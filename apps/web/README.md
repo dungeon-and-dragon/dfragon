@@ -16,11 +16,13 @@ pnpm --filter @dfragon/web preview
 
 `build`는 `tsc -b`와 Vite production build를 포함하므로 같은 변경을 검증할 때 `typecheck`를 다시 실행할 필요는 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 산출물은 `dist`에 생기며, `public/CNAME`(`dfragon.com`)이 함께 복사됩니다.
 
+`dev`와 `build`는 먼저 `prepare:ocr-assets`로 Desktop의 [`prepare-ocr-assets.mjs`](../desktop/scripts/prepare-ocr-assets.mjs)를 출력 폴더만 바꿔 실행해 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다. 이 폴더는 Git에서 제외합니다. 파인튜닝 모델을 쓰므로 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
+
 웹 앱은 첫 화면에 넣기 전까지 `dev` 서버의 개발용 화면 `http://localhost:5173/web-app.html`에서 엽니다. 이 화면은 production build의 입력이 아닙니다. `dev` 서버는 같은 origin의 `/characters`, `/items` 요청을 운영 API(`https://api.dfragon.com`)로 넘기므로 운영 API의 CORS 허용 origin이나 로컬 API, Neople key 없이 닉네임 검색을 해 볼 수 있습니다.
 
 ## 배포
 
-[`web-pages.yml`](../../.github/workflows/web-pages.yml)이 main에 push(PR merge)될 때와 수동 실행에서 `pnpm --filter @dfragon/web build`의 `dist`를 GitHub Pages에 올립니다. 사이트는 submodule 없이 빌드하므로 OCR 모델과 점수 엔진은 받지 않습니다. 내려받기 버튼은 방문 시점에 GitHub API에서 최신 Release를 읽으므로 새 Release를 게시해도 다시 배포하지 않습니다.
+[`web-pages.yml`](../../.github/workflows/web-pages.yml)이 main에 push(PR merge)될 때와 수동 실행에서 `pnpm --filter @dfragon/web build`의 `dist`를 GitHub Pages에 올립니다. workflow는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다. 내려받기 버튼은 방문 시점에 GitHub API에서 최신 Release를 읽으므로 새 Release를 게시해도 다시 배포하지 않습니다.
 
 저장소 소유자가 한 번 해야 하는 설정입니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다.
 
@@ -58,6 +60,7 @@ pnpm --filter @dfragon/web preview
 - `notices/THIRD-PARTY.txt`: 번들 입력 package의 license와 NOTICE(Noto Sans KR의 OFL 1.1 포함)
 - `notices/desktop/`: Desktop과 같은 글꼴(마루미냐 한글, Barlow Condensed)과 Lucide 아이콘 고지
 - `notices/site/NOTICE.md`: 캐릭터 초상화와 Neople Open API 로고의 출처, 권리([원본](NOTICE.md))
+- `ocr/`: OCR 모델과 ONNX Runtime의 license, NOTICE. Desktop의 `out/frontend/ocr`과 같은 파일입니다.
 
 ## 테스트 경계
 
