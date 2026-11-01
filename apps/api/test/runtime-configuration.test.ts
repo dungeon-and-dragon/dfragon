@@ -37,7 +37,8 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 입력
     apiKey: 'synthetic',
     trustedProxyHops: undefined,
     localHttps: undefined,
-    webDevOrigins: []
+    webDevOrigins: [],
+    scoreLibraryPath: null
   })
   assert.deepEqual(
     await readRuntimeConfiguration({
@@ -80,6 +81,20 @@ test('로컬 웹 개발 origin은 loopback http(s) origin 목록만 받는다', 
       readRuntimeConfiguration({ ...environment, WEB_DEV_ORIGINS: value }),
       /Invalid API runtime configuration/,
       value
+    )
+  }
+})
+
+test('점수 엔진 라이브러리는 절대 경로만 받고 파일이 없어도 시작 설정은 실패하지 않는다', async () => {
+  const path = '/synthetic/missing/libdnfscore.so'
+
+  const configuration = await readRuntimeConfiguration({ ...environment, SCORE_LIBRARY_FILE: path })
+
+  assert.equal(configuration.scoreLibraryPath, path)
+  for (const relativePath of ['', 'libdnfscore.so', './score/libdnfscore.so']) {
+    await assert.rejects(
+      readRuntimeConfiguration({ ...environment, SCORE_LIBRARY_FILE: relativePath }),
+      /Invalid API runtime configuration/
     )
   }
 })

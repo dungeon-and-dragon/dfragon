@@ -25,11 +25,13 @@
     "@nestjs/platform-express": "catalog:",
     "@nestjs/swagger": "catalog:",
     "dataloader": "catalog:",
+    "koffi": "catalog:",
     "ky": "catalog:",
     "lru-cache": "catalog:",
     "reflect-metadata": "catalog:",
     "remeda": "catalog:",
-    "rxjs": "catalog:"
+    "rxjs": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@nestjs/testing": "catalog:",

@@ -15,12 +15,16 @@
 
 | 필수 | 선택 |
 | --- | --- |
-| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `WEB_DEV_ORIGINS` |
+| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `WEB_DEV_ORIGINS`, `SCORE_LIBRARY_FILE` |
 
 PORT는 ASCII 십진 정수 1~65535입니다. `.env.example`을 앱의 `.env`로 복사하고 실제 secret은 Git 밖에서 관리합니다.
 Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
 `WEB_DEV_ORIGINS`는 로컬 웹 개발 서버(Vite dev 서버)의 origin을 CORS 허용에 더하며, `http://localhost:5173,http://127.0.0.1:5173`처럼 쉼표로 구분합니다.
 각 값은 경로와 공백 없이 `http`, `https`의 `localhost`, `127.0.0.1`, `[::1]` origin이어야 하며, 다른 값은 시작 전에 거절합니다. 운영에서는 지정하지 않습니다.
+`SCORE_LIBRARY_FILE`은 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로입니다.
+지정하면 앱을 만들 때 점수 worker 하나를 띄우고, listen을 기다리지 않고 그 worker에서 딜러, 버퍼 준비 계산을 한 번씩 합니다.
+빈 값과 상대 경로는 시작 전에 거절하고, 지정하지 않으면 점수 없이 실행합니다.
+파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둡니다. 로컬에서는 점수 엔진 submodule의 파일을 지정할 수 있습니다.
 
 Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절대 경로에서 읽습니다. GitHub나 특정 secret manager가
 필요하지 않으며 self-host 운영자가 준비한 환경변수, 읽기 전용 파일을 사용할 수 있습니다.
@@ -84,6 +88,13 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 {"time":"2026-10-29T00:00:05.000Z","service":"api","method":"GET","route":"/characters/:serverId/:characterId","status":200,"durationMs":4,"neopleMs":{"catalog":1},"correlationId":"<uuid>"}
 {"time":"2026-10-29T00:00:09.000Z","service":"api","method":"GET","route":"/characters/:serverId/:characterId","status":200,"durationMs":0,"responseCached":true,"correlationId":"<uuid>"}
 {"time":"2026-10-31T00:00:00.000Z","service":"api","method":"GET","route":"/characters/candidates","status":200,"durationMs":0,"responseCached":true,"correlationId":"<uuid>"}
+```
+
+점수 엔진을 열지 못하면 `SCORE_ENGINE_UNAVAILABLE`, 점수 worker가 오류로 끝나거나 엔진 결과 형식이 틀리면 `SCORE_ENGINE_FAILED`를 같은 stdout에 남깁니다.
+요청마다 남기는 줄과 달리 `time`, `service`, `code`만 담습니다.
+
+```json
+{"time":"2026-11-01T00:00:00.000Z","service":"api","code":"SCORE_ENGINE_UNAVAILABLE"}
 ```
 
 ## 서버 이미지
