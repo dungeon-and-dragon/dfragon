@@ -189,7 +189,7 @@ node apps/api/test-support/container-deployment.mjs dfragon-api:local
 
 이 검사는 이미지를 빌드하지 않고 합성 Neople key와 네트워크 없는 컨테이너로 entrypoint, secret 입력(ENV, FILE, 기본 파일), 실행 사용자, 읽기 전용 파일시스템, HTTP 기동, 잘못된 입력의 거절, 정상 종료를 확인하고 자체 컨테이너 정리를 시도합니다. 강제 종료, Docker 장애 시 컨테이너가 남을 수 있습니다. 운영 credential은 입력하지 않습니다.
 
-Desktop `build`는 `typecheck`를 포함하므로 위 조합에서 별도로 반복하지 않습니다. Web `build`도 `tsc -b`를 포함합니다. Web의 창 목업은 Desktop renderer 컴포넌트를 쓰므로 Desktop renderer를 바꾸면 Web 검사도 함께 실행합니다. 빠른 feedback이 필요할 때는 기존 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
+Desktop `build`는 `typecheck`를 포함하므로 위 조합에서 별도로 반복하지 않습니다. Web `build`도 `tsc -b`를 포함합니다. Web의 웹 앱은 Desktop renderer 컴포넌트를 쓰므로 Desktop renderer를 바꾸면 Web 검사도 함께 실행합니다. 빠른 feedback이 필요할 때는 기존 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
 
 API의 `test`는 `build`를 먼저 실행해 `dist`를 새로 만든 뒤 `.test-dist` compile과 test를 수행합니다. 위 API 조합은 이 build와 `tsconfig.test.json`의 compile을 포함하므로 같은 입력의 별도 typecheck를 반복하지 않습니다. 단독 `pnpm --filter @dfragon/api test`도 최신 production output을 검증합니다. Root `test`는 `pnpm verify`와 같습니다. 문서만 변경할 때 app build를 반복할 필요는 없습니다. 실행 결과에는 실제 검증 범위와 실행하지 못한 항목을 구분해 기록합니다.
 

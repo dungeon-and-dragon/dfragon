@@ -26,7 +26,7 @@
   unicode-range: U+0020-007E;
 }
 
-/* 창 목업의 Desktop 컴포넌트는 Desktop 전역 글꼴 CSS와 같은 글꼴 토큰을 읽는다. */
+/* 웹 앱의 Desktop 컴포넌트는 Desktop 전역 글꼴 CSS와 같은 글꼴 토큰을 읽는다. */
 :root {
   color-scheme: light;
   --df-font-ui:
