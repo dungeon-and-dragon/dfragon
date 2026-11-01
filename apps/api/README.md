@@ -8,6 +8,8 @@
 
 `/docs`, `/docs/openapi.json`은 API 계약만 제공합니다. `/health`는 200, `/auth/**`와 `/me`는 404입니다.
 
+`GET /characters/:serverId/:characterId/image`는 웹 클라이언트가 픽셀을 읽을 수 있게 네오플 캐릭터 이미지를 그대로 전달하며, 입력, 응답, 오류는 [초상화 전달](../../docs/rules/character-search.md#초상화-전달)을 따릅니다.
+
 ## 준비할 입력
 
 | 필수 | 선택 |
@@ -67,6 +69,8 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 강제 갱신은 캐시를 건너뛰므로 새로 받았거나 합류한 조회의 `basic`, `sections`가 붙습니다.
 `catalog`는 그 요청이 공용 아이템 정보를 기다린 시간입니다.
 공용 아이템은 24시간 캐시하므로 모든 아이템이 캐시에 있으면 거의 0이고, 다른 요청이 이미 조회 중인 아이템은 그 조회를 함께 기다립니다.
+
+`GET /characters/:serverId/:characterId/image`는 저장하지 않고 매번 네오플 이미지 서버를 부르며 `neopleMs`, `responseCached`를 붙이지 않습니다.
 
 `GET /characters/candidates`는 이름별로 24시간 [캐시](../../docs/rules/character-search.md#후보-검색-캐시)하며 `neopleMs`를 붙이지 않습니다.
 저장한 결과를 보낸 요청에는 `responseCached: true`, 같은 이름의 진행 중인 검색에 합류한 요청에는 `neopleShared: true`가 붙고, Neople을 직접 기다린 요청에는 둘 다 붙지 않습니다.
