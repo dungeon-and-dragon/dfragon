@@ -32,7 +32,10 @@ it.each([['src/backend/search/character-http.ts', 'createCharacterCandidatesHttp
     const environment = mainEnvironment()
     runInContext(chunks[0].code, environment.context)
     expect(() =>
-      environment.context.exports[factory]({ apiOrigin: 'https://api.example.test' })
+      environment.context.exports[factory]({
+        apiOrigin: 'https://api.example.test',
+        fetch: vi.fn()
+      })
     ).not.toThrow()
   }
 )

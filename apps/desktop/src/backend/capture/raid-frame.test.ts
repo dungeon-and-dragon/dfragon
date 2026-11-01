@@ -2,6 +2,7 @@ import { expect, it, vi } from 'vitest'
 import { toRaidFrameResult } from './raid-frame'
 import { readRaidWindowValues } from '../lib/raid-window'
 import { raidFrame } from '../lib/raid-window-test-fixture'
+import { readRaidWindowTemplates } from '../lib/raid-window-templates'
 
 vi.mock('../lib/raid-window', async (original) => {
   const actual = await original<typeof import('../lib/raid-window')>()
@@ -9,6 +10,7 @@ vi.mock('../lib/raid-window', async (original) => {
   return { ...actual, readRaidWindowValues: vi.fn(actual.readRaidWindowValues) }
 })
 
+const templates = readRaidWindowTemplates()
 const NICKNAME = { x: 497, y: 169, width: 86, height: 17, rowSpacing: 21 }
 const JOB = { x: 582, y: 169, rowSpacing: 21 }
 
@@ -26,7 +28,7 @@ it('공대 상세 창의 12행을 화면 순서로 돌려주고 빈 행은 null,
   const frame = raidFrame(9)
   const original = frame.rgba.slice()
 
-  const result = toRaidFrameResult({ kind: 'frame', image: frame })
+  const result = toRaidFrameResult({ kind: 'frame', image: frame }, templates)
 
   expect(result.kind).toBe('rows')
   if (result.kind !== 'rows') {
@@ -61,7 +63,7 @@ it('다른 창에 가려 투명하게 제외된 픽셀이 있는 행만 읽지 �
   const covered = ((NICKNAME.y + NICKNAME.rowSpacing * 4 + 8) * frame.width + NICKNAME.x + 40) * 4
   frame.rgba[covered + 3] = 0
 
-  const result = toRaidFrameResult({ kind: 'frame', image: frame })
+  const result = toRaidFrameResult({ kind: 'frame', image: frame }, templates)
 
   expect(result.kind).toBe('rows')
   if (result.kind === 'rows') {
@@ -76,7 +78,7 @@ it('직업명 칸만 가려진 행은 닉네임을 남기고 직업명 크롭만
   const covered = ((JOB.y + JOB.rowSpacing * 2 + 8) * frame.width + JOB.x + 20) * 4
   frame.rgba[covered + 3] = 0
 
-  const result = toRaidFrameResult({ kind: 'frame', image: frame })
+  const result = toRaidFrameResult({ kind: 'frame', image: frame }, templates)
 
   expect(result.kind).toBe('rows')
   if (result.kind === 'rows') {
@@ -99,7 +101,7 @@ it('FHD보다 큰 프레임은 창을 찾아도 수치 칸을 읽지 않는다',
     )
   }
 
-  const result = toRaidFrameResult({ kind: 'frame', image: { width, height, rgba } })
+  const result = toRaidFrameResult({ kind: 'frame', image: { width, height, rgba } }, templates)
 
   expect(result.kind).toBe('rows')
   if (result.kind === 'rows') {
@@ -110,7 +112,7 @@ it('FHD보다 큰 프레임은 창을 찾아도 수치 칸을 읽지 않는다',
 
 it('창을 찾지 못하거나 후보가 둘이면 크롭 없이 미검출 사유만 돌려준다', () => {
   const empty = { width: 1067, height: 600, rgba: new Uint8Array(1067 * 600 * 4) }
-  expect(toRaidFrameResult({ kind: 'frame', image: empty })).toEqual({
+  expect(toRaidFrameResult({ kind: 'frame', image: empty }, templates)).toEqual({
     kind: 'missing',
     reason: 'not-found'
   })
@@ -118,7 +120,7 @@ it('창을 찾지 못하거나 후보가 둘이면 크롭 없이 미검출 사�
     { x: 20, y: 30 },
     { x: 580, y: 30 }
   ])
-  expect(toRaidFrameResult({ kind: 'frame', image: two })).toEqual({
+  expect(toRaidFrameResult({ kind: 'frame', image: two }, templates)).toEqual({
     kind: 'missing',
     reason: 'uncertain'
   })
@@ -129,7 +131,7 @@ it.each([
   { kind: 'waiting', reason: 'unavailable' },
   { kind: 'unsupported' }
 ] as const)('프레임 없는 결과 %j는 그대로 전달한다', (result) => {
-  expect(toRaidFrameResult(result)).toEqual(result)
+  expect(toRaidFrameResult(result, templates)).toEqual(result)
 })
 
 it('행마다 읽은 수치 표기를 같은 화면 행의 결과에 붙이고 빈 행과 가려진 행은 버린다', () => {
@@ -140,7 +142,7 @@ it('행마다 읽은 수치 표기를 같은 화면 행의 결과에 붙이고 �
   const covered = ((NICKNAME.y + NICKNAME.rowSpacing + 8) * frame.width + NICKNAME.x + 40) * 4
   frame.rgba[covered + 3] = 0
 
-  const result = toRaidFrameResult({ kind: 'frame', image: frame })
+  const result = toRaidFrameResult({ kind: 'frame', image: frame }, templates)
 
   expect(result.kind).toBe('rows')
   if (result.kind === 'rows') {

@@ -2,11 +2,31 @@ import { describe, expect, it, vi } from 'vitest'
 import { bufferCard, dealerCard } from '../../preload/common/search/card-test-fixture'
 import { parseSearchSnapshot } from '../../preload/common/search/snapshot'
 import { searchRow, searchSlot, withSearchSlot } from '../../preload/api/search-test-fixture'
-import type { CharacterDetails } from '../../preload/common/types/character'
+import type {
+  CharacterDetails,
+  CharacterScoreCalculator
+} from '../../preload/common/types/character'
+import { createEngineCardScorer } from '../score/card-score'
 import { apiDetailsFromEngineInput, readEngineInput } from '../score/details-test-fixture'
 import type { ScoreEngineResult } from '../score/engine'
-import { toScoreEngineInput } from '../score/input'
-import { buildCharacterCard, type CalculateScore } from './card-assembler'
+import { toScoreEngineInput, type ScoreEngineInput } from '../score/input'
+import { buildCharacterCard, type CalculateCardScore } from './card-assembler'
+
+type CalculateScore = (
+  input: ScoreEngineInput,
+  calculator: CharacterScoreCalculator
+) => Promise<ScoreEngineResult | null>
+
+// 엔진 결과를 카드 점수로 바꾸는 Desktop adapter를 거쳐 카드 조립을 확인한다.
+function engineScore(score: CalculateScore): CalculateCardScore {
+  const scorer = createEngineCardScorer({
+    calculate: (input, calculator) => score(input, calculator),
+    prepare: () => undefined
+  })
+
+  return (details, calculator) =>
+    scorer.calculate(details, calculator, new AbortController().signal)
+}
 
 const versions = { package: '0.1.0', rules_rev: 'rev12', bundle_id: 'phase31-rev12' }
 const dealerResult: ScoreEngineResult = {
@@ -55,7 +75,7 @@ describe('API 카드와 엔진 결과 조립', () => {
     const details = apiDetailsFromEngineInput(readEngineInput('dealer-blade'), dealerCard)
     const score = vi.fn<CalculateScore>(async () => dealerResult)
 
-    const card = await buildCharacterCard(details, score)
+    const card = await buildCharacterCard(details, engineScore(score))
 
     expect(score).toHaveBeenCalledExactlyOnceWith(toScoreEngineInput(details), 'equipment')
     expect(card).toEqual({
@@ -75,7 +95,7 @@ describe('API 카드와 엔진 결과 조립', () => {
     const details = apiDetailsFromEngineInput(readEngineInput('buffer-muse'), bufferCard)
     const score = vi.fn<CalculateScore>(async () => bufferResult)
 
-    const card = await buildCharacterCard(details, score)
+    const card = await buildCharacterCard(details, engineScore(score))
 
     expect(score.mock.calls[0][1]).toBe('buff')
     expect(card).toMatchObject({ role: 'buffer', score: { calculator: 'buff', value: 136617 } })
@@ -88,7 +108,7 @@ describe('API 카드와 엔진 결과 조립', () => {
     })
     const score = vi.fn<CalculateScore>(async () => dealerResult)
 
-    const card = await buildCharacterCard(details, score)
+    const card = await buildCharacterCard(details, engineScore(score))
 
     expect(score.mock.calls[0][1]).toBe('equipment')
     expect(card).toMatchObject({ role: null, score: { value: 1741 } })
@@ -109,14 +129,23 @@ describe('API 카드와 엔진 결과 조립', () => {
       }
     } as CharacterDetails
 
-    expect(await buildCharacterCard(legacy, async () => dealerResult)).toMatchObject({
+    expect(
+      await buildCharacterCard(
+        legacy,
+        engineScore(async () => dealerResult)
+      )
+    ).toMatchObject({
       role: 'dealer',
       score: { value: 1741 }
     })
-    expect(Object.keys((await buildCharacterCard(legacy, async () => dealerResult))!)).toEqual([
-      'role',
-      'score'
-    ])
+    expect(
+      Object.keys(
+        (await buildCharacterCard(
+          legacy,
+          engineScore(async () => dealerResult)
+        ))!
+      )
+    ).toEqual(['role', 'score'])
   })
 
   it('건너뛴 결과는 점수 null과 사유를 카드에 남긴다', async () => {
@@ -124,7 +153,7 @@ describe('API 카드와 엔진 결과 조립', () => {
     const skipped = { kind: 'resolution', message: '판정 불가' }
     const score: CalculateScore = async () => ({ ...dealerResult, score: null, skipped })
 
-    expect((await buildCharacterCard(details, score))?.score).toMatchObject({
+    expect((await buildCharacterCard(details, engineScore(score)))?.score).toMatchObject({
       value: null,
       skipped,
       approximate: null
@@ -144,7 +173,7 @@ describe('API 카드와 엔진 결과 조립', () => {
       warning
     })
 
-    const card = await buildCharacterCard(details, score)
+    const card = await buildCharacterCard(details, engineScore(score))
 
     expect(card?.score).toMatchObject({
       value: null,
@@ -158,7 +187,7 @@ describe('API 카드와 엔진 결과 조립', () => {
     const details = apiDetailsFromEngineInput(readEngineInput('buffer-muse'), bufferCard)
     const score: CalculateScore = async () => ({ ...bufferResult, warning: '아바타가 번들에 없음' })
 
-    const card = await buildCharacterCard(details, score)
+    const card = await buildCharacterCard(details, engineScore(score))
 
     expect(card?.score).toMatchObject({ value: 136617, skipped: null, approximate: null })
     expect(acceptsCard(card)).toBe(true)
@@ -178,7 +207,7 @@ describe('API 카드와 엔진 결과 조립', () => {
       score: apiScore
     })
 
-    expect(await buildCharacterCard(details, score)).toEqual(bufferCard)
+    expect(await buildCharacterCard(details, engineScore(score))).toEqual(bufferCard)
   })
 
   it.each([
@@ -193,7 +222,7 @@ describe('API 카드와 엔진 결과 조립', () => {
     const details = apiCard === undefined ? withoutCard : { ...withoutCard, card: apiCard }
     const score = vi.fn<CalculateScore>(async () => dealerResult)
 
-    expect(await buildCharacterCard(details as CharacterDetails, score)).toBeNull()
+    expect(await buildCharacterCard(details as CharacterDetails, engineScore(score))).toBeNull()
     expect(score).not.toHaveBeenCalled()
   })
 })

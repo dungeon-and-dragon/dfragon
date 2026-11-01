@@ -1,4 +1,3 @@
-import { setImmediate } from 'node:timers/promises'
 import type { CharacterImage, CharacterPortrait } from '../../preload/common/types/character'
 
 export const RGBA_CHANNELS = 4
@@ -14,7 +13,13 @@ export const PORTRAIT_COMPARISON_LIMITS = {
 } as const
 
 export type OpaqueBounds = Readonly<{ left: number; top: number; right: number; bottom: number }>
-export type SearchBudget = { comparisonSteps: number; workSinceYield: number }
+/** 같은 프로세스의 취소와 다른 작업이 처리되도록 event loop에 한 번 양보한다. */
+export type YieldToEventLoop = () => Promise<void>
+export type SearchBudget = {
+  comparisonSteps: number
+  workSinceYield: number
+  readonly yieldToEventLoop: YieldToEventLoop
+}
 export type PortraitRaster = Readonly<{
   width: number
   height: number
@@ -46,8 +51,8 @@ export function validateImage(image: CharacterImage): void {
   }
 }
 
-export function createSearchBudget(): SearchBudget {
-  return { comparisonSteps: 0, workSinceYield: 0 }
+export function createSearchBudget(yieldToEventLoop: YieldToEventLoop): SearchBudget {
+  return { comparisonSteps: 0, workSinceYield: 0, yieldToEventLoop }
 }
 
 export function countComparisonStep(budget: SearchBudget): void {
@@ -64,7 +69,7 @@ export function shouldYield(budget: SearchBudget): boolean {
 }
 
 export async function yieldSearch(budget: SearchBudget, signal: AbortSignal): Promise<void> {
-  await setImmediate()
+  await budget.yieldToEventLoop()
   signal.throwIfAborted()
   budget.workSinceYield = 0
 }

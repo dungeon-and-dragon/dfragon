@@ -7,7 +7,12 @@ import {
   type IpcMainInvokeEvent,
   type WebFrameMain
 } from 'electron'
+import { setImmediate } from 'node:timers/promises'
+import { reportDiagnostic } from '../diagnostics/log'
+import { fetchApi } from '../api-fetch'
 import { addHandler } from '../ipc'
+import { decodeCharacterPng } from '../lib/character-png'
+import { readRaidWindowTemplates } from '../lib/raid-window-templates'
 import type { CaptureBinding } from '../search/capture-lifetime'
 import {
   createCharacterCandidatesHttp,
@@ -22,6 +27,7 @@ import {
 import { createPortraitColorScorer, type PortraitColorPolicy } from '../search/portrait-color'
 import type { CharacterSelectionPolicy } from '../search/identify'
 import type { SearchRuntime } from '../search/request'
+import { createEngineCardScorer } from '../score/card-score'
 import type { ScoreEngine } from '../score/engine'
 import { registerManualSearchIpc, type ManualSearchKind } from '../search/manual-ipc'
 import { findSelectedSource } from './capture-policy'
@@ -164,14 +170,19 @@ function createSearchRuntime(
   if (configuration === undefined) {
     return undefined
   }
-  const policy = configuration.portraitColorPolicy
-  const scorePortrait = createPortraitColorScorer(policy)
-  const candidates = createCachedCharacterCandidates(createCharacterCandidatesHttp(configuration))
-  const image = createCharacterImageSource({ image: createCharacterImageHttp(configuration) })
-  const details = createCachedCharacterDetails(createCharacterDetailsHttp(configuration))
+  const { apiOrigin, fetch = fetchApi, portraitColorPolicy: policy } = configuration
+  const scorePortrait = createPortraitColorScorer(policy, () => setImmediate())
+  const candidates = createCachedCharacterCandidates(
+    createCharacterCandidatesHttp({ apiOrigin, fetch })
+  )
+  const image = createCharacterImageSource({
+    image: createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+  })
+  const details = createCachedCharacterDetails(createCharacterDetailsHttp({ apiOrigin, fetch }))
 
   return {
-    scoreEngine: configuration.scoreEngine,
+    cardScorer: createEngineCardScorer(configuration.scoreEngine),
+    reportDiagnostic,
     identification: { candidates, image, details, scorePortrait, selection: policy }
   }
 }
@@ -258,7 +269,7 @@ function registerCaptureIpc(configuration?: SearchConfiguration): () => void {
   addHandler('readCaptureFrame', (event, ...args) => readBoundCaptureFrame(event, args, party))
 
   addHandler('readRaidCaptureFrame', async (event, ...args) =>
-    toRaidFrameResult(await readBoundCaptureFrame(event, args, raid))
+    toRaidFrameResult(await readBoundCaptureFrame(event, args, raid), readRaidWindowTemplates())
   )
 
   return () => {

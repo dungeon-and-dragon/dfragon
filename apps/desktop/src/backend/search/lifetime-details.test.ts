@@ -7,8 +7,6 @@ import { deferred } from '../lib/async-test-fixture'
 import { SearchHttpFailure } from './http'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 
-vi.mock('electron', () => ({ session: { fromPartition: vi.fn() } }))
-
 function candidate(name: string): CharacterCandidate {
   return {
     characterId: `id-${name}`,
@@ -82,7 +80,8 @@ function fixture() {
         scorePortrait: vi.fn(),
         selection: INITIAL_PORTRAIT_COLOR_POLICY
       },
-      scoreEngine: { calculate: async () => null, prepare: vi.fn() }
+      cardScorer: { calculate: async () => null, prepare: vi.fn() },
+      reportDiagnostic: vi.fn()
     }
   })
   const captureId = lifetime.begin({ windowGeneration: 1, sourceGeneration: 1 }).snapshot.captureId!

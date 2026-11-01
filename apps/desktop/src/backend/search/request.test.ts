@@ -1,3 +1,4 @@
+import { setImmediate } from 'node:timers/promises'
 import { describe, expect, it, vi } from 'vitest'
 import type { MockedFunction } from 'vitest'
 import type {
@@ -21,10 +22,9 @@ import { SearchHttpFailure } from './http'
 import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 import { PortraitComparisonBudgetExceededError } from './portrait-raster'
+import { createEngineCardScorer } from '../score/card-score'
 import type { ScoreEngine, ScoreEngineResult } from '../score/engine'
 import { dealerCard } from '../../preload/common/search/card-test-fixture'
-
-vi.mock('electron', () => ({ session: { fromPartition: vi.fn() } }))
 
 const FACE_SIZE = 8
 const FACE_LEFT_SHADE = 100
@@ -84,7 +84,8 @@ function requestWith(adapters: IdentificationAdapters) {
     runSearchRequest({
       runtime: {
         identification: adapters,
-        scoreEngine: { calculate: async () => null, prepare: vi.fn() }
+        cardScorer: { calculate: async () => null, prepare: vi.fn() },
+        reportDiagnostic: vi.fn()
       },
       nickname: input.nicknames[0] ?? '',
       signal: input.signal,
@@ -120,7 +121,7 @@ function fixture(shifts: Record<string, number> = { high: 20, low: 10, null: 30 
     return shadedImage(shifts[characterId])
   })
   const scorePortrait = vi.fn<PortraitColorScorer>(
-    createPortraitColorScorer(INITIAL_PORTRAIT_COLOR_POLICY)
+    createPortraitColorScorer(INITIAL_PORTRAIT_COLOR_POLICY, () => setImmediate())
   )
   const getDetails = vi.fn<CharacterDetailsHttp>(async ({ characterId }) => {
     calls.push(`details:${characterId}`)
@@ -363,7 +364,9 @@ describe('캐릭터 식별 요청의 실행 경계', () => {
         ],
         image,
         details: async ({ characterId }) => details(characterId),
-        scorePortrait: createPortraitColorScorer(INITIAL_PORTRAIT_COLOR_POLICY),
+        scorePortrait: createPortraitColorScorer(INITIAL_PORTRAIT_COLOR_POLICY, () =>
+          setImmediate()
+        ),
         selection: INITIAL_PORTRAIT_COLOR_POLICY
       })
       const outcome = request({
@@ -443,7 +446,8 @@ describe('선택한 캐릭터 카드와 점수 엔진', () => {
             scorePortrait: f.scorePortrait,
             selection: INITIAL_PORTRAIT_COLOR_POLICY
           },
-          scoreEngine: { calculate, prepare: vi.fn() }
+          cardScorer: createEngineCardScorer({ calculate, prepare: vi.fn() }),
+          reportDiagnostic: vi.fn()
         },
         summary: identified,
         signal: f.controller.signal,
