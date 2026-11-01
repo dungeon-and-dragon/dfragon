@@ -40,11 +40,10 @@ scripts/
 
 현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스와 DB는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 없이 동작한다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다.
 
-웹 클라이언트는 dfragon.com 첫 화면에 두고, Desktop renderer 컴포넌트를 브라우저 host로 연결해 쓴다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). OCR과 초상화 비교는 브라우저에서 하고 화면 이미지는 브라우저 밖으로 나가지 않으며, API는 캐릭터 검색, 상세와 점수, 네오플 초상화 전달을 맡는다. 계약은 [웹 클라이언트](../rules/web-client.md)를 따른다.
+웹 클라이언트는 dfragon.com 첫 화면에 두고, Desktop renderer 컴포넌트를 브라우저 host로 연결해 쓴다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). OCR과 초상화 비교는 브라우저에서 하고 화면 이미지는 브라우저 밖으로 나가지 않으며, API는 캐릭터 검색, 상세와 점수, 네오플 초상화 전달을 맡는다. 계약은 [웹 클라이언트](../rules/web-client.md)를 따른다. 모바일은 지원하지 않는다(2026-11-01 결정, [웹 클라이언트](../rules/web-client.md#지원-범위)). 모바일 앱(native client)을 만들지 않고, 웹 클라이언트도 휴대폰과 좁은 화면용 레이아웃, 입력을 두지 않는다.
 
 다음 사항은 구체 결정, 확보 또는 검증이 남아 있다.
 
-- Mobile client
 - 아래 Shared UI, Shared library boundary 이외의 shared package 종류와 dependency direction
 - 현재 요청과 MVP 운영 기준을 벗어나는 새로운 deployment boundary
 

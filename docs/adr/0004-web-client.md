@@ -6,7 +6,7 @@ decided: 2026-11-01
 last-reviewed: 2026-11-01
 superseded-by: 없음
 evidence: "Issue #1074 정한 것, 구조, 확인한 사실(https://github.com/dungeon-and-dragon/dfragon/issues/1074) ; 저장소 소유자 결정(2026-11-01) ; 네오플 초상화와 운영 API 응답의 CORS 헤더 확인(2026-11-01) ; Issue #1076 화면 공유 실기 확인(2026-11-01, Windows 10, Chrome, Edge, https://github.com/dungeon-and-dragon/dfragon/issues/1076#issuecomment-6553122671)"
-review-after: 모바일 client, 웹에서 화면 이미지를 서버로 보내는 기능, 별도 workspace package 도입 전
+review-after: 모바일 지원 범위, 웹에서 화면 이미지를 서버로 보내는 기능, 별도 workspace package 도입 전
 ---
 
 # ADR 0004: dfragon.com 첫 화면에 설치 없이 쓰는 웹 클라이언트를 둔다
@@ -61,7 +61,7 @@ E를 채택한다(2026-11-01 저장소 소유자 결정). Desktop은 게임 안�
 - **OCR**: Desktop과 같은 `onnxruntime-web` worker를 쓴다. 모델은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 사용자는 받지 않는다.
 - **단축키, 클립보드**: 전역 단축키는 없고 페이지에 포커스가 있을 때만 Desktop과 같은 키를 받는다. 클립보드는 `navigator.clipboard`를 쓴다.
 - **붙여넣기 안내**: 기본 안내는 Alt+PrtSc다. PrtSc 전체 화면은 던파 창이 왼쪽 위에 있을 때만 파티를 찾는다.
-- **고려하지 않는 범위**: 휴대폰 방문자, API와 Neople API key 할당량, 게임 중 Alt+Tab 흐름은 이번 범위에서 고려하지 않는다. OCR 자산(모델 26.8MB, ONNX Runtime WASM 25.5MB, 약 54MB)은 줄이지 않고 배포 뒤 지켜본다.
+- **고려하지 않는 범위**: 휴대폰 방문자, API와 Neople API key 할당량, 게임 중 Alt+Tab 흐름은 이번 범위에서 고려하지 않는다. OCR 자산(모델 26.8MB, ONNX Runtime WASM 25.5MB, 약 54MB)은 줄이지 않고 배포 뒤 지켜본다. 휴대폰은 같은 날 모바일 미지원으로 확정했다([지원 범위](../rules/web-client.md#지원-범위)).
 
 ## 결과
 
