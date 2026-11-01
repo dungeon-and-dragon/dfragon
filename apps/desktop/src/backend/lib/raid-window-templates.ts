@@ -3,12 +3,12 @@
 import { readFileSync } from 'node:fs'
 import { PNG } from 'pngjs'
 import type { DNFParticipantFrame } from '@dfragon/lib'
-import raidHeadingPath from './raid-heading.png?asset'
-import fameHeadingPath from './raid-value-heading-fame.png?asset'
-import equipmentScoreHeadingPath from './raid-value-heading-equipment-score.png?asset'
-import valueGlyphsPath from './raid-value-glyphs.png?asset'
-import { sliceRaidValueGlyphs } from './raid-value-glyphs'
-import type { RaidWindowTemplates } from './raid-window'
+import raidHeadingPath from '../../shared/raid/raid-heading.png?asset'
+import fameHeadingPath from '../../shared/raid/raid-value-heading-fame.png?asset'
+import equipmentScoreHeadingPath from '../../shared/raid/raid-value-heading-equipment-score.png?asset'
+import valueGlyphsPath from '../../shared/raid/raid-value-glyphs.png?asset'
+import { sliceRaidValueGlyphs } from '../../shared/raid/raid-value-glyphs'
+import type { RaidWindowTemplates } from '../../shared/raid/raid-window'
 
 let templates: RaidWindowTemplates | null = null
 

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { PNG } from 'pngjs'
 
-const RAID_HEADING_URL = new URL('./raid-heading.png', import.meta.url)
+const RAID_HEADING_URL = new URL('../../shared/raid/raid-heading.png', import.meta.url)
 
 /**
  * 함께 보관한 UI 0% 기준 헤더를 붙인 1067×600 합성 공대 상세 창. 위에서부터 `count`개 행에 초상화, 레벨,

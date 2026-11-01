@@ -9,7 +9,7 @@ import {
   cropRaidWindowNicknames,
   readRaidWindowValues,
   type RaidWindowTemplates
-} from '../lib/raid-window'
+} from './raid-window'
 
 const RGBA_CHANNELS = 4
 const ALPHA_CHANNEL = 3
