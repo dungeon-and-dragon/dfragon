@@ -36,7 +36,8 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 입력
     port: 3000,
     apiKey: 'synthetic',
     trustedProxyHops: undefined,
-    localHttps: undefined
+    localHttps: undefined,
+    scoreLibraryPath: null
   })
   assert.deepEqual(
     await readRuntimeConfiguration({
@@ -52,6 +53,20 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 입력
     readRuntimeConfiguration({ ...environment, NEOPLE_API_KEY: '' }),
     /Invalid API runtime configuration/
   )
+})
+
+test('점수 엔진 라이브러리는 절대 경로만 받고 파일이 없어도 시작 설정은 실패하지 않는다', async () => {
+  const path = '/synthetic/missing/libdnfscore.so'
+
+  const configuration = await readRuntimeConfiguration({ ...environment, SCORE_LIBRARY_FILE: path })
+
+  assert.equal(configuration.scoreLibraryPath, path)
+  for (const relativePath of ['', 'libdnfscore.so', './score/libdnfscore.so']) {
+    await assert.rejects(
+      readRuntimeConfiguration({ ...environment, SCORE_LIBRARY_FILE: relativePath }),
+      /Invalid API runtime configuration/
+    )
+  }
 })
 
 test('runtime secret 파일은 원문을 유지하며 모호하거나 읽을 수 없는 입력을 거절한다', async () => {
