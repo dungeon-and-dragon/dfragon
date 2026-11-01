@@ -55,6 +55,7 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
   vi.clearAllMocks()
   useSearchModeStore.setState({ searchMode: 'party' })
 })
@@ -137,4 +138,37 @@ it('공대 화면에서 붙여 넣으면 공대 회차가 host의 공대 프레�
   expect(readPartyFrame).not.toHaveBeenCalled()
   readRaidFrame.mockRestore()
   readPartyFrame.mockRestore()
+})
+
+it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 화면을 읽고, 공유를 멈추면 연결 전으로 돌아간다', async () => {
+  // jsdom에는 화면 공유와 video 재생이 없어 getDisplayMedia가 돌려주는 track과 stream만 흉내 낸다.
+  const track = Object.assign(new EventTarget(), { label: 'Dungeon & Fighter', stop: vi.fn() })
+  vi.stubGlobal('navigator', {
+    mediaDevices: { getDisplayMedia: vi.fn(async () => ({ getVideoTracks: () => [track] })) }
+  })
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+  await act(async () => root.render(<WebApp host={host} />))
+  const chip = (): HTMLButtonElement =>
+    container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
+  const captureButton = (): HTMLButtonElement =>
+    container.querySelector<HTMLButtonElement>('button[aria-label^="파티 캡처"]')!
+  expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결')
+  expect(captureButton().disabled).toBe(true)
+
+  await act(async () => chip().click())
+
+  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+  expect(captureButton().disabled).toBe(false)
+
+  await act(async () => captureButton().click())
+
+  await vi.waitFor(() =>
+    expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(expect.any(HTMLVideoElement))
+  )
+
+  await act(async () => track.dispatchEvent(new Event('ended')))
+
+  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
+  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(captureButton().disabled).toBe(true)
 })
