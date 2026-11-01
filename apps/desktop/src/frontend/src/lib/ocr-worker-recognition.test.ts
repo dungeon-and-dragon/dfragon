@@ -1,5 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
+import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
 
 const mocks = vi.hoisted(() => ({ createPartyOcrWorker: vi.fn() }))
@@ -32,7 +33,7 @@ beforeEach(() => {
 })
 
 it('회차가 끝나도 worker를 정리하지 않고 다음 회차가 다시 쓴다', async () => {
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
 
   await expect(ocr.recognize(new AbortController().signal, '실패', recognizeOnce)).resolves.toBe(
     'recognized'
@@ -47,7 +48,7 @@ it('회차가 끝나도 worker를 정리하지 않고 다음 회차가 다시 �
 })
 
 it('미리 띄운 worker를 첫 회차가 쓴다', async () => {
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
   ocr.prepare()
   expect(mocks.createPartyOcrWorker).toHaveBeenCalledOnce()
 
@@ -58,7 +59,7 @@ it('미리 띄운 worker를 첫 회차가 쓴다', async () => {
 })
 
 it('회차의 인식이 실패하면 실패 문구로 던지고 worker는 유지한다', async () => {
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
 
   await expect(
     ocr.recognize(new AbortController().signal, '실패', () => Promise.reject(new Error('x')))
@@ -71,7 +72,7 @@ it('worker의 인식 요청이 실패하면 그 worker를 정리하고 다음 �
   const next = fakeWorker()
   worker.recognize.mockRejectedValueOnce(new Error('PaddleOCR timed out.'))
   mocks.createPartyOcrWorker.mockResolvedValueOnce(worker).mockResolvedValueOnce(next)
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
 
   await expect(ocr.recognize(new AbortController().signal, '실패', recognizeOnce)).resolves.toBe(
     'failed'
@@ -87,7 +88,7 @@ it('worker의 인식 요청이 실패하면 그 worker를 정리하고 다음 �
 
 it('worker를 띄우지 못하면 준비 실패 문구로 던지고 다음 회차가 다시 띄운다', async () => {
   mocks.createPartyOcrWorker.mockRejectedValueOnce(new Error('x'))
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
   const run = vi.fn(recognizeOnce)
 
   await expect(ocr.recognize(new AbortController().signal, '실패', run)).rejects.toThrow(
@@ -102,7 +103,7 @@ it('worker를 띄우지 못하면 준비 실패 문구로 던지고 다음 회�
 it('worker 준비를 기다리는 동안 회차가 취소되면 준비 실패로 던지고 worker는 다음 회차에 남긴다', async () => {
   const pending = Promise.withResolvers<typeof worker>()
   mocks.createPartyOcrWorker.mockReturnValueOnce(pending.promise)
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
   const controller = new AbortController()
   const run = vi.fn(recognizeOnce)
 
@@ -121,7 +122,7 @@ it('worker 준비를 기다리는 동안 회차가 취소되면 준비 실패로
 it('worker에는 한 번에 한 요청만 보내고 취소된 회차의 남은 요청은 보내지 않는다', async () => {
   const first = Promise.withResolvers<PartyOcrResult>()
   worker.recognize.mockReturnValueOnce(first.promise)
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
   const previous = new AbortController()
   const previousRound = ocr.recognize(previous.signal, '실패', async (recognizeText) => {
     const slots = [recognizeOnce(recognizeText), recognizeOnce(recognizeText)]
@@ -146,7 +147,7 @@ it('release는 준비 중인 worker를 취소하고 띄운 worker를 정리하�
   const pending = Promise.withResolvers<typeof worker>()
   const next = fakeWorker()
   mocks.createPartyOcrWorker.mockReturnValueOnce(pending.promise).mockResolvedValueOnce(next)
-  const ocr = createSharedOcrWorker()
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
   ocr.prepare()
   const signal = mocks.createPartyOcrWorker.mock.calls[0][0] as AbortSignal
 
@@ -159,4 +160,20 @@ it('release는 준비 중인 worker를 취소하고 띄운 worker를 정리하�
   expect(mocks.createPartyOcrWorker).toHaveBeenCalledTimes(2)
   expect(next.recognize).toHaveBeenCalledOnce()
   expect(worker.recognize).not.toHaveBeenCalled()
+})
+
+it('worker가 준비되면 준비 상태를 알리고 정리하면 준비 전으로 돌아간다', async () => {
+  const ocr = createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed)
+  const listener = vi.fn()
+  ocr.subscribe(listener)
+  expect(ocr.isReady()).toBe(false)
+
+  ocr.prepare()
+  expect(ocr.isReady()).toBe(false)
+  await vi.waitFor(() => expect(ocr.isReady()).toBe(true))
+  expect(listener).toHaveBeenCalledOnce()
+
+  ocr.release()
+  expect(ocr.isReady()).toBe(false)
+  expect(listener).toHaveBeenCalledTimes(2)
 })

@@ -1,6 +1,7 @@
 import { createActor, waitFor } from 'xstate'
 import { afterEach, expect, it, vi } from 'vitest'
 import { partyCaptureMachine } from './party-capture-machine'
+import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
 import type { WindowFrameResult } from '../../../preload/common/types/capture'
 
@@ -15,6 +16,7 @@ const CAPTURE_ID = '00000000-0000-4000-8000-000000000001'
 
 function start() {
   const effects = {
+    texts: DESKTOP_CAPTURE_TEXTS,
     selectSource: vi.fn(async (_sourceId: string): Promise<unknown> => undefined),
     beginSearch: vi.fn(async (_signal: AbortSignal): Promise<string | null> => CAPTURE_ID),
     endSearch: vi.fn(),
@@ -24,7 +26,7 @@ function start() {
       })
     ),
     observeOcr: vi.fn(),
-    recognizeWithOcr: createSharedOcrWorker().recognize
+    recognizeWithOcr: createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed).recognize
   }
   const actor = createActor(partyCaptureMachine, { input: effects }).start()
 
@@ -65,4 +67,28 @@ it('시작한 회차 수는 받아들인 START마다 오르고 창 선택과 중
   expect(startedRounds()).toBe(3)
   actor.send({ type: 'SELECT', sourceId: 'game' })
   expect(startedRounds()).toBe(3)
+})
+
+it('붙여 넣은 프레임은 창을 고르지 않아도 회차를 시작하고 host가 든 프레임을 읽는다', async () => {
+  const { actor, effects } = start()
+  const frame = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }
+  effects.readFrame.mockResolvedValue({ kind: 'frame', image: frame })
+  const startedRounds = () => actor.getSnapshot().context.startedRounds
+
+  actor.send({ type: 'PASTE' })
+  expect(effects.beginSearch).toHaveBeenCalledOnce()
+  expect(startedRounds()).toBe(1)
+  expect(actor.getSnapshot().context.status).toBe('파티를 인식하고 있습니다.')
+
+  actor.send({ type: 'PASTE' })
+  expect(startedRounds()).toBe(1)
+
+  await vi.waitFor(() => expect(effects.readFrame).toHaveBeenCalledWith(CAPTURE_ID))
+  expect(effects.selectSource).not.toHaveBeenCalled()
+  expect(actor.getSnapshot().context.selectedSourceId).toBe('')
+  await waitFor(actor, (state) => !state.matches({ capturing: 'search' }))
+
+  actor.send({ type: 'PASTE' })
+  expect(startedRounds()).toBe(2)
+  expect(effects.beginSearch).toHaveBeenCalledTimes(2)
 })

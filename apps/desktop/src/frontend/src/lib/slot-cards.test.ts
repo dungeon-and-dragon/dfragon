@@ -36,6 +36,7 @@ function input(
     recognizing: false,
     snapshotMarks: [],
     snapshotAdventureInputs: [],
+    nextLookupStep: NEXT_STEP,
     ...overrides
   }
 }

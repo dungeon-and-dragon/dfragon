@@ -3,6 +3,7 @@ import { act, useLayoutEffect, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useRaidCapture } from './useRaidCapture'
+import { DESKTOP_CAPTURE_TEXTS } from '../lib/capture-texts'
 import { createSharedOcrWorker } from '../lib/ocr-worker-recognition'
 import { emptySearchSlots } from '../lib/slots'
 import type { RaidSlotRecognition } from '../lib/raid-recognition'
@@ -33,12 +34,13 @@ let value: ReturnType<typeof useRaidCapture>
 let root: Root
 
 function Harness(): null {
-  const [ocrWorker] = useState(createSharedOcrWorker)
+  const [ocrWorker] = useState(() => createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed))
   const current = useRaidCapture({
     sourceId: 'game',
     sourceReady: true,
     receivesShortcut: false,
-    recognizeWithOcr: ocrWorker.recognize
+    recognizeWithOcr: ocrWorker.recognize,
+    texts: DESKTOP_CAPTURE_TEXTS
   })
   useLayoutEffect(() => {
     value = current
