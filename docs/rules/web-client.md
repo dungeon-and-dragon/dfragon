@@ -5,7 +5,7 @@ enforcement: approval-required
 scope: dfragon.com web client
 last-reviewed: 2026-11-01
 rationale: 웹 클라이언트가 Desktop renderer를 같이 쓰면서 전송 정보, 입력, 플랫폼 연결을 어디까지 바꾸는지 정한다.
-evidence: "2026-11-01 ADR 0004 저장소 소유자 결정 ; 2026-11-01 #1076 화면 공유, Alt+PrtSc 실기 확인 ; 2026-11-01 #1085 PrtSc, Win+Shift+S 검출 조건과 붙여넣기 실기 확인 ; 2026-11-01 #1086 Chrome, Edge 화면 공유 연결, 캡처, 공유 중지 실기 확인 ; 2026-11-01 저장소 소유자 결정: 운영에 바로 내지 않도록 dev.dfragon.com을 둠"
+evidence: "2026-11-01 ADR 0004 저장소 소유자 결정 ; 2026-11-01 #1076 화면 공유, Alt+PrtSc 실기 확인 ; 2026-11-01 #1085 PrtSc, Win+Shift+S 검출 조건과 붙여넣기 실기 확인 ; 2026-11-01 #1086 Chrome, Edge 화면 공유 연결, 캡처, 공유 중지 실기 확인 ; 2026-11-01 저장소 소유자 결정: 운영에 바로 내지 않도록 dev.dfragon.com을 둠 ; 2026-11-01 #1087 첫 화면의 목업을 웹 앱으로 교체"
 exceptions: 화면 이미지를 브라우저 밖으로 보내는 기능과 전역 단축키는 새 결정 없이 더하지 않는다.
 review-after: 모바일 지원 범위, 사이트 hosting, Desktop bridge 구성 변경 전
 ---
@@ -16,7 +16,7 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 
 ## 위치와 화면
 
-- 웹 앱은 dfragon.com 메인 첫 화면의 창 목업 자리에 둔다. Desktop 내려받기는 보조 버튼이다. 사이트 소개 문구의 문체는 [표기와 문체](writing.md#사용자-문구의-문체)를 따르고, 앱 화면 문구는 Desktop과 같은 합니다체다.
+- 웹 앱은 dfragon.com 메인 첫 화면에 둔다. 각본으로 움직이는 목업 창은 두지 않는다. Desktop 내려받기는 보조 버튼이며, 게임 안에서 Alt+R로 쓰려면 Desktop을 받는다는 뜻을 짧게 적는다. 첫 화면은 웹이 보내는 정보([전송 정보](#전송-정보))와 데스크톱 브라우저용이라는 지원 범위도 사이트 문구로 안내한다. 사이트 소개 문구의 문체는 [표기와 문체](writing.md#사용자-문구의-문체)를 따르고, 앱 화면 문구는 Desktop과 같은 합니다체다.
 - 웹 entry는 Desktop의 `main.tsx`, `App.tsx`를 쓰지 않는다. 상단 바와 파티 화면을 1280×163, 공대 화면을 1280×300 상자 안에 합성한 컴포넌트를 `@dfragon/desktop-web` 별칭으로 내보낸다. Desktop의 문서 전체 드래그 차단, `user-select: none`, `100dvh`는 이 상자 밖의 사이트에 적용하지 않는다.
 
 ## 지원 범위
