@@ -54,13 +54,13 @@ HTTP client는 `ky`(Node 내장 `fetch` 위에서 동작), test runner와 assert
 
 App 생성은 port를 열지 않는 factory로 분리하고, `main.ts`만 설정 읽기, listen, 종료 signal 연결을 담당한다. Test는 factory에 fake 설정/provider를 넣어 `127.0.0.1`의 port `0`에서 실행하고 반드시 `app.close()`한다. 정상 HTTP 검증용 route는 test module 안에 두며 제품용 health/API를 추가하지 않는다.
 
-실행 기반의 최소 **필수** 설정은 `PORT`(십진 정수 1~65535)다. 누락, 빈 값, 잘못된 값은 listen 전에 실패한다. 따라서 runtime-only 단계에서도 실제 필수 설정 누락 실패를 검증한다. Test factory의 loopback port 0 주입은 환경변수 검증과 구분한다. 검색 구성에 필요한 `NEOPLE_API_KEY`는 검색 module을 연결할 때부터 필수이며 누락, 빈 값은 listen 전에 실패한다. Runtime-only app은 아직 연결하지 않은 검색 설정을 요구하지 않는다. 필수 설정 실패는 값이나 stack을 출력하지 않고 검증한다. Fake 설정은 test에서만 주입하며 운영용 인증 우회나 test mode를 추가하지 않는다.
+실행 기반의 최소 **필수** 설정은 `PORT`(십진 정수 1~65535)다. 누락, 빈 값, 잘못된 값은 listen 전에 실패한다. 따라서 runtime-only 단계에서도 실제 필수 설정 누락 실패를 검증한다. Test factory의 loopback port 0 주입은 환경변수 검증과 구분한다. 검색 구성에 필요한 `NEOPLE_API_KEY`는 검색 module을 연결할 때부터 필수이며 누락, 빈 값은 listen 전에 실패한다. Runtime-only app은 아직 연결하지 않은 검색 설정을 요구하지 않는다. 필수 설정 실패는 값이나 stack을 출력하지 않고 검증한다. Fake 설정은 test에서만 주입하며 운영용 인증 우회나 test mode를 추가하지 않는다. 점수 엔진 라이브러리 경로 `SCORE_LIBRARY_FILE`은 선택 설정이다. 절대 경로가 아니면 listen 전에 실패하고, 설정하지 않으면 점수 worker를 띄우지 않는다. 파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둔다.
 
 설정 검증은 키의 누락, 빈 값, 공백뿐인 값 검증을 runtime 설정 읽기에 집중한다. listen 전에 검증하고, runtime 조합부가 검색, 상세, 카탈로그 어댑터를 생성한다. 검색과 상세 서비스, HTTP 앱 factory는 raw API 키 없이 준비된 어댑터를 필수 의존성으로 받는다. 서비스 생성 후 매 요청 키를 다시 검사하지 않으며, 서비스 종료와 클라이언트 연결 종료 등 요청마다 달라지는 조건만 실행 단계에서 확인한다. 연결이 이미 끊긴 요청은 공급자를 호출하지 않는다. HTTP 테스트의 fake 어댑터에는 형식상 API 키를 요구하지 않는다. 잘못된 키로 HTTP 앱을 구성한 뒤 400/500 우선순위를 검사하던 내부 factory 테스트는 시작 단계의 설정 실패 검증으로 옮긴다. 정상 runtime의 설정 오류 시 시작 거절과 공개 HTTP 입력, 오류, 호출 한도 계약은 유지한다.
 
 표준 검증 command는 `apps/api/package.json`의 `typecheck`, `lint`, `build`, `test` script이며, root에서 `pnpm --filter @dfragon/api <script>`로 실행한다. `build`는 `dist`를, `test`는 `.test-dist`를 먼저 정리하고 위 tsconfig로 컴파일한 뒤 `node --import reflect-metadata --test`로 실행한다. 변경 범위별 조합은 [검증 명령](../../scripts/README.md#native-validation)을 따른다.
 
-Runtime acceptance에는 test HTTP 응답, metadata가 필요한 constructor DI, app 시작, 종료 후 열린 handle 없음, child process의 build entry 실행과 종료, `PORT` 누락, 빈 값, 잘못된 값에서 nonzero exit, 미listen을 포함한다. 검색 module 연결 후에는 해당 필수 설정 누락도 검증한다. Test의 child process는 허용한 fake environment만 받아 실제 credential을 상속하지 않는다. Build entry 검증에는 `build`가 선행해야 한다.
+Runtime acceptance에는 test HTTP 응답, metadata가 필요한 constructor DI, app 시작, 종료 후 열린 handle 없음(점수 엔진 submodule이 있으면 점수 worker를 띄운 상태 포함), child process의 build entry 실행과 종료, `PORT` 누락, 빈 값, 잘못된 값에서 nonzero exit, 미listen을 포함한다. 검색 module 연결 후에는 해당 필수 설정 누락도 검증한다. Test의 child process는 허용한 fake environment만 받아 실제 credential을 상속하지 않는다. Build entry 검증에는 `build`가 선행해야 한다.
 
 검색 adapter는 fake transport 또는 loopback upstream으로 검증한다. 외부 domain, 네오플 credential, 인증, DB가 필요하지 않아야 한다. 필요한 실제 운영, provider 권한은 별도로 확인한다. Search query 길이의 외부 규격 미확인은 credential 없는 runtime 검증을 막지 않는다.
 
