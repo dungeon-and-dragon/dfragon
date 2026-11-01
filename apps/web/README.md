@@ -22,7 +22,7 @@ pnpm --filter @dfragon/web preview
 
 ## 배포
 
-[`web-pages.yml`](../../.github/workflows/web-pages.yml)이 main에 push(PR merge)될 때와 수동 실행에서 `pnpm --filter @dfragon/web build`의 `dist`를 GitHub Pages에 올립니다. workflow는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다. 내려받기 버튼은 방문 시점에 GitHub API에서 최신 Release를 읽으므로 새 Release를 게시해도 다시 배포하지 않습니다.
+[`web-pages.yml`](../../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 `pnpm --filter @dfragon/web build`의 `dist`를 GitHub Pages에 올립니다. workflow는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다. 내려받기 버튼은 방문 시점에 GitHub API에서 최신 Release를 읽으므로 새 Release를 게시해도 다시 배포하지 않습니다.
 
 저장소 소유자가 한 번 해야 하는 설정입니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다.
 
