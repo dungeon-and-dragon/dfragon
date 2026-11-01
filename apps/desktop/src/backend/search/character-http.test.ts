@@ -3,6 +3,7 @@ import type { AddressInfo } from 'node:net'
 import { crc32, deflateSync } from 'node:zlib'
 import { PNG } from 'pngjs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { characterImageUrl } from '../../preload/common/search/character-summary'
 import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
 import {
   CHARACTER_HTTP_LIMITS,
@@ -281,7 +282,11 @@ describe('캐릭터 PNG HTTP', () => {
       .mockResolvedValue(
         new Response(new Uint8Array(bytes), { headers: { 'Content-Type': 'image/png' } })
       )
-    const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+    const read = createCharacterImageHttp({
+      fetch,
+      decodePng: decodeCharacterPng,
+      imageUrl: characterImageUrl
+    })
 
     expect(await read({ ...identity, signal: signal() })).toEqual({
       width: 2,
@@ -303,7 +308,11 @@ describe('캐릭터 PNG HTTP', () => {
     { characterId: 'character-1\n' }
   ])('지원하지 않는 이미지 identity %j는 호출 전에 거부한다', async (fields) => {
     const fetch = vi.fn<typeof globalThis.fetch>()
-    const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+    const read = createCharacterImageHttp({
+      fetch,
+      decodePng: decodeCharacterPng,
+      imageUrl: characterImageUrl
+    })
 
     await expect(read({ ...identity, ...fields, signal: signal() })).rejects.toMatchObject({
       code: 'INVALID_SEARCH_QUERY'
@@ -330,7 +339,11 @@ describe('캐릭터 PNG HTTP', () => {
         .mockResolvedValue(
           new Response(new Uint8Array(bytes), { headers: { 'Content-Type': contentType } })
         )
-      const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+      const read = createCharacterImageHttp({
+        fetch,
+        decodePng: decodeCharacterPng,
+        imageUrl: characterImageUrl
+      })
 
       await expect(read({ ...identity, signal: signal() })).rejects.toMatchObject({
         code: 'SEARCH_RESPONSE_INVALID'
@@ -342,7 +355,11 @@ describe('캐릭터 PNG HTTP', () => {
     const fetch = vi
       .fn<typeof globalThis.fetch>()
       .mockResolvedValue(new Response(null, { status: 404 }))
-    const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+    const read = createCharacterImageHttp({
+      fetch,
+      decodePng: decodeCharacterPng,
+      imageUrl: characterImageUrl
+    })
 
     await expect(read({ ...identity, signal: signal() })).rejects.toMatchObject({
       code: 'NEOPLE_API_ERROR'
@@ -354,7 +371,11 @@ describe('캐릭터 PNG HTTP', () => {
     const fetch = vi
       .fn<typeof globalThis.fetch>()
       .mockResolvedValue(new Response(null, { status: 429, headers: { 'Retry-After': '7' } }))
-    const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+    const read = createCharacterImageHttp({
+      fetch,
+      decodePng: decodeCharacterPng,
+      imageUrl: characterImageUrl
+    })
 
     await expect(read({ ...identity, signal: signal() })).rejects.toMatchObject({
       code: 'SEARCH_RATE_LIMITED'
@@ -386,7 +407,11 @@ describe('캐릭터 PNG HTTP', () => {
         .mockResolvedValue(
           new Response(new Uint8Array(bytes), { headers: { 'Content-Type': 'image/png' } })
         )
-      const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+      const read = createCharacterImageHttp({
+        fetch,
+        decodePng: decodeCharacterPng,
+        imageUrl: characterImageUrl
+      })
       try {
         await expect(read({ ...identity, signal: signal() })).rejects.toMatchObject({
           code: 'SEARCH_RESPONSE_INVALID'
@@ -523,7 +548,11 @@ describe('캐릭터 통신 실패와 호출자 취소', () => {
           signal: controller.signal
         })
       } else if (kind === 'image') {
-        request = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })({
+        request = createCharacterImageHttp({
+          fetch,
+          decodePng: decodeCharacterPng,
+          imageUrl: characterImageUrl
+        })({
           ...identity,
           signal: controller.signal
         })
@@ -592,7 +621,11 @@ describe('캐릭터 통신 실패와 호출자 취소', () => {
           signal: signal()
         })
       } else if (kind === 'image') {
-        request = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })({
+        request = createCharacterImageHttp({
+          fetch,
+          decodePng: decodeCharacterPng,
+          imageUrl: characterImageUrl
+        })({
           ...identity,
           signal: signal()
         })
@@ -615,7 +648,11 @@ describe('캐릭터 통신 실패와 호출자 취소', () => {
 
   it('이미 취소한 호출은 새 단계의 네트워크 요청을 시작하지 않는다', async () => {
     const fetch = vi.fn<typeof globalThis.fetch>()
-    const read = createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+    const read = createCharacterImageHttp({
+      fetch,
+      decodePng: decodeCharacterPng,
+      imageUrl: characterImageUrl
+    })
     const controller = new AbortController()
     controller.abort()
 

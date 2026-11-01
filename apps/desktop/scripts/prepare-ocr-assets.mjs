@@ -124,5 +124,7 @@ if (
   invokedPath !== '' &&
   import.meta.url === pathToFileURL(resolve(invokedPath)).href
 ) {
-  await prepareOcrAssets()
+  const destinationArg = process.argv[2]
+  const destination = destinationArg !== undefined ? resolve(destinationArg) : defaultDestination
+  await prepareOcrAssets(destination)
 }

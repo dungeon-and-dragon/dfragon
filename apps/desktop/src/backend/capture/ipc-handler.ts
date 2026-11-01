@@ -1,5 +1,6 @@
 import type { WindowFrameResult } from '../../preload/common/types/capture'
 import { SEARCH_COMMAND_ERRORS } from '../../preload/common/types/search'
+import { characterImageUrl } from '../../preload/common/search/character-summary'
 import {
   desktopCapturer,
   ipcMain,
@@ -179,7 +180,11 @@ function createSearchRuntime(
     createCharacterCandidatesHttp({ apiOrigin, fetch })
   )
   const image = createCharacterImageSource({
-    image: createCharacterImageHttp({ fetch, decodePng: decodeCharacterPng })
+    image: createCharacterImageHttp({
+      fetch,
+      decodePng: decodeCharacterPng,
+      imageUrl: characterImageUrl
+    })
   })
   const details = createCachedCharacterDetails(createCharacterDetailsHttp({ apiOrigin, fetch }))
 

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "es2023",
-    "lib": ["ES2023", "DOM"],
+    "lib": ["ES2024", "DOM"],
     "module": "esnext",
     "types": ["vite/client", "node"],
     "allowArbitraryExtensions": true,
@@ -17,7 +17,8 @@
       "@dfragon/lib/utils/shape-check": ["../../packages/lib/src/utils/shape-check.ts"],
       "@dfragon/desktop-shared/*": ["../desktop/src/shared/*"],
       "@dfragon/desktop-site": ["../desktop/src/frontend/src/site/index.ts"],
-      "@dfragon/desktop-site/time-of-day": ["../desktop/src/frontend/src/site/time-of-day.ts"]
+      "@dfragon/desktop-site/time-of-day": ["../desktop/src/frontend/src/site/time-of-day.ts"],
+      "@dfragon/desktop-web": ["../desktop/src/frontend/src/site/web/index.ts"]
     },
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
