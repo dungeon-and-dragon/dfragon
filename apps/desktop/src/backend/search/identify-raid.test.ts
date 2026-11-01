@@ -5,11 +5,10 @@ import type { RaidRowObservation } from '../../preload/common/types/search'
 import { deferred } from '../lib/async-test-fixture'
 import { runDetailsRequest, runSearchRequest } from './request'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-http'
+import { createEngineCardScorer } from '../score/card-score'
 import type { ScoreEngine, ScoreEngineResult } from '../score/engine'
 import { dealerCard } from '../../preload/common/search/card-test-fixture'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
-
-vi.mock('electron', () => ({ session: { fromPartition: vi.fn() } }))
 
 // 합성 후보, 직업명, 점수만 쓰며 표본이나 플레이어 식별자는 넣지 않는다.
 function candidate(
@@ -100,7 +99,8 @@ function fixture(engineScores: Record<string, number | null>) {
       selection: INITIAL_PORTRAIT_COLOR_POLICY
     },
     ocrIdentification: 'raid' as const,
-    scoreEngine: { calculate: score, prepare: vi.fn() }
+    cardScorer: createEngineCardScorer({ calculate: score, prepare: vi.fn() }),
+    reportDiagnostic: vi.fn()
   })
   const request = (
     raidRow: RaidRowObservation = SCORE_ROW,
@@ -253,7 +253,8 @@ it.each([[['']], [[' 공대원']], [['가', '나', '다']]])(
           selection: INITIAL_PORTRAIT_COLOR_POLICY
         },
         ocrIdentification: 'raid',
-        scoreEngine: { calculate: f.score, prepare: vi.fn() }
+        cardScorer: createEngineCardScorer({ calculate: f.score, prepare: vi.fn() }),
+        reportDiagnostic: vi.fn()
       },
       nickname: nicknames[0],
       signal: f.controller.signal,
