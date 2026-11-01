@@ -30,20 +30,20 @@
       "sha256": "143764b952fdb1a7c69ce653bfba74a7744d6a8a573bfb73e235fba356c83de3"
     }
   ],
-  "koffi@3.3.3": [
+  "koffi@3.3.4": [
     {
       "file": "upstream/koffi-LICENSE.txt",
-      "source": "npm:koffi@3.3.3/LICENSE.txt",
+      "source": "npm:koffi@3.3.4/LICENSE.txt",
       "sha256": "22bcbbbacd739b026a8dc484f62a31484ce4c4e31f3408b60b29b4e41d62b290"
     },
     {
       "file": "upstream/node-api-headers-LICENSE.txt",
-      "source": "npm:koffi@3.3.3/vendor/node-api-headers/LICENSE",
+      "source": "npm:koffi@3.3.4/vendor/node-api-headers/LICENSE",
       "sha256": "a553508f516031c91f3af1148d44970cb81bbae6c4f091be6835d39cc252238c"
     },
     {
       "file": "upstream/node-addon-api-LICENSE.txt",
-      "source": "npm:koffi@3.3.3/vendor/node-addon-api/LICENSE.md",
+      "source": "npm:koffi@3.3.4/vendor/node-addon-api/LICENSE.md",
       "sha256": "89024017b88a9f2b763f79b941a4f2db3b4428edfcacdc0b23866b2da633ad0c"
     }
   ],
