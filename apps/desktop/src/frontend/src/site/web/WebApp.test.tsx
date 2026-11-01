@@ -1,24 +1,51 @@
 // @vitest-environment jsdom
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { installBrowserHost } from './browser-host'
+import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
+import { useSearchModeStore } from '../../hooks/useSearchModeStore'
+import { installBrowserHost, type BrowserHost } from './browser-host'
+import { decodeBrowserImage } from './browser-png'
+import { readRaidWindowTemplates } from './browser-raid-templates'
 import { WebApp } from './WebApp'
+import { WEB_CAPTURE_TEXTS } from './web-capture-texts'
+
+vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
+vi.mock('./browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
 
 const API_ORIGIN = 'https://api.example.test'
+const pastedImage = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }
+
+function pasteImage(): void {
+  const event = new Event('paste', { bubbles: true })
+  const file = new File([new Uint8Array([1])], 'shot.png', { type: 'image/png' })
+  Object.defineProperty(event, 'clipboardData', {
+    value: { items: [{ kind: 'file', type: 'image/png', getAsFile: () => file }] }
+  })
+  document.dispatchEvent(event)
+}
+
+function captureStatus(): string | null {
+  return container.querySelector('[data-capture-announcer]')!.textContent
+}
 
 let root: Root
 let container: HTMLDivElement
+let host: BrowserHost
+
+// host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
+beforeAll(() => {
+  host = installBrowserHost(API_ORIGIN)
+})
 
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  vi.mocked(decodeBrowserImage).mockResolvedValue(pastedImage)
   vi.stubGlobal(
     'fetch',
     vi.fn<typeof fetch>(async () =>
       Response.json({ percent: 85, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() })
     )
   )
-  installBrowserHost(API_ORIGIN)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -28,10 +55,12 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.unstubAllGlobals()
+  vi.clearAllMocks()
+  useSearchModeStore.setState({ searchMode: 'party' })
 })
 
 it('preload 없이 브라우저 host만으로 상단 바와 파티 카드 네 장을 그린다', async () => {
-  await act(async () => root.render(<WebApp />))
+  await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() => expect(container.textContent).toContain('85'))
   expect(container.querySelectorAll('article')).toHaveLength(4)
@@ -41,7 +70,7 @@ it('preload 없이 브라우저 host만으로 상단 바와 파티 카드 네 �
 })
 
 it('Desktop과 달리 문서 전체의 드래그를 막지 않는다', async () => {
-  await act(async () => root.render(<WebApp />))
+  await act(async () => root.render(<WebApp host={host} />))
   const event = new Event('dragstart', { bubbles: true, cancelable: true })
 
   document.body.dispatchEvent(event)
@@ -55,4 +84,57 @@ it('Clipboard API가 없는 페이지에서는 복사를 예외 대신 거절된
   const written = window.desktopClipboard.writeText('[가나, 카인, -]')
 
   await expect(written).rejects.toThrow(TypeError)
+})
+
+it('창을 고르기 전에는 붙여넣기 안내를 보이고, 이미지를 붙여 넣으면 지금 화면의 회차가 웹 문구로 진행된다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+
+  await act(async () => pasteImage())
+
+  // jsdom에는 Worker가 없어 OCR 준비 실패로 끝나므로 그 웹 문구까지 확인한다.
+  await vi.waitFor(() => expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.ocrPrepareFailed))
+  expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(expect.any(File))
+})
+
+it('앱 상자 안 카드의 Alt+방향키는 브라우저에 넘기지 않고 이름 칸에서는 막지 않는다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+  const seat = container.querySelector('article')!
+  const nameField = container.querySelector('input')!
+
+  const onSeat = new KeyboardEvent('keydown', {
+    key: 'ArrowLeft',
+    altKey: true,
+    bubbles: true,
+    cancelable: true
+  })
+  seat.dispatchEvent(onSeat)
+  const onNameField = new KeyboardEvent('keydown', {
+    key: 'ArrowLeft',
+    altKey: true,
+    bubbles: true,
+    cancelable: true
+  })
+  nameField.dispatchEvent(onNameField)
+
+  expect(onSeat.defaultPrevented).toBe(true)
+  expect(onNameField.defaultPrevented).toBe(false)
+})
+
+it('공대 화면에서 붙여 넣으면 공대 회차가 host의 공대 프레임 읽기로 시작된다', async () => {
+  vi.mocked(readRaidWindowTemplates).mockRejectedValue(new Error('no templates'))
+  useSearchModeStore.setState({ searchMode: 'raid' })
+  const readRaidFrame = vi.spyOn(window.raidSearch, 'readCaptureFrame')
+  const readPartyFrame = vi.spyOn(window.api, 'readCaptureFrame')
+  await act(async () => root.render(<WebApp host={host} />))
+  expect(container.querySelectorAll('article')).toHaveLength(12)
+
+  await act(async () => pasteImage())
+
+  // 템플릿을 받지 못하면 공대 프레임 읽기가 거절돼 그 회차가 웹의 읽기 실패 문구로 끝난다.
+  await vi.waitFor(() => expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.disconnected))
+  expect(readRaidFrame).toHaveBeenCalledOnce()
+  expect(readPartyFrame).not.toHaveBeenCalled()
+  readRaidFrame.mockRestore()
+  readPartyFrame.mockRestore()
 })

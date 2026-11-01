@@ -15,8 +15,8 @@ import { PartyPage } from './PartyPage'
 import { styles } from './PartyScreen.style'
 
 export function PartyScreen(): React.JSX.Element {
-  const { partyCapture: capture } = useScreenCaptureContext()
-  const { cards, snapshot, clipboardText } = usePartySlotCards(capture)
+  const { partyCapture: capture, texts } = useScreenCaptureContext()
+  const { cards, snapshot, clipboardText } = usePartySlotCards(capture, texts.nextLookupStep)
   const { renderBoardHeader } = useBoardHeaderPortal()
   const clipboard = useClipboardCopy(clipboardText)
   useDesktopShortcut('take-snapshot', !snapshot.active, snapshot.take)

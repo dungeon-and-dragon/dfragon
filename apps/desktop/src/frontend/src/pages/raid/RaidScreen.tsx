@@ -14,8 +14,8 @@ import { filledSlotCount } from '../../lib/slot-cards'
 import { RaidPage } from './RaidPage'
 
 export function RaidScreen(): React.JSX.Element {
-  const { raidCapture: capture } = useScreenCaptureContext()
-  const { cards, snapshot, clipboardText } = useRaidSlotCards(capture)
+  const { raidCapture: capture, texts } = useScreenCaptureContext()
+  const { cards, snapshot, clipboardText } = useRaidSlotCards(capture, texts.nextLookupStep)
   const notice = capture.search.connectionFailed
     ? '검색 연결을 확인하지 못했습니다. 앱 화면을 다시 열어 주세요.'
     : ''

@@ -6,7 +6,10 @@ import { toSlotCards, type SlotCard } from '../lib/slot-cards'
 import { useAdventureSnapshot } from './useAdventureSnapshot'
 import type { RaidCapture } from './useRaidCapture'
 
-export function useRaidSlotCards(capture: RaidCapture): {
+export function useRaidSlotCards(
+  capture: RaidCapture,
+  nextLookupStep: string
+): {
   cards: SlotCard[]
   snapshot: ReturnType<typeof useAdventureSnapshot>
   clipboardText: string
@@ -25,6 +28,7 @@ export function useRaidSlotCards(capture: RaidCapture): {
     recognizing: capture.recognizing,
     snapshotMarks: seatValuesToSlotOrder(seatOrder, snapshot.marks),
     snapshotAdventureInputs: seatValuesToSlotOrder(seatOrder, snapshot.adventureInputs),
+    nextLookupStep,
     screen: 'raid'
   })
   const clipboardText = toClipboardText({

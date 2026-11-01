@@ -5,8 +5,6 @@ import type { CandidatePicker } from './candidate-picker'
 import type { SearchMode } from '../types/search-mode'
 import { searchSlotNotice, toCharacterCard } from './character-card'
 
-const NEXT_LOOKUP_STEP = 'Alt+R로 다시 인식하거나 서버와 이름을 직접 조회해 주세요.'
-
 export type SlotCard = {
   state: SlotState
   character?: CardCharacter
@@ -32,6 +30,7 @@ export function toSlotCards({
   recognizing,
   snapshotMarks,
   snapshotAdventureInputs,
+  nextLookupStep,
   candidatePickers = [],
   screen = 'party'
 }: {
@@ -41,13 +40,14 @@ export function toSlotCards({
   recognizing: boolean
   snapshotMarks: readonly (SnapshotMark | undefined)[]
   snapshotAdventureInputs: readonly (string | undefined)[]
+  nextLookupStep: string
   candidatePickers?: readonly (CandidatePicker | null)[]
   screen?: SearchMode
 }): SlotCard[] {
   return slots.map((slot, index) => {
     const character = toCharacterCard(slot.selected)
     const nickname = nicknames[index] ?? undefined
-    const notice = searchSlotNotice(slot, NEXT_LOOKUP_STEP, screen)
+    const notice = searchSlotNotice(slot, nextLookupStep, screen)
     const loading = !manualSlots[index] && recognizing
     const picker = candidatePickers[index] ?? undefined
     const scorePending = slot.details === 'pending'

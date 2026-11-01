@@ -1,6 +1,7 @@
 import { createActor, waitFor } from 'xstate'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { getRaidCapturePhase, raidCaptureMachine } from './raid-capture-machine'
+import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
 import type { RaidFrameResult } from '../../../preload/common/types/capture'
 import type { RaidSlotRecognition } from './raid-recognition'
@@ -37,10 +38,11 @@ const recognized: RaidSlotRecognition[] = [
 
 function start() {
   const effects = {
+    texts: DESKTOP_CAPTURE_TEXTS,
     beginSearch: vi.fn(async (_signal: AbortSignal): Promise<string | null> => ROUND),
     readFrame: vi.fn(async (_captureId: string): Promise<RaidFrameResult> => rows),
     observeOcr: vi.fn(),
-    recognizeWithOcr: createSharedOcrWorker().recognize
+    recognizeWithOcr: createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed).recognize
   }
   const actor = createActor(raidCaptureMachine, { input: effects }).start()
 
@@ -255,4 +257,17 @@ it('시작한 회차 수는 받아들인 START마다 오르고 무시한 START�
   actor.send({ type: 'SOURCE', sourceId: 'game' })
   actor.send({ type: 'START' })
   expect(actor.getSnapshot().context.startedRounds).toBe(2)
+})
+
+it('붙여 넣은 프레임은 등록된 창 없이 회차를 시작해 host가 잘라 둔 12행을 인식한다', async () => {
+  const { actor, effects } = start()
+
+  actor.send({ type: 'PASTE' })
+  expect(effects.beginSearch).toHaveBeenCalledOnce()
+  expect(actor.getSnapshot().context.startedRounds).toBe(1)
+
+  await waitFor(actor, (state) => state.matches({ capturing: 'complete' }))
+  expect(effects.readFrame).toHaveBeenCalledWith(ROUND)
+  expect(effects.observeOcr).toHaveBeenCalledTimes(3)
+  expect(actor.getSnapshot().context.sourceId).toBeNull()
 })

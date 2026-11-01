@@ -1,4 +1,5 @@
 import type { CapturePhase } from '../types/capture'
+import type { CaptureTexts } from './capture-texts'
 
 const DNF_CAPTURE_WINDOW_TITLE_PATTERN = /던전\s*앤\s*파이터|Dungeon.*Fighter|\bDNF\b/i
 
@@ -71,10 +72,13 @@ function getRaidScreenCapture({
   party,
   raid
 }: {
-  party: CaptureStatus & { sourceReady: boolean }
+  party: CaptureStatus & { sourceReady: boolean; selectedSourceId: string }
   raid: CaptureStatus
 }): CaptureStatus {
-  if (!party.sourceReady) {
+  // 창을 고른 Desktop은 창 변경, 중지, 등록 실패를 공대 회차보다 먼저 알린다. 창 없이 붙여 넣은 회차만 공대 단계를 보인다.
+  const partyStatusFirst =
+    !party.sourceReady && (party.selectedSourceId !== '' || raid.phase === 'idle')
+  if (partyStatusFirst) {
     return { phase: party.phase, status: party.status }
   }
 
@@ -88,7 +92,9 @@ function getRaidScreenCapture({
 export function getTopBarCaptureControls({
   isRaidMode,
   party,
-  raid
+  raid,
+  ocrReady,
+  texts
 }: {
   isRaidMode: boolean
   party: CaptureStatus & {
@@ -97,6 +103,8 @@ export function getTopBarCaptureControls({
     connectionFailed: boolean
   }
   raid: CaptureStatus
+  ocrReady: boolean
+  texts: Pick<CaptureTexts, 'noSource' | 'ocrPreparing'>
 }): CaptureStatus {
   const screenCapture = isRaidMode
     ? getRaidScreenCapture({ party, raid })
@@ -109,8 +117,12 @@ export function getTopBarCaptureControls({
     }
   }
 
-  if (!party.selectedSourceId) {
-    return { phase: screenCapture.phase, status: '' }
+  if (!party.selectedSourceId && screenCapture.phase === 'idle') {
+    return { phase: screenCapture.phase, status: texts.noSource }
+  }
+
+  if (screenCapture.phase === 'recognizing' && !ocrReady && texts.ocrPreparing !== null) {
+    return { phase: screenCapture.phase, status: texts.ocrPreparing }
   }
 
   return screenCapture
