@@ -7,7 +7,7 @@ last-reviewed: 2026-11-01
 rationale: 웹 클라이언트가 Desktop renderer를 같이 쓰면서 전송 정보, 입력, 플랫폼 연결을 어디까지 바꾸는지 정한다.
 evidence: "2026-11-01 ADR 0004 저장소 소유자 결정 ; 2026-11-01 #1076 화면 공유, Alt+PrtSc 실기 확인"
 exceptions: 화면 이미지를 브라우저 밖으로 보내는 기능과 전역 단축키는 새 결정 없이 더하지 않는다.
-review-after: 모바일 client, 사이트 hosting, Desktop bridge 구성 변경 전
+review-after: 모바일 지원 범위, 사이트 hosting, Desktop bridge 구성 변경 전
 ---
 
 # 웹 클라이언트
@@ -18,6 +18,10 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 
 - 웹 앱은 dfragon.com 메인 첫 화면의 창 목업 자리에 둔다. Desktop 내려받기는 보조 버튼이다. 사이트 소개 문구의 문체는 [표기와 문체](writing.md#사용자-문구의-문체)를 따르고, 앱 화면 문구는 Desktop과 같은 합니다체다.
 - 웹 entry는 Desktop의 `main.tsx`, `App.tsx`를 쓰지 않는다. 상단 바와 파티 화면을 1280×163, 공대 화면을 1280×300 상자 안에 합성한 컴포넌트를 `@dfragon/desktop-web` 별칭으로 내보낸다. Desktop의 문서 전체 드래그 차단, `user-select: none`, `100dvh`는 이 상자 밖의 사이트에 적용하지 않는다.
+
+## 지원 범위
+
+웹 클라이언트는 데스크톱 브라우저만 지원하고, 휴대폰과 좁은 화면은 지원하지 않는다(2026-11-01 저장소 소유자 결정). 모바일 앱(native client)도 만들지 않는다. 휴대폰과 좁은 화면용 레이아웃, 입력을 두지 않으며, 창이 앱 상자보다 좁으면 상자 안에서 가로로 스크롤한다.
 
 ## 입력
 
