@@ -3,9 +3,9 @@ type: rule
 status: active
 enforcement: approval-required
 scope: apps/api character search
-last-reviewed: 2026-10-31
+last-reviewed: 2026-11-01
 rationale: 검색 입력, 응답, 실패, 호출 제한을 후속 구현자가 추측하지 않게 한다.
-evidence: "2026-09-05 PR #42 검색 계약, PR #48 인증 통합 merge; 2026-10-20 #774, #778 호출 제한 제거; 2026-10-29 #987 회차 상세 동시 조회, #992 공용 아이템 24시간, 캐릭터 1시간 캐시; 2026-10-31 Cloudflare Tunnel 공개 경로, #1069 후보 검색 24시간 캐시"
+evidence: "2026-09-05 PR #42 검색 계약, PR #48 인증 통합 merge; 2026-10-20 #774, #778 호출 제한 제거; 2026-10-29 #987 회차 상세 동시 조회, #992 공용 아이템 24시간, 캐릭터 1시간 캐시; 2026-10-31 Cloudflare Tunnel 공개 경로, #1069 후보 검색 24시간 캐시; 2026-11-01 #1079 웹 클라이언트 초상화 전달"
 exceptions: 미확인 외부 규격과 새 정책은 사용자 결정 없이 구현하지 않는다.
 review-after: 네오플 공식 규격 변경 시
 ---
@@ -40,7 +40,7 @@ Top-level은 null, array가 아닌 JSON object이고 `rows`는 array여야 한�
 
 서버는 Neople 검색을 `serverId=all`, `wordType=match`, `limit=200`으로 한 번 호출한다. 저장한 결과가 없는 이름에만 호출한다([후보 검색 캐시](#후보-검색-캐시)). 현재 8개 서버의 동명 캐릭터를 찾지만 응답을 임의로 8개에서 자르지 않는다. Neople의 `match`는 영문 대소문자를 구분하지 않아 `exe` 검색에 `EXE`도 함께 돌려준다. 2026-10-20 [#770](https://github.com/dungeon-and-dragon/dfragon/issues/770) 결정으로 대소문자만 다른 이름은 공급자 오류로 보지 않고 후보에서 뺀다. 후보로 반환하는 이름은 요청 이름과 정확히 같다. 대소문자를 무시해도 다른 이름은 공급자 응답 오류다. 후보의 서버는 지원하는 실제 서버 ID이고 캐릭터 ID는 상세 API와 같은 1~256자의 ASCII 영숫자, `_`, `-`여야 한다. 다른 이름이나 사용할 수 없는 식별자가 섞이면 일부만 반환하지 않고 `502 NEOPLE_API_ERROR`로 실패한다. 이 추가 검증은 새 후보 API에 한정하며 기존 검색의 미등록 서버 보존 정책을 바꾸지 않는다.
 
-성공 응답은 `{"rows":[...]}`다. 각 행은 기존 `characterId`, `characterName`, `serverId`, `serverName`, `fame`에 `imageUrl`을 추가한다. `imageUrl`은 검증한 식별자로 구성한 `https://img-api.neople.co.kr/df/servers/<serverId>/characters/<characterId>?zoom=1`이다. 네오플의 전체 캐릭터 이미지 URL이며 얼굴만 잘린 이미지가 아니다. API는 이미지를 다운로드, 변환, 저장하거나 중계하지 않는다.
+성공 응답은 `{"rows":[...]}`다. 각 행은 기존 `characterId`, `characterName`, `serverId`, `serverName`, `fame`에 `imageUrl`을 추가한다. `imageUrl`은 검증한 식별자로 구성한 `https://img-api.neople.co.kr/df/servers/<serverId>/characters/<characterId>?zoom=1`이다. 네오플의 전체 캐릭터 이미지 URL이며 얼굴만 잘린 이미지가 아니다. 후보 검색은 이미지를 받지 않는다. 같은 이미지를 웹 클라이언트에 전달하는 경로는 [초상화 전달](#초상화-전달)이다.
 
 각 행에는 `jobName`, `jobGrowName`도 붙인다. 2026-10-20 [#760](https://github.com/dungeon-and-dragon/dfragon/issues/760) 결정으로, Desktop이 공대원 창의 직업명과 같은 후보만 남길 수 있게 Neople 검색 응답의 두 필드를 그대로 전달한다. 문자열이 아니거나 비어 있으면 null이다. 이를 채우려고 Neople을 더 호출하거나 후보마다 상세를 조회하지 않는다. 기존 `GET /characters`는 위 다섯 필드를 유지하며 직업명을 섞지 않는다.
 
@@ -71,6 +71,16 @@ Top-level은 null, array가 아닌 JSON object이고 `rows`는 array여야 한�
 - 후보의 명성 순서도 최대 24시간 늦다. [파티 식별](#desktop의-식별-흐름)은 명성 순 상위 후보만 얼굴과 비교하고, 거리가 같거나 거리를 구하지 못하면 명성 순서로 고르므로 그 사이 순서가 바뀐 후보를 비교에서 빠뜨리거나 다른 후보를 고를 수 있다.
 - 전직하거나 각성한 캐릭터의 `jobGrowName`이 최대 24시간 늦어, Desktop의 직업 비교가 맞지 않을 수 있다.
 - 삭제했거나 이름을 바꾼 캐릭터가 최대 24시간 후보에 남는다. Desktop이 그 후보를 고르면 상세 조회가 실패한다.
+
+### 초상화 전달
+
+`GET /characters/:serverId/:characterId/image`는 2026-11-01 [#1079](https://github.com/dungeon-and-dragon/dfragon/issues/1079)에서 추가한 공개 API다. 네오플 이미지 서버는 200 응답에 CORS 헤더를 주지 않아 브라우저가 픽셀을 읽지 못하므로, 웹 클라이언트가 얼굴 크롭과 비교할 후보 이미지를 API가 대신 전달한다. 전달 계약은 [웹 클라이언트의 초상화 전달](web-client.md#초상화-전달)을 따른다. Desktop은 지금처럼 `imageUrl`에서 직접 받는다.
+
+- `serverId`, `characterId`는 상세 API와 같은 규칙(지원하는 실제 서버 ID, 1~256자의 ASCII 영숫자, `_`, `-`)으로 검증한다. Query와 HEAD를 포함해 검증에 실패하면 `400 INVALID_CHARACTER_QUERY`이며 네오플을 호출하지 않는다. 요청자는 URL, host, `zoom`을 지정할 수 없다.
+- 서버는 검증한 값으로만 후보 `imageUrl`과 같은 `https://img-api.neople.co.kr/df/servers/<serverId>/characters/<characterId>?zoom=1`을 만들어 한 번 부른다. 이미지 서버는 API key를 쓰지 않으므로 key 헤더를 보내지 않는다.
+- 성공 응답은 200, `Content-Type: image/png`, `Cache-Control: private, max-age=3600`이며 네오플 PNG 본문을 변환하지 않고 그대로 보낸다. API 메모리에 캐시하거나 저장하지 않고, 1시간은 캐릭터 상세 캐시와 맞춘 브라우저 캐시 기간이다.
+- 오류 body와 message는 캐릭터 상세와 같다. 네오플이 429, 503이면 `503 NEOPLE_UNAVAILABLE`, 그 밖의 비2xx, `image/png`가 아닌 응답, 4MiB(Desktop의 초상화 상한과 같다)를 넘는 본문, 통신 실패는 `502 NEOPLE_API_ERROR`, 응답 timeout은 `504 NEOPLE_TIMEOUT`이다. Timeout, retry 0회, redirect를 따라가지 않는 정책은 [Timeout과 adapter](#timeout과-adapter)와 같다. 이미지 서버는 JSON 오류 code를 주지 않으므로 HTTP status로만 분류한다.
+- 접근 로그는 다른 경로처럼 route template만 남기고 캐릭터 ID를 남기지 않는다.
 
 ### Desktop의 식별 흐름
 

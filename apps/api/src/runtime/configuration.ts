@@ -5,6 +5,27 @@ import { parsePort } from '../port.js'
 import { readSecretInput } from '../secret-input.js'
 
 const invalidConfiguration = 'Invalid API runtime configuration'
+const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+function readWebDevOrigins(value: string | undefined): string[] {
+  if (value === undefined) {
+    return []
+  }
+
+  return value.split(',').map((origin) => {
+    const url = URL.parse(origin)
+    if (
+      url === null ||
+      url.origin !== origin ||
+      !['http:', 'https:'].includes(url.protocol) ||
+      !LOOPBACK_HOSTNAMES.has(url.hostname)
+    ) {
+      throw new Error(invalidConfiguration)
+    }
+
+    return origin
+  })
+}
 
 async function readLocalHttps(environment: NodeJS.ProcessEnv, port: number, apiOrigin: string) {
   const certPath = environment.LOCAL_HTTPS_CERT_FILE
@@ -50,11 +71,13 @@ export async function readRuntimeConfiguration(environment: NodeJS.ProcessEnv) {
       throw new Error(invalidConfiguration)
     }
     const localHttps = await readLocalHttps(environment, port, environment.API_ORIGIN ?? '')
+    const webDevOrigins = readWebDevOrigins(environment.WEB_DEV_ORIGINS)
 
     return {
       port,
       trustedProxyHops,
       localHttps,
+      webDevOrigins,
       apiKey
     }
   } catch {

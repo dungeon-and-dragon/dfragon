@@ -32,6 +32,7 @@ test('Swagger는 공개 API 경로만 문서화하고 provider를 호출하지 �
         'get /characters',
         'get /characters/candidates',
         'get /characters/{serverId}/{characterId}',
+        'get /characters/{serverId}/{characterId}/image',
         'post /characters/{serverId}/{characterId}/refresh',
         'get /items/today-grade'
       ].sort()
@@ -45,6 +46,10 @@ test('Swagger는 공개 API 경로만 문서화하고 provider를 호출하지 �
       '503',
       '504'
     ])
+    const image = document.paths['/characters/{serverId}/{characterId}/image']!.get!
+    const imageSuccess = image.responses['200']
+    assert.ok(imageSuccess !== undefined && 'content' in imageSuccess)
+    assert.deepEqual(Object.keys(imageSuccess.content ?? {}), ['image/png'])
     assert.equal(document.paths['/me'], undefined)
     assert.equal(document.security, undefined)
     assert.equal(document.paths['/characters'].get?.security, undefined)

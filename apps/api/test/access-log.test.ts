@@ -92,6 +92,7 @@ test('접근 로그는 요청마다 allowlist field 한 줄만 남기고 credent
     search: { searchCharacters: failWithDetail },
     details: { fetchDetails: failWithDetail, catalog: unusedCatalog },
     todayGrade: { fetchShopGrade: unusedProvider },
+    fetchCharacterImage: failWithDetail,
     writeAccessLog: logs.sink
   })
   t.after(() => app.close())
@@ -119,6 +120,18 @@ test('접근 로그는 요청마다 allowlist field 한 줄만 남기고 credent
         service: 'api',
         method: 'GET',
         route: '/characters/:serverId/:characterId',
+        status: 500,
+        code: 'INTERNAL_SERVER_ERROR'
+      }
+    },
+    {
+      name: '초상화 경로 parameter와 내부 오류',
+      path: `/characters/cain/${secrets.pathValue}/image`,
+      init: {},
+      expected: {
+        service: 'api',
+        method: 'GET',
+        route: '/characters/:serverId/:characterId/image',
         status: 500,
         code: 'INTERNAL_SERVER_ERROR'
       }
