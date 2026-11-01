@@ -96,7 +96,8 @@ export const styles = stylex.create({
     lineHeight: { default: '48px', '@media (max-width: 479px)': '36px' },
     whiteSpace: 'nowrap'
   },
-  mockup: {
+  text: { margin: 0, fontSize: 16, lineHeight: '24px' },
+  app: {
     maxWidth: '100%',
     boxSizing: 'border-box',
     overflowX: 'auto',
@@ -104,7 +105,28 @@ export const styles = stylex.create({
     boxShadow: `8px 8px 0 ${siteColors.accent}`,
     backgroundColor: '#0F0F11'
   },
-  mockupPending: { width: 1280, height: 163 },
+  appPending: { width: 1280, height: 163 },
+  notes: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+    gap: 24,
+    width: '100%',
+    maxWidth: 1280,
+    boxSizing: 'border-box',
+    padding: 24,
+    backgroundColor: siteColors.surface,
+    border: `3px solid ${siteColors.accent}`,
+    boxShadow: `8px 8px 0 ${siteColors.accent}`
+  },
+  note: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12 },
+  noteTitle: {
+    margin: 0,
+    fontFamily: siteFonts.title,
+    fontSize: 24,
+    fontWeight: 700,
+    lineHeight: '36px'
+  },
+  noteList: { margin: 0, paddingInlineStart: 20, fontSize: 16, lineHeight: '24px' },
   footer: {
     display: 'flex',
     alignItems: 'center',
