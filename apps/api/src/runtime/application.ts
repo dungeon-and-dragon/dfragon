@@ -16,6 +16,7 @@ export function createApiRuntime(configuration: RuntimeConfiguration) {
       catalog: createCatalogService(createNeopleCatalog(configuration.apiKey))
     },
     todayGrade: { fetchShopGrade: createNeopleShopGrade(configuration.apiKey) },
+    webDevOrigins: configuration.webDevOrigins,
     trustedProxyHops: configuration.trustedProxyHops,
     httpsOptions: configuration.localHttps
   })
