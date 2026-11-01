@@ -2,11 +2,11 @@ import { readFileSync } from 'node:fs'
 import { PNG } from 'pngjs'
 import { expect, it } from 'vitest'
 import { readDNFRaidParticipantValues } from '@dfragon/lib'
-import { sliceRaidValueGlyphs } from './raid-value-glyphs'
+import { sliceRaidValueGlyphs } from '../../shared/raid/raid-value-glyphs'
 
 function readSprite() {
   const { width, height, data } = PNG.sync.read(
-    readFileSync(new URL('./raid-value-glyphs.png', import.meta.url))
+    readFileSync(new URL('../../shared/raid/raid-value-glyphs.png', import.meta.url))
   )
 
   return { width, height, rgba: data }

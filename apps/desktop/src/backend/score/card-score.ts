@@ -1,5 +1,5 @@
 import type { CharacterCardScore } from '../../preload/common/types/character'
-import type { CharacterCardScorer } from '../search/request'
+import type { CharacterCardScorer } from '../../shared/search/request'
 import type { ScoreEngine, ScoreEngineResult } from './engine'
 import { toScoreEngineInput } from './input'
 

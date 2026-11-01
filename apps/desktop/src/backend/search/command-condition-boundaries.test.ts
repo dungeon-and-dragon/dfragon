@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { parseOcrSearchObservation, parseSearchControl } from './commands'
-import { deferred } from '../lib/async-test-fixture'
+import { parseOcrSearchObservation, parseSearchControl } from '../../shared/search/commands'
+import { deferred } from '../../shared/search/async-test-fixture'
 import {
   candidate,
   candidateResponse,

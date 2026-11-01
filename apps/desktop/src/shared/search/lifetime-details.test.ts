@@ -3,7 +3,7 @@ import type { MockedFunction } from 'vitest'
 import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-http'
 import { createCaptureSearchLifetime } from './capture-lifetime'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from './async-test-fixture'
 import { SearchHttpFailure } from './http'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 
@@ -146,7 +146,7 @@ function fixture() {
   }
 }
 
-const settle = () => new Promise<void>((resolve) => setImmediate(resolve))
+const settle = () => new Promise<void>((resolve) => setTimeout(resolve))
 
 describe('이름과 서버를 정한 뒤 상세를 채우는 순서', () => {
   it('모든 슬롯이 이름과 서버를 정할 때까지 상세를 받지 않는다', async () => {

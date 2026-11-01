@@ -1,11 +1,11 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { candidate, createSearchFixture, jsonResponse } from './search-test-fixture'
-import { planRaidComparison } from './raid-candidate'
+import { planRaidComparison } from '../../shared/search/raid-candidate'
 import type { CharacterCandidate } from '../../preload/common/types/character'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 
-vi.mock('./raid-candidate', async (original) => {
-  const actual = await original<typeof import('./raid-candidate')>()
+vi.mock('../../shared/search/raid-candidate', async (original) => {
+  const actual = await original<typeof import('../../shared/search/raid-candidate')>()
 
   return { ...actual, planRaidComparison: vi.fn(actual.planRaidComparison) }
 })

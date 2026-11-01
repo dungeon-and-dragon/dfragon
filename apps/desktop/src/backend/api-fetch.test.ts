@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { session } from 'electron'
 import { fetchApi } from './api-fetch'
-import { createCharacterCandidatesHttp } from './search/character-http'
+import { createCharacterCandidatesHttp } from '../shared/search/character-http'
 
 vi.mock('electron', () => {
   const fromPartition = vi.fn()

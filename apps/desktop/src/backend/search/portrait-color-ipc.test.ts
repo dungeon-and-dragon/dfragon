@@ -1,6 +1,6 @@
 import { PNG } from 'pngjs'
 import { expect, it, vi } from 'vitest'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 import { candidate, createSearchFixture, jsonResponse } from './search-test-fixture'
 import { parseSearchSnapshot } from '../../preload/common/search/snapshot'
 import type {
@@ -9,7 +9,7 @@ import type {
   CharacterImage,
   CharacterPortrait
 } from '../../preload/common/types/character'
-import { deferred, type Deferred } from '../lib/async-test-fixture'
+import { deferred, type Deferred } from '../../shared/search/async-test-fixture'
 import { API_ORIGIN } from './search-test-fixture'
 
 const IMAGE_ORIGIN = 'https://img-api.neople.co.kr'

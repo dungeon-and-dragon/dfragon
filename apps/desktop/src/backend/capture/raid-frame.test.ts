@@ -1,11 +1,11 @@
 import { expect, it, vi } from 'vitest'
-import { toRaidFrameResult } from './raid-frame'
-import { readRaidWindowValues } from '../lib/raid-window'
+import { toRaidFrameResult } from '../../shared/raid/raid-frame'
+import { readRaidWindowValues } from '../../shared/raid/raid-window'
 import { raidFrame } from '../lib/raid-window-test-fixture'
 import { readRaidWindowTemplates } from '../lib/raid-window-templates'
 
-vi.mock('../lib/raid-window', async (original) => {
-  const actual = await original<typeof import('../lib/raid-window')>()
+vi.mock('../../shared/raid/raid-window', async (original) => {
+  const actual = await original<typeof import('../../shared/raid/raid-window')>()
 
   return { ...actual, readRaidWindowValues: vi.fn(actual.readRaidWindowValues) }
 })

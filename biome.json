@@ -325,6 +325,23 @@
           }
         }
       }
+    },
+    {
+      "includes": ["apps/desktop/src/shared/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "electron": "src/shared는 Electron main과 브라우저가 함께 읽으므로 Electron adapter는 src/backend에 둔다."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

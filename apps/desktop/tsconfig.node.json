@@ -4,6 +4,7 @@
     "electron.vite.config.*",
     "electron-builder*.ts",
     "src/backend/**/*",
+    "src/shared/**/*",
     "src/preload/**/*"
   ],
   "compilerOptions": {

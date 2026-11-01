@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from '../../shared/search/async-test-fixture'
 import type { SearchSlot } from '../../preload/common/types/search'
 import { API_ORIGIN } from './search-test-fixture'
 import {

@@ -5,9 +5,12 @@ import {
 } from '../../preload/common/types/search'
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { addHandler } from '../ipc'
-import { createCaptureSearchLifetime, type CaptureBinding } from './capture-lifetime'
-import { parseOcrSearchObservation, parseSearchControl } from './commands'
-import type { SearchRuntime } from './request'
+import {
+  createCaptureSearchLifetime,
+  type CaptureBinding
+} from '../../shared/search/capture-lifetime'
+import { parseOcrSearchObservation, parseSearchControl } from '../../shared/search/commands'
+import type { SearchRuntime } from '../../shared/search/request'
 import type { SearchSnapshot } from '../../preload/common/types/search'
 
 export type ManualSearchKind = keyof typeof SEARCH_SLOT_COUNTS

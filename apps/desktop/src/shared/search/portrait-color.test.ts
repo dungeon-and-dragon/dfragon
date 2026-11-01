@@ -1,4 +1,3 @@
-import { setImmediate } from 'node:timers/promises'
 import { describe, expect, it } from 'vitest'
 import type { CharacterImage, CharacterPortrait } from '../../preload/common/types/character'
 import type { PortraitAnchor } from '../../preload/common/search/portrait-anchor'
@@ -24,6 +23,10 @@ const POLICY: PortraitColorPolicy = {
 }
 type Pixel = readonly [number, number, number, number]
 type Placement = Readonly<{ x: number; y: number; source: CharacterImage }>
+
+function yieldToEventLoop(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve))
+}
 
 function image(
   width: number,
@@ -129,9 +132,10 @@ function score(
 ) {
   const signal = new AbortController().signal
 
-  return createPortraitColorScorer({ ...POLICY, ...policy }, () => setImmediate())(
-    input(face, candidate, signal, anchor)
-  )
+  return createPortraitColorScorer(
+    { ...POLICY, ...policy },
+    yieldToEventLoop
+  )(input(face, candidate, signal, anchor))
 }
 
 describe('셀 평균 색 비교의 정렬과 점수', () => {
@@ -367,9 +371,10 @@ describe('색 비교 입력 경계', () => {
     const candidate = candidateImage(60, 80, [{ x: 5, y: 7, source: faceImage() }])
 
     await expect(
-      createPortraitColorScorer(POLICY, () => setImmediate())(
-        input(portrait(), candidate, controller.signal)
-      )
+      createPortraitColorScorer(
+        POLICY,
+        yieldToEventLoop
+      )(input(portrait(), candidate, controller.signal))
     ).rejects.toBe(reason)
   })
 
@@ -377,11 +382,12 @@ describe('색 비교 입력 경계', () => {
     const controller = new AbortController()
     const reason = new Error('탐색 도중 캡처 중지')
     const candidate = image(80, 80, () => [80, 90, 100, OPAQUE_ALPHA])
-    const pending = createPortraitColorScorer({ ...POLICY, gridSize: 8 }, () => setImmediate())(
-      input(portrait(), candidate, controller.signal)
-    )
+    const pending = createPortraitColorScorer(
+      { ...POLICY, gridSize: 8 },
+      yieldToEventLoop
+    )(input(portrait(), candidate, controller.signal))
     const rejected = expect(pending).rejects.toBe(reason)
-    await setImmediate()
+    await yieldToEventLoop()
     controller.abort(reason)
 
     await rejected
