@@ -18,7 +18,11 @@ const siteNotices = {
   }
 } satisfies Plugin
 
+// 개발 서버는 같은 origin 경로를 운영 API로 넘겨, 운영 API의 CORS 허용 origin 없이 웹 앱을 연다.
+const DEV_API_PROXY = { target: 'https://api.dfragon.com', changeOrigin: true }
+
 export default defineConfig({
   plugins: [stylex.vite(stylexOptions), react(), uiNotices(), desktopNotices(), siteNotices],
-  resolve: { alias: workspaceAliases, dedupe: ['react', 'react-dom'] }
+  resolve: { alias: workspaceAliases, dedupe: ['react', 'react-dom'] },
+  server: { proxy: { '/characters': DEV_API_PROXY, '/items': DEV_API_PROXY } }
 })
