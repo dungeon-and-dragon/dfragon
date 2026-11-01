@@ -3,7 +3,7 @@ type: rule
 status: active
 enforcement: approval-required
 scope: architecture
-last-reviewed: 2026-10-29
+last-reviewed: 2026-11-01
 ---
 
 # Architecture Overview
@@ -27,7 +27,7 @@ scripts/
 
 - `apps/api`: 캐릭터 공개 NestJS API workspace. DB 없이 Neople API를 조회하고 캐릭터, 공용 아이템 조회 결과를 API 메모리에 캐시한다. 승인된 ESM runtime, dependency, build/test 계약은 [`../rules/api-runtime.md`](../rules/api-runtime.md)를 따른다. 구현 현황은 Reference에서 확인한다.
 - `apps/desktop`: Electron, React, TypeScript, electron-vite 기반 desktop application.
-- `apps/web`: 던삐삐 소개와 내려받기 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면의 창 목업은 Desktop renderer 컴포넌트로 그린다. 아래 Shared UI boundary를 따른다.
+- `apps/web`: 던삐삐 소개와 내려받기 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면의 창 목업은 Desktop renderer 컴포넌트로 그린다. 그 자리에 설치 없이 쓰는 웹 클라이언트를 둔다([웹 클라이언트](../rules/web-client.md)). 아래 Shared UI boundary를 따른다.
 - `packages/ui`: 현재 tracked shared UI package `@dfragon/ui`. 실제 구현, 명령은 [공용 UI 안내](../../packages/ui/README.md)에서 확인한다.
 - `packages/lib`: 앱과 UI에 의존하지 않는 공용 순수 함수 `@dfragon/lib`. 아래 Shared library boundary를 따른다.
 - `packages/licenses`: 빌드 시 고지 원문, 수집, 배포 자료를 관리하는 `@dfragon/licenses`. 제품 runtime에서 import하지 않는다.
@@ -38,9 +38,13 @@ scripts/
 
 ## Approved boundary
 
-현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스와 DB는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 없이 동작한다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다. 다음 사항은 구체 결정, 확보 또는 검증이 남아 있다.
+현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스와 DB는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 없이 동작한다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다.
 
-- Web/mobile client
+웹 클라이언트는 dfragon.com 첫 화면에 두고, Desktop renderer 컴포넌트를 브라우저 host로 연결해 쓴다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). OCR과 초상화 비교는 브라우저에서 하고 화면 이미지는 브라우저 밖으로 나가지 않으며, API는 캐릭터 검색, 상세와 점수, 네오플 초상화 전달을 맡는다. 계약은 [웹 클라이언트](../rules/web-client.md)를 따른다.
+
+다음 사항은 구체 결정, 확보 또는 검증이 남아 있다.
+
+- Mobile client
 - 아래 Shared UI, Shared library boundary 이외의 shared package 종류와 dependency direction
 - 현재 요청과 MVP 운영 기준을 벗어나는 새로운 deployment boundary
 
@@ -50,14 +54,15 @@ Desktop은 파티, 공대 캡처와 검색, 카드의 캐릭터 면만 둔다. �
 
 ## 점수 엔진 경계
 
-비공개 엔진 저장소가 만든 C 네이티브 점수 엔진(Windows DLL, macOS dylib)은 Desktop main process가 띄운 Node worker thread 하나에서 `koffi`로 불러 쓴다(2026-10-19 결정, [Issue #716](https://github.com/dungeon-and-dragon/dfragon/issues/716), worker 이전은 [Issue #987](https://github.com/dungeon-and-dragon/dfragon/issues/987)). Main의 경계는 `apps/desktop/src/backend/score/engine.ts`, worker 진입은 `worker.ts`다. 엔진은 OS thread마다 첫 계산을 초기화하므로 준비와 모든 계산을 같은 worker에서 하고, main은 계산을 기다리는 동안 막히지 않는다.
+비공개 엔진 저장소가 만든 C 네이티브 점수 엔진(Windows DLL, macOS dylib, Linux `libdnfscore.so`)은 실행 위치마다 Node worker thread 하나를 띄워 `koffi`로 불러 쓴다(2026-10-19 결정, [Issue #716](https://github.com/dungeon-and-dragon/dfragon/issues/716), worker 이전은 [Issue #987](https://github.com/dungeon-and-dragon/dfragon/issues/987)). 실행 위치는 `apps/api`와 Desktop main이다. API는 웹 클라이언트를 위해 점수를 계산해 상세 응답에 넣는다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). Desktop main의 경계는 `apps/desktop/src/backend/score/engine.ts`, worker 진입은 `worker.ts`다. 엔진은 OS thread마다 첫 계산을 초기화하므로 실행 위치마다 준비와 모든 계산을 같은 worker에서 하고, 그 process는 계산을 기다리는 동안 막히지 않는다.
 
 | 대상 | 책임 |
 | --- | --- |
 | 비공개 엔진 저장소 | 엔진의 소스, 계산 데이터, 빌드, Release를 소유한다. |
 | 이 저장소 | 엔진을 불러 쓰는 로더와 바이너리 입수 script만 둔다. 엔진의 소스, 데이터, 바이너리를 commit하지 않는다. |
-| `apps/desktop` main | Main process의 점수 worker가 엔진을 `koffi`로 로드하고 호출하는 유일한 실행 위치다. 결과 검증과 진단은 main이 맡는다. |
-| renderer, preload, `apps/api` | 엔진을 로드하거나 import하지 않는다. renderer는 main이 계산해 전달한 결과만 받는다. |
+| `apps/api` | API의 점수 worker가 Linux 엔진을 `koffi`로 로드해 장비 점수와 버프 점수를 계산하고, 상세 응답과 1시간 상세 캐시에 함께 둔다. 웹 클라이언트는 이 점수만 쓴다. |
+| `apps/desktop` main | Main process의 점수 worker가 엔진을 `koffi`로 로드하고 호출한다. 결과 검증과 진단은 main이 맡는다. Desktop이 API 점수를 쓰도록 바꾸고 로컬 엔진을 지우는 [Issue #1088](https://github.com/dungeon-and-dragon/dfragon/issues/1088)이 끝날 때까지 남는다. |
+| renderer, preload, 웹 클라이언트 | 엔진을 로드하거나 import하지 않는다. Desktop renderer는 main이 계산해 전달한 결과를, 웹 클라이언트는 API 상세 응답의 결과만 받는다. |
 
 - **빌드 조건**: 엔진 바이너리는 CI secret으로 입수한다. 엔진 없는 빌드를 허용한다.
 - **코드 노출 한계**: 컴파일된 코드도 역공학으로 해석할 수 있다. 이 경계는 소스와 데이터를 공개 저장소 밖에 두는 소유 분리이며, Desktop에 실린 바이너리의 로직이 끝까지 숨겨진다고 보장하지 않는다.
@@ -70,7 +75,7 @@ Desktop은 파티, 공대 캡처와 검색, 카드의 캐릭터 면만 둔다. �
 | --- | --- |
 | `packages/ui`의 `@dfragon/ui` | Browser React shared package 하나로 자체 토큰(`tokens.css`, `tokens.stylex`), Base UI 기반 공용 Component, 공용 형태와 실제로 공유하는 Layout, composition, 디자인 컴포넌트, Typo를 제공한다. `@dfragon/ui` → Base UI/React, StyleX runtime 방향으로 연결하며 app source, 앱 테마, API client, backend, Electron main/preload, IPC, 인증, domain을 import하지 않는다. |
 | `apps/desktop` renderer | `@dfragon/ui`를 소비하고 제품 data, event, behavior와 app별 platform 연결을 맡는다. Desktop main/preload는 UI package를 소비하지 않는다. |
-| `apps/web` | `@dfragon/ui`를 소비하고 사이트 배치와 사이트 색을 자체 StyleX 상수로 그린다. 창 목업은 Desktop renderer가 사이트용으로 공개한 entry(`apps/desktop/src/frontend/src/site/index.ts`, 별칭 `@dfragon/desktop-site`) 하나만 source로 import하고, Desktop의 다른 source, main/preload, IPC는 import하지 않는다. 그 entry는 캡처와 검색 대신 각본 상태로 실제 상단 바와 카드 컴포넌트를 그린다. |
+| `apps/web` | `@dfragon/ui`를 소비하고 사이트 배치와 사이트 색을 자체 StyleX 상수로 그린다. Desktop source는 Desktop이 사이트용으로 공개한 entry와 공용 검색 코어만 import한다. 창 목업 entry(`apps/desktop/src/frontend/src/site/index.ts`, 별칭 `@dfragon/desktop-site`)는 캡처와 검색 대신 각본 상태로 실제 상단 바와 카드 컴포넌트를 그린다. 웹 앱 entry(같은 `site` 폴더, 별칭 `@dfragon/desktop-web`)는 같은 컴포넌트를 브라우저 host로 연결해 [웹 클라이언트](../rules/web-client.md)를 그린다. Desktop의 공용 검색 코어(`src/shared/`, [Desktop 코드 구조](desktop-code-organization.md))는 별칭으로 읽는다. Desktop의 다른 source, main/preload, IPC는 import하지 않는다. |
 | 독립 Vite Example entry | 필요한 상태를 실제 화면에서 확인하기 어려울 때 같은 `@dfragon/ui` public API와 합성 content로 확인한다. 새 화면마다 Component, Pattern, Template 예제를 갖출 의무는 없다. |
 
 공용 Component는 Base UI 부품의 semantic API와 접근성 동작을 유지하고 외형만 StyleX로 그린다. 같은 역할의 Component를 이름만 바꿔 다시 감싸지 않는다. 화면별 스타일 허용 범위와 필요한 Example, 토큰, version, 영향 검증은 [`design-system.md`](../rules/design-system.md)가 canonical Rule이다.
