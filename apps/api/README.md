@@ -8,16 +8,19 @@
 
 `/docs`, `/docs/openapi.json`은 API 계약만 제공합니다. `/health`는 200, `/auth/**`와 `/me`는 404입니다.
 
+웹 클라이언트가 브라우저에서 부르도록 CORS는 `https://dfragon.com` origin의 `GET`만 허용합니다. 다른 origin의 요청에는 CORS 헤더를 붙이지 않습니다.
 `GET /characters/:serverId/:characterId/image`는 웹 클라이언트가 픽셀을 읽을 수 있게 네오플 캐릭터 이미지를 그대로 전달하며, 입력, 응답, 오류는 [초상화 전달](../../docs/rules/character-search.md#초상화-전달)을 따릅니다.
 
 ## 준비할 입력
 
 | 필수 | 선택 |
 | --- | --- |
-| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS |
+| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `WEB_DEV_ORIGINS` |
 
 PORT는 ASCII 십진 정수 1~65535입니다. `.env.example`을 앱의 `.env`로 복사하고 실제 secret은 Git 밖에서 관리합니다.
 Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
+`WEB_DEV_ORIGINS`는 로컬 웹 개발 서버(Vite dev 서버)의 origin을 CORS 허용에 더하며, `http://localhost:5173,http://127.0.0.1:5173`처럼 쉼표로 구분합니다.
+각 값은 경로와 공백 없이 `http`, `https`의 `localhost`, `127.0.0.1`, `[::1]` origin이어야 하며, 다른 값은 시작 전에 거절합니다. 운영에서는 지정하지 않습니다.
 
 Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절대 경로에서 읽습니다. GitHub나 특정 secret manager가
 필요하지 않으며 self-host 운영자가 준비한 환경변수, 읽기 전용 파일을 사용할 수 있습니다.
