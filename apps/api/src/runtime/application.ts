@@ -17,6 +17,7 @@ export function createApiRuntime(configuration: RuntimeConfiguration) {
     },
     todayGrade: { fetchShopGrade: createNeopleShopGrade(configuration.apiKey) },
     trustedProxyHops: configuration.trustedProxyHops,
-    httpsOptions: configuration.localHttps
+    httpsOptions: configuration.localHttps,
+    scoreLibraryPath: configuration.scoreLibraryPath
   })
 }

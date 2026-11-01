@@ -18,6 +18,7 @@ import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
+import { SCORE_ENGINE, createScoreEngine } from './score/engine.js'
 import {
   type AccessLogSink,
   createAccessLog,
@@ -89,6 +90,7 @@ export interface ApiHttpAppOptions {
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
   readonly buildInfoPath?: string
   readonly writeAccessLog?: AccessLogSink
+  readonly scoreLibraryPath?: string | null
 }
 
 /** Public game data runs without authentication credentials or a database connection. */
@@ -99,7 +101,8 @@ export async function createApiHttpApp({
   trustedProxyHops,
   httpsOptions,
   buildInfoPath = '/app/build-info.json',
-  writeAccessLog = writeAccessLogToStdout
+  writeAccessLog = writeAccessLogToStdout,
+  scoreLibraryPath = null
 }: ApiHttpAppOptions): Promise<INestApplication> {
   const buildInfo = await readApiBuildInfo(buildInfoPath)
   @Module({
@@ -117,6 +120,18 @@ export async function createApiHttpApp({
       {
         provide: TODAY_GRADE_SERVICE,
         useValue: createTodayGradeService(todayGrade.fetchShopGrade)
+      },
+      {
+        provide: SCORE_ENGINE,
+        // worker는 listen을 기다리지 않고 시작해 준비 계산을 하며, 그동안 온 계산은 worker에 쌓였다가 차례로 계산된다.
+        useFactory: () =>
+          createScoreEngine({
+            path: scoreLibraryPath,
+            report: (code) =>
+              writeAccessLog(
+                JSON.stringify({ time: new Date().toISOString(), service: 'api', code })
+              )
+          })
       }
     ]
   })
