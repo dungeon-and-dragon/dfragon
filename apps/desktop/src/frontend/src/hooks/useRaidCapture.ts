@@ -8,6 +8,7 @@ import { useManualCharacterLookup, type ManualCharacterLookup } from './useManua
 import { useDesktopShortcut } from './useDesktopShortcut'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import type { OcrRecognition } from '../lib/ocr-worker-recognition'
+import type { CaptureTexts } from '../lib/capture-texts'
 
 export type RaidCapture = {
   search: ManualCharacterLookup
@@ -20,6 +21,7 @@ export type RaidCapture = {
   lastCompletedAt: number | null
   canStartCapture: boolean
   startRound: () => void
+  startPastedRound: () => void
   seats: SeatArrangement
 }
 
@@ -35,12 +37,14 @@ export function useRaidCapture({
   sourceId,
   sourceReady,
   receivesShortcut,
-  recognizeWithOcr
+  recognizeWithOcr,
+  texts
 }: {
   receivesShortcut: boolean
   sourceId: string
   sourceReady: boolean
   recognizeWithOcr: OcrRecognition
+  texts: CaptureTexts
 }): RaidCapture {
   // 파티 카드와 다른 main 검색 수명을 써서 파티 네 자리와 공대 12자리가 서로의 결과를 덮어쓰지 않는다.
   const search = useManualCharacterLookup(
@@ -60,6 +64,7 @@ export function useRaidCapture({
   )
   const [snapshot, send] = useMachine(raidCaptureMachine, {
     input: {
+      texts,
       beginSearch: beginRound,
       readFrame: (captureId) => window.raidSearch.readCaptureFrame(captureId),
       observeOcr: search.observeOcr,
@@ -73,6 +78,7 @@ export function useRaidCapture({
   }, [send, registeredSourceId])
 
   const startRound = useCallback(() => send({ type: 'START' }), [send])
+  const startPastedRound = useCallback(() => send({ type: 'PASTE' }), [send])
   useDesktopShortcut('restart-search', receivesShortcut, startRound)
 
   const phase = getRaidCapturePhase(snapshot)
@@ -92,6 +98,7 @@ export function useRaidCapture({
     lastCompletedAt: snapshot.context.completedAt,
     canStartCapture,
     startRound,
+    startPastedRound,
     seats: {
       layout: RAID_SEAT_LAYOUT,
       seatOrder,

@@ -5,7 +5,10 @@ import { toSlotCards, type SlotCard } from '../lib/slot-cards'
 import { useAdventureSnapshot } from './useAdventureSnapshot'
 import type { PartyCapture } from './usePartyCapture'
 
-export function usePartySlotCards(capture: PartyCapture): {
+export function usePartySlotCards(
+  capture: PartyCapture,
+  nextLookupStep: string
+): {
   cards: SlotCard[]
   snapshot: ReturnType<typeof useAdventureSnapshot>
   clipboardText: string
@@ -24,6 +27,7 @@ export function usePartySlotCards(capture: PartyCapture): {
     recognizing: capture.recognizing,
     snapshotMarks: seatValuesToSlotOrder(seatOrder, snapshot.marks),
     snapshotAdventureInputs: seatValuesToSlotOrder(seatOrder, snapshot.adventureInputs),
+    nextLookupStep,
     candidatePickers: search.candidatePickers
   })
   const clipboardText = toClipboardText({

@@ -4,8 +4,6 @@ import type { RaidFrameResult, WindowFrameResult } from '../../../preload/common
 import type { FirstCandidate } from './party-recognition'
 
 export const CAPTURE_UNSUPPORTED_STATUS = '화면 캡처는 Windows에서 사용할 수 있습니다.'
-export const CAPTURE_DISCONNECTED_STATUS = '캡처 연결이 종료되었습니다. 창을 다시 선택해 주세요.'
-export const CAPTURE_COMPLETE_STATUS = '인식을 마쳤습니다. 다시 인식하려면 Alt+R을 누르세요.'
 
 export const beginCaptureSearch = fromPromise(
   async ({
