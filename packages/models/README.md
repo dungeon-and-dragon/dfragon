@@ -9,7 +9,7 @@
 
 ## 받기
 
-처음 checkout할 때 한 번 실행합니다. Windows Test Build와 Windows Portable workflow도 고정된 submodule 커밋을 가져오고, Web Pages workflow(`web-pages.yml`)는 `ocr-finetuned`만 가져옵니다. 엔진 저장소가 비공개이던 때 `git submodule init`을 실행한 checkout은 `.git/config`에 `update = none`이 남아 엔진을 건너뛰므로, 아래 명령 전에 `git config --unset submodule.packages/models/score-engine.update`를 한 번 실행합니다.
+처음 checkout할 때 한 번 실행합니다. Windows Test Build와 Windows Portable workflow도 고정된 submodule 커밋을 가져오고, 웹 사이트 빌드 action(`web-site-build`)은 운영, dev 모두 `ocr-finetuned`만 가져옵니다. 엔진 저장소가 비공개이던 때 `git submodule init`을 실행한 checkout은 `.git/config`에 `update = none`이 남아 엔진을 건너뛰므로, 아래 명령 전에 `git config --unset submodule.packages/models/score-engine.update`를 한 번 실행합니다.
 
 ```sh
 git submodule update --init --recursive

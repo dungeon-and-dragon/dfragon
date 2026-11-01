@@ -1,7 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    # Composite actions outside .github/workflows are found only through their own directories.
+    directories: ['/', '/.github/actions/*']
     schedule:
       interval: monthly
     cooldown:
