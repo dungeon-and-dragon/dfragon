@@ -1,6 +1,6 @@
 # 공대 행 판독 오프라인 평가
 
-공대 상세 창 원본에서 창 검출, 수치 열 종류(`fame`, `equipment-score`, `unknown`), 수치 표기, 직업명 OCR이 정답과 얼마나 맞는지 표본으로 측정합니다. 공대 식별의 직업명 비교 규칙과 명성 허용 오차를 다시 측정하는 도구입니다. `@dfragon/lib`의 검출, 판독 함수와 `src/backend/lib/`의 기준 이미지, renderer의 OCR 전처리와 CTC 디코딩, 제품의 직업명 비교 규칙(`src/backend/search/raid-job-name.ts`)을 그대로 import하고 네트워크는 쓰지 않습니다.
+공대 상세 창 원본에서 창 검출, 수치 열 종류(`fame`, `equipment-score`, `unknown`), 수치 표기, 직업명 OCR이 정답과 얼마나 맞는지 표본으로 측정합니다. 공대 식별의 직업명 비교 규칙과 명성 허용 오차를 다시 측정하는 도구입니다. `@dfragon/lib`의 검출, 판독 함수와 `src/shared/raid/`의 기준 이미지, renderer의 OCR 전처리와 CTC 디코딩, 제품의 직업명 비교 규칙(`src/shared/search/raid-job-name.ts`)을 그대로 import하고 네트워크는 쓰지 않습니다.
 
 ## 실행
 
@@ -78,7 +78,7 @@ pnpm --filter @dfragon/desktop run test:raid-row-evaluation
 | `ruleMatched` | 제품 규칙 `matchJobName`이 정답 `jobGrowName`과 맞다고 본 행 |
 | `ruleFalseMatched` | 제품 규칙이 manifest에 있는 다른 직업명과도 맞다고 본 행 |
 
-`matchJobName`은 정규화한 두 문자열이 같으면 `exact`, 읽은 문자열이 4자 이상이고 후보 이름이 그 문자열이나 마지막 한 글자를 뺀 문자열(5자 이상일 때)로 시작하면 `clipped-prefix`입니다. 칸은 `眞` 표식 자리에서 시작하므로, 읽은 문자열이 `眞`으로 시작하지 않으면 첫 글자를 표식 오인식으로 보고 뺀 문자열로도 비교합니다. 공대 후보 선택(`src/backend/search/raid-candidate.ts`)이 이 규칙을 씁니다.
+`matchJobName`은 정규화한 두 문자열이 같으면 `exact`, 읽은 문자열이 4자 이상이고 후보 이름이 그 문자열이나 마지막 한 글자를 뺀 문자열(5자 이상일 때)로 시작하면 `clipped-prefix`입니다. 칸은 `眞` 표식 자리에서 시작하므로, 읽은 문자열이 `眞`으로 시작하지 않으면 첫 글자를 표식 오인식으로 보고 뺀 문자열로도 비교합니다. 공대 후보 선택(`src/shared/search/raid-candidate.ts`)이 이 규칙을 씁니다.
 
 ## 측정 결과
 
@@ -101,7 +101,7 @@ pnpm --filter @dfragon/desktop run test:raid-row-evaluation
 
 ## 기준 이미지
 
-`src/backend/lib/`의 다음 파일을 읽습니다. 캐릭터 이름이나 참가자 정보가 든 영역은 넣지 않았습니다.
+`src/shared/raid/`의 다음 파일을 읽습니다. 캐릭터 이름이나 참가자 정보가 든 영역은 넣지 않았습니다.
 
 - `raid-heading.png`: 창 검출 기준 헤더. 제품과 같은 파일입니다.
 - `raid-value-heading-fame.png`, `raid-value-heading-equipment-score.png`: 수치 열 제목 칸(`75 × 18`). 1067×600, 검출 배율 1.0 원본에서 잘라 낸 UI 0% 게임 UI입니다.
