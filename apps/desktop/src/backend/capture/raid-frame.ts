@@ -5,7 +5,11 @@ import type {
   WindowFrameResult
 } from '../../preload/common/types/capture'
 import type { CharacterImage } from '../../preload/common/types/character'
-import { cropRaidWindowNicknames, readRaidWindowValues } from '../lib/raid-window'
+import {
+  cropRaidWindowNicknames,
+  readRaidWindowValues,
+  type RaidWindowTemplates
+} from '../lib/raid-window'
 
 const RGBA_CHANNELS = 4
 const ALPHA_CHANNEL = 3
@@ -38,11 +42,14 @@ function copyRegion(frame: CharacterImage, region: DNFRectangle): CharacterImage
   return { width, height, rgba }
 }
 
-export function toRaidFrameResult(result: WindowFrameResult): RaidFrameResult {
+export function toRaidFrameResult(
+  result: WindowFrameResult,
+  templates: RaidWindowTemplates
+): RaidFrameResult {
   if (result.kind !== 'frame') {
     return result
   }
-  const detection = cropRaidWindowNicknames(result.image)
+  const detection = cropRaidWindowNicknames(result.image, templates)
   if (detection.status === 'not-found') {
     return { kind: 'missing', reason: 'not-found' }
   }
@@ -50,7 +57,7 @@ export function toRaidFrameResult(result: WindowFrameResult): RaidFrameResult {
   if (detection.status !== 'found') {
     return { kind: 'missing', reason: 'uncertain' }
   }
-  const { valueColumn, valueTexts } = readRaidWindowValues(result.image, detection)
+  const { valueColumn, valueTexts } = readRaidWindowValues(result.image, detection, templates)
   const rows = detection.rows.map((row, index): RaidFrameRow | null => {
     const crop = row.nicknameCrop
     if (crop === null || containsExcludedPixels(crop.rgba)) {

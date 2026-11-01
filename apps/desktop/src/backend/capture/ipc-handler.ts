@@ -12,6 +12,7 @@ import { reportDiagnostic } from '../diagnostics/log'
 import { fetchApi } from '../api-fetch'
 import { addHandler } from '../ipc'
 import { decodeCharacterPng } from '../lib/character-png'
+import { readRaidWindowTemplates } from '../lib/raid-window-templates'
 import type { CaptureBinding } from '../search/capture-lifetime'
 import {
   createCharacterCandidatesHttp,
@@ -268,7 +269,7 @@ function registerCaptureIpc(configuration?: SearchConfiguration): () => void {
   addHandler('readCaptureFrame', (event, ...args) => readBoundCaptureFrame(event, args, party))
 
   addHandler('readRaidCaptureFrame', async (event, ...args) =>
-    toRaidFrameResult(await readBoundCaptureFrame(event, args, raid))
+    toRaidFrameResult(await readBoundCaptureFrame(event, args, raid), readRaidWindowTemplates())
   )
 
   return () => {
