@@ -1,2 +1,2 @@
-export { installBrowserHost } from './browser-host'
+export { installBrowserHost, type BrowserHost } from './browser-host'
 export { WebApp } from './WebApp'

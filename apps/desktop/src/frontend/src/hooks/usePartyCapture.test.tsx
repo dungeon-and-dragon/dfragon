@@ -17,6 +17,7 @@ import type {
   SearchSlot,
   SearchSnapshot
 } from '../../../preload/common/types/search'
+import { DESKTOP_CAPTURE_TEXTS } from '../lib/capture-texts'
 import * as diagnostics from '../lib/runtime-diagnostics'
 import { usePartyCapture } from './usePartyCapture'
 
@@ -60,7 +61,7 @@ const readCaptureFrame = vi.fn()
 let defaultWorker: ReturnType<typeof captureResources>['worker']
 
 function HookHarness({ onRender }: { onRender: (value: HookValue) => void }): null {
-  onRender(usePartyCapture({ receivesShortcut: true }))
+  onRender(usePartyCapture({ receivesShortcut: true, texts: DESKTOP_CAPTURE_TEXTS }))
 
   return null
 }
@@ -1281,4 +1282,30 @@ it('회차 중 main이 파티 수명을 무효화하면 캡처를 멈추고 늦�
   expect(defaultWorker.recognize).not.toHaveBeenCalled()
   expect(api.notifyOcrCandidatesDetected).not.toHaveBeenCalled()
   await hook.unmount()
+})
+
+it('붙여 넣은 회차는 창 등록 없이 프레임을 읽어 완료하고, 화면이 사라질 때 띄운 worker를 정리한다', async () => {
+  const { frame, worker } = captureResources()
+  readCaptureFrame.mockResolvedValue(frame)
+  moduleMocks.createPartyOcrWorker.mockResolvedValue(worker)
+  setSlots(0)
+  worker.recognize.mockResolvedValue(ocrResult('이름0'))
+  const hook = await renderPartyCaptureHook()
+
+  await act(async () => hook.getCurrent().startPastedRound())
+  for (let attempt = 0; attempt < 20 && hook.getCurrent().phase !== 'complete'; attempt += 1) {
+    await flushPromises()
+  }
+
+  expect(hook.getCurrent().phase).toBe('complete')
+  expect(readCaptureFrame).toHaveBeenCalledExactlyOnceWith(CAPTURE_ID)
+  expect(hook.getCurrent().nicknames).toEqual(['이름0', null, null, null])
+  expect(hook.getCurrent().startedRounds).toBe(1)
+  expect(api.selectCaptureSource).not.toHaveBeenCalled()
+  expect(hook.getCurrent().source.sourceReady).toBe(false)
+  expect(hook.getCurrent().source.selectedSourceId).toBe('')
+  expect(worker.terminate).not.toHaveBeenCalled()
+
+  await hook.unmount()
+  expect(worker.terminate).toHaveBeenCalledOnce()
 })

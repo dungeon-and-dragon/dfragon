@@ -4,8 +4,6 @@ import type { RaidFrameResult, RaidFrameRow } from '../../../preload/common/type
 import type { RaidValueColumn } from '../../../preload/common/types/search'
 import {
   beginCaptureSearch,
-  CAPTURE_COMPLETE_STATUS,
-  CAPTURE_DISCONNECTED_STATUS,
   CAPTURE_UNSUPPORTED_STATUS,
   getCapturingPhase,
   getObservedNickname,
@@ -13,15 +11,15 @@ import {
   getWaitingStatus
 } from './capture-round'
 import type { OcrCaptureObservation } from './capture-search'
+import type { CaptureTexts } from './capture-texts'
 import type { OcrRecognition } from './ocr-worker-recognition'
 import { recognizeRaidRows, type RaidSlotRecognition } from './raid-recognition'
 import { reportRendererDiagnostic, showRejectedOcrNickname } from './runtime-diagnostics'
 
 const READY_STATUS = 'Alt+R을 눌러 공대를 인식해 주세요.'
-const OCR_FAILED_STATUS =
-  '글자 인식에 실패했습니다. Alt+R을 누르거나 서버와 이름을 직접 조회해 주세요.'
 
 type RaidCaptureInput = {
+  texts: CaptureTexts
   beginSearch: (signal: AbortSignal) => Promise<string | null>
   readFrame: (captureId: string) => Promise<RaidFrameResult>
   observeOcr: (input: OcrCaptureObservation) => void
@@ -41,7 +39,10 @@ type RaidCaptureContext = {
   completedAt: number | null
 }
 
-type RaidCaptureEvent = { type: 'START' } | { type: 'SOURCE'; sourceId: string | null }
+type RaidCaptureEvent =
+  | { type: 'START' }
+  | { type: 'PASTE' }
+  | { type: 'SOURCE'; sourceId: string | null }
 
 /**
  * 공대 화면의 캡처 회차. 파티 캡처처럼 Alt+R과 공대 헤더의 캡처 버튼이 같은 START를 보내고, 회차마다 공대
@@ -69,7 +70,7 @@ export const raidCaptureMachine = setup({
         input: { rows: readonly (RaidFrameRow | null)[]; effects: RaidCaptureInput }
         signal: AbortSignal
       }) =>
-        input.effects.recognizeWithOcr(signal, OCR_FAILED_STATUS, (recognizeText) =>
+        input.effects.recognizeWithOcr(signal, input.effects.texts.raidOcrFailed, (recognizeText) =>
           recognizeRaidRows(input.rows, recognizeText)
         )
     )
@@ -137,7 +138,11 @@ export const raidCaptureMachine = setup({
     completedAt: null
   }),
   // 등록 변경은 어느 상태에서든 기록한다. 진행 중 상태는 아래에서 회차 취소를 함께 정한다.
-  on: { SOURCE: { actions: 'recordSource' } },
+  on: {
+    SOURCE: { actions: 'recordSource' },
+    // 붙여 넣은 프레임은 host가 들고 있다가 readFrame으로 돌려주므로 등록된 창 없이 회차를 시작한다.
+    PASTE: { target: '.capturing', actions: 'countStart' }
+  },
   states: {
     idle: {
       on: { START: { guard: 'hasSource', target: 'capturing', actions: 'countStart' } }
@@ -146,7 +151,8 @@ export const raidCaptureMachine = setup({
       initial: 'search',
       entry: ['resetRecognition', assign({ status: '공대를 인식하고 있습니다.' })],
       on: {
-        START: { guard: 'hasSource', target: 'capturing', reenter: true, actions: 'countStart' }
+        START: { guard: 'hasSource', target: 'capturing', reenter: true, actions: 'countStart' },
+        PASTE: { target: 'capturing', reenter: true, actions: 'countStart' }
       },
       states: {
         search: {
@@ -154,6 +160,7 @@ export const raidCaptureMachine = setup({
           // 공대 수명의 begin 응답이 도착할 때까지 중복 시작을 막는다.
           on: {
             START: {},
+            PASTE: {},
             SOURCE: { target: '#raidCapture.idle', actions: ['recordSource', 'cancelRound'] }
           },
           invoke: {
@@ -167,7 +174,7 @@ export const raidCaptureMachine = setup({
               target: '#raidCapture.failed',
               actions: [
                 () => reportRendererDiagnostic('CAPTURE_START_FAILED'),
-                assign({ status: '검색을 시작하지 못했습니다. Alt+R을 눌러 다시 시도해 주세요.' })
+                assign({ status: ({ context }) => context.effects.texts.raidStartFailed })
               ]
             }
           }
@@ -197,12 +204,12 @@ export const raidCaptureMachine = setup({
                 guard: ({ event }) => event.output.kind === 'missing',
                 target: 'unavailable',
                 actions: assign({
-                  status: ({ event }) => {
+                  status: ({ context, event }) => {
                     if (event.output.kind === 'missing' && event.output.reason === 'not-found') {
-                      return '공대 상세 창을 찾지 못했습니다. 12인 공대 상세 창을 연 뒤 Alt+R을 누르세요.'
+                      return context.effects.texts.raidWindowMissing
                     }
 
-                    return '공대 상세 창을 확인하지 못했습니다. 창 하나만 가려지지 않게 연 뒤 Alt+R을 누르세요.'
+                    return context.effects.texts.raidWindowUncertain
                   }
                 })
               },
@@ -223,7 +230,7 @@ export const raidCaptureMachine = setup({
               target: '#raidCapture.failed',
               actions: [
                 () => reportRendererDiagnostic('CAPTURE_READ_FAILED'),
-                assign({ status: CAPTURE_DISCONNECTED_STATUS })
+                assign({ status: ({ context }) => context.effects.texts.disconnected })
               ]
             }
           }
@@ -243,16 +250,13 @@ export const raidCaptureMachine = setup({
                 target: '#raidCapture.failed',
                 actions: [
                   () => reportRendererDiagnostic('OCR_FAILED'),
-                  assign({ status: OCR_FAILED_STATUS })
+                  assign({ status: ({ context }) => context.effects.texts.raidOcrFailed })
                 ]
               },
               {
                 guard: ({ event }) => event.output.every((result) => result.kind === 'missing'),
                 target: 'unavailable',
-                actions: assign({
-                  status:
-                    '공대원 이름을 찾지 못했습니다. 공대 상세 창이 가려지지 않게 한 뒤 Alt+R을 누르세요.'
-                })
+                actions: assign({ status: ({ context }) => context.effects.texts.raidNamesMissing })
               },
               {
                 target: 'complete',
@@ -264,7 +268,8 @@ export const raidCaptureMachine = setup({
               actions: [
                 () => reportRendererDiagnostic('OCR_FAILED'),
                 assign({
-                  status: ({ event }) => getRecognizeErrorStatus(event.error, OCR_FAILED_STATUS)
+                  status: ({ context, event }) =>
+                    getRecognizeErrorStatus(event.error, context.effects.texts.raidOcrFailed)
                 })
               ]
             }
@@ -272,7 +277,7 @@ export const raidCaptureMachine = setup({
         },
         complete: {
           entry: assign({
-            status: CAPTURE_COMPLETE_STATUS,
+            status: ({ context }) => context.effects.texts.complete,
             completedAt: () => Date.now()
           })
         },

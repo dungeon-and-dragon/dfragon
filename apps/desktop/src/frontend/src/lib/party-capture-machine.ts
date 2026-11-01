@@ -4,8 +4,6 @@ import type { WindowFrameResult } from '../../../preload/common/types/capture'
 import type { CharacterImage } from '../../../preload/common/types/character'
 import {
   beginCaptureSearch,
-  CAPTURE_COMPLETE_STATUS,
-  CAPTURE_DISCONNECTED_STATUS,
   CAPTURE_UNSUPPORTED_STATUS,
   getCapturingPhase,
   getObservedNickname,
@@ -13,14 +11,13 @@ import {
   getWaitingStatus
 } from './capture-round'
 import type { OcrCaptureObservation } from './capture-search'
+import type { CaptureTexts } from './capture-texts'
 import type { OcrRecognition } from './ocr-worker-recognition'
 import { recognizePartyFrame, type PartySlotRecognition } from './party-recognition'
 import { reportRendererDiagnostic, showRejectedOcrNickname } from './runtime-diagnostics'
 
-const OCR_FAILED_STATUS =
-  '글자 인식에 실패했습니다. Alt+R을 누르거나 캐릭터 직접 검색을 사용해 주세요.'
-
 type CaptureInput = {
+  texts: CaptureTexts
   selectSource: (sourceId: string) => Promise<unknown>
   beginSearch: (signal: AbortSignal) => Promise<string | null>
   endSearch: () => void
@@ -41,7 +38,11 @@ type CaptureContext = {
   completedAt: number | null
 }
 
-type CaptureEvent = { type: 'SELECT'; sourceId: string } | { type: 'START' } | { type: 'STOP' }
+type CaptureEvent =
+  | { type: 'SELECT'; sourceId: string }
+  | { type: 'START' }
+  | { type: 'PASTE' }
+  | { type: 'STOP' }
 
 export const partyCaptureMachine = setup({
   types: {
@@ -67,8 +68,10 @@ export const partyCaptureMachine = setup({
         input: { frame: CharacterImage; effects: CaptureInput }
         signal: AbortSignal
       }) =>
-        input.effects.recognizeWithOcr(signal, OCR_FAILED_STATUS, (recognizeText) =>
-          recognizePartyFrame(input.frame, recognizeText)
+        input.effects.recognizeWithOcr(
+          signal,
+          input.effects.texts.partyOcrFailed,
+          (recognizeText) => recognizePartyFrame(input.frame, recognizeText)
         )
     ),
     lifetime: fromCallback<CaptureEvent, CaptureInput>(({ input }) => () => {
@@ -135,6 +138,8 @@ export const partyCaptureMachine = setup({
       target: '.selecting',
       actions: ['resetSearch', 'resetRecognition', 'clearCompletion', 'selectSource']
     },
+    // 붙여 넣은 프레임은 host가 들고 있다가 readFrame으로 돌려주므로 창 선택 없이 회차를 시작한다.
+    PASTE: { target: '.capturing', actions: ['countStart'] },
     STOP: {
       target: '.stopped',
       actions: [
@@ -180,12 +185,13 @@ export const partyCaptureMachine = setup({
       initial: 'search',
       entry: ['resetSearch', 'resetRecognition', assign({ status: '파티를 인식하고 있습니다.' })],
       on: {
-        START: { target: 'capturing', reenter: true, actions: ['countStart'] }
+        START: { target: 'capturing', reenter: true, actions: ['countStart'] },
+        PASTE: { target: 'capturing', reenter: true, actions: ['countStart'] }
       },
       states: {
         search: {
           // Main에 수명이 생긴 뒤 begin 응답이 도착할 때까지 중복 시작을 막는다.
-          on: { START: {} },
+          on: { START: {}, PASTE: {} },
           invoke: {
             src: 'beginSearch',
             input: ({ context }) => context.effects,
@@ -197,7 +203,7 @@ export const partyCaptureMachine = setup({
               target: '#partyCapture.captureFailed',
               actions: [
                 () => reportRendererDiagnostic('CAPTURE_START_FAILED'),
-                assign({ status: '검색을 시작하지 못했습니다. 창을 다시 선택해 주세요.' })
+                assign({ status: ({ context }) => context.effects.texts.partyStartFailed })
               ]
             }
           }
@@ -238,7 +244,7 @@ export const partyCaptureMachine = setup({
               target: '#partyCapture.captureFailed',
               actions: [
                 () => reportRendererDiagnostic('CAPTURE_READ_FAILED'),
-                assign({ status: CAPTURE_DISCONNECTED_STATUS })
+                assign({ status: ({ context }) => context.effects.texts.disconnected })
               ]
             }
           }
@@ -255,15 +261,14 @@ export const partyCaptureMachine = setup({
                 actions: [
                   assign({ results: ({ event }) => event.output }),
                   () => reportRendererDiagnostic('OCR_FAILED'),
-                  assign({ status: OCR_FAILED_STATUS })
+                  assign({ status: ({ context }) => context.effects.texts.partyOcrFailed })
                 ]
               },
               {
                 guard: ({ event }) => event.output.every((result) => result.kind === 'missing'),
                 target: 'unavailable',
                 actions: assign({
-                  status:
-                    '파티 프레임을 찾지 못했습니다. 파티 프레임이 보이게 한 뒤 Alt+R을 누르세요.'
+                  status: ({ context }) => context.effects.texts.partyFrameMissing
                 })
               },
               {
@@ -276,7 +281,8 @@ export const partyCaptureMachine = setup({
               actions: [
                 () => reportRendererDiagnostic('OCR_FAILED'),
                 assign({
-                  status: ({ event }) => getRecognizeErrorStatus(event.error, OCR_FAILED_STATUS)
+                  status: ({ context, event }) =>
+                    getRecognizeErrorStatus(event.error, context.effects.texts.partyOcrFailed)
                 })
               ]
             }
@@ -284,7 +290,7 @@ export const partyCaptureMachine = setup({
         },
         complete: {
           entry: assign({
-            status: CAPTURE_COMPLETE_STATUS,
+            status: ({ context }) => context.effects.texts.complete,
             completedAt: () => Date.now()
           })
         },

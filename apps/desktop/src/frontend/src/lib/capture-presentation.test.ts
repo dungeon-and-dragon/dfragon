@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getCaptureControlState, getTopBarCaptureControls } from './capture-presentation'
+import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 
 describe('getCaptureControlState', () => {
   const idle = { phase: 'idle', loading: false, failed: false, hasDetectedSource: true } as const
@@ -24,6 +25,8 @@ describe('getCaptureControlState', () => {
 
 describe('getTopBarCaptureControls', () => {
   const input = {
+    ocrReady: true,
+    texts: DESKTOP_CAPTURE_TEXTS,
     party: {
       phase: 'selected',
       status: '파티 문구',
@@ -67,16 +70,94 @@ describe('getTopBarCaptureControls', () => {
     })
   })
 
-  it('게임 창을 고르기 전에는 문구를 비우고 단계는 화면의 단계를 둔다', () => {
+  it('게임 창을 고르기 전에는 창 없음 문구를 보인다', () => {
     const unselected = {
       ...input,
-      party: { ...input.party, selectedSourceId: '' }
-    }
+      texts: { ...DESKTOP_CAPTURE_TEXTS, noSource: '붙여 넣으세요' },
+      party: { ...input.party, phase: 'idle', status: '창을 고르세요', selectedSourceId: '' }
+    } as const
 
     expect(getTopBarCaptureControls({ ...unselected, isRaidMode: false })).toEqual({
-      phase: 'selected',
-      status: ''
+      phase: 'idle',
+      status: '붙여 넣으세요'
     })
+    expect(
+      getTopBarCaptureControls({ ...unselected, isRaidMode: false, texts: DESKTOP_CAPTURE_TEXTS })
+    ).toEqual({ phase: 'idle', status: '' })
+    expect(
+      getTopBarCaptureControls({
+        ...unselected,
+        isRaidMode: true,
+        party: { ...unselected.party, sourceReady: false },
+        raid: { phase: 'idle', status: '공대 대기' }
+      })
+    ).toEqual({ phase: 'idle', status: '붙여 넣으세요' })
+  })
+
+  it('창을 고르지 않고 붙여 넣은 회차는 파티와 공대 모두 그 회차의 단계와 문구를 보인다', () => {
+    const pasted = {
+      ...input,
+      party: {
+        ...input.party,
+        phase: 'recognizing',
+        status: '파티 인식 중',
+        sourceReady: false,
+        selectedSourceId: ''
+      }
+    } as const
+
+    expect(getTopBarCaptureControls({ ...pasted, isRaidMode: false })).toEqual({
+      phase: 'recognizing',
+      status: '파티 인식 중'
+    })
+    expect(
+      getTopBarCaptureControls({
+        ...pasted,
+        isRaidMode: true,
+        raid: { phase: 'complete', status: '공대 완료' }
+      })
+    ).toEqual({ phase: 'complete', status: '공대 완료' })
+  })
+
+  it('창을 고른 뒤의 중지, 창 변경은 끝난 공대 회차보다 먼저 파티 문구를 보인다', () => {
+    const stopped = {
+      ...input,
+      isRaidMode: true,
+      party: { ...input.party, phase: 'idle', status: '캡처를 중지했습니다.', sourceReady: false },
+      raid: { phase: 'complete', status: '공대 완료' }
+    } as const
+
+    expect(getTopBarCaptureControls(stopped)).toEqual({
+      phase: 'idle',
+      status: '캡처를 중지했습니다.'
+    })
+    expect(
+      getTopBarCaptureControls({
+        ...stopped,
+        party: { ...stopped.party, phase: 'selecting', status: '창 확인 중' }
+      })
+    ).toEqual({ phase: 'selecting', status: '창 확인 중' })
+  })
+
+  it('OCR 준비 문구가 있으면 worker가 준비되기 전의 인식 단계에서 그 문구를 보인다', () => {
+    const preparing = {
+      ...input,
+      ocrReady: false,
+      texts: { ...DESKTOP_CAPTURE_TEXTS, ocrPreparing: '모델 받는 중' },
+      party: { ...input.party, phase: 'recognizing', status: '파티 인식 중' }
+    } as const
+
+    expect(getTopBarCaptureControls({ ...preparing, isRaidMode: false })).toEqual({
+      phase: 'recognizing',
+      status: '모델 받는 중'
+    })
+    expect(getTopBarCaptureControls({ ...preparing, isRaidMode: true })).toEqual({
+      phase: 'recognizing',
+      status: '모델 받는 중'
+    })
+    expect(
+      getTopBarCaptureControls({ ...preparing, isRaidMode: false, texts: DESKTOP_CAPTURE_TEXTS })
+    ).toEqual({ phase: 'recognizing', status: '파티 인식 중' })
   })
 
   it('공대 화면에서 창이 준비됐고 공대 회차 전이면 단계를 selected로 둔다', () => {
