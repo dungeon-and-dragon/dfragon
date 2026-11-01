@@ -11,6 +11,8 @@ import { CHARACTER_DETAIL_SERVICE, CharacterDetailController } from './character
 import { createCharacterDetailService } from './characters/details/service.js'
 import type { CharacterDetailDependencies } from './characters/details/service.js'
 import { characterDetailFailure } from './characters/details/errors.js'
+import { CHARACTER_IMAGE_FETCH, CharacterImageController } from './characters/image/http.js'
+import { type FetchCharacterImage, createNeopleCharacterImage } from './characters/image/neople.js'
 import { NeopleSearchFailure } from './errors/neople-search.js'
 import { TODAY_GRADE_SERVICE, TodayGradeController } from './today-grade/http.js'
 import { createTodayGradeService } from './today-grade/service.js'
@@ -85,6 +87,7 @@ export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
   readonly details: CharacterDetailDependencies
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
+  readonly fetchCharacterImage?: FetchCharacterImage
   readonly trustedProxyHops?: 1
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
   readonly buildInfoPath?: string
@@ -96,6 +99,7 @@ export async function createApiHttpApp({
   search,
   details,
   todayGrade,
+  fetchCharacterImage = createNeopleCharacterImage(),
   trustedProxyHops,
   httpsOptions,
   buildInfoPath = '/app/build-info.json',
@@ -108,12 +112,14 @@ export async function createApiHttpApp({
       ApiVersionController,
       CharacterSearchController,
       CharacterDetailController,
+      CharacterImageController,
       TodayGradeController
     ],
     providers: [
       { provide: API_BUILD_INFO, useValue: buildInfo },
       { provide: CHARACTER_SEARCH_SERVICE, useValue: createCharacterSearchService(search) },
       { provide: CHARACTER_DETAIL_SERVICE, useValue: createCharacterDetailService(details) },
+      { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
         provide: TODAY_GRADE_SERVICE,
         useValue: createTodayGradeService(todayGrade.fetchShopGrade)

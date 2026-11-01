@@ -10,6 +10,7 @@ import type {
 } from '../types/neople-character-search.js'
 import { parseCharacterCandidatesQuery, parseCharacterSearchQuery } from './query.js'
 import { createCandidateCache } from './candidate-cache.js'
+import { neopleCharacterImageUrl } from './image/neople.js'
 import type { CharacterSearchDependencies, CharacterSearchHttpService } from './types.js'
 
 export function createCharacterSearchService(
@@ -45,9 +46,7 @@ export function createCharacterSearchService(
   ): Promise<CharacterCandidatesResult> => {
     const result = await search(input)
     const candidates = result.rows.map((candidate): CharacterImageCandidate => {
-      const serverId = encodeURIComponent(candidate.serverId)
-      const characterId = encodeURIComponent(candidate.characterId)
-      const imageUrl = `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=1`
+      const imageUrl = neopleCharacterImageUrl(candidate)
       // 모험단명은 저장한 상세에서 찾던 값이다. 기존 Desktop이 읽는 필드라 null로 남긴다.
 
       return { ...candidate, imageUrl, adventureName: null }
