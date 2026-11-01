@@ -16,7 +16,6 @@
       "@dfragon/lib/ocr-contract": ["../../packages/lib/src/ocr-contract.ts"],
       "@dfragon/lib/utils/shape-check": ["../../packages/lib/src/utils/shape-check.ts"],
       "@dfragon/desktop-shared/*": ["../desktop/src/shared/*"],
-      "@dfragon/desktop-site": ["../desktop/src/frontend/src/site/index.ts"],
       "@dfragon/desktop-site/time-of-day": ["../desktop/src/frontend/src/site/time-of-day.ts"],
       "@dfragon/desktop-web": ["../desktop/src/frontend/src/site/web/index.ts"]
     },
