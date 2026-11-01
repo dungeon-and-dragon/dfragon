@@ -318,13 +318,13 @@ test('원문이 없는 패키지는 등록된 버전만 보완하고 다른 버�
 test('Koffi 플랫폼 패키지는 같은 버전의 부모 보완 원문들을 수집한다', (t) => {
   const { pkg } = createPackageFixture(t)
   const directory = pkg('@koromix/koffi-linux-x64', {
-    manifest: { version: '3.3.3', license: 'ISC' },
+    manifest: { version: '3.3.4', license: 'ISC' },
     documents: {}
   })
 
   assert.deepEqual(packageNotice(directory), {
     name: '@koromix/koffi-linux-x64',
-    version: '3.3.3',
+    version: '3.3.4',
     license: 'ISC',
     documents: [
       {
