@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { session } from 'electron'
+import { fetchApi } from './api-fetch'
 import { createCharacterCandidatesHttp } from './search/character-http'
 
 vi.mock('electron', () => {
@@ -35,7 +36,7 @@ describe('Desktop API system networking', () => {
     const apiOrigin = 'https://api.synthetic.test'
     const signal = new AbortController().signal
 
-    const rows = await createCharacterCandidatesHttp({ apiOrigin })({
+    const rows = await createCharacterCandidatesHttp({ apiOrigin, fetch: fetchApi })({
       nickname: '가나',
       signal
     })

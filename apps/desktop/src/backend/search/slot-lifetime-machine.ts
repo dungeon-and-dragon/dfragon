@@ -53,7 +53,11 @@ export const slotLifetimeMachine = setup({
           outcome = { kind: 'failure', error: { code: 'SEARCH_NETWORK_ERROR' } }
         }
         if (!stopped) {
-          reportSearchOutcome(outcome, request.runtime.ocrIdentification)
+          reportSearchOutcome(
+            request.runtime.reportDiagnostic,
+            outcome,
+            request.runtime.ocrIdentification
+          )
           input.complete(request, outcome)
         }
       }

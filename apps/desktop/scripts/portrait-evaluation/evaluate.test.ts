@@ -1,6 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { setImmediate } from 'node:timers/promises'
 import { PNG } from 'pngjs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -23,13 +24,16 @@ const FACE = 26
 const CANDIDATE_SIZE = { width: 44, height: 60 } as const
 const FACE_ORIGIN = { x: 9, y: 7 } as const
 const GRID_SIZE = 4
-const scorer = createPortraitColorScorer({
-  gridSize: GRID_SIZE,
-  minCoverage: 0.5,
-  minComparedCells: 4,
-  topFraction: 1,
-  anchorRadius: 0
-})
+const scorer = createPortraitColorScorer(
+  {
+    gridSize: GRID_SIZE,
+    minCoverage: 0.5,
+    minComparedCells: 4,
+    topFraction: 1,
+    anchorRadius: 0
+  },
+  () => setImmediate()
+)
 const signal = new AbortController().signal
 
 type Color = (x: number, y: number) => readonly [number, number, number]

@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
+import { setImmediate } from 'node:timers/promises'
 import { describe, expect, it } from 'vitest'
 import { createPortraitColorScorer } from '../../src/backend/search/portrait-color'
 import { type CaseResult, evaluateCase, type PolicyBase, summarize } from './evaluate'
@@ -51,7 +52,7 @@ describe.skipIf(samples === undefined || samples === '')('얼굴 색 비교 오�
     const signal = new AbortController().signal
     const results: CaseResult[] = []
     for (const gridSize of GRID_SIZES) {
-      const scorer = createPortraitColorScorer({ ...policyBase, gridSize })
+      const scorer = createPortraitColorScorer({ ...policyBase, gridSize }, () => setImmediate())
       for (const entry of manifest.cases) {
         results.push(
           await evaluateCase({

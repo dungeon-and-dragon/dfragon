@@ -1,8 +1,8 @@
-import { reportDiagnostic } from '../diagnostics/log'
 import type { SearchOutcome, SearchRuntime } from './request'
 
 /** 완료한 요청의 고정 상태만 기록하고 이름, 응답 본문과 요청 식별자는 남기지 않는다. */
 export function reportSearchOutcome(
+  reportDiagnostic: SearchRuntime['reportDiagnostic'],
   outcome: SearchOutcome,
   identification: SearchRuntime['ocrIdentification'] = 'portrait'
 ): void {

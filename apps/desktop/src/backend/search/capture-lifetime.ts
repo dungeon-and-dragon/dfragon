@@ -1,6 +1,5 @@
 import { isCharacterSearchNickname } from './identify'
 import { SEARCH_COMMAND_ERRORS } from '../../preload/common/types/search'
-import { randomUUID } from 'node:crypto'
 import { createActor } from 'xstate'
 import {
   runDetailsRequest,
@@ -131,7 +130,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   }
 
   function begin(nextBinding: Omit<CaptureBinding, 'captureId'>): SearchCommandResult {
-    binding = { ...nextBinding, captureId: randomUUID() }
+    binding = { ...nextBinding, captureId: crypto.randomUUID() }
     emit()
 
     return result()
@@ -252,7 +251,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     slots[input.slot] = {
       slot: input.slot,
       observationRevision: input.observationRevision,
-      requestId: randomUUID(),
+      requestId: crypto.randomUUID(),
       nickname: input.nickname,
       state: 'failure',
       rows: [],
@@ -277,7 +276,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
       return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
     }
 
-    const requestId = randomUUID()
+    const requestId = crypto.randomUUID()
     const isValidInput = isCharacterSearchNickname(input.nickname)
     ocrInputs[input.slot] = ocrInput
     slots[input.slot] = {

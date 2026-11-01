@@ -8,8 +8,6 @@ import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 import type { CharacterCandidate } from '../../preload/common/types/character'
 import type { OcrSearchObservation, SearchSnapshot } from '../../preload/common/types/search'
 
-vi.mock('electron', () => ({ session: { fromPartition: vi.fn() } }))
-
 const rows: readonly CharacterCandidate[] = [
   {
     characterId: 'synthetic-character',
@@ -37,7 +35,8 @@ function runtime(candidates: CharacterCandidatesHttp): SearchRuntime {
       scorePortrait: vi.fn(),
       selection: INITIAL_PORTRAIT_COLOR_POLICY
     },
-    scoreEngine: { calculate: async () => null, prepare: vi.fn() }
+    cardScorer: { calculate: async () => null, prepare: vi.fn() },
+    reportDiagnostic: vi.fn()
   }
 }
 

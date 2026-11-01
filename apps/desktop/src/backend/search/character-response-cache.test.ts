@@ -10,8 +10,6 @@ import {
   createCachedCharacterDetails
 } from './character-response-cache'
 
-vi.mock('electron', () => ({ session: { fromPartition: vi.fn() } }))
-
 const API_ORIGIN = 'https://api.example.test'
 const IMAGE_URL = 'https://img-api.neople.co.kr/df/servers/cain/characters/character-1?zoom=1'
 const identity = { serverId: 'cain', characterId: 'character-1' }

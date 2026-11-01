@@ -68,7 +68,11 @@ describe('OCR로 고른 캐릭터의 카드 요약', () => {
       publish: vi.fn(),
       isCurrent: () => true,
       isCurrentOcr: () => true,
-      runtime: { identification, scoreEngine: { calculate: async () => null, prepare: vi.fn() } }
+      runtime: {
+        identification,
+        cardScorer: { calculate: async () => null, prepare: vi.fn() },
+        reportDiagnostic: vi.fn()
+      }
     })
     const captureId = lifetime.begin({ windowGeneration: 1, sourceGeneration: 1 }).snapshot
       .captureId!
