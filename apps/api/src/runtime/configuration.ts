@@ -72,13 +72,18 @@ export async function readRuntimeConfiguration(environment: NodeJS.ProcessEnv) {
     }
     const localHttps = await readLocalHttps(environment, port, environment.API_ORIGIN ?? '')
     const webDevOrigins = readWebDevOrigins(environment.WEB_DEV_ORIGINS)
+    const scoreLibraryPath = environment.SCORE_LIBRARY_FILE ?? null
+    if (scoreLibraryPath !== null && !isAbsolute(scoreLibraryPath)) {
+      throw new Error(invalidConfiguration)
+    }
 
     return {
       port,
       trustedProxyHops,
       localHttps,
       webDevOrigins,
-      apiKey
+      apiKey,
+      scoreLibraryPath
     }
   } catch {
     // FS/JSON/crypto의 error와 cause는 파일 경로나 값을 포함할 수 있다.
