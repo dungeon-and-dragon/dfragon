@@ -4,7 +4,8 @@
     "src/frontend/src/env.d.ts",
     "src/frontend/src/**/*",
     "src/frontend/src/**/*.tsx",
-    "src/preload/*.d.ts"
+    "src/preload/*.d.ts",
+    "src/shared/**/*"
   ],
   "compilerOptions": {
     "composite": false,

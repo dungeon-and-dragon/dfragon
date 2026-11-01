@@ -13,26 +13,29 @@ import { fetchApi } from '../api-fetch'
 import { addHandler } from '../ipc'
 import { decodeCharacterPng } from '../lib/character-png'
 import { readRaidWindowTemplates } from '../lib/raid-window-templates'
-import type { CaptureBinding } from '../search/capture-lifetime'
+import type { CaptureBinding } from '../../shared/search/capture-lifetime'
 import {
   createCharacterCandidatesHttp,
   createCharacterDetailsHttp,
   createCharacterImageHttp
-} from '../search/character-http'
-import { createCharacterImageSource } from '../search/character-image-source'
+} from '../../shared/search/character-http'
+import { createCharacterImageSource } from '../../shared/search/character-image-source'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
-} from '../search/character-response-cache'
-import { createPortraitColorScorer, type PortraitColorPolicy } from '../search/portrait-color'
-import type { CharacterSelectionPolicy } from '../search/identify'
-import type { SearchRuntime } from '../search/request'
+} from '../../shared/search/character-response-cache'
+import {
+  createPortraitColorScorer,
+  type PortraitColorPolicy
+} from '../../shared/search/portrait-color'
+import type { CharacterSelectionPolicy } from '../../shared/search/identify'
+import type { SearchRuntime } from '../../shared/search/request'
 import { createEngineCardScorer } from '../score/card-score'
 import type { ScoreEngine } from '../score/engine'
 import { registerManualSearchIpc, type ManualSearchKind } from '../search/manual-ipc'
 import { findSelectedSource } from './capture-policy'
 import { bindWindowFrame, type ReadWindowFrame } from './native-frame'
-import { toRaidFrameResult } from './raid-frame'
+import { toRaidFrameResult } from '../../shared/raid/raid-frame'
 
 let captureWindow: BrowserWindow | null = null
 let documentUrl: string | null = null

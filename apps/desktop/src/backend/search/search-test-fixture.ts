@@ -5,9 +5,9 @@ import { registerCaptureIpc, registerCaptureWindow } from '../capture/ipc-handle
 import type { SearchSnapshot } from '../../preload/common/types/search'
 import type { CharacterDetails } from '../../preload/common/types/character'
 import { characterImageUrl } from '../../preload/common/search/character-summary'
-import type { CharacterSelectionPolicy } from './identify'
-import type { PortraitColorPolicy } from './portrait-color'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
+import type { CharacterSelectionPolicy } from '../../shared/search/identify'
+import type { PortraitColorPolicy } from '../../shared/search/portrait-color'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 
 vi.mock('../capture/native-frame', () => ({
   bindWindowFrame: () => () => ({ kind: 'unsupported' })

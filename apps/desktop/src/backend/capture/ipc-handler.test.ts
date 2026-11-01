@@ -1,7 +1,7 @@
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import { EventEmitter } from 'node:events'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from '../../shared/search/async-test-fixture'
 import { registerCaptureIpc, registerCaptureWindow } from './ipc-handler'
 import type { WindowFrameResult } from '../../preload/common/types/capture'
 import { raidFrame } from '../lib/raid-window-test-fixture'
@@ -13,10 +13,10 @@ const nativeFrame = vi.hoisted(() => {
   return { read, bind }
 })
 vi.mock('./native-frame', () => ({ bindWindowFrame: nativeFrame.bind }))
-vi.mock('../lib/raid-heading.png?asset', async () => {
+vi.mock('../../shared/raid/raid-heading.png?asset', async () => {
   const { fileURLToPath } = await import('node:url')
 
-  return { default: fileURLToPath(new URL('../lib/raid-heading.png', import.meta.url)) }
+  return { default: fileURLToPath(new URL('../../shared/raid/raid-heading.png', import.meta.url)) }
 })
 
 const electron = vi.hoisted(() => {

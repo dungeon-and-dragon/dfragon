@@ -2,7 +2,7 @@ import type {
   PortraitColorPolicy,
   PortraitColorScore,
   PortraitColorScorer
-} from '../../src/backend/search/portrait-color'
+} from '../../src/shared/search/portrait-color'
 import { portraitAnchorOf } from '../../src/preload/common/search/portrait-anchor'
 import { buildHudPortrait } from './hud-portrait'
 import type { LoadedCase } from './manifest'

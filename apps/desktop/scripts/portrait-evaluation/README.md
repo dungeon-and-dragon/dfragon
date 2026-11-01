@@ -25,7 +25,7 @@ pnpm --filter @dfragon/desktop run test:portrait-evaluation
 | `DFRAGON_PORTRAIT_ANCHOR_RADIUS` | `anchorRadius`. 기본 2 |
 | `DFRAGON_PORTRAIT_ANCHORS` | `0`이면 직업별 얼굴 위치를 쓰지 않고 모든 후보를 `topFraction` 범위에서 찾는다. 기본은 제품처럼 사용 |
 
-정책 기본값은 `portrait.evaluation.ts` 상단의 `DEFAULT_POLICY`이며 제품값 `INITIAL_PORTRAIT_COLOR_POLICY`(`apps/desktop/src/backend/search/portrait-policy.ts`)와 같습니다. 제품은 `gridSize` 8을 쓰고, 평가는 4, 6, 8을 모두 측정합니다.
+정책 기본값은 `portrait.evaluation.ts` 상단의 `DEFAULT_POLICY`이며 제품값 `INITIAL_PORTRAIT_COLOR_POLICY`(`apps/desktop/src/shared/search/portrait-policy.ts`)와 같습니다. 제품은 `gridSize` 8을 쓰고, 평가는 4, 6, 8을 모두 측정합니다.
 
 ## manifest 형식
 

@@ -10,7 +10,7 @@ import { createEngineCardScorer } from '../score/card-score'
 import { apiDetailsFromEngineInput, readEngineInput } from '../score/details-test-fixture'
 import type { ScoreEngineResult } from '../score/engine'
 import { toScoreEngineInput, type ScoreEngineInput } from '../score/input'
-import { buildCharacterCard, type CalculateCardScore } from './card-assembler'
+import { buildCharacterCard, type CalculateCardScore } from '../../shared/search/card-assembler'
 
 type CalculateScore = (
   input: ScoreEngineInput,
