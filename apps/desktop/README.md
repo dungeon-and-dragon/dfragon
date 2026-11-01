@@ -42,7 +42,7 @@ $env:DFRAGON_DISTRIBUTION_API_ORIGIN = 'https://api.example.test'
 pnpm --filter @dfragon/desktop build:win
 ```
 
-설치 파일은 `apps/desktop/dist/DFragon-<버전>-x64-setup.exe`에 생성됩니다. 명령은 node/web typecheck, OCR 자산 검증, 복사, main/preload/renderer 빌드, NSIS 패키징을 포함합니다. API 주소가 없거나 HTTP, localhost, 경로/쿼리가 포함된 값이면 실패합니다. 예시 주소로 패키징에 성공해도 실제 배포, 검색 검증이 된 것이 아닙니다.
+설치 파일은 `apps/desktop/dist/DFragon-<버전>-x64-setup.exe`에 생성됩니다. 명령은 node/shared/web typecheck, OCR 자산 검증, 복사, main/preload/renderer 빌드, NSIS 패키징을 포함합니다. API 주소가 없거나 HTTP, localhost, 경로/쿼리가 포함된 값이면 실패합니다. 예시 주소로 패키징에 성공해도 실제 배포, 검색 검증이 된 것이 아닙니다.
 
 제3자 고지는 app.asar 안의 `out/frontend/notices`, `out/frontend/ocr`에 있고, 패키지는 사용자가 asar를 풀지 않고 읽도록 같은 고지를 앱 폴더의 `licenses/`에도 평문으로 둡니다. `licenses/THIRD-PARTY.txt`가 npm 패키지, `licenses/desktop`, `licenses/lib`, `licenses/score-engine`이 글꼴과 UI 자산, CP949 표, 점수 엔진, `licenses/ocr`이 OCR 모델과 ONNX Runtime의 고지입니다. Electron, Chromium 고지(`LICENSE.electron.txt`, `LICENSES.chromium.html`)는 electron-builder가 같은 앱 폴더에 둡니다.
 
@@ -201,7 +201,7 @@ pnpm --filter @dfragon/desktop format:check
 pnpm --filter @dfragon/desktop build
 ```
 
-`build`에는 node/web typecheck가 포함됩니다. Electron은 설치 단계에서 실행 파일을 내려받지 않으므로 `test`, `dev`가 먼저 `install-electron`으로 Electron runtime을 준비하며, 이미 받은 runtime은 다시 내려받지 않습니다. 의존성을 새로 설치한 뒤 `exec vitest run`으로 파일을 직접 실행하거나 VS Code 디버그 설정을 쓰려면 `pnpm --filter @dfragon/desktop exec install-electron`을 한 번 실행합니다.
+`build`에는 node/shared/web typecheck가 포함됩니다. Electron은 설치 단계에서 실행 파일을 내려받지 않으므로 `test`, `dev`가 먼저 `install-electron`으로 Electron runtime을 준비하며, 이미 받은 runtime은 다시 내려받지 않습니다. 의존성을 새로 설치한 뒤 `exec vitest run`으로 파일을 직접 실행하거나 VS Code 디버그 설정을 쓰려면 `pnpm --filter @dfragon/desktop exec install-electron`을 한 번 실행합니다.
 
 GitHub Actions에는 Windows에서 Desktop 테스트를 실행하는 workflow가 없습니다.
 
