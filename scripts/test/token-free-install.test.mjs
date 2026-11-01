@@ -17,18 +17,30 @@ function readRepositoryFile(path) {
   return readFile(join(root, path), 'utf8')
 }
 
-test('workflow는 비공개 registry 설정이나 registry 토큰을 설치에 넘기지 않는다', async () => {
-  const workflows = (await readdir(join(root, '.github/workflows'))).filter((name) => {
-    return /\.ya?ml$/u.test(name)
-  })
+test('workflow와 composite action은 비공개 registry 설정이나 registry 토큰을 설치에 넘기지 않는다', async () => {
+  const workflows = (await readdir(join(root, '.github/workflows')))
+    .filter((name) => {
+      return /\.ya?ml$/u.test(name)
+    })
+    .map((name) => `.github/workflows/${name}`)
+  const actions = (await readdir(join(root, '.github/actions')))
+    .map((name) => `.github/actions/${name}/action.yml`)
+    .filter((path) => existsSync(join(root, path)))
 
-  assert.ok(workflows.includes('product-images.yml'), 'workflow 목록을 찾지 못했다')
+  assert.ok(
+    workflows.includes('.github/workflows/product-images.yml'),
+    'workflow 목록을 찾지 못했다'
+  )
+  assert.ok(
+    actions.includes('.github/actions/web-site-build/action.yml'),
+    'composite action 목록을 찾지 못했다'
+  )
 
-  for (const name of workflows) {
-    const workflow = await readRepositoryFile(`.github/workflows/${name}`)
+  for (const path of [...workflows, ...actions]) {
+    const file = await readRepositoryFile(path)
 
-    assert.doesNotMatch(workflow, privateRegistry, name)
-    assert.doesNotMatch(workflow, installCredential, name)
+    assert.doesNotMatch(file, privateRegistry, path)
+    assert.doesNotMatch(file, installCredential, path)
   }
 })
 
