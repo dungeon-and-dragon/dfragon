@@ -2,9 +2,13 @@ import type { CharacterImage } from '../../../../preload/common/types/character'
 
 const IMAGE_READ_ERROR = 'Could not read the character image.'
 
-export async function decodeBrowserPng(bytes: Uint8Array): Promise<CharacterImage> {
+export function decodeBrowserPng(bytes: Uint8Array): Promise<CharacterImage> {
+  return decodeBrowserImage(new Blob([bytes.slice()], { type: 'image/png' }))
+}
+
+export async function decodeBrowserImage(image: Blob): Promise<CharacterImage> {
   // Desktop의 pngjs처럼 파일의 픽셀 값을 그대로 비교하도록 색 공간 변환과 alpha 미리 곱하기를 끈다.
-  const bitmap = await createImageBitmap(new Blob([bytes.slice()], { type: 'image/png' }), {
+  const bitmap = await createImageBitmap(image, {
     colorSpaceConversion: 'none',
     premultiplyAlpha: 'none'
   })
