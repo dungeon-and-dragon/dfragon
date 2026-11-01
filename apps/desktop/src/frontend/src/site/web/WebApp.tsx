@@ -8,6 +8,7 @@ import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { BrowserHost } from './browser-host'
+import { ScreenShareChip } from './ScreenShareChip'
 import { styles } from './WebApp.style'
 import { WEB_CAPTURE_TEXTS } from './web-capture-texts'
 
@@ -52,7 +53,7 @@ export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
           styles.windowSize(MAIN_WINDOW_SIZE.width, MAIN_WINDOW_HEIGHTS[searchMode])
         )}
       >
-        <AppTopBar />
+        <AppTopBar captureControls={<ScreenShareChip host={host} />} />
         <SearchScreen />
       </div>
     </ScreenCaptureProvider>
