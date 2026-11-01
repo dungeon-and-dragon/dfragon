@@ -8,7 +8,7 @@
 
 `/docs`, `/docs/openapi.json`은 API 계약만 제공합니다. `/health`는 200, `/auth/**`와 `/me`는 404입니다.
 
-웹 클라이언트가 브라우저에서 부르도록 CORS는 `https://dfragon.com`과 [`WEB_DEV_ORIGINS`](#준비할-입력)로 더한 로컬 웹 개발 origin의 `GET`, preflight만 허용합니다. 다른 origin과 다른 method의 요청에는 CORS 헤더를 붙이지 않습니다.
+웹 클라이언트가 브라우저에서 부르도록 CORS는 운영 사이트 `https://dfragon.com`, dev 사이트 `https://dev.dfragon.com`과 [`WEB_DEV_ORIGINS`](#준비할-입력)로 더한 로컬 웹 개발 origin의 `GET`, preflight만 허용합니다. 다른 origin과 다른 method의 요청에는 CORS 헤더를 붙이지 않습니다.
 `GET /characters/:serverId/:characterId/image`는 웹 클라이언트가 픽셀을 읽을 수 있게 네오플 캐릭터 이미지를 그대로 전달하며, 입력, 응답, 오류는 [초상화 전달](../../docs/rules/character-search.md#초상화-전달)을 따릅니다.
 
 ## 준비할 입력

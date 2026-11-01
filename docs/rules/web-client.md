@@ -5,7 +5,7 @@ enforcement: approval-required
 scope: dfragon.com web client
 last-reviewed: 2026-11-01
 rationale: 웹 클라이언트가 Desktop renderer를 같이 쓰면서 전송 정보, 입력, 플랫폼 연결을 어디까지 바꾸는지 정한다.
-evidence: "2026-11-01 ADR 0004 저장소 소유자 결정 ; 2026-11-01 #1076 화면 공유, Alt+PrtSc 실기 확인 ; 2026-11-01 #1085 PrtSc, Win+Shift+S 검출 조건과 붙여넣기 실기 확인 ; 2026-11-01 #1086 Chrome, Edge 화면 공유 연결, 캡처, 공유 중지 실기 확인"
+evidence: "2026-11-01 ADR 0004 저장소 소유자 결정 ; 2026-11-01 #1076 화면 공유, Alt+PrtSc 실기 확인 ; 2026-11-01 #1085 PrtSc, Win+Shift+S 검출 조건과 붙여넣기 실기 확인 ; 2026-11-01 #1086 Chrome, Edge 화면 공유 연결, 캡처, 공유 중지 실기 확인 ; 2026-11-01 저장소 소유자 결정: 운영에 바로 내지 않도록 dev.dfragon.com을 둠"
 exceptions: 화면 이미지를 브라우저 밖으로 보내는 기능과 전역 단축키는 새 결정 없이 더하지 않는다.
 review-after: 모바일 지원 범위, 사이트 hosting, Desktop bridge 구성 변경 전
 ---
@@ -67,6 +67,7 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 | 공대 행에서 읽은 직업명, 수치와 초상화 비교 거리 | 브라우저 밖으로 보내지 않는다. 인식한 닉네임과 비교로 고른 캐릭터만 위 검색, 상세 요청에 쓴다 |
 
 - OCR은 Desktop과 같은 `onnxruntime-web` worker로 브라우저에서 한다. 모델은 첫 붙여넣기나 첫 화면 공유 때 사이트에서 받으므로 닉네임 검색만 하는 사용자는 받지 않는다. 받는 동안 회차의 상태 문구는 모델을 받고 있다고 알린다. 사이트 hosting이 COOP, COEP 헤더를 붙일 수 없어 WASM은 단일 스레드로 돌고, WebGPU가 있으면 쓴다.
+- API는 운영 사이트 `https://dfragon.com`과 dev 사이트 `https://dev.dfragon.com`의 `GET`, preflight에만 CORS를 허용한다. dev 사이트도 운영 API를 부른다. 로컬 웹 개발 origin은 [API 안내](../../apps/api/README.md#준비할-입력)의 `WEB_DEV_ORIGINS`로만 더한다.
 - 장비 점수와 버프 점수는 API가 상세 응답에 넣은 값만 보인다. 브라우저는 점수 엔진을 받거나 로드하지 않는다([점수 엔진 경계](../architecture/overview.md#점수-엔진-경계)). 점수가 없으면 Desktop처럼 `-`로 둔다.
 
 ## 초상화 전달

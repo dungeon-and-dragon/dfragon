@@ -30,7 +30,7 @@ import {
 } from './access-log.js'
 
 const TRAILING_SLASHES_PATTERN = /\/+$/
-const WEB_ORIGIN = 'https://dfragon.com'
+const WEB_ORIGINS = ['https://dfragon.com', 'https://dev.dfragon.com']
 const CORS_ORIGIN_METHODS = new Set(['GET', 'OPTIONS'])
 
 function requestFailure(
@@ -161,7 +161,7 @@ export async function createApiHttpApp({
       response.removeHeader('X-Powered-By')
       next()
     })
-    const corsOrigins = [WEB_ORIGIN, ...webDevOrigins]
+    const corsOrigins = [...WEB_ORIGINS, ...webDevOrigins]
     // cors의 `methods`는 preflight 응답만 제한하므로, preflight 없는 simple POST에는 origin을 허용하지 않게 요청마다 고른다.
     app.enableCors((request: Request, callback) => {
       const origin = CORS_ORIGIN_METHODS.has(request.method) && corsOrigins

@@ -7,6 +7,7 @@ const unusedProvider = async (): Promise<never> => {
   throw new Error('CORS test must not call this provider')
 }
 const WEB_ORIGIN = 'https://dfragon.com'
+const WEB_DEV_SITE_ORIGIN = 'https://dev.dfragon.com'
 
 async function startApp(t: test.TestContext, webDevOrigins?: readonly string[]): Promise<string> {
   const app = await createApiHttpApp({
@@ -23,13 +24,15 @@ async function startApp(t: test.TestContext, webDevOrigins?: readonly string[]):
   return app.getUrl()
 }
 
-test('CORS는 dfragon.com과 지정한 로컬 웹 개발 origin의 GET과 preflight만 허용하고 다른 origin에는 header를 주지 않는다', async (t) => {
+test('CORS는 dfragon.com, dev.dfragon.com과 지정한 로컬 웹 개발 origin의 GET과 preflight만 허용하고 다른 origin에는 header를 주지 않는다', async (t) => {
   const devOrigin = 'http://localhost:5173'
   const origin = await startApp(t, [devOrigin])
 
   for (const [allowed, path] of [
     [WEB_ORIGIN, '/health'],
     [WEB_ORIGIN, '/characters/cain/character_id-1/image'],
+    [WEB_DEV_SITE_ORIGIN, '/health'],
+    [WEB_DEV_SITE_ORIGIN, '/characters/cain/character_id-1/image'],
     [devOrigin, '/health']
   ]) {
     const response = await fetch(origin + path, { headers: { Origin: allowed } })
@@ -42,7 +45,9 @@ test('CORS는 dfragon.com과 지정한 로컬 웹 개발 origin의 GET과 prefli
   for (const rejected of [
     'https://evil.example',
     'https://www.dfragon.com',
-    'http://dfragon.com'
+    'http://dfragon.com',
+    'https://evil.dfragon.com',
+    'http://dev.dfragon.com'
   ]) {
     const response = await fetch(`${origin}/health`, { headers: { Origin: rejected } })
 
@@ -50,13 +55,15 @@ test('CORS는 dfragon.com과 지정한 로컬 웹 개발 origin의 GET과 prefli
     assert.equal(response.headers.get('access-control-allow-origin'), null, rejected)
   }
 
-  const preflight = await fetch(`${origin}/characters/candidates`, {
-    method: 'OPTIONS',
-    headers: { Origin: WEB_ORIGIN, 'Access-Control-Request-Method': 'GET' }
-  })
-  assert.equal(preflight.status, 204)
-  assert.equal(preflight.headers.get('access-control-allow-origin'), WEB_ORIGIN)
-  assert.equal(preflight.headers.get('access-control-allow-methods'), 'GET')
+  for (const allowed of [WEB_ORIGIN, WEB_DEV_SITE_ORIGIN]) {
+    const preflight = await fetch(`${origin}/characters/candidates`, {
+      method: 'OPTIONS',
+      headers: { Origin: allowed, 'Access-Control-Request-Method': 'GET' }
+    })
+    assert.equal(preflight.status, 204, allowed)
+    assert.equal(preflight.headers.get('access-control-allow-origin'), allowed)
+    assert.equal(preflight.headers.get('access-control-allow-methods'), 'GET')
+  }
 
   const rejectedPreflight = await fetch(`${origin}/characters/candidates`, {
     method: 'OPTIONS',
@@ -64,11 +71,13 @@ test('CORS는 dfragon.com과 지정한 로컬 웹 개발 origin의 GET과 prefli
   })
   assert.equal(rejectedPreflight.headers.get('access-control-allow-origin'), null)
 
-  const simplePost = await fetch(`${origin}/characters/cain/character_id-1/refresh`, {
-    method: 'POST',
-    headers: { Origin: WEB_ORIGIN }
-  })
-  assert.equal(simplePost.headers.get('access-control-allow-origin'), null)
+  for (const allowed of [WEB_ORIGIN, WEB_DEV_SITE_ORIGIN]) {
+    const simplePost = await fetch(`${origin}/characters/cain/character_id-1/refresh`, {
+      method: 'POST',
+      headers: { Origin: allowed }
+    })
+    assert.equal(simplePost.headers.get('access-control-allow-origin'), null, allowed)
+  }
 })
 
 test('CORS는 로컬 웹 개발 origin을 지정하지 않으면 localhost origin을 허용하지 않는다', async (t) => {
