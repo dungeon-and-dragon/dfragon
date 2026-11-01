@@ -1,6 +1,6 @@
 import ky from 'ky'
 import { parseTodayGrade } from '../../../../preload/common/today-grade'
-import type { WindowFrameResult } from '../../../../preload/common/types/capture'
+import type { CaptureSource, WindowFrameResult } from '../../../../preload/common/types/capture'
 import type { CharacterImage } from '../../../../preload/common/types/character'
 import type { DesktopShortcut } from '../../../../preload/common/types/desktop-shortcut'
 import {
@@ -20,15 +20,20 @@ import { createBrowserCardSearch, createBrowserSearchRuntime } from './browser-s
 // 응답은 `{ percent, expiresAt }` 하나라 100바이트 안팎이다.
 const TODAY_GRADE_MAX_BYTES = 4 * 1024
 const NO_UPDATE_NOTICE: UpdateNoticeSnapshot = { revision: 0, notice: null }
-// 한글 자판에서는 Alt+W의 key가 'ㅈ'이므로 물리 키로 고른다. Alt+R은 화면 공유 회차와 함께 들어온다.
+// 한글 자판에서는 Alt+W의 key가 'ㅈ'이므로 물리 키로 고른다.
 const PAGE_SHORTCUTS: Readonly<Record<string, DesktopShortcut>> = {
   KeyW: 'take-snapshot',
-  KeyA: 'copy-clipboard'
+  KeyA: 'copy-clipboard',
+  KeyR: 'restart-search'
 }
 
 export type BrowserHost = {
   onPastedFrame: (listener: () => void) => () => void
+  requestScreenShare: () => Promise<string | null>
+  onScreenShareEnded: (listener: () => void) => () => void
 }
+
+type ScreenShare = { id: string; track: MediaStreamTrack; video: HTMLVideoElement }
 
 type BrowserDiagnostics = DiagnosticApi & { report: (code: DiagnosticCode) => void }
 
@@ -108,21 +113,107 @@ function findPastedImage(data: DataTransfer | null): File | null {
   return null
 }
 
-// 붙여 넣은 이미지는 host가 들고 있다가 renderer가 시작한 회차의 readCaptureFrame으로 돌려준다.
-function createPastedFrames(): {
+function createScreenShare(): {
+  isConnected: () => boolean
+  request: BrowserHost['requestScreenShare']
+  select: (sourceId: string) => CaptureSource | null
+  read: () => Promise<CharacterImage>
+  onEnded: BrowserHost['onScreenShareEnded']
+} {
+  let current: ScreenShare | null = null
+  let shareCount = 0
+  const ended = createListeners<[]>()
+
+  // track.stop()은 ended 이벤트를 보내지 않으므로, 앱이 끊은 공유는 끝났다고 다시 알리지 않는다.
+  function stop(): void {
+    current?.track.stop()
+    current = null
+  }
+
+  return {
+    isConnected: () => current !== null,
+    async request() {
+      let stream: MediaStream
+      try {
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { displaySurface: 'window' },
+          audio: false
+        })
+      } catch {
+        // 공유 창을 닫거나 거절하면 지금 연결을 그대로 둔다.
+        return null
+      }
+      const [track] = stream.getVideoTracks()
+      const video = document.createElement('video')
+      video.muted = true
+      video.srcObject = stream
+      await video.play()
+      stop()
+      shareCount += 1
+      const share: ScreenShare = { id: `screen-share-${shareCount}`, track, video }
+      track.addEventListener('ended', () => {
+        if (current === share) {
+          current = null
+          ended.notify()
+        }
+      })
+      current = share
+
+      return share.id
+    },
+    select(sourceId) {
+      if (sourceId === '') {
+        stop()
+
+        return null
+      }
+
+      if (current?.id !== sourceId) {
+        throw new Error('SCREEN_SHARE_ENDED')
+      }
+
+      return { id: current.id, name: current.track.label }
+    },
+    read() {
+      if (current === null) {
+        return Promise.reject(new Error('SCREEN_SHARE_ENDED'))
+      }
+
+      // 재생 중인 video의 지금 프레임을 읽어, 화면이 바뀌지 않아 새 프레임이 오지 않아도 기다리지 않는다.
+
+      return decodeBrowserImage(current.video)
+    },
+    onEnded: ended.subscribe
+  }
+}
+
+// 붙여 넣은 이미지는 host가 들고 있다가 renderer가 시작한 회차의 readCaptureFrame으로 돌려준다. 공유한 창이 있으면
+// 붙여넣기로 시작한 회차만 그 이미지를 읽고, 캡처 버튼과 Alt+R 회차는 공유 화면을 읽는다.
+function createPastedFrames(share: ReturnType<typeof createScreenShare>): {
   read: () => Promise<WindowFrameResult>
   install: () => BrowserHost['onPastedFrame']
 } {
   let frame: Promise<CharacterImage> | null = null
+  let pastedRoundPending = false
   const pasted = createListeners<[]>()
+
+  function readImage(): Promise<CharacterImage> {
+    const readsPasted = pastedRoundPending || !share.isConnected()
+    pastedRoundPending = false
+    if (!readsPasted) {
+      return share.read()
+    }
+
+    if (frame === null) {
+      return Promise.reject(new Error('NO_PASTED_FRAME'))
+    }
+
+    return frame
+  }
 
   return {
     read() {
-      if (frame === null) {
-        return Promise.reject(new Error('NO_PASTED_FRAME'))
-      }
-
-      return frame.then((image) => ({ kind: 'frame', image }))
+      return readImage().then((image) => ({ kind: 'frame', image }))
     },
     install() {
       document.addEventListener('paste', (event) => {
@@ -133,6 +224,7 @@ function createPastedFrames(): {
         frame = decodeBrowserImage(image)
         // 디코딩 실패는 회차의 readCaptureFrame이 받아 안내하므로 여기서는 미처리 거절로 남기지 않는다.
         frame.catch(() => undefined)
+        pastedRoundPending = true
         pasted.notify()
       })
 
@@ -141,14 +233,17 @@ function createPastedFrames(): {
   }
 }
 
-function installPageShortcuts(): (listener: (shortcut: DesktopShortcut) => void) => () => void {
+function installPageShortcuts(
+  canRestart: () => boolean
+): (listener: (shortcut: DesktopShortcut) => void) => () => void {
   const shortcuts = createListeners<[DesktopShortcut]>()
   document.addEventListener('keydown', (event) => {
     if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.repeat) {
       return
     }
     const shortcut = PAGE_SHORTCUTS[event.code]
-    if (shortcut === undefined) {
+    // Alt+R은 공유한 창이 있을 때만 받는다. 붙여넣기만 있으면 다시 읽을 화면이 없다.
+    if (shortcut === undefined || (shortcut === 'restart-search' && !canRestart())) {
       return
     }
     event.preventDefault()
@@ -163,11 +258,13 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
   const runtime = createBrowserSearchRuntime(apiOrigin, diagnostics.report)
   const party = createBrowserCardSearch('party', runtime)
   const raid = createBrowserCardSearch('raid', runtime)
-  const pastedFrames = createPastedFrames()
+  const screenShare = createScreenShare()
+  const pastedFrames = createPastedFrames(screenShare)
 
+  // 공유는 게임 연결 칩을 눌렀을 때만 요청한다. 목록 재조회가 공유 창을 띄우지 않도록 목록은 늘 비운다.
   window.api = {
     listCaptureSources: async () => [],
-    selectCaptureSource: async () => null,
+    selectCaptureSource: async (sourceId) => screenShare.select(sourceId),
     readCaptureFrame: pastedFrames.read,
     notifyOcrCandidatesDetected: party.notifyOcrCandidatesDetected
   }
@@ -180,7 +277,7 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     readCaptureFrame: async () =>
       toRaidFrameResult(await pastedFrames.read(), await readRaidWindowTemplates())
   }
-  window.desktopShortcut = { onDesktopShortcut: installPageShortcuts() }
+  window.desktopShortcut = { onDesktopShortcut: installPageShortcuts(screenShare.isConnected) }
   // 보안 컨텍스트가 아니면 navigator.clipboard가 없으므로, async로 감싸 그 TypeError도 복사 실패로 보이게 한다.
   window.desktopClipboard = {
     writeText: async (text) => {
@@ -198,5 +295,9 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
   window.windowChrome = { setContentHeight: async () => {} }
   startRendererDiagnostics(diagnostics)
 
-  return { onPastedFrame: pastedFrames.install() }
+  return {
+    onPastedFrame: pastedFrames.install(),
+    requestScreenShare: screenShare.request,
+    onScreenShareEnded: screenShare.onEnded
+  }
 }
