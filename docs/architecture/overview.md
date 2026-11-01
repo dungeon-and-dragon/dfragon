@@ -54,7 +54,7 @@ Desktop은 파티, 공대 캡처와 검색, 카드의 캐릭터 면만 둔다. �
 
 ## 점수 엔진 경계
 
-비공개 엔진 저장소가 만든 C 네이티브 점수 엔진(Windows DLL, macOS dylib, Linux `libdnfscore.so`)은 실행 위치마다 Node worker thread 하나를 띄워 `koffi`로 불러 쓴다(2026-10-19 결정, [Issue #716](https://github.com/dungeon-and-dragon/dfragon/issues/716), worker 이전은 [Issue #987](https://github.com/dungeon-and-dragon/dfragon/issues/987)). 실행 위치는 `apps/api`와 Desktop main이다. API는 웹 클라이언트를 위해 점수를 계산해 상세 응답에 넣는다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). Desktop main의 경계는 `apps/desktop/src/backend/score/engine.ts`, worker 진입은 `worker.ts`다. 엔진은 OS thread마다 첫 계산을 초기화하므로 실행 위치마다 준비와 모든 계산을 같은 worker에서 하고, 그 process는 계산을 기다리는 동안 막히지 않는다.
+비공개 엔진 저장소가 만든 C 네이티브 점수 엔진(Windows DLL, macOS dylib, Linux `libdnfscore.so`)은 실행 위치마다 Node worker thread 하나를 띄워 `koffi`로 불러 쓴다(2026-10-19 결정, [Issue #716](https://github.com/dungeon-and-dragon/dfragon/issues/716), worker 이전은 [Issue #987](https://github.com/dungeon-and-dragon/dfragon/issues/987)). 실행 위치는 `apps/api`와 Desktop main이다. API는 웹 클라이언트를 위해 점수를 계산해 상세 응답에 넣는다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). API의 경계는 `apps/api/src/score/engine.ts`, Desktop main의 경계는 `apps/desktop/src/backend/score/engine.ts`이고, worker 진입은 각각 같은 폴더의 `worker.ts`다. 엔진은 OS thread마다 첫 계산을 초기화하므로 실행 위치마다 준비와 모든 계산을 같은 worker에서 하고, 그 process는 계산을 기다리는 동안 막히지 않는다.
 
 | 대상 | 책임 |
 | --- | --- |
