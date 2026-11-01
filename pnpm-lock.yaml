@@ -273,8 +273,8 @@ catalogs:
       specifier: 0.2.2
       version: 0.2.2
     remeda:
-      specifier: 2.53.0
-      version: 2.53.0
+      specifier: 2.54.1
+      version: 2.54.1
     rxjs:
       specifier: 7.8.2
       version: 7.8.2
@@ -379,7 +379,7 @@ importers:
         version: 0.2.2
       remeda:
         specifier: 'catalog:'
-        version: 2.53.0
+        version: 2.54.1
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
@@ -3250,8 +3250,8 @@ packages:
   reflect-metadata@0.2.2:
     resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
 
-  remeda@2.53.0:
-    resolution: {integrity: sha512-1jeHr8AUMB3r089AOmaiHBPAcGTep27JCbMt8MeXXXquDkO3h2N4CtuK++4Oas8mulCUiOUDeZqN+ssrcatKlw==}
+  remeda@2.54.1:
+    resolution: {integrity: sha512-l3pxw2Hz5V2FG3RaU9C6z121H8dF5VYjj3z6lnHoN3SCRLoxr+pZS2dq8dDe3NA+9kyKm56A1BB2Ejr+DrLlJw==}
     engines: {node: '>=18.0.0'}
 
   require-directory@2.1.1:
@@ -6213,7 +6213,7 @@ snapshots:
 
   reflect-metadata@0.2.2: {}
 
-  remeda@2.53.0: {}
+  remeda@2.54.1: {}
 
   require-directory@2.1.1: {}
 
