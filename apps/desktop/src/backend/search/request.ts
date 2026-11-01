@@ -7,9 +7,13 @@ import type {
 } from '../../preload/common/types/search'
 import type {
   CharacterCandidate,
+  CharacterCardScore,
+  CharacterDetails,
+  CharacterScoreCalculator,
   SelectedCharacterSummary,
   CharacterJsonValue
 } from '../../preload/common/types/character'
+import type { DiagnosticCode } from '../../preload/common/types/diagnostics'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,
@@ -29,7 +33,6 @@ import type {
 import type { PortraitColorScorer } from './portrait-color'
 import { runSearchOperation, type SearchOperation, type SearchOperationFailure } from './operation'
 import { buildCharacterCard } from './card-assembler'
-import type { ScoreEngine } from '../score/engine'
 
 export type IdentificationAdapters = {
   candidates: CharacterCandidatesHttp
@@ -39,10 +42,21 @@ export type IdentificationAdapters = {
   selection: CharacterSelectionPolicy
 }
 
+export type CharacterCardScorer = Readonly<{
+  /** 점수를 계산하지 못하면 null이다. 신호가 취소되면 그 이유로 거절한다. */
+  calculate: (
+    details: CharacterDetails,
+    calculator: CharacterScoreCalculator,
+    signal: AbortSignal
+  ) => Promise<CharacterCardScore | null>
+  prepare: () => void
+}>
+
 export type SearchRuntime = {
   identification: IdentificationAdapters
   ocrIdentification?: 'portrait' | 'raid'
-  scoreEngine: ScoreEngine
+  cardScorer: CharacterCardScorer
+  reportDiagnostic: (code: DiagnosticCode) => void
 }
 export type SearchOutcome =
   | {
@@ -94,7 +108,7 @@ export async function runSearchRequest(input: RequestInput): Promise<SearchOutco
         return { identified, summary: null }
       }
       const base = candidateSummary(identified.candidate)
-      const summary = await loadDetailsSummary(base, adapters, execution, input.runtime.scoreEngine)
+      const summary = await loadDetailsSummary(base, adapters, execution, input.runtime.cardScorer)
 
       return { identified, summary }
     }
@@ -140,7 +154,7 @@ export async function runDetailsRequest(input: {
   const adapters = input.runtime.identification
   const outcome = await runSearchOperation(
     { signal: input.signal, isCurrent: input.isCurrent },
-    (execution) => loadDetailsSummary(input.summary, adapters, execution, input.runtime.scoreEngine)
+    (execution) => loadDetailsSummary(input.summary, adapters, execution, input.runtime.cardScorer)
   )
   if (outcome === null || outcome.kind === 'failure') {
     return outcome
@@ -171,14 +185,14 @@ async function loadDetailsSummary(
   base: SelectedCharacterSummary,
   adapters: IdentificationAdapters,
   execution: SearchOperation,
-  scoreEngine: ScoreEngine
+  cardScorer: CharacterCardScorer
 ): Promise<SelectedCharacterSummary> {
   const identity = { serverId: base.serverId, characterId: base.characterId }
   const details = await execution.run((signal) => adapters.details({ ...identity, signal }))
   // 점수 계산도 같은 취소, 현재 요청 판정 안에서 실행해 늦은 결과를 버린다.
   const card = await execution.run((signal) =>
-    buildCharacterCard(details, (scoreInput, calculator) =>
-      scoreEngine.calculate(scoreInput, calculator, signal)
+    buildCharacterCard(details, (cardDetails, calculator) =>
+      cardScorer.calculate(cardDetails, calculator, signal)
     )
   )
   const character = details.character

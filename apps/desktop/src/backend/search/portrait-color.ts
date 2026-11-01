@@ -12,7 +12,8 @@ import {
   type SearchBudget,
   shouldYield,
   validateImage,
-  yieldSearch
+  yieldSearch,
+  type YieldToEventLoop
 } from './portrait-raster'
 
 const RGB_CHANNELS = 3
@@ -288,11 +289,14 @@ async function findBestWindow(
   return best
 }
 
-export function createPortraitColorScorer(policy: PortraitColorPolicy): PortraitColorScorer {
+export function createPortraitColorScorer(
+  policy: PortraitColorPolicy,
+  yieldToEventLoop: YieldToEventLoop
+): PortraitColorScorer {
   return async ({ portrait, candidate, anchor, signal }) => {
     signal.throwIfAborted()
     validateImage(candidate)
-    const budget = createSearchBudget()
+    const budget = createSearchBudget(yieldToEventLoop)
     const raster = await rasterizePortrait(portrait, budget, signal)
     const face = summarizeFace(raster, policy.gridSize)
     signal.throwIfAborted()

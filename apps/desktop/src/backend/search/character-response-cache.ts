@@ -19,7 +19,7 @@ function cacheCompleted<Input extends { signal: AbortSignal }, Value>(
     const value = await load(input)
     input.signal.throwIfAborted()
     const serialized = JSON.stringify(value)
-    cache.write(key, structuredClone(value), Buffer.byteLength(serialized, 'utf8'))
+    cache.write(key, structuredClone(value), new TextEncoder().encode(serialized).byteLength)
 
     return value
   }

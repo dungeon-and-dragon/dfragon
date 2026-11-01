@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { fetchApi } from '../api-fetch'
 import type {
   CharacterCandidate,
   CharacterDetails,
@@ -8,7 +7,7 @@ import type {
 } from '../../preload/common/types/character'
 import type { SearchErrorCode } from '../../preload/common/types/search'
 import { SearchHttpFailure } from './http'
-import { CHARACTER_IMAGE_LIMITS, decodeCharacterImage } from './character-image'
+import { CHARACTER_IMAGE_LIMITS, decodeCharacterImage, type DecodePng } from './character-image'
 import {
   createCharacterHttpClient,
   parseCharacterJson,
@@ -90,8 +89,8 @@ const statusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
   504: 'NEOPLE_TIMEOUT'
 }
 
-type TransportOptions = { fetch?: typeof fetch }
-type ApiOptions = TransportOptions & { apiOrigin: string }
+type ApiOptions = { fetch: typeof fetch; apiOrigin: string }
+type ImageOptions = { fetch: typeof fetch; decodePng: DecodePng }
 type IdentityRequest = CharacterIdentity & { signal: AbortSignal }
 export type CharacterCandidatesHttp = (input: {
   nickname: string
@@ -149,7 +148,7 @@ function assertApiSuccess(response: Response, body: unknown, details: boolean): 
 
 export function createCharacterCandidatesHttp({
   apiOrigin,
-  fetch: transport = fetchApi
+  fetch: transport
 }: ApiOptions): CharacterCandidatesHttp {
   const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.candidateJsonBytes)
 
@@ -180,8 +179,9 @@ export function createCharacterCandidatesHttp({
 }
 
 export function createCharacterImageHttp({
-  fetch: transport = fetchApi
-}: TransportOptions = {}): CharacterImageHttp {
+  fetch: transport,
+  decodePng
+}: ImageOptions): CharacterImageHttp {
   const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.imageBytes)
 
   return async ({ serverId, characterId, signal }) => {
@@ -202,12 +202,12 @@ export function createCharacterImageHttp({
         throw new SearchHttpFailure('NEOPLE_API_ERROR')
       }
       // ky의 body 메서드만 본문 읽기에도 timeout을 건다.
-      const bytes = Buffer.from(await request.arrayBuffer())
+      const bytes = new Uint8Array(await request.arrayBuffer())
       const contentType = response.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase()
       if (contentType !== 'image/png') {
         throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
       }
-      const image = decodeCharacterImage(bytes)
+      const image = await decodeCharacterImage(bytes, decodePng)
       signal.throwIfAborted()
 
       return image
@@ -219,7 +219,7 @@ export function createCharacterImageHttp({
 
 export function createCharacterDetailsHttp({
   apiOrigin,
-  fetch: transport = fetchApi
+  fetch: transport
 }: ApiOptions): CharacterDetailsHttp {
   const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.detailJsonBytes)
 
