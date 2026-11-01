@@ -2,7 +2,7 @@
 type: rule
 status: active
 scope: desktop source organization and process boundaries
-last-reviewed: 2026-10-29
+last-reviewed: 2026-11-01
 ---
 
 # Desktop 코드 구조와 프로세스 경계
@@ -19,9 +19,10 @@ last-reviewed: 2026-10-29
 - Frontend의 UI와 독립적인 구현, 공통 유틸리티는 `src/frontend/src/lib`, 공통 타입은 `types`, 상수는 `constants`에서 역할별 파일로 관리하고 직접 import한다. `lib`는 하위 폴더 없이 파일을 바로 둔다. 이 모듈은 UI 계층이나 fixture를 import하지 않는다. 요청, 구독 수명을 관리하는 class도 `lib`에 두고 구현 전용 타입은 해당 파일에 유지하며, process 간 IPC contract는 기존 preload 위치를 사용한다.
 - Frontend 커스텀 hook은 기능 전용 여부와 관계없이 `src/frontend/src/hooks`에 하위 폴더 없이 모으고, hook 전용 테스트는 옆에 둔다. Hook은 다른 hook과 기존 검색, OCR 등의 비UI 구현을 직접 참조할 수 있지만 UI 컴포넌트, page, fixture, testing을 import하지 않는다.
 - Frontend의 `src/frontend/src/testing`에는 여러 테스트가 공유하는 유틸리티, mock, fixture만 둔다. 실제 테스트 파일은 검증하는 코드 옆에 두고, 앱 조합 통합 테스트는 기존 `integration`에 둔다. 제품 코드는 `testing`을 import하지 않는다. 직접 실행하는 미리보기, Electron fixture는 기존 `fixture`에 유지한다.
-- `src/frontend/src/site`는 웹사이트(`apps/web`)가 import하는 창 목업 entry다(2026-10-31, [Issue #1037](https://github.com/dungeon-and-dragon/dfragon/issues/1037)). 실제 상단 바와 카드 컴포넌트를 캡처, 검색 IPC 대신 각본 상태로 조합하며, 목업 전용 hook, 데이터, 그림도 이 폴더에 둔다. 앱 진입점과 다른 Frontend 코드는 이 폴더를 import하지 않는다. 카드나 상단 바 컴포넌트를 바꾸면 Web 검사도 함께 실행한다.
+- `src/frontend/src/site`는 웹사이트(`apps/web`)가 import하는 entry를 둔다. 창 목업 entry(`index.ts`, 별칭 `@dfragon/desktop-site`, 2026-10-31 [Issue #1037](https://github.com/dungeon-and-dragon/dfragon/issues/1037))는 실제 상단 바와 카드 컴포넌트를 캡처, 검색 IPC 대신 각본 상태로 조합한다. 웹 앱 entry(별칭 `@dfragon/desktop-web`, 2026-11-01 [ADR 0004](../adr/0004-web-client.md))는 Desktop의 `main.tsx`, `App.tsx` 대신 같은 컴포넌트를 1280×163(공대 1280×300) 상자 안에 합성하고 브라우저 host로 연결한다([웹 클라이언트](../rules/web-client.md)). 목업과 웹 앱 전용 hook, 데이터, 그림도 이 폴더에 둔다. 앱 진입점과 다른 Frontend 코드는 이 폴더를 import하지 않는다. 카드나 상단 바 컴포넌트를 바꾸면 Web 검사도 함께 실행한다.
 - `src/backend/main.ts`와 `src/preload/index.ts`는 composition root로 유지한다. App lifecycle, module 등록, API 노출만 두고 feature state, handler body, domain logic은 넣지 않는다.
 - Feature 관련 implementation과 test는 process별 feature 위치에 함께 둔다. 예: `src/backend/capture/**`, `src/preload/api/capture.ts`.
+- `src/shared/`는 Electron main과 브라우저(웹 앱 entry)가 함께 쓰는 검색 코어와 공대 crop을 둔다(2026-11-01 [ADR 0004](../adr/0004-web-client.md)). 새 workspace package 대신 Desktop 안에 두는 폴더이며 process 간 IPC contract와는 다르다. 이 폴더는 `electron`, `node:*`, `Buffer`처럼 Node나 Electron에만 있는 API와 DOM에만 있는 전역을 쓰지 않고, `@dfragon/lib`와 두 환경에서 함께 도는 라이브러리만 import한다. HTTP 요청, 이미지 디코딩, 작업 양보, 진단 기록, 템플릿 이미지 읽기처럼 실행 환경에 묶인 일은 adapter로 받는다. Desktop은 `src/backend`가 Electron adapter를, 웹은 브라우저 host가 `fetch`, `createImageBitmap` adapter를 넣는다. 의존 방향은 `src/backend`, 웹 앱 entry(`src/frontend/src/site`), `apps/web`(별칭) → `src/shared/`이며, `src/shared/`는 `src/backend`, `src/frontend`, `src/preload`를 import하지 않는다. `ipcMain`에 닿는 연결 코드와 Electron adapter는 `src/backend`에 남긴다.
 - Desktop main의 공통 Windows 화면 획득은 `src/backend/lib`가 소유한다. 파티와 공대 캡처는 같은 GDI, DPI, 픽셀 변환과 자원 정리 구현을 사용한다. 이 lib는 검색, UI와 IPC handler에 의존하지 않으며 각 기능이 획득 결과를 자기 계약으로 변환한다. 네이티브 DLL과 Node API는 Desktop 내부에 유지하고 순수 함수용 `packages/lib`로 옮기지 않는다.
 - Backend handler와 preload invoker의 argument 및 return type은 shared IPC contract에서 파생한다.
 - TypeScript IPC contract가 있더라도 renderer에서 전달되는 값은 backend trust boundary에서 runtime validation한다.

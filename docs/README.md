@@ -2,7 +2,7 @@
 type: rule
 status: active
 scope: repository
-last-reviewed: 2026-10-30
+last-reviewed: 2026-11-01
 ---
 
 # 던삐삐 Document Guide
@@ -19,6 +19,7 @@ last-reviewed: 2026-10-30
 | app, package 경계 | [Architecture Overview](architecture/overview.md) |
 | API runtime, 검색 | [API runtime](rules/api-runtime.md), [캐릭터 검색](rules/character-search.md), [캐릭터 상세](rules/character-details.md), [오늘의 등급](rules/today-grade.md) |
 | Desktop MVP 카드, 입력 범위 | [Desktop MVP 카드 UI](rules/desktop-mvp-ui.md) |
+| 웹 클라이언트 입력, 전송 정보, 플랫폼 연결 | [웹 클라이언트](rules/web-client.md), 결정 [ADR 0004 dfragon.com 첫 화면에 설치 없이 쓰는 웹 클라이언트를 둔다](adr/0004-web-client.md) |
 | Desktop 새 버전 알림, 자동 설치를 미룬 결정 | [ADR 0001 새 버전 알림만 두고 자동 설치는 미룬다](adr/0001-update-notice-without-auto-install.md) |
 | Desktop 사용 통계를 지운 결정 | [ADR 0003 Desktop 사용 통계를 보내지 않는다](adr/0003-remove-desktop-usage-stats.md), 이전 결정 [ADR 0002](adr/0002-desktop-usage-stats-ga4.md) |
 | 앱 공용 UI, 디자인 토큰, Base UI, StyleX, 시각 검증 | [Design System](rules/design-system.md), [Shared UI boundary](architecture/overview.md#shared-ui-boundary), [공통 StyleX 설정](../packages/ui/README.md#공통-stylex-설정) |
