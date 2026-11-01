@@ -90,7 +90,11 @@ const statusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
 }
 
 type ApiOptions = { fetch: typeof fetch; apiOrigin: string }
-type ImageOptions = { fetch: typeof fetch; decodePng: DecodePng }
+type ImageOptions = {
+  fetch: typeof fetch
+  decodePng: DecodePng
+  imageUrl: (identity: CharacterIdentity) => string
+}
 type IdentityRequest = CharacterIdentity & { signal: AbortSignal }
 export type CharacterCandidatesHttp = (input: {
   nickname: string
@@ -180,7 +184,8 @@ export function createCharacterCandidatesHttp({
 
 export function createCharacterImageHttp({
   fetch: transport,
-  decodePng
+  decodePng,
+  imageUrl
 }: ImageOptions): CharacterImageHttp {
   const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.imageBytes)
 
@@ -189,7 +194,7 @@ export function createCharacterImageHttp({
     validateIdentity(identity)
     try {
       signal.throwIfAborted()
-      const request = client.get(characterImageUrl(identity), {
+      const request = client.get(imageUrl(identity), {
         headers: { Accept: 'image/png' },
         signal
       })
