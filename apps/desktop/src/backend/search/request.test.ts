@@ -8,20 +8,30 @@ import type {
   CharacterPortrait,
   SelectedCharacterSummary
 } from '../../preload/common/types/character'
-import { deferred } from '../lib/async-test-fixture'
-import { runDetailsRequest, runSearchRequest, type IdentificationAdapters } from './request'
-import type { CharacterIdentificationInput } from './identify'
-import type { SearchOperationContext } from './operation'
+import { deferred } from '../../shared/search/async-test-fixture'
+import {
+  runDetailsRequest,
+  runSearchRequest,
+  type IdentificationAdapters
+} from '../../shared/search/request'
+import type { CharacterIdentificationInput } from '../../shared/search/identify'
+import type { SearchOperationContext } from '../../shared/search/operation'
 import type {
   CharacterCandidatesHttp,
   CharacterDetailsHttp,
   CharacterImageHttp
-} from './character-http'
-import { createCharacterImageCache, createCharacterImageSource } from './character-image-source'
-import { SearchHttpFailure } from './http'
-import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
-import { PortraitComparisonBudgetExceededError } from './portrait-raster'
+} from '../../shared/search/character-http'
+import {
+  createCharacterImageCache,
+  createCharacterImageSource
+} from '../../shared/search/character-image-source'
+import { SearchHttpFailure } from '../../shared/search/http'
+import {
+  createPortraitColorScorer,
+  type PortraitColorScorer
+} from '../../shared/search/portrait-color'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
+import { PortraitComparisonBudgetExceededError } from '../../shared/search/portrait-raster'
 import { createEngineCardScorer } from '../score/card-score'
 import type { ScoreEngine, ScoreEngineResult } from '../score/engine'
 import { dealerCard } from '../../preload/common/search/card-test-fixture'

@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from '../../shared/search/async-test-fixture'
 import { candidateResponse, createSearchFixture, jsonResponse } from './search-test-fixture'
 
 it.each(['navigation', 'destruction', 'render-process-gone'] as const)(

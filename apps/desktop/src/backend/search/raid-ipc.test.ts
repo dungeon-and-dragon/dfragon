@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from '../../shared/search/async-test-fixture'
 import { candidate, createSearchFixture, jsonResponse } from './search-test-fixture'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 
 const imageUrl =
   'https://img-api.neople.co.kr/df/servers/cain/characters/synthetic-character?zoom=1'

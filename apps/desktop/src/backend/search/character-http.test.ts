@@ -9,8 +9,8 @@ import {
   createCharacterCandidatesHttp,
   createCharacterDetailsHttp,
   createCharacterImageHttp
-} from './character-http'
-import { SearchHttpFailure } from './http'
+} from '../../shared/search/character-http'
+import { SearchHttpFailure } from '../../shared/search/http'
 import { decodeCharacterPng } from '../lib/character-png'
 
 afterEach(() => {

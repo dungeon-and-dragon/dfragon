@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
 import { createCaptureSearchLifetime, type CaptureBinding } from './capture-lifetime'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from './async-test-fixture'
 import { SearchHttpFailure } from './http'
 import type { SearchRuntime } from './request'
 import type { CharacterCandidatesHttp } from './character-http'
@@ -50,7 +50,7 @@ function ocr(input: {
 }
 
 async function flushCompletion(): Promise<void> {
-  await new Promise<void>((resolve) => setImmediate(resolve))
+  await new Promise<void>((resolve) => setTimeout(resolve))
 }
 
 it('검색 불가 닉네임의 새 관측은 이전 HTTP를 취소하고 입력 실패로 교체한다', async () => {

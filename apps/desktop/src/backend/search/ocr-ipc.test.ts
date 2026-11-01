@@ -4,7 +4,7 @@ import type { CharacterDetails, CharacterPortrait } from '../../preload/common/t
 import type { OcrSearchObservation } from '../../preload/common/types/search'
 import { parseSearchSnapshot } from '../../preload/common/search/snapshot'
 import { dealerCard } from '../../preload/common/search/card-test-fixture'
-import { deferred } from '../lib/async-test-fixture'
+import { deferred } from '../../shared/search/async-test-fixture'
 import { candidate, createSearchFixture, jsonResponse } from './search-test-fixture'
 
 const policy = {

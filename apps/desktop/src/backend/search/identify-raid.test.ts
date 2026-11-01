@@ -2,13 +2,16 @@ import { describe, expect, it, vi } from 'vitest'
 import type { MockedFunction } from 'vitest'
 import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
 import type { RaidRowObservation } from '../../preload/common/types/search'
-import { deferred } from '../lib/async-test-fixture'
-import { runDetailsRequest, runSearchRequest } from './request'
-import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-http'
+import { deferred } from '../../shared/search/async-test-fixture'
+import { runDetailsRequest, runSearchRequest } from '../../shared/search/request'
+import type {
+  CharacterCandidatesHttp,
+  CharacterDetailsHttp
+} from '../../shared/search/character-http'
 import { createEngineCardScorer } from '../score/card-score'
 import type { ScoreEngine, ScoreEngineResult } from '../score/engine'
 import { dealerCard } from '../../preload/common/search/card-test-fixture'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 
 // 합성 후보, 직업명, 점수만 쓰며 표본이나 플레이어 식별자는 넣지 않는다.
 function candidate(
