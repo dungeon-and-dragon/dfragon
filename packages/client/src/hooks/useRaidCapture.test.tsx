@@ -6,6 +6,8 @@ import { useRaidCapture } from './useRaidCapture'
 import { DESKTOP_CAPTURE_TEXTS } from '../lib/capture-texts'
 import { createSharedOcrWorker } from '../lib/ocr-worker-recognition'
 import { emptySearchSlots } from '../lib/slots'
+import { createTestClientHost } from '../testing/test-support/client-host'
+import { ClientHostContext, type RaidCaptureHost } from './useClientHost'
 import type { RaidSlotRecognition } from '../lib/raid-recognition'
 import { searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
 import type { RaidFrameResult } from '@dfragon/client-core/preload/common/types/capture'
@@ -32,6 +34,7 @@ const recognized: RaidSlotRecognition[] = [
 ]
 let value: ReturnType<typeof useRaidCapture>
 let root: Root
+let raid: RaidCaptureHost
 
 function Harness(): null {
   const [ocrWorker] = useState(() => createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed))
@@ -52,7 +55,7 @@ function Harness(): null {
 beforeEach(async () => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   let snapshot: SearchSnapshot = searchSnapshot({ captureId: null, slots: emptySearchSlots(12) })
-  vi.stubGlobal('raidSearch', {
+  raid = {
     controlCharacterSearch: vi.fn<SearchApi['controlCharacterSearch']>(async (command) => {
       if (command.action === 'begin') {
         snapshot = {
@@ -65,11 +68,17 @@ beforeEach(async () => {
       return { ok: true, snapshot }
     }),
     onCharacterSearchChanged: vi.fn<SearchApi['onCharacterSearchChanged']>(() => () => {}),
-    notifyOcrCandidatesDetected: vi.fn(async () => ({ ok: true, snapshot })),
+    notifyOcrCandidatesDetected: vi.fn(async () => ({ ok: true as const, snapshot })),
     readCaptureFrame: vi.fn(async () => frame)
-  })
+  }
   root = createRoot(document.createElement('div'))
-  await act(async () => root.render(<Harness />))
+  await act(async () =>
+    root.render(
+      <ClientHostContext value={createTestClientHost({ raid })}>
+        <Harness />
+      </ClientHostContext>
+    )
+  )
 })
 
 afterEach(async () => {
@@ -113,8 +122,8 @@ it('공대 회차가 인식하는 동안 자리 맞바꾸기 요청을 거절하
 it('공대 회차 중 직접 조회한 슬롯은 공대 수명으로 조회하고 그 회차의 OCR 결과를 통지하지 않으며, 다음 회차는 다시 통지한다', async () => {
   const late = Promise.withResolvers<RaidSlotRecognition[]>()
   raidMocks.recognize.mockReturnValueOnce(late.promise).mockResolvedValueOnce(recognized)
-  const control = vi.mocked(window.raidSearch.controlCharacterSearch)
-  const notifyOcr = vi.mocked(window.raidSearch.notifyOcrCandidatesDetected)
+  const control = vi.mocked(raid.controlCharacterSearch)
+  const notifyOcr = vi.mocked(raid.notifyOcrCandidatesDetected)
   await act(async () => value.startRound())
   await vi.waitFor(() => expect(raidMocks.recognize).toHaveBeenCalledOnce())
 

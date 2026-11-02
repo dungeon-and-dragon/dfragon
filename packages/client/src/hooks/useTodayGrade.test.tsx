@@ -2,8 +2,9 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { createTestClientHost } from '../testing/test-support/client-host'
+import { ClientHostContext, type ClientHost } from './useClientHost'
 import { useTodayGrade } from './useTodayGrade'
-import type { TodayGradeApi } from '@dfragon/client-core/preload/common/types/today-grade'
 
 function Harness(): React.JSX.Element {
   const grade = useTodayGrade()
@@ -29,11 +30,23 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-function installApi(getTodayGrade: TodayGradeApi['getTodayGrade']) {
+let host: ClientHost
+
+function installApi(getTodayGrade: ClientHost['getTodayGrade']) {
   const api = { getTodayGrade: vi.fn(getTodayGrade) }
-  vi.stubGlobal('todayGrade', api)
+  host = createTestClientHost(api)
 
   return api
+}
+
+function render(): Promise<void> {
+  return act(async () =>
+    root.render(
+      <ClientHostContext value={host}>
+        <Harness />
+      </ClientHostContext>
+    )
+  )
 }
 
 function shown(): string | null {
@@ -42,7 +55,7 @@ function shown(): string | null {
 
 it('받은 등급 퍼센트를 보이고, 만료 시각이 지나면 다시 받는다', async () => {
   const api = installApi(async () => ({ percent: 85, expiresAt: '2026-10-30T15:00:00.000Z' }))
-  await act(async () => root.render(<Harness />))
+  await render()
 
   expect(shown()).toBe('85')
   expect(api.getTodayGrade).toHaveBeenCalledOnce()
@@ -56,7 +69,7 @@ it('받은 등급 퍼센트를 보이고, 만료 시각이 지나면 다시 받�
 
 it('받았던 등급을 만료 뒤 다시 받지 못하면 값 없이 둔다', async () => {
   const api = installApi(async () => ({ percent: 85, expiresAt: '2026-10-30T15:00:00.000Z' }))
-  await act(async () => root.render(<Harness />))
+  await render()
 
   expect(shown()).toBe('85')
 
@@ -69,7 +82,7 @@ it('받았던 등급을 만료 뒤 다시 받지 못하면 값 없이 둔다', a
 
 it('만료가 이미 지난 등급을 받아도 1분 안에 다시 받지 않는다', async () => {
   const api = installApi(async () => ({ percent: 85, expiresAt: '2026-10-30T13:00:00.000Z' }))
-  await act(async () => root.render(<Harness />))
+  await render()
   await act(async () => vi.advanceTimersByTimeAsync(59 * 1000))
 
   expect(api.getTodayGrade).toHaveBeenCalledOnce()
