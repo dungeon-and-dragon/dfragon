@@ -83,7 +83,7 @@ async function publish(view: SearchView): Promise<void> {
   await act(async () => onChange(view))
 }
 
-function lookups(): string[] {
+function lookups(): Array<string | undefined> {
   return vi.mocked(bridge.lookup).mock.calls.map(([input]) => input.serverId)
 }
 
@@ -271,4 +271,28 @@ it('회차를 끝내면 누른 후보를 버리고 다음 회차의 후보 창�
     shownServerId: 'cain',
     previewServerId: null
   })
+})
+
+it('서버 없이 이름 칸에서 조회한 결과에 후보가 있으면 후보 창을 띄우고 서버 칩 조회는 띄우지 않는다', async () => {
+  const lookupResult = lookupSlot({
+    state: 'success',
+    rows: [searchRow],
+    selected: selected('cain'),
+    selectionMethod: 'highest-fame',
+    choices: [choice('cain', '카인'), choice('siroco', '시로코')]
+  })
+  await act(async () => value.lookupSlot(SLOT, '고친이름'))
+  await publish(viewWithSlot(lookupResult))
+
+  expect(vi.mocked(bridge.lookup)).toHaveBeenLastCalledWith({
+    slot: SLOT,
+    nickname: '고친이름',
+    serverId: undefined
+  })
+  expect(value.candidatePickers[SLOT]).toMatchObject({ shownServerId: 'cain' })
+
+  await act(async () => value.lookupSlot(SLOT, '고친이름', 'cain'))
+  await publish(viewWithSlot(lookupResult))
+
+  expect(value.candidatePickers[SLOT]).toBeNull()
 })

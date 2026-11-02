@@ -249,7 +249,7 @@ function keydown(target: Element, key: string, init: KeyboardEventInit = {}): Ke
   return event
 }
 
-async function renderCard(onLookup: (nickname: string, serverId: string) => void): Promise<void> {
+async function renderCard(onLookup: (nickname: string, serverId?: string) => void): Promise<void> {
   await act(async () =>
     root.render(
       <CharacterCard

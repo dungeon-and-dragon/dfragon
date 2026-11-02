@@ -96,7 +96,7 @@ async function enterName(value: string): Promise<HTMLInputElement> {
   return input
 }
 
-it('결과가 없어도 이름과 서버를 수정하고 서버 변경 또는 Enter로 조회한다', async () => {
+it('결과가 없어도 이름과 서버를 수정하고 서버 변경은 그 서버로, Enter는 서버 없이 조회한다', async () => {
   const lookup = vi.fn()
   await render({ onLookup: lookup })
   const input = await enterName('수동이름')
@@ -110,10 +110,10 @@ it('결과가 없어도 이름과 서버를 수정하고 서버 변경 또는 En
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
-  expect(lookup).toHaveBeenLastCalledWith('새이름', 'cain')
+  expect(lookup).toHaveBeenLastCalledWith('새이름', undefined)
 })
 
-it('한글 조합 중 Enter는 조회하지 않고 서버 없는 입력은 안내한다', async () => {
+it('한글 조합 중 Enter는 조회하지 않고 서버 칩이 비어도 Enter로 조회한다', async () => {
   const lookup = vi.fn()
   await render({ onLookup: lookup })
   const input = await enterName('이름')
@@ -126,8 +126,35 @@ it('한글 조합 중 Enter는 조회하지 않고 서버 없는 입력은 안�
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
-  expect(container.textContent).toContain('서버를 선택해 주세요.')
-  expect(lookup).not.toHaveBeenCalled()
+  expect(container.textContent).not.toContain('서버를 선택해 주세요.')
+  expect(lookup).toHaveBeenCalledExactlyOnceWith('이름', undefined)
+})
+
+it('엉뚱한 서버의 캐릭터에서 이름을 고쳐 Enter로 조회하면 그 서버를 보내지 않고 고른 결과의 서버를 칩에 넣는다', async () => {
+  const lookup = vi.fn()
+  const misread: CardCharacter = {
+    name: '잘못읽은이름',
+    serverId: 'cain',
+    adventure: '',
+    job: '',
+    fame: null,
+    card: null
+  }
+  await render({ state: 'success', character: misread, onLookup: lookup })
+  const input = await enterName('고친이름')
+  await act(async () =>
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+  )
+  expect(lookup).toHaveBeenCalledExactlyOnceWith('고친이름', undefined)
+
+  await render({ state: 'pending', nickname: '고친이름', onLookup: lookup })
+  await render({
+    state: 'success',
+    character: { ...misread, name: '고친이름', serverId: 'siroco' },
+    onLookup: lookup
+  })
+  expect(input.value).toBe('고친이름')
+  expect(container.querySelector('select')!.value).toBe('siroco')
 })
 
 it('OCR, 후보 검색, 상세 정보 순서로 진행 점을 하나씩 켜고 조회를 마치면 지운다', async () => {
@@ -167,7 +194,7 @@ it('제출한 수동 이름은 검색 대기와 실패 중 이전 OCR이나 캐�
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
-  expect(lookup).toHaveBeenLastCalledWith('수동이름', 'cain')
+  expect(lookup).toHaveBeenLastCalledWith('수동이름', undefined)
 
   await render({ state: 'pending', nickname: '이전OCR', onLookup: lookup })
   expect(input.value).toBe('수동이름')
@@ -177,7 +204,7 @@ it('제출한 수동 이름은 검색 대기와 실패 중 이전 OCR이나 캐�
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
   expect(lookup).toHaveBeenCalledTimes(2)
-  expect(lookup).toHaveBeenLastCalledWith('수동이름', 'cain')
+  expect(lookup).toHaveBeenLastCalledWith('수동이름', undefined)
 
   await render({ state: 'success', character: previous, onLookup: lookup })
   expect(input.value).toBe('수동이름')
@@ -399,7 +426,7 @@ it('이름에 들어가거나 고치는 동안 선택 상태로 보이되 진행
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
-  expect(lookup).toHaveBeenCalledExactlyOnceWith('고친이름', 'cain')
+  expect(lookup).toHaveBeenCalledExactlyOnceWith('고친이름', undefined)
   await render({ state: 'pending', nickname: '고친이름', onLookup: lookup })
   expect(card().getAttribute('data-state')).toBe('default')
   expect(statusMark()).toBeNull()
