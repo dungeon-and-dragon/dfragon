@@ -2,7 +2,6 @@ import { fileURLToPath } from 'node:url'
 
 const SHARED_UI_IMPORT_PATTERN = /^@dfragon\/ui$/
 const LIB_IMPORT_PATTERN = /^@dfragon\/lib$/
-const OCR_CONTRACT_IMPORT_PATTERN = /^@dfragon\/lib\/ocr-contract$/
 const SHAPE_CHECK_IMPORT_PATTERN = /^@dfragon\/lib\/utils\/shape-check$/
 
 function source(path: string): string {
@@ -14,10 +13,6 @@ function source(path: string): string {
 export const workspaceAliases = [
   { find: SHARED_UI_IMPORT_PATTERN, replacement: source('../../packages/ui/src/index.tsx') },
   { find: LIB_IMPORT_PATTERN, replacement: source('../../packages/lib/src/index.ts') },
-  {
-    find: OCR_CONTRACT_IMPORT_PATTERN,
-    replacement: source('../../packages/lib/src/ocr-contract.ts')
-  },
   {
     find: SHAPE_CHECK_IMPORT_PATTERN,
     replacement: source('../../packages/lib/src/utils/shape-check.ts')
