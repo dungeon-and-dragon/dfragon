@@ -7,7 +7,7 @@ import {
   useRef,
   useState
 } from 'react'
-import { neighborSeat, seatDirections, type SeatDirection } from '../lib/seats'
+import { neighborSeat, seatDirections, type SeatDirection } from '@dfragon/client-core/lib/seats'
 import type { SeatArrangement } from './useSeatOrder'
 
 export type SeatMove = Pick<

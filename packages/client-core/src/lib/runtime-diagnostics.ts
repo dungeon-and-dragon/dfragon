@@ -1,8 +1,5 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
-import {
-  DIAGNOSTIC_MESSAGES,
-  type DiagnosticCode
-} from '@dfragon/client-core/preload/common/types/diagnostics'
+import { DIAGNOSTIC_MESSAGES, type DiagnosticCode } from '../preload/common/types/diagnostics'
 
 let activeReport: ((code: DiagnosticCode) => void) | null = null
 

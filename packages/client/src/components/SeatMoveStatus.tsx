@@ -1,7 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { SeatMoveNotice } from '../hooks/useSeatMove'
-import { seatDirections, type SeatDirection, type SeatLayout } from '../lib/seats'
+import { seatDirections, type SeatDirection, type SeatLayout } from '@dfragon/client-core/lib/seats'
 
 const directionLabels: Readonly<Record<SeatDirection, string>> = {
   up: '위',

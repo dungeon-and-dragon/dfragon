@@ -1,7 +1,7 @@
 import type { PartyOcrWorker } from '../types/capture'
-import type { RaidFrameRow } from '@dfragon/client-core/preload/common/types/capture'
-import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
-import { MAX_RAID_JOB_TEXT_LENGTH } from '@dfragon/client-core/preload/common/types/search'
+import type { RaidFrameRow } from '../preload/common/types/capture'
+import type { CharacterImage } from '../preload/common/types/character'
+import { MAX_RAID_JOB_TEXT_LENGTH } from '../preload/common/types/search'
 import { toRaidJobCanvas, toRaidNicknameCanvas } from './nickname-pixels'
 import { firstCandidate, type FirstCandidate, recognizeBinarizedText } from './party-recognition'
 

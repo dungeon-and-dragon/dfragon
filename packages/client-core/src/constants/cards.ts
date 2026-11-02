@@ -1,4 +1,4 @@
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import { SEARCH_SLOT_COUNTS } from '../preload/common/types/search'
 import type { SeatLayout } from '../lib/seats'
 import type { CharacterTier } from '../types/cards'
 

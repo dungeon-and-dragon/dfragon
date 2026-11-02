@@ -1,6 +1,6 @@
 import { assign, enqueueActions, fromCallback, fromPromise, setup } from 'xstate'
-import { SEARCH_ACTIONS } from '@dfragon/client-core/preload/common/types/search'
-import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
+import { SEARCH_ACTIONS } from '../preload/common/types/search'
+import type { SearchApi, SearchSnapshot } from '../preload/common/types/search'
 
 type ConnectionEvent =
   | { type: 'SUBSCRIBED' }

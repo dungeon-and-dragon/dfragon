@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SearchMode } from '../types/search-mode'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
 
 export const useSearchModeStore = create<{
   searchMode: SearchMode

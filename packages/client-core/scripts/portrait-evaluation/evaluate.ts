@@ -2,8 +2,8 @@ import type {
   PortraitColorPolicy,
   PortraitColorScore,
   PortraitColorScorer
-} from '@dfragon/client-core/shared/search/portrait-color'
-import { portraitAnchorOf } from '@dfragon/client-core/preload/common/search/portrait-anchor'
+} from '../../src/shared/search/portrait-color'
+import { portraitAnchorOf } from '../../src/preload/common/search/portrait-anchor'
 import { buildHudPortrait } from './hud-portrait'
 import type { LoadedCase } from './manifest'
 

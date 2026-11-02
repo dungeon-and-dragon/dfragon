@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { CardCharacter } from '../types/cards'
+import type { CardCharacter } from '@dfragon/client-core/types/cards'
 import {
   type SlotCardKey,
   type StoredLookupDraft,

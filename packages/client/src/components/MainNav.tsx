@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex'
 import { windowChromeStyles } from '../constants/window-chrome.style'
 import { useSearchModeStore } from '../hooks/useSearchModeStore'
 import { ChevronDownIcon } from './ChevronDownIcon'
-import type { SearchMode } from '../types/search-mode'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
 import { styles } from './MainNav.style'
 
 const SEARCH_MODES: readonly SearchMode[] = ['party', 'raid']

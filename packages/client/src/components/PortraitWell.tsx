@@ -1,7 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import type { CharacterTier } from '../types/cards'
+import type { CharacterTier } from '@dfragon/client-core/types/cards'
 import { styles } from './PortraitWell.style'
 
 export function PortraitWell({

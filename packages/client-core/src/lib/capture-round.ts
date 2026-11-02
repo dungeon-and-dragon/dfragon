@@ -1,9 +1,6 @@
 import { fromPromise } from 'xstate'
 import type { CapturePhase } from '../types/capture'
-import type {
-  RaidFrameResult,
-  WindowFrameResult
-} from '@dfragon/client-core/preload/common/types/capture'
+import type { RaidFrameResult, WindowFrameResult } from '../preload/common/types/capture'
 import type { FirstCandidate } from './party-recognition'
 
 export const CAPTURE_UNSUPPORTED_STATUS = '화면 캡처는 Windows에서 사용할 수 있습니다.'

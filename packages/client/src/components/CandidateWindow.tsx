@@ -3,10 +3,10 @@ import * as stylex from '@stylexjs/stylex'
 import { CheckIcon } from './CheckIcon'
 import { CloseIcon } from './CloseIcon'
 import { FACE_SIZE, styles } from './CandidateWindow.style'
-import { MISSING_VALUE } from '../constants/cards'
+import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { characterImageUrl } from '@dfragon/client-core/preload/common/search/character-summary'
 import type { CharacterChoice } from '@dfragon/client-core/preload/common/types/search'
-import type { CandidatePicker } from '../lib/candidate-picker'
+import type { CandidatePicker } from '@dfragon/client-core/lib/candidate-picker'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

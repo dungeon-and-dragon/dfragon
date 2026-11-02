@@ -1,9 +1,6 @@
 import type { ServerId } from './servers'
-import type {
-  CharacterFaceWindow,
-  SearchSlot
-} from '@dfragon/client-core/preload/common/types/search'
-import type { CharacterCard } from '@dfragon/client-core/preload/common/types/character'
+import type { CharacterFaceWindow, SearchSlot } from '../preload/common/types/search'
+import type { CharacterCard } from '../preload/common/types/character'
 
 export type SlotState = SearchSlot['state']
 
