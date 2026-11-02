@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import type { CharacterFaceWindow } from '../../../preload/common/types/search'
+import type { CharacterFaceWindow } from '@dfragon/client-core/preload/common/types/search'
 import { CardImage } from './CardImage'
 import { styles } from './Portrait.style'
 

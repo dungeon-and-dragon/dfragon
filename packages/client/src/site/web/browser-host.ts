@@ -5,24 +5,24 @@ import {
   type DNFRectangle
 } from '@dfragon/lib'
 import ky from 'ky'
-import { parseTodayGrade } from '../../../../preload/common/today-grade'
-import type { CaptureSource } from '../../../../preload/common/types/capture'
-import type { CharacterImage } from '../../../../preload/common/types/character'
-import type { DesktopShortcut } from '../../../../preload/common/types/desktop-shortcut'
-import { SEARCH_SLOT_COUNTS } from '../../../../preload/common/types/search'
+import { parseTodayGrade } from '@dfragon/client-core/preload/common/today-grade'
+import type { CaptureSource } from '@dfragon/client-core/preload/common/types/capture'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
+import type { DesktopShortcut } from '@dfragon/client-core/preload/common/types/desktop-shortcut'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import {
   DIAGNOSTIC_HISTORY_LIMIT,
   type DiagnosticApi,
   type DiagnosticCode,
   type DiagnosticEntry
-} from '../../../../preload/common/types/diagnostics'
-import type { TodayGrade } from '../../../../preload/common/types/today-grade'
-import type { UpdateNoticeSnapshot } from '../../../../preload/common/types/update-notice'
-import { toRaidFrameResult } from '../../../../shared/raid/raid-frame'
+} from '@dfragon/client-core/preload/common/types/diagnostics'
+import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
+import type { UpdateNoticeSnapshot } from '@dfragon/client-core/preload/common/types/update-notice'
+import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
-} from '../../../../shared/raid/raid-window'
+} from '@dfragon/client-core/shared/raid/raid-window'
 import { startRendererDiagnostics } from '../../lib/runtime-diagnostics'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'

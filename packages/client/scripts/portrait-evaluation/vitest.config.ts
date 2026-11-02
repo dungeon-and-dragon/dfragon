@@ -8,9 +8,7 @@ export default defineConfig({
     alias: [
       {
         find: LIBRARY_IMPORT_PATTERN,
-        replacement: fileURLToPath(
-          new URL('../../../../packages/lib/src/index.ts', import.meta.url)
-        )
+        replacement: fileURLToPath(new URL('../../../lib/src/index.ts', import.meta.url))
       }
     ]
   },

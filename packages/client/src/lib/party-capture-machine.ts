@@ -1,7 +1,7 @@
 import { assign, fromCallback, fromPromise, setup, type SnapshotFrom } from 'xstate'
 import type { CapturePhase } from '../types/capture'
-import type { WindowFrameResult } from '../../../preload/common/types/capture'
-import type { CharacterImage } from '../../../preload/common/types/character'
+import type { WindowFrameResult } from '@dfragon/client-core/preload/common/types/capture'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import {
   beginCaptureSearch,
   CAPTURE_UNSUPPORTED_STATUS,

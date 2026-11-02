@@ -1,5 +1,8 @@
-import { cropPartyPortrait } from '../../src/frontend/src/lib/party-portrait'
-import type { CharacterImage, CharacterPortrait } from '../../src/preload/common/types/character'
+import { cropPartyPortrait } from '../../src/lib/party-portrait'
+import type {
+  CharacterImage,
+  CharacterPortrait
+} from '@dfragon/client-core/preload/common/types/character'
 
 const RGBA_CHANNELS = 4
 const OPAQUE_ALPHA = 255

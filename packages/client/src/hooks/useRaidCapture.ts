@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { useMachine } from '@xstate/react'
 import { getRaidCapturePhase, raidCaptureMachine } from '../lib/raid-capture-machine'
-import { SEARCH_SLOT_COUNTS } from '../../../preload/common/types/search'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import { getRecognizedNicknames } from '../lib/recognized-nicknames'
 import { RAID_SEAT_LAYOUT } from '../constants/cards'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'

@@ -1,5 +1,5 @@
-import type { SelectedCharacterSummary } from '../../../../preload/common/types/character'
-import type { CharacterChoice, SearchSlot } from '../../../../preload/common/types/search'
+import type { SelectedCharacterSummary } from '@dfragon/client-core/preload/common/types/character'
+import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 import { bufferCard, dealerCard } from '../../testing/fixtures/character-cards'
 import type { CardCharacter, CharacterCard } from '../../types/cards'
 import characterImage from './assets/character.png'

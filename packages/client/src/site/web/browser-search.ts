@@ -1,4 +1,4 @@
-import type { DiagnosticCode } from '../../../../preload/common/types/diagnostics'
+import type { DiagnosticCode } from '@dfragon/client-core/preload/common/types/diagnostics'
 import {
   SEARCH_ACTIONS,
   SEARCH_COMMAND_ERRORS,
@@ -7,23 +7,26 @@ import {
   type SearchApi,
   type SearchCommandResult,
   type SearchSnapshot
-} from '../../../../preload/common/types/search'
-import { createCaptureSearchLifetime } from '../../../../shared/search/capture-lifetime'
+} from '@dfragon/client-core/preload/common/types/search'
+import { createCaptureSearchLifetime } from '@dfragon/client-core/shared/search/capture-lifetime'
 import {
   createCharacterCandidatesHttp,
   createCharacterDetailsHttp,
   createCharacterImageHttp
-} from '../../../../shared/search/character-http'
-import { createCharacterImageSource } from '../../../../shared/search/character-image-source'
+} from '@dfragon/client-core/shared/search/character-http'
+import { createCharacterImageSource } from '@dfragon/client-core/shared/search/character-image-source'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
-} from '../../../../shared/search/character-response-cache'
-import { parseOcrSearchObservation, parseSearchControl } from '../../../../shared/search/commands'
-import { createPortraitColorScorer } from '../../../../shared/search/portrait-color'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../../../shared/search/portrait-policy'
-import type { YieldToEventLoop } from '../../../../shared/search/portrait-raster'
-import type { SearchRuntime } from '../../../../shared/search/request'
+} from '@dfragon/client-core/shared/search/character-response-cache'
+import {
+  parseOcrSearchObservation,
+  parseSearchControl
+} from '@dfragon/client-core/shared/search/commands'
+import { createPortraitColorScorer } from '@dfragon/client-core/shared/search/portrait-color'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '@dfragon/client-core/shared/search/portrait-policy'
+import type { YieldToEventLoop } from '@dfragon/client-core/shared/search/portrait-raster'
+import type { SearchRuntime } from '@dfragon/client-core/shared/search/request'
 import { decodeBrowserPng } from './browser-png'
 
 export type BrowserCardSearch = SearchApi & {

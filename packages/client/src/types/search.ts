@@ -1,4 +1,4 @@
-import type { SearchSlot } from '../../../preload/common/types/search'
+import type { SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 
 export type SearchView = {
   ready: boolean

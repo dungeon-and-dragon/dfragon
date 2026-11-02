@@ -1,4 +1,4 @@
-import type { SearchSlot, SearchSlotCount } from '../../../preload/common/types/search'
+import type { SearchSlot, SearchSlotCount } from '@dfragon/client-core/preload/common/types/search'
 
 export function fillSlots<T>(slotCount: SearchSlotCount, value: T): T[] {
   return Array.from({ length: slotCount }, () => value)

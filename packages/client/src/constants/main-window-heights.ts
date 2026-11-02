@@ -1,4 +1,4 @@
-import { MAIN_WINDOW_SIZE } from '../../../preload/common/window-chrome'
+import { MAIN_WINDOW_SIZE } from '@dfragon/client-core/preload/common/window-chrome'
 import type { SearchMode } from '../types/search-mode'
 
 export const MAIN_WINDOW_HEIGHTS: Record<SearchMode, number> = {

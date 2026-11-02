@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { setImmediate } from 'node:timers/promises'
 import { describe, expect, it } from 'vitest'
-import { createPortraitColorScorer } from '../../src/shared/search/portrait-color'
+import { createPortraitColorScorer } from '@dfragon/client-core/shared/search/portrait-color'
 import { type CaseResult, evaluateCase, type PolicyBase, summarize } from './evaluate'
 import {
   formatCandidateTable,

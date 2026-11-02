@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@dfragon/lib": ["../lib/src/index.ts"],
+      "@dfragon/lib/ocr-contract": ["../lib/src/ocr-contract.ts"],
+      "@dfragon/lib/utils/shape-check": ["../lib/src/utils/shape-check.ts"]
+    }
+  },
+  "include": ["src", "vitest.config.ts"]
+}

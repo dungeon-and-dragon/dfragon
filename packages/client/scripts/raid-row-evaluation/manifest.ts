@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { isAbsolute, join, relative, resolve } from 'node:path'
 import { PNG } from 'pngjs'
 import type { DNFRaidValueColumnKind } from '@dfragon/lib'
-import type { CharacterImage } from '../../src/preload/common/types/character'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 
 const MANIFEST_FILE = 'manifest.json'
 export const COLUMN_KINDS: readonly DNFRaidValueColumnKind[] = [

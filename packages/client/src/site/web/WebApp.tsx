@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
-import { MAIN_WINDOW_SIZE } from '../../../../preload/common/window-chrome'
+import { MAIN_WINDOW_SIZE } from '@dfragon/client-core/preload/common/window-chrome'
 import { AppTopBar } from '../../components/AppTopBar'
 import { MAIN_WINDOW_HEIGHTS } from '../../constants/main-window-heights'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'

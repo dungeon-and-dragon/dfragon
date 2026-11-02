@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type {
   UpdateNotice,
   UpdateNoticeSnapshot
-} from '../../../preload/common/types/update-notice'
+} from '@dfragon/client-core/preload/common/types/update-notice'
 
 const EMPTY_SNAPSHOT: UpdateNoticeSnapshot = { revision: -1, notice: null }
 

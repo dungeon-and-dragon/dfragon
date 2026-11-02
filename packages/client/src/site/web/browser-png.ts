@@ -1,4 +1,4 @@
-import type { CharacterImage } from '../../../../preload/common/types/character'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 
 const IMAGE_READ_ERROR = 'Could not read the character image.'
 

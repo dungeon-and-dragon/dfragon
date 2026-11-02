@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent } from 'react'
-import type { DesktopShortcut } from '../../../preload/common/types/desktop-shortcut'
+import type { DesktopShortcut } from '@dfragon/client-core/preload/common/types/desktop-shortcut'
 
 export function useDesktopShortcut(
   shortcut: DesktopShortcut,

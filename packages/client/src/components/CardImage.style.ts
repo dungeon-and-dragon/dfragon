@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors } from '@dfragon/ui/tokens.stylex'
-import { PORTRAIT_CANVAS_WIDTH } from '../../../preload/common/search/portrait-anchor'
+import { PORTRAIT_CANVAS_WIDTH } from '@dfragon/client-core/preload/common/search/portrait-anchor'
 
 function percentOfFace(value: number, faceWidth: number): string {
   return `${(value / faceWidth) * 100}%`

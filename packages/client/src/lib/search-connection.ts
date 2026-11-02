@@ -5,7 +5,7 @@ import type {
   SearchCommandResult,
   SearchControl,
   SearchSnapshot
-} from '../../../preload/common/types/search'
+} from '@dfragon/client-core/preload/common/types/search'
 import { readSearchSnapshot, searchConnectionMachine } from './search-connection-machine'
 
 type ConnectionActor = Actor<typeof searchConnectionMachine>

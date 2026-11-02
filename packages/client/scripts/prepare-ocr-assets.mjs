@@ -21,14 +21,13 @@ export const OCR_ASSETS = [
   'ort/ort-wasm-simd-threaded.asyncify.wasm'
 ]
 export const OCR_MODEL_NOTICE = 'OCR-Model-NOTICE.txt'
-const defaultDestination = fileURLToPath(new URL('../src/frontend/public/ocr', import.meta.url))
 
 /**
  * @param {string} destination
  * @param {{name: string, modelPath: string, dictionaryPath: string, noticePath?: string}} selection
  * @returns {Promise<void>}
  */
-export async function prepareOcrAssets(destination = defaultDestination, selection = ocrModel) {
+export async function prepareOcrAssets(destination, selection = ocrModel) {
   if (
     selection == null ||
     [selection.name, selection.modelPath, selection.dictionaryPath].some(
@@ -125,6 +124,9 @@ if (
   import.meta.url === pathToFileURL(resolve(invokedPath)).href
 ) {
   const destinationArg = process.argv[2]
-  const destination = destinationArg !== undefined ? resolve(destinationArg) : defaultDestination
-  await prepareOcrAssets(destination)
+  if (destinationArg === undefined) {
+    throw new Error('Usage: prepare-ocr-assets.mjs <destination>')
+  }
+
+  await prepareOcrAssets(resolve(destinationArg))
 }

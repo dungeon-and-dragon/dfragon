@@ -1,4 +1,4 @@
-import type { CharacterChoice, SearchSlot } from '../../../preload/common/types/search'
+import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 
 /**
  * 슬롯에서 누른 후보. 미리보기 조회는 같은 슬롯을 새 요청으로 덮으므로, 처음 누를 때의 후보 목록과 보이던

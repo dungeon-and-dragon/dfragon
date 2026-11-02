@@ -4,8 +4,8 @@ import { CheckIcon } from './CheckIcon'
 import { CloseIcon } from './CloseIcon'
 import { FACE_SIZE, styles } from './CandidateWindow.style'
 import { MISSING_VALUE } from '../constants/cards'
-import { characterImageUrl } from '../../../preload/common/search/character-summary'
-import type { CharacterChoice } from '../../../preload/common/types/search'
+import { characterImageUrl } from '@dfragon/client-core/preload/common/search/character-summary'
+import type { CharacterChoice } from '@dfragon/client-core/preload/common/types/search'
 import type { CandidatePicker } from '../lib/candidate-picker'
 
 const integer = new Intl.NumberFormat('ko-KR')

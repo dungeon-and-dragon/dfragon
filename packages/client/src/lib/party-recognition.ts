@@ -1,5 +1,8 @@
 import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
-import type { CharacterImage, CharacterPortrait } from '../../../preload/common/types/character'
+import type {
+  CharacterImage,
+  CharacterPortrait
+} from '@dfragon/client-core/preload/common/types/character'
 import { capturePartyRecognitionInputs } from './party'
 import type { OcrNicknameRejection } from './runtime-diagnostics'
 

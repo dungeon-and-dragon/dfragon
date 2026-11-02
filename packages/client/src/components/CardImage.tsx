@@ -1,7 +1,7 @@
 import { Typo } from '@dfragon/ui'
 import { useState } from 'react'
 import * as stylex from '@stylexjs/stylex'
-import type { CharacterFaceWindow } from '../../../preload/common/types/search'
+import type { CharacterFaceWindow } from '@dfragon/client-core/preload/common/types/search'
 import { styles } from './CardImage.style'
 
 export function CardImage({

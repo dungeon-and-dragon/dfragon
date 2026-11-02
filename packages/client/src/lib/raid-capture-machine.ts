@@ -1,7 +1,10 @@
 import { assign, fromPromise, setup, type SnapshotFrom } from 'xstate'
 import type { CapturePhase } from '../types/capture'
-import type { RaidFrameResult, RaidFrameRow } from '../../../preload/common/types/capture'
-import type { RaidValueColumn } from '../../../preload/common/types/search'
+import type {
+  RaidFrameResult,
+  RaidFrameRow
+} from '@dfragon/client-core/preload/common/types/capture'
+import type { RaidValueColumn } from '@dfragon/client-core/preload/common/types/search'
 import {
   beginCaptureSearch,
   CAPTURE_UNSUPPORTED_STATUS,

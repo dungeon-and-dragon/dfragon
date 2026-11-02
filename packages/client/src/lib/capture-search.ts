@@ -1,7 +1,7 @@
 import { createActor } from 'xstate'
 import type { SearchView } from '../types/search'
 import { emptySearchSlots, fillSlots } from './slots'
-import { SEARCH_ACTIONS } from '../../../preload/common/types/search'
+import { SEARCH_ACTIONS } from '@dfragon/client-core/preload/common/types/search'
 import type {
   SearchApi,
   OcrSearchInput,
@@ -10,7 +10,7 @@ import type {
   SearchSlot,
   SearchSlotCount,
   SearchSnapshot
-} from '../../../preload/common/types/search'
+} from '@dfragon/client-core/preload/common/types/search'
 import { createSearchConnection } from './search-connection'
 import { captureSearchMachine } from './capture-search-machine'
 

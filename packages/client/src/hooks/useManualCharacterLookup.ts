@@ -11,7 +11,7 @@ import type {
   SearchApi,
   SearchCommandResult,
   SearchSlotCount
-} from '../../../preload/common/types/search'
+} from '@dfragon/client-core/preload/common/types/search'
 
 export type ManualCharacterLookup = SearchView & {
   lookupSlot: (slot: number, nickname: string, serverId?: string) => void

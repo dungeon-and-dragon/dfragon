@@ -5,7 +5,7 @@ import {
   parseDNFRaidValueNotation
 } from '@dfragon/lib'
 import type { JobOcrReader } from './job-ocr'
-import { matchJobName, normalizeJobName } from '../../src/shared/search/raid-job-name'
+import { matchJobName, normalizeJobName } from '@dfragon/client-core/shared/search/raid-job-name'
 import { COLUMN_KINDS, type ManifestCandidate, type ManifestRow } from './manifest'
 
 const K_NOTATION_PATTERN = /K$/

@@ -6,7 +6,7 @@ import {
   type CandidatePick,
   type CandidatePicker
 } from '../lib/candidate-picker'
-import { SEARCH_SLOT_COUNTS } from '../../../preload/common/types/search'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 
 type CharacterSearch = ManualCharacterLookup & {
