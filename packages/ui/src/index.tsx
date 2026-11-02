@@ -44,28 +44,6 @@ export { Chip } from './chip'
 export type { ChipProps } from './chip'
 export { Tooltip } from './tooltip'
 export type { TooltipPopupProps } from './tooltip'
-export {
-  DialogAction,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger
-} from './dialog'
-export type {
-  DialogActionProps,
-  DialogBodyProps,
-  DialogContentProps,
-  DialogDescriptionProps,
-  DialogFooterProps,
-  DialogHeaderProps,
-  DialogRootProps,
-  DialogTitleProps,
-  DialogTriggerProps
-} from './dialog'
 export { StatusChip } from './status-chip'
 export type { StatusChipProps, StatusChipTone } from './status-chip'
 export { StepDots } from './step-dots'

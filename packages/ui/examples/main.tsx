@@ -9,15 +9,6 @@ import {
   Checkbox,
   Chip,
   ContentStack,
-  DialogAction,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
   ExampleSection,
   IconButton,
   Kbd,
@@ -254,24 +245,6 @@ function Examples() {
               </CardFrame>
             ))}
           </div>
-        </ExampleSection>
-        <ExampleSection title="대화상자">
-          <DialogRoot>
-            <DialogTrigger render={<Button />}>입력한 값 보기</DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>입력한 값</DialogTitle>
-                <DialogDescription>열기, 닫기, 키보드 focus를 확인합니다.</DialogDescription>
-              </DialogHeader>
-              <DialogBody>
-                <SupportingText>{name}</SupportingText>
-              </DialogBody>
-              <DialogFooter>
-                <DialogAction variant="primary">확인</DialogAction>
-              </DialogFooter>
-            </DialogContent>
-          </DialogRoot>
-          <SupportingText>Escape나 닫기로 끝내면 여는 버튼으로 focus가 돌아옵니다.</SupportingText>
         </ExampleSection>
       </ContentStack>
     </main>
