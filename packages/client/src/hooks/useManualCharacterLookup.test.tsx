@@ -3,14 +3,14 @@ import { act, useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useManualCharacterLookup } from './useManualCharacterLookup'
-import { CAPTURE_ID, searchSnapshot } from '../../../preload/api/search-test-fixture'
+import { CAPTURE_ID, searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
 import {
   SEARCH_SLOT_COUNTS,
   type OcrSearchObservation,
   type SearchApi,
   type SearchCommandResult,
   type SearchSnapshot
-} from '../../../preload/common/types/search'
+} from '@dfragon/client-core/preload/common/types/search'
 
 let current: ReturnType<typeof useManualCharacterLookup>
 let root: ReturnType<typeof createRoot>

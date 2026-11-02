@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { SelectedCharacterSummary } from '../../../preload/common/types/character'
-import type { SearchSlot } from '../../../preload/common/types/search'
+import type { SelectedCharacterSummary } from '@dfragon/client-core/preload/common/types/character'
+import type { SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 import { dealerCard } from '../testing/fixtures/character-cards'
 import { searchSlotNotice, toCharacterCard } from './character-card'
 

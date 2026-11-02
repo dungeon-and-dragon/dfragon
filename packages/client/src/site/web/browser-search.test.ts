@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import type { SearchSnapshot } from '../../../../preload/common/types/search'
+import type { SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
 import { createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
 
 const API_ORIGIN = 'https://api.example.test'

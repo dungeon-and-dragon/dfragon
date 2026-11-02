@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { searchSlot } from '../../../preload/api/search-test-fixture'
-import type { SelectedCharacterSummary } from '../../../preload/common/types/character'
-import type { SearchSlot } from '../../../preload/common/types/search'
+import { searchSlot } from '@dfragon/client-core/preload/api/search-test-fixture'
+import type { SelectedCharacterSummary } from '@dfragon/client-core/preload/common/types/character'
+import type { SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 import { compareWithSnapshot, slotAdventureName } from './adventure-snapshot'
 
 const NONE = undefined

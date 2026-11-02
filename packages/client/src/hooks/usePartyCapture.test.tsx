@@ -8,15 +8,15 @@ import {
   searchRow,
   searchSnapshot,
   searchSlot
-} from '../../../preload/api/search-test-fixture'
-import type { WindowFrameResult } from '../../../preload/common/types/capture'
+} from '@dfragon/client-core/preload/api/search-test-fixture'
+import type { WindowFrameResult } from '@dfragon/client-core/preload/common/types/capture'
 import type {
   CharacterChoice,
   SearchCommandResult,
   SearchControl,
   SearchSlot,
   SearchSnapshot
-} from '../../../preload/common/types/search'
+} from '@dfragon/client-core/preload/common/types/search'
 import { DESKTOP_CAPTURE_TEXTS } from '../lib/capture-texts'
 import * as diagnostics from '../lib/runtime-diagnostics'
 import { usePartyCapture } from './usePartyCapture'

@@ -2,10 +2,7 @@ import { readFileSync } from 'node:fs'
 import { expect, it } from 'vitest'
 import { WINDOW_CHROME_COLORS } from './window-chrome'
 
-const tokensCss = readFileSync(
-  new URL('../../../../../packages/ui/tokens.css', import.meta.url),
-  'utf8'
-)
+const tokensCss = readFileSync(new URL('../../../../ui/tokens.css', import.meta.url), 'utf8')
 
 // tokens.css는 :root(다크) 블록에서 변수를 처음 정의한다.
 function readDarkTokenValue(name: string): string {

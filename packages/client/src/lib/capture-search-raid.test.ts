@@ -5,8 +5,8 @@ import {
   searchSnapshot,
   searchSlot,
   searchRow
-} from '../../../preload/api/search-test-fixture'
-import type { SearchApi, SearchSnapshot } from '../../../preload/common/types/search'
+} from '@dfragon/client-core/preload/api/search-test-fixture'
+import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
 import type { SearchView } from '../types/search'
 
 it('공대 연결은 12자리 snapshot의 12번째 슬롯 결과를 보인다', async () => {

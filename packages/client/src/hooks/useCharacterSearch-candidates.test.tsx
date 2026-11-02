@@ -6,13 +6,13 @@ import { useCharacterSearch } from './useCharacterSearch'
 import type { CaptureSearch, createCaptureSearch } from '../lib/capture-search'
 import { emptySearchSlots } from '../lib/slots'
 import type { SearchView } from '../types/search'
-import type { CharacterChoice, SearchSlot } from '../../../preload/common/types/search'
+import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 import {
   CAPTURE_ID,
   REQUEST_ID,
   searchRow,
   searchSlot
-} from '../../../preload/api/search-test-fixture'
+} from '@dfragon/client-core/preload/api/search-test-fixture'
 
 // 파티 검색 수명의 연결(createCaptureSearch)만 바꾸고 useManualCharacterLookup은 그대로 쓴다.
 const mocks = vi.hoisted(() => ({ create: vi.fn<typeof createCaptureSearch>() }))

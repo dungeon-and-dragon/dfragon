@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useTodayGrade } from './useTodayGrade'
-import type { TodayGradeApi } from '../../../preload/common/types/today-grade'
+import type { TodayGradeApi } from '@dfragon/client-core/preload/common/types/today-grade'
 
 function Harness(): React.JSX.Element {
   const grade = useTodayGrade()

@@ -7,9 +7,9 @@ import { DESKTOP_CAPTURE_TEXTS } from '../lib/capture-texts'
 import { createSharedOcrWorker } from '../lib/ocr-worker-recognition'
 import { emptySearchSlots } from '../lib/slots'
 import type { RaidSlotRecognition } from '../lib/raid-recognition'
-import { searchSnapshot } from '../../../preload/api/search-test-fixture'
-import type { RaidFrameResult } from '../../../preload/common/types/capture'
-import type { SearchApi, SearchSnapshot } from '../../../preload/common/types/search'
+import { searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
+import type { RaidFrameResult } from '@dfragon/client-core/preload/common/types/capture'
+import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
 
 const raidMocks = vi.hoisted(() => ({ recognize: vi.fn() }))
 vi.mock('../lib/raid-recognition', () => ({ recognizeRaidRows: raidMocks.recognize }))

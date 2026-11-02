@@ -24,7 +24,7 @@ const candidate: CharacterCandidate = {
   jobGrowName: null
 }
 
-function json(body: unknown, status = 200, headers?: HeadersInit): Response {
+function json(body: unknown, status = 200, headers?: ResponseInit['headers']): Response {
   return new Response(JSON.stringify(body), { status, headers })
 }
 

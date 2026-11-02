@@ -7,7 +7,7 @@ import { UpdateNotice } from '../components/UpdateNotice'
 import type {
   UpdateNoticeApi,
   UpdateNoticeSnapshot
-} from '../../../preload/common/types/update-notice'
+} from '@dfragon/client-core/preload/common/types/update-notice'
 
 function Harness(): React.JSX.Element | null {
   const { notice, openRelease, dismiss } = useUpdateNotice()

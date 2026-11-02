@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
-import { sameOcrSearchInput } from '../../../preload/common/search/ocr-input'
-import type { CharacterPortrait } from '../../../preload/common/types/character'
+import { sameOcrSearchInput } from '@dfragon/client-core/preload/common/search/ocr-input'
+import type { CharacterPortrait } from '@dfragon/client-core/preload/common/types/character'
 import { cropPartyPortrait } from './party-portrait'
 
 type PartyPortraitCropInput = Parameters<typeof cropPartyPortrait>[0]

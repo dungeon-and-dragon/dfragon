@@ -8,12 +8,12 @@ import {
   type PartyFrameSlot
 } from '@dfragon/lib'
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
-import type { CharacterImage } from '../../../../preload/common/types/character'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import {
   cropRaidWindowNicknames,
   readRaidWindowValues,
   type RaidWindowTemplates
-} from '../../../../shared/raid/raid-window'
+} from '@dfragon/client-core/shared/raid/raid-window'
 import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
@@ -28,8 +28,8 @@ vi.mock('@dfragon/lib', async (importOriginal) => ({
   detectDNFTownIndicator: vi.fn(),
   detectPartyFrameGeometry: vi.fn()
 }))
-vi.mock('../../../../shared/raid/raid-window', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../../../shared/raid/raid-window')>()),
+vi.mock('@dfragon/client-core/shared/raid/raid-window', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@dfragon/client-core/shared/raid/raid-window')>()),
   cropRaidWindowNicknames: vi.fn(),
   readRaidWindowValues: vi.fn()
 }))

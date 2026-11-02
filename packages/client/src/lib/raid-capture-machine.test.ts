@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { getRaidCapturePhase, raidCaptureMachine } from './raid-capture-machine'
 import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
-import type { RaidFrameResult } from '../../../preload/common/types/capture'
+import type { RaidFrameResult } from '@dfragon/client-core/preload/common/types/capture'
 import type { RaidSlotRecognition } from './raid-recognition'
 
 const modules = vi.hoisted(() => ({

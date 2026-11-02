@@ -1,7 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi, type Mock, type MockInstance } from 'vitest'
 import { reportRendererDiagnostic, startRendererDiagnostics } from './runtime-diagnostics'
-import type { DiagnosticApi, DiagnosticEntry } from '../../../preload/common/types/diagnostics'
+import type {
+  DiagnosticApi,
+  DiagnosticEntry
+} from '@dfragon/client-core/preload/common/types/diagnostics'
 
 afterEach(() => {
   window.dispatchEvent(new Event('pagehide'))
