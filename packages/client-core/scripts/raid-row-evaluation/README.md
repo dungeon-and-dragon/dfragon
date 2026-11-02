@@ -9,10 +9,10 @@ Repository root에서 실행합니다. 표본 폴더는 저장소 밖에 둡니�
 ```bash
 DFRAGON_RAID_ROW_SAMPLES=/path/to/samples \
 DFRAGON_RAID_ROW_REPORT=/path/to/report.json \
-pnpm --filter @dfragon/client run test:raid-row-evaluation
+pnpm --filter @dfragon/client-core run test:raid-row-evaluation
 ```
 
-`test:raid-row-evaluation`은 전용 `tsc`로 이 폴더를 검사한 뒤 `vitest.config.ts`로 `*.evaluation.ts`만 실행합니다. `@dfragon/client`의 기본 `test`에는 포함되지 않습니다. `DFRAGON_RAID_ROW_SAMPLES`가 없으면 평가는 건너뜁니다. 같은 폴더의 `*.test.ts`는 표본 없이 도는 합성 데이터 테스트이며 기본 `test`가 실행합니다.
+`test:raid-row-evaluation`은 전용 `tsc`로 이 폴더를 검사한 뒤 `vitest.config.ts`로 `*.evaluation.ts`만 실행합니다. `@dfragon/client-core`의 기본 `test`에는 포함되지 않습니다. `DFRAGON_RAID_ROW_SAMPLES`가 없으면 평가는 건너뜁니다. 같은 폴더의 `*.test.ts`는 표본 없이 도는 합성 데이터 테스트이며 기본 `test`가 실행합니다.
 
 | 환경 변수 | 설명 |
 | --- | --- |
