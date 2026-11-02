@@ -13,7 +13,6 @@ export type ScreenWatchObservation = Readonly<{
 export type ScreenWatchState = Readonly<{
   baselines: Readonly<Record<ScreenWatchKind, NameCrops | null>>
   candidate: Readonly<{ kind: ScreenWatchKind; crops: NameCrops }> | null
-  roundRunning: boolean
 }>
 
 export type ScreenWatchSignal = 'none' | Readonly<{ kind: ScreenWatchKind }>
@@ -28,15 +27,14 @@ const CHANGED_PIXELS_FOR_NEW_NAME = 10
 
 export const initialScreenWatchState: ScreenWatchState = {
   baselines: { party: null, raid: null },
-  candidate: null,
-  roundRunning: false
+  candidate: null
 }
 
 export function observeScreenWatch(
   state: ScreenWatchState,
   observation: ScreenWatchObservation
 ): { state: ScreenWatchState; signal: ScreenWatchSignal } {
-  const changed = state.roundRunning ? null : changedScreen(state, observation)
+  const changed = changedScreen(state, observation)
   if (changed == null) {
     return { state: { ...state, candidate: null }, signal: 'none' }
   }

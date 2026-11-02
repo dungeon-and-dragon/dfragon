@@ -1,4 +1,5 @@
 import type { CaptureTexts } from '../../lib/capture-texts'
+import type { SearchMode } from '../../types/search-mode'
 
 const RETRY = '다시 캡처하거나 스크린샷을 다시 붙여 넣어 주세요.'
 const RECAPTURE = '다시 캡처하거나 다시 찍어 붙여 넣으세요.'
@@ -22,4 +23,18 @@ export const WEB_CAPTURE_TEXTS: CaptureTexts = {
   raidWindowMissing: `공대 상세 창을 찾지 못했습니다. 12인 공대 상세 창을 연 뒤 ${RECAPTURE}`,
   raidWindowUncertain: `공대 상세 창을 확인하지 못했습니다. 창 하나만 가려지지 않게 연 뒤 ${RECAPTURE}`,
   raidNamesMissing: `공대원 이름을 찾지 못했습니다. 공대 상세 창이 가려지지 않게 한 뒤 ${RECAPTURE}`
+}
+
+// 회차 문구는 기계를 만들 때 고정되므로, 던파 창을 연결한 동안의 대기와 완료 문구는 칩이 지금 화면의 자동 인식으로 바꿔 보인다.
+export const WEB_SCREEN_WATCH_TEXTS: Readonly<
+  Record<SearchMode, Readonly<{ waiting: string; complete: string }>>
+> = {
+  party: {
+    waiting: '마을에서 파티 구성이 바뀌면 자동으로 인식합니다.',
+    complete: '인식을 마쳤습니다. 마을에서 파티 구성이 바뀌면 자동으로 다시 인식합니다.'
+  },
+  raid: {
+    waiting: '마을에서 공대 상세 창의 구성이 바뀌면 자동으로 인식합니다.',
+    complete: '인식을 마쳤습니다. 마을에서 공대 상세 창의 구성이 바뀌면 자동으로 다시 인식합니다.'
+  }
 }

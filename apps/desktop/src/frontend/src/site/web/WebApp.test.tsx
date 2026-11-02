@@ -3,14 +3,16 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
-import { installBrowserHost, type BrowserHost } from './browser-host'
+import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
+import { readTownIndicatorTemplate } from './browser-town-template'
 import { WebApp } from './WebApp'
-import { WEB_CAPTURE_TEXTS } from './web-capture-texts'
+import { WEB_CAPTURE_TEXTS, WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
 vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
 vi.mock('./browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
+vi.mock('./browser-town-template', () => ({ readTownIndicatorTemplate: vi.fn() }))
 
 const API_ORIGIN = 'https://api.example.test'
 const pastedImage = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }
@@ -22,6 +24,29 @@ function pasteImage(): void {
     value: { items: [{ kind: 'file', type: 'image/png', getAsFile: () => file }] }
   })
   document.dispatchEvent(event)
+}
+
+// 공유 화면의 판정은 browser-host 테스트가 보고, 여기서는 host가 보내는 시작 신호를 직접 넣는다.
+function hostWithAutoRound(): {
+  watchedHost: BrowserHost
+  sendAutoRound: (signal: AutoRoundSignal) => boolean
+  setWatchedScreen: ReturnType<typeof vi.fn<BrowserHost['setWatchedScreen']>>
+} {
+  let listener: ((signal: AutoRoundSignal) => boolean) | null = null
+  const setWatchedScreen = vi.fn<BrowserHost['setWatchedScreen']>()
+  const watchedHost: BrowserHost = {
+    ...host,
+    setWatchedScreen,
+    onAutoRound: (next) => {
+      listener = next
+
+      return () => {
+        listener = null
+      }
+    }
+  }
+
+  return { watchedHost, sendAutoRound: (signal) => listener!(signal), setWatchedScreen }
 }
 
 function captureStatus(): string | null {
@@ -40,6 +65,8 @@ beforeAll(() => {
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   vi.mocked(decodeBrowserImage).mockResolvedValue(pastedImage)
+  vi.mocked(readTownIndicatorTemplate).mockResolvedValue(pastedImage)
+  vi.mocked(readRaidWindowTemplates).mockRejectedValue(new Error('no templates'))
   vi.stubGlobal(
     'fetch',
     vi.fn<typeof fetch>(async () =>
@@ -171,4 +198,73 @@ it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 �
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
   expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
   expect(captureButton().disabled).toBe(true)
+})
+
+it('host의 시작 신호를 받으면 지금 화면의 회차를 시작하고 화면은 바꾸지 않으며, 다른 화면의 신호와 진행 중의 신호는 무시한다', async () => {
+  const readPartyFrame = vi
+    .spyOn(window.api, 'readCaptureFrame')
+    .mockReturnValue(new Promise(() => undefined))
+  const { watchedHost, sendAutoRound, setWatchedScreen } = hostWithAutoRound()
+  await act(async () => root.render(<WebApp host={watchedHost} />))
+  expect(setWatchedScreen).toHaveBeenLastCalledWith({ kind: 'party', roundRunning: false })
+
+  let started = true
+  await act(async () => {
+    started = sendAutoRound({ kind: 'raid' })
+  })
+  expect(started).toBe(false)
+  expect(readPartyFrame).not.toHaveBeenCalled()
+
+  await act(async () => {
+    started = sendAutoRound({ kind: 'party' })
+  })
+  expect(started).toBe(true)
+  await vi.waitFor(() => expect(readPartyFrame).toHaveBeenCalledOnce())
+  expect(useSearchModeStore.getState().searchMode).toBe('party')
+  expect(setWatchedScreen).toHaveBeenLastCalledWith({ kind: 'party', roundRunning: true })
+
+  await act(async () => {
+    started = sendAutoRound({ kind: 'party' })
+  })
+  expect(started).toBe(false)
+  expect(readPartyFrame).toHaveBeenCalledOnce()
+  readPartyFrame.mockRestore()
+})
+
+it('공대 화면에서 공대 신호를 받으면 공대 회차가 host의 공대 프레임 읽기로 시작된다', async () => {
+  useSearchModeStore.setState({ searchMode: 'raid' })
+  const readRaidFrame = vi
+    .spyOn(window.raidSearch, 'readCaptureFrame')
+    .mockReturnValue(new Promise(() => undefined))
+  const readPartyFrame = vi.spyOn(window.api, 'readCaptureFrame')
+  const { watchedHost, sendAutoRound, setWatchedScreen } = hostWithAutoRound()
+  await act(async () => root.render(<WebApp host={watchedHost} />))
+  expect(setWatchedScreen).toHaveBeenLastCalledWith({ kind: 'raid', roundRunning: false })
+
+  await act(async () => {
+    sendAutoRound({ kind: 'raid' })
+  })
+
+  await vi.waitFor(() => expect(readRaidFrame).toHaveBeenCalledOnce())
+  expect(readPartyFrame).not.toHaveBeenCalled()
+  expect(useSearchModeStore.getState().searchMode).toBe('raid')
+  readRaidFrame.mockRestore()
+  readPartyFrame.mockRestore()
+})
+
+it('던파 창을 연결한 동안 칩은 지금 화면의 마을 자동 인식을 안내한다', async () => {
+  const track = Object.assign(new EventTarget(), { label: 'Dungeon & Fighter', stop: vi.fn() })
+  vi.stubGlobal('navigator', {
+    mediaDevices: { getDisplayMedia: vi.fn(async () => ({ getVideoTracks: () => [track] })) }
+  })
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+  await act(async () => root.render(<WebApp host={host} />))
+  const chip = container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
+
+  await act(async () => chip.click())
+
+  await vi.waitFor(() => expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.party.waiting))
+  await act(async () => useSearchModeStore.setState({ searchMode: 'raid' }))
+  expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.raid.waiting)
+  await act(async () => window.api.selectCaptureSource(''))
 })
