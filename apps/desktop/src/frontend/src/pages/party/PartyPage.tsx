@@ -25,7 +25,7 @@ export function PartyPage({
   const { moveSeat, notice } = useSeatMove({ resetKey, seats })
 
   function renderSeat(slot: number, seat: number): React.JSX.Element {
-    const handleLookup = (nickname: string, serverId: string): void =>
+    const handleLookup = (nickname: string, serverId?: string): void =>
       lookupSlot(slot, nickname, serverId)
     const handlePickCandidate = (serverId: string): void => pickCandidate(slot, serverId)
     const handleChangeSnapshotAdventure = (value: string): void =>

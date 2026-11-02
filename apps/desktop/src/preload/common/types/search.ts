@@ -22,7 +22,8 @@ export type CharacterSelectionMethod = (typeof CHARACTER_SELECTION_METHODS)[numb
 export const SELECTED_DETAILS_STATES = ['pending', 'failed'] as const
 export type SelectedDetailsState = (typeof SELECTED_DETAILS_STATES)[number]
 
-export type ManualCharacterLookup = SearchObservation & Readonly<{ serverId: string }>
+/** 서버 칩으로 고른 조회는 `serverId`를 보내고, 이름 칸 Enter는 서버 없이 보내 그 자리의 OCR 관측으로 고르게 한다. */
+export type ManualCharacterLookup = SearchObservation & Readonly<{ serverId?: string }>
 
 export type SearchControl =
   | Readonly<{ action: typeof SEARCH_ACTIONS.READ }>

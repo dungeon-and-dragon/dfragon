@@ -352,7 +352,7 @@ describe('이름과 서버를 정한 뒤 상세를 채우는 순서', () => {
     expect(f.lifetime.snapshot().slots[3].selected).toMatchObject({ level: 115 })
   })
 
-  it('같은 수명의 직접 조회가 끝날 때까지 이름과 서버를 정한 OCR 슬롯의 상세를 받지 않는다', async () => {
+  it('서버 없는 직접 조회가 진행 중이어도 이름과 서버를 정한 OCR 슬롯의 상세를 바로 받는다', async () => {
     const f = fixture()
     const search = deferred<CharacterCandidate[]>()
     f.candidates.mockReturnValueOnce(search.promise)
@@ -360,24 +360,25 @@ describe('이름과 서버를 정한 뒤 상세를 채우는 순서', () => {
       captureId: f.captureId,
       slot: 3,
       observationRevision: 1,
-      nickname: '사아',
-      serverId: 'cain'
+      nickname: '사아'
     })
     await f.identifyAll()
-    await settle()
-    expect(f.getDetails).not.toHaveBeenCalled()
+
+    await vi.waitFor(() => expect(f.loadedIds()).toEqual(['id-가나', 'id-다라', 'id-마바']))
+    expect(f.lifetime.snapshot().slots[3].state).toBe('pending')
 
     search.resolve([candidate('사아')])
-    await vi.waitFor(() => expect(f.loads).toHaveLength(1))
-    expect(f.loads[0].characterId).toBe('id-사아')
-    f.loads[0].resolve()
-
     await vi.waitFor(() =>
       expect(f.loadedIds()).toEqual(['id-가나', 'id-다라', 'id-마바', 'id-사아'])
     )
+    f.load('사아').resolve()
+    await vi.waitFor(() =>
+      expect(f.lifetime.snapshot().slots[3].selected).toMatchObject({ level: 115 })
+    )
+    expect(f.lifetime.snapshot().slots[3]).not.toHaveProperty('details')
   })
 
-  it('같은 수명의 직접 조회가 호출 제한을 받으면 OCR 슬롯의 남은 상세도 받지 않는다', async () => {
+  it('직접 조회가 호출 제한을 받아도 이미 받는 중인 OCR 슬롯의 상세는 끝까지 반영한다', async () => {
     const f = fixture()
     const search = deferred<CharacterCandidate[]>()
     f.candidates.mockReturnValueOnce(search.promise)
@@ -389,14 +390,17 @@ describe('이름과 서버를 정한 뒤 상세를 채우는 순서', () => {
       serverId: 'cain'
     })
     await f.identifyAll()
+    await vi.waitFor(() => expect(f.loads).toHaveLength(3))
 
     search.reject(new SearchHttpFailure('SEARCH_RATE_LIMITED'))
-
     await vi.waitFor(() =>
       expect(f.lifetime.snapshot().slots[3].error).toEqual({ code: 'SEARCH_RATE_LIMITED' })
     )
-    expect(f.ocrDetails()).toEqual(['failed', 'failed', 'failed'])
-    await settle()
-    expect(f.getDetails).not.toHaveBeenCalled()
+    for (const name of NAMES) {
+      f.load(name).resolve()
+    }
+
+    await vi.waitFor(() => expect(f.ocrDetails()).toEqual([undefined, undefined, undefined]))
+    expect(f.loads.every(({ signal }) => !signal.aborted)).toBe(true)
   })
 })

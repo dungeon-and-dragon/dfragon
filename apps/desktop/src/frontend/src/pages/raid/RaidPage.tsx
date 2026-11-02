@@ -33,7 +33,7 @@ export function RaidPage({
 
   function renderSeat(seat: number, partyLabelId: string): React.JSX.Element {
     const slot = seatOrder[seat]
-    const handleLookup = (nickname: string, serverId: string): void =>
+    const handleLookup = (nickname: string, serverId?: string): void =>
       lookupSlot(slot, nickname, serverId)
     const handleChangeSnapshotAdventure = (value: string): void =>
       changeSnapshotAdventure(seat, value)
