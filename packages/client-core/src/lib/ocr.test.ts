@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createPartyOcrWorker } from './ocr'
+import { createPartyOcrWorker, OcrGpuUnavailableError } from './ocr'
 import type { PartyOcrResult } from '../types/capture'
 
 class NativeWorker {
@@ -292,5 +292,16 @@ describe('PaddleOCR worker 수명', () => {
     await rejected
     expect(native.terminate).toHaveBeenCalledOnce()
     expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('초기화 요청에 GPU 없음이 오면 GPU 없음 오류로 거절하고 worker를 종료한다', async () => {
+    const creating = createPartyOcrWorker(new AbortController().signal)
+    const native = NativeWorker.latest
+    const rejected = expect(creating).rejects.toBeInstanceOf(OcrGpuUnavailableError)
+
+    native.reply({ gpuUnavailable: true })
+
+    await rejected
+    expect(native.terminate).toHaveBeenCalledOnce()
   })
 })

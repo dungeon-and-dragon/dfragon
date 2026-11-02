@@ -75,15 +75,26 @@ beforeEach(async () => {
 afterEach(() => vi.unstubAllGlobals())
 
 it('preserves WASM setup, dictionary normalization and recognition tensor layout', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: URL) => {
+      if (url.pathname.endsWith('.onnx')) {
+        return new Response(new Uint8Array([1, 2, 3]))
+      }
+
+      return new Response('가\r\n나\r\n')
+    })
+  )
   await initialize()
   expect(mocks.env).toEqual({
     logLevel: 'error',
     wasm: { numThreads: 8, proxy: false, wasmPaths: 'https://fixture.invalid/ocr/ort/' }
   })
-  expect(mocks.create).toHaveBeenCalledExactlyOnceWith(
-    'https://fixture.invalid/ocr/korean-rec.onnx',
-    { executionProviders: ['webgpu', 'wasm'], logSeverityLevel: 3 }
-  )
+  expect(fetch).toHaveBeenCalledWith(new URL('https://fixture.invalid/ocr/korean-rec.onnx'))
+  expect(mocks.create).toHaveBeenCalledExactlyOnceWith(new Uint8Array([1, 2, 3]), {
+    executionProviders: ['webgpu'],
+    logSeverityLevel: 3
+  })
   expect(postMessage).toHaveBeenLastCalledWith({ ready: true })
 
   await send({ pixels })
@@ -112,53 +123,47 @@ it('준비 단계에서 0으로 채운 입력으로 한 번 추론하고 텐서�
   expect(postMessage).toHaveBeenCalledExactlyOnceWith({ ready: true })
 })
 
-it('WebGPU 세션의 준비 추론이 실패하면 그 세션을 해제하고 CPU WASM 세션으로 회차를 인식한다', async () => {
+it('WebGPU 세션의 준비 추론이 실패하면 그 세션을 해제하고 CPU로 넘어가지 않은 채 GPU 없음으로 응답한다', async () => {
   const gpu = modelSession(vi.fn().mockRejectedValue(new Error('private shader failure')))
-  const cpu = modelSession(mocks.run)
-  mocks.create.mockResolvedValueOnce(gpu).mockResolvedValueOnce(cpu)
+  mocks.create.mockResolvedValueOnce(gpu)
 
   await send({ root: 'https://fixture.invalid/ocr/' })
 
-  expect(mocks.create.mock.calls.map(([, options]) => options.executionProviders)).toEqual([
-    ['webgpu', 'wasm'],
-    ['wasm']
-  ])
+  expect(mocks.create).toHaveBeenCalledOnce()
   expect(gpu.release).toHaveBeenCalledOnce()
-  expect(cpu.release).not.toHaveBeenCalled()
-  expect(mocks.dispose).toHaveBeenCalledTimes(2)
-  expect(postMessage).toHaveBeenCalledExactlyOnceWith({ ready: true })
+  expect(mocks.dispose).toHaveBeenCalledOnce()
+  expect(postMessage).toHaveBeenCalledExactlyOnceWith({ gpuUnavailable: true })
 
   await send({ pixels })
 
   expect(gpu.run).toHaveBeenCalledOnce()
-  expect(cpu.run).toHaveBeenCalledTimes(2)
-  expect(postMessage).toHaveBeenLastCalledWith({
-    candidates: [{ rank: 1, nickname: '가', modelScore: 100 }]
-  })
+  expect(postMessage).toHaveBeenLastCalledWith({ failed: true })
 })
 
-it('WebGPU 세션을 만들지 못하면 CPU WASM 세션으로 준비한다', async () => {
+it('WebGPU 세션을 만들지 못하면 CPU로 넘어가지 않고 GPU 없음으로 응답한다', async () => {
   mocks.create.mockRejectedValueOnce(new Error('private provider failure'))
 
   await send({ root: 'https://fixture.invalid/ocr/' })
 
-  expect(mocks.create.mock.calls.map(([, options]) => options.executionProviders)).toEqual([
-    ['webgpu', 'wasm'],
-    ['wasm']
-  ])
-  expect(postMessage).toHaveBeenCalledExactlyOnceWith({ ready: true })
+  expect(mocks.create).toHaveBeenCalledOnce()
+  expect(postMessage).toHaveBeenCalledExactlyOnceWith({ gpuUnavailable: true })
 })
 
-it('CPU WASM 세션의 준비 추론까지 실패하면 두 세션을 모두 해제하고 초기화 실패로 응답한다', async () => {
-  const gpu = modelSession(vi.fn().mockRejectedValue(new Error('private shader failure')))
-  const cpu = modelSession(vi.fn().mockRejectedValue(new Error('private model failure')))
-  mocks.create.mockResolvedValueOnce(gpu).mockResolvedValueOnce(cpu)
+it('모델을 받지 못하면 세션을 만들지 않고 GPU 없음이 아닌 초기화 실패로 응답한다', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: URL) => {
+      if (url.pathname.endsWith('.onnx')) {
+        return new Response(null, { status: 404 })
+      }
+
+      return new Response('가\n')
+    })
+  )
 
   await send({ root: 'https://fixture.invalid/ocr/' })
 
-  expect(gpu.release).toHaveBeenCalledOnce()
-  expect(cpu.release).toHaveBeenCalledOnce()
-  expect(mocks.dispose).toHaveBeenCalledTimes(2)
+  expect(mocks.create).not.toHaveBeenCalled()
   expect(postMessage).toHaveBeenCalledExactlyOnceWith({ failed: true })
 })
 

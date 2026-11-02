@@ -12,7 +12,10 @@ const modules = vi.hoisted(() => ({
   diagnostic: vi.fn(),
   rejected: vi.fn()
 }))
-vi.mock('./ocr', () => ({ createPartyOcrWorker: modules.worker }))
+vi.mock('./ocr', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./ocr')>()),
+  createPartyOcrWorker: modules.worker
+}))
 vi.mock('./raid-recognition', () => ({ recognizeRaidRows: modules.recognize }))
 vi.mock('./runtime-diagnostics', () => ({
   reportRendererDiagnostic: modules.diagnostic,
@@ -42,7 +45,7 @@ function start() {
     beginSearch: vi.fn(async (_signal: AbortSignal): Promise<string | null> => ROUND),
     readFrame: vi.fn(async (_captureId: string): Promise<RaidFrameResult> => rows),
     observeOcr: vi.fn(),
-    recognizeWithOcr: createSharedOcrWorker(WEB_CAPTURE_TEXTS.ocrPrepareFailed).recognize
+    recognizeWithOcr: createSharedOcrWorker(WEB_CAPTURE_TEXTS).recognize
   }
   const actor = createActor(raidCaptureMachine, { input: effects }).start()
 

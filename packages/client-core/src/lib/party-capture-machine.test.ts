@@ -6,7 +6,10 @@ import { createSharedOcrWorker } from './ocr-worker-recognition'
 import type { CharacterImage } from '../preload/common/types/character'
 
 const modules = vi.hoisted(() => ({ diagnostic: vi.fn() }))
-vi.mock('./ocr', () => ({ createPartyOcrWorker: vi.fn() }))
+vi.mock('./ocr', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./ocr')>()),
+  createPartyOcrWorker: vi.fn()
+}))
 vi.mock('./runtime-diagnostics', () => ({
   reportRendererDiagnostic: modules.diagnostic,
   showRejectedOcrNickname: vi.fn()
@@ -24,7 +27,7 @@ function start() {
       throw new Error('CAPTURE_NOT_ALLOWED')
     }),
     observeOcr: vi.fn(),
-    recognizeWithOcr: createSharedOcrWorker(WEB_CAPTURE_TEXTS.ocrPrepareFailed).recognize
+    recognizeWithOcr: createSharedOcrWorker(WEB_CAPTURE_TEXTS).recognize
   }
   const actor = createActor(partyCaptureMachine, { input: effects }).start()
 

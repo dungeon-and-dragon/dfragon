@@ -39,7 +39,7 @@ let root: Root
 let raid: RaidCaptureHost
 
 function Harness(): null {
-  const [ocrWorker] = useState(() => createSharedOcrWorker(WEB_CAPTURE_TEXTS.ocrPrepareFailed))
+  const [ocrWorker] = useState(() => createSharedOcrWorker(WEB_CAPTURE_TEXTS))
   const current = useRaidCapture({
     sourceId: 'game',
     sourceReady: true,
