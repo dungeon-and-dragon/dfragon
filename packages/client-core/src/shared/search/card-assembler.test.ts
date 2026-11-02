@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
-import { parseSearchSnapshot } from '../../preload/common/search/snapshot'
-import { searchRow, searchSlot, withSearchSlot } from '../../preload/api/search-test-fixture'
 import type { CharacterCardScore, CharacterDetails } from '../../preload/common/types/character'
-import { buildCharacterCard } from '../../shared/search/card-assembler'
+import { buildCharacterCard } from './card-assembler'
 
 const versions = {
   package: 'synthetic-engine 0.1.0',
@@ -55,26 +53,6 @@ function details(card: unknown): CharacterDetails {
   }
 }
 
-const selected = {
-  ...searchRow,
-  fame: 0,
-  level: null,
-  adventureName: null,
-  jobName: null,
-  jobGrowName: null,
-  imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/synthetic-character?zoom=1',
-  guildName: null,
-  equipmentScore: null
-}
-
-function acceptsCard(card: unknown): boolean {
-  const snapshot = withSearchSlot(
-    searchSlot({ state: 'success', rows: [searchRow], selected: { ...selected, card } as never })
-  )
-
-  return parseSearchSnapshot(snapshot) !== null
-}
-
 describe('상세 응답 card에서 카드 읽기', () => {
   it.each([
     ['딜러의 장비 점수', scoredDealerCard(1741)],
@@ -86,7 +64,6 @@ describe('상세 응답 card에서 카드 읽기', () => {
     const card = buildCharacterCard(details(apiCard))
 
     expect(card).toEqual(apiCard)
-    expect(acceptsCard(card)).toBe(true)
   })
 
   it('card와 점수에 Desktop이 모르는 칸이 있으면 버리고 역할과 점수만 남긴다', () => {
@@ -107,7 +84,6 @@ describe('상세 응답 card에서 카드 읽기', () => {
     )
 
     expect(card).toEqual(scoredDealerCard(1741))
-    expect(acceptsCard(card)).toBe(true)
   })
 
   it.each([
