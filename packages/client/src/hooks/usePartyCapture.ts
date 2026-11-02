@@ -9,18 +9,17 @@ import {
 import { useMachine } from '@xstate/react'
 import { partyCaptureMachine, getCapturePhase } from '../lib/party-capture-machine'
 import type { CapturePhase } from '../types/capture'
-import { useCaptureSources } from './useCaptureSources'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import { useCharacterSearch } from './useCharacterSearch'
-import { findSingleDnfCaptureSource } from '../lib/capture-presentation'
 import { getRecognizedNicknames } from '../lib/recognized-nicknames'
-import { useDesktopShortcut } from './useDesktopShortcut'
+import { useClientHost } from './useClientHost'
+import { usePageShortcut } from './usePageShortcut'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import { PARTY_SEAT_LAYOUT } from '../constants/cards'
 import { createSharedOcrWorker, type OcrRecognition } from '../lib/ocr-worker-recognition'
 import type { CaptureTexts } from '../lib/capture-texts'
 
-export type CaptureSourceSelection = ReturnType<typeof useCaptureSources> & {
+export type CaptureSourceSelection = {
   selectedSourceId: string
   sourceReady: boolean
   selectSource: (sourceId: string) => void
@@ -56,8 +55,9 @@ export function usePartyCapture({
   receivesShortcut: boolean
   texts: CaptureTexts
 }): PartyCapture {
+  const { party } = useClientHost()
   const stopRef = useRef<() => void>(() => {})
-  const search = useCharacterSearch(() => stopRef.current())
+  const search = useCharacterSearch(party, () => stopRef.current())
   const [ocrWorker] = useState(() => createSharedOcrWorker(texts.ocrPrepareFailed))
   const ocrReady = useSyncExternalStore(ocrWorker.subscribe, ocrWorker.isReady)
   const { seatOrder, swapSeats, resetSeats } = useSeatOrder(PARTY_SEAT_LAYOUT)
@@ -76,34 +76,19 @@ export function usePartyCapture({
   const [snapshot, send] = useMachine(partyCaptureMachine, {
     input: {
       texts,
-      selectSource: (sourceId) => window.api.selectCaptureSource(sourceId),
+      selectSource: party.selectCaptureSource,
       beginSearch: beginRound,
-      readFrame: (captureId) => window.api.readCaptureFrame(captureId),
+      readFrame: party.readCaptureFrame,
       endSearch: search.end,
       observeOcr: search.observeOcr,
       recognizeWithOcr: ocrWorker.recognize
     }
   })
-  const sources = useCaptureSources()
   const phase = getCapturePhase(snapshot)
-  const canAutoSelect = snapshot.matches('idle')
-  const autoAttemptedSource = useRef<string | null>(null)
-
-  useEffect(() => {
-    if (!search.ready || !canAutoSelect) {
-      return
-    }
-    const game = findSingleDnfCaptureSource(sources.sources)
-    if (game === null || autoAttemptedSource.current === game.id) {
-      return
-    }
-    autoAttemptedSource.current = game.id
-    send({ type: 'SELECT', sourceId: game.id })
-  }, [search.ready, canAutoSelect, send, sources.sources])
 
   const startRound = useCallback(() => send({ type: 'START' }), [send])
   const startPastedRound = useCallback(() => send({ type: 'PASTE' }), [send])
-  useDesktopShortcut('restart-search', receivesShortcut, startRound)
+  usePageShortcut('restart-search', receivesShortcut, startRound)
 
   function stopCapture(): void {
     send({ type: 'STOP' })
@@ -141,7 +126,6 @@ export function usePartyCapture({
   useEffect(() => () => ocrWorker.release(), [ocrWorker])
 
   const source: CaptureSourceSelection = {
-    ...sources,
     selectedSourceId,
     sourceReady,
     selectSource

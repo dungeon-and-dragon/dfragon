@@ -7,6 +7,7 @@ import {
   type CandidatePicker
 } from '../lib/candidate-picker'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import type { CardSearchHost } from './useClientHost'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 
 type CharacterSearch = ManualCharacterLookup & {
@@ -17,11 +18,14 @@ type CharacterSearch = ManualCharacterLookup & {
 const DIRECT_LOOKUP_PICK: CandidatePick = { kind: 'confirmed', requestId: null }
 
 /** 회차가 끝나면 직접 조회한 슬롯과 누른 후보까지 파티 네 슬롯을 모두 비운다. */
-export function useCharacterSearch(onInvalidated: () => void): CharacterSearch {
+export function useCharacterSearch(
+  host: CardSearchHost,
+  onInvalidated: () => void
+): CharacterSearch {
   const search = useManualCharacterLookup(
-    window.search,
+    host,
     SEARCH_SLOT_COUNTS.party,
-    window.api.notifyOcrCandidatesDetected,
+    host.notifyOcrCandidatesDetected,
     onInvalidated
   )
   const { end: endSearch, lookupSlot: lookup } = search

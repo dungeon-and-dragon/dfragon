@@ -1,13 +1,10 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
 import {
   DIAGNOSTIC_MESSAGES,
-  DIAGNOSTIC_HISTORY_LIMIT,
-  type DiagnosticApi,
-  type DiagnosticEntry,
-  type RendererDiagnosticCode
+  type DiagnosticCode
 } from '@dfragon/client-core/preload/common/types/diagnostics'
 
-let activeApi: DiagnosticApi | null = null
+let activeReport: ((code: DiagnosticCode) => void) | null = null
 
 const OCR_NICKNAME_REJECTION_REASONS = {
   missing: '후보 없음',
@@ -35,57 +32,23 @@ export function showRejectedOcrNickname({
   )
 }
 
-export function reportRendererDiagnostic(code: RendererDiagnosticCode): void {
-  try {
-    activeApi?.reportRendererDiagnostic(code).catch(() => {})
-  } catch {
-    // 종료 중인 preload 연결 실패는 원래 작업 오류와 분리한다.
-  }
+export function reportRendererDiagnostic(code: DiagnosticCode): void {
+  activeReport?.(code)
 }
 
-export function startRendererDiagnostics(api: DiagnosticApi): void {
+export function startRendererDiagnostics(): (code: DiagnosticCode) => void {
   let disposed = false
-  let lastSequence = 0
-  let historyLoaded = false
-  const pending: DiagnosticEntry[] = []
-  activeApi = api
+  let lastCode: DiagnosticCode | null = null
 
-  function display(entry: DiagnosticEntry): void {
-    if (disposed || entry.sequence <= lastSequence) {
+  function report(code: DiagnosticCode): void {
+    if (disposed || code === lastCode) {
       return
     }
-    lastSequence = entry.sequence
-    const time = new Date(entry.timestamp).toLocaleTimeString()
-    const message = DIAGNOSTIC_MESSAGES[entry.code]
-    console.warn(`[${PRODUCT_NAME} ${time}] ${entry.code}: ${message}`)
+    lastCode = code
+    const time = new Date().toLocaleTimeString()
+    console.warn(`[${PRODUCT_NAME} ${time}] ${code}: ${DIAGNOSTIC_MESSAGES[code]}`)
   }
-
-  const unsubscribe = api.onDiagnosticEntry((entry) => {
-    if (!historyLoaded) {
-      pending.push(entry)
-      if (pending.length > DIAGNOSTIC_HISTORY_LIMIT) {
-        pending.shift()
-      }
-
-      return
-    }
-    display(entry)
-  })
-  api
-    .getDiagnosticHistory()
-    .then((history) => {
-      for (const entry of history) {
-        display(entry)
-      }
-    })
-    .catch(() => {})
-    .finally(() => {
-      historyLoaded = true
-      for (const entry of pending) {
-        display(entry)
-      }
-      pending.length = 0
-    })
+  activeReport = report
 
   const onError = (): void => reportRendererDiagnostic('RENDERER_ERROR')
   const onRejection = (): void => reportRendererDiagnostic('RENDERER_REJECTION')
@@ -94,14 +57,14 @@ export function startRendererDiagnostics(api: DiagnosticApi): void {
 
   function dispose(): void {
     disposed = true
-    if (activeApi === api) {
-      activeApi = null
+    if (activeReport === report) {
+      activeReport = null
     }
-    unsubscribe()
-    pending.length = 0
     window.removeEventListener('error', onError)
     window.removeEventListener('unhandledrejection', onRejection)
     window.removeEventListener('pagehide', dispose)
   }
   window.addEventListener('pagehide', dispose)
+
+  return report
 }
