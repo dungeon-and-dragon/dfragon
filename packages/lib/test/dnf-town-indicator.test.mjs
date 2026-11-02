@@ -6,8 +6,9 @@ const testTitles = {
   clientFrame: '1067×600 client 오른쪽 위의 지구본 아이콘을 찾는다',
   oddWidthShare: '홀수 폭을 한 열 줄인 1066×600 공유 프레임에서도 찾는다',
   scaled: '1~1.8 배율로 커진 아이콘을 오른쪽 위 기준 위치에서 찾는다',
-  outOfScale: '1.8을 넘는 배율의 아이콘은 찾지 않는다',
+  outOfScale: '2.4배로 커진 아이콘은 찾지 않는다',
   grayGlobe: '같은 모양의 회색 지구본은 마을로 보지 않는다',
+  tintedGrayGlobe: '색이 조금 흔들린 회색 지구본도 마을로 보지 않는다',
   differentLuminance: '노란 부분만 같고 밝기 모양이 다른 그림은 마을로 보지 않는다',
   outsideTopRight: '오른쪽 위 밖에 있는 같은 아이콘은 찾지 않는다',
   emptyFrames: '아이콘이 없는 화면과 템플릿보다 작은 화면은 미검출이다',
@@ -71,6 +72,16 @@ function brightBackgroundIcon() {
     if (rgba[index] === dark[0] && rgba[index + 1] === dark[1] && rgba[index + 2] === dark[2]) {
       rgba.set([200, 200, 210], index)
     }
+  }
+
+  return { width: 16, height: 16, rgba }
+}
+
+function tintedGrayIcon() {
+  const { rgba } = grayIcon()
+  for (let index = 0; index < rgba.length; index += 4) {
+    rgba[index] = Math.round(rgba[index] * 1.01)
+    rgba[index + 1] = Math.round(rgba[index + 1] * 1.01)
   }
 
   return { width: 16, height: 16, rgba }
@@ -143,6 +154,13 @@ test(testTitles.outOfScale, () => {
 test(testTitles.grayGlobe, () => {
   const image = frame(1067, 600)
   placeTopRight(image, grayIcon())
+
+  assert.deepEqual(detectDNFTownIndicator(image, template), { status: 'not-found' })
+})
+
+test(testTitles.tintedGrayGlobe, () => {
+  const image = frame(1067, 600)
+  placeTopRight(image, tintedGrayIcon())
 
   assert.deepEqual(detectDNFTownIndicator(image, template), { status: 'not-found' })
 })
