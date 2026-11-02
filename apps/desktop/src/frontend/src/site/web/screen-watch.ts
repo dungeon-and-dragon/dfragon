@@ -30,8 +30,8 @@ const binarizers: Readonly<
   party: binarizeNicknamePixels,
   raid: binarizeRaidNicknamePixels
 }
-// 2026-11-03 Windows 실기의 공유 crop에서 글자 여부가 다른 픽셀은 같은 이름의 연속 프레임끼리 0개(공대 노랑, 보라
-// 배경과 파티), 서로 다른 공대 이름 526쌍에서 최소 79개였다. 그 사이의 40개부터 다른 구성으로 본다.
+// 글자 여부가 다른 픽셀은 같은 이름끼리 0개(2026-11-03 Windows 실기 공유 crop의 공대 노랑, 보라 배경 연속 프레임과
+// 파티 표본), 서로 다른 공대 이름끼리 최소 79개(1067×600, 3840×2160 표본 526쌍)였다. 그 사이의 40개부터 다른 구성으로 본다.
 const CHANGED_PIXELS_FOR_NEW_NAME = 40
 
 export const initialScreenWatchState: ScreenWatchState = {
