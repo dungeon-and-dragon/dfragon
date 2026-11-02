@@ -205,6 +205,17 @@ export function removeRaidNicknameFrameLines(
   }
 }
 
+// OCR과 자동 인식의 같은 구성 비교가 같은 공대 닉네임 글자를 보도록 순서를 한곳에 둔다.
+export function binarizeRaidNicknamePixels(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number
+): void {
+  binarizeRaidTextPixels(data)
+  removeRaidNicknameFrameLines(data, width, height)
+  removeDetachedRaidNicknamePixels(data, width, height)
+}
+
 export function removeDetachedRaidNicknamePixels(
   data: Uint8ClampedArray,
   width: number,
@@ -277,11 +288,9 @@ export function toBinarizedTextCanvas(
 export function toRaidNicknameCanvas(
   image: Readonly<{ width: number; height: number; rgba: ArrayLike<number> }>
 ): HTMLCanvasElement {
-  return toTextCanvas(image, (pixels) => {
-    binarizeRaidTextPixels(pixels.data)
-    removeRaidNicknameFrameLines(pixels.data, pixels.width, pixels.height)
-    removeDetachedRaidNicknamePixels(pixels.data, pixels.width, pixels.height)
-  })
+  return toTextCanvas(image, (pixels) =>
+    binarizeRaidNicknamePixels(pixels.data, pixels.width, pixels.height)
+  )
 }
 
 export function toRaidJobCanvas(

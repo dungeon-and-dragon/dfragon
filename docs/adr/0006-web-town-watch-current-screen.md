@@ -4,7 +4,7 @@ status: accepted
 scope: dfragon.com web client town auto recognition, screen to watch and same composition comparison
 decided: 2026-11-03
 last-reviewed: 2026-11-03
-superseded-by: 없음
+superseded-by: "0007-web-town-compare-binarized-name-crops.md(같은 구성 기준에 한함)"
 evidence: "PR #1112 리뷰(https://github.com/dungeon-and-dragon/dfragon/pull/1112) ; 저장소 소유자 결정(2026-11-03) ; 1067×600 파티 이름 crop(73×16) 표본의 RGB 평균 차이 측정과 추정(2026-11-03)"
 review-after: "#1110 dev 사이트 확인에서 실제 공유 프레임으로 비교 상수를 다시 볼 때, 자동 화면 전환을 다시 넣기 전"
 ---
