@@ -1,4 +1,5 @@
 import type { DNFParticipantFrame } from '@dfragon/lib'
+import { binarizeNicknamePixels, binarizeRaidNicknamePixels } from '../../lib/nickname-pixels'
 
 export type ScreenWatchKind = 'party' | 'raid'
 
@@ -10,19 +11,29 @@ export type ScreenWatchObservation = Readonly<{
   crops: NameCrops | null
 }>
 
+// 이진화한 RGBA다. 글자는 0, 배경은 255라 한 채널만 보아도 글자 여부가 갈린다.
+type BinarizedCrop = Readonly<{ width: number; height: number; pixels: Uint8ClampedArray }>
+
+type BinarizedCrops = readonly (BinarizedCrop | null)[]
+
 export type ScreenWatchState = Readonly<{
-  baselines: Readonly<Record<ScreenWatchKind, NameCrops | null>>
-  candidate: Readonly<{ kind: ScreenWatchKind; crops: NameCrops }> | null
+  baselines: Readonly<Record<ScreenWatchKind, BinarizedCrops | null>>
+  candidate: Readonly<{ kind: ScreenWatchKind; crops: BinarizedCrops }> | null
 }>
 
 export type ScreenWatchSignal = 'none' | Readonly<{ kind: ScreenWatchKind }>
 
-// 잠정 값이다. #1076에서 색 패턴의 원본과 공유 결과는 채널마다 1~3 달랐고, 32는 그 흔들림을 넘는다.
-// 글자 가장자리의 YUV 4:2:0 차이가 32 이하라는 근거는 없어 #1110에서 실제 공유 crop으로 다시 맞춘다.
-const CHANGED_PIXEL_CHANNEL_DIFFERENCE = 32
-// 잠정 값이다. 바뀐 픽셀이 10개 미만이면 같은 구성, 10개 이상이면 다른 구성이다. 73×16 이름 crop에서
-// 글자 하나가 수십 픽셀을 바꾼다는 추정에서 정했고, 그중 채널 차이가 32를 넘는 픽셀이 10개 이상인지는
-// 재지 않았다. #1110에서 같은 이름과 한 글자만 다른 이름의 실제 공유 crop으로 다시 맞춘다.
+// OCR이 그 화면의 닉네임에 쓰는 이진화를 같이 써, 움직이고 비치는 이름 칸 배경을 글자와 떼어 놓는다.
+const binarizers: Readonly<
+  Record<ScreenWatchKind, (data: Uint8ClampedArray, width: number, height: number) => void>
+> = {
+  party: binarizeNicknamePixels,
+  raid: binarizeRaidNicknamePixels
+}
+// 글자 여부가 다른 픽셀은 같은 이름끼리 0개(2026-11-03 Windows 실기 공유 crop의 공대 노랑, 보라 배경 연속 프레임과
+// 파티 표본)였다. 서로 다른 공대 이름 526쌍의 최소 79개(1067×600, 3840×2160 표본)는 이름 전체가 다른 쌍이라, 같은 폭의
+// 한 음절만 바뀐 이름(crop 하나의 글자 픽셀 71~209개, 4~6음절에서 음절당 약 20~40개로 추정, 쌍으로는 재지 않음)을
+// 잡도록 낮게 둔다. 실제 화면 공유(YUV 변환)에서 같은 이름의 가장자리 픽셀이 몇 개 바뀌는지는 #1110에서 확인한다.
 const CHANGED_PIXELS_FOR_NEW_NAME = 10
 
 export const initialScreenWatchState: ScreenWatchState = {
@@ -55,35 +66,51 @@ export function recordScreenBaseline(
   crops: NameCrops
 ): ScreenWatchState {
   // 후보는 회차 전 기준으로 고른 것이라, 회차 앞뒤의 틱을 이어 2번으로 세지 않게 버린다.
-  return { ...state, baselines: { ...state.baselines, [kind]: crops }, candidate: null }
+  return {
+    ...state,
+    baselines: { ...state.baselines, [kind]: binarizeCrops(kind, crops) },
+    candidate: null
+  }
 }
 
 function changedScreen(
   state: ScreenWatchState,
   { town, kind, crops }: ScreenWatchObservation
-): { kind: ScreenWatchKind; crops: NameCrops } | null {
+): { kind: ScreenWatchKind; crops: BinarizedCrops } | null {
   if (!town || crops == null) {
     return null
   }
 
+  const binarized = binarizeCrops(kind, crops)
   const baseline = state.baselines[kind]
-  if (baseline != null && sameNameCrops(baseline, crops)) {
+  if (baseline != null && sameNameCrops(baseline, binarized)) {
     return null
   }
 
-  return { kind, crops }
+  return { kind, crops: binarized }
 }
 
-function sameNameCrops(left: NameCrops, right: NameCrops): boolean {
+function binarizeCrops(kind: ScreenWatchKind, crops: NameCrops): BinarizedCrops {
+  return crops.map((crop) => {
+    if (crop == null) {
+      return null
+    }
+
+    const { width, height } = crop
+    const pixels = new Uint8ClampedArray(crop.rgba)
+    binarizers[kind](pixels, width, height)
+
+    return { width, height, pixels }
+  })
+}
+
+function sameNameCrops(left: BinarizedCrops, right: BinarizedCrops): boolean {
   return (
     left.length === right.length && left.every((crop, index) => sameNameCrop(crop, right[index]))
   )
 }
 
-function sameNameCrop(
-  left: DNFParticipantFrame | null,
-  right: DNFParticipantFrame | null
-): boolean {
+function sameNameCrop(left: BinarizedCrop | null, right: BinarizedCrop | null): boolean {
   if (left == null || right == null) {
     return left == null && right == null
   }
@@ -92,21 +119,13 @@ function sameNameCrop(
     return false
   }
 
-  return countChangedPixels(left.rgba, right.rgba) < CHANGED_PIXELS_FOR_NEW_NAME
+  return countChangedGlyphPixels(left.pixels, right.pixels) < CHANGED_PIXELS_FOR_NEW_NAME
 }
 
-function countChangedPixels(
-  left: DNFParticipantFrame['rgba'],
-  right: DNFParticipantFrame['rgba']
-): number {
+function countChangedGlyphPixels(left: Uint8ClampedArray, right: Uint8ClampedArray): number {
   let changed = 0
   for (let index = 0; index < left.length; index += 4) {
-    const difference = Math.max(
-      Math.abs(left[index] - right[index]),
-      Math.abs(left[index + 1] - right[index + 1]),
-      Math.abs(left[index + 2] - right[index + 2])
-    )
-    if (difference > CHANGED_PIXEL_CHANNEL_DIFFERENCE) {
+    if (left[index] !== right[index]) {
       changed += 1
     }
   }

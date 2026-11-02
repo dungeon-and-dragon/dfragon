@@ -69,8 +69,8 @@ function stubVideoDecode(): void {
   })
 }
 
-// 합성 장면이다. party, raid 값은 그 화면 이름 crop의 회색 값이고 null이면 그 화면의 창이 없다. 파티 이름은
-// partySlot 슬롯 하나에만 보인다.
+// 합성 장면이다. party, raid 값은 그 화면의 이름이고 null이면 그 화면의 창이 없다. 파티 이름은 partySlot 슬롯
+// 하나에만 보인다.
 type Scene = Readonly<{
   town: boolean
   party: number | null
@@ -78,7 +78,7 @@ type Scene = Readonly<{
   raid: number | null
 }>
 
-const FRAME_SIZE = 4
+const FRAME_SIZE = 32
 const scenes = new WeakMap<object, Scene>()
 const region: DNFRectangle = { x: 0, y: 0, width: FRAME_SIZE, height: FRAME_SIZE }
 const townTemplate: DNFParticipantFrame = solid(0)
@@ -93,10 +93,20 @@ function solid(gray: number): CharacterImage {
   return { width: FRAME_SIZE, height: FRAME_SIZE, rgba }
 }
 
+// 이름 값의 10분의 1만큼 왼쪽 열을 흰 글자로 칠한다. 쓰는 값끼리 2열(64픽셀) 이상 달라 다른 구성으로 갈린다.
+function nameImage(name: number): CharacterImage {
+  const frame = solid(0)
+  for (let y = 0; y < FRAME_SIZE; y += 1) {
+    frame.rgba.fill(255, y * FRAME_SIZE * 4, (y * FRAME_SIZE + name / 10) * 4)
+  }
+
+  return frame
+}
+
 // 파티 이름 영역은 프레임 전체이고, 프레임의 픽셀이 곧 파티 이름 crop이다.
 function gameFrame(scene: Partial<Scene>): CharacterImage {
   const resolved: Scene = { town: true, party: null, partySlot: 2, raid: null, ...scene }
-  const frame = solid(resolved.party ?? 0)
+  const frame = nameImage(resolved.party ?? 0)
   scenes.set(frame, resolved)
 
   return frame
@@ -128,7 +138,7 @@ function stubDetectors(): void {
       partyRegion: region,
       equipmentScoreRegion: region,
       jobRegion: region,
-      nicknameCrop: solid(name)
+      nicknameCrop: nameImage(name)
     }
 
     return {

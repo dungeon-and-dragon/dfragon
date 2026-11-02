@@ -11,50 +11,109 @@ import {
   type ScreenWatchState
 } from './screen-watch'
 
-// 이름 crop 대신 한 색으로 채운 합성 crop을 쓴다. 색 값이 곧 이름 구성의 차이를 나타낸다.
-function crop(gray: number, width = 8, height = 4): DNFParticipantFrame {
-  const rgba = new Uint8Array(width * height * 4)
-  for (let index = 0; index < rgba.length; index += 4) {
-    rgba.set([gray, gray, gray, 255], index)
-  }
+type Rgb = readonly [number, number, number]
+type Glyph = 'full' | 'upper' | 'middle' | 'lower'
 
-  return { width, height, rgba }
+const NAME_WIDTH = 73
+const NAME_HEIGHT = 17
+const GLYPH_WIDTH = 6
+const GLYPH_LEFT = 4
+const GLYPH_ROWS: Readonly<Record<Glyph, readonly [number, number]>> = {
+  full: [4, 12],
+  upper: [4, 8],
+  middle: [6, 10],
+  lower: [8, 12]
 }
+// 두 글자 이름의 마지막 글자 칸 바로 뒤 6열이다. 이름에 붙은 글자 픽셀을 원하는 개수만큼 더할 때 쓴다.
+const EXTRA_TEXT_LEFT = GLYPH_LEFT + 2 * (GLYPH_WIDTH + 1)
 
-function shiftPixels(
-  source: DNFParticipantFrame,
-  pixels: number[],
-  delta: (pixel: number) => readonly number[]
+const DARK: Rgb = [24, 28, 36]
+const LIGHT: Rgb = [235, 235, 235]
+const YELLOW: Rgb = [200, 170, 30]
+const PURPLE: Rgb = [120, 60, 160]
+const SKY: Rgb = [90, 170, 220]
+
+// 합성 이름 crop이다. 글자는 GLYPH_WIDTH 폭 칸에 1열 간격으로 그리며, upper와 lower는 48픽셀이 다르다.
+function nameCrop(
+  glyphs: readonly Glyph[],
+  {
+    background = DARK,
+    text = LIGHT
+  }: { background?: Rgb | ((pixel: number) => Rgb); text?: Rgb } = {}
 ): DNFParticipantFrame {
-  const rgba = Uint8Array.from(source.rgba)
+  const rgba = new Uint8Array(NAME_WIDTH * NAME_HEIGHT * 4)
+  for (let pixel = 0; pixel < NAME_WIDTH * NAME_HEIGHT; pixel += 1) {
+    rgba.set(
+      [...(typeof background === 'function' ? background(pixel) : background), 255],
+      pixel * 4
+    )
+  }
+  const pixels = glyphs.flatMap((glyph, index) => {
+    const [top, bottom] = GLYPH_ROWS[glyph]
+
+    return block(GLYPH_LEFT + index * (GLYPH_WIDTH + 1), top, GLYPH_WIDTH, bottom - top)
+  })
+
+  return paint({ width: NAME_WIDTH, height: NAME_HEIGHT, rgba }, pixels, text)
+}
+
+function block(left: number, top: number, width: number, height: number): number[] {
+  return Array.from(
+    { length: width * height },
+    (_, index) => (top + Math.floor(index / width)) * NAME_WIDTH + left + (index % width)
+  )
+}
+
+function paint(
+  crop: DNFParticipantFrame,
+  pixels: readonly number[],
+  color: Rgb
+): DNFParticipantFrame {
+  const rgba = Uint8Array.from(crop.rgba)
   for (const pixel of pixels) {
-    delta(pixel).forEach((value, channel) => {
-      rgba[pixel * 4 + channel] += value
-    })
+    rgba.set(color, pixel * 4)
   }
 
-  return { ...source, rgba }
+  return { ...crop, rgba }
 }
 
-function firstPixels(count: number): number[] {
-  return Array.from({ length: count }, (_, pixel) => pixel)
+function withExtraText(
+  crop: DNFParticipantFrame,
+  count: number,
+  text = LIGHT
+): DNFParticipantFrame {
+  return paint(
+    crop,
+    block(EXTRA_TEXT_LEFT, GLYPH_ROWS.full[0], GLYPH_WIDTH, 8).slice(0, count),
+    text
+  )
 }
 
-function allPixels(source: DNFParticipantFrame): number[] {
-  return firstPixels(source.width * source.height)
+function sized(width: number, height: number): DNFParticipantFrame {
+  return { width, height, rgba: new Uint8Array(width * height * 4) }
 }
 
-const partyA: NameCrops = [crop(10), crop(80), null, null]
-const partyB: NameCrops = [crop(10), crop(150), null, null]
-const partyC: NameCrops = [crop(10), crop(220), null, null]
-const raidA: NameCrops = [crop(30), crop(100), crop(170)]
+const nameA = nameCrop(['full', 'upper'])
+const nameB = nameCrop(['full', 'lower'])
+const partyA: NameCrops = [nameA, nameB, null, null]
+const partyB: NameCrops = [nameA, nameCrop(['full', 'upper', 'full']), null, null]
+const partyC: NameCrops = [nameA, nameCrop(['full', 'lower', 'full']), null, null]
+const raidA: NameCrops = [nameB, nameA, nameCrop(['upper'])]
+
+function observe(
+  kind: ScreenWatchKind,
+  crops: NameCrops | null,
+  town = true
+): ScreenWatchObservation {
+  return { town, kind, crops }
+}
 
 function party(crops: NameCrops | null, town = true): ScreenWatchObservation {
-  return { town, kind: 'party', crops }
+  return observe('party', crops, town)
 }
 
 function raid(crops: NameCrops | null): ScreenWatchObservation {
-  return { town: true, kind: 'raid', crops }
+  return observe('raid', crops)
 }
 
 function watch(
@@ -85,17 +144,25 @@ function withBaselines(baselines: Partial<Record<ScreenWatchKind, NameCrops>>): 
   return state
 }
 
-function partyTwiceAgainst(
+function twiceAgainst(
+  kind: ScreenWatchKind,
   baseline: DNFParticipantFrame,
-  observed: DNFParticipantFrame
+  first: DNFParticipantFrame,
+  second = first
 ): ScreenWatchSignal[] {
-  const state = withBaselines({ party: [baseline] })
+  const state = withBaselines({ [kind]: [baseline] })
 
-  return watch([party([observed]), party([observed])], state).signals
+  return watch([observe(kind, [first]), observe(kind, [second])], state).signals
 }
 
+function starts(kind: ScreenWatchKind): ScreenWatchSignal[] {
+  return ['none', { kind }]
+}
+
+const KINDS: readonly ScreenWatchKind[] = ['party', 'raid']
+
 const NO_START = ['none', 'none']
-const STARTS_PARTY = ['none', { kind: 'party' }]
+const STARTS_PARTY = starts('party')
 
 it('마을이 아니면 새 구성이 보여도 시작하지 않고, 그 틱은 연속 횟수를 끊는다', () => {
   expect(watch([party(partyB, false), party(partyB, false)]).signals).toEqual(NO_START)
@@ -132,127 +199,105 @@ it('기준과 같은 구성이 계속 보이면 시작하지 않는다', () => {
   )
 })
 
-it('채널 차이가 32 이하인 픽셀은 바뀐 픽셀로 세지 않고, 33부터 센다', () => {
-  const base = crop(100)
+it.each(KINDS)(
+  '%s 화면에서 배경 색만 노랑에서 보라, 하늘색으로 바뀌면 같은 구성으로 본다',
+  (kind) => {
+    const glyphs: Glyph[] = ['full', 'upper']
+    const baseline = nameCrop(glyphs, { background: YELLOW })
 
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, allPixels(base), () => [32, 32, 32])
-    )
-  ).toEqual(NO_START)
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, allPixels(base), () => [33, 0, 0])
-    )
-  ).toEqual(STARTS_PARTY)
-})
-
-it('바뀐 픽셀이 9개면 같은 구성, 10개면 다른 구성으로 본다', () => {
-  const base = crop(100)
-
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, firstPixels(9), () => [33, 33, 33])
-    )
-  ).toEqual(NO_START)
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, firstPixels(10), () => [33, 33, 33])
-    )
-  ).toEqual(STARTS_PARTY)
-})
-
-it('세 채널 중 하나만 크게 달라도 바뀐 픽셀로 센다', () => {
-  const base = crop(100)
-
-  for (const delta of [
-    [60, 0, 0],
-    [0, 60, 0],
-    [0, 0, -60]
-  ]) {
-    expect(
-      partyTwiceAgainst(
-        base,
-        shiftPixels(base, allPixels(base), () => delta)
-      )
-    ).toEqual(STARTS_PARTY)
+    for (const background of [PURPLE, SKY]) {
+      expect(twiceAgainst(kind, baseline, nameCrop(glyphs, { background }))).toEqual(NO_START)
+    }
   }
-})
+)
 
-it('채널 차이의 부호가 섞여 합하면 0이어도 바뀐 픽셀로 센다', () => {
-  const base = crop(100)
+it.each(KINDS)(
+  '%s 화면에서 배경 색이 프레임마다 바뀌어도 새 구성이 2번 연속 보이면 시작한다',
+  (kind) => {
+    expect(
+      twiceAgainst(
+        kind,
+        nameCrop(['full', 'upper'], { background: YELLOW }),
+        nameCrop(['full', 'lower'], { background: PURPLE }),
+        nameCrop(['full', 'lower'], { background: SKY })
+      )
+    ).toEqual(starts(kind))
+  }
+)
 
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, allPixels(base), () => [40, -40, 0])
-    )
-  ).toEqual(STARTS_PARTY)
-})
+// 같은 폭의 한 음절이 바뀐 이름이다. upper와 middle은 24픽셀이 달라, 이름 전체가 다른 쌍의 최소 79보다 작다.
+it.each(KINDS)(
+  '%s 화면에서 같은 폭의 글자 하나가 획 일부만 달라져도 다른 구성으로 본다',
+  (kind) => {
+    expect(
+      twiceAgainst(kind, nameCrop(['full', 'upper', 'full']), nameCrop(['full', 'middle', 'full']))
+    ).toEqual(starts(kind))
+  }
+)
 
-it('alpha만 다른 crop은 같은 구성으로 본다', () => {
-  const base = crop(100)
+it.each(KINDS)(
+  '%s 화면에서 글자 여부가 다른 픽셀이 9개면 같은 구성, 10개면 다른 구성으로 본다',
+  (kind) => {
+    const base = nameCrop(['full', 'full'])
 
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, allPixels(base), () => [0, 0, 0, -255])
-    )
-  ).toEqual(NO_START)
-})
+    expect(twiceAgainst(kind, base, withExtraText(base, 9))).toEqual(NO_START)
+    expect(twiceAgainst(kind, base, withExtraText(base, 10))).toEqual(starts(kind))
+  }
+)
 
-it('이름 crop 전체에 고르게 퍼진 1~3 흔들림은 같은 구성으로 남는다', () => {
-  const base = crop(100, 73, 16)
-  const jitter = [
-    [1, -2, 3],
-    [-3, 1, -1],
-    [2, 3, -2]
-  ]
+// 반투명한 공대 이름 칸에 비치는 밝은 반점이다. BT.601 회색으로는 연노랑 글자처럼 글자로 남는다.
+it('공대 이름 칸의 반점이 옮겨 가도 같은 구성으로 보고, 반점 속에서도 새 구성은 시작한다', () => {
+  const sparkles = (offset: number) => (pixel: number) =>
+    (pixel + offset) % 5 === 0 ? ([250, 230, 60] as const) : YELLOW
+  const text: Rgb = [255, 240, 150]
+  const name = (glyphs: readonly Glyph[], offset: number) =>
+    nameCrop(glyphs, { background: sparkles(offset), text })
 
-  expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, allPixels(base), (pixel) => jitter[pixel % 3])
-    )
-  ).toEqual(NO_START)
-})
-
-// 73×16 crop에서 48픽셀을 100씩 바꾸면 RGB 평균 차이는 약 4라, 평균 6 기준이었다면 놓치는 변화다.
-it('글자 하나 크기만큼 국소적으로 바뀌면 나머지가 같아도 다른 구성으로 본다', () => {
-  const base = crop(40, 73, 16)
-  const glyph = Array.from(
-    { length: 6 * 8 },
-    (_, index) => 60 + Math.floor(index / 6) * 73 + (index % 6)
+  expect(twiceAgainst('raid', name(['full', 'upper'], 0), name(['full', 'upper'], 2))).toEqual(
+    NO_START
   )
+  expect(
+    twiceAgainst(
+      'raid',
+      name(['full', 'upper'], 0),
+      name(['full', 'lower'], 2),
+      name(['full', 'lower'], 4)
+    )
+  ).toEqual(starts('raid'))
+})
+
+it('공대 선택 행 테두리가 생기거나 사라져도 같은 구성으로 본다', () => {
+  const base = nameCrop(['full', 'upper'], { background: YELLOW })
+  const selected = paint(base, block(0, 0, NAME_WIDTH, 1), [180, 200, 255])
+
+  expect(twiceAgainst('raid', base, selected)).toEqual(NO_START)
+})
+
+// 가장 어두운 채널은 글자와 배경이 같은 20이라 공대 이진화로는 글자가 남지 않는다.
+it('파티 이름은 가장 어두운 채널이 배경과 같은 색 글자도 BT.601 회색으로 갈라 다른 구성을 찾는다', () => {
+  const colors = { background: [20, 20, 20] as const, text: [220, 20, 20] as const }
 
   expect(
-    partyTwiceAgainst(
-      base,
-      shiftPixels(base, glyph, () => [100, 100, 100])
-    )
+    twiceAgainst('party', nameCrop(['full', 'upper'], colors), nameCrop(['full', 'lower'], colors))
   ).toEqual(STARTS_PARTY)
 })
 
 it('자리 수나 빈 자리가 달라지면 같은 crop이 남아 있어도 다른 구성으로 본다', () => {
-  const state = withBaselines({ party: [crop(10), null] })
+  const state = withBaselines({ party: [nameA, null] })
   const twice = (crops: NameCrops) => watch([party(crops), party(crops)], state).signals
 
-  expect(twice([crop(10), null])).toEqual(NO_START)
-  expect(twice([crop(10), null, null])).toEqual(STARTS_PARTY)
-  expect(twice([crop(10), crop(10)])).toEqual(STARTS_PARTY)
+  expect(twice([nameA, null])).toEqual(NO_START)
+  expect(twice([nameA, null, null])).toEqual(STARTS_PARTY)
+  expect(twice([nameA, nameA])).toEqual(STARTS_PARTY)
   expect(twice([null, null])).toEqual(STARTS_PARTY)
 })
 
-it('한 자리라도 crop 폭이나 높이가 다르면 색이 같아도 다른 구성으로 본다', () => {
-  expect(partyTwiceAgainst(crop(20), crop(20, 9, 4))).toEqual(STARTS_PARTY)
-  expect(partyTwiceAgainst(crop(20), crop(20, 8, 5))).toEqual(STARTS_PARTY)
+it('한 자리라도 crop 폭이나 높이가 다르면 글자가 없어도 다른 구성으로 본다', () => {
+  expect(twiceAgainst('party', sized(8, 4), sized(9, 4))).toEqual(STARTS_PARTY)
+  expect(twiceAgainst('party', sized(8, 4), sized(8, 5))).toEqual(STARTS_PARTY)
 
-  const state = withBaselines({ party: [crop(10), crop(20)] })
-  const resized = [crop(10), crop(20, 8, 5)]
+  const state = withBaselines({ party: [nameA, sized(8, 4)] })
+  const resized = [nameA, sized(8, 5)]
 
   expect(watch([party(resized), party(resized)], state).signals).toEqual(STARTS_PARTY)
 })
@@ -283,7 +328,7 @@ it('새 구성 사이에 그 화면을 찾지 못한 틱이 끼면 다시 센다
 })
 
 it('기준과 다른 두 관측이 서로 허용 범위 안이면 시작한다', () => {
-  const nearB = partyB.map((name) => name && shiftPixels(name, firstPixels(9), () => [33, 33, 33]))
+  const nearB = [withExtraText(nameA, 9), ...partyB.slice(1)]
 
   expect(watch([party(partyB), party(nearB)], withBaselines({ party: partyA })).signals).toEqual(
     STARTS_PARTY
