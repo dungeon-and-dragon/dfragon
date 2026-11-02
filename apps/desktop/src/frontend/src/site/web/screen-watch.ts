@@ -18,12 +18,12 @@ export type ScreenWatchState = Readonly<{
 
 export type ScreenWatchSignal = 'none' | Readonly<{ kind: ScreenWatchKind }>
 
-// #1076에서 화면 공유 프레임의 색은 원본과 채널마다 1~3 달랐다. 최대 3의 10배 남짓을 넘어야 바뀐
-// 픽셀로 세어, 흔들림과 YUV 4:2:0 변환이 글자 가장자리에 남기는 차이는 세지 않는다.
+// 잠정 값이다. #1076에서 색 패턴의 원본과 공유 결과는 채널마다 1~3 달랐고, 32는 그 흔들림을 넘는다.
+// 글자 가장자리의 YUV 4:2:0 차이가 32 이하라는 근거는 없어 #1110에서 실제 공유 crop으로 다시 맞춘다.
 const CHANGED_PIXEL_CHANNEL_DIFFERENCE = 32
-// 1067×600 파티 이름 crop(73×16)에서 글자 하나는 수십 픽셀을 바꾼다고 보고, 그보다 적은 수만 넘으면
-// 같은 구성으로 둔다. 글자 하나만 다른 실제 이름 쌍으로 잰 값은 아니다. 두 상수 모두 실제 공유
-// 프레임으로 맞춘 값이 아니어서 #1110에서 다시 본다.
+// 잠정 값이다. 바뀐 픽셀이 10개 미만이면 같은 구성, 10개 이상이면 다른 구성이다. 73×16 이름 crop에서
+// 글자 하나가 수십 픽셀을 바꾼다는 추정에서 정했고, 그중 채널 차이가 32를 넘는 픽셀이 10개 이상인지는
+// 재지 않았다. #1110에서 같은 이름과 한 글자만 다른 이름의 실제 공유 crop으로 다시 맞춘다.
 const CHANGED_PIXELS_FOR_NEW_NAME = 10
 
 export const initialScreenWatchState: ScreenWatchState = {
