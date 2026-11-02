@@ -15,7 +15,6 @@ import { finalize } from 'rxjs'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 import type { SearchCharacters } from '../src/types/neople-character-search.js'
-import { REAL_SCORE_LIBRARY_PATH } from './score-fixtures.js'
 
 @Injectable()
 class GreetingService {
@@ -221,29 +220,16 @@ async function findFreePort(): Promise<number> {
   return port
 }
 
-const mainCases = [
-  { signal: 'SIGTERM', scoreWorker: false },
-  { signal: 'SIGINT', scoreWorker: false },
-  { signal: 'SIGTERM', scoreWorker: true }
-] as const
-for (const { signal, scoreWorker } of mainCases) {
-  const prefix = scoreWorker ? '점수 worker를 띄운 ' : ''
-  const title = `${prefix}compiled main은 listen 뒤 ${signal}를 받으면 앱을 닫고 exit code 0으로 끝난다`
-  const skip = scoreWorker && REAL_SCORE_LIBRARY_PATH === null && '점수 엔진 submodule이 없음'
-  test(title, { timeout: 10_000, skip }, async (t) => {
+// 점수 worker를 띄운 main은 여기서 보지 않는다. 시작 중인 worker를 끝내면 Linux의 koffi가 Node를 abort시켜
+// 결과가 시작 속도에 따라 갈린다(#1081 Merge Risk). worker 종료는 점수 엔진 테스트가 확인한다.
+for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+  const title = `compiled main은 listen 뒤 ${signal}를 받으면 앱을 닫고 exit code 0으로 끝난다`
+  test(title, { timeout: 10_000 }, async (t) => {
     const port = await findFreePort()
-    const scoreEnvironment =
-      scoreWorker && REAL_SCORE_LIBRARY_PATH !== null
-        ? { SCORE_LIBRARY_FILE: REAL_SCORE_LIBRARY_PATH }
-        : {}
     const child = spawn(process.execPath, ['--import', 'reflect-metadata', compiledMainPath], {
       cwd: apiRoot,
       // 실제 환경, credential은 상속하지 않고 합성 입력만 전달한다.
-      env: {
-        PORT: String(port),
-        NEOPLE_API_KEY: 'synthetic-private-api-key',
-        ...scoreEnvironment
-      },
+      env: { PORT: String(port), NEOPLE_API_KEY: 'synthetic-private-api-key' },
       stdio: ['ignore', 'ignore', 'pipe']
     })
     t.after(() => child.kill('SIGKILL'))

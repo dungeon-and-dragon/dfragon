@@ -26,6 +26,7 @@ test('공용 빌드 입력은 모든 서비스를 선택한다', () => {
   for (const path of [
     'packages/lib/src/index.ts',
     'packages/licenses/notices/unknown.txt',
+    'packages/models/score-engine',
     'package.json',
     'pnpm-lock.yaml',
     'pnpm-workspace.yaml',
