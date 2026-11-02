@@ -165,9 +165,9 @@ export function findParticipantAnchors(
   return anchors
 }
 
-function headingPattern(
+export function headingPattern(
   heading: Uint8Array,
-  layout: ParticipantHeadingLayout,
+  layout: Pick<ParticipantHeadingLayout, 'width' | 'height'>,
   width: number,
   height: number,
   frameWidth: number,
@@ -204,7 +204,12 @@ function headingPattern(
   return { width, height, offsets: patternOffsets, weights, energy }
 }
 
-function headingScore(frame: ParticipantGrayFrame, pattern: Pattern, x: number, y: number): number {
+export function headingScore(
+  frame: ParticipantGrayFrame,
+  pattern: Pattern,
+  x: number,
+  y: number
+): number {
   let sum = 0
   let squares = 0
   let product = 0
