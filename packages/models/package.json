@@ -9,6 +9,7 @@
     "./ocr-finetuned/NOTICE": "./ocr-finetuned/NOTICE",
     "./score-engine/dnfscore.dll": "./score-engine/dnfscore.dll",
     "./score-engine/libdnfscore.dylib": "./score-engine/libdnfscore.dylib",
+    "./score-engine/libdnfscore.so": "./score-engine/libdnfscore.so",
     "./package.json": "./package.json"
   }
 }

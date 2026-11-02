@@ -7,6 +7,9 @@ import { type LoadCharacter, createCharacterCache } from './character-cache.js'
 import { type NeopleStageTimings, elapsedMs } from './neople-stages.js'
 import type { CatalogService } from '../catalog/service.js'
 import { projectCharacterCard } from '../card/project.js'
+import { cardScoreCalculator, withCardScore } from '../card/score.js'
+import type { ScoreEngine } from '../../score/engine.js'
+import { toScoreEngineInput } from '../../score/input.js'
 
 export interface CharacterDetailResponse {
   body: Buffer
@@ -16,6 +19,7 @@ export interface CharacterDetailResponse {
 export interface CharacterDetailDependencies {
   fetchDetails: FetchCharacterDetails
   catalog: CatalogService
+  calculateScore: ScoreEngine['calculate']
 }
 
 export { parseCharacterIdentity } from '../identity.js'
@@ -55,11 +59,14 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
       const { payloads, fetchedAt } = character
       const projected = projectCharacterDetails(identity, payloads, fetchedAt)
       const freshness = projectCharacterFreshness(fetchedAt)
-      const card = projectCharacterCard(projected)
       const catalogStartedAt = performance.now()
-      const details = await enrichCharacterDetails(projected, deps.catalog, signal)
+      const { details, items } = await enrichCharacterDetails(projected, deps.catalog, signal)
       timings.record('catalog', elapsedMs(catalogStartedAt))
       signal.throwIfAborted()
+      const unscored = projectCharacterCard(projected)
+      const input = toScoreEngineInput(payloads, items)
+      const result = await deps.calculateScore(input, cardScoreCalculator(unscored.role), signal)
+      const card = withCardScore(unscored, result)
       // Express `json` serializes with plain JSON.stringify unless the app sets a replacer, spaces or escape, and
       // this app sets none, so the stored bytes match what `json` sent before.
       const body = Buffer.from(JSON.stringify({ ...details, freshness, card }))

@@ -2,8 +2,8 @@
 type: rule
 status: active
 scope: apps/api character details
-last-reviewed: 2026-10-31
-evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간, 캐릭터 1시간 메모리 캐시와 강제 갱신 API; 2026-10-30 #996 응답 본문 재사용; 2026-10-31 Cloudflare Tunnel 공개 경로"
+last-reviewed: 2026-11-03
+evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간, 캐릭터 1시간 메모리 캐시와 강제 갱신 API; 2026-10-30 #996 응답 본문 재사용; 2026-10-31 Cloudflare Tunnel 공개 경로; 2026-11-01 ADR 0004 API 점수 계산"
 ---
 
 # 캐릭터 상세 정보
@@ -36,7 +36,7 @@ evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간,
 
 ## 응답 본문 재사용
 
-캐릭터 캐시 항목마다 완성한 응답 JSON 본문을 함께 둔다(2026-10-30 결정, [Issue #996](https://github.com/dungeon-and-dragon/dfragon/issues/996)). 캐시가 맞은 상세 GET은 응답을 다시 조립하거나 직렬화하지 않고 저장한 본문을 그대로 보낸다. 저장한 본문은 캐시 없이 만든 응답과 바이트 단위로 같고 `Content-Type: application/json; charset=utf-8`도 같다. 캐릭터 항목이 만료되거나 밀려나거나 강제 갱신으로 바뀌면 본문도 함께 사라진다. 강제 갱신이 새로 만든 응답은 이후 상세 GET이 보내는 본문이 된다.
+캐릭터 캐시 항목마다 완성한 응답 JSON 본문을 함께 둔다(2026-10-30 결정, [Issue #996](https://github.com/dungeon-and-dragon/dfragon/issues/996)). 캐시가 맞은 상세 GET은 응답을 다시 조립하거나 직렬화하지 않고 저장한 본문을 그대로 보낸다. 저장한 본문은 캐시 없이 만든 응답과 바이트 단위로 같고 `Content-Type: application/json; charset=utf-8`도 같다. 캐릭터 항목이 만료되거나 밀려나거나 강제 갱신으로 바뀌면 본문도 함께 사라진다. 강제 갱신이 새로 만든 응답은 이후 상세 GET이 보내는 본문이 된다. 저장한 본문에는 [카드 점수](#카드-투영)도 들어 있어, 본문을 보낸 요청은 점수를 다시 계산하지 않는다.
 
 공용 아이템 상세가 하나라도 `unavailable`인 응답은 저장하지 않는다. 다음 요청이 그 아이템을 다시 조회하게 하기 위해서다. 저장한 본문 안의 공용 아이템 상세는 캐릭터 항목이 사는 동안(최대 1시간) 고정된다. 그 사이 공용 아이템 캐시가 새 값을 받아도 이 본문에 반영되지 않는 것은 감수한다(2026-10-30 결정, [Issue #996](https://github.com/dungeon-and-dragon/dfragon/issues/996)).
 
@@ -44,11 +44,11 @@ evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간,
 
 ## 카드 투영
 
-응답 최상위 `card`는 Desktop 카드의 캐릭터 면이 쓰는 역할이다. 형태는 [#716](https://github.com/dungeon-and-dragon/dfragon/issues/716)의 공유 계약을 따르며 `apps/api/src/characters/card/project.ts`의 순수 함수가 HTTP 없이 만든다. Desktop은 캐릭터 면만 두므로 API는 역할만 정한다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)).
+응답 최상위 `card`는 카드의 캐릭터 면이 쓰는 역할과 점수다. 형태는 [#716](https://github.com/dungeon-and-dragon/dfragon/issues/716)의 공유 계약을 따른다. 역할은 `apps/api/src/characters/card/project.ts`의 순수 함수가 HTTP 없이 정하고(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)), 점수는 공용 아이템 상세를 붙인 뒤 API의 점수 엔진이 계산한다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)).
 
 - `role`: 기본정보 `jobGrowName`에서 앞의 `眞`을 뺀 이름이 크루세이더, 인챈트리스, 패러메딕, 뮤즈면 `buffer`, 다른 문자열이면 `dealer`, 문자열이 아니면 null이다. Desktop은 이 값으로 점수 계산기를 고른다.
-- `score`: 항상 null이다. 장비 점수는 Desktop main이 네이티브 점수 엔진으로 채운다. 서버는 점수를 계산하지 않는다.
-- `stats`, `serverRank`, `set`, `oath`는 항상 null이고 `investment`는 항상 빈 배열이다. 카드의 스탯 한 줄, 서버 내 명성 순위, 장비 면, 기타 면에 쓰던 값이다. 이미 배포된 Desktop이 카드 전체를 strict 스키마로 검사하므로, 그 버전이 역할과 점수를 계속 표시하도록 필드만 남긴다. 새 Desktop은 역할만 읽는다.
+- `score`: `role`이 `buffer`면 버프 점수, 그 밖은 장비 점수다. API의 [점수 worker](../architecture/overview.md#점수-엔진-경계)가 받은 Neople 섹션 원문과 공용 아이템 상세를 엔진에 넣어 계산한다. 형태는 Desktop renderer가 쓰는 값과 같다. `calculator`는 `equipment`나 `buff`, `value`는 점수, `versions`는 엔진의 `package`, `rulesRev`, `bundleId`다. 엔진이 점수를 건너뛰면 `value`가 null이고 `skipped`에 `kind`, `message`가 있으며, 근사값을 냈으면 `approximate`에 `value`, `source`, `warning`이 있다. 엔진이 없거나 결과를 내지 못하면 `score`가 null이다. 배포된 Desktop v1.0.0, v1.0.2는 card에서 `role`만 읽고 다른 칸은 버리므로 이 값을 쓰지 않는다.
+- `stats`, `serverRank`, `set`, `oath`는 항상 null이고 `investment`는 항상 빈 배열이다. 카드의 스탯 한 줄, 서버 내 명성 순위, 장비 면, 기타 면에 쓰던 값이며 응답 형태를 바꾸지 않으려고 필드만 남긴다. v0.1.0 이후 배포된 Desktop은 card에서 `role`만 읽는다.
 
 모험단명으로 저장된 캐릭터를 찾던 `GET /adventures/characters`도 DB에만 있던 기능이라 지웠다. 이 경로는 일반 404다.
 

@@ -24,7 +24,9 @@ Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
 `SCORE_LIBRARY_FILE`은 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로입니다.
 지정하면 앱을 만들 때 점수 worker 하나를 띄우고, listen을 기다리지 않고 그 worker에서 딜러, 버퍼 준비 계산을 한 번씩 합니다.
 빈 값과 상대 경로는 시작 전에 거절하고, 지정하지 않으면 점수 없이 실행합니다.
+계산한 점수는 캐릭터 상세 응답의 [`card.score`](../../docs/rules/character-details.md#카드-투영)에 들어가고 응답 본문과 함께 1시간 캐시됩니다.
 파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둡니다. 로컬에서는 점수 엔진 submodule의 파일을 지정할 수 있습니다.
+[서버 이미지](#서버-이미지)는 이미지 안의 Linux 엔진 `/app/score-engine/libdnfscore.so`를 이 값으로 지정합니다.
 
 Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절대 경로에서 읽습니다. GitHub나 특정 secret manager가
 필요하지 않으며 self-host 운영자가 준비한 환경변수, 읽기 전용 파일을 사용할 수 있습니다.
@@ -100,8 +102,9 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ## 서버 이미지
 
 [Product Images](../../.github/workflows/product-images.yml)는 서버 이미지 입력이 바뀌었을 때만 API 이미지를 빌드합니다.
-`apps/api/**`, `packages/lib/**`, `packages/licenses/**`와 root package, lockfile, workspace 설정,
+`apps/api/**`, `packages/lib/**`, `packages/licenses/**`, `packages/models/**`와 root package, lockfile, workspace 설정,
 이미지 workflow, 선택 도구, 커밋 정보 생성기(`scripts/server-build-info.mjs`) 변경이 해당합니다.
+`packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진만 바꾼 PR도 이미지를 다시 빌드합니다.
 그 안의 `*.md` 문서는 이미지에 들어가지 않으므로 입력으로 보지 않습니다.
 지운 accounts, OCR 이미지는 더 빌드하지 않습니다.
 서버 이미지 입력이 없는 문서, Desktop 전용 변경은 이미지 빌드, 발행을 건너뜁니다.
@@ -158,7 +161,10 @@ GHCR의 공개 범위, 접근 정책은 workflow가 변경하지 않습니다. �
 제품 main merge는 운영 배포를 실행하지 않으며 Product Images는 인프라 checkout, 운영 credential에 의존하지 않습니다.
 
 Dockerfile과 전용 ignore 파일은 `apps/api/`에 있습니다. 빌드 context는 제품 저장소 root이며
-`docker-entrypoint.sh`도 앱 옆에서 관리합니다. 의존성 설치에는 registry 토큰이나 BuildKit secret이 필요하지 않습니다. 로컬 빌드는 다음과 같습니다.
+`docker-entrypoint.sh`도 앱 옆에서 관리합니다. 의존성 설치에는 registry 토큰이나 BuildKit secret이 필요하지 않습니다.
+이미지는 점수 엔진 submodule의 Linux 엔진 `libdnfscore.so`와 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
+엔진 파일이 없으면 빌드에 실패하므로, 로컬 빌드 전에 `git submodule update --init packages/models/score-engine`으로 엔진을 받습니다.
+Product Images의 빌드 job도 이 submodule만 받습니다. 로컬 빌드는 다음과 같습니다.
 
 ```sh
 docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .

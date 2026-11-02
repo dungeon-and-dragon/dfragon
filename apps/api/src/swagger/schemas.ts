@@ -90,6 +90,37 @@ const retiredNull = (description: string): SchemaObject => ({
   enum: [null],
   description: `항상 null. ${description} 이전 Desktop과의 호환을 위해 필드만 남깁니다.`
 })
+const nonblankText: SchemaObject = { type: 'string', minLength: 1 }
+const cardScore: SchemaObject = {
+  ...object({
+    calculator: {
+      type: 'string',
+      enum: ['equipment', 'buff'],
+      description: 'role이 buffer면 buff(버프 점수), 그 밖은 equipment(장비 점수).'
+    },
+    value: {
+      type: 'integer',
+      nullable: true,
+      description: '엔진이 낸 점수. 엔진이 점수를 건너뛰면 null이고 skipped에 사유가 있습니다.'
+    },
+    skipped: { ...object({ kind: nonblankText, message: nonblankText }), nullable: true },
+    approximate: {
+      ...object({ value: { type: 'integer' }, source: nonblankText, warning: nonblankText }),
+      nullable: true,
+      description: '엔진이 점수를 건너뛰고 근사값을 낸 경우의 값, 근사 방법, 경고.'
+    },
+    versions: object({ package: nonblankText, rulesRev: nonblankText, bundleId: nonblankText })
+  }),
+  nullable: true,
+  description: 'API 점수 엔진이 계산한 점수. 엔진이 없거나 결과를 내지 못하면 null.',
+  example: {
+    calculator: 'equipment',
+    value: 1769,
+    skipped: null,
+    approximate: null,
+    versions: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+  }
+}
 const characterCard = object({
   role: {
     type: 'string',
@@ -99,7 +130,7 @@ const characterCard = object({
       'jobGrowName이 크루세이더, 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)면 buffer, 그 밖은 dealer, 직업을 모르면 null.'
   },
   stats: retiredNull('카드 스탯 한 줄의 값이었습니다.'),
-  score: retiredNull('장비 점수는 Desktop 점수 엔진이 채웁니다.'),
+  score: cardScore,
   serverRank: retiredNull('저장한 캐릭터끼리 비교하던 명성 순위였습니다.'),
   set: retiredNull('카드 장비 면의 세트 값이었습니다.'),
   oath: retiredNull('카드 장비 면의 서약 값이었습니다.'),
@@ -244,7 +275,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
     ),
     card: {
       ...characterCard,
-      description: '카드의 역할. 직업을 모르면 null이며 점수는 Desktop이 채웁니다.'
+      description: '카드의 역할과 점수. 역할은 직업을 모르면 null입니다.'
     }
   }),
   TodayGrade: object({

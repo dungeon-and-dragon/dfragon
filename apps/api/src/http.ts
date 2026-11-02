@@ -20,7 +20,7 @@ import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
-import { SCORE_ENGINE, createScoreEngine } from './score/engine.js'
+import { SCORE_ENGINE, type ScoreEngine, createScoreEngine } from './score/engine.js'
 import {
   type AccessLogSink,
   createAccessLog,
@@ -88,7 +88,7 @@ class HealthController {
 
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
-  readonly details: CharacterDetailDependencies
+  readonly details: Omit<CharacterDetailDependencies, 'calculateScore'>
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -125,7 +125,12 @@ export async function createApiHttpApp({
     providers: [
       { provide: API_BUILD_INFO, useValue: buildInfo },
       { provide: CHARACTER_SEARCH_SERVICE, useValue: createCharacterSearchService(search) },
-      { provide: CHARACTER_DETAIL_SERVICE, useValue: createCharacterDetailService(details) },
+      {
+        provide: CHARACTER_DETAIL_SERVICE,
+        inject: [SCORE_ENGINE],
+        useFactory: (engine: ScoreEngine) =>
+          createCharacterDetailService({ ...details, calculateScore: engine.calculate })
+      },
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
         provide: TODAY_GRADE_SERVICE,
