@@ -4,7 +4,7 @@ status: accepted
 scope: dfragon.com web client, apps/api score and portrait boundary, apps/desktop shared search core
 decided: 2026-11-01
 last-reviewed: 2026-11-01
-superseded-by: 없음
+superseded-by: "0005-web-town-auto-recognition.md(화면 공유 중 회차를 시작하는 방식에 한함)"
 evidence: "Issue #1074 정한 것, 구조, 확인한 사실(https://github.com/dungeon-and-dragon/dfragon/issues/1074) ; 저장소 소유자 결정(2026-11-01) ; 네오플 초상화와 운영 API 응답의 CORS 헤더 확인(2026-11-01) ; Issue #1076 화면 공유 실기 확인(2026-11-01, Windows 10, Chrome, Edge, https://github.com/dungeon-and-dragon/dfragon/issues/1076#issuecomment-6553122671)"
 review-after: 모바일 지원 범위, 웹에서 화면 이미지를 서버로 보내는 기능, 별도 workspace package 도입 전
 ---
