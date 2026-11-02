@@ -36,9 +36,10 @@ export function useCharacterSearch(onInvalidated: () => void): CharacterSearch {
   const setPick = useCallback((slot: number, pick: CandidatePick | null): void => {
     setPicks((current) => current.map((value, index) => (index === slot ? pick : value)))
   }, [])
+  // 서버를 고른 조회는 확정이고, 서버 없이 고른 조회는 OCR처럼 확정하지 못하면 후보 창을 다시 띄운다.
   const lookupSlot = useCallback(
-    (slot: number, nickname: string, serverId: string): void => {
-      setPick(slot, DIRECT_LOOKUP_PICK)
+    (slot: number, nickname: string, serverId?: string): void => {
+      setPick(slot, serverId === undefined ? null : DIRECT_LOOKUP_PICK)
       lookup(slot, nickname, serverId)
     },
     [lookup, setPick]

@@ -38,7 +38,7 @@ export function useLookupDraft({
   cardKey: SlotCardKey
   character?: LookupCharacter
   nickname?: string
-  onLookup: (nickname: string, serverId: string) => void
+  onLookup: (nickname: string, serverId?: string) => void
 }): LookupDraft {
   const stored = useSlotCardState(cardKey).lookupDraft
   const updateSlotCard = useSlotCardStore((state) => state.updateSlotCard)
@@ -61,13 +61,8 @@ export function useLookupDraft({
     updateSlotCard(cardKey, { lookupDraft: next })
   }
 
-  function submit(base: StoredLookupDraft, serverId: string): void {
-    if (serverId.length === 0) {
-      save({ ...base, inputNotice: '서버를 선택해 주세요.' })
-
-      return
-    }
-
+  // 이름 칸 Enter는 서버 없이 보내 main이 그 자리의 OCR 관측으로 서버를 고르고, 서버 칩만 그 서버로 조회한다.
+  function submit(base: StoredLookupDraft, serverId?: string): void {
     if (base.name.trim().length === 0) {
       save({ ...base, inputNotice: '캐릭터 이름을 입력해 주세요.' })
 
@@ -97,7 +92,7 @@ export function useLookupDraft({
     changeServer: (value) => submit({ ...draft, serverId: value, dirty: true }, value),
     focusName: () => setNameFocused(true),
     blurName: () => setNameFocused(false),
-    submit: () => submit(draft, draft.serverId)
+    submit: () => submit(draft)
   }
 }
 
@@ -149,8 +144,12 @@ function keepsUserInput(draft: StoredLookupDraft, character?: LookupCharacter): 
   if (draft.submitted === null) {
     return false
   }
+  const { name, serverId } = draft.submitted
+  if (serverId === undefined) {
+    return name !== character?.name
+  }
 
-  return !isSameTarget(draft.submitted, character ?? {})
+  return !isSameTarget({ name, serverId }, character ?? {})
 }
 
 function isSameTarget(a: LookupTarget, b: LookupTarget): boolean {
