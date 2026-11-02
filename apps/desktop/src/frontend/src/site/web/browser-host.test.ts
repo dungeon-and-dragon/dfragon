@@ -4,7 +4,8 @@ import {
   detectPartyFrameGeometry,
   PartyFrameGeometryError,
   type DNFParticipantFrame,
-  type DNFRectangle
+  type DNFRectangle,
+  type PartyFrameSlot
 } from '@dfragon/lib'
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
 import type { CharacterImage } from '../../../../preload/common/types/character'
@@ -68,8 +69,14 @@ function stubVideoDecode(): void {
   })
 }
 
-// 합성 장면이다. party, raid 값은 그 화면 이름 crop의 회색 값이고 null이면 그 화면의 창이 없다.
-type Scene = Readonly<{ town: boolean; party: number | null; raid: number | null }>
+// 합성 장면이다. party, raid 값은 그 화면 이름 crop의 회색 값이고 null이면 그 화면의 창이 없다. 파티 이름은
+// partySlot 슬롯 하나에만 보인다.
+type Scene = Readonly<{
+  town: boolean
+  party: number | null
+  partySlot: PartyFrameSlot
+  raid: number | null
+}>
 
 const FRAME_SIZE = 4
 const scenes = new WeakMap<object, Scene>()
@@ -88,7 +95,7 @@ function solid(gray: number): CharacterImage {
 
 // 파티 이름 영역은 프레임 전체이고, 프레임의 픽셀이 곧 파티 이름 crop이다.
 function gameFrame(scene: Partial<Scene>): CharacterImage {
-  const resolved: Scene = { town: true, party: null, raid: null, ...scene }
+  const resolved: Scene = { town: true, party: null, partySlot: 2, raid: null, ...scene }
   const frame = solid(resolved.party ?? 0)
   scenes.set(frame, resolved)
 
@@ -102,11 +109,12 @@ function stubDetectors(): void {
       : { status: 'not-found' }
   )
   vi.mocked(detectPartyFrameGeometry).mockImplementation((frame) => {
-    if (scenes.get(frame)?.party == null) {
+    const scene = scenes.get(frame)
+    if (scene?.party == null) {
       throw new PartyFrameGeometryError('no-anchor')
     }
 
-    return { scale: 1, slots: [{ slot: 2, ...region, coverage: region }] }
+    return { scale: 1, slots: [{ slot: scene.partySlot, ...region, coverage: region }] }
   })
   vi.mocked(cropRaidWindowNicknames).mockImplementation((frame) => {
     const name = scenes.get(frame)?.raid
@@ -321,13 +329,14 @@ it('신호로 시작한 회차는 판정에 쓴 프레임을 읽고, 그 구성�
   showGame(judged)
   await passTick()
   await passTick()
-  const sameNames = gameFrame({ party: 40 })
-  showGame(sameNames)
+  showGame(gameFrame({ party: 90 }))
 
   await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({
     kind: 'frame',
     image: judged
   })
+  const sameNames = gameFrame({ party: 40 })
+  showGame(sameNames)
   await passTick()
   await passTick()
   expect(signals).toHaveBeenCalledOnce()
@@ -435,10 +444,112 @@ it('회차가 진행 중이면 프레임을 읽지 않고, 읽는 동안 회차�
   vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
   await passTick()
   host.setWatchedScreen({ kind: 'party', roundRunning: true })
+  const detections = vi.mocked(detectDNFTownIndicator).mock.calls.length
   resolve(gameFrame({ party: 40 }))
   await passTick()
 
   expect(signals).not.toHaveBeenCalled()
+  expect(detectDNFTownIndicator).toHaveBeenCalledTimes(detections)
+})
+
+it('프레임을 읽는 동안 회차가 시작해 프레임을 읽고 끝나면, 회차 전에 읽기 시작한 틱의 결과를 버린다', async () => {
+  const { signals } = await connectWatchedShare()
+  showGame(gameFrame({ party: 90 }))
+  const { promise, resolve } = Promise.withResolvers<CharacterImage>()
+  vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
+  await passTick()
+
+  host.setWatchedScreen({ kind: 'party', roundRunning: true })
+  await window.api.readCaptureFrame('capture')
+  host.setWatchedScreen({ kind: 'party', roundRunning: false })
+  resolve(gameFrame({ party: 40 }))
+  showGame(gameFrame({ party: 40 }))
+  await passTick()
+  expect(signals).not.toHaveBeenCalled()
+
+  await passTick()
+  expect(signals).toHaveBeenCalledExactlyOnceWith({ kind: 'party' })
+})
+
+it('앞 틱이 아직 프레임을 읽고 있으면 다음 틱은 프레임을 읽지 않고 건너뛴다', async () => {
+  const { signals } = await connectWatchedShare()
+  showGame(gameFrame({ party: 40 }))
+  const { promise, resolve } = Promise.withResolvers<CharacterImage>()
+  vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
+  await passTick()
+
+  await passTick()
+  expect(videoReads()).toBe(1)
+
+  resolve(gameFrame({ party: 40 }))
+  await passTick()
+  expect(videoReads()).toBe(2)
+  expect(signals).toHaveBeenCalledExactlyOnceWith({ kind: 'party' })
+})
+
+it('웹의 화면이 바뀌면 후보를 버리고, 프레임을 읽는 동안 화면이 바뀐 틱의 결과도 버린다', async () => {
+  const { signals } = await connectWatchedShare()
+  showGame(gameFrame({ party: 40 }))
+  await passTick()
+  host.setWatchedScreen({ kind: 'raid', roundRunning: false })
+  host.setWatchedScreen({ kind: 'party', roundRunning: false })
+  await passTick()
+  expect(signals).not.toHaveBeenCalled()
+  await passTick()
+  expect(signals).toHaveBeenCalledExactlyOnceWith({ kind: 'party' })
+
+  showGame(gameFrame({ party: 90 }))
+  const { promise, resolve } = Promise.withResolvers<CharacterImage>()
+  vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
+  await passTick()
+  host.setWatchedScreen({ kind: 'raid', roundRunning: false })
+  host.setWatchedScreen({ kind: 'party', roundRunning: false })
+  resolve(gameFrame({ party: 90 }))
+  await passTick()
+  expect(signals).toHaveBeenCalledOnce()
+  await passTick()
+  expect(signals).toHaveBeenCalledTimes(2)
+})
+
+it('같은 이름 crop이 다른 파티 슬롯으로 옮겨 가면 다른 구성으로 보고 회차 신호를 보낸다', async () => {
+  const { signals } = await connectWatchedShare()
+  showGame(gameFrame({ party: 40, partySlot: 2 }))
+  await window.api.readCaptureFrame('capture')
+
+  showGame(gameFrame({ party: 40, partySlot: 3 }))
+  await passTick()
+  await passTick()
+
+  expect(signals).toHaveBeenCalledExactlyOnceWith({ kind: 'party' })
+})
+
+it('entry가 거절한 신호는 대기 중인 붙여넣기 프레임을 지우지 않는다', async () => {
+  const { signals } = await connectWatchedShare()
+  signals.mockReturnValue(false)
+  showGame(gameFrame({ party: 40 }))
+  await passTick()
+  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
+  await passTick()
+  expect(signals).toHaveBeenCalledOnce()
+
+  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({ kind: 'frame', image })
+})
+
+it('회차가 프레임을 읽는 동안 공유가 바뀌면 그 프레임을 새 공유의 기준으로 기록하지 않는다', async () => {
+  const { signals } = await connectWatchedShare()
+  const { promise, resolve } = Promise.withResolvers<CharacterImage>()
+  vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
+  const read = window.api.readCaptureFrame('capture')
+
+  stubScreenShare()
+  await host.requestScreenShare()
+  resolve(gameFrame({ party: 40 }))
+  await read
+  showGame(gameFrame({ party: 40 }))
+  await passTick()
+  await passTick()
+
+  expect(signals).toHaveBeenCalledExactlyOnceWith({ kind: 'party' })
 })
 
 it('검출기가 예외를 던진 틱은 창을 찾지 못한 틱으로 보아 2번 연속을 처음부터 다시 센다', async () => {
