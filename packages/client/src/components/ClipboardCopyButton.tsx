@@ -1,10 +1,10 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { windowChromeStyles } from '../constants/window-chrome.style'
 import type { ClipboardCopyStatus } from '../hooks/useClipboardCopy'
 import { CheckIcon } from './CheckIcon'
 import { CopyIcon } from './CopyIcon'
 import { ShortcutTooltip } from './ShortcutTooltip'
+import { triggerStyles } from './ShortcutTooltip.style'
 import { styles } from './ClipboardCopyButton.style'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'
@@ -30,7 +30,7 @@ export function ClipboardCopyButton({
         </p>
       )}
       <ShortcutTooltip label="복사하기" shortcut="Alt A">
-        <span {...stylex.props(windowChromeStyles.noDrag)}>
+        <span {...stylex.props(triggerStyles.wrapper)}>
           <button
             type="button"
             aria-label="클립보드로 복사"

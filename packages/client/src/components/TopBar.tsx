@@ -47,7 +47,6 @@ export function TopBar({
 }): React.JSX.Element {
   return (
     <header {...stylex.props(styles.header)}>
-      <div aria-hidden="true" {...stylex.props(styles.dragArea)} />
       <div {...stylex.props(styles.brand)}>
         <GradePercent percent={grade} />
         <Typo.caption as="span" weight={700} {...stylex.props(styles.name)}>
