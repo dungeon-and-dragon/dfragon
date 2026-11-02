@@ -22,7 +22,7 @@ evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간,
 
 11개가 모두 성공해야 응답한다. 하나라도 실패하면 오류를 반환하며 부분 결과를 성공처럼 돌려주지 않는다. 여러 upstream 호출이 게임 서버의 같은 순간을 나타낸다고 보장하지는 않는다.
 
-응답은 `character`, `status`, `equipment`, `avatar`, `creature`, `oath`, `mistAssimilation`, `skillStyle`, `buff`, `sections`, `freshness`, `card`다. 공통 신상 정보는 `character`로 모으고 반복되는 헤더를 제거한다. 장비별 옵션은 보존한다. `sections`에는 섹션별 revision, 내용 갱신 시각, 최근 성공 조회 시각을 제공한다. 11개 섹션을 한 번에 받아 통째로 캐시하므로 revision은 항상 1이고 두 시각은 그 값을 Neople에서 실제로 받은 시각이다. 최상위 `freshness.lastSuccessfulFetchAt`도 같은 시각이고, `freshness.expiresAt`은 그 시각에 1시간을 더한 ISO 시각으로 캐시가 끝나는 때다. 캐시한 값이면 처음 받은 시각이 그대로 나간다. 기존 Desktop과의 호환을 위해 이 필드들의 형태를 유지한다.
+응답은 `character`, `status`, `equipment`, `avatar`, `creature`, `oath`, `mistAssimilation`, `skillStyle`, `buff`, `sections`, `freshness`, `card`다. 공통 신상 정보는 `character`로 모으고 반복되는 헤더를 제거한다. 장비별 옵션은 보존한다. `sections`에는 섹션별 revision, 내용 갱신 시각, 최근 성공 조회 시각을 제공한다. 11개 섹션을 한 번에 받아 통째로 캐시하므로 revision은 항상 1이고 두 시각은 그 값을 Neople에서 실제로 받은 시각이다. 최상위 `freshness.lastSuccessfulFetchAt`도 같은 시각이고, `freshness.expiresAt`은 그 시각에 1시간을 더한 ISO 시각으로 캐시가 끝나는 때다. 캐시한 값이면 처음 받은 시각이 그대로 나간다. 이전 Desktop과의 호환을 위해 이 필드들의 형태를 유지한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
 
 ## 캐릭터 캐시와 강제 갱신
 
@@ -40,15 +40,15 @@ evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간,
 
 공용 아이템 상세가 하나라도 `unavailable`인 응답은 저장하지 않는다. 다음 요청이 그 아이템을 다시 조회하게 하기 위해서다. 저장한 본문 안의 공용 아이템 상세는 캐릭터 항목이 사는 동안(최대 1시간) 고정된다. 그 사이 공용 아이템 캐시가 새 값을 받아도 이 본문에 반영되지 않는 것은 감수한다(2026-10-30 결정, [Issue #996](https://github.com/dungeon-and-dragon/dfragon/issues/996)).
 
-응답 압축은 API가 하지 않고 운영 Caddy가 맡는다(2026-10-30 결정). 저장한 본문도 압축하지 않은 채 보내며, Caddy가 요청의 `Accept-Encoding`에 맞춰 zstd나 gzip으로 압축한다. 운영 요청은 Cloudflare를 거치므로 Caddy가 맞추는 `Accept-Encoding`은 Cloudflare가 보낸 값이고, Desktop이 받는 압축 방식은 Cloudflare가 정한다([검색의 운영 proxy 경로](character-search.md#공개-검색과-호출-제한)).
+응답 압축은 API가 하지 않고 운영 Caddy가 맡는다(2026-10-30 결정). 저장한 본문도 압축하지 않은 채 보내며, Caddy가 요청의 `Accept-Encoding`에 맞춰 zstd나 gzip으로 압축한다. 운영 요청은 Cloudflare를 거치므로 Caddy가 맞추는 `Accept-Encoding`은 Cloudflare가 보낸 값이고, 클라이언트가 받는 압축 방식은 Cloudflare가 정한다([검색의 운영 proxy 경로](character-search.md#공개-검색과-호출-제한)).
 
 ## 카드 투영
 
 응답 최상위 `card`는 카드의 캐릭터 면이 쓰는 역할과 점수다. 형태는 [#716](https://github.com/dungeon-and-dragon/dfragon/issues/716)의 공유 계약을 따른다. 역할은 `apps/api/src/characters/card/project.ts`의 순수 함수가 HTTP 없이 정하고(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)), 점수는 공용 아이템 상세를 붙인 뒤 API의 점수 엔진이 계산한다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)).
 
 - `role`: 기본정보 `jobGrowName`에서 앞의 `眞`을 뺀 이름이 크루세이더, 인챈트리스, 패러메딕, 뮤즈면 `buffer`, 다른 문자열이면 `dealer`, 문자열이 아니면 null이다. 카드는 이 값으로 점수 라벨을 고른다.
-- `score`: `role`이 `buffer`면 버프 점수, 그 밖은 장비 점수다. API의 [점수 worker](../architecture/overview.md#점수-엔진-경계)가 받은 Neople 섹션 원문과 공용 아이템 상세를 엔진에 넣어 계산한다. 형태는 Desktop renderer가 쓰는 값과 같다. `calculator`는 `equipment`나 `buff`, `value`는 점수, `versions`는 엔진의 `package`, `rulesRev`, `bundleId`다. 엔진이 점수를 건너뛰면 `value`가 null이고 `skipped`에 `kind`, `message`가 있으며, 근사값을 냈으면 `approximate`에 `value`, `source`, `warning`이 있다. 엔진이 없거나 결과를 내지 못하면 `score`가 null이다. Desktop과 웹 클라이언트는 이 값을 카드 점수로 그대로 쓴다([Issue #1088](https://github.com/dungeon-and-dragon/dfragon/issues/1088)). 그 전에 배포된 Desktop v1.0.2 이하는 card에서 `role`만 읽고 다른 칸은 버리므로 이 값을 쓰지 않는다.
-- `stats`, `serverRank`, `set`, `oath`는 항상 null이고 `investment`는 항상 빈 배열이다. 카드의 스탯 한 줄, 서버 내 명성 순위, 장비 면, 기타 면에 쓰던 값이며 응답 형태를 바꾸지 않으려고 필드만 남긴다. v0.1.0부터 v1.0.2까지 배포된 Desktop은 card에서 `role`만 읽고, 그 뒤 Desktop은 `role`과 `score`만 읽는다.
+- `score`: `role`이 `buffer`면 버프 점수, 그 밖은 장비 점수다. API의 [점수 worker](../architecture/overview.md#점수-엔진-경계)가 받은 Neople 섹션 원문과 공용 아이템 상세를 엔진에 넣어 계산한다. `calculator`는 `equipment`나 `buff`, `value`는 점수, `versions`는 엔진의 `package`, `rulesRev`, `bundleId`다. 엔진이 점수를 건너뛰면 `value`가 null이고 `skipped`에 `kind`, `message`가 있으며, 근사값을 냈으면 `approximate`에 `value`, `source`, `warning`이 있다. 엔진이 없거나 결과를 내지 못하면 `score`가 null이다. 웹 클라이언트는 이 값을 카드 점수로 그대로 쓴다([Issue #1088](https://github.com/dungeon-and-dragon/dfragon/issues/1088)). 이전에 배포된 Desktop v1.0.2 이하는 card에서 `role`만 읽고 다른 칸은 버리므로 이 값을 쓰지 않는다.
+- `stats`, `serverRank`, `set`, `oath`는 항상 null이고 `investment`는 항상 빈 배열이다. 카드의 스탯 한 줄, 서버 내 명성 순위, 장비 면, 기타 면에 쓰던 값이며 응답 형태를 바꾸지 않으려고 필드만 남긴다. v0.1.0부터 v1.0.2까지 배포된 Desktop은 card에서 `role`만 읽었고, 웹 클라이언트는 `role`과 `score`만 읽는다.
 
 모험단명으로 저장된 캐릭터를 찾던 `GET /adventures/characters`도 DB에만 있던 기능이라 지웠다. 이 경로는 일반 404다.
 

@@ -144,7 +144,7 @@ const styles = stylex.create({
 - `node packages/ui/scripts/verify-build.mjs library packages/ui/dist`: 공개 export 산출물, Base UI와 StyleX를 포함한 external, `@stylexjs/stylex` 외 StyleX import 없음, SEED 패키지 import 없음, CSS 없음, 이식 가능한 declaration, 토큰 상수의 위치와 export 이름, React 전용 Typo entry.
 - `node packages/ui/scripts/verify-build.mjs consumer <산출물 경로>`: 단일 React 사본, 번들된 경우 단일 Base UI 사본, stylesheet 1개, tokens.css 1회, 공용 글꼴 선언 1회, dependency license 원문 확인.
 - `pnpm install --frozen-lockfile`
-- `node --test packages/ui/scripts/test-consumer-resolution.mjs`: 전용 checkout의 cold consumer command 회귀. 격리 조건과 Desktop 경계는 script 머리 주석에 있다.
+- `node --test packages/ui/scripts/test-consumer-resolution.mjs`: 전용 checkout의 cold consumer command 회귀. 격리 조건과 소비 경계는 script 머리 주석에 있다.
 
 현재 package command는 repository root에서 실행한다. 소비 app과 Example은 [Design System의 영향 범위 검증](../../docs/rules/design-system.md#영향-범위-검증)에 따라 변경한 화면, 상태, 환경을 선택해 확인한다. jsdom 결과를 실제 browser/Electron 또는 Tab 이동 성공으로 대신하지 않는다.
 
@@ -152,16 +152,16 @@ Vitest는 TypeScript를 변환해 runtime assertion을 실행한다. Public API�
 
 `test/build-consumer`의 별도 tsconfig는 source paths 없이 `@dfragon/ui`와 `@dfragon/ui/typo`의 dist declaration을 browser의 `Bundler` module resolution으로 해석한다. 같은 package specifier와 소비자 소유 CSS를 별도 Vite fixture가 소비 앱과 같은 StyleX compiler로 번들링하며 임시 결과는 `packages/ui/node_modules/.tmp/build-consumer`에 둔다. 산출 CSS에 library StyleX 선언의 atomic class가 들어 있는지 확인한다. React 전용 `typo` entry는 Node ESM import와 React 렌더링도 확인한다. 전체 UI entry는 StyleX 컴파일이 필요한 browser용이므로 Node에서 직접 import하는 경로를 지원하지 않는다.
 
-Desktop renderer, Example은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석한다. 소비 command 전에 library build를 실행할 필요가 없으며 dev에는 source 변경이 직접 반영된다. Exact alias는 `@dfragon/ui/foundation.css` subpath를 바꾸지 않는다. Package export의 ESM/declaration 산출물은 별도 library build로 계속 검증한다.
+`packages/client`, Example은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석한다. 소비 command 전에 library build를 실행할 필요가 없으며 dev에는 source 변경이 직접 반영된다. Exact alias는 `@dfragon/ui/foundation.css` subpath를 바꾸지 않는다. Package export의 ESM/declaration 산출물은 별도 library build로 계속 검증한다.
 
 ## 고지
 
-Library, Example, Desktop renderer, Web build는 [`@dfragon/licenses`](../licenses/README.md)의 공용 `uiNotices` plugin으로 bundle 입력 graph(미사용 입력 포함)의 dependency license/NOTICE와 module 목록, 생성 JS chunk 목록을 산출물 `notices`에 기록한다. Absolute filesystem path는 이 목록에 저장하지 않는다. `@dfragon/ui`에는 외부 source를 복사해 고친 코드가 없어 별도 수정 고지를 두지 않는다.
+Library, Example, Web build는 [`@dfragon/licenses`](../licenses/README.md)의 공용 `uiNotices` plugin으로 bundle 입력 graph(미사용 입력 포함)의 dependency license/NOTICE와 module 목록, 생성 JS chunk 목록을 산출물 `notices`에 기록한다. Absolute filesystem path는 이 목록에 저장하지 않는다. `@dfragon/ui`에는 외부 source를 복사해 고친 코드가 없어 별도 수정 고지를 두지 않는다.
 
 ## 소비 entry와 실제 UI 확인
 
 각 browser entry는 `@dfragon/ui/tokens.css` 다음에 `@dfragon/ui/foundation.css`를 한 번 import한다. 이 별도 public asset은 system font stack과 body 초기화(여백, `--df-fg-default` 글자색, `--df-bg-canvas` 바탕)만 담당하며 library JS가 import하거나 dist에 CSS bundle로 출력하지 않는다. Root font-size는 지정하지 않는다.
 
-Desktop renderer는 공용 Component와 토큰을 화면에서 직접 쓴다. Desktop의 React, UI package, Base UI는 기존 renderer dependency 배치에 맞춰 devDependency로 설치하고 renderer bundle에 포함한다.
+`packages/client`는 공용 Component와 토큰을 화면에서 직접 쓴다.
 
 Browser에서는 `dev:examples`와 `preview:examples`를 확인한다.
