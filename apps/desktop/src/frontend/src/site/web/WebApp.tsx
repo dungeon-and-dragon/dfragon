@@ -7,7 +7,7 @@ import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
-import type { BrowserHost } from './browser-host'
+import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
 import { styles } from './WebApp.style'
 import { WEB_CAPTURE_TEXTS } from './web-capture-texts'
@@ -39,6 +39,27 @@ function PastedFrameRounds({ host }: { host: BrowserHost }): null {
   return null
 }
 
+// 자동 인식은 웹의 화면을 바꾸지 않는다. 신호를 보낸 뒤 사용자가 화면을 바꿨거나 회차가 진행 중이면 시작하지 않는다.
+function AutoRounds({ host }: { host: BrowserHost }): null {
+  const { partyCapture, raidCapture, startPastedRound } = useScreenCaptureContext()
+  const kind = useSearchModeStore((state) => state.searchMode)
+  const phase = kind === 'party' ? partyCapture.phase : raidCapture.phase
+  const roundRunning = phase === 'recognizing'
+  const onAutoRound = useEffectEvent((signal: AutoRoundSignal): boolean => {
+    if (signal.kind !== kind || roundRunning) {
+      return false
+    }
+    startPastedRound()
+
+    return true
+  })
+
+  useEffect(() => host.setWatchedScreen({ kind, roundRunning }), [host, kind, roundRunning])
+  useEffect(() => host.onAutoRound(onAutoRound), [host])
+
+  return null
+}
+
 // Desktop main.tsx, App.tsx의 문서 전체 드래그 차단, 글자 선택 차단, 100dvh가 사이트로 번지지 않게 창 크기 상자에만 그린다.
 export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
   const searchMode = useSearchModeStore((state) => state.searchMode)
@@ -46,6 +67,7 @@ export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
   return (
     <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
       <PastedFrameRounds host={host} />
+      <AutoRounds host={host} />
       <div
         onKeyDown={keepSeatMoveKeys}
         {...stylex.props(
