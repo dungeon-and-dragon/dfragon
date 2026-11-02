@@ -129,6 +129,7 @@ describe.skipIf(manifestPath === undefined || manifestPath === '')(
 
       for (const entry of cases) {
         const scale = entry.scale !== null ? `s=${entry.scale.toFixed(2)}` : entry.detectionFailure
+        console.log(`${entry.caseId}  ${scale}`)
         for (const slot of entry.slots) {
           console.log(
             [
