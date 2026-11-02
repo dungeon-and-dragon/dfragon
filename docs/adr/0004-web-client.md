@@ -13,7 +13,7 @@ review-after: 모바일 지원 범위, 웹에서 화면 이미지를 서버로 �
 
 ## 상태
 
-채택. 웹 클라이언트 계약은 [웹 클라이언트](../rules/web-client.md), 점수 엔진과 앱 경계는 [Architecture Overview](../architecture/overview.md), Desktop 안의 공용 폴더는 [Desktop 코드 구조](../architecture/desktop-code-organization.md)에 둔다. 구현은 [Issue #1074](https://github.com/dungeon-and-dragon/dfragon/issues/1074)의 sub-issue로 나눠 진행한다.
+채택. 웹 클라이언트 계약은 [웹 클라이언트](../rules/web-client.md), 점수 엔진과 앱 경계는 [Architecture Overview](../architecture/overview.md), Desktop 안의 공용 폴더는 [Desktop 코드 구조](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/docs/architecture/desktop-code-organization.md)에 둔다. 구현은 [Issue #1074](https://github.com/dungeon-and-dragon/dfragon/issues/1074)의 sub-issue로 나눠 진행한다.
 
 ## 맥락
 
@@ -40,7 +40,7 @@ review-after: 모바일 지원 범위, 웹에서 화면 이미지를 서버로 �
 
 | 선택지 | 첫 사용까지 | 고르지 않은 이유 |
 | --- | --- | --- |
-| A. Desktop 경량화(압축 설치본, 코드 서명) | 여전히 내려받고 실행해야 한다 | 압축해도 약 163MB이고, 서명은 예산이 없다([ADR 0001](0001-update-notice-without-auto-install.md)). 받기 전의 판단 장벽이 남는다. |
+| A. Desktop 경량화(압축 설치본, 코드 서명) | 여전히 내려받고 실행해야 한다 | 압축해도 약 163MB이고, 서명은 예산이 없다([ADR 0001](https://github.com/dungeon-and-dragon/dfragon/blob/v1.0.2/docs/adr/0001-update-notice-without-auto-install.md)). 받기 전의 판단 장벽이 남는다. |
 | B. 웹 앱을 사이트의 별도 경로에 둔다 | 첫 화면에서 한 번 더 이동한다 | 방문자가 첫 화면에서 바로 써 보지 못하고, 첫 화면의 목업과 실제 앱을 따로 유지해야 한다. |
 | C. 브라우저에서 WASM 엔진으로 점수를 계산한다 | 엔진을 함께 받는다 | 비공개 엔진의 바이너리와 계산 데이터를 모든 방문자에게 내려보내게 되고, 엔진 저장소에 WASM 빌드를 새로 만들어야 한다. |
 | D. 검색 코어를 새 workspace package로 꺼낸다 | E와 같다 | 검색 코어는 검색 수명과 요청 상태를 가진 Desktop 코드다. 웹 하나를 위해 package와 의존 방향 승인을 새로 늘릴 만큼 독립 계약이 없다([Architecture change](../architecture/overview.md#architecture-change)). |

@@ -1,0 +1,109 @@
+import { useCallback, useEffect } from 'react'
+import { useMachine } from '@xstate/react'
+import { getRaidCapturePhase, raidCaptureMachine } from '../lib/raid-capture-machine'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import { getRecognizedNicknames } from '../lib/recognized-nicknames'
+import { RAID_SEAT_LAYOUT } from '../constants/cards'
+import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
+import { useDesktopShortcut } from './useDesktopShortcut'
+import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
+import type { OcrRecognition } from '../lib/ocr-worker-recognition'
+import type { CaptureTexts } from '../lib/capture-texts'
+
+export type RaidCapture = {
+  search: ManualCharacterLookup
+  phase: ReturnType<typeof getRaidCapturePhase>
+  recognizing: boolean
+  nicknames: (string | null)[]
+  round: number
+  startedRounds: number
+  status: string
+  lastCompletedAt: number | null
+  canStartCapture: boolean
+  startRound: () => void
+  startPastedRound: () => void
+  seats: SeatArrangement
+}
+
+/**
+ * 공대 화면의 캡처 회차, 12자리 조회와 자리 배치를 묶는다. 게임 창 선택과 중지는 파티 캡처가 소유하며, 이
+ * hook은 그 등록 상태를 공대 회차에 알린다. OCR worker도 파티 캡처가 창을 등록한 동안 띄워 둔 것을 함께 쓴다.
+ *
+ * 회차는 12자리를 비우고 게임 화면의 행 순서대로 1~12번 자리를 채우므로 시작할 때 배치를 처음으로 되돌린다.
+ * 인식하는 동안 맞바꾸면 아직 들어오지 않은 행의 이름이 사용자가 옮긴 자리와 어긋나므로, 회차가 인식을
+ * 마치거나 끝날 때까지 맞바꾸지 않는다.
+ */
+export function useRaidCapture({
+  sourceId,
+  sourceReady,
+  receivesShortcut,
+  recognizeWithOcr,
+  texts
+}: {
+  receivesShortcut: boolean
+  sourceId: string
+  sourceReady: boolean
+  recognizeWithOcr: OcrRecognition
+  texts: CaptureTexts
+}): RaidCapture {
+  // 파티 카드와 다른 main 검색 수명을 써서 파티 네 자리와 공대 12자리가 서로의 결과를 덮어쓰지 않는다.
+  const search = useManualCharacterLookup(
+    window.raidSearch,
+    SEARCH_SLOT_COUNTS.raid,
+    window.raidSearch.notifyOcrCandidatesDetected
+  )
+  const { seatOrder, swapSeats, resetSeats } = useSeatOrder(RAID_SEAT_LAYOUT)
+  const { begin: beginSearch } = search
+  const beginRound = useCallback(
+    (signal: AbortSignal): Promise<string | null> => {
+      resetSeats()
+
+      return beginSearch(signal)
+    },
+    [beginSearch, resetSeats]
+  )
+  const [snapshot, send] = useMachine(raidCaptureMachine, {
+    input: {
+      texts,
+      beginSearch: beginRound,
+      readFrame: (captureId) => window.raidSearch.readCaptureFrame(captureId),
+      observeOcr: search.observeOcr,
+      recognizeWithOcr
+    }
+  })
+
+  const registeredSourceId = sourceReady ? sourceId : null
+  useEffect(() => {
+    send({ type: 'SOURCE', sourceId: registeredSourceId })
+  }, [send, registeredSourceId])
+
+  const startRound = useCallback(() => send({ type: 'START' }), [send])
+  const startPastedRound = useCallback(() => send({ type: 'PASTE' }), [send])
+  useDesktopShortcut('restart-search', receivesShortcut, startRound)
+
+  const phase = getRaidCapturePhase(snapshot)
+  const recognizing = phase === 'recognizing'
+  const nicknames = getRecognizedNicknames(snapshot.context.results, SEARCH_SLOT_COUNTS.raid)
+  const canStartCapture = snapshot.can({ type: 'START' })
+  const canMoveSeats = !recognizing
+
+  return {
+    search,
+    phase,
+    recognizing,
+    nicknames,
+    round: snapshot.context.round,
+    startedRounds: snapshot.context.startedRounds,
+    status: snapshot.context.status,
+    lastCompletedAt: snapshot.context.completedAt,
+    canStartCapture,
+    startRound,
+    startPastedRound,
+    seats: {
+      layout: RAID_SEAT_LAYOUT,
+      seatOrder,
+      canMoveSeats,
+      swapSeats: (from, to) => canMoveSeats && swapSeats(from, to)
+    }
+  }
+}

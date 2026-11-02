@@ -96,7 +96,7 @@ import { Typo } from '@dfragon/ui'
 
 | 소비자 | 연결 위치 |
 | --- | --- |
-| Desktop 제품, test, fixture | `apps/desktop/build/renderer-transforms.ts` |
+| 웹 앱 package test | `packages/client/vitest.config.ts` |
 | 공용 UI Example, test | `packages/ui/examples/vite.config.ts`, `packages/ui/vitest.config.ts` |
 | 공용 UI 산출물 소비 검사 | `packages/ui/test/build-consumer/vite.config.ts` |
 
@@ -164,9 +164,4 @@ Library, Example, Desktop renderer, Web build는 [`@dfragon/licenses`](../licens
 
 Desktop renderer는 공용 Component와 토큰을 화면에서 직접 쓴다. Desktop의 React, UI package, Base UI는 기존 renderer dependency 배치에 맞춰 devDependency로 설치하고 renderer bundle에 포함한다.
 
-Browser에서는 `dev:examples`와 `preview:examples`를 확인한다. 실제 Electron은 아래 test-only harness에서 각각 production renderer와 Example 산출물을 연다.
-
-- `pnpm --filter @dfragon/desktop ui:fixture desktop light`
-- `pnpm --filter @dfragon/desktop ui:fixture example dark`
-
-두 번째 인자는 `system`, `light`, `dark`이며 fixture process의 Theme만 변경한다. 제품 main/preload/auth는 로드하지 않는다. Source 목록과 선택은 synthetic bridge이며 native media API는 거절 stub으로 교체한다. Stub 설치 확인 전 window를 보이지 않고 실패 시 종료하며 fallback하지 않는다. Start는 `UI fixture: media capture blocked.` 상태로 callback 진입만 확인하고 stream, OCR를 실행하지 않는다. 실제 capture 성공이나 OS permission 검증은 이 evidence의 범위가 아니다. Desktop App component test와 fixture 검증의 경계를 구분한다.
+Browser에서는 `dev:examples`와 `preview:examples`를 확인한다.

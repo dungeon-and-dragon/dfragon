@@ -12,7 +12,7 @@ last-reviewed: 2026-10-31
 ## 제품 이름
 
 - 제품 이름은 `던삐삐`다(2026-10-31 결정, [Issue #1035](https://github.com/dungeon-and-dragon/dfragon/issues/1035)). 산문, UI 문구, 주석, 창 제목과 Windows 앱 이름, 작업 표시줄, 바로 가기, 제거 목록의 표시 이름에 쓴다. 영문 보조 이름을 함께 쓰지 않는다.
-- `DFragon`은 식별자에만 남긴다. 설치, 포터블 파일 이름(`DFragon-<버전>-x64-portable.exe`), `DFRAGON_` 접두어의 환경 변수와 빌드 상수, `@dfragon/*` 패키지, `dfragon` 실행 파일, profile, protocol 이름, `dfragon.com` 도메인, `DFRAGON-MODIFICATIONS.txt` 같은 파일 이름은 그대로 둔다. Desktop의 표시 이름은 `apps/desktop/build/channels.json`의 `productName`, 파일 이름 접두어는 같은 파일의 `artifactPrefix`가 정한다.
+- `DFragon`은 식별자에만 남긴다. 설치, 포터블 파일 이름(`DFragon-<버전>-x64-portable.exe`), `DFRAGON_` 접두어의 환경 변수와 빌드 상수, `@dfragon/*` 패키지, `dfragon` 실행 파일, profile, protocol 이름, `dfragon.com` 도메인, `DFRAGON-MODIFICATIONS.txt` 같은 파일 이름은 그대로 둔다. Desktop의 표시 이름은 [`channels.json`](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/apps/desktop/build/channels.json)의 `productName`, 파일 이름 접두어는 같은 파일의 `artifactPrefix`가 정했다.
 - 식별자에서 `DFRAGON`, `Dfragon`을 제품 이름처럼 단독으로 쓰지 않는다. 검사는 앞뒤에 `_`, `-`, 영숫자가 붙은 표기를 식별자로 보고 건너뛴다.
 - 코드에서 제품 이름이 단독으로 서거나 제목에 들어갈 때는 `@dfragon/lib`의 `PRODUCT_NAME`을 쓴다. HTML `<title>`처럼 import할 수 없는 곳과 `던삐삐는`처럼 한국어 조사가 붙는 문장은 문자열로 쓴다.
 - 외부 저장소 이름은 이 규칙의 대상이 아니다.
@@ -36,4 +36,4 @@ last-reviewed: 2026-10-31
 
 ## 검사
 
-`scripts/check-writing.mjs`가 Git이 추적하는 텍스트 파일에서 위 표기와 어미를 찾아 `경로:줄: 규칙: 내용`으로 출력하고, 위반이 있으면 실패한다. 이 문서와 검사 스크립트, 그 테스트는 금지 표기를 예시로 담으므로 검사에서 제외하고, `packages/lib/src/cp949-characters.ts`와 `apps/desktop/assets/ocr/korean-dict.txt`는 가운뎃점이 문자 표와 사전의 데이터라 제외한다. 사용법은 [scripts 안내](../../scripts/README.md#check-writing)에 있다. `pnpm verify`가 `pnpm check:writing`을 실행하며, 디자인 저장소는 같은 정규식을 `git grep`으로 실행하는 workflow를 둔다.
+`scripts/check-writing.mjs`가 Git이 추적하는 텍스트 파일에서 위 표기와 어미를 찾아 `경로:줄: 규칙: 내용`으로 출력하고, 위반이 있으면 실패한다. 이 문서와 검사 스크립트, 그 테스트는 금지 표기를 예시로 담으므로 검사에서 제외하고, `packages/lib/src/cp949-characters.ts`와 `packages/client/assets/ocr/korean-dict.txt`는 가운뎃점이 문자 표와 사전의 데이터라 제외한다. 사용법은 [scripts 안내](../../scripts/README.md#check-writing)에 있다. `pnpm verify`가 `pnpm check:writing`을 실행하며, 디자인 저장소는 같은 정규식을 `git grep`으로 실행하는 workflow를 둔다.

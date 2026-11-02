@@ -1,0 +1,204 @@
+import { afterEach, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
+import type {
+  SearchApi,
+  SearchCommandResult,
+  SearchSnapshot
+} from '@dfragon/client-core/preload/common/types/search'
+import { CAPTURE_ID, searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
+import { createSearchConnection, type SearchConnection } from './search-connection'
+
+const connections: SearchConnection[] = []
+afterEach(() => connections.splice(0).forEach((connection) => connection.dispose()))
+
+function fixture(): {
+  connection: SearchConnection
+  control: Mock<SearchApi['controlCharacterSearch']>
+  listeners: Array<(snapshot: SearchSnapshot) => void>
+  unsubscribes: Mock[]
+  onSnapshot: Mock
+  onFailure: Mock
+} {
+  const listeners: Array<(snapshot: SearchSnapshot) => void> = []
+  const unsubscribes: Mock[] = []
+  const control = vi.fn<SearchApi['controlCharacterSearch']>().mockResolvedValue({
+    ok: true,
+    snapshot: searchSnapshot({ captureId: null })
+  })
+  const onSnapshot = vi.fn()
+  const onFailure = vi.fn()
+  const connection = createSearchConnection({
+    api: {
+      controlCharacterSearch: control,
+      onCharacterSearchChanged: (listener) => {
+        listeners.push(listener)
+        const unsubscribe = vi.fn()
+        unsubscribes.push(unsubscribe)
+
+        return unsubscribe
+      }
+    },
+    onSnapshot,
+    onFailure
+  })
+  connections.push(connection)
+
+  return { connection, control, listeners, unsubscribes, onSnapshot, onFailure }
+}
+
+it('초기 조회 전 event 중 최신 revision만 조회 뒤 반영한다', async () => {
+  const f = fixture()
+  const read = Promise.withResolvers<SearchCommandResult>()
+  f.control.mockReturnValueOnce(read.promise)
+  f.connection.connect()
+  f.listeners[0](searchSnapshot({ revision: 5 }))
+  f.listeners[0](searchSnapshot({ revision: 4 }))
+  expect(f.connection.isReady()).toBe(false)
+  expect(f.onSnapshot).toHaveBeenCalledExactlyOnceWith(null)
+
+  read.resolve({ ok: true, snapshot: searchSnapshot({ revision: 2 }) })
+  await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+  expect(f.onSnapshot).toHaveBeenLastCalledWith(searchSnapshot({ revision: 5 }))
+})
+
+it('재연결은 이전 구독을 해제하고 이전 명령 응답을 새 연결에 반영하지 않는다', async () => {
+  const f = fixture()
+  f.connection.connect()
+  await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+  const begin = Promise.withResolvers<SearchCommandResult>()
+  f.control.mockReturnValueOnce(begin.promise)
+  const command = f.connection.command({ action: 'begin' })
+  f.connection.connect()
+  await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+  expect(f.unsubscribes[0]).toHaveBeenCalledOnce()
+
+  f.onSnapshot.mockClear()
+  f.listeners[0](searchSnapshot({ revision: 99 }))
+  const direct = { ok: true, snapshot: searchSnapshot({ revision: 98 }) } as const
+  begin.resolve(direct)
+  expect(await command).toEqual(direct)
+  expect(f.onSnapshot).not.toHaveBeenCalled()
+})
+
+it.each(['success', 'failure'] as const)(
+  '재연결 뒤 이전 복구 조회의 %s는 새 상태를 바꾸지 않는다',
+  async (outcome) => {
+    const f = fixture()
+    f.connection.connect()
+    await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+    const recovery = Promise.withResolvers<SearchCommandResult>()
+    f.control
+      .mockRejectedValueOnce(new Error('Synthetic response loss'))
+      .mockReturnValueOnce(recovery.promise)
+    const command = f.connection.command({ action: 'begin' })
+    await vi.waitFor(() => expect(f.control).toHaveBeenCalledTimes(3))
+    f.connection.connect()
+    await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+    f.onSnapshot.mockClear()
+    if (outcome === 'success') {
+      recovery.resolve({ ok: true, snapshot: searchSnapshot({ revision: 99 }) })
+    } else {
+      recovery.reject(new Error('Synthetic stale read failure'))
+    }
+    expect(await command).toBeNull()
+    expect(f.onSnapshot).not.toHaveBeenCalled()
+    expect(f.onFailure).not.toHaveBeenCalled()
+    expect(f.connection.isReady()).toBe(true)
+  }
+)
+
+it('슬롯별 명령을 동시에 보내고 역순 응답에도 최신 snapshot을 유지한다', async () => {
+  const f = fixture()
+  f.connection.connect()
+  await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+  const first = Promise.withResolvers<SearchCommandResult>()
+  const second = Promise.withResolvers<SearchCommandResult>()
+  const sendFirst = vi.fn(() => first.promise)
+  const sendSecond = vi.fn(() => second.promise)
+  const one = f.connection.invoke(sendFirst)
+  const two = f.connection.invoke(sendSecond)
+  expect(sendFirst).toHaveBeenCalledOnce()
+  expect(sendSecond).toHaveBeenCalledOnce()
+
+  second.resolve({ ok: true, snapshot: searchSnapshot({ revision: 3 }) })
+  await two
+  first.resolve({ ok: true, snapshot: searchSnapshot({ revision: 2 }) })
+  await one
+  expect(f.onSnapshot).toHaveBeenLastCalledWith(searchSnapshot({ revision: 3 }))
+})
+
+it('복구 조회 실패 뒤 event는 표시하되 조회 성공 전에는 새 시작을 허용하지 않는다', async () => {
+  const f = fixture()
+  f.connection.connect()
+  await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+  for (let revision = 2; revision <= 3; revision += 1) {
+    f.control
+      .mockRejectedValueOnce(new Error('Synthetic command loss'))
+      .mockRejectedValueOnce(new Error('Synthetic read loss'))
+    expect(await f.connection.command({ action: 'end', captureId: CAPTURE_ID })).toBeNull()
+    expect(f.onFailure).toHaveBeenCalledTimes(revision - 1)
+    expect(f.onSnapshot).toHaveBeenLastCalledWith(null)
+    f.listeners[0](searchSnapshot({ revision }))
+    expect(f.onSnapshot).toHaveBeenLastCalledWith(searchSnapshot({ revision }))
+    expect(f.connection.isReady()).toBe(false)
+  }
+  f.control
+    .mockRejectedValueOnce(new Error('Synthetic command loss'))
+    .mockResolvedValueOnce({ ok: true, snapshot: searchSnapshot({ revision: 4 }) })
+  expect(await f.connection.command({ action: 'end', captureId: CAPTURE_ID })).toBeNull()
+  expect(f.connection.isReady()).toBe(true)
+})
+
+it('dispose 뒤 늦은 begin의 직접 응답과 end 전송은 보존하되 표시, 복구 조회는 하지 않는다', async () => {
+  const f = fixture()
+  f.connection.connect()
+  await vi.waitFor(() => expect(f.connection.isReady()).toBe(true))
+  const begin = Promise.withResolvers<SearchCommandResult>()
+  f.control.mockReturnValueOnce(begin.promise)
+  const command = f.connection.command({ action: 'begin' })
+  f.connection.dispose()
+  f.onSnapshot.mockClear()
+  begin.resolve({ ok: true, snapshot: searchSnapshot() })
+  const result = await command
+  expect(result?.snapshot.captureId).toBe(CAPTURE_ID)
+  f.control.mockRejectedValueOnce(new Error('Synthetic cleanup loss'))
+  await f.connection.command({ action: 'end', captureId: CAPTURE_ID })
+  expect(f.control).toHaveBeenCalledTimes(3)
+  expect(f.control).toHaveBeenLastCalledWith({ action: 'end', captureId: CAPTURE_ID })
+  expect(f.onSnapshot).not.toHaveBeenCalled()
+  expect(f.onFailure).not.toHaveBeenCalled()
+  expect(f.unsubscribes[0]).toHaveBeenCalledOnce()
+  expect(f.connection.isReady()).toBe(false)
+})
+
+it('분리한 제어 함수도 최신 연결 상태를 읽고 다른 연결의 구독을 정리하지 않는다', async () => {
+  const first = fixture()
+  const second = fixture()
+  const { connect, isReady, command, dispose } = first.connection
+  expect(isReady()).toBe(false)
+  connect()
+  second.connection.connect()
+  await vi.waitFor(() => {
+    expect(isReady()).toBe(true)
+    expect(second.connection.isReady()).toBe(true)
+  })
+
+  const nextRead = Promise.withResolvers<SearchCommandResult>()
+  first.control.mockReturnValueOnce(nextRead.promise)
+  connect()
+  expect(isReady()).toBe(false)
+  expect(first.unsubscribes[0]).toHaveBeenCalledOnce()
+  expect(second.unsubscribes[0]).not.toHaveBeenCalled()
+  nextRead.resolve({ ok: true, snapshot: searchSnapshot({ captureId: null, revision: 2 }) })
+  await vi.waitFor(() => expect(isReady()).toBe(true))
+  expect(await command({ action: 'begin' })).not.toBeNull()
+
+  dispose()
+  expect(isReady()).toBe(false)
+  expect(first.unsubscribes[1]).toHaveBeenCalledOnce()
+  expect(second.connection.isReady()).toBe(true)
+  expect(second.unsubscribes[0]).not.toHaveBeenCalled()
+  second.onSnapshot.mockClear()
+  second.listeners[0](searchSnapshot({ revision: 3 }))
+  expect(second.onSnapshot).toHaveBeenLastCalledWith(searchSnapshot({ revision: 3 }))
+})

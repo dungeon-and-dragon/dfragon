@@ -8,7 +8,7 @@
 
 `pnpm test:tooling`은 `scripts/test/*.test.mjs`를 모두 실행합니다. 작업 준비, 날짜, build-info, 이미지 선택, 앱 생성, 아이콘 생성, lint 플러그인, 포맷 정책, 표기와 문체 검사, 문서 링크와 경로 검사, 토큰 없는 의존성 설치, 의존성 snapshot 변환, `verify` 실행기와 workflow 연결의 회귀 검사가 포함됩니다. 어느 테스트든 실패하면 검사가 실패합니다. Root `pnpm test`는 [`pnpm verify`](#verify)를 실행합니다.
 
-앱 생성과 아이콘 생성 검사는 저장소 코드를 격리된 임시 디렉터리에 복사해 실제 CLI의 출력 파일, 입력 거절, 실패 코드, 정리를 확인합니다. 아이콘 변환기는 합성 파일을 만드는 fake이므로 실제 Electron 이미지 변환 품질이나 제품 아이콘은 검증하지 않습니다.
+앱 생성과 아이콘 생성 검사는 저장소 코드를 격리된 임시 디렉터리에 복사해 실제 CLI의 출력 파일, 입력 거절, 실패 코드, 정리를 확인합니다. 아이콘 생성 검사는 합성 PNG의 축소 결과만 확인하므로 제품 아이콘의 화질은 검증하지 않습니다.
 
 ## 작업 시작
 
@@ -26,7 +26,7 @@ node scripts/start-task.mjs api 123 fix-character-search ../dfragon-worktrees/ap
 
 인자 순서는 `<project> <Issue 번호> <description> <새 worktree 경로>`입니다. 위 명령은 `api-123-fix-character-search` 브랜치를 만듭니다. `123`은 현재 저장소의 실제 OPEN Issue 번호로 바꿉니다. 마지막 인자는 아직 존재하지 않는 경로이며, 공백이 있으면 quote합니다. Base는 이번 fetch로 받은 main commit이며 현재 checkout의 미반영 변경은 포함하지 않습니다.
 
-`project`에는 `api`, `desktop`, `web`, `ui`, `cross`, `repo` 중 하나를 전달합니다. 이 명명법은 도구를 선택했을 때의 입력 계약이며 모든 작업 브랜치에 강제하지 않습니다. `description`은 `fix-character-search`처럼 변경 동사로 시작하는 소문자 설명을 정합니다. 스크립트는 소문자로 시작하고 소문자, 숫자를 하이픈 하나로 연결하는 형식을 검증하며, 동사 의미나 Issue 범위의 적합성은 담당자가 판단합니다.
+`project`에는 `api`, `web`, `ui`, `cross`, `repo` 중 하나를 전달합니다. 이 명명법은 도구를 선택했을 때의 입력 계약이며 모든 작업 브랜치에 강제하지 않습니다. `description`은 `fix-character-search`처럼 변경 동사로 시작하는 소문자 설명을 정합니다. 스크립트는 소문자로 시작하고 소문자, 숫자를 하이픈 하나로 연결하는 형식을 검증하며, 동사 의미나 Issue 범위의 적합성은 담당자가 판단합니다.
 
 기존 브랜치, worktree를 바꾸거나 지우지 않으며, 같은 이름의 로컬 브랜치나 대상 경로가 이미 존재하면 생성을 거절합니다.
 
@@ -75,7 +75,7 @@ node scripts/format-date.mjs
 
 ```bash
 pnpm check:writing
-node scripts/check-writing.mjs apps/desktop/README.md
+node scripts/check-writing.mjs apps/web/README.md
 ```
 
 검증: `node --test scripts/test/check-writing.test.mjs`, `node --check scripts/check-writing.mjs`.
@@ -114,9 +114,9 @@ main push의 `before`부터 변경된 경로를 비교해 JSON 목록을 저장�
 
 PR 제목, PR 작성자, 실행 event로 빌드할지 정해 `GITHUB_OUTPUT`에 `build=true` 또는 `build=false`를 기록합니다. [`build-scope.yml`](../.github/workflows/build-scope.yml)이 이 도구를 실행합니다. main push는 GitHub API로 commit을 merge한 PR을 찾고, 조회에 실패하면 빌드를 건너뛰지 않고 실패합니다. 새 dependency 없이 Node.js 26을 사용합니다.
 
-빌드는 비용이 큰 job이라 PR 제목이 `feat(build): ...`, `fix(build)!: ...`처럼 Conventional Commits scope가 `(build)`이거나, Dependabot PR이거나, Actions 페이지에서 수동 실행한 경우에만 실행합니다. main push는 그 commit을 merge한 PR의 제목으로 같은 규칙을 적용하며, Windows Test Build와 Product Images의 이미지 빌드, 발행이 이 결과를 따릅니다. 제목은 PR을 열거나 새 commit을 push할 때 읽으므로, 열린 PR의 제목에 `(build)`를 붙였으면 새 commit을 push하거나 Actions 페이지에서 Windows Test Build를 수동 실행합니다.
+빌드는 비용이 큰 job이라 PR 제목이 `feat(build): ...`, `fix(build)!: ...`처럼 Conventional Commits scope가 `(build)`이거나, Dependabot PR이거나, Actions 페이지에서 수동 실행한 경우에만 실행합니다. main push는 그 commit을 merge한 PR의 제목으로 같은 규칙을 적용하며, Product Images의 이미지 빌드, 발행이 이 결과를 따릅니다. 제목은 PR을 열거나 새 commit을 push할 때 읽으므로, 열린 PR의 제목에 `(build)`를 붙였으면 새 commit을 push하거나 Actions 페이지에서 Product Images를 수동 실행합니다.
 
-배포 workflow는 다섯입니다. [`product-images.yml`](../.github/workflows/product-images.yml)은 main push에서 API 이미지를 빌드해 GHCR에 발행합니다([서버 이미지](../apps/api/README.md#서버-이미지)). [`desktop-test-build.yml`](../.github/workflows/desktop-test-build.yml)은 Desktop 관련 PR에서 test 채널 포터블 exe를 artifact로 만듭니다. [`desktop-release.yml`](../.github/workflows/desktop-release.yml)은 Release 게시나 수동 실행에서 배포 포터블 exe를 Release에 첨부합니다([포터블 exe와 GitHub Releases](../apps/desktop/README.md#포터블-exe와-github-releases)). [`web-dev-pages.yml`](../.github/workflows/web-dev-pages.yml)은 main push마다 `dungeon-and-dragon/dfragon-dev`의 배포 workflow를 실행해 그때의 main으로 `apps/web`을 `dev.dfragon.com`에 올립니다. [`web-pages.yml`](../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 `apps/web`을 빌드해 운영 `dfragon.com`에 올립니다. 두 workflow는 build scope를 따르지 않습니다([Web 배포](../apps/web/README.md#배포)). 의존성 snapshot 제출은 [`dependency-snapshot`](#dependency-snapshot)에 있습니다. 저장소 Actions 설정은 외부 action을 40자리 commit SHA로 고정하도록 요구하므로 tag로 참조한 action은 실행되지 않습니다.
+배포 workflow는 셋입니다. [`product-images.yml`](../.github/workflows/product-images.yml)은 main push에서 API 이미지를 빌드해 GHCR에 발행합니다([서버 이미지](../apps/api/README.md#서버-이미지)). [`web-dev-pages.yml`](../.github/workflows/web-dev-pages.yml)은 main push마다 `dungeon-and-dragon/dfragon-dev`의 배포 workflow를 실행해 그때의 main으로 `apps/web`을 `dev.dfragon.com`에 올립니다. [`web-pages.yml`](../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 `apps/web`을 빌드해 운영 `dfragon.com`에 올립니다. 두 workflow는 build scope를 따르지 않습니다([Web 배포](../apps/web/README.md#배포)). 의존성 snapshot 제출은 [`dependency-snapshot`](#dependency-snapshot)에 있습니다. 저장소 Actions 설정은 외부 action을 40자리 commit SHA로 고정하도록 요구하므로 tag로 참조한 action은 실행되지 않습니다.
 
 검증: `node --test scripts/test/build-scope.test.mjs`, `node --check scripts/build-scope.mjs`.
 
@@ -146,7 +146,7 @@ GitHub 이미지 빌드, 발행은 내장 정보와 선택한 정확한 commit�
 
 ## `verify`
 
-`pnpm verify`는 저장소 검사를 로컬에서 실행합니다. GitHub Actions에는 CI 검사가 없으므로 이 명령이 기본 검사입니다. Root `pnpm test`도 같은 명령입니다. 정적 검사(`lint`, `format:check`, `check:writing`, `check:docs`), 루트 도구 테스트, 공용 package, Desktop test와 typecheck, API, Web job의 run 명령을 차례로 실행합니다.
+`pnpm verify`는 저장소 검사를 로컬에서 실행합니다. GitHub Actions에는 CI 검사가 없으므로 이 명령이 기본 검사입니다. Root `pnpm test`도 같은 명령입니다. 정적 검사(`lint`, `format:check`, `check:writing`, `check:docs`), 루트 도구 테스트, 공용 package와 웹 앱 package, API, Web job의 run 명령을 차례로 실행합니다.
 
 명령 목록은 `scripts/verify.mjs`에 있습니다.
 
@@ -154,20 +154,19 @@ GitHub 이미지 빌드, 발행은 내장 정보와 선택한 정확한 commit�
 
 `pnpm verify`가 통과하면 검사한 작업 트리 내용(untracked 파일 포함)의 tree hash를 worktree의 Git 디렉터리(`dfragon-verify/passed-tree`)에 기록합니다. 검사 중에 파일이 바뀌면 기록하지 않습니다. `--reuse-pass`로 실행하면 커밋하지 않은 변경이 없고 HEAD 내용이 기록과 같을 때 검사를 건너뜁니다. 직접 `pnpm verify`로 확인하고 커밋한 직후 push할 때 같은 검사를 다시 돌지 않게 하기 위해서입니다. 의존성 설치 상태, Git이 무시하는 파일(`.env` 등), Node.js 같은 실행 환경은 기록에 들어가지 않으므로 이것만 바꾼 뒤에는 `pnpm verify`를 직접 다시 실행합니다.
 
-Job 안에서는 앞 명령이 실패하면 남은 명령을 건너뛰고 다른 job은 계속 실행합니다. 끝에 실패한 job, 명령, 종료 코드와 건너뛴 명령 수를 모아 출력하고 non-zero로 종료합니다. Job끼리 같은 build 산출물을 쓰므로 병렬로 실행하지 않습니다. 의존성과 Electron runtime이 준비된 Apple silicon Mac에서 전체 실행에 약 3분 걸렸습니다.
+Job 안에서는 앞 명령이 실패하면 남은 명령을 건너뛰고 다른 job은 계속 실행합니다. 끝에 실패한 job, 명령, 종료 코드와 건너뛴 명령 수를 모아 출력하고 non-zero로 종료합니다. Job끼리 같은 build 산출물을 쓰므로 병렬로 실행하지 않습니다. 의존성이 준비된 Apple silicon Mac에서 전체 실행에 약 3분 걸렸습니다.
 
 ```bash
 pnpm verify
 ```
 
-- `pnpm install --frozen-lockfile`로 의존성을 설치합니다. Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. Desktop 배포 빌드는 OCR 모델 submodule만, API 이미지는 점수 엔진 submodule만 받습니다. 둘 다 받으려면 `git submodule update --init --recursive`를 실행합니다. API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 submodule에 있을 때만 실행합니다.
-- Desktop 테스트는 HOME의 모든 상위 디렉터리가 root나 현재 사용자 소유이고 group, other 쓰기 권한이 없어야 통과합니다. [Desktop 테스트 범위](../apps/desktop/README.md#테스트-범위와-실행)를 참고합니다.
+- `pnpm install --frozen-lockfile`로 의존성을 설치합니다. Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. API 이미지는 점수 엔진 submodule만 받습니다. 둘 다 받으려면 `git submodule update --init --recursive`를 실행합니다. API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 submodule에 있을 때만 실행합니다.
 
 로컬 통과는 Windows 실기 확인과 Product Images의 이미지 빌드를 대신하지 않습니다. 실행기는 macOS, Linux에서 확인했고 Windows에서는 확인하지 않았습니다. `pnpm verify`로 실행하면 `npm_execpath`의 pnpm을 직접 시작하므로 `pnpm.cmd`만 있는 Windows 환경에서도 명령을 시작합니다. `node scripts/verify.mjs`로 직접 실행하면 shell 없이 `pnpm`을 찾으므로 이런 환경에서는 시작하지 못할 수 있습니다.
 
 ## Native validation
 
-로컬 API, Desktop은 각 앱 `package.json`의 `dev` 명령을 사용합니다. `pnpm --filter @dfragon/api dev`, `pnpm --filter @dfragon/desktop dev`가 해당 앱의 `.env`를 읽으며, 개인 홈의 별도 실행 파일은 필요하지 않습니다. 최초 준비는 [API 로컬 실행](../apps/api/README.md#로컬-개발-명령), Desktop 설정은 [카드 화면 개발](../apps/desktop/README.md#카드-화면-개발)을 참고합니다.
+로컬 API는 앱 `package.json`의 `dev` 명령을 사용합니다. `pnpm --filter @dfragon/api dev`가 앱의 `.env`를 읽으며, 개인 홈의 별도 실행 파일은 필요하지 않습니다. 최초 준비는 [API 로컬 실행](../apps/api/README.md#로컬-개발-명령)을 참고합니다.
 
 실제 호출부, 소비자와 변경 위험에 맞는 command를 선택합니다. 아래 조합은 workspace 전반의 검사가 필요할 때의 예제이며 매 수정의 필수 목록이 아닙니다. 아래 [pnpm regex selector와 `--sequential`](https://pnpm.io/cli/run)은 선택한 script를 이름순으로 하나씩 실행하며 실패 시 non-zero로 종료합니다. 별도 validation runner나 dependency가 필요하지 않습니다.
 
@@ -175,7 +174,7 @@ pnpm verify
 | --- | --- |
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
-| Desktop | `pnpm --filter @dfragon/desktop run --sequential '/^(test\|lint\|build)$/'` |
+| 웹 앱 package | `pnpm --filter @dfragon/client-core --filter @dfragon/client run --sequential '/^(test\|lint)$/'` |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
 | Task 준비 tooling | 위 `node --test`와 `node --check` command |
 
@@ -189,7 +188,7 @@ node apps/api/test-support/container-deployment.mjs dfragon-api:local
 
 이 검사는 이미지를 빌드하지 않고 합성 Neople key와 네트워크 없는 컨테이너로 entrypoint, secret 입력(ENV, FILE, 기본 파일), 실행 사용자, 읽기 전용 파일시스템, HTTP 기동, 잘못된 입력의 거절, 정상 종료를 확인하고 자체 컨테이너 정리를 시도합니다. 강제 종료, Docker 장애 시 컨테이너가 남을 수 있습니다. 운영 credential은 입력하지 않습니다.
 
-Desktop `build`는 `typecheck`를 포함하므로 위 조합에서 별도로 반복하지 않습니다. Web `build`도 `tsc -b`를 포함합니다. Web의 웹 앱은 Desktop renderer 컴포넌트를 쓰므로 Desktop renderer를 바꾸면 Web 검사도 함께 실행합니다. 빠른 feedback이 필요할 때는 기존 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
+웹 앱 package의 `test`는 `typecheck`를 포함하므로 위 조합에서 별도로 반복하지 않습니다. Web `build`도 `tsc -b`를 포함합니다. Web은 `@dfragon/client`, `@dfragon/client-core`를 번들하므로 두 package를 바꾸면 Web 검사도 함께 실행합니다. 빠른 feedback이 필요할 때는 기존 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
 
 API의 `test`는 `build`를 먼저 실행해 `dist`를 새로 만든 뒤 `.test-dist` compile과 test를 수행합니다. 위 API 조합은 이 build와 `tsconfig.test.json`의 compile을 포함하므로 같은 입력의 별도 typecheck를 반복하지 않습니다. 단독 `pnpm --filter @dfragon/api test`도 최신 production output을 검증합니다. Root `test`는 `pnpm verify`와 같습니다. 문서만 변경할 때 app build를 반복할 필요는 없습니다. 실행 결과에는 실제 검증 범위와 실행하지 못한 항목을 구분해 기록합니다.
 

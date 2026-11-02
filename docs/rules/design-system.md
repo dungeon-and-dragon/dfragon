@@ -113,7 +113,7 @@ Desktop renderer는 숫자 글꼴 Barlow Condensed(SIL OFL 1.1)를 앱에 번들
 
 ## React UI 책임
 
-이 기준은 저장소의 Desktop renderer React 화면에 적용한다. Desktop의 폴더 구조와 process 경계는 [Desktop 구조](../architecture/desktop-code-organization.md)를, 다른 앱은 해당 제품 계약을 따른다. 기존 전체 화면을 한 번에 재구성하지 않고 현재 변경에 적용한다.
+이 기준은 저장소의 Desktop renderer React 화면에 적용한다. Desktop의 폴더 구조와 process 경계는 [Desktop 구조](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/docs/architecture/desktop-code-organization.md)를, 다른 앱은 해당 제품 계약을 따른다. 기존 전체 화면을 한 번에 재구성하지 않고 현재 변경에 적용한다.
 
 - 수정 전에 실제 앱 진입점과 호출 경로를 확인해 제품 화면, 구버전, 미리보기를 구분한다. 테스트에서 쓰이는 파일이라는 이유만으로 제품 진입점으로 판단하지 않는다.
 - 컴포넌트는 표시, DOM 이벤트, 확인 문구와 대화상자를 소유한다. 입력 draft, 포커스 같은 자체 UI 상태는 컴포넌트에 남겨도 된다. 사용자 확인을 취소하면 실행하지 않고, 승인한 요청을 hook이나 실행 경계에 전달한다. 요청 hook이 사용하는 화면의 확인 창까지 직접 띄우지 않는다.

@@ -134,7 +134,7 @@ test('저장소 루트의 CLI는 Biome 제외 경로와 gitignore 대상을 검�
     'apps/web/src/fixture.ts': source,
     'apps/web/dist/fixture.js': source,
     'apps/web/generated-output/fixture.js': source,
-    'apps/desktop/src/frontend/public/ocr/fixture.js': source
+    'packages/licenses/notices/fixture.js': source
   })
   const result = runCli(['--check'], directory)
   const reported = result.stderr.split('\n').filter((line) => DIAGNOSTIC_LINE_PATTERN.test(line))

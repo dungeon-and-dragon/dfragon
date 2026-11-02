@@ -15,9 +15,10 @@ last-reviewed: 2026-11-01
 ```text
 apps/
   api/
-  desktop/
   web/
 packages/
+  client/
+  client-core/
   ui/
   lib/
   licenses/
@@ -26,8 +27,9 @@ scripts/
 ```
 
 - `apps/api`: 캐릭터 공개 NestJS API workspace. DB 없이 Neople API를 조회하고 캐릭터, 공용 아이템 조회 결과를 API 메모리에 캐시한다. 승인된 ESM runtime, dependency, build/test 계약은 [`../rules/api-runtime.md`](../rules/api-runtime.md)를 따른다. 구현 현황은 Reference에서 확인한다.
-- `apps/desktop`: Electron, React, TypeScript, electron-vite 기반 desktop application.
 - `apps/web`: 던삐삐 소개와 내려받기 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면에 Desktop renderer 컴포넌트로 그린 설치 없이 쓰는 웹 클라이언트를 둔다([웹 클라이언트](../rules/web-client.md)). 아래 Shared UI boundary를 따른다.
+- `packages/client`: 웹 앱의 컴포넌트, hook, OCR, WebApp, browser host를 담은 `@dfragon/client`. build 없이 source를 export한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
+- `packages/client-core`: 웹 앱이 쓰는 검색, 공대 로직과 타입을 담은 `@dfragon/client-core`. React, DOM에 의존하지 않으며 build 없이 source를 export한다.
 - `packages/ui`: 현재 tracked shared UI package `@dfragon/ui`. 실제 구현, 명령은 [공용 UI 안내](../../packages/ui/README.md)에서 확인한다.
 - `packages/lib`: 앱과 UI에 의존하지 않는 공용 순수 함수 `@dfragon/lib`. 아래 Shared library boundary를 따른다.
 - `packages/licenses`: 빌드 시 고지 원문, 수집, 배포 자료를 관리하는 `@dfragon/licenses`. 제품 runtime에서 import하지 않는다.
@@ -60,7 +62,7 @@ Desktop은 파티, 공대 캡처와 검색, 카드의 캐릭터 면만 둔다. �
 | 비공개 엔진 저장소 | 엔진의 소스, 계산 데이터, 빌드, Release를 소유한다. |
 | 이 저장소 | 엔진을 불러 쓰는 로더만 두고, API 이미지는 submodule의 바이너리를 Dockerfile로 넣는다. 엔진의 소스, 데이터, 바이너리를 commit하지 않는다. |
 | `apps/api` | API의 점수 worker가 Linux 엔진을 `koffi`로 로드해 장비 점수와 버프 점수를 계산하고, 상세 응답과 1시간 상세 캐시에 함께 둔다. 웹 클라이언트는 이 점수만 쓴다. |
-| `apps/desktop`, 웹 클라이언트 | 엔진을 로드하거나 import하지 않는다. API 상세 응답의 점수만 받는다. |
+| 웹 클라이언트 | 엔진을 로드하거나 import하지 않는다. API 상세 응답의 점수만 받는다. |
 
 - **빌드 조건**: 엔진은 공개 바이너리 저장소의 submodule로 받고, API 이미지는 엔진이 없으면 빌드에 실패한다.
 - **코드 노출 한계**: 컴파일된 코드도 역공학으로 해석할 수 있다. 이 경계는 소스와 데이터를 공개 저장소 밖에 두는 소유 분리이며, 공개 바이너리 저장소와 API 이미지에 실린 바이너리의 로직이 끝까지 숨겨진다고 보장하지 않는다.
@@ -72,8 +74,8 @@ Desktop은 파티, 공대 캡처와 검색, 카드의 캐릭터 면만 둔다. �
 | 대상 | 책임과 dependency direction |
 | --- | --- |
 | `packages/ui`의 `@dfragon/ui` | Browser React shared package 하나로 자체 토큰(`tokens.css`, `tokens.stylex`), Base UI 기반 공용 Component, 공용 형태와 실제로 공유하는 Layout, composition, 디자인 컴포넌트, Typo를 제공한다. `@dfragon/ui` → Base UI/React, StyleX runtime 방향으로 연결하며 app source, 앱 테마, API client, backend, Electron main/preload, IPC, 인증, domain을 import하지 않는다. |
-| `apps/desktop` renderer | `@dfragon/ui`를 소비하고 제품 data, event, behavior와 app별 platform 연결을 맡는다. Desktop main/preload는 UI package를 소비하지 않는다. |
-| `apps/web` | `@dfragon/ui`를 소비하고 사이트 배치와 사이트 색을 자체 StyleX 상수로 그린다. Desktop source는 Desktop이 사이트용으로 공개한 entry와 공용 검색 코어만 import한다. 웹 앱 entry(`apps/desktop/src/frontend/src/site/web/index.ts`, 별칭 `@dfragon/desktop-web`)는 실제 상단 바와 카드 컴포넌트를 브라우저 host로 연결해 [웹 클라이언트](../rules/web-client.md)를 그린다. 첫 화면 배경의 시간대 그림은 같은 `site` 폴더의 `time-of-day.ts`(별칭 `@dfragon/desktop-site/time-of-day`)로 읽는다. Desktop의 공용 검색 코어(`src/shared/`, [Desktop 코드 구조](desktop-code-organization.md))는 별칭으로 읽는다. Desktop의 다른 source, main/preload, IPC는 import하지 않는다. |
+| `packages/client`의 `@dfragon/client` | `@dfragon/ui`를 소비하고 제품 data, event, behavior와 platform 연결을 맡는다. |
+| `apps/web` | `@dfragon/ui`를 소비하고 사이트 배치와 사이트 색을 자체 StyleX 상수로 그린다. `@dfragon/client`는 사이트용으로 공개한 entry만 import한다. 웹 앱 entry(`packages/client/src/site/web/index.ts`, `@dfragon/client/web`)는 실제 상단 바와 카드 컴포넌트를 브라우저 host로 연결해 [웹 클라이언트](../rules/web-client.md)를 그린다. 첫 화면 배경의 시간대 그림은 같은 `site` 폴더의 `time-of-day.ts`(`@dfragon/client/time-of-day`)로 읽는다. |
 | 독립 Vite Example entry | 필요한 상태를 실제 화면에서 확인하기 어려울 때 같은 `@dfragon/ui` public API와 합성 content로 확인한다. 새 화면마다 Component, Pattern, Template 예제를 갖출 의무는 없다. |
 
 공용 Component는 Base UI 부품의 semantic API와 접근성 동작을 유지하고 외형만 StyleX로 그린다. 같은 역할의 Component를 이름만 바꿔 다시 감싸지 않는다. 화면별 스타일 허용 범위와 필요한 Example, 토큰, version, 영향 검증은 [`design-system.md`](../rules/design-system.md)가 canonical Rule이다.
@@ -104,7 +106,7 @@ OCR 파인튜닝 모델 submodule은 `packages/models`의 workspace package `@df
 | 대상 | 책임과 dependency direction |
 | --- | --- |
 | `packages/models`의 `@dfragon/models` | 모델 저장소를 submodule로 고정 커밋에 묶고 `exports`로 모델, 사전 파일 경로를 제공한다. 코드와 dependency가 없으며 앱 source를 참조하지 않는다. |
-| `apps/desktop` | 빌드 설정에서 패키지 이름으로 모델 파일을 찾아 renderer 자원으로 복사한다. 어떤 모델을 넣을지와 호환성 검증은 Desktop이 소유한다. |
+| `packages/client` | OCR 자산 준비 script가 패키지 이름으로 모델 파일을 찾아 Web의 `public/ocr`로 복사한다. 어떤 모델을 넣을지와 호환성 검증은 `@dfragon/client`가 소유한다. |
 
 점수 엔진 바이너리도 같은 패키지의 submodule(`score-engine`)로 입수한다. 바이너리 저장소는 공개라 OCR 모델과 같은 submodule 명령으로 받으며, 어떤 엔진을 넣을지는 submodule 커밋으로 고정한다. API 이미지는 Linux 파일을 넣으며 엔진이 없으면 빌드에 실패한다.
 
