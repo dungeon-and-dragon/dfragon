@@ -1,0 +1,508 @@
+import { setImmediate } from 'node:timers/promises'
+import { describe, expect, it, vi } from 'vitest'
+import type { MockedFunction } from 'vitest'
+import type {
+  CharacterCandidate,
+  CharacterDetails,
+  CharacterImage,
+  CharacterPortrait,
+  SelectedCharacterSummary
+} from '../../preload/common/types/character'
+import { deferred } from '../../shared/search/async-test-fixture'
+import {
+  runDetailsRequest,
+  runSearchRequest,
+  type IdentificationAdapters
+} from '../../shared/search/request'
+import type { CharacterIdentificationInput } from '../../shared/search/identify'
+import type { SearchOperationContext } from '../../shared/search/operation'
+import type {
+  CharacterCandidatesHttp,
+  CharacterDetailsHttp,
+  CharacterImageHttp
+} from '../../shared/search/character-http'
+import {
+  createCharacterImageCache,
+  createCharacterImageSource
+} from '../../shared/search/character-image-source'
+import { SearchHttpFailure } from '../../shared/search/http'
+import {
+  createPortraitColorScorer,
+  type PortraitColorScorer
+} from '../../shared/search/portrait-color'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
+import { PortraitComparisonBudgetExceededError } from '../../shared/search/portrait-raster'
+import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
+
+const FACE_SIZE = 8
+const FACE_LEFT_SHADE = 100
+const FACE_RIGHT_SHADE = 150
+
+function shadedImage(shift = 0): CharacterImage {
+  const rgba = new Uint8Array(FACE_SIZE * FACE_SIZE * 4)
+  for (let y = 0; y < FACE_SIZE; y += 1) {
+    for (let x = 0; x < FACE_SIZE; x += 1) {
+      const shade = (x < FACE_SIZE / 2 ? FACE_LEFT_SHADE : FACE_RIGHT_SHADE) + shift
+      rgba.set([shade, shade, shade, 255], (y * FACE_SIZE + x) * 4)
+    }
+  }
+
+  return { width: FACE_SIZE, height: FACE_SIZE, rgba }
+}
+
+const portrait: CharacterPortrait = { image: shadedImage(), rasterScale: 1 }
+
+function candidate(id: string, name = '첫이름', fame: number | null = 100): CharacterCandidate {
+  const imageUrl = `https://img-api.neople.co.kr/df/servers/cain/characters/${id}?zoom=1`
+
+  return {
+    characterId: id,
+    characterName: name,
+    serverId: 'cain',
+    serverName: '카인',
+    fame,
+    imageUrl,
+    adventureName: null,
+    jobName: null,
+    jobGrowName: null
+  }
+}
+
+function details(characterId: string): CharacterDetails {
+  return {
+    character: { characterId, serverId: 'cain', serverName: '카인', characterName: '선택이름' },
+    status: { status: null, buff: null },
+    equipment: { equipment: [], setItemInfo: [] },
+    avatar: null,
+    creature: null,
+    oath: null,
+    mistAssimilation: null,
+    skillStyle: null,
+    buff: { equipment: null, avatar: null, creature: null },
+    sections: {},
+    freshness: {
+      lastSuccessfulFetchAt: '2026-10-07T00:00:00.000Z',
+      expiresAt: '2026-10-07T00:05:00.000Z'
+    }
+  }
+}
+
+function requestWith(adapters: IdentificationAdapters) {
+  return (input: CharacterIdentificationInput & SearchOperationContext) =>
+    runSearchRequest({
+      runtime: {
+        identification: adapters,
+        reportDiagnostic: vi.fn()
+      },
+      nickname: input.nicknames[0] ?? '',
+      signal: input.signal,
+      isCurrent: input.isCurrent,
+      ocrInput: { candidateNicknames: [...input.nicknames], portrait: input.portrait }
+    })
+}
+
+function fixture(shifts: Record<string, number> = { high: 20, low: 10, null: 30 }): {
+  controller: AbortController
+  calls: string[]
+  candidates: MockedFunction<CharacterCandidatesHttp>
+  image: MockedFunction<CharacterImageHttp>
+  scorePortrait: MockedFunction<PortraitColorScorer>
+  getDetails: MockedFunction<CharacterDetailsHttp>
+  identify: ReturnType<typeof requestWith>
+  input: CharacterIdentificationInput & SearchOperationContext
+} {
+  const controller = new AbortController()
+  const calls: string[] = []
+  const candidates = vi.fn<CharacterCandidatesHttp>(async ({ nickname }) => {
+    calls.push(`candidates:${nickname}`)
+
+    return [
+      candidate('high', nickname),
+      candidate('low', nickname, 50),
+      candidate('null', nickname, null)
+    ]
+  })
+  const image = vi.fn<CharacterImageHttp>(async ({ characterId }) => {
+    calls.push(`image:${characterId}`)
+
+    return shadedImage(shifts[characterId])
+  })
+  const scorePortrait = vi.fn<PortraitColorScorer>(
+    createPortraitColorScorer(INITIAL_PORTRAIT_COLOR_POLICY, () => setImmediate())
+  )
+  const getDetails = vi.fn<CharacterDetailsHttp>(async ({ characterId }) => {
+    calls.push(`details:${characterId}`)
+
+    return details(characterId)
+  })
+  const identify = requestWith({
+    candidates,
+    image,
+    details: getDetails,
+    scorePortrait,
+    selection: INITIAL_PORTRAIT_COLOR_POLICY
+  })
+  const input: CharacterIdentificationInput & SearchOperationContext = {
+    signal: controller.signal,
+    isCurrent: () => true,
+    nicknames: ['첫이름', '둘째이름'],
+    portrait
+  }
+
+  return {
+    controller,
+    calls,
+    candidates,
+    image,
+    scorePortrait,
+    getDetails,
+    identify,
+    input
+  }
+}
+
+describe('캐릭터 식별 요청의 실행 경계', () => {
+  it('실제 색 비교기로 후보 전원을 비교해 가장 가까운 후보를 같은 취소 신호로 선택한다', async () => {
+    const f = fixture()
+
+    expect(await f.identify(f.input)).toMatchObject({
+      kind: 'success',
+      rows: [expect.objectContaining({ characterId: 'low', characterName: '첫이름' })],
+      selected: {
+        selectionMethod: 'portrait',
+        details: 'pending',
+        summary: { characterId: 'low', level: null, card: null }
+      }
+    })
+    expect(f.calls).toEqual(['candidates:첫이름', 'image:high', 'image:low', 'image:null'])
+    await expect(f.scorePortrait.mock.results[1].value).resolves.toMatchObject({
+      distance: 10,
+      comparedCells: 64
+    })
+    const signals = [
+      ...f.candidates.mock.calls.map(([input]) => input.signal),
+      ...f.image.mock.calls.map(([input]) => input.signal),
+      ...f.scorePortrait.mock.calls.map(([input]) => input.signal)
+    ]
+    expect(new Set(signals).size).toBe(1)
+  })
+
+  it('1위와 2위의 거리 차이가 초기 minMargin보다 작으면 1위를 고르고 선택지를 함께 준다', async () => {
+    const f = fixture({ high: 12, low: 10, null: 30 })
+
+    const outcome = await f.identify(f.input)
+
+    expect(outcome).toMatchObject({
+      kind: 'success',
+      rows: [expect.objectContaining({ characterId: 'low' })],
+      selected: { selectionMethod: 'portrait', summary: { characterId: 'low' } }
+    })
+    expect(
+      outcome?.kind === 'success' && outcome.selected?.choices?.map((choice) => choice.characterId)
+    ).toEqual(['high', 'low', 'null'])
+    expect(f.scorePortrait).toHaveBeenCalledTimes(3)
+  })
+
+  it('크롭이 없으면 후보 조회만 실행한다', async () => {
+    const f = fixture()
+
+    expect(await f.identify({ ...f.input, portrait: null })).toMatchObject({
+      kind: 'success',
+      selected: { selectionMethod: 'highest-fame', summary: { characterId: 'high' } }
+    })
+    expect(f.calls).toEqual(['candidates:첫이름'])
+    expect(f.scorePortrait).not.toHaveBeenCalled()
+  })
+
+  it('두 개를 초과한 후보 입력은 조회 전에 거절한다', async () => {
+    const f = fixture()
+
+    expect(await f.identify({ ...f.input, nicknames: ['가', '나', '다'] })).toMatchObject({
+      kind: 'failure',
+      error: { code: 'INVALID_SEARCH_QUERY' }
+    })
+    expect(f.calls).toEqual([])
+  })
+
+  it('이미지 로딩 실패와 비교 예산 초과는 그 후보만 점수 없이 두고 선택지를 함께 준다', async () => {
+    const loading = fixture()
+    loading.image.mockRejectedValueOnce(new SearchHttpFailure('NEOPLE_API_ERROR'))
+    const loaded = await loading.identify(loading.input)
+    expect(loaded).toMatchObject({
+      kind: 'success',
+      selected: { selectionMethod: 'portrait', summary: { characterId: 'low' } }
+    })
+    expect(
+      loaded?.kind === 'success' &&
+        loaded.selected?.choices?.find((choice) => choice.characterId === 'high')?.face
+    ).toBeNull()
+    expect(loading.image).toHaveBeenCalledTimes(3)
+    expect(loading.scorePortrait).toHaveBeenCalledTimes(2)
+
+    const comparing = fixture()
+    comparing.scorePortrait.mockRejectedValueOnce(new PortraitComparisonBudgetExceededError())
+    const compared = await comparing.identify(comparing.input)
+    expect(compared).toMatchObject({
+      kind: 'success',
+      selected: { selectionMethod: 'portrait', summary: { characterId: 'low' } }
+    })
+    expect(
+      compared?.kind === 'success' &&
+        compared.selected?.choices?.find((choice) => choice.characterId === 'high')?.face
+    ).toBeNull()
+    expect(comparing.getDetails).not.toHaveBeenCalled()
+  })
+
+  it.each(['후보', '이미지'] as const)(
+    '%s 호출 제한은 명성 대체로 바꾸지 않고 호출 제한 실패로 끝낸다',
+    async (stage) => {
+      const f = fixture()
+      const error = new SearchHttpFailure('SEARCH_RATE_LIMITED')
+      if (stage === '후보') {
+        f.candidates.mockRejectedValueOnce(error)
+      } else {
+        f.image.mockImplementation(async ({ characterId }) => {
+          if (characterId === 'low') {
+            throw error
+          }
+
+          return shadedImage()
+        })
+      }
+
+      expect(await f.identify(f.input)).toEqual({
+        kind: 'failure',
+        error: { code: 'SEARCH_RATE_LIMITED' }
+      })
+      expect(f.candidates).toHaveBeenCalledOnce()
+      if (stage === '이미지') {
+        expect(f.image).toHaveBeenCalledTimes(2)
+        expect(f.getDetails).not.toHaveBeenCalled()
+      }
+    }
+  )
+
+  it('이미지 대기 중 캡처가 끝나면 늦게 온 이미지로 비교와 상세 조회를 시작하지 않는다', async () => {
+    const f = fixture()
+    // 취소를 무시하고 늦게 끝나는 의존성이다.
+    const pendingImage = deferred<CharacterImage>()
+    f.image.mockReturnValueOnce(pendingImage.promise)
+    const pending = f.identify(f.input)
+    await vi.waitFor(() => expect(f.image).toHaveBeenCalledOnce())
+    const signal = f.image.mock.calls[0][0].signal
+
+    f.controller.abort()
+    pendingImage.resolve(shadedImage())
+
+    expect(await pending).toBeNull()
+    expect(signal.aborted).toBe(true)
+    expect(f.image).toHaveBeenCalledOnce()
+    expect(f.scorePortrait).not.toHaveBeenCalled()
+    expect(f.getDetails).not.toHaveBeenCalled()
+  })
+
+  it('후보 응답을 기다리는 동안 이전 관측이 되면 이미지 조회를 시작하지 않는다', async () => {
+    const f = fixture()
+    let current = true
+    f.candidates.mockImplementationOnce(async () => {
+      current = false
+
+      return [candidate('stale'), candidate('other', '첫이름', 50)]
+    })
+
+    expect(await f.identify({ ...f.input, isCurrent: () => current })).toBeNull()
+    expect(f.image).not.toHaveBeenCalled()
+  })
+
+  it('비교 중 취소되면 비교 오류를 명성 대체로 바꾸지 않고 요청 수명 판정을 우선한다', async () => {
+    const f = fixture()
+    f.scorePortrait.mockImplementationOnce(async () => {
+      f.controller.abort()
+      throw new PortraitComparisonBudgetExceededError()
+    })
+
+    expect(await f.identify(f.input)).toBeNull()
+    expect(f.image).toHaveBeenCalledOnce()
+    expect(f.getDetails).not.toHaveBeenCalled()
+    expect(f.scorePortrait.mock.calls[0][0].signal.aborted).toBe(true)
+  })
+
+  it.each(['취소', '이전 요청'] as const)(
+    '이미지 오류를 복구하더라도 %s 판정 뒤에는 다음 후보 비교나 명성 후보의 상세를 요청하지 않는다',
+    async (reason) => {
+      const f = fixture()
+      let current = true
+      f.image.mockImplementationOnce(async () => {
+        if (reason === '취소') {
+          f.controller.abort()
+        } else {
+          current = false
+        }
+        throw new SearchHttpFailure('NEOPLE_API_ERROR')
+      })
+
+      expect(await f.identify({ ...f.input, isCurrent: () => current })).toBeNull()
+      expect(f.getDetails).not.toHaveBeenCalled()
+      expect(f.scorePortrait).not.toHaveBeenCalled()
+    }
+  )
+
+  it('공유 직렬 큐에서 대기하던 슬롯의 캡처가 끝나면 그 슬롯의 이미지 요청을 시작하지 않는다', async () => {
+    const started: { characterId: string; resolve: (image: CharacterImage) => void }[] = []
+    const http = vi.fn<CharacterImageHttp>(
+      ({ characterId }) =>
+        new Promise((resolve) => {
+          started.push({ characterId, resolve })
+        })
+    )
+    const queued: string[] = []
+    const source = createCharacterImageSource({ image: http, cache: createCharacterImageCache() })
+    const image: CharacterImageHttp = (input) => {
+      queued.push(input.characterId)
+
+      return source(input)
+    }
+    const slot = (prefix: string) => {
+      const controller = new AbortController()
+      const request = requestWith({
+        candidates: async () => [
+          candidate(`${prefix}-high`),
+          candidate(`${prefix}-low`, '첫이름', 50)
+        ],
+        image,
+        details: async ({ characterId }) => details(characterId),
+        scorePortrait: createPortraitColorScorer(INITIAL_PORTRAIT_COLOR_POLICY, () =>
+          setImmediate()
+        ),
+        selection: INITIAL_PORTRAIT_COLOR_POLICY
+      })
+      const outcome = request({
+        signal: controller.signal,
+        isCurrent: () => true,
+        nicknames: ['첫이름'],
+        portrait
+      })
+
+      return { controller, outcome }
+    }
+
+    const first = slot('a')
+    await vi.waitFor(() => expect(started.map((call) => call.characterId)).toEqual(['a-high']))
+    const second = slot('b')
+    await vi.waitFor(() => expect(queued).toContain('b-high'))
+    second.controller.abort()
+    expect(await second.outcome).toBeNull()
+
+    started[0].resolve(shadedImage(20))
+    await vi.waitFor(() => expect(started).toHaveLength(2))
+    started[1].resolve(shadedImage(5))
+
+    expect(await first.outcome).toMatchObject({
+      kind: 'success',
+      selected: { selectionMethod: 'portrait', summary: { characterId: 'a-low' } }
+    })
+    expect(http.mock.calls.map(([input]) => input.characterId)).toEqual(['a-high', 'a-low'])
+  })
+})
+
+describe('선택한 캐릭터 카드와 상세 응답 점수', () => {
+  const identified: SelectedCharacterSummary = {
+    characterId: 'high',
+    characterName: '첫이름',
+    serverId: 'cain',
+    serverName: '카인',
+    adventureName: null,
+    jobName: null,
+    jobGrowName: null,
+    level: null,
+    fame: 100,
+    imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/high?zoom=1',
+    guildName: null,
+    equipmentScore: null,
+    card: null
+  }
+
+  function cardRequest(f: ReturnType<typeof fixture>, card: unknown) {
+    f.getDetails.mockImplementation(async ({ characterId }) => ({
+      ...details(characterId),
+      card: card as CharacterDetails['card']
+    }))
+
+    return (isCurrent: () => boolean = () => true) =>
+      runDetailsRequest({
+        runtime: {
+          identification: {
+            candidates: f.candidates,
+            image: f.image,
+            details: f.getDetails,
+            scorePortrait: f.scorePortrait,
+            selection: INITIAL_PORTRAIT_COLOR_POLICY
+          },
+          reportDiagnostic: vi.fn()
+        },
+        summary: identified,
+        signal: f.controller.signal,
+        isCurrent
+      })
+  }
+
+  it('상세 응답 card의 점수를 카드에 그대로 넣고 요약의 장비 점수로 옮긴다', async () => {
+    const f = fixture()
+    const card = scoredDealerCard(1741)
+
+    const outcome = await cardRequest(f, card)()
+
+    expect(outcome).toEqual({
+      kind: 'success',
+      summary: expect.objectContaining({
+        characterId: 'high',
+        imageUrl: identified.imageUrl,
+        equipmentScore: 1741,
+        card
+      })
+    })
+    expect(f.getDetails).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ serverId: 'cain', characterId: 'high' })
+    )
+  })
+
+  it('카드 역할을 읽지 못하면 카드만 null로 두어 나머지 요약은 전달한다', async () => {
+    const f = fixture()
+
+    const outcome = await cardRequest(f, { ...scoredDealerCard(1741), role: 'tank' })()
+
+    expect(outcome).toMatchObject({
+      kind: 'success',
+      summary: { characterId: 'high', equipmentScore: null, card: null }
+    })
+  })
+
+  it('상세 호출 제한은 호출 제한 실패로 전달한다', async () => {
+    const f = fixture()
+    const request = cardRequest(f, dealerCard)
+    f.getDetails.mockRejectedValueOnce(new SearchHttpFailure('SEARCH_RATE_LIMITED'))
+
+    expect(await request()).toEqual({
+      kind: 'failure',
+      error: { code: 'SEARCH_RATE_LIMITED' }
+    })
+  })
+
+  it('상세를 기다리는 중 이전 요청이 되면 늦은 카드 결과를 발행하지 않는다', async () => {
+    const f = fixture()
+    let current = true
+    const request = cardRequest(f, scoredDealerCard(1741))
+    const pending = deferred<CharacterDetails>()
+    f.getDetails.mockReturnValueOnce(pending.promise)
+    const outcome = request(() => current)
+    await vi.waitFor(() => expect(f.getDetails).toHaveBeenCalledOnce())
+
+    current = false
+    pending.resolve({
+      ...details('high'),
+      card: scoredDealerCard(1741) as CharacterDetails['card']
+    })
+
+    expect(await outcome).toBeNull()
+  })
+})
