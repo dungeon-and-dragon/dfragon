@@ -1,13 +1,23 @@
+import type { ScoreCalculator } from '../../score/input.js'
+
 export type CharacterRole = 'dealer' | 'buffer'
 
+export interface CharacterCardScore {
+  calculator: ScoreCalculator
+  value: number | null
+  skipped: { kind: string; message: string } | null
+  approximate: { value: number; source: string; warning: string } | null
+  versions: { package: string; rulesRev: string; bundleId: string }
+}
+
 /**
- * Released Desktop builds validate the whole card strictly, so the retired stats, rank, set, oath and
- * investment fields stay as empty values until those builds are retired.
+ * The retired stats, rank, set, oath and investment fields stay as empty values so the response shape
+ * does not change; released Desktop builds read only `role` from the card.
  */
 export interface CharacterCard {
   role: CharacterRole | null
   stats: null
-  score: null
+  score: CharacterCardScore | null
   serverRank: null
   set: null
   oath: null

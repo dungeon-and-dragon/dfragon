@@ -19,17 +19,18 @@ export async function enrichCharacterDetails(
 
     return item
   })
-  const loaded = await catalog.load(itemIds, signal)
-
-  return mapCharacterItems(details, (item) => {
+  const items = await catalog.load(itemIds, signal)
+  const enriched = mapCharacterItems(details, (item) => {
     if (isCatalogId(item.itemId)) {
-      const itemDetail = loaded.get(item.itemId) ?? unavailableDetail
+      const itemDetail = items.get(item.itemId) ?? unavailableDetail
 
       return { ...item, itemDetail }
     }
 
     return item
   })
+
+  return { details: enriched, items }
 }
 
 export function hasUnavailableItemDetail(details: CharacterDetails): boolean {
