@@ -1,9 +1,9 @@
 import { createActor, waitFor } from 'xstate'
 import { afterEach, expect, it, vi } from 'vitest'
 import { partyCaptureMachine } from './party-capture-machine'
-import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
+import { WEB_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
-import type { WindowFrameResult } from '../preload/common/types/capture'
+import type { CharacterImage } from '../preload/common/types/character'
 
 const modules = vi.hoisted(() => ({ diagnostic: vi.fn() }))
 vi.mock('./ocr', () => ({ createPartyOcrWorker: vi.fn() }))
@@ -16,17 +16,15 @@ const CAPTURE_ID = '00000000-0000-4000-8000-000000000001'
 
 function start() {
   const effects = {
-    texts: DESKTOP_CAPTURE_TEXTS,
+    texts: WEB_CAPTURE_TEXTS,
     selectSource: vi.fn(async (_sourceId: string): Promise<unknown> => undefined),
     beginSearch: vi.fn(async (_signal: AbortSignal): Promise<string | null> => CAPTURE_ID),
     endSearch: vi.fn(),
-    readFrame: vi.fn(
-      async (_captureId: string): Promise<WindowFrameResult> => ({
-        kind: 'unsupported'
-      })
-    ),
+    readFrame: vi.fn(async (_captureId: string): Promise<CharacterImage> => {
+      throw new Error('CAPTURE_NOT_ALLOWED')
+    }),
     observeOcr: vi.fn(),
-    recognizeWithOcr: createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed).recognize
+    recognizeWithOcr: createSharedOcrWorker(WEB_CAPTURE_TEXTS.ocrPrepareFailed).recognize
   }
   const actor = createActor(partyCaptureMachine, { input: effects }).start()
 
@@ -39,7 +37,7 @@ afterEach(() => {
 
 it('시작한 회차 수는 받아들인 START마다 오르고 창 선택과 중지는 세지 않는다', async () => {
   const { actor, effects } = start()
-  const pendingFrame = Promise.withResolvers<WindowFrameResult>()
+  const pendingFrame = Promise.withResolvers<CharacterImage>()
   effects.readFrame.mockReturnValueOnce(pendingFrame.promise)
   const startedRounds = () => actor.getSnapshot().context.startedRounds
 
@@ -72,7 +70,7 @@ it('시작한 회차 수는 받아들인 START마다 오르고 창 선택과 중
 it('붙여 넣은 프레임은 창을 고르지 않아도 회차를 시작하고 host가 든 프레임을 읽는다', async () => {
   const { actor, effects } = start()
   const frame = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }
-  effects.readFrame.mockResolvedValue({ kind: 'frame', image: frame })
+  effects.readFrame.mockResolvedValue(frame)
   const startedRounds = () => actor.getSnapshot().context.startedRounds
 
   actor.send({ type: 'PASTE' })
