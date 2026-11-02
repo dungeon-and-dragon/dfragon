@@ -16,6 +16,9 @@ export type DNFTownIndicatorDetection =
 // right edge and 5px below the top, and both offsets grew with the UI scale up to 1.8.
 const templateLayout = { width: 16, height: 16, right: 23, top: 5 }
 const searchPolicy = { minScale: 1, maxScale: 1.8, positionRadiusPx: 3, minCorrelation: 0.7 }
+// Matched yellow over template yellow (means): town samples 0.954 or more, gray dungeon-result
+// globes 0.010 or less and 0.080 or less with R, G raised 5%.
+const minYellowRatio = 0.5
 
 function validateFrame(frame: DNFParticipantFrame, template = false): void {
   if (
@@ -37,6 +40,17 @@ function yellowness(rgba: Uint8Array | Uint8ClampedArray): Uint8Array {
   }
 
   return yellow
+}
+
+function meanPixel(frame: ParticipantGrayFrame, x: number, y: number, size: number): number {
+  let sum = 0
+  for (let row = y; row < y + size; row += 1) {
+    for (let column = x; column < x + size; column += 1) {
+      sum += frame.pixels[row * frame.width + column]
+    }
+  }
+
+  return sum / (size * size)
 }
 
 function cropRgba(frame: DNFParticipantFrame, region: DNFRectangle): Uint8Array {
@@ -121,6 +135,15 @@ export function detectDNFTownIndicator(
   }
 
   if (best == null || best.score < minCorrelation) {
+    return { status: 'not-found' }
+  }
+
+  // Correlation ignores intensity, so a gray globe tinted by a few levels of capture color noise
+  // still correlates; the match has to be about as yellow as the template.
+  const templateYellowMean =
+    templateYellow.reduce((sum, value) => sum + value, 0) / templateYellow.length
+  const matchedYellowMean = meanPixel(yellow, best.x, best.y, best.size)
+  if (matchedYellowMean < templateYellowMean * minYellowRatio) {
     return { status: 'not-found' }
   }
 
