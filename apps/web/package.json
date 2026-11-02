@@ -21,7 +21,6 @@
     "@dfragon/client-core": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@dfragon/ui": "workspace:*",
-    "@fontsource/noto-sans-kr": "catalog:",
     "@stylexjs/stylex": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

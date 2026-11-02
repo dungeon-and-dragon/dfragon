@@ -77,7 +77,7 @@ Desktop 앱은 더 개발하지 않는다. 소스는 `v1.0.2` tag에 남아 있�
 | --- | --- |
 | `packages/ui`의 `@dfragon/ui` | Browser React shared package 하나로 자체 토큰(`tokens.css`, `tokens.stylex`), Base UI 기반 공용 Component, 공용 형태와 실제로 공유하는 Layout, composition, 디자인 컴포넌트, Typo를 제공한다. `@dfragon/ui` → Base UI/React, StyleX runtime 방향으로 연결하며 app source, 앱 테마, API client, backend, IPC, 인증, domain을 import하지 않는다. |
 | `packages/client`의 `@dfragon/client` | `@dfragon/ui`를 소비하고 제품 data, event, behavior와 platform 연결을 맡는다. |
-| `apps/web` | `@dfragon/ui`를 소비하고 사이트 배치와 사이트 색을 자체 StyleX 상수로 그린다. `@dfragon/client`는 사이트용으로 공개한 entry만 import한다. 웹 앱 entry(`packages/client/src/site/web/index.ts`, `@dfragon/client/web`)는 실제 상단 바와 카드 컴포넌트를 브라우저 host로 연결해 [웹 클라이언트](../rules/web-client.md)를 그린다. 첫 화면 배경의 시간대 그림은 같은 `site` 폴더의 `time-of-day.ts`(`@dfragon/client/time-of-day`)로 읽는다. |
+| `apps/web` | `@dfragon/ui`를 소비하고 웹 앱 상자를 페이지 가운데에 놓는다. `@dfragon/client`는 사이트용으로 공개한 entry만 import한다. 웹 앱 entry(`packages/client/src/site/web/index.ts`, `@dfragon/client/web`)는 실제 상단 바와 카드 컴포넌트를 브라우저 host로 연결해 [웹 클라이언트](../rules/web-client.md)를 그린다. |
 | 독립 Vite Example entry | 필요한 상태를 실제 화면에서 확인하기 어려울 때 같은 `@dfragon/ui` public API와 합성 content로 확인한다. 새 화면마다 Component, Pattern, Template 예제를 갖출 의무는 없다. |
 
 공용 Component는 Base UI 부품의 semantic API와 접근성 동작을 유지하고 외형만 StyleX로 그린다. 같은 역할의 Component를 이름만 바꿔 다시 감싸지 않는다. 화면별 스타일 허용 범위와 필요한 Example, 토큰, version, 영향 검증은 [`design-system.md`](../rules/design-system.md)가 canonical Rule이다.
