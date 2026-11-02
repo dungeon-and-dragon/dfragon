@@ -1,7 +1,7 @@
 import { createActor, waitFor } from 'xstate'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { getRaidCapturePhase, raidCaptureMachine } from './raid-capture-machine'
-import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
+import { WEB_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
 import type { RaidFrameResult } from '../preload/common/types/capture'
 import type { RaidSlotRecognition } from './raid-recognition'
@@ -38,11 +38,11 @@ const recognized: RaidSlotRecognition[] = [
 
 function start() {
   const effects = {
-    texts: DESKTOP_CAPTURE_TEXTS,
+    texts: WEB_CAPTURE_TEXTS,
     beginSearch: vi.fn(async (_signal: AbortSignal): Promise<string | null> => ROUND),
     readFrame: vi.fn(async (_captureId: string): Promise<RaidFrameResult> => rows),
     observeOcr: vi.fn(),
-    recognizeWithOcr: createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed).recognize
+    recognizeWithOcr: createSharedOcrWorker(WEB_CAPTURE_TEXTS.ocrPrepareFailed).recognize
   }
   const actor = createActor(raidCaptureMachine, { input: effects }).start()
 
@@ -97,30 +97,16 @@ it('회차는 공대 수명을 시작해 프레임 한 장의 12행을 인식하
   expect(modules.rejected).toHaveBeenCalledOnce()
   const snapshot = actor.getSnapshot()
   expect(getRaidCapturePhase(snapshot)).toBe('complete')
-  expect(snapshot.context.status).toBe('인식을 마쳤습니다. 다시 인식하려면 Alt+R을 누르세요.')
+  expect(snapshot.context.status).toBe(WEB_CAPTURE_TEXTS.complete)
   expect(snapshot.context.completedAt).toBe(Date.now())
 })
 
 it.each([
-  [
-    { kind: 'missing', reason: 'not-found' },
-    '공대 상세 창을 찾지 못했습니다. 12인 공대 상세 창을 연 뒤 Alt+R을 누르세요.'
-  ],
-  [
-    { kind: 'missing', reason: 'uncertain' },
-    '공대 상세 창을 확인하지 못했습니다. 창 하나만 가려지지 않게 연 뒤 Alt+R을 누르세요.'
-  ],
-  [
-    { kind: 'waiting', reason: 'covered' },
-    '게임 창이 가려져 있습니다. 게임 창을 앞으로 가져온 뒤 Alt+R을 누르세요.'
-  ],
-  [
-    { kind: 'waiting', reason: 'unavailable' },
-    '게임 화면을 읽지 못했습니다. 창이 최소화되지 않았는지 확인한 뒤 Alt+R을 누르세요.'
-  ],
+  [{ kind: 'missing', reason: 'not-found' }, WEB_CAPTURE_TEXTS.raidWindowMissing],
+  [{ kind: 'missing', reason: 'uncertain' }, WEB_CAPTURE_TEXTS.raidWindowUncertain],
   [
     { kind: 'rows', valueColumn: 'unknown', rows: Array.from({ length: 12 }, () => null) },
-    '공대원 이름을 찾지 못했습니다. 공대 상세 창이 가려지지 않게 한 뒤 Alt+R을 누르세요.'
+    WEB_CAPTURE_TEXTS.raidNamesMissing
   ]
 ] as const)('프레임 결과 %j는 확인 필요로 끝내고 다시 읽지 않는다', async (frame, status) => {
   const { actor, effects } = start()
@@ -141,14 +127,10 @@ it.each([
 })
 
 it.each([
-  ['수명 시작 실패', '검색을 시작하지 못했습니다. Alt+R을 눌러 다시 시도해 주세요.'],
-  ['프레임 거절', '캡처 연결이 종료되었습니다. 창을 다시 선택해 주세요.'],
-  ['미지원', '화면 캡처는 Windows에서 사용할 수 있습니다.'],
-  ['OCR 준비 실패', '글자 인식을 준비하지 못했습니다. Alt+R을 눌러 다시 인식해 주세요.'],
-  [
-    '한 행 인식 실패',
-    '글자 인식에 실패했습니다. Alt+R을 누르거나 서버와 이름을 직접 조회해 주세요.'
-  ]
+  ['수명 시작 실패', WEB_CAPTURE_TEXTS.raidStartFailed],
+  ['프레임 거절', WEB_CAPTURE_TEXTS.disconnected],
+  ['OCR 준비 실패', WEB_CAPTURE_TEXTS.ocrPrepareFailed],
+  ['한 행 인식 실패', WEB_CAPTURE_TEXTS.raidOcrFailed]
 ] as const)(
   '%s는 실패로 끝내고 이름을 알리지 않으며 Alt+R로 다시 시작한다',
   async (cause, status) => {
@@ -157,8 +139,6 @@ it.each([
       effects.beginSearch.mockResolvedValue(null)
     } else if (cause === '프레임 거절') {
       effects.readFrame.mockRejectedValue(new Error('CAPTURE_NOT_ALLOWED'))
-    } else if (cause === '미지원') {
-      effects.readFrame.mockResolvedValue({ kind: 'unsupported' })
     } else if (cause === 'OCR 준비 실패') {
       modules.worker.mockRejectedValue(new Error('worker'))
     } else {

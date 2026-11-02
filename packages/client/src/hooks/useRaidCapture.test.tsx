@@ -3,7 +3,7 @@ import { act, useLayoutEffect, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useRaidCapture } from './useRaidCapture'
-import { DESKTOP_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
+import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 import { createSharedOcrWorker } from '@dfragon/client-core/lib/ocr-worker-recognition'
 import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 import { createTestClientHost } from '../testing/test-support/client-host'
@@ -39,13 +39,13 @@ let root: Root
 let raid: RaidCaptureHost
 
 function Harness(): null {
-  const [ocrWorker] = useState(() => createSharedOcrWorker(DESKTOP_CAPTURE_TEXTS.ocrPrepareFailed))
+  const [ocrWorker] = useState(() => createSharedOcrWorker(WEB_CAPTURE_TEXTS.ocrPrepareFailed))
   const current = useRaidCapture({
     sourceId: 'game',
     sourceReady: true,
     receivesShortcut: false,
     recognizeWithOcr: ocrWorker.recognize,
-    texts: DESKTOP_CAPTURE_TEXTS
+    texts: WEB_CAPTURE_TEXTS
   })
   useLayoutEffect(() => {
     value = current

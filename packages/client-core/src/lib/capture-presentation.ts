@@ -49,7 +49,7 @@ function getRaidScreenCapture({
   party: CaptureStatus & { sourceReady: boolean; selectedSourceId: string }
   raid: CaptureStatus
 }): CaptureStatus {
-  // 창을 고른 Desktop은 창 변경, 중지, 등록 실패를 공대 회차보다 먼저 알린다. 창 없이 붙여 넣은 회차만 공대 단계를 보인다.
+  // 창을 공유했으면 창 변경, 중지, 등록 실패를 공대 회차보다 먼저 알린다. 창 없이 붙여 넣은 회차만 공대 단계를 보인다.
   const partyStatusFirst =
     !party.sourceReady && (party.selectedSourceId !== '' || raid.phase === 'idle')
   if (partyStatusFirst) {
@@ -95,7 +95,7 @@ export function getTopBarCaptureControls({
     return { phase: screenCapture.phase, status: texts.noSource }
   }
 
-  if (screenCapture.phase === 'recognizing' && !ocrReady && texts.ocrPreparing !== null) {
+  if (screenCapture.phase === 'recognizing' && !ocrReady) {
     return { phase: screenCapture.phase, status: texts.ocrPreparing }
   }
 

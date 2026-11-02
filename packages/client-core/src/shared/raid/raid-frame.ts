@@ -1,9 +1,5 @@
 import type { DNFRectangle } from '@dfragon/lib'
-import type {
-  RaidFrameResult,
-  RaidFrameRow,
-  WindowFrameResult
-} from '../../preload/common/types/capture'
+import type { RaidFrameResult, RaidFrameRow } from '../../preload/common/types/capture'
 import type { CharacterImage } from '../../preload/common/types/character'
 import {
   cropRaidWindowNicknames,
@@ -43,13 +39,10 @@ function copyRegion(frame: CharacterImage, region: DNFRectangle): CharacterImage
 }
 
 export function toRaidFrameResult(
-  result: WindowFrameResult,
+  image: CharacterImage,
   templates: RaidWindowTemplates
 ): RaidFrameResult {
-  if (result.kind !== 'frame') {
-    return result
-  }
-  const detection = cropRaidWindowNicknames(result.image, templates)
+  const detection = cropRaidWindowNicknames(image, templates)
   if (detection.status === 'not-found') {
     return { kind: 'missing', reason: 'not-found' }
   }
@@ -57,7 +50,7 @@ export function toRaidFrameResult(
   if (detection.status !== 'found') {
     return { kind: 'missing', reason: 'uncertain' }
   }
-  const { valueColumn, valueTexts } = readRaidWindowValues(result.image, detection, templates)
+  const { valueColumn, valueTexts } = readRaidWindowValues(image, detection, templates)
   const rows = detection.rows.map((row, index): RaidFrameRow | null => {
     const crop = row.nicknameCrop
     if (crop === null || containsExcludedPixels(crop.rgba)) {
@@ -65,7 +58,7 @@ export function toRaidFrameResult(
     }
     const { width, height } = crop
     const nickname = { width, height, rgba: Uint8Array.from(crop.rgba) }
-    const job = copyRegion(result.image, row.jobRegion)
+    const job = copyRegion(image, row.jobRegion)
 
     return { nickname, job, valueText: valueTexts[index] }
   })

@@ -8,7 +8,8 @@ import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { readTownIndicatorTemplate } from './browser-town-template'
 import { WebApp } from './WebApp'
-import { WEB_CAPTURE_TEXTS, WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
+import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
+import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
 vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
 vi.mock('./browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
