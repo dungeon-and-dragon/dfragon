@@ -34,17 +34,11 @@ export const checkJobs = [
     commands: [
       workspace('@dfragon/licenses', 'test'),
       workspace('@dfragon/lib', 'test'),
-      workspace('@dfragon/ui', 'test')
+      workspace('@dfragon/ui', 'test'),
+      workspace('@dfragon/client-core', 'test'),
+      workspace('@dfragon/client', 'test')
     ]
   },
-  {
-    job: 'desktop',
-    commands: [
-      workspace('@dfragon/desktop', 'exec', 'install-electron'),
-      workspace('@dfragon/desktop', 'test')
-    ]
-  },
-  { job: 'desktop-typecheck', commands: [workspace('@dfragon/desktop', 'typecheck')] },
   { job: 'api', commands: [workspace('@dfragon/api', 'test')] },
   {
     job: 'web',

@@ -1,5 +1,5 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
-import { timeOfDayImages } from '@dfragon/desktop-site/time-of-day'
+import { timeOfDayImages } from '@dfragon/client/time-of-day'
 import * as stylex from '@stylexjs/stylex'
 import { lazy, Suspense } from 'react'
 import neopleOpenApiLogo from './assets/neople-open-api.png'

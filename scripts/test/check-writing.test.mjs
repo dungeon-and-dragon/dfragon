@@ -106,14 +106,14 @@ test('웹사이트 문구는 해요체를 허용하고 다른 표기 규칙은 �
 
 test('해요체 예외는 apps/web 밖의 경로에 적용하지 않는다', async (t) => {
   const result = await checkFixture(t, {
-    'apps/desktop/src/App.tsx': '파티, 공대를 쉽게 확인해봐요\n',
+    'packages/client/src/App.tsx': '파티, 공대를 쉽게 확인해봐요\n',
     'apps/webview/App.tsx': '파티, 공대를 쉽게 확인해봐요\n',
     'docs/apps/web/guide.md': '파티, 공대를 쉽게 확인해봐요\n'
   })
 
   assert.equal(result.code, 1)
   for (const path of [
-    'apps/desktop/src/App.tsx',
+    'packages/client/src/App.tsx',
     'apps/webview/App.tsx',
     'docs/apps/web/guide.md'
   ]) {

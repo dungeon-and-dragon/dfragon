@@ -89,16 +89,14 @@ test('export const 초기값의 정규식 리터럴을 허용한다', async () =
 })
 
 const excludedFiles = [
-  'apps/desktop/src/backend/regex.test.ts',
+  'packages/client-core/src/regex.test.ts',
   'apps/web/src/regex.spec.tsx',
   'apps/api/test/regex.ts',
   'apps/api/tests/regex.ts',
   'packages/ui/src/__tests__/regex.ts',
   'scripts/test/fixtures/regex.mjs',
-  'apps/desktop/src/frontend/src/fixture/regex.ts',
-  'apps/desktop/src/frontend/src/testing/regex.ts',
-  'apps/desktop/scripts/ui-fixture-preload.cts',
-  'apps/desktop/scripts/ui-fixture.mjs',
+  'packages/client/src/fixture/regex.ts',
+  'packages/client/src/testing/regex.ts',
   'apps/api/test-support/character-search-fixtures.mjs',
   'packages/ui/scripts/test-consumer-resolution.mjs',
   'packages/lib/generated/regex.ts',
@@ -120,8 +118,7 @@ for (const filePath of excludedFiles) {
 }
 
 const buildToolFiles = [
-  'apps/desktop/build/regex-sample.ts',
-  'apps/desktop/scripts/validate-ocr-model.mjs',
+  'packages/client/scripts/validate-ocr-model.mjs',
   'apps/web/vite.config.ts',
   'packages/ui/scripts/verify-build.mjs'
 ]
@@ -142,7 +139,7 @@ test('기존 생성물과 의존성의 전역 ignore를 유지한다', async () 
   const ignoredFiles = [
     'node_modules/sample/index.js',
     'apps/api/dist/main.js',
-    'apps/desktop/src/frontend/public/ocr/worker.js'
+    'packages/licenses/notices/worker.js'
   ]
   const source = 'export const valid = /item/.test("item")'
   const files = [checkedFile, ...ignoredFiles]

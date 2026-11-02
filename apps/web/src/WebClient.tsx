@@ -1,4 +1,4 @@
-import { installBrowserHost, WebApp } from '@dfragon/desktop-web'
+import { installBrowserHost, WebApp } from '@dfragon/client/web'
 
 const PRODUCTION_API_ORIGIN = 'https://api.dfragon.com'
 

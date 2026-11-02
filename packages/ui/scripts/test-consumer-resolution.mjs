@@ -10,25 +10,18 @@ const root = fileURLToPath(new URL('../../../', import.meta.url))
 
 // 전용 checkout에서 직렬 실행한다. 이전 case의 output/cache로 cold 실패를 가리지 않는다.
 // 보존할 artifact가 있거나 dev server, 다른 build가 도는 checkout에서는 실행하지 않는다.
-// Desktop 제품 dev는 Electron bootstrap을 띄우고 electron-vite의 --rendererOnly도 이전 main/preload를
-// 실행하므로, renderer 해석은 apps/desktop/scripts/ui-renderer-resolution.mjs가 Vite server로만 확인한다.
 // POSIX process group 종료를 쓰며 macOS에서 검증했다.
 beforeEach(() => {
   for (const path of [
     'packages/ui/dist',
     'packages/ui/dist-examples',
-    'apps/desktop/out',
-    'packages/ui/node_modules/.vite',
-    'apps/desktop/node_modules/.vite'
+    'packages/ui/node_modules/.vite'
   ]) {
     rmSync(new URL(`../../../${path}`, import.meta.url), { recursive: true, force: true })
   }
 })
 
 for (const [workspace, command] of [
-  ['@dfragon/desktop', 'test'],
-  ['@dfragon/desktop', 'typecheck'],
-  ['@dfragon/desktop', 'build'],
   ['@dfragon/ui', 'test'],
   ['@dfragon/ui', 'typecheck'],
   ['@dfragon/ui', 'build:examples']
@@ -53,13 +46,6 @@ for (const { name, executable, args, cwd, entries } of [
     args: ['--filter', '@dfragon/ui', 'dev:examples', '--host', '127.0.0.1', '--port', '0'],
     cwd: root,
     entries: ['/main.tsx']
-  },
-  {
-    name: 'Electron bootstrap 없는 Desktop dev renderer',
-    executable: 'node',
-    args: ['scripts/ui-renderer-resolution.mjs'],
-    cwd: new URL('../../../apps/desktop/', import.meta.url),
-    entries: ['/src/main.tsx', '/src/App.tsx']
   }
 ]) {
   test(`library 선행 빌드 없이 ${name}에서 browser entry를 해석한다`, async () => {

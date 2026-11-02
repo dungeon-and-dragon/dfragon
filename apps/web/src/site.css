@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'MaruMinya Hangul';
-  src: url('../../desktop/src/frontend/src/assets/fonts/x12y12pxMaruMinyaHangul.woff2')
+  src: url('../../../packages/client/src/assets/fonts/x12y12pxMaruMinyaHangul.woff2')
     format('woff2');
   font-weight: 100 900;
   font-style: normal;
@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: 'Barlow Condensed';
-  src: url('../../desktop/src/frontend/src/assets/fonts/BarlowCondensed-SemiBold.woff2')
+  src: url('../../../packages/client/src/assets/fonts/BarlowCondensed-SemiBold.woff2')
     format('woff2');
   font-weight: 600;
   font-style: normal;
@@ -19,7 +19,7 @@
 
 @font-face {
   font-family: 'Barlow Condensed';
-  src: url('../../desktop/src/frontend/src/assets/fonts/BarlowCondensed-Bold.woff2') format('woff2');
+  src: url('../../../packages/client/src/assets/fonts/BarlowCondensed-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;

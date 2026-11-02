@@ -9,7 +9,7 @@ const skippedPaths = new Set([
   'scripts/check-writing.mjs',
   'scripts/test/check-writing.test.mjs',
   'packages/lib/src/cp949-characters.ts',
-  'apps/desktop/assets/ocr/korean-dict.txt'
+  'packages/client/assets/ocr/korean-dict.txt'
 ])
 const legacyBrandName = /(?<![A-Za-z0-9_-])DFRAGON(?![A-Za-z0-9_-])/u
 const mixedCaseBrandName = /(?<![A-Za-z0-9_-])Dfragon(?![A-Za-z0-9_-])/u

@@ -1,0 +1,170 @@
+import { assign, enqueueActions, fromCallback, fromPromise, setup } from 'xstate'
+import { SEARCH_ACTIONS } from '@dfragon/client-core/preload/common/types/search'
+import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
+
+type ConnectionEvent =
+  | { type: 'SUBSCRIBED' }
+  | { type: 'SUBSCRIPTION_FAILED' }
+  | { type: 'SNAPSHOT'; snapshot: SearchSnapshot }
+  | { type: 'RESULT'; snapshot: SearchSnapshot }
+  | { type: 'READ_SUCCEEDED'; snapshot: SearchSnapshot }
+  | { type: 'READ_FAILED' }
+
+type ConnectionTarget = { api: SearchApi }
+type ConnectionContext = ConnectionTarget & {
+  snapshot: SearchSnapshot | null
+  queued: SearchSnapshot | null
+}
+
+export async function readSearchSnapshot({ api }: ConnectionTarget): Promise<SearchSnapshot> {
+  const result = await api.controlCharacterSearch({ action: SEARCH_ACTIONS.READ })
+
+  return result.snapshot
+}
+
+// 구독의 초기 기준과 마지막 조회의 성공 여부는 독립적이다.
+// 초기 조회 실패 뒤 event는 받지 않지만, 연결 후 복구 조회 실패 뒤 event는 표시할 수 있다.
+export const searchConnectionMachine = setup({
+  types: {
+    context: {} as ConnectionContext,
+    input: {} as ConnectionTarget,
+    events: {} as ConnectionEvent
+  },
+  actors: {
+    subscription: fromCallback<ConnectionEvent, ConnectionTarget>(({ input, sendBack }) => {
+      try {
+        const unsubscribe = input.api.onCharacterSearchChanged((snapshot) =>
+          sendBack({ type: 'SNAPSHOT', snapshot })
+        )
+        sendBack({ type: 'SUBSCRIBED' })
+
+        return unsubscribe
+      } catch {
+        sendBack({ type: 'SUBSCRIPTION_FAILED' })
+
+        return undefined
+      }
+    }),
+    read: fromPromise(({ input }: { input: ConnectionTarget }) => readSearchSnapshot(input))
+  },
+  actions: {
+    acceptSnapshot: enqueueActions(
+      ({ context, enqueue }, { snapshot }: { snapshot: SearchSnapshot }) => {
+        const previous = context.snapshot
+        if (previous != null && snapshot.revision <= previous.revision) {
+          return
+        }
+        enqueue.assign({ snapshot })
+      }
+    ),
+    queueSnapshot: assign(({ context, event }) => {
+      if (event.type !== 'SNAPSHOT') {
+        return {}
+      }
+      const previous = context.queued
+      const snapshot = event.snapshot
+      if (previous != null && snapshot.revision <= previous.revision) {
+        return {}
+      }
+
+      return { queued: snapshot }
+    }),
+    flushQueued: enqueueActions(({ context, enqueue }) => {
+      if (context.queued != null) {
+        enqueue.raise({ type: 'SNAPSHOT', snapshot: context.queued })
+      }
+      enqueue.assign({ queued: null })
+    })
+  }
+}).createMachine({
+  id: 'searchConnection',
+  context: ({ input }) => ({
+    api: input.api,
+    snapshot: null,
+    queued: null
+  }),
+  initial: 'connected',
+  states: {
+    connected: {
+      type: 'parallel',
+      invoke: {
+        src: 'subscription',
+        input: ({ context }) => ({ api: context.api })
+      },
+      on: {
+        RESULT: {
+          actions: { type: 'acceptSnapshot', params: ({ event }) => ({ snapshot: event.snapshot }) }
+        }
+      },
+      states: {
+        events: {
+          initial: 'subscribing',
+          states: {
+            subscribing: {
+              on: {
+                SUBSCRIBED: 'loading',
+                SUBSCRIPTION_FAILED: {
+                  target: 'failed',
+                  actions: enqueueActions(({ enqueue }) => enqueue.raise({ type: 'READ_FAILED' }))
+                },
+                SNAPSHOT: { actions: 'queueSnapshot' }
+              }
+            },
+            loading: {
+              on: { SNAPSHOT: { actions: 'queueSnapshot' } },
+              invoke: {
+                src: 'read',
+                input: ({ context }) => ({ api: context.api }),
+                onDone: {
+                  target: 'listening',
+                  actions: [
+                    enqueueActions(({ event, enqueue }) =>
+                      enqueue.raise({ type: 'READ_SUCCEEDED', snapshot: event.output })
+                    ),
+                    'flushQueued'
+                  ]
+                },
+                onError: {
+                  target: 'failed',
+                  actions: [
+                    assign({ queued: null }),
+                    enqueueActions(({ enqueue }) => enqueue.raise({ type: 'READ_FAILED' }))
+                  ]
+                }
+              }
+            },
+            failed: {},
+            listening: {
+              on: {
+                SNAPSHOT: {
+                  actions: {
+                    type: 'acceptSnapshot',
+                    params: ({ event }) => ({ snapshot: event.snapshot })
+                  }
+                }
+              }
+            }
+          }
+        },
+        synchronization: {
+          initial: 'waiting',
+          on: {
+            READ_SUCCEEDED: {
+              target: '.ready',
+              actions: {
+                type: 'acceptSnapshot',
+                params: ({ event }) => ({ snapshot: event.snapshot })
+              }
+            },
+            READ_FAILED: { target: '.failed', actions: assign({ snapshot: null }) }
+          },
+          states: {
+            waiting: {},
+            ready: { tags: ['ready'] },
+            failed: { tags: ['failed'] }
+          }
+        }
+      }
+    }
+  }
+})

@@ -10,13 +10,15 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "prepare:ocr-assets": "node ../desktop/scripts/prepare-ocr-assets.mjs public/ocr",
+    "prepare:ocr-assets": "node ../../packages/client/scripts/prepare-ocr-assets.mjs public/ocr",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
     "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
+    "@dfragon/client": "workspace:*",
+    "@dfragon/client-core": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@dfragon/ui": "workspace:*",
     "@fontsource/noto-sans-kr": "catalog:",

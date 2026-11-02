@@ -12,12 +12,12 @@ review-after: 모바일 지원 범위, 사이트 hosting, Desktop bridge 구성 
 
 # 웹 클라이언트
 
-dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약을 정한다. 결정의 이유와 고르지 않은 대안은 [ADR 0004](../adr/0004-web-client.md)에 있다. 상단 바, 카드, 검색과 캡처 회차의 동작은 [Desktop MVP 카드 UI](desktop-mvp-ui.md)와 [캐릭터 검색](character-search.md)을 그대로 따르고, 이 문서는 웹에서 달라지는 것만 정한다. 앱 경계와 점수 엔진 위치는 [Architecture Overview](../architecture/overview.md), 웹 entry와 공용 검색 코어의 파일 위치는 [Desktop 코드 구조](../architecture/desktop-code-organization.md)를 따른다.
+dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약을 정한다. 결정의 이유와 고르지 않은 대안은 [ADR 0004](../adr/0004-web-client.md)에 있다. 상단 바, 카드, 검색과 캡처 회차의 동작은 [Desktop MVP 카드 UI](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/docs/rules/desktop-mvp-ui.md)와 [캐릭터 검색](character-search.md)을 그대로 따르고, 이 문서는 웹에서 달라지는 것만 정한다. 앱 경계와 점수 엔진 위치는 [Architecture Overview](../architecture/overview.md), 웹 entry와 공용 검색 코어의 package는 [ADR 0008](../adr/0008-desktop-discontinued.md)을 따른다.
 
 ## 위치와 화면
 
 - 웹 앱은 dfragon.com 메인 첫 화면에 둔다. 각본으로 움직이는 목업 창은 두지 않는다. 첫 화면에 Desktop 안내와 내려받기 버튼은 두지 않으며 GitHub Releases API도 부르지 않는다([ADR 0008](../adr/0008-desktop-discontinued.md)). 첫 화면은 웹이 보내는 정보([전송 정보](#전송-정보))와 데스크톱 브라우저용이라는 지원 범위도 사이트 문구로 안내한다. 사이트 소개 문구의 문체는 [표기와 문체](writing.md#사용자-문구의-문체)를 따르고, 앱 화면 문구는 Desktop과 같은 합니다체다.
-- 웹 entry는 Desktop의 `main.tsx`, `App.tsx`를 쓰지 않는다. 상단 바와 파티 화면을 1280×163, 공대 화면을 1280×300 상자 안에 합성한 컴포넌트를 `@dfragon/desktop-web` 별칭으로 내보낸다. Desktop의 문서 전체 드래그 차단, `user-select: none`, `100dvh`는 이 상자 밖의 사이트에 적용하지 않는다.
+- 웹 entry는 Desktop의 `main.tsx`, `App.tsx`를 쓰지 않는다. 상단 바와 파티 화면을 1280×163, 공대 화면을 1280×300 상자 안에 합성한 컴포넌트를 `@dfragon/client/web`으로 내보낸다. Desktop의 문서 전체 드래그 차단, `user-select: none`, `100dvh`는 이 상자 밖의 사이트에 적용하지 않는다.
 - main merge는 검색 엔진의 크롤링을 막은 `dev.dfragon.com`에만 자동으로 배포한다. `dfragon.com`은 저장소 소유자가 운영 배포를 수동 실행할 때만 바뀌고, 그 시점은 소유자가 정한다(2026-11-01 저장소 소유자 결정). 두 사이트는 같은 빌드 단계를 쓰며, 저장소와 절차는 [Web 배포](../../apps/web/README.md#배포)에 있다.
 
 ## 지원 범위
@@ -55,7 +55,7 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 
 판정 함수(마을, 지금 화면의 crop 비교, 2번 연속)는 host와 분리한 순수 모듈로 두고 합성 입력으로 테스트한다. 공유 화면 이미지와 crop은 이 판정에서도 브라우저 밖으로 보내지 않는다([전송 정보](#전송-정보)).
 
-[Desktop Windows 캡처 정책](desktop-windows-capture.md)의 Electron media 권한 거절과 네이티브 창 캡처는 Desktop에만 적용한다. 웹은 브라우저의 화면 공유 권한을 쓴다.
+[Desktop Windows 캡처 정책](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/docs/rules/desktop-windows-capture.md)의 Electron media 권한 거절과 네이티브 창 캡처는 Desktop에만 적용한다. 웹은 브라우저의 화면 공유 권한을 쓴다.
 
 ### 붙여넣기 안내 범위
 
@@ -104,11 +104,11 @@ Alt와 왼쪽, 오른쪽 방향키는 브라우저의 뒤로, 앞으로 가기�
 
 ## 클립보드
 
-웹의 클립보드로 복사는 `navigator.clipboard`로 글자를 쓴다. 복사 형식, 결과 표시, 단축키는 [Desktop의 클립보드로 복사](desktop-mvp-ui.md#클립보드로-복사)와 같다. 그 절의 "renderer의 Clipboard API를 쓰지 않는다"는 Electron 권한 정책 때문에 정한 Desktop만의 경로이며 웹에는 적용하지 않는다. 클립보드 읽기는 두지 않는다.
+웹의 클립보드로 복사는 `navigator.clipboard`로 글자를 쓴다. 복사 형식, 결과 표시, 단축키는 [Desktop의 클립보드로 복사](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/docs/rules/desktop-mvp-ui.md#클립보드로-복사)와 같다. 그 절의 "renderer의 Clipboard API를 쓰지 않는다"는 Electron 권한 정책 때문에 정한 Desktop만의 경로이며 웹에는 적용하지 않는다. 클립보드 읽기는 두지 않는다.
 
 ## Renderer 주입 지점
 
-Renderer는 Electron을 직접 참조하지 않고 `apps/desktop/src/preload/index.d.ts`의 bridge 9개(`api`, `search`, `raidSearch`, `desktopShortcut`, `desktopClipboard`, `todayGrade`, `diagnostics`, `updateNotice`, `windowChrome`)로만 플랫폼에 닿는다. 웹은 9개를 모두 브라우저 API로 구현한 브라우저 host를 넣어 Desktop renderer 컴포넌트와 hook을 그대로 쓴다. `search`, `raidSearch`는 공용 검색 코어에 `fetch`, `createImageBitmap` adapter를 넣어 구현하고, `desktopClipboard`는 위 [클립보드](#클립보드)를 따른다.
+Renderer는 Electron을 직접 참조하지 않고 `packages/client/src/globals.d.ts`의 bridge 9개(`api`, `search`, `raidSearch`, `desktopShortcut`, `desktopClipboard`, `todayGrade`, `diagnostics`, `updateNotice`, `windowChrome`)로만 플랫폼에 닿는다. 웹은 9개를 모두 브라우저 API로 구현한 브라우저 host를 넣어 Desktop renderer 컴포넌트와 hook을 그대로 쓴다. `search`, `raidSearch`는 공용 검색 코어에 `fetch`, `createImageBitmap` adapter를 넣어 구현하고, `desktopClipboard`는 위 [클립보드](#클립보드)를 따른다.
 
 Renderer 컴포넌트와 hook은 아래 세 주입 지점만 고친다. 그 밖의 웹 전용 분기는 renderer에 넣지 않고 브라우저 host와 웹 entry에 둔다. 주입 지점을 고쳐도 Desktop의 동작과 문구는 바뀌지 않는다.
 

@@ -229,7 +229,7 @@ const allowedCases = [
 ]
 
 function samplePath(index) {
-  return `apps/desktop/src/frontend/src/criteria-sample-${index}.tsx`
+  return `packages/client/src/criteria-sample-${index}.tsx`
 }
 
 async function pluginMessages(sources) {
@@ -264,10 +264,10 @@ for (const [offset, [name]] of allowedCases.entries()) {
 }
 
 const excludedFiles = [
-  'apps/desktop/src/frontend/src/criteria.test.tsx',
+  'packages/client/src/criteria.test.tsx',
   'packages/ui/test/criteria.tsx',
-  'apps/desktop/src/frontend/src/fixture/criteria.tsx',
-  'apps/desktop/src/frontend/src/testing/criteria.tsx',
+  'packages/client/src/fixture/criteria.tsx',
+  'packages/client/src/testing/criteria.tsx',
   'packages/lib/src/criteria.generated.tsx'
 ]
 const excludedSource = [

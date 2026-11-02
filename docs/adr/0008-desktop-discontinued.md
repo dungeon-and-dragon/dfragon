@@ -19,7 +19,7 @@ review-after: Desktop을 다시 배포해야 할 때, API의 이전 Desktop 호�
 
 [ADR 0004](0004-web-client.md)의 웹 클라이언트(dfragon.com)가 닉네임 검색, 스크린샷 붙여넣기, 화면 공유의 같은 인식과 검색을 설치 없이 제공한다. Desktop은 서비스상 더 이상 의미가 없다.
 
-그런데 `apps/web`의 실제 웹 앱은 `apps/desktop` 안에 있다. `apps/web/workspace-aliases.ts`와 `tsconfig.app.json`이 `@dfragon/desktop-web`, `@dfragon/desktop-shared`, `@dfragon/desktop-site` 별칭으로 Desktop renderer를 직접 import한다. 웹 진입점에서 닿는 Desktop 파일은 테스트를 빼고 약 200개, 1만 4천 줄이다. 글꼴, 시간대 배경 그림, OCR 자산 준비 script와 그 입력도 Desktop 경로에 있다. renderer는 Electron preload가 만든 `window.api`, `window.search` 같은 전역 9개를 부르고, 웹에서는 브라우저 host가 이 전역을 흉내 내 붙인다. 그래서 `apps/desktop`을 그냥 지우면 Web이 깨진다.
+그런데 `apps/web`의 실제 웹 앱은 [apps/desktop](https://github.com/dungeon-and-dragon/dfragon/tree/v1.0.2/apps/desktop) 안에 있다. `apps/web/workspace-aliases.ts`와 `tsconfig.app.json`이 `@dfragon/desktop-web`, `@dfragon/desktop-shared`, `@dfragon/desktop-site` 별칭으로 Desktop renderer를 직접 import한다. 웹 진입점에서 닿는 Desktop 파일은 테스트를 빼고 약 200개, 1만 4천 줄이다. 글꼴, 시간대 배경 그림, OCR 자산 준비 script와 그 입력도 Desktop 경로에 있다. renderer는 Electron preload가 만든 `window.api`, `window.search` 같은 전역 9개를 부르고, 웹에서는 브라우저 host가 이 전역을 흉내 내 붙인다. 그래서 Desktop 앱 폴더를 그냥 지우면 Web이 깨진다.
 
 ## 결정
 
@@ -42,4 +42,4 @@ review-after: Desktop을 다시 배포해야 할 때, API의 이전 Desktop 호�
 - 기존 exe는 API의 이전 Desktop 호환 필드가 지워질 때까지만 동작한다. 안내 없이 중단하므로 그 시점에 상세 조회가 깨진다.
 - 웹 앱의 코드는 Desktop 없이 `@dfragon/client-core`, `@dfragon/client` package에서 개발한다.
 - 이동 PR은 파일 수가 많다. rename 위주로 만들고 리뷰는 rename이 아닌 변경(import 경로, 설정, 검사 job)에 집중한다.
-- 이 ADR을 쓰는 PR은 문서와 Web 첫 화면만 바꾼다. `apps/desktop`과 그 workflow, 검사 job은 다음 sub-issue에서 지운다.
+- 이 ADR을 쓰는 PR은 문서와 Web 첫 화면만 바꾼다. Desktop 앱 폴더와 그 workflow, 검사 job은 다음 sub-issue에서 지운다.

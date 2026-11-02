@@ -28,8 +28,6 @@ updates:
         patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
       base-ui:
         patterns: ['@base-ui/*']
-      electron:
-        patterns: ['electron', 'electron-builder', 'electron-vite', '@electron-toolkit/*']
       stylex:
         patterns: ['@stylexjs/*']
       minor-patch:
@@ -38,9 +36,6 @@ updates:
     # Names in both the default and a named catalog are updated by hand: Dependabot reads the
     # named catalog version but writes the default catalog (#691 downgraded TypeScript 7 to 6).
     ignore:
-      - dependency-name: vite
-      - dependency-name: '@vitejs/plugin-react'
-      - dependency-name: '@types/node'
       - dependency-name: typescript
       # Dependabot handling of this npm alias has not been verified.
       - dependency-name: typescript-compiler-api
@@ -55,7 +50,7 @@ updates:
     groups:
       node-image:
         patterns: ['node']
-    # Node majors must follow the server engines (<27) and Electron plan.
+    # Node majors must follow the server engines (<27).
     ignore:
       - dependency-name: node
         update-types: ['version-update:semver-major']

@@ -41,7 +41,6 @@ API는 `https://localhost:3443`을 사용합니다. 운영 credential을 개발�
 
 ```sh
 pnpm --filter @dfragon/api dev
-pnpm --filter @dfragon/desktop dev
 ```
 
 `LOCAL_HTTPS_CERT_FILE`, `LOCAL_HTTPS_KEY_FILE`을 신뢰한 localhost 인증서의 절대 경로로 설정하고

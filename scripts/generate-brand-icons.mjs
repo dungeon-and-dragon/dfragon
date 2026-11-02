@@ -1,34 +1,43 @@
-import { copyFile, mkdtemp, rm } from 'node:fs/promises'
-import { createRequire } from 'node:module'
-import { tmpdir } from 'node:os'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { PNG } from 'pngjs'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
-const desktopRequire = createRequire(new URL('../apps/desktop/package.json', import.meta.url))
-const builderRequire = createRequire(desktopRequire.resolve('electron-builder'))
-const { runIconsTool } = builderRequire('app-builder-lib/out/toolsets/icons.js')
-const output = await mkdtemp(join(tmpdir(), 'dfragon-brand-icons-'))
+const FAVICON_SIZE = 64
+const CHANNELS = 4
 
-try {
-  for (const format of ['ico', 'icns', 'set']) {
-    await runIconsTool({
-      inputFile: join(root, 'assets/brand/dfragon.png'),
-      outputFormat: format,
-      outDir: join(output, format)
-    })
+function downscale(source, size) {
+  const factor = source.width / size
+  if (source.width !== source.height || !Number.isInteger(factor) || factor < 1) {
+    throw new Error(
+      `원본은 ${size}px의 정수배인 정사각형이어야 합니다: ${source.width}×${source.height}`
+    )
   }
 
-  const assets = [
-    ['ico/icon.ico', 'apps/desktop/build/icon.ico'],
-    ['icns/icon.icns', 'apps/desktop/build/icon.icns'],
-    ['set/512x512.png', 'apps/desktop/build/icon.png'],
-    ['set/128x128.png', 'apps/desktop/resources/brand.png'],
-    ['set/64x64.png', 'apps/web/public/favicon.png']
-  ]
-  for (const [source, target] of assets) {
-    await copyFile(join(output, source), join(root, target))
+  const output = new PNG({ width: size, height: size })
+  const area = factor * factor
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const sums = [0, 0, 0, 0]
+      for (let dy = 0; dy < factor; dy += 1) {
+        for (let dx = 0; dx < factor; dx += 1) {
+          const offset = ((y * factor + dy) * source.width + x * factor + dx) * CHANNELS
+          for (let channel = 0; channel < CHANNELS; channel += 1) {
+            sums[channel] += source.data[offset + channel]
+          }
+        }
+      }
+      const target = (y * size + x) * CHANNELS
+      for (let channel = 0; channel < CHANNELS; channel += 1) {
+        output.data[target + channel] = Math.round(sums[channel] / area)
+      }
+    }
   }
-} finally {
-  await rm(output, { recursive: true, force: true })
+
+  return output
 }
+
+const source = PNG.sync.read(await readFile(join(root, 'assets/brand/dfragon.png')))
+const favicon = downscale(source, FAVICON_SIZE)
+await writeFile(join(root, 'apps/web/public/favicon.png'), PNG.sync.write(favicon))
