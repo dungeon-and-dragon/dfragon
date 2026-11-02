@@ -2,6 +2,9 @@ import { expect, it, vi } from 'vitest'
 import { deferred } from '../../shared/search/async-test-fixture'
 import { candidate, createSearchFixture, jsonResponse } from './search-test-fixture'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
+import { scoredDealerCard } from '../../preload/common/search/card-test-fixture'
+import { parseSearchSnapshot } from '../../preload/common/search/snapshot'
+import { SEARCH_SLOT_COUNTS } from '../../preload/common/types/search'
 
 const imageUrl =
   'https://img-api.neople.co.kr/df/servers/cain/characters/synthetic-character?zoom=1'
@@ -85,6 +88,21 @@ it('공대 수명은 12자리를 갖고 12번째 슬롯까지 조회하며 범�
   })
   expect(snapshot.slots.slice(0, 11).every((slot) => slot.state === 'idle')).toBe(true)
   expect(fixture.published).toHaveBeenCalledWith('raidSearchChanged', snapshot)
+})
+
+it('상세 응답 card의 점수를 공대 카드의 renderer snapshot에 그대로 담는다', async () => {
+  const fixture = await createSearchFixture('raid', INITIAL_PORTRAIT_COLOR_POLICY)
+  const card = scoredDealerCard(51234)
+  fixture.fetchSearch
+    .mockResolvedValueOnce(jsonResponse({ body: { rows: [{ ...candidate, imageUrl }] } }))
+    .mockResolvedValueOnce(jsonResponse({ body: { ...details, card } }))
+
+  await fixture.invoke('controlRaidSearch', lookup(fixture.captureId, 0))
+  await vi.waitFor(async () => expect((await fixture.read()).slots[0].state).toBe('success'))
+  const snapshot = await fixture.read()
+
+  expect(snapshot.slots[0].selected).toMatchObject({ equipmentScore: 51234, card })
+  expect(parseSearchSnapshot(snapshot, SEARCH_SLOT_COUNTS.raid)).toEqual(snapshot)
 })
 
 it('공대와 파티 카드 조회는 같은 슬롯 번호에서도 서로의 결과와 요청을 바꾸지 않는다', async () => {

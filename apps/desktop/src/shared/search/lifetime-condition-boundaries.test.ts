@@ -35,7 +35,6 @@ function runtime(candidates: CharacterCandidatesHttp): SearchRuntime {
       scorePortrait: vi.fn(),
       selection: INITIAL_PORTRAIT_COLOR_POLICY
     },
-    cardScorer: { calculate: async () => null, prepare: vi.fn() },
     reportDiagnostic: vi.fn()
   }
 }

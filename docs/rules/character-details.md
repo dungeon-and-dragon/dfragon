@@ -46,9 +46,9 @@ evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간,
 
 응답 최상위 `card`는 카드의 캐릭터 면이 쓰는 역할과 점수다. 형태는 [#716](https://github.com/dungeon-and-dragon/dfragon/issues/716)의 공유 계약을 따른다. 역할은 `apps/api/src/characters/card/project.ts`의 순수 함수가 HTTP 없이 정하고(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)), 점수는 공용 아이템 상세를 붙인 뒤 API의 점수 엔진이 계산한다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)).
 
-- `role`: 기본정보 `jobGrowName`에서 앞의 `眞`을 뺀 이름이 크루세이더, 인챈트리스, 패러메딕, 뮤즈면 `buffer`, 다른 문자열이면 `dealer`, 문자열이 아니면 null이다. Desktop은 이 값으로 점수 계산기를 고른다.
-- `score`: `role`이 `buffer`면 버프 점수, 그 밖은 장비 점수다. API의 [점수 worker](../architecture/overview.md#점수-엔진-경계)가 받은 Neople 섹션 원문과 공용 아이템 상세를 엔진에 넣어 계산한다. 형태는 Desktop renderer가 쓰는 값과 같다. `calculator`는 `equipment`나 `buff`, `value`는 점수, `versions`는 엔진의 `package`, `rulesRev`, `bundleId`다. 엔진이 점수를 건너뛰면 `value`가 null이고 `skipped`에 `kind`, `message`가 있으며, 근사값을 냈으면 `approximate`에 `value`, `source`, `warning`이 있다. 엔진이 없거나 결과를 내지 못하면 `score`가 null이다. 배포된 Desktop v1.0.0, v1.0.2는 card에서 `role`만 읽고 다른 칸은 버리므로 이 값을 쓰지 않는다.
-- `stats`, `serverRank`, `set`, `oath`는 항상 null이고 `investment`는 항상 빈 배열이다. 카드의 스탯 한 줄, 서버 내 명성 순위, 장비 면, 기타 면에 쓰던 값이며 응답 형태를 바꾸지 않으려고 필드만 남긴다. v0.1.0 이후 배포된 Desktop은 card에서 `role`만 읽는다.
+- `role`: 기본정보 `jobGrowName`에서 앞의 `眞`을 뺀 이름이 크루세이더, 인챈트리스, 패러메딕, 뮤즈면 `buffer`, 다른 문자열이면 `dealer`, 문자열이 아니면 null이다. 카드는 이 값으로 점수 라벨을 고른다.
+- `score`: `role`이 `buffer`면 버프 점수, 그 밖은 장비 점수다. API의 [점수 worker](../architecture/overview.md#점수-엔진-경계)가 받은 Neople 섹션 원문과 공용 아이템 상세를 엔진에 넣어 계산한다. 형태는 Desktop renderer가 쓰는 값과 같다. `calculator`는 `equipment`나 `buff`, `value`는 점수, `versions`는 엔진의 `package`, `rulesRev`, `bundleId`다. 엔진이 점수를 건너뛰면 `value`가 null이고 `skipped`에 `kind`, `message`가 있으며, 근사값을 냈으면 `approximate`에 `value`, `source`, `warning`이 있다. 엔진이 없거나 결과를 내지 못하면 `score`가 null이다. Desktop과 웹 클라이언트는 이 값을 카드 점수로 그대로 쓴다([Issue #1088](https://github.com/dungeon-and-dragon/dfragon/issues/1088)). 그 전에 배포된 Desktop v1.0.2 이하는 card에서 `role`만 읽고 다른 칸은 버리므로 이 값을 쓰지 않는다.
+- `stats`, `serverRank`, `set`, `oath`는 항상 null이고 `investment`는 항상 빈 배열이다. 카드의 스탯 한 줄, 서버 내 명성 순위, 장비 면, 기타 면에 쓰던 값이며 응답 형태를 바꾸지 않으려고 필드만 남긴다. v0.1.0부터 v1.0.2까지 배포된 Desktop은 card에서 `role`만 읽고, 그 뒤 Desktop은 `role`과 `score`만 읽는다.
 
 모험단명으로 저장된 캐릭터를 찾던 `GET /adventures/characters`도 DB에만 있던 기능이라 지웠다. 이 경로는 일반 404다.
 

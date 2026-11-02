@@ -1,53 +1,58 @@
-import { describe, expect, it, vi } from 'vitest'
-import { bufferCard, dealerCard } from '../../preload/common/search/card-test-fixture'
+import { describe, expect, it } from 'vitest'
+import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
 import { parseSearchSnapshot } from '../../preload/common/search/snapshot'
 import { searchRow, searchSlot, withSearchSlot } from '../../preload/api/search-test-fixture'
-import type {
-  CharacterDetails,
-  CharacterScoreCalculator
-} from '../../preload/common/types/character'
-import { createEngineCardScorer } from '../score/card-score'
-import { apiDetailsFromEngineInput, readEngineInput } from '../score/details-test-fixture'
-import type { ScoreEngineResult } from '../score/engine'
-import { toScoreEngineInput, type ScoreEngineInput } from '../score/input'
-import { buildCharacterCard, type CalculateCardScore } from '../../shared/search/card-assembler'
+import type { CharacterCardScore, CharacterDetails } from '../../preload/common/types/character'
+import { buildCharacterCard } from '../../shared/search/card-assembler'
 
-type CalculateScore = (
-  input: ScoreEngineInput,
-  calculator: CharacterScoreCalculator
-) => Promise<ScoreEngineResult | null>
-
-// 엔진 결과를 카드 점수로 바꾸는 Desktop adapter를 거쳐 카드 조립을 확인한다.
-function engineScore(score: CalculateScore): CalculateCardScore {
-  const scorer = createEngineCardScorer({
-    calculate: (input, calculator) => score(input, calculator),
-    prepare: () => undefined
-  })
-
-  return (details, calculator) =>
-    scorer.calculate(details, calculator, new AbortController().signal)
+const versions = {
+  package: 'synthetic-engine 0.1.0',
+  rulesRev: 'rev12',
+  bundleId: 'phase31-rev12'
 }
-
-const versions = { package: '0.1.0', rules_rev: 'rev12', bundle_id: 'phase31-rev12' }
-const dealerResult: ScoreEngineResult = {
-  calculator: 'equipment',
-  score: 1741,
-  skipped: null,
-  approximate_score: null,
-  approximate_source: null,
-  warning: null,
-  versions,
-  display: { role: 'dealer', switchingLevel: 3, buff30: null, buff50: null }
-}
-const bufferResult: ScoreEngineResult = {
+const buffScore: CharacterCardScore = {
   calculator: 'buff',
-  score: 136617,
+  value: 136617,
   skipped: null,
-  approximate_score: null,
-  approximate_source: null,
-  warning: null,
-  versions,
-  display: { role: 'buffer', switchingLevel: 2, buff30: 1874.5, buff50: 622 }
+  approximate: null,
+  versions
+}
+const approximateScore: CharacterCardScore = {
+  calculator: 'equipment',
+  value: null,
+  skipped: { kind: 'unresolved', message: '판정 불가' },
+  approximate: {
+    value: 1650,
+    source: 'legacy_fusion_policy_a',
+    warning: '근사값, 1% 밖일 가능성 높음: 판정 불가'
+  },
+  versions
+}
+
+// 합성 캐릭터의 상세 응답이며 card만 바꿔 가며 쓴다.
+function details(card: unknown): CharacterDetails {
+  return {
+    character: {
+      characterId: 'synthetic-character',
+      serverId: 'cain',
+      serverName: '카인',
+      characterName: '합성캐릭터'
+    },
+    status: { status: null, buff: null },
+    equipment: { equipment: [], setItemInfo: [] },
+    avatar: null,
+    creature: null,
+    oath: null,
+    mistAssimilation: null,
+    skillStyle: null,
+    buff: { equipment: null, avatar: null, creature: null },
+    sections: {},
+    freshness: {
+      lastSuccessfulFetchAt: '2026-10-07T00:00:00.000Z',
+      expiresAt: '2026-10-07T00:05:00.000Z'
+    },
+    card: card as CharacterDetails['card']
+  }
 }
 
 const selected = {
@@ -70,159 +75,61 @@ function acceptsCard(card: unknown): boolean {
   return parseSearchSnapshot(snapshot) !== null
 }
 
-describe('API 카드와 엔진 결과 조립', () => {
-  it('딜러 카드는 equipment 계산기로 상세 응답의 엔진 입력을 넘기고 점수를 채운다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('dealer-blade'), dealerCard)
-    const score = vi.fn<CalculateScore>(async () => dealerResult)
+describe('상세 응답 card에서 카드 읽기', () => {
+  it.each([
+    ['딜러의 장비 점수', scoredDealerCard(1741)],
+    ['버퍼의 버프 점수', { role: 'buffer', score: buffScore }],
+    ['역할을 모르는 캐릭터의 점수', { ...scoredDealerCard(1741), role: null }],
+    ['건너뛴 결과의 근사값', { role: 'dealer', score: approximateScore }],
+    ['점수 없음', dealerCard]
+  ] as const)('%s를 API가 보낸 그대로 카드에 넣는다', (_name, apiCard) => {
+    const card = buildCharacterCard(details(apiCard))
 
-    const card = await buildCharacterCard(details, engineScore(score))
-
-    expect(score).toHaveBeenCalledExactlyOnceWith(toScoreEngineInput(details), 'equipment')
-    expect(card).toEqual({
-      role: 'dealer',
-      score: {
-        calculator: 'equipment',
-        value: 1741,
-        skipped: null,
-        approximate: null,
-        versions: { package: '0.1.0', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
-      }
-    })
+    expect(card).toEqual(apiCard)
     expect(acceptsCard(card)).toBe(true)
   })
 
-  it('버퍼 카드는 buff 계산기로 부르고 점수를 채운다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('buffer-muse'), bufferCard)
-    const score = vi.fn<CalculateScore>(async () => bufferResult)
-
-    const card = await buildCharacterCard(details, engineScore(score))
-
-    expect(score.mock.calls[0][1]).toBe('buff')
-    expect(card).toMatchObject({ role: 'buffer', score: { calculator: 'buff', value: 136617 } })
-  })
-
-  it('역할을 모르는 카드는 equipment 계산기로 부른다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('dealer-blade'), {
-      role: null,
-      score: null
-    })
-    const score = vi.fn<CalculateScore>(async () => dealerResult)
-
-    const card = await buildCharacterCard(details, engineScore(score))
-
-    expect(score.mock.calls[0][1]).toBe('equipment')
-    expect(card).toMatchObject({ role: null, score: { value: 1741 } })
-  })
-
-  it('이전 API가 함께 보낸 스탯, 세트, 서약, 강화 값은 카드에 남기지 않는다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('dealer-blade'), dealerCard)
-    const legacy = {
-      ...details,
-      card: {
+  it('card와 점수에 Desktop이 모르는 칸이 있으면 버리고 역할과 점수만 남긴다', () => {
+    const card = buildCharacterCard(
+      details({
         role: 'dealer',
-        stats: { role: 'dealer', attackIncrease: 1, amplification: 2, critical: 3 },
-        score: null,
+        stats: null,
+        score: {
+          ...scoredDealerCard(1741).score,
+          display: { role: 'dealer' },
+          versions: { ...versions, engineCommit: 'synthetic' }
+        },
         serverRank: null,
         set: null,
         oath: null,
         investment: []
-      }
-    } as CharacterDetails
+      })
+    )
 
-    expect(
-      await buildCharacterCard(
-        legacy,
-        engineScore(async () => dealerResult)
-      )
-    ).toMatchObject({
-      role: 'dealer',
-      score: { value: 1741 }
-    })
-    expect(
-      Object.keys(
-        (await buildCharacterCard(
-          legacy,
-          engineScore(async () => dealerResult)
-        ))!
-      )
-    ).toEqual(['role', 'score'])
-  })
-
-  it('건너뛴 결과는 점수 null과 사유를 카드에 남긴다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('dealer-blade'), dealerCard)
-    const skipped = { kind: 'resolution', message: '판정 불가' }
-    const score: CalculateScore = async () => ({ ...dealerResult, score: null, skipped })
-
-    expect((await buildCharacterCard(details, engineScore(score)))?.score).toMatchObject({
-      value: null,
-      skipped,
-      approximate: null
-    })
-  })
-
-  it('엔진이 건너뛴 결과에 낸 근사값은 정확한 점수 칸을 비운 채 따로 남긴다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('dealer-blade'), dealerCard)
-    const skipped = { kind: 'unresolved', message: '판정 불가' }
-    const warning = '근사값, 1% 밖일 가능성 높음: 판정 불가'
-    const score: CalculateScore = async () => ({
-      ...dealerResult,
-      score: null,
-      skipped,
-      approximate_score: 1650,
-      approximate_source: 'legacy_fusion_policy_a',
-      warning
-    })
-
-    const card = await buildCharacterCard(details, engineScore(score))
-
-    expect(card?.score).toMatchObject({
-      value: null,
-      skipped,
-      approximate: { value: 1650, source: 'legacy_fusion_policy_a', warning }
-    })
+    expect(card).toEqual(scoredDealerCard(1741))
     expect(acceptsCard(card)).toBe(true)
-  })
-
-  it('정확한 점수에 붙은 경고는 카드에 남기지 않고 점수만 채운다', async () => {
-    const details = apiDetailsFromEngineInput(readEngineInput('buffer-muse'), bufferCard)
-    const score: CalculateScore = async () => ({ ...bufferResult, warning: '아바타가 번들에 없음' })
-
-    const card = await buildCharacterCard(details, engineScore(score))
-
-    expect(card?.score).toMatchObject({ value: 136617, skipped: null, approximate: null })
-    expect(acceptsCard(card)).toBe(true)
-  })
-
-  it('엔진 실패이면 API가 보낸 점수를 지운다', async () => {
-    const score: CalculateScore = async () => null
-    const apiScore = {
-      calculator: 'equipment',
-      value: 9999,
-      skipped: null,
-      approximate: null,
-      versions: { package: 'api', rulesRev: 'api', bundleId: 'api' }
-    } as const
-    const details = apiDetailsFromEngineInput(readEngineInput('buffer-muse'), {
-      ...bufferCard,
-      score: apiScore
-    })
-
-    expect(await buildCharacterCard(details, engineScore(score))).toEqual(bufferCard)
   })
 
   it.each([
-    ['카드 없음', undefined],
-    ['역할 누락', { score: null }],
-    ['알 수 없는 역할', { ...dealerCard, role: 'tank' }]
-  ])('%s 상세 응답은 엔진을 부르지 않고 카드를 null로 둔다', async (_name, apiCard) => {
-    const { card: _card, ...withoutCard } = apiDetailsFromEngineInput(
-      readEngineInput('dealer-blade'),
-      null
-    )
-    const details = apiCard === undefined ? withoutCard : { ...withoutCard, card: apiCard }
-    const score = vi.fn<CalculateScore>(async () => dealerResult)
+    ['점수 칸 누락', { role: 'buffer' }],
+    ['알 수 없는 계산기', { role: 'buffer', score: { ...buffScore, calculator: 'tank' } }],
+    [
+      '정확한 점수에 붙은 근사값',
+      { role: 'buffer', score: { ...buffScore, approximate: approximateScore.approximate } }
+    ],
+    [
+      '빈 버전',
+      { role: 'buffer', score: { ...buffScore, versions: { ...versions, package: ' ' } } }
+    ]
+  ])('%s처럼 점수를 읽지 못하면 역할만 남긴다', (_name, apiCard) => {
+    expect(buildCharacterCard(details(apiCard))).toEqual({ role: 'buffer', score: null })
+  })
 
-    expect(await buildCharacterCard(details as CharacterDetails, engineScore(score))).toBeNull()
-    expect(score).not.toHaveBeenCalled()
+  it.each([
+    ['카드 없음', null],
+    ['역할 누락', { score: null }],
+    ['알 수 없는 역할', { ...scoredDealerCard(1741), role: 'tank' }]
+  ])('%s 상세 응답은 카드를 null로 둔다', (_name, apiCard) => {
+    expect(buildCharacterCard(details(apiCard))).toBeNull()
   })
 })

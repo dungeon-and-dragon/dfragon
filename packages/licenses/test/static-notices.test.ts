@@ -9,8 +9,7 @@ import { createPackageFixture } from './fixtures.ts'
 
 const noticeFiles = {
   lib: ['iconv-lite-LICENSE'],
-  desktop: ['BARLOW-LICENSE', 'LUCIDE-LICENSE', 'MARUMINYA-LICENSE', 'NOTICE.md'],
-  'score-engine': ['NOTICE', 'RUST-LICENSE-MIT']
+  desktop: ['BARLOW-LICENSE', 'LUCIDE-LICENSE', 'MARUMINYA-LICENSE', 'NOTICE.md']
 }
 const copyCommand = fileURLToPath(new URL('../src/copy-notices.mjs', import.meta.url))
 
@@ -49,15 +48,11 @@ test('Desktop UI 자산 plugin은 Web과 함께 쓰는 글꼴, 아이콘, 자산
   assertOriginalNotices(assets, ['desktop'])
 })
 
-test('Desktop 앱 plugin은 번들한 lib와 점수 엔진 고지를 그룹별 경로에 원문 그대로 낸다', () => {
+test('Desktop 앱 plugin은 번들한 lib 고지만 원문 그대로 내고 점수 엔진 고지는 내지 않는다', () => {
   const assets = emitPluginNotices(desktopAppNotices())
 
-  assert.deepEqual([...assets.keys()].sort(), [
-    'notices/lib/iconv-lite-LICENSE',
-    'notices/score-engine/NOTICE',
-    'notices/score-engine/RUST-LICENSE-MIT'
-  ])
-  assertOriginalNotices(assets, ['lib', 'score-engine'])
+  assert.deepEqual([...assets.keys()].sort(), ['notices/lib/iconv-lite-LICENSE'])
+  assertOriginalNotices(assets, ['lib'])
 })
 
 for (const group of ['lib', 'desktop'] as const) {

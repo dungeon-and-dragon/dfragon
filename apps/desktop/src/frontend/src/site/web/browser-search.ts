@@ -23,15 +23,12 @@ import { parseOcrSearchObservation, parseSearchControl } from '../../../../share
 import { createPortraitColorScorer } from '../../../../shared/search/portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../../../shared/search/portrait-policy'
 import type { YieldToEventLoop } from '../../../../shared/search/portrait-raster'
-import type { CharacterCardScorer, SearchRuntime } from '../../../../shared/search/request'
+import type { SearchRuntime } from '../../../../shared/search/request'
 import { decodeBrowserPng } from './browser-png'
 
 export type BrowserCardSearch = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>
 }
-
-// 점수는 API 상세 응답이 계산해 넣기로 했고, 그 전까지 웹 카드의 점수 칸은 비워 둔다.
-const NO_CARD_SCORE: CharacterCardScorer = { calculate: async () => null, prepare: () => {} }
 
 // setTimeout은 중첩되면 4ms 이상 기다려 초상화 비교의 양보가 수 초로 늘어난다.
 function createMessageChannelYield(): YieldToEventLoop {
@@ -72,7 +69,6 @@ export function createBrowserSearchRuntime(
   const scorePortrait = createPortraitColorScorer(policy, createMessageChannelYield())
 
   return {
-    cardScorer: NO_CARD_SCORE,
     reportDiagnostic,
     identification: { candidates, image, details, scorePortrait, selection: policy }
   }

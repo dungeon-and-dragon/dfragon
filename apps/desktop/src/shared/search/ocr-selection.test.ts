@@ -70,7 +70,6 @@ describe('OCR로 고른 캐릭터의 카드 요약', () => {
       isCurrentOcr: () => true,
       runtime: {
         identification,
-        cardScorer: { calculate: async () => null, prepare: vi.fn() },
         reportDiagnostic: vi.fn()
       }
     })

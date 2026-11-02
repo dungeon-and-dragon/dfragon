@@ -30,13 +30,13 @@ export function desktopNotices() {
   }
 }
 
-// Desktop 앱은 @dfragon/lib 원본을 직접 번들하고 점수 엔진 바이너리도 함께 배포한다. Desktop UI 자산만 쓰는
-// Web에 점수 엔진 고지가 붙지 않도록 desktopNotices와 나눈다.
+// Desktop 앱은 @dfragon/lib 원본을 직접 번들한다. Desktop UI 자산만 쓰는 Web에 lib 고지가 붙지 않도록
+// desktopNotices와 나눈다.
 export function desktopAppNotices() {
   return {
     name: 'dfragon-desktop-app-notices',
     generateBundle(this: AssetContext) {
-      emitNoticeGroups(this, ['lib', 'score-engine'])
+      emitNoticeGroups(this, ['lib'])
     }
   }
 }

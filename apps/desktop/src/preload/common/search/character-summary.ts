@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CharacterIdentity } from '../types/character'
+import type { CharacterCardScore, CharacterIdentity } from '../types/character'
 
 const INVALID_CHARACTER_ID_CHARACTERS_PATTERN = /[^a-zA-Z0-9_-]/
 const MAX_CHARACTER_ID_LENGTH = 256
@@ -55,13 +55,33 @@ function hasFixedServerAndImage(summary: z.infer<z.ZodObject<typeof characterSum
 
 const characterRole = z.enum(['dealer', 'buffer']).nullable()
 
-export const apiCharacterCardSchema = z.object({ role: characterRole })
+const scoreCalculator = z.enum(['equipment', 'buff'])
+
+function hasApproximateOnlyWhenSkipped(score: CharacterCardScore) {
+  return score.approximate === null || (score.value === null && score.skipped !== null)
+}
+
+// API 응답은 card에 칸이 더해져도 읽도록 모르는 칸을 버리고, 점수를 읽지 못해도 역할은 남긴다.
+export const apiCharacterCardSchema = z.object({
+  role: characterRole,
+  score: z
+    .object({
+      calculator: scoreCalculator,
+      value: z.number().nullable(),
+      skipped: z.object({ kind: nonblank, message: nonblank }).nullable(),
+      approximate: z.object({ value: z.number(), source: nonblank, warning: nonblank }).nullable(),
+      versions: z.object({ package: nonblank, rulesRev: nonblank, bundleId: nonblank })
+    })
+    .refine(hasApproximateOnlyWhenSkipped)
+    .nullable()
+    .catch(null)
+})
 
 const characterCardSchema = z.strictObject({
   role: characterRole,
   score: z
     .strictObject({
-      calculator: z.enum(['equipment', 'buff']),
+      calculator: scoreCalculator,
       value: z.number().nullable(),
       skipped: z.strictObject({ kind: nonblank, message: nonblank }).nullable(),
       approximate: z
@@ -69,9 +89,7 @@ const characterCardSchema = z.strictObject({
         .nullable(),
       versions: z.strictObject({ package: nonblank, rulesRev: nonblank, bundleId: nonblank })
     })
-    .refine(
-      (score) => score.approximate === null || (score.value === null && score.skipped !== null)
-    )
+    .refine(hasApproximateOnlyWhenSkipped)
     .nullable()
 })
 
