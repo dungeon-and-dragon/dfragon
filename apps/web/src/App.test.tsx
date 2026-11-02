@@ -6,17 +6,16 @@ import App from './App'
 
 vi.mock('./WebClient', () => ({ default: () => <div data-testid="web-client" /> }))
 
+const fetchMock = vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
 let root: Root
 let container: HTMLDivElement
 
 beforeEach(() => {
+  fetchMock.mockClear()
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(() => Promise.reject(new TypeError('Failed to fetch')))
-  )
+  vi.stubGlobal('fetch', fetchMock)
 })
 
 afterEach(async () => {
@@ -25,18 +24,15 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-it('첫 화면에 웹 앱을 두고 내려받기는 보조 안내 안에 둔다', async () => {
+it('첫 화면에 웹 앱을 두고 Desktop 안내와 내려받기 링크는 두지 않는다', async () => {
   await act(async () => root.render(<App />))
 
   const webApp = container.querySelector('section[aria-label$="웹 앱"]')
-  const desktopNote = [...container.querySelectorAll('section[aria-label="안내"] > div')].find(
-    (note) => note.querySelector('h2')?.textContent === '게임 안에서 쓰려면'
-  )
 
   expect(webApp?.querySelector('[data-testid="web-client"]')).not.toBeNull()
-  expect(desktopNote?.textContent).toContain('Alt+R')
-  expect(desktopNote?.querySelector('a')?.textContent).toBe('Windows용 내려받기')
-  expect(container.querySelectorAll('a[href$="/releases/latest"]')).toHaveLength(1)
+  expect(container.textContent).not.toContain('Desktop')
+  expect(container.querySelector('a[href*="/releases"]')).toBeNull()
+  expect(fetchMock).not.toHaveBeenCalled()
 })
 
 it('서버로 보내는 정보와 지원 범위를 사이트에 적는다', async () => {
