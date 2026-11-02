@@ -1,6 +1,6 @@
 # @dfragon/lib
 
-API, Desktop에서 입력 규칙, DNF UI 좌표, 픽셀 계산을 재사용하는 공용 TypeScript 패키지입니다. 앱 source, React, Electron, Node 전용 runtime에 의존하지 않는 ESM과 선언 파일을 제공합니다.
+API, 웹 앱에서 입력 규칙, DNF UI 좌표, 픽셀 계산을 재사용하는 공용 TypeScript 패키지입니다. 앱 source, React, Node 전용 runtime에 의존하지 않는 ESM과 선언 파일을 제공합니다.
 
 소비 workspace의 `dependencies`에 `"@dfragon/lib": "workspace:*"`를 추가하고 `pnpm --filter @dfragon/lib build` 후 사용합니다. API의 build와 typecheck는 공용 패키지를 먼저 빌드합니다. 캐릭터명 검사와 DNF 계산 함수의 적용 범위는 아래 안내를 따릅니다.
 
@@ -29,7 +29,7 @@ assert(isRecord(value))
 value.rows // 이 줄부터 value는 Record<string, unknown>
 ```
 
-`assert(condition, failure?)`는 조건이 falsy이면 실패를 던지고, 통과하면 TypeScript가 이후 코드에서 조건을 참으로 보고 타입을 좁힙니다. Electron preload처럼 Node 전용 모듈을 쓸 수 없는 곳에서도 쓰도록 `node:assert`에 의존하지 않습니다.
+`assert(condition, failure?)`는 조건이 falsy이면 실패를 던지고, 통과하면 TypeScript가 이후 코드에서 조건을 참으로 보고 타입을 좁힙니다. 브라우저처럼 Node 전용 모듈을 쓸 수 없는 곳에서도 쓰도록 `node:assert`에 의존하지 않습니다.
 
 - `failure`를 주지 않거나 문자열을 주면 그 message로 이 패키지의 `AssertionError`를 던집니다. 기본 message는 `'Assertion failed'`입니다.
 - `Error`를 주면 그 객체를 그대로 던집니다.
@@ -46,7 +46,7 @@ assert(Array.isArray(body.rows), invalidResponse)
 
 `matchesDNFSearchNicknamePolicy(nickname)`는 검색어의 Unicode 코드 포인트 수 2~12와 앞뒤 공백 금지를 함께 검사합니다. `DNF_SEARCH_NICKNAME_LIMITS`가 두 길이 경계의 원본입니다. 문자열을 trim, 정규화하지 않고 내부 공백과 분해 문자, 이모지 sequence의 기존 의미를 유지합니다.
 
-API 검색 query, Desktop main 검색 관측, 수동 입력 화면이 이 함수를 공유합니다. 함수의 보장은 길이, 공백 정책에 한정됩니다. API의 엄격한 URL/UTF-8 decode와 Desktop의 `isWellFormed()` 검사는 각 입력 경계에 남아 있습니다. 아래 CP949 기반 캐릭터명 생성 검사를 대체하지 않습니다.
+API 검색 query, 웹 앱의 검색 관측, 수동 입력 화면이 이 함수를 공유합니다. 함수의 보장은 길이, 공백 정책에 한정됩니다. API의 엄격한 URL/UTF-8 decode와 웹 앱의 `isWellFormed()` 검사는 각 입력 경계에 남아 있습니다. 아래 CP949 기반 캐릭터명 생성 검사를 대체하지 않습니다.
 
 ## 던파 캐릭터명 검사
 
@@ -97,7 +97,7 @@ pnpm --filter @dfragon/lib format:check
 
 ## 12인 공대창 검출, 크롭
 
-`detectDNFRaidParticipantWindow(frame, headingTemplate)`은 공대창의 위치, 배율과 12행의 참가 여부, 닉네임, 파티 표식, 장비 점수 영역을 반환합니다. `cropDNFRaidParticipantNicknames(frame, headingTemplate)`은 같은 프레임에서 참가 행의 닉네임 원본 RGBA도 복사합니다. 닉네임 OCR이나 Desktop 수집, 웹 업로드를 실행하지 않습니다.
+`detectDNFRaidParticipantWindow(frame, headingTemplate)`은 공대창의 위치, 배율과 12행의 참가 여부, 닉네임, 파티 표식, 장비 점수 영역을 반환합니다. `cropDNFRaidParticipantNicknames(frame, headingTemplate)`은 같은 프레임에서 참가 행의 닉네임 원본 RGBA도 복사합니다. 닉네임 OCR이나 이미지 수집, 업로드를 실행하지 않습니다.
 
 공대원이 나가면 아래 행이 위로 당겨집니다. 결과의 `row`는 해당 프레임의 화면 위치(1~12)이며 이전 프레임의 같은 행과 같은 캐릭터라는 뜻이 아닙니다. 결과는 항상 12행이며 빈 행은 `occupied: false`, `nicknameCrop: null`입니다. 별도 8인 레이드 레이아웃은 지원 범위 밖입니다.
 
@@ -120,7 +120,7 @@ if (result.status === 'found') {
 
 파티 구분과 장비 점수 판독은 `readDNFRaidParticipantMetadata(frame, rows, templates)`로 별도 실행합니다. 호출자가 준비한 표식, 글자 기준 이미지와 행별 픽셀에서 `party`, `equipmentScoreText`를 반환하며 판독할 수 없는 필드는 `null`입니다. R/Y/G, 싱글을 행 번호로 추정하지 않고, 점수는 `1000.4K` 같은 표시 문자열을 유지합니다. 정답 저장, 화면 연결은 하지 않습니다. 파티 표식 기준 없이 수치만 읽을 때는 `readDNFRaidParticipantValues(frame, rows, glyphs)`가 같은 판독 규칙으로 행별 `{ row, valueText }`를 반환합니다. 같은 칸은 게임에서 명성으로 바뀔 수 있어, `classifyDNFRaidValueColumn`이 검출 결과의 `valueHeadingRegion`을 기준 열 제목과 비교해 `fame`, `equipment-score`, `unknown`을 정합니다. 표시 문자열은 `parseDNFRaidValueNotation`이 보일 수 있는 정수 범위 `{ min, max }`로 바꿉니다(`1000.4K`는 1,000,400~1,000,499). 행의 `jobRegion`은 직업명 칸 좌표이며 OCR은 하지 않습니다.
 
-Desktop의 공대 캡처가 이 함수들을 씁니다. 창 검출 기준 헤더, 파티 표식, 수치 글자와 열 제목 기준 이미지는 호출자가 보관, 디코딩하며 라이브러리에 게임 이미지나 플레이어 데이터를 포함하지 않습니다.
+웹 앱의 공대 캡처가 이 함수들을 씁니다. 창 검출 기준 헤더, 파티 표식, 수치 글자와 열 제목 기준 이미지는 호출자가 보관, 디코딩하며 라이브러리에 게임 이미지나 플레이어 데이터를 포함하지 않습니다.
 
 ### 입력과 좌표
 
@@ -185,11 +185,11 @@ Desktop의 공대 캡처가 이 함수들을 씁니다. 창 검출 기준 헤더
 
 ## HUD 파티 프레임 검출
 
-`detectPartyFrameGeometry({ width, height, rgba })`는 HP, MP가 가득 찬 HUD 프레임과 주변 경계를 찾아 `scale`, `slots`를 반환합니다. 각 슬롯은 1~4번 번호와 원본 닉네임 크롭 좌표, 가림 확인용 `coverage`를 포함합니다. 누락된 슬롯은 채우지 않으며 미검출, 모호한 후보, 잘못된 입력은 `PartyFrameGeometryError`의 `reason`으로 구분합니다. 일반 Desktop OCR 캡처와 개발자 이미지 수집이 같은 함수를 사용합니다.
+`detectPartyFrameGeometry({ width, height, rgba })`는 HP, MP가 가득 찬 HUD 프레임과 주변 경계를 찾아 `scale`, `slots`를 반환합니다. 각 슬롯은 1~4번 번호와 원본 닉네임 크롭 좌표, 가림 확인용 `coverage`를 포함합니다. 누락된 슬롯은 채우지 않으며 미검출, 모호한 후보, 잘못된 입력은 `PartyFrameGeometryError`의 `reason`으로 구분합니다. 웹 앱의 OCR 캡처가 이 함수를 사용합니다.
 
 `rgba`는 행 우선 RGBA `Uint8Array`이며 정확히 `width × height × 4`바이트여야 합니다. Canvas의 `Uint8ClampedArray`는 같은 buffer를 보는 `Uint8Array`로 전달할 수 있습니다. `isValidPartyFrameSize(width, height)`는 양의 안전한 정수, 한 변 8192px 이하, 총 33,000,000픽셀 이하를 확인합니다. 특정 해상도 일치 조건은 없으며, 호출자가 창 테두리를 제외한 게임 client 원점의 픽셀을 제공해야 합니다.
 
-검출기는 화면에서 관측한 래스터 배율을 사용하며 UI 설정 퍼센트를 역산하지 않습니다. HP, MP 잔량이 줄어든 전투 화면, 폰트 변경, 모든 장식의 정확도는 보장하지 않습니다. Desktop의 일반 캡처는 Alt+R로 읽은 회차 프레임 한 장에서 이 함수가 검출한 위치만 원본 크기로 자릅니다.
+검출기는 화면에서 관측한 래스터 배율을 사용하며 UI 설정 퍼센트를 역산하지 않습니다. HP, MP 잔량이 줄어든 전투 화면, 폰트 변경, 모든 장식의 정확도는 보장하지 않습니다. 웹 앱의 캡처는 붙여 넣거나 공유한 회차 프레임 한 장에서 이 함수가 검출한 위치만 원본 크기로 자릅니다.
 
 ### 배율과 관측값
 
