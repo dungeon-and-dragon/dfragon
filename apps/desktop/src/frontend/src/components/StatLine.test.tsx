@@ -125,7 +125,7 @@ it('점수의 계산값 안내와 계산하지 못한 사유를 보조 기술에
       value: null,
       skipped: { kind: 'resolution', message: 'ValueError: switching item has no candidate' },
       approximate: null,
-      versions: { package: 'dnfscore', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
+      versions: { package: 'synthetic-engine', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
     }
   }
   await render({ fame: 1, card: skipped })
@@ -145,7 +145,7 @@ it('근사값 점수는 ≈를 붙이고 근사값이라는 뜻을 전한다', a
         source: 'input_gate_diagnostic',
         warning: '근사값, 1% 밖일 가능성 높음: ValueError: switching item has no candidate'
       },
-      versions: { package: 'dnfscore-native 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
+      versions: { package: 'synthetic-engine 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
     }
   }
   await render({ fame: 1, card: approximate })

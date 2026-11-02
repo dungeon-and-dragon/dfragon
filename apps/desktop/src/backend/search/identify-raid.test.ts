@@ -8,9 +8,7 @@ import type {
   CharacterCandidatesHttp,
   CharacterDetailsHttp
 } from '../../shared/search/character-http'
-import { createEngineCardScorer } from '../score/card-score'
-import type { ScoreEngine, ScoreEngineResult } from '../score/engine'
-import { dealerCard } from '../../preload/common/search/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 
 // 합성 후보, 직업명, 점수만 쓰며 표본이나 플레이어 식별자는 넣지 않는다.
@@ -32,7 +30,9 @@ function candidate(
   }
 }
 
-function details(characterId: string): CharacterDetails {
+function details(characterId: string, score: number | null = null): CharacterDetails {
+  const card = score === null ? dealerCard : scoredDealerCard(score)
+
   return {
     character: { characterId, serverId: 'cain', serverName: '카인', characterName: '공대원' },
     status: { status: null, buff: null },
@@ -48,22 +48,7 @@ function details(characterId: string): CharacterDetails {
       lastSuccessfulFetchAt: '2026-10-07T00:00:00.000Z',
       expiresAt: '2026-10-07T00:05:00.000Z'
     },
-    card: dealerCard as CharacterDetails['card']
-  }
-}
-
-function engineResult(score: number | null): ScoreEngineResult {
-  const skipped = score === null ? { kind: 'resolution', message: '계산 범위 밖' } : null
-
-  return {
-    calculator: 'equipment',
-    score,
-    skipped,
-    approximate_score: null,
-    approximate_source: null,
-    warning: null,
-    versions: { package: '0.1.0', rules_rev: 'rev12', bundle_id: 'phase31-rev12' },
-    display: { role: 'dealer', switchingLevel: null, buff30: null, buff50: null }
+    card: card as CharacterDetails['card']
   }
 }
 
@@ -73,7 +58,7 @@ const SCORE_ROW: RaidRowObservation = {
   valueText: '50,000'
 }
 
-function fixture(engineScores: Record<string, number | null>) {
+function fixture(detailScores: Record<string, number>) {
   const controller = new AbortController()
   const calls: string[] = []
   const candidates: MockedFunction<CharacterCandidatesHttp> = vi.fn(async () => [
@@ -86,12 +71,7 @@ function fixture(engineScores: Record<string, number | null>) {
   const getDetails: MockedFunction<CharacterDetailsHttp> = vi.fn(async ({ characterId }) => {
     calls.push(`details:${characterId}`)
 
-    return details(characterId)
-  })
-  const score: MockedFunction<ScoreEngine['calculate']> = vi.fn(async (input) => {
-    const id = String(input.status.characterId)
-
-    return engineResult(engineScores[id] ?? null)
+    return details(characterId, detailScores[characterId] ?? null)
   })
   const runtime = () => ({
     identification: {
@@ -102,7 +82,6 @@ function fixture(engineScores: Record<string, number | null>) {
       selection: INITIAL_PORTRAIT_COLOR_POLICY
     },
     ocrIdentification: 'raid' as const,
-    cardScorer: createEngineCardScorer({ calculate: score, prepare: vi.fn() }),
     reportDiagnostic: vi.fn()
   })
   const request = (
@@ -130,7 +109,7 @@ function fixture(engineScores: Record<string, number | null>) {
     })
   }
 
-  return { controller, calls, candidates, getDetails, score, request, loadDetails }
+  return { controller, calls, candidates, getDetails, request, loadDetails }
 }
 
 describe('공대 장비 점수 열의 식별', () => {
@@ -213,7 +192,7 @@ describe('공대 식별의 비교 종류', () => {
 })
 
 describe('고른 공대원의 상세 조회', () => {
-  it('고른 후보의 상세로 레벨과 카드 점수를 채운다', async () => {
+  it('고른 후보의 상세 응답 점수로 카드와 요약의 장비 점수를 채운다', async () => {
     const f = fixture({ first: 50_000 })
 
     expect(await f.loadDetails()).toMatchObject({
@@ -238,7 +217,6 @@ describe('고른 공대원의 상세 조회', () => {
     expect(await pending).toBeNull()
     expect(signal.aborted).toBe(true)
     expect(f.getDetails).toHaveBeenCalledOnce()
-    expect(f.score).not.toHaveBeenCalled()
   })
 })
 
@@ -256,7 +234,6 @@ it.each([[['']], [[' 공대원']], [['가', '나', '다']]])(
           selection: INITIAL_PORTRAIT_COLOR_POLICY
         },
         ocrIdentification: 'raid',
-        cardScorer: createEngineCardScorer({ calculate: f.score, prepare: vi.fn() }),
         reportDiagnostic: vi.fn()
       },
       nickname: nicknames[0],

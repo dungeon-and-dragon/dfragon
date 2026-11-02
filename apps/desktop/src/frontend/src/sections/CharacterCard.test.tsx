@@ -601,7 +601,7 @@ it('계산하지 못한 장비 점수는 -에 사유 종류를 보조 기술로 
       value: null,
       skipped: { kind: 'resolution', message: 'ValueError: switching item has no candidate' },
       approximate: null,
-      versions: { package: 'dnfscore', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
+      versions: { package: 'synthetic-engine', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
     }
   }
   await render({ state: 'success', character: { ...found, card: skipped } })
@@ -623,7 +623,7 @@ it('엔진이 근사값을 낸 장비 점수는 ≈를 붙여 역할 색으로 �
         source: 'input_gate_diagnostic',
         warning: '근사값, 1% 밖일 가능성 높음: ValueError: switching item has no candidate'
       },
-      versions: { package: 'dnfscore-native 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
+      versions: { package: 'synthetic-engine 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
     }
   }
   await render({ state: 'success', character: { ...found, card: approximate } })

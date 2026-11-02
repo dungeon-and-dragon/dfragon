@@ -10,7 +10,7 @@ export const dealerCard: CharacterCard = {
     value: 330556,
     skipped: null,
     approximate: null,
-    versions: { package: 'dnfscore', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
+    versions: { package: 'synthetic-engine', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
   }
 }
 
@@ -21,6 +21,6 @@ export const bufferCard: CharacterCard = {
     value: 55358,
     skipped: null,
     approximate: null,
-    versions: { package: 'dnfscore', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
+    versions: { package: 'synthetic-engine', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
   }
 }

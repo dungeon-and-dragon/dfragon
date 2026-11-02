@@ -142,7 +142,7 @@ describe('OCR 후보 전용 IPC와 기존 캡처 수명', () => {
     expect(fixture.fetchSearch).not.toHaveBeenCalled()
   })
 
-  it('상세 응답의 card를 검증해 엔진 없이도 점수 null인 카드를 renderer snapshot에 담는다', async () => {
+  it('상세 응답 card의 점수를 파티 카드의 renderer snapshot에 그대로 담는다', async () => {
     const apiScore = {
       calculator: 'equipment',
       value: 9999,
@@ -157,8 +157,8 @@ describe('OCR 후보 전용 IPC와 기존 캡처 수명', () => {
     const snapshot = await fixture.read()
 
     expect(snapshot.slots[0].selected).toMatchObject({
-      equipmentScore: null,
-      card: dealerCard
+      equipmentScore: 9999,
+      card: { ...dealerCard, score: apiScore }
     })
     expect(parseSearchSnapshot(snapshot)).toEqual(snapshot)
   })

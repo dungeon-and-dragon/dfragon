@@ -32,9 +32,7 @@ import {
 } from '../../shared/search/portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from '../../shared/search/portrait-policy'
 import { PortraitComparisonBudgetExceededError } from '../../shared/search/portrait-raster'
-import { createEngineCardScorer } from '../score/card-score'
-import type { ScoreEngine, ScoreEngineResult } from '../score/engine'
-import { dealerCard } from '../../preload/common/search/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
 
 const FACE_SIZE = 8
 const FACE_LEFT_SHADE = 100
@@ -94,7 +92,6 @@ function requestWith(adapters: IdentificationAdapters) {
     runSearchRequest({
       runtime: {
         identification: adapters,
-        cardScorer: { calculate: async () => null, prepare: vi.fn() },
         reportDiagnostic: vi.fn()
       },
       nickname: input.nicknames[0] ?? '',
@@ -408,18 +405,7 @@ describe('캐릭터 식별 요청의 실행 경계', () => {
   })
 })
 
-describe('선택한 캐릭터 카드와 점수 엔진', () => {
-  const engineResult: ScoreEngineResult = {
-    calculator: 'equipment',
-    score: 1741,
-    skipped: null,
-    approximate_score: null,
-    approximate_source: null,
-    warning: null,
-    versions: { package: '0.1.0', rules_rev: 'rev12', bundle_id: 'phase31-rev12' },
-    display: { role: 'dealer', switchingLevel: 3, buff30: null, buff50: null }
-  }
-
+describe('선택한 캐릭터 카드와 상세 응답 점수', () => {
   const identified: SelectedCharacterSummary = {
     characterId: 'high',
     characterName: '첫이름',
@@ -436,11 +422,7 @@ describe('선택한 캐릭터 카드와 점수 엔진', () => {
     card: null
   }
 
-  function cardRequest(
-    f: ReturnType<typeof fixture>,
-    calculate: ScoreEngine['calculate'],
-    card: unknown = dealerCard
-  ) {
+  function cardRequest(f: ReturnType<typeof fixture>, card: unknown) {
     f.getDetails.mockImplementation(async ({ characterId }) => ({
       ...details(characterId),
       card: card as CharacterDetails['card']
@@ -456,7 +438,6 @@ describe('선택한 캐릭터 카드와 점수 엔진', () => {
             scorePortrait: f.scorePortrait,
             selection: INITIAL_PORTRAIT_COLOR_POLICY
           },
-          cardScorer: createEngineCardScorer({ calculate, prepare: vi.fn() }),
           reportDiagnostic: vi.fn()
         },
         summary: identified,
@@ -465,90 +446,62 @@ describe('선택한 캐릭터 카드와 점수 엔진', () => {
       })
   }
 
-  it('카드 역할에 엔진 점수를 채우고 요약의 장비 점수로 옮긴다', async () => {
+  it('상세 응답 card의 점수를 카드에 그대로 넣고 요약의 장비 점수로 옮긴다', async () => {
     const f = fixture()
-    const score = vi.fn<ScoreEngine['calculate']>(async () => engineResult)
+    const card = scoredDealerCard(1741)
 
-    const outcome = await cardRequest(f, score)()
+    const outcome = await cardRequest(f, card)()
 
-    expect(outcome).toMatchObject({
+    expect(outcome).toEqual({
       kind: 'success',
-      summary: {
+      summary: expect.objectContaining({
         characterId: 'high',
         imageUrl: identified.imageUrl,
         equipmentScore: 1741,
-        card: {
-          role: 'dealer',
-          score: { calculator: 'equipment', value: 1741, skipped: null }
-        }
-      }
+        card
+      })
     })
     expect(f.getDetails).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({ serverId: 'cain', characterId: 'high' })
     )
-    expect(score).toHaveBeenCalledOnce()
   })
 
-  it('카드 역할을 읽지 못하면 엔진을 부르지 않고 카드만 null로 두어 나머지 요약은 전달한다', async () => {
+  it('카드 역할을 읽지 못하면 카드만 null로 두어 나머지 요약은 전달한다', async () => {
     const f = fixture()
-    const score = vi.fn<ScoreEngine['calculate']>(async () => engineResult)
 
-    const outcome = await cardRequest(f, score, { ...dealerCard, role: 'tank' })()
+    const outcome = await cardRequest(f, { ...scoredDealerCard(1741), role: 'tank' })()
 
     expect(outcome).toMatchObject({
       kind: 'success',
       summary: { characterId: 'high', equipmentScore: null, card: null }
     })
-    expect(score).not.toHaveBeenCalled()
   })
 
-  it('상세 호출 제한은 호출 제한 실패로 전달하고 엔진을 부르지 않는다', async () => {
+  it('상세 호출 제한은 호출 제한 실패로 전달한다', async () => {
     const f = fixture()
-    const score = vi.fn<ScoreEngine['calculate']>(async () => engineResult)
-    const request = cardRequest(f, score)
+    const request = cardRequest(f, dealerCard)
     f.getDetails.mockRejectedValueOnce(new SearchHttpFailure('SEARCH_RATE_LIMITED'))
 
     expect(await request()).toEqual({
       kind: 'failure',
       error: { code: 'SEARCH_RATE_LIMITED' }
     })
-    expect(score).not.toHaveBeenCalled()
   })
 
-  it.each(['이전 요청', '취소'] as const)(
-    '엔진 계산 중 %s 판정이 나면 늦은 카드 결과를 발행하지 않는다',
-    async (reason) => {
-      const f = fixture()
-      let current = true
-      const score = vi.fn<ScoreEngine['calculate']>(async () => {
-        if (reason === '이전 요청') {
-          current = false
-        } else {
-          f.controller.abort()
-        }
-
-        return engineResult
-      })
-
-      const outcome = await cardRequest(f, score)(() => current)
-
-      expect(score).toHaveBeenCalledOnce()
-      expect(outcome).toBeNull()
-    }
-  )
-
-  it('점수 계산을 기다리는 중 취소하면 계산에 넘긴 신호도 취소되어 응답을 기다리지 않는다', async () => {
+  it('상세를 기다리는 중 이전 요청이 되면 늦은 카드 결과를 발행하지 않는다', async () => {
     const f = fixture()
-    const calculate = vi.fn<ScoreEngine['calculate']>(
-      (_input, _calculator, signal) =>
-        new Promise((_resolve, reject) => {
-          signal.addEventListener('abort', () => reject(signal.reason))
-        })
-    )
-    const outcome = cardRequest(f, calculate)()
+    let current = true
+    const request = cardRequest(f, scoredDealerCard(1741))
+    const pending = deferred<CharacterDetails>()
+    f.getDetails.mockReturnValueOnce(pending.promise)
+    const outcome = request(() => current)
+    await vi.waitFor(() => expect(f.getDetails).toHaveBeenCalledOnce())
 
-    await vi.waitFor(() => expect(calculate).toHaveBeenCalledOnce())
-    f.controller.abort()
+    current = false
+    pending.resolve({
+      ...details('high'),
+      card: scoredDealerCard(1741) as CharacterDetails['card']
+    })
 
     expect(await outcome).toBeNull()
   })

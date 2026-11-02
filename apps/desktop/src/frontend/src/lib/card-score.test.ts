@@ -60,7 +60,7 @@ it('엔진이 건너뛴 점수는 값 없이 사유 종류만 전하고 엔진�
       value: null,
       skipped: { kind, message: 'unresolved: equipment TITLE missing' },
       approximate: null,
-      versions: { package: 'dnfscore', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
+      versions: { package: 'synthetic-engine', rulesRev: 'rev12', bundleId: 'phase31-rev12' }
     }
   })
   expect(toScoreView(skipped('unresolved'))).toEqual({
@@ -97,7 +97,7 @@ it('엔진이 건너뛴 점수에 낸 근사값은 근사값으로 보이고 사
         source,
         warning: '근사값, 1% 밖일 가능성 높음: unresolved: equipment TITLE missing'
       },
-      versions: { package: 'dnfscore-native 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
+      versions: { package: 'synthetic-engine 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
     }
   })
   const legacy = toScoreView(approximate('legacy_fusion_policy_a'))
@@ -136,7 +136,7 @@ it('엔진이 건너뛴 버프 점수에 낸 근사값도 버퍼 톤의 근사�
         source: 'missing_avatar_record',
         warning: '아바타 레코드 없음'
       },
-      versions: { package: 'dnfscore-native 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
+      versions: { package: 'synthetic-engine 0.3.1', rulesRev: 'rev14', bundleId: 'phase32-rev14b' }
     }
   }
 
