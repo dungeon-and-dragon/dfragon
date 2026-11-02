@@ -1,4 +1,4 @@
-import { readTimeOfDay, type TimeOfDay } from '@dfragon/desktop-site/time-of-day'
+import { readTimeOfDay, type TimeOfDay } from '@dfragon/client/time-of-day'
 import { useEffect, useState } from 'react'
 
 const CHECK_INTERVAL_MS = 60_000
