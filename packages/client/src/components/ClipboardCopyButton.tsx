@@ -3,8 +3,8 @@ import * as stylex from '@stylexjs/stylex'
 import type { ClipboardCopyStatus } from '../hooks/useClipboardCopy'
 import { CheckIcon } from './CheckIcon'
 import { CopyIcon } from './CopyIcon'
-import { ShortcutTooltip } from './ShortcutTooltip'
-import { triggerStyles } from './ShortcutTooltip.style'
+import { HeaderTooltip } from './HeaderTooltip'
+import { triggerStyles } from './HeaderTooltip.style'
 import { styles } from './ClipboardCopyButton.style'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'
@@ -29,19 +29,18 @@ export function ClipboardCopyButton({
           <span {...stylex.props(styles.failureText)}>{FAILURE_MESSAGE}</span>
         </p>
       )}
-      <ShortcutTooltip label="복사하기" shortcut="Alt A">
+      <HeaderTooltip label="복사하기">
         <span {...stylex.props(triggerStyles.wrapper)}>
           <button
             type="button"
             aria-label="클립보드로 복사"
-            aria-keyshortcuts="Alt+A"
             onClick={onCopy}
             {...stylex.props(shapes.cutTopRight, styles.button)}
           >
             <Icon width={16} height={16} />
           </button>
         </span>
-      </ShortcutTooltip>
+      </HeaderTooltip>
       {/* 화면 밖에 두어 헤더 컨트롤 사이 간격을 바꾸지 않는다. */}
       <span role="status" data-clipboard-announcer="" {...stylex.props(shapes.srOnly)}>
         {announcement}

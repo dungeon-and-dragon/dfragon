@@ -164,7 +164,7 @@ export const partyCaptureMachine = setup({
           {
             guard: ({ context }) => context.selectedSourceId.length > 0,
             target: 'selected',
-            actions: assign({ status: 'Alt+R을 눌러 파티를 인식해 주세요.' })
+            actions: assign({ status: '캡처 버튼을 눌러 파티를 인식해 주세요.' })
           },
           { target: 'idle' }
         ],

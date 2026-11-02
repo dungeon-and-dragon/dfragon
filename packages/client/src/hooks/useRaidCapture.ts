@@ -9,7 +9,6 @@ import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nick
 import { RAID_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 import { useClientHost } from './useClientHost'
-import { usePageShortcut } from './usePageShortcut'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import type { OcrRecognition } from '@dfragon/client-core/lib/ocr-worker-recognition'
 import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
@@ -40,11 +39,9 @@ export type RaidCapture = {
 export function useRaidCapture({
   sourceId,
   sourceReady,
-  receivesShortcut,
   recognizeWithOcr,
   texts
 }: {
-  receivesShortcut: boolean
   sourceId: string
   sourceReady: boolean
   recognizeWithOcr: OcrRecognition
@@ -84,7 +81,6 @@ export function useRaidCapture({
 
   const startRound = useCallback(() => send({ type: 'START' }), [send])
   const startPastedRound = useCallback(() => send({ type: 'PASTE' }), [send])
-  usePageShortcut('restart-search', receivesShortcut, startRound)
 
   const phase = getRaidCapturePhase(snapshot)
   const recognizing = phase === 'recognizing'

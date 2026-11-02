@@ -7,7 +7,6 @@ import { LastCaptureTime } from '../../components/LastCaptureTime'
 import { SnapshotToggle } from '../../components/SnapshotToggle'
 import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
 import { useClipboardCopy } from '../../hooks/useClipboardCopy'
-import { usePageShortcut } from '../../hooks/usePageShortcut'
 import { usePartySlotCards } from '../../hooks/usePartySlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { filledSlotCount } from '@dfragon/client-core/lib/slot-cards'
@@ -19,8 +18,6 @@ export function PartyScreen(): React.JSX.Element {
   const { cards, snapshot, clipboardText } = usePartySlotCards(capture, texts.nextLookupStep)
   const { renderBoardHeader } = useBoardHeaderPortal()
   const clipboard = useClipboardCopy(clipboardText)
-  usePageShortcut('take-snapshot', !snapshot.active, snapshot.take)
-  usePageShortcut('copy-clipboard', true, clipboard.copy)
 
   return (
     <div {...stylex.props(styles.party)}>

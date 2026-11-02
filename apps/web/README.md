@@ -22,9 +22,9 @@ pnpm --filter @dfragon/web preview
 
 첫 화면에 던파 창의 스크린샷(Alt+PrtSc)을 Ctrl+V로 붙여 넣으면 지금 화면(파티, 공대)의 인식 회차가 시작됩니다. 첫 붙여넣기 때 `/ocr`의 모델과 WASM을 받습니다. `dev` 서버는 첫 붙여넣기에서 `onnxruntime-web/webgpu`를 처음 최적화하며 페이지를 한 번 다시 읽으므로, 그때는 다시 붙여 넣습니다.
 
-상단 바의 게임 연결 칩을 누르면 브라우저의 화면 공유 창이 열립니다. 던파 창을 공유한 뒤 캡처 버튼이나 Alt+R(페이지에 포커스가 있을 때)을 누르면 공유 화면에서 한 장을 읽어 지금 화면의 회차를 시작합니다. 브라우저의 공유 중지를 누르면 칩이 연결 전으로 돌아갑니다. 화면 공유는 `localhost`나 HTTPS 페이지에서만 열립니다.
+상단 바의 게임 연결 칩을 누르면 브라우저의 화면 공유 창이 열립니다. 던파 창을 공유한 뒤 캡처 버튼을 누르면 공유 화면에서 한 장을 읽어 지금 화면의 회차를 시작합니다. 브라우저의 공유 중지를 누르면 칩이 연결 전으로 돌아갑니다. 화면 공유는 `localhost`나 HTTPS 페이지에서만 열립니다.
 
-던파 창을 공유한 동안에는 약 1초마다 공유 화면을 보고, 게임이 마을에 있을 때 지금 화면의 구성이 바뀌면 그 화면의 회차를 자동으로 시작합니다. 파티 화면이면 게임의 파티 프레임만, 공대 화면이면 공대 상세 창만 보며, 자동 인식은 화면(파티, 공대)을 바꾸지 않습니다. 구성이 같으면 회차를 시작하지 않으므로 같은 구성을 다시 읽으려면 캡처 버튼이나 Alt+R을 누릅니다. 판정 규칙은 [마을 자동 인식](../../docs/rules/web-client.md#마을-자동-인식)을 따릅니다.
+던파 창을 공유한 동안에는 약 1초마다 공유 화면을 보고, 게임이 마을에 있을 때 지금 화면의 구성이 바뀌면 그 화면의 회차를 자동으로 시작합니다. 파티 화면이면 게임의 파티 프레임만, 공대 화면이면 공대 상세 창만 보며, 자동 인식은 화면(파티, 공대)을 바꾸지 않습니다. 구성이 같으면 회차를 시작하지 않으므로 같은 구성을 다시 읽으려면 캡처 버튼을 누릅니다. 판정 규칙은 [마을 자동 인식](../../docs/rules/web-client.md#마을-자동-인식)을 따릅니다.
 
 ## 배포
 
@@ -67,7 +67,7 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 - `index.html`: 제목, 설명, OG 메타 태그. OG 이미지는 두지 않아 링크 미리보기는 제목과 설명만 보입니다(2026-10-31 결정, [Issue #1036](https://github.com/dungeon-and-dragon/dfragon/issues/1036)).
 - `src/App.tsx`: 웹 앱 상자를 페이지 가운데에, Neople Open API 로고(96×18)를 페이지 아래 가운데에 놓는 첫 화면입니다. 웹 앱 상자는 창이 1280px보다 좁으면 상자 안에서만 가로로 스크롤하고 페이지는 넘치지 않습니다.
-- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 단축키, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)와 Alt+W, Alt+A, 화면 공유 중의 Alt+R을 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달되어 상단 바와 검색 화면을 파티 1280×163, 공대 1280×300 상자 안에 그립니다. 상단 바의 캡처 칩 자리에는 화면 공유를 요청하는 게임 연결 칩을 넣습니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. 계약은 [웹 클라이언트](../../docs/rules/web-client.md)를 따릅니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
+- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달되어 상단 바와 검색 화면을 파티 1280×163, 공대 1280×300 상자 안에 그립니다. 상단 바의 캡처 칩 자리에는 화면 공유를 요청하는 게임 연결 칩을 넣습니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. 계약은 [웹 클라이언트](../../docs/rules/web-client.md)를 따릅니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
 
 ## 글꼴과 고지
 
@@ -84,4 +84,4 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 `src/App.test.tsx`는 첫 화면에 웹 앱 상자와 Neople 로고 링크만 있고 상단 바, 푸터, 사이트 문구, 내려받기 링크가 없으며 GitHub Releases API를 부르지 않는지 확인합니다.
 
-웹 앱의 브라우저 host는 `packages/client`의 `site/web/*.test.ts(x)`가 확인합니다. API 경로로 후보, 상세, 초상화를 받는지, 명령 호출 중에 수명 알림을 동기적으로 보내지 않는지, 브라우저 host만으로 화면이 그려지는지, 문서 전체의 드래그를 막지 않는지, 붙여 넣은 이미지가 회차의 프레임이 되고 웹 문구로 안내하는지, 게임 연결 칩으로 공유한 창을 캡처 버튼이 읽고 공유 중의 붙여넣기 회차는 붙여 넣은 이미지를 읽는지, 공유한 동안 지금 화면의 새 구성이 마을에서 2번 연속 보일 때만 그 화면의 회차가 자동으로 시작되고 회차가 읽은 프레임이 기준이 되는지, 공유를 멈추면 연결 전으로 돌아가는지, Alt+W와 Alt+A, 공유 중의 Alt+R을 단축키로 알리고 앱 상자 안의 Alt+방향키를 브라우저에 넘기지 않는지를 봅니다. 화면 공유(`getDisplayMedia`), 초상화와 붙여 넣은 이미지의 디코딩(`createImageBitmap`, WebGL)과 OCR worker는 jsdom에 없어 실제 브라우저에서 pngjs 결과와 비교하고 카드가 채워지는지 확인합니다. 닉네임 검색, 서버 변경, 클립보드 복사도 첫 화면을 브라우저에서 열어 확인합니다. jsdom은 실제 레이아웃을 재현하지 않으므로 390px 폭에서 웹 앱 상자 안에만 가로 스크롤이 생기고 페이지는 넘치지 않는지, 글자 대비, 키보드 조작은 production build를 브라우저에서 확인합니다.
+웹 앱의 브라우저 host는 `packages/client`의 `site/web/*.test.ts(x)`가 확인합니다. API 경로로 후보, 상세, 초상화를 받는지, 명령 호출 중에 수명 알림을 동기적으로 보내지 않는지, 브라우저 host만으로 화면이 그려지는지, 문서 전체의 드래그를 막지 않는지, 붙여 넣은 이미지가 회차의 프레임이 되고 웹 문구로 안내하는지, 게임 연결 칩으로 공유한 창을 캡처 버튼이 읽고 공유 중의 붙여넣기 회차는 붙여 넣은 이미지를 읽는지, 공유한 동안 지금 화면의 새 구성이 마을에서 2번 연속 보일 때만 그 화면의 회차가 자동으로 시작되고 회차가 읽은 프레임이 기준이 되는지, 공유를 멈추면 연결 전으로 돌아가는지, 앱 상자 안의 Alt+방향키를 브라우저에 넘기지 않는지를 봅니다. 화면 공유(`getDisplayMedia`), 초상화와 붙여 넣은 이미지의 디코딩(`createImageBitmap`, WebGL)과 OCR worker는 jsdom에 없어 실제 브라우저에서 pngjs 결과와 비교하고 카드가 채워지는지 확인합니다. 닉네임 검색, 서버 변경, 클립보드 복사도 첫 화면을 브라우저에서 열어 확인합니다. jsdom은 실제 레이아웃을 재현하지 않으므로 390px 폭에서 웹 앱 상자 안에만 가로 스크롤이 생기고 페이지는 넘치지 않는지, 글자 대비, 키보드 조작은 production build를 브라우저에서 확인합니다.

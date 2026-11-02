@@ -46,10 +46,6 @@ function pasteEvent(items: Array<Partial<DataTransferItem>>): Event {
   return event
 }
 
-function keydown(init: KeyboardEventInit): KeyboardEvent {
-  return new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
-}
-
 // jsdom에는 화면 공유와 video 재생이 없어 getDisplayMedia가 돌려주는 track과 stream만 흉내 낸다.
 function stubScreenShare(): { track: EventTarget & { stop: () => void }; getDisplayMedia: Mock } {
   const track = Object.assign(new EventTarget(), { label: 'Dungeon & Fighter', stop: vi.fn() })
@@ -233,36 +229,9 @@ it('붙여 넣은 이미지를 읽지 못하면 readCaptureFrame이 거절한다
   await expect(host.party.readCaptureFrame()).rejects.toThrow('broken')
 })
 
-it('페이지의 Alt+W, Alt+A를 페이지 단축키로 알리고 다른 조합은 브라우저에 넘긴다', () => {
-  const received = vi.fn()
-  const unsubscribe = host.onShortcut(received)
-
-  const snapshot = keydown({ code: 'KeyW', key: 'ㅈ', altKey: true })
-  document.body.dispatchEvent(snapshot)
-  const copy = keydown({ code: 'KeyA', key: 'a', altKey: true })
-  document.body.dispatchEvent(copy)
-  const withShift = keydown({ code: 'KeyW', key: 'W', altKey: true, shiftKey: true })
-  document.body.dispatchEvent(withShift)
-  const restart = keydown({ code: 'KeyR', key: 'r', altKey: true })
-  document.body.dispatchEvent(restart)
-
-  expect(received.mock.calls).toEqual([['take-snapshot'], ['copy-clipboard']])
-  expect(snapshot.defaultPrevented).toBe(true)
-  expect(copy.defaultPrevented).toBe(true)
-  expect(withShift.defaultPrevented).toBe(false)
-  expect(restart.defaultPrevented).toBe(false)
-
-  unsubscribe()
-  document.body.dispatchEvent(keydown({ code: 'KeyA', key: 'a', altKey: true }))
-  expect(received).toHaveBeenCalledTimes(2)
-})
-
 it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이미지를 읽는다', async () => {
   const { getDisplayMedia } = stubScreenShare()
   stubVideoDecode()
-  const received = vi.fn()
-  const unsubscribe = host.onShortcut(received)
-
   const sourceId = await host.requestScreenShare()
 
   expect(getDisplayMedia).toHaveBeenCalledExactlyOnceWith({
@@ -278,12 +247,6 @@ it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이�
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
   await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
   await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
-
-  const restart = keydown({ code: 'KeyR', key: 'ㄱ', altKey: true })
-  document.body.dispatchEvent(restart)
-  expect(received).toHaveBeenCalledExactlyOnceWith('restart-search')
-  expect(restart.defaultPrevented).toBe(true)
-  unsubscribe()
 })
 
 it('사용자가 공유를 멈추면 끝났다고 알리고, 앱이 끊은 공유와 거절한 요청은 알리지 않는다', async () => {

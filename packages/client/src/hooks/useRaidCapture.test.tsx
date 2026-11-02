@@ -43,7 +43,6 @@ function Harness(): null {
   const current = useRaidCapture({
     sourceId: 'game',
     sourceReady: true,
-    receivesShortcut: false,
     recognizeWithOcr: ocrWorker.recognize,
     texts: WEB_CAPTURE_TEXTS
   })

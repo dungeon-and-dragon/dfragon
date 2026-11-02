@@ -21,7 +21,7 @@ afterEach(async () => {
 })
 
 function button(): HTMLButtonElement {
-  return container.querySelector<HTMLButtonElement>('[aria-label="공대 캡처, 단축키 Alt R"]')!
+  return container.querySelector<HTMLButtonElement>('[aria-label="공대 캡처"]')!
 }
 
 it('누를 수 있을 때만 회차 시작을 요청한다', async () => {

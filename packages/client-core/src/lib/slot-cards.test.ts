@@ -4,7 +4,7 @@ import type { SelectedCharacterSummary } from '../preload/common/types/character
 import type { SearchSlot } from '../preload/common/types/search'
 import { filledSlotCount, toSlotCards } from './slot-cards'
 
-const NEXT_STEP = 'Alt+R로 다시 인식하거나 서버와 이름을 직접 조회해 주세요.'
+const NEXT_STEP = '캡처나 붙여넣기로 다시 인식하거나 서버와 이름을 직접 조회해 주세요.'
 const summary: SelectedCharacterSummary = {
   characterId: 'synthetic-character',
   characterName: '합성',

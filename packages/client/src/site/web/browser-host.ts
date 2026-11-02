@@ -15,7 +15,7 @@ import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
 } from '@dfragon/client-core/shared/raid/raid-window'
-import type { ClientHost, PageShortcut } from '../../hooks/useClientHost'
+import type { ClientHost } from '../../hooks/useClientHost'
 import { startRendererDiagnostics } from '@dfragon/client-core/lib/runtime-diagnostics'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
@@ -32,12 +32,6 @@ import {
 
 // 응답은 `{ percent, expiresAt }` 하나라 100바이트 안팎이다.
 const TODAY_GRADE_MAX_BYTES = 4 * 1024
-// 한글 자판에서는 Alt+W의 key가 'ㅈ'이므로 물리 키로 고른다.
-const PAGE_SHORTCUTS: Readonly<Record<string, PageShortcut>> = {
-  KeyW: 'take-snapshot',
-  KeyA: 'copy-clipboard',
-  KeyR: 'restart-search'
-}
 // 마을 자동 인식의 판정 주기는 약 1초이며 ms 단위로 맞추지 않는다.
 const SCREEN_WATCH_INTERVAL_MS = 1000
 
@@ -190,7 +184,7 @@ function createScreenShare(): {
 }
 
 // 붙여 넣은 이미지와 마을 자동 인식이 판정에 쓴 프레임은 host가 들고 있다가 renderer가 시작한 회차의
-// readCaptureFrame으로 돌려준다. 공유한 창이 있으면 그렇게 시작한 회차만 든 프레임을 읽고, 캡처 버튼과 Alt+R 회차는
+// readCaptureFrame으로 돌려준다. 공유한 창이 있으면 그렇게 시작한 회차만 든 프레임을 읽고, 캡처 버튼 회차는
 // 공유 화면을 읽는다.
 function createRoundFrames(share: ReturnType<typeof createScreenShare>): {
   read: () => Promise<CharacterImage>
@@ -452,24 +446,6 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
   }
 }
 
-function installPageShortcuts(canRestart: () => boolean): ClientHost['onShortcut'] {
-  const shortcuts = createListeners<[PageShortcut]>()
-  document.addEventListener('keydown', (event) => {
-    if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.repeat) {
-      return
-    }
-    const shortcut = PAGE_SHORTCUTS[event.code]
-    // Alt+R은 공유한 창이 있을 때만 받는다. 붙여넣기만 있으면 다시 읽을 화면이 없다.
-    if (shortcut === undefined || (shortcut === 'restart-search' && !canRestart())) {
-      return
-    }
-    event.preventDefault()
-    shortcuts.notify(shortcut)
-  })
-
-  return shortcuts.subscribe
-}
-
 export function installBrowserHost(apiOrigin: string): BrowserHost {
   const reportDiagnostic = startRendererDiagnostics()
   const runtime = createBrowserSearchRuntime(apiOrigin, reportDiagnostic)
@@ -499,7 +475,6 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
       readCaptureFrame: async () =>
         toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
-    onShortcut: installPageShortcuts(screenShare.isConnected),
     getTodayGrade: () => readTodayGrade(apiOrigin),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
