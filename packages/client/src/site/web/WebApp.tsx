@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
-import { MAIN_WINDOW_SIZE } from '@dfragon/client-core/preload/common/window-chrome'
 import { AppTopBar } from '../../components/AppTopBar'
-import { MAIN_WINDOW_HEIGHTS } from '../../constants/main-window-heights'
+import { MAIN_WINDOW_HEIGHTS, MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
+import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { SearchScreen } from '../../pages/search/SearchScreen'
@@ -60,24 +60,26 @@ function AutoRounds({ host }: { host: BrowserHost }): null {
   return null
 }
 
-// Desktop main.tsx, App.tsx의 문서 전체 드래그 차단, 글자 선택 차단, 100dvh가 사이트로 번지지 않게 창 크기 상자에만 그린다.
+// 앱의 드래그, 글자 선택 차단과 100dvh가 사이트로 번지지 않게 창 크기 상자에만 그린다.
 export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
   const searchMode = useSearchModeStore((state) => state.searchMode)
 
   return (
-    <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-      <PastedFrameRounds host={host} />
-      <AutoRounds host={host} />
-      <div
-        onKeyDown={keepSeatMoveKeys}
-        {...stylex.props(
-          styles.window,
-          styles.windowSize(MAIN_WINDOW_SIZE.width, MAIN_WINDOW_HEIGHTS[searchMode])
-        )}
-      >
-        <AppTopBar captureControls={<ScreenShareChip host={host} />} />
-        <SearchScreen />
-      </div>
-    </ScreenCaptureProvider>
+    <ClientHostContext value={host}>
+      <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
+        <PastedFrameRounds host={host} />
+        <AutoRounds host={host} />
+        <div
+          onKeyDown={keepSeatMoveKeys}
+          {...stylex.props(
+            styles.window,
+            styles.windowSize(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHTS[searchMode])
+          )}
+        >
+          <AppTopBar captureControls={<ScreenShareChip host={host} />} />
+          <SearchScreen />
+        </div>
+      </ScreenCaptureProvider>
+    </ClientHostContext>
   )
 }
