@@ -10,7 +10,7 @@ import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
 import { styles } from './WebApp.style'
-import { WEB_CAPTURE_TEXTS } from './web-capture-texts'
+import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 

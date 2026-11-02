@@ -1,6 +1,5 @@
 import { Menu, shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { windowChromeStyles } from '../constants/window-chrome.style'
 import { useSearchModeStore } from '../hooks/useSearchModeStore'
 import { ChevronDownIcon } from './ChevronDownIcon'
 import type { SearchMode } from '@dfragon/client-core/types/search-mode'
@@ -21,7 +20,7 @@ export function MainNav(): React.JSX.Element {
   const searchMode = useSearchModeStore((state) => state.searchMode)
 
   return (
-    <nav aria-label="주 메뉴" {...stylex.props(windowChromeStyles.noDrag, styles.nav)}>
+    <nav aria-label="주 메뉴" {...stylex.props(styles.nav)}>
       <Menu.Root>
         <SearchMenuTrigger modeLabel={SEARCH_MODE_LABELS[searchMode]} />
         <Menu.Popup aria-label="검색">

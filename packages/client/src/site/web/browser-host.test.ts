@@ -220,7 +220,7 @@ it('페이지에 이미지를 붙여 넣으면 알리고 readCaptureFrame이 그
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
   expect(pasted).toHaveBeenCalledOnce()
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
   expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(file)
   unsubscribe()
 })
@@ -273,17 +273,11 @@ it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이�
     id: sourceId,
     name: 'Dungeon & Fighter'
   })
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({
-    kind: 'frame',
-    image: sharedImage
-  })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({
-    kind: 'frame',
-    image: sharedImage
-  })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
 
   const restart = keydown({ code: 'KeyR', key: 'ㄱ', altKey: true })
   document.body.dispatchEvent(restart)
@@ -305,7 +299,7 @@ it('사용자가 공유를 멈추면 끝났다고 알리고, 앱이 끊은 공�
 
   expect(ended).toHaveBeenCalledOnce()
   await expect(host.party.selectCaptureSource(sourceId!)).rejects.toThrow('SCREEN_SHARE_ENDED')
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
 
   const next = stubScreenShare()
   await host.requestScreenShare()
@@ -340,20 +334,14 @@ it('신호로 시작한 회차는 판정에 쓴 프레임을 읽고, 그 구성�
   await passTick()
   showGame(gameFrame({ party: 90 }))
 
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({
-    kind: 'frame',
-    image: judged
-  })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(judged)
   const sameNames = gameFrame({ party: 40 })
   showGame(sameNames)
   await passTick()
   await passTick()
   expect(signals).toHaveBeenCalledOnce()
 
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({
-    kind: 'frame',
-    image: sameNames
-  })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(sameNames)
 })
 
 it('entry가 신호로 회차를 시작하지 않으면 든 프레임을 놓아 다음 캡처 회차가 공유 화면을 읽는다', async () => {
@@ -366,10 +354,7 @@ it('entry가 신호로 회차를 시작하지 않으면 든 프레임을 놓아 
   showGame(live)
 
   expect(signals).toHaveBeenCalledOnce()
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({
-    kind: 'frame',
-    image: live
-  })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(live)
 })
 
 it('마을이 아니거나 지금 화면의 창이 없으면 신호가 없고, 지금 화면이 아닌 쪽 검출기는 부르지 않는다', async () => {
@@ -541,7 +526,7 @@ it('entry가 거절한 신호는 대기 중인 붙여넣기 프레임을 지우�
   await passTick()
   expect(signals).toHaveBeenCalledOnce()
 
-  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
 })
 
 it('회차가 프레임을 읽는 동안 공유가 바뀌면 그 프레임을 새 공유의 기준으로 기록하지 않는다', async () => {
@@ -632,5 +617,5 @@ it('사용자가 공유를 멈추면 틱을 멈추고 회차용으로 든 프레
 
   expect(videoReads()).toBe(reads)
   const next = await host.party.readCaptureFrame().catch(() => null)
-  expect(next).not.toEqual({ kind: 'frame', image: judged })
+  expect(next).not.toEqual(judged)
 })

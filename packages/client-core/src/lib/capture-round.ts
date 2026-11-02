@@ -1,9 +1,6 @@
 import { fromPromise } from 'xstate'
 import type { CapturePhase } from '../types/capture'
-import type { RaidFrameResult, WindowFrameResult } from '../preload/common/types/capture'
 import type { FirstCandidate } from './party-recognition'
-
-export const CAPTURE_UNSUPPORTED_STATUS = '화면 캡처는 Windows에서 사용할 수 있습니다.'
 
 export const beginCaptureSearch = fromPromise(
   async ({
@@ -22,14 +19,6 @@ export const beginCaptureSearch = fromPromise(
     return captureId
   }
 )
-
-export function getWaitingStatus(frame: WindowFrameResult | RaidFrameResult): string {
-  if (frame.kind === 'waiting' && frame.reason === 'covered') {
-    return '게임 창이 가려져 있습니다. 게임 창을 앞으로 가져온 뒤 Alt+R을 누르세요.'
-  }
-
-  return '게임 화면을 읽지 못했습니다. 창이 최소화되지 않았는지 확인한 뒤 Alt+R을 누르세요.'
-}
 
 export function getRecognizeErrorStatus(error: unknown, ocrFailedStatus: string): string {
   if (error instanceof Error) {

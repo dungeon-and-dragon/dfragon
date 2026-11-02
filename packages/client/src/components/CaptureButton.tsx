@@ -1,8 +1,8 @@
 import { Button } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { windowChromeStyles } from '../constants/window-chrome.style'
 import { CameraIcon } from './CameraIcon'
 import { ShortcutTooltip } from './ShortcutTooltip'
+import { triggerStyles } from './ShortcutTooltip.style'
 import { styles } from './CaptureButton.style'
 
 export function CaptureButton({
@@ -16,7 +16,7 @@ export function CaptureButton({
 }): React.JSX.Element {
   return (
     <ShortcutTooltip label="캡처하기" shortcut="Alt R">
-      <span {...stylex.props(windowChromeStyles.noDrag)}>
+      <span {...stylex.props(triggerStyles.wrapper)}>
         <Button
           variant="primary"
           size="sm"

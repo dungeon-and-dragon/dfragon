@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getCaptureControlState, getTopBarCaptureControls } from './capture-presentation'
-import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
+import { WEB_CAPTURE_TEXTS } from './capture-texts'
 
 describe('getCaptureControlState', () => {
   it.each([
@@ -22,7 +22,7 @@ describe('getCaptureControlState', () => {
 describe('getTopBarCaptureControls', () => {
   const input = {
     ocrReady: true,
-    texts: DESKTOP_CAPTURE_TEXTS,
+    texts: WEB_CAPTURE_TEXTS,
     party: {
       phase: 'selected',
       status: '파티 문구',
@@ -69,7 +69,7 @@ describe('getTopBarCaptureControls', () => {
   it('게임 창을 고르기 전에는 창 없음 문구를 보인다', () => {
     const unselected = {
       ...input,
-      texts: { ...DESKTOP_CAPTURE_TEXTS, noSource: '붙여 넣으세요' },
+      texts: { ...WEB_CAPTURE_TEXTS, noSource: '붙여 넣으세요' },
       party: { ...input.party, phase: 'idle', status: '창을 고르세요', selectedSourceId: '' }
     } as const
 
@@ -77,9 +77,6 @@ describe('getTopBarCaptureControls', () => {
       phase: 'idle',
       status: '붙여 넣으세요'
     })
-    expect(
-      getTopBarCaptureControls({ ...unselected, isRaidMode: false, texts: DESKTOP_CAPTURE_TEXTS })
-    ).toEqual({ phase: 'idle', status: '' })
     expect(
       getTopBarCaptureControls({
         ...unselected,
@@ -135,11 +132,11 @@ describe('getTopBarCaptureControls', () => {
     ).toEqual({ phase: 'selecting', status: '창 확인 중' })
   })
 
-  it('OCR 준비 문구가 있으면 worker가 준비되기 전의 인식 단계에서 그 문구를 보인다', () => {
+  it('worker가 준비되기 전의 인식 단계에서는 OCR 준비 문구를 보인다', () => {
     const preparing = {
       ...input,
       ocrReady: false,
-      texts: { ...DESKTOP_CAPTURE_TEXTS, ocrPreparing: '모델 받는 중' },
+      texts: { ...WEB_CAPTURE_TEXTS, ocrPreparing: '모델 받는 중' },
       party: { ...input.party, phase: 'recognizing', status: '파티 인식 중' }
     } as const
 
@@ -151,9 +148,6 @@ describe('getTopBarCaptureControls', () => {
       phase: 'recognizing',
       status: '모델 받는 중'
     })
-    expect(
-      getTopBarCaptureControls({ ...preparing, isRaidMode: false, texts: DESKTOP_CAPTURE_TEXTS })
-    ).toEqual({ phase: 'recognizing', status: '파티 인식 중' })
   })
 
   it('공대 화면에서 창이 준비됐고 공대 회차 전이면 단계를 selected로 둔다', () => {

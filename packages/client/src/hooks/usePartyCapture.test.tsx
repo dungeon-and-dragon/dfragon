@@ -9,7 +9,7 @@ import {
   searchSnapshot,
   searchSlot
 } from '@dfragon/client-core/preload/api/search-test-fixture'
-import type { WindowFrameResult } from '@dfragon/client-core/preload/common/types/capture'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import type {
   CharacterChoice,
   SearchCommandResult,
@@ -17,7 +17,7 @@ import type {
   SearchSlot,
   SearchSnapshot
 } from '@dfragon/client-core/preload/common/types/search'
-import { DESKTOP_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
+import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 import * as diagnostics from '@dfragon/client-core/lib/runtime-diagnostics'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext } from './useClientHost'
@@ -71,7 +71,7 @@ const readCaptureFrame = vi.fn()
 let defaultWorker: ReturnType<typeof captureResources>['worker']
 
 function HookHarness({ onRender }: { onRender: (value: HookValue) => void }): null {
-  onRender(usePartyCapture({ receivesShortcut: true, texts: DESKTOP_CAPTURE_TEXTS }))
+  onRender(usePartyCapture({ receivesShortcut: true, texts: WEB_CAPTURE_TEXTS }))
 
   return null
 }
@@ -117,13 +117,10 @@ async function flushPromises(): Promise<void> {
 }
 
 function captureResources(): {
-  frame: WindowFrameResult
+  frame: CharacterImage
   worker: { recognize: ReturnType<typeof vi.fn>; terminate: ReturnType<typeof vi.fn> }
 } {
-  const frame: WindowFrameResult = {
-    kind: 'frame',
-    image: { width: 2, height: 1, rgba: new Uint8Array([1, 2, 3, 255, 4, 5, 6, 255]) }
-  }
+  const frame = { width: 2, height: 1, rgba: new Uint8Array([1, 2, 3, 255, 4, 5, 6, 255]) }
   const worker = {
     recognize: vi.fn().mockResolvedValue(ocrResult('Alice')),
     terminate: vi.fn()
@@ -368,9 +365,7 @@ it('네 슬롯을 첫 프레임으로 한 번 처리하고 완료 뒤에는 추�
   await act(async () => hook.getCurrent().source.selectSource('game'))
   await shortcut()
   expect(readCaptureFrame).toHaveBeenCalledExactlyOnceWith(CAPTURE_ID)
-  expect(moduleMocks.capturePartyRecognitionInputs).toHaveBeenCalledExactlyOnceWith(
-    frame.kind === 'frame' ? frame.image : {}
-  )
+  expect(moduleMocks.capturePartyRecognitionInputs).toHaveBeenCalledExactlyOnceWith(frame)
   expect(worker.recognize.mock.calls.map(([crop]) => crop)).toEqual(
     inputs.map((input) => input!.nickname)
   )
@@ -386,7 +381,7 @@ it('네 슬롯을 첫 프레임으로 한 번 처리하고 완료 뒤에는 추�
   )
   expect(hook.getCurrent().nicknames).toEqual(['이름0', '이름1', '이름2', '이름3'])
   expect(hook.getCurrent().phase).toBe('complete')
-  expect(hook.getCurrent().status).toBe('인식을 마쳤습니다. 다시 인식하려면 Alt+R을 누르세요.')
+  expect(hook.getCurrent().status).toBe(WEB_CAPTURE_TEXTS.complete)
   expect(worker.terminate).not.toHaveBeenCalled()
   currentSearch = searchSnapshot({
     revision: currentSearch.revision + 1,
@@ -417,23 +412,13 @@ it('네 슬롯을 첫 프레임으로 한 번 처리하고 완료 뒤에는 추�
   expect(worker.terminate).toHaveBeenCalledOnce()
 })
 
-it.each([
-  ['covered', '게임 창이 가려져 있습니다. 게임 창을 앞으로 가져온 뒤 Alt+R을 누르세요.'],
-  [
-    'unavailable',
-    '게임 화면을 읽지 못했습니다. 창이 최소화되지 않았는지 확인한 뒤 Alt+R을 누르세요.'
-  ],
-  ['missing', '파티 프레임을 찾지 못했습니다. 파티 프레임이 보이게 한 뒤 Alt+R을 누르세요.']
-] as const)('%s 프레임은 다시 읽지 않고 Alt+R을 기다린다', async (reason, status) => {
+it('파티 프레임이 없는 프레임은 다시 읽지 않고 Alt+R을 기다린다', async () => {
   vi.useFakeTimers()
-  if (reason !== 'missing') {
-    readCaptureFrame.mockResolvedValueOnce({ kind: 'waiting', reason })
-  }
   const hook = await renderPartyCaptureHook()
   await act(async () => hook.getCurrent().source.selectSource('game'))
   await shortcut()
   expect(hook.getCurrent().phase).toBe('unavailable')
-  expect(hook.getCurrent().status).toBe(status)
+  expect(hook.getCurrent().status).toBe(WEB_CAPTURE_TEXTS.partyFrameMissing)
   expect(api.notifyOcrCandidatesDetected).not.toHaveBeenCalled()
   expect(defaultWorker.recognize).not.toHaveBeenCalled()
   await act(async () => vi.advanceTimersByTimeAsync(60_000))
@@ -552,15 +537,10 @@ it.each(['idle', 'selecting', 'selectionFailed', 'stopped'] as const)(
 )
 
 it.each([
-  ['begin', '검색을 시작하지 못했습니다. 창을 다시 선택해 주세요.', 'CAPTURE_START_FAILED'],
-  ['frame', '캡처 연결이 종료되었습니다. 창을 다시 선택해 주세요.', 'CAPTURE_READ_FAILED'],
-  ['unsupported', '화면 캡처는 Windows에서 사용할 수 있습니다.', 'CAPTURE_READ_FAILED'],
-  ['worker', '글자 인식을 준비하지 못했습니다. Alt+R을 눌러 다시 인식해 주세요.', 'OCR_FAILED'],
-  [
-    'ocr',
-    '글자 인식에 실패했습니다. Alt+R을 누르거나 캐릭터 직접 검색을 사용해 주세요.',
-    'OCR_FAILED'
-  ]
+  ['begin', WEB_CAPTURE_TEXTS.partyStartFailed, 'CAPTURE_START_FAILED'],
+  ['frame', WEB_CAPTURE_TEXTS.disconnected, 'CAPTURE_READ_FAILED'],
+  ['worker', WEB_CAPTURE_TEXTS.ocrPrepareFailed, 'OCR_FAILED'],
+  ['ocr', WEB_CAPTURE_TEXTS.partyOcrFailed, 'OCR_FAILED']
 ] as const)(
   '%s 실패는 진단과 자원 정리를 유지하고 Alt+R로 재시작한다',
   async (stage, status, code) => {
@@ -582,10 +562,6 @@ it.each([
 
     if (stage === 'frame') {
       readCaptureFrame.mockRejectedValueOnce(new Error('internal detail'))
-    }
-
-    if (stage === 'unsupported') {
-      readCaptureFrame.mockResolvedValueOnce({ kind: 'unsupported' })
     }
 
     if (stage === 'ocr') {
@@ -699,7 +675,7 @@ it('인식 중 Alt+R은 같은 worker로 진행 중인 슬롯 뒤에 새 회차�
 
 it('프레임 준비 중 Alt+R은 회차를 교체하고 늦은 프레임을 폐기한다', async () => {
   const old = captureResources()
-  const pendingFrame = Promise.withResolvers<WindowFrameResult>()
+  const pendingFrame = Promise.withResolvers<CharacterImage>()
   setSlots(0)
   readCaptureFrame.mockReturnValueOnce(pendingFrame.promise)
   const hook = await renderPartyCaptureHook()
@@ -848,9 +824,7 @@ it.each(['failed', 'rejected'] as const)(
     expect(api.notifyOcrCandidatesDetected).not.toHaveBeenCalled()
     expect(report).toHaveBeenCalledExactlyOnceWith('OCR_FAILED')
     expect(hook.getCurrent().phase).toBe('failed')
-    expect(hook.getCurrent().status).toBe(
-      '글자 인식에 실패했습니다. Alt+R을 누르거나 캐릭터 직접 검색을 사용해 주세요.'
-    )
+    expect(hook.getCurrent().status).toBe(WEB_CAPTURE_TEXTS.partyOcrFailed)
     expect(hook.getCurrent().nicknames).toEqual([null, null, null, null])
     expect(endCalls()).toEqual([[{ action: 'end', captureId: CAPTURE_ID }]])
     expect(worker.terminate).toHaveBeenCalledOnce()
@@ -966,7 +940,7 @@ it.each(['older end', 'newer same capture'] as const)(
 
 it('중지한 회차의 늦은 프레임 읽기 실패는 새 회차의 검색을 끝내지 않는다', async () => {
   setSlots(0)
-  const oldFrame = Promise.withResolvers<WindowFrameResult>()
+  const oldFrame = Promise.withResolvers<CharacterImage>()
   readCaptureFrame.mockReturnValueOnce(oldFrame.promise)
   const hook = await renderPartyCaptureHook()
   await act(async () => hook.getCurrent().source.selectSource('game'))
@@ -1089,7 +1063,7 @@ it('게임 창을 등록하면 그 전에 창 없이 직접 조회한 카드를 
 it('회차가 실패하면 그 회차 중 직접 조회한 카드를 비운다', async () => {
   acceptLookups()
   setSlots(0)
-  const frame = Promise.withResolvers<WindowFrameResult>()
+  const frame = Promise.withResolvers<CharacterImage>()
   readCaptureFrame.mockReturnValueOnce(frame.promise)
   const hook = await renderPartyCaptureHook()
   await act(async () => hook.getCurrent().source.selectSource('game'))
@@ -1108,7 +1082,7 @@ it('회차가 실패하면 그 회차 중 직접 조회한 카드를 비운다',
 it('회차 중 직접 조회한 슬롯은 그 회차의 OCR 결과를 통지하지 않고 직접 조회 결과를 둔다', async () => {
   acceptLookups()
   setSlots(0, 1)
-  const frame = Promise.withResolvers<WindowFrameResult>()
+  const frame = Promise.withResolvers<CharacterImage>()
   readCaptureFrame.mockReturnValueOnce(frame.promise)
   const hook = await renderPartyCaptureHook()
   await act(async () => hook.getCurrent().source.selectSource('game'))
@@ -1158,7 +1132,7 @@ it.each([
     await flushPromises()
 
     expect(hook.getCurrent().phase).toBe('failed')
-    expect(hook.getCurrent().status).toBe('검색을 시작하지 못했습니다. 창을 다시 선택해 주세요.')
+    expect(hook.getCurrent().status).toBe(WEB_CAPTURE_TEXTS.partyStartFailed)
     expect(hook.getCurrent().search.connectionFailed).toBe(false)
     expectClearedSearch(hook.getCurrent())
     expect(
@@ -1170,7 +1144,7 @@ it.each([
 
 it('회차 중 main이 파티 수명을 무효화하면 캡처를 멈추고 늦은 프레임으로 인식하지 않는다', async () => {
   setSlots(0)
-  const frame = Promise.withResolvers<WindowFrameResult>()
+  const frame = Promise.withResolvers<CharacterImage>()
   readCaptureFrame.mockReturnValueOnce(frame.promise)
   const hook = await renderPartyCaptureHook()
   await act(async () => hook.getCurrent().source.selectSource('game'))

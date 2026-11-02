@@ -2,8 +2,8 @@ import { Popover } from '@base-ui/react/popover'
 import { Button, IconButton, shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef } from 'react'
-import { windowChromeStyles } from '../constants/window-chrome.style'
 import { ShortcutTooltip } from './ShortcutTooltip'
+import { triggerStyles } from './ShortcutTooltip.style'
 import { SnapshotIcon } from './SnapshotIcon'
 import { styles } from './SnapshotToggle.style'
 
@@ -33,7 +33,7 @@ export function SnapshotToggle({
   return (
     <Popover.Root onOpenChange={handleOpenChange}>
       <ShortcutTooltip label={tooltipLabel} shortcut={tooltipShortcut}>
-        <span {...stylex.props(windowChromeStyles.noDrag)}>
+        <span {...stylex.props(triggerStyles.wrapper)}>
           <Popover.Trigger
             render={
               <IconButton

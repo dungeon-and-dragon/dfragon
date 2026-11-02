@@ -4,11 +4,9 @@ import type { RaidFrameResult, RaidFrameRow } from '../preload/common/types/capt
 import type { RaidValueColumn } from '../preload/common/types/search'
 import {
   beginCaptureSearch,
-  CAPTURE_UNSUPPORTED_STATUS,
   getCapturingPhase,
   getObservedNickname,
-  getRecognizeErrorStatus,
-  getWaitingStatus
+  getRecognizeErrorStatus
 } from './capture-round'
 import type { OcrCaptureObservation } from './capture-search'
 import type { CaptureTexts } from './capture-texts'
@@ -212,18 +210,6 @@ export const raidCaptureMachine = setup({
                     return context.effects.texts.raidWindowUncertain
                   }
                 })
-              },
-              {
-                guard: ({ event }) => event.output.kind === 'waiting',
-                target: 'unavailable',
-                actions: assign({ status: ({ event }) => getWaitingStatus(event.output) })
-              },
-              {
-                target: '#raidCapture.failed',
-                actions: [
-                  () => reportRendererDiagnostic('CAPTURE_READ_FAILED'),
-                  assign({ status: CAPTURE_UNSUPPORTED_STATUS })
-                ]
               }
             ],
             onError: {

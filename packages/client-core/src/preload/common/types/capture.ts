@@ -6,11 +6,6 @@ export type CaptureSource = {
   name: string
 }
 
-export type WindowFrameResult =
-  | { kind: 'frame'; image: CharacterImage }
-  | { kind: 'waiting'; reason: 'covered' | 'unavailable' }
-  | { kind: 'unsupported' }
-
 export type RaidFrameRow = Readonly<{
   nickname: CharacterImage
   job: CharacterImage | null
@@ -20,4 +15,3 @@ export type RaidFrameRow = Readonly<{
 export type RaidFrameResult =
   | { kind: 'rows'; valueColumn: RaidValueColumn; rows: readonly (RaidFrameRow | null)[] }
   | { kind: 'missing'; reason: 'not-found' | 'uncertain' }
-  | Exclude<WindowFrameResult, { kind: 'frame' }>
