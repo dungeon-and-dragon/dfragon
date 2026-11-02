@@ -1,11 +1,4 @@
-import {
-  createRef,
-  type ChangeEvent,
-  type CSSProperties,
-  type KeyboardEvent,
-  type MouseEvent,
-  type Ref
-} from 'react'
+import { createRef, type ChangeEvent, type CSSProperties, type MouseEvent, type Ref } from 'react'
 import { expectTypeOf } from 'vitest'
 import {
   Button,
@@ -14,15 +7,6 @@ import {
   Chip,
   ContentStack,
   CornerBrackets,
-  DialogAction,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
   ExampleSection,
   IconButton,
   Kbd,
@@ -49,15 +33,6 @@ import {
   type CheckboxProps,
   type ChipProps,
   type ControlSurface,
-  type DialogActionProps,
-  type DialogBodyProps,
-  type DialogContentProps,
-  type DialogDescriptionProps,
-  type DialogFooterProps,
-  type DialogHeaderProps,
-  type DialogRootProps,
-  type DialogTitleProps,
-  type DialogTriggerProps,
   type IconButtonProps,
   type KbdProps,
   type KbdSurface,
@@ -92,14 +67,6 @@ type PublicPropKeys =
   | keyof TextFieldInputProps
   | keyof TextFieldDescriptionProps
   | keyof TextFieldErrorProps
-  | keyof DialogTriggerProps
-  | keyof DialogContentProps
-  | keyof DialogHeaderProps
-  | keyof DialogTitleProps
-  | keyof DialogDescriptionProps
-  | keyof DialogBodyProps
-  | keyof DialogFooterProps
-  | keyof DialogActionProps
   | keyof SelectTriggerProps
   | keyof SelectPopupProps
   | keyof SelectItemProps
@@ -127,15 +94,6 @@ expectTypeOf<TextFieldProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefi
 expectTypeOf<TextFieldProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
 expectTypeOf<TextFieldErrorProps>().not.toHaveProperty('match')
 expectTypeOf<TextFieldInputProps['ref']>().toEqualTypeOf<Ref<HTMLInputElement> | undefined>()
-expectTypeOf<DialogTriggerProps['ref']>().toEqualTypeOf<Ref<HTMLButtonElement> | undefined>()
-expectTypeOf<DialogContentProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>()
-expectTypeOf<DialogContentProps['size']>().toEqualTypeOf<'sm' | 'lg' | undefined>()
-expectTypeOf<DialogContentProps>().not.toHaveProperty('title')
-expectTypeOf<DialogHeaderProps['showCloseButton']>().toEqualTypeOf<boolean | undefined>()
-expectTypeOf<DialogBodyProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>()
-expectTypeOf<DialogFooterProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>()
-expectTypeOf<DialogActionProps['ref']>().toEqualTypeOf<Ref<HTMLButtonElement> | undefined>()
-expectTypeOf<DialogRootProps>().not.toHaveProperty('ref')
 expectTypeOf<StatusChipTone>().toEqualTypeOf<
   'neutral' | 'success' | 'danger' | 'warning' | 'signal'
 >()
@@ -204,41 +162,6 @@ export const componentExamples = (
         <TextFieldLabel>검색</TextFieldLabel>
         <TextFieldInput render={<Typo.txtS as="input" />} />
       </TextField>
-      <DialogRoot
-        open
-        disablePointerDismissal={false}
-        onOpenChange={(open, details) => {
-          expectTypeOf(open).toEqualTypeOf<boolean>()
-          expectTypeOf(details.reason).toExtend<string>()
-          details.cancel()
-        }}
-      >
-        <DialogTrigger ref={buttonRef} render={<Button />}>
-          상세 열기
-        </DialogTrigger>
-        <DialogContent
-          ref={divRef}
-          size="lg"
-          onKeyDown={(event) => {
-            expectTypeOf(event).toExtend<KeyboardEvent<HTMLDivElement>>()
-          }}
-        >
-          <DialogHeader ref={divRef} showCloseButton={false}>
-            <DialogTitle>
-              <span>작업 상세</span>
-            </DialogTitle>
-            <DialogDescription>진행 상태를 확인하세요.</DialogDescription>
-          </DialogHeader>
-          <DialogBody ref={divRef}>
-            <SupportingText>본문</SupportingText>
-          </DialogBody>
-          <DialogFooter ref={divRef}>
-            <DialogAction ref={buttonRef} variant="primary" disabled>
-              확인
-            </DialogAction>
-          </DialogFooter>
-        </DialogContent>
-      </DialogRoot>
     </ExampleSection>
   </ContentStack>
 )
@@ -256,11 +179,6 @@ export const designExamples = (
         expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLButtonElement>>()
       }}
     />
-    <DialogRoot>
-      <DialogTrigger
-        render={<IconButton aria-label="화면 캡처" icon={<svg aria-hidden="true" />} />}
-      />
-    </DialogRoot>
     <StatusChip tone="signal" role="status" busy>
       인식 중
     </StatusChip>
@@ -445,18 +363,6 @@ export const invalidComponentExamples = (
     <ProgressCircle ref={inputRef} />
     {/* @ts-expect-error TextFieldInput의 ref는 input element를 가리킨다. */}
     <TextFieldInput ref={buttonRef} />
-    {/* @ts-expect-error DialogTrigger의 ref는 button element를 가리킨다. */}
-    <DialogTrigger ref={inputRef}>열기</DialogTrigger>
-    {/* @ts-expect-error DialogTrigger는 자식 요소 합성에 render를 쓴다. */}
-    <DialogTrigger asChild>열기</DialogTrigger>
-    {/* @ts-expect-error DialogContent 크기는 디자인 대화상자 sm, lg 중 하나다. */}
-    <DialogContent size="md" />
-    {/* @ts-expect-error DialogContent의 className은 공개 prop이 아니다. */}
-    <DialogContent className="wide" />
-    {/* @ts-expect-error DialogContent는 제목을 prop이 아니라 DialogTitle로 받는다. */}
-    <DialogContent title="상세" />
-    {/* @ts-expect-error DialogFooter의 className은 공개 prop이 아니다. */}
-    <DialogFooter className="footer">확인</DialogFooter>
     {/* @ts-expect-error ExampleSection은 제목을 요구한다. */}
     <ExampleSection>본문</ExampleSection>
     {/* @ts-expect-error SupportingText는 children만 받는다. */}

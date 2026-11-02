@@ -9,12 +9,13 @@ const FAILURE = '클립보드에 복사하지 못했습니다.'
 
 let root: Root
 let container: HTMLDivElement
-let writeText: ReturnType<typeof vi.fn<Window['desktopClipboard']['writeText']>>
+let writeText: ReturnType<typeof vi.fn<Clipboard['writeText']>>
 
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
-  writeText = vi.fn<Window['desktopClipboard']['writeText']>(async () => {})
-  vi.stubGlobal('desktopClipboard', { writeText })
+  writeText = vi.fn<Clipboard['writeText']>(async () => {})
+  // jsdom에는 navigator.clipboard가 없다.
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -25,6 +26,7 @@ afterEach(async () => {
   container.remove()
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  Reflect.deleteProperty(navigator, 'clipboard')
 })
 
 function Harness({ text }: { text: string }): React.JSX.Element {
@@ -111,4 +113,13 @@ it('연달아 누르면 늦게 끝난 앞 복사의 실패가 마지막 성공�
 
   expect(failure()).toBeNull()
   expect(showsCopyIcon()).toBe(false)
+})
+
+it('Clipboard API가 없는 페이지에서는 복사 실패를 보인다', async () => {
+  Reflect.deleteProperty(navigator, 'clipboard')
+  await render()
+
+  await act(async () => button().click())
+
+  expect(failure()).toBe(`!${FAILURE}`)
 })

@@ -7,15 +7,6 @@ import {
   Chip,
   ContentStack,
   CornerBrackets,
-  DialogAction,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
   ExampleSection,
   IconButton,
   Kbd,
@@ -41,15 +32,6 @@ import {
 import type {
   ButtonProps,
   CardFrameProps,
-  DialogActionProps,
-  DialogBodyProps,
-  DialogContentProps,
-  DialogDescriptionProps,
-  DialogFooterProps,
-  DialogHeaderProps,
-  DialogRootProps,
-  DialogTitleProps,
-  DialogTriggerProps,
   IconButtonProps,
   ProgressCircleProps,
   SelectPopupProps,
@@ -74,15 +56,6 @@ export const components = [
   Chip,
   ContentStack,
   CornerBrackets,
-  DialogAction,
-  DialogBody,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
   ExampleSection,
   IconButton,
   Kbd,
@@ -111,15 +84,6 @@ export type PublicProps = {
   input: TextFieldInputProps
   fieldDescription: TextFieldDescriptionProps
   fieldError: TextFieldErrorProps
-  dialogRoot: DialogRootProps
-  dialogTrigger: DialogTriggerProps
-  dialogContent: DialogContentProps
-  dialogHeader: DialogHeaderProps
-  dialogTitle: DialogTitleProps
-  dialogDescription: DialogDescriptionProps
-  dialogBody: DialogBodyProps
-  dialogFooter: DialogFooterProps
-  dialogAction: DialogActionProps
   iconButton: IconButtonProps
   selectPopup: SelectPopupProps
   statusChip: StatusChipProps

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useCharacterSearch } from './useCharacterSearch'
 import type { CaptureSearch, createCaptureSearch } from '../lib/capture-search'
 import { emptySearchSlots } from '../lib/slots'
+import { createTestClientHost } from '../testing/test-support/client-host'
 import type { SearchView } from '../types/search'
 import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 import {
@@ -19,6 +20,7 @@ const mocks = vi.hoisted(() => ({ create: vi.fn<typeof createCaptureSearch>() })
 vi.mock('../lib/capture-search', () => ({ createCaptureSearch: mocks.create }))
 
 const SLOT = 1
+const partyHost = createTestClientHost().party
 const NEXT_REQUEST_ID = '00000000-0000-4000-8000-000000000088'
 let value: ReturnType<typeof useCharacterSearch>
 let bridge: CaptureSearch
@@ -92,7 +94,7 @@ function Harness({
 }: {
   onRender: (value: ReturnType<typeof useCharacterSearch>) => void
 }): null {
-  onRender(useCharacterSearch(vi.fn()))
+  onRender(useCharacterSearch(partyHost, vi.fn()))
 
   return null
 }
@@ -108,10 +110,6 @@ beforeEach(async () => {
     dispose: vi.fn()
   }
   mocks.create.mockReset().mockReturnValue(bridge)
-  vi.stubGlobal('search', {})
-  vi.stubGlobal('api', {
-    notifyOcrCandidatesDetected: vi.fn()
-  })
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)

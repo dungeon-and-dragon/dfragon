@@ -1,38 +1,20 @@
 import type { CapturePhase } from '../types/capture'
 import type { CaptureTexts } from './capture-texts'
 
-const DNF_CAPTURE_WINDOW_TITLE_PATTERN = /던전\s*앤\s*파이터|Dungeon.*Fighter|\bDNF\b/i
-
-export function isDnfCaptureSource(source: { name: string }): boolean {
-  return DNF_CAPTURE_WINDOW_TITLE_PATTERN.test(source.name)
-}
-
-export function findSingleDnfCaptureSource<T extends { name: string }>(sources: T[]): T | null {
-  const games = sources.filter(isDnfCaptureSource)
-  if (games.length !== 1) {
-    return null
-  }
-
-  return games[0]
-}
-
 type CaptureControlInput = {
   phase: CapturePhase
-  loading: boolean
-  failed: boolean
-  hasDetectedSource: boolean
+  connected: boolean
 }
 
 type CaptureStatus = { phase: CapturePhase; status: string }
 
 export type CaptureControlTone = 'neutral' | 'success' | 'danger' | 'warning' | 'signal'
 
-export function getCaptureControlState({
-  phase,
-  loading,
-  failed,
-  hasDetectedSource
-}: CaptureControlInput): { label: string; tone: CaptureControlTone; busy: boolean } {
+export function getCaptureControlState({ phase, connected }: CaptureControlInput): {
+  label: string
+  tone: CaptureControlTone
+  busy: boolean
+} {
   if (phase === 'selecting') {
     return { label: '준비 중', tone: 'neutral', busy: false }
   }
@@ -53,19 +35,11 @@ export function getCaptureControlState({
     return { label: '캡처 실패', tone: 'danger', busy: false }
   }
 
-  if (loading) {
-    return { label: '창 확인 중', tone: 'neutral', busy: false }
+  if (connected) {
+    return { label: '게임 연결됨', tone: 'success', busy: false }
   }
 
-  if (failed) {
-    return { label: '조회 실패', tone: 'danger', busy: false }
-  }
-
-  if (!hasDetectedSource) {
-    return { label: '창 미감지', tone: 'warning', busy: false }
-  }
-
-  return { label: '창 감지됨', tone: 'success', busy: false }
+  return { label: '게임 연결', tone: 'warning', busy: false }
 }
 
 function getRaidScreenCapture({

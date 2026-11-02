@@ -32,11 +32,3 @@ test('공개 package 경로를 Node와 strict TypeScript 소비자가 앱별 타
     '사용할 수 없는 단어가 포함되어 있습니다.'
   )
 })
-
-test('OCR 공개 계약을 소비하는 슬롯 목록은 공대 12행과 기존 4슬롯을 구분한다', async () => {
-  const { collectableSlots } = await import(consumer.href)
-
-  assert.deepEqual(collectableSlots('hud'), [1, 2, 3, 4])
-  assert.deepEqual(collectableSlots('participants'), [1, 2, 3, 4])
-  assert.deepEqual(collectableSlots('raid'), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-})

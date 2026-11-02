@@ -60,7 +60,6 @@ last-reviewed: 2026-11-03
 | `IconButton` | 아이콘만 있는 버튼. 접근 가능한 이름 필수 |
 | `TextField`, `TextFieldLabel`, `TextFieldInput`, `TextFieldDescription`, `TextFieldError` | Base UI `Field`, `Input` 기반 입력과 라벨, 설명, 오류 |
 | `Select`, `Menu`, `Switch`, `Checkbox`, `Chip`(`Toggle`), `Tabs`, `Tooltip` | 같은 이름의 Base UI 부품 기반 |
-| `DialogRoot`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogBody`, `DialogFooter`, `DialogAction` | Base UI `Dialog` 기반. 기존 이름 유지 |
 | `StatusChip` | tone `neutral`, `success`, `danger`, `warning`, `signal`. 글자색 사각 점과 옅은 면, 진행 중이면 `busy`로 점 세 개 |
 | `StepDots` | 진행 중임을 보이는 사각 점 세 개 |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG |

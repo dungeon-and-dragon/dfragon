@@ -3,18 +3,14 @@ import { getCaptureControlState, getTopBarCaptureControls } from './capture-pres
 import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 
 describe('getCaptureControlState', () => {
-  const idle = { phase: 'idle', loading: false, failed: false, hasDetectedSource: true } as const
-
   it.each([
-    ['준비 중', { ...idle, phase: 'selecting', loading: true }, 'neutral', false],
-    ['인식 중', { ...idle, phase: 'recognizing', loading: true }, 'signal', true],
-    ['인식 완료', { ...idle, phase: 'complete', failed: true }, 'signal', false],
-    ['확인 필요', { ...idle, phase: 'unavailable', loading: true }, 'warning', false],
-    ['캡처 실패', { ...idle, phase: 'failed', loading: true }, 'danger', false],
-    ['창 확인 중', { ...idle, loading: true, failed: true }, 'neutral', false],
-    ['조회 실패', { ...idle, failed: true, hasDetectedSource: false }, 'danger', false],
-    ['창 미감지', { ...idle, hasDetectedSource: false }, 'warning', false],
-    ['창 감지됨', idle, 'success', false]
+    ['준비 중', { phase: 'selecting', connected: true }, 'neutral', false],
+    ['인식 중', { phase: 'recognizing', connected: false }, 'signal', true],
+    ['인식 완료', { phase: 'complete', connected: false }, 'signal', false],
+    ['확인 필요', { phase: 'unavailable', connected: true }, 'warning', false],
+    ['캡처 실패', { phase: 'failed', connected: true }, 'danger', false],
+    ['게임 연결됨', { phase: 'selected', connected: true }, 'success', false],
+    ['게임 연결', { phase: 'idle', connected: false }, 'warning', false]
   ] as const)(
     '%s 상태를 우선순위대로 고르고 상태 칩 tone과 진행 표시를 함께 정한다',
     (label, input, tone, busy) => {
@@ -179,13 +175,6 @@ describe('getTopBarCaptureControls', () => {
     })
 
     expect(controls).toEqual({ phase: 'failed', status: '공대원창을 읽지 못했습니다.' })
-    expect(
-      getCaptureControlState({
-        phase: controls.phase,
-        loading: false,
-        failed: false,
-        hasDetectedSource: true
-      }).tone
-    ).toBe('danger')
+    expect(getCaptureControlState({ phase: controls.phase, connected: true }).tone).toBe('danger')
   })
 })

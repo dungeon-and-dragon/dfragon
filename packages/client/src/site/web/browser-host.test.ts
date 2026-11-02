@@ -201,7 +201,7 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
-  await window.api.selectCaptureSource('')
+  await host.party.selectCaptureSource('')
   unsubscribeAutoRound()
   host.setWatchedScreen({ kind: 'party', roundRunning: false })
   vi.useRealTimers()
@@ -213,14 +213,14 @@ afterEach(async () => {
 it('페이지에 이미지를 붙여 넣으면 알리고 readCaptureFrame이 그 이미지를 프레임으로 돌려준다', async () => {
   const pasted = vi.fn()
   const unsubscribe = host.onPastedFrame(pasted)
-  await expect(window.api.readCaptureFrame('capture')).rejects.toThrow('NO_PASTED_FRAME')
+  await expect(host.party.readCaptureFrame()).rejects.toThrow('NO_PASTED_FRAME')
 
   document.dispatchEvent(pasteEvent([{ kind: 'string', type: 'text/plain' }]))
   expect(pasted).not.toHaveBeenCalled()
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
   expect(pasted).toHaveBeenCalledOnce()
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
   expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(file)
   unsubscribe()
 })
@@ -230,12 +230,12 @@ it('붙여 넣은 이미지를 읽지 못하면 readCaptureFrame이 거절한다
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
 
-  await expect(window.api.readCaptureFrame('capture')).rejects.toThrow('broken')
+  await expect(host.party.readCaptureFrame()).rejects.toThrow('broken')
 })
 
-it('페이지의 Alt+W, Alt+A를 Desktop 단축키로 알리고 다른 조합은 브라우저에 넘긴다', () => {
+it('페이지의 Alt+W, Alt+A를 페이지 단축키로 알리고 다른 조합은 브라우저에 넘긴다', () => {
   const received = vi.fn()
-  const unsubscribe = window.desktopShortcut.onDesktopShortcut(received)
+  const unsubscribe = host.onShortcut(received)
 
   const snapshot = keydown({ code: 'KeyW', key: 'ㅈ', altKey: true })
   document.body.dispatchEvent(snapshot)
@@ -257,11 +257,11 @@ it('페이지의 Alt+W, Alt+A를 Desktop 단축키로 알리고 다른 조합은
   expect(received).toHaveBeenCalledTimes(2)
 })
 
-it('공유한 창은 목록에 나오지 않고, 캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이미지를 읽는다', async () => {
+it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이미지를 읽는다', async () => {
   const { getDisplayMedia } = stubScreenShare()
   stubVideoDecode()
   const received = vi.fn()
-  const unsubscribe = window.desktopShortcut.onDesktopShortcut(received)
+  const unsubscribe = host.onShortcut(received)
 
   const sourceId = await host.requestScreenShare()
 
@@ -269,19 +269,18 @@ it('공유한 창은 목록에 나오지 않고, 캡처 회차는 공유 화면�
     video: { displaySurface: 'window' },
     audio: false
   })
-  await expect(window.api.listCaptureSources()).resolves.toEqual([])
-  await expect(window.api.selectCaptureSource(sourceId!)).resolves.toEqual({
+  await expect(host.party.selectCaptureSource(sourceId!)).resolves.toEqual({
     id: sourceId,
     name: 'Dungeon & Fighter'
   })
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({
     kind: 'frame',
     image: sharedImage
   })
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({ kind: 'frame', image })
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({
     kind: 'frame',
     image: sharedImage
   })
@@ -300,17 +299,17 @@ it('사용자가 공유를 멈추면 끝났다고 알리고, 앱이 끊은 공�
   const unsubscribe = host.onScreenShareEnded(ended)
   const sourceId = await host.requestScreenShare()
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await window.api.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
 
   track.dispatchEvent(new Event('ended'))
 
   expect(ended).toHaveBeenCalledOnce()
-  await expect(window.api.selectCaptureSource(sourceId!)).rejects.toThrow('SCREEN_SHARE_ENDED')
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.selectCaptureSource(sourceId!)).rejects.toThrow('SCREEN_SHARE_ENDED')
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
 
   const next = stubScreenShare()
   await host.requestScreenShare()
-  await window.api.selectCaptureSource('')
+  await host.party.selectCaptureSource('')
   next.track.dispatchEvent(new Event('ended'))
   expect(next.track.stop).toHaveBeenCalledOnce()
 
@@ -341,7 +340,7 @@ it('신호로 시작한 회차는 판정에 쓴 프레임을 읽고, 그 구성�
   await passTick()
   showGame(gameFrame({ party: 90 }))
 
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({
     kind: 'frame',
     image: judged
   })
@@ -351,7 +350,7 @@ it('신호로 시작한 회차는 판정에 쓴 프레임을 읽고, 그 구성�
   await passTick()
   expect(signals).toHaveBeenCalledOnce()
 
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({
     kind: 'frame',
     image: sameNames
   })
@@ -367,7 +366,7 @@ it('entry가 신호로 회차를 시작하지 않으면 든 프레임을 놓아 
   showGame(live)
 
   expect(signals).toHaveBeenCalledOnce()
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({
     kind: 'frame',
     image: live
   })
@@ -402,8 +401,8 @@ it('마을이 아니거나 지금 화면의 창이 없으면 신호가 없고, �
 it('캡처 버튼, 붙여넣기 회차가 읽은 프레임이 그 화면의 기준이 된다', async () => {
   const { signals } = await connectWatchedShare()
   showGame(gameFrame({ party: 40, raid: 70 }))
-  await window.api.readCaptureFrame('capture')
-  await window.raidSearch.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
+  await host.raid.readCaptureFrame()
   await passTick()
   await passTick()
   host.setWatchedScreen({ kind: 'raid', roundRunning: false })
@@ -414,7 +413,7 @@ it('캡처 버튼, 붙여넣기 회차가 읽은 프레임이 그 화면의 기�
   const pasted = gameFrame({ raid: 120 })
   vi.mocked(decodeBrowserImage).mockResolvedValueOnce(pasted)
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await window.raidSearch.readCaptureFrame('capture')
+  await host.raid.readCaptureFrame()
   showGame(gameFrame({ raid: 120 }))
   await passTick()
   await passTick()
@@ -429,9 +428,9 @@ it('캡처 버튼, 붙여넣기 회차가 읽은 프레임이 그 화면의 기�
 it('회차가 이름 crop을 못 만든 프레임을 읽으면 빈 기준이 되어, 앞 기준과 같은 구성도 다시 보이면 새 구성으로 본다', async () => {
   const { signals } = await connectWatchedShare()
   showGame(gameFrame({ party: 40 }))
-  await window.api.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
   showGame(gameFrame({ party: null }))
-  await window.api.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
 
   showGame(gameFrame({ party: 40 }))
   await passTick()
@@ -470,7 +469,7 @@ it('프레임을 읽는 동안 회차가 시작해 프레임을 읽고 끝나면
   await passTick()
 
   host.setWatchedScreen({ kind: 'party', roundRunning: true })
-  await window.api.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
   host.setWatchedScreen({ kind: 'party', roundRunning: false })
   resolve(gameFrame({ party: 40 }))
   showGame(gameFrame({ party: 40 }))
@@ -524,7 +523,7 @@ it('웹의 화면이 바뀌면 후보를 버리고, 프레임을 읽는 동안 �
 it('같은 이름 crop이 다른 파티 슬롯으로 옮겨 가면 다른 구성으로 보고 회차 신호를 보낸다', async () => {
   const { signals } = await connectWatchedShare()
   showGame(gameFrame({ party: 40, partySlot: 2 }))
-  await window.api.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
 
   showGame(gameFrame({ party: 40, partySlot: 3 }))
   await passTick()
@@ -542,14 +541,14 @@ it('entry가 거절한 신호는 대기 중인 붙여넣기 프레임을 지우�
   await passTick()
   expect(signals).toHaveBeenCalledOnce()
 
-  await expect(window.api.readCaptureFrame('capture')).resolves.toEqual({ kind: 'frame', image })
+  await expect(host.party.readCaptureFrame()).resolves.toEqual({ kind: 'frame', image })
 })
 
 it('회차가 프레임을 읽는 동안 공유가 바뀌면 그 프레임을 새 공유의 기준으로 기록하지 않는다', async () => {
   const { signals } = await connectWatchedShare()
   const { promise, resolve } = Promise.withResolvers<CharacterImage>()
   vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
-  const read = window.api.readCaptureFrame('capture')
+  const read = host.party.readCaptureFrame()
 
   stubScreenShare()
   await host.requestScreenShare()
@@ -580,7 +579,7 @@ it('검출기가 예외를 던진 틱은 창을 찾지 못한 틱으로 보아 2
 it('공유를 바꾸면 기준을 비우고, 판정 중에 바뀐 공유의 결과는 버린다', async () => {
   const { track, signals } = await connectWatchedShare()
   showGame(gameFrame({ party: 40 }))
-  await window.api.readCaptureFrame('capture')
+  await host.party.readCaptureFrame()
   const { promise, resolve } = Promise.withResolvers<CharacterImage>()
   vi.mocked(decodeBrowserImage).mockReturnValueOnce(promise)
   await passTick()
@@ -632,6 +631,6 @@ it('사용자가 공유를 멈추면 틱을 멈추고 회차용으로 든 프레
   await passTick()
 
   expect(videoReads()).toBe(reads)
-  const next = await window.api.readCaptureFrame('capture').catch(() => null)
+  const next = await host.party.readCaptureFrame().catch(() => null)
   expect(next).not.toEqual({ kind: 'frame', image: judged })
 })

@@ -5,7 +5,8 @@ import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/se
 import { getRecognizedNicknames } from '../lib/recognized-nicknames'
 import { RAID_SEAT_LAYOUT } from '../constants/cards'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
-import { useDesktopShortcut } from './useDesktopShortcut'
+import { useClientHost } from './useClientHost'
+import { usePageShortcut } from './usePageShortcut'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import type { OcrRecognition } from '../lib/ocr-worker-recognition'
 import type { CaptureTexts } from '../lib/capture-texts'
@@ -46,11 +47,12 @@ export function useRaidCapture({
   recognizeWithOcr: OcrRecognition
   texts: CaptureTexts
 }): RaidCapture {
-  // 파티 카드와 다른 main 검색 수명을 써서 파티 네 자리와 공대 12자리가 서로의 결과를 덮어쓰지 않는다.
+  const { raid } = useClientHost()
+  // 파티 카드와 다른 검색 수명을 써서 파티 네 자리와 공대 12자리가 서로의 결과를 덮어쓰지 않는다.
   const search = useManualCharacterLookup(
-    window.raidSearch,
+    raid,
     SEARCH_SLOT_COUNTS.raid,
-    window.raidSearch.notifyOcrCandidatesDetected
+    raid.notifyOcrCandidatesDetected
   )
   const { seatOrder, swapSeats, resetSeats } = useSeatOrder(RAID_SEAT_LAYOUT)
   const { begin: beginSearch } = search
@@ -66,7 +68,7 @@ export function useRaidCapture({
     input: {
       texts,
       beginSearch: beginRound,
-      readFrame: (captureId) => window.raidSearch.readCaptureFrame(captureId),
+      readFrame: raid.readCaptureFrame,
       observeOcr: search.observeOcr,
       recognizeWithOcr
     }
@@ -79,7 +81,7 @@ export function useRaidCapture({
 
   const startRound = useCallback(() => send({ type: 'START' }), [send])
   const startPastedRound = useCallback(() => send({ type: 'PASTE' }), [send])
-  useDesktopShortcut('restart-search', receivesShortcut, startRound)
+  usePageShortcut('restart-search', receivesShortcut, startRound)
 
   const phase = getRaidCapturePhase(snapshot)
   const recognizing = phase === 'recognizing'
