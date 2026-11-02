@@ -2,8 +2,8 @@ import { Popover } from '@base-ui/react/popover'
 import { Button, IconButton, shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef } from 'react'
-import { ShortcutTooltip } from './ShortcutTooltip'
-import { triggerStyles } from './ShortcutTooltip.style'
+import { HeaderTooltip } from './HeaderTooltip'
+import { triggerStyles } from './HeaderTooltip.style'
 import { SnapshotIcon } from './SnapshotIcon'
 import { styles } from './SnapshotToggle.style'
 
@@ -19,9 +19,7 @@ export function SnapshotToggle({
   onClear: () => void
 }): React.JSX.Element {
   const cancelRef = useRef<HTMLButtonElement>(null)
-  // 켜진 동안 누르면 끄기 확인이 열리고 Alt W는 아무것도 하지 않으므로 단축키 줄을 두지 않는다.
   const tooltipLabel = active ? '모험단 고정 풀기' : '모험단 고정하기'
-  const tooltipShortcut = active ? undefined : 'Alt W'
 
   function handleOpenChange(open: boolean, details: Popover.Root.ChangeEventDetails): void {
     if (open && !active) {
@@ -32,14 +30,13 @@ export function SnapshotToggle({
 
   return (
     <Popover.Root onOpenChange={handleOpenChange}>
-      <ShortcutTooltip label={tooltipLabel} shortcut={tooltipShortcut}>
+      <HeaderTooltip label={tooltipLabel}>
         <span {...stylex.props(triggerStyles.wrapper)}>
           <Popover.Trigger
             render={
               <IconButton
                 size="lg"
                 aria-label={label}
-                aria-keyshortcuts="Alt+W"
                 pressed={active}
                 icon={<SnapshotIcon width={16} height={16} {...stylex.props(styles.icon)} />}
                 {...stylex.props(styles.trigger)}
@@ -47,7 +44,7 @@ export function SnapshotToggle({
             }
           />
         </span>
-      </ShortcutTooltip>
+      </HeaderTooltip>
       <Popover.Portal>
         <Popover.Positioner
           side="bottom"

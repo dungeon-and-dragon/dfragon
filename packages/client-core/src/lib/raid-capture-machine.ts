@@ -14,7 +14,7 @@ import type { OcrRecognition } from './ocr-worker-recognition'
 import { recognizeRaidRows, type RaidSlotRecognition } from './raid-recognition'
 import { reportRendererDiagnostic, showRejectedOcrNickname } from './runtime-diagnostics'
 
-const READY_STATUS = 'Alt+R을 눌러 공대를 인식해 주세요.'
+const READY_STATUS = '캡처 버튼을 눌러 공대를 인식해 주세요.'
 
 type RaidCaptureInput = {
   texts: CaptureTexts
@@ -43,7 +43,7 @@ type RaidCaptureEvent =
   | { type: 'SOURCE'; sourceId: string | null }
 
 /**
- * 공대 화면의 캡처 회차. 파티 캡처처럼 Alt+R과 공대 헤더의 캡처 버튼이 같은 START를 보내고, 회차마다 공대
+ * 공대 화면의 캡처 회차. 파티 캡처처럼 공대 헤더의 캡처 버튼이 START를 보내고, 회차마다 공대
  * 수명을 새로 시작한 뒤 게임 창 프레임을 한 장만 읽어 12행 공대원 이름을 인식한다. 창 선택은 파티 캡처가
  * 소유하고 등록 결과를 SOURCE로 알린다. 등록된 창이 없으면 START를 받지 않고, 등록이 바뀌면 진행 중 회차를
  * 끝낸다. 그 회차가 이미 비운 슬롯은 비운 채로 두고 완료 시각도 지운다.
