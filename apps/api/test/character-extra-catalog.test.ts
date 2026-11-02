@@ -68,7 +68,7 @@ test('장착 부속에 공용 상세를 연결하고 원본, 빈 슬롯, 서약 
       })
     )
   })
-  const result = await enrichCharacterDetails(details, service, signal)
+  const { details: result } = await enrichCharacterDetails(details, service, signal)
   assert.deepEqual(details, original)
   assert.equal(calls.length, 9)
   assert.equal(Object.hasOwn(result, 'setDetails'), false)
@@ -108,7 +108,7 @@ test('공용 상세 실패에도 미장착 null과 빈 배열을 그대로 유�
     const service = createCatalogService(async () => {
       throw new Error('failure')
     })
-    const result = await enrichCharacterDetails(details, service, signal)
+    const { details: result } = await enrichCharacterDetails(details, service, signal)
     assert.deepEqual(result.avatar, value)
     assert.equal(result.creature, null)
     assert.equal(result.oath, null)
@@ -159,7 +159,7 @@ test('잘못된 참조는 조회하지 않고 반복 아이템은 한 번씩 연
     return new Map(itemIds.map((itemId) => [itemId, catalogPayload(itemId)]))
   })
 
-  const result = await enrichCharacterDetails(details, catalog, signal)
+  const { details: result } = await enrichCharacterDetails(details, catalog, signal)
 
   assert.deepEqual(requested.sort(), ['buff', 'shared'])
   const equipment = result.equipment.equipment as Array<Record<string, unknown> | null>
@@ -199,7 +199,7 @@ test('예약된 itemDetail은 공용 조회값으로 교체하고 캐릭터 옵�
     )
   })
 
-  const result = await enrichCharacterDetails(details, catalog, signal)
+  const { details: result } = await enrichCharacterDetails(details, catalog, signal)
 
   const equipment = result.equipment.equipment as Array<Record<string, unknown>>
   assert.equal(equipment[0]!.option, '장착 옵션')

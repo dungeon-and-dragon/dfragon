@@ -12,6 +12,7 @@ const identity = { serverId: 'siroco', characterId: 'fixture-character' }
 const signal = new AbortController().signal
 const ignoredTimings: NeopleStageTimings = { record: () => undefined, markShared: () => undefined }
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8'
+const noScore = async () => null
 
 function payloadsNamed(characterName: string): CharacterPayloads {
   const common = { ...identity, characterName, jobId: 'job' }
@@ -104,6 +105,7 @@ async function startApp(
 test('캐릭터 캐시가 맞은 GET은 공용 아이템을 다시 붙이지 않고 처음 만든 본문 바이트를 그대로 돌려준다', async (t) => {
   const { counter, catalog } = countingCatalog(foundItems)
   const service = createCharacterDetailService({
+    calculateScore: noScore,
     catalog,
     fetchDetails: async () => payloadsNamed('합성 캐릭터')
   })
@@ -129,6 +131,7 @@ test('공용 아이템이 unavailable인 응답은 저장하지 않아 다음 �
     return foundItems(itemIds, catalogSignal)
   })
   const service = createCharacterDetailService({
+    calculateScore: noScore,
     catalog,
     fetchDetails: async () => payloadsNamed('합성 캐릭터')
   })
