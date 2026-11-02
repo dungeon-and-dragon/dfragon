@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { searchSlot } from '@dfragon/client-core/preload/api/search-test-fixture'
-import type { SelectedCharacterSummary } from '@dfragon/client-core/preload/common/types/character'
-import type { SearchSlot } from '@dfragon/client-core/preload/common/types/search'
+import { searchSlot } from '../preload/api/search-test-fixture'
+import type { SelectedCharacterSummary } from '../preload/common/types/character'
+import type { SearchSlot } from '../preload/common/types/search'
 import { filledSlotCount, toSlotCards } from './slot-cards'
 
 const NEXT_STEP = 'Alt+R로 다시 인식하거나 서버와 이름을 직접 조회해 주세요.'

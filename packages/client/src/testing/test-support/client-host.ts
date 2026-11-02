@@ -3,7 +3,7 @@ import { searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fix
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import type { ClientHost } from '../../hooks/useClientHost'
-import { emptySearchSlots } from '../../lib/slots'
+import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 
 type ClientHostOverrides = Partial<Pick<ClientHost, 'onShortcut' | 'getTodayGrade'>> & {
   party?: Partial<ClientHost['party']>

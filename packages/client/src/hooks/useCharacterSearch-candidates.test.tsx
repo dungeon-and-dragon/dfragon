@@ -3,10 +3,10 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useCharacterSearch } from './useCharacterSearch'
-import type { CaptureSearch, createCaptureSearch } from '../lib/capture-search'
-import { emptySearchSlots } from '../lib/slots'
+import type { CaptureSearch, createCaptureSearch } from '@dfragon/client-core/lib/capture-search'
+import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 import { createTestClientHost } from '../testing/test-support/client-host'
-import type { SearchView } from '../types/search'
+import type { SearchView } from '@dfragon/client-core/types/search'
 import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
 import {
   CAPTURE_ID,
@@ -17,7 +17,7 @@ import {
 
 // 파티 검색 수명의 연결(createCaptureSearch)만 바꾸고 useManualCharacterLookup은 그대로 쓴다.
 const mocks = vi.hoisted(() => ({ create: vi.fn<typeof createCaptureSearch>() }))
-vi.mock('../lib/capture-search', () => ({ createCaptureSearch: mocks.create }))
+vi.mock('@dfragon/client-core/lib/capture-search', () => ({ createCaptureSearch: mocks.create }))
 
 const SLOT = 1
 const partyHost = createTestClientHost().party

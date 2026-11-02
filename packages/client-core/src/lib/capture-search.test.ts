@@ -4,14 +4,14 @@ import type {
   SearchApi,
   SearchCommandResult,
   SearchSnapshot
-} from '@dfragon/client-core/preload/common/types/search'
-import type { CharacterPortrait } from '@dfragon/client-core/preload/common/types/character'
+} from '../preload/common/types/search'
+import type { CharacterPortrait } from '../preload/common/types/character'
 import {
   CAPTURE_ID,
   searchRow,
   searchSlot,
   searchSnapshot
-} from '@dfragon/client-core/preload/api/search-test-fixture'
+} from '../preload/api/search-test-fixture'
 import type { SearchView } from '../types/search'
 import {
   createCaptureSearch,

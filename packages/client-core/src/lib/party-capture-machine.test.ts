@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { partyCaptureMachine } from './party-capture-machine'
 import { DESKTOP_CAPTURE_TEXTS } from './capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
-import type { WindowFrameResult } from '@dfragon/client-core/preload/common/types/capture'
+import type { WindowFrameResult } from '../preload/common/types/capture'
 
 const modules = vi.hoisted(() => ({ diagnostic: vi.fn() }))
 vi.mock('./ocr', () => ({ createPartyOcrWorker: vi.fn() }))

@@ -1,11 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
-import type {
-  SearchApi,
-  SearchCommandResult,
-  SearchSnapshot
-} from '@dfragon/client-core/preload/common/types/search'
-import { CAPTURE_ID, searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
+import type { SearchApi, SearchCommandResult, SearchSnapshot } from '../preload/common/types/search'
+import { CAPTURE_ID, searchSnapshot } from '../preload/api/search-test-fixture'
 import { createSearchConnection, type SearchConnection } from './search-connection'
 
 const connections: SearchConnection[] = []

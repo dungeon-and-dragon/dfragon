@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   createPortraitColorScorer,
   type PortraitColorScorer
-} from '@dfragon/client-core/shared/search/portrait-color'
-import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
+} from '../../src/shared/search/portrait-color'
+import type { CharacterImage } from '../../src/preload/common/types/character'
 import { type CaseResult, evaluateCase, summarize } from './evaluate'
 import { buildHudPortrait, hudFaceSize } from './hud-portrait'
 import {
