@@ -2,12 +2,19 @@ import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
 import { REQUEST_TIMEOUT_MS } from '../constants/capture'
 
 type Reply = { ready: true } | PartyOcrResult
-type WorkerMessage = Reply | { failed: true }
+type WorkerMessage = Reply | { failed: true } | { gpuUnavailable: true }
 
 class OcrWorkerUnavailableError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'OcrWorkerUnavailableError'
+  }
+}
+
+export class OcrGpuUnavailableError extends Error {
+  constructor() {
+    super('PaddleOCR could not run on WebGPU.')
+    this.name = 'OcrGpuUnavailableError'
   }
 }
 
@@ -52,6 +59,12 @@ export async function createPartyOcrWorker(signal: AbortSignal): Promise<PartyOc
       return
     }
     const value = event.data
+    if ('gpuUnavailable' in value) {
+      terminate(new OcrGpuUnavailableError())
+
+      return
+    }
+
     if ('failed' in value) {
       terminate(new OcrWorkerUnavailableError('PaddleOCR could not complete recognition.'))
 

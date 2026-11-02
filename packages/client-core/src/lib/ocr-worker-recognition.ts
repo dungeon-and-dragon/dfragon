@@ -1,5 +1,6 @@
 import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
-import { createPartyOcrWorker } from './ocr'
+import type { CaptureTexts } from './capture-texts'
+import { createPartyOcrWorker, OcrGpuUnavailableError } from './ocr'
 
 export type OcrRecognition = <T>(
   signal: AbortSignal,
@@ -24,7 +25,9 @@ type WorkerEntry = {
  * 모델 로드를 회차마다 반복하지 않도록 worker 하나를 회차 사이에 유지하고 파티와 공대 회차가 함께 쓴다.
  * Worker는 한 번에 이미지 하나만 받으므로 인식 요청을 차례로 보내고, 취소된 회차의 남은 요청은 보내지 않는다.
  */
-export function createSharedOcrWorker(prepareFailedStatus: string): SharedOcrWorker {
+export function createSharedOcrWorker(
+  texts: Pick<CaptureTexts, 'ocrPrepareFailed' | 'ocrGpuUnavailable'>
+): SharedOcrWorker {
   let current: WorkerEntry | null = null
   let queue: Promise<unknown> = Promise.resolve()
   let ready = false
@@ -77,11 +80,13 @@ export function createSharedOcrWorker(prepareFailedStatus: string): SharedOcrWor
     run: (recognizeText: PartyOcrWorker['recognize']) => Promise<T>
   ): Promise<T> {
     const entry = acquire()
-    const worker = await entry.worker.catch(() => {
-      throw new Error(prepareFailedStatus)
+    const worker = await entry.worker.catch((error: unknown) => {
+      throw new Error(
+        error instanceof OcrGpuUnavailableError ? texts.ocrGpuUnavailable : texts.ocrPrepareFailed
+      )
     })
     if (signal.aborted) {
-      throw new Error(prepareFailedStatus)
+      throw new Error(texts.ocrPrepareFailed)
     }
 
     function recognizeText(image: HTMLCanvasElement): Promise<PartyOcrResult> {

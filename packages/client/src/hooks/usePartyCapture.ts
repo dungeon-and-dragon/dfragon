@@ -64,7 +64,7 @@ export function usePartyCapture({
   const { party } = useClientHost()
   const stopRef = useRef<() => void>(() => {})
   const search = useCharacterSearch(party, () => stopRef.current())
-  const [ocrWorker] = useState(() => createSharedOcrWorker(texts.ocrPrepareFailed))
+  const [ocrWorker] = useState(() => createSharedOcrWorker(texts))
   const ocrReady = useSyncExternalStore(ocrWorker.subscribe, ocrWorker.isReady)
   const { seatOrder, swapSeats, resetSeats } = useSeatOrder(PARTY_SEAT_LAYOUT)
   const { begin: beginSearch } = search

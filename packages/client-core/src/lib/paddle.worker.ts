@@ -12,6 +12,8 @@ const MAX_THREADS = 8
 let session: InferenceSession | null = null
 let characters: string[] = []
 
+class GpuUnavailableError extends Error {}
+
 async function initializeModel(root: string): Promise<void> {
   env.logLevel = 'error'
   // onnxruntime-web은 cross-origin 격리가 아닌 페이지에서 기본값을 1 thread로 잡으므로 직접 정한다.
@@ -28,22 +30,23 @@ async function initializeModel(root: string): Promise<void> {
     .split('\n')
   characters.push(' ')
   assertCtcLabels(characters)
-  const modelUrl = new URL('korean-rec.onnx', root).toString()
+  // 모델을 먼저 받아 두어 다운로드 실패가 GPU 없음으로 잘못 안내되지 않게 한다.
+  const modelResponse = await fetch(new URL('korean-rec.onnx', root))
+  if (!modelResponse.ok) {
+    throw new Error('OCR model unavailable.')
+  }
+  const model = new Uint8Array(await modelResponse.arrayBuffer())
   try {
-    // GPU adapter를 얻지 못하는 PC에서는 onnxruntime-web이 다음 provider인 CPU WASM으로 넘어간다.
-    session = await createWarmSession(modelUrl, ['webgpu', 'wasm'])
+    session = await createWarmSession(model)
   } catch {
-    // Adapter를 얻었어도 드라이버 문제로 GPU 추론이 실패할 수 있으므로 CPU WASM만으로 다시 만든다.
-    session = await createWarmSession(modelUrl, ['wasm'])
+    // CPU WASM으로 넘어가지 않으므로 adapter가 없거나 드라이버 문제로 GPU 추론이 실패하면 GPU를 쓸 수 없다고 알린다.
+    throw new GpuUnavailableError()
   }
 }
 
-async function createWarmSession(
-  modelUrl: string,
-  executionProviders: string[]
-): Promise<InferenceSession> {
-  const created = await InferenceSession.create(modelUrl, {
-    executionProviders,
+async function createWarmSession(model: Uint8Array): Promise<InferenceSession> {
+  const created = await InferenceSession.create(model, {
+    executionProviders: ['webgpu'],
     logSeverityLevel: 3
   })
   try {
@@ -128,8 +131,8 @@ globalThis.onmessage = async (event: MessageEvent<{ root?: string; pixels?: Imag
       throw new Error('OCR model unavailable.')
     }
     await recognizeAndReply(pixels)
-  } catch {
+  } catch (error) {
     // Never forward model exceptions, image pixels, or recognized names to logs.
-    postMessage({ failed: true })
+    postMessage(error instanceof GpuUnavailableError ? { gpuUnavailable: true } : { failed: true })
   }
 }
