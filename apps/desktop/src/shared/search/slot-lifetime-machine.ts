@@ -1,5 +1,10 @@
 import { assign, fromCallback, setup } from 'xstate'
-import { runSearchRequest, type SearchOutcome, type SearchRuntime } from './request'
+import {
+  runSearchRequest,
+  type ManualLookup,
+  type SearchOutcome,
+  type SearchRuntime
+} from './request'
 import { reportSearchOutcome } from './diagnostics'
 import type { OcrSearchInput } from '../../preload/common/types/search'
 
@@ -11,7 +16,7 @@ export type SearchRequest = {
   nickname: string
   runtime: SearchRuntime
   ocrInput?: OcrSearchInput
-  manualServerId?: string
+  manual?: ManualLookup
 }
 export type RequestIdentity = Pick<SearchRequest, 'slot' | 'captureId' | 'requestId'>
 
@@ -47,7 +52,7 @@ export const slotLifetimeMachine = setup({
             signal: controller.signal,
             isCurrent: () => input.canComplete(request),
             ocrInput: request.ocrInput,
-            manualServerId: request.manualServerId
+            manual: request.manual
           })
         } catch {
           outcome = { kind: 'failure', error: { code: 'SEARCH_NETWORK_ERROR' } }

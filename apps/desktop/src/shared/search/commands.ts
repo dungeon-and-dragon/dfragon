@@ -32,7 +32,7 @@ function createControlSchema(slotCount: SearchSlotCount) {
       slot,
       observationRevision,
       nickname: text.max(MAX_NICKNAME_INPUT_LENGTH),
-      serverId: z.enum(Object.keys(CHARACTER_SERVER_NAMES))
+      serverId: z.enum(Object.keys(CHARACTER_SERVER_NAMES)).optional()
     }),
     z.strictObject({ action: z.literal(SEARCH_ACTIONS.END), captureId: uuid })
   ])

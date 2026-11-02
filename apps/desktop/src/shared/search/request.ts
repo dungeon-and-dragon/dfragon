@@ -58,13 +58,16 @@ export type SearchOutcome =
   | SearchOperationFailure
   | null
 
+/** 사용자가 이름 칸에서 시작한 조회. `serverId`가 없으면 `ocrInput`의 증거로 OCR 회차처럼 서버를 고른다. */
+export type ManualLookup = Readonly<{ serverId?: string }>
+
 type RequestInput = {
   runtime: SearchRuntime
   nickname: string
   signal: AbortSignal
   isCurrent: () => boolean
   ocrInput?: OcrSearchInput
-  manualServerId?: string
+  manual?: ManualLookup
 }
 
 function displayText(value: CharacterJsonValue | undefined): string | null {
@@ -90,7 +93,7 @@ export async function runSearchRequest(input: RequestInput): Promise<SearchOutco
     async (execution) => {
       const services = bindIdentificationServices(adapters, execution)
       const identified = await identifyCharacter(input, services, adapters.selection)
-      if (identified.kind !== 'matched' || input.manualServerId === undefined) {
+      if (identified.kind !== 'matched' || input.manual === undefined) {
         return { identified, summary: null }
       }
       const base = candidateSummary(identified.candidate)
@@ -206,10 +209,11 @@ function identifyCharacter(
   services: IdentificationServices & RaidIdentificationServices,
   selection: CharacterSelectionPolicy
 ): Promise<CharacterIdentification> {
-  if (input.manualServerId !== undefined) {
+  const manualServerId = input.manual?.serverId
+  if (manualServerId !== undefined) {
     const lookup = createManualCharacterLookup(services)
 
-    return lookup({ nickname: input.nickname, serverId: input.manualServerId })
+    return lookup({ nickname: input.nickname, serverId: manualServerId })
   }
   const nicknames = input.ocrInput?.candidateNicknames ?? []
   if (input.runtime.ocrIdentification === 'raid') {
