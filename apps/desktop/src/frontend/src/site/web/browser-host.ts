@@ -344,7 +344,7 @@ function createBackgroundLoad<T>(load: () => Promise<T>): () => T | null {
 
 function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
   onShareChanged: (share: ScreenShare | null) => void
-  recordRound: (kind: ScreenWatchKind, frame: CharacterImage) => Promise<void>
+  beginRoundRead: () => (kind: ScreenWatchKind, frame: CharacterImage) => Promise<void>
   setWatchedScreen: BrowserHost['setWatchedScreen']
   onAutoRound: BrowserHost['onAutoRound']
 } {
@@ -356,6 +356,9 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
   let timer: ReturnType<typeof setInterval> | undefined
   let releaseHeldFrame: (() => void) | null = null
   let startAutoRound: ((signal: AutoRoundSignal) => boolean) | null = null
+  // 공유나 지금 화면이 바뀌거나 회차가 프레임을 읽으면 올려, 그 전에 프레임을 읽기 시작한 틱의 결과를 버린다.
+  let generation = 0
+  let judging = false
 
   // 지금 화면이 아닌 쪽 검출기는 부르지 않는다.
   function cropReader(kind: ScreenWatchKind): ((frame: CharacterImage) => NameCrops | null) | null {
@@ -388,39 +391,38 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
     }
   }
 
+  // 회차는 검색을 시작한 뒤에 프레임을 읽으므로 승인한 뒤에 들어도 그 회차가 이 프레임을 읽는다. 승인 전에 들면 거절한
+  // 신호가 대기 중인 붙여넣기 프레임을 덮는다.
   function holdAutoRound(signal: AutoRoundSignal, frame: CharacterImage): void {
-    const release = frames.hold(Promise.resolve(frame))
     if (startAutoRound?.(signal) === true) {
-      releaseHeldFrame = release
-    } else {
-      release()
+      releaseHeldFrame = frames.hold(Promise.resolve(frame))
     }
   }
 
   async function tick(share: ScreenShare): Promise<void> {
-    const { kind, roundRunning } = screen
+    const { kind } = screen
     const town = townTemplate()
     const readCrops = cropReader(kind)
-    if (roundRunning || town === null || readCrops === null) {
+    // 앞 틱이 아직 프레임을 읽고 있으면 건너뛰어, 늦게 끝난 결과가 다음 틱의 결과와 순서가 바뀌지 않게 한다.
+    if (judging || screen.roundRunning || town === null || readCrops === null) {
       return
     }
 
+    const judgedGeneration = generation
+    judging = true
     let frame: CharacterImage
     try {
       frame = await decodeBrowserImage(share.video)
     } catch {
       // 영상 프레임을 읽지 못한 틱은 건너뛰고 다음 틱에 다시 읽는다.
       return
+    } finally {
+      judging = false
     }
-    // 판정 중에 공유가 끝나거나 바뀌면 그 프레임의 결과를 버린다.
-    if (active !== share) {
+    if (judgedGeneration !== generation || screen.roundRunning) {
       return
     }
-    // 회차 진행 여부는 프레임을 읽는 동안 바뀔 수 있어 판정 직전의 값을 쓴다.
-    const result = observeScreenWatch(
-      { ...state, roundRunning: screen.roundRunning },
-      observeFrame(frame, kind, town, readCrops)
-    )
+    const result = observeScreenWatch(state, observeFrame(frame, kind, town, readCrops))
     state = result.state
     if (result.signal !== 'none') {
       holdAutoRound(result.signal, frame)
@@ -434,6 +436,7 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
       releaseHeldFrame?.()
       releaseHeldFrame = null
       state = initialScreenWatchState
+      generation += 1
       active = share
       if (share !== null) {
         // 첫 틱 전에 템플릿을 받기 시작한다.
@@ -442,25 +445,35 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
         timer = setInterval(() => tick(share), SCREEN_WATCH_INTERVAL_MS)
       }
     },
-    async recordRound(kind, frame) {
+    // 회차가 프레임을 읽기 전의 공유를 잡아 두어, 읽는 동안 공유가 바뀌면 새 공유의 기준으로 기록하지 않는다.
+    beginRoundRead() {
       const share = active
-      if (share === null) {
-        return
-      }
-      let crops: NameCrops | null = null
-      try {
-        crops =
-          kind === 'party'
-            ? readPartyNameCrops(frame)
-            : readRaidNameCrops(frame, await readRaidWindowTemplates())
-      } catch {
-        // 이름 crop을 만들지 못한 프레임도 아래에서 빈 기준이 되어, 그 화면의 창이 다시 보이면 새 구성으로 본다.
-      }
-      if (active === share) {
-        state = recordScreenBaseline(state, kind, crops ?? [])
+
+      return async (kind, frame) => {
+        if (share === null || active !== share) {
+          return
+        }
+        generation += 1
+        let crops: NameCrops | null = null
+        try {
+          crops =
+            kind === 'party'
+              ? readPartyNameCrops(frame)
+              : readRaidNameCrops(frame, await readRaidWindowTemplates())
+        } catch {
+          // 이름 crop을 만들지 못한 프레임도 아래에서 빈 기준이 되어, 그 화면의 창이 다시 보이면 새 구성으로 본다.
+        }
+        if (active === share) {
+          state = recordScreenBaseline(state, kind, crops ?? [])
+        }
       }
     },
     setWatchedScreen(next) {
+      // 화면이 바뀌면 2번 연속을 처음부터 다시 센다.
+      if (next.kind !== screen.kind) {
+        generation += 1
+        state = { ...state, candidate: null }
+      }
       screen = next
     },
     onAutoRound(listener) {
@@ -506,8 +519,9 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
   screenShare.onChanged(watch.onShareChanged)
 
   async function readRoundFrame(kind: ScreenWatchKind): Promise<CharacterImage> {
+    const recordRound = watch.beginRoundRead()
     const frame = await roundFrames.read()
-    await watch.recordRound(kind, frame)
+    await recordRound(kind, frame)
 
     return frame
   }
