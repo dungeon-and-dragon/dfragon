@@ -27,7 +27,7 @@ scripts/
 ```
 
 - `apps/api`: 캐릭터 공개 NestJS API workspace. DB 없이 Neople API를 조회하고 캐릭터, 공용 아이템 조회 결과를 API 메모리에 캐시한다. 승인된 ESM runtime, dependency, build/test 계약은 [`../rules/api-runtime.md`](../rules/api-runtime.md)를 따른다. 구현 현황은 Reference에서 확인한다.
-- `apps/web`: 던삐삐 소개와 내려받기 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면에 `@dfragon/client`로 그린 설치 없이 쓰는 웹 클라이언트를 둔다([웹 클라이언트](../rules/web-client.md)). 아래 Shared UI boundary를 따른다.
+- `apps/web`: 던삐삐 소개 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면에 `@dfragon/client`로 그린 설치 없이 쓰는 웹 클라이언트를 둔다([웹 클라이언트](../rules/web-client.md)). 아래 Shared UI boundary를 따른다.
 - `packages/client`: 웹 앱의 컴포넌트, hook, OCR, WebApp, browser host를 담은 `@dfragon/client`. build 없이 source를 export한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
 - `packages/client-core`: 웹 앱이 쓰는 검색, 공대 로직과 타입을 담은 `@dfragon/client-core`. React, DOM에 의존하지 않으며 build 없이 source를 export한다.
 - `packages/ui`: 현재 tracked shared UI package `@dfragon/ui`. 실제 구현, 명령은 [공용 UI 안내](../../packages/ui/README.md)에서 확인한다.

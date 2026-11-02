@@ -146,7 +146,7 @@ const styles = stylex.create({
 - `pnpm install --frozen-lockfile`
 - `node --test packages/ui/scripts/test-consumer-resolution.mjs`: 전용 checkout의 cold consumer command 회귀. 격리 조건과 소비 경계는 script 머리 주석에 있다.
 
-현재 package command는 repository root에서 실행한다. 소비 app과 Example은 [Design System의 영향 범위 검증](../../docs/rules/design-system.md#영향-범위-검증)에 따라 변경한 화면, 상태, 환경을 선택해 확인한다. jsdom 결과를 실제 browser/Electron 또는 Tab 이동 성공으로 대신하지 않는다.
+현재 package command는 repository root에서 실행한다. 소비 app과 Example은 [Design System의 영향 범위 검증](../../docs/rules/design-system.md#영향-범위-검증)에 따라 변경한 화면, 상태, 환경을 선택해 확인한다. jsdom 결과를 실제 브라우저 또는 Tab 이동 성공으로 대신하지 않는다.
 
 Vitest는 TypeScript를 변환해 runtime assertion을 실행한다. Public API의 compile-only JSX 사례와 `expectTypeOf` assertion은 `test` 첫 단계의 실제 tsc에서 검사하며, runtime PASS만으로 타입 계약을 판단하지 않는다. Library의 declaration 생성은 src만 포함하므로 test와 examples의 typecheck를 대신하지 않는다.
 

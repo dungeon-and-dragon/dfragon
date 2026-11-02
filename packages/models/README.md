@@ -35,7 +35,7 @@ const modelPath = fileURLToPath(import.meta.resolve('@dfragon/models/ocr-finetun
 
 ## 갱신
 
-모델, 엔진 저장소에 파일을 올리는 것만으로 빌드의 파일이 바뀌지는 않습니다. 작업 브랜치에서 submodule을 원하는 커밋으로 옮기고 그 변경을 PR에 넣습니다.
+모델, 엔진 저장소에 파일을 올리는 것만으로 빌드의 파일이 바뀌지는 않습니다. 작업 브랜치에서 submodule을 원하는 커밋으로 옮기고 그 변경을 PR에 넣습니다. OCR 모델은 학습에 쓴 사전 순서를 유지하고 출력 클래스 수가 사전 문자 수 + 2여야 합니다. `modelScore`는 문자열 확률의 100배이며 실제 정답률이 아닙니다.
 
 ```sh
 git -C packages/models/ocr-finetuned fetch origin
