@@ -255,7 +255,7 @@ it('자리 배치대로 슬롯을 그리고 조회는 그 자리에 놓인 검�
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
-  expect(lookup).toHaveBeenLastCalledWith(5, '다시조회', 'siroco')
+  expect(lookup).toHaveBeenLastCalledWith(5, '다시조회', undefined)
 })
 
 it('맞바꾸면 카드가 입력 중인 이름과 함께 다른 파티의 자리로 옮겨 간다', async () => {

@@ -33,6 +33,10 @@ describe('검색 IPC 명령 입력 경계', () => {
     ['종료', { action: 'end', captureId }],
     ['첫 슬롯 서버 지정 조회', lookup],
     [
+      '이름 칸 Enter의 서버 없는 조회',
+      { action: 'lookup', captureId, slot: 0, observationRevision: 1, nickname: '가나' }
+    ],
+    [
       '마지막 슬롯의 안전 정수 상한 관측',
       { ...lookup, slot: 3, observationRevision: Number.MAX_SAFE_INTEGER }
     ]

@@ -22,7 +22,7 @@ type SearchOptions = {
   slotCount: SearchSlotCount
 }
 
-type LookupInput = { slot: number; nickname: string; serverId: string }
+type LookupInput = { slot: number; nickname: string; serverId?: string }
 
 type LifetimeStart = { captureId: Promise<string | null>; controller: AbortController }
 

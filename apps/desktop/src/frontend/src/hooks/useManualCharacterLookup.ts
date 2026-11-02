@@ -14,7 +14,7 @@ import type {
 } from '../../../preload/common/types/search'
 
 export type ManualCharacterLookup = SearchView & {
-  lookupSlot: (slot: number, nickname: string, serverId: string) => void
+  lookupSlot: (slot: number, nickname: string, serverId?: string) => void
   begin: (signal: AbortSignal) => Promise<string | null>
   end: () => void
   observeOcr: (input: OcrCaptureObservation) => void
@@ -69,7 +69,7 @@ export function useManualCharacterLookup(
   const observeOcr = useCallback((input: OcrCaptureObservation): void => {
     bridge.current?.observe(input)
   }, [])
-  const lookupSlot = useCallback((slot: number, nickname: string, serverId: string): void => {
+  const lookupSlot = useCallback((slot: number, nickname: string, serverId?: string): void => {
     bridge.current?.lookup({ slot, nickname, serverId })
   }, [])
 

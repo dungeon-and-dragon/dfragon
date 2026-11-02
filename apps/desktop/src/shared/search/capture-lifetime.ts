@@ -86,6 +86,8 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   )
   let slots = slotIndexes.map((slot) => idleSlot({ slot }))
   const ocrInputs: Array<OcrSearchInput | null> = slotIndexes.map(() => null)
+  // 지금 요청이 OCR에서 왔는지와 따로, 자리의 마지막 OCR 관측을 서버 없는 직접 조회의 증거로 새 회차까지 둔다.
+  const ocrEvidence: Array<OcrSearchInput | null> = slotIndexes.map(() => null)
   const actors = slotIndexes.map(() =>
     createActor(slotLifetimeMachine, {
       input: { canComplete, complete }
@@ -151,6 +153,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     binding = null
     for (const slot of slotIndexes) {
       cancelSlot(slot)
+      ocrEvidence[slot] = null
     }
     slots = slotIndexes.map((slot) => idleSlot({ slot }))
     emit()
@@ -244,6 +247,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     cancelSlot(input.slot)
     if ('candidateNicknames' in input) {
       ocrInputs[input.slot] = cloneOcrInput(input)
+      ocrEvidence[input.slot] = ocrInputs[input.slot]
     }
     const code = isCharacterSearchNickname(input.nickname)
       ? 'NEOPLE_UNAVAILABLE'
@@ -270,7 +274,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     runtime: SearchRuntime
   }): SearchCommandResult {
     const ocrInput = 'candidateNicknames' in input ? cloneOcrInput(input) : null
-    const manualServerId = 'serverId' in input ? input.serverId : undefined
+    const manual = 'candidateNicknames' in input ? undefined : { serverId: input.serverId }
     cancelSlot(input.slot)
     if (binding?.captureId !== input.captureId || !options.isCurrent(binding)) {
       return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
@@ -279,6 +283,9 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     const requestId = crypto.randomUUID()
     const isValidInput = isCharacterSearchNickname(input.nickname)
     ocrInputs[input.slot] = ocrInput
+    if (ocrInput !== null) {
+      ocrEvidence[input.slot] = ocrInput
+    }
     slots[input.slot] = {
       slot: input.slot,
       observationRevision: input.observationRevision,
@@ -295,8 +302,8 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
       observationRevision: input.observationRevision,
       requestId,
       runtime,
-      ocrInput: ocrInput ?? undefined,
-      manualServerId
+      ocrInput: ocrInput ?? evidenceInput(ocrEvidence[input.slot], input.nickname),
+      manual
     }
     if (isValidInput) {
       actors[input.slot].send({ type: 'PREPARE', request })
@@ -385,7 +392,8 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   }
 
   /**
-   * 어느 슬롯이든 조회 중이면 시작하지 않아, 회차의 모든 슬롯이 이름과 서버를 먼저 정한 뒤 상세를 받는다.
+   * 어느 슬롯이든 OCR로 조회 중이면 시작하지 않아, 회차의 모든 슬롯이 이름과 서버를 먼저 정한 뒤 상세를 받는다.
+   * 직접 조회는 같은 요청에서 상세까지 받으므로 기다리지 않는다.
    */
   function startPendingDetails(): void {
     const runtime = options.runtime
@@ -394,7 +402,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
       return
     }
 
-    if (slots.some((slot) => slot.state === 'pending')) {
+    if (slots.some((slot) => slot.state === 'pending' && ocrInputs[slot.slot] !== null)) {
       return
     }
     for (const slot of slots) {
@@ -501,6 +509,14 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     observeOcr,
     lookup
   }
+}
+
+function evidenceInput(evidence: OcrSearchInput | null, nickname: string): OcrSearchInput {
+  if (evidence === null) {
+    return { candidateNicknames: [nickname], portrait: null }
+  }
+
+  return { ...evidence, candidateNicknames: [nickname] }
 }
 
 /** IPC 픽셀 참조를 복사해 요청과 다음 관측 비교에 같은 관측을 쓴다. 공대 행의 값은 그대로 함께 둔다. */

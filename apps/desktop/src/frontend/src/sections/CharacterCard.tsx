@@ -39,7 +39,7 @@ export function CharacterCard({
   cardKey: SlotCardKey
   card: SlotCard
   slot: number
-  onLookup: (nickname: string, serverId: string) => void
+  onLookup: (nickname: string, serverId?: string) => void
   onPickCandidate: (serverId: string) => void
   onChangeSnapshotAdventure: (value: string) => void
 }): React.JSX.Element {

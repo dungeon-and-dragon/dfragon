@@ -36,7 +36,7 @@ export function RaidCard({
   cardKey: SlotCardKey
   card: SlotCard
   slot: number
-  onLookup: (nickname: string, serverId: string) => void
+  onLookup: (nickname: string, serverId?: string) => void
   onChangeSnapshotAdventure: (value: string) => void
 }): React.JSX.Element {
   const { state, character, notice, snapshotMark, snapshotAdventureInput, loading = false } = card

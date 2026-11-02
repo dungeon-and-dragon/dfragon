@@ -344,6 +344,7 @@ function acceptLookups(): void {
     if (control.action !== 'lookup') {
       return base(control)
     }
+    const serverId = control.serverId ?? searchRow.serverId
     currentSearch = withSlot(
       searchSlot({
         slot: control.slot,
@@ -351,8 +352,8 @@ function acceptLookups(): void {
         requestId: `00000000-0000-4000-8000-00000000020${control.slot}`,
         nickname: control.nickname,
         state: 'success',
-        rows: [{ ...searchRow, serverId: control.serverId }],
-        selected: selectedSummary(control.serverId),
+        rows: [{ ...searchRow, serverId }],
+        selected: selectedSummary(serverId),
         selectionMethod: 'manual'
       })
     )

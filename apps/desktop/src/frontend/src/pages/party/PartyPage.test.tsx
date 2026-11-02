@@ -267,7 +267,7 @@ it('자리 배치대로 카드를 그리고 조회는 그 자리에 놓인 검�
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
   )
-  expect(lookupSlot).toHaveBeenCalledExactlyOnceWith(0, '옮긴자리', 'cain')
+  expect(lookupSlot).toHaveBeenCalledExactlyOnceWith(0, '옮긴자리', undefined)
 })
 
 it('스냅샷 모험단 입력은 그 슬롯이 놓인 자리 카드에 열리고 바꾼 값을 자리 번호로 알린다', async () => {
