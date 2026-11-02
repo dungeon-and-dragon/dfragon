@@ -338,7 +338,10 @@
               "level": "error",
               "options": {
                 "paths": {
-                  "electron": "client-core는 브라우저에서 실행되는 플랫폼 독립 코드라 Electron을 import하지 않는다."
+                  "electron": "client-core는 브라우저에서 실행되는 플랫폼 독립 코드라 Electron을 import하지 않는다.",
+                  "react": "client-core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 @dfragon/client에 둔다.",
+                  "react-dom": "client-core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 @dfragon/client에 둔다.",
+                  "@dfragon/ui": "client-core는 화면과 무관한 로직이라 @dfragon/ui를 import하지 않는다. 화면 코드는 @dfragon/client에 둔다."
                 }
               }
             }

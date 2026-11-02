@@ -28,8 +28,8 @@ scripts/
 
 - `apps/api`: 캐릭터 공개 NestJS API workspace. DB 없이 Neople API를 조회하고 캐릭터, 공용 아이템 조회 결과를 API 메모리에 캐시한다. 승인된 ESM runtime, dependency, build/test 계약은 [`../rules/api-runtime.md`](../rules/api-runtime.md)를 따른다. 구현 현황은 Reference에서 확인한다.
 - `apps/web`: 던삐삐 소개와 내려받기 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면에 Desktop renderer 컴포넌트로 그린 설치 없이 쓰는 웹 클라이언트를 둔다([웹 클라이언트](../rules/web-client.md)). 아래 Shared UI boundary를 따른다.
-- `packages/client`: 웹 앱의 컴포넌트, hook, OCR, WebApp, browser host를 담은 `@dfragon/client`. build 없이 source를 export한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
-- `packages/client-core`: 웹 앱이 쓰는 검색, 공대 로직과 타입을 담은 `@dfragon/client-core`. React, DOM에 의존하지 않으며 build 없이 source를 export한다.
+- `packages/client`: 웹 앱의 컴포넌트, hook, WebApp, browser host를 담은 `@dfragon/client`. build 없이 source를 export한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
+- `packages/client-core`: 웹 앱이 쓰는 검색, 공대, OCR 로직과 타입, OCR 자산과 평가 도구를 담은 `@dfragon/client-core`. React와 `@dfragon/ui`에 의존하지 않으며 build 없이 source를 export한다. OCR과 화면 판독은 canvas, Worker 같은 브라우저 API를 쓴다.
 - `packages/ui`: 현재 tracked shared UI package `@dfragon/ui`. 실제 구현, 명령은 [공용 UI 안내](../../packages/ui/README.md)에서 확인한다.
 - `packages/lib`: 앱과 UI에 의존하지 않는 공용 순수 함수 `@dfragon/lib`. 아래 Shared library boundary를 따른다.
 - `packages/licenses`: 빌드 시 고지 원문, 수집, 배포 자료를 관리하는 `@dfragon/licenses`. 제품 runtime에서 import하지 않는다.
@@ -106,7 +106,7 @@ OCR 파인튜닝 모델 submodule은 `packages/models`의 workspace package `@df
 | 대상 | 책임과 dependency direction |
 | --- | --- |
 | `packages/models`의 `@dfragon/models` | 모델 저장소를 submodule로 고정 커밋에 묶고 `exports`로 모델, 사전 파일 경로를 제공한다. 코드와 dependency가 없으며 앱 source를 참조하지 않는다. |
-| `packages/client` | OCR 자산 준비 script가 패키지 이름으로 모델 파일을 찾아 Web의 `public/ocr`로 복사한다. 어떤 모델을 넣을지와 호환성 검증은 `@dfragon/client`가 소유한다. |
+| `packages/client-core` | OCR 자산 준비 script가 패키지 이름으로 모델 파일을 찾아 Web의 `public/ocr`로 복사한다. 어떤 모델을 넣을지와 호환성 검증은 `@dfragon/client-core`가 소유한다. |
 
 점수 엔진 바이너리도 같은 패키지의 submodule(`score-engine`)로 입수한다. 바이너리 저장소는 공개라 OCR 모델과 같은 submodule 명령으로 받으며, 어떤 엔진을 넣을지는 submodule 커밋으로 고정한다. API 이미지는 Linux 파일을 넣으며 엔진이 없으면 빌드에 실패한다.
 

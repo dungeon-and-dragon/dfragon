@@ -1,4 +1,4 @@
-import type { SearchMode } from '../types/search-mode'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
 
 export const MAIN_WINDOW_WIDTH = 1280
 

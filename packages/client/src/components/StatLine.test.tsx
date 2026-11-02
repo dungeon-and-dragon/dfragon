@@ -5,10 +5,10 @@ import * as stylex from '@stylexjs/stylex'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { StatLine } from './StatLine'
-import { toScoreView } from '../lib/card-score'
-import { bufferCard, dealerCard } from '../testing/fixtures/character-cards'
+import { toScoreView } from '@dfragon/client-core/lib/card-score'
+import { bufferCard, dealerCard } from '@dfragon/client-core/testing/fixtures/character-cards'
 import { toneClassesOf } from '../testing/test-support/score-tone-class'
-import type { CharacterCard } from '../types/cards'
+import type { CharacterCard } from '@dfragon/client-core/types/cards'
 
 // jsdom은 색을 계산하지 않으므로 같은 선언에서 나온 class를 값이 가졌는지로 확인한다.
 const dim = stylex.create({

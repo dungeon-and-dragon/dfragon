@@ -16,7 +16,7 @@ import {
   type RaidWindowTemplates
 } from '@dfragon/client-core/shared/raid/raid-window'
 import type { ClientHost, PageShortcut } from '../../hooks/useClientHost'
-import { startRendererDiagnostics } from '../../lib/runtime-diagnostics'
+import { startRendererDiagnostics } from '@dfragon/client-core/lib/runtime-diagnostics'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'

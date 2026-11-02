@@ -1,8 +1,8 @@
-import { RAID_PARTY_SIZE } from '../constants/cards'
-import { slotAdventureName } from '../lib/adventure-snapshot'
-import { seatValuesToSlotOrder } from '../lib/seats'
-import { toClipboardText } from '../lib/slot-clipboard'
-import { toSlotCards, type SlotCard } from '../lib/slot-cards'
+import { RAID_PARTY_SIZE } from '@dfragon/client-core/constants/cards'
+import { slotAdventureName } from '@dfragon/client-core/lib/adventure-snapshot'
+import { seatValuesToSlotOrder } from '@dfragon/client-core/lib/seats'
+import { toClipboardText } from '@dfragon/client-core/lib/slot-clipboard'
+import { toSlotCards, type SlotCard } from '@dfragon/client-core/lib/slot-cards'
 import { useAdventureSnapshot } from './useAdventureSnapshot'
 import type { RaidCapture } from './useRaidCapture'
 

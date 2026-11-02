@@ -6,10 +6,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { CharacterCard } from './CharacterCard'
 import type { ServerSelect } from '../components/ServerSelect'
-import { bufferCard, dealerCard } from '../testing/fixtures/character-cards'
+import { bufferCard, dealerCard } from '@dfragon/client-core/testing/fixtures/character-cards'
 import { toneClassesOf } from '../testing/test-support/score-tone-class'
-import type { SlotCard } from '../lib/slot-cards'
-import type { CardCharacter, CharacterCard as CardValues } from '../types/cards'
+import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
+import type { CardCharacter, CharacterCard as CardValues } from '@dfragon/client-core/types/cards'
 
 vi.mock('../components/ServerSelect', () => ({
   ServerSelect: ({ value, onValueChange, label, options }: ComponentProps<typeof ServerSelect>) => (
