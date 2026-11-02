@@ -492,15 +492,12 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     party: {
       ...party,
       selectCaptureSource: async (sourceId) => screenShare.select(sourceId),
-      readCaptureFrame: async () => ({ kind: 'frame', image: await readRoundFrame('party') })
+      readCaptureFrame: () => readRoundFrame('party')
     },
     raid: {
       ...raid,
       readCaptureFrame: async () =>
-        toRaidFrameResult(
-          { kind: 'frame', image: await readRoundFrame('raid') },
-          await readRaidWindowTemplates()
-        )
+        toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
     onShortcut: installPageShortcuts(screenShare.isConnected),
     getTodayGrade: () => readTodayGrade(apiOrigin),

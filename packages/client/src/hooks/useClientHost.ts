@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react'
 import type {
   CaptureSource,
-  RaidFrameResult,
-  WindowFrameResult
+  RaidFrameResult
 } from '@dfragon/client-core/preload/common/types/capture'
+import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import type {
   OcrSearchObservation,
   SearchApi,
@@ -19,7 +19,7 @@ export type CardSearchHost = SearchApi & {
 
 export type PartyCaptureHost = CardSearchHost & {
   selectCaptureSource: (sourceId: string) => Promise<CaptureSource | null>
-  readCaptureFrame: () => Promise<WindowFrameResult>
+  readCaptureFrame: () => Promise<CharacterImage>
 }
 
 export type RaidCaptureHost = CardSearchHost & {

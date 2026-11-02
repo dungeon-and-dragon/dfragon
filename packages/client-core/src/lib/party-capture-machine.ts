@@ -1,14 +1,11 @@
 import { assign, fromCallback, fromPromise, setup, type SnapshotFrom } from 'xstate'
 import type { CapturePhase } from '../types/capture'
-import type { WindowFrameResult } from '../preload/common/types/capture'
 import type { CharacterImage } from '../preload/common/types/character'
 import {
   beginCaptureSearch,
-  CAPTURE_UNSUPPORTED_STATUS,
   getCapturingPhase,
   getObservedNickname,
-  getRecognizeErrorStatus,
-  getWaitingStatus
+  getRecognizeErrorStatus
 } from './capture-round'
 import type { OcrCaptureObservation } from './capture-search'
 import type { CaptureTexts } from './capture-texts'
@@ -21,7 +18,7 @@ type CaptureInput = {
   selectSource: (sourceId: string) => Promise<unknown>
   beginSearch: (signal: AbortSignal) => Promise<string | null>
   endSearch: () => void
-  readFrame: (captureId: string) => Promise<WindowFrameResult>
+  readFrame: (captureId: string) => Promise<CharacterImage>
   observeOcr: (input: OcrCaptureObservation) => void
   recognizeWithOcr: OcrRecognition
 }
@@ -213,33 +210,10 @@ export const partyCaptureMachine = setup({
             src: 'readFrame',
             // 검색 시작 actor의 성공 전이에서만 captureId가 기록된다.
             input: ({ context }) => ({ captureId: context.captureId!, effects: context.effects }),
-            onDone: [
-              {
-                guard: ({ event }) => event.output.kind === 'frame',
-                target: 'recognizing',
-                actions: assign({
-                  frame: ({ event }) => {
-                    if (event.output.kind !== 'frame') {
-                      return null
-                    }
-
-                    return event.output.image
-                  }
-                })
-              },
-              {
-                guard: ({ event }) => event.output.kind === 'waiting',
-                target: 'unavailable',
-                actions: assign({ status: ({ event }) => getWaitingStatus(event.output) })
-              },
-              {
-                target: '#partyCapture.captureFailed',
-                actions: [
-                  () => reportRendererDiagnostic('CAPTURE_READ_FAILED'),
-                  assign({ status: CAPTURE_UNSUPPORTED_STATUS })
-                ]
-              }
-            ],
+            onDone: {
+              target: 'recognizing',
+              actions: assign({ frame: ({ event }) => event.output })
+            },
             onError: {
               target: '#partyCapture.captureFailed',
               actions: [
