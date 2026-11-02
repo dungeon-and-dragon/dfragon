@@ -10,6 +10,8 @@
   "scripts": {
     "test": "pnpm typecheck && vitest run",
     "typecheck": "tsc --noEmit",
+    "test:portrait-evaluation": "tsc --noEmit -p scripts/portrait-evaluation/tsconfig.json && vitest run --config scripts/portrait-evaluation/vitest.config.ts",
+    "test:raid-row-evaluation": "tsc --noEmit -p scripts/raid-row-evaluation/tsconfig.json && vitest run --config scripts/raid-row-evaluation/vitest.config.ts",
     "lint": "biome lint",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
@@ -18,12 +20,15 @@
   "dependencies": {
     "@dfragon/lib": "workspace:*",
     "ky": "catalog:",
+    "onnxruntime-web": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@dfragon/models": "workspace:*",
     "@types/node": "catalog:",
     "@types/pngjs": "catalog:",
+    "jsdom": "catalog:",
     "pngjs": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react'
-import { type ElapsedTime, getElapsedTimeRefreshDelay, toElapsedTime } from '../lib/elapsed-time'
+import {
+  type ElapsedTime,
+  getElapsedTimeRefreshDelay,
+  toElapsedTime
+} from '@dfragon/client-core/lib/elapsed-time'
 
 export function useElapsedTime(at: number): ElapsedTime {
   const [now, setNow] = useState(() => Date.now())

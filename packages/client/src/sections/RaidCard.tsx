@@ -19,11 +19,11 @@ import {
   isVacantSlot,
   toJobLabel
 } from '../lib/card-presentation'
-import { toScoreView } from '../lib/card-score'
+import { toScoreView } from '@dfragon/client-core/lib/card-score'
 import { toNameFieldTone } from '../lib/name-field-tone'
-import { type RaidParty, toRaidSeat } from '../lib/raid-seat'
-import type { SlotCard } from '../lib/slot-cards'
-import { MISSING_VALUE, tierLabels } from '../constants/cards'
+import { type RaidParty, toRaidSeat } from '@dfragon/client-core/lib/raid-seat'
+import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
+import { MISSING_VALUE, tierLabels } from '@dfragon/client-core/constants/cards'
 import { styles } from './RaidCard.style'
 
 export function RaidCard({

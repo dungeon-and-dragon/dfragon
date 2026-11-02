@@ -10,7 +10,7 @@ import { useClipboardCopy } from '../../hooks/useClipboardCopy'
 import { usePageShortcut } from '../../hooks/usePageShortcut'
 import { usePartySlotCards } from '../../hooks/usePartySlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { filledSlotCount } from '../../lib/slot-cards'
+import { filledSlotCount } from '@dfragon/client-core/lib/slot-cards'
 import { PartyPage } from './PartyPage'
 import { styles } from './PartyScreen.style'
 

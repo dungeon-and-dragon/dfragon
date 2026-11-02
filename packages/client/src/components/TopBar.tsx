@@ -2,7 +2,7 @@ import { PRODUCT_NAME } from '@dfragon/lib'
 import { Typo } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import { GRADE_RARITY_NAMES, gradeRarity } from '../lib/today-grade'
+import { GRADE_RARITY_NAMES, gradeRarity } from '@dfragon/client-core/lib/today-grade'
 import { styles } from './TopBar.style'
 
 function GradePercent({ percent }: { percent: number | null }): React.JSX.Element {

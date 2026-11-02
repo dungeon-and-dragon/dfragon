@@ -3,9 +3,9 @@ import {
   createCaptureSearch,
   type CaptureSearch,
   type OcrCaptureObservation
-} from '../lib/capture-search'
-import { emptySearchSlots, fillSlots } from '../lib/slots'
-import type { SearchView } from '../types/search'
+} from '@dfragon/client-core/lib/capture-search'
+import { emptySearchSlots, fillSlots } from '@dfragon/client-core/lib/slots'
+import type { SearchView } from '@dfragon/client-core/types/search'
 import type {
   OcrSearchObservation,
   SearchApi,
