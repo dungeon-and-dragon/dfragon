@@ -6,7 +6,7 @@ import { beforeEach, afterEach, expect, it, vi } from 'vitest'
 import { CharacterCard } from '../sections/CharacterCard'
 import { RaidCard } from '../sections/RaidCard'
 import { previewCharacter } from '../fixture/mvp/fixture'
-import { serverNames } from '../constants/servers'
+import { serverNames } from '@dfragon/client-core/constants/servers'
 import { useServerMenu } from '../hooks/useServerMenu'
 import { ServerSelect } from './ServerSelect'
 

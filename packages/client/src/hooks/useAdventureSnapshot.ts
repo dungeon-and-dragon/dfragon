@@ -3,8 +3,8 @@ import {
   compareWithSnapshot,
   type SeatAdventures,
   type SnapshotMark
-} from '../lib/adventure-snapshot'
-import type { SearchMode } from '../types/search-mode'
+} from '@dfragon/client-core/lib/adventure-snapshot'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
 
 type AdventureSnapshot = {
   adventures: SeatAdventures

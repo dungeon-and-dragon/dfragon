@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useSearchModeStore } from '../hooks/useSearchModeStore'
-import type { SearchMode } from '../types/search-mode'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
 import { MainNav } from './MainNav'
 
 let root: Root

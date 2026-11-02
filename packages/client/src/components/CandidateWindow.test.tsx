@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { CandidateWindow } from './CandidateWindow'
-import type { CandidatePicker } from '../lib/candidate-picker'
+import type { CandidatePicker } from '@dfragon/client-core/lib/candidate-picker'
 
 let root: Root
 let container: HTMLDivElement

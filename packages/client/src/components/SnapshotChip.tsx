@@ -1,7 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import type { SnapshotMark } from '../lib/adventure-snapshot'
-import { type RaidParty, toRaidSeat } from '../lib/raid-seat'
+import type { SnapshotMark } from '@dfragon/client-core/lib/adventure-snapshot'
+import { type RaidParty, toRaidSeat } from '@dfragon/client-core/lib/raid-seat'
 import { SnapshotIcon } from './SnapshotIcon'
 import { styles } from './SnapshotChip.style'
 

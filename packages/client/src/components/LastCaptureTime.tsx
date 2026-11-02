@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { MISSING_VALUE } from '../constants/cards'
+import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { useElapsedTime } from '../hooks/useElapsedTime'
 import { styles } from './LastCaptureTime.style'
 

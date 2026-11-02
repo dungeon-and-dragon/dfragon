@@ -118,7 +118,7 @@ for (const filePath of excludedFiles) {
 }
 
 const buildToolFiles = [
-  'packages/client/scripts/validate-ocr-model.mjs',
+  'packages/client-core/scripts/validate-ocr-model.mjs',
   'apps/web/vite.config.ts',
   'packages/ui/scripts/verify-build.mjs'
 ]

@@ -7,17 +7,23 @@ import {
   useSyncExternalStore
 } from 'react'
 import { useMachine } from '@xstate/react'
-import { partyCaptureMachine, getCapturePhase } from '../lib/party-capture-machine'
-import type { CapturePhase } from '../types/capture'
+import {
+  partyCaptureMachine,
+  getCapturePhase
+} from '@dfragon/client-core/lib/party-capture-machine'
+import type { CapturePhase } from '@dfragon/client-core/types/capture'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import { useCharacterSearch } from './useCharacterSearch'
-import { getRecognizedNicknames } from '../lib/recognized-nicknames'
+import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { useClientHost } from './useClientHost'
 import { usePageShortcut } from './usePageShortcut'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
-import { PARTY_SEAT_LAYOUT } from '../constants/cards'
-import { createSharedOcrWorker, type OcrRecognition } from '../lib/ocr-worker-recognition'
-import type { CaptureTexts } from '../lib/capture-texts'
+import { PARTY_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
+import {
+  createSharedOcrWorker,
+  type OcrRecognition
+} from '@dfragon/client-core/lib/ocr-worker-recognition'
+import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
 
 export type CaptureSourceSelection = {
   selectedSourceId: string

@@ -17,8 +17,8 @@ import type {
   SearchSlot,
   SearchSnapshot
 } from '@dfragon/client-core/preload/common/types/search'
-import { DESKTOP_CAPTURE_TEXTS } from '../lib/capture-texts'
-import * as diagnostics from '../lib/runtime-diagnostics'
+import { DESKTOP_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
+import * as diagnostics from '@dfragon/client-core/lib/runtime-diagnostics'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext } from './useClientHost'
 import { usePartyCapture } from './usePartyCapture'
@@ -33,15 +33,15 @@ const moduleMocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('../lib/ocr', async (importOriginal) => {
-  const ocr = { ...(await importOriginal<typeof import('../lib/ocr')>()) }
+vi.mock('@dfragon/client-core/lib/ocr', async (importOriginal) => {
+  const ocr = { ...(await importOriginal<typeof import('@dfragon/client-core/lib/ocr')>()) }
   ocr.createPartyOcrWorker = moduleMocks.createPartyOcrWorker
 
   return ocr
 })
 
-vi.mock('../lib/party', async (importOriginal) => {
-  const party = { ...(await importOriginal<typeof import('../lib/party')>()) }
+vi.mock('@dfragon/client-core/lib/party', async (importOriginal) => {
+  const party = { ...(await importOriginal<typeof import('@dfragon/client-core/lib/party')>()) }
   party.capturePartyRecognitionInputs = moduleMocks.capturePartyRecognitionInputs
 
   return party

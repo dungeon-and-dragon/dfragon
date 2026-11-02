@@ -1,7 +1,7 @@
 import type { SelectedCharacterSummary } from '@dfragon/client-core/preload/common/types/character'
 import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
-import { bufferCard, dealerCard } from '../../testing/fixtures/character-cards'
-import type { CardCharacter, CharacterCard } from '../../types/cards'
+import { bufferCard, dealerCard } from '@dfragon/client-core/testing/fixtures/character-cards'
+import type { CardCharacter, CharacterCard } from '@dfragon/client-core/types/cards'
 import characterImage from './assets/character.png'
 
 export const previewCharacter: CardCharacter = {

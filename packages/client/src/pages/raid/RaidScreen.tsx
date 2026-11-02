@@ -10,7 +10,7 @@ import { useClipboardCopy } from '../../hooks/useClipboardCopy'
 import { usePageShortcut } from '../../hooks/usePageShortcut'
 import { useRaidSlotCards } from '../../hooks/useRaidSlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { filledSlotCount } from '../../lib/slot-cards'
+import { filledSlotCount } from '@dfragon/client-core/lib/slot-cards'
 import { RaidPage } from './RaidPage'
 
 export function RaidScreen(): React.JSX.Element {

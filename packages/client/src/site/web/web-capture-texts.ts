@@ -1,5 +1,5 @@
-import type { CaptureTexts } from '../../lib/capture-texts'
-import type { SearchMode } from '../../types/search-mode'
+import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
 
 const RETRY = '다시 캡처하거나 스크린샷을 다시 붙여 넣어 주세요.'
 const RECAPTURE = '다시 캡처하거나 다시 찍어 붙여 넣으세요.'

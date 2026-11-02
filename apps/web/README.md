@@ -16,7 +16,7 @@ pnpm --filter @dfragon/web preview
 
 `build`는 `tsc -b`와 Vite production build를 포함하므로 같은 변경을 검증할 때 `typecheck`를 다시 실행할 필요는 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 산출물은 `dist`에 생기며, `public/CNAME`(`dfragon.com`)이 함께 복사됩니다. dev 사이트 빌드는 이 `CNAME`을 뺍니다([배포](#배포)).
 
-`dev`와 `build`는 먼저 `prepare:ocr-assets`로 `@dfragon/client`의 [`prepare-ocr-assets.mjs`](../../packages/client/scripts/prepare-ocr-assets.mjs)에 출력 폴더를 넘겨 실행해 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다. 이 폴더는 Git에서 제외합니다. 파인튜닝 모델을 쓰므로 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
+`dev`와 `build`는 먼저 `prepare:ocr-assets`로 `@dfragon/client-core`의 [`prepare-ocr-assets.mjs`](../../packages/client-core/scripts/prepare-ocr-assets.mjs)에 출력 폴더를 넘겨 실행해 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다. 이 폴더는 Git에서 제외합니다. 파인튜닝 모델을 쓰므로 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
 
 `dev` 서버(`http://localhost:5173/`)는 같은 origin의 `/characters`, `/items` 요청을 운영 API(`https://api.dfragon.com`)로 넘기므로 운영 API의 CORS 허용 origin이나 로컬 API, Neople key 없이 첫 화면에서 닉네임 검색을 해 볼 수 있습니다. production build(`build`, `preview`)는 운영 API를 직접 부르므로 CORS가 허용한 origin에서만 검색합니다.
 

@@ -1,6 +1,6 @@
 import type { CardFrameState } from '@dfragon/ui'
-import type { CharacterTier, SlotState } from '../types/cards'
-import type { SlotCard } from './slot-cards'
+import type { CharacterTier, SlotState } from '@dfragon/client-core/types/cards'
+import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
 
 export const LOOKUP_STEPS = ['이름 인식', '캐릭터 검색', '상세 정보 확인'] as const
 export type LookupStep = (typeof LOOKUP_STEPS)[number]

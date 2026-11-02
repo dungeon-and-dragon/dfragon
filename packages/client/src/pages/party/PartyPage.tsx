@@ -5,7 +5,7 @@ import { SeatMoveStatus } from '../../components/SeatMoveStatus'
 import { useSeatMove } from '../../hooks/useSeatMove'
 import type { SeatArrangement } from '../../hooks/useSeatOrder'
 import { CharacterCard } from '../../sections/CharacterCard'
-import type { SlotCard, SlotCardActions } from '../../lib/slot-cards'
+import type { SlotCard, SlotCardActions } from '@dfragon/client-core/lib/slot-cards'
 import { styles } from './PartyPage.style'
 
 export function PartyPage({

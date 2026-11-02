@@ -4,7 +4,7 @@ import {
   swapSeats as swapSeatOrder,
   type SeatLayout,
   type SeatOrder
-} from '../lib/seats'
+} from '@dfragon/client-core/lib/seats'
 
 export type SeatArrangement = {
   layout: SeatLayout

@@ -23,10 +23,10 @@ import type { SlotCardKey } from '../hooks/useSlotCardStore'
 import { CandidateWindow } from '../components/CandidateWindow'
 import { StatLine } from '../components/StatLine'
 import { styles } from './CharacterCard.style'
-import { MISSING_VALUE, tierLabels } from '../constants/cards'
+import { MISSING_VALUE, tierLabels } from '@dfragon/client-core/constants/cards'
 import { toNameFieldTone } from '../lib/name-field-tone'
-import type { SlotCard } from '../lib/slot-cards'
-import { toScoreView } from '../lib/card-score'
+import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
+import { toScoreView } from '@dfragon/client-core/lib/card-score'
 
 export function CharacterCard({
   cardKey,

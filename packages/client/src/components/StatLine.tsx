@@ -1,9 +1,9 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { styles } from './StatLine.style'
-import { MISSING_VALUE } from '../constants/cards'
-import { type ScoreView, formatApproximateScore } from '../lib/card-score'
-import type { CharacterTier } from '../types/cards'
+import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
+import { type ScoreView, formatApproximateScore } from '@dfragon/client-core/lib/card-score'
+import type { CharacterTier } from '@dfragon/client-core/types/cards'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

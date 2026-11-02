@@ -459,9 +459,6 @@ importers:
       ky:
         specifier: 'catalog:'
         version: 2.2.0
-      onnxruntime-web:
-        specifier: 'catalog:'
-        version: 1.30.0
       xstate:
         specifier: 'catalog:'
         version: 5.33.3
@@ -472,9 +469,6 @@ importers:
       '@base-ui/react':
         specifier: 'catalog:'
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@dfragon/models':
-        specifier: workspace:*
-        version: link:../models
       '@stylexjs/stylex':
         specifier: 'catalog:'
         version: 0.19.1
@@ -484,9 +478,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.5
-      '@types/pngjs':
-        specifier: 'catalog:'
-        version: 6.0.5
       '@types/react':
         specifier: 'catalog:'
         version: 19.3.0
@@ -499,9 +490,6 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 30.1.3(@noble/hashes@1.8.0)
-      pngjs:
-        specifier: 'catalog:'
-        version: 7.0.0
       react:
         specifier: 'catalog:'
         version: 19.3.1
@@ -526,6 +514,9 @@ importers:
       ky:
         specifier: 'catalog:'
         version: 2.2.0
+      onnxruntime-web:
+        specifier: 'catalog:'
+        version: 1.30.0
       xstate:
         specifier: 'catalog:'
         version: 5.33.3
@@ -533,12 +524,18 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
+      '@dfragon/models':
+        specifier: workspace:*
+        version: link:../models
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.5
       '@types/pngjs':
         specifier: 'catalog:'
         version: 6.0.5
+      jsdom:
+        specifier: 'catalog:'
+        version: 30.1.3(@noble/hashes@1.8.0)
       pngjs:
         specifier: 'catalog:'
         version: 7.0.0
