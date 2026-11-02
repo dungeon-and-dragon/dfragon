@@ -11,8 +11,6 @@ import type {
 } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 
-export type PageShortcut = 'restart-search' | 'take-snapshot' | 'copy-clipboard'
-
 export type CardSearchHost = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>
 }
@@ -29,7 +27,6 @@ export type RaidCaptureHost = CardSearchHost & {
 export type ClientHost = Readonly<{
   party: PartyCaptureHost
   raid: RaidCaptureHost
-  onShortcut: (listener: (shortcut: PageShortcut) => void) => () => void
   getTodayGrade: () => Promise<TodayGrade>
 }>
 

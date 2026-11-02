@@ -3,7 +3,7 @@ import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
 import type { CapturePhase } from '@dfragon/client-core/types/capture'
 import { usePartyCapture, type PartyCapture } from './usePartyCapture'
 import { useRaidCapture, type RaidCapture } from './useRaidCapture'
-import { useIsPartyMode, useIsRaidMode } from './useSearchModeStore'
+import { useIsRaidMode } from './useSearchModeStore'
 
 export type ScreenCapture = {
   partyCapture: PartyCapture
@@ -14,13 +14,11 @@ export type ScreenCapture = {
 }
 
 export function useScreenCapture(texts: CaptureTexts): ScreenCapture {
-  const isPartyMode = useIsPartyMode()
   const isRaidMode = useIsRaidMode()
-  const partyCapture = usePartyCapture({ receivesShortcut: isPartyMode, texts })
+  const partyCapture = usePartyCapture({ texts })
   const raidCapture = useRaidCapture({
     sourceId: partyCapture.source.selectedSourceId,
     sourceReady: partyCapture.source.sourceReady,
-    receivesShortcut: isRaidMode,
     recognizeWithOcr: partyCapture.recognizeWithOcr,
     texts
   })

@@ -16,7 +16,6 @@ import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/se
 import { useCharacterSearch } from './useCharacterSearch'
 import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { useClientHost } from './useClientHost'
-import { usePageShortcut } from './usePageShortcut'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import { PARTY_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
 import {
@@ -54,13 +53,7 @@ export type PartyCapture = {
  * 회차는 네 자리를 비우고 게임 화면의 파티 순서대로 1~4번 자리를 채우므로 시작할 때 자리 배치를 처음으로
  * 되돌리고, 인식하는 동안에는 맞바꾸지 않는다.
  */
-export function usePartyCapture({
-  receivesShortcut,
-  texts
-}: {
-  receivesShortcut: boolean
-  texts: CaptureTexts
-}): PartyCapture {
+export function usePartyCapture({ texts }: { texts: CaptureTexts }): PartyCapture {
   const { party } = useClientHost()
   const stopRef = useRef<() => void>(() => {})
   const search = useCharacterSearch(party, () => stopRef.current())
@@ -94,7 +87,6 @@ export function usePartyCapture({
 
   const startRound = useCallback(() => send({ type: 'START' }), [send])
   const startPastedRound = useCallback(() => send({ type: 'PASTE' }), [send])
-  usePageShortcut('restart-search', receivesShortcut, startRound)
 
   function stopCapture(): void {
     send({ type: 'STOP' })

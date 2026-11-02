@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { useEffect, useEffectEvent } from 'react'
 import { shapes, StatusChip } from '@dfragon/ui'
-import { ShortcutTooltip } from '../../components/ShortcutTooltip'
+import { HeaderTooltip } from '../../components/HeaderTooltip'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { getCaptureControlState } from '@dfragon/client-core/lib/capture-presentation'
@@ -53,7 +53,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
 
   return (
     <span>
-      <ShortcutTooltip label={status} disabled={status.length === 0}>
+      <HeaderTooltip label={status} disabled={status.length === 0}>
         <button
           type="button"
           aria-label={`화면 공유, ${state.label}`}
@@ -64,7 +64,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
             {state.label}
           </StatusChip>
         </button>
-      </ShortcutTooltip>
+      </HeaderTooltip>
       <span role="status" data-capture-announcer="" {...stylex.props(shapes.srOnly)}>
         {status}
       </span>
