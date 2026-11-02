@@ -1,7 +1,7 @@
 /**
- * Runtime shape checks for values that cross a trust boundary, such as IPC results read in a
- * sandboxed Electron preload. Every check is pure, never coerces, and only answers whether the
- * value already has the expected shape.
+ * Runtime shape checks for values that cross a trust boundary, such as Neople API responses read by
+ * the API server or API responses read by the web client. Every check is pure, never coerces, and
+ * only answers whether the value already has the expected shape.
  */
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
