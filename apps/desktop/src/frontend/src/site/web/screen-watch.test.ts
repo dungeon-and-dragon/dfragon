@@ -12,7 +12,7 @@ import {
 } from './screen-watch'
 
 type Rgb = readonly [number, number, number]
-type Glyph = 'full' | 'upper' | 'lower'
+type Glyph = 'full' | 'upper' | 'middle' | 'lower'
 
 const NAME_WIDTH = 73
 const NAME_HEIGHT = 17
@@ -21,6 +21,7 @@ const GLYPH_LEFT = 4
 const GLYPH_ROWS: Readonly<Record<Glyph, readonly [number, number]>> = {
   full: [4, 12],
   upper: [4, 8],
+  middle: [6, 10],
   lower: [8, 12]
 }
 // 두 글자 이름의 마지막 글자 칸 바로 뒤 6열이다. 이름에 붙은 글자 픽셀을 원하는 개수만큼 더할 때 쓴다.
@@ -224,19 +225,23 @@ it.each(KINDS)(
   }
 )
 
-it.each(KINDS)('%s 화면에서 글자 하나만 바뀌어도 다른 구성으로 본다', (kind) => {
-  expect(
-    twiceAgainst(kind, nameCrop(['full', 'upper', 'full']), nameCrop(['full', 'lower', 'full']))
-  ).toEqual(starts(kind))
-})
+// 같은 폭의 한 음절이 바뀐 이름이다. upper와 middle은 24픽셀이 달라, 이름 전체가 다른 쌍의 최소 79보다 작다.
+it.each(KINDS)(
+  '%s 화면에서 같은 폭의 글자 하나가 획 일부만 달라져도 다른 구성으로 본다',
+  (kind) => {
+    expect(
+      twiceAgainst(kind, nameCrop(['full', 'upper', 'full']), nameCrop(['full', 'middle', 'full']))
+    ).toEqual(starts(kind))
+  }
+)
 
 it.each(KINDS)(
-  '%s 화면에서 글자 여부가 다른 픽셀이 39개면 같은 구성, 40개면 다른 구성으로 본다',
+  '%s 화면에서 글자 여부가 다른 픽셀이 9개면 같은 구성, 10개면 다른 구성으로 본다',
   (kind) => {
     const base = nameCrop(['full', 'full'])
 
-    expect(twiceAgainst(kind, base, withExtraText(base, 39))).toEqual(NO_START)
-    expect(twiceAgainst(kind, base, withExtraText(base, 40))).toEqual(starts(kind))
+    expect(twiceAgainst(kind, base, withExtraText(base, 9))).toEqual(NO_START)
+    expect(twiceAgainst(kind, base, withExtraText(base, 10))).toEqual(starts(kind))
   }
 )
 
@@ -323,7 +328,7 @@ it('새 구성 사이에 그 화면을 찾지 못한 틱이 끼면 다시 센다
 })
 
 it('기준과 다른 두 관측이 서로 허용 범위 안이면 시작한다', () => {
-  const nearB = [withExtraText(nameA, 39), ...partyB.slice(1)]
+  const nearB = [withExtraText(nameA, 9), ...partyB.slice(1)]
 
   expect(watch([party(partyB), party(nearB)], withBaselines({ party: partyA })).signals).toEqual(
     STARTS_PARTY
