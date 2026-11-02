@@ -132,7 +132,7 @@ it.each([
   ['OCR 준비 실패', WEB_CAPTURE_TEXTS.ocrPrepareFailed],
   ['한 행 인식 실패', WEB_CAPTURE_TEXTS.raidOcrFailed]
 ] as const)(
-  '%s는 실패로 끝내고 이름을 알리지 않으며 Alt+R로 다시 시작한다',
+  '%s는 실패로 끝내고 이름을 알리지 않으며 캡처로 다시 시작한다',
   async (cause, status) => {
     const { actor, effects } = start()
     if (cause === '수명 시작 실패') {
@@ -196,7 +196,7 @@ it.each([null, 'next'])(
     await new Promise((resolve) => setTimeout(resolve, 0))
 
     expect(actor.getSnapshot().matches('idle')).toBe(true)
-    expect(actor.getSnapshot().context.status).toBe('Alt+R을 눌러 공대를 인식해 주세요.')
+    expect(actor.getSnapshot().context.status).toBe('캡처 버튼을 눌러 공대를 인식해 주세요.')
     expect(effects.observeOcr).not.toHaveBeenCalled()
     expect(actor.getSnapshot().can({ type: 'START' })).toBe(sourceId !== null)
   }
