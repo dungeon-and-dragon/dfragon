@@ -20,13 +20,13 @@
 - `pnpm verify`가 저장소 검사를 차례로 실행한다. Root `pnpm test`도 `pnpm verify`를 실행한다.
 - `pnpm install`이 husky `pre-push` hook을 설치하며, hook이 push 전에 `pnpm verify --reuse-pass`를 실행한다. 같은 내용을 직접 `pnpm verify`로 통과한 직후면 다시 검사하지 않는다. Windows Test Build와 Product Images는 PR 제목 scope가 `(build)`일 때만 빌드한다. 규칙은 [scripts 안내의 build-scope](scripts/README.md#build-scope)에 있다.
 - 변경 범위별 명령 조합은 [Native validation](scripts/README.md#native-validation), 준비 조건은 [`verify` 안내](scripts/README.md#verify)를 따른다.
-- Desktop 테스트는 HOME의 모든 상위 디렉터리가 root나 현재 사용자 소유이고 group, other 쓰기 권한이 없어야 통과한다. [Desktop 테스트 범위](apps/desktop/README.md#테스트-범위와-실행)를 참고한다.
+- Desktop 테스트는 HOME의 모든 상위 디렉터리가 root나 현재 사용자 소유이고 group, other 쓰기 권한이 없어야 통과한다. [Desktop 테스트 범위](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/apps/desktop/README.md#테스트-범위와-실행)를 참고한다.
 
 ## 작업 경계
 
 - main은 ruleset에 따라 PR로만 바꾼다. 작업 브랜치에서 PR을 열고, PR merge는 저장소 소유자가 하거나 소유자가 허락한 PR을 에이전트가 대신 한다. 에이전트는 ruleset이 요구하는 check가 있으면 현재 PR head에서 통과했을 때만 merge하며, 관리자 권한으로 ruleset을 건너뛰는 merge(`gh pr merge --admin`)는 하지 않는다.
 - PR merge에는 리뷰 승인을 요구하지 않는다. `.github/CODEOWNERS`는 리뷰 요청 대상만 정한다. 저장소 관리자는 PR merge 때 이 조건을 건너뛸 수 있다.
-- `v*` tag 생성과 삭제, Release 게시, Windows Portable workflow 실행, main에서 이미지를 발행하는 Product Images run의 재실행은 저장소 소유자가 한다. 절차는 [포터블 exe와 GitHub Releases](apps/desktop/README.md#포터블-exe와-github-releases)에 있다.
+- `v*` tag 생성과 삭제, Release 게시, Windows Portable workflow 실행, main에서 이미지를 발행하는 Product Images run의 재실행은 저장소 소유자가 한다. 절차는 [포터블 exe와 GitHub Releases](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/apps/desktop/README.md#포터블-exe와-github-releases)에 있다.
 - Ruleset, Secret, Environment와 저장소 설정도 저장소 소유자가 바꾼다.
 - 개발과 테스트에는 실제 credential을 쓰지 않는다.
 - 포맷은 `pnpm format`(Biome 포맷과 문장 간격 도구)으로만 맞춘다. Prettier 같은 다른 formatter를 실행하면 손대지 않은 코드의 줄바꿈까지 바뀐다.

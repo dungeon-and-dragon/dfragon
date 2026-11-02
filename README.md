@@ -41,7 +41,6 @@ pnpm workspace 모노레포입니다.
 
 | 경로 | 내용 |
 | --- | --- |
-| [`apps/desktop`](apps/desktop/README.md) | Windows 앱(Electron) |
 | [`apps/api`](apps/api/README.md) | Neople 오픈 API를 조회해 캐시하는 공개 캐릭터 API |
 | [`apps/web`](apps/web/README.md) | 웹 앱과 소개 사이트(dfragon.com) |
 | [`packages/lib`](packages/lib/README.md) | API와 Desktop이 함께 쓰는 입력 규칙, 게임 UI 좌표, 픽셀 계산 |
@@ -53,6 +52,6 @@ pnpm workspace 모노레포입니다.
 
 ---
 
-배포 앱에 포함된 오픈소스 고지의 위치는 [Desktop 안내의 Windows 배포 빌드](apps/desktop/README.md#windows-배포-빌드)에 있습니다.
+배포 앱에 포함된 오픈소스 고지의 위치는 [Desktop 안내의 Windows 배포 빌드](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/apps/desktop/README.md#windows-배포-빌드)에 있습니다.
 
 <a href="https://developers.neople.co.kr"><img src="apps/web/src/assets/neople-open-api.png" width="191" height="36" alt="Neople 오픈 API" /></a>

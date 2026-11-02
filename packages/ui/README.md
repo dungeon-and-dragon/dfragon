@@ -96,7 +96,7 @@ import { Typo } from '@dfragon/ui'
 
 | 소비자 | 연결 위치 |
 | --- | --- |
-| Desktop 제품, test, fixture | `apps/desktop/build/renderer-transforms.ts` |
+| 웹 앱 package test | `packages/client/vitest.config.ts` |
 | 공용 UI Example, test | `packages/ui/examples/vite.config.ts`, `packages/ui/vitest.config.ts` |
 | 공용 UI 산출물 소비 검사 | `packages/ui/test/build-consumer/vite.config.ts` |
 

@@ -35,7 +35,7 @@ const modelPath = fileURLToPath(import.meta.resolve('@dfragon/models/ocr-finetun
 
 ## 갱신
 
-모델, 엔진 저장소에 파일을 올리는 것만으로 빌드의 파일이 바뀌지는 않습니다. 작업 브랜치에서 submodule을 원하는 커밋으로 옮기고 그 변경을 PR에 넣습니다. Desktop의 모델 선택과 호환성 조건은 [파인튜닝 OCR 모델로 빌드하기](../../apps/desktop/README.md#파인튜닝-ocr-모델로-빌드하기)를 따릅니다.
+모델, 엔진 저장소에 파일을 올리는 것만으로 빌드의 파일이 바뀌지는 않습니다. 작업 브랜치에서 submodule을 원하는 커밋으로 옮기고 그 변경을 PR에 넣습니다. Desktop의 모델 선택과 호환성 조건은 [파인튜닝 OCR 모델로 빌드하기](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/apps/desktop/README.md#파인튜닝-ocr-모델로-빌드하기)를 따릅니다.
 
 ```sh
 git -C packages/models/ocr-finetuned fetch origin
