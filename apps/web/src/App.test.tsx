@@ -35,13 +35,12 @@ it('첫 화면에 웹 앱을 두고 Desktop 안내와 내려받기 링크는 두
   expect(fetchMock).not.toHaveBeenCalled()
 })
 
-it('서버로 보내는 정보와 지원 범위를 사이트에 적는다', async () => {
+it('첫 화면에 웹 앱 상자와 Neople 로고 링크만 두고 상단 바, 푸터, 사이트 문구는 두지 않는다', async () => {
   await act(async () => root.render(<App />))
 
-  const text = container.textContent
-  expect(text).toContain('api.dfragon.com으로 보내요')
-  expect(text).toContain('API가 네오플에서 받아 전달해요')
-  expect(text).toContain('브라우저 밖으로 나가지 않아요')
-  expect(text).toContain('데스크톱 브라우저용')
-  expect(text).toContain('휴대폰은 지원하지 않고')
+  const neopleLink = container.querySelector('a[href="https://developers.neople.co.kr"]')
+
+  expect(neopleLink?.querySelector('img')?.getAttribute('alt')).toBe('Neople 오픈 API')
+  expect(container.querySelector('header, footer, h1')).toBeNull()
+  expect(container.textContent).toBe('')
 })

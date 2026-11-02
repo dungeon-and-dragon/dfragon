@@ -7,7 +7,6 @@ catalogMode: strict
 catalog:
   '@base-ui/react': 1.9.0
   '@biomejs/biome': 2.6.3
-  '@fontsource/noto-sans-kr': 5.3.1
   '@nestjs/common': 12.2.0
   '@nestjs/core': 12.2.0
   '@nestjs/platform-express': 12.2.0

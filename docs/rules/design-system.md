@@ -98,7 +98,7 @@ last-reviewed: 2026-11-03
 
 웹 클라이언트는 숫자 글꼴 Barlow Condensed(SIL OFL 1.1)를 앱에 번들하고 CDN에서 받지 않는다. 600, 700 굵기를 숫자와 기본 라틴 문자로 줄여 담고, `@font-face`는 앱 전역 글꼴 CSS에, 글꼴 이름은 `font` 토큰에 둔다. 숫자 값은 `NumericText`나 같은 토큰으로 이 글꼴을 쓴다.
 
-웹사이트(`apps/web`)는 제목에 마루미냐 한글을 12px의 정수 배(24, 36, 48)로만 쓰고, 본문은 Noto Sans KR, 숫자는 Barlow Condensed로 쓴다(2026-10-31 결정, [Issue #1037](https://github.com/dungeon-and-dragon/dfragon/issues/1037)). 세 글꼴 모두 SIL OFL 1.1이고 사이트에 함께 배포하며 CDN에서 받지 않는다. 마루미냐 한글과 Barlow Condensed는 `packages/client`와 같은 파일을, Noto Sans KR은 `@fontsource/noto-sans-kr`의 글자 범위별 파일을 쓴다. 웹 앱은 같은 글꼴 토큰을 읽는다.
+웹사이트(`apps/web`)는 웹 앱 상자 밖에 문구가 없어 사이트 전용 글꼴을 두지 않는다. 마루미냐 한글과 Barlow Condensed(둘 다 SIL OFL 1.1)는 `packages/client`와 같은 파일을 사이트에 함께 배포하고 CDN에서 받지 않으며, 웹 앱은 같은 글꼴 토큰을 읽는다.
 
 - 같은 전역 CSS에 `word-break: keep-all`, `overflow-wrap: anywhere`를 두어 한국어를 어절 단위로 줄바꿈하고 긴 문자열은 영역 안에서 나눈다. `packages/ui/foundation.css`는 공용 Example도 공유하므로 이 기준을 두지 않는다.
 - 기울임, `text-transform: uppercase`, 양수 자간을 새로 쓰지 않는다.
