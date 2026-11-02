@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { desktopNotices, uiNotices } from '@dfragon/licenses/vite'
+import { clientNotices, uiNotices } from '@dfragon/licenses/vite'
 import { stylexOptions } from '@dfragon/ui/stylex-config'
 import { unplugin as stylex } from '@stylexjs/unplugin'
 import react from '@vitejs/plugin-react'
@@ -22,7 +22,7 @@ const siteNotices = {
 const DEV_API_PROXY = { target: 'https://api.dfragon.com', changeOrigin: true }
 
 export default defineConfig({
-  plugins: [stylex.vite(stylexOptions), react(), uiNotices(), desktopNotices(), siteNotices],
+  plugins: [stylex.vite(stylexOptions), react(), uiNotices(), clientNotices(), siteNotices],
   worker: { format: 'es' },
   resolve: {
     alias: workspaceAliases,
