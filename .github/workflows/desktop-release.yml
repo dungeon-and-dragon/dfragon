@@ -40,7 +40,8 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
           persist-credentials: false
-          submodules: recursive
+      # Desktop packages only the pinned OCR model. The score engine submodule is for the API image.
+      - run: git submodule update --init --depth 1 packages/models/ocr-finetuned
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: package.json
@@ -77,8 +78,6 @@ jobs:
             exit 1
           fi
       - run: pnpm install --frozen-lockfile
-      - name: Prepare score engine
-        run: pnpm --filter @dfragon/desktop prepare:score-engine --require
       - run: pnpm --filter @dfragon/desktop build:distribution
       - name: Package portable executable with release version
         shell: bash

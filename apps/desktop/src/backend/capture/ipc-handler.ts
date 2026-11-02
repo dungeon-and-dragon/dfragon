@@ -31,8 +31,6 @@ import {
 } from '../../shared/search/portrait-color'
 import type { CharacterSelectionPolicy } from '../../shared/search/identify'
 import type { SearchRuntime } from '../../shared/search/request'
-import { createEngineCardScorer } from '../score/card-score'
-import type { ScoreEngine } from '../score/engine'
 import { registerManualSearchIpc, type ManualSearchKind } from '../search/manual-ipc'
 import { findSelectedSource } from './capture-policy'
 import { bindWindowFrame, type ReadWindowFrame } from './native-frame'
@@ -165,7 +163,6 @@ type SearchConfiguration = {
   apiOrigin: string
   fetch?: typeof fetch
   portraitColorPolicy: PortraitColorPolicy & CharacterSelectionPolicy
-  scoreEngine: ScoreEngine
 }
 
 function createSearchRuntime(
@@ -189,7 +186,6 @@ function createSearchRuntime(
   const details = createCachedCharacterDetails(createCharacterDetailsHttp({ apiOrigin, fetch }))
 
   return {
-    cardScorer: createEngineCardScorer(configuration.scoreEngine),
     reportDiagnostic,
     identification: { candidates, image, details, scorePortrait, selection: policy }
   }

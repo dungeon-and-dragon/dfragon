@@ -31,8 +31,7 @@
     "build:win:portable": "pnpm run build:distribution && electron-builder --win portable --x64 --publish never",
     "ui:fixture": "pnpm run ui:fixture:prepare && electron scripts/ui-fixture.mjs",
     "ui:fixture:prepare": "tsc --ignoreConfig scripts/ui-fixture-preload.cts --rootDir . --outDir node_modules/.tmp/ui-fixture --module nodenext --target es2022 --strict --skipLibCheck",
-    "prepare:ocr-assets": "node scripts/prepare-ocr-assets.mjs",
-    "prepare:score-engine": "node scripts/prepare-score-engine.mjs"
+    "prepare:ocr-assets": "node scripts/prepare-ocr-assets.mjs"
   },
   "dependencies": {
     "@electron-toolkit/preload": "catalog:",
