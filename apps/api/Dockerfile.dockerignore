@@ -20,6 +20,11 @@
 !packages/licenses/notices/lib/**
 !packages/licenses/notices/upstream/
 !packages/licenses/notices/upstream/remeda-2.53.0-LICENSE.txt
+!packages/licenses/notices/score-engine/
+!packages/licenses/notices/score-engine/**
+!packages/models/
+!packages/models/score-engine/
+!packages/models/score-engine/libdnfscore.so
 !apps/
 !apps/api/
 !apps/api/package.json

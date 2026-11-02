@@ -14,13 +14,16 @@ COPY apps/api/tsconfig*.json apps/api/
 COPY apps/api/src apps/api/src
 COPY apps/api/test apps/api/test
 COPY apps/api/test-support apps/api/test-support
+COPY packages/models/score-engine/libdnfscore.so packages/models/score-engine/libdnfscore.so
 RUN pnpm --filter @dfragon/api test \
     && pnpm --filter @dfragon/api deploy --legacy --prod /production
 COPY packages/licenses/notices/upstream/remeda-2.53.0-LICENSE.txt apps/api/dist/notices/remeda-2.53.0-LICENSE.txt
+COPY packages/licenses/notices/score-engine apps/api/dist/notices/score-engine
 
 FROM docker.io/library/node:26-bookworm-slim@sha256:86f07bc9c5dce4578cf37e5a418b7bfc7f817cda25cde66e2b66e95ed86c4567 AS runtime
 ARG SOURCE_COMMIT=""
 ENV NODE_ENV=production
+ENV SCORE_LIBRARY_FILE=/app/score-engine/libdnfscore.so
 WORKDIR /app
 COPY scripts/server-build-info.mjs /tmp/dfragon-server-build-info.mjs
 RUN node /tmp/dfragon-server-build-info.mjs api "$SOURCE_COMMIT" /app/build-info.json \
@@ -28,6 +31,7 @@ RUN node /tmp/dfragon-server-build-info.mjs api "$SOURCE_COMMIT" /app/build-info
 COPY --from=build /production/package.json ./package.json
 COPY --from=build /production/node_modules ./node_modules
 COPY --from=build /workspace/apps/api/dist ./dist
+COPY --from=build /workspace/packages/models/score-engine/libdnfscore.so ./score-engine/libdnfscore.so
 COPY --chmod=755 apps/api/docker-entrypoint.sh /usr/local/bin/dfragon-api-entrypoint
 USER node
 EXPOSE 3000
