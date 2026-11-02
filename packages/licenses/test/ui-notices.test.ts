@@ -5,12 +5,11 @@ import { uiNotices } from '../src/vite.ts'
 import { createPackageFixture } from './fixtures.ts'
 
 function buildNotices(
-  options: Parameters<typeof uiNotices>[0] = {},
   moduleIds: string[] = [],
   bundle: Parameters<ReturnType<typeof uiNotices>['generateBundle']>[1] = {}
 ) {
   const assets = new Map<string, string>()
-  uiNotices(options).generateBundle.call(
+  uiNotices().generateBundle.call(
     {
       getModuleIds: () => moduleIds.values(),
       emitFile(asset) {
@@ -26,19 +25,13 @@ function buildNotices(
   return assets
 }
 
-test('앱의 production 전이 고지와 번들 고지를 합치되 main 전용 의존성을 renderer 입력에 넣지 않는다', (t) => {
+test('번들 입력의 고지만 원문 그대로 수집하고 번들하지 않은 production 의존성은 넣지 않는다', (t) => {
   const fixture = createPackageFixture(t)
-  fixture.writeManifest('desktop', {
-    dependencies: { 'main-only': '1' },
+  fixture.writeManifest('', {
+    dependencies: { 'unbundled-production': '1' },
     devDependencies: { tool: '1' }
   })
-  fixture.pkg('main-only', {
-    manifest: { dependencies: { 'runtime-child': '1' } },
-    documents: { LICENSE: 'Main original\r\nCopyright 2026 Fixture owner\r\n' }
-  })
-  fixture.pkg('runtime-child', {
-    documents: { 'COPYING.txt': '\ufeff  Runtime child\r\n\r\n  original attribution  \n' }
-  })
+  fixture.pkg('unbundled-production', { documents: {} })
   const renderer = fixture.pkg('renderer', {
     documents: {
       LICENSE: 'Renderer original\r\n',
@@ -47,8 +40,8 @@ test('앱의 production 전이 고지와 번들 고지를 합치되 main 전용 
   })
   fixture.writeFile('node_modules/renderer/feature.js', '')
   fixture.pkg('tool', { documents: {} })
-  const localModule = fixture.writeFile('desktop/src/index.ts', '')
-  const assets = buildNotices({ runtimeRoot: join(fixture.root, 'desktop') }, [
+  const localModule = fixture.writeFile('src/index.ts', '')
+  const assets = buildNotices([
     join(renderer, 'index.js?commonjs-proxy'),
     join(renderer, 'feature.js'),
     `\0${join(fixture.root, 'node_modules/tool/index.js')}`,
@@ -57,13 +50,9 @@ test('앱의 production 전이 고지와 번들 고지를 합치되 main 전용 
 
   assert.equal(
     assets.get('notices/THIRD-PARTY.txt'),
-    'main-only@1.0.0 (MIT)\n\n' +
-      'LICENSE\nMain original\r\nCopyright 2026 Fixture owner\r\n\n\n' +
-      'renderer@1.0.0 (MIT)\n\n' +
+    'renderer@1.0.0 (MIT)\n\n' +
       'LICENSE\nRenderer original\r\n\n\n' +
-      'NOTICE.txt\n  Renderer attribution\n\n\n' +
-      'runtime-child@1.0.0 (MIT)\n\n' +
-      'COPYING.txt\n\ufeff  Runtime child\r\n\r\n  original attribution  \n'
+      'NOTICE.txt\n  Renderer attribution\n'
   )
   assert.deepEqual(JSON.parse(assets.get('notices/bundle-modules.json')!), [
     {
@@ -76,20 +65,6 @@ test('앱의 production 전이 고지와 번들 고지를 합치되 main 전용 
   assert.equal(assets.get('notices/THIRD-PARTY.txt')!.includes(fixture.root), false)
 })
 
-test('runtimeRoot가 없는 UI 빌드는 번들 입력의 고지만 수집한다', (t) => {
-  const fixture = createPackageFixture(t)
-  fixture.writeManifest('', { dependencies: { 'unbundled-production': '1' } })
-  fixture.pkg('unbundled-production', { documents: {} })
-  const renderer = fixture.pkg('renderer', { documents: { LICENSE: 'Renderer original\n' } })
-
-  const assets = buildNotices({}, [join(renderer, 'index.js')])
-
-  assert.equal(
-    assets.get('notices/THIRD-PARTY.txt'),
-    'renderer@1.0.0 (MIT)\n\nLICENSE\nRenderer original\n'
-  )
-})
-
 test('생성 JavaScript chunk 목록만 기록하고 chunk 코드와 다른 asset은 바꾸지 않는다', () => {
   const bundle = {
     'app.js': { type: 'chunk' as const, code: 'export const app = 1\n' },
@@ -98,7 +73,7 @@ test('생성 JavaScript chunk 목록만 기록하고 chunk 코드와 다른 asse
     'placeholder.js': { type: 'chunk' as const }
   }
 
-  const assets = buildNotices({}, [], bundle)
+  const assets = buildNotices([], bundle)
 
   assert.equal(bundle['app.js'].code, 'export const app = 1\n')
   assert.equal(bundle['lazy.js'].code, 'export const lazy = 2\n')
@@ -116,13 +91,12 @@ test('생성 JavaScript chunk 목록만 기록하고 chunk 코드와 다른 asse
 
 test('알려진 원문 공백은 THIRD-PARTY에서도 확인 필요 표시와 근거를 유지한다', (t) => {
   const fixture = createPackageFixture(t)
-  fixture.writeManifest('', { dependencies: { 'guid-typescript': '1.0.9' } })
-  fixture.pkg('guid-typescript', {
+  const guid = fixture.pkg('guid-typescript', {
     manifest: { version: '1.0.9', license: 'ISC' },
     documents: {}
   })
 
-  const assets = buildNotices({ runtimeRoot: fixture.root })
+  const assets = buildNotices([join(guid, 'index.js')])
 
   assert.equal(
     assets.get('notices/THIRD-PARTY.txt'),
@@ -134,22 +108,12 @@ test('알려진 원문 공백은 THIRD-PARTY에서도 확인 필요 표시와 �
   )
 })
 
-for (const scope of ['번들 입력', '앱 production 의존성'] as const) {
-  test(`${scope}의 원문이 누락되면 THIRD-PARTY 산출 성공으로 처리하지 않는다`, (t) => {
-    const fixture = createPackageFixture(t)
-    const unknown = fixture.pkg('unknown', { documents: {} })
-    const options: Parameters<typeof uiNotices>[0] = {}
-    let moduleIds: string[] = []
-    if (scope === '번들 입력') {
-      moduleIds = [join(unknown, 'index.js')]
-    } else {
-      fixture.writeManifest('', { dependencies: { unknown: '1' } })
-      options.runtimeRoot = fixture.root
-    }
+test('번들 입력의 원문이 누락되면 THIRD-PARTY 산출 성공으로 처리하지 않는다', (t) => {
+  const fixture = createPackageFixture(t)
+  const unknown = fixture.pkg('unknown', { documents: {} })
 
-    assert.throws(() => buildNotices(options, moduleIds), {
-      name: 'Error',
-      message: 'Missing license text for unknown@1.0.0'
-    })
+  assert.throws(() => buildNotices([join(unknown, 'index.js')]), {
+    name: 'Error',
+    message: 'Missing license text for unknown@1.0.0'
   })
-}
+})

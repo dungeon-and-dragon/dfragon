@@ -7,13 +7,6 @@ import {
   CardFrame,
   Checkbox,
   Chip,
-  DialogAction,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
   IconButton,
   Kbd,
   Menu,
@@ -31,7 +24,6 @@ import {
   Typo,
   type ButtonProps,
   type ControlSurface,
-  type DialogRootProps,
   type IconButtonProps,
   type TextFieldInputProps
 } from '../src/index'
@@ -82,7 +74,6 @@ function accessibleName(element: Element) {
 const IMPLICIT_ROLES: Record<string, string> = {
   button: 'button, [role="button"]',
   textbox: 'input:not([type]), input[type="text"], [role="textbox"]',
-  dialog: '[role="dialog"]',
   combobox: '[role="combobox"]',
   listbox: '[role="listbox"]',
   option: '[role="option"]',
@@ -151,11 +142,6 @@ async function editInput(input: HTMLInputElement, value: string) {
     valueSetter.call(input, value)
     input.dispatchEvent(new Event('input', { bubbles: true }))
   })
-}
-
-// Base UI는 열기를 유발한 입력과 바깥 누름을 구분하려고 일부 listener를 다음 timer에 등록한다.
-async function settle() {
-  await act(async () => new Promise((resolve) => setTimeout(resolve, 0)))
 }
 
 describe('Button의 클릭과 disabled, loading 상태', () => {
@@ -388,197 +374,6 @@ describe('TextField의 controlled 입력과 접근성 연결', () => {
   })
 })
 
-type DialogExampleProps = Pick<
-  DialogRootProps,
-  'defaultOpen' | 'open' | 'onOpenChange' | 'disablePointerDismissal'
->
-
-function DialogExample(props: DialogExampleProps) {
-  return (
-    <DialogRoot {...props}>
-      <DialogTrigger render={<Button />}>상세 정보 열기</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>상세 정보</DialogTitle>
-          <DialogDescription>입력한 내용을 확인해 주세요.</DialogDescription>
-        </DialogHeader>
-        <DialogAction>확인하고 닫기</DialogAction>
-      </DialogContent>
-    </DialogRoot>
-  )
-}
-
-function reasons(
-  onOpenChange: ReturnType<typeof vi.fn<NonNullable<DialogRootProps['onOpenChange']>>>
-) {
-  return new Set(onOpenChange.mock.calls.map(([, details]) => details.reason))
-}
-
-describe('Dialog의 상태 전이와 접근성, 포커스', () => {
-  it('trigger를 누르면 열림 값을 전달하고 이름이 붙은 dialog를 표시한다', async () => {
-    const onOpenChange = vi.fn<NonNullable<DialogRootProps['onOpenChange']>>()
-    await render(<DialogExample onOpenChange={onOpenChange} />)
-    const trigger = getByRole('button', '상세 정보 열기')
-    expect(queryByRole('dialog')).toBeNull()
-    expect(trigger.getAttribute('aria-haspopup')).toBe('dialog')
-    expect(trigger.getAttribute('aria-expanded')).toBe('false')
-
-    await click(trigger)
-
-    expect(onOpenChange).toHaveBeenCalledWith(true, expect.anything())
-    expect(reasons(onOpenChange)).toEqual(new Set(['trigger-press']))
-    expect(trigger.getAttribute('aria-expanded')).toBe('true')
-    expect(queryByRole('dialog', '상세 정보')).not.toBeNull()
-  })
-
-  it('modal의 제목과 설명이 dialog의 접근성 이름, 설명에 연결되고 바깥 내용은 가려진다', async () => {
-    await render(<DialogExample defaultOpen />)
-    const dialog = getByRole('dialog', '상세 정보')
-
-    expect(describedTexts(dialog)).toEqual(['입력한 내용을 확인해 주세요.'])
-    // Base UI는 aria-modal 대신 dialog 밖의 형제 내용을 보조 기술에서 가린다.
-    expect(container.getAttribute('aria-hidden')).toBe('true')
-  })
-
-  it.each([
-    { title: '기본값이면 닫지 않는다', props: {}, closes: false },
-    { title: '허용하면 닫는다', props: { disablePointerDismissal: false }, closes: true }
-  ])('바깥 누름은 $title', async ({ props, closes }) => {
-    const onOpenChange = vi.fn<NonNullable<DialogRootProps['onOpenChange']>>()
-    await render(<DialogExample {...props} onOpenChange={onOpenChange} />)
-    await click(getByRole('button', '상세 정보 열기'))
-    const dialog = getByRole('dialog', '상세 정보')
-    await vi.waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true))
-    await settle()
-    onOpenChange.mockClear()
-
-    await act(async () => {
-      document.body.dispatchEvent(
-        new PointerEvent('pointerdown', { bubbles: true, pointerType: 'mouse', button: 0 })
-      )
-      document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }))
-      document.body.dispatchEvent(
-        new PointerEvent('pointerup', { bubbles: true, pointerType: 'mouse', button: 0 })
-      )
-      document.body.click()
-    })
-
-    if (closes) {
-      expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything())
-      expect(reasons(onOpenChange)).toEqual(new Set(['outside-press']))
-      await vi.waitFor(() => expect(queryByRole('dialog')).toBeNull())
-    } else {
-      expect(onOpenChange).not.toHaveBeenCalled()
-      expect(queryByRole('dialog')).toBe(dialog)
-    }
-  })
-
-  // jsdom은 inert와 Tab 이동을 구현하지 않으므로 focus 가두기는 시작 위치와 경계 표시까지만 확인한다.
-  it('trigger로 열면 focus가 dialog 안으로 이동하고 앞뒤에 focus 경계를 둔다', async () => {
-    await render(<DialogExample />)
-    const trigger = getByRole('button', '상세 정보 열기')
-    trigger.focus()
-
-    await click(trigger)
-    const dialog = getByRole('dialog', '상세 정보')
-
-    await vi.waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true))
-    expect(dialog.previousElementSibling?.hasAttribute('data-base-ui-focus-guard')).toBe(true)
-    expect(dialog.nextElementSibling?.hasAttribute('data-base-ui-focus-guard')).toBe(true)
-  })
-
-  it.each([
-    { title: 'Escape 키 입력', method: 'escape', reason: 'escape-key' },
-    { title: '닫기 버튼 클릭', method: 'close', reason: 'close-press' },
-    { title: 'DialogAction 클릭', method: 'action', reason: 'close-press' }
-  ])('$title 시 닫힘 값을 전달하고 trigger로 focus를 돌려준다', async ({ method, reason }) => {
-    const onOpenChange = vi.fn<NonNullable<DialogRootProps['onOpenChange']>>()
-    await render(<DialogExample onOpenChange={onOpenChange} />)
-    const trigger = getByRole('button', '상세 정보 열기')
-    trigger.focus()
-    await click(trigger)
-    const dialog = getByRole('dialog', '상세 정보')
-    await vi.waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true))
-    onOpenChange.mockClear()
-
-    if (method === 'escape') {
-      await press(document.activeElement as HTMLElement, 'Escape')
-    } else if (method === 'close') {
-      await click(getByRole('button', '닫기', dialog))
-    } else {
-      await click(getByRole('button', '확인하고 닫기', dialog))
-    }
-
-    expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything())
-    expect(reasons(onOpenChange)).toEqual(new Set([reason]))
-    await vi.waitFor(() => expect(queryByRole('dialog')).toBeNull())
-    expect(trigger.getAttribute('aria-expanded')).toBe('false')
-    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
-  })
-
-  it('onOpenChange에서 Escape 닫기를 취소하면 열린 상태를 유지한다', async () => {
-    await render(
-      <DialogExample
-        defaultOpen
-        onOpenChange={(_open, details) => {
-          if (details.reason === 'escape-key') {
-            details.cancel()
-          }
-        }}
-      />
-    )
-    const dialog = getByRole('dialog', '상세 정보')
-    await vi.waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true))
-
-    await press(document.activeElement as HTMLElement, 'Escape')
-
-    expect(queryByRole('dialog', '상세 정보')).toBe(dialog)
-  })
-
-  it.each([{ role: 'listbox' }, { role: 'menu' }])(
-    'dialog 안에 펼친 $role 에서 누른 Escape는 dialog를 닫지 않는다',
-    async ({ role }) => {
-      const onOpenChange = vi.fn<NonNullable<DialogRootProps['onOpenChange']>>()
-      await render(
-        <DialogRoot defaultOpen onOpenChange={onOpenChange}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>화면 캡처</DialogTitle>
-            </DialogHeader>
-            <div role={role} aria-label="캡처할 창" tabIndex={0} />
-          </DialogContent>
-        </DialogRoot>
-      )
-      const list = getByRole(role, '캡처할 창')
-      await act(async () => list.focus())
-
-      await press(list, 'Escape')
-
-      expect(onOpenChange).not.toHaveBeenCalled()
-      expect(queryByRole('dialog', '화면 캡처')).not.toBeNull()
-    }
-  )
-
-  it('controlled dialog는 닫힘 요청 뒤에도 부모의 open 값이 바뀔 때까지 열린 상태를 유지한다', async () => {
-    const onOpenChange = vi.fn<NonNullable<DialogRootProps['onOpenChange']>>()
-    await render(<DialogExample open onOpenChange={onOpenChange} />)
-    const dialog = getByRole('dialog', '상세 정보')
-    await vi.waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true))
-
-    await press(document.activeElement as HTMLElement, 'Escape')
-
-    expect(onOpenChange).toHaveBeenCalledWith(false, expect.anything())
-    expect(getByRole('button', '상세 정보 열기').getAttribute('aria-expanded')).toBe('true')
-    expect(queryByRole('dialog', '상세 정보')).not.toBeNull()
-    onOpenChange.mockClear()
-
-    await render(<DialogExample open={false} onOpenChange={onOpenChange} />)
-
-    await vi.waitFor(() => expect(queryByRole('dialog')).toBeNull())
-    expect(onOpenChange).not.toHaveBeenCalled()
-  })
-})
-
 function SettingsIcon() {
   return <svg data-testid="settings-icon" viewBox="0 0 24 24" />
 }
@@ -593,7 +388,7 @@ const pressedRingClass = stylex.props(
   }).ring
 ).className
 
-describe('IconButton의 이름, 클릭, disabled와 Dialog trigger 연결', () => {
+describe('IconButton의 이름, 클릭, disabled', () => {
   it('아이콘만 보이는 버튼이 aria-label을 이름으로 갖고 클릭과 ref를 전달한다', async () => {
     const onClick = vi.fn<NonNullable<IconButtonProps['onClick']>>()
     const ref = createRef<HTMLButtonElement>()
@@ -619,35 +414,6 @@ describe('IconButton의 이름, 클릭, disabled와 Dialog trigger 연결', () =
     expect(button.disabled).toBe(true)
     await click(button)
     expect(onClick).not.toHaveBeenCalled()
-  })
-
-  it('render로 합성한 DialogTrigger는 dialog를 열고 Escape로 닫으면 focus를 버튼으로 돌려준다', async () => {
-    const icon = <IconButton aria-label="설정" icon={<SettingsIcon />} />
-    await render(
-      <DialogRoot>
-        <DialogTrigger render={icon} />
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>설정</DialogTitle>
-          </DialogHeader>
-          <DialogAction>닫기</DialogAction>
-        </DialogContent>
-      </DialogRoot>
-    )
-    const trigger = getByRole('button', '설정')
-    expect(allByRole('button').length).toBe(1)
-    expect(trigger.getAttribute('aria-haspopup')).toBe('dialog')
-    trigger.focus()
-
-    await click(trigger)
-    const dialog = getByRole('dialog', '설정')
-    expect(trigger.getAttribute('aria-expanded')).toBe('true')
-    await vi.waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true))
-
-    await press(document.activeElement as HTMLElement, 'Escape')
-
-    await vi.waitFor(() => expect(queryByRole('dialog')).toBeNull())
-    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
   })
 
   // jsdom은 계산된 크기를 모르므로 크기마다 다른 StyleX class가 붙는지만 확인한다.
@@ -690,31 +456,6 @@ describe('IconButton의 이름, 클릭, disabled와 Dialog trigger 연결', () =
     for (const button of [off, direct, plain]) {
       expect(button.className).toBe(on.className)
     }
-  })
-
-  it('DialogContent lg는 기본 sm과 다른 외형을 쓴다', async () => {
-    await render(
-      <>
-        <DialogRoot defaultOpen>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>작은 대화상자</DialogTitle>
-            </DialogHeader>
-          </DialogContent>
-        </DialogRoot>
-        <DialogRoot defaultOpen>
-          <DialogContent size="lg">
-            <DialogHeader>
-              <DialogTitle>큰 대화상자</DialogTitle>
-            </DialogHeader>
-          </DialogContent>
-        </DialogRoot>
-      </>
-    )
-    const small = await vi.waitFor(() => getByRole('dialog', '작은 대화상자'))
-    const large = getByRole('dialog', '큰 대화상자')
-
-    expect(large.className).not.toBe(small.className)
   })
 })
 

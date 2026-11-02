@@ -76,7 +76,7 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 서드파티 고지는 화면에 링크하지 않고 빌드 산출물의 `notices`에 둡니다. 배포하면 `https://dfragon.com/notices/` 아래에서 볼 수 있습니다.
 
 - `notices/THIRD-PARTY.txt`: 번들 입력 package의 license와 NOTICE(Noto Sans KR의 OFL 1.1 포함)
-- `notices/desktop/`: Desktop과 같은 글꼴(마루미냐 한글, Barlow Condensed)과 Lucide 아이콘 고지
+- `notices/client/`: Desktop과 같은 글꼴(마루미냐 한글, Barlow Condensed)과 Lucide 아이콘 고지
 - `notices/site/NOTICE.md`: Neople Open API 로고의 출처, 권리([원본](NOTICE.md))
 - `ocr/`: OCR 모델과 ONNX Runtime의 license, NOTICE. Desktop의 `out/frontend/ocr`과 같은 파일입니다.
 

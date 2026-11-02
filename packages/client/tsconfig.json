@@ -19,7 +19,6 @@
     "paths": {
       "@dfragon/ui": ["../ui/src/index.tsx"],
       "@dfragon/lib": ["../lib/src/index.ts"],
-      "@dfragon/lib/ocr-contract": ["../lib/src/ocr-contract.ts"],
       "@dfragon/lib/utils/shape-check": ["../lib/src/utils/shape-check.ts"]
     }
   },

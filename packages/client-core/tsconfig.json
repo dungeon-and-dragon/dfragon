@@ -17,7 +17,6 @@
     "types": ["node"],
     "paths": {
       "@dfragon/lib": ["../lib/src/index.ts"],
-      "@dfragon/lib/ocr-contract": ["../lib/src/ocr-contract.ts"],
       "@dfragon/lib/utils/shape-check": ["../lib/src/utils/shape-check.ts"]
     }
   },

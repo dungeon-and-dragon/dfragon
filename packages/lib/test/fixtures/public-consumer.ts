@@ -28,7 +28,6 @@ import {
   type ServerBuildInfo,
   type ServerService
 } from '@dfragon/lib'
-import { OCR_DATA_LIMITS } from '@dfragon/lib/ocr-contract'
 import manifest from '@dfragon/lib/package.json' with { type: 'json' }
 
 export const packageName: string = manifest.name
@@ -132,20 +131,4 @@ export function readRaidValueColumn(
 
 export function versionResponse(value: unknown, service: ServerService): ServerBuildInfo | null {
   return parseServerBuildInfo(value, service)
-}
-
-export function collectableSlots(kind: keyof typeof OCR_DATA_LIMITS.maximumCropsByKind): number[] {
-  const maximum = OCR_DATA_LIMITS.maximumCropsByKind[kind]
-
-  return Array.from({ length: maximum }, (_, index) => index + 1)
-}
-
-export function ocrImageBudget() {
-  const pngBytes: number = OCR_DATA_LIMITS.maximumPngBytes
-  const dimension: number = OCR_DATA_LIMITS.maximumDimension
-  const pixels: number = OCR_DATA_LIMITS.maximumPixels
-  const uiScale: number = OCR_DATA_LIMITS.maximumUiScale
-  const labelLength: number = OCR_DATA_LIMITS.maximumLabelLength
-
-  return { pngBytes, dimension, pixels, uiScale, labelLength }
 }

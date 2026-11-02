@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 
-const OCR_CONTRACT_IMPORT_PATTERN = /^@dfragon\/lib\/ocr-contract$/
 const SHAPE_CHECK_IMPORT_PATTERN = /^@dfragon\/lib\/utils\/shape-check$/
 const SHARED_LIBRARY_IMPORT_PATTERN = /^@dfragon\/lib$/
 
@@ -13,7 +12,6 @@ function source(path: string): string {
 export default defineConfig({
   resolve: {
     alias: [
-      { find: OCR_CONTRACT_IMPORT_PATTERN, replacement: source('../lib/src/ocr-contract.ts') },
       { find: SHAPE_CHECK_IMPORT_PATTERN, replacement: source('../lib/src/utils/shape-check.ts') },
       { find: SHARED_LIBRARY_IMPORT_PATTERN, replacement: source('../lib/src/index.ts') }
     ]

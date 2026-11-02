@@ -4,7 +4,6 @@ import stylex from '@stylexjs/unplugin'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
-const OCR_CONTRACT_IMPORT_PATTERN = /^@dfragon\/lib\/ocr-contract$/
 const SHAPE_CHECK_IMPORT_PATTERN = /^@dfragon\/lib\/utils\/shape-check$/
 const SHARED_LIBRARY_IMPORT_PATTERN = /^@dfragon\/lib$/
 const SHARED_UI_IMPORT_PATTERN = /^@dfragon\/ui$/
@@ -18,7 +17,6 @@ export default defineConfig({
   plugins: [stylex.rollup(stylexOptions), react()],
   resolve: {
     alias: [
-      { find: OCR_CONTRACT_IMPORT_PATTERN, replacement: source('../lib/src/ocr-contract.ts') },
       { find: SHAPE_CHECK_IMPORT_PATTERN, replacement: source('../lib/src/utils/shape-check.ts') },
       { find: SHARED_LIBRARY_IMPORT_PATTERN, replacement: source('../lib/src/index.ts') },
       { find: SHARED_UI_IMPORT_PATTERN, replacement: source('../ui/src/index.tsx') }

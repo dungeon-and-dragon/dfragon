@@ -7,8 +7,7 @@ type BundleContext = {
   emitFile(asset: { type: 'asset'; fileName: string; source: string }): string
 }
 
-// Vite 7(Electron)과 Vite 8에서 공통으로 제공하는 Rollup hook만 사용한다.
-export function uiNotices({ runtimeRoot }: { runtimeRoot?: string } = {}) {
+export function uiNotices() {
   return {
     name: 'dfragon-ui-notices',
     generateBundle(
@@ -57,7 +56,7 @@ export function uiNotices({ runtimeRoot }: { runtimeRoot?: string } = {}) {
       }
 
       const thirdParty: string[] = []
-      for (const metadata of collectPackages(this.getModuleIds(), runtimeRoot)) {
+      for (const metadata of collectPackages(this.getModuleIds())) {
         thirdParty.push(`${metadata.name}@${metadata.version} (${metadata.license})`)
         for (const document of metadata.documents) {
           thirdParty.push(`${document.name}\n${document.text}`)
