@@ -94,6 +94,8 @@ export type {
   DNFRaidValueHeadingTemplates,
   DNFRaidValueNotation
 } from './dnf-raid-value-column.js'
+export { detectDNFTownIndicator } from './dnf-town-indicator.js'
+export type { DNFTownIndicatorDetection } from './dnf-town-indicator.js'
 export { parseServerBuildInfo } from './server-build-info.js'
 export type { ServerBuildInfo, ServerService } from './server-build-info.js'
 export {
