@@ -138,7 +138,7 @@ test('14개 장비 슬롯, 마법부여 스킬 옵션, 체인 null과 캐릭터 
       itemIds.map((itemId) => [itemId, { ...catalogPayload(itemId), tune: [{ level: 0 }] }])
     )
   })
-  const result = await enrichCharacterDetails(details, service, signal)
+  const { details: result } = await enrichCharacterDetails(details, service, signal)
   assert.equal(requested, 1)
   assert.deepEqual(details, original)
   const resultItems = result.equipment.equipment as Array<Record<string, unknown>>
