@@ -9,7 +9,7 @@ Repository root에서 실행합니다. 표본 폴더는 저장소 밖에 둡니�
 ```bash
 DFRAGON_PORTRAIT_SAMPLES=/path/to/samples \
 DFRAGON_PORTRAIT_REPORT=/path/to/report.json \
-pnpm --filter @dfragon/desktop run test:portrait-evaluation
+pnpm --filter @dfragon/client run test:portrait-evaluation
 ```
 
 `test:portrait-evaluation`은 전용 `tsc`로 이 폴더를 검사한 뒤 `vitest.config.ts`로 `*.evaluation.ts`만 실행합니다. Desktop의 기본 `test`에는 포함되지 않습니다. `DFRAGON_PORTRAIT_SAMPLES`가 없으면 평가는 건너뜁니다. 같은 폴더의 `*.test.ts`는 표본 없이 도는 합성 데이터 테스트이며 기본 `test`가 실행합니다.
@@ -25,7 +25,7 @@ pnpm --filter @dfragon/desktop run test:portrait-evaluation
 | `DFRAGON_PORTRAIT_ANCHOR_RADIUS` | `anchorRadius`. 기본 2 |
 | `DFRAGON_PORTRAIT_ANCHORS` | `0`이면 직업별 얼굴 위치를 쓰지 않고 모든 후보를 `topFraction` 범위에서 찾는다. 기본은 제품처럼 사용 |
 
-정책 기본값은 `portrait.evaluation.ts` 상단의 `DEFAULT_POLICY`이며 제품값 `INITIAL_PORTRAIT_COLOR_POLICY`(`apps/desktop/src/shared/search/portrait-policy.ts`)와 같습니다. 제품은 `gridSize` 8을 쓰고, 평가는 4, 6, 8을 모두 측정합니다.
+정책 기본값은 `portrait.evaluation.ts` 상단의 `DEFAULT_POLICY`이며 제품값 `INITIAL_PORTRAIT_COLOR_POLICY`(`packages/client-core/src/shared/search/portrait-policy.ts`)와 같습니다. 제품은 `gridSize` 8을 쓰고, 평가는 4, 6, 8을 모두 측정합니다.
 
 ## manifest 형식
 
