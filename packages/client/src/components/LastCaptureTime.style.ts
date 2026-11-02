@@ -11,7 +11,6 @@ export const styles = stylex.create({
     fontSize: 12,
     lineHeight: '14px'
   },
-  label: { marginInlineEnd: 6, color: colors.fgSubtle },
   value: { color: colors.fgMuted },
   number: {
     fontFamily: font.num,
