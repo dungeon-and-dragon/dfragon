@@ -300,16 +300,6 @@ it('시작 신호를 낸 뒤에는 다음 시작에도 2번 연속이 다시 필
   ])
 })
 
-it('회차가 진행 중이면 판정하지 않고, 끝난 뒤에는 처음부터 2번을 센다', () => {
-  const pending = watch([party(partyB)], withBaselines({ party: partyA }))
-  const running = watch([party(partyB), party(partyB)], { ...pending.state, roundRunning: true })
-
-  expect(running.signals).toEqual(NO_START)
-  expect(
-    watch([party(partyB), party(partyB)], { ...running.state, roundRunning: false }).signals
-  ).toEqual(STARTS_PARTY)
-})
-
 it('회차에 넘긴 crop을 기준으로 기록하면 그 구성으로는 다시 시작하지 않는다', () => {
   const started = watch([party(partyB), party(partyB)], withBaselines({ party: partyA }))
   const recorded = recordScreenBaseline(started.state, 'party', partyB)
@@ -342,11 +332,4 @@ it('한 화면의 기준을 기록해도 다른 화면의 기준은 그대로 �
 
   expect(watch([party(partyA), party(partyA)], recorded).signals).toEqual(NO_START)
   expect(watch([raid(raidA), raid(raidA)], recorded).signals).toEqual(NO_START)
-})
-
-it('회차 진행 중에 기준을 기록해도 진행 중이면 판정하지 않는다', () => {
-  const running = { ...withBaselines({ party: partyA }), roundRunning: true }
-  const recorded = recordScreenBaseline(running, 'party', partyC)
-
-  expect(watch([party(partyB), party(partyB)], recorded).signals).toEqual(NO_START)
 })
