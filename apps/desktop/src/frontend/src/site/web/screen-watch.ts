@@ -31,8 +31,10 @@ const binarizers: Readonly<
   raid: binarizeRaidNicknamePixels
 }
 // 글자 여부가 다른 픽셀은 같은 이름끼리 0개(2026-11-03 Windows 실기 공유 crop의 공대 노랑, 보라 배경 연속 프레임과
-// 파티 표본), 서로 다른 공대 이름끼리 최소 79개(1067×600, 3840×2160 표본 526쌍)였다. 그 사이의 40개부터 다른 구성으로 본다.
-const CHANGED_PIXELS_FOR_NEW_NAME = 40
+// 파티 표본)였다. 서로 다른 공대 이름 526쌍의 최소 79개(1067×600, 3840×2160 표본)는 이름 전체가 다른 쌍이라, 같은 폭의
+// 한 음절만 바뀐 이름(crop 하나의 글자 픽셀 71~209개, 4~6음절에서 음절당 약 20~40개로 추정, 쌍으로는 재지 않음)을
+// 잡도록 낮게 둔다. 실제 화면 공유(YUV 변환)에서 같은 이름의 가장자리 픽셀이 몇 개 바뀌는지는 #1110에서 확인한다.
+const CHANGED_PIXELS_FOR_NEW_NAME = 10
 
 export const initialScreenWatchState: ScreenWatchState = {
   baselines: { party: null, raid: null },
