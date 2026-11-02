@@ -2,13 +2,13 @@
 type: rule
 status: active
 scope: apps/api today grade
-last-reviewed: 2026-10-30
+last-reviewed: 2026-11-03
 evidence: "2026-10-30 #1001 상단 바 등급 퍼센트의 뜻, 조회 아이템, 캐시 시각 사용자 결정; 2026-10-30 운영 502 뒤 엘더 페어리 장비로 교체"
 ---
 
 # 오늘의 등급
 
-Desktop 상단 바 왼쪽의 등급 퍼센트를 API가 계산해 제공한다(2026-10-30 결정, [Issue #1001](https://github.com/dungeon-and-dragon/dfragon/issues/1001)). 오늘의 등급은 캐릭터와 상관없이 모든 사용자에게 같은 값이다. Neople API 키는 API 서버에만 있으므로 Desktop은 Neople을 직접 부르지 않는다. 화면 표시는 [Desktop MVP 카드 UI의 상단 바](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/docs/rules/desktop-mvp-ui.md#상단-바)를 따른다.
+상단 바 왼쪽의 등급 퍼센트를 API가 계산해 제공한다(2026-10-30 결정, [Issue #1001](https://github.com/dungeon-and-dragon/dfragon/issues/1001)). 오늘의 등급은 캐릭터와 상관없이 모든 사용자에게 같은 값이다. Neople API 키는 API 서버에만 있으므로 클라이언트는 Neople을 직접 부르지 않는다.
 
 ## 조회와 계산
 
@@ -20,4 +20,4 @@ Desktop 상단 바 왼쪽의 등급 퍼센트를 API가 계산해 제공한다(2
 
 등급은 매일 0시(KST)에 바뀐다. 계산한 값은 조회를 시작한 시각 기준 다음 0시까지 API 메모리에 두고, 그동안 Neople을 다시 부르지 않는다. 0시 직전에 시작한 조회는 전날 등급을 받았을 수 있으므로 끝난 시각이 아니라 시작한 시각으로 만료를 정한다. 같은 프로세스에서 겹치는 조회는 하나를 함께 기다리고, 요청 하나의 연결 종료는 그 조회를 취소하지 않는다. 서버 종료는 진행 중인 조회를 취소한다.
 
-11개가 모두 성공해야 응답한다. 하나라도 실패하면 나머지 조회를 취소하고 부분 결과 없이 오류를 돌려주며, 실패는 캐시하지 않아 다음 요청이 다시 조회한다. 오류 본문과 상태는 캐릭터 상세와 같은 `INTERNAL_SERVER_ERROR`(500), `NEOPLE_API_ERROR`(502), `NEOPLE_UNAVAILABLE`(503), `NEOPLE_TIMEOUT`(504)이다. `itemGradeValue`가 없거나 0 이상 100 이하의 수가 아니면 502다. 목록의 아이템이 상점 조회 대상이 아니어서 받는 404 `DNF003`도 Desktop 입력과 상관없이 API가 보낸 Neople 조회가 거절된 것이라 502로 둔다. Neople 요청은 HTTP client 기본 timeout을 따르고 자동 재시도하지 않는다.
+11개가 모두 성공해야 응답한다. 하나라도 실패하면 나머지 조회를 취소하고 부분 결과 없이 오류를 돌려주며, 실패는 캐시하지 않아 다음 요청이 다시 조회한다. 오류 본문과 상태는 캐릭터 상세와 같은 `INTERNAL_SERVER_ERROR`(500), `NEOPLE_API_ERROR`(502), `NEOPLE_UNAVAILABLE`(503), `NEOPLE_TIMEOUT`(504)이다. `itemGradeValue`가 없거나 0 이상 100 이하의 수가 아니면 502다. 목록의 아이템이 상점 조회 대상이 아니어서 받는 404 `DNF003`도 클라이언트 입력과 상관없이 API가 보낸 Neople 조회가 거절된 것이라 502로 둔다. Neople 요청은 HTTP client 기본 timeout을 따르고 자동 재시도하지 않는다.

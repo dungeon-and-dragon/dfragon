@@ -162,7 +162,7 @@ pnpm verify
 
 - `pnpm install --frozen-lockfile`로 의존성을 설치합니다. Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. API 이미지는 점수 엔진 submodule만 받습니다. 둘 다 받으려면 `git submodule update --init --recursive`를 실행합니다. API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 submodule에 있을 때만 실행합니다.
 
-로컬 통과는 Windows 실기 확인과 Product Images의 이미지 빌드를 대신하지 않습니다. 실행기는 macOS, Linux에서 확인했고 Windows에서는 확인하지 않았습니다. `pnpm verify`로 실행하면 `npm_execpath`의 pnpm을 직접 시작하므로 `pnpm.cmd`만 있는 Windows 환경에서도 명령을 시작합니다. `node scripts/verify.mjs`로 직접 실행하면 shell 없이 `pnpm`을 찾으므로 이런 환경에서는 시작하지 못할 수 있습니다.
+로컬 통과는 Product Images의 이미지 빌드를 대신하지 않습니다. 실행기는 macOS, Linux에서 확인했고 Windows에서는 확인하지 않았습니다. `pnpm verify`로 실행하면 `npm_execpath`의 pnpm을 직접 시작하므로 `pnpm.cmd`만 있는 Windows 환경에서도 명령을 시작합니다. `node scripts/verify.mjs`로 직접 실행하면 shell 없이 `pnpm`을 찾으므로 이런 환경에서는 시작하지 못할 수 있습니다.
 
 ## Native validation
 

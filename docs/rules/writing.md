@@ -2,7 +2,7 @@
 type: rule
 status: active
 scope: repository prose, UI copy, comments, and the dfragon-design handoff repository
-last-reviewed: 2026-10-31
+last-reviewed: 2026-11-03
 ---
 
 # 표기와 문체
@@ -11,8 +11,8 @@ last-reviewed: 2026-10-31
 
 ## 제품 이름
 
-- 제품 이름은 `던삐삐`다(2026-10-31 결정, [Issue #1035](https://github.com/dungeon-and-dragon/dfragon/issues/1035)). 산문, UI 문구, 주석, 창 제목과 Windows 앱 이름, 작업 표시줄, 바로 가기, 제거 목록의 표시 이름에 쓴다. 영문 보조 이름을 함께 쓰지 않는다.
-- `DFragon`은 식별자에만 남긴다. 설치, 포터블 파일 이름(`DFragon-<버전>-x64-portable.exe`), `DFRAGON_` 접두어의 환경 변수와 빌드 상수, `@dfragon/*` 패키지, `dfragon` 실행 파일, profile, protocol 이름, `dfragon.com` 도메인, `DFRAGON-MODIFICATIONS.txt` 같은 파일 이름은 그대로 둔다. Desktop의 표시 이름은 [`channels.json`](https://github.com/dungeon-and-dragon/dfragon/blob/37318cc17d4661c5c0b1e0fa0fa6d994fd2a0958/apps/desktop/build/channels.json)의 `productName`, 파일 이름 접두어는 같은 파일의 `artifactPrefix`가 정했다.
+- 제품 이름은 `던삐삐`다(2026-10-31 결정, [Issue #1035](https://github.com/dungeon-and-dragon/dfragon/issues/1035)). 산문, UI 문구, 주석에 쓴다. 영문 보조 이름을 함께 쓰지 않는다.
+- `DFragon`은 식별자에만 남긴다. `DFRAGON_` 접두어의 환경 변수와 빌드 상수, `@dfragon/*` 패키지, `dfragon` 실행 파일, profile, protocol 이름, `dfragon.com` 도메인, `DFRAGON-MODIFICATIONS.txt` 같은 파일 이름은 그대로 둔다.
 - 식별자에서 `DFRAGON`, `Dfragon`을 제품 이름처럼 단독으로 쓰지 않는다. 검사는 앞뒤에 `_`, `-`, 영숫자가 붙은 표기를 식별자로 보고 건너뛴다.
 - 코드에서 제품 이름이 단독으로 서거나 제목에 들어갈 때는 `@dfragon/lib`의 `PRODUCT_NAME`을 쓴다. HTML `<title>`처럼 import할 수 없는 곳과 `던삐삐는`처럼 한국어 조사가 붙는 문장은 문자열로 쓴다.
 - 외부 저장소 이름은 이 규칙의 대상이 아니다.
@@ -25,7 +25,7 @@ last-reviewed: 2026-10-31
 - 확인 대화상자는 제목을 `사용 표시 해제`처럼 동작 이름으로 쓴다. 되돌릴 수 없는 결과처럼 꼭 알려야 할 때만 본문 한 문장을 두고, 질문 문장이 필요하면 `~하시겠습니까?`를 쓴다.
 - 화면, 대화상자, 오류 메시지, 알림처럼 사용자에게 보이는 한국어 문구를 문장으로 쓸 때는 합니다체로 쓴다. 서술은 `~합니다`, `~입니다`, 요청은 `~하세요`, `~해 주세요`, 확인 질문은 `~하시겠습니까?`를 쓴다. `~해주세요`, `~열어주세요`처럼 보조용언 `주세요`를 붙여 쓰지 않고 `~해 주세요`, `~열어 주세요`로 띄어 쓴다.
 - `~해요`, `~이에요`, `~만들어져요`, `~할게요`, `~할까요`, `~죠` 같은 해요체 어미는 쓰지 않는다. 검사는 문자열과 문서를 가리지 않고 한글 뒤에 와서 문장 끝이나 구두점으로 이어지는 `요`, `죠`를 찾는다. 하세요체 `세요`, 대답 `아니요`와 명사 `필요`, `주요`, `중요`, `개요`, `소요`, `수요`, `동요`, `강요`는 `요` 앞 글자로 구분해 허용한다.
-- 웹사이트(`apps/web`)의 소개 문구는 해요체를 쓸 수 있다(2026-10-31 저장소 소유자 결정, [Issue #1037](https://github.com/dungeon-and-dragon/dfragon/issues/1037)). 처음 들어온 방문자에게 말을 거는 문구라 앱 화면과 다르게 정했다. 헤드라인 "파티, 공대를 쉽게 확인"처럼 어미 없이 끝내도 된다. 검사는 `apps/web/` 경로에서 해요체 규칙 하나만 건너뛰고 옛 표기, 가운뎃점, `주세요` 띄어쓰기는 그대로 검사한다. Desktop 등 다른 화면은 합니다체다.
+- 웹사이트(`apps/web`)의 소개 문구는 해요체를 쓸 수 있다(2026-10-31 저장소 소유자 결정, [Issue #1037](https://github.com/dungeon-and-dragon/dfragon/issues/1037)). 처음 들어온 방문자에게 말을 거는 문구라 앱 화면과 다르게 정했다. 헤드라인 "파티, 공대를 쉽게 확인"처럼 어미 없이 끝내도 된다. 검사는 `apps/web/` 경로에서 해요체 규칙 하나만 건너뛰고 옛 표기, 가운뎃점, `주세요` 띄어쓰기는 그대로 검사한다. 앱 화면은 합니다체다.
 - 문서 문체는 저장소별 기존 기준을 유지한다. 제품 저장소의 Rule과 Reference는 한다체, 앱 README와 디자인 인계 저장소의 문서는 합니다체다.
 - 사용자가 직접 쓰는 콘텐츠의 예시 데이터는 문체 규칙의 대상이 아니다. 디자인 저장소의 `design/fixtures/`가 여기에 해당한다.
 

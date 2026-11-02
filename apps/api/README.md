@@ -45,10 +45,9 @@ pnpm --filter @dfragon/api dev
 
 `LOCAL_HTTPS_CERT_FILE`, `LOCAL_HTTPS_KEY_FILE`을 신뢰한 localhost 인증서의 절대 경로로 설정하고
 `API_ORIGIN=https://localhost:3443`을 지정합니다. TLS 파일의 key 일치, localhost/port 입력을 listen 전에 확인하며
-client의 실제 신뢰 체인 검증을 끄지 않습니다. 설치형 배포는 `DFRAGON_DISTRIBUTION_API_ORIGIN`,
-Shell 기반 구성의 검색은 `DFRAGON_API_ORIGIN`을 사용합니다.
+client의 실제 신뢰 체인 검증을 끄지 않습니다.
 별도 Node client의 개발 CA는 실행 전 `NODE_EXTRA_CA_CERTS`에 공개 CA certificate를 지정합니다.
-Desktop은 OS 인증서 신뢰를 사용하며 인증서 오류를 무시하지 않습니다.
+브라우저는 OS 인증서 신뢰를 사용하며 인증서 오류를 무시하지 않습니다.
 
 ## 시작, 종료와 검증
 
@@ -106,7 +105,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 `packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진만 바꾼 PR도 이미지를 다시 빌드합니다.
 그 안의 `*.md` 문서는 이미지에 들어가지 않으므로 입력으로 보지 않습니다.
 지운 accounts, OCR 이미지는 더 빌드하지 않습니다.
-서버 이미지 입력이 없는 문서, Desktop 전용 변경은 이미지 빌드, 발행을 건너뜁니다.
+서버 이미지 입력이 없는 문서, 웹 전용 변경은 이미지 빌드, 발행을 건너뜁니다.
 PR 제목 scope가 `(build)`가 아닌 PR과 그 main push도 이미지를 빌드, 발행하지 않으며, 그 변경은 다음
 `(build)` main push가 함께 발행합니다. 규칙은 [build-scope 안내](../../scripts/README.md#build-scope)에 있습니다.
 
