@@ -87,7 +87,7 @@ afterEach(async () => {
   useSearchModeStore.setState({ searchMode: 'party' })
 })
 
-it('preload 없이 브라우저 host만으로 상단 바와 파티 카드 네 장을 그린다', async () => {
+it('브라우저 host만으로 상단 바와 파티 카드 네 장을 그린다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() => expect(container.textContent).toContain('85'))
@@ -104,14 +104,6 @@ it('Desktop과 달리 문서 전체의 드래그를 막지 않는다', async () 
   document.body.dispatchEvent(event)
 
   expect(event.defaultPrevented).toBe(false)
-})
-
-it('Clipboard API가 없는 페이지에서는 복사를 예외 대신 거절된 Promise로 알린다', async () => {
-  vi.stubGlobal('navigator', {})
-
-  const written = window.desktopClipboard.writeText('[가나, 카인, -]')
-
-  await expect(written).rejects.toThrow(TypeError)
 })
 
 it('창을 고르기 전에는 붙여넣기 안내를 보이고, 이미지를 붙여 넣으면 지금 화면의 회차가 웹 문구로 진행된다', async () => {
@@ -152,8 +144,8 @@ it('앱 상자 안 카드의 Alt+방향키는 브라우저에 넘기지 않고 �
 it('공대 화면에서 붙여 넣으면 공대 회차가 host의 공대 프레임 읽기로 시작된다', async () => {
   vi.mocked(readRaidWindowTemplates).mockRejectedValue(new Error('no templates'))
   useSearchModeStore.setState({ searchMode: 'raid' })
-  const readRaidFrame = vi.spyOn(window.raidSearch, 'readCaptureFrame')
-  const readPartyFrame = vi.spyOn(window.api, 'readCaptureFrame')
+  const readRaidFrame = vi.spyOn(host.raid, 'readCaptureFrame')
+  const readPartyFrame = vi.spyOn(host.party, 'readCaptureFrame')
   await act(async () => root.render(<WebApp host={host} />))
   expect(container.querySelectorAll('article')).toHaveLength(12)
 
@@ -202,7 +194,7 @@ it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 �
 
 it('host의 시작 신호를 받으면 지금 화면의 회차를 시작하고 화면은 바꾸지 않으며, 다른 화면의 신호와 진행 중의 신호는 무시한다', async () => {
   const readPartyFrame = vi
-    .spyOn(window.api, 'readCaptureFrame')
+    .spyOn(host.party, 'readCaptureFrame')
     .mockReturnValue(new Promise(() => undefined))
   const { watchedHost, sendAutoRound, setWatchedScreen } = hostWithAutoRound()
   await act(async () => root.render(<WebApp host={watchedHost} />))
@@ -234,9 +226,9 @@ it('host의 시작 신호를 받으면 지금 화면의 회차를 시작하고 �
 it('공대 화면에서 공대 신호를 받으면 공대 회차가 host의 공대 프레임 읽기로 시작된다', async () => {
   useSearchModeStore.setState({ searchMode: 'raid' })
   const readRaidFrame = vi
-    .spyOn(window.raidSearch, 'readCaptureFrame')
+    .spyOn(host.raid, 'readCaptureFrame')
     .mockReturnValue(new Promise(() => undefined))
-  const readPartyFrame = vi.spyOn(window.api, 'readCaptureFrame')
+  const readPartyFrame = vi.spyOn(host.party, 'readCaptureFrame')
   const { watchedHost, sendAutoRound, setWatchedScreen } = hostWithAutoRound()
   await act(async () => root.render(<WebApp host={watchedHost} />))
   expect(setWatchedScreen).toHaveBeenLastCalledWith({ kind: 'raid', roundRunning: false })
@@ -266,5 +258,5 @@ it('던파 창을 연결한 동안 칩은 지금 화면의 마을 자동 인식�
   await vi.waitFor(() => expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.party.waiting))
   await act(async () => useSearchModeStore.setState({ searchMode: 'raid' }))
   expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.raid.waiting)
-  await act(async () => window.api.selectCaptureSource(''))
+  await act(async () => host.party.selectCaptureSource(''))
 })

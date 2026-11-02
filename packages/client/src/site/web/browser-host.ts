@@ -8,21 +8,14 @@ import ky from 'ky'
 import { parseTodayGrade } from '@dfragon/client-core/preload/common/today-grade'
 import type { CaptureSource } from '@dfragon/client-core/preload/common/types/capture'
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
-import type { DesktopShortcut } from '@dfragon/client-core/preload/common/types/desktop-shortcut'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
-import {
-  DIAGNOSTIC_HISTORY_LIMIT,
-  type DiagnosticApi,
-  type DiagnosticCode,
-  type DiagnosticEntry
-} from '@dfragon/client-core/preload/common/types/diagnostics'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
-import type { UpdateNoticeSnapshot } from '@dfragon/client-core/preload/common/types/update-notice'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
 } from '@dfragon/client-core/shared/raid/raid-window'
+import type { ClientHost, PageShortcut } from '../../hooks/useClientHost'
 import { startRendererDiagnostics } from '../../lib/runtime-diagnostics'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
@@ -39,9 +32,8 @@ import {
 
 // 응답은 `{ percent, expiresAt }` 하나라 100바이트 안팎이다.
 const TODAY_GRADE_MAX_BYTES = 4 * 1024
-const NO_UPDATE_NOTICE: UpdateNoticeSnapshot = { revision: 0, notice: null }
 // 한글 자판에서는 Alt+W의 key가 'ㅈ'이므로 물리 키로 고른다.
-const PAGE_SHORTCUTS: Readonly<Record<string, DesktopShortcut>> = {
+const PAGE_SHORTCUTS: Readonly<Record<string, PageShortcut>> = {
   KeyW: 'take-snapshot',
   KeyA: 'copy-clipboard',
   KeyR: 'restart-search'
@@ -53,7 +45,7 @@ export type WatchedScreen = Readonly<{ kind: ScreenWatchKind; roundRunning: bool
 
 export type AutoRoundSignal = Readonly<{ kind: ScreenWatchKind }>
 
-export type BrowserHost = {
+export type BrowserHost = ClientHost & {
   onPastedFrame: (listener: () => void) => () => void
   requestScreenShare: () => Promise<string | null>
   onScreenShareEnded: (listener: () => void) => () => void
@@ -63,8 +55,6 @@ export type BrowserHost = {
 }
 
 type ScreenShare = { id: string; track: MediaStreamTrack; video: HTMLVideoElement }
-
-type BrowserDiagnostics = DiagnosticApi & { report: (code: DiagnosticCode) => void }
 
 function createListeners<T extends unknown[]>(): {
   subscribe: (listener: (...args: T) => void) => () => void
@@ -85,32 +75,6 @@ function createListeners<T extends unknown[]>(): {
         listener(...args)
       }
     }
-  }
-}
-
-function createMemoryDiagnostics(): BrowserDiagnostics {
-  const entries: DiagnosticEntry[] = []
-  const listeners = createListeners<[DiagnosticEntry]>()
-  let sequence = 0
-
-  function report(code: DiagnosticCode): void {
-    if (entries.at(-1)?.code === code) {
-      return
-    }
-    sequence += 1
-    const entry = Object.freeze({ sequence, timestamp: Date.now(), code })
-    entries.push(entry)
-    if (entries.length > DIAGNOSTIC_HISTORY_LIMIT) {
-      entries.shift()
-    }
-    listeners.notify(entry)
-  }
-
-  return {
-    report,
-    getDiagnosticHistory: async () => entries.slice(),
-    reportRendererDiagnostic: async (code) => report(code),
-    onDiagnosticEntry: listeners.subscribe
   }
 }
 
@@ -488,10 +452,8 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
   }
 }
 
-function installPageShortcuts(
-  canRestart: () => boolean
-): (listener: (shortcut: DesktopShortcut) => void) => () => void {
-  const shortcuts = createListeners<[DesktopShortcut]>()
+function installPageShortcuts(canRestart: () => boolean): ClientHost['onShortcut'] {
+  const shortcuts = createListeners<[PageShortcut]>()
   document.addEventListener('keydown', (event) => {
     if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.repeat) {
       return
@@ -509,8 +471,8 @@ function installPageShortcuts(
 }
 
 export function installBrowserHost(apiOrigin: string): BrowserHost {
-  const diagnostics = createMemoryDiagnostics()
-  const runtime = createBrowserSearchRuntime(apiOrigin, diagnostics.report)
+  const reportDiagnostic = startRendererDiagnostics()
+  const runtime = createBrowserSearchRuntime(apiOrigin, reportDiagnostic)
   const party = createBrowserCardSearch('party', runtime)
   const raid = createBrowserCardSearch('raid', runtime)
   const screenShare = createScreenShare()
@@ -526,44 +488,22 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     return frame
   }
 
-  // 공유는 게임 연결 칩을 눌렀을 때만 요청한다. 목록 재조회가 공유 창을 띄우지 않도록 목록은 늘 비운다.
-  window.api = {
-    listCaptureSources: async () => [],
-    selectCaptureSource: async (sourceId) => screenShare.select(sourceId),
-    readCaptureFrame: async () => ({ kind: 'frame', image: await readRoundFrame('party') }),
-    notifyOcrCandidatesDetected: party.notifyOcrCandidatesDetected
-  }
-  window.search = {
-    controlCharacterSearch: party.controlCharacterSearch,
-    onCharacterSearchChanged: party.onCharacterSearchChanged
-  }
-  window.raidSearch = {
-    ...raid,
-    readCaptureFrame: async () =>
-      toRaidFrameResult(
-        { kind: 'frame', image: await readRoundFrame('raid') },
-        await readRaidWindowTemplates()
-      )
-  }
-  window.desktopShortcut = { onDesktopShortcut: installPageShortcuts(screenShare.isConnected) }
-  // 보안 컨텍스트가 아니면 navigator.clipboard가 없으므로, async로 감싸 그 TypeError도 복사 실패로 보이게 한다.
-  window.desktopClipboard = {
-    writeText: async (text) => {
-      await navigator.clipboard.writeText(text)
-    }
-  }
-  window.todayGrade = { getTodayGrade: () => readTodayGrade(apiOrigin) }
-  window.diagnostics = diagnostics
-  window.updateNotice = {
-    getUpdateNotice: async () => NO_UPDATE_NOTICE,
-    dismissUpdateNotice: async () => NO_UPDATE_NOTICE,
-    openUpdateRelease: async () => {},
-    onUpdateNoticeChanged: () => () => {}
-  }
-  window.windowChrome = { setContentHeight: async () => {} }
-  startRendererDiagnostics(diagnostics)
-
   return {
+    party: {
+      ...party,
+      selectCaptureSource: async (sourceId) => screenShare.select(sourceId),
+      readCaptureFrame: async () => ({ kind: 'frame', image: await readRoundFrame('party') })
+    },
+    raid: {
+      ...raid,
+      readCaptureFrame: async () =>
+        toRaidFrameResult(
+          { kind: 'frame', image: await readRoundFrame('raid') },
+          await readRaidWindowTemplates()
+        )
+    },
+    onShortcut: installPageShortcuts(screenShare.isConnected),
+    getTodayGrade: () => readTodayGrade(apiOrigin),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
     onScreenShareEnded: screenShare.onEnded,

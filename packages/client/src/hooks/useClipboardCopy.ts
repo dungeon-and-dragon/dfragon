@@ -4,13 +4,14 @@ export type ClipboardCopyStatus = 'idle' | 'copied' | 'failed'
 
 const COPIED_FEEDBACK_MS = 1500
 
-function writeDesktopClipboard(text: string): Promise<void> {
-  return window.desktopClipboard.writeText(text)
+// 보안 컨텍스트가 아니면 navigator.clipboard가 없으므로, async로 감싸 그 TypeError도 복사 실패로 보이게 한다.
+async function writeBrowserClipboard(text: string): Promise<void> {
+  await navigator.clipboard.writeText(text)
 }
 
 export function useClipboardCopy(
   text: string,
-  writeText: (text: string) => Promise<void> = writeDesktopClipboard
+  writeText: (text: string) => Promise<void> = writeBrowserClipboard
 ): {
   status: ClipboardCopyStatus
   copy: () => void

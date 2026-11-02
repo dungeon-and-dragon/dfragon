@@ -5,10 +5,7 @@
   "type": "module",
   "exports": {
     "./web": "./src/site/web/index.ts",
-    "./time-of-day": "./src/site/time-of-day.ts",
-    "./globals": {
-      "types": "./src/globals.d.ts"
-    }
+    "./time-of-day": "./src/site/time-of-day.ts"
   },
   "scripts": {
     "test": "pnpm typecheck && vitest run",

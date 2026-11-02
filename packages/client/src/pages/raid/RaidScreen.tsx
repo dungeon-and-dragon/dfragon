@@ -7,7 +7,7 @@ import { LastCaptureTime } from '../../components/LastCaptureTime'
 import { SnapshotToggle } from '../../components/SnapshotToggle'
 import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
 import { useClipboardCopy } from '../../hooks/useClipboardCopy'
-import { useDesktopShortcut } from '../../hooks/useDesktopShortcut'
+import { usePageShortcut } from '../../hooks/usePageShortcut'
 import { useRaidSlotCards } from '../../hooks/useRaidSlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { filledSlotCount } from '../../lib/slot-cards'
@@ -21,8 +21,8 @@ export function RaidScreen(): React.JSX.Element {
     : ''
   const { renderBoardHeader } = useBoardHeaderPortal()
   const clipboard = useClipboardCopy(clipboardText)
-  useDesktopShortcut('take-snapshot', !snapshot.active, snapshot.take)
-  useDesktopShortcut('copy-clipboard', true, clipboard.copy)
+  usePageShortcut('take-snapshot', !snapshot.active, snapshot.take)
+  usePageShortcut('copy-clipboard', true, clipboard.copy)
 
   return (
     <>

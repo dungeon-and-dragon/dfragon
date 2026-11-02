@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
+import { useClientHost } from './useClientHost'
 
 // PC 시계가 API 서버보다 빠르면 만료가 이미 지난 값을 다시 받으므로, 다시 받는 간격을 1분 아래로 줄이지 않는다.
 const MIN_REFRESH_DELAY_MS = 60 * 1000
 
 export function useTodayGrade(): number | null {
+  const { getTodayGrade } = useClientHost()
   const [grade, setGrade] = useState<TodayGrade | null>(null)
   const [revision, setRevision] = useState(0)
 
   useEffect(() => {
     let active = true
-    window.todayGrade.getTodayGrade().then(
+    getTodayGrade().then(
       (next) => {
         if (active) {
           setGrade(next)
@@ -26,7 +28,7 @@ export function useTodayGrade(): number | null {
     return () => {
       active = false
     }
-  }, [revision])
+  }, [getTodayGrade, revision])
 
   useEffect(() => {
     if (grade == null) {

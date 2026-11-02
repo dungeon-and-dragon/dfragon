@@ -34,7 +34,7 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 
 ### 화면 공유 연결
 
-- 상단 바의 게임 연결 칩을 누르면 그 클릭 안에서 `getDisplayMedia`로 창 공유를 요청한다. 칩 말고는 공유를 요청하지 않으며, Desktop의 캡처 소스 목록 재조회도 웹에서는 빈 목록만 받아 공유 창을 다시 띄우지 않는다.
+- 상단 바의 게임 연결 칩을 누르면 그 클릭 안에서 `getDisplayMedia`로 창 공유를 요청한다. 칩 말고는 공유를 요청하지 않는다. 웹에는 캡처 소스 목록이 없다.
 - 공유를 받으면 그 창이 연결된 캡처 소스 하나가 되고, 칩은 연결됨으로 바뀐다. 연결된 동안 칩을 다시 누르면 새로 고른 창으로 바꾸고, 공유 창을 닫거나 거절하면 지금 연결을 그대로 둔다.
 - 연결된 동안 웹은 마을에서 지금 보이는 화면(파티, 공대)의 구성이 바뀌면 그 화면의 회차를 자동으로 시작한다([마을 자동 인식](#마을-자동-인식)). 켜고 끄는 토글과 설정은 두지 않는다.
 - 캡처 버튼과 Alt+R은 남긴다. 누르면 Desktop처럼 공유 화면에서 프레임 한 장을 읽어 지금 보이는 화면의 회차를 시작하고, 같은 구성이어도 바로 다시 인식한다. 연결된 동안에도 붙여 넣은 이미지는 그 붙여넣기로 시작한 회차에서만 읽는다.
@@ -108,7 +108,7 @@ Alt와 왼쪽, 오른쪽 방향키는 브라우저의 뒤로, 앞으로 가기�
 
 ## Renderer 주입 지점
 
-Renderer는 Electron을 직접 참조하지 않고 `packages/client/src/globals.d.ts`의 bridge 9개(`api`, `search`, `raidSearch`, `desktopShortcut`, `desktopClipboard`, `todayGrade`, `diagnostics`, `updateNotice`, `windowChrome`)로만 플랫폼에 닿는다. 웹은 9개를 모두 브라우저 API로 구현한 브라우저 host를 넣어 Desktop renderer 컴포넌트와 hook을 그대로 쓴다. `search`, `raidSearch`는 공용 검색 코어에 `fetch`, `createImageBitmap` adapter를 넣어 구현하고, `desktopClipboard`는 위 [클립보드](#클립보드)를 따른다.
+Renderer는 전역 대신 `packages/client/src/hooks/useClientHost.ts`의 `ClientHost`(`party`, `raid`, `onShortcut`, `getTodayGrade`)로 검색, 캡처, 단축키, 등급 연산을 받는다. 웹 entry가 브라우저 host를 React context로 넣는다. `party`, `raid`는 공용 검색 코어에 `fetch`, `createImageBitmap` adapter를 넣어 구현하고, 클립보드는 위 [클립보드](#클립보드)대로 renderer가 `navigator.clipboard`를 바로 쓴다.
 
 Renderer 컴포넌트와 hook은 아래 세 주입 지점만 고친다. 그 밖의 웹 전용 분기는 renderer에 넣지 않고 브라우저 host와 웹 entry에 둔다. 주입 지점을 고쳐도 Desktop의 동작과 문구는 바뀌지 않는다.
 
