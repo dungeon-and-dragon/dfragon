@@ -17,14 +17,6 @@ function LineIcon({ children, ...props }: SVGProps<SVGSVGElement>): React.JSX.El
   )
 }
 
-export function DownloadIcon(props: SVGProps<SVGSVGElement>): React.JSX.Element {
-  return (
-    <LineIcon {...props}>
-      <path d="M12 15V3m-5 7 5 5 5-5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    </LineIcon>
-  )
-}
-
 export function ExternalLinkIcon(props: SVGProps<SVGSVGElement>): React.JSX.Element {
   return (
     <LineIcon {...props}>
