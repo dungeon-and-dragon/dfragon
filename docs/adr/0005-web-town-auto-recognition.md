@@ -4,7 +4,7 @@ status: accepted
 scope: dfragon.com web client round start while sharing the game window
 decided: 2026-11-03
 last-reviewed: 2026-11-03
-superseded-by: 없음
+superseded-by: "0006-web-town-watch-current-screen.md(판정 대상 화면, 자동 화면 전환과 그 구조 문장, 같은 구성 기준에 한함)"
 evidence: "Issue #1105 정한 것, 동작, 구조, 확인한 사실(https://github.com/dungeon-and-dragon/dfragon/issues/1105) ; 저장소 소유자 결정(2026-11-03) ; hidden 페이지의 프레임 읽기, timer 실험(2026-11-03, macOS Chrome 155, DevTools Protocol) ; 판정, OCR 비용 측정(Node, Apple M3 Max)"
 review-after: Desktop 자동 인식, 마을 밖 자동 인식, 바뀐 자리만 다시 조회하는 부분 회차를 넣기 전, Chrome의 hidden 페이지 timer, freezing 정책이 바뀔 때
 ---
