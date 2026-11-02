@@ -27,16 +27,12 @@ async function render(at: number | null): Promise<void> {
 }
 
 function lastCapture(): string | null {
-  const label = [...container.querySelectorAll('span')].find(
-    (span) => span.textContent === '마지막 캡처'
-  )!
-
-  return label.nextElementSibling!.textContent
+  return container.firstElementChild!.textContent
 }
 
-it('마지막 캡처 시각이 없으면 -이고, 있으면 상대 시간을 표시 값이 바뀔 때마다 고친다', async () => {
+it('마지막 캡처 시각이 없으면 비우고, 있으면 상대 시간을 표시 값이 바뀔 때마다 고친다', async () => {
   await render(null)
-  expect(lastCapture()).toBe('-')
+  expect(lastCapture()).toBe('')
   expect(container.querySelector('time')).toBeNull()
   const at = Date.now() - 12_000
   await render(at)
@@ -59,7 +55,7 @@ it('마지막 캡처 시각이 없으면 -이고, 있으면 상대 시간을 표
   expect(nextTimer.mock.lastCall?.[1]).toBe(60_000)
   nextTimer.mockRestore()
   await render(null)
-  expect(lastCapture()).toBe('-')
+  expect(lastCapture()).toBe('')
   expect(vi.getTimerCount()).toBe(0)
 })
 
