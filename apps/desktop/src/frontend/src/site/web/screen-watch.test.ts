@@ -325,3 +325,28 @@ it('기준을 바꾸면 후보를 버려 새 기준 아래에서 다시 2번을 
 
   expect(watch([party(partyB), party(partyB)], recorded).signals).toEqual(STARTS_PARTY)
 })
+
+it('다른 화면의 기준을 기록하면 이 화면의 후보도 버린다', () => {
+  const pending = watch([party(partyB)], withBaselines({ party: partyA }))
+  const recorded = recordScreenBaseline(pending.state, 'raid', raidA)
+
+  expect(watch([party(partyB), party(partyB)], recorded).signals).toEqual(STARTS_PARTY)
+})
+
+it('한 화면의 기준을 기록해도 다른 화면의 기준은 그대로 남는다', () => {
+  const recorded = recordScreenBaseline(
+    recordScreenBaseline(initialScreenWatchState, 'party', partyA),
+    'raid',
+    raidA
+  )
+
+  expect(watch([party(partyA), party(partyA)], recorded).signals).toEqual(NO_START)
+  expect(watch([raid(raidA), raid(raidA)], recorded).signals).toEqual(NO_START)
+})
+
+it('회차 진행 중에 기준을 기록해도 진행 중이면 판정하지 않는다', () => {
+  const running = { ...withBaselines({ party: partyA }), roundRunning: true }
+  const recorded = recordScreenBaseline(running, 'party', partyC)
+
+  expect(watch([party(partyB), party(partyB)], recorded).signals).toEqual(NO_START)
+})
