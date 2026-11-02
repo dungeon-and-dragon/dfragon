@@ -3,7 +3,6 @@ import { timeOfDayImages } from '@dfragon/desktop-site/time-of-day'
 import * as stylex from '@stylexjs/stylex'
 import { lazy, Suspense } from 'react'
 import neopleOpenApiLogo from './assets/neople-open-api.png'
-import { DownloadLink } from './download/DownloadLink'
 import { ExternalLinkIcon } from './icons'
 import { useTimeOfDay } from './useTimeOfDay'
 import { styles } from './App.style'
@@ -64,13 +63,6 @@ export default function App(): React.JSX.Element {
               <li>캐릭터 초상화는 API가 네오플에서 받아 전달해요.</li>
               <li>붙여 넣거나 공유한 화면 이미지는 브라우저 밖으로 나가지 않아요.</li>
             </ul>
-          </div>
-          <div {...stylex.props(styles.note)}>
-            <h2 {...stylex.props(styles.noteTitle)}>게임 안에서 쓰려면</h2>
-            <p {...stylex.props(styles.text)}>
-              Desktop 앱을 받으면 게임 위에서 Alt+R로 바로 인식해요.
-            </p>
-            <DownloadLink />
           </div>
         </section>
       </main>
