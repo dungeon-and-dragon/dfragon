@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pngjs": "catalog:",
+    "pngjs": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
