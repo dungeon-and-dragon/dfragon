@@ -53,18 +53,17 @@ Desktop은 파티, 공대 캡처와 검색, 카드의 캐릭터 면만 둔다. �
 
 ## 점수 엔진 경계
 
-비공개 엔진 저장소가 만든 C 네이티브 점수 엔진(Windows DLL, macOS dylib, Linux `libdnfscore.so`)은 실행 위치마다 Node worker thread 하나를 띄워 `koffi`로 불러 쓴다(2026-10-19 결정, [Issue #716](https://github.com/dungeon-and-dragon/dfragon/issues/716), worker 이전은 [Issue #987](https://github.com/dungeon-and-dragon/dfragon/issues/987)). 실행 위치는 `apps/api`와 Desktop main이다. API는 웹 클라이언트를 위해 점수를 계산해 상세 응답에 넣는다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). API의 경계는 `apps/api/src/score/engine.ts`, Desktop main의 경계는 `apps/desktop/src/backend/score/engine.ts`이고, worker 진입은 각각 같은 폴더의 `worker.ts`다. 엔진은 OS thread마다 첫 계산을 초기화하므로 실행 위치마다 준비와 모든 계산을 같은 worker에서 하고, 그 process는 계산을 기다리는 동안 막히지 않는다.
+비공개 엔진 저장소가 만든 C 네이티브 점수 엔진(Windows DLL, macOS dylib, Linux `libdnfscore.so`)은 Node worker thread 하나를 띄워 `koffi`로 불러 쓴다(2026-10-19 결정, [Issue #716](https://github.com/dungeon-and-dragon/dfragon/issues/716), worker 이전은 [Issue #987](https://github.com/dungeon-and-dragon/dfragon/issues/987)). 실행 위치는 `apps/api` 하나다. API는 점수를 계산해 상세 응답에 넣고, 웹 클라이언트와 Desktop은 그 점수를 쓴다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md), Desktop은 [Issue #1088](https://github.com/dungeon-and-dragon/dfragon/issues/1088)). 경계는 `apps/api/src/score/engine.ts`, worker 진입은 같은 폴더의 `worker.ts`다. 엔진은 OS thread마다 첫 계산을 초기화하므로 준비와 모든 계산을 같은 worker에서 하고, API process는 계산을 기다리는 동안 막히지 않는다.
 
 | 대상 | 책임 |
 | --- | --- |
 | 비공개 엔진 저장소 | 엔진의 소스, 계산 데이터, 빌드, Release를 소유한다. |
-| 이 저장소 | 엔진을 불러 쓰는 로더와 바이너리 입수 script만 둔다. 엔진의 소스, 데이터, 바이너리를 commit하지 않는다. |
+| 이 저장소 | 엔진을 불러 쓰는 로더만 두고, API 이미지는 submodule의 바이너리를 Dockerfile로 넣는다. 엔진의 소스, 데이터, 바이너리를 commit하지 않는다. |
 | `apps/api` | API의 점수 worker가 Linux 엔진을 `koffi`로 로드해 장비 점수와 버프 점수를 계산하고, 상세 응답과 1시간 상세 캐시에 함께 둔다. 웹 클라이언트는 이 점수만 쓴다. |
-| `apps/desktop` main | Main process의 점수 worker가 엔진을 `koffi`로 로드하고 호출한다. 결과 검증과 진단은 main이 맡는다. Desktop이 API 점수를 쓰도록 바꾸고 로컬 엔진을 지우는 [Issue #1088](https://github.com/dungeon-and-dragon/dfragon/issues/1088)이 끝날 때까지 남는다. |
-| renderer, preload, 웹 클라이언트 | 엔진을 로드하거나 import하지 않는다. Desktop renderer는 main이 계산해 전달한 결과를, 웹 클라이언트는 API 상세 응답의 결과만 받는다. |
+| `apps/desktop`, 웹 클라이언트 | 엔진을 로드하거나 import하지 않는다. API 상세 응답의 점수만 받는다. |
 
-- **빌드 조건**: 엔진 바이너리는 CI secret으로 입수한다. 엔진 없는 빌드를 허용한다.
-- **코드 노출 한계**: 컴파일된 코드도 역공학으로 해석할 수 있다. 이 경계는 소스와 데이터를 공개 저장소 밖에 두는 소유 분리이며, Desktop에 실린 바이너리의 로직이 끝까지 숨겨진다고 보장하지 않는다.
+- **빌드 조건**: 엔진은 공개 바이너리 저장소의 submodule로 받고, API 이미지는 엔진이 없으면 빌드에 실패한다.
+- **코드 노출 한계**: 컴파일된 코드도 역공학으로 해석할 수 있다. 이 경계는 소스와 데이터를 공개 저장소 밖에 두는 소유 분리이며, 공개 바이너리 저장소와 API 이미지에 실린 바이너리의 로직이 끝까지 숨겨진다고 보장하지 않는다.
 
 ## Shared UI boundary
 
@@ -107,7 +106,7 @@ OCR 파인튜닝 모델 submodule은 `packages/models`의 workspace package `@df
 | `packages/models`의 `@dfragon/models` | 모델 저장소를 submodule로 고정 커밋에 묶고 `exports`로 모델, 사전 파일 경로를 제공한다. 코드와 dependency가 없으며 앱 source를 참조하지 않는다. |
 | `apps/desktop` | 빌드 설정에서 패키지 이름으로 모델 파일을 찾아 renderer 자원으로 복사한다. 어떤 모델을 넣을지와 호환성 검증은 Desktop이 소유한다. |
 
-점수 엔진 바이너리도 같은 패키지의 submodule(`score-engine`)로 입수한다. 바이너리 저장소는 공개라 OCR 모델과 같은 submodule 명령으로 받으며, 받지 않은 checkout의 Desktop은 점수 없이 빌드한다. 어떤 엔진을 넣을지는 submodule 커밋으로 고정하고 Desktop이 플랫폼별 파일을 패키지 자원으로 복사한다. API 이미지는 Linux 파일을 넣으며 엔진이 없으면 빌드에 실패한다.
+점수 엔진 바이너리도 같은 패키지의 submodule(`score-engine`)로 입수한다. 바이너리 저장소는 공개라 OCR 모델과 같은 submodule 명령으로 받으며, 어떤 엔진을 넣을지는 submodule 커밋으로 고정한다. API 이미지는 Linux 파일을 넣으며 엔진이 없으면 빌드에 실패한다.
 
 
 모델 원본과 학습은 모델 저장소가 소유하며 이 저장소에 모델 파일을 commit하지 않는다. 점수 엔진의 소스와 빌드는 비공개 엔진 저장소가 소유한다. 사용법과 갱신 절차는 [패키지 안내](../../packages/models/README.md)를 따른다.

@@ -3,7 +3,6 @@ import { pathToFileURL } from 'node:url'
 import type { BrowserWindowConstructorOptions } from 'electron'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { readDesktopChannel } from '../../build/channels'
-import type { ScoreEngine } from './score/engine'
 
 const mocks = vi.hoisted(() => {
   const constructWindow = vi.fn()
@@ -54,8 +53,6 @@ const mocks = vi.hoisted(() => {
   const exit = vi.fn()
   const appOn = vi.fn()
   const windows = [] as unknown[]
-  const scoreWorker = { on: vi.fn(), postMessage: vi.fn(), terminate: vi.fn() }
-  const createScoreWorker = vi.fn(() => scoreWorker)
 
   return {
     constructWindow,
@@ -90,9 +87,7 @@ const mocks = vi.hoisted(() => {
     setAppUserModelId,
     exit,
     appOn,
-    windows,
-    scoreWorker,
-    createScoreWorker
+    windows
   }
 })
 vi.mock('electron', () => {
@@ -120,7 +115,6 @@ vi.mock('electron', () => {
     requestSingleInstanceLock: mocks.requestSingleInstanceLock,
     setPath: mocks.setPath,
     getPath: mocks.getPath,
-    getAppPath: () => '/synthetic/app',
     getVersion: mocks.getVersion,
     setName: mocks.setName,
     setAppUserModelId: mocks.setAppUserModelId,
@@ -186,7 +180,6 @@ vi.mock('./today-grade/ipc-handler', () => ({
 vi.mock('./clipboard/ipc-handler', () => ({
   registerClipboardWindow: mocks.registerClipboardWindow
 }))
-vi.mock('./score/worker?nodeWorker', () => ({ default: mocks.createScoreWorker }))
 vi.mock('./app-icon/register', () => ({
   readAppIcon: () => '/synthetic/time-of-day/day.png',
   registerTimeOfDayIcon: () => vi.fn()
@@ -340,23 +333,14 @@ it('API 미구성이면 검색 설정 없이 캡처 IPC를 등록한다', async 
   expect(mocks.registerCapture).toHaveBeenCalledExactlyOnceWith(undefined)
 })
 
-it('API origin이 있으면 얼굴 비교 정책과 점수 엔진을 캡처 IPC에 연결하고 종료 때 점수 worker를 정리한다', async () => {
+it('API origin이 있으면 얼굴 비교 정책을 캡처 IPC에 연결하고 종료 때 정리한다', async () => {
   vi.stubEnv('DFRAGON_API_ORIGIN', 'https://api.synthetic.test')
   await import('./main')
   await mocks.bootstrap
 
   expect(mocks.registerCapture).toHaveBeenCalledExactlyOnceWith({
     apiOrigin: 'https://api.synthetic.test',
-    portraitColorPolicy: expect.any(Object),
-    scoreEngine: expect.objectContaining({ prepare: expect.any(Function) })
-  })
-  expect(mocks.createScoreWorker).not.toHaveBeenCalled()
-  const [configuration] = mocks.registerCapture.mock.calls[0] as unknown as [
-    { scoreEngine: ScoreEngine }
-  ]
-  configuration.scoreEngine.prepare()
-  expect(mocks.createScoreWorker).toHaveBeenCalledExactlyOnceWith({
-    workerData: { path: expect.any(String) }
+    portraitColorPolicy: expect.any(Object)
   })
   for (const [event, listener] of mocks.appOn.mock.calls) {
     if (event === 'quit') {
@@ -364,7 +348,6 @@ it('API origin이 있으면 얼굴 비교 정책과 점수 엔진을 캡처 IPC�
     }
   }
   expect(mocks.disposeCapture).toHaveBeenCalledOnce()
-  expect(mocks.scoreWorker.terminate).toHaveBeenCalledOnce()
 })
 
 it('기본 entry는 legacy를 포함한 media permission을 명시적으로 거절한다', async () => {
