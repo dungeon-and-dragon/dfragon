@@ -144,7 +144,8 @@ export const link = (
 const consumerStyles = stylex.create({
   signal: { backgroundColor: colors.signal, transitionDuration: motion.durHover }
 })
-export const primaryShape = <div {...stylex.props(consumerStyles.signal, shapes.cutTopRight)} />
+export const signalSurface = <div {...stylex.props(consumerStyles.signal)} />
+export const gridShape = <div {...stylex.props(shapes.gridWell)} />
 
 // @ts-expect-error 공개 Button은 화면별 className override를 허용하지 않는다.
 export const unsupportedAppearance = <Button className="override" />
