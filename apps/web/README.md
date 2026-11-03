@@ -66,8 +66,8 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 ## 구성
 
 - `index.html`: 제목, 설명, OG 메타 태그. OG 이미지는 두지 않아 링크 미리보기는 제목과 설명만 보입니다(2026-10-31 결정, [Issue #1036](https://github.com/dungeon-and-dragon/dfragon/issues/1036)).
-- `src/App.tsx`: 웹 앱 상자를 페이지 가운데에, Neople Open API 로고(96×18)를 페이지 아래 가운데에 놓는 첫 화면입니다. 웹 앱 상자는 창이 1280px보다 좁으면 상자 안에서만 가로로 스크롤하고 페이지는 넘치지 않습니다.
-- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달되어 상단 바와 검색 화면을 파티 1280×163, 공대 1280×300 상자 안에 그립니다. 상단 바의 캡처 칩 자리에는 화면 공유를 요청하는 게임 연결 칩을 넣습니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. 계약은 [웹 클라이언트](../../docs/rules/web-client.md)를 따릅니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
+- `src/App.tsx`: 웹 앱 상자를 페이지 가운데에, Neople Open API 로고(96×18)를 페이지 아래 가운데에 놓는 첫 화면입니다. 웹 앱 상자는 창이 1080px보다 좁으면 상자 안에서만 가로로 스크롤하고 페이지는 넘치지 않습니다.
+- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달되어 상단 바와 검색 화면을 파티 1080×207, 공대 1080×344 상자 안에 그립니다. 상단 바의 캡처 칩 자리에는 화면 공유를 요청하는 게임 연결 칩을 넣습니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. 계약은 [웹 클라이언트](../../docs/rules/web-client.md)를 따릅니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
 
 ## 글꼴과 고지
 

@@ -4,12 +4,11 @@ import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
 const popupOpen = ':is([data-popup-open])'
 
 export const styles = stylex.create({
-  nav: { display: 'flex', alignItems: 'center', gap: space.s4, flexShrink: 0 },
+  nav: { display: 'flex', alignSelf: 'stretch', gap: space.s4, flexShrink: 0 },
   item: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 6,
-    height: 36,
     margin: 0,
     paddingInline: space.s16,
     borderWidth: 0,
@@ -35,10 +34,6 @@ export const styles = stylex.create({
     transitionProperty: 'background-color, color',
     transitionDuration: motion.durHover,
     transitionTimingFunction: motion.ease
-  },
-  // 자른 모서리가 바깥 포커스 링을 가리므로 현재 항목은 면 안쪽에 선을 그린다.
-  currentFocus: {
-    ':focus-visible': { outline: `2px solid ${colors.signal}`, outlineOffset: -4 }
   },
   sub: {
     fontSize: 12,

@@ -23,7 +23,7 @@ export function ClipboardCopyButton({
     <>
       {status === 'failed' && (
         <p title={FAILURE_MESSAGE} {...stylex.props(styles.failure)}>
-          <span aria-hidden="true" {...stylex.props(shapes.cutTopRight, styles.failureMark)}>
+          <span aria-hidden="true" {...stylex.props(styles.failureMark)}>
             !
           </span>
           <span {...stylex.props(styles.failureText)}>{FAILURE_MESSAGE}</span>
@@ -35,7 +35,7 @@ export function ClipboardCopyButton({
             type="button"
             aria-label="클립보드로 복사"
             onClick={onCopy}
-            {...stylex.props(shapes.cutTopRight, styles.button)}
+            {...stylex.props(styles.button)}
           >
             <Icon width={16} height={16} />
           </button>

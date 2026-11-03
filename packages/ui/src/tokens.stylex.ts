@@ -108,7 +108,6 @@ export const radius = stylex.defineConsts({
 })
 
 export const shape = stylex.defineConsts({
-  cut: 'var(--df-cut)',
   gridCell: 'var(--df-grid-cell)',
   hazardStripe: 'var(--df-hazard-stripe)'
 })

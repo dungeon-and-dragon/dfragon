@@ -24,14 +24,11 @@ export const styles = stylex.create({
   sm: { width: size.controlSm, height: size.controlSm, fontSize: 16 },
   md: { width: size.controlMd, height: size.controlMd, fontSize: 24 },
   bar: { width: 36, height: 36, fontSize: 20 },
-  // 자른 모서리가 바깥 outline을 가리므로 포커스 링은 면 안쪽에 그린다.
   lg: {
     width: size.controlLg,
     height: size.controlLg,
     fontSize: 24,
-    borderRadius: radius.panel,
-    backgroundColor: colors.bgInset,
-    outlineOffset: -4
+    backgroundColor: colors.bgInset
   },
   icon: { display: 'inline-flex', width: '1em', height: '1em' }
 })

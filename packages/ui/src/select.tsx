@@ -6,7 +6,6 @@ import { ChevronDownIcon } from './icons'
 import { listboxStyles } from './listbox.style'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
 import { styles } from './select.style'
-import { shapes } from './shapes'
 import type { ControlSurface } from './surface'
 
 export type SelectTriggerProps = PublicProps<typeof BaseSelect.Trigger> & {
@@ -32,7 +31,6 @@ function SelectTriggerImpl({
           controlStyles.focusRing,
           controlStyles.hoverTransition,
           styles[size],
-          size === '2xs' && shapes.cutTopRight,
           surface === 'card' && styles.cardTrigger
         ),
         { className, style }

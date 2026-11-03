@@ -27,7 +27,7 @@ test('소비자 compiler가 library의 StyleX 선언을 산출 CSS의 atomic cla
     'border-top-color:var(--df-signal)',
     'font-family:var(--df-font-num)',
     'outline-color:var(--df-signal)',
-    'clip-path:polygon(00,calc(100%-var(--df-cut))0,100%var(--df-cut),100%100%,0100%)',
+    'background-size:var(--df-grid-cell)var(--df-grid-cell)',
     'background-color:var(--df-signal)'
   ]) {
     const atomicRule = new RegExp(

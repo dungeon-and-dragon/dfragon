@@ -1,16 +1,9 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, shape, space } from './tokens.stylex'
 
-const cut = shape.cut
 const stripe = shape.hazardStripe
 
 export const shapes = stylex.create({
-  cutTopRight: {
-    clipPath: `polygon(0 0, calc(100% - ${cut}) 0, 100% ${cut}, 100% 100%, 0 100%)`
-  },
-  cutBottomRight: {
-    clipPath: `polygon(0 0, 100% 0, 100% calc(100% - ${cut}), calc(100% - ${cut}) 100%, 0 100%)`
-  },
   gridWell: {
     backgroundColor: colors.bgWell,
     backgroundImage: `linear-gradient(${colors.gridLine} 1px, transparent 1px), linear-gradient(90deg, ${colors.gridLine} 1px, transparent 1px)`,
