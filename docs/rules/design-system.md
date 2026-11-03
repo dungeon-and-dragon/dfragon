@@ -35,7 +35,7 @@ last-reviewed: 2026-11-04
 
 색 토큰은 이전 앱 색 토큰의 이름(`bgCanvas`, `bgSurface`, `bgInset`, `bgControl*`, `borderDefault`, `borderStrong`, `fgDefault`, `fgMuted`, `fgSubtle`, `fgSuccess`, `fgDanger`, `card*`, 희귀도, 강화, 게임, 속성 색)을 유지하고 다음을 바꾼다.
 
-- 추가: `bgBar`, `bgWell`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
+- 추가: `bgBar`, `bgWell`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, 길드 이름 색 `fgGuild`(`#E879F9`), `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
 - 삭제: `bgBrand*`, `fgBrand`, `fgInfo`, `borderBrand`, `borderFocus` 같은 파랑 계열 전부
 - 주의 톤: 2026-10-19 결정으로 던삐삐 디자인 캔버스의 캡처 보드 값인 `fgWarning`(`#FFB400`)과 그 12% 면 `bgWarningWeak`을 다시 들인다. 라이트 값은 `provisional`이다.
 
@@ -82,6 +82,7 @@ last-reviewed: 2026-11-04
 - 색: 무채색 바탕 위에 신호색 하나를 쓴다. 신호색 `signal`(`#FF7A33`, hover `signalHover` `#FF9357`)은 선택, 주 버튼, 포커스와 진행 중인 캡처 회차에 쓴다. 희귀도 색은 유지하고, 로고 빨강 `brandLogo`(`#E83830`)와 크림 `brandCream`(`#F8E8C8`)은 로고 자산에만 쓴다.
 - 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 사각 점, 옅은 면 `bgWarningWeak`으로 표현한다.
 - 글자: 라벨은 12px로 작게, 값은 `tabular-nums`로 크게 쓴다. 본문, 로고 글자, 숫자 모두 Pretendard를 쓴다.
+- 길드 이름은 `fgGuild`, 모험단 이름은 `fgAdventure`로 쓴다. 아이템 등급 색(`rarity*`)은 길드 이름에 쓰지 않는다.
 - 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 버튼, 입력, 칩, 배지는 반지름 2px이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
 - 배치: 상단 바는 위 전역 바(48px)에 등급 퍼센트, 제품 이름, 게임 연결 칩을, 아래 게임 바(40px)에 검색 메뉴와 화면 헤더를 둔다. 웹 앱 상자의 폭은 1080px이다.
 - 카드 상태: 테두리 전체를 칠하지 않고 네 모서리 꺾쇠로 표시한다. 기본, 선택, 실패(노란 꺾쇠), 대기(dashed)를 구분한다. 스냅샷에 없는 모험단만 카드를 덮는 빨간 빗금(`alertHatch`)을 쓴다.
