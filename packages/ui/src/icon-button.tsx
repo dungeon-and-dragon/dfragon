@@ -2,7 +2,6 @@ import * as stylex from '@stylexjs/stylex'
 import type { ComponentType, ReactNode } from 'react'
 import { controlStyles } from './control.style'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { shapes } from './shapes'
 import { styles } from './icon-button.style'
 
 export type IconButtonProps = Omit<PublicProps<'button'>, 'children'> & {
@@ -29,8 +28,7 @@ function IconButtonImpl({
           styles.root,
           controlStyles.focusRing,
           controlStyles.hoverTransition,
-          styles[size],
-          size === 'lg' && shapes.cutTopRight
+          styles[size]
         ),
         { className, style }
       )}

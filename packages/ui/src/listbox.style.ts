@@ -1,9 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, shape, space } from './tokens.stylex'
+import { colors, motion, space } from './tokens.stylex'
 
-const cut = shape.cut
-const openShape = `polygon(0 0, 100% 0, 100% calc(100% - ${cut}), calc(100% - ${cut}) 100%, 0 100%)`
-const foldedShape = 'polygon(0 0, 100% 0, 100% 0, 100% 0, 0 0)'
+const openShape = 'inset(0)'
+const foldedShape = 'inset(0 0 100% 0)'
 const onCard = ':is([data-surface="card"])'
 
 export const listboxStyles = stylex.create({

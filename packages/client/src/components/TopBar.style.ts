@@ -1,26 +1,31 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, space } from '@dfragon/ui/tokens.stylex'
+import { colors, size, space } from '@dfragon/ui/tokens.stylex'
 
 const HIDE_NAME = '@container (max-width: 900px)'
+
+const bar = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: space.s16,
+  boxSizing: 'border-box',
+  paddingInline: space.s24,
+  borderBottomWidth: 1,
+  borderBottomStyle: 'solid',
+  borderBottomColor: colors.borderDefault
+} as const
 
 export const styles = stylex.create({
   header: {
     display: 'flex',
+    flexDirection: 'column',
     flexShrink: 0,
-    alignItems: 'center',
-    gap: space.s16,
     width: '100%',
-    height: 44,
-    boxSizing: 'border-box',
-    paddingInline: 24,
     containerType: 'inline-size',
-    backgroundColor: colors.bgBar,
-    borderBottomWidth: 1,
-    borderBottomStyle: 'solid',
-    borderBottomColor: colors.borderDefault,
     color: colors.fgDefault,
     position: 'relative'
   },
+  globalBar: { ...bar, height: size.topbar, backgroundColor: colors.bgBar },
+  gameBar: { ...bar, height: 40, backgroundColor: colors.bgSurface },
   brand: { display: 'flex', alignItems: 'center', gap: space.s8, flexShrink: 0 },
   percent: { whiteSpace: 'nowrap' },
   common: { color: colors.rarityCommon },
@@ -33,11 +38,11 @@ export const styles = stylex.create({
     whiteSpace: 'nowrap',
     color: colors.fgDefault
   },
-  divider: { width: 1, height: 24, flexShrink: 0, backgroundColor: colors.borderDefault },
   status: {
     display: 'flex',
     alignItems: 'center',
     gap: space.s16,
-    flexShrink: 0
+    flexShrink: 0,
+    marginInlineStart: 'auto'
   }
 })

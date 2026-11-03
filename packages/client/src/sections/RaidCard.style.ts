@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
+import { colors, motion, radius, space } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
   body: {
@@ -42,6 +42,7 @@ export const styles = stylex.create({
     height: 20,
     paddingInlineStart: 6,
     paddingInlineEnd: space.s8,
+    borderRadius: radius.control,
     fontSize: 12,
     lineHeight: '14px',
     fontVariantNumeric: 'tabular-nums',

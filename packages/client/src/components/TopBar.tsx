@@ -36,27 +36,30 @@ function GradePercent({ percent }: { percent: number | null }): React.JSX.Elemen
 
 export function TopBar({
   grade,
-  start,
-  center,
-  end
+  nav,
+  board,
+  status
 }: {
   grade: number | null
-  start: ReactNode
-  center: ReactNode
-  end: ReactNode
+  nav: ReactNode
+  board: ReactNode
+  status: ReactNode
 }): React.JSX.Element {
   return (
     <header {...stylex.props(styles.header)}>
-      <div {...stylex.props(styles.brand)}>
-        <GradePercent percent={grade} />
-        <Typo.caption as="span" weight={700} {...stylex.props(styles.name)}>
-          {PRODUCT_NAME}
-        </Typo.caption>
+      <div {...stylex.props(styles.globalBar)}>
+        <div {...stylex.props(styles.brand)}>
+          <GradePercent percent={grade} />
+          <Typo.caption as="span" weight={700} {...stylex.props(styles.name)}>
+            {PRODUCT_NAME}
+          </Typo.caption>
+        </div>
+        <span {...stylex.props(styles.status)}>{status}</span>
       </div>
-      <span aria-hidden="true" {...stylex.props(styles.divider)} />
-      {start}
-      {center}
-      <span {...stylex.props(styles.status)}>{end}</span>
+      <div {...stylex.props(styles.gameBar)}>
+        {nav}
+        {board}
+      </div>
     </header>
   )
 }

@@ -1,8 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, font, space } from '@dfragon/ui/tokens.stylex'
+import { colors, font, radius, space } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
-  // 자른 모서리가 바깥 outline을 가리므로 포커스 링은 면 안쪽에 그린다.
   button: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -13,6 +12,7 @@ export const styles = stylex.create({
     padding: 0,
     margin: 0,
     borderWidth: 0,
+    borderRadius: radius.control,
     backgroundColor: colors.bgInset,
     boxShadow: `inset 0 0 0 1px ${colors.signal}`,
     color: colors.signal,
@@ -20,7 +20,7 @@ export const styles = stylex.create({
     outlineStyle: { default: 'none', ':focus-visible': 'solid' },
     outlineWidth: 2,
     outlineColor: colors.signal,
-    outlineOffset: -4
+    outlineOffset: 2
   },
   failure: {
     display: 'flex',
@@ -40,6 +40,7 @@ export const styles = stylex.create({
     flexShrink: 0,
     width: 18,
     height: 18,
+    borderRadius: radius.control,
     fontFamily: font.num,
     fontSize: 14,
     fontWeight: 700,

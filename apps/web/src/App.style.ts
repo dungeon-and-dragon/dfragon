@@ -17,7 +17,7 @@ export const styles = stylex.create({
     overflowX: 'auto',
     backgroundColor: colors.bgCanvas
   },
-  appPending: { width: 1280, height: 163 },
+  appPending: { width: 1080, height: 207 },
   neople: {
     position: 'fixed',
     bottom: 16,

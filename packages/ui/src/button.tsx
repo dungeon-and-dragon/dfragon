@@ -3,7 +3,6 @@ import type { ComponentType } from 'react'
 import { controlStyles } from './control.style'
 import { LoadingIndicator } from './loading-indicator'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { shapes } from './shapes'
 import { styles } from './button.style'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
@@ -24,8 +23,6 @@ function ButtonImpl({
   style,
   ...buttonProps
 }: ButtonProps & ForwardedStyle) {
-  const isPrimary = variant === 'primary'
-
   return (
     <button
       data-loading={loading ? '' : undefined}
@@ -36,8 +33,7 @@ function ButtonImpl({
           controlStyles.focusRing,
           controlStyles.hoverTransition,
           styles[size],
-          styles[variant],
-          isPrimary && shapes.cutTopRight
+          styles[variant]
         ),
         { className, style }
       )}

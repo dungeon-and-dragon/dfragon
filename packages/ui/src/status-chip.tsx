@@ -1,6 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import { shapes } from './shapes'
 import { StepDots } from './step-dots'
 import { styles } from './status-chip.style'
 
@@ -20,7 +19,7 @@ export function StatusChip({ tone, role, size = 'sm', busy = false, children }: 
       role={role}
       data-tone={tone}
       data-busy={busy ? '' : undefined}
-      {...stylex.props(styles.root, styles[size], shapes.cutTopRight, styles[tone])}
+      {...stylex.props(styles.root, styles[size], styles[tone])}
     >
       {busy ? (
         <StepDots />

@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { SnapshotMark } from '@dfragon/client-core/lib/adventure-snapshot'
 import { type RaidParty, toRaidSeat } from '@dfragon/client-core/lib/raid-seat'
@@ -29,7 +28,6 @@ export function SnapshotChip({
       aria-label={label}
       {...stylex.props(
         styles.chip,
-        shapes.cutTopRight,
         moved ? styles.moved : styles.absent,
         size === 'party' ? styles.party : styles.raid,
         size === 'party' && (moved ? styles.partyMoved : styles.partyAbsent),

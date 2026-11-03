@@ -169,7 +169,7 @@ function CandidateChip({
       aria-expanded={expanded}
       aria-controls={controls}
       onClick={onClick}
-      {...stylex.props(styles.candidateChip, shapes.cutTopRight)}
+      {...stylex.props(styles.candidateChip)}
     >
       <Typo.caption as="span">{children}</Typo.caption>
     </button>
