@@ -51,7 +51,7 @@ export const styles = stylex.create({
     backgroundColor: colors.cardBorderStrong
   },
   adventure: { ...ellipsis, color: colors.cardFgAdventure },
-  guild: { ...ellipsis, color: colors.rarityUnique },
+  guild: { ...ellipsis, color: colors.fgGuild },
   job: { ...ellipsis, flex: '0 1 auto', color: colors.cardFgMuted },
   message: { ...ellipsis, flex: '1 1 0', margin: 0, color: colors.cardFgMuted },
   placeholder: { color: colors.cardBorderStrong },
