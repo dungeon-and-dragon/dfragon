@@ -25,9 +25,9 @@ async function render(props: Partial<ComponentProps<typeof TopBar>> = {}): Promi
     root.render(
       <TopBar
         grade={85}
-        start={<nav aria-label="주 메뉴">내비</nav>}
-        center={null}
-        end={
+        nav={<nav aria-label="주 메뉴">내비</nav>}
+        board={null}
+        status={
           <button aria-label="화면 캡처, 창 감지됨">
             <span data-tone="success">창 감지됨</span>
           </button>
@@ -47,7 +47,7 @@ function textOrLabel(element: Element): string | null {
   return element.textContent
 }
 
-it('상단 바는 등급, 이름, 내비, 게임 연결 상태 순서로 표시하고 로고, 테마, 카메라, 설정, 로그인 버튼은 없다', async () => {
+it('상단 바는 위 전역 바에 등급, 이름, 게임 연결 상태를, 아래 게임 바에 내비를 두고 로고, 테마, 카메라, 설정, 로그인 버튼은 없다', async () => {
   await render()
   const header = container.querySelector('header')!
   expect(container.querySelectorAll('header')).toHaveLength(1)
@@ -63,7 +63,11 @@ it('상단 바는 등급, 이름, 내비, 게임 연결 상태 순서로 표시�
   expect(header.textContent).not.toContain('로그인')
   expect(header.querySelector('[aria-label="설정"]')).toBeNull()
   expect(header.querySelector('kbd')).toBeNull()
-  const items = [grade, name, nav, status]
+  const [globalBar, gameBar] = [...header.children]
+  expect(header.children).toHaveLength(2)
+  expect([grade, name, status].every((item) => globalBar.contains(item))).toBe(true)
+  expect(gameBar.contains(nav)).toBe(true)
+  const items = [grade, name, status]
   for (let index = 1; index < items.length; index++) {
     expect(
       items[index - 1].compareDocumentPosition(items[index]) & Node.DOCUMENT_POSITION_FOLLOWING
@@ -71,14 +75,15 @@ it('상단 바는 등급, 이름, 내비, 게임 연결 상태 순서로 표시�
   }
 })
 
-it('가운데 슬롯 내용은 내비와 게임 연결 상태 사이에 둔다', async () => {
-  await render({ center: <div data-center="" /> })
+it('보드 헤더 슬롯은 게임 바에서 내비 뒤에 두고 전역 바에는 두지 않는다', async () => {
+  await render({ board: <div data-board="" /> })
   const header = container.querySelector('header')!
+  const [globalBar, gameBar] = [...header.children]
   const nav = header.querySelector('nav')!
-  const center = header.querySelector('[data-center]')!
-  const chip = header.querySelector('[aria-label="화면 캡처, 창 감지됨"]')!
-  expect(nav.compareDocumentPosition(center) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-  expect(center.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  const board = header.querySelector('[data-board]')!
+  expect(gameBar.contains(board)).toBe(true)
+  expect(globalBar.contains(board)).toBe(false)
+  expect(nav.compareDocumentPosition(board) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 })
 
 it('등급 퍼센트를 숫자와 희귀도 이름으로 보조 기술에 알린다', async () => {
