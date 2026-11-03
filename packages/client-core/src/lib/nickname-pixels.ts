@@ -6,9 +6,10 @@ const NICKNAME_BACKGROUND = 255
 // 관측한 HUD 닉네임의 프레임 장식과 공대 선택 행 테두리는 위아래 여백 안에 걸친 긴 가로선이다.
 const FRAME_EDGE_MARGIN_RATIO = 1 / 5
 const FRAME_LINE_WIDTH_RATIO = 3 / 4
-// 게임 닉네임에는 공백이 없다. UI 0% 높이 17px 공대 닉네임 칸에서 공백 한 칸 폭(4px) 이상
-// 떨어진 덩어리는 레이드 보상 테두리에서 튄 점 같은 이름 밖의 픽셀로 본다(2026-10-30 결정).
-const RAID_DETACHED_GAP_RATIO = 4 / 17
+// 게임 닉네임에는 공백이 없으므로 본문과 멀리 떨어진 덩어리는 레이드 보상 테두리에서 튄 점 같은
+// 이름 밖의 픽셀로 본다(2026-10-30 결정). 실기 공대 칸에서 이름 안 가장 넓은 빈 열은 숫자 `1` 뒤의
+// 칸 높이 0.22배였고 튄 점은 0.8배 떨어져 있어, 그 사이인 높이 17px 기준 6px로 나눈다(2026-11-03 실측).
+const RAID_DETACHED_GAP_RATIO = 6 / 17
 
 function excludeNicknameFrameLines(
   rgba: Uint8ClampedArray,
