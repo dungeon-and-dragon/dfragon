@@ -4,7 +4,7 @@
 
 ## 원본과 수집 범위
 
-- `notices/client`: 마루미냐 한글(MaruMinya Hangul), Barlow Condensed, Lucide와 웹 클라이언트 UI 자산 출처입니다.
+- `notices/client`: Pretendard Variable, Lucide와 웹 클라이언트 UI 자산 출처입니다.
 - `notices/lib`: CP949 문자 표의 iconv-lite 고지입니다. `@dfragon/lib` build에서 기존 `dist/notices`와 runtime 의존성 수집용 패키지 루트 `LICENSES`에 복사합니다.
 - `notices/score-engine`: API 이미지가 배포하는 점수 엔진 바이너리에 정적으로 링크된 코드의 고지입니다. API 이미지는 Dockerfile이 이 폴더를 `dist/notices/score-engine`에 복사합니다. `NOTICE`는 비공개 엔진 저장소의 0.4.2 빌드 커밋 `483a3fa0`에 있는 Rust 엔진의 NOTICE(SHA-256 `fdd0c1bc319908e42ad7092eed6892b10bdabddb53cf6a941ae5bc066da622f6`)이고, `RUST-LICENSE-MIT`는 그 엔진이 고정한 Rust 1.99.1 커밋 `58cf8f9c35b355199727627d07ae34a4e2846d67`의 `LICENSE-MIT`(SHA-256 `b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1`)입니다. 엔진 NOTICE가 Rust 표준 라이브러리의 라이선스 이름만 적어 MIT 원문을 더했습니다. 점수 엔진 submodule을 옮길 때 엔진의 `Cargo.lock`, `NOTICE`나 Rust 버전이 바뀌었으면 이 두 파일과 출처를 같은 PR에서 갱신합니다.
 - `notices/upstream`, `overrides.json`: 설치된 npm 패키지에서 빠진 원문을 해당 버전의 upstream 또는 배포 패키지로부터 보완합니다. 출처, 버전, SHA-256을 기록하며 빌드 중 네트워크에서 가져오지 않습니다. 범용 MIT 문구로 저작권자를 추정하지 않습니다. Dependabot PR이 버전 갱신 후 `Missing license text`로 실패하면 같은 절차로 원문을 보완하고 `overrides.json`의 `이름@버전` 키, 출처, SHA-256을 갱신해 같은 PR에 추가합니다.
