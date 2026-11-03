@@ -40,6 +40,7 @@ async function render(props: Partial<ComponentProps<typeof SnapshotToggle>> = {}
       <SnapshotToggle
         label="파티 모험단 순번 스냅샷"
         active={false}
+        disabled={false}
         onTake={() => {}}
         onClear={() => {}}
         {...props}
@@ -60,12 +61,22 @@ function choice(name: string): HTMLButtonElement {
   return [...confirm()!.querySelectorAll('button')].find((button) => button.textContent === name)!
 }
 
-it('버튼 아이콘은 켜짐 여부와 관계없이 윤곽만 있는 핀이다', async () => {
+it('버튼 아이콘은 꺼짐이면 윤곽만, 켜짐이면 채운 핀이다', async () => {
   await render()
   expect(toggle().querySelector('svg')?.getAttribute('fill')).toBe('none')
 
   await render({ active: true })
-  expect(toggle().querySelector('svg')?.getAttribute('fill')).toBe('none')
+  expect(toggle().querySelector('svg')?.getAttribute('fill')).toBe('currentColor')
+})
+
+it('비활성이면 눌러도 스냅샷을 찍지 않는다', async () => {
+  const onTake = vi.fn()
+  await render({ disabled: true, onTake })
+
+  expect(toggle().disabled).toBe(true)
+  await act(async () => toggle().click())
+
+  expect(onTake).not.toHaveBeenCalled()
 })
 
 it('꺼진 버튼을 누르면 확인 없이 스냅샷을 켠다', async () => {

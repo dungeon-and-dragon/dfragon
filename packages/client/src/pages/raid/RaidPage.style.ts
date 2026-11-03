@@ -11,16 +11,12 @@ export const styles = stylex.create({
   page: {
     display: { default: 'flex', ':is([hidden])': 'none' },
     flexDirection: 'column',
-    flex: '1 1 0',
-    minHeight: 0,
     gap: space.s12
   },
   // 헤더는 고정하고 보드만 스크롤한다. 창이 낮아 넘치면 보드 영역이 세로로 스크롤한다. 세로 막대는
   // 콘텐츠 영역의 오른쪽 여백(App.style.ts `content`의 좌우 16) 안에 둔다. 여백보다 더 튀어나오면 콘텐츠
   // 영역에 가로 스크롤이 생긴다.
   scroller: {
-    flex: '1 1 0',
-    minHeight: 0,
     overflow: 'auto',
     scrollbarGutter: 'stable',
     marginBlock: -EDGE_ROOM,

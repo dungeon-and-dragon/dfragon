@@ -5,6 +5,7 @@ import { CheckIcon } from './CheckIcon'
 import { CopyIcon } from './CopyIcon'
 import { HeaderTooltip } from './HeaderTooltip'
 import { triggerStyles } from './HeaderTooltip.style'
+import { toolStyles } from './HeaderTool.style'
 import { styles } from './ClipboardCopyButton.style'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'
@@ -35,7 +36,7 @@ export function ClipboardCopyButton({
             type="button"
             aria-label="클립보드로 복사"
             onClick={onCopy}
-            {...stylex.props(styles.button)}
+            {...stylex.props(toolStyles.button)}
           >
             <Icon width={16} height={16} />
           </button>

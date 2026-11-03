@@ -13,7 +13,7 @@ export const styles = stylex.create({
   end: {
     display: 'flex',
     alignItems: 'center',
-    gap: space.s12,
+    gap: space.s4,
     flexShrink: 0,
     marginInlineStart: 'auto'
   }

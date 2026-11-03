@@ -1,7 +1,7 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
 import * as stylex from '@stylexjs/stylex'
 import { lazy, Suspense } from 'react'
-import neopleOpenApiLogo from './assets/neople-open-api.png'
+import neopleOpenApiLogo from './assets/neople-open-api-gray.png'
 import { styles } from './App.style'
 
 const NEOPLE_API_URL = 'https://developers.neople.co.kr'
@@ -26,8 +26,8 @@ export default function App(): React.JSX.Element {
         <img
           src={neopleOpenApiLogo}
           alt="Neople 오픈 API"
-          width={96}
-          height={18}
+          width={86}
+          height={24}
           {...stylex.props(styles.neopleLogo)}
         />
       </a>
