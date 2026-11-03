@@ -11,13 +11,13 @@ import { neighborSeat, seatDirections, type SeatDirection } from '@dfragon/clien
 import type { SeatArrangement } from './useSeatOrder'
 
 export type SeatMove = Pick<
-  HTMLAttributes<HTMLDivElement>,
+  HTMLAttributes<HTMLTableRowElement>,
   'onDragStart' | 'onDragOver' | 'onDragLeave' | 'onDrop' | 'onDragEnd' | 'onKeyDown'
 > & {
   movable: boolean
   drag?: 'source' | 'target'
   keyShortcuts?: string
-  ref: RefCallback<HTMLDivElement>
+  ref: RefCallback<HTMLTableRowElement>
 }
 
 export type SeatMoveNotice = { text: string; sequence: number }
@@ -47,7 +47,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
     canMoveSeats
   })
   const [notice, setNotice] = useState<SeatMoveNotice>({ text: '', sequence: 0 })
-  const seatElements = useRef(new Map<number, HTMLDivElement>())
+  const seatElements = useRef(new Map<number, HTMLTableRowElement>())
   const movedSlot = useRef<number | null>(null)
   const keyShortcuts = canMoveSeats
     ? seatDirections(layout)
@@ -81,7 +81,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
 
   function moveSeat(seat: number): SeatMove {
     const slot = seatOrder[seat]
-    const ref: RefCallback<HTMLDivElement> = (element) => {
+    const ref: RefCallback<HTMLTableRowElement> = (element) => {
       if (element === null) {
         return
       }
@@ -91,7 +91,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
         seatElements.current.delete(slot)
       }
     }
-    const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
+    const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>): void => {
       if (event.target !== event.currentTarget || !event.altKey) {
         return
       }
@@ -108,7 +108,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
         movedSlot.current = slot
       }
     }
-    const onDragStart = (event: DragEvent<HTMLDivElement>): void => {
+    const onDragStart = (event: DragEvent<HTMLTableRowElement>): void => {
       // 이름 칸의 선택한 글자를 드래그하는 동작은 자리 맞바꾸기가 아니다. 맞바꿀 수 없는 동안 시작한 드래그는
       // 다음 그리기에서 끝낸 것으로 본다.
       if (event.target !== event.currentTarget) {
@@ -118,7 +118,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
       event.dataTransfer.setData(SEAT_DRAG_TYPE, String(seat + 1))
       startDrag(slot)
     }
-    const onDragOver = (event: DragEvent<HTMLDivElement>): void => {
+    const onDragOver = (event: DragEvent<HTMLTableRowElement>): void => {
       if (getDraggedSlot(event, dragging) === null) {
         return
       }
@@ -126,13 +126,13 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
       event.dataTransfer.dropEffect = 'move'
       hoverSeat(slot)
     }
-    const onDragLeave = (event: DragEvent<HTMLDivElement>): void => {
+    const onDragLeave = (event: DragEvent<HTMLTableRowElement>): void => {
       if (isEnteringInsideSeat(event)) {
         return
       }
       leaveSeat(slot)
     }
-    const onDrop = (event: DragEvent<HTMLDivElement>): void => {
+    const onDrop = (event: DragEvent<HTMLTableRowElement>): void => {
       const draggedSlot = getDraggedSlot(event, dragging)
       if (draggedSlot === null) {
         return
@@ -229,7 +229,10 @@ function getSeatDrag(
   return undefined
 }
 
-function getDraggedSlot(event: DragEvent<HTMLDivElement>, dragging: number | null): number | null {
+function getDraggedSlot(
+  event: DragEvent<HTMLTableRowElement>,
+  dragging: number | null
+): number | null {
   if (dragging === null) {
     return null
   }
@@ -241,6 +244,6 @@ function getDraggedSlot(event: DragEvent<HTMLDivElement>, dragging: number | nul
   return dragging
 }
 
-function isEnteringInsideSeat(event: DragEvent<HTMLDivElement>): boolean {
+function isEnteringInsideSeat(event: DragEvent<HTMLTableRowElement>): boolean {
   return event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)
 }
