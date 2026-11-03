@@ -3,7 +3,12 @@ import type { CardCharacter, SlotState } from '../types/cards'
 import type { SnapshotMark } from './adventure-snapshot'
 import type { CandidatePicker } from './candidate-picker'
 import type { SearchMode } from '../types/search-mode'
-import { type SlotNotice, searchSlotNotice, toCharacterCard } from './character-card'
+import {
+  type SlotNotice,
+  searchSlotNotice,
+  toCharacterCard,
+  toChoiceCharacterCard
+} from './character-card'
 
 export type SlotCard = {
   state: SlotState
@@ -14,6 +19,7 @@ export type SlotCard = {
   snapshotMark?: SnapshotMark
   snapshotAdventureInput?: string
   picker?: CandidatePicker
+  picking?: boolean
   scorePending?: boolean
 }
 
@@ -43,11 +49,23 @@ export function toSlotCards({
   screen?: SearchMode
 }): SlotCard[] {
   return slots.map((slot, index) => {
+    const picker = candidatePickers[index] ?? undefined
+    const picking = picker?.picking ?? null
+    if (picking !== null) {
+      const character = toChoiceCharacterCard(picking)
+
+      return {
+        state: 'success',
+        character,
+        snapshotMark: snapshotMarks[index],
+        picker,
+        picking: true
+      }
+    }
     const character = toCharacterCard(slot.selected)
     const nickname = nicknames[index] ?? undefined
     const notice = searchSlotNotice(slot, screen)
     const loading = !manualSlots[index] && recognizing
-    const picker = candidatePickers[index] ?? undefined
     const scorePending = slot.details === 'pending'
     const characterMissing = slot.state === 'failure' || slot.state === 'empty'
     const snapshotAdventureInput = characterMissing ? snapshotAdventureInputs[index] : undefined

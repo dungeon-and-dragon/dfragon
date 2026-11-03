@@ -1,8 +1,4 @@
-import type {
-  CharacterChoice,
-  CharacterFaceWindow,
-  CharacterSelectionMethod
-} from '../../preload/common/types/search'
+import type { CharacterChoice, CharacterSelectionMethod } from '../../preload/common/types/search'
 import type {
   CharacterCandidate,
   CharacterIdentity,
@@ -10,17 +6,13 @@ import type {
   CharacterPortrait
 } from '../../preload/common/types/character'
 import { orderedCandidates } from './candidate-order'
-import {
-  portraitAnchorOf,
-  portraitFaceWindowOf,
-  type PortraitAnchor
-} from '../../preload/common/search/portrait-anchor'
+import { portraitAnchorOf, type PortraitAnchor } from '../../preload/common/search/portrait-anchor'
 import { planRaidComparison, selectRaidCandidate, type RaidObservedValues } from './raid-candidate'
 
 const MAX_OCR_NAMES = 2
 const MAX_NAME_CODE_POINTS = 12
 
-type PortraitScore = Readonly<{ distance: number; alignment: CharacterFaceWindow }>
+type PortraitScore = Readonly<{ distance: number }>
 
 export type IdentificationServices = {
   findCandidates: (nickname: string) => Promise<readonly CharacterCandidate[]>
@@ -90,9 +82,7 @@ export function createCharacterIdentifier(
     const scores = await scoreCandidates(services, input.portrait, compared)
     const best = closestScore(scores)
     if (best === null) {
-      const choices = candidates.map((candidate) =>
-        toChoice(candidate, portraitFaceWindowOf(candidate.jobName))
-      )
+      const choices = candidates.map(toChoice)
 
       return toMatchedIdentification(highest, nickname, 'highest-fame', choices)
     }
@@ -100,9 +90,7 @@ export function createCharacterIdentifier(
     if (isConfident(policy, scores, best)) {
       return toMatchedIdentification(best.candidate, nickname, 'portrait', undefined)
     }
-    const choices = scores.map(({ candidate, score }) =>
-      toChoice(candidate, score?.alignment ?? portraitFaceWindowOf(candidate.jobName))
-    )
+    const choices = scores.map(({ candidate }) => toChoice(candidate))
 
     return toMatchedIdentification(best.candidate, nickname, 'portrait', choices)
   }
@@ -167,13 +155,10 @@ function isConfident(
   return bestDistance <= policy.maxDistance && runnerUp - bestDistance >= policy.minMargin
 }
 
-function toChoice(
-  candidate: CharacterCandidate,
-  face: CharacterFaceWindow | null
-): CharacterChoice {
+function toChoice(candidate: CharacterCandidate): CharacterChoice {
   const { characterId, characterName, serverId, serverName, fame, adventureName } = candidate
 
-  return { characterId, characterName, serverId, serverName, fame, adventureName, face }
+  return { characterId, characterName, serverId, serverName, fame, adventureName }
 }
 
 export type RaidIdentificationServices = Pick<IdentificationServices, 'findCandidates'>
@@ -193,7 +178,7 @@ export function createRaidCharacterIdentifier(services: RaidIdentificationServic
       return { kind: 'unmatched' }
     }
     const { candidate, selectionMethod, choices } = selectRaidCandidate(plan)
-    const raidChoices = choices?.map((choice) => toChoice(choice, null))
+    const raidChoices = choices?.map(toChoice)
 
     return toMatchedIdentification(candidate, nickname, selectionMethod, raidChoices)
   }

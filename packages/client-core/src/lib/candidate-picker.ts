@@ -1,69 +1,56 @@
 import type { CharacterChoice, SearchSlot } from '../preload/common/types/search'
 
 /**
- * 슬롯에서 누른 후보. 미리보기 조회는 같은 슬롯을 새 요청으로 덮으므로, 처음 누를 때의 후보 목록과 보이던
- * 슬롯을 복사해 둔다. 확정은 `requestId`가 있으면 그 요청이 슬롯에 있는 동안만 후보 창을 닫는다.
+ * 후보 창에서 누른 후보. 누른 후보의 직접 조회 결과에는 후보 목록이 없으므로, 확정한 뒤에도 칩을 남기려고 누를
+ * 때의 후보 목록을 복사해 둔다.
  */
-export type CandidatePick =
-  | Readonly<{
-      kind: 'preview'
-      serverId: string
-      choices: readonly CharacterChoice[]
-      shownSlot: SearchSlot
-    }>
-  | Readonly<{ kind: 'confirmed'; requestId: string | null }>
+export type CandidatePick = Readonly<{
+  choices: readonly CharacterChoice[]
+  serverId: string
+}>
 
 export type CandidatePicker = Readonly<{
   choices: readonly CharacterChoice[]
-  shownServerId: string
-  previewServerId: string | null
+  shownServerId: string | null
+  picking: CharacterChoice | null
 }>
 
-function closesPicker(slot: SearchSlot, pick: CandidatePick | null): boolean {
-  if (pick?.kind !== 'confirmed') {
-    return false
-  }
-
-  return pick.requestId === null || pick.requestId === slot.requestId
+function byFame(choices: readonly CharacterChoice[]): CharacterChoice[] {
+  return choices.toSorted((a, b) => (b.fame ?? -Infinity) - (a.fame ?? -Infinity))
 }
 
+/** `pick`은 그 슬롯이 아직 이 회차의 직접 조회 상태일 때만 넘긴다. 다음 회차는 OCR 결과로 다시 판정한다. */
 export function toCandidatePicker(
   slot: SearchSlot,
   pick: CandidatePick | null
 ): CandidatePicker | null {
-  if (pick?.kind === 'preview') {
-    return { choices: pick.choices, shownServerId: pick.serverId, previewServerId: pick.serverId }
+  if (pick !== null) {
+    const pending = slot.state === 'pending'
+    const picking = pending
+      ? (pick.choices.find((choice) => choice.serverId === pick.serverId) ?? null)
+      : null
+    const shownServerId = pending ? pick.serverId : (slot.selected?.serverId ?? null)
+
+    return { choices: pick.choices, shownServerId, picking }
   }
   const { choices, selected } = slot
-  if (choices === undefined || selected === undefined || closesPicker(slot, pick)) {
+  if (choices === undefined || choices.length < 2 || selected === undefined) {
     return null
   }
 
-  return { choices, shownServerId: selected.serverId, previewServerId: null }
+  const sortedChoices = byFame(choices)
+
+  return { choices: sortedChoices, shownServerId: selected.serverId, picking: null }
 }
 
 export function nextCandidatePick(
-  slot: SearchSlot,
-  pick: CandidatePick | null,
+  picker: CandidatePicker | null,
   serverId: string
 ): CandidatePick | null {
-  const picker = toCandidatePicker(slot, pick)
   const isChoice = picker?.choices.some((choice) => choice.serverId === serverId) === true
-  if (picker === null || !isChoice) {
+  if (picker === null || !isChoice || picker.shownServerId === serverId) {
     return null
   }
 
-  if (pick?.kind !== 'preview') {
-    return { kind: 'preview', serverId, choices: picker.choices, shownSlot: slot }
-  }
-
-  if (pick.serverId !== serverId) {
-    return { ...pick, serverId }
-  }
-  // 미리보기 조회가 슬롯을 덮지 않았으면 자동으로 고른 후보를 조회 없이 확정한 것이므로, 같은 슬롯의 새 OCR
-  // 요청이 후보 창을 다시 열 수 있게 그 요청에만 묶는다.
-  const isUnchanged = slot.requestId === pick.shownSlot.requestId
-  const requestId = isUnchanged ? slot.requestId : null
-
-  return { kind: 'confirmed', requestId }
+  return { choices: picker.choices, serverId }
 }
