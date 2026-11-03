@@ -4,23 +4,13 @@ import { createRoot, type Root } from 'react-dom/client'
 import * as stylex from '@stylexjs/stylex'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { NameFieldTone } from '../lib/name-field-tone'
 import { NameField, type NameFieldProps } from './NameField'
-import { ServerSelect } from './ServerSelect'
 
 // jsdom은 테두리 색을 계산하지 않으므로 같은 선언에서 나온 class를 칸이 가졌는지로 확인한다.
-const borders = stylex.create({
-  signal: { borderColor: colors.cardSignal },
-  failure: { borderColor: colors.cardFailure },
-  quiet: { borderColor: colors.cardBorder },
-  dashed: { borderStyle: 'dashed' }
+const vacantBorder = stylex.create({
+  strong: { borderColor: { default: colors.borderStrong, ':focus': colors.signal } }
 })
-
-type Border = keyof typeof borders
-
-const borderNames: Border[] = ['signal', 'failure', 'quiet', 'dashed']
-
-const classOf = (border: Border): string => stylex.props(borders[border]).className!
+const vacantClasses = stylex.props(vacantBorder.strong).className!.split(' ')
 
 let root: Root
 let container: HTMLElement
@@ -68,44 +58,12 @@ it('일반 input props를 안쪽 input에 그대로 넘기고 placeholder를 두
   expect(onBlur).toHaveBeenCalledOnce()
 })
 
-it('end를 입력 뒤 같은 칸 안에 그린다', async () => {
-  await render({
-    end: (
-      <ServerSelect
-        label="2번 서버"
-        value="siroco"
-        options={[{ id: 'siroco', label: '시로코' }]}
-        open={false}
-        onOpenChange={vi.fn()}
-        onValueChange={vi.fn()}
-      />
-    )
-  })
-  const field = input().parentElement!
-  const server = container.querySelector('[aria-label="2번 서버"]')!
-  expect(field.contains(server)).toBe(true)
-  expect(input().compareDocumentPosition(server) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  expect(server.textContent).toContain('시로코')
-})
+it('빈 자리 칸에만 늘 보이는 테두리를 둔다', async () => {
+  const hasVacantBorder = (): boolean =>
+    vacantClasses.every((name) => input().classList.contains(name))
 
-it('end를 넘기지 않으면 입력만 둔다', async () => {
   await render()
-  expect(input().parentElement!.children).toHaveLength(1)
-})
-
-it('테두리는 tone을 따른다', async () => {
-  const cases: { tone?: NameFieldTone; has: Border[] }[] = [
-    { has: [] },
-    { tone: 'default', has: [] },
-    { tone: 'selected', has: ['signal'] },
-    { tone: 'failure', has: ['failure'] },
-    { tone: 'vacant', has: ['quiet', 'dashed'] }
-  ]
-  for (const { tone, has } of cases) {
-    await render({ tone })
-    const classes = input().parentElement!.className.split(' ')
-    for (const border of borderNames) {
-      expect(classes.includes(classOf(border)), `${tone} ${border}`).toBe(has.includes(border))
-    }
-  }
+  expect(hasVacantBorder()).toBe(false)
+  await render({ vacant: true })
+  expect(hasVacantBorder()).toBe(true)
 })

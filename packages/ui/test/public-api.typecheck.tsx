@@ -2,11 +2,9 @@ import { createRef, type ChangeEvent, type CSSProperties, type MouseEvent, type 
 import { expectTypeOf } from 'vitest'
 import {
   Button,
-  CardFrame,
   Checkbox,
   Chip,
   ContentStack,
-  CornerBrackets,
   ExampleSection,
   IconButton,
   Kbd,
@@ -29,7 +27,6 @@ import {
   Typo,
   typographyVariants,
   type ButtonProps,
-  type CardFrameState,
   type CheckboxProps,
   type ChipProps,
   type ControlSurface,
@@ -106,9 +103,6 @@ expectTypeOf<SelectPopupProps['surface']>().toEqualTypeOf<ControlSurface | undef
 expectTypeOf<TabsListProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
 expectTypeOf<KbdSurface>().toEqualTypeOf<'default' | 'signal'>()
 expectTypeOf<KbdProps['surface']>().toEqualTypeOf<KbdSurface | undefined>()
-expectTypeOf<CardFrameState>().toEqualTypeOf<
-  'default' | 'selected' | 'failure' | 'waiting' | 'top' | 'ranker'
->()
 
 const buttonRef = createRef<HTMLButtonElement>()
 const inputRef = createRef<HTMLInputElement>()
@@ -188,12 +182,7 @@ export const designExamples = (
     </StatusChip>
     <Kbd>Alt</Kbd>
     <Kbd surface="signal">R</Kbd>
-    <CardFrame state="ranker" as="article" aria-label="랭커 카드">
-      <NumericText value={125850} format={(value) => `${value}`} countUp={false} />
-    </CardFrame>
-    <div>
-      <CornerBrackets tone="selected" />
-    </div>
+    <NumericText value={125850} format={(value) => `${value}`} countUp={false} />
   </>
 )
 
@@ -263,8 +252,6 @@ export const invalidDesignExamples = (
     <StepDots size={6} />
     {/* @ts-expect-error IconButton은 외형 variant를 받지 않는다. */}
     <IconButton variant="ghost" aria-label="설정" icon={<svg />} />
-    {/* @ts-expect-error CardFrame state는 정해진 카드 상태 중 하나여야 한다. */}
-    <CardFrame state="warning" />
     {/* @ts-expect-error Select trigger 크기는 2xs, xs, sm, md 중 하나다. */}
     <Select.Trigger size="lg" />
   </>

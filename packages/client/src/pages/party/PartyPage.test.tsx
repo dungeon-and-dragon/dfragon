@@ -10,16 +10,20 @@ import type { CardCharacter, SlotState } from '@dfragon/client-core/types/cards'
 
 const CHARACTER_NAME_INPUT_SELECTOR = 'input[aria-label$="번 캐릭터 이름"]'
 
-function statText(scope: Element, label: string): string | null {
-  const term = [...scope.querySelectorAll('dt')].find((item) => item.textContent === label)
-  const value = term?.nextElementSibling
-  const shown = value?.querySelector('[aria-hidden="true"]') ?? value
+function columnText(row: HTMLTableRowElement, label: string): string | null {
+  const headers = [...container.querySelectorAll('thead th')]
+  const column = headers.findIndex((header) => header.textContent === label)
 
-  if (shown == null) {
+  const cell = row.cells.item(column)
+  if (cell === null) {
     return null
   }
 
-  return shown.textContent
+  return cell.textContent
+}
+
+function rows(): HTMLTableRowElement[] {
+  return [...container.querySelectorAll<HTMLTableRowElement>('tbody tr')]
 }
 
 let root: Root
@@ -86,7 +90,7 @@ async function render({
     root.render(
       <PartyPage
         resetKey="party"
-        actions={{ lookupSlot: vi.fn(), pickCandidate: vi.fn(), changeSnapshotAdventure: vi.fn() }}
+        actions={{ lookupSlot: vi.fn(), changeSnapshotAdventure: vi.fn() }}
         {...props}
         seats={{ layout: PARTY_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
         slots={cards}
@@ -109,17 +113,14 @@ it('비동기 식별 성공은 OCR 첫 이름 대신 선택된 이름과 서버�
     nicknames: ['OCR첫후보']
   })
 
-  const slot = container.querySelector('article')!
-  expect(slot.querySelector<HTMLInputElement>(CHARACTER_NAME_INPUT_SELECTOR)?.value).toBe(
+  const [row] = rows()
+  expect(row.querySelector<HTMLInputElement>(CHARACTER_NAME_INPUT_SELECTOR)?.value).toBe(
     '선택된이름'
   )
-  expect(slot.textContent).toContain('카인')
-  expect(statText(slot, '명성')).toBe('0')
-  expect(statText(slot, '장비')).toBe('-')
-  expect(slot.getAttribute('data-state')).toBe('default')
-  expect(slot.querySelector('img')?.getAttribute('src')).toBe(character.image)
-  expect(slot.querySelector('[role="tab"]')).toBeNull()
-  expect(slot.querySelector('[aria-label="1번 캐릭터 상세 열기"]')).toBeNull()
+  expect(columnText(row, '서버')).toBe('카인')
+  expect(columnText(row, '명성')).toBe('0')
+  expect(columnText(row, '점수')).toBe('장비-')
+  expect(row.querySelector('img')?.getAttribute('src')).toBe(character.image)
 })
 
 it('네 슬롯의 서로 다른 선택과 대기 상태를 독립적으로 표시한다', async () => {
@@ -133,41 +134,34 @@ it('네 슬롯의 서로 다른 선택과 대기 상태를 독립적으로 표�
     ],
     nicknames: [null, null, '검색중', null]
   })
-  const slots = container.querySelectorAll('article')
+  const slots = rows()
   expect(slots[0].querySelector<HTMLInputElement>(CHARACTER_NAME_INPUT_SELECTOR)?.value).toBe(
     '선택된이름'
   )
   expect(slots[1].querySelector<HTMLInputElement>(CHARACTER_NAME_INPUT_SELECTOR)?.value).toBe(
     '다른이름'
   )
-  expect(statText(slots[1], '명성')).toBe('-')
+  expect(columnText(slots[1], '명성')).toBe('-')
   expect(slots[2].getAttribute('aria-busy')).toBe('true')
-  expect(slots[3].getAttribute('aria-busy')).not.toBe('true')
-  expect([...slots].map((slot) => slot.getAttribute('data-state'))).toEqual([
-    'default',
-    'default',
-    'default',
-    'waiting'
-  ])
+  expect(slots[2].querySelector('[role="progressbar"]')?.textContent).toBe('캐릭터 검색 중')
+  expect(slots[3].getAttribute('aria-busy')).toBe('false')
+  expect(slots[3].querySelector('[role="progressbar"]')).toBeNull()
   expect(slots[2].querySelector('img')).toBeNull()
   expect(slots[3].querySelector('img')).toBeNull()
-  expect(slots[2].querySelector('[aria-label="3번 캐릭터 상세 열기"]')).toBeNull()
-  expect(slots[2].querySelector('[role="tablist"]')).toBeNull()
 })
 
-it('슬롯 번호대로 스냅샷 표시를 그 슬롯의 카드에 전한다', async () => {
+it('슬롯 번호대로 스냅샷 표시를 그 슬롯의 행에 전한다', async () => {
   await render({
     slots: ['success', 'success', 'success', 'idle'],
     characters: [character, character, character],
-    snapshotMarks: [undefined, { kind: 'moved', seat: 1 }, { kind: 'absent' }]
+    snapshotMarks: [{ kind: 'kept', seat: 1 }, { kind: 'moved', seat: 1 }, { kind: 'absent' }]
   })
 
-  const slots = [...container.querySelectorAll('article')]
   expect(
-    slots.map((slot) =>
-      slot.querySelector('[role="img"][aria-label^="스냅샷"]')?.getAttribute('aria-label')
+    rows().map((row) =>
+      row.querySelector('[role="img"][aria-label^="스냅샷"]')?.getAttribute('aria-label')
     )
-  ).toEqual([undefined, '스냅샷 순번 1', '스냅샷에 없는 모험단', undefined])
+  ).toEqual(['스냅샷 순번 1', '스냅샷 순번 1, 자리 바뀜', '스냅샷에 없는 모험단', undefined])
 })
 
 function seats(): HTMLElement[] {
@@ -194,7 +188,7 @@ async function drag(type: string, target: HTMLElement, types: string[]): Promise
   return event
 }
 
-it('파티 카드를 다른 카드에 끌어 놓으면 두 자리를 맞바꾼다', async () => {
+it('파티 행을 다른 행에 끌어 놓으면 두 자리를 맞바꾼다', async () => {
   const swap = vi.fn(() => true)
   await render({
     slots: ['success', 'idle', 'idle', 'idle'],
@@ -214,7 +208,7 @@ it('파티 카드를 다른 카드에 끌어 놓으면 두 자리를 맞바꾼�
   )
 })
 
-it('이름 칸을 고치는 동안은 그 파티 카드를 끌 수 없다', async () => {
+it('이름 칸을 고치는 동안은 그 파티 행을 끌 수 없다', async () => {
   await render({ slots: ['idle', 'idle', 'idle', 'idle'] })
   const [first, second] = seats()
   const input = first.querySelector<HTMLInputElement>(CHARACTER_NAME_INPUT_SELECTOR)!
@@ -227,30 +221,30 @@ it('이름 칸을 고치는 동안은 그 파티 카드를 끌 수 없다', asyn
   expect(first.getAttribute('draggable')).toBe('true')
 })
 
-it('파티 카드는 Alt와 왼쪽, 오른쪽 방향키로만 옆 자리와 맞바꾼다', async () => {
+it('파티 행은 Alt와 위, 아래 방향키로만 위아래 자리와 맞바꾼다', async () => {
   const swap = vi.fn(() => true)
   await render({ slots: ['idle', 'idle', 'idle', 'idle'], swapSeats: swap })
   const hint = document.getElementById(seats()[1].getAttribute('aria-describedby')!)
-  expect(hint?.textContent).toBe('Alt와 방향키로 왼쪽, 오른쪽 자리와 맞바꿉니다.')
-  expect(seats()[1].getAttribute('aria-keyshortcuts')).toBe('Alt+ArrowLeft Alt+ArrowRight')
+  expect(hint?.textContent).toBe('Alt와 방향키로 위, 아래 자리와 맞바꿉니다.')
+  expect(seats()[1].getAttribute('aria-keyshortcuts')).toBe('Alt+ArrowUp Alt+ArrowDown')
 
-  await pressAlt(seats()[1], 'ArrowUp')
-  await pressAlt(seats()[1], 'ArrowDown')
-  await pressAlt(seats()[0], 'ArrowLeft')
-  await pressAlt(seats()[3], 'ArrowRight')
+  await pressAlt(seats()[1], 'ArrowLeft')
+  await pressAlt(seats()[1], 'ArrowRight')
+  await pressAlt(seats()[0], 'ArrowUp')
+  await pressAlt(seats()[3], 'ArrowDown')
   expect(swap).not.toHaveBeenCalled()
 
-  await pressAlt(seats()[1], 'ArrowRight')
+  await pressAlt(seats()[1], 'ArrowDown')
   expect(swap).toHaveBeenCalledExactlyOnceWith(1, 2)
 })
 
-it('자리 배치대로 카드를 그리고 조회는 그 자리에 놓인 검색 슬롯 번호로 알린다', async () => {
+it('자리 배치대로 행을 그리고 조회는 그 자리에 놓인 검색 슬롯 번호로 알린다', async () => {
   const lookupSlot = vi.fn()
   await render({
     slots: ['success', 'idle', 'idle', 'idle'],
     characters: [character],
     seatOrder: swapSeats(createSeatOrder(PARTY_SEAT_LAYOUT), 0, 3),
-    actions: { lookupSlot, pickCandidate: vi.fn(), changeSnapshotAdventure: vi.fn() }
+    actions: { lookupSlot, changeSnapshotAdventure: vi.fn() }
   })
 
   expect(nameOf(seats()[3])).toBe('선택된이름')
@@ -270,13 +264,13 @@ it('자리 배치대로 카드를 그리고 조회는 그 자리에 놓인 검�
   expect(lookupSlot).toHaveBeenCalledExactlyOnceWith(0, '옮긴자리', undefined)
 })
 
-it('스냅샷 모험단 입력은 그 슬롯이 놓인 자리 카드에 열리고 바꾼 값을 자리 번호로 알린다', async () => {
+it('스냅샷 모험단 입력은 그 슬롯이 놓인 자리 행에 열리고 바꾼 값을 자리 번호로 알린다', async () => {
   const changeSnapshotAdventure = vi.fn()
   await render({
     slots: ['failure', 'idle', 'idle', 'idle'],
     snapshotAdventureInputs: [''],
     seatOrder: swapSeats(createSeatOrder(PARTY_SEAT_LAYOUT), 0, 3),
-    actions: { lookupSlot: vi.fn(), pickCandidate: vi.fn(), changeSnapshotAdventure }
+    actions: { lookupSlot: vi.fn(), changeSnapshotAdventure }
   })
 
   const field = seats()[3].querySelector<HTMLInputElement>('input[aria-label="4번 모험단"]')!
@@ -287,7 +281,7 @@ it('스냅샷 모험단 입력은 그 슬롯이 놓인 자리 카드에 열리�
   expect(changeSnapshotAdventure).toHaveBeenCalledExactlyOnceWith(3, '별빛')
 })
 
-it('맞바꿀 수 없는 동안에는 파티 카드를 끌거나 옮길 수 없다', async () => {
+it('맞바꿀 수 없는 동안에는 파티 행을 끌거나 옮길 수 없다', async () => {
   const swap = vi.fn(() => true)
   await render({ slots: ['idle', 'idle', 'idle', 'idle'], canMoveSeats: false, swapSeats: swap })
 
@@ -298,6 +292,6 @@ it('맞바꿀 수 없는 동안에는 파티 카드를 끌거나 옮길 수 없�
     '4번 자리'
   ])
   expect(seats()[0].getAttribute('draggable')).toBe('false')
-  await pressAlt(seats()[0], 'ArrowRight')
+  await pressAlt(seats()[0], 'ArrowDown')
   expect(swap).not.toHaveBeenCalled()
 })
