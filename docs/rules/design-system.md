@@ -18,7 +18,7 @@ last-reviewed: 2026-11-04
 - 화면 계약에 남은 기존 색 이름과 상태 표현은 해당 화면의 던삐삐 디자인 적용 PR에서 이 문서의 토큰과 규칙으로 옮긴다.
 - 상위, 랭커 티어 표시는 UI 셸과 fixture 데이터까지가 범위다. 공대 12인 화면은 자리별 서버, 이름 조회와 공대 캡처까지 연결했고 티어 기준은 별도 과제다.
 
-디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다. 같은 날 결정([ADR 0010](../adr/0010-two-tier-header-1080-width-no-cut-corners.md))으로 상단 바를 전역 바와 게임 바 2단으로 나누고, 웹 앱 상자 폭을 1080px로 줄이고, 자른 모서리를 없앴다.
+디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다. 같은 날 결정([ADR 0010](../adr/0010-two-tier-header-1080-width-no-cut-corners.md))으로 상단 바를 전역 바와 게임 바 2단으로 나누고, 웹 앱 상자 폭을 1080px로 줄이고, 자른 모서리를 없앴다. 같은 날 결정([ADR 0011](../adr/0011-pretendard-font-and-guild-color.md))으로 웹 글꼴을 Pretendard 하나로 통일하고 길드 이름 색 `fgGuild`를 더했다.
 
 공용 자산과 Base UI를 우선 사용해 필요한 화면을 완성한다. 공용화와 예제 구축을 제품 화면의 선행 작업으로 만들지 않는다.
 
@@ -35,7 +35,7 @@ last-reviewed: 2026-11-04
 
 색 토큰은 이전 앱 색 토큰의 이름(`bgCanvas`, `bgSurface`, `bgInset`, `bgControl*`, `borderDefault`, `borderStrong`, `fgDefault`, `fgMuted`, `fgSubtle`, `fgSuccess`, `fgDanger`, `card*`, 희귀도, 강화, 게임, 속성 색)을 유지하고 다음을 바꾼다.
 
-- 추가: `bgBar`, `bgWell`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
+- 추가: `bgBar`, `bgWell`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, 길드 이름 색 `fgGuild`(`#E879F9`), `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
 - 삭제: `bgBrand*`, `fgBrand`, `fgInfo`, `borderBrand`, `borderFocus` 같은 파랑 계열 전부
 - 주의 톤: 2026-10-19 결정으로 던삐삐 디자인 캔버스의 캡처 보드 값인 `fgWarning`(`#FFB400`)과 그 12% 면 `bgWarningWeak`을 다시 들인다. 라이트 값은 `provisional`이다.
 
@@ -65,7 +65,7 @@ last-reviewed: 2026-11-04
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG |
 | `Kbd`, `CornerBrackets` | 단축키 표시, 네 모서리 꺾쇠 |
 | `CardFrame` | state `default`, `selected`, `failure`, `waiting`, `top`, `ranker` |
-| `NumericText` | Barlow Condensed 숫자, 400ms 증가 |
+| `NumericText` | `font.num` 숫자, `tabular-nums`, 400ms 증가 |
 | `ContentStack`, `SupportingText`, `ExampleSection` | plain 요소와 StyleX |
 | `Typo` | 변경 없음. 아래 [Typo의 명시적 예외](#typo의-명시적-예외)를 따른다 |
 
@@ -73,7 +73,7 @@ last-reviewed: 2026-11-04
 - 이행 중에 두었던 `ActionButton`, `StatusBadge` alias와 `asChild` 같은 이전 prop 이름은 던삐삐 디자인 적용의 마지막 PR에서 제거했다. 버튼은 `Button`, 상태 표시는 `StatusChip`을 쓰고 요소 합성은 Base UI의 `render`로 한다.
 - `@base-ui/react`는 `@dfragon/ui`의 peer dependency이자 build external이다. `@seed-design/*`, `@karrotmarket/*`는 dependency와 external에 두지 않는다. Package, CSS의 책임은 [Shared UI boundary](../architecture/overview.md#shared-ui-boundary)를 따른다.
 - 업데이트에서는 바뀐 API, peer 조건, 실제 소비 경로의 호환성을 확인한다. 통상적인 호환 패치에는 별도 Rule 승인이나 전체 시각 matrix 재실행을 요구하지 않는다. 중요 동작이나 디자인 방향을 바꾸는 선택은 [제품 계약 적용 기준](../README.md#document-class)을 따른다.
-- Base UI, Barlow Condensed처럼 새로 들이는 외부 코드와 자산의 license, NOTICE는 `@dfragon/licenses`의 고지 수집에 포함한다.
+- Base UI, Pretendard처럼 새로 들이는 외부 코드와 자산의 license, NOTICE는 `@dfragon/licenses`의 고지 수집에 포함한다.
 
 ## 던삐삐 디자인 규칙
 
@@ -81,7 +81,8 @@ last-reviewed: 2026-11-04
 
 - 색: 무채색 바탕 위에 신호색 하나를 쓴다. 신호색 `signal`(`#FF7A33`, hover `signalHover` `#FF9357`)은 선택, 주 버튼, 포커스와 진행 중인 캡처 회차에 쓴다. 희귀도 색은 유지하고, 로고 빨강 `brandLogo`(`#E83830`)와 크림 `brandCream`(`#F8E8C8`)은 로고 자산에만 쓴다.
 - 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 사각 점, 옅은 면 `bgWarningWeak`으로 표현한다.
-- 글자: 라벨은 12px로 작게, 값은 Barlow Condensed `tabular-nums`로 크게 쓴다. 한글은 마루미냐 한글을 쓴다.
+- 글자: 라벨은 12px로 작게, 값은 `tabular-nums`로 크게 쓴다. 본문, 로고 글자, 숫자 모두 Pretendard를 쓴다.
+- 길드 이름은 `fgGuild`, 모험단 이름은 `fgAdventure`로 쓴다. 아이템 등급 색(`rarity*`)은 길드 이름에 쓰지 않는다.
 - 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 버튼, 입력, 칩, 배지는 반지름 2px이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
 - 배치: 상단 바는 위 전역 바(48px)에 등급 퍼센트, 제품 이름, 게임 연결 칩을, 아래 게임 바(40px)에 검색 메뉴와 화면 헤더를 둔다. 웹 앱 상자의 폭은 1080px이다.
 - 카드 상태: 테두리 전체를 칠하지 않고 네 모서리 꺾쇠로 표시한다. 기본, 선택, 실패(노란 꺾쇠), 대기(dashed)를 구분한다. 스냅샷에 없는 모험단만 카드를 덮는 빨간 빗금(`alertHatch`)을 쓴다.
@@ -95,17 +96,17 @@ last-reviewed: 2026-11-04
 
 ## 글꼴과 한국어 타이포그래피
 
-웹 클라이언트는 앱에 번들한 마루미냐 한글(MaruMinya Hangul, x12y12pxMaruMinyaHangul) 비트맵 글꼴을 사용하며 CDN에서 받지 않는다. 글꼴 이름과 대체 순서는 전역 글꼴 CSS와 `font` 토큰에서 정하고 화면 스타일에 반복하지 않는다. 웹 앱 상자는 `font.ui`를 적용하고 그 안의 화면은 상속을 사용하며, 기본 글꼴이 따로 정해진 `pre` 같은 요소만 `inherit`로 연결한다. 굵기는 400, 500, 600, 700만 쓴다. 마루미냐 한글은 굵기가 하나라 500 이상은 브라우저가 합성한다. Typo의 크기, 행간, 굵기, 자간은 `typographyVariants`가 소유한다.
+웹 클라이언트는 본문, 로고 글자, 숫자 모두 앱에 번들한 Pretendard Variable(SIL OFL 1.1) 한 파일을 사용하며 CDN에서 받지 않는다. `@font-face`는 앱 전역 글꼴 CSS에, 글꼴 이름과 대체 순서는 `font` 토큰에 두고 화면 스타일에 반복하지 않는다. 웹 앱 상자는 `font.ui`를 적용하고 그 안의 화면은 상속을 사용하며, 기본 글꼴이 따로 정해진 `pre` 같은 요소만 `inherit`로 연결한다. 굵기는 400, 500, 600, 700만 쓴다. Typo의 크기, 행간, 굵기, 자간은 `typographyVariants`가 소유한다.
 
-웹 클라이언트는 숫자 글꼴 Barlow Condensed(SIL OFL 1.1)를 앱에 번들하고 CDN에서 받지 않는다. 600, 700 굵기를 숫자와 기본 라틴 문자로 줄여 담고, `@font-face`는 앱 전역 글꼴 CSS에, 글꼴 이름은 `font` 토큰에 둔다. 숫자 값은 `NumericText`나 같은 토큰으로 이 글꼴을 쓴다.
+숫자 값은 `NumericText`나 `font.num` 토큰으로 쓴다. `font.num`은 `font.ui`와 같은 Pretendard이고, 숫자 열을 맞추는 일은 `tabular-nums`가 맡는다.
 
-웹사이트(`apps/web`)는 웹 앱 상자 밖에 문구가 없어 사이트 전용 글꼴을 두지 않는다. 마루미냐 한글과 Barlow Condensed(둘 다 SIL OFL 1.1)는 `packages/client`와 같은 파일을 사이트에 함께 배포하고 CDN에서 받지 않으며, 웹 앱은 같은 글꼴 토큰을 읽는다.
+웹사이트(`apps/web`)는 웹 앱 상자 밖에 문구가 없어 사이트 전용 글꼴을 두지 않는다. Pretendard Variable은 `packages/client`의 파일을 사이트에 함께 배포하고 CDN에서 받지 않으며, 웹 앱은 같은 글꼴 토큰을 읽는다.
 
 - 같은 전역 CSS에 `word-break: keep-all`, `overflow-wrap: anywhere`를 두어 한국어를 어절 단위로 줄바꿈하고 긴 문자열은 영역 안에서 나눈다. `packages/ui/foundation.css`는 공용 Example도 공유하므로 이 기준을 두지 않는다.
 - 기울임, `text-transform: uppercase`, 양수 자간을 새로 쓰지 않는다.
 - 수치, 표, 타이머는 `font-variant-numeric: tabular-nums`를 쓴다. 기존 사용처는 유지하며 기존 코드의 일괄 정리는 이 기준의 선행 조건이 아니다.
 
-값과 규칙의 디자인 기준은 디자인 인계 저장소의 [Typography](https://github.com/dungeon-and-dragon/dfragon-design/blob/main/design/typography.md)다. Pretendard 기준은 사용자가 승인한 Pretendard 전환 요청으로 채택했고, 마루미냐 한글은 2026-10-26 요청(#795)으로 바꿨으며, Barlow Condensed 기준은 2026-10-18 결정으로 채택했다.
+값과 규칙의 디자인 기준은 디자인 인계 저장소의 [Typography](https://github.com/dungeon-and-dragon/dfragon-design/blob/main/design/typography.md)다. 2026-11-04 결정([ADR 0011](../adr/0011-pretendard-font-and-guild-color.md))으로 마루미냐 한글(2026-10-26 요청 #795)과 숫자 글꼴 Barlow Condensed(2026-10-18 결정)를 Pretendard로 바꿨다.
 
 ## 공통 자산과 화면의 책임
 

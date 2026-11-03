@@ -15,7 +15,7 @@ export const styles = stylex.create({
   },
   stat: { display: 'flex', alignItems: 'center', gap: space.s4, minWidth: 0, margin: 0 },
   label: { margin: 0, fontWeight: 400, color: colors.cardFg },
-  value: { margin: 0, fontWeight: 400, color: colors.cardFg },
+  value: { margin: 0, fontWeight: 400, color: colors.cardFg, fontVariantNumeric: 'tabular-nums' },
   divider: { flexShrink: 0, width: 1, height: 10, backgroundColor: colors.cardBorderStrong },
   dealer: { color: colors.scoreDealer },
   buffer: { color: colors.scoreBuffer },

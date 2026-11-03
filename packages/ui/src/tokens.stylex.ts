@@ -29,6 +29,7 @@ export const colors = stylex.defineConsts({
   fgDanger: 'var(--df-fg-danger)',
   fgWarning: 'var(--df-fg-warning)',
   fgAdventure: 'var(--df-fg-adventure)',
+  fgGuild: 'var(--df-fg-guild)',
   borderDefault: 'var(--df-border-default)',
   borderStrong: 'var(--df-border-strong)',
   borderDanger: 'var(--df-border-danger)',

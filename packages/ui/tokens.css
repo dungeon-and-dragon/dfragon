@@ -6,6 +6,8 @@
  * card 토큰(--df-card-*), 꺾쇠 기본색과 상단 바 높이 토큰은 2026-11-04 결정(docs/adr/0009-design-tokens-game-site-conventions.md)의
  * 값이고 아직 tokens.json에 반영하지 않았다. 자른 모서리 --df-cut은 같은 날 결정
  * (docs/adr/0010-two-tier-header-1080-width-no-cut-corners.md)으로 지웠고 tokens.json 반영은 그 저장소의 PR로 한다.
+ * 길드 이름 색 --df-fg-guild(#E879F9)와 숫자 글꼴 --df-font-num을 본문과 같은 Pretendard로 둔 값은 2026-11-04 결정
+ * (docs/adr/0011-pretendard-font-and-guild-color.md)이고 아직 tokens.json에 반영하지 않았다.
  * 기준 commit의 tokens.json과 값이 다르거나 한쪽에만 있는 색 토큰은 아래와 같다. layout, typography의
  * 창과 대화상자 크기, 꺾쇠 형태, 숫자 글자 단계 같은 일부 토큰은 이 파일로 옮기지 않았다.
  * 검색 실패의 노란색 --df-bracket-failure, --df-card-failure{,-weak}와 스냅샷에 없는 모험단의 빗금
@@ -47,6 +49,7 @@
   --df-fg-danger: #ff5c5c;
   --df-fg-warning: #ffb400;
   --df-fg-adventure: #93e5c0;
+  --df-fg-guild: #e879f9;
   --df-border-default: #2a2b32;
   --df-border-strong: #3b3d46;
   --df-border-danger: #ff5c5c;
@@ -138,8 +141,8 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
     'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --df-font-num:
-    'Barlow Condensed', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -71,7 +71,7 @@ export const styles = stylex.create({
     textOverflow: 'ellipsis',
     color: colors.cardFgAdventure
   },
-  guild: { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', color: colors.rarityUnique },
+  guild: { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', color: colors.fgGuild },
   divider: {
     flexShrink: 0,
     width: 1,
