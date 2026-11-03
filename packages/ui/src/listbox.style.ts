@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, space } from './tokens.stylex'
+import { colors, motion, radius, space } from './tokens.stylex'
 
 const openShape = 'inset(0)'
 const foldedShape = 'inset(0 0 100% 0)'
@@ -33,7 +33,7 @@ export const listboxStyles = stylex.create({
     display: 'flex',
     alignItems: 'center',
     gap: space.s8,
-    paddingInline: space.s12,
+    paddingInline: { default: space.s12, [stylex.when.ancestor(onCard)]: 10 },
     outlineStyle: 'none',
     cursor: { default: 'pointer', ':is([data-disabled])': 'not-allowed' },
     userSelect: 'none',
@@ -52,12 +52,19 @@ export const listboxStyles = stylex.create({
         [stylex.when.ancestor(onCard)]: colors.cardBorderStrong
       }
     },
-    fontWeight: { default: 'inherit', ':is([data-selected], [data-checked])': 700 },
+    fontWeight: {
+      default: 'inherit',
+      ':is([data-selected], [data-checked])': {
+        default: 700,
+        [stylex.when.ancestor(onCard)]: 600
+      }
+    },
+    borderRadius: { default: null, [stylex.when.ancestor(onCard)]: radius.control },
     backgroundColor: {
       default: 'transparent',
       ':is([data-highlighted])': {
         default: colors.bgControlHover,
-        [stylex.when.ancestor(onCard)]: colors.cardControlHover
+        [stylex.when.ancestor(onCard)]: colors.cardControl
       }
     },
     transitionProperty: 'color, background-color',
@@ -88,10 +95,14 @@ export const listboxStyles = stylex.create({
       [stylex.when.ancestor(onCard)]: colors.cardBorder
     }
   },
+  // 표 행 위에 뜨는 팝오버는 면과 1px 테두리에 그림자를 두며, 그림자를 자르지 않게 펼침 clip-path를 쓰지 않는다.
   cardPopup: {
-    borderTopColor: colors.cardSignal,
-    backgroundColor: colors.cardInset,
-    boxShadow: `inset 0 0 0 1px ${colors.cardBorderStrong}`,
-    color: colors.cardFgMuted
+    paddingInline: space.s4,
+    borderTopWidth: 0,
+    backgroundColor: colors.bgSurface,
+    boxShadow: `inset 0 0 0 1px ${colors.cardBorderStrong}, 0 8px 24px rgb(0 0 0 / 45%)`,
+    color: colors.cardFgMuted,
+    clipPath: 'none',
+    transitionProperty: 'none'
   }
 })
