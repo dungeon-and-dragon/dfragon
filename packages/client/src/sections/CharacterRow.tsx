@@ -11,6 +11,7 @@ import type { SlotNotice } from '@dfragon/client-core/lib/character-card'
 import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
 import type { CardCharacter } from '@dfragon/client-core/types/cards'
 import type { SearchMode } from '@dfragon/client-core/types/search-mode'
+import { CandidatePopover } from '../components/CandidatePopover'
 import { CardAnnouncer } from '../components/CardAnnouncer'
 import { LookupProgress } from '../components/LookupProgress'
 import { NameField } from '../components/NameField'
@@ -39,6 +40,7 @@ export function CharacterRow({
   seat,
   screen,
   onLookup,
+  onPickCandidate,
   onChangeSnapshotAdventure
 }: {
   cardKey: SlotCardKey
@@ -47,9 +49,18 @@ export function CharacterRow({
   seat: ReactNode
   screen: SearchMode
   onLookup: (nickname: string, serverId?: string) => void
+  onPickCandidate: (serverId: string) => void
   onChangeSnapshotAdventure: (value: string) => void
 }): React.JSX.Element {
-  const { state, character, snapshotMark, snapshotAdventureInput, loading = false } = card
+  const {
+    state,
+    character,
+    snapshotMark,
+    snapshotAdventureInput,
+    picker,
+    picking = false,
+    loading = false
+  } = card
   const found = state === 'success' && character != null ? character : undefined
   const draft = useLookupDraft({
     cardKey,
@@ -65,7 +76,11 @@ export function CharacterRow({
   const shown = draft.inputNotice === '' ? found : undefined
   const estimated = shown !== undefined && notice?.tone === 'estimate'
   const snapshotShown =
-    shown !== undefined && !draft.editing && lookupStep === null && notice?.tone !== 'error'
+    shown !== undefined &&
+    !draft.editing &&
+    !picking &&
+    lookupStep === null &&
+    notice?.tone !== 'error'
 
   return (
     <>
@@ -89,6 +104,9 @@ export function CharacterRow({
             </span>
           )}
           {estimated && <span {...stylex.props(styles.badge, styles.estimate)}>추정</span>}
+          {picker !== undefined && (
+            <CandidatePopover slot={slot} picker={picker} onPick={onPickCandidate} />
+          )}
           <CardAnnouncer>
             {shown !== undefined && !draft.editing ? shown.name : (notice?.text ?? '')}
           </CardAnnouncer>
@@ -184,6 +202,18 @@ function DetailCells({
           <LookupProgress slot={slot} step={lookupStep} />
         </td>
         <MissingCell end />
+        <MissingCell end />
+      </>
+    )
+  }
+
+  if (found !== undefined && card.picking === true) {
+    return (
+      <>
+        <td colSpan={3} {...stylex.props(styles.cell)}>
+          <LookupProgress slot={slot} step="상세 정보 확인" />
+        </td>
+        <FameCell fame={found.fame} tier={found.tier} />
         <MissingCell end />
       </>
     )

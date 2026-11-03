@@ -7,14 +7,14 @@ import {
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { RAID_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
-import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
+import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
 import { useClientHost } from './useClientHost'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import type { OcrRecognition } from '@dfragon/client-core/lib/ocr-worker-recognition'
 import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
 
 export type RaidCapture = {
-  search: ManualCharacterLookup
+  search: CharacterSearch
   phase: ReturnType<typeof getRaidCapturePhase>
   recognizing: boolean
   nicknames: (string | null)[]
@@ -49,11 +49,7 @@ export function useRaidCapture({
 }): RaidCapture {
   const { raid } = useClientHost()
   // 파티 카드와 다른 검색 수명을 써서 파티 네 자리와 공대 12자리가 서로의 결과를 덮어쓰지 않는다.
-  const search = useManualCharacterLookup(
-    raid,
-    SEARCH_SLOT_COUNTS.raid,
-    raid.notifyOcrCandidatesDetected
-  )
+  const search = useCharacterSearch(raid, SEARCH_SLOT_COUNTS.raid)
   const { seatOrder, swapSeats, resetSeats } = useSeatOrder(RAID_SEAT_LAYOUT)
   const { begin: beginSearch } = search
   const beginRound = useCallback(

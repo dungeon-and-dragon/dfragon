@@ -108,11 +108,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
       }
 
       if (slot.choices !== undefined) {
-        copiedSlot.choices = slot.choices.map((choice) => {
-          const face = choice.face !== null ? { ...choice.face } : null
-
-          return { ...choice, face }
-        })
+        copiedSlot.choices = slot.choices.map((choice) => ({ ...choice }))
       }
       copiedSlot.error = error != null ? { ...error } : null
 

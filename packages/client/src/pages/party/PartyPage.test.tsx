@@ -90,7 +90,7 @@ async function render({
     root.render(
       <PartyPage
         resetKey="party"
-        actions={{ lookupSlot: vi.fn(), changeSnapshotAdventure: vi.fn() }}
+        actions={{ lookupSlot: vi.fn(), pickCandidate: vi.fn(), changeSnapshotAdventure: vi.fn() }}
         {...props}
         seats={{ layout: PARTY_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
         slots={cards}
@@ -244,7 +244,7 @@ it('자리 배치대로 행을 그리고 조회는 그 자리에 놓인 검색 �
     slots: ['success', 'idle', 'idle', 'idle'],
     characters: [character],
     seatOrder: swapSeats(createSeatOrder(PARTY_SEAT_LAYOUT), 0, 3),
-    actions: { lookupSlot, changeSnapshotAdventure: vi.fn() }
+    actions: { lookupSlot, pickCandidate: vi.fn(), changeSnapshotAdventure: vi.fn() }
   })
 
   expect(nameOf(seats()[3])).toBe('선택된이름')
@@ -270,7 +270,7 @@ it('스냅샷 모험단 입력은 그 슬롯이 놓인 자리 행에 열리고 �
     slots: ['failure', 'idle', 'idle', 'idle'],
     snapshotAdventureInputs: [''],
     seatOrder: swapSeats(createSeatOrder(PARTY_SEAT_LAYOUT), 0, 3),
-    actions: { lookupSlot: vi.fn(), changeSnapshotAdventure }
+    actions: { lookupSlot: vi.fn(), pickCandidate: vi.fn(), changeSnapshotAdventure }
   })
 
   const field = seats()[3].querySelector<HTMLInputElement>('input[aria-label="4번 모험단"]')!

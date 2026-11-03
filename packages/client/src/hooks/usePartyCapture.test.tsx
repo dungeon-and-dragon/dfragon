@@ -280,7 +280,7 @@ function selectedSummary(serverId: string): NonNullable<SearchSlot['selected']> 
 }
 
 function choice(serverId: string): CharacterChoice {
-  return { ...searchRow, serverId, adventureName: null, face: null }
+  return { ...searchRow, serverId, adventureName: null }
 }
 
 function withSlot(slot: SearchSlot): SearchSnapshot {
@@ -1023,7 +1023,7 @@ it.each(['새 회차', '중지', '창 변경'] as const)(
       null
     ])
     expect(before.manualSlots).toEqual([true, true, false, false])
-    expect(before.candidatePickers[0]?.previewServerId).toBe('siroco')
+    expect(before.candidatePickers[0]?.shownServerId).toBe('siroco')
 
     if (action === '새 회차') {
       readCaptureFrame.mockReturnValueOnce(new Promise(() => {}))

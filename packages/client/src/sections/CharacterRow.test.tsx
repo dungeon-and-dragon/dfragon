@@ -5,7 +5,9 @@ import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { bufferCard, dealerCard } from '@dfragon/client-core/testing/fixtures/character-cards'
+import type { CandidatePicker } from '@dfragon/client-core/lib/candidate-picker'
 import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
+import type { CharacterChoice } from '@dfragon/client-core/preload/common/types/search'
 import type { CardCharacter } from '@dfragon/client-core/types/cards'
 import type { ServerSelect } from '../components/ServerSelect'
 import { colors } from '@dfragon/ui/tokens.stylex'
@@ -56,13 +58,19 @@ const found: CardCharacter = {
 const COLUMNS = ['자리', '캐릭터', '서버', '모험단', '길드', '직업', '명성', '점수', '스냅샷']
 
 type RenderProps = Partial<SlotCard> &
-  Partial<Pick<ComponentProps<typeof CharacterRow>, 'onLookup' | 'onChangeSnapshotAdventure'>> & {
+  Partial<
+    Pick<
+      ComponentProps<typeof CharacterRow>,
+      'onLookup' | 'onPickCandidate' | 'onChangeSnapshotAdventure'
+    >
+  > & {
     resetKey?: string
   }
 
 async function render({
   state = 'idle',
   onLookup = vi.fn(),
+  onPickCandidate = vi.fn(),
   onChangeSnapshotAdventure = vi.fn(),
   resetKey = '0',
   ...card
@@ -80,6 +88,7 @@ async function render({
               seat="1"
               screen="party"
               onLookup={onLookup}
+              onPickCandidate={onPickCandidate}
               onChangeSnapshotAdventure={onChangeSnapshotAdventure}
             />
           </tr>
@@ -505,4 +514,63 @@ it('추정 행도 이름을 고치는 동안에는 모험단 자리에 Enter 조
   expect(cell('모험단')?.colSpan).toBe(1)
   expect(cell('모험단')?.textContent).toBe('Enter로 조회')
   expect(cell('길드')?.textContent).toBe('찾은길드')
+})
+
+function choiceOf(serverId: string, serverName: string, fame: number): CharacterChoice {
+  const characterId = `synthetic-${serverId}`
+
+  return { characterId, characterName: found.name, serverId, serverName, fame, adventureName: null }
+}
+
+const picker: CandidatePicker = {
+  choices: [choiceOf('cain', '카인', 125850), choiceOf('siroco', '시로코', 98412)],
+  shownServerId: 'cain',
+  picking: null
+}
+
+it('같은 이름 후보가 여럿이면 이름 옆에 후보 수 칩을 두고 추정 행은 추정 배지와 원인을 함께 둔다', async () => {
+  await render({
+    state: 'success',
+    character: found,
+    picker,
+    notice: { text: '직업과 수치 미확인, 최고 명성 후보입니다.', tone: 'estimate' }
+  })
+
+  const character = cell('캐릭터')!
+  expect(visibleText(character)).toContain('추정')
+  expect(character.querySelector('[aria-label="1번 후보 고르기, 후보 2"]')?.textContent).toBe(
+    '후보 2'
+  )
+  expect(cell('모험단')?.textContent).toContain('직업과 수치 미확인, 최고 명성 후보입니다.')
+})
+
+it('확정 중인 행은 받은 초상화, 서버, 명성을 그대로 두고 모험단부터 직업까지 상세 정보 확인 진행을 둔다', async () => {
+  const snapshotMark = { kind: 'kept', seat: 1 } as const
+  const image = 'https://img-api.neople.co.kr/df/servers/siroco/characters/synthetic-siroco?zoom=1'
+  await render({
+    state: 'success',
+    character: {
+      ...found,
+      serverId: 'siroco',
+      fame: 98412,
+      adventure: '-',
+      job: '-',
+      card: null,
+      image
+    },
+    picker: { ...picker, shownServerId: 'siroco' },
+    picking: true,
+    snapshotMark
+  })
+
+  const bar = row().querySelector('[role="progressbar"]')!
+  expect(cell('모험단')?.colSpan).toBe(3)
+  expect(cell('모험단')?.contains(bar)).toBe(true)
+  expect(bar.textContent).toBe('상세 정보 확인 중')
+  expect(cell('캐릭터')?.querySelector('img')?.getAttribute('src')).toBe(image)
+  expect(cell('서버')?.querySelector('select')?.value).toBe('siroco')
+  expect(cell('명성')?.textContent).toBe('98,412')
+  expect(cell('점수')?.textContent).toBe('-')
+  expect(cell('스냅샷')?.textContent).toBe('')
+  expect(container.querySelector('[aria-label="1번 후보 고르기, 후보 2"]')).not.toBeNull()
 })

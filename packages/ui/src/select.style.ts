@@ -1,6 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, radius, size, space } from './tokens.stylex'
 
+const onCard = ':is([data-surface="card"])'
+
 export const styles = stylex.create({
   trigger: {
     display: 'inline-flex',
@@ -50,30 +52,38 @@ export const styles = stylex.create({
     transitionDuration: motion.durState,
     transitionTimingFunction: motion.ease
   },
-  item: { height: 28, fontSize: 13 },
+  item: {
+    height: { default: 28, [stylex.when.ancestor(onCard)]: 32 },
+    fontSize: 13
+  },
   grid: (columns: number) => ({
     display: 'grid',
     gridTemplateColumns: `repeat(${columns}, auto)`
+  }),
+  cardGrid: (columns: number) => ({
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columns}, 84px)`,
+    gap: 2
   }),
   // 표 행의 작은 칩은 행 글자보다 한 단계 흐린 글자로 두고, 올리거나 열면 surface의 글자색으로 돌아간다.
   mutedText: {
     color: {
       default: colors.fgMuted,
-      ':hover:not(:disabled, [data-popup-open])': colors.fgDefault,
-      ':is([data-popup-open])': colors.onSignal,
+      ':hover:not(:disabled)': colors.fgDefault,
+      ':is([data-popup-open])': colors.fgDefault,
       ':disabled': colors.fgDisabled
     }
   },
+  // 표 행의 칩은 열어도 신호색으로 채우지 않고 올린 면 그대로 둔다. 신호색은 목록의 지금 항목이 쓴다.
   cardTrigger: {
     color: {
       default: colors.cardFg,
-      ':is([data-popup-open])': colors.cardOnSignal,
       ':disabled': colors.cardFgSubtle
     },
     backgroundColor: {
       default: colors.cardControl,
-      ':hover:not(:disabled, [data-popup-open])': colors.cardControlHover,
-      ':is([data-popup-open])': colors.cardSignal
+      ':hover:not(:disabled)': colors.cardControlHover,
+      ':is([data-popup-open])': colors.cardControlHover
     },
     outlineColor: colors.cardSignal
   }

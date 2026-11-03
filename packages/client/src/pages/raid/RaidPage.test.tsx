@@ -106,7 +106,7 @@ async function render({
         resetKey="raid"
         {...props}
         seats={{ layout: RAID_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
-        actions={{ lookupSlot, changeSnapshotAdventure }}
+        actions={{ lookupSlot, pickCandidate: vi.fn(), changeSnapshotAdventure }}
         slots={slots}
       />
     )
