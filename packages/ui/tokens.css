@@ -138,8 +138,8 @@
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
     'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --df-font-num:
-    'Barlow Condensed', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
 }
 
 @media (prefers-reduced-motion: reduce) {
