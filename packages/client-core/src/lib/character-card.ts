@@ -1,6 +1,12 @@
 import { portraitFaceWindowOf } from '../preload/common/search/portrait-anchor'
 import type { SelectedCharacterSummary } from '../preload/common/types/character'
-import { SEARCH_ERRORS, type SearchError, type SearchSlot } from '../preload/common/types/search'
+import { characterImageUrl } from '../preload/common/search/character-summary'
+import {
+  type CharacterChoice,
+  SEARCH_ERRORS,
+  type SearchError,
+  type SearchSlot
+} from '../preload/common/types/search'
 import { serverNames } from '../constants/servers'
 import { MISSING_VALUE } from '../constants/cards'
 import type { CardCharacter } from '../types/cards'
@@ -32,6 +38,26 @@ export function toCharacterCard(
     level: summary.level,
     image: summary.imageUrl,
     face: portraitFaceWindowOf(summary.jobName)
+  }
+}
+
+/** 누른 후보의 상세를 받기 전에는 후보 검색이 준 이름, 서버, 명성과 초상화만 안다. */
+export function toChoiceCharacterCard(choice: CharacterChoice): CardCharacter | undefined {
+  if (!isServerId(choice.serverId)) {
+    return undefined
+  }
+  const adventure = choice.adventureName ?? MISSING_VALUE
+  const image = characterImageUrl(choice)
+
+  return {
+    characterId: choice.characterId,
+    name: choice.characterName,
+    adventure,
+    job: MISSING_VALUE,
+    serverId: choice.serverId,
+    fame: choice.fame,
+    card: null,
+    image
   }
 }
 

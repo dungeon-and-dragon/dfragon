@@ -13,7 +13,7 @@ import {
 } from '@dfragon/client-core/lib/party-capture-machine'
 import type { CapturePhase } from '@dfragon/client-core/types/capture'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
-import { useCharacterSearch } from './useCharacterSearch'
+import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
 import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { useClientHost } from './useClientHost'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
@@ -32,7 +32,7 @@ export type CaptureSourceSelection = {
 
 export type PartyCapture = {
   source: CaptureSourceSelection
-  search: ReturnType<typeof useCharacterSearch>
+  search: CharacterSearch
   phase: CapturePhase
   recognizing: boolean
   canStartCapture: boolean
@@ -56,7 +56,7 @@ export type PartyCapture = {
 export function usePartyCapture({ texts }: { texts: CaptureTexts }): PartyCapture {
   const { party } = useClientHost()
   const stopRef = useRef<() => void>(() => {})
-  const search = useCharacterSearch(party, () => stopRef.current())
+  const search = useCharacterSearch(party, SEARCH_SLOT_COUNTS.party, () => stopRef.current())
   const [ocrWorker] = useState(() => createSharedOcrWorker(texts.ocrPrepareFailed))
   const ocrReady = useSyncExternalStore(ocrWorker.subscribe, ocrWorker.isReady)
   const { seatOrder, swapSeats, resetSeats } = useSeatOrder(PARTY_SEAT_LAYOUT)

@@ -5,9 +5,10 @@ export type LookupStep = (typeof LOOKUP_STEPS)[number]
 
 export function isBusySlot({
   state,
-  loading = false
-}: Pick<SlotCard, 'state' | 'loading'>): boolean {
-  return loading || state === 'pending'
+  loading = false,
+  picking = false
+}: Pick<SlotCard, 'state' | 'loading' | 'picking'>): boolean {
+  return loading || picking || state === 'pending'
 }
 
 /** 직접 조회는 사용자가 이름을 넣은 뒤라 캐릭터 검색 단계부터 보인다. */

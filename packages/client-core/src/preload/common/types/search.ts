@@ -68,8 +68,7 @@ export type CharacterSearchRow = Readonly<{
 
 export type CharacterFaceWindow = Readonly<{ x: number; y: number; width: number; height: number }>
 
-export type CharacterChoice = CharacterSearchRow &
-  Readonly<{ adventureName: string | null; face: CharacterFaceWindow | null }>
+export type CharacterChoice = CharacterSearchRow & Readonly<{ adventureName: string | null }>
 
 type SearchErrorDefinition = Readonly<{ message: string }>
 
