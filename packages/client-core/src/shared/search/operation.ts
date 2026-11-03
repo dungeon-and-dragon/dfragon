@@ -78,7 +78,7 @@ export async function runSearchOperation<T>(
       return failure('SEARCH_NETWORK_ERROR')
     }
 
-    return failure(error.code)
+    return { kind: 'failure', error: error.toSearchError() }
   } finally {
     signal.removeEventListener('abort', cancel)
   }

@@ -3,13 +3,13 @@ import type { CardCharacter, SlotState } from '../types/cards'
 import type { SnapshotMark } from './adventure-snapshot'
 import type { CandidatePicker } from './candidate-picker'
 import type { SearchMode } from '../types/search-mode'
-import { searchSlotNotice, toCharacterCard } from './character-card'
+import { type SlotNotice, searchSlotNotice, toCharacterCard } from './character-card'
 
 export type SlotCard = {
   state: SlotState
   character?: CardCharacter
   nickname?: string
-  notice?: string
+  notice?: SlotNotice
   loading?: boolean
   snapshotMark?: SnapshotMark
   snapshotAdventureInput?: string
@@ -30,7 +30,6 @@ export function toSlotCards({
   recognizing,
   snapshotMarks,
   snapshotAdventureInputs,
-  nextLookupStep,
   candidatePickers = [],
   screen = 'party'
 }: {
@@ -40,14 +39,13 @@ export function toSlotCards({
   recognizing: boolean
   snapshotMarks: readonly (SnapshotMark | undefined)[]
   snapshotAdventureInputs: readonly (string | undefined)[]
-  nextLookupStep: string
   candidatePickers?: readonly (CandidatePicker | null)[]
   screen?: SearchMode
 }): SlotCard[] {
   return slots.map((slot, index) => {
     const character = toCharacterCard(slot.selected)
     const nickname = nicknames[index] ?? undefined
-    const notice = searchSlotNotice(slot, nextLookupStep, screen)
+    const notice = searchSlotNotice(slot, screen)
     const loading = !manualSlots[index] && recognizing
     const picker = candidatePickers[index] ?? undefined
     const scorePending = slot.details === 'pending'

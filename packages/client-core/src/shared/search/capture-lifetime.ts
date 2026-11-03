@@ -355,6 +355,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     delete completedSlot.selectionMethod
     delete completedSlot.choices
     delete completedSlot.details
+    delete completedSlot.detailsError
     if (isSuccess) {
       slots[request.slot] = {
         ...completedSlot,
@@ -473,7 +474,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     }
 
     if (outcome.kind === 'failure') {
-      slots[job.slot] = { ...slots[job.slot], details: 'failed' }
+      slots[job.slot] = { ...slots[job.slot], details: 'failed', detailsError: outcome.error }
       if (outcome.error.code === 'SEARCH_RATE_LIMITED') {
         failUnstartedDetails()
       }
