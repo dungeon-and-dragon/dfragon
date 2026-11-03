@@ -41,6 +41,7 @@ function FoundRow({
         seat={slot}
         screen={screen}
         onLookup={onLookup}
+        onPickCandidate={vi.fn()}
         onChangeSnapshotAdventure={vi.fn()}
       />
     </tr>
@@ -247,7 +248,7 @@ it('서버 8개를 4열 목록으로 연다', async () => {
   const field = document.querySelector<HTMLButtonElement>('[aria-label="칸 안 서버"]')!
   await act(async () => field.click())
   const fieldList = document.querySelector('[role="listbox"][aria-label="칸 안 서버"]')!
-  expect(fieldList.getAttribute('style')).toContain('repeat(4, auto)')
+  expect(fieldList.getAttribute('style')).toContain('repeat(4, 84px)')
   expect(fieldList.querySelectorAll('[role="option"]')).toHaveLength(8)
 })
 

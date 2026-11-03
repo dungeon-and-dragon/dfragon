@@ -131,16 +131,15 @@ it('파티 카드의 최고 명성 선택은 후보 창 여부와 무관하게 �
     selectionMethod: 'highest-fame'
   }
   const choices = [
-    { ...summary, adventureName: null, face: null },
-    { ...summary, serverId: 'siroco', serverName: '시로코', adventureName: null, face: null }
-  ].map(({ characterId, characterName, serverId, serverName, fame, adventureName, face }) => ({
+    { ...summary, adventureName: null },
+    { ...summary, serverId: 'siroco', serverName: '시로코', adventureName: null }
+  ].map(({ characterId, characterName, serverId, serverName, fame, adventureName }) => ({
     characterId,
     characterName,
     serverId,
     serverName,
     fame,
-    adventureName,
-    face
+    adventureName
   }))
 
   expect(searchSlotNotice(slot)).toBeUndefined()
@@ -158,15 +157,14 @@ describe('공대 카드의 선택 근거 안내', () => {
     error: null,
     selected: summary
   }
-  const choices = [{ ...summary, adventureName: null, face: null }].map(
-    ({ characterId, characterName, serverId, serverName, fame, adventureName, face }) => ({
+  const choices = [{ ...summary, adventureName: null }].map(
+    ({ characterId, characterName, serverId, serverName, fame, adventureName }) => ({
       characterId,
       characterName,
       serverId,
       serverName,
       fame,
-      adventureName,
-      face
+      adventureName
     })
   )
 

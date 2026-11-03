@@ -7,7 +7,11 @@ import type { CaptureSearch, createCaptureSearch } from '@dfragon/client-core/li
 import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import type { SearchView } from '@dfragon/client-core/types/search'
-import type { CharacterChoice, SearchSlot } from '@dfragon/client-core/preload/common/types/search'
+import {
+  type CharacterChoice,
+  SEARCH_SLOT_COUNTS,
+  type SearchSlot
+} from '@dfragon/client-core/preload/common/types/search'
 import {
   CAPTURE_ID,
   REQUEST_ID,
@@ -27,16 +31,19 @@ let bridge: CaptureSearch
 let root: Root
 let container: HTMLDivElement
 
-function choice(serverId: string, serverName: string): CharacterChoice {
+function choice(serverId: string, serverName: string, fame: number): CharacterChoice {
   return {
     ...searchRow,
     characterId: `synthetic-${serverId}`,
     serverId,
     serverName,
-    adventureName: null,
-    face: null
+    fame,
+    adventureName: null
   }
 }
+
+const CAIN = choice('cain', '카인', 100)
+const SIROCO = choice('siroco', '시로코', 200)
 
 function selected(serverId: string) {
   return {
@@ -53,10 +60,12 @@ function selected(serverId: string) {
   }
 }
 
-function viewWithSlot(slot: SearchSlot): SearchView {
+// 실제 연결은 직접 조회를 받으면 그 슬롯을 직접 조회 상태로 두고, 새 회차를 시작하면 모두 되돌린다.
+function viewWithSlot(slot: SearchSlot, manual = false): SearchView {
   const slots = emptySearchSlots(4).map((current) => (current.slot === slot.slot ? slot : current))
+  const manualSlots = slots.map((current) => manual && current.slot === slot.slot)
 
-  return { ready: true, slots, manualSlots: [false, false, false, false], connectionFailed: false }
+  return { ready: true, slots, manualSlots, connectionFailed: false }
 }
 
 function ocrSlotWithChoices(requestId = REQUEST_ID): SearchSlot {
@@ -67,7 +76,7 @@ function ocrSlotWithChoices(requestId = REQUEST_ID): SearchSlot {
     rows: [searchRow],
     selected: selected('cain'),
     selectionMethod: 'portrait',
-    choices: [choice('cain', '카인'), choice('siroco', '시로코')]
+    choices: [CAIN, SIROCO]
   })
 }
 
@@ -79,6 +88,13 @@ function lookupSlot(overrides: Partial<SearchSlot>): SearchSlot {
     ...overrides
   })
 }
+
+const pickedResult = lookupSlot({
+  state: 'success',
+  rows: [{ ...searchRow, serverId: 'siroco' }],
+  selected: selected('siroco'),
+  selectionMethod: 'manual'
+})
 
 async function publish(view: SearchView): Promise<void> {
   const onChange = mocks.create.mock.lastCall![0].onChange
@@ -94,7 +110,7 @@ function Harness({
 }: {
   onRender: (value: ReturnType<typeof useCharacterSearch>) => void
 }): null {
-  onRender(useCharacterSearch(partyHost, vi.fn()))
+  onRender(useCharacterSearch(partyHost, SEARCH_SLOT_COUNTS.party, vi.fn()))
 
   return null
 }
@@ -132,17 +148,18 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-it('캡처 검색이 준 후보로 자동 선택을 보여 주는 후보 창을 만든다', () => {
+it('캡처 검색이 준 후보를 명성 순으로 늘어놓고 자동으로 고른 후보를 지금 후보로 둔다', () => {
   expect(value.candidatePickers[SLOT]).toEqual({
-    choices: [choice('cain', '카인'), choice('siroco', '시로코')],
+    choices: [SIROCO, CAIN],
     shownServerId: 'cain',
-    previewServerId: null
+    picking: null
   })
   expect(value.candidatePickers[0]).toBeNull()
 })
 
-it('다른 후보를 한 번 누르면 같은 수명에서 그 서버로 조회해 미리보기하고 다시 누르면 조회 없이 확정한다', async () => {
+it('다른 후보를 한 번 누르면 같은 수명에서 그 서버로 조회하고, 조회하는 동안 그 후보를 지금 후보로 둔다', async () => {
   await act(async () => value.pickCandidate(SLOT, 'siroco'))
+  await publish(viewWithSlot(lookupSlot({ state: 'pending', rows: [] }), true))
 
   expect(bridge.lookup).toHaveBeenCalledExactlyOnceWith({
     slot: SLOT,
@@ -150,137 +167,86 @@ it('다른 후보를 한 번 누르면 같은 수명에서 그 서버로 조회�
     serverId: 'siroco'
   })
   expect(bridge.begin).toHaveBeenCalledOnce()
-  expect(value.candidatePickers[SLOT]).toMatchObject({
+  expect(value.candidatePickers[SLOT]).toEqual({
+    choices: [SIROCO, CAIN],
     shownServerId: 'siroco',
-    previewServerId: 'siroco'
+    picking: SIROCO
+  })
+})
+
+it('누른 후보로 확정한 뒤에도 같은 후보 목록을 남겨 다른 후보로 바꿀 수 있다', async () => {
+  await act(async () => value.pickCandidate(SLOT, 'siroco'))
+  await publish(viewWithSlot(pickedResult, true))
+
+  expect(value.slots[SLOT]).toEqual(pickedResult)
+  expect(value.candidatePickers[SLOT]).toEqual({
+    choices: [SIROCO, CAIN],
+    shownServerId: 'siroco',
+    picking: null
   })
 
-  await act(async () => value.pickCandidate(SLOT, 'siroco'))
-
-  expect(value.candidatePickers[SLOT]).toBeNull()
-  expect(bridge.lookup).toHaveBeenCalledOnce()
-})
-
-it('이미 보이는 자동 선택 후보를 누르면 다시 조회하지 않고 미리보기만 한다', async () => {
   await act(async () => value.pickCandidate(SLOT, 'cain'))
-
-  expect(bridge.lookup).not.toHaveBeenCalled()
-  expect(value.candidatePickers[SLOT]?.previewServerId).toBe('cain')
-})
-
-it('미리보기를 다른 후보로 옮기면 옮긴 후보로 다시 조회한다', async () => {
-  await act(async () => value.pickCandidate(SLOT, 'siroco'))
-  await act(async () => value.pickCandidate(SLOT, 'cain'))
-
   expect(lookups()).toEqual(['siroco', 'cain'])
-  expect(value.candidatePickers[SLOT]?.previewServerId).toBe('cain')
 })
 
-it('후보 창에 없는 서버는 무시한다', async () => {
+it('지금 후보나 후보 창에 없는 서버를 누르면 조회하지 않는다', async () => {
+  await act(async () => value.pickCandidate(SLOT, 'cain'))
   await act(async () => value.pickCandidate(SLOT, 'anton'))
 
   expect(bridge.lookup).not.toHaveBeenCalled()
-  expect(value.candidatePickers[SLOT]?.previewServerId).toBeNull()
+  expect(value.candidatePickers[SLOT]).toMatchObject({ shownServerId: 'cain', picking: null })
 })
 
-it('미리보기 조회 중에는 처음 보이던 캐릭터를 두고, 결과가 슬롯을 덮어도 후보 창이 남아 옮기고 확정할 수 있다', async () => {
-  await act(async () => value.pickCandidate(SLOT, 'siroco'))
-  await publish(viewWithSlot(lookupSlot({ state: 'pending', rows: [] })))
-
-  expect(value.slots[SLOT]).toMatchObject({ state: 'success', selected: { serverId: 'cain' } })
-  expect(value.candidatePickers[SLOT]).toEqual({
-    choices: [choice('cain', '카인'), choice('siroco', '시로코')],
-    shownServerId: 'siroco',
-    previewServerId: 'siroco'
-  })
-
-  const result = lookupSlot({
-    state: 'success',
-    rows: [{ ...searchRow, serverId: 'siroco' }],
-    selected: selected('siroco'),
-    selectionMethod: 'manual'
-  })
-  await publish(viewWithSlot(result))
-
-  expect(value.slots[SLOT]).toEqual(result)
-  expect(value.candidatePickers[SLOT]).toMatchObject({
-    choices: [choice('cain', '카인'), choice('siroco', '시로코')],
-    previewServerId: 'siroco'
-  })
-
-  await act(async () => value.pickCandidate(SLOT, 'cain'))
-  expect(lookups()).toEqual(['siroco', 'cain'])
-  await act(async () => value.pickCandidate(SLOT, 'cain'))
-  expect(value.candidatePickers[SLOT]).toBeNull()
-  expect(lookups()).toEqual(['siroco', 'cain'])
-})
-
-it('미리보기 조회가 실패해도 후보 창이 남아 다른 후보를 고를 수 있다', async () => {
+it('누른 후보의 조회가 실패해도 후보 목록이 남아 다른 후보를 고를 수 있다', async () => {
   await act(async () => value.pickCandidate(SLOT, 'siroco'))
   const failure = lookupSlot({ state: 'failure', rows: [], error: { code: 'NEOPLE_TIMEOUT' } })
-  await publish(viewWithSlot(failure))
+  await publish(viewWithSlot(failure, true))
 
   expect(value.slots[SLOT]).toEqual(failure)
-  expect(value.candidatePickers[SLOT]?.previewServerId).toBe('siroco')
+  expect(value.candidatePickers[SLOT]).toMatchObject({ shownServerId: null, picking: null })
   await act(async () => value.pickCandidate(SLOT, 'cain'))
   expect(lookups()).toEqual(['siroco', 'cain'])
 })
 
-it.each(['조회 전', '미리보기 중'] as const)(
-  '%s 서버 칩으로 직접 조회하면 후보 창을 닫는다',
-  async (state) => {
-    if (state === '미리보기 중') {
-      await act(async () => value.pickCandidate(SLOT, 'cain'))
-    }
+it('누른 후보로 확정한 뒤 서버 칩으로 직접 조회하면 후보 목록을 버린다', async () => {
+  await act(async () => value.pickCandidate(SLOT, 'siroco'))
+  await publish(viewWithSlot(pickedResult, true))
 
-    await act(async () => value.lookupSlot(SLOT, searchRow.characterName, 'anton'))
+  await act(async () => value.lookupSlot(SLOT, searchRow.characterName, 'anton'))
+  await publish(viewWithSlot(lookupSlot({ state: 'pending', rows: [] }), true))
 
-    expect(bridge.lookup).toHaveBeenLastCalledWith({
-      slot: SLOT,
-      nickname: searchRow.characterName,
-      serverId: 'anton'
-    })
-    expect(value.candidatePickers[SLOT]).toBeNull()
-  }
-)
-
-it('조회 없이 확정한 자동 선택은 같은 슬롯의 새 요청이 후보 창을 다시 열게 한다', async () => {
-  await act(async () => value.pickCandidate(SLOT, 'cain'))
-  await act(async () => value.pickCandidate(SLOT, 'cain'))
-  expect(value.candidatePickers[SLOT]).toBeNull()
-
-  await publish(viewWithSlot(ocrSlotWithChoices(NEXT_REQUEST_ID)))
-
-  expect(value.candidatePickers[SLOT]).toMatchObject({
-    shownServerId: 'cain',
-    previewServerId: null
+  expect(bridge.lookup).toHaveBeenLastCalledWith({
+    slot: SLOT,
+    nickname: searchRow.characterName,
+    serverId: 'anton'
   })
+  expect(value.candidatePickers[SLOT]).toBeNull()
 })
 
-it('회차를 끝내면 누른 후보를 버리고 다음 회차의 후보 창을 처음부터 보인다', async () => {
+it('다음 회차가 슬롯을 OCR 검색으로 되돌리면 누른 후보를 버리고 그 회차의 후보로 다시 판정한다', async () => {
   await act(async () => value.pickCandidate(SLOT, 'siroco'))
-  await act(async () => value.end())
-  expect(bridge.end).toHaveBeenCalled()
+  await publish(viewWithSlot(pickedResult, true))
 
   await act(async () => value.begin(new AbortController().signal))
   await publish(viewWithSlot(ocrSlotWithChoices(NEXT_REQUEST_ID)))
 
-  expect(value.candidatePickers[SLOT]).toMatchObject({
+  expect(value.candidatePickers[SLOT]).toEqual({
+    choices: [SIROCO, CAIN],
     shownServerId: 'cain',
-    previewServerId: null
+    picking: null
   })
 })
 
-it('서버 없이 이름 칸에서 조회한 결과에 후보가 있으면 후보 창을 띄우고 서버 칩 조회는 띄우지 않는다', async () => {
+it('서버 없이 이름 칸에서 조회한 결과에 후보가 있으면 후보 창을 두고 서버 칩 조회는 두지 않는다', async () => {
   const lookupResult = lookupSlot({
     state: 'success',
     rows: [searchRow],
     selected: selected('cain'),
     selectionMethod: 'highest-fame',
-    choices: [choice('cain', '카인'), choice('siroco', '시로코')]
+    choices: [CAIN, SIROCO]
   })
   await act(async () => value.lookupSlot(SLOT, '고친이름'))
-  await publish(viewWithSlot(lookupResult))
+  await publish(viewWithSlot(lookupResult, true))
 
   expect(vi.mocked(bridge.lookup)).toHaveBeenLastCalledWith({
     slot: SLOT,
@@ -290,7 +256,7 @@ it('서버 없이 이름 칸에서 조회한 결과에 후보가 있으면 후�
   expect(value.candidatePickers[SLOT]).toMatchObject({ shownServerId: 'cain' })
 
   await act(async () => value.lookupSlot(SLOT, '고친이름', 'cain'))
-  await publish(viewWithSlot(lookupResult))
+  await publish(viewWithSlot(pickedResult, true))
 
   expect(value.candidatePickers[SLOT]).toBeNull()
 })

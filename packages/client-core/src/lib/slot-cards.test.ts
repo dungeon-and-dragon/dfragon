@@ -117,6 +117,30 @@ describe('toSlotCards', () => {
     expect(idle.map((card) => card.loading)).toEqual([false, false])
   })
 
+  it('누른 후보를 조회하는 동안에는 그 후보의 이름, 서버, 명성과 초상화로 확정 중 카드를 만든다', () => {
+    const choice = {
+      characterId: 'synthetic-siroco',
+      characterName: '합성',
+      serverId: 'siroco',
+      serverName: '시로코',
+      fame: 250,
+      adventureName: null
+    }
+    const picker = { choices: [choice], shownServerId: 'siroco', picking: choice }
+
+    const [card] = toSlotCards(
+      input([slot('pending', { selected: summary })], { candidatePickers: [picker] })
+    )
+
+    expect(card).toMatchObject({ state: 'success', picking: true, picker })
+    expect(card.character).toMatchObject({
+      name: '합성',
+      serverId: 'siroco',
+      fame: 250,
+      image: 'https://img-api.neople.co.kr/df/servers/siroco/characters/synthetic-siroco?zoom=1'
+    })
+  })
+
   it('스냅샷 표시를 같은 슬롯 번호의 카드에 붙인다', () => {
     const moved = { kind: 'moved', seat: 2 } as const
     const cards = toSlotCards(

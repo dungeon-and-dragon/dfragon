@@ -6,88 +6,57 @@ import {
   type CandidatePick,
   type CandidatePicker
 } from '@dfragon/client-core/lib/candidate-picker'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import type { SearchSlotCount } from '@dfragon/client-core/preload/common/types/search'
 import type { CardSearchHost } from './useClientHost'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 
-type CharacterSearch = ManualCharacterLookup & {
+export type CharacterSearch = ManualCharacterLookup & {
   candidatePickers: readonly (CandidatePicker | null)[]
   pickCandidate: (slot: number, serverId: string) => void
 }
 
-const DIRECT_LOOKUP_PICK: CandidatePick = { kind: 'confirmed', requestId: null }
-
-/** 회차가 끝나면 직접 조회한 슬롯과 누른 후보까지 파티 네 슬롯을 모두 비운다. */
+/**
+ * 파티와 공대가 같은 후보 창을 쓰도록 직접 조회에 누른 후보를 더한다. 누른 후보는 그 슬롯이 직접 조회 상태인
+ * 동안만 쓰므로, 다음 회차가 슬롯을 OCR 자동 검색으로 되돌리면 그 회차의 결과로 다시 판정한다.
+ */
 export function useCharacterSearch(
   host: CardSearchHost,
-  onInvalidated: () => void
+  slotCount: SearchSlotCount,
+  onInvalidated?: () => void
 ): CharacterSearch {
   const search = useManualCharacterLookup(
     host,
-    SEARCH_SLOT_COUNTS.party,
+    slotCount,
     host.notifyOcrCandidatesDetected,
     onInvalidated
   )
-  const { end: endSearch, lookupSlot: lookup } = search
+  const { lookupSlot: lookup, manualSlots } = search
   const [picks, setPicks] = useState<readonly (CandidatePick | null)[]>(() =>
-    fillSlots(SEARCH_SLOT_COUNTS.party, null)
+    fillSlots(slotCount, null)
   )
 
-  const end = useCallback((): void => {
-    setPicks(fillSlots(SEARCH_SLOT_COUNTS.party, null))
-    endSearch()
-  }, [endSearch])
   const setPick = useCallback((slot: number, pick: CandidatePick | null): void => {
     setPicks((current) => current.map((value, index) => (index === slot ? pick : value)))
   }, [])
-  // 서버를 고른 조회는 확정이고, 서버 없이 고른 조회는 OCR처럼 확정하지 못하면 후보 창을 다시 띄운다.
   const lookupSlot = useCallback(
     (slot: number, nickname: string, serverId?: string): void => {
-      setPick(slot, serverId === undefined ? null : DIRECT_LOOKUP_PICK)
+      setPick(slot, null)
       lookup(slot, nickname, serverId)
     },
     [lookup, setPick]
   )
-  const pickCandidate = useCallback(
-    (slot: number, serverId: string): void => {
-      const current = search.slots[slot]
-      const previous = picks[slot]
-      const next = nextCandidatePick(current, previous, serverId)
-      if (next === null) {
-        return
-      }
-      const shownServerId = toCandidatePicker(current, previous)?.shownServerId
-      setPick(slot, next)
-      const choice =
-        next.kind === 'preview'
-          ? next.choices.find((candidate) => candidate.serverId === serverId)
-          : undefined
-      if (choice === undefined || shownServerId === serverId) {
-        return
-      }
-      lookup(slot, choice.characterName, serverId)
-    },
-    [lookup, picks, setPick, search.slots]
-  )
   const candidatePickers = search.slots.map((slot, index) =>
-    toCandidatePicker(slot, picks[index] ?? null)
+    toCandidatePicker(slot, manualSlots[index] ? (picks[index] ?? null) : null)
   )
-  // 미리보기 조회가 끝날 때까지는 대기 화면 대신 처음 누를 때 보이던 캐릭터를 둔다.
-  const slots = search.slots.map((slot, index) => {
-    const pick = picks[index]
-    if (pick?.kind === 'preview' && slot.state === 'pending') {
-      return pick.shownSlot
+  const pickCandidate = (slot: number, serverId: string): void => {
+    const next = nextCandidatePick(candidatePickers[slot] ?? null, serverId)
+    const choice = next?.choices.find((candidate) => candidate.serverId === serverId)
+    if (next === null || choice === undefined) {
+      return
     }
-
-    return slot
-  })
-
-  return {
-    ...search,
-    slots,
-    end,
-    lookupSlot,
-    candidatePickers,
-    pickCandidate
+    setPick(slot, next)
+    lookup(slot, choice.characterName, serverId)
   }
+
+  return { ...search, lookupSlot, candidatePickers, pickCandidate }
 }

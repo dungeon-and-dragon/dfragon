@@ -35,10 +35,6 @@ function candidate(id: string, name: string, fame: number | null): CharacterCand
   }
 }
 
-function faceOf(characterId: string): { x: number; y: number; width: number; height: number } {
-  return { x: characterId.length, y: 2, width: 26, height: 26 }
-}
-
 function fixture(distances: Record<string, number> = { high: 20, low: 10, null: 30 }): {
   calls: string[]
   findCandidates: MockedFunction<IdentificationServices['findCandidates']>
@@ -74,7 +70,7 @@ function fixture(distances: Record<string, number> = { high: 20, low: 10, null: 
       return null
     }
 
-    return { distance, alignment: faceOf(characterId) }
+    return { distance }
   })
   const services = { findCandidates, loadPortrait, scorePortrait }
   const identify = createCharacterIdentifier(services, SELECTION)
@@ -109,11 +105,10 @@ describe('캐릭터 식별 규칙', () => {
         serverId: 'cain',
         serverName: '카인',
         fame: 100,
-        adventureName: null,
-        face: null
+        adventureName: null
       },
-      expect.objectContaining({ characterId: 'low', face: null }),
-      expect.objectContaining({ characterId: 'null', face: null })
+      expect.objectContaining({ characterId: 'low' }),
+      expect.objectContaining({ characterId: 'null' })
     ])
     expect(f.calls).toEqual(['candidates:첫이름'])
   })
@@ -173,13 +168,8 @@ describe('캐릭터 식별 규칙', () => {
       expect(identified).not.toHaveProperty('choices')
     } else {
       expect(
-        identified.kind === 'matched' &&
-          identified.choices?.map(({ characterId, face }) => ({ characterId, face }))
-      ).toEqual([
-        { characterId: 'high', face: faceOf('high') },
-        { characterId: 'low', face: faceOf('low') },
-        { characterId: 'null', face: faceOf('null') }
-      ])
+        identified.kind === 'matched' && identified.choices?.map(({ characterId }) => characterId)
+      ).toEqual(['high', 'low', 'null'])
     }
     expect(f.scorePortrait).toHaveBeenCalledTimes(3)
   })
@@ -197,41 +187,6 @@ describe('캐릭터 식별 규칙', () => {
     expect(f.scorePortrait.mock.calls.map(([input]) => input.anchor)).toEqual([
       { x: 85, y: 108 },
       null,
-      null
-    ])
-  })
-
-  it('비교하지 못한 후보의 얼굴 창은 직업별 얼굴 위치로 채우고 직업도 모르면 null로 둔다', async () => {
-    const f = fixture({ high: 20 })
-    f.findCandidates.mockImplementation(async (nickname) => [
-      { ...candidate('high', nickname, 100), jobName: '아처' },
-      candidate('low', nickname, 50),
-      { ...candidate('null', nickname, null), jobName: '나이트' }
-    ])
-
-    const identified = await f.identify(f.input)
-
-    expect(
-      identified.kind === 'matched' &&
-        identified.choices?.map(({ characterId, face }) => ({ characterId, face }))
-    ).toEqual([
-      { characterId: 'high', face: faceOf('high') },
-      { characterId: 'low', face: null },
-      { characterId: 'null', face: { x: 84, y: 101, width: 26, height: 26 } }
-    ])
-  })
-
-  it('얼굴이 없어 비교하지 않은 선택지도 직업별 얼굴 위치를 얼굴 창으로 준다', async () => {
-    const f = fixture()
-    f.findCandidates.mockImplementation(async (nickname) => [
-      { ...candidate('high', nickname, 100), jobName: '거너(남)' },
-      candidate('low', nickname, 50)
-    ])
-
-    const identified = await f.identify({ ...f.input, portrait: null })
-
-    expect(identified.kind === 'matched' && identified.choices?.map(({ face }) => face)).toEqual([
-      { x: 85, y: 61, width: 26, height: 26 },
       null
     ])
   })
@@ -268,13 +223,8 @@ describe('캐릭터 식별 규칙', () => {
       candidate: { characterId: 'null' }
     })
     expect(
-      identified.kind === 'matched' &&
-        identified.choices?.map(({ characterId, face }) => ({ characterId, face }))
-    ).toEqual([
-      { characterId: 'high', face: faceOf('high') },
-      { characterId: 'low', face: null },
-      { characterId: 'null', face: faceOf('null') }
-    ])
+      identified.kind === 'matched' && identified.choices?.map(({ characterId }) => characterId)
+    ).toEqual(['high', 'low', 'null'])
     expect(f.loadPortrait).toHaveBeenCalledTimes(3)
     expect(f.calls).toEqual([
       'candidates:첫이름',
@@ -305,13 +255,8 @@ describe('캐릭터 식별 규칙', () => {
       candidate: { characterId: 'high' }
     })
     expect(
-      identified.kind === 'matched' &&
-        identified.choices?.map(({ characterId, face }) => ({ characterId, face }))
-    ).toEqual([
-      { characterId: 'high', face: faceOf('high') },
-      { characterId: 'low', face: null },
-      { characterId: 'null', face: faceOf('null') }
-    ])
+      identified.kind === 'matched' && identified.choices?.map(({ characterId }) => characterId)
+    ).toEqual(['high', 'low', 'null'])
   })
 
   it('점수를 하나도 만들지 못하면 최고 명성을 고르고 비교 범위 밖 후보까지 선택지로 준다', async () => {

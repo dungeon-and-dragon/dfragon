@@ -81,6 +81,8 @@ function SelectPopupImpl({
   'aria-labelledby': labelledBy,
   ...props
 }: SelectPopupProps & ForwardedStyle) {
+  const gridStyle = surface === 'card' ? styles.cardGrid : styles.grid
+
   return (
     <BaseSelect.Portal container={container}>
       <BaseSelect.Positioner
@@ -106,7 +108,7 @@ function SelectPopupImpl({
           <BaseSelect.List
             aria-label={label}
             aria-labelledby={labelledBy}
-            {...stylex.props(columns !== undefined && styles.grid(columns))}
+            {...stylex.props(columns !== undefined && gridStyle(columns))}
           >
             {children}
           </BaseSelect.List>
