@@ -4,12 +4,11 @@ import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
 const popupOpen = ':is([data-popup-open])'
 
 export const styles = stylex.create({
-  nav: { display: 'flex', alignItems: 'center', gap: space.s4, flexShrink: 0 },
+  nav: { display: 'flex', alignSelf: 'stretch', gap: space.s4, flexShrink: 0 },
   item: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: 6,
-    height: 36,
     margin: 0,
     paddingInline: space.s16,
     borderWidth: 0,

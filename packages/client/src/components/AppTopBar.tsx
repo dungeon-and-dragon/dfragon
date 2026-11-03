@@ -8,6 +8,6 @@ export function AppTopBar({ captureControls }: { captureControls: ReactNode }): 
   const grade = useTodayGrade()
 
   return (
-    <TopBar grade={grade} start={<MainNav />} center={<BoardHeaderSlot />} end={captureControls} />
+    <TopBar grade={grade} nav={<MainNav />} board={<BoardHeaderSlot />} status={captureControls} />
   )
 }
