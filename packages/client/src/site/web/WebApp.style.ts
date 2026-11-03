@@ -7,11 +7,14 @@ export const styles = stylex.create({
     flexDirection: 'column',
     boxSizing: 'border-box',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: colors.borderDefault,
     backgroundColor: colors.bgCanvas,
     color: colors.fgDefault,
     fontFamily: font.ui,
     wordBreak: 'keep-all',
     overflowWrap: 'anywhere'
   },
-  windowSize: (width: number, height: number) => ({ width, height })
+  windowWidth: (width: number) => ({ width })
 })

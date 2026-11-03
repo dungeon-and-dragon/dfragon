@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
 import { AppTopBar } from '../../components/AppTopBar'
-import { MAIN_WINDOW_HEIGHTS, MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
+import { MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
 import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
@@ -60,10 +60,8 @@ function AutoRounds({ host }: { host: BrowserHost }): null {
   return null
 }
 
-// 앱의 드래그, 글자 선택 차단과 100dvh가 사이트로 번지지 않게 창 크기 상자에만 그린다.
+// 앱의 드래그, 글자 선택 차단과 100dvh가 사이트로 번지지 않게 창 폭 상자에만 그린다. 높이는 내용에 맞춘다.
 export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
-  const searchMode = useSearchModeStore((state) => state.searchMode)
-
   return (
     <ClientHostContext value={host}>
       <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
@@ -71,10 +69,7 @@ export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
         <AutoRounds host={host} />
         <div
           onKeyDown={keepSeatMoveKeys}
-          {...stylex.props(
-            styles.window,
-            styles.windowSize(MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHTS[searchMode])
-          )}
+          {...stylex.props(styles.window, styles.windowWidth(MAIN_WINDOW_WIDTH))}
         >
           <AppTopBar captureControls={<ScreenShareChip host={host} />} />
           <SearchScreen />
