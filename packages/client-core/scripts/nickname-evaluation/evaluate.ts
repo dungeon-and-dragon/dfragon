@@ -1,5 +1,5 @@
-import type { PartyFrameGeometryFailureReason, PartyFrameSlot } from '@dfragon/lib'
-import type { CaptureKind, ClientSize } from './manifest'
+import type { DNFRaidParticipantCropResult, PartyFrameGeometryFailureReason } from '@dfragon/lib'
+import type { CaptureKind, ClientSize, NicknameSlot, Screen } from './manifest'
 
 export const NICKNAME_PREPROCESSINGS = ['nickname', 'raw'] as const
 export type NicknamePreprocessing = (typeof NICKNAME_PREPROCESSINGS)[number]
@@ -9,8 +9,12 @@ export type NicknameReads = Readonly<Record<NicknamePreprocessing, string>>
 const SCALE_BIN_WIDTH = 0.1
 const UNDETECTED_SCALE_BIN = 'undetected'
 
+export type RaidDetectionFailure = Exclude<DNFRaidParticipantCropResult['status'], 'found'>
+
+export type DetectionFailure = PartyFrameGeometryFailureReason | RaidDetectionFailure
+
 export type SlotObservation = Readonly<{
-  slot: PartyFrameSlot
+  slot: NicknameSlot
   expected: string | null
   uncertain: boolean
   read: NicknameReads | null
@@ -18,11 +22,12 @@ export type SlotObservation = Readonly<{
 
 export type CaseObservation = Readonly<{
   caseId: string
+  screen: Screen
   client: ClientSize
   uiPercent: number | null
   capture: CaptureKind
   scale: number | null
-  detectionFailure: PartyFrameGeometryFailureReason | null
+  detectionFailure: DetectionFailure | null
   slots: readonly SlotObservation[]
 }>
 
@@ -45,6 +50,7 @@ export type GroupSummary = Readonly<{
 
 export type EvaluationSummary = Readonly<{
   overall: GroupSummary
+  byScreen: Readonly<Record<string, GroupSummary>>
   byClientUi: Readonly<Record<string, GroupSummary>>
   byScale: Readonly<Record<string, GroupSummary>>
   byCapture: Readonly<Record<string, GroupSummary>>
@@ -149,6 +155,7 @@ function groupBy(
 export function summarize(cases: readonly CaseObservation[]): EvaluationSummary {
   return {
     overall: groupSummary(cases),
+    byScreen: groupBy(cases, (entry) => entry.screen),
     byClientUi: groupBy(cases, (entry) => clientUiKey(entry.client, entry.uiPercent)),
     byScale: groupBy(cases, (entry) => scaleBin(entry.scale)),
     byCapture: groupBy(cases, (entry) => entry.capture)

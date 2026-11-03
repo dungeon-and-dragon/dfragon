@@ -13,7 +13,7 @@ export default defineConfig({
     ]
   },
   test: {
-    include: ['scripts/party-nickname-evaluation/*.evaluation.ts'],
+    include: ['scripts/nickname-evaluation/*.evaluation.ts'],
     fileParallelism: false,
     disableConsoleIntercept: true,
     testTimeout: 30 * 60_000

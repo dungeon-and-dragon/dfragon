@@ -3,18 +3,18 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PNG } from 'pngjs'
 import { describe, expect, it } from 'vitest'
-import {
-  detectPartyFrameGeometry,
-  type PartyFrameGeometry,
-  PartyFrameGeometryError,
-  type PartyFrameGeometryFailureReason,
-  type PartyFrameRegion
-} from '@dfragon/lib'
-import type { CharacterImage } from '../../src/preload/common/types/character'
-import { type CropRegion, cropRegion } from '../shared/onnx-ocr'
+import type { DNFParticipantFrame } from '@dfragon/lib'
+import type { CropRegion } from '../shared/onnx-ocr'
 import { type CaseObservation, formatTable, type SlotObservation, summarize } from './evaluate'
-import { loadCaseImage, type ManifestCase, PARTY_SLOTS, readManifest } from './manifest'
+import {
+  loadCaseImage,
+  type ManifestCase,
+  type NicknameSlot,
+  readManifest,
+  SCREEN_SLOTS
+} from './manifest'
 import { createNicknameReader } from './nickname-ocr'
+import { createScreenDetector } from './screen-detection'
 
 const DEFAULT_OCR_MODEL = fileURLToPath(
   new URL('../../../models/ocr-finetuned/model.onnx', import.meta.url)
@@ -23,15 +23,16 @@ const DEFAULT_OCR_DICTIONARY = fileURLToPath(
   new URL('../../../models/ocr-finetuned/characters.txt', import.meta.url)
 )
 
-const manifestPath = process.env.DFRAGON_PARTY_NICKNAME_MANIFEST
-const reportPath = process.env.DFRAGON_PARTY_NICKNAME_REPORT
-const cropsDirectory = process.env.DFRAGON_PARTY_NICKNAME_CROPS
-const modelPath = process.env.DFRAGON_PARTY_NICKNAME_OCR_MODEL || DEFAULT_OCR_MODEL
-const dictionaryPath = process.env.DFRAGON_PARTY_NICKNAME_OCR_DICTIONARY || DEFAULT_OCR_DICTIONARY
+const manifestPath = process.env.DFRAGON_NICKNAME_MANIFEST
+const reportPath = process.env.DFRAGON_NICKNAME_REPORT
+const cropsDirectory = process.env.DFRAGON_NICKNAME_CROPS
+const modelPath = process.env.DFRAGON_NICKNAME_OCR_MODEL || DEFAULT_OCR_MODEL
+const dictionaryPath = process.env.DFRAGON_NICKNAME_OCR_DICTIONARY || DEFAULT_OCR_DICTIONARY
 
 type CropIndexEntry = Readonly<{
   caseId: string
-  slot: PartyFrameRegion['slot']
+  screen: ManifestCase['screen']
+  slot: NicknameSlot
   file: string
   scale: number
   crop: CropRegion
@@ -41,32 +42,18 @@ type CropIndexEntry = Readonly<{
   capture: ManifestCase['capture']
 }>
 
-type Detection =
-  | Readonly<{ geometry: PartyFrameGeometry; failure: null }>
-  | Readonly<{ geometry: null; failure: PartyFrameGeometryFailureReason }>
-
-function detect(frame: CharacterImage): Detection {
-  try {
-    return { geometry: detectPartyFrameGeometry(frame), failure: null }
-  } catch (error) {
-    if (error instanceof PartyFrameGeometryError) {
-      return { geometry: null, failure: error.reason }
-    }
-    throw error
-  }
-}
-
-function writeCrop(directory: string, file: string, crop: CharacterImage): void {
+function writeCrop(directory: string, file: string, crop: DNFParticipantFrame): void {
   const png = new PNG({ width: crop.width, height: crop.height })
   png.data = Buffer.from(crop.rgba)
   writeFileSync(join(directory, file), PNG.sync.write(png))
 }
 
 describe.skipIf(manifestPath === undefined || manifestPath === '')(
-  '파티 닉네임 OCR 오프라인 평가',
+  '닉네임 OCR 오프라인 평가',
   () => {
-    it('표본마다 파티 프레임을 검출하고 자리별 닉네임을 두 전처리로 읽어 정답과 비교한다', async () => {
+    it('표본마다 파티 프레임이나 공대 창을 검출하고 자리별 닉네임을 두 전처리로 읽어 정답과 비교한다', async () => {
       const manifest = readManifest(manifestPath as string)
+      const detect = createScreenDetector()
       const reader = await createNicknameReader(modelPath, dictionaryPath)
       const saveCrops = cropsDirectory !== undefined && cropsDirectory !== ''
       if (saveCrops) {
@@ -76,12 +63,12 @@ describe.skipIf(manifestPath === undefined || manifestPath === '')(
       const cases: CaseObservation[] = []
       for (const entry of manifest.cases) {
         const frame = loadCaseImage(manifest, entry)
-        const { geometry, failure } = detect(frame)
+        const detection = detect(frame, entry.screen)
         const slots: SlotObservation[] = []
-        for (const slot of PARTY_SLOTS) {
+        for (const slot of SCREEN_SLOTS[entry.screen]) {
           const expected = entry.slots.find((labeled) => labeled.slot === slot)
-          const region = geometry?.slots.find((detected) => detected.slot === slot)
-          if (region === undefined) {
+          const detected = detection.crops.find((candidate) => candidate.slot === slot)
+          if (detected === undefined) {
             if (expected !== undefined) {
               slots.push({
                 slot,
@@ -92,16 +79,17 @@ describe.skipIf(manifestPath === undefined || manifestPath === '')(
             }
             continue
           }
-          const crop = cropRegion(frame, region)
-          if (saveCrops && geometry !== null) {
+
+          if (saveCrops && detection.scale !== null) {
             const file = `${entry.id}_slot${slot}.png`
-            writeCrop(cropsDirectory, file, crop)
+            writeCrop(cropsDirectory, file, detected.crop)
             cropIndex.push({
               caseId: entry.id,
+              screen: entry.screen,
               slot,
               file,
-              scale: geometry.scale,
-              crop: { x: region.x, y: region.y, width: region.width, height: region.height },
+              scale: detection.scale,
+              crop: detected.region,
               client: entry.client,
               image: { width: frame.width, height: frame.height },
               uiPercent: entry.uiPercent,
@@ -112,16 +100,17 @@ describe.skipIf(manifestPath === undefined || manifestPath === '')(
             slot,
             expected: expected?.text ?? null,
             uncertain: expected?.uncertain ?? false,
-            read: await reader(crop)
+            read: await reader(detected.crop, entry.screen)
           })
         }
         cases.push({
           caseId: entry.id,
+          screen: entry.screen,
           client: entry.client,
           uiPercent: entry.uiPercent,
           capture: entry.capture,
-          scale: geometry?.scale ?? null,
-          detectionFailure: failure,
+          scale: detection.scale,
+          detectionFailure: detection.failure,
           slots
         })
       }
@@ -129,11 +118,12 @@ describe.skipIf(manifestPath === undefined || manifestPath === '')(
 
       for (const entry of cases) {
         const scale = entry.scale !== null ? `s=${entry.scale.toFixed(2)}` : entry.detectionFailure
-        console.log(`${entry.caseId}  ${scale}`)
+        console.log(`${entry.caseId}  ${entry.screen}  ${scale}`)
         for (const slot of entry.slots) {
           console.log(
             [
               entry.caseId,
+              entry.screen,
               scale,
               `slot ${slot.slot}`,
               `expected ${JSON.stringify(slot.expected)}${slot.uncertain ? ' (uncertain)' : ''}`,
@@ -145,6 +135,7 @@ describe.skipIf(manifestPath === undefined || manifestPath === '')(
       console.log(
         [
           formatTable('전체', { all: summary.overall }),
+          formatTable('화면', summary.byScreen),
           formatTable('client, UI', summary.byClientUi),
           formatTable('s 구간', summary.byScale),
           formatTable('캡처', summary.byCapture)
