@@ -23,6 +23,7 @@ function slotOf(overrides: Partial<SlotObservation> = {}): SlotObservation {
 function caseOf(overrides: Partial<CaseObservation> = {}): CaseObservation {
   return {
     caseId: 'case-01',
+    screen: 'party',
     client: { width: 1920, height: 1080 },
     uiPercent: 100,
     capture: 'prtsc',
@@ -136,6 +137,45 @@ describe('평가 요약', () => {
     expect(Object.keys(summary.byCapture)).toEqual(['ingame-jpg', 'prtsc', 'share'])
   })
 
+  it('파티와 공대 화면을 나눠 세고 공대 검출 실패도 그 화면에 모은다', () => {
+    const summary = summarize([
+      caseOf({ caseId: 'party-a' }),
+      caseOf({
+        caseId: 'raid-a',
+        screen: 'raid',
+        scale: 1.8,
+        slots: [
+          slotOf({ slot: 1, read: { nickname: '가나다', raw: '가나다라' } }),
+          slotOf({ slot: 12 })
+        ]
+      }),
+      caseOf({
+        caseId: 'raid-b',
+        screen: 'raid',
+        scale: null,
+        detectionFailure: 'not-found',
+        slots: [slotOf({ slot: 7, read: null })]
+      })
+    ])
+
+    expect(summary.byScreen.party).toMatchObject({
+      cases: 1,
+      detectedCases: 1,
+      recognition: { nickname: { slots: 1, exact: 1 } }
+    })
+    expect(summary.byScreen.raid).toMatchObject({
+      cases: 2,
+      detectedCases: 1,
+      labeledSlots: 3,
+      missingSlots: 1,
+      recognition: { nickname: { slots: 2, exact: 1 }, raw: { slots: 2, exact: 2 } }
+    })
+    expect(summary.byScale['1.8']).toMatchObject({
+      cases: 2,
+      recognition: { nickname: { slots: 3 } }
+    })
+  })
+
   it('표는 구간마다 두 전처리의 일치 수와 CER을 한 행에 쓴다', () => {
     const summary = summarize([
       caseOf({ slots: [slotOf({ expected: '가나', read: { nickname: '가나', raw: '가' } })] })
@@ -151,6 +191,7 @@ describe('manifest', () => {
   const entry = {
     id: 'case-01',
     image: 'case-01.png',
+    screen: 'party',
     client: { width: 1920, height: 1080 },
     uiPercent: null,
     capture: 'ingame-jpg',
@@ -170,12 +211,38 @@ describe('manifest', () => {
     })
   })
 
+  it('공대 화면은 행 번호 1~12를 자리로 읽는다', () => {
+    const raid = {
+      ...entry,
+      screen: 'raid',
+      slots: [
+        { slot: 1, text: '가나' },
+        { slot: 12, text: '다라' }
+      ]
+    }
+
+    expect(parseManifest('/samples', { cases: [raid] }).cases[0]).toMatchObject({
+      screen: 'raid',
+      slots: [
+        { slot: 1, text: '가나', uncertain: false },
+        { slot: 12, text: '다라', uncertain: false }
+      ]
+    })
+  })
+
   it.each([
     ['PNG가 아닌 이미지', { image: 'case-01.jpg' }, 'PNG'],
     ['절대 경로', { image: '/case-01.png' }, '상대 경로'],
     ['알 수 없는 캡처 종류', { capture: 'clipboard' }, 'capture'],
     ['범위 밖 UI 크기', { uiPercent: 125 }, 'uiPercent'],
-    ['없는 자리 번호', { slots: [{ slot: 5, text: '가' }] }, 'slot'],
+    ['화면 종류가 없는 케이스', { screen: undefined }, 'screen'],
+    ['알 수 없는 화면 종류', { screen: 'town' }, 'screen'],
+    ['파티에 없는 자리 번호', { slots: [{ slot: 5, text: '가' }] }, 'party의 slot은 1~4'],
+    [
+      '공대에 없는 행 번호',
+      { screen: 'raid', slots: [{ slot: 13, text: '가' }] },
+      'raid의 slot은 1~12'
+    ],
     [
       '중복 자리',
       {
