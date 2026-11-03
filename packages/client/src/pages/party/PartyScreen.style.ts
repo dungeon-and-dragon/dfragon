@@ -5,8 +5,6 @@ export const styles = stylex.create({
   party: {
     display: { default: 'flex', ':is([hidden])': 'none' },
     flexDirection: 'column',
-    flex: '1 1 0',
-    minHeight: 0,
     gap: space.s16
   }
 })

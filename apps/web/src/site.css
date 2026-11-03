@@ -28,7 +28,7 @@
 
 /* 웹 앱의 Desktop 컴포넌트는 Desktop 전역 글꼴 CSS와 같은 글꼴 토큰을 읽는다. */
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --df-font-ui:
     'MaruMinya Hangul', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo',
     'Malgun Gothic', sans-serif;
@@ -38,8 +38,8 @@
 }
 
 body {
-  color: #0f1a24;
-  background: #f3f8fc;
+  color: var(--df-fg-default);
+  background: var(--df-bg-canvas);
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
