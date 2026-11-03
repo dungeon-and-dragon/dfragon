@@ -35,16 +35,12 @@ function SearchMenuTrigger({ modeLabel }: { modeLabel: string }): React.JSX.Elem
   return (
     <Menu.Trigger
       aria-current="page"
-      render={
-        <button
-          type="button"
-          {...stylex.props(styles.item, styles.current, stylex.defaultMarker())}
-        />
-      }
+      render={<button type="button" {...stylex.props(styles.item, stylex.defaultMarker())} />}
     >
       검색
       <span {...stylex.props(styles.sub)}>{modeLabel}</span>
       <ChevronDownIcon width={12} height={12} strokeWidth={2.5} {...stylex.props(styles.chevron)} />
+      <i aria-hidden="true" {...stylex.props(styles.underline)} />
     </Menu.Trigger>
   )
 }

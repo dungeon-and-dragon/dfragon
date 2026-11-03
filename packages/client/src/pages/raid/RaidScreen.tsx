@@ -42,6 +42,7 @@ export function RaidScreen(): React.JSX.Element {
               <SnapshotToggle
                 label="공대 모험단 순번 스냅샷"
                 active={snapshot.active}
+                disabled={!snapshot.active && filledSlotCount(cards) === 0}
                 onTake={snapshot.take}
                 onClear={snapshot.clear}
               />
