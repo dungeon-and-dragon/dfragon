@@ -71,12 +71,12 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 ## 글꼴과 고지
 
-웹 앱은 마루미냐 한글과 Barlow Condensed를 씁니다. 두 글꼴과 사이트 자산은 사이트에 함께 배포하고 외부 CDN에서 받지 않습니다.
+웹 앱은 본문과 숫자 모두 Pretendard Variable을 씁니다. 글꼴과 사이트 자산은 사이트에 함께 배포하고 외부 CDN에서 받지 않습니다.
 
 서드파티 고지는 화면에 링크하지 않고 빌드 산출물의 `notices`에 둡니다. 배포하면 `https://dfragon.com/notices/` 아래에서 볼 수 있습니다.
 
 - `notices/THIRD-PARTY.txt`: 번들 입력 package의 license와 NOTICE
-- `notices/client/`: 글꼴(마루미냐 한글, Barlow Condensed)과 Lucide 아이콘 고지
+- `notices/client/`: 글꼴(Pretendard Variable)과 Lucide 아이콘 고지
 - `notices/site/NOTICE.md`: Neople Open API 로고의 출처, 권리([원본](NOTICE.md))
 - `ocr/`: OCR 모델과 ONNX Runtime의 license, NOTICE
 
