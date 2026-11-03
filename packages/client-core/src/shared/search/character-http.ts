@@ -79,7 +79,9 @@ const detailsSchema = z
     freshness: z.object({ lastSuccessfulFetchAt: z.iso.datetime(), expiresAt: z.iso.datetime() })
   })
   .catchall(z.json())
-const failureSchema = z.object({ error: z.object({ code: z.string() }) })
+const failureSchema = z.object({
+  error: z.object({ code: z.string(), message: z.string().min(1).optional().catch(undefined) })
+})
 const statusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
   400: 'INVALID_SEARCH_QUERY',
   429: 'SEARCH_RATE_LIMITED',
@@ -147,7 +149,7 @@ function assertApiSuccess(response: Response, body: unknown, details: boolean): 
   if (!code || !failure.success || failure.data.error.code !== expectedCode) {
     throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
   }
-  throw new SearchHttpFailure(code)
+  throw new SearchHttpFailure(code, failure.data.error.message)
 }
 
 export function createCharacterCandidatesHttp({

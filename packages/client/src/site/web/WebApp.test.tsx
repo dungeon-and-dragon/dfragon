@@ -88,11 +88,11 @@ afterEach(async () => {
   useSearchModeStore.setState({ searchMode: 'party' })
 })
 
-it('브라우저 host만으로 상단 바와 파티 카드 네 장을 그린다', async () => {
+it('브라우저 host만으로 상단 바와 파티 표의 네 자리 행을 그린다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() => expect(container.textContent).toContain('85'))
-  expect(container.querySelectorAll('article')).toHaveLength(4)
+  expect(container.querySelectorAll('tr[aria-label*="번 자리"]')).toHaveLength(4)
   expect(vi.mocked(fetch).mock.calls.map((args) => new Request(...args).url)).toContain(
     `${API_ORIGIN}/items/today-grade`
   )
@@ -118,9 +118,9 @@ it('창을 고르기 전에는 붙여넣기 안내를 보이고, 이미지를 �
   expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(expect.any(File))
 })
 
-it('앱 상자 안 카드의 Alt+방향키는 브라우저에 넘기지 않고 이름 칸에서는 막지 않는다', async () => {
+it('앱 상자 안 자리 행의 Alt+방향키는 브라우저에 넘기지 않고 이름 칸에서는 막지 않는다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
-  const seat = container.querySelector('article')!
+  const seat = container.querySelector<HTMLElement>('tr[aria-label*="번 자리"]')!
   const nameField = container.querySelector('input')!
 
   const onSeat = new KeyboardEvent('keydown', {
@@ -148,7 +148,7 @@ it('공대 화면에서 붙여 넣으면 공대 회차가 host의 공대 프레�
   const readRaidFrame = vi.spyOn(host.raid, 'readCaptureFrame')
   const readPartyFrame = vi.spyOn(host.party, 'readCaptureFrame')
   await act(async () => root.render(<WebApp host={host} />))
-  expect(container.querySelectorAll('article')).toHaveLength(12)
+  expect(container.querySelectorAll('tr[aria-label*="번 자리"]')).toHaveLength(12)
 
   await act(async () => pasteImage())
 

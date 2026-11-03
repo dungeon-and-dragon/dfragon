@@ -11,7 +11,6 @@ export const colors = stylex.defineConsts({
   bgStripe: 'var(--df-bg-stripe)',
   bgControl: 'var(--df-bg-control)',
   bgControlHover: 'var(--df-bg-control-hover)',
-  bgWell: 'var(--df-bg-well)',
   bgSuccessWeak: 'var(--df-bg-success-weak)',
   bgDangerWeak: 'var(--df-bg-danger-weak)',
   bgWarningWeak: 'var(--df-bg-warning-weak)',
@@ -35,13 +34,8 @@ export const colors = stylex.defineConsts({
   borderDanger: 'var(--df-border-danger)',
   tierTop: 'var(--df-tier-top)',
   tierRanker: 'var(--df-tier-ranker)',
-  tierRankerSurface: 'var(--df-tier-ranker-surface)',
-  tierRankerWell: 'var(--df-tier-ranker-well)',
-  tierRankerOutline: 'var(--df-tier-ranker-outline)',
   scoreDealer: 'var(--df-score-dealer)',
   scoreBuffer: 'var(--df-score-buffer)',
-  cardBg: 'var(--df-card-bg)',
-  cardBgWaiting: 'var(--df-card-bg-waiting)',
   cardInset: 'var(--df-card-inset)',
   cardStripe: 'var(--df-card-stripe)',
   cardControl: 'var(--df-card-control)',
@@ -52,19 +46,9 @@ export const colors = stylex.defineConsts({
   cardFg: 'var(--df-card-fg)',
   cardFgMuted: 'var(--df-card-fg-muted)',
   cardFgSubtle: 'var(--df-card-fg-subtle)',
-  cardFgAdventure: 'var(--df-card-fg-adventure)',
   cardSignal: 'var(--df-card-signal)',
   cardOnSignal: 'var(--df-card-on-signal)',
-  bracketDefault: 'var(--df-bracket-default)',
-  bracketSelected: 'var(--df-bracket-selected)',
-  bracketDanger: 'var(--df-bracket-danger)',
-  bracketFailure: 'var(--df-bracket-failure)',
-  bracketTop: 'var(--df-bracket-top)',
-  bracketRanker: 'var(--df-bracket-ranker)',
   cardFailure: 'var(--df-card-failure)',
-  cardFailureWeak: 'var(--df-card-failure-weak)',
-  hatchAlert: 'var(--df-hatch-alert)',
-  gridLine: 'var(--df-grid-line)',
   brandDragon: 'var(--df-brand-dragon)',
   brandCream: 'var(--df-brand-cream)',
   brandOutline: 'var(--df-brand-outline)',
@@ -91,8 +75,11 @@ export const colors = stylex.defineConsts({
   oathUpgradeSpeed: 'var(--df-oath-upgrade-speed)',
   oathUpgradeRange: 'var(--df-oath-upgrade-range)',
   raidPartyRed: 'var(--df-raid-party-red)',
+  raidPartyRedWeak: 'var(--df-raid-party-red-weak)',
   raidPartyYellow: 'var(--df-raid-party-yellow)',
-  raidPartyGreen: 'var(--df-raid-party-green)'
+  raidPartyYellowWeak: 'var(--df-raid-party-yellow-weak)',
+  raidPartyGreen: 'var(--df-raid-party-green)',
+  raidPartyGreenWeak: 'var(--df-raid-party-green-weak)'
 })
 
 export const space = stylex.defineConsts({
@@ -106,11 +93,6 @@ export const space = stylex.defineConsts({
 export const radius = stylex.defineConsts({
   panel: 'var(--df-radius-panel)',
   control: 'var(--df-radius-control)'
-})
-
-export const shape = stylex.defineConsts({
-  gridCell: 'var(--df-grid-cell)',
-  hazardStripe: 'var(--df-hazard-stripe)'
 })
 
 export const size = stylex.defineConsts({

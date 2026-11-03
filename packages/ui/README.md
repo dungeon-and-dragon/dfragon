@@ -9,7 +9,7 @@
 | `Button` | native `button` | `variant` `primary`, `secondary`(기본), `ghost`, `danger`와 `size` `sm`, `md`(기본), `lg`(32, 40, 48px). `primary`는 신호색 면이다. `loading`은 진행 원을 겹치고 클릭을 막지 않는다. |
 | `IconButton` | native `button` | 회색 면 없이 hover 때 아이콘이 밝아진다. `aria-label`, `icon` 필수, `size` `sm` 32, `md` 40, `bar` 36(상단 바 도구 버튼, 아이콘 20), `lg` 48(화면 헤더 도구 버튼, 아이콘 24, `bg.inset` 면). `pressed`를 주면 켜고 끄는 토글로 `aria-pressed`를 전하고 켜진 동안 아이콘과 안쪽 2px 선이 신호색이다. |
 | `TextField`, `TextFieldLabel`, `TextFieldInput`, `TextFieldDescription`, `TextFieldError` | `Field`, `Input` | `TextField`가 `invalid`, `disabled`, `name`, `size` `sm`, `md`, `lg`를 받고, 안에 둔 라벨, 설명, 오류를 입력에 연결한다. 글자는 각 부품의 `children`으로 주며 `TextFieldError`는 `invalid`일 때만 보인다. `value`, `defaultValue`, `onValueChange(value)`, `readOnly`, `required`는 `TextFieldInput`이 받고, 입력 요소 합성은 `render`다. |
-| `Select` | `Select` | `Root`, `Trigger`(칩, `size` `2xs`, `xs`, `sm`, `md`. `2xs`는 높이 16이다), `Value`, `Popup`(Portal, Positioner, Popup, List), `Item`, `ItemText`, `Group`, `GroupLabel`, `Separator`. 캐릭터 카드 위에서는 `Trigger`와 `Popup`에 `surface="card"`를 넘겨 라이트 모드에서도 `card*` 토큰으로 그린다. `Popup`의 `columns`는 항목을 그 수의 열로 읽는 순서대로 늘어놓는 격자 목록이고, 없으면 한 줄 목록이다. |
+| `Select` | `Select` | `Root`, `Trigger`(칩, `size` `2xs`, `xs`, `sm`, `md`. `2xs`는 표 행의 서버 칩으로 높이 20, 글자 11 500에 흐린 글자이고 올리면 밝아진다), `Value`, `Popup`(Portal, Positioner, Popup, List), `Item`, `ItemText`, `Group`, `GroupLabel`, `Separator`. 캐릭터 행에서는 `Trigger`와 `Popup`에 `surface="card"`를 넘겨 라이트 모드에서도 `card*` 토큰으로 그린다. `Popup`의 `columns`는 항목을 그 수의 열로 읽는 순서대로 늘어놓는 격자 목록이고, 없으면 한 줄 목록이다. |
 | `Menu` | `Menu` | `Root`, `Trigger`(외형 없음, `render`로 연결), `Popup`, `Item`, `RadioGroup`, `RadioItem`, `Group`, `GroupLabel`, `Separator`. |
 | `Tabs` | `Tabs` | `Root`, `List`(현재 탭 2px 선 포함), `Tab`, `Panel`. `List`의 `surface="card"`는 카드 면 탭이다. 탭이 폭을 나눠 채우고(높이 40, 글자 13) 현재 탭 선이 위쪽에 있으며 `card*` 토큰으로 그린다. |
 | `Switch`, `Checkbox`, `Chip` | `Switch`, `Checkbox`, `Toggle` | 한 요소로 쓰는 켜고 끄는 컨트롤. 이름은 감싼 label이나 `aria-label`로 준다. |
@@ -17,7 +17,7 @@
 | `StatusChip` | `span` | tone `neutral`(`fg.subtle`), `success`, `danger`, `warning`(주의, `fg.warning`), `signal`(진행 중인 일)이고, 모두 글자색 사각 점과 같은 색 12% 안팎의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 사각 점 대신 `StepDots`를 둔다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 28이다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
 | `StepDots` | plain | 글자색 사각 점 세 개가 `motion.beat`마다 `steps()`로 차례로 켜진다. `size` 4(상태 칩 안, 3px 간격)와 5(목록 안내, 4px 간격). 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG | 값이 없으면 `steps()`로 끊어 도는 호, 있으면 진행 호. |
-| `Kbd`, `CornerBrackets`, `CardFrame`, `NumericText` | plain | 단축키(22px 키캡, 숫자 글꼴 14 700. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 네 모서리 꺾쇠(`selected`는 박자 두 번마다 바깥 4px에서 조여 든다), 카드 상태(`default`, `selected`, `failure`, `waiting`, `top`, `ranker`. `failure`는 노란 꺾쇠(`bracketFailure`)로 보이고 그림 칸은 바꾸지 않는다. `top`, `ranker`는 `motion.cycle` 주기의 6~30%에 옅은 단계 색 빛줄기가 카드를 지나가고, `ranker`는 카드에 `shapes.scanlines`를 깐다. 동작 줄이기에서는 빛줄기를 그리지 않는다), 숫자 글꼴(`font.num`, `tabular-nums`)과 400ms 증가. |
+| `Kbd`, `NumericText` | plain | 단축키(22px 키캡, 숫자 글꼴 14 700. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 숫자 글꼴(`font.num`, `tabular-nums`)과 400ms 증가. |
 | `ContentStack`, `ExampleSection`, `SupportingText` | plain | 예제와 단순 화면의 세로 묶음, 제목, 보조 글자. |
 | `Typo` | plain | 아래 [Typo](#typo). |
 
@@ -30,8 +30,8 @@
 던삐삐 디자인 토큰은 CSS custom property와 StyleX 상수 두 형태로 제공한다. 값과 이름은 dfragon-design `design/tokens.json`을 손으로 옮긴 것이며 기준 commit은 `tokens.css` 머리말에 적는다. 2026-11-04 결정([ADR 0009](../../docs/adr/0009-design-tokens-game-site-conventions.md))으로 바꾼 값은 `tokens.json` 반영 전이며, 어떤 토큰이 다른지는 그 머리말과 ADR에 있다.
 
 - `@dfragon/ui/tokens.css`: `--df-*` 변수. 테마는 다크 하나라 `:root`에 값을 두며 `prefers-reduced-motion: reduce`에서 `--df-dur-*`를 0으로 둔다. `color-scheme`도 `dark`로 정해 스크롤 막대 같은 브라우저 기본 부품이 다크로 그려진다. Library JS는 이 파일을 import하지 않는다.
-- `@dfragon/ui/tokens.stylex`: `colors`, `space`, `radius`, `shape`, `size`, `motion`, `font`. `stylex.defineConsts`로 `'var(--df-…)'` 문자열을 정의하며 `defineVars`, `createTheme`를 쓰지 않으므로 모드 전환은 CSS만으로 끝난다. StyleX compiler는 import 경로가 `.stylex`로 끝나는 파일의 `defineConsts`만 다른 파일에서 읽으므로 export 이름에 `.stylex`를 둔다. Package export는 source(`src/tokens.stylex.ts`)를 가리켜 소비 앱이 library를 먼저 빌드하지 않아도 compiler가 해석한다. 컴파일 없이 실행하면 `defineConsts`가 오류를 낸다.
-- `shapes`: 기본 entry의 공용 `stylex.create`. `gridWell`, `alertHatch`, `scanlines`, `srOnly`.
+- `@dfragon/ui/tokens.stylex`: `colors`, `space`, `radius`, `size`, `motion`, `font`. `stylex.defineConsts`로 `'var(--df-…)'` 문자열을 정의하며 `defineVars`, `createTheme`를 쓰지 않으므로 모드 전환은 CSS만으로 끝난다. StyleX compiler는 import 경로가 `.stylex`로 끝나는 파일의 `defineConsts`만 다른 파일에서 읽으므로 export 이름에 `.stylex`를 둔다. Package export는 source(`src/tokens.stylex.ts`)를 가리켜 소비 앱이 library를 먼저 빌드하지 않아도 compiler가 해석한다. 컴파일 없이 실행하면 `defineConsts`가 오류를 낸다.
+- `shapes`: 기본 entry의 공용 `stylex.create`. `srOnly`.
 
 Library build는 `tokens.stylex`를 별도 entry로 두어 `dist/tokens.stylex.js`에 남기고 `index.js`가 이 파일을 import한다. Compiler는 `defineConsts` 결과가 같은 이름으로 export될 때만 받아들이므로 library build는 식별자를 줄이지 않는다(`minify: false`).
 
@@ -122,7 +122,7 @@ const styles = stylex.create({
 ```
 
 - 스타일은 module scope에서 선언하고 색, 간격, 반지름, 모션은 `@dfragon/ui/tokens.stylex`의 상수를 쓴다. `colors`의 키는 dfragon-design [색 체계](https://github.com/dungeon-and-dragon/dfragon-design/blob/main/design/colors.md)의 의미 토큰을 camelCase로 옮긴 것이다(`bg.surface`는 `bgSurface`, `card.fgMuted`는 `cardFgMuted`).
-- 홀짝 행, hover, focus, disabled처럼 브라우저가 판단할 수 있는 시각 상태는 CSS pseudo-class로 표현한다. 예를 들어 교차 행 배경은 `backgroundColor: { default: colors.cardBg, ':nth-child(even)': colors.cardStripe }`로 선언하고 JSX에서 행 인덱스를 계산하지 않는다.
+- 홀짝 행, hover, focus, disabled처럼 브라우저가 판단할 수 있는 시각 상태는 CSS pseudo-class로 표현한다. 예를 들어 교차 행 배경은 `backgroundColor: { default: colors.bgSurface, ':nth-child(even)': colors.bgStripe }`로 선언하고 JSX에서 행 인덱스를 계산하지 않는다.
 - 유한한 UI 상태는 정적 스타일을 정의하고 상태 값으로 고른다. 동적 스타일 함수는 런타임 색상, 그리드 좌표처럼 실제 값이 달라질 때만 쓴다. StyleX는 빌드 중 정적으로 해석하므로 일반 함수 호출이나 임의의 외부 객체를 `stylex.create` 안에 넣지 않는다.
 - 기존 `className`, `style`과 같은 요소에 적용할 때는 JSX spread가 그 prop을 덮어쓰지 않도록 합성한다. 공용 Component의 내부 DOM 선택자는 쓰지 않는다. 공용 Component에 넘긴 StyleX와 공용 class가 같은 속성을 덮으면 우선순위가 CSS 순서에 달려 있으므로, 배치는 감싼 요소에 주는 편이 안전하다.
 - StyleX class hash는 생성 결과이므로 테스트 계약이 아니다. 테스트는 접근 가능한 이름과 표시 내용을 검사한다.

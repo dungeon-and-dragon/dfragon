@@ -1,24 +1,25 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors } from '@dfragon/ui/tokens.stylex'
+import { colors, radius } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
   field: {
     boxSizing: 'border-box',
-    flex: '1 1 0',
-    minWidth: 0,
-    height: 14,
+    width: '100%',
+    maxWidth: 130,
+    height: 24,
     margin: 0,
-    padding: 0,
-    borderWidth: 0,
-    borderBottomWidth: 1,
-    borderBottomStyle: { default: 'dashed', ':focus': 'solid' },
-    borderBottomColor: { default: colors.cardBorderStrong, ':focus': colors.cardSignal },
-    backgroundColor: 'transparent',
-    color: colors.cardFgAdventure,
+    paddingBlock: 0,
+    paddingInline: 6,
+    borderWidth: 1,
+    borderStyle: { default: 'dashed', ':focus': 'solid' },
+    borderColor: { default: colors.borderStrong, ':focus': colors.signal },
+    borderRadius: radius.control,
+    backgroundColor: colors.bgCanvas,
+    color: colors.fgAdventure,
     fontFamily: 'inherit',
-    fontSize: 12,
-    lineHeight: '14px',
+    fontSize: 13,
+    lineHeight: '18px',
     outlineStyle: 'none',
-    '::placeholder': { color: colors.cardBorderStrong }
+    '::placeholder': { color: colors.fgSubtle }
   }
 })
