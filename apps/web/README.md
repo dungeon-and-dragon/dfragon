@@ -35,6 +35,21 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 두 사이트는 같은 빌드 단계 [`web-site-build`](../../.github/actions/web-site-build/action.yml) action으로 `pnpm --filter @dfragon/web build`의 `dist`를 만듭니다. action은 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. dev 빌드는 `CNAME`을 빼고, `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막으며, 빌드한 커밋 SHA를 `version.txt`에 둡니다. 배포된 dev 커밋은 `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
 
+### Cloudflare Workers 이전
+
+GitHub Pages는 응답 헤더를 정할 수 없어 사이트를 Cloudflare Workers로 옮기는 중입니다. 지금은 dev Worker만 있고, `dfragon.com`, `dev.dfragon.com`은 위의 GitHub Pages가 계속 맡습니다.
+
+- 정적 파일은 Workers static assets가 바로 응답합니다. [`public/_headers`](public/_headers)가 static assets의 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙이고 Worker가 `/ocr/*` 응답에 같은 COEP를 붙여 페이지와 OCR worker가 cross-origin 격리되므로 OCR의 ONNX Runtime WASM이 여러 thread로 돕니다. 해시가 붙은 `/assets/*`는 1년 동안 캐시합니다.
+- OCR 모델과 ONNX Runtime WASM은 static assets의 파일 하나 25 MiB 한도를 넘어 R2 bucket `dfragon-web-ocr`에 둡니다([`public/.assetsignore`](public/.assetsignore)가 `dist/ocr`를 static assets에서 뺍니다). 배포는 먼저 [`scripts/upload-ocr-assets.mjs`](scripts/upload-ocr-assets.mjs)로 `dist/ocr`의 파일을 내용 hash 폴더(`ocr/<hash>/`)에 올리고, 그 hash를 Worker 변수 `OCR_ASSET_VERSION`으로 넘겨 배포합니다. [Worker](worker/index.ts)는 `/ocr/*` 요청을 그 폴더에서 읽어 같은 주소로 돌려주며, 주소에 hash가 없으므로 `Cache-Control: no-cache`와 ETag로 매번 확인합니다.
+- workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/characters*`, `/items*`를 `https://api.dfragon.com`으로 넘깁니다. dev Worker 빌드는 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 이 경로를 부릅니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. API 경로를 더하면 `vite.config.ts`의 `server.proxy`, Worker의 `API_PATH_PREFIXES`, `wrangler.jsonc`의 `run_worker_first`를 함께 바꿉니다.
+
+로컬에서는 dev 서버 대신 Worker로 production build를 띄워 헤더와 R2 경로까지 확인할 수 있습니다. `apps/web`에서 실행하며, `--local`은 wrangler의 로컬 R2에만 올립니다.
+
+```sh
+VITE_SAME_ORIGIN_API=true pnpm build
+pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload:ocr --env dev --local)"
+```
+
 ### 운영 사이트 설정
 
 저장소 소유자가 한 번 해야 하는 설정입니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다.
