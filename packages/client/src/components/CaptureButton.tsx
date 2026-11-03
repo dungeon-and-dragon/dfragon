@@ -18,7 +18,7 @@ export function CaptureButton({
     <HeaderTooltip label="캡처하기">
       <span {...stylex.props(triggerStyles.wrapper)}>
         <Button
-          variant="primary"
+          variant={disabled ? 'ghost' : 'primary'}
           size="sm"
           aria-label={`${target} 캡처`}
           disabled={disabled}

@@ -3,8 +3,8 @@ import * as stylex from '@stylexjs/stylex'
 import type { ReactElement } from 'react'
 import { styles } from './HeaderTooltip.style'
 
-// 상단 바의 28px 버튼 아래로 12px을 띄워 툴팁이 상단 바(44px)보다 4px 아래에서 시작하게 한다.
-const TOP_BAR_TOOLTIP_OFFSET = 12
+// 게임 바(40px)의 32px 버튼 아래로 8px을 띄워 툴팁이 게임 바보다 4px 아래에서 시작하게 한다.
+const TOP_BAR_TOOLTIP_OFFSET = 8
 
 export function HeaderTooltip({
   label,

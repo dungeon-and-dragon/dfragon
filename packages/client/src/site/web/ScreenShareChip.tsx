@@ -1,7 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { useEffect, useEffectEvent } from 'react'
-import { shapes, StatusChip } from '@dfragon/ui'
+import { Button, shapes, StatusChip } from '@dfragon/ui'
 import { HeaderTooltip } from '../../components/HeaderTooltip'
+import { MonitorIcon } from '../../components/MonitorIcon'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { getCaptureControlState } from '@dfragon/client-core/lib/capture-presentation'
@@ -37,6 +38,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   const { selectSource, sourceReady } = partyCapture.source
   const searchMode = useSearchModeStore((store) => store.searchMode)
   const state = getCaptureControlState({ phase: controls.phase, connected: sourceReady })
+  const sharePrompt = !sourceReady && (controls.phase === 'idle' || controls.phase === 'selected')
   // 검색 연결 실패는 단계를 그대로 두고 문구만 바꾸므로 자동 인식 안내로 덮지 않는다.
   const watching = sourceReady && !partyCapture.search.connectionFailed
   const status = getScreenShareStatus(controls, watching, searchMode)
@@ -54,16 +56,30 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   return (
     <span>
       <HeaderTooltip label={status} disabled={status.length === 0}>
-        <button
-          type="button"
-          aria-label={`화면 공유, ${state.label}`}
-          onClick={connect}
-          {...stylex.props(styles.trigger)}
-        >
-          <StatusChip tone={state.tone} busy={state.busy} size="md">
-            {state.label}
-          </StatusChip>
-        </button>
+        {sharePrompt ? (
+          <span {...stylex.props(styles.wrapper)}>
+            <Button
+              variant="primary"
+              size="sm"
+              aria-label={`화면 공유, ${state.label}`}
+              onClick={connect}
+            >
+              <MonitorIcon width={16} height={16} />
+              화면 공유
+            </Button>
+          </span>
+        ) : (
+          <button
+            type="button"
+            aria-label={`화면 공유, ${state.label}`}
+            onClick={connect}
+            {...stylex.props(styles.trigger)}
+          >
+            <StatusChip tone={state.tone} busy={state.busy} size="md">
+              {state.label}
+            </StatusChip>
+          </button>
+        )}
       </HeaderTooltip>
       <span role="status" data-capture-announcer="" {...stylex.props(shapes.srOnly)}>
         {status}

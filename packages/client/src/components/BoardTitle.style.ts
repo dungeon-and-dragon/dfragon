@@ -5,9 +5,9 @@ export const styles = stylex.create({
   heading: {
     flexShrink: 0,
     margin: 0,
-    fontSize: 12,
-    fontWeight: 400,
-    lineHeight: '14px',
+    fontSize: 14,
+    fontWeight: 700,
+    lineHeight: '20px',
     color: colors.fgDefault
   },
   number: {
@@ -17,7 +17,7 @@ export const styles = stylex.create({
     fontSize: 16,
     fontWeight: 700,
     fontVariantNumeric: 'tabular-nums',
-    lineHeight: 1
+    lineHeight: '20px'
   },
   round: { color: colors.signal },
   total: { color: colors.fgSubtle }

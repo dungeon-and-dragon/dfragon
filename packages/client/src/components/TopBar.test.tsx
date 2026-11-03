@@ -47,11 +47,10 @@ function textOrLabel(element: Element): string | null {
   return element.textContent
 }
 
-it('상단 바는 위 전역 바에 등급, 이름, 게임 연결 상태를, 아래 게임 바에 내비를 두고 로고, 테마, 카메라, 설정, 로그인 버튼은 없다', async () => {
+it('상단 바는 위 전역 바에 아이콘, 이름, 등급, 게임 연결 상태를, 아래 게임 바에 내비를 두고 테마, 카메라, 설정, 로그인 버튼은 없다', async () => {
   await render()
   const header = container.querySelector('header')!
   expect(container.querySelectorAll('header')).toHaveLength(1)
-  expect(header.querySelector('img')).toBeNull()
   const grade = header.querySelector('[role="img"]')!
   const name = [...header.querySelectorAll('span')].find((span) => span.textContent === '던삐삐')!
   expect(name).toBeDefined()
@@ -65,9 +64,11 @@ it('상단 바는 위 전역 바에 등급, 이름, 게임 연결 상태를, 아
   expect(header.querySelector('kbd')).toBeNull()
   const [globalBar, gameBar] = [...header.children]
   expect(header.children).toHaveLength(2)
+  expect(globalBar.querySelector('img')?.getAttribute('alt')).toBe('')
+  expect(globalBar.textContent).toContain('오늘 등급')
   expect([grade, name, status].every((item) => globalBar.contains(item))).toBe(true)
   expect(gameBar.contains(nav)).toBe(true)
-  const items = [grade, name, status]
+  const items = [name, grade, status]
   for (let index = 1; index < items.length; index++) {
     expect(
       items[index - 1].compareDocumentPosition(items[index]) & Node.DOCUMENT_POSITION_FOLLOWING
