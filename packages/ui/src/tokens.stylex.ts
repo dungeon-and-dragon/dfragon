@@ -17,6 +17,7 @@ export const colors = stylex.defineConsts({
   bgWarningWeak: 'var(--df-bg-warning-weak)',
   bgOverlay: 'var(--df-bg-overlay)',
   signal: 'var(--df-signal)',
+  signalHover: 'var(--df-signal-hover)',
   onSignal: 'var(--df-on-signal)',
   brandLogo: 'var(--df-brand-logo)',
   fgDefault: 'var(--df-fg-default)',

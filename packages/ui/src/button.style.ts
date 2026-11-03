@@ -30,7 +30,11 @@ export const styles = stylex.create({
     borderWidth: 0,
     fontWeight: 700,
     color: { default: colors.onSignal, ':disabled': colors.fgDisabled },
-    backgroundColor: { default: colors.signal, ':disabled': colors.bgControl },
+    backgroundColor: {
+      default: colors.signal,
+      ':hover:not(:disabled)': colors.signalHover,
+      ':disabled': colors.bgControl
+    },
     // 자른 모서리가 바깥 outline을 가리므로 면 안쪽에 글자색 선을 그린다.
     outlineColor: colors.onSignal,
     outlineOffset: -4
