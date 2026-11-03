@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import { colors } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
   page: {
@@ -14,7 +15,7 @@ export const styles = stylex.create({
   app: {
     maxWidth: '100%',
     overflowX: 'auto',
-    backgroundColor: '#0F0F11'
+    backgroundColor: colors.bgCanvas
   },
   appPending: { width: 1280, height: 163 },
   neople: {
