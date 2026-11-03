@@ -18,7 +18,7 @@ last-reviewed: 2026-11-04
 - 화면 계약에 남은 기존 색 이름과 상태 표현은 해당 화면의 던삐삐 디자인 적용 PR에서 이 문서의 토큰과 규칙으로 옮긴다.
 - 상위, 랭커 티어 표시는 UI 셸과 fixture 데이터까지가 범위다. 공대 12인 화면은 자리별 서버, 이름 조회와 공대 캡처까지 연결했고 티어 기준은 별도 과제다.
 
-디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다. 같은 날 결정([ADR 0010](../adr/0010-two-tier-header-1080-width-no-cut-corners.md))으로 상단 바를 전역 바와 게임 바 2단으로 나누고, 웹 앱 상자 폭을 1080px로 줄이고, 자른 모서리를 없앴다. 같은 날 결정([ADR 0011](../adr/0011-pretendard-font-and-guild-color.md))으로 웹 글꼴을 Pretendard 하나로 통일하고 길드 이름 색 `fgGuild`를 더했다.
+디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다. 같은 날 결정([ADR 0010](../adr/0010-two-tier-header-1080-width-no-cut-corners.md))으로 상단 바를 전역 바와 게임 바 2단으로 나누고, 웹 앱 상자 폭을 1080px로 줄이고, 자른 모서리를 없앴다. 같은 날 결정([ADR 0011](../adr/0011-pretendard-font-and-guild-color.md))으로 웹 글꼴을 Pretendard 하나로 통일하고 길드 이름 색 `fgGuild`를 더했다. 같은 날 결정([ADR 0012](../adr/0012-party-raid-table-rows.md))으로 파티, 공대 화면을 카드 격자 대신 표의 행으로 그리고 카드 상태 장식과 그 토큰을 지웠다.
 
 공용 자산과 Base UI를 우선 사용해 필요한 화면을 완성한다. 공용화와 예제 구축을 제품 화면의 선행 작업으로 만들지 않는다.
 
@@ -31,12 +31,12 @@ last-reviewed: 2026-11-04
 - `@dfragon/ui/tokens.stylex`(`packages/ui/src/tokens.stylex.ts`)는 `stylex.defineConsts`로 `colors`, `space`, `radius`, `motion`, `font`를 `'var(--df-…)'` 문자열 상수로 제공한다. React는 쓰지 않지만 소비 앱의 StyleX 컴파일이 필요한 entry다.
 - StyleX compiler는 import 경로가 `.stylex`로 끝나는 모듈의 값만 다른 파일에서 정적으로 읽고, 그 경로를 bundler alias가 아닌 package exports로 해석한다. 그래서 entry 이름에 `.stylex`를 붙이고 `@dfragon/ui` 내부도 `./tokens.stylex`로 가져온다. `src/shapes.ts`처럼 `stylex.create`만 쓰는 파일은 이 이름 규칙의 대상이 아니다.
 - `defineVars`, `createTheme`, runtime 테마는 쓰지 않는다. 컴파일 결과에는 `var(--df-…)` 값이 그대로 들어가고 새 `:root` 변수가 생기지 않으므로, portal마다 테마를 다시 바르지 않는다.
-- `packages/ui/src/shapes.ts`는 공용 `stylex.create`로 `gridWell`, `alertHatch`, `scanlines`, `srOnly`를 제공한다.
+- `packages/ui/src/shapes.ts`는 공용 `stylex.create`로 `srOnly`를 제공한다.
 
 색 토큰은 이전 앱 색 토큰의 이름(`bgCanvas`, `bgSurface`, `bgInset`, `bgControl*`, `borderDefault`, `borderStrong`, `fgDefault`, `fgMuted`, `fgSubtle`, `fgSuccess`, `fgDanger`, `card*`, 희귀도, 강화, 게임, 속성 색)을 유지하고 다음을 바꾼다.
 
-- 추가: `bgBar`, `bgWell`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, 길드 이름 색 `fgGuild`(`#E879F9`), `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
-- 삭제: `bgBrand*`, `fgBrand`, `fgInfo`, `borderBrand`, `borderFocus` 같은 파랑 계열 전부
+- 추가: `bgBar`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, 길드 이름 색 `fgGuild`(`#E879F9`), `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), 검색 실패의 노란 글자 `cardFailure`(`#FFD54A`), 공대 파티 색의 글자와 옅은 면 `raidParty{Red,Yellow,Green}`, `raidParty{Red,Yellow,Green}Weak`, 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
+- 삭제: `bgBrand*`, `fgBrand`, `fgInfo`, `borderBrand`, `borderFocus` 같은 파랑 계열 전부. 카드 상태만 쓰던 `bgWell`, `bracket*`, `hatchAlert`, `gridLine`, `cardBg`, `cardBgWaiting`, `cardFailureWeak`, `cardFgAdventure`, `tierRanker{Surface,Well,Outline}`, `shape.*`(ADR 0012)
 - 주의 톤: 2026-10-19 결정으로 던삐삐 디자인 캔버스의 캡처 보드 값인 `fgWarning`(`#FFB400`)과 그 12% 면 `bgWarningWeak`을 다시 들인다. 라이트 값은 `provisional`이다.
 
 라이트 모드는 유지한다. 라이트 값은 현재 값에서 임시로 가져온 `provisional`이며, `signal`과 티어 색처럼 대응 값이 없는 토큰도 임시 값이다. dfragon-design이 라이트 값을 정하면 함께 바꾼다.
@@ -44,7 +44,7 @@ last-reviewed: 2026-11-04
 | 분류 | 값 |
 | --- | --- |
 | 간격 | 4, 8, 12, 16, 24px |
-| 반지름 | 패널, 카드, 팝업 0, 버튼, 입력, 칩, 배지 2px |
+| 반지름 | 패널, 표, 팝업 0, 버튼, 입력, 칩, 배지 2px |
 | 크기 | 상단 바의 전역 바 48px(`size.topbar`), 게임 바 40px, 웹 앱 상자 폭 1080px, 컨트롤 sm 32px, md 40px, lg 48px |
 | 모션 | 감속 곡선 `cubic-bezier(.2,0,0,1)`, hover 120ms, 상태 전환 180ms, 숫자 증가 400ms, 반복 4s |
 
@@ -63,8 +63,7 @@ last-reviewed: 2026-11-04
 | `StatusChip` | tone `neutral`, `success`, `danger`, `warning`, `signal`. pill 모양, 글자색 둥근 점과 옅은 면, 진행 중이면 `busy`로 점 세 개 |
 | `StepDots` | 진행 중임을 보이는 사각 점 세 개 |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG |
-| `Kbd`, `CornerBrackets` | 단축키 표시, 네 모서리 꺾쇠 |
-| `CardFrame` | state `default`, `selected`, `failure`, `waiting`, `top`, `ranker` |
+| `Kbd` | 단축키 표시 |
 | `NumericText` | `font.num` 숫자, `tabular-nums`, 400ms 증가 |
 | `ContentStack`, `SupportingText`, `ExampleSection` | plain 요소와 StyleX |
 | `Typo` | 변경 없음. 아래 [Typo의 명시적 예외](#typo의-명시적-예외)를 따른다 |
@@ -83,9 +82,9 @@ last-reviewed: 2026-11-04
 - 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 둥근 점, 옅은 면 `bgWarningWeak`으로 표현한다.
 - 글자: 라벨은 12px로 작게, 값은 `tabular-nums`로 크게 쓴다. 본문, 로고 글자, 숫자 모두 Pretendard를 쓴다.
 - 길드 이름은 `fgGuild`, 모험단 이름은 `fgAdventure`로 쓴다. 아이템 등급 색(`rarity*`)은 길드 이름에 쓰지 않는다.
-- 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 버튼, 입력, 배지는 반지름 2px이고 상태 칩(`StatusChip`)은 pill이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
+- 형태: 패널과 표는 반지름 0이며 테두리 없이 면과 행 구분선으로 나눈다. 버튼, 입력, 배지는 반지름 2px이고 상태 칩(`StatusChip`)은 pill이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
 - 배치: 상단 바는 위 전역 바(48px)에 아이콘과 제품 이름, "오늘 등급" 퍼센트, 오른쪽 끝 게임 연결 칩을, 아래 게임 바(40px)에 검색 메뉴와 화면 헤더를 둔다. 검색 메뉴는 바 높이를 채우고 신호색 2px 밑줄이 바 아래에 닿는다. 웹 앱 상자의 폭은 1080px이다.
-- 카드 상태: 테두리 전체를 칠하지 않고 네 모서리 꺾쇠로 표시한다. 기본, 선택, 실패(노란 꺾쇠), 대기(dashed)를 구분한다. 스냅샷에 없는 모험단만 카드를 덮는 빨간 빗금(`alertHatch`)을 쓴다.
+- 표 행 상태: 행 바탕은 물들이지 않고 글자와 배지 색만 바꾼다. 상위(`tierTop`), 랭커(`tierRanker`)는 명성 숫자와 이름 옆 외곽선 배지, 실패는 노란 글자(`cardFailure`), 오류는 빨간 글자(`fgDanger`), 공대의 추정은 경고색 글자(`fgWarning`)와 배지다. 진행은 둥근 점 세 개(지난 점 `signal`, 지금 점 깜박임)와 단계 이름이다. 스냅샷 순번 배지는 신호색 외곽선, 자리가 바뀌면 신호색 면, 스냅샷에 없는 모험단은 빨간 외곽선이다. 행을 올리면 `bgSurface` 면, 자리 맞바꾸기의 포커스와 놓을 자리는 안쪽 신호색 2px 외곽선이다. 상태 21가지의 모양은 캔버스의 "표 행 상태" 보드가 기준이고 화면 계약은 [웹 클라이언트](web-client.md#화면-구성)에 있다.
 - 모션: hover 120ms, 상태 전환 180ms, 숫자 증가 400ms와 감속 곡선 하나만 쓴다. 튕김, 흔들림, 빛 번짐은 쓰지 않으며 `prefers-reduced-motion: reduce`에서 모두 끈다.
 - 아이콘: 선 아이콘은 `stroke-linecap="square"`, `stroke-linejoin="miter"`로 그린다. 스냅샷 고정은 Lucide `pin`이다.
 - 라벨: 화면 라벨을 영어로 쓰지 않는다. 숫자와 단축키는 예외다.

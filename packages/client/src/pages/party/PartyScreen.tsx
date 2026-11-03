@@ -14,8 +14,8 @@ import { PartyPage } from './PartyPage'
 import { styles } from './PartyScreen.style'
 
 export function PartyScreen(): React.JSX.Element {
-  const { partyCapture: capture, texts } = useScreenCaptureContext()
-  const { cards, snapshot, clipboardText } = usePartySlotCards(capture, texts.nextLookupStep)
+  const { partyCapture: capture } = useScreenCaptureContext()
+  const { cards, snapshot, clipboardText } = usePartySlotCards(capture)
   const { renderBoardHeader } = useBoardHeaderPortal()
   const clipboard = useClipboardCopy(clipboardText)
 
@@ -59,7 +59,6 @@ export function PartyScreen(): React.JSX.Element {
         seats={capture.seats}
         actions={{
           lookupSlot: capture.search.lookupSlot,
-          pickCandidate: capture.search.pickCandidate,
           changeSnapshotAdventure: snapshot.changeAdventure
         }}
       />

@@ -13,7 +13,6 @@ export type StoredLookupDraft = {
 
 type SlotCardState = {
   lookupDraft?: StoredLookupDraft
-  candidatesClosed?: boolean
 }
 
 const EMPTY_SLOT_CARD_STATE: SlotCardState = {}

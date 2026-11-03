@@ -4,7 +4,6 @@ export type CaptureTexts = Readonly<{
   ocrPrepareFailed: string
   complete: string
   disconnected: string
-  nextLookupStep: string
   partyStartFailed: string
   partyOcrFailed: string
   partyFrameMissing: string
@@ -25,7 +24,6 @@ export const WEB_CAPTURE_TEXTS: CaptureTexts = {
   ocrPrepareFailed: `글자 인식을 준비하지 못했습니다. ${RETRY}`,
   complete: '인식을 마쳤습니다. 다시 캡처하거나 스크린샷을 붙여 넣으면 새로 인식합니다.',
   disconnected: '화면을 읽지 못했습니다. 게임을 다시 연결하거나 스크린샷을 다시 붙여 넣어 주세요.',
-  nextLookupStep: '캡처나 붙여넣기로 다시 인식하거나 서버와 이름을 직접 조회해 주세요.',
   partyStartFailed: `검색을 시작하지 못했습니다. ${RETRY}`,
   partyOcrFailed:
     '글자 인식에 실패했습니다. 캡처나 붙여넣기를 다시 하거나 캐릭터 직접 검색을 사용해 주세요.',

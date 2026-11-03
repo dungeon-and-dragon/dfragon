@@ -5,7 +5,6 @@ import '@dfragon/ui/tokens.css'
 import '@dfragon/ui/foundation.css'
 import {
   Button,
-  CardFrame,
   Checkbox,
   Chip,
   ContentStack,
@@ -13,10 +12,8 @@ import {
   IconButton,
   Kbd,
   Menu,
-  NumericText,
   ProgressCircle,
   Select,
-  shapes,
   StatusChip,
   SupportingText,
   Switch,
@@ -26,8 +23,7 @@ import {
   TextFieldError,
   TextFieldInput,
   TextFieldLabel,
-  Tooltip,
-  type CardFrameState
+  Tooltip
 } from '@dfragon/ui'
 import { colors, space } from '@dfragon/ui/tokens.stylex'
 
@@ -41,13 +37,6 @@ const styles = stylex.create({
     color: colors.fgDefault
   },
   row: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: space.s8 },
-  cards: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: space.s16
-  },
-  card: { display: 'grid', gap: space.s8, padding: space.s12 },
-  well: { height: 48 },
   label: { display: 'inline-flex', alignItems: 'center', gap: space.s8, fontSize: 14 }
 })
 
@@ -56,15 +45,6 @@ const servers = [
   { value: 'diregie', label: '디레지에' },
   { value: 'siroco', label: '시로코' },
   { value: 'prey', label: '프레이' }
-]
-
-const cardStates: { state: CardFrameState; label: string }[] = [
-  { state: 'default', label: '조회 완료' },
-  { state: 'selected', label: '선택' },
-  { state: 'failure', label: '검색 실패' },
-  { state: 'waiting', label: '인식 대기' },
-  { state: 'top', label: '상위' },
-  { state: 'ranker', label: '랭커' }
 ]
 
 function SettingsIcon() {
@@ -233,17 +213,6 @@ function Examples() {
             <ProgressCircle size="24" value={60} aria-label="60% 진행" />
             <Kbd>Alt</Kbd>
             <Kbd>R</Kbd>
-          </div>
-          <div {...stylex.props(styles.cards)}>
-            {cardStates.map(({ state, label }) => (
-              <CardFrame key={state} state={state} as="article" aria-label={label}>
-                <div {...stylex.props(styles.card)}>
-                  <div {...stylex.props(styles.well, shapes.gridWell)} />
-                  <SupportingText>{label}</SupportingText>
-                  <NumericText value={125850} />
-                </div>
-              </CardFrame>
-            ))}
           </div>
         </ExampleSection>
       </ContentStack>

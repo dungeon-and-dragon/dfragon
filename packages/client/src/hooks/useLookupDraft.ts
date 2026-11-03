@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import type { CardCharacter } from '@dfragon/client-core/types/cards'
 import {
   type SlotCardKey,
@@ -16,11 +16,8 @@ export type LookupDraft = {
   serverId: string
   inputNotice: string
   editing: boolean
-  active: boolean
   changeName: (name: string) => void
   changeServer: (serverId: string) => void
-  focusName: () => void
-  blurName: () => void
   submit: () => void
 }
 
@@ -42,7 +39,6 @@ export function useLookupDraft({
 }): LookupDraft {
   const stored = useSlotCardState(cardKey).lookupDraft
   const updateSlotCard = useSlotCardStore((state) => state.updateSlotCard)
-  const [nameFocused, setNameFocused] = useState(false)
   const source = { name: character?.name ?? nickname, serverId: character?.serverId }
   const draft = followSource(
     stored ?? createDraft({ character, nickname, source }),
@@ -80,18 +76,14 @@ export function useLookupDraft({
   }
 
   const editing = character != null && !isSameTarget(draft, character)
-  const active = nameFocused || draft.dirty || editing
 
   return {
     name: draft.name,
     serverId: draft.serverId,
     inputNotice: draft.inputNotice,
     editing,
-    active,
     changeName: (value) => save({ ...draft, name: value, dirty: true, inputNotice: '' }),
     changeServer: (value) => submit({ ...draft, serverId: value, dirty: true }, value),
-    focusName: () => setNameFocused(true),
-    blurName: () => setNameFocused(false),
     submit: () => submit(draft)
   }
 }

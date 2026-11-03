@@ -6,10 +6,7 @@ import { toSlotCards, type SlotCard } from '@dfragon/client-core/lib/slot-cards'
 import { useAdventureSnapshot } from './useAdventureSnapshot'
 import type { RaidCapture } from './useRaidCapture'
 
-export function useRaidSlotCards(
-  capture: RaidCapture,
-  nextLookupStep: string
-): {
+export function useRaidSlotCards(capture: RaidCapture): {
   cards: SlotCard[]
   snapshot: ReturnType<typeof useAdventureSnapshot>
   clipboardText: string
@@ -28,7 +25,6 @@ export function useRaidSlotCards(
     recognizing: capture.recognizing,
     snapshotMarks: seatValuesToSlotOrder(seatOrder, snapshot.marks),
     snapshotAdventureInputs: seatValuesToSlotOrder(seatOrder, snapshot.adventureInputs),
-    nextLookupStep,
     screen: 'raid'
   })
   const clipboardText = toClipboardText({

@@ -4,7 +4,6 @@ import type { SelectedCharacterSummary } from '../preload/common/types/character
 import type { SearchSlot } from '../preload/common/types/search'
 import { filledSlotCount, toSlotCards } from './slot-cards'
 
-const NEXT_STEP = '캡처나 붙여넣기로 다시 인식하거나 서버와 이름을 직접 조회해 주세요.'
 const summary: SelectedCharacterSummary = {
   characterId: 'synthetic-character',
   characterName: '합성',
@@ -36,7 +35,6 @@ function input(
     recognizing: false,
     snapshotMarks: [],
     snapshotAdventureInputs: [],
-    nextLookupStep: NEXT_STEP,
     ...overrides
   }
 }
@@ -69,7 +67,10 @@ describe('toSlotCards', () => {
     expect(pending.notice).toBeUndefined()
     expect(failed).toMatchObject({
       scorePending: false,
-      notice: '상세 정보를 불러오지 못했습니다. 서버와 이름을 직접 조회하면 다시 불러옵니다.'
+      notice: {
+        text: '상세 정보를 불러오지 못했습니다. 서버와 이름을 직접 조회하면 다시 불러옵니다.',
+        tone: 'error'
+      }
     })
     expect(filled.scorePending).toBe(false)
   })
@@ -83,21 +84,25 @@ describe('toSlotCards', () => {
     expect(unnamed.nickname).toBeUndefined()
   })
 
-  it('실패한 슬롯의 안내에 다음 조회 방법을 덧붙인다', () => {
+  it('실패한 슬롯에는 실패 문구 한 줄만 두고 다음 조회 안내를 덧붙이지 않는다', () => {
     const [failed, pending] = toSlotCards(
       input([slot('failure', { error: { code: 'SEARCH_TIMEOUT' } }), slot('pending')])
     )
 
-    expect(failed.notice?.endsWith(` ${NEXT_STEP}`)).toBe(true)
+    expect(failed.notice).toEqual({
+      text: '검색 시간이 초과됐습니다. 다시 시도해 주세요.',
+      tone: 'error'
+    })
     expect(pending.notice).toBeUndefined()
   })
 
   it('공대 화면은 최고 명성 선택에 직업과 수치 안내를, 파티 화면은 안내를 두지 않는다', () => {
     const slots = [slot('success', { selected: summary, selectionMethod: 'highest-fame' })]
 
-    expect(toSlotCards(input(slots, { screen: 'raid' }))[0].notice).toBe(
-      '직업과 수치 미확인, 최고 명성 후보입니다.'
-    )
+    expect(toSlotCards(input(slots, { screen: 'raid' }))[0].notice).toEqual({
+      text: '직업과 수치 미확인, 최고 명성 후보입니다.',
+      tone: 'estimate'
+    })
     expect(toSlotCards(input(slots))[0].notice).toBeUndefined()
   })
 

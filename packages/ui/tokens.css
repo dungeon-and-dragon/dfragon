@@ -2,24 +2,28 @@
  * 던삐삐 디자인 토큰. 이름은 dfragon-design design/tokens.json 기준이며 기준 commit은
  * aae3d0d(dfragon-design PR #45 merge)이다. 두 저장소 사이에 자동 동기화가 없으므로 이 파일은
  * 손으로 맞추고, 값을 바꿀 때 기준 commit도 함께 고친다.
- * 무채색 바탕, 글자, 테두리, 신호색(--df-signal, --df-signal-hover, --df-on-signal), danger 계열(옅은 면, 테두리, 꺾쇠, 빗금 포함),
- * card 토큰(--df-card-*), 꺾쇠 기본색과 상단 바 높이 토큰은 2026-11-04 결정(docs/adr/0009-design-tokens-game-site-conventions.md)의
+ * 무채색 바탕, 글자, 테두리, 신호색(--df-signal, --df-signal-hover, --df-on-signal), danger 계열(옅은 면, 테두리 포함),
+ * card 토큰(--df-card-*)과 상단 바 높이 토큰은 2026-11-04 결정(docs/adr/0009-design-tokens-game-site-conventions.md)의
  * 값이고 아직 tokens.json에 반영하지 않았다. 자른 모서리 --df-cut은 같은 날 결정
  * (docs/adr/0010-two-tier-header-1080-width-no-cut-corners.md)으로 지웠고 tokens.json 반영은 그 저장소의 PR로 한다.
  * 길드 이름 색 --df-fg-guild(#E879F9)와 숫자 글꼴 --df-font-num을 본문과 같은 Pretendard로 둔 값은 2026-11-04 결정
  * (docs/adr/0011-pretendard-font-and-guild-color.md)이고 아직 tokens.json에 반영하지 않았다.
  * 기준 commit의 tokens.json과 값이 다르거나 한쪽에만 있는 색 토큰은 아래와 같다. layout, typography의
  * 창과 대화상자 크기, 꺾쇠 형태, 숫자 글자 단계 같은 일부 토큰은 이 파일로 옮기지 않았다.
- * 검색 실패의 노란색 --df-bracket-failure, --df-card-failure{,-weak}와 스냅샷에 없는 모험단의 빗금
- * --df-hatch-alert는 2026-10-20 담당자 요청으로 던삐삐 디자인 캔버스 시안 값(노란색 #FFD54A와 그 14% 면,
- * 빨강 rgba(255, 110, 96, .14) 빗금)을 들였고(dfragon-design PR #43), 아직 tokens.json에는 이 이름이 없다.
+ * 검색 실패의 노란 글자 --df-card-failure는 2026-10-20 담당자 요청으로 던삐삐 디자인 캔버스 시안 값(#FFD54A)을
+ * 들였고(dfragon-design PR #43), 아직 tokens.json에는 이 이름이 없다. 카드 상태의 꺾쇠(--df-bracket-*), 빗금
+ * (--df-hatch-alert), 격자(--df-grid-*), 사선 간격(--df-hazard-stripe), 그림 칸(--df-bg-well), 카드 면(--df-card-bg,
+ * --df-card-bg-waiting, --df-tier-ranker-{surface,well,outline})과 실패 면(--df-card-failure-weak)은 파티, 공대 화면을
+ * 표의 행으로 바꾼 2026-11-04 결정(docs/adr/0012-party-raid-table-rows.md)으로 쓰는 곳이 없어 지웠고, tokens.json
+ * 반영은 그 저장소의 PR로 한다.
  * 점수 숫자의 역할 색 --df-score-dealer, --df-score-buffer는 2026-10-20 담당자 결정의 캔버스 값(#4FA3FF,
  * #3CC985)이고, dfragon-design colors.md가 토큰 이름을 정하지 않아 아직 tokens.json에는 이 이름이 없다.
  * 대화상자 뒤 막 --df-bg-overlay의 다크 값은 2026-10-20 던삐삐 디자인 캔버스의 메인 위 설정, 캡처 보드 값
  * (rgba(8, 8, 10, .72))을 들였고, tokens.json의 다크 값(#00000074)과 다르다.
  * tokens.json의 hazard(검색 실패 그림 칸의 사선 색)는 제품에서 쓰지 않아 옮기지 않았다.
- * 공대 파티 색 --df-raid-party-{red,yellow,green}은 2026-10-31 사용자 요청으로 게임 공대 창의 R, Y, G 배지
- * 캡처에서 뽑은 값이고, 아직 tokens.json에는 이 이름이 없다.
+ * 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 16% 면 --df-raid-party-{red,yellow,green}-weak은 표 행의 자리
+ * 배지에 쓰는 2026-11-04 표 시안 값(ADR 0012)이다. 2026-10-31 게임 공대 창 배지 캡처에서 뽑은 진한 면 값을 대신하며,
+ * 아직 tokens.json에는 이 이름이 없다.
  */
 :root {
   color-scheme: dark;
@@ -31,7 +35,6 @@
   --df-bg-stripe: #25262c;
   --df-bg-control: #2c2d34;
   --df-bg-control-hover: #34353d;
-  --df-bg-well: #18191d;
   --df-bg-success-weak: #3dd68c1f;
   --df-bg-danger-weak: #ff5c5c29;
   --df-bg-warning-weak: #ffb4001f;
@@ -55,13 +58,8 @@
   --df-border-danger: #ff5c5c;
   --df-tier-top: #ffb400;
   --df-tier-ranker: #50e3c2;
-  --df-tier-ranker-surface: #1b2324;
-  --df-tier-ranker-well: #151e1f;
-  --df-tier-ranker-outline: #50e3c259;
   --df-score-dealer: #4fa3ff;
   --df-score-buffer: #3cc985;
-  --df-card-bg: #1e1f24;
-  --df-card-bg-waiting: #1b1c21;
   --df-card-inset: #25262c;
   --df-card-stripe: #25262c;
   --df-card-control: #2c2d34;
@@ -72,19 +70,9 @@
   --df-card-fg: #f2f2f4;
   --df-card-fg-muted: #a3a6b1;
   --df-card-fg-subtle: #70737e;
-  --df-card-fg-adventure: #93e5c0;
   --df-card-signal: #ff7a33;
   --df-card-on-signal: #1a0e07;
-  --df-bracket-default: #3b3d46;
-  --df-bracket-selected: #ff7a33;
-  --df-bracket-danger: #ff5c5c;
-  --df-bracket-failure: #ffd54a;
-  --df-bracket-top: #ffb400;
-  --df-bracket-ranker: #50e3c2;
   --df-card-failure: #ffd54a;
-  --df-card-failure-weak: #ffd54a24;
-  --df-hatch-alert: #ff5c5c24;
-  --df-grid-line: #ffffff09;
 
   --df-brand-dragon: #e83830;
   --df-brand-cream: #f8e8c8;
@@ -112,9 +100,12 @@
   --df-oath-upgrade-oath-point: #3cc985;
   --df-oath-upgrade-speed: #ffb400;
   --df-oath-upgrade-range: #a066ff;
-  --df-raid-party-red: #782726;
-  --df-raid-party-yellow: #c39b3b;
-  --df-raid-party-green: #318b2b;
+  --df-raid-party-red: #ff8f82;
+  --df-raid-party-red-weak: #ff7a6e29;
+  --df-raid-party-yellow: #e8c262;
+  --df-raid-party-yellow-weak: #e8c26229;
+  --df-raid-party-green: #6cd268;
+  --df-raid-party-green-weak: #6cd26829;
 
   --df-space-4: 4px;
   --df-space-8: 8px;
@@ -123,8 +114,6 @@
   --df-space-24: 24px;
   --df-radius-panel: 0;
   --df-radius-control: 2px;
-  --df-grid-cell: 24px;
-  --df-hazard-stripe: 10px;
   --df-size-topbar: 48px;
   --df-size-control-sm: 32px;
   --df-size-control-md: 40px;

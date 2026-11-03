@@ -1,41 +1,47 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, space } from '@dfragon/ui/tokens.stylex'
+import { colors, motion, radius } from '@dfragon/ui/tokens.stylex'
+
+// 칸의 테두리 1과 안쪽 여백 5만큼 왼쪽으로 내밀어 이름 글자가 칸이 없는 글자와 같은 세로줄에 오게 한다.
+const TEXT_INSET = 6
 
 export const styles = stylex.create({
-  field: {
-    boxSizing: 'border-box',
-    display: 'flex',
-    alignItems: 'center',
-    gap: space.s4,
-    minWidth: 0,
-    height: 20,
-    paddingInlineStart: space.s4,
-    paddingInlineEnd: 1,
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'transparent'
-  },
-  fieldSelected: { borderColor: colors.cardSignal, backgroundColor: colors.bgWell },
-  fieldFailure: { borderColor: colors.cardFailure },
-  fieldVacant: {
-    borderStyle: 'dashed',
-    borderColor: colors.cardBorder,
-    backgroundColor: colors.bgWell
-  },
   name: {
+    boxSizing: 'border-box',
     flex: '1 1 0',
     minWidth: 0,
-    height: '100%',
+    height: 24,
     margin: 0,
-    padding: 0,
-    borderWidth: 0,
-    backgroundColor: 'transparent',
-    color: colors.cardFg,
+    marginInlineStart: -TEXT_INSET,
+    paddingBlock: 0,
+    paddingInline: TEXT_INSET - 1,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderRadius: radius.control,
+    borderColor: {
+      default: 'transparent',
+      ':hover': colors.borderStrong,
+      ':focus': colors.signal
+    },
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': colors.bgCanvas,
+      ':focus': colors.bgCanvas
+    },
+    boxShadow: { default: null, ':focus': `0 0 0 1px ${colors.signal}` },
+    color: colors.fgDefault,
     fontFamily: 'inherit',
+    fontSize: 13,
+    lineHeight: '18px',
     fontWeight: 700,
     outlineStyle: 'none',
-    overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
+    transitionProperty: 'border-color, background-color',
+    transitionDuration: motion.durHover,
+    transitionTimingFunction: motion.ease,
+    '::placeholder': { color: colors.fgSubtle, fontWeight: 500 }
+  },
+  vacant: {
+    borderColor: { default: colors.borderStrong, ':focus': colors.signal },
+    backgroundColor: colors.bgCanvas
   }
 })

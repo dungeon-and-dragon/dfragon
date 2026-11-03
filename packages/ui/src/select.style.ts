@@ -28,7 +28,14 @@ export const styles = stylex.create({
       ':is([data-popup-open])': colors.signal
     }
   },
-  '2xs': { height: 16, fontSize: 12, paddingInlineStart: 6, paddingInlineEnd: space.s4 },
+  '2xs': {
+    height: 20,
+    gap: 2,
+    fontSize: 11,
+    fontWeight: 500,
+    paddingInlineStart: 6,
+    paddingInlineEnd: space.s4
+  },
   xs: { height: 24, fontSize: 12 },
   sm: { height: size.controlSm, fontSize: 13 },
   md: { height: size.controlMd, fontSize: 14 },
@@ -48,6 +55,15 @@ export const styles = stylex.create({
     display: 'grid',
     gridTemplateColumns: `repeat(${columns}, auto)`
   }),
+  // 표 행의 작은 칩은 행 글자보다 한 단계 흐린 글자로 두고, 올리거나 열면 surface의 글자색으로 돌아간다.
+  mutedText: {
+    color: {
+      default: colors.fgMuted,
+      ':hover:not(:disabled, [data-popup-open])': colors.fgDefault,
+      ':is([data-popup-open])': colors.onSignal,
+      ':disabled': colors.fgDisabled
+    }
+  },
   cardTrigger: {
     color: {
       default: colors.cardFg,

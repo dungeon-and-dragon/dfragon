@@ -3,8 +3,8 @@ import * as stylex from '@stylexjs/stylex'
 import { act, type ComponentProps } from 'react'
 import { createRoot } from 'react-dom/client'
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
-import { CharacterCard } from '../sections/CharacterCard'
-import { RaidCard } from '../sections/RaidCard'
+import type { SearchMode } from '@dfragon/client-core/types/search-mode'
+import { CharacterRow } from '../sections/CharacterRow'
 import { previewCharacter } from '../fixture/mvp/fixture'
 import { serverNames } from '@dfragon/client-core/constants/servers'
 import { useServerMenu } from '../hooks/useServerMenu'
@@ -23,6 +23,30 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
+function FoundRow({
+  slot,
+  screen = 'party',
+  onLookup
+}: {
+  slot: number
+  screen?: SearchMode
+  onLookup: (nickname: string, serverId?: string) => void
+}): React.JSX.Element {
+  return (
+    <tr>
+      <CharacterRow
+        cardKey={{ id: `${screen}-${slot - 1}`, resetKey: '0' }}
+        card={{ state: 'success', character: previewCharacter }}
+        slot={slot}
+        seat={slot}
+        screen={screen}
+        onLookup={onLookup}
+        onChangeSnapshotAdventure={vi.fn()}
+      />
+    </tr>
+  )
+}
+
 function ServerMenuSelect(
   props: Omit<ComponentProps<typeof ServerSelect>, 'open' | 'onOpenChange'>
 ): React.JSX.Element {
@@ -31,29 +55,17 @@ function ServerMenuSelect(
   return <ServerSelect {...props} open={menu.open} onOpenChange={menu.setOpen} />
 }
 
-it('서버 변경은 해당 카드만 조회한다', async () => {
+it('서버 변경은 해당 행만 조회한다', async () => {
   const onLookup = vi.fn()
   const otherLookup = vi.fn()
   await act(async () =>
     root.render(
-      <>
-        <CharacterCard
-          cardKey={{ id: 'party-0', resetKey: '0' }}
-          card={{ state: 'success', character: previewCharacter }}
-          slot={1}
-          onLookup={onLookup}
-          onPickCandidate={vi.fn()}
-          onChangeSnapshotAdventure={vi.fn()}
-        />
-        <CharacterCard
-          cardKey={{ id: 'party-1', resetKey: '0' }}
-          card={{ state: 'success', character: previewCharacter }}
-          slot={2}
-          onLookup={otherLookup}
-          onPickCandidate={vi.fn()}
-          onChangeSnapshotAdventure={vi.fn()}
-        />
-      </>
+      <table>
+        <tbody>
+          <FoundRow slot={1} onLookup={onLookup} />
+          <FoundRow slot={2} onLookup={otherLookup} />
+        </tbody>
+      </table>
     )
   )
   const trigger = document.querySelector<HTMLButtonElement>('[aria-label="1번 서버"]')!
@@ -68,11 +80,11 @@ it('서버 변경은 해당 카드만 조회한다', async () => {
   expect(otherLookup).not.toHaveBeenCalled()
   expect(trigger.textContent).toContain('카인')
   expect(trigger.getAttribute('aria-expanded')).toBe('false')
-  const cards = document.querySelectorAll('article')
-  expect(cards[0].textContent).toContain('Enter로 조회')
-  expect(cards[1].textContent).not.toContain('Enter로 조회')
-  expect(cards[1].querySelector('[aria-label="2번 서버"]')!.textContent).toContain('시로코')
-  expect(cards[0].querySelector('[aria-label="1번 캐릭터 이름"]')).not.toBeNull()
+  const rows = document.querySelectorAll('tr')
+  expect(rows[0].textContent).toContain('Enter로 조회')
+  expect(rows[1].textContent).not.toContain('Enter로 조회')
+  expect(rows[1].querySelector('[aria-label="2번 서버"]')!.textContent).toContain('시로코')
+  expect(rows[0].querySelector('[aria-label="1번 캐릭터 이름"]')).not.toBeNull()
 })
 
 it('전달된 서버만 제공하고 Escape로 선택 변경 없이 닫는다', async () => {
@@ -132,7 +144,7 @@ it('서버를 고르지 않으면 트리거에 서버를 표시하고 선택된 
   expect(options.filter((item) => item.getAttribute('aria-selected') === 'true')).toEqual([])
 })
 
-it('카드 위 칩과 목록을 카드 면으로 그리고 키보드로 열어 고른다', async () => {
+it('행의 칩과 목록을 카드 면으로 그리고 키보드로 열어 고른다', async () => {
   const onValueChange = vi.fn()
   await act(async () =>
     root.render(
@@ -183,17 +195,14 @@ it('카드 위 칩과 목록을 카드 면으로 그리고 키보드로 열어 �
   await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
 })
 
-it('파티 카드의 서버 목록은 카인, 디레지에, 시로코, 프레이, 카시야스, 힐더, 안톤, 바칼 순서다', async () => {
+it('파티 행의 서버 목록은 카인, 디레지에, 시로코, 프레이, 카시야스, 힐더, 안톤, 바칼 순서다', async () => {
   await act(async () =>
     root.render(
-      <CharacterCard
-        cardKey={{ id: 'party-0', resetKey: '0' }}
-        card={{ state: 'success', character: previewCharacter }}
-        slot={1}
-        onLookup={vi.fn()}
-        onPickCandidate={vi.fn()}
-        onChangeSnapshotAdventure={vi.fn()}
-      />
+      <table>
+        <tbody>
+          <FoundRow slot={1} onLookup={vi.fn()} />
+        </tbody>
+      </table>
     )
   )
   const trigger = document.querySelector<HTMLButtonElement>('[aria-label="1번 서버"]')!
@@ -252,14 +261,11 @@ function keydown(target: Element, key: string, init: KeyboardEventInit = {}): Ke
 async function renderCard(onLookup: (nickname: string, serverId?: string) => void): Promise<void> {
   await act(async () =>
     root.render(
-      <CharacterCard
-        cardKey={{ id: 'party-0', resetKey: '0' }}
-        card={{ state: 'success', character: previewCharacter }}
-        slot={1}
-        onLookup={onLookup}
-        onPickCandidate={vi.fn()}
-        onChangeSnapshotAdventure={vi.fn()}
-      />
+      <table>
+        <tbody>
+          <FoundRow slot={1} onLookup={onLookup} />
+        </tbody>
+      </table>
     )
   )
 }
@@ -352,17 +358,15 @@ it('Shift+Tab과 한글 조합 중의 Tab은 서버 목록을 열지 않는다',
   expect(trigger.getAttribute('aria-expanded')).toBe('false')
 })
 
-it('공대 카드의 이름 칸도 Tab으로 서버 목록을 열고 Enter로 고른 서버를 바로 조회한다', async () => {
+it('공대 행의 이름 칸도 Tab으로 서버 목록을 열고 Enter로 고른 서버를 바로 조회한다', async () => {
   const onLookup = vi.fn()
   await act(async () =>
     root.render(
-      <RaidCard
-        cardKey={{ id: 'raid-8', resetKey: '0' }}
-        card={{ state: 'success', character: previewCharacter }}
-        slot={9}
-        onLookup={onLookup}
-        onChangeSnapshotAdventure={vi.fn()}
-      />
+      <table>
+        <tbody>
+          <FoundRow slot={9} screen="raid" onLookup={onLookup} />
+        </tbody>
+      </table>
     )
   )
   const name = document.querySelector<HTMLInputElement>('[aria-label="9번 캐릭터 이름"]')!

@@ -102,6 +102,50 @@ it('닉네임과 서버로 조회하면 API에서 상세를 받아 슬롯을 채
   ])
 })
 
+it('수동 조회의 검색과 상세 정보 오류 응답은 API가 보낸 message를 슬롯 오류에 담는다', async () => {
+  let candidatesFound = false
+  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
+    const candidates = new URL(new Request(...args).url).pathname === '/characters/candidates'
+    if (candidates && candidatesFound) {
+      return json({ rows: [candidate] })
+    }
+
+    if (candidates) {
+      return json({ error: { code: 'NEOPLE_UNAVAILABLE', message: '검색 오류 문구' } }, 503)
+    }
+
+    return json({ error: { code: 'NEOPLE_TIMEOUT', message: '상세 오류 문구' } }, 504)
+  })
+  vi.stubGlobal('fetch', fetch)
+  const search = createBrowserCardSearch('party', createBrowserSearchRuntime(API_ORIGIN, vi.fn()))
+  const snapshots: SearchSnapshot[] = []
+  search.onCharacterSearchChanged((snapshot) => snapshots.push(snapshot))
+  const begun = await search.controlCharacterSearch({ action: 'begin' })
+  const lookup = { action: 'lookup', captureId: begun.snapshot.captureId!, slot: 0 } as const
+
+  await search.controlCharacterSearch({ ...lookup, observationRevision: 1, nickname: '가나' })
+  await vi.waitFor(() =>
+    expect(snapshots.at(-1)?.slots[0]).toMatchObject({
+      state: 'failure',
+      error: { code: 'NEOPLE_UNAVAILABLE', message: '검색 오류 문구' }
+    })
+  )
+
+  candidatesFound = true
+  await search.controlCharacterSearch({
+    ...lookup,
+    observationRevision: 2,
+    nickname: '가나',
+    serverId: 'cain'
+  })
+  await vi.waitFor(() =>
+    expect(snapshots.at(-1)?.slots[0]).toMatchObject({
+      state: 'failure',
+      error: { code: 'NEOPLE_TIMEOUT', message: '상세 오류 문구' }
+    })
+  )
+})
+
 it('후보 초상화는 네오플 이미지 서버가 아니라 API의 초상화 전달 경로에서 받는다', async () => {
   const fetch = vi.fn<typeof globalThis.fetch>(async () => json({ error: { code: 'x' } }, 404))
   vi.stubGlobal('fetch', fetch)

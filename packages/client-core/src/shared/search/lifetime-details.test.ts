@@ -186,18 +186,19 @@ describe('이름과 서버를 정한 뒤 상세를 채우는 순서', () => {
     expect(f.getDetails).toHaveBeenCalledTimes(3)
   })
 
-  it('상세를 받지 못하면 고른 이름과 서버는 두고 그 슬롯만 실패로 표시하며 다른 슬롯의 상세는 그대로 반영한다', async () => {
+  it('상세를 받지 못하면 고른 이름과 서버는 두고 그 슬롯만 API 오류와 함께 실패로 표시하며 다른 슬롯의 상세는 그대로 반영한다', async () => {
     const f = fixture()
     await f.identifyAll()
     await vi.waitFor(() => expect(f.loads).toHaveLength(3))
 
-    f.load('가나').reject(new SearchHttpFailure('NEOPLE_API_ERROR'))
+    f.load('가나').reject(new SearchHttpFailure('NEOPLE_API_ERROR', 'API가 보낸 문구'))
 
     await vi.waitFor(() => expect(f.lifetime.snapshot().slots[0].details).toBe('failed'))
     expect(f.lifetime.snapshot().slots[0]).toMatchObject({
       state: 'success',
       error: null,
-      selected: { characterName: '가나', card: null }
+      selected: { characterName: '가나', card: null },
+      detailsError: { code: 'NEOPLE_API_ERROR', message: 'API가 보낸 문구' }
     })
     f.load('다라').resolve()
     f.load('마바').resolve()

@@ -88,7 +88,8 @@ export const SEARCH_ERRORS = {
 } as const satisfies Record<string, SearchErrorDefinition>
 
 export type SearchErrorCode = keyof typeof SEARCH_ERRORS
-export type SearchError = Readonly<{ code: SearchErrorCode }>
+/** `message`는 API가 오류 응답에 담아 보낸 문구다. 응답을 받지 못한 실패에는 없다. */
+export type SearchError = Readonly<{ code: SearchErrorCode; message?: string }>
 
 export const SEARCH_SLOT_STATES = ['idle', 'pending', 'success', 'empty', 'failure'] as const
 type SearchSlotState = (typeof SEARCH_SLOT_STATES)[number]
@@ -105,6 +106,7 @@ export type SearchSlot = Readonly<{
   selectionMethod?: CharacterSelectionMethod
   choices?: readonly CharacterChoice[]
   details?: SelectedDetailsState
+  detailsError?: SearchError
 }>
 
 export type SearchSnapshot = Readonly<{

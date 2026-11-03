@@ -75,12 +75,19 @@ afterEach(async () => {
   vi.restoreAllMocks()
 })
 
-it('켜기 전에는 표시가 없고, 켠 순간의 자리를 저장해 이후 자리와 비교한다', async () => {
+it('켜기 전에는 표시가 없고, 켠 순간의 자리를 제자리로 저장해 이후 자리와 비교한다', async () => {
   await render(['가', '나'])
   expect(shown()).toEqual({ active: false, marks: [null, null], round: null })
 
   await press('take')
-  expect(shown()).toEqual({ active: true, marks: [null, null], round: 1 })
+  expect(shown()).toEqual({
+    active: true,
+    marks: [
+      { kind: 'kept', seat: 1 },
+      { kind: 'kept', seat: 2 }
+    ],
+    round: 1
+  })
 
   await render(['나', '가'])
   expect(shown().marks).toEqual([
@@ -185,7 +192,10 @@ it('자모로 나뉜 입력도 NFC로 합쳐 검색 결과의 모험단과 맞�
 
   await render(['가', '별빛'], 1)
 
-  expect(shown().marks).toEqual([null, null])
+  expect(shown().marks).toEqual([
+    { kind: 'kept', seat: 1 },
+    { kind: 'kept', seat: 2 }
+  ])
 })
 
 it('끄고 다시 켜면 전에 적은 모험단을 지우고 빈 입력으로 시작한다', async () => {
@@ -198,5 +208,5 @@ it('끄고 다시 켜면 전에 적은 모험단을 지우고 빈 입력으로 �
 
   expect(adventureInputs()).toEqual([null, ''])
   await render(['가', '별빛'], 1)
-  expect(shown().marks).toEqual([null, { kind: 'absent' }])
+  expect(shown().marks).toEqual([{ kind: 'kept', seat: 1 }, { kind: 'absent' }])
 })

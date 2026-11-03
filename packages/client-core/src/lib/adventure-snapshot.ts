@@ -2,7 +2,10 @@ import type { SearchSlot } from '../preload/common/types/search'
 
 export type SeatAdventures = readonly (string | null)[]
 
-export type SnapshotMark = Readonly<{ kind: 'moved'; seat: number }> | Readonly<{ kind: 'absent' }>
+/** `seat`은 그 모험단이 스냅샷에서 있던 자리 번호(1부터)다. */
+export type SnapshotMark =
+  | Readonly<{ kind: 'kept' | 'moved'; seat: number }>
+  | Readonly<{ kind: 'absent' }>
 
 export function slotAdventureName(slot: SearchSlot): string | null {
   if (slot.state !== 'success') {
@@ -27,6 +30,7 @@ export function compareWithSnapshot(
     if (adventure !== null && snapshot[seat] === adventure) {
       unclaimed.delete(seat)
       keptInPlace.add(seat)
+      marks[seat] = { kind: 'kept', seat: seat + 1 }
     }
   }
   for (const [seat, adventure] of current.entries()) {

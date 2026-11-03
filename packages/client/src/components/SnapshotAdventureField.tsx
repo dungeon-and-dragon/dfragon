@@ -21,7 +21,7 @@ export function SnapshotAdventureField({
     <input
       type="text"
       aria-label={`${slot}번 모험단`}
-      placeholder="모험단 입력"
+      placeholder="모험단 이름"
       title={notice || undefined}
       value={value}
       onChange={handleChange}

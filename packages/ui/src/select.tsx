@@ -31,7 +31,8 @@ function SelectTriggerImpl({
           controlStyles.focusRing,
           controlStyles.hoverTransition,
           styles[size],
-          surface === 'card' && styles.cardTrigger
+          surface === 'card' && styles.cardTrigger,
+          size === '2xs' && styles.mutedText
         ),
         { className, style }
       )}
