@@ -41,6 +41,7 @@ function FoundRow({
         seat={slot}
         screen={screen}
         onLookup={onLookup}
+        onPickCandidate={vi.fn()}
         onChangeSnapshotAdventure={vi.fn()}
       />
     </tr>
