@@ -2,7 +2,7 @@
 type: rule
 status: active
 scope: application-browser-ui
-last-reviewed: 2026-11-03
+last-reviewed: 2026-11-04
 ---
 
 # Design System Contract
@@ -18,7 +18,7 @@ last-reviewed: 2026-11-03
 - 화면 계약에 남은 기존 색 이름과 상태 표현은 해당 화면의 던삐삐 디자인 적용 PR에서 이 문서의 토큰과 규칙으로 옮긴다.
 - 상위, 랭커 티어 표시는 UI 셸과 fixture 데이터까지가 범위다. 공대 12인 화면은 자리별 서버, 이름 조회와 공대 캡처까지 연결했고 티어 기준은 별도 과제다.
 
-디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다.
+디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다.
 
 공용 자산과 Base UI를 우선 사용해 필요한 화면을 완성한다. 공용화와 예제 구축을 제품 화면의 선행 작업으로 만들지 않는다.
 
@@ -35,7 +35,7 @@ last-reviewed: 2026-11-03
 
 색 토큰은 이전 앱 색 토큰의 이름(`bgCanvas`, `bgSurface`, `bgInset`, `bgControl*`, `borderDefault`, `borderStrong`, `fgDefault`, `fgMuted`, `fgSubtle`, `fgSuccess`, `fgDanger`, `card*`, 희귀도, 강화, 게임, 속성 색)을 유지하고 다음을 바꾼다.
 
-- 추가: `bgBar`, `bgWell`, `signal`(`#F8E8C8`), `onSignal`(`#111012`), `brandLogo`(`#E83830`), `fgAdventure`, `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
+- 추가: `bgBar`, `bgWell`, `signal`(`#FF7A33`), `signalHover`(`#FF9357`), `onSignal`(`#1A0E07`), `brandLogo`(`#E83830`), `fgAdventure`, `tierTop`(`#FFB400`), `tierRanker`(`#50E3C2`), 점수 숫자의 역할 색 `scoreDealer`(`#4FA3FF`), `scoreBuffer`(`#3CC985`), `bracket*`, `hatchAlert`, `gridLine`, 검색 실패의 노란색 `cardFailure`, `cardFailureWeak`(`#FFD54A`와 그 14% 면), 묵언의 진의 옵션 색 `oathUpgradeDamage`(`#FF4848`), `oathUpgradeCooldown`(`#4FA3FF`), `oathUpgradeOathPoint`(`#3CC985`), `oathUpgradeSpeed`(`#FFB400`), `oathUpgradeRange`(`#A066FF`). 묵언의 진의 색은 점수 역할 색, `rarity.epic`과 값이 같아도 뜻이 달라 따로 둔다(2026-10-20 사용자 결정, dfragon-design PR #45)
 - 삭제: `bgBrand*`, `fgBrand`, `fgInfo`, `borderBrand`, `borderFocus` 같은 파랑 계열 전부
 - 주의 톤: 2026-10-19 결정으로 던삐삐 디자인 캔버스의 캡처 보드 값인 `fgWarning`(`#FFB400`)과 그 12% 면 `bgWarningWeak`을 다시 들인다. 라이트 값은 `provisional`이다.
 
@@ -45,7 +45,7 @@ last-reviewed: 2026-11-03
 | --- | --- |
 | 간격 | 4, 8, 12, 16, 24px |
 | 반지름 | 패널, 카드 0, 입력, 칩, 보조 버튼 2px, 자른 모서리 8px |
-| 크기 | 상단 바 44px, 컨트롤 sm 32px, md 40px, lg 48px |
+| 크기 | 상단 바 토큰 48px(현재 화면의 상단 바는 44px 직접 값), 컨트롤 sm 32px, md 40px, lg 48px |
 | 모션 | 감속 곡선 `cubic-bezier(.2,0,0,1)`, hover 120ms, 상태 전환 180ms, 숫자 증가 400ms, 반복 4s |
 
 토큰 값의 원본은 dfragon-design `tokens.json`이다. 두 저장소 사이에 자동 동기화는 없으므로 `tokens.css`를 바꿀 때 기준이 된 디자인 저장소 commit을 함께 기록한다.
@@ -79,7 +79,7 @@ last-reviewed: 2026-11-03
 
 앱 화면은 아래 규칙으로 그린다. 상세 값과 예시는 dfragon-design 문서를 따른다.
 
-- 색: 무채색 바탕 위에 신호색 하나를 쓴다. 신호색 `signal`(`#F8E8C8`)은 선택, 주 버튼, 포커스와 진행 중인 캡처 회차에 쓴다. 희귀도 색은 유지하고, 로고 빨강 `brandLogo`(`#E83830`)는 로고 마크에만 쓴다.
+- 색: 무채색 바탕 위에 신호색 하나를 쓴다. 신호색 `signal`(`#FF7A33`, hover `signalHover` `#FF9357`)은 선택, 주 버튼, 포커스와 진행 중인 캡처 회차에 쓴다. 희귀도 색은 유지하고, 로고 빨강 `brandLogo`(`#E83830`)와 크림 `brandCream`(`#F8E8C8`)은 로고 자산에만 쓴다.
 - 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 사각 점, 옅은 면 `bgWarningWeak`으로 표현한다.
 - 글자: 라벨은 12px로 작게, 값은 Barlow Condensed `tabular-nums`로 크게 쓴다. 한글은 마루미냐 한글을 쓴다.
 - 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 입력, 칩, 보조 버튼은 반지름 2px이다. 누를 수 있는 주 행동에만 오른쪽 위 모서리를 8px 자른다.
