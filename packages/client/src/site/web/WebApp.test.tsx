@@ -173,11 +173,13 @@ it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 �
   const captureButton = (): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('button[aria-label^="파티 캡처"]')!
   expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결')
+  expect(chip().textContent).toBe('화면 공유')
   expect(captureButton().disabled).toBe(true)
 
   await act(async () => chip().click())
 
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+  expect(chip().textContent).toBe('게임 연결됨')
   expect(captureButton().disabled).toBe(false)
 
   await act(async () => captureButton().click())
