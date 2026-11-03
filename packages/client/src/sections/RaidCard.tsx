@@ -118,10 +118,7 @@ const partyNumberStyles: Readonly<Record<RaidParty, stylex.StyleXStyles>> = {
 
 function SlotNumber({ party, label }: { party: RaidParty; label: string }): React.JSX.Element {
   return (
-    <span
-      aria-hidden="true"
-      {...stylex.props(styles.number, shapes.cutTopRight, partyNumberStyles[party])}
-    >
+    <span aria-hidden="true" {...stylex.props(styles.number, partyNumberStyles[party])}>
       {label}
     </span>
   )

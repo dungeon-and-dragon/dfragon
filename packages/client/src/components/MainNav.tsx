@@ -1,4 +1,4 @@
-import { Menu, shapes } from '@dfragon/ui'
+import { Menu } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useSearchModeStore } from '../hooks/useSearchModeStore'
 import { ChevronDownIcon } from './ChevronDownIcon'
@@ -38,13 +38,7 @@ function SearchMenuTrigger({ modeLabel }: { modeLabel: string }): React.JSX.Elem
       render={
         <button
           type="button"
-          {...stylex.props(
-            styles.item,
-            styles.current,
-            styles.currentFocus,
-            shapes.cutTopRight,
-            stylex.defaultMarker()
-          )}
+          {...stylex.props(styles.item, styles.current, stylex.defaultMarker())}
         />
       }
     >

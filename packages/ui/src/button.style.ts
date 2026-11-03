@@ -26,7 +26,6 @@ export const styles = stylex.create({
   md: { height: size.controlMd, paddingInline: space.s16, fontSize: 14 },
   lg: { height: size.controlLg, paddingInline: space.s24, fontSize: 16 },
   primary: {
-    borderRadius: radius.panel,
     borderWidth: 0,
     fontWeight: 700,
     color: { default: colors.onSignal, ':disabled': colors.fgDisabled },
@@ -34,10 +33,7 @@ export const styles = stylex.create({
       default: colors.signal,
       ':hover:not(:disabled)': colors.signalHover,
       ':disabled': colors.bgControl
-    },
-    // 자른 모서리가 바깥 outline을 가리므로 면 안쪽에 글자색 선을 그린다.
-    outlineColor: colors.onSignal,
-    outlineOffset: -4
+    }
   },
   secondary: {
     color: { default: colors.fgDefault, ':disabled': colors.fgDisabled },

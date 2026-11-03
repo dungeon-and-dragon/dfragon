@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, space } from './tokens.stylex'
+import { colors, motion, radius, space } from './tokens.stylex'
 
 const live = stylex.keyframes({
   '0%': { opacity: 1 },
@@ -10,6 +10,7 @@ export const styles = stylex.create({
   root: {
     display: 'inline-flex',
     alignItems: 'center',
+    borderRadius: radius.control,
     fontSize: 12,
     fontWeight: 700,
     lineHeight: 1,

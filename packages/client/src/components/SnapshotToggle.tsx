@@ -1,5 +1,5 @@
 import { Popover } from '@base-ui/react/popover'
-import { Button, IconButton, shapes } from '@dfragon/ui'
+import { Button, IconButton } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef } from 'react'
 import { HeaderTooltip } from './HeaderTooltip'
@@ -55,7 +55,7 @@ export function SnapshotToggle({
           <Popover.Popup
             role="alertdialog"
             initialFocus={cancelRef}
-            {...stylex.props(styles.popup, shapes.cutBottomRight)}
+            {...stylex.props(styles.popup)}
           >
             <Popover.Title {...stylex.props(styles.title)}>고정을 취소하시겠습니까?</Popover.Title>
             <div {...stylex.props(styles.actions)}>

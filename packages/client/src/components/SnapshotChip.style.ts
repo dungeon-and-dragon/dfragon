@@ -1,11 +1,12 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, font } from '@dfragon/ui/tokens.stylex'
+import { colors, font, radius } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
   chip: {
     display: 'inline-flex',
     alignItems: 'center',
     flexShrink: 0,
+    borderRadius: radius.control,
     fontFamily: font.num,
     fontVariantNumeric: 'tabular-nums',
     fontWeight: 700,

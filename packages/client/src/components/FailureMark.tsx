@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { styles } from './FailureMark.style'
 
@@ -13,11 +12,7 @@ export function FailureMark({
     <span
       role="img"
       aria-label={label}
-      {...stylex.props(
-        styles.mark,
-        shapes.cutTopRight,
-        size === 'party' ? styles.party : styles.raid
-      )}
+      {...stylex.props(styles.mark, size === 'party' ? styles.party : styles.raid)}
     >
       !
     </span>

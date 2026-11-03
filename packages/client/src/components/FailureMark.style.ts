@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, font } from '@dfragon/ui/tokens.stylex'
+import { colors, font, radius } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
   mark: {
@@ -8,6 +8,7 @@ export const styles = stylex.create({
     flexShrink: 0,
     width: 20,
     height: 20,
+    borderRadius: radius.control,
     backgroundColor: colors.cardFailureWeak,
     color: colors.cardFailure
   },
