@@ -223,9 +223,8 @@ describe('캐릭터 식별 요청의 실행 경계', () => {
       selected: { selectionMethod: 'portrait', summary: { characterId: 'low' } }
     })
     expect(
-      loaded?.kind === 'success' &&
-        loaded.selected?.choices?.find((choice) => choice.characterId === 'high')?.face
-    ).toBeNull()
+      loaded?.kind === 'success' && loaded.selected?.choices?.map((choice) => choice.characterId)
+    ).toEqual(['high', 'low', 'null'])
     expect(loading.image).toHaveBeenCalledTimes(3)
     expect(loading.scorePortrait).toHaveBeenCalledTimes(2)
 
@@ -238,8 +237,8 @@ describe('캐릭터 식별 요청의 실행 경계', () => {
     })
     expect(
       compared?.kind === 'success' &&
-        compared.selected?.choices?.find((choice) => choice.characterId === 'high')?.face
-    ).toBeNull()
+        compared.selected?.choices?.map((choice) => choice.characterId)
+    ).toEqual(['high', 'low', 'null'])
     expect(comparing.getDetails).not.toHaveBeenCalled()
   })
 
