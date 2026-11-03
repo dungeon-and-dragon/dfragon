@@ -18,7 +18,7 @@ last-reviewed: 2026-11-04
 - 화면 계약에 남은 기존 색 이름과 상태 표현은 해당 화면의 던삐삐 디자인 적용 PR에서 이 문서의 토큰과 규칙으로 옮긴다.
 - 상위, 랭커 티어 표시는 UI 셸과 fixture 데이터까지가 범위다. 공대 12인 화면은 자리별 서버, 이름 조회와 공대 캡처까지 연결했고 티어 기준은 별도 과제다.
 
-디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다.
+디자인 원본은 디자인 인계 저장소 [dfragon-design](https://github.com/dungeon-and-dragon/dfragon-design)의 markdown 문서와 손으로 관리하는 `design/tokens.json`이다. 던삐삐 디자인 시안 캔버스는 시각 참고이며, Penpot 보드와 PNG 미리보기는 superseded다. 2026-11-04 결정([ADR 0009](../adr/0009-design-tokens-game-site-conventions.md))으로 무채색 바탕, 글자, 테두리, 신호색 값을 게임 전적 사이트의 관습에 맞춰 바꿨고 dfragon-design `tokens.json`에는 아직 반영하지 않았다. 반영 전까지 값의 기준은 ADR 0009와 `tokens.css` 머리말이다. 같은 날 결정([ADR 0010](../adr/0010-two-tier-header-1080-width-no-cut-corners.md))으로 상단 바를 전역 바와 게임 바 2단으로 나누고, 웹 앱 상자 폭을 1080px로 줄이고, 자른 모서리를 없앴다.
 
 공용 자산과 Base UI를 우선 사용해 필요한 화면을 완성한다. 공용화와 예제 구축을 제품 화면의 선행 작업으로 만들지 않는다.
 
@@ -31,7 +31,7 @@ last-reviewed: 2026-11-04
 - `@dfragon/ui/tokens.stylex`(`packages/ui/src/tokens.stylex.ts`)는 `stylex.defineConsts`로 `colors`, `space`, `radius`, `motion`, `font`를 `'var(--df-…)'` 문자열 상수로 제공한다. React는 쓰지 않지만 소비 앱의 StyleX 컴파일이 필요한 entry다.
 - StyleX compiler는 import 경로가 `.stylex`로 끝나는 모듈의 값만 다른 파일에서 정적으로 읽고, 그 경로를 bundler alias가 아닌 package exports로 해석한다. 그래서 entry 이름에 `.stylex`를 붙이고 `@dfragon/ui` 내부도 `./tokens.stylex`로 가져온다. `src/shapes.ts`처럼 `stylex.create`만 쓰는 파일은 이 이름 규칙의 대상이 아니다.
 - `defineVars`, `createTheme`, runtime 테마는 쓰지 않는다. 컴파일 결과에는 `var(--df-…)` 값이 그대로 들어가고 새 `:root` 변수가 생기지 않으므로, portal마다 테마를 다시 바르지 않는다.
-- `packages/ui/src/shapes.ts`는 공용 `stylex.create`로 `cutTopRight`, `cutBottomRight`, `gridWell`, `alertHatch`, `scanlines`, `srOnly`를 제공한다.
+- `packages/ui/src/shapes.ts`는 공용 `stylex.create`로 `gridWell`, `alertHatch`, `scanlines`, `srOnly`를 제공한다.
 
 색 토큰은 이전 앱 색 토큰의 이름(`bgCanvas`, `bgSurface`, `bgInset`, `bgControl*`, `borderDefault`, `borderStrong`, `fgDefault`, `fgMuted`, `fgSubtle`, `fgSuccess`, `fgDanger`, `card*`, 희귀도, 강화, 게임, 속성 색)을 유지하고 다음을 바꾼다.
 
@@ -44,8 +44,8 @@ last-reviewed: 2026-11-04
 | 분류 | 값 |
 | --- | --- |
 | 간격 | 4, 8, 12, 16, 24px |
-| 반지름 | 패널, 카드 0, 입력, 칩, 보조 버튼 2px, 자른 모서리 8px |
-| 크기 | 상단 바 토큰 48px(현재 화면의 상단 바는 44px 직접 값), 컨트롤 sm 32px, md 40px, lg 48px |
+| 반지름 | 패널, 카드, 팝업 0, 버튼, 입력, 칩, 배지 2px |
+| 크기 | 상단 바의 전역 바 48px(`size.topbar`), 게임 바 40px, 웹 앱 상자 폭 1080px, 컨트롤 sm 32px, md 40px, lg 48px |
 | 모션 | 감속 곡선 `cubic-bezier(.2,0,0,1)`, hover 120ms, 상태 전환 180ms, 숫자 증가 400ms, 반복 4s |
 
 토큰 값의 원본은 dfragon-design `tokens.json`이다. 두 저장소 사이에 자동 동기화는 없으므로 `tokens.css`를 바꿀 때 기준이 된 디자인 저장소 commit을 함께 기록한다.
@@ -56,7 +56,7 @@ last-reviewed: 2026-11-04
 
 | Component | 책임 |
 | --- | --- |
-| `Button` | `primary`, `secondary`, `ghost`, `danger` 변형과 `sm`, `md`, `lg` 크기. `primary`는 `signal` 배경에 오른쪽 위 8px 자른 모서리 |
+| `Button` | `primary`, `secondary`, `ghost`, `danger` 변형과 `sm`, `md`, `lg` 크기. `primary`는 `signal` 배경 |
 | `IconButton` | 아이콘만 있는 버튼. 접근 가능한 이름 필수 |
 | `TextField`, `TextFieldLabel`, `TextFieldInput`, `TextFieldDescription`, `TextFieldError` | Base UI `Field`, `Input` 기반 입력과 라벨, 설명, 오류 |
 | `Select`, `Menu`, `Switch`, `Checkbox`, `Chip`(`Toggle`), `Tabs`, `Tooltip` | 같은 이름의 Base UI 부품 기반 |
@@ -82,7 +82,8 @@ last-reviewed: 2026-11-04
 - 색: 무채색 바탕 위에 신호색 하나를 쓴다. 신호색 `signal`(`#FF7A33`, hover `signalHover` `#FF9357`)은 선택, 주 버튼, 포커스와 진행 중인 캡처 회차에 쓴다. 희귀도 색은 유지하고, 로고 빨강 `brandLogo`(`#E83830`)와 크림 `brandCream`(`#F8E8C8`)은 로고 자산에만 쓴다.
 - 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 사각 점, 옅은 면 `bgWarningWeak`으로 표현한다.
 - 글자: 라벨은 12px로 작게, 값은 Barlow Condensed `tabular-nums`로 크게 쓴다. 한글은 마루미냐 한글을 쓴다.
-- 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 입력, 칩, 보조 버튼은 반지름 2px이다. 누를 수 있는 주 행동에만 오른쪽 위 모서리를 8px 자른다.
+- 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 버튼, 입력, 칩, 배지는 반지름 2px이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
+- 배치: 상단 바는 위 전역 바(48px)에 등급 퍼센트, 제품 이름, 게임 연결 칩을, 아래 게임 바(40px)에 검색 메뉴와 화면 헤더를 둔다. 웹 앱 상자의 폭은 1080px이다.
 - 카드 상태: 테두리 전체를 칠하지 않고 네 모서리 꺾쇠로 표시한다. 기본, 선택, 실패(노란 꺾쇠), 대기(dashed)를 구분한다. 스냅샷에 없는 모험단만 카드를 덮는 빨간 빗금(`alertHatch`)을 쓴다.
 - 모션: hover 120ms, 상태 전환 180ms, 숫자 증가 400ms와 감속 곡선 하나만 쓴다. 튕김, 흔들림, 빛 번짐은 쓰지 않으며 `prefers-reduced-motion: reduce`에서 모두 끈다.
 - 아이콘: 선 아이콘은 `stroke-linecap="square"`, `stroke-linejoin="miter"`로 그린다. 스냅샷 고정은 Lucide `pin`이다.
