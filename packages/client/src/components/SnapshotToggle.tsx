@@ -1,20 +1,23 @@
 import { Popover } from '@base-ui/react/popover'
-import { Button, IconButton } from '@dfragon/ui'
+import { Button } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef } from 'react'
 import { HeaderTooltip } from './HeaderTooltip'
 import { triggerStyles } from './HeaderTooltip.style'
+import { toolStyles } from './HeaderTool.style'
 import { SnapshotIcon } from './SnapshotIcon'
 import { styles } from './SnapshotToggle.style'
 
 export function SnapshotToggle({
   label,
   active,
+  disabled,
   onTake,
   onClear
 }: {
   label: string
   active: boolean
+  disabled: boolean
   onTake: () => void
   onClear: () => void
 }): React.JSX.Element {
@@ -33,14 +36,16 @@ export function SnapshotToggle({
       <HeaderTooltip label={tooltipLabel}>
         <span {...stylex.props(triggerStyles.wrapper)}>
           <Popover.Trigger
+            disabled={disabled}
             render={
-              <IconButton
-                size="lg"
+              <button
+                type="button"
                 aria-label={label}
-                pressed={active}
-                icon={<SnapshotIcon width={16} height={16} {...stylex.props(styles.icon)} />}
-                {...stylex.props(styles.trigger)}
-              />
+                aria-pressed={active}
+                {...stylex.props(toolStyles.button)}
+              >
+                <SnapshotIcon filled={active} width={16} height={16} />
+              </button>
             }
           />
         </span>

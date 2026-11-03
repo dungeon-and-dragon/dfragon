@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, radius, space } from './tokens.stylex'
+import { colors, motion, space } from './tokens.stylex'
 
 const live = stylex.keyframes({
   '0%': { opacity: 1 },
@@ -10,7 +10,7 @@ export const styles = stylex.create({
   root: {
     display: 'inline-flex',
     alignItems: 'center',
-    borderRadius: radius.control,
+    borderRadius: 999,
     fontSize: 12,
     fontWeight: 700,
     lineHeight: 1,
@@ -29,7 +29,7 @@ export const styles = stylex.create({
     color: colors.signal,
     backgroundColor: `color-mix(in srgb, ${colors.signal} 12%, transparent)`
   },
-  dot: { flexShrink: 0, width: 6, height: 6, backgroundColor: 'currentColor' },
+  dot: { flexShrink: 0, width: 6, height: 6, borderRadius: 999, backgroundColor: 'currentColor' },
   liveDot: {
     animationName: { default: live, '@media (prefers-reduced-motion: reduce)': 'none' },
     animationDuration: `calc(${motion.beat} * 2)`,
