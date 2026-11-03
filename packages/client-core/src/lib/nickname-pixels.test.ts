@@ -178,8 +178,8 @@ it.each([
 )
 
 it.each([
-  ['UI 0% 높이 17', 4, 17],
-  ['배율 1.8 높이 31', 7, 31]
+  ['UI 0% 높이 17', 6, 17],
+  ['배율 1.8 높이 31', 11, 31]
 ])('%s에서는 본문과 빈 열 %i개 이상 떨어진 덩어리부터 지운다', (_case, gap, height) => {
   const kept = raidNickname(height, [[20 - gap, 5]])
   const removed = raidNickname(height, [[20 - gap - 1, 5]])
@@ -189,6 +189,21 @@ it.each([
 
   expect(darkColumns(kept, height)).toEqual([20 - gap, ...textColumns])
   expect(darkColumns(removed, height)).toEqual(textColumns)
+})
+
+// 실기 높이 18 칸에서 숫자 `1`과 다음 글자 사이는 빈 열 4개였다(2026-11-03).
+it('숫자 1 뒤 빈 열만큼 떨어진 다음 글자는 본문과 함께 남긴다', () => {
+  const nextGlyph: [number, number][] = []
+  for (const x of [45, 47, 49, 51, 53]) {
+    for (let y = 3; y < 15; y += 1) {
+      nextGlyph.push([x, y])
+    }
+  }
+  const data = raidNickname(18, nextGlyph)
+
+  removeDetachedRaidNicknamePixels(data, RAID_NICKNAME_WIDTH, 18)
+
+  expect(darkColumns(data, 18)).toEqual([...textColumns, 45, 47, 49, 51, 53])
 })
 
 it('글자 획만큼 큰 덩어리도 본문과 떨어져 있으면 지운다', () => {
