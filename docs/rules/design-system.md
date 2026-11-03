@@ -60,7 +60,7 @@ last-reviewed: 2026-11-04
 | `IconButton` | 아이콘만 있는 버튼. 접근 가능한 이름 필수 |
 | `TextField`, `TextFieldLabel`, `TextFieldInput`, `TextFieldDescription`, `TextFieldError` | Base UI `Field`, `Input` 기반 입력과 라벨, 설명, 오류 |
 | `Select`, `Menu`, `Switch`, `Checkbox`, `Chip`(`Toggle`), `Tabs`, `Tooltip` | 같은 이름의 Base UI 부품 기반 |
-| `StatusChip` | tone `neutral`, `success`, `danger`, `warning`, `signal`. 글자색 사각 점과 옅은 면, 진행 중이면 `busy`로 점 세 개 |
+| `StatusChip` | tone `neutral`, `success`, `danger`, `warning`, `signal`. pill 모양, 글자색 둥근 점과 옅은 면, 진행 중이면 `busy`로 점 세 개 |
 | `StepDots` | 진행 중임을 보이는 사각 점 세 개 |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG |
 | `Kbd`, `CornerBrackets` | 단축키 표시, 네 모서리 꺾쇠 |
@@ -80,11 +80,11 @@ last-reviewed: 2026-11-04
 앱 화면은 아래 규칙으로 그린다. 상세 값과 예시는 dfragon-design 문서를 따른다.
 
 - 색: 무채색 바탕 위에 신호색 하나를 쓴다. 신호색 `signal`(`#FF7A33`, hover `signalHover` `#FF9357`)은 선택, 주 버튼, 포커스와 진행 중인 캡처 회차에 쓴다. 희귀도 색은 유지하고, 로고 빨강 `brandLogo`(`#E83830`)와 크림 `brandCream`(`#F8E8C8`)은 로고 자산에만 쓴다.
-- 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 사각 점, 옅은 면 `bgWarningWeak`으로 표현한다.
+- 주의 상태: 확인 필요, 창 미감지처럼 사용자가 살펴야 하는 상태는 주의 색 `fgWarning`(`#FFB400`) 글자와 둥근 점, 옅은 면 `bgWarningWeak`으로 표현한다.
 - 글자: 라벨은 12px로 작게, 값은 `tabular-nums`로 크게 쓴다. 본문, 로고 글자, 숫자 모두 Pretendard를 쓴다.
 - 길드 이름은 `fgGuild`, 모험단 이름은 `fgAdventure`로 쓴다. 아이템 등급 색(`rarity*`)은 길드 이름에 쓰지 않는다.
-- 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 버튼, 입력, 칩, 배지는 반지름 2px이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
-- 배치: 상단 바는 위 전역 바(48px)에 등급 퍼센트, 제품 이름, 게임 연결 칩을, 아래 게임 바(40px)에 검색 메뉴와 화면 헤더를 둔다. 웹 앱 상자의 폭은 1080px이다.
+- 형태: 패널과 카드는 반지름 0이며 테두리 없이 면으로 구분한다. 버튼, 입력, 배지는 반지름 2px이고 상태 칩(`StatusChip`)은 pill이다. 모서리를 자르지 않으며 포커스 링은 공용 바깥 링으로 그린다.
+- 배치: 상단 바는 위 전역 바(48px)에 아이콘과 제품 이름, "오늘 등급" 퍼센트, 오른쪽 끝 게임 연결 칩을, 아래 게임 바(40px)에 검색 메뉴와 화면 헤더를 둔다. 검색 메뉴는 바 높이를 채우고 신호색 2px 밑줄이 바 아래에 닿는다. 웹 앱 상자의 폭은 1080px이다.
 - 카드 상태: 테두리 전체를 칠하지 않고 네 모서리 꺾쇠로 표시한다. 기본, 선택, 실패(노란 꺾쇠), 대기(dashed)를 구분한다. 스냅샷에 없는 모험단만 카드를 덮는 빨간 빗금(`alertHatch`)을 쓴다.
 - 모션: hover 120ms, 상태 전환 180ms, 숫자 증가 400ms와 감속 곡선 하나만 쓴다. 튕김, 흔들림, 빛 번짐은 쓰지 않으며 `prefers-reduced-motion: reduce`에서 모두 끈다.
 - 아이콘: 선 아이콘은 `stroke-linecap="square"`, `stroke-linejoin="miter"`로 그린다. 스냅샷 고정은 Lucide `pin`이다.
