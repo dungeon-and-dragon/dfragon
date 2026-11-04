@@ -17,6 +17,9 @@ import {
   syncCharacterTimeline
 } from '../src/characters/timeline/sync.js'
 import { createApiHttpApp } from '../src/http.js'
+import { CHARACTER_FETCHED, type CharacterFetched } from '../src/characters/events.js'
+import type { CharacterIdentity } from '../src/characters/identity.js'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 const character = { serverId: 'siroco', characterId: 'timeline-fixture' }
 const MINUTE_MS = 60 * 1000
@@ -260,8 +263,10 @@ const payloads: CharacterPayloads = {
   buff_creature: { ...common, skill: { buff: null } }
 }
 
-test('상세 조회는 캐시 적중에도 동기화를 넣고, 캐릭터를 받지 못하면 넣지 않는다', async (t) => {
-  const requested: TimelineCharacter[] = []
+test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 캐릭터를 받지 못하면 알리지 않는다', async (t) => {
+  const fetched: CharacterIdentity[] = []
+  const events = new EventEmitter2()
+  events.on(CHARACTER_FETCHED, (event: CharacterFetched) => fetched.push({ ...event }))
   let found = true
   const service = createCharacterDetailService({
     catalog: createCatalogService(async () => new Map()),
@@ -273,7 +278,7 @@ test('상세 조회는 캐시 적중에도 동기화를 넣고, 캐릭터를 받
       return payloads
     },
     calculateScore: async () => null,
-    requestTimelineSync: (identity) => requested.push(identity)
+    events
   })
   t.after(() => service.onModuleDestroy())
 
@@ -284,7 +289,7 @@ test('상세 조회는 캐시 적중에도 동기화를 넣고, 캐릭터를 받
   await assert.rejects(service.get(missing, signal, ignoredTimings), CharacterDetailFailure)
 
   assert.equal(cached.reused, true)
-  assert.deepEqual(requested, [character, character])
+  assert.deepEqual(fetched, [character, character])
 })
 
 // 닫기가 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
