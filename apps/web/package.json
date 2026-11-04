@@ -9,6 +9,7 @@
     "lint": "biome lint",
     "preview": "vite preview",
     "test": "vitest run",
+    "upload:ocr": "node scripts/upload-ocr-assets.mjs",
     "typecheck": "tsc -b",
     "prepare:ocr-assets": "node ../../packages/client-core/scripts/prepare-ocr-assets.mjs public/ocr",
     "lint:fix": "biome lint --write",
@@ -27,6 +28,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
     "@dfragon/licenses": "workspace:*",
     "@stylexjs/unplugin": "catalog:",
     "@types/node": "catalog:",
@@ -36,6 +38,7 @@
     "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
   }
 }
