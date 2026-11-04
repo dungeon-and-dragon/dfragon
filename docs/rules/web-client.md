@@ -19,7 +19,7 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 - 웹 앱은 dfragon.com 메인 첫 화면에 둔다. 각본으로 움직이는 목업 창은 두지 않는다. 첫 화면의 바탕은 어두운 canvas 토큰 하나이고(밝은 바탕은 쓰지 않는다), 웹 앱 상자 하나만 페이지 가운데에 두며, 사이트 상단 바, 푸터, 배경 그림, 소개와 안내 문구는 두지 않는다. Neople 오픈 API BI 가이드에 따라 페이지 아래 가운데에 어두운 바탕용 회색 Neople 로고(86×24)만 `https://developers.neople.co.kr` 링크로 둔다(2026-11-03 저장소 소유자 결정, 2026-11-04 시안). 앱 화면 문구는 합니다체다.
 - 상단 바와 파티, 공대 화면을 폭 1080px 상자 안에 합성한 컴포넌트를 `@dfragon/client/web`으로 내보낸다. 상자 높이는 화면 내용에 맞추고 고정하지 않으며, 상자는 페이지 세로 가운데에 둔다. 앱 화면의 문서 전체 드래그 차단, `user-select: none`, `100dvh`는 이 상자 밖의 사이트에 적용하지 않는다.
 - 파티와 공대 화면은 카드 격자 대신 표 하나다. 배치와 행 상태는 아래 [화면 구성](#화면-구성)을 따른다.
-- main merge는 검색 엔진의 크롤링을 막은 `dev.dfragon.com`에만 자동으로 배포한다. `dfragon.com`은 저장소 소유자가 운영 배포를 수동 실행할 때만 바뀌고, 그 시점은 소유자가 정한다(2026-11-01 저장소 소유자 결정). 두 사이트는 같은 빌드 단계를 쓰며, 저장소와 절차는 [Web 배포](../../apps/web/README.md#배포)에 있다.
+- main merge는 검색 엔진의 크롤링을 막은 `dev.dfragon.com`에만 자동으로 배포한다. `dfragon.com`은 저장소 소유자가 운영 배포를 수동 실행할 때만 바뀌고, 그 시점은 소유자가 정한다(2026-11-01 저장소 소유자 결정). `dev.dfragon.com`은 Cloudflare Worker가, `dfragon.com`은 GitHub Pages가 맡으며, 절차는 [Web 배포](../../apps/web/README.md#배포)에 있다.
 
 ## 화면 구성
 
@@ -100,8 +100,8 @@ dfragon.com 첫 화면에서 설치 없이 쓰는 웹 클라이언트의 계약�
 | 붙여 넣거나 공유한 화면 이미지와 그 crop | 브라우저 밖으로 보내지 않는다 |
 | 공대 행에서 읽은 직업명, 수치와 초상화 비교 거리 | 브라우저 밖으로 보내지 않는다. 인식한 닉네임과 비교로 고른 캐릭터만 위 검색, 상세 요청에 쓴다 |
 
-- OCR은 `onnxruntime-web` worker로 브라우저에서 한다. 모델은 첫 붙여넣기나 첫 화면 공유 때 사이트에서 받으므로 닉네임 검색만 하는 사용자는 받지 않는다. 받는 동안 회차의 상태 문구는 모델을 받고 있다고 알린다. 사이트 hosting이 COOP, COEP 헤더를 붙일 수 없어 WASM은 단일 스레드로 돌고, WebGPU가 있으면 쓴다.
-- API는 운영 사이트 `https://dfragon.com`과 dev 사이트 `https://dev.dfragon.com`의 `GET`, preflight에만 CORS를 허용한다. dev 사이트도 운영 API를 부른다. 로컬 웹 개발 origin은 [API 안내](../../apps/api/README.md#준비할-입력)의 `WEB_DEV_ORIGINS`로만 더한다.
+- OCR은 `onnxruntime-web` worker로 브라우저에서 한다. 모델은 첫 붙여넣기나 첫 화면 공유 때 사이트에서 받으므로 닉네임 검색만 하는 사용자는 받지 않는다. 받는 동안 회차의 상태 문구는 모델을 받고 있다고 알린다. `dev.dfragon.com`(Cloudflare Worker)은 COOP, COEP 헤더로 cross-origin 격리되어 WASM이 최대 8 thread로 돈다. `dfragon.com`(GitHub Pages)은 이 헤더를 붙일 수 없어 WASM이 단일 스레드로 돈다. 두 사이트 모두 WebGPU가 있으면 쓴다.
+- API는 운영 사이트 `https://dfragon.com`과 dev 사이트 `https://dev.dfragon.com`의 `GET`, preflight에만 CORS를 허용한다. dev 사이트도 운영 API를 부르며, workers.dev 주소에서도 열리도록 같은 origin의 `/characters*`, `/items*`를 Worker가 운영 API로 넘긴다. 로컬 웹 개발 origin은 [API 안내](../../apps/api/README.md#준비할-입력)의 `WEB_DEV_ORIGINS`로만 더한다.
 - 장비 점수와 버프 점수는 API가 상세 응답에 넣은 값만 보인다. 브라우저는 점수 엔진을 받거나 로드하지 않는다([점수 엔진 경계](../architecture/overview.md#점수-엔진-경계)). 점수가 없으면 `-`로 둔다.
 
 ## 초상화 전달
