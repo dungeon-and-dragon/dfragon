@@ -6,7 +6,10 @@ const invalidConfiguration = 'Invalid character collector configuration'
 const DEFAULT_REQUESTS_PER_SECOND = 5
 
 const collectorEnvironmentSchema = z.object({
-  CHARACTER_IMPORT_FILE: z.string().refine(isAbsolute),
+  CHARACTER_IMPORT_FILES: z
+    .string()
+    .transform((value) => value.split(','))
+    .pipe(z.array(z.string().refine(isAbsolute)).min(1)),
   CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: z.coerce
     .number()
     .positive()
@@ -17,7 +20,7 @@ const collectorEnvironmentSchema = z.object({
 export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
   try {
     const {
-      CHARACTER_IMPORT_FILE: importFile,
+      CHARACTER_IMPORT_FILES: importFiles,
       CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: requestsPerSecond
     } = collectorEnvironmentSchema.parse(environment)
     const apiKey = readSecretInput(environment.NEOPLE_API_KEY, environment.NEOPLE_API_KEY_FILE)
@@ -26,7 +29,7 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
       throw new Error(invalidConfiguration)
     }
 
-    return { apiKey, database, importFile, requestsPerSecond }
+    return { apiKey, database, importFiles, requestsPerSecond }
   } catch {
     // secret 파일 읽기 오류와 zod issue는 경로나 입력값을 담을 수 있다.
     throw new Error(invalidConfiguration)
