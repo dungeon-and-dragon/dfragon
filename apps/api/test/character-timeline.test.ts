@@ -56,7 +56,8 @@ test('next를 따라 모든 페이지를 모으고 다음 페이지 요청에는
     events.map(({ code, occurredAt, raidName }) => ({ code, occurredAt, raidName })),
     [
       { code: 201, occurredAt: new Date('2025-01-09T12:15:00Z'), raidName: '테스트 레이드' },
-      { code: 104, occurredAt: new Date('2025-01-08T21:00:00Z'), raidName: null }
+      { code: 104, occurredAt: new Date('2025-01-08T21:00:00Z'), raidName: null },
+      { code: 301, occurredAt: new Date('2025-01-08T21:00:00Z'), raidName: null }
     ]
   )
   assert.deepEqual(events[1]!.data, { level: 115 })
@@ -110,8 +111,11 @@ test('공급자 오류와 잘못된 응답은 기존 Neople 분류로 바꾸고 
     [200, {}, 'api'],
     [200, { timeline: { rows: [validRow], next: 1 } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, date: '20250109T0600' }], next: null } }, 'api'],
+    [200, { timeline: { rows: [{ ...validRow, date: '2025-02-30 06:00' }], next: null } }, 'api'],
+    [200, { timeline: { rows: [{ ...validRow, date: '2025-01-09 25:00' }], next: null } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, data: null }], next: null } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, code: 99 }], next: null } }, 'api'],
+    [200, { timeline: { rows: [{ ...validRow, code: 408 }], next: null } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, code: 701 }], next: null } }, 'api']
   ] as const) {
     let calls = 0
