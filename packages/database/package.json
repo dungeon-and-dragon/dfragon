@@ -1,0 +1,37 @@
+{
+  "name": "@dfragon/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "prisma",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "pnpm --filter @dfragon/lib build && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.json",
+    "test": "pnpm build && node --test test/*.test.mjs",
+    "lint": "biome lint",
+    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check",
+    "db:migrate:dev": "pnpm run build && dotenv --no-expand -e ../../apps/api/.env -- prisma migrate dev --config dist/prisma.config.js",
+    "db:migrate:deploy": "pnpm run build && dotenv --no-expand -e ../../apps/api/.env -- prisma migrate deploy --config dist/prisma.config.js",
+    "db:migrate:status": "pnpm run build && dotenv --no-expand -e ../../apps/api/.env -- prisma migrate status --config dist/prisma.config.js",
+    "db:migrate:reset": "pnpm run build && dotenv --no-expand -e ../../apps/api/.env -- prisma migrate reset --config dist/prisma.config.js"
+  },
+  "dependencies": {
+    "@dfragon/lib": "workspace:*",
+    "prisma": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "dotenv-cli": "catalog:",
+    "typescript": "catalog:"
+  }
+}

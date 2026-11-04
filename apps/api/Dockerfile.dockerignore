@@ -6,6 +6,13 @@
 !scripts/
 !scripts/server-build-info.mjs
 !packages/
+!packages/database/
+!packages/database/package.json
+!packages/database/tsconfig.json
+!packages/database/src/
+!packages/database/src/**
+!packages/database/prisma/
+!packages/database/prisma/**
 !packages/lib/
 !packages/lib/package.json
 !packages/lib/tsconfig.json

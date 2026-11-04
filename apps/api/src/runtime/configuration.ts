@@ -1,9 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { isAbsolute } from 'node:path'
 import { createSecureContext } from 'node:tls'
-import { readDatabaseConfiguration } from '../database/configuration.js'
-import { parsePort } from '../port.js'
-import { readSecretInput } from '../secret-input.js'
+import { readDatabaseConfiguration, readSecretInput } from '@dfragon/database'
+import { parsePort } from '@dfragon/lib/port'
 
 const invalidConfiguration = 'Invalid API runtime configuration'
 const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
