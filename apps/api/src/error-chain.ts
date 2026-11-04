@@ -12,6 +12,15 @@ const NON_ERROR = '<non-error>'
 
 export type FailureOptions = { cause?: unknown }
 
+/** 감싼 오류 대신 그 원인을 넘겨, 다른 오류로 바꿔도 오류 chain에 중간 단계가 끼지 않게 한다. */
+export function forwardCause(error: Error): FailureOptions {
+  if (Object.hasOwn(error, 'cause')) {
+    return { cause: error.cause }
+  }
+
+  return {}
+}
+
 /**
  * `{ cause }`는 표준 ErrorOptions처럼 받지만 원래 오류 object와 message는 보관하지 않고,
  * 그 자리에서 정제한 chain만 `sanitizedCause`에 둔다.
