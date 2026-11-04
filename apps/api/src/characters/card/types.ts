@@ -1,6 +1,7 @@
 import type { ScoreCalculator } from '../../score/input.js'
+import type { CharacterRole } from '../job/character-job.js'
 
-export type CharacterRole = 'dealer' | 'buffer'
+export type { CharacterRole }
 
 export interface CharacterCardScore {
   calculator: ScoreCalculator
