@@ -31,10 +31,11 @@ pnpm --filter @dfragon/web preview
 main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 올라갑니다. 운영 `https://dfragon.com`은 저장소 소유자가 수동 실행할 때만 바뀌며, 배포 시점은 소유자가 정합니다.
 
 - dev: main push마다 [`web-workers.yml`](../../.github/workflows/web-workers.yml)이 그 커밋을 빌드해 Cloudflare Worker `dfragon-web-dev`에 올립니다. 이 Worker가 `https://dev.dfragon.com`과 workers.dev 주소 `https://dfragon-web-dev.dfragon.workers.dev`를 함께 맡습니다. 배포는 한 번에 하나씩 돌고 대기 중인 실행은 새 실행으로 바뀌므로, 연속으로 merge해도 마지막 실행이 최신 main을 올립니다. 저장소 소유자는 Actions에서 target `dev`로 수동 실행해 다른 ref를 올릴 수도 있습니다.
+- PR 미리보기: 이 저장소 브랜치의 PR이 `apps/web`, `packages/client`, `packages/client-core`, `packages/ui`, `packages/lib`, `packages/licenses`, `packages/models`(OCR 모델 submodule 포함), root `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`이나 이 workflow를 바꾸면, 같은 workflow가 PR 브랜치를 빌드해 `wrangler versions upload --preview-alias pr-<번호>`로 dev Worker의 새 버전만 올립니다. 배포 중인 dev Worker 버전은 바뀌지 않고 `https://pr-<번호>-dfragon-web-dev.dfragon.workers.dev`가 생기며, 이 주소를 PR 댓글 하나로 남기고 다시 올리면 같은 댓글을 고칩니다. 같은 PR에 커밋을 더하면 돌던 미리보기는 취소됩니다. fork와 Dependabot의 PR은 Cloudflare Secret을 받지 않으므로 돌지 않습니다.
 - 운영 Worker: 저장소 소유자가 Actions에서 main으로 target `production`을 골라 수동 실행할 때만 Cloudflare Worker `dfragon-web`에 올리며, 다른 ref에서는 job이 돌지 않습니다. 이 Worker가 `https://dfragon.com`을 맡고 workers.dev 주소는 두지 않습니다. 운영 빌드는 같은 origin 프록시 대신 `https://api.dfragon.com`을 직접 부릅니다. 아래 [운영 Worker 전환](#운영-worker-전환)을 마치기 전에는 `dfragon.com` DNS가 GitHub Pages를 가리켜 이 배포가 custom domain 연결에서 실패합니다.
 - 운영 Pages: [`web-pages.yml`](../../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 이 저장소의 GitHub Pages에 올립니다. 빌드는 [`web-site-build`](../../.github/actions/web-site-build/action.yml) action이 합니다. 운영 Worker 전환을 마치면 지웁니다.
 
-모든 배포는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. Worker 빌드는 `CNAME`을 빼고 빌드한 커밋 SHA를 `version.txt`에 두며, dev는 `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막습니다. 배포된 dev 커밋은 `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
+모든 배포는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. Worker 빌드는 `CNAME`을 빼고 빌드한 커밋 SHA를 `version.txt`에 두며, dev와 PR 미리보기는 `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막습니다. 배포된 dev 커밋은 `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
 
 ### Cloudflare Workers 이전
 
