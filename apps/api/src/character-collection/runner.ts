@@ -7,8 +7,8 @@ import { type EnqueueCharacters, importCollectedCharacters } from './import.js'
 const COLLECTION_BATCH_SIZE = 100
 
 export interface CollectionPassDependencies {
-  importFile: string
-  importedAt: number | undefined
+  importFiles: readonly string[]
+  importedAt: ReadonlyMap<string, number>
   enqueue: EnqueueCharacters
   fetchBasic: FetchCharacterBasic
   store: CollectionStore
@@ -17,13 +17,13 @@ export interface CollectionPassDependencies {
 }
 
 export interface CollectionPassResult {
-  importedAt: number | undefined
+  importedAt: ReadonlyMap<string, number>
   outcome: 'drained' | 'unavailable'
 }
 
 type ImportDependencies = Pick<
   CollectionPassDependencies,
-  'importFile' | 'importedAt' | 'enqueue' | 'report'
+  'importFiles' | 'importedAt' | 'enqueue' | 'report'
 >
 
 type BatchCollectionDependencies = Pick<
@@ -40,20 +40,24 @@ async function modifiedTime(path: string): Promise<number | undefined> {
   }
 }
 
-async function importIfChanged({
-  importFile,
+async function importChangedFiles({
+  importFiles,
   importedAt,
   enqueue,
   report
-}: ImportDependencies): Promise<number | undefined> {
-  const listedAt = await modifiedTime(importFile)
-  if (listedAt === undefined || listedAt === importedAt) {
-    return importedAt
+}: ImportDependencies): Promise<ReadonlyMap<string, number>> {
+  const imported = new Map(importedAt)
+  for (const importFile of importFiles) {
+    const listedAt = await modifiedTime(importFile)
+    if (listedAt === undefined || listedAt === importedAt.get(importFile)) {
+      continue
+    }
+    const count = await importCollectedCharacters(importFile, enqueue)
+    report('CHARACTER_IMPORT_DONE', { count })
+    imported.set(importFile, listedAt)
   }
-  const count = await importCollectedCharacters(importFile, enqueue)
-  report('CHARACTER_IMPORT_DONE', { count })
 
-  return listedAt
+  return imported
 }
 
 async function collectBatch(
@@ -91,7 +95,7 @@ async function drainQueue(
 export async function runCollectionPass(
   dependencies: CollectionPassDependencies
 ): Promise<CollectionPassResult> {
-  const importedAt = await importIfChanged(dependencies)
+  const importedAt = await importChangedFiles(dependencies)
   const outcome = await drainQueue(dependencies)
 
   return { importedAt, outcome }
