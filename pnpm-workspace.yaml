@@ -7,6 +7,7 @@ catalogMode: strict
 catalog:
   '@base-ui/react': 1.9.0
   '@biomejs/biome': 2.6.3
+  '@cloudflare/workers-types': 5.20261024.1
   '@nestjs/common': 12.2.0
   '@nestjs/core': 12.2.0
   '@nestjs/platform-express': 12.2.0
@@ -41,6 +42,7 @@ catalog:
   'typescript-compiler-api': 'npm:typescript@6.0.2'
   vite: 8.3.5
   vitest: 5.0.5
+  wrangler: 4.155.0
   xstate: 5.33.3
   zod: 4.6.7
   zustand: 5.0.16
@@ -54,6 +56,7 @@ allowBuilds:
   esbuild: true
   koffi: true
   protobufjs: false
+  workerd: true
 
 disallowWorkspaceCycles: true
 

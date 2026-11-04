@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dfragon-web",
+  "main": "worker/index.ts",
+  // wrangler가 고정한 workerd가 지원하는 가장 늦은 날짜다.
+  "compatibility_date": "2026-10-23",
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/ocr/*", "/characters*", "/items*"]
+  },
+  "env": {
+    "dev": {
+      "name": "dfragon-web-dev",
+      "r2_buckets": [{ "binding": "OCR_ASSETS", "bucket_name": "dfragon-web-ocr" }]
+    }
+  }
+}

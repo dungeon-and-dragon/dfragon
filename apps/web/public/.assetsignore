@@ -1,0 +1,2 @@
+# OCR assets are served from R2 by the Worker because the ONNX Runtime WASM exceeds the 25 MiB asset limit.
+ocr

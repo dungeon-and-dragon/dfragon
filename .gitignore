@@ -2,6 +2,7 @@ node_modules
 /packages/lib/LICENSES/
 .codex/
 apps/web/public/ocr
+apps/web/.wrangler
 /.artifacts/workflow.png
 /.artifacts/ocr/
 .dnf-image
