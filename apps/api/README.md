@@ -53,7 +53,7 @@ Migration은 `public` schema 안에서만 합니다. 운영 계정은 extension,
 ### 타임라인 동기화
 
 DB 설정이 있으면 API를 만들 때 Prisma client 하나와 메모리 queue를 만들고, 종료 때 client를 닫습니다.
-상세 GET과 강제 갱신은 캐릭터 11개 섹션을 받았거나 캐릭터 캐시가 맞으면 그 캐릭터를 queue에 넣고, 동기화를 기다리지 않고 응답합니다.
+상세 GET과 강제 갱신은 캐릭터 11개 섹션을 받았거나 캐릭터 캐시가 맞으면 `character.fetched` 이벤트를 내고, 동기화를 기다리지 않고 응답합니다. 타임라인 구독자가 이 이벤트를 받아 queue에 넣습니다.
 Queue는 같은 캐릭터를 합치고 2명씩 처리하며, 마지막 성공이 1시간 이내가 아닌 캐릭터만 `synced_until`부터 90일 구간씩 Neople에서 받아 `timeline_events`, `timeline_items`, `timeline_sync_state`에 저장합니다.
 실패는 `timeline_sync_state.last_failure`에 남고 재시도하지 않습니다. 종료 때 대기열은 버리고 진행 중인 동기화는 기다리지 않습니다.
 DB 설정이 없으면 queue를 만들지 않습니다. 동작은 [캐릭터 타임라인](../../docs/rules/character-timeline.md)에 있습니다.
