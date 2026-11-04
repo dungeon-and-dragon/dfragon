@@ -21,6 +21,7 @@ import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.
 import { setupSwagger } from './swagger/setup.js'
 import { createTimelineSyncQueue } from './characters/timeline/queue.js'
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
+import { CharacterEvents } from './characters/events.js'
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
@@ -98,7 +99,7 @@ export interface TimelineSyncOptions {
 
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
-  readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'events'>
+  readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
   readonly timeline?: TimelineSyncOptions
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
@@ -156,8 +157,12 @@ export async function createApiHttpApp({
       {
         provide: CHARACTER_DETAIL_SERVICE,
         inject: [SCORE_ENGINE, EventEmitter2],
-        useFactory: (engine: ScoreEngine, events: EventEmitter2) =>
-          createCharacterDetailService({ ...details, calculateScore: engine.calculate, events })
+        useFactory: (engine: ScoreEngine, emitter: EventEmitter2) =>
+          createCharacterDetailService({
+            ...details,
+            calculateScore: engine.calculate,
+            characterEvents: new CharacterEvents(emitter)
+          })
       },
       ...timelineProviders,
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
