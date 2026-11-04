@@ -18,6 +18,9 @@ const postgresImage =
   'docker.io/library/postgres:18.6-trixie@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280'
 const runtimeCheckPath = fileURLToPath(new URL('./container-runtime-check.mjs', import.meta.url))
 const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs', import.meta.url))
+const characterCheckPath = fileURLToPath(
+  new URL('./container-character-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -236,6 +239,8 @@ try {
         `type=bind,source=${runtimeCheckPath},target=/app/container-runtime-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${timelineCheckPath},target=/app/container-timeline-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
         imageId
       ])
     )
@@ -347,6 +352,25 @@ try {
     't'
   )
 
+  stage = 'character and adventure'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-character-check.mjs'
+  ])
+  // 서버가 달라도 한 모험단이고, 모험단 이름이 바뀌어도 모험단 id는 그대로다.
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(c.server_id || ':' || c.character_name || ':' || a.name, ',' ORDER BY c.server_id), count(DISTINCT a.id), (SELECT count(*) FROM adventures) FROM characters c JOIN adventures a ON a.id = c.adventure_id"
+      )
+    ).stdout.trim(),
+    'cain:합성A2:새모험단,siroco:합성B:새모험단|1|1'
+  )
+
   stage = 'graceful stop'
   for (const name of apiNames) {
     await docker(['stop', '--time', '15', name])
@@ -440,6 +464,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, character records, HTTP and database input rejection\n'
   )
 }
