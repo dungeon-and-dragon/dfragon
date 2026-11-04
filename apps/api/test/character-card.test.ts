@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { projectCharacterCard } from '../src/characters/card/project.js'
+import { cardScoreCalculator } from '../src/characters/card/score.js'
 import type { CharacterCard } from '../src/characters/card/types.js'
 import { projectCharacterDetails } from '../src/characters/details/project.js'
 import type { CharacterDetailSection } from '../src/characters/details/sections.js'
@@ -76,5 +77,16 @@ test('남성 크루세이더는 용기의 은총을 습득하면 딜러, 아니�
       const card = projectCharacterCard({ character: { jobName, jobGrowName }, skillStyle })
       assert.deepEqual(card, { role, ...retiredFields }, `${jobName} ${jobGrowName} ${role}`)
     }
+  }
+})
+
+test('버퍼만 버프 점수로, 딜러, 시너지, 역할을 모르는 카드는 장비 점수로 계산한다', () => {
+  for (const [role, calculator] of [
+    ['buffer', 'buff'],
+    ['dealer', 'equipment'],
+    ['synergy', 'equipment'],
+    [null, 'equipment']
+  ] as const) {
+    assert.equal(cardScoreCalculator(role), calculator, String(role))
   }
 })
