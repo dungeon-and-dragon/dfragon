@@ -4,6 +4,8 @@ import { z } from 'zod'
 
 const invalidConfiguration = 'Invalid character collector configuration'
 const DEFAULT_REQUESTS_PER_SECOND = 5
+const DEFAULT_CONCURRENCY = 1
+const MAX_CONCURRENCY = 32
 
 const collectorEnvironmentSchema = z.object({
   CHARACTER_IMPORT_FILES: z
@@ -14,14 +16,21 @@ const collectorEnvironmentSchema = z.object({
     .number()
     .positive()
     .finite()
-    .default(DEFAULT_REQUESTS_PER_SECOND)
+    .default(DEFAULT_REQUESTS_PER_SECOND),
+  CHARACTER_COLLECTOR_CONCURRENCY: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_CONCURRENCY)
+    .default(DEFAULT_CONCURRENCY)
 })
 
 export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
   try {
     const {
       CHARACTER_IMPORT_FILES: importFiles,
-      CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: requestsPerSecond
+      CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: requestsPerSecond,
+      CHARACTER_COLLECTOR_CONCURRENCY: concurrency
     } = collectorEnvironmentSchema.parse(environment)
     const apiKey = readSecretInput(environment.NEOPLE_API_KEY, environment.NEOPLE_API_KEY_FILE)
     const database = readDatabaseConfiguration(environment)
@@ -29,7 +38,7 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
       throw new Error(invalidConfiguration)
     }
 
-    return { apiKey, database, importFiles, requestsPerSecond }
+    return { apiKey, database, importFiles, requestsPerSecond, concurrency }
   } catch {
     // secret 파일 읽기 오류와 zod issue는 경로나 입력값을 담을 수 있다.
     throw new Error(invalidConfiguration)
