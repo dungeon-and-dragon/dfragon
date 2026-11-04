@@ -30,7 +30,15 @@ const environment = {
   NEOPLE_API_KEY: 'synthetic'
 }
 
-test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 입력을 무시한다', async () => {
+const databaseEnvironment = {
+  DB_HOST: 'postgres',
+  DB_PORT: '5432',
+  DB_NAME: 'dfragon',
+  DB_USERNAME: 'dfragon_api',
+  DB_PASSWORD: 'synthetic-db-password'
+}
+
+test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 인증 입력을 무시한다', async () => {
   const baseline = await readRuntimeConfiguration(environment)
   assert.deepEqual(baseline, {
     port: 3000,
@@ -38,15 +46,11 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 입력
     trustedProxyHops: undefined,
     localHttps: undefined,
     webDevOrigins: [],
+    database: undefined,
     scoreLibraryPath: null
   })
   assert.deepEqual(
-    await readRuntimeConfiguration({
-      ...environment,
-      AUTH_CONFIG_FILE: '/missing/auth.json',
-      DB_HOST: 'localhost',
-      DB_PORT: '5.432'
-    }),
+    await readRuntimeConfiguration({ ...environment, AUTH_CONFIG_FILE: '/missing/auth.json' }),
     baseline
   )
   assert.equal(Object.hasOwn(baseline, 'issueAccessJwt'), false)
@@ -54,6 +58,82 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 입력
     readRuntimeConfiguration({ ...environment, NEOPLE_API_KEY: '' }),
     /Invalid API runtime configuration/
   )
+})
+
+test('DB 설정은 다섯 입력이 모두 있을 때 읽고 비밀번호 파일은 끝 줄바꿈과 공백을 뺀다', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'api-db-password-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const file = join(directory, 'db_password')
+  await writeFile(file, 'synthetic-file-password \r\n')
+
+  const direct = await readRuntimeConfiguration({ ...environment, ...databaseEnvironment })
+  const fromFile = await readRuntimeConfiguration({
+    ...environment,
+    ...databaseEnvironment,
+    DB_PASSWORD: undefined,
+    DB_PASSWORD_FILE: file
+  })
+
+  assert.deepEqual(direct.database, {
+    host: 'postgres',
+    port: 5432,
+    database: 'dfragon',
+    username: 'dfragon_api',
+    password: 'synthetic-db-password'
+  })
+  assert.equal(fromFile.database?.password, 'synthetic-file-password')
+})
+
+test('DB 설정이 일부만 있거나 잘못되면 값 없이 시작 설정을 거절한다', async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), 'api-db-password-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const passwordFile = join(directory, 'db_password')
+  await writeFile(passwordFile, 'synthetic-file-password')
+  const cases = [
+    { name: 'host 누락', change: { DB_HOST: undefined } },
+    { name: 'host 빈 값', change: { DB_HOST: '' } },
+    { name: 'host 공백', change: { DB_HOST: ' ' } },
+    { name: 'username 공백', change: { DB_USERNAME: ' ' } },
+    { name: 'port 누락', change: { DB_PORT: undefined } },
+    { name: 'port 소수', change: { DB_PORT: '5.432' } },
+    { name: 'port 범위 초과', change: { DB_PORT: '65536' } },
+    { name: 'database 누락', change: { DB_NAME: undefined } },
+    { name: 'username 누락', change: { DB_USERNAME: undefined } },
+    { name: '비밀번호 누락', change: { DB_PASSWORD: undefined } },
+    { name: '비밀번호 공백', change: { DB_PASSWORD: ' ' } },
+    { name: '비밀번호 두 입력', change: { DB_PASSWORD_FILE: passwordFile } },
+    {
+      name: '비밀번호 파일만',
+      change: {
+        DB_HOST: undefined,
+        DB_PORT: undefined,
+        DB_NAME: undefined,
+        DB_USERNAME: undefined,
+        DB_PASSWORD: undefined,
+        DB_PASSWORD_FILE: '/run/secrets/db_password'
+      }
+    }
+  ]
+  for (const { name, change } of cases) {
+    await t.test(name, async () => {
+      await assert.rejects(
+        readRuntimeConfiguration({
+          ...environment,
+          ...databaseEnvironment,
+          DB_PASSWORD: 'db-private-marker',
+          ...change
+        }),
+        (error: unknown) => {
+          assert(error instanceof Error)
+          assert.equal(error.message, 'Invalid API runtime configuration')
+          assert.equal(error.cause, undefined)
+          assert.doesNotMatch(error.stack ?? '', /private-marker/)
+
+          return true
+        }
+      )
+    })
+  }
 })
 
 test('로컬 웹 개발 origin은 loopback http(s) origin 목록만 받는다', async () => {

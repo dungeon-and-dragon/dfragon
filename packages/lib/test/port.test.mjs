@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { parsePort } from '../src/port.js'
+import { parsePort } from '@dfragon/lib/port'
 
 test('PORT는 허용 범위의 ASCII 십진 정수와 선행 0을 받는다', () => {
   assert.equal(parsePort('1'), 1)

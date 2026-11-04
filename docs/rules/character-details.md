@@ -8,7 +8,7 @@ evidence: "2026-10-26 #796 DB 제거; 2026-10-29 #992 공용 아이템 24시간,
 
 # 캐릭터 상세 정보
 
-사용자가 검색 결과에서 선택한 캐릭터를 Neople에서 조회해 JSON으로 정제해 제공한다. API는 DB를 쓰지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). [캐릭터 조회](#캐릭터-캐시와-강제-갱신)는 API 메모리에 1시간, [공용 아이템 상세](#공용-아이템-상세)는 24시간 캐시한다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). API가 서버 한 대, 인스턴스 하나라 캐시를 Redis 대신 프로세스 메모리에 두며, 노드가 늘면 여러 노드가 공유하는 Redis로 옮긴다.
+사용자가 검색 결과에서 선택한 캐릭터를 Neople에서 조회해 JSON으로 정제해 제공한다. 캐릭터 상세는 DB에 저장하지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). [캐릭터 조회](#캐릭터-캐시와-강제-갱신)는 API 메모리에 1시간, [공용 아이템 상세](#공용-아이템-상세)는 24시간 캐시한다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). API가 서버 한 대, 인스턴스 하나라 캐시를 Redis 대신 프로세스 메모리에 두며, 노드가 늘면 여러 노드가 공유하는 Redis로 옮긴다.
 
 ## 조회와 응답
 

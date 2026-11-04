@@ -24,6 +24,7 @@ test('API 경로는 API 이미지를 선택한다', () => {
 
 test('공용 빌드 입력은 모든 서비스를 선택한다', () => {
   for (const path of [
+    'packages/database/src/migrate.ts',
     'packages/lib/src/index.ts',
     'packages/licenses/notices/unknown.txt',
     'packages/models/score-engine',

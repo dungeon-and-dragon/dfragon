@@ -4,7 +4,7 @@ import { setTimeout } from 'node:timers/promises'
 assert.equal(process.getuid(), 1000)
 assert.equal(process.getgid(), 1000)
 assert.throws(() => writeFileSync('/app/write-probe', ''), { code: 'EROFS' })
-for (const path of ['/app/src', '/app/test-support', '/run/secrets/db_password']) {
+for (const path of ['/app/src', '/app/test-support']) {
   assert.equal(existsSync(path), false)
 }
 let response
