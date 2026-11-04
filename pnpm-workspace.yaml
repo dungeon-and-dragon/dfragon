@@ -31,6 +31,7 @@ catalog:
   ky: 2.2.0
   lru-cache: 11.5.3
   onnxruntime-web: 1.31.1
+  pg: 8.23.1
   pngjs: 7.0.0
   react: 19.3.1
   react-dom: 19.3.1
@@ -38,6 +39,7 @@ catalog:
   remeda: 2.54.1
   rxjs: 7.8.2
   tar: 7.5.22
+  typeorm: 1.1.2
   typescript: 7.0.2
   'typescript-compiler-api': 'npm:typescript@6.0.2'
   vite: 8.3.5
