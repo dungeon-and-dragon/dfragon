@@ -10,6 +10,36 @@ CREATE TABLE "seasons" (
 );
 
 -- CreateTable
+CREATE TABLE "adventures" (
+    "id" BIGINT GENERATED ALWAYS AS IDENTITY,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "adventures_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "characters" (
+    "server_id" TEXT NOT NULL,
+    "character_id" TEXT NOT NULL,
+    "character_name" TEXT NOT NULL,
+    "adventure_id" BIGINT NOT NULL,
+
+    CONSTRAINT "characters_pkey" PRIMARY KEY ("server_id","character_id")
+);
+
+-- CreateIndex
+CREATE INDEX "adventures_name_idx" ON "adventures"("name");
+
+-- CreateIndex
+CREATE INDEX "characters_adventure_id_idx" ON "characters"("adventure_id");
+
+-- CreateIndex
+CREATE INDEX "characters_server_id_character_name_idx" ON "characters"("server_id", "character_name");
+
+-- AddForeignKey
+ALTER TABLE "characters" ADD CONSTRAINT "characters_adventure_id_fkey" FOREIGN KEY ("adventure_id") REFERENCES "adventures"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- CreateTable
 CREATE TABLE "timeline_events" (
     "id" BIGINT GENERATED ALWAYS AS IDENTITY,
     "server_id" TEXT NOT NULL,
@@ -58,19 +88,10 @@ CREATE TABLE "timeline_sync_state" (
 );
 
 -- CreateIndex
-CREATE INDEX "timeline_events_server_id_character_id_occurred_at_idx" ON "timeline_events"("server_id", "character_id", "occurred_at");
-
--- CreateIndex
 CREATE INDEX "timeline_events_server_id_character_id_code_occurred_at_idx" ON "timeline_events"("server_id", "character_id", "code", "occurred_at");
 
 -- CreateIndex
-CREATE INDEX "timeline_items_server_id_character_id_occurred_at_idx" ON "timeline_items"("server_id", "character_id", "occurred_at");
-
--- CreateIndex
 CREATE INDEX "timeline_items_server_id_character_id_code_occurred_at_idx" ON "timeline_items"("server_id", "character_id", "code", "occurred_at");
-
--- CreateIndex
-CREATE INDEX "timeline_items_code_item_rarity_occurred_at_idx" ON "timeline_items"("code", "item_rarity", "occurred_at");
 
 INSERT INTO "seasons" ("id", "name", "starts_at") VALUES
     (1, '중천', '2025-01-09 06:00:00+09'),

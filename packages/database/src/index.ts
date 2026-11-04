@@ -1,3 +1,5 @@
+export { recordCharacter } from './character.js'
+export type { CharacterInput } from './character.js'
 export { createDatabaseClient } from './client.js'
 export type { DatabaseClient } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'

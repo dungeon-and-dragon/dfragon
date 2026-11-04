@@ -15,6 +15,28 @@ model Season {
   @@map("seasons")
 }
 
+model Adventure {
+  id         BigInt      @id @default(autoincrement())
+  name       String
+  characters Character[]
+
+  @@index([name])
+  @@map("adventures")
+}
+
+model Character {
+  serverId      String    @map("server_id")
+  characterId   String    @map("character_id")
+  characterName String    @map("character_name")
+  adventureId   BigInt    @map("adventure_id")
+  adventure     Adventure @relation(fields: [adventureId], references: [id])
+
+  @@id([serverId, characterId])
+  @@index([adventureId])
+  @@index([serverId, characterName])
+  @@map("characters")
+}
+
 model TimelineEvent {
   id          BigInt   @id @default(autoincrement())
   serverId    String   @map("server_id")
@@ -25,7 +47,6 @@ model TimelineEvent {
   raidName    String?  @map("raid_name")
   data        Json
 
-  @@index([serverId, characterId, occurredAt])
   @@index([serverId, characterId, code, occurredAt])
   @@map("timeline_events")
 }
@@ -43,9 +64,7 @@ model TimelineItem {
   data        Json
 
   @@id([id, occurredAt])
-  @@index([serverId, characterId, occurredAt])
   @@index([serverId, characterId, code, occurredAt])
-  @@index([code, itemRarity, occurredAt])
   @@map("timeline_items")
 }
 
