@@ -96,7 +96,7 @@ const cardScore: SchemaObject = {
     calculator: {
       type: 'string',
       enum: ['equipment', 'buff'],
-      description: 'role이 buffer면 buff(버프 점수), 그 밖은 equipment(장비 점수).'
+      description: 'role이 buffer면 buff(버프 점수), dealer나 synergy면 equipment(장비 점수).'
     },
     value: {
       type: 'integer',
@@ -124,10 +124,10 @@ const cardScore: SchemaObject = {
 const characterCard = object({
   role: {
     type: 'string',
-    enum: ['dealer', 'buffer'],
+    enum: ['dealer', 'buffer', 'synergy'],
     nullable: true,
     description:
-      'jobGrowName이 크루세이더, 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)면 buffer, 그 밖은 dealer, 직업을 모르면 null. 단 jobName이 프리스트(남)인 크루세이더는 용기의 은총을 습득했으면 dealer.'
+      'jobGrowName이 크루세이더, 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)면 buffer, 그 밖은 dealer, 직업을 모르면 null. 단 jobName이 프리스트(남)인 크루세이더는 용기의 은총을 습득했으면 dealer. synergy는 장비 점수를 쓰는 시너지 역할이며 아직 이 값으로 판정하는 직업은 없음.'
   },
   stats: retiredNull('카드 스탯 한 줄의 값이었습니다.'),
   score: cardScore,

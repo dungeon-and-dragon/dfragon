@@ -31,10 +31,22 @@ const scoreNote = (label: ScoreView['label']): string =>
 
 export const formatApproximateScore = (value: number): string => `≈${integer.format(value)}`
 
+function scoreTone(role: CharacterCard['role'] | undefined): ScoreView['tone'] {
+  if (role == null) {
+    return null
+  }
+
+  if (role === 'buffer') {
+    return 'buffer'
+  }
+
+  return 'dealer'
+}
+
 export function toScoreView(card: CharacterCard | null | undefined, pending = false): ScoreView {
   const score = card?.score
   const label = card?.role === 'buffer' ? '버프 점수' : '장비 점수'
-  const labelTone = { label, tone: card?.role ?? null } as const
+  const labelTone = { label, tone: scoreTone(card?.role) } as const
   if (score == null) {
     const description = pending ? '계산 중' : undefined
 

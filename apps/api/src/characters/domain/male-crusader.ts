@@ -1,16 +1,20 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
-import { CharacterJob } from './character-job.js'
+import { Character, type CharacterRole } from './character.js'
 
 const dealerSkill = '용기의 은총'
 
 // 남성 크루세이더는 스킬 구성으로 딜러와 버퍼를 바꾼다.
-export class MaleCrusader extends CharacterJob {
+export class MaleCrusader extends Character {
   constructor(private readonly skillStyle: unknown) {
     super()
   }
 
-  isDealer(): boolean {
-    return this.hasLearned(dealerSkill)
+  role(): CharacterRole {
+    if (this.hasLearned(dealerSkill)) {
+      return 'dealer'
+    }
+
+    return 'buffer'
   }
 
   private hasLearned(skillName: string): boolean {
