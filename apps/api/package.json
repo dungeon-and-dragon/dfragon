@@ -19,6 +19,7 @@
     "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
   },
   "dependencies": {
+    "@date-fns/tz": "catalog:",
     "@dfragon/database": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@nestjs/common": "catalog:",
@@ -26,6 +27,7 @@
     "@nestjs/platform-express": "catalog:",
     "@nestjs/swagger": "catalog:",
     "dataloader": "catalog:",
+    "date-fns": "catalog:",
     "koffi": "catalog:",
     "ky": "catalog:",
     "lru-cache": "catalog:",
