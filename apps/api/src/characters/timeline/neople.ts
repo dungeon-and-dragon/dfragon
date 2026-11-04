@@ -37,7 +37,11 @@ const timelineRowSchema = z
     code: z.int().refine(isTimelineCode),
     name: z.string(),
     date: seoulMinute,
-    data: z.record(z.string(), z.unknown())
+    // 실제 응답의 101(캐릭터 생성) 행은 data가 null이다(#1186).
+    data: z
+      .record(z.string(), z.unknown())
+      .nullable()
+      .transform((data) => data ?? {})
   })
   .transform(({ code, name, date, data }): TimelineRow => ({ code, occurredAt: date, name, data }))
 
