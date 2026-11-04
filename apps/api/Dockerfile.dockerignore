@@ -47,3 +47,4 @@
 **/*.pem
 **/*.key
 **/.env*
+packages/database/src/generated/
