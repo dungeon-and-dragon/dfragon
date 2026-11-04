@@ -76,7 +76,6 @@ jobs:
           VITE_SAME_ORIGIN_API: ${{ env.TARGET != 'production' }}
       # Dev and preview sites must stay out of search results.
       - run: |
-          rm apps/web/dist/CNAME
           if [ "$TARGET" != production ]; then
             printf 'User-agent: *\nDisallow: /\n' > apps/web/dist/robots.txt
           fi
