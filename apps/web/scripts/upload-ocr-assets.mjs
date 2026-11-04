@@ -18,8 +18,9 @@ const CONTENT_TYPES = {
 const { values } = parseArgs({
   options: { env: { type: 'string' }, local: { type: 'boolean', default: false } }
 })
-if (values.env !== 'dev') {
-  throw new Error('Usage: upload-ocr-assets.mjs --env dev [--local]')
+// 빈 --env는 wrangler처럼 wrangler.jsonc 최상위의 운영 Worker 설정을 가리킨다.
+if (values.env !== '' && values.env !== 'dev') {
+  throw new Error('Usage: upload-ocr-assets.mjs --env=<""|dev> [--local]')
 }
 
 const files = (await readdir(OCR_ROOT, { recursive: true, withFileTypes: true }))
@@ -51,8 +52,7 @@ for (const file of files) {
       join(OCR_ROOT, file),
       '--content-type',
       contentType,
-      '--env',
-      values.env,
+      `--env=${values.env}`,
       values.local ? '--local' : '--remote'
     ],
     { stdio: ['ignore', process.stderr, 'inherit'] }
