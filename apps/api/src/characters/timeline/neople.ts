@@ -6,35 +6,35 @@ import {
   neopleStatusFailureKind
 } from '../../errors/neople-search.js'
 import type { FetchTransport } from '../../types/neople-character-search.js'
+import { formatSeoulTime, parseSeoulTime } from '../../utils/seoul-time.js'
 import type { CharacterIdentity } from '../details/sections.js'
 import { TimelineFailure } from './errors.js'
 import type { TimelineRange } from './ranges.js'
-import { TIMELINE_CODES, type TimelineInputs, type TimelineRow, toTimelineInputs } from './rows.js'
+import {
+  TIMELINE_CODES,
+  type TimelineInputs,
+  type TimelineRow,
+  isTimelineCode,
+  toTimelineInputs
+} from './rows.js'
 
 const PAGE_LIMIT = 100
 // 문서에 code를 빼면 모든 코드가 온다는 설명이 없어 저장할 코드를 모두 적는다.
 const TIMELINE_CODE_QUERY = TIMELINE_CODES.join(',')
 
-// Asia/Seoul은 1988년 이후 일광 절약 시간이 없어 수집 범위 전체가 UTC+9다.
-const SEOUL_OFFSET_MS = 9 * 60 * 60_000
-
-function formatSeoulMinute(date: Date): string {
-  const seoul = new Date(date.getTime() + SEOUL_OFFSET_MS).toISOString()
-
-  return `${seoul.slice(0, 4)}${seoul.slice(5, 7)}${seoul.slice(8, 10)}T${seoul.slice(11, 13)}${seoul.slice(14, 16)}`
-}
-
+const REQUEST_DATE_FORMAT = "yyyyMMdd'T'HHmm"
+const ROW_DATE_FORMAT = 'yyyy-MM-dd HH:mm'
 const ROW_DATE_PATTERN = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/
 
 const seoulMinute = z
   .string()
   .regex(ROW_DATE_PATTERN)
-  .transform((date) => new Date(`${date.replace(' ', 'T')}:00+09:00`))
-  .refine((date) => !Number.isNaN(date.getTime()))
+  .transform((date) => parseSeoulTime(date, ROW_DATE_FORMAT))
+  .pipe(z.date())
 
 const timelineRowSchema = z
   .object({
-    code: z.int().min(100).max(699),
+    code: z.int().refine(isTimelineCode),
     name: z.string(),
     date: seoulMinute,
     data: z.record(z.string(), z.unknown())
@@ -95,8 +95,8 @@ function makeAdapter(apiKey: string, deps: TransportDependencies): FetchCharacte
     const firstQuery = {
       limit: PAGE_LIMIT,
       code: TIMELINE_CODE_QUERY,
-      startDate: formatSeoulMinute(range.start),
-      endDate: formatSeoulMinute(range.end)
+      startDate: formatSeoulTime(range.start, REQUEST_DATE_FORMAT),
+      endDate: formatSeoulTime(range.end, REQUEST_DATE_FORMAT)
     }
     const rows: TimelineRow[] = []
     try {
