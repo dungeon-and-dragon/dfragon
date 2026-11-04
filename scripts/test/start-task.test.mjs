@@ -170,7 +170,7 @@ test('CLI는 상대 경로와 공백을 해석하고 생성한 Issue, 브랜치,
       'Branch: api-30-fix-search',
       `Worktree: ${f.destination}`,
       `Base: ${base}`,
-      '제품 계약: docs/README.md | 명령: scripts/README.md',
+      '명령: scripts/README.md',
       ''
     ].join('\n')
   )
