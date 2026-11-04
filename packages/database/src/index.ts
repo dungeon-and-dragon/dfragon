@@ -1,5 +1,12 @@
 export { recordCharacter } from './character.js'
-export type { CharacterInput } from './character.js'
+export type { CharacterBasicInput, CharacterInput } from './character.js'
+export {
+  enqueueCollectedCharacters,
+  recordCharacterBasic,
+  recordCollectionFailure,
+  takeCollectionBatch
+} from './character-collection.js'
+export type { CollectedCharacter } from './character-collection.js'
 export { createDatabaseClient } from './client.js'
 export type { DatabaseClient } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
