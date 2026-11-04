@@ -10,7 +10,8 @@ import { projectCharacterCard } from '../card/project.js'
 import { cardScoreCalculator, withCardScore } from '../card/score.js'
 import type { ScoreEngine } from '../../score/engine.js'
 import { toScoreEngineInput } from '../../score/input.js'
-import type { RequestTimelineSync } from '../timeline/queue.js'
+import type { EventEmitter2 } from '@nestjs/event-emitter'
+import { CHARACTER_FETCHED, CharacterFetched } from '../events.js'
 
 export interface CharacterDetailResponse {
   body: Buffer
@@ -21,7 +22,7 @@ export interface CharacterDetailDependencies {
   fetchDetails: FetchCharacterDetails
   catalog: CatalogService
   calculateScore: ScoreEngine['calculate']
-  requestTimelineSync?: RequestTimelineSync
+  events?: EventEmitter2
 }
 
 export { parseCharacterIdentity } from '../identity.js'
@@ -53,8 +54,11 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
         throw new CharacterDetailFailure('internal')
       }
       const character = await loadCharacter(identity, signal, timings)
-      // 기본정보로 있는 캐릭터임을 확인한 뒤에 넣어, 없는 캐릭터 ID로 동기화 상태 행이 생기지 않게 한다.
-      deps.requestTimelineSync?.(identity)
+      // 받은 뒤에 내서, 존재하지 않는 캐릭터 ID로 구독자가 기록을 만들지 않게 한다.
+      deps.events?.emit(
+        CHARACTER_FETCHED,
+        new CharacterFetched(identity.serverId, identity.characterId)
+      )
       signal.throwIfAborted()
       const reusable = bodies.get(character)
       if (reusable !== undefined) {
