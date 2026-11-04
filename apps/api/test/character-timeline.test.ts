@@ -36,7 +36,7 @@ test('next를 따라 모든 페이지를 모으고 다음 페이지 요청에는
     }
   })
 
-  const { events, items } = await adapter(identity, range, new AbortController().signal)
+  const { events, items } = await adapter(identity, range)
 
   assert.equal(requests.length, 2)
   const [first, second] = requests
@@ -121,18 +121,15 @@ test('공급자 오류와 잘못된 응답은 기존 Neople 분류로 바꾸고 
         return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status })
       }
     })
-    await assert.rejects(
-      adapter(identity, range, new AbortController().signal),
-      (error: unknown) => {
-        assert(error instanceof TimelineFailure)
-        assert.equal(error.kind, kind, `${status} ${JSON.stringify(body)}`)
-        assert.equal(error.message.includes('sensitive'), false)
-        assert.equal(JSON.stringify(error).includes('sensitive'), false)
-        assert.equal(JSON.stringify(error.sanitizedCause ?? []).includes('sensitive'), false)
+    await assert.rejects(adapter(identity, range), (error: unknown) => {
+      assert(error instanceof TimelineFailure)
+      assert.equal(error.kind, kind, `${status} ${JSON.stringify(body)}`)
+      assert.equal(error.message.includes('sensitive'), false)
+      assert.equal(JSON.stringify(error).includes('sensitive'), false)
+      assert.equal(JSON.stringify(error.sanitizedCause ?? []).includes('sensitive'), false)
 
-        return true
-      }
-    )
+      return true
+    })
     assert.equal(calls, 1)
   }
 })
@@ -146,7 +143,7 @@ test('연결 오류는 재시도하지 않고 원문 없이 공급자 오류로 
       throw new TypeError('fetch failed', { cause: new Error('sensitive socket detail') })
     }
   })
-  await assert.rejects(adapter(identity, range, new AbortController().signal), (error: unknown) => {
+  await assert.rejects(adapter(identity, range), (error: unknown) => {
     assert(error instanceof TimelineFailure)
     assert.equal(error.kind, 'api')
     assert(error.sanitizedCause)
@@ -155,22 +152,6 @@ test('연결 오류는 재시도하지 않고 원문 없이 공급자 오류로 
 
     return true
   })
-  assert.equal(calls, 1)
-})
-
-test('취소되면 다음 페이지를 요청하지 않고 취소 이유를 그대로 던진다', async () => {
-  const controller = new AbortController()
-  const reason = new Error('sync stopped')
-  let calls = 0
-  const adapter = createNeopleCharacterTimelineForTest('fake-key', {
-    fetch: async () => {
-      calls++
-      controller.abort(reason)
-
-      return Response.json(timelinePages()[0])
-    }
-  })
-  await assert.rejects(adapter(identity, range, controller.signal), (error) => error === reason)
   assert.equal(calls, 1)
 })
 
