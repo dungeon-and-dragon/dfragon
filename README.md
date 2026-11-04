@@ -22,13 +22,6 @@
 
 Windows용 Desktop 앱은 더 개발하지 않습니다. 소스는 [`v1.0.2` tag](https://github.com/dungeon-and-dragon/dfragon/tree/v1.0.2)에 있고, 이전 Release의 포터블 exe는 그대로 남아 있습니다.
 
-## 보내는 정보
-
-- **캐릭터 검색**: 서버와 닉네임을 API(`api.dfragon.com`)에 보내고, API가 [Neople 오픈 API](https://developers.neople.co.kr)에서 조회합니다.
-- **웹의 캐릭터 초상화**: 웹은 조회한 캐릭터의 서버와 캐릭터 ID를 API에 보내고, API가 네오플에서 받은 초상화를 전달합니다.
-- **웹의 화면 이미지**: 붙여 넣거나 공유한 화면 이미지는 브라우저 밖으로 보내지 않고 브라우저 안에서 읽습니다.
-- **사용 통계**: 보내지 않습니다.
-
 ## 개발
 
 pnpm workspace 모노레포입니다.
