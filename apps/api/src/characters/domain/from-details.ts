@@ -1,5 +1,5 @@
 import { textOrNull } from '@dfragon/lib/utils/shape-check'
-import { BufferJob, type CharacterJob, DealerJob } from './character-job.js'
+import { BufferCharacter, type Character, DealerCharacter } from './character.js'
 import { MaleCrusader } from './male-crusader.js'
 
 const awakeningPrefix = '眞'
@@ -22,10 +22,10 @@ function baseJobGrowName(jobGrowName: unknown): string | null {
   return name.slice(awakeningPrefix.length).trim()
 }
 
-export function characterJob(
+export function characterFromDetails(
   character: Record<string, unknown>,
   skillStyle: unknown
-): CharacterJob | null {
+): Character | null {
   const job = baseJobGrowName(character.jobGrowName)
   if (job === null) {
     return null
@@ -37,8 +37,8 @@ export function characterJob(
   }
 
   if (bufferJobs.has(job)) {
-    return new BufferJob()
+    return new BufferCharacter()
   }
 
-  return new DealerJob()
+  return new DealerCharacter()
 }

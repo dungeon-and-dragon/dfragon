@@ -53,7 +53,7 @@ function hasFixedServerAndImage(summary: z.infer<z.ZodObject<typeof characterSum
   )
 }
 
-const characterRole = z.enum(['dealer', 'buffer']).nullable()
+const characterRole = z.enum(['dealer', 'buffer', 'synergy']).nullable()
 
 const scoreCalculator = z.enum(['equipment', 'buff'])
 
