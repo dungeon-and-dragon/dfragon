@@ -125,7 +125,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ## 서버 이미지
 
 [Product Images](../../.github/workflows/product-images.yml)는 서버 이미지 입력이 바뀌었을 때만 API 이미지를 빌드합니다.
-`apps/api/**`, `packages/database/**`, `packages/lib/**`, `packages/licenses/**`, `packages/models/**`와 root package, lockfile, workspace 설정,
+`apps/api/**`, `packages/database/**`, `packages/lib/**`, `packages/neople/**`, `packages/licenses/**`, `packages/models/**`와 root package, lockfile, workspace 설정,
 이미지 workflow, 선택 도구, 커밋 정보 생성기(`scripts/server-build-info.mjs`) 변경이 해당합니다.
 `packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진만 바꾼 PR도 이미지를 다시 빌드합니다.
 그 안의 `*.md` 문서는 이미지에 들어가지 않으므로 입력으로 보지 않습니다.

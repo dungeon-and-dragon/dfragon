@@ -1,3 +1,4 @@
+import { neopleCharacterImageUrl } from '@dfragon/neople'
 import { pick, sortBy } from 'remeda'
 import { NeopleSearchFailure } from '../errors/neople-search.js'
 import type {
@@ -10,7 +11,6 @@ import type {
 } from '../types/neople-character-search.js'
 import { parseCharacterCandidatesQuery, parseCharacterSearchQuery } from './query.js'
 import { createCandidateCache } from './candidate-cache.js'
-import { neopleCharacterImageUrl } from './image/neople.js'
 import type { CharacterSearchDependencies, CharacterSearchHttpService } from './types.js'
 
 export function createCharacterSearchService(

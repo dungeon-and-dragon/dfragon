@@ -18,6 +18,7 @@ const commonFiles = new Set([
 const commonDirectories = [
   'packages/database/',
   'packages/lib/',
+  'packages/neople/',
   'packages/licenses/',
   'packages/models/'
 ]

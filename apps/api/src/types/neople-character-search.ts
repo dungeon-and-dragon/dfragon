@@ -42,17 +42,6 @@ export interface SearchErrorBody {
   }
 }
 
-export type FetchTransport = (request: Request, init?: RequestInit) => Promise<Response>
 export type SearchCharacters = (
   input: NeopleCharacterSearchInput
 ) => Promise<NeopleCharacterSearchResult>
-
-export interface SearchDependencies {
-  fetch?: FetchTransport
-  origin: string
-}
-
-export interface NeopleCharacterSearchTestDependencies {
-  fetch: FetchTransport
-  origin?: string
-}

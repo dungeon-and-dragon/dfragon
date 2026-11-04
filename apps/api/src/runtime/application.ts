@@ -1,4 +1,5 @@
 import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/database'
+import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { createCatalogService } from '../characters/catalog/service.js'
 import { createNeopleCatalog } from '../characters/catalog/neople.js'
 import { createNeopleCharacterSearch } from '../characters/neople-character-search.js'
@@ -13,14 +14,14 @@ import type { readRuntimeConfiguration } from './configuration.js'
 type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
 
 function createTimelineSync(
-  apiKey: string,
+  neople: NeopleClient,
   database: DatabaseConfiguration | undefined
 ): TimelineSyncOptions | undefined {
   if (database === undefined) {
     return undefined
   }
   const client = createDatabaseClient(database)
-  const fetchTimeline = createNeopleCharacterTimeline(apiKey)
+  const fetchTimeline = createNeopleCharacterTimeline(neople)
   const store = createDatabaseTimelineStore(client)
 
   return {
@@ -30,14 +31,16 @@ function createTimelineSync(
 }
 
 export function createApiRuntime(configuration: RuntimeConfiguration) {
+  const neople = createNeopleClient(configuration.apiKey)
+
   return createApiHttpApp({
-    search: { searchCharacters: createNeopleCharacterSearch(configuration.apiKey) },
+    search: { searchCharacters: createNeopleCharacterSearch(neople) },
     details: {
-      fetchDetails: createNeopleCharacterDetails(configuration.apiKey),
-      catalog: createCatalogService(createNeopleCatalog(configuration.apiKey))
+      fetchDetails: createNeopleCharacterDetails(neople),
+      catalog: createCatalogService(createNeopleCatalog(neople))
     },
-    timeline: createTimelineSync(configuration.apiKey, configuration.database),
-    todayGrade: { fetchShopGrade: createNeopleShopGrade(configuration.apiKey) },
+    timeline: createTimelineSync(neople, configuration.database),
+    todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
     webDevOrigins: configuration.webDevOrigins,
     trustedProxyHops: configuration.trustedProxyHops,
     httpsOptions: configuration.localHttps,
