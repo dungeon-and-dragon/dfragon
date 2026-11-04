@@ -1,3 +1,4 @@
+import type { TimelineEventInput, TimelineItemInput } from '@dfragon/database'
 import { groupBy } from 'remeda'
 
 // https://developers.neople.co.kr/contents/guide/pages/all#던파-타임라인-코드
@@ -28,24 +29,6 @@ export function isTimelineCode(code: number): boolean {
 // 응답 schema가 표에 있는 코드만 통과시키므로 여기서는 늘 찾는다.
 function tableOf(row: TimelineRow): TimelineTable {
   return TIMELINE_TABLE_BY_CODE.get(row.code)!
-}
-
-export type TimelineEventInput = {
-  code: number
-  occurredAt: Date
-  name: string
-  raidName: string | null
-  data: Record<string, unknown>
-}
-
-export type TimelineItemInput = {
-  code: number
-  occurredAt: Date
-  name: string
-  itemId: string | null
-  itemName: string | null
-  itemRarity: string | null
-  data: Record<string, unknown>
 }
 
 export type TimelineInputs = { events: TimelineEventInput[]; items: TimelineItemInput[] }

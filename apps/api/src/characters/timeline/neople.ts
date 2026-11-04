@@ -1,3 +1,4 @@
+import type { TimelineRange } from '@dfragon/database'
 import ky, { isTimeoutError } from 'ky'
 import { z } from 'zod'
 import { NEOPLE_ORIGIN } from '../../constants/neople-character-search.js'
@@ -9,7 +10,6 @@ import type { FetchTransport } from '../../types/neople-character-search.js'
 import { formatSeoulTime, parseSeoulTime } from '../../utils/seoul-time.js'
 import type { CharacterIdentity } from '../details/sections.js'
 import { TimelineFailure } from './errors.js'
-import type { TimelineRange } from './ranges.js'
 import {
   TIMELINE_CODES,
   type TimelineInputs,
