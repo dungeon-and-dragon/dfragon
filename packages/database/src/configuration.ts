@@ -1,5 +1,5 @@
-import { parsePort } from '../port.js'
-import { readSecretInput } from '../secret-input.js'
+import { parsePort } from '@dfragon/lib/port'
+import { readSecretInput } from './secret-input.js'
 
 export interface DatabaseConfiguration {
   host: string

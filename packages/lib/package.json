@@ -8,6 +8,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./port": {
+      "types": "./dist/port.d.ts",
+      "import": "./dist/port.js"
+    },
     "./utils/assert": {
       "types": "./dist/utils/assert.d.ts",
       "import": "./dist/utils/assert.js"

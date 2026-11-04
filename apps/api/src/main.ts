@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { applyMigrations } from './database/migrate.js'
+import { applyMigrations } from '@dfragon/database'
 import { createApiRuntime } from './runtime/application.js'
 import { readRuntimeConfiguration } from './runtime/configuration.js'
 
@@ -8,7 +8,7 @@ const startupFailureMessage = 'API failed to start'
 async function main(): Promise<void> {
   const configuration = await readRuntimeConfiguration(process.env)
   if (configuration.database !== undefined) {
-    await applyMigrations(configuration.database)
+    await applyMigrations()
   }
   const app = await createApiRuntime(configuration)
   try {
