@@ -1,6 +1,6 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import ky from 'ky'
-import { readSecretInput } from '../dist/secret-input.js'
+import { readSecretInput } from '@dfragon/database'
 import { createNeopleCharacterSearch } from '../dist/characters/neople-character-search.js'
 import { createNeopleCharacterDetails } from '../dist/characters/details/neople.js'
 import { NEOPLE_ORIGIN } from '../dist/constants/neople-character-search.js'

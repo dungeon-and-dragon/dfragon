@@ -188,7 +188,8 @@ try {
   ]
 
   stage = 'migration waits for the advisory lock'
-  const migrationLock = "pg_advisory_lock(hashtext('dfragon-api-migrations'))"
+  // Prisma migrate가 PostgreSQL에서 잡는 advisory lock key다. 10초 안에 얻지 못하면 실패한다.
+  const migrationLock = 'pg_advisory_lock(72707369)'
   const advisoryLockCount = async (granted) =>
     Number(
       (
@@ -238,7 +239,7 @@ try {
   )
   await waitFor(async () => (await advisoryLockCount(false)) === apiNames.length)
   assert.equal(
-    (await psql("SELECT to_regclass('public.typeorm_migrations') IS NULL")).stdout.trim(),
+    (await psql("SELECT to_regclass('public._prisma_migrations') IS NULL")).stdout.trim(),
     't'
   )
   await psql(
@@ -252,12 +253,12 @@ try {
   assert.equal(
     (
       await psql(
-        "SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid = to_regclass('public.typeorm_migrations')"
+        "SELECT pg_get_userbyid(relowner) FROM pg_class WHERE oid = to_regclass('public._prisma_migrations')"
       )
     ).stdout.trim(),
     'dfragon_api'
   )
-  assert.equal((await psql('SELECT count(*) FROM typeorm_migrations')).stdout.trim(), '0')
+  assert.equal((await psql('SELECT count(*) FROM _prisma_migrations')).stdout.trim(), '0')
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
     '0'
@@ -273,7 +274,7 @@ try {
     await removeOwned(name)
   }
 
-  stage = 'failed migration rolls back and fails closed'
+  stage = 'failed migration fails closed'
   const failedMigration = await docker(
     [
       'run',
@@ -285,7 +286,7 @@ try {
       '--mount',
       `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`,
       '--mount',
-      `type=bind,source=${failingMigrationPath},target=/app/dist/database/migrations,readonly`,
+      `type=bind,source=${failingMigrationPath},target=/app/node_modules/@dfragon/database/prisma/migrations,readonly`,
       imageId
     ],
     { allowFailure: true }
@@ -295,11 +296,17 @@ try {
   assert.equal(failedMigration.stderr, 'API failed to start\n')
   // 연결이나 import 실패와 구분하려고, fixture의 두 번째 문장이 실제로 실패했는지 PostgreSQL 로그로 확인한다.
   assert.match((await docker(['logs', postgresName])).stderr, pgcryptoPermissionDeniedPattern)
+  // Prisma는 실패한 migration을 실패로 기록해 해결하기 전까지 다음 적용을 막는다. BEGIN, COMMIT으로 감싼 앞 문장은 되돌려진다.
+  assert.equal(
+    (
+      await psql('SELECT migration_name, finished_at IS NULL FROM _prisma_migrations')
+    ).stdout.trim(),
+    '20000101000000_failing_migration|t'
+  )
   assert.equal(
     (await psql("SELECT to_regclass('public.failing_migration_probe') IS NULL")).stdout.trim(),
     't'
   )
-  assert.equal((await psql('SELECT count(*) FROM typeorm_migrations')).stdout.trim(), '0')
   assert.equal(await advisoryLockCount(true), 0)
 
   stage = 'invalid database inputs fail closed'
