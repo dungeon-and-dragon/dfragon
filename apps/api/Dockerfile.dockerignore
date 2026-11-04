@@ -18,6 +18,11 @@
 !packages/lib/tsconfig.json
 !packages/lib/src/
 !packages/lib/src/**
+!packages/neople/
+!packages/neople/package.json
+!packages/neople/tsconfig.json
+!packages/neople/src/
+!packages/neople/src/**
 !packages/licenses/
 !packages/licenses/package.json
 !packages/licenses/src/

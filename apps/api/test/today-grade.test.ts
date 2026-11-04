@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createNeopleClientForTest } from '@dfragon/neople'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 import { TodayGradeFailure } from '../src/today-grade/errors.js'
@@ -166,19 +167,23 @@ test('한 부위라도 실패하면 결과 없이 실패하고, 실패는 저장
 
 test('상점 조회는 아이템마다 /df/items/{itemId}/shop을 부르고 itemGradeValue를 읽는다', async () => {
   const requests: Request[] = []
-  const fetchShopGrade = createNeopleShopGrade('synthetic-shop-key', async (request) => {
-    requests.push(request)
+  const fetchShopGrade = createNeopleShopGrade(
+    createNeopleClientForTest('synthetic-shop-key', {
+      fetch: async (request) => {
+        requests.push(request)
 
-    // 2026-10-30 운영 키로 받은 상점 응답의 최상위 필드 모양이다.
+        // 2026-10-30 운영 키로 받은 상점 응답의 최상위 필드 모양이다.
 
-    return jsonResponse({
-      itemId: 'item-a',
-      itemName: '합성 상점 장비',
-      itemGradeName: '최상급',
-      itemGradeValue: 97,
-      itemStatus: []
+        return jsonResponse({
+          itemId: 'item-a',
+          itemName: '합성 상점 장비',
+          itemGradeName: '최상급',
+          itemGradeValue: 97,
+          itemStatus: []
+        })
+      }
     })
-  })
+  )
 
   assert.equal(await fetchShopGrade('item-a', signal), 97)
   assert.equal(requests.length, 1)
@@ -200,7 +205,9 @@ test('Neople 오류 코드와 잘못된 등급 값을 오늘의 등급 오류로
     ['JSON이 아닌 응답', new Response('<html>', { status: 200 }), 502]
   ]
   for (const [name, response, status] of cases) {
-    const fetchShopGrade = createNeopleShopGrade('synthetic-shop-key', async () => response)
+    const fetchShopGrade = createNeopleShopGrade(
+      createNeopleClientForTest('synthetic-shop-key', { fetch: async () => response })
+    )
     await assert.rejects(fetchShopGrade('item-a', signal), (error) => {
       assert(error instanceof TodayGradeFailure, name)
       assert.equal(error.status, status, name)

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createNeopleCharacterSearchForTest } from '../src/characters/neople-character-search.js'
-import { createNeopleCharacterDetailsForTest } from '../src/characters/details/neople.js'
+import { createNeopleClientForTest, type FetchTransport } from '@dfragon/neople'
+import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
+import { createNeopleCharacterDetails } from '../src/characters/details/neople.js'
 import { createNeopleCatalog } from '../src/characters/catalog/neople.js'
-import type { FetchTransport } from '../src/types/neople-character-search.js'
 
 // 2026-10-20 #778 결정으로 프로세스 전체 Neople 예산(최근 60초 600회, 동시 12회)을 없앴다.
 // 예전 상한보다 많이 보내 거절 없이 실제 transport 수가 맞는지 확인한다.
@@ -16,7 +16,9 @@ test('검색을 예전 상한보다 많은 601회 보내도 모두 Neople까지 
 
     return Response.json({ rows: [] })
   }
-  const search = createNeopleCharacterSearchForTest('fixture', { fetch: transport })
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('fixture', { fetch: transport })
+  )
   for (let index = 0; index < 601; index++) {
     assert.deepEqual(await search(input), { rows: [] })
   }
@@ -51,7 +53,9 @@ test('body를 받는 중인 검색이 13개여도 새 검색을 거절하지 않
         { highWaterMark: 0 }
       )
     )
-  const search = createNeopleCharacterSearchForTest('fixture', { fetch: transport })
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('fixture', { fetch: transport })
+  )
   const pending = Array.from({ length: 13 }, () => search(input))
   try {
     await allBodiesReading
@@ -107,7 +111,9 @@ test('상세 5건은 응답 전에 섹션 transport 13개 이상을 함께 연�
   const identity = { serverId: 'siroco', characterId: 'fixture-character' }
   await expectThirteenOpenTransports(
     (transport) => {
-      const details = createNeopleCharacterDetailsForTest('fixture', { fetch: transport })
+      const details = createNeopleCharacterDetails(
+        createNeopleClientForTest('fixture', { fetch: transport })
+      )
 
       return Array.from({ length: 5 }, () =>
         details(identity, new AbortController().signal, () => undefined)
@@ -120,7 +126,9 @@ test('상세 5건은 응답 전에 섹션 transport 13개 이상을 함께 연�
 test('공용 상세 13건은 응답 전에 모두 transport를 연다', { timeout: 2_000 }, async () => {
   await expectThirteenOpenTransports(
     (transport) => {
-      const catalog = createNeopleCatalog('fixture', transport)
+      const catalog = createNeopleCatalog(
+        createNeopleClientForTest('fixture', { fetch: transport })
+      )
 
       return Array.from({ length: 13 }, () =>
         catalog(['fixture-item'], new AbortController().signal)

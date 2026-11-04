@@ -3,9 +3,9 @@ type: rule
 status: active
 enforcement: approval-required
 scope: apps/api character search
-last-reviewed: 2026-11-04
+last-reviewed: 2026-11-05
 rationale: 검색 입력, 응답, 실패, 호출 제한을 후속 구현자가 추측하지 않게 한다.
-evidence: "2026-09-05 PR #42 검색 계약, PR #48 인증 통합 merge; 2026-10-20 #774, #778 호출 제한 제거; 2026-10-29 #987 회차 상세 동시 조회, #992 공용 아이템 24시간, 캐릭터 1시간 캐시; 2026-10-31 Cloudflare Tunnel 공개 경로, #1069 후보 검색 24시간 캐시; 2026-11-01 #1079 웹 클라이언트 초상화 전달; 2026-11-04 ADR 0012 표 행의 추정 안내와 상세 정보 오류 표시; 2026-11-04 ADR 0013 한 번 누르면 확정하는 후보 창과 공대 후보 창"
+evidence: "2026-09-05 PR #42 검색 계약, PR #48 인증 통합 merge; 2026-10-20 #774, #778 호출 제한 제거; 2026-10-29 #987 회차 상세 동시 조회, #992 공용 아이템 24시간, 캐릭터 1시간 캐시; 2026-10-31 Cloudflare Tunnel 공개 경로, #1069 후보 검색 24시간 캐시; 2026-11-01 #1079 웹 클라이언트 초상화 전달; 2026-11-04 ADR 0012 표 행의 추정 안내와 상세 정보 오류 표시; 2026-11-04 ADR 0013 한 번 누르면 확정하는 후보 창과 공대 후보 창; 2026-11-05 ADR 0016 Neople 호출 package"
 exceptions: 미확인 외부 규격과 새 정책은 사용자 결정 없이 구현하지 않는다.
 review-after: 네오플 공식 규격 변경 시
 ---
@@ -214,7 +214,7 @@ Body는 `{"error":{"code":"<CODE>","message":"<MESSAGE>"}}`만 사용한다. Ups
 
 Timeout이 나면 transport를 취소하고, 늦게 도착한 response나 code로 결과를 바꾸지 않는다. Timeout 전의 network, body read 실패는 502다. Redirect는 따라가지 않는 안이며 3xx는 위 fallback 오류다. 늦게 끝난 작업으로 추가 응답하거나 retry하지 않는다.
 
-순수 adapter는 **검증된 검색 값 → URL 구성, transport 1회, 전체 응답 검증/projection 또는 정제된 오류**를 담당한다. 인증 guard, user/session, DB와 활동 기록을 import하지 않는다. Transport는 test에서 fake로 제어할 수 있어야 하며 loopback upstream으로 실제 HTTP encoding, status, body를 검증한다. Timeout에 따른 취소는 fake transport로 검증한다. 운영 upstream origin은 고정하고 요청 query가 URL/host를 지정하지 못하게 한다. Loopback origin과 fake credential은 test 주입에만 사용한다. [Node fetch](https://nodejs.org/docs/latest-v26.x/api/globals.html#fetch)
+Neople 호출의 transport, 오류 분류와 응답 schema는 [`@dfragon/neople`](../../packages/neople/README.md)이 맡는다([ADR 0016](../adr/0016-neople-client-package.md)). 순수 adapter는 **검증된 검색 값 → package endpoint 호출 1회, 던삐삐 규칙의 응답 검증/projection 또는 정제된 오류**를 담당한다. 인증 guard, user/session, DB와 활동 기록을 import하지 않는다. Transport는 test에서 fake로 제어할 수 있어야 하며 loopback upstream으로 실제 HTTP encoding, status, body를 검증한다. Timeout에 따른 취소는 fake transport로 검증한다. 운영 upstream origin은 고정하고 요청 query가 URL/host를 지정하지 못하게 한다. Loopback origin과 fake credential은 test 주입에만 사용한다. [Node fetch](https://nodejs.org/docs/latest-v26.x/api/globals.html#fetch)
 
 ## 공개 검색과 호출 제한
 
