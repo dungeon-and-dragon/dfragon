@@ -9,7 +9,7 @@
 
 ## 받기
 
-처음 checkout할 때 한 번 실행합니다. 웹 사이트 빌드 action(`web-site-build`, 운영, dev 모두)은 고정된 `ocr-finetuned` 커밋만, Product Images는 `score-engine`만 가져옵니다. 엔진 저장소가 비공개이던 때 `git submodule init`을 실행한 checkout은 `.git/config`에 `update = none`이 남아 엔진을 건너뛰므로, 아래 명령 전에 `git config --unset submodule.packages/models/score-engine.update`를 한 번 실행합니다.
+처음 checkout할 때 한 번 실행합니다. 웹 사이트 배포 workflow(`web-workers.yml`, 운영, dev, PR 미리보기 모두)는 고정된 `ocr-finetuned` 커밋만, Product Images는 `score-engine`만 가져옵니다. 엔진 저장소가 비공개이던 때 `git submodule init`을 실행한 checkout은 `.git/config`에 `update = none`이 남아 엔진을 건너뛰므로, 아래 명령 전에 `git config --unset submodule.packages/models/score-engine.update`를 한 번 실행합니다.
 
 ```sh
 git submodule update --init --recursive

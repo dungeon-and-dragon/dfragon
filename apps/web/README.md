@@ -14,7 +14,7 @@ pnpm --filter @dfragon/web build
 pnpm --filter @dfragon/web preview
 ```
 
-`build`는 `tsc -b`와 Vite production build를 포함하므로 같은 변경을 검증할 때 `typecheck`를 다시 실행할 필요는 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 산출물은 `dist`에 생기며, `public/CNAME`(`dfragon.com`)이 함께 복사됩니다. dev 사이트 빌드는 이 `CNAME`을 뺍니다([배포](#배포)).
+`build`는 `tsc -b`와 Vite production build를 포함하므로 같은 변경을 검증할 때 `typecheck`를 다시 실행할 필요는 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 산출물은 `dist`에 생깁니다.
 
 `dev`와 `build`는 먼저 `prepare:ocr-assets`로 `@dfragon/client-core`의 [`prepare-ocr-assets.mjs`](../../packages/client-core/scripts/prepare-ocr-assets.mjs)에 출력 폴더를 넘겨 실행해 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다. 이 폴더는 Git에서 제외합니다. 파인튜닝 모델을 쓰므로 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
 
@@ -32,14 +32,13 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 - dev: main push마다 [`web-workers.yml`](../../.github/workflows/web-workers.yml)이 그 커밋을 빌드해 Cloudflare Worker `dfragon-web-dev`에 올립니다. 이 Worker가 `https://dev.dfragon.com`과 workers.dev 주소 `https://dfragon-web-dev.dfragon.workers.dev`를 함께 맡습니다. 배포는 한 번에 하나씩 돌고 대기 중인 실행은 새 실행으로 바뀌므로, 연속으로 merge해도 마지막 실행이 최신 main을 올립니다. 저장소 소유자는 Actions에서 target `dev`로 수동 실행해 다른 ref를 올릴 수도 있습니다.
 - PR 미리보기: 이 저장소 브랜치의 PR이 `apps/web`, `packages/client`, `packages/client-core`, `packages/ui`, `packages/lib`, `packages/licenses`, `packages/models`(OCR 모델 submodule 포함), root `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`이나 이 workflow를 바꾸면, 같은 workflow가 PR 브랜치를 빌드해 `wrangler versions upload --preview-alias pr-<번호>`로 dev Worker의 새 버전만 올립니다. 배포 중인 dev Worker 버전은 바뀌지 않고 `https://pr-<번호>-dfragon-web-dev.dfragon.workers.dev`가 생기며, 이 주소를 PR 댓글 하나로 남기고 다시 올리면 같은 댓글을 고칩니다. 같은 PR에 커밋을 더하면 돌던 미리보기는 취소됩니다. fork와 Dependabot의 PR은 Cloudflare Secret을 받지 않으므로 돌지 않습니다.
-- 운영 Worker: 저장소 소유자가 Actions에서 main으로 target `production`을 골라 수동 실행할 때만 Cloudflare Worker `dfragon-web`에 올리며, 다른 ref에서는 job이 돌지 않습니다. 이 Worker가 `https://dfragon.com`을 맡고 workers.dev 주소는 두지 않습니다. 운영 빌드는 같은 origin 프록시 대신 `https://api.dfragon.com`을 직접 부릅니다. 아래 [운영 Worker 전환](#운영-worker-전환)을 마치기 전에는 `dfragon.com` DNS가 GitHub Pages를 가리켜 이 배포가 custom domain 연결에서 실패합니다.
-- 운영 Pages: [`web-pages.yml`](../../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 이 저장소의 GitHub Pages에 올립니다. 빌드는 [`web-site-build`](../../.github/actions/web-site-build/action.yml) action이 합니다. 운영 Worker 전환을 마치면 지웁니다.
+- 운영 Worker: 저장소 소유자가 Actions에서 main으로 target `production`을 골라 수동 실행할 때만 Cloudflare Worker `dfragon-web`에 올리며, 다른 ref에서는 job이 돌지 않습니다. 이 Worker가 `https://dfragon.com`을 맡고 workers.dev 주소는 두지 않습니다. 운영 빌드는 같은 origin 프록시 대신 `https://api.dfragon.com`을 직접 부릅니다.
 
-모든 배포는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. Worker 빌드는 `CNAME`을 빼고 빌드한 커밋 SHA를 `version.txt`에 두며, dev와 PR 미리보기는 `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막습니다. 배포된 dev 커밋은 `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
+모든 배포는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. 빌드한 커밋 SHA는 `version.txt`에 두며, dev와 PR 미리보기는 `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막습니다. 배포된 커밋은 `https://dfragon.com/version.txt`, `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
 
-### Cloudflare Workers 이전
+### Cloudflare Workers
 
-GitHub Pages는 응답 헤더를 정할 수 없어 사이트를 Cloudflare Workers로 옮기는 중입니다. `dev.dfragon.com`은 Worker로 옮겼고, `dfragon.com`은 [운영 Worker 전환](#운영-worker-전환)을 마칠 때까지 위의 GitHub Pages가 맡습니다.
+두 사이트는 응답 헤더를 정할 수 있는 Cloudflare Workers에서 돕니다(ADR 0017).
 
 - 정적 파일은 Workers static assets가 바로 응답합니다. [`public/_headers`](public/_headers)가 static assets의 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙이고 Worker가 `/ocr/*` 응답에 같은 COEP를 붙여 페이지와 OCR worker가 cross-origin 격리되므로 OCR의 ONNX Runtime WASM이 여러 thread로 돕니다. 해시가 붙은 `/assets/*`는 1년 동안 캐시합니다.
 - OCR 모델과 ONNX Runtime WASM은 static assets의 파일 하나 25 MiB 한도를 넘어 R2 bucket `dfragon-web-ocr`에 둡니다([`public/.assetsignore`](public/.assetsignore)가 `dist/ocr`를 static assets에서 뺍니다). 배포는 먼저 [`scripts/upload-ocr-assets.mjs`](scripts/upload-ocr-assets.mjs)로 `dist/ocr`의 파일을 내용 hash 폴더(`ocr/<hash>/`)에 올리고, 그 hash를 Worker 변수 `OCR_ASSET_VERSION`으로 넘겨 배포합니다. [Worker](worker/index.ts)는 `/ocr/*` 요청을 그 폴더에서 읽어 같은 주소로 돌려주며, 주소에 hash가 없으므로 `Cache-Control: no-cache`와 ETag로 매번 확인합니다.
@@ -60,37 +59,8 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 2. Workers & Pages에서 workers.dev subdomain을 등록합니다. 등록하지 않으면 배포가 subdomain을 묻다가 실패합니다. 지금 subdomain은 `dfragon`이라 dev Worker 주소는 `https://dfragon-web-dev.dfragon.workers.dev`입니다.
 3. Account API token을 만듭니다. 권한은 Workers 제품 범위의 Admin(처음 배포가 새 Worker를 만들어야 해서 Editor로는 안 됩니다), Workers R2 Storage Write, `dfragon.com` zone의 Workers Routes Edit(`dev.dfragon.com`, `dfragon.com` custom domain 연결)만 줍니다. Workers R2 Storage Bucket Item Write로는 wrangler의 R2 업로드가 403으로 실패합니다. 예전 Workers Scripts 권한은 legacy입니다.
 4. 이 저장소의 Actions Secret `CLOUDFLARE_API_TOKEN`에 token을, `CLOUDFLARE_ACCOUNT_ID`에 계정 ID를 넣습니다.
-5. Cloudflare의 `dfragon.com` DNS에 `dev` 이름의 레코드가 없게 둡니다. 배포가 custom domain의 DNS 레코드를 직접 만들며, 같은 이름의 레코드가 있으면 배포가 실패합니다.
-
-### 운영 Worker 전환
-
-`dfragon.com`을 GitHub Pages에서 운영 Worker로 옮기는 설정이며 저장소 소유자가 한 번 합니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다. `api.dfragon.com` 레코드는 건드리지 않습니다.
-
-1. Cloudflare의 `dfragon.com` DNS에서 GitHub Pages용 apex A, AAAA 레코드와 `www` CNAME을 지웁니다. 배포가 `dfragon.com` custom domain의 DNS 레코드를 직접 만들며, 같은 이름의 레코드가 있으면 배포가 실패합니다.
-2. 이 저장소의 Settings → Pages에서 Custom domain을 비웁니다.
-3. Actions → Web Workers → Run workflow에서 main, target `production`으로 실행합니다.
-4. `www.dfragon.com`을 `https://dfragon.com`으로 보냅니다. `www` 이름에 proxied 레코드(예: AAAA `100::`)를 두고, Rules → Redirect Rules에서 호스트가 `www.dfragon.com`인 요청을 경로와 query를 유지해 `https://dfragon.com`으로 301 리디렉션합니다.
-5. `https://dfragon.com`의 응답 헤더에 `Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`가 있는지, 첫 화면의 닉네임 검색과 붙여넣기가 되는지 확인합니다.
-
-### 운영 Pages 설정
-
-[운영 Worker 전환](#운영-worker-전환) 전까지 `dfragon.com`을 맡는 GitHub Pages 설정이며, 저장소 소유자가 한 번 해야 하는 설정입니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다.
-
-1. Settings → Pages → Build and deployment의 Source를 GitHub Actions로 정합니다.
-2. 같은 화면의 Custom domain에 `dfragon.com`을 입력합니다. 배포마다 `CNAME` 파일이 함께 올라가므로 도메인 설정이 유지됩니다.
-3. Porkbun의 `dfragon.com` DNS에 아래 레코드를 넣습니다. IP는 GitHub 문서 [Managing a custom domain for your GitHub Pages site](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site)의 apex 도메인 값이며, 설정 전에 문서와 다시 대조합니다.
-
-   | 종류 | 호스트 | 값 |
-   | --- | --- | --- |
-   | A | (비움, `dfragon.com`) | `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153` 네 개 |
-   | AAAA | (비움, `dfragon.com`) | `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153` 네 개 |
-   | CNAME | `www` | `dungeon-and-dragon.github.io` |
-
-4. DNS가 확인되면 Pages 화면에서 Enforce HTTPS를 켭니다. 인증서 발급에는 시간이 걸릴 수 있습니다.
-
-`www.dfragon.com`을 `dfragon.com`으로 보내는 일은 GitHub Pages가 합니다. Custom domain이 apex(`dfragon.com`)이고 `www` CNAME이 `dungeon-and-dragon.github.io`를 가리키면 `www`로 들어온 요청을 apex로 리디렉션하므로 별도 리디렉션 설정이 없습니다.
-
-`api.dfragon.com`은 운영 API가 쓰는 레코드입니다. 위 레코드를 넣을 때 건드리지 않습니다.
+5. Cloudflare의 `dfragon.com` DNS에 apex(`dfragon.com`)와 `dev` 이름의 레코드를 직접 넣지 않습니다. 배포가 custom domain의 DNS 레코드를 직접 만들며, 같은 이름의 레코드가 있으면 배포가 실패합니다. `api.dfragon.com`은 운영 API가 쓰는 레코드라 건드리지 않습니다.
+6. `www.dfragon.com`을 `https://dfragon.com`으로 보냅니다. `www` 이름에 proxied 레코드(AAAA `100::`)를 두고, Rules → Redirect Rules에서 호스트가 `www.dfragon.com`인 요청을 경로와 query를 유지해 `https://dfragon.com`으로 301 리디렉션합니다.
 
 ## 구성
 
