@@ -111,6 +111,7 @@ test('공급자 오류와 잘못된 응답은 기존 Neople 분류로 바꾸고 
     [200, { timeline: { rows: [validRow], next: 1 } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, date: '20250109T0600' }], next: null } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, data: null }], next: null } }, 'api'],
+    [200, { timeline: { rows: [{ ...validRow, code: 99 }], next: null } }, 'api'],
     [200, { timeline: { rows: [{ ...validRow, code: 701 }], next: null } }, 'api']
   ] as const) {
     let calls = 0
