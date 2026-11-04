@@ -3,14 +3,13 @@
 `apps/api`는 공개 캐릭터 API입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시합니다.
 DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)을 PostgreSQL에 저장합니다.
 여러 노드로 띄울 수 있지만 캐시는 노드마다 따로 둡니다. 기본 entry는 설정 검증, [DB migration](#db와-migration)(DB 설정이 있을 때), HTTP listen 순서로 시작합니다.
-검색, 상세, 오늘의 등급의 제품 계약은 [문서 안내](../../docs/README.md)에서 찾습니다.
 
 ## Swagger와 HTTP
 
 `/docs`, `/docs/openapi.json`은 API 계약만 제공합니다. `/health`는 200, `/auth/**`와 `/me`는 404입니다.
 
 웹 클라이언트가 브라우저에서 부르도록 CORS는 운영 사이트 `https://dfragon.com`, dev 사이트 `https://dev.dfragon.com`과 [`WEB_DEV_ORIGINS`](#준비할-입력)로 더한 로컬 웹 개발 origin의 `GET`, preflight만 허용합니다. 다른 origin과 다른 method의 요청에는 CORS 헤더를 붙이지 않습니다.
-`GET /characters/:serverId/:characterId/image`는 웹 클라이언트가 픽셀을 읽을 수 있게 네오플 캐릭터 이미지를 그대로 전달하며, 입력, 응답, 오류는 [초상화 전달](../../docs/rules/character-search.md#초상화-전달)을 따릅니다.
+`GET /characters/:serverId/:characterId/image`는 웹 클라이언트가 픽셀을 읽을 수 있게 네오플 캐릭터 이미지를 그대로 전달합니다.
 
 ## 준비할 입력
 
@@ -25,7 +24,7 @@ Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
 `SCORE_LIBRARY_FILE`은 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로입니다.
 지정하면 앱을 만들 때 점수 worker 하나를 띄우고, listen을 기다리지 않고 그 worker에서 딜러, 버퍼 준비 계산을 한 번씩 합니다.
 빈 값과 상대 경로는 시작 전에 거절하고, 지정하지 않으면 점수 없이 실행합니다.
-계산한 점수는 캐릭터 상세 응답의 [`card.score`](../../docs/rules/character-details.md#카드-투영)에 들어가고 응답 본문과 함께 1시간 캐시됩니다.
+계산한 점수는 캐릭터 상세 응답의 `card.score`에 들어가고 응답 본문과 함께 1시간 캐시됩니다.
 파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둡니다. 로컬에서는 점수 엔진 submodule의 파일을 지정할 수 있습니다.
 [서버 이미지](#서버-이미지)는 이미지 안의 Linux 엔진 `/app/score-engine/libdnfscore.so`를 이 값으로 지정합니다.
 
@@ -48,7 +47,6 @@ DB 설정이 있으면 listen 전에 [`@dfragon/database`](../../packages/databa
 Prisma CLI의 출력은 시작 경로에서 버립니다. 실패 원인은 같은 DB 설정으로 `@dfragon/database`의 `db:migrate:status`, `db:migrate:deploy`를 실행해 봅니다.
 Prisma는 실패한 migration을 실패로 기록하므로, 기록을 정리하기 전까지 다음 시작도 실패합니다. 정리 절차는 [migration 실패 복구](#migration-실패-복구)에 있습니다.
 Migration은 `public` schema 안에서만 합니다. 운영 계정은 extension, schema를 만들 수 없습니다.
-결정과 이유는 [ADR 0014](../../docs/adr/0014-api-postgresql-migrations-on-startup.md)에 있습니다.
 
 ### 타임라인 동기화
 
@@ -56,7 +54,7 @@ DB 설정이 있으면 API를 만들 때 Prisma client 하나와 메모리 queue
 상세 GET과 강제 갱신은 캐릭터 11개 섹션을 받았거나 캐릭터 캐시가 맞으면 `character.fetched` 이벤트를 내고, 동기화를 기다리지 않고 응답합니다. 타임라인 구독자가 이 이벤트를 받아 queue에 넣습니다.
 Queue는 같은 캐릭터를 합치고 2명씩 처리하며, 마지막 성공이 1시간 이내가 아닌 캐릭터만 `synced_until`부터 90일 구간씩 Neople에서 받아 `timeline_events`, `timeline_items`, `timeline_sync_state`에 저장합니다.
 실패는 `timeline_sync_state.last_failure`에 남고 재시도하지 않습니다. 종료 때 대기열은 버리고 진행 중인 동기화는 기다리지 않습니다.
-DB 설정이 없으면 queue를 만들지 않습니다. 동작은 [캐릭터 타임라인](../../docs/rules/character-timeline.md)에 있습니다.
+DB 설정이 없으면 queue를 만들지 않습니다.
 
 Migration 파일, 설정 읽기와 CLI는 `packages/database`에 있습니다. 만드는 법은 [`@dfragon/database` 안내](../../packages/database/README.md#빌드와-migration)를 따릅니다.
 Migration을 더하는 PR에는 이전 이미지가 새 schema로 뜨는지와 되돌릴 수 없는 변경이 있는지를 적습니다.
@@ -96,7 +94,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 `basic`은 기본정보, `sections`는 나머지 섹션 10개의 병렬 조회, `catalog`는 공용 아이템 조회입니다.
 실패한 요청은 성공한 단계까지만 남습니다.
 같은 캐릭터의 겹친 요청은 기본정보와 섹션 조회를 공유하므로 그 조회를 기다린 요청들에 같은 `basic`, `sections` 값이 붙고, 진행 중인 조회에 합류한 요청에는 `neopleShared: true`가 붙습니다.
-캐릭터 캐시가 맞았지만 [저장한 응답 본문](../../docs/rules/character-details.md#응답-본문-재사용)이 없는 요청은 Neople을 기다리지 않으므로 `basic`, `sections` 없이 `catalog`만 남습니다.
+캐릭터 캐시가 맞았지만 저장한 응답 본문이 없는 요청은 Neople을 기다리지 않으므로 `basic`, `sections` 없이 `catalog`만 남습니다.
 저장한 응답 본문을 그대로 보낸 요청은 Neople도 공용 아이템도 기다리지 않으므로 `neopleMs` 없이 `responseCached: true`가 붙습니다.
 `responseCached`는 상세 GET과 강제 갱신, 후보 검색에만 붙고, 저장한 본문 없이 새로 만든 응답에는 붙지 않습니다.
 강제 갱신은 캐시를 건너뛰므로 새로 받았거나 합류한 조회의 `basic`, `sections`가 붙습니다.
@@ -105,7 +103,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 
 `GET /characters/:serverId/:characterId/image`는 저장하지 않고 매번 네오플 이미지 서버를 부르며 `neopleMs`, `responseCached`를 붙이지 않습니다.
 
-`GET /characters/candidates`는 이름별로 24시간 [캐시](../../docs/rules/character-search.md#후보-검색-캐시)하며 `neopleMs`를 붙이지 않습니다.
+`GET /characters/candidates`는 이름별로 24시간 캐시하며 `neopleMs`를 붙이지 않습니다.
 저장한 결과를 보낸 요청에는 `responseCached: true`, 같은 이름의 진행 중인 검색에 합류한 요청에는 `neopleShared: true`가 붙고, Neople을 직접 기다린 요청에는 둘 다 붙지 않습니다.
 상세와 같은 뜻이라 같은 필드를 쓰며, 둘은 route로 구분합니다.
 

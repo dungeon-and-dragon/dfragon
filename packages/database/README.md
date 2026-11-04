@@ -2,7 +2,7 @@
 
 API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적용과 migration CLI를 담은 package입니다.
 `prisma`, `@prisma/client`, `@prisma/adapter-pg`(모두 7.10.1) 의존성을 이 package가 갖고, API는 `"@dfragon/database": "workspace:*"`로 공개 export만 씁니다.
-이 package는 `apps/api`를 import하지 않습니다. 동작과 결정은 [API README의 DB와 migration](../../apps/api/README.md#db와-migration)과 [ADR 0014](../../docs/adr/0014-api-postgresql-migrations-on-startup.md)를 따릅니다.
+이 package는 `apps/api`를 import하지 않습니다. 동작은 [API README의 DB와 migration](../../apps/api/README.md#db와-migration)을 따릅니다.
 
 ## 공개 export
 
@@ -34,7 +34,6 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 `src/prisma.config.ts`가 `readDatabaseConfiguration`으로 DB 입력을 읽고 계정, 비밀번호, DB 이름을 URL 인코딩해 `datasource.url`을 만듭니다.
 Child process에는 현재 환경변수를 그대로 넘기므로, API가 실행하는 Prisma 명령에는 운영 비밀번호가 `/run/secrets/db_password` 파일 경로로만 전달됩니다.
 다만 Prisma 7.10.1의 CLI는 schema engine을 실행할 때 연결 URL 전체를 `--datasource` 명령 인자로 넘기므로, migration이 도는 몇 초 동안 schema engine 프로세스의 명령 인자에 비밀번호가 보입니다.
-이 노출과 받아들인 이유는 [ADR 0014](../../docs/adr/0014-api-postgresql-migrations-on-startup.md)에 있습니다.
 
 ## 빌드와 migration
 
