@@ -3,7 +3,7 @@ type: rule
 status: active
 scope: apps/api character timeline sync, packages/database timeline tables
 last-reviewed: 2026-11-04
-evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 Neople adapter; #1179 상세 조회와 queue 연결"
+evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 Neople adapter; #1179 상세 조회와 queue 연결; #1180 운영 확인(101 data null, 기록 지연)"
 ---
 
 # 캐릭터 타임라인
@@ -13,7 +13,7 @@ evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 
 ## 수집 범위와 저장 코드
 
 - 수집은 중천 시즌 시작 `2025-01-09 06:00+09`부터 지금까지다. 이벤트와 아이템 모두 같고, 그 전 이력은 받지 않는다.
-- Neople [타임라인 코드](https://developers.neople.co.kr/contents/guide/pages/all#던파-타임라인-코드) 54개를 모두 저장한다. 표에 없는 코드가 오면 응답 전체를 공급자 오류로 본다.
+- Neople [타임라인 코드](https://developers.neople.co.kr/contents/guide/pages/all#던파-타임라인-코드) 54개를 모두 저장한다. 표에 없는 코드가 오면 응답 전체를 공급자 오류로 본다. 101(캐릭터 생성)처럼 `data`가 null로 오는 행은 빈 객체로 저장한다.
 - 1xx, 2xx, 3xx(캐릭터, 던전, 결투장)는 `timeline_events`에, 4xx, 5xx, 55x, 6xx(강화, 획득, 서약, 룬과 탈리스만)는 `timeline_items`에 둔다. `timeline_events`는 `raid_name`을, `timeline_items`는 `item_id`, `item_name`, `item_rarity`를 열로 꺼내고 원본 `data`를 jsonb로 함께 둔다.
 - `timeline_items`는 `occurred_at` 기준 시즌별 range partition이다. 시즌은 `seasons` 테이블에 있다. 테이블과 index는 [`@dfragon/database` 안내](../../packages/database/README.md#테이블)에 있다.
 
@@ -23,7 +23,8 @@ evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 
 - 응답은 동기화를 기다리지 않으며 형태와 시간이 DB 설정이 없을 때와 같다. 요청 경로는 DB를 읽지 않는다. 클라이언트는 동기화 상태를 알 수 없다.
 - Queue는 API 프로세스 메모리에 있다. 대기 중이거나 처리 중인 캐릭터는 서버, 캐릭터 ID로 합쳐 한 번만 처리하고, 동시에 2명까지 처리한다. 별도 worker 프로세스와 주기 갱신은 없다.
 - 처리기는 `timeline_sync_state`의 마지막 성공이 1시간 이내면 Neople을 부르지 않고 끝난다.
-- 아니면 `synced_until`부터 지금까지를 90일 이하 구간으로 나눠 앞 구간부터 차례로 받는다. 처음이거나 `synced_until`이 null이면 중천 시작부터 받는다. `synced_until` 분은 그때 받은 뒤 행이 더 생겼을 수 있어 그 분부터 다시 받는다.
+- 아니면 `synced_until` 30분 전부터 지금까지를 90일 이하 구간으로 나눠 앞 구간부터 차례로 받는다. 처음이거나 `synced_until`이 null이면 중천 시작부터 받고, 30분 전이 중천 시작보다 앞이면 중천 시작부터 받는다.
+- 30분을 다시 받는 이유는 기록 지연이다. 행동이 Neople 타임라인에 나타나기까지 보통 10분 안쪽이고 더 늦을 때가 있다. 지난 동기화 때 아직 보이지 않던 행은 일어난 시각이 `synced_until`보다 앞이라, 그 자리부터 받으면 영영 빠진다. 겹쳐 받은 30분은 구간 교체가 지우고 다시 넣어 두 번 들어가지 않는다.
 - 구간마다 `next`를 끝까지 따라 받은 뒤 구간 교체 transaction 하나로 저장한다. 모든 구간을 저장하면 마지막 성공을 기록한다.
 - Neople 호출 제한은 두지 않는다. 판단은 [공개 검색과 호출 제한](character-search.md#공개-검색과-호출-제한)과 같고, Neople 한도는 앱당 1초 1,000건이다. 처음 동기화하는 캐릭터는 구간(2026-11 기준 8개)마다 페이지 수만큼, 다시 받는 캐릭터는 보통 한 번 부른다.
 

@@ -7,6 +7,8 @@ import type { TimelineInputs } from './rows.js'
 // 중천 시즌 시작이다. 그 전 이력은 받지 않는다(#1175).
 const TIMELINE_COLLECTION_START = new Date('2025-01-09T06:00:00+09:00')
 const RESYNC_INTERVAL_MS = 60 * 60 * 1000
+// Neople 타임라인은 행동 뒤 보통 10분 안에 나타나지만 더 늦을 때가 있어 넉넉히 30분을 다시 받는다(#1187).
+const RECORD_DELAY_MS = 30 * 60 * 1000
 
 export type TimelineSyncFailure = `neople-${TimelineFailureKind}` | 'database'
 
@@ -35,6 +37,17 @@ function syncFailureOf(error: unknown): TimelineSyncFailure {
   return 'database'
 }
 
+function syncStart(state: TimelineSyncState | undefined): Date {
+  const syncedUntil = state?.syncedUntil
+  if (syncedUntil == null) {
+    return TIMELINE_COLLECTION_START
+  }
+
+  return new Date(
+    Math.max(syncedUntil.getTime() - RECORD_DELAY_MS, TIMELINE_COLLECTION_START.getTime())
+  )
+}
+
 function syncedRecently(state: TimelineSyncState | undefined, now: Date): boolean {
   const lastSucceededAt = state?.lastSucceededAt
   if (lastSucceededAt == null) {
@@ -55,10 +68,8 @@ export async function syncCharacterTimeline(
       return
     }
 
-    // synced_until 분은 그때 받은 뒤에도 행이 더 생겼을 수 있어 그 분부터 다시 받아 교체한다.
-    const from = state?.syncedUntil ?? TIMELINE_COLLECTION_START
     // 구간 교체가 synced_until을 그 구간 끝으로 덮어쓰므로 앞 구간부터 차례로 저장한다.
-    for (const range of splitTimelineRanges(from, until)) {
+    for (const range of splitTimelineRanges(syncStart(state), until)) {
       const inputs = await fetchTimeline(character, range)
       await store.replaceRange(character, range, inputs)
     }
