@@ -2,16 +2,16 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
 import type { TestContext } from 'node:test'
+import { createNeopleClientForTest, type NeopleTestDependencies } from '@dfragon/neople'
 import { createCatalogService } from '../src/characters/catalog/service.js'
-import { createNeopleCharacterSearchForTest } from '../src/characters/neople-character-search.js'
+import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
 import { createCharacterSearchService } from '../src/characters/search-service.js'
 import { NeopleSearchFailure } from '../src/errors/neople-search.js'
 import { createApiHttpApp } from '../src/http.js'
 import type {
   CharacterSearchRow,
   NeopleCharacterSearchInput,
-  NeopleCharacterSearchResult,
-  NeopleCharacterSearchTestDependencies
+  NeopleCharacterSearchResult
 } from '../src/types/neople-character-search.js'
 
 const characterName = '후보이름'
@@ -30,13 +30,9 @@ function jsonResponse(body: unknown, status = 200): Response {
   })
 }
 
-async function startApp(
-  t: TestContext,
-  dependencies: NeopleCharacterSearchTestDependencies
-): Promise<string> {
-  const searchCharacters = createNeopleCharacterSearchForTest(
-    'synthetic-candidates-key',
-    dependencies
+async function startApp(t: TestContext, dependencies: NeopleTestDependencies): Promise<string> {
+  const searchCharacters = createNeopleCharacterSearch(
+    createNeopleClientForTest('synthetic-candidates-key', dependencies)
   )
   const unusedProvider = async (): Promise<never> => {
     throw new Error('candidate search must not call detail providers')

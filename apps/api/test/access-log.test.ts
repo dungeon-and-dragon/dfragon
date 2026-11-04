@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
 import { Writable } from 'node:stream'
 import test from 'node:test'
+import { createNeopleClientForTest } from '@dfragon/neople'
 import { type AccessLogSink, createStreamAccessLogSink } from '../src/access-log.js'
 import { createCatalogService } from '../src/characters/catalog/service.js'
-import { createNeopleCharacterDetailsForTest } from '../src/characters/details/neople.js'
-import { createNeopleCharacterSearchForTest } from '../src/characters/neople-character-search.js'
+import { createNeopleCharacterDetails } from '../src/characters/details/neople.js'
+import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
 import { createApiHttpApp } from '../src/http.js'
 
 const unusedProvider = async (): Promise<never> => {
@@ -272,9 +273,11 @@ test('상세의 Neople 실패는 상세 오류와 원래 원인만 chain에 남�
   const app = await createApiHttpApp({
     search: { searchCharacters: async () => ({ rows: [] }) },
     details: {
-      fetchDetails: createNeopleCharacterDetailsForTest('fake-key', {
-        fetch: async () => responses.shift()!()
-      }),
+      fetchDetails: createNeopleCharacterDetails(
+        createNeopleClientForTest('fake-key', {
+          fetch: async () => responses.shift()!()
+        })
+      ),
       catalog: unusedCatalog
     },
     todayGrade: { fetchShopGrade: unusedProvider },
@@ -313,21 +316,24 @@ test('상세 요청 로그에는 Neople 단계별 대기 시간만 붙이고, �
   const app = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: {
-      fetchDetails: createNeopleCharacterDetailsForTest('fake-key', {
-        fetch: async (request) => {
-          const [, characterId, suffix = ''] = detailPath.exec(new URL(request.url).pathname) ?? []
-          if (characterId === failingCharacterId && suffix !== '') {
-            return Response.json({ error: { code: 'API901', message: secrets.errorDetail } })
-          }
+      fetchDetails: createNeopleCharacterDetails(
+        createNeopleClientForTest('fake-key', {
+          fetch: async (request) => {
+            const [, characterId, suffix = ''] =
+              detailPath.exec(new URL(request.url).pathname) ?? []
+            if (characterId === failingCharacterId && suffix !== '') {
+              return Response.json({ error: { code: 'API901', message: secrets.errorDetail } })
+            }
 
-          return Response.json({
-            serverId: 'siroco',
-            characterId,
-            characterName: secrets.characterName,
-            ...sectionFields[suffix]
-          })
-        }
-      }),
+            return Response.json({
+              serverId: 'siroco',
+              characterId,
+              characterName: secrets.characterName,
+              ...sectionFields[suffix]
+            })
+          }
+        })
+      ),
       catalog: createCatalogService(async (itemIds) => {
         catalogRequests.push(itemIds)
 
@@ -377,24 +383,26 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
   const app = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: {
-      fetchDetails: createNeopleCharacterDetailsForTest('fake-key', {
-        fetch: async (request) => {
-          const suffix = new URL(request.url).pathname.replace(
-            '/df/servers/siroco/characters/fixture-character',
-            ''
-          )
-          if (suffix === '') {
-            basicRequests.push(request.method)
-          }
+      fetchDetails: createNeopleCharacterDetails(
+        createNeopleClientForTest('fake-key', {
+          fetch: async (request) => {
+            const suffix = new URL(request.url).pathname.replace(
+              '/df/servers/siroco/characters/fixture-character',
+              ''
+            )
+            if (suffix === '') {
+              basicRequests.push(request.method)
+            }
 
-          return Response.json({
-            serverId: 'siroco',
-            characterId: 'fixture-character',
-            characterName: `조회 ${basicRequests.length}`,
-            ...sectionFields[suffix]
-          })
-        }
-      }),
+            return Response.json({
+              serverId: 'siroco',
+              characterId: 'fixture-character',
+              characterName: `조회 ${basicRequests.length}`,
+              ...sectionFields[suffix]
+            })
+          }
+        })
+      ),
       catalog: createCatalogService(
         async (itemIds) => new Map(itemIds.map((itemId) => [itemId, { itemId }]))
       )
@@ -456,17 +464,19 @@ test('후보 검색 요청 로그는 저장한 결과를 보낸 요청에 respon
   const logs = collectAccessLogs()
   const app = await createApiHttpApp({
     search: {
-      searchCharacters: createNeopleCharacterSearchForTest('fake-key', {
-        fetch: async (request) => {
-          providerCalls += 1
-          await gate
-          const characterName = new URL(request.url).searchParams.get('characterName')
+      searchCharacters: createNeopleCharacterSearch(
+        createNeopleClientForTest('fake-key', {
+          fetch: async (request) => {
+            providerCalls += 1
+            await gate
+            const characterName = new URL(request.url).searchParams.get('characterName')
 
-          return Response.json({
-            rows: [{ characterId: 'fixture-character', characterName, serverId: 'cain', fame: 1 }]
-          })
-        }
-      })
+            return Response.json({
+              rows: [{ characterId: 'fixture-character', characterName, serverId: 'cain', fame: 1 }]
+            })
+          }
+        })
+      )
     },
     details: unusedDetails,
     todayGrade: { fetchShopGrade: unusedProvider },
