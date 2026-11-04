@@ -17,7 +17,11 @@ import {
   syncCharacterTimeline
 } from '../src/characters/timeline/sync.js'
 import { createApiHttpApp } from '../src/http.js'
-import { CHARACTER_FETCHED, type CharacterFetched } from '../src/characters/events.js'
+import {
+  CHARACTER_FETCHED,
+  CharacterEvents,
+  type CharacterFetched
+} from '../src/characters/events.js'
 import type { CharacterIdentity } from '../src/characters/identity.js'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 
@@ -265,8 +269,8 @@ const payloads: CharacterPayloads = {
 
 test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 캐릭터를 받지 못하면 알리지 않는다', async (t) => {
   const fetched: CharacterIdentity[] = []
-  const events = new EventEmitter2()
-  events.on(CHARACTER_FETCHED, (event: CharacterFetched) => fetched.push({ ...event }))
+  const emitter = new EventEmitter2()
+  emitter.on(CHARACTER_FETCHED, (event: CharacterFetched) => fetched.push({ ...event }))
   let found = true
   const service = createCharacterDetailService({
     catalog: createCatalogService(async () => new Map()),
@@ -278,7 +282,7 @@ test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 
       return payloads
     },
     calculateScore: async () => null,
-    events
+    characterEvents: new CharacterEvents(emitter)
   })
   t.after(() => service.onModuleDestroy())
 
