@@ -46,7 +46,8 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 | 테이블 | 내용 |
 | --- | --- |
 | `adventures` | 자체 모험단 id와 지금 이름. 서버가 달라도 한 모험단입니다 |
-| `characters` | PK `(server_id, character_id)`, 지금 캐릭터 이름, 모험단 id |
+| `characters` | PK `(server_id, character_id)`, 지금 캐릭터 이름, 모험단 id. Neople 기본 정보를 받아 저장한 캐릭터는 레벨, 직업 id와 이름, 명성, 길드, `basic_fetched_at`도 있고, 다른 경로로 기록한 캐릭터는 이 열이 null입니다 |
+| `character_collection` | 기본 정보를 받을 캐릭터 대기열. PK `(server_id, character_id)`, 넣은 시각, 실패한 시도의 시각과 이유. 저장에 성공하면 행을 지웁니다 |
 | `seasons` | 시즌 id, 이름, 시작 시각. 중천(`2025-01-09 06:00+09`), 천해천(`2026-03-26 06:00+09`)을 migration이 넣습니다 |
 | `timeline_events` | 코드 1xx, 2xx, 3xx 타임라인. partition이 없습니다 |
 | `timeline_items` | 코드 4xx, 5xx, 55x, 6xx 타임라인. `occurred_at` 기준 시즌별 range partition이며 PK는 `(id, occurred_at)`입니다 |
