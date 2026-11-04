@@ -419,7 +419,7 @@ try {
     collectorName,
     ...collectorOptions,
     '--env',
-    'CHARACTER_IMPORT_FILE=/data/characters.jsonl',
+    'CHARACTER_IMPORT_FILES=/data/1/characters.jsonl,/data/2/characters.jsonl',
     imageId,
     'node',
     'dist/character-collector.js'
