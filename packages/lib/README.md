@@ -42,6 +42,17 @@ assert(Array.isArray(body.rows), invalidResponse)
 
 `./package.json`도 export하므로 빌드의 라이선스 수집기가 패키지 위치를 찾을 수 있습니다. 기존 CP949 원문은 `dist/notices`에 유지하고 패키지 루트 `LICENSES`에도 복사해 배포합니다.
 
+## Port 검사
+
+```ts
+import { parsePort } from '@dfragon/lib/port'
+
+parsePort('3000') // 3000
+```
+
+`parsePort`는 ASCII 십진 정수 1~65535만 받고, 누락, 공백, 부호, 소수, 범위 밖 값은 `Invalid server configuration`을 던집니다.
+API의 `PORT`와 `@dfragon/database`의 `DB_PORT`가 같은 규칙을 씁니다.
+
 ## 캐릭터 검색어 정책
 
 `matchesDNFSearchNicknamePolicy(nickname)`는 검색어의 Unicode 코드 포인트 수 2~12와 앞뒤 공백 금지를 함께 검사합니다. `DNF_SEARCH_NICKNAME_LIMITS`가 두 길이 경계의 원본입니다. 문자열을 trim, 정규화하지 않고 내부 공백과 분해 문자, 이모지 sequence의 기존 의미를 유지합니다.

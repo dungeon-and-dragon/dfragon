@@ -32,6 +32,7 @@ catalog:
   lru-cache: 11.5.3
   onnxruntime-web: 1.31.1
   pngjs: 7.0.0
+  prisma: 7.10.1
   react: 19.3.1
   react-dom: 19.3.1
   reflect-metadata: 0.2.2
@@ -52,9 +53,11 @@ catalogs:
     typescript: 6.0.2
 
 allowBuilds:
+  '@prisma/engines': true
   '@scarf/scarf': false
   esbuild: true
   koffi: true
+  prisma: false
   protobufjs: false
   workerd: true
 

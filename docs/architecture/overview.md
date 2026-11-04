@@ -19,6 +19,7 @@ apps/
 packages/
   client/
   client-core/
+  database/
   ui/
   lib/
   licenses/
@@ -26,10 +27,11 @@ packages/
 scripts/
 ```
 
-- `apps/api`: 캐릭터 공개 NestJS API workspace. DB 없이 Neople API를 조회하고 캐릭터, 공용 아이템 조회 결과를 API 메모리에 캐시한다. 승인된 ESM runtime, dependency, build/test 계약은 [`../rules/api-runtime.md`](../rules/api-runtime.md)를 따른다. 구현 현황은 Reference에서 확인한다.
+- `apps/api`: 캐릭터 공개 NestJS API workspace. Neople API를 조회하고 캐릭터, 공용 아이템 조회 결과를 API 메모리에 캐시한다. 승인된 ESM runtime, dependency, build/test 계약은 [`../rules/api-runtime.md`](../rules/api-runtime.md)를 따른다. 구현 현황은 Reference에서 확인한다.
 - `apps/web`: 던삐삐 소개 정적 사이트(`dfragon.com`). React, TypeScript, Vite 기반이며 첫 화면에 `@dfragon/client`로 그린 설치 없이 쓰는 웹 클라이언트를 둔다([웹 클라이언트](../rules/web-client.md)). 아래 Shared UI boundary를 따른다.
 - `packages/client`: 웹 앱의 컴포넌트, hook, WebApp, browser host를 담은 `@dfragon/client`. build 없이 source를 export한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
 - `packages/client-core`: 웹 앱이 쓰는 검색, 공대, OCR 로직과 타입, OCR 자산과 평가 도구를 담은 `@dfragon/client-core`. React와 `@dfragon/ui`에 의존하지 않으며 build 없이 source를 export한다. OCR과 화면 판독은 canvas, Worker 같은 브라우저 API를 쓴다.
+- `packages/database`: API가 쓰는 PostgreSQL 설정 읽기, migration 적용과 migration CLI를 담은 `@dfragon/database`. `prisma`를 소유하며 `apps/api`를 import하지 않는다([ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md), [안내](../../packages/database/README.md)).
 - `packages/ui`: 현재 tracked shared UI package `@dfragon/ui`. 실제 구현, 명령은 [공용 UI 안내](../../packages/ui/README.md)에서 확인한다.
 - `packages/lib`: 앱과 UI에 의존하지 않는 공용 순수 함수 `@dfragon/lib`. 아래 Shared library boundary를 따른다.
 - `packages/licenses`: 빌드 시 고지 원문, 수집, 배포 자료를 관리하는 `@dfragon/licenses`. 제품 runtime에서 import하지 않는다.
@@ -40,7 +42,7 @@ scripts/
 
 ## Approved boundary
 
-현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스와 DB는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 없이 동작한다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다.
+현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 설정이 있으면 PostgreSQL을 쓰고 시작할 때 migration을 적용한다(2026-11-04 결정, [ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md)). 아직 업무 테이블은 없다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다.
 
 웹 클라이언트는 dfragon.com 첫 화면에 두고, `@dfragon/client`의 컴포넌트를 브라우저 host로 연결해 쓴다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). OCR과 초상화 비교는 브라우저에서 하고 화면 이미지는 브라우저 밖으로 나가지 않으며, API는 캐릭터 검색, 상세와 점수, 네오플 초상화 전달을 맡는다. 계약은 [웹 클라이언트](../rules/web-client.md)를 따른다. 모바일은 지원하지 않는다(2026-11-01 결정, [웹 클라이언트](../rules/web-client.md#지원-범위)). 모바일 앱(native client)을 만들지 않고, 웹 클라이언트도 휴대폰과 좁은 화면용 레이아웃, 입력을 두지 않는다.
 
