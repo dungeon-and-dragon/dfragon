@@ -3,7 +3,7 @@ type: rule
 status: active
 scope: apps/api character timeline sync, packages/database timeline tables
 last-reviewed: 2026-11-04
-evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 Neople adapter; #1179 상세 조회와 queue 연결"
+evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 Neople adapter; #1179 상세 조회와 queue 연결; #1180 운영 확인(101 data null)"
 ---
 
 # 캐릭터 타임라인
@@ -13,7 +13,7 @@ evidence: "2026-11-04 #1175 결정 표; #1177 테이블과 저장 함수; #1178 
 ## 수집 범위와 저장 코드
 
 - 수집은 중천 시즌 시작 `2025-01-09 06:00+09`부터 지금까지다. 이벤트와 아이템 모두 같고, 그 전 이력은 받지 않는다.
-- Neople [타임라인 코드](https://developers.neople.co.kr/contents/guide/pages/all#던파-타임라인-코드) 54개를 모두 저장한다. 표에 없는 코드가 오면 응답 전체를 공급자 오류로 본다.
+- Neople [타임라인 코드](https://developers.neople.co.kr/contents/guide/pages/all#던파-타임라인-코드) 54개를 모두 저장한다. 표에 없는 코드가 오면 응답 전체를 공급자 오류로 본다. 101(캐릭터 생성)처럼 `data`가 null로 오는 행은 빈 객체로 저장한다.
 - 1xx, 2xx, 3xx(캐릭터, 던전, 결투장)는 `timeline_events`에, 4xx, 5xx, 55x, 6xx(강화, 획득, 서약, 룬과 탈리스만)는 `timeline_items`에 둔다. `timeline_events`는 `raid_name`을, `timeline_items`는 `item_id`, `item_name`, `item_rarity`를 열로 꺼내고 원본 `data`를 jsonb로 함께 둔다.
 - `timeline_items`는 `occurred_at` 기준 시즌별 range partition이다. 시즌은 `seasons` 테이블에 있다. 테이블과 index는 [`@dfragon/database` 안내](../../packages/database/README.md#테이블)에 있다.
 
