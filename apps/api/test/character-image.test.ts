@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createNeopleImageClientForTest, type FetchTransport } from '@dfragon/neople'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createNeopleCharacterImage } from '../src/characters/image/neople.js'
 import { createApiHttpApp } from '../src/http.js'
-import type { FetchTransport } from '../src/types/neople-character-search.js'
 
 const unusedProvider = async (): Promise<never> => {
   throw new Error('character image test must not call this provider')
@@ -26,7 +26,9 @@ async function startApp(t: test.TestContext, transport: FetchTransport): Promise
     search: { searchCharacters: unusedProvider },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider },
-    fetchCharacterImage: createNeopleCharacterImage({ fetch: transport }),
+    fetchCharacterImage: createNeopleCharacterImage(
+      createNeopleImageClientForTest({ fetch: transport })
+    ),
     writeAccessLog: () => undefined
   })
   t.after(() => app.close())

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { createNeopleClientForTest } from '@dfragon/neople'
 import { TimelineFailure } from '../src/characters/timeline/errors.js'
-import { createNeopleCharacterTimelineForTest } from '../src/characters/timeline/neople.js'
+import { createNeopleCharacterTimeline } from '../src/characters/timeline/neople.js'
 import { splitTimelineRanges } from '../src/characters/timeline/ranges.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
@@ -27,14 +28,16 @@ function seoulDayNumber(date: Date): number {
 test('next를 따라 모든 페이지를 모으고 다음 페이지 요청에는 next만 보낸다', async () => {
   const pages = timelinePages()
   const requests: URL[] = []
-  const adapter = createNeopleCharacterTimelineForTest('fake-key', {
-    fetch: async (request) => {
-      assert.equal(request.headers.get('apikey'), 'fake-key')
-      requests.push(new URL(request.url))
+  const adapter = createNeopleCharacterTimeline(
+    createNeopleClientForTest('fake-key', {
+      fetch: async (request) => {
+        assert.equal(request.headers.get('apikey'), 'fake-key')
+        requests.push(new URL(request.url))
 
-      return Response.json(pages[requests.length - 1])
-    }
-  })
+        return Response.json(pages[requests.length - 1])
+      }
+    })
+  )
 
   const { events, items } = await adapter(identity, range)
 
@@ -121,13 +124,15 @@ test('공급자 오류와 잘못된 응답은 기존 Neople 분류로 바꾸고 
     [200, { timeline: { rows: [{ ...validRow, code: 701 }], next: null } }, 'api']
   ] as const) {
     let calls = 0
-    const adapter = createNeopleCharacterTimelineForTest('fake-key', {
-      fetch: async () => {
-        calls++
+    const adapter = createNeopleCharacterTimeline(
+      createNeopleClientForTest('fake-key', {
+        fetch: async () => {
+          calls++
 
-        return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status })
-      }
-    })
+          return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status })
+        }
+      })
+    )
     await assert.rejects(adapter(identity, range), (error: unknown) => {
       assert(error instanceof TimelineFailure)
       assert.equal(error.kind, kind, `${status} ${JSON.stringify(body)}`)
@@ -143,13 +148,15 @@ test('공급자 오류와 잘못된 응답은 기존 Neople 분류로 바꾸고 
 
 test('연결 오류는 재시도하지 않고 원문 없이 공급자 오류로 반환한다', async () => {
   let calls = 0
-  const adapter = createNeopleCharacterTimelineForTest('fake-key', {
-    fetch: async () => {
-      calls++
-      // undici가 연결 실패에 쓰는 오류와 같은 이름, 문구다.
-      throw new TypeError('fetch failed', { cause: new Error('sensitive socket detail') })
-    }
-  })
+  const adapter = createNeopleCharacterTimeline(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () => {
+        calls++
+        // undici가 연결 실패에 쓰는 오류와 같은 이름, 문구다.
+        throw new TypeError('fetch failed', { cause: new Error('sensitive socket detail') })
+      }
+    })
+  )
   await assert.rejects(adapter(identity, range), (error: unknown) => {
     assert(error instanceof TimelineFailure)
     assert.equal(error.kind, 'api')

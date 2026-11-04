@@ -1,7 +1,5 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
-import ky from 'ky'
-import { NEOPLE_ORIGIN } from '../../constants/neople-character-search.js'
-import type { FetchTransport } from '../../types/neople-character-search.js'
+import type { NeopleClient } from '@dfragon/neople'
 import type { CharacterPayload } from '../details/sections.js'
 import { CATALOG_LIMITS, isCatalogId } from './types.js'
 
@@ -10,16 +8,7 @@ export type FetchCatalog = (
   signal: AbortSignal
 ) => Promise<Map<string, CharacterPayload>>
 
-function selectRequestedRows(body: unknown, itemIds: string[]): Map<string, CharacterPayload> {
-  if (!isRecord(body)) {
-    throw new Error('Invalid catalog body')
-  }
-
-  if (!Array.isArray(body.rows)) {
-    throw new Error('Invalid catalog list')
-  }
-  const rows = body.rows
-
+function selectRequestedRows(rows: unknown[], itemIds: string[]): Map<string, CharacterPayload> {
   const payloads = new Map<string, CharacterPayload>()
   for (const itemId of itemIds) {
     const matches = rows.filter((row) => isRecord(row) && row.itemId === itemId)
@@ -38,15 +27,7 @@ function selectRequestedRows(body: unknown, itemIds: string[]): Map<string, Char
   return payloads
 }
 
-export function createNeopleCatalog(apiKey: string, fetchImpl?: FetchTransport): FetchCatalog {
-  const neople = ky.create({
-    baseUrl: NEOPLE_ORIGIN,
-    fetch: fetchImpl,
-    headers: { apikey: apiKey },
-    redirect: 'error',
-    retry: 0
-  })
-
+export function createNeopleCatalog(neople: NeopleClient): FetchCatalog {
   return async (itemIds, signal) => {
     if (
       itemIds.length === 0 ||
@@ -57,13 +38,9 @@ export function createNeopleCatalog(apiKey: string, fetchImpl?: FetchTransport):
     }
 
     try {
-      return await neople
-        .get('/df/multi/items', {
-          signal,
-          searchParams: { itemIds: itemIds.join(',') },
-          parseJson: (rawBody) => selectRequestedRows(JSON.parse(rawBody), itemIds)
-        })
-        .json<Map<string, CharacterPayload>>()
+      const { rows } = await neople.multiItems(itemIds, signal)
+
+      return selectRequestedRows(rows, itemIds)
     } catch {
       throw new Error('Catalog lookup failed')
     }

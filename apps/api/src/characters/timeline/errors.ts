@@ -1,7 +1,7 @@
-import type { NeopleUpstreamFailureKind } from '../../errors/neople-search.js'
+import type { NeopleFailureKind } from '@dfragon/neople'
 import { type FailureOptions, SanitizedFailure } from '../../error-chain.js'
 
-export type TimelineFailureKind = NeopleUpstreamFailureKind | 'timeout'
+export type TimelineFailureKind = NeopleFailureKind
 
 export class TimelineFailure extends SanitizedFailure {
   readonly kind: TimelineFailureKind

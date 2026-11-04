@@ -1,41 +1,28 @@
 import { assert } from '@dfragon/lib/utils/assert'
+import { textOrNull } from '@dfragon/lib/utils/shape-check'
 import {
-  isFiniteNumber,
-  isNonblankString,
-  isRecord,
-  textOrNull
-} from '@dfragon/lib/utils/shape-check'
-import ky, { isTimeoutError } from 'ky'
-import { NEOPLE_ORIGIN, NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
-import {
-  classifyNeopleUpstreamFailure,
-  neopleStatusFailureKind,
-  NeopleSearchFailure
-} from '../errors/neople-search.js'
+  type NeopleCharacterSearchRow,
+  type NeopleClient,
+  NeopleRequestFailure
+} from '@dfragon/neople'
+import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
+import { forwardCause } from '../error-chain.js'
+import { NeopleSearchFailure } from '../errors/neople-search.js'
 import { CHARACTER_ID_PATTERN } from './identity.js'
 import type {
   CharacterSearchRow,
   NeopleCharacterSearchResult,
   NeopleCharacterSearchInput,
-  NeopleCharacterSearchTestDependencies,
-  SearchCharacters,
-  SearchDependencies
+  SearchCharacters
 } from '../types/neople-character-search.js'
-
-const nativeDependencies: SearchDependencies = {
-  origin: NEOPLE_ORIGIN
-}
 
 const invalidResponse = (): NeopleSearchFailure => new NeopleSearchFailure('api')
 
-function projectRow(candidate: unknown, input: NeopleCharacterSearchInput): CharacterSearchRow {
-  assert(isRecord(candidate), invalidResponse)
-
+function projectRow(
+  candidate: NeopleCharacterSearchRow,
+  input: NeopleCharacterSearchInput
+): CharacterSearchRow {
   const { characterId, characterName, serverId, fame } = candidate
-  assert(isNonblankString(characterId), invalidResponse)
-  assert(isNonblankString(characterName), invalidResponse)
-  assert(isNonblankString(serverId), invalidResponse)
-  assert(fame == null || isFiniteNumber(fame), invalidResponse)
 
   // Neople match ignores letter case, so a name differing only in case is a valid response row.
   if (input.wordType === 'match') {
@@ -45,7 +32,7 @@ function projectRow(candidate: unknown, input: NeopleCharacterSearchInput): Char
   }
 
   const serverName = NEOPLE_SERVER_NAMES.get(serverId) ?? null
-  const knownFame = isFiniteNumber(fame) ? fame : null
+  const knownFame = fame ?? null
   const jobName = textOrNull(candidate.jobName)
   const jobGrowName = textOrNull(candidate.jobGrowName)
 
@@ -61,20 +48,10 @@ function projectRow(candidate: unknown, input: NeopleCharacterSearchInput): Char
 }
 
 function projectResponse(
-  body: unknown,
-  status: number,
-  ok: boolean,
+  candidates: NeopleCharacterSearchRow[],
   input: NeopleCharacterSearchInput
 ): NeopleCharacterSearchResult {
-  const upstreamFailure = classifyNeopleUpstreamFailure(body, status, ok)
-  if (upstreamFailure !== undefined) {
-    throw new NeopleSearchFailure(upstreamFailure)
-  }
-
-  assert(isRecord(body), invalidResponse)
-  assert(Array.isArray(body.rows), invalidResponse)
-
-  const rows = body.rows.map((candidate: unknown) => projectRow(candidate, input))
+  const rows = candidates.map((candidate) => projectRow(candidate, input))
   if (input.wordType === 'match') {
     const exactRows = rows.filter((row) => row.characterName === input.characterName)
 
@@ -84,65 +61,25 @@ function projectResponse(
   return { rows }
 }
 
-function parseBody(rawBody: string, status: number): unknown {
-  try {
-    return JSON.parse(rawBody) as unknown
-  } catch (error) {
-    throw new NeopleSearchFailure(neopleStatusFailureKind(status), { cause: error })
-  }
-}
-
-function makeSearch(apiKey: string, dependencies: SearchDependencies): SearchCharacters {
-  const neople = ky.create({
-    baseUrl: dependencies.origin,
-    fetch: dependencies.fetch,
-    headers: { apikey: apiKey },
-    redirect: 'manual',
-    retry: 0,
-    throwHttpErrors: false
-  })
-
+export function createNeopleCharacterSearch(neople: NeopleClient): SearchCharacters {
   return async (input) => {
     try {
-      return await neople
-        .get(`/df/servers/${encodeURIComponent(input.serverId)}/characters`, {
-          searchParams: {
-            characterName: input.characterName,
-            limit: input.limit,
-            wordType: input.wordType ?? 'full'
-          },
-          // Only parseJson sees the response status while ky's .json() keeps its timeout on the body read.
-          // Reading response.text() directly after awaiting the request would leave the body unbounded.
-          parseJson: (rawBody, { response }) =>
-            projectResponse(
-              parseBody(rawBody, response.status),
-              response.status,
-              response.ok,
-              input
-            )
-        })
-        .json<NeopleCharacterSearchResult>()
+      const { rows } = await neople.searchCharacters(input.serverId, {
+        characterName: input.characterName,
+        limit: input.limit,
+        wordType: input.wordType ?? 'full'
+      })
+
+      return projectResponse(rows, input)
     } catch (error) {
-      if (isTimeoutError(error)) {
-        throw new NeopleSearchFailure('timeout')
+      if (error instanceof NeopleRequestFailure) {
+        throw new NeopleSearchFailure(error.kind, forwardCause(error))
       }
 
-      const failure =
-        error instanceof NeopleSearchFailure
-          ? error
-          : new NeopleSearchFailure('api', { cause: error })
-      throw failure
+      if (error instanceof NeopleSearchFailure) {
+        throw error
+      }
+      throw new NeopleSearchFailure('api', { cause: error })
     }
   }
-}
-
-export function createNeopleCharacterSearch(apiKey: string): SearchCharacters {
-  return makeSearch(apiKey, nativeDependencies)
-}
-
-export function createNeopleCharacterSearchForTest(
-  apiKey: string,
-  overrides: NeopleCharacterSearchTestDependencies
-): SearchCharacters {
-  return makeSearch(apiKey, { ...nativeDependencies, ...overrides })
 }

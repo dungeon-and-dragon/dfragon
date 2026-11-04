@@ -32,6 +32,7 @@ scripts/
 - `packages/client`: 웹 앱의 컴포넌트, hook, WebApp, browser host를 담은 `@dfragon/client`. build 없이 source를 export한다([ADR 0008](../adr/0008-desktop-discontinued.md)).
 - `packages/client-core`: 웹 앱이 쓰는 검색, 공대, OCR 로직과 타입, OCR 자산과 평가 도구를 담은 `@dfragon/client-core`. React와 `@dfragon/ui`에 의존하지 않으며 build 없이 source를 export한다. OCR과 화면 판독은 canvas, Worker 같은 브라우저 API를 쓴다.
 - `packages/database`: API가 쓰는 PostgreSQL 설정 읽기, migration 적용과 migration CLI를 담은 `@dfragon/database`. `prisma`를 소유하며 `apps/api`를 import하지 않는다([ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md), [안내](../../packages/database/README.md)).
+- `packages/neople`: API가 쓰는 Neople 오픈 API, 이미지 서버 client와 응답 schema를 담은 `@dfragon/neople`. `ky`, `zod`를 소유하고 `@dfragon/lib`에 의존하며 `apps/api`를 import하지 않는다([ADR 0016](../adr/0016-neople-client-package.md), [안내](../../packages/neople/README.md)).
 - `packages/ui`: 현재 tracked shared UI package `@dfragon/ui`. 실제 구현, 명령은 [공용 UI 안내](../../packages/ui/README.md)에서 확인한다.
 - `packages/lib`: 앱과 UI에 의존하지 않는 공용 순수 함수 `@dfragon/lib`. 아래 Shared library boundary를 따른다.
 - `packages/licenses`: 빌드 시 고지 원문, 수집, 배포 자료를 관리하는 `@dfragon/licenses`. 제품 runtime에서 import하지 않는다.

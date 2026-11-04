@@ -1,15 +1,13 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
+import { createNeopleClientForTest } from '@dfragon/neople'
 import type {
   CharacterDetailSection,
   CharacterPayloads
 } from '../src/characters/details/sections.js'
 import { CharacterDetailFailure, characterDetailFailure } from '../src/characters/details/errors.js'
-import {
-  createNeopleCharacterDetailsForTest,
-  validateCharacterPayload
-} from '../src/characters/details/neople.js'
+import { createNeopleCharacterDetails } from '../src/characters/details/neople.js'
 import { parseCharacterIdentity } from '../src/characters/details/service.js'
 import { NeopleSearchFailure } from '../src/errors/neople-search.js'
 
@@ -39,9 +37,9 @@ test('상세 입력은 지원 서버, 안전한 ID만 허용하고 query와 경�
   }
 })
 
-test('공급자 원문의 시즌 옵션과 미장착 null을 보존하고 누락, 잘못된 envelope를 거절한다', () => {
+test('공급자 원문의 시즌 옵션과 미장착 null을 보존하고 누락, 잘못된 envelope를 거절한다', async () => {
   const payload = { ...basic, creature: null, futureOption: { rate: '48.3%', value: 0 } }
-  assert.deepEqual(validateCharacterPayload(payload, identity, 'creature'), payload)
+  assert.deepEqual((await loadWithSection('creature', payload)).creature, payload)
   for (const body of [
     null,
     [],
@@ -50,8 +48,8 @@ test('공급자 원문의 시즌 옵션과 미장착 null을 보존하고 누락
     { ...payload, serverId: 'cain' },
     { ...payload, creature: 'invalid' }
   ]) {
-    assert.throws(
-      () => validateCharacterPayload(body, identity, 'creature'),
+    await assert.rejects(
+      loadWithSection('creature', body),
       (error: unknown) =>
         error instanceof CharacterDetailFailure &&
         error.status === 502 &&
@@ -94,14 +92,16 @@ test('공급자 알려진 code를 우선 분류하고 기본 조회 실패는 �
     [200, { ...basic, characterId: 'wrong' }, 502, 'NEOPLE_API_ERROR']
   ] as const) {
     let calls = 0
-    const adapter = createNeopleCharacterDetailsForTest('fake-key', {
-      fetch: async (request) => {
-        calls++
-        assert.equal(request.headers.get('apikey'), 'fake-key')
+    const adapter = createNeopleCharacterDetails(
+      createNeopleClientForTest('fake-key', {
+        fetch: async (request) => {
+          calls++
+          assert.equal(request.headers.get('apikey'), 'fake-key')
 
-        return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status })
-      }
-    })
+          return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status })
+        }
+      })
+    )
     await assert.rejects(
       adapter(identity, new AbortController().signal, ignoreStage),
       (error: unknown) => {
@@ -119,13 +119,15 @@ test('공급자 알려진 code를 우선 분류하고 기본 조회 실패는 �
 
 test('연결 오류는 재시도하지 않고 원문 없이 공급자 오류로 반환한다', async () => {
   let calls = 0
-  const adapter = createNeopleCharacterDetailsForTest('fake-key', {
-    fetch: async () => {
-      calls++
-      // undici가 연결 실패에 쓰는 오류와 같은 이름, 문구다.
-      throw new TypeError('fetch failed', { cause: new Error('sensitive socket detail') })
-    }
-  })
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () => {
+        calls++
+        // undici가 연결 실패에 쓰는 오류와 같은 이름, 문구다.
+        throw new TypeError('fetch failed', { cause: new Error('sensitive socket detail') })
+      }
+    })
+  )
   await assert.rejects(
     adapter(identity, new AbortController().signal, ignoreStage),
     (error: unknown) => {
@@ -153,23 +155,25 @@ test('공급자가 header나 body를 보내지 않으면 HTTP client timeout 뒤
     const waiting = new Promise<void>((resolve) => {
       markWaiting = resolve
     })
-    const adapter = createNeopleCharacterDetailsForTest('fake-key', {
-      fetch: async (request) => {
-        signal = request.signal
-        if (stall === 'header') {
-          markWaiting()
+    const adapter = createNeopleCharacterDetails(
+      createNeopleClientForTest('fake-key', {
+        fetch: async (request) => {
+          signal = request.signal
+          if (stall === 'header') {
+            markWaiting()
 
-          return neverSettles(request.signal)
+            return neverSettles(request.signal)
+          }
+          const pull = () => {
+            markWaiting()
+
+            return neverSettles(request.signal)
+          }
+
+          return new Response(new ReadableStream({ pull }, { highWaterMark: 0 }))
         }
-        const pull = () => {
-          markWaiting()
-
-          return neverSettles(request.signal)
-        }
-
-        return new Response(new ReadableStream({ pull }, { highWaterMark: 0 }))
-      }
-    })
+      })
+    )
     const pending = assert.rejects(
       adapter(identity, new AbortController().signal, ignoreStage),
       (error: unknown) => error instanceof CharacterDetailFailure && error.status === 504,
@@ -194,9 +198,11 @@ test('실제 HTTP transport는 redirect를 따라가지 않고 공급자 오류�
   const address = server.address()
   assert(address && typeof address !== 'string')
   try {
-    const adapter = createNeopleCharacterDetailsForTest('fake-key', {
-      origin: `http://127.0.0.1:${address.port}`
-    })
+    const adapter = createNeopleCharacterDetails(
+      createNeopleClientForTest('fake-key', {
+        origin: `http://127.0.0.1:${address.port}`
+      })
+    )
     await assert.rejects(
       adapter(identity, new AbortController().signal, ignoreStage),
       (error: unknown) => error instanceof CharacterDetailFailure && error.status === 502
@@ -219,15 +225,17 @@ test('기본 응답 뒤 취소되면 남은 섹션은 전송하지 않는다', a
     finish = resolve
   })
   let calls = 0
-  const adapter = createNeopleCharacterDetailsForTest('fixture-key', {
-    fetch: async () => {
-      calls++
-      started()
-      await late
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async () => {
+        calls++
+        started()
+        await late
 
-      return Response.json(basic)
-    }
-  })
+        return Response.json(basic)
+      }
+    })
+  )
   const pending = adapter(identity, controller.signal, ignoreStage)
   const rejected = assert.rejects(pending, { status: 500 })
   await entered
@@ -241,13 +249,15 @@ test('이미 취소된 요청은 기본 조회도 전송하지 않는다', async
   const controller = new AbortController()
   controller.abort()
   let calls = 0
-  const adapter = createNeopleCharacterDetailsForTest('fixture-key', {
-    fetch: async () => {
-      calls++
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async () => {
+        calls++
 
-      return Response.json(basic)
-    }
-  })
+        return Response.json(basic)
+      }
+    })
+  )
   await assert.rejects(adapter(identity, controller.signal, ignoreStage), { status: 500 })
   assert.equal(calls, 0)
 })
@@ -320,6 +330,22 @@ const sectionsByPath = new Map<string, CharacterDetailSection>([
   ['/skill/buff/equip/creature', 'buff_creature']
 ])
 
+function loadWithSection(section: CharacterDetailSection, body: unknown) {
+  const prefix = '/df/servers/siroco/characters/fixture-character'
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async (request) => {
+        const requested = sectionsByPath.get(new URL(request.url).pathname.slice(prefix.length))
+        assert(requested)
+
+        return Response.json(requested === section ? body : completePayloads[requested])
+      }
+    })
+  )
+
+  return adapter(identity, new AbortController().signal, ignoreStage)
+}
+
 test('기본 식별 응답을 확인한 뒤 나머지 10개를 동시에 시작해 11개 원문, 옵션, null을 모두 반환한다', {
   timeout: 2000
 }, async (t) => {
@@ -345,34 +371,36 @@ test('기본 식별 응답을 확인한 뒤 나머지 10개를 동시에 시작�
   let active = 0,
     peak = 0
   const prefix = '/df/servers/siroco/characters/fixture-character'
-  const adapter = createNeopleCharacterDetailsForTest('fixture-key', {
-    fetch: async (request) => {
-      const url = new URL(request.url)
-      assert(url.pathname.startsWith(prefix))
-      assert.equal(url.search, '')
-      assert.equal(request.headers.get('apikey'), 'fixture-key')
-      assert.equal(request.redirect, 'error')
-      const suffix = url.pathname.slice(prefix.length)
-      const section = sectionsByPath.get(suffix)
-      assert(section)
-      requested.push(suffix)
-      active++
-      peak = Math.max(peak, active)
-      if (section === 'basic') {
-        basicStarted()
-        await basicBody
-      } else {
-        // 예전 3개씩 조회에서는 응답 전에 10개가 모두 시작되지 않아 timeout으로 실패한다.
-        if (active === 10) {
-          allSectionsStarted()
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async (request) => {
+        const url = new URL(request.url)
+        assert(url.pathname.startsWith(prefix))
+        assert.equal(url.search, '')
+        assert.equal(request.headers.get('apikey'), 'fixture-key')
+        assert.equal(request.redirect, 'error')
+        const suffix = url.pathname.slice(prefix.length)
+        const section = sectionsByPath.get(suffix)
+        assert(section)
+        requested.push(suffix)
+        active++
+        peak = Math.max(peak, active)
+        if (section === 'basic') {
+          basicStarted()
+          await basicBody
+        } else {
+          // 예전 3개씩 조회에서는 응답 전에 10개가 모두 시작되지 않아 timeout으로 실패한다.
+          if (active === 10) {
+            allSectionsStarted()
+          }
+          await sectionBodies
         }
-        await sectionBodies
-      }
-      active--
+        active--
 
-      return Response.json(completePayloads[section])
-    }
-  })
+        return Response.json(completePayloads[section])
+      }
+    })
+  )
   const pending = adapter(identity, new AbortController().signal, ignoreStage)
   await enteredBasic
   assert.deepEqual(requested, [''])
@@ -400,24 +428,24 @@ test('각 상세 섹션의 필수 최상위 envelope를 검사하되 미장착 n
     ['buff_avatar', ['skill']],
     ['buff_creature', ['skill']]
   ] as const) {
-    await t.test(`${section} 필수 최상위 필드`, () => {
+    await t.test(`${section} 필수 최상위 필드`, async () => {
       const original = structuredClone(completePayloads[section])
       assert.deepEqual(
-        validateCharacterPayload(original, identity, section),
+        (await loadWithSection(section, original))[section],
         completePayloads[section]
       )
       for (const field of fields) {
         const absent = structuredClone(original)
         delete absent[field]
-        assert.throws(
-          () => validateCharacterPayload(absent, identity, section),
+        await assert.rejects(
+          loadWithSection(section, absent),
           (error: unknown) =>
             error instanceof CharacterDetailFailure &&
             error.status === 502 &&
             error.body.error.code === 'NEOPLE_API_ERROR'
         )
         const empty = { ...original, [field]: null }
-        assert.deepEqual(validateCharacterPayload(empty, identity, section), empty)
+        assert.deepEqual((await loadWithSection(section, empty))[section], empty)
       }
       assert.deepEqual(original, completePayloads[section])
     })
@@ -426,19 +454,21 @@ test('각 상세 섹션의 필수 최상위 envelope를 검사하되 미장착 n
 
 test('기본 응답 뒤 한 섹션이 실패하면 부분 성공을 반환하지 않는다', async () => {
   const paths: string[] = []
-  const adapter = createNeopleCharacterDetailsForTest('fixture-key', {
-    fetch: async (request) => {
-      const path = new URL(request.url).pathname
-      paths.push(path)
-      if (path.endsWith('/fixture-character')) {
-        return Response.json(basic)
-      }
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async (request) => {
+        const path = new URL(request.url).pathname
+        paths.push(path)
+        if (path.endsWith('/fixture-character')) {
+          return Response.json(basic)
+        }
 
-      return Response.json({
-        error: { code: 'API901', message: 'private section failure' }
-      })
-    }
-  })
+        return Response.json({
+          error: { code: 'API901', message: 'private section failure' }
+        })
+      }
+    })
+  )
 
   await assert.rejects(
     adapter(identity, new AbortController().signal, ignoreStage),
@@ -460,28 +490,30 @@ test('기본 응답 뒤 한 섹션이 실패하면 아직 진행 중인 다른 �
   timeout: 2_000
 }, async () => {
   const pendingSignals: AbortSignal[] = []
-  const adapter = createNeopleCharacterDetailsForTest('fixture-key', {
-    fetch: async (request) => {
-      const path = new URL(request.url).pathname
-      if (path.endsWith('/fixture-character')) {
-        return Response.json(basic)
+  const adapter = createNeopleCharacterDetails(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async (request) => {
+        const path = new URL(request.url).pathname
+        if (path.endsWith('/fixture-character')) {
+          return Response.json(basic)
+        }
+
+        if (path.endsWith('/equip/equipment')) {
+          return Response.json({ error: { code: 'API901', message: 'private section failure' } })
+        }
+
+        pendingSignals.push(request.signal)
+
+        return new Promise<Response>((_resolve, reject) => {
+          request.signal.addEventListener(
+            'abort',
+            () => reject(new DOMException('요청 취소', 'AbortError')),
+            { once: true }
+          )
+        })
       }
-
-      if (path.endsWith('/equip/equipment')) {
-        return Response.json({ error: { code: 'API901', message: 'private section failure' } })
-      }
-
-      pendingSignals.push(request.signal)
-
-      return new Promise<Response>((_resolve, reject) => {
-        request.signal.addEventListener(
-          'abort',
-          () => reject(new DOMException('요청 취소', 'AbortError')),
-          { once: true }
-        )
-      })
-    }
-  })
+    })
+  )
 
   await assert.rejects(adapter(identity, new AbortController().signal, ignoreStage), {
     status: 502

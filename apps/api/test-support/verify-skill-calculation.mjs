@@ -1,9 +1,7 @@
-import { isRecord } from '@dfragon/lib/utils/shape-check'
-import ky from 'ky'
 import { readSecretInput } from '@dfragon/database'
+import { createNeopleClient } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../dist/characters/neople-character-search.js'
 import { createNeopleCharacterDetails } from '../dist/characters/details/neople.js'
-import { NEOPLE_ORIGIN } from '../dist/constants/neople-character-search.js'
 import { isCatalogId } from '../dist/characters/catalog/types.js'
 import {
   SkillVerificationFailure,
@@ -13,32 +11,18 @@ import {
   verifyCharacterSkills
 } from './skill-calculation.mjs'
 
-function createSkillLookup(apiKey) {
-  const neople = ky.create({
-    baseUrl: NEOPLE_ORIGIN,
-    headers: { apikey: apiKey },
-    redirect: 'error',
-    retry: 0
-  })
-
+function createSkillLookup(neople) {
   return async ([key], signal) => {
     if (!key || !isCatalogId(key.jobId) || !isCatalogId(key.skillId)) {
       throw new Error('Invalid skill request')
     }
-    const path = `/df/skills/${encodeURIComponent(key.jobId)}/${encodeURIComponent(key.skillId)}`
     let body
     try {
-      body = await neople.get(path, { signal }).json()
+      body = await neople.skill(key.jobId, key.skillId, signal)
     } catch {
       throw new Error('Skill lookup failed')
     }
-    if (
-      !isRecord(body) ||
-      body.jobId !== key.jobId ||
-      typeof body.name !== 'string' ||
-      !body.name.trim() ||
-      (Object.hasOwn(body, 'skillId') && body.skillId !== key.skillId)
-    ) {
+    if (body.jobId !== key.jobId || (body.skillId !== undefined && body.skillId !== key.skillId)) {
       throw new Error('Invalid skill identity')
     }
 
@@ -58,10 +42,11 @@ try {
   } catch {
     throw new SkillVerificationFailure('INVALID_SECRET')
   }
+  const neople = createNeopleClient(apiKey)
   const providers = {
-    searchCharacters: createNeopleCharacterSearch(apiKey),
-    fetchDetails: createNeopleCharacterDetails(apiKey),
-    fetchCatalog: createSkillLookup(apiKey)
+    searchCharacters: createNeopleCharacterSearch(neople),
+    fetchDetails: createNeopleCharacterDetails(neople),
+    fetchCatalog: createSkillLookup(neople)
   }
   const summary = await verifyCharacterSkills(options, skillPackage, providers)
   process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
