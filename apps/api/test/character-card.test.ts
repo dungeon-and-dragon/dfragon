@@ -40,7 +40,6 @@ test('실응답 fixture의 딜러와 버퍼는 역할만 정하고 지운 칸은
 
 test('역할은 眞 접두를 포함한 버퍼 전직명으로 정하고 직업을 모르면 null이다', () => {
   for (const [jobGrowName, role] of [
-    ['眞 크루세이더', 'buffer'],
     ['眞 인챈트리스', 'buffer'],
     ['眞 패러메딕', 'buffer'],
     ['眞 뮤즈', 'buffer'],
@@ -54,5 +53,18 @@ test('역할은 眞 접두를 포함한 버퍼 전직명으로 정하고 직업�
   ] as const) {
     const card = projectCharacterCard({ character: { jobGrowName } })
     assert.deepEqual(card, { role, ...retiredFields }, String(jobGrowName))
+  }
+})
+
+test('크루세이더는 여성 프리스트면 버퍼, 남성 프리스트나 직업 계열을 모르면 딜러다', () => {
+  for (const [jobName, role] of [
+    ['프리스트(여)', 'buffer'],
+    ['프리스트(남)', 'dealer'],
+    [null, 'dealer']
+  ] as const) {
+    for (const jobGrowName of ['眞 크루세이더', '크루세이더']) {
+      const card = projectCharacterCard({ character: { jobName, jobGrowName } })
+      assert.deepEqual(card, { role, ...retiredFields }, `${jobName} ${jobGrowName}`)
+    }
   }
 })
