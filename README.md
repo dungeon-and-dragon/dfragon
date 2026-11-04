@@ -39,6 +39,7 @@ pnpm workspace 모노레포입니다.
 | [`apps/web`](apps/web/README.md) | 웹 앱과 소개 사이트(dfragon.com) |
 | [`packages/client`](packages/client/package.json) | 웹 앱의 컴포넌트, hook, OCR, 브라우저 host |
 | [`packages/client-core`](packages/client-core/package.json) | 웹 앱이 쓰는 검색, 공대 로직과 타입 |
+| [`packages/database`](packages/database/README.md) | API의 PostgreSQL 설정, Prisma migration과 migration CLI |
 | [`packages/lib`](packages/lib/README.md) | API와 웹 앱이 함께 쓰는 입력 규칙, 게임 UI 좌표, 픽셀 계산 |
 | [`packages/ui`](packages/ui/README.md) | 디자인 토큰과 공용 컴포넌트 |
 | [`packages/licenses`](packages/licenses/README.md) | 배포물에 넣는 오픈소스 고지 수집 |

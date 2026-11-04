@@ -39,29 +39,17 @@ Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절
 
 DB는 선택입니다. `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`과 `DB_PASSWORD` 또는 `DB_PASSWORD_FILE`의 절대 경로를 모두 지정하면 PostgreSQL을 쓰고, 모두 생략하면 DB 없이 뜹니다.
 일부만 지정하면 시작 전에 값 없이 실패합니다. 비밀번호는 Neople key처럼 읽되 끝의 줄바꿈과 공백까지 뺍니다.
-아직 업무 테이블은 없고, migration 기록 테이블 `typeorm_migrations`만 만듭니다.
+아직 업무 테이블은 없고, Prisma의 migration 기록 테이블 `_prisma_migrations`만 만듭니다.
 
-DB 설정이 있으면 listen 전에 `src/database/migrations`의 적용하지 않은 migration을 한 transaction으로 적용합니다.
-여러 인스턴스가 동시에 시작해도 PostgreSQL advisory lock으로 한 번만 적용합니다.
-연결, 인증, migration이 실패하면 transaction을 되돌리고 `API failed to start`와 nonzero exit로 끝나며 `/health`를 열지 않습니다.
-TypeORM의 migration 진행, 오류 출력은 시작 경로에서 끕니다. 실패 원인은 같은 DB 설정으로 아래 `db:migration:run`을 실행해 봅니다.
+DB 설정이 있으면 listen 전에 [`@dfragon/database`](../../packages/database/README.md)가 `prisma migrate deploy`로 적용하지 않은 migration을 적용합니다.
+여러 인스턴스가 동시에 시작해도 Prisma가 잡는 PostgreSQL advisory lock으로 한 번만 적용하며, lock을 10초 안에 얻지 못한 인스턴스는 끝납니다.
+연결, 인증, migration이 실패하면 `API failed to start`와 nonzero exit로 끝나며 `/health`를 열지 않습니다.
+Prisma CLI의 출력은 시작 경로에서 버립니다. 실패 원인은 같은 DB 설정으로 `@dfragon/database`의 `db:migrate:status`, `db:migrate:deploy`를 실행해 봅니다.
+Prisma는 실패한 migration을 실패로 기록하므로, 기록을 정리하기 전까지 다음 시작도 실패합니다. 정리 절차는 [migration 실패 복구](#migration-실패-복구)에 있습니다.
 Migration은 `public` schema 안에서만 합니다. 운영 계정은 extension, schema를 만들 수 없습니다.
 결정과 이유는 [ADR 0014](../../docs/adr/0014-api-postgresql-migrations-on-startup.md)에 있습니다.
 
-Migration은 TypeORM CLI로 만듭니다. `create`는 빈 파일을, `generate`는 entity와 DB의 차이를 담은 파일을 만듭니다.
-`generate`, `run`, `revert`, `show`는 앱의 `.env`에서 DB 설정을 읽습니다.
-
-```sh
-pnpm --filter @dfragon/api db:migration:create src/database/migrations/AddExample
-pnpm --filter @dfragon/api db:migration:generate src/database/migrations/AddExample
-pnpm --filter @dfragon/api db:migration:run
-pnpm --filter @dfragon/api db:migration:show
-pnpm --filter @dfragon/api db:migration:revert
-```
-
-TypeORM이 만든 파일의 `MigrationInterface`, `QueryRunner` import는 `verbatimModuleSyntax` 때문에 `import type`으로 바꾸고 `pnpm format`을 실행합니다.
-CLI의 `run`은 advisory lock을 잡지 않으므로 로컬 DB에만 씁니다.
-모든 migration을 한 transaction으로 적용하므로 `transaction = false`가 필요한 migration(`CREATE INDEX CONCURRENTLY` 등)을 더하면 시작에 실패합니다.
+Migration 파일, 설정 읽기와 CLI는 `packages/database`에 있습니다. 만드는 법은 [`@dfragon/database` 안내](../../packages/database/README.md#빌드와-migration)를 따릅니다.
 Migration을 더하는 PR에는 이전 이미지가 새 schema로 뜨는지와 되돌릴 수 없는 변경이 있는지를 적습니다.
 
 ## 로컬 개발 명령
@@ -129,7 +117,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ## 서버 이미지
 
 [Product Images](../../.github/workflows/product-images.yml)는 서버 이미지 입력이 바뀌었을 때만 API 이미지를 빌드합니다.
-`apps/api/**`, `packages/lib/**`, `packages/licenses/**`, `packages/models/**`와 root package, lockfile, workspace 설정,
+`apps/api/**`, `packages/database/**`, `packages/lib/**`, `packages/licenses/**`, `packages/models/**`와 root package, lockfile, workspace 설정,
 이미지 workflow, 선택 도구, 커밋 정보 생성기(`scripts/server-build-info.mjs`) 변경이 해당합니다.
 `packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진만 바꾼 PR도 이미지를 다시 빌드합니다.
 그 안의 `*.md` 문서는 이미지에 들어가지 않으므로 입력으로 보지 않습니다.
@@ -190,6 +178,7 @@ GHCR의 공개 범위, 접근 정책은 workflow가 변경하지 않습니다. �
 Dockerfile과 전용 ignore 파일은 `apps/api/`에 있습니다. 빌드 context는 제품 저장소 root이며
 `docker-entrypoint.sh`도 앱 옆에서 관리합니다. 의존성 설치에는 registry 토큰이나 BuildKit secret이 필요하지 않습니다.
 이미지는 점수 엔진 submodule의 Linux 엔진 `libdnfscore.so`와 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
+Prisma schema engine이 OpenSSL 3용으로 설치되도록 빌드 단계에 `openssl`을, 런타임 이미지에 `libssl3`을 둡니다.
 엔진 파일이 없으면 빌드에 실패하므로, 로컬 빌드 전에 `git submodule update --init packages/models/score-engine`으로 엔진을 받습니다.
 Product Images의 빌드 job도 이 submodule만 받습니다. 로컬 빌드는 다음과 같습니다.
 
@@ -239,9 +228,31 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 이미지 실행 계약은 로컬에 있는 이미지로 `node apps/api/test-support/container-deployment.mjs dfragon-api:local`을 실행해
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
 DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
-PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
+PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
-실패하는 migration이 되돌려지고 nonzero로 끝나는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
+실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
+
+### Migration 실패 복구
+
+새 이미지의 migration이 실패하면 배포 helper가 이전 이미지로 복귀하고, `_prisma_migrations`에 실패 기록이 남아 같은 이미지를 다시 배포해도 `P3009`로 뜨지 않습니다.
+관리자(ldbadmin)가 node1에서 실패한 이미지로 아래 명령을 실행해 정리합니다. 연결 정보는 운영 API 컨테이너와 같은 env 4개와 비밀번호 파일을 쓰며, 비밀번호는 파일 mount로만 넘겨 `docker run` 명령 인자에 드러나지 않습니다. 명령이 도는 동안 schema engine의 명령 인자에는 보입니다.
+Secret 파일의 host 경로와 network 이름은 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)의 현재 값을 확인해 씁니다.
+
+```sh
+IMAGE=ghcr.io/dungeon-and-dragon/dfragon/api@sha256:<실패한 이미지 digest>
+prisma_admin() {
+  docker run --rm --read-only --user 1000:1000 --cap-drop ALL --network dfragon_backend \
+    --env DB_HOST=postgres --env DB_PORT=5432 --env DB_NAME=dfragon --env DB_USERNAME=dfragon_api \
+    --mount type=bind,source=/etc/dfragon/secrets/dfragon_api_password,target=/run/secrets/db_password,readonly \
+    "$IMAGE" node node_modules/@dfragon/database/dist/cli.js "$@"
+}
+prisma_admin migrate status
+```
+
+1. `migrate status`로 실패한 migration 이름을 확인합니다.
+2. Migration이 `BEGIN`, `COMMIT`으로 감싸여 있으면 DB에 남은 변경이 없습니다. 감싸지 않은 migration이면 그 SQL에서 실행된 문장을 DB 관리자 계정으로 직접 되돌립니다.
+3. `prisma_admin migrate resolve --rolled-back <migration 이름>`으로 실패 기록을 되돌린 것으로 표시합니다.
+4. 원인을 고친 이미지를 다시 배포하면 시작할 때 그 migration을 다시 적용합니다.
 
 ## 비공개 스킬 패키지 검증
 
