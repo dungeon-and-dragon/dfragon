@@ -3,7 +3,8 @@ import { createServer } from 'node:http'
 import { URL } from 'node:url'
 import { createApiHttpApp } from '../dist/http.js'
 import { createCatalogService } from '../dist/characters/catalog/service.js'
-import { createNeopleCharacterSearchForTest } from '../dist/characters/neople-character-search.js'
+import { createNeopleClientForTest } from '@dfragon/neople'
+import { createNeopleCharacterSearch } from '../dist/characters/neople-character-search.js'
 
 export async function isolatedNeople() {
   const calls = []
@@ -83,10 +84,9 @@ export function unusedTodayGradeProvider() {
 export async function withSearchApp(operation, overrides = {}) {
   const neople = await isolatedNeople()
   const { calls, upstream } = neople
-  const adapter = createNeopleCharacterSearchForTest('synthetic-search-key', {
-    fetch,
-    origin: neople.origin
-  })
+  const adapter = createNeopleCharacterSearch(
+    createNeopleClientForTest('synthetic-search-key', { fetch, origin: neople.origin })
+  )
   const searchCharacters = (input) => {
     upstream.start?.()
 

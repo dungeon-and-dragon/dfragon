@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import test from 'node:test'
-import { createNeopleCharacterSearchForTest } from '../src/characters/neople-character-search.js'
+import { createNeopleClientForTest } from '@dfragon/neople'
+import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
 import { NeopleSearchFailure } from '../src/errors/neople-search.js'
 
 interface Loopback {
@@ -94,10 +95,12 @@ test('native fetch는 고정 endpoint와 검색어를 encode하고 API key를 �
   })
 
   try {
-    const search = createNeopleCharacterSearchForTest('obvious-placeholder-key', {
-      fetch,
-      origin: loopback.origin
-    })
+    const search = createNeopleCharacterSearch(
+      createNeopleClientForTest('obvious-placeholder-key', {
+        fetch,
+        origin: loopback.origin
+      })
+    )
     const result = await search({ characterName: '가 나+&/?', serverId: 'cain', limit: 200 })
 
     assert.deepEqual(result, {
@@ -147,10 +150,12 @@ test('native fetch는 redirect를 따라가거나 공급자 실패를 재시도�
   })
 
   try {
-    const search = createNeopleCharacterSearchForTest('obvious-placeholder-key', {
-      fetch,
-      origin: loopback.origin
-    })
+    const search = createNeopleCharacterSearch(
+      createNeopleClientForTest('obvious-placeholder-key', {
+        fetch,
+        origin: loopback.origin
+      })
+    )
     const error = await expectStatus(
       search({ characterName: '리다이렉트', serverId: 'cain', limit: 10 }),
       502
@@ -170,10 +175,12 @@ test('native fetch는 연결이 끊긴 통신 실패를 재시도하지 않고 5
   })
 
   try {
-    const search = createNeopleCharacterSearchForTest('obvious-placeholder-key', {
-      fetch,
-      origin: loopback.origin
-    })
+    const search = createNeopleCharacterSearch(
+      createNeopleClientForTest('obvious-placeholder-key', {
+        fetch,
+        origin: loopback.origin
+      })
+    )
     await expectStatus(search({ characterName: '연결끊김', serverId: 'cain', limit: 10 }), 502)
     assert.equal(requests, 1)
   } finally {
@@ -190,10 +197,12 @@ test('loopback의 잘못된 JSON은 공급자 HTTP 503 fallback으로 정제한�
   })
 
   try {
-    const search = createNeopleCharacterSearchForTest('obvious-placeholder-key', {
-      fetch,
-      origin: loopback.origin
-    })
+    const search = createNeopleCharacterSearch(
+      createNeopleClientForTest('obvious-placeholder-key', {
+        fetch,
+        origin: loopback.origin
+      })
+    )
     const error = await expectStatus(
       search({ characterName: '점검중', serverId: 'all', limit: 1 }),
       503
@@ -219,10 +228,12 @@ test('loopback API901 code는 HTTP 503보다 우선하여 502로 정제한다', 
   })
 
   try {
-    const search = createNeopleCharacterSearchForTest('obvious-placeholder-key', {
-      fetch,
-      origin: loopback.origin
-    })
+    const search = createNeopleCharacterSearch(
+      createNeopleClientForTest('obvious-placeholder-key', {
+        fetch,
+        origin: loopback.origin
+      })
+    )
     const error = await expectStatus(
       search({ characterName: '코드우선', serverId: 'cain', limit: 10 }),
       502
@@ -256,16 +267,18 @@ test('native 본문이 headers 뒤에 끊기면 HTTP 503 fallback 대신 통신 
   })
   t.after(() => closeLoopback(loopback.server))
 
-  const search = createNeopleCharacterSearchForTest('obvious-placeholder-key', {
-    fetch: async (request, init) => {
-      const response = await fetch(request, init)
-      assert.equal(response.status, 503)
-      headersReceived()
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('obvious-placeholder-key', {
+      fetch: async (request, init) => {
+        const response = await fetch(request, init)
+        assert.equal(response.status, 503)
+        headersReceived()
 
-      return response
-    },
-    origin: loopback.origin
-  })
+        return response
+      },
+      origin: loopback.origin
+    })
+  )
   await expectStatus(search({ characterName: '본문실패', serverId: 'all', limit: 10 }), 502)
   assert.equal(requests, 1)
 })

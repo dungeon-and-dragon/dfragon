@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCatalog } from '../src/characters/catalog/neople.js'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { enrichCharacterDetails } from '../src/characters/catalog/enrich.js'
@@ -70,20 +71,30 @@ test('공급자 응답을 요청 itemId로 대응하고 옵션을 보존하며 �
       ]
     })
   }
-  const values = await createNeopleCatalog('fixture-key', fetchImpl)([item, 'missing'], signal)
+  const values = await createNeopleCatalog(
+    createNeopleClientForTest('fixture-key', { fetch: fetchImpl })
+  )([item, 'missing'], signal)
   assert.deepEqual([...values.keys()], [item])
   assert.deepEqual(values.get(item)!.option, { value: '3%' })
   assert(!requestPaths[0]!.includes('fixture-key'))
-  const failure = createNeopleCatalog('fixture-key', async () => {
-    throw new Error('secret upstream message')
-  })
+  const failure = createNeopleCatalog(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async () => {
+        throw new Error('secret upstream message')
+      }
+    })
+  )
   await assert.rejects(failure([item], signal), { message: 'Catalog lookup failed' })
   let unavailableCalls = 0
-  const unavailable = createNeopleCatalog('fixture-key', async () => {
-    unavailableCalls++
+  const unavailable = createNeopleCatalog(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async () => {
+        unavailableCalls++
 
-    return Response.json({ error: { message: 'secret upstream message' } }, { status: 503 })
-  })
+        return Response.json({ error: { message: 'secret upstream message' } }, { status: 503 })
+      }
+    })
+  )
   await assert.rejects(unavailable([item], signal), { message: 'Catalog lookup failed' })
   // 503은 HTTP client 기본 재시도 대상이지만 공용 상세 조회는 재시도하지 않는다.
   assert.equal(unavailableCalls, 1)
@@ -161,17 +172,20 @@ test('아이템 다중 응답의 누락, 중복, 잘못된 이름은 저장 대�
     itemStatus: [{ name: '힘', value: 0 }],
     futureOption: { rate: '3%' }
   }
-  const adapter = createNeopleCatalog('fixture-key', async () =>
-    Response.json({
-      rows: [
-        { itemId: 'unrequested', itemName: '요청하지 않은 아이템' },
-        { itemId: 'duplicate', itemName: '중복 아이템' },
-        valid,
-        { itemId: 'duplicate', itemName: '중복 아이템' },
-        { itemId: 'bad-name', itemName: null },
-        null,
-        []
-      ]
+  const adapter = createNeopleCatalog(
+    createNeopleClientForTest('fixture-key', {
+      fetch: async () =>
+        Response.json({
+          rows: [
+            { itemId: 'unrequested', itemName: '요청하지 않은 아이템' },
+            { itemId: 'duplicate', itemName: '중복 아이템' },
+            valid,
+            { itemId: 'duplicate', itemName: '중복 아이템' },
+            { itemId: 'bad-name', itemName: null },
+            null,
+            []
+          ]
+        })
     })
   )
 

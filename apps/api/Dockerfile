@@ -9,6 +9,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
 COPY packages/database/package.json packages/database/package.json
 COPY packages/lib/package.json packages/lib/package.json
+COPY packages/neople/package.json packages/neople/package.json
 COPY packages/licenses/package.json packages/licenses/package.json
 COPY packages/licenses/src/copy-notices.mjs packages/licenses/src/copy-notices.mjs
 RUN pnpm install --frozen-lockfile --filter @dfragon/api...
@@ -17,6 +18,8 @@ COPY packages/database/src packages/database/src
 COPY packages/database/prisma packages/database/prisma
 COPY packages/lib/tsconfig.json packages/lib/tsconfig.json
 COPY packages/lib/src packages/lib/src
+COPY packages/neople/tsconfig.json packages/neople/tsconfig.json
+COPY packages/neople/src packages/neople/src
 COPY packages/licenses/notices/lib packages/licenses/notices/lib
 COPY apps/api/tsconfig*.json apps/api/
 COPY apps/api/src apps/api/src
