@@ -41,6 +41,7 @@ pnpm workspace 모노레포입니다.
 | [`packages/client-core`](packages/client-core/package.json) | 웹 앱이 쓰는 검색, 공대 로직과 타입 |
 | [`packages/database`](packages/database/README.md) | API의 PostgreSQL 설정, Prisma migration과 migration CLI |
 | [`packages/lib`](packages/lib/README.md) | API와 웹 앱이 함께 쓰는 입력 규칙, 게임 UI 좌표, 픽셀 계산 |
+| [`packages/neople`](packages/neople/README.md) | API가 쓰는 Neople 오픈 API, 이미지 서버 client와 응답 schema |
 | [`packages/ui`](packages/ui/README.md) | 디자인 토큰과 공용 컴포넌트 |
 | [`packages/licenses`](packages/licenses/README.md) | 배포물에 넣는 오픈소스 고지 수집 |
 | [`packages/models`](packages/models/README.md) | OCR 모델과 점수 엔진 submodule |
