@@ -14,7 +14,7 @@ export type CharacterSummary = CharacterIdentity &
     imageUrl: string
   }>
 
-export type CharacterCardRole = 'dealer' | 'buffer'
+export type CharacterCardRole = 'dealer' | 'buffer' | 'synergy'
 export type CharacterScoreCalculator = 'equipment' | 'buff'
 
 export type CharacterCardScore = Readonly<{

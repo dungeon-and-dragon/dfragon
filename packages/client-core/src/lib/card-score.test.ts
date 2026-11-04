@@ -33,6 +33,14 @@ it('버퍼 카드는 점수 라벨을 버프 점수, 색을 버퍼 톤으로 정
   })
 })
 
+it('시너지 카드는 장비 점수를 딜러 톤으로 보인다', () => {
+  expect(toScoreView({ ...dealerCard, role: 'synergy' })).toMatchObject({
+    label: '장비 점수',
+    tone: 'dealer',
+    value: 330556
+  })
+})
+
 it('역할을 모르는 카드는 점수 라벨을 장비 점수로 두고 역할 색을 정하지 않는다', () => {
   expect(toScoreView({ ...dealerCard, role: null })).toMatchObject({
     label: '장비 점수',
