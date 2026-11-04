@@ -21,6 +21,9 @@ const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs'
 const characterCheckPath = fileURLToPath(
   new URL('./container-character-check.mjs', import.meta.url)
 )
+const collectionCheckPath = fileURLToPath(
+  new URL('./container-collection-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -242,6 +245,8 @@ try {
         `type=bind,source=${timelineCheckPath},target=/app/container-timeline-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
         imageId
       ])
     )
@@ -372,8 +377,35 @@ try {
     'cain:합성A2:새모험단,siroco:합성B:새모험단|1|1'
   )
 
+  stage = 'character collection queue'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-collection-check.mjs'
+  ])
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(character_id || ':' || coalesce(failure, '-'), ',' ORDER BY character_id) FROM character_collection"
+      )
+    ).stdout.trim(),
+    'collect-failed:neople-api,collect-no-basic:-'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT c.level || ':' || c.job_grow_name || ':' || a.name || ':' || (c.basic_fetched_at IS NOT NULL) FROM characters c JOIN adventures a ON a.id = c.adventure_id WHERE c.character_id = 'collect-saved'"
+      )
+    ).stdout.trim(),
+    '115:眞 웨펀마스터:합성수집모험단:true'
+  )
+  await psql('DELETE FROM character_collection')
+
   stage = 'character collector waits on the empty queue and stops'
-  // 대기열이 비어 있어 Neople을 부르지 않는다. 수집기 export가 아직 없어도 대기열을 보며 기다린다.
+  // 대기열이 비어 있어 Neople을 부르지 않는다.
   const collectorOptions = [
     ...runtimeOptions,
     ...databaseEnvironment,
@@ -409,6 +441,10 @@ try {
           )
         ).stdout.trim()
       ) > 0
+  )
+  assert.equal(
+    (await docker(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
+    'true'
   )
   await docker(['stop', '--time', '15', collectorName])
   assert.equal(
