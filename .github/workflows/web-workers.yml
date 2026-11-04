@@ -1,6 +1,8 @@
 name: Web Workers
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -11,8 +13,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Deploys apps/web to the dev Worker on workers.dev while the sites still run on GitHub Pages.
+  # Deploys apps/web to the dev Worker, which serves dev.dfragon.com and its workers.dev address.
+  # Queued runs replace each other, so quick successive merges end with the latest main.
   deploy-dev:
+    if: github.repository == 'dungeon-and-dragon/dfragon'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

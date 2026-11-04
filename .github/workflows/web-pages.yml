@@ -23,8 +23,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/web-site-build
-        with:
-          site: production
 
   deploy:
     needs: build

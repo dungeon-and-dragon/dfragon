@@ -1,22 +1,9 @@
 name: Web site build
-description: Builds apps/web from the checked-out dfragon commit and uploads it as the Pages artifact.
-
-inputs:
-  site:
-    description: production (dfragon.com) or dev (dev.dfragon.com)
-    required: true
+description: Builds apps/web from the checked-out dfragon commit and uploads it as the dfragon.com Pages artifact.
 
 runs:
   using: composite
   steps:
-    - shell: bash
-      env:
-        SITE: ${{ inputs.site }}
-      run: |
-        case "$SITE" in
-          production | dev) ;;
-          *) echo "::error::site must be production or dev: $SITE"; exit 1 ;;
-        esac
     # The web app's OCR needs the pinned fine-tuned model. The site never loads the score engine submodule.
     - shell: bash
       run: git submodule update --init --depth 1 packages/models/ocr-finetuned
@@ -30,13 +17,6 @@ runs:
       run: pnpm install --frozen-lockfile
     - shell: bash
       run: pnpm --filter @dfragon/web build
-    # The dev site must stay out of search results and must not claim the production domain.
-    - if: inputs.site == 'dev'
-      shell: bash
-      run: |
-        rm apps/web/dist/CNAME
-        printf 'User-agent: *\nDisallow: /\n' > apps/web/dist/robots.txt
-        git rev-parse HEAD > apps/web/dist/version.txt
     # configure-pages reads the Pages site settings, which needs the pages permission.
     - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
     - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
