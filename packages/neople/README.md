@@ -2,7 +2,7 @@
 
 Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neople.co.kr`)를 부르는 package입니다.
 `ky`, `zod` 의존성을 이 package가 갖고(`@dfragon/lib`에도 의존), API는 `"@dfragon/neople": "workspace:*"`로 공개 export만 씁니다.
-이 package는 `apps/api`를 import하지 않습니다. 결정은 [ADR 0016](../../docs/adr/0016-neople-client-package.md)에 있습니다.
+이 package는 `apps/api`를 import하지 않습니다.
 
 ## 공개 export
 
@@ -27,7 +27,6 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
 - Neople 오류 body의 code를 먼저 분류하고, code가 없거나 모르는 값이면 HTTP status로 분류합니다. 429, 503은 `unavailable`, 그 밖의 비2xx는 `api`입니다.
 - JSON이 아닌 본문은 status로 분류하고, schema에 맞지 않는 응답은 `api`입니다.
 - Timeout은 `timeout`, 연결 오류와 그 밖의 transport 실패는 `api`입니다.
-- 응답 계약은 [캐릭터 검색의 Timeout과 adapter](../../docs/rules/character-search.md#timeout과-adapter)를 따릅니다.
 
 ## 검증
 

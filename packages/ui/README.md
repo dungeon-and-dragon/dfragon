@@ -1,6 +1,6 @@
 # 공용 UI
 
-`@dfragon/ui`는 던삐삐 디자인 토큰과 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이, 외형은 `--df-*` 토큰만 쓰는 StyleX가 맡는다. 제품 data, event, platform 연결은 소비 app이 소유한다. 기준은 `docs/rules/design-system.md`와 `docs/architecture/overview.md`다.
+`@dfragon/ui`는 던삐삐 디자인 토큰과 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이, 외형은 `--df-*` 토큰만 쓰는 StyleX가 맡는다. 제품 data, event, platform 연결은 소비 app이 소유한다.
 
 ## Public API와 CSS 책임
 
@@ -27,7 +27,7 @@
 
 ## 토큰
 
-던삐삐 디자인 토큰은 CSS custom property와 StyleX 상수 두 형태로 제공한다. 값과 이름은 dfragon-design `design/tokens.json`을 손으로 옮긴 것이며 기준 commit은 `tokens.css` 머리말에 적는다. 2026-11-04 결정([ADR 0009](../../docs/adr/0009-design-tokens-game-site-conventions.md))으로 바꾼 값은 `tokens.json` 반영 전이며, 어떤 토큰이 다른지는 그 머리말과 ADR에 있다.
+던삐삐 디자인 토큰은 CSS custom property와 StyleX 상수 두 형태로 제공한다. 값과 이름은 dfragon-design `design/tokens.json`을 손으로 옮긴 것이며 기준 commit은 `tokens.css` 머리말에 적는다. 2026-11-04 결정(ADR 0009)으로 바꾼 값은 `tokens.json` 반영 전이며, 어떤 토큰이 다른지는 그 머리말에 있다.
 
 - `@dfragon/ui/tokens.css`: `--df-*` 변수. 테마는 다크 하나라 `:root`에 값을 두며 `prefers-reduced-motion: reduce`에서 `--df-dur-*`를 0으로 둔다. `color-scheme`도 `dark`로 정해 스크롤 막대 같은 브라우저 기본 부품이 다크로 그려진다. Library JS는 이 파일을 import하지 않는다.
 - `@dfragon/ui/tokens.stylex`: `colors`, `space`, `radius`, `size`, `motion`, `font`. `stylex.defineConsts`로 `'var(--df-…)'` 문자열을 정의하며 `defineVars`, `createTheme`를 쓰지 않으므로 모드 전환은 CSS만으로 끝난다. StyleX compiler는 import 경로가 `.stylex`로 끝나는 파일의 `defineConsts`만 다른 파일에서 읽으므로 export 이름에 `.stylex`를 둔다. Package export는 source(`src/tokens.stylex.ts`)를 가리켜 소비 앱이 library를 먼저 빌드하지 않아도 compiler가 해석한다. 컴파일 없이 실행하면 `defineConsts`가 오류를 낸다.
@@ -102,8 +102,6 @@ import { Typo } from '@dfragon/ui'
 
 ### 화면 스타일 작성
 
-파일 배치, named export, 스타일 합성의 기준은 [화면별 스타일 계약](../../docs/rules/design-system.md#화면별-스타일-조정)을 따른다.
-
 ```tsx
 import * as stylex from '@stylexjs/stylex'
 import { colors, space } from '@dfragon/ui/tokens.stylex'
@@ -144,7 +142,7 @@ const styles = stylex.create({
 - `pnpm install --frozen-lockfile`
 - `node --test packages/ui/scripts/test-consumer-resolution.mjs`: 전용 checkout의 cold consumer command 회귀. 격리 조건과 소비 경계는 script 머리 주석에 있다.
 
-현재 package command는 repository root에서 실행한다. 소비 app과 Example은 [Design System의 영향 범위 검증](../../docs/rules/design-system.md#영향-범위-검증)에 따라 변경한 화면, 상태, 환경을 선택해 확인한다. jsdom 결과를 실제 브라우저 또는 Tab 이동 성공으로 대신하지 않는다.
+현재 package command는 repository root에서 실행한다. 소비 app과 Example은 변경한 화면, 상태, 환경을 선택해 확인한다. jsdom 결과를 실제 브라우저 또는 Tab 이동 성공으로 대신하지 않는다.
 
 Vitest는 TypeScript를 변환해 runtime assertion을 실행한다. Public API의 compile-only JSX 사례와 `expectTypeOf` assertion은 `test` 첫 단계의 실제 tsc에서 검사하며, runtime PASS만으로 타입 계약을 판단하지 않는다. Library의 declaration 생성은 src만 포함하므로 test와 examples의 typecheck를 대신하지 않는다.
 

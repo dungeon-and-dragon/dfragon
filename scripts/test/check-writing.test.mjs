@@ -86,9 +86,10 @@ test('옛 표기, 해요체 어미, 나열 가운뎃점, 붙여 쓴 요청형을
   assert.match(result.stderr, /위반 14건/u)
 })
 
-test('규칙 문서처럼 금지 표기를 예시로 담는 제외 경로는 명시해도 건너뛴다', async (t) => {
+test('검사 스크립트처럼 금지 표기를 예시로 담는 제외 경로는 명시해도 건너뛴다', async (t) => {
   const result = await checkFixture(t, {
-    'docs/rules/writing.md': '`DFRAGON`, `Dfragon`은 쓰지 않는다. 동작·구조 나열은 쉼표로 쓴다.\n'
+    'scripts/check-writing.mjs':
+      '// `DFRAGON`, `Dfragon`은 쓰지 않는다. 동작·구조 나열은 쉼표로 쓴다.\n'
   })
 
   assert.equal(result.code, 0, result.stderr)
