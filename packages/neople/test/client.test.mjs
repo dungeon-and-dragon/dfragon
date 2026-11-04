@@ -6,6 +6,20 @@ import { NeopleRequestFailure, createNeopleClientForTest } from '@dfragon/neople
 const apiKey = 'synthetic-neople-key'
 const signal = new AbortController().signal
 const identity = { serverId: 'cain', characterId: 'a/b c' }
+// 합성 캐릭터의 기본 정보다.
+const basic = {
+  ...identity,
+  characterName: '이름',
+  level: 115,
+  jobId: 'job-1',
+  jobGrowId: 'grow-1',
+  jobName: '귀검사(남)',
+  jobGrowName: '眞 웨펀마스터',
+  fame: 60000,
+  adventureName: '모험단',
+  guildId: null,
+  guildName: null
+}
 
 function recordingClient(body) {
   const requests = []
@@ -40,6 +54,11 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
       url: 'http://neople.test/df/servers/cain/characters/a%2Fb%20c/status'
     },
     {
+      call: (neople) => neople.characterBasic(identity),
+      body: basic,
+      url: 'http://neople.test/df/servers/cain/characters/a%2Fb%20c'
+    },
+    {
       call: (neople) => neople.characterTimeline(identity, { next: 'cursor' }),
       body: { timeline: { rows: [], next: null } },
       url: 'http://neople.test/df/servers/cain/characters/a%2Fb%20c/timeline?next=cursor'
@@ -68,6 +87,17 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
     assert.equal(requests[0].headers.get('apikey'), apiKey, url)
     assert.equal(requests[0].redirect, 'error', url)
   }
+})
+
+test('기본 정보에 모험단 이름이 없으면 api 실패로 던진다', async () => {
+  const { neople } = recordingClient({ ...basic, adventureName: null })
+
+  await assert.rejects(neople.characterBasic(identity), (error) => {
+    assert.ok(error instanceof NeopleRequestFailure)
+    assert.equal(error.kind, 'api')
+
+    return true
+  })
 })
 
 test('실패 종류와 원인: 분류한 실패와 schema 불일치는 원인 없이, 파싱, 연결 실패는 원래 오류를 원인으로 던진다', async () => {
