@@ -3,7 +3,7 @@ type: rule
 status: active
 enforcement: approval-required
 scope: architecture
-last-reviewed: 2026-11-03
+last-reviewed: 2026-11-04
 ---
 
 # Architecture Overview
@@ -42,7 +42,7 @@ scripts/
 
 ## Approved boundary
 
-현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 설정이 있으면 PostgreSQL을 쓰고 시작할 때 migration을 적용한다(2026-11-04 결정, [ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md)). 아직 업무 테이블은 없다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다.
+현재 workspace, app boundary와 API runtime, 검증 기반이 승인됐다. 검색의 입력, 응답, 오류는 [`../rules/character-search.md`](../rules/character-search.md)를 따른다. 회원 인증 서비스는 두지 않는다(2026-10-26 결정, [Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). API는 DB 설정이 있으면 PostgreSQL을 쓰고 시작할 때 migration을 적용한다(2026-11-04 결정, [ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md)). 업무 테이블은 캐릭터 상세 조회가 API 안 queue로 채우는 캐릭터 타임라인이며([캐릭터 타임라인](../rules/character-timeline.md), [ADR 0015](../adr/0015-character-timeline-sync-in-api.md)), 저장한 값을 읽는 API는 아직 없다. 캐릭터 조회 결과를 API 메모리에 1시간, 공용 아이템 정보를 24시간 캐시하며, 지금은 서버 한 대, 인스턴스 하나라 메모리로 충분하다(2026-10-29 결정, [Issue #992](https://github.com/dungeon-and-dragon/dfragon/issues/992)). 여러 노드로 늘리면 캐시를 노드가 공유하는 저장소(Redis)로 옮긴다.
 
 웹 클라이언트는 dfragon.com 첫 화면에 두고, `@dfragon/client`의 컴포넌트를 브라우저 host로 연결해 쓴다(2026-11-01 결정, [ADR 0004](../adr/0004-web-client.md)). OCR과 초상화 비교는 브라우저에서 하고 화면 이미지는 브라우저 밖으로 나가지 않으며, API는 캐릭터 검색, 상세와 점수, 네오플 초상화 전달을 맡는다. 계약은 [웹 클라이언트](../rules/web-client.md)를 따른다. 모바일은 지원하지 않는다(2026-11-01 결정, [웹 클라이언트](../rules/web-client.md#지원-범위)). 모바일 앱(native client)을 만들지 않고, 웹 클라이언트도 휴대폰과 좁은 화면용 레이아웃, 입력을 두지 않는다.
 
