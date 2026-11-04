@@ -54,8 +54,9 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 저장소 소유자가 한 번 해야 하는 설정입니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다.
 
 1. Cloudflare 계정에 R2를 켜고 bucket `dfragon-web-ocr`를 만듭니다.
-2. Account API token을 만듭니다. 권한은 Workers 제품 범위의 Admin(처음 배포가 새 Worker를 만들어야 해서 Editor로는 안 됩니다)과 bucket `dfragon-web-ocr`의 Workers R2 Storage Bucket Item Write만 줍니다. 예전 Workers Scripts 권한은 legacy입니다.
-3. 이 저장소의 Actions Secret `CLOUDFLARE_API_TOKEN`에 token을, `CLOUDFLARE_ACCOUNT_ID`에 계정 ID를 넣습니다.
+2. Workers & Pages에서 workers.dev subdomain을 등록합니다. 등록하지 않으면 배포가 subdomain을 묻다가 실패합니다. 지금 subdomain은 `dfragon`이라 dev Worker 주소는 `https://dfragon-web-dev.dfragon.workers.dev`입니다.
+3. Account API token을 만듭니다. 권한은 Workers 제품 범위의 Admin(처음 배포가 새 Worker를 만들어야 해서 Editor로는 안 됩니다)과 Workers R2 Storage Write만 줍니다. Workers R2 Storage Bucket Item Write로는 wrangler의 R2 업로드가 403으로 실패합니다. 예전 Workers Scripts 권한은 legacy입니다.
+4. 이 저장소의 Actions Secret `CLOUDFLARE_API_TOKEN`에 token을, `CLOUDFLARE_ACCOUNT_ID`에 계정 ID를 넣습니다.
 
 ### 운영 사이트 설정
 
