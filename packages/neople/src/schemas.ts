@@ -53,6 +53,23 @@ export const characterSectionSchemas = Object.fromEntries(
   ])
 ) as Record<NeopleCharacterSection, ReturnType<typeof sectionSchema>>
 
+export const characterBasicSchema = z.object({
+  characterId: nonblankString,
+  serverId: nonblankString,
+  characterName: nonblankString,
+  level: z.int(),
+  jobId: nonblankString,
+  jobGrowId: nonblankString,
+  jobName: nonblankString,
+  jobGrowName: nonblankString,
+  fame: z.int().nullish(),
+  adventureName: nonblankString,
+  guildId: z.string().nullish(),
+  guildName: z.string().nullish()
+})
+
+export type NeopleCharacterBasic = z.output<typeof characterBasicSchema>
+
 const TIMELINE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/
 
 export const timelinePageSchema = z.object({

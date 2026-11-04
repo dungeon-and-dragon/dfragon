@@ -16,6 +16,11 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   Neople은 모험단 id를 주지 않아 `adventures`가 자체 id를 붙입니다.
   캐릭터는 모험단을 옮기지 못하므로, 이미 기록한 캐릭터의 모험단 이름이 다르면 그 모험단의 이름이 바뀐 것으로 보고 이름만 바꿉니다.
   처음 보는 캐릭터는 같은 이름의 모험단에 붙이고(같은 이름이 여럿이면 가장 나중에 만든 행), 없으면 모험단을 만듭니다. 모험단 이름 단위 advisory lock으로 같은 모험단이 두 번 생기지 않게 합니다.
+- `enqueueCollectedCharacters(client, characters)`: 목록 파일에서 읽은 캐릭터(`CollectedCharacter`)를 `character_collection`에 넣습니다.
+  이미 대기열에 있거나 기본 정보를 저장한(`basic_fetched_at`이 있는) 캐릭터와 같은 입력 안의 중복은 넣지 않습니다.
+- `takeCollectionBatch(client, limit)`: `failure`가 없는 대기열 행을 넣은 순서(같은 시각이면 서버, 캐릭터 id 순)대로 `limit`개까지 돌려줍니다.
+- `recordCharacterBasic(client, basic)`: Neople 기본 정보(`CharacterBasicInput`)를 `recordCharacter`와 같은 모험단 규칙으로 `characters`에 저장하고 `basic_fetched_at`을 지금으로 둔 뒤, 같은 transaction에서 대기열 행을 지웁니다.
+- `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `replaceTimelineRange(client, character, range, events, items)`: 캐릭터 하나의 `[range.start, range.end]`(양 끝 포함) 타임라인을 교체합니다.
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
   Transaction timeout은 lock 대기를 포함해 60초입니다. 로컬에서 items 5만 행 교체가 Prisma 기본값 5초를 넘었습니다.

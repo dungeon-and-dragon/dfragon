@@ -21,6 +21,7 @@ export {
 export {
   NEOPLE_CHARACTER_SECTIONS,
   type NeopleCharacter,
+  type NeopleCharacterBasic,
   type NeopleCharacterSearchRow,
   type NeopleCharacterSection,
   type NeopleSkill,
