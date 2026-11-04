@@ -1,0 +1,108 @@
+[
+  {
+    "characterId": "fixture-character",
+    "characterName": "테스트 캐릭터",
+    "level": 115,
+    "jobId": "fixture-job",
+    "jobGrowId": "fixture-job-grow",
+    "jobName": "테스트 직업",
+    "jobGrowName": "테스트 전직",
+    "adventureName": "테스트 모험단",
+    "guildId": null,
+    "guildName": null,
+    "timeline": {
+      "date": { "start": "2025-01-09 06:00", "end": "2025-04-08 05:59" },
+      "next": "fixture-next-page",
+      "rows": [
+        {
+          "code": 505,
+          "name": "아이템 획득(던전 드랍)",
+          "date": "2025-01-10 00:30",
+          "data": {
+            "itemId": "fixture-item-epic",
+            "itemName": "테스트 에픽 아이템",
+            "itemRarity": "에픽",
+            "channelName": "테스트 채널",
+            "channelNo": 7,
+            "dungeonName": "테스트 던전",
+            "mistGear": false
+          }
+        },
+        {
+          "code": 504,
+          "name": "아이템 획득(항아리&상자)",
+          "date": "2025-01-09 23:59",
+          "data": {
+            "itemId": "fixture-item-box",
+            "itemName": "테스트 상자 아이템",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "code": 504,
+          "name": "아이템 획득(항아리&상자)",
+          "date": "2025-01-09 23:59",
+          "data": {
+            "itemId": "fixture-item-box",
+            "itemName": "테스트 상자 아이템",
+            "itemRarity": "레전더리"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "characterId": "fixture-character",
+    "characterName": "테스트 캐릭터",
+    "level": 115,
+    "jobId": "fixture-job",
+    "jobGrowId": "fixture-job-grow",
+    "jobName": "테스트 직업",
+    "jobGrowName": "테스트 전직",
+    "adventureName": "테스트 모험단",
+    "guildId": null,
+    "guildName": null,
+    "timeline": {
+      "date": { "start": "2025-01-09 06:00", "end": "2025-04-08 05:59" },
+      "next": null,
+      "rows": [
+        {
+          "code": 201,
+          "name": "레이드",
+          "date": "2025-01-09 21:15",
+          "data": {
+            "raidName": "테스트 레이드",
+            "phaseName": "테스트 단계",
+            "raidPartyName": "테스트 공격대",
+            "hard": true
+          }
+        },
+        {
+          "code": 401,
+          "name": "아이템 강화",
+          "date": "2025-01-09 07:05",
+          "data": {
+            "itemId": "fixture-item-reinforce",
+            "itemName": "테스트 강화 아이템",
+            "before": 11,
+            "after": 12,
+            "result": true,
+            "safe": false
+          }
+        },
+        {
+          "code": 104,
+          "name": "캐릭터 최고 레벨 달성",
+          "date": "2025-01-09 06:00",
+          "data": { "level": 115 }
+        },
+        {
+          "code": 301,
+          "name": "결투장 경험치 등급 상승",
+          "date": "2025-01-09 06:00",
+          "data": { "pvpGradeName": "테스트 등급" }
+        }
+      ]
+    }
+  }
+]
