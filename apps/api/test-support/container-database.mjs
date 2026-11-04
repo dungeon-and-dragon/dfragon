@@ -29,6 +29,7 @@ const networkName = `dfragon-db-test-${runId}`
 const postgresName = `dfragon-db-test-${runId}-postgres`
 const apiNames = [1, 2].map((index) => `dfragon-db-test-${runId}-api-${index}`)
 const failureName = `dfragon-db-test-${runId}-failure`
+const collectorName = `dfragon-db-test-${runId}-collector`
 const labelKey = 'com.dfragon.image-test.run'
 const label = `${labelKey}=${runId}`
 // Docker CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
@@ -371,6 +372,67 @@ try {
     'cain:합성A2:새모험단,siroco:합성B:새모험단|1|1'
   )
 
+  stage = 'character collector waits on the empty queue and stops'
+  // 대기열이 비어 있어 Neople을 부르지 않는다. 수집기 export가 아직 없어도 대기열을 보며 기다린다.
+  const collectorOptions = [
+    ...runtimeOptions,
+    ...databaseEnvironment,
+    '--mount',
+    `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`
+  ]
+  await docker([
+    'run',
+    '--detach',
+    '--name',
+    collectorName,
+    ...collectorOptions,
+    '--env',
+    'CHARACTER_IMPORT_FILE=/data/characters.jsonl',
+    imageId,
+    'node',
+    'dist/character-collector.js'
+  ])
+  const collectorAddress = (
+    await docker([
+      'inspect',
+      '--format',
+      `{{(index .NetworkSettings.Networks "${networkName}").IPAddress}}`,
+      collectorName
+    ])
+  ).stdout.trim()
+  await waitFor(
+    async () =>
+      Number(
+        (
+          await psql(
+            `SELECT count(*) FROM pg_stat_activity WHERE client_addr = '${collectorAddress}'`
+          )
+        ).stdout.trim()
+      ) > 0
+  )
+  await docker(['stop', '--time', '15', collectorName])
+  assert.equal(
+    (await docker(['inspect', '--format', '{{.State.ExitCode}}', collectorName])).stdout.trim(),
+    // 종료 처리를 두지 않아 SIGTERM의 기본 동작(128 + 15)으로 끝난다.
+    '143'
+  )
+  await removeOwned(collectorName)
+  const missingImportFile = await docker(
+    [
+      'run',
+      '--rm',
+      '--name',
+      collectorName,
+      ...collectorOptions,
+      imageId,
+      'node',
+      'dist/character-collector.js'
+    ],
+    { allowFailure: true }
+  )
+  assert.equal(missingImportFile.code, 1)
+  assert.equal(missingImportFile.stderr, 'Character collector failed\n')
+
   stage = 'graceful stop'
   for (const name of apiNames) {
     await docker(['stop', '--time', '15', name])
@@ -441,7 +503,9 @@ try {
   process.exitCode = 1
 } finally {
   const cleanup = [
-    ...[...apiNames, failureName, postgresName].map((name) => () => removeOwned(name)),
+    ...[...apiNames, failureName, collectorName, postgresName].map(
+      (name) => () => removeOwned(name)
+    ),
     async () => {
       if (networkCreated) {
         await docker(['network', 'rm', networkName])
@@ -464,6 +528,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, character records, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, character records, character collector start and stop, HTTP and database input rejection\n'
   )
 }
