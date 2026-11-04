@@ -194,7 +194,7 @@ DB를 붙인 실행은 아래 명령으로 검사합니다. 같은 준비 조건
 node apps/api/test-support/container-database.mjs dfragon-api:local
 ```
 
-합성 비밀번호로 PostgreSQL 컨테이너와 internal network를 만들고, 시작 때 migration 적용, 다른 연결이 advisory lock을 잡은 동안 두 인스턴스의 대기, HTTP 기동, 실패한 migration의 rollback, 잘못된 DB 입력의 거절을 확인한 뒤 만든 컨테이너와 network를 지웁니다.
+합성 비밀번호로 PostgreSQL 컨테이너와 internal network를 만들고, 시작 때 migration 적용, 다른 연결이 Prisma의 advisory lock을 잡은 동안 두 인스턴스의 대기, HTTP 기동, 실패한 migration의 nonzero 종료, 잘못된 DB 입력의 거절을 확인한 뒤 만든 컨테이너와 network를 지웁니다.
 
 웹 앱 package의 `test`는 `typecheck`를 포함하므로 위 조합에서 별도로 반복하지 않습니다. Web `build`도 `tsc -b`를 포함합니다. Web은 `@dfragon/client`, `@dfragon/client-core`를 번들하므로 두 package를 바꾸면 Web 검사도 함께 실행합니다. 빠른 feedback이 필요할 때는 기존 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
 

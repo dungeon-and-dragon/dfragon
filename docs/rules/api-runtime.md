@@ -63,10 +63,11 @@ App 생성은 port를 열지 않는 factory로 분리하고, `main.ts`만 설정
 DB 설정은 `DB_HOST`, `DB_PORT`(십진 정수 1~65535), `DB_NAME`, `DB_USERNAME`과 `DB_PASSWORD` 또는 `DB_PASSWORD_FILE`(절대 경로) 다섯 입력이다.
 전부 없으면 DB 없이 시작한다. 일부만 있거나 빈 값, 잘못된 값이 있으면 listen 전에 값 없이 실패한다.
 비밀번호는 끝의 줄바꿈과 공백을 빼고 쓴다.
-DB 설정이 있으면 listen 전에 `typeorm`의 migration을 PostgreSQL session advisory lock 아래에서 한 transaction으로 적용한다.
-연결, 인증, migration이 실패하면 transaction을 되돌리고 값, 원인 없이 nonzero로 끝나며 `/health`를 열지 않는다.
+DB 설정이 있으면 listen 전에 `prisma migrate deploy`로 아직 적용하지 않은 migration을 적용한다. 동시 실행은 Prisma가 잡는 advisory lock이 막는다.
+연결, 인증, migration이 실패하면 값, 원인 없이 nonzero로 끝나며 `/health`를 열지 않는다. Prisma는 실패한 migration을 되돌리지 않고 실패로 기록하므로, migration SQL은 `BEGIN;`, `COMMIT;`으로 감싸고 감쌀 수 없는 문장은 별도 migration으로 두어 PR 위험에 적는다.
 `/health`는 DB 상태를 확인하지 않는다.
-Migration은 `public` schema 안에서만 하며, 기록은 `typeorm_migrations` 테이블에 남는다.
+Migration은 `public` schema 안에서만 하며, 기록은 `_prisma_migrations` 테이블에 남는다.
+DB 설정 읽기, migration 적용과 migration 파일, CLI는 [`@dfragon/database`](../../packages/database/README.md)가 소유하고, API는 그 공개 export만 쓴다.
 Migration을 더하는 PR은 이전 이미지가 새 schema로 뜨는지와 되돌릴 수 없는 변경이 있는지를 PR 위험에 적는다([ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md)).
 
 표준 검증 command는 `apps/api/package.json`의 `typecheck`, `lint`, `build`, `test` script이며, root에서 `pnpm --filter @dfragon/api <script>`로 실행한다. `build`는 `dist`를, `test`는 `.test-dist`를 먼저 정리하고 위 tsconfig로 컴파일한 뒤 `node --import reflect-metadata --test`로 실행한다. 변경 범위별 조합은 [검증 명령](../../scripts/README.md#native-validation)을 따른다.
