@@ -30,19 +30,18 @@ pnpm --filter @dfragon/web preview
 
 main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 올라갑니다. 운영 `https://dfragon.com`은 저장소 소유자가 수동 실행할 때만 바뀌며, 배포 시점은 소유자가 정합니다.
 
-- dev: main push마다 [`web-dev-pages.yml`](../../.github/workflows/web-dev-pages.yml)이 공개 저장소 [`dungeon-and-dragon/dfragon-dev`](https://github.com/dungeon-and-dragon/dfragon-dev)의 배포 workflow를 실행하고, 그 workflow가 실행 시점의 이 저장소 main을 checkout해 빌드한 뒤 `dfragon-dev`의 GitHub Pages에 올립니다. dev 배포는 한 번에 하나씩 돌고 각 실행이 그때의 main을 받으므로, 연속으로 merge해도 마지막 실행이 최신 main을 올립니다. `dfragon-dev`에서 수동 실행하면 PR branch 같은 다른 ref도 올릴 수 있습니다. 실행 방법은 그 저장소의 README에 있습니다.
-- 운영: [`web-pages.yml`](../../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 이 저장소의 GitHub Pages에 올립니다.
+- dev: main push마다 [`web-workers.yml`](../../.github/workflows/web-workers.yml)이 그 커밋을 빌드해 Cloudflare Worker `dfragon-web-dev`에 올립니다. 이 Worker가 `https://dev.dfragon.com`과 workers.dev 주소 `https://dfragon-web-dev.dfragon.workers.dev`를 함께 맡습니다. 배포는 한 번에 하나씩 돌고 대기 중인 실행은 새 실행으로 바뀌므로, 연속으로 merge해도 마지막 실행이 최신 main을 올립니다. 저장소 소유자는 Actions에서 수동 실행해 다른 ref를 올릴 수도 있습니다.
+- 운영: [`web-pages.yml`](../../.github/workflows/web-pages.yml)은 저장소 소유자가 Actions에서 main으로 수동 실행할 때만 이 저장소의 GitHub Pages에 올립니다. 빌드는 [`web-site-build`](../../.github/actions/web-site-build/action.yml) action이 합니다.
 
-두 사이트는 같은 빌드 단계 [`web-site-build`](../../.github/actions/web-site-build/action.yml) action으로 `pnpm --filter @dfragon/web build`의 `dist`를 만듭니다. action은 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. dev 빌드는 `CNAME`을 빼고, `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막으며, 빌드한 커밋 SHA를 `version.txt`에 둡니다. 배포된 dev 커밋은 `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
+두 배포 모두 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. dev 빌드는 `CNAME`을 빼고, `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막으며, 빌드한 커밋 SHA를 `version.txt`에 둡니다. 배포된 dev 커밋은 `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
 
 ### Cloudflare Workers 이전
 
-GitHub Pages는 응답 헤더를 정할 수 없어 사이트를 Cloudflare Workers로 옮기는 중입니다. 지금은 dev Worker만 있고, `dfragon.com`, `dev.dfragon.com`은 위의 GitHub Pages가 계속 맡습니다.
+GitHub Pages는 응답 헤더를 정할 수 없어 사이트를 Cloudflare Workers로 옮기는 중입니다. `dev.dfragon.com`은 Worker로 옮겼고, `dfragon.com`은 위의 GitHub Pages가 계속 맡습니다.
 
-- [`web-workers.yml`](../../.github/workflows/web-workers.yml)은 저장소 소유자가 Actions에서 수동 실행할 때만 고른 ref를 dev Worker(`dfragon-web-dev`의 workers.dev 주소)에 올립니다. dev 사이트와 같이 `CNAME`을 빼고 `robots.txt`를 `Disallow: /`로 바꾸며 `version.txt`를 둡니다.
 - 정적 파일은 Workers static assets가 바로 응답합니다. [`public/_headers`](public/_headers)가 static assets의 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙이고 Worker가 `/ocr/*` 응답에 같은 COEP를 붙여 페이지와 OCR worker가 cross-origin 격리되므로 OCR의 ONNX Runtime WASM이 여러 thread로 돕니다. 해시가 붙은 `/assets/*`는 1년 동안 캐시합니다.
 - OCR 모델과 ONNX Runtime WASM은 static assets의 파일 하나 25 MiB 한도를 넘어 R2 bucket `dfragon-web-ocr`에 둡니다([`public/.assetsignore`](public/.assetsignore)가 `dist/ocr`를 static assets에서 뺍니다). 배포는 먼저 [`scripts/upload-ocr-assets.mjs`](scripts/upload-ocr-assets.mjs)로 `dist/ocr`의 파일을 내용 hash 폴더(`ocr/<hash>/`)에 올리고, 그 hash를 Worker 변수 `OCR_ASSET_VERSION`으로 넘겨 배포합니다. [Worker](worker/index.ts)는 `/ocr/*` 요청을 그 폴더에서 읽어 같은 주소로 돌려주며, 주소에 hash가 없으므로 `Cache-Control: no-cache`와 ETag로 매번 확인합니다.
-- workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/characters*`, `/items*`를 `https://api.dfragon.com`으로 넘깁니다. dev Worker 빌드는 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 이 경로를 부릅니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. API 경로를 더하면 `vite.config.ts`의 `server.proxy`, Worker의 `API_PATH_PREFIXES`, `wrangler.jsonc`의 `run_worker_first`를 함께 바꿉니다.
+- workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/characters*`, `/items*`를 `https://api.dfragon.com`으로 넘깁니다. dev Worker 빌드는 `dev.dfragon.com`과 workers.dev 주소 모두에서 열리도록 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 이 경로를 부릅니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. API 경로를 더하면 `vite.config.ts`의 `server.proxy`, Worker의 `API_PATH_PREFIXES`, `wrangler.jsonc`의 `run_worker_first`를 함께 바꿉니다.
 
 로컬에서는 dev 서버 대신 Worker로 production build를 띄워 헤더와 R2 경로까지 확인할 수 있습니다. `apps/web`에서 실행하며, `--local`은 wrangler의 로컬 R2에만 올립니다.
 
@@ -55,8 +54,9 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 
 1. Cloudflare 계정에 R2를 켜고 bucket `dfragon-web-ocr`를 만듭니다.
 2. Workers & Pages에서 workers.dev subdomain을 등록합니다. 등록하지 않으면 배포가 subdomain을 묻다가 실패합니다. 지금 subdomain은 `dfragon`이라 dev Worker 주소는 `https://dfragon-web-dev.dfragon.workers.dev`입니다.
-3. Account API token을 만듭니다. 권한은 Workers 제품 범위의 Admin(처음 배포가 새 Worker를 만들어야 해서 Editor로는 안 됩니다)과 Workers R2 Storage Write만 줍니다. Workers R2 Storage Bucket Item Write로는 wrangler의 R2 업로드가 403으로 실패합니다. 예전 Workers Scripts 권한은 legacy입니다.
+3. Account API token을 만듭니다. 권한은 Workers 제품 범위의 Admin(처음 배포가 새 Worker를 만들어야 해서 Editor로는 안 됩니다), Workers R2 Storage Write, `dfragon.com` zone의 Workers Routes Edit(`dev.dfragon.com` custom domain 연결)만 줍니다. Workers R2 Storage Bucket Item Write로는 wrangler의 R2 업로드가 403으로 실패합니다. 예전 Workers Scripts 권한은 legacy입니다.
 4. 이 저장소의 Actions Secret `CLOUDFLARE_API_TOKEN`에 token을, `CLOUDFLARE_ACCOUNT_ID`에 계정 ID를 넣습니다.
+5. Cloudflare의 `dfragon.com` DNS에 `dev` 이름의 레코드가 없게 둡니다. 배포가 custom domain의 DNS 레코드를 직접 만들며, 같은 이름의 레코드가 있으면 배포가 실패합니다.
 
 ### 운영 사이트 설정
 
@@ -77,14 +77,6 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 `www.dfragon.com`을 `dfragon.com`으로 보내는 일은 GitHub Pages가 합니다. Custom domain이 apex(`dfragon.com`)이고 `www` CNAME이 `dungeon-and-dragon.github.io`를 가리키면 `www`로 들어온 요청을 apex로 리디렉션하므로 별도 리디렉션 설정이 없습니다.
 
 `api.dfragon.com`은 운영 API가 쓰는 레코드입니다. 위 레코드를 넣을 때 건드리지 않습니다.
-
-### dev 사이트 설정
-
-저장소 소유자가 한 번 해야 하는 설정입니다. workflow와 에이전트는 이 설정을 바꾸지 않습니다.
-
-1. 공개 저장소 `dungeon-and-dragon/dfragon-dev`를 만들고, Settings → Pages의 Source를 GitHub Actions로, Custom domain을 `dev.dfragon.com`으로 정한 뒤 Enforce HTTPS를 켭니다.
-2. Cloudflare의 `dfragon.com` DNS에 `dev` CNAME → `dungeon-and-dragon.github.io`를 DNS only로 넣습니다.
-3. 이 저장소의 Actions Secret `DFRAGON_DEV_DISPATCH_TOKEN`에 fine-grained PAT를 넣습니다. 대상 저장소는 `dfragon-dev` 하나, 권한은 Actions read and write만입니다. `web-dev-pages.yml`은 이 token을 `dfragon-dev`의 workflow 실행에만 쓰고 빌드에는 넘기지 않습니다.
 
 ## 구성
 
