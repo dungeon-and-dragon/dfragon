@@ -3,21 +3,21 @@ type: rule
 status: active
 enforcement: approval-required
 scope: apps/api
-last-reviewed: 2026-11-03
+last-reviewed: 2026-11-04
 rationale: 검색 구현이 runtime과 검증 도구를 추측해 추가하지 않도록 승인 경계를 정한다.
-evidence: "2026-09-05 PR #42 runtime 계약 merge; 2026-10-26 #796 인증, DB 제거; 2026-10-29 #992 메모리 캐시"
+evidence: "2026-09-05 PR #42 runtime 계약 merge; 2026-10-26 #796 인증, DB 제거; 2026-10-29 #992 메모리 캐시; 2026-11-04 #1164 PostgreSQL migration"
 review-after: 지원 Node 또는 Nest major 변경 시
 ---
 
 # API Runtime Contract
 
-이 Rule은 API runtime과 검증 계약을 정의한다. API는 인증과 DB 없이 동작한다([Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). 구현은 현재 요청 범위에서 [제품 계약 적용 기준](../README.md#document-class)과 [검증 명령](../../scripts/README.md#native-validation)을 따른다. Dependency와 architecture 변경은 공통 변경 승인 기준을 따른다.
+이 Rule은 API runtime과 검증 계약을 정의한다. API는 인증 없이 동작한다([Issue #796](https://github.com/dungeon-and-dragon/dfragon/issues/796)). DB 설정이 있으면 PostgreSQL을 쓰고, 없으면 DB 없이 뜬다([ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md)). 구현은 현재 요청 범위에서 [제품 계약 적용 기준](../README.md#document-class)과 [검증 명령](../../scripts/README.md#native-validation)을 따른다. Dependency와 architecture 변경은 공통 변경 승인 기준을 따른다.
 
 ## 결정의 상태
 
 | 구분 | 내용 |
 | --- | --- |
-| 방향 | `apps/api`의 NestJS 중앙 API, DB 저장 없음. 캐릭터, 공용 아이템, 오늘의 등급 조회 결과만 API 메모리에 캐시하며([캐릭터 상세](character-details.md), [오늘의 등급](today-grade.md)), 노드가 늘면 여러 노드가 공유하는 Redis로 옮긴다. |
+| 방향 | `apps/api`의 NestJS 중앙 API. PostgreSQL은 선택 설정이며 아직 업무 테이블은 없다. 캐릭터, 공용 아이템, 오늘의 등급 조회 결과만 API 메모리에 캐시하며([캐릭터 상세](character-details.md), [오늘의 등급](today-grade.md)), 노드가 늘면 여러 노드가 공유하는 Redis로 옮긴다. |
 | 실행 계약 | Node 26, Nest 12, ESM과 TypeScript build, 아래 build, test 방식 |
 | 남은 미결정 | 운영 배포, 실제 credential과 domain, 전체 서비스 한도 |
 
@@ -57,6 +57,17 @@ App 생성은 port를 열지 않는 factory로 분리하고, `main.ts`만 설정
 실행 기반의 최소 **필수** 설정은 `PORT`(십진 정수 1~65535)다. 누락, 빈 값, 잘못된 값은 listen 전에 실패한다. 따라서 runtime-only 단계에서도 실제 필수 설정 누락 실패를 검증한다. Test factory의 loopback port 0 주입은 환경변수 검증과 구분한다. 검색 구성에 필요한 `NEOPLE_API_KEY`는 검색 module을 연결할 때부터 필수이며 누락, 빈 값은 listen 전에 실패한다. Runtime-only app은 아직 연결하지 않은 검색 설정을 요구하지 않는다. 필수 설정 실패는 값이나 stack을 출력하지 않고 검증한다. Fake 설정은 test에서만 주입하며 운영용 인증 우회나 test mode를 추가하지 않는다. 점수 엔진 라이브러리 경로 `SCORE_LIBRARY_FILE`은 선택 설정이다. 절대 경로가 아니면 listen 전에 실패하고, 설정하지 않으면 점수 worker를 띄우지 않는다. 파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둔다.
 
 설정 검증은 키의 누락, 빈 값, 공백뿐인 값 검증을 runtime 설정 읽기에 집중한다. listen 전에 검증하고, runtime 조합부가 검색, 상세, 카탈로그 어댑터를 생성한다. 검색과 상세 서비스, HTTP 앱 factory는 raw API 키 없이 준비된 어댑터를 필수 의존성으로 받는다. 서비스 생성 후 매 요청 키를 다시 검사하지 않으며, 서비스 종료와 클라이언트 연결 종료 등 요청마다 달라지는 조건만 실행 단계에서 확인한다. 연결이 이미 끊긴 요청은 공급자를 호출하지 않는다. HTTP 테스트의 fake 어댑터에는 형식상 API 키를 요구하지 않는다. 잘못된 키로 HTTP 앱을 구성한 뒤 400/500 우선순위를 검사하던 내부 factory 테스트는 시작 단계의 설정 실패 검증으로 옮긴다. 정상 runtime의 설정 오류 시 시작 거절과 공개 HTTP 입력, 오류, 호출 한도 계약은 유지한다.
+
+## DB와 migration
+
+DB 설정은 `DB_HOST`, `DB_PORT`(십진 정수 1~65535), `DB_NAME`, `DB_USERNAME`과 `DB_PASSWORD` 또는 `DB_PASSWORD_FILE`(절대 경로) 다섯 입력이다.
+전부 없으면 DB 없이 시작한다. 일부만 있거나 빈 값, 잘못된 값이 있으면 listen 전에 값 없이 실패한다.
+비밀번호는 끝의 줄바꿈과 공백을 빼고 쓴다.
+DB 설정이 있으면 listen 전에 `typeorm`의 migration을 PostgreSQL session advisory lock 아래에서 한 transaction으로 적용한다.
+연결, 인증, migration이 실패하면 transaction을 되돌리고 값, 원인 없이 nonzero로 끝나며 `/health`를 열지 않는다.
+`/health`는 DB 상태를 확인하지 않는다.
+Migration은 `public` schema 안에서만 하며, 기록은 `typeorm_migrations` 테이블에 남는다.
+Migration을 더하는 PR은 이전 이미지가 새 schema로 뜨는지와 되돌릴 수 없는 변경이 있는지를 PR 위험에 적는다([ADR 0014](../adr/0014-api-postgresql-migrations-on-startup.md)).
 
 표준 검증 command는 `apps/api/package.json`의 `typecheck`, `lint`, `build`, `test` script이며, root에서 `pnpm --filter @dfragon/api <script>`로 실행한다. `build`는 `dist`를, `test`는 `.test-dist`를 먼저 정리하고 위 tsconfig로 컴파일한 뒤 `node --import reflect-metadata --test`로 실행한다. 변경 범위별 조합은 [검증 명령](../../scripts/README.md#native-validation)을 따른다.
 

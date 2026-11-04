@@ -1,7 +1,7 @@
 # 던삐삐 API
 
-`apps/api`는 공개 캐릭터 API입니다. DB를 쓰지 않으며 Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시합니다.
-여러 노드로 띄울 수 있지만 캐시는 노드마다 따로 둡니다. 기본 entry는 설정 검증, HTTP listen 순서로 시작합니다.
+`apps/api`는 공개 캐릭터 API입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시합니다.
+여러 노드로 띄울 수 있지만 캐시는 노드마다 따로 둡니다. 기본 entry는 설정 검증, [DB migration](#db와-migration)(DB 설정이 있을 때), HTTP listen 순서로 시작합니다.
 검색, 상세, 오늘의 등급의 제품 계약은 [문서 안내](../../docs/README.md)에서 찾습니다.
 
 ## Swagger와 HTTP
@@ -15,7 +15,7 @@
 
 | 필수 | 선택 |
 | --- | --- |
-| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `WEB_DEV_ORIGINS`, `SCORE_LIBRARY_FILE` |
+| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `WEB_DEV_ORIGINS`, `SCORE_LIBRARY_FILE`, [DB 설정](#db와-migration) |
 
 PORT는 ASCII 십진 정수 1~65535입니다. `.env.example`을 앱의 `.env`로 복사하고 실제 secret은 Git 밖에서 관리합니다.
 Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
@@ -34,6 +34,35 @@ Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절
 두 입력을 함께 지정하면 빈 값이어도 거절합니다. 빈 값, 상대 경로, 읽을 수 없는 파일은
 시작 전에 값, 경로 없이 실패합니다. 파일은 UTF-8로 읽고 끝의 LF만 제거하며, 직접 입력은 그대로 사용합니다.
 비밀값은 이미지 빌드 인자나 Dockerfile의 `ENV`로 넣지 않습니다. 값 교체 후에는 앱을 다시 시작합니다.
+
+## DB와 migration
+
+DB는 선택입니다. `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`과 `DB_PASSWORD` 또는 `DB_PASSWORD_FILE`의 절대 경로를 모두 지정하면 PostgreSQL을 쓰고, 모두 생략하면 DB 없이 뜹니다.
+일부만 지정하면 시작 전에 값 없이 실패합니다. 비밀번호는 Neople key처럼 읽되 끝의 줄바꿈과 공백까지 뺍니다.
+아직 업무 테이블은 없고, migration 기록 테이블 `typeorm_migrations`만 만듭니다.
+
+DB 설정이 있으면 listen 전에 `src/database/migrations`의 적용하지 않은 migration을 한 transaction으로 적용합니다.
+여러 인스턴스가 동시에 시작해도 PostgreSQL advisory lock으로 한 번만 적용합니다.
+연결, 인증, migration이 실패하면 transaction을 되돌리고 `API failed to start`와 nonzero exit로 끝나며 `/health`를 열지 않습니다.
+TypeORM의 migration 진행, 오류 출력은 시작 경로에서 끕니다. 실패 원인은 같은 DB 설정으로 아래 `db:migration:run`을 실행해 봅니다.
+Migration은 `public` schema 안에서만 합니다. 운영 계정은 extension, schema를 만들 수 없습니다.
+결정과 이유는 [ADR 0014](../../docs/adr/0014-api-postgresql-migrations-on-startup.md)에 있습니다.
+
+Migration은 TypeORM CLI로 만듭니다. `create`는 빈 파일을, `generate`는 entity와 DB의 차이를 담은 파일을 만듭니다.
+`generate`, `run`, `revert`, `show`는 앱의 `.env`에서 DB 설정을 읽습니다.
+
+```sh
+pnpm --filter @dfragon/api db:migration:create src/database/migrations/AddExample
+pnpm --filter @dfragon/api db:migration:generate src/database/migrations/AddExample
+pnpm --filter @dfragon/api db:migration:run
+pnpm --filter @dfragon/api db:migration:show
+pnpm --filter @dfragon/api db:migration:revert
+```
+
+TypeORM이 만든 파일의 `MigrationInterface`, `QueryRunner` import는 `verbatimModuleSyntax` 때문에 `import type`으로 바꾸고 `pnpm format`을 실행합니다.
+CLI의 `run`은 advisory lock을 잡지 않으므로 로컬 DB에만 씁니다.
+모든 migration을 한 transaction으로 적용하므로 `transaction = false`가 필요한 migration(`CREATE INDEX CONCURRENTLY` 등)을 더하면 시작에 실패합니다.
+Migration을 더하는 PR에는 이전 이미지가 새 schema로 뜨는지와 되돌릴 수 없는 변경이 있는지를 적습니다.
 
 ## 로컬 개발 명령
 
@@ -199,14 +228,20 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 - Neople key는 위 직접 입력 또는 `_FILE` 입력을 사용합니다. 둘 다 생략한 경우에만
   entrypoint가 `/run/secrets/neople_api_key`를 기본 파일로 선택합니다. Neople key는 필수입니다.
   `SEARCH_TRUST_PROXY`는 생략하거나 기존 단일 proxy 구성에서만 `single-hop`을 사용합니다.
+- DB 설정은 선택입니다. `DB_HOST`를 지정하고 비밀번호 입력을 둘 다 생략한 경우에만
+  entrypoint가 `/run/secrets/db_password`를 기본 파일로 선택합니다.
 - `GET /health`의 200과 `{"status":"ok"}`는 HTTP 시작 확인입니다. 요청마다 Neople 연결을
   재검사하는 readiness는 아니며, 검색 성공 검증과 구분합니다.
 
-이미지의 기본 CMD는 `node --import reflect-metadata dist/main.js`입니다. Migration, cleanup CLI는 없습니다.
+이미지의 기본 CMD는 `node --import reflect-metadata dist/main.js`입니다. Migration은 이 CMD가 시작할 때 적용하며 별도 migration, cleanup 명령은 없습니다.
 이미지 빌드에는 운영 설정, secret, 실데이터를 제공하지 않습니다.
 
 이미지 실행 계약은 로컬에 있는 이미지로 `node apps/api/test-support/container-deployment.mjs dfragon-api:local`을 실행해
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
+DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
+PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
+Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
+실패하는 migration이 되돌려지고 nonzero로 끝나는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
 
 ## 비공개 스킬 패키지 검증
 
