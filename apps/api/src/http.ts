@@ -19,6 +19,8 @@ import { createTodayGradeService } from './today-grade/service.js'
 import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
+import { createTimelineSyncQueue } from './characters/timeline/queue.js'
+import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
 import { SCORE_ENGINE, type ScoreEngine, createScoreEngine } from './score/engine.js'
 import {
@@ -32,6 +34,7 @@ import {
 const TRAILING_SLASHES_PATTERN = /\/+$/
 const WEB_ORIGINS = ['https://dfragon.com', 'https://dev.dfragon.com']
 const CORS_ORIGIN_METHODS = new Set(['GET', 'OPTIONS'])
+const TIMELINE_SYNC_CLOSE = Symbol('TIMELINE_SYNC_CLOSE')
 
 function requestFailure(
   path: string,
@@ -86,9 +89,16 @@ class HealthController {
   }
 }
 
+export interface TimelineSyncOptions {
+  readonly sync: (character: TimelineCharacter) => Promise<void>
+  // 진행 중인 동기화를 기다리지 않고 닫는다.
+  readonly close: () => Promise<void>
+}
+
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
-  readonly details: Omit<CharacterDetailDependencies, 'calculateScore'>
+  readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'requestTimelineSync'>
+  readonly timeline?: TimelineSyncOptions
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -99,10 +109,11 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials or a database connection. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync. */
 export async function createApiHttpApp({
   search,
   details,
+  timeline,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -113,6 +124,10 @@ export async function createApiHttpApp({
   scoreLibraryPath = null
 }: ApiHttpAppOptions): Promise<INestApplication> {
   const buildInfo = await readApiBuildInfo(buildInfoPath)
+  const reportCode = (code: string) =>
+    writeAccessLog(JSON.stringify({ time: new Date().toISOString(), service: 'api', code }))
+  const timelineQueue =
+    timeline && createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED'))
   @Module({
     controllers: [
       HealthController,
@@ -129,7 +144,22 @@ export async function createApiHttpApp({
         provide: CHARACTER_DETAIL_SERVICE,
         inject: [SCORE_ENGINE],
         useFactory: (engine: ScoreEngine) =>
-          createCharacterDetailService({ ...details, calculateScore: engine.calculate })
+          createCharacterDetailService({
+            ...details,
+            calculateScore: engine.calculate,
+            requestTimelineSync: timelineQueue?.request
+          })
+      },
+      {
+        provide: TIMELINE_SYNC_CLOSE,
+        useValue: {
+          onApplicationShutdown: () => {
+            // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, 대기열이 남으면 종료 뒤에도 계속 꺼내 받는다.
+            timelineQueue?.close()
+
+            return timeline?.close()
+          }
+        }
       },
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
@@ -142,10 +172,7 @@ export async function createApiHttpApp({
         useFactory: () =>
           createScoreEngine({
             path: scoreLibraryPath,
-            report: (code) =>
-              writeAccessLog(
-                JSON.stringify({ time: new Date().toISOString(), service: 'api', code })
-              )
+            report: reportCode
           })
       }
     ]
