@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url'
 
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url))
 const skippedPaths = new Set([
-  'docs/rules/writing.md',
   'scripts/check-writing.mjs',
   'scripts/test/check-writing.test.mjs',
   'packages/lib/src/cp949-characters.ts',
@@ -84,7 +83,7 @@ function main(args) {
   }
 
   if (violations.length > 0) {
-    console.error(`위반 ${violations.length}건. 기준: docs/rules/writing.md`)
+    console.error(`위반 ${violations.length}건. 사용법: scripts/README.md#check-writing`)
     process.exit(1)
   }
 
