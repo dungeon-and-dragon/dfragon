@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createNeopleCharacterSearchForTest } from '../src/characters/neople-character-search.js'
+import { createNeopleClientForTest } from '@dfragon/neople'
+import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
 import { NEOPLE_SERVER_NAMES } from '../src/constants/neople-character-search.js'
 import { NeopleSearchFailure } from '../src/errors/neople-search.js'
 
@@ -56,37 +57,39 @@ test('계약의 전체 서버 map을 제공하고 prototype key를 서버로 취
 })
 
 test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 직업명이 없으면 null로 둔다', async () => {
-  const search = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async () =>
-      jsonResponse({
-        ignored: true,
-        rows: [
-          {
-            characterId: ' id-1 ',
-            characterName: ' 이름 ',
-            serverId: 'cain',
-            serverName: 'wrong upstream name',
-            fame: 0,
-            jobName: '귀검사(남)',
-            jobGrowName: '眞 웨펀마스터',
-            extra: 'ignored'
-          },
-          {
-            characterId: 'id-2',
-            characterName: '둘째',
-            serverId: 'future-server',
-            fame: -1.5
-          },
-          {
-            characterId: 'id-3',
-            characterName: '셋째',
-            serverId: 'constructor',
-            fame: null
-          },
-          { characterId: 'id-4', characterName: '넷째', serverId: '__proto__' }
-        ]
-      })
-  })
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () =>
+        jsonResponse({
+          ignored: true,
+          rows: [
+            {
+              characterId: ' id-1 ',
+              characterName: ' 이름 ',
+              serverId: 'cain',
+              serverName: 'wrong upstream name',
+              fame: 0,
+              jobName: '귀검사(남)',
+              jobGrowName: '眞 웨펀마스터',
+              extra: 'ignored'
+            },
+            {
+              characterId: 'id-2',
+              characterName: '둘째',
+              serverId: 'future-server',
+              fame: -1.5
+            },
+            {
+              characterId: 'id-3',
+              characterName: '셋째',
+              serverId: 'constructor',
+              fame: null
+            },
+            { characterId: 'id-4', characterName: '넷째', serverId: '__proto__' }
+          ]
+        })
+    })
+  )
 
   const result = await search(input)
 
@@ -133,9 +136,11 @@ test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 
 })
 
 test('후보가 없으면 빈 rows로 성공한다', async () => {
-  const search = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async () => jsonResponse({ rows: [] })
-  })
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () => jsonResponse({ rows: [] })
+    })
+  )
 
   assert.deepEqual(await search(input), { rows: [] })
 })
@@ -176,9 +181,11 @@ test('응답 구조나 필수 후보 값이 잘못되면 전체 응답을 거절
 
   for (const [name, body] of invalidBodies) {
     await t.test(name, async () => {
-      const search = createNeopleCharacterSearchForTest('fake-key', {
-        fetch: async () => rawResponse(body)
-      })
+      const search = createNeopleCharacterSearch(
+        createNeopleClientForTest('fake-key', {
+          fetch: async () => rawResponse(body)
+        })
+      )
       await expectFailure(
         search(input),
         502,
@@ -196,9 +203,11 @@ test('후보 하나의 오류도 부분 rows 없이 전체 실패로 정제한�
       { characterId: 'invalid', characterName: '오류', serverId: 'cain', fame: '1' }
     ]
   }
-  const search = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async () => jsonResponse(upstreamBody)
-  })
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () => jsonResponse(upstreamBody)
+    })
+  )
 
   const error = await expectFailure(
     search(input),
@@ -245,16 +254,18 @@ test('HTTP 200과 rows가 있어도 식별한 공급자 code를 오류로 처리
 
   for (const [upstreamCode, status, code, message] of cases) {
     await t.test(`${upstreamCode} 공급자 code`, async () => {
-      const search = createNeopleCharacterSearchForTest('fake-key', {
-        fetch: async () =>
-          jsonResponse(
-            {
-              error: { code: upstreamCode, status: 503, message: 'private upstream detail' },
-              rows: []
-            },
-            200
-          )
-      })
+      const search = createNeopleCharacterSearch(
+        createNeopleClientForTest('fake-key', {
+          fetch: async () =>
+            jsonResponse(
+              {
+                error: { code: upstreamCode, status: 503, message: 'private upstream detail' },
+                rows: []
+              },
+              200
+            )
+        })
+      )
       const error = await expectFailure(search(input), status, code, message)
       const exposed = JSON.stringify(error.body)
       assert.equal(exposed.includes('private upstream detail'), false)
@@ -285,9 +296,12 @@ test('식별한 공급자 code는 다른 HTTP 오류 상태보다 우선한다',
 
   for (const item of cases) {
     await t.test(`${item.upstreamCode}와 HTTP ${item.upstreamStatus}`, async () => {
-      const search = createNeopleCharacterSearchForTest('fake-key', {
-        fetch: async () => jsonResponse({ error: { code: item.upstreamCode } }, item.upstreamStatus)
-      })
+      const search = createNeopleCharacterSearch(
+        createNeopleClientForTest('fake-key', {
+          fetch: async () =>
+            jsonResponse({ error: { code: item.upstreamCode } }, item.upstreamStatus)
+        })
+      )
       await expectFailure(search(input), item.status, item.code, item.message)
     })
   }
@@ -321,9 +335,11 @@ test('미식별, 잘못된 code와 HTTP 실패는 실제 상태의 fallback을 �
 
   for (const [name, body, upstreamStatus, status, code] of cases) {
     await t.test(name, async () => {
-      const search = createNeopleCharacterSearchForTest('fake-key', {
-        fetch: async () => jsonResponse(body, upstreamStatus)
-      })
+      const search = createNeopleCharacterSearch(
+        createNeopleClientForTest('fake-key', {
+          fetch: async () => jsonResponse(body, upstreamStatus)
+        })
+      )
       const isUnavailable = code === 'NEOPLE_UNAVAILABLE'
       const expectedMessage = isUnavailable
         ? '현재 캐릭터 검색을 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.'
@@ -334,9 +350,11 @@ test('미식별, 잘못된 code와 HTTP 실패는 실제 상태의 fallback을 �
 })
 
 test('JSON 파싱 실패는 HTTP fallback을 적용하고 본문, 통신 실패는 502로 정제한다', async () => {
-  const malformed503 = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async () => rawResponse('not json', 503)
-  })
+  const malformed503 = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () => rawResponse('not json', 503)
+    })
+  )
   await expectFailure(
     malformed503(input),
     503,
@@ -344,17 +362,19 @@ test('JSON 파싱 실패는 HTTP fallback을 적용하고 본문, 통신 실패�
     '현재 캐릭터 검색을 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.'
   )
 
-  const bodyFailure503 = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async () =>
-      new Response(
-        new ReadableStream({
-          start(controller) {
-            controller.error(new Error('private body failure'))
-          }
-        }),
-        { status: 503 }
-      )
-  })
+  const bodyFailure503 = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.error(new Error('private body failure'))
+            }
+          }),
+          { status: 503 }
+        )
+    })
+  )
   await expectFailure(
     bodyFailure503(input),
     502,
@@ -362,9 +382,11 @@ test('JSON 파싱 실패는 HTTP fallback을 적용하고 본문, 통신 실패�
     '캐릭터 검색 중 오류가 발생했습니다.'
   )
 
-  const transportFailure = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async () => Promise.reject(new Error('private transport failure'))
-  })
+  const transportFailure = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async () => Promise.reject(new Error('private transport failure'))
+    })
+  )
   await expectFailure(
     transportFailure(input),
     502,
@@ -388,24 +410,26 @@ test('공급자가 header나 body를 보내지 않으면 transport를 취소하�
     const waiting = new Promise<void>((resolve) => {
       markWaiting = resolve
     })
-    const search = createNeopleCharacterSearchForTest('fake-key', {
-      fetch: async (request) => {
-        calls++
-        signal = request.signal
-        if (stall === 'header') {
-          markWaiting()
+    const search = createNeopleCharacterSearch(
+      createNeopleClientForTest('fake-key', {
+        fetch: async (request) => {
+          calls++
+          signal = request.signal
+          if (stall === 'header') {
+            markWaiting()
 
-          return neverSettles(request.signal)
+            return neverSettles(request.signal)
+          }
+          const pull = () => {
+            markWaiting()
+
+            return neverSettles(request.signal)
+          }
+
+          return new Response(new ReadableStream({ pull }, { highWaterMark: 0 }))
         }
-        const pull = () => {
-          markWaiting()
-
-          return neverSettles(request.signal)
-        }
-
-        return new Response(new ReadableStream({ pull }, { highWaterMark: 0 }))
-      }
-    })
+      })
+    )
     const pending = expectFailure(
       search(input),
       504,
@@ -428,20 +452,22 @@ test('동시 검색은 결과와 취소를 공유하지 않는다', async () => 
   const slowResponse = new Promise<Response>((resolve) => {
     respondSlow = resolve
   })
-  const search = createNeopleCharacterSearchForTest('fake-key', {
-    fetch: async (request) => {
-      const name = new URL(request.url).searchParams.get('characterName') ?? ''
-      signals.set(name, request.signal)
-      const isFastSearch = name === '빠른검색'
-      if (isFastSearch) {
-        return jsonResponse({
-          rows: [{ characterId: 'fast', characterName: name, serverId: 'cain', fame: 0 }]
-        })
-      }
+  const search = createNeopleCharacterSearch(
+    createNeopleClientForTest('fake-key', {
+      fetch: async (request) => {
+        const name = new URL(request.url).searchParams.get('characterName') ?? ''
+        signals.set(name, request.signal)
+        const isFastSearch = name === '빠른검색'
+        if (isFastSearch) {
+          return jsonResponse({
+            rows: [{ characterId: 'fast', characterName: name, serverId: 'cain', fame: 0 }]
+          })
+        }
 
-      return slowResponse
-    }
-  })
+        return slowResponse
+      }
+    })
+  )
 
   const slow = search({ ...input, characterName: '느린검색' })
   const fast = search({ ...input, characterName: '빠른검색' })
