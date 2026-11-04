@@ -13,6 +13,11 @@
     "verify:skills": "pnpm run build && node --import reflect-metadata test-support/verify-skill-calculation.mjs",
     "typecheck": "pnpm --filter @dfragon/lib build && tsc --noEmit -p tsconfig.test.json",
     "start": "node --import reflect-metadata dist/main.js",
+    "db:migration:create": "typeorm migration:create",
+    "db:migration:generate": "pnpm run build && dotenv --no-expand -- typeorm migration:generate -d dist/database/cli-data-source.js",
+    "db:migration:run": "pnpm run build && dotenv --no-expand -- typeorm migration:run -d dist/database/cli-data-source.js",
+    "db:migration:revert": "pnpm run build && dotenv --no-expand -- typeorm migration:revert -d dist/database/cli-data-source.js",
+    "db:migration:show": "pnpm run build && dotenv --no-expand -- typeorm migration:show -d dist/database/cli-data-source.js",
     "lint": "biome lint",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
@@ -28,9 +33,11 @@
     "koffi": "catalog:",
     "ky": "catalog:",
     "lru-cache": "catalog:",
+    "pg": "catalog:",
     "reflect-metadata": "catalog:",
     "remeda": "catalog:",
     "rxjs": "catalog:",
+    "typeorm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

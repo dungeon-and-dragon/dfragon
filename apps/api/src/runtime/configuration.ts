@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { isAbsolute } from 'node:path'
 import { createSecureContext } from 'node:tls'
+import { readDatabaseConfiguration } from '../database/configuration.js'
 import { parsePort } from '../port.js'
 import { readSecretInput } from '../secret-input.js'
 
@@ -70,6 +71,7 @@ export async function readRuntimeConfiguration(environment: NodeJS.ProcessEnv) {
     if (apiKey === undefined) {
       throw new Error(invalidConfiguration)
     }
+    const database = readDatabaseConfiguration(environment)
     const localHttps = await readLocalHttps(environment, port, environment.API_ORIGIN ?? '')
     const webDevOrigins = readWebDevOrigins(environment.WEB_DEV_ORIGINS)
     const scoreLibraryPath = environment.SCORE_LIBRARY_FILE ?? null
@@ -83,6 +85,7 @@ export async function readRuntimeConfiguration(environment: NodeJS.ProcessEnv) {
       localHttps,
       webDevOrigins,
       apiKey,
+      database,
       scoreLibraryPath
     }
   } catch {
