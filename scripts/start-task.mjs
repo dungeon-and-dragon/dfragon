@@ -12,7 +12,7 @@ function buildTaskContext({ issue, branch, destination, base }) {
     `Branch: ${branch}`,
     `Worktree: ${destination}`,
     `Base: ${base}`,
-    '제품 계약: docs/README.md | 명령: scripts/README.md'
+    '명령: scripts/README.md'
   ].join('\n')
 
   return taskContext
