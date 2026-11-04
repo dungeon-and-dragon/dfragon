@@ -26,8 +26,7 @@ type TimelinePage = { rows: NeopleTimelineRow[]; next: string | null }
 
 export type FetchCharacterTimeline = (
   identity: CharacterIdentity,
-  range: TimelineRange,
-  signal: AbortSignal
+  range: TimelineRange
 ) => Promise<TimelineInputs>
 
 interface TransportDependencies {
@@ -69,7 +68,7 @@ function makeAdapter(apiKey: string, deps: TransportDependencies): FetchCharacte
     throwHttpErrors: false
   })
 
-  return async (identity, range, signal) => {
+  return async (identity, range) => {
     const path = `/df/servers/${encodeURIComponent(identity.serverId)}/characters/${encodeURIComponent(identity.characterId)}/timeline`
     const firstQuery = {
       limit: PAGE_LIMIT,
@@ -81,11 +80,8 @@ function makeAdapter(apiKey: string, deps: TransportDependencies): FetchCharacte
     try {
       let next: string | null = null
       do {
-        // ky hands an already aborted request to fetch, so a cancelled sync stops before the next transport.
-        signal.throwIfAborted()
         const page: TimelinePage = await neople
           .get(path, {
-            signal,
             // Neople applies the first request's limit, code and dates to every next page.
             searchParams: next !== null ? { next } : firstQuery,
             parseJson: (rawBody, { response }) => {
@@ -105,11 +101,6 @@ function makeAdapter(apiKey: string, deps: TransportDependencies): FetchCharacte
 
       return toTimelineInputs(rows)
     } catch (error) {
-      // The caller that aborted owns the cancellation, so it gets its own reason instead of a provider failure.
-      if (signal.aborted) {
-        throw signal.reason
-      }
-
       if (isTimeoutError(error)) {
         throw new TimelineFailure('timeout')
       }
