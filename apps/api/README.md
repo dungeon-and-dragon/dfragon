@@ -62,10 +62,10 @@ DB 설정이 없으면 queue를 만들지 않습니다.
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
-입력은 Neople key, DB 설정(필수), `CHARACTER_IMPORT_FILES`(캐릭터 목록 파일 `characters.jsonl`의 절대 경로를 쉼표로 이은 목록, 목록을 여러 컨테이너로 나눠 모으면 파일도 여러 개), `CHARACTER_COLLECTOR_REQUESTS_PER_SECOND`(Neople 초당 요청 상한, 기본 5)입니다. 잘못된 입력은 `Character collector failed`와 nonzero exit로 끝납니다.
+입력은 Neople key, DB 설정(필수), `CHARACTER_IMPORT_FILES`(캐릭터 목록 파일 `characters.jsonl`의 절대 경로를 쉼표로 이은 목록, 목록을 여러 컨테이너로 나눠 모으면 파일도 여러 개), `CHARACTER_COLLECTOR_REQUESTS_PER_SECOND`(Neople 초당 요청 상한, 기본 5), `CHARACTER_COLLECTOR_CONCURRENCY`(한 번에 함께 처리할 캐릭터 수, 1~32, 기본 1)입니다. 잘못된 입력은 `Character collector failed`와 nonzero exit로 끝납니다.
 
 1. 목록 파일마다 수정 시각을 기억하고, 바뀐 파일만 줄마다 `server`, `key`를 Neople serverId, characterId로 읽어 1000개씩 `character_collection`에 넣습니다. 이미 대기열에 있거나 기본 정보를 저장한 캐릭터는 넣지 않으므로 같은 파일을 다시 읽어도 Neople을 다시 부르지 않습니다.
-2. 대기열의 캐릭터를 넣은 순서(같은 시각이면 서버, 캐릭터 id 순)대로 100명씩 꺼내 `GET /df/servers/<serverId>/characters/<characterId>`를 차례로 부르고, 이름, 모험단, 레벨, 직업, 명성, 길드와 `basic_fetched_at`을 `characters`에 저장한 뒤 대기열에서 지웁니다. 한 번 저장한 캐릭터는 다시 조회하지 않습니다.
+2. 대기열의 캐릭터를 넣은 순서(같은 시각이면 서버, 캐릭터 id 순)대로 100명씩 꺼내 `GET /df/servers/<serverId>/characters/<characterId>`를 부르고, 이름, 모험단, 레벨, 직업, 명성, 길드와 `basic_fetched_at`을 `characters`에 저장한 뒤 대기열에서 지웁니다. 한 번 저장한 캐릭터는 다시 조회하지 않습니다. 동시 처리 수만큼 묶어 함께 부르고, 묶음마다 요청 수에 맞는 간격을 채워 평균 속도가 초당 상한을 넘지 않게 합니다.
 3. 없는 캐릭터나 schema가 맞지 않는 응답(모험단 이름이 없는 경우 포함)은 대기열 행의 `failure`(`neople-api`, `neople-internal`)에 남기고 재시도하지 않습니다. 한도 초과, 점검, timeout이면 기록하지 않고 1분 쉰 뒤 같은 캐릭터부터 다시 부릅니다. 대기열이 비면 1분 쉽니다.
 4. 목록 파일 하나를 읽을 때마다 `CHARACTER_IMPORT_DONE`(`count`), Neople을 쓸 수 없을 때 `CHARACTER_NEOPLE_UNAVAILABLE`을 stdout JSON 한 줄로 남깁니다. DB 오류와 잘못된 목록 파일 줄은 프로세스를 끝내므로 컨테이너 재시작 정책으로 다시 띄웁니다.
 5. 종료 처리는 따로 두지 않아 SIGTERM, SIGINT를 받으면 그대로 끝납니다. 진행 중인 Neople 요청은 끊지 않고 버려지며, 저장은 transaction이라 반만 남지 않습니다. 저장 전에 끝난 캐릭터는 대기열에 남아 다음 시작 때 다시 부르고, 대기열 넣기는 다시 해도 같은 결과라 목록 파일도 처음부터 다시 읽습니다.

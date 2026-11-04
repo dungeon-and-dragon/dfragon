@@ -41,6 +41,7 @@ async function main(): Promise<never> {
       fetchBasic,
       store,
       requestIntervalMs: 1000 / configuration.requestsPerSecond,
+      concurrency: configuration.concurrency,
       report
     })
     importedAt = pass.importedAt

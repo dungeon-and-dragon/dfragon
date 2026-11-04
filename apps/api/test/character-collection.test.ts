@@ -3,6 +3,7 @@ import { mkdtemp, rm, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import { setImmediate } from 'node:timers/promises'
 import { ZodError } from 'zod'
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
 import { NeopleRequestFailure } from '@dfragon/neople'
@@ -175,6 +176,7 @@ test('목록 파일 여러 개를 대기열에 넣고 대기열이 빌 때까지
       fetchBasic: async (character) => basicOf(character),
       store: memory.store,
       requestIntervalMs: 0,
+      concurrency: 1,
       report: (code, details) => reports.push([code, details?.count])
     }
 
@@ -227,6 +229,7 @@ test('Neople을 쓸 수 없으면 실패로 기록하지 않고 멈추며, 다�
     },
     store: memory.store,
     requestIntervalMs: 0,
+    concurrency: 1,
     report: (code) => reports.push(code)
   }
 
@@ -247,6 +250,80 @@ test('Neople을 쓸 수 없으면 실패로 기록하지 않고 멈추며, 다�
   assert.deepEqual(reports, ['CHARACTER_NEOPLE_UNAVAILABLE'])
 })
 
+test('동시 처리 수만큼 기본 정보를 함께 받고 그 수를 넘지 않으며 모두 저장한다', async () => {
+  const queued = Array.from({ length: 7 }, (_, index) => ({
+    serverId: 'cain',
+    characterId: `c${index}`
+  }))
+  const memory = memoryStore(queued)
+  let inFlight = 0
+  let maxInFlight = 0
+
+  const result = await runCollectionPass({
+    importFiles: [],
+    importedAt: new Map(),
+    enqueue: async () => {},
+    fetchBasic: async (character) => {
+      inFlight++
+      maxInFlight = Math.max(maxInFlight, inFlight)
+      await setImmediate()
+      inFlight--
+
+      return basicOf(character)
+    },
+    store: memory.store,
+    requestIntervalMs: 0,
+    concurrency: 3,
+    report: () => {}
+  })
+
+  assert.equal(result.outcome, 'drained')
+  assert.equal(maxInFlight, 3)
+  assert.deepEqual(
+    memory.recorded.map((basic) => basic.characterId).sort(),
+    queued.map((character) => character.characterId)
+  )
+})
+
+test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저장하고 그 캐릭터만 다음 회차에 다시 부른다', async () => {
+  const queued = ['c0', 'c1', 'c2'].map((characterId) => ({ serverId: 'cain', characterId }))
+  const memory = memoryStore(queued)
+  const called: string[] = []
+  const dependencies: CollectionPassDependencies = {
+    importFiles: [],
+    importedAt: new Map(),
+    enqueue: async () => {},
+    fetchBasic: async (character) => {
+      called.push(character.characterId)
+      if (character.characterId === 'c1' && called.length <= 2) {
+        throw new NeopleRequestFailure('unavailable')
+      }
+
+      return basicOf(character)
+    },
+    store: memory.store,
+    requestIntervalMs: 0,
+    concurrency: 2,
+    report: () => {}
+  }
+
+  const stopped = await runCollectionPass(dependencies)
+  assert.equal(stopped.outcome, 'unavailable')
+  assert.deepEqual(
+    memory.recorded.map((basic) => basic.characterId),
+    ['c0']
+  )
+  assert.deepEqual(memory.failures, [])
+
+  const resumed = await runCollectionPass(dependencies)
+  assert.equal(resumed.outcome, 'drained')
+  assert.deepEqual(called, ['c0', 'c1', 'c1', 'c2'])
+  assert.deepEqual(
+    memory.recorded.map((basic) => basic.characterId),
+    ['c0', 'c1', 'c2']
+  )
+})
+
 // 합성 key와 DB 입력이다. 실제 credential이 아니다.
 const collectorEnvironment = {
   NEOPLE_API_KEY: 'synthetic-neople-key',
@@ -258,13 +335,19 @@ const collectorEnvironment = {
   CHARACTER_IMPORT_FILES: '/data/1/characters.jsonl,/data/2/characters.jsonl'
 }
 
-test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 상한 기본값이 5이며, 잘못된 입력은 값 없이 거절한다', () => {
+test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 상한 기본값이 5, 동시 처리 기본값이 1이며, 잘못된 입력은 값 없이 거절한다', () => {
   const configuration = readCollectorConfiguration(collectorEnvironment)
   assert.deepEqual(configuration.importFiles, [
     '/data/1/characters.jsonl',
     '/data/2/characters.jsonl'
   ])
   assert.equal(configuration.requestsPerSecond, 5)
+  assert.equal(configuration.concurrency, 1)
+  assert.equal(
+    readCollectorConfiguration({ ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '8' })
+      .concurrency,
+    8
+  )
   assert.equal(
     readCollectorConfiguration({
       ...collectorEnvironment,
@@ -281,7 +364,10 @@ test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 �
     },
     { ...collectorEnvironment, CHARACTER_IMPORT_FILES: '' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: '0' },
-    { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: 'fast' }
+    { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: 'fast' },
+    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '0' },
+    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '33' },
+    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '1.5' }
   ]) {
     assert.throws(() => readCollectorConfiguration(invalid), {
       message: 'Invalid character collector configuration'
