@@ -39,7 +39,7 @@ Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절
 
 DB는 선택입니다. `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`과 `DB_PASSWORD` 또는 `DB_PASSWORD_FILE`의 절대 경로를 모두 지정하면 PostgreSQL을 쓰고, 모두 생략하면 DB 없이 뜹니다.
 일부만 지정하면 시작 전에 값 없이 실패합니다. 비밀번호는 Neople key처럼 읽되 끝의 줄바꿈과 공백까지 뺍니다.
-아직 업무 테이블은 없고, Prisma의 migration 기록 테이블 `_prisma_migrations`만 만듭니다.
+Prisma의 migration 기록 테이블 `_prisma_migrations`와 타임라인 테이블(`seasons`, `timeline_events`, `timeline_items`, `timeline_sync_state`)을 만듭니다. 테이블은 [`@dfragon/database` 안내](../../packages/database/README.md#테이블)에 있습니다.
 
 DB 설정이 있으면 listen 전에 [`@dfragon/database`](../../packages/database/README.md)가 `prisma migrate deploy`로 적용하지 않은 migration을 적용합니다.
 여러 인스턴스가 동시에 시작해도 Prisma가 잡는 PostgreSQL advisory lock으로 한 번만 적용하며, lock을 10초 안에 얻지 못한 인스턴스는 끝납니다.
