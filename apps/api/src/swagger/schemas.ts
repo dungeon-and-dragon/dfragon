@@ -118,7 +118,7 @@ const cardScore: SchemaObject = {
     value: 1769,
     skipped: null,
     approximate: null,
-    versions: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+    versions: { package: 'dnfscore-native 0.4.3', rulesRev: 'rev14', bundleId: 'phase32-rev14e' }
   }
 }
 const characterCard = object({
