@@ -12,6 +12,10 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   Prisma CLI의 출력은 버립니다.
 - `createDatabaseClient(configuration)`: 같은 연결 URL로 `@prisma/adapter-pg`를 쓰는 Prisma client(`DatabaseClient`)를 만듭니다.
   연결은 첫 query 때 열리고, 끝낼 때는 호출자가 `$disconnect()`를 부릅니다.
+- `recordCharacter(client, character)`: 캐릭터의 서버, id, 이름과 모험단 이름(`CharacterInput`)을 기록합니다.
+  Neople은 모험단 id를 주지 않아 `adventures`가 자체 id를 붙입니다.
+  캐릭터는 모험단을 옮기지 못하므로, 이미 기록한 캐릭터의 모험단 이름이 다르면 그 모험단의 이름이 바뀐 것으로 보고 이름만 바꿉니다.
+  처음 보는 캐릭터는 같은 이름의 모험단에 붙이고(같은 이름이 여럿이면 가장 나중에 만든 행), 없으면 모험단을 만듭니다. 모험단 이름 단위 advisory lock으로 같은 모험단이 두 번 생기지 않게 합니다.
 - `replaceTimelineRange(client, character, range, events, items)`: 캐릭터 하나의 `[range.start, range.end]`(양 끝 포함) 타임라인을 교체합니다.
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
   Transaction timeout은 lock 대기를 포함해 60초입니다. 로컬에서 items 5만 행 교체가 Prisma 기본값 5초를 넘었습니다.
@@ -42,13 +46,17 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 
 | 테이블 | 내용 |
 | --- | --- |
+| `adventures` | 자체 모험단 id와 지금 이름. 서버가 달라도 한 모험단입니다 |
+| `characters` | PK `(server_id, character_id)`, 지금 캐릭터 이름, 모험단 id |
 | `seasons` | 시즌 id, 이름, 시작 시각. 중천(`2025-01-09 06:00+09`), 천해천(`2026-03-26 06:00+09`)을 migration이 넣습니다 |
 | `timeline_events` | 코드 1xx, 2xx, 3xx 타임라인. partition이 없습니다 |
 | `timeline_items` | 코드 4xx, 5xx, 55x, 6xx 타임라인. `occurred_at` 기준 시즌별 range partition이며 PK는 `(id, occurred_at)`입니다 |
 | `timeline_sync_state` | 캐릭터별 `synced_until`, 마지막 시도와 성공 시각, 실패 이유 |
 
 `timeline_items`의 partition은 `timeline_items_season_1`(중천 시작부터 천해천 시작 전까지), `timeline_items_season_2`(천해천 시작부터 `MAXVALUE`까지)입니다.
-두 타임라인 테이블은 캐릭터와 `occurred_at` 구간(교체 때 지우기), 캐릭터, `code`, `occurred_at` 구간(집계) index를 갖고, `timeline_items`는 `code`, `item_rarity`, `occurred_at` index를 더 갖습니다.
+조회는 모험단 이름(`adventures.name`), 캐릭터 이름(`characters(server_id, character_name)`)으로 캐릭터를 찾고, 두 타임라인 테이블의 `(server_id, character_id, code, occurred_at)` index로 읽습니다.
+교체 때 캐릭터와 구간으로 지우는 문장도 PostgreSQL 18의 skip scan으로 같은 index를 씁니다.
+로컬에서 items 200만 행의 구간 삭제가 0.7ms, events 200만 행에서 모험단 하나의 레이드 클리어 수가 1ms였습니다.
 
 Migration CLI는 API의 `apps/api/.env`에서 DB 설정을 읽습니다.
 
