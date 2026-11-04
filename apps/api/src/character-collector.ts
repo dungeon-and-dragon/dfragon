@@ -32,10 +32,10 @@ async function main(): Promise<never> {
   const fetchBasic = createNeopleCharacterBasic(createNeopleClient(configuration.apiKey))
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
-  let importedAt: number | undefined
+  let importedAt: ReadonlyMap<string, number> = new Map()
   for (;;) {
     const pass = await runCollectionPass({
-      importFile: configuration.importFile,
+      importFiles: configuration.importFiles,
       importedAt,
       enqueue,
       fetchBasic,
