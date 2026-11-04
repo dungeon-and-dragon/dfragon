@@ -54,7 +54,7 @@ node --check scripts/statement-spacing.mjs
 
 ## Biome lint 플러그인
 
-`scripts/biome/return-expression.grit`은 `return` 식의 삼항, `??`, 반환 객체 속성의 조건식을, `scripts/biome/regex-literal-constant.grit`은 `const` 초기값이 아닌 정규식 리터럴을 보고합니다. `let-branch-assignment.grit`은 `let`과 분기로 값 하나를 정하는 블록을, `hidden-screen-prop.grit`은 화면을 `hidden`으로 숨겨 마운트해 두는 prop을, `jsx-prop-callback.grit`은 JSX prop 자리에서 만드는 콜백을, `absent-first-conditional.grit`은 값이 없는 경우를 앞에 둔 삼항을 보고합니다. Root `biome.json`이 여섯 GritQL 플러그인을 등록하며 `return` 식 플러그인을 뺀 다섯 플러그인은 테스트 코드와 생성물을 제외하는 override에서만 붙습니다. 적용 기준은 [Convention 도구 적용](../docs/rules/convention-tooling.md)을 따릅니다. `pnpm test:tooling`의 `biome-return-expression.test.mjs`, `biome-regex-literal.test.mjs`, `biome-refactoring-criteria.test.mjs`가 저장소 설정을 임시 디렉터리에 복사해 거부, 허용 사례와 제외 범위를 검증합니다.
+`scripts/biome/return-expression.grit`은 `return` 식의 삼항, `??`, 반환 객체 속성의 조건식을, `scripts/biome/regex-literal-constant.grit`은 `const` 초기값이 아닌 정규식 리터럴을 보고합니다. `let-branch-assignment.grit`은 `let`과 분기로 값 하나를 정하는 블록을, `hidden-screen-prop.grit`은 화면을 `hidden`으로 숨겨 마운트해 두는 prop을, `jsx-prop-callback.grit`은 JSX prop 자리에서 만드는 콜백을, `absent-first-conditional.grit`은 값이 없는 경우를 앞에 둔 삼항을 보고합니다. Root `biome.json`이 여섯 GritQL 플러그인을 등록하며 `return` 식 플러그인을 뺀 다섯 플러그인은 테스트 코드와 생성물을 제외하는 override에서만 붙습니다. `pnpm test:tooling`의 `biome-return-expression.test.mjs`, `biome-regex-literal.test.mjs`, `biome-refactoring-criteria.test.mjs`가 저장소 설정을 임시 디렉터리에 복사해 거부, 허용 사례와 제외 범위를 검증합니다.
 
 ## `format-date`
 
@@ -71,7 +71,7 @@ node scripts/format-date.mjs
 
 ## `check-writing`
 
-제품 이름 표기와 사용자 문구의 문체를 검사합니다. 기준은 [표기와 문체](../docs/rules/writing.md)입니다. 인자가 없으면 Git이 추적하는 파일을 모두 읽고, 경로를 주면 현재 디렉터리 기준으로 그 파일만 검사합니다. NUL 바이트가 있는 이진 파일, submodule 항목과 검사 스크립트 자신, 그 테스트는 건너뜁니다. 위반은 `경로:줄: 규칙: 내용`으로 출력하고 non-zero로 종료합니다. `pnpm verify`가 `pnpm check:writing`을 실행합니다.
+제품 이름 표기와 사용자 문구의 문체를 검사합니다. 인자가 없으면 Git이 추적하는 파일을 모두 읽고, 경로를 주면 현재 디렉터리 기준으로 그 파일만 검사합니다. NUL 바이트가 있는 이진 파일, submodule 항목과 검사 스크립트 자신, 그 테스트는 건너뜁니다. 위반은 `경로:줄: 규칙: 내용`으로 출력하고 non-zero로 종료합니다. `pnpm verify`가 `pnpm check:writing`을 실행합니다.
 
 ```bash
 pnpm check:writing
