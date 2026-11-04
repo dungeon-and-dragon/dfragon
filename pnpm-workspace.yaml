@@ -7,7 +7,7 @@ catalogMode: strict
 catalog:
   '@base-ui/react': 1.9.0
   '@biomejs/biome': 2.6.3
-  '@cloudflare/workers-types': 5.20261024.1
+  '@cloudflare/workers-types': 5.20261028.1
   '@date-fns/tz': 1.5.0
   '@nestjs/common': 12.3.2
   '@nestjs/core': 12.3.2
@@ -32,7 +32,7 @@ catalog:
   husky: 9.1.7
   iconv-lite: 0.7.3
   jsdom: 30.1.3
-  koffi: 3.3.4
+  koffi: 3.3.5
   ky: 2.2.0
   lru-cache: 11.5.3
   onnxruntime-web: 1.31.1
@@ -41,7 +41,7 @@ catalog:
   react: 19.3.1
   react-dom: 19.3.1
   reflect-metadata: 0.2.2
-  remeda: 2.54.1
+  remeda: 2.56.0
   rxjs: 7.8.2
   tar: 7.5.22
   typescript: 7.0.2
