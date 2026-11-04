@@ -3,27 +3,62 @@ name: Web Workers
 on:
   push:
     branches: [main]
+  # Only changes that can alter the built site get a preview.
+  pull_request:
+    paths:
+      - apps/web/**
+      - packages/client/**
+      - packages/client-core/**
+      - packages/ui/**
+      - packages/lib/**
+      - packages/licenses/**
+      - packages/models/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .github/workflows/web-workers.yml
   workflow_dispatch:
+    inputs:
+      target:
+        description: Worker to deploy. production runs only from main.
+        type: choice
+        options: [dev, production]
+        default: dev
 
 permissions:
   contents: read
 
-concurrency:
-  group: web-workers-dev
-  cancel-in-progress: false
-
 jobs:
-  # Deploys apps/web to the dev Worker, which serves dev.dfragon.com and its workers.dev address.
-  # Queued runs replace each other, so quick successive merges end with the latest main.
-  deploy-dev:
-    if: github.repository == 'dungeon-and-dragon/dfragon'
+  # Builds apps/web and puts it on a Worker: dev (dev.dfragon.com) on main push, production (dfragon.com) when
+  # the repository owner runs it from main, or a preview version of the dev Worker for a pull request.
+  deploy:
+    # Fork and Dependabot pull requests get no Cloudflare secrets, so they never reach the upload.
+    if: >-
+      github.repository == 'dungeon-and-dragon/dfragon'
+      && (github.event_name != 'pull_request'
+        || (github.event.pull_request.head.repo.full_name == github.repository
+          && github.event.pull_request.user.login != 'dependabot[bot]'))
+      && (inputs.target != 'production' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
+    # Queued deploys replace each other, so quick successive merges end with the latest main. A new push to a
+    # pull request cancels its running preview because only the latest commit matters there.
+    concurrency:
+      group: >-
+        web-workers-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number)
+        || inputs.target || 'dev' }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.preview-url }}
+    env:
+      TARGET: ${{ github.event_name == 'pull_request' && 'preview' || inputs.target || 'dev' }}
     steps:
+      # A preview shows the pull request branch itself, not its merge with main.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
       # The web app's OCR needs the pinned fine-tuned model. The site never loads the score engine submodule.
       - run: git submodule update --init --depth 1 packages/models/ocr-finetuned
@@ -34,21 +69,69 @@ jobs:
           # The deployed site must not be built from package caches that other runs could have written.
           package-manager-cache: false
       - run: pnpm install --frozen-lockfile
-      # workers.dev is not an API CORS origin, so the build calls the API through the Worker's same-origin proxy.
+      # workers.dev is not an API CORS origin, so dev and preview builds call the API through the Worker's
+      # same-origin proxy. Production calls https://api.dfragon.com directly like before.
       - run: pnpm --filter @dfragon/web build
         env:
-          VITE_SAME_ORIGIN_API: 'true'
-      # The dev site must stay out of search results and must not claim the production domain.
+          VITE_SAME_ORIGIN_API: ${{ env.TARGET != 'production' }}
+      # Dev and preview sites must stay out of search results.
       - run: |
           rm apps/web/dist/CNAME
-          printf 'User-agent: *\nDisallow: /\n' > apps/web/dist/robots.txt
+          if [ "$TARGET" != production ]; then
+            printf 'User-agent: *\nDisallow: /\n' > apps/web/dist/robots.txt
+          fi
           git rev-parse HEAD > apps/web/dist/version.txt
-      # OCR assets go first so the deployed Worker never points at a version folder that is missing in R2.
-      - working-directory: apps/web
+      # OCR assets go first so the Worker never points at a version folder that is missing in R2.
+      # A preview uploads a version of the dev Worker under its alias and leaves the dev deployment unchanged.
+      - id: deploy
+        working-directory: apps/web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_SEND_METRICS: 'false'
+          PR_NUMBER: ${{ github.event.number }}
         run: |
-          version="$(pnpm --silent upload:ocr --env dev)"
-          pnpm exec wrangler deploy --env dev --var "OCR_ASSET_VERSION:$version"
+          case "$TARGET" in
+            production)
+              version="$(pnpm --silent upload:ocr --env=)"
+              pnpm exec wrangler deploy --env= --var "OCR_ASSET_VERSION:$version"
+              ;;
+            dev)
+              version="$(pnpm --silent upload:ocr --env dev)"
+              pnpm exec wrangler deploy --env dev --var "OCR_ASSET_VERSION:$version"
+              ;;
+            preview)
+              version="$(pnpm --silent upload:ocr --env dev)"
+              pnpm exec wrangler versions upload --env dev --preview-alias "pr-$PR_NUMBER" \
+                --var "OCR_ASSET_VERSION:$version"
+              echo "preview-url=https://pr-$PR_NUMBER-dfragon-web-dev.dfragon.workers.dev" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+  # Keeps one comment per pull request with the preview address and edits it on every new upload.
+  comment-preview:
+    needs: deploy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.number }}
+      PREVIEW_URL: ${{ needs.deploy.outputs.preview-url }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - run: |
+          marker='<!-- web-workers-preview -->'
+          body="$(printf '%s\n웹 미리보기: %s\n\n커밋 `%s`를 올렸습니다. dev Worker의 배포 버전은 바뀌지 않습니다.\n' \
+            "$marker" "$PREVIEW_URL" "$HEAD_SHA")"
+          comment_id="$(gh api --paginate "repos/$GH_REPO/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" \
+            | head -n 1)"
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$GH_REPO/issues/comments/$comment_id" -f body="$body" > /dev/null
+          else
+            gh api --method POST "repos/$GH_REPO/issues/$PR_NUMBER/comments" -f body="$body" > /dev/null
+          fi
