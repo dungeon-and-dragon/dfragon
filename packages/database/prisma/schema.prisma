@@ -25,16 +25,37 @@ model Adventure {
 }
 
 model Character {
-  serverId      String    @map("server_id")
-  characterId   String    @map("character_id")
-  characterName String    @map("character_name")
-  adventureId   BigInt    @map("adventure_id")
-  adventure     Adventure @relation(fields: [adventureId], references: [id])
+  serverId       String    @map("server_id")
+  characterId    String    @map("character_id")
+  characterName  String    @map("character_name")
+  adventureId    BigInt    @map("adventure_id")
+  adventure      Adventure @relation(fields: [adventureId], references: [id])
+  level          Int?
+  jobId          String?   @map("job_id")
+  jobGrowId      String?   @map("job_grow_id")
+  jobName        String?   @map("job_name")
+  jobGrowName    String?   @map("job_grow_name")
+  fame           Int?
+  guildId        String?   @map("guild_id")
+  guildName      String?   @map("guild_name")
+  basicFetchedAt DateTime? @map("basic_fetched_at") @db.Timestamptz(3)
 
   @@id([serverId, characterId])
   @@index([adventureId])
   @@index([serverId, characterName])
   @@map("characters")
+}
+
+model CharacterCollection {
+  serverId    String    @map("server_id")
+  characterId String    @map("character_id")
+  queuedAt    DateTime  @default(now()) @map("queued_at") @db.Timestamptz(3)
+  attemptedAt DateTime? @map("attempted_at") @db.Timestamptz(3)
+  failure     String?
+
+  @@id([serverId, characterId])
+  @@index([queuedAt])
+  @@map("character_collection")
 }
 
 model TimelineEvent {
