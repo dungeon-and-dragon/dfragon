@@ -10,6 +10,7 @@ import { projectCharacterCard } from '../card/project.js'
 import { cardScoreCalculator, withCardScore } from '../card/score.js'
 import type { ScoreEngine } from '../../score/engine.js'
 import { toScoreEngineInput } from '../../score/input.js'
+import type { CharacterEvents } from '../events.js'
 
 export interface CharacterDetailResponse {
   body: Buffer
@@ -20,6 +21,7 @@ export interface CharacterDetailDependencies {
   fetchDetails: FetchCharacterDetails
   catalog: CatalogService
   calculateScore: ScoreEngine['calculate']
+  characterEvents?: CharacterEvents
 }
 
 export { parseCharacterIdentity } from '../identity.js'
@@ -51,6 +53,8 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
         throw new CharacterDetailFailure('internal')
       }
       const character = await loadCharacter(identity, signal, timings)
+      // 받은 뒤에 내서, 존재하지 않는 캐릭터 ID로 구독자가 기록을 만들지 않게 한다.
+      deps.characterEvents?.fetched(identity)
       signal.throwIfAborted()
       const reusable = bodies.get(character)
       if (reusable !== undefined) {

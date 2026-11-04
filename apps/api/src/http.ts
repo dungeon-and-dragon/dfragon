@@ -19,6 +19,11 @@ import { createTodayGradeService } from './today-grade/service.js'
 import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
+import { createTimelineSyncQueue } from './characters/timeline/queue.js'
+import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
+import { CharacterEvents } from './characters/events.js'
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
+import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
 import { SCORE_ENGINE, type ScoreEngine, createScoreEngine } from './score/engine.js'
 import {
@@ -86,9 +91,16 @@ class HealthController {
   }
 }
 
+export interface TimelineSyncOptions {
+  readonly sync: (character: TimelineCharacter) => Promise<void>
+  // 진행 중인 동기화를 기다리지 않고 닫는다.
+  readonly close: () => Promise<void>
+}
+
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
-  readonly details: Omit<CharacterDetailDependencies, 'calculateScore'>
+  readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
+  readonly timeline?: TimelineSyncOptions
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -99,10 +111,11 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials or a database connection. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync. */
 export async function createApiHttpApp({
   search,
   details,
+  timeline,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -113,7 +126,23 @@ export async function createApiHttpApp({
   scoreLibraryPath = null
 }: ApiHttpAppOptions): Promise<INestApplication> {
   const buildInfo = await readApiBuildInfo(buildInfoPath)
+  const reportCode = (code: string) =>
+    writeAccessLog(JSON.stringify({ time: new Date().toISOString(), service: 'api', code }))
+  // DB 설정이 없으면 구독자를 등록하지 않아, 상세 조회가 낸 이벤트를 받는 곳이 없다.
+  const timelineProviders = timeline
+    ? [
+        {
+          provide: TimelineSyncSubscriber,
+          useFactory: () =>
+            new TimelineSyncSubscriber(
+              createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED')),
+              timeline.close
+            )
+        }
+      ]
+    : []
   @Module({
+    imports: [EventEmitterModule.forRoot()],
     controllers: [
       HealthController,
       ApiVersionController,
@@ -127,10 +156,15 @@ export async function createApiHttpApp({
       { provide: CHARACTER_SEARCH_SERVICE, useValue: createCharacterSearchService(search) },
       {
         provide: CHARACTER_DETAIL_SERVICE,
-        inject: [SCORE_ENGINE],
-        useFactory: (engine: ScoreEngine) =>
-          createCharacterDetailService({ ...details, calculateScore: engine.calculate })
+        inject: [SCORE_ENGINE, EventEmitter2],
+        useFactory: (engine: ScoreEngine, emitter: EventEmitter2) =>
+          createCharacterDetailService({
+            ...details,
+            calculateScore: engine.calculate,
+            characterEvents: new CharacterEvents(emitter)
+          })
       },
+      ...timelineProviders,
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
         provide: TODAY_GRADE_SERVICE,
@@ -142,10 +176,7 @@ export async function createApiHttpApp({
         useFactory: () =>
           createScoreEngine({
             path: scoreLibraryPath,
-            report: (code) =>
-              writeAccessLog(
-                JSON.stringify({ time: new Date().toISOString(), service: 'api', code })
-              )
+            report: reportCode
           })
       }
     ]
