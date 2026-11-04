@@ -20,7 +20,7 @@
 
 ## Desktop 앱
 
-Windows용 Desktop 앱은 더 개발하지 않습니다. 소스는 [`v1.0.2` tag](https://github.com/dungeon-and-dragon/dfragon/tree/v1.0.2)에 있고, 이전 Release의 포터블 exe는 그대로 남아 있습니다. 중단 결정은 [ADR 0008](docs/adr/0008-desktop-discontinued.md)에 있습니다.
+Windows용 Desktop 앱은 더 개발하지 않습니다. 소스는 [`v1.0.2` tag](https://github.com/dungeon-and-dragon/dfragon/tree/v1.0.2)에 있고, 이전 Release의 포터블 exe는 그대로 남아 있습니다.
 
 ## 보내는 정보
 
@@ -46,7 +46,7 @@ pnpm workspace 모노레포입니다.
 | [`packages/licenses`](packages/licenses/README.md) | 배포물에 넣는 오픈소스 고지 수집 |
 | [`packages/models`](packages/models/README.md) | OCR 모델과 점수 엔진 submodule |
 
-설치, 검증 명령과 작업 경계는 [AGENTS.md](AGENTS.md), 제품 계약과 결정 기록은 [문서 안내](docs/README.md)에서 시작합니다.
+설치, 검증 명령과 작업 경계는 [AGENTS.md](AGENTS.md)에서 시작합니다.
 
 ---
 
