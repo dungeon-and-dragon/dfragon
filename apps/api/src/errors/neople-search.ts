@@ -1,4 +1,3 @@
-import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type { SearchErrorBody } from '../types/neople-character-search.js'
 import { type FailureOptions, SanitizedFailure } from '../error-chain.js'
 
@@ -32,26 +31,6 @@ const errors = {
 
 type NeopleSearchFailureKind = keyof typeof errors
 
-export type NeopleUpstreamFailureKind = 'internal' | 'api' | 'unavailable'
-
-const upstreamCodeErrors = new Map<string, NeopleUpstreamFailureKind>([
-  ['API000', 'internal'],
-  ['API003', 'internal'],
-  ['API004', 'internal'],
-  ['API005', 'internal'],
-  ['API002', 'unavailable'],
-  ['API008', 'unavailable'],
-  ['DNF980', 'unavailable'],
-  ['API901', 'api'],
-  ['DNF901', 'api'],
-  ['DNF000', 'api'],
-  ['API006', 'api'],
-  ['API007', 'api'],
-  ['API900', 'api'],
-  ['API999', 'api'],
-  ['DNF999', 'api']
-])
-
 export class NeopleSearchFailure extends SanitizedFailure {
   readonly body: SearchErrorBody
   readonly kind: NeopleSearchFailureKind
@@ -65,35 +44,4 @@ export class NeopleSearchFailure extends SanitizedFailure {
     this.status = definition.status
     this.body = { error: { code: definition.code, message: definition.message } }
   }
-}
-
-export function neopleStatusFailureKind(status: number): NeopleUpstreamFailureKind {
-  if (status === 429 || status === 503) {
-    return 'unavailable'
-  }
-
-  return 'api'
-}
-
-export function classifyNeopleUpstreamFailure(
-  body: unknown,
-  status: number,
-  ok: boolean
-): NeopleUpstreamFailureKind | undefined {
-  if (!isRecord(body) || !Object.hasOwn(body, 'error')) {
-    if (ok) {
-      return undefined
-    }
-
-    return neopleStatusFailureKind(status)
-  }
-
-  const code = isRecord(body.error) ? body.error.code : undefined
-  const knownError = typeof code === 'string' ? upstreamCodeErrors.get(code) : undefined
-
-  if (knownError !== undefined) {
-    return knownError
-  }
-
-  return neopleStatusFailureKind(status)
 }
