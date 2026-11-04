@@ -1,4 +1,4 @@
-export type TimelineRange = { start: Date; end: Date }
+import type { TimelineRange } from '@dfragon/database'
 
 const MINUTE_MS = 60_000
 // 문서가 90일을 어떻게 세는지 밝히지 않아, 시작일과 끝날을 모두 세어도 90일이 되는 길이로 둔다.

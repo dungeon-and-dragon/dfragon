@@ -17,7 +17,7 @@ review-after: 지원 Node 또는 Nest major 변경 시
 
 | 구분 | 내용 |
 | --- | --- |
-| 방향 | `apps/api`의 NestJS 중앙 API. PostgreSQL은 선택 설정이며 아직 업무 테이블은 없다. 캐릭터, 공용 아이템, 오늘의 등급 조회 결과만 API 메모리에 캐시하며([캐릭터 상세](character-details.md), [오늘의 등급](today-grade.md)), 노드가 늘면 여러 노드가 공유하는 Redis로 옮긴다. |
+| 방향 | `apps/api`의 NestJS 중앙 API. PostgreSQL은 선택 설정이며 DB 설정이 있으면 [캐릭터 타임라인](character-timeline.md)을 저장한다. 캐릭터, 공용 아이템, 오늘의 등급 조회 결과만 API 메모리에 캐시하며([캐릭터 상세](character-details.md), [오늘의 등급](today-grade.md)), 노드가 늘면 여러 노드가 공유하는 Redis로 옮긴다. |
 | 실행 계약 | Node 26, Nest 12, ESM과 TypeScript build, 아래 build, test 방식 |
 | 남은 미결정 | 운영 배포, 실제 credential과 domain, 전체 서비스 한도 |
 
@@ -57,6 +57,21 @@ App 생성은 port를 열지 않는 factory로 분리하고, `main.ts`만 설정
 실행 기반의 최소 **필수** 설정은 `PORT`(십진 정수 1~65535)다. 누락, 빈 값, 잘못된 값은 listen 전에 실패한다. 따라서 runtime-only 단계에서도 실제 필수 설정 누락 실패를 검증한다. Test factory의 loopback port 0 주입은 환경변수 검증과 구분한다. 검색 구성에 필요한 `NEOPLE_API_KEY`는 검색 module을 연결할 때부터 필수이며 누락, 빈 값은 listen 전에 실패한다. Runtime-only app은 아직 연결하지 않은 검색 설정을 요구하지 않는다. 필수 설정 실패는 값이나 stack을 출력하지 않고 검증한다. Fake 설정은 test에서만 주입하며 운영용 인증 우회나 test mode를 추가하지 않는다. 점수 엔진 라이브러리 경로 `SCORE_LIBRARY_FILE`은 선택 설정이다. 절대 경로가 아니면 listen 전에 실패하고, 설정하지 않으면 점수 worker를 띄우지 않는다. 파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둔다.
 
 설정 검증은 키의 누락, 빈 값, 공백뿐인 값 검증을 runtime 설정 읽기에 집중한다. listen 전에 검증하고, runtime 조합부가 검색, 상세, 카탈로그 어댑터를 생성한다. 검색과 상세 서비스, HTTP 앱 factory는 raw API 키 없이 준비된 어댑터를 필수 의존성으로 받는다. 서비스 생성 후 매 요청 키를 다시 검사하지 않으며, 서비스 종료와 클라이언트 연결 종료 등 요청마다 달라지는 조건만 실행 단계에서 확인한다. 연결이 이미 끊긴 요청은 공급자를 호출하지 않는다. HTTP 테스트의 fake 어댑터에는 형식상 API 키를 요구하지 않는다. 잘못된 키로 HTTP 앱을 구성한 뒤 400/500 우선순위를 검사하던 내부 factory 테스트는 시작 단계의 설정 실패 검증으로 옮긴다. 정상 runtime의 설정 오류 시 시작 거절과 공개 HTTP 입력, 오류, 호출 한도 계약은 유지한다.
+
+## 프로세스 안 이벤트
+
+한 업무 흐름의 사실에 다른 기능이 반응해야 하면, 발행자가 구독자를 직접 부르지 않고 `@nestjs/event-emitter`로 이벤트를 낸다([ADR 0015](../adr/0015-character-timeline-sync-in-api.md)).
+
+- 이벤트 이름은 `character.fetched`처럼 일어난 사실의 과거형으로 짓고, 할 일을 이름에 넣지 않는다.
+- 이름 상수와 payload class를 한 파일에 두고, 발행자와 구독자는 둘 다 그것을 import한다. 문자열 이름을 따로 쓰지 않는다.
+- 발행은 같은 파일의 발행 class 메서드(`CharacterEvents.fetched` 등)로만 하고, 발행자는 그 class를 의존성으로 받는다. `EventEmitter2.emit`을 업무 코드에서 직접 부르지 않는다. 메서드의 참조를 찾으면 발행하는 곳이 모두 나온다.
+- `emit`은 구독자를 그 자리에서 실행하므로, 구독자는 무거운 일을 queue에 넣기만 하고 곧바로 돌아온다. 오류를 던지지 않고 실패는 직접 기록하거나 보고한다.
+- 업무 판단은 구독자 밖의 함수에 두어 HTTP와 DB 없이 테스트한다. 구독자는 이벤트를 그 함수나 queue 호출로 바꾸는 연결만 한다.
+- 이벤트는 프로세스 메모리 안에서만 전달되고 저장되지 않는다. 재시작이나 다른 인스턴스로 전달해야 하면 메시지 큐를 따로 정한다.
+
+| 이벤트 | 발행 | 구독 |
+| --- | --- | --- |
+| `character.fetched` | 캐릭터 상세 GET, 강제 갱신(11개 섹션을 받았거나 캐시 적중) | [타임라인 동기화](character-timeline.md#동기화)(DB 설정이 있을 때) |
 
 ## DB와 migration
 
