@@ -127,7 +127,7 @@ const characterCard = object({
     enum: ['dealer', 'buffer'],
     nullable: true,
     description:
-      'jobGrowName이 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)이거나 jobName이 프리스트(여)인 크루세이더면 buffer, 그 밖은 dealer, 직업을 모르면 null.'
+      'jobGrowName이 크루세이더, 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)면 buffer, 그 밖은 dealer, 직업을 모르면 null. 단 jobName이 프리스트(남)인 크루세이더는 용기의 은총을 습득했으면 dealer.'
   },
   stats: retiredNull('카드 스탯 한 줄의 값이었습니다.'),
   score: cardScore,
