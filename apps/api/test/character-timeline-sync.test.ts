@@ -183,8 +183,39 @@ test('마지막 성공이 1시간 이내면 Neople을 부르지 않는다', asyn
   await syncCharacterTimeline(character, { fetchTimeline, store: stale.store, now: () => now })
 
   assert.equal(calls, 1)
-  assert.deepEqual(stale.replaced, [{ start: new Date('2026-11-04T11:00:00Z'), end: now }])
   assert.equal(stale.successes(), 1)
+})
+
+test('다시 받을 때는 기록 지연을 감안해 마지막 동기화 위치보다 30분 앞에서 시작한다', async () => {
+  const now = new Date('2026-11-04T12:00:00Z')
+  const stale = memoryStore({
+    syncedUntil: new Date('2026-11-04T11:00:00Z'),
+    lastSucceededAt: new Date('2026-11-04T10:00:00Z')
+  })
+
+  await syncCharacterTimeline(character, {
+    fetchTimeline: async () => emptyInputs,
+    store: stale.store,
+    now: () => now
+  })
+
+  assert.deepEqual(stale.replaced, [{ start: new Date('2026-11-04T10:30:00Z'), end: now }])
+})
+
+test('마지막 동기화 위치가 중천 시작 30분 안이면 중천 시작보다 앞에서 받지 않는다', async () => {
+  const now = new Date(SEASON_START.getTime() + 2 * 60 * MINUTE_MS)
+  const early = memoryStore({
+    syncedUntil: new Date(SEASON_START.getTime() + 10 * MINUTE_MS),
+    lastSucceededAt: new Date(SEASON_START.getTime() - 60 * MINUTE_MS)
+  })
+
+  await syncCharacterTimeline(character, {
+    fetchTimeline: async () => emptyInputs,
+    store: early.store,
+    now: () => now
+  })
+
+  assert.deepEqual(early.replaced, [{ start: SEASON_START, end: now }])
 })
 
 test('처음 동기화는 중천 시작부터 90일 구간을 앞에서부터 받고 모두 저장하면 성공을 기록한다', async () => {
