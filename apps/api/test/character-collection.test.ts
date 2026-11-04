@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, utimes, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -154,40 +154,56 @@ test('server나 key가 빠진 줄이 있으면 import가 실패한다', async ()
   }
 })
 
-test('목록 파일을 대기열에 넣고 대기열이 빌 때까지 기본 정보를 저장하며, 바뀌지 않은 목록은 다시 넣지 않는다', async () => {
+test('목록 파일 여러 개를 대기열에 넣고 대기열이 빌 때까지 기본 정보를 저장하며, 바뀐 파일만 다시 넣는다', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'character-collector-'))
   try {
-    const importFile = join(directory, 'characters.jsonl')
-    await writeFile(
-      importFile,
-      ['first', 'second'].map((key) => JSON.stringify({ server: 'cain', key })).join('\n')
-    )
+    const listFile = (shard: number) => join(directory, `characters-${shard}.jsonl`)
+    const writeList = (shard: number, keys: string[]) =>
+      writeFile(
+        listFile(shard),
+        keys.map((key) => JSON.stringify({ server: 'cain', key })).join('\n')
+      )
+    await writeList(1, ['first'])
+    await writeList(2, ['second'])
     const memory = memoryStore([])
-    const reports: string[] = []
+    const reports: Array<[string, number | undefined]> = []
     const dependencies: Omit<CollectionPassDependencies, 'importedAt'> = {
-      importFile,
+      importFiles: [listFile(1), listFile(2)],
       enqueue: async (characters) => {
         memory.queue.push(...characters)
       },
       fetchBasic: async (character) => basicOf(character),
       store: memory.store,
       requestIntervalMs: 0,
-      report: (code) => reports.push(code)
+      report: (code, details) => reports.push([code, details?.count])
     }
 
-    const initialPass = await runCollectionPass({ ...dependencies, importedAt: undefined })
+    const initialPass = await runCollectionPass({ ...dependencies, importedAt: new Map() })
     const unchangedPass = await runCollectionPass({
       ...dependencies,
       importedAt: initialPass.importedAt
     })
+    await writeList(2, ['second', 'third'])
+    // 같은 ms 안에 다시 쓰면 수정 시각이 같을 수 있어 바뀐 파일의 수정 시각을 확실히 뒤로 둔다.
+    await utimes(listFile(2), new Date(), new Date(Date.now() + 60_000))
+    const changedPass = await runCollectionPass({
+      ...dependencies,
+      importedAt: unchangedPass.importedAt
+    })
 
-    assert.equal(initialPass.outcome, 'drained')
-    assert.equal(unchangedPass.outcome, 'drained')
+    assert.deepEqual(
+      [initialPass.outcome, unchangedPass.outcome, changedPass.outcome],
+      ['drained', 'drained', 'drained']
+    )
     assert.deepEqual(
       memory.recorded.map((basic) => basic.characterId),
-      ['first', 'second']
+      ['first', 'second', 'second', 'third']
     )
-    assert.deepEqual(reports, ['CHARACTER_IMPORT_DONE'])
+    assert.deepEqual(reports, [
+      ['CHARACTER_IMPORT_DONE', 1],
+      ['CHARACTER_IMPORT_DONE', 1],
+      ['CHARACTER_IMPORT_DONE', 2]
+    ])
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
@@ -198,8 +214,8 @@ test('Neople을 쓸 수 없으면 실패로 기록하지 않고 멈추며, 다�
   const reports: string[] = []
   let calls = 0
   const dependencies: CollectionPassDependencies = {
-    importFile: join(tmpdir(), 'missing-character-list.jsonl'),
-    importedAt: undefined,
+    importFiles: [join(tmpdir(), 'missing-character-list.jsonl')],
+    importedAt: new Map(),
     enqueue: async () => {},
     fetchBasic: async (character) => {
       calls++
@@ -239,11 +255,16 @@ const collectorEnvironment = {
   DB_NAME: 'dfragon',
   DB_USERNAME: 'dfragon_api',
   DB_PASSWORD: 'synthetic',
-  CHARACTER_IMPORT_FILE: '/data/characters.jsonl'
+  CHARACTER_IMPORT_FILES: '/data/1/characters.jsonl,/data/2/characters.jsonl'
 }
 
-test('수집 worker 설정은 요청 상한 기본값이 5이고, 잘못된 입력은 값 없이 거절한다', () => {
-  assert.equal(readCollectorConfiguration(collectorEnvironment).requestsPerSecond, 5)
+test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 상한 기본값이 5이며, 잘못된 입력은 값 없이 거절한다', () => {
+  const configuration = readCollectorConfiguration(collectorEnvironment)
+  assert.deepEqual(configuration.importFiles, [
+    '/data/1/characters.jsonl',
+    '/data/2/characters.jsonl'
+  ])
+  assert.equal(configuration.requestsPerSecond, 5)
   assert.equal(
     readCollectorConfiguration({
       ...collectorEnvironment,
@@ -254,7 +275,11 @@ test('수집 worker 설정은 요청 상한 기본값이 5이고, 잘못된 입�
   const { DB_HOST: _, ...withoutDatabase } = collectorEnvironment
   for (const invalid of [
     withoutDatabase,
-    { ...collectorEnvironment, CHARACTER_IMPORT_FILE: 'characters.jsonl' },
+    {
+      ...collectorEnvironment,
+      CHARACTER_IMPORT_FILES: '/data/1/characters.jsonl,characters.jsonl'
+    },
+    { ...collectorEnvironment, CHARACTER_IMPORT_FILES: '' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: '0' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: 'fast' }
   ]) {
