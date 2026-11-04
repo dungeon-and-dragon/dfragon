@@ -62,12 +62,12 @@ DB 설정이 없으면 queue를 만들지 않습니다.
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
-입력은 Neople key, DB 설정(필수), `CHARACTER_IMPORT_FILE`(캐릭터 목록 파일 `characters.jsonl`의 절대 경로), `CHARACTER_COLLECTOR_REQUESTS_PER_SECOND`(Neople 초당 요청 상한, 기본 5)입니다. 잘못된 입력은 `Character collector failed`와 nonzero exit로 끝납니다.
+입력은 Neople key, DB 설정(필수), `CHARACTER_IMPORT_FILES`(캐릭터 목록 파일 `characters.jsonl`의 절대 경로를 쉼표로 이은 목록, 목록을 여러 컨테이너로 나눠 모으면 파일도 여러 개), `CHARACTER_COLLECTOR_REQUESTS_PER_SECOND`(Neople 초당 요청 상한, 기본 5)입니다. 잘못된 입력은 `Character collector failed`와 nonzero exit로 끝납니다.
 
-1. 목록 파일의 수정 시각이 바뀌면 줄마다 `server`, `key`를 Neople serverId, characterId로 읽어 1000개씩 `character_collection`에 넣습니다. 이미 대기열에 있거나 기본 정보를 저장한 캐릭터는 넣지 않으므로 같은 파일을 다시 읽어도 Neople을 다시 부르지 않습니다.
+1. 목록 파일마다 수정 시각을 기억하고, 바뀐 파일만 줄마다 `server`, `key`를 Neople serverId, characterId로 읽어 1000개씩 `character_collection`에 넣습니다. 이미 대기열에 있거나 기본 정보를 저장한 캐릭터는 넣지 않으므로 같은 파일을 다시 읽어도 Neople을 다시 부르지 않습니다.
 2. 대기열의 캐릭터를 넣은 순서(같은 시각이면 서버, 캐릭터 id 순)대로 100명씩 꺼내 `GET /df/servers/<serverId>/characters/<characterId>`를 차례로 부르고, 이름, 모험단, 레벨, 직업, 명성, 길드와 `basic_fetched_at`을 `characters`에 저장한 뒤 대기열에서 지웁니다. 한 번 저장한 캐릭터는 다시 조회하지 않습니다.
 3. 없는 캐릭터나 schema가 맞지 않는 응답(모험단 이름이 없는 경우 포함)은 대기열 행의 `failure`(`neople-api`, `neople-internal`)에 남기고 재시도하지 않습니다. 한도 초과, 점검, timeout이면 기록하지 않고 1분 쉰 뒤 같은 캐릭터부터 다시 부릅니다. 대기열이 비면 1분 쉽니다.
-4. 목록 파일을 읽은 뒤 `CHARACTER_IMPORT_DONE`(`count`), Neople을 쓸 수 없을 때 `CHARACTER_NEOPLE_UNAVAILABLE`을 stdout JSON 한 줄로 남깁니다. DB 오류와 잘못된 목록 파일 줄은 프로세스를 끝내므로 컨테이너 재시작 정책으로 다시 띄웁니다.
+4. 목록 파일 하나를 읽을 때마다 `CHARACTER_IMPORT_DONE`(`count`), Neople을 쓸 수 없을 때 `CHARACTER_NEOPLE_UNAVAILABLE`을 stdout JSON 한 줄로 남깁니다. DB 오류와 잘못된 목록 파일 줄은 프로세스를 끝내므로 컨테이너 재시작 정책으로 다시 띄웁니다.
 5. 종료 처리는 따로 두지 않아 SIGTERM, SIGINT를 받으면 그대로 끝납니다. 진행 중인 Neople 요청은 끊지 않고 버려지며, 저장은 transaction이라 반만 남지 않습니다. 저장 전에 끝난 캐릭터는 대기열에 남아 다음 시작 때 다시 부르고, 대기열 넣기는 다시 해도 같은 결과라 목록 파일도 처음부터 다시 읽습니다.
 
 Neople 연결 실패, 잘못된 key, 429와 503을 뺀 HTTP 오류도 `neople-api`로 분류되므로, 장애가 길면 그동안 부른 캐릭터가 모두 실패로 남습니다. 장애가 끝난 뒤 관리자가 `UPDATE character_collection SET failure = NULL, attempted_at = NULL WHERE attempted_at >= <장애 시작 시각>`으로 되돌리면 worker가 다시 부릅니다.
@@ -255,7 +255,7 @@ DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfrago
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
-수집 worker는 빈 대기열에서 DB에 붙은 채 실행 중인지, SIGTERM으로 끝나는지, `CHARACTER_IMPORT_FILE`이 없으면 `Character collector failed`로 끝나는지 봅니다. 대기열이 비어 있어 Neople은 부르지 않습니다.
+수집 worker는 빈 대기열에서 DB에 붙은 채 실행 중인지, SIGTERM으로 끝나는지, `CHARACTER_IMPORT_FILES`가 없으면 `Character collector failed`로 끝나는지 봅니다. 대기열이 비어 있어 Neople은 부르지 않습니다.
 
 ### Migration 실패 복구
 
