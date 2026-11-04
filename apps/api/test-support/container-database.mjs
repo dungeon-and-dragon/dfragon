@@ -17,6 +17,7 @@ if (imageArguments.length !== 1 || imageReference.trim() === '' || imageReferenc
 const postgresImage =
   'docker.io/library/postgres:18.6-trixie@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280'
 const runtimeCheckPath = fileURLToPath(new URL('./container-runtime-check.mjs', import.meta.url))
+const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs', import.meta.url))
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -233,6 +234,8 @@ try {
         `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`,
         '--mount',
         `type=bind,source=${runtimeCheckPath},target=/app/container-runtime-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${timelineCheckPath},target=/app/container-timeline-check.mjs,readonly`,
         imageId
       ])
     )
@@ -258,10 +261,90 @@ try {
     ).stdout.trim(),
     'dfragon_api'
   )
-  assert.equal((await psql('SELECT count(*) FROM _prisma_migrations')).stdout.trim(), '0')
+  assert.equal(
+    (
+      await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
+    ).stdout.trim(),
+    '1'
+  )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
     '0'
+  )
+
+  stage = 'timeline tables'
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(relid::text, ',' ORDER BY relid::text) FROM pg_partition_tree('timeline_items') WHERE isleaf"
+      )
+    ).stdout.trim(),
+    'timeline_items_season_1,timeline_items_season_2'
+  )
+  assert.equal(
+    (await psql("SELECT string_agg(name, ',' ORDER BY starts_at) FROM seasons")).stdout.trim(),
+    '중천,천해천'
+  )
+  // 교체 대상이 아닌 행이다. 다른 캐릭터의 같은 시각 행과 같은 캐릭터의 구간 밖 행이다.
+  for (const table of ['timeline_events', 'timeline_items']) {
+    await psql(
+      `INSERT INTO ${table} (server_id, character_id, code, occurred_at, name, data) VALUES ('cain', 'other-character', 201, '2026-04-01 00:00+09', 'kept', '{}'), ('cain', 'synthetic-character', 201, '2026-04-01 00:01+09', 'kept', '{}')`
+    )
+  }
+  const timelineRowCounts = async () =>
+    (
+      await psql(
+        "SELECT (SELECT count(*) FROM timeline_events WHERE name <> 'kept'), (SELECT count(*) FROM timeline_items WHERE name <> 'kept'), (SELECT count(*) FROM timeline_events WHERE name = 'kept') + (SELECT count(*) FROM timeline_items WHERE name = 'kept')"
+      )
+    ).stdout.trim()
+  const replaceTimeline = (copies) =>
+    docker([
+      'exec',
+      '--env',
+      'DB_PASSWORD_FILE=/run/secrets/db_password',
+      apiNames[0],
+      'node',
+      '/app/container-timeline-check.mjs',
+      String(copies)
+    ])
+  // 같은 내용의 두 행은 두 행으로 남고, 같은 구간을 다시 교체해도 늘지 않으며 다른 행은 지우지 않는다.
+  for (const copies of [2, 2, 1]) {
+    await replaceTimeline(copies)
+    assert.equal(await timelineRowCounts(), `${copies}|${copies}|4`)
+  }
+  assert.equal(
+    (
+      await psql("SELECT item_rarity, data->>'probe' FROM timeline_items WHERE name <> 'kept'")
+    ).stdout.trim(),
+    '에픽|1'
+  )
+
+  stage = 'timeline replacement waits for the character lock'
+  // 교체가 캐릭터 lock을 잡지 않으면 겹친 두 교체가 서로의 행을 지우지 못해 행이 두 번 들어간다.
+  await docker([
+    'exec',
+    '--detach',
+    postgresName,
+    'psql',
+    '--host=127.0.0.1',
+    '--username=postgres',
+    '--dbname=dfragon',
+    '--command',
+    "SELECT pg_advisory_lock(1175, hashtext('cain/synthetic-character')); SELECT pg_sleep(600)"
+  ])
+  await waitFor(async () => (await advisoryLockCount(true)) === 1)
+  const overlappingReplacements = Promise.all([replaceTimeline(2), replaceTimeline(2)])
+  await waitFor(async () => (await advisoryLockCount(false)) === 2)
+  await psql(
+    "SELECT pg_terminate_backend(pid) FROM pg_locks WHERE locktype = 'advisory' AND granted"
+  )
+  await overlappingReplacements
+  assert.equal(await timelineRowCounts(), '2|2|4')
+  assert.equal(
+    (
+      await psql("SELECT synced_until = '2026-04-01 00:00+09' FROM timeline_sync_state")
+    ).stdout.trim(),
+    't'
   )
 
   stage = 'graceful stop'
@@ -299,9 +382,9 @@ try {
   // Prisma는 실패한 migration을 실패로 기록해 해결하기 전까지 다음 적용을 막는다. BEGIN, COMMIT으로 감싼 앞 문장은 되돌려진다.
   assert.equal(
     (
-      await psql('SELECT migration_name, finished_at IS NULL FROM _prisma_migrations')
+      await psql('SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL')
     ).stdout.trim(),
-    '20000101000000_failing_migration|t'
+    '20000101000000_failing_migration'
   )
   assert.equal(
     (await psql("SELECT to_regclass('public.failing_migration_probe') IS NULL")).stdout.trim(),
@@ -356,5 +439,7 @@ try {
   }
 }
 if (process.exitCode === undefined) {
-  process.stdout.write('PASS: api image migration on startup, HTTP and database input rejection\n')
+  process.stdout.write(
+    'PASS: api image migration on startup, timeline replacement, HTTP and database input rejection\n'
+  )
 }
