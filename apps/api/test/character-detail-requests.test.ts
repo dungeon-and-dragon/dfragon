@@ -292,15 +292,7 @@ test('상세 응답 JSON은 섹션마다 revision 1과 조회 시각을, freshne
       buff_creature: metadata
     },
     freshness: { lastSuccessfulFetchAt: fetchedAt, expiresAt: '2026-10-29T01:00:00.000Z' },
-    card: {
-      role: null,
-      stats: null,
-      score: null,
-      serverRank: null,
-      set: null,
-      oath: null,
-      investment: []
-    }
+    card: { role: null, score: null }
   })
 })
 
@@ -551,7 +543,7 @@ test('서버 종료는 진행 중인 공용 아이템 묶음 호출을 취소하
   await closing
 })
 
-test('상세 응답은 기존 필드에 역할만 정한 card를 더하고 지운 카드 칸은 빈 값이다', async (t) => {
+test('상세 응답은 기존 필드에 역할과 점수만 담은 card를 더한다', async (t) => {
   const service = createCharacterDetailService({
     calculateScore: noScore,
     catalog,
@@ -561,15 +553,7 @@ test('상세 응답은 기존 필드에 역할만 정한 card를 더하고 지�
 
   const result = await readDetail(service.get(identity, signal, ignoredTimings))
 
-  assert.deepEqual(result.card, {
-    role: null,
-    stats: null,
-    score: null,
-    serverRank: null,
-    set: null,
-    oath: null,
-    investment: []
-  })
+  assert.deepEqual(result.card, { role: null, score: null })
   const { card: _card, ...rest } = result
   assert.deepEqual(
     Object.keys(rest).sort(),

@@ -7,16 +7,6 @@ import type { CharacterCard } from '../src/characters/card/types.js'
 import { projectCharacterDetails } from '../src/characters/details/project.js'
 import type { CharacterDetailSection } from '../src/characters/details/sections.js'
 
-// 이전 Desktop은 카드 전체를 엄격하게 검사하므로 지운 칸은 빈 값으로 남긴다.
-const retiredFields = {
-  stats: null,
-  score: null,
-  serverRank: null,
-  set: null,
-  oath: null,
-  investment: []
-} as const
-
 function readFixture(role: 'dealer' | 'buffer') {
   const url = new URL(`../../test/fixtures/character-card-${role}.json`, import.meta.url)
 
@@ -26,7 +16,7 @@ function readFixture(role: 'dealer' | 'buffer') {
   }
 }
 
-test('실응답 fixture의 딜러와 버퍼는 역할만 정하고 지운 칸은 빈 값으로 둔다', () => {
+test('실응답 fixture의 딜러와 버퍼는 역할만 정하고 점수는 비워 둔다', () => {
   for (const role of ['dealer', 'buffer'] as const) {
     const fixture = readFixture(role)
     const { serverId, characterId } = fixture.sections.basic as Record<string, string>
@@ -35,7 +25,7 @@ test('실응답 fixture의 딜러와 버퍼는 역할만 정하고 지운 칸은
 
     const card = projectCharacterCard(projectCharacterDetails(identity, fixture.sections, at))
 
-    assert.deepEqual(card, { role, ...retiredFields }, role)
+    assert.deepEqual(card, { role, score: null }, role)
   }
 })
 
@@ -54,7 +44,7 @@ test('역할은 眞 접두를 포함한 버퍼 전직명으로 정하고 직업�
     [undefined, null]
   ] as const) {
     const card = projectCharacterCard({ character: { jobGrowName }, skillStyle: null })
-    assert.deepEqual(card, { role, ...retiredFields }, String(jobGrowName))
+    assert.deepEqual(card, { role, score: null }, String(jobGrowName))
   }
 })
 
@@ -75,7 +65,7 @@ test('남성 크루세이더는 용기의 은총을 습득하면 딜러, 아니�
   ] as const) {
     for (const jobGrowName of ['眞 크루세이더', '크루세이더']) {
       const card = projectCharacterCard({ character: { jobName, jobGrowName }, skillStyle })
-      assert.deepEqual(card, { role, ...retiredFields }, `${jobName} ${jobGrowName} ${role}`)
+      assert.deepEqual(card, { role, score: null }, `${jobName} ${jobGrowName} ${role}`)
     }
   }
 })

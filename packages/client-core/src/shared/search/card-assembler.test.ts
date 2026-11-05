@@ -66,7 +66,7 @@ describe('상세 응답 card에서 카드 읽기', () => {
     expect(card).toEqual(apiCard)
   })
 
-  it('card와 점수에 Desktop이 모르는 칸이 있으면 버리고 역할과 점수만 남긴다', () => {
+  it('card와 점수에 모르는 칸이 있으면 버리고 역할과 점수만 남긴다', () => {
     const card = buildCharacterCard(
       details({
         role: 'dealer',
