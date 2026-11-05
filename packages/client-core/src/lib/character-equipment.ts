@@ -50,7 +50,7 @@ export type EquipmentView = Readonly<{
   mistLevel: number | null
   items: EquipmentRow[]
   creature: ItemView | null
-  aura: (ItemView & Readonly<{ emblems: string[] }>) | null
+  aura: ItemView | null
 }>
 
 function enchantGroup(name: string): string {
@@ -165,23 +165,13 @@ function toEquipmentRow(item: EquipmentItem): EquipmentRow {
   }
 }
 
-function toAuraView(
-  aura: CharacterDetailView['avatar'][number] | undefined
-): EquipmentView['aura'] {
-  if (aura === undefined) {
-    return null
-  }
-
-  const emblems = aura.emblems.flatMap(({ itemName }) => (itemName != null ? [itemName] : []))
-
-  return { ...toItemView(aura), emblems }
-}
-
 export function toEquipmentView(
   detail: Pick<CharacterDetailView, 'equipment' | 'creature' | 'avatar' | 'mistAssimilation'>
 ): EquipmentView {
   const creature = detail.creature != null ? toItemView(detail.creature) : null
   const mistLevel = detail.mistAssimilation?.level ?? null
+  const auraAvatar = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
+  const aura = auraAvatar !== undefined ? toItemView(auraAvatar) : null
 
   return {
     sets: detail.equipment.setItemInfo.map((set) => {
@@ -197,6 +187,6 @@ export function toEquipmentView(
     mistLevel,
     items: detail.equipment.equipment.map(toEquipmentRow),
     creature,
-    aura: toAuraView(detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID))
+    aura
   }
 }
