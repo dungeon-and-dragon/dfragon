@@ -1,6 +1,8 @@
 import {
   type DatabaseConfiguration,
   createDatabaseClient,
+  readAdventureCharacters,
+  readGuild,
   recordCharacterBasic
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
@@ -21,7 +23,7 @@ type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
 function createDatabaseSubscribers(
   neople: NeopleClient,
   database: DatabaseConfiguration | undefined
-): Pick<ApiHttpAppOptions, 'timeline' | 'recordCharacterBasic'> {
+): Pick<ApiHttpAppOptions, 'timeline' | 'recordCharacterBasic' | 'adventureGuild'> {
   if (database === undefined) {
     return {}
   }
@@ -37,7 +39,11 @@ function createDatabaseSubscribers(
       read: (character) => readCharacterTimeline(client, character, new Date()),
       close: () => client.$disconnect()
     },
-    recordCharacterBasic: (basic) => recordCharacterBasic(client, basic)
+    recordCharacterBasic: (basic) => recordCharacterBasic(client, basic),
+    adventureGuild: {
+      readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),
+      readGuild: (guildId) => readGuild(client, guildId)
+    }
   }
 }
 

@@ -43,6 +43,7 @@ model Character {
   @@id([serverId, characterId])
   @@index([adventureId])
   @@index([serverId, characterName])
+  @@index([guildId])
   @@map("characters")
 }
 
