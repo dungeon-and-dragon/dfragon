@@ -54,7 +54,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   }
 
   return (
-    <span>
+    <span {...stylex.props(styles.root)}>
       <HeaderTooltip label={status} disabled={status.length === 0}>
         {sharePrompt ? (
           <span {...stylex.props(styles.wrapper)}>
