@@ -77,6 +77,7 @@ export function WeeklyClears({ clears }: { clears: readonly TimelineClear[] }): 
           <li key={`${clear.occurredAt}-${index}`} {...stylex.props(styles.clear)}>
             <span {...stylex.props(styles.badge)}>{CLEAR_KIND_LABELS[clear.kind]}</span>
             <span {...stylex.props(styles.clearName)}>{clear.name}</span>
+            {clear.hard && <span {...stylex.props(styles.badge)}>하드</span>}
             {clear.modeName != null && (
               <span {...stylex.props(styles.clearMode)}>{clear.modeName}</span>
             )}
@@ -103,11 +104,12 @@ export function SeasonClears({
     >
       <ul {...stylex.props(styles.counts)}>
         {counts.map((count) => (
-          <li key={`${count.kind}-${count.name}`} {...stylex.props(styles.countChip)}>
+          <li key={`${count.kind}-${count.name}-${count.hard}`} {...stylex.props(styles.countChip)}>
             <span {...stylex.props(styles.badge, styles.badgeInChip)}>
               {CLEAR_KIND_LABELS[count.kind]}
             </span>
             <span>{count.name}</span>
+            {count.hard && <span {...stylex.props(styles.badge, styles.badgeInChip)}>하드</span>}
             <span {...stylex.props(styles.countValue)}>{count.count}</span>
           </li>
         ))}
