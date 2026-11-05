@@ -43,6 +43,7 @@ export type TimelineEventRow = {
 }
 
 export type TimelineItemRow = {
+  id: bigint
   code: number
   occurredAt: Date
   name: string
@@ -54,10 +55,16 @@ export type TimelineItemRow = {
 
 export type CharacterTimelineEventRow = TimelineCharacter & TimelineEventRow
 
+export type TimelineItemCursor = {
+  occurredAt: Date
+  id: bigint
+}
+
 export type RecentTimelineItemQuery = {
   codes: readonly number[]
   itemRarities?: readonly string[]
   limit: number
+  before?: TimelineItemCursor
 }
 
 // pg_advisory_xact_lock(int, int)는 Prisma migrate의 단일 bigint key와 다른 lock 공간을 쓴다.
@@ -291,7 +298,7 @@ export function readCharactersTimelineEvents(
 export function readRecentTimelineItems(
   client: DatabaseClient,
   character: TimelineCharacter,
-  { codes, itemRarities, limit }: RecentTimelineItemQuery
+  { codes, itemRarities, limit, before }: RecentTimelineItemQuery
 ): Promise<TimelineItemRow[]> {
   const { serverId, characterId } = character
 
@@ -300,11 +307,16 @@ export function readRecentTimelineItems(
       serverId,
       characterId,
       code: { in: [...codes] },
-      itemRarity: itemRarities && { in: [...itemRarities] }
+      itemRarity: itemRarities && { in: [...itemRarities] },
+      OR: before && [
+        { occurredAt: { lt: before.occurredAt } },
+        { occurredAt: before.occurredAt, id: { lt: before.id } }
+      ]
     },
     orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
     take: limit,
     select: {
+      id: true,
       code: true,
       occurredAt: true,
       name: true,
