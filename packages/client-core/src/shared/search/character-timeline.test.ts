@@ -74,15 +74,23 @@ it('값이 있는 응답과 빈 응답을 그대로 읽고 캐릭터의 timeline
   await expect(readTimeline(empty).read).resolves.toEqual(empty)
 })
 
+it('hard를 주지 않는 API의 클리어는 하드가 아닌 것으로 읽는다', async () => {
+  const { hard: _weeklyHard, ...weekly } = filled.weeklyClears[0]
+  const { hard: _seasonHard, ...season } = filled.seasonClears[0]
+  const { read } = readTimeline({ ...empty, weeklyClears: [weekly], seasonClears: [season] })
+
+  await expect(read).resolves.toEqual({
+    ...empty,
+    weeklyClears: [{ ...weekly, hard: false }],
+    seasonClears: [{ ...season, hard: false }]
+  })
+})
+
 it.each([
   ['목록이 빠진 응답', { ...empty, acquisitions: undefined }],
   [
     '모르는 클리어 종류',
     { ...empty, seasonClears: [{ kind: 'dungeon', name: '이름', hard: false, count: 1 }] }
-  ],
-  [
-    '하드 여부가 빠진 클리어',
-    { ...empty, weeklyClears: [{ ...filled.weeklyClears[0], hard: undefined }] }
   ],
   [
     '에픽, 태초가 아닌 획득',
