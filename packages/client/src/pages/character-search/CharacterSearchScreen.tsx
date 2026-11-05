@@ -4,7 +4,7 @@ import {
   type CharacterSearchQuery,
   isSearchableCharacterName,
   type SearchedCharacter
-} from '@dfragon/client-core/shared/search/character-http'
+} from '@dfragon/client-core/shared/api/character-schemas'
 import {
   CharacterTable,
   type CharacterTableRow,

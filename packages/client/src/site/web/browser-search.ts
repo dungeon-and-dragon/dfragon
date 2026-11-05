@@ -6,11 +6,8 @@ import {
   type SearchSnapshot
 } from '@dfragon/client-core/preload/common/types/search'
 import { createCaptureSearchLifetime } from '@dfragon/client-core/shared/search/capture-lifetime'
-import {
-  createCharacterCandidatesHttp,
-  createCharacterDetailsHttp,
-  createCharacterImageHttp
-} from '@dfragon/client-core/shared/search/character-http'
+import type { DfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
+import { decodeCharacterImage } from '@dfragon/client-core/shared/search/character-image'
 import { createCharacterImageSource } from '@dfragon/client-core/shared/search/character-image-source'
 import {
   createCachedCharacterCandidates,
@@ -44,25 +41,24 @@ function createMessageChannelYield(): YieldToEventLoop {
 export const browserFetch: typeof fetch = (input, init) => fetch(input, init)
 
 export function createBrowserSearchRuntime(
-  apiOrigin: string,
+  dfragon: DfragonClient,
   reportDiagnostic: (code: DiagnosticCode) => void
 ): SearchRuntime {
   const policy = INITIAL_PORTRAIT_COLOR_POLICY
-  const candidates = createCachedCharacterCandidates(
-    createCharacterCandidatesHttp({ apiOrigin, fetch: browserFetch })
-  )
+  const candidates = createCachedCharacterCandidates(dfragon.characters.candidates)
   // 네오플 이미지 서버는 CORS 헤더를 주지 않아 픽셀을 읽을 수 없으므로 API가 전달하는 같은 PNG를 받는다.
   const image = createCharacterImageSource({
-    image: createCharacterImageHttp({
-      fetch: browserFetch,
-      decodePng: decodeBrowserPng,
-      imageUrl: ({ serverId, characterId }) =>
-        `${apiOrigin}/characters/${serverId}/${characterId}/image`
-    })
+    image: async (input) => {
+      const bytes = await dfragon.characters.image(input)
+      try {
+        return await decodeCharacterImage(bytes, decodeBrowserPng)
+      } finally {
+        // 디코드 중에 취소되면 디코드 결과나 실패보다 취소를 먼저 알린다.
+        input.signal.throwIfAborted()
+      }
+    }
   })
-  const details = createCachedCharacterDetails(
-    createCharacterDetailsHttp({ apiOrigin, fetch: browserFetch })
-  )
+  const details = createCachedCharacterDetails(dfragon.characters.details)
   const scorePortrait = createPortraitColorScorer(policy, createMessageChannelYield())
 
   return {

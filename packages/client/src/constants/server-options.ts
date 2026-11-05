@@ -1,5 +1,5 @@
 import { serverNames } from '@dfragon/client-core/constants/servers'
-import { ALL_CHARACTER_SERVERS } from '@dfragon/client-core/shared/search/character-http'
+import { ALL_CHARACTER_SERVERS } from '@dfragon/client-core/shared/api/character-schemas'
 
 export const serverOptions = Object.entries(serverNames).map(([id, label]) => ({ id, label }))
 

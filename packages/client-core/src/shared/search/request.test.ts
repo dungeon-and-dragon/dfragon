@@ -12,11 +12,8 @@ import { deferred } from './async-test-fixture'
 import { runDetailsRequest, runSearchRequest, type IdentificationAdapters } from './request'
 import type { CharacterIdentificationInput } from './identify'
 import type { SearchOperationContext } from './operation'
-import type {
-  CharacterCandidatesHttp,
-  CharacterDetailsHttp,
-  CharacterImageHttp
-} from './character-http'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
+import type { CharacterImageHttp } from './character-image-source'
 import { createCharacterImageCache, createCharacterImageSource } from './character-image-source'
 import { SearchHttpFailure } from './http'
 import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'

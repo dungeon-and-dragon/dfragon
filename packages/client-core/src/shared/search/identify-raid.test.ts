@@ -4,7 +4,7 @@ import type { CharacterCandidate, CharacterDetails } from '../../preload/common/
 import type { RaidRowObservation } from '../../preload/common/types/search'
 import { deferred } from './async-test-fixture'
 import { runDetailsRequest, runSearchRequest } from './request'
-import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-http'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
 import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 
