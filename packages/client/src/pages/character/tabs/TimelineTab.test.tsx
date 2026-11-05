@@ -66,7 +66,6 @@ const EMPTY: CharacterTimeline = {
   acquisitionsCursor: null
 }
 
-// 시각은 UTC로 주고 한국 시간(+9시간)으로 보이는지 본다.
 const FILLED: CharacterTimeline = {
   weeklyClears: [
     {
@@ -172,6 +171,8 @@ beforeEach(() => {
   observed = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
+  // 2026-11-06 12:00 KST. 타이머는 그대로 두고 지금 시각만 고정한다.
+  vi.useFakeTimers({ now: new Date('2026-11-06T03:00:00.000Z'), toFake: ['Date'] })
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -180,6 +181,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
+  vi.useRealTimers()
   vi.unstubAllGlobals()
 })
 
@@ -247,14 +249,21 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시�
   })
 })
 
-it('이번 주 클리어는 종류, 이름, 하드 배지와 난이도(없으면 생략), 한국 시간 MM-DD HH:mm을 보이고 시즌은 하드를 나눈 횟수 칩을 보인다', async () => {
+it('이번 주 클리어는 종류, 이름, 하드 배지와 난이도(없으면 생략), 지난 시간을 보이고 한국 시간 MM-DD HH:mm은 title로 두며, 시즌은 하드를 나눈 횟수 칩을 보인다', async () => {
   await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
 
   expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '3'])
   expect(rowsOf('이번 주 클리어')).toEqual([
-    ['레이드', '디레지에 레이드', '하드', '디레지에 : 악연', '11-05 21:30'],
-    ['레이드', '나벨 레이드', '나벨 : 무지의 악', '11-05 22:00'],
-    ['레기온', '베누스', '11-06 00:05']
+    ['레이드', '디레지에 레이드', '하드', '디레지에 : 악연', '14시간 전'],
+    ['레이드', '나벨 레이드', '나벨 : 무지의 악', '14시간 전'],
+    ['레기온', '베누스', '11시간 전']
+  ])
+  expect(
+    [...group('이번 주 클리어').querySelectorAll('time')].map((time) => [time.dateTime, time.title])
+  ).toEqual([
+    ['2026-11-05T12:30:00.000Z', '11-05 21:30'],
+    ['2026-11-05T13:00:00.000Z', '11-05 22:00'],
+    ['2026-11-05T15:05:00.000Z', '11-06 00:05']
   ])
   expect(rowsOf('시즌 클리어 횟수')).toEqual([
     ['레이드', '디레지에 레이드', '하드', '3'],
@@ -268,9 +277,9 @@ it('강화 표는 종류별 색, 등급 색 장비, 전과 후 수치(재련은 
   await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
 
   expect(rowsOf('강화, 증폭, 재련')).toEqual([
-    ['11-04 10:02', '강화', '합성 무기', '13 → 14', '성공안전'],
-    ['11-04 08:59', '증폭', '합성 상의', '10 → 0', '실패'],
-    ['11-03 09:00', '재련', '합성 무기', '8', '성공']
+    ['2일 전', '강화', '합성 무기', '13 → 14', '성공안전'],
+    ['2일 전', '증폭', '합성 상의', '10 → 0', '실패'],
+    ['3일 전', '재련', '합성 무기', '8', '성공']
   ])
   const kinds = [0, 1, 2].map((row) => cellsOf('강화, 증폭, 재련', row)[1])
   expect(kinds.map((cell) => hasTone(cell, 'reinforce'))).toEqual([true, false, false])
@@ -292,8 +301,8 @@ it('획득 표는 제목 옆에 개수와 에픽, 태초를 적고 경로는 이
 
   expect(headerOf('획득')).toEqual(['획득', '2', '에픽, 태초'])
   expect(rowsOf('획득')).toEqual([
-    ['11-02 19:00', '합성 하의', '던전 드랍'],
-    ['11-01 19:00', '합성 신발', '항아리 획득']
+    ['3일 전', '합성 하의', '던전 드랍'],
+    ['4일 전', '합성 신발', '항아리 획득']
   ])
 })
 

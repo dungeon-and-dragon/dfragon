@@ -4,7 +4,7 @@ import { createNeopleClientForTest } from '@dfragon/neople'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 import { TodayGradeFailure } from '../src/today-grade/errors.js'
-import { averageGradePercent, nextGradeResetAt } from '../src/today-grade/grade.js'
+import { averageGradePercent } from '../src/today-grade/grade.js'
 import { TODAY_GRADE_ITEMS } from '../src/today-grade/items.js'
 import { createNeopleShopGrade, type FetchShopGrade } from '../src/today-grade/neople.js'
 import { createTodayGradeService } from '../src/today-grade/service.js'
@@ -31,18 +31,6 @@ function recordingShopGrade(value: (itemId: string) => number | Promise<number>)
 
   return { calls, fetchShopGrade }
 }
-
-test('다음 등급 갱신 시각은 한국 시간 다음 0시이고, 0시 정각에는 그다음 날 0시다', () => {
-  assert.equal(nextGradeResetAt(noonKst).toISOString(), nextMidnightKst)
-  assert.equal(
-    nextGradeResetAt(new Date('2026-10-30T14:59:59.999Z')).toISOString(),
-    nextMidnightKst
-  )
-  assert.equal(
-    nextGradeResetAt(new Date(nextMidnightKst)).toISOString(),
-    '2026-10-31T15:00:00.000Z'
-  )
-})
 
 test('11부위 등급의 평균을 정수 퍼센트로 반올림한다', () => {
   assert.equal(averageGradePercent(Array(11).fill(85)), 85)

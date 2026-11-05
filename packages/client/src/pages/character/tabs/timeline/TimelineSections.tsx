@@ -12,9 +12,9 @@ import {
   acquisitionRoute,
   CLEAR_KIND_LABELS,
   ENHANCEMENT_KIND_LABELS,
-  formatEnhancementValue,
-  formatTimelineTime
+  formatEnhancementValue
 } from './timeline-format'
+import { RelativeTime } from '../../../../components/RelativeTime'
 import { rarityStyles, styles } from './TimelineTab.style'
 
 const TIME_COLUMN_WIDTH = 112
@@ -127,9 +127,7 @@ export function WeeklyClears({ clears }: { clears: readonly TimelineClear[] }): 
             {clear.modeName != null && (
               <span {...stylex.props(styles.clearMode)}>{clear.modeName}</span>
             )}
-            <time dateTime={clear.occurredAt} {...stylex.props(styles.clearTime)}>
-              {formatTimelineTime(clear.occurredAt)}
-            </time>
+            <RelativeTime at={clear.occurredAt} style={styles.clearTime} />
           </li>
         ))}
       </ul>
@@ -214,9 +212,7 @@ export function Enhancements({
           {enhancements.map((enhancement, index) => (
             <tr key={`${enhancement.occurredAt}-${index}`}>
               <td {...stylex.props(styles.cell, styles.first, styles.time)}>
-                <time dateTime={enhancement.occurredAt}>
-                  {formatTimelineTime(enhancement.occurredAt)}
-                </time>
+                <RelativeTime at={enhancement.occurredAt} />
               </td>
               <td {...stylex.props(styles.cell, styles[enhancement.kind])}>
                 {ENHANCEMENT_KIND_LABELS[enhancement.kind]}
@@ -275,9 +271,7 @@ export function Acquisitions({
           {acquisitions.map((acquisition, index) => (
             <tr key={`${acquisition.occurredAt}-${index}`}>
               <td {...stylex.props(styles.cell, styles.first, styles.time)}>
-                <time dateTime={acquisition.occurredAt}>
-                  {formatTimelineTime(acquisition.occurredAt)}
-                </time>
+                <RelativeTime at={acquisition.occurredAt} />
               </td>
               <td {...stylex.props(styles.cell)}>
                 <ItemName itemName={acquisition.itemName} itemRarity={acquisition.itemRarity} />
