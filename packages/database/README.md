@@ -23,6 +23,8 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `readAdventureCharacters(client, adventureName)`: 이름이 `adventureName`인 모험단의 캐릭터(`StoredCharacter`)를 서버를 가리지 않고 명성이 높은 순(명성이 없으면 뒤, 같으면 서버, 캐릭터 id 순)으로 돌려줍니다. `fetchedAt`은 `basic_fetched_at`입니다.
 - `readGuild(client, guildId)`: `guild_id`가 같은 캐릭터를 같은 순서로 읽고, 가장 최근에 받은 행의 길드 이름과 함께(`StoredGuild`) 돌려줍니다. 길드 ID는 서버가 달라도 같은 길드라 서버로 거르지 않습니다. 길드원이 없으면 이름은 `null`입니다.
+- `readFameRanking(client, { serverId, jobId, jobGrowId }, limit)`: 명성이 있는 캐릭터(`StoredCharacter`)를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 `limit`개까지 돌려줍니다. 주지 않은 조건은 거르지 않습니다.
+- `readCharacterStats(client)`: 전체 캐릭터 수, 서버별 캐릭터 수, 기본 정보를 받은 캐릭터의 직업과 전직별 수와 평균 명성(반올림 전), 명성 10,000 단위 구간별 수(`CharacterStats`)를 돌려줍니다. 서버와 직업은 많은 순, 구간은 캐릭터가 있는 구간만 낮은 순입니다.
 - `replaceTimelineRange(client, character, range, events, items)`: 캐릭터 하나의 `[range.start, range.end]`(양 끝 포함) 타임라인을 교체합니다.
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
   Transaction timeout은 lock 대기를 포함해 60초입니다. 로컬에서 items 5만 행 교체가 Prisma 기본값 5초를 넘었습니다.
@@ -68,6 +70,7 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 조회는 모험단 이름(`adventures.name`), 캐릭터 이름(`characters(server_id, character_name)`), 길드 ID(`characters(guild_id)`)로 캐릭터를 찾고, 두 타임라인 테이블의 `(server_id, character_id, code, occurred_at)` index로 읽습니다.
 교체 때 캐릭터와 구간으로 지우는 문장도 PostgreSQL 18의 skip scan으로 같은 index를 씁니다.
 로컬에서 items 200만 행의 구간 삭제가 0.7ms, events 200만 행에서 모험단 하나의 레이드 클리어 수가 1ms였습니다.
+명성 랭킹은 `characters`의 `(fame DESC)`, `(server_id, fame DESC)`, `(job_id, fame DESC)`, `(job_id, job_grow_id, fame DESC)` index로 거른 조건의 명성 순 앞부분만 읽습니다.
 
 Migration CLI는 API의 `apps/api/.env`에서 DB 설정을 읽습니다.
 
