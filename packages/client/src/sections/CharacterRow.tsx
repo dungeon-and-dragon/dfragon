@@ -104,7 +104,11 @@ export function CharacterRow({
               {tierLabels[shown.tier]}
             </span>
           )}
-          {estimated && <span {...stylex.props(styles.badge, styles.estimate)}>추정</span>}
+          {estimated && (
+            <span title={notice?.text} {...stylex.props(styles.badge, styles.estimate)}>
+              추정
+            </span>
+          )}
           {picker !== undefined && (
             <CandidatePopover slot={slot} picker={picker} onPick={onPickCandidate} />
           )}
@@ -338,20 +342,11 @@ function FoundCells({
 }): React.JSX.Element {
   return (
     <>
-      {notice?.tone === 'estimate' && !editing ? (
-        <td colSpan={3} {...stylex.props(styles.cell)}>
-          <span {...stylex.props(styles.adventure)}>{character.adventure}</span>
-          <NoticeText notice={notice} inline />
-        </td>
-      ) : (
-        <>
-          <AdventureCell adventure={character.adventure} editing={editing} />
-          <GuildCell guildId={character.guildId} guild={character.guild} />
-          <td title={character.job} {...stylex.props(styles.cell, styles.job)}>
-            {character.job}
-          </td>
-        </>
-      )}
+      <AdventureCell adventure={character.adventure} editing={editing} />
+      <GuildCell guildId={character.guildId} guild={character.guild} />
+      <td title={character.job} {...stylex.props(styles.cell, styles.job)}>
+        {character.job}
+      </td>
       <StatCells
         slot={slot}
         character={character}
@@ -517,18 +512,9 @@ function MissingCell({ end = false }: { end?: boolean }): React.JSX.Element {
   )
 }
 
-function NoticeText({
-  notice,
-  inline = false
-}: {
-  notice: SlotNotice
-  inline?: boolean
-}): React.JSX.Element {
+function NoticeText({ notice }: { notice: SlotNotice }): React.JSX.Element {
   return (
-    <span
-      title={notice.text}
-      {...stylex.props(styles.notice, styles[notice.tone], inline && styles.inline)}
-    >
+    <span title={notice.text} {...stylex.props(styles.notice, styles[notice.tone])}>
       <span aria-hidden="true" {...stylex.props(styles.mark)}>
         !
       </span>
