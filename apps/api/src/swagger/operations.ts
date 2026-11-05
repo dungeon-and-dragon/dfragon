@@ -136,12 +136,38 @@ export function ApiCharacterTimeline() {
     ApiOperation({
       summary: '캐릭터 타임라인 조회',
       description:
-        '공개 API. DB에 저장한 타임라인에서 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210)와 레기온(209) 클리어, 지금 시즌의 같은 기록을 이름별로 센 횟수, 강화(401), 증폭(402), 재련(403)과 에픽, 태초 장비 획득(501~521, 550~557)의 최근 50개씩을 반환합니다. 조회한 캐릭터의 타임라인 동기화를 대기열에 넣고(마지막 성공 뒤 1시간 안이면 받지 않음), 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽습니다. 처음 조회한 캐릭터는 동기화가 끝날 때까지 몇 초 걸릴 수 있습니다. 동기화 실패는 응답에 드러나지 않고 저장한 값까지만 반환합니다. DB 설정이 없는 API는 동기화 없이 빈 배열을 반환합니다.'
+        '공개 API. DB에 저장한 타임라인에서 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210)와 레기온(209) 클리어, 지금 시즌의 같은 기록을 이름별로 센 횟수, 강화(401), 증폭(402), 재련(403)과 에픽, 태초 장비 획득(501~521, 550~557)의 최근 50개씩을 반환합니다. 강화, 획득 목록에 더 오래된 기록이 남아 있으면 enhancementsCursor, acquisitionsCursor로 이어 받기 경로에서 다음 50개를 받습니다. 조회한 캐릭터의 타임라인 동기화를 대기열에 넣고(마지막 성공 뒤 1시간 안이면 받지 않음), 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽습니다. 처음 조회한 캐릭터는 동기화가 끝날 때까지 몇 초 걸릴 수 있습니다. 동기화 실패는 응답에 드러나지 않고 저장한 값까지만 반환합니다. DB 설정이 없는 API는 동기화 없이 빈 배열을 반환합니다.'
     }),
     ...characterParams,
     success('CharacterTimeline', '저장한 타임라인의 클리어, 강화, 획득 기록 (없으면 빈 배열)'),
     errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
   )
+}
+
+function timelinePage(list: string, label: string, schema: string) {
+  return applyDecorators(
+    ApiOperation({
+      summary: `캐릭터 타임라인 ${label} 이어 받기`,
+      description: `공개 API. 타임라인 조회나 앞선 이어 받기에서 받은 cursor를 before로 주면 그보다 오래된 ${label} 기록을 최근 순으로 50개까지 반환합니다. 동기화를 기다리지 않고 DB에 저장한 값만 읽습니다. nextCursor가 null이면 더 받을 기록이 없습니다. DB 설정이 없는 API는 빈 목록을 반환합니다.`
+    }),
+    ...characterParams,
+    ApiQuery({
+      name: 'before',
+      required: true,
+      schema: { type: 'string' },
+      description: `타임라인 조회의 ${list}Cursor나 이어 받기의 nextCursor. 값의 형식은 정하지 않습니다.`
+    }),
+    success(schema, `${label} 기록과 다음 cursor`),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiCharacterTimelineEnhancements() {
+  return timelinePage('enhancements', '강화, 증폭, 재련', 'TimelineEnhancementPage')
+}
+
+export function ApiCharacterTimelineAcquisitions() {
+  return timelinePage('acquisitions', '에픽, 태초 획득', 'TimelineAcquisitionPage')
 }
 
 export function ApiTodayGrade() {
