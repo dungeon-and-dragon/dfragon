@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import type { ReactNode } from 'react'
 import { BoardHeader } from '../../components/BoardHeader'
 import { BoardTitle } from '../../components/BoardTitle'
 import { CaptureButton } from '../../components/CaptureButton'
@@ -13,7 +14,7 @@ import { filledSlotCount } from '@dfragon/client-core/lib/slot-cards'
 import { PartyPage } from './PartyPage'
 import { styles } from './PartyScreen.style'
 
-export function PartyScreen(): React.JSX.Element {
+export function PartyScreen({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {
   const { partyCapture: capture } = useScreenCaptureContext()
   const { cards, snapshot, clipboardText } = usePartySlotCards(capture)
   const { renderBoardHeader } = useBoardHeaderPortal()
@@ -36,6 +37,7 @@ export function PartyScreen(): React.JSX.Element {
           end={
             <>
               <LastCaptureTime at={capture.lastCompletedAt} />
+              {captureSource}
               <SnapshotToggle
                 label="파티 모험단 순번 스냅샷"
                 active={snapshot.active}

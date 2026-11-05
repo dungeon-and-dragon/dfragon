@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { BoardHeader } from '../../components/BoardHeader'
 import { BoardNotice } from '../../components/BoardNotice'
 import { BoardTitle } from '../../components/BoardTitle'
@@ -12,7 +13,7 @@ import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { filledSlotCount } from '@dfragon/client-core/lib/slot-cards'
 import { RaidPage } from './RaidPage'
 
-export function RaidScreen(): React.JSX.Element {
+export function RaidScreen({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {
   const { raidCapture: capture } = useScreenCaptureContext()
   const { cards, snapshot, clipboardText } = useRaidSlotCards(capture)
   const notice = capture.search.connectionFailed
@@ -39,6 +40,7 @@ export function RaidScreen(): React.JSX.Element {
           end={
             <>
               <LastCaptureTime at={capture.lastCompletedAt} />
+              {captureSource}
               <SnapshotToggle
                 label="공대 모험단 순번 스냅샷"
                 active={snapshot.active}

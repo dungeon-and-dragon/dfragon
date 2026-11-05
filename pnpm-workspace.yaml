@@ -19,6 +19,7 @@ catalog:
   '@prisma/client': 7.10.1
   '@stylexjs/stylex': 0.19.1
   '@stylexjs/unplugin': 0.19.1
+  '@tanstack/react-router': 1.170.46
   '@types/express': 5.0.6
   '@types/node': 26.6.5
   '@types/pngjs': 6.0.5
