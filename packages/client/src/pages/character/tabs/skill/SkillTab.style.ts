@@ -1,0 +1,118 @@
+import * as stylex from '@stylexjs/stylex'
+import { colors, radius, space } from '@dfragon/ui/tokens.stylex'
+
+// 스킬 창은 11열(col 0~10)이다. 아이콘은 직업 sprite에서 28×28씩 잘라 그린다.
+const SKILL_WINDOW_COLUMNS = 11
+const SKILL_ICON_SIZE = 28
+const SKILL_CELL_WIDTH = 44
+const SKILL_CELL_HEIGHT = 48
+const SKILL_ROW_LABEL_WIDTH = 36
+const UPGRADE_COLUMN_WIDTH = 300
+
+export const styles = stylex.create({
+  root: {
+    display: 'grid',
+    gridTemplateColumns: `max-content minmax(0, ${UPGRADE_COLUMN_WIDTH}px)`,
+    alignItems: 'start',
+    justifyContent: 'space-between',
+    gap: space.s24,
+    padding: space.s16
+  },
+  window: {
+    position: 'relative',
+    flexShrink: 0,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: colors.borderDefault,
+    borderRadius: radius.control,
+    backgroundColor: colors.bgInset
+  },
+  windowSize: (rowCount: number) => ({
+    width: SKILL_ROW_LABEL_WIDTH + SKILL_WINDOW_COLUMNS * SKILL_CELL_WIDTH,
+    height: rowCount * SKILL_CELL_HEIGHT
+  }),
+  rowLabel: {
+    position: 'absolute',
+    left: 0,
+    width: SKILL_ROW_LABEL_WIDTH,
+    height: SKILL_CELL_HEIGHT,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 11,
+    lineHeight: '14px',
+    color: colors.fgSubtle,
+    fontVariantNumeric: 'tabular-nums',
+    whiteSpace: 'nowrap'
+  },
+  rowTop: (row: number) => ({ top: row * SKILL_CELL_HEIGHT }),
+  rowLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 0,
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: colors.borderDefault
+  },
+  icon: {
+    position: 'absolute',
+    width: SKILL_CELL_WIDTH,
+    height: SKILL_CELL_HEIGHT,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    padding: 0,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    color: 'inherit',
+    font: 'inherit'
+  },
+  iconPosition: (col: number, row: number) => ({
+    left: SKILL_ROW_LABEL_WIDTH + col * SKILL_CELL_WIDTH,
+    top: row * SKILL_CELL_HEIGHT
+  }),
+  image: {
+    display: 'block',
+    width: SKILL_ICON_SIZE,
+    height: SKILL_ICON_SIZE,
+    backgroundRepeat: 'no-repeat'
+  },
+  sprite: (url: string, x: number, y: number) => ({
+    backgroundImage: `url("${url}")`,
+    backgroundPosition: `${-x}px ${-y}px`
+  }),
+  unlearned: { opacity: 0.3, filter: 'grayscale(1)' },
+  level: {
+    height: 12,
+    fontSize: 10,
+    lineHeight: '12px',
+    fontWeight: 600,
+    color: colors.fgMuted,
+    fontVariantNumeric: 'tabular-nums',
+    whiteSpace: 'nowrap'
+  },
+  tooltip: { fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap' },
+  side: { display: 'flex', flexDirection: 'column', gap: space.s24, minWidth: 0 },
+  list: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.s4,
+    margin: 0,
+    padding: 0,
+    listStyle: 'none',
+    fontSize: 13,
+    lineHeight: '18px'
+  },
+  listRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: space.s8
+  },
+  subtle: { color: colors.fgSubtle, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' },
+  levelRows: { display: 'flex', flexDirection: 'column', gap: space.s16, minWidth: 0 },
+  state: { display: 'flex', alignItems: 'center', minHeight: SKILL_CELL_HEIGHT }
+})
