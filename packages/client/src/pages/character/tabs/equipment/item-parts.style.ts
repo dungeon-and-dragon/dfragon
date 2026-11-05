@@ -3,21 +3,6 @@ import { colors, radius, space } from '@dfragon/ui/tokens.stylex'
 
 const ICON_SIZE = 28
 
-export const oathText = stylex.create({
-  rare: { color: 'transparent', backgroundImage: colors.oathRareGradient, backgroundClip: 'text' },
-  unique: {
-    color: 'transparent',
-    backgroundImage: colors.oathUniqueGradient,
-    backgroundClip: 'text'
-  },
-  legendary: {
-    color: 'transparent',
-    backgroundImage: colors.oathLegendaryGradient,
-    backgroundClip: 'text'
-  },
-  epic: { color: 'transparent', backgroundImage: colors.oathEpicGradient, backgroundClip: 'text' }
-})
-
 // 테두리와 배지처럼 그라데이션을 쓸 수 없는 좁은 자리의 단색이다.
 export const raritySolid = stylex.create({
   common: { color: colors.rarityCommon },
@@ -30,13 +15,6 @@ export const raritySolid = stylex.create({
   primordial: { color: colors.rarityPrimordial },
   mythic: { color: colors.rarityMythic },
   unknown: { color: colors.borderStrong }
-})
-
-export const oathSolid = stylex.create({
-  rare: { color: colors.oathRare },
-  unique: { color: colors.oathUnique },
-  legendary: { color: colors.oathLegendary },
-  epic: { color: colors.oathEpic }
 })
 
 export const styles = stylex.create({
