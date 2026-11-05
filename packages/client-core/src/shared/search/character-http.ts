@@ -8,6 +8,7 @@ import type {
 import type { SearchErrorCode } from '../../preload/common/types/search'
 import { SearchHttpFailure } from './http'
 import { characterDetailViewSchema, type CharacterDetailView } from './character-detail-view'
+import { characterTimelineSchema, type CharacterTimeline } from './character-timeline'
 import { CHARACTER_IMAGE_LIMITS, decodeCharacterImage, type DecodePng } from './character-image'
 import {
   createCharacterHttpClient,
@@ -24,6 +25,8 @@ const MAX_CHARACTER_NAME_CODE_POINTS = 12
 export const CHARACTER_HTTP_LIMITS = {
   candidateJsonBytes: 256 * 1024,
   detailJsonBytes: 8 * 1024 * 1024,
+  // 목록 넷이 각각 최근 50개 안팎이라 응답은 수십 KB다.
+  timelineJsonBytes: 256 * 1024,
   ...CHARACTER_IMAGE_LIMITS
 } as const
 
@@ -110,6 +113,7 @@ export type CharacterCandidatesHttp = (input: {
 export type CharacterImageHttp = (input: IdentityRequest) => Promise<CharacterImage>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
 export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
+export type CharacterTimelineHttp = (identity: CharacterIdentity) => Promise<CharacterTimeline>
 
 function validateIdentity(identity: CharacterIdentity): void {
   if (!identitySchema.safeParse(identity).success) {
@@ -295,6 +299,34 @@ export function createCharacterDetailViewHttp(options: ApiOptions): CharacterDet
         parsed.data.character.serverId !== identity.serverId ||
         parsed.data.character.characterId !== identity.characterId
       ) {
+        throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
+      }
+
+      return parsed.data
+    } catch (error) {
+      throwCharacterTransportFailure(error)
+    }
+  }
+}
+
+export function createCharacterTimelineHttp({
+  apiOrigin,
+  fetch: transport
+}: ApiOptions): CharacterTimelineHttp {
+  const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.timelineJsonBytes)
+
+  return async ({ serverId, characterId }) => {
+    validateIdentity({ serverId, characterId })
+    try {
+      const request = client.get(`${apiOrigin}/characters/${serverId}/${characterId}/timeline`, {
+        headers: { Accept: 'application/json' }
+      })
+      const response = await request
+      // ky의 body 메서드만 본문 읽기에도 timeout을 건다.
+      const body = parseCharacterJson(await request.arrayBuffer())
+      assertApiSuccess(response, body, true)
+      const parsed = characterTimelineSchema.safeParse(body)
+      if (!parsed.success) {
         throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
       }
 
