@@ -10,6 +10,10 @@ import type { CaptureSource } from '@dfragon/client-core/preload/common/types/ca
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
+import {
+  createCharacterStatsHttp,
+  createFameRankingHttp
+} from '@dfragon/client-core/shared/ranking/ranking-stats-http'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import {
   createCharacterDetailViewHttp,
@@ -504,6 +508,8 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     getTodayGrade: () => readTodayGrade(apiOrigin),
     getCharacterDetail: createCharacterDetailViewHttp({ apiOrigin, fetch: browserFetch }),
     getCharacterTimeline: createCharacterTimelineHttp({ apiOrigin, fetch: browserFetch }),
+    getFameRanking: createFameRankingHttp({ apiOrigin, fetch: browserFetch }),
+    getCharacterStats: createCharacterStatsHttp({ apiOrigin, fetch: browserFetch }),
     searchCharacters: createCharacterNameSearch(runtime.identification.candidates),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
