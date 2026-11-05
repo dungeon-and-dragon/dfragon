@@ -45,6 +45,7 @@ const filled: CharacterTimeline = {
       occurredAt: '2026-11-04T10:00:00.000Z'
     }
   ],
+  enhancementsCursor: 'enhancement-cursor',
   acquisitions: [
     {
       code: 505,
@@ -54,14 +55,17 @@ const filled: CharacterTimeline = {
       itemRarity: '에픽',
       occurredAt: '2026-11-03T10:00:00.000Z'
     }
-  ]
+  ],
+  acquisitionsCursor: null
 }
 
 const empty: CharacterTimeline = {
   weeklyClears: [],
   seasonClears: [],
   enhancements: [],
-  acquisitions: []
+  enhancementsCursor: null,
+  acquisitions: [],
+  acquisitionsCursor: null
 }
 
 it('값이 있는 응답과 빈 응답을 그대로 읽고 캐릭터의 timeline 경로를 부른다', async () => {
@@ -83,6 +87,52 @@ it('hard를 주지 않는 API의 클리어는 하드가 아닌 것으로 읽는�
     ...empty,
     weeklyClears: [{ ...weekly, hard: false }],
     seasonClears: [{ ...season, hard: false }]
+  })
+})
+
+it('cursor를 보내지 않는 API의 응답은 강화, 획득을 더 받을 수 없는 것으로 읽는다', async () => {
+  const { enhancementsCursor: _enhancements, acquisitionsCursor: _acquisitions, ...before } = filled
+
+  await expect(readTimeline(before).read).resolves.toEqual({
+    ...filled,
+    enhancementsCursor: null,
+    acquisitionsCursor: null
+  })
+})
+
+it('강화, 획득 이어 받기는 목록별 경로에 before를 붙여 부르고 받은 행과 다음 cursor를 준다', async () => {
+  const pages = [
+    { items: filled.acquisitions, nextCursor: 'next-acquisition' },
+    { items: filled.enhancements, nextCursor: null }
+  ]
+  const fetch = vi.fn<typeof globalThis.fetch>()
+  for (const page of pages) {
+    fetch.mockResolvedValueOnce(new Response(JSON.stringify(page)))
+  }
+  const { characters } = createDfragonClient({ apiOrigin: API_ORIGIN, fetch })
+
+  await expect(characters.timelineAcquisitions(identity, 'cursor 1')).resolves.toEqual(pages[0])
+  await expect(characters.timelineEnhancements(identity, 'cursor-2')).resolves.toEqual(pages[1])
+  expect(fetch.mock.calls.map(([request]) => new Request(request).url)).toEqual([
+    `${API_ORIGIN}/characters/cain/character-1/timeline/acquisitions?before=cursor+1`,
+    `${API_ORIGIN}/characters/cain/character-1/timeline/enhancements?before=cursor-2`
+  ])
+})
+
+it('이어 받기 응답의 행이 타임라인 형식과 다르면 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
+  const fetch = vi.fn<typeof globalThis.fetch>(
+    async () =>
+      new Response(
+        JSON.stringify({
+          items: [{ ...filled.acquisitions[0], itemRarity: '레전더리' }],
+          nextCursor: null
+        })
+      )
+  )
+  const { characters } = createDfragonClient({ apiOrigin: API_ORIGIN, fetch })
+
+  await expect(characters.timelineAcquisitions(identity, 'cursor')).rejects.toMatchObject({
+    code: 'SEARCH_RESPONSE_INVALID'
   })
 })
 

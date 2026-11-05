@@ -27,7 +27,12 @@ import type {
   FameRanking,
   FameRankingFilter
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
-import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
+import type {
+  CharacterTimeline,
+  TimelineAcquisition,
+  TimelineEnhancement,
+  TimelinePage
+} from '@dfragon/client-core/shared/search/character-timeline'
 import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 
 export type CardSearchHost = SearchApi & {
@@ -49,6 +54,14 @@ export type ClientHost = Readonly<{
   getTodayGrade: () => Promise<TodayGrade>
   getCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
   getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
+  getTimelineEnhancements: (
+    identity: CharacterIdentity,
+    before: string
+  ) => Promise<TimelinePage<TimelineEnhancement>>
+  getTimelineAcquisitions: (
+    identity: CharacterIdentity,
+    before: string
+  ) => Promise<TimelinePage<TimelineAcquisition>>
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
   getAdventureCharacters: (adventureName: string) => Promise<AdventureCharacters>

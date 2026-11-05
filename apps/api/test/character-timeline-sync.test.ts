@@ -10,6 +10,7 @@ import { createCharacterDetailService } from '../src/characters/details/service.
 import { TimelineFailure } from '../src/characters/timeline/errors.js'
 import type { FetchCharacterTimeline } from '../src/characters/timeline/neople.js'
 import { createTimelineSyncQueue } from '../src/characters/timeline/queue.js'
+import { EMPTY_CHARACTER_TIMELINE } from '../src/characters/timeline/read.js'
 import type { TimelineInputs } from '../src/characters/timeline/rows.js'
 import {
   type TimelineStore,
@@ -342,12 +343,8 @@ test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백
     },
     timeline: {
       sync: async () => undefined,
-      read: async () => ({
-        weeklyClears: [],
-        seasonClears: [],
-        enhancements: [],
-        acquisitions: []
-      }),
+      read: async () => EMPTY_CHARACTER_TIMELINE,
+      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
       backfillEnhancements: async (requested) => {
         backfilled.push(requested)
         await backfilling.promise
@@ -394,6 +391,7 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
         await running.promise
       },
       read: async () => assert.fail('타임라인을 읽으면 안 된다'),
+      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
       backfillEnhancements: async () => {
         backfilled++
         await running.promise

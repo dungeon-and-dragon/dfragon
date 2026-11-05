@@ -27,7 +27,8 @@ import {
 import type { CharacterTimeline } from './characters/timeline/read.js'
 import {
   createCharacterTimelineService,
-  emptyCharacterTimelineService
+  emptyCharacterTimelineService,
+  type ReadTimelinePage
 } from './characters/timeline/service.js'
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
 import {
@@ -121,6 +122,7 @@ export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
   readonly backfillEnhancements: (character: TimelineCharacter) => Promise<void>
   readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
+  readonly readPage: ReadTimelinePage
   // 진행 중인 동기화를 기다리지 않고 닫는다.
   readonly close: () => Promise<void>
 }
@@ -187,7 +189,7 @@ export async function createApiHttpApp({
           provide: CHARACTER_TIMELINE_SERVICE,
           inject: [TIMELINE_SYNC_QUEUE],
           useFactory: (queue: TimelineSyncQueue) =>
-            createCharacterTimelineService(queue, timeline.read)
+            createCharacterTimelineService(queue, timeline.read, timeline.readPage)
         }
       ]
     : [{ provide: CHARACTER_TIMELINE_SERVICE, useValue: emptyCharacterTimelineService }]

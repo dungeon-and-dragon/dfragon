@@ -5,7 +5,12 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
-import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
+import type {
+  CharacterTimeline,
+  TimelineAcquisition,
+  TimelineEnhancement,
+  TimelinePage
+} from '@dfragon/client-core/shared/search/character-timeline'
 import { ClientHostContext, type ClientHost } from '../../../hooks/useClientHost'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TimelineTab } from './TimelineTab'
@@ -56,7 +61,9 @@ const EMPTY: CharacterTimeline = {
   weeklyClears: [],
   seasonClears: [],
   enhancements: [],
-  acquisitions: []
+  enhancementsCursor: null,
+  acquisitions: [],
+  acquisitionsCursor: null
 }
 
 // 시각은 UTC로 주고 한국 시간(+9시간)으로 보이는지 본다.
@@ -125,6 +132,7 @@ const FILLED: CharacterTimeline = {
       occurredAt: '2026-11-03T00:00:00.000Z'
     }
   ],
+  enhancementsCursor: null,
   acquisitions: [
     {
       code: 505,
@@ -142,14 +150,28 @@ const FILLED: CharacterTimeline = {
       itemRarity: '에픽',
       occurredAt: '2026-11-01T10:00:00.000Z'
     }
-  ]
+  ],
+  acquisitionsCursor: null
 }
 
 let container: HTMLDivElement
 let root: Root
+let observed: { callback: IntersectionObserverCallback; target: Element }[]
+
+class FakeIntersectionObserver {
+  constructor(private readonly callback: IntersectionObserverCallback) {}
+  observe(target: Element): void {
+    observed.push({ callback: this.callback, target })
+  }
+  disconnect(): void {
+    observed = observed.filter((entry) => entry.callback !== this.callback)
+  }
+}
 
 beforeEach(() => {
+  observed = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -187,6 +209,16 @@ function rowsOf(title: string): string[][] {
   return [...group(title).querySelectorAll('li, tbody tr')].map((row) =>
     [...row.querySelectorAll(':scope > *')].map((cell) => cell.textContent ?? '')
   )
+}
+
+function reachEnd(title: string): Promise<void> {
+  return act(async () => {
+    for (const { callback, target } of observed) {
+      if (group(title).contains(target)) {
+        callback([{ isIntersecting: true, target } as IntersectionObserverEntry], {} as never)
+      }
+    }
+  })
 }
 
 function cellsOf(title: string, row: number): HTMLElement[] {
@@ -333,4 +365,108 @@ it('다른 캐릭터로 바뀐 뒤 늦게 온 이전 캐릭터의 응답은 무�
   expect(container.querySelectorAll('section')).toHaveLength(4)
   expect(container.querySelector('section p')?.textContent).toBe('이번 주 클리어 기록이 없습니다.')
   expect(container.querySelectorAll('li, table')).toHaveLength(0)
+})
+
+function enhancement(itemName: string): TimelineEnhancement {
+  return { ...FILLED.enhancements[0], itemName }
+}
+
+function acquisition(itemName: string): TimelineAcquisition {
+  return { ...FILLED.acquisitions[0], itemName }
+}
+
+function itemNames(title: string): string[] {
+  return [...group(title).querySelectorAll('tbody tr')].map(
+    (row) => row.querySelectorAll('td')[title === '획득' ? 1 : 2].textContent ?? ''
+  )
+}
+
+const PAGED: CharacterTimeline = {
+  ...EMPTY,
+  enhancements: [enhancement('첫 강화')],
+  enhancementsCursor: 'enhancement-cursor-1',
+  acquisitions: [acquisition('첫 획득')],
+  acquisitionsCursor: 'acquisition-cursor-1'
+}
+
+it('강화, 획득 목록의 끝이 화면에 들어오면 그 목록의 cursor로 다음 묶음을 받아 뒤에 붙이고, cursor가 없으면 더 받지 않는다', async () => {
+  const getTimelineEnhancements = vi
+    .fn<ClientHost['getTimelineEnhancements']>()
+    .mockResolvedValueOnce({
+      items: [enhancement('둘째 강화')],
+      nextCursor: 'enhancement-cursor-2'
+    })
+    .mockResolvedValueOnce({ items: [enhancement('셋째 강화')], nextCursor: null })
+  const getTimelineAcquisitions = vi
+    .fn<ClientHost['getTimelineAcquisitions']>()
+    .mockResolvedValueOnce({ items: [acquisition('둘째 획득')], nextCursor: null })
+  const host = createTestClientHost({
+    getCharacterTimeline: async () => PAGED,
+    getTimelineEnhancements,
+    getTimelineAcquisitions
+  })
+  await render(host, detailOf())
+
+  await reachEnd('강화, 증폭, 재련')
+  await reachEnd('강화, 증폭, 재련')
+
+  expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화', '둘째 강화', '셋째 강화'])
+  expect(headerOf('강화, 증폭, 재련')).toEqual(['강화, 증폭, 재련', '3'])
+  expect(getTimelineEnhancements.mock.calls).toEqual([
+    [{ serverId: 'cain', characterId: 'character-1' }, 'enhancement-cursor-1'],
+    [{ serverId: 'cain', characterId: 'character-1' }, 'enhancement-cursor-2']
+  ])
+  expect(itemNames('획득')).toEqual(['첫 획득'])
+  expect(getTimelineAcquisitions).not.toHaveBeenCalled()
+
+  await reachEnd('획득')
+  await reachEnd('강화, 증폭, 재련')
+  await reachEnd('획득')
+
+  expect(itemNames('획득')).toEqual(['첫 획득', '둘째 획득'])
+  expect(getTimelineAcquisitions).toHaveBeenCalledExactlyOnceWith(
+    { serverId: 'cain', characterId: 'character-1' },
+    'acquisition-cursor-1'
+  )
+  expect(getTimelineEnhancements).toHaveBeenCalledTimes(2)
+  expect(observed).toHaveLength(0)
+})
+
+it('다음 묶음을 받는 동안 받는 중을 알리고 끝을 다시 지나도 겹쳐 받지 않으며, 실패하면 오류와 다시 시도를 보이고 다시 시도하면 같은 cursor로 받는다', async () => {
+  const pending = Promise.withResolvers<TimelinePage<TimelineEnhancement>>()
+  const getTimelineEnhancements = vi
+    .fn<ClientHost['getTimelineEnhancements']>()
+    .mockReturnValueOnce(pending.promise)
+    .mockResolvedValueOnce({ items: [enhancement('둘째 강화')], nextCursor: null })
+  const host = createTestClientHost({
+    getCharacterTimeline: async () => PAGED,
+    getTimelineEnhancements
+  })
+  await render(host, detailOf())
+
+  await reachEnd('강화, 증폭, 재련')
+  await reachEnd('강화, 증폭, 재련')
+
+  expect(group('강화, 증폭, 재련').querySelector('[role="status"]')?.textContent).toBe(
+    '기록을 더 받는 중입니다.'
+  )
+  expect(getTimelineEnhancements).toHaveBeenCalledOnce()
+
+  await act(async () => pending.reject(new Error('검색 시간이 초과됐습니다. 다시 시도해 주세요.')))
+
+  expect(group('강화, 증폭, 재련').querySelector('[role="status"]')).toBeNull()
+  expect(group('강화, 증폭, 재련').querySelector('[role="alert"]')?.textContent).toBe(
+    '검색 시간이 초과됐습니다. 다시 시도해 주세요.'
+  )
+  expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화'])
+  expect(observed.some(({ target }) => group('강화, 증폭, 재련').contains(target))).toBe(false)
+
+  await act(async () => group('강화, 증폭, 재련').querySelector('button')!.click())
+
+  expect(group('강화, 증폭, 재련').querySelector('[role="alert"]')).toBeNull()
+  expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화', '둘째 강화'])
+  expect(getTimelineEnhancements.mock.calls.map(([, before]) => before)).toEqual([
+    'enhancement-cursor-1',
+    'enhancement-cursor-1'
+  ])
 })
