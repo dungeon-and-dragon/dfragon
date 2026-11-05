@@ -56,18 +56,8 @@ export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Ele
         {items.map((item, index) => (
           <EquipmentItemRow key={`${item.slotName}-${index}`} item={item} />
         ))}
-        {creature !== null && <ExtraRow slotName="크리쳐" item={creature} enchant={null} />}
-        {aura !== null && (
-          <ExtraRow
-            slotName="오라"
-            item={aura}
-            enchant={
-              aura.emblems.length > 0 && (
-                <span {...stylex.props(styles.emblem)}>{aura.emblems.join(', ')}</span>
-              )
-            }
-          />
-        )}
+        {creature !== null && <ExtraRow slotName="크리쳐" item={creature} />}
+        {aura !== null && <ExtraRow slotName="오라" item={aura} />}
       </tbody>
     </table>
   )
@@ -116,15 +106,7 @@ function EquipmentItemRow({ item }: { item: EquipmentRow }): React.JSX.Element {
   )
 }
 
-function ExtraRow({
-  slotName,
-  item,
-  enchant
-}: {
-  slotName: string
-  item: ItemView
-  enchant: React.ReactNode
-}): React.JSX.Element {
+function ExtraRow({ slotName, item }: { slotName: string; item: ItemView }): React.JSX.Element {
   return (
     <tr {...stylex.props(tableStyles.row)}>
       <td {...stylex.props(tableStyles.cell, tableStyles.first, tableStyles.slot)}>{slotName}</td>
@@ -132,7 +114,7 @@ function ExtraRow({
         <ItemCell item={item} tune={null} exalted={false} />
       </td>
       <td {...stylex.props(tableStyles.cell, tableStyles.missing)}>{MISSING_VALUE}</td>
-      <td {...stylex.props(tableStyles.cell)}>{enchant}</td>
+      <td {...stylex.props(tableStyles.cell)} />
       <td {...stylex.props(tableStyles.cell, tableStyles.end, tableStyles.missing)}>
         {MISSING_VALUE}
       </td>

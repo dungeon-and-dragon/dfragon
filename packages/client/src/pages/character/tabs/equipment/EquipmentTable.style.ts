@@ -11,6 +11,5 @@ export const styles = stylex.create({
   enhance: { color: colors.gameEnhance, fontWeight: 600 },
   refine: { marginInlineStart: 6, color: colors.gameRefine, fontSize: 12 },
   enchant: { color: colors.gameEnchant, fontSize: 12, lineHeight: '16px' },
-  emblem: { color: colors.fgMuted, fontSize: 12, lineHeight: '16px' },
   potency: { color: colors.gamePrecision }
 })

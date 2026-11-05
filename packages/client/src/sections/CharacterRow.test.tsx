@@ -188,6 +188,17 @@ it('찾은 행은 초상화가 그 캐릭터의 상세 링크이고 이름 칸�
   expect(nameInput().closest('a')).toBeNull()
 })
 
+it('초상화, 모험단, 길드 링크는 draggable=false라 링크 자체 드래그를 시작하지 않는다', async () => {
+  await render({
+    state: 'success',
+    character: { ...found, characterId: 'found-id', guildId: 'guild-id' }
+  })
+
+  for (const column of ['캐릭터', '모험단', '길드']) {
+    expect(cell(column)!.querySelector('a')?.getAttribute('draggable')).toBe('false')
+  }
+})
+
 it('캐릭터 ID를 모르는 행은 초상화를 링크로 만들지 않는다', async () => {
   await render({ state: 'success', character: found })
 
@@ -522,16 +533,22 @@ it('상세 정보를 기다리거나 받지 못했거나 이름을 고치는 동
   expect(badge()).toBeNull()
 })
 
-it('추정 행도 이름을 고치는 동안에는 모험단 자리에 Enter 조회 안내를 둔다', async () => {
+it('추정 행은 모험단, 길드, 직업을 그대로 두고 원인은 추정 배지의 마우스 설명으로 둔다', async () => {
   await render({
     state: 'success',
     character: found,
     notice: { text: '명성으로 추정한 후보입니다.', tone: 'estimate' }
   })
-  expect(cell('모험단')?.colSpan).toBe(3)
+
+  expect(cell('모험단')?.textContent).toBe('찾은모험단')
+  expect(cell('길드')?.textContent).toBe('찾은길드')
+  expect(cell('직업')?.textContent).toBe('眞 웨펀마스터')
+  const badge = [...cell('캐릭터')!.querySelectorAll('span')].find(
+    (span) => span.textContent === '추정'
+  )
+  expect(badge?.getAttribute('title')).toBe('명성으로 추정한 후보입니다.')
 
   await enterName('고친이름')
-  expect(cell('모험단')?.colSpan).toBe(1)
   expect(cell('모험단')?.textContent).toBe('Enter로 조회')
   expect(cell('길드')?.textContent).toBe('찾은길드')
 })
@@ -548,7 +565,7 @@ const picker: CandidatePicker = {
   picking: null
 }
 
-it('같은 이름 후보가 여럿이면 이름 옆에 후보 수 칩을 두고 추정 행은 추정 배지와 원인을 함께 둔다', async () => {
+it('같은 이름 후보가 여럿이면 이름 옆에 후보 수 칩을 두고 추정 행은 추정 배지를 함께 둔다', async () => {
   await render({
     state: 'success',
     character: found,
@@ -561,7 +578,6 @@ it('같은 이름 후보가 여럿이면 이름 옆에 후보 수 칩을 두고 
   expect(character.querySelector('[aria-label="1번 후보 고르기, 후보 2"]')?.textContent).toBe(
     '후보 2'
   )
-  expect(cell('모험단')?.textContent).toContain('직업과 수치 미확인, 최고 명성 후보입니다.')
 })
 
 it('확정 중인 행은 받은 초상화, 서버, 명성을 그대로 두고 모험단부터 직업까지 상세 정보 확인 진행을 둔다', async () => {

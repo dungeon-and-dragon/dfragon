@@ -71,7 +71,6 @@ export const styles = stylex.create({
     borderBottomColor: colors.fgSubtle
   },
   notice: { overflow: 'hidden', textOverflow: 'ellipsis' },
-  inline: { marginInlineStart: 10, fontSize: 12 },
   mark: { marginInlineEnd: 6, fontWeight: 700 },
   failure: { color: colors.cardFailure },
   error: { color: colors.fgDanger }

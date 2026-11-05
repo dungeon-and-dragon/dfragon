@@ -7,6 +7,8 @@ type Enchant = NonNullable<EquipmentItem['enchant']>
 type StatValue = number | string
 
 const AURA_SLOT_ID = 'AURORA'
+const WEAPON_SLOT_ID = 'WEAPON'
+const SUB_WEAPON_SLOT_ID = 'SUPPORT_WEAPON'
 const BUFF_PASSIVE_SKILL = '버프 패시브 스킬'
 const ALL_ELEMENT = '모든 속성 강화'
 const SINGLE_ELEMENT_PATTERN = /^[화수명암]속성\s?강화$/
@@ -50,7 +52,7 @@ export type EquipmentView = Readonly<{
   mistLevel: number | null
   items: EquipmentRow[]
   creature: ItemView | null
-  aura: (ItemView & Readonly<{ emblems: string[] }>) | null
+  aura: ItemView | null
 }>
 
 function enchantGroup(name: string): string {
@@ -165,16 +167,26 @@ function toEquipmentRow(item: EquipmentItem): EquipmentRow {
   }
 }
 
-function toAuraView(
-  aura: CharacterDetailView['avatar'][number] | undefined
-): EquipmentView['aura'] {
-  if (aura === undefined) {
-    return null
+// 응답은 보조무기를 마법석 뒤에 두지만, 화면에서는 무기와 함께 보도록 무기 바로 아래로 옮긴다.
+function subWeaponAfterWeapon(items: EquipmentItem[]): EquipmentItem[] {
+  const subWeapon = items.find(({ slotId }) => slotId === SUB_WEAPON_SLOT_ID)
+  const hasWeapon = items.some(({ slotId }) => slotId === WEAPON_SLOT_ID)
+
+  if (subWeapon === undefined || !hasWeapon) {
+    return items
   }
 
-  const emblems = aura.emblems.flatMap(({ itemName }) => (itemName != null ? [itemName] : []))
+  return items.flatMap((item) => {
+    if (item === subWeapon) {
+      return []
+    }
 
-  return { ...toItemView(aura), emblems }
+    if (item.slotId === WEAPON_SLOT_ID) {
+      return [item, subWeapon]
+    }
+
+    return [item]
+  })
 }
 
 export function toEquipmentView(
@@ -182,6 +194,8 @@ export function toEquipmentView(
 ): EquipmentView {
   const creature = detail.creature != null ? toItemView(detail.creature) : null
   const mistLevel = detail.mistAssimilation?.level ?? null
+  const auraAvatar = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
+  const aura = auraAvatar !== undefined ? toItemView(auraAvatar) : null
 
   return {
     sets: detail.equipment.setItemInfo.map((set) => {
@@ -195,8 +209,8 @@ export function toEquipmentView(
       }
     }),
     mistLevel,
-    items: detail.equipment.equipment.map(toEquipmentRow),
+    items: subWeaponAfterWeapon(detail.equipment.equipment).map(toEquipmentRow),
     creature,
-    aura: toAuraView(detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID))
+    aura
   }
 }

@@ -125,10 +125,32 @@ describe('장비 탭 값', () => {
     ])
     expect(view.mistLevel).toBe(100)
     expect(view.creature).toMatchObject({ itemName: '운명을 담는 재단사', rarity: 'rare' })
-    expect(view.aura).toMatchObject({
-      itemName: '고결한 영혼의 잔상',
-      emblems: ['빛나는 붉은빛 엠블렘[힘]', '빛나는 붉은빛 엠블렘[힘]']
-    })
+    expect(view.aura).toMatchObject({ itemName: '고결한 영혼의 잔상' })
+  })
+
+  it('응답에서 마법석 뒤에 오는 보조무기를 무기 바로 아래로 옮긴다', () => {
+    const detail = characterDetailFixture('dealer')
+    const [weapon] = detail.equipment.equipment
+    const subWeapon = { ...weapon, slotId: 'SUPPORT_WEAPON', slotName: '보조무기' }
+    detail.equipment.equipment.splice(12, 0, subWeapon)
+    const view = toEquipmentView(detail)
+
+    expect(view.items.map((item) => item.slotName)).toEqual([
+      '무기',
+      '보조무기',
+      '칭호',
+      '상의',
+      '머리어깨',
+      '하의',
+      '신발',
+      '벨트',
+      '목걸이',
+      '팔찌',
+      '반지',
+      '보조장비',
+      '마법석',
+      '귀걸이'
+    ])
   })
 
   it('버퍼의 재련과 스킬 레벨 증가 마법부여를 읽는다', () => {
