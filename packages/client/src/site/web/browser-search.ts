@@ -41,7 +41,7 @@ function createMessageChannelYield(): YieldToEventLoop {
 }
 
 // 브라우저 fetch는 window가 아닌 this로 부르면 Illegal invocation으로 실패하므로 ky에 감싸서 넘긴다.
-const browserFetch: typeof fetch = (input, init) => fetch(input, init)
+export const browserFetch: typeof fetch = (input, init) => fetch(input, init)
 
 export function createBrowserSearchRuntime(
   apiOrigin: string,
