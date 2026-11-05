@@ -5,5 +5,7 @@ import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 export function useAdventureCharacters(adventureName: string): LoadedResult<AdventureCharacters> {
   const { getAdventureCharacters } = useClientHost()
 
-  return useLoadedResult(adventureName, () => getAdventureCharacters(adventureName))
+  return useLoadedResult(['adventure', adventureName, 'characters'], () =>
+    getAdventureCharacters(adventureName)
+  )
 }

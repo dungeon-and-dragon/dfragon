@@ -9,6 +9,7 @@ import type {
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
 import { RankingsScreen } from './RankingsScreen'
 import { RANKING_JOBS } from './ranking-jobs'
@@ -73,9 +74,11 @@ function render(
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ getFameRanking })}>
-        <TestRouter>
-          <RankingsScreen filter={filter} onFilterChange={onFilterChange} />
-        </TestRouter>
+        <TestQueryClient>
+          <TestRouter>
+            <RankingsScreen filter={filter} onFilterChange={onFilterChange} />
+          </TestRouter>
+        </TestQueryClient>
       </ClientHostContext>
     )
   )
