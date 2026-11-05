@@ -15,6 +15,8 @@ import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
 import { AdventurePage } from '../../pages/adventure/AdventurePage'
+import { parseCharacterSearch } from '../../pages/character-search/character-search-params'
+import { CharacterSearchPage } from '../../pages/character-search/CharacterSearchPage'
 import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
 import { FavoritesScreen } from '../../pages/favorites/FavoritesScreen'
 import { GuildPage } from '../../pages/guild/GuildPage'
@@ -135,6 +137,13 @@ const characterRoute = createRoute({
   component: CharacterDetailPage
 })
 
+const characterSearchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/search',
+  validateSearch: parseCharacterSearch,
+  component: CharacterSearchPage
+})
+
 const rankingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/rankings',
@@ -175,6 +184,7 @@ const favoritesRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   homeRoute,
   characterRoute,
+  characterSearchRoute,
   rankingsRoute,
   statsRoute,
   adventureRoute,

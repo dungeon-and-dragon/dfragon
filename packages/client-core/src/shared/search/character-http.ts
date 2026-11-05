@@ -22,6 +22,10 @@ import {
 } from '../../preload/common/search/character-summary'
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
+const MIN_SEARCH_NAME_CODE_POINTS = 2
+const CHARACTER_SEARCH_LIMIT = 200
+
+export const ALL_CHARACTER_SERVERS = 'all'
 
 const nonblank = z.string().refine((value) => value.trim().length > 0)
 const candidateSchema = identitySchema
@@ -103,6 +107,12 @@ export type CharacterCandidatesHttp = (input: {
   nickname: string
   signal: AbortSignal
 }) => Promise<readonly CharacterCandidate[]>
+/** `serverId`가 `ALL_CHARACTER_SERVERS`면 모든 서버에서 찾는다. */
+export type CharacterSearchQuery = Readonly<{ characterName: string; serverId: string }>
+export type SearchedCharacter = z.output<typeof candidateSchema>
+export type CharacterSearchHttp = (
+  query: CharacterSearchQuery
+) => Promise<readonly SearchedCharacter[]>
 export type CharacterImageHttp = (input: IdentityRequest) => Promise<CharacterImage>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
 export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
@@ -124,6 +134,24 @@ function validateNickname(nickname: string): void {
   } catch {
     throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
   }
+}
+
+export function isSearchableCharacterName(characterName: string): boolean {
+  const length = Array.from(characterName).length
+
+  return (
+    length >= MIN_SEARCH_NAME_CODE_POINTS &&
+    length <= MAX_CHARACTER_NAME_CODE_POINTS &&
+    characterName === characterName.trim()
+  )
+}
+
+function validateSearchQuery({ characterName, serverId }: CharacterSearchQuery): void {
+  const knownServer = serverId === ALL_CHARACTER_SERVERS || Object.hasOwn(SERVER_NAMES, serverId)
+  if (!isSearchableCharacterName(characterName) || !knownServer) {
+    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+  }
+  validateNickname(characterName)
 }
 
 function statusErrorCode(status: number, details: boolean): SearchErrorCode | undefined {
@@ -191,6 +219,43 @@ export function createCharacterCandidatesHttp({
       return parsed.data.rows
     } catch (error) {
       throwCharacterTransportFailure(error, signal)
+    }
+  }
+}
+
+export function createCharacterSearchHttp({
+  apiOrigin,
+  fetch: transport
+}: ApiOptions): CharacterSearchHttp {
+  const client = createCharacterHttpClient(transport)
+
+  return async (query) => {
+    validateSearchQuery(query)
+    try {
+      const request = client.get(`${apiOrigin}/characters`, {
+        searchParams: {
+          characterName: query.characterName,
+          serverId: query.serverId,
+          limit: CHARACTER_SEARCH_LIMIT
+        },
+        headers: { Accept: 'application/json' }
+      })
+      const response = await request
+      // ky의 body 메서드만 본문 읽기에도 timeout을 건다.
+      const body = parseCharacterJson(await request.arrayBuffer())
+      assertApiSuccess(response, body, false)
+      const parsed = candidatesSchema.safeParse(body)
+      if (
+        !parsed.success ||
+        (query.serverId !== ALL_CHARACTER_SERVERS &&
+          parsed.data.rows.some((row) => row.serverId !== query.serverId))
+      ) {
+        throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
+      }
+
+      return parsed.data.rows
+    } catch (error) {
+      throwCharacterTransportFailure(error)
     }
   }
 }
