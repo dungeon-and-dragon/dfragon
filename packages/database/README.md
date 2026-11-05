@@ -28,7 +28,6 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `replaceTimelineRange(client, character, range, events, items)`: 캐릭터 하나의 `[range.start, range.end]`(양 끝 포함) 타임라인을 교체합니다.
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
   Transaction timeout은 lock 대기를 포함해 60초입니다. 로컬에서 items 5만 행 교체가 Prisma 기본값 5초를 넘었습니다.
-  `range.start`가 중천 시작보다 앞이고 그 앞의 item이 있으면 들어갈 partition이 없어 전체가 실패합니다.
   타임라인 행에는 고유 ID가 없고 같은 분에 같은 내용의 행이 여러 개 있을 수 있어 중복 검사 대신 구간 교체로 맞춥니다. 구간 밖 행이 있으면 아무것도 바꾸지 않고 `RangeError`를 던집니다.
 - `readTimelineSyncState(client, character)`: `synced_until`, `last_succeeded_at`을 돌려주고, 행이 없으면 `undefined`입니다.
   첫 구간을 넣기 전에 실패만 기록된 캐릭터는 `syncedUntil`이 `null`입니다.
@@ -62,12 +61,15 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 | `adventures` | 자체 모험단 id와 지금 이름. 서버가 달라도 한 모험단입니다 |
 | `characters` | PK `(server_id, character_id)`, 지금 캐릭터 이름, 모험단 id. Neople 기본 정보를 받아 저장한 캐릭터는 레벨, 직업 id와 이름, 명성, 길드, `basic_fetched_at`도 있고, 다른 경로로 기록한 캐릭터는 이 열이 null입니다 |
 | `character_collection` | 기본 정보를 받을 캐릭터 대기열. PK `(server_id, character_id)`, 넣은 시각, 실패한 시도의 시각과 이유. 저장에 성공하면 행을 지웁니다 |
-| `seasons` | 시즌 id, 이름, 시작 시각. 중천(`2025-01-09 06:00+09`), 천해천(`2026-03-26 06:00+09`)을 migration이 넣습니다 |
+| `seasons` | 게임의 시즌 번호를 id로 쓰는 시즌 이름과 시작 시각. 시즌 5 마계(`2016-09-01 06:00+09`)부터 시즌 11 천해천(`2026-03-26 06:00+09`)까지를 migration이 넣습니다 |
 | `timeline_events` | 코드 1xx, 2xx, 3xx 타임라인. partition이 없습니다 |
 | `timeline_items` | 코드 4xx, 5xx, 55x, 6xx 타임라인. `occurred_at` 기준 시즌별 range partition이며 PK는 `(id, occurred_at)`입니다 |
-| `timeline_sync_state` | 캐릭터별 `synced_until`, 마지막 시도와 성공 시각, 실패 이유 |
+| `timeline_sync_state` | 캐릭터별 `synced_until`, 마지막 시도와 성공 시각, 실패 이유, 강화, 증폭, 재련 백필 위치 `enhancement_backfilled_until` |
 
-`timeline_items`의 partition은 `timeline_items_season_1`(중천 시작부터 천해천 시작 전까지), `timeline_items_season_2`(천해천 시작부터 `MAXVALUE`까지)입니다.
+`timeline_items`의 partition은 시즌마다 하나이고 이름은 `timeline_items_season_<시즌 id>`입니다.
+가장 앞의 `timeline_items_season_5`는 시즌 5 시작이 아니라 Neople 타임라인이 시작하는 `2017-09-21 00:00+09`부터이고, 그 전 행은 넣을 수 없습니다.
+나머지는 시즌 시작부터 다음 시즌 시작 전까지이고, 지금 시즌 `timeline_items_season_11`만 `MAXVALUE`까지 열려 있습니다.
+중천 전 partition(시즌 5~9)에는 강화, 증폭, 재련 백필 행만 들어갑니다.
 조회는 모험단 이름(`adventures.name`), 캐릭터 이름(`characters(server_id, character_name)`), 길드 ID(`characters(guild_id)`)로 캐릭터를 찾고, 두 타임라인 테이블의 `(server_id, character_id, code, occurred_at)` index로 읽습니다.
 교체 때 캐릭터와 구간으로 지우는 문장도 PostgreSQL 18의 skip scan으로 같은 index를 씁니다.
 로컬에서 items 200만 행의 구간 삭제가 0.7ms, events 200만 행에서 모험단 하나의 레이드 클리어 수가 1ms였습니다.
@@ -107,18 +109,18 @@ Prisma 7.10.1은 partition 자식 테이블을 schema 비교에서 빼고 부모
 
 새 시즌이 시작하기 전에 migration 하나로 `timeline_items`의 partition을 나누고 `seasons`에 행을 넣습니다.
 시작 전이라 지금 시즌 partition에 새 시즌 구간의 행이 없어 옮길 행이 없습니다.
-아래는 시즌 3이 `2027-03-25 06:00+09`에 시작한다고 가정한 예입니다.
+아래는 시즌 12가 `2027-03-25 06:00+09`에 시작한다고 가정한 예입니다.
 
 ```sql
 BEGIN;
 
-ALTER TABLE "timeline_items" DETACH PARTITION "timeline_items_season_2";
-ALTER TABLE "timeline_items" ATTACH PARTITION "timeline_items_season_2"
+ALTER TABLE "timeline_items" DETACH PARTITION "timeline_items_season_11";
+ALTER TABLE "timeline_items" ATTACH PARTITION "timeline_items_season_11"
     FOR VALUES FROM ('2026-03-26 06:00:00+09') TO ('2027-03-25 06:00:00+09');
-CREATE TABLE "timeline_items_season_3" PARTITION OF "timeline_items"
+CREATE TABLE "timeline_items_season_12" PARTITION OF "timeline_items"
     FOR VALUES FROM ('2027-03-25 06:00:00+09') TO (MAXVALUE);
 
-INSERT INTO "seasons" ("id", "name", "starts_at") VALUES (3, '시즌 이름', '2027-03-25 06:00:00+09');
+INSERT INTO "seasons" ("id", "name", "starts_at") VALUES (12, '시즌 이름', '2027-03-25 06:00:00+09');
 
 COMMIT;
 ```
@@ -128,8 +130,8 @@ Prisma가 이 migration을 실패로 기록해 다음 `migrate deploy`가 `P3009
 실패한 migration을 아래 순서로 고치고 `migrate resolve --rolled-back <migration 이름>`으로 기록을 정리한 뒤 다시 배포합니다.
 
 1. 지금 시즌 partition을 `DETACH`하고 새 시즌 partition을 `MAXVALUE`까지 만듭니다.
-2. `INSERT INTO "timeline_items" OVERRIDING SYSTEM VALUE SELECT * FROM "timeline_items_season_2" WHERE "occurred_at" >= <새 시즌 시작>`으로 시작 뒤 행을 옮깁니다. `id`가 identity라 `OVERRIDING SYSTEM VALUE`가 있어야 그대로 옮겨집니다.
-3. 같은 조건으로 `timeline_items_season_2`에서 지운 뒤 상한을 새 시즌 시작으로 정해 `ATTACH`하고 `seasons`에 행을 넣습니다.
+2. `INSERT INTO "timeline_items" OVERRIDING SYSTEM VALUE SELECT * FROM "timeline_items_season_11" WHERE "occurred_at" >= <새 시즌 시작>`으로 시작 뒤 행을 옮깁니다. `id`가 identity라 `OVERRIDING SYSTEM VALUE`가 있어야 그대로 옮겨집니다.
+3. 같은 조건으로 `timeline_items_season_11`에서 지운 뒤 상한을 새 시즌 시작으로 정해 `ATTACH`하고 `seasons`에 행을 넣습니다.
 
 정리 명령은 [API README의 migration 실패 복구](../../apps/api/README.md#migration-실패-복구)를 따릅니다.
 
