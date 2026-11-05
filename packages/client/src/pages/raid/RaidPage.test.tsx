@@ -233,17 +233,22 @@ it('맞바꾼 뒤 파티 헤더 행의 찾은 수는 지금 그 파티 자리에
   ])
 })
 
-it('공대의 추정 선택은 이름 옆 추정 배지와 모험단 뒤 경고색 안내를 두고 명성과 점수는 그대로 보인다', async () => {
+it('공대의 추정 선택은 이름 옆 추정 배지에 원인을 마우스 설명으로 두고 모험단부터 점수까지 그대로 보인다', async () => {
   const notices: (SlotNotice | undefined)[] = Array(12).fill(undefined)
   notices[1] = { text: '명성으로 추정한 후보입니다.', tone: 'estimate' }
   await render({ characters: [member, member], slotNotices: notices })
 
   const [plain, estimated] = seats()
   expect(plain.textContent).not.toContain('추정')
-  expect(estimated.cells[1].textContent).toContain('추정')
-  expect(estimated.cells[3].colSpan).toBe(3)
-  expect(estimated.cells[3].textContent).toBe('공대모험단!명성으로 추정한 후보입니다.')
-  expect(estimated.cells[4].textContent).toBe('120,000')
+  expect(
+    estimated.cells[1].querySelector('[title="명성으로 추정한 후보입니다."]')?.textContent
+  ).toBe('추정')
+  expect([...estimated.cells].slice(3, 7).map((cell) => cell.textContent)).toEqual([
+    '공대모험단',
+    '공대길드',
+    '공대직업',
+    '120,000'
+  ])
 })
 
 it('스냅샷 순번 배지는 공대 자리를 파티와 파티 안 순번으로 보인다', async () => {
