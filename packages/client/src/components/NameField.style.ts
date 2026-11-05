@@ -19,7 +19,7 @@ export const styles = stylex.create({
     borderRadius: radius.control,
     borderColor: {
       default: 'transparent',
-      ':hover': colors.borderStrong,
+      ':hover': colors.borderInput,
       ':focus': colors.signal
     },
     backgroundColor: {
@@ -41,7 +41,7 @@ export const styles = stylex.create({
     '::placeholder': { color: colors.fgSubtle, fontWeight: 500 }
   },
   vacant: {
-    borderColor: { default: colors.borderStrong, ':focus': colors.signal },
+    borderColor: { default: colors.borderInput, ':focus': colors.signal },
     backgroundColor: colors.bgCanvas
   }
 })
