@@ -34,6 +34,7 @@ export type {
   TimelineEventInput,
   TimelineEventRow,
   TimelineItemInput,
+  TimelineItemCursor,
   TimelineItemRow,
   TimelineRange,
   TimelineSyncState

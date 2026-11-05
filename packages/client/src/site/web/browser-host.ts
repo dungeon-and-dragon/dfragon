@@ -463,6 +463,8 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     getTodayGrade: dfragon.items.todayGrade,
     getCharacterDetail: dfragon.characters.detailView,
     getCharacterTimeline: dfragon.characters.timeline,
+    getTimelineEnhancements: dfragon.characters.timelineEnhancements,
+    getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
     getFameRanking: dfragon.rankings.fame,
     getCharacterStats: dfragon.stats,
     getAdventureCharacters: dfragon.adventures.characters,

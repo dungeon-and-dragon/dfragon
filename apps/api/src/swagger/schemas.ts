@@ -17,6 +17,33 @@ function object(properties: Record<string, SchemaObject>): SchemaObject {
 }
 
 const timelineClearKind: SchemaObject = { type: 'string', enum: ['raid', 'legion'] }
+const timelineCursor: SchemaObject = { ...text, nullable: true }
+const timelineEnhancement = object({
+  kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
+  itemId: { ...text, nullable: true },
+  itemName: { ...text, nullable: true },
+  itemRarity: { ...text, nullable: true },
+  before: { type: 'integer', nullable: true, description: '재련은 값이 없어 null' },
+  after: { type: 'integer' },
+  result: { type: 'boolean' },
+  safe: { type: 'boolean', nullable: true, description: '재련은 값이 없어 null' },
+  occurredAt: timestamp
+})
+const timelineAcquisition = object({
+  code: { type: 'integer', description: '획득 경로의 타임라인 코드' },
+  name: { ...text, description: '타임라인 코드 이름' },
+  itemId: { ...text, nullable: true },
+  itemName: { ...text, nullable: true },
+  itemRarity: { type: 'string', enum: ['에픽', '태초'] },
+  occurredAt: timestamp
+})
+
+function timelinePage(item: SchemaObject): SchemaObject {
+  return object({
+    items: { type: 'array', description: '최근 순으로 50개까지입니다.', items: item },
+    nextCursor: { ...timelineCursor, description: '다음 이어 받기의 before. 없으면 null' }
+  })
+}
 
 const providerValue: SchemaObject = {
   description: 'Neople 섹션 값. 미장착은 null이며 시즌별 중첩 필드와 배열을 그대로 보존합니다.',
@@ -308,31 +335,24 @@ export const apiSchemas: Record<string, SchemaObject> = {
     enhancements: {
       type: 'array',
       description: '강화, 증폭, 재련 기록. 최근 순으로 50개까지입니다.',
-      items: object({
-        kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
-        itemId: { ...text, nullable: true },
-        itemName: { ...text, nullable: true },
-        itemRarity: { ...text, nullable: true },
-        before: { type: 'integer', nullable: true, description: '재련은 값이 없어 null' },
-        after: { type: 'integer' },
-        result: { type: 'boolean' },
-        safe: { type: 'boolean', nullable: true, description: '재련은 값이 없어 null' },
-        occurredAt: timestamp
-      })
+      items: timelineEnhancement
+    },
+    enhancementsCursor: {
+      ...timelineCursor,
+      description: '강화 이어 받기의 before. 더 오래된 기록이 없으면 null'
     },
     acquisitions: {
       type: 'array',
       description: '에픽, 태초 장비 획득 기록. 최근 순으로 50개까지입니다.',
-      items: object({
-        code: { type: 'integer', description: '획득 경로의 타임라인 코드' },
-        name: { ...text, description: '타임라인 코드 이름' },
-        itemId: { ...text, nullable: true },
-        itemName: { ...text, nullable: true },
-        itemRarity: { type: 'string', enum: ['에픽', '태초'] },
-        occurredAt: timestamp
-      })
+      items: timelineAcquisition
+    },
+    acquisitionsCursor: {
+      ...timelineCursor,
+      description: '획득 이어 받기의 before. 더 오래된 기록이 없으면 null'
     }
   }),
+  TimelineEnhancementPage: timelinePage(timelineEnhancement),
+  TimelineAcquisitionPage: timelinePage(timelineAcquisition),
   TodayGrade: object({
     percent: {
       type: 'integer',

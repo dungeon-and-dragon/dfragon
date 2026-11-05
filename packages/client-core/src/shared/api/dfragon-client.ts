@@ -23,7 +23,15 @@ import {
   characterDetailViewSchema,
   type CharacterDetailView
 } from '../search/character-detail-view'
-import { characterTimelineSchema, type CharacterTimeline } from '../search/character-timeline'
+import {
+  characterTimelineSchema,
+  timelineAcquisitionPageSchema,
+  timelineEnhancementPageSchema,
+  type CharacterTimeline,
+  type TimelineAcquisition,
+  type TimelineEnhancement,
+  type TimelinePage
+} from '../search/character-timeline'
 import { SearchHttpFailure } from '../search/http'
 import {
   assertApiSuccess,
@@ -54,6 +62,10 @@ export type CharacterPngHttp = (input: IdentityRequest) => Promise<Uint8Array>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
 export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
 export type CharacterTimelineHttp = (identity: CharacterIdentity) => Promise<CharacterTimeline>
+export type TimelinePageHttp<Item> = (
+  identity: CharacterIdentity,
+  before: string
+) => Promise<TimelinePage<Item>>
 export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type AdventureCharactersHttp = (adventureName: string) => Promise<AdventureCharacters>
@@ -69,6 +81,8 @@ export type DfragonClient = Readonly<{
     details: CharacterDetailsHttp
     detailView: CharacterDetailViewHttp
     timeline: CharacterTimelineHttp
+    timelineEnhancements: TimelinePageHttp<TimelineEnhancement>
+    timelineAcquisitions: TimelinePageHttp<TimelineAcquisition>
   }>
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
@@ -234,6 +248,24 @@ export function createDfragonClient({
         validateIdentity(identity)
 
         return requestJson(`${characterPath(identity)}/timeline`, characterTimelineSchema)
+      },
+      async timelineEnhancements(identity, before) {
+        validateIdentity(identity)
+
+        return requestJson(
+          `${characterPath(identity)}/timeline/enhancements`,
+          timelineEnhancementPageSchema,
+          { searchParams: { before } }
+        )
+      },
+      async timelineAcquisitions(identity, before) {
+        validateIdentity(identity)
+
+        return requestJson(
+          `${characterPath(identity)}/timeline/acquisitions`,
+          timelineAcquisitionPageSchema,
+          { searchParams: { before } }
+        )
       }
     },
     rankings: {
