@@ -28,8 +28,8 @@ export function parseCharacterJson(bytes: ArrayBuffer): unknown {
   }
 }
 
-export function throwCharacterTransportFailure(error: unknown, signal: AbortSignal): never {
-  signal.throwIfAborted()
+export function throwCharacterTransportFailure(error: unknown, signal?: AbortSignal): never {
+  signal?.throwIfAborted()
   if (error instanceof SearchHttpFailure) {
     throw error
   }
