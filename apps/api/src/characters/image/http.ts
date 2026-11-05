@@ -3,7 +3,6 @@ import { ApiTags } from '@nestjs/swagger'
 import type { Request, Response } from 'express'
 import { sendWithCancellation } from '../../http-response.js'
 import { ApiCharacterImage } from '../../swagger/operations.js'
-import { CharacterDetailFailure } from '../details/errors.js'
 import { parseCharacterIdentity } from '../identity.js'
 import type { FetchCharacterImage } from './neople.js'
 
@@ -19,14 +18,7 @@ export class CharacterImageController {
   @Get(':serverId/:characterId/image')
   @ApiCharacterImage()
   async image(@Req() request: Request, @Res() response: Response): Promise<void> {
-    if (request.method !== 'GET') {
-      throw new CharacterDetailFailure('query')
-    }
-    const identity = parseCharacterIdentity(
-      request.params.serverId,
-      request.params.characterId,
-      request.originalUrl
-    )
+    const identity = parseCharacterIdentity(request.params.serverId, request.params.characterId)
     await sendWithCancellation(
       response,
       (signal) => this.fetchImage(identity, signal),

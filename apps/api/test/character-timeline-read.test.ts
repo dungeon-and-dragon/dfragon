@@ -311,7 +311,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
   assert.deepEqual(await response.json(), stored)
 })
 
-test('DB 설정이 없으면 타임라인 조회는 빈 배열을 주고 잘못된 캐릭터는 거절한다', async (t) => {
+test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 배열을 주고 HEAD도 200으로 답하며 잘못된 캐릭터는 거절한다', async (t) => {
   const app = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
@@ -323,21 +323,21 @@ test('DB 설정이 없으면 타임라인 조회는 빈 배열을 주고 잘못�
   const origin = await app.getUrl()
 
   const response = await fetch(new URL('/characters/siroco/synthetic/timeline', origin))
-  const unknownServer = await fetch(new URL('/characters/unknown/synthetic/timeline', origin))
   const withQuery = await fetch(new URL('/characters/siroco/synthetic/timeline?x=1', origin))
-
-  assert.equal(response.status, 200)
-  assert.deepEqual(await response.json(), {
-    weeklyClears: [],
-    seasonClears: [],
-    enhancements: [],
-    acquisitions: []
+  const head = await fetch(new URL('/characters/siroco/synthetic/timeline', origin), {
+    method: 'HEAD'
   })
-  for (const rejected of [unknownServer, withQuery]) {
-    assert.equal(rejected.status, 400)
-    assert.equal(
-      ((await rejected.json()) as { error: { code: string } }).error.code,
-      'INVALID_CHARACTER_QUERY'
-    )
+  const unknownServer = await fetch(new URL('/characters/unknown/synthetic/timeline', origin))
+
+  const empty = { weeklyClears: [], seasonClears: [], enhancements: [], acquisitions: [] }
+  for (const accepted of [response, withQuery]) {
+    assert.equal(accepted.status, 200)
+    assert.deepEqual(await accepted.json(), empty)
   }
+  assert.equal(head.status, 200)
+  assert.equal(unknownServer.status, 400)
+  assert.equal(
+    ((await unknownServer.json()) as { error: { code: string } }).error.code,
+    'INVALID_CHARACTER_QUERY'
+  )
 })
