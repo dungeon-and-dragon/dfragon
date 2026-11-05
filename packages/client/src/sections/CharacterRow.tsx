@@ -1,5 +1,6 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import { MISSING_VALUE, tierLabels } from '@dfragon/client-core/constants/cards'
 import {
@@ -89,7 +90,7 @@ export function CharacterRow({
         <div {...stylex.props(styles.character)}>
           <div {...stylex.props(styles.well, shown === undefined && styles.wellEmpty)}>
             {shown !== undefined && (
-              <Portrait src={shown.image} face={screen === 'raid' ? shown.face : undefined} />
+              <RowPortrait character={shown} face={screen === 'raid' ? shown.face : undefined} />
             )}
           </div>
           <LookupName
@@ -138,6 +139,31 @@ export function CharacterRow({
         )}
       </td>
     </>
+  )
+}
+
+// 이름 칸은 편집 칸이라 링크로 만들지 않고 초상화로 상세에 간다.
+function RowPortrait({
+  character,
+  face
+}: {
+  character: CardCharacter
+  face: CardCharacter['face']
+}): React.JSX.Element {
+  const portrait = <Portrait src={character.image} face={face} />
+  if (character.characterId === undefined) {
+    return portrait
+  }
+
+  return (
+    <Link
+      to="/c/$serverId/$characterId"
+      params={{ serverId: character.serverId, characterId: character.characterId }}
+      aria-label={`${character.name} 상세`}
+      {...stylex.props(styles.portraitLink)}
+    >
+      {portrait}
+    </Link>
   )
 }
 

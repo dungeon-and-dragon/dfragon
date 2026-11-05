@@ -12,6 +12,7 @@ import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/se
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import { createCharacterDetailViewHttp } from '@dfragon/client-core/shared/search/character-http'
+import type { SearchRuntime } from '@dfragon/client-core/shared/search/request'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
@@ -453,6 +454,21 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
   }
 }
 
+// 후보 검색은 이름이 정확히 같은 캐릭터를 모든 서버에서 명성 순으로 주므로 서버는 받은 뒤 거른다.
+function createCharacterNameSearch(
+  candidates: SearchRuntime['identification']['candidates']
+): ClientHost['searchCharacters'] {
+  return async ({ characterName, serverId }) => {
+    // 후보 검색 계약은 표의 회차 수명에 맞춰 signal을 받는다. 전역 검색은 취소하지 않아 끊기지 않는 signal을 넘긴다.
+    const rows = await candidates({ nickname: characterName, signal: AbortSignal.any([]) })
+    if (serverId === null) {
+      return rows
+    }
+
+    return rows.filter((row) => row.serverId === serverId)
+  }
+}
+
 export function installBrowserHost(apiOrigin: string): BrowserHost {
   const reportDiagnostic = startRendererDiagnostics()
   const runtime = createBrowserSearchRuntime(apiOrigin, reportDiagnostic)
@@ -484,6 +500,7 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     },
     getTodayGrade: () => readTodayGrade(apiOrigin),
     getCharacterDetail: createCharacterDetailViewHttp({ apiOrigin, fetch: browserFetch }),
+    searchCharacters: createCharacterNameSearch(runtime.identification.candidates),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
     onScreenShareEnded: screenShare.onEnded,
