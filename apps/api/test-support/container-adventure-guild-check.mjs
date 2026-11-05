@@ -96,6 +96,47 @@ try {
 
   assert.deepEqual(await readAdventureCharacters(client, '없는모험단'), [])
   assert.deepEqual(await readGuild(client, 'missing-guild'), { guildName: null, members: [] })
+
+  // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결까지 확인한다.
+  const get = async (path) => {
+    const response = await fetch(new URL(path, 'http://127.0.0.1:3000'))
+    assert.equal(response.status, 200, path)
+
+    return response.json()
+  }
+  const guildAnswer = await get(`/guilds/${guildId}`)
+  assert.equal(guildAnswer.guildName, '새합성길드')
+  assert.equal(guildAnswer.memberCount, 3)
+  assert.equal(guildAnswer.averageFame, 65001)
+  assert.deepEqual(
+    guildAnswer.members.map(({ characterId }) => characterId),
+    ['adventure-high', 'guild-renamed', 'guild-no-fame']
+  )
+  const adventureAnswer = await get(`/adventures/${encodeURIComponent(adventureName)}/characters`)
+  assert.equal(adventureAnswer.adventureName, adventureName)
+  assert.deepEqual(
+    adventureAnswer.characters.map(({ characterId, fetchedAt }) => [
+      characterId,
+      fetchedAt === null
+    ]),
+    [
+      ['adventure-high', false],
+      ['adventure-low', false],
+      ['adventure-no-fame', false],
+      ['adventure-no-basic', true]
+    ]
+  )
+  assert.deepEqual(await get(`/adventures/${encodeURIComponent('없는모험단')}/characters`), {
+    adventureName: '없는모험단',
+    characters: []
+  })
+  assert.deepEqual(await get('/guilds/missing-guild'), {
+    guildId: 'missing-guild',
+    guildName: null,
+    memberCount: 0,
+    averageFame: null,
+    members: []
+  })
 } finally {
   await client.$disconnect()
 }

@@ -34,6 +34,8 @@ test('Swagger는 공개 API 경로만 문서화하고 provider를 호출하지 �
         'get /characters/{serverId}/{characterId}',
         'get /characters/{serverId}/{characterId}/image',
         'post /characters/{serverId}/{characterId}/refresh',
+        'get /adventures/{adventureName}/characters',
+        'get /guilds/{guildId}',
         'get /items/today-grade'
       ].sort()
     )
