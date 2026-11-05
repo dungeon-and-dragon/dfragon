@@ -15,6 +15,7 @@ import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
 import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
+import { FavoritesScreen } from '../../pages/favorites/FavoritesScreen'
 import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from '../../pages/rankings/ranking-search'
 import { RankingsPage } from '../../pages/rankings/RankingsPage'
@@ -144,7 +145,19 @@ const statsRoute = createRoute({
   component: StatsScreen
 })
 
-const routeTree = rootRoute.addChildren([homeRoute, characterRoute, rankingsRoute, statsRoute])
+const favoritesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/favorites',
+  component: FavoritesScreen
+})
+
+const routeTree = rootRoute.addChildren([
+  homeRoute,
+  characterRoute,
+  rankingsRoute,
+  statsRoute,
+  favoritesRoute
+])
 
 function createWebRouter(host: BrowserHost) {
   return createRouter({ routeTree, context: { host } })

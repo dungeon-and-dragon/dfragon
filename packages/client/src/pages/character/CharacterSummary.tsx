@@ -8,12 +8,15 @@ import {
 } from '@dfragon/client-core/preload/common/search/character-summary'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { Portrait } from '../../components/Portrait'
+import { characterDisplaySchema } from '../../lib/stored-character'
 import { styles } from './CharacterSummary.style'
+import { FavoriteToggle } from './FavoriteToggle'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
 export function CharacterSummary({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
+  const favorite = characterDisplaySchema.safeParse(character).data
   const job = character.jobGrowName ?? character.jobName
   const affiliations = [
     { id: 'adventure', name: character.adventureName, tone: styles.adventure },
@@ -26,7 +29,10 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <Portrait src={characterImageUrl(character)} />
       </div>
       <div {...stylex.props(styles.identity)}>
-        <h1 {...stylex.props(styles.name)}>{character.characterName ?? MISSING_VALUE}</h1>
+        <div {...stylex.props(styles.heading)}>
+          <h1 {...stylex.props(styles.name)}>{character.characterName ?? MISSING_VALUE}</h1>
+          {favorite != null && <FavoriteToggle character={favorite} />}
+        </div>
         <div {...stylex.props(styles.line)}>
           <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
           {job != null && <span {...stylex.props(styles.muted)}>{job}</span>}

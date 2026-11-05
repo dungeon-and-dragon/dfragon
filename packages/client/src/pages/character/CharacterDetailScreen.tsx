@@ -1,6 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCharacterDetail } from '../../hooks/useCharacterDetail'
+import { useViewedCharacter } from '../../hooks/useViewedCharacter'
 import type { CharacterTab } from './character-tabs'
 import { styles } from './CharacterDetailScreen.style'
 import { CharacterSummary, CharacterSummarySkeleton } from './CharacterSummary'
@@ -18,6 +19,7 @@ export function CharacterDetailScreen({
   onTabChange: (tab: CharacterTab) => void
 }): React.JSX.Element {
   const result = useCharacterDetail(serverId, characterId)
+  useViewedCharacter(result.status === 'success' ? result.detail.character : null)
   switch (result.status) {
     case 'loading':
       return (

@@ -8,7 +8,16 @@ import type { StoredCharacter } from '@dfragon/client-core/shared/ranking/rankin
 import { Portrait } from '../Portrait'
 import { styles } from './CharacterCell.style'
 
-export function CharacterCell({ character }: { character: StoredCharacter }): React.JSX.Element {
+export type CharacterCellCharacter = Pick<
+  StoredCharacter,
+  'serverId' | 'characterId' | 'characterName' | 'level' | 'jobName' | 'jobGrowName'
+>
+
+export function CharacterCell({
+  character
+}: {
+  character: CharacterCellCharacter
+}): React.JSX.Element {
   const details = [
     character.level != null ? `Lv.${character.level}` : null,
     character.jobGrowName ?? character.jobName
