@@ -54,7 +54,8 @@ const avatarItem = z.object({
   slotName: text,
   ...itemShape,
   optionAbility: text,
-  emblems: list(z.object({ slotNo: count, slotColor: text, ...itemShape }))
+  emblems: list(z.object({ slotNo: count, slotColor: text, ...itemShape })),
+  clone: section({ itemId: text, itemName: text })
 })
 
 const skill = z.object({ skillId: text, name: text, level: count, requiredLevel: count })
@@ -118,7 +119,10 @@ export const characterDetailViewSchema = z.object({
     avatar: section({ skillInfo: buffSkillInfo, avatar: list(avatarItem) }),
     creature: section({ skillInfo: buffSkillInfo, creature: list(z.object(itemShape)) })
   }),
-  status: group({ status: list(namedStat) })
+  status: group({
+    status: list(namedStat),
+    buff: list(z.object({ name: text, level: count, status: list(namedStat) }))
+  })
 })
 
 export type CharacterDetailView = z.infer<typeof characterDetailViewSchema>
