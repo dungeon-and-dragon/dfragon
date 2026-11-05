@@ -6,6 +6,7 @@ import { EquipmentTab } from './tabs/EquipmentTab'
 import { OathTab } from './tabs/OathTab'
 import { SkillTab } from './tabs/SkillTab'
 import { StatusTab } from './tabs/StatusTab'
+import { TimelineTab } from './tabs/TimelineTab'
 
 type CharacterTabEntry = Readonly<{
   id: string
@@ -19,7 +20,8 @@ export const CHARACTER_TABS = [
   { id: 'skill', label: '스킬', Content: SkillTab },
   { id: 'avatar', label: '아바타와 크리쳐', Content: AvatarCreatureTab },
   { id: 'buff', label: '버프 강화', Content: BuffTab },
-  { id: 'status', label: '스탯', Content: StatusTab }
+  { id: 'status', label: '스탯', Content: StatusTab },
+  { id: 'timeline', label: '타임라인', Content: TimelineTab }
 ] as const satisfies readonly CharacterTabEntry[]
 
 export type CharacterTab = (typeof CHARACTER_TABS)[number]['id']

@@ -1,0 +1,316 @@
+// @vitest-environment jsdom
+import { colors } from '@dfragon/ui/tokens.stylex'
+import * as stylex from '@stylexjs/stylex'
+import { act } from 'react'
+import { createRoot, type Root } from 'react-dom/client'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
+import { ClientHostContext, type ClientHost } from '../../../hooks/useClientHost'
+import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TimelineTab } from './TimelineTab'
+
+// jsdom은 색을 계산하지 않으므로 같은 선언으로 만든 StyleX class가 붙었는지로 색을 확인한다.
+const tones = stylex.create({
+  reinforce: { color: colors.gameEnhance },
+  amplify: { color: colors.gameAmplify },
+  refine: { color: colors.gameRefine },
+  success: { color: colors.fgSuccess },
+  failure: { color: colors.fgDanger },
+  epic: { color: colors.rarityEpic },
+  primordial: { color: colors.rarityPrimordial }
+})
+
+function hasTone(element: Element, tone: keyof typeof tones): boolean {
+  return element.className.split(' ').includes(stylex.props(tones[tone]).className ?? '')
+}
+
+function detailOf(characterId = 'character-1'): CharacterDetailView {
+  return {
+    character: {
+      serverId: 'cain',
+      characterId,
+      characterName: '하늘',
+      serverName: '카인',
+      level: 115,
+      jobName: null,
+      jobGrowName: null,
+      fame: null,
+      adventureName: null,
+      guildName: null
+    },
+    card: null,
+    equipment: { equipment: [], setItemInfo: [] },
+    creature: null,
+    avatar: [],
+    mistAssimilation: null,
+    oath: null,
+    skillStyle: null,
+    buff: { equipment: null, avatar: null, creature: null },
+    status: { status: [], buff: [] }
+  }
+}
+
+const EMPTY: CharacterTimeline = {
+  weeklyClears: [],
+  seasonClears: [],
+  enhancements: [],
+  acquisitions: []
+}
+
+// 시각은 UTC로 주고 한국 시간(+9시간)으로 보이는지 본다.
+const FILLED: CharacterTimeline = {
+  weeklyClears: [
+    {
+      kind: 'raid',
+      name: '디레지에 레이드',
+      modeName: '하드',
+      occurredAt: '2026-11-05T12:30:00.000Z'
+    },
+    { kind: 'legion', name: '베누스', modeName: null, occurredAt: '2026-11-05T15:05:00.000Z' }
+  ],
+  seasonClears: [
+    { kind: 'raid', name: '디레지에 레이드', count: 3 },
+    { kind: 'legion', name: '베누스', count: 12 }
+  ],
+  enhancements: [
+    {
+      kind: 'reinforce',
+      itemId: 'item-1',
+      itemName: '합성 무기',
+      itemRarity: '에픽',
+      before: 13,
+      after: 14,
+      result: true,
+      safe: true,
+      occurredAt: '2026-11-04T01:02:00.000Z'
+    },
+    {
+      kind: 'amplify',
+      itemId: 'item-2',
+      itemName: '합성 상의',
+      itemRarity: '태초',
+      before: 10,
+      after: 0,
+      result: false,
+      safe: false,
+      occurredAt: '2026-11-03T23:59:00.000Z'
+    },
+    {
+      kind: 'refine',
+      itemId: 'item-1',
+      itemName: '합성 무기',
+      itemRarity: '에픽',
+      before: null,
+      after: 8,
+      result: true,
+      safe: null,
+      occurredAt: '2026-11-03T00:00:00.000Z'
+    }
+  ],
+  acquisitions: [
+    {
+      code: 505,
+      name: '아이템 획득(던전 드랍)',
+      itemId: 'item-3',
+      itemName: '합성 하의',
+      itemRarity: '태초',
+      occurredAt: '2026-11-02T10:00:00.000Z'
+    },
+    {
+      code: 550,
+      name: '항아리 획득',
+      itemId: 'item-4',
+      itemName: '합성 신발',
+      itemRarity: '에픽',
+      occurredAt: '2026-11-01T10:00:00.000Z'
+    }
+  ]
+}
+
+let container: HTMLDivElement
+let root: Root
+
+beforeEach(() => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  container = document.createElement('div')
+  document.body.append(container)
+  root = createRoot(container)
+})
+
+afterEach(async () => {
+  await act(async () => root.unmount())
+  container.remove()
+  vi.unstubAllGlobals()
+})
+
+function render(host: ClientHost, detail: CharacterDetailView): Promise<void> {
+  return act(async () =>
+    root.render(
+      <ClientHostContext value={host}>
+        <TimelineTab detail={detail} />
+      </ClientHostContext>
+    )
+  )
+}
+
+function hide(): Promise<void> {
+  return act(async () => root.render(null))
+}
+
+function group(title: string): HTMLElement {
+  return container.querySelector<HTMLElement>(`section[aria-label="${title}"]`)!
+}
+
+function headerOf(title: string): string[] {
+  return [...group(title).querySelectorAll('h2 > span')].map((span) => span.textContent ?? '')
+}
+
+function rowsOf(title: string): string[][] {
+  return [...group(title).querySelectorAll('li, tbody tr')].map((row) =>
+    [...row.querySelectorAll(':scope > *')].map((cell) => cell.textContent ?? '')
+  )
+}
+
+function cellsOf(title: string, row: number): HTMLElement[] {
+  return [...group(title).querySelectorAll<HTMLElement>('tbody tr')[row].querySelectorAll('td')]
+}
+
+it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시즌, 강화, 획득 순으로 그린다', async () => {
+  const { promise, resolve } = Promise.withResolvers<CharacterTimeline>()
+  const host = createTestClientHost({ getCharacterTimeline: vi.fn(() => promise) })
+  await render(host, detailOf())
+
+  expect(container.querySelector('[role="status"]')?.textContent).toContain('타임라인을 받는 중')
+
+  await act(async () => resolve(FILLED))
+
+  expect(container.querySelector('[role="status"]')).toBeNull()
+  expect([...container.querySelectorAll('section')].map((section) => section.ariaLabel)).toEqual([
+    '이번 주 클리어',
+    '시즌 클리어 횟수',
+    '강화, 증폭, 재련',
+    '획득'
+  ])
+  expect(host.getCharacterTimeline).toHaveBeenCalledExactlyOnceWith({
+    serverId: 'cain',
+    characterId: 'character-1'
+  })
+})
+
+it('이번 주 클리어는 종류, 이름, 난이도(없으면 생략)와 한국 시간 MM-DD HH:mm을 보이고 시즌은 횟수 칩을 보인다', async () => {
+  await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
+
+  expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '2'])
+  expect(rowsOf('이번 주 클리어')).toEqual([
+    ['레이드', '디레지에 레이드', '하드', '11-05 21:30'],
+    ['레기온', '베누스', '11-06 00:05']
+  ])
+  expect(rowsOf('시즌 클리어 횟수')).toEqual([
+    ['레이드', '디레지에 레이드', '3'],
+    ['레기온', '베누스', '12']
+  ])
+})
+
+it('강화 표는 종류별 색, 등급 색 장비, 전과 후 수치(재련은 후 수치만), 결과 색과 안전 배지를 보인다', async () => {
+  await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
+
+  expect(rowsOf('강화, 증폭, 재련')).toEqual([
+    ['11-04 10:02', '강화', '합성 무기', '13 → 14', '성공안전'],
+    ['11-04 08:59', '증폭', '합성 상의', '10 → 0', '실패'],
+    ['11-03 09:00', '재련', '합성 무기', '8', '성공']
+  ])
+  const kinds = [0, 1, 2].map((row) => cellsOf('강화, 증폭, 재련', row)[1])
+  expect(kinds.map((cell) => hasTone(cell, 'reinforce'))).toEqual([true, false, false])
+  expect(kinds.map((cell) => hasTone(cell, 'amplify'))).toEqual([false, true, false])
+  expect(kinds.map((cell) => hasTone(cell, 'refine'))).toEqual([false, false, true])
+
+  const [success, failure] = [0, 1].map(
+    (row) => cellsOf('강화, 증폭, 재련', row)[4].querySelector('span > span')!
+  )
+  expect([hasTone(success, 'success'), hasTone(success, 'failure')]).toEqual([true, false])
+  expect([hasTone(failure, 'success'), hasTone(failure, 'failure')]).toEqual([false, true])
+
+  const items = [0, 1].map((row) => cellsOf('강화, 증폭, 재련', row)[2].firstElementChild!)
+  expect([hasTone(items[0], 'epic'), hasTone(items[1], 'primordial')]).toEqual([true, true])
+})
+
+it('획득 표는 제목 옆에 개수와 에픽, 태초를 적고 경로는 이름의 괄호 안 글자만, 괄호가 없으면 이름을 보인다', async () => {
+  await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
+
+  expect(headerOf('획득')).toEqual(['획득', '2', '에픽, 태초'])
+  expect(rowsOf('획득')).toEqual([
+    ['11-02 19:00', '합성 하의', '던전 드랍'],
+    ['11-01 19:00', '합성 신발', '항아리 획득']
+  ])
+})
+
+it('값이 없는 캐릭터는 네 묶음의 제목을 남기고 묶음마다 빈 상태 한 줄을 보인다', async () => {
+  await render(createTestClientHost({ getCharacterTimeline: async () => EMPTY }), detailOf())
+
+  const groups = [...container.querySelectorAll('section')]
+  expect(groups.map((section) => headerOf(section.ariaLabel!)[1])).toEqual(['0', '0', '0', '0'])
+  expect(groups.map((section) => section.querySelector('p')?.textContent)).toEqual([
+    '이번 주 클리어 기록이 없습니다.',
+    '이번 시즌 클리어 기록이 없습니다.',
+    '강화, 증폭, 재련 기록이 없습니다.',
+    '에픽, 태초 획득 기록이 없습니다.'
+  ])
+  expect(container.querySelectorAll('li, table')).toHaveLength(0)
+})
+
+it('탭을 숨겼다가 다시 열어도 같은 상세에서는 다시 조회하지 않고, 상세를 새로 받으면 다시 조회한다', async () => {
+  const getCharacterTimeline = vi.fn<ClientHost['getCharacterTimeline']>(async () => FILLED)
+  const host = createTestClientHost({ getCharacterTimeline })
+  const detail = detailOf()
+
+  await render(host, detail)
+  await hide()
+  await render(host, detail)
+
+  expect(rowsOf('이번 주 클리어')).toHaveLength(2)
+  expect(getCharacterTimeline).toHaveBeenCalledOnce()
+
+  await render(host, detailOf())
+  expect(getCharacterTimeline).toHaveBeenCalledTimes(2)
+})
+
+it('조회가 실패하면 오류 문구를 보이고, 탭을 다시 열면 다시 조회한다', async () => {
+  const getCharacterTimeline = vi
+    .fn<ClientHost['getCharacterTimeline']>()
+    .mockRejectedValueOnce(new Error('검색 시간이 초과됐습니다. 다시 시도해 주세요.'))
+    .mockResolvedValueOnce(EMPTY)
+  const host = createTestClientHost({ getCharacterTimeline })
+  const detail = detailOf()
+
+  await render(host, detail)
+  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    '검색 시간이 초과됐습니다. 다시 시도해 주세요.'
+  )
+
+  await hide()
+  await render(host, detail)
+  expect(container.querySelector('[role="alert"]')).toBeNull()
+  expect(container.querySelectorAll('section')).toHaveLength(4)
+  expect(getCharacterTimeline).toHaveBeenCalledTimes(2)
+})
+
+it('다른 캐릭터로 바뀐 뒤 늦게 온 이전 캐릭터의 응답은 무시한다', async () => {
+  const pending = new Map<string, PromiseWithResolvers<CharacterTimeline>>()
+  const getCharacterTimeline = vi.fn<ClientHost['getCharacterTimeline']>(({ characterId }) => {
+    const request = Promise.withResolvers<CharacterTimeline>()
+    pending.set(characterId, request)
+
+    return request.promise
+  })
+  const host = createTestClientHost({ getCharacterTimeline })
+
+  await render(host, detailOf('character-1'))
+  await render(host, detailOf('character-2'))
+  await act(async () => pending.get('character-2')!.resolve(EMPTY))
+  await act(async () => pending.get('character-1')!.resolve(FILLED))
+
+  expect(container.querySelectorAll('section')).toHaveLength(4)
+  expect(container.querySelector('section p')?.textContent).toBe('이번 주 클리어 기록이 없습니다.')
+  expect(container.querySelectorAll('li, table')).toHaveLength(0)
+})
