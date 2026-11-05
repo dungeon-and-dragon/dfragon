@@ -22,11 +22,8 @@ import {
 } from './identify'
 import { toRaidObservedValues } from './raid-candidate'
 import { SearchHttpFailure } from './http'
-import type {
-  CharacterCandidatesHttp,
-  CharacterDetailsHttp,
-  CharacterImageHttp
-} from './character-http'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
+import type { CharacterImageHttp } from './character-image-source'
 import type { PortraitColorScorer } from './portrait-color'
 import { runSearchOperation, type SearchOperation, type SearchOperationFailure } from './operation'
 import { buildCharacterCard } from './card-assembler'

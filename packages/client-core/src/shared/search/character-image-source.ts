@@ -1,6 +1,8 @@
 import type { CharacterImage } from '../../preload/common/types/character'
-import type { CharacterImageHttp } from './character-http'
+import type { IdentityRequest } from '../api/dfragon-client'
 import { CompletedCache } from './completed-cache'
+
+export type CharacterImageHttp = (input: IdentityRequest) => Promise<CharacterImage>
 
 const DEFAULT_CACHE_ENTRIES = 64
 const DEFAULT_CACHE_BYTES = 16 * 1024 * 1024
