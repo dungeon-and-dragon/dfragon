@@ -1,7 +1,7 @@
 import type {
   CharacterSearchQuery,
   SearchedCharacter
-} from '@dfragon/client-core/shared/search/character-http'
+} from '@dfragon/client-core/shared/api/character-schemas'
 import { useClientHost } from './useClientHost'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

@@ -4,27 +4,11 @@ import {
   type DNFParticipantFrame,
   type DNFRectangle
 } from '@dfragon/lib'
-import ky from 'ky'
-import { parseTodayGrade } from '@dfragon/client-core/preload/common/today-grade'
 import type { CaptureSource } from '@dfragon/client-core/preload/common/types/capture'
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
-import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
-import {
-  createAdventureCharactersHttp,
-  createGuildHttp
-} from '@dfragon/client-core/shared/adventure-guild/adventure-guild-http'
-import {
-  createCharacterStatsHttp,
-  createFameRankingHttp
-} from '@dfragon/client-core/shared/ranking/ranking-stats-http'
-import { createAdventureWeeklyHttp } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly-http'
+import { createDfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
-import {
-  createCharacterDetailViewHttp,
-  createCharacterSearchHttp,
-  createCharacterTimelineHttp
-} from '@dfragon/client-core/shared/search/character-http'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
@@ -84,23 +68,6 @@ function createListeners<T extends unknown[]>(): {
     },
     isEmpty: () => listeners.size === 0
   }
-}
-
-async function readTodayGrade(apiOrigin: string): Promise<TodayGrade> {
-  const body = await ky
-    .get(`${apiOrigin}/items/today-grade`, {
-      retry: 0,
-      credentials: 'omit',
-      redirect: 'error',
-      cache: 'no-store'
-    })
-    .json()
-  const grade = parseTodayGrade(body)
-  if (grade == null) {
-    throw new Error('INVALID_TODAY_GRADE_RESPONSE')
-  }
-
-  return grade
 }
 
 function findPastedImage(data: DataTransfer | null): File | null {
@@ -465,7 +432,8 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
 
 export function installBrowserHost(apiOrigin: string): BrowserHost {
   const reportDiagnostic = startRendererDiagnostics()
-  const runtime = createBrowserSearchRuntime(apiOrigin, reportDiagnostic)
+  const dfragon = createDfragonClient({ apiOrigin, fetch: browserFetch })
+  const runtime = createBrowserSearchRuntime(dfragon, reportDiagnostic)
   const party = createBrowserCardSearch('party', runtime)
   const raid = createBrowserCardSearch('raid', runtime)
   const screenShare = createScreenShare()
@@ -492,15 +460,15 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
       readCaptureFrame: async () =>
         toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
-    getTodayGrade: () => readTodayGrade(apiOrigin),
-    getCharacterDetail: createCharacterDetailViewHttp({ apiOrigin, fetch: browserFetch }),
-    getCharacterTimeline: createCharacterTimelineHttp({ apiOrigin, fetch: browserFetch }),
-    getFameRanking: createFameRankingHttp({ apiOrigin, fetch: browserFetch }),
-    getCharacterStats: createCharacterStatsHttp({ apiOrigin, fetch: browserFetch }),
-    getAdventureCharacters: createAdventureCharactersHttp({ apiOrigin, fetch: browserFetch }),
-    getGuild: createGuildHttp({ apiOrigin, fetch: browserFetch }),
-    getAdventureWeekly: createAdventureWeeklyHttp({ apiOrigin, fetch: browserFetch }),
-    searchCharacters: createCharacterSearchHttp({ apiOrigin, fetch: browserFetch }),
+    getTodayGrade: dfragon.items.todayGrade,
+    getCharacterDetail: dfragon.characters.detailView,
+    getCharacterTimeline: dfragon.characters.timeline,
+    getFameRanking: dfragon.rankings.fame,
+    getCharacterStats: dfragon.stats,
+    getAdventureCharacters: dfragon.adventures.characters,
+    getGuild: dfragon.guilds.get,
+    getAdventureWeekly: dfragon.adventures.weekly,
+    searchCharacters: dfragon.characters.search,
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
     onScreenShareEnded: screenShare.onEnded,

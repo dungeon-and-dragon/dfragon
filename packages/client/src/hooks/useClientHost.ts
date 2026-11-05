@@ -21,7 +21,7 @@ import type { CharacterDetailView } from '@dfragon/client-core/shared/search/cha
 import type {
   CharacterSearchQuery,
   SearchedCharacter
-} from '@dfragon/client-core/shared/search/character-http'
+} from '@dfragon/client-core/shared/api/character-schemas'
 import type {
   CharacterStats,
   FameRanking,

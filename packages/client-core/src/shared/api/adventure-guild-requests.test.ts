@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest'
 import type { StoredCharacter } from '../ranking/ranking-stats'
-import type { AdventureCharacters, Guild } from './adventure-guild'
-import { createAdventureCharactersHttp, createGuildHttp } from './adventure-guild-http'
+import type { AdventureCharacters, Guild } from '../adventure-guild/adventure-guild'
+import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
 
@@ -35,7 +35,7 @@ const guild: Guild = {
 
 it('모험단 응답을 읽고 한글 이름을 주소에 인코딩한다', async () => {
   const fetch = respond(adventure)
-  const read = createAdventureCharactersHttp({ apiOrigin: API_ORIGIN, fetch })
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.characters
 
   await expect(read('합성 모험단')).resolves.toEqual(adventure)
   expect(new Request(fetch.mock.calls[0][0]).url).toBe(
@@ -47,10 +47,12 @@ it('길드 응답을 읽고, 길드원이 없는 길드도 읽는다', async () 
   const empty: Guild = { ...guild, guildName: null, memberCount: 0, averageFame: null, members: [] }
   const fetch = respond(guild)
 
-  await expect(createGuildHttp({ apiOrigin: API_ORIGIN, fetch })('guild-1')).resolves.toEqual(guild)
+  await expect(
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).guilds.get('guild-1')
+  ).resolves.toEqual(guild)
   expect(new Request(fetch.mock.calls[0][0]).url).toBe(`${API_ORIGIN}/guilds/guild-1`)
   await expect(
-    createGuildHttp({ apiOrigin: API_ORIGIN, fetch: respond(empty) })('guild-2')
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).guilds.get('guild-2')
   ).resolves.toEqual(empty)
 })
 
@@ -58,18 +60,20 @@ it('빈 모험단을 읽고, 모르는 서버가 있는 응답과 오류 응답�
   const empty: AdventureCharacters = { adventureName: '없는 모험단', characters: [] }
 
   await expect(
-    createAdventureCharactersHttp({ apiOrigin: API_ORIGIN, fetch: respond(empty) })('없는 모험단')
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).adventures.characters(
+      '없는 모험단'
+    )
   ).resolves.toEqual(empty)
   await expect(
-    createAdventureCharactersHttp({
+    createDfragonClient({
       apiOrigin: API_ORIGIN,
       fetch: respond({ ...adventure, characters: [{ ...character, serverId: 'unknown' }] })
-    })('합성 모험단')
+    }).adventures.characters('합성 모험단')
   ).rejects.toThrow()
   await expect(
-    createGuildHttp({
+    createDfragonClient({
       apiOrigin: API_ORIGIN,
       fetch: respond({ error: { code: 'INTERNAL_SERVER_ERROR', message: '실패' } }, 500)
-    })('guild-1')
+    }).guilds.get('guild-1')
   ).rejects.toThrow()
 })
