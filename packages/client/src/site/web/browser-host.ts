@@ -44,8 +44,6 @@ import {
   type ScreenWatchObservation
 } from './screen-watch'
 
-// 응답은 `{ percent, expiresAt }` 하나라 100바이트 안팎이다.
-const TODAY_GRADE_MAX_BYTES = 4 * 1024
 // 마을 자동 인식의 판정 주기는 약 1초이며 ms 단위로 맞추지 않는다.
 const SCREEN_WATCH_INTERVAL_MS = 1000
 
@@ -92,7 +90,6 @@ async function readTodayGrade(apiOrigin: string): Promise<TodayGrade> {
   const body = await ky
     .get(`${apiOrigin}/items/today-grade`, {
       retry: 0,
-      maxResponseSize: TODAY_GRADE_MAX_BYTES,
       credentials: 'omit',
       redirect: 'error',
       cache: 'no-store'

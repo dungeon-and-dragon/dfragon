@@ -1,5 +1,5 @@
 import { SearchHttpFailure } from '../search/http'
-import { assertApiSuccess, CHARACTER_HTTP_LIMITS, type ApiOptions } from '../search/character-http'
+import { assertApiSuccess, type ApiOptions } from '../search/character-http'
 import {
   createCharacterHttpClient,
   parseCharacterJson,
@@ -20,10 +20,9 @@ export type CharacterStatsHttp = () => Promise<CharacterStats>
 export function createJsonRequest<Schema extends z.ZodType>(
   { apiOrigin, fetch: transport }: ApiOptions,
   path: string,
-  schema: Schema,
-  maxBytes: number
+  schema: Schema
 ): (searchParams?: Record<string, string>) => Promise<z.infer<Schema>> {
-  const client = createCharacterHttpClient(transport, maxBytes)
+  const client = createCharacterHttpClient(transport)
 
   return async (searchParams) => {
     try {
@@ -48,12 +47,7 @@ export function createJsonRequest<Schema extends z.ZodType>(
 }
 
 export function createFameRankingHttp(options: ApiOptions): FameRankingHttp {
-  const request = createJsonRequest(
-    options,
-    '/rankings/fame',
-    fameRankingSchema,
-    CHARACTER_HTTP_LIMITS.rankingJsonBytes
-  )
+  const request = createJsonRequest(options, '/rankings/fame', fameRankingSchema)
 
   return async (filter) => {
     if (filter.jobGrowId !== undefined && filter.jobId === undefined) {
@@ -68,12 +62,7 @@ export function createFameRankingHttp(options: ApiOptions): FameRankingHttp {
 }
 
 export function createCharacterStatsHttp(options: ApiOptions): CharacterStatsHttp {
-  const request = createJsonRequest(
-    options,
-    '/stats',
-    characterStatsSchema,
-    CHARACTER_HTTP_LIMITS.statsJsonBytes
-  )
+  const request = createJsonRequest(options, '/stats', characterStatsSchema)
 
   return () => request()
 }
