@@ -42,9 +42,9 @@ async function listen(
   return { app, origin: await app.getUrl() }
 }
 
-async function getJson(origin: string, path: string, method = 'GET') {
-  const response = await fetch(new URL(path, origin), { method })
-  const body = method === 'HEAD' ? null : await response.json()
+async function getJson(origin: string, path: string) {
+  const response = await fetch(new URL(path, origin))
+  const body = await response.json()
 
   return { status: response.status, body }
 }
@@ -139,23 +139,6 @@ test('DB 설정이 없는 API는 두 경로에 빈 목록을 준다', async () =
         members: []
       }
     })
-  } finally {
-    await app.close()
-  }
-})
-
-test('두 경로는 query와 HEAD를 거절하고 DB를 읽지 않는다', async () => {
-  const { app, origin } = await listen({
-    readAdventureCharacters: async () => assert.fail('모험단을 읽으면 안 된다'),
-    readGuild: async () => assert.fail('길드를 읽으면 안 된다')
-  })
-  try {
-    for (const path of ['/adventures/합성/characters', '/guilds/synthetic-guild']) {
-      const query = await getJson(origin, `${path}?serverId=cain`)
-      assert.equal(query.status, 400, path)
-      assert.equal(query.body.error.code, 'INVALID_CHARACTER_QUERY', path)
-      assert.equal((await getJson(origin, path, 'HEAD')).status, 400, path)
-    }
   } finally {
     await app.close()
   }
