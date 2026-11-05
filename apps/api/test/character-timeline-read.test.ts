@@ -4,7 +4,13 @@ import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineEventRow, TimelineItemRow } from '@dfragon/database'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createTimelineSyncQueue } from '../src/characters/timeline/queue.js'
-import { type CharacterTimeline, toCharacterTimeline } from '../src/characters/timeline/read.js'
+import {
+  type CharacterTimeline,
+  EMPTY_CHARACTER_TIMELINE,
+  formatTimelineCursor,
+  parseTimelineCursor,
+  toCharacterTimeline
+} from '../src/characters/timeline/read.js'
 import { createApiHttpApp } from '../src/http.js'
 import { startOfResetWeek } from '../src/utils/seoul-time.js'
 
@@ -46,6 +52,7 @@ function event(row: Partial<TimelineEventRow> & Pick<TimelineEventRow, 'code'>):
 
 function item(row: Partial<TimelineItemRow> & Pick<TimelineItemRow, 'code'>): TimelineItemRow {
   return {
+    id: 1n,
     occurredAt: new Date('2026-11-05T12:00:00+09:00'),
     name: '아이템',
     itemId: 'synthetic-item',
@@ -286,10 +293,9 @@ test('queue를 닫으면 대기열에서 기다리던 요청은 동기화 없이
 
 test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값을 준다', async (t) => {
   const stored: CharacterTimeline = {
-    weeklyClears: [],
+    ...EMPTY_CHARACTER_TIMELINE,
     seasonClears: [{ kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 }],
-    enhancements: [],
-    acquisitions: []
+    enhancementsCursor: '1762311600000.42'
   }
   let synced = false
   const app = await createApiHttpApp({
@@ -306,6 +312,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
 
         return stored
       },
+      readPage: unused,
       backfillEnhancements: unused,
       close: async () => undefined
     },
@@ -323,7 +330,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
   assert.deepEqual(await response.json(), stored)
 })
 
-test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 배열을 주고 HEAD도 200으로 답하며 잘못된 캐릭터는 거절한다', async (t) => {
+test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 배열을, 이어 받기는 빈 목록을 주고 HEAD도 200으로 답하며 잘못된 캐릭터는 거절한다', async (t) => {
   const app = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
@@ -340,8 +347,20 @@ test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 �
     method: 'HEAD'
   })
   const unknownServer = await fetch(new URL('/characters/unknown/synthetic/timeline', origin))
+  const page = await fetch(
+    new URL('/characters/siroco/synthetic/timeline/enhancements?before=1.1', origin)
+  )
 
-  const empty = { weeklyClears: [], seasonClears: [], enhancements: [], acquisitions: [] }
+  assert.equal(page.status, 200)
+  assert.deepEqual(await page.json(), { items: [], nextCursor: null })
+  const empty = {
+    weeklyClears: [],
+    seasonClears: [],
+    enhancements: [],
+    enhancementsCursor: null,
+    acquisitions: [],
+    acquisitionsCursor: null
+  }
   for (const accepted of [response, withQuery]) {
     assert.equal(accepted.status, 200)
     assert.deepEqual(await accepted.json(), empty)
@@ -352,4 +371,130 @@ test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 �
     ((await unknownServer.json()) as { error: { code: string } }).error.code,
     'INVALID_CHARACTER_QUERY'
   )
+})
+
+test('강화, 획득은 최근 50개를 주고, 더 있으면 50번째 행을 가리키는 cursor를, 없으면 null을 준다', () => {
+  const now = new Date('2026-11-05T12:00:00+09:00')
+  const rows = (count: number, code: number, data: Record<string, unknown> = {}) =>
+    Array.from({ length: count }, (_, index) =>
+      item({
+        id: BigInt(1000 - index),
+        code,
+        data,
+        occurredAt: new Date(now.getTime() - index * 60_000)
+      })
+    )
+  const acquisitions = rows(51, 505)
+  const timeline = toCharacterTimeline(
+    {
+      clears: [],
+      enhancements: rows(50, 401, { after: 10, result: true }),
+      acquisitions
+    },
+    now,
+    now
+  )
+
+  assert.equal(timeline.enhancements.length, 50)
+  assert.equal(timeline.enhancementsCursor, null)
+  assert.deepEqual(
+    timeline.acquisitions.map(({ occurredAt }) => occurredAt),
+    acquisitions.slice(0, 50).map(({ occurredAt }) => occurredAt)
+  )
+  assert.deepEqual(parseTimelineCursor(timeline.acquisitionsCursor!), {
+    occurredAt: acquisitions[49]!.occurredAt,
+    id: acquisitions[49]!.id
+  })
+})
+
+test('cursor는 시각과 id를 그대로 되돌리고 형식이 다르거나 bigint를 넘을 수 있는 값은 읽지 않는다', () => {
+  const cursor = { occurredAt: new Date('2017-09-21T00:00:00.123+09:00'), id: 987654321012345678n }
+
+  assert.deepEqual(parseTimelineCursor(formatTimelineCursor(cursor)), cursor)
+  for (const invalid of [
+    '',
+    'abc',
+    '1',
+    '1.',
+    '.1',
+    '-1.1',
+    '1.-1',
+    '1.1.1',
+    '1.5e3',
+    '1.9223372036854775808',
+    '1234567890123456.1'
+  ]) {
+    assert.equal(parseTimelineCursor(invalid), undefined, invalid)
+  }
+})
+
+test('이어 받기는 동기화를 기다리지 않고 before의 cursor로 목록을 읽고, before가 없거나 잘못됐거나 다른 query가 있으면 400으로 거절한다', async (t) => {
+  const stored = {
+    items: [
+      {
+        code: 505,
+        name: '아이템 획득(던전 드랍)',
+        itemId: 'synthetic-item',
+        itemName: '합성 아이템',
+        itemRarity: '에픽',
+        occurredAt: new Date('2026-11-05T12:00:00+09:00')
+      }
+    ],
+    nextCursor: '1762311600000.7'
+  }
+  const reads: unknown[] = []
+  const app = await createApiHttpApp({
+    search: { searchCharacters: unused },
+    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    timeline: {
+      sync: unused,
+      read: unused,
+      readPage: async (requested, list, before) => {
+        reads.push({ requested, list, before })
+
+        return stored
+      },
+      backfillEnhancements: unused,
+      close: async () => undefined
+    },
+    todayGrade: { fetchShopGrade: unused },
+    writeAccessLog: () => undefined
+  })
+  t.after(() => app.close())
+  await app.listen(0, '127.0.0.1')
+  const origin = await app.getUrl()
+  const path = `/characters/${character.serverId}/${character.characterId}/timeline`
+
+  const enhancements = await fetch(new URL(`${path}/enhancements?before=1762311600000.42`, origin))
+  const acquisitions = await fetch(new URL(`${path}/acquisitions?before=1762311600000.43`, origin))
+
+  for (const response of [enhancements, acquisitions]) {
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), {
+      ...stored,
+      items: [{ ...stored.items[0], occurredAt: '2026-11-05T03:00:00.000Z' }]
+    })
+  }
+  const occurredAt = new Date(1762311600000)
+  assert.deepEqual(reads, [
+    { requested: character, list: 'enhancements', before: { occurredAt, id: 42n } },
+    { requested: character, list: 'acquisitions', before: { occurredAt, id: 43n } }
+  ])
+
+  for (const query of [
+    '',
+    '?before=',
+    '?before=abc',
+    '?before=1.2&x=1',
+    '?before=1.2&before=1.3'
+  ]) {
+    const rejected = await fetch(new URL(`${path}/enhancements${query}`, origin))
+
+    assert.equal(rejected.status, 400, query)
+    assert.equal(
+      ((await rejected.json()) as { error: { code: string } }).error.code,
+      'INVALID_CHARACTER_QUERY'
+    )
+  }
+  assert.equal(reads.length, 2)
 })
