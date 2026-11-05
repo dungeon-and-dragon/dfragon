@@ -21,6 +21,7 @@ const ENHANCEMENT_KINDS = new Map<number, EnhancementKind>([
   [402, 'amplify'],
   [403, 'refine']
 ])
+export const ENHANCEMENT_CODES = [...ENHANCEMENT_KINDS.keys()]
 const ACQUISITION_CODES = [
   501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519,
   520, 521, 550, 551, 552, 553, 554, 555, 556, 557
@@ -197,7 +198,7 @@ export async function readCharacterTimeline(
   const [clears, enhancements, acquisitions] = await Promise.all([
     readTimelineEvents(client, character, CLEAR_CODES, since),
     readRecentTimelineItems(client, character, {
-      codes: [...ENHANCEMENT_KINDS.keys()],
+      codes: ENHANCEMENT_CODES,
       limit: RECENT_LIMIT
     }),
     readRecentTimelineItems(client, character, {

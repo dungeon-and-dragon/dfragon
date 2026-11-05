@@ -48,6 +48,7 @@ function detailOf(characterId: string): CharacterDetailView {
       jobGrowName: null,
       fame: null,
       adventureName: null,
+      guildId: null,
       guildName: null
     },
     card: null,

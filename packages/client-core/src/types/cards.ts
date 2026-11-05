@@ -12,6 +12,7 @@ export interface CardCharacter {
   characterId?: string
   name: string
   adventure: string
+  guildId?: string | null
   guild?: string | null
   job: string
   serverId: ServerId

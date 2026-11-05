@@ -11,6 +11,10 @@ import type { CharacterImage } from '@dfragon/client-core/preload/common/types/c
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import {
+  createAdventureCharactersHttp,
+  createGuildHttp
+} from '@dfragon/client-core/shared/adventure-guild/adventure-guild-http'
+import {
   createCharacterStatsHttp,
   createFameRankingHttp
 } from '@dfragon/client-core/shared/ranking/ranking-stats-http'
@@ -511,6 +515,8 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     getCharacterTimeline: createCharacterTimelineHttp({ apiOrigin, fetch: browserFetch }),
     getFameRanking: createFameRankingHttp({ apiOrigin, fetch: browserFetch }),
     getCharacterStats: createCharacterStatsHttp({ apiOrigin, fetch: browserFetch }),
+    getAdventureCharacters: createAdventureCharactersHttp({ apiOrigin, fetch: browserFetch }),
+    getGuild: createGuildHttp({ apiOrigin, fetch: browserFetch }),
     getAdventureWeekly: createAdventureWeeklyHttp({ apiOrigin, fetch: browserFetch }),
     searchCharacters: createCharacterNameSearch(runtime.identification.candidates),
     onPastedFrame: roundFrames.install(),

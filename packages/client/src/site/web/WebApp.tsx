@@ -14,7 +14,9 @@ import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
+import { AdventurePage } from '../../pages/adventure/AdventurePage'
 import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
+import { GuildPage } from '../../pages/guild/GuildPage'
 import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from '../../pages/rankings/ranking-search'
 import { RankingsPage } from '../../pages/rankings/RankingsPage'
@@ -145,6 +147,18 @@ const statsRoute = createRoute({
   component: StatsScreen
 })
 
+const adventureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/adventures/$adventureName',
+  component: AdventurePage
+})
+
+const guildRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/guilds/$guildId',
+  component: GuildPage
+})
+
 const weeklyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my',
@@ -156,6 +170,8 @@ const routeTree = rootRoute.addChildren([
   characterRoute,
   rankingsRoute,
   statsRoute,
+  adventureRoute,
+  guildRoute,
   weeklyRoute
 ])
 
