@@ -375,7 +375,7 @@ test('상세 요청 로그에는 Neople 단계별 대기 시간만 붙이고, �
   assert.equal(failed!.neopleShared, undefined)
 })
 
-test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 없이 responseCached로 표시하고 강제 갱신은 refresh route로 다시 받은 단계를 남기며 query가 붙은 강제 갱신은 거절한다', {
+test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 없이 responseCached로 표시하고 강제 갱신은 refresh route로 다시 받은 단계를 남기며 query가 붙거나 HEAD인 요청도 같은 route로 처리한다', {
   timeout: 5000
 }, async (t) => {
   const basicRequests: string[] = []
@@ -417,25 +417,21 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
     { method: 'GET', url: detailUrl, status: 200, characterName: '조회 1' },
     { method: 'GET', url: detailUrl, status: 200, characterName: '조회 1' },
     { method: 'POST', url: `${detailUrl}/refresh`, status: 200, characterName: '조회 2' },
-    { method: 'GET', url: detailUrl, status: 200, characterName: '조회 2' },
-    { method: 'POST', url: `${detailUrl}/refresh?force=1`, status: 400 }
+    { method: 'GET', url: `${detailUrl}?force=1`, status: 200, characterName: '조회 2' },
+    { method: 'HEAD', url: detailUrl, status: 200 },
+    { method: 'POST', url: `${detailUrl}/refresh?force=1`, status: 200, characterName: '조회 3' }
   ]
   for (const [index, expected] of requests.entries()) {
     const response = await fetch(expected.url, { method: expected.method })
     assert.equal(response.status, expected.status, `${index}`)
-    const body = (await response.json()) as {
-      character?: { characterName: string }
-      error?: { code: string }
-    }
-    if (expected.characterName === undefined) {
-      assert.equal(body.error?.code, 'INVALID_CHARACTER_QUERY')
-    } else {
-      assert.equal(body.character?.characterName, expected.characterName, `${index}`)
+    if (expected.characterName !== undefined) {
+      const body = (await response.json()) as { character: { characterName: string } }
+      assert.equal(body.character.characterName, expected.characterName, `${index}`)
     }
     await logs.waitFor(index + 1)
   }
 
-  assert.equal(basicRequests.length, 2)
+  assert.equal(basicRequests.length, 3)
   const entries = logs.lines.map((line) => {
     const { route, neopleMs, responseCached } = readEntry(line).fields
 
@@ -449,7 +445,8 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
     { route: detailRoute, stages: [], responseCached: true },
     { route: refreshRoute, stages: built, responseCached: undefined },
     { route: detailRoute, stages: [], responseCached: true },
-    { route: refreshRoute, stages: [], responseCached: undefined }
+    { route: detailRoute, stages: [], responseCached: true },
+    { route: refreshRoute, stages: built, responseCached: undefined }
   ])
 })
 
