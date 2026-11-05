@@ -68,11 +68,13 @@ DB 설정이 없으면 queue를 만들지 않습니다.
 | 필드 | 내용 |
 | --- | --- |
 | `weeklyClears` | 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210, `kind: "raid"`)와 레기온(209, `kind: "legion"`) 클리어, 오래된 순 |
-| `seasonClears` | 지금 시즌(`seasons`에서 가장 최근에 시작한 시즌)의 같은 클리어를 `kind`, `name`별로 센 횟수 |
+| `seasonClears` | 지금 시즌(`seasons`에서 가장 최근에 시작한 시즌)의 같은 클리어를 `kind`, `name`, `hard`별로 센 횟수 |
 | `enhancements` | 강화(401, `reinforce`), 증폭(402, `amplify`), 재련(403, `refine`), 최근 순 50개 |
 | `acquisitions` | 획득 코드(501~521, 550~557) 가운데 `item_rarity`가 에픽, 태초인 행, 최근 순 50개 |
 
 레이드 이름은 `raid_name`, 난이도 이름 `modeName`은 행의 `data.modeName`(없으면 `null`)이고, 레기온 이름은 `data.regionName`입니다.
+`hard`는 레이드 행의 `data.hard`입니다. Neople은 하드로 클리어한 행에만 `hard: true`를 넣고 나머지 행에는 이 칸을 두지 않아, 칸이 없는 레이드와 레기온은 `false`입니다.
+`modeName`만으로는 하드를 알 수 없습니다. 같은 난이도 이름이라도 하드 행과 아닌 행이 섞여 있고, 미카엘라 종언서처럼 `modeName`에 "(하드)"가 들어 있으면서 `hard: true`인 행도 있습니다.
 재련에는 `before`, `safe`가 없어 `null`입니다. 값이 없으면 빈 배열이고, DB 설정이 없는 API는 동기화 없이 빈 배열만 돌려줍니다.
 
 ### 캐릭터 기본 정보 저장
