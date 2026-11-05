@@ -37,7 +37,10 @@ const equipmentItem = z.object({
   amplificationName: text,
   refine: count,
   tune: list(z.object({ level: count, setPoint: count })),
-  enchant: section({ status: list(namedStat) }),
+  enchant: section({
+    status: list(namedStat),
+    reinforceSkill: list(z.object({ skills: list(z.object({ name: text, value: count })) }))
+  }),
   exaltedInfo: section({ explain: text }),
   potency: section({ value: statValue })
 })
