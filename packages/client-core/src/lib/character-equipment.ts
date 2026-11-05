@@ -11,20 +11,45 @@ const WEAPON_SLOT_ID = 'WEAPON'
 const SUB_WEAPON_SLOT_ID = 'SUPPORT_WEAPON'
 const BUFF_PASSIVE_SKILL = '버프 패시브 스킬'
 const ALL_ELEMENT = '모든 속성 강화'
+const ALL_STAT = '올스탯'
+const ATTACK = '공격력'
+const CRITICAL = '크리티컬'
+const FINAL_DAMAGE = '최종 데미지 증가'
+const ATTACK_AMPLIFY = '공격력 증폭'
 const SINGLE_ELEMENT_PATTERN = /^[화수명암]속성\s?강화$/
+const PLAIN_VALUE_PATTERN = /^(-?\d+(?:\.\d+)?)(%?)$/
 
 // 2026-11-06 저장소 소유자 결정의 마법부여 묶음이다.
 const ENCHANT_GROUPS: ReadonlyMap<string, string> = new Map([
-  ['힘', '올스탯'],
-  ['지능', '올스탯'],
-  ['체력', '올스탯'],
-  ['정신력', '올스탯'],
-  ['물리 공격력', '공격력'],
-  ['마법 공격력', '공격력'],
-  ['독립 공격력', '공격력'],
-  ['물리 크리티컬 히트', '크리티컬'],
-  ['마법 크리티컬 히트', '크리티컬']
+  ['힘', ALL_STAT],
+  ['지능', ALL_STAT],
+  ['체력', ALL_STAT],
+  ['정신력', ALL_STAT],
+  ['물리 공격력', ATTACK],
+  ['마법 공격력', ATTACK],
+  ['독립 공격력', ATTACK],
+  ['물리 크리티컬 히트', CRITICAL],
+  ['마법 크리티컬 히트', CRITICAL]
 ])
+
+// 2026-11-06 저장소 소유자 결정: 역할마다 중요한 묶음을 앞에 강조하고, 나머지는 이 순서 뒤에 흐리게 둔다.
+const ENCHANT_ORDER = [
+  FINAL_DAMAGE,
+  ATTACK_AMPLIFY,
+  ALL_ELEMENT,
+  BUFF_PASSIVE_SKILL,
+  ATTACK,
+  ALL_STAT,
+  CRITICAL
+]
+const EMPHASIZED_ENCHANTS: Readonly<Record<EnchantRole, ReadonlySet<string>>> = {
+  dealer: new Set([FINAL_DAMAGE, ATTACK_AMPLIFY, ALL_ELEMENT]),
+  buffer: new Set([BUFF_PASSIVE_SKILL, ALL_STAT])
+}
+
+export type EnchantRole = 'dealer' | 'buffer'
+
+export type EnchantOption = Readonly<{ label: string; emphasized: boolean }>
 
 export type EquipmentReinforce = Readonly<{ kind: 'amplify' | 'enhance'; value: number }>
 
@@ -35,7 +60,7 @@ export type EquipmentRow = ItemView &
     exalted: boolean
     reinforce: EquipmentReinforce | null
     refine: number | null
-    enchants: string[]
+    enchants: EnchantOption[]
     setPoint: number | null
     potency: string | null
   }>
@@ -77,8 +102,20 @@ function magnitude(value: StatValue): number {
   return Number.parseFloat(value)
 }
 
+function enchantValueText(value: StatValue): string {
+  const plain = typeof value === 'string' ? PLAIN_VALUE_PATTERN.exec(value) : null
+
+  if (plain === null) {
+    return formatStatValue(value)
+  }
+
+  const [, number, unit] = plain
+
+  return `${formatStatValue(Number(number))}${unit}`
+}
+
 function signed(value: StatValue): string {
-  const text = formatStatValue(value)
+  const text = enchantValueText(value)
 
   if (text.startsWith('-') || text.startsWith('+')) {
     return text
@@ -87,7 +124,17 @@ function signed(value: StatValue): string {
   return `+${text}`
 }
 
-export function groupEnchant(enchant: Enchant | null): string[] {
+function orderRank(name: string): number {
+  const index = ENCHANT_ORDER.indexOf(name)
+
+  if (index === -1) {
+    return ENCHANT_ORDER.length
+  }
+
+  return index
+}
+
+export function groupEnchant(enchant: Enchant | null, role: EnchantRole): EnchantOption[] {
   const groups = new Map<string, StatValue>()
 
   for (const { name, value } of enchant?.status ?? []) {
@@ -111,7 +158,31 @@ export function groupEnchant(enchant: Enchant | null): string[] {
     groups.set(BUFF_PASSIVE_SKILL, Math.max(...skillLevels))
   }
 
-  return [...groups].map(([name, value]) => `${name} ${signed(value)}`)
+  const emphasized = EMPHASIZED_ENCHANTS[role]
+  const options = [...groups].map(([name, value]) => ({
+    name,
+    label: `${name} ${signed(value)}`,
+    emphasized: emphasized.has(name)
+  }))
+  const sorted = options.toSorted((a, b) => {
+    const emphasisOrder = Number(b.emphasized) - Number(a.emphasized)
+
+    if (emphasisOrder !== 0) {
+      return emphasisOrder
+    }
+
+    return orderRank(a.name) - orderRank(b.name)
+  })
+
+  return sorted.map(({ label, emphasized }) => ({ label, emphasized }))
+}
+
+function enchantRole(card: CharacterDetailView['card']): EnchantRole {
+  if (card?.role === 'buffer') {
+    return 'buffer'
+  }
+
+  return 'dealer'
 }
 
 function toReinforce(item: EquipmentItem): EquipmentReinforce | null {
@@ -148,7 +219,7 @@ function highestTune(item: EquipmentItem): string | null {
   return tuneNumeral(Math.max(...levels))
 }
 
-function toEquipmentRow(item: EquipmentItem): EquipmentRow {
+function toEquipmentRow(item: EquipmentItem, role: EnchantRole): EquipmentRow {
   const refined = item.refine != null && item.refine > 0
   const refine = refined ? item.refine : null
   const setPoint = item.tune.find((tune) => tune.setPoint != null)?.setPoint ?? null
@@ -161,7 +232,7 @@ function toEquipmentRow(item: EquipmentItem): EquipmentRow {
     exalted: item.exaltedInfo != null,
     reinforce: toReinforce(item),
     refine,
-    enchants: groupEnchant(item.enchant),
+    enchants: groupEnchant(item.enchant, role),
     setPoint,
     potency
   }
@@ -190,8 +261,12 @@ function subWeaponAfterWeapon(items: EquipmentItem[]): EquipmentItem[] {
 }
 
 export function toEquipmentView(
-  detail: Pick<CharacterDetailView, 'equipment' | 'creature' | 'avatar' | 'mistAssimilation'>
+  detail: Pick<
+    CharacterDetailView,
+    'equipment' | 'creature' | 'avatar' | 'mistAssimilation' | 'card'
+  >
 ): EquipmentView {
+  const role = enchantRole(detail.card)
   const creature = detail.creature != null ? toItemView(detail.creature) : null
   const mistLevel = detail.mistAssimilation?.level ?? null
   const auraAvatar = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
@@ -209,7 +284,9 @@ export function toEquipmentView(
       }
     }),
     mistLevel,
-    items: subWeaponAfterWeapon(detail.equipment.equipment).map(toEquipmentRow),
+    items: subWeaponAfterWeapon(detail.equipment.equipment).map((item) =>
+      toEquipmentRow(item, role)
+    ),
     creature,
     aura
   }
