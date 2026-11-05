@@ -52,7 +52,10 @@ describe('없는 캐릭터의 404 응답', () => {
 type Route = 'candidates' | 'details' | 'detail-view'
 
 function request(route: Route, response: Response): Promise<unknown> {
-  const options = { apiOrigin: API_ORIGIN, fetch: vi.fn(async () => response) }
+  const options = {
+    apiOrigin: API_ORIGIN,
+    fetch: vi.fn<typeof globalThis.fetch>(async () => response)
+  }
   const signal = new AbortController().signal
   const identity = { serverId: 'cain', characterId: 'character-1' }
   switch (route) {
@@ -71,7 +74,8 @@ function apiError(status: number, code: string, message: string): Response {
 
 type ApiErrorCase = [status: number, apiCode: string, code: SearchErrorCode, message: string]
 
-// 문구는 API가 경로마다 보내는 문구와 같게 둔다. 상세 경로의 404는 위 describe에서 확인한다.
+// 문구는 API가 경로마다 보내는 문구와 같게 둔다.
+// 상세 경로의 404 CHARACTER_NOT_FOUND는 위 describe와 character-detail-view.test.ts가 확인한다.
 const candidateErrors: ApiErrorCase[] = [
   [400, 'INVALID_SEARCH_QUERY', 'INVALID_SEARCH_QUERY', '검색 조건을 확인해 주세요.'],
   [
@@ -137,6 +141,7 @@ describe('경로별 API 오류 응답', () => {
   it.each([
     ['candidates', 400, 'INVALID_CHARACTER_QUERY'],
     ['details', 400, 'INVALID_SEARCH_QUERY'],
+    ['detail-view', 404, 'NEOPLE_API_ERROR'],
     ['detail-view', 409, 'CHARACTER_NOT_FOUND']
   ] as const)(
     '%s가 Swagger에 없는 %i %s를 받으면 SEARCH_RESPONSE_INVALID로 실패한다',
