@@ -5,7 +5,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
 import { styles as dotTones } from './avatar/CreatureArtifacts.style'
-import { styles as rarityTones } from './shared/ItemName.style'
+import { styles as rarityTones } from './avatar/ItemName.style'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
 
 let container: HTMLDivElement

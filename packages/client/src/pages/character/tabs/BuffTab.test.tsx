@@ -5,7 +5,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
-import { styles as rarityTones } from './shared/ItemName.style'
+import { styles as rarityTones } from './avatar/ItemName.style'
 import { BuffTab } from './BuffTab'
 
 let container: HTMLDivElement
