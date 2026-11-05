@@ -19,6 +19,7 @@ import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from '../../pages/rankings/ranking-search'
 import { RankingsPage } from '../../pages/rankings/RankingsPage'
 import { SearchScreen } from '../../pages/search/SearchScreen'
+import { StatsScreen } from '../../pages/stats/StatsScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
@@ -137,7 +138,13 @@ const rankingsRoute = createRoute({
   component: RankingsPage
 })
 
-const routeTree = rootRoute.addChildren([homeRoute, characterRoute, rankingsRoute])
+const statsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/stats',
+  component: StatsScreen
+})
+
+const routeTree = rootRoute.addChildren([homeRoute, characterRoute, rankingsRoute, statsRoute])
 
 function createWebRouter(host: BrowserHost) {
   return createRouter({ routeTree, context: { host } })
