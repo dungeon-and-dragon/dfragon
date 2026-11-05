@@ -11,6 +11,7 @@ import type { CharacterImage } from '@dfragon/client-core/preload/common/types/c
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
+import { createCharacterDetailViewHttp } from '@dfragon/client-core/shared/search/character-http'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
@@ -19,7 +20,7 @@ import type { ClientHost } from '../../hooks/useClientHost'
 import { startRendererDiagnostics } from '@dfragon/client-core/lib/runtime-diagnostics'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
-import { createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
+import { browserFetch, createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
 import { readTownIndicatorTemplate } from './browser-town-template'
 import {
   initialScreenWatchState,
@@ -482,6 +483,7 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
         toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
     getTodayGrade: () => readTodayGrade(apiOrigin),
+    getCharacterDetail: createCharacterDetailViewHttp({ apiOrigin, fetch: browserFetch }),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
     onScreenShareEnded: screenShare.onEnded,
