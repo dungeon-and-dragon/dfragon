@@ -21,6 +21,7 @@ const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs'
 const timelineReadCheckPath = fileURLToPath(
   new URL('./container-timeline-read-check.mjs', import.meta.url)
 )
+const backfillCheckPath = fileURLToPath(new URL('./container-backfill-check.mjs', import.meta.url))
 const characterCheckPath = fileURLToPath(
   new URL('./container-character-check.mjs', import.meta.url)
 )
@@ -255,6 +256,8 @@ try {
         '--mount',
         `type=bind,source=${timelineReadCheckPath},target=/app/container-timeline-read-check.mjs,readonly`,
         '--mount',
+        `type=bind,source=${backfillCheckPath},target=/app/container-backfill-check.mjs,readonly`,
+        '--mount',
         `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
@@ -408,6 +411,45 @@ try {
       await psql("SELECT synced_until = '2026-04-01 00:00+09' FROM timeline_sync_state")
     ).stdout.trim(),
     't'
+  )
+
+  stage = 'enhancement backfill'
+  // 백필 구간 안의 강화류가 아닌 행과 백필 구간 밖의 증폭 행은 남아야 한다.
+  await psql(
+    "INSERT INTO timeline_items (server_id, character_id, code, occurred_at, name, data) VALUES ('cain', 'synthetic-character', 505, '2020-01-01 00:00+09', 'kept-backfill', '{}'), ('cain', 'synthetic-character', 402, '2020-02-01 00:01+09', 'kept-backfill', '{}')"
+  )
+  const backfill = () =>
+    docker([
+      'exec',
+      '--env',
+      'DB_PASSWORD_FILE=/run/secrets/db_password',
+      apiNames[0],
+      'node',
+      '/app/container-backfill-check.mjs'
+    ])
+  // 같은 구간을 다시 받아도 행이 늘지 않고, 정기 동기화 위치는 그대로다.
+  for (let run = 0; run < 2; run++) {
+    await backfill()
+    assert.equal(
+      (
+        await psql(
+          "SELECT tableoid::regclass, code, data->>'after' FROM timeline_items WHERE name = '아이템 증폭'"
+        )
+      ).stdout.trim(),
+      'timeline_items_season_6|402|10'
+    )
+  }
+  assert.equal(
+    (await psql("SELECT count(*) FROM timeline_items WHERE name = 'kept-backfill'")).stdout.trim(),
+    '2'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT synced_until = '2026-04-01 00:00+09', enhancement_backfilled_until = '2020-02-01 00:00+09' FROM timeline_sync_state"
+      )
+    ).stdout.trim(),
+    't|t'
   )
 
   stage = 'timeline read'
