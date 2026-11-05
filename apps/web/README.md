@@ -18,7 +18,7 @@ pnpm --filter @dfragon/web preview
 
 `dev`와 `build`는 먼저 `prepare:ocr-assets`로 `@dfragon/client-core`의 [`prepare-ocr-assets.mjs`](../../packages/client-core/scripts/prepare-ocr-assets.mjs)에 출력 폴더를 넘겨 실행해 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다. 이 폴더는 Git에서 제외합니다. 파인튜닝 모델을 쓰므로 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
 
-`dev` 서버(`http://localhost:5173/`)는 같은 origin의 `/characters`, `/items` 요청을 운영 API(`https://api.dfragon.com`)로 넘기므로 운영 API의 CORS 허용 origin이나 로컬 API, Neople key 없이 첫 화면에서 닉네임 검색을 해 볼 수 있습니다. production build(`build`, `preview`)는 운영 API를 직접 부르므로 CORS가 허용한 origin에서만 검색합니다.
+`dev` 서버(`http://localhost:5173/`)는 같은 origin의 `/api/*` 요청을 `/api`를 뗀 경로로 운영 API(`https://api.dfragon.com`)에 넘기므로 운영 API의 CORS 허용 origin이나 로컬 API, Neople key 없이 첫 화면에서 닉네임 검색을 해 볼 수 있습니다. production build(`build`, `preview`)는 운영 API를 직접 부르므로 CORS가 허용한 origin에서만 검색합니다.
 
 첫 화면에 던파 창의 스크린샷(Alt+PrtSc)을 Ctrl+V로 붙여 넣으면 지금 화면(파티, 공대)의 인식 회차가 시작됩니다. 첫 붙여넣기 때 `/ocr`의 모델과 WASM을 받습니다. `dev` 서버는 첫 붙여넣기에서 `onnxruntime-web/webgpu`를 처음 최적화하며 페이지를 한 번 다시 읽으므로, 그때는 다시 붙여 넣습니다.
 
@@ -42,7 +42,7 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 - 정적 파일은 Workers static assets가 바로 응답합니다. [`public/_headers`](public/_headers)가 static assets의 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙이고 Worker가 `/ocr/*` 응답에 같은 COEP를 붙여 페이지와 OCR worker가 cross-origin 격리되므로 OCR의 ONNX Runtime WASM이 여러 thread로 돕니다. 해시가 붙은 `/assets/*`는 1년 동안 캐시합니다.
 - OCR 모델과 ONNX Runtime WASM은 static assets의 파일 하나 25 MiB 한도를 넘어 R2 bucket `dfragon-web-ocr`에 둡니다([`public/.assetsignore`](public/.assetsignore)가 `dist/ocr`를 static assets에서 뺍니다). 배포는 먼저 [`scripts/upload-ocr-assets.mjs`](scripts/upload-ocr-assets.mjs)로 `dist/ocr`의 파일을 내용 hash 폴더(`ocr/<hash>/`)에 올리고, 그 hash를 Worker 변수 `OCR_ASSET_VERSION`으로 넘겨 배포합니다. [Worker](worker/index.ts)는 `/ocr/*` 요청을 그 폴더에서 읽어 같은 주소로 돌려주며, 주소에 hash가 없으므로 `Cache-Control: no-cache`와 ETag로 매번 확인합니다.
-- workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/characters*`, `/items*`를 `https://api.dfragon.com`으로 넘깁니다. dev Worker 빌드는 `dev.dfragon.com`과 workers.dev 주소 모두에서 열리도록 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 이 경로를 부릅니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. API 경로를 더하면 `vite.config.ts`의 `server.proxy`, Worker의 `API_PATH_PREFIXES`, `wrangler.jsonc`의 `run_worker_first`를 함께 바꿉니다.
+- workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/api/*` 요청을 `/api`를 뗀 경로로 `https://api.dfragon.com`에 넘깁니다(`/api/characters/candidates`는 `/characters/candidates`로 갑니다). dev Worker 빌드는 `dev.dfragon.com`과 workers.dev 주소 모두에서 열리도록 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 `/api`를 API 주소로 씁니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. `/api/*` 밖의 주소는 운영 API로 넘기지 않으므로 웹 주소와 API 경로의 이름이 같아도 사이트가 응답합니다.
 
 로컬에서는 dev 서버 대신 Worker로 production build를 띄워 헤더와 R2 경로까지 확인할 수 있습니다. `apps/web`에서 실행하며, `--local`은 wrangler의 로컬 R2에만 올립니다.
 
@@ -66,7 +66,7 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 
 - `index.html`: 제목, 설명, OG 메타 태그. OG 이미지는 두지 않아 링크 미리보기는 제목과 설명만 보입니다(2026-10-31 결정, [Issue #1036](https://github.com/dungeon-and-dragon/dfragon/issues/1036)).
 - `src/App.tsx`: 웹 앱 상자를 페이지 가운데에, 회색 Neople Open API 로고(86×24)를 페이지 아래 가운데에 놓는 첫 화면입니다. 웹 앱 상자는 창이 1080px보다 좁으면 상자 안에서만 가로로 스크롤하고 페이지는 넘치지 않습니다.
-- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달되어 상단 바와 검색 화면을 폭 1080px 상자 안에 그립니다. 상자 높이는 내용에 맞고, 웹 앱을 받는 동안에는 상단 바 두 단 높이(88px)의 빈 상자를 둡니다. 상단 바의 캡처 칩 자리에는 화면 공유를 요청하는 게임 연결 칩을 넣습니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
+- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin의 `/api`, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달되어 상단 바와 검색 화면을 폭 1080px 상자 안에 그립니다. 상자 높이는 내용에 맞고, 웹 앱을 받는 동안에는 상단 바 두 단 높이(88px)의 빈 상자를 둡니다. 상단 바의 캡처 칩 자리에는 화면 공유를 요청하는 게임 연결 칩을 넣습니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
 
 ## 글꼴과 고지
 
