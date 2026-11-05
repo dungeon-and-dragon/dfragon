@@ -99,7 +99,7 @@ function mostCommonLevel(levels: readonly number[]): number | null {
   return picked
 }
 
-// 같은 줄에 습득 레벨이 다른 스킬이 섞이기도 한다(48과 50, 70과 75). 줄 머리에는 그 줄에 가장 많은 습득 레벨을 쓴다.
+// 같은 줄에 습득 레벨이 다른 스킬이 섞이기도 한다(48과 50, 70과 75). 줄 헤더에는 그 줄에 가장 많은 습득 레벨을 쓴다.
 function rowsOf(icons: readonly SkillWindowIcon[]): SkillWindowRow[] {
   const levelsByRow = new Map<number, number[]>()
   for (const { row, requiredLevel } of icons) {
