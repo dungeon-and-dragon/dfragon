@@ -406,6 +406,7 @@ describe('선택한 캐릭터 카드와 상세 응답 점수', () => {
     level: null,
     fame: 100,
     imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/high?zoom=1',
+    guildId: null,
     guildName: null,
     equipmentScore: null,
     card: null

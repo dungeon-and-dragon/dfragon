@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import { Link } from '@tanstack/react-router'
 import type { ReactNode, Ref } from 'react'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import type { RankedCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
@@ -8,12 +9,19 @@ import { RankBadge } from './RankBadge'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
+export type Affiliation = 'adventure' | 'guild'
+
+const ALL_AFFILIATIONS: readonly Affiliation[] = ['adventure', 'guild']
+const AFFILIATION_HEADINGS: Record<Affiliation, string> = { adventure: '모험단', guild: '길드' }
+
 export function CharacterTable({
   rows,
-  trailing
+  trailing,
+  affiliations = ALL_AFFILIATIONS
 }: {
   rows: readonly RankedCharacter[]
   trailing?: ReactNode
+  affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
     <table {...stylex.props(styles.table)}>
@@ -21,8 +29,9 @@ export function CharacterTable({
         <col {...stylex.props(styles.rankColumn)} />
         <col />
         <col {...stylex.props(styles.fameColumn)} />
-        <col {...stylex.props(styles.affiliationColumn)} />
-        <col {...stylex.props(styles.affiliationColumn)} />
+        {affiliations.map((affiliation) => (
+          <col key={affiliation} {...stylex.props(styles.affiliationColumn)} />
+        ))}
       </colgroup>
       <thead>
         <tr>
@@ -35,12 +44,11 @@ export function CharacterTable({
           <th scope="col" {...stylex.props(styles.headCell, styles.right)}>
             명성
           </th>
-          <th scope="col" {...stylex.props(styles.headCell, styles.center)}>
-            모험단
-          </th>
-          <th scope="col" {...stylex.props(styles.headCell, styles.center)}>
-            길드
-          </th>
+          {affiliations.map((affiliation) => (
+            <th key={affiliation} scope="col" {...stylex.props(styles.headCell, styles.center)}>
+              {AFFILIATION_HEADINGS[affiliation]}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
@@ -55,12 +63,14 @@ export function CharacterTable({
             <td {...stylex.props(styles.cell, styles.right, styles.fame)}>
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
             </td>
-            <td {...stylex.props(styles.cell, styles.center, styles.affiliation)}>
-              {row.adventureName}
-            </td>
-            <td {...stylex.props(styles.cell, styles.center, styles.affiliation)}>
-              {row.guildName ?? MISSING_VALUE}
-            </td>
+            {affiliations.map((affiliation) => (
+              <td
+                key={affiliation}
+                {...stylex.props(styles.cell, styles.center, styles.affiliation)}
+              >
+                <AffiliationLink affiliation={affiliation} character={row} />
+              </td>
+            ))}
           </tr>
         ))}
         {trailing}
@@ -69,14 +79,50 @@ export function CharacterTable({
   )
 }
 
-const AFFILIATION_COLUMNS = 2
+function AffiliationLink({
+  affiliation,
+  character
+}: {
+  affiliation: Affiliation
+  character: RankedCharacter
+}): React.JSX.Element | string {
+  if (affiliation === 'adventure') {
+    return (
+      <Link
+        to="/adventures/$adventureName"
+        params={{ adventureName: character.adventureName }}
+        {...stylex.props(styles.link)}
+      >
+        {character.adventureName}
+      </Link>
+    )
+  }
+
+  if (character.guildName == null) {
+    return MISSING_VALUE
+  }
+
+  if (character.guildId == null) {
+    return character.guildName
+  }
+
+  return (
+    <Link
+      to="/guilds/$guildId"
+      params={{ guildId: character.guildId }}
+      {...stylex.props(styles.link)}
+    >
+      {character.guildName}
+    </Link>
+  )
+}
 
 export function SkeletonRow({
   rowRef,
-  blankCells = AFFILIATION_COLUMNS
+  affiliations = ALL_AFFILIATIONS
 }: {
   rowRef?: Ref<HTMLTableRowElement>
-  blankCells?: number
+  affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
     <tr ref={rowRef} aria-hidden="true">
@@ -95,8 +141,8 @@ export function SkeletonRow({
       <td {...stylex.props(styles.cell)}>
         <Bone width={64} height={14} />
       </td>
-      {Array.from({ length: blankCells }, (_, index) => (
-        <td key={index} {...stylex.props(styles.cell)} />
+      {affiliations.map((affiliation) => (
+        <td key={affiliation} {...stylex.props(styles.cell)} />
       ))}
     </tr>
   )

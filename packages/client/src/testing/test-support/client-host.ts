@@ -13,6 +13,8 @@ type ClientHostOverrides = Partial<
     | 'getCharacterTimeline'
     | 'getFameRanking'
     | 'getCharacterStats'
+    | 'getAdventureCharacters'
+    | 'getGuild'
     | 'getAdventureWeekly'
   >
 > & {
@@ -59,6 +61,8 @@ export function createTestClientHost({
     getCharacterTimeline: vi.fn(() => new Promise<never>(() => {})),
     getFameRanking: vi.fn(() => new Promise<never>(() => {})),
     getCharacterStats: vi.fn(() => new Promise<never>(() => {})),
+    getAdventureCharacters: vi.fn(() => new Promise<never>(() => {})),
+    getGuild: vi.fn(() => new Promise<never>(() => {})),
     getAdventureWeekly: vi.fn(() => new Promise<never>(() => {})),
     searchCharacters: vi.fn(() => new Promise<never>(() => {})),
     ...operations

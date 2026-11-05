@@ -14,6 +14,10 @@ import type {
   SearchCommandResult
 } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
+import type {
+  AdventureCharacters,
+  Guild
+} from '@dfragon/client-core/shared/adventure-guild/adventure-guild'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import type {
   CharacterStats,
@@ -47,6 +51,8 @@ export type ClientHost = Readonly<{
   getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
+  getAdventureCharacters: (adventureName: string) => Promise<AdventureCharacters>
+  getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
   searchCharacters: (query: CharacterNameQuery) => Promise<readonly CharacterCandidate[]>
 }>

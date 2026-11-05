@@ -13,8 +13,6 @@ import {
 } from './rows.js'
 
 const PAGE_LIMIT = 100
-// 문서에 code를 빼면 모든 코드가 온다는 설명이 없어 저장할 코드를 모두 적는다.
-const TIMELINE_CODE_QUERY = TIMELINE_CODES.join(',')
 
 const REQUEST_DATE_FORMAT = "yyyyMMdd'T'HHmm"
 const ROW_DATE_FORMAT = 'yyyy-MM-dd HH:mm'
@@ -37,11 +35,17 @@ function toTimelineRow({ code, name, date, data }: NeopleTimelineRow): TimelineR
   return { code, occurredAt, name, data: rowData }
 }
 
-export function createNeopleCharacterTimeline(neople: NeopleClient): FetchCharacterTimeline {
+// 문서에 code를 빼면 모든 코드가 온다는 설명이 없어 기본값으로 저장할 코드를 모두 적는다.
+export function createNeopleCharacterTimeline(
+  neople: NeopleClient,
+  codes: readonly number[] = TIMELINE_CODES
+): FetchCharacterTimeline {
+  const codeQuery = codes.join(',')
+
   return async (identity, range) => {
     const firstQuery = {
       limit: PAGE_LIMIT,
-      code: TIMELINE_CODE_QUERY,
+      code: codeQuery,
       startDate: formatSeoulTime(range.start, REQUEST_DATE_FORMAT),
       endDate: formatSeoulTime(range.end, REQUEST_DATE_FORMAT)
     }

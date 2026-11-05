@@ -53,6 +53,7 @@ export const styles = stylex.create({
   },
   adventure: { color: colors.fgAdventure },
   guild: { color: colors.fgGuild },
+  link: { color: 'inherit', textDecoration: { default: 'none', ':hover': 'underline' } },
   job: { color: colors.fgMuted },
   subtle: { color: colors.fgSubtle },
   missing: { color: colors.fgDisabled },

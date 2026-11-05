@@ -88,7 +88,7 @@ function WeeklyClearList({
               clearNames={[]}
               rows={[]}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} blankCells={0} />
+                <SkeletonRow key={index} affiliations={[]} />
               ))}
             />
           </div>

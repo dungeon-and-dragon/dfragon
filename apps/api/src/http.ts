@@ -119,6 +119,7 @@ class HealthController {
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
+  readonly backfillEnhancements: (character: TimelineCharacter) => Promise<void>
   readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
   // 진행 중인 동기화를 기다리지 않고 닫는다.
   readonly close: () => Promise<void>
@@ -172,8 +173,15 @@ export async function createApiHttpApp({
         {
           provide: TimelineSyncSubscriber,
           inject: [TIMELINE_SYNC_QUEUE],
+          // 타임라인 조회가 백필을 기다리지 않도록 백필은 따로 queue를 둔다.
           useFactory: (queue: TimelineSyncQueue) =>
-            new TimelineSyncSubscriber(queue, timeline.close)
+            new TimelineSyncSubscriber(
+              queue,
+              createTimelineSyncQueue(timeline.backfillEnhancements, () =>
+                reportCode('TIMELINE_BACKFILL_FAILED')
+              ),
+              timeline.close
+            )
         },
         {
           provide: CHARACTER_TIMELINE_SERVICE,

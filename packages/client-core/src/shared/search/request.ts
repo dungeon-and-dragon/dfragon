@@ -164,6 +164,7 @@ function candidateSummary(candidate: CharacterCandidate): SelectedCharacterSumma
     level: null,
     fame: candidate.fame,
     imageUrl: candidate.imageUrl,
+    guildId: null,
     guildName: null,
     equipmentScore: null,
     card: null
@@ -184,6 +185,7 @@ async function loadDetailsSummary(
   const jobGrowName = displayText(character.jobGrowName)
   const level = displayNumber(character.level)
   const fame = displayNumber(character.fame)
+  const guildId = displayText(character.guildId)
   const guildName = displayText(character.guildName)
   const equipmentScore = card?.score?.value ?? null
 
@@ -198,6 +200,7 @@ async function loadDetailsSummary(
     level,
     fame,
     imageUrl: base.imageUrl,
+    guildId,
     guildName,
     equipmentScore,
     card

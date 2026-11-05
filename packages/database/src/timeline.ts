@@ -76,6 +76,27 @@ function toJson(data: Record<string, unknown>): Prisma.InputJsonObject {
   return data as Prisma.InputJsonObject
 }
 
+function lockCharacter(
+  transaction: Prisma.TransactionClient,
+  { serverId, characterId }: TimelineCharacter
+): Promise<unknown> {
+  return transaction.$executeRaw`SELECT pg_advisory_xact_lock(${timelineLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
+}
+
+function toItemData({ serverId, characterId }: TimelineCharacter, item: TimelineItemInput) {
+  return {
+    serverId,
+    characterId,
+    code: item.code,
+    occurredAt: item.occurredAt,
+    name: item.name,
+    itemId: item.itemId,
+    itemName: item.itemName,
+    itemRarity: item.itemRarity,
+    data: toJson(item.data)
+  }
+}
+
 export async function replaceTimelineRange(
   client: DatabaseClient,
   character: TimelineCharacter,
@@ -93,7 +114,7 @@ export async function replaceTimelineRange(
   await client.$transaction(
     async (transaction) => {
       // 같은 캐릭터의 교체가 겹치면 둘 다 지운 뒤 넣어 행이 두 번 들어가므로 지우기 전에 잡는다.
-      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${timelineLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
+      await lockCharacter(transaction, character)
       await transaction.timelineEvent.deleteMany({ where: { serverId, characterId, occurredAt } })
       await transaction.timelineItem.deleteMany({ where: { serverId, characterId, occurredAt } })
       await transaction.timelineEvent.createMany({
@@ -108,17 +129,7 @@ export async function replaceTimelineRange(
         }))
       })
       await transaction.timelineItem.createMany({
-        data: items.map((item) => ({
-          serverId,
-          characterId,
-          code: item.code,
-          occurredAt: item.occurredAt,
-          name: item.name,
-          itemId: item.itemId,
-          itemName: item.itemName,
-          itemRarity: item.itemRarity,
-          data: toJson(item.data)
-        }))
+        data: items.map((item) => toItemData(character, item))
       })
       await transaction.timelineSyncState.upsert({
         where: { serverId_characterId: { serverId, characterId } },
@@ -128,6 +139,55 @@ export async function replaceTimelineRange(
     },
     { timeout: replaceTimeout }
   )
+}
+
+export async function replaceEnhancementBackfillRange(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  range: TimelineRange,
+  codes: readonly number[],
+  items: readonly TimelineItemInput[]
+): Promise<void> {
+  // 백필 코드가 아닌 행을 넣으면 정기 동기화가 받은 같은 구간의 행과 겹쳐도 지워지지 않는다.
+  if (!items.every((item) => isInRange(item.occurredAt, range) && codes.includes(item.code))) {
+    throw new RangeError('Timeline row outside replaced backfill')
+  }
+  const { serverId, characterId } = character
+  const occurredAt = { gte: range.start, lte: range.end }
+
+  await client.$transaction(
+    async (transaction) => {
+      await lockCharacter(transaction, character)
+      await transaction.timelineItem.deleteMany({
+        where: { serverId, characterId, code: { in: [...codes] }, occurredAt }
+      })
+      await transaction.timelineItem.createMany({
+        data: items.map((item) => toItemData(character, item))
+      })
+      await transaction.timelineSyncState.upsert({
+        where: { serverId_characterId: { serverId, characterId } },
+        create: { serverId, characterId, enhancementBackfilledUntil: range.end },
+        update: { enhancementBackfilledUntil: range.end }
+      })
+    },
+    { timeout: replaceTimeout }
+  )
+}
+
+export async function readEnhancementBackfilledUntil(
+  client: DatabaseClient,
+  { serverId, characterId }: TimelineCharacter
+): Promise<Date | null> {
+  const state = await client.timelineSyncState.findUnique({
+    where: { serverId_characterId: { serverId, characterId } },
+    select: { enhancementBackfilledUntil: true }
+  })
+
+  if (state === null) {
+    return null
+  }
+
+  return state.enhancementBackfilledUntil
 }
 
 export async function readTimelineSyncState(
