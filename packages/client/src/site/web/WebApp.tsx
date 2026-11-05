@@ -48,6 +48,16 @@ function PastedFrameRounds({ host }: { host: BrowserHost }): null {
   return null
 }
 
+// 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 라우터 위에서 구독한다.
+function ScreenShareEndings({ host }: { host: BrowserHost }): null {
+  const { selectSource } = useScreenCaptureContext().partyCapture.source
+  const onShareEnded = useEffectEvent(() => selectSource(''))
+
+  useEffect(() => host.onScreenShareEnded(onShareEnded), [host])
+
+  return null
+}
+
 // 자동 인식은 웹의 화면을 바꾸지 않는다. 신호를 보낸 뒤 사용자가 화면을 바꿨거나 회차가 진행 중이면 시작하지 않는다.
 function AutoRounds({ host }: { host: BrowserHost }): null {
   const { partyCapture, raidCapture, startPastedRound } = useScreenCaptureContext()
@@ -128,6 +138,7 @@ export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
   return (
     <ClientHostContext value={host}>
       <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
+        <ScreenShareEndings host={host} />
         <RouterProvider router={router} />
       </ScreenCaptureProvider>
     </ClientHostContext>
