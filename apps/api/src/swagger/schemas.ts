@@ -16,6 +16,8 @@ function object(properties: Record<string, SchemaObject>): SchemaObject {
   }
 }
 
+const timelineClearKind: SchemaObject = { type: 'string', enum: ['raid', 'legion'] }
+
 const providerValue: SchemaObject = {
   description: 'Neople 섹션 값. 미장착은 null이며 시즌별 중첩 필드와 배열을 그대로 보존합니다.',
   oneOf: [
@@ -280,6 +282,55 @@ export const apiSchemas: Record<string, SchemaObject> = {
     card: {
       ...characterCard,
       description: '카드의 역할과 점수. 역할은 직업을 모르면 null입니다.'
+    }
+  }),
+  CharacterTimeline: object({
+    weeklyClears: {
+      type: 'array',
+      description: '이번 주 클리어. 오래된 순입니다.',
+      items: object({
+        kind: timelineClearKind,
+        name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' },
+        modeName: { ...text, nullable: true, description: '레이드의 data.modeName. 레기온은 null' },
+        occurredAt: timestamp
+      })
+    },
+    seasonClears: {
+      type: 'array',
+      description:
+        '지금 시즌(가장 최근에 시작한 시즌) 클리어를 kind, name별로 센 횟수. 시즌에 처음 클리어한 순입니다.',
+      items: object({
+        kind: timelineClearKind,
+        name: text,
+        count: { type: 'integer', minimum: 1 }
+      })
+    },
+    enhancements: {
+      type: 'array',
+      description: '강화, 증폭, 재련 기록. 최근 순으로 50개까지입니다.',
+      items: object({
+        kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
+        itemId: { ...text, nullable: true },
+        itemName: { ...text, nullable: true },
+        itemRarity: { ...text, nullable: true },
+        before: { type: 'integer', nullable: true, description: '재련은 값이 없어 null' },
+        after: { type: 'integer' },
+        result: { type: 'boolean' },
+        safe: { type: 'boolean', nullable: true, description: '재련은 값이 없어 null' },
+        occurredAt: timestamp
+      })
+    },
+    acquisitions: {
+      type: 'array',
+      description: '에픽, 태초 장비 획득 기록. 최근 순으로 50개까지입니다.',
+      items: object({
+        code: { type: 'integer', description: '획득 경로의 타임라인 코드' },
+        name: { ...text, description: '타임라인 코드 이름' },
+        itemId: { ...text, nullable: true },
+        itemName: { ...text, nullable: true },
+        itemRarity: { type: 'string', enum: ['에픽', '태초'] },
+        occurredAt: timestamp
+      })
     }
   }),
   TodayGrade: object({
