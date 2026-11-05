@@ -12,6 +12,8 @@ let root: Root
 
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  // 2026-11-06 12:00 KST. 타이머는 그대로 두고 지금 시각만 고정한다.
+  vi.useFakeTimers({ now: new Date('2026-11-06T03:00:00.000Z'), toFake: ['Date'] })
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -20,6 +22,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
+  vi.useRealTimers()
   vi.unstubAllGlobals()
 })
 
@@ -82,12 +85,13 @@ function rowsOf(name: string): string[][] {
   )
 }
 
-it('제목 상자에 캐릭터 수와 한국 시간의 마지막 업데이트 시간을 보인다', async () => {
+it('제목 상자에 캐릭터 수와 마지막 업데이트로부터 지난 시간을 보이고 한국 시간은 title로 둔다', async () => {
   await render(async () => stats)
 
   expect(container.querySelector('header')?.textContent).toBe(
-    '캐릭터 통계캐릭터1,234,567마지막 업데이트 시간11-06 00:30'
+    '캐릭터 통계캐릭터1,234,567마지막 업데이트 시간11시간 전'
   )
+  expect(container.querySelector('header time')?.getAttribute('title')).toBe('11-06 00:30')
 })
 
 it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 직업 분포, 명성 분포, 직업별 평균 명성 순으로 그린다', async () => {
