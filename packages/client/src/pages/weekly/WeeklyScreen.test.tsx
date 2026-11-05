@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type {
   AdventureWeekly,
   WeeklyCharacter
-} from '@dfragon/client-core/shared/adventure/adventure-weekly'
+} from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { createTestClientHost } from '../../testing/test-support/client-host'
