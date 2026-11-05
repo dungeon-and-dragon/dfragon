@@ -97,7 +97,7 @@ export function ApiCharacterDetails() {
     }),
     ...characterParams,
     success('CharacterDetails', '정제된 상세 정보, 섹션별 조회 시각과 freshness 만료 시각'),
-    errors({ 400: 'INVALID_CHARACTER_QUERY', ...neopleFailures })
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 404: 'CHARACTER_NOT_FOUND', ...neopleFailures })
   )
 }
 
@@ -110,7 +110,7 @@ export function ApiCharacterRefresh() {
     }),
     ...characterParams,
     success('CharacterDetails', '다시 받은 상세 정보, 섹션별 조회 시각과 freshness 만료 시각'),
-    errors({ 400: 'INVALID_CHARACTER_QUERY', ...neopleFailures })
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 404: 'CHARACTER_NOT_FOUND', ...neopleFailures })
   )
 }
 
