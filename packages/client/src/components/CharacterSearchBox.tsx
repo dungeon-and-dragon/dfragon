@@ -1,12 +1,20 @@
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Select } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { type ChangeEvent, type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
+import {
+  type ChangeEvent,
+  type FocusEvent,
+  type FormEvent,
+  type KeyboardEvent,
+  useRef,
+  useState
+} from 'react'
 import { serverOptions } from '../constants/server-options'
 import { useCharacterNameSearch } from '../hooks/useCharacterNameSearch'
 import { ChevronDownIcon } from './ChevronDownIcon'
 import { CharacterSearchResults } from './CharacterSearchResults'
 import { styles } from './CharacterSearchBox.style'
+import { RecentCharacterList } from './RecentCharacterList'
 import { SearchIcon } from './SearchIcon'
 
 const ALL_SERVERS = 'all'
@@ -15,6 +23,7 @@ const searchServerOptions = [{ id: ALL_SERVERS, label: '전체' }, ...serverOpti
 export function CharacterSearchBox(): React.JSX.Element {
   const [serverId, setServerId] = useState(ALL_SERVERS)
   const [name, setName] = useState('')
+  const [recentOpen, setRecentOpen] = useState(false)
   const boxRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
@@ -31,6 +40,18 @@ export function CharacterSearchBox(): React.JSX.Element {
 
   function handleNameChange(event: ChangeEvent<HTMLInputElement>): void {
     setName(event.target.value)
+  }
+
+  function openRecent(event: FocusEvent<HTMLInputElement>): void {
+    const fromList =
+      event.relatedTarget instanceof Node && listRef.current?.contains(event.relatedTarget)
+    if (!fromList) {
+      setRecentOpen(true)
+    }
+  }
+
+  function closeRecent(): void {
+    setRecentOpen(false)
   }
 
   function focusFirstResult(event: KeyboardEvent<HTMLInputElement>): void {
@@ -84,6 +105,7 @@ export function CharacterSearchBox(): React.JSX.Element {
         spellCheck={false}
         value={name}
         onChange={handleNameChange}
+        onFocus={openRecent}
         onKeyDown={focusFirstResult}
         {...stylex.props(styles.input)}
       />
@@ -101,6 +123,13 @@ export function CharacterSearchBox(): React.JSX.Element {
         list={listRef}
         state={state}
         onClose={close}
+      />
+      <RecentCharacterList
+        open={recentOpen && name === '' && state.status === 'idle'}
+        anchor={boxRef}
+        input={inputRef}
+        list={listRef}
+        onClose={closeRecent}
       />
     </form>
   )

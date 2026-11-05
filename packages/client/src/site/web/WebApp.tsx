@@ -16,6 +16,7 @@ import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
 import { AdventurePage } from '../../pages/adventure/AdventurePage'
 import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
+import { FavoritesScreen } from '../../pages/favorites/FavoritesScreen'
 import { GuildPage } from '../../pages/guild/GuildPage'
 import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from '../../pages/rankings/ranking-search'
@@ -165,6 +166,12 @@ const weeklyRoute = createRoute({
   component: WeeklyScreen
 })
 
+const favoritesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/favorites',
+  component: FavoritesScreen
+})
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   characterRoute,
@@ -172,7 +179,8 @@ const routeTree = rootRoute.addChildren([
   statsRoute,
   adventureRoute,
   guildRoute,
-  weeklyRoute
+  weeklyRoute,
+  favoritesRoute
 ])
 
 function createWebRouter(host: BrowserHost) {

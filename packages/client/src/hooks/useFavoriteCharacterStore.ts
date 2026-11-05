@@ -1,36 +1,32 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { isFiniteNumber, isRecord } from '@dfragon/lib/utils/shape-check'
+import { z } from 'zod'
 import {
-  isCharacterDisplay,
+  characterDisplaySchema,
   isSameCharacter,
   pickCharacterDisplay,
-  readStoredCharacters,
   refreshCharacterDisplay,
+  storedCharacterList,
   type CharacterDisplay,
   type CharacterKey
 } from '../lib/stored-character'
 
-export type FavoriteCharacter = CharacterDisplay & { savedAt: number }
+const favoriteCharacterSchema = characterDisplaySchema.extend({ savedAt: z.number() })
 
-type PersistedFavoriteCharacters = { favoriteCharacters: FavoriteCharacter[] }
+const persistedFavoriteCharactersSchema = z.object({
+  favoriteCharacters: storedCharacterList(favoriteCharacterSchema)
+})
+
+export type FavoriteCharacter = z.infer<typeof favoriteCharacterSchema>
+
+type PersistedFavoriteCharacters = z.infer<typeof persistedFavoriteCharactersSchema>
 
 const FAVORITE_CHARACTERS_VERSION = 1
-
-function isFavoriteCharacter(value: unknown): value is FavoriteCharacter {
-  return isCharacterDisplay(value) && 'savedAt' in value && isFiniteNumber(value.savedAt)
-}
 
 function readPersistedFavoriteCharacters(
   persisted: unknown
 ): PersistedFavoriteCharacters | undefined {
-  if (!isRecord(persisted)) {
-    return undefined
-  }
-
-  const favoriteCharacters = readStoredCharacters(persisted.favoriteCharacters, isFavoriteCharacter)
-
-  return { favoriteCharacters }
+  return persistedFavoriteCharactersSchema.safeParse(persisted).data
 }
 
 export const useFavoriteCharacterStore = create<

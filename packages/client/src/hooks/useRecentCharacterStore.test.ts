@@ -1,16 +1,21 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { CharacterDisplay } from '../lib/stored-character'
 import { RECENT_CHARACTER_LIMIT, useRecentCharacterStore } from './useRecentCharacterStore'
 
 const STORAGE_KEY = 'dfragon:recent-characters'
 const START = Date.parse('2026-11-06T00:00:00.000Z')
 
-function character(index: number) {
+function character(index: number): CharacterDisplay {
   return {
     serverId: 'cain',
     characterId: `id-${index}`,
     characterName: `캐릭터${index}`,
     adventureName: '가나다',
+    guildId: null,
+    guildName: null,
+    level: 115,
+    jobName: '귀검사(남)',
     jobGrowName: '검신',
     fame: 40000 + index
   }

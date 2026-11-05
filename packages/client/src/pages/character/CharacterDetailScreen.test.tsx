@@ -106,8 +106,12 @@ function summary(): HTMLElement {
   return container.querySelector<HTMLElement>('section[aria-label="캐릭터 요약"]')!
 }
 
+function identityLines(): Element[] {
+  return [...(summary().querySelector('h1')?.parentElement?.parentElement?.children ?? [])]
+}
+
 function textLines(): string[] {
-  return [...summary().querySelectorAll('h1 ~ div, h1')].map((line) => line.textContent ?? '')
+  return identityLines().map((line) => line.textContent ?? '')
 }
 
 function statValue(label: string): HTMLElement {
@@ -185,7 +189,7 @@ it('명성과 점수가 없으면 -를 두고, 길드가 없으면 모험단만 
   expect(statValue('명성').textContent).toBe('-')
   expect(statValue('장비 점수').textContent).toBe('-')
   expect(textLines()[2]).toBe('동네커피')
-  expect(summary().querySelectorAll('[aria-hidden="true"]')).toHaveLength(0)
+  expect(identityLines()[2].querySelectorAll('[aria-hidden="true"]')).toHaveLength(0)
 })
 
 it('탭 줄은 일곱 탭을 순서대로 두고 받은 tab을 고르며, 다른 탭을 누르면 다시 조회하지 않고 그 탭을 알린다', async () => {

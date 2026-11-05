@@ -1,13 +1,25 @@
+import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode, Ref } from 'react'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import type { RankedCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
-import { CharacterCell } from './CharacterCell'
+import type { StoredCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
+import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
 import { styles } from './CharacterTable.style'
 import { RankBadge } from './RankBadge'
 
 const integer = new Intl.NumberFormat('ko-KR')
+
+export type CharacterTableRow = CharacterCellCharacter &
+  Pick<StoredCharacter, 'fame' | 'guildId' | 'guildName'> & {
+    adventureName: string | null
+    rank?: number
+  }
+
+export type CharacterTableAction = {
+  name: string
+  render: (row: CharacterTableRow) => ReactNode
+}
 
 export type Affiliation = 'adventure' | 'guild'
 
@@ -16,28 +28,35 @@ const AFFILIATION_HEADINGS: Record<Affiliation, string> = { adventure: '모험�
 
 export function CharacterTable({
   rows,
+  ranked = true,
+  action,
   trailing,
   affiliations = ALL_AFFILIATIONS
 }: {
-  rows: readonly RankedCharacter[]
+  rows: readonly CharacterTableRow[]
+  ranked?: boolean
+  action?: CharacterTableAction
   trailing?: ReactNode
   affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
     <table {...stylex.props(styles.table)}>
       <colgroup>
-        <col {...stylex.props(styles.rankColumn)} />
+        {ranked && <col {...stylex.props(styles.rankColumn)} />}
         <col />
         <col {...stylex.props(styles.fameColumn)} />
         {affiliations.map((affiliation) => (
           <col key={affiliation} {...stylex.props(styles.affiliationColumn)} />
         ))}
+        {action != null && <col {...stylex.props(styles.actionColumn)} />}
       </colgroup>
       <thead>
         <tr>
-          <th scope="col" {...stylex.props(styles.headCell, styles.center)}>
-            #
-          </th>
+          {ranked && (
+            <th scope="col" {...stylex.props(styles.headCell, styles.center)}>
+              #
+            </th>
+          )}
           <th scope="col" {...stylex.props(styles.headCell)}>
             캐릭터
           </th>
@@ -49,14 +68,21 @@ export function CharacterTable({
               {AFFILIATION_HEADINGS[affiliation]}
             </th>
           ))}
+          {action != null && (
+            <th scope="col" {...stylex.props(styles.headCell)}>
+              <span {...stylex.props(shapes.srOnly)}>{action.name}</span>
+            </th>
+          )}
         </tr>
       </thead>
       <tbody>
         {rows.map((row) => (
           <tr key={`${row.serverId}/${row.characterId}`}>
-            <td {...stylex.props(styles.cell, styles.center)}>
-              <RankBadge rank={row.rank} />
-            </td>
+            {ranked && (
+              <td {...stylex.props(styles.cell, styles.center)}>
+                {row.rank != null && <RankBadge rank={row.rank} />}
+              </td>
+            )}
             <td {...stylex.props(styles.cell)}>
               <CharacterCell character={row} />
             </td>
@@ -71,6 +97,9 @@ export function CharacterTable({
                 <AffiliationLink affiliation={affiliation} character={row} />
               </td>
             ))}
+            {action != null && (
+              <td {...stylex.props(styles.cell, styles.center)}>{action.render(row)}</td>
+            )}
           </tr>
         ))}
         {trailing}
@@ -84,9 +113,13 @@ function AffiliationLink({
   character
 }: {
   affiliation: Affiliation
-  character: RankedCharacter
+  character: CharacterTableRow
 }): React.JSX.Element | string {
   if (affiliation === 'adventure') {
+    if (character.adventureName == null) {
+      return MISSING_VALUE
+    }
+
     return (
       <Link
         to="/adventures/$adventureName"
