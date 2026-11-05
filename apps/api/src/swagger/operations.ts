@@ -142,3 +142,33 @@ export function ApiTodayGrade() {
     errors(neopleFailures)
   )
 }
+
+export function ApiAdventureCharacters() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '모험단 캐릭터 목록 조회',
+      description:
+        '공개 API. DB에 저장된 캐릭터 기본 정보에서 모험단 이름이 같은 캐릭터를 서버를 가리지 않고 명성이 높은 순으로 반환합니다. 명성이 없는 캐릭터는 뒤에 두고, 페이지는 없습니다. Neople을 부르지 않으며 값은 행마다 fetchedAt 시점의 것입니다. DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 반환합니다. Query와 HEAD는 허용하지 않습니다.'
+    }),
+    ApiParam({
+      name: 'adventureName',
+      schema: { type: 'string' },
+      description: 'URL 인코딩한 모험단 이름'
+    }),
+    success('AdventureCharacters', '모험단 이름과 캐릭터 목록 (없으면 빈 목록)'),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiGuild() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '길드 조회',
+      description:
+        '공개 API. DB에 저장된 캐릭터 기본 정보에서 길드 ID가 같은 길드원을 명성이 높은 순으로 반환하고, 길드원 수와 명성이 있는 길드원의 평균 명성을 붙입니다. 길드 ID는 서버가 달라도 같은 길드라 서버 조건이 없습니다. 명성이 없는 캐릭터는 뒤에 두고, 페이지는 없습니다. Neople을 부르지 않습니다. DB에 없는 길드와 DB 설정이 없는 API는 guildName, averageFame이 null인 빈 목록을 반환합니다. Query와 HEAD는 허용하지 않습니다.'
+    }),
+    ApiParam({ name: 'guildId', schema: { type: 'string' } }),
+    success('Guild', '길드 이름, 길드원 수, 평균 명성과 길드원 목록 (없으면 빈 목록)'),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
