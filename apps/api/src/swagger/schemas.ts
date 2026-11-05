@@ -85,11 +85,6 @@ const catalogCreature: SchemaObject = {
   }
 }
 
-const retiredNull = (description: string): SchemaObject => ({
-  nullable: true,
-  enum: [null],
-  description: `항상 null. ${description} 이전 Desktop과의 호환을 위해 필드만 남깁니다.`
-})
 const nonblankText: SchemaObject = { type: 'string', minLength: 1 }
 const cardScore: SchemaObject = {
   ...object({
@@ -129,18 +124,7 @@ const characterCard = object({
     description:
       'jobGrowName이 크루세이더, 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)면 buffer, 그 밖은 dealer, 직업을 모르면 null. 단 jobName이 프리스트(남)인 크루세이더는 용기의 은총을 습득했으면 dealer. synergy는 장비 점수를 쓰는 시너지 역할이며 아직 이 값으로 판정하는 직업은 없음.'
   },
-  stats: retiredNull('카드 스탯 한 줄의 값이었습니다.'),
-  score: cardScore,
-  serverRank: retiredNull('저장한 캐릭터끼리 비교하던 명성 순위였습니다.'),
-  set: retiredNull('카드 장비 면의 세트 값이었습니다.'),
-  oath: retiredNull('카드 장비 면의 서약 값이었습니다.'),
-  investment: {
-    type: 'array',
-    maxItems: 0,
-    items: object({}),
-    description:
-      '항상 빈 배열. 카드 기타 면의 12부위 값이었으며 이전 Desktop과의 호환을 위해 필드만 남깁니다.'
-  }
+  score: cardScore
 })
 
 export const apiSchemas: Record<string, SchemaObject> = {
@@ -188,14 +172,8 @@ export const apiSchemas: Record<string, SchemaObject> = {
         imageUrl: {
           type: 'string',
           format: 'uri',
-          description: 'Neople 전체 캐릭터 이미지 URL. Desktop에서 파티원 얼굴 영역과 비교합니다.',
+          description: 'Neople 전체 캐릭터 이미지 URL. Web에서 파티원 얼굴 영역과 비교합니다.',
           example: 'https://img-api.neople.co.kr/df/servers/cain/characters/character-id?zoom=1'
-        },
-        adventureName: {
-          type: 'string',
-          nullable: true,
-          description:
-            '항상 null. 저장한 상세에서 찾던 값이며 기존 Desktop과의 호환을 위해 필드만 남깁니다.'
         }
       })
     }

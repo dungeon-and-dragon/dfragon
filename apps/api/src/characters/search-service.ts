@@ -47,9 +47,8 @@ export function createCharacterSearchService(
     const result = await search(input)
     const candidates = result.rows.map((candidate): CharacterImageCandidate => {
       const imageUrl = neopleCharacterImageUrl(candidate)
-      // 모험단명은 저장한 상세에서 찾던 값이다. 기존 Desktop이 읽는 필드라 null로 남긴다.
 
-      return { ...candidate, imageUrl, adventureName: null }
+      return { ...candidate, imageUrl }
     })
     const rows = sortBy(
       candidates,
