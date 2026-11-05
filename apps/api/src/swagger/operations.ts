@@ -35,7 +35,7 @@ export function ApiCharacterSearch() {
     ApiOperation({
       summary: '캐릭터 검색',
       description:
-        '공개 API. 검색 결과는 저장하지 않습니다. IP별, 서버 전체 호출 제한은 없습니다. 중복, 알 수 없는 query key는 거절합니다.'
+        '공개 API. Neople wordType=full로 검색한 뒤 이름이 characterName으로 시작하는 캐릭터만 반환합니다. 행의 모양과 순서는 후보 조회와 같습니다. 검색 결과는 저장하지 않습니다. IP별, 서버 전체 호출 제한은 없습니다. 중복, 알 수 없는 query key는 거절합니다.'
     }),
     ApiQuery({
       name: 'characterName',
@@ -54,7 +54,7 @@ export function ApiCharacterSearch() {
       schema: { type: 'integer', minimum: 1, maximum: 200, default: 10 },
       description: 'ASCII 십진 숫자만 허용. 선행 0 허용.'
     }),
-    success('CharacterSearchResult', '검색 결과 (0건이면 빈 rows)'),
+    success('CharacterCandidatesResult', '검색 결과 (0건이면 빈 rows)'),
     errors({ 400: 'INVALID_SEARCH_QUERY', ...neopleFailures })
   )
 }

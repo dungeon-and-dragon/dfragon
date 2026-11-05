@@ -1,11 +1,9 @@
 import { neopleCharacterImageUrl } from '@dfragon/neople'
-import { pick, sortBy } from 'remeda'
+import { sortBy } from 'remeda'
 import { NeopleSearchFailure } from '../errors/neople-search.js'
 import type {
-  CharacterCandidate,
   CharacterCandidatesResult,
   CharacterImageCandidate,
-  CharacterSearchResult,
   NeopleCharacterSearchInput,
   NeopleCharacterSearchResult
 } from '../types/neople-character-search.js'
@@ -63,13 +61,7 @@ export function createCharacterSearchService(
     async search(originalUrl) {
       const input = parseCharacterSearchQuery(originalUrl)
 
-      const result = await search(input)
-      const rows = result.rows.map(
-        (row): CharacterCandidate =>
-          pick(row, ['characterId', 'characterName', 'serverId', 'serverName', 'fame'])
-      )
-
-      return { rows } satisfies CharacterSearchResult
+      return loadCandidates(input)
     },
     async candidates(originalUrl) {
       const input = parseCharacterCandidatesQuery(originalUrl)
