@@ -17,7 +17,7 @@ import {
 export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 
-function createJsonRequest<Schema extends z.ZodType>(
+export function createJsonRequest<Schema extends z.ZodType>(
   { apiOrigin, fetch: transport }: ApiOptions,
   path: string,
   schema: Schema,
