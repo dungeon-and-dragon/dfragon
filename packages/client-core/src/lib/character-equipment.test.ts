@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { characterDetailFixture } from '../testing/fixtures/character-details'
+import { characterDetailFixture } from '../testing/fixtures/character-detail'
 import { groupEnchant, toEquipmentView } from './character-equipment'
 
 type Stat = { name: string; value: number | string }
