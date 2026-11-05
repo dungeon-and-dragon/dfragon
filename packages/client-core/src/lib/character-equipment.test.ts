@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { characterDetailFixture } from '../testing/fixtures/character-detail'
-import { groupEnchant, toEquipmentView } from './character-equipment'
+import { type EnchantOption, groupEnchant, toEquipmentView } from './character-equipment'
 
 type Stat = { name: string; value: number | string }
+
+function labels(options: EnchantOption[]): string[] {
+  return options.map(({ label }) => label)
+}
 
 function enchantOf(status: Stat[], skillLevels: number[][] = []) {
   return {
@@ -66,18 +70,77 @@ describe('마법부여 묶음', () => {
       ['최종 데미지 증가 +1%', '공격력 증폭 +3%']
     ]
   ])('%s', (_, status, expected) => {
-    expect(groupEnchant(enchantOf(status))).toEqual(expected)
+    expect(labels(groupEnchant(enchantOf(status), 'dealer'))).toEqual(expected)
   })
 
   it('스킬 레벨 증가는 직업별 스킬 가운데 가장 큰 레벨로 버프 패시브 스킬 +N을 쓴다', () => {
-    expect(groupEnchant(enchantOf([{ name: '힘', value: 25 }], [[3], [4], [3]]))).toEqual([
-      '올스탯 +25',
-      '버프 패시브 스킬 +4'
-    ])
+    const options = groupEnchant(enchantOf([{ name: '힘', value: 25 }], [[3], [4], [3]]), 'buffer')
+
+    expect(labels(options)).toEqual(['버프 패시브 스킬 +4', '올스탯 +25'])
+  })
+
+  it('3.0%처럼 소수점 아래가 0인 값은 3%로 쓴다', () => {
+    const options = groupEnchant(
+      enchantOf([{ name: '물리 크리티컬 히트', value: '3.0%' }]),
+      'dealer'
+    )
+
+    expect(labels(options)).toEqual(['크리티컬 +3%'])
   })
 
   it('마법부여가 없으면 빈 목록이다', () => {
-    expect(groupEnchant(null)).toEqual([])
+    expect(groupEnchant(null, 'dealer')).toEqual([])
+  })
+})
+
+describe('마법부여 정렬과 강조', () => {
+  const status: Stat[] = [
+    { name: '힘', value: 40 },
+    { name: '물리 크리티컬 히트', value: '5%' },
+    { name: '캐스트속도', value: '7%' },
+    { name: '모든 속성 강화', value: 12 },
+    { name: '물리 공격력', value: 10 },
+    { name: '공격력 증폭', value: '3%' },
+    { name: '최종 데미지 증가', value: '3%' }
+  ]
+
+  it('딜러는 최종 데미지 증가, 공격력 증폭, 모든 속성 강화를 앞에 강조하고 나머지를 공격력, 올스탯, 크리티컬, 그 밖 순으로 둔다', () => {
+    expect(groupEnchant(enchantOf(status, [[2]]), 'dealer')).toEqual([
+      { label: '최종 데미지 증가 +3%', emphasized: true },
+      { label: '공격력 증폭 +3%', emphasized: true },
+      { label: '모든 속성 강화 +12', emphasized: true },
+      { label: '버프 패시브 스킬 +2', emphasized: false },
+      { label: '공격력 +10', emphasized: false },
+      { label: '올스탯 +40', emphasized: false },
+      { label: '크리티컬 +5%', emphasized: false },
+      { label: '캐스트속도 +7%', emphasized: false }
+    ])
+  })
+
+  it('버퍼는 버프 패시브 스킬, 올스탯을 앞에 강조하고 나머지를 같은 순서로 둔다', () => {
+    expect(groupEnchant(enchantOf(status, [[2]]), 'buffer')).toEqual([
+      { label: '버프 패시브 스킬 +2', emphasized: true },
+      { label: '올스탯 +40', emphasized: true },
+      { label: '최종 데미지 증가 +3%', emphasized: false },
+      { label: '공격력 증폭 +3%', emphasized: false },
+      { label: '모든 속성 강화 +12', emphasized: false },
+      { label: '공격력 +10', emphasized: false },
+      { label: '크리티컬 +5%', emphasized: false },
+      { label: '캐스트속도 +7%', emphasized: false }
+    ])
+  })
+
+  it('순서를 정하지 않은 이름끼리는 응답 순서를 지킨다', () => {
+    const options = groupEnchant(
+      enchantOf([
+        { name: '이동속도', value: '4%' },
+        { name: '캐스트속도', value: '7%' },
+        { name: '공격속도', value: '4%' }
+      ]),
+      'dealer'
+    )
+
+    expect(labels(options)).toEqual(['이동속도 +4%', '캐스트속도 +7%', '공격속도 +4%'])
   })
 })
 
@@ -106,17 +169,17 @@ describe('장비 탭 값', () => {
       reinforce: { kind: 'enhance', value: 10 },
       refine: null,
       tune: null,
-      enchants: ['모든 속성 강화 +15'],
+      enchants: [{ label: '모든 속성 강화 +15', emphasized: true }],
       setPoint: null,
       exalted: false,
       potency: null
     })
     expect(view.items[1].reinforce).toBeNull()
     expect(view.items[3].enchants).toEqual([
-      '올스탯 +40',
-      '공격력 +10',
-      '크리티컬 +5%',
-      '최종 데미지 증가 +3%'
+      { label: '최종 데미지 증가 +3%', emphasized: true },
+      { label: '공격력 +10', emphasized: false },
+      { label: '올스탯 +40', emphasized: false },
+      { label: '크리티컬 +5%', emphasized: false }
     ])
     expect(view.items[3].setPoint).toBe(235)
     expect(view.items[12].reinforce).toEqual({ kind: 'amplify', value: 8 })
@@ -160,7 +223,10 @@ describe('장비 탭 값', () => {
     expect(view.items[2]).toMatchObject({
       slotName: '상의',
       reinforce: null,
-      enchants: ['올스탯 +100', '버프 패시브 스킬 +3']
+      enchants: [
+        { label: '버프 패시브 스킬 +3', emphasized: true },
+        { label: '올스탯 +100', emphasized: true }
+      ]
     })
   })
 
@@ -190,7 +256,8 @@ describe('장비 탭 값', () => {
       },
       creature: null,
       avatar: [],
-      mistAssimilation: null
+      mistAssimilation: null,
+      card: detail.card
     })
 
     expect(view.items).toHaveLength(12)
