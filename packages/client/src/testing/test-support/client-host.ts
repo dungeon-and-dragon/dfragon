@@ -16,6 +16,7 @@ type ClientHostOverrides = Partial<
     | 'getAdventureCharacters'
     | 'getGuild'
     | 'getAdventureWeekly'
+    | 'searchCharacters'
   >
 > & {
   party?: Partial<ClientHost['party']>

@@ -152,16 +152,20 @@ function AffiliationLink({
 
 export function SkeletonRow({
   rowRef,
+  ranked = true,
   affiliations = ALL_AFFILIATIONS
 }: {
   rowRef?: Ref<HTMLTableRowElement>
+  ranked?: boolean
   affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
     <tr ref={rowRef} aria-hidden="true">
-      <td {...stylex.props(styles.cell, styles.center)}>
-        <Bone width={24} height={20} />
-      </td>
+      {ranked && (
+        <td {...stylex.props(styles.cell, styles.center)}>
+          <Bone width={24} height={20} />
+        </td>
+      )}
       <td {...stylex.props(styles.cell)}>
         <div {...stylex.props(styles.boneCharacter)}>
           <Bone width={40} height={48} />

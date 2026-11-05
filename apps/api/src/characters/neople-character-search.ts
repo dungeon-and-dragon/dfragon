@@ -27,9 +27,9 @@ function projectRow(
   // Neople match ignores letter case, so a name differing only in case is a valid response row.
   if (input.wordType === 'match') {
     assert(characterName.toLowerCase() === input.characterName.toLowerCase(), invalidResponse)
-    assert(NEOPLE_SERVER_NAMES.has(serverId), invalidResponse)
-    assert(CHARACTER_ID_PATTERN.test(characterId), invalidResponse)
   }
+  assert(NEOPLE_SERVER_NAMES.has(serverId), invalidResponse)
+  assert(CHARACTER_ID_PATTERN.test(characterId), invalidResponse)
 
   const serverName = NEOPLE_SERVER_NAMES.get(serverId) ?? null
   const knownFame = fame ?? null
@@ -57,8 +57,10 @@ function projectResponse(
 
     return { rows: exactRows }
   }
+  // Neople full also returns names containing the query in the middle; search keeps only name prefixes.
+  const prefixRows = rows.filter((row) => row.characterName.startsWith(input.characterName))
 
-  return { rows }
+  return { rows: prefixRows }
 }
 
 export function createNeopleCharacterSearch(neople: NeopleClient): SearchCharacters {

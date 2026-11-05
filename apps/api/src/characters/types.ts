@@ -1,6 +1,5 @@
 import type {
   CharacterCandidatesResult,
-  CharacterSearchResult,
   SearchCharacters
 } from '../types/neople-character-search.js'
 
@@ -14,7 +13,7 @@ export interface CharacterCandidatesResponse {
 }
 
 export interface CharacterSearchHttpService {
-  search(originalUrl: string): Promise<CharacterSearchResult>
+  search(originalUrl: string): Promise<CharacterCandidatesResult>
   candidates(originalUrl: string): Promise<CharacterCandidatesResponse>
   onModuleDestroy(): Promise<void>
 }
