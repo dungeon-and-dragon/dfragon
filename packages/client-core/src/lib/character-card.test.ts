@@ -15,6 +15,7 @@ const summary: SelectedCharacterSummary = {
   level: 115,
   fame: 0,
   imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/fixture-character?zoom=1',
+  guildId: null,
   guildName: null,
   equipmentScore: null,
   card: null
@@ -29,6 +30,7 @@ it('선택한 기본 정보와 명성 0을 보존하고 main이 넘기지 않은
     job: '직업',
     level: 115,
     fame: 0,
+    guildId: null,
     guild: null,
     card: null,
     image: summary.imageUrl,
@@ -42,11 +44,12 @@ it('선택한 기본 정보와 명성 0을 보존하고 main이 넘기지 않은
   expect(
     toCharacterCard({
       ...summary,
+      guildId: 'guild-1',
       guildName: '길드',
       equipmentScore: 414806,
       card: dealerCard
     })
-  ).toMatchObject({ guild: '길드', card: dealerCard })
+  ).toMatchObject({ guildId: 'guild-1', guild: '길드', card: dealerCard })
   expect(toCharacterCard(undefined)).toBeUndefined()
   expect(toCharacterCard({ ...summary, serverId: 'unknown' })).toBeUndefined()
 })

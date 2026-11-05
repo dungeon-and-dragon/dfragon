@@ -58,6 +58,7 @@ it('공대 연결은 12자리 snapshot의 12번째 슬롯 결과를 보인다', 
     jobGrowName: null,
     level: null,
     imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/synthetic-character?zoom=1',
+    guildId: null,
     guildName: null,
     equipmentScore: null,
     card: null

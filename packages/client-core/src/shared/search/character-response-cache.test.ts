@@ -47,6 +47,7 @@ function detail(): CharacterDetails {
     jobGrowName: '眞 웨펀마스터',
     fame: null,
     adventureName: '모험단',
+    guildId: null,
     guildName: null
   }
   const sections = {

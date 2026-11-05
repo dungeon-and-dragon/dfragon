@@ -33,6 +33,7 @@ export function toCharacterCard(
     job,
     serverId: summary.serverId,
     fame: summary.fame,
+    guildId: summary.guildId,
     guild: summary.guildName,
     card: summary.card,
     level: summary.level,
