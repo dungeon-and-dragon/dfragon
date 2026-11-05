@@ -188,6 +188,17 @@ it('찾은 행은 초상화가 그 캐릭터의 상세 링크이고 이름 칸�
   expect(nameInput().closest('a')).toBeNull()
 })
 
+it('초상화, 모험단, 길드 링크는 draggable=false라 링크 자체 드래그를 시작하지 않는다', async () => {
+  await render({
+    state: 'success',
+    character: { ...found, characterId: 'found-id', guildId: 'guild-id' }
+  })
+
+  for (const column of ['캐릭터', '모험단', '길드']) {
+    expect(cell(column)!.querySelector('a')?.getAttribute('draggable')).toBe('false')
+  }
+})
+
 it('캐릭터 ID를 모르는 행은 초상화를 링크로 만들지 않는다', async () => {
   await render({ state: 'success', character: found })
 
