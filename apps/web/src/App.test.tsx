@@ -24,23 +24,24 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-it('첫 화면에 웹 앱을 두고 Desktop 안내와 내려받기 링크는 두지 않는다', async () => {
+it('페이지에 웹 앱을 두고 Desktop 안내와 내려받기 링크는 두지 않는다', async () => {
   await act(async () => root.render(<App />))
 
-  const webApp = container.querySelector('section[aria-label$="웹 앱"]')
-
-  expect(webApp?.querySelector('[data-testid="web-client"]')).not.toBeNull()
+  expect(container.querySelector('[data-testid="web-client"]')).not.toBeNull()
   expect(container.textContent).not.toContain('Desktop')
   expect(container.querySelector('a[href*="/releases"]')).toBeNull()
   expect(fetchMock).not.toHaveBeenCalled()
 })
 
-it('첫 화면에 웹 앱 상자와 Neople 로고 링크만 두고 상단 바, 푸터, 사이트 문구는 두지 않는다', async () => {
+it('전역 바와 화면은 웹 앱에 맡기고 페이지는 그 아래에 Neople 로고 링크만 더하며 푸터와 사이트 문구는 두지 않는다', async () => {
   await act(async () => root.render(<App />))
 
-  const neopleLink = container.querySelector('a[href="https://developers.neople.co.kr"]')
-
-  expect(neopleLink?.querySelector('img')?.getAttribute('alt')).toBe('Neople 오픈 API')
+  const webClient = container.querySelector('[data-testid="web-client"]')!
+  const neopleLink = container.querySelector('a[href="https://developers.neople.co.kr"]')!
+  expect(neopleLink.querySelector('img')?.getAttribute('alt')).toBe('Neople 오픈 API')
+  expect(webClient.compareDocumentPosition(neopleLink) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(
+    0
+  )
   expect(container.querySelector('header, footer, h1')).toBeNull()
   expect(container.textContent).toBe('')
 })
