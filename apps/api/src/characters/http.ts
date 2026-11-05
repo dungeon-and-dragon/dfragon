@@ -2,7 +2,6 @@ import { ApiTags } from '@nestjs/swagger'
 import { ApiCharacterCandidates, ApiCharacterSearch } from '../swagger/operations.js'
 import { Controller, Get, Inject, Req, Res } from '@nestjs/common'
 import type { Request, Response } from 'express'
-import { NeopleSearchFailure } from '../errors/neople-search.js'
 import { recordAccessLogCachedResponse, recordAccessLogSharedNeopleFetch } from '../access-log.js'
 import { respondWithCancellation, sendWithCancellation } from '../http-response.js'
 import type { CharacterCandidatesResponse, CharacterSearchHttpService } from './types.js'
@@ -19,25 +18,17 @@ export class CharacterSearchController {
   @Get()
   @ApiCharacterSearch()
   async search(@Req() request: Request, @Res() response: Response): Promise<void> {
-    assertGet(request)
     await respondWithCancellation(response, () => this.service.search(request.originalUrl))
   }
 
   @Get('candidates')
   @ApiCharacterCandidates()
   async candidates(@Req() request: Request, @Res() response: Response): Promise<void> {
-    assertGet(request)
     await sendWithCancellation(
       response,
       () => this.service.candidates(request.originalUrl),
       (candidates) => sendCandidates(response, candidates)
     )
-  }
-}
-
-function assertGet(request: Request): void {
-  if (request.method !== 'GET') {
-    throw new NeopleSearchFailure('query')
   }
 }
 

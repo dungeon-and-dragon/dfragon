@@ -35,7 +35,7 @@ export function ApiCharacterSearch() {
     ApiOperation({
       summary: '캐릭터 검색',
       description:
-        '공개 API. 검색 결과는 저장하지 않습니다. IP별, 서버 전체 호출 제한은 없습니다. 중복, 알 수 없는 query key와 HEAD는 거절합니다.'
+        '공개 API. 검색 결과는 저장하지 않습니다. IP별, 서버 전체 호출 제한은 없습니다. 중복, 알 수 없는 query key는 거절합니다.'
     }),
     ApiQuery({
       name: 'characterName',
@@ -64,7 +64,7 @@ export function ApiCharacterCandidates() {
     ApiOperation({
       summary: 'OCR 닉네임의 캐릭터 비교 후보 조회',
       description:
-        '공개 API. 닉네임 하나를 전체 서버에서 정확히 일치하는 wordType=match로 검색합니다. fame이 있는 후보를 내림차순, fame이 null인 후보를 뒤에 반환하며 동률과 null 사이에는 공급자 순서를 유지합니다. jobName, jobGrowName은 Neople 검색 응답의 값이며 없으면 null입니다. imageUrl은 zoom=1인 전체 캐릭터 이미지이며 얼굴 크롭과 비교는 Web에서 수행합니다. 반환 순서대로 비교하여 기준을 먼저 통과한 캐릭터를 선택하고, 모두 실패한 뒤 다음 OCR 닉네임을 요청합니다. 후보가 있는 검색 결과는 이름별로 API 메모리에 24시간 캐시하며, 실패와 빈 결과는 캐시하지 않습니다. 이미지는 API에 저장하지 않습니다. IP별, 서버 전체 호출 제한은 없습니다. characterName 외 query key, 중복 query와 HEAD는 거절합니다.'
+        '공개 API. 닉네임 하나를 전체 서버에서 정확히 일치하는 wordType=match로 검색합니다. fame이 있는 후보를 내림차순, fame이 null인 후보를 뒤에 반환하며 동률과 null 사이에는 공급자 순서를 유지합니다. jobName, jobGrowName은 Neople 검색 응답의 값이며 없으면 null입니다. imageUrl은 zoom=1인 전체 캐릭터 이미지이며 얼굴 크롭과 비교는 Web에서 수행합니다. 반환 순서대로 비교하여 기준을 먼저 통과한 캐릭터를 선택하고, 모두 실패한 뒤 다음 OCR 닉네임을 요청합니다. 후보가 있는 검색 결과는 이름별로 API 메모리에 24시간 캐시하며, 실패와 빈 결과는 캐시하지 않습니다. 이미지는 API에 저장하지 않습니다. IP별, 서버 전체 호출 제한은 없습니다. characterName 외 query key와 중복 query는 거절합니다.'
     }),
     ApiQuery({
       name: 'characterName',
@@ -93,7 +93,7 @@ export function ApiCharacterDetails() {
     ApiOperation({
       summary: '캐릭터 상세 조회',
       description:
-        '공개 API. Neople 11개 캐릭터 섹션을 모두 조회하여 반환합니다. 캐릭터 조회 결과는 API 메모리에 1시간 캐시하며 그동안 같은 캐릭터는 Neople을 다시 부르지 않습니다. 그동안 처음 만든 응답 본문을 그대로 보냅니다. 공용 아이템이 하나라도 unavailable인 응답은 저장하지 않습니다. sections의 시각과 freshness.lastSuccessfulFetchAt은 Neople에서 받은 시각, freshness.expiresAt은 그 1시간 뒤입니다. 캐릭터 조회 실패 시 부분 결과는 없으며 실패는 캐시하지 않습니다. 공용 아이템 상세는 API 메모리에 24시간 캐시하며 조회에 실패하면 unavailable 상태를 반환합니다. 아이템 상세는 장비, 아바타, 엠블렘, 크리쳐, 아티팩트, 서약, 결정, 버프 장착 항목에 연결합니다. 공용 아이템 상세는 최대 128개 참조이며, 동시에 들어온 요청들의 아이템을 중복 없이 15개씩 묶어 조회합니다. IP별, 서버 전체 호출 제한은 없습니다. 같은 프로세스에서 겹치는 동일 캐릭터 조회는 공유합니다. Query와 HEAD는 허용하지 않습니다.'
+        '공개 API. Neople 11개 캐릭터 섹션을 모두 조회하여 반환합니다. 캐릭터 조회 결과는 API 메모리에 1시간 캐시하며 그동안 같은 캐릭터는 Neople을 다시 부르지 않습니다. 그동안 처음 만든 응답 본문을 그대로 보냅니다. 공용 아이템이 하나라도 unavailable인 응답은 저장하지 않습니다. sections의 시각과 freshness.lastSuccessfulFetchAt은 Neople에서 받은 시각, freshness.expiresAt은 그 1시간 뒤입니다. 캐릭터 조회 실패 시 부분 결과는 없으며 실패는 캐시하지 않습니다. 공용 아이템 상세는 API 메모리에 24시간 캐시하며 조회에 실패하면 unavailable 상태를 반환합니다. 아이템 상세는 장비, 아바타, 엠블렘, 크리쳐, 아티팩트, 서약, 결정, 버프 장착 항목에 연결합니다. 공용 아이템 상세는 최대 128개 참조이며, 동시에 들어온 요청들의 아이템을 중복 없이 15개씩 묶어 조회합니다. IP별, 서버 전체 호출 제한은 없습니다. 같은 프로세스에서 겹치는 동일 캐릭터 조회는 공유합니다.'
     }),
     ...characterParams,
     success('CharacterDetails', '정제된 상세 정보, 섹션별 조회 시각과 freshness 만료 시각'),
@@ -106,7 +106,7 @@ export function ApiCharacterRefresh() {
     ApiOperation({
       summary: '캐릭터 상세 강제 갱신',
       description:
-        '공개 API. 캐릭터 캐시를 건너뛰고 Neople 11개 캐릭터 섹션을 다시 받아 캐시를 덮어쓴 뒤 상세 조회와 같은 응답을 반환합니다. 같은 캐릭터를 이미 Neople에서 받는 중이면 그 조회를 함께 기다립니다. 공용 아이템 상세는 캐시를 그대로 쓰고, 새로 만든 응답 본문이 이후 상세 조회의 응답이 됩니다. 새로 받지 못하면 상세 조회와 같은 오류를 반환하고 기존 캐시는 그대로 둡니다. Query는 허용하지 않으며 body는 읽지 않습니다.'
+        '공개 API. 캐릭터 캐시를 건너뛰고 Neople 11개 캐릭터 섹션을 다시 받아 캐시를 덮어쓴 뒤 상세 조회와 같은 응답을 반환합니다. 같은 캐릭터를 이미 Neople에서 받는 중이면 그 조회를 함께 기다립니다. 공용 아이템 상세는 캐시를 그대로 쓰고, 새로 만든 응답 본문이 이후 상세 조회의 응답이 됩니다. 새로 받지 못하면 상세 조회와 같은 오류를 반환하고 기존 캐시는 그대로 둡니다. Query와 body는 읽지 않습니다.'
     }),
     ...characterParams,
     success('CharacterDetails', '다시 받은 상세 정보, 섹션별 조회 시각과 freshness 만료 시각'),
@@ -119,7 +119,7 @@ export function ApiCharacterImage() {
     ApiOperation({
       summary: '캐릭터 초상화 전달',
       description:
-        '공개 API. 검증한 serverId, characterId로 만든 Neople 캐릭터 이미지(zoom=1)를 받아 image/png 본문을 변환하지 않고 그대로 반환합니다. 웹 클라이언트가 얼굴 크롭과 비교할 픽셀을 읽도록 dfragon.com과 dev.dfragon.com에 CORS를 허용합니다. API 메모리에 캐시하거나 저장하지 않으며 Cache-Control: private, max-age=3600으로 브라우저 캐시만 씁니다. Neople 이미지가 4MiB를 넘거나 image/png가 아니면 NEOPLE_API_ERROR입니다. Query와 HEAD는 허용하지 않습니다.'
+        '공개 API. 검증한 serverId, characterId로 만든 Neople 캐릭터 이미지(zoom=1)를 받아 image/png 본문을 변환하지 않고 그대로 반환합니다. 웹 클라이언트가 얼굴 크롭과 비교할 픽셀을 읽도록 dfragon.com과 dev.dfragon.com에 CORS를 허용합니다. API 메모리에 캐시하거나 저장하지 않으며 Cache-Control: private, max-age=3600으로 브라우저 캐시만 씁니다. Neople 이미지가 4MiB를 넘거나 image/png가 아니면 NEOPLE_API_ERROR입니다.'
     }),
     ...characterParams,
     ApiResponse({
@@ -136,7 +136,7 @@ export function ApiCharacterTimeline() {
     ApiOperation({
       summary: '캐릭터 타임라인 조회',
       description:
-        '공개 API. DB에 저장한 타임라인에서 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210)와 레기온(209) 클리어, 지금 시즌의 같은 기록을 이름별로 센 횟수, 강화(401), 증폭(402), 재련(403)과 에픽, 태초 장비 획득(501~521, 550~557)의 최근 50개씩을 반환합니다. 조회한 캐릭터의 타임라인 동기화를 대기열에 넣고(마지막 성공 뒤 1시간 안이면 받지 않음), 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽습니다. 처음 조회한 캐릭터는 동기화가 끝날 때까지 몇 초 걸릴 수 있습니다. 동기화 실패는 응답에 드러나지 않고 저장한 값까지만 반환합니다. DB 설정이 없는 API는 동기화 없이 빈 배열을 반환합니다. Query와 HEAD는 허용하지 않습니다.'
+        '공개 API. DB에 저장한 타임라인에서 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210)와 레기온(209) 클리어, 지금 시즌의 같은 기록을 이름별로 센 횟수, 강화(401), 증폭(402), 재련(403)과 에픽, 태초 장비 획득(501~521, 550~557)의 최근 50개씩을 반환합니다. 조회한 캐릭터의 타임라인 동기화를 대기열에 넣고(마지막 성공 뒤 1시간 안이면 받지 않음), 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽습니다. 처음 조회한 캐릭터는 동기화가 끝날 때까지 몇 초 걸릴 수 있습니다. 동기화 실패는 응답에 드러나지 않고 저장한 값까지만 반환합니다. DB 설정이 없는 API는 동기화 없이 빈 배열을 반환합니다.'
     }),
     ...characterParams,
     success('CharacterTimeline', '저장한 타임라인의 클리어, 강화, 획득 기록 (없으면 빈 배열)'),
@@ -182,6 +182,26 @@ export function ApiGuild() {
     }),
     ApiParam({ name: 'guildId', schema: { type: 'string' } }),
     success('Guild', '길드 이름, 길드원 수, 평균 명성과 길드원 목록 (없으면 빈 목록)'),
+    errors({ 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiAdventureWeekly() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '모험단 주간 클리어 조회',
+      description:
+        '공개 API. DB에 저장된 그 모험단 캐릭터를 명성이 높은 순으로 반환하고, 캐릭터마다 이번 주(목요일 06:00 KST부터) 레이드, 레기온 클리어를 붙입니다. clearNames는 그 캐릭터들이 이번 주를 포함한 최근 4주 안에 클리어한 이름입니다. 조회는 캐릭터마다 타임라인 동기화를 기존 대기열에 넣고 끝나기를 기다리지 않아, 응답은 지금 저장된 값입니다. DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 반환합니다.'
+    }),
+    ApiParam({
+      name: 'adventureName',
+      schema: { type: 'string' },
+      description: 'URL 인코딩한 모험단 이름'
+    }),
+    success(
+      'AdventureWeekly',
+      '모험단 이름, 최근 4주 클리어 이름과 캐릭터별 이번 주 클리어 (없으면 빈 목록)'
+    ),
     errors({ 500: 'INTERNAL_SERVER_ERROR' })
   )
 }

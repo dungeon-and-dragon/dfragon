@@ -6,8 +6,10 @@ import {
   readDatabaseConfiguration,
   readGuild,
   recordCharacter,
-  recordCharacterBasic
+  recordCharacterBasic,
+  replaceTimelineRange
 } from '@dfragon/database'
+import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
 const job = {
@@ -97,6 +99,66 @@ try {
   assert.deepEqual(await readAdventureCharacters(client, '없는모험단'), [])
   assert.deepEqual(await readGuild(client, 'missing-guild'), { guildName: null, members: [] })
 
+  // 합성 클리어다. 천해천 둘째 주 목요일 정오에 읽어 이번 주는 04-02 06:00, 최근 4주는 03-12 06:00부터다.
+  const now = new Date('2026-04-02T12:00:00+09:00')
+  const at = (time) => new Date(`2026-${time}+09:00`)
+  const range = { start: at('03-01T00:00:00'), end: now }
+  const raid = (code, time, raidName) => ({
+    code,
+    occurredAt: at(time),
+    name: '레이드',
+    raidName,
+    data: {}
+  })
+  const legion = (time, regionName) => ({
+    code: 209,
+    occurredAt: at(time),
+    name: '레기온',
+    raidName: null,
+    data: { regionName }
+  })
+  const clears = [
+    [
+      { serverId: 'siroco', characterId: 'adventure-high' },
+      [
+        raid(201, '03-12T05:59:00', '합성 4주 밖 레이드'),
+        raid(210, '03-12T06:00:00', '합성 4주 레이드'),
+        raid(201, '04-02T05:59:00', '합성 지난주 레이드'),
+        raid(201, '04-02T06:00:00', '디레지에 레이드')
+      ]
+    ],
+    [{ serverId: 'cain', characterId: 'adventure-low' }, [legion('04-02T07:00:00', '베누스')]],
+    [
+      { serverId: 'hilder', characterId: 'guild-no-fame' },
+      [raid(201, '04-02T08:00:00', '합성 다른 모험단 레이드')]
+    ]
+  ]
+  for (const [character, events] of clears) {
+    await replaceTimelineRange(client, character, range, events, [])
+  }
+
+  const weekly = await readAdventureWeeklyClears(client, adventureName, now)
+  assert.deepEqual(weekly.clearNames, [
+    { kind: 'raid', name: '디레지에 레이드' },
+    { kind: 'raid', name: '합성 4주 레이드' },
+    { kind: 'raid', name: '합성 지난주 레이드' },
+    { kind: 'legion', name: '베누스' }
+  ])
+  assert.deepEqual(
+    weekly.characters.map(({ characterId, weeklyClears }) => [characterId, weeklyClears]),
+    [
+      ['adventure-high', [{ kind: 'raid', name: '디레지에 레이드' }]],
+      ['adventure-low', [{ kind: 'legion', name: '베누스' }]],
+      ['adventure-no-fame', []],
+      ['adventure-no-basic', []]
+    ]
+  )
+  assert.deepEqual(weekly.characters.at(-1), { ...adventure.at(-1), weeklyClears: [] })
+  assert.deepEqual(await readAdventureWeeklyClears(client, '없는모험단', now), {
+    clearNames: [],
+    characters: []
+  })
+
   // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결까지 확인한다.
   const get = async (path) => {
     const response = await fetch(new URL(path, 'http://127.0.0.1:3000'))
@@ -130,6 +192,19 @@ try {
     adventureName: '없는모험단',
     characters: []
   })
+  // 합성 클리어는 지금 시각의 4주보다 오래돼 비고, 동기화 요청은 internal network라 기록만 남기고 실패한다.
+  const weeklyAnswer = await get(`/adventures/${encodeURIComponent(adventureName)}/weekly`)
+  assert.equal(weeklyAnswer.adventureName, adventureName)
+  assert.deepEqual(weeklyAnswer.clearNames, [])
+  assert.deepEqual(
+    weeklyAnswer.characters.map(({ characterId, weeklyClears }) => [characterId, weeklyClears]),
+    [
+      ['adventure-high', []],
+      ['adventure-low', []],
+      ['adventure-no-fame', []],
+      ['adventure-no-basic', []]
+    ]
+  )
   assert.deepEqual(await get('/guilds/missing-guild'), {
     guildId: 'missing-guild',
     guildName: null,

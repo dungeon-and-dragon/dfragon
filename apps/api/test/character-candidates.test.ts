@@ -192,6 +192,22 @@ test('후보가 8개를 넘어도 자르지 않고 빈 검색 결과도 성공�
   assert.equal(calls, 2)
 })
 
+test('후보 검색 HEAD는 GET처럼 공급자를 불러 200으로 답한다', async (t) => {
+  let calls = 0
+  const origin = await startApp(t, {
+    fetch: async () => {
+      calls++
+
+      return jsonResponse({ rows: [] })
+    }
+  })
+
+  const head = await fetch(origin + candidatePath, { method: 'HEAD' })
+
+  assert.equal(head.status, 200)
+  assert.equal(calls, 1)
+})
+
 test('실제 HTTP에서 후보 검색은 all과 match를 고정하고 일반 검색은 full을 유지한다', async (t) => {
   const requests: Array<{ url: URL; apiKey: string | string[] | undefined }> = []
   const provider = createServer((request, response) => {

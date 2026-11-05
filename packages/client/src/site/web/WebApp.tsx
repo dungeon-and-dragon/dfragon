@@ -13,6 +13,8 @@ import { MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
 import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
+import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
+import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
 import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
@@ -119,7 +121,14 @@ const homeRoute = createRoute({
   component: HomeScreen
 })
 
-const routeTree = rootRoute.addChildren([homeRoute])
+const characterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/c/$serverId/$characterId',
+  validateSearch: parseCharacterTabSearch,
+  component: CharacterDetailPage
+})
+
+const routeTree = rootRoute.addChildren([homeRoute, characterRoute])
 
 function createWebRouter(host: BrowserHost) {
   return createRouter({ routeTree, context: { host } })
