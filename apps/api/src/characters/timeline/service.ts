@@ -1,18 +1,33 @@
-import type { TimelineCharacter } from '@dfragon/database'
+import type { TimelineCharacter, TimelineItemCursor } from '@dfragon/database'
 import type { TimelineSyncQueue } from './queue.js'
-import { type CharacterTimeline, EMPTY_CHARACTER_TIMELINE } from './read.js'
+import {
+  type CharacterTimeline,
+  EMPTY_CHARACTER_TIMELINE,
+  EMPTY_TIMELINE_PAGE,
+  type TimelineItemPage,
+  type TimelinePageList
+} from './read.js'
+
+export type ReadTimelinePage = (
+  character: TimelineCharacter,
+  list: TimelinePageList,
+  before: TimelineItemCursor
+) => Promise<TimelineItemPage>
 
 export interface CharacterTimelineService {
   get(character: TimelineCharacter): Promise<CharacterTimeline>
+  page: ReadTimelinePage
 }
 
 export const emptyCharacterTimelineService: CharacterTimelineService = {
-  get: async () => EMPTY_CHARACTER_TIMELINE
+  get: async () => EMPTY_CHARACTER_TIMELINE,
+  page: async () => EMPTY_TIMELINE_PAGE
 }
 
 export function createCharacterTimelineService(
   queue: TimelineSyncQueue,
-  read: (character: TimelineCharacter) => Promise<CharacterTimeline>
+  read: (character: TimelineCharacter) => Promise<CharacterTimeline>,
+  readPage: ReadTimelinePage
 ): CharacterTimelineService {
   return {
     async get(character) {
@@ -20,6 +35,8 @@ export function createCharacterTimelineService(
       await queue.requestAndWait(character)
 
       return read(character)
-    }
+    },
+    // 이어 받기는 첫 조회 뒤에만 오므로 동기화를 기다리지 않고 저장한 값을 읽는다.
+    page: readPage
   }
 }

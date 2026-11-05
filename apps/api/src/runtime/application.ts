@@ -18,7 +18,11 @@ import {
   createDatabaseEnhancementBackfillStore,
   createDatabaseTimelineStore
 } from '../characters/timeline/store.js'
-import { ENHANCEMENT_CODES, readCharacterTimeline } from '../characters/timeline/read.js'
+import {
+  ENHANCEMENT_CODES,
+  readCharacterTimeline,
+  readTimelinePage
+} from '../characters/timeline/read.js'
 import { syncCharacterTimeline } from '../characters/timeline/sync.js'
 import { createNeopleShopGrade } from '../today-grade/neople.js'
 import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
@@ -52,6 +56,7 @@ function createDatabaseSubscribers(
       sync: (character) => syncCharacterTimeline(character, { fetchTimeline, store }),
       backfillEnhancements: (character) => backfillEnhancements(character, backfill),
       read: (character) => readCharacterTimeline(client, character, new Date()),
+      readPage: (character, list, before) => readTimelinePage(client, character, list, before),
       close: () => client.$disconnect()
     },
     recordCharacterBasic: (basic) => recordCharacterBasic(client, basic),
