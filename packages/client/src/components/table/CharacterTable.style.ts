@@ -5,12 +5,14 @@ const ROW_HEIGHT = 64
 const RANK_COLUMN_WIDTH = 64
 const FAME_COLUMN_WIDTH = 120
 const AFFILIATION_COLUMN_WIDTH = 160
+const ACTION_COLUMN_WIDTH = 56
 
 export const styles = stylex.create({
   table: { width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' },
   rankColumn: { width: RANK_COLUMN_WIDTH },
   fameColumn: { width: FAME_COLUMN_WIDTH },
   affiliationColumn: { width: AFFILIATION_COLUMN_WIDTH },
+  actionColumn: { width: ACTION_COLUMN_WIDTH },
   headCell: {
     height: 32,
     paddingInline: space.s12,
