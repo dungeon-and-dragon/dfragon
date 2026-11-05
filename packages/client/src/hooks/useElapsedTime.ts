@@ -3,7 +3,7 @@ import {
   type ElapsedTime,
   getElapsedTimeRefreshDelay,
   toElapsedTime
-} from '@dfragon/client-core/lib/elapsed-time'
+} from '@dfragon/client-core/lib/time-format'
 
 export function useElapsedTime(at: number): ElapsedTime {
   const [now, setNow] = useState(() => Date.now())

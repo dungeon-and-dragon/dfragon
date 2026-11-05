@@ -3,23 +3,6 @@ import type {
   TimelineEnhancement
 } from '@dfragon/client-core/shared/search/character-timeline'
 
-const seoulTime = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23'
-})
-
-export function formatTimelineTime(occurredAt: string): string {
-  const parts = Object.fromEntries(
-    seoulTime.formatToParts(new Date(occurredAt)).map(({ type, value }) => [type, value])
-  )
-
-  return `${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`
-}
-
 export const CLEAR_KIND_LABELS = {
   raid: '레이드',
   legion: '레기온'
