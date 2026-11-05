@@ -1,0 +1,193 @@
+// @vitest-environment jsdom
+import { act } from 'react'
+import { createRoot, type Root } from 'react-dom/client'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import type {
+  AdventureWeekly,
+  WeeklyCharacter
+} from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
+import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
+import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
+import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestRouter } from '../../testing/test-support/test-router'
+import { WeeklyScreen } from './WeeklyScreen'
+
+let container: HTMLDivElement
+let root: Root
+
+beforeEach(() => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  container = document.createElement('div')
+  document.body.append(container)
+  root = createRoot(container)
+})
+
+afterEach(async () => {
+  await act(async () => root.unmount())
+  container.remove()
+  vi.unstubAllGlobals()
+  useMyAdventureStore.setState({ adventureName: null })
+  localStorage.clear()
+})
+
+function weeklyCharacter(
+  index: number,
+  weeklyClears: WeeklyCharacter['weeklyClears']
+): WeeklyCharacter {
+  return {
+    serverId: 'cain',
+    characterId: `character-${index}`,
+    characterName: `합성${index}`,
+    adventureName: '합성 모험단',
+    level: 115,
+    jobId: 'job-1',
+    jobGrowId: 'grow-1',
+    jobName: '합성 직업',
+    jobGrowName: '眞 합성 전직',
+    fame: 90000 - index,
+    guildId: null,
+    guildName: null,
+    weeklyClears
+  }
+}
+
+const weekly: AdventureWeekly = {
+  adventureName: '합성 모험단',
+  clearNames: [
+    { kind: 'raid', name: '가 레이드' },
+    { kind: 'raid', name: '나 레이드' },
+    { kind: 'legion', name: '다 레기온' }
+  ],
+  characters: [
+    weeklyCharacter(1, [
+      { kind: 'raid', name: '나 레이드' },
+      { kind: 'legion', name: '다 레기온' }
+    ]),
+    weeklyCharacter(2, [])
+  ]
+}
+
+function render(getAdventureWeekly: ClientHost['getAdventureWeekly']): Promise<void> {
+  return act(async () =>
+    root.render(
+      <ClientHostContext value={createTestClientHost({ getAdventureWeekly })}>
+        <TestRouter>
+          <WeeklyScreen />
+        </TestRouter>
+      </ClientHostContext>
+    )
+  )
+}
+
+function listName(): string | null | undefined {
+  return container.querySelector('section h2')?.textContent
+}
+
+function headerRows(): string[][] {
+  return [...container.querySelectorAll('thead tr')].map((row) =>
+    [...row.querySelectorAll('th')].map((cell) => cell.textContent ?? '')
+  )
+}
+
+function bodyRows(): string[][] {
+  return [...container.querySelectorAll('tbody tr')].map((row) =>
+    [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')
+  )
+}
+
+function button(name: string): HTMLButtonElement | undefined {
+  return [...container.querySelectorAll('button')].find((item) => item.textContent === name)
+}
+
+async function submitName(name: string): Promise<void> {
+  const form = container.querySelector<HTMLFormElement>('form')!
+  const input = form.querySelector<HTMLInputElement>('input[aria-label="내 모험단"]')!
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, name)
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await act(async () => form.requestSubmit())
+}
+
+it('저장된 모험단이 없으면 조회하지 않고 내 모험단 상자에 이름을 넣으라는 한 줄만 두며 새로고침 버튼이 없다', async () => {
+  const getAdventureWeekly = vi.fn<ClientHost['getAdventureWeekly']>()
+  await render(getAdventureWeekly)
+
+  expect(container.querySelector('h1')?.textContent).toBe('주간 던파')
+  expect(listName()).toBe('내 모험단')
+  expect(container.querySelector('section p')?.textContent).toBe('모험단 이름을 넣어 주세요.')
+  expect(button('보기')).toBeDefined()
+  expect(button('새로고침')).toBeUndefined()
+  expect(getAdventureWeekly).not.toHaveBeenCalled()
+})
+
+it('이름을 넣고 보기를 누르면 앞뒤 공백을 뺀 이름으로 조회하고 이름을 저장한다', async () => {
+  const getAdventureWeekly = vi.fn<ClientHost['getAdventureWeekly']>(async () => weekly)
+  await render(getAdventureWeekly)
+
+  await submitName('  ')
+  expect(getAdventureWeekly).not.toHaveBeenCalled()
+  await submitName(' 합성 모험단 ')
+
+  expect(getAdventureWeekly).toHaveBeenCalledWith('합성 모험단')
+  expect(useMyAdventureStore.getState().adventureName).toBe('합성 모험단')
+  expect(listName()).toBe('합성 모험단')
+})
+
+it('클리어 이름 열을 응답 순서로 레이드, 레기온 묶음 아래 두고, 응답 순서의 캐릭터마다 클리어한 칸에만 체크를 둔다', async () => {
+  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
+  await render(async () => weekly)
+
+  expect(headerRows()).toEqual([
+    ['#', '캐릭터', '명성', '레이드', '레기온'],
+    ['가 레이드', '나 레이드', '다 레기온']
+  ])
+  expect(
+    [...container.querySelectorAll('thead th[scope="colgroup"]')].map((cell) =>
+      cell.getAttribute('colspan')
+    )
+  ).toEqual(['2', '1'])
+  const [first, second] = bodyRows()
+  expect(first.slice(2)).toEqual(['89,999', '클리어 안 함', '클리어', '클리어'])
+  expect(second.slice(2)).toEqual(['89,998', '클리어 안 함', '클리어 안 함', '클리어 안 함'])
+  expect(container.querySelectorAll('tbody tr:first-child td svg')).toHaveLength(2)
+  const link = container.querySelector<HTMLAnchorElement>('tbody a')!
+  expect(link.textContent).toBe('합성1')
+  expect(link.getAttribute('href')).toBe('/c/cain/character-1')
+})
+
+it('클리어 이름이 없는 응답은 묶음 헤더 없이 #, 캐릭터, 명성 열만 그린다', async () => {
+  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
+  await render(async () => ({
+    ...weekly,
+    clearNames: [],
+    characters: weekly.characters.map((character) => ({ ...character, weeklyClears: [] }))
+  }))
+
+  expect(headerRows()).toEqual([['#', '캐릭터', '명성']])
+  expect(bodyRows()).toHaveLength(2)
+})
+
+it('캐릭터가 없는 응답은 모험단 이름 한 줄만 둔다', async () => {
+  useMyAdventureStore.setState({ adventureName: '없는 모험단' })
+  await render(async () => ({ adventureName: '없는 모험단', clearNames: [], characters: [] }))
+
+  expect(listName()).toBe('없는 모험단')
+  expect(container.querySelector('section table')).toBeNull()
+  expect(container.querySelector('section p')).toBeNull()
+})
+
+it('새로고침을 누르면 같은 모험단을 다시 조회해 새 응답으로 표를 다시 그린다', async () => {
+  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
+  const getAdventureWeekly = vi
+    .fn<ClientHost['getAdventureWeekly']>()
+    .mockResolvedValueOnce({ ...weekly, characters: [weekly.characters[1]] })
+    .mockResolvedValueOnce(weekly)
+  await render(getAdventureWeekly)
+  expect(bodyRows()).toHaveLength(1)
+
+  await act(async () => button('새로고침')!.click())
+
+  expect(getAdventureWeekly.mock.calls).toEqual([['합성 모험단'], ['합성 모험단']])
+  expect(bodyRows()).toHaveLength(2)
+})

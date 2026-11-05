@@ -18,6 +18,7 @@ import {
   createCharacterStatsHttp,
   createFameRankingHttp
 } from '@dfragon/client-core/shared/ranking/ranking-stats-http'
+import { createAdventureWeeklyHttp } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly-http'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import {
   createCharacterDetailViewHttp,
@@ -516,6 +517,7 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     getCharacterStats: createCharacterStatsHttp({ apiOrigin, fetch: browserFetch }),
     getAdventureCharacters: createAdventureCharactersHttp({ apiOrigin, fetch: browserFetch }),
     getGuild: createGuildHttp({ apiOrigin, fetch: browserFetch }),
+    getAdventureWeekly: createAdventureWeeklyHttp({ apiOrigin, fetch: browserFetch }),
     searchCharacters: createCharacterNameSearch(runtime.identification.candidates),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,

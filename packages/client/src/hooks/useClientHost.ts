@@ -25,6 +25,7 @@ import type {
   FameRankingFilter
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
+import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 
 export type CardSearchHost = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>
@@ -52,6 +53,7 @@ export type ClientHost = Readonly<{
   getCharacterStats: () => Promise<CharacterStats>
   getAdventureCharacters: (adventureName: string) => Promise<AdventureCharacters>
   getGuild: (guildId: string) => Promise<Guild>
+  getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
   searchCharacters: (query: CharacterNameQuery) => Promise<readonly CharacterCandidate[]>
 }>
 
