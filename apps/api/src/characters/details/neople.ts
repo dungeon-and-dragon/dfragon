@@ -64,7 +64,8 @@ export function createNeopleCharacterDetails(neople: NeopleClient): FetchCharact
       }
 
       if (error instanceof NeopleRequestFailure) {
-        throw new CharacterDetailFailure(error.kind, forwardCause(error))
+        const kind = error.characterNotFound ? 'notFound' : error.kind
+        throw new CharacterDetailFailure(kind, forwardCause(error))
       }
       throw new CharacterDetailFailure('api', { cause: error })
     }
