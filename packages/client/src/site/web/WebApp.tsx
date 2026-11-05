@@ -16,7 +16,10 @@ import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
 import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
 import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
+import { parseRankingSearch } from '../../pages/rankings/ranking-search'
+import { RankingsPage } from '../../pages/rankings/RankingsPage'
 import { SearchScreen } from '../../pages/search/SearchScreen'
+import { StatsScreen } from '../../pages/stats/StatsScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
@@ -128,7 +131,20 @@ const characterRoute = createRoute({
   component: CharacterDetailPage
 })
 
-const routeTree = rootRoute.addChildren([homeRoute, characterRoute])
+const rankingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/rankings',
+  validateSearch: parseRankingSearch,
+  component: RankingsPage
+})
+
+const statsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/stats',
+  component: StatsScreen
+})
+
+const routeTree = rootRoute.addChildren([homeRoute, characterRoute, rankingsRoute, statsRoute])
 
 function createWebRouter(host: BrowserHost) {
   return createRouter({ routeTree, context: { host } })
