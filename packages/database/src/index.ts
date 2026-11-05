@@ -16,6 +16,7 @@ export type { DatabaseConfiguration } from './configuration.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
 export {
+  readCharactersTimelineEvents,
   readCurrentSeasonStart,
   readRecentTimelineItems,
   readTimelineEvents,
@@ -25,6 +26,7 @@ export {
   replaceTimelineRange
 } from './timeline.js'
 export type {
+  CharacterTimelineEventRow,
   RecentTimelineItemQuery,
   TimelineCharacter,
   TimelineEventInput,

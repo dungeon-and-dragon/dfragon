@@ -12,6 +12,7 @@ import { startOfResetWeek } from '../../utils/seoul-time.js'
 
 const RAID_CLEAR_CODES = [201, 210]
 const LEGION_CLEAR_CODE = 209
+export const CLEAR_CODES = [...RAID_CLEAR_CODES, LEGION_CLEAR_CODE]
 type ClearKind = 'raid' | 'legion'
 type EnhancementKind = 'reinforce' | 'amplify' | 'refine'
 
@@ -91,7 +92,7 @@ const enhancementData = z.object({
   safe: z.boolean().nullable().catch(null)
 })
 
-function toClear({ code, occurredAt, raidName, data }: TimelineEventRow): TimelineClear[] {
+export function toClear({ code, occurredAt, raidName, data }: TimelineEventRow): TimelineClear[] {
   if (code === LEGION_CLEAR_CODE) {
     const legion = legionClearData.safeParse(data)
     if (!legion.success) {
@@ -184,7 +185,7 @@ export async function readCharacterTimeline(
   }
   const since = new Date(Math.min(weekStart.getTime(), seasonStart.getTime()))
   const [clears, enhancements, acquisitions] = await Promise.all([
-    readTimelineEvents(client, character, [...RAID_CLEAR_CODES, LEGION_CLEAR_CODE], since),
+    readTimelineEvents(client, character, CLEAR_CODES, since),
     readRecentTimelineItems(client, character, {
       codes: [...ENHANCEMENT_KINDS.keys()],
       limit: RECENT_LIMIT
