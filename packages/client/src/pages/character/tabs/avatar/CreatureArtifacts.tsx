@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
-import { ItemName } from '../shared/ItemName'
-import { styles as layout } from '../shared/detail-tab.style'
+import { ItemName } from './ItemName'
+import { styles as layout } from './detail-tab.style'
 import { styles } from './CreatureArtifacts.style'
 
 type Creature = NonNullable<CharacterDetailView['creature']>

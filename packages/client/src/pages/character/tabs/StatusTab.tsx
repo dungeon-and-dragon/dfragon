@@ -5,7 +5,7 @@ import {
 } from '@dfragon/client-core/shared/search/character-detail-display'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import type { CharacterTabProps } from './character-tab-props'
-import { styles as layout } from './shared/detail-tab.style'
+import { styles as layout } from './avatar/detail-tab.style'
 import { styles } from './status/StatusTab.style'
 
 type NamedStat = CharacterDetailView['status']['status'][number]

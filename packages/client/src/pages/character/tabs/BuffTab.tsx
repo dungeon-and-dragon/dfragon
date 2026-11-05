@@ -5,9 +5,9 @@ import {
 } from '@dfragon/client-core/shared/search/character-detail-display'
 import { styles } from './buff/BuffTab.style'
 import type { CharacterTabProps } from './character-tab-props'
-import { AvatarTable } from './shared/AvatarTable'
-import { ItemName } from './shared/ItemName'
-import { styles as layout } from './shared/detail-tab.style'
+import { AvatarTable } from './avatar/AvatarTable'
+import { ItemName } from './avatar/ItemName'
+import { styles as layout } from './avatar/detail-tab.style'
 
 export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   const { buff } = detail
