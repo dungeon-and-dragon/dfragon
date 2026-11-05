@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Req } from '@nestjs/common'
+import { Controller, Get, Inject, Param, Req } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request } from 'express'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
@@ -7,13 +7,10 @@ import type { AdventureCharacters, AdventureGuildService, GuildMembers } from '.
 
 export const ADVENTURE_GUILD_SERVICE = Symbol('ADVENTURE_GUILD_SERVICE')
 
-function pathValue(request: Request, name: string): string {
-  const value = request.params[name]
-  if (request.method !== 'GET' || request.originalUrl.includes('?') || typeof value !== 'string') {
+function rejectQueryAndHead(request: Request): void {
+  if (request.method !== 'GET' || request.originalUrl.includes('?')) {
     throw new CharacterDetailFailure('query')
   }
-
-  return value
 }
 
 @ApiTags('캐릭터')
@@ -23,13 +20,20 @@ export class AdventureGuildController {
 
   @Get('adventures/:adventureName/characters')
   @ApiAdventureCharacters()
-  adventure(@Req() request: Request): Promise<AdventureCharacters> {
-    return this.service.adventure(pathValue(request, 'adventureName'))
+  adventure(
+    @Req() request: Request,
+    @Param('adventureName') adventureName: string
+  ): Promise<AdventureCharacters> {
+    rejectQueryAndHead(request)
+
+    return this.service.adventure(adventureName)
   }
 
   @Get('guilds/:guildId')
   @ApiGuild()
-  guild(@Req() request: Request): Promise<GuildMembers> {
-    return this.service.guild(pathValue(request, 'guildId'))
+  guild(@Req() request: Request, @Param('guildId') guildId: string): Promise<GuildMembers> {
+    rejectQueryAndHead(request)
+
+    return this.service.guild(guildId)
   }
 }
