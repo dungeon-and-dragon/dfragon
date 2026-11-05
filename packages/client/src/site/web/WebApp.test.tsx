@@ -215,6 +215,38 @@ it('첫 화면에서 고친 이름과 맞바꾼 자리는 없는 주소 화면�
   await vi.waitFor(() => expect(seats().map(nameOf)).toEqual(before))
 })
 
+it('화면 공유는 없는 주소 화면에 다녀와도 연결된 채 남고, 다른 화면에서 공유를 멈추면 돌아왔을 때 연결 전이다', async () => {
+  // jsdom에는 화면 공유와 video 재생이 없어 getDisplayMedia가 돌려주는 track과 stream만 흉내 낸다.
+  const track = Object.assign(new EventTarget(), { label: 'Dungeon & Fighter', stop: vi.fn() })
+  vi.stubGlobal('navigator', {
+    mediaDevices: { getDisplayMedia: vi.fn(async () => ({ getVideoTracks: () => [track] })) }
+  })
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+  window.history.replaceState(null, '', '/guide')
+  await act(async () => root.render(<WebApp host={host} />))
+  await act(async () => homeLink().click())
+  await waitForPath('/')
+  const chip = (): HTMLButtonElement =>
+    container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
+  await act(async () => chip().click())
+  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+
+  await act(async () => window.history.back())
+  await waitForPath('/guide')
+  await act(async () => window.history.forward())
+  await waitForPath('/')
+  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+
+  await act(async () => window.history.back())
+  await waitForPath('/guide')
+  await act(async () => track.dispatchEvent(new Event('ended')))
+  await act(async () => window.history.forward())
+  await waitForPath('/')
+
+  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
+  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+})
+
 it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는다', async () => {
   window.history.replaceState(null, '', '/guide')
   await act(async () => root.render(<WebApp host={host} />))
