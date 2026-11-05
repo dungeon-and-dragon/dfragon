@@ -363,31 +363,13 @@ test('잘못된 후보 이름, 서버와 이미지 경로 값은 부분 결과 �
   }
 })
 
-test('후보의 ID 검증은 256자 안전 문자를 허용하며 일반 검색의 기존 값 보존을 바꾸지 않는다', async (t) => {
+test('후보의 ID 검증은 256자 안전 문자를 허용한다', async (t) => {
   const safeId = 'A0_-'.repeat(64)
-  let calls = 0
   const origin = await startApp(t, {
-    fetch: async () => {
-      calls += 1
-      if (calls === 1) {
-        return jsonResponse({
-          rows: [{ characterId: safeId, characterName, serverId: 'cain', fame: null }]
-        })
-      }
-
-      return jsonResponse({
-        rows: [
-          {
-            characterId: ' id/old ',
-            characterName: '다른이름',
-            serverId: 'future-server',
-            fame: -1.5,
-            jobName: '귀검사(남)',
-            jobGrowName: '眞 웨펀마스터'
-          }
-        ]
+    fetch: async () =>
+      jsonResponse({
+        rows: [{ characterId: safeId, characterName, serverId: 'cain', fame: null }]
       })
-    }
   })
 
   const candidate = await fetch(`${origin}${candidatePath}`)
@@ -406,20 +388,83 @@ test('후보의 ID 검증은 256자 안전 문자를 허용하며 일반 검색�
       }
     ]
   })
+})
 
-  const full = await fetch(`${origin}/characters?characterName=normal`)
-  assert.equal(full.status, 200)
-  assert.deepEqual(await full.json(), {
+test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보와 같은 모양으로 명성 순서에 따라 반환한다', async (t) => {
+  const origin = await startApp(t, {
+    fetch: async () =>
+      jsonResponse({
+        rows: [
+          { characterId: 'low', characterName: '홍길동', serverId: 'cain', fame: 100 },
+          { characterId: 'middle', characterName: '김홍길', serverId: 'cain', fame: 900 },
+          { characterId: 'exact', characterName: '홍길', serverId: 'anton', fame: null },
+          {
+            characterId: 'high',
+            characterName: '홍길순',
+            serverId: 'bakal',
+            fame: 500,
+            jobName: '귀검사(남)',
+            jobGrowName: '眞 웨펀마스터'
+          }
+        ]
+      })
+  })
+
+  const response = await fetch(`${origin}/characters?characterName=${encodeURIComponent('홍길')}`)
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), {
     rows: [
       {
-        characterId: ' id/old ',
-        characterName: '다른이름',
-        serverId: 'future-server',
-        serverName: null,
-        fame: -1.5
+        characterId: 'high',
+        characterName: '홍길순',
+        serverId: 'bakal',
+        serverName: '바칼',
+        fame: 500,
+        jobName: '귀검사(남)',
+        jobGrowName: '眞 웨펀마스터',
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/high?zoom=1'
+      },
+      {
+        characterId: 'low',
+        characterName: '홍길동',
+        serverId: 'cain',
+        serverName: '카인',
+        fame: 100,
+        jobName: null,
+        jobGrowName: null,
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/low?zoom=1'
+      },
+      {
+        characterId: 'exact',
+        characterName: '홍길',
+        serverId: 'anton',
+        serverName: '안톤',
+        fame: null,
+        jobName: null,
+        jobGrowName: null,
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/exact?zoom=1'
       }
     ]
   })
+})
+
+test('일반 검색도 미등록 서버나 경로를 포함한 ID는 부분 결과 없이 전체 502로 거절한다', async (t) => {
+  const valid = { characterId: 'valid', characterName: '홍길동', serverId: 'cain', fame: 1 }
+  for (const [name, change] of [
+    ['미등록 서버', { serverId: 'future-server' }],
+    ['경로를 포함한 ID', { characterId: 'id/other' }]
+  ] as const) {
+    await t.test(name, async (context) => {
+      const origin = await startApp(context, {
+        fetch: async () => jsonResponse({ rows: [valid, { ...valid, ...change }] })
+      })
+      const response = await fetch(
+        `${origin}/characters?characterName=${encodeURIComponent('홍길')}`
+      )
+      assert.equal(response.status, 502)
+      assert.deepEqual(await response.json(), providerError)
+    })
+  }
 })
 
 test('공급자 실패는 빈 후보로 숨기지 않으며 같은 IP의 공대 12명 이상 검색도 IP별 한도로 거절하지 않는다', async (t) => {

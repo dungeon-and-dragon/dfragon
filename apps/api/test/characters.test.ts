@@ -56,7 +56,7 @@ test('계약의 전체 서버 map을 제공하고 prototype key를 서버로 취
   assert.equal(NEOPLE_SERVER_NAMES.get('__proto__'), undefined)
 })
 
-test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 직업명이 없으면 null로 둔다', async () => {
+test('이름이 검색어로 시작하는 후보만 순서대로 일곱 field로 정제하고 직업명이 없으면 null로 둔다', async () => {
   const search = createNeopleCharacterSearch(
     createNeopleClientForTest('fake-key', {
       fetch: async () =>
@@ -64,8 +64,8 @@ test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 
           ignored: true,
           rows: [
             {
-              characterId: ' id-1 ',
-              characterName: ' 이름 ',
+              characterId: 'id-1',
+              characterName: '가나다라',
               serverId: 'cain',
               serverName: 'wrong upstream name',
               fame: 0,
@@ -73,19 +73,8 @@ test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 
               jobGrowName: '眞 웨펀마스터',
               extra: 'ignored'
             },
-            {
-              characterId: 'id-2',
-              characterName: '둘째',
-              serverId: 'future-server',
-              fame: -1.5
-            },
-            {
-              characterId: 'id-3',
-              characterName: '셋째',
-              serverId: 'constructor',
-              fame: null
-            },
-            { characterId: 'id-4', characterName: '넷째', serverId: '__proto__' }
+            { characterId: 'id-2', characterName: '마가나다', serverId: 'cain', fame: 10 },
+            { characterId: 'id-3', characterName: '가나다', serverId: 'siroco', fame: -1.5 }
           ]
         })
     })
@@ -96,8 +85,8 @@ test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 
   assert.deepEqual(result, {
     rows: [
       {
-        characterId: ' id-1 ',
-        characterName: ' 이름 ',
+        characterId: 'id-1',
+        characterName: '가나다라',
         serverId: 'cain',
         serverName: '카인',
         fame: 0,
@@ -105,29 +94,11 @@ test('후보 순서, 값을 보존하며 응답을 일곱 field로 정제하고 
         jobGrowName: '眞 웨펀마스터'
       },
       {
-        characterId: 'id-2',
-        characterName: '둘째',
-        serverId: 'future-server',
-        serverName: null,
-        fame: -1.5,
-        jobName: null,
-        jobGrowName: null
-      },
-      {
         characterId: 'id-3',
-        characterName: '셋째',
-        serverId: 'constructor',
-        serverName: null,
-        fame: null,
-        jobName: null,
-        jobGrowName: null
-      },
-      {
-        characterId: 'id-4',
-        characterName: '넷째',
-        serverId: '__proto__',
-        serverName: null,
-        fame: null,
+        characterName: '가나다',
+        serverId: 'siroco',
+        serverName: '시로코',
+        fame: -1.5,
         jobName: null,
         jobGrowName: null
       }
