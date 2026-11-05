@@ -18,8 +18,13 @@ const siteNotices = {
   }
 } satisfies Plugin
 
-// 개발 서버는 같은 origin 경로를 운영 API로 넘겨, 운영 API의 CORS 허용 origin 없이 웹 앱을 연다.
-const DEV_API_PROXY = { target: 'https://api.dfragon.com', changeOrigin: true }
+// 개발 서버는 같은 origin의 /api 경로를 운영 API로 넘겨, 운영 API의 CORS 허용 origin 없이 웹 앱을 연다.
+const API_PATH_PREFIX = '/api'
+const DEV_API_PROXY = {
+  target: 'https://api.dfragon.com',
+  changeOrigin: true,
+  rewrite: (path: string) => path.slice(API_PATH_PREFIX.length)
+}
 
 export default defineConfig({
   plugins: [stylex.vite(stylexOptions), react(), uiNotices(), clientNotices(), siteNotices],
@@ -31,5 +36,5 @@ export default defineConfig({
     // 내보낸다. OCR worker는 wasmPaths로 public/ocr의 사본만 읽으므로, 그 참조가 없는 extern WASM 빌드를 고른다.
     conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions]
   },
-  server: { proxy: { '/characters': DEV_API_PROXY, '/items': DEV_API_PROXY } }
+  server: { proxy: { [`${API_PATH_PREFIX}/`]: DEV_API_PROXY } }
 })
