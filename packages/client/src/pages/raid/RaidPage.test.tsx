@@ -12,6 +12,7 @@ import type { SlotNotice } from '@dfragon/client-core/lib/character-card'
 import { dealerCard } from '@dfragon/client-core/testing/fixtures/character-cards'
 import type { CardCharacter, SlotState } from '@dfragon/client-core/types/cards'
 import { RaidPage } from './RaidPage'
+import { TestRouter } from '../../testing/test-support/test-router'
 
 vi.mock('../../components/ServerSelect', () => ({
   ServerSelect: ({ value, onValueChange, label, options }: ComponentProps<typeof ServerSelect>) => (
@@ -102,13 +103,15 @@ async function render({
   })
   await act(async () =>
     root.render(
-      <RaidPage
-        resetKey="raid"
-        {...props}
-        seats={{ layout: RAID_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
-        actions={{ lookupSlot, pickCandidate: vi.fn(), changeSnapshotAdventure }}
-        slots={slots}
-      />
+      <TestRouter>
+        <RaidPage
+          resetKey="raid"
+          {...props}
+          seats={{ layout: RAID_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
+          actions={{ lookupSlot, pickCandidate: vi.fn(), changeSnapshotAdventure }}
+          slots={slots}
+        />
+      </TestRouter>
     )
   )
 }

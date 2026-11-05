@@ -29,6 +29,7 @@ function details(characterId: string): CharacterDetails {
       serverName: '카인',
       characterName: characterId.slice(3),
       level: 115,
+      guildId: 'guild-1',
       guildName: '합성길드'
     },
     status: { status: [], buff: null },
@@ -177,6 +178,7 @@ describe('이름과 서버를 정한 뒤 상세를 채우는 순서', () => {
     await vi.waitFor(() => expect(f.lifetime.snapshot().slots[2]).not.toHaveProperty('details'))
     expect(f.lifetime.snapshot().slots[2].selected).toMatchObject({
       level: 115,
+      guildId: 'guild-1',
       guildName: '합성길드'
     })
     expect(f.ocrDetails()).toEqual(['pending', 'pending', undefined])
