@@ -4,7 +4,7 @@ import { NeopleRequestFailure, neopleStatusFailureKind } from './failure.js'
 import type { FetchTransport } from './transport.js'
 
 const NEOPLE_IMAGE_ORIGIN = 'https://img-api.neople.co.kr'
-// Desktop이 같은 초상화를 직접 받을 때의 상한(CHARACTER_IMAGE_LIMITS.imageBytes)과 같다.
+// API가 초상화 본문을 메모리에 모두 읽어 클라이언트로 넘기므로, 비정상적으로 큰 응답은 받는 도중 끊는다.
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
 export function neopleCharacterImageUrl({

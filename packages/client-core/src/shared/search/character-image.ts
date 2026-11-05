@@ -8,7 +8,6 @@ const PNG_IHDR_TYPE = 'IHDR'
 const RGBA_CHANNELS = 4
 
 export const CHARACTER_IMAGE_LIMITS = {
-  imageBytes: 4 * 1024 * 1024,
   imageDimension: 2048,
   imagePixels: 1024 * 1024
 } as const
