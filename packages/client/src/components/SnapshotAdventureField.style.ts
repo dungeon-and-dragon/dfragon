@@ -12,7 +12,7 @@ export const styles = stylex.create({
     paddingInline: 6,
     borderWidth: 1,
     borderStyle: { default: 'dashed', ':focus': 'solid' },
-    borderColor: { default: colors.borderStrong, ':focus': colors.signal },
+    borderColor: { default: colors.borderInput, ':focus': colors.signal },
     borderRadius: radius.control,
     backgroundColor: colors.bgCanvas,
     color: colors.fgAdventure,

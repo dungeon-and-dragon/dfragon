@@ -18,7 +18,7 @@ export const styles = stylex.create({
     cursor: { default: 'pointer', ':is([data-disabled])': 'not-allowed' },
     color: colors.onSignal,
     borderColor: {
-      default: colors.borderStrong,
+      default: colors.borderInput,
       ':is([data-checked], [data-indeterminate])': colors.signal,
       ':is([data-disabled])': colors.borderDefault
     },

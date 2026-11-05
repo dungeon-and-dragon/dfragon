@@ -17,7 +17,7 @@ export const styles = stylex.create({
     borderRadius: radius.control,
     cursor: { default: 'pointer', ':is([data-disabled])': 'not-allowed' },
     borderColor: {
-      default: colors.borderStrong,
+      default: colors.borderInput,
       ':is([data-checked])': colors.signal,
       ':is([data-disabled])': colors.borderDefault
     },
