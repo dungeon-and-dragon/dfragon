@@ -621,7 +621,8 @@ it('같은 이름이 여러 명이면 초상화, 이름과 전직, 서버, 명�
   )
   expect(window.location.pathname).toBe('/')
   const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
-  expect(document.activeElement).toBe(input)
+  // 팝업은 열린 뒤 비동기로 초점을 옮기므로, 팝업이 보이는 것만으로 초점이 옮겨졌다고 보지 않는다.
+  await vi.waitFor(() => expect(document.activeElement).toBe(input))
   await act(async () =>
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
   )
