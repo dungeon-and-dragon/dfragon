@@ -53,6 +53,7 @@ type ScreenShare = { id: string; track: MediaStreamTrack; video: HTMLVideoElemen
 function createListeners<T extends unknown[]>(): {
   subscribe: (listener: (...args: T) => void) => () => void
   notify: (...args: T) => void
+  isEmpty: () => boolean
 } {
   const listeners = new Set<(...args: T) => void>()
 
@@ -68,7 +69,8 @@ function createListeners<T extends unknown[]>(): {
       for (const listener of listeners) {
         listener(...args)
       }
-    }
+    },
+    isEmpty: () => listeners.size === 0
   }
 }
 
@@ -224,6 +226,10 @@ function createRoundFrames(share: ReturnType<typeof createScreenShare>): {
     },
     install() {
       document.addEventListener('paste', (event) => {
+        // 붙여넣기 회차를 시작할 화면이 없을 때 든 프레임은 뒤의 캡처 버튼 회차가 공유 화면 대신 읽으므로 받지 않는다.
+        if (pasted.isEmpty()) {
+          return
+        }
         const image = findPastedImage(event.clipboardData)
         if (image === null) {
           return

@@ -1,10 +1,19 @@
 import * as stylex from '@stylexjs/stylex'
-import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
-import { AppTopBar } from '../../components/AppTopBar'
+import {
+  createRootRouteWithContext,
+  createRoute,
+  createRouter,
+  Outlet,
+  RouterProvider
+} from '@tanstack/react-router'
+import { useEffect, useEffectEvent, useState, type KeyboardEvent } from 'react'
+import { GameBar } from '../../components/GameBar'
+import { GlobalBar } from '../../components/GlobalBar'
 import { MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
 import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
+import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
@@ -23,7 +32,7 @@ function isTextField(target: EventTarget | null): boolean {
 }
 
 // 자리 맞바꾸기의 Alt+방향키는 브라우저의 뒤로, 앞으로 가기와 겹친다. 가장자리 자리처럼 맞바꿀 상대가 없어 카드가
-// 처리하지 않은 키도 앱 상자 안에서는 페이지를 떠나지 않게 막는다.
+// 처리하지 않은 키도 첫 화면 안에서는 페이지를 떠나지 않게 막는다.
 function keepSeatMoveKeys(event: KeyboardEvent<HTMLDivElement>): void {
   if (event.altKey && ARROW_KEYS.has(event.key) && !isTextField(event.target)) {
     event.preventDefault()
@@ -35,6 +44,16 @@ function PastedFrameRounds({ host }: { host: BrowserHost }): null {
   const onPastedFrame = useEffectEvent(startPastedRound)
 
   useEffect(() => host.onPastedFrame(onPastedFrame), [host])
+
+  return null
+}
+
+// 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 라우터 위에서 구독한다.
+function ScreenShareEndings({ host }: { host: BrowserHost }): null {
+  const { selectSource } = useScreenCaptureContext().partyCapture.source
+  const onShareEnded = useEffectEvent(() => selectSource(''))
+
+  useEffect(() => host.onScreenShareEnded(onShareEnded), [host])
 
   return null
 }
@@ -60,20 +79,67 @@ function AutoRounds({ host }: { host: BrowserHost }): null {
   return null
 }
 
-// 앱의 드래그, 글자 선택 차단과 100dvh가 사이트로 번지지 않게 창 폭 상자에만 그린다. 높이는 내용에 맞춘다.
+// 표 상태는 라우터 위의 ScreenCaptureProvider와 store가 가지므로 첫 화면을 떠나며 unmount해도 남는다. 붙여넣기와
+// 자동 인식 회차는 이 화면이 그려진 동안에만 구독한다.
+function HomeScreen(): React.JSX.Element {
+  const { host } = homeRoute.useRouteContext()
+
+  return (
+    <div
+      onKeyDown={keepSeatMoveKeys}
+      {...stylex.props(styles.home, styles.homeWidth(MAIN_WINDOW_WIDTH))}
+    >
+      <PastedFrameRounds host={host} />
+      <AutoRounds host={host} />
+      <GameBar />
+      <SearchScreen captureSource={<ScreenShareChip host={host} />} />
+    </div>
+  )
+}
+
+function SiteLayout(): React.JSX.Element {
+  return (
+    <div {...stylex.props(styles.site)}>
+      <GlobalBar />
+      <main {...stylex.props(styles.screen, styles.screenWidth(MAIN_WINDOW_WIDTH))}>
+        <Outlet />
+      </main>
+    </div>
+  )
+}
+
+const rootRoute = createRootRouteWithContext<{ host: BrowserHost }>()({
+  component: SiteLayout,
+  notFoundComponent: NotFoundScreen
+})
+
+const homeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: HomeScreen
+})
+
+const routeTree = rootRoute.addChildren([homeRoute])
+
+function createWebRouter(host: BrowserHost) {
+  return createRouter({ routeTree, context: { host } })
+}
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: ReturnType<typeof createWebRouter>
+  }
+}
+
+// 화면을 옮겨도 화면 공유 연결과 표 상태가 남도록 host와 캡처 provider를 라우터 위에 둔다.
 export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
+  const [router] = useState(() => createWebRouter(host))
+
   return (
     <ClientHostContext value={host}>
       <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-        <PastedFrameRounds host={host} />
-        <AutoRounds host={host} />
-        <div
-          onKeyDown={keepSeatMoveKeys}
-          {...stylex.props(styles.window, styles.windowWidth(MAIN_WINDOW_WIDTH))}
-        >
-          <AppTopBar captureControls={<ScreenShareChip host={host} />} />
-          <SearchScreen />
-        </div>
+        <ScreenShareEndings host={host} />
+        <RouterProvider router={router} />
       </ScreenCaptureProvider>
     </ClientHostContext>
   )

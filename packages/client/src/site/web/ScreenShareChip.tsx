@@ -1,5 +1,4 @@
 import * as stylex from '@stylexjs/stylex'
-import { useEffect, useEffectEvent } from 'react'
 import { Button, shapes, StatusChip } from '@dfragon/ui'
 import { HeaderTooltip } from '../../components/HeaderTooltip'
 import { MonitorIcon } from '../../components/MonitorIcon'
@@ -42,9 +41,6 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   // 검색 연결 실패는 단계를 그대로 두고 문구만 바꾸므로 자동 인식 안내로 덮지 않는다.
   const watching = sourceReady && !partyCapture.search.connectionFailed
   const status = getScreenShareStatus(controls, watching, searchMode)
-  const onShareEnded = useEffectEvent(() => selectSource(''))
-
-  useEffect(() => host.onScreenShareEnded(onShareEnded), [host])
 
   async function connect(): Promise<void> {
     const sourceId = await host.requestScreenShare()
@@ -54,7 +50,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   }
 
   return (
-    <span>
+    <span {...stylex.props(styles.root)}>
       <HeaderTooltip label={status} disabled={status.length === 0}>
         {sharePrompt ? (
           <span {...stylex.props(styles.wrapper)}>
