@@ -7,6 +7,7 @@ import type {
 } from '../../preload/common/types/character'
 import type { SearchErrorCode } from '../../preload/common/types/search'
 import { SearchHttpFailure } from './http'
+import { characterDetailViewSchema, type CharacterDetailView } from './character-detail-view'
 import { CHARACTER_IMAGE_LIMITS, decodeCharacterImage, type DecodePng } from './character-image'
 import {
   createCharacterHttpClient,
@@ -104,6 +105,7 @@ export type CharacterCandidatesHttp = (input: {
 }) => Promise<readonly CharacterCandidate[]>
 export type CharacterImageHttp = (input: IdentityRequest) => Promise<CharacterImage>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
+export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
 
 function validateIdentity(identity: CharacterIdentity): void {
   if (!identitySchema.safeParse(identity).success) {
@@ -224,24 +226,34 @@ export function createCharacterImageHttp({
   }
 }
 
-export function createCharacterDetailsHttp({
+function createCharacterDetailsRequest({
   apiOrigin,
   fetch: transport
-}: ApiOptions): CharacterDetailsHttp {
+}: ApiOptions): (identity: CharacterIdentity, signal?: AbortSignal) => Promise<unknown> {
   const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.detailJsonBytes)
+
+  return async ({ serverId, characterId }, signal) => {
+    signal?.throwIfAborted()
+    const request = client.get(`${apiOrigin}/characters/${serverId}/${characterId}`, {
+      headers: { Accept: 'application/json' },
+      signal
+    })
+    const response = await request
+    // ky의 body 메서드만 본문 읽기에도 timeout을 건다.
+    const body = parseCharacterJson(await request.arrayBuffer())
+    assertApiSuccess(response, body, true)
+
+    return body
+  }
+}
+
+export function createCharacterDetailsHttp(options: ApiOptions): CharacterDetailsHttp {
+  const requestDetails = createCharacterDetailsRequest(options)
 
   return async ({ serverId, characterId, signal }) => {
     validateIdentity({ serverId, characterId })
     try {
-      signal.throwIfAborted()
-      const request = client.get(`${apiOrigin}/characters/${serverId}/${characterId}`, {
-        headers: { Accept: 'application/json' },
-        signal
-      })
-      const response = await request
-      // ky의 body 메서드만 본문 읽기에도 timeout을 건다.
-      const body = parseCharacterJson(await request.arrayBuffer())
-      assertApiSuccess(response, body, true)
+      const body = await requestDetails({ serverId, characterId }, signal)
       const parsed = detailsSchema.safeParse(body)
       if (
         !parsed.success ||
@@ -255,6 +267,28 @@ export function createCharacterDetailsHttp({
       return parsed.data
     } catch (error) {
       throwCharacterTransportFailure(error, signal)
+    }
+  }
+}
+
+export function createCharacterDetailViewHttp(options: ApiOptions): CharacterDetailViewHttp {
+  const requestDetails = createCharacterDetailsRequest(options)
+
+  return async (identity) => {
+    validateIdentity(identity)
+    try {
+      const parsed = characterDetailViewSchema.safeParse(await requestDetails(identity))
+      if (
+        !parsed.success ||
+        parsed.data.character.serverId !== identity.serverId ||
+        parsed.data.character.characterId !== identity.characterId
+      ) {
+        throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
+      }
+
+      return parsed.data
+    } catch (error) {
+      throwCharacterTransportFailure(error)
     }
   }
 }

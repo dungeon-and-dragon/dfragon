@@ -37,7 +37,7 @@ export const styles = stylex.create({
   },
   secondary: {
     color: { default: colors.fgDefault, ':disabled': colors.fgDisabled },
-    borderColor: { default: colors.borderStrong, ':disabled': colors.borderDefault },
+    borderColor: { default: colors.borderInput, ':disabled': colors.borderDefault },
     backgroundColor: { default: 'transparent', ':hover:not(:disabled)': colors.bgControlHover }
   },
   ghost: {
