@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
+import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
 import { decodeBrowserImage } from './browser-png'
@@ -118,6 +119,8 @@ afterEach(async () => {
   vi.restoreAllMocks()
   vi.clearAllMocks()
   useSearchModeStore.setState({ searchMode: 'party' })
+  useMyAdventureStore.setState({ adventureName: null })
+  localStorage.clear()
 })
 
 it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 자리 행을 그린다', async () => {
@@ -143,6 +146,7 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
   expect(brand.getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
     ['파티, 공대', 'page'],
+    ['내 모험단', null],
     ['즐겨찾기', null]
   ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -172,6 +176,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(homeLink().getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
     ['파티, 공대', null],
+    ['내 모험단', null],
     ['즐겨찾기', null]
   ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
@@ -184,6 +189,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(seats()).toHaveLength(4)
   expect(globalMenu()).toEqual([
     ['파티, 공대', 'page'],
+    ['내 모험단', null],
     ['즐겨찾기', null]
   ])
 })
@@ -228,6 +234,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(selectedTab()).toBe('스킬')
   expect(globalMenu()).toEqual([
     ['파티, 공대', null],
+    ['내 모험단', null],
     ['즐겨찾기', null]
   ])
 
@@ -787,4 +794,44 @@ it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최�
   expect(JSON.parse(localStorage.getItem('dfragon:recent-characters') ?? '{}')).toMatchObject({
     state: { recentCharacters: [] }
   })
+})
+
+it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 주간 던파만 조회하고 이름은 브라우저에 남긴다', async () => {
+  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
+    const url = new URL(new Request(...args).url)
+    if (url.pathname.endsWith('/weekly')) {
+      return Response.json({ adventureName: '합성 모험단', clearNames: [], characters: [] })
+    }
+
+    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
+  })
+  vi.stubGlobal('fetch', fetch)
+  window.history.replaceState(null, '', '/my')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', null],
+    ['내 모험단', 'page'],
+    ['즐겨찾기', null]
+  ])
+  const form = container.querySelector<HTMLFormElement>('main form')!
+  const input = form.querySelector<HTMLInputElement>('input[aria-label="내 모험단"]')!
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
+      input,
+      ' 합성 모험단 '
+    )
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await act(async () => form.requestSubmit())
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('main section h2')?.textContent).toBe('합성 모험단')
+  )
+  const urls = fetch.mock.calls.map((args) => new Request(...args).url)
+  const encodedName = encodeURIComponent('합성 모험단')
+  expect(urls.filter((url) => url.includes(encodedName))).toEqual([
+    `${API_BASE_URL}/adventures/${encodedName}/weekly`
+  ])
+  expect(localStorage.getItem('dfragon:my-adventure')).toContain('합성 모험단')
 })
