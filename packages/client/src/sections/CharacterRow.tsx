@@ -409,7 +409,13 @@ function FameCell({
 
   return (
     <td
-      {...stylex.props(styles.cell, styles.end, styles.number, tier !== undefined && styles[tier])}
+      {...stylex.props(
+        styles.cell,
+        styles.end,
+        styles.number,
+        styles.fame,
+        tier !== undefined && styles[tier]
+      )}
     >
       {integer.format(fame)}
     </td>
