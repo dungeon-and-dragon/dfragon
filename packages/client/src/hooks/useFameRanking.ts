@@ -8,7 +8,7 @@ import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRanking> {
   const { getFameRanking } = useClientHost()
 
-  return useLoadedResult(`${filter.jobId ?? ''}/${filter.jobGrowId ?? ''}`, () =>
+  return useLoadedResult(['fame-ranking', filter.jobId ?? null, filter.jobGrowId ?? null], () =>
     getFameRanking(filter)
   )
 }

@@ -5,5 +5,5 @@ import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 export function useCharacterStats(): LoadedResult<CharacterStats> {
   const { getCharacterStats } = useClientHost()
 
-  return useLoadedResult('stats', getCharacterStats)
+  return useLoadedResult(['stats'], getCharacterStats)
 }
