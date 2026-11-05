@@ -4,21 +4,32 @@ export type NeopleUpstreamFailureKind = 'internal' | 'api' | 'unavailable'
 
 export type NeopleFailureKind = NeopleUpstreamFailureKind | 'timeout'
 
+// Neople 결과 코드표(https://developers.neople.co.kr/contents/guide/pages/code)의 공통, 던전앤파이터 code를 모두 둔다.
 const upstreamCodeErrors = new Map<string, NeopleUpstreamFailureKind>([
   ['API000', 'internal'],
+  ['API001', 'api'],
+  ['API002', 'unavailable'],
   ['API003', 'internal'],
   ['API004', 'internal'],
   ['API005', 'internal'],
-  ['API002', 'unavailable'],
-  ['API008', 'unavailable'],
-  ['DNF980', 'unavailable'],
-  ['API901', 'api'],
-  ['DNF901', 'api'],
-  ['DNF000', 'api'],
   ['API006', 'api'],
   ['API007', 'api'],
+  ['API008', 'unavailable'],
   ['API900', 'api'],
+  ['API901', 'api'],
   ['API999', 'api'],
+  ['DNF000', 'api'],
+  ['DNF001', 'api'],
+  ['DNF003', 'api'],
+  ['DNF004', 'api'],
+  ['DNF005', 'api'],
+  ['DNF006', 'api'],
+  ['DNF007', 'api'],
+  ['DNF008', 'api'],
+  ['DNF009', 'api'],
+  ['DNF900', 'api'],
+  ['DNF901', 'api'],
+  ['DNF980', 'unavailable'],
   ['DNF999', 'api']
 ])
 
