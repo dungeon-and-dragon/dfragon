@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const nullableText = z.string().nullable()
 const occurredAt = z.iso.datetime()
-const clearKind = z.enum(['raid', 'legion'])
+export const clearKind = z.enum(['raid', 'legion'])
 
 export const characterTimelineSchema = z.object({
   weeklyClears: z.array(
