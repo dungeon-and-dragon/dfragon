@@ -17,7 +17,7 @@ const SCORE_LIBRARY_FILE_NAMES: Readonly<Partial<Record<NodeJS.Platform, string>
 }
 
 /**
- * 비공개 엔진 저장소의 golden 벡터 입력(가명 처리한 딜러 1명, 버퍼 1명)이다. Desktop 점수 테스트와 같은 파일이다.
+ * 비공개 엔진 저장소의 golden 벡터 입력(가명 처리한 딜러 1명, 버퍼 1명)이다.
  */
 export function readEngineInput(name: 'dealer-blade' | 'buffer-muse'): ScoreEngineInput {
   const url = new URL(`../../test/fixtures/score-${name}.engine-input.json`, import.meta.url)
