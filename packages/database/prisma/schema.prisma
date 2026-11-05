@@ -44,6 +44,9 @@ model Character {
   @@index([adventureId])
   @@index([serverId, characterName])
   @@index([guildId])
+  @@index([fame(sort: Desc)])
+  @@index([jobId, fame(sort: Desc)])
+  @@index([jobId, jobGrowId, fame(sort: Desc)])
   @@map("characters")
 }
 
