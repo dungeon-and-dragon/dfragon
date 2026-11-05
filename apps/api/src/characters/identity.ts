@@ -9,17 +9,12 @@ export interface CharacterIdentity {
   serverId: string
 }
 
-export function parseCharacterIdentity(
-  serverId: unknown,
-  characterId: unknown,
-  originalUrl: string
-): CharacterIdentity {
+export function parseCharacterIdentity(serverId: unknown, characterId: unknown): CharacterIdentity {
   if (
     typeof serverId !== 'string' ||
     !NEOPLE_SERVER_NAMES.has(serverId) ||
     typeof characterId !== 'string' ||
-    !CHARACTER_ID_PATTERN.test(characterId) ||
-    originalUrl.includes('?')
+    !CHARACTER_ID_PATTERN.test(characterId)
   ) {
     throw new CharacterDetailFailure('query')
   }
