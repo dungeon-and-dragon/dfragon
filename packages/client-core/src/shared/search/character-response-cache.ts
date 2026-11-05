@@ -1,5 +1,5 @@
 import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
-import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-http'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
 import { CompletedCache } from './completed-cache'
 
 const TTL_MS = 5 * 60_000
