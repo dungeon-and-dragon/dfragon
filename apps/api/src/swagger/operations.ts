@@ -185,3 +185,23 @@ export function ApiGuild() {
     errors({ 500: 'INTERNAL_SERVER_ERROR' })
   )
 }
+
+export function ApiAdventureWeekly() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '모험단 주간 클리어 조회',
+      description:
+        '공개 API. DB에 저장된 그 모험단 캐릭터를 명성이 높은 순으로 반환하고, 캐릭터마다 이번 주(목요일 06:00 KST부터) 레이드, 레기온 클리어를 붙입니다. clearNames는 그 캐릭터들이 이번 주를 포함한 최근 4주 안에 클리어한 이름입니다. 조회는 캐릭터마다 타임라인 동기화를 기존 대기열에 넣고 끝나기를 기다리지 않아, 응답은 지금 저장된 값입니다. DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 반환합니다.'
+    }),
+    ApiParam({
+      name: 'adventureName',
+      schema: { type: 'string' },
+      description: 'URL 인코딩한 모험단 이름'
+    }),
+    success(
+      'AdventureWeekly',
+      '모험단 이름, 최근 4주 클리어 이름과 캐릭터별 이번 주 클리어 (없으면 빈 목록)'
+    ),
+    errors({ 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}

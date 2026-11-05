@@ -1,9 +1,13 @@
 import type { StoredCharacter, StoredGuild } from '@dfragon/database'
+import type { RequestTimelineSync } from '../characters/timeline/queue.js'
+import type { AdventureWeeklyClears } from './weekly.js'
 
 export type AdventureCharacters = {
   adventureName: string
   characters: StoredCharacter[]
 }
+
+export type AdventureWeekly = AdventureWeeklyClears & { adventureName: string }
 
 export type GuildMembers = {
   guildId: string
@@ -16,11 +20,13 @@ export type GuildMembers = {
 export interface AdventureGuildReader {
   readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]>
   readGuild(guildId: string): Promise<StoredGuild>
+  readAdventureWeeklyClears(adventureName: string): Promise<AdventureWeeklyClears>
 }
 
 export interface AdventureGuildService {
   adventure(adventureName: string): Promise<AdventureCharacters>
   guild(guildId: string): Promise<GuildMembers>
+  adventureWeekly(adventureName: string): Promise<AdventureWeekly>
 }
 
 function averageFame(members: readonly StoredCharacter[]): number | null {
@@ -32,7 +38,10 @@ function averageFame(members: readonly StoredCharacter[]): number | null {
   return Math.round(fames.reduce((sum, fame) => sum + fame, 0) / fames.length)
 }
 
-export function createAdventureGuildService(reader: AdventureGuildReader): AdventureGuildService {
+export function createAdventureGuildService(
+  reader: AdventureGuildReader,
+  requestTimelineSync: RequestTimelineSync
+): AdventureGuildService {
   return {
     async adventure(adventureName) {
       const characters = await reader.readAdventureCharacters(adventureName)
@@ -49,11 +58,24 @@ export function createAdventureGuildService(reader: AdventureGuildReader): Adven
         averageFame: averageFame(members),
         members
       }
+    },
+    async adventureWeekly(adventureName) {
+      const weekly = await reader.readAdventureWeeklyClears(adventureName)
+      // 동기화는 기다리지 않아 이번 응답은 지금 저장된 값이고, 다음 조회부터 새 클리어가 보인다.
+      for (const { serverId, characterId } of weekly.characters) {
+        requestTimelineSync({ serverId, characterId })
+      }
+
+      return { adventureName, ...weekly }
     }
   }
 }
 
-export const emptyAdventureGuildService = createAdventureGuildService({
-  readAdventureCharacters: async () => [],
-  readGuild: async () => ({ guildName: null, members: [] })
-})
+export const emptyAdventureGuildService = createAdventureGuildService(
+  {
+    readAdventureCharacters: async () => [],
+    readGuild: async () => ({ guildName: null, members: [] }),
+    readAdventureWeeklyClears: async () => ({ clearNames: [], characters: [] })
+  },
+  () => undefined
+)
