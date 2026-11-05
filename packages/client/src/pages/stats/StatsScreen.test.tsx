@@ -58,7 +58,7 @@ const stats: CharacterStats = {
   ],
   fameDistribution: [
     { from: 70000, to: 80000, count: 10 },
-    { from: 80000, to: 90000, count: 5 }
+    { from: 80000, to: 90000, count: 66392 }
   ]
 }
 
@@ -90,7 +90,7 @@ it('제목 상자에 캐릭터 수와 한국 시간의 마지막 업데이트 �
   )
 })
 
-it('상자 넷을 서버 인구, 직업 분포, 명성 분포, 직업별 평균 명성 순으로 그린다', async () => {
+it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 직업 분포, 명성 분포, 직업별 평균 명성 순으로 그린다', async () => {
   await render(async () => stats)
 
   expect([...container.querySelectorAll('h2')].map((name) => name.textContent)).toEqual([
@@ -110,7 +110,7 @@ it('상자 넷을 서버 인구, 직업 분포, 명성 분포, 직업별 평균 
   ])
   expect(rowsOf('명성 분포')).toEqual([
     ['10', '', '7만'],
-    ['5', '', '8만']
+    ['6.6만', '', '8만']
   ])
 })
 
