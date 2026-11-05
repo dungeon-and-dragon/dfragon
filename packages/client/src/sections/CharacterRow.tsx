@@ -164,6 +164,7 @@ function RowPortrait({
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       aria-label={`${character.name} 상세`}
+      draggable={false}
       {...stylex.props(styles.portraitLink)}
     >
       {portrait}
@@ -377,6 +378,7 @@ function AdventureCell({
         <Link
           to="/adventures/$adventureName"
           params={{ adventureName: adventure }}
+          draggable={false}
           {...stylex.props(styles.link)}
         >
           {adventure}
@@ -400,7 +402,12 @@ function GuildCell({
   return (
     <td {...stylex.props(styles.cell, styles.guild)}>
       {guildId != null ? (
-        <Link to="/guilds/$guildId" params={{ guildId }} {...stylex.props(styles.link)}>
+        <Link
+          to="/guilds/$guildId"
+          params={{ guildId }}
+          draggable={false}
+          {...stylex.props(styles.link)}
+        >
           {guild}
         </Link>
       ) : (
