@@ -24,6 +24,7 @@
     "@dfragon/client-core": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@dfragon/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@xstate/react": "catalog:",
     "xstate": "catalog:",
