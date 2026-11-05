@@ -3,7 +3,7 @@ import {
   type CharacterDetailBody,
   characterDetailResponse
 } from '../../testing/fixtures/character-detail'
-import { createCharacterDetailViewHttp } from './character-http'
+import { createDfragonClient } from '../api/dfragon-client'
 import { SearchHttpFailure } from './http'
 
 const API_ORIGIN = 'https://api.example.test'
@@ -17,7 +17,7 @@ function load(body: unknown, status = 200) {
     async () => new Response(JSON.stringify(body), { status })
   )
 
-  return createCharacterDetailViewHttp({ apiOrigin: API_ORIGIN, fetch })
+  return createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).characters.detailView
 }
 
 describe('캐릭터 상세 화면 응답', () => {

@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
-import { createCharacterStatsHttp, createFameRankingHttp } from './ranking-stats-http'
-import type { CharacterStats, FameRanking } from './ranking-stats'
+import type { CharacterStats, FameRanking } from '../ranking/ranking-stats'
+import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
 
@@ -47,7 +47,7 @@ const stats: CharacterStats = {
 
 it('랭킹 응답을 그대로 읽고 정한 직업, 전직만 query로 보낸다', async () => {
   const fetch = respond(ranking)
-  const read = createFameRankingHttp({ apiOrigin: API_ORIGIN, fetch })
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
 
   await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1' })).resolves.toEqual(ranking)
   expect(new Request(fetch.mock.calls[0][0]).url).toBe(
@@ -58,14 +58,15 @@ it('랭킹 응답을 그대로 읽고 정한 직업, 전직만 query로 보낸�
 })
 
 it('빈 랭킹도 읽는다', async () => {
-  const read = createFameRankingHttp({ apiOrigin: API_ORIGIN, fetch: respond({ characters: [] }) })
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond({ characters: [] }) })
+    .rankings.fame
 
   await expect(read({})).resolves.toEqual({ characters: [] })
 })
 
 it('직업 없이 전직만 보내면 요청하지 않고 거부한다', async () => {
   const fetch = respond(ranking)
-  const read = createFameRankingHttp({ apiOrigin: API_ORIGIN, fetch })
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
 
   await expect(read({ jobGrowId: 'grow-1' })).rejects.toThrow()
   expect(fetch).not.toHaveBeenCalled()
@@ -74,7 +75,8 @@ it('직업 없이 전직만 보내면 요청하지 않고 거부한다', async (
 it('순위가 없거나 모르는 서버가 있는 랭킹 응답은 거부한다', async () => {
   const { rank: _rank, ...withoutRank } = ranking.characters[0]
   for (const characters of [[withoutRank], [{ ...ranking.characters[0], serverId: 'unknown' }]]) {
-    const read = createFameRankingHttp({ apiOrigin: API_ORIGIN, fetch: respond({ characters }) })
+    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond({ characters }) })
+      .rankings.fame
 
     await expect(read({})).rejects.toThrow()
   }
@@ -84,10 +86,10 @@ it('통계 응답과 빈 통계를 읽는다', async () => {
   const empty: CharacterStats = { ...stats, total: 0, servers: [], jobs: [], fameDistribution: [] }
 
   await expect(
-    createCharacterStatsHttp({ apiOrigin: API_ORIGIN, fetch: respond(stats) })()
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(stats) }).stats()
   ).resolves.toEqual(stats)
   await expect(
-    createCharacterStatsHttp({ apiOrigin: API_ORIGIN, fetch: respond(empty) })()
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).stats()
   ).resolves.toEqual(empty)
 })
 
@@ -95,12 +97,12 @@ it('집계 시각이 없는 통계 응답과 오류 응답은 거부한다', asy
   const { computedAt: _computedAt, ...withoutTime } = stats
 
   await expect(
-    createCharacterStatsHttp({ apiOrigin: API_ORIGIN, fetch: respond(withoutTime) })()
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(withoutTime) }).stats()
   ).rejects.toThrow()
   await expect(
-    createCharacterStatsHttp({
+    createDfragonClient({
       apiOrigin: API_ORIGIN,
       fetch: respond({ error: { code: 'INTERNAL_SERVER_ERROR', message: '실패' } }, 500)
-    })()
+    }).stats()
   ).rejects.toThrow()
 })
