@@ -79,6 +79,11 @@ export const colors = stylex.defineConsts({
   raidPartyGreenWeak: 'var(--df-raid-party-green-weak)'
 })
 
+export const shadow = stylex.defineConsts({
+  popover: 'var(--df-shadow-popover)',
+  tooltip: 'var(--df-shadow-tooltip)'
+})
+
 export const space = stylex.defineConsts({
   s4: 'var(--df-space-4)',
   s8: 'var(--df-space-8)',
