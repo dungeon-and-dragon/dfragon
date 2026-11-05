@@ -9,7 +9,7 @@ import type { SearchErrorCode } from '../../preload/common/types/search'
 import { SearchHttpFailure } from './http'
 import { characterDetailViewSchema, type CharacterDetailView } from './character-detail-view'
 import { characterTimelineSchema, type CharacterTimeline } from './character-timeline'
-import { CHARACTER_IMAGE_LIMITS, decodeCharacterImage, type DecodePng } from './character-image'
+import { decodeCharacterImage, type DecodePng } from './character-image'
 import {
   createCharacterHttpClient,
   parseCharacterJson,
@@ -22,18 +22,6 @@ import {
 } from '../../preload/common/search/character-summary'
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
-export const CHARACTER_HTTP_LIMITS = {
-  candidateJsonBytes: 256 * 1024,
-  detailJsonBytes: 8 * 1024 * 1024,
-  // 목록 넷이 각각 최근 50개 안팎이라 응답은 수십 KB다.
-  timelineJsonBytes: 256 * 1024,
-  // 랭킹은 캐릭터 100명이라 수십 KB, 통계는 직업, 전직 수십 개와 명성 구간이라 수 KB다.
-  rankingJsonBytes: 256 * 1024,
-  statsJsonBytes: 256 * 1024,
-  // 길드는 API가 길드원 전체를 한 번에 줘서 큰 길드는 수 MB다.
-  adventureGuildJsonBytes: 8 * 1024 * 1024,
-  ...CHARACTER_IMAGE_LIMITS
-} as const
 
 const nonblank = z.string().refine((value) => value.trim().length > 0)
 const candidateSchema = identitySchema
@@ -179,7 +167,7 @@ export function createCharacterCandidatesHttp({
   apiOrigin,
   fetch: transport
 }: ApiOptions): CharacterCandidatesHttp {
-  const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.candidateJsonBytes)
+  const client = createCharacterHttpClient(transport)
 
   return async ({ nickname, signal }) => {
     validateNickname(nickname)
@@ -212,7 +200,7 @@ export function createCharacterImageHttp({
   decodePng,
   imageUrl
 }: ImageOptions): CharacterImageHttp {
-  const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.imageBytes)
+  const client = createCharacterHttpClient(transport)
 
   return async ({ serverId, characterId, signal }) => {
     const identity = { serverId, characterId }
@@ -251,7 +239,7 @@ function createCharacterDetailsRequest({
   apiOrigin,
   fetch: transport
 }: ApiOptions): (identity: CharacterIdentity, signal?: AbortSignal) => Promise<unknown> {
-  const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.detailJsonBytes)
+  const client = createCharacterHttpClient(transport)
 
   return async ({ serverId, characterId }, signal) => {
     signal?.throwIfAborted()
@@ -318,7 +306,7 @@ export function createCharacterTimelineHttp({
   apiOrigin,
   fetch: transport
 }: ApiOptions): CharacterTimelineHttp {
-  const client = createCharacterHttpClient(transport, CHARACTER_HTTP_LIMITS.timelineJsonBytes)
+  const client = createCharacterHttpClient(transport)
 
   return async ({ serverId, characterId }) => {
     validateIdentity({ serverId, characterId })

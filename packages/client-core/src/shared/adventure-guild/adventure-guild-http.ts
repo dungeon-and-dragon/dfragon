@@ -1,4 +1,4 @@
-import { CHARACTER_HTTP_LIMITS, type ApiOptions } from '../search/character-http'
+import type { ApiOptions } from '../search/character-http'
 import { createJsonRequest } from '../ranking/ranking-stats-http'
 import {
   adventureCharactersSchema,
@@ -15,17 +15,11 @@ export function createAdventureCharactersHttp(options: ApiOptions): AdventureCha
     createJsonRequest(
       options,
       `/adventures/${encodeURIComponent(adventureName)}/characters`,
-      adventureCharactersSchema,
-      CHARACTER_HTTP_LIMITS.adventureGuildJsonBytes
+      adventureCharactersSchema
     )()
 }
 
 export function createGuildHttp(options: ApiOptions): GuildHttp {
   return (guildId) =>
-    createJsonRequest(
-      options,
-      `/guilds/${encodeURIComponent(guildId)}`,
-      guildSchema,
-      CHARACTER_HTTP_LIMITS.adventureGuildJsonBytes
-    )()
+    createJsonRequest(options, `/guilds/${encodeURIComponent(guildId)}`, guildSchema)()
 }
