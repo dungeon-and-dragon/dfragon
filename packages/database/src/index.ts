@@ -16,15 +16,21 @@ export type { DatabaseConfiguration } from './configuration.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
 export {
+  readCurrentSeasonStart,
+  readRecentTimelineItems,
+  readTimelineEvents,
   readTimelineSyncState,
   recordTimelineSyncFailure,
   recordTimelineSyncSuccess,
   replaceTimelineRange
 } from './timeline.js'
 export type {
+  RecentTimelineItemQuery,
   TimelineCharacter,
   TimelineEventInput,
+  TimelineEventRow,
   TimelineItemInput,
+  TimelineItemRow,
   TimelineRange,
   TimelineSyncState
 } from './timeline.js'

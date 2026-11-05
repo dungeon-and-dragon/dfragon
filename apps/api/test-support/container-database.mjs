@@ -18,6 +18,9 @@ const postgresImage =
   'docker.io/library/postgres:18.6-trixie@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280'
 const runtimeCheckPath = fileURLToPath(new URL('./container-runtime-check.mjs', import.meta.url))
 const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs', import.meta.url))
+const timelineReadCheckPath = fileURLToPath(
+  new URL('./container-timeline-read-check.mjs', import.meta.url)
+)
 const characterCheckPath = fileURLToPath(
   new URL('./container-character-check.mjs', import.meta.url)
 )
@@ -247,6 +250,8 @@ try {
         '--mount',
         `type=bind,source=${timelineCheckPath},target=/app/container-timeline-check.mjs,readonly`,
         '--mount',
+        `type=bind,source=${timelineReadCheckPath},target=/app/container-timeline-read-check.mjs,readonly`,
+        '--mount',
         `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
@@ -362,6 +367,16 @@ try {
     ).stdout.trim(),
     't'
   )
+
+  stage = 'timeline read'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-timeline-read-check.mjs'
+  ])
 
   stage = 'character and adventure'
   await docker([
@@ -585,6 +600,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, character records, adventure and guild reads, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement and read, character records, adventure and guild reads, character collector start and stop, HTTP and database input rejection\n'
   )
 }
