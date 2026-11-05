@@ -98,6 +98,26 @@ DB 설정이 없으면 구독자를 등록하지 않습니다.
 `guildName`은 가장 최근에 받은 길드원 행의 이름이고, `averageFame`은 명성이 있는 길드원의 평균을 반올림한 값입니다. 그런 길드원이 없으면 `null`입니다.
 DB에 없는 모험단과 길드, DB 설정이 없는 API는 빈 목록을 주며 이때 `guildName`, `averageFame`은 `null`입니다. 예전에 지운 `GET /adventures/characters`와는 다른 경로입니다.
 
+### 명성 랭킹과 통계
+
+`GET /rankings/fame`과 `GET /stats`도 Neople을 부르지 않고 DB에 저장된 캐릭터 기본 정보를 읽습니다.
+명성은 각 행을 저장한 시점의 값입니다.
+
+```json
+{ "characters": [ { "rank": 1, /* 캐릭터 행 */ } ] }
+{ "computedAt": "…", "total": 558178, "servers": [{ "serverId": "cain", "count": 231502 }], "jobs": [{ "jobId": "…", "jobGrowId": "…", "jobName": "…", "jobGrowName": "…", "count": 113107, "averageFame": 80123 }], "fameDistribution": [{ "from": 70000, "to": 80000, "count": 51234 }] }
+```
+
+랭킹은 명성이 있는 캐릭터를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 100명까지 주고, `rank`는 1부터 매긴 순서입니다. 캐릭터 행은 모험단, 길드 조회와 같습니다.
+선택 query `serverId`, `jobId`, `jobGrowId`로 거르며 `jobGrowId`는 `jobId`와 함께 씁니다. 알 수 없는 서버, 빈 값, 같은 key의 중복과 `jobId` 없는 `jobGrowId`는 400 `INVALID_CHARACTER_QUERY`이고, 다른 query key는 무시합니다.
+`characters`의 `(fame DESC)`, `(server_id, fame DESC)`, `(job_id, fame DESC)`, `(job_id, job_grow_id, fame DESC)` index로 읽습니다.
+
+통계는 첫 요청 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 요청은 한 계산을 함께 기다립니다. 실패는 캐시하지 않습니다. 캐시는 노드마다 따로 둡니다.
+`total`과 `servers`는 모든 캐릭터 행, `jobs`는 기본 정보를 받은 행을 직업과 전직(이름 포함)별로 센 값이고 많은 순입니다. `jobs`는 랭킹의 직업 필터 목록으로도 씁니다.
+`averageFame`은 명성이 있는 캐릭터의 평균을 반올림한 값이고, 그런 캐릭터가 없으면 `null`입니다.
+`fameDistribution`은 명성이 있는 캐릭터를 10,000 단위 구간(`from` 포함, `to` 제외)으로 센 값이며 캐릭터가 있는 구간만 낮은 순으로 줍니다.
+DB 설정이 없는 API는 빈 랭킹과, 0과 빈 목록인 통계를 줍니다.
+
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
@@ -292,6 +312,7 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
 DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
 타임라인 조회는 합성 행으로 주간 경계 앞뒤, 시즌 경계, 최근 50개, 빈 캐릭터와 진행 중인 동기화를 기다린 조회를 봅니다.
+명성 랭킹과 통계는 합성 행으로 서버와 직업 필터, 명성이 없는 캐릭터 제외, 100명 상한, 명성 구간 경계, 직업별 평균 명성과 API의 통계 캐시를 봅니다.
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
