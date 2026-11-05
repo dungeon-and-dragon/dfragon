@@ -32,12 +32,14 @@ export type TimelineClear = {
   kind: ClearKind
   name: string
   modeName: string | null
+  hard: boolean
   occurredAt: Date
 }
 
 export type TimelineClearCount = {
   kind: ClearKind
   name: string
+  hard: boolean
   count: number
 }
 
@@ -83,7 +85,11 @@ export const EMPTY_CHARACTER_TIMELINE: CharacterTimeline = {
 }
 
 // 저장한 data는 Neople 응답의 객체지만 행마다 필드가 다를 수 있어 쓰기 전에 확인한다.
-const raidClearData = z.object({ modeName: z.string().nullable().catch(null) })
+// Neople은 하드로 클리어한 레이드에만 hard: true를 넣고 나머지 행에는 칸을 두지 않는다.
+const raidClearData = z.object({
+  modeName: z.string().nullable().catch(null),
+  hard: z.boolean().catch(false)
+})
 const legionClearData = z.object({ regionName: z.string() })
 const enhancementData = z.object({
   before: z.number().nullable().catch(null),
@@ -99,7 +105,9 @@ export function toClear({ code, occurredAt, raidName, data }: TimelineEventRow):
       return []
     }
 
-    return [{ kind: 'legion', name: legion.data.regionName, modeName: null, occurredAt }]
+    return [
+      { kind: 'legion', name: legion.data.regionName, modeName: null, hard: false, occurredAt }
+    ]
   }
 
   const raid = raidClearData.safeParse(data)
@@ -107,16 +115,18 @@ export function toClear({ code, occurredAt, raidName, data }: TimelineEventRow):
     return []
   }
 
-  return [{ kind: 'raid', name: raidName, modeName: raid.data.modeName, occurredAt }]
+  const { modeName, hard } = raid.data
+
+  return [{ kind: 'raid', name: raidName, modeName, hard, occurredAt }]
 }
 
 function countClears(clears: readonly TimelineClear[]): TimelineClearCount[] {
   const counts = new Map<string, TimelineClearCount>()
-  for (const { kind, name } of clears) {
-    const key = `${kind}/${name}`
+  for (const { kind, name, hard } of clears) {
+    const key = `${kind}/${name}/${hard}`
     const count = counts.get(key)
     if (count === undefined) {
-      counts.set(key, { kind, name, count: 1 })
+      counts.set(key, { kind, name, hard, count: 1 })
     } else {
       count.count++
     }
