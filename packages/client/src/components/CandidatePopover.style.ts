@@ -119,5 +119,6 @@ export const styles = stylex.create({
     lineHeight: '14px',
     fontWeight: 600,
     fontVariantNumeric: 'tabular-nums'
-  }
+  },
+  fameValue: { color: colors.gameFame }
 })
