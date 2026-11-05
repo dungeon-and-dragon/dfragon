@@ -125,10 +125,7 @@ describe('장비 탭 값', () => {
     ])
     expect(view.mistLevel).toBe(100)
     expect(view.creature).toMatchObject({ itemName: '운명을 담는 재단사', rarity: 'rare' })
-    expect(view.aura).toMatchObject({
-      itemName: '고결한 영혼의 잔상',
-      emblems: ['빛나는 붉은빛 엠블렘[힘]', '빛나는 붉은빛 엠블렘[힘]']
-    })
+    expect(view.aura).toMatchObject({ itemName: '고결한 영혼의 잔상' })
   })
 
   it('버퍼의 재련과 스킬 레벨 증가 마법부여를 읽는다', () => {

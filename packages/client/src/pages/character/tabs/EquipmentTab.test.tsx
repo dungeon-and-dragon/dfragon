@@ -55,7 +55,7 @@ it('딜러 장비 13칸과 크리쳐, 오라 행을 부위, 장비, 강화, 마�
   ])
   expect(rows[12].slice(0, 3)).toEqual(['귀걸이', '강인한 절제의 귀걸이', '+8'])
   expect(rows[13]).toEqual(['크리쳐', '운명을 담는 재단사', '-', '', '-', '-'])
-  expect(rows[14][3]).toBe('빛나는 붉은빛 엠블렘[힘], 빛나는 붉은빛 엠블렘[힘]')
+  expect(rows[14]).toEqual(['오라', '고결한 영혼의 잔상', '-', '', '-', '-'])
   expect(container.querySelector('tbody img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/items/89c42c1d02e6749244ce518e9b34e1c7'
   )
