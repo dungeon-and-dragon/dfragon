@@ -166,7 +166,22 @@ export const styles = stylex.create({
     lineHeight: '20px',
     textAlign: 'center'
   },
-  error: { color: colors.fgDanger }
+  error: { color: colors.fgDanger },
+  more: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.s8,
+    minHeight: 48,
+    paddingInline: space.s16,
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: colors.borderDefault,
+    color: colors.fgMuted,
+    fontSize: 13,
+    lineHeight: '18px'
+  },
+  moreError: { margin: 0, color: colors.fgDanger }
 })
 
 export const rarityStyles = stylex.create({

@@ -2,7 +2,9 @@ import {
   type DatabaseClient,
   type TimelineCharacter,
   type TimelineEventRow,
+  type TimelineItemCursor,
   type TimelineItemRow,
+  type RecentTimelineItemQuery,
   readCurrentSeasonStart,
   readRecentTimelineItems,
   readTimelineEvents
@@ -27,7 +29,9 @@ const ACQUISITION_CODES = [
   520, 521, 550, 551, 552, 553, 554, 555, 556, 557
 ]
 const ACQUISITION_RARITIES = ['에픽', '태초']
-const RECENT_LIMIT = 50
+const PAGE_SIZE = 50
+// 15자리 ms는 언제나 올바른 Date이고, 18자리 id는 PostgreSQL bigint 범위를 넘지 않는다.
+const CURSOR_PATTERN = /^(\d{1,15})\.(\d{1,18})$/
 
 export type TimelineClear = {
   kind: ClearKind
@@ -65,11 +69,22 @@ export type TimelineAcquisition = {
   occurredAt: Date
 }
 
+export type TimelinePageList = 'enhancements' | 'acquisitions'
+
+export type TimelinePage<Item> = {
+  items: Item[]
+  nextCursor: string | null
+}
+
+export type TimelineItemPage = TimelinePage<TimelineEnhancement> | TimelinePage<TimelineAcquisition>
+
 export type CharacterTimeline = {
   weeklyClears: TimelineClear[]
   seasonClears: TimelineClearCount[]
   enhancements: TimelineEnhancement[]
+  enhancementsCursor: string | null
   acquisitions: TimelineAcquisition[]
+  acquisitionsCursor: string | null
 }
 
 export type TimelineRecords = {
@@ -82,8 +97,17 @@ export const EMPTY_CHARACTER_TIMELINE: CharacterTimeline = {
   weeklyClears: [],
   seasonClears: [],
   enhancements: [],
-  acquisitions: []
+  enhancementsCursor: null,
+  acquisitions: [],
+  acquisitionsCursor: null
 }
+
+export const EMPTY_TIMELINE_PAGE: TimelineItemPage = { items: [], nextCursor: null }
+
+const PAGE_QUERIES = {
+  enhancements: { codes: ENHANCEMENT_CODES },
+  acquisitions: { codes: ACQUISITION_CODES, itemRarities: ACQUISITION_RARITIES }
+} satisfies Record<TimelinePageList, Pick<RecentTimelineItemQuery, 'codes' | 'itemRarities'>>
 
 // 저장한 data는 Neople 응답의 객체지만 행마다 필드가 다를 수 있어 쓰기 전에 확인한다.
 // Neople은 하드로 클리어한 레이드에만 hard: true를 넣고 나머지 행에는 칸을 두지 않는다.
@@ -170,6 +194,41 @@ function toAcquisition({
   return { code, name, itemId, itemName, itemRarity, occurredAt }
 }
 
+export function formatTimelineCursor({ occurredAt, id }: TimelineItemCursor): string {
+  return `${occurredAt.getTime()}.${id}`
+}
+
+export function parseTimelineCursor(cursor: string): TimelineItemCursor | undefined {
+  const match = CURSOR_PATTERN.exec(cursor)
+  if (match === null) {
+    return undefined
+  }
+
+  return { occurredAt: new Date(Number(match[1])), id: BigInt(match[2]!) }
+}
+
+// 한 개를 더 읽어 다음 묶음이 있는지 본다. 형식이 맞지 않아 뺀 행이 있어도 cursor는 읽은 행으로 정한다.
+function toPage<Item>(
+  rows: readonly TimelineItemRow[],
+  toItems: (rows: readonly TimelineItemRow[]) => Item[]
+): TimelinePage<Item> {
+  const page = rows.slice(0, PAGE_SIZE)
+  const last = page.at(-1)
+  const items = toItems(page)
+  const nextCursor =
+    rows.length > PAGE_SIZE && last !== undefined ? formatTimelineCursor(last) : null
+
+  return { items, nextCursor }
+}
+
+function toEnhancementPage(rows: readonly TimelineItemRow[]): TimelinePage<TimelineEnhancement> {
+  return toPage(rows, (page) => page.flatMap(toEnhancement))
+}
+
+function toAcquisitionPage(rows: readonly TimelineItemRow[]): TimelinePage<TimelineAcquisition> {
+  return toPage(rows, (page) => page.map(toAcquisition))
+}
+
 export function toCharacterTimeline(
   records: TimelineRecords,
   weekStart: Date,
@@ -178,10 +237,30 @@ export function toCharacterTimeline(
   const clears = records.clears.flatMap(toClear)
   const weeklyClears = clears.filter(({ occurredAt }) => occurredAt >= weekStart)
   const seasonClears = countClears(clears.filter(({ occurredAt }) => occurredAt >= seasonStart))
-  const enhancements = records.enhancements.flatMap(toEnhancement)
-  const acquisitions = records.acquisitions.map(toAcquisition)
+  const enhancements = toEnhancementPage(records.enhancements)
+  const acquisitions = toAcquisitionPage(records.acquisitions)
 
-  return { weeklyClears, seasonClears, enhancements, acquisitions }
+  return {
+    weeklyClears,
+    seasonClears,
+    enhancements: enhancements.items,
+    enhancementsCursor: enhancements.nextCursor,
+    acquisitions: acquisitions.items,
+    acquisitionsCursor: acquisitions.nextCursor
+  }
+}
+
+function readPageRows(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  list: TimelinePageList,
+  before?: TimelineItemCursor
+): Promise<TimelineItemRow[]> {
+  return readRecentTimelineItems(client, character, {
+    ...PAGE_QUERIES[list],
+    limit: PAGE_SIZE + 1,
+    before
+  })
 }
 
 export async function readCharacterTimeline(
@@ -197,16 +276,23 @@ export async function readCharacterTimeline(
   const since = new Date(Math.min(weekStart.getTime(), seasonStart.getTime()))
   const [clears, enhancements, acquisitions] = await Promise.all([
     readTimelineEvents(client, character, CLEAR_CODES, since),
-    readRecentTimelineItems(client, character, {
-      codes: ENHANCEMENT_CODES,
-      limit: RECENT_LIMIT
-    }),
-    readRecentTimelineItems(client, character, {
-      codes: ACQUISITION_CODES,
-      itemRarities: ACQUISITION_RARITIES,
-      limit: RECENT_LIMIT
-    })
+    readPageRows(client, character, 'enhancements'),
+    readPageRows(client, character, 'acquisitions')
   ])
 
   return toCharacterTimeline({ clears, enhancements, acquisitions }, weekStart, seasonStart)
+}
+
+export async function readTimelinePage(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  list: TimelinePageList,
+  before: TimelineItemCursor
+): Promise<TimelineItemPage> {
+  const rows = await readPageRows(client, character, list, before)
+  if (list === 'enhancements') {
+    return toEnhancementPage(rows)
+  }
+
+  return toAcquisitionPage(rows)
 }
