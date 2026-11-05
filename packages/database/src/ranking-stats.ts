@@ -3,7 +3,6 @@ import type { DatabaseClient } from './client.js'
 import type { Prisma } from './generated/prisma/client.js'
 
 export type FameRankingFilter = {
-  serverId?: string
   jobId?: string
   jobGrowId?: string
 }
@@ -39,11 +38,11 @@ const FAME_BUCKET_SIZE = 10_000
 
 export async function readFameRanking(
   client: DatabaseClient,
-  { serverId, jobId, jobGrowId }: FameRankingFilter,
+  { jobId, jobGrowId }: FameRankingFilter,
   limit: number
 ): Promise<StoredCharacter[]> {
   const rows = await client.character.findMany({
-    where: { fame: { not: null }, serverId, jobId, jobGrowId },
+    where: { fame: { not: null }, jobId, jobGrowId },
     orderBy: [{ fame: 'desc' }, { serverId: 'asc' }, { characterId: 'asc' }],
     take: limit,
     select: {
