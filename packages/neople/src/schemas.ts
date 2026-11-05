@@ -62,10 +62,10 @@ export const characterBasicSchema = z.object({
   jobGrowId: nonblankString,
   jobName: nonblankString,
   jobGrowName: nonblankString,
-  fame: z.int().nullish(),
+  fame: z.int().nullable().default(null),
   adventureName: nonblankString,
-  guildId: z.string().nullish(),
-  guildName: z.string().nullish()
+  guildId: z.string().nullable().default(null),
+  guildName: z.string().nullable().default(null)
 })
 
 export type NeopleCharacterBasic = z.output<typeof characterBasicSchema>

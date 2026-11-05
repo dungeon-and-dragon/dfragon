@@ -301,7 +301,9 @@ const payloads: CharacterPayloads = {
 test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 캐릭터를 받지 못하면 알리지 않는다', async (t) => {
   const fetched: CharacterIdentity[] = []
   const emitter = new EventEmitter2()
-  emitter.on(CHARACTER_FETCHED, (event: CharacterFetched) => fetched.push({ ...event }))
+  emitter.on(CHARACTER_FETCHED, ({ serverId, characterId }: CharacterFetched) =>
+    fetched.push({ serverId, characterId })
+  )
   let found = true
   const service = createCharacterDetailService({
     catalog: createCatalogService(async () => new Map()),
