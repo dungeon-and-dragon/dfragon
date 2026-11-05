@@ -6,10 +6,21 @@ const clearKind = z.enum(['raid', 'legion'])
 
 export const characterTimelineSchema = z.object({
   weeklyClears: z.array(
-    z.object({ kind: clearKind, name: z.string(), modeName: nullableText, occurredAt })
+    z.object({
+      kind: clearKind,
+      name: z.string(),
+      modeName: nullableText,
+      hard: z.boolean(),
+      occurredAt
+    })
   ),
   seasonClears: z.array(
-    z.object({ kind: clearKind, name: z.string(), count: z.number().int().positive() })
+    z.object({
+      kind: clearKind,
+      name: z.string(),
+      hard: z.boolean(),
+      count: z.number().int().positive()
+    })
   ),
   enhancements: z.array(
     z.object({
