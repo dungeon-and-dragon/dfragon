@@ -27,7 +27,12 @@ import type {
   FameRanking,
   FameRankingFilter
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
-import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
+import type {
+  CharacterTimeline,
+  TimelineAcquisition,
+  TimelineEnhancement,
+  TimelinePage
+} from '@dfragon/client-core/shared/search/character-timeline'
 import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
 import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 
@@ -50,6 +55,14 @@ export type ClientHost = Readonly<{
   getTodayGrade: () => Promise<TodayGrade>
   getCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
   getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
+  getTimelineEnhancements: (
+    identity: CharacterIdentity,
+    before: string
+  ) => Promise<TimelinePage<TimelineEnhancement>>
+  getTimelineAcquisitions: (
+    identity: CharacterIdentity,
+    before: string
+  ) => Promise<TimelinePage<TimelineAcquisition>>
   // 스킬 창 데이터를 아직 올리지 않았으면 null을 돌려준다.
   getSkillWindowCatalog: () => Promise<SkillWindowCatalog | null>
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>

@@ -1,8 +1,19 @@
 import { ProgressCircle } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { useCallback } from 'react'
+import type { CharacterIdentity } from '@dfragon/client-core/preload/common/types/character'
+import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
 import { useCharacterTimeline } from '../../../hooks/useCharacterTimeline'
+import { useClientHost } from '../../../hooks/useClientHost'
+import { useTimelinePages } from '../../../hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
-import { Acquisitions, Enhancements, SeasonClears, WeeklyClears } from './timeline/TimelineSections'
+import {
+  Acquisitions,
+  Enhancements,
+  SeasonClears,
+  TimelineMore,
+  WeeklyClears
+} from './timeline/TimelineSections'
 import { styles } from './timeline/TimelineTab.style'
 
 export function TimelineTab({ detail }: CharacterTabProps): React.JSX.Element {
@@ -22,18 +33,47 @@ export function TimelineTab({ detail }: CharacterTabProps): React.JSX.Element {
         </div>
       )
     case 'success': {
-      const { weeklyClears, seasonClears, enhancements, acquisitions } = result.timeline
+      const { serverId, characterId } = detail.character
 
-      return (
-        <div {...stylex.props(styles.root)}>
-          <WeeklyClears clears={weeklyClears} />
-          <SeasonClears counts={seasonClears} />
-          <div {...stylex.props(styles.columns)}>
-            <Enhancements enhancements={enhancements} />
-            <Acquisitions acquisitions={acquisitions} />
-          </div>
-        </div>
-      )
+      return <TimelineContent identity={{ serverId, characterId }} timeline={result.timeline} />
     }
   }
+}
+
+function TimelineContent({
+  identity,
+  timeline
+}: {
+  identity: CharacterIdentity
+  timeline: CharacterTimeline
+}): React.JSX.Element {
+  const { getTimelineEnhancements, getTimelineAcquisitions } = useClientHost()
+  const { serverId, characterId } = identity
+  const enhancements = useTimelinePages(
+    timeline.enhancements,
+    timeline.enhancementsCursor,
+    useCallback(
+      (before: string) => getTimelineEnhancements({ serverId, characterId }, before),
+      [getTimelineEnhancements, serverId, characterId]
+    )
+  )
+  const acquisitions = useTimelinePages(
+    timeline.acquisitions,
+    timeline.acquisitionsCursor,
+    useCallback(
+      (before: string) => getTimelineAcquisitions({ serverId, characterId }, before),
+      [getTimelineAcquisitions, serverId, characterId]
+    )
+  )
+
+  return (
+    <div {...stylex.props(styles.root)}>
+      <WeeklyClears clears={timeline.weeklyClears} />
+      <SeasonClears counts={timeline.seasonClears} />
+      <div {...stylex.props(styles.columns)}>
+        <Enhancements enhancements={enhancements.items} more={<TimelineMore {...enhancements} />} />
+        <Acquisitions acquisitions={acquisitions.items} more={<TimelineMore {...acquisitions} />} />
+      </div>
+    </div>
+  )
 }
