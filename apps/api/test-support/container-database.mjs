@@ -18,11 +18,17 @@ const postgresImage =
   'docker.io/library/postgres:18.6-trixie@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280'
 const runtimeCheckPath = fileURLToPath(new URL('./container-runtime-check.mjs', import.meta.url))
 const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs', import.meta.url))
+const timelineReadCheckPath = fileURLToPath(
+  new URL('./container-timeline-read-check.mjs', import.meta.url)
+)
 const characterCheckPath = fileURLToPath(
   new URL('./container-character-check.mjs', import.meta.url)
 )
 const collectionCheckPath = fileURLToPath(
   new URL('./container-collection-check.mjs', import.meta.url)
+)
+const adventureGuildCheckPath = fileURLToPath(
+  new URL('./container-adventure-guild-check.mjs', import.meta.url)
 )
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
@@ -244,9 +250,13 @@ try {
         '--mount',
         `type=bind,source=${timelineCheckPath},target=/app/container-timeline-check.mjs,readonly`,
         '--mount',
+        `type=bind,source=${timelineReadCheckPath},target=/app/container-timeline-read-check.mjs,readonly`,
+        '--mount',
         `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${adventureGuildCheckPath},target=/app/container-adventure-guild-check.mjs,readonly`,
         imageId
       ])
     )
@@ -276,7 +286,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '2'
+    '3'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -358,6 +368,16 @@ try {
     't'
   )
 
+  stage = 'timeline read'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-timeline-read-check.mjs'
+  ])
+
   stage = 'character and adventure'
   await docker([
     'exec',
@@ -403,6 +423,22 @@ try {
     '115:眞 웨펀마스터:합성수집모험단:true'
   )
   await psql('DELETE FROM character_collection')
+
+  stage = 'adventure and guild reads'
+  assert.equal(
+    (
+      await psql("SELECT indexdef FROM pg_indexes WHERE indexname = 'characters_guild_id_idx'")
+    ).stdout.trim(),
+    'CREATE INDEX characters_guild_id_idx ON public.characters USING btree (guild_id)'
+  )
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-adventure-guild-check.mjs'
+  ])
 
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
@@ -564,6 +600,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, character records, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement and read, character records, adventure and guild reads, character collector start and stop, HTTP and database input rejection\n'
   )
 }

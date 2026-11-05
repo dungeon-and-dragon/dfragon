@@ -145,23 +145,22 @@ test('검색 HTTP는 raw 구조와 UTF-8 오류를 공급자 호출 전에 거�
   })
 })
 
-test('HEAD와 잘못된 검색 query는 공급자를 호출하지 않고 같은 IP의 정상 GET은 IP별 한도 없이 처리한다', async () => {
+test('HEAD는 GET처럼 검색하고 잘못된 검색 query는 공급자를 호출하지 않으며 같은 IP의 정상 GET은 IP별 한도 없이 처리한다', async () => {
   await withSearchApp(async ({ base, calls }) => {
     const head = await fetch(`${base}/characters?characterName=ab`, { method: 'HEAD' })
-    assert.equal(head.status, 400)
-    assert.equal(head.headers.get('cache-control'), 'no-store')
-    assert.equal(await head.text(), '')
+    assert.equal(head.status, 200)
+    assert.equal(calls.length, 1)
     expectSearchError(
       await rawGet(base, '/characters?characterName=ab&unknown=1'),
       400,
       'INVALID_SEARCH_QUERY',
       queryMessage
     )
-    assert.deepEqual(calls, [])
+    assert.equal(calls.length, 1)
     for (let index = 0; index < 12; index++) {
       expectEmptyRows(await rawGet(base, '/characters?characterName=ab'))
     }
-    assert.equal(calls.length, 12)
+    assert.equal(calls.length, 13)
   })
 })
 

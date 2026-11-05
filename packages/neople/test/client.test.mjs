@@ -89,6 +89,18 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
   }
 })
 
+test('기본 정보에 명성, 길드가 없으면 null로 돌려준다', async () => {
+  const { fame: _fame, guildId: _guildId, guildName: _guildName, ...withoutGuild } = basic
+  const { neople } = recordingClient(withoutGuild)
+
+  assert.deepEqual(await neople.characterBasic(identity), {
+    ...withoutGuild,
+    fame: null,
+    guildId: null,
+    guildName: null
+  })
+})
+
 test('기본 정보에 모험단 이름이 없으면 api 실패로 던진다', async () => {
   const { neople } = recordingClient({ ...basic, adventureName: null })
 
@@ -167,5 +179,24 @@ test('실패 종류와 원인: 분류한 실패와 schema 불일치는 원인 �
       return true
     })
     assert.equal(calls, 1, name)
+  }
+})
+
+test('DNF001은 없는 캐릭터로 표시하되 분류는 status대로 두고 다른 오류 code는 표시하지 않는다', async () => {
+  for (const [code, characterNotFound] of [
+    ['DNF001', true],
+    ['DNF003', false]
+  ]) {
+    const neople = createNeopleClientForTest(apiKey, {
+      fetch: async () => Response.json({ error: { status: 404, code } }, { status: 404 })
+    })
+    await assert.rejects(neople.characterBasic(identity), (error) => {
+      assert(error instanceof NeopleRequestFailure, code)
+      assert.equal(error.kind, 'api', code)
+      assert.equal(error.characterNotFound, characterNotFound, code)
+      assert.equal(Object.hasOwn(error, 'cause'), false, code)
+
+      return true
+    })
   }
 })

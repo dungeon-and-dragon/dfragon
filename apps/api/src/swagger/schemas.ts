@@ -16,6 +16,8 @@ function object(properties: Record<string, SchemaObject>): SchemaObject {
   }
 }
 
+const timelineClearKind: SchemaObject = { type: 'string', enum: ['raid', 'legion'] }
+
 const providerValue: SchemaObject = {
   description: 'Neople 섹션 값. 미장착은 null이며 시즌별 중첩 필드와 배열을 그대로 보존합니다.',
   oneOf: [
@@ -125,6 +127,32 @@ const characterCard = object({
       'jobGrowName이 크루세이더, 인챈트리스, 패러메딕, 뮤즈(眞 접두 포함)면 buffer, 그 밖은 dealer, 직업을 모르면 null. 단 jobName이 프리스트(남)인 크루세이더는 용기의 은총을 습득했으면 dealer. synergy는 장비 점수를 쓰는 시너지 역할이며 아직 이 값으로 판정하는 직업은 없음.'
   },
   score: cardScore
+})
+
+const nullableText: SchemaObject = { type: 'string', nullable: true }
+const storedCharacter = object({
+  serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
+  characterId: text,
+  characterName: text,
+  adventureName: text,
+  level: { type: 'integer', nullable: true },
+  jobId: nullableText,
+  jobGrowId: nullableText,
+  jobName: nullableText,
+  jobGrowName: nullableText,
+  fame: { type: 'integer', nullable: true },
+  guildId: nullableText,
+  guildName: nullableText,
+  fetchedAt: {
+    ...timestamp,
+    nullable: true,
+    description: '이 행의 기본 정보를 Neople에서 받은 시각(basic_fetched_at). 받지 않은 행은 null'
+  }
+})
+const storedCharacters = (description: string): SchemaObject => ({
+  type: 'array',
+  description,
+  items: storedCharacter
 })
 
 export const apiSchemas: Record<string, SchemaObject> = {
@@ -256,6 +284,55 @@ export const apiSchemas: Record<string, SchemaObject> = {
       description: '카드의 역할과 점수. 역할은 직업을 모르면 null입니다.'
     }
   }),
+  CharacterTimeline: object({
+    weeklyClears: {
+      type: 'array',
+      description: '이번 주 클리어. 오래된 순입니다.',
+      items: object({
+        kind: timelineClearKind,
+        name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' },
+        modeName: { ...text, nullable: true, description: '레이드의 data.modeName. 레기온은 null' },
+        occurredAt: timestamp
+      })
+    },
+    seasonClears: {
+      type: 'array',
+      description:
+        '지금 시즌(가장 최근에 시작한 시즌) 클리어를 kind, name별로 센 횟수. 시즌에 처음 클리어한 순입니다.',
+      items: object({
+        kind: timelineClearKind,
+        name: text,
+        count: { type: 'integer', minimum: 1 }
+      })
+    },
+    enhancements: {
+      type: 'array',
+      description: '강화, 증폭, 재련 기록. 최근 순으로 50개까지입니다.',
+      items: object({
+        kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
+        itemId: { ...text, nullable: true },
+        itemName: { ...text, nullable: true },
+        itemRarity: { ...text, nullable: true },
+        before: { type: 'integer', nullable: true, description: '재련은 값이 없어 null' },
+        after: { type: 'integer' },
+        result: { type: 'boolean' },
+        safe: { type: 'boolean', nullable: true, description: '재련은 값이 없어 null' },
+        occurredAt: timestamp
+      })
+    },
+    acquisitions: {
+      type: 'array',
+      description: '에픽, 태초 장비 획득 기록. 최근 순으로 50개까지입니다.',
+      items: object({
+        code: { type: 'integer', description: '획득 경로의 타임라인 코드' },
+        name: { ...text, description: '타임라인 코드 이름' },
+        itemId: { ...text, nullable: true },
+        itemName: { ...text, nullable: true },
+        itemRarity: { type: 'string', enum: ['에픽', '태초'] },
+        occurredAt: timestamp
+      })
+    }
+  }),
   TodayGrade: object({
     percent: {
       type: 'integer',
@@ -264,5 +341,27 @@ export const apiSchemas: Record<string, SchemaObject> = {
       description: '11부위 대표 아이템 오늘의 등급(itemGradeValue)의 평균을 반올림한 값'
     },
     expiresAt: { ...timestamp, description: '등급이 바뀌는 다음 0시(KST)' }
+  }),
+  AdventureCharacters: object({
+    adventureName: text,
+    characters: storedCharacters(
+      'DB에 저장된 그 모험단의 캐릭터. 서버를 가리지 않고 명성이 높은 순이며 명성이 없는 캐릭터는 뒤입니다.'
+    )
+  }),
+  Guild: object({
+    guildId: text,
+    guildName: {
+      ...nullableText,
+      description: '가장 최근에 기본 정보를 받은 길드원의 길드 이름. 길드원이 없으면 null'
+    },
+    memberCount: { type: 'integer', minimum: 0 },
+    averageFame: {
+      type: 'integer',
+      nullable: true,
+      description: '명성이 있는 길드원의 평균을 반올림한 값. 그런 길드원이 없으면 null'
+    },
+    members: storedCharacters(
+      'DB에 저장된 길드원. 서버를 가리지 않고 명성이 높은 순이며 명성이 없는 캐릭터는 뒤입니다.'
+    )
   })
 }

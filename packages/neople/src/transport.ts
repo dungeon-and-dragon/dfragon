@@ -8,6 +8,7 @@ import ky, {
 import {
   NeopleRequestFailure,
   classifyNeopleUpstreamFailure,
+  isCharacterNotFound,
   neopleStatusFailureKind
 } from './failure.js'
 
@@ -40,7 +41,7 @@ function readBody(rawBody: string, response: Response): unknown {
   }
   const failure = classifyNeopleUpstreamFailure(body, response.status, response.ok)
   if (failure) {
-    throw new NeopleRequestFailure(failure)
+    throw new NeopleRequestFailure(failure, { characterNotFound: isCharacterNotFound(body) })
   }
 
   return body

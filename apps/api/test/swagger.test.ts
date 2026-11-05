@@ -34,18 +34,27 @@ test('Swagger는 공개 API 경로만 문서화하고 provider를 호출하지 �
         'get /characters/{serverId}/{characterId}',
         'get /characters/{serverId}/{characterId}/image',
         'post /characters/{serverId}/{characterId}/refresh',
+        'get /characters/{serverId}/{characterId}/timeline',
+        'get /adventures/{adventureName}/characters',
+        'get /guilds/{guildId}',
         'get /items/today-grade'
       ].sort()
     )
-    const refresh = document.paths['/characters/{serverId}/{characterId}/refresh']!.post!
-    assert.deepEqual(Object.keys(refresh.responses).sort(), [
-      '200',
-      '400',
-      '500',
-      '502',
-      '503',
-      '504'
-    ])
+    const detailPath = '/characters/{serverId}/{characterId}'
+    for (const operation of [
+      document.paths[detailPath]!.get!,
+      document.paths[`${detailPath}/refresh`]!.post!
+    ]) {
+      assert.deepEqual(Object.keys(operation.responses).sort(), [
+        '200',
+        '400',
+        '404',
+        '500',
+        '502',
+        '503',
+        '504'
+      ])
+    }
     const image = document.paths['/characters/{serverId}/{characterId}/image']!.get!
     const imageSuccess = image.responses['200']
     assert.ok(imageSuccess !== undefined && 'content' in imageSuccess)

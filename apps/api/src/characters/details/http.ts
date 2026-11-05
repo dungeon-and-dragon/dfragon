@@ -2,7 +2,6 @@ import { ApiTags } from '@nestjs/swagger'
 import { ApiCharacterDetails, ApiCharacterRefresh } from '../../swagger/operations.js'
 import { Controller, Get, Inject, Post, Req, Res } from '@nestjs/common'
 import type { Request, Response } from 'express'
-import { CharacterDetailFailure } from './errors.js'
 import { parseCharacterIdentity } from '../identity.js'
 import type { CharacterDetailResponse, CharacterDetailService } from './service.js'
 import { sendWithCancellation } from '../../http-response.js'
@@ -25,9 +24,6 @@ export class CharacterDetailController {
   @Get(':serverId/:characterId')
   @ApiCharacterDetails()
   async detail(@Req() request: Request, @Res() response: Response): Promise<void> {
-    if (request.method !== 'GET') {
-      throw new CharacterDetailFailure('query')
-    }
     const identity = readIdentity(request)
     const timings = accessLogTimings(response)
     await sendWithCancellation(
@@ -60,11 +56,7 @@ function sendDetail(response: Response, { body, reused }: CharacterDetailRespons
 }
 
 function readIdentity(request: Request) {
-  return parseCharacterIdentity(
-    request.params.serverId,
-    request.params.characterId,
-    request.originalUrl
-  )
+  return parseCharacterIdentity(request.params.serverId, request.params.characterId)
 }
 
 function accessLogTimings(response: Response): NeopleStageTimings {

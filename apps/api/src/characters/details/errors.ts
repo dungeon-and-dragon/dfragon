@@ -7,6 +7,11 @@ const failures = {
     code: 'INVALID_CHARACTER_QUERY',
     message: '캐릭터 조회 조건을 확인해 주세요.'
   },
+  notFound: {
+    status: 404,
+    code: 'CHARACTER_NOT_FOUND',
+    message: '캐릭터를 찾을 수 없습니다. 서버와 캐릭터 ID를 확인해 주세요.'
+  },
   internal: {
     status: 500,
     code: 'INTERNAL_SERVER_ERROR',

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
+import { createCatalogService } from '../src/characters/catalog/service.js'
 import type {
   CharacterDetailSection,
   CharacterPayloads
@@ -10,28 +11,21 @@ import { CharacterDetailFailure, characterDetailFailure } from '../src/character
 import { createNeopleCharacterDetails } from '../src/characters/details/neople.js'
 import { parseCharacterIdentity } from '../src/characters/details/service.js'
 import { NeopleSearchFailure } from '../src/errors/neople-search.js'
+import { createApiHttpApp } from '../src/http.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
 const ignoreStage = () => undefined
 const basic = { ...identity, characterName: '테스트 캐릭터' }
 
-test('상세 입력은 지원 서버, 안전한 ID만 허용하고 query와 경로 주입을 거절한다', () => {
-  assert.deepEqual(
-    parseCharacterIdentity(
-      identity.serverId,
-      identity.characterId,
-      '/characters/siroco/fixture-character'
-    ),
-    identity
-  )
-  for (const [server, character, url] of [
-    ['all', identity.characterId, '/characters/all/id'],
-    ['siroco', '../id', '/characters/siroco/../id'],
-    ['siroco', ' ', '/characters/siroco/%20'],
-    ['siroco', identity.characterId, '/characters/siroco/id?apikey=untrusted']
+test('상세 입력은 지원 서버, 안전한 ID만 허용하고 경로 주입을 거절한다', () => {
+  assert.deepEqual(parseCharacterIdentity(identity.serverId, identity.characterId), identity)
+  for (const [server, character] of [
+    ['all', identity.characterId],
+    ['siroco', '../id'],
+    ['siroco', ' ']
   ]) {
     assert.throws(
-      () => parseCharacterIdentity(server, character, url!),
+      () => parseCharacterIdentity(server, character),
       (error: unknown) => error instanceof CharacterDetailFailure && error.status === 400
     )
   }
@@ -115,6 +109,59 @@ test('공급자 알려진 code를 우선 분류하고 기본 조회 실패는 �
     )
     assert.equal(calls, 1)
   }
+})
+
+test('Neople이 없는 캐릭터(DNF001)라고 답하면 상세 조회와 강제 갱신 모두 404 JSON을 돌려주고 나머지 섹션을 부르지 않는다', async (t) => {
+  const paths: string[] = []
+  const unused = async (): Promise<never> => {
+    throw new Error('not found test must not call this provider')
+  }
+  const app = await createApiHttpApp({
+    search: { searchCharacters: unused },
+    details: {
+      fetchDetails: createNeopleCharacterDetails(
+        createNeopleClientForTest('fake-key', {
+          fetch: async (request) => {
+            paths.push(new URL(request.url).pathname)
+
+            return Response.json(
+              { error: { status: 404, code: 'DNF001', message: 'NOT_FOUND_CHARACTER' } },
+              { status: 404 }
+            )
+          }
+        })
+      ),
+      catalog: createCatalogService(unused)
+    },
+    todayGrade: { fetchShopGrade: unused },
+    writeAccessLog: () => undefined
+  })
+  t.after(() => app.close())
+  await app.listen(0, '127.0.0.1')
+  const detailUrl = `${await app.getUrl()}/characters/siroco/0000000000000000000000000000dead`
+
+  for (const [method, url] of [
+    ['GET', detailUrl],
+    ['POST', `${detailUrl}/refresh`]
+  ] as const) {
+    const response = await fetch(url, { method })
+    assert.equal(response.status, 404, method)
+    assert.equal(response.headers.get('content-type'), 'application/json; charset=utf-8', method)
+    assert.deepEqual(
+      await response.json(),
+      {
+        error: {
+          code: 'CHARACTER_NOT_FOUND',
+          message: '캐릭터를 찾을 수 없습니다. 서버와 캐릭터 ID를 확인해 주세요.'
+        }
+      },
+      method
+    )
+  }
+  assert.deepEqual(paths, [
+    '/df/servers/siroco/characters/0000000000000000000000000000dead',
+    '/df/servers/siroco/characters/0000000000000000000000000000dead'
+  ])
 })
 
 test('연결 오류는 재시도하지 않고 원문 없이 공급자 오류로 반환한다', async () => {
@@ -264,17 +311,14 @@ test('이미 취소된 요청은 기본 조회도 전송하지 않는다', async
 
 test('상세 ID는 대소문자와 ASCII 경계 1~256자를 보존하고 빈 값, 257자, 비ASCII를 거절한다', () => {
   for (const characterId of ['A', 'Mixed_ID-Case', 'x'.repeat(256)]) {
-    assert.deepEqual(
-      parseCharacterIdentity('siroco', characterId, '/characters/siroco/' + characterId),
-      {
-        serverId: 'siroco',
-        characterId
-      }
-    )
+    assert.deepEqual(parseCharacterIdentity('siroco', characterId), {
+      serverId: 'siroco',
+      characterId
+    })
   }
   for (const characterId of ['', 'x'.repeat(257), '캐릭터', 'id/path', 'id%2Fpath']) {
     assert.throws(
-      () => parseCharacterIdentity('siroco', characterId, '/characters/siroco/' + characterId),
+      () => parseCharacterIdentity('siroco', characterId),
       (error: unknown) =>
         error instanceof CharacterDetailFailure &&
         error.status === 400 &&
