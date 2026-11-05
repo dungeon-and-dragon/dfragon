@@ -216,9 +216,16 @@ export async function createApiHttpApp({
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
         provide: ADVENTURE_GUILD_SERVICE,
-        useValue: adventureGuild
-          ? createAdventureGuildService(adventureGuild)
-          : emptyAdventureGuildService
+        // 타임라인 queue는 DB 설정이 있을 때만 있어, 테스트처럼 모험단 읽기만 준 앱은 동기화를 요청하지 않는다.
+        inject: [{ token: TIMELINE_SYNC_QUEUE, optional: true }],
+        useFactory: (queue: TimelineSyncQueue | undefined) => {
+          if (!adventureGuild) {
+            return emptyAdventureGuildService
+          }
+          const requestTimelineSync = queue?.request ?? (() => undefined)
+
+          return createAdventureGuildService(adventureGuild, requestTimelineSync)
+        }
       },
       {
         provide: TODAY_GRADE_SERVICE,
