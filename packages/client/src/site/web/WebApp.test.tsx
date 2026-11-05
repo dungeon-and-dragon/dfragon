@@ -728,3 +728,45 @@ it('상세의 별로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨�
     expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
   )
 })
+
+function recentPopup(): HTMLElement | null {
+  return document.querySelector('[aria-label="최근 본 캐릭터"]')
+}
+
+it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최근 본 캐릭터로 보이고, 이름을 쓰면 닫히며, 지우면 목록에서 빠진다', async () => {
+  stubDetailFetch()
+  window.history.replaceState(null, '', DETAIL_PATH)
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() => expect(summaryStar()).not.toBeNull())
+  const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
+  expect(recentPopup()).toBeNull()
+
+  await act(async () => input.focus())
+
+  await vi.waitFor(() => expect(recentPopup()).not.toBeNull())
+  const items = [...recentPopup()!.querySelectorAll<HTMLAnchorElement>('li a')]
+  expect(items.map((item) => [item.getAttribute('href'), item.textContent])).toEqual([
+    [DETAIL_PATH, '하늘프레이126,965']
+  ])
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, '하')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await vi.waitFor(() => expect(recentPopup()).toBeNull())
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, '')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await vi.waitFor(() => expect(recentPopup()).not.toBeNull())
+
+  const remove = recentPopup()!.querySelector<HTMLButtonElement>(
+    'button[aria-label="하늘 최근 목록에서 지우기"]'
+  )!
+  await act(async () => remove.click())
+
+  await vi.waitFor(() => expect(recentPopup()).toBeNull())
+  expect(document.activeElement).toBe(input)
+  expect(JSON.parse(localStorage.getItem('dfragon:recent-characters') ?? '{}')).toMatchObject({
+    state: { recentCharacters: [] }
+  })
+})
