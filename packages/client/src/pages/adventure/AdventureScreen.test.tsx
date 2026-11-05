@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { StoredCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
 import { AdventureScreen } from './AdventureScreen'
 
@@ -46,9 +47,11 @@ function render(getAdventureCharacters: ClientHost['getAdventureCharacters']): P
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ getAdventureCharacters })}>
-        <TestRouter>
-          <AdventureScreen adventureName="합성 모험단" />
-        </TestRouter>
+        <TestQueryClient>
+          <TestRouter>
+            <AdventureScreen adventureName="합성 모험단" />
+          </TestRouter>
+        </TestQueryClient>
       </ClientHostContext>
     )
   )

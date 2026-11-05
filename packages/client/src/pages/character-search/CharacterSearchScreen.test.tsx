@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
 import { CharacterSearchScreen } from './CharacterSearchScreen'
 
@@ -27,9 +28,11 @@ function render(searchCharacters: ClientHost['searchCharacters']): Promise<void>
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ searchCharacters })}>
-        <TestRouter>
-          <CharacterSearchScreen query={{ characterName: '합성', serverId: 'prey' }} />
-        </TestRouter>
+        <TestQueryClient>
+          <TestRouter>
+            <CharacterSearchScreen query={{ characterName: '합성', serverId: 'prey' }} />
+          </TestRouter>
+        </TestQueryClient>
       </ClientHostContext>
     )
   )

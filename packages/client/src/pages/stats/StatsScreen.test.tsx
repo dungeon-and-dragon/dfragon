@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import { ClientHostContext } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { StatsScreen } from './StatsScreen'
 
 let container: HTMLDivElement
@@ -69,7 +70,9 @@ function render(getCharacterStats: () => Promise<CharacterStats>): Promise<void>
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ getCharacterStats })}>
-        <StatsScreen />
+        <TestQueryClient>
+          <StatsScreen />
+        </TestQueryClient>
       </ClientHostContext>
     )
   )
