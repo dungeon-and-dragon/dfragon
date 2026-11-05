@@ -455,8 +455,7 @@ try {
     [
       'CREATE INDEX characters_fame_idx ON public.characters USING btree (fame DESC)',
       'CREATE INDEX characters_job_id_fame_idx ON public.characters USING btree (job_id, fame DESC)',
-      'CREATE INDEX characters_job_id_job_grow_id_fame_idx ON public.characters USING btree (job_id, job_grow_id, fame DESC)',
-      'CREATE INDEX characters_server_id_fame_idx ON public.characters USING btree (server_id, fame DESC)'
+      'CREATE INDEX characters_job_id_job_grow_id_fame_idx ON public.characters USING btree (job_id, job_grow_id, fame DESC)'
     ].join('\n')
   )
   await docker([
