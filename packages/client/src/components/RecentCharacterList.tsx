@@ -9,9 +9,8 @@ import {
 } from '@dfragon/client-core/preload/common/search/character-summary'
 import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
 import { CardImage } from './CardImage'
-import { styles } from './CharacterSearchResults.style'
 import { moveItemFocus } from './move-item-focus'
-import { styles as recentStyles } from './RecentCharacterList.style'
+import { styles } from './RecentCharacterList.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -69,12 +68,12 @@ export function RecentCharacterList({
             finalFocus={false}
             {...stylex.props(styles.popup)}
           >
-            <h3 {...stylex.props(recentStyles.title)}>최근 본 캐릭터</h3>
+            <h3 {...stylex.props(styles.title)}>최근 본 캐릭터</h3>
             <ul ref={list} onKeyDown={handleListKeyDown} {...stylex.props(styles.list)}>
               {recentCharacters.map((character) => (
                 <li
                   key={`${character.serverId}/${character.characterId}`}
-                  {...stylex.props(recentStyles.row)}
+                  {...stylex.props(styles.row)}
                 >
                   <RecentItem character={character} onPick={onClose} />
                   <RemoveButton character={character} onRemove={remove} />
@@ -102,7 +101,7 @@ function RecentItem({
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
-      {...stylex.props(styles.item, recentStyles.item)}
+      {...stylex.props(styles.item)}
     >
       <span {...stylex.props(styles.well)}>
         <CardImage src={characterImageUrl(character)} />
@@ -135,9 +134,9 @@ function RemoveButton({
       type="button"
       aria-label={`${character.characterName} 최근 목록에서 지우기`}
       onClick={handleClick}
-      {...stylex.props(recentStyles.remove)}
+      {...stylex.props(styles.remove)}
     >
-      <svg aria-hidden="true" viewBox="0 0 24 24" {...stylex.props(recentStyles.removeIcon)}>
+      <svg aria-hidden="true" viewBox="0 0 24 24" {...stylex.props(styles.removeIcon)}>
         <path d="M6 6l12 12M18 6 6 18" />
       </svg>
     </button>

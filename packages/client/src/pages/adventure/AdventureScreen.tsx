@@ -5,12 +5,17 @@ import { CharacterListBox } from '../../components/table/CharacterListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useAdventureCharacters } from '../../hooks/useAdventureCharacters'
 import type { LoadedResult } from '../../hooks/useLoadedResult'
+import { NotFoundScreen } from '../not-found/NotFoundScreen'
 import { styles } from './AdventureScreen.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
 export function AdventureScreen({ adventureName }: { adventureName: string }): React.JSX.Element {
   const result = useAdventureCharacters(adventureName)
+  if (result.status === 'success' && result.value.characters.length === 0) {
+    return <NotFoundScreen />
+  }
+
   const characters: LoadedResult<readonly StoredCharacter[]> =
     result.status === 'success' ? { status: 'success', value: result.value.characters } : result
 
