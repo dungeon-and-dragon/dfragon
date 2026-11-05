@@ -20,6 +20,7 @@ import { parseRankingSearch } from '../../pages/rankings/ranking-search'
 import { RankingsPage } from '../../pages/rankings/RankingsPage'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { StatsScreen } from '../../pages/stats/StatsScreen'
+import { WeeklyScreen } from '../../pages/weekly/WeeklyScreen'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
@@ -144,7 +145,19 @@ const statsRoute = createRoute({
   component: StatsScreen
 })
 
-const routeTree = rootRoute.addChildren([homeRoute, characterRoute, rankingsRoute, statsRoute])
+const weeklyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/my',
+  component: WeeklyScreen
+})
+
+const routeTree = rootRoute.addChildren([
+  homeRoute,
+  characterRoute,
+  rankingsRoute,
+  statsRoute,
+  weeklyRoute
+])
 
 function createWebRouter(host: BrowserHost) {
   return createRouter({ routeTree, context: { host } })
