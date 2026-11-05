@@ -4,15 +4,19 @@
  * 손으로 맞추고, 값을 바꿀 때 기준 commit도 함께 고친다.
  * 색 값은 2026-11-05, 11-06 결정의 무채색 팔레트와 게임 색이며 ADR 0009의 색 값을 대체한다. 바탕, 글자, 선과
  * 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류)과 게임 클라이언트 값을 쓰는 게임 색에만 쓴다.
- * 상황별 색의 옅은 면(--df-bg-*-weak)은 그 색 14%다. 모험단, 길드 이름은 흐린 글자색, 명성 상위와 랭커는 기본 명성
- * 숫자와 같은 초록을 쓰며 구분하는 방법은 나중에 정한다. 태초와 신화는 세로 그라데이션(*-gradient)으로 그리고
- * 그라데이션을 쓸 수 없는 좁은 자리에는 같은 이름의 단색을 쓴다. 이 값들은 아직 tokens.json에 반영하지 않았다.
+ * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 기본은 시스템 설정을 따르고, 사용자가 고른 모드는
+ * html의 data-color-mode가 color-scheme을 고정한다. 브랜드 로고 색(--df-brand-*)은 그림 색이라 모드와 관계없이 같다.
+ * 상황별 색의 옅은 면(--df-bg-*-weak)은 다크에서 그 색 14%, 라이트에서 10%다. 모험단, 길드 이름은 흐린 글자색, 명성
+ * 상위와 랭커는 기본 명성 숫자와 같은 초록을 쓰며 구분하는 방법은 나중에 정한다. 태초와 신화는 세로
+ * 그라데이션(*-gradient)으로 그리고 그라데이션을 쓸 수 없는 좁은 자리에는 같은 이름의 단색을 쓴다. 이 값들은 아직
+ * tokens.json에 반영하지 않았다.
  * 기준 commit의 tokens.json에 없는 이름은 아래와 같다.
  * - 입력 칸 테두리 --df-border-input, 포인트 색 --df-accent, card 토큰(--df-card-*), 검색 실패 --df-card-failure,
- *   점수 --df-score-dealer, --df-score-buffer, 상단 바 높이 --df-size-topbar
+ *   점수 --df-score-dealer, --df-score-buffer, 상단 바 높이 --df-size-topbar, 팝오버와 툴팁 그림자 --df-shadow-*
  * - 게임 색 --df-game-refine, --df-game-enchant, --df-game-set, --df-game-increase, --df-game-fame, --df-game-decrease,
  *   --df-game-precision, --df-game-fame-label, --df-rarity-mythic, --df-rarity-*-gradient
- * - 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 16% 면(ADR 0012의 표 행 자리 배지 값)
+ * - 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 면(ADR 0012의 표 행 자리 배지 값). 다크는 16% 면이고, 라이트는
+ *   오류, 검색 실패, 성공의 라이트 값과 그 10% 면을 쓴다.
  * 숫자 글꼴 --df-font-num은 본문과 같은 Pretendard다(ADR 0011).
  * 자른 모서리 --df-cut(ADR 0010), 카드 상태의 꺾쇠, 빗금, 격자, 사선 간격, 그림 칸, 카드 면, 실패 면(ADR 0012),
  * 속성 색과 마법부여 종결, 준종결 색은 지웠다. 대화상자 뒤 막 --df-bg-overlay의 다크 값은 tokens.json의
@@ -20,83 +24,93 @@
  * tokens.json 반영은 그 저장소의 PR로 한다.
  */
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
 
-  --df-bg-canvas: #0a0a0b;
-  --df-bg-bar: #101012;
-  --df-bg-surface: #151517;
-  --df-bg-inset: #1c1c1f;
-  --df-bg-stripe: #1c1c1f;
-  --df-bg-control: #242427;
-  --df-bg-control-hover: #2e2e32;
-  --df-bg-success-weak: #00d80924;
-  --df-bg-danger-weak: #fe352c24;
-  --df-bg-warning-weak: #ffb40024;
-  --df-bg-overlay: #08080ab8;
-  --df-signal: #f4f4f5;
-  --df-signal-hover: #ffffff;
-  --df-on-signal: #0a0a0b;
-  --df-accent: #d6c592;
+  --df-bg-canvas: light-dark(#ffffff, #0a0a0b);
+  --df-bg-bar: light-dark(#fafafa, #101012);
+  --df-bg-surface: light-dark(#f4f4f5, #151517);
+  --df-bg-inset: light-dark(#eeeef0, #1c1c1f);
+  --df-bg-stripe: light-dark(#eeeef0, #1c1c1f);
+  --df-bg-control: light-dark(#e4e4e7, #242427);
+  --df-bg-control-hover: light-dark(#d8d8dd, #2e2e32);
+  --df-bg-success-weak: light-dark(#047c061a, #00d80924);
+  --df-bg-danger-weak: light-dark(#d2080d1a, #fe352c24);
+  --df-bg-warning-weak: light-dark(#8e62001a, #ffb40024);
+  --df-bg-overlay: light-dark(#0a0a0b66, #08080ab8);
+  --df-signal: light-dark(#0a0a0b, #f4f4f5);
+  --df-signal-hover: light-dark(#2e2e32, #ffffff);
+  --df-on-signal: light-dark(#ffffff, #0a0a0b);
+  --df-accent: light-dark(#796939, #d6c592);
   --df-brand-logo: #e83830;
-  --df-fg-default: #f4f4f5;
-  --df-fg-muted: #a9a9b2;
-  --df-fg-subtle: #85858f;
-  --df-fg-placeholder: #85858f;
-  --df-fg-disabled: #55555c;
-  --df-fg-success: #00d809;
-  --df-fg-danger: #fe352c;
-  --df-fg-warning: #ffb400;
-  --df-fg-adventure: #a9a9b2;
-  --df-fg-guild: #a9a9b2;
-  --df-border-default: #252529;
-  --df-border-strong: #3b3b41;
-  --df-border-input: #6b6b74;
-  --df-border-danger: #fe352c;
-  --df-tier-top: #4aa256;
-  --df-tier-ranker: #4aa256;
-  --df-score-dealer: #5f88ff;
-  --df-score-buffer: #97e334;
-  --df-card-control: #242427;
-  --df-card-control-hover: #2e2e32;
-  --df-card-border: #252529;
-  --df-card-border-strong: #3b3b41;
-  --df-card-fg: #f4f4f5;
-  --df-card-fg-muted: #a9a9b2;
-  --df-card-fg-subtle: #85858f;
-  --df-card-signal: #f4f4f5;
-  --df-card-failure: #ffd54a;
+  --df-fg-default: light-dark(#0a0a0b, #f4f4f5);
+  --df-fg-muted: light-dark(#55555c, #a9a9b2);
+  --df-fg-subtle: light-dark(#6b6b74, #85858f);
+  --df-fg-placeholder: light-dark(#6b6b74, #85858f);
+  --df-fg-disabled: light-dark(#a9a9b2, #55555c);
+  --df-fg-success: light-dark(#047c06, #00d809);
+  --df-fg-danger: light-dark(#d2080d, #fe352c);
+  --df-fg-warning: light-dark(#8e6200, #ffb400);
+  --df-fg-adventure: light-dark(#55555c, #a9a9b2);
+  --df-fg-guild: light-dark(#55555c, #a9a9b2);
+  --df-border-default: light-dark(#e4e4e7, #252529);
+  --df-border-strong: light-dark(#c8c8ce, #3b3b41);
+  --df-border-input: light-dark(#8a8a94, #6b6b74);
+  --df-border-danger: light-dark(#d2080d, #fe352c);
+  --df-tier-top: light-dark(#1e7b31, #4aa256);
+  --df-tier-ranker: light-dark(#1e7b31, #4aa256);
+  --df-score-dealer: light-dark(#3e62d5, #5f88ff);
+  --df-score-buffer: light-dark(#4a7606, #97e334);
+  --df-card-control: light-dark(#e4e4e7, #242427);
+  --df-card-control-hover: light-dark(#d8d8dd, #2e2e32);
+  --df-card-border: light-dark(#e4e4e7, #252529);
+  --df-card-border-strong: light-dark(#c8c8ce, #3b3b41);
+  --df-card-fg: light-dark(#0a0a0b, #f4f4f5);
+  --df-card-fg-muted: light-dark(#55555c, #a9a9b2);
+  --df-card-fg-subtle: light-dark(#6b6b74, #85858f);
+  --df-card-signal: light-dark(#0a0a0b, #f4f4f5);
+  --df-card-failure: light-dark(#806707, #ffd54a);
 
   --df-brand-dragon: #e83830;
   --df-brand-cream: #f8e8c8;
   --df-brand-outline: #000000;
 
-  --df-rarity-common: #f4f4f5;
-  --df-rarity-uncommon: #68d5ed;
-  --df-rarity-rare: #b36bff;
-  --df-rarity-unique: #ff00ff;
-  --df-rarity-epic: #ffb400;
-  --df-rarity-legendary: #ff7800;
-  --df-rarity-chronicle: #ff6666;
-  --df-rarity-primordial: #59e2b0;
-  --df-rarity-primordial-gradient: linear-gradient(180deg, #5aff62, #58c6ff);
-  --df-rarity-mythic: #e2988e;
-  --df-rarity-mythic-gradient: linear-gradient(180deg, #ffd61d, #c659ff);
-  --df-game-enhance: #68d5ed;
-  --df-game-refine: #b36bff;
-  --df-game-amplify: #ff00ff;
-  --df-game-enchant: #68eda1;
-  --df-game-set: #97e334;
-  --df-game-increase: #4aa256;
-  --df-game-fame: #4aa256;
-  --df-game-decrease: #e35752;
-  --df-game-precision: #d6c592;
-  --df-game-fame-label: #a0844b;
-  --df-raid-party-red: #ff8f82;
-  --df-raid-party-red-weak: #ff7a6e29;
-  --df-raid-party-yellow: #e8c262;
-  --df-raid-party-yellow-weak: #e8c26229;
-  --df-raid-party-green: #6cd268;
-  --df-raid-party-green-weak: #6cd26829;
+  --df-rarity-common: light-dark(#0a0a0b, #f4f4f5);
+  --df-rarity-uncommon: light-dark(#077487, #68d5ed);
+  --df-rarity-rare: light-dark(#8e43d5, #b36bff);
+  --df-rarity-unique: light-dark(#b808b8, #ff00ff);
+  --df-rarity-epic: light-dark(#8e6200, #ffb400);
+  --df-rarity-legendary: light-dark(#aa4f07, #ff7800);
+  --df-rarity-chronicle: light-dark(#c73039, #ff6666);
+  --df-rarity-primordial: light-dark(#0a7858, #59e2b0);
+  --df-rarity-primordial-gradient: linear-gradient(
+    180deg,
+    light-dark(#007c16, #5aff62),
+    light-dark(#04729e, #58c6ff)
+  );
+  --df-rarity-mythic: light-dark(#9b584f, #e2988e);
+  --df-rarity-mythic-gradient: linear-gradient(
+    180deg,
+    light-dark(#7e6908, #ffd61d),
+    light-dark(#a12ed7, #c659ff)
+  );
+  --df-game-enhance: light-dark(#077487, #68d5ed);
+  --df-game-refine: light-dark(#8e43d5, #b36bff);
+  --df-game-amplify: light-dark(#b808b8, #ff00ff);
+  --df-game-enchant: light-dark(#037a46, #68eda1);
+  --df-game-set: light-dark(#4a7606, #97e334);
+  --df-game-increase: light-dark(#1e7b31, #4aa256);
+  --df-game-fame: light-dark(#1e7b31, #4aa256);
+  --df-game-decrease: light-dark(#bc3232, #e35752);
+  --df-game-precision: light-dark(#796939, #d6c592);
+  --df-game-fame-label: light-dark(#82672d, #a0844b);
+  --df-raid-party-red: light-dark(#d2080d, #ff8f82);
+  --df-raid-party-red-weak: light-dark(#d2080d1a, #ff7a6e29);
+  --df-raid-party-yellow: light-dark(#806707, #e8c262);
+  --df-raid-party-yellow-weak: light-dark(#8067071a, #e8c26229);
+  --df-raid-party-green: light-dark(#047c06, #6cd268);
+  --df-raid-party-green-weak: light-dark(#047c061a, #6cd26829);
+  --df-shadow-popover: 0 8px 24px light-dark(rgb(0 0 0 / 12%), rgb(0 0 0 / 45%));
+  --df-shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
 
   --df-space-4: 4px;
   --df-space-8: 8px;
@@ -123,6 +137,14 @@
   --df-font-num:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
     'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+
+:root[data-color-mode='light'] {
+  color-scheme: light;
+}
+
+:root[data-color-mode='dark'] {
+  color-scheme: dark;
 }
 
 @media (prefers-reduced-motion: reduce) {
