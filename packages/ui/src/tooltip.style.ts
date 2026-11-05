@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, space } from './tokens.stylex'
+import { colors, motion, shadow, space } from './tokens.stylex'
 
 export const styles = stylex.create({
   positioner: { zIndex: 120 },
@@ -10,7 +10,7 @@ export const styles = stylex.create({
     borderTopStyle: 'solid',
     borderTopColor: colors.signal,
     backgroundColor: colors.bgInset,
-    boxShadow: `inset 0 0 0 1px ${colors.borderStrong}, 0 12px 32px rgba(0, 0, 0, 0.6)`,
+    boxShadow: `inset 0 0 0 1px ${colors.borderStrong}, ${shadow.tooltip}`,
     color: colors.fgDefault,
     fontSize: 12,
     lineHeight: '14px',
