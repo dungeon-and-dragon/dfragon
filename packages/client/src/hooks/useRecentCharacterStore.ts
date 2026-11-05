@@ -1,39 +1,34 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { isFiniteNumber, isRecord } from '@dfragon/lib/utils/shape-check'
+import { z } from 'zod'
 import {
-  isCharacterDisplay,
+  characterDisplaySchema,
   isSameCharacter,
   pickCharacterDisplay,
-  readStoredCharacters,
   refreshCharacterDisplay,
+  storedCharacterList,
   type CharacterDisplay,
   type CharacterKey
 } from '../lib/stored-character'
 
-export type RecentCharacter = CharacterDisplay & { viewedAt: number }
-
-type PersistedRecentCharacters = { recentCharacters: RecentCharacter[] }
-
 export const RECENT_CHARACTER_LIMIT = 10
+
+const recentCharacterSchema = characterDisplaySchema.extend({ viewedAt: z.number() })
+
+const persistedRecentCharactersSchema = z.object({
+  recentCharacters: storedCharacterList(recentCharacterSchema).transform((characters) =>
+    characters.slice(0, RECENT_CHARACTER_LIMIT)
+  )
+})
+
+export type RecentCharacter = z.infer<typeof recentCharacterSchema>
+
+type PersistedRecentCharacters = z.infer<typeof persistedRecentCharactersSchema>
 
 const RECENT_CHARACTERS_VERSION = 1
 
-function isRecentCharacter(value: unknown): value is RecentCharacter {
-  return isCharacterDisplay(value) && 'viewedAt' in value && isFiniteNumber(value.viewedAt)
-}
-
 function readPersistedRecentCharacters(persisted: unknown): PersistedRecentCharacters | undefined {
-  if (!isRecord(persisted)) {
-    return undefined
-  }
-
-  const recentCharacters = readStoredCharacters(
-    persisted.recentCharacters,
-    isRecentCharacter
-  ).slice(0, RECENT_CHARACTER_LIMIT)
-
-  return { recentCharacters }
+  return persistedRecentCharactersSchema.safeParse(persisted).data
 }
 
 export const useRecentCharacterStore = create<
