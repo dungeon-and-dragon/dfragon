@@ -21,6 +21,10 @@ import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.
 import { setupSwagger } from './swagger/setup.js'
 import { createTimelineSyncQueue } from './characters/timeline/queue.js'
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
+import {
+  CharacterBasicSubscriber,
+  type RecordCharacterBasic
+} from './characters/basic/subscriber.js'
 import { CharacterEvents } from './characters/events.js'
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
@@ -101,6 +105,7 @@ export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
   readonly timeline?: TimelineSyncOptions
+  readonly recordCharacterBasic?: RecordCharacterBasic
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -111,11 +116,12 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync and character basics. */
 export async function createApiHttpApp({
   search,
   details,
   timeline,
+  recordCharacterBasic,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -137,6 +143,17 @@ export async function createApiHttpApp({
             new TimelineSyncSubscriber(
               createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED')),
               timeline.close
+            )
+        }
+      ]
+    : []
+  const characterBasicProviders = recordCharacterBasic
+    ? [
+        {
+          provide: CharacterBasicSubscriber,
+          useFactory: () =>
+            new CharacterBasicSubscriber(recordCharacterBasic, () =>
+              reportCode('CHARACTER_BASIC_RECORD_FAILED')
             )
         }
       ]
@@ -165,6 +182,7 @@ export async function createApiHttpApp({
           })
       },
       ...timelineProviders,
+      ...characterBasicProviders,
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
         provide: TODAY_GRADE_SERVICE,
