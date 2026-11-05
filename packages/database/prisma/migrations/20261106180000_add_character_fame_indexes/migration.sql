@@ -4,9 +4,6 @@ BEGIN;
 CREATE INDEX "characters_fame_idx" ON "characters"("fame" DESC);
 
 -- CreateIndex
-CREATE INDEX "characters_server_id_fame_idx" ON "characters"("server_id", "fame" DESC);
-
--- CreateIndex
 CREATE INDEX "characters_job_id_fame_idx" ON "characters"("job_id", "fame" DESC);
 
 -- CreateIndex
