@@ -1,7 +1,7 @@
 # 던삐삐 API
 
 `apps/api`는 공개 캐릭터 API입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시합니다.
-DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)을 PostgreSQL에 저장합니다.
+DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)을 PostgreSQL에 저장하고, [타임라인 조회](#타임라인-조회)로 저장한 값을 돌려줍니다.
 같은 이미지의 [캐릭터 수집 worker](#캐릭터-수집-worker)는 캐릭터 목록 파일에 있는 캐릭터의 Neople 기본 정보를 DB에 쌓습니다.
 여러 노드로 띄울 수 있지만 캐시는 노드마다 따로 둡니다. 기본 entry는 설정 검증, [DB migration](#db와-migration)(DB 설정이 있을 때), HTTP listen 순서로 시작합니다.
 
@@ -58,6 +58,22 @@ DB 설정이 있으면 API를 만들 때 Prisma client 하나와 메모리 queue
 Queue는 같은 캐릭터를 합치고 2명씩 처리하며, 마지막 성공이 1시간 이내가 아닌 캐릭터만 `synced_until`부터 90일 구간씩 Neople에서 받아 `timeline_events`, `timeline_items`, `timeline_sync_state`에 저장합니다.
 실패는 `timeline_sync_state.last_failure`에 남고 재시도하지 않습니다. 종료 때 대기열은 버리고 진행 중인 동기화는 기다리지 않습니다.
 DB 설정이 없으면 queue를 만들지 않습니다.
+
+### 타임라인 조회
+
+`GET /characters/:serverId/:characterId/timeline`은 그 캐릭터의 동기화를 같은 queue에 넣고, 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽어 응답합니다.
+마지막 성공이 1시간 이내면 동기화는 Neople을 부르지 않고 바로 끝납니다. 처음 조회한 캐릭터는 구간 여러 개를 받으므로 응답이 몇 초 걸릴 수 있습니다.
+동기화 실패와 동기화 상태는 응답에 넣지 않고, 저장한 값까지만 돌려줍니다. 종료 때 대기열을 버리면 그 캐릭터를 기다리던 조회도 바로 DB를 읽습니다.
+
+| 필드 | 내용 |
+| --- | --- |
+| `weeklyClears` | 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210, `kind: "raid"`)와 레기온(209, `kind: "legion"`) 클리어, 오래된 순 |
+| `seasonClears` | 지금 시즌(`seasons`에서 가장 최근에 시작한 시즌)의 같은 클리어를 `kind`, `name`별로 센 횟수 |
+| `enhancements` | 강화(401, `reinforce`), 증폭(402, `amplify`), 재련(403, `refine`), 최근 순 50개 |
+| `acquisitions` | 획득 코드(501~521, 550~557) 가운데 `item_rarity`가 에픽, 태초인 행, 최근 순 50개 |
+
+레이드 이름은 `raid_name`, 난이도 이름 `modeName`은 행의 `data.modeName`(없으면 `null`)이고, 레기온 이름은 `data.regionName`입니다.
+재련에는 `before`, `safe`가 없어 `null`입니다. 값이 없으면 빈 배열이고, DB 설정이 없는 API는 동기화 없이 빈 배열만 돌려줍니다.
 
 ### 캐릭터 수집 worker
 
@@ -252,6 +268,7 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 이미지 실행 계약은 로컬에 있는 이미지로 `node apps/api/test-support/container-deployment.mjs dfragon-api:local`을 실행해
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
 DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
+타임라인 조회는 합성 행으로 주간 경계 앞뒤, 시즌 경계, 최근 50개, 빈 캐릭터와 진행 중인 동기화를 기다린 조회를 봅니다.
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
