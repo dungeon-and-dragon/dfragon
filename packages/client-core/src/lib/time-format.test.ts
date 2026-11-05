@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import {
+  formatSeason,
   formatSeoulDateTime,
   formatTimeAgo,
   getElapsedTimeRefreshDelay,
@@ -57,3 +58,17 @@ it('title 시각은 한국 시간 HH:mm을 붙이고 자정은 24시가 아니�
   expect(formatSeoulDateTime('2026-01-15T15:00:00.000Z', NOW)).toBe('01-16 00:00')
   expect(formatSeoulDateTime('2025-12-31T14:59:00.000Z', NOW)).toBe('25-12-31 23:59')
 })
+
+it.each([
+  ['2026-11-06T03:00:00.000Z', '천해천'],
+  ['2026-03-25T21:00:00.000Z', '천해천'],
+  ['2026-03-25T20:59:59.999Z', '중천'],
+  ['2022-03-17T06:00:00+09:00', 'THE NEXT JOURNEY'],
+  ['2017-09-21T00:00:00+09:00', '마계'],
+  ['2016-08-31T20:59:59.999Z', null]
+])(
+  '%s는 그 시각에 시작해 있던 가장 최근 시즌 %s이고, 시즌은 첫날 06:00(KST)에 시작한다',
+  (at, season) => {
+    expect(formatSeason(at)).toBe(season)
+  }
+)
