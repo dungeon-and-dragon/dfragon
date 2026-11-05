@@ -57,13 +57,15 @@ DB 설정이 있으면 API를 만들 때 Prisma client 하나와 메모리 queue
 상세 GET과 강제 갱신은 캐릭터 11개 섹션을 받았거나 캐릭터 캐시가 맞으면 `character.fetched` 이벤트를 내고, 동기화를 기다리지 않고 응답합니다. 타임라인 구독자가 이 이벤트를 받아 queue에 넣습니다.
 Queue는 같은 캐릭터를 합치고 2명씩 처리하며, 마지막 성공이 1시간 이내가 아닌 캐릭터만 `synced_until`부터 90일 구간씩 Neople에서 받아 `timeline_events`, `timeline_items`, `timeline_sync_state`에 저장합니다.
 실패는 `timeline_sync_state.last_failure`에 남고 재시도하지 않습니다. 종료 때 대기열은 버리고 진행 중인 동기화는 기다리지 않습니다.
+같은 이벤트가 강화, 증폭, 재련(401~403) 백필을 별도 queue에 넣습니다. 백필은 Neople이 주는 첫날 2017-09-21부터 중천 시작 직전까지 그 세 코드만 90일 구간씩 받아 `timeline_items`에 저장하고, 저장한 구간 끝을 `enhancement_backfilled_until`에 남깁니다.
+끝까지 받은 캐릭터는 Neople을 부르지 않습니다. 실패하면 그 자리에서 멈추고, 다음 상세 조회가 저장한 구간 뒤부터 이어 받습니다.
 DB 설정이 없으면 queue를 만들지 않습니다.
 
 ### 타임라인 조회
 
 `GET /characters/:serverId/:characterId/timeline`은 그 캐릭터의 동기화를 같은 queue에 넣고, 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽어 응답합니다.
 마지막 성공이 1시간 이내면 동기화는 Neople을 부르지 않고 바로 끝납니다. 처음 조회한 캐릭터는 구간 여러 개를 받으므로 응답이 몇 초 걸릴 수 있습니다.
-동기화 실패와 동기화 상태는 응답에 넣지 않고, 저장한 값까지만 돌려줍니다. 종료 때 대기열을 버리면 그 캐릭터를 기다리던 조회도 바로 DB를 읽습니다.
+강화 백필은 기다리지 않으므로 백필이 끝나기 전에는 중천 전 기록이 빠질 수 있습니다. 동기화 실패와 동기화 상태는 응답에 넣지 않고, 저장한 값까지만 돌려줍니다. 종료 때 대기열을 버리면 그 캐릭터를 기다리던 조회도 바로 DB를 읽습니다.
 
 | 필드 | 내용 |
 | --- | --- |
@@ -210,7 +212,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ```
 
 점수 엔진을 열지 못하면 `SCORE_ENGINE_UNAVAILABLE`, 점수 worker가 오류로 끝나거나 엔진 결과 형식이 틀리면 `SCORE_ENGINE_FAILED`를 같은 stdout에 남깁니다.
-[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
+[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, 강화 백필이 실패하면 `TIMELINE_BACKFILL_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
 요청마다 남기는 줄과 달리 `time`, `service`, `code`만 담습니다.
 
 ```json
