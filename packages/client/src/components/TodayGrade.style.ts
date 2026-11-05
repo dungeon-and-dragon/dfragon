@@ -14,6 +14,10 @@ export const styles = stylex.create({
   common: { color: colors.rarityCommon },
   uncommon: { color: colors.rarityUncommon },
   epic: { color: colors.rarityEpic },
-  primordial: { color: colors.rarityPrimordial },
+  primordial: {
+    color: 'transparent',
+    backgroundImage: colors.rarityPrimordialGradient,
+    backgroundClip: 'text'
+  },
   unknown: { color: colors.fgMuted }
 })
