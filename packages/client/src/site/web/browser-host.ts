@@ -11,7 +11,10 @@ import type { CharacterImage } from '@dfragon/client-core/preload/common/types/c
 import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
-import { createCharacterDetailViewHttp } from '@dfragon/client-core/shared/search/character-http'
+import {
+  createCharacterDetailViewHttp,
+  createCharacterTimelineHttp
+} from '@dfragon/client-core/shared/search/character-http'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates
@@ -484,6 +487,7 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
     },
     getTodayGrade: () => readTodayGrade(apiOrigin),
     getCharacterDetail: createCharacterDetailViewHttp({ apiOrigin, fetch: browserFetch }),
+    getCharacterTimeline: createCharacterTimelineHttp({ apiOrigin, fetch: browserFetch }),
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
     onScreenShareEnded: screenShare.onEnded,
