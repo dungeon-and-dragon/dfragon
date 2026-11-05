@@ -59,6 +59,27 @@ export function formatSeoulDateTime(at: string, now: number): string {
   return `${seoulDate(time, now)} ${hour}:${minute}`
 }
 
+// API DB의 seasons 테이블과 같은 값이다. 새 시즌을 넣는 migration을 더할 때 맨 앞에 같이 더한다.
+const SEASONS = [
+  { name: '천해천', startsAt: Date.parse('2026-03-26T06:00:00+09:00') },
+  { name: '중천', startsAt: Date.parse('2025-01-09T06:00:00+09:00') },
+  { name: '선계', startsAt: Date.parse('2023-09-14T06:00:00+09:00') },
+  { name: 'THE NEXT JOURNEY', startsAt: Date.parse('2022-03-17T06:00:00+09:00') },
+  { name: '귀환', startsAt: Date.parse('2020-01-09T06:00:00+09:00') },
+  { name: '할렘', startsAt: Date.parse('2018-08-09T06:00:00+09:00') },
+  { name: '마계', startsAt: Date.parse('2016-09-01T06:00:00+09:00') }
+] as const
+
+export function formatSeason(at: string): string | null {
+  const time = Date.parse(at)
+  const season = SEASONS.find(({ startsAt }) => time >= startsAt)
+  if (season === undefined) {
+    return null
+  }
+
+  return season.name
+}
+
 export function formatTimeAgo(at: string, now: number): string {
   const time = Date.parse(at)
   const elapsed = now - time
