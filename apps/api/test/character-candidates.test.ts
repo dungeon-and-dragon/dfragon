@@ -94,8 +94,7 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 60000,
         jobName: '귀검사(남)',
         jobGrowName: '眞 웨펀마스터',
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/hilder/characters/top_A-1?zoom=1',
-        adventureName: null
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/hilder/characters/top_A-1?zoom=1'
       },
       {
         characterId: 'tie-first',
@@ -105,8 +104,7 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 50000,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/tie-first?zoom=1',
-        adventureName: null
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/tie-first?zoom=1'
       },
       {
         characterId: 'tie-second',
@@ -116,8 +114,7 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 50000,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/prey/characters/tie-second?zoom=1',
-        adventureName: null
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/prey/characters/tie-second?zoom=1'
       },
       {
         characterId: 'zero',
@@ -127,8 +124,7 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 0,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/zero?zoom=1',
-        adventureName: null
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/zero?zoom=1'
       },
       {
         characterId: 'null-first',
@@ -138,8 +134,7 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/siroco/characters/null-first?zoom=1',
-        adventureName: null
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/siroco/characters/null-first?zoom=1'
       },
       {
         characterId: 'omitted',
@@ -149,8 +144,7 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/omitted?zoom=1',
-        adventureName: null
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/omitted?zoom=1'
       }
     ]
   })
@@ -392,8 +386,7 @@ test('후보의 ID 검증은 256자 안전 문자를 허용하며 일반 검색�
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: `https://img-api.neople.co.kr/df/servers/cain/characters/${safeId}?zoom=1`,
-        adventureName: null
+        imageUrl: `https://img-api.neople.co.kr/df/servers/cain/characters/${safeId}?zoom=1`
       }
     ]
   })
@@ -437,27 +430,6 @@ test('공급자 실패는 빈 후보로 숨기지 않으며 같은 IP의 공대 
     assert.deepEqual(await response.json(), { rows: [] })
   }
   assert.equal(calls, 13)
-})
-
-test('후보의 모험단명은 저장하지 않으므로 항상 null이다', async (t) => {
-  const origin = await startApp(t, {
-    fetch: async () =>
-      jsonResponse({
-        rows: [
-          { characterId: 'first', characterName, serverId: 'cain', fame: 200 },
-          { characterId: 'second', characterName, serverId: 'siroco', fame: 100 }
-        ]
-      })
-  })
-
-  const response = await fetch(`${origin}${candidatePath}`)
-
-  assert.equal(response.status, 200)
-  const body = (await response.json()) as { rows: Array<{ adventureName: string | null }> }
-  assert.deepEqual(
-    body.rows.map((row) => row.adventureName),
-    [null, null]
-  )
 })
 
 const HOUR_MS = 60 * 60 * 1000

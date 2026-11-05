@@ -11,16 +11,7 @@ export interface CharacterCardScore {
   versions: { package: string; rulesRev: string; bundleId: string }
 }
 
-/**
- * The retired stats, rank, set, oath and investment fields stay as empty values so the response shape
- * does not change; released Desktop builds read only `role` from the card.
- */
 export interface CharacterCard {
   role: CharacterRole | null
-  stats: null
   score: CharacterCardScore | null
-  serverRank: null
-  set: null
-  oath: null
-  investment: []
 }

@@ -12,5 +12,5 @@ export function projectCharacterCard({
 }: CharacterCardSource): CharacterCard {
   const role = characterFromDetails(character, skillStyle)?.role() ?? null
 
-  return { role, stats: null, score: null, serverRank: null, set: null, oath: null, investment: [] }
+  return { role, score: null }
 }
