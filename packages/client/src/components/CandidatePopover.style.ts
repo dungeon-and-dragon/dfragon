@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, radius } from '@dfragon/ui/tokens.stylex'
 
-const signalWeak = `color-mix(in srgb, ${colors.signal} 14%, transparent)`
+const accentWeak = `color-mix(in srgb, ${colors.accent} 14%, transparent)`
 
 export const styles = stylex.create({
   chip: {
@@ -22,11 +22,11 @@ export const styles = stylex.create({
     lineHeight: '16px',
     fontWeight: 700,
     whiteSpace: 'nowrap',
-    color: colors.signal,
+    color: colors.accent,
     backgroundColor: {
       default: 'transparent',
-      ':hover': signalWeak,
-      ':is([data-popup-open])': signalWeak
+      ':hover': accentWeak,
+      ':is([data-popup-open])': accentWeak
     },
     cursor: 'pointer',
     outlineStyle: { default: 'none', ':focus-visible': 'solid' },
@@ -61,7 +61,7 @@ export const styles = stylex.create({
     padding: 0,
     borderWidth: 1,
     borderStyle: 'solid',
-    borderColor: { default: 'transparent', ':hover': colors.borderStrong },
+    borderColor: { default: 'transparent', ':hover': colors.borderInput },
     borderRadius: radius.control,
     backgroundColor: 'transparent',
     fontFamily: 'inherit',
@@ -119,5 +119,6 @@ export const styles = stylex.create({
     lineHeight: '14px',
     fontWeight: 600,
     fontVariantNumeric: 'tabular-nums'
-  }
+  },
+  fameValue: { color: colors.gameFame }
 })

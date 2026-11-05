@@ -12,7 +12,7 @@ export const styles = stylex.create({
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: {
-      default: colors.borderDefault,
+      default: colors.borderInput,
       ':focus-within': colors.signal
     },
     borderRadius: radius.control,

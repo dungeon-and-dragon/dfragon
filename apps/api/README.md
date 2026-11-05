@@ -1,7 +1,7 @@
 # 던삐삐 API
 
 `apps/api`는 공개 캐릭터 API입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시합니다.
-DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)을 PostgreSQL에 저장하고, [타임라인 조회](#타임라인-조회)로 저장한 값을 돌려줍니다.
+DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)과 [기본 정보](#캐릭터-기본-정보-저장)를 PostgreSQL에 저장하고, [타임라인 조회](#타임라인-조회)로 저장한 타임라인을 돌려줍니다.
 같은 이미지의 [캐릭터 수집 worker](#캐릭터-수집-worker)는 캐릭터 목록 파일에 있는 캐릭터의 Neople 기본 정보를 DB에 쌓습니다.
 여러 노드로 띄울 수 있지만 캐시는 노드마다 따로 둡니다. 기본 entry는 설정 검증, [DB migration](#db와-migration)(DB 설정이 있을 때), HTTP listen 순서로 시작합니다.
 
@@ -75,6 +75,14 @@ DB 설정이 없으면 queue를 만들지 않습니다.
 레이드 이름은 `raid_name`, 난이도 이름 `modeName`은 행의 `data.modeName`(없으면 `null`)이고, 레기온 이름은 `data.regionName`입니다.
 재련에는 `before`, `safe`가 없어 `null`입니다. 값이 없으면 빈 배열이고, DB 설정이 없는 API는 동기화 없이 빈 배열만 돌려줍니다.
 
+### 캐릭터 기본 정보 저장
+
+DB 설정이 있으면 기본 정보 구독자도 `character.fetched` 이벤트를 받아, 상세 응답의 `character`와 같은 이름, 모험단, 레벨, 직업, 명성, 길드를 `@dfragon/database`의 `recordCharacterBasic`으로 `characters`에 덮어쓰고 `basic_fetched_at`을 지금으로 둡니다.
+그 캐릭터가 `character_collection` 대기열에 있으면 대기열 행도 지웁니다.
+캐시가 맞은 조회도 저장하고, DB에 없던 캐릭터와 모험단은 새로 만듭니다. Prisma client는 타임라인 동기화와 함께 씁니다.
+응답은 저장을 기다리지 않고, 저장이 실패해도 상세 응답은 그대로이며 재시도하지 않습니다. 모험단 이름이 없는 캐릭터처럼 기본 정보 schema에 맞지 않는 응답은 저장하지 않습니다.
+DB 설정이 없으면 구독자를 등록하지 않습니다.
+
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
@@ -147,7 +155,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ```
 
 점수 엔진을 열지 못하면 `SCORE_ENGINE_UNAVAILABLE`, 점수 worker가 오류로 끝나거나 엔진 결과 형식이 틀리면 `SCORE_ENGINE_FAILED`를 같은 stdout에 남깁니다.
-[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`를 남깁니다.
+[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
 요청마다 남기는 줄과 달리 `time`, `service`, `code`만 담습니다.
 
 ```json

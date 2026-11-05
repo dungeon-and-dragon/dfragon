@@ -6,6 +6,7 @@ import * as stylex from '@stylexjs/stylex'
 const tones = stylex.create({
   dealer: { color: colors.scoreDealer },
   buffer: { color: colors.scoreBuffer },
+  fame: { color: colors.gameFame },
   top: { color: colors.tierTop },
   ranker: { color: colors.tierRanker }
 })
@@ -22,7 +23,7 @@ function toneClass(tone: keyof typeof tones): string {
 export function toneClassesOf(element: Element): (keyof typeof tones)[] {
   const classes = element.className.split(' ')
 
-  return (['dealer', 'buffer', 'top', 'ranker'] as const).filter((tone) =>
+  return (['dealer', 'buffer', 'fame', 'top', 'ranker'] as const).filter((tone) =>
     classes.includes(toneClass(tone))
   )
 }

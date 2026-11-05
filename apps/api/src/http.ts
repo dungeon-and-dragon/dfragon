@@ -30,6 +30,10 @@ import {
   emptyCharacterTimelineService
 } from './characters/timeline/service.js'
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
+import {
+  CharacterBasicSubscriber,
+  type RecordCharacterBasic
+} from './characters/basic/subscriber.js'
 import { CharacterEvents } from './characters/events.js'
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
@@ -112,6 +116,7 @@ export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
   readonly timeline?: TimelineSyncOptions
+  readonly recordCharacterBasic?: RecordCharacterBasic
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -122,11 +127,12 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync and character basics. */
 export async function createApiHttpApp({
   search,
   details,
   timeline,
+  recordCharacterBasic,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -161,6 +167,17 @@ export async function createApiHttpApp({
         }
       ]
     : [{ provide: CHARACTER_TIMELINE_SERVICE, useValue: emptyCharacterTimelineService }]
+  const characterBasicProviders = recordCharacterBasic
+    ? [
+        {
+          provide: CharacterBasicSubscriber,
+          useFactory: () =>
+            new CharacterBasicSubscriber(recordCharacterBasic, () =>
+              reportCode('CHARACTER_BASIC_RECORD_FAILED')
+            )
+        }
+      ]
+    : []
   @Module({
     imports: [EventEmitterModule.forRoot()],
     controllers: [
@@ -186,6 +203,7 @@ export async function createApiHttpApp({
           })
       },
       ...timelineProviders,
+      ...characterBasicProviders,
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
       {
         provide: TODAY_GRADE_SERVICE,
