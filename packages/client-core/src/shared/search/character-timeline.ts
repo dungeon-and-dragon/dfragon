@@ -10,7 +10,7 @@ export const characterTimelineSchema = z.object({
       kind: clearKind,
       name: z.string(),
       modeName: nullableText,
-      hard: z.boolean(),
+      hard: z.boolean().default(false),
       occurredAt
     })
   ),
@@ -18,7 +18,7 @@ export const characterTimelineSchema = z.object({
     z.object({
       kind: clearKind,
       name: z.string(),
-      hard: z.boolean(),
+      hard: z.boolean().default(false),
       count: z.number().int().positive()
     })
   ),
