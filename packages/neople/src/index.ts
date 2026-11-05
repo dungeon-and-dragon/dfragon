@@ -26,6 +26,7 @@ export {
   type NeopleCharacterSection,
   type NeopleSkill,
   type NeopleTimelinePage,
-  type NeopleTimelineRow
+  type NeopleTimelineRow,
+  characterBasicSchema
 } from './schemas.js'
 export type { FetchTransport } from './transport.js'
