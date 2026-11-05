@@ -6,7 +6,14 @@ import type { ClientHost } from '../../hooks/useClientHost'
 import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 
 type ClientHostOverrides = Partial<
-  Pick<ClientHost, 'getTodayGrade' | 'getCharacterDetail' | 'getCharacterTimeline'>
+  Pick<
+    ClientHost,
+    | 'getTodayGrade'
+    | 'getCharacterDetail'
+    | 'getCharacterTimeline'
+    | 'getFameRanking'
+    | 'getCharacterStats'
+  >
 > & {
   party?: Partial<ClientHost['party']>
   raid?: Partial<ClientHost['raid']>
@@ -49,6 +56,8 @@ export function createTestClientHost({
     getTodayGrade: vi.fn(() => new Promise<TodayGrade>(() => {})),
     getCharacterDetail: vi.fn(() => new Promise<never>(() => {})),
     getCharacterTimeline: vi.fn(() => new Promise<never>(() => {})),
+    getFameRanking: vi.fn(() => new Promise<never>(() => {})),
+    getCharacterStats: vi.fn(() => new Promise<never>(() => {})),
     searchCharacters: vi.fn(() => new Promise<never>(() => {})),
     ...operations
   }
