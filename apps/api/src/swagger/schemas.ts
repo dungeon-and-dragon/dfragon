@@ -299,16 +299,21 @@ export const apiSchemas: Record<string, SchemaObject> = {
         kind: timelineClearKind,
         name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' },
         modeName: { ...text, nullable: true, description: '레이드의 data.modeName. 레기온은 null' },
+        hard: {
+          type: 'boolean',
+          description: '레이드의 data.hard. 칸이 없는 레이드와 레기온은 false'
+        },
         occurredAt: timestamp
       })
     },
     seasonClears: {
       type: 'array',
       description:
-        '지금 시즌(가장 최근에 시작한 시즌) 클리어를 kind, name별로 센 횟수. 시즌에 처음 클리어한 순입니다.',
+        '지금 시즌(가장 최근에 시작한 시즌) 클리어를 kind, name, hard별로 센 횟수. 시즌에 처음 클리어한 순입니다.',
       items: object({
         kind: timelineClearKind,
         name: text,
+        hard: { type: 'boolean', description: '하드 클리어와 아닌 클리어를 따로 셉니다.' },
         count: { type: 'integer', minimum: 1 }
       })
     },
