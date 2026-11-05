@@ -18,6 +18,7 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
   `Content-Type`이 `image/png`가 아니거나 본문이 4MiB를 넘으면 실패합니다.
 - `neopleCharacterImageUrl(identity)`: 캐릭터 이미지의 고정 URL을 만듭니다.
 - `NeopleRequestFailure`: 모든 실패를 이 오류로 던집니다. `kind`는 `internal`, `api`, `unavailable`, `timeout` 가운데 하나입니다.
+  Neople이 없는 캐릭터(`DNF001`)라고 답하면 `characterNotFound`가 `true`이고, `kind`는 분류표에 없는 code처럼 HTTP status로 정해 `api`입니다.
   JSON 파싱 실패와 연결 오류는 원래 오류를 `cause`로 갖습니다. `cause`에는 정제하지 않은 오류가 남으므로 응답이나 로그로 그대로 내보내지 않습니다.
 - `createNeopleClientForTest(apiKey, { fetch, origin })`, `createNeopleImageClientForTest({ fetch })`: 테스트에서 `fetch`와 origin을 바꿉니다.
   운영 origin은 고정이고, 이 함수는 테스트에서만 씁니다.
