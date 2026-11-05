@@ -39,11 +39,10 @@ export const styles = stylex.create({
   columns: {
     display: 'flex',
     alignItems: 'flex-end',
-    gap: space.s8,
+    gap: space.s4,
     margin: 0,
     padding: space.s16,
-    listStyle: 'none',
-    overflowX: 'auto'
+    listStyle: 'none'
   },
   column: {
     display: 'flex',
@@ -51,12 +50,13 @@ export const styles = stylex.create({
     alignItems: 'center',
     flexGrow: 1,
     flexBasis: 0,
-    minWidth: 32,
+    minWidth: 0,
     gap: space.s4,
     fontSize: 12,
     lineHeight: '16px',
     fontVariantNumeric: 'tabular-nums'
   },
+  columnValue: { whiteSpace: 'nowrap', fontSize: 11 },
   columnTrack: {
     display: 'flex',
     alignItems: 'flex-end',
