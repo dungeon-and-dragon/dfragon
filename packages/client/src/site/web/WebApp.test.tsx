@@ -15,7 +15,7 @@ vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng:
 vi.mock('./browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
 vi.mock('./browser-town-template', () => ({ readTownIndicatorTemplate: vi.fn() }))
 
-const API_ORIGIN = 'https://api.example.test'
+const API_BASE_URL = 'https://site.example.test/api'
 const pastedImage = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }
 
 function pasteImage(): void {
@@ -60,7 +60,7 @@ let host: BrowserHost
 
 // host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
 beforeAll(() => {
-  host = installBrowserHost(API_ORIGIN)
+  host = installBrowserHost(API_BASE_URL)
 })
 
 beforeEach(() => {
@@ -94,7 +94,7 @@ it('브라우저 host만으로 상단 바와 파티 표의 네 자리 행을 그
   await vi.waitFor(() => expect(container.textContent).toContain('85'))
   expect(container.querySelectorAll('tr[aria-label*="번 자리"]')).toHaveLength(4)
   expect(vi.mocked(fetch).mock.calls.map((args) => new Request(...args).url)).toContain(
-    `${API_ORIGIN}/items/today-grade`
+    `${API_BASE_URL}/items/today-grade`
   )
 })
 
