@@ -2,6 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
+import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
 import { decodeBrowserImage } from './browser-png'
@@ -104,6 +105,7 @@ beforeEach(() => {
       Response.json({ percent: 85, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() })
     )
   )
+  localStorage.clear()
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -139,7 +141,10 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
   const brand = header.querySelector('a[aria-label="던삐삐 첫 화면"]')!
   const grade = header.querySelector('[role="img"]')!
   expect(brand.getAttribute('href')).toBe('/')
-  expect(globalMenu()).toEqual([['파티, 공대', 'page']])
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', 'page'],
+    ['즐겨찾기', null]
+  ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   const buttons = [...header.querySelectorAll('button')]
   expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
@@ -165,7 +170,10 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(main.querySelector('h1')?.textContent).toBe('없는 주소입니다.')
   expect(main.querySelector('p')?.textContent).toBe(`${window.location.host}/guide?from=1`)
   expect(homeLink().getAttribute('href')).toBe('/')
-  expect(globalMenu()).toEqual([['파티, 공대', null]])
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', null],
+    ['즐겨찾기', null]
+  ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
   expect(container.querySelector('button[aria-label^="화면 공유"]')).toBeNull()
   expect(seats()).toHaveLength(0)
@@ -174,7 +182,10 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
 
   await waitForPath('/')
   expect(seats()).toHaveLength(4)
-  expect(globalMenu()).toEqual([['파티, 공대', 'page']])
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', 'page'],
+    ['즐겨찾기', null]
+  ])
 })
 
 const DETAIL_PATH = '/c/prey/buffer-1'
@@ -215,7 +226,10 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
 
   await vi.waitFor(() => expect(container.querySelector('main h1')?.textContent).toBe('하늘'))
   expect(selectedTab()).toBe('스킬')
-  expect(globalMenu()).toEqual([['파티, 공대', null]])
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', null],
+    ['즐겨찾기', null]
+  ])
 
   const statusTab = [...container.querySelectorAll<HTMLElement>('[role="tab"]')].find(
     (tab) => tab.textContent === '스탯'
@@ -654,4 +668,63 @@ it('서버를 고른 전역 검색은 그 서버의 캐릭터만 돌려준다', 
   await expect(
     host.searchCharacters({ characterName: '서버별', serverId: null })
   ).resolves.toMatchObject([{ characterId: 'server-1' }, { characterId: 'server-2' }])
+})
+
+function summaryStar(): HTMLButtonElement | null {
+  return container.querySelector(
+    'section[aria-label="캐릭터 요약"] button:is([aria-label="즐겨찾기에 더하기"], [aria-label="즐겨찾기 해제"])'
+  )
+}
+
+function favoriteRows(): (string | null)[] {
+  return [...container.querySelectorAll('section[aria-label="즐겨찾기한 캐릭터"] tbody tr')].map(
+    (row) => row.querySelector('a')?.getAttribute('href') ?? null
+  )
+}
+
+function globalMenuLink(label: string): HTMLAnchorElement {
+  return [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="전역 메뉴"] a')].find(
+    (link) => link.textContent === label
+  )!
+}
+
+it('상세의 별로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨찾기 화면에서 해제하면 목록에서 빠지고 상세의 별도 꺼진다', async () => {
+  stubDetailFetch()
+  window.history.replaceState(null, '', DETAIL_PATH)
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() =>
+    expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
+  )
+
+  await act(async () => summaryStar()!.click())
+
+  expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기 해제')
+  await act(async () => root.unmount())
+  const savedText = localStorage.getItem('dfragon:favorite-characters') ?? ''
+  useFavoriteCharacterStore.setState({ favoriteCharacters: [] })
+  localStorage.setItem('dfragon:favorite-characters', savedText)
+  await act(async () => useFavoriteCharacterStore.persist.rehydrate())
+  root = createRoot(container)
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() => expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기 해제'))
+
+  await act(async () => globalMenuLink('즐겨찾기').click())
+
+  await waitForPath('/favorites')
+  expect(container.querySelector('main h1')?.textContent).toBe('즐겨찾기')
+  expect(favoriteRows()).toEqual([DETAIL_PATH])
+  const unfavorite = container.querySelector<HTMLButtonElement>(
+    'section[aria-label="즐겨찾기한 캐릭터"] button[aria-label="즐겨찾기 해제"]'
+  )!
+  await act(async () => unfavorite.click())
+
+  expect(favoriteRows()).toEqual([])
+  expect(container.querySelector('section[aria-label="즐겨찾기한 캐릭터"]')?.textContent).toBe(
+    '즐겨찾기한 캐릭터즐겨찾기한 캐릭터가 없습니다.'
+  )
+  await act(async () => window.history.back())
+  await waitForPath(DETAIL_PATH)
+  await vi.waitFor(() =>
+    expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
+  )
 })
