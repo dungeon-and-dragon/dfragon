@@ -1,6 +1,5 @@
 import { Controller, Get, Inject, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { RejectQueryAndHead } from '../reject-query-and-head.js'
 import { ApiAdventureCharacters, ApiGuild } from '../swagger/operations.js'
 import type { AdventureCharacters, AdventureGuildService, GuildMembers } from './service.js'
 
@@ -8,7 +7,6 @@ export const ADVENTURE_GUILD_SERVICE = Symbol('ADVENTURE_GUILD_SERVICE')
 
 @ApiTags('캐릭터')
 @Controller()
-@RejectQueryAndHead()
 export class AdventureGuildController {
   constructor(@Inject(ADVENTURE_GUILD_SERVICE) private readonly service: AdventureGuildService) {}
 
