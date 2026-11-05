@@ -242,17 +242,19 @@ describe('캐릭터 상세 화면 응답', () => {
     ).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
   })
 
-  it('API 오류 응답의 error.message를 오류 문구로 준다', async () => {
-    const message = '캐릭터 정보 조회 중 오류가 발생했습니다.'
+  it.each([
+    [404, 'CHARACTER_NOT_FOUND', 'API가 보낸 없는 캐릭터 문구'],
+    [502, 'NEOPLE_API_ERROR', '캐릭터 정보 조회 중 오류가 발생했습니다.']
+  ])('API %i 오류 응답(%s)의 error.message를 오류 문구로 준다', async (status, code, message) => {
     const error = load(
-      { error: { code: 'NEOPLE_API_ERROR', message } },
-      502
+      { error: { code, message } },
+      status
     )({
       serverId: 'cain',
       characterId: 'missing-character'
     })
 
     await expect(error).rejects.toBeInstanceOf(SearchHttpFailure)
-    await expect(error).rejects.toMatchObject({ code: 'NEOPLE_API_ERROR', message })
+    await expect(error).rejects.toMatchObject({ code, message })
   })
 })
