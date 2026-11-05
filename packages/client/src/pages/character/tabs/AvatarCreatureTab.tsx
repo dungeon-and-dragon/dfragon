@@ -1,5 +1,26 @@
+import * as stylex from '@stylexjs/stylex'
+import { CreatureArtifacts } from './avatar/CreatureArtifacts'
+import { AvatarTable } from './shared/AvatarTable'
+import { styles } from './shared/detail-tab.style'
 import type { CharacterTabProps } from './character-tab-props'
 
-export function AvatarCreatureTab(_props: CharacterTabProps): React.JSX.Element | null {
-  return null
+export function AvatarCreatureTab({ detail }: CharacterTabProps): React.JSX.Element {
+  const { avatar, creature } = detail
+
+  return (
+    <div {...stylex.props(styles.tab)}>
+      {avatar.length > 0 && (
+        <section aria-label="아바타" {...stylex.props(styles.section)}>
+          <h2 {...stylex.props(styles.heading)}>아바타</h2>
+          <AvatarTable avatars={avatar} />
+        </section>
+      )}
+      {creature != null && (
+        <section aria-label="크리쳐" {...stylex.props(styles.section)}>
+          <h2 {...stylex.props(styles.heading)}>크리쳐</h2>
+          <CreatureArtifacts creature={creature} />
+        </section>
+      )}
+    </div>
+  )
 }
