@@ -21,6 +21,7 @@ const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs'
 const timelineReadCheckPath = fileURLToPath(
   new URL('./container-timeline-read-check.mjs', import.meta.url)
 )
+const backfillCheckPath = fileURLToPath(new URL('./container-backfill-check.mjs', import.meta.url))
 const characterCheckPath = fileURLToPath(
   new URL('./container-character-check.mjs', import.meta.url)
 )
@@ -255,6 +256,8 @@ try {
         '--mount',
         `type=bind,source=${timelineReadCheckPath},target=/app/container-timeline-read-check.mjs,readonly`,
         '--mount',
+        `type=bind,source=${backfillCheckPath},target=/app/container-backfill-check.mjs,readonly`,
+        '--mount',
         `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
@@ -291,7 +294,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '4'
+    '5'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -305,11 +308,48 @@ try {
         "SELECT string_agg(relid::text, ',' ORDER BY relid::text) FROM pg_partition_tree('timeline_items') WHERE isleaf"
       )
     ).stdout.trim(),
-    'timeline_items_season_1,timeline_items_season_2'
+    'timeline_items_season_10,timeline_items_season_11,timeline_items_season_5,timeline_items_season_6,timeline_items_season_7,timeline_items_season_8,timeline_items_season_9'
   )
   assert.equal(
-    (await psql("SELECT string_agg(name, ',' ORDER BY starts_at) FROM seasons")).stdout.trim(),
-    '중천,천해천'
+    (
+      await psql("SELECT string_agg(id || ':' || name, ',' ORDER BY starts_at) FROM seasons")
+    ).stdout.trim(),
+    '5:마계,6:할렘,7:귀환,8:THE NEXT JOURNEY,9:선계,10:중천,11:천해천'
+  )
+  // 시즌마다 시작 분과 끝 분의 행이 그 시즌 partition에 들어가야 partition 사이에 빈틈과 경계 어긋남이 없다.
+  const probeTimes = [
+    '2017-09-21 00:00',
+    '2018-08-09 05:59',
+    '2018-08-09 06:00',
+    '2020-01-09 05:59',
+    '2020-01-09 06:00',
+    '2022-03-17 05:59',
+    '2022-03-17 06:00',
+    '2023-09-14 05:59',
+    '2023-09-14 06:00',
+    '2025-01-09 05:59',
+    '2025-01-09 06:00',
+    '2026-03-26 05:59',
+    '2026-03-26 06:00',
+    '2099-01-01 00:00'
+  ]
+  const probeValues = probeTimes.map((time) => `'${time}+09'`).join(',')
+  assert.equal(
+    (
+      await psql(
+        `WITH probe AS (INSERT INTO timeline_items (server_id, character_id, code, occurred_at, name, data) SELECT 'cain', 'partition-probe', 401, time::timestamptz, 'probe', '{}' FROM unnest(ARRAY[${probeValues}]) AS time RETURNING occurred_at, tableoid::regclass AS partition) SELECT string_agg(partition::text, ',' ORDER BY occurred_at) FROM probe`
+      )
+    ).stdout.trim(),
+    [5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11]
+      .map((season) => `timeline_items_season_${season}`)
+      .join(',')
+  )
+  await psql("DELETE FROM timeline_items WHERE character_id = 'partition-probe'")
+  // Neople이 주지 않는 2017-09-21 전 행은 들어갈 partition이 없다.
+  await assert.rejects(
+    psql(
+      "INSERT INTO timeline_items (server_id, character_id, code, occurred_at, name, data) VALUES ('cain', 'partition-probe', 401, '2017-09-20 23:59+09', 'probe', '{}')"
+    )
   )
   // 교체 대상이 아닌 행이다. 다른 캐릭터의 같은 시각 행과 같은 캐릭터의 구간 밖 행이다.
   for (const table of ['timeline_events', 'timeline_items']) {
@@ -371,6 +411,45 @@ try {
       await psql("SELECT synced_until = '2026-04-01 00:00+09' FROM timeline_sync_state")
     ).stdout.trim(),
     't'
+  )
+
+  stage = 'enhancement backfill'
+  // 백필 구간 안의 강화류가 아닌 행과 백필 구간 밖의 증폭 행은 남아야 한다.
+  await psql(
+    "INSERT INTO timeline_items (server_id, character_id, code, occurred_at, name, data) VALUES ('cain', 'synthetic-character', 505, '2020-01-01 00:00+09', 'kept-backfill', '{}'), ('cain', 'synthetic-character', 402, '2020-02-01 00:01+09', 'kept-backfill', '{}')"
+  )
+  const backfill = () =>
+    docker([
+      'exec',
+      '--env',
+      'DB_PASSWORD_FILE=/run/secrets/db_password',
+      apiNames[0],
+      'node',
+      '/app/container-backfill-check.mjs'
+    ])
+  // 같은 구간을 다시 받아도 행이 늘지 않고, 정기 동기화 위치는 그대로다.
+  for (let run = 0; run < 2; run++) {
+    await backfill()
+    assert.equal(
+      (
+        await psql(
+          "SELECT tableoid::regclass, code, data->>'after' FROM timeline_items WHERE name = '아이템 증폭'"
+        )
+      ).stdout.trim(),
+      'timeline_items_season_6|402|10'
+    )
+  }
+  assert.equal(
+    (await psql("SELECT count(*) FROM timeline_items WHERE name = 'kept-backfill'")).stdout.trim(),
+    '2'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT synced_until = '2026-04-01 00:00+09', enhancement_backfilled_until = '2020-02-01 00:00+09' FROM timeline_sync_state"
+      )
+    ).stdout.trim(),
+    't|t'
   )
 
   stage = 'timeline read'

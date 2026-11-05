@@ -41,6 +41,10 @@ export const styles = stylex.create({
     whiteSpace: 'nowrap',
     color: colors.fgAdventure
   },
+  link: {
+    color: 'inherit',
+    textDecoration: { default: 'none', ':hover': 'underline' }
+  },
   missing: { color: colors.fgDisabled },
   bone: {
     display: 'block',

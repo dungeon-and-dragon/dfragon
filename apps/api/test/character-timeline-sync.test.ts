@@ -329,13 +329,59 @@ test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 
   assert.deepEqual(fetched, [character, character])
 })
 
+test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백필이 끝나기를 기다리지 않는다', {
+  timeout: 10_000
+}, async (t) => {
+  const backfilling = gate()
+  const backfilled: TimelineCharacter[] = []
+  const app = await createApiHttpApp({
+    search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
+    details: {
+      fetchDetails: async () => payloads,
+      catalog: createCatalogService(async () => new Map())
+    },
+    timeline: {
+      sync: async () => undefined,
+      read: async () => ({
+        weeklyClears: [],
+        seasonClears: [],
+        enhancements: [],
+        acquisitions: []
+      }),
+      backfillEnhancements: async (requested) => {
+        backfilled.push(requested)
+        await backfilling.promise
+      },
+      close: async () => undefined
+    },
+    todayGrade: { fetchShopGrade: async () => assert.fail('오늘의 등급을 부르면 안 된다') },
+    writeAccessLog: () => undefined
+  })
+  t.after(async () => {
+    backfilling.release()
+    await app.close()
+  })
+  await app.listen(0, '127.0.0.1')
+  const origin = await app.getUrl()
+
+  const detail = await fetch(new URL(`/characters/siroco/${character.characterId}`, origin))
+  const timeline = await fetch(
+    new URL(`/characters/siroco/${character.characterId}/timeline`, origin)
+  )
+
+  assert.equal(detail.status, 200)
+  assert.equal(timeline.status, 200)
+  assert.deepEqual(backfilled, [character])
+})
+
 // 닫기가 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
-test('앱을 닫으면 진행 중인 동기화를 기다리지 않고 대기열을 버린 뒤 타임라인 저장소를 닫는다', {
+test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 대기열을 버린 뒤 타임라인 저장소를 닫는다', {
   timeout: 10_000
 }, async () => {
   const running = gate()
   let closed = 0
   let synced = 0
+  let backfilled = 0
   const app = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
@@ -348,6 +394,10 @@ test('앱을 닫으면 진행 중인 동기화를 기다리지 않고 대기열�
         await running.promise
       },
       read: async () => assert.fail('타임라인을 읽으면 안 된다'),
+      backfillEnhancements: async () => {
+        backfilled++
+        await running.promise
+      },
       close: async () => {
         closed++
       }
@@ -364,6 +414,7 @@ test('앱을 닫으면 진행 중인 동기화를 기다리지 않고 대기열�
   }
 
   assert.equal(synced, 2)
+  assert.equal(backfilled, 2)
 
   await app.close()
   running.release()
@@ -371,4 +422,5 @@ test('앱을 닫으면 진행 중인 동기화를 기다리지 않고 대기열�
 
   assert.equal(closed, 1)
   assert.equal(synced, 2)
+  assert.equal(backfilled, 2)
 })

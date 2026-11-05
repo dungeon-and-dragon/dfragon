@@ -100,6 +100,7 @@ model TimelineSyncState {
   lastAttemptedAt DateTime? @map("last_attempted_at") @db.Timestamptz(3)
   lastSucceededAt DateTime? @map("last_succeeded_at") @db.Timestamptz(3)
   lastFailure     String?   @map("last_failure")
+  enhancementBackfilledUntil DateTime? @map("enhancement_backfilled_until") @db.Timestamptz(3)
 
   @@id([serverId, characterId])
   @@map("timeline_sync_state")

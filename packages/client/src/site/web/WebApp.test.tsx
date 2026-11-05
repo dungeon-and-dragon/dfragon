@@ -242,6 +242,23 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(detailRequests(detail)).toBe(1)
 })
 
+it('한글 모험단 이름의 주소를 직접 열면 그 모험단의 캐릭터 목록을 조회해 그린다', async () => {
+  const requested = vi.fn<typeof fetch>(async () =>
+    Response.json({ adventureName: '동네커피', characters: [] })
+  )
+  vi.stubGlobal('fetch', requested)
+  window.history.replaceState(null, '', `/adventures/${encodeURIComponent('동네커피')}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('main section')?.textContent).toBe('저장된 캐릭터가 없습니다.')
+  )
+  expect(container.querySelector('main h1')?.textContent).toBe('동네커피')
+  expect(requested.mock.calls.map((args) => new Request(...args).url)).toContain(
+    `${API_BASE_URL}/adventures/${encodeURIComponent('동네커피')}/characters`
+  )
+})
+
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
   stubDetailFetch()
   window.history.replaceState(null, '', `${DETAIL_PATH}?tab=unknown`)

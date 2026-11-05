@@ -273,6 +273,7 @@ function selectedSummary(serverId: string): NonNullable<SearchSlot['selected']> 
     jobGrowName: null,
     level: null,
     imageUrl: `https://img-api.neople.co.kr/df/servers/${serverId}/characters/synthetic-character?zoom=1`,
+    guildId: null,
     guildName: null,
     equipmentScore: null,
     card: null

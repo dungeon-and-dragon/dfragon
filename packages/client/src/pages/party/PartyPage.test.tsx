@@ -132,6 +132,20 @@ it('비동기 식별 성공은 OCR 첫 이름 대신 선택된 이름과 서버�
   expect(row.querySelector('img')?.getAttribute('src')).toBe(character.image)
 })
 
+it('찾은 캐릭터의 모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {
+  await render({
+    slots: ['success', 'idle', 'idle', 'idle'],
+    characters: [{ ...character, adventure: '동네커피', guildId: 'guild-1', guild: '필로시스' }]
+  })
+
+  const links = [...rows()[0].querySelectorAll('a')].map((link) => [
+    link.textContent,
+    link.getAttribute('href')
+  ])
+  expect(links).toContainEqual(['동네커피', '/adventures/%EB%8F%99%EB%84%A4%EC%BB%A4%ED%94%BC'])
+  expect(links).toContainEqual(['필로시스', '/guilds/guild-1'])
+})
+
 it('네 슬롯의 서로 다른 선택과 대기 상태를 독립적으로 표시한다', async () => {
   await render({
     slots: ['success', 'success', 'pending', 'idle'],

@@ -9,6 +9,7 @@ import { previewCharacter } from '../fixture/mvp/fixture'
 import { serverNames } from '@dfragon/client-core/constants/servers'
 import { useServerMenu } from '../hooks/useServerMenu'
 import { ServerSelect } from './ServerSelect'
+import { TestRouter } from '../testing/test-support/test-router'
 
 let root: ReturnType<typeof createRoot>
 beforeEach(() => {
@@ -61,12 +62,14 @@ it('서버 변경은 해당 행만 조회한다', async () => {
   const otherLookup = vi.fn()
   await act(async () =>
     root.render(
-      <table>
-        <tbody>
-          <FoundRow slot={1} onLookup={onLookup} />
-          <FoundRow slot={2} onLookup={otherLookup} />
-        </tbody>
-      </table>
+      <TestRouter>
+        <table>
+          <tbody>
+            <FoundRow slot={1} onLookup={onLookup} />
+            <FoundRow slot={2} onLookup={otherLookup} />
+          </tbody>
+        </table>
+      </TestRouter>
     )
   )
   const trigger = document.querySelector<HTMLButtonElement>('[aria-label="1번 서버"]')!
@@ -199,11 +202,13 @@ it('행의 칩과 목록을 카드 면으로 그리고 키보드로 열어 고�
 it('파티 행의 서버 목록은 카인, 디레지에, 시로코, 프레이, 카시야스, 힐더, 안톤, 바칼 순서다', async () => {
   await act(async () =>
     root.render(
-      <table>
-        <tbody>
-          <FoundRow slot={1} onLookup={vi.fn()} />
-        </tbody>
-      </table>
+      <TestRouter>
+        <table>
+          <tbody>
+            <FoundRow slot={1} onLookup={vi.fn()} />
+          </tbody>
+        </table>
+      </TestRouter>
     )
   )
   const trigger = document.querySelector<HTMLButtonElement>('[aria-label="1번 서버"]')!
@@ -262,11 +267,13 @@ function keydown(target: Element, key: string, init: KeyboardEventInit = {}): Ke
 async function renderCard(onLookup: (nickname: string, serverId?: string) => void): Promise<void> {
   await act(async () =>
     root.render(
-      <table>
-        <tbody>
-          <FoundRow slot={1} onLookup={onLookup} />
-        </tbody>
-      </table>
+      <TestRouter>
+        <table>
+          <tbody>
+            <FoundRow slot={1} onLookup={onLookup} />
+          </tbody>
+        </table>
+      </TestRouter>
     )
   )
 }
@@ -363,11 +370,13 @@ it('공대 행의 이름 칸도 Tab으로 서버 목록을 열고 Enter로 고�
   const onLookup = vi.fn()
   await act(async () =>
     root.render(
-      <table>
-        <tbody>
-          <FoundRow slot={9} screen="raid" onLookup={onLookup} />
-        </tbody>
-      </table>
+      <TestRouter>
+        <table>
+          <tbody>
+            <FoundRow slot={9} screen="raid" onLookup={onLookup} />
+          </tbody>
+        </table>
+      </TestRouter>
     )
   )
   const name = document.querySelector<HTMLInputElement>('[aria-label="9번 캐릭터 이름"]')!
