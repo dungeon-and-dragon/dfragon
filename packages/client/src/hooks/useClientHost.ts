@@ -15,6 +15,7 @@ import type {
 } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
 
 export type CardSearchHost = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>
@@ -37,6 +38,7 @@ export type ClientHost = Readonly<{
   raid: RaidCaptureHost
   getTodayGrade: () => Promise<TodayGrade>
   getCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
+  getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
   searchCharacters: (query: CharacterNameQuery) => Promise<readonly CharacterCandidate[]>
 }>
 

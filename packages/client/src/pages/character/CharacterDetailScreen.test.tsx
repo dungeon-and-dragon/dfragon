@@ -171,7 +171,7 @@ it('명성과 점수가 없으면 -를 두고, 길드가 없으면 모험단만 
   expect(summary().querySelectorAll('[aria-hidden="true"]')).toHaveLength(0)
 })
 
-it('탭 줄은 여섯 탭을 순서대로 두고 받은 tab을 고르며, 다른 탭을 누르면 다시 조회하지 않고 그 탭을 알린다', async () => {
+it('탭 줄은 일곱 탭을 순서대로 두고 받은 tab을 고르며, 다른 탭을 누르면 다시 조회하지 않고 그 탭을 알린다', async () => {
   const onTabChange = vi.fn()
   const host = await render(async () => detailOf(), { tab: 'oath', onTabChange })
 
@@ -181,11 +181,13 @@ it('탭 줄은 여섯 탭을 순서대로 두고 받은 tab을 고르며, 다른
     '스킬',
     '아바타와 크리쳐',
     '버프 강화',
-    '스탯'
+    '스탯',
+    '타임라인'
   ])
   expect(tabs().map((tab) => tab.getAttribute('aria-selected'))).toEqual([
     'false',
     'true',
+    'false',
     'false',
     'false',
     'false',
