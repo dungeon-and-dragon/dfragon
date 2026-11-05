@@ -17,7 +17,13 @@ export function TitleBox({
   )
 }
 
-export function TitleStat({ label, value }: { label: string; value: string }): React.JSX.Element {
+export function TitleStat({
+  label,
+  value
+}: {
+  label: string
+  value: ReactNode
+}): React.JSX.Element {
   return (
     <div {...stylex.props(styles.stat)}>
       <span {...stylex.props(styles.statLabel)}>{label}</span>

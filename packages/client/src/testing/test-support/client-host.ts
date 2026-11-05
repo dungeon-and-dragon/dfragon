@@ -11,6 +11,8 @@ type ClientHostOverrides = Partial<
     | 'getTodayGrade'
     | 'getCharacterDetail'
     | 'getCharacterTimeline'
+    | 'getTimelineEnhancements'
+    | 'getTimelineAcquisitions'
     | 'getSkillWindowCatalog'
     | 'getFameRanking'
     | 'getCharacterStats'
@@ -61,6 +63,8 @@ export function createTestClientHost({
     getTodayGrade: vi.fn(() => new Promise<TodayGrade>(() => {})),
     getCharacterDetail: vi.fn(() => new Promise<never>(() => {})),
     getCharacterTimeline: vi.fn(() => new Promise<never>(() => {})),
+    getTimelineEnhancements: vi.fn(() => new Promise<never>(() => {})),
+    getTimelineAcquisitions: vi.fn(() => new Promise<never>(() => {})),
     getSkillWindowCatalog: vi.fn(async () => null),
     getFameRanking: vi.fn(() => new Promise<never>(() => {})),
     getCharacterStats: vi.fn(() => new Promise<never>(() => {})),

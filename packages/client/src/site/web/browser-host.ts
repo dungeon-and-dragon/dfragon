@@ -464,6 +464,8 @@ export function installBrowserHost(apiOrigin: string, skillWindowCatalogUrl: str
     getTodayGrade: dfragon.items.todayGrade,
     getCharacterDetail: dfragon.characters.detailView,
     getCharacterTimeline: dfragon.characters.timeline,
+    getTimelineEnhancements: dfragon.characters.timelineEnhancements,
+    getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
     getSkillWindowCatalog: createSkillWindowCatalogSource(skillWindowCatalogUrl),
     getFameRanking: dfragon.rankings.fame,
     getCharacterStats: dfragon.stats,

@@ -1,18 +1,20 @@
+import { Button, ProgressCircle } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import type { ReactNode } from 'react'
+import { type ReactNode, useCallback } from 'react'
 import type {
   TimelineAcquisition,
   TimelineClear,
   TimelineClearCount,
   TimelineEnhancement
 } from '@dfragon/client-core/shared/search/character-timeline'
+import type { TimelinePages } from '../../../../hooks/useTimelinePages'
 import {
   acquisitionRoute,
   CLEAR_KIND_LABELS,
   ENHANCEMENT_KIND_LABELS,
-  formatEnhancementValue,
-  formatTimelineTime
+  formatEnhancementValue
 } from './timeline-format'
+import { RelativeTime } from '../../../../components/RelativeTime'
 import { rarityStyles, styles } from './TimelineTab.style'
 
 const TIME_COLUMN_WIDTH = 112
@@ -54,6 +56,50 @@ function TimelineGroup({
   )
 }
 
+// 목록 끝의 빈 줄이 화면에 들어오면 다음 묶음을 받는다. 받은 뒤 다시 그린 빈 줄이 아직 화면 안이면 이어서 받는다.
+export function TimelineMore({
+  state,
+  loadMore
+}: Pick<TimelinePages<unknown>, 'state' | 'loadMore'>): React.JSX.Element | null {
+  const watchEnd = useCallback(
+    (element: HTMLDivElement) => {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadMore()
+        }
+      })
+      observer.observe(element)
+
+      return () => observer.disconnect()
+    },
+    [loadMore]
+  )
+  switch (state.status) {
+    case 'end':
+      return null
+    case 'idle':
+      return <div ref={watchEnd} aria-hidden="true" {...stylex.props(styles.more)} />
+    case 'loading':
+      return (
+        <div aria-busy="true" {...stylex.props(styles.more)}>
+          <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
+          <span role="status">기록을 더 받는 중입니다.</span>
+        </div>
+      )
+    case 'error':
+      return (
+        <div {...stylex.props(styles.more)}>
+          <p role="alert" {...stylex.props(styles.moreError)}>
+            {state.message}
+          </p>
+          <Button variant="secondary" size="sm" onClick={loadMore}>
+            다시 시도
+          </Button>
+        </div>
+      )
+  }
+}
+
 function ItemName({
   itemName,
   itemRarity
@@ -81,9 +127,7 @@ export function WeeklyClears({ clears }: { clears: readonly TimelineClear[] }): 
             {clear.modeName != null && (
               <span {...stylex.props(styles.clearMode)}>{clear.modeName}</span>
             )}
-            <time dateTime={clear.occurredAt} {...stylex.props(styles.clearTime)}>
-              {formatTimelineTime(clear.occurredAt)}
-            </time>
+            <RelativeTime at={clear.occurredAt} style={styles.clearTime} />
           </li>
         ))}
       </ul>
@@ -135,9 +179,11 @@ function HeaderCell({
 }
 
 export function Enhancements({
-  enhancements
+  enhancements,
+  more
 }: {
   enhancements: readonly TimelineEnhancement[]
+  more?: ReactNode
 }): React.JSX.Element {
   return (
     <TimelineGroup
@@ -166,9 +212,7 @@ export function Enhancements({
           {enhancements.map((enhancement, index) => (
             <tr key={`${enhancement.occurredAt}-${index}`}>
               <td {...stylex.props(styles.cell, styles.first, styles.time)}>
-                <time dateTime={enhancement.occurredAt}>
-                  {formatTimelineTime(enhancement.occurredAt)}
-                </time>
+                <RelativeTime at={enhancement.occurredAt} />
               </td>
               <td {...stylex.props(styles.cell, styles[enhancement.kind])}>
                 {ENHANCEMENT_KIND_LABELS[enhancement.kind]}
@@ -191,14 +235,17 @@ export function Enhancements({
           ))}
         </tbody>
       </table>
+      {more}
     </TimelineGroup>
   )
 }
 
 export function Acquisitions({
-  acquisitions
+  acquisitions,
+  more
 }: {
   acquisitions: readonly TimelineAcquisition[]
+  more?: ReactNode
 }): React.JSX.Element {
   return (
     <TimelineGroup
@@ -224,9 +271,7 @@ export function Acquisitions({
           {acquisitions.map((acquisition, index) => (
             <tr key={`${acquisition.occurredAt}-${index}`}>
               <td {...stylex.props(styles.cell, styles.first, styles.time)}>
-                <time dateTime={acquisition.occurredAt}>
-                  {formatTimelineTime(acquisition.occurredAt)}
-                </time>
+                <RelativeTime at={acquisition.occurredAt} />
               </td>
               <td {...stylex.props(styles.cell)}>
                 <ItemName itemName={acquisition.itemName} itemRarity={acquisition.itemRarity} />
@@ -238,6 +283,7 @@ export function Acquisitions({
           ))}
         </tbody>
       </table>
+      {more}
     </TimelineGroup>
   )
 }
