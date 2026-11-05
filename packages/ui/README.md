@@ -29,8 +29,8 @@
 
 던삐삐 디자인 토큰은 CSS custom property와 StyleX 상수 두 형태로 제공한다. 값과 이름은 dfragon-design `design/tokens.json`을 손으로 옮긴 것이며 기준 commit은 `tokens.css` 머리말에 적는다. 2026-11-04 결정(ADR 0009)으로 바꾼 값은 `tokens.json` 반영 전이며, 어떤 토큰이 다른지는 그 머리말에 있다.
 
-- `@dfragon/ui/tokens.css`: `--df-*` 변수. 테마는 다크 하나라 `:root`에 값을 두며 `prefers-reduced-motion: reduce`에서 `--df-dur-*`를 0으로 둔다. `color-scheme`도 `dark`로 정해 스크롤 막대 같은 브라우저 기본 부품이 다크로 그려진다. Library JS는 이 파일을 import하지 않는다.
-- `@dfragon/ui/tokens.stylex`: `colors`, `space`, `radius`, `size`, `motion`, `font`. `stylex.defineConsts`로 `'var(--df-…)'` 문자열을 정의하며 `defineVars`, `createTheme`를 쓰지 않으므로 모드 전환은 CSS만으로 끝난다. StyleX compiler는 import 경로가 `.stylex`로 끝나는 파일의 `defineConsts`만 다른 파일에서 읽으므로 export 이름에 `.stylex`를 둔다. Package export는 source(`src/tokens.stylex.ts`)를 가리켜 소비 앱이 library를 먼저 빌드하지 않아도 compiler가 해석한다. 컴파일 없이 실행하면 `defineConsts`가 오류를 낸다.
+- `@dfragon/ui/tokens.css`: `--df-*` 변수. 색 변수는 `:root`에 `light-dark(라이트, 다크)`로 두 모드 값을 함께 두고, `prefers-reduced-motion: reduce`에서 `--df-dur-*`를 0으로 둔다. `:root`의 `color-scheme: light dark`로 기본은 시스템 설정을 따르며, `html`의 `data-color-mode`가 `light`, `dark`이면 그 모드로 `color-scheme`만 고정한다. 스크롤 막대 같은 브라우저 기본 부품도 같은 모드로 그려진다. Library JS는 이 파일을 import하지 않는다.
+- `@dfragon/ui/tokens.stylex`: `colors`, `shadow`, `space`, `radius`, `size`, `motion`, `font`. `stylex.defineConsts`로 `'var(--df-…)'` 문자열을 정의하며 `defineVars`, `createTheme`를 쓰지 않으므로 모드 전환은 CSS만으로 끝난다. StyleX compiler는 import 경로가 `.stylex`로 끝나는 파일의 `defineConsts`만 다른 파일에서 읽으므로 export 이름에 `.stylex`를 둔다. Package export는 source(`src/tokens.stylex.ts`)를 가리켜 소비 앱이 library를 먼저 빌드하지 않아도 compiler가 해석한다. 컴파일 없이 실행하면 `defineConsts`가 오류를 낸다.
 - `shapes`: 기본 entry의 공용 `stylex.create`. `srOnly`.
 
 Library build는 `tokens.stylex`를 별도 entry로 두어 `dist/tokens.stylex.js`에 남기고 `index.js`가 이 파일을 import한다. Compiler는 `defineConsts` 결과가 같은 이름으로 export될 때만 받아들이므로 library build는 식별자를 줄이지 않는다(`minify: false`).
@@ -90,7 +90,7 @@ import { Typo } from '@dfragon/ui'
 - `useCSSLayers: false`: 공용 토큰 CSS, foundation, 앱 전역 글꼴 CSS 같은 전역 기반 스타일과 같은 cascade에서 조합한다.
 - Vite에서는 StyleX를 React plugin보다 먼저 실행한다. Vitest는 HTTP/HMR timer가 없는 Rollup adapter를 사용한다.
 - 모든 browser entry는 `@dfragon/ui/tokens.css`, 공용 `foundation.css`, 앱 전역 글꼴 CSS 순서로 한 번 import한다. 글꼴, reset 같은 전역 기반 CSS와 vendor CSS는 StyleX로 복제하지 않는다.
-- 테마는 다크 하나다. `tokens.css`가 `:root`에 다크 색 변수와 `color-scheme`을 두므로 앱은 테마 값을 따로 넣지 않아도 첫 페인트부터 다크다.
+- `tokens.css`가 `:root`에 두 모드의 색 변수와 `color-scheme`을 두므로 앱은 모드 값을 따로 넣지 않아도 첫 페인트부터 시스템 설정의 모드다. 사용자가 고른 모드는 앱이 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
 
 | 소비자 | 연결 위치 |
 | --- | --- |
