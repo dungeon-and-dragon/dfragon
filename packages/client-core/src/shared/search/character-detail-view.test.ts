@@ -1,73 +1,14 @@
-import { readFileSync } from 'node:fs'
 import { describe, expect, it, vi } from 'vitest'
+import {
+  type CharacterDetailBody,
+  characterDetailResponse
+} from '../../testing/fixtures/character-detail'
 import { createCharacterDetailViewHttp } from './character-http'
 import { SearchHttpFailure } from './http'
 
 const API_ORIGIN = 'https://api.example.test'
 
-type Entry = { slotId?: string; [key: string]: unknown }
-type Basic = { serverId: string; characterId: string; [key: string]: unknown }
-type Buff = { skill: { buff: unknown } }
-type Fixture = {
-  sections: {
-    basic: Basic
-    status: { status: unknown; buff: unknown }
-    equipment: { equipment: Entry[]; setItemInfo: unknown }
-    avatar: { avatar: Entry[] }
-    creature: { creature: unknown }
-    oath: { oath: unknown }
-    mist_assimilation: { mistAssimilation: unknown }
-    skill_style: { skill: unknown }
-    buff_equipment: Buff
-    buff_avatar: Buff
-    buff_creature: Buff
-  }
-  card: unknown
-}
-type DetailBody = {
-  character: Basic
-  equipment: Fixture['sections']['equipment']
-  avatar: Entry[]
-  oath: unknown
-  [key: string]: unknown
-}
-
-function readFixture(role: 'dealer' | 'buffer'): Fixture {
-  const url = new URL(
-    `../../../../../apps/api/test/fixtures/character-card-${role}.json`,
-    import.meta.url
-  )
-
-  return JSON.parse(readFileSync(url, 'utf8'))
-}
-
-// API의 상세 응답처럼 Neople 섹션 원문을 응답 키로 옮긴다. sections, freshness 같은 메타데이터는 화면이 읽지 않아 뺀다.
-function detailResponse(role: 'dealer' | 'buffer'): DetailBody {
-  const { sections, card } = readFixture(role)
-  const { serverId, characterId, ...basic } = sections.basic
-
-  return {
-    character: { serverId, characterId, serverName: '카인', ...basic },
-    status: { status: sections.status.status, buff: sections.status.buff },
-    equipment: {
-      equipment: sections.equipment.equipment,
-      setItemInfo: sections.equipment.setItemInfo
-    },
-    avatar: sections.avatar.avatar,
-    creature: sections.creature.creature,
-    oath: sections.oath.oath,
-    mistAssimilation: sections.mist_assimilation.mistAssimilation,
-    skillStyle: sections.skill_style.skill,
-    buff: {
-      equipment: sections.buff_equipment.skill.buff,
-      avatar: sections.buff_avatar.skill.buff,
-      creature: sections.buff_creature.skill.buff
-    },
-    card
-  }
-}
-
-function identityOf(body: Pick<DetailBody, 'character'>) {
+function identityOf(body: Pick<CharacterDetailBody, 'character'>) {
   return { serverId: body.character.serverId, characterId: body.character.characterId }
 }
 
@@ -81,7 +22,7 @@ function load(body: unknown, status = 200) {
 
 describe('캐릭터 상세 화면 응답', () => {
   it('딜러 fixture의 장비, 세트, 서약, 크리쳐, 아바타, 스킬, 버프 강화, 스탯을 읽는다', async () => {
-    const body = detailResponse('dealer')
+    const body = characterDetailResponse('dealer')
     const detail = await load(body)(identityOf(body))
 
     expect(detail.character).toMatchObject({ serverName: '카인', level: 115, fame: null })
@@ -138,10 +79,25 @@ describe('캐릭터 상세 화면 응답', () => {
     expect(detail.buff.creature?.skillInfo?.option?.values).toHaveLength(3)
     expect(detail.status.status).toHaveLength(79)
     expect(detail.status.status[0]).toEqual({ name: 'HP', value: 176036 })
+    expect(detail.status.buff[0]).toEqual({
+      name: '모험단 버프',
+      level: 41,
+      status: [
+        { name: '힘', value: 290 },
+        { name: '지능', value: 290 },
+        { name: '체력', value: 290 },
+        { name: '정신력', value: 290 }
+      ]
+    })
+    expect(detail.status.buff[1]).toMatchObject({ name: '무제한 길드능력치', level: null })
+    expect(detail.avatar[0].clone).toEqual({
+      itemId: '9d2ba5dfe1f49c5a5e31dd0d6665d1de',
+      itemName: '인페르노의 장식핀[B타입]'
+    })
   })
 
   it('버퍼 fixture의 증폭 장비, 재련 무기, 강화 옵션이 없는 서약, 버프 강화 장비를 읽는다', async () => {
-    const body = detailResponse('buffer')
+    const body = characterDetailResponse('buffer')
     const detail = await load(body)(identityOf(body))
 
     expect(detail.card?.role).toBe('buffer')
@@ -160,7 +116,7 @@ describe('캐릭터 상세 화면 응답', () => {
   })
 
   it('빈 슬롯과 칸이 빠진 장비는 실패하지 않고 빈 값으로 읽는다', async () => {
-    const body = detailResponse('dealer')
+    const body = characterDetailResponse('dealer')
     body.equipment.equipment = body.equipment.equipment.filter((item) => item.slotId !== 'TITLE')
     body.equipment.equipment[0] = { slotId: 'WEAPON', tune: null, enchant: [] }
     body.avatar = body.avatar.filter((avatar) => avatar.slotId !== 'AURORA')
@@ -185,7 +141,7 @@ describe('캐릭터 상세 화면 응답', () => {
   })
 
   it('유일 장비의 옵션과 정밀도를 읽는다', async () => {
-    const body = detailResponse('dealer')
+    const body = characterDetailResponse('dealer')
     Object.assign(body.equipment.equipment[9], {
       exaltedInfo: { damage: 1, buff: 1, explain: '장착 중인 가장 높은 세트 포인트' },
       potency: { value: 100, damage: 1, buff: 1 }
@@ -203,7 +159,7 @@ describe('캐릭터 상세 화면 응답', () => {
     ['null', null],
     ['빈 객체', {}]
   ])('서약이 %s인 캐릭터를 실패 없이 읽는다', async (_, oath) => {
-    const body = detailResponse('buffer')
+    const body = characterDetailResponse('buffer')
     body.oath = oath
     const detail = await load(body)(identityOf(body))
 
@@ -213,7 +169,7 @@ describe('캐릭터 상세 화면 응답', () => {
   })
 
   it('character만 있고 나머지 섹션이 통째로 없는 응답은 빈 섹션으로 읽는다', async () => {
-    const { character } = detailResponse('dealer')
+    const { character } = characterDetailResponse('dealer')
     const detail = await load({ character })(identityOf({ character }))
 
     expect(detail).toEqual({
@@ -226,12 +182,12 @@ describe('캐릭터 상세 화면 응답', () => {
       oath: null,
       skillStyle: null,
       buff: { equipment: null, avatar: null, creature: null },
-      status: { status: [] }
+      status: { status: [], buff: [] }
     })
   })
 
   it('character가 없거나 요청한 캐릭터가 아니면 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
-    const body = detailResponse('dealer')
+    const body = characterDetailResponse('dealer')
     const identity = identityOf(body)
 
     await expect(load({ ...body, character: undefined })(identity)).rejects.toMatchObject({
