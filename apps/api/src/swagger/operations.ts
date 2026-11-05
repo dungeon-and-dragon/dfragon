@@ -185,3 +185,39 @@ export function ApiGuild() {
     errors({ 500: 'INTERNAL_SERVER_ERROR' })
   )
 }
+
+export function ApiFameRanking() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '명성 랭킹 조회',
+      description:
+        '공개 API. DB에 저장된 캐릭터 기본 정보에서 명성이 있는 캐릭터를 명성이 높은 순으로 100명까지 반환합니다. 명성이 같으면 서버, 캐릭터 id 순이고 rank는 1부터 매긴 순서입니다. serverId, jobId, jobGrowId로 거르며 jobGrowId는 jobId와 함께 씁니다. 다른 query key는 무시합니다. Neople을 부르지 않으며 값은 행마다 fetchedAt 시점의 것입니다. DB 설정이 없는 API는 빈 목록을 반환합니다.'
+    }),
+    ApiQuery({
+      name: 'serverId',
+      required: false,
+      schema: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] }
+    }),
+    ApiQuery({ name: 'jobId', required: false, schema: { type: 'string', minLength: 1 } }),
+    ApiQuery({
+      name: 'jobGrowId',
+      required: false,
+      schema: { type: 'string', minLength: 1 },
+      description: 'jobId와 함께 씁니다.'
+    }),
+    success('FameRanking', '명성 순 캐릭터 목록 (없으면 빈 목록)'),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiStats() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '캐릭터 통계 조회',
+      description:
+        '공개 API. DB에 저장된 캐릭터 기본 정보로 전체 캐릭터 수, 서버별 캐릭터 수, 직업별 캐릭터 수와 평균 명성, 명성 분포를 반환합니다. 처음 요청할 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 계산은 공유합니다. 실패는 캐시하지 않습니다. DB 설정이 없는 API는 0과 빈 목록을 반환합니다.'
+    }),
+    success('Stats', '집계 시각과 서버, 직업, 명성 분포'),
+    errors({ 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
