@@ -6,6 +6,7 @@ import { createNeopleCharacterSearch } from '../characters/neople-character-sear
 import { createNeopleCharacterDetails } from '../characters/details/neople.js'
 import { createNeopleCharacterTimeline } from '../characters/timeline/neople.js'
 import { createDatabaseTimelineStore } from '../characters/timeline/store.js'
+import { readCharacterTimeline } from '../characters/timeline/read.js'
 import { syncCharacterTimeline } from '../characters/timeline/sync.js'
 import { createNeopleShopGrade } from '../today-grade/neople.js'
 import { type TimelineSyncOptions, createApiHttpApp } from '../http.js'
@@ -26,6 +27,7 @@ function createTimelineSync(
 
   return {
     sync: (character) => syncCharacterTimeline(character, { fetchTimeline, store }),
+    read: (character) => readCharacterTimeline(client, character, new Date()),
     close: () => client.$disconnect()
   }
 }
