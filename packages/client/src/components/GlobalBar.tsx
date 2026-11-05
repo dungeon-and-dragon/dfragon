@@ -2,6 +2,7 @@ import { PRODUCT_NAME } from '@dfragon/lib'
 import * as stylex from '@stylexjs/stylex'
 import { Link, type LinkProps } from '@tanstack/react-router'
 import { useTodayGrade } from '../hooks/useTodayGrade'
+import { CharacterSearchBox } from './CharacterSearchBox'
 import { ColorModeToggle } from './ColorModeToggle'
 import { styles } from './GlobalBar.style'
 import { TodayGrade } from './TodayGrade'
@@ -41,6 +42,7 @@ export function GlobalBar(): React.JSX.Element {
             </Link>
           ))}
         </nav>
+        <CharacterSearchBox />
         <TodayGrade grade={grade} />
         <ColorModeToggle />
       </div>

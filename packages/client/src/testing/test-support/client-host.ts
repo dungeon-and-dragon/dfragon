@@ -49,6 +49,7 @@ export function createTestClientHost({
     getTodayGrade: vi.fn(() => new Promise<TodayGrade>(() => {})),
     getCharacterDetail: vi.fn(() => new Promise<never>(() => {})),
     getCharacterTimeline: vi.fn(() => new Promise<never>(() => {})),
+    searchCharacters: vi.fn(() => new Promise<never>(() => {})),
     ...operations
   }
 }
