@@ -19,7 +19,16 @@ import { createTodayGradeService } from './today-grade/service.js'
 import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
-import { createTimelineSyncQueue } from './characters/timeline/queue.js'
+import { type TimelineSyncQueue, createTimelineSyncQueue } from './characters/timeline/queue.js'
+import {
+  CHARACTER_TIMELINE_SERVICE,
+  CharacterTimelineController
+} from './characters/timeline/http.js'
+import type { CharacterTimeline } from './characters/timeline/read.js'
+import {
+  createCharacterTimelineService,
+  emptyCharacterTimelineService
+} from './characters/timeline/service.js'
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
 import {
   CharacterBasicSubscriber,
@@ -41,6 +50,7 @@ import {
 const TRAILING_SLASHES_PATTERN = /\/+$/
 const WEB_ORIGINS = ['https://dfragon.com', 'https://dev.dfragon.com']
 const CORS_ORIGIN_METHODS = new Set(['GET', 'OPTIONS'])
+const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
 
 function requestFailure(
   path: string,
@@ -97,6 +107,7 @@ class HealthController {
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
+  readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
   // 진행 중인 동기화를 기다리지 않고 닫는다.
   readonly close: () => Promise<void>
 }
@@ -138,15 +149,24 @@ export async function createApiHttpApp({
   const timelineProviders = timeline
     ? [
         {
-          provide: TimelineSyncSubscriber,
+          provide: TIMELINE_SYNC_QUEUE,
           useFactory: () =>
-            new TimelineSyncSubscriber(
-              createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED')),
-              timeline.close
-            )
+            createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED'))
+        },
+        {
+          provide: TimelineSyncSubscriber,
+          inject: [TIMELINE_SYNC_QUEUE],
+          useFactory: (queue: TimelineSyncQueue) =>
+            new TimelineSyncSubscriber(queue, timeline.close)
+        },
+        {
+          provide: CHARACTER_TIMELINE_SERVICE,
+          inject: [TIMELINE_SYNC_QUEUE],
+          useFactory: (queue: TimelineSyncQueue) =>
+            createCharacterTimelineService(queue, timeline.read)
         }
       ]
-    : []
+    : [{ provide: CHARACTER_TIMELINE_SERVICE, useValue: emptyCharacterTimelineService }]
   const characterBasicProviders = recordCharacterBasic
     ? [
         {
@@ -166,6 +186,7 @@ export async function createApiHttpApp({
       CharacterSearchController,
       CharacterDetailController,
       CharacterImageController,
+      CharacterTimelineController,
       TodayGradeController
     ],
     providers: [

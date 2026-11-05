@@ -34,6 +34,30 @@ export type TimelineSyncState = {
   lastSucceededAt: Date | null
 }
 
+export type TimelineEventRow = {
+  code: number
+  occurredAt: Date
+  name: string
+  raidName: string | null
+  data: unknown
+}
+
+export type TimelineItemRow = {
+  code: number
+  occurredAt: Date
+  name: string
+  itemId: string | null
+  itemName: string | null
+  itemRarity: string | null
+  data: unknown
+}
+
+export type RecentTimelineItemQuery = {
+  codes: readonly number[]
+  itemRarities?: readonly string[]
+  limit: number
+}
+
 // pg_advisory_xact_lock(int, int)는 Prisma migrate의 단일 bigint key와 다른 lock 공간을 쓴다.
 // 캐릭터 hash가 겹치면 다른 캐릭터의 교체가 잠깐 기다릴 뿐 결과는 같다.
 const timelineLockNamespace = 1175
@@ -146,5 +170,61 @@ export async function recordTimelineSyncFailure(
     where: { serverId_characterId: { serverId, characterId } },
     create: { serverId, characterId, ...result },
     update: result
+  })
+}
+
+export async function readCurrentSeasonStart(
+  client: DatabaseClient,
+  now: Date
+): Promise<Date | undefined> {
+  const season = await client.season.findFirst({
+    where: { startsAt: { lte: now } },
+    orderBy: { startsAt: 'desc' },
+    select: { startsAt: true }
+  })
+
+  return season?.startsAt
+}
+
+export function readTimelineEvents(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  codes: readonly number[],
+  since: Date
+): Promise<TimelineEventRow[]> {
+  const { serverId, characterId } = character
+
+  return client.timelineEvent.findMany({
+    where: { serverId, characterId, code: { in: [...codes] }, occurredAt: { gte: since } },
+    orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+    select: { code: true, occurredAt: true, name: true, raidName: true, data: true }
+  })
+}
+
+export function readRecentTimelineItems(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  { codes, itemRarities, limit }: RecentTimelineItemQuery
+): Promise<TimelineItemRow[]> {
+  const { serverId, characterId } = character
+
+  return client.timelineItem.findMany({
+    where: {
+      serverId,
+      characterId,
+      code: { in: [...codes] },
+      itemRarity: itemRarities && { in: [...itemRarities] }
+    },
+    orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+    take: limit,
+    select: {
+      code: true,
+      occurredAt: true,
+      name: true,
+      itemId: true,
+      itemName: true,
+      itemRarity: true,
+      data: true
+    }
   })
 }
