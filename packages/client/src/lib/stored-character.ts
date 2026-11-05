@@ -7,6 +7,7 @@ const count = z.number().nullable()
 export const characterDisplaySchema = characterIdentitySchema.extend({
   characterName: z.string().refine((value) => value.trim().length > 0),
   adventureName: text,
+  guildId: text,
   guildName: text,
   level: count,
   jobName: text,
