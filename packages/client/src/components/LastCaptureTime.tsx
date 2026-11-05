@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
-import { useElapsedTime } from '../hooks/useElapsedTime'
+import { toElapsedTime } from '@dfragon/client-core/lib/time-format'
+import { useRefreshingNow } from '../hooks/useRefreshingNow'
 import { styles } from './LastCaptureTime.style'
 
 export function LastCaptureTime({ at }: { at: number | null }): React.JSX.Element {
@@ -12,7 +13,7 @@ export function LastCaptureTime({ at }: { at: number | null }): React.JSX.Elemen
 }
 
 function CaptureTimeValue({ at }: { at: number }): React.JSX.Element {
-  const time = useElapsedTime(at)
+  const time = toElapsedTime(useRefreshingNow(at) - at)
 
   return (
     <time dateTime={new Date(at).toISOString()} {...stylex.props(styles.value)}>

@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react'
-import {
-  type ElapsedTime,
-  getElapsedTimeRefreshDelay,
-  toElapsedTime
-} from '@dfragon/client-core/lib/time-format'
+import { getElapsedTimeRefreshDelay } from '@dfragon/client-core/lib/time-format'
 
-export function useElapsedTime(at: number): ElapsedTime {
+export function useRefreshingNow(at: number): number {
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -14,5 +10,5 @@ export function useElapsedTime(at: number): ElapsedTime {
     return () => window.clearTimeout(timer)
   }, [at, now])
 
-  return toElapsedTime(now - at)
+  return now
 }

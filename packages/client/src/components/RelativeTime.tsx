@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
-import { formatElapsedTime, formatSeoulDateTime } from '@dfragon/client-core/lib/time-format'
-import { useElapsedTime } from '../hooks/useElapsedTime'
+import { formatSeoulDateTime, formatTimeAgo } from '@dfragon/client-core/lib/time-format'
+import { useRefreshingNow } from '../hooks/useRefreshingNow'
 
 type RelativeTimeProps = { at: string; style?: stylex.StyleXStyles }
 
@@ -10,11 +10,11 @@ export function RelativeTime(props: RelativeTimeProps): React.JSX.Element {
 }
 
 function RelativeTimeValue({ at, style }: RelativeTimeProps): React.JSX.Element {
-  const elapsed = useElapsedTime(Date.parse(at))
+  const now = useRefreshingNow(Date.parse(at))
 
   return (
-    <time dateTime={at} title={formatSeoulDateTime(at)} {...stylex.props(style)}>
-      {formatElapsedTime(elapsed)}
+    <time dateTime={at} title={formatSeoulDateTime(at, now)} {...stylex.props(style)}>
+      {formatTimeAgo(at, now)}
     </time>
   )
 }
