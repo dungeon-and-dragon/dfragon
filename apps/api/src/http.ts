@@ -19,9 +19,28 @@ import { createTodayGradeService } from './today-grade/service.js'
 import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
-import { createTimelineSyncQueue } from './characters/timeline/queue.js'
+import { type TimelineSyncQueue, createTimelineSyncQueue } from './characters/timeline/queue.js'
+import {
+  CHARACTER_TIMELINE_SERVICE,
+  CharacterTimelineController
+} from './characters/timeline/http.js'
+import type { CharacterTimeline } from './characters/timeline/read.js'
+import {
+  createCharacterTimelineService,
+  emptyCharacterTimelineService
+} from './characters/timeline/service.js'
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
+import {
+  CharacterBasicSubscriber,
+  type RecordCharacterBasic
+} from './characters/basic/subscriber.js'
 import { CharacterEvents } from './characters/events.js'
+import { ADVENTURE_GUILD_SERVICE, AdventureGuildController } from './adventure-guild/http.js'
+import {
+  type AdventureGuildReader,
+  createAdventureGuildService,
+  emptyAdventureGuildService
+} from './adventure-guild/service.js'
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
@@ -37,6 +56,7 @@ import {
 const TRAILING_SLASHES_PATTERN = /\/+$/
 const WEB_ORIGINS = ['https://dfragon.com', 'https://dev.dfragon.com']
 const CORS_ORIGIN_METHODS = new Set(['GET', 'OPTIONS'])
+const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
 
 function requestFailure(
   path: string,
@@ -93,6 +113,7 @@ class HealthController {
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
+  readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
   // 진행 중인 동기화를 기다리지 않고 닫는다.
   readonly close: () => Promise<void>
 }
@@ -101,6 +122,8 @@ export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
   readonly timeline?: TimelineSyncOptions
+  readonly recordCharacterBasic?: RecordCharacterBasic
+  readonly adventureGuild?: AdventureGuildReader
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -111,11 +134,13 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics and adventure, guild reads. */
 export async function createApiHttpApp({
   search,
   details,
   timeline,
+  recordCharacterBasic,
+  adventureGuild,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -132,11 +157,31 @@ export async function createApiHttpApp({
   const timelineProviders = timeline
     ? [
         {
-          provide: TimelineSyncSubscriber,
+          provide: TIMELINE_SYNC_QUEUE,
           useFactory: () =>
-            new TimelineSyncSubscriber(
-              createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED')),
-              timeline.close
+            createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED'))
+        },
+        {
+          provide: TimelineSyncSubscriber,
+          inject: [TIMELINE_SYNC_QUEUE],
+          useFactory: (queue: TimelineSyncQueue) =>
+            new TimelineSyncSubscriber(queue, timeline.close)
+        },
+        {
+          provide: CHARACTER_TIMELINE_SERVICE,
+          inject: [TIMELINE_SYNC_QUEUE],
+          useFactory: (queue: TimelineSyncQueue) =>
+            createCharacterTimelineService(queue, timeline.read)
+        }
+      ]
+    : [{ provide: CHARACTER_TIMELINE_SERVICE, useValue: emptyCharacterTimelineService }]
+  const characterBasicProviders = recordCharacterBasic
+    ? [
+        {
+          provide: CharacterBasicSubscriber,
+          useFactory: () =>
+            new CharacterBasicSubscriber(recordCharacterBasic, () =>
+              reportCode('CHARACTER_BASIC_RECORD_FAILED')
             )
         }
       ]
@@ -149,6 +194,8 @@ export async function createApiHttpApp({
       CharacterSearchController,
       CharacterDetailController,
       CharacterImageController,
+      CharacterTimelineController,
+      AdventureGuildController,
       TodayGradeController
     ],
     providers: [
@@ -165,7 +212,14 @@ export async function createApiHttpApp({
           })
       },
       ...timelineProviders,
+      ...characterBasicProviders,
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
+      {
+        provide: ADVENTURE_GUILD_SERVICE,
+        useValue: adventureGuild
+          ? createAdventureGuildService(adventureGuild)
+          : emptyAdventureGuildService
+      },
       {
         provide: TODAY_GRADE_SERVICE,
         useValue: createTodayGradeService(todayGrade.fetchShopGrade)

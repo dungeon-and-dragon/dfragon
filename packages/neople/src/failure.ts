@@ -22,17 +22,29 @@ const upstreamCodeErrors = new Map<string, NeopleUpstreamFailureKind>([
   ['DNF999', 'api']
 ])
 
+const CHARACTER_NOT_FOUND_CODE = 'DNF001'
+
+interface NeopleRequestFailureOptions extends ErrorOptions {
+  characterNotFound?: boolean
+}
+
 /**
  * `cause`에 정제하지 않은 원래 오류가 남으므로 응답이나 로그로 그대로 내보내지 않는다.
  * 호출한 쪽이 자기 오류로 바꿀 때 `kind`와 원인만 넘긴다.
  */
 export class NeopleRequestFailure extends Error {
   readonly kind: NeopleFailureKind
+  // DNF001이어도 kind는 그대로 두어 검색, 타임라인, 수집이 쓰는 분류를 바꾸지 않는다.
+  readonly characterNotFound: boolean
 
-  constructor(kind: NeopleFailureKind, options?: ErrorOptions) {
+  constructor(
+    kind: NeopleFailureKind,
+    { characterNotFound = false, ...options }: NeopleRequestFailureOptions = {}
+  ) {
     super(`Neople request failed: ${kind}`, options)
     this.name = 'NeopleRequestFailure'
     this.kind = kind
+    this.characterNotFound = characterNotFound
   }
 }
 
@@ -57,7 +69,7 @@ export function classifyNeopleUpstreamFailure(
     return neopleStatusFailureKind(status)
   }
 
-  const code = isRecord(body.error) ? body.error.code : undefined
+  const code = upstreamErrorCode(body)
   const knownError = typeof code === 'string' ? upstreamCodeErrors.get(code) : undefined
 
   if (knownError !== undefined) {
@@ -65,4 +77,16 @@ export function classifyNeopleUpstreamFailure(
   }
 
   return neopleStatusFailureKind(status)
+}
+
+export function isCharacterNotFound(body: unknown): boolean {
+  return upstreamErrorCode(body) === CHARACTER_NOT_FOUND_CODE
+}
+
+function upstreamErrorCode(body: unknown): unknown {
+  if (!isRecord(body) || !isRecord(body.error)) {
+    return undefined
+  }
+
+  return body.error.code
 }

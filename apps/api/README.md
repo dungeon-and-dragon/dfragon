@@ -1,7 +1,7 @@
 # 던삐삐 API
 
 `apps/api`는 공개 캐릭터 API입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시합니다.
-DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)을 PostgreSQL에 저장합니다.
+DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라인-동기화)과 [기본 정보](#캐릭터-기본-정보-저장)를 PostgreSQL에 저장하고, [타임라인 조회](#타임라인-조회)로 저장한 타임라인을 돌려줍니다.
 같은 이미지의 [캐릭터 수집 worker](#캐릭터-수집-worker)는 캐릭터 목록 파일에 있는 캐릭터의 Neople 기본 정보를 DB에 쌓습니다.
 여러 노드로 띄울 수 있지만 캐시는 노드마다 따로 둡니다. 기본 entry는 설정 검증, [DB migration](#db와-migration)(DB 설정이 있을 때), HTTP listen 순서로 시작합니다.
 
@@ -58,6 +58,45 @@ DB 설정이 있으면 API를 만들 때 Prisma client 하나와 메모리 queue
 Queue는 같은 캐릭터를 합치고 2명씩 처리하며, 마지막 성공이 1시간 이내가 아닌 캐릭터만 `synced_until`부터 90일 구간씩 Neople에서 받아 `timeline_events`, `timeline_items`, `timeline_sync_state`에 저장합니다.
 실패는 `timeline_sync_state.last_failure`에 남고 재시도하지 않습니다. 종료 때 대기열은 버리고 진행 중인 동기화는 기다리지 않습니다.
 DB 설정이 없으면 queue를 만들지 않습니다.
+
+### 타임라인 조회
+
+`GET /characters/:serverId/:characterId/timeline`은 그 캐릭터의 동기화를 같은 queue에 넣고, 그 캐릭터의 대기 중이거나 진행 중인 동기화가 끝난 뒤 DB를 읽어 응답합니다.
+마지막 성공이 1시간 이내면 동기화는 Neople을 부르지 않고 바로 끝납니다. 처음 조회한 캐릭터는 구간 여러 개를 받으므로 응답이 몇 초 걸릴 수 있습니다.
+동기화 실패와 동기화 상태는 응답에 넣지 않고, 저장한 값까지만 돌려줍니다. 종료 때 대기열을 버리면 그 캐릭터를 기다리던 조회도 바로 DB를 읽습니다.
+
+| 필드 | 내용 |
+| --- | --- |
+| `weeklyClears` | 이번 주(목요일 06:00 KST부터) 레이드(코드 201, 210, `kind: "raid"`)와 레기온(209, `kind: "legion"`) 클리어, 오래된 순 |
+| `seasonClears` | 지금 시즌(`seasons`에서 가장 최근에 시작한 시즌)의 같은 클리어를 `kind`, `name`별로 센 횟수 |
+| `enhancements` | 강화(401, `reinforce`), 증폭(402, `amplify`), 재련(403, `refine`), 최근 순 50개 |
+| `acquisitions` | 획득 코드(501~521, 550~557) 가운데 `item_rarity`가 에픽, 태초인 행, 최근 순 50개 |
+
+레이드 이름은 `raid_name`, 난이도 이름 `modeName`은 행의 `data.modeName`(없으면 `null`)이고, 레기온 이름은 `data.regionName`입니다.
+재련에는 `before`, `safe`가 없어 `null`입니다. 값이 없으면 빈 배열이고, DB 설정이 없는 API는 동기화 없이 빈 배열만 돌려줍니다.
+
+### 캐릭터 기본 정보 저장
+
+DB 설정이 있으면 기본 정보 구독자도 `character.fetched` 이벤트를 받아, 상세 응답의 `character`와 같은 이름, 모험단, 레벨, 직업, 명성, 길드를 `@dfragon/database`의 `recordCharacterBasic`으로 `characters`에 덮어쓰고 `basic_fetched_at`을 지금으로 둡니다.
+그 캐릭터가 `character_collection` 대기열에 있으면 대기열 행도 지웁니다.
+캐시가 맞은 조회도 저장하고, DB에 없던 캐릭터와 모험단은 새로 만듭니다. Prisma client는 타임라인 동기화와 함께 씁니다.
+응답은 저장을 기다리지 않고, 저장이 실패해도 상세 응답은 그대로이며 재시도하지 않습니다. 모험단 이름이 없는 캐릭터처럼 기본 정보 schema에 맞지 않는 응답은 저장하지 않습니다.
+DB 설정이 없으면 구독자를 등록하지 않습니다.
+
+### 모험단, 길드 조회
+
+`GET /adventures/:adventureName/characters`와 `GET /guilds/:guildId`는 Neople을 부르지 않고 DB에 저장된 캐릭터 기본 정보를 읽습니다.
+모험단은 `adventures.name`이 같은 캐릭터, 길드는 `guild_id`가 같은 캐릭터이며 길드 ID는 서버가 달라도 같은 길드라 서버로 거르지 않습니다.
+두 목록 모두 서버를 가리지 않고 명성이 높은 순이고, 명성이 없는 캐릭터는 뒤에 둡니다. 페이지는 없습니다.
+
+```json
+{ "adventureName": "…", "characters": [ /* 캐릭터 행 */ ] }
+{ "guildId": "…", "guildName": "…", "memberCount": 42, "averageFame": 81234, "members": [ /* 캐릭터 행 */ ] }
+```
+
+캐릭터 행은 `serverId`, `characterId`, `characterName`, `adventureName`, `level`, `jobId`, `jobGrowId`, `jobName`, `jobGrowName`, `fame`, `guildId`, `guildName`, `fetchedAt`(`basic_fetched_at`)입니다. 기본 정보를 받지 않은 행은 레벨, 직업, 명성, 길드와 `fetchedAt`이 `null`입니다.
+`guildName`은 가장 최근에 받은 길드원 행의 이름이고, `averageFame`은 명성이 있는 길드원의 평균을 반올림한 값입니다. 그런 길드원이 없으면 `null`입니다.
+DB에 없는 모험단과 길드, DB 설정이 없는 API는 빈 목록을 주며 이때 `guildName`, `averageFame`은 `null`입니다. 예전에 지운 `GET /adventures/characters`와는 다른 경로입니다.
 
 ### 캐릭터 수집 worker
 
@@ -131,7 +170,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ```
 
 점수 엔진을 열지 못하면 `SCORE_ENGINE_UNAVAILABLE`, 점수 worker가 오류로 끝나거나 엔진 결과 형식이 틀리면 `SCORE_ENGINE_FAILED`를 같은 stdout에 남깁니다.
-[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`를 남깁니다.
+[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
 요청마다 남기는 줄과 달리 `time`, `service`, `code`만 담습니다.
 
 ```json
@@ -252,6 +291,7 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 이미지 실행 계약은 로컬에 있는 이미지로 `node apps/api/test-support/container-deployment.mjs dfragon-api:local`을 실행해
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
 DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
+타임라인 조회는 합성 행으로 주간 경계 앞뒤, 시즌 경계, 최근 50개, 빈 캐릭터와 진행 중인 동기화를 기다린 조회를 봅니다.
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
