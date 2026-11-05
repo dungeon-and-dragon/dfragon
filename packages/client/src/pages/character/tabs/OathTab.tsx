@@ -36,7 +36,7 @@ function OathStrip({ view: { info, set } }: { view: OathView }): React.JSX.Eleme
       {info !== null && (
         <span {...stylex.props(partStyles.itemText)}>
           <span {...stylex.props(partStyles.stripLabel)}>서약</span>
-          <ItemName name={info.itemName} rarity={info.rarity} oath />
+          <ItemName name={info.itemName} rarity={info.rarity} />
           {info.setPoint !== null && (
             <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(info.setPoint)}</span>
           )}
@@ -46,14 +46,12 @@ function OathStrip({ view: { info, set } }: { view: OathView }): React.JSX.Eleme
       {set !== null && (
         <span {...stylex.props(partStyles.itemText)}>
           <span {...stylex.props(partStyles.stripLabel)}>서약 세트</span>
-          <ItemName name={set.name} rarity={set.rarity} oath />
+          <ItemName name={set.name} rarity={set.rarity} />
           {set.optionName !== null && (
             <span {...stylex.props(partStyles.stripMuted)}>{set.optionName}</span>
           )}
           {set.rarityName !== null && (
-            <RarityBadge rarity={set.rarity} oath>
-              {set.rarityName}
-            </RarityBadge>
+            <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>
           )}
           {set.point !== null && (
             <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(set.point)}</span>
@@ -114,9 +112,9 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
               </td>
               <td {...stylex.props(tableStyles.cell)}>
                 <div {...stylex.props(partStyles.item)}>
-                  <ItemIcon itemId={crystal.itemId} rarity={crystal.rarity} oath />
+                  <ItemIcon itemId={crystal.itemId} rarity={crystal.rarity} />
                   <span {...stylex.props(partStyles.itemText)}>
-                    <ItemName name={crystal.itemName} rarity={crystal.rarity} oath />
+                    <ItemName name={crystal.itemName} rarity={crystal.rarity} />
                     <TuneNumeral numeral={crystal.tune} />
                   </span>
                 </div>

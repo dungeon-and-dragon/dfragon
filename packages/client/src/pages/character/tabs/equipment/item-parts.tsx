@@ -3,29 +3,17 @@ import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { itemIconUrl } from '@dfragon/client-core/lib/character-item'
 import type { ItemRarity } from '@dfragon/client-core/shared/search/character-detail-display'
 import { styles as rarityText } from '../avatar/ItemName.style'
-import { oathSolid, oathText, raritySolid, styles } from './item-parts.style'
+import { raritySolid, styles } from './item-parts.style'
 
-type Tone = Readonly<{ rarity: ItemRarity | null; oath?: boolean }>
+type Tone = Readonly<{ rarity: ItemRarity | null }>
 
-function isOathRarity(rarity: ItemRarity | null): rarity is keyof typeof oathText {
-  return rarity !== null && rarity in oathText
-}
-
-function textTone({ rarity, oath = false }: Tone) {
-  if (oath && isOathRarity(rarity)) {
-    return oathText[rarity]
-  }
-
+function textTone({ rarity }: Tone) {
   const key = rarity ?? 'unknown'
 
   return rarityText[key]
 }
 
-function solidTone({ rarity, oath = false }: Tone) {
-  if (oath && isOathRarity(rarity)) {
-    return oathSolid[rarity]
-  }
-
+function solidTone({ rarity }: Tone) {
   const key = rarity ?? 'unknown'
 
   return raritySolid[key]
