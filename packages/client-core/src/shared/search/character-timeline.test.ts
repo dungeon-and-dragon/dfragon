@@ -19,12 +19,19 @@ const filled: CharacterTimeline = {
     {
       kind: 'raid',
       name: '디레지에 레이드',
-      modeName: '하드',
+      modeName: '디레지에 : 악연',
+      hard: true,
       occurredAt: '2026-11-05T12:30:00.000Z'
     },
-    { kind: 'legion', name: '베누스', modeName: null, occurredAt: '2026-11-05T13:00:00.000Z' }
+    {
+      kind: 'legion',
+      name: '베누스',
+      modeName: null,
+      hard: false,
+      occurredAt: '2026-11-05T13:00:00.000Z'
+    }
   ],
-  seasonClears: [{ kind: 'raid', name: '디레지에 레이드', count: 3 }],
+  seasonClears: [{ kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 }],
   enhancements: [
     {
       kind: 'refine',
@@ -67,9 +74,24 @@ it('값이 있는 응답과 빈 응답을 그대로 읽고 캐릭터의 timeline
   await expect(readTimeline(empty).read).resolves.toEqual(empty)
 })
 
+it('hard를 주지 않는 API의 클리어는 하드가 아닌 것으로 읽는다', async () => {
+  const { hard: _weeklyHard, ...weekly } = filled.weeklyClears[0]
+  const { hard: _seasonHard, ...season } = filled.seasonClears[0]
+  const { read } = readTimeline({ ...empty, weeklyClears: [weekly], seasonClears: [season] })
+
+  await expect(read).resolves.toEqual({
+    ...empty,
+    weeklyClears: [{ ...weekly, hard: false }],
+    seasonClears: [{ ...season, hard: false }]
+  })
+})
+
 it.each([
   ['목록이 빠진 응답', { ...empty, acquisitions: undefined }],
-  ['모르는 클리어 종류', { ...empty, seasonClears: [{ kind: 'dungeon', name: '이름', count: 1 }] }],
+  [
+    '모르는 클리어 종류',
+    { ...empty, seasonClears: [{ kind: 'dungeon', name: '이름', hard: false, count: 1 }] }
+  ],
   [
     '에픽, 태초가 아닌 획득',
     { ...empty, acquisitions: [{ ...filled.acquisitions[0], itemRarity: '레전더리' }] }

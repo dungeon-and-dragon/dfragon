@@ -64,14 +64,30 @@ const FILLED: CharacterTimeline = {
     {
       kind: 'raid',
       name: '디레지에 레이드',
-      modeName: '하드',
+      modeName: '디레지에 : 악연',
+      hard: true,
       occurredAt: '2026-11-05T12:30:00.000Z'
     },
-    { kind: 'legion', name: '베누스', modeName: null, occurredAt: '2026-11-05T15:05:00.000Z' }
+    {
+      kind: 'raid',
+      name: '나벨 레이드',
+      modeName: '나벨 : 무지의 악',
+      hard: false,
+      occurredAt: '2026-11-05T13:00:00.000Z'
+    },
+    {
+      kind: 'legion',
+      name: '베누스',
+      modeName: null,
+      hard: false,
+      occurredAt: '2026-11-05T15:05:00.000Z'
+    }
   ],
   seasonClears: [
-    { kind: 'raid', name: '디레지에 레이드', count: 3 },
-    { kind: 'legion', name: '베누스', count: 12 }
+    { kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 },
+    { kind: 'raid', name: '나벨 레이드', hard: true, count: 2 },
+    { kind: 'raid', name: '나벨 레이드', hard: false, count: 1 },
+    { kind: 'legion', name: '베누스', hard: false, count: 12 }
   ],
   enhancements: [
     {
@@ -198,16 +214,19 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시�
   })
 })
 
-it('이번 주 클리어는 종류, 이름, 난이도(없으면 생략)와 한국 시간 MM-DD HH:mm을 보이고 시즌은 횟수 칩을 보인다', async () => {
+it('이번 주 클리어는 종류, 이름, 하드 배지와 난이도(없으면 생략), 한국 시간 MM-DD HH:mm을 보이고 시즌은 하드를 나눈 횟수 칩을 보인다', async () => {
   await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
 
-  expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '2'])
+  expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '3'])
   expect(rowsOf('이번 주 클리어')).toEqual([
-    ['레이드', '디레지에 레이드', '하드', '11-05 21:30'],
+    ['레이드', '디레지에 레이드', '하드', '디레지에 : 악연', '11-05 21:30'],
+    ['레이드', '나벨 레이드', '나벨 : 무지의 악', '11-05 22:00'],
     ['레기온', '베누스', '11-06 00:05']
   ])
   expect(rowsOf('시즌 클리어 횟수')).toEqual([
-    ['레이드', '디레지에 레이드', '3'],
+    ['레이드', '디레지에 레이드', '하드', '3'],
+    ['레이드', '나벨 레이드', '하드', '2'],
+    ['레이드', '나벨 레이드', '1'],
     ['레기온', '베누스', '12']
   ])
 })
@@ -268,7 +287,7 @@ it('탭을 숨겼다가 다시 열어도 같은 상세에서는 다시 조회하
   await hide()
   await render(host, detail)
 
-  expect(rowsOf('이번 주 클리어')).toHaveLength(2)
+  expect(rowsOf('이번 주 클리어')).toHaveLength(3)
   expect(getCharacterTimeline).toHaveBeenCalledOnce()
 
   await render(host, detailOf())
