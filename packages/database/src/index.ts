@@ -18,11 +18,13 @@ export { readSecretInput } from './secret-input.js'
 export {
   readCharactersTimelineEvents,
   readCurrentSeasonStart,
+  readEnhancementBackfilledUntil,
   readRecentTimelineItems,
   readTimelineEvents,
   readTimelineSyncState,
   recordTimelineSyncFailure,
   recordTimelineSyncSuccess,
+  replaceEnhancementBackfillRange,
   replaceTimelineRange
 } from './timeline.js'
 export type {

@@ -306,6 +306,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
 
         return stored
       },
+      backfillEnhancements: unused,
       close: async () => undefined
     },
     todayGrade: { fetchShopGrade: unused },
