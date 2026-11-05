@@ -25,7 +25,7 @@ import type {
   FameRankingFilter
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
-import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure/adventure-weekly'
+import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 
 export type CardSearchHost = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>

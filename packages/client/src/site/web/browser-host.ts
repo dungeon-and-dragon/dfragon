@@ -18,7 +18,7 @@ import {
   createCharacterStatsHttp,
   createFameRankingHttp
 } from '@dfragon/client-core/shared/ranking/ranking-stats-http'
-import { createAdventureWeeklyHttp } from '@dfragon/client-core/shared/adventure/adventure-weekly-http'
+import { createAdventureWeeklyHttp } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly-http'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import {
   createCharacterDetailViewHttp,
