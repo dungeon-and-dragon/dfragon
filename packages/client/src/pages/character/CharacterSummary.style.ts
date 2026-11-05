@@ -56,6 +56,7 @@ export const styles = stylex.create({
   muted: { color: colors.fgMuted },
   adventure: { color: colors.fgAdventure },
   guild: { color: colors.fgGuild },
+  link: { textDecoration: { default: 'none', ':hover': 'underline' } },
   level: { color: colors.fgSubtle, fontVariantNumeric: 'tabular-nums' },
   affiliation: { display: 'inline-flex', alignItems: 'center', gap: space.s8 },
   divider: { width: 1, height: 10, backgroundColor: colors.borderDefault },

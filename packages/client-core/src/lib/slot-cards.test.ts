@@ -15,6 +15,7 @@ const summary: SelectedCharacterSummary = {
   level: 115,
   fame: 100,
   imageUrl: '',
+  guildId: null,
   guildName: null,
   equipmentScore: null,
   card: null

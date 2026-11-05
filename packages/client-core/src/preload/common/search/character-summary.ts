@@ -96,6 +96,7 @@ const characterCardSchema = z.strictObject({
 export const selectedCharacterSummarySchema = z
   .strictObject({
     ...characterSummaryShape,
+    guildId: z.string().nullable(),
     guildName: z.string().nullable(),
     equipmentScore: z.number().nullable(),
     card: characterCardSchema.nullable()
