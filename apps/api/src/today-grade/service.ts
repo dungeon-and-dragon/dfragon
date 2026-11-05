@@ -1,5 +1,6 @@
 import { TodayGradeFailure, todayGradeFailure } from './errors.js'
-import { averageGradePercent, nextGradeResetAt } from './grade.js'
+import { startOfNextSeoulDay } from '../utils/seoul-time.js'
+import { averageGradePercent } from './grade.js'
 import { TODAY_GRADE_ITEMS } from './items.js'
 import type { FetchShopGrade } from './neople.js'
 
@@ -34,7 +35,7 @@ export function createTodayGradeService(
       shutdown.signal.throwIfAborted()
       const grade = {
         percent: averageGradePercent(values),
-        expiresAt: nextGradeResetAt(startedAt).toISOString()
+        expiresAt: startOfNextSeoulDay(startedAt).toISOString()
       }
       cached = grade
 
