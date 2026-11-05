@@ -152,7 +152,7 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   const buttons = [...header.querySelectorAll('button')]
   expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
-    '검색할 서버',
+    '검색 대상',
     '검색',
     '다크 모드로 바꾸기'
   ])
@@ -251,14 +251,32 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
 
 it('한글 모험단 이름의 주소를 직접 열면 그 모험단의 캐릭터 목록을 조회해 그린다', async () => {
   const requested = vi.fn<typeof fetch>(async () =>
-    Response.json({ adventureName: '동네커피', characters: [] })
+    Response.json({
+      adventureName: '동네커피',
+      characters: [
+        {
+          serverId: 'cain',
+          characterId: 'coffee-1',
+          characterName: '커피',
+          adventureName: '동네커피',
+          level: 115,
+          jobId: null,
+          jobGrowId: null,
+          jobName: null,
+          jobGrowName: null,
+          fame: 1000,
+          guildId: null,
+          guildName: null
+        }
+      ]
+    })
   )
   vi.stubGlobal('fetch', requested)
   window.history.replaceState(null, '', `/adventures/${encodeURIComponent('동네커피')}`)
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() =>
-    expect(container.querySelector('main section')?.textContent).toBe('저장된 캐릭터가 없습니다.')
+    expect(container.querySelector('main tbody a')?.getAttribute('href')).toBe('/c/cain/coffee-1')
   )
   expect(container.querySelector('main h1')?.textContent).toBe('동네커피')
   expect(requested.mock.calls.map((args) => new Request(...args).url)).toContain(
@@ -551,27 +569,48 @@ function candidateRow(
   }
 }
 
-// host의 후보 응답 캐시가 테스트 사이에 남으므로 테스트마다 다른 이름으로 검색한다.
-function stubSearchFetch(rows: readonly CharacterCandidate[]): void {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn<typeof fetch>(async (...args) => {
-      const url = new URL(new Request(...args).url)
-      if (url.pathname === '/api/characters/candidates') {
-        return Response.json({ rows })
-      }
+function stubSearchFetch(
+  rows: readonly CharacterCandidate[]
+): ReturnType<typeof vi.fn<typeof globalThis.fetch>> {
+  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
+    const url = new URL(new Request(...args).url)
+    if (url.pathname === '/api/characters') {
+      return Response.json({ rows })
+    }
 
-      return Response.json({
-        percent: 85,
-        expiresAt: new Date(Date.now() + 3_600_000).toISOString()
-      })
+    return Response.json({
+      percent: 85,
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString()
     })
+  })
+  vi.stubGlobal('fetch', fetch)
+
+  return fetch
+}
+
+function searchRequests(fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>): URL[] {
+  return fetch.mock.calls
+    .map((args) => new URL(new Request(...args).url))
+    .filter((url) => url.pathname === '/api/characters')
+}
+
+function searchBox(): HTMLFormElement {
+  return container.querySelector<HTMLFormElement>('header form[role="search"]')!
+}
+
+async function chooseScope(label: string): Promise<void> {
+  await act(async () =>
+    searchBox().querySelector<HTMLButtonElement>('button[aria-label="검색 대상"]')!.click()
   )
+  const option = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
+    (item) => item.textContent === label
+  )!
+  await act(async () => option.click())
 }
 
 async function searchName(name: string): Promise<void> {
-  const box = container.querySelector<HTMLFormElement>('header form[role="search"]')!
-  const input = box.querySelector<HTMLInputElement>('input[aria-label="캐릭터 이름"]')!
+  const box = searchBox()
+  const input = box.querySelector<HTMLInputElement>('input[type="search"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, name)
     input.dispatchEvent(new Event('input', { bubbles: true }))
@@ -579,79 +618,145 @@ async function searchName(name: string): Promise<void> {
   await act(async () => box.requestSubmit())
 }
 
-function resultPopup(): HTMLElement | null {
-  return document.querySelector('[aria-label="캐릭터 검색 결과"]')
+function searchResultRows(): [string | null, string | null][] {
+  return [...container.querySelectorAll('main section tbody tr')].map((row) => [
+    row.querySelector('a')?.getAttribute('href') ?? null,
+    row.textContent
+  ])
 }
 
-it('전역 검색창은 오늘 등급 왼쪽에 서버 선택, 이름 칸, 검색 버튼 순으로 두고 서버 기본값은 전체다', async () => {
+it('전역 검색창은 오늘 등급 왼쪽에 검색 대상, 이름 칸, 검색 버튼 순으로 두고 대상 기본값은 전체다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
-  const box = header.querySelector('form[role="search"]')!
+  const box = searchBox()
   const grade = header.querySelector('[role="img"]')!
   expect(box.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   expect(
     [...box.querySelectorAll('button, input[type="search"]')].map((control) =>
       control.getAttribute('aria-label')
     )
-  ).toEqual(['검색할 서버', '캐릭터 이름', '검색'])
-  expect(box.querySelector('button[aria-label="검색할 서버"]')?.textContent).toBe('전체')
+  ).toEqual(['검색 대상', '캐릭터 이름', '검색'])
+  expect(box.querySelector('button[aria-label="검색 대상"]')?.textContent).toBe('전체')
 })
 
-it('전역 검색 결과가 한 명이면 목록 없이 그 캐릭터의 상세로 간다', async () => {
-  stubSearchFetch([candidateRow('한명', 'cain', 'only-1', 50000)])
+it('검색 대상 목록은 전체, 서버, 모험단 순이고 모험단을 고르면 이름 칸이 모험단 이름으로 바뀐다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+  await act(async () =>
+    searchBox().querySelector<HTMLButtonElement>('button[aria-label="검색 대상"]')!.click()
+  )
+
+  const options = [...document.querySelectorAll('[role="option"]')].map((item) => item.textContent)
+  expect(options[0]).toBe('전체')
+  expect(options.at(-1)).toBe('모험단')
+  expect(options.slice(1, -1).toSorted()).toEqual(Object.values(CHARACTER_SERVER_NAMES).toSorted())
+  await act(async () => document.querySelector<HTMLElement>('[role="option"]:last-child')!.click())
+
+  const input = searchBox().querySelector<HTMLInputElement>('input[type="search"]')!
+  expect(input.getAttribute('aria-label')).toBe('모험단 이름')
+  expect(input.getAttribute('placeholder')).toBe('모험단 이름')
+})
+
+it('캐릭터 검색을 제출하면 결과가 한 명이어도 검색 화면으로 가서 목록을 보이고, 고른 캐릭터의 상세로 가며 뒤로 가면 목록으로 돌아온다', async () => {
+  const fetch = stubSearchFetch([candidateRow('한명', 'cain', 'only-1', 50000)])
   await act(async () => root.render(<WebApp host={host} />))
 
   await searchName(' 한명 ')
 
+  await waitForPath('/search')
+  expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+    characterName: '한명',
+    serverId: 'all'
+  })
+  await vi.waitFor(() =>
+    expect(searchResultRows()).toEqual([['/c/cain/only-1', '카인한명眞 크루세이더50,000']])
+  )
+  expect(searchRequests(fetch).map((url) => Object.fromEntries(url.searchParams))).toEqual([
+    { characterName: '한명', serverId: 'all', limit: '200' }
+  ])
+
+  await act(async () => container.querySelector<HTMLAnchorElement>('main tbody a')!.click())
+
   await waitForPath('/c/cain/only-1')
-  expect(resultPopup()).toBeNull()
-})
-
-it('같은 이름이 여러 명이면 초상화, 이름과 전직, 서버, 명성 목록을 열되 초점은 이름 칸에 두고, 고른 캐릭터의 상세로 가며 뒤로 가면 표로 돌아온다', async () => {
-  stubSearchFetch([
-    candidateRow('여럿', 'prey', 'many-1', 90000),
-    candidateRow('여럿', 'cain', 'many-2', null)
-  ])
-  await act(async () => root.render(<WebApp host={host} />))
-
-  await searchName('여럿')
-
-  await vi.waitFor(() => expect(resultPopup()).not.toBeNull())
-  const items = [...resultPopup()!.querySelectorAll<HTMLAnchorElement>('a')]
-  expect(items.map((item) => [item.getAttribute('href'), item.textContent])).toEqual([
-    ['/c/prey/many-1', '여럿眞 크루세이더프레이90,000'],
-    ['/c/cain/many-2', '여럿眞 크루세이더카인-']
-  ])
-  expect(items[0].querySelector('img')?.getAttribute('src')).toBe(
-    'https://img-api.neople.co.kr/df/servers/prey/characters/many-1?zoom=1'
-  )
-  expect(window.location.pathname).toBe('/')
-  const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
-  // 팝업은 열린 뒤 비동기로 초점을 옮기므로, 팝업이 보이는 것만으로 초점이 옮겨졌다고 보지 않는다.
-  await vi.waitFor(() => expect(document.activeElement).toBe(input))
-  await act(async () =>
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
-  )
-  expect(document.activeElement).toBe(items[0])
-
-  await act(async () => items[1].click())
-
-  await waitForPath('/c/cain/many-2')
-  expect(resultPopup()).toBeNull()
   await act(async () => window.history.back())
-  await waitForPath('/')
-  expect(seats()).toHaveLength(4)
+  await waitForPath('/search')
+  await vi.waitFor(() => expect(searchResultRows()).toHaveLength(1))
 })
 
-it('전역 검색 결과가 없으면 화면을 옮기지 않고 찾지 못했다는 문구를 보인다', async () => {
-  stubSearchFetch([])
+it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답을 그 순서대로 보인다', async () => {
+  const fetch = stubSearchFetch([
+    candidateRow('카인검색1', 'cain', 'server-1', 90000),
+    candidateRow('카인검색', 'cain', 'server-2', null)
+  ])
+  await act(async () => root.render(<WebApp host={host} />))
+  await chooseScope('카인')
+
+  await searchName('카인검색')
+
+  await waitForPath('/search')
+  await vi.waitFor(() =>
+    expect(searchResultRows()).toEqual([
+      ['/c/cain/server-1', '카인카인검색1眞 크루세이더90,000'],
+      ['/c/cain/server-2', '카인카인검색眞 크루세이더-']
+    ])
+  )
+  expect(container.querySelector('main h1')?.textContent).toBe('캐릭터 검색')
+  expect(searchRequests(fetch).map((url) => url.searchParams.get('serverId'))).toEqual(['cain'])
+})
+
+it('캐릭터 이름 한 글자는 제출해도 화면을 옮기지 않고 요청하지 않는다', async () => {
+  const fetch = stubSearchFetch([])
   await act(async () => root.render(<WebApp host={host} />))
 
-  await searchName('없는이름')
+  await searchName('가')
 
-  await vi.waitFor(() => expect(resultPopup()?.textContent).toBe('캐릭터를 찾지 못했습니다.'))
   expect(window.location.pathname).toBe('/')
+  expect(searchRequests(fetch)).toEqual([])
+})
+
+it('검색 결과가 없으면 찾지 못했다는 목록 제목 한 줄만 보인다', async () => {
+  stubSearchFetch([])
+  window.history.replaceState(null, '', '/search?characterName=없는이름&serverId=all')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('main section')?.textContent).toBe('캐릭터를 찾지 못했습니다.')
+  )
+  expect(container.querySelector('main table')).toBeNull()
+})
+
+it('주소의 이름이 한 글자면 검색 화면은 요청하지 않는다', async () => {
+  const fetch = stubSearchFetch([])
+  window.history.replaceState(null, '', '/search?characterName=가&serverId=unknown')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  expect(container.querySelector('main section')?.textContent).toBe(
+    '두 글자 이상 검색할 수 있습니다.'
+  )
+  expect(container.querySelector('main header')?.textContent).toBe('캐릭터 검색서버전체')
+  expect(searchRequests(fetch)).toEqual([])
+})
+
+it('모험단 검색을 제출하면 다듬은 이름의 모험단 화면으로 가고, 그 모험단에 캐릭터가 없으면 없는 주소 화면을 보인다', async () => {
+  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
+    const url = new URL(new Request(...args).url)
+    if (url.pathname.startsWith('/api/adventures/')) {
+      return Response.json({ adventureName: '없는 모험단', characters: [] })
+    }
+
+    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
+  })
+  vi.stubGlobal('fetch', fetch)
+  await act(async () => root.render(<WebApp host={host} />))
+  await chooseScope('모험단')
+
+  await searchName(' 없는 모험단 ')
+
+  await waitForPath(`/adventures/${encodeURIComponent('없는 모험단')}`)
+  await vi.waitFor(() =>
+    expect(container.querySelector('main h1')?.textContent).toBe('없는 주소입니다.')
+  )
+  expect(searchRequests(fetch)).toEqual([])
 })
 
 it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기본 동작을 막지 않고 표의 자리와 회차 안내를 바꾸지 않는다', async () => {
@@ -679,20 +784,6 @@ it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기
   expect(paste.defaultPrevented).toBe(false)
   expect(seats().map(nameOf)).toEqual(before)
   expect(captureStatus()).toBe(status)
-})
-
-it('서버를 고른 전역 검색은 그 서버의 캐릭터만 돌려준다', async () => {
-  stubSearchFetch([
-    candidateRow('서버별', 'prey', 'server-1', 90000),
-    candidateRow('서버별', 'cain', 'server-2', 80000)
-  ])
-
-  await expect(
-    host.searchCharacters({ characterName: '서버별', serverId: 'cain' })
-  ).resolves.toMatchObject([{ characterId: 'server-2' }])
-  await expect(
-    host.searchCharacters({ characterName: '서버별', serverId: null })
-  ).resolves.toMatchObject([{ characterId: 'server-1' }, { characterId: 'server-2' }])
 })
 
 function summaryStar(): HTMLButtonElement | null {

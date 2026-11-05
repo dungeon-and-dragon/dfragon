@@ -165,18 +165,6 @@ const storedCharacters = (description: string): SchemaObject => ({
 export const apiSchemas: Record<string, SchemaObject> = {
   CatalogDetail: catalogDetail,
   ApiError: object({ error: object({ code: text, message: text }) }),
-  CharacterSearchResult: object({
-    rows: {
-      type: 'array',
-      items: object({
-        characterId: text,
-        characterName: text,
-        serverId: text,
-        serverName: { type: 'string', nullable: true },
-        fame: { type: 'number', nullable: true }
-      })
-    }
-  }),
   CharacterCandidatesResult: object({
     rows: {
       type: 'array',

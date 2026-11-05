@@ -32,10 +32,14 @@ import {
   throwCharacterTransportFailure
 } from './api-response'
 import {
+  ALL_CHARACTER_SERVERS,
   candidatesSchema,
+  type CharacterSearchQuery,
   detailsSchema,
+  type SearchedCharacter,
   validateIdentity,
-  validateNickname
+  validateNickname,
+  validateSearchQuery
 } from './character-schemas'
 
 export type IdentityRequest = CharacterIdentity & { signal: AbortSignal }
@@ -43,6 +47,9 @@ export type CharacterCandidatesHttp = (input: {
   nickname: string
   signal: AbortSignal
 }) => Promise<readonly CharacterCandidate[]>
+export type CharacterSearchHttp = (
+  query: CharacterSearchQuery
+) => Promise<readonly SearchedCharacter[]>
 export type CharacterPngHttp = (input: IdentityRequest) => Promise<Uint8Array>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
 export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
@@ -56,6 +63,7 @@ export type TodayGradeHttp = () => Promise<TodayGrade>
 
 export type DfragonClient = Readonly<{
   characters: Readonly<{
+    search: CharacterSearchHttp
     candidates: CharacterCandidatesHttp
     image: CharacterPngHttp
     details: CharacterDetailsHttp
@@ -74,6 +82,8 @@ type JsonRequestOptions = {
   signal?: AbortSignal
   details?: boolean
 }
+
+const CHARACTER_SEARCH_LIMIT = '200'
 
 const todayGradeSchema = z.object({
   percent: z.number().int().min(0).max(100),
@@ -168,6 +178,27 @@ export function createDfragonClient({
 
   return {
     characters: {
+      async search(query) {
+        validateSearchQuery(query)
+        const { rows } = await requestJson(
+          '/characters',
+          candidatesSchema.refine(
+            ({ rows }) =>
+              query.serverId === ALL_CHARACTER_SERVERS ||
+              rows.every((row) => row.serverId === query.serverId)
+          ),
+          {
+            searchParams: {
+              characterName: query.characterName,
+              serverId: query.serverId,
+              limit: CHARACTER_SEARCH_LIMIT
+            },
+            details: false
+          }
+        )
+
+        return rows
+      },
       async candidates({ nickname, signal }) {
         validateNickname(nickname)
         const { rows } = await requestJson(

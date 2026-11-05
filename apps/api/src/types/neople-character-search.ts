@@ -5,21 +5,14 @@ export interface NeopleCharacterSearchInput {
   wordType?: 'full' | 'match'
 }
 
-export interface CharacterCandidate {
+export interface CharacterSearchRow {
   characterId: string
   characterName: string
   serverId: string
   serverName: string | null
   fame: number | null
-}
-
-export interface CharacterSearchRow extends CharacterCandidate {
   jobName: string | null
   jobGrowName: string | null
-}
-
-export interface CharacterSearchResult {
-  rows: CharacterCandidate[]
 }
 
 export interface NeopleCharacterSearchResult {

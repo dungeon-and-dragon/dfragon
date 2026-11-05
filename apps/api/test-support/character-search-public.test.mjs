@@ -13,7 +13,7 @@ test('공개 검색은 loopback 공급자의 후보를 정제한다', async () =
           fame: 0,
           privateField: 'excluded'
         },
-        { characterId: 'future', characterName: 'other', serverId: 'future-server', fame: null }
+        { characterId: 'middle', characterName: '다가나', serverId: 'cain', fame: 9 }
       ]
     }
     const response = await fetch(`${base}/characters?characterName=%EA%B0%80%EB%82%98`)
@@ -25,14 +25,10 @@ test('공개 검색은 loopback 공급자의 후보를 정제한다', async () =
           characterName: '가나',
           serverId: 'cain',
           serverName: '카인',
-          fame: 0
-        },
-        {
-          characterId: 'future',
-          characterName: 'other',
-          serverId: 'future-server',
-          serverName: null,
-          fame: null
+          fame: 0,
+          jobName: null,
+          jobGrowName: null,
+          imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/candidate?zoom=1'
         }
       ]
     })

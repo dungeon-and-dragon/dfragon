@@ -1,0 +1,14 @@
+import type {
+  CharacterSearchQuery,
+  SearchedCharacter
+} from '@dfragon/client-core/shared/api/character-schemas'
+import { useClientHost } from './useClientHost'
+import { type LoadedResult, useLoadedResult } from './useLoadedResult'
+
+export function useSearchedCharacters(
+  query: CharacterSearchQuery
+): LoadedResult<readonly SearchedCharacter[]> {
+  const { searchCharacters } = useClientHost()
+
+  return useLoadedResult(`${query.serverId}/${query.characterName}`, () => searchCharacters(query))
+}

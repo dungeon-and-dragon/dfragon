@@ -8,6 +8,9 @@ import {
 } from '../../preload/common/search/character-summary'
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
+const MIN_SEARCH_NAME_CODE_POINTS = 2
+
+export const ALL_CHARACTER_SERVERS = 'all'
 
 const nonblank = z.string().refine((value) => value.trim().length > 0)
 const candidateSchema = identitySchema
@@ -27,6 +30,10 @@ const candidateSchema = identitySchema
       candidate.imageUrl === characterImageUrl(candidate)
   )
 export const candidatesSchema = z.object({ rows: z.array(candidateSchema) })
+
+/** `serverId`가 `ALL_CHARACTER_SERVERS`면 모든 서버에서 찾는다. */
+export type CharacterSearchQuery = Readonly<{ characterName: string; serverId: string }>
+export type SearchedCharacter = z.output<typeof candidateSchema>
 const sectionMetadataSchema = z.object({
   revision: z.number().int().positive(),
   contentUpdatedAt: z.iso.datetime(),
@@ -79,4 +86,22 @@ export function validateNickname(nickname: string): void {
   } catch {
     throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
   }
+}
+
+export function isSearchableCharacterName(characterName: string): boolean {
+  const length = Array.from(characterName).length
+
+  return (
+    length >= MIN_SEARCH_NAME_CODE_POINTS &&
+    length <= MAX_CHARACTER_NAME_CODE_POINTS &&
+    characterName === characterName.trim()
+  )
+}
+
+export function validateSearchQuery({ characterName, serverId }: CharacterSearchQuery): void {
+  const knownServer = serverId === ALL_CHARACTER_SERVERS || Object.hasOwn(SERVER_NAMES, serverId)
+  if (!isSearchableCharacterName(characterName) || !knownServer) {
+    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+  }
+  validateNickname(characterName)
 }

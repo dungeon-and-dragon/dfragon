@@ -1,6 +1,7 @@
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Select } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { useNavigate } from '@tanstack/react-router'
 import {
   type ChangeEvent,
   type FocusEvent,
@@ -9,33 +10,45 @@ import {
   useRef,
   useState
 } from 'react'
-import { serverOptions } from '../constants/server-options'
-import { useCharacterNameSearch } from '../hooks/useCharacterNameSearch'
+import {
+  ALL_CHARACTER_SERVERS,
+  isSearchableCharacterName
+} from '@dfragon/client-core/shared/api/character-schemas'
+import { characterSearchServerOptions } from '../constants/server-options'
 import { ChevronDownIcon } from './ChevronDownIcon'
-import { CharacterSearchResults } from './CharacterSearchResults'
 import { styles } from './CharacterSearchBox.style'
 import { RecentCharacterList } from './RecentCharacterList'
 import { SearchIcon } from './SearchIcon'
 
-const ALL_SERVERS = 'all'
-const searchServerOptions = [{ id: ALL_SERVERS, label: '전체' }, ...serverOptions]
+const ADVENTURE = 'adventure'
+const scopeOptions = [...characterSearchServerOptions, { id: ADVENTURE, label: '모험단' }]
+const MAX_CHARACTER_NAME_LENGTH = 12
 
 export function CharacterSearchBox(): React.JSX.Element {
-  const [serverId, setServerId] = useState(ALL_SERVERS)
+  const navigate = useNavigate()
+  const [scope, setScope] = useState(ALL_CHARACTER_SERVERS)
   const [name, setName] = useState('')
   const [recentOpen, setRecentOpen] = useState(false)
   const boxRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
-  const { state, search, close } = useCharacterNameSearch()
+  const isAdventure = scope === ADVENTURE
+  const fieldName = isAdventure ? '모험단 이름' : '캐릭터 이름'
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault()
-    const characterName = name.trim()
-    if (characterName === '') {
+    const searchName = name.trim()
+    if (isAdventure) {
+      if (searchName !== '') {
+        await navigate({ to: '/adventures/$adventureName', params: { adventureName: searchName } })
+      }
+
       return
     }
-    await search({ characterName, serverId: serverId === ALL_SERVERS ? null : serverId })
+
+    if (isSearchableCharacterName(searchName)) {
+      await navigate({ to: '/search', search: { characterName: searchName, serverId: scope } })
+    }
   }
 
   function handleNameChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -63,9 +76,9 @@ export function CharacterSearchBox(): React.JSX.Element {
     first.focus()
   }
 
-  function handleServerChange(next: string | null): void {
+  function handleScopeChange(next: string | null): void {
     if (next != null) {
-      setServerId(next)
+      setScope(next)
     }
   }
 
@@ -73,21 +86,21 @@ export function CharacterSearchBox(): React.JSX.Element {
     <form
       ref={boxRef}
       role="search"
-      aria-label="캐릭터 검색"
+      aria-label={isAdventure ? '모험단 검색' : '캐릭터 검색'}
       onSubmit={handleSubmit}
       {...stylex.props(styles.box)}
     >
       <BaseSelect.Root
-        value={serverId}
-        onValueChange={handleServerChange}
-        items={searchServerOptions.map((option) => ({ value: option.id, label: option.label }))}
+        value={scope}
+        onValueChange={handleScopeChange}
+        items={scopeOptions.map((option) => ({ value: option.id, label: option.label }))}
       >
-        <BaseSelect.Trigger aria-label="검색할 서버" {...stylex.props(styles.server)}>
+        <BaseSelect.Trigger aria-label="검색 대상" {...stylex.props(styles.server)}>
           <BaseSelect.Value />
           <ChevronDownIcon {...stylex.props(styles.chevron)} />
         </BaseSelect.Trigger>
-        <Select.Popup aria-label="검색할 서버" columns={3}>
-          {searchServerOptions.map((option) => (
+        <Select.Popup aria-label="검색 대상" columns={3}>
+          {scopeOptions.map((option) => (
             <Select.Item key={option.id} value={option.id}>
               <Select.ItemText>{option.label}</Select.ItemText>
             </Select.Item>
@@ -98,9 +111,9 @@ export function CharacterSearchBox(): React.JSX.Element {
       <input
         ref={inputRef}
         type="search"
-        aria-label="캐릭터 이름"
-        placeholder="캐릭터 이름"
-        maxLength={12}
+        aria-label={fieldName}
+        placeholder={fieldName}
+        maxLength={isAdventure ? undefined : MAX_CHARACTER_NAME_LENGTH}
         autoComplete="off"
         spellCheck={false}
         value={name}
@@ -109,23 +122,11 @@ export function CharacterSearchBox(): React.JSX.Element {
         onKeyDown={focusFirstResult}
         {...stylex.props(styles.input)}
       />
-      <button
-        type="submit"
-        aria-label="검색"
-        disabled={state.status === 'searching'}
-        {...stylex.props(styles.submit)}
-      >
+      <button type="submit" aria-label="검색" {...stylex.props(styles.submit)}>
         <SearchIcon {...stylex.props(styles.icon)} />
       </button>
-      <CharacterSearchResults
-        anchor={boxRef}
-        input={inputRef}
-        list={listRef}
-        state={state}
-        onClose={close}
-      />
       <RecentCharacterList
-        open={recentOpen && name === '' && state.status === 'idle'}
+        open={recentOpen && name === ''}
         anchor={boxRef}
         input={inputRef}
         list={listRef}

@@ -4,7 +4,6 @@ import type {
   RaidFrameResult
 } from '@dfragon/client-core/preload/common/types/capture'
 import type {
-  CharacterCandidate,
   CharacterIdentity,
   CharacterImage
 } from '@dfragon/client-core/preload/common/types/character'
@@ -19,6 +18,10 @@ import type {
   Guild
 } from '@dfragon/client-core/shared/adventure-guild/adventure-guild'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type {
+  CharacterSearchQuery,
+  SearchedCharacter
+} from '@dfragon/client-core/shared/api/character-schemas'
 import type {
   CharacterStats,
   FameRanking,
@@ -40,9 +43,6 @@ export type RaidCaptureHost = CardSearchHost & {
   readCaptureFrame: () => Promise<RaidFrameResult>
 }
 
-/** `serverId`가 null이면 모든 서버에서 찾는다. */
-export type CharacterNameQuery = Readonly<{ characterName: string; serverId: string | null }>
-
 export type ClientHost = Readonly<{
   party: PartyCaptureHost
   raid: RaidCaptureHost
@@ -54,7 +54,7 @@ export type ClientHost = Readonly<{
   getAdventureCharacters: (adventureName: string) => Promise<AdventureCharacters>
   getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
-  searchCharacters: (query: CharacterNameQuery) => Promise<readonly CharacterCandidate[]>
+  searchCharacters: (query: CharacterSearchQuery) => Promise<readonly SearchedCharacter[]>
 }>
 
 export const ClientHostContext = createContext<ClientHost | null>(null)
