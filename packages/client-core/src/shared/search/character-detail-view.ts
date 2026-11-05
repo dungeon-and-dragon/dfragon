@@ -79,6 +79,7 @@ export const characterDetailViewSchema = z.object({
     jobGrowName: text,
     fame: count,
     adventureName: text,
+    guildId: text,
     guildName: text
   }),
   card: apiCharacterCardSchema.nullable().catch(null),
