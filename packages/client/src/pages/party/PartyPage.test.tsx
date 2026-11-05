@@ -7,6 +7,7 @@ import { PARTY_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
 import type { SnapshotMark } from '@dfragon/client-core/lib/adventure-snapshot'
 import { createSeatOrder, swapSeats, type SeatOrder } from '@dfragon/client-core/lib/seats'
 import type { CardCharacter, SlotState } from '@dfragon/client-core/types/cards'
+import { TestRouter } from '../../testing/test-support/test-router'
 
 const CHARACTER_NAME_INPUT_SELECTOR = 'input[aria-label$="번 캐릭터 이름"]'
 
@@ -42,6 +43,8 @@ const character: CardCharacter = {
 
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
+  // 라우터는 처음 그릴 때 창 스크롤을 처음으로 돌리는데 jsdom에는 scrollTo가 없다.
+  vi.stubGlobal('scrollTo', vi.fn())
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -88,13 +91,19 @@ async function render({
   })
   await act(async () =>
     root.render(
-      <PartyPage
-        resetKey="party"
-        actions={{ lookupSlot: vi.fn(), pickCandidate: vi.fn(), changeSnapshotAdventure: vi.fn() }}
-        {...props}
-        seats={{ layout: PARTY_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
-        slots={cards}
-      />
+      <TestRouter>
+        <PartyPage
+          resetKey="party"
+          actions={{
+            lookupSlot: vi.fn(),
+            pickCandidate: vi.fn(),
+            changeSnapshotAdventure: vi.fn()
+          }}
+          {...props}
+          seats={{ layout: PARTY_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
+          slots={cards}
+        />
+      </TestRouter>
     )
   )
 }
