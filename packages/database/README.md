@@ -29,6 +29,9 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
   Transaction timeout은 lock 대기를 포함해 60초입니다. 로컬에서 items 5만 행 교체가 Prisma 기본값 5초를 넘었습니다.
   타임라인 행에는 고유 ID가 없고 같은 분에 같은 내용의 행이 여러 개 있을 수 있어 중복 검사 대신 구간 교체로 맞춥니다. 구간 밖 행이 있으면 아무것도 바꾸지 않고 `RangeError`를 던집니다.
+- `replaceEnhancementBackfillRange(client, character, range, codes, items)`: 캐릭터 하나의 `[range.start, range.end]`에서 `codes`의 `timeline_items` 행만 교체하고 `timeline_sync_state.enhancement_backfilled_until`을 `range.end`로 옮깁니다.
+  `replaceTimelineRange`와 같은 캐릭터 lock과 timeout을 쓰며, `timeline_events`, 다른 코드의 행과 `synced_until`은 바꾸지 않습니다. 구간 밖이거나 `codes`에 없는 행이 있으면 아무것도 바꾸지 않고 `RangeError`를 던집니다.
+- `readEnhancementBackfilledUntil(client, character)`: `enhancement_backfilled_until`을 돌려주고, 행이나 값이 없으면 `null`입니다.
 - `readTimelineSyncState(client, character)`: `synced_until`, `last_succeeded_at`을 돌려주고, 행이 없으면 `undefined`입니다.
   첫 구간을 넣기 전에 실패만 기록된 캐릭터는 `syncedUntil`이 `null`입니다.
 - `recordTimelineSyncSuccess(client, character)`: `last_attempted_at`, `last_succeeded_at`을 지금으로 두고 `last_failure`를 비웁니다.
