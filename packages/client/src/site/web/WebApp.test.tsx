@@ -130,7 +130,7 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
 })
 
-it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메뉴, 오늘 등급을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
+it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메뉴, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
@@ -139,7 +139,9 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
   expect(brand.getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([['파티, 공대', 'page']])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-  expect(header.querySelector('button')).toBeNull()
+  const buttons = [...header.querySelectorAll('button')]
+  expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual(['다크 모드로 바꾸기'])
+  expect(grade.compareDocumentPosition(buttons[0]) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 
   const main = container.querySelector('main')!
   const tabs = main.querySelector('[role="tablist"][aria-label="화면"]')!
@@ -167,6 +169,65 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   await waitForPath('/')
   expect(seats()).toHaveLength(4)
   expect(globalMenu()).toEqual([['파티, 공대', 'page']])
+})
+
+const DETAIL_PATH = '/c/prey/buffer-1'
+
+function stubDetailFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
+  const detail = vi.fn<typeof fetch>(async (...args) => {
+    if (new Request(...args).url !== `${API_BASE_URL}/characters/prey/buffer-1`) {
+      return Response.json({
+        percent: 85,
+        expiresAt: new Date(Date.now() + 3_600_000).toISOString()
+      })
+    }
+
+    return Response.json({
+      character: { serverId: 'prey', characterId: 'buffer-1', characterName: '하늘', fame: 126965 },
+      card: { role: 'buffer', score: null }
+    })
+  })
+  vi.stubGlobal('fetch', detail)
+
+  return detail
+}
+
+function detailRequests(detail: ReturnType<typeof vi.fn<typeof fetch>>): number {
+  return detail.mock.calls.filter((args) => new Request(...args).url.includes('/characters/prey/'))
+    .length
+}
+
+function selectedTab(): string | null | undefined {
+  return container.querySelector('[role="tab"][aria-selected="true"]')?.textContent
+}
+
+it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그리고, 탭을 바꾸면 다시 조회하지 않고 지금 기록의 tab만 바꾼다', async () => {
+  const detail = stubDetailFetch()
+  window.history.replaceState(null, '', `${DETAIL_PATH}?tab=skill`)
+  const historyLength = window.history.length
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(container.querySelector('main h1')?.textContent).toBe('하늘'))
+  expect(selectedTab()).toBe('스킬')
+  expect(globalMenu()).toEqual([['파티, 공대', null]])
+
+  const statusTab = [...container.querySelectorAll<HTMLElement>('[role="tab"]')].find(
+    (tab) => tab.textContent === '스탯'
+  )!
+  await act(async () => statusTab.click())
+
+  await vi.waitFor(() => expect(window.location.search).toBe('?tab=status'))
+  expect(selectedTab()).toBe('스탯')
+  expect(window.history.length).toBe(historyLength)
+  expect(detailRequests(detail)).toBe(1)
+})
+
+it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
+  stubDetailFetch()
+  window.history.replaceState(null, '', `${DETAIL_PATH}?tab=timeline`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(selectedTab()).toBe('장비'))
 })
 
 it('없는 주소 화면에서는 Alt+방향키를 브라우저의 뒤로, 앞으로 가기에 넘긴다', async () => {

@@ -57,7 +57,29 @@ test('초상화 전달은 검증한 식별자로 만든 Neople URL의 PNG를 key
   assert.equal(requests[0]!.headers.has('apikey'), false)
 })
 
-test('초상화 전달은 잘못된 식별자, query, HEAD를 Neople 호출 없이 400으로 거절한다', async (t) => {
+test('초상화 전달은 query를 무시하고 HEAD에는 GET과 같은 status, 헤더로 답한다', async (t) => {
+  const requests: Request[] = []
+  const origin = await startApp(t, async (request) => {
+    requests.push(request)
+
+    return pngResponse()
+  })
+
+  const withQuery = await fetch(`${origin}${IMAGE_PATH}?zoom=3`)
+  const head = await fetch(origin + IMAGE_PATH, { method: 'HEAD' })
+
+  assert.equal(withQuery.status, 200)
+  assert.deepEqual(Buffer.from(await withQuery.arrayBuffer()), PNG_BYTES)
+  assert.equal(head.status, 200)
+  assert.equal(head.headers.get('content-type'), 'image/png')
+  assert.equal(head.headers.get('cache-control'), 'private, max-age=3600')
+  assert.deepEqual(
+    requests.map((request) => request.url),
+    [NEOPLE_IMAGE_URL, NEOPLE_IMAGE_URL]
+  )
+})
+
+test('초상화 전달은 잘못된 식별자를 Neople 호출 없이 400으로 거절한다', async (t) => {
   let calls = 0
   const origin = await startApp(t, async () => {
     calls += 1
@@ -65,22 +87,18 @@ test('초상화 전달은 잘못된 식별자, query, HEAD를 Neople 호출 없�
     return pngResponse()
   })
 
-  for (const [name, path, method] of [
-    ['알 수 없는 서버', '/characters/unknown/character_id-1/image', 'GET'],
-    ['허용하지 않는 문자', '/characters/cain/character.id/image', 'GET'],
-    ['인코딩한 경로 구분자', '/characters/cain/character%2Fid/image', 'GET'],
-    ['query', `${IMAGE_PATH}?zoom=3`, 'GET'],
-    ['HEAD', IMAGE_PATH, 'HEAD']
+  for (const [name, path] of [
+    ['알 수 없는 서버', '/characters/unknown/character_id-1/image'],
+    ['허용하지 않는 문자', '/characters/cain/character.id/image'],
+    ['인코딩한 경로 구분자', '/characters/cain/character%2Fid/image']
   ] as const) {
-    const response = await fetch(origin + path, { method })
+    const response = await fetch(origin + path)
 
     assert.equal(response.status, 400, name)
     assert.equal(response.headers.get('cache-control'), 'no-store', name)
-    if (method === 'GET') {
-      assert.deepEqual(await response.json(), {
-        error: { code: 'INVALID_CHARACTER_QUERY', message: '캐릭터 조회 조건을 확인해 주세요.' }
-      })
-    }
+    assert.deepEqual(await response.json(), {
+      error: { code: 'INVALID_CHARACTER_QUERY', message: '캐릭터 조회 조건을 확인해 주세요.' }
+    })
   }
   assert.equal(calls, 0)
 })

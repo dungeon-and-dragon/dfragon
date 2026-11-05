@@ -17,6 +17,7 @@ import { createDatabaseTimelineStore } from '../characters/timeline/store.js'
 import { readCharacterTimeline } from '../characters/timeline/read.js'
 import { syncCharacterTimeline } from '../characters/timeline/sync.js'
 import { createNeopleShopGrade } from '../today-grade/neople.js'
+import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../http.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
@@ -47,7 +48,9 @@ function createDatabaseSubscribers(
     recordCharacterBasic: (basic) => recordCharacterBasic(client, basic),
     adventureGuild: {
       readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),
-      readGuild: (guildId) => readGuild(client, guildId)
+      readGuild: (guildId) => readGuild(client, guildId),
+      readAdventureWeeklyClears: (adventureName) =>
+        readAdventureWeeklyClears(client, adventureName, new Date())
     },
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),

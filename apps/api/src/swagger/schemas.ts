@@ -152,6 +152,10 @@ const storedCharacterProperties: Record<string, SchemaObject> = {
 }
 const storedCharacter = object(storedCharacterProperties)
 const characterCount: SchemaObject = { type: 'integer', minimum: 0 }
+const clearName = object({
+  kind: timelineClearKind,
+  name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' }
+})
 const storedCharacters = (description: string): SchemaObject => ({
   type: 'array',
   description,
@@ -366,6 +370,29 @@ export const apiSchemas: Record<string, SchemaObject> = {
     members: storedCharacters(
       'DB에 저장된 길드원. 서버를 가리지 않고 명성이 높은 순이며 명성이 없는 캐릭터는 뒤입니다.'
     )
+  }),
+  AdventureWeekly: object({
+    adventureName: text,
+    clearNames: {
+      type: 'array',
+      description:
+        '모험단 캐릭터들이 이번 주를 포함한 최근 4주 안에 클리어한 레이드, 레기온 이름. 레이드가 먼저이고 같은 kind는 이름 순입니다.',
+      items: clearName
+    },
+    characters: {
+      type: 'array',
+      description:
+        'DB에 저장된 그 모험단의 캐릭터. 서버를 가리지 않고 명성이 높은 순이며 명성이 없는 캐릭터는 뒤입니다.',
+      items: object({
+        ...storedCharacterProperties,
+        weeklyClears: {
+          type: 'array',
+          description:
+            '이번 주(목요일 06:00 KST부터) 클리어한 이름. 여러 번 클리어해도 한 번이며 clearNames와 같은 순서입니다.',
+          items: clearName
+        }
+      })
+    }
   }),
   FameRanking: object({
     characters: {
