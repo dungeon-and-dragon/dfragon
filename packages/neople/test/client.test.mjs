@@ -182,7 +182,7 @@ test('실패 종류와 원인: 분류한 실패와 schema 불일치는 원인 �
   }
 })
 
-test('DNF001은 없는 캐릭터로 표시하되 분류는 status대로 두고 다른 오류 code는 표시하지 않는다', async () => {
+test('DNF001은 없는 캐릭터로 표시하되 분류는 api로 두고 다른 오류 code는 표시하지 않는다', async () => {
   for (const [code, characterNotFound] of [
     ['DNF001', true],
     ['DNF003', false]
@@ -198,5 +198,48 @@ test('DNF001은 없는 캐릭터로 표시하되 분류는 status대로 두고 �
 
       return true
     })
+  }
+})
+
+test('Neople 결과 코드표의 code는 HTTP status와 상관없이 코드표대로 분류한다', async () => {
+  // 모르는 code는 429를 unavailable로 분류하므로, 429로 보내면 분류표에서 빠진 api code를 잡는다.
+  const kinds = {
+    internal: ['API000', 'API003', 'API004', 'API005'],
+    unavailable: ['API002', 'API008', 'DNF980'],
+    api: [
+      'API001',
+      'API006',
+      'API007',
+      'API900',
+      'API901',
+      'API999',
+      'DNF000',
+      'DNF001',
+      'DNF003',
+      'DNF004',
+      'DNF005',
+      'DNF006',
+      'DNF007',
+      'DNF008',
+      'DNF009',
+      'DNF900',
+      'DNF901',
+      'DNF999'
+    ]
+  }
+  for (const [kind, codes] of Object.entries(kinds)) {
+    for (const code of codes) {
+      for (const status of [429, 200]) {
+        const neople = createNeopleClientForTest(apiKey, {
+          fetch: async () => Response.json({ error: { code } }, { status })
+        })
+        await assert.rejects(neople.itemShop('item', signal), (error) => {
+          assert(error instanceof NeopleRequestFailure, code)
+          assert.equal(error.kind, kind, `${code} ${status}`)
+
+          return true
+        })
+      }
+    }
   }
 })

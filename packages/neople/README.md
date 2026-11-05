@@ -18,7 +18,7 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
   `Content-Type`이 `image/png`가 아니거나 본문이 4MiB를 넘으면 실패합니다.
 - `neopleCharacterImageUrl(identity)`: 캐릭터 이미지의 고정 URL을 만듭니다.
 - `NeopleRequestFailure`: 모든 실패를 이 오류로 던집니다. `kind`는 `internal`, `api`, `unavailable`, `timeout` 가운데 하나입니다.
-  Neople이 없는 캐릭터(`DNF001`)라고 답하면 `characterNotFound`가 `true`이고, `kind`는 분류표에 없는 code처럼 HTTP status로 정해 `api`입니다.
+  Neople이 없는 캐릭터(`DNF001`)라고 답하면 `characterNotFound`가 `true`이고, `kind`는 분류표대로 `api`입니다.
   JSON 파싱 실패와 연결 오류는 원래 오류를 `cause`로 갖습니다. `cause`에는 정제하지 않은 오류가 남으므로 응답이나 로그로 그대로 내보내지 않습니다.
 - `createNeopleClientForTest(apiKey, { fetch, origin })`, `createNeopleImageClientForTest({ fetch })`: 테스트에서 `fetch`와 origin을 바꿉니다.
   운영 origin은 고정이고, 이 함수는 테스트에서만 씁니다.
@@ -27,6 +27,8 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
 
 - 모든 요청은 redirect를 따라가지 않고(`redirect: 'error'`), 자동 retry가 없으며, ky의 기본 timeout을 씁니다.
 - Neople 오류 body의 code를 먼저 분류하고, code가 없거나 모르는 값이면 HTTP status로 분류합니다. 429, 503은 `unavailable`, 그 밖의 비2xx는 `api`입니다.
+- 분류표에는 [Neople 결과 코드표](https://developers.neople.co.kr/contents/guide/pages/code)의 공통, 던전앤파이터 code를 모두 둡니다.
+  API key 문제(`API000`, `API003`, `API004`, `API005`)는 `internal`, 사용량 초과(`API002`, `API008`)와 점검(`DNF980`)은 `unavailable`, 그 밖의 code는 `api`입니다.
 - JSON이 아닌 본문은 status로 분류하고, schema에 맞지 않는 응답은 `api`입니다.
 - Timeout은 `timeout`, 연결 오류와 그 밖의 transport 실패는 `api`입니다.
 
