@@ -41,6 +41,12 @@ import {
   createAdventureGuildService,
   emptyAdventureGuildService
 } from './adventure-guild/service.js'
+import { RANKING_STATS_SERVICE, RankingStatsController } from './ranking-stats/http.js'
+import {
+  type RankingStatsReader,
+  createRankingStatsService,
+  emptyRankingStatsReader
+} from './ranking-stats/service.js'
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
@@ -124,6 +130,7 @@ export interface ApiHttpAppOptions {
   readonly timeline?: TimelineSyncOptions
   readonly recordCharacterBasic?: RecordCharacterBasic
   readonly adventureGuild?: AdventureGuildReader
+  readonly rankingStats?: RankingStatsReader
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -134,13 +141,14 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics and adventure, guild reads. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, adventure, guild reads and fame rankings, stats. */
 export async function createApiHttpApp({
   search,
   details,
   timeline,
   recordCharacterBasic,
   adventureGuild,
+  rankingStats,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -196,6 +204,7 @@ export async function createApiHttpApp({
       CharacterImageController,
       CharacterTimelineController,
       AdventureGuildController,
+      RankingStatsController,
       TodayGradeController
     ],
     providers: [
@@ -226,6 +235,10 @@ export async function createApiHttpApp({
 
           return createAdventureGuildService(adventureGuild, requestTimelineSync)
         }
+      },
+      {
+        provide: RANKING_STATS_SERVICE,
+        useValue: createRankingStatsService(rankingStats ?? emptyRankingStatsReader)
       },
       {
         provide: TODAY_GRADE_SERVICE,

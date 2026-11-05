@@ -30,6 +30,9 @@ const collectionCheckPath = fileURLToPath(
 const adventureGuildCheckPath = fileURLToPath(
   new URL('./container-adventure-guild-check.mjs', import.meta.url)
 )
+const rankingStatsCheckPath = fileURLToPath(
+  new URL('./container-ranking-stats-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -257,6 +260,8 @@ try {
         `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${adventureGuildCheckPath},target=/app/container-adventure-guild-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${rankingStatsCheckPath},target=/app/container-ranking-stats-check.mjs,readonly`,
         imageId
       ])
     )
@@ -286,7 +291,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '3'
+    '4'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -438,6 +443,28 @@ try {
     apiNames[0],
     'node',
     '/app/container-adventure-guild-check.mjs'
+  ])
+
+  stage = 'fame ranking and stats reads'
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(indexdef, E'\\n' ORDER BY indexname) FROM pg_indexes WHERE indexname LIKE 'characters_%fame_idx'"
+      )
+    ).stdout.trim(),
+    [
+      'CREATE INDEX characters_fame_idx ON public.characters USING btree (fame DESC)',
+      'CREATE INDEX characters_job_id_fame_idx ON public.characters USING btree (job_id, fame DESC)',
+      'CREATE INDEX characters_job_id_job_grow_id_fame_idx ON public.characters USING btree (job_id, job_grow_id, fame DESC)'
+    ].join('\n')
+  )
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-ranking-stats-check.mjs'
   ])
 
   stage = 'character collector waits on the empty queue and stops'
@@ -600,6 +627,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement and read, character records, adventure and guild reads, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, HTTP and database input rejection\n'
   )
 }

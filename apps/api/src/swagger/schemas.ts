@@ -130,8 +130,9 @@ const characterCard = object({
 })
 
 const nullableText: SchemaObject = { type: 'string', nullable: true }
+const serverId: SchemaObject = { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] }
 const storedCharacterProperties: Record<string, SchemaObject> = {
-  serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
+  serverId,
   characterId: text,
   characterName: text,
   adventureName: text,
@@ -150,6 +151,7 @@ const storedCharacterProperties: Record<string, SchemaObject> = {
   }
 }
 const storedCharacter = object(storedCharacterProperties)
+const characterCount: SchemaObject = { type: 'integer', minimum: 0 }
 const clearName = object({
   kind: timelineClearKind,
   name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' }
@@ -389,6 +391,52 @@ export const apiSchemas: Record<string, SchemaObject> = {
             '이번 주(목요일 06:00 KST부터) 클리어한 이름. 여러 번 클리어해도 한 번이며 clearNames와 같은 순서입니다.',
           items: clearName
         }
+      })
+    }
+  }),
+  FameRanking: object({
+    characters: {
+      type: 'array',
+      description:
+        'DB에 저장된 명성이 있는 캐릭터. 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 100명까지입니다.',
+      items: object({
+        rank: { type: 'integer', minimum: 1, description: '1부터 매긴 순서' },
+        ...storedCharacterProperties
+      })
+    }
+  }),
+  Stats: object({
+    computedAt: { ...timestamp, description: '집계를 계산한 시각' },
+    total: { ...characterCount, description: 'DB에 저장된 캐릭터 수' },
+    servers: {
+      type: 'array',
+      description: '서버별 캐릭터 수. 많은 순입니다.',
+      items: object({ serverId, count: characterCount })
+    },
+    jobs: {
+      type: 'array',
+      description: '직업, 전직별 캐릭터 수. 기본 정보가 없는 캐릭터는 빠지며 많은 순입니다.',
+      items: object({
+        jobId: text,
+        jobGrowId: text,
+        jobName: text,
+        jobGrowName: text,
+        count: characterCount,
+        averageFame: {
+          type: 'integer',
+          nullable: true,
+          description: '명성이 있는 캐릭터의 평균을 반올림한 값. 그런 캐릭터가 없으면 null'
+        }
+      })
+    },
+    fameDistribution: {
+      type: 'array',
+      description:
+        '명성이 있는 캐릭터를 10,000 단위 구간으로 센 수. 캐릭터가 있는 구간만 낮은 순입니다.',
+      items: object({
+        from: { type: 'integer', description: '구간 시작(포함)' },
+        to: { type: 'integer', description: '구간 끝(제외)' },
+        count: characterCount
       })
     }
   })

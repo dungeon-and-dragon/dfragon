@@ -1,5 +1,14 @@
 import { tz } from '@date-fns/tz'
-import { addHours, format, isValid, parse, startOfWeek, subHours } from 'date-fns'
+import {
+  addDays,
+  addHours,
+  format,
+  isValid,
+  parse,
+  startOfDay,
+  startOfWeek,
+  subHours
+} from 'date-fns'
 
 const inSeoul = tz('Asia/Seoul')
 const THURSDAY = 4
@@ -27,4 +36,8 @@ export function startOfResetWeek(date: Date): Date {
   })
 
   return new Date(addHours(start, WEEK_RESET_HOUR))
+}
+
+export function startOfNextSeoulDay(date: Date): Date {
+  return new Date(addDays(startOfDay(date, { in: inSeoul }), 1))
 }
