@@ -211,12 +211,7 @@ export function ApiFameRanking() {
     ApiOperation({
       summary: '명성 랭킹 조회',
       description:
-        '공개 API. DB에 저장된 캐릭터 기본 정보에서 명성이 있는 캐릭터를 명성이 높은 순으로 100명까지 반환합니다. 명성이 같으면 서버, 캐릭터 id 순이고 rank는 1부터 매긴 순서입니다. serverId, jobId, jobGrowId로 거르며 jobGrowId는 jobId와 함께 씁니다. 다른 query key는 무시합니다. Neople을 부르지 않으며 값은 행마다 fetchedAt 시점의 것입니다. DB 설정이 없는 API는 빈 목록을 반환합니다.'
-    }),
-    ApiQuery({
-      name: 'serverId',
-      required: false,
-      schema: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] }
+        '공개 API. DB에 저장된 캐릭터 기본 정보에서 명성이 있는 캐릭터를 명성이 높은 순으로 100명까지 반환합니다. 명성이 같으면 서버, 캐릭터 id 순이고 rank는 1부터 매긴 순서입니다. jobId, jobGrowId로 거르며 jobGrowId는 jobId와 함께 씁니다. 서버는 통합되어 있어 서버로 거르지 않습니다. 다른 query key는 무시합니다. Neople을 부르지 않으며 값은 행마다 fetchedAt 시점의 것입니다. DB 설정이 없는 API는 빈 목록을 반환합니다.'
     }),
     ApiQuery({ name: 'jobId', required: false, schema: { type: 'string', minLength: 1 } }),
     ApiQuery({
