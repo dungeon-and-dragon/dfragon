@@ -123,7 +123,7 @@ try {
       [
         raid(201, '03-12T05:59:00', '합성 4주 밖 레이드'),
         raid(210, '03-12T06:00:00', '합성 4주 레이드'),
-        raid(201, '04-02T05:59:00', '디레지에 레이드'),
+        raid(201, '04-02T05:59:00', '합성 지난주 레이드'),
         raid(201, '04-02T06:00:00', '디레지에 레이드')
       ]
     ],
@@ -141,6 +141,7 @@ try {
   assert.deepEqual(weekly.clearNames, [
     { kind: 'raid', name: '디레지에 레이드' },
     { kind: 'raid', name: '합성 4주 레이드' },
+    { kind: 'raid', name: '합성 지난주 레이드' },
     { kind: 'legion', name: '베누스' }
   ])
   assert.deepEqual(
