@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, radius, space } from './tokens.stylex'
+import { colors, motion, radius, shadow, space } from './tokens.stylex'
 
 const openShape = 'inset(0)'
 const foldedShape = 'inset(0 0 100% 0)'
@@ -100,7 +100,7 @@ export const listboxStyles = stylex.create({
     paddingInline: space.s4,
     borderTopWidth: 0,
     backgroundColor: colors.bgSurface,
-    boxShadow: `inset 0 0 0 1px ${colors.cardBorderStrong}, 0 8px 24px rgb(0 0 0 / 45%)`,
+    boxShadow: `inset 0 0 0 1px ${colors.cardBorderStrong}, ${shadow.popover}`,
     color: colors.cardFgMuted,
     clipPath: 'none',
     transitionProperty: 'none'

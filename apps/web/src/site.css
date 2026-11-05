@@ -6,10 +6,6 @@
   font-display: swap;
 }
 
-:root {
-  color-scheme: dark;
-}
-
 body {
   color: var(--df-fg-default);
   background: var(--df-bg-canvas);
