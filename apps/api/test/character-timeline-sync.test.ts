@@ -345,6 +345,7 @@ test('앱을 닫으면 진행 중인 동기화를 기다리지 않고 대기열�
         synced++
         await running.promise
       },
+      read: async () => assert.fail('타임라인을 읽으면 안 된다'),
       close: async () => {
         closed++
       }
