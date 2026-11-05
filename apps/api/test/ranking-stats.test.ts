@@ -78,7 +78,7 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('명성 랭킹은 query의 서버와 직업, limit 100으로 읽고 1부터 rank를 붙인다', async () => {
+test('명성 랭킹은 query의 직업과 전직, limit 100으로 읽고 serverId는 무시하며 1부터 rank를 붙인다', async () => {
   const reads: [FameRankingFilter, number][] = []
   const characters = [character('a', 80000), character('b', 70000)]
   const { app, origin } = await listen({
@@ -105,7 +105,7 @@ test('명성 랭킹은 query의 서버와 직업, limit 100으로 읽고 1부터
     })
     assert.equal(all.status, 200)
     assert.deepEqual(reads, [
-      [{ serverId: 'cain', jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }, 100],
+      [{ jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }, 100],
       [{}, 100]
     ])
   } finally {
@@ -113,12 +113,11 @@ test('명성 랭킹은 query의 서버와 직업, limit 100으로 읽고 1부터
   }
 })
 
-test('명성 랭킹은 잘못된 서버, 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으로 거절한다', async () => {
+test('명성 랭킹은 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으로 거절한다', async () => {
   const { app, origin } = await listen(unusedReader)
   try {
     for (const query of [
-      'serverId=all',
-      'serverId=cain&serverId=siroco',
+      'jobId=synthetic-job&jobId=other-job',
       'jobId=',
       'jobGrowId=synthetic-grow'
     ]) {
@@ -249,7 +248,7 @@ test('명성 랭킹 DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준�
 test('DB 설정이 없는 API는 빈 랭킹과 0인 통계를 준다', async () => {
   const { app, origin } = await listen()
   try {
-    assert.deepEqual(await getJson(origin, '/rankings/fame?serverId=cain'), {
+    assert.deepEqual(await getJson(origin, '/rankings/fame'), {
       status: 200,
       body: { characters: [] }
     })
