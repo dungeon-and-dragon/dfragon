@@ -5,7 +5,7 @@ import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import type {
   ClearName,
   WeeklyCharacter
-} from '@dfragon/client-core/shared/adventure/adventure-weekly'
+} from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 import { CheckIcon } from '../../components/CheckIcon'
 import { CharacterCell } from '../../components/table/CharacterCell'
 import { styles as tableStyles } from '../../components/table/CharacterTable.style'
