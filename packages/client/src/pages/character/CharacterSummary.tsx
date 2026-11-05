@@ -1,5 +1,6 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { formatApproximateScore, toScoreView } from '@dfragon/client-core/lib/card-score'
 import {
@@ -16,8 +17,34 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
   const { character } = detail
   const job = character.jobGrowName ?? character.jobName
   const affiliations = [
-    { id: 'adventure', name: character.adventureName, tone: styles.adventure },
-    { id: 'guild', name: character.guildName, tone: styles.guild }
+    {
+      id: 'adventure',
+      name: character.adventureName,
+      tone: styles.adventure,
+      link: character.adventureName != null && (
+        <Link
+          to="/adventures/$adventureName"
+          params={{ adventureName: character.adventureName }}
+          {...stylex.props(styles.adventure, styles.link)}
+        >
+          {character.adventureName}
+        </Link>
+      )
+    },
+    {
+      id: 'guild',
+      name: character.guildName,
+      tone: styles.guild,
+      link: character.guildId != null && (
+        <Link
+          to="/guilds/$guildId"
+          params={{ guildId: character.guildId }}
+          {...stylex.props(styles.guild, styles.link)}
+        >
+          {character.guildName}
+        </Link>
+      )
+    }
   ].filter((affiliation) => affiliation.name != null)
 
   return (
@@ -36,10 +63,10 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         </div>
         {affiliations.length > 0 && (
           <div {...stylex.props(styles.line)}>
-            {affiliations.map(({ id, name, tone }, index) => (
+            {affiliations.map(({ id, name, tone, link }, index) => (
               <span key={id} {...stylex.props(styles.affiliation)}>
                 {index > 0 && <span aria-hidden="true" {...stylex.props(styles.divider)} />}
-                <span {...stylex.props(tone)}>{name}</span>
+                {link || <span {...stylex.props(tone)}>{name}</span>}
               </span>
             ))}
           </div>
