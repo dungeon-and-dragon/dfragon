@@ -5,7 +5,7 @@ interface Env {
 }
 
 const API_ORIGIN = 'https://api.dfragon.com'
-const API_PATH_PREFIXES = ['/characters', '/items']
+const API_PATH_PREFIX = '/api'
 const OCR_PATH_PREFIX = '/ocr/'
 
 export default {
@@ -15,8 +15,10 @@ export default {
       return serveOcrAsset(request, env, url.pathname.slice(OCR_PATH_PREFIX.length))
     }
 
-    if (API_PATH_PREFIXES.some((prefix) => url.pathname.startsWith(prefix))) {
-      return fetch(new Request(new URL(`${url.pathname}${url.search}`, API_ORIGIN), request))
+    if (url.pathname.startsWith(`${API_PATH_PREFIX}/`)) {
+      const apiPath = url.pathname.slice(API_PATH_PREFIX.length)
+
+      return fetch(new Request(new URL(`${apiPath}${url.search}`, API_ORIGIN), request))
     }
 
     return env.ASSETS.fetch(request)
