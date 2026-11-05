@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
-import { createAdventureWeeklyHttp } from './adventure-weekly-http'
-import type { AdventureWeekly } from './adventure-weekly'
+import type { AdventureWeekly } from '../adventure-guild/adventure-weekly'
+import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
 
@@ -35,7 +35,7 @@ const weekly: AdventureWeekly = {
 
 it('모험단 이름을 경로에 담아 주간 클리어 응답을 읽는다', async () => {
   const fetch = respond(weekly)
-  const read = createAdventureWeeklyHttp({ apiOrigin: API_ORIGIN, fetch })
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.weekly
 
   await expect(read('합성 모험단/1')).resolves.toEqual(weekly)
   expect(new Request(fetch.mock.calls[0][0]).url).toBe(
@@ -51,7 +51,8 @@ it('클리어가 없는 응답과 빈 응답도 읽는다', async () => {
   }
   const empty = { adventureName: '없는 모험단', clearNames: [], characters: [] }
   for (const body of [noClears, empty]) {
-    const read = createAdventureWeeklyHttp({ apiOrigin: API_ORIGIN, fetch: respond(body) })
+    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).adventures
+      .weekly
 
     await expect(read(body.adventureName)).resolves.toEqual(body)
   }
@@ -59,7 +60,7 @@ it('클리어가 없는 응답과 빈 응답도 읽는다', async () => {
 
 it('빈 이름은 요청하지 않고 거부한다', async () => {
   const fetch = respond(weekly)
-  const read = createAdventureWeeklyHttp({ apiOrigin: API_ORIGIN, fetch })
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.weekly
 
   await expect(read('  ')).rejects.toMatchObject({ code: 'INVALID_SEARCH_QUERY' })
   expect(fetch).not.toHaveBeenCalled()
@@ -71,7 +72,8 @@ it('모르는 클리어 종류나 weeklyClears가 없는 응답은 거부한다'
     { ...weekly, clearNames: [{ kind: 'dungeon', name: '합성 던전' }] },
     { ...weekly, characters: [withoutClears] }
   ]) {
-    const read = createAdventureWeeklyHttp({ apiOrigin: API_ORIGIN, fetch: respond(body) })
+    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).adventures
+      .weekly
 
     await expect(read('합성 모험단')).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
   }

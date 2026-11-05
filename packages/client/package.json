@@ -26,7 +26,6 @@
     "@dfragon/ui": "workspace:*",
     "@tanstack/react-router": "catalog:",
     "@xstate/react": "catalog:",
-    "ky": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"

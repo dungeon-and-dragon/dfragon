@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { SearchErrorCode } from '../../preload/common/types/search'
-import {
-  createCharacterCandidatesHttp,
-  createCharacterDetailsHttp,
-  createCharacterDetailViewHttp
-} from './character-http'
+import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
 const NOT_FOUND_MESSAGE = 'API가 보낸 없는 캐릭터 문구'
@@ -18,7 +14,7 @@ function respondWith(body: unknown, status: number) {
 }
 
 function readDetails(body: unknown, status: number) {
-  return createCharacterDetailsHttp(respondWith(body, status))({
+  return createDfragonClient(respondWith(body, status)).characters.details({
     serverId: 'cain',
     characterId: 'missing-character',
     signal: new AbortController().signal
@@ -39,9 +35,9 @@ describe('없는 캐릭터의 404 응답', () => {
   })
 
   it('후보 검색은 404 CHARACTER_NOT_FOUND를 받아도 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
-    const candidates = createCharacterCandidatesHttp(
+    const candidates = createDfragonClient(
       respondWith({ error: { code: 'CHARACTER_NOT_FOUND', message: NOT_FOUND_MESSAGE } }, 404)
-    )
+    ).characters.candidates
 
     await expect(
       candidates({ nickname: '가나', signal: new AbortController().signal })
@@ -60,11 +56,11 @@ function request(route: Route, response: Response): Promise<unknown> {
   const identity = { serverId: 'cain', characterId: 'character-1' }
   switch (route) {
     case 'candidates':
-      return createCharacterCandidatesHttp(options)({ nickname: '가나', signal })
+      return createDfragonClient(options).characters.candidates({ nickname: '가나', signal })
     case 'details':
-      return createCharacterDetailsHttp(options)({ ...identity, signal })
+      return createDfragonClient(options).characters.details({ ...identity, signal })
     case 'detail-view':
-      return createCharacterDetailViewHttp(options)(identity)
+      return createDfragonClient(options).characters.detailView(identity)
   }
 }
 
@@ -164,4 +160,45 @@ describe('경로별 API 오류 응답', () => {
       })
     }
   )
+})
+
+describe('캐릭터 이미지 요청', () => {
+  const PNG_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+
+  function readImage(response: Response) {
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => response)
+    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).characters.image({
+      serverId: 'cain',
+      characterId: 'character-1',
+      signal: new AbortController().signal
+    })
+
+    return { fetch, read }
+  }
+
+  it('API 이미지 경로에서 받은 PNG bytes를 풀지 않고 그대로 준다', async () => {
+    const { fetch, read } = readImage(
+      new Response(PNG_BYTES.slice(), { headers: { 'Content-Type': 'image/png; charset=binary' } })
+    )
+
+    await expect(read).resolves.toEqual(PNG_BYTES)
+    expect(new Request(fetch.mock.calls[0][0]).url).toBe(
+      `${API_ORIGIN}/characters/cain/character-1/image`
+    )
+  })
+
+  it('Content-Type이 image/png가 아니면 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
+    const { read } = readImage(
+      new Response(PNG_BYTES.slice(), { headers: { 'Content-Type': 'image/jpeg' } })
+    )
+
+    await expect(read).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
+  })
+
+  it.each([
+    [429, 'SEARCH_RATE_LIMITED'],
+    [502, 'NEOPLE_API_ERROR']
+  ])('%i 응답은 %s로 실패한다', async (status, code) => {
+    await expect(readImage(new Response(null, { status })).read).rejects.toMatchObject({ code })
+  })
 })

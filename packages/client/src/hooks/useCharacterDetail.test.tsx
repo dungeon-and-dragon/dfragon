@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { createCharacterDetailViewHttp } from '@dfragon/client-core/shared/search/character-http'
+import { createDfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { useCharacterDetail } from './useCharacterDetail'
@@ -104,10 +104,10 @@ it('없는 캐릭터의 404 CHARACTER_NOT_FOUND 응답이면 error.message를 �
         status: 404
       })
   )
-  const getCharacterDetail = createCharacterDetailViewHttp({
+  const getCharacterDetail = createDfragonClient({
     apiOrigin: 'https://api.example.test',
     fetch
-  })
+  }).characters.detailView
 
   await render(createTestClientHost({ getCharacterDetail }), 'missing-character')
   await vi.waitFor(() => expect(shown()).toBe(message))

@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest'
-import { createCharacterTimelineHttp } from './character-http'
+import { createDfragonClient } from '../api/dfragon-client'
 import type { CharacterTimeline } from './character-timeline'
 
 const API_ORIGIN = 'https://api.example.test'
@@ -9,7 +9,7 @@ function readTimeline(body: unknown, status = 200) {
   const fetch = vi.fn<typeof globalThis.fetch>(
     async () => new Response(JSON.stringify(body), { status })
   )
-  const read = createCharacterTimelineHttp({ apiOrigin: API_ORIGIN, fetch })(identity)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).characters.timeline(identity)
 
   return { fetch, read }
 }
