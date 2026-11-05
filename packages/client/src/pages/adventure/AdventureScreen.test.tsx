@@ -89,12 +89,20 @@ it('제목 상자에 모험단 이름, 캐릭터 수, 목록의 최고 명성을
   expect(container.querySelector('tbody a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
-it('저장된 캐릭터가 없으면 목록 상자에 한 줄만 두고 수는 0, 최고 명성은 -다', async () => {
+it('캐릭터가 0명이면 그 이름의 모험단이 없으므로 없는 주소 화면을 보인다', async () => {
   await render(async () => ({ adventureName: '합성 모험단', characters: [] }))
 
-  expect(container.querySelector('section')?.textContent).toBe('저장된 캐릭터가 없습니다.')
+  expect(container.querySelector('h1')?.textContent).toBe('없는 주소입니다.')
   expect(container.querySelector('table')).toBeNull()
-  expect(stats()).toEqual(expect.arrayContaining(['캐릭터0', '최고 명성-']))
+})
+
+it('명성이 모두 없으면 최고 명성은 -다', async () => {
+  await render(async () => ({
+    adventureName: '합성 모험단',
+    characters: [storedCharacter(1, { fame: null })]
+  }))
+
+  expect(stats()).toEqual(expect.arrayContaining(['캐릭터1', '최고 명성-']))
 })
 
 it('조회가 실패하면 오류를 알린다', async () => {
