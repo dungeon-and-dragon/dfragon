@@ -33,7 +33,7 @@ const diregie = { modeName: '디레지에 : 악연', hard: true }
 const events = [
   raid(201, at('03-26T05:59:00'), '디레지에 레이드', diregie),
   raid(201, at('03-26T06:00:00'), '디레지에 레이드', diregie),
-  raid(201, at('04-02T05:59:00'), '디레지에 레이드', diregie),
+  raid(201, at('04-02T05:59:00'), '디레지에 레이드', { modeName: '디레지에 : 악연' }),
   raid(201, weekStart, '디레지에 레이드', diregie),
   raid(210, at('04-02T07:00:00'), '이내 황혼전'),
   { ...raid(209, at('04-02T08:00:00'), null, { regionName: '베누스' }), name: '레기온' },
@@ -66,14 +66,33 @@ try {
   const timeline = await readCharacterTimeline(client, stored, now)
 
   assert.deepEqual(timeline.weeklyClears, [
-    { kind: 'raid', name: '디레지에 레이드', modeName: '디레지에 : 악연', occurredAt: weekStart },
-    { kind: 'raid', name: '이내 황혼전', modeName: null, occurredAt: at('04-02T07:00:00') },
-    { kind: 'legion', name: '베누스', modeName: null, occurredAt: at('04-02T08:00:00') }
+    {
+      kind: 'raid',
+      name: '디레지에 레이드',
+      modeName: '디레지에 : 악연',
+      hard: true,
+      occurredAt: weekStart
+    },
+    {
+      kind: 'raid',
+      name: '이내 황혼전',
+      modeName: null,
+      hard: false,
+      occurredAt: at('04-02T07:00:00')
+    },
+    {
+      kind: 'legion',
+      name: '베누스',
+      modeName: null,
+      hard: false,
+      occurredAt: at('04-02T08:00:00')
+    }
   ])
   assert.deepEqual(timeline.seasonClears, [
-    { kind: 'raid', name: '디레지에 레이드', count: 3 },
-    { kind: 'raid', name: '이내 황혼전', count: 1 },
-    { kind: 'legion', name: '베누스', count: 1 }
+    { kind: 'raid', name: '디레지에 레이드', hard: true, count: 2 },
+    { kind: 'raid', name: '디레지에 레이드', hard: false, count: 1 },
+    { kind: 'raid', name: '이내 황혼전', hard: false, count: 1 },
+    { kind: 'legion', name: '베누스', hard: false, count: 1 }
   ])
   assert.equal(timeline.enhancements.length, 50)
   assert.deepEqual(timeline.enhancements[0], {
@@ -133,7 +152,7 @@ try {
   release()
 
   assert.deepEqual((await answer).weeklyClears, [
-    { kind: 'raid', name: '합성 레이드', modeName: null, occurredAt: weekStart }
+    { kind: 'raid', name: '합성 레이드', modeName: null, hard: false, occurredAt: weekStart }
   ])
 } finally {
   await client.$disconnect()

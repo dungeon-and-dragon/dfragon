@@ -70,16 +70,18 @@ test('한 주는 목요일 06:00(KST)에 시작한다', () => {
   }
 })
 
-test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시즌 클리어는 종류와 이름별로 센다', () => {
+test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시즌 클리어는 종류, 이름, 하드 여부별로 센다', () => {
   const weekStart = new Date('2026-11-05T06:00:00+09:00')
   const seasonStart = new Date('2026-03-26T06:00:00+09:00')
-  const raid = { raidName: '디레지에 레이드', data: { modeName: '디레지에 : 악연' } }
+  const raid = { raidName: '나벨 레이드', data: { modeName: '나벨 : 무지의 악' } }
+  const hardRaid = { raidName: '나벨 레이드', data: { modeName: '나벨 : 무지의 악', hard: true } }
   const timeline = toCharacterTimeline(
     {
       clears: [
         event({ code: 201, occurredAt: new Date('2026-03-26T05:59:00+09:00'), ...raid }),
-        event({ code: 201, occurredAt: new Date('2026-11-05T05:59:00+09:00'), ...raid }),
-        event({ code: 201, occurredAt: weekStart, ...raid }),
+        event({ code: 201, occurredAt: new Date('2026-11-05T05:58:00+09:00'), ...raid }),
+        event({ code: 201, occurredAt: new Date('2026-11-05T05:59:00+09:00'), ...hardRaid }),
+        event({ code: 201, occurredAt: weekStart, ...hardRaid }),
         event({
           code: 210,
           occurredAt: new Date('2026-11-05T08:00:00+09:00'),
@@ -99,24 +101,33 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
   )
 
   assert.deepEqual(timeline.weeklyClears, [
-    { kind: 'raid', name: '디레지에 레이드', modeName: '디레지에 : 악연', occurredAt: weekStart },
+    {
+      kind: 'raid',
+      name: '나벨 레이드',
+      modeName: '나벨 : 무지의 악',
+      hard: true,
+      occurredAt: weekStart
+    },
     {
       kind: 'raid',
       name: '이내 황혼전',
       modeName: null,
+      hard: false,
       occurredAt: new Date('2026-11-05T08:00:00+09:00')
     },
     {
       kind: 'legion',
       name: '베누스',
       modeName: null,
+      hard: false,
       occurredAt: new Date('2026-11-05T09:00:00+09:00')
     }
   ])
   assert.deepEqual(timeline.seasonClears, [
-    { kind: 'raid', name: '디레지에 레이드', count: 2 },
-    { kind: 'raid', name: '이내 황혼전', count: 1 },
-    { kind: 'legion', name: '베누스', count: 1 }
+    { kind: 'raid', name: '나벨 레이드', hard: false, count: 1 },
+    { kind: 'raid', name: '나벨 레이드', hard: true, count: 2 },
+    { kind: 'raid', name: '이내 황혼전', hard: false, count: 1 },
+    { kind: 'legion', name: '베누스', hard: false, count: 1 }
   ])
 })
 
@@ -157,12 +168,12 @@ test('강화, 증폭, 재련의 종류를 나누고 재련에 없는 before, saf
   )
 })
 
-test('형식이 다른 선택 필드는 null로 두고 이름, after, result가 맞지 않는 행은 뺀다', () => {
+test('형식이 다른 선택 필드는 null이나 false로 두고 이름, after, result가 맞지 않는 행은 뺀다', () => {
   const occurredAt = new Date('2026-11-05T12:00:00+09:00')
   const timeline = toCharacterTimeline(
     {
       clears: [
-        event({ code: 201, raidName: '디레지에 레이드', data: { modeName: 3 } }),
+        event({ code: 201, raidName: '디레지에 레이드', data: { modeName: 3, hard: 'true' } }),
         event({ code: 209, data: { regionName: null } }),
         event({ code: 210, raidName: null, data: { modeName: '합성 난이도' } })
       ],
@@ -179,7 +190,7 @@ test('형식이 다른 선택 필드는 null로 두고 이름, after, result가 
   )
 
   assert.deepEqual(timeline.weeklyClears, [
-    { kind: 'raid', name: '디레지에 레이드', modeName: null, occurredAt }
+    { kind: 'raid', name: '디레지에 레이드', modeName: null, hard: false, occurredAt }
   ])
   assert.deepEqual(
     timeline.enhancements.map(({ kind, before, after, result, safe }) => ({
@@ -276,7 +287,7 @@ test('queue를 닫으면 대기열에서 기다리던 요청은 동기화 없이
 test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값을 준다', async (t) => {
   const stored: CharacterTimeline = {
     weeklyClears: [],
-    seasonClears: [{ kind: 'raid', name: '디레지에 레이드', count: 3 }],
+    seasonClears: [{ kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 }],
     enhancements: [],
     acquisitions: []
   }
