@@ -98,6 +98,24 @@ DB 설정이 없으면 구독자를 등록하지 않습니다.
 `guildName`은 가장 최근에 받은 길드원 행의 이름이고, `averageFame`은 명성이 있는 길드원의 평균을 반올림한 값입니다. 그런 길드원이 없으면 `null`입니다.
 DB에 없는 모험단과 길드, DB 설정이 없는 API는 빈 목록을 주며 이때 `guildName`, `averageFame`은 `null`입니다. 예전에 지운 `GET /adventures/characters`와는 다른 경로입니다.
 
+### 모험단 주간 클리어 조회
+
+`GET /adventures/:adventureName/weekly`는 모험단 조회와 같은 캐릭터 행에 이번 주(목요일 06:00 KST부터) 클리어를 붙여 명성 순으로 줍니다.
+`kind`, `name`의 뜻은 [타임라인 조회](#타임라인-조회)와 같습니다.
+
+```json
+{
+  "adventureName": "…",
+  "clearNames": [{ "kind": "raid", "name": "디레지에 레이드" }, { "kind": "legion", "name": "베누스" }],
+  "characters": [{ /* 캐릭터 행 */ "weeklyClears": [{ "kind": "raid", "name": "디레지에 레이드" }] }]
+}
+```
+
+`clearNames`는 그 캐릭터들이 이번 주를 포함한 최근 4주 안에 클리어한 레이드(201, 210)와 레기온(209) 이름이며, 레이드가 먼저이고 같은 `kind`는 이름 순입니다.
+`weeklyClears`는 같은 이름을 여러 번 클리어해도 한 번만 넣고 `clearNames`와 같은 순서입니다.
+조회는 그 캐릭터들의 타임라인 동기화를 같은 queue에 넣고 끝나기를 기다리지 않습니다. 응답은 지금 저장된 값이라, 처음 여는 모험단은 비어 있다가 동기화가 끝난 뒤 다시 조회하면 채워집니다.
+DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.
+
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
