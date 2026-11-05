@@ -19,6 +19,6 @@ export const styles = stylex.create({
     fontVariantNumeric: 'tabular-nums',
     lineHeight: '20px'
   },
-  round: { color: colors.signal },
+  round: { color: colors.accent },
   total: { color: colors.fgSubtle }
 })
