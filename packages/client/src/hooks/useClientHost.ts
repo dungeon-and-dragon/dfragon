@@ -15,6 +15,11 @@ import type {
 } from '@dfragon/client-core/preload/common/types/search'
 import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type {
+  CharacterStats,
+  FameRanking,
+  FameRankingFilter
+} from '@dfragon/client-core/shared/ranking/ranking-stats'
 import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
 
 export type CardSearchHost = SearchApi & {
@@ -39,6 +44,8 @@ export type ClientHost = Readonly<{
   getTodayGrade: () => Promise<TodayGrade>
   getCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
   getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
+  getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
+  getCharacterStats: () => Promise<CharacterStats>
   searchCharacters: (query: CharacterNameQuery) => Promise<readonly CharacterCandidate[]>
 }>
 

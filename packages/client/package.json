@@ -28,6 +28,7 @@
     "@xstate/react": "catalog:",
     "ky": "catalog:",
     "xstate": "catalog:",
+    "zod": "catalog:",
     "zustand": "catalog:"
   },
   "devDependencies": {
