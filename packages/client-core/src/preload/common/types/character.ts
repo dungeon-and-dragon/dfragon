@@ -32,6 +32,7 @@ export type CharacterCard = Readonly<{
 
 export type SelectedCharacterSummary = CharacterSummary &
   Readonly<{
+    guildId: string | null
     guildName: string | null
     equipmentScore: number | null
     card: CharacterCard | null
