@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { CreatureArtifacts } from './avatar/CreatureArtifacts'
-import { AvatarTable } from './shared/AvatarTable'
-import { styles } from './shared/detail-tab.style'
+import { AvatarTable } from './avatar/AvatarTable'
+import { styles } from './avatar/detail-tab.style'
 import type { CharacterTabProps } from './character-tab-props'
 
 export function AvatarCreatureTab({ detail }: CharacterTabProps): React.JSX.Element {
