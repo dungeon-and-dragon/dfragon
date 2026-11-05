@@ -1,8 +1,8 @@
+import type { ItemRarity } from '../shared/search/character-detail-display'
 import type { CharacterDetailView } from '../shared/search/character-detail-view'
 import {
-  type ItemRarity,
   type ItemView,
-  itemRarity,
+  itemRarityOfGrade,
   type StatLine,
   toItemView,
   toStatLines,
@@ -85,7 +85,7 @@ function toSetView(setInfo: Oath['setInfo']): OathSet | null {
     name: setInfo.setName,
     optionName: setInfo.setOptionName,
     rarityName: setInfo.setRarityName,
-    rarity: itemRarity(setInfo.setRarityName),
+    rarity: itemRarityOfGrade(setInfo.setRarityName),
     point
   }
 }

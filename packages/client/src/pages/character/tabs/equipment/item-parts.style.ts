@@ -3,27 +3,6 @@ import { colors, radius, space } from '@dfragon/ui/tokens.stylex'
 
 const ICON_SIZE = 28
 
-export const rarityText = stylex.create({
-  common: { color: colors.rarityCommon },
-  uncommon: { color: colors.rarityUncommon },
-  rare: { color: colors.rarityRare },
-  unique: { color: colors.rarityUnique },
-  legendary: { color: colors.rarityLegendary },
-  epic: { color: colors.rarityEpic },
-  chronicle: { color: colors.rarityChronicle },
-  primordial: {
-    color: 'transparent',
-    backgroundImage: colors.rarityPrimordialGradient,
-    backgroundClip: 'text'
-  },
-  mythic: {
-    color: 'transparent',
-    backgroundImage: colors.rarityMythicGradient,
-    backgroundClip: 'text'
-  },
-  unknown: { color: colors.fgDefault }
-})
-
 export const oathText = stylex.create({
   rare: { color: 'transparent', backgroundImage: colors.oathRareGradient, backgroundClip: 'text' },
   unique: {
