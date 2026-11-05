@@ -183,6 +183,7 @@ async function connectWatchedShare(): Promise<{
 
 let host: BrowserHost
 let unsubscribeAutoRound = (): void => {}
+let unsubscribePastedFrame = (): void => {}
 
 // host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
 beforeAll(() => {
@@ -194,9 +195,12 @@ beforeEach(() => {
   vi.mocked(readTownIndicatorTemplate).mockResolvedValue(townTemplate)
   vi.mocked(readRaidWindowTemplates).mockResolvedValue(raidTemplates)
   vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+  // 웹 앱 첫 화면처럼 붙여넣기 회차를 받을 화면이 있는 상태를 기본으로 둔다.
+  unsubscribePastedFrame = host.onPastedFrame(() => undefined)
 })
 
 afterEach(async () => {
+  unsubscribePastedFrame()
   await host.party.selectCaptureSource('')
   unsubscribeAutoRound()
   host.setWatchedScreen({ kind: 'party', roundRunning: false })
@@ -246,6 +250,19 @@ it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이�
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
   await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
+  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
+})
+
+it('붙여넣기 회차를 받을 화면이 없을 때 붙여 넣은 이미지는 들지 않아 캡처 회차가 공유 화면을 읽는다', async () => {
+  stubScreenShare()
+  stubVideoDecode()
+  const sourceId = await host.requestScreenShare()
+  await host.party.selectCaptureSource(sourceId!)
+  unsubscribePastedFrame()
+
+  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
+
+  expect(decodeBrowserImage).not.toHaveBeenCalledWith(file)
   await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
 })
 

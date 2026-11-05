@@ -1,7 +1,9 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors } from '@dfragon/ui/tokens.stylex'
+import { colors, space } from '@dfragon/ui/tokens.stylex'
 
 export const styles = stylex.create({
+  // 보드 헤더 끝의 도구 간격(4px)에 더해 마지막 캡처 시각, 스냅샷과 12px씩 띄운다.
+  root: { display: 'inline-flex', marginInlineEnd: space.s8 },
   wrapper: { display: 'inline-flex' },
   trigger: {
     display: 'inline-flex',
