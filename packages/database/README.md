@@ -30,7 +30,11 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   첫 구간을 넣기 전에 실패만 기록된 캐릭터는 `syncedUntil`이 `null`입니다.
 - `recordTimelineSyncSuccess(client, character)`: `last_attempted_at`, `last_succeeded_at`을 지금으로 두고 `last_failure`를 비웁니다.
 - `recordTimelineSyncFailure(client, character, failure)`: `last_attempted_at`과 `last_failure`만 바꿉니다.
-- 입력 타입 `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`와 결과 타입 `TimelineSyncState`를 함께 export합니다.
+- `readCurrentSeasonStart(client, now)`: `seasons`에서 `now` 전에 시작한 가장 최근 시즌의 시작 시각을 돌려주고, 없으면 `undefined`입니다.
+- `readTimelineEvents(client, character, codes, since)`: `timeline_events`에서 `codes`의 `since` 이후 행을 오래된 순으로 돌려줍니다.
+- `readRecentTimelineItems(client, character, { codes, itemRarities, limit })`: `timeline_items`에서 `codes`의 행을 최근 순으로 `limit`개까지 돌려줍니다. `itemRarities`를 주면 그 `item_rarity`만 고릅니다.
+  읽은 행의 `data`는 저장한 JSON 그대로이며 형식은 호출자가 확인합니다.
+- 입력 타입 `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `TimelineEventRow`, `TimelineItemRow`를 함께 export합니다.
 - `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다. API의 Neople key도 같은 함수로 읽습니다.
   `@dfragon/lib`는 Node 전용 runtime에 의존하지 않아야 해서 `node:fs`를 쓰는 이 함수를 이 package에 둡니다.
 
