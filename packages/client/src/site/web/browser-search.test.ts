@@ -2,7 +2,8 @@ import { afterEach, expect, it, vi } from 'vitest'
 import type { SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
 import { createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
 
-const API_ORIGIN = 'https://api.example.test'
+// 같은 origin 빌드의 API 주소처럼 경로가 붙은 base도 요청 주소에 그대로 남는지 본다.
+const API_BASE_URL = 'https://site.example.test/api'
 const identity = { serverId: 'cain', characterId: 'character-1' }
 const metadata = {
   revision: 1,
@@ -65,12 +66,12 @@ afterEach(() => {
 
 it('닉네임과 서버로 조회하면 API에서 상세를 받아 슬롯을 채우고, 명령 호출 중에는 동기적으로 알리지 않는다', async () => {
   const fetch = vi.fn<typeof globalThis.fetch>(async (...args) =>
-    new URL(new Request(...args).url).pathname === '/characters/candidates'
+    new URL(new Request(...args).url).pathname === '/api/characters/candidates'
       ? json({ rows: [candidate] })
       : json(details)
   )
   vi.stubGlobal('fetch', fetch)
-  const search = createBrowserCardSearch('party', createBrowserSearchRuntime(API_ORIGIN, vi.fn()))
+  const search = createBrowserCardSearch('party', createBrowserSearchRuntime(API_BASE_URL, vi.fn()))
   const snapshots: SearchSnapshot[] = []
   search.onCharacterSearchChanged((snapshot) => snapshots.push(snapshot))
   const begun = await search.controlCharacterSearch({ action: 'begin' })
@@ -97,15 +98,15 @@ it('닉네임과 서버로 조회하면 API에서 상세를 받아 슬롯을 채
     card: null
   })
   expect(requestUrls(fetch)).toEqual([
-    `${API_ORIGIN}/characters/candidates?characterName=%EA%B0%80%EB%82%98`,
-    `${API_ORIGIN}/characters/cain/character-1`
+    `${API_BASE_URL}/characters/candidates?characterName=%EA%B0%80%EB%82%98`,
+    `${API_BASE_URL}/characters/cain/character-1`
   ])
 })
 
 it('수동 조회의 검색과 상세 정보 오류 응답은 API가 보낸 message를 슬롯 오류에 담는다', async () => {
   let candidatesFound = false
   const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
-    const candidates = new URL(new Request(...args).url).pathname === '/characters/candidates'
+    const candidates = new URL(new Request(...args).url).pathname === '/api/characters/candidates'
     if (candidates && candidatesFound) {
       return json({ rows: [candidate] })
     }
@@ -117,7 +118,7 @@ it('수동 조회의 검색과 상세 정보 오류 응답은 API가 보낸 mess
     return json({ error: { code: 'NEOPLE_TIMEOUT', message: '상세 오류 문구' } }, 504)
   })
   vi.stubGlobal('fetch', fetch)
-  const search = createBrowserCardSearch('party', createBrowserSearchRuntime(API_ORIGIN, vi.fn()))
+  const search = createBrowserCardSearch('party', createBrowserSearchRuntime(API_BASE_URL, vi.fn()))
   const snapshots: SearchSnapshot[] = []
   search.onCharacterSearchChanged((snapshot) => snapshots.push(snapshot))
   const begun = await search.controlCharacterSearch({ action: 'begin' })
@@ -149,18 +150,18 @@ it('수동 조회의 검색과 상세 정보 오류 응답은 API가 보낸 mess
 it('후보 초상화는 네오플 이미지 서버가 아니라 API의 초상화 전달 경로에서 받는다', async () => {
   const fetch = vi.fn<typeof globalThis.fetch>(async () => json({ error: { code: 'x' } }, 404))
   vi.stubGlobal('fetch', fetch)
-  const { identification } = createBrowserSearchRuntime(API_ORIGIN, vi.fn())
+  const { identification } = createBrowserSearchRuntime(API_BASE_URL, vi.fn())
 
   await expect(
     identification.image({ ...identity, signal: new AbortController().signal })
   ).rejects.toMatchObject({ code: 'NEOPLE_API_ERROR' })
-  expect(requestUrls(fetch)).toEqual([`${API_ORIGIN}/characters/cain/character-1/image`])
+  expect(requestUrls(fetch)).toEqual([`${API_BASE_URL}/characters/cain/character-1/image`])
 })
 
 it('형식이 맞지 않는 명령은 API를 부르지 않고 INVALID_SEARCH_COMMAND로 답한다', async () => {
   const fetch = vi.fn<typeof globalThis.fetch>()
   vi.stubGlobal('fetch', fetch)
-  const search = createBrowserCardSearch('raid', createBrowserSearchRuntime(API_ORIGIN, vi.fn()))
+  const search = createBrowserCardSearch('raid', createBrowserSearchRuntime(API_BASE_URL, vi.fn()))
 
   const result = await search.controlCharacterSearch({
     action: 'lookup',
