@@ -10,5 +10,7 @@ export function useSearchedCharacters(
 ): LoadedResult<readonly SearchedCharacter[]> {
   const { searchCharacters } = useClientHost()
 
-  return useLoadedResult(`${query.serverId}/${query.characterName}`, () => searchCharacters(query))
+  return useLoadedResult(['character-search', query.serverId, query.characterName], () =>
+    searchCharacters(query)
+  )
 }

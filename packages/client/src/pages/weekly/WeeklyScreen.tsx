@@ -4,7 +4,7 @@ import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox } from '../../components/table/TitleBox'
-import { useAdventureWeekly } from '../../hooks/useAdventureWeekly'
+import { useAdventureWeekly, useRefreshAdventureWeekly } from '../../hooks/useAdventureWeekly'
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { WeeklyClearTable } from './WeeklyClearTable'
 import { styles } from './WeeklyScreen.style'
@@ -15,14 +15,16 @@ export function WeeklyScreen(): React.JSX.Element {
   const adventureName = useMyAdventureStore((state) => state.adventureName)
   const changeAdventureName = useMyAdventureStore((state) => state.changeAdventureName)
   const [draft, setDraft] = useState(adventureName ?? '')
-  const [revision, setRevision] = useState(0)
+  const refreshWeekly = useRefreshAdventureWeekly()
 
   function handleDraftChange(event: ChangeEvent<HTMLInputElement>): void {
     setDraft(event.target.value)
   }
 
   function handleRefresh(): void {
-    setRevision(revision + 1)
+    if (adventureName != null) {
+      refreshWeekly(adventureName)
+    }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
@@ -58,7 +60,7 @@ export function WeeklyScreen(): React.JSX.Element {
         </form>
       </TitleBox>
       {adventureName != null ? (
-        <WeeklyClearList adventureName={adventureName} revision={revision} />
+        <WeeklyClearList adventureName={adventureName} />
       ) : (
         <ListBox name="내 모험단">
           <p {...stylex.props(styles.state)}>모험단 이름을 넣어 주세요.</p>
@@ -68,14 +70,8 @@ export function WeeklyScreen(): React.JSX.Element {
   )
 }
 
-function WeeklyClearList({
-  adventureName,
-  revision
-}: {
-  adventureName: string
-  revision: number
-}): React.JSX.Element {
-  const result = useAdventureWeekly(adventureName, revision)
+function WeeklyClearList({ adventureName }: { adventureName: string }): React.JSX.Element {
+  const result = useAdventureWeekly(adventureName)
   switch (result.status) {
     case 'loading':
       return (

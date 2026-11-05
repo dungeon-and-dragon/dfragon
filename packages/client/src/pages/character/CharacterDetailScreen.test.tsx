@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { toneClassesOf } from '../../testing/test-support/score-tone-class'
 import type { CharacterTab } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
@@ -88,12 +89,14 @@ async function render(
     root.render(
       <TestRouter>
         <ClientHostContext value={host}>
-          <CharacterDetailScreen
-            serverId="bakal"
-            characterId="dealer-1"
-            tab={tab}
-            onTabChange={onTabChange}
-          />
+          <TestQueryClient>
+            <CharacterDetailScreen
+              serverId="bakal"
+              characterId="dealer-1"
+              tab={tab}
+              onTabChange={onTabChange}
+            />
+          </TestQueryClient>
         </ClientHostContext>
       </TestRouter>
     )

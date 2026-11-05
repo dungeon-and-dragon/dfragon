@@ -13,6 +13,7 @@ import type {
 } from '@dfragon/client-core/shared/search/character-timeline'
 import { ClientHostContext, type ClientHost } from '../../../hooks/useClientHost'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { TimelineTab } from './TimelineTab'
 
 // jsdom은 색을 계산하지 않으므로 같은 선언으로 만든 StyleX class가 붙었는지로 색을 확인한다.
@@ -185,18 +186,19 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-function render(host: ClientHost, detail: CharacterDetailView): Promise<void> {
+function render(host: ClientHost, detail: CharacterDetailView | null): Promise<void> {
   return act(async () =>
     root.render(
       <ClientHostContext value={host}>
-        <TimelineTab detail={detail} />
+        <TestQueryClient>{detail !== null && <TimelineTab detail={detail} />}</TestQueryClient>
       </ClientHostContext>
     )
   )
 }
 
-function hide(): Promise<void> {
-  return act(async () => root.render(null))
+// 탭 패널을 숨기면 탭 내용만 unmount되고 화면 위의 캐시는 남는다.
+function hide(host: ClientHost): Promise<void> {
+  return render(host, null)
 }
 
 function group(title: string): HTMLElement {
@@ -320,20 +322,16 @@ it('값이 없는 캐릭터는 네 묶음의 제목을 남기고 묶음마다 �
   expect(container.querySelectorAll('li, table')).toHaveLength(0)
 })
 
-it('탭을 숨겼다가 다시 열어도 같은 상세에서는 다시 조회하지 않고, 상세를 새로 받으면 다시 조회한다', async () => {
+it('탭을 숨겼다가 다시 열거나 같은 캐릭터의 상세를 새로 받아도 캐시가 남은 동안 다시 조회하지 않는다', async () => {
   const getCharacterTimeline = vi.fn<ClientHost['getCharacterTimeline']>(async () => FILLED)
   const host = createTestClientHost({ getCharacterTimeline })
-  const detail = detailOf()
 
-  await render(host, detail)
-  await hide()
-  await render(host, detail)
+  await render(host, detailOf())
+  await hide(host)
+  await render(host, detailOf())
 
   expect(rowsOf('이번 주 클리어')).toHaveLength(3)
   expect(getCharacterTimeline).toHaveBeenCalledOnce()
-
-  await render(host, detailOf())
-  expect(getCharacterTimeline).toHaveBeenCalledTimes(2)
 })
 
 it('조회가 실패하면 오류 문구를 보이고, 탭을 다시 열면 다시 조회한다', async () => {
@@ -349,7 +347,7 @@ it('조회가 실패하면 오류 문구를 보이고, 탭을 다시 열면 다�
     '검색 시간이 초과됐습니다. 다시 시도해 주세요.'
   )
 
-  await hide()
+  await hide(host)
   await render(host, detail)
   expect(container.querySelector('[role="alert"]')).toBeNull()
   expect(container.querySelectorAll('section')).toHaveLength(4)
@@ -478,4 +476,36 @@ it('다음 묶음을 받는 동안 받는 중을 알리고 끝을 다시 지나�
     'enhancement-cursor-1',
     'enhancement-cursor-1'
   ])
+})
+
+it('5분이 지나 다시 연 탭은 받아 둔 타임라인을 먼저 그리고, 새로 받은 첫 페이지로 바꾸며 그 전에 이어 받던 묶음은 붙이지 않는다', async () => {
+  const startedAt = Date.now()
+  const refetched = Promise.withResolvers<CharacterTimeline>()
+  const nextPage = Promise.withResolvers<TimelinePage<TimelineEnhancement>>()
+  const getCharacterTimeline = vi
+    .fn<ClientHost['getCharacterTimeline']>()
+    .mockResolvedValueOnce(PAGED)
+    .mockReturnValueOnce(refetched.promise)
+  const getTimelineEnhancements = vi.fn<ClientHost['getTimelineEnhancements']>(
+    () => nextPage.promise
+  )
+  const host = createTestClientHost({ getCharacterTimeline, getTimelineEnhancements })
+
+  await render(host, detailOf())
+  await hide(host)
+  vi.setSystemTime(startedAt + 6 * 60_000)
+  await render(host, detailOf())
+  expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화'])
+
+  await reachEnd('강화, 증폭, 재련')
+  expect(getTimelineEnhancements).toHaveBeenCalledExactlyOnceWith(
+    { serverId: 'cain', characterId: 'character-1' },
+    'enhancement-cursor-1'
+  )
+  await act(async () => refetched.resolve({ ...PAGED, enhancements: [enhancement('새 첫 강화')] }))
+  expect(itemNames('강화, 증폭, 재련')).toEqual(['새 첫 강화'])
+
+  await act(async () => nextPage.resolve({ items: [enhancement('둘째 강화')], nextCursor: null }))
+  expect(itemNames('강화, 증폭, 재련')).toEqual(['새 첫 강화'])
+  expect(getCharacterTimeline).toHaveBeenCalledTimes(2)
 })

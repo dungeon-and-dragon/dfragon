@@ -6,10 +6,12 @@ import {
   Outlet,
   RouterProvider
 } from '@tanstack/react-router'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState, type KeyboardEvent } from 'react'
 import { GameBar } from '../../components/GameBar'
 import { GlobalBar } from '../../components/GlobalBar'
 import { MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
+import { createQueryClient } from '../../lib/query-client'
 import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
@@ -206,13 +208,16 @@ declare module '@tanstack/react-router' {
 // 화면을 옮겨도 화면 공유 연결과 표 상태가 남도록 host와 캡처 provider를 라우터 위에 둔다.
 export function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
   const [router] = useState(() => createWebRouter(host))
+  const [queryClient] = useState(createQueryClient)
 
   return (
     <ClientHostContext value={host}>
-      <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-        <ScreenShareEndings host={host} />
-        <RouterProvider router={router} />
-      </ScreenCaptureProvider>
+      <QueryClientProvider client={queryClient}>
+        <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
+          <ScreenShareEndings host={host} />
+          <RouterProvider router={router} />
+        </ScreenCaptureProvider>
+      </QueryClientProvider>
     </ClientHostContext>
   )
 }
