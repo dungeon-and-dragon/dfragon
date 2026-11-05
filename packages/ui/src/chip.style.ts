@@ -24,8 +24,9 @@ export const styles = stylex.create({
     },
     backgroundColor: {
       default: colors.bgControl,
-      ':hover:not(:disabled)': colors.bgControlHover,
-      ':is([data-pressed])': colors.signal
+      ':hover:not(:disabled, [data-pressed])': colors.bgControlHover,
+      ':is([data-pressed])': colors.signal,
+      ':is([data-pressed]):hover:not(:disabled)': colors.signalHover
     }
   }
 })
