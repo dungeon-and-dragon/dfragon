@@ -27,6 +27,9 @@ export const CHARACTER_HTTP_LIMITS = {
   detailJsonBytes: 8 * 1024 * 1024,
   // 목록 넷이 각각 최근 50개 안팎이라 응답은 수십 KB다.
   timelineJsonBytes: 256 * 1024,
+  // 랭킹은 캐릭터 100명이라 수십 KB, 통계는 직업, 전직 수십 개와 명성 구간이라 수 KB다.
+  rankingJsonBytes: 256 * 1024,
+  statsJsonBytes: 256 * 1024,
   ...CHARACTER_IMAGE_LIMITS
 } as const
 
@@ -99,7 +102,7 @@ const detailStatusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
   404: 'CHARACTER_NOT_FOUND'
 }
 
-type ApiOptions = { fetch: typeof fetch; apiOrigin: string }
+export type ApiOptions = { fetch: typeof fetch; apiOrigin: string }
 type ImageOptions = {
   fetch: typeof fetch
   decodePng: DecodePng
@@ -153,7 +156,7 @@ function expectedErrorCode(status: number, details: boolean): string | undefined
   return statusErrorCode(status, details)
 }
 
-function assertApiSuccess(response: Response, body: unknown, details: boolean): void {
+export function assertApiSuccess(response: Response, body: unknown, details: boolean): void {
   if (response.status === 200) {
     if (body != null && typeof body === 'object' && Object.hasOwn(body, 'error')) {
       throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
