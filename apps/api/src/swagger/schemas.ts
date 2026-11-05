@@ -127,6 +127,32 @@ const characterCard = object({
   score: cardScore
 })
 
+const nullableText: SchemaObject = { type: 'string', nullable: true }
+const storedCharacter = object({
+  serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
+  characterId: text,
+  characterName: text,
+  adventureName: text,
+  level: { type: 'integer', nullable: true },
+  jobId: nullableText,
+  jobGrowId: nullableText,
+  jobName: nullableText,
+  jobGrowName: nullableText,
+  fame: { type: 'integer', nullable: true },
+  guildId: nullableText,
+  guildName: nullableText,
+  fetchedAt: {
+    ...timestamp,
+    nullable: true,
+    description: '이 행의 기본 정보를 Neople에서 받은 시각(basic_fetched_at). 받지 않은 행은 null'
+  }
+})
+const storedCharacters = (description: string): SchemaObject => ({
+  type: 'array',
+  description,
+  items: storedCharacter
+})
+
 export const apiSchemas: Record<string, SchemaObject> = {
   CatalogDetail: catalogDetail,
   ApiError: object({ error: object({ code: text, message: text }) }),
@@ -264,5 +290,27 @@ export const apiSchemas: Record<string, SchemaObject> = {
       description: '11부위 대표 아이템 오늘의 등급(itemGradeValue)의 평균을 반올림한 값'
     },
     expiresAt: { ...timestamp, description: '등급이 바뀌는 다음 0시(KST)' }
+  }),
+  AdventureCharacters: object({
+    adventureName: text,
+    characters: storedCharacters(
+      'DB에 저장된 그 모험단의 캐릭터. 서버를 가리지 않고 명성이 높은 순이며 명성이 없는 캐릭터는 뒤입니다.'
+    )
+  }),
+  Guild: object({
+    guildId: text,
+    guildName: {
+      ...nullableText,
+      description: '가장 최근에 기본 정보를 받은 길드원의 길드 이름. 길드원이 없으면 null'
+    },
+    memberCount: { type: 'integer', minimum: 0 },
+    averageFame: {
+      type: 'integer',
+      nullable: true,
+      description: '명성이 있는 길드원의 평균을 반올림한 값. 그런 길드원이 없으면 null'
+    },
+    members: storedCharacters(
+      'DB에 저장된 길드원. 서버를 가리지 않고 명성이 높은 순이며 명성이 없는 캐릭터는 뒤입니다.'
+    )
   })
 }
