@@ -91,6 +91,10 @@ const statusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
   503: 'NEOPLE_UNAVAILABLE',
   504: 'NEOPLE_TIMEOUT'
 }
+const detailStatusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
+  ...statusErrors,
+  404: 'CHARACTER_NOT_FOUND'
+}
 
 type ApiOptions = { fetch: typeof fetch; apiOrigin: string }
 type ImageOptions = {
@@ -125,6 +129,14 @@ function validateNickname(nickname: string): void {
   }
 }
 
+function statusErrorCode(status: number, details: boolean): SearchErrorCode | undefined {
+  if (details) {
+    return detailStatusErrors[status]
+  }
+
+  return statusErrors[status]
+}
+
 function expectedErrorCode(status: number, details: boolean): string | undefined {
   if (details && status === 400) {
     return 'INVALID_CHARACTER_QUERY'
@@ -134,7 +146,7 @@ function expectedErrorCode(status: number, details: boolean): string | undefined
     return 'CHARACTER_RATE_LIMITED'
   }
 
-  return statusErrors[status]
+  return statusErrorCode(status, details)
 }
 
 function assertApiSuccess(response: Response, body: unknown, details: boolean): void {
@@ -145,7 +157,7 @@ function assertApiSuccess(response: Response, body: unknown, details: boolean): 
 
     return
   }
-  const code = statusErrors[response.status]
+  const code = statusErrorCode(response.status, details)
   const expectedCode = expectedErrorCode(response.status, details)
   const failure = failureSchema.safeParse(body)
   if (!code || !failure.success || failure.data.error.code !== expectedCode) {
