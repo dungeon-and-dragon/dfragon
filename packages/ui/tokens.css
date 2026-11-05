@@ -15,6 +15,7 @@
  *   점수 --df-score-dealer, --df-score-buffer, 상단 바 높이 --df-size-topbar, 팝오버와 툴팁 그림자 --df-shadow-*
  * - 게임 색 --df-game-refine, --df-game-enchant, --df-game-set, --df-game-increase, --df-game-fame, --df-game-decrease,
  *   --df-game-precision, --df-game-fame-label, --df-rarity-mythic, --df-rarity-*-gradient
+ * - 서약 등급 색 --df-oath-{rare,unique,legendary,epic}과 그 세로 그라데이션(*-gradient)
  * - 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 면(ADR 0012의 표 행 자리 배지 값). 다크는 16% 면이고, 라이트는
  *   오류, 검색 실패, 성공의 라이트 값과 그 10% 면을 쓴다.
  * 숫자 글꼴 --df-font-num은 본문과 같은 Pretendard다(ADR 0011).
@@ -92,6 +93,30 @@
     180deg,
     light-dark(#7e6908, #ffd61d),
     light-dark(#a12ed7, #c659ff)
+  );
+  --df-oath-rare: light-dark(#874acc, #b57aff);
+  --df-oath-rare-gradient: linear-gradient(
+    180deg,
+    light-dark(#8152c2, #b88aff),
+    light-dark(#8e43d5, #b36bff)
+  );
+  --df-oath-unique: light-dark(#be07ac, #ff54e8);
+  --df-oath-unique-gradient: linear-gradient(
+    180deg,
+    light-dark(#9e5079, #ffa8d2),
+    light-dark(#b808b8, #ff00ff)
+  );
+  --df-oath-legendary: light-dark(#9b5c00, #eb9e49);
+  --df-oath-legendary-gradient: linear-gradient(
+    180deg,
+    light-dark(#796939, #d6c592),
+    light-dark(#aa4f07, #ff7800)
+  );
+  --df-oath-epic: light-dark(#876602, #ebbc49);
+  --df-oath-epic-gradient: linear-gradient(
+    180deg,
+    light-dark(#796939, #d6c592),
+    light-dark(#8e6200, #ffb400)
   );
   --df-game-enhance: light-dark(#077487, #68d5ed);
   --df-game-refine: light-dark(#8e43d5, #b36bff);
