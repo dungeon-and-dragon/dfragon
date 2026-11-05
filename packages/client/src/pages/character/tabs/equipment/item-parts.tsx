@@ -1,7 +1,9 @@
 import * as stylex from '@stylexjs/stylex'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import { type ItemRarity, itemIconUrl } from '@dfragon/client-core/lib/character-item'
-import { oathSolid, oathText, raritySolid, rarityText, styles } from './item-parts.style'
+import { itemIconUrl } from '@dfragon/client-core/lib/character-item'
+import type { ItemRarity } from '@dfragon/client-core/shared/search/character-detail-display'
+import { styles as rarityText } from '../avatar/ItemName.style'
+import { oathSolid, oathText, raritySolid, styles } from './item-parts.style'
 
 type Tone = Readonly<{ rarity: ItemRarity | null; oath?: boolean }>
 

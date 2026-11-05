@@ -1,12 +1,6 @@
+import { formatStatValue, type ItemRarity } from '../shared/search/character-detail-display'
 import type { CharacterDetailView } from '../shared/search/character-detail-view'
-import {
-  formatStatValue,
-  type ItemRarity,
-  type ItemView,
-  itemRarity,
-  toItemView,
-  tuneNumeral
-} from './character-item'
+import { type ItemView, itemRarityOfGrade, toItemView, tuneNumeral } from './character-item'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
 type Enchant = NonNullable<EquipmentItem['enchant']>
@@ -196,7 +190,7 @@ export function toEquipmentView(
       return {
         name: set.setItemName,
         rarityName: set.setItemRarityName,
-        rarity: itemRarity(set.setItemRarityName),
+        rarity: itemRarityOfGrade(set.setItemRarityName),
         point
       }
     }),
