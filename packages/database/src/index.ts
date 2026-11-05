@@ -34,3 +34,11 @@ export type {
   TimelineRange,
   TimelineSyncState
 } from './timeline.js'
+export { readCharacterStats, readFameRanking } from './ranking-stats.js'
+export type {
+  CharacterStats,
+  FameBucket,
+  FameRankingFilter,
+  JobCount,
+  ServerCount
+} from './ranking-stats.js'
