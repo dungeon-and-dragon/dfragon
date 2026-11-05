@@ -41,6 +41,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   // 검색 연결 실패는 단계를 그대로 두고 문구만 바꾸므로 자동 인식 안내로 덮지 않는다.
   const watching = sourceReady && !partyCapture.search.connectionFailed
   const status = getScreenShareStatus(controls, watching, searchMode)
+
   async function connect(): Promise<void> {
     const sourceId = await host.requestScreenShare()
     if (sourceId !== null) {
