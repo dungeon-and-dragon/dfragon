@@ -1,14 +1,19 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { CharacterDisplay } from '../lib/stored-character'
 import { useFavoriteCharacterStore } from './useFavoriteCharacterStore'
 
 const STORAGE_KEY = 'dfragon:favorite-characters'
 
-const ALPHA = {
+const ALPHA: CharacterDisplay = {
   serverId: 'cain',
   characterId: 'alpha-id',
   characterName: '알파',
   adventureName: '가나다',
+  guildId: 'guild-1',
+  guildName: '길드1',
+  level: 115,
+  jobName: '귀검사(남)',
   jobGrowName: '검신',
   fame: 50000
 }
@@ -143,7 +148,7 @@ describe('브라우저 저장', () => {
 
   it('형태가 틀린 항목만 버리고 나머지는 읽는다', () => {
     const saved = { ...ALPHA, savedAt: 1 }
-    storeValue([saved, { ...BETA, savedAt: '어제' }, { ...BETA, fame: null, savedAt: 1 }, null])
+    storeValue([saved, { ...BETA, savedAt: '어제' }, { ...BETA, fame: '많음', savedAt: 1 }, null])
     useFavoriteCharacterStore.persist.rehydrate()
 
     expect(storeState().favoriteCharacters).toEqual([saved])

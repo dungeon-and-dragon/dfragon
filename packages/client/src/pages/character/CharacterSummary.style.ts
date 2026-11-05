@@ -31,6 +31,7 @@ export const styles = stylex.create({
     flexGrow: 1,
     minWidth: 0
   },
+  heading: { display: 'flex', alignItems: 'center', gap: space.s8, minWidth: 0 },
   name: { margin: 0, fontSize: 20, lineHeight: '28px', fontWeight: 700 },
   line: {
     display: 'flex',

@@ -1,27 +1,30 @@
-import { isFiniteNumber, isNonblankString, isRecord } from '@dfragon/lib/utils/shape-check'
+import { z } from 'zod'
+import { characterIdentitySchema } from '@dfragon/client-core/preload/common/search/character-summary'
+
+const text = z.string().nullable()
+const count = z.number().nullable()
+
+export const characterDisplaySchema = characterIdentitySchema.extend({
+  characterName: z.string().refine((value) => value.trim().length > 0),
+  adventureName: text,
+  guildId: text,
+  guildName: text,
+  level: count,
+  jobName: text,
+  jobGrowName: text,
+  fame: count
+})
 
 export type CharacterKey = { serverId: string; characterId: string }
 
-export type CharacterDisplay = CharacterKey & {
-  characterName: string
-  adventureName: string
-  jobGrowName: string
-  fame: number
-}
+export type CharacterDisplay = z.infer<typeof characterDisplaySchema>
 
 export function isSameCharacter(a: CharacterKey, b: CharacterKey): boolean {
   return a.serverId === b.serverId && a.characterId === b.characterId
 }
 
 export function pickCharacterDisplay(character: CharacterDisplay): CharacterDisplay {
-  return {
-    serverId: character.serverId,
-    characterId: character.characterId,
-    characterName: character.characterName,
-    adventureName: character.adventureName,
-    jobGrowName: character.jobGrowName,
-    fame: character.fame
-  }
+  return characterDisplaySchema.parse(character)
 }
 
 export function refreshCharacterDisplay<T extends CharacterDisplay>(
@@ -37,25 +40,18 @@ export function refreshCharacterDisplay<T extends CharacterDisplay>(
   })
 }
 
-export function isCharacterDisplay(value: unknown): value is CharacterDisplay {
-  return (
-    isRecord(value) &&
-    isNonblankString(value.serverId) &&
-    isNonblankString(value.characterId) &&
-    isNonblankString(value.characterName) &&
-    typeof value.adventureName === 'string' &&
-    typeof value.jobGrowName === 'string' &&
-    isFiniteNumber(value.fame)
-  )
-}
+export function storedCharacterList<Item extends z.ZodType>(item: Item) {
+  return z
+    .array(z.unknown())
+    .catch([])
+    .transform((entries) =>
+      entries.flatMap((entry) => {
+        const parsed = item.safeParse(entry)
+        if (!parsed.success) {
+          return []
+        }
 
-export function readStoredCharacters<T>(
-  value: unknown,
-  isCharacter: (value: unknown) => value is T
-): T[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value.filter(isCharacter)
+        return [parsed.data]
+      })
+    )
 }
