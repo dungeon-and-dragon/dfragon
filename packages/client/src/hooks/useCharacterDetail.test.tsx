@@ -95,12 +95,12 @@ it('받는 동안 받는 중을 보이고, 같은 캐릭터를 다시 그려도 
   })
 })
 
-it('없는 캐릭터의 API 오류 응답이면 error.message를 그대로 준다', async () => {
-  const message = '캐릭터 정보 조회 중 오류가 발생했습니다.'
+it('없는 캐릭터의 404 CHARACTER_NOT_FOUND 응답이면 error.message를 그대로 준다', async () => {
+  const message = 'API가 보낸 없는 캐릭터 문구'
   const fetch = vi.fn<typeof globalThis.fetch>(
     async () =>
-      new Response(JSON.stringify({ error: { code: 'NEOPLE_API_ERROR', message } }), {
-        status: 502
+      new Response(JSON.stringify({ error: { code: 'CHARACTER_NOT_FOUND', message } }), {
+        status: 404
       })
   )
   const getCharacterDetail = createCharacterDetailViewHttp({
