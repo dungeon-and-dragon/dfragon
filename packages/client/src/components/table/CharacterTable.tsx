@@ -69,7 +69,15 @@ export function CharacterTable({
   )
 }
 
-export function SkeletonRow({ rowRef }: { rowRef?: Ref<HTMLTableRowElement> }): React.JSX.Element {
+const AFFILIATION_COLUMNS = 2
+
+export function SkeletonRow({
+  rowRef,
+  blankCells = AFFILIATION_COLUMNS
+}: {
+  rowRef?: Ref<HTMLTableRowElement>
+  blankCells?: number
+}): React.JSX.Element {
   return (
     <tr ref={rowRef} aria-hidden="true">
       <td {...stylex.props(styles.cell, styles.center)}>
@@ -87,8 +95,9 @@ export function SkeletonRow({ rowRef }: { rowRef?: Ref<HTMLTableRowElement> }): 
       <td {...stylex.props(styles.cell)}>
         <Bone width={64} height={14} />
       </td>
-      <td {...stylex.props(styles.cell)} />
-      <td {...stylex.props(styles.cell)} />
+      {Array.from({ length: blankCells }, (_, index) => (
+        <td key={index} {...stylex.props(styles.cell)} />
+      ))}
     </tr>
   )
 }
