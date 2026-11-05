@@ -2,7 +2,6 @@ import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
-import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
 import { ApiFameRanking, ApiStats } from '../swagger/operations.js'
 import type { FameRanking, RankingStatsService, Stats } from './service.js'
 
@@ -10,10 +9,6 @@ export const RANKING_STATS_SERVICE = Symbol('RANKING_STATS_SERVICE')
 
 const fameRankingQuery = z
   .object({
-    serverId: z
-      .string()
-      .refine((serverId) => NEOPLE_SERVER_NAMES.has(serverId))
-      .optional(),
     jobId: z.string().min(1).optional(),
     jobGrowId: z.string().min(1).optional()
   })
