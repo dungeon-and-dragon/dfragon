@@ -12,6 +12,7 @@ import type { CardCharacter } from '@dfragon/client-core/types/cards'
 import type { ServerSelect } from '../components/ServerSelect'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import { toneClassesOf } from '../testing/test-support/score-tone-class'
+import { TestRouter } from '../testing/test-support/test-router'
 import { CharacterRow } from './CharacterRow'
 
 vi.mock('../components/ServerSelect', () => ({
@@ -35,6 +36,8 @@ let root: Root
 let container: HTMLDivElement
 beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  // 라우터는 처음 그릴 때 창 스크롤을 처음으로 돌리는데 jsdom에는 scrollTo가 없다.
+  vi.stubGlobal('scrollTo', vi.fn())
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -77,23 +80,25 @@ async function render({
 }: RenderProps = {}): Promise<void> {
   await act(async () =>
     root.render(
-      <table>
-        <tbody>
-          <tr>
-            <CharacterRow
-              key={resetKey}
-              cardKey={{ id: 'party-0', resetKey }}
-              card={{ state, ...card }}
-              slot={1}
-              seat="1"
-              screen="party"
-              onLookup={onLookup}
-              onPickCandidate={onPickCandidate}
-              onChangeSnapshotAdventure={onChangeSnapshotAdventure}
-            />
-          </tr>
-        </tbody>
-      </table>
+      <TestRouter>
+        <table>
+          <tbody>
+            <tr>
+              <CharacterRow
+                key={resetKey}
+                cardKey={{ id: 'party-0', resetKey }}
+                card={{ state, ...card }}
+                slot={1}
+                seat="1"
+                screen="party"
+                onLookup={onLookup}
+                onPickCandidate={onPickCandidate}
+                onChangeSnapshotAdventure={onChangeSnapshotAdventure}
+              />
+            </tr>
+          </tbody>
+        </table>
+      </TestRouter>
     )
   )
 }
@@ -172,6 +177,21 @@ it('한 행은 자리부터 스냅샷까지 아홉 열을 채운다', async () =
   expect(cell('명성')?.textContent).toBe('125,850')
   expect(visibleText(cell('점수')!)).toBe('장비330,556')
   expect(cell('스냅샷')?.textContent).toBe('1')
+})
+
+it('찾은 행은 초상화가 그 캐릭터의 상세 링크이고 이름 칸은 링크가 아니다', async () => {
+  await render({ state: 'success', character: { ...found, characterId: 'found-id' } })
+
+  const link = cell('캐릭터')!.querySelector('a')!
+  expect(link.getAttribute('href')).toBe('/c/cain/found-id')
+  expect(link.getAttribute('aria-label')).toBe('찾은이름 상세')
+  expect(nameInput().closest('a')).toBeNull()
+})
+
+it('캐릭터 ID를 모르는 행은 초상화를 링크로 만들지 않는다', async () => {
+  await render({ state: 'success', character: found })
+
+  expect(cell('캐릭터')!.querySelector('a')).toBeNull()
 })
 
 it('빈 자리는 캐릭터 이름 placeholder와 빈 서버만 두고 나머지 칸은 -다', async () => {

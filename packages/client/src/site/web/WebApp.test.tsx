@@ -8,6 +8,8 @@ import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { readTownIndicatorTemplate } from './browser-town-template'
 import { WebApp } from './WebApp'
+import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/preload/common/search/character-summary'
+import type { CharacterCandidate } from '@dfragon/client-core/preload/common/types/character'
 import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
@@ -130,7 +132,7 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
 })
 
-it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메뉴, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
+it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
@@ -140,8 +142,12 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
   expect(globalMenu()).toEqual([['파티, 공대', 'page']])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   const buttons = [...header.querySelectorAll('button')]
-  expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual(['다크 모드로 바꾸기'])
-  expect(grade.compareDocumentPosition(buttons[0]) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
+    '검색할 서버',
+    '검색',
+    '다크 모드로 바꾸기'
+  ])
+  expect(grade.compareDocumentPosition(buttons[2]) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 
   const main = container.querySelector('main')!
   const tabs = main.querySelector('[role="tablist"][aria-label="화면"]')!
@@ -484,4 +490,168 @@ it('던파 창을 연결한 동안 칩은 지금 화면의 마을 자동 인식�
   await act(async () => useSearchModeStore.setState({ searchMode: 'raid' }))
   expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.raid.waiting)
   await act(async () => host.party.selectCaptureSource(''))
+})
+
+function candidateRow(
+  characterName: string,
+  serverId: 'cain' | 'prey',
+  characterId: string,
+  fame: number | null
+): CharacterCandidate {
+  const serverName = CHARACTER_SERVER_NAMES[serverId]
+
+  return {
+    serverId,
+    characterId,
+    characterName,
+    serverName,
+    fame,
+    adventureName: null,
+    imageUrl: `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=1`,
+    jobName: '프리스트(남)',
+    jobGrowName: '眞 크루세이더'
+  }
+}
+
+// host의 후보 응답 캐시가 테스트 사이에 남으므로 테스트마다 다른 이름으로 검색한다.
+function stubSearchFetch(rows: readonly CharacterCandidate[]): void {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>(async (...args) => {
+      const url = new URL(new Request(...args).url)
+      if (url.pathname === '/api/characters/candidates') {
+        return Response.json({ rows })
+      }
+
+      return Response.json({
+        percent: 85,
+        expiresAt: new Date(Date.now() + 3_600_000).toISOString()
+      })
+    })
+  )
+}
+
+async function searchName(name: string): Promise<void> {
+  const box = container.querySelector<HTMLFormElement>('header form[role="search"]')!
+  const input = box.querySelector<HTMLInputElement>('input[aria-label="캐릭터 이름"]')!
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, name)
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await act(async () => box.requestSubmit())
+}
+
+function resultPopup(): HTMLElement | null {
+  return document.querySelector('[aria-label="캐릭터 검색 결과"]')
+}
+
+it('전역 검색창은 오늘 등급 왼쪽에 서버 선택, 이름 칸, 검색 버튼 순으로 두고 서버 기본값은 전체다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const header = container.querySelector('header')!
+  const box = header.querySelector('form[role="search"]')!
+  const grade = header.querySelector('[role="img"]')!
+  expect(box.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  expect(
+    [...box.querySelectorAll('button, input[type="search"]')].map((control) =>
+      control.getAttribute('aria-label')
+    )
+  ).toEqual(['검색할 서버', '캐릭터 이름', '검색'])
+  expect(box.querySelector('button[aria-label="검색할 서버"]')?.textContent).toBe('전체')
+})
+
+it('전역 검색 결과가 한 명이면 목록 없이 그 캐릭터의 상세로 간다', async () => {
+  stubSearchFetch([candidateRow('한명', 'cain', 'only-1', 50000)])
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await searchName(' 한명 ')
+
+  await waitForPath('/c/cain/only-1')
+  expect(resultPopup()).toBeNull()
+})
+
+it('같은 이름이 여러 명이면 초상화, 이름과 전직, 서버, 명성 목록을 열되 초점은 이름 칸에 두고, 고른 캐릭터의 상세로 가며 뒤로 가면 표로 돌아온다', async () => {
+  stubSearchFetch([
+    candidateRow('여럿', 'prey', 'many-1', 90000),
+    candidateRow('여럿', 'cain', 'many-2', null)
+  ])
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await searchName('여럿')
+
+  await vi.waitFor(() => expect(resultPopup()).not.toBeNull())
+  const items = [...resultPopup()!.querySelectorAll<HTMLAnchorElement>('a')]
+  expect(items.map((item) => [item.getAttribute('href'), item.textContent])).toEqual([
+    ['/c/prey/many-1', '여럿眞 크루세이더프레이90,000'],
+    ['/c/cain/many-2', '여럿眞 크루세이더카인-']
+  ])
+  expect(items[0].querySelector('img')?.getAttribute('src')).toBe(
+    'https://img-api.neople.co.kr/df/servers/prey/characters/many-1?zoom=1'
+  )
+  expect(window.location.pathname).toBe('/')
+  const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
+  expect(document.activeElement).toBe(input)
+  await act(async () =>
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+  )
+  expect(document.activeElement).toBe(items[0])
+
+  await act(async () => items[1].click())
+
+  await waitForPath('/c/cain/many-2')
+  expect(resultPopup()).toBeNull()
+  await act(async () => window.history.back())
+  await waitForPath('/')
+  expect(seats()).toHaveLength(4)
+})
+
+it('전역 검색 결과가 없으면 화면을 옮기지 않고 찾지 못했다는 문구를 보인다', async () => {
+  stubSearchFetch([])
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await searchName('없는이름')
+
+  await vi.waitFor(() => expect(resultPopup()?.textContent).toBe('캐릭터를 찾지 못했습니다.'))
+  expect(window.location.pathname).toBe('/')
+})
+
+it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기본 동작을 막지 않고 표의 자리와 회차 안내를 바꾸지 않는다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+  const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
+  const before = seats().map(nameOf)
+  const status = captureStatus()
+  const altArrow = new KeyboardEvent('keydown', {
+    key: 'ArrowDown',
+    altKey: true,
+    bubbles: true,
+    cancelable: true
+  })
+  const paste = new Event('paste', { bubbles: true, cancelable: true })
+  Object.defineProperty(paste, 'clipboardData', {
+    value: { items: [{ kind: 'string', type: 'text/plain', getAsFile: () => null }] }
+  })
+
+  await act(async () => {
+    input.dispatchEvent(altArrow)
+    input.dispatchEvent(paste)
+  })
+
+  expect(altArrow.defaultPrevented).toBe(false)
+  expect(paste.defaultPrevented).toBe(false)
+  expect(seats().map(nameOf)).toEqual(before)
+  expect(captureStatus()).toBe(status)
+})
+
+it('서버를 고른 전역 검색은 그 서버의 캐릭터만 돌려준다', async () => {
+  stubSearchFetch([
+    candidateRow('서버별', 'prey', 'server-1', 90000),
+    candidateRow('서버별', 'cain', 'server-2', 80000)
+  ])
+
+  await expect(
+    host.searchCharacters({ characterName: '서버별', serverId: 'cain' })
+  ).resolves.toMatchObject([{ characterId: 'server-2' }])
+  await expect(
+    host.searchCharacters({ characterName: '서버별', serverId: null })
+  ).resolves.toMatchObject([{ characterId: 'server-1' }, { characterId: 'server-2' }])
 })

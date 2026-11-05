@@ -58,7 +58,7 @@ function detailOf(characterId: string): CharacterDetailView {
     oath: null,
     skillStyle: null,
     buff: { equipment: null, avatar: null, creature: null },
-    status: { status: [] }
+    status: { status: [], buff: [] }
   }
 }
 
