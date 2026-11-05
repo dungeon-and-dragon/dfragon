@@ -5,11 +5,8 @@ import type {
   OcrSearchObservation,
   RaidRowObservation
 } from '../../preload/common/types/search'
-import type {
-  CharacterCandidatesHttp,
-  CharacterDetailsHttp,
-  CharacterImageHttp
-} from './character-http'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
+import type { CharacterImageHttp } from './character-image-source'
 import type { PortraitColorScorer } from './portrait-color'
 import { createCaptureSearchLifetime } from './capture-lifetime'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'

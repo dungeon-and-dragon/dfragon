@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
-import {
-  createCharacterCandidatesHttp,
-  createCharacterDetailsHttp,
-  type CharacterCandidatesHttp
-} from './character-http'
+import { createDfragonClient, type CharacterCandidatesHttp } from '../api/dfragon-client'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
@@ -97,8 +93,10 @@ describe('완료한 캐릭터 응답 캐시', () => {
           json(kind === 'candidates' ? { rows: [candidate] } : detail())
         )
       const options = { apiOrigin: API_ORIGIN, fetch }
-      const candidates = createCachedCharacterCandidates(createCharacterCandidatesHttp(options))
-      const details = createCachedCharacterDetails(createCharacterDetailsHttp(options))
+      const candidates = createCachedCharacterCandidates(
+        createDfragonClient(options).characters.candidates
+      )
+      const details = createCachedCharacterDetails(createDfragonClient(options).characters.details)
       const read = () => {
         if (kind === 'candidates') {
           return candidates({ nickname: '가나', signal: signal() })
@@ -139,8 +137,10 @@ describe('완료한 캐릭터 응답 캐시', () => {
       .mockResolvedValueOnce(json({ error: { code } }, 429))
       .mockResolvedValueOnce(json(kind === 'candidates' ? { rows: [candidate] } : detail()))
     const options = { apiOrigin: API_ORIGIN, fetch }
-    const candidates = createCachedCharacterCandidates(createCharacterCandidatesHttp(options))
-    const details = createCachedCharacterDetails(createCharacterDetailsHttp(options))
+    const candidates = createCachedCharacterCandidates(
+      createDfragonClient(options).characters.candidates
+    )
+    const details = createCachedCharacterDetails(createDfragonClient(options).characters.details)
     const read = () => {
       if (kind === 'candidates') {
         return candidates({ nickname: '가나', signal: signal() })

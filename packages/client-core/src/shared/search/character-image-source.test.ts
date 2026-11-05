@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { CharacterImage } from '../../preload/common/types/character'
-import type { CharacterImageHttp } from './character-http'
-import { createCharacterImageSource } from './character-image-source'
+import { createCharacterImageSource, type CharacterImageHttp } from './character-image-source'
 import { CompletedCache } from './completed-cache'
 
 function createImage(value: number): CharacterImage {
