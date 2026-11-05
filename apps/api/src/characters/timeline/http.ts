@@ -2,7 +2,6 @@ import { Controller, Get, Inject, Req } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request } from 'express'
 import { ApiCharacterTimeline } from '../../swagger/operations.js'
-import { CharacterDetailFailure } from '../details/errors.js'
 import { parseCharacterIdentity } from '../identity.js'
 import type { CharacterTimeline } from './read.js'
 import type { CharacterTimelineService } from './service.js'
@@ -19,14 +18,7 @@ export class CharacterTimelineController {
   @Get(':serverId/:characterId/timeline')
   @ApiCharacterTimeline()
   timeline(@Req() request: Request): Promise<CharacterTimeline> {
-    if (request.method !== 'GET') {
-      throw new CharacterDetailFailure('query')
-    }
-    const identity = parseCharacterIdentity(
-      request.params.serverId,
-      request.params.characterId,
-      request.originalUrl
-    )
+    const identity = parseCharacterIdentity(request.params.serverId, request.params.characterId)
 
     return this.service.get(identity)
   }
