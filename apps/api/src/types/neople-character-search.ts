@@ -28,7 +28,6 @@ export interface NeopleCharacterSearchResult {
 
 export interface CharacterImageCandidate extends CharacterSearchRow {
   imageUrl: string
-  adventureName: string | null
 }
 
 export interface CharacterCandidatesResult {
