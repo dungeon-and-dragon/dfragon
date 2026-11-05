@@ -35,6 +35,12 @@ import {
   type RecordCharacterBasic
 } from './characters/basic/subscriber.js'
 import { CharacterEvents } from './characters/events.js'
+import { ADVENTURE_GUILD_SERVICE, AdventureGuildController } from './adventure-guild/http.js'
+import {
+  type AdventureGuildReader,
+  createAdventureGuildService,
+  emptyAdventureGuildService
+} from './adventure-guild/service.js'
 import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
@@ -117,6 +123,7 @@ export interface ApiHttpAppOptions {
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
   readonly timeline?: TimelineSyncOptions
   readonly recordCharacterBasic?: RecordCharacterBasic
+  readonly adventureGuild?: AdventureGuildReader
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly webDevOrigins?: readonly string[]
@@ -127,12 +134,13 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync and character basics. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics and adventure, guild reads. */
 export async function createApiHttpApp({
   search,
   details,
   timeline,
   recordCharacterBasic,
+  adventureGuild,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   webDevOrigins = [],
@@ -187,6 +195,7 @@ export async function createApiHttpApp({
       CharacterDetailController,
       CharacterImageController,
       CharacterTimelineController,
+      AdventureGuildController,
       TodayGradeController
     ],
     providers: [
@@ -205,6 +214,12 @@ export async function createApiHttpApp({
       ...timelineProviders,
       ...characterBasicProviders,
       { provide: CHARACTER_IMAGE_FETCH, useValue: fetchCharacterImage },
+      {
+        provide: ADVENTURE_GUILD_SERVICE,
+        useValue: adventureGuild
+          ? createAdventureGuildService(adventureGuild)
+          : emptyAdventureGuildService
+      },
       {
         provide: TODAY_GRADE_SERVICE,
         useValue: createTodayGradeService(todayGrade.fetchShopGrade)

@@ -83,6 +83,21 @@ DB 설정이 있으면 기본 정보 구독자도 `character.fetched` 이벤트�
 응답은 저장을 기다리지 않고, 저장이 실패해도 상세 응답은 그대로이며 재시도하지 않습니다. 모험단 이름이 없는 캐릭터처럼 기본 정보 schema에 맞지 않는 응답은 저장하지 않습니다.
 DB 설정이 없으면 구독자를 등록하지 않습니다.
 
+### 모험단, 길드 조회
+
+`GET /adventures/:adventureName/characters`와 `GET /guilds/:guildId`는 Neople을 부르지 않고 DB에 저장된 캐릭터 기본 정보를 읽습니다.
+모험단은 `adventures.name`이 같은 캐릭터, 길드는 `guild_id`가 같은 캐릭터이며 길드 ID는 서버가 달라도 같은 길드라 서버로 거르지 않습니다.
+두 목록 모두 서버를 가리지 않고 명성이 높은 순이고, 명성이 없는 캐릭터는 뒤에 둡니다. 페이지는 없습니다.
+
+```json
+{ "adventureName": "…", "characters": [ /* 캐릭터 행 */ ] }
+{ "guildId": "…", "guildName": "…", "memberCount": 42, "averageFame": 81234, "members": [ /* 캐릭터 행 */ ] }
+```
+
+캐릭터 행은 `serverId`, `characterId`, `characterName`, `adventureName`, `level`, `jobId`, `jobGrowId`, `jobName`, `jobGrowName`, `fame`, `guildId`, `guildName`, `fetchedAt`(`basic_fetched_at`)입니다. 기본 정보를 받지 않은 행은 레벨, 직업, 명성, 길드와 `fetchedAt`이 `null`입니다.
+`guildName`은 가장 최근에 받은 길드원 행의 이름이고, `averageFame`은 명성이 있는 길드원의 평균을 반올림한 값입니다. 그런 길드원이 없으면 `null`입니다.
+DB에 없는 모험단과 길드, DB 설정이 없는 API는 빈 목록을 주며 이때 `guildName`, `averageFame`은 `null`입니다. 예전에 지운 `GET /adventures/characters`와는 다른 경로입니다.
+
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
