@@ -7,6 +7,7 @@ import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skil
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
 import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { SkillTab } from './SkillTab'
 
 // 저장소 fixture(프리스트(여) 眞 이단심판관)의 스킬 이름으로 만든 합성 배치다.
@@ -68,7 +69,9 @@ async function render(host: ClientHost, detail: CharacterDetailView): Promise<vo
   await act(async () =>
     root.render(
       <ClientHostContext value={host}>
-        <SkillTab detail={detail} />
+        <TestQueryClient>
+          <SkillTab detail={detail} />
+        </TestQueryClient>
       </ClientHostContext>
     )
   )
