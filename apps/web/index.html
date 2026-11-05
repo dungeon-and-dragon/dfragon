@@ -9,7 +9,33 @@
       content="던전앤파이터 파티, 공대의 캐릭터 정보를 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 설치 없이 바로 확인하는 웹 앱입니다."
     />
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-    <meta name="theme-color" content="#157b9c" />
+    <meta
+      name="theme-color"
+      data-color-mode="light"
+      media="(prefers-color-scheme: light)"
+      content="#fafafa"
+    />
+    <meta
+      name="theme-color"
+      data-color-mode="dark"
+      media="(prefers-color-scheme: dark)"
+      content="#101012"
+    />
+    <script>
+    // 첫 그리기 전에 고른 모드를 붙여 새로 고칠 때 다른 모드가 잠깐 보이지 않게 한다. key와 형식은
+    // packages/client의 useColorModeStore(zustand persist), 붙이는 방식은 ColorModeToggle의 applyColorMode와 같다.
+    try {
+      const colorMode = JSON.parse(localStorage.getItem('dfragon:color-mode'))?.state?.colorMode
+      if (colorMode === 'light' || colorMode === 'dark') {
+        document.documentElement.dataset.colorMode = colorMode
+        for (const meta of document.querySelectorAll('meta[name="theme-color"][data-color-mode]')) {
+          meta.media = meta.dataset.colorMode === colorMode ? 'all' : 'not all'
+        }
+      }
+    } catch {
+      // 저장소를 읽을 수 없거나 값이 깨졌으면 시스템 설정을 따른다.
+    }
+    </script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="던삐삐" />
     <meta property="og:locale" content="ko_KR" />
