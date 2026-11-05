@@ -224,7 +224,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
 
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
   stubDetailFetch()
-  window.history.replaceState(null, '', `${DETAIL_PATH}?tab=timeline`)
+  window.history.replaceState(null, '', `${DETAIL_PATH}?tab=unknown`)
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() => expect(selectedTab()).toBe('장비'))
