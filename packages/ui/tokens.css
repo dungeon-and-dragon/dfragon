@@ -2,104 +2,95 @@
  * 던삐삐 디자인 토큰. 이름은 dfragon-design design/tokens.json 기준이며 기준 commit은
  * aae3d0d(dfragon-design PR #45 merge)이다. 두 저장소 사이에 자동 동기화가 없으므로 이 파일은
  * 손으로 맞추고, 값을 바꿀 때 기준 commit도 함께 고친다.
- * 무채색 바탕, 글자, 테두리, 신호색(--df-signal, --df-signal-hover, --df-on-signal), danger 계열(옅은 면, 테두리 포함),
- * card 토큰(--df-card-*)과 상단 바 높이 토큰은 2026-11-04 결정(ADR 0009)의
- * 값이고 아직 tokens.json에 반영하지 않았다. 자른 모서리 --df-cut은 같은 날 결정(ADR 0010)으로
- * 지웠고 tokens.json 반영은 그 저장소의 PR로 한다.
- * 길드 이름 색 --df-fg-guild(#E879F9)와 숫자 글꼴 --df-font-num을 본문과 같은 Pretendard로 둔 값은 2026-11-04 결정(ADR 0011)이고
- * 아직 tokens.json에 반영하지 않았다.
- * 기준 commit의 tokens.json과 값이 다르거나 한쪽에만 있는 색 토큰은 아래와 같다. layout, typography의
- * 창과 대화상자 크기, 꺾쇠 형태, 숫자 글자 단계 같은 일부 토큰은 이 파일로 옮기지 않았다.
- * 검색 실패의 노란 글자 --df-card-failure는 2026-10-20 담당자 요청으로 던삐삐 디자인 캔버스 시안 값(#FFD54A)을
- * 들였고(dfragon-design PR #43), 아직 tokens.json에는 이 이름이 없다. 카드 상태의 꺾쇠(--df-bracket-*), 빗금
- * (--df-hatch-alert), 격자(--df-grid-*), 사선 간격(--df-hazard-stripe), 그림 칸(--df-bg-well), 카드 면(--df-card-bg,
- * --df-card-bg-waiting, --df-tier-ranker-{surface,well,outline})과 실패 면(--df-card-failure-weak)은 파티, 공대 화면을
- * 표의 행으로 바꾼 2026-11-04 결정(ADR 0012)으로 쓰는 곳이 없어 지웠고, tokens.json
- * 반영은 그 저장소의 PR로 한다.
- * 점수 숫자의 역할 색 --df-score-dealer, --df-score-buffer는 2026-10-20 담당자 결정의 캔버스 값(#4FA3FF,
- * #3CC985)이고, dfragon-design colors.md가 토큰 이름을 정하지 않아 아직 tokens.json에는 이 이름이 없다.
- * 대화상자 뒤 막 --df-bg-overlay의 다크 값은 2026-10-20 던삐삐 디자인 캔버스의 메인 위 설정, 캡처 보드 값
- * (rgba(8, 8, 10, .72))을 들였고, tokens.json의 다크 값(#00000074)과 다르다.
- * tokens.json의 hazard(검색 실패 그림 칸의 사선 색)는 제품에서 쓰지 않아 옮기지 않았다.
- * 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 16% 면 --df-raid-party-{red,yellow,green}-weak은 표 행의 자리
- * 배지에 쓰는 2026-11-04 표 시안 값(ADR 0012)이다. 2026-10-31 게임 공대 창 배지 캡처에서 뽑은 진한 면 값을 대신하며,
- * 아직 tokens.json에는 이 이름이 없다.
+ * 색 값은 2026-11-05, 11-06 결정의 무채색 팔레트와 게임 색이며 ADR 0009의 색 값을 대체한다. 바탕, 글자, 선과
+ * 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류)과 게임 클라이언트 값을 쓰는 게임 색에만 쓴다.
+ * 상황별 색의 옅은 면(--df-bg-*-weak)은 그 색 14%다. 모험단, 길드 이름은 흐린 글자색, 명성 상위와 랭커는 기본 명성
+ * 숫자와 같은 초록을 쓰며 구분하는 방법은 나중에 정한다. 태초와 신화는 세로 그라데이션(*-gradient)으로 그리고
+ * 그라데이션을 쓸 수 없는 좁은 자리에는 같은 이름의 단색을 쓴다. 이 값들은 아직 tokens.json에 반영하지 않았다.
+ * 기준 commit의 tokens.json에 없는 이름은 아래와 같다.
+ * - 입력 칸 테두리 --df-border-input, 포인트 색 --df-accent, card 토큰(--df-card-*), 검색 실패 --df-card-failure,
+ *   점수 --df-score-dealer, --df-score-buffer, 상단 바 높이 --df-size-topbar
+ * - 게임 색 --df-game-refine, --df-game-enchant, --df-game-set, --df-game-increase, --df-game-fame, --df-game-decrease,
+ *   --df-game-precision, --df-game-fame-label, --df-rarity-mythic, --df-rarity-*-gradient
+ * - 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 16% 면(ADR 0012의 표 행 자리 배지 값)
+ * 숫자 글꼴 --df-font-num은 본문과 같은 Pretendard다(ADR 0011).
+ * 자른 모서리 --df-cut(ADR 0010), 카드 상태의 꺾쇠, 빗금, 격자, 사선 간격, 그림 칸, 카드 면, 실패 면(ADR 0012),
+ * 속성 색과 마법부여 종결, 준종결 색은 지웠다. 대화상자 뒤 막 --df-bg-overlay의 다크 값은 tokens.json의
+ * 다크 값(#00000074)과 다르다. layout, typography의 일부 토큰과 hazard는 이 파일로 옮기지 않았다.
+ * tokens.json 반영은 그 저장소의 PR로 한다.
  */
 :root {
   color-scheme: dark;
 
-  --df-bg-canvas: #131417;
-  --df-bg-bar: #18191d;
-  --df-bg-surface: #1e1f24;
-  --df-bg-inset: #25262c;
-  --df-bg-stripe: #25262c;
-  --df-bg-control: #2c2d34;
-  --df-bg-control-hover: #34353d;
-  --df-bg-success-weak: #3dd68c1f;
-  --df-bg-danger-weak: #ff5c5c29;
-  --df-bg-warning-weak: #ffb4001f;
+  --df-bg-canvas: #0a0a0b;
+  --df-bg-bar: #101012;
+  --df-bg-surface: #151517;
+  --df-bg-inset: #1c1c1f;
+  --df-bg-stripe: #1c1c1f;
+  --df-bg-control: #242427;
+  --df-bg-control-hover: #2e2e32;
+  --df-bg-success-weak: #00d80924;
+  --df-bg-danger-weak: #fe352c24;
+  --df-bg-warning-weak: #ffb40024;
   --df-bg-overlay: #08080ab8;
-  --df-signal: #ff7a33;
-  --df-signal-hover: #ff9357;
-  --df-on-signal: #1a0e07;
+  --df-signal: #f4f4f5;
+  --df-signal-hover: #ffffff;
+  --df-on-signal: #0a0a0b;
+  --df-accent: #d6c592;
   --df-brand-logo: #e83830;
-  --df-fg-default: #f2f2f4;
-  --df-fg-muted: #a3a6b1;
-  --df-fg-subtle: #70737e;
-  --df-fg-placeholder: #70737e;
-  --df-fg-disabled: #4b4d56;
-  --df-fg-success: #3dd68c;
-  --df-fg-danger: #ff5c5c;
+  --df-fg-default: #f4f4f5;
+  --df-fg-muted: #a9a9b2;
+  --df-fg-subtle: #85858f;
+  --df-fg-placeholder: #85858f;
+  --df-fg-disabled: #55555c;
+  --df-fg-success: #00d809;
+  --df-fg-danger: #fe352c;
   --df-fg-warning: #ffb400;
-  --df-fg-adventure: #93e5c0;
-  --df-fg-guild: #e879f9;
-  --df-border-default: #2a2b32;
-  --df-border-strong: #3b3d46;
-  --df-border-danger: #ff5c5c;
-  --df-tier-top: #ffb400;
-  --df-tier-ranker: #50e3c2;
-  --df-score-dealer: #4fa3ff;
-  --df-score-buffer: #3cc985;
-  --df-card-inset: #25262c;
-  --df-card-stripe: #25262c;
-  --df-card-control: #2c2d34;
-  --df-card-control-hover: #34353d;
-  --df-card-border: #2a2b32;
-  --df-card-border-strong: #3b3d46;
-  --df-card-divider: #27282f;
-  --df-card-fg: #f2f2f4;
-  --df-card-fg-muted: #a3a6b1;
-  --df-card-fg-subtle: #70737e;
-  --df-card-signal: #ff7a33;
-  --df-card-on-signal: #1a0e07;
+  --df-fg-adventure: #a9a9b2;
+  --df-fg-guild: #a9a9b2;
+  --df-border-default: #252529;
+  --df-border-strong: #3b3b41;
+  --df-border-input: #6b6b74;
+  --df-border-danger: #fe352c;
+  --df-tier-top: #4aa256;
+  --df-tier-ranker: #4aa256;
+  --df-score-dealer: #5f88ff;
+  --df-score-buffer: #97e334;
+  --df-card-control: #242427;
+  --df-card-control-hover: #2e2e32;
+  --df-card-border: #252529;
+  --df-card-border-strong: #3b3b41;
+  --df-card-fg: #f4f4f5;
+  --df-card-fg-muted: #a9a9b2;
+  --df-card-fg-subtle: #85858f;
+  --df-card-signal: #f4f4f5;
   --df-card-failure: #ffd54a;
 
   --df-brand-dragon: #e83830;
   --df-brand-cream: #f8e8c8;
   --df-brand-outline: #000000;
 
-  --df-rarity-common: #ffffff;
+  --df-rarity-common: #f4f4f5;
   --df-rarity-uncommon: #68d5ed;
   --df-rarity-rare: #b36bff;
   --df-rarity-unique: #ff00ff;
   --df-rarity-epic: #ffb400;
   --df-rarity-legendary: #ff7800;
   --df-rarity-chronicle: #ff6666;
-  --df-rarity-primordial: #50e3c2;
-  --df-enchant-final: #50e3c2;
-  --df-enchant-semi: #ffb400;
-  --df-enchant-other: #ffffff;
+  --df-rarity-primordial: #59e2b0;
+  --df-rarity-primordial-gradient: linear-gradient(180deg, #5aff62, #58c6ff);
+  --df-rarity-mythic: #e2988e;
+  --df-rarity-mythic-gradient: linear-gradient(180deg, #ffd61d, #c659ff);
   --df-game-enhance: #68d5ed;
-  --df-game-amplify: #ff75f5;
-  --df-attr-fire: #ff9d85;
-  --df-attr-water: #83caff;
-  --df-attr-light: #e9be6b;
-  --df-attr-dark: #beadf2;
-  --df-oath-upgrade-damage: #ff4848;
-  --df-oath-upgrade-cooldown: #4fa3ff;
-  --df-oath-upgrade-oath-point: #3cc985;
-  --df-oath-upgrade-speed: #ffb400;
-  --df-oath-upgrade-range: #a066ff;
+  --df-game-refine: #b36bff;
+  --df-game-amplify: #ff00ff;
+  --df-game-enchant: #68eda1;
+  --df-game-set: #97e334;
+  --df-game-increase: #4aa256;
+  --df-game-fame: #4aa256;
+  --df-game-decrease: #e35752;
+  --df-game-precision: #d6c592;
+  --df-game-fame-label: #a0844b;
   --df-raid-party-red: #ff8f82;
   --df-raid-party-red-weak: #ff7a6e29;
   --df-raid-party-yellow: #e8c262;

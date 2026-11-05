@@ -8,9 +8,9 @@ import { NameField, type NameFieldProps } from './NameField'
 
 // jsdom은 테두리 색을 계산하지 않으므로 같은 선언에서 나온 class를 칸이 가졌는지로 확인한다.
 const vacantBorder = stylex.create({
-  strong: { borderColor: { default: colors.borderStrong, ':focus': colors.signal } }
+  input: { borderColor: { default: colors.borderInput, ':focus': colors.signal } }
 })
-const vacantClasses = stylex.props(vacantBorder.strong).className!.split(' ')
+const vacantClasses = stylex.props(vacantBorder.input).className!.split(' ')
 
 let root: Root
 let container: HTMLElement

@@ -89,6 +89,18 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
   }
 })
 
+test('기본 정보에 명성, 길드가 없으면 null로 돌려준다', async () => {
+  const { fame: _fame, guildId: _guildId, guildName: _guildName, ...withoutGuild } = basic
+  const { neople } = recordingClient(withoutGuild)
+
+  assert.deepEqual(await neople.characterBasic(identity), {
+    ...withoutGuild,
+    fame: null,
+    guildId: null,
+    guildName: null
+  })
+})
+
 test('기본 정보에 모험단 이름이 없으면 api 실패로 던진다', async () => {
   const { neople } = recordingClient({ ...basic, adventureName: null })
 

@@ -350,7 +350,7 @@ it('스냅샷을 켠 채 찾지 못한 행은 모험단 자리에 직접 입력 
   expect(change).toHaveBeenCalledExactlyOnceWith('별빛')
 })
 
-it('상위와 랭커는 이름 옆 배지와 명성 숫자 색만 바꾸고 점수는 역할 색을 지킨다', async () => {
+it('명성 숫자는 명성 색이고, 상위와 랭커는 이름 옆 배지와 명성 숫자 색 토큰만 바꾸고 점수는 역할 색을 지킨다', async () => {
   await render({ state: 'success', character: { ...found, tier: 'top' } })
   expect(cell('캐릭터')?.textContent).toContain('상위')
   expect(toneClassesOf(cell('명성')!)).toEqual(['top'])
@@ -363,7 +363,7 @@ it('상위와 랭커는 이름 옆 배지와 명성 숫자 색만 바꾸고 점�
 
   await render({ state: 'success', character: found })
   expect(visibleText(cell('캐릭터')!)).not.toMatch(/상위|랭커/)
-  expect(toneClassesOf(cell('명성')!)).toEqual([])
+  expect(toneClassesOf(cell('명성')!)).toEqual(['fame'])
 })
 
 it('점수 열은 딜러 장비 라벨과 파란 숫자, 버퍼 버프 라벨과 초록 숫자이고 역할을 모르면 기본색이다', async () => {

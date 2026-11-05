@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CandidatePicker } from '@dfragon/client-core/lib/candidate-picker'
 import type { CharacterChoice } from '@dfragon/client-core/preload/common/types/search'
+import { toneClassesOf } from '../testing/test-support/score-tone-class'
 import { CandidatePopover } from './CandidatePopover'
 
 let root: Root
@@ -88,6 +89,16 @@ it('후보 N 칩을 누르면 타일만 있는 창을 열고 지금 후보를 �
   ])
   expect(dialog.textContent).not.toContain('흰늑대')
   await vi.waitFor(() => expect(document.activeElement).toBe(tiles(dialog)[1]))
+})
+
+it('타일의 명성 숫자는 명성 색이고 명성이 없는 타일의 -는 색을 입히지 않는다', async () => {
+  const dialog = await open(await render())
+
+  expect(tiles(dialog).map((tile) => toneClassesOf(tile.lastElementChild!))).toEqual([
+    ['fame'],
+    ['fame'],
+    []
+  ])
 })
 
 it('타일을 한 번 누르면 그 서버를 알리고 창을 닫는다', async () => {

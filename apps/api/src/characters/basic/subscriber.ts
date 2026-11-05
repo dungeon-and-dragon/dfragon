@@ -18,10 +18,6 @@ export class CharacterBasicSubscriber {
     if (!parsed.success) {
       return
     }
-    const { data } = parsed
-    const fame = data.fame ?? null
-    const guildId = data.guildId ?? null
-    const guildName = data.guildName ?? null
-    this.record({ ...data, fame, guildId, guildName }).catch(this.reportFailure)
+    this.record(parsed.data).catch(this.reportFailure)
   }
 }
