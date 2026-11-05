@@ -27,6 +27,14 @@ export const styles = stylex.create({
     backgroundColor: colors.bgInset
   },
   wellEmpty: { backgroundColor: colors.bgSurface },
+  portraitLink: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 'inherit',
+    cursor: 'pointer',
+    outline: { default: null, ':focus-visible': `2px solid ${colors.signal}` },
+    outlineOffset: -2
+  },
   badge: {
     boxSizing: 'border-box',
     display: 'inline-flex',
