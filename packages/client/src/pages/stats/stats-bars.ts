@@ -4,23 +4,6 @@ import type { Bar } from './BarCharts'
 
 const FAME_BUCKET_UNIT = 10_000
 
-const seoulTime = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hourCycle: 'h23'
-})
-
-export function formatComputedAt(computedAt: string): string {
-  const parts = Object.fromEntries(
-    seoulTime.formatToParts(new Date(computedAt)).map(({ type, value }) => [type, value])
-  )
-
-  return `${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`
-}
-
 export function serverBars({ servers }: CharacterStats): Bar[] {
   return servers.map(({ serverId, count }) => ({
     key: serverId,
