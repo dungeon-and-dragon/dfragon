@@ -9,6 +9,7 @@ import type {
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
 import { WeeklyScreen } from './WeeklyScreen'
 
@@ -71,9 +72,11 @@ function render(getAdventureWeekly: ClientHost['getAdventureWeekly']): Promise<v
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ getAdventureWeekly })}>
-        <TestRouter>
-          <WeeklyScreen />
-        </TestRouter>
+        <TestQueryClient>
+          <TestRouter>
+            <WeeklyScreen />
+          </TestRouter>
+        </TestQueryClient>
       </ClientHostContext>
     )
   )
@@ -177,17 +180,21 @@ it('캐릭터가 없는 응답은 모험단 이름 한 줄만 둔다', async () 
   expect(container.querySelector('section p')).toBeNull()
 })
 
-it('새로고침을 누르면 같은 모험단을 다시 조회해 새 응답으로 표를 다시 그린다', async () => {
+it('새로고침을 누르면 받아 둔 표를 버리고 받는 중을 보인 뒤 같은 모험단을 다시 조회해 새 응답으로 그린다', async () => {
   useMyAdventureStore.setState({ adventureName: '합성 모험단' })
+  const refreshed = Promise.withResolvers<AdventureWeekly>()
   const getAdventureWeekly = vi
     .fn<ClientHost['getAdventureWeekly']>()
     .mockResolvedValueOnce({ ...weekly, characters: [weekly.characters[1]] })
-    .mockResolvedValueOnce(weekly)
+    .mockReturnValueOnce(refreshed.promise)
   await render(getAdventureWeekly)
   expect(bodyRows()).toHaveLength(1)
 
   await act(async () => button('새로고침')!.click())
+  expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
 
+  await act(async () => refreshed.resolve(weekly))
   expect(getAdventureWeekly.mock.calls).toEqual([['합성 모험단'], ['합성 모험단']])
+  expect(container.querySelector('[aria-busy="true"]')).toBeNull()
   expect(bodyRows()).toHaveLength(2)
 })

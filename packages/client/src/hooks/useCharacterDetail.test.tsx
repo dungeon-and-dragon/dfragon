@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createDfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { createTestClientHost } from '../testing/test-support/client-host'
+import { TestQueryClient } from '../testing/test-support/test-query-client'
 import { useCharacterDetail } from './useCharacterDetail'
 import { ClientHostContext, type ClientHost } from './useClientHost'
 
@@ -34,6 +35,7 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
 function detailOf(characterId: string): CharacterDetailView {
@@ -63,11 +65,13 @@ function detailOf(characterId: string): CharacterDetailView {
   }
 }
 
-function render(host: ClientHost, characterId: string): Promise<void> {
+function render(host: ClientHost, characterId: string | null): Promise<void> {
   return act(async () =>
     root.render(
       <ClientHostContext value={host}>
-        <Harness characterId={characterId} />
+        <TestQueryClient>
+          {characterId !== null && <Harness characterId={characterId} />}
+        </TestQueryClient>
       </ClientHostContext>
     )
   )
@@ -132,4 +136,26 @@ it('다른 캐릭터로 바뀌면 다시 받는 중이 되고, 이전 캐릭터�
 
   await act(async () => pending.get('character-1')!.resolve(detailOf('character-1')))
   expect(shown()).toBe('이름-character-2')
+})
+
+it('화면을 떠났다 돌아와도 5분 동안은 다시 조회하지 않고, 5분이 지나면 다시 조회한다', async () => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  const startedAt = Date.now()
+  const getCharacterDetail = vi.fn<ClientHost['getCharacterDetail']>(async ({ characterId }) =>
+    detailOf(characterId)
+  )
+  const host = createTestClientHost({ getCharacterDetail })
+
+  await render(host, 'character-1')
+  await render(host, null)
+  vi.setSystemTime(startedAt + 4 * 60_000)
+  await render(host, 'character-1')
+  expect(shown()).toBe('이름-character-1')
+  expect(getCharacterDetail).toHaveBeenCalledOnce()
+
+  await render(host, null)
+  vi.setSystemTime(startedAt + 6 * 60_000)
+  await render(host, 'character-1')
+  expect(shown()).toBe('이름-character-1')
+  expect(getCharacterDetail).toHaveBeenCalledTimes(2)
 })

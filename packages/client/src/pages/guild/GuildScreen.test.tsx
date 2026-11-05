@@ -6,6 +6,7 @@ import type { Guild } from '@dfragon/client-core/shared/adventure-guild/adventur
 import type { StoredCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
+import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
 import { GuildScreen } from './GuildScreen'
 
@@ -70,9 +71,11 @@ function render(getGuild: ClientHost['getGuild']): Promise<void> {
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ getGuild })}>
-        <TestRouter>
-          <GuildScreen guildId="guild-1" />
-        </TestRouter>
+        <TestQueryClient>
+          <TestRouter>
+            <GuildScreen guildId="guild-1" />
+          </TestRouter>
+        </TestQueryClient>
       </ClientHostContext>
     )
   )
