@@ -8,6 +8,7 @@ import { createTestClientHost } from '../../testing/test-support/client-host'
 import { toneClassesOf } from '../../testing/test-support/score-tone-class'
 import type { CharacterTab } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
+import { TestRouter } from '../../testing/test-support/test-router'
 
 type Card = NonNullable<CharacterDetailView['card']>
 type Score = NonNullable<Card['score']>
@@ -43,6 +44,7 @@ function detailOf({
       jobGrowName: '眞 버서커',
       fame: 125689,
       adventureName: '동네커피',
+      guildId: 'guild-1',
       guildName: '필로시스',
       ...character
     },
@@ -84,14 +86,16 @@ async function render(
   const host = createTestClientHost({ getCharacterDetail: vi.fn(getCharacterDetail) })
   await act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <CharacterDetailScreen
-          serverId="bakal"
-          characterId="dealer-1"
-          tab={tab}
-          onTabChange={onTabChange}
-        />
-      </ClientHostContext>
+      <TestRouter>
+        <ClientHostContext value={host}>
+          <CharacterDetailScreen
+            serverId="bakal"
+            characterId="dealer-1"
+            tab={tab}
+            onTabChange={onTabChange}
+          />
+        </ClientHostContext>
+      </TestRouter>
     )
   )
 
@@ -142,6 +146,19 @@ it('딜러 요약은 이름, 서버 칩과 전직과 레벨, 모험단과 길드
   expect(toneClassesOf(statValue('명성'))).toEqual(['fame'])
   expect(statValue('장비 점수').firstChild?.textContent).toBe('392,332')
   expect(toneClassesOf(statValue('장비 점수'))).toEqual(['dealer'])
+})
+
+it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {
+  await render(async () => detailOf())
+
+  const links = [...summary().querySelectorAll('a')].map((link) => [
+    link.textContent,
+    link.getAttribute('href')
+  ])
+  expect(links).toEqual([
+    ['동네커피', '/adventures/%EB%8F%99%EB%84%A4%EC%BB%A4%ED%94%BC'],
+    ['필로시스', '/guilds/guild-1']
+  ])
 })
 
 it('버퍼 요약은 점수 라벨이 버프 점수이고 버퍼 색이며, 근사값은 표처럼 ≈를 붙인다', async () => {

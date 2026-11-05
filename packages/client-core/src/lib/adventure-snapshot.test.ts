@@ -91,6 +91,7 @@ describe('slotAdventureName', () => {
     level: null,
     fame: null,
     imageUrl: '',
+    guildId: null,
     guildName: null,
     equipmentScore: null,
     card: null
