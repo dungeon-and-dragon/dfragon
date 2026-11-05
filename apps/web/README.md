@@ -26,6 +26,15 @@ pnpm --filter @dfragon/web preview
 
 던파 창을 공유한 동안에는 약 1초마다 공유 화면을 보고, 게임이 마을에 있을 때 지금 화면의 구성이 바뀌면 그 화면의 회차를 자동으로 시작합니다. 파티 화면이면 게임의 파티 프레임만, 공대 화면이면 공대 상세 창만 보며, 자동 인식은 화면(파티, 공대)을 바꾸지 않습니다. 구성이 같으면 회차를 시작하지 않으므로 같은 구성을 다시 읽으려면 캡처 버튼을 누릅니다. 자동 인식 회차도 첫 화면을 보는 동안에만 시작합니다.
 
+캐릭터 상세의 스킬 탭은 게임 클라이언트에서 뽑은 스킬 창 데이터가 있어야 스킬 창 배치로 그립니다. 이 데이터는 저장소와 사이트 빌드에 넣지 않으며, 웹 앱은 같은 origin의 `/skilltab/skilltab.json`에서 받습니다. 이 주소가 404면(아직 올리지 않았으면) 배운 스킬을 습득 레벨 줄로 나눈 목록으로 보이고, 묶음에 없는 전직도 같은 목록으로 보입니다.
+
+[`scripts/build-skilltab.mjs`](scripts/build-skilltab.mjs)가 추출한 묶음(`skilltab.json`과 `icons/<jobId>/<skillId>.png`)을 고치지 않고, 직업마다 아이콘을 한 장으로 묶은 sprite(`<PVF 해시 앞 8자리>/sprites/<jobId>.<내용 hash>.png`)와 sprite 안 위치를 적은 웹용 `skilltab.json`을 빈 출력 폴더에 만듭니다. 개발 서버에서는 그 출력 폴더를 `DFRAGON_SKILLTAB_DIR`로 주면 `/skilltab/` 아래에 내줍니다.
+
+```sh
+pnpm --filter @dfragon/web build:skilltab <묶음 폴더> <출력 폴더>
+DFRAGON_SKILLTAB_DIR=<출력 폴더> pnpm --filter @dfragon/web dev
+```
+
 ## 배포
 
 main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 올라갑니다. 운영 `https://dfragon.com`은 저장소 소유자가 수동 실행할 때만 바뀌며, 배포 시점은 소유자가 정합니다.
@@ -42,6 +51,11 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 - 정적 파일은 Workers static assets가 바로 응답합니다. [`public/_headers`](public/_headers)가 static assets의 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙이고 Worker가 `/ocr/*` 응답에 같은 COEP를 붙여 페이지와 OCR worker가 cross-origin 격리되므로 OCR의 ONNX Runtime WASM이 여러 thread로 돕니다. 해시가 붙은 `/assets/*`는 1년 동안 캐시합니다.
 - OCR 모델과 ONNX Runtime WASM은 static assets의 파일 하나 25 MiB 한도를 넘어 R2 bucket `dfragon-web-ocr`에 둡니다([`public/.assetsignore`](public/.assetsignore)가 `dist/ocr`를 static assets에서 뺍니다). 배포는 먼저 [`scripts/upload-ocr-assets.mjs`](scripts/upload-ocr-assets.mjs)로 `dist/ocr`의 파일을 내용 hash 폴더(`ocr/<hash>/`)에 올리고, 그 hash를 Worker 변수 `OCR_ASSET_VERSION`으로 넘겨 배포합니다. [Worker](worker/index.ts)는 `/ocr/*` 요청을 그 폴더에서 읽어 같은 주소로 돌려주며, 주소에 hash가 없으므로 `Cache-Control: no-cache`와 ETag로 매번 확인합니다.
+- 스킬 창 데이터도 R2 bucket `dfragon-web-ocr`의 `skilltab/` 아래에 두고, [Worker](worker/index.ts)가 `/skilltab/*` 요청을 같은 key에서 읽어 돌려줍니다. 사이트 배포와 따로 올리므로 배포 workflow는 이 데이터를 다루지 않습니다. `skilltab.json`은 `Cache-Control: no-cache`와 ETag로 매번 확인하고, 이름에 내용 hash가 있는 sprite는 1년 동안 캐시합니다. 게임 패치로 묶음을 다시 뽑으면 저장소 소유자가 `wrangler login` 뒤 `apps/web`에서 `build:skilltab` 출력 폴더를 올립니다. [`scripts/upload-skilltab.mjs`](scripts/upload-skilltab.mjs)는 sprite를 모두 올린 뒤 `skilltab.json`을 마지막에 바꿉니다. dev와 운영이 같은 bucket을 쓰므로 한 번 올리면 두 사이트에 함께 보입니다.
+
+  ```sh
+  pnpm upload:skilltab --env dev <출력 폴더>
+  ```
 - workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/api/*` 요청을 `/api`를 뗀 경로로 `https://api.dfragon.com`에 넘깁니다(`/api/characters/candidates`는 `/characters/candidates`로 갑니다). dev Worker 빌드는 `dev.dfragon.com`과 workers.dev 주소 모두에서 열리도록 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 `/api`를 API 주소로 씁니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. `/api/*` 밖의 주소는 운영 API로 넘기지 않으므로 웹 주소와 API 경로의 이름이 같아도 사이트가 응답합니다.
 
 로컬에서는 dev 서버 대신 Worker로 production build를 띄워 헤더와 R2 경로까지 확인할 수 있습니다. `apps/web`에서 실행하며, `--local`은 wrangler의 로컬 R2에만 올립니다.
