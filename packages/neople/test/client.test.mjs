@@ -181,3 +181,22 @@ test('실패 종류와 원인: 분류한 실패와 schema 불일치는 원인 �
     assert.equal(calls, 1, name)
   }
 })
+
+test('DNF001은 없는 캐릭터로 표시하되 분류는 status대로 두고 다른 오류 code는 표시하지 않는다', async () => {
+  for (const [code, characterNotFound] of [
+    ['DNF001', true],
+    ['DNF003', false]
+  ]) {
+    const neople = createNeopleClientForTest(apiKey, {
+      fetch: async () => Response.json({ error: { status: 404, code } }, { status: 404 })
+    })
+    await assert.rejects(neople.characterBasic(identity), (error) => {
+      assert(error instanceof NeopleRequestFailure, code)
+      assert.equal(error.kind, 'api', code)
+      assert.equal(error.characterNotFound, characterNotFound, code)
+      assert.equal(Object.hasOwn(error, 'cause'), false, code)
+
+      return true
+    })
+  }
+})
