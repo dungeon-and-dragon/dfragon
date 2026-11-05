@@ -49,6 +49,7 @@ export const styles = stylex.create({
   subtle: { color: colors.fgSubtle },
   missing: { color: colors.fgDisabled },
   number: { fontWeight: 600, fontVariantNumeric: 'tabular-nums' },
+  fame: { color: colors.gameFame },
   top: { color: colors.tierTop },
   ranker: { color: colors.tierRanker },
   estimate: { color: colors.fgWarning },

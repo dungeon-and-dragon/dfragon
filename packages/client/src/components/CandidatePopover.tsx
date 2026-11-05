@@ -133,7 +133,10 @@ function CandidateTile({
       <span aria-hidden="true" {...stylex.props(styles.server)}>
         {server}
       </span>
-      <span aria-hidden="true" {...stylex.props(styles.fame)}>
+      <span
+        aria-hidden="true"
+        {...stylex.props(styles.fame, choice.fame !== null && styles.fameValue)}
+      >
         {fame}
       </span>
     </button>
