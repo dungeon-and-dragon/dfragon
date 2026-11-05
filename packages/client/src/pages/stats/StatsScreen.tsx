@@ -1,11 +1,12 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { RelativeTime } from '../../components/RelativeTime'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useCharacterStats } from '../../hooks/useCharacterStats'
 import { type Bar, ColumnBars, RowBars } from './BarCharts'
 import { styles } from './StatsScreen.style'
-import { averageFameBars, fameBars, formatComputedAt, jobBars, serverBars } from './stats-bars'
+import { averageFameBars, fameBars, jobBars, serverBars } from './stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -37,7 +38,10 @@ export function StatsScreen(): React.JSX.Element {
         <div {...stylex.props(styles.screen)}>
           <TitleBox title="캐릭터 통계">
             <TitleStat label="캐릭터" value={integer.format(stats.total)} />
-            <TitleStat label="마지막 업데이트 시간" value={formatComputedAt(stats.computedAt)} />
+            <TitleStat
+              label="마지막 업데이트 시간"
+              value={<RelativeTime at={stats.computedAt} />}
+            />
           </TitleBox>
           <div {...stylex.props(styles.grid)}>
             <StatBox name="서버 인구" bars={serverBars(stats)} />
