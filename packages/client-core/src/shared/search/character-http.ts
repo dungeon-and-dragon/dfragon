@@ -30,6 +30,8 @@ export const CHARACTER_HTTP_LIMITS = {
   // 랭킹은 캐릭터 100명이라 수십 KB, 통계는 직업, 전직 수십 개와 명성 구간이라 수 KB다.
   rankingJsonBytes: 256 * 1024,
   statsJsonBytes: 256 * 1024,
+  // 길드는 API가 길드원 전체를 한 번에 줘서 큰 길드는 수 MB다.
+  adventureGuildJsonBytes: 8 * 1024 * 1024,
   ...CHARACTER_IMAGE_LIMITS
 } as const
 

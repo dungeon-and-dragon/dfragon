@@ -202,6 +202,7 @@ function previewSelected(choice: CharacterChoice): SelectedCharacterSummary {
     level: null,
     fame: choice.fame,
     imageUrl: '',
+    guildId: null,
     guildName: null,
     equipmentScore: null,
     card: null

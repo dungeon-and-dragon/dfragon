@@ -45,6 +45,7 @@ async function listen(
     timeline: syncTimeline && {
       sync: syncTimeline,
       read: unused,
+      backfillEnhancements: unused,
       close: async () => undefined
     },
     writeAccessLog: () => undefined

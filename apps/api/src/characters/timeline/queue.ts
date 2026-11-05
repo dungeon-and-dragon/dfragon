@@ -48,7 +48,7 @@ export function createTimelineSyncQueue(
       }
       waiting.delete(key)
       running.set(key, queued)
-      // 동기화는 실패를 직접 기록하므로, 여기 오는 것은 그 기록마저 실패한 경우다.
+      // 동기화는 실패를 직접 기록하므로 여기 오는 것은 그 기록마저 실패한 경우이고, 백필은 실패를 그대로 던진다.
       sync(queued.character)
         .catch(reportFailure)
         .finally(() => {

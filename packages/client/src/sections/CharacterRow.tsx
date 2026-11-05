@@ -346,11 +346,7 @@ function FoundCells({
       ) : (
         <>
           <AdventureCell adventure={character.adventure} editing={editing} />
-          <td
-            {...stylex.props(styles.cell, character.guild == null ? styles.missing : styles.guild)}
-          >
-            {character.guild ?? MISSING_VALUE}
-          </td>
+          <GuildCell guildId={character.guildId} guild={character.guild} />
           <td title={character.job} {...stylex.props(styles.cell, styles.job)}>
             {character.job}
           </td>
@@ -380,7 +376,41 @@ function AdventureCell({
 
   return (
     <td title={adventure} {...stylex.props(styles.cell, styles.adventure)}>
-      {adventure}
+      {adventure === MISSING_VALUE ? (
+        adventure
+      ) : (
+        <Link
+          to="/adventures/$adventureName"
+          params={{ adventureName: adventure }}
+          {...stylex.props(styles.link)}
+        >
+          {adventure}
+        </Link>
+      )}
+    </td>
+  )
+}
+
+function GuildCell({
+  guildId,
+  guild
+}: {
+  guildId: string | null | undefined
+  guild: string | null | undefined
+}): React.JSX.Element {
+  if (guild == null) {
+    return <td {...stylex.props(styles.cell, styles.missing)}>{MISSING_VALUE}</td>
+  }
+
+  return (
+    <td {...stylex.props(styles.cell, styles.guild)}>
+      {guildId != null ? (
+        <Link to="/guilds/$guildId" params={{ guildId }} {...stylex.props(styles.link)}>
+          {guild}
+        </Link>
+      ) : (
+        guild
+      )}
     </td>
   )
 }

@@ -104,6 +104,24 @@ test('next를 따라 모든 페이지를 모으고 다음 페이지 요청에는
   assert.equal(items[0]!.data.dungeonName, '테스트 던전')
 })
 
+test('조회할 코드를 주면 그 코드만 요청한다', async () => {
+  const requests: URL[] = []
+  const adapter = createNeopleCharacterTimeline(
+    createNeopleClientForTest('fake-key', {
+      fetch: async (request) => {
+        requests.push(new URL(request.url))
+
+        return Response.json({ timeline: { rows: [], next: null } })
+      }
+    }),
+    [401, 402, 403]
+  )
+
+  await adapter(identity, range)
+
+  assert.equal(requests[0]!.searchParams.get('code'), '401,402,403')
+})
+
 test('공급자 오류와 잘못된 응답은 기존 Neople 분류로 바꾸고 원문을 남기지 않는다', async () => {
   const validRow = { code: 101, name: '캐릭터 생성', date: '2025-01-09 06:00', data: {} }
   for (const [status, body, kind] of [
