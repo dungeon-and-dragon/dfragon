@@ -10,6 +10,7 @@ const ALPHA: CharacterDisplay = {
   characterId: 'alpha-id',
   characterName: '알파',
   adventureName: '가나다',
+  guildId: 'guild-1',
   guildName: '길드1',
   level: 115,
   jobName: '귀검사(남)',

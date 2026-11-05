@@ -12,6 +12,7 @@ function character(index: number): CharacterDisplay {
     characterId: `id-${index}`,
     characterName: `캐릭터${index}`,
     adventureName: '가나다',
+    guildId: null,
     guildName: null,
     level: 115,
     jobName: '귀검사(남)',
