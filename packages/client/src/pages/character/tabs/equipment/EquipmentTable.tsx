@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import type {
+  EnchantOption,
   EquipmentReinforce,
   EquipmentRow,
   EquipmentView
@@ -75,7 +76,9 @@ function EquipmentItemRow({ item }: { item: EquipmentRow }): React.JSX.Element {
       <td {...stylex.props(tableStyles.cell, tableStyles.nowrap)}>
         <Reinforce reinforce={item.reinforce} refine={item.refine} />
       </td>
-      <td {...stylex.props(tableStyles.cell, styles.enchant)}>{item.enchants.join(', ')}</td>
+      <td {...stylex.props(tableStyles.cell, styles.enchant)}>
+        <Enchants options={item.enchants} />
+      </td>
       <td
         {...stylex.props(
           tableStyles.cell,
@@ -103,6 +106,18 @@ function EquipmentItemRow({ item }: { item: EquipmentRow }): React.JSX.Element {
         )}
       </td>
     </tr>
+  )
+}
+
+function Enchants({ options }: { options: EnchantOption[] }): React.JSX.Element {
+  return (
+    <>
+      {options.map(({ label, emphasized }, index) => (
+        <span key={label} {...stylex.props(!emphasized && styles.minorEnchant)}>
+          {index < options.length - 1 ? `${label}, ` : label}
+        </span>
+      ))}
+    </>
   )
 }
 
