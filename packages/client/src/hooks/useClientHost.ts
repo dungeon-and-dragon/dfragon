@@ -18,6 +18,7 @@ import type {
   Guild
 } from '@dfragon/client-core/shared/adventure-guild/adventure-guild'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'
 import type {
   CharacterSearchQuery,
   SearchedCharacter
@@ -65,6 +66,8 @@ export type ClientHost = Readonly<{
   ) => Promise<TimelinePage<TimelineAcquisition>>
   // 스킬 창 데이터를 아직 올리지 않았으면 null을 돌려준다.
   getSkillWindowCatalog: () => Promise<SkillWindowCatalog | null>
+  // 서약 데이터를 아직 올리지 않았으면 null을 돌려준다.
+  getOathCatalog: () => Promise<OathCatalog | null>
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
   getAdventureCharacters: (adventureName: string) => Promise<AdventureCharacters>

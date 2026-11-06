@@ -104,6 +104,7 @@ export const characterDetailViewSchema = z.object({
     ),
     blessing: section({ status: list(keyedStat) }),
     setInfo: section({
+      setId: count,
       setName: text,
       setOptionName: text,
       setRarityName: text,
