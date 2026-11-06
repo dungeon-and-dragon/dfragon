@@ -389,7 +389,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
     clearNames: {
       type: 'array',
       description:
-        '모험단 캐릭터들이 이번 주를 포함한 최근 4주 안에 클리어한 레이드, 레기온 이름. 레이드가 먼저이고 같은 kind는 이름 순입니다.',
+        '모든 모험단에 같은 고정 레이드, 레기온 목록. 디레지에 레이드, 무너진 성자 미카엘라, 아포칼립스 순입니다.',
       items: clearName
     },
     characters: {
