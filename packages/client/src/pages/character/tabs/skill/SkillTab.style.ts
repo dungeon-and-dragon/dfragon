@@ -65,7 +65,7 @@ export const styles = stylex.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: space.s8,
+    gap: space.s4,
     padding: 0,
     borderWidth: 0,
     backgroundColor: 'transparent',
@@ -108,9 +108,9 @@ export const styles = stylex.create({
     imageRendering: 'pixelated'
   },
   level: {
-    height: 12,
+    height: 10,
     fontSize: 10,
-    lineHeight: '12px',
+    lineHeight: '10px',
     fontWeight: 600,
     color: colors.fgMuted,
     fontVariantNumeric: 'tabular-nums',
