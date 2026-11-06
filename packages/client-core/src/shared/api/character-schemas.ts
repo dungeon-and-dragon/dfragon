@@ -8,7 +8,7 @@ import {
 } from '../../preload/common/search/character-summary'
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
-const MIN_SEARCH_NAME_CODE_POINTS = 2
+const MIN_SEARCH_NAME_CODE_POINTS = 1
 
 export const ALL_CHARACTER_SERVERS = 'all'
 

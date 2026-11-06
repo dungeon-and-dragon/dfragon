@@ -85,5 +85,10 @@ function validateSearchQuery(pairs: readonly DecodedQueryPair[]): NeopleCharacte
     throw new NeopleSearchFailure('query')
   }
 
+  // Neople wordType=full은 2자 이상만 받으므로 한 글자 이름은 정확히 일치하는 match로 찾는다.
+  if ([...characterName].length === 1) {
+    return { characterName, serverId, limit, wordType: 'match' }
+  }
+
   return { characterName, serverId, limit }
 }
