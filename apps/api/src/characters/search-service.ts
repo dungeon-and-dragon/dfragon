@@ -11,6 +11,8 @@ import { parseCharacterCandidatesQuery, parseCharacterSearchQuery } from './quer
 import { createCandidateCache } from './candidate-cache.js'
 import type { CharacterSearchDependencies, CharacterSearchHttpService } from './types.js'
 
+const nameCollator = new Intl.Collator('ko')
+
 export function createCharacterSearchService(
   dependencies: CharacterSearchDependencies
 ): CharacterSearchHttpService {
@@ -39,17 +41,23 @@ export function createCharacterSearchService(
     }
   }
 
-  const loadCandidates = async (
+  const loadRows = async (
     input: NeopleCharacterSearchInput
-  ): Promise<CharacterCandidatesResult> => {
+  ): Promise<CharacterImageCandidate[]> => {
     const result = await search(input)
-    const candidates = result.rows.map((candidate): CharacterImageCandidate => {
+
+    return result.rows.map((candidate): CharacterImageCandidate => {
       const imageUrl = neopleCharacterImageUrl(candidate)
 
       return { ...candidate, imageUrl }
     })
+  }
+
+  const loadCandidates = async (
+    input: NeopleCharacterSearchInput
+  ): Promise<CharacterCandidatesResult> => {
     const rows = sortBy(
-      candidates,
+      await loadRows(input),
       [(row) => row.fame === null, 'asc'],
       [(row) => row.fame ?? 0, 'desc']
     )
@@ -60,8 +68,11 @@ export function createCharacterSearchService(
   return {
     async search(originalUrl) {
       const input = parseCharacterSearchQuery(originalUrl)
+      const rows = (await loadRows(input)).toSorted((left, right) =>
+        nameCollator.compare(left.characterName, right.characterName)
+      )
 
-      return loadCandidates(input)
+      return { rows }
     },
     async candidates(originalUrl) {
       const input = parseCharacterCandidatesQuery(originalUrl)
