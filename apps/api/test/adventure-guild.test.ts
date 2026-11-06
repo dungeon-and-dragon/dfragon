@@ -12,7 +12,7 @@ import { toAdventureWeeklyClears } from '../src/adventure-guild/weekly.js'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 
-// 합성 캐릭터다. DB 읽기는 fake이며 정렬, 저장과 4주 경계는 container-adventure-guild-check.mjs가 실제 DB로 확인한다.
+// 합성 캐릭터다. DB 읽기는 fake이며 정렬, 저장과 주간 경계는 container-adventure-guild-check.mjs가 실제 DB로 확인한다.
 const fetchedAt = new Date('2026-11-06T00:00:00.000Z')
 function member(characterId: string, fame: number | null): StoredCharacter {
   return {
@@ -205,25 +205,26 @@ const raid = (characterId: string, occurredAt: string, raidName: string) =>
 const legion = (characterId: string, occurredAt: string, regionName: string) =>
   clearEvent(characterId, occurredAt, { code: 209, raidName: null, data: { regionName } })
 
-test('주간 클리어는 목요일 06:00부터 세고 열 이름은 지난주 클리어까지 모은다', () => {
+test('주간 클리어는 고정한 레이드, 레기온 열에 목요일 06:00부터의 클리어만 표시한다', () => {
   const weekly = toAdventureWeeklyClears(
     [member('a', 70000), member('b', 60000), member('none', null)],
     [
-      raid('a', '2026-11-05T05:59:00+09:00', '이내 황혼전'),
-      raid('a', '2026-11-05T06:00:00+09:00', '디레지에 레이드'),
-      legion('a', '2026-11-05T07:00:00+09:00', '베누스'),
+      raid('a', '2026-11-05T05:59:00+09:00', '무너진 성자 미카엘라'),
+      legion('a', '2026-11-05T06:00:00+09:00', '아포칼립스'),
+      raid('a', '2026-11-05T07:00:00+09:00', '디레지에 레이드'),
       raid('a', '2026-11-05T08:00:00+09:00', '디레지에 레이드'),
       raid('b', '2026-11-06T12:00:00+09:00', '나벨 레이드'),
-      clearEvent('b', '2026-11-06T13:00:00+09:00', { code: 209, raidName: null, data: {} })
+      legion('b', '2026-11-06T12:30:00+09:00', '베누스'),
+      raid('b', '2026-11-06T13:00:00+09:00', '무너진 성자 미카엘라'),
+      clearEvent('b', '2026-11-06T14:00:00+09:00', { code: 209, raidName: null, data: {} })
     ],
     weekStart
   )
 
   assert.deepEqual(weekly.clearNames, [
-    { kind: 'raid', name: '나벨 레이드' },
     { kind: 'raid', name: '디레지에 레이드' },
-    { kind: 'raid', name: '이내 황혼전' },
-    { kind: 'legion', name: '베누스' }
+    { kind: 'raid', name: '무너진 성자 미카엘라' },
+    { kind: 'legion', name: '아포칼립스' }
   ])
   assert.deepEqual(
     weekly.characters.map(({ characterId, weeklyClears }) => [characterId, weeklyClears]),
@@ -232,10 +233,10 @@ test('주간 클리어는 목요일 06:00부터 세고 열 이름은 지난주 �
         'a',
         [
           { kind: 'raid', name: '디레지에 레이드' },
-          { kind: 'legion', name: '베누스' }
+          { kind: 'legion', name: '아포칼립스' }
         ]
       ],
-      ['b', [{ kind: 'raid', name: '나벨 레이드' }]],
+      ['b', [{ kind: 'raid', name: '무너진 성자 미카엘라' }]],
       ['none', []]
     ]
   )
