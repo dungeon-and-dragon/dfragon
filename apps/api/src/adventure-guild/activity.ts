@@ -10,6 +10,7 @@ import {
   readSeasons
 } from '@dfragon/database'
 import { addHours } from 'date-fns'
+import { z } from 'zod'
 import {
   ACQUISITION_CODES,
   CLEAR_CODES,
@@ -31,6 +32,8 @@ const ITEM_RARITIES = {
   신화: 'mythic'
 } as const
 const ITEM_CODES = new Set(ACQUISITION_CODES)
+// data.ticket은 강화권, 증폭권처럼 쓴 아이템 이름이다. 권은 그 단계에 직접 도전한 기록이 아니라 단계별 성공률에서 뺀다.
+const ticketData = z.object({ ticket: z.string().min(1) })
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -185,6 +188,10 @@ function toItemRarityName({
   return itemRarity
 }
 
+function usedTicket({ data }: CharacterTimelineItemRow): boolean {
+  return ticketData.safeParse(data).success
+}
+
 function emptySummary(): ActivitySummary {
   return {
     raids: [],
@@ -290,6 +297,7 @@ export function toSeasonActivity(
       day.mythic ||= rarity === 'mythic'
     }
 
+    const ticket = usedTicket(row)
     for (const attempt of toEnhancement(row)) {
       const day = dayOf(attempt.occurredAt)
       enhancement.attempts++
@@ -298,11 +306,15 @@ export function toSeasonActivity(
       if (attempt.kind === 'refine') {
         enhancement.refine++
       } else if (attempt.kind === 'amplify' && attempt.after >= HIGH_AMPLIFY_TARGET) {
-        countTarget(amplify, attempt)
+        if (!ticket) {
+          countTarget(amplify, attempt)
+        }
       } else if (attempt.kind === 'amplify') {
         enhancement.amplifyBelow10++
       } else if (attempt.after >= HIGH_REINFORCE_TARGET) {
-        countTarget(reinforce, attempt)
+        if (!ticket) {
+          countTarget(reinforce, attempt)
+        }
       } else {
         enhancement.reinforceBelow12++
       }
