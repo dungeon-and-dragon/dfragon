@@ -73,7 +73,8 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
       return characters
     },
     readGuild: async () => assert.fail('길드를 읽으면 안 된다'),
-    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다')
+    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
+    readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다')
   })
   try {
     const answer = await getJson(
@@ -104,7 +105,8 @@ test('길드 조회는 명성이 있는 길드원만으로 평균 명성을 반�
 
       return { guildName: '합성길드', members }
     },
-    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다')
+    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
+    readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다')
   })
   try {
     const { status, body } = await getJson(origin, '/guilds/synthetic-guild')
@@ -127,7 +129,8 @@ test('명성이 있는 길드원이 없으면 평균 명성은 null이다', asyn
   const { app, origin } = await listen({
     readAdventureCharacters: async () => [],
     readGuild: async () => ({ guildName: '합성길드', members: [member('a', null)] }),
-    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다')
+    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
+    readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다')
   })
   try {
     const { body } = await getJson(origin, '/guilds/synthetic-guild')
@@ -139,7 +142,7 @@ test('명성이 있는 길드원이 없으면 평균 명성은 null이다', asyn
   }
 })
 
-test('DB 설정이 없는 API는 세 경로에 빈 목록을 준다', async () => {
+test('DB 설정이 없는 API는 네 경로에 빈 목록을 준다', async () => {
   const { app, origin } = await listen()
   try {
     assert.deepEqual(await getJson(origin, '/adventures/%ED%95%A9%EC%84%B1/characters'), {
@@ -160,6 +163,28 @@ test('DB 설정이 없는 API는 세 경로에 빈 목록을 준다', async () =
       status: 200,
       body: { adventureName: '합성', clearNames: [], characters: [] }
     })
+    const activity = await getJson(origin, '/adventures/%ED%95%A9%EC%84%B1/activity')
+    assert.equal(activity.status, 200)
+    assert.deepEqual(activity.body.seasons, [])
+    assert.equal(activity.body.season, null)
+    assert.deepEqual(activity.body.days, [])
+    assert.deepEqual(activity.body.summary, {
+      raids: [],
+      legions: [],
+      items: { legendary: 0, epic: 0, primeval: 0, mythic: 0 },
+      enhancement: {
+        attempts: 0,
+        amplify: [],
+        reinforce: [],
+        amplifyBelow10: 0,
+        reinforceBelow12: 0,
+        refine: 0
+      }
+    })
+    assert.equal(
+      (await getJson(origin, '/adventures/%ED%95%A9%EC%84%B1/activity?season=11')).status,
+      400
+    )
   } finally {
     await app.close()
   }
@@ -175,13 +200,17 @@ test('DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () =
     },
     readAdventureWeeklyClears: async () => {
       throw new Error('synthetic database failure')
+    },
+    readAdventureActivity: async () => {
+      throw new Error('synthetic database failure')
     }
   })
   try {
     for (const path of [
       '/adventures/합성/characters',
       '/guilds/synthetic-guild',
-      '/adventures/합성/weekly'
+      '/adventures/합성/weekly',
+      '/adventures/합성/activity'
     ]) {
       const { status, body } = await getJson(origin, path)
       assert.equal(status, 500, path)
@@ -261,7 +290,8 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
         assert.equal(adventureName, '합성 모험단')
 
         return { clearNames: [{ kind: 'raid', name: '디레지에 레이드' }], characters }
-      }
+      },
+      readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다')
     },
     (character) => {
       requested.push(character)
