@@ -243,10 +243,10 @@ it('개화, 강화 데이터가 있으면 배울 수 있는 스킬을 모두 두
   )
 
   expect(container.querySelector('section[aria-label="스킬 개화"] h2')?.textContent).toBe(
-    '스킬 개화 2 / 2'
+    '스킬 개화'
   )
   expect(container.querySelector('section[aria-label="스킬 강화"] h2')?.textContent).toBe(
-    '스킬 강화 1 / 2'
+    '스킬 강화'
   )
   const picked = (label: string) =>
     [...container.querySelectorAll(`section[aria-label="${label}"] [aria-current="true"]`)].map(
@@ -264,6 +264,16 @@ it('개화, 강화 데이터가 있으면 배울 수 있는 스킬을 모두 두
     ['데미지', '쿨타임 감소'],
     ['데미지', '쿨타임 감소']
   ])
+})
+
+it('개화 갈래만 설명 창을 여는 버튼이고 강화 칸은 설명 창이 없다', async () => {
+  await render(
+    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
+    characterDetailFixture('dealer')
+  )
+
+  expect(container.querySelectorAll('section[aria-label="스킬 개화"] button')).toHaveLength(4)
+  expect(container.querySelectorAll('section[aria-label="스킬 강화"] button')).toHaveLength(0)
 })
 
 it('스킬 창 아이콘에 고른 개화 마름모와 강화 표식을 붙인다', async () => {
@@ -286,7 +296,7 @@ it('스킬 창 아이콘에 고른 개화 마름모와 강화 표식을 붙인�
   expect(marksOf('성화')).toEqual([])
 })
 
-it('스킬 트리 코드와 체인 스킬을 체인 순서대로 보인다', async () => {
+it('스킬 트리 코드와 체인 스킬 이름을 보인다', async () => {
   await render(
     createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
     characterDetailFixture('dealer')
@@ -296,7 +306,7 @@ it('스킬 트리 코드와 체인 스킬을 체인 순서대로 보인다', asy
     /^eJyNjDFOAlEARN9b/
   )
   expect(container.querySelector('section[aria-label="스킬 체인"] h2')?.textContent).toBe(
-    '스킬 체인 4초기화 시간 0'
+    '스킬 체인'
   )
   expect(
     [...container.querySelectorAll('section[aria-label="스킬 체인"] li')].map(

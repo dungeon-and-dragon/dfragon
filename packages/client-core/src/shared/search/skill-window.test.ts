@@ -330,10 +330,7 @@ describe('스킬 개화, 강화', () => {
       ['즉결심판', 1],
       ['참수', 1]
     ])
-    expect(board?.enhancements[0]?.branches).toEqual([
-      { type: 1, explain: '데미지 증가' },
-      { type: 2, explain: '데미지 증가, 쿨타임 감소' }
-    ])
+    expect(board?.enhancements[0]?.branches).toEqual([{ type: 1 }, { type: 2 }])
   })
 
   it('개화, 강화 데이터를 넣지 않은 묶음이면 목록을 만들지 않는다', () => {
@@ -350,7 +347,6 @@ describe('스킬 체인', () => {
     const { character, style } = inquisitor()
 
     expect(skillChainOf(INQUISITOR_CATALOG, character, style)).toEqual({
-      resetTime: 0,
       skills: [
         { name: '세례의 불길', icon: { sprite: 'sprites/at_priest.png', x: 0, y: 0 } },
         { name: '성염의 쇄도', icon: { sprite: 'sprites/at_priest.png', x: 84, y: 28 } },
