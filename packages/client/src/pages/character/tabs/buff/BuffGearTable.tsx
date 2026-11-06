@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { toItemView } from '@dfragon/client-core/lib/character-item'
+import { type ItemView, toItemView } from '@dfragon/client-core/lib/character-item'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { styles } from '../avatar/AvatarTable.style'
 import { AvatarRow } from '../avatar/AvatarTable'
@@ -9,13 +9,16 @@ import { styles as tableStyles } from '../equipment/item-table.style'
 type Buff = CharacterDetailView['buff']
 type BuffEquipment = NonNullable<Buff['equipment']>['equipment'][number]
 type BuffAvatar = NonNullable<Buff['avatar']>['avatar'][number]
+type BuffCreature = NonNullable<Buff['creature']>['creature'][number]
 
 export function BuffGearTable({
   equipment,
-  avatars
+  avatars,
+  creatures
 }: {
   equipment: readonly BuffEquipment[]
   avatars: readonly BuffAvatar[]
+  creatures: readonly BuffCreature[]
 }): React.JSX.Element {
   return (
     <table {...stylex.props(tableStyles.table)}>
@@ -40,21 +43,36 @@ export function BuffGearTable({
       </thead>
       <tbody>
         {equipment.map((item, index) => (
-          <tr key={`equipment-${item.slotId ?? index}`} {...stylex.props(tableStyles.row)}>
-            <td {...stylex.props(tableStyles.cell, tableStyles.first, tableStyles.slot)}>
-              {item.slotName}
-            </td>
-            <td {...stylex.props(tableStyles.cell)}>
-              <ItemCell item={toItemView(item)} tune={null} exalted={false} />
-            </td>
-            <td {...stylex.props(tableStyles.cell)} />
-            <td {...stylex.props(tableStyles.cell, tableStyles.last)} />
-          </tr>
+          <ItemRow
+            key={`equipment-${item.slotId ?? index}`}
+            slot={item.slotName}
+            item={toItemView(item)}
+          />
         ))}
         {avatars.map((avatar, index) => (
           <AvatarRow key={`avatar-${avatar.slotId ?? index}`} avatar={avatar} />
         ))}
+        {creatures.map((creature, index) => (
+          <ItemRow
+            key={`creature-${creature.itemId ?? index}`}
+            slot="크리쳐"
+            item={toItemView(creature)}
+          />
+        ))}
       </tbody>
     </table>
+  )
+}
+
+function ItemRow({ slot, item }: { slot: string | null; item: ItemView }): React.JSX.Element {
+  return (
+    <tr {...stylex.props(tableStyles.row)}>
+      <td {...stylex.props(tableStyles.cell, tableStyles.first, tableStyles.slot)}>{slot}</td>
+      <td {...stylex.props(tableStyles.cell)}>
+        <ItemCell item={item} tune={null} exalted={false} />
+      </td>
+      <td {...stylex.props(tableStyles.cell)} />
+      <td {...stylex.props(tableStyles.cell, tableStyles.last)} />
+    </tr>
   )
 }

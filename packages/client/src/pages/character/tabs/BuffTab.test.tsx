@@ -105,7 +105,7 @@ it('스킬 창 데이터에 그 전직의 버프 스킬이 있으면 이름 대�
 it('버퍼 버프 강화 장비와 아바타는 한 테이블에서 장비 뒤에 아바타 순서로 보인다', async () => {
   await render(characterDetailFixture('buffer'))
 
-  const tables = section('버프 강화 장비, 아바타')!.querySelectorAll('table')
+  const tables = section('버프 강화 장비, 아바타, 크리쳐')!.querySelectorAll('table')
   expect(tables).toHaveLength(1)
   const rows = [...tables[0]!.querySelectorAll('tbody tr')]
   expect(rows.map((row) => row.querySelector('td')?.textContent)).toEqual(['칭호', '상의'])
@@ -114,16 +114,34 @@ it('버퍼 버프 강화 장비와 아바타는 한 테이블에서 장비 뒤�
   const { className } = stylex.props(rarityTones.rare)
   expect(item?.querySelector('b')?.className.split(' ')).toContain(className)
   expect(rows[1]?.textContent).toContain('러블리 템포 스킬Lv +1')
-  expect(section('버프 강화 크리쳐')).toBeNull()
 })
 
-it('딜러처럼 버프 강화 장비가 없으면 장비, 아바타 테이블에 아바타만 보이고 크리쳐 이름을 보인다', async () => {
+it('딜러처럼 버프 강화 장비가 없으면 같은 테이블에 아바타 뒤로 크리쳐 행을 보인다', async () => {
   await render(characterDetailFixture('dealer'))
 
-  const gearRows = [...(section('버프 강화 장비, 아바타')?.querySelectorAll('tbody tr') ?? [])]
-  expect(gearRows.map((row) => row.querySelector('td')?.textContent)).toEqual(['상의'])
-  const creatureCells = section('버프 강화 크리쳐')?.querySelectorAll('tbody td') ?? []
-  expect([...creatureCells].map((cell) => cell.textContent)).toEqual(['크리쳐', '2026 쁘띠 발키리'])
+  const tables = section('버프 강화 장비, 아바타, 크리쳐')?.querySelectorAll('table') ?? []
+  expect(tables).toHaveLength(1)
+  const rows = [...(tables[0]?.querySelectorAll('tbody tr') ?? [])]
+  expect(rows.map((row) => row.querySelector('td')?.textContent)).toEqual(['상의', '크리쳐'])
+  expect(rows[1]?.querySelectorAll('td')[1]?.textContent).toBe('2026 쁘띠 발키리')
+})
+
+it('이름 없는 크리쳐만 있으면 장비, 아바타, 크리쳐 테이블을 생략한다', async () => {
+  const detail = characterDetailFixture('dealer')
+  const creature = detail.buff.creature!
+  await render({
+    ...detail,
+    buff: {
+      equipment: null,
+      avatar: null,
+      creature: {
+        ...creature,
+        creature: creature.creature.map((item) => ({ ...item, itemName: null }))
+      }
+    }
+  })
+
+  expect(section('버프 강화 장비, 아바타, 크리쳐')).toBeNull()
 })
 
 it('버프 강화 응답이 없으면 스킬 줄과 장착 목록을 모두 생략한다', async () => {
