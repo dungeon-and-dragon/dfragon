@@ -312,7 +312,7 @@ describe('스킬 개화, 강화', () => {
     })
   })
 
-  it('그 전직이 배울 수 있는 개화, 강화 스킬을 습득 레벨 순으로 모두 두고 고른 갈래를 표시한다', () => {
+  it('개화는 그 전직이 배울 수 있는 스킬을 모두, 강화는 강화한 스킬만 습득 레벨 순으로 두고 고른 갈래를 표시한다', () => {
     const { character, style } = inquisitor()
     const board = skillUpgradeBoardOf(INQUISITOR_CATALOG, character, style)
 
@@ -326,11 +326,18 @@ describe('스킬 개화, 강화', () => {
       { type: 2, name: '참수 2', basicExplain: '참수 요약 2', explain: '참수 설명 2' }
     ])
     expect(board?.enhancements.map(({ name, picked }) => [name, picked])).toEqual([
-      ['성화', null],
       ['즉결심판', 1],
       ['참수', 1]
     ])
     expect(board?.enhancements[0]?.branches).toEqual([{ type: 1 }, { type: 2 }])
+  })
+
+  it('강화한 스킬이 없으면 스킬 강화 목록이 비어 있다', () => {
+    const { character, style } = inquisitor()
+    const board = skillUpgradeBoardOf(INQUISITOR_CATALOG, character, { ...style, enhancement: [] })
+
+    expect(board?.enhancements).toEqual([])
+    expect(board?.evolutions).toHaveLength(3)
   })
 
   it('개화, 강화 데이터를 넣지 않은 묶음이면 목록을 만들지 않는다', () => {
