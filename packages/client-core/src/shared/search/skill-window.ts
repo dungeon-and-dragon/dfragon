@@ -423,6 +423,24 @@ export function skillChainOf(
   return { resetTime: style.chain.resetTime, skills }
 }
 
+// 버프 강화의 skillInfo.skillId는 직업이 달라도 같은 값이 다시 나오는 API ID라, 그 전직이 배우는 스킬과 이름으로 잇는다.
+export function buffSkillIconOf(
+  catalog: SkillWindowCatalog,
+  character: SkillCharacter,
+  skillName: string
+): SkillIconImage | null {
+  const tree = skillTreeOf(catalog, character)
+  if (tree === null) {
+    return null
+  }
+  const learnable = learnableSkillsOf(tree).find(({ skill }) => skill.name === skillName)
+  if (learnable === undefined) {
+    return null
+  }
+
+  return { sprite: tree.job.sprite, ...learnable.skill.icon }
+}
+
 export type LearnedSkillRow = Readonly<{
   requiredLevel: number | null
   skills: readonly LearnedSkill[]
