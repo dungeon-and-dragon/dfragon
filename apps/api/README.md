@@ -118,6 +118,48 @@ DB에 없는 모험단과 길드, DB 설정이 없는 API는 빈 목록을 주�
 조회는 그 캐릭터들의 타임라인 동기화를 같은 queue에 넣고 끝나기를 기다리지 않습니다. 응답은 지금 저장된 값이라, 처음 여는 모험단은 비어 있다가 동기화가 끝난 뒤 다시 조회하면 채워집니다.
 DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 API는 `clearNames`와 `characters`를 모두 빈 목록으로 줍니다.
 
+### 모험단 시즌 활동 조회
+
+`GET /adventures/:adventureName/activity?season=<시즌 번호>`는 그 모험단 캐릭터 전체의 타임라인을 합쳐 한 시즌의 활동을 셉니다.
+`season`이 없으면 지금 시즌(`seasons`에서 가장 최근에 시작한 시즌)이고, 정수가 아니거나 시작한 시즌에 없는 번호면 400 `INVALID_CHARACTER_QUERY`입니다. 다른 query key는 무시합니다.
+
+```json
+{
+  "seasons": [{ "id": 11, "name": "천해천", "startsAt": "…", "available": true }],
+  "season": { "id": 11, "startsAt": "…", "endsAt": null },
+  "summary": {
+    "raids": [{ "name": "디레지에 레이드", "count": 83 }],
+    "legions": [{ "name": "아포칼립스", "count": 52 }],
+    "items": { "legendary": 628, "epic": 412, "primeval": 6, "mythic": 1 },
+    "enhancement": {
+      "attempts": 510,
+      "amplify": [{ "target": 13, "attempts": 4, "successes": 0 }],
+      "reinforce": [{ "target": 15, "attempts": 2, "successes": 0 }],
+      "amplifyBelow10": 239,
+      "reinforceBelow12": 129,
+      "refine": 66
+    }
+  },
+  "days": [{ "date": "2026-07-18", "raid": 2, "legion": 1, "item": 7, "enhance": 5, "primeval": false, "mythic": false, "highEnhancement": false }]
+}
+```
+
+`seasons`는 시작한 시즌을 오래된 순으로 주고, `available`은 타임라인을 받기 시작한 중천(10) 이후 시즌인지입니다.
+`season.endsAt`은 다음 시즌 시작이며 지금 시즌은 `null`입니다. 시즌 구간은 `startsAt` 포함, `endsAt` 제외입니다.
+`available`이 `false`인 시즌은 강화 백필 행만 있어 읽지 않고 빈 집계를 줍니다.
+
+- 레이드(201, 210)와 레기온(209)은 [타임라인 조회](#타임라인-조회)의 `name`별 클리어 수이고 많은 순입니다. 하드 여부는 나누지 않습니다.
+- `items`는 획득 코드(501~521, 550~557) 가운데 `item_rarity`가 레전더리, 에픽, 태초, 신화인 행의 수입니다.
+- `enhancement.attempts`는 강화, 증폭, 재련(401~403) 전체 횟수입니다.
+  `amplify`는 10증폭 이상, `reinforce`는 12강 이상 도전을 단계별로 센 시도와 성공이고, 그 아래는 `amplifyBelow10`, `reinforceBelow12`, 재련은 `refine`에 횟수만 셉니다.
+- 단계 `target`은 타임라인의 `after`(Neople 설명: 성공 후 변경 예정 수치)입니다.
+  실패도 `after`는 도전한 단계이고, 강화권, 증폭권처럼 여러 단계를 한 번에 올리는 기록은 `before + 1`보다 커서 `after`로 셉니다.
+- `days`는 활동이 있는 날만 오래된 순으로 줍니다. 하루는 06:00 KST에 바뀌어 05:59 기록은 전날입니다.
+  `item`, `enhance`는 위와 같은 기준의 그날 횟수이고, `primeval`, `mythic`은 그날 태초, 신화를 얻었는지, `highEnhancement`는 그날 10증폭 이상이나 12강 이상 도전이 있었는지입니다.
+
+조회는 [모험단 주간 클리어 조회](#모험단-주간-클리어-조회)처럼 캐릭터마다 타임라인 동기화를 queue에 넣고 끝나기를 기다리지 않습니다.
+DB에 없는 모험단은 시즌 목록과 빈 집계를 주고, DB 설정이 없는 API는 `seasons`가 빈 목록, `season`이 `null`인 빈 집계를 줍니다.
+
 ### 명성 랭킹과 통계
 
 `GET /rankings/fame`과 `GET /stats`도 Neople을 부르지 않고 DB에 저장된 캐릭터 기본 정보를 읽습니다.
