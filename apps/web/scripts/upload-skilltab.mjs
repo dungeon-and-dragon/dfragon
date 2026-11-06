@@ -5,6 +5,7 @@ import { parseArgs } from 'node:util'
 
 const BUCKET = 'dfragon-web-ocr'
 const INDEX = 'skilltab.json'
+const INDEXES = new Set([INDEX, 'oath.json'])
 const CONTENT_TYPES = { '.json': 'application/json', '.png': 'image/png' }
 
 const { values, positionals } = parseArgs({
@@ -48,8 +49,11 @@ if (!files.includes(INDEX)) {
   throw new Error(`${INDEX}이 없습니다: ${root}`)
 }
 
-// skilltab.json이 새 sprite를 가리키므로, sprite를 모두 올린 뒤에 바꿔야 그 사이에 연 페이지가 없는 그림을 받지 않는다.
-for (const file of files.filter((file) => file !== INDEX)) {
+// skilltab.json, oath.json이 새 sprite와 아이콘을 가리키므로, 그림을 모두 올린 뒤에 바꿔야 그 사이에 연 페이지가 없는 그림을
+// 받지 않는다.
+for (const file of files.filter((file) => !INDEXES.has(file))) {
   put(file)
 }
-put(INDEX)
+for (const file of files.filter((file) => INDEXES.has(file))) {
+  put(file)
+}
