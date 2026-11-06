@@ -477,6 +477,7 @@ export function installBrowserHost(
     getAdventureCharacters: dfragon.adventures.characters,
     getGuild: dfragon.guilds.get,
     getAdventureWeekly: dfragon.adventures.weekly,
+    getAdventureActivity: dfragon.adventures.activity,
     searchCharacters: dfragon.characters.search,
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
