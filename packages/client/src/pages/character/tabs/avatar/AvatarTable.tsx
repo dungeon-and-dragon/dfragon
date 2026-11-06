@@ -40,7 +40,7 @@ export function AvatarTable({ avatars }: { avatars: readonly Avatar[] }): React.
   )
 }
 
-function AvatarRow({ avatar }: { avatar: Avatar }): React.JSX.Element {
+export function AvatarRow({ avatar }: { avatar: Avatar }): React.JSX.Element {
   const item = toItemView(avatar)
   const cloneName = avatar.clone?.itemName ?? null
 
