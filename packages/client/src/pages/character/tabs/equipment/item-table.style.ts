@@ -36,5 +36,22 @@ export const styles = stylex.create({
   slot: { color: colors.fgSubtle, fontSize: 12, whiteSpace: 'nowrap' },
   number: { fontVariantNumeric: 'tabular-nums' },
   muted: { color: colors.fgMuted },
-  missing: { color: colors.fgSubtle }
+  missing: { color: colors.fgSubtle },
+  heading: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: space.s8,
+    height: 32,
+    margin: 0,
+    paddingInline: space.s16,
+    backgroundColor: colors.bgInset,
+    color: colors.fgSubtle,
+    fontSize: 12,
+    lineHeight: '16px',
+    fontWeight: 500,
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: colors.borderDefault
+  },
+  count: { color: colors.fgMuted, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }
 })

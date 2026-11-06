@@ -57,12 +57,12 @@ it('버퍼 버프 스킬은 이름, 레벨과 desc의 {valueN} 자리에 values�
 it('버퍼 버프 강화 장비는 부위와 등급 색 이름을, 아바타는 부위와 옵션을 보인다', async () => {
   await render(characterDetailFixture('buffer'))
 
-  const [row] = section('버프 강화 장비')!.querySelectorAll('tr')
+  const [row] = section('버프 강화 장비')!.querySelectorAll('tbody tr')
   const [slot, item] = row!.querySelectorAll('td')
   expect(slot?.textContent).toBe('칭호')
   expect(item?.textContent).toBe('모험가의 의지[빛]')
   const { className } = stylex.props(rarityTones.rare)
-  expect(item?.querySelector('span')?.className.split(' ')).toContain(className)
+  expect(item?.querySelector('b')?.className.split(' ')).toContain(className)
   const avatarRows = [...section('버프 강화 아바타')!.querySelectorAll('tbody tr')]
   expect(avatarRows.map((avatar) => avatar.querySelector('td')?.textContent)).toEqual(['상의'])
   expect(avatarRows[0]?.textContent).toContain('러블리 템포 스킬Lv +1')
@@ -74,7 +74,8 @@ it('딜러처럼 버프 강화 장비가 없으면 장비 칸을 생략하고 �
 
   expect(section('버프 강화 장비')).toBeNull()
   expect(section('버프 스킬')?.querySelector('li')?.textContent).toBe('지속 시간 : -초')
-  expect(section('버프 강화 크리쳐')?.querySelector('li')?.textContent).toBe('2026 쁘띠 발키리')
+  const creatureCells = section('버프 강화 크리쳐')?.querySelectorAll('tbody td') ?? []
+  expect([...creatureCells].map((cell) => cell.textContent)).toEqual(['크리쳐', '2026 쁘띠 발키리'])
 })
 
 it('버프 강화 응답이 없으면 스킬 줄과 장착 목록을 모두 생략한다', async () => {
