@@ -27,7 +27,6 @@
 **/dist/
 **/.git
 apps/web/public/ocr/
-apps/web/.wrangler/
 packages/lib/LICENSES/
 **/*.pem
 **/*.key
