@@ -453,8 +453,12 @@ export const apiSchemas: Record<string, SchemaObject> = {
       }),
       enhancement: object({
         attempts: { ...activityCount, description: '강화, 증폭, 재련(401~403) 전체 횟수' },
-        amplify: enhancementTargets('10증폭 이상 도전의 단계별 시도와 성공, 낮은 단계 순'),
-        reinforce: enhancementTargets('12강 이상 도전의 단계별 시도와 성공, 낮은 단계 순'),
+        amplify: enhancementTargets(
+          '10증폭 이상 도전의 단계별 시도와 성공, 낮은 단계 순. 강화권, 증폭권 기록(data.ticket)은 뺍니다'
+        ),
+        reinforce: enhancementTargets(
+          '12강 이상 도전의 단계별 시도와 성공, 낮은 단계 순. 강화권, 증폭권 기록(data.ticket)은 뺍니다'
+        ),
         amplifyBelow10: activityCount,
         reinforceBelow12: activityCount,
         refine: activityCount
