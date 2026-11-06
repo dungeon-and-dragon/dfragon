@@ -20,7 +20,7 @@ const siteNotices = {
   }
 } satisfies Plugin
 
-// 개발 서버는 같은 origin의 /api 경로를 운영 API로 넘겨, 운영 API의 CORS 허용 origin 없이 웹 앱을 연다.
+// 개발 서버는 같은 origin의 /api 경로를 운영 API로 넘겨, 배포된 사이트와 같은 주소로 API를 부른다.
 const API_PATH_PREFIX = '/api'
 const DEV_API_PROXY = {
   target: 'https://api.dfragon.com',
@@ -28,7 +28,7 @@ const DEV_API_PROXY = {
   rewrite: (path: string) => path.slice(API_PATH_PREFIX.length)
 }
 
-// 스킬 창 데이터는 저장소 밖에서 만들어 올리고, 배포된 사이트는 Worker가 R2에서 /skilltab/ 아래로 내준다. 개발 서버는
+// 스킬 창 데이터는 저장소 밖에서 만들어 올리고, 배포된 사이트는 node1의 host Caddy가 /skilltab/ 아래로 내준다. 개발 서버는
 // DFRAGON_SKILLTAB_DIR에 build-skilltab.mjs의 출력 폴더를 주면 그 폴더를 같은 주소로 내준다.
 const SKILLTAB_PATH = '/skilltab/'
 const SKILLTAB_CONTENT_TYPES: Readonly<Record<string, string>> = {
