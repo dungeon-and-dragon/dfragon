@@ -220,6 +220,10 @@ function EnhancementSection({
   rows: readonly EnhancementRow[]
   marks: SkillMarks
 }): React.JSX.Element {
+  if (rows.length === 0) {
+    return <h2 {...stylex.props(tableStyles.heading)}>스킬 강화 없음</h2>
+  }
+
   return (
     <section aria-label="스킬 강화">
       <h2 {...stylex.props(tableStyles.heading)}>스킬 강화</h2>
