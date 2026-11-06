@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { characterDetailFixture } from '../../testing/fixtures/character-detail'
 import {
+  buffSkillIconOf,
   learnedSkillRowsOf,
   type SkillWindowCatalog,
   skillChainOf,
@@ -388,5 +389,26 @@ describe('스킬 체인', () => {
     const emptyChain = { ...style, chain: { resetTime: 0, skills: [null, null, null, null] } }
 
     expect(skillChainOf(INQUISITOR_CATALOG, character, emptyChain)).toBeNull()
+  })
+})
+
+describe('버프 강화 스킬 아이콘', () => {
+  it('그 전직이 배우는 스킬 가운데 이름이 같은 스킬의 아이콘을 쓴다', () => {
+    const { character } = inquisitor()
+
+    expect(buffSkillIconOf(INQUISITOR_CATALOG, character, '성염의 쇄도')).toEqual({
+      sprite: 'sprites/at_priest.png',
+      x: 84,
+      y: 28
+    })
+  })
+
+  it('다른 전직에만 있거나 데이터에 없는 스킬, 데이터에 없는 직업이면 아이콘이 없다', () => {
+    const { character } = inquisitor()
+    const buffer = characterDetailFixture('buffer').character
+
+    expect(buffSkillIconOf(INQUISITOR_CATALOG, character, '무녀의 스킬')).toBeNull()
+    expect(buffSkillIconOf(INQUISITOR_CATALOG, character, '광적인 믿음')).toBeNull()
+    expect(buffSkillIconOf(INQUISITOR_CATALOG, buffer, '러블리 템포')).toBeNull()
   })
 })
