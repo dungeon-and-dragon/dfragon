@@ -1,10 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { toItemView } from '@dfragon/client-core/lib/character-item'
-import {
-  buffOptionLines,
-  buffSkillInfoOf
-} from '@dfragon/client-core/shared/search/character-detail-display'
+import { buffSkillInfoOf } from '@dfragon/client-core/shared/search/character-detail-display'
 import {
   buffSkillIconOf,
   type SkillIconImage
@@ -114,13 +111,6 @@ function BuffSkill({
           <span {...stylex.props(partStyles.stripMuted)}>{`Lv.${option.level}`}</span>
         )}
       </div>
-      {option != null && (
-        <ul {...stylex.props(styles.optionLines)}>
-          {buffOptionLines(option).map((line, index) => (
-            <li key={index}>{line}</li>
-          ))}
-        </ul>
-      )}
     </section>
   )
 }

@@ -1,7 +1,6 @@
 import type { CharacterDetailView } from './character-detail-view'
 
 type BuffSkillInfo = NonNullable<NonNullable<CharacterDetailView['buff']['equipment']>['skillInfo']>
-type BuffSkillOption = NonNullable<BuffSkillInfo['option']>
 
 const ITEM_RARITY_BY_NAME = {
   커먼: 'common',
@@ -35,27 +34,6 @@ export function avatarSlotLabel(slotName: string | null): string | null {
   }
 
   return slotName
-}
-
-const OPTION_VALUE_PLACEHOLDER = /\{value(\d+)\}/g
-
-// desc의 {valueN}은 1부터 세는 values의 N번째 값이다. 값이 없는 자리는 응답 그대로 둔다.
-export function buffOptionLines({ desc, values }: BuffSkillOption): string[] {
-  if (desc == null) {
-    return []
-  }
-
-  return desc
-    .replace(OPTION_VALUE_PLACEHOLDER, (placeholder, order: string) => {
-      const value = values[Number(order) - 1]
-      if (value == null) {
-        return placeholder
-      }
-
-      return value
-    })
-    .split('\n')
-    .filter((line) => line.trim() !== '')
 }
 
 export function buffSkillInfoOf(buff: CharacterDetailView['buff']): BuffSkillInfo | null {
