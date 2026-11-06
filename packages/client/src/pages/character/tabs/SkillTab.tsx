@@ -36,7 +36,7 @@ function SkillIcon({
   const picked = icon.evolution !== null || icon.enhancement !== null
 
   return (
-    <Tooltip.Root>
+    <Tooltip.Root disableHoverablePopup>
       <Tooltip.Trigger
         delay={0}
         closeDelay={0}
