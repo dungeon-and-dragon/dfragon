@@ -36,6 +36,7 @@ import type {
 } from '@dfragon/client-core/shared/search/character-timeline'
 import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
 import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
+import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 
 export type CardSearchHost = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>
@@ -73,6 +74,10 @@ export type ClientHost = Readonly<{
   getAdventureCharacters: (adventureName: string) => Promise<AdventureCharacters>
   getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
+  getAdventureActivity: (
+    adventureName: string,
+    season: number | undefined
+  ) => Promise<AdventureActivity>
   searchCharacters: (query: CharacterSearchQuery) => Promise<readonly SearchedCharacter[]>
 }>
 

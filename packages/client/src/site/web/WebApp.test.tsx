@@ -918,7 +918,35 @@ it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최�
   })
 })
 
-it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 주간 던파만 조회하고 이름은 브라우저에 남긴다', async () => {
+it('내 모험단 주소의 season은 그 시즌의 활동을 조회하고, 숫자가 아닌 season은 지금 시즌을 조회한다', async () => {
+  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
+  const fetch = vi.fn<typeof globalThis.fetch>(async () => new Response('{}', { status: 500 }))
+  vi.stubGlobal('fetch', fetch)
+  const encodedName = encodeURIComponent('합성 모험단')
+  const activityUrls = () =>
+    fetch.mock.calls
+      .map((args) => new Request(...args).url)
+      .filter((url) => url.includes(`${encodedName}/activity`))
+
+  window.history.replaceState(null, '', '/my?season=10')
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() =>
+    expect(activityUrls()).toEqual([`${API_BASE_URL}/adventures/${encodedName}/activity?season=10`])
+  )
+  await act(async () => root.unmount())
+
+  root = createRoot(container)
+  window.history.replaceState(null, '', '/my?season=abc')
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() =>
+    expect(activityUrls()).toEqual([
+      `${API_BASE_URL}/adventures/${encodedName}/activity?season=10`,
+      `${API_BASE_URL}/adventures/${encodedName}/activity`
+    ])
+  )
+})
+
+it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 지금 시즌 활동과 주간 던파만 조회하고 이름은 브라우저에 남긴다', async () => {
   const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
     const url = new URL(new Request(...args).url)
     if (url.pathname.endsWith('/weekly')) {
@@ -954,7 +982,8 @@ it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 주�
   )
   const urls = fetch.mock.calls.map((args) => new Request(...args).url)
   const encodedName = encodeURIComponent('합성 모험단')
-  expect(urls.filter((url) => url.includes(encodedName))).toEqual([
+  expect(urls.filter((url) => url.includes(encodedName)).toSorted()).toEqual([
+    `${API_BASE_URL}/adventures/${encodedName}/activity`,
     `${API_BASE_URL}/adventures/${encodedName}/weekly`
   ])
   expect(localStorage.getItem('dfragon:my-adventure')).toContain('합성 모험단')

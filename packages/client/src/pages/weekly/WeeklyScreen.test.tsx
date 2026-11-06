@@ -74,7 +74,7 @@ function render(getAdventureWeekly: ClientHost['getAdventureWeekly']): Promise<v
       <ClientHostContext value={createTestClientHost({ getAdventureWeekly })}>
         <TestQueryClient>
           <TestRouter>
-            <WeeklyScreen />
+            <WeeklyScreen season={undefined} onSeasonChange={vi.fn()} />
           </TestRouter>
         </TestQueryClient>
       </ClientHostContext>
@@ -116,7 +116,8 @@ it('저장된 모험단이 없으면 조회하지 않고 내 모험단 상자에
   const getAdventureWeekly = vi.fn<ClientHost['getAdventureWeekly']>()
   await render(getAdventureWeekly)
 
-  expect(container.querySelector('h1')?.textContent).toBe('주간 던파')
+  expect(container.querySelector('h1')?.textContent).toBe('내 모험단')
+  expect(container.querySelector('nav[aria-label="시즌"]')).toBeNull()
   expect(listName()).toBe('내 모험단')
   expect(container.querySelector('section p')?.textContent).toBe('모험단 이름을 넣어 주세요.')
   expect(button('보기')).toBeDefined()
@@ -191,10 +192,10 @@ it('새로고침을 누르면 받아 둔 표를 버리고 받는 중을 보인 �
   expect(bodyRows()).toHaveLength(1)
 
   await act(async () => button('새로고침')!.click())
-  expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
+  expect(container.querySelector('section [aria-busy="true"]')).not.toBeNull()
 
   await act(async () => refreshed.resolve(weekly))
   expect(getAdventureWeekly.mock.calls).toEqual([['합성 모험단'], ['합성 모험단']])
-  expect(container.querySelector('[aria-busy="true"]')).toBeNull()
+  expect(container.querySelector('section [aria-busy="true"]')).toBeNull()
   expect(bodyRows()).toHaveLength(2)
 })
