@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
-const services = ['api']
+const services = ['api', 'web']
 // 지운 서비스다. 지우기 전에 main에서 발행한 계획이 다음 run의 baseline으로 남을 수 있어 baseline에서만 무시한다.
 const retiredServices = ['ocr', 'accounts']
 const commonFiles = new Set([
@@ -16,11 +16,14 @@ const commonFiles = new Set([
   'scripts/server-build-info.mjs'
 ])
 const commonDirectories = [
+  'packages/client/',
+  'packages/client-core/',
   'packages/database/',
   'packages/lib/',
   'packages/neople/',
   'packages/licenses/',
-  'packages/models/'
+  'packages/models/',
+  'packages/ui/'
 ]
 
 export function selectServices(changedPaths) {
@@ -115,7 +118,7 @@ export function validatePlan(plan, sourceCommit) {
     plan.services.some((service) => !services.includes(service)) ||
     new Set(plan.services).size !== plan.services.length
   ) {
-    throw new Error('Expected a plan with unique api services')
+    throw new Error('Expected a plan with unique product image services')
   }
 
   const selectedServices = services.filter((service) => plan.services.includes(service))

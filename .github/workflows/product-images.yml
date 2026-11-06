@@ -105,9 +105,19 @@ jobs:
           set -euo pipefail
           [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
-      # The API image needs the pinned Linux score engine. The image never loads the OCR model submodule.
-      - name: Checkout the score engine submodule
-        run: git submodule update --init --depth 1 packages/models/score-engine
+      # The API image needs the pinned Linux score engine and the web image the fine-tuned OCR model.
+      # Each image loads only its own model submodule.
+      - name: Checkout the model submodule
+        env:
+          SERVICE: ${{ matrix.service }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$SERVICE" in
+            api) git submodule update --init --depth 1 packages/models/score-engine ;;
+            web) git submodule update --init --depth 1 packages/models/ocr-finetuned ;;
+            *) echo "Unknown service: $SERVICE" >&2; exit 1 ;;
+          esac
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Build image without registry credentials
