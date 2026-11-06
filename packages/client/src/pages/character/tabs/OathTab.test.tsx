@@ -3,8 +3,47 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
+import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
+import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { OathTab } from './OathTab'
+
+function effects(primitive: string): OathCatalog['sets'][number]['options'][number]['effects'] {
+  return { rare: null, unique: null, legendary: null, epic: null, primitive }
+}
+
+// build-skilltab이 만드는 oath.json과 같은 모양의 합성 데이터다. 세트 번호와 고른 선택지 이름은 딜러 fixture의 용투 서약이다.
+const OATH_CATALOG: OathCatalog = {
+  pvfSha256: 'synthetic',
+  sets: [
+    {
+      setId: 16204,
+      name: '야망의 용투 서약',
+      icon: 'https://skilltab.test/oath-set/16204.png',
+      options: [
+        {
+          name: '용투 : 세계를 태우는 불꽃',
+          icon: 'https://skilltab.test/oath/9.png',
+          effects: effects(
+            '<tst::primeval><tst::up_color>[투룡의 불꽃]<tst::default> [장비 발동 옵션]\\n모든 속도 +20%%\\n<tst::ui_disable>[용투장의 난 세트] 장착 시'
+          )
+        },
+        {
+          name: '용투 : 용의 분노',
+          icon: 'https://skilltab.test/oath/10.png',
+          effects: effects('분노')
+        },
+        {
+          name: '용투 : 승리의 함성',
+          icon: 'https://skilltab.test/oath/11.png',
+          effects: effects('함성')
+        }
+      ]
+    }
+  ]
+}
 
 let container: HTMLDivElement
 let root: Root
@@ -22,8 +61,19 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function render(detail: CharacterDetailView): Promise<void> {
-  await act(async () => root.render(<OathTab detail={detail} />))
+async function render(
+  detail: CharacterDetailView,
+  host: ClientHost = createTestClientHost()
+): Promise<void> {
+  await act(async () =>
+    root.render(
+      <ClientHostContext value={host}>
+        <TestQueryClient>
+          <OathTab detail={detail} />
+        </TestQueryClient>
+      </ClientHostContext>
+    )
+  )
 }
 
 function section(name: string): HTMLElement {
@@ -78,4 +128,37 @@ it('서약이 없는 캐릭터는 아무것도 그리지 않는다', async () =>
   await render({ ...characterDetailFixture('dealer'), oath: null })
 
   expect(container.innerHTML).toBe('')
+})
+
+it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장을 두고 고른 선택지만 표시한다', async () => {
+  await render(
+    characterDetailFixture('dealer'),
+    createTestClientHost({ getOathCatalog: async () => OATH_CATALOG })
+  )
+
+  expect(
+    container.querySelector('img[src="https://skilltab.test/oath-set/16204.png"]')
+  ).not.toBeNull()
+  expect(container.textContent).toContain('야망의 용투 서약태초2,780pt')
+  expect(container.textContent).not.toContain('용투 : 세계를 태우는 불꽃')
+  const cards = [...container.querySelectorAll('article')]
+  expect(cards.map((card) => card.getAttribute('aria-current'))).toEqual(['true', null, null])
+  expect(
+    [...(cards[0]?.querySelectorAll('p > span') ?? [])].map((line) => line.textContent)
+  ).toEqual(['[투룡의 불꽃] [장비 발동 옵션]', '모든 속도 +20%', '[용투장의 난 세트] 장착 시'])
+  expect(section('서약 본체').textContent).toContain('세계를 태우는 용투 서약655pt')
+  expect(section('서약 결정').querySelectorAll('tbody tr')).toHaveLength(11)
+})
+
+it('서약 데이터에 없는 세트는 지금 화면대로 그린다', async () => {
+  await render(
+    characterDetailFixture('dealer'),
+    createTestClientHost({ getOathCatalog: async () => ({ ...OATH_CATALOG, sets: [] }) })
+  )
+
+  expect(container.textContent).toContain(
+    '서약 세트야망의 용투 서약용투 : 세계를 태우는 불꽃태초2,780pt'
+  )
+  expect(container.querySelector('article')).toBeNull()
+  expect(container.querySelector('section[aria-label="서약 본체"]')).toBeNull()
 })

@@ -1,0 +1,71 @@
+import { describe, expect, it } from 'vitest'
+import { characterDetailFixture } from '../../testing/fixtures/character-detail'
+import { type OathCatalog, oathCatalogSchema, oathSetBoardOf } from './oath-catalog'
+
+type Effects = OathCatalog['sets'][number]['options'][number]['effects']
+
+function effects(name: string, rare: string | null): Effects {
+  return {
+    rare,
+    unique: `${name} 유니크`,
+    legendary: `${name} 레전더리`,
+    epic: `${name} 에픽`,
+    primitive: `<tst::primeval>${name}\\n<tst::up_color>[강조]<tst::primeval> 태초`
+  }
+}
+
+// build-skilltab이 만드는 oath.json과 같은 모양의 합성 데이터다. 세트 번호와 선택지 이름은 저장소 fixture의 용투 서약이다.
+const CATALOG: OathCatalog = oathCatalogSchema.parse({
+  pvfSha256: 'synthetic',
+  sets: [
+    {
+      setId: 16204,
+      name: '야망의 용투 서약',
+      icon: 'oath-set/16204.png',
+      options: [
+        {
+          name: '용투 : 세계를 태우는 불꽃',
+          icon: 'oath/9.png',
+          effects: effects('불꽃', null)
+        },
+        { name: '용투 : 용의 분노', icon: 'oath/10.png', effects: effects('분노', '분노 레어') },
+        { name: '용투 : 승리의 함성', icon: 'oath/11.png', effects: effects('함성', null) }
+      ]
+    }
+  ]
+})
+
+function setInfoOf(role: 'dealer' | 'buffer') {
+  const setInfo = characterDetailFixture(role).oath?.setInfo
+  if (setInfo == null) {
+    throw new Error(`${role} fixture에 서약 세트가 없다`)
+  }
+
+  return setInfo
+}
+
+describe('서약 세트 선택지', () => {
+  it('setId로 세트를 찾고, setOptionName과 같은 선택지를 고른 것으로 두며 세트 등급의 문구를 쓴다', () => {
+    const board = oathSetBoardOf(CATALOG, setInfoOf('dealer'))
+
+    expect(board?.icon).toBe('oath-set/16204.png')
+    expect(board?.options.map(({ icon, picked }) => [icon, picked])).toEqual([
+      ['oath/9.png', true],
+      ['oath/10.png', false],
+      ['oath/11.png', false]
+    ])
+    expect(board?.options[0]?.effect).toBe(
+      '<tst::primeval>불꽃\\n<tst::up_color>[강조]<tst::primeval> 태초'
+    )
+  })
+
+  it('"레어 Ⅱ"처럼 단계가 붙은 등급은 등급 이름의 파일을 쓰고, 그 파일이 없는 선택지는 문구가 없다', () => {
+    const board = oathSetBoardOf(CATALOG, setInfoOf('buffer'))
+
+    expect(board?.options.map(({ effect }) => effect)).toEqual([null, '분노 레어', null])
+  })
+
+  it('데이터에 없는 세트는 선택지를 만들지 않는다', () => {
+    expect(oathSetBoardOf(CATALOG, { ...setInfoOf('dealer'), setId: 50000 })).toBeNull()
+  })
+})
