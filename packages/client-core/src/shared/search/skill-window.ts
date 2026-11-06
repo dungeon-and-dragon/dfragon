@@ -1,13 +1,26 @@
 import { z } from 'zod'
 import type { CharacterDetailView } from './character-detail-view'
 
+const evolutionBranchSchema = z.object({
+  name: z.string(),
+  basicExplain: z.string(),
+  explain: z.string()
+})
+const enhancementBranchSchema = z.object({ explain: z.string() })
+
+// 개화, 강화와 표식은 detail-extras 묶음을 함께 넣어 만든 데이터에만 있다.
 const skillSchema = z.object({
   name: z.string(),
   kind: z.enum(['active', 'passive']),
   requiredLevel: z.number().int().nullable(),
   maxLevel: z.number().int(),
-  icon: z.object({ x: z.number().int(), y: z.number().int() })
+  icon: z.object({ x: z.number().int(), y: z.number().int() }),
+  evolution: z.tuple([evolutionBranchSchema, evolutionBranchSchema]).optional(),
+  enhancement: z.object({ 1: enhancementBranchSchema, 2: enhancementBranchSchema }).optional()
 })
+
+const markPairSchema = z.tuple([z.string(), z.string()])
+const marksSchema = z.object({ evolution: markPairSchema, enhancement: markPairSchema })
 
 const slotSchema = z.object({
   skillId: z.number().int(),
@@ -33,6 +46,7 @@ const jobSchema = z.object({
 
 export const skillWindowCatalogSchema = z.object({
   pvfSha256: z.string(),
+  marks: marksSchema.optional(),
   jobs: z.array(jobSchema)
 })
 
@@ -41,19 +55,27 @@ type CatalogJob = SkillWindowCatalog['jobs'][number]
 type CatalogAdvancement = CatalogJob['advancements'][number]
 type CatalogSkill = CatalogJob['skills'][string]
 
+export type SkillMarks = z.infer<typeof marksSchema>
+
 export type SkillStyle = NonNullable<NonNullable<CharacterDetailView['skillStyle']>['style']>
 export type LearnedSkill = SkillStyle['active'][number]
+
+export type UpgradeType = 1 | 2
+
+export type SkillIconImage = Readonly<{ sprite: string; x: number; y: number }>
 
 export type SkillWindowIcon = Readonly<{
   skillId: number
   name: string
   kind: CatalogSkill['kind']
-  icon: Readonly<{ sprite: string; x: number; y: number }>
+  icon: SkillIconImage
   col: number
   row: number
   requiredLevel: number | null
   learned: boolean
   level: number | null
+  evolution: UpgradeType | null
+  enhancement: UpgradeType | null
 }>
 
 export type SkillWindowRow = Readonly<{ row: number; requiredLevel: number | null }>
@@ -61,6 +83,7 @@ export type SkillWindowRow = Readonly<{ row: number; requiredLevel: number | nul
 export type SkillWindow = Readonly<{
   rows: readonly SkillWindowRow[]
   icons: readonly SkillWindowIcon[]
+  marks: SkillMarks | null
 }>
 
 const BEFORE_ADVANCEMENT_GROWTYPE = 0
@@ -148,11 +171,11 @@ function pickInCell(
   })
 }
 
-export function skillWindowOf(
-  catalog: SkillWindowCatalog,
-  character: Readonly<{ jobName: string | null; jobGrowName: string | null }>,
-  style: SkillStyle
-): SkillWindow | null {
+type SkillCharacter = Readonly<{ jobName: string | null; jobGrowName: string | null }>
+
+type SkillTree = Readonly<{ job: CatalogJob; advancement: CatalogAdvancement }>
+
+function skillTreeOf(catalog: SkillWindowCatalog, character: SkillCharacter): SkillTree | null {
   const job = catalog.jobs.find(({ jobName }) => jobName === character.jobName)
   if (job === undefined || character.jobGrowName == null) {
     return null
@@ -161,9 +184,53 @@ export function skillWindowOf(
   if (advancement === undefined || advancement.slots.length === 0) {
     return null
   }
+
+  return { job, advancement }
+}
+
+function upgradeTypeOf(type: number | null): UpgradeType | null {
+  if (type === 1 || type === 2) {
+    return type
+  }
+
+  return null
+}
+
+// 개화, 강화의 skillId는 API의 32자리 ID라 배운 스킬에서 이름을 찾아, 스킬 창 데이터와 이름으로 잇는다.
+function pickedTypesByName(
+  style: SkillStyle,
+  kind: 'evolution' | 'enhancement'
+): Map<string | null, UpgradeType> {
+  const nameById = new Map(
+    [...style.active, ...style.passive].map((skill) => [skill.skillId, skill.name])
+  )
+  const picked = new Map<string | null, UpgradeType>()
+  for (const { skillId, type } of style[kind]) {
+    const upgradeType = upgradeTypeOf(type)
+    const name = nameById.get(skillId)
+    if (upgradeType !== null && name !== undefined) {
+      picked.set(name, upgradeType)
+    }
+  }
+
+  return picked
+}
+
+export function skillWindowOf(
+  catalog: SkillWindowCatalog,
+  character: SkillCharacter,
+  style: SkillStyle
+): SkillWindow | null {
+  const tree = skillTreeOf(catalog, character)
+  if (tree === null) {
+    return null
+  }
+  const { job, advancement } = tree
   const levelByName = new Map(
     [...style.active, ...style.passive].map((skill) => [skill.name, skill.level])
   )
+  const evolutionByName = pickedTypesByName(style, 'evolution')
+  const enhancementByName = pickedTypesByName(style, 'enhancement')
   const cells = new Map<string, [SkillWindowIcon, ...SkillWindowIcon[]]>()
   for (const { skillId, col, row } of advancement.slots) {
     const skill = job.skills[skillId]
@@ -179,7 +246,9 @@ export function skillWindowOf(
       row,
       requiredLevel: skill.requiredLevel,
       learned: levelByName.has(skill.name),
-      level: levelByName.get(skill.name) ?? null
+      level: levelByName.get(skill.name) ?? null,
+      evolution: evolutionByName.get(skill.name) ?? null,
+      enhancement: enhancementByName.get(skill.name) ?? null
     }
     const key = `${col},${row}`
     const sameCell = cells.get(key)
@@ -188,7 +257,170 @@ export function skillWindowOf(
   const icons = [...cells.values()].map((candidates) => pickInCell(catalog, candidates))
   const rows = rowsOf(icons)
 
-  return { rows, icons }
+  const marks = catalog.marks ?? null
+
+  return { rows, icons, marks }
+}
+
+type UpgradeSkill = Readonly<{
+  skillId: number
+  name: string
+  requiredLevel: number | null
+  icon: SkillIconImage
+  picked: UpgradeType | null
+}>
+
+export type EvolutionBranch = Readonly<{
+  type: UpgradeType
+  name: string
+  basicExplain: string
+  explain: string
+}>
+
+export type EnhancementBranch = Readonly<{ type: UpgradeType; explain: string }>
+
+export type EvolutionRow = UpgradeSkill &
+  Readonly<{ branches: readonly [EvolutionBranch, EvolutionBranch] }>
+
+export type EnhancementRow = UpgradeSkill &
+  Readonly<{ branches: readonly [EnhancementBranch, EnhancementBranch] }>
+
+export type SkillUpgradeBoard = Readonly<{
+  marks: SkillMarks
+  evolutions: readonly EvolutionRow[]
+  enhancements: readonly EnhancementRow[]
+}>
+
+type LearnableSkill = Readonly<{ skillId: number; skill: CatalogSkill }>
+
+// 그 전직이 배울 수 있는 스킬은 전직 배치의 슬롯 스킬이다. 습득 레벨, 줄, 열 순서로 둔다.
+function learnableSkillsOf({ job, advancement }: SkillTree): LearnableSkill[] {
+  const slots = [...advancement.slots].sort(
+    (left, right) =>
+      (job.skills[left.skillId]?.requiredLevel ?? Number.POSITIVE_INFINITY) -
+        (job.skills[right.skillId]?.requiredLevel ?? Number.POSITIVE_INFINITY) ||
+      left.row - right.row ||
+      left.col - right.col
+  )
+  const learnable = new Map<number, LearnableSkill>()
+  for (const { skillId } of slots) {
+    const skill = job.skills[skillId]
+    if (skill !== undefined && !learnable.has(skillId)) {
+      learnable.set(skillId, { skillId, skill })
+    }
+  }
+
+  return [...learnable.values()]
+}
+
+function upgradeSkillOf(
+  job: CatalogJob,
+  { skillId, skill }: LearnableSkill,
+  picked: Map<string | null, UpgradeType>
+): UpgradeSkill {
+  const pickedType = picked.get(skill.name) ?? null
+
+  return {
+    skillId,
+    name: skill.name,
+    requiredLevel: skill.requiredLevel,
+    icon: { sprite: job.sprite, ...skill.icon },
+    picked: pickedType
+  }
+}
+
+export function skillMarkOf(marks: SkillMarks, kind: keyof SkillMarks, type: UpgradeType): string {
+  const [first, second] = marks[kind]
+  if (type === 1) {
+    return first
+  }
+
+  return second
+}
+
+export function skillUpgradeBoardOf(
+  catalog: SkillWindowCatalog,
+  character: SkillCharacter,
+  style: SkillStyle
+): SkillUpgradeBoard | null {
+  const tree = skillTreeOf(catalog, character)
+  if (tree === null || catalog.marks === undefined) {
+    return null
+  }
+  const learnable = learnableSkillsOf(tree)
+  const evolutionByName = pickedTypesByName(style, 'evolution')
+  const enhancementByName = pickedTypesByName(style, 'enhancement')
+  const evolutions = learnable.flatMap((learnableSkill): EvolutionRow[] => {
+    const branches = learnableSkill.skill.evolution
+    if (branches === undefined) {
+      return []
+    }
+    const [first, second] = branches
+
+    return [
+      {
+        ...upgradeSkillOf(tree.job, learnableSkill, evolutionByName),
+        branches: [
+          { type: 1, ...first },
+          { type: 2, ...second }
+        ]
+      }
+    ]
+  })
+  const enhancements = learnable.flatMap((learnableSkill): EnhancementRow[] => {
+    const branches = learnableSkill.skill.enhancement
+    if (branches === undefined) {
+      return []
+    }
+
+    return [
+      {
+        ...upgradeSkillOf(tree.job, learnableSkill, enhancementByName),
+        branches: [
+          { type: 1, ...branches[1] },
+          { type: 2, ...branches[2] }
+        ]
+      }
+    ]
+  })
+
+  return { marks: catalog.marks, evolutions, enhancements }
+}
+
+export type SkillChainLink = Readonly<{ name: string | null; icon: SkillIconImage | null }>
+
+export type SkillChain = Readonly<{ resetTime: number | null; skills: readonly SkillChainLink[] }>
+
+export function skillChainOf(
+  catalog: SkillWindowCatalog | null,
+  character: SkillCharacter,
+  style: SkillStyle
+): SkillChain | null {
+  // 체인을 비워 둔 캐릭터도 칸 수만큼 null이 온다(2026-11-06 운영 응답).
+  const chainSkillIds = style.chain?.skills.filter((skillId) => skillId !== null) ?? []
+  if (style.chain === null || chainSkillIds.length === 0) {
+    return null
+  }
+  const nameById = new Map(
+    [...style.active, ...style.passive].map((skill) => [skill.skillId, skill.name])
+  )
+  const tree = catalog !== null ? skillTreeOf(catalog, character) : null
+  const iconByName = new Map(
+    tree !== null
+      ? learnableSkillsOf(tree).map(({ skill }) => [
+          skill.name,
+          { sprite: tree.job.sprite, ...skill.icon }
+        ])
+      : []
+  )
+  const skills = chainSkillIds.map((skillId) => {
+    const name = nameById.get(skillId) ?? null
+    const icon = iconByName.get(name ?? '') ?? null
+
+    return { name, icon }
+  })
+
+  return { resetTime: style.chain.resetTime, skills }
 }
 
 export type LearnedSkillRow = Readonly<{

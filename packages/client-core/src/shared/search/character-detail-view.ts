@@ -111,11 +111,13 @@ export const characterDetailViewSchema = z.object({
     })
   }),
   skillStyle: section({
+    hash: text,
     style: section({
       active: list(skill),
       passive: list(skill),
       evolution: list(skillUpgrade),
-      enhancement: list(skillUpgrade)
+      enhancement: list(skillUpgrade),
+      chain: section({ resetTime: count, skills: list(text) })
     })
   }),
   buff: group({
