@@ -9,19 +9,17 @@ DB 설정이 있으면 상세 조회한 캐릭터의 [타임라인](#타임라�
 
 `/docs`, `/docs/openapi.json`은 API 계약만 제공합니다. `/health`는 200, `/auth/**`와 `/me`는 404입니다.
 
-웹 클라이언트가 브라우저에서 부르도록 CORS는 운영 사이트 `https://dfragon.com`, dev 사이트 `https://dev.dfragon.com`과 [`WEB_DEV_ORIGINS`](#준비할-입력)로 더한 로컬 웹 개발 origin의 `GET`, preflight만 허용합니다. 다른 origin과 다른 method의 요청에는 CORS 헤더를 붙이지 않습니다.
+웹 사이트는 같은 origin의 `/api`로 API를 부르므로(운영과 dev는 node1의 host Caddy, 개발 서버는 Vite proxy가 넘깁니다) API는 CORS 헤더를 붙이지 않습니다.
 `GET /characters/:serverId/:characterId/image`는 웹 클라이언트가 픽셀을 읽을 수 있게 네오플 캐릭터 이미지를 그대로 전달합니다.
 
 ## 준비할 입력
 
 | 필수 | 선택 |
 | --- | --- |
-| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `WEB_DEV_ORIGINS`, `SCORE_LIBRARY_FILE`, [DB 설정](#db와-migration) |
+| `PORT`, Neople key | `SEARCH_TRUST_PROXY=single-hop`, local TLS, `SCORE_LIBRARY_FILE`, [DB 설정](#db와-migration) |
 
 PORT는 ASCII 십진 정수 1~65535입니다. `.env.example`을 앱의 `.env`로 복사하고 실제 secret은 Git 밖에서 관리합니다.
 Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
-`WEB_DEV_ORIGINS`는 로컬 웹 개발 서버(Vite dev 서버)의 origin을 CORS 허용에 더하며, `http://localhost:5173,http://127.0.0.1:5173`처럼 쉼표로 구분합니다.
-각 값은 경로와 공백 없이 `http`, `https`의 `localhost`, `127.0.0.1`, `[::1]` origin이어야 하며, 다른 값은 시작 전에 거절합니다. 운영에서는 지정하지 않습니다.
 `SCORE_LIBRARY_FILE`은 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로입니다.
 지정하면 앱을 만들 때 점수 worker 하나를 띄우고, listen을 기다리지 않고 그 worker에서 딜러, 버퍼 준비 계산을 한 번씩 합니다.
 빈 값과 상대 경로는 시작 전에 거절하고, 지정하지 않으면 점수 없이 실행합니다.
