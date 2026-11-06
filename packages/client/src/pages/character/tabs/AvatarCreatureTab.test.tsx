@@ -4,7 +4,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
-import { styles as dotTones } from './avatar/CreatureArtifacts.style'
+import { styles as dotTones } from './avatar/CreatureTable.style'
 import { styles as rarityTones } from './avatar/ItemName.style'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
 
@@ -37,10 +37,10 @@ function hasTone(element: Element | null | undefined, tone: stylex.StyleXStyles)
   return element.className.split(' ').includes(className)
 }
 
-// 이름 칸은 등급 색 이름과 클론 이름처럼 span 여럿을 줄로 쌓으므로 span마다 |로 나눠 읽는다.
+// 이름 칸은 등급 색 이름과 클론 이름을 줄로 쌓으므로 줄마다 |로 나눠 읽는다.
 function cellTexts(row: Element): string[] {
   return [...row.querySelectorAll('td')].map((cell) => {
-    const lines = [...cell.querySelectorAll('span')].map((span) => span.textContent)
+    const lines = [...cell.querySelectorAll('b, b + span')].map((line) => line.textContent)
     if (lines.length === 0) {
       return cell.textContent
     }
@@ -73,28 +73,30 @@ it('딜러 아바타 표는 응답 순서대로 부위, 등급 색 이름과 클
     '찬란한 붉은빛 엠블렘[힘]|찬란한 붉은빛 엠블렘[힘]'
   ])
   const [, avatarCell, , emblemCell] = rows[0]!.querySelectorAll('td')
-  expect(hasTone(avatarCell?.querySelector('div > span'), rarityTones.rare)).toBe(true)
-  expect(hasTone(emblemCell?.querySelector('div > span'), rarityTones.unique)).toBe(true)
+  expect(hasTone(avatarCell?.querySelector('b'), rarityTones.rare)).toBe(true)
+  expect(hasTone(emblemCell?.querySelector('b'), rarityTones.unique)).toBe(true)
 })
 
-it('크리쳐 이름 아래에 아티팩트 3개를 슬롯 색 점과 등급 색 이름으로 보인다', async () => {
+it('크리쳐 행 아래에 아티팩트 3개를 슬롯 색 점과 등급 색 이름으로 보인다', async () => {
   await render(characterDetailFixture('dealer'))
 
-  const creature = container.querySelector('section[aria-label="크리쳐"]')!
-  expect(creature.querySelector('h2 ~ div > span')?.textContent).toBe('운명을 담는 재단사')
-  const artifacts = [...creature.querySelectorAll('li')]
-  expect(artifacts.map((artifact) => artifact.textContent)).toEqual([
-    '[이벤트]타오르는 황혼의 공명',
-    '기민한 적룡의 날개',
-    '빛을 머금은 이슬'
+  const rows = [...container.querySelectorAll('section[aria-label="크리쳐"] tbody tr')]
+  expect(
+    rows.map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent))
+  ).toEqual([
+    ['크리쳐', '운명을 담는 재단사'],
+    ['아티팩트', '[이벤트]타오르는 황혼의 공명'],
+    ['아티팩트', '기민한 적룡의 날개'],
+    ['아티팩트', '빛을 머금은 이슬']
   ])
-  const dots = artifacts.map((artifact) => artifact.querySelector('[aria-hidden="true"]'))
-  expect(hasTone(dots[0], dotTones.red)).toBe(true)
-  expect(hasTone(dots[1], dotTones.blue)).toBe(true)
-  expect(hasTone(dots[2], dotTones.green)).toBe(true)
-  const names = artifacts.map((artifact) => artifact.querySelector('span:not([aria-hidden])'))
-  expect(hasTone(names[0], rarityTones.unique)).toBe(true)
-  expect(hasTone(names[1], rarityTones.rare)).toBe(true)
+  const dots = rows.map((row) => row.querySelector('td:first-child [aria-hidden="true"]'))
+  expect(dots[0]).toBeNull()
+  expect(hasTone(dots[1], dotTones.red)).toBe(true)
+  expect(hasTone(dots[2], dotTones.blue)).toBe(true)
+  expect(hasTone(dots[3], dotTones.green)).toBe(true)
+  const names = rows.map((row) => row.querySelector('b'))
+  expect(hasTone(names[1], rarityTones.unique)).toBe(true)
+  expect(hasTone(names[2], rarityTones.rare)).toBe(true)
 })
 
 it('클론이 아닌 아바타는 클론 줄을 두지 않고, 응답에 없는 아바타와 크리쳐는 그 칸을 생략한다', async () => {

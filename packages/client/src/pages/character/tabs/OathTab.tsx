@@ -69,8 +69,8 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
 
   return (
     <section aria-label="서약 결정" {...stylex.props(styles.crystals)}>
-      <h2 {...stylex.props(styles.heading)}>
-        서약 결정 <span {...stylex.props(styles.count)}>{formatCount(crystals.length)}</span>
+      <h2 {...stylex.props(tableStyles.heading)}>
+        서약 결정 <span {...stylex.props(tableStyles.count)}>{formatCount(crystals.length)}</span>
       </h2>
       <table {...stylex.props(tableStyles.table)}>
         <thead>
@@ -165,7 +165,7 @@ function StatSection({
 
   return (
     <section aria-label={title ?? undefined}>
-      {title !== null && <h2 {...stylex.props(styles.heading)}>{title}</h2>}
+      {title !== null && <h2 {...stylex.props(tableStyles.heading)}>{title}</h2>}
       <dl {...stylex.props(styles.list)}>
         {lines.map(({ name, value }, index) => (
           <div key={`${name}-${index}`} {...stylex.props(styles.line)}>
