@@ -478,6 +478,30 @@ export const apiSchemas: Record<string, SchemaObject> = {
       })
     }
   }),
+  AdventureActivityDay: object({
+    date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
+    raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
+    legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+    items: {
+      type: 'array',
+      description: '레전더리 이상 아이템 획득, 시각 순',
+      items: object({
+        at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
+        name: { ...text, nullable: true, description: 'item_name' },
+        rarity: { type: 'string', enum: ['레전더리', '에픽', '태초', '신화'] }
+      })
+    },
+    enhancements: {
+      type: 'array',
+      description: '강화, 증폭, 재련(401~403) 기록, 시각 순',
+      items: object({
+        at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
+        kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
+        target: { type: 'integer', description: '도전한 단계(타임라인 after)' },
+        success: { type: 'boolean' }
+      })
+    }
+  }),
   FameRanking: object({
     characters: {
       type: 'array',

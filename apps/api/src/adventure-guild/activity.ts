@@ -9,6 +9,7 @@ import {
   readCharactersTimelineItems,
   readSeasons
 } from '@dfragon/database'
+import { addHours } from 'date-fns'
 import {
   ACQUISITION_CODES,
   CLEAR_CODES,
@@ -17,21 +18,24 @@ import {
   toClear,
   toEnhancement
 } from '../characters/timeline/read.js'
-import { formatResetDate } from '../utils/seoul-time.js'
+import { formatResetDate, formatSeoulTime, parseResetDate } from '../utils/seoul-time.js'
 
 // 타임라인은 중천(시즌 10)부터 받는다. 그 전 시즌에는 강화 백필 행만 있어 집계하지 않는다.
 const FIRST_COLLECTED_SEASON_ID = 10
 const HIGH_AMPLIFY_TARGET = 10
 const HIGH_REINFORCE_TARGET = 12
-const ITEM_RARITIES = new Map<string, ItemRarity>([
-  ['레전더리', 'legendary'],
-  ['에픽', 'epic'],
-  ['태초', 'primeval'],
-  ['신화', 'mythic']
-])
+const ITEM_RARITIES = {
+  레전더리: 'legendary',
+  에픽: 'epic',
+  태초: 'primeval',
+  신화: 'mythic'
+} as const
 const ITEM_CODES = new Set(ACQUISITION_CODES)
+const ACTIVITY_DAY_HOURS = 24
+const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
-type ItemRarity = 'legendary' | 'epic' | 'primeval' | 'mythic'
+type ItemRarityName = keyof typeof ITEM_RARITIES
+type ItemRarity = (typeof ITEM_RARITIES)[ItemRarityName]
 
 export type ActivitySeason = {
   id: number
@@ -102,6 +106,33 @@ export type ActivityRecords = {
   items: readonly CharacterTimelineItemRow[]
 }
 
+export type ActivityDayRange = {
+  date: string
+  startsAt: Date
+  endsAt: Date
+}
+
+export type ActivityDayItem = {
+  at: string
+  name: string | null
+  rarity: ItemRarityName
+}
+
+export type ActivityDayEnhancement = {
+  at: string
+  kind: TimelineEnhancement['kind']
+  target: number
+  success: boolean
+}
+
+export type ActivityDayDetail = {
+  date: string
+  raids: NameCount[]
+  legions: NameCount[]
+  items: ActivityDayItem[]
+  enhancements: ActivityDayEnhancement[]
+}
+
 function isCollectedSeason(id: number): boolean {
   return id >= FIRST_COLLECTED_SEASON_ID
 }
@@ -130,6 +161,28 @@ export function findActivitySeason(
   const endsAt = seasons[index + 1]?.startsAt ?? null
 
   return { id: season.id, startsAt: season.startsAt, endsAt }
+}
+
+function occursIn(
+  { startsAt, endsAt }: { startsAt: Date; endsAt: Date | null },
+  { occurredAt }: { occurredAt: Date }
+): boolean {
+  return occurredAt >= startsAt && (endsAt === null || occurredAt < endsAt)
+}
+
+function isItemRarityName(name: string): name is ItemRarityName {
+  return Object.hasOwn(ITEM_RARITIES, name)
+}
+
+function toItemRarityName({
+  code,
+  itemRarity
+}: CharacterTimelineItemRow): ItemRarityName | undefined {
+  if (!ITEM_CODES.has(code) || itemRarity === null || !isItemRarityName(itemRarity)) {
+    return undefined
+  }
+
+  return itemRarity
 }
 
 function emptySummary(): ActivitySummary {
@@ -190,8 +243,7 @@ export function toSeasonActivity(
   season: ActivitySeasonRange,
   records: ActivityRecords
 ): SeasonActivity {
-  const inSeason = ({ occurredAt }: { occurredAt: Date }) =>
-    occurredAt >= season.startsAt && (season.endsAt === null || occurredAt < season.endsAt)
+  const inSeason = (record: { occurredAt: Date }) => occursIn(season, record)
   const summary = emptySummary()
   const { items, enhancement } = summary
   const raids = new Map<string, number>()
@@ -228,8 +280,9 @@ export function toSeasonActivity(
   }
 
   for (const row of records.items.filter(inSeason)) {
-    const rarity = ITEM_CODES.has(row.code) ? ITEM_RARITIES.get(row.itemRarity ?? '') : undefined
-    if (rarity !== undefined) {
+    const rarityName = toItemRarityName(row)
+    if (rarityName !== undefined) {
+      const rarity = ITEM_RARITIES[rarityName]
       const day = dayOf(row.occurredAt)
       items[rarity]++
       day.item++
@@ -266,24 +319,88 @@ export function toSeasonActivity(
   return { summary, days: activeDays }
 }
 
+export function toActivityDayRange(date: string): ActivityDayRange | undefined {
+  const startsAt = parseResetDate(date)
+  if (startsAt === null) {
+    return undefined
+  }
+
+  return { date, startsAt, endsAt: addHours(startsAt, ACTIVITY_DAY_HOURS) }
+}
+
+function formatActivityTime(occurredAt: Date): string {
+  return formatSeoulTime(occurredAt, ACTIVITY_TIME_PATTERN)
+}
+
+export function toActivityDayDetail(
+  day: ActivityDayRange,
+  records: ActivityRecords
+): ActivityDayDetail {
+  const onDay = (record: { occurredAt: Date }) => occursIn(day, record)
+  const raidCounts = new Map<string, number>()
+  const legionCounts = new Map<string, number>()
+  for (const clear of records.clears.flatMap(toClear).filter(onDay)) {
+    countName(clear.kind === 'raid' ? raidCounts : legionCounts, clear.name)
+  }
+  const rows = records.items
+    .filter(onDay)
+    .sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
+  const items = rows.flatMap((row): ActivityDayItem[] => {
+    const rarity = toItemRarityName(row)
+    if (rarity === undefined) {
+      return []
+    }
+
+    const at = formatActivityTime(row.occurredAt)
+
+    return [{ at, name: row.itemName, rarity }]
+  })
+  const enhancements = rows
+    .flatMap(toEnhancement)
+    .map(({ occurredAt, kind, after, result }): ActivityDayEnhancement => {
+      const at = formatActivityTime(occurredAt)
+
+      return { at, kind, target: after, success: result }
+    })
+  const raids = toNameCounts(raidCounts)
+  const legions = toNameCounts(legionCounts)
+
+  return { date: day.date, raids, legions, items, enhancements }
+}
+
+async function readActivityRecords(
+  client: DatabaseClient,
+  characters: readonly TimelineCharacter[],
+  since: Date,
+  until: Date | undefined
+): Promise<ActivityRecords> {
+  const [clears, items] = await Promise.all([
+    readCharactersTimelineEvents(client, characters, CLEAR_CODES, since, until),
+    readCharactersTimelineItems(
+      client,
+      characters,
+      [...ENHANCEMENT_CODES, ...ACQUISITION_CODES],
+      since,
+      until
+    )
+  ])
+
+  return { clears, items }
+}
+
 async function readSeasonActivity(
   client: DatabaseClient,
   characters: readonly TimelineCharacter[],
   season: ActivitySeasonRange
 ): Promise<SeasonActivity> {
-  const until = season.endsAt ?? undefined
-  const [clears, items] = await Promise.all([
-    readCharactersTimelineEvents(client, characters, CLEAR_CODES, season.startsAt, until),
-    readCharactersTimelineItems(
-      client,
-      characters,
-      [...ENHANCEMENT_CODES, ...ACQUISITION_CODES],
-      season.startsAt,
-      until
-    )
-  ])
+  const records = await readActivityRecords(
+    client,
+    characters,
+    season.startsAt,
+    season.endsAt ?? undefined
+  )
 
-  return toSeasonActivity(season, { clears, items })
+  return toSeasonActivity(season, records)
 }
 
 export async function readAdventureActivity(
@@ -306,4 +423,15 @@ export async function readAdventureActivity(
     : emptySeasonActivity()
 
   return { characters, activity: { seasons, season, ...activity } }
+}
+
+export async function readAdventureActivityDay(
+  client: DatabaseClient,
+  adventureName: string,
+  day: ActivityDayRange
+): Promise<ActivityDayDetail> {
+  const characters = await readAdventureCharacters(client, adventureName)
+  const records = await readActivityRecords(client, characters, day.startsAt, day.endsAt)
+
+  return toActivityDayDetail(day, records)
 }
