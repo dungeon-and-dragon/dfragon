@@ -1,5 +1,5 @@
 export const DNF_SEARCH_NICKNAME_LIMITS = {
-  minimumCodePoints: 2,
+  minimumCodePoints: 1,
   maximumCodePoints: 12
 } as const
 
