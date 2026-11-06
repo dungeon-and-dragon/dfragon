@@ -12,6 +12,8 @@ import {
   type AdventureActivityRead,
   emptySeasonActivity,
   findActivitySeason,
+  toActivityDayDetail,
+  toActivityDayRange,
   toActivitySeasons,
   toSeasonActivity
 } from '../src/adventure-guild/activity.js'
@@ -241,11 +243,132 @@ test('시즌 목록은 시작한 시즌만 두고 중천부터 available이며, 
   assert.equal(findActivitySeason([], undefined), undefined)
 })
 
+const day = (date: string) => {
+  const range = toActivityDayRange(date)
+  assert.ok(range, date)
+
+  return range
+}
+const dayDetail = (records: Partial<Parameters<typeof toActivityDayDetail>[1]>) =>
+  toActivityDayDetail(day('2026-07-18'), { clears: [], items: [], ...records })
+
+test('하루 상세는 그날 06:00부터 다음 날 06:00 전까지의 기록만 준다', () => {
+  assert.deepEqual(day('2026-07-18'), {
+    date: '2026-07-18',
+    startsAt: at('2026-07-18T06:00:00'),
+    endsAt: at('2026-07-19T06:00:00')
+  })
+  const detail = dayDetail({
+    clears: [
+      legion('2026-07-18T05:59:00', '아포칼립스'),
+      legion('2026-07-18T06:00:00', '아포칼립스'),
+      legion('2026-07-19T05:59:00', '아포칼립스'),
+      legion('2026-07-19T06:00:00', '아포칼립스')
+    ],
+    items: [
+      acquisition('2026-07-18T05:59:00', '에픽'),
+      acquisition('2026-07-19T05:59:00', '에픽'),
+      enhancement(402, '2026-07-19T06:00:00', 9, 10, true)
+    ]
+  })
+
+  assert.deepEqual(detail.legions, [{ name: '아포칼립스', count: 2 }])
+  assert.deepEqual(
+    detail.items.map(({ at }) => at),
+    ['2026-07-19T05:59:00+09:00']
+  )
+  assert.deepEqual(detail.enhancements, [])
+})
+
+test('YYYY-MM-DD가 아니거나 없는 날짜면 하루 구간을 만들지 않는다', () => {
+  for (const date of ['2026-7-18', '20260718', '2026-07-18T06', '2026-02-30', '2026-13-01', '']) {
+    assert.equal(toActivityDayRange(date), undefined, date)
+  }
+})
+
+test('하루 상세의 레이드와 레기온은 이름별로 많은 순으로 센다', () => {
+  const { raids, legions } = dayDetail({
+    clears: [
+      raid('2026-07-18T12:00:00', '무너진 성자 미카엘라'),
+      raid('2026-07-18T13:00:00', '디레지에 레이드'),
+      raid('2026-07-18T14:00:00', '디레지에 레이드'),
+      legion('2026-07-18T15:00:00', '아포칼립스')
+    ]
+  })
+
+  assert.deepEqual(raids, [
+    { name: '디레지에 레이드', count: 2 },
+    { name: '무너진 성자 미카엘라', count: 1 }
+  ])
+  assert.deepEqual(legions, [{ name: '아포칼립스', count: 1 }])
+})
+
+test('하루 상세의 아이템과 강화는 캐릭터와 들어온 순서에 상관없이 시각 순이다', () => {
+  const { items, enhancements } = dayDetail({
+    items: [
+      { ...acquisition('2026-07-18T21:00:00', '에픽'), characterId: 'b' },
+      enhancement(401, '2026-07-19T01:30:00', 11, 12, false),
+      acquisition('2026-07-18T09:58:00', '레전더리'),
+      { ...enhancement(402, '2026-07-18T10:00:00', 9, 10, true), characterId: 'b' },
+      acquisition('2026-07-19T02:00:00', '에픽')
+    ]
+  })
+
+  assert.deepEqual(
+    items.map(({ at }) => at),
+    ['2026-07-18T09:58:00+09:00', '2026-07-18T21:00:00+09:00', '2026-07-19T02:00:00+09:00']
+  )
+  assert.deepEqual(
+    enhancements.map(({ at }) => at),
+    ['2026-07-18T10:00:00+09:00', '2026-07-19T01:30:00+09:00']
+  )
+})
+
+test('하루 상세의 아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급 이름과 함께 준다', () => {
+  const { items } = dayDetail({
+    items: [
+      { ...acquisition('2026-07-18T12:00:00', '레전더리'), itemName: '한계 : 선명한 광휘 결정' },
+      acquisition('2026-07-18T12:01:00', '에픽'),
+      acquisition('2026-07-18T12:02:00', '태초', 513),
+      acquisition('2026-07-18T12:03:00', '신화', 557),
+      acquisition('2026-07-18T12:04:00', '레어', 554),
+      acquisition('2026-07-18T12:05:00', null, 501),
+      enhancement(401, '2026-07-18T12:06:00', 5, 6, true)
+    ]
+  })
+
+  assert.deepEqual(items, [
+    { at: '2026-07-18T12:00:00+09:00', name: '한계 : 선명한 광휘 결정', rarity: '레전더리' },
+    { at: '2026-07-18T12:01:00+09:00', name: null, rarity: '에픽' },
+    { at: '2026-07-18T12:02:00+09:00', name: null, rarity: '태초' },
+    { at: '2026-07-18T12:03:00+09:00', name: null, rarity: '신화' }
+  ])
+})
+
+test('하루 상세의 강화는 종류, 도전한 단계 after와 성공 여부를 준다', () => {
+  const { enhancements } = dayDetail({
+    items: [
+      enhancement(401, '2026-07-18T12:00:00', 14, 15, false),
+      enhancement(401, '2026-07-18T12:01:00', 0, 13, true),
+      enhancement(402, '2026-07-18T12:02:00', 0, 12, false),
+      enhancement(403, '2026-07-18T12:03:00', null, 8, true),
+      acquisition('2026-07-18T12:04:00', '에픽')
+    ]
+  })
+
+  assert.deepEqual(enhancements, [
+    { at: '2026-07-18T12:00:00+09:00', kind: 'reinforce', target: 15, success: false },
+    { at: '2026-07-18T12:01:00+09:00', kind: 'reinforce', target: 13, success: true },
+    { at: '2026-07-18T12:02:00+09:00', kind: 'amplify', target: 12, success: false },
+    { at: '2026-07-18T12:03:00+09:00', kind: 'refine', target: 8, success: true }
+  ])
+})
+
 async function listen(
-  readAdventureActivity: AdventureGuildReader['readAdventureActivity'],
+  reader: Partial<Pick<AdventureGuildReader, 'readAdventureActivity' | 'readAdventureActivityDay'>>,
   syncTimeline: (character: TimelineCharacter) => Promise<void>
 ): Promise<{ app: INestApplication; origin: string }> {
-  const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
+  const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
   const app = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
@@ -254,7 +377,9 @@ async function listen(
       readAdventureCharacters: unused,
       readGuild: unused,
       readAdventureWeeklyClears: unused,
-      readAdventureActivity
+      readAdventureActivity: unused,
+      readAdventureActivityDay: unused,
+      ...reader
     },
     timeline: {
       sync: syncTimeline,
@@ -290,10 +415,12 @@ test('시즌 활동 조회는 고른 시즌을 넘기고 캐릭터마다 동기�
     release = resolve
   })
   const { app, origin } = await listen(
-    async (adventureName, seasonId) => {
-      reads.push([adventureName, seasonId])
+    {
+      readAdventureActivity: async (adventureName, seasonId) => {
+        reads.push([adventureName, seasonId])
 
-      return activityRead
+        return activityRead
+      }
     },
     (character) => {
       requested.push(character)
@@ -331,10 +458,12 @@ test('시즌 활동 조회는 고른 시즌을 넘기고 캐릭터마다 동기�
 test('시즌 번호가 정수가 아니거나 없는 시즌이면 400 INVALID_CHARACTER_QUERY를 준다', async () => {
   const reads: (number | undefined)[] = []
   const { app, origin } = await listen(
-    async (_adventureName, seasonId) => {
-      reads.push(seasonId)
+    {
+      readAdventureActivity: async (_adventureName, seasonId) => {
+        reads.push(seasonId)
 
-      return undefined
+        return undefined
+      }
     },
     async () => undefined
   )
@@ -354,6 +483,65 @@ test('시즌 번호가 정수가 아니거나 없는 시즌이면 400 INVALID_CH
       assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
     }
     assert.deepEqual(reads, [99])
+  } finally {
+    await app.close()
+  }
+})
+
+test('하루 상세 조회는 06:00 KST부터의 하루 구간을 넘기고 동기화를 요청하지 않는다', async () => {
+  const reads: [string, unknown][] = []
+  const requested: TimelineCharacter[] = []
+  const detail = toActivityDayDetail(day('2026-07-18'), {
+    clears: [raid('2026-07-18T12:00:00', '디레지에 레이드')],
+    items: [acquisition('2026-07-18T09:58:00', '레전더리')]
+  })
+  const { app, origin } = await listen(
+    {
+      readAdventureActivityDay: async (adventureName, range) => {
+        reads.push([adventureName, range])
+
+        return detail
+      }
+    },
+    async (character) => {
+      requested.push(character)
+    }
+  )
+  try {
+    const name = encodeURIComponent('합성 모험단')
+    const response = await fetch(new URL(`/adventures/${name}/activity/days/2026-07-18`, origin))
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), detail)
+    assert.deepEqual(reads, [
+      [
+        '합성 모험단',
+        {
+          date: '2026-07-18',
+          startsAt: at('2026-07-18T06:00:00'),
+          endsAt: at('2026-07-19T06:00:00')
+        }
+      ]
+    ])
+    assert.deepEqual(requested, [])
+  } finally {
+    await app.close()
+  }
+})
+
+test('하루 상세의 날짜가 YYYY-MM-DD가 아니거나 없는 날짜면 400 INVALID_CHARACTER_QUERY를 준다', async () => {
+  const { app, origin } = await listen(
+    { readAdventureActivityDay: async () => assert.fail('잘못된 날짜로 읽으면 안 된다') },
+    async () => undefined
+  )
+  try {
+    for (const date of ['2026-7-18', '20260718', '2026-02-30', 'today']) {
+      const response = await fetch(new URL(`/adventures/a/activity/days/${date}`, origin))
+      const body = await response.json()
+
+      assert.equal(response.status, 400, date)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', date)
+    }
   } finally {
     await app.close()
   }
