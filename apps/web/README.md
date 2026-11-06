@@ -18,7 +18,7 @@ pnpm --filter @dfragon/web preview
 
 `dev`와 `build`는 먼저 `prepare:ocr-assets`로 `@dfragon/client-core`의 [`prepare-ocr-assets.mjs`](../../packages/client-core/scripts/prepare-ocr-assets.mjs)에 출력 폴더를 넘겨 실행해 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다. 이 폴더는 Git에서 제외합니다. 파인튜닝 모델을 쓰므로 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
 
-`dev` 서버(`http://localhost:5173/`)는 같은 origin의 `/api/*` 요청을 `/api`를 뗀 경로로 운영 API(`https://api.dfragon.com`)에 넘기므로 운영 API의 CORS 허용 origin이나 로컬 API, Neople key 없이 첫 화면에서 닉네임 검색을 해 볼 수 있습니다. production build(`build`, `preview`)는 운영 API를 직접 부르므로 CORS가 허용한 origin에서만 검색합니다.
+`dev` 서버(`http://localhost:5173/`)는 같은 origin의 `/api/*` 요청을 `/api`를 뗀 경로로 운영 API(`https://api.dfragon.com`)에 넘기므로 운영 API의 CORS 허용 origin이나 로컬 API, Neople key 없이 첫 화면에서 닉네임 검색을 해 볼 수 있습니다. production build(`build`, `preview`)도 같은 origin의 `/api`를 부르므로, `/api/*`를 API로 넘기는 Worker나 서버에 올려야 검색합니다.
 
 첫 화면에 던파 창의 스크린샷(Alt+PrtSc)을 Ctrl+V로 붙여 넣으면 지금 화면(파티, 공대)의 인식 회차가 시작됩니다. 다른 주소의 화면에서 붙여 넣은 이미지는 회차를 시작하지 않고 버립니다. 첫 붙여넣기 때 `/ocr`의 모델과 WASM을 받습니다. `dev` 서버는 첫 붙여넣기에서 `onnxruntime-web/webgpu`를 처음 최적화하며 페이지를 한 번 다시 읽으므로, 그때는 다시 붙여 넣습니다.
 
@@ -41,7 +41,7 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
 
 - dev: main push마다 [`web-workers.yml`](../../.github/workflows/web-workers.yml)이 그 커밋을 빌드해 Cloudflare Worker `dfragon-web-dev`에 올립니다. 이 Worker가 `https://dev.dfragon.com`과 workers.dev 주소 `https://dfragon-web-dev.dfragon.workers.dev`를 함께 맡습니다. 배포는 한 번에 하나씩 돌고 대기 중인 실행은 새 실행으로 바뀌므로, 연속으로 merge해도 마지막 실행이 최신 main을 올립니다. 저장소 소유자는 Actions에서 target `dev`로 수동 실행해 다른 ref를 올릴 수도 있습니다.
 - PR 미리보기: 이 저장소 브랜치의 PR이 `apps/web`, `packages/client`, `packages/client-core`, `packages/ui`, `packages/lib`, `packages/licenses`, `packages/models`(OCR 모델 submodule 포함), root `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`이나 이 workflow를 바꾸면, 같은 workflow가 PR 브랜치를 빌드해 `wrangler versions upload --preview-alias pr-<번호>`로 dev Worker의 새 버전만 올립니다. 배포 중인 dev Worker 버전은 바뀌지 않고 `https://pr-<번호>-dfragon-web-dev.dfragon.workers.dev`가 생기며, 이 주소를 PR 댓글 하나로 남기고 다시 올리면 같은 댓글을 고칩니다. 같은 PR에 커밋을 더하면 돌던 미리보기는 취소됩니다. fork와 Dependabot의 PR은 Cloudflare Secret을 받지 않으므로 돌지 않습니다.
-- 운영 Worker: 저장소 소유자가 Actions에서 main으로 target `production`을 골라 수동 실행할 때만 Cloudflare Worker `dfragon-web`에 올리며, 다른 ref에서는 job이 돌지 않습니다. 이 Worker가 `https://dfragon.com`을 맡고 workers.dev 주소는 두지 않습니다. 운영 빌드는 같은 origin 프록시 대신 `https://api.dfragon.com`을 직접 부릅니다.
+- 운영 Worker: 저장소 소유자가 Actions에서 main으로 target `production`을 골라 수동 실행할 때만 Cloudflare Worker `dfragon-web`에 올리며, 다른 ref에서는 job이 돌지 않습니다. 이 Worker가 `https://dfragon.com`을 맡고 workers.dev 주소는 두지 않습니다.
 
 모든 배포는 빌드 전에 `ocr-finetuned` submodule만 받아 OCR 자산을 `dist/ocr`에 넣고, 점수 엔진 submodule은 받지 않습니다. 빌드한 커밋 SHA는 `version.txt`에 두며, dev와 PR 미리보기는 `robots.txt`를 `Disallow: /`로 바꿔 검색 엔진의 크롤링을 막습니다. 배포된 커밋은 `https://dfragon.com/version.txt`, `https://dev.dfragon.com/version.txt`로 확인합니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
 
@@ -56,12 +56,12 @@ main에 merge하면 사이트는 `https://dev.dfragon.com`에만 자동으로 �
   ```sh
   pnpm upload:skilltab --env dev <출력 폴더>
   ```
-- workers.dev는 운영 API의 CORS 허용 origin이 아니므로 Worker가 `/api/*` 요청을 `/api`를 뗀 경로로 `https://api.dfragon.com`에 넘깁니다(`/api/characters/candidates`는 `/characters/candidates`로 갑니다). dev Worker 빌드는 `dev.dfragon.com`과 workers.dev 주소 모두에서 열리도록 `VITE_SAME_ORIGIN_API=true`로 같은 origin의 `/api`를 API 주소로 씁니다. 이 변수가 없는 빌드는 지금처럼 운영 API를 직접 부릅니다. `/api/*` 밖의 주소는 운영 API로 넘기지 않으므로 웹 주소와 API 경로의 이름이 같아도 사이트가 응답합니다.
+- dev, 운영, PR 미리보기 빌드는 모두 같은 origin의 `/api`를 API 주소로 쓰고, Worker가 `/api/*` 요청을 `/api`를 뗀 경로로 `https://api.dfragon.com`에 넘깁니다(`/api/characters/candidates`는 `/characters/candidates`로 갑니다). `/api/*` 밖의 주소는 운영 API로 넘기지 않으므로 웹 주소와 API 경로의 이름이 같아도 사이트가 응답합니다.
 
 로컬에서는 dev 서버 대신 Worker로 production build를 띄워 헤더와 R2 경로까지 확인할 수 있습니다. `apps/web`에서 실행하며, `--local`은 wrangler의 로컬 R2에만 올립니다.
 
 ```sh
-VITE_SAME_ORIGIN_API=true pnpm build
+pnpm build
 pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload:ocr --env dev --local)"
 ```
 
@@ -80,7 +80,7 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 
 - `index.html`: 제목, 설명, OG 메타 태그. OG 이미지는 두지 않아 링크 미리보기는 제목과 설명만 보입니다(2026-10-31 결정, [Issue #1036](https://github.com/dungeon-and-dragon/dfragon/issues/1036)).
 - `src/App.tsx`: 위에서 시작하는 페이지에 웹 앱을 그리고 회색 Neople Open API 로고(86×24)를 모든 화면의 페이지 아래 가운데에 놓습니다. 페이지는 창 높이를 채우고, 내용이 길면 로고가 내용 아래로 밀립니다. 웹 앱을 받는 동안에는 빈 전역 바만 둡니다.
-- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(개발 서버는 같은 origin의 `/api`, production build는 `https://api.dfragon.com`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달됩니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
+- 웹 앱: `@dfragon/client`가 사이트용으로 공개한 `packages/client/src/site/web/index.ts`를 `@dfragon/client/web`으로 가져옵니다. `src/WebClient.tsx`가 모듈을 읽을 때 한 번 `installBrowserHost`를 부르고(API 주소는 같은 origin의 `/api`), `App.tsx`가 이 모듈을 나중에 받아 첫 화면에 그립니다. `installBrowserHost`는 전역을 붙이지 않고 검색, 캡처, 등급 연산을 담은 host를 돌려주며 페이지의 붙여넣기(`paste`)를 받습니다. 이 host를 `WebApp`에 넘기면 React context로 화면에 전달됩니다. 붙여 넣은 이미지와 공유 화면의 프레임은 `createImageBitmap`과 WebGL로 읽고, 공대 템플릿 PNG도 같은 디코더로 받습니다. `@dfragon/client`의 다른 source는 직접 import하지 않습니다. `@dfragon/client`, `@dfragon/client-core`는 build 없이 source를 export하고, Vite가 직접 번들합니다.
 - 주소와 화면: `WebApp`이 TanStack Router(`@tanstack/react-router`)로 `/`에 파티, 공대 표를, `/c/<serverId>/<characterId>`에 캐릭터 상세(상단 요약과 장비, 서약, 스킬, 아바타와 크리쳐, 버프 강화, 스탯, 타임라인 탭)를, 그 밖의 주소에 없는 주소 화면(열려던 주소, "없는 주소입니다.", "첫 화면으로" 링크)을 그립니다. 캐릭터 상세는 고른 탭을 search param `tab`에 두고, 탭을 바꾸면 다시 조회하지 않고 지금 기록의 주소만 바꿉니다. 타임라인 탭은 상세 응답에 없어 탭을 처음 열 때 API의 `/characters/<serverId>/<characterId>/timeline`을 따로 조회합니다. 조회가 실패하면 다음에 탭을 열 때 다시 조회합니다. Worker의 static assets는 없는 파일 주소에 `index.html`을 돌려주고(`not_found_handling: single-page-application`) 개발 서버도 같으므로, 주소창에 어느 주소를 직접 열어도 사이트가 뜹니다. 새 화면은 그 기능이 주소를 등록하며 더합니다.
 - 조회 캐시: 캐릭터 상세, 타임라인, 이름 검색, 모험단, 길드, 명성 순위, 통계, 주간 던파는 TanStack Query(`@tanstack/react-query`)로 받은 값을 5분 동안 브라우저 메모리에 둡니다. 5분 안에 같은 화면이나 탭을 다시 열면 조회하지 않고 받아 둔 값을 그립니다. 받은 지 5분이 지났는데 화면을 떠난 지 5분이 지나지 않았다면 받아 둔 값을 먼저 그리고 다시 조회해 바꿉니다. 실패한 조회는 다시 시도하지 않습니다. 받아 둔 값이 없으면 오류를 보이고 다음에 그 화면을 열 때 다시 조회하며, 받아 둔 값이 있으면 그 값을 계속 보입니다. 주간 던파의 새로고침은 캐시를 버리고 받는 중부터 다시 그립니다. 오늘 등급은 API가 준 만료 시각에 다시 받으므로 이 캐시를 쓰지 않습니다. 페이지를 다시 읽으면 캐시가 사라집니다.
 - 전역 바: 모든 화면 위에 화면 전체 폭으로 펴고, 안쪽 내용은 가운데 1080px 열에 둡니다. 왼쪽부터 브랜드(누르면 `/`), 전역 메뉴, 캐릭터 검색창, 오늘 등급, 오른쪽 끝의 모드 전환 버튼입니다. 오늘 등급은 라벨 글자 없이 퍼센트만 보이고, 보조 기술에는 "오늘 등급 N퍼센트"와 희귀도 이름으로 알립니다. 메뉴는 지금 `파티, 공대` 하나이고 지금 화면의 항목을 굵은 글자와 신호색 밑줄로 표시합니다. 검색창은 서버(기본 전체)와 이름으로 이름이 정확히 같은 캐릭터를 찾아, 한 명이면 바로 그 캐릭터의 상세로 가고 여러 명이면 아래 목록(명성 순)에서 고르며 없으면 찾지 못했다는 문구를 보입니다. 목록이 열려도 초점은 이름 칸에 남고 아래 방향키로 목록에 들어갑니다. 그 아래 24px을 띄운 폭 1080px 상자에 화면의 내용을 그리며, 창이 1080px보다 좁으면 상자 안에서만 가로로 스크롤하고 페이지는 넘치지 않습니다.
