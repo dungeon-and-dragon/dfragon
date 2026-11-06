@@ -187,7 +187,11 @@ let unsubscribePastedFrame = (): void => {}
 
 // host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
 beforeAll(() => {
-  host = installBrowserHost(API_ORIGIN, 'https://site.example.test/skilltab/skilltab.json')
+  host = installBrowserHost(
+    API_ORIGIN,
+    'https://site.example.test/skilltab/skilltab.json',
+    'https://site.example.test/skilltab/oath.json'
+  )
 })
 
 beforeEach(() => {

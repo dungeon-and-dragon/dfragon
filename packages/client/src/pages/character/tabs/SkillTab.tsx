@@ -3,21 +3,38 @@ import * as stylex from '@stylexjs/stylex'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
+  type SkillMarks,
   type SkillStyle,
   type SkillUpgrade,
   type SkillWindow,
+  type SkillWindowCatalog,
   type SkillWindowIcon,
+  skillChainOf,
+  skillMarkOf,
+  skillUpgradeBoardOf,
   skillUpgradesOf,
   skillWindowOf
 } from '@dfragon/client-core/shared/search/skill-window'
+import type { LoadedResult } from '../../../hooks/useLoadedResult'
 import { useSkillWindowCatalog } from '../../../hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as layout } from './avatar/detail-tab.style'
+import { SkillChainSection, SkillTreeCode, SkillUpgradeSections } from './skill/SkillSide'
+import { styles as sideStyles } from './skill/SkillSide.style'
+import { SkillSprite } from './skill/SkillSprite'
 import { styles } from './skill/SkillTab.style'
 
 const COMMON_ROW = 0
 
-function SkillIcon({ icon }: { icon: SkillWindowIcon }): React.JSX.Element {
+function SkillIcon({
+  icon,
+  marks
+}: {
+  icon: SkillWindowIcon
+  marks: SkillMarks | null
+}): React.JSX.Element {
+  const picked = icon.evolution !== null || icon.enhancement !== null
+
   return (
     <Tooltip.Root>
       <Tooltip.Trigger
@@ -30,15 +47,23 @@ function SkillIcon({ icon }: { icon: SkillWindowIcon }): React.JSX.Element {
           />
         }
       >
-        <span
-          role="img"
-          aria-label={icon.name}
-          {...stylex.props(
-            styles.image,
-            styles.sprite(icon.icon.sprite, icon.icon.x, icon.icon.y),
-            !icon.learned && styles.unlearned
+        <span {...stylex.props(styles.frame, picked && styles.picked)}>
+          <SkillSprite icon={icon.icon} label={icon.name} dim={!icon.learned} />
+          {marks !== null && icon.evolution !== null && (
+            <img
+              src={skillMarkOf(marks, 'evolution', icon.evolution)}
+              alt=""
+              {...stylex.props(styles.evolutionMark)}
+            />
           )}
-        />
+          {marks !== null && icon.enhancement !== null && (
+            <img
+              src={skillMarkOf(marks, 'enhancement', icon.enhancement)}
+              alt=""
+              {...stylex.props(styles.enhancementMark)}
+            />
+          )}
+        </span>
         <span {...stylex.props(styles.level)}>
           {icon.learned && icon.level !== null ? `Lv ${icon.level}` : ''}
         </span>
@@ -66,7 +91,7 @@ function SkillWindowGrid({ skillWindow }: { skillWindow: SkillWindow }): React.J
         </div>
       ))}
       {skillWindow.icons.map((icon) => (
-        <SkillIcon key={`${icon.col},${icon.row}`} icon={icon} />
+        <SkillIcon key={`${icon.col},${icon.row}`} icon={icon} marks={skillWindow.marks} />
       ))}
     </div>
   )
@@ -122,22 +147,25 @@ function SkillUpgrades({
   )
 }
 
+function loadedCatalog(
+  catalog: LoadedResult<SkillWindowCatalog | null>
+): SkillWindowCatalog | null {
+  if (catalog.status !== 'success') {
+    return null
+  }
+
+  return catalog.value
+}
+
 function LearnedSkills({
   detail,
-  style
-}: CharacterTabProps & { style: SkillStyle }): React.JSX.Element {
-  const catalog = useSkillWindowCatalog()
-  if (catalog.status === 'loading') {
-    return (
-      <div aria-busy="true" {...stylex.props(styles.state)}>
-        <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
-      </div>
-    )
-  }
-  const skillWindow =
-    catalog.status === 'success' && catalog.value !== null
-      ? skillWindowOf(catalog.value, detail.character, style)
-      : null
+  style,
+  catalog
+}: CharacterTabProps & {
+  style: SkillStyle
+  catalog: SkillWindowCatalog | null
+}): React.JSX.Element {
+  const skillWindow = catalog !== null ? skillWindowOf(catalog, detail.character, style) : null
   if (skillWindow === null) {
     return <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
   }
@@ -145,19 +173,54 @@ function LearnedSkills({
   return <SkillWindowGrid skillWindow={skillWindow} />
 }
 
+function SkillSideColumn({
+  detail,
+  style,
+  catalog
+}: CharacterTabProps & {
+  style: SkillStyle
+  catalog: SkillWindowCatalog | null
+}): React.JSX.Element {
+  const hash = detail.skillStyle?.hash ?? null
+  const board = catalog !== null ? skillUpgradeBoardOf(catalog, detail.character, style) : null
+
+  return (
+    <div {...stylex.props(sideStyles.side)}>
+      {hash !== null && <SkillTreeCode hash={hash} />}
+      <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
+      {board !== null ? (
+        <SkillUpgradeSections board={board} />
+      ) : (
+        <div {...stylex.props(sideStyles.fallback)}>
+          <SkillUpgrades label="스킬 개화" upgrades={skillUpgradesOf(style, 'evolution')} />
+          <SkillUpgrades label="스킬 강화" upgrades={skillUpgradesOf(style, 'enhancement')} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function SkillTab({ detail }: CharacterTabProps): React.JSX.Element | null {
+  const catalog = useSkillWindowCatalog()
   const style = detail.skillStyle?.style
   if (style == null) {
     return null
   }
 
+  if (catalog.status === 'loading') {
+    return (
+      <div aria-busy="true" {...stylex.props(styles.root)}>
+        <div {...stylex.props(styles.state)}>
+          <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div {...stylex.props(styles.root)}>
-      <LearnedSkills detail={detail} style={style} />
-      <div {...stylex.props(styles.side)}>
-        <SkillUpgrades label="스킬 개화" upgrades={skillUpgradesOf(style, 'evolution')} />
-        <SkillUpgrades label="스킬 강화" upgrades={skillUpgradesOf(style, 'enhancement')} />
-      </div>
+      <LearnedSkills detail={detail} style={style} catalog={loadedCatalog(catalog)} />
+      <SkillSideColumn detail={detail} style={style} catalog={loadedCatalog(catalog)} />
     </div>
   )
 }

@@ -73,6 +73,17 @@ describe('캐릭터 상세 화면 응답', () => {
       requiredLevel: 1
     })
     expect(detail.skillStyle?.style?.evolution[0]).toMatchObject({ type: 1 })
+    expect(detail.skillStyle?.hash).toMatch(/^eJyNjDFOAlEARN9b/)
+    expect(detail.skillStyle?.style?.chain).toEqual({
+      resetTime: 0,
+      skills: [
+        'fc7a3f4c2852c832a2f20af63d5d212f',
+        '8c10cefa65364880451e389bb74d3600',
+        '4b2c90ec226fd40e967875aa5eabefb2',
+        '128b9ddef2262f40723deae4407bdb42'
+      ]
+    })
+    expect(detail.oath?.setInfo).toMatchObject({ setId: 16204, setRarityName: '태초' })
     expect(detail.buff.equipment?.equipment).toEqual([])
     expect(detail.buff.avatar?.avatar.map((avatar) => avatar.slotId)).toEqual(['JACKET'])
     expect(detail.buff.creature?.skillInfo?.option).toMatchObject({ level: 16 })
@@ -113,6 +124,7 @@ describe('캐릭터 상세 화면 응답', () => {
     expect(detail.buff.equipment?.equipment[0]).toMatchObject({ slotId: 'TITLE' })
     expect(detail.buff.creature?.creature).toEqual([])
     expect(detail.skillStyle?.style?.passive).toHaveLength(14)
+    expect(detail.skillStyle?.style?.chain).toBeNull()
   })
 
   it('빈 슬롯과 칸이 빠진 장비는 실패하지 않고 빈 값으로 읽는다', async () => {

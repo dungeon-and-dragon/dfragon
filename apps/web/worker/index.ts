@@ -9,7 +9,7 @@ const API_ORIGIN = 'https://api.dfragon.com'
 const API_PATH_PREFIX = '/api'
 const OCR_PATH_PREFIX = '/ocr/'
 const SKILLTAB_PATH_PREFIX = '/skilltab/'
-const SKILLTAB_INDEX = 'skilltab.json'
+const SKILLTAB_INDEXES: ReadonlySet<string> = new Set(['skilltab.json', 'oath.json'])
 
 export default {
   async fetch(request, env): Promise<Response> {
@@ -76,11 +76,11 @@ function serveOcrAsset(request: Request, env: Env, file: string): Promise<Respon
   return serveBucketObject(request, env.OCR_ASSETS, `ocr/${env.OCR_ASSET_VERSION}/${file}`, headers)
 }
 
-// 스킬 창 데이터는 게임 클라이언트에서 뽑아 저장소 밖에서 올리므로 배포와 따로 바뀐다. skilltab.json은 매번 ETag로 확인하고,
-// 이 파일이 가리키는 sprite는 이름에 내용 hash가 있어 오래 캐시한다.
+// 스킬 창과 서약 데이터는 게임 클라이언트에서 뽑아 저장소 밖에서 올리므로 배포와 따로 바뀐다. skilltab.json, oath.json은 매번
+// ETag로 확인하고, 이 파일들이 가리키는 sprite와 아이콘은 이름에 내용 hash가 있어 오래 캐시한다.
 function serveSkillTabAsset(request: Request, env: Env, file: string): Promise<Response> {
   const headers = {
-    'Cache-Control': file === SKILLTAB_INDEX ? 'no-cache' : 'public, max-age=31536000, immutable'
+    'Cache-Control': SKILLTAB_INDEXES.has(file) ? 'no-cache' : 'public, max-age=31536000, immutable'
   }
 
   return serveBucketObject(request, env.SKILLTAB_ASSETS, `skilltab/${file}`, headers)
