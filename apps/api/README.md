@@ -221,13 +221,14 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 
 ## 서버 이미지
 
-[Product Images](../../.github/workflows/product-images.yml)는 서버 이미지 입력이 바뀌었을 때만 API 이미지를 빌드합니다.
-`apps/api/**`, `packages/database/**`, `packages/lib/**`, `packages/neople/**`, `packages/licenses/**`, `packages/models/**`와 root package, lockfile, workspace 설정,
-이미지 workflow, 선택 도구, 커밋 정보 생성기(`scripts/server-build-info.mjs`) 변경이 해당합니다.
-`packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진만 바꾼 PR도 이미지를 다시 빌드합니다.
+[Product Images](../../.github/workflows/product-images.yml)는 이미지 입력이 바뀐 서비스의 이미지만 빌드합니다. 서비스는 API(`apps/api/**`)와
+웹([웹 이미지](../web/README.md#웹-이미지), `apps/web/**`)입니다.
+`packages/client/**`, `packages/client-core/**`, `packages/database/**`, `packages/lib/**`, `packages/neople/**`, `packages/licenses/**`, `packages/models/**`, `packages/ui/**`와 root package, lockfile, workspace 설정,
+이미지 workflow, 선택 도구, 커밋 정보 생성기(`scripts/server-build-info.mjs`) 변경은 두 이미지를 모두 빌드합니다.
+`packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진이나 OCR 모델만 바꾼 PR도 이미지를 다시 빌드합니다.
 그 안의 `*.md` 문서는 이미지에 들어가지 않으므로 입력으로 보지 않습니다.
 지운 accounts, OCR 이미지는 더 빌드하지 않습니다.
-서버 이미지 입력이 없는 문서, 웹 전용 변경은 이미지 빌드, 발행을 건너뜁니다.
+이미지 입력이 없는 문서 변경은 이미지 빌드, 발행을 건너뜁니다.
 PR 제목 scope가 `(build)`가 아닌 PR과 그 main push도 이미지를 빌드, 발행하지 않으며, 그 변경은 다음
 `(build)` main push가 함께 발행합니다. 규칙은 [build-scope 안내](../../scripts/README.md#build-scope)에 있습니다.
 
@@ -236,11 +237,11 @@ main push 전체의 `before`부터 push한 commit까지 비교해 이미지를 �
 빌드, 발행합니다. 후속 실행 때의 최신 main을 다시 선택하지 않습니다.
 main에서는 마지막으로 Product Images 전체가 성공한 실행의 source commit 이후 변경도
 포함합니다. 앞선 빌드, 발행의 취소나 실패로 발행되지 않은 변경은 다음 성공 실행에서
-반영합니다. 이전 성공 목록이 없거나 90일 보관 기한이 지났으면 API 이미지를 빌드합니다.
+반영합니다. 이전 성공 목록이 없거나 90일 보관 기한이 지났으면 모든 이미지를 빌드합니다.
 지우기 전의 목록에 남은 `ocr`, `accounts`는 이전 성공 목록에서만 무시합니다.
 선택 목록이 없거나 source commit이 다르면 실패하며 임의로 빌드를 생략하지 않습니다.
 
-이미지는 `ghcr.io/dungeon-and-dragon/dfragon/api:<40자리 commit SHA>`로 발행하고
+이미지는 `ghcr.io/dungeon-and-dragon/dfragon/<service>:<40자리 commit SHA>`로 발행하고
 OCI `source`, `revision` label에 저장소와 commit을 기록합니다. 대상 플랫폼은 `linux/amd64` 하나입니다.
 같은 제품 commit을 `SOURCE_COMMIT` 빌드 인자로 전달해 이미지 내부 `/app/build-info.json`에도
 고정합니다. 빌드와 발행 전에 컨테이너를 시작하지 않고 파일을 추출해 서비스명과 commit을
@@ -250,7 +251,7 @@ OCI `source`, `revision` label에 저장소와 commit을 기록합니다. 대상
 Provenance 기록 실패는 `Attest the published image provenance`에서 확인합니다.
 선택한 이미지 빌드가 모두 성공해야 같은 목록의 발행 job이 시작됩니다.
 
-인프라에서는 성공한 발행 실행의 summary 또는 `image-handoff-api` artifact 안의 JSON을 사용합니다.
+인프라에서는 성공한 발행 실행의 summary 또는 `image-handoff-<service>` artifact 안의 JSON을 사용합니다.
 파일은 다음 형식이며 `image`는 registry에서 조회, 확인한 digest reference입니다.
 Tag는 조회 편의용이고 배포 입력은 `image@sha256:digest`입니다.
 
@@ -285,7 +286,7 @@ Dockerfile과 전용 ignore 파일은 `apps/api/`에 있습니다. 빌드 contex
 이미지는 점수 엔진 submodule의 Linux 엔진 `libdnfscore.so`와 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
 Prisma schema engine이 OpenSSL 3용으로 설치되도록 빌드 단계에 `openssl`을, 런타임 이미지에 `libssl3`을 둡니다.
 엔진 파일이 없으면 빌드에 실패하므로, 로컬 빌드 전에 `git submodule update --init packages/models/score-engine`으로 엔진을 받습니다.
-Product Images의 빌드 job도 이 submodule만 받습니다. 로컬 빌드는 다음과 같습니다.
+Product Images의 API 빌드 job도 이 submodule만 받습니다. 로컬 빌드는 다음과 같습니다.
 
 ```sh
 docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .
