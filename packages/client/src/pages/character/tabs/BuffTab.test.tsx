@@ -4,7 +4,11 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
+import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
+import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { styles as rarityTones } from './avatar/ItemName.style'
 import { BuffTab } from './BuffTab'
 
@@ -24,8 +28,48 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function render(detail: CharacterDetailView): Promise<void> {
-  await act(async () => root.render(<BuffTab detail={detail} />))
+// 저장소 fixture(아처 眞 뮤즈)의 버프 스킬 이름으로 만든 합성 배치다.
+const MUSE_CATALOG: SkillWindowCatalog = {
+  pvfSha256: 'synthetic',
+  jobs: [
+    {
+      jobId: 'archer',
+      jobName: '아처',
+      sprite: 'https://skilltab.test/sprites/archer.png',
+      advancements: [
+        {
+          growtype: 1,
+          name: '뮤즈',
+          awakeningNames: ['眞 뮤즈'],
+          slots: [{ skillId: 48, col: 0, row: 3, nextSkills: [] }]
+        }
+      ],
+      skills: {
+        48: {
+          name: '러블리 템포',
+          kind: 'active',
+          requiredLevel: 30,
+          maxLevel: 40,
+          icon: { x: 56, y: 28 }
+        }
+      }
+    }
+  ]
+}
+
+async function render(
+  detail: CharacterDetailView,
+  host: ClientHost = createTestClientHost()
+): Promise<void> {
+  await act(async () =>
+    root.render(
+      <ClientHostContext value={host}>
+        <TestQueryClient>
+          <BuffTab detail={detail} />
+        </TestQueryClient>
+      </ClientHostContext>
+    )
+  )
 }
 
 function section(label: string): Element | null {
@@ -52,6 +96,22 @@ it('버퍼 버프 스킬은 이름, 레벨과 desc의 {valueN} 자리에 values�
     '[범위 정보]',
     '버프 적용 범위 : 900px'
   ])
+})
+
+it('스킬 창 데이터에 그 전직의 버프 스킬이 있으면 이름 대신 그 스킬의 sprite 아이콘을 보인다', async () => {
+  await render(
+    characterDetailFixture('buffer'),
+    createTestClientHost({ getSkillWindowCatalog: async () => MUSE_CATALOG })
+  )
+
+  const name = section('버프 스킬')!.querySelector('h2')!
+  expect(name.textContent).toBe('')
+  const icon = name.querySelector('[role="img"]')
+  expect(icon?.getAttribute('aria-label')).toBe('러블리 템포')
+  // jsdom은 StyleX의 동적 값을 CSS 변수로만 받으므로, style 속성에 sprite 주소와 위치가 들어갔는지 본다.
+  expect(icon?.getAttribute('style')).toMatch(
+    /url\("https:\/\/skilltab\.test\/sprites\/archer\.png"\).*-56px -28px/
+  )
 })
 
 it('버퍼 버프 강화 장비와 아바타는 한 테이블에서 장비 뒤에 아바타 순서로 보인다', async () => {
