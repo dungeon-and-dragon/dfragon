@@ -61,8 +61,6 @@ import {
 } from './access-log.js'
 
 const TRAILING_SLASHES_PATTERN = /\/+$/
-const WEB_ORIGINS = ['https://dfragon.com', 'https://dev.dfragon.com']
-const CORS_ORIGIN_METHODS = new Set(['GET', 'OPTIONS'])
 const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
 
 function requestFailure(
@@ -136,7 +134,6 @@ export interface ApiHttpAppOptions {
   readonly rankingStats?: RankingStatsReader
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
-  readonly webDevOrigins?: readonly string[]
   readonly trustedProxyHops?: 1
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
   readonly buildInfoPath?: string
@@ -154,7 +151,6 @@ export async function createApiHttpApp({
   rankingStats,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
-  webDevOrigins = [],
   trustedProxyHops,
   httpsOptions,
   buildInfoPath = '/app/build-info.json',
@@ -280,12 +276,6 @@ export async function createApiHttpApp({
       response.setHeader('Cache-Control', 'no-store')
       response.removeHeader('X-Powered-By')
       next()
-    })
-    const corsOrigins = [...WEB_ORIGINS, ...webDevOrigins]
-    // cors의 `methods`는 preflight 응답만 제한하므로, preflight 없는 simple POST에는 origin을 허용하지 않게 요청마다 고른다.
-    app.enableCors((request: Request, callback) => {
-      const origin = CORS_ORIGIN_METHODS.has(request.method) && corsOrigins
-      callback(null, { origin, methods: ['GET'] })
     })
     app.useGlobalFilters(new ApiHttpFilter())
     setupSwagger(app)
