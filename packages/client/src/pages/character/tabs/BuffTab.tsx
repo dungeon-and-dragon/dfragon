@@ -4,7 +4,7 @@ import {
   buffOptionLines,
   buffSkillInfoOf
 } from '@dfragon/client-core/shared/search/character-detail-display'
-import { AvatarTable } from './avatar/AvatarTable'
+import { BuffGearTable } from './buff/BuffGearTable'
 import { styles } from './buff/BuffTab.style'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as partStyles } from './equipment/item-parts.style'
@@ -21,23 +21,10 @@ export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   return (
     <div {...stylex.props(tableStyles.root)}>
       {skillInfo?.name != null && <BuffSkill name={skillInfo.name} option={skillInfo.option} />}
-      {equipment.length > 0 && (
-        <section aria-label="버프 강화 장비">
-          <h3 {...stylex.props(tableStyles.heading)}>장비</h3>
-          <SlotItemTable
-            itemLabel="장비"
-            rows={equipment.map((item, index) => {
-              const key = item.slotId ?? String(index)
-
-              return { key, slot: item.slotName, item: toItemView(item) }
-            })}
-          />
-        </section>
-      )}
-      {avatars.length > 0 && (
-        <section aria-label="버프 강화 아바타">
-          <h3 {...stylex.props(tableStyles.heading)}>아바타</h3>
-          <AvatarTable avatars={avatars} />
+      {(equipment.length > 0 || avatars.length > 0) && (
+        <section aria-label="버프 강화 장비, 아바타">
+          <h3 {...stylex.props(tableStyles.heading)}>장비, 아바타</h3>
+          <BuffGearTable equipment={equipment} avatars={avatars} />
         </section>
       )}
       {creatures.length > 0 && (
