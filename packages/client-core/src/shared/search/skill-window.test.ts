@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { characterDetailFixture } from '../../testing/fixtures/character-detail'
 import {
   learnedSkillRowsOf,
   type SkillWindowCatalog,
+  skillChainOf,
+  skillUpgradeBoardOf,
   skillUpgradesOf,
   skillWindowOf
 } from './skill-window'
@@ -82,7 +85,7 @@ function learned(name: string, level: number, requiredLevel: number | null = 1) 
 }
 
 function styleOf(active: Style['active'], passive: Style['passive'] = []): Style {
-  return { active, passive, evolution: [], enhancement: [] }
+  return { active, passive, evolution: [], enhancement: [], chain: null }
 }
 
 const CRUSADER = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
@@ -206,7 +209,8 @@ it('스킬 개화와 강화는 skillId로 배운 스킬의 이름을 찾고 type
     active: [learned('백스텝', 1)],
     passive: [learned('신의 대행자', 9, 95)],
     evolution: [{ skillId: 'id-신의 대행자', type: 2 }],
-    enhancement: [{ skillId: 'id-없음', type: 1 }]
+    enhancement: [{ skillId: 'id-없음', type: 1 }],
+    chain: null
   }
 
   expect(skillUpgradesOf(style, 'evolution')).toEqual([
@@ -215,4 +219,174 @@ it('스킬 개화와 강화는 skillId로 배운 스킬의 이름을 찾고 type
   expect(skillUpgradesOf(style, 'enhancement')).toEqual([
     { skillId: 'id-없음', name: null, type: 1 }
   ])
+})
+
+function evolutionOf(name: string): NonNullable<Skill['evolution']> {
+  return [
+    { name: `${name} 1`, basicExplain: `${name} 요약 1`, explain: `${name} 설명 1` },
+    { name: `${name} 2`, basicExplain: `${name} 요약 2`, explain: `${name} 설명 2` }
+  ]
+}
+
+const ENHANCEMENT: NonNullable<Skill['enhancement']> = {
+  1: { explain: '데미지 증가' },
+  2: { explain: '데미지 증가, 쿨타임 감소' }
+}
+
+const MARKS = {
+  evolution: ['marks/evolution-1.png', 'marks/evolution-2.png'],
+  enhancement: ['marks/enhancement-1.png', 'marks/enhancement-2.png']
+} satisfies SkillWindowCatalog['marks']
+
+// 저장소 fixture(프리스트(여) 眞 이단심판관)의 개화, 강화, 스킬 체인 스킬 이름으로 만든 합성 배치다. 스킬 번호 9는 다른
+// 전직에만 있어 배울 수 없는 스킬이다.
+const INQUISITOR_CATALOG: SkillWindowCatalog = {
+  pvfSha256: 'synthetic',
+  marks: MARKS,
+  jobs: [
+    {
+      jobId: 'at_priest',
+      jobName: '프리스트(여)',
+      sprite: 'sprites/at_priest.png',
+      advancements: [
+        {
+          growtype: 2,
+          name: '이단심판관',
+          awakeningNames: ['眞 이단심판관'],
+          slots: [
+            slot(1, 2, 8),
+            slot(2, 0, 7),
+            slot(3, 1, 7),
+            slot(4, 3, 6),
+            slot(5, 0, 6),
+            slot(6, 0, 0)
+          ]
+        },
+        { growtype: 3, name: '무녀', awakeningNames: ['眞 무녀'], slots: [slot(9, 0, 7)] }
+      ],
+      skills: {
+        1: { ...skill('참수', 45), evolution: evolutionOf('참수'), enhancement: ENHANCEMENT },
+        2: {
+          ...skill('즉결심판', 35),
+          evolution: evolutionOf('즉결심판'),
+          enhancement: ENHANCEMENT
+        },
+        3: { ...skill('세례의 불길', 35), evolution: evolutionOf('세례의 불길') },
+        4: { ...skill('성염의 쇄도', 30), icon: { x: 84, y: 28 } },
+        5: { ...skill('성화', 25), enhancement: ENHANCEMENT },
+        6: skill('백스텝', 1),
+        9: { ...skill('무녀의 스킬', 35), evolution: evolutionOf('무녀의 스킬') }
+      }
+    }
+  ]
+}
+
+function inquisitor() {
+  const detail = characterDetailFixture('dealer')
+  const style = detail.skillStyle?.style
+  if (style == null) {
+    throw new Error('딜러 fixture에 스킬 스타일이 없다')
+  }
+
+  return { character: detail.character, style }
+}
+
+describe('스킬 개화, 강화', () => {
+  it('스킬 창 아이콘에 고른 개화와 강화 type을 둔다', () => {
+    const { character, style } = inquisitor()
+    const window = skillWindowOf(INQUISITOR_CATALOG, character, style)
+
+    expect(window?.marks).toEqual(MARKS)
+    expect(
+      window?.icons
+        .filter(({ evolution, enhancement }) => evolution !== null || enhancement !== null)
+        .map(({ name, evolution, enhancement }) => [name, evolution, enhancement])
+    ).toEqual([
+      ['참수', 2, 1],
+      ['즉결심판', 1, 1],
+      ['세례의 불길', 1, null]
+    ])
+    expect(window?.icons.find(({ name }) => name === '성화')).toMatchObject({
+      evolution: null,
+      enhancement: null
+    })
+  })
+
+  it('그 전직이 배울 수 있는 개화, 강화 스킬을 습득 레벨 순으로 모두 두고 고른 갈래를 표시한다', () => {
+    const { character, style } = inquisitor()
+    const board = skillUpgradeBoardOf(INQUISITOR_CATALOG, character, style)
+
+    expect(board?.evolutions.map(({ name, picked }) => [name, picked])).toEqual([
+      ['즉결심판', 1],
+      ['세례의 불길', 1],
+      ['참수', 2]
+    ])
+    expect(board?.evolutions[2]?.branches).toEqual([
+      { type: 1, name: '참수 1', basicExplain: '참수 요약 1', explain: '참수 설명 1' },
+      { type: 2, name: '참수 2', basicExplain: '참수 요약 2', explain: '참수 설명 2' }
+    ])
+    expect(board?.enhancements.map(({ name, picked }) => [name, picked])).toEqual([
+      ['성화', null],
+      ['즉결심판', 1],
+      ['참수', 1]
+    ])
+    expect(board?.enhancements[0]?.branches).toEqual([
+      { type: 1, explain: '데미지 증가' },
+      { type: 2, explain: '데미지 증가, 쿨타임 감소' }
+    ])
+  })
+
+  it('개화, 강화 데이터를 넣지 않은 묶음이면 목록을 만들지 않는다', () => {
+    const { character, style } = inquisitor()
+    const { marks: _marks, ...withoutExtras } = INQUISITOR_CATALOG
+
+    expect(skillUpgradeBoardOf(withoutExtras, character, style)).toBeNull()
+    expect(skillWindowOf(withoutExtras, character, style)?.marks).toBeNull()
+  })
+})
+
+describe('스킬 체인', () => {
+  it('체인 스킬을 순서대로 이름과 그 전직 배치의 아이콘으로 둔다', () => {
+    const { character, style } = inquisitor()
+
+    expect(skillChainOf(INQUISITOR_CATALOG, character, style)).toEqual({
+      resetTime: 0,
+      skills: [
+        { name: '세례의 불길', icon: { sprite: 'sprites/at_priest.png', x: 0, y: 0 } },
+        { name: '성염의 쇄도', icon: { sprite: 'sprites/at_priest.png', x: 84, y: 28 } },
+        { name: '성화', icon: { sprite: 'sprites/at_priest.png', x: 0, y: 0 } },
+        { name: '즉결심판', icon: { sprite: 'sprites/at_priest.png', x: 0, y: 0 } }
+      ]
+    })
+  })
+
+  it('스킬 창 데이터가 없으면 이름만 둔다', () => {
+    const { character, style } = inquisitor()
+
+    expect(
+      skillChainOf(null, character, style)?.skills.map(({ name, icon }) => [name, icon])
+    ).toEqual([
+      ['세례의 불길', null],
+      ['성염의 쇄도', null],
+      ['성화', null],
+      ['즉결심판', null]
+    ])
+  })
+
+  it('체인을 쓰지 않는 캐릭터는 체인이 없다', () => {
+    const detail = characterDetailFixture('buffer')
+    const style = detail.skillStyle?.style
+    if (style == null) {
+      throw new Error('버퍼 fixture에 스킬 스타일이 없다')
+    }
+
+    expect(skillChainOf(INQUISITOR_CATALOG, detail.character, style)).toBeNull()
+  })
+
+  it('칸이 모두 비어 있는 체인은 체인이 없는 것으로 본다', () => {
+    const { character, style } = inquisitor()
+    const emptyChain = { ...style, chain: { resetTime: 0, skills: [null, null, null, null] } }
+
+    expect(skillChainOf(INQUISITOR_CATALOG, character, emptyChain)).toBeNull()
+  })
 })

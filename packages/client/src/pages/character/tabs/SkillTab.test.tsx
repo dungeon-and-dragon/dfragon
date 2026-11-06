@@ -49,6 +49,90 @@ const CATALOG: SkillWindowCatalog = {
   ]
 }
 
+const MARKS = {
+  evolution: [
+    'https://skilltab.test/marks/evolution-1.png',
+    'https://skilltab.test/marks/evolution-2.png'
+  ],
+  enhancement: [
+    'https://skilltab.test/marks/enhancement-1.png',
+    'https://skilltab.test/marks/enhancement-2.png'
+  ]
+} satisfies SkillWindowCatalog['marks']
+
+const [PRIEST] = CATALOG.jobs
+const [INQUISITOR] = PRIEST?.advancements ?? []
+if (PRIEST === undefined || INQUISITOR === undefined) {
+  throw new Error('합성 배치에 직업이 없다')
+}
+
+// 개화, 강화 데이터를 함께 넣어 만든 묶음이다. fixture에서 세례의 불길은 개화 Ⅰ, 참수는 개화 Ⅱ와 강화 데미지를 골랐고,
+// 성화는 아무것도 고르지 않았다.
+const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
+  ...CATALOG,
+  marks: MARKS,
+  jobs: [
+    {
+      ...PRIEST,
+      advancements: [
+        {
+          ...INQUISITOR,
+          slots: [
+            ...INQUISITOR.slots,
+            { skillId: 3, col: 1, row: 7, nextSkills: [] },
+            { skillId: 4, col: 2, row: 9, nextSkills: [] },
+            { skillId: 5, col: 3, row: 6, nextSkills: [] }
+          ]
+        }
+      ],
+      skills: {
+        ...PRIEST.skills,
+        3: {
+          name: '세례의 불길',
+          kind: 'active',
+          requiredLevel: 35,
+          maxLevel: 60,
+          icon: { x: 56, y: 0 },
+          evolution: [
+            {
+              name: '정화의 세례',
+              basicExplain: '범위 증가',
+              explain: '[세례의 불길]\\n범위 30%% 증가'
+            },
+            { name: '심판의 세례', basicExplain: '시전 시간 감소', explain: '시전 시간 감소' }
+          ]
+        },
+        4: {
+          name: '참수',
+          kind: 'active',
+          requiredLevel: 45,
+          maxLevel: 60,
+          icon: { x: 84, y: 0 },
+          evolution: [
+            { name: '단죄', basicExplain: '공격력 증가', explain: '공격력 증가' },
+            { name: '처형', basicExplain: '딜레이 캔슬', explain: '딜레이 캔슬' }
+          ],
+          enhancement: {
+            1: { explain: '데미지 증가' },
+            2: { explain: '데미지 증가, 쿨타임 감소' }
+          }
+        },
+        5: {
+          name: '성화',
+          kind: 'active',
+          requiredLevel: 25,
+          maxLevel: 60,
+          icon: { x: 112, y: 0 },
+          enhancement: {
+            1: { explain: '데미지 증가' },
+            2: { explain: '데미지 증가, 쿨타임 감소' }
+          }
+        }
+      }
+    }
+  ]
+}
+
 let container: HTMLDivElement
 let root: Root
 
@@ -89,7 +173,7 @@ function iconTexts(): string[][] {
     (image) => [
       image.getAttribute('aria-label') ?? '',
       image.getAttribute('style') ?? '',
-      image.nextElementSibling?.textContent ?? ''
+      image.parentElement?.nextElementSibling?.textContent ?? ''
     ]
   )
 }
@@ -150,4 +234,80 @@ it('스킬 개화와 강화는 스킬 이름과 type 숫자로 나열한다', as
     ['참수', '1'],
     ['신벌', '1']
   ])
+})
+
+it('개화, 강화 데이터가 있으면 배울 수 있는 스킬을 모두 두고 고른 갈래만 표시한다', async () => {
+  await render(
+    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
+    characterDetailFixture('dealer')
+  )
+
+  expect(container.querySelector('section[aria-label="스킬 개화"] h2')?.textContent).toBe(
+    '스킬 개화 2 / 2'
+  )
+  expect(container.querySelector('section[aria-label="스킬 강화"] h2')?.textContent).toBe(
+    '스킬 강화 1 / 2'
+  )
+  const picked = (label: string) =>
+    [...container.querySelectorAll(`section[aria-label="${label}"] [aria-current="true"]`)].map(
+      (branch) => branch.textContent
+    )
+  expect(picked('스킬 개화')).toEqual(['정화의 세례', '처형'])
+  expect(picked('스킬 강화')).toEqual(['데미지'])
+  expect(
+    [...container.querySelectorAll('section[aria-label="스킬 강화"] li')].map((row) =>
+      [...row.querySelectorAll('img[src*="marks/enhancement"]')].map(
+        (mark) => mark.parentElement?.textContent
+      )
+    )
+  ).toEqual([
+    ['데미지', '쿨타임 감소'],
+    ['데미지', '쿨타임 감소']
+  ])
+})
+
+it('스킬 창 아이콘에 고른 개화 마름모와 강화 표식을 붙인다', async () => {
+  await render(
+    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
+    characterDetailFixture('dealer')
+  )
+
+  const marksOf = (name: string) =>
+    [
+      ...(container
+        .querySelector(`[aria-label="스킬 창"] [role="img"][aria-label="${name}"]`)
+        ?.parentElement?.querySelectorAll('img') ?? [])
+    ].map((mark) => mark.getAttribute('src'))
+  expect(marksOf('세례의 불길')).toEqual(['https://skilltab.test/marks/evolution-1.png'])
+  expect(marksOf('참수')).toEqual([
+    'https://skilltab.test/marks/evolution-2.png',
+    'https://skilltab.test/marks/enhancement-1.png'
+  ])
+  expect(marksOf('성화')).toEqual([])
+})
+
+it('스킬 트리 코드와 체인 스킬을 체인 순서대로 보인다', async () => {
+  await render(
+    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
+    characterDetailFixture('dealer')
+  )
+
+  expect(container.querySelector('section[aria-label="스킬 트리 코드"] code')?.textContent).toMatch(
+    /^eJyNjDFOAlEARN9b/
+  )
+  expect(container.querySelector('section[aria-label="스킬 체인"] h2')?.textContent).toBe(
+    '스킬 체인 4초기화 시간 0'
+  )
+  expect(
+    [...container.querySelectorAll('section[aria-label="스킬 체인"] li')].map(
+      (link) => link.textContent
+    )
+  ).toEqual(['세례의 불길', '성염의 쇄도', '성화', '즉결심판'])
+})
+
+it('스킬 체인을 쓰지 않는 캐릭터는 체인 없음 한 줄을 보인다', async () => {
+  await render(createTestClientHost(), characterDetailFixture('buffer'))
+
+  expect(container.textContent).toContain('스킬 체인 없음')
+  expect(container.querySelector('section[aria-label="스킬 체인"]')).toBeNull()
 })
