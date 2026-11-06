@@ -12,7 +12,6 @@ export const styles = stylex.create({
     borderStyle: 'solid',
     borderColor: colors.borderDefault
   },
-  spacer: { flexGrow: 1 },
   codeRow: {
     display: 'flex',
     alignItems: 'center',

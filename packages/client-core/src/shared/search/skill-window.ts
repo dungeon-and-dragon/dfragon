@@ -277,7 +277,7 @@ export type EvolutionBranch = Readonly<{
   explain: string
 }>
 
-export type EnhancementBranch = Readonly<{ type: UpgradeType; explain: string }>
+export type EnhancementBranch = Readonly<{ type: UpgradeType }>
 
 export type EvolutionRow = UpgradeSkill &
   Readonly<{ branches: readonly [EvolutionBranch, EvolutionBranch] }>
@@ -368,20 +368,15 @@ export function skillUpgradeBoardOf(
     ]
   })
   const enhancements = learnable.flatMap((learnableSkill): EnhancementRow[] => {
-    const branches = learnableSkill.skill.enhancement
-    if (branches === undefined) {
+    if (learnableSkill.skill.enhancement === undefined) {
+      return []
+    }
+    const enhancement = upgradeSkillOf(tree.job, learnableSkill, enhancementByName)
+    if (enhancement.picked === null) {
       return []
     }
 
-    return [
-      {
-        ...upgradeSkillOf(tree.job, learnableSkill, enhancementByName),
-        branches: [
-          { type: 1, ...branches[1] },
-          { type: 2, ...branches[2] }
-        ]
-      }
-    ]
+    return [{ ...enhancement, branches: [{ type: 1 }, { type: 2 }] }]
   })
 
   return { marks: catalog.marks, evolutions, enhancements }
@@ -389,7 +384,7 @@ export function skillUpgradeBoardOf(
 
 export type SkillChainLink = Readonly<{ name: string | null; icon: SkillIconImage | null }>
 
-export type SkillChain = Readonly<{ resetTime: number | null; skills: readonly SkillChainLink[] }>
+export type SkillChain = Readonly<{ skills: readonly SkillChainLink[] }>
 
 export function skillChainOf(
   catalog: SkillWindowCatalog | null,
@@ -420,7 +415,7 @@ export function skillChainOf(
     return { name, icon }
   })
 
-  return { resetTime: style.chain.resetTime, skills }
+  return { skills }
 }
 
 // 버프 강화의 skillInfo.skillId는 직업이 달라도 같은 값이 다시 나오는 API ID라, 그 전직이 배우는 스킬과 이름으로 잇는다.
