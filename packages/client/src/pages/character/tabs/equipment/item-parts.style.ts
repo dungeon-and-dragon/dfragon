@@ -31,6 +31,7 @@ export const styles = stylex.create({
     backgroundColor: colors.bgInset,
     objectFit: 'contain'
   },
+  iconSpace: { flexShrink: 0, width: ICON_SIZE, height: ICON_SIZE },
   name: { fontWeight: 600 },
   badge: {
     display: 'inline-flex',
