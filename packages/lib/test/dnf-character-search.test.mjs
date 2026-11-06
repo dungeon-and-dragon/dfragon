@@ -3,7 +3,7 @@ import test from 'node:test'
 import { matchesDNFSearchNicknamePolicy, DNF_SEARCH_NICKNAME_LIMITS } from '@dfragon/lib'
 
 const TITLES = {
-  lengthLimits: '검색어는 바이트, UTF-16 단위 대신 Unicode code point로 2~12개를 센다',
+  lengthLimits: '검색어는 바이트, UTF-16 단위 대신 Unicode code point로 1~12개를 센다',
   preservedUnicode: '정규화, 내부 공백, 결합 sequence의 원문 code point 수를 유지한다',
   trimWhitespace: 'ECMAScript trim 공백은 앞뒤에서 거절하고 내부에서는 허용한다',
   trimDifference: 'trim 대상이 아닌 Unicode 공백, format 문자를 별도 금지하지 않는다',
@@ -11,11 +11,11 @@ const TITLES = {
 }
 
 test(TITLES.lengthLimits, () => {
-  assert.deepEqual(DNF_SEARCH_NICKNAME_LIMITS, { minimumCodePoints: 2, maximumCodePoints: 12 })
+  assert.deepEqual(DNF_SEARCH_NICKNAME_LIMITS, { minimumCodePoints: 1, maximumCodePoints: 12 })
   assert.equal(matchesDNFSearchNicknamePolicy(''), false)
   for (const character of ['가', '漢', '𠀀', '😀', '♥']) {
     for (const [length, allowed] of [
-      [1, false],
+      [1, true],
       [2, true],
       [12, true],
       [13, false]
@@ -69,7 +69,7 @@ test(TITLES.generatedCodePoints, () => {
         { length },
         (_, index) => atoms[(index + offset) % atoms.length]
       ).join('')
-      const allowed = length >= 2 && length <= 12
+      const allowed = length >= 1 && length <= 12
       assert.equal(
         matchesDNFSearchNicknamePolicy(nickname),
         allowed,

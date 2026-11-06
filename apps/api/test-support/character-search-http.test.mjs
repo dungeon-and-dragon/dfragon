@@ -101,7 +101,6 @@ test('검색 HTTP는 raw 구조와 UTF-8 오류를 공급자 호출 전에 거�
   const invalidQueries = [
     '',
     'characterName=',
-    'characterName=a',
     `characterName=${'a'.repeat(13)}`,
     'characterName=%20ab',
     'characterName=ab+',
