@@ -232,6 +232,29 @@ export function ApiAdventureWeekly() {
   )
 }
 
+export function ApiAdventureActivity() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '모험단 시즌 활동 조회',
+      description:
+        '공개 API. DB에 저장된 그 모험단 캐릭터의 타임라인을 합쳐 한 시즌의 레이드, 레기온 클리어, 레전더리 이상 아이템 획득, 강화, 증폭, 재련 횟수와 활동이 있는 날(06:00 KST에 바뀜)의 횟수를 반환합니다. season이 없으면 지금 시즌입니다. 강화 단계는 타임라인의 after(도전한 단계)입니다. 타임라인을 받기 전인 중천 전 시즌은 available이 false이고 집계는 비어 있습니다. 조회는 캐릭터마다 타임라인 동기화를 기존 대기열에 넣고 끝나기를 기다리지 않아, 응답은 지금 저장된 값입니다. DB에 없는 모험단은 집계가 비어 있고, DB 설정이 없는 API는 시즌 목록이 비고 season이 null입니다.'
+    }),
+    ApiParam({
+      name: 'adventureName',
+      schema: { type: 'string' },
+      description: 'URL 인코딩한 모험단 이름'
+    }),
+    ApiQuery({
+      name: 'season',
+      required: false,
+      schema: { type: 'integer', minimum: 1 },
+      description: '시즌 번호(중천 10, 천해천 11). 없으면 지금 시즌'
+    }),
+    success('AdventureActivity', '시즌 목록, 고른 시즌의 구간, 시즌 요약과 날짜별 활동'),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
 export function ApiFameRanking() {
   return applyDecorators(
     ApiOperation({

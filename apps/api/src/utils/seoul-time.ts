@@ -12,7 +12,7 @@ import {
 
 const inSeoul = tz('Asia/Seoul')
 const THURSDAY = 4
-const WEEK_RESET_HOUR = 6
+const RESET_HOUR = 6
 
 export function formatSeoulTime(date: Date, pattern: string): string {
   return format(date, pattern, { in: inSeoul })
@@ -30,12 +30,17 @@ export function parseSeoulTime(text: string, pattern: string): Date | null {
 
 // 던파의 한 주는 목요일 06:00(KST)에 시작한다. 한국은 서머타임이 없어 시각을 더하고 빼도 어긋나지 않는다.
 export function startOfResetWeek(date: Date): Date {
-  const start = startOfWeek(subHours(date, WEEK_RESET_HOUR), {
+  const start = startOfWeek(subHours(date, RESET_HOUR), {
     weekStartsOn: THURSDAY,
     in: inSeoul
   })
 
-  return new Date(addHours(start, WEEK_RESET_HOUR))
+  return new Date(addHours(start, RESET_HOUR))
+}
+
+// 던파의 하루도 06:00(KST)에 바뀐다. 그 전 기록은 전날로 센다.
+export function formatResetDate(date: Date): string {
+  return formatSeoulTime(subHours(date, RESET_HOUR), 'yyyy-MM-dd')
 }
 
 export function startOfNextSeoulDay(date: Date): Date {

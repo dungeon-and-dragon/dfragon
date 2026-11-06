@@ -1,5 +1,11 @@
 import type { StoredCharacter, StoredGuild } from '@dfragon/database'
+import { CharacterDetailFailure } from '../characters/details/errors.js'
 import type { RequestTimelineSync } from '../characters/timeline/queue.js'
+import {
+  type AdventureActivity,
+  type AdventureActivityRead,
+  emptySeasonActivity
+} from './activity.js'
 import type { AdventureWeeklyClears } from './weekly.js'
 
 export type AdventureCharacters = {
@@ -21,12 +27,17 @@ export interface AdventureGuildReader {
   readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]>
   readGuild(guildId: string): Promise<StoredGuild>
   readAdventureWeeklyClears(adventureName: string): Promise<AdventureWeeklyClears>
+  readAdventureActivity(
+    adventureName: string,
+    seasonId: number | undefined
+  ): Promise<AdventureActivityRead | undefined>
 }
 
 export interface AdventureGuildService {
   adventure(adventureName: string): Promise<AdventureCharacters>
   guild(guildId: string): Promise<GuildMembers>
   adventureWeekly(adventureName: string): Promise<AdventureWeekly>
+  adventureActivity(adventureName: string, seasonId: number | undefined): Promise<AdventureActivity>
 }
 
 function averageFame(members: readonly StoredCharacter[]): number | null {
@@ -67,6 +78,17 @@ export function createAdventureGuildService(
       }
 
       return { adventureName, ...weekly }
+    },
+    async adventureActivity(adventureName, seasonId) {
+      const read = await reader.readAdventureActivity(adventureName, seasonId)
+      if (read === undefined) {
+        throw new CharacterDetailFailure('query')
+      }
+      for (const { serverId, characterId } of read.characters) {
+        requestTimelineSync({ serverId, characterId })
+      }
+
+      return read.activity
     }
   }
 }
@@ -75,7 +97,17 @@ export const emptyAdventureGuildService = createAdventureGuildService(
   {
     readAdventureCharacters: async () => [],
     readGuild: async () => ({ guildName: null, members: [] }),
-    readAdventureWeeklyClears: async () => ({ clearNames: [], characters: [] })
+    readAdventureWeeklyClears: async () => ({ clearNames: [], characters: [] }),
+    readAdventureActivity: async (_adventureName, seasonId) => {
+      if (seasonId !== undefined) {
+        return undefined
+      }
+
+      return {
+        characters: [],
+        activity: { seasons: [], season: null, ...emptySeasonActivity() }
+      }
+    }
   },
   () => undefined
 )
