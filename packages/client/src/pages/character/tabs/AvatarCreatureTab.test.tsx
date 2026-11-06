@@ -3,10 +3,12 @@ import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { itemIconUrl } from '@dfragon/client-core/lib/character-item'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
 import { styles as dotTones } from './avatar/CreatureTable.style'
 import { styles as rarityTones } from './avatar/ItemName.style'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
+import { styles as partStyles, raritySolid } from './equipment/item-parts.style'
 
 let container: HTMLDivElement
 let root: Root
@@ -75,6 +77,26 @@ it('딜러 아바타 표는 응답 순서대로 부위, 등급 색 이름과 클
   const [, avatarCell, , emblemCell] = rows[0]!.querySelectorAll('td')
   expect(hasTone(avatarCell?.querySelector('b'), rarityTones.rare)).toBe(true)
   expect(hasTone(emblemCell?.querySelector('b'), rarityTones.unique)).toBe(true)
+})
+
+it('아바타 아이콘 오른쪽에 클론 아이콘을 보이고, 클론이 없으면 같은 크기의 빈 칸을 남긴다', async () => {
+  await render(characterDetailFixture('dealer'))
+
+  const rows = [...container.querySelectorAll('section[aria-label="아바타"] tbody tr')]
+  const avatarCell = (row: Element) => row.querySelectorAll('td')[1]!
+  const headgearIcons = [...avatarCell(rows[0]!).querySelectorAll('img')]
+  expect(headgearIcons.map((icon) => icon.getAttribute('src'))).toEqual([
+    itemIconUrl(characterDetailFixture('dealer').avatar[0]!.itemId!),
+    itemIconUrl('9d2ba5dfe1f49c5a5e31dd0d6665d1de')
+  ])
+  expect(hasTone(headgearIcons[1], raritySolid.unknown)).toBe(true)
+
+  const topCell = avatarCell(rows[3]!)
+  expect(topCell.querySelectorAll('img')).toHaveLength(1)
+  const space = topCell.querySelector('img + span[aria-hidden="true"]')
+  const spaceClasses = stylex.props(partStyles.iconSpace).className?.split(' ') ?? []
+  expect(spaceClasses.length).toBeGreaterThan(0)
+  expect(spaceClasses.every((name) => space?.classList.contains(name))).toBe(true)
 })
 
 it('크리쳐 행 아래에 아티팩트 3개를 슬롯 색 점과 등급 색 이름으로 보인다', async () => {
