@@ -119,7 +119,9 @@ try {
     weeklyClears: [],
     seasonClears: [],
     enhancements: [],
-    acquisitions: []
+    acquisitions: [],
+    enhancementsCursor: null,
+    acquisitionsCursor: null
   })
 
   let release
