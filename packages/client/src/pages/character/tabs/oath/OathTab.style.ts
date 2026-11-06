@@ -13,23 +13,6 @@ export const styles = stylex.create({
     borderInlineEndColor: colors.borderDefault
   },
   side: { flexShrink: 0, width: SIDE_WIDTH },
-  heading: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: space.s8,
-    height: 32,
-    margin: 0,
-    paddingInline: space.s16,
-    backgroundColor: colors.bgInset,
-    color: colors.fgSubtle,
-    fontSize: 12,
-    lineHeight: '16px',
-    fontWeight: 500,
-    borderBottomWidth: 1,
-    borderBottomStyle: 'solid',
-    borderBottomColor: colors.borderDefault
-  },
-  count: { color: colors.fgMuted, fontWeight: 500, fontVariantNumeric: 'tabular-nums' },
   slotColumn: { width: 56 },
   pointColumn: { width: 110 },
   list: { margin: 0, padding: 0 },

@@ -1,13 +1,15 @@
 import * as stylex from '@stylexjs/stylex'
+import { toItemView } from '@dfragon/client-core/lib/character-item'
 import {
   buffOptionLines,
   buffSkillInfoOf
 } from '@dfragon/client-core/shared/search/character-detail-display'
+import { AvatarTable } from './avatar/AvatarTable'
 import { styles } from './buff/BuffTab.style'
 import type { CharacterTabProps } from './character-tab-props'
-import { AvatarTable } from './avatar/AvatarTable'
-import { ItemName } from './avatar/ItemName'
-import { styles as layout } from './avatar/detail-tab.style'
+import { styles as partStyles } from './equipment/item-parts.style'
+import { styles as tableStyles } from './equipment/item-table.style'
+import { SlotItemTable } from './equipment/SlotItemTable'
 
 export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   const { buff } = detail
@@ -17,68 +19,67 @@ export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   const creatures = buff.creature?.creature ?? []
 
   return (
-    <div {...stylex.props(layout.tab)}>
-      {skillInfo?.name != null && (
-        <section aria-label="버프 스킬" {...stylex.props(styles.skill)}>
-          <div {...stylex.props(styles.skillTitle)}>
-            <h2 {...stylex.props(styles.skillName)}>{skillInfo.name}</h2>
-            {skillInfo.option?.level != null && (
-              <span {...stylex.props(styles.skillLevel)}>{`Lv.${skillInfo.option.level}`}</span>
-            )}
-          </div>
-          {skillInfo.option != null && (
-            <ul {...stylex.props(styles.optionLines)}>
-              {buffOptionLines(skillInfo.option).map((line, index) => (
-                <li key={index}>{line}</li>
-              ))}
-            </ul>
-          )}
+    <div {...stylex.props(tableStyles.root)}>
+      {skillInfo?.name != null && <BuffSkill name={skillInfo.name} option={skillInfo.option} />}
+      {equipment.length > 0 && (
+        <section aria-label="버프 강화 장비">
+          <h3 {...stylex.props(tableStyles.heading)}>장비</h3>
+          <SlotItemTable
+            itemLabel="장비"
+            rows={equipment.map((item, index) => {
+              const key = item.slotId ?? String(index)
+
+              return { key, slot: item.slotName, item: toItemView(item) }
+            })}
+          />
         </section>
       )}
-      <div {...stylex.props(styles.columns)}>
-        {equipment.length > 0 && (
-          <section aria-label="버프 강화 장비" {...stylex.props(layout.section, styles.equipment)}>
-            <h3 {...stylex.props(layout.heading)}>장비</h3>
-            <table {...stylex.props(layout.table)}>
-              <tbody>
-                {equipment.map((item, index) => (
-                  <tr key={item.slotId ?? index}>
-                    <td {...stylex.props(layout.cell, layout.slot)}>{item.slotName}</td>
-                    <td {...stylex.props(layout.cell)}>
-                      {item.itemName != null && (
-                        <ItemName name={item.itemName} rarity={item.itemRarity} />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        )}
-        <div {...stylex.props(styles.side)}>
-          {avatars.length > 0 && (
-            <section aria-label="버프 강화 아바타" {...stylex.props(layout.section)}>
-              <h3 {...stylex.props(layout.heading)}>아바타</h3>
-              <AvatarTable avatars={avatars} />
-            </section>
-          )}
-          {creatures.length > 0 && (
-            <section aria-label="버프 강화 크리쳐" {...stylex.props(layout.section)}>
-              <h3 {...stylex.props(layout.heading)}>크리쳐</h3>
-              <ul {...stylex.props(styles.creatures)}>
-                {creatures.map(
-                  (creature, index) =>
-                    creature.itemName != null && (
-                      <li key={creature.itemId ?? index}>
-                        <ItemName name={creature.itemName} rarity={creature.itemRarity} />
-                      </li>
-                    )
-                )}
-              </ul>
-            </section>
-          )}
-        </div>
-      </div>
+      {avatars.length > 0 && (
+        <section aria-label="버프 강화 아바타">
+          <h3 {...stylex.props(tableStyles.heading)}>아바타</h3>
+          <AvatarTable avatars={avatars} />
+        </section>
+      )}
+      {creatures.length > 0 && (
+        <section aria-label="버프 강화 크리쳐">
+          <h3 {...stylex.props(tableStyles.heading)}>크리쳐</h3>
+          <SlotItemTable
+            itemLabel="크리쳐"
+            rows={creatures.flatMap((creature, index) => {
+              if (creature.itemName == null) {
+                return []
+              }
+
+              const key = creature.itemId ?? String(index)
+
+              return [{ key, slot: '크리쳐', item: toItemView(creature) }]
+            })}
+          />
+        </section>
+      )}
     </div>
+  )
+}
+
+type BuffSkillOption = NonNullable<ReturnType<typeof buffSkillInfoOf>>['option']
+
+function BuffSkill({ name, option }: { name: string; option: BuffSkillOption }): React.JSX.Element {
+  return (
+    <section aria-label="버프 스킬">
+      <div {...stylex.props(partStyles.strip)}>
+        <span {...stylex.props(partStyles.stripLabel)}>버프 스킬</span>
+        <h2 {...stylex.props(styles.skillName)}>{name}</h2>
+        {option?.level != null && (
+          <span {...stylex.props(partStyles.stripMuted)}>{`Lv.${option.level}`}</span>
+        )}
+      </div>
+      {option != null && (
+        <ul {...stylex.props(styles.optionLines)}>
+          {buffOptionLines(option).map((line, index) => (
+            <li key={index}>{line}</li>
+          ))}
+        </ul>
+      )}
+    </section>
   )
 }
