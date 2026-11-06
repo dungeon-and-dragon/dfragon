@@ -1,6 +1,5 @@
 import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { toItemView } from '@dfragon/client-core/lib/character-item'
 import { buffSkillInfoOf } from '@dfragon/client-core/shared/search/character-detail-display'
 import {
   buffSkillIconOf,
@@ -12,7 +11,6 @@ import { styles } from './buff/BuffTab.style'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as partStyles } from './equipment/item-parts.style'
 import { styles as tableStyles } from './equipment/item-table.style'
-import { SlotItemTable } from './equipment/SlotItemTable'
 import { SkillSprite } from './skill/SkillSprite'
 import { styles as skillStyles } from './skill/SkillTab.style'
 
@@ -21,7 +19,7 @@ export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   const skillInfo = buffSkillInfoOf(buff)
   const equipment = buff.equipment?.equipment ?? []
   const avatars = buff.avatar?.avatar ?? []
-  const creatures = buff.creature?.creature ?? []
+  const creatures = (buff.creature?.creature ?? []).filter(({ itemName }) => itemName != null)
   const icon = useBuffSkillIcon(detail, skillInfo?.name ?? null)
 
   return (
@@ -29,27 +27,10 @@ export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
       {skillInfo?.name != null && (
         <BuffSkill name={skillInfo.name} icon={icon} option={skillInfo.option} />
       )}
-      {(equipment.length > 0 || avatars.length > 0) && (
-        <section aria-label="버프 강화 장비, 아바타">
-          <h3 {...stylex.props(tableStyles.heading)}>장비, 아바타</h3>
-          <BuffGearTable equipment={equipment} avatars={avatars} />
-        </section>
-      )}
-      {creatures.length > 0 && (
-        <section aria-label="버프 강화 크리쳐">
-          <h3 {...stylex.props(tableStyles.heading)}>크리쳐</h3>
-          <SlotItemTable
-            itemLabel="크리쳐"
-            rows={creatures.flatMap((creature, index) => {
-              if (creature.itemName == null) {
-                return []
-              }
-
-              const key = creature.itemId ?? String(index)
-
-              return [{ key, slot: '크리쳐', item: toItemView(creature) }]
-            })}
-          />
+      {(equipment.length > 0 || avatars.length > 0 || creatures.length > 0) && (
+        <section aria-label="버프 강화 장비, 아바타, 크리쳐">
+          <h3 {...stylex.props(tableStyles.heading)}>장비, 아바타, 크리쳐</h3>
+          <BuffGearTable equipment={equipment} avatars={avatars} creatures={creatures} />
         </section>
       )}
     </div>
