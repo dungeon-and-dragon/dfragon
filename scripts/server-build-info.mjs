@@ -4,9 +4,11 @@ import { fileURLToPath } from 'node:url'
 
 const SOURCE_COMMIT_PATTERN = /^[0-9a-f]{40}$/
 
+const SERVICES = ['api', 'web']
+
 export function createServerBuildInfo(service, commit) {
-  if (service !== 'api') {
-    throw new Error('Expected the API service.')
+  if (!SERVICES.includes(service)) {
+    throw new Error('Expected a product image service.')
   }
 
   if (

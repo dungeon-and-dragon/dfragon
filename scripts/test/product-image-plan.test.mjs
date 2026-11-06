@@ -15,20 +15,29 @@ import { createProductImageApiFixture } from './fixtures/task-tools/product-imag
 import { createProductImageCliFixture } from './fixtures/task-tools/product-image-cli.mjs'
 import { createProductImageRepository as repository } from './fixtures/task-tools/product-image-repository.mjs'
 
-const allServices = ['api']
+const allServices = ['api', 'web']
 
 test('API 경로는 API 이미지를 선택한다', () => {
   assert.deepEqual(selectServices(['apps/api/src/main.ts']), ['api'])
   assert.deepEqual(selectServices(['apps/api/Dockerfile', 'apps/api/src/main.ts']), ['api'])
 })
 
+test('웹 경로는 웹 이미지를 선택한다', () => {
+  assert.deepEqual(selectServices(['apps/web/src/main.tsx']), ['web'])
+  assert.deepEqual(selectServices(['apps/web/Caddyfile', 'apps/api/src/main.ts']), allServices)
+})
+
 test('공용 빌드 입력은 모든 서비스를 선택한다', () => {
   for (const path of [
+    'packages/client/src/site/web/index.ts',
+    'packages/client-core/src/ocr.ts',
     'packages/database/src/migrate.ts',
     'packages/lib/src/index.ts',
     'packages/neople/src/client.ts',
     'packages/licenses/notices/unknown.txt',
     'packages/models/score-engine',
+    'packages/models/ocr-finetuned',
+    'packages/ui/src/button.tsx',
     'package.json',
     'pnpm-lock.yaml',
     'pnpm-workspace.yaml',
@@ -52,10 +61,10 @@ test('문서, 무관한 앱, 다른 tooling과 비슷한 접두사의 경로는 
       'packages/lib/README.md',
       'assets/logo.svg',
       'apps/desktop/src/main.ts',
-      'apps/web/src/main.tsx',
+      'apps/web/README.md',
       'scripts/create-app.mjs',
       'apps/api-copy/src/main.ts',
-      'packages/ui/src/button.tsx',
+      'apps/web-copy/src/main.tsx',
       'packages/library/src/main.ts',
       'packages/ui-kit/src/button.tsx',
       'docs/apps/accounts/src/main.ts'
@@ -111,7 +120,7 @@ for (const [name, change] of [
       sourceCommit
     })
 
-    assert.deepEqual(plan, { sourceCommit, services: allServices })
+    assert.deepEqual(plan, { sourceCommit, services: ['api'] })
   })
 }
 
@@ -187,7 +196,7 @@ test('계획은 commit 불일치, 알 수 없는 서비스, 중복, 잘못된 �
     { sourceCommit: 'b'.repeat(40), services: ['api'] },
     { sourceCommit: 'invalid', services: ['api'] },
     { sourceCommit, services: 'api' },
-    { sourceCommit, services: ['web'] },
+    { sourceCommit, services: ['desktop'] },
     { sourceCommit, services: ['api', 'api'] }
   ]) {
     assert.throws(() => validatePlan(plan, sourceCommit))
@@ -318,7 +327,7 @@ test('CLI output의 읽기, 검증, 쓰기 실패는 기존 matrix를 변경하�
     },
     {
       planBody: JSON.stringify({ sourceCommit, services: ['api', 'api'] }),
-      error: 'Expected a plan with unique api services'
+      error: 'Expected a plan with unique product image services'
     },
     { outputPath: '', error: 'Expected GITHUB_OUTPUT for product image planning' },
     { outputPath: directoryOutput, error: 'Could not write the product image planning output' }
@@ -416,7 +425,7 @@ test('catch-up은 지운 서비스가 남은 이전 baseline을 거절하지 않
         ...options,
         plan: { sourceCommit, services: ['accounts'] }
       }),
-    { message: 'Expected a plan with unique api services' }
+    { message: 'Expected a plan with unique product image services' }
   )
 })
 
@@ -440,7 +449,7 @@ test('CLI catch-up에 지정한 baseline이 읽기, 검증에 실패하면 기�
     {
       path: baselinePath,
       body: JSON.stringify({ sourceCommit: repo.initial, services: ['unknown'] }),
-      error: 'Expected a plan with unique api services'
+      error: 'Expected a plan with unique product image services'
     }
   ]) {
     writeFileSync(baselinePath, options.body)

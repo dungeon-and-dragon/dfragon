@@ -76,6 +76,19 @@ pnpm exec wrangler dev --env dev --var "OCR_ASSET_VERSION:$(pnpm --silent upload
 5. Cloudflare의 `dfragon.com` DNS에 apex(`dfragon.com`)와 `dev` 이름의 레코드를 직접 넣지 않습니다. 배포가 custom domain의 DNS 레코드를 직접 만들며, 같은 이름의 레코드가 있으면 배포가 실패합니다. `api.dfragon.com`은 운영 API가 쓰는 레코드라 건드리지 않습니다.
 6. `www.dfragon.com`을 `https://dfragon.com`으로 보냅니다. `www` 이름에 proxied 레코드(AAAA `100::`)를 두고, Rules → Redirect Rules에서 호스트가 `www.dfragon.com`인 요청을 경로와 query를 유지해 `https://dfragon.com`으로 301 리디렉션합니다.
 
+### 웹 이미지
+
+Cloudflare를 걷어낸 뒤 node1이 사이트를 맡도록 [`Dockerfile`](Dockerfile)이 `dist`를 Caddy가 내주는 이미지로 만듭니다. Product Images가 `ghcr.io/dungeon-and-dragon/dfragon/web:<commit SHA>`로 발행하며([서버 이미지](../api/README.md#서버-이미지)), 이 이미지로 바꾸기 전까지 사이트는 위의 Worker가 맡습니다. 빌드는 `ocr-finetuned` submodule이 있어야 하며 OCR 자산(`/ocr/`)을 이미지에 그대로 넣습니다. `/api/*`, `/skilltab/*`과 TLS는 node1의 host Caddy가 맡고 이 이미지는 다루지 않습니다.
+
+[`Caddyfile`](Caddyfile)은 Worker와 `public/_headers`가 하던 응답을 그대로 냅니다. 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙이고, `/assets/*`의 파일은 1년 동안 캐시하며, `/ocr/*`와 나머지 파일은 `Cache-Control: no-cache`와 ETag로 매번 확인합니다. 파일이 없는 주소는 `index.html`을 돌려주지만 `/assets/*`, `/ocr/*`에 없는 파일은 404입니다.
+
+배포 helper는 컨테이너를 `1000:1000` 사용자, 읽기 전용 root, capability 없음, tmpfs `/tmp`로 띄웁니다. 그래서 Caddy는 admin endpoint를 끄고 `:8080`에서 받으며 설정, 데이터 폴더를 `/tmp`에 둡니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받아 `/app/build-info.json`에 기록합니다. 저장소 root에서 같은 제약으로 띄워 확인합니다.
+
+```sh
+docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
+docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-web:local
+```
+
 ## 구성
 
 - `index.html`: 제목, 설명, OG 메타 태그. OG 이미지는 두지 않아 링크 미리보기는 제목과 설명만 보입니다(2026-10-31 결정, [Issue #1036](https://github.com/dungeon-and-dragon/dfragon/issues/1036)).
