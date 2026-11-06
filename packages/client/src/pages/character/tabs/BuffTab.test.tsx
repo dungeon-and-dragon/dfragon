@@ -4,7 +4,11 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
+import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
+import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { styles as rarityTones } from './avatar/ItemName.style'
 import { BuffTab } from './BuffTab'
 
@@ -24,34 +28,78 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function render(detail: CharacterDetailView): Promise<void> {
-  await act(async () => root.render(<BuffTab detail={detail} />))
+// 저장소 fixture(아처 眞 뮤즈)의 버프 스킬 이름으로 만든 합성 배치다.
+const MUSE_CATALOG: SkillWindowCatalog = {
+  pvfSha256: 'synthetic',
+  jobs: [
+    {
+      jobId: 'archer',
+      jobName: '아처',
+      sprite: 'https://skilltab.test/sprites/archer.png',
+      advancements: [
+        {
+          growtype: 1,
+          name: '뮤즈',
+          awakeningNames: ['眞 뮤즈'],
+          slots: [{ skillId: 48, col: 0, row: 3, nextSkills: [] }]
+        }
+      ],
+      skills: {
+        48: {
+          name: '러블리 템포',
+          kind: 'active',
+          requiredLevel: 30,
+          maxLevel: 40,
+          icon: { x: 56, y: 28 }
+        }
+      }
+    }
+  ]
+}
+
+async function render(
+  detail: CharacterDetailView,
+  host: ClientHost = createTestClientHost()
+): Promise<void> {
+  await act(async () =>
+    root.render(
+      <ClientHostContext value={host}>
+        <TestQueryClient>
+          <BuffTab detail={detail} />
+        </TestQueryClient>
+      </ClientHostContext>
+    )
+  )
 }
 
 function section(label: string): Element | null {
   return container.querySelector(`section[aria-label="${label}"]`)
 }
 
-it('버퍼 버프 스킬은 이름, 레벨과 desc의 {valueN} 자리에 values를 채운 줄을 보인다', async () => {
+it('버퍼 버프 스킬은 이름과 레벨만 보이고 스킬 설명 줄은 보이지 않는다', async () => {
   await render(characterDetailFixture('buffer'))
 
   const skill = section('버프 스킬')!
   expect(skill.querySelector('h2')?.textContent).toBe('러블리 템포')
   expect(skill.querySelector('h2 + span')?.textContent).toBe('Lv.30')
-  expect([...skill.querySelectorAll('li')].map((line) => line.textContent)).toEqual([
-    '지속 시간 : 300초',
-    '적중률 증가 : 40.6%',
-    '[뮤즈 전용 효과]',
-    '기본 공격 및 스킬 공격력 증가율 : 70%',
-    '[파티원 전용 효과]',
-    '힘 증가 : 488',
-    '지능 증가 : 488',
-    '물리 공격력 증가 : 92',
-    '마법 공격력 증가 : 92',
-    '독립 공격력 증가 : 92',
-    '[범위 정보]',
-    '버프 적용 범위 : 900px'
-  ])
+  expect(skill.textContent).not.toContain('지속 시간')
+  expect(skill.querySelector('li')).toBeNull()
+})
+
+it('스킬 창 데이터에 그 전직의 버프 스킬이 있으면 이름 대신 그 스킬의 sprite 아이콘을 보인다', async () => {
+  await render(
+    characterDetailFixture('buffer'),
+    createTestClientHost({ getSkillWindowCatalog: async () => MUSE_CATALOG })
+  )
+
+  const name = section('버프 스킬')!.querySelector('h2')!
+  expect(name.textContent).toBe('')
+  const icon = name.querySelector('[role="img"]')
+  expect(icon?.getAttribute('aria-label')).toBe('러블리 템포')
+  // jsdom은 StyleX의 동적 값을 CSS 변수로만 받으므로, style 속성에 sprite 주소와 위치가 들어갔는지 본다.
+  expect(icon?.getAttribute('style')).toMatch(
+    /url\("https:\/\/skilltab\.test\/sprites\/archer\.png"\).*-56px -28px/
+  )
 })
 
 it('버퍼 버프 강화 장비와 아바타는 한 테이블에서 장비 뒤에 아바타 순서로 보인다', async () => {
@@ -74,7 +122,6 @@ it('딜러처럼 버프 강화 장비가 없으면 장비, 아바타 테이블�
 
   const gearRows = [...(section('버프 강화 장비, 아바타')?.querySelectorAll('tbody tr') ?? [])]
   expect(gearRows.map((row) => row.querySelector('td')?.textContent)).toEqual(['상의'])
-  expect(section('버프 스킬')?.querySelector('li')?.textContent).toBe('지속 시간 : -초')
   const creatureCells = section('버프 강화 크리쳐')?.querySelectorAll('tbody td') ?? []
   expect([...creatureCells].map((cell) => cell.textContent)).toEqual(['크리쳐', '2026 쁘띠 발키리'])
 })
