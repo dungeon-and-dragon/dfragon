@@ -7,8 +7,10 @@ import {
   readGuild,
   recordCharacter,
   recordCharacterBasic,
+  replaceEnhancementBackfillRange,
   replaceTimelineRange
 } from '@dfragon/database'
+import { emptySeasonActivity, readAdventureActivity } from './dist/adventure-guild/activity.js'
 import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
@@ -117,6 +119,15 @@ try {
     raidName: null,
     data: { regionName }
   })
+  const item = (code, occurredAt, itemRarity, data = {}) => ({
+    code,
+    occurredAt,
+    name: '합성',
+    itemId: null,
+    itemName: null,
+    itemRarity,
+    data
+  })
   const clears = [
     [
       { serverId: 'siroco', characterId: 'adventure-high' },
@@ -124,17 +135,46 @@ try {
         raid(201, '04-02T05:59:00', '무너진 성자 미카엘라'),
         raid(210, '04-02T06:00:00', '디레지에 레이드'),
         raid(201, '04-02T06:30:00', '합성 목록 밖 레이드')
+      ],
+      [
+        item(505, at('04-02T10:00:00'), '태초'),
+        item(402, at('04-02T11:00:00'), '에픽', {
+          before: 0,
+          after: 12,
+          result: false,
+          safe: false
+        })
       ]
     ],
-    [{ serverId: 'cain', characterId: 'adventure-low' }, [legion('04-02T07:00:00', '아포칼립스')]],
+    [
+      { serverId: 'cain', characterId: 'adventure-low' },
+      [legion('04-02T07:00:00', '아포칼립스')],
+      []
+    ],
     [
       { serverId: 'hilder', characterId: 'guild-no-fame' },
-      [raid(201, '04-02T08:00:00', '무너진 성자 미카엘라')]
+      [raid(201, '04-02T08:00:00', '무너진 성자 미카엘라')],
+      [item(505, at('04-02T09:00:00'), '신화')]
     ]
   ]
-  for (const [character, events] of clears) {
-    await replaceTimelineRange(client, character, range, events, [])
+  for (const [character, events, items] of clears) {
+    await replaceTimelineRange(client, character, range, events, items)
   }
+  // 중천 전 시즌에는 강화 백필 행만 들어온다. 선계 기간에 하나 넣어 집계하지 않는지 본다.
+  await replaceEnhancementBackfillRange(
+    client,
+    { serverId: 'siroco', characterId: 'adventure-high' },
+    { start: new Date('2024-01-01T00:00:00+09:00'), end: new Date('2024-01-31T00:00:00+09:00') },
+    [401, 402, 403],
+    [
+      item(401, new Date('2024-01-10T12:00:00+09:00'), '에픽', {
+        before: 11,
+        after: 12,
+        result: true,
+        safe: false
+      })
+    ]
+  )
 
   const weekly = await readAdventureWeeklyClears(client, adventureName, now)
   const fixedClearNames = [
@@ -157,6 +197,90 @@ try {
     clearNames: fixedClearNames,
     characters: []
   })
+
+  const seasonIds = [5, 6, 7, 8, 9, 10, 11]
+  const activity = await readAdventureActivity(client, adventureName, undefined, now)
+  assert.deepEqual(
+    activity.characters.map(({ characterId }) => characterId),
+    adventure.map(({ characterId }) => characterId)
+  )
+  assert.deepEqual(
+    activity.activity.seasons.map(({ id, available }) => [id, available]),
+    seasonIds.map((id) => [id, id >= 10])
+  )
+  const seasonActivity = {
+    summary: {
+      raids: [
+        { name: '디레지에 레이드', count: 1 },
+        { name: '무너진 성자 미카엘라', count: 1 },
+        { name: '합성 목록 밖 레이드', count: 1 }
+      ],
+      legions: [{ name: '아포칼립스', count: 1 }],
+      items: { legendary: 0, epic: 0, primeval: 1, mythic: 0 },
+      enhancement: {
+        ...emptySeasonActivity().summary.enhancement,
+        attempts: 1,
+        amplify: [{ target: 12, attempts: 1, successes: 0 }]
+      }
+    },
+    days: [
+      {
+        date: '2026-04-01',
+        raid: 1,
+        legion: 0,
+        item: 0,
+        enhance: 0,
+        primeval: false,
+        mythic: false,
+        highEnhancement: false
+      },
+      {
+        date: '2026-04-02',
+        raid: 2,
+        legion: 1,
+        item: 1,
+        enhance: 1,
+        primeval: true,
+        mythic: false,
+        highEnhancement: true
+      }
+    ]
+  }
+  assert.deepEqual(activity.activity, {
+    seasons: activity.activity.seasons,
+    season: { id: 11, startsAt: new Date('2026-03-26T06:00:00+09:00'), endsAt: null },
+    ...seasonActivity
+  })
+  const emptyActivity = async (name, seasonId) => {
+    const read = await readAdventureActivity(client, name, seasonId, now)
+
+    return {
+      season: read.activity.season,
+      summary: read.activity.summary,
+      days: read.activity.days
+    }
+  }
+  assert.deepEqual(await emptyActivity('없는모험단', undefined), {
+    season: activity.activity.season,
+    ...emptySeasonActivity()
+  })
+  assert.deepEqual(await emptyActivity(adventureName, 10), {
+    season: {
+      id: 10,
+      startsAt: new Date('2025-01-09T06:00:00+09:00'),
+      endsAt: new Date('2026-03-26T06:00:00+09:00')
+    },
+    ...emptySeasonActivity()
+  })
+  assert.deepEqual(await emptyActivity(adventureName, 9), {
+    season: {
+      id: 9,
+      startsAt: new Date('2023-09-14T06:00:00+09:00'),
+      endsAt: new Date('2025-01-09T06:00:00+09:00')
+    },
+    ...emptySeasonActivity()
+  })
+  assert.equal(await readAdventureActivity(client, adventureName, 12, now), undefined)
 
   // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결까지 확인한다.
   const get = async (path) => {
@@ -204,6 +328,15 @@ try {
       ['adventure-no-basic', []]
     ]
   )
+  // 지금 시각에 시즌이 더 생겨도 같은 값을 보도록 천해천을 골라 읽는다.
+  const activityAnswer = await get(
+    `/adventures/${encodeURIComponent(adventureName)}/activity?season=11`
+  )
+  assert.deepEqual(
+    activityAnswer.seasons.slice(0, seasonIds.length).map(({ id }) => id),
+    seasonIds
+  )
+  assert.deepEqual({ summary: activityAnswer.summary, days: activityAnswer.days }, seasonActivity)
   assert.deepEqual(await get('/guilds/missing-guild'), {
     guildId: 'missing-guild',
     guildName: null,

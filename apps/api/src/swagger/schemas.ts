@@ -183,6 +183,21 @@ const clearName = object({
   kind: timelineClearKind,
   name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' }
 })
+const activityCount: SchemaObject = { type: 'integer', minimum: 0 }
+const activityNameCounts = (description: string): SchemaObject => ({
+  type: 'array',
+  description,
+  items: object({ name: text, count: activityCount })
+})
+const enhancementTargets = (description: string): SchemaObject => ({
+  type: 'array',
+  description,
+  items: object({
+    target: { type: 'integer', description: '도전한 단계(타임라인 after)' },
+    attempts: activityCount,
+    successes: activityCount
+  })
+})
 const storedCharacters = (description: string): SchemaObject => ({
   type: 'array',
   description,
@@ -403,6 +418,62 @@ export const apiSchemas: Record<string, SchemaObject> = {
           description:
             '이번 주(목요일 06:00 KST부터) 클리어한 이름. 여러 번 클리어해도 한 번이며 clearNames와 같은 순서입니다.',
           items: clearName
+        }
+      })
+    }
+  }),
+  AdventureActivity: object({
+    seasons: {
+      type: 'array',
+      description: '시작한 시즌, 오래된 순',
+      items: object({
+        id: { type: 'integer', description: '시즌 번호' },
+        name: text,
+        startsAt: timestamp,
+        available: { type: 'boolean', description: '타임라인을 받기 시작한 중천(10) 이후 시즌인지' }
+      })
+    },
+    season: {
+      ...object({
+        id: { type: 'integer' },
+        startsAt: timestamp,
+        endsAt: { ...timestamp, nullable: true, description: '다음 시즌 시작. 지금 시즌은 null' }
+      }),
+      nullable: true,
+      description: '집계한 시즌. 시즌이 없는 DB 설정 없는 API에서만 null'
+    },
+    summary: object({
+      raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
+      legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+      items: object({
+        legendary: activityCount,
+        epic: activityCount,
+        primeval: { ...activityCount, description: '태초' },
+        mythic: { ...activityCount, description: '신화' }
+      }),
+      enhancement: object({
+        attempts: { ...activityCount, description: '강화, 증폭, 재련(401~403) 전체 횟수' },
+        amplify: enhancementTargets('10증폭 이상 도전의 단계별 시도와 성공, 낮은 단계 순'),
+        reinforce: enhancementTargets('12강 이상 도전의 단계별 시도와 성공, 낮은 단계 순'),
+        amplifyBelow10: activityCount,
+        reinforceBelow12: activityCount,
+        refine: activityCount
+      })
+    }),
+    days: {
+      type: 'array',
+      description: '활동이 있는 날만, 오래된 순. 하루는 06:00 KST에 바뀝니다.',
+      items: object({
+        date: { type: 'string', format: 'date' },
+        raid: activityCount,
+        legion: activityCount,
+        item: { ...activityCount, description: '레전더리 이상 아이템 획득 수' },
+        enhance: { ...activityCount, description: '강화, 증폭, 재련 횟수' },
+        primeval: { type: 'boolean', description: '태초를 얻었는지' },
+        mythic: { type: 'boolean', description: '신화를 얻었는지' },
+        highEnhancement: {
+          type: 'boolean',
+          description: '10증폭 이상이나 12강 이상 도전이 있었는지'
         }
       })
     }

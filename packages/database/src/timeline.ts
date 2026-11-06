@@ -55,6 +55,14 @@ export type TimelineItemRow = {
 
 export type CharacterTimelineEventRow = TimelineCharacter & TimelineEventRow
 
+export type CharacterTimelineItemRow = TimelineCharacter & TimelineItemRow
+
+export type StoredSeason = {
+  id: number
+  name: string
+  startsAt: Date
+}
+
 export type TimelineItemCursor = {
   occurredAt: Date
   id: bigint
@@ -255,6 +263,13 @@ export async function readCurrentSeasonStart(
   return season?.startsAt
 }
 
+export function readSeasons(client: DatabaseClient): Promise<StoredSeason[]> {
+  return client.season.findMany({
+    orderBy: { startsAt: 'asc' },
+    select: { id: true, name: true, startsAt: true }
+  })
+}
+
 export function readTimelineEvents(
   client: DatabaseClient,
   character: TimelineCharacter,
@@ -274,13 +289,14 @@ export function readCharactersTimelineEvents(
   client: DatabaseClient,
   characters: readonly TimelineCharacter[],
   codes: readonly number[],
-  since: Date
+  since: Date,
+  until?: Date
 ): Promise<CharacterTimelineEventRow[]> {
   return client.timelineEvent.findMany({
     where: {
       OR: characters.map(({ serverId, characterId }) => ({ serverId, characterId })),
       code: { in: [...codes] },
-      occurredAt: { gte: since }
+      occurredAt: { gte: since, lt: until }
     },
     orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
     select: {
@@ -290,6 +306,35 @@ export function readCharactersTimelineEvents(
       occurredAt: true,
       name: true,
       raidName: true,
+      data: true
+    }
+  })
+}
+
+export function readCharactersTimelineItems(
+  client: DatabaseClient,
+  characters: readonly TimelineCharacter[],
+  codes: readonly number[],
+  since: Date,
+  until?: Date
+): Promise<CharacterTimelineItemRow[]> {
+  return client.timelineItem.findMany({
+    where: {
+      OR: characters.map(({ serverId, characterId }) => ({ serverId, characterId })),
+      code: { in: [...codes] },
+      occurredAt: { gte: since, lt: until }
+    },
+    orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+    select: {
+      serverId: true,
+      characterId: true,
+      id: true,
+      code: true,
+      occurredAt: true,
+      name: true,
+      itemId: true,
+      itemName: true,
+      itemRarity: true,
       data: true
     }
   })
