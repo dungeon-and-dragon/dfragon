@@ -11,9 +11,10 @@ const brandIcon = new URL('../assets/dfragon-icon.png', import.meta.url).href
 
 type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
 
-// 랭킹, 통계는 그 화면이 merge될 때 내 모험단 앞에 더한다.
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '파티, 공대', to: '/' },
+  { label: '랭킹', to: '/rankings' },
+  { label: '통계', to: '/stats' },
   { label: '내 모험단', to: '/my' },
   { label: '즐겨찾기', to: '/favorites' }
 ]
@@ -34,7 +35,7 @@ export function GlobalBar(): React.JSX.Element {
             <Link
               key={item.to}
               to={item.to}
-              activeOptions={{ exact: true }}
+              activeOptions={{ exact: true, includeSearch: false }}
               {...stylex.props(styles.menuItem)}
             >
               {({ isActive }) => (
