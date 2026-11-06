@@ -208,7 +208,7 @@ test('후보 검색 HEAD는 GET처럼 공급자를 불러 200으로 답한다', 
   assert.equal(calls, 1)
 })
 
-test('실제 HTTP에서 후보 검색은 all과 match를 고정하고 일반 검색은 full을 유지한다', async (t) => {
+test('실제 HTTP에서 후보 검색은 all과 match를 고정하고 일반 검색은 full, 한 글자면 match로 찾는다', async (t) => {
   const requests: Array<{ url: URL; apiKey: string | string[] | undefined }> = []
   const provider = createServer((request, response) => {
     assert(request.url)
@@ -267,10 +267,14 @@ test('실제 HTTP에서 후보 검색은 all과 match를 고정하고 일반 검
   })
   assert.equal(requests.at(-1)!.url.searchParams.size, 3)
 
-  const shortFull = await fetch(`${origin}/characters?characterName=A`)
-  assert.equal(shortFull.status, 400)
-  assert.deepEqual(await shortFull.json(), queryError)
-  assert.equal(requests.length, 7)
+  const singleCharacter = await fetch(`${origin}/characters?characterName=A`)
+  assert.equal(singleCharacter.status, 200)
+  assert.deepEqual(Object.fromEntries(requests.at(-1)!.url.searchParams), {
+    characterName: 'A',
+    limit: '10',
+    wordType: 'match'
+  })
+  assert.equal(requests.length, 8)
 })
 
 test('잘못된 후보 query는 정제된 400으로 거절하고 공급자를 호출하지 않는다', async (t) => {

@@ -34,7 +34,7 @@ export function CharacterSearchScreen({
       {isSearchableCharacterName(query.characterName) ? (
         <SearchedCharacterList query={query} />
       ) : (
-        <ListBox name="두 글자 이상 검색할 수 있습니다." />
+        <ListBox name="검색할 수 없는 이름입니다." />
       )}
     </div>
   )

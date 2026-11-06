@@ -88,7 +88,14 @@ test('검색 query는 code point를 세고 대소문자, 분해된 Unicode, 내�
           parseCharacterSearchQuery(
             `/characters?characterName=${encodeURIComponent(characterName)}`
           )
-        if (length === 2 || length === 12) {
+        if (length === 1) {
+          assert.deepEqual(parse(), {
+            characterName,
+            serverId: 'all',
+            limit: 10,
+            wordType: 'match'
+          })
+        } else if (length === 2 || length === 12) {
           assert.deepEqual(parse(), { characterName, serverId: 'all', limit: 10 })
         } else {
           assert.throws(parse, queryFailure)
