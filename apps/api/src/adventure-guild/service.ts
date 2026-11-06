@@ -2,9 +2,12 @@ import type { StoredCharacter, StoredGuild } from '@dfragon/database'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
 import type { RequestTimelineSync } from '../characters/timeline/queue.js'
 import {
+  type ActivityDayDetail,
+  type ActivityDayRange,
   type AdventureActivity,
   type AdventureActivityRead,
-  emptySeasonActivity
+  emptySeasonActivity,
+  toActivityDayDetail
 } from './activity.js'
 import type { AdventureWeeklyClears } from './weekly.js'
 
@@ -31,6 +34,7 @@ export interface AdventureGuildReader {
     adventureName: string,
     seasonId: number | undefined
   ): Promise<AdventureActivityRead | undefined>
+  readAdventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
 }
 
 export interface AdventureGuildService {
@@ -38,6 +42,7 @@ export interface AdventureGuildService {
   guild(guildId: string): Promise<GuildMembers>
   adventureWeekly(adventureName: string): Promise<AdventureWeekly>
   adventureActivity(adventureName: string, seasonId: number | undefined): Promise<AdventureActivity>
+  adventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
 }
 
 function averageFame(members: readonly StoredCharacter[]): number | null {
@@ -89,6 +94,10 @@ export function createAdventureGuildService(
       }
 
       return read.activity
+    },
+    // 하루 상세는 시즌 조회가 이미 동기화를 건 뒤 화면이 부르므로 다시 걸지 않는다.
+    adventureActivityDay(adventureName, day) {
+      return reader.readAdventureActivityDay(adventureName, day)
     }
   }
 }
@@ -107,7 +116,9 @@ export const emptyAdventureGuildService = createAdventureGuildService(
         characters: [],
         activity: { seasons: [], season: null, ...emptySeasonActivity() }
       }
-    }
+    },
+    readAdventureActivityDay: async (_adventureName, day) =>
+      toActivityDayDetail(day, { clears: [], items: [] })
   },
   () => undefined
 )

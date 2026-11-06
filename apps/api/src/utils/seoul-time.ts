@@ -13,6 +13,8 @@ import {
 const inSeoul = tz('Asia/Seoul')
 const THURSDAY = 4
 const RESET_HOUR = 6
+const RESET_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+const RESET_DATE_HOUR_PATTERN = 'yyyy-MM-dd H'
 
 export function formatSeoulTime(date: Date, pattern: string): string {
   return format(date, pattern, { in: inSeoul })
@@ -41,6 +43,14 @@ export function startOfResetWeek(date: Date): Date {
 // 던파의 하루도 06:00(KST)에 바뀐다. 그 전 기록은 전날로 센다.
 export function formatResetDate(date: Date): string {
   return formatSeoulTime(subHours(date, RESET_HOUR), 'yyyy-MM-dd')
+}
+
+export function parseResetDate(text: string): Date | null {
+  if (!RESET_DATE_PATTERN.test(text)) {
+    return null
+  }
+
+  return parseSeoulTime(`${text} ${RESET_HOUR}`, RESET_DATE_HOUR_PATTERN)
 }
 
 export function startOfNextSeoulDay(date: Date): Date {

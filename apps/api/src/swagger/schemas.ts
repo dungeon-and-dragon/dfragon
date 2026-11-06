@@ -453,8 +453,12 @@ export const apiSchemas: Record<string, SchemaObject> = {
       }),
       enhancement: object({
         attempts: { ...activityCount, description: '강화, 증폭, 재련(401~403) 전체 횟수' },
-        amplify: enhancementTargets('10증폭 이상 도전의 단계별 시도와 성공, 낮은 단계 순'),
-        reinforce: enhancementTargets('12강 이상 도전의 단계별 시도와 성공, 낮은 단계 순'),
+        amplify: enhancementTargets(
+          '10증폭 이상 도전의 단계별 시도와 성공, 낮은 단계 순. 강화권, 증폭권 기록(data.ticket)은 뺍니다'
+        ),
+        reinforce: enhancementTargets(
+          '12강 이상 도전의 단계별 시도와 성공, 낮은 단계 순. 강화권, 증폭권 기록(data.ticket)은 뺍니다'
+        ),
         amplifyBelow10: activityCount,
         reinforceBelow12: activityCount,
         refine: activityCount
@@ -475,6 +479,30 @@ export const apiSchemas: Record<string, SchemaObject> = {
           type: 'boolean',
           description: '10증폭 이상이나 12강 이상 도전이 있었는지'
         }
+      })
+    }
+  }),
+  AdventureActivityDay: object({
+    date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
+    raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
+    legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+    items: {
+      type: 'array',
+      description: '레전더리 이상 아이템 획득, 시각 순',
+      items: object({
+        at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
+        name: { ...text, nullable: true, description: 'item_name' },
+        rarity: { type: 'string', enum: ['레전더리', '에픽', '태초', '신화'] }
+      })
+    },
+    enhancements: {
+      type: 'array',
+      description: '강화, 증폭, 재련(401~403) 기록, 시각 순',
+      items: object({
+        at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
+        kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
+        target: { type: 'integer', description: '도전한 단계(타임라인 after)' },
+        success: { type: 'boolean' }
       })
     }
   }),

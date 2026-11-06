@@ -154,11 +154,40 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
   `amplify`는 10증폭 이상, `reinforce`는 12강 이상 도전을 단계별로 센 시도와 성공이고, 그 아래는 `amplifyBelow10`, `reinforceBelow12`, 재련은 `refine`에 횟수만 셉니다.
 - 단계 `target`은 타임라인의 `after`(Neople 설명: 성공 후 변경 예정 수치)입니다.
   실패도 `after`는 도전한 단계이고, 강화권, 증폭권처럼 여러 단계를 한 번에 올리는 기록은 `before + 1`보다 커서 `after`로 셉니다.
+- `amplify`, `reinforce`의 단계별 시도와 성공은 강화권, 증폭권을 쓴 기록(`data.ticket`이 있는 행)을 빼고 셉니다.
+  권 기록도 `attempts`, `days`의 `enhance`, `highEnhancement`에는 들어갑니다.
 - `days`는 활동이 있는 날만 오래된 순으로 줍니다. 하루는 06:00 KST에 바뀌어 05:59 기록은 전날입니다.
   `item`, `enhance`는 위와 같은 기준의 그날 횟수이고, `primeval`, `mythic`은 그날 태초, 신화를 얻었는지, `highEnhancement`는 그날 10증폭 이상이나 12강 이상 도전이 있었는지입니다.
 
 조회는 [모험단 주간 클리어 조회](#모험단-주간-클리어-조회)처럼 캐릭터마다 타임라인 동기화를 queue에 넣고 끝나기를 기다리지 않습니다.
 DB에 없는 모험단은 시즌 목록과 빈 집계를 주고, DB 설정이 없는 API는 `seasons`가 빈 목록, `season`이 `null`인 빈 집계를 줍니다.
+
+### 모험단 하루 활동 상세 조회
+
+`GET /adventures/:adventureName/activity/days/:date`는 [시즌 활동 조회](#모험단-시즌-활동-조회)의 `days` 한 칸에 들어간 기록을 하루치 모두 줍니다.
+`date`는 `YYYY-MM-DD`이고, 그날 06:00 KST부터 다음 날 06:00 KST 전까지가 하루입니다.
+형식이 다르거나 없는 날짜(예: `2026-02-30`)면 400 `INVALID_CHARACTER_QUERY`입니다.
+
+```json
+{
+  "date": "2026-07-18",
+  "raids": [{ "name": "디레지에 레이드", "count": 1 }],
+  "legions": [{ "name": "아포칼립스", "count": 1 }],
+  "items": [{ "at": "2026-07-18T09:58:00+09:00", "name": "한계 : 선명한 광휘 결정", "rarity": "레전더리" }],
+  "enhancements": [{ "at": "2026-07-18T10:02:00+09:00", "kind": "amplify", "target": 10, "success": true }]
+}
+```
+
+- `raids`, `legions`는 그날의 이름별 클리어 수이고 많은 순입니다.
+- `items`는 시즌 조회의 `items`와 같은 기준(획득 코드 가운데 레전더리, 에픽, 태초, 신화)의 기록입니다.
+  `name`은 `item_name`이고, `rarity`는 저장된 등급 이름 그대로입니다.
+- `enhancements`는 강화, 증폭, 재련(401~403) 기록입니다.
+  `kind`는 `reinforce`, `amplify`, `refine`이고, `target`은 시즌 조회와 같이 타임라인의 `after`, `success`는 `result`입니다.
+- `items`, `enhancements`는 모험단 캐릭터 전체를 합쳐 시각 순이고, `at`은 `+09:00`을 붙인 KST 시각입니다.
+  화면이 줄여 보여 주더라도 API는 그날 기록을 모두 줍니다.
+
+화면은 시즌 조회 뒤에 이 경로를 부르므로 타임라인 동기화를 다시 걸지 않습니다.
+DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.
 
 ### 명성 랭킹과 통계
 

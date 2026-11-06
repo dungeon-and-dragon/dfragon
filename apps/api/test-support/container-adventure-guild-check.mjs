@@ -10,7 +10,12 @@ import {
   replaceEnhancementBackfillRange,
   replaceTimelineRange
 } from '@dfragon/database'
-import { emptySeasonActivity, readAdventureActivity } from './dist/adventure-guild/activity.js'
+import {
+  emptySeasonActivity,
+  readAdventureActivity,
+  readAdventureActivityDay,
+  toActivityDayRange
+} from './dist/adventure-guild/activity.js'
 import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
@@ -282,6 +287,34 @@ try {
   })
   assert.equal(await readAdventureActivity(client, adventureName, 12, now), undefined)
 
+  // 다른 모험단(guild-no-fame)의 같은 날 기록은 빠지고, 05:59 레이드는 전날 상세에만 들어가는지 본다.
+  const activityDay = {
+    date: '2026-04-02',
+    raids: [
+      { name: '디레지에 레이드', count: 1 },
+      { name: '합성 목록 밖 레이드', count: 1 }
+    ],
+    legions: [{ name: '아포칼립스', count: 1 }],
+    items: [{ at: '2026-04-02T10:00:00+09:00', name: null, rarity: '태초' }],
+    enhancements: [{ at: '2026-04-02T11:00:00+09:00', kind: 'amplify', target: 12, success: false }]
+  }
+  const readDay = (name, date) => readAdventureActivityDay(client, name, toActivityDayRange(date))
+  assert.deepEqual(await readDay(adventureName, '2026-04-02'), activityDay)
+  assert.deepEqual(await readDay(adventureName, '2026-04-01'), {
+    date: '2026-04-01',
+    raids: [{ name: '무너진 성자 미카엘라', count: 1 }],
+    legions: [],
+    items: [],
+    enhancements: []
+  })
+  assert.deepEqual(await readDay('없는모험단', '2026-04-02'), {
+    date: '2026-04-02',
+    raids: [],
+    legions: [],
+    items: [],
+    enhancements: []
+  })
+
   // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결까지 확인한다.
   const get = async (path) => {
     const response = await fetch(new URL(path, 'http://127.0.0.1:3000'))
@@ -337,6 +370,10 @@ try {
     seasonIds
   )
   assert.deepEqual({ summary: activityAnswer.summary, days: activityAnswer.days }, seasonActivity)
+  assert.deepEqual(
+    await get(`/adventures/${encodeURIComponent(adventureName)}/activity/days/2026-04-02`),
+    activityDay
+  )
   assert.deepEqual(await get('/guilds/missing-guild'), {
     guildId: 'missing-guild',
     guildName: null,
