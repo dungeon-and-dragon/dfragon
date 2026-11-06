@@ -277,7 +277,7 @@ export type EvolutionBranch = Readonly<{
   explain: string
 }>
 
-export type EnhancementBranch = Readonly<{ type: UpgradeType; explain: string }>
+export type EnhancementBranch = Readonly<{ type: UpgradeType }>
 
 export type EvolutionRow = UpgradeSkill &
   Readonly<{ branches: readonly [EvolutionBranch, EvolutionBranch] }>
@@ -376,10 +376,7 @@ export function skillUpgradeBoardOf(
     return [
       {
         ...upgradeSkillOf(tree.job, learnableSkill, enhancementByName),
-        branches: [
-          { type: 1, ...branches[1] },
-          { type: 2, ...branches[2] }
-        ]
+        branches: [{ type: 1 }, { type: 2 }]
       }
     ]
   })
@@ -389,7 +386,7 @@ export function skillUpgradeBoardOf(
 
 export type SkillChainLink = Readonly<{ name: string | null; icon: SkillIconImage | null }>
 
-export type SkillChain = Readonly<{ resetTime: number | null; skills: readonly SkillChainLink[] }>
+export type SkillChain = Readonly<{ skills: readonly SkillChainLink[] }>
 
 export function skillChainOf(
   catalog: SkillWindowCatalog | null,
@@ -420,7 +417,7 @@ export function skillChainOf(
     return { name, icon }
   })
 
-  return { resetTime: style.chain.resetTime, skills }
+  return { skills }
 }
 
 export type LearnedSkillRow = Readonly<{

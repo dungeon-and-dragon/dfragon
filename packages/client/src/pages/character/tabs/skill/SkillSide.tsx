@@ -74,11 +74,7 @@ export function SkillChainSection({ chain }: { chain: SkillChain | null }): Reac
 
   return (
     <section aria-label="스킬 체인">
-      <h2 {...stylex.props(tableStyles.heading)}>
-        스킬 체인 <span {...stylex.props(tableStyles.count)}>{chain.skills.length}</span>
-        <span {...stylex.props(styles.spacer)} />
-        {chain.resetTime !== null && `초기화 시간 ${chain.resetTime}`}
-      </h2>
+      <h2 {...stylex.props(tableStyles.heading)}>스킬 체인</h2>
       <ol {...stylex.props(styles.chain)}>
         {chain.skills.map(({ name, icon }, index) => (
           <li key={`${name}-${index}`} {...stylex.props(styles.chainLink)}>
@@ -107,7 +103,7 @@ function Branch({
   picked: boolean
   mark: string
   label: string
-  tooltip: React.ReactNode
+  tooltip?: React.ReactNode
 }): React.JSX.Element {
   const content = (
     <>
@@ -120,7 +116,7 @@ function Branch({
     </>
   )
   const branchStyle = stylex.props(styles.branch, picked && styles.branchPicked)
-  if (tooltip === null) {
+  if (tooltip === undefined) {
     return (
       <span aria-current={picked || undefined} {...branchStyle}>
         {content}
@@ -129,7 +125,8 @@ function Branch({
   }
 
   return (
-    <Tooltip.Root>
+    // 설명 창이 아래 갈래를 덮으므로, 마우스가 설명 창으로 옮겨 가면 닫아 다른 갈래를 볼 수 있게 한다.
+    <Tooltip.Root disableHoverablePopup>
       <Tooltip.Trigger delay={0} closeDelay={0} aria-current={picked || undefined} {...branchStyle}>
         {content}
       </Tooltip.Trigger>
@@ -168,10 +165,6 @@ function RowTitle({ row }: { row: EvolutionRow | EnhancementRow }): React.JSX.El
   )
 }
 
-function pickedCount(rows: readonly (EvolutionRow | EnhancementRow)[]): number {
-  return rows.filter(({ picked }) => picked !== null).length
-}
-
 function EvolutionSection({
   rows,
   marks
@@ -181,10 +174,7 @@ function EvolutionSection({
 }): React.JSX.Element {
   return (
     <section aria-label="스킬 개화">
-      <h2 {...stylex.props(tableStyles.heading)}>
-        스킬 개화{' '}
-        <span {...stylex.props(tableStyles.count)}>{`${pickedCount(rows)} / ${rows.length}`}</span>
-      </h2>
+      <h2 {...stylex.props(tableStyles.heading)}>스킬 개화</h2>
       <ul {...stylex.props(styles.rows)}>
         {rows.map((row) => (
           <li key={row.skillId} {...stylex.props(styles.row)}>
@@ -232,10 +222,7 @@ function EnhancementSection({
 }): React.JSX.Element {
   return (
     <section aria-label="스킬 강화">
-      <h2 {...stylex.props(tableStyles.heading)}>
-        스킬 강화{' '}
-        <span {...stylex.props(tableStyles.count)}>{`${pickedCount(rows)} / ${rows.length}`}</span>
-      </h2>
+      <h2 {...stylex.props(tableStyles.heading)}>스킬 강화</h2>
       <ul {...stylex.props(styles.rows)}>
         {rows.map((row) => (
           <li key={row.skillId} {...stylex.props(styles.row)}>
@@ -249,16 +236,6 @@ function EnhancementSection({
                     picked={row.picked === branch.type}
                     mark={skillMarkOf(marks, 'enhancement', branch.type)}
                     label={ENHANCEMENT_LABELS[branch.type]}
-                    tooltip={
-                      branch.explain !== '' ? (
-                        <>
-                          <b {...stylex.props(styles.tooltipTitle)}>
-                            {`${row.name} ${ENHANCEMENT_LABELS[branch.type]}`}
-                          </b>
-                          <GameText text={branch.explain} />
-                        </>
-                      ) : null
-                    }
                   />
                 ))}
               </div>
