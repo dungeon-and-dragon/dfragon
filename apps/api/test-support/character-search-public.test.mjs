@@ -42,6 +42,28 @@ test('공개 검색은 loopback 공급자의 후보를 정제한다', async () =
   })
 })
 
+test('한 글자 공개 검색은 공급자를 match로 부르고 이름이 같은 캐릭터만 반환한다', async () => {
+  await withSearchApp(async ({ base, calls, upstream }) => {
+    upstream.body = {
+      rows: [
+        { characterId: 'lower', characterName: 'a', serverId: 'cain', fame: 10 },
+        { characterId: 'upper', characterName: 'A', serverId: 'prey', fame: 20 }
+      ]
+    }
+    const response = await fetch(`${base}/characters?characterName=a`)
+    assert.equal(response.status, 200)
+    const { rows } = await response.json()
+    assert.deepEqual(
+      rows.map(({ characterId, characterName }) => ({ characterId, characterName })),
+      [{ characterId: 'lower', characterName: 'a' }]
+    )
+    assert.deepEqual(
+      calls.map(({ query }) => query),
+      [{ characterName: 'a', limit: '10', wordType: 'match' }]
+    )
+  })
+})
+
 test('잘못된 공개 검색 query는 공급자를 호출하지 않는다', async () => {
   await withSearchApp(async ({ base, calls }) => {
     await expectSearchError(

@@ -708,14 +708,17 @@ it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답�
   expect(searchRequests(fetch).map((url) => url.searchParams.get('serverId'))).toEqual(['cain'])
 })
 
-it('캐릭터 이름 한 글자는 제출해도 화면을 옮기지 않고 요청하지 않는다', async () => {
-  const fetch = stubSearchFetch([])
+it('캐릭터 이름 한 글자를 제출하면 검색 화면으로 가서 그 이름으로 찾는다', async () => {
+  const fetch = stubSearchFetch([candidateRow('가', 'cain', 'single-1', 1000)])
   await act(async () => root.render(<WebApp host={host} />))
 
   await searchName('가')
 
-  expect(window.location.pathname).toBe('/')
-  expect(searchRequests(fetch)).toEqual([])
+  await waitForPath('/search')
+  await vi.waitFor(() =>
+    expect(searchResultRows()).toEqual([['/c/cain/single-1', '카인가眞 크루세이더1,000']])
+  )
+  expect(searchRequests(fetch).map((url) => url.searchParams.get('characterName'))).toEqual(['가'])
 })
 
 it('검색 결과가 없으면 찾지 못했다는 목록 제목 한 줄만 보인다', async () => {
@@ -729,14 +732,16 @@ it('검색 결과가 없으면 찾지 못했다는 목록 제목 한 줄만 보�
   expect(container.querySelector('main table')).toBeNull()
 })
 
-it('주소의 이름이 한 글자면 검색 화면은 요청하지 않는다', async () => {
+it('주소의 이름이 열세 글자면 검색 화면은 요청하지 않는다', async () => {
   const fetch = stubSearchFetch([])
-  window.history.replaceState(null, '', '/search?characterName=가&serverId=unknown')
+  window.history.replaceState(
+    null,
+    '',
+    '/search?characterName=가나다라마바사아자차카타파&serverId=unknown'
+  )
   await act(async () => root.render(<WebApp host={host} />))
 
-  expect(container.querySelector('main section')?.textContent).toBe(
-    '두 글자 이상 검색할 수 있습니다.'
-  )
+  expect(container.querySelector('main section')?.textContent).toBe('검색할 수 없는 이름입니다.')
   expect(container.querySelector('main header')?.textContent).toBe('캐릭터 검색서버전체')
   expect(searchRequests(fetch)).toEqual([])
 })
