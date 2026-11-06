@@ -12,23 +12,6 @@ export const styles = stylex.create({
     borderStyle: 'solid',
     borderColor: colors.borderDefault
   },
-  heading: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: space.s8,
-    height: 32,
-    margin: 0,
-    paddingInline: space.s16,
-    backgroundColor: colors.bgInset,
-    color: colors.fgSubtle,
-    fontSize: 12,
-    lineHeight: '16px',
-    fontWeight: 500,
-    borderBottomWidth: 1,
-    borderBottomStyle: 'solid',
-    borderBottomColor: colors.borderDefault
-  },
-  count: { color: colors.fgMuted, fontWeight: 500, fontVariantNumeric: 'tabular-nums' },
   spacer: { flexGrow: 1 },
   codeRow: {
     display: 'flex',

@@ -14,6 +14,7 @@ import { CopyIcon } from '../../../../components/CopyIcon'
 import { useClipboardCopy } from '../../../../hooks/useClipboardCopy'
 import { GameText } from '../GameText'
 import { SkillSprite } from './SkillSprite'
+import { styles as tableStyles } from '../equipment/item-table.style'
 import { styles } from './SkillSide.style'
 import { styles as markStyles } from './SkillTab.style'
 
@@ -29,7 +30,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
 
   return (
     <section aria-label="스킬 트리 코드">
-      <h2 {...stylex.props(styles.heading)}>스킬 트리 코드</h2>
+      <h2 {...stylex.props(tableStyles.heading)}>스킬 트리 코드</h2>
       <div {...stylex.props(styles.codeRow)}>
         <code title={hash} {...stylex.props(styles.code)}>
           {hash}
@@ -68,13 +69,13 @@ function ChevronRight(): React.JSX.Element {
 
 export function SkillChainSection({ chain }: { chain: SkillChain | null }): React.JSX.Element {
   if (chain === null) {
-    return <h2 {...stylex.props(styles.heading)}>스킬 체인 없음</h2>
+    return <h2 {...stylex.props(tableStyles.heading)}>스킬 체인 없음</h2>
   }
 
   return (
     <section aria-label="스킬 체인">
-      <h2 {...stylex.props(styles.heading)}>
-        스킬 체인 <span {...stylex.props(styles.count)}>{chain.skills.length}</span>
+      <h2 {...stylex.props(tableStyles.heading)}>
+        스킬 체인 <span {...stylex.props(tableStyles.count)}>{chain.skills.length}</span>
         <span {...stylex.props(styles.spacer)} />
         {chain.resetTime !== null && `초기화 시간 ${chain.resetTime}`}
       </h2>
@@ -180,9 +181,9 @@ function EvolutionSection({
 }): React.JSX.Element {
   return (
     <section aria-label="스킬 개화">
-      <h2 {...stylex.props(styles.heading)}>
+      <h2 {...stylex.props(tableStyles.heading)}>
         스킬 개화{' '}
-        <span {...stylex.props(styles.count)}>{`${pickedCount(rows)} / ${rows.length}`}</span>
+        <span {...stylex.props(tableStyles.count)}>{`${pickedCount(rows)} / ${rows.length}`}</span>
       </h2>
       <ul {...stylex.props(styles.rows)}>
         {rows.map((row) => (
@@ -231,9 +232,9 @@ function EnhancementSection({
 }): React.JSX.Element {
   return (
     <section aria-label="스킬 강화">
-      <h2 {...stylex.props(styles.heading)}>
+      <h2 {...stylex.props(tableStyles.heading)}>
         스킬 강화{' '}
-        <span {...stylex.props(styles.count)}>{`${pickedCount(rows)} / ${rows.length}`}</span>
+        <span {...stylex.props(tableStyles.count)}>{`${pickedCount(rows)} / ${rows.length}`}</span>
       </h2>
       <ul {...stylex.props(styles.rows)}>
         {rows.map((row) => (
