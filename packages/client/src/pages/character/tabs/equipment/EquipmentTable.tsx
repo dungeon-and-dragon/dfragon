@@ -7,8 +7,7 @@ import type {
   EquipmentView
 } from '@dfragon/client-core/lib/character-equipment'
 import { formatPoint, type ItemView } from '@dfragon/client-core/lib/character-item'
-import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './item-parts'
-import { styles as partStyles } from './item-parts.style'
+import { ItemCell } from './item-parts'
 import { styles as tableStyles } from './item-table.style'
 import { styles } from './EquipmentTable.style'
 
@@ -139,27 +138,6 @@ function ExtraRow({ slotName, item }: { slotName: string; item: ItemView }): Rea
         {MISSING_VALUE}
       </td>
     </tr>
-  )
-}
-
-function ItemCell({
-  item,
-  tune,
-  exalted
-}: {
-  item: ItemView
-  tune: string | null
-  exalted: boolean
-}): React.JSX.Element {
-  return (
-    <div {...stylex.props(partStyles.item)}>
-      <ItemIcon itemId={item.itemId} rarity={item.rarity} />
-      <span {...stylex.props(partStyles.itemText)}>
-        <ItemName name={item.itemName} rarity={item.rarity} />
-        <TuneNumeral numeral={tune} />
-        {exalted && <RarityBadge rarity={item.rarity}>유일</RarityBadge>}
-      </span>
-    </div>
   )
 }
 

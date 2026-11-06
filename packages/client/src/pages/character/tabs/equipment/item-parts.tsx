@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import { itemIconUrl } from '@dfragon/client-core/lib/character-item'
+import { type ItemView, itemIconUrl } from '@dfragon/client-core/lib/character-item'
 import type { ItemRarity } from '@dfragon/client-core/shared/search/character-detail-display'
 import { styles as rarityText } from '../avatar/ItemName.style'
 import { raritySolid, styles } from './item-parts.style'
@@ -59,4 +59,25 @@ export function TuneNumeral({ numeral }: { numeral: string | null }): React.JSX.
   }
 
   return <span {...stylex.props(styles.tune)}>{numeral}</span>
+}
+
+export function ItemCell({
+  item,
+  tune,
+  exalted
+}: {
+  item: ItemView
+  tune: string | null
+  exalted: boolean
+}): React.JSX.Element {
+  return (
+    <div {...stylex.props(styles.item)}>
+      <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+      <span {...stylex.props(styles.itemText)}>
+        <ItemName name={item.itemName} rarity={item.rarity} />
+        <TuneNumeral numeral={tune} />
+        {exalted && <RarityBadge rarity={item.rarity}>유일</RarityBadge>}
+      </span>
+    </div>
+  )
 }
