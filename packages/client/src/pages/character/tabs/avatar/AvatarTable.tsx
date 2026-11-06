@@ -42,6 +42,7 @@ export function AvatarTable({ avatars }: { avatars: readonly Avatar[] }): React.
 
 export function AvatarRow({ avatar }: { avatar: Avatar }): React.JSX.Element {
   const item = toItemView(avatar)
+  const cloneId = avatar.clone?.itemId ?? null
   const cloneName = avatar.clone?.itemName ?? null
 
   return (
@@ -51,7 +52,14 @@ export function AvatarRow({ avatar }: { avatar: Avatar }): React.JSX.Element {
       </td>
       <td {...stylex.props(tableStyles.cell)}>
         <div {...stylex.props(partStyles.item)}>
-          <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+          <span {...stylex.props(styles.icons)}>
+            <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+            {cloneId != null ? (
+              <ItemIcon itemId={cloneId} rarity={null} />
+            ) : (
+              <span aria-hidden="true" {...stylex.props(partStyles.iconSpace)} />
+            )}
+          </span>
           <span {...stylex.props(styles.stack)}>
             <ItemName name={item.itemName} rarity={item.rarity} />
             {cloneName != null && <span {...stylex.props(styles.clone)}>{cloneName}</span>}
