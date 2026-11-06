@@ -17,9 +17,11 @@ export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
 export {
   readCharactersTimelineEvents,
+  readCharactersTimelineItems,
   readCurrentSeasonStart,
   readEnhancementBackfilledUntil,
   readRecentTimelineItems,
+  readSeasons,
   readTimelineEvents,
   readTimelineSyncState,
   recordTimelineSyncFailure,
@@ -29,7 +31,9 @@ export {
 } from './timeline.js'
 export type {
   CharacterTimelineEventRow,
+  CharacterTimelineItemRow,
   RecentTimelineItemQuery,
+  StoredSeason,
   TimelineCharacter,
   TimelineEventInput,
   TimelineEventRow,
