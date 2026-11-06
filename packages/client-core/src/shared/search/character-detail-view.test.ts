@@ -83,6 +83,7 @@ describe('캐릭터 상세 화면 응답', () => {
         '128b9ddef2262f40723deae4407bdb42'
       ]
     })
+    expect(detail.oath?.setInfo).toMatchObject({ setId: 16204, setRarityName: '태초' })
     expect(detail.buff.equipment?.equipment).toEqual([])
     expect(detail.buff.avatar?.avatar.map((avatar) => avatar.slotId)).toEqual(['JACKET'])
     expect(detail.buff.creature?.skillInfo?.option).toMatchObject({ level: 16 })
