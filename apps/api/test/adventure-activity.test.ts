@@ -70,8 +70,10 @@ const enhancement = (
   before: number | null,
   after: number,
   result: boolean,
-  ticket?: string
+  ticket?: Record<string, unknown> | null
 ) => item(code, time, '에픽', { before, after, result, safe: false, ticket })
+// 운영 DB의 data.ticket은 객체지만 안의 키는 확인하지 못해 합성 키를 쓴다.
+const ticketItem = (name: string) => ({ name })
 const activity = (records: Partial<Parameters<typeof toSeasonActivity>[1]>) =>
   toSeasonActivity(season, { clears: [], items: [], ...records })
 const day = (date: string) => {
@@ -189,16 +191,17 @@ test('강화 단계는 before + 1이 아니라 after로 세고 성공을 따로 
 
 test('강화권, 증폭권 기록은 단계별 시도와 성공에서 빼고 전체 횟수와 날짜별 값에는 센다', () => {
   const items = [
-    enhancement(402, '2026-07-18T12:00:00', 0, 12, false, '1프로 +12 장비 증폭권'),
-    enhancement(402, '2026-07-18T12:01:00', 3, 12, true, '+12 장비 증폭권[골고라이언]'),
-    enhancement(401, '2026-07-18T12:02:00', 0, 13, true, '100프로 +13 무기 강화권'),
-    enhancement(402, '2026-07-19T12:00:00', 11, 12, true)
+    enhancement(402, '2026-07-18T12:00:00', 0, 12, false, ticketItem('1프로 +12 장비 증폭권')),
+    enhancement(402, '2026-07-18T12:01:00', 3, 12, true, ticketItem('+12 장비 증폭권[골고라이언]')),
+    enhancement(401, '2026-07-18T12:02:00', 0, 13, true, ticketItem('100프로 +13 무기 강화권')),
+    enhancement(402, '2026-07-19T12:00:00', 11, 12, true),
+    enhancement(402, '2026-07-19T12:01:00', 11, 12, false, null)
   ]
   const { summary, days } = activity({ items })
 
   assert.deepEqual(summary.enhancement, {
-    attempts: 4,
-    amplify: [{ target: 12, attempts: 1, successes: 1 }],
+    attempts: 5,
+    amplify: [{ target: 12, attempts: 2, successes: 1 }],
     reinforce: [],
     amplifyBelow10: 0,
     reinforceBelow12: 0,
@@ -208,7 +211,7 @@ test('강화권, 증폭권 기록은 단계별 시도와 성공에서 빼고 전
     days.map(({ date, enhance, highEnhancement }) => ({ date, enhance, highEnhancement })),
     [
       { date: '2026-07-18', enhance: 3, highEnhancement: true },
-      { date: '2026-07-19', enhance: 1, highEnhancement: true }
+      { date: '2026-07-19', enhance: 2, highEnhancement: true }
     ]
   )
   assert.equal(toActivityDayDetail(day('2026-07-18'), { clears: [], items }).enhancements.length, 3)
