@@ -7,12 +7,14 @@ const SKILL_ICON_SIZE = 28
 const SKILL_CELL_WIDTH = 44
 const SKILL_CELL_HEIGHT = 48
 const SKILL_ROW_LABEL_WIDTH = 36
-const UPGRADE_COLUMN_WIDTH = 300
+const SIDE_COLUMN_WIDTH = 340
+const EVOLUTION_MARK_SIZE = 17
+const ENHANCEMENT_MARK_SIZE = 18
 
 export const styles = stylex.create({
   root: {
     display: 'grid',
-    gridTemplateColumns: `max-content minmax(0, ${UPGRADE_COLUMN_WIDTH}px)`,
+    gridTemplateColumns: `max-content minmax(0, ${SIDE_COLUMN_WIDTH}px)`,
     alignItems: 'start',
     justifyContent: 'space-between',
     gap: space.s24,
@@ -63,7 +65,7 @@ export const styles = stylex.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: space.s8,
     padding: 0,
     borderWidth: 0,
     backgroundColor: 'transparent',
@@ -85,6 +87,26 @@ export const styles = stylex.create({
     backgroundPosition: `${-x}px ${-y}px`
   }),
   unlearned: { opacity: 0.3, filter: 'grayscale(1)' },
+  frame: { position: 'relative', display: 'block' },
+  picked: { boxShadow: `0 0 0 2px ${colors.signal}` },
+  // 개화 마름모는 아이콘 아래 가운데에 걸치고, 강화 표식은 오른쪽 위에 둔다.
+  evolutionMark: {
+    position: 'absolute',
+    left: '50%',
+    bottom: -8,
+    width: EVOLUTION_MARK_SIZE,
+    height: EVOLUTION_MARK_SIZE,
+    marginLeft: -8,
+    imageRendering: 'pixelated'
+  },
+  enhancementMark: {
+    position: 'absolute',
+    right: -7,
+    top: -7,
+    width: ENHANCEMENT_MARK_SIZE,
+    height: ENHANCEMENT_MARK_SIZE,
+    imageRendering: 'pixelated'
+  },
   level: {
     height: 12,
     fontSize: 10,

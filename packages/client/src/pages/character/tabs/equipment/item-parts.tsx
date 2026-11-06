@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import { useState } from 'react'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { type ItemView, itemIconUrl } from '@dfragon/client-core/lib/character-item'
 import type { ItemRarity } from '@dfragon/client-core/shared/search/character-detail-display'
@@ -20,8 +21,14 @@ function solidTone({ rarity }: Tone) {
 }
 
 export function ItemIcon({ itemId, ...tone }: Tone & { itemId: string | null }): React.JSX.Element {
-  if (itemId === null) {
+  // Neople 이미지 서버에 그림이 없는 아이템(서약 본체 등)은 404라 빈 칸으로 둔다.
+  const [failedItemId, setFailedItemId] = useState<string | null>(null)
+  if (itemId === null || itemId === failedItemId) {
     return <span aria-hidden="true" {...stylex.props(styles.icon, solidTone(tone))} />
+  }
+
+  function handleError(): void {
+    setFailedItemId(itemId)
   }
 
   return (
@@ -29,6 +36,7 @@ export function ItemIcon({ itemId, ...tone }: Tone & { itemId: string | null }):
       src={itemIconUrl(itemId)}
       alt=""
       loading="lazy"
+      onError={handleError}
       {...stylex.props(styles.icon, solidTone(tone))}
     />
   )

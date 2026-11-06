@@ -104,6 +104,7 @@ export const characterDetailViewSchema = z.object({
     ),
     blessing: section({ status: list(keyedStat) }),
     setInfo: section({
+      setId: count,
       setName: text,
       setOptionName: text,
       setRarityName: text,
@@ -111,11 +112,13 @@ export const characterDetailViewSchema = z.object({
     })
   }),
   skillStyle: section({
+    hash: text,
     style: section({
       active: list(skill),
       passive: list(skill),
       evolution: list(skillUpgrade),
-      enhancement: list(skillUpgrade)
+      enhancement: list(skillUpgrade),
+      chain: section({ resetTime: count, skills: list(text) })
     })
   }),
   buff: group({
