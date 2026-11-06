@@ -7,7 +7,30 @@ const CLEAR_MARK_SIZE = 16
 
 export const styles = stylex.create({
   screen: { display: 'flex', flexDirection: 'column', gap: space.s16, padding: space.s16 },
-  form: { display: 'flex', alignItems: 'center', gap: space.s8 },
+  dashboard: {
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: colors.borderDefault,
+    backgroundColor: colors.bgBar
+  },
+  emptyTitle: {
+    margin: 0,
+    paddingBlock: space.s16,
+    paddingInline: space.s16,
+    fontSize: 20,
+    lineHeight: '28px',
+    fontWeight: 700
+  },
+  form: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: space.s8,
+    paddingBlock: space.s12,
+    paddingInline: space.s16,
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: colors.borderDefault
+  },
   adventureInput: { width: ADVENTURE_INPUT_WIDTH },
   state: {
     margin: 0,
