@@ -37,6 +37,32 @@ it('sprite 경로를 skilltab.json 주소 기준의 절대 주소로 바꾸고 �
   expect(fetch).toHaveBeenCalledOnce()
 })
 
+it('개화, 강화 표식 경로도 skilltab.json 주소 기준의 절대 주소로 바꾼다', async () => {
+  const marks = {
+    evolution: [
+      '1d9658f7/marks/evolution-1.8df0e8da.png',
+      '1d9658f7/marks/evolution-2.b314323a.png'
+    ],
+    enhancement: [
+      '1d9658f7/marks/enhancement-1.77cf8f9d.png',
+      '1d9658f7/marks/enhancement-2.5be2681f.png'
+    ]
+  }
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => Response.json({ ...CATALOG_JSON, marks }))
+  )
+
+  const catalog = await createSkillWindowCatalogSource(CATALOG_URL)()
+
+  expect(catalog?.marks?.evolution[1]).toBe(
+    'https://site.example.test/skilltab/1d9658f7/marks/evolution-2.b314323a.png'
+  )
+  expect(catalog?.marks?.enhancement[0]).toBe(
+    'https://site.example.test/skilltab/1d9658f7/marks/enhancement-1.77cf8f9d.png'
+  )
+})
+
 it('아직 올리지 않아 404면 실패가 아니라 데이터 없음으로 돌려준다', async () => {
   vi.stubGlobal(
     'fetch',
