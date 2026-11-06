@@ -2,27 +2,123 @@ import * as stylex from '@stylexjs/stylex'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { formatCount, formatPoint, type StatLine } from '@dfragon/client-core/lib/character-item'
 import { type OathView, toOathView } from '@dfragon/client-core/lib/character-oath'
+import {
+  type OathOptionCard,
+  type OathSetBoard,
+  oathSetBoardOf
+} from '@dfragon/client-core/shared/search/oath-catalog'
+import { useOathCatalog } from '../../../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
+import { GameText } from './GameText'
 import { styles as tableStyles } from './equipment/item-table.style'
 import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
-import { styles as partStyles } from './equipment/item-parts.style'
+import { raritySolid, styles as partStyles } from './equipment/item-parts.style'
 import { styles } from './oath/OathTab.style'
 
 export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null {
+  const catalog = useOathCatalog()
   if (detail.oath === null) {
     return null
   }
 
   const view = toOathView(detail.oath)
+  const setInfo = detail.oath.setInfo
+  const board =
+    catalog.status === 'success' && catalog.value !== null && setInfo !== null
+      ? oathSetBoardOf(catalog.value, setInfo)
+      : null
 
   return (
     <div {...stylex.props(tableStyles.root)}>
-      <OathStrip view={view} />
+      {board !== null ? (
+        <>
+          <OathSetCard view={view} board={board} />
+          <OathOptionCards options={board.options} />
+        </>
+      ) : (
+        <OathStrip view={view} />
+      )}
       <div {...stylex.props(styles.body)}>
-        <OathCrystals view={view} />
+        <div {...stylex.props(styles.main)}>
+          {board !== null && <OathBody view={view} />}
+          <OathCrystals view={view} />
+        </div>
         <OathEffects view={view} />
       </div>
     </div>
+  )
+}
+
+function OathSetCard({
+  view: { set },
+  board
+}: {
+  view: OathView
+  board: OathSetBoard
+}): React.JSX.Element | null {
+  if (set === null) {
+    return null
+  }
+
+  return (
+    <div {...stylex.props(styles.setCard)}>
+      <span {...stylex.props(styles.setIconWell, raritySolid[set.rarity ?? 'unknown'])}>
+        {board.icon !== null && <img src={board.icon} alt="" {...stylex.props(styles.setIcon)} />}
+      </span>
+      <span {...stylex.props(styles.setTitle)}>
+        <ItemName name={set.name} rarity={set.rarity} />
+        {set.rarityName !== null && <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>}
+        {set.point !== null && (
+          <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(set.point)}</span>
+        )}
+      </span>
+    </div>
+  )
+}
+
+function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): React.JSX.Element {
+  return (
+    <div {...stylex.props(styles.options)}>
+      {options.map((option) => (
+        <article
+          key={option.name}
+          aria-label={option.name}
+          aria-current={option.picked || undefined}
+          {...stylex.props(styles.option, option.picked && styles.optionPicked)}
+        >
+          <img
+            src={option.icon}
+            alt=""
+            {...stylex.props(styles.optionIcon, !option.picked && styles.optionIconDim)}
+          />
+          {option.effect !== null && (
+            <GameText text={option.effect} muted={!option.picked} style={styles.optionEffect} />
+          )}
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function OathBody({ view: { info } }: { view: OathView }): React.JSX.Element | null {
+  if (info === null) {
+    return null
+  }
+
+  return (
+    <section aria-label="서약 본체">
+      <h2 {...stylex.props(styles.heading)}>서약 본체</h2>
+      <div {...stylex.props(styles.bodyRow)}>
+        <div {...stylex.props(partStyles.item)}>
+          <ItemIcon itemId={info.itemId} rarity={info.rarity} />
+          <ItemName name={info.itemName} rarity={info.rarity} />
+        </div>
+        <span {...stylex.props(partStyles.spacer)} />
+        {info.setPoint !== null && (
+          <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(info.setPoint)}</span>
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -68,7 +164,7 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
   }
 
   return (
-    <section aria-label="서약 결정" {...stylex.props(styles.crystals)}>
+    <section aria-label="서약 결정">
       <h2 {...stylex.props(styles.heading)}>
         서약 결정 <span {...stylex.props(styles.count)}>{formatCount(crystals.length)}</span>
       </h2>

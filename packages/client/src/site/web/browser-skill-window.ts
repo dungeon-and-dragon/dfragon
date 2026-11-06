@@ -1,4 +1,8 @@
 import {
+  type OathCatalog,
+  oathCatalogSchema
+} from '@dfragon/client-core/shared/search/oath-catalog'
+import {
   type SkillMarks,
   type SkillWindowCatalog,
   skillWindowCatalogSchema
@@ -26,6 +30,21 @@ function readSkillWindowCatalog(json: unknown, catalogUrl: string): SkillWindowC
   }
 
   return { ...catalog, marks: markUrlsOf(marks, catalogUrl), jobs }
+}
+
+function readOathCatalog(json: unknown, catalogUrl: string): OathCatalog {
+  const catalog = oathCatalogSchema.parse(json)
+  const sets = catalog.sets.map((set) => {
+    const icon = set.icon !== null ? absoluteUrl(set.icon, catalogUrl) : null
+    const options = set.options.map((option) => ({
+      ...option,
+      icon: absoluteUrl(option.icon, catalogUrl)
+    }))
+
+    return { ...set, icon, options }
+  })
+
+  return { ...catalog, sets }
 }
 
 const NOT_UPLOADED_STATUS = 404
@@ -73,4 +92,8 @@ export function createSkillWindowCatalogSource(
   catalogUrl: string
 ): () => Promise<SkillWindowCatalog | null> {
   return createCatalogSource(catalogUrl, readSkillWindowCatalog)
+}
+
+export function createOathCatalogSource(catalogUrl: string): () => Promise<OathCatalog | null> {
+  return createCatalogSource(catalogUrl, readOathCatalog)
 }

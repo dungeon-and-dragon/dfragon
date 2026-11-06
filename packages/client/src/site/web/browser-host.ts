@@ -17,7 +17,7 @@ import type { ClientHost } from '../../hooks/useClientHost'
 import { startRendererDiagnostics } from '@dfragon/client-core/lib/runtime-diagnostics'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
-import { createSkillWindowCatalogSource } from './browser-skill-window'
+import { createOathCatalogSource, createSkillWindowCatalogSource } from './browser-skill-window'
 import { browserFetch, createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
 import { readTownIndicatorTemplate } from './browser-town-template'
 import {
@@ -431,7 +431,11 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
   }
 }
 
-export function installBrowserHost(apiOrigin: string, skillWindowCatalogUrl: string): BrowserHost {
+export function installBrowserHost(
+  apiOrigin: string,
+  skillWindowCatalogUrl: string,
+  oathCatalogUrl: string
+): BrowserHost {
   const reportDiagnostic = startRendererDiagnostics()
   const dfragon = createDfragonClient({ apiOrigin, fetch: browserFetch })
   const runtime = createBrowserSearchRuntime(dfragon, reportDiagnostic)
@@ -467,6 +471,7 @@ export function installBrowserHost(apiOrigin: string, skillWindowCatalogUrl: str
     getTimelineEnhancements: dfragon.characters.timelineEnhancements,
     getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
     getSkillWindowCatalog: createSkillWindowCatalogSource(skillWindowCatalogUrl),
+    getOathCatalog: createOathCatalogSource(oathCatalogUrl),
     getFameRanking: dfragon.rankings.fame,
     getCharacterStats: dfragon.stats,
     getAdventureCharacters: dfragon.adventures.characters,
