@@ -27,7 +27,8 @@ import { parseRankingSearch } from '../../pages/rankings/ranking-search'
 import { RankingsPage } from '../../pages/rankings/RankingsPage'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { StatsScreen } from '../../pages/stats/StatsScreen'
-import { WeeklyScreen } from '../../pages/weekly/WeeklyScreen'
+import { parseWeeklySearch } from '../../pages/weekly/weekly-search'
+import { WeeklyPage } from '../../pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
@@ -174,7 +175,8 @@ const guildRoute = createRoute({
 const weeklyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my',
-  component: WeeklyScreen
+  validateSearch: parseWeeklySearch,
+  component: WeeklyPage
 })
 
 const favoritesRoute = createRoute({

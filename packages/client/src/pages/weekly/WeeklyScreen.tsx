@@ -3,18 +3,26 @@ import * as stylex from '@stylexjs/stylex'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
-import { TitleBox } from '../../components/table/TitleBox'
+import { useRefreshAdventureActivity } from '../../hooks/useAdventureActivity'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from '../../hooks/useAdventureWeekly'
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
+import { AdventureDashboard } from './AdventureDashboard'
 import { WeeklyClearTable } from './WeeklyClearTable'
 import { styles } from './WeeklyScreen.style'
 
 const LOADING_ROWS = 5
 
-export function WeeklyScreen(): React.JSX.Element {
+export function WeeklyScreen({
+  season,
+  onSeasonChange
+}: {
+  season: number | undefined
+  onSeasonChange: (season: number) => void
+}): React.JSX.Element {
   const adventureName = useMyAdventureStore((state) => state.adventureName)
   const changeAdventureName = useMyAdventureStore((state) => state.changeAdventureName)
   const [draft, setDraft] = useState(adventureName ?? '')
+  const refreshActivity = useRefreshAdventureActivity()
   const refreshWeekly = useRefreshAdventureWeekly()
 
   function handleDraftChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -23,6 +31,7 @@ export function WeeklyScreen(): React.JSX.Element {
 
   function handleRefresh(): void {
     if (adventureName != null) {
+      refreshActivity(adventureName)
       refreshWeekly(adventureName)
     }
   }
@@ -37,7 +46,16 @@ export function WeeklyScreen(): React.JSX.Element {
 
   return (
     <div {...stylex.props(styles.screen)}>
-      <TitleBox title="주간 던파">
+      <div {...stylex.props(styles.dashboard)}>
+        {adventureName != null ? (
+          <AdventureDashboard
+            adventureName={adventureName}
+            season={season}
+            onSeasonChange={onSeasonChange}
+          />
+        ) : (
+          <h1 {...stylex.props(styles.emptyTitle)}>내 모험단</h1>
+        )}
         <form onSubmit={handleSubmit} {...stylex.props(styles.form)}>
           <TextField size="sm">
             <TextFieldInput
@@ -58,7 +76,7 @@ export function WeeklyScreen(): React.JSX.Element {
             </Button>
           )}
         </form>
-      </TitleBox>
+      </div>
       {adventureName != null ? (
         <WeeklyClearList adventureName={adventureName} />
       ) : (
