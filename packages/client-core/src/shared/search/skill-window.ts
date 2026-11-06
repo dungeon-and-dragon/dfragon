@@ -368,17 +368,15 @@ export function skillUpgradeBoardOf(
     ]
   })
   const enhancements = learnable.flatMap((learnableSkill): EnhancementRow[] => {
-    const branches = learnableSkill.skill.enhancement
-    if (branches === undefined) {
+    if (learnableSkill.skill.enhancement === undefined) {
+      return []
+    }
+    const enhancement = upgradeSkillOf(tree.job, learnableSkill, enhancementByName)
+    if (enhancement.picked === null) {
       return []
     }
 
-    return [
-      {
-        ...upgradeSkillOf(tree.job, learnableSkill, enhancementByName),
-        branches: [{ type: 1 }, { type: 2 }]
-      }
-    ]
+    return [{ ...enhancement, branches: [{ type: 1 }, { type: 2 }] }]
   })
 
   return { marks: catalog.marks, evolutions, enhancements }
