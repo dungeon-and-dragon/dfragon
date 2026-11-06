@@ -84,7 +84,6 @@ export function createApiRuntime(configuration: RuntimeConfiguration) {
     },
     ...createDatabaseSubscribers(neople, configuration.database),
     todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
-    webDevOrigins: configuration.webDevOrigins,
     trustedProxyHops: configuration.trustedProxyHops,
     httpsOptions: configuration.localHttps,
     scoreLibraryPath: configuration.scoreLibraryPath
