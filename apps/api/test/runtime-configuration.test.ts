@@ -45,7 +45,6 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 인증
     apiKey: 'synthetic',
     trustedProxyHops: undefined,
     localHttps: undefined,
-    webDevOrigins: [],
     database: undefined,
     scoreLibraryPath: null
   })
@@ -133,35 +132,6 @@ test('DB 설정이 일부만 있거나 잘못되면 값 없이 시작 설정을 
         }
       )
     })
-  }
-})
-
-test('로컬 웹 개발 origin은 loopback http(s) origin 목록만 받는다', async () => {
-  const configuration = await readRuntimeConfiguration({
-    ...environment,
-    WEB_DEV_ORIGINS: 'http://localhost:5173,https://127.0.0.1:5173,http://[::1]:5173'
-  })
-  assert.deepEqual(configuration.webDevOrigins, [
-    'http://localhost:5173',
-    'https://127.0.0.1:5173',
-    'http://[::1]:5173'
-  ])
-
-  for (const value of [
-    '',
-    'http://localhost:5173/',
-    'http://localhost:5173, http://127.0.0.1:5173',
-    'http://localhost:5173,',
-    'https://dfragon.com',
-    'http://192.168.0.2:5173',
-    'ws://localhost:5173',
-    'localhost:5173'
-  ]) {
-    await assert.rejects(
-      readRuntimeConfiguration({ ...environment, WEB_DEV_ORIGINS: value }),
-      /Invalid API runtime configuration/,
-      value
-    )
   }
 })
 

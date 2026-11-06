@@ -195,7 +195,6 @@ for (const [name, database, registered] of [
       port: 0,
       trustedProxyHops: undefined,
       localHttps: undefined,
-      webDevOrigins: [],
       apiKey: 'synthetic-neople-key',
       database,
       scoreLibraryPath: null
