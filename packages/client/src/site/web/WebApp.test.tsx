@@ -5,6 +5,7 @@ import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
+import { RANKING_JOBS } from '../../pages/rankings/ranking-jobs'
 import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
 import { decodeBrowserImage } from './browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
@@ -150,6 +151,8 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
   expect(brand.getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
     ['파티, 공대', 'page'],
+    ['랭킹', null],
+    ['통계', null],
     ['내 모험단', null],
     ['즐겨찾기', null]
   ])
@@ -180,6 +183,8 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(homeLink().getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
     ['파티, 공대', null],
+    ['랭킹', null],
+    ['통계', null],
     ['내 모험단', null],
     ['즐겨찾기', null]
   ])
@@ -193,6 +198,21 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(seats()).toHaveLength(4)
   expect(globalMenu()).toEqual([
     ['파티, 공대', 'page'],
+    ['랭킹', null],
+    ['통계', null],
+    ['내 모험단', null],
+    ['즐겨찾기', null]
+  ])
+})
+
+it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 지금 화면으로 표시한다', async () => {
+  window.history.replaceState(null, '', `/rankings?jobId=${RANKING_JOBS[0]!.jobId}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', null],
+    ['랭킹', 'page'],
+    ['통계', null],
     ['내 모험단', null],
     ['즐겨찾기', null]
   ])
@@ -238,6 +258,8 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(selectedTab()).toBe('스킬')
   expect(globalMenu()).toEqual([
     ['파티, 공대', null],
+    ['랭킹', null],
+    ['통계', null],
     ['내 모험단', null],
     ['즐겨찾기', null]
   ])
@@ -911,6 +933,8 @@ it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 주�
 
   expect(globalMenu()).toEqual([
     ['파티, 공대', null],
+    ['랭킹', null],
+    ['통계', null],
     ['내 모험단', 'page'],
     ['즐겨찾기', null]
   ])
