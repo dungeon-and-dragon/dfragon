@@ -11,6 +11,10 @@ import {
   type AdventureCharacters,
   type Guild
 } from '../adventure-guild/adventure-guild'
+import {
+  adventureActivitySchema,
+  type AdventureActivity
+} from '../adventure-guild/adventure-activity'
 import { adventureWeeklySchema, type AdventureWeekly } from '../adventure-guild/adventure-weekly'
 import {
   characterStatsSchema,
@@ -71,6 +75,10 @@ export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type AdventureCharactersHttp = (adventureName: string) => Promise<AdventureCharacters>
 export type GuildHttp = (guildId: string) => Promise<Guild>
 export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
+export type AdventureActivityHttp = (
+  adventureName: string,
+  season: number | undefined
+) => Promise<AdventureActivity>
 export type TodayGradeHttp = () => Promise<TodayGrade>
 
 export type DfragonClient = Readonly<{
@@ -86,7 +94,11 @@ export type DfragonClient = Readonly<{
   }>
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
-  adventures: Readonly<{ characters: AdventureCharactersHttp; weekly: AdventureWeeklyHttp }>
+  adventures: Readonly<{
+    characters: AdventureCharactersHttp
+    weekly: AdventureWeeklyHttp
+    activity: AdventureActivityHttp
+  }>
   guilds: Readonly<{ get: GuildHttp }>
   items: Readonly<{ todayGrade: TodayGradeHttp }>
 }>
@@ -297,6 +309,17 @@ export function createDfragonClient({
         return requestJson(
           `/adventures/${encodeURIComponent(adventureName)}/weekly`,
           adventureWeeklySchema
+        )
+      },
+      async activity(adventureName, season) {
+        if (adventureName.trim() === '') {
+          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+        }
+
+        return requestJson(
+          `/adventures/${encodeURIComponent(adventureName)}/activity`,
+          adventureActivitySchema,
+          { searchParams: { ...(season !== undefined && { season: String(season) }) } }
         )
       }
     },
