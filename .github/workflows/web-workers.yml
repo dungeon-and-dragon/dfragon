@@ -69,11 +69,7 @@ jobs:
           # The deployed site must not be built from package caches that other runs could have written.
           package-manager-cache: false
       - run: pnpm install --frozen-lockfile
-      # workers.dev is not an API CORS origin, so dev and preview builds call the API through the Worker's
-      # same-origin proxy. Production calls https://api.dfragon.com directly like before.
       - run: pnpm --filter @dfragon/web build
-        env:
-          VITE_SAME_ORIGIN_API: ${{ env.TARGET != 'production' }}
       # Dev and preview sites must stay out of search results.
       - run: |
           if [ "$TARGET" != production ]; then
