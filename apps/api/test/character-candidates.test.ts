@@ -390,7 +390,7 @@ test('후보의 ID 검증은 256자 안전 문자를 허용한다', async (t) =>
   })
 })
 
-test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보와 같은 모양으로 명성 순서에 따라 반환한다', async (t) => {
+test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보와 같은 모양으로 명성과 관계없이 이름순으로 반환한다', async (t) => {
   const origin = await startApp(t, {
     fetch: async () =>
       jsonResponse({
@@ -415,14 +415,14 @@ test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보�
   assert.deepEqual(await response.json(), {
     rows: [
       {
-        characterId: 'high',
-        characterName: '홍길순',
-        serverId: 'bakal',
-        serverName: '바칼',
-        fame: 500,
-        jobName: '귀검사(남)',
-        jobGrowName: '眞 웨펀마스터',
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/high?zoom=1'
+        characterId: 'exact',
+        characterName: '홍길',
+        serverId: 'anton',
+        serverName: '안톤',
+        fame: null,
+        jobName: null,
+        jobGrowName: null,
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/exact?zoom=1'
       },
       {
         characterId: 'low',
@@ -435,14 +435,14 @@ test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보�
         imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/low?zoom=1'
       },
       {
-        characterId: 'exact',
-        characterName: '홍길',
-        serverId: 'anton',
-        serverName: '안톤',
-        fame: null,
-        jobName: null,
-        jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/exact?zoom=1'
+        characterId: 'high',
+        characterName: '홍길순',
+        serverId: 'bakal',
+        serverName: '바칼',
+        fame: 500,
+        jobName: '귀검사(남)',
+        jobGrowName: '眞 웨펀마스터',
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/high?zoom=1'
       }
     ]
   })
