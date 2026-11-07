@@ -105,3 +105,14 @@ model TimelineSyncState {
   @@id([serverId, characterId])
   @@map("timeline_sync_state")
 }
+
+model TimelineSeasonBackfill {
+  serverId        String    @map("server_id")
+  characterId     String    @map("character_id")
+  seasonId        Int       @map("season_id")
+  backfilledUntil DateTime  @map("backfilled_until") @db.Timestamptz(3)
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz(3)
+
+  @@id([serverId, characterId, seasonId])
+  @@map("timeline_season_backfill")
+}

@@ -34,6 +34,11 @@ export type TimelineSyncState = {
   lastSucceededAt: Date | null
 }
 
+export type SeasonBackfillState = TimelineCharacter & {
+  backfilledUntil: Date
+  completedAt: Date | null
+}
+
 export type TimelineEventRow = {
   code: number
   occurredAt: Date
@@ -112,6 +117,47 @@ function toItemData({ serverId, characterId }: TimelineCharacter, item: Timeline
   }
 }
 
+function assertRowsInRange(
+  range: TimelineRange,
+  events: readonly TimelineEventInput[],
+  items: readonly TimelineItemInput[]
+): void {
+  // 구간 밖 행을 넣으면 그 구간을 교체할 때 지워지지 않고 두 번 들어간다.
+  if (![...events, ...items].every((row) => isInRange(row.occurredAt, range))) {
+    throw new RangeError('Timeline row outside replaced range')
+  }
+}
+
+async function replaceRangeRows(
+  transaction: Prisma.TransactionClient,
+  character: TimelineCharacter,
+  range: TimelineRange,
+  events: readonly TimelineEventInput[],
+  items: readonly TimelineItemInput[]
+): Promise<void> {
+  const { serverId, characterId } = character
+  const occurredAt = { gte: range.start, lte: range.end }
+
+  // 같은 캐릭터의 교체가 겹치면 둘 다 지운 뒤 넣어 행이 두 번 들어가므로 지우기 전에 잡는다.
+  await lockCharacter(transaction, character)
+  await transaction.timelineEvent.deleteMany({ where: { serverId, characterId, occurredAt } })
+  await transaction.timelineItem.deleteMany({ where: { serverId, characterId, occurredAt } })
+  await transaction.timelineEvent.createMany({
+    data: events.map((event) => ({
+      serverId,
+      characterId,
+      code: event.code,
+      occurredAt: event.occurredAt,
+      name: event.name,
+      raidName: event.raidName,
+      data: toJson(event.data)
+    }))
+  })
+  await transaction.timelineItem.createMany({
+    data: items.map((item) => toItemData(character, item))
+  })
+}
+
 export async function replaceTimelineRange(
   client: DatabaseClient,
   character: TimelineCharacter,
@@ -119,33 +165,12 @@ export async function replaceTimelineRange(
   events: readonly TimelineEventInput[],
   items: readonly TimelineItemInput[]
 ): Promise<void> {
-  // 구간 밖 행을 넣으면 그 구간을 교체할 때 지워지지 않고 두 번 들어간다.
-  if (![...events, ...items].every((row) => isInRange(row.occurredAt, range))) {
-    throw new RangeError('Timeline row outside replaced range')
-  }
+  assertRowsInRange(range, events, items)
   const { serverId, characterId } = character
-  const occurredAt = { gte: range.start, lte: range.end }
 
   await client.$transaction(
     async (transaction) => {
-      // 같은 캐릭터의 교체가 겹치면 둘 다 지운 뒤 넣어 행이 두 번 들어가므로 지우기 전에 잡는다.
-      await lockCharacter(transaction, character)
-      await transaction.timelineEvent.deleteMany({ where: { serverId, characterId, occurredAt } })
-      await transaction.timelineItem.deleteMany({ where: { serverId, characterId, occurredAt } })
-      await transaction.timelineEvent.createMany({
-        data: events.map((event) => ({
-          serverId,
-          characterId,
-          code: event.code,
-          occurredAt: event.occurredAt,
-          name: event.name,
-          raidName: event.raidName,
-          data: toJson(event.data)
-        }))
-      })
-      await transaction.timelineItem.createMany({
-        data: items.map((item) => toItemData(character, item))
-      })
+      await replaceRangeRows(transaction, character, range, events, items)
       await transaction.timelineSyncState.upsert({
         where: { serverId_characterId: { serverId, characterId } },
         create: { serverId, characterId, syncedUntil: range.end },
@@ -187,6 +212,56 @@ export async function replaceEnhancementBackfillRange(
     },
     { timeout: replaceTimeout }
   )
+}
+
+export async function replaceSeasonBackfillRange(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  seasonId: number,
+  range: TimelineRange,
+  events: readonly TimelineEventInput[],
+  items: readonly TimelineItemInput[]
+): Promise<void> {
+  assertRowsInRange(range, events, items)
+  const { serverId, characterId } = character
+
+  await client.$transaction(
+    async (transaction) => {
+      await replaceRangeRows(transaction, character, range, events, items)
+      await transaction.timelineSeasonBackfill.upsert({
+        where: { serverId_characterId_seasonId: { serverId, characterId, seasonId } },
+        create: { serverId, characterId, seasonId, backfilledUntil: range.end },
+        update: { backfilledUntil: range.end }
+      })
+    },
+    { timeout: replaceTimeout }
+  )
+}
+
+export async function recordSeasonBackfillCompleted(
+  client: DatabaseClient,
+  { serverId, characterId }: TimelineCharacter,
+  seasonId: number
+): Promise<void> {
+  await client.timelineSeasonBackfill.update({
+    where: { serverId_characterId_seasonId: { serverId, characterId, seasonId } },
+    data: { completedAt: new Date() }
+  })
+}
+
+export function readSeasonBackfillStates(
+  client: DatabaseClient,
+  characters: readonly TimelineCharacter[],
+  seasonId: number
+): Promise<SeasonBackfillState[]> {
+  return client.timelineSeasonBackfill.findMany({
+    where: {
+      OR: characters.map(({ serverId, characterId }) => ({ serverId, characterId })),
+      seasonId
+    },
+    orderBy: [{ serverId: 'asc' }, { characterId: 'asc' }],
+    select: { serverId: true, characterId: true, backfilledUntil: true, completedAt: true }
+  })
 }
 
 export async function readEnhancementBackfilledUntil(
