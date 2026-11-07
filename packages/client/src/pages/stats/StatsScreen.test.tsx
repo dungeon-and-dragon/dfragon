@@ -130,6 +130,26 @@ it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직�
   ])
 })
 
+it('직업 분포와 직업별 평균 명성에서 眞이 붙지 않은 전직은 뺀다', async () => {
+  await render(async () => ({
+    ...stats,
+    jobs: [
+      ...stats.jobs,
+      {
+        jobId: 'job-2',
+        jobGrowId: 'grow-4',
+        jobName: '직업2',
+        jobGrowName: '전직4',
+        count: 500,
+        averageFame: 100000
+      }
+    ]
+  }))
+
+  expect(rowsOf('직업 분포').map(([name]) => name)).toEqual(['眞 전직1', '眞 전직2', '眞 전직3'])
+  expect(rowsOf('직업별 평균 명성').map(([name]) => name)).toEqual(['眞 전직2', '眞 전직1'])
+})
+
 it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
   await render(async () => ({
     ...stats,
