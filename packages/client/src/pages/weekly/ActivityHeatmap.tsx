@@ -19,7 +19,7 @@ import {
   type SeasonRange
 } from './activity-heatmap'
 import { ActivityDayDetail } from './ActivityDayDetail'
-import { wheelScrollTarget } from './heatmap-wheel'
+import { wheelAction } from './heatmap-wheel'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
 import { useRingRotation } from './useRingRotation'
@@ -272,6 +272,7 @@ function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
 
     let duration = 0
     let target: number | undefined
+    let lastHeldAt: number | undefined
     const media = gsap.matchMedia()
     media.add('(prefers-reduced-motion: no-preference)', () => {
       duration = WHEEL_SCROLL_SECONDS
@@ -290,20 +291,27 @@ function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
         return
       }
 
-      const next = wheelScrollTarget({
+      const action = wheelAction({
         deltaX: event.deltaX,
         deltaY: event.deltaY,
         from: target ?? element.scrollLeft,
-        max: element.scrollWidth - element.clientWidth
+        max: element.scrollWidth - element.clientWidth,
+        now: event.timeStamp,
+        lastHeldAt
       })
-      if (next === undefined) {
+      if (action.kind === 'pass') {
         return
       }
 
       event.preventDefault()
-      target = next
+      lastHeldAt = event.timeStamp
+      if (action.kind === 'hold') {
+        return
+      }
+
+      target = action.target
       gsap.to(element, {
-        scrollLeft: next,
+        scrollLeft: action.target,
         duration,
         ease: 'power2.out',
         overwrite: true,
