@@ -1,5 +1,3 @@
-<img src="assets/brand/dfragon.png" width="96" height="96" alt="던삐삐" />
-
 # 던삐삐
 
 현재 속해있는 파티원, 공대원의 정보를 게임 화면에서 가져와 확인할 수 있는 웹 앱입니다.
