@@ -36,7 +36,10 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
           <OathOptionCards options={board.options} />
         </>
       ) : (
-        <OathStrip view={view} />
+        <OathStrip
+          view={view}
+          icon={loaded !== null && view.info !== null ? oathItemIconOf(loaded, view.info) : null}
+        />
       )}
       <div {...stylex.props(styles.body)}>
         <div {...stylex.props(styles.main)}>
@@ -128,7 +131,13 @@ function OathBody({
   )
 }
 
-function OathStrip({ view: { info, set } }: { view: OathView }): React.JSX.Element | null {
+function OathStrip({
+  view: { info, set },
+  icon
+}: {
+  view: OathView
+  icon: string | null
+}): React.JSX.Element | null {
   if (info === null && set === null) {
     return null
   }
@@ -138,6 +147,7 @@ function OathStrip({ view: { info, set } }: { view: OathView }): React.JSX.Eleme
       {info !== null && (
         <span {...stylex.props(partStyles.itemText)}>
           <span {...stylex.props(partStyles.stripLabel)}>서약</span>
+          {icon !== null && <ItemIcon itemId={info.itemId} src={icon} rarity={info.rarity} />}
           <ItemName name={info.itemName} rarity={info.rarity} />
           {info.setPoint !== null && (
             <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(info.setPoint)}</span>
