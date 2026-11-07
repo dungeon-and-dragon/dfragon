@@ -61,3 +61,42 @@ it('검색이 실패하면 오류를 알린다', async () => {
     '검색 조건을 확인해 주세요.'
   )
 })
+
+function candidate(
+  characterId: string,
+  adventureName: string | null
+): Awaited<ReturnType<ClientHost['searchCharacters']>>[number] {
+  return {
+    serverId: 'prey',
+    characterId,
+    characterName: '합성',
+    serverName: '프레이',
+    fame: 1000,
+    imageUrl: `https://img-api.neople.co.kr/df/servers/prey/characters/${characterId}?zoom=1`,
+    adventureName,
+    jobName: null,
+    jobGrowName: null
+  }
+}
+
+it('후보의 서버, 이름 오른쪽에 모험단명이 있으면 그 모험단 링크를 두고 없으면 아무것도 두지 않는다', async () => {
+  await render(async () => [
+    candidate('with-adventure', '합성 모험단'),
+    candidate('no-adventure', null)
+  ])
+
+  const [withAdventure, withoutAdventure] = [...container.querySelectorAll('tbody tr')].map(
+    (row) => row.querySelector('td')!
+  )
+  expect(
+    [...withAdventure.querySelectorAll('a')].map((link) => [
+      link.textContent,
+      link.getAttribute('href')
+    ])
+  ).toEqual([
+    ['합성', '/c/prey/with-adventure'],
+    ['합성 모험단', `/adventures/${encodeURIComponent('합성 모험단')}`]
+  ])
+  expect(withoutAdventure.textContent).toBe('프레이합성')
+  expect(withoutAdventure.querySelectorAll('a')).toHaveLength(1)
+})
