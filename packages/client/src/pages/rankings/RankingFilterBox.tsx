@@ -1,5 +1,6 @@
 import { Chip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import type { FameRankingFilter } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import { RANKING_JOBS } from './ranking-jobs'
 import { styles } from './RankingsScreen.style'
@@ -47,7 +48,7 @@ export function RankingFilterBox({
           {job?.grows.map(({ jobGrowId, name }) => (
             <FilterChip
               key={jobGrowId}
-              label={name}
+              label={formatJobName(name)}
               pressed={jobGrowId === filter.jobGrowId}
               value={{ jobId: job.jobId, jobGrowId }}
               onSelect={onChange}
