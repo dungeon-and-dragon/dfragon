@@ -1,11 +1,9 @@
 import type { TimelineCharacter, TimelineItemInput, TimelineRange } from '@dfragon/database'
 import type { FetchCharacterTimeline } from './neople.js'
-import { splitTimelineRanges } from './ranges.js'
+import { NEOPLE_TIMELINE_START, splitTimelineRanges } from './ranges.js'
 import { TIMELINE_COLLECTION_START } from './sync.js'
 
 const MINUTE_MS = 60_000
-// Neople 타임라인은 2017-09-21 이후 데이터만 준다(#1175 API 제약).
-const BACKFILL_START = new Date('2017-09-21T00:00:00+09:00')
 // 중천 시작부터는 정기 동기화가 모든 코드를 받으므로 그 직전 분까지만 받는다.
 const BACKFILL_END = new Date(TIMELINE_COLLECTION_START.getTime() - MINUTE_MS)
 
@@ -25,7 +23,7 @@ export interface EnhancementBackfillDependencies {
 
 function backfillStart(backfilledUntil: Date | null): Date {
   if (backfilledUntil === null) {
-    return BACKFILL_START
+    return NEOPLE_TIMELINE_START
   }
 
   return new Date(backfilledUntil.getTime() + MINUTE_MS)

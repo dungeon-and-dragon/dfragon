@@ -125,8 +125,11 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
 
 ```json
 {
-  "seasons": [{ "id": 11, "name": "천해천", "startsAt": "…", "available": true }],
-  "season": { "id": 11, "startsAt": "…", "endsAt": null },
+  "seasons": [
+    { "id": 9, "name": "선계", "startsAt": "…", "available": false, "backfill": { "done": 12, "total": 30, "running": true } },
+    { "id": 11, "name": "천해천", "startsAt": "…", "available": true }
+  ],
+  "season": { "id": 11, "startsAt": "…", "endsAt": null, "timelineStartsAt": "…" },
   "summary": {
     "raids": [{ "name": "디레지에 레이드", "count": 83 }],
     "legions": [{ "name": "아포칼립스", "count": 52 }],
@@ -144,9 +147,12 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
 }
 ```
 
-`seasons`는 시작한 시즌을 오래된 순으로 주고, `available`은 타임라인을 받기 시작한 중천(10) 이후 시즌인지입니다.
+`seasons`는 시작한 시즌을 오래된 순으로 주고, `available`은 집계할 수 있는 시즌인지입니다.
+중천(10) 이후 시즌은 늘 `true`이고 `backfill`이 없습니다.
+중천 전 시즌은 `backfill`에 [옛 시즌 받기](#모험단-옛-시즌-받기) 진행률을 주고, 지금 DB의 그 모험단 캐릭터가 모두 그 시즌을 끝까지 받았을 때만 `true`입니다.
 `season.endsAt`은 다음 시즌 시작이며 지금 시즌은 `null`입니다. 시즌 구간은 `startsAt` 포함, `endsAt` 제외입니다.
-`available`이 `false`인 시즌은 강화 백필 행만 있어 읽지 않고 빈 집계를 줍니다.
+`season.timelineStartsAt`은 기록이 있을 수 있는 첫 시각입니다. Neople 타임라인은 2017-09-21 00:00 KST부터라 마계(5)는 그 시각이고, 나머지 시즌은 `startsAt`과 같습니다.
+`available`이 `false`인 시즌은 강화 백필 행이나 일부 캐릭터의 행만 있어 읽지 않고 빈 집계를 줍니다.
 
 - 레이드(201, 210)와 레기온(209)은 [타임라인 조회](#타임라인-조회)의 `name`별 클리어 수이고 많은 순입니다. 하드 여부는 나누지 않습니다.
 - `items`는 획득 코드(501~521, 550~557) 가운데 `item_rarity`가 레전더리, 에픽, 태초, 신화인 행의 수입니다.
@@ -162,10 +168,32 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
 조회는 [모험단 주간 클리어 조회](#모험단-주간-클리어-조회)처럼 캐릭터마다 타임라인 동기화를 queue에 넣고 끝나기를 기다리지 않습니다.
 DB에 없는 모험단은 시즌 목록과 빈 집계를 주고, DB 설정이 없는 API는 `seasons`가 빈 목록, `season`이 `null`인 빈 집계를 줍니다.
 
+### 모험단 옛 시즌 받기
+
+`POST /adventures/:adventureName/activity/seasons/:season/backfill`은 지금 DB에 있는 그 모험단 캐릭터마다 중천 전 시즌(마계 5 ~ 선계 9) 하나의 모든 타임라인 코드를 Neople에서 받도록 queue에 넣고, 끝나기를 기다리지 않고 그 시즌의 받기 상태를 200으로 줍니다.
+본문은 없고, 응답은 [시즌 활동 조회](#모험단-시즌-활동-조회)의 `seasons` 한 칸과 같은 모양입니다.
+`season`이 정수가 아니거나, 시작하지 않았거나 중천 이후인 시즌, DB 설정이 없는 API는 400 `INVALID_CHARACTER_QUERY`입니다.
+
+```json
+{ "id": 9, "name": "선계", "startsAt": "2023-09-13T21:00:00.000Z", "available": false, "backfill": { "done": 12, "total": 30, "running": true } }
+```
+
+- 받는 구간은 시즌 시작부터 다음 시즌 시작 직전 분까지입니다. 마계는 Neople이 주는 첫 시각 2017-09-21 00:00 KST부터 받습니다.
+  선계는 2025-01-09 05:59에서 끝나, 06:00부터 받는 정기 동기화 행과 겹치지 않습니다.
+- 캐릭터마다 받은 위치 다음 분부터 시즌 끝까지 90일 이하 구간으로 나눠 앞 구간부터 받고, 구간마다 `next`를 끝까지 따라간 뒤 그 구간의 모든 코드 행을 바꿉니다.
+  받은 위치는 `timeline_season_backfill`에 남고, 시즌 끝까지 받으면 `completed_at`을 남깁니다.
+- 실패하면 그 캐릭터는 저장한 구간까지 남기고 멈춥니다. 다시 요청하면 저장한 구간 뒤부터 이어 받습니다.
+- `done`, `total`은 그 모험단 캐릭터들의 90일 구간 수 합입니다. 캐릭터당 마계 4, 할렘 6, 귀환 9, THE NEXT JOURNEY 7, 선계 6구간입니다.
+  `running`은 그 모험단의 캐릭터 가운데 그 시즌을 queue에서 기다리거나 받는 중인 캐릭터가 있는지입니다.
+- 끝까지 받은 캐릭터는 다시 넣지 않고 다시 받지도 않습니다. 받는 중인 캐릭터와 시즌을 다시 요청하면 하나로 합칩니다.
+- Queue는 정기 동기화, 강화 백필과 다른 메모리 queue이고 캐릭터와 시즌마다 합쳐 2개씩 처리합니다. 종료 때 대기열은 버리고 진행 중인 받기는 기다리지 않습니다.
+  API가 다시 시작되면 받는 중이던 시즌은 멈추고, 다시 요청하면 이어 받습니다.
+- 로그인이 없어 누구나 아무 모험단 이름으로 요청할 수 있고 호출 제한은 없습니다.
+
 ### 모험단 하루 활동 상세 조회
 
 `GET /adventures/:adventureName/activity/days/:date`는 [시즌 활동 조회](#모험단-시즌-활동-조회)의 `days` 한 칸에 들어간 기록을 하루치 모두 줍니다.
-`date`는 `YYYY-MM-DD`이고, 그날 06:00 KST부터 다음 날 06:00 KST 전까지가 하루입니다.
+`date`는 `YYYY-MM-DD`이고, 그날 06:00 KST부터 다음 날 06:00 KST 전까지가 하루입니다. 옛 시즌 날짜도 저장한 행을 같은 기준으로 줍니다.
 형식이 다르거나 없는 날짜(예: `2026-02-30`)면 400 `INVALID_CHARACTER_QUERY`입니다.
 
 ```json
@@ -281,7 +309,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ```
 
 점수 엔진을 열지 못하면 `SCORE_ENGINE_UNAVAILABLE`, 점수 worker가 오류로 끝나거나 엔진 결과 형식이 틀리면 `SCORE_ENGINE_FAILED`를 같은 stdout에 남깁니다.
-[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, 강화 백필이 실패하면 `TIMELINE_BACKFILL_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
+[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, 강화 백필이 실패하면 `TIMELINE_BACKFILL_FAILED`, [옛 시즌 받기](#모험단-옛-시즌-받기)가 실패하면 `TIMELINE_SEASON_BACKFILL_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
 요청마다 남기는 줄과 달리 `time`, `service`, `code`만 담습니다.
 
 ```json
@@ -404,6 +432,7 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
 DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
 옛 시즌 받기는 합성 행으로 구간 양 끝 분의 교체, 강화 백필 행의 교체, 받은 위치 이동과 끝까지 받음 기록, 다른 캐릭터와 구간 밖 행, 정기 동기화와 강화 백필 위치를 바꾸지 않는 것을 봅니다.
+모험단 조회는 합성 행을 Neople 대신 주는 fake로 옛 시즌을 받아, 모든 캐릭터가 받은 시즌의 집계와 하루 상세, 한 캐릭터만 받은 시즌의 빈 집계, 다 받은 시즌의 받기 요청을 봅니다.
 타임라인 조회는 합성 행으로 주간 경계 앞뒤, 시즌 경계, 최근 50개, 빈 캐릭터와 진행 중인 동기화를 기다린 조회를 봅니다.
 명성 랭킹과 통계는 합성 행으로 직업과 전직 필터, 명성이 없는 캐릭터 제외, 100명 상한, 명성 구간 경계, 직업별 평균 명성과 API의 통계 캐시를 봅니다.
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
