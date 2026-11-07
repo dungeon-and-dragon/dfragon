@@ -237,7 +237,7 @@ export function ApiAdventureActivity() {
     ApiOperation({
       summary: '모험단 시즌 활동 조회',
       description:
-        '공개 API. DB에 저장된 그 모험단 캐릭터의 타임라인을 합쳐 한 시즌의 레이드, 레기온 클리어, 레전더리 이상 아이템 획득, 강화, 증폭, 재련 횟수와 활동이 있는 날(06:00 KST에 바뀜)의 횟수를 반환합니다. season이 없으면 지금 시즌입니다. 강화 단계는 타임라인의 after(도전한 단계)입니다. 타임라인을 받기 전인 중천 전 시즌은 available이 false이고 집계는 비어 있습니다. 조회는 캐릭터마다 타임라인 동기화를 기존 대기열에 넣고 끝나기를 기다리지 않아, 응답은 지금 저장된 값입니다. DB에 없는 모험단은 집계가 비어 있고, DB 설정이 없는 API는 시즌 목록이 비고 season이 null입니다.'
+        '공개 API. DB에 저장된 그 모험단 캐릭터의 타임라인을 합쳐 한 시즌의 레이드, 레기온 클리어, 레전더리 이상 아이템 획득, 강화, 증폭, 재련 횟수와 활동이 있는 날(06:00 KST에 바뀜)의 횟수를 반환합니다. season이 없으면 지금 시즌입니다. 강화 단계는 타임라인의 after(도전한 단계)입니다. 중천 전 시즌은 backfill에 옛 시즌 받기 진행률이 있고, 모험단 캐릭터가 모두 끝까지 받아야 available이 true가 되어 집계하며 그 전에는 집계가 비어 있습니다. 조회는 캐릭터마다 타임라인 동기화를 기존 대기열에 넣고 끝나기를 기다리지 않아, 응답은 지금 저장된 값입니다. DB에 없는 모험단은 집계가 비어 있고, DB 설정이 없는 API는 시즌 목록이 비고 season이 null입니다.'
     }),
     ApiParam({
       name: 'adventureName',
@@ -251,6 +251,28 @@ export function ApiAdventureActivity() {
       description: '시즌 번호(중천 10, 천해천 11). 없으면 지금 시즌'
     }),
     success('AdventureActivity', '시즌 목록, 고른 시즌의 구간, 시즌 요약과 날짜별 활동'),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiAdventureSeasonBackfill() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '모험단 옛 시즌 받기',
+      description:
+        '공개 API. DB에 저장된 그 모험단 캐릭터마다 중천 전 시즌 하나의 모든 타임라인 코드를 Neople에서 받도록 옛 시즌 받기 대기열에 넣고, 끝나기를 기다리지 않고 그 시즌의 진행률을 반환합니다. 받는 중이거나 끝까지 받은 캐릭터는 다시 넣지 않습니다. 진행률은 캐릭터마다 시즌 구간을 90일 이하로 나눈 구간 수의 합입니다. 받기는 메모리 대기열이라 API가 다시 시작되면 멈추고, 다시 요청하면 저장한 구간 뒤부터 이어 받습니다. 호출 제한은 없습니다. 중천 이후 시즌이나 시작하지 않은 시즌, DB 설정이 없는 API는 400입니다.'
+    }),
+    ApiParam({
+      name: 'adventureName',
+      schema: { type: 'string' },
+      description: 'URL 인코딩한 모험단 이름'
+    }),
+    ApiParam({
+      name: 'season',
+      schema: { type: 'integer', minimum: 1 },
+      description: '중천 전 시즌 번호(마계 5 ~ 선계 9)'
+    }),
+    success('AdventureSeasonBackfill', '시즌 목록의 한 칸과 같은 모양의 그 시즌 받기 상태'),
     errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
   )
 }

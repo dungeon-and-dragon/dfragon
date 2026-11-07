@@ -21,6 +21,11 @@ import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.
 import { setupSwagger } from './swagger/setup.js'
 import { type TimelineSyncQueue, createTimelineSyncQueue } from './characters/timeline/queue.js'
 import {
+  type SeasonBackfillJob,
+  type SeasonBackfillQueue,
+  createSeasonBackfillQueue
+} from './characters/timeline/season-backfill.js'
+import {
   CHARACTER_TIMELINE_SERVICE,
   CharacterTimelineController
 } from './characters/timeline/http.js'
@@ -40,7 +45,8 @@ import { ADVENTURE_GUILD_SERVICE, AdventureGuildController } from './adventure-g
 import {
   type AdventureGuildReader,
   createAdventureGuildService,
-  emptyAdventureGuildService
+  emptyAdventureGuildService,
+  noSeasonBackfill
 } from './adventure-guild/service.js'
 import { RANKING_STATS_SERVICE, RankingStatsController } from './ranking-stats/http.js'
 import {
@@ -62,6 +68,7 @@ import {
 
 const TRAILING_SLASHES_PATTERN = /\/+$/
 const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
+const SEASON_BACKFILL_QUEUE = Symbol('SEASON_BACKFILL_QUEUE')
 
 function requestFailure(
   path: string,
@@ -119,6 +126,7 @@ class HealthController {
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
   readonly backfillEnhancements: (character: TimelineCharacter) => Promise<void>
+  readonly backfillSeason: (job: SeasonBackfillJob) => Promise<void>
   readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
   readonly readPage: ReadTimelinePage
   // 진행 중인 동기화를 기다리지 않고 닫는다.
@@ -169,15 +177,23 @@ export async function createApiHttpApp({
             createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED'))
         },
         {
+          provide: SEASON_BACKFILL_QUEUE,
+          useFactory: () =>
+            createSeasonBackfillQueue(timeline.backfillSeason, () =>
+              reportCode('TIMELINE_SEASON_BACKFILL_FAILED')
+            )
+        },
+        {
           provide: TimelineSyncSubscriber,
-          inject: [TIMELINE_SYNC_QUEUE],
+          inject: [TIMELINE_SYNC_QUEUE, SEASON_BACKFILL_QUEUE],
           // 타임라인 조회가 백필을 기다리지 않도록 백필은 따로 queue를 둔다.
-          useFactory: (queue: TimelineSyncQueue) =>
+          useFactory: (queue: TimelineSyncQueue, seasonBackfillQueue: SeasonBackfillQueue) =>
             new TimelineSyncSubscriber(
               queue,
               createTimelineSyncQueue(timeline.backfillEnhancements, () =>
                 reportCode('TIMELINE_BACKFILL_FAILED')
               ),
+              seasonBackfillQueue,
               timeline.close
             )
         },
@@ -232,14 +248,21 @@ export async function createApiHttpApp({
       {
         provide: ADVENTURE_GUILD_SERVICE,
         // 타임라인 queue는 DB 설정이 있을 때만 있어, 테스트처럼 모험단 읽기만 준 앱은 동기화를 요청하지 않는다.
-        inject: [{ token: TIMELINE_SYNC_QUEUE, optional: true }],
-        useFactory: (queue: TimelineSyncQueue | undefined) => {
+        inject: [
+          { token: TIMELINE_SYNC_QUEUE, optional: true },
+          { token: SEASON_BACKFILL_QUEUE, optional: true }
+        ],
+        useFactory: (
+          queue: TimelineSyncQueue | undefined,
+          seasonBackfillQueue: SeasonBackfillQueue | undefined
+        ) => {
           if (!adventureGuild) {
             return emptyAdventureGuildService
           }
           const requestTimelineSync = queue?.request ?? (() => undefined)
+          const seasonBackfill = seasonBackfillQueue ?? noSeasonBackfill
 
-          return createAdventureGuildService(adventureGuild, requestTimelineSync)
+          return createAdventureGuildService(adventureGuild, requestTimelineSync, seasonBackfill)
         }
       },
       {
