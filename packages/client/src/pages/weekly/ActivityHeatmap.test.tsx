@@ -303,3 +303,23 @@ it('특별한 날이 있는 탭은 테두리 각도를 돌리고, 움직임 줄�
   await act(async () => tab('아이템').click())
   expect(ringAngle()).toBe('')
 })
+
+it('칸의 레이드 줄은 하드와 노말이 모두 있으면 둘을 나눠 보이고, 한쪽만 있거나 없는 응답은 합계만 응답 순서대로 보인다', async () => {
+  const raids = [
+    { name: '가 레이드', count: 2, hard: 1, normal: 1 },
+    { name: '나 레이드', count: 4, hard: 0, normal: 4 },
+    { name: '다 레이드', count: 6 }
+  ]
+  await render({
+    getAdventureActivityDay: async () => ({ ...april2, raids, items: [], enhancements: [] })
+  })
+
+  await act(async () => hover(cell('4월 2일')))
+
+  expect(popupText().slice(1, 5)).toEqual([
+    '레이드12회',
+    '가 레이드하드 1회 | 노말 1회',
+    '나 레이드4회',
+    '다 레이드6회'
+  ])
+})
