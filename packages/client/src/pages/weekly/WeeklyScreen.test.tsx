@@ -7,11 +7,10 @@ import type {
   WeeklyCharacter
 } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
-import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
-import { WeeklyScreen } from './WeeklyScreen'
+import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 let container: HTMLDivElement
 let root: Root
@@ -27,8 +26,6 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.unstubAllGlobals()
-  useMyAdventureStore.setState({ adventureName: null })
-  localStorage.clear()
 })
 
 function weeklyCharacter(
@@ -68,17 +65,34 @@ const weekly: AdventureWeekly = {
   ]
 }
 
-function render(getAdventureWeekly: ClientHost['getAdventureWeekly']): Promise<void> {
+function render(
+  screen: React.JSX.Element,
+  getAdventureWeekly: ClientHost['getAdventureWeekly'] = vi.fn()
+): Promise<void> {
   return act(async () =>
     root.render(
       <ClientHostContext value={createTestClientHost({ getAdventureWeekly })}>
         <TestQueryClient>
-          <TestRouter>
-            <WeeklyScreen season={undefined} onSeasonChange={vi.fn()} />
-          </TestRouter>
+          <TestRouter>{screen}</TestRouter>
         </TestQueryClient>
       </ClientHostContext>
     )
+  )
+}
+
+function renderWeekly(
+  adventureName: string,
+  getAdventureWeekly: ClientHost['getAdventureWeekly'],
+  onAdventureOpen: (adventureName: string) => void = vi.fn()
+): Promise<void> {
+  return render(
+    <WeeklyScreen
+      adventureName={adventureName}
+      season={undefined}
+      onSeasonChange={vi.fn()}
+      onAdventureOpen={onAdventureOpen}
+    />,
+    getAdventureWeekly
   )
 }
 
@@ -104,7 +118,7 @@ function button(name: string): HTMLButtonElement | undefined {
 
 async function submitName(name: string): Promise<void> {
   const form = container.querySelector<HTMLFormElement>('form')!
-  const input = form.querySelector<HTMLInputElement>('input[aria-label="내 모험단"]')!
+  const input = form.querySelector<HTMLInputElement>('input[aria-label="모험단"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, name)
     input.dispatchEvent(new Event('input', { bubbles: true }))
@@ -112,35 +126,36 @@ async function submitName(name: string): Promise<void> {
   await act(async () => form.requestSubmit())
 }
 
-it('저장된 모험단이 없으면 조회하지 않고 내 모험단 상자에 이름을 넣으라는 한 줄만 두며 새로고침 버튼이 없다', async () => {
+it('모험단 이름 입력 화면은 제목 한 줄과 빈 입력, 보기 버튼만 두고 조회하지 않는다', async () => {
   const getAdventureWeekly = vi.fn<ClientHost['getAdventureWeekly']>()
-  await render(getAdventureWeekly)
+  await render(<AdventureEntryScreen onAdventureOpen={vi.fn()} />, getAdventureWeekly)
 
-  expect(container.querySelector('h1')?.textContent).toBe('내 모험단')
+  expect(container.querySelector('h1')?.textContent).toBe('모험단')
+  expect(container.querySelector<HTMLInputElement>('input[aria-label="모험단"]')?.value).toBe('')
   expect(container.querySelector('nav[aria-label="시즌"]')).toBeNull()
-  expect(listName()).toBe('내 모험단')
-  expect(container.querySelector('section p')?.textContent).toBe('모험단 이름을 넣어 주세요.')
+  expect(container.querySelector('section')).toBeNull()
+  expect(container.querySelector('p')).toBeNull()
   expect(button('보기')).toBeDefined()
   expect(button('새로고침')).toBeUndefined()
   expect(getAdventureWeekly).not.toHaveBeenCalled()
 })
 
-it('이름을 넣고 보기를 누르면 앞뒤 공백을 뺀 이름으로 조회하고 이름을 저장한다', async () => {
-  const getAdventureWeekly = vi.fn<ClientHost['getAdventureWeekly']>(async () => weekly)
-  await render(getAdventureWeekly)
+it('모험단 화면의 입력은 지금 모험단 이름으로 시작하고, 보기를 누르면 앞뒤 공백을 뺀 이름을 열며 빈 이름은 열지 않는다', async () => {
+  const onAdventureOpen = vi.fn()
+  await renderWeekly('합성 모험단', async () => weekly, onAdventureOpen)
+  expect(container.querySelector<HTMLInputElement>('input[aria-label="모험단"]')?.value).toBe(
+    '합성 모험단'
+  )
 
   await submitName('  ')
-  expect(getAdventureWeekly).not.toHaveBeenCalled()
-  await submitName(' 합성 모험단 ')
+  expect(onAdventureOpen).not.toHaveBeenCalled()
+  await submitName(' 다른 모험단 ')
 
-  expect(getAdventureWeekly).toHaveBeenCalledWith('합성 모험단')
-  expect(useMyAdventureStore.getState().adventureName).toBe('합성 모험단')
-  expect(container.querySelector('h1')?.textContent).toBe('합성 모험단')
+  expect(onAdventureOpen.mock.calls).toEqual([['다른 모험단']])
 })
 
 it('표 위에 제목 없이 클리어 이름 열을 응답 순서로 레이드, 레기온 묶음 아래 두고, 응답 순서의 캐릭터마다 클리어한 칸에만 체크를 둔다', async () => {
-  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
-  await render(async () => weekly)
+  await renderWeekly('합성 모험단', async () => weekly)
 
   expect(listName()).toBeUndefined()
   expect(headerRows()).toEqual([
@@ -162,8 +177,7 @@ it('표 위에 제목 없이 클리어 이름 열을 응답 순서로 레이드,
 })
 
 it('클리어 이름이 없는 응답은 묶음 헤더 없이 #, 캐릭터, 명성 열만 그린다', async () => {
-  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
-  await render(async () => ({
+  await renderWeekly('합성 모험단', async () => ({
     ...weekly,
     clearNames: [],
     characters: weekly.characters.map((character) => ({ ...character, weeklyClears: [] }))
@@ -174,8 +188,11 @@ it('클리어 이름이 없는 응답은 묶음 헤더 없이 #, 캐릭터, 명�
 })
 
 it('캐릭터가 없는 응답은 모험단 이름 한 줄만 둔다', async () => {
-  useMyAdventureStore.setState({ adventureName: '없는 모험단' })
-  await render(async () => ({ adventureName: '없는 모험단', clearNames: [], characters: [] }))
+  await renderWeekly('없는 모험단', async () => ({
+    adventureName: '없는 모험단',
+    clearNames: [],
+    characters: []
+  }))
 
   expect(listName()).toBe('없는 모험단')
   expect(container.querySelector('section table')).toBeNull()
@@ -183,13 +200,12 @@ it('캐릭터가 없는 응답은 모험단 이름 한 줄만 둔다', async () 
 })
 
 it('새로고침을 누르면 받아 둔 표를 버리고 받는 중을 보인 뒤 같은 모험단을 다시 조회해 새 응답으로 그린다', async () => {
-  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
   const refreshed = Promise.withResolvers<AdventureWeekly>()
   const getAdventureWeekly = vi
     .fn<ClientHost['getAdventureWeekly']>()
     .mockResolvedValueOnce({ ...weekly, characters: [weekly.characters[1]] })
     .mockReturnValueOnce(refreshed.promise)
-  await render(getAdventureWeekly)
+  await renderWeekly('합성 모험단', getAdventureWeekly)
   expect(bodyRows()).toHaveLength(1)
 
   await act(async () => button('새로고침')!.click())

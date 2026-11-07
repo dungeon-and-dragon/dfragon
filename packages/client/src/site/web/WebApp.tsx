@@ -4,6 +4,7 @@ import {
   createRoute,
   createRouter,
   Outlet,
+  redirect,
   RouterProvider,
   useMatch
 } from '@tanstack/react-router'
@@ -15,9 +16,9 @@ import { MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
 import { createQueryClient } from '../../lib/query-client'
 import { ClientHostContext } from '../../hooks/useClientHost'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
+import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
-import { AdventurePage } from '../../pages/adventure/AdventurePage'
 import { parseCharacterSearch } from '../../pages/character-search/character-search-params'
 import { CharacterSearchPage } from '../../pages/character-search/CharacterSearchPage'
 import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
@@ -29,7 +30,7 @@ import { RankingsPage } from '../../pages/rankings/RankingsPage'
 import { SearchScreen } from '../../pages/search/SearchScreen'
 import { StatsScreen } from '../../pages/stats/StatsScreen'
 import { parseWeeklySearch } from '../../pages/weekly/weekly-search'
-import { WeeklyPage } from '../../pages/weekly/WeeklyPage'
+import { AdventureEntryPage, WeeklyPage } from '../../pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import type { AutoRoundSignal, BrowserHost } from './browser-host'
 import { ScreenShareChip } from './ScreenShareChip'
@@ -113,7 +114,7 @@ function HomeScreen(): React.JSX.Element {
 }
 
 function SiteLayout(): React.JSX.Element {
-  const weekly = useMatch({ from: weeklyRoute.id, shouldThrow: false })
+  const adventure = useMatch({ from: adventureRoute.id, shouldThrow: false })
 
   return (
     <div {...stylex.props(styles.site)}>
@@ -121,7 +122,7 @@ function SiteLayout(): React.JSX.Element {
       <main
         {...stylex.props(
           styles.screen,
-          weekly !== undefined && styles.sideRoomScreen,
+          adventure !== undefined && styles.sideRoomScreen,
           styles.screenWidth(MAIN_WINDOW_WIDTH)
         )}
       >
@@ -169,10 +170,29 @@ const statsRoute = createRoute({
   component: StatsScreen
 })
 
+const adventureEntryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/adventures',
+  validateSearch: parseWeeklySearch,
+  beforeLoad: ({ search }) => {
+    const { adventureName } = useMyAdventureStore.getState()
+    if (adventureName != null) {
+      throw redirect({
+        to: '/adventures/$adventureName',
+        params: { adventureName },
+        search,
+        replace: true
+      })
+    }
+  },
+  component: AdventureEntryPage
+})
+
 const adventureRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/adventures/$adventureName',
-  component: AdventurePage
+  validateSearch: parseWeeklySearch,
+  component: WeeklyPage
 })
 
 const guildRoute = createRoute({
@@ -181,11 +201,14 @@ const guildRoute = createRoute({
   component: GuildPage
 })
 
-const weeklyRoute = createRoute({
+// 예전 내 모험단 주소의 북마크가 깨지지 않게 모험단 화면으로 넘긴다.
+const legacyMyAdventureRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my',
   validateSearch: parseWeeklySearch,
-  component: WeeklyPage
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: '/adventures', search, replace: true })
+  }
 })
 
 const favoritesRoute = createRoute({
@@ -200,9 +223,10 @@ const routeTree = rootRoute.addChildren([
   characterSearchRoute,
   rankingsRoute,
   statsRoute,
+  adventureEntryRoute,
   adventureRoute,
   guildRoute,
-  weeklyRoute,
+  legacyMyAdventureRoute,
   favoritesRoute
 ])
 

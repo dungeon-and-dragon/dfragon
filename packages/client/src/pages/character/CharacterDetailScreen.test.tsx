@@ -145,7 +145,7 @@ it('딜러 요약은 이름, 서버 칩과 전직과 레벨, 모험단과 길드
   const card: Card = { role: 'dealer', score: scoreOf({ value: 392332 }) }
   await render(async () => detailOf({ card }))
 
-  expect(textLines()).toEqual(['커피', '바칼眞 버서커Lv.115', '동네커피필로시스'])
+  expect(textLines()).toEqual(['커피', '바칼버서커Lv.115', '동네커피필로시스'])
   expect(summary().querySelector('img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/servers/bakal/characters/dealer-1?zoom=1'
   )

@@ -110,7 +110,7 @@ it('제목 상자에 길드 이름, 길드원 수, 평균 명성을 두고 열�
   ])
   expect([...bodyRows()[0].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual([
     '1',
-    '카인합성1Lv.115 | 眞 합성 전직',
+    '카인합성1Lv.115 | 합성 전직',
     '89,999',
     '모험단1'
   ])
