@@ -266,6 +266,22 @@ DB 설정이 없는 API는 빈 랭킹과, 0과 빈 목록인 통계를 줍니다
 
 Neople 연결 실패, 잘못된 key, 429와 503을 뺀 HTTP 오류도 `neople-api`로 분류되므로, 장애가 길면 그동안 부른 캐릭터가 모두 실패로 남습니다. 장애가 끝난 뒤 관리자가 `UPDATE character_collection SET failure = NULL, attempted_at = NULL WHERE attempted_at >= <장애 시작 시각>`으로 되돌리면 worker가 다시 부릅니다.
 
+### 스킬 스타일 갱신 worker
+
+`node dist/skill-style-collector.js`는 명성 상위 캐릭터의 스킬 스타일을 주기적으로 다시 받는 별도 프로세스입니다. HTTP를 띄우지 않고 migration을 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
+입력은 Neople key, DB 설정(필수), `SKILL_STYLE_COLLECTOR_REQUESTS_PER_SECOND`(Neople 초당 요청 상한, 기본 5), `SKILL_STYLE_COLLECTOR_CONCURRENCY`(한 번에 함께 처리할 캐릭터 수, 1~32, 기본 1)입니다. 잘못된 입력은 `Skill style collector failed`와 nonzero exit로 끝납니다.
+속도 제한, 동시 처리와 한도 초과, 점검, timeout 처리는 캐릭터 수집 worker와 같은 함수를 씁니다. 두 worker와 상세 조회는 같은 Neople key를 나눠 쓰므로 초당 상한은 합계로 정합니다.
+
+1. 명성이 있는 캐릭터의 전직(`job_id`, `job_grow_id`) 목록을 읽고, 전직마다 표본을 고릅니다. 표본은 그 전직에서 명성 내림차순 `percent_rank()`가 상위 10% 이내인 캐릭터이며 명성이 없는 행은 뺍니다. 비율과 갱신 주기는 `@dfragon/database`의 `SKILL_STYLE_SAMPLE_TOP_PERCENT`, `SKILL_STYLE_REFRESH_DAYS`입니다.
+2. 표본 가운데 스킬 스타일을 받은 적 없거나 받은 지 7일 이상 지난 캐릭터를 받은 적 없는 캐릭터, 오래된 순(같으면 서버, 캐릭터 id 순)으로 100명씩 골라 `GET /df/servers/<serverId>/characters/<characterId>/skill/style`을 부릅니다. 대기열 테이블은 없고 매번 query로 고릅니다.
+3. 응답 최상위의 기본 정보를 캐릭터 수집 worker와 같은 writer로 `characters`에 쓰고, 스킬 스타일을 받은 시각과 함께 `character_skill_styles`에 쓰며 둘은 한 transaction입니다.
+4. 없는 캐릭터(`DNF001`)는 스킬 스타일 행을 지웁니다. 그 밖의 Neople 실패는 `SKILL_STYLE_NEOPLE_FAILED`를 stdout JSON 한 줄로 남기고, 이번 회차에서는 다시 고르지 않고 다음 회차에 다시 부릅니다.
+5. 한도 초과, 점검, timeout이면 저장하지 않고 `SKILL_STYLE_NEOPLE_UNAVAILABLE`을 남긴 뒤 1분 쉬고 처음부터 다시 고릅니다. 모든 전직에 대상이 없으면 1시간 쉽니다. DB 오류는 프로세스를 끝내므로 컨테이너 재시작 정책으로 다시 띄웁니다.
+6. 종료 처리는 따로 두지 않아 SIGTERM, SIGINT를 받으면 그대로 끝납니다. 저장 전에 끝난 캐릭터는 받은 시각이 그대로라 다음 시작 때 다시 고릅니다.
+
+대상 고르기는 `characters`의 `(job_id, job_grow_id, fame DESC)` index로 전직 하나의 행만 읽고 `character_skill_styles`를 `(server_id, character_id)`로 붙이므로, 새 index를 두지 않습니다.
+로컬에서 합성 캐릭터 160만 명(전직 70개, 스킬 스타일 행 15만 개)일 때 전직 목록이 85ms, 전직 하나의 100명 고르기가 44ms였습니다.
+
 Migration 파일, 설정 읽기와 CLI는 `packages/database`에 있습니다. 만드는 법은 [`@dfragon/database` 안내](../../packages/database/README.md#빌드와-migration)를 따릅니다.
 Migration을 더하는 PR에는 이전 이미지가 새 schema로 뜨는지와 되돌릴 수 없는 변경이 있는지를 적습니다.
 
@@ -390,7 +406,7 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 - `GET /health`의 200과 `{"status":"ok"}`는 HTTP 시작 확인입니다. 요청마다 Neople 연결을
   재검사하는 readiness는 아니며, 검색 성공 검증과 구분합니다.
 
-이미지의 기본 CMD는 `node --import reflect-metadata dist/main.js`입니다. [캐릭터 수집 worker](#캐릭터-수집-worker)는 CMD를 `node dist/character-collector.js`로 바꿔 실행하며, entrypoint의 Neople key, DB 비밀번호 기본 파일 선택은 같습니다. Migration은 이 CMD가 시작할 때 적용하며 별도 migration, cleanup 명령은 없습니다.
+이미지의 기본 CMD는 `node --import reflect-metadata dist/main.js`입니다. [캐릭터 수집 worker](#캐릭터-수집-worker)와 [스킬 스타일 갱신 worker](#스킬-스타일-갱신-worker)는 CMD를 `node dist/character-collector.js`, `node dist/skill-style-collector.js`로 바꿔 실행하며, entrypoint의 Neople key, DB 비밀번호 기본 파일 선택은 같습니다. Migration은 이 CMD가 시작할 때 적용하며 별도 migration, cleanup 명령은 없습니다.
 이미지 빌드에는 운영 설정, secret, 실데이터를 제공하지 않습니다.
 
 이미지 실행 계약은 로컬에 있는 이미지로 `node apps/api/test-support/container-deployment.mjs dfragon-api:local`을 실행해
@@ -405,6 +421,8 @@ PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
 수집 worker는 빈 대기열에서 DB에 붙은 채 실행 중인지, SIGTERM으로 끝나는지, `CHARACTER_IMPORT_FILES`가 없으면 `Character collector failed`로 끝나는지 봅니다. 대기열이 비어 있어 Neople은 부르지 않습니다.
+스킬 스타일 갱신은 합성 행으로 상위 10% 경계, 7일 앞뒤, 명성 없는 캐릭터와 다른 전직 제외, 받은 적 없는 캐릭터 먼저, 이번 회차에서 뺀 캐릭터, 기본 정보와 스킬 스타일의 함께 저장과 함께 되돌림, 행 삭제를 봅니다.
+갱신 worker는 DB에 붙어 네트워크 없는 컨테이너에서 Neople 실패를 남기고도 계속 도는지, SIGTERM으로 끝나는지, 잘못된 설정이면 `Skill style collector failed`로 끝나는지 봅니다.
 
 ### Migration 실패 복구
 
