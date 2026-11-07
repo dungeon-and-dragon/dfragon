@@ -26,7 +26,8 @@ const at = (time: string) => new Date(`${time}+09:00`)
 const season: ActivitySeasonRange = {
   id: 11,
   startsAt: at('2026-03-26T06:00:00'),
-  endsAt: at('2026-12-17T06:00:00')
+  endsAt: at('2026-12-17T06:00:00'),
+  timelineStartsAt: at('2026-03-26T06:00:00')
 }
 const raid = (time: string, raidName: string): TimelineEventRow => ({
   code: 201,
@@ -269,12 +270,14 @@ test('시즌 목록은 시작한 시즌만 두고 중천부터 available이며, 
   assert.deepEqual(findActivitySeason(seasons, undefined), {
     id: 11,
     startsAt: at('2026-03-26T06:00:00'),
-    endsAt: null
+    endsAt: null,
+    timelineStartsAt: at('2026-03-26T06:00:00')
   })
   assert.deepEqual(findActivitySeason(seasons, 10), {
     id: 10,
     startsAt: at('2025-01-09T06:00:00'),
-    endsAt: at('2026-03-26T06:00:00')
+    endsAt: at('2026-03-26T06:00:00'),
+    timelineStartsAt: at('2025-01-09T06:00:00')
   })
   assert.equal(findActivitySeason(seasons, 12), undefined)
   assert.equal(findActivitySeason([], undefined), undefined)
@@ -396,7 +399,12 @@ test('하루 상세의 강화는 종류, 도전한 단계 after와 성공 여부
 })
 
 async function listen(
-  reader: Partial<Pick<AdventureGuildReader, 'readAdventureActivity' | 'readAdventureActivityDay'>>,
+  reader: Partial<
+    Pick<
+      AdventureGuildReader,
+      'readAdventureActivity' | 'readAdventureActivityDay' | 'readAdventureSeasonBackfill'
+    >
+  >,
   syncTimeline: (character: TimelineCharacter) => Promise<void>
 ): Promise<{ app: INestApplication; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
@@ -410,6 +418,7 @@ async function listen(
       readAdventureWeeklyClears: unused,
       readAdventureActivity: unused,
       readAdventureActivityDay: unused,
+      readAdventureSeasonBackfill: unused,
       ...reader
     },
     timeline: {
@@ -417,6 +426,7 @@ async function listen(
       read: unused,
       readPage: unused,
       backfillEnhancements: unused,
+      backfillSeason: unused,
       close: async () => undefined
     },
     writeAccessLog: () => undefined
@@ -468,7 +478,12 @@ test('시즌 활동 조회는 고른 시즌을 넘기고 캐릭터마다 동기�
     assert.equal(chosen.status, 200)
     assert.deepEqual(await current.json(), {
       seasons: [{ id: 11, name: '천해천', startsAt: '2026-03-25T21:00:00.000Z', available: true }],
-      season: { id: 11, startsAt: '2026-03-25T21:00:00.000Z', endsAt: null },
+      season: {
+        id: 11,
+        startsAt: '2026-03-25T21:00:00.000Z',
+        endsAt: null,
+        timelineStartsAt: '2026-03-25T21:00:00.000Z'
+      },
       ...emptySeasonActivity()
     })
     assert.deepEqual(reads, [
