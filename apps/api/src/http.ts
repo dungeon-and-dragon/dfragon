@@ -38,7 +38,8 @@ import {
 import { TimelineSyncSubscriber } from './characters/timeline/subscriber.js'
 import {
   CharacterBasicSubscriber,
-  type RecordCharacterBasic
+  type RecordCharacterBasic,
+  type RecordCharacterSkillStyle
 } from './characters/basic/subscriber.js'
 import { CharacterEvents } from './characters/events.js'
 import { ADVENTURE_GUILD_SERVICE, AdventureGuildController } from './adventure-guild/http.js'
@@ -138,6 +139,7 @@ export interface ApiHttpAppOptions {
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
   readonly timeline?: TimelineSyncOptions
   readonly recordCharacterBasic?: RecordCharacterBasic
+  readonly recordCharacterSkillStyle?: RecordCharacterSkillStyle
   readonly adventureGuild?: AdventureGuildReader
   readonly rankingStats?: RankingStatsReader
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
@@ -149,12 +151,13 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, adventure, guild reads and fame rankings, stats. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, skill styles, adventure, guild reads and fame rankings, stats. */
 export async function createApiHttpApp({
   search,
   details,
   timeline,
   recordCharacterBasic,
+  recordCharacterSkillStyle,
   adventureGuild,
   rankingStats,
   todayGrade,
@@ -210,8 +213,10 @@ export async function createApiHttpApp({
         {
           provide: CharacterBasicSubscriber,
           useFactory: () =>
-            new CharacterBasicSubscriber(recordCharacterBasic, () =>
-              reportCode('CHARACTER_BASIC_RECORD_FAILED')
+            new CharacterBasicSubscriber(
+              recordCharacterBasic,
+              recordCharacterSkillStyle,
+              reportCode
             )
         }
       ]

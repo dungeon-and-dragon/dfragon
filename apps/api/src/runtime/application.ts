@@ -6,7 +6,8 @@ import {
   readCharacterStats,
   readFameRanking,
   readGuild,
-  recordCharacterBasic
+  recordCharacterBasic,
+  recordCharacterSkillStyle
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { createCatalogService } from '../characters/catalog/service.js'
@@ -45,7 +46,11 @@ function createDatabaseSubscribers(
   database: DatabaseConfiguration | undefined
 ): Pick<
   ApiHttpAppOptions,
-  'timeline' | 'recordCharacterBasic' | 'adventureGuild' | 'rankingStats'
+  | 'timeline'
+  | 'recordCharacterBasic'
+  | 'recordCharacterSkillStyle'
+  | 'adventureGuild'
+  | 'rankingStats'
 > &
   Pick<CharacterSearchDependencies, 'readAdventureNames'> {
   if (database === undefined) {
@@ -72,6 +77,7 @@ function createDatabaseSubscribers(
       close: () => client.$disconnect()
     },
     recordCharacterBasic: (basic) => recordCharacterBasic(client, basic),
+    recordCharacterSkillStyle: (style) => recordCharacterSkillStyle(client, style),
     readAdventureNames: (characters) => readAdventureNames(client, characters),
     adventureGuild: {
       readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),
