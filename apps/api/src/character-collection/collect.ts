@@ -1,6 +1,6 @@
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
 import { NeopleRequestFailure } from '@dfragon/neople'
-import { type CollectionResult, isNeopleUnavailable } from '../neople-collection/pace.js'
+import { type CollectionResult, isNeopleUnavailable } from '../neople-collection/concurrency.js'
 
 export type CollectionFailure = `neople-${'internal' | 'api'}`
 
