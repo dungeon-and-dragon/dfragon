@@ -85,6 +85,11 @@ DB 설정이 있으면 기본 정보 구독자도 `character.fetched` 이벤트�
 응답은 저장을 기다리지 않고, 저장이 실패해도 상세 응답은 그대로이며 재시도하지 않습니다. 모험단 이름이 없는 캐릭터처럼 기본 정보 schema에 맞지 않는 응답은 저장하지 않습니다.
 DB 설정이 없으면 구독자를 등록하지 않습니다.
 
+기본 정보를 저장한 뒤 같은 구독자가 스킬 스타일 섹션을 `@dfragon/neople`의 `characterSkillStyleSchema`로 바꿔 `recordCharacterSkillStyle`로 `character_skill_styles`에 덮어씁니다.
+스킬 스타일 행은 `characters`를 참조하므로 기본 정보를 저장하지 못하면 스킬 스타일도 저장하지 않습니다.
+명성 상위 표본인지와 상관없이 저장하고, `fetched_at`은 캐시가 맞은 조회에서도 그 섹션을 Neople에서 받은 시각입니다.
+스킬 스타일 schema에 맞지 않는 응답은 저장하지 않으며, 응답은 이 저장도 기다리지 않습니다.
+
 ### 검색 후보의 모험단명
 
 `GET /characters/candidates`는 후보마다 DB `characters`에 저장된 그 캐릭터(서버, 캐릭터 ID)의 모험단명을 `adventureName`으로 붙입니다.
@@ -320,7 +325,7 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 ```
 
 점수 엔진을 열지 못하면 `SCORE_ENGINE_UNAVAILABLE`, 점수 worker가 오류로 끝나거나 엔진 결과 형식이 틀리면 `SCORE_ENGINE_FAILED`를 같은 stdout에 남깁니다.
-[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, 강화 백필이 실패하면 `TIMELINE_BACKFILL_FAILED`, [옛 시즌 받기](#모험단-옛-시즌-받기)가 실패하면 `TIMELINE_SEASON_BACKFILL_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`를 남깁니다.
+[타임라인 동기화](#타임라인-동기화)가 실패를 DB에 기록하지 못하면 `TIMELINE_SYNC_FAILED`, 강화 백필이 실패하면 `TIMELINE_BACKFILL_FAILED`, [옛 시즌 받기](#모험단-옛-시즌-받기)가 실패하면 `TIMELINE_SEASON_BACKFILL_FAILED`, [기본 정보 저장](#캐릭터-기본-정보-저장)이 실패하면 `CHARACTER_BASIC_RECORD_FAILED`, 스킬 스타일 저장이 실패하면 `CHARACTER_SKILL_STYLE_RECORD_FAILED`를 남깁니다.
 요청마다 남기는 줄과 달리 `time`, `service`, `code`만 담습니다.
 
 ```json
