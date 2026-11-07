@@ -1,5 +1,12 @@
 import { ProgressCircle, Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { useState } from 'react'
+import {
+  type SkillAdoption,
+  type SkillStats,
+  type SkillStatsJob,
+  skillAdoptionOf
+} from '@dfragon/client-core/shared/ranking/skill-stats'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
@@ -16,9 +23,11 @@ import {
   skillWindowOf
 } from '@dfragon/client-core/shared/search/skill-window'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
+import { useSkillStats } from '../../../hooks/useSkillStats'
 import { useSkillWindowCatalog } from '../../../hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as layout } from './avatar/detail-tab.style'
+import { SkillAdoptionTooltip } from './skill/SkillAdoptionTooltip'
 import { SkillChainSection, SkillTreeCode, SkillUpgradeSections } from './skill/SkillSide'
 import { styles as sideStyles } from './skill/SkillSide.style'
 import { SkillSprite } from './skill/SkillSprite'
@@ -28,10 +37,14 @@ const COMMON_ROW = 0
 
 function SkillIcon({
   icon,
-  marks
+  marks,
+  adoption,
+  now
 }: {
   icon: SkillWindowIcon
   marks: SkillMarks | null
+  adoption: SkillAdoption | null
+  now: number
 }): React.JSX.Element {
   const picked = icon.evolution !== null || icon.enhancement !== null
 
@@ -69,13 +82,25 @@ function SkillIcon({
         </span>
       </Tooltip.Trigger>
       <Tooltip.Popup>
-        <span {...stylex.props(styles.tooltip)}>{icon.name}</span>
+        {adoption !== null ? (
+          <SkillAdoptionTooltip name={icon.name} adoption={adoption} marks={marks} now={now} />
+        ) : (
+          <span {...stylex.props(styles.tooltip)}>{icon.name}</span>
+        )}
       </Tooltip.Popup>
     </Tooltip.Root>
   )
 }
 
-function SkillWindowGrid({ skillWindow }: { skillWindow: SkillWindow }): React.JSX.Element {
+function SkillWindowGrid({
+  skillWindow,
+  stats
+}: {
+  skillWindow: SkillWindow
+  stats: SkillStats | null
+}): React.JSX.Element {
+  const [now] = useState(Date.now)
+
   return (
     <div
       role="group"
@@ -90,10 +115,44 @@ function SkillWindowGrid({ skillWindow }: { skillWindow: SkillWindow }): React.J
           </span>
         </div>
       ))}
-      {skillWindow.icons.map((icon) => (
-        <SkillIcon key={`${icon.col},${icon.row}`} icon={icon} marks={skillWindow.marks} />
-      ))}
+      {skillWindow.icons.map((icon) => {
+        const adoption =
+          stats !== null
+            ? skillAdoptionOf(stats, {
+                name: icon.name,
+                evolutionNames: icon.evolutionNames,
+                hasEnhancement: icon.enhanceable
+              })
+            : null
+
+        return (
+          <SkillIcon
+            key={`${icon.col},${icon.row}`}
+            icon={icon}
+            marks={skillWindow.marks}
+            adoption={adoption}
+            now={now}
+          />
+        )
+      })}
     </div>
+  )
+}
+
+function SkillWindowWithStats({
+  skillWindow,
+  job
+}: {
+  skillWindow: SkillWindow
+  job: SkillStatsJob
+}): React.JSX.Element {
+  const stats = useSkillStats(job)
+
+  return (
+    <SkillWindowGrid
+      skillWindow={skillWindow}
+      stats={stats.status === 'success' ? stats.value : null}
+    />
   )
 }
 
@@ -170,7 +229,12 @@ function LearnedSkills({
     return <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
   }
 
-  return <SkillWindowGrid skillWindow={skillWindow} />
+  const { jobId, jobGrowId } = detail.character
+  if (jobId === null || jobGrowId === null) {
+    return <SkillWindowGrid skillWindow={skillWindow} stats={null} />
+  }
+
+  return <SkillWindowWithStats skillWindow={skillWindow} job={{ jobId, jobGrowId }} />
 }
 
 function SkillSideColumn({

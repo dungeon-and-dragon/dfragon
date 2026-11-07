@@ -75,6 +75,8 @@ export const characterDetailViewSchema = z.object({
     characterName: text,
     serverName: text,
     level: count,
+    jobId: text,
+    jobGrowId: text,
     jobName: text,
     jobGrowName: text,
     fame: count,
