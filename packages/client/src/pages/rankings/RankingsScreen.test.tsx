@@ -134,9 +134,26 @@ it('열은 순위, 캐릭터, 명성, 모험단, 길드이고 값이 없는 길�
   const [first, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['1', '카인합성1Lv.115 | 합성 전직', '99,999', '모험단1', '합성 길드'])
+  expect(first).toEqual(['1', '카인합성1합성 전직', '99,999', '모험단1', '합성 길드'])
   expect(fourth).toEqual(['4', '카인합성4합성 직업', '99,996', '모험단4', '-'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
+})
+
+// 캐릭터 칸은 서버, 이름, 직업명 줄과 그 아래 레벨 줄로 나눠 읽는다.
+function characterLines(row: Element): (string | null)[] {
+  const line = row.querySelector('a[href^="/c/"]')?.parentElement
+
+  return [line?.textContent ?? null, line?.nextElementSibling?.textContent ?? null]
+}
+
+it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 그 아래 줄에 레벨만 둔다', async () => {
+  await render(async () => ({
+    characters: [rankedCharacter(1), rankedCharacter(2, { level: 110 })]
+  }))
+
+  const [maxLevel, belowMax] = bodyRows()
+  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직', null])
+  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직', 'Lv.110'])
 })
 
 it('빈 랭킹은 목록 상자에 이름 한 줄만 둔다', async () => {

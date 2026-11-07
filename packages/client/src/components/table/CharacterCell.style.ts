@@ -49,6 +49,13 @@ export const styles = stylex.create({
     color: colors.fgMuted,
     textDecoration: { default: 'none', ':hover': 'underline' }
   },
+  job: {
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+    fontSize: 12,
+    lineHeight: '16px',
+    color: colors.fgSubtle
+  },
   detail: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
