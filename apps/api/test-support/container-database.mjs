@@ -40,6 +40,9 @@ const rankingStatsCheckPath = fileURLToPath(
 const skillStyleCheckPath = fileURLToPath(
   new URL('./container-skill-style-check.mjs', import.meta.url)
 )
+const skillAdoptionCheckPath = fileURLToPath(
+  new URL('./container-skill-adoption-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -275,6 +278,8 @@ try {
         `type=bind,source=${rankingStatsCheckPath},target=/app/container-ranking-stats-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${skillStyleCheckPath},target=/app/container-skill-style-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${skillAdoptionCheckPath},target=/app/container-skill-adoption-check.mjs,readonly`,
         imageId
       ])
     )
@@ -593,6 +598,16 @@ try {
     (await psql("SELECT string_agg(character_id, ',') FROM character_skill_styles")).stdout.trim(),
     'skill-a'
   )
+
+  stage = 'skill adoption reads'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-skill-adoption-check.mjs'
+  ])
 
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.

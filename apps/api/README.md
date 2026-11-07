@@ -253,6 +253,28 @@ DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.
 `fameDistribution`은 명성이 있는 캐릭터를 10,000 단위 구간(`from` 포함, `to` 제외)으로 센 값이며 캐릭터가 있는 구간만 낮은 순으로 줍니다.
 DB 설정이 없는 API는 빈 랭킹과, 0과 빈 목록인 통계를 줍니다.
 
+### 스킬 채택률
+
+`GET /stats/skills?jobId=&jobGrowId=`는 한 전직의 명성 상위 캐릭터가 스킬을 얼마나 찍었는지 줍니다.
+Neople을 부르지 않고 DB의 `characters`와 `character_skill_styles`를 읽습니다.
+스킬 스타일 행은 [상세 조회](#캐릭터-기본-정보-저장)가 저장한 것뿐이라, 표본 가운데 누군가 상세를 조회한 캐릭터만 셉니다.
+
+```json
+{ "computedAt": "…", "topPercent": 10, "minFame": 100028, "sampleSize": 2316,
+  "skills": [{ "name": "발도", "learned": 2201, "levels": [[1, 30], [13, 2171]] }],
+  "evolutions": [{ "name": "발도", "type1": 1500, "type2": 650 }],
+  "enhancements": [{ "name": "발도", "type1": 300, "type2": 1800 }] }
+```
+
+- 두 query는 모두 필수이고, 빈 값과 같은 key의 중복은 400 `INVALID_CHARACTER_QUERY`입니다.
+- 표본은 그 전직에서 명성이 있는 캐릭터 가운데 명성 상위 `topPercent`%이고, `minFame`은 표본의 최저 명성입니다(표본이 없으면 `null`).
+- `sampleSize`는 표본 가운데 스킬 스타일 행이 있고, 그 행을 받을 때의 전직이 지금 전직과 같은 캐릭터 수입니다. `skills`, `evolutions`, `enhancements`도 이 캐릭터만 셉니다.
+- `skills`의 `learned`는 그 스킬을 배운 캐릭터 수, `levels`는 `[레벨, 캐릭터 수]`를 레벨 순으로 둔 것입니다. 채택률의 분모는 `sampleSize`, 개화와 강화 비율의 분모는 그 스킬의 `learned`입니다.
+- 목록은 모두 스킬 이름 순입니다.
+- 전직마다 첫 요청 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 요청은 한 계산을 함께 기다립니다. 실패와 명성이 있는 캐릭터가 없는 전직(`minFame`이 `null`)은 캐시하지 않습니다.
+- 표본은 `characters`의 `(job_id, job_grow_id, fame DESC)` index로, 스킬 스타일은 PK로 읽습니다.
+- DB 설정이 없는 API는 `sampleSize` 0과 빈 목록을 줍니다.
+
 ### 캐릭터 수집 worker
 
 `node dist/character-collector.js`는 HTTP 없이 도는 별도 프로세스입니다. API와 다른 컨테이너 하나로 띄우며 migration은 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
