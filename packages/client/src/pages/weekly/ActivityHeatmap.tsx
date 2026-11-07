@@ -22,6 +22,7 @@ import { ActivityDayDetail } from './ActivityDayDetail'
 import { wheelScrollTarget } from './heatmap-wheel'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
+import { useRingRotation } from './useRingRotation'
 
 const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: string }>[] = [
   { kind: 'all', label: '전체', cellLabel: '활동' },
@@ -33,7 +34,6 @@ const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: s
 
 const ROW_LABELS = ['목', '', '토', '', '월', '', '수']
 const LEVEL_STYLES = [styles.empty, styles.level1, styles.level2, styles.level3, styles.level4]
-const RING_TURN_SECONDS = 4
 const WHEEL_SCROLL_SECONDS = 0.35
 
 const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
@@ -73,26 +73,6 @@ function cellLabel(kind: ActivityKind, date: string, day: ActivityDay | undefine
   }
 
   return `${label}, ${RING_LABELS[highlight]}`
-}
-
-function useRingRotation(ref: RefObject<HTMLElement | null>, enabled: boolean): void {
-  useEffect(() => {
-    const element = ref.current
-    if (!enabled || element == null) {
-      return
-    }
-
-    const media = gsap.matchMedia()
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(
-        element,
-        { '--heatmap-ring-angle': 0 },
-        { '--heatmap-ring-angle': 360, duration: RING_TURN_SECONDS, ease: 'none', repeat: -1 }
-      )
-    })
-
-    return () => media.revert()
-  }, [ref, enabled])
 }
 
 function Legend({
@@ -231,7 +211,7 @@ function HeatmapGrid({
 }): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
   const hasRing = [...days.values()].some((day) => ringHighlight(day, kind) !== undefined)
-  useRingRotation(ref, hasRing)
+  useRingRotation(ref, hasRing, '--heatmap-ring-angle')
 
   return (
     <div ref={ref} {...stylex.props(styles.grid)}>
