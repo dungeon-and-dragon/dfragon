@@ -4,7 +4,6 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import type { ActivitySeason } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { type SeasonBar, seasonBar } from './season-bar'
 import { styles } from './SeasonTimeline.style'
-import { useRingRotation } from './useRingRotation'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -18,22 +17,23 @@ function seasonDays(seasons: readonly ActivitySeason[], index: number, now: numb
   return Math.max(1, Math.round((endsAt - startsAt) / DAY_MS))
 }
 
-function BackfillBar({
-  progress,
-  running
-}: {
-  progress: number
-  running: boolean
-}): React.JSX.Element {
-  const ringRef = useRef<HTMLElement>(null)
-  useRingRotation(ringRef, running, '--season-ring-angle')
-
+function BackfillBar({ progress }: { progress: number }): React.JSX.Element {
   return (
     <i {...stylex.props(styles.bar, styles.barOff)}>
       <i {...stylex.props(styles.fill, styles.fillLength(progress))} />
-      {running && <i ref={ringRef} aria-hidden="true" {...stylex.props(styles.backfillRing)} />}
     </i>
   )
+}
+
+function filledLength(bar: SeasonBar): number {
+  switch (bar.state) {
+    case 'ready':
+      return 1
+    case 'locked':
+      return 0
+    case 'backfill':
+      return bar.progress
+  }
 }
 
 function SeasonButton({
@@ -73,7 +73,7 @@ function SeasonButton({
       {...stylex.props(styles.season, stylex.defaultMarker(), styles.length(days))}
     >
       {bar.state === 'backfill' ? (
-        <BackfillBar progress={bar.progress} running={running} />
+        <BackfillBar progress={bar.progress} />
       ) : (
         <i
           {...stylex.props(
@@ -83,6 +83,15 @@ function SeasonButton({
           )}
         />
       )}
+      {/* 받기가 끝나 막대가 바뀌어도 이 층은 남아 태초색이 서서히 사라지도록 막대 밖에 둔다. */}
+      <i
+        aria-hidden="true"
+        {...stylex.props(
+          styles.primevalFill,
+          styles.fillLength(filledLength(bar)),
+          running && styles.primevalOn
+        )}
+      />
       <span
         {...stylex.props(styles.name, selected && styles.nameOn, !season.available && styles.off)}
       >
