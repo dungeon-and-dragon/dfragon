@@ -82,12 +82,5 @@ export const styles = stylex.create({
   },
   nameOn: { color: colors.fgDefault, fontWeight: 700 },
   barOn: { backgroundColor: colors.borderStrong },
-  year: {
-    fontSize: 11,
-    lineHeight: '14px',
-    whiteSpace: 'nowrap',
-    color: colors.fgSubtle,
-    fontVariantNumeric: 'tabular-nums'
-  },
   off: { color: colors.fgDisabled }
 })
