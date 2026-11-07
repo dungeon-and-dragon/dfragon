@@ -183,7 +183,7 @@ test('캐시한 캐릭터를 다시 조회하면 점수를 다시 계산하지 �
 })
 
 test('실제 엔진을 연 API는 상세 응답에 golden 입력을 엔진에 바로 넣은 것과 같은 점수를 낸다', {
-  skip: REAL_SCORE_LIBRARY_PATH === null && '점수 엔진 submodule이 없음',
+  skip: REAL_SCORE_LIBRARY_PATH === null && '점수 엔진 라이브러리가 없음',
   timeout: 30_000
 }, async (t) => {
   const direct = openNativeScore({ path: REAL_SCORE_LIBRARY_PATH! })!
