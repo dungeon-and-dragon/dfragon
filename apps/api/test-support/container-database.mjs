@@ -37,6 +37,9 @@ const adventureGuildCheckPath = fileURLToPath(
 const rankingStatsCheckPath = fileURLToPath(
   new URL('./container-ranking-stats-check.mjs', import.meta.url)
 )
+const skillStyleCheckPath = fileURLToPath(
+  new URL('./container-skill-style-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -270,6 +273,8 @@ try {
         `type=bind,source=${adventureGuildCheckPath},target=/app/container-adventure-guild-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${rankingStatsCheckPath},target=/app/container-ranking-stats-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${skillStyleCheckPath},target=/app/container-skill-style-check.mjs,readonly`,
         imageId
       ])
     )
@@ -299,7 +304,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '6'
+    '7'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -560,6 +565,34 @@ try {
     'node',
     '/app/container-ranking-stats-check.mjs'
   ])
+
+  stage = 'skill style upsert'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-skill-style-check.mjs'
+  ])
+  // 새로 받은 값은 이전 행을 바꾸고, 그보다 예전에 받은 값과 다른 캐릭터의 저장은 그 행을 바꾸지 않는다.
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(character_id || ':' || job_grow_id || ':' || skills::text || ':' || evolutions::text || ':' || enhancements::text || ':' || to_char(fetched_at AT TIME ZONE 'UTC', 'YYYY-MM-DD'), E'\\n' ORDER BY character_id) FROM character_skill_styles"
+      )
+    ).stdout.trim(),
+    [
+      'skill-a:synthetic-skill-grow:[{"name": "합성A2", "level": 13}]:[{"name": "합성A2", "type": 1}]:[{"name": "합성A2", "type": 2}]:2026-11-07',
+      'skill-b:synthetic-skill-grow:[{"name": "합성B", "level": 1}]:[{"name": "합성B", "type": 1}]:[{"name": "합성B", "type": 2}]:2026-11-01'
+    ].join('\n')
+  )
+  // 캐릭터 행을 지우면 스킬 스타일 행도 함께 지워진다.
+  await psql("DELETE FROM characters WHERE server_id = 'cain' AND character_id = 'skill-b'")
+  assert.equal(
+    (await psql("SELECT string_agg(character_id, ',') FROM character_skill_styles")).stdout.trim(),
+    'skill-a'
+  )
 
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
