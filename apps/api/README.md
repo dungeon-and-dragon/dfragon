@@ -355,7 +355,7 @@ Dockerfile과 전용 ignore 파일은 `apps/api/`에 있습니다. 빌드 contex
 이미지는 점수 엔진 submodule의 Linux 엔진 `libdnfscore.so`와 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
 Prisma schema engine이 OpenSSL 3용으로 설치되도록 빌드 단계에 `openssl`을, 런타임 이미지에 `libssl3`을 둡니다.
 엔진 파일이 없으면 빌드에 실패하므로, 로컬 빌드 전에 `git submodule update --init packages/models/score-engine`으로 엔진을 받습니다.
-Product Images의 API 빌드 job도 이 submodule만 받습니다. 로컬 빌드는 다음과 같습니다.
+Product Images의 API 빌드 job도 이 submodule만 저장소 Secret `SCORE_ENGINE_DEPLOY_KEY`의 읽기 전용 deploy key로 받습니다. 로컬 빌드는 다음과 같습니다.
 
 ```sh
 docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .
