@@ -14,9 +14,11 @@ export type CharacterCellCharacter = Pick<
 >
 
 export function CharacterCell({
-  character
+  character,
+  adventureName = null
 }: {
   character: CharacterCellCharacter
+  adventureName?: string | null
 }): React.JSX.Element {
   const details = [
     character.level != null ? `Lv.${character.level}` : null,
@@ -38,6 +40,15 @@ export function CharacterCell({
           >
             {character.characterName}
           </Link>
+          {adventureName != null && (
+            <Link
+              to="/adventures/$adventureName"
+              params={{ adventureName }}
+              {...stylex.props(styles.adventure)}
+            >
+              {adventureName}
+            </Link>
+          )}
         </span>
         <span {...stylex.props(styles.detail)}>{details.join(' | ')}</span>
       </span>

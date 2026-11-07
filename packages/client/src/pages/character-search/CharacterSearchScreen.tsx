@@ -81,6 +81,7 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
             rows={result.value.map(tableRow)}
             ranked={false}
             affiliations={NO_AFFILIATIONS}
+            adventureBesideName
           />
         </ListBox>
       )

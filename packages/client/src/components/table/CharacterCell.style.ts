@@ -40,6 +40,15 @@ export const styles = stylex.create({
     color: colors.fgDefault,
     textDecoration: { default: 'none', ':hover': 'underline' }
   },
+  adventure: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    fontSize: 12,
+    lineHeight: '16px',
+    color: colors.fgMuted,
+    textDecoration: { default: 'none', ':hover': 'underline' }
+  },
   detail: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
