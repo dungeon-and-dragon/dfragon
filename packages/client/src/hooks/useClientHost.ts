@@ -37,6 +37,7 @@ import type {
 import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
 import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
 import type {
+  ActivitySeason,
   AdventureActivity,
   AdventureActivityDay
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
@@ -82,6 +83,7 @@ export type ClientHost = Readonly<{
     season: number | undefined
   ) => Promise<AdventureActivity>
   getAdventureActivityDay: (adventureName: string, date: string) => Promise<AdventureActivityDay>
+  backfillAdventureSeason: (adventureName: string, season: number) => Promise<ActivitySeason>
   searchCharacters: (query: CharacterSearchQuery) => Promise<readonly SearchedCharacter[]>
 }>
 
