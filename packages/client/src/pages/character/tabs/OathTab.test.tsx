@@ -98,6 +98,15 @@ function section(name: string): HTMLElement {
   return found
 }
 
+function strip(): Element {
+  const found = container.firstElementChild?.firstElementChild
+  if (found == null) {
+    throw new Error('서약 한 줄 영역이 없다')
+  }
+
+  return found
+}
+
 function lines(name: string): string[][] {
   return [...section(name).querySelectorAll('dl > div')].map((line) =>
     [...line.children].map((cell) => cell.textContent ?? '')
@@ -177,4 +186,43 @@ it('서약 데이터에 없는 세트는 지금 화면대로 그린다', async (
   )
   expect(container.querySelector('article')).toBeNull()
   expect(container.querySelector('section[aria-label="서약 본체"]')).toBeNull()
+})
+
+it('세트가 없는 서약도 한 줄 화면에 서약 데이터의 아이콘을 둔다', async () => {
+  const buffer = characterDetailFixture('buffer')
+  const oath = buffer.oath
+  if (oath === null) {
+    throw new Error('buffer fixture에 서약이 없다')
+  }
+  const withoutSet = { ...buffer, oath: { ...oath, setInfo: null } }
+  const catalog: OathCatalog = {
+    ...OATH_CATALOG,
+    items: [
+      {
+        name: '영겁의 안개 서약',
+        rarity: '에픽',
+        icon: 'https://skilltab.test/oath-item/mist-epic.webp'
+      }
+    ]
+  }
+
+  await render(withoutSet, createTestClientHost({ getOathCatalog: async () => catalog }))
+
+  expect(container.textContent).toContain('서약영겁의 안개 서약455pt')
+  expect(strip().querySelector('img')?.getAttribute('src')).toBe(
+    'https://skilltab.test/oath-item/mist-epic.webp'
+  )
+})
+
+it('서약 데이터가 없으면 한 줄 화면에 아이콘을 두지 않는다', async () => {
+  const buffer = characterDetailFixture('buffer')
+  const oath = buffer.oath
+  if (oath === null) {
+    throw new Error('buffer fixture에 서약이 없다')
+  }
+
+  await render({ ...buffer, oath: { ...oath, setInfo: null } })
+
+  expect(container.textContent).toContain('서약영겁의 안개 서약455pt')
+  expect(strip().querySelector('img')).toBeNull()
 })
