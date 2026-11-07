@@ -17,6 +17,12 @@ export type StoredCharacter = {
   fetchedAt: Date | null
 }
 
+export type StoredAdventureName = {
+  serverId: string
+  characterId: string
+  adventureName: string
+}
+
 export type StoredGuild = {
   guildName: string | null
   members: StoredCharacter[]
@@ -66,6 +72,18 @@ export function readAdventureCharacters(
   adventureName: string
 ): Promise<StoredCharacter[]> {
   return readStoredCharacters(client, { adventure: { name: adventureName } })
+}
+
+export async function readAdventureNames(
+  client: DatabaseClient,
+  characters: readonly { serverId: string; characterId: string }[]
+): Promise<StoredAdventureName[]> {
+  const rows = await client.character.findMany({
+    where: { OR: characters.map(({ serverId, characterId }) => ({ serverId, characterId })) },
+    select: { serverId: true, characterId: true, adventure: { select: { name: true } } }
+  })
+
+  return rows.map(({ adventure, ...row }) => ({ ...row, adventureName: adventure.name }))
 }
 
 export async function readGuild(client: DatabaseClient, guildId: string): Promise<StoredGuild> {
