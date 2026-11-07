@@ -51,7 +51,12 @@ const seasons: AdventureActivity['seasons'] = [
 
 const currentSeason: AdventureActivity = {
   seasons,
-  season: { id: 11, startsAt: '2026-03-25T21:00:00.000Z', endsAt: null },
+  season: {
+    id: 11,
+    startsAt: '2026-03-25T21:00:00.000Z',
+    endsAt: null,
+    timelineStartsAt: '2026-03-25T21:00:00.000Z'
+  },
   summary: {
     raids: [
       { name: '가 레이드', count: 1200 },
@@ -76,18 +81,26 @@ const currentSeason: AdventureActivity = {
 
 const previousSeason: AdventureActivity = {
   ...currentSeason,
-  season: { id: 10, startsAt: '2025-01-08T21:00:00.000Z', endsAt: '2026-03-25T21:00:00.000Z' },
+  season: {
+    id: 10,
+    startsAt: '2025-01-08T21:00:00.000Z',
+    endsAt: '2026-03-25T21:00:00.000Z',
+    timelineStartsAt: '2025-01-08T21:00:00.000Z'
+  },
   summary: { ...emptySummary, raids: [{ name: '라 레이드', count: 9 }] }
 }
 
 function render(
   getAdventureActivity: ClientHost['getAdventureActivity'],
   season: number | undefined,
-  onSeasonChange: (season: number) => void = vi.fn()
+  onSeasonChange: (season: number) => void = vi.fn(),
+  backfillAdventureSeason?: ClientHost['backfillAdventureSeason']
 ): Promise<void> {
   return act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getAdventureActivity })}>
+      <ClientHostContext
+        value={createTestClientHost({ getAdventureActivity, backfillAdventureSeason })}
+      >
         <TestQueryClient>
           <TestRouter>
             <WeeklyScreen season={season} onSeasonChange={onSeasonChange} />
@@ -135,6 +148,42 @@ function tooltipRows(): string[] {
 
 function hover(element: HTMLElement): void {
   element.dispatchEvent(new MouseEvent('mouseenter'))
+}
+
+function filledPercent(name: string): number | undefined {
+  const style = seasonButton(name).querySelector('i > i')?.getAttribute('style') ?? ''
+  const width = /width: ([\d.]+)%/.exec(style)?.[1]
+  if (width === undefined) {
+    return undefined
+  }
+
+  return Number(width)
+}
+
+function progressText(name: string): string | undefined {
+  const last = seasonButton(name).lastElementChild?.textContent ?? ''
+  if (!last.endsWith('%')) {
+    return undefined
+  }
+
+  return last
+}
+
+function withBackfill(
+  activity: AdventureActivity,
+  backfill: NonNullable<AdventureActivity['seasons'][number]['backfill']>,
+  available = false
+): AdventureActivity {
+  return {
+    ...activity,
+    seasons: activity.seasons.map((season) =>
+      season.id === 9 ? { ...season, available, backfill } : season
+    )
+  }
+}
+
+function backfillSeason(activity: AdventureActivity): AdventureActivity['seasons'][number] {
+  return activity.seasons.find(({ id }) => id === 9)!
 }
 
 function heroBusy(): string | null | undefined {
@@ -189,6 +238,95 @@ it('타임라인 수집 전 시즌은 누를 수 없고 눌러도 시즌을 바�
 
   expect(onSeasonChange).not.toHaveBeenCalled()
   expect(currentSeasonName()).toBe('합성 시즌 11시즌 11, 2026')
+})
+
+it('받기 전 옛 시즌을 누르면 그 시즌 받기를 요청하고 고른 시즌은 그대로 둔 채 받은 만큼 막대를 채운다', async () => {
+  const onSeasonChange = vi.fn()
+  const running = withBackfill(currentSeason, { done: 12, total: 30, running: true })
+  const backfillAdventureSeason = vi.fn<ClientHost['backfillAdventureSeason']>(async () =>
+    backfillSeason(running)
+  )
+  await render(
+    async () => withBackfill(currentSeason, { done: 0, total: 30, running: false }),
+    undefined,
+    onSeasonChange,
+    backfillAdventureSeason
+  )
+  expect(seasonButton('합성 시즌 9').disabled).toBe(false)
+  expect(filledPercent('합성 시즌 9')).toBe(0)
+
+  await act(async () => seasonButton('합성 시즌 9').click())
+
+  expect(backfillAdventureSeason).toHaveBeenCalledWith('합성 모험단', 9)
+  expect(onSeasonChange).not.toHaveBeenCalled()
+  expect(currentSeasonName()).toBe('합성 시즌 11시즌 11, 2026')
+  expect(filledPercent('합성 시즌 9')).toBe(40)
+  expect(progressText('합성 시즌 9')).toBe('40%')
+  expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBe('true')
+
+  await act(async () => seasonButton('합성 시즌 9').click())
+  expect(backfillAdventureSeason).toHaveBeenCalledOnce()
+})
+
+it('받는 동안 시즌 활동을 다시 조회해 막대를 늘리고, 다 받으면 조회를 멈추고 그 시즌을 고를 수 있다', async () => {
+  vi.useFakeTimers()
+  try {
+    const onSeasonChange = vi.fn()
+    const getAdventureActivity = vi
+      .fn<ClientHost['getAdventureActivity']>()
+      .mockResolvedValueOnce(withBackfill(currentSeason, { done: 6, total: 30, running: true }))
+      .mockResolvedValueOnce(withBackfill(currentSeason, { done: 24, total: 30, running: true }))
+      .mockResolvedValue(withBackfill(currentSeason, { done: 30, total: 30, running: false }, true))
+    await render(getAdventureActivity, undefined, onSeasonChange)
+    expect(filledPercent('합성 시즌 9')).toBe(20)
+
+    await act(async () => vi.advanceTimersByTimeAsync(3000))
+    expect(filledPercent('합성 시즌 9')).toBe(80)
+
+    await act(async () => vi.advanceTimersByTimeAsync(3000))
+    expect(progressText('합성 시즌 9')).toBeUndefined()
+    expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBeNull()
+
+    const calls = getAdventureActivity.mock.calls.length
+    await act(async () => vi.advanceTimersByTimeAsync(30_000))
+    expect(getAdventureActivity).toHaveBeenCalledTimes(calls)
+
+    await act(async () => seasonButton('합성 시즌 9').click())
+    expect(onSeasonChange).toHaveBeenCalledWith(9)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+it('받다 멈춘 옛 시즌은 받은 만큼 채운 막대를 그대로 보이고, 다시 누르면 이어 받기를 요청하고 진행을 다시 조회한다', async () => {
+  vi.useFakeTimers()
+  try {
+    const onSeasonChange = vi.fn()
+    const getAdventureActivity = vi
+      .fn<ClientHost['getAdventureActivity']>()
+      .mockResolvedValueOnce(withBackfill(currentSeason, { done: 12, total: 30, running: false }))
+      .mockResolvedValue(withBackfill(currentSeason, { done: 18, total: 30, running: true }))
+    const backfillAdventureSeason = vi.fn<ClientHost['backfillAdventureSeason']>(async () =>
+      backfillSeason(withBackfill(currentSeason, { done: 12, total: 30, running: true }))
+    )
+    await render(getAdventureActivity, undefined, onSeasonChange, backfillAdventureSeason)
+    expect(filledPercent('합성 시즌 9')).toBe(40)
+    expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBeNull()
+
+    await act(async () => vi.advanceTimersByTimeAsync(30_000))
+    expect(getAdventureActivity).toHaveBeenCalledOnce()
+
+    await act(async () => seasonButton('합성 시즌 9').click())
+    expect(backfillAdventureSeason).toHaveBeenCalledWith('합성 모험단', 9)
+    expect(onSeasonChange).not.toHaveBeenCalled()
+    expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBe('true')
+
+    await act(async () => vi.advanceTimersByTimeAsync(3000))
+    expect(getAdventureActivity).toHaveBeenCalledTimes(2)
+    expect(filledPercent('합성 시즌 9')).toBe(60)
+  } finally {
+    vi.useRealTimers()
+  }
 })
 
 it('요약 숫자에 키보드 focus를 주면 내역이 열리고, 강화는 높은 단계부터 증폭, 강화 순 성공/시도 뒤에 나머지 횟수를 보인다', async () => {

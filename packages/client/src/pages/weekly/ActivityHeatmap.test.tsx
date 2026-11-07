@@ -35,7 +35,12 @@ const activity: AdventureActivity = {
   seasons: [
     { id: 11, name: '합성 시즌 11', startsAt: '2026-03-25T21:00:00.000Z', available: true }
   ],
-  season: { id: 11, startsAt: '2026-03-25T21:00:00.000Z', endsAt: null },
+  season: {
+    id: 11,
+    startsAt: '2026-03-25T21:00:00.000Z',
+    endsAt: null,
+    timelineStartsAt: '2026-03-25T21:00:00.000Z'
+  },
   summary: {
     raids: [{ name: '가 레이드', count: 2 }],
     legions: [],
