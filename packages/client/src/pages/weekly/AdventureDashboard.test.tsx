@@ -4,7 +4,6 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
-import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
@@ -18,15 +17,12 @@ beforeEach(() => {
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
-  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
 })
 
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.unstubAllGlobals()
-  useMyAdventureStore.setState({ adventureName: null })
-  localStorage.clear()
 })
 
 const emptySummary: AdventureActivity['summary'] = {
@@ -103,7 +99,12 @@ function render(
       >
         <TestQueryClient>
           <TestRouter>
-            <WeeklyScreen season={season} onSeasonChange={onSeasonChange} />
+            <WeeklyScreen
+              adventureName="합성 모험단"
+              season={season}
+              onSeasonChange={onSeasonChange}
+              onAdventureOpen={vi.fn()}
+            />
           </TestRouter>
         </TestQueryClient>
       </ClientHostContext>
@@ -192,13 +193,14 @@ function heroBusy(): string | null | undefined {
   return container.querySelector('h1')?.closest('[aria-busy]')?.getAttribute('aria-busy')
 }
 
-it('시즌을 고르지 않으면 지금 시즌을 받아 시즌 이름, 시작일과 요약 숫자 4개를 보인다', async () => {
+it('시즌을 고르지 않으면 지금 시즌을 받아 모험단 이름 위에 다른 글자 없이 시즌 이름, 시작일과 요약 숫자 4개를 보인다', async () => {
   const getAdventureActivity = vi.fn<ClientHost['getAdventureActivity']>(async () => currentSeason)
   await render(getAdventureActivity, undefined)
 
   expect(getAdventureActivity).toHaveBeenCalledWith('합성 모험단', undefined)
   expect(container.querySelector('h1')?.textContent).toBe('합성 모험단')
-  expect(currentSeasonName()).toBe('합성 시즌 11시즌 11, 2026')
+  expect(container.querySelector('h1')?.parentElement?.textContent).toBe('합성 모험단')
+  expect(currentSeasonName()).toBe('합성 시즌 11')
   expect(container.textContent).toContain('시즌 11합성 시즌 112026.03.26 ~')
   expect(statValues()).toEqual(['1,203', '5', '14', '40'])
 })
@@ -219,7 +221,7 @@ it('시즌을 누르면 그 시즌 번호를 알리고, 바뀐 시즌을 받는 
 
   await render(getAdventureActivity, 10, onSeasonChange)
   expect(getAdventureActivity).toHaveBeenLastCalledWith('합성 모험단', 10)
-  expect(currentSeasonName()).toBe('합성 시즌 10시즌 10, 2025')
+  expect(currentSeasonName()).toBe('합성 시즌 10')
   expect(container.textContent).toContain('시즌 10합성 시즌 102025.01.09 ~')
   expect(heroBusy()).toBe('true')
   expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(0)
@@ -239,7 +241,7 @@ it('타임라인 수집 전 시즌은 누를 수 없고 눌러도 시즌을 바�
   await act(async () => before.click())
 
   expect(onSeasonChange).not.toHaveBeenCalled()
-  expect(currentSeasonName()).toBe('합성 시즌 11시즌 11, 2026')
+  expect(currentSeasonName()).toBe('합성 시즌 11')
 })
 
 it('받기 전 옛 시즌을 누르면 그 시즌 받기를 요청하고 고른 시즌은 그대로 둔 채 받은 만큼 막대를 채운다', async () => {
@@ -261,7 +263,7 @@ it('받기 전 옛 시즌을 누르면 그 시즌 받기를 요청하고 고른 
 
   expect(backfillAdventureSeason).toHaveBeenCalledWith('합성 모험단', 9)
   expect(onSeasonChange).not.toHaveBeenCalled()
-  expect(currentSeasonName()).toBe('합성 시즌 11시즌 11, 2026')
+  expect(currentSeasonName()).toBe('합성 시즌 11')
   expect(filledPercent('합성 시즌 9')).toBe(40)
   expect(progressText('합성 시즌 9')).toBe('40%')
   expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBe('true')
