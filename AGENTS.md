@@ -11,7 +11,7 @@
 
 - Node.js 26(root `package.json`의 `devEngines.runtime`이 고정한 버전을 pnpm이 내려받아 script에 쓴다. API의 `engines`는 `>=26.11.1 <27`)과 pnpm 12.11.2(root `package.json`의 `packageManager`)를 쓴다.
 - 의존성은 `pnpm install --frozen-lockfile`로 설치한다.
-- `pnpm verify`의 Web 빌드는 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 있어야 통과한다. 점수 엔진 submodule(`packages/models/score-engine`)은 API 이미지만 쓰며, 받지 않으면 API 테스트 가운데 실제 엔진 계산과 점수 worker를 띄운 종료 확인만 건너뛴다. 둘 다 받으려면 `git submodule update --init --recursive`를 실행한다.
+- `pnpm verify`의 Web 빌드는 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 있어야 통과한다. 점수 엔진은 `packages/models/score-engine.lock.json`이 엔진 소스 commit을 고정하고 node1이 API 이미지를 빌드할 때 그 commit으로 빌드한다. 로컬에 `packages/models/score-engine/`의 라이브러리가 없으면 API 테스트 가운데 실제 엔진 계산과 점수 worker를 띄운 종료 확인만 건너뛴다. OCR 모델을 받으려면 `git submodule update --init --recursive`를 실행한다.
 
 ## 검증
 

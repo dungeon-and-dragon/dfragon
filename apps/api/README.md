@@ -26,7 +26,7 @@ Proxy 설정은 단일 신뢰 proxy를 사용할 때만 켭니다.
 계산한 점수는 캐릭터 상세 응답의 `card.score`에 들어가고 응답 본문과 함께 1시간 캐시됩니다.
 점수 계산기는 카드 `role`로 고릅니다. `buffer`는 버프 점수, `dealer`와 `synergy`는 장비 점수를 계산합니다.
 직업별 역할 판정은 `src/characters/domain/`의 캐릭터 class가 맡고, 남성 크루세이더처럼 스킬 구성으로 역할이 바뀌는 직업은 스킬 스타일을 봅니다.
-파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둡니다. 로컬에서는 점수 엔진 submodule의 파일을 지정할 수 있습니다.
+파일을 열지 못하거나 worker가 끝나도 API는 계속 실행하고 점수를 null로 둡니다. 로컬에서는 [엔진 라이브러리를 직접 빌드해 둔](../../packages/models/README.md#점수-엔진) 파일을 지정할 수 있습니다.
 [서버 이미지](#서버-이미지)는 이미지 안의 Linux 엔진 `/app/score-engine/libdnfscore.so`를 이 값으로 지정합니다.
 
 Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절대 경로에서 읽습니다. GitHub나 특정 secret manager가
@@ -367,10 +367,11 @@ node1은 컨테이너를 시작하지 않고 이 파일을 꺼내 서비스명�
 
 Dockerfile과 전용 ignore 파일은 `apps/api/`에 있습니다. 빌드 context는 제품 저장소 root이며
 `docker-entrypoint.sh`도 앱 옆에서 관리합니다. 의존성 설치에는 registry 토큰이나 BuildKit secret이 필요하지 않습니다.
-이미지는 점수 엔진 submodule의 Linux 엔진 `libdnfscore.so`와 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
+이미지는 `packages/models/score-engine/libdnfscore.so`의 Linux 엔진과 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
 Prisma schema engine이 OpenSSL 3용으로 설치되도록 빌드 단계에 `openssl`을, 런타임 이미지에 `libssl3`을 둡니다.
-엔진 파일이 없으면 빌드에 실패하므로, 로컬 빌드 전에 `git submodule update --init packages/models/score-engine`으로 엔진을 받습니다.
-node1의 API 빌드도 이 submodule만 읽기 전용 deploy key로 받습니다. 로컬 빌드는 다음과 같습니다.
+엔진 파일이 없으면 빌드에 실패합니다.
+node1은 `packages/models/score-engine.lock.json`이 고정한 엔진 commit으로 라이브러리를 빌드해 이 경로에 둔 뒤 이미지를 빌드합니다.
+로컬 빌드는 [엔진 라이브러리를 직접 빌드해](../../packages/models/README.md#점수-엔진) 같은 경로에 둔 뒤 다음과 같이 합니다.
 
 ```sh
 docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .
