@@ -8,6 +8,7 @@ import type {
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { useAdventureActivityDay } from '../../hooks/useAdventureActivity'
 import { styles } from './ActivityDayDetail.style'
+import { formatClearCount } from './clear-count'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
@@ -55,10 +56,10 @@ function ClearGroup({
   return (
     <>
       <Group title={title} value={`${numberFormat.format(total)}회`} />
-      {counts.map(({ name, count }) => (
-        <div key={name} {...stylex.props(styles.row)}>
-          <span {...stylex.props(styles.text)}>{name}</span>
-          <span {...stylex.props(styles.number, styles.muted)}>{numberFormat.format(count)}회</span>
+      {counts.map((clear) => (
+        <div key={clear.name} {...stylex.props(styles.row)}>
+          <span {...stylex.props(styles.text)}>{clear.name}</span>
+          <span {...stylex.props(styles.number, styles.muted)}>{formatClearCount(clear)}</span>
         </div>
       ))}
     </>
