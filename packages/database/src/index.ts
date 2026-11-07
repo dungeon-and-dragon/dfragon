@@ -15,7 +15,19 @@ export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
-export { recordCharacterSkillStyle } from './skill-style.js'
+export {
+  deleteCharacterSkillStyle,
+  recordCharacterBasicAndSkillStyle,
+  recordCharacterSkillStyle
+} from './skill-style.js'
+export {
+  SKILL_STYLE_REFRESH_DAYS,
+  SKILL_STYLE_SAMPLE_TOP_PERCENT,
+  readSkillStyleSampleJobs,
+  skillStyleSampleSql,
+  takeSkillStyleRefreshBatch
+} from './skill-style-sample.js'
+export type { SkillStyleSampleJob } from './skill-style-sample.js'
 export type {
   CharacterSkillStyleInput,
   SkillStyleSelection,

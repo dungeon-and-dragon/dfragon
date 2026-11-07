@@ -1,5 +1,6 @@
 import { type CharacterBasicInput, writeCharacter } from './character.js'
 import type { DatabaseClient } from './client.js'
+import type { Prisma } from './generated/prisma/client.js'
 
 export type CollectedCharacter = {
   serverId: string
@@ -43,12 +44,17 @@ export async function recordCharacterBasic(
   client: DatabaseClient,
   basic: CharacterBasicInput
 ): Promise<void> {
+  await client.$transaction((transaction) => writeCharacterBasic(transaction, basic))
+}
+
+export async function writeCharacterBasic(
+  transaction: Prisma.TransactionClient,
+  basic: CharacterBasicInput
+): Promise<void> {
   const { serverId, characterId, adventureName, ...details } = basic
 
-  await client.$transaction(async (transaction) => {
-    await writeCharacter(transaction, basic, { ...details, basicFetchedAt: new Date() })
-    await transaction.characterCollection.deleteMany({ where: { serverId, characterId } })
-  })
+  await writeCharacter(transaction, basic, { ...details, basicFetchedAt: new Date() })
+  await transaction.characterCollection.deleteMany({ where: { serverId, characterId } })
 }
 
 export async function recordCollectionFailure(
