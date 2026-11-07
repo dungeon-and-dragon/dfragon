@@ -138,7 +138,7 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
   ],
   "season": { "id": 11, "startsAt": "…", "endsAt": null, "timelineStartsAt": "…" },
   "summary": {
-    "raids": [{ "name": "디레지에 레이드", "count": 83 }],
+    "raids": [{ "name": "디레지에 레이드", "count": 83, "hard": 21, "normal": 62 }],
     "legions": [{ "name": "아포칼립스", "count": 52 }],
     "items": { "legendary": 628, "epic": 412, "primeval": 6, "mythic": 1 },
     "enhancement": {
@@ -161,7 +161,8 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
 `season.timelineStartsAt`은 기록이 있을 수 있는 첫 시각입니다. Neople 타임라인은 2017-09-21 00:00 KST부터라 마계(5)는 그 시각이고, 나머지 시즌은 `startsAt`과 같습니다.
 `available`이 `false`인 시즌은 강화 백필 행이나 일부 캐릭터의 행만 있어 읽지 않고 빈 집계를 줍니다.
 
-- 레이드(201, 210)와 레기온(209)은 [타임라인 조회](#타임라인-조회)의 `name`별 클리어 수이고 많은 순입니다. 하드 여부는 나누지 않습니다.
+- 레이드(201, 210)와 레기온(209)은 [타임라인 조회](#타임라인-조회)의 `name`별 클리어 수이고 많은 순입니다.
+  레이드는 타임라인의 `hard`가 `true`인 클리어를 `hard`, 나머지를 `normal`로 나눠 세고 `count`는 둘의 합입니다. 레기온은 하드가 없어 `count`만 줍니다.
 - `items`는 획득 코드(501~521, 550~557) 가운데 `item_rarity`가 레전더리, 에픽, 태초, 신화인 행의 수입니다.
 - `enhancement.attempts`는 강화, 증폭, 재련(401~403) 전체 횟수입니다.
   `amplify`는 10증폭 이상, `reinforce`는 12강 이상 도전을 단계별로 센 시도와 성공이고, 그 아래는 `amplifyBelow10`, `reinforceBelow12`, 재련은 `refine`에 횟수만 셉니다.
@@ -206,14 +207,14 @@ DB에 없는 모험단은 시즌 목록과 빈 집계를 주고, DB 설정이 �
 ```json
 {
   "date": "2026-07-18",
-  "raids": [{ "name": "디레지에 레이드", "count": 1 }],
+  "raids": [{ "name": "디레지에 레이드", "count": 1, "hard": 1, "normal": 0 }],
   "legions": [{ "name": "아포칼립스", "count": 1 }],
   "items": [{ "at": "2026-07-18T09:58:00+09:00", "name": "한계 : 선명한 광휘 결정", "rarity": "레전더리" }],
   "enhancements": [{ "at": "2026-07-18T10:02:00+09:00", "kind": "amplify", "target": 10, "success": true }]
 }
 ```
 
-- `raids`, `legions`는 그날의 이름별 클리어 수이고 많은 순입니다.
+- `raids`, `legions`는 그날의 이름별 클리어 수이고 많은 순입니다. 레이드의 `hard`, `normal`은 시즌 조회와 같습니다.
 - `items`는 시즌 조회의 `items`와 같은 기준(획득 코드 가운데 레전더리, 에픽, 태초, 신화)의 기록입니다.
   `name`은 `item_name`이고, `rarity`는 저장된 등급 이름 그대로입니다.
 - `enhancements`는 강화, 증폭, 재련(401~403) 기록입니다.
