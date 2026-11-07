@@ -76,6 +76,8 @@ export type SkillWindowIcon = Readonly<{
   level: number | null
   evolution: UpgradeType | null
   enhancement: UpgradeType | null
+  evolutionNames: readonly [string, string] | null
+  enhanceable: boolean
 }>
 
 export type SkillWindowRow = Readonly<{ row: number; requiredLevel: number | null }>
@@ -216,6 +218,15 @@ function pickedTypesByName(
   return picked
 }
 
+function evolutionNamesOf({ evolution }: CatalogSkill): readonly [string, string] | null {
+  if (evolution === undefined) {
+    return null
+  }
+  const [first, second] = evolution
+
+  return [first.name, second.name]
+}
+
 export function skillWindowOf(
   catalog: SkillWindowCatalog,
   character: SkillCharacter,
@@ -248,7 +259,9 @@ export function skillWindowOf(
       learned: levelByName.has(skill.name),
       level: levelByName.get(skill.name) ?? null,
       evolution: evolutionByName.get(skill.name) ?? null,
-      enhancement: enhancementByName.get(skill.name) ?? null
+      enhancement: enhancementByName.get(skill.name) ?? null,
+      evolutionNames: evolutionNamesOf(skill),
+      enhanceable: skill.enhancement !== undefined
     }
     const key = `${col},${row}`
     const sameCell = cells.get(key)

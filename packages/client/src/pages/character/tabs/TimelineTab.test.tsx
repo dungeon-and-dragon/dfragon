@@ -39,6 +39,8 @@ function detailOf(characterId = 'character-1'): CharacterDetailView {
       characterName: '하늘',
       serverName: '카인',
       level: 115,
+      jobId: null,
+      jobGrowId: null,
       jobName: null,
       jobGrowName: null,
       fame: null,

@@ -106,3 +106,28 @@ it('집계 시각이 없는 통계 응답과 오류 응답은 거부한다', asy
     }).stats()
   ).rejects.toThrow()
 })
+
+it('스킬 채택률은 전직을 query로 보내고 응답을 schema로 읽는다', async () => {
+  const skillStats = {
+    computedAt: '2026-11-06T15:00:00.000Z',
+    topPercent: 10,
+    minFame: null,
+    sampleSize: 0,
+    skills: [],
+    evolutions: [],
+    enhancements: []
+  }
+  const fetch = respond(skillStats)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).skillStats
+
+  await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1' })).resolves.toEqual(skillStats)
+  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
+    `${API_ORIGIN}/stats/skills?jobId=job-1&jobGrowId=grow-1`
+  )
+  await expect(
+    createDfragonClient({
+      apiOrigin: API_ORIGIN,
+      fetch: respond({ ...skillStats, sampleSize: undefined })
+    }).skillStats({ jobId: 'job-1', jobGrowId: 'grow-1' })
+  ).rejects.toThrow()
+})
