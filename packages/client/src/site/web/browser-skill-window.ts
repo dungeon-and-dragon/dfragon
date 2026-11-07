@@ -43,8 +43,9 @@ function readOathCatalog(json: unknown, catalogUrl: string): OathCatalog {
 
     return { ...set, icon, options }
   })
+  const items = catalog.items.map((item) => ({ ...item, icon: absoluteUrl(item.icon, catalogUrl) }))
 
-  return { ...catalog, sets }
+  return { ...catalog, sets, items }
 }
 
 const NOT_UPLOADED_STATUS = 404
