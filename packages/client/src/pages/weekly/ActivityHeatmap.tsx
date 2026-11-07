@@ -271,8 +271,8 @@ function DayLabels(): React.JSX.Element {
   )
 }
 
-// GitHub처럼 가장 최근 주가 보이게 한다. 시즌이나 탭을 바꾸면 패널을 새로 그리므로 처음 그릴 때만 맞춘다.
-function useScrollToLatest(ref: RefObject<HTMLElement | null>): void {
+// GitHub처럼 가장 최근 주가 보이게 한다. 받아 둔 시즌으로 돌아가면 패널을 새로 그리지 않으므로 시즌마다 맞춘다.
+function useScrollToLatest(ref: RefObject<HTMLElement | null>, seasonId: number): void {
   useLayoutEffect(() => {
     const element = ref.current
     if (element == null) {
@@ -280,7 +280,7 @@ function useScrollToLatest(ref: RefObject<HTMLElement | null>): void {
     }
 
     element.scrollLeft = element.scrollWidth
-  }, [ref])
+  }, [ref, seasonId])
 }
 
 function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
@@ -359,7 +359,7 @@ function HeatmapPanel({
   const days = new Map(activity.days.map((day) => [day.date, day]))
   const thresholds = levelThresholds(activity.days.map((day) => dayCount(day, kind)))
   const scroller = useRef<HTMLDivElement>(null)
-  useScrollToLatest(scroller)
+  useScrollToLatest(scroller, season.id)
   useWheelScroll(scroller)
 
   return (
