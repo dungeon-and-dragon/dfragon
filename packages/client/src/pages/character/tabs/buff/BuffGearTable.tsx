@@ -50,7 +50,11 @@ export function BuffGearTable({
           />
         ))}
         {avatars.map((avatar, index) => (
-          <AvatarRow key={`avatar-${avatar.slotId ?? index}`} avatar={avatar} />
+          <AvatarRow
+            key={`avatar-${avatar.slotId ?? index}`}
+            avatar={avatar}
+            cloneIconSpace={false}
+          />
         ))}
         {creatures.map((creature, index) => (
           <ItemRow
