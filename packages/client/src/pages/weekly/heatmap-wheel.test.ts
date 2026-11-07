@@ -16,6 +16,15 @@ it('이미 오른쪽 끝에서 아래로, 왼쪽 끝에서 위로 굴리면 가�
   expect(wheelScrollTarget({ deltaX: 0, deltaY: -100, from: 0, max: 400 })).toBeUndefined()
 })
 
+it('끝까지 1px이 남지 않은 소수 위치에서 그 방향으로 굴리면 가로채지 않는다', () => {
+  expect(wheelScrollTarget({ deltaX: 0, deltaY: 100, from: 399.5, max: 400 })).toBeUndefined()
+  expect(wheelScrollTarget({ deltaX: 0, deltaY: -100, from: 0.4, max: 400 })).toBeUndefined()
+})
+
+it('가운데에서는 1px보다 작은 휠도 가로로 옮긴다', () => {
+  expect(wheelScrollTarget({ deltaX: 0, deltaY: 0.5, from: 200, max: 400 })).toBe(200.5)
+})
+
 it('가로 스크롤이 없으면 가로채지 않는다', () => {
   expect(wheelScrollTarget({ deltaX: 0, deltaY: 100, from: 0, max: 0 })).toBeUndefined()
 })
