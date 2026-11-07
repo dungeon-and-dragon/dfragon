@@ -291,6 +291,12 @@ const characterSearchRows = (
     }
   })
 
+const skillSelectionCount = object({
+  name: { ...text, description: '스킬 이름' },
+  type1: { ...characterCount, description: 'type 1을 고른 캐릭터 수' },
+  type2: { ...characterCount, description: 'type 2를 고른 캐릭터 수' }
+})
+
 export const apiSchemas: Record<string, SchemaObject> = {
   CatalogDetail: catalogDetail,
   ApiError: object({ error: object({ code: text, message: text }) }),
@@ -611,6 +617,42 @@ export const apiSchemas: Record<string, SchemaObject> = {
         to: { type: 'integer', description: '구간 끝(제외)' },
         count: characterCount
       })
+    }
+  }),
+  SkillStats: object({
+    computedAt: { ...timestamp, description: '집계를 계산한 시각' },
+    topPercent: { type: 'integer', description: '표본으로 삼은 전직 안 명성 상위 비율(%)' },
+    minFame: {
+      type: 'integer',
+      nullable: true,
+      description: '표본의 최저 명성. 명성이 있는 캐릭터가 없으면 null'
+    },
+    sampleSize: {
+      ...characterCount,
+      description: '표본 가운데 스킬 스타일을 받았고, 받을 때의 전직이 지금 전직과 같은 캐릭터 수'
+    },
+    skills: {
+      type: 'array',
+      description: '표본 캐릭터가 배운 스킬. 이름 순입니다.',
+      items: object({
+        name: { ...text, description: '스킬 이름' },
+        learned: { ...characterCount, description: '이 스킬을 배운 캐릭터 수' },
+        levels: {
+          type: 'array',
+          description: '[레벨, 캐릭터 수] 쌍. 레벨이 낮은 순입니다.',
+          items: { type: 'array', items: { type: 'integer' }, minItems: 2, maxItems: 2 }
+        }
+      })
+    },
+    evolutions: {
+      type: 'array',
+      description: '스킬 개화를 고른 캐릭터 수. 이름 순이며 비율의 분모는 skills의 learned입니다.',
+      items: skillSelectionCount
+    },
+    enhancements: {
+      type: 'array',
+      description: '스킬 강화를 고른 캐릭터 수. 이름 순이며 비율의 분모는 skills의 learned입니다.',
+      items: skillSelectionCount
     }
   })
 }
