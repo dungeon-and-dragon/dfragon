@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { CharacterBasicInput } from '@dfragon/database'
+import type { CharacterBasicInput, CharacterSkillStyleInput } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import { CharacterBasicSubscriber } from '../src/characters/basic/subscriber.js'
 import { createCatalogService } from '../src/characters/catalog/service.js'
@@ -24,7 +24,23 @@ const basicFields = {
   fame: 61234
 }
 
-function payloadsWith(basic: CharacterPayload): CharacterPayloads {
+const skillStyle = {
+  style: {
+    active: [
+      { skillId: 'synthetic-active', name: '합성 액티브', level: 13, requiredLevel: 1 },
+      { skillId: 'synthetic-evolved', name: '합성 개화', level: 1, requiredLevel: 100 }
+    ],
+    passive: [{ skillId: 'synthetic-passive', name: '합성 패시브', level: 20, requiredLevel: 1 }],
+    evolution: [{ skillId: 'synthetic-evolved', type: 2 }],
+    enhancement: [{ skillId: 'synthetic-active', type: 1 }],
+    chain: { resetTime: 0, skills: ['synthetic-active'] }
+  }
+}
+
+function payloadsWith(
+  basic: CharacterPayload,
+  skill: CharacterPayload = { style: { active: [] } }
+): CharacterPayloads {
   return {
     basic,
     status: { ...basic, status: [], buff: [] },
@@ -33,7 +49,7 @@ function payloadsWith(basic: CharacterPayload): CharacterPayloads {
     creature: { ...basic, creature: null },
     oath: { ...basic, oath: null },
     mist_assimilation: { ...basic, mistAssimilation: null },
-    skill_style: { ...basic, skill: { style: { active: [] } } },
+    skill_style: { ...basic, skill },
     buff_equipment: { ...basic, skill: { buff: null } },
     buff_avatar: { ...basic, skill: { buff: null } },
     buff_creature: { ...basic, skill: { buff: null } }
@@ -41,7 +57,10 @@ function payloadsWith(basic: CharacterPayload): CharacterPayloads {
 }
 
 async function listen(
-  options: Pick<ApiHttpAppOptions, 'details' | 'recordCharacterBasic' | 'writeAccessLog'>
+  options: Pick<
+    ApiHttpAppOptions,
+    'details' | 'recordCharacterBasic' | 'recordCharacterSkillStyle' | 'writeAccessLog'
+  >
 ): Promise<{ app: INestApplication; origin: string }> {
   const app = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
@@ -58,6 +77,12 @@ function detailsReturning(payloads: CharacterPayloads): ApiHttpAppOptions['detai
   return {
     fetchDetails: async () => payloads,
     catalog: createCatalogService(async () => new Map())
+  }
+}
+
+async function waitUntil(condition: () => boolean): Promise<void> {
+  while (!condition()) {
+    await new Promise((resolve) => setTimeout(resolve, 5))
   }
 }
 
@@ -173,6 +198,129 @@ test('기본 정보 저장이 실패해도 상세 응답은 그대로이고 실�
   assert.equal(response.status, 200)
   assert.deepEqual(content, expectedContent)
   assert.deepEqual(codes, ['CHARACTER_BASIC_RECORD_FAILED'])
+})
+
+test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 스킬 스타일을 저장하고, 캐시 적중에도 같은 시각으로 저장한다', {
+  timeout: 10_000
+}, async (t) => {
+  let savedBasics = 0
+  const savedBasicsBeforeStyle: number[] = []
+  const styles: CharacterSkillStyleInput[] = []
+  let neopleFetches = 0
+  const payloads = payloadsWith(basicFields, skillStyle)
+  const { app, origin } = await listen({
+    details: {
+      fetchDetails: async () => {
+        neopleFetches++
+
+        return payloads
+      },
+      catalog: createCatalogService(async () => new Map())
+    },
+    recordCharacterBasic: async () => {
+      // 기본 정보보다 먼저 저장하면 characters 참조가 깨지므로, 늦게 끝나도 기다리는지 보려고 일부러 늦춘다.
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      savedBasics++
+    },
+    recordCharacterSkillStyle: async (style) => {
+      savedBasicsBeforeStyle.push(savedBasics)
+      styles.push(style)
+    }
+  })
+  t.after(() => app.close())
+
+  const before = Date.now()
+  await getDetails(origin)
+  // 캐시 적중 때 지금 시각을 쓰면 첫 저장과 달라지도록 두 번째 조회 전에 시각을 넘긴다.
+  await new Promise((resolve) => setTimeout(resolve, 10))
+  const beforeCachedRequest = Date.now()
+  await getDetails(origin)
+  await waitUntil(() => styles.length === 2)
+
+  assert.equal(neopleFetches, 1)
+  assert.ok(savedBasicsBeforeStyle.every((count, index) => count >= index + 1))
+  const [first, second] = styles
+  assert.ok(first.fetchedAt.getTime() >= before)
+  assert.ok(second.fetchedAt.getTime() < beforeCachedRequest)
+  assert.deepEqual(second, first)
+  assert.deepEqual(
+    { ...first, fetchedAt: undefined },
+    {
+      ...character,
+      jobId: 'synthetic-job',
+      jobGrowId: 'synthetic-grow',
+      skills: [
+        { name: '합성 액티브', level: 13 },
+        { name: '합성 개화', level: 1 },
+        { name: '합성 패시브', level: 20 }
+      ],
+      evolutions: [{ name: '합성 개화', type: 2 }],
+      enhancements: [{ name: '합성 액티브', type: 1 }],
+      fetchedAt: undefined
+    }
+  )
+})
+
+test('스킬 스타일 저장이 실패해도 상세 응답은 그대로이고 실패 code를 남긴다', {
+  timeout: 10_000
+}, async (t) => {
+  const codes: string[] = []
+  let failureReported!: () => void
+  const reported = new Promise<void>((resolve) => {
+    failureReported = resolve
+  })
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields, skillStyle)),
+    recordCharacterBasic: async () => undefined,
+    recordCharacterSkillStyle: async () => {
+      throw new Error('database closed')
+    },
+    writeAccessLog: (line) => {
+      const { code } = JSON.parse(line)
+      if (code !== undefined) {
+        codes.push(code)
+        failureReported()
+      }
+    }
+  })
+  t.after(() => app.close())
+
+  const { status, body } = await getDetails(origin)
+  await reported
+
+  assert.equal(status, 200)
+  assert.equal(body.character.characterName, basicFields.characterName)
+  assert.deepEqual(codes, ['CHARACTER_SKILL_STYLE_RECORD_FAILED'])
+})
+
+test('기본 정보를 저장하지 못하면 스킬 스타일도 저장하지 않는다', {
+  timeout: 10_000
+}, async (t) => {
+  const styles: CharacterSkillStyleInput[] = []
+  let failureReported!: () => void
+  const reported = new Promise<void>((resolve) => {
+    failureReported = resolve
+  })
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields, skillStyle)),
+    recordCharacterBasic: async () => {
+      throw new Error('database closed')
+    },
+    recordCharacterSkillStyle: async (style) => {
+      styles.push(style)
+    },
+    writeAccessLog: (line) => {
+      if (JSON.parse(line).code !== undefined) {
+        failureReported()
+      }
+    }
+  })
+  t.after(() => app.close())
+
+  await getDetails(origin)
+  await reported
+
+  assert.deepEqual(styles, [])
 })
 
 for (const [name, database, registered] of [
