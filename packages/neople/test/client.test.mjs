@@ -101,6 +101,42 @@ test('기본 정보에 명성, 길드가 없으면 null로 돌려준다', async 
   })
 })
 
+test('스킬 스타일은 encode한 경로로 받아 최상위 기본 정보와 저장할 스킬 스타일로 나눠 돌려준다', async () => {
+  const { neople, requests } = recordingClient({
+    ...basic,
+    skill: {
+      style: {
+        active: [{ skillId: 'active-a', name: '합성스킬', level: 13 }],
+        evolution: [{ skillId: 'active-a', type: 2 }]
+      }
+    }
+  })
+
+  assert.deepEqual(await neople.characterSkillStyle(identity), {
+    basic,
+    skillStyle: {
+      jobId: 'job-1',
+      jobGrowId: 'grow-1',
+      skills: [{ name: '합성스킬', level: 13 }],
+      evolutions: [{ name: '합성스킬', type: 2 }],
+      enhancements: []
+    }
+  })
+  assert.equal(
+    requests[0].url,
+    'http://neople.test/df/servers/cain/characters/a%2Fb%20c/skill/style'
+  )
+})
+
+test('스킬 스타일 응답에 모험단 이름이나 스킬 스타일이 없으면 api 실패로 던진다', async () => {
+  const { adventureName: _, ...withoutAdventure } = basic
+  for (const body of [{ ...withoutAdventure, skill: { style: { active: [] } } }, basic]) {
+    const { neople } = recordingClient(body)
+
+    await assert.rejects(neople.characterSkillStyle(identity), { kind: 'api' })
+  }
+})
+
 test('기본 정보에 모험단 이름이 없으면 api 실패로 던진다', async () => {
   const { neople } = recordingClient({ ...basic, adventureName: null })
 
