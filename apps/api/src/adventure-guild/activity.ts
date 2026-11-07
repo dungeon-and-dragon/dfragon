@@ -32,8 +32,9 @@ const ITEM_RARITIES = {
   신화: 'mythic'
 } as const
 const ITEM_CODES = new Set(ACQUISITION_CODES)
-// data.ticket은 강화권, 증폭권처럼 쓴 아이템 이름이다. 권은 그 단계에 직접 도전한 기록이 아니라 단계별 성공률에서 뺀다.
-const ticketData = z.object({ ticket: z.string().min(1) })
+// data.ticket은 강화권, 증폭권을 쓴 기록에만 있다. 운영 DB에서는 객체지만 안의 키를 확인하지 못해 값이 있는지만 본다.
+// 권은 그 단계에 직접 도전한 기록이 아니라 단계별 성공률에서 뺀다.
+const ticketData = z.object({ ticket: z.unknown().refine((ticket) => ticket != null) })
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 

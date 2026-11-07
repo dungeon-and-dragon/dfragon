@@ -154,7 +154,7 @@ DB에 없는 모험단은 `characters`만 빈 목록이고, DB 설정이 없는 
   `amplify`는 10증폭 이상, `reinforce`는 12강 이상 도전을 단계별로 센 시도와 성공이고, 그 아래는 `amplifyBelow10`, `reinforceBelow12`, 재련은 `refine`에 횟수만 셉니다.
 - 단계 `target`은 타임라인의 `after`(Neople 설명: 성공 후 변경 예정 수치)입니다.
   실패도 `after`는 도전한 단계이고, 강화권, 증폭권처럼 여러 단계를 한 번에 올리는 기록은 `before + 1`보다 커서 `after`로 셉니다.
-- `amplify`, `reinforce`의 단계별 시도와 성공은 강화권, 증폭권을 쓴 기록(`data.ticket`이 있는 행)을 빼고 셉니다.
+- `amplify`, `reinforce`의 단계별 시도와 성공은 강화권, 증폭권을 쓴 기록(`data.ticket`이 있고 `null`이 아닌 행)을 빼고 셉니다.
   권 기록도 `attempts`, `days`의 `enhance`, `highEnhancement`에는 들어갑니다.
 - `days`는 활동이 있는 날만 오래된 순으로 줍니다. 하루는 06:00 KST에 바뀌어 05:59 기록은 전날입니다.
   `item`, `enhance`는 위와 같은 기준의 그날 횟수이고, `primeval`, `mythic`은 그날 태초, 신화를 얻었는지, `highEnhancement`는 그날 10증폭 이상이나 12강 이상 도전이 있었는지입니다.
