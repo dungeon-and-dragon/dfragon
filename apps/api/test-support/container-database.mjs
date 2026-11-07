@@ -52,6 +52,7 @@ const postgresName = `dfragon-db-test-${runId}-postgres`
 const apiNames = [1, 2].map((index) => `dfragon-db-test-${runId}-api-${index}`)
 const failureName = `dfragon-db-test-${runId}-failure`
 const collectorName = `dfragon-db-test-${runId}-collector`
+const skillStyleCollectorName = `dfragon-db-test-${runId}-skill-style-collector`
 const labelKey = 'com.dfragon.image-test.run'
 const label = `${labelKey}=${runId}`
 // Docker CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
@@ -674,6 +675,71 @@ try {
   assert.equal(missingImportFile.code, 1)
   assert.equal(missingImportFile.stderr, 'Character collector failed\n')
 
+  stage = 'skill style collector runs and stops'
+  // 앞 단계의 표본 캐릭터가 있어 Neople을 부르지만, 네트워크 없는 컨테이너라 실패로 남기고 계속 돈다.
+  await docker([
+    'run',
+    '--detach',
+    '--name',
+    skillStyleCollectorName,
+    ...collectorOptions,
+    imageId,
+    'node',
+    'dist/skill-style-collector.js'
+  ])
+  const skillStyleCollectorAddress = (
+    await docker([
+      'inspect',
+      '--format',
+      `{{(index .NetworkSettings.Networks "${networkName}").IPAddress}}`,
+      skillStyleCollectorName
+    ])
+  ).stdout.trim()
+  await waitFor(
+    async () =>
+      Number(
+        (
+          await psql(
+            `SELECT count(*) FROM pg_stat_activity WHERE client_addr = '${skillStyleCollectorAddress}'`
+          )
+        ).stdout.trim()
+      ) > 0
+  )
+  await waitFor(async () =>
+    (await docker(['logs', skillStyleCollectorName])).stdout.includes('SKILL_STYLE_NEOPLE_FAILED')
+  )
+  assert.equal(
+    (
+      await docker(['inspect', '--format', '{{.State.Running}}', skillStyleCollectorName])
+    ).stdout.trim(),
+    'true'
+  )
+  await docker(['stop', '--time', '15', skillStyleCollectorName])
+  assert.equal(
+    (
+      await docker(['inspect', '--format', '{{.State.ExitCode}}', skillStyleCollectorName])
+    ).stdout.trim(),
+    '143'
+  )
+  await removeOwned(skillStyleCollectorName)
+  const invalidSkillStyleCollector = await docker(
+    [
+      'run',
+      '--rm',
+      '--name',
+      skillStyleCollectorName,
+      ...collectorOptions,
+      '--env',
+      'SKILL_STYLE_COLLECTOR_CONCURRENCY=0',
+      imageId,
+      'node',
+      'dist/skill-style-collector.js'
+    ],
+    { allowFailure: true }
+  )
+  assert.equal(invalidSkillStyleCollector.code, 1)
+  assert.equal(invalidSkillStyleCollector.stderr, 'Skill style collector failed\n')
+
   stage = 'graceful stop'
   for (const name of apiNames) {
     await docker(['stop', '--time', '15', name])
@@ -744,7 +810,7 @@ try {
   process.exitCode = 1
 } finally {
   const cleanup = [
-    ...[...apiNames, failureName, collectorName, postgresName].map(
+    ...[...apiNames, failureName, collectorName, skillStyleCollectorName, postgresName].map(
       (name) => () => removeOwned(name)
     ),
     async () => {
@@ -769,6 +835,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, skill style refresh targets, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, skill style refresh targets and collector start and stop, HTTP and database input rejection\n'
   )
 }
