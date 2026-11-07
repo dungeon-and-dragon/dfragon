@@ -474,6 +474,7 @@ export function installBrowserHost(
     getOathCatalog: createOathCatalogSource(oathCatalogUrl),
     getFameRanking: dfragon.rankings.fame,
     getCharacterStats: dfragon.stats,
+    getSkillStats: dfragon.skillStats,
     getGuild: dfragon.guilds.get,
     getAdventureWeekly: dfragon.adventures.weekly,
     getAdventureActivity: dfragon.adventures.activity,

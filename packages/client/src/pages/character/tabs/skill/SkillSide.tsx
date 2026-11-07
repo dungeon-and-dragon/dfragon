@@ -6,8 +6,7 @@ import {
   type SkillChain,
   type SkillMarks,
   type SkillUpgradeBoard,
-  skillMarkOf,
-  type UpgradeType
+  skillMarkOf
 } from '@dfragon/client-core/shared/search/skill-window'
 import { CheckIcon } from '../../../../components/CheckIcon'
 import { CopyIcon } from '../../../../components/CopyIcon'
@@ -17,12 +16,7 @@ import { SkillSprite } from './SkillSprite'
 import { styles as tableStyles } from '../equipment/item-table.style'
 import { styles } from './SkillSide.style'
 import { styles as markStyles } from './SkillTab.style'
-
-const EVOLUTION_NUMERALS: Readonly<Record<UpgradeType, string>> = { 1: 'Ⅰ', 2: 'Ⅱ' }
-const ENHANCEMENT_LABELS: Readonly<Record<UpgradeType, string>> = {
-  1: '데미지',
-  2: '쿨타임 감소'
-}
+import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 
 export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
   const clipboard = useClipboardCopy(hash)
