@@ -70,6 +70,62 @@ export const characterBasicSchema = z.object({
 
 export type NeopleCharacterBasic = z.output<typeof characterBasicSchema>
 
+const learnedSkillSchema = z.looseObject({
+  skillId: nonblankString,
+  name: nonblankString,
+  level: z.int()
+})
+
+const selectedSkillSchema = z.looseObject({ skillId: nonblankString, type: z.int() })
+
+type LearnedSkill = z.output<typeof learnedSkillSchema>
+type SelectedSkill = z.output<typeof selectedSkillSchema>
+
+function namedSelections(selections: readonly SelectedSkill[], learned: readonly LearnedSkill[]) {
+  const names = new Map(learned.map(({ skillId, name }) => [skillId, name]))
+
+  return selections.flatMap(({ skillId, type }) => {
+    const name = names.get(skillId)
+    // 배운 목록에 없는 스킬은 이름으로 이을 수 없고 Neople 스킬 ID는 저장하지 않으므로 뺀다.
+    if (name === undefined) {
+      return []
+    }
+
+    return [{ name, type }]
+  })
+}
+
+function listOrEmpty<T extends z.ZodType>(item: T) {
+  return z
+    .array(item)
+    .nullish()
+    .transform((list) => list ?? [])
+}
+
+export const characterSkillStyleSchema = z
+  .looseObject({
+    jobId: nonblankString,
+    jobGrowId: nonblankString,
+    skill: z.looseObject({
+      style: z.looseObject({
+        active: z.array(learnedSkillSchema),
+        passive: listOrEmpty(learnedSkillSchema),
+        evolution: listOrEmpty(selectedSkillSchema),
+        enhancement: listOrEmpty(selectedSkillSchema)
+      })
+    })
+  })
+  .transform(({ jobId, jobGrowId, skill: { style } }) => {
+    const learned = [...style.active, ...style.passive]
+    const skills = learned.map(({ name, level }) => ({ name, level }))
+    const evolutions = namedSelections(style.evolution, learned)
+    const enhancements = namedSelections(style.enhancement, learned)
+
+    return { jobId, jobGrowId, skills, evolutions, enhancements }
+  })
+
+export type NeopleCharacterSkillStyle = z.output<typeof characterSkillStyleSchema>
+
 const TIMELINE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/
 
 export const timelinePageSchema = z.object({
