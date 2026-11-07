@@ -173,7 +173,7 @@ it('한 행은 자리부터 스냅샷까지 아홉 열을 채운다', async () =
   expect(cell('서버')?.querySelector('select')?.value).toBe('cain')
   expect(cell('모험단')?.textContent).toBe('찾은모험단')
   expect(cell('길드')?.textContent).toBe('찾은길드')
-  expect(cell('직업')?.textContent).toBe('眞 웨펀마스터')
+  expect(cell('직업')?.textContent).toBe('웨펀마스터')
   expect(cell('명성')?.textContent).toBe('125,850')
   expect(visibleText(cell('점수')!)).toBe('장비330,556')
   expect(cell('스냅샷')?.textContent).toBe('1')
@@ -356,7 +356,7 @@ it('상세 정보 오류는 모험단, 길드, 직업을 두고 명성과 점수
   })
 
   expect(cell('모험단')?.textContent).toBe('찾은모험단')
-  expect(cell('직업')?.textContent).toBe('眞 웨펀마스터')
+  expect(cell('직업')?.textContent).toBe('웨펀마스터')
   expect(cell('명성')?.colSpan).toBe(2)
   expect(visibleText(cell('명성')!)).toBe('캐릭터 검색 응답 시간이 초과됐습니다.')
 })
@@ -542,7 +542,7 @@ it('추정 행은 모험단, 길드, 직업을 그대로 두고 원인은 추정
 
   expect(cell('모험단')?.textContent).toBe('찾은모험단')
   expect(cell('길드')?.textContent).toBe('찾은길드')
-  expect(cell('직업')?.textContent).toBe('眞 웨펀마스터')
+  expect(cell('직업')?.textContent).toBe('웨펀마스터')
   const badge = [...cell('캐릭터')!.querySelectorAll('span')].find(
     (span) => span.textContent === '추정'
   )

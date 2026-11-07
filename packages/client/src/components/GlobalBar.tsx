@@ -15,7 +15,7 @@ const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '파티, 공대', to: '/' },
   { label: '랭킹', to: '/rankings' },
   { label: '통계', to: '/stats' },
-  { label: '내 모험단', to: '/my' },
+  { label: '모험단', to: '/adventures' },
   { label: '즐겨찾기', to: '/favorites' }
 ]
 
@@ -35,7 +35,8 @@ export function GlobalBar(): React.JSX.Element {
             <Link
               key={item.to}
               to={item.to}
-              activeOptions={{ exact: true, includeSearch: false }}
+              // 첫 화면 주소는 모든 주소의 앞부분이라 같은 주소일 때만 지금 화면으로 본다.
+              activeOptions={{ exact: item.to === '/', includeSearch: false }}
               {...stylex.props(styles.menuItem)}
             >
               {({ isActive }) => (

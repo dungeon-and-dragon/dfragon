@@ -6,7 +6,6 @@ import { ListBox } from '../../components/table/ListBox'
 import { styles as listBoxStyles } from '../../components/table/ListBox.style'
 import { useRefreshAdventureActivity } from '../../hooks/useAdventureActivity'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from '../../hooks/useAdventureWeekly'
-import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
 import { WeeklyClearTable } from './WeeklyClearTable'
@@ -14,79 +13,103 @@ import { styles } from './WeeklyScreen.style'
 
 const LOADING_ROWS = 5
 
-export function WeeklyScreen({
-  season,
-  onSeasonChange
+function AdventureNameForm({
+  initialName,
+  onAdventureOpen,
+  onRefresh
 }: {
-  season: number | undefined
-  onSeasonChange: (season: number) => void
+  initialName: string
+  onAdventureOpen: (adventureName: string) => void
+  onRefresh?: () => void
 }): React.JSX.Element {
-  const adventureName = useMyAdventureStore((state) => state.adventureName)
-  const changeAdventureName = useMyAdventureStore((state) => state.changeAdventureName)
-  const [draft, setDraft] = useState(adventureName ?? '')
-  const refreshActivity = useRefreshAdventureActivity()
-  const refreshWeekly = useRefreshAdventureWeekly()
+  const [draft, setDraft] = useState(initialName)
 
   function handleDraftChange(event: ChangeEvent<HTMLInputElement>): void {
     setDraft(event.target.value)
-  }
-
-  function handleRefresh(): void {
-    if (adventureName != null) {
-      refreshActivity(adventureName)
-      refreshWeekly(adventureName)
-    }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault()
     const next = draft.trim()
     if (next !== '') {
-      changeAdventureName(next)
+      onAdventureOpen(next)
     }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} {...stylex.props(styles.form)}>
+      <TextField size="sm">
+        <TextFieldInput
+          aria-label="모험단"
+          autoComplete="off"
+          spellCheck={false}
+          value={draft}
+          onChange={handleDraftChange}
+          {...stylex.props(styles.adventureInput)}
+        />
+      </TextField>
+      <Button type="submit" variant="primary" size="sm">
+        보기
+      </Button>
+      {onRefresh != null && (
+        <Button type="button" size="sm" onClick={onRefresh}>
+          새로고침
+        </Button>
+      )}
+    </form>
+  )
+}
+
+export function AdventureEntryScreen({
+  onAdventureOpen
+}: {
+  onAdventureOpen: (adventureName: string) => void
+}): React.JSX.Element {
+  return (
+    <div {...stylex.props(styles.screen)}>
+      <div {...stylex.props(styles.dashboard)}>
+        <h1 {...stylex.props(styles.emptyTitle)}>모험단</h1>
+        <AdventureNameForm initialName="" onAdventureOpen={onAdventureOpen} />
+      </div>
+    </div>
+  )
+}
+
+export function WeeklyScreen({
+  adventureName,
+  season,
+  onSeasonChange,
+  onAdventureOpen
+}: {
+  adventureName: string
+  season: number | undefined
+  onSeasonChange: (season: number) => void
+  onAdventureOpen: (adventureName: string) => void
+}): React.JSX.Element {
+  const refreshActivity = useRefreshAdventureActivity()
+  const refreshWeekly = useRefreshAdventureWeekly()
+
+  function handleRefresh(): void {
+    refreshActivity(adventureName)
+    refreshWeekly(adventureName)
   }
 
   return (
     <div {...stylex.props(styles.screen)}>
       <div {...stylex.props(styles.dashboard)}>
-        {adventureName != null ? (
-          <AdventureDashboard
-            adventureName={adventureName}
-            season={season}
-            onSeasonChange={onSeasonChange}
-          />
-        ) : (
-          <h1 {...stylex.props(styles.emptyTitle)}>내 모험단</h1>
-        )}
-        <form onSubmit={handleSubmit} {...stylex.props(styles.form)}>
-          <TextField size="sm">
-            <TextFieldInput
-              aria-label="내 모험단"
-              autoComplete="off"
-              spellCheck={false}
-              value={draft}
-              onChange={handleDraftChange}
-              {...stylex.props(styles.adventureInput)}
-            />
-          </TextField>
-          <Button type="submit" variant="primary" size="sm">
-            보기
-          </Button>
-          {adventureName != null && (
-            <Button type="button" size="sm" onClick={handleRefresh}>
-              새로고침
-            </Button>
-          )}
-        </form>
+        <AdventureDashboard
+          adventureName={adventureName}
+          season={season}
+          onSeasonChange={onSeasonChange}
+        />
+        <AdventureNameForm
+          initialName={adventureName}
+          onAdventureOpen={onAdventureOpen}
+          onRefresh={handleRefresh}
+        />
       </div>
-      {adventureName != null && <ActivityHeatmap adventureName={adventureName} season={season} />}
-      {adventureName != null ? (
-        <WeeklyClearList adventureName={adventureName} />
-      ) : (
-        <ListBox name="내 모험단">
-          <p {...stylex.props(styles.state)}>모험단 이름을 넣어 주세요.</p>
-        </ListBox>
-      )}
+      <ActivityHeatmap adventureName={adventureName} season={season} />
+      <WeeklyClearList adventureName={adventureName} />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import {
   CHARACTER_SERVER_NAMES,
@@ -14,13 +15,16 @@ export type CharacterCellCharacter = Pick<
 >
 
 export function CharacterCell({
-  character
+  character,
+  adventureName = null
 }: {
   character: CharacterCellCharacter
+  adventureName?: string | null
 }): React.JSX.Element {
+  const job = character.jobGrowName ?? character.jobName
   const details = [
     character.level != null ? `Lv.${character.level}` : null,
-    character.jobGrowName ?? character.jobName
+    job != null ? formatJobName(job) : null
   ].filter((part) => part != null)
 
   return (
@@ -38,6 +42,15 @@ export function CharacterCell({
           >
             {character.characterName}
           </Link>
+          {adventureName != null && (
+            <Link
+              to="/adventures/$adventureName"
+              params={{ adventureName }}
+              {...stylex.props(styles.adventure)}
+            >
+              {adventureName}
+            </Link>
+          )}
         </span>
         <span {...stylex.props(styles.detail)}>{details.join(' | ')}</span>
       </span>

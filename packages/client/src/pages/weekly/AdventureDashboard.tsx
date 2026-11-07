@@ -75,7 +75,6 @@ function DashboardHero({
         url={seasonId !== undefined ? findSeasonRaidBackground(seasonId) : undefined}
       />
       <div {...stylex.props(styles.content)}>
-        <span {...stylex.props(styles.kind)}>내 모험단</span>
         <h1 {...stylex.props(styles.title)}>{adventureName}</h1>
       </div>
       <div {...stylex.props(styles.bottom)}>
@@ -116,7 +115,6 @@ export function AdventureDashboard({
     return (
       <div {...stylex.props(styles.hero)}>
         <div {...stylex.props(styles.content)}>
-          <span {...stylex.props(styles.kind)}>내 모험단</span>
           <h1 {...stylex.props(styles.title)}>{adventureName}</h1>
         </div>
         <p role="alert" {...stylex.props(styles.state)}>

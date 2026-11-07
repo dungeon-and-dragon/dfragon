@@ -153,7 +153,7 @@ it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메�
     ['파티, 공대', 'page'],
     ['랭킹', null],
     ['통계', null],
-    ['내 모험단', null],
+    ['모험단', null],
     ['즐겨찾기', null]
   ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -185,7 +185,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['파티, 공대', null],
     ['랭킹', null],
     ['통계', null],
-    ['내 모험단', null],
+    ['모험단', null],
     ['즐겨찾기', null]
   ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
@@ -200,7 +200,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['파티, 공대', 'page'],
     ['랭킹', null],
     ['통계', null],
-    ['내 모험단', null],
+    ['모험단', null],
     ['즐겨찾기', null]
   ])
 })
@@ -213,7 +213,7 @@ it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 �
     ['파티, 공대', null],
     ['랭킹', 'page'],
     ['통계', null],
-    ['내 모험단', null],
+    ['모험단', null],
     ['즐겨찾기', null]
   ])
 })
@@ -260,7 +260,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
     ['파티, 공대', null],
     ['랭킹', null],
     ['통계', null],
-    ['내 모험단', null],
+    ['모험단', null],
     ['즐겨찾기', null]
   ])
 
@@ -275,39 +275,67 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(detailRequests(detail)).toBe(1)
 })
 
-it('한글 모험단 이름의 주소를 직접 열면 그 모험단의 캐릭터 목록을 조회해 그린다', async () => {
-  const requested = vi.fn<typeof fetch>(async () =>
-    Response.json({
-      adventureName: '동네커피',
-      characters: [
-        {
-          serverId: 'cain',
-          characterId: 'coffee-1',
-          characterName: '커피',
-          adventureName: '동네커피',
-          level: 115,
-          jobId: null,
-          jobGrowId: null,
-          jobName: null,
-          jobGrowName: null,
-          fame: 1000,
-          guildId: null,
-          guildName: null
-        }
-      ]
-    })
-  )
+function stubAdventureFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
+  const requested = vi.fn<typeof fetch>(async (...args) => {
+    const url = new URL(new Request(...args).url)
+    if (url.pathname.endsWith('/weekly')) {
+      const adventureName = decodeURIComponent(url.pathname.split('/').at(-2)!)
+
+      return Response.json({ adventureName, clearNames: [], characters: [] })
+    }
+
+    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
+  })
   vi.stubGlobal('fetch', requested)
-  window.history.replaceState(null, '', `/adventures/${encodeURIComponent('동네커피')}`)
+
+  return requested
+}
+
+function adventureRequests(fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>): string[] {
+  return fetch.mock.calls
+    .map((args) => new Request(...args).url)
+    .filter((url) => url.startsWith(`${API_BASE_URL}/adventures/`))
+    .toSorted()
+}
+
+it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 달라도 그 모험단의 대시보드를 그리고 저장한 이름은 그대로 둔다', async () => {
+  useMyAdventureStore.setState({ adventureName: '저장 모험단' })
+  const fetch = stubAdventureFetch()
+  const encodedName = encodeURIComponent('동네커피')
+  window.history.replaceState(null, '', `/adventures/${encodedName}`)
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() =>
-    expect(container.querySelector('main tbody a')?.getAttribute('href')).toBe('/c/cain/coffee-1')
+    expect(container.querySelector('main section h2')?.textContent).toBe('동네커피')
   )
   expect(container.querySelector('main h1')?.textContent).toBe('동네커피')
-  expect(requested.mock.calls.map((args) => new Request(...args).url)).toContain(
-    `${API_BASE_URL}/adventures/${encodeURIComponent('동네커피')}/characters`
+  expect(container.querySelector<HTMLInputElement>('main input[aria-label="모험단"]')?.value).toBe(
+    '동네커피'
   )
+  expect(globalMenu()).toEqual([
+    ['파티, 공대', null],
+    ['랭킹', null],
+    ['통계', null],
+    ['모험단', 'page'],
+    ['즐겨찾기', null]
+  ])
+  expect(adventureRequests(fetch)).toEqual([
+    `${API_BASE_URL}/adventures/${encodedName}/activity`,
+    `${API_BASE_URL}/adventures/${encodedName}/weekly`
+  ])
+  expect(useMyAdventureStore.getState().adventureName).toBe('저장 모험단')
+})
+
+it('모험단 주소는 저장한 모험단이 있으면 기록을 늘리지 않고 그 모험단 주소로 season과 함께 바꾼다', async () => {
+  useMyAdventureStore.setState({ adventureName: '합성 모험단' })
+  stubAdventureFetch()
+  window.history.replaceState(null, '', '/adventures?season=10')
+  const historyLength = window.history.length
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await waitForPath(`/adventures/${encodeURIComponent('합성 모험단')}`)
+  expect(window.location.search).toBe('?season=10')
+  expect(window.history.length).toBe(historyLength)
 })
 
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
@@ -695,7 +723,7 @@ it('캐릭터 검색을 제출하면 결과가 한 명이어도 검색 화면으
     serverId: 'all'
   })
   await vi.waitFor(() =>
-    expect(searchResultRows()).toEqual([['/c/cain/only-1', '카인한명眞 크루세이더50,000']])
+    expect(searchResultRows()).toEqual([['/c/cain/only-1', '카인한명크루세이더50,000']])
   )
   expect(searchRequests(fetch).map((url) => Object.fromEntries(url.searchParams))).toEqual([
     { characterName: '한명', serverId: 'all', limit: '200' }
@@ -722,8 +750,8 @@ it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답�
   await waitForPath('/search')
   await vi.waitFor(() =>
     expect(searchResultRows()).toEqual([
-      ['/c/cain/server-1', '카인카인검색1眞 크루세이더90,000'],
-      ['/c/cain/server-2', '카인카인검색眞 크루세이더-']
+      ['/c/cain/server-1', '카인카인검색1크루세이더90,000'],
+      ['/c/cain/server-2', '카인카인검색크루세이더-']
     ])
   )
   expect(container.querySelector('main h1')?.textContent).toBe('캐릭터 검색')
@@ -738,7 +766,7 @@ it('캐릭터 이름 한 글자를 제출하면 검색 화면으로 가서 그 �
 
   await waitForPath('/search')
   await vi.waitFor(() =>
-    expect(searchResultRows()).toEqual([['/c/cain/single-1', '카인가眞 크루세이더1,000']])
+    expect(searchResultRows()).toEqual([['/c/cain/single-1', '카인가크루세이더1,000']])
   )
   expect(searchRequests(fetch).map((url) => url.searchParams.get('characterName'))).toEqual(['가'])
 })
@@ -768,16 +796,8 @@ it('주소의 이름이 열세 글자면 검색 화면은 요청하지 않는다
   expect(searchRequests(fetch)).toEqual([])
 })
 
-it('모험단 검색을 제출하면 다듬은 이름의 모험단 화면으로 가고, 그 모험단에 캐릭터가 없으면 없는 주소 화면을 보인다', async () => {
-  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
-    const url = new URL(new Request(...args).url)
-    if (url.pathname.startsWith('/api/adventures/')) {
-      return Response.json({ adventureName: '없는 모험단', characters: [] })
-    }
-
-    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
-  })
-  vi.stubGlobal('fetch', fetch)
+it('모험단 검색을 제출하면 다듬은 이름의 모험단 대시보드로 가고 저장한 이름은 바꾸지 않는다', async () => {
+  const fetch = stubAdventureFetch()
   await act(async () => root.render(<WebApp host={host} />))
   await chooseScope('모험단')
 
@@ -785,9 +805,11 @@ it('모험단 검색을 제출하면 다듬은 이름의 모험단 화면으로 
 
   await waitForPath(`/adventures/${encodeURIComponent('없는 모험단')}`)
   await vi.waitFor(() =>
-    expect(container.querySelector('main h1')?.textContent).toBe('없는 주소입니다.')
+    expect(container.querySelector('main section h2')?.textContent).toBe('없는 모험단')
   )
+  expect(container.querySelector('main h1')?.textContent).toBe('없는 모험단')
   expect(searchRequests(fetch)).toEqual([])
+  expect(useMyAdventureStore.getState().adventureName).toBeNull()
 })
 
 it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기본 동작을 막지 않고 표의 자리와 회차 안내를 바꾸지 않는다', async () => {
@@ -918,7 +940,7 @@ it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최�
   })
 })
 
-it('내 모험단 주소의 season은 그 시즌의 활동을 조회하고, 숫자가 아닌 season은 지금 시즌을 조회한다', async () => {
+it('예전 내 모험단 주소는 season과 함께 저장한 모험단 주소로 넘어가 그 시즌을 조회하고, 숫자가 아닌 season은 지금 시즌을 조회한다', async () => {
   useMyAdventureStore.setState({ adventureName: '합성 모험단' })
   const fetch = vi.fn<typeof globalThis.fetch>(async () => new Response('{}', { status: 500 }))
   vi.stubGlobal('fetch', fetch)
@@ -930,6 +952,8 @@ it('내 모험단 주소의 season은 그 시즌의 활동을 조회하고, 숫�
 
   window.history.replaceState(null, '', '/my?season=10')
   await act(async () => root.render(<WebApp host={host} />))
+  await waitForPath(`/adventures/${encodedName}`)
+  expect(window.location.search).toBe('?season=10')
   await vi.waitFor(() =>
     expect(activityUrls()).toEqual([`${API_BASE_URL}/adventures/${encodedName}/activity?season=10`])
   )
@@ -946,28 +970,22 @@ it('내 모험단 주소의 season은 그 시즌의 활동을 조회하고, 숫�
   )
 })
 
-it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 지금 시즌 활동과 주간 던파만 조회하고 이름은 브라우저에 남긴다', async () => {
-  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
-    const url = new URL(new Request(...args).url)
-    if (url.pathname.endsWith('/weekly')) {
-      return Response.json({ adventureName: '합성 모험단', clearNames: [], characters: [] })
-    }
-
-    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
-  })
-  vi.stubGlobal('fetch', fetch)
+it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 이름 입력 화면으로 넘어가고, 이름을 넣고 보기를 누르면 그 모험단 주소로 가서 지금 시즌 활동과 주간 던파만 조회하고 이름은 브라우저에 남긴다', async () => {
+  const fetch = stubAdventureFetch()
   window.history.replaceState(null, '', '/my')
   await act(async () => root.render(<WebApp host={host} />))
 
+  await waitForPath('/adventures')
+  expect(container.querySelector('main h1')?.textContent).toBe('모험단')
   expect(globalMenu()).toEqual([
     ['파티, 공대', null],
     ['랭킹', null],
     ['통계', null],
-    ['내 모험단', 'page'],
+    ['모험단', 'page'],
     ['즐겨찾기', null]
   ])
   const form = container.querySelector<HTMLFormElement>('main form')!
-  const input = form.querySelector<HTMLInputElement>('input[aria-label="내 모험단"]')!
+  const input = form.querySelector<HTMLInputElement>('input[aria-label="모험단"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
       input,
@@ -977,12 +995,12 @@ it('내 모험단에 이름을 넣고 보기를 누르면 그 모험단의 지�
   })
   await act(async () => form.requestSubmit())
 
+  const encodedName = encodeURIComponent('합성 모험단')
+  await waitForPath(`/adventures/${encodedName}`)
   await vi.waitFor(() =>
     expect(container.querySelector('main section h2')?.textContent).toBe('합성 모험단')
   )
-  const urls = fetch.mock.calls.map((args) => new Request(...args).url)
-  const encodedName = encodeURIComponent('합성 모험단')
-  expect(urls.filter((url) => url.includes(encodedName)).toSorted()).toEqual([
+  expect(adventureRequests(fetch)).toEqual([
     `${API_BASE_URL}/adventures/${encodedName}/activity`,
     `${API_BASE_URL}/adventures/${encodedName}/weekly`
   ])

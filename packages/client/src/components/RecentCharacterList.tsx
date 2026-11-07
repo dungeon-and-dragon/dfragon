@@ -1,5 +1,6 @@
 import { Popover } from '@base-ui/react/popover'
 import * as stylex from '@stylexjs/stylex'
+import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import type { KeyboardEvent, RefObject } from 'react'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
@@ -108,7 +109,7 @@ function RecentItem({
       </span>
       <span {...stylex.props(styles.identity)}>
         <span {...stylex.props(styles.name)}>{character.characterName}</span>
-        {job != null && <span {...stylex.props(styles.job)}>{job}</span>}
+        {job != null && <span {...stylex.props(styles.job)}>{formatJobName(job)}</span>}
       </span>
       <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
       <span {...stylex.props(styles.fame, character.fame == null && styles.missing)}>

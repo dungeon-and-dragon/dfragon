@@ -1,3 +1,4 @@
+import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/preload/common/search/character-summary'
 import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import type { Bar } from './BarCharts'
@@ -20,7 +21,7 @@ function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
 export function jobBars(stats: CharacterStats): Bar[] {
   return awakenedJobs(stats).map(({ jobId, jobGrowId, jobGrowName, count }) => ({
     key: `${jobId}/${jobGrowId}`,
-    name: jobGrowName,
+    name: formatJobName(jobGrowName),
     value: count
   }))
 }
@@ -32,7 +33,9 @@ export function averageFameBars(stats: CharacterStats): Bar[] {
         return []
       }
 
-      return [{ key: `${jobId}/${jobGrowId}`, name: jobGrowName, value: averageFame }]
+      return [
+        { key: `${jobId}/${jobGrowId}`, name: formatJobName(jobGrowName), value: averageFame }
+      ]
     })
     .toSorted((a, b) => b.value - a.value)
 }

@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex'
 import { colors, space } from '@dfragon/ui/tokens.stylex'
 
 const HERO_MIN_HEIGHT = 220
-const TIMELINE_HEIGHT = 46
+const TIMELINE_HEIGHT = 52
 
 const fadeIn = stylex.keyframes({
   from: { opacity: 0 },

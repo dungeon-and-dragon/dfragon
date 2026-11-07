@@ -1,5 +1,6 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { formatApproximateScore, toScoreView } from '@dfragon/client-core/lib/card-score'
@@ -62,7 +63,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         </div>
         <div {...stylex.props(styles.line)}>
           <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
-          {job != null && <span {...stylex.props(styles.muted)}>{job}</span>}
+          {job != null && <span {...stylex.props(styles.muted)}>{formatJobName(job)}</span>}
           {character.level != null && (
             <span {...stylex.props(styles.level)}>{`Lv.${character.level}`}</span>
           )}
