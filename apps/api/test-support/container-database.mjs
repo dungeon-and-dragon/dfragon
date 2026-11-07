@@ -22,6 +22,9 @@ const timelineReadCheckPath = fileURLToPath(
   new URL('./container-timeline-read-check.mjs', import.meta.url)
 )
 const backfillCheckPath = fileURLToPath(new URL('./container-backfill-check.mjs', import.meta.url))
+const seasonBackfillCheckPath = fileURLToPath(
+  new URL('./container-season-backfill-check.mjs', import.meta.url)
+)
 const characterCheckPath = fileURLToPath(
   new URL('./container-character-check.mjs', import.meta.url)
 )
@@ -258,6 +261,8 @@ try {
         '--mount',
         `type=bind,source=${backfillCheckPath},target=/app/container-backfill-check.mjs,readonly`,
         '--mount',
+        `type=bind,source=${seasonBackfillCheckPath},target=/app/container-season-backfill-check.mjs,readonly`,
+        '--mount',
         `type=bind,source=${characterCheckPath},target=/app/container-character-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${collectionCheckPath},target=/app/container-collection-check.mjs,readonly`,
@@ -294,7 +299,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '5'
+    '6'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -451,6 +456,16 @@ try {
     ).stdout.trim(),
     't|t'
   )
+
+  stage = 'old season backfill'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-season-backfill-check.mjs'
+  ])
 
   stage = 'timeline read'
   await docker([
@@ -706,6 +721,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, HTTP and database input rejection\n'
   )
 }
