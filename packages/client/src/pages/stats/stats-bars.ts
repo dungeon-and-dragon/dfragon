@@ -3,6 +3,7 @@ import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking
 import type { Bar } from './BarCharts'
 
 const FAME_BUCKET_UNIT = 10_000
+const AWAKENING_MARK = '眞'
 
 export function serverBars({ servers }: CharacterStats): Bar[] {
   return servers.map(({ serverId, count }) => ({
@@ -12,16 +13,20 @@ export function serverBars({ servers }: CharacterStats): Bar[] {
   }))
 }
 
-export function jobBars({ jobs }: CharacterStats): Bar[] {
-  return jobs.map(({ jobId, jobGrowId, jobGrowName, count }) => ({
+function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
+  return jobs.filter(({ jobGrowName }) => jobGrowName.startsWith(AWAKENING_MARK))
+}
+
+export function jobBars(stats: CharacterStats): Bar[] {
+  return awakenedJobs(stats).map(({ jobId, jobGrowId, jobGrowName, count }) => ({
     key: `${jobId}/${jobGrowId}`,
     name: jobGrowName,
     value: count
   }))
 }
 
-export function averageFameBars({ jobs }: CharacterStats): Bar[] {
-  return jobs
+export function averageFameBars(stats: CharacterStats): Bar[] {
+  return awakenedJobs(stats)
     .flatMap(({ jobId, jobGrowId, jobGrowName, averageFame }) => {
       if (averageFame == null) {
         return []
