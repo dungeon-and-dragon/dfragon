@@ -2,7 +2,7 @@ import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import gsap from 'gsap'
-import { type RefObject, useEffect, useRef, useState } from 'react'
+import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { useAdventureActivity } from '../../hooks/useAdventureActivity'
 import {
@@ -19,6 +19,7 @@ import {
   type SeasonRange
 } from './activity-heatmap'
 import { ActivityDayDetail } from './ActivityDayDetail'
+import { wheelScrollTarget } from './heatmap-wheel'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
 
@@ -33,6 +34,7 @@ const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: s
 const ROW_LABELS = ['목', '', '토', '', '월', '', '수']
 const LEVEL_STYLES = [styles.empty, styles.level1, styles.level2, styles.level3, styles.level4]
 const RING_TURN_SECONDS = 4
+const WHEEL_SCROLL_SECONDS = 0.35
 
 const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
 
@@ -232,13 +234,7 @@ function HeatmapGrid({
   useRingRotation(ref, hasRing)
 
   return (
-    <div ref={ref} {...stylex.props(styles.grid, styles.columns(weeks.length))}>
-      <span />
-      {ROW_LABELS.map((label, index) => (
-        <span key={index} aria-hidden="true" {...stylex.props(styles.label)}>
-          {label}
-        </span>
-      ))}
+    <div ref={ref} {...stylex.props(styles.grid)}>
       {weeks.flatMap((week, weekIndex) => [
         <span key={`month-${weekIndex}`} aria-hidden="true" {...stylex.props(styles.label)}>
           {week.month !== undefined && `${week.month}월`}
@@ -262,6 +258,89 @@ function HeatmapGrid({
   )
 }
 
+function DayLabels(): React.JSX.Element {
+  return (
+    <div aria-hidden="true" {...stylex.props(styles.dayLabels)}>
+      <span />
+      {ROW_LABELS.map((label, index) => (
+        <span key={index} {...stylex.props(styles.label)}>
+          {label}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+// GitHub처럼 가장 최근 주가 보이게 한다. 받아 둔 시즌으로 돌아가면 패널을 새로 그리지 않으므로 시즌마다 맞춘다.
+function useScrollToLatest(ref: RefObject<HTMLElement | null>, seasonId: number): void {
+  useLayoutEffect(() => {
+    const element = ref.current
+    if (element == null) {
+      return
+    }
+
+    element.scrollLeft = element.scrollWidth
+  }, [ref, seasonId])
+}
+
+function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
+  useEffect(() => {
+    const element = ref.current
+    if (element == null) {
+      return
+    }
+
+    let duration = 0
+    let target: number | undefined
+    const media = gsap.matchMedia()
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      duration = WHEEL_SCROLL_SECONDS
+
+      return () => {
+        duration = 0
+      }
+    })
+
+    function handleComplete(): void {
+      target = undefined
+    }
+
+    function handleWheel(event: WheelEvent): void {
+      if (element == null) {
+        return
+      }
+
+      const next = wheelScrollTarget({
+        deltaX: event.deltaX,
+        deltaY: event.deltaY,
+        from: target ?? element.scrollLeft,
+        max: element.scrollWidth - element.clientWidth
+      })
+      if (next === undefined) {
+        return
+      }
+
+      event.preventDefault()
+      target = next
+      gsap.to(element, {
+        scrollLeft: next,
+        duration,
+        ease: 'power2.out',
+        overwrite: true,
+        onComplete: handleComplete
+      })
+    }
+
+    element.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      element.removeEventListener('wheel', handleWheel)
+      gsap.killTweensOf(element)
+      media.revert()
+    }
+  }, [ref])
+}
+
 function HeatmapPanel({
   adventureName,
   activity,
@@ -279,6 +358,9 @@ function HeatmapPanel({
   const weeks = buildHeatmapWeeks(season, now)
   const days = new Map(activity.days.map((day) => [day.date, day]))
   const thresholds = levelThresholds(activity.days.map((day) => dayCount(day, kind)))
+  const scroller = useRef<HTMLDivElement>(null)
+  useScrollToLatest(scroller, season.id)
+  useWheelScroll(scroller)
 
   return (
     <>
@@ -287,13 +369,16 @@ function HeatmapPanel({
         <Legend kind={kind} thresholds={thresholds} />
       </div>
       <div {...stylex.props(styles.gridArea)}>
-        <HeatmapGrid
-          kind={kind}
-          weeks={weeks}
-          days={days}
-          thresholds={thresholds}
-          tooltip={tooltip}
-        />
+        <DayLabels />
+        <div ref={scroller} {...stylex.props(styles.scroller)}>
+          <HeatmapGrid
+            kind={kind}
+            weeks={weeks}
+            days={days}
+            thresholds={thresholds}
+            tooltip={tooltip}
+          />
+        </div>
       </div>
       <Tooltip.Root handle={tooltip}>
         {({ payload }) =>
