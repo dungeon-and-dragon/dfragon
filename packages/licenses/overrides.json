@@ -67,5 +67,12 @@
       "source": "https://raw.githubusercontent.com/remeda/remeda/bceae4f9658444383fde4569491480cc765ff1e8/LICENSE",
       "sha256": "acf30083045d768ce20640237313ee31a45d548d66ef76df5bb5fb0745479535"
     }
+  ],
+  "gsap@3.15.1": [
+    {
+      "file": "upstream/gsap-standard-license.txt",
+      "source": "https://gsap.com/standard-license",
+      "sha256": "fc3a9a8be109f3daec126182fc284b99877f3d9894aecab9b9bc04fefcd3338e"
+    }
   ]
 }
