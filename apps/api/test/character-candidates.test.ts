@@ -94,7 +94,8 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 60000,
         jobName: '귀검사(남)',
         jobGrowName: '眞 웨펀마스터',
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/hilder/characters/top_A-1?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/hilder/characters/top_A-1?zoom=1',
+        adventureName: null
       },
       {
         characterId: 'tie-first',
@@ -104,7 +105,8 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 50000,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/tie-first?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/tie-first?zoom=1',
+        adventureName: null
       },
       {
         characterId: 'tie-second',
@@ -114,7 +116,8 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 50000,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/prey/characters/tie-second?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/prey/characters/tie-second?zoom=1',
+        adventureName: null
       },
       {
         characterId: 'zero',
@@ -124,7 +127,8 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: 0,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/zero?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/zero?zoom=1',
+        adventureName: null
       },
       {
         characterId: 'null-first',
@@ -134,7 +138,8 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/siroco/characters/null-first?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/siroco/characters/null-first?zoom=1',
+        adventureName: null
       },
       {
         characterId: 'omitted',
@@ -144,7 +149,8 @@ test('후보는 명성 내림차순, 동률과 null의 공급자 순서로 정�
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/omitted?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/omitted?zoom=1',
+        adventureName: null
       }
     ]
   })
@@ -388,7 +394,8 @@ test('후보의 ID 검증은 256자 안전 문자를 허용한다', async (t) =>
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: `https://img-api.neople.co.kr/df/servers/cain/characters/${safeId}?zoom=1`
+        imageUrl: `https://img-api.neople.co.kr/df/servers/cain/characters/${safeId}?zoom=1`,
+        adventureName: null
       }
     ]
   })
@@ -662,4 +669,77 @@ test('서버 종료 뒤에는 저장한 후보도 돌려주지 않고 진행 중
     await assert.rejects(service.candidates(candidateUrl(name)), NeopleSearchFailure)
   }
   assert.equal(names.length, 2)
+})
+
+test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 저장되지 않은 캐릭터는 null이다', async () => {
+  const reads: string[][] = []
+  const service = createCharacterSearchService({
+    searchCharacters: async (input) => ({
+      rows: [
+        candidateRow(input.characterName, 'stored'),
+        {
+          ...candidateRow(input.characterName, 'stored'),
+          serverId: 'siroco',
+          serverName: '시로코'
+        },
+        candidateRow(input.characterName, 'unknown')
+      ]
+    }),
+    readAdventureNames: async (characters) => {
+      reads.push(characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`))
+
+      return [{ serverId: 'cain', characterId: 'stored', adventureName: '합성모험단' }]
+    }
+  })
+
+  const { result } = await service.candidates(candidateUrl(characterName))
+
+  assert.deepEqual(
+    result.rows.map(({ serverId, characterId, adventureName }) => ({
+      serverId,
+      characterId,
+      adventureName
+    })),
+    [
+      { serverId: 'cain', characterId: 'stored', adventureName: '합성모험단' },
+      { serverId: 'siroco', characterId: 'stored', adventureName: null },
+      { serverId: 'cain', characterId: 'unknown', adventureName: null }
+    ]
+  )
+  assert.deepEqual(reads, [['cain/stored', 'siroco/stored', 'cain/unknown']])
+})
+
+test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로 읽는다', async () => {
+  let adventureName = '옛모험단'
+  let searches = 0
+  const service = createCharacterSearchService({
+    searchCharacters: async (input) => {
+      searches++
+
+      return { rows: [candidateRow(input.characterName, 'renamed')] }
+    },
+    readAdventureNames: async () => [{ serverId: 'cain', characterId: 'renamed', adventureName }]
+  })
+
+  const first = await service.candidates(candidateUrl(characterName))
+  adventureName = '새모험단'
+  const cached = await service.candidates(candidateUrl(characterName))
+
+  assert.equal(searches, 1)
+  assert.equal(cached.source, 'cache')
+  assert.deepEqual(
+    [first, cached].map(({ result }) => result.rows[0]?.adventureName),
+    ['옛모험단', '새모험단']
+  )
+})
+
+test('후보가 없으면 모험단명을 읽지 않는다', async () => {
+  const service = createCharacterSearchService({
+    searchCharacters: async () => ({ rows: [] }),
+    readAdventureNames: async () => {
+      throw new Error('빈 후보는 DB를 읽지 않아야 한다')
+    }
+  })
+
+  assert.deepEqual((await service.candidates(candidateUrl(characterName))).result, { rows: [] })
 })
