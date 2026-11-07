@@ -4,6 +4,7 @@ import { colors, space } from '@dfragon/ui/tokens.stylex'
 const BAR_HEIGHT = 4
 const SEASON_MIN_WIDTH = 84
 const INDICATOR_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+const FILL_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
 export const styles = stylex.create({
   timeline: {
@@ -46,7 +47,7 @@ export const styles = stylex.create({
     color: 'inherit',
     font: 'inherit',
     textAlign: 'left',
-    cursor: { default: 'pointer', ':disabled': 'default' }
+    cursor: { default: 'pointer', ':is(:disabled, [aria-disabled="true"])': 'default' }
   },
   length: (days: number) => ({ flexGrow: days, flexShrink: 1, flexBasis: 0 }),
   bar: {
@@ -61,6 +62,17 @@ export const styles = stylex.create({
     }
   },
   barOff: { backgroundColor: colors.bgInset },
+  fill: {
+    position: 'absolute',
+    insetBlock: 0,
+    left: 0,
+    borderRadius: 1,
+    backgroundColor: colors.borderStrong,
+    transitionProperty: 'width',
+    transitionDuration: { default: '0.8s', '@media (prefers-reduced-motion: reduce)': '0s' },
+    transitionTimingFunction: FILL_EASE
+  },
+  fillLength: (progress: number) => ({ width: `${progress * 100}%` }),
   name: {
     fontSize: 12,
     lineHeight: '16px',

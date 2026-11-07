@@ -32,7 +32,7 @@ function day(overrides: Partial<ActivityDay>): ActivityDay {
 describe('buildHeatmapWeeks', () => {
   it('목요일에 시작한 시즌은 첫 열이 시작일부터 수요일까지 7일이다', () => {
     const weeks = buildHeatmapWeeks(
-      { id: 11, startsAt: SEASON_START, endsAt: null },
+      { id: 11, startsAt: SEASON_START, endsAt: null, timelineStartsAt: SEASON_START },
       Date.parse('2026-04-08T21:00:00.000Z')
     )
 
@@ -51,7 +51,7 @@ describe('buildHeatmapWeeks', () => {
 
   it('지금 시즌의 마지막 열에서 오늘 뒤의 날은 아직 오지 않은 날이다', () => {
     const weeks = buildHeatmapWeeks(
-      { id: 11, startsAt: SEASON_START, endsAt: null },
+      { id: 11, startsAt: SEASON_START, endsAt: null, timelineStartsAt: SEASON_START },
       Date.parse('2026-03-28T03:00:00.000Z')
     )
 
@@ -70,11 +70,11 @@ describe('buildHeatmapWeeks', () => {
 
   it('06:00 KST 전 시각은 전날에 속한다', () => {
     const beforeReset = buildHeatmapWeeks(
-      { id: 11, startsAt: SEASON_START, endsAt: null },
+      { id: 11, startsAt: SEASON_START, endsAt: null, timelineStartsAt: SEASON_START },
       Date.parse('2026-03-27T20:59:59.000Z')
     )
     const afterReset = buildHeatmapWeeks(
-      { id: 11, startsAt: SEASON_START, endsAt: null },
+      { id: 11, startsAt: SEASON_START, endsAt: null, timelineStartsAt: SEASON_START },
       Date.parse('2026-03-27T21:00:00.000Z')
     )
 
@@ -84,7 +84,12 @@ describe('buildHeatmapWeeks', () => {
 
   it('목요일이 아닌 날 시작한 시즌은 그 주 목요일 열에 놓고 시작 전 날은 비운다', () => {
     const weeks = buildHeatmapWeeks(
-      { id: 11, startsAt: '2026-03-27T21:00:00.000Z', endsAt: null },
+      {
+        id: 11,
+        startsAt: '2026-03-27T21:00:00.000Z',
+        endsAt: null,
+        timelineStartsAt: '2026-03-27T21:00:00.000Z'
+      },
       Date.parse('2026-03-28T03:00:00.000Z')
     )
 
@@ -101,7 +106,12 @@ describe('buildHeatmapWeeks', () => {
 
   it('끝난 시즌은 다음 시즌 시작 전날까지만 칸을 두고 오늘을 표시하지 않는다', () => {
     const weeks = buildHeatmapWeeks(
-      { id: 10, startsAt: SEASON_START, endsAt: '2026-04-04T21:00:00.000Z' },
+      {
+        id: 10,
+        startsAt: SEASON_START,
+        endsAt: '2026-04-04T21:00:00.000Z',
+        timelineStartsAt: SEASON_START
+      },
       Date.parse('2026-11-07T03:00:00.000Z')
     )
 
@@ -122,7 +132,7 @@ describe('buildHeatmapWeeks', () => {
 
   it('주에 1일이 들어 있는 열에만 그 달을 붙인다', () => {
     const weeks = buildHeatmapWeeks(
-      { id: 11, startsAt: SEASON_START, endsAt: null },
+      { id: 11, startsAt: SEASON_START, endsAt: null, timelineStartsAt: SEASON_START },
       Date.parse('2026-05-08T03:00:00.000Z')
     )
 
@@ -135,6 +145,27 @@ describe('buildHeatmapWeeks', () => {
       5,
       undefined
     ])
+  })
+
+  it('마계는 시즌 시작일이 아니라 기록이 있는 첫 시각이 속한 리셋 주부터 그린다', () => {
+    // 마계는 2016-09-01 06:00 KST에 시작했지만 타임라인은 2017-09-21 00:00 KST부터 있다.
+    const weeks = buildHeatmapWeeks(
+      {
+        id: 5,
+        startsAt: '2016-08-31T21:00:00.000Z',
+        endsAt: '2018-08-08T21:00:00.000Z',
+        timelineStartsAt: '2017-09-20T15:00:00.000Z'
+      },
+      Date.parse('2026-11-07T03:00:00.000Z')
+    )
+
+    expect(dates(weeks[0].days)).toEqual([null, null, null, null, null, null, '2017-09-20'])
+    expect(dates(weeks[1].days)[0]).toBe('2017-09-21')
+    expect(
+      dates(weeks.at(-1)!.days)
+        .filter((date) => date !== null)
+        .at(-1)
+    ).toBe('2018-08-08')
   })
 })
 
