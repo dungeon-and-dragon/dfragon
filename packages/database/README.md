@@ -20,6 +20,8 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   이미 대기열에 있거나 기본 정보를 저장한(`basic_fetched_at`이 있는) 캐릭터와 같은 입력 안의 중복은 넣지 않습니다.
 - `takeCollectionBatch(client, limit)`: `failure`가 없는 대기열 행을 넣은 순서(같은 시각이면 서버, 캐릭터 id 순)대로 `limit`개까지 돌려줍니다.
 - `recordCharacterBasic(client, basic)`: Neople 기본 정보(`CharacterBasicInput`)를 `recordCharacter`와 같은 모험단 규칙으로 `characters`에 저장하고 `basic_fetched_at`을 지금으로 둔 뒤, 같은 transaction에서 대기열 행을 지웁니다.
+- `recordCharacterSkillStyle(client, style)`: 캐릭터 하나의 스킬 스타일(`CharacterSkillStyleInput`)을 `character_skill_styles`에 덮어씁니다.
+  이미 있는 행의 `fetched_at`이 `style.fetchedAt`보다 늦으면 바꾸지 않아, 캐시한 예전 응답이 그 뒤에 받은 행을 덮지 않습니다. `characters`에 없는 캐릭터는 FK 오류로 던집니다.
 - `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `readAdventureCharacters(client, adventureName)`: 이름이 `adventureName`인 모험단의 캐릭터(`StoredCharacter`)를 서버를 가리지 않고 명성이 높은 순(명성이 없으면 뒤, 같으면 서버, 캐릭터 id 순)으로 돌려줍니다. `fetchedAt`은 `basic_fetched_at`입니다.
 - `readAdventureNames(client, characters)`: `characters`(서버, 캐릭터 ID) 가운데 `characters`에 저장된 캐릭터의 모험단 이름(`StoredAdventureName`)을 query 한 번으로 돌려줍니다. 저장되지 않은 캐릭터는 결과에 없고 순서는 정하지 않습니다.
@@ -49,7 +51,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readCharactersTimelineItems(client, characters, codes, since, until)`: 여러 캐릭터의 `timeline_items`에서 `codes`의 `[since, until)` 행을 오래된 순으로 돌려주고, 행마다 `serverId`, `characterId`를 붙입니다. `until`을 주지 않으면 끝이 없습니다.
 - `readRecentTimelineItems(client, character, { codes, itemRarities, limit, before })`: `timeline_items`에서 `codes`의 행을 최근 순(`occurred_at`, `id` 내림차순)으로 `limit`개까지 돌려줍니다. `itemRarities`를 주면 그 `item_rarity`만 고르고, `before`(`occurredAt`, `id`)를 주면 그 행보다 앞선 행만 읽습니다.
   읽은 행의 `data`는 저장한 JSON 그대로이며 형식은 호출자가 확인합니다.
-- 입력 타입 `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `TimelineItemCursor`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `SeasonBackfillState`, `TimelineEventRow`, `CharacterTimelineEventRow`, `TimelineItemRow`, `CharacterTimelineItemRow`, `StoredSeason`을 함께 export합니다.
+- 입력 타입 `CharacterSkillStyleInput`, `SkillStyleSkill`, `SkillStyleSelection`, `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `TimelineItemCursor`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `SeasonBackfillState`, `TimelineEventRow`, `CharacterTimelineEventRow`, `TimelineItemRow`, `CharacterTimelineItemRow`, `StoredSeason`을 함께 export합니다.
 - `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다. API의 Neople key도 같은 함수로 읽습니다.
   `@dfragon/lib`는 Node 전용 runtime에 의존하지 않아야 해서 `node:fs`를 쓰는 이 함수를 이 package에 둡니다.
 
@@ -71,6 +73,7 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 | --- | --- |
 | `adventures` | 자체 모험단 id와 지금 이름. 서버가 달라도 한 모험단입니다 |
 | `characters` | PK `(server_id, character_id)`, 지금 캐릭터 이름, 모험단 id. Neople 기본 정보를 받아 저장한 캐릭터는 레벨, 직업 id와 이름, 명성, 길드, `basic_fetched_at`도 있고, 다른 경로로 기록한 캐릭터는 이 열이 null입니다 |
+| `character_skill_styles` | 캐릭터마다 최신 스킬 스타일 한 행. PK `(server_id, character_id)`이고 `characters`를 참조하며 캐릭터 행을 지우면 함께 지워집니다. 받을 때의 `job_id`, `job_grow_id`, active와 passive를 합친 `skills`(`[{ name, level }]`), 개화 `evolutions`와 강화 `enhancements`(`[{ name, type }]`), 받은 시각 `fetched_at` |
 | `character_collection` | 기본 정보를 받을 캐릭터 대기열. PK `(server_id, character_id)`, 넣은 시각, 실패한 시도의 시각과 이유. 저장에 성공하면 행을 지웁니다 |
 | `seasons` | 게임의 시즌 번호를 id로 쓰는 시즌 이름과 시작 시각. 시즌 5 마계(`2016-09-01 06:00+09`)부터 시즌 11 천해천(`2026-03-26 06:00+09`)까지를 migration이 넣습니다 |
 | `timeline_events` | 코드 1xx, 2xx, 3xx 타임라인. partition이 없습니다 |
