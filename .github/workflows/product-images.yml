@@ -106,18 +106,34 @@ jobs:
           [[ "$SOURCE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
       # The API image needs the pinned Linux score engine and the web image the fine-tuned OCR model.
-      # Each image loads only its own model submodule.
+      # Both model repositories are private, so each job receives only the read-only deploy key of its own repository.
       - name: Checkout the model submodule
         env:
           SERVICE: ${{ matrix.service }}
+          MODEL_DEPLOY_KEY: ${{ matrix.service == 'api' && secrets.SCORE_ENGINE_DEPLOY_KEY || matrix.service == 'web' && secrets.OCR_MODELS_DEPLOY_KEY || '' }}
         shell: bash
         run: |
           set -euo pipefail
           case "$SERVICE" in
-            api) git submodule update --init --depth 1 packages/models/score-engine ;;
-            web) git submodule update --init --depth 1 packages/models/ocr-finetuned ;;
+            api) submodule=packages/models/score-engine secret=SCORE_ENGINE_DEPLOY_KEY ;;
+            web) submodule=packages/models/ocr-finetuned secret=OCR_MODELS_DEPLOY_KEY ;;
             *) echo "Unknown service: $SERVICE" >&2; exit 1 ;;
           esac
+          if [[ -z "$MODEL_DEPLOY_KEY" ]]; then
+            echo "::error::Repository secret $secret is not set." >&2
+            exit 1
+          fi
+          ssh_dir="$RUNNER_TEMP/model-ssh"
+          trap 'rm -rf "$ssh_dir"' EXIT
+          install -d -m 700 "$ssh_dir"
+          install -m 600 /dev/null "$ssh_dir/key"
+          printf '%s\n' "$MODEL_DEPLOY_KEY" > "$ssh_dir/key"
+          # GitHub's published ed25519 host key (GET /meta), pinned so the clone never trusts an unknown host.
+          echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > "$ssh_dir/known_hosts"
+          git \
+            -c url."git@github.com:".insteadOf=https://github.com/ \
+            -c core.sshCommand="ssh -i $ssh_dir/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh_dir/known_hosts -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519" \
+            submodule update --init --depth 1 "$submodule"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Build image without registry credentials
