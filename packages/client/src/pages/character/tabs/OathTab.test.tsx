@@ -103,7 +103,8 @@ it('딜러의 서약, 세트, 결정, 세트 효과, 가호와 진의 단계를 
     [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')
   )
   expect(crystals).toHaveLength(11)
-  expect(crystals[0]).toEqual(['1', '용투 : 완전한 광휘 결정III', '195pt'])
+  expect(crystals[0]).toEqual(['9', '용투 : 태초의 광휘 결정', '205pt'])
+  expect(crystals.at(-1)).toEqual(['8', '용투 : 완전한 광휘 결정', '165pt'])
   expect(section('서약 결정').querySelector('h2')?.textContent).toBe('서약 결정 11')
   expect(lines('서약 세트 효과')).toEqual([
     ['최종 데미지 증가', '500%'],

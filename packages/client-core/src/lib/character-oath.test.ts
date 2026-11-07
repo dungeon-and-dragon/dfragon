@@ -28,7 +28,7 @@ describe('서약 탭 값', () => {
       rarity: 'primordial',
       point: 2780
     })
-    expect(view.crystals[0]).toMatchObject({
+    expect(view.crystals.find(({ slot }) => slot === 1)).toMatchObject({
       slot: 1,
       itemName: '용투 : 완전한 광휘 결정',
       rarity: 'epic',
@@ -57,9 +57,49 @@ describe('서약 탭 값', () => {
 
     expect(view.set).toMatchObject({ rarityName: '레어 Ⅱ', rarity: 'rare', point: 905 })
     expect(view.setStatus).toEqual([])
-    expect(view.crystals.map(({ slot }) => slot)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-    expect(view.crystals[0].tune).toBeNull()
+    expect(view.crystals.find(({ slot }) => slot === 1)?.tune).toBeNull()
     expect(view.upgrade).toBeNull()
+  })
+
+  it('결정을 세트 포인트가 높은 순으로 두고, 같으면 칸 번호 순으로 둔다', () => {
+    const dealer = toOathView(oathOf('dealer'))
+    // 버퍼 fixture의 슬롯 5, 6은 165, 7은 125, 나머지는 85점이다.
+    const buffer = toOathView(oathOf('buffer'))
+
+    expect(dealer.crystals.map(({ slot, setPoint }) => [slot, setPoint])).toEqual([
+      [9, 205],
+      [10, 205],
+      [11, 205],
+      [1, 195],
+      [2, 195],
+      [3, 195],
+      [4, 195],
+      [5, 195],
+      [6, 195],
+      [7, 175],
+      [8, 165]
+    ])
+    expect(buffer.crystals.map(({ slot }) => slot)).toEqual([5, 6, 7, 1, 2, 3, 4, 8, 9, 10, 11])
+  })
+
+  it('응답의 결정 순서가 칸 번호 순이 아니어도 같은 세트 포인트는 칸 번호 순으로 둔다', () => {
+    const oath = oathOf('dealer')
+
+    const sorted = toOathView(oath).crystals
+    const fromReversed = toOathView({ ...oath, crystal: [...oath.crystal].reverse() }).crystals
+
+    expect(fromReversed).toEqual(sorted)
+  })
+
+  it('세트 포인트가 없는 결정은 뒤에 둔다', () => {
+    const oath = oathOf('dealer')
+    const crystal = oath.crystal.map((item, index) =>
+      index === 8 ? { ...item, tune: null } : item
+    )
+
+    const slots = toOathView({ ...oath, crystal }).crystals.map(({ slot }) => slot)
+
+    expect(slots).toEqual([10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
 
   it('내용이 빈 서약도 실패하지 않고 빈 값으로 읽는다', () => {
