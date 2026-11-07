@@ -1,5 +1,8 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+import type {
+  AdventureActivity,
+  AdventureActivityDay
+} from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { useClientHost } from './useClientHost'
 
 export type AdventureActivityResult =
@@ -26,6 +29,33 @@ export function useAdventureActivity(
   })
   if (data !== undefined) {
     return { status: 'success', value: data, previous: isPlaceholderData }
+  }
+
+  if (error != null) {
+    const message = error instanceof Error ? error.message : String(error)
+
+    return { status: 'error', message }
+  }
+
+  return LOADING
+}
+
+export type AdventureActivityDayResult =
+  | Readonly<{ status: 'loading' }>
+  | Readonly<{ status: 'success'; value: AdventureActivityDay }>
+  | Readonly<{ status: 'error'; message: string }>
+
+export function useAdventureActivityDay(
+  adventureName: string,
+  date: string
+): AdventureActivityDayResult {
+  const { getAdventureActivityDay } = useClientHost()
+  const { data, error } = useQuery({
+    queryKey: [...activityKey(adventureName), 'days', date],
+    queryFn: () => getAdventureActivityDay(adventureName, date)
+  })
+  if (data !== undefined) {
+    return { status: 'success', value: data }
   }
 
   if (error != null) {

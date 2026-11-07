@@ -12,8 +12,10 @@ import {
   type Guild
 } from '../adventure-guild/adventure-guild'
 import {
+  adventureActivityDaySchema,
   adventureActivitySchema,
-  type AdventureActivity
+  type AdventureActivity,
+  type AdventureActivityDay
 } from '../adventure-guild/adventure-activity'
 import { adventureWeeklySchema, type AdventureWeekly } from '../adventure-guild/adventure-weekly'
 import {
@@ -79,6 +81,10 @@ export type AdventureActivityHttp = (
   adventureName: string,
   season: number | undefined
 ) => Promise<AdventureActivity>
+export type AdventureActivityDayHttp = (
+  adventureName: string,
+  date: string
+) => Promise<AdventureActivityDay>
 export type TodayGradeHttp = () => Promise<TodayGrade>
 
 export type DfragonClient = Readonly<{
@@ -98,6 +104,7 @@ export type DfragonClient = Readonly<{
     characters: AdventureCharactersHttp
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
+    activityDay: AdventureActivityDayHttp
   }>
   guilds: Readonly<{ get: GuildHttp }>
   items: Readonly<{ todayGrade: TodayGradeHttp }>
@@ -320,6 +327,16 @@ export function createDfragonClient({
           `/adventures/${encodeURIComponent(adventureName)}/activity`,
           adventureActivitySchema,
           { searchParams: { ...(season !== undefined && { season: String(season) }) } }
+        )
+      },
+      async activityDay(adventureName, date) {
+        if (adventureName.trim() === '') {
+          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+        }
+
+        return requestJson(
+          `/adventures/${encodeURIComponent(adventureName)}/activity/days/${encodeURIComponent(date)}`,
+          adventureActivityDaySchema
         )
       }
     },
