@@ -11,10 +11,6 @@ function seoulDateParts(at: string): Readonly<Record<string, string>> {
   )
 }
 
-export function formatSeasonYear(startsAt: string): string {
-  return seoulDateParts(startsAt).year
-}
-
 export function formatSeasonStart(startsAt: string): string {
   const { year, month, day } = seoulDateParts(startsAt)
 

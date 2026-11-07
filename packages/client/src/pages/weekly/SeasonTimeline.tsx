@@ -3,7 +3,6 @@ import * as stylex from '@stylexjs/stylex'
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { ActivitySeason } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { type SeasonBar, seasonBar } from './season-bar'
-import { formatSeasonYear } from './season-format'
 import { styles } from './SeasonTimeline.style'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -77,9 +76,6 @@ function SeasonButton({
         {...stylex.props(styles.name, selected && styles.nameOn, !season.available && styles.off)}
       >
         {season.name}
-      </span>
-      <span {...stylex.props(styles.year, !season.available && styles.off)}>
-        시즌 {season.id}, {formatSeasonYear(season.startsAt)}
       </span>
       {bar.state === 'backfill' && (
         <span {...stylex.props(shapes.srOnly)}>{Math.floor(bar.progress * 100)}%</span>
