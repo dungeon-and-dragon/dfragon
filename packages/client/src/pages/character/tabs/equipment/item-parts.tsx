@@ -20,7 +20,11 @@ function solidTone({ rarity }: Tone) {
   return raritySolid[key]
 }
 
-export function ItemIcon({ itemId, ...tone }: Tone & { itemId: string | null }): React.JSX.Element {
+export function ItemIcon({
+  itemId,
+  src,
+  ...tone
+}: Tone & { itemId: string | null; src?: string | null }): React.JSX.Element {
   // Neople 이미지 서버에 그림이 없는 아이템(서약 본체 등)은 404라 빈 칸으로 둔다.
   const [failedItemId, setFailedItemId] = useState<string | null>(null)
   if (itemId === null || itemId === failedItemId) {
@@ -33,7 +37,7 @@ export function ItemIcon({ itemId, ...tone }: Tone & { itemId: string | null }):
 
   return (
     <img
-      src={itemIconUrl(itemId)}
+      src={src ?? itemIconUrl(itemId)}
       alt=""
       loading="lazy"
       onError={handleError}

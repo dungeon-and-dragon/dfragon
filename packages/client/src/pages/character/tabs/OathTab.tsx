@@ -3,8 +3,10 @@ import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import { formatCount, formatPoint, type StatLine } from '@dfragon/client-core/lib/character-item'
 import { type OathView, toOathView } from '@dfragon/client-core/lib/character-oath'
 import {
+  type OathCatalog,
   type OathOptionCard,
   type OathSetBoard,
+  oathItemIconOf,
   oathSetBoardOf
 } from '@dfragon/client-core/shared/search/oath-catalog'
 import { useOathCatalog } from '../../../hooks/useOathCatalog'
@@ -23,10 +25,8 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
 
   const view = toOathView(detail.oath)
   const setInfo = detail.oath.setInfo
-  const board =
-    catalog.status === 'success' && catalog.value !== null && setInfo !== null
-      ? oathSetBoardOf(catalog.value, setInfo)
-      : null
+  const loaded = catalog.status === 'success' ? catalog.value : null
+  const board = loaded !== null && setInfo !== null ? oathSetBoardOf(loaded, setInfo) : null
 
   return (
     <div {...stylex.props(tableStyles.root)}>
@@ -40,7 +40,7 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
       )}
       <div {...stylex.props(styles.body)}>
         <div {...stylex.props(styles.main)}>
-          {board !== null && <OathBody view={view} />}
+          {loaded !== null && board !== null && <OathBody view={view} catalog={loaded} />}
           <OathCrystals view={view} />
         </div>
         <OathEffects view={view} />
@@ -100,7 +100,13 @@ function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): R
   )
 }
 
-function OathBody({ view: { info } }: { view: OathView }): React.JSX.Element | null {
+function OathBody({
+  view: { info },
+  catalog
+}: {
+  view: OathView
+  catalog: OathCatalog
+}): React.JSX.Element | null {
   if (info === null) {
     return null
   }
@@ -110,7 +116,7 @@ function OathBody({ view: { info } }: { view: OathView }): React.JSX.Element | n
       <h2 {...stylex.props(tableStyles.heading)}>서약 본체</h2>
       <div {...stylex.props(styles.bodyRow)}>
         <div {...stylex.props(partStyles.item)}>
-          <ItemIcon itemId={info.itemId} rarity={info.rarity} />
+          <ItemIcon itemId={info.itemId} src={oathItemIconOf(catalog, info)} rarity={info.rarity} />
           <ItemName name={info.itemName} rarity={info.rarity} />
         </div>
         <span {...stylex.props(partStyles.spacer)} />
