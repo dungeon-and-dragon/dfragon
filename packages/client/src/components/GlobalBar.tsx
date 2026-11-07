@@ -7,8 +7,6 @@ import { ColorModeToggle } from './ColorModeToggle'
 import { styles } from './GlobalBar.style'
 import { TodayGrade } from './TodayGrade'
 
-const brandIcon = new URL('../assets/dfragon-icon.png', import.meta.url).href
-
 type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
@@ -26,7 +24,6 @@ export function GlobalBar(): React.JSX.Element {
     <header {...stylex.props(styles.bar)}>
       <div {...stylex.props(styles.inner)}>
         <Link to="/" aria-label={`${PRODUCT_NAME} 첫 화면`} {...stylex.props(styles.brand)}>
-          <img src={brandIcon} alt="" width={24} height={24} {...stylex.props(styles.brandIcon)} />
           <span {...stylex.props(styles.name)}>{PRODUCT_NAME}</span>
         </Link>
         <span aria-hidden="true" {...stylex.props(styles.divider)} />

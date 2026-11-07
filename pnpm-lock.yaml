@@ -334,9 +334,6 @@ importers:
       node:
         specifier: runtime:26.12.1
         version: runtime:26.12.1
-      pngjs:
-        specifier: 'catalog:'
-        version: 7.0.0
       tar:
         specifier: 'catalog:'
         version: 7.5.22
