@@ -19,9 +19,10 @@ import {
   type SeasonRange
 } from './activity-heatmap'
 import { ActivityDayDetail } from './ActivityDayDetail'
-import { wheelScrollTarget } from './heatmap-wheel'
+import { wheelAction } from './heatmap-wheel'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
+import { useRingRotation } from './useRingRotation'
 
 const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: string }>[] = [
   { kind: 'all', label: '전체', cellLabel: '활동' },
@@ -33,14 +34,13 @@ const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: s
 
 const ROW_LABELS = ['목', '', '토', '', '월', '', '수']
 const LEVEL_STYLES = [styles.empty, styles.level1, styles.level2, styles.level3, styles.level4]
-const RING_TURN_SECONDS = 4
 const WHEEL_SCROLL_SECONDS = 0.35
 
 const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
-type CellPayload = Readonly<{ date: string; total: number }>
+type CellPayload = Readonly<{ date: string }>
 type CellTooltip = ReturnType<typeof Tooltip.createHandle<CellPayload>>
 
 function isActivityKind(value: unknown): value is ActivityKind {
@@ -73,26 +73,6 @@ function cellLabel(kind: ActivityKind, date: string, day: ActivityDay | undefine
   }
 
   return `${label}, ${RING_LABELS[highlight]}`
-}
-
-function useRingRotation(ref: RefObject<HTMLElement | null>, enabled: boolean): void {
-  useEffect(() => {
-    const element = ref.current
-    if (!enabled || element == null) {
-      return
-    }
-
-    const media = gsap.matchMedia()
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(
-        element,
-        { '--heatmap-ring-angle': 0 },
-        { '--heatmap-ring-angle': 360, duration: RING_TURN_SECONDS, ease: 'none', repeat: -1 }
-      )
-    })
-
-    return () => media.revert()
-  }, [ref, enabled])
 }
 
 function Legend({
@@ -206,7 +186,7 @@ function HeatmapCell({
   return (
     <Tooltip.Trigger
       handle={tooltip}
-      payload={{ date: cell.date, total: dayCount(day, 'all') }}
+      payload={{ date: cell.date }}
       delay={0}
       closeDelay={0}
       render={<span {...props} />}
@@ -231,7 +211,7 @@ function HeatmapGrid({
 }): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
   const hasRing = [...days.values()].some((day) => ringHighlight(day, kind) !== undefined)
-  useRingRotation(ref, hasRing)
+  useRingRotation(ref, hasRing, '--heatmap-ring-angle')
 
   return (
     <div ref={ref} {...stylex.props(styles.grid)}>
@@ -292,6 +272,7 @@ function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
 
     let duration = 0
     let target: number | undefined
+    let lastHeldAt: number | undefined
     const media = gsap.matchMedia()
     media.add('(prefers-reduced-motion: no-preference)', () => {
       duration = WHEEL_SCROLL_SECONDS
@@ -310,20 +291,27 @@ function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
         return
       }
 
-      const next = wheelScrollTarget({
+      const action = wheelAction({
         deltaX: event.deltaX,
         deltaY: event.deltaY,
         from: target ?? element.scrollLeft,
-        max: element.scrollWidth - element.clientWidth
+        max: element.scrollWidth - element.clientWidth,
+        now: event.timeStamp,
+        lastHeldAt
       })
-      if (next === undefined) {
+      if (action.kind === 'pass') {
         return
       }
 
       event.preventDefault()
-      target = next
+      lastHeldAt = event.timeStamp
+      if (action.kind === 'hold') {
+        return
+      }
+
+      target = action.target
       gsap.to(element, {
-        scrollLeft: next,
+        scrollLeft: action.target,
         duration,
         ease: 'power2.out',
         overwrite: true,
@@ -384,11 +372,7 @@ function HeatmapPanel({
         {({ payload }) =>
           payload !== undefined && (
             <Tooltip.Popup side="top" sideOffset={8}>
-              <ActivityDayDetail
-                adventureName={adventureName}
-                date={payload.date}
-                total={payload.total}
-              />
+              <ActivityDayDetail adventureName={adventureName} date={payload.date} />
             </Tooltip.Popup>
           )
         }

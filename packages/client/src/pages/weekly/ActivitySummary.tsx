@@ -6,6 +6,7 @@ import type {
   EnhancementTarget
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { styles } from './ActivitySummary.style'
+import { formatClearCount } from './clear-count'
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
@@ -61,8 +62,8 @@ function SummaryStat({
 function ClearRows({ counts }: { counts: readonly NameCount[] }): React.JSX.Element {
   return (
     <>
-      {counts.map(({ name, count }) => (
-        <DetailRow key={name} label={name} value={`${numberFormat.format(count)}회`} />
+      {counts.map((clear) => (
+        <DetailRow key={clear.name} label={clear.name} value={formatClearCount(clear)} />
       ))}
     </>
   )

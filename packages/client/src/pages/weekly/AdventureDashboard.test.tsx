@@ -431,3 +431,63 @@ it('새로고침을 누르면 받아 둔 시즌 활동을 버리고 받는 중�
   ])
   expect(heroBusy()).toBe('false')
 })
+
+it('레이드 내역은 하드와 노말이 모두 있으면 둘을 나눠 보이고, 한쪽만 있거나 없는 응답은 합계만 응답 순서대로 보인다', async () => {
+  const raids = [
+    { name: '가 레이드', count: 55, hard: 24, normal: 31 },
+    { name: '나 레이드', count: 3, hard: 3, normal: 0 },
+    { name: '다 레이드', count: 7 }
+  ]
+  await render(
+    async () => ({ ...currentSeason, summary: { ...currentSeason.summary, raids } }),
+    undefined
+  )
+
+  await act(async () => stat('레이드').focus())
+
+  expect(tooltipRows()).toEqual(['가 레이드하드 24회 | 노말 31회', '나 레이드3회', '다 레이드7회'])
+})
+
+function backfillRing(name: string): Element | null {
+  return seasonButton(name).querySelector('i[aria-hidden="true"]')
+}
+
+function stubReducedMotion(reduce: boolean): void {
+  vi.stubGlobal('matchMedia', (query: string) =>
+    Object.assign(new EventTarget(), {
+      matches: query === '(prefers-reduced-motion: no-preference)' ? !reduce : false,
+      media: query,
+      onchange: null,
+      addListener() {},
+      removeListener() {}
+    })
+  )
+}
+
+it.each([
+  ['받는 중', { done: 12, total: 30, running: true }, false, true],
+  ['멈춤', { done: 12, total: 30, running: false }, false, false],
+  ['완료', { done: 30, total: 30, running: false }, true, false]
+])('옛 시즌 막대의 테두리는 받는 중일 때만 둔다: %s', async (_, backfill, available, ringed) => {
+  await render(async () => withBackfill(currentSeason, backfill, available), undefined)
+
+  expect(backfillRing('합성 시즌 9') !== null).toBe(ringed)
+})
+
+it('받는 중인 막대의 테두리 각도를 돌리고, 움직임 줄이기 설정이면 돌리지 않는다', async () => {
+  const running = withBackfill(currentSeason, { done: 12, total: 30, running: true })
+  const ringAngle = () =>
+    (backfillRing('합성 시즌 9') as HTMLElement | null)?.style.getPropertyValue(
+      '--season-ring-angle'
+    )
+  stubReducedMotion(false)
+  await render(async () => running, undefined)
+  expect(ringAngle()).not.toBe('')
+
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  stubReducedMotion(true)
+  await render(async () => running, undefined)
+  expect(backfillRing('합성 시즌 9')).not.toBeNull()
+  expect(ringAngle()).toBe('')
+})
