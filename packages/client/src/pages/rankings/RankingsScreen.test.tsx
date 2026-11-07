@@ -134,7 +134,7 @@ it('열은 순위, 캐릭터, 명성, 모험단, 길드이고 값이 없는 길�
   const [first, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['1', '카인합성1Lv.115 | 眞 합성 전직', '99,999', '모험단1', '합성 길드'])
+  expect(first).toEqual(['1', '카인합성1Lv.115 | 합성 전직', '99,999', '모험단1', '합성 길드'])
   expect(fourth).toEqual(['4', '카인합성4합성 직업', '99,996', '모험단4', '-'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
@@ -146,7 +146,7 @@ it('빈 랭킹은 목록 상자에 이름 한 줄만 둔다', async () => {
   expect(container.querySelector('table')).toBeNull()
 })
 
-it('고른 직업으로 목록 이름을 바꾸고 필터 변경을 알린다', async () => {
+it('고른 직업으로 목록 이름을 바꾸고, 앞의 眞을 뺀 전직 이름 칩으로 필터 변경을 알린다', async () => {
   const [job] = RANKING_JOBS
   const onFilterChange = vi.fn()
   await render(async () => rankingOf(1), { jobId: job.jobId }, onFilterChange)
@@ -154,7 +154,7 @@ it('고른 직업으로 목록 이름을 바꾸고 필터 변경을 알린다', 
   expect(container.querySelector(`section[aria-label="${job.name} 명성 랭킹"]`)).not.toBeNull()
   expect(chip(job.name).hasAttribute('data-pressed')).toBe(true)
   expect(chip('직업 전체').hasAttribute('data-pressed')).toBe(false)
-  await act(async () => chip(job.grows[0].name).click())
+  await act(async () => chip('웨펀마스터').click())
   expect(onFilterChange).toHaveBeenLastCalledWith({
     jobId: job.jobId,
     jobGrowId: job.grows[0].jobGrowId
