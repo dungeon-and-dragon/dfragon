@@ -9,7 +9,6 @@
     "start-task": "node scripts/start-task.mjs",
     "test": "pnpm verify",
     "verify": "node scripts/verify.mjs",
-    "test:product-images": "node --test scripts/test/product-image-plan.test.mjs",
     "lint": "biome lint",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node scripts/statement-spacing.mjs --write",
