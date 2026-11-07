@@ -40,5 +40,6 @@ export const Tooltip = {
   Provider: BaseTooltip.Provider,
   Root: BaseTooltip.Root,
   Trigger: BaseTooltip.Trigger,
-  Popup: TooltipPopup
+  Popup: TooltipPopup,
+  createHandle: BaseTooltip.createHandle
 }
