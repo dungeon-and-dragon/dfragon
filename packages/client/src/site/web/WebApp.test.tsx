@@ -917,7 +917,7 @@ it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최�
   await vi.waitFor(() => expect(recentPopup()).not.toBeNull())
   const items = [...recentPopup()!.querySelectorAll<HTMLAnchorElement>('li a')]
   expect(items.map((item) => [item.getAttribute('href'), item.textContent])).toEqual([
-    [DETAIL_PATH, '하늘프레이126,965']
+    [DETAIL_PATH, '프레이하늘126,965']
   ])
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, '하')
