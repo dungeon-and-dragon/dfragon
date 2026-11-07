@@ -1,5 +1,5 @@
-export { readAdventureCharacters, readGuild } from './adventure-guild.js'
-export type { StoredCharacter, StoredGuild } from './adventure-guild.js'
+export { readAdventureCharacters, readAdventureNames, readGuild } from './adventure-guild.js'
+export type { StoredAdventureName, StoredCharacter, StoredGuild } from './adventure-guild.js'
 export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
 export {

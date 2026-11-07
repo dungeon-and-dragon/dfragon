@@ -2,6 +2,7 @@ import { neopleCharacterImageUrl } from '@dfragon/neople'
 import { sortBy } from 'remeda'
 import { NeopleSearchFailure } from '../errors/neople-search.js'
 import type {
+  CharacterCandidatesWithAdventureResult,
   CharacterCandidatesResult,
   CharacterImageCandidate,
   NeopleCharacterSearchInput,
@@ -16,7 +17,7 @@ const nameCollator = new Intl.Collator('ko')
 export function createCharacterSearchService(
   dependencies: CharacterSearchDependencies
 ): CharacterSearchHttpService {
-  const { searchCharacters } = dependencies
+  const { searchCharacters, readAdventureNames } = dependencies
   const candidateCache = createCandidateCache()
   let closed = false
 
@@ -65,6 +66,27 @@ export function createCharacterSearchService(
     return { rows }
   }
 
+  // 모험단명은 캐시하지 않아 DB에 새로 저장된 모험단명이 캐시된 후보에도 바로 붙는다.
+  const withAdventureNames = async ({
+    rows
+  }: CharacterCandidatesResult): Promise<CharacterCandidatesWithAdventureResult> => {
+    const stored = readAdventureNames && rows.length > 0 ? await readAdventureNames(rows) : []
+    const names = new Map(
+      stored.map(({ serverId, characterId, adventureName }) => [
+        `${serverId}/${characterId}`,
+        adventureName
+      ])
+    )
+
+    const candidates = rows.map((row) => {
+      const adventureName = names.get(`${row.serverId}/${row.characterId}`) ?? null
+
+      return { ...row, adventureName }
+    })
+
+    return { rows: candidates }
+  }
+
   return {
     async search(originalUrl) {
       const input = parseCharacterSearchQuery(originalUrl)
@@ -80,7 +102,13 @@ export function createCharacterSearchService(
 
       // 키는 요청 이름 그대로다. Neople match는 대소문자를 무시하지만 후보에는 요청 이름과 정확히 같은 이름만 남는다.
 
-      return candidateCache.get(input.characterName, () => loadCandidates(input))
+      const { result, source } = await candidateCache.get(input.characterName, () =>
+        loadCandidates(input)
+      )
+
+      const named = await withAdventureNames(result)
+
+      return { result: named, source }
     },
     async onModuleDestroy() {
       closed = true

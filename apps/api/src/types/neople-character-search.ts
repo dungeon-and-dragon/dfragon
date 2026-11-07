@@ -27,6 +27,14 @@ export interface CharacterCandidatesResult {
   rows: CharacterImageCandidate[]
 }
 
+export interface CharacterCandidateWithAdventure extends CharacterImageCandidate {
+  adventureName: string | null
+}
+
+export interface CharacterCandidatesWithAdventureResult {
+  rows: CharacterCandidateWithAdventure[]
+}
+
 export interface SearchErrorBody {
   error: {
     code: string

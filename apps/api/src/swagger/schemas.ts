@@ -232,43 +232,60 @@ const storedCharacters = (description: string): SchemaObject => ({
   items: storedCharacter
 })
 
+const characterSearchRowProperties: Record<string, SchemaObject> = {
+  characterId: {
+    type: 'string',
+    pattern: CHARACTER_ID_PATTERN_SOURCE,
+    minLength: 1,
+    maxLength: 256
+  },
+  characterName: text,
+  serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
+  serverName: text,
+  fame: { type: 'number', nullable: true },
+  jobName: {
+    type: 'string',
+    nullable: true,
+    description:
+      'Neople 검색 응답의 jobName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
+  },
+  jobGrowName: {
+    type: 'string',
+    nullable: true,
+    description:
+      'Neople 검색 응답의 jobGrowName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
+  },
+  imageUrl: {
+    type: 'string',
+    format: 'uri',
+    description: 'Neople 전체 캐릭터 이미지 URL. Web에서 파티원 얼굴 영역과 비교합니다.',
+    example: 'https://img-api.neople.co.kr/df/servers/cain/characters/character-id?zoom=1'
+  }
+}
+const CHARACTER_SEARCH_ORDER_DESCRIPTION =
+  'fame 내림차순, null은 마지막. 동률과 null은 공급자 순서 유지.'
+const characterSearchRows = (
+  description: string,
+  properties: Record<string, SchemaObject> = {}
+): SchemaObject =>
+  object({
+    rows: {
+      type: 'array',
+      description,
+      items: object({ ...characterSearchRowProperties, ...properties })
+    }
+  })
+
 export const apiSchemas: Record<string, SchemaObject> = {
   CatalogDetail: catalogDetail,
   ApiError: object({ error: object({ code: text, message: text }) }),
-  CharacterCandidatesResult: object({
-    rows: {
-      type: 'array',
-      description: 'fame 내림차순, null은 마지막. 동률과 null은 공급자 순서 유지.',
-      items: object({
-        characterId: {
-          type: 'string',
-          pattern: CHARACTER_ID_PATTERN_SOURCE,
-          minLength: 1,
-          maxLength: 256
-        },
-        characterName: text,
-        serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
-        serverName: text,
-        fame: { type: 'number', nullable: true },
-        jobName: {
-          type: 'string',
-          nullable: true,
-          description:
-            'Neople 검색 응답의 jobName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
-        },
-        jobGrowName: {
-          type: 'string',
-          nullable: true,
-          description:
-            'Neople 검색 응답의 jobGrowName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
-        },
-        imageUrl: {
-          type: 'string',
-          format: 'uri',
-          description: 'Neople 전체 캐릭터 이미지 URL. Web에서 파티원 얼굴 영역과 비교합니다.',
-          example: 'https://img-api.neople.co.kr/df/servers/cain/characters/character-id?zoom=1'
-        }
-      })
+  CharacterCandidatesResult: characterSearchRows(CHARACTER_SEARCH_ORDER_DESCRIPTION),
+  CharacterCandidatesWithAdventureResult: characterSearchRows(CHARACTER_SEARCH_ORDER_DESCRIPTION, {
+    adventureName: {
+      type: 'string',
+      nullable: true,
+      description:
+        'DB에 저장된 그 캐릭터(서버, 캐릭터 ID)의 모험단명. 저장되지 않은 캐릭터와 DB 설정이 없는 API는 null입니다. 응답할 때마다 DB에서 읽어 24시간 후보 캐시에 들지 않습니다.'
     }
   }),
   CharacterDetails: object({
