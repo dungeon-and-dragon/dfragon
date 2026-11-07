@@ -723,7 +723,7 @@ it('캐릭터 검색을 제출하면 결과가 한 명이어도 검색 화면으
     serverId: 'all'
   })
   await vi.waitFor(() =>
-    expect(searchResultRows()).toEqual([['/c/cain/only-1', '카인한명眞 크루세이더50,000']])
+    expect(searchResultRows()).toEqual([['/c/cain/only-1', '카인한명크루세이더50,000']])
   )
   expect(searchRequests(fetch).map((url) => Object.fromEntries(url.searchParams))).toEqual([
     { characterName: '한명', serverId: 'all', limit: '200' }
@@ -750,8 +750,8 @@ it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답�
   await waitForPath('/search')
   await vi.waitFor(() =>
     expect(searchResultRows()).toEqual([
-      ['/c/cain/server-1', '카인카인검색1眞 크루세이더90,000'],
-      ['/c/cain/server-2', '카인카인검색眞 크루세이더-']
+      ['/c/cain/server-1', '카인카인검색1크루세이더90,000'],
+      ['/c/cain/server-2', '카인카인검색크루세이더-']
     ])
   )
   expect(container.querySelector('main h1')?.textContent).toBe('캐릭터 검색')
@@ -766,7 +766,7 @@ it('캐릭터 이름 한 글자를 제출하면 검색 화면으로 가서 그 �
 
   await waitForPath('/search')
   await vi.waitFor(() =>
-    expect(searchResultRows()).toEqual([['/c/cain/single-1', '카인가眞 크루세이더1,000']])
+    expect(searchResultRows()).toEqual([['/c/cain/single-1', '카인가크루세이더1,000']])
   )
   expect(searchRequests(fetch).map((url) => url.searchParams.get('characterName'))).toEqual(['가'])
 })
