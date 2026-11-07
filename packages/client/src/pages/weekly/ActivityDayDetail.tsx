@@ -8,9 +8,10 @@ import type {
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { useAdventureActivityDay } from '../../hooks/useAdventureActivity'
 import { styles } from './ActivityDayDetail.style'
+import { type DayItemRow, dayItemRows } from './day-item-rows'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
-const MAX_TIMELINE_ROWS = 8
+const MAX_ENHANCEMENT_ROWS = 8
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
@@ -64,37 +65,68 @@ function ClearGroup({
   )
 }
 
-function TimelineGroup<Entry extends { at: string }>({
-  title,
-  unit,
-  entries,
-  render
-}: {
-  title: string
-  unit: string
-  entries: readonly Entry[]
-  render: (entry: Entry) => ReactNode
-}): React.JSX.Element | null {
-  if (entries.length === 0) {
+function TimelineRow({ at, children }: { at: string; children: ReactNode }): React.JSX.Element {
+  return (
+    <div {...stylex.props(styles.row, styles.timelineRow)}>
+      <span {...stylex.props(styles.number, styles.time)}>{formatSeoulTime(at)}</span>
+      <span {...stylex.props(styles.text)}>{children}</span>
+    </div>
+  )
+}
+
+function ItemRow({ row }: { row: DayItemRow }): React.JSX.Element {
+  if (row.kind === 'item') {
+    return (
+      <TimelineRow at={row.item.at}>
+        <ItemName {...row.item} />
+      </TimelineRow>
+    )
+  }
+
+  return (
+    <div {...stylex.props(styles.row)}>
+      <span {...stylex.props(styles.text, RARITY_STYLES[row.rarity])}>{row.rarity}</span>
+      <span {...stylex.props(styles.number, styles.muted)}>{numberFormat.format(row.count)}개</span>
+    </div>
+  )
+}
+
+function ItemGroup({ items }: { items: readonly ActivityDayItem[] }): React.JSX.Element | null {
+  if (items.length === 0) {
     return null
   }
 
-  const rest = entries.length - MAX_TIMELINE_ROWS
+  return (
+    <>
+      <Group title="아이템" value={`${numberFormat.format(items.length)}개`} />
+      {dayItemRows(items).map((row, index) => (
+        <ItemRow key={index} row={row} />
+      ))}
+    </>
+  )
+}
+
+function EnhancementGroup({
+  enhancements
+}: {
+  enhancements: readonly ActivityDayEnhancement[]
+}): React.JSX.Element | null {
+  if (enhancements.length === 0) {
+    return null
+  }
+
+  const rest = enhancements.length - MAX_ENHANCEMENT_ROWS
 
   return (
     <>
-      <Group title={title} value={`${numberFormat.format(entries.length)}${unit}`} />
-      {entries.slice(0, MAX_TIMELINE_ROWS).map((entry, index) => (
-        <div key={index} {...stylex.props(styles.row, styles.timelineRow)}>
-          <span {...stylex.props(styles.number, styles.time)}>{formatSeoulTime(entry.at)}</span>
-          <span {...stylex.props(styles.text)}>{render(entry)}</span>
-        </div>
+      <Group title="강화" value={`${numberFormat.format(enhancements.length)}회`} />
+      {enhancements.slice(0, MAX_ENHANCEMENT_ROWS).map((enhancement, index) => (
+        <TimelineRow key={index} at={enhancement.at}>
+          <EnhancementResult {...enhancement} />
+        </TimelineRow>
       ))}
       {rest > 0 && (
-        <div {...stylex.props(styles.row, styles.muted)}>
-          외 {numberFormat.format(rest)}
-          {unit}
-        </div>
+        <div {...stylex.props(styles.row, styles.muted)}>외 {numberFormat.format(rest)}회</div>
       )}
     </>
   )
@@ -115,21 +147,13 @@ function EnhancementResult({ kind, target, success }: ActivityDayEnhancement): R
   )
 }
 
-function renderItem(item: ActivityDayItem): ReactNode {
-  return <ItemName {...item} />
-}
-
-function renderEnhancement(enhancement: ActivityDayEnhancement): ReactNode {
-  return <EnhancementResult {...enhancement} />
-}
-
 function DayRecords({ day }: { day: AdventureActivityDay }): React.JSX.Element {
   return (
     <>
       <ClearGroup title="레이드" counts={day.raids} />
       <ClearGroup title="레기온" counts={day.legions} />
-      <TimelineGroup title="아이템" unit="개" entries={day.items} render={renderItem} />
-      <TimelineGroup title="강화" unit="회" entries={day.enhancements} render={renderEnhancement} />
+      <ItemGroup items={day.items} />
+      <EnhancementGroup enhancements={day.enhancements} />
     </>
   )
 }
