@@ -2,11 +2,13 @@ import type { OnApplicationShutdown } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { CHARACTER_FETCHED, type CharacterFetched } from '../events.js'
 import type { TimelineSyncQueue } from './queue.js'
+import type { SeasonBackfillQueue } from './season-backfill.js'
 
 export class TimelineSyncSubscriber implements OnApplicationShutdown {
   constructor(
     private readonly queue: TimelineSyncQueue,
     private readonly backfillQueue: TimelineSyncQueue,
+    private readonly seasonBackfillQueue: SeasonBackfillQueue,
     private readonly closeStore: () => Promise<void>
   ) {}
 
@@ -20,6 +22,7 @@ export class TimelineSyncSubscriber implements OnApplicationShutdown {
     // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, 대기열이 남으면 종료 뒤에도 계속 꺼내 받는다.
     this.queue.close()
     this.backfillQueue.close()
+    this.seasonBackfillQueue.close()
 
     return this.closeStore()
   }
