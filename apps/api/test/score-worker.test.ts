@@ -171,7 +171,7 @@ test('실제 worker가 라이브러리를 열지 못하면 점수를 null로 두
   }
 })
 
-const realLibrary = { skip: REAL_SCORE_LIBRARY_PATH === null && '점수 엔진 submodule이 없음' }
+const realLibrary = { skip: REAL_SCORE_LIBRARY_PATH === null && '점수 엔진 라이브러리가 없음' }
 
 test('실제 엔진은 준비 입력을 두 계산기 모두 오류 없이 계산한다', realLibrary, () => {
   const score = openNativeScore({ path: REAL_SCORE_LIBRARY_PATH! })!

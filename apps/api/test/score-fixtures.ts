@@ -96,5 +96,5 @@ function findScoreLibrary(): string | null {
   return path
 }
 
-/** 점수 엔진 submodule을 받은 checkout에서만 경로가 있다. */
+/** 점수 엔진 라이브러리를 `packages/models/score-engine/`에 둔 checkout에서만 경로가 있다. */
 export const REAL_SCORE_LIBRARY_PATH = findScoreLibrary()

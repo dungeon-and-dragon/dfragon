@@ -1,6 +1,3 @@
 [submodule "packages/models/ocr-finetuned"]
 	path = packages/models/ocr-finetuned
 	url = https://github.com/dungeon-and-dragon/dfragon-ocr-models.git
-[submodule "packages/models/score-engine"]
-	path = packages/models/score-engine
-	url = https://github.com/dungeon-and-dragon/dfragon-score-engine.git
