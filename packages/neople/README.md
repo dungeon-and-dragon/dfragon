@@ -17,6 +17,10 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
 - `createNeopleImageClient()`: 이미지 서버 client를 만듭니다. `characterImage(identity, signal)`는 API key 없이 PNG를 받아 `ArrayBuffer`로 돌려줍니다.
   `Content-Type`이 `image/png`가 아니거나 본문이 4MiB를 넘으면 실패합니다.
 - `neopleCharacterImageUrl(identity)`: 캐릭터 이미지의 고정 URL을 만듭니다.
+- `characterSkillStyleSchema`: `/skill/style` 응답을 받을 때의 전직(`jobId`, `jobGrowId`)과 저장할 스킬 스타일로 바꿉니다.
+  active와 passive를 합친 `skills`는 `{ name, level }`, 개화 `evolutions`와 강화 `enhancements`는 `{ name, type }`입니다.
+  개화, 강화의 `skillId`는 배운 스킬의 이름으로 바꾸고, 배운 목록에 없는 `skillId`는 이름을 알 수 없어 뺍니다. 스킬 ID, `hash`, `chain`, `requiredLevel`은 남기지 않습니다.
+  passive, 개화, 강화가 없거나 `null`이면 빈 목록이고, `skill.style.active`나 전직이 없으면 schema에 맞지 않습니다.
 - `NeopleRequestFailure`: 모든 실패를 이 오류로 던집니다. `kind`는 `internal`, `api`, `unavailable`, `timeout` 가운데 하나입니다.
   Neople이 없는 캐릭터(`DNF001`)라고 답하면 `characterNotFound`가 `true`이고, `kind`는 분류표대로 `api`입니다.
   JSON 파싱 실패와 연결 오류는 원래 오류를 `cause`로 갖습니다. `cause`에는 정제하지 않은 오류가 남으므로 응답이나 로그로 그대로 내보내지 않습니다.
