@@ -1,4 +1,11 @@
-import type { CharacterStats, FameRankingFilter, StoredCharacter } from '@dfragon/database'
+import {
+  type CharacterStats,
+  type FameRankingFilter,
+  type JobSkillAdoption,
+  SKILL_STYLE_SAMPLE_TOP_PERCENT,
+  type SkillStyleSampleJob,
+  type StoredCharacter
+} from '@dfragon/database'
 import { startOfNextSeoulDay } from '../utils/seoul-time.js'
 
 export const FAME_RANKING_LIMIT = 100
@@ -9,14 +16,18 @@ export type FameRanking = {
 
 export type Stats = CharacterStats & { computedAt: string }
 
+export type SkillStats = JobSkillAdoption & { computedAt: string; topPercent: number }
+
 export interface RankingStatsReader {
   readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
   readCharacterStats(): Promise<CharacterStats>
+  readJobSkillAdoption(job: SkillStyleSampleJob): Promise<JobSkillAdoption>
 }
 
 export interface RankingStatsService {
   fameRanking(filter: FameRankingFilter): Promise<FameRanking>
   stats(): Promise<Stats>
+  skillStats(job: SkillStyleSampleJob): Promise<SkillStats>
 }
 
 export function createRankingStatsService(
@@ -44,6 +55,25 @@ export function createRankingStatsService(
     return stats
   }
 
+  const cachedSkillStats = new Map<string, { skillStats: SkillStats; expiresAt: Date }>()
+  const loadingSkillStats = new Map<string, Promise<SkillStats>>()
+
+  const loadSkillStats = async (key: string, job: SkillStyleSampleJob): Promise<SkillStats> => {
+    const computedAt = now()
+    const adoption = await reader.readJobSkillAdoption(job)
+    const skillStats = {
+      computedAt: computedAt.toISOString(),
+      topPercent: SKILL_STYLE_SAMPLE_TOP_PERCENT,
+      ...adoption
+    }
+    // 명성 있는 캐릭터가 없는 전직은 아무 문자열로 만들 수 있어, 캐시하면 query마다 메모리가 는다.
+    if (adoption.minFame !== null) {
+      cachedSkillStats.set(key, { skillStats, expiresAt: startOfNextSeoulDay(computedAt) })
+    }
+
+    return skillStats
+  }
+
   return {
     async fameRanking(filter) {
       const characters = await reader.readFameRanking(filter, FAME_RANKING_LIMIT)
@@ -61,11 +91,34 @@ export function createRankingStatsService(
       })
 
       return loading
+    },
+    async skillStats(job) {
+      const key = JSON.stringify([job.jobId, job.jobGrowId])
+      const cachedJob = cachedSkillStats.get(key)
+      if (cachedJob !== undefined && now() < cachedJob.expiresAt) {
+        return cachedJob.skillStats
+      }
+      let loadingJob = loadingSkillStats.get(key)
+      if (loadingJob === undefined) {
+        loadingJob = loadSkillStats(key, job).finally(() => {
+          loadingSkillStats.delete(key)
+        })
+        loadingSkillStats.set(key, loadingJob)
+      }
+
+      return loadingJob
     }
   }
 }
 
 export const emptyRankingStatsReader: RankingStatsReader = {
   readFameRanking: async () => [],
-  readCharacterStats: async () => ({ total: 0, servers: [], jobs: [], fameDistribution: [] })
+  readCharacterStats: async () => ({ total: 0, servers: [], jobs: [], fameDistribution: [] }),
+  readJobSkillAdoption: async () => ({
+    minFame: null,
+    sampleSize: 0,
+    skills: [],
+    evolutions: [],
+    enhancements: []
+  })
 }

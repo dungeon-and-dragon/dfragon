@@ -6,6 +6,7 @@ import {
   readCharacterStats,
   readFameRanking,
   readGuild,
+  readJobSkillAdoption,
   recordCharacterBasic,
   recordCharacterSkillStyle
 } from '@dfragon/database'
@@ -93,7 +94,8 @@ function createDatabaseSubscribers(
     },
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
-      readCharacterStats: () => readCharacterStats(client)
+      readCharacterStats: () => readCharacterStats(client),
+      readJobSkillAdoption: (job) => readJobSkillAdoption(client, job)
     }
   }
 }
