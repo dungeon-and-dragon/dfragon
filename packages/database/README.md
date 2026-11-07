@@ -22,6 +22,12 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `recordCharacterBasic(client, basic)`: Neople 기본 정보(`CharacterBasicInput`)를 `recordCharacter`와 같은 모험단 규칙으로 `characters`에 저장하고 `basic_fetched_at`을 지금으로 둔 뒤, 같은 transaction에서 대기열 행을 지웁니다.
 - `recordCharacterSkillStyle(client, style)`: 캐릭터 하나의 스킬 스타일(`CharacterSkillStyleInput`)을 `character_skill_styles`에 덮어씁니다.
   이미 있는 행의 `fetched_at`이 `style.fetchedAt`보다 늦으면 바꾸지 않아, 캐시한 예전 응답이 그 뒤에 받은 행을 덮지 않습니다. `characters`에 없는 캐릭터는 FK 오류로 던집니다.
+- `recordCharacterBasicAndSkillStyle(client, basic, style)`: `recordCharacterBasic`과 같은 기본 정보 저장과 `recordCharacterSkillStyle`과 같은 스킬 스타일 저장을 한 transaction에서 합니다. 어느 하나가 실패하면 둘 다 남지 않습니다.
+- `deleteCharacterSkillStyle(client, character)`: 그 캐릭터의 스킬 스타일 행을 지웁니다. 행이 없으면 아무것도 바꾸지 않고, `characters` 행은 남깁니다.
+- `SKILL_STYLE_SAMPLE_TOP_PERCENT`(10), `SKILL_STYLE_REFRESH_DAYS`(7): 스킬 스타일 표본의 명성 상위 비율과 갱신 주기입니다. 갱신 worker와 집계가 같은 값을 씁니다.
+- `skillStyleSampleSql({ jobId, jobGrowId })`: 그 전직의 표본(`server_id`, `character_id`, `fame`)을 고르는 SQL 조각입니다. 명성이 없는 행을 빼고 명성 내림차순 `percent_rank()`가 `SKILL_STYLE_SAMPLE_TOP_PERCENT`% 이내인 행이며, 같은 명성은 같은 순위라 함께 들거나 함께 빠집니다.
+- `readSkillStyleSampleJobs(client)`: 명성이 있는 캐릭터의 전직(`SkillStyleSampleJob`) 목록을 직업, 전직 id 순으로 돌려줍니다.
+- `takeSkillStyleRefreshBatch(client, job, skipped, limit, now)`: 그 전직의 표본 가운데 스킬 스타일이 없거나 `fetched_at`이 `now`보다 `SKILL_STYLE_REFRESH_DAYS`일 이상 앞선 캐릭터를, 없는 캐릭터 먼저, 오래된 순(같으면 서버, 캐릭터 id 순)으로 `limit`명까지 돌려줍니다. `skipped`의 캐릭터는 고르지 않습니다.
 - `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `readAdventureCharacters(client, adventureName)`: 이름이 `adventureName`인 모험단의 캐릭터(`StoredCharacter`)를 서버를 가리지 않고 명성이 높은 순(명성이 없으면 뒤, 같으면 서버, 캐릭터 id 순)으로 돌려줍니다. `fetchedAt`은 `basic_fetched_at`입니다.
 - `readAdventureNames(client, characters)`: `characters`(서버, 캐릭터 ID) 가운데 `characters`에 저장된 캐릭터의 모험단 이름(`StoredAdventureName`)을 query 한 번으로 돌려줍니다. 저장되지 않은 캐릭터는 결과에 없고 순서는 정하지 않습니다.
@@ -51,7 +57,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readCharactersTimelineItems(client, characters, codes, since, until)`: 여러 캐릭터의 `timeline_items`에서 `codes`의 `[since, until)` 행을 오래된 순으로 돌려주고, 행마다 `serverId`, `characterId`를 붙입니다. `until`을 주지 않으면 끝이 없습니다.
 - `readRecentTimelineItems(client, character, { codes, itemRarities, limit, before })`: `timeline_items`에서 `codes`의 행을 최근 순(`occurred_at`, `id` 내림차순)으로 `limit`개까지 돌려줍니다. `itemRarities`를 주면 그 `item_rarity`만 고르고, `before`(`occurredAt`, `id`)를 주면 그 행보다 앞선 행만 읽습니다.
   읽은 행의 `data`는 저장한 JSON 그대로이며 형식은 호출자가 확인합니다.
-- 입력 타입 `CharacterSkillStyleInput`, `SkillStyleSkill`, `SkillStyleSelection`, `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `TimelineItemCursor`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `SeasonBackfillState`, `TimelineEventRow`, `CharacterTimelineEventRow`, `TimelineItemRow`, `CharacterTimelineItemRow`, `StoredSeason`을 함께 export합니다.
+- 입력 타입 `CharacterSkillStyleInput`, `SkillStyleSkill`, `SkillStyleSelection`, `SkillStyleSampleJob`, `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `TimelineItemCursor`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `SeasonBackfillState`, `TimelineEventRow`, `CharacterTimelineEventRow`, `TimelineItemRow`, `CharacterTimelineItemRow`, `StoredSeason`을 함께 export합니다.
 - `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다. API의 Neople key도 같은 함수로 읽습니다.
   `@dfragon/lib`는 Node 전용 runtime에 의존하지 않아야 해서 `node:fs`를 쓰는 이 함수를 이 package에 둡니다.
 
