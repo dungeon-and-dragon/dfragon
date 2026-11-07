@@ -102,11 +102,24 @@ function toCrystalView(crystal: Oath['crystal'][number]): OathCrystal {
   }
 }
 
+function bySetPointThenSlot(a: OathCrystal, b: OathCrystal): number {
+  const bPoint = b.setPoint ?? Number.NEGATIVE_INFINITY
+  const aPoint = a.setPoint ?? Number.NEGATIVE_INFINITY
+  if (aPoint !== bPoint) {
+    return bPoint - aPoint
+  }
+
+  const aSlot = a.slot ?? Number.POSITIVE_INFINITY
+  const bSlot = b.slot ?? Number.POSITIVE_INFINITY
+
+  return aSlot - bSlot
+}
+
 export function toOathView(oath: Oath): OathView {
   return {
     info: toInfoView(oath.info),
     set: toSetView(oath.setInfo),
-    crystals: oath.crystal.map(toCrystalView),
+    crystals: oath.crystal.map(toCrystalView).sort(bySetPointThenSlot),
     setStatus: toStatLines(oath.setInfo?.active?.status ?? []),
     blessing: toStatLines(oath.blessing?.status ?? []),
     upgrade: toUpgradeView(oath.info?.oathUpgrade ?? null)
