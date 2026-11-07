@@ -28,7 +28,7 @@ pnpm --filter @dfragon/web preview
 
 캐릭터 상세의 스킬 탭은 게임 클라이언트에서 뽑은 스킬 창 데이터가 있어야 스킬 창 배치로 그립니다. 이 데이터는 저장소와 사이트 빌드에 넣지 않으며, 웹 앱은 같은 origin의 `/skilltab/skilltab.json`에서 받습니다. 이 주소가 404면(아직 올리지 않았으면) 배운 스킬을 습득 레벨 줄로 나눈 목록으로 보이고, 묶음에 없는 전직도 같은 목록으로 보입니다. 서약 탭의 세트 아이콘과 선택지 효과 카드는 `/skilltab/oath.json`에서 받으며, 404면 지금의 서약 한 줄로 보입니다.
 
-[`scripts/build-skilltab.mjs`](scripts/build-skilltab.mjs)가 추출한 묶음(`skilltab.json`과 `icons/<jobId>/<skillId>.png`)을 고치지 않고, 직업마다 아이콘을 한 장으로 묶은 sprite(`<PVF 해시 앞 8자리>/sprites/<jobId>.<내용 hash>.png`)와 sprite 안 위치를 적은 웹용 `skilltab.json`을 빈 출력 폴더에 만듭니다. `--extras`에 같은 판의 개화, 강화, 서약 묶음(`skillstyle.json`, `oath.json`, `icons/`)을 주면 스킬에 개화 설명과 강화가 바꾸는 값의 종류를 붙이고, 개화, 강화 표식(`<판>/marks/`), 서약 아이콘(`<판>/oath/`, `<판>/oath-set/`)과 웹용 `oath.json`을 함께 만듭니다. 판이 다르면 멈춥니다. 개발 서버에서는 그 출력 폴더를 `DFRAGON_SKILLTAB_DIR`로 주면 `/skilltab/` 아래에 내줍니다.
+[`scripts/build-skilltab.mjs`](scripts/build-skilltab.mjs)가 추출한 묶음(`skilltab.json`과 `icons/<jobId>/<skillId>.png`)을 고치지 않고, 직업마다 아이콘을 한 장으로 묶은 sprite(`<PVF 해시 앞 8자리>/sprites/<jobId>.<내용 hash>.png`)와 sprite 안 위치를 적은 웹용 `skilltab.json`을 빈 출력 폴더에 만듭니다. `--extras`에 같은 판의 개화, 강화, 서약 묶음(`skillstyle.json`, `oath.json`, `icons/`)을 주면 스킬에 개화 설명과 강화가 바꾸는 값의 종류를 붙이고, 개화, 강화 표식(`<판>/marks/`), 서약 아이콘(`<판>/oath/`, `<판>/oath-set/`)과 웹용 `oath.json`을 함께 만듭니다. 판이 다르면 멈춥니다. `--oath-items`에 서약 아이템 아이콘 묶음(이름, 등급, 파일을 적은 `index.json`과 webp)을 더 주면 서약 본체 아이콘(`<판>/oath-item/`)을 복사하고 `oath.json`의 `items`에 이름과 등급별로 싣습니다. 서약 탭은 Neople 이미지 서버에 그림이 없는 서약 본체 아이콘을 여기서 찾습니다. 개발 서버에서는 그 출력 폴더를 `DFRAGON_SKILLTAB_DIR`로 주면 `/skilltab/` 아래에 내줍니다.
 
 ```sh
 pnpm --filter @dfragon/web build:skilltab --extras <개화, 서약 묶음 폴더> <묶음 폴더> <출력 폴더>

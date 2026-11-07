@@ -42,6 +42,18 @@ const OATH_CATALOG: OathCatalog = {
         }
       ]
     }
+  ],
+  items: [
+    {
+      name: '세계를 태우는 용투 서약',
+      rarity: '에픽',
+      icon: 'https://skilltab.test/oath-item/epic.webp'
+    },
+    {
+      name: '세계를 태우는 용투 서약',
+      rarity: '태초',
+      icon: 'https://skilltab.test/oath-item/primordial.webp'
+    }
   ]
 }
 
@@ -148,6 +160,9 @@ it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장�
     [...(cards[0]?.querySelectorAll('p > span') ?? [])].map((line) => line.textContent)
   ).toEqual(['[투룡의 불꽃] [장비 발동 옵션]', '모든 속도 +20%', '[용투장의 난 세트] 장착 시'])
   expect(section('서약 본체').textContent).toContain('세계를 태우는 용투 서약655pt')
+  expect(section('서약 본체').querySelector('img')?.getAttribute('src')).toBe(
+    'https://skilltab.test/oath-item/primordial.webp'
+  )
   expect(section('서약 결정').querySelectorAll('tbody tr')).toHaveLength(11)
 })
 

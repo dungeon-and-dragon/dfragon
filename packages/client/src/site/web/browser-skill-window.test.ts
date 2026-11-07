@@ -94,6 +94,36 @@ it('서약 세트, 선택지 아이콘 경로를 oath.json 주소 기준의 절�
     'https://site.example.test/skilltab/1d9658f7/oath/9.4e5f6a7b.png'
   )
   expect(catalog?.sets[1]?.icon).toBeNull()
+  expect(catalog?.items).toEqual([])
+})
+
+it('서약 아이템 아이콘 경로도 oath.json 주소 기준의 절대 주소로 바꾼다', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () =>
+      Response.json({
+        pvfSha256: 'synthetic',
+        sets: [],
+        items: [
+          {
+            name: '세계를 태우는 용투 서약',
+            rarity: '태초',
+            icon: '1d9658f7/oath-item/100610081.5d6e7f80.webp'
+          }
+        ]
+      })
+    )
+  )
+
+  const catalog = await createOathCatalogSource('https://site.example.test/skilltab/oath.json')()
+
+  expect(catalog?.items).toEqual([
+    {
+      name: '세계를 태우는 용투 서약',
+      rarity: '태초',
+      icon: 'https://site.example.test/skilltab/1d9658f7/oath-item/100610081.5d6e7f80.webp'
+    }
+  ])
 })
 
 it('아직 올리지 않아 404면 실패가 아니라 데이터 없음으로 돌려준다', async () => {

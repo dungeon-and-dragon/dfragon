@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import type { ItemView } from '../../lib/character-item'
+import { itemRarityOf } from './character-detail-display'
 import type { CharacterDetailView } from './character-detail-view'
 
 const RARITY_FILES = ['rare', 'unique', 'legendary', 'epic', 'primitive'] as const
@@ -18,9 +20,17 @@ const setSchema = z.object({
   options: z.array(optionSchema)
 })
 
+const itemSchema = z.object({
+  name: z.string(),
+  rarity: z.string(),
+  icon: z.string()
+})
+
 export const oathCatalogSchema = z.object({
   pvfSha256: z.string(),
-  sets: z.array(setSchema)
+  sets: z.array(setSchema),
+  // 서약 아이템 아이콘을 싣기 전에 올린 oath.json에는 items가 없다.
+  items: z.array(itemSchema).default([])
 })
 
 export type OathCatalog = z.infer<typeof oathCatalogSchema>
@@ -76,4 +86,20 @@ export function oathSetBoardOf(catalog: OathCatalog, setInfo: OathSetInfo): Oath
   })
 
   return { icon: set.icon, options }
+}
+
+// Neople의 서약 itemId는 게임 아이템 번호가 아니고, 영겁의 안개 서약처럼 등급마다 이름이 같은 서약이 있어 이름과 등급으로 찾는다.
+export function oathItemIconOf(catalog: OathCatalog, item: ItemView): string | null {
+  if (item.rarity === null) {
+    return null
+  }
+
+  const found = catalog.items.find(
+    ({ name, rarity }) => name === item.itemName && itemRarityOf(rarity) === item.rarity
+  )
+  if (found === undefined) {
+    return null
+  }
+
+  return found.icon
 }

@@ -7,6 +7,7 @@ import { PNG } from 'pngjs'
 // 게임 클라이언트에서 뽑은 스킬 창 묶음(skilltab.json과 icons/<jobId>/<skillId>.png)을 고치지 않고, 직업마다 아이콘을
 // 한 장으로 묶은 sprite와 sprite 안 위치를 적은 웹용 skilltab.json을 따로 만든다. --extras에 같은 판의 detail-extras
 // 묶음(skillstyle.json, oath.json, icons/)을 주면 스킬에 개화와 강화를 붙이고, 서약 탭용 oath.json을 함께 만든다.
+// --oath-items에 서약 아이템 아이콘 묶음(index.json과 webp)을 주면 oath.json에 이름과 등급별 아이콘을 싣는다.
 const ICON_SIZE = 28
 const SPRITE_COLUMNS = 16
 const PVF_SHA256 = /^[0-9a-f]{64}$/
@@ -16,15 +17,19 @@ const OATH_RARITY_FILES = ['rare', 'unique', 'legendary', 'epic', 'primitive']
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
-  options: { extras: { type: 'string' } }
+  options: { extras: { type: 'string' }, 'oath-items': { type: 'string' } }
 })
 if (positionals.length !== 2) {
   throw new Error(
-    'Usage: build-skilltab.mjs [--extras <detail-extras 폴더>] <묶음 폴더> <출력 폴더>'
+    'Usage: build-skilltab.mjs [--extras <detail-extras 폴더> [--oath-items <서약 아이콘 폴더>]] <묶음 폴더> <출력 폴더>'
   )
 }
 const [bundleDir, outDir] = positionals
 const extrasDir = values.extras
+const oathItemsDir = values['oath-items']
+if (oathItemsDir !== undefined && extrasDir === undefined) {
+  throw new Error('--oath-items는 서약 데이터를 만드는 --extras와 함께 줘야 합니다.')
+}
 
 const outEntries = await readdir(outDir).catch(() => [])
 if (outEntries.length > 0) {
@@ -72,6 +77,35 @@ async function copyIcon(path, folder) {
   await writeFile(join(outDir, iconPath), body)
 
   return iconPath
+}
+
+function isWebp(body) {
+  return body.toString('latin1', 0, 4) === 'RIFF' && body.toString('latin1', 8, 12) === 'WEBP'
+}
+
+async function copyOathItemIcon(file) {
+  const body = await readFile(join(oathItemsDir, file))
+  if (!isWebp(body)) {
+    throw new Error(`서약 아이콘이 webp가 아닙니다: ${file}`)
+  }
+  const hash = createHash('sha256').update(body).digest('hex').slice(0, 8)
+  const iconPath = `${version}/oath-item/${basename(file, '.webp')}.${hash}.webp`
+  await writeFile(join(outDir, iconPath), body)
+
+  return iconPath
+}
+
+async function buildOathItems() {
+  const { format, items } = JSON.parse(await readFile(join(oathItemsDir, 'index.json'), 'utf8'))
+  if (format !== 'oath-items-1') {
+    throw new Error(`서약 아이콘 index.json의 format이 oath-items-1이 아닙니다: ${format}`)
+  }
+  const icons = []
+  for (const { name, rarity, file } of items) {
+    icons.push({ name, rarity, icon: await copyOathItemIcon(file) })
+  }
+
+  return icons
 }
 
 // 강화 값의 화면 단위를 확인하지 못해 숫자는 싣지 않고, 바뀌는 값의 종류만 문장으로 둔다.
@@ -151,7 +185,9 @@ async function buildOath() {
     sets.push({ setId: set.setId, name: set.name, icon, options })
   }
 
-  return { pvfSha256: oath.pvfSha256, sets }
+  const items = oathItemsDir !== undefined ? await buildOathItems() : []
+
+  return { pvfSha256: oath.pvfSha256, sets, items }
 }
 
 await mkdir(join(outDir, version, 'sprites'), { recursive: true })
@@ -159,7 +195,7 @@ let skillStyles = null
 let marks
 if (extrasDir !== undefined) {
   skillStyles = (await readJson(extrasDir, 'skillstyle.json', 'skillstyle-1')).jobs
-  for (const folder of ['marks', 'oath', 'oath-set']) {
+  for (const folder of ['marks', 'oath', 'oath-set', 'oath-item']) {
     await mkdir(join(outDir, version, folder), { recursive: true })
   }
   marks = await buildMarks()
