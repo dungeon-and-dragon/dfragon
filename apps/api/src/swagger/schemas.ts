@@ -1,4 +1,5 @@
 import type { SchemaObject } from '@nestjs/swagger'
+import { LEGION_RELEASE_ORDER, RAID_RELEASE_ORDER } from '../adventure-guild/activity.js'
 import { CHARACTER_ID_PATTERN_SOURCE } from '../characters/identity.js'
 import { characterDetailSections } from '../characters/details/sections.js'
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
@@ -184,6 +185,10 @@ const clearName = object({
   name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' }
 })
 const activityCount: SchemaObject = { type: 'integer', minimum: 0 }
+const releaseOrderDescription = (kind: string, releaseOrder: readonly string[]): string =>
+  `${kind} 이름별 클리어 수. 출시가 최근인 것부터(${releaseOrder.join(', ')})이고, 목록에 없는 이름은 그 뒤에 많은 순, 같으면 이름 순`
+const RAID_ORDER_DESCRIPTION = releaseOrderDescription('레이드(201, 210)', RAID_RELEASE_ORDER)
+const LEGION_ORDER_DESCRIPTION = releaseOrderDescription('레기온(209)', LEGION_RELEASE_ORDER)
 const activityNameCounts = (description: string): SchemaObject => ({
   type: 'array',
   description,
@@ -498,8 +503,8 @@ export const apiSchemas: Record<string, SchemaObject> = {
       description: '집계한 시즌. 시즌이 없는 DB 설정 없는 API에서만 null'
     },
     summary: object({
-      raids: activityRaidCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
-      legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+      raids: activityRaidCounts(RAID_ORDER_DESCRIPTION),
+      legions: activityNameCounts(LEGION_ORDER_DESCRIPTION),
       items: object({
         legendary: activityCount,
         epic: activityCount,
@@ -540,8 +545,8 @@ export const apiSchemas: Record<string, SchemaObject> = {
   AdventureSeasonBackfill: activitySeason,
   AdventureActivityDay: object({
     date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
-    raids: activityRaidCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
-    legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+    raids: activityRaidCounts(RAID_ORDER_DESCRIPTION),
+    legions: activityNameCounts(LEGION_ORDER_DESCRIPTION),
     items: {
       type: 'array',
       description: '레전더리 이상 아이템 획득, 시각 순',
