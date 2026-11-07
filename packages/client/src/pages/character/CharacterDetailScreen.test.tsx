@@ -41,6 +41,8 @@ function detailOf({
       characterName: '커피',
       serverName: '바칼',
       level: 115,
+      jobId: null,
+      jobGrowId: null,
       jobName: '귀검사(남)',
       jobGrowName: '眞 버서커',
       fame: 125689,
