@@ -2,7 +2,11 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { skillAdoptionOf, type SkillStats } from '@dfragon/client-core/shared/ranking/skill-stats'
+import {
+  type SkillAdoptionTarget,
+  type SkillStats,
+  skillAdoptionOf
+} from '@dfragon/client-core/shared/ranking/skill-stats'
 import type { SkillMarks } from '@dfragon/client-core/shared/search/skill-window'
 import { SkillAdoptionTooltip } from './SkillAdoptionTooltip'
 
@@ -30,7 +34,7 @@ const STATS: SkillStats = {
       levels: [
         [1, 400],
         [41, 550],
-        [50, 50]
+        [50, 60]
       ]
     }
   ],
@@ -56,11 +60,7 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function renderTooltip(target: {
-  name: string
-  evolutionNames: readonly [string, string] | null
-  hasEnhancement: boolean
-}): Promise<void> {
+async function renderTooltip(target: SkillAdoptionTarget): Promise<void> {
   const adoption = skillAdoptionOf(STATS, target)
   if (adoption === null) {
     throw new Error('합성 집계의 표본이 20명보다 적다')
