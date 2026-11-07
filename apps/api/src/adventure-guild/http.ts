@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param, Query } from '@nestjs/common'
+import { Controller, Get, HttpCode, Inject, Param, Post, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
@@ -6,10 +6,16 @@ import {
   ApiAdventureActivity,
   ApiAdventureActivityDay,
   ApiAdventureCharacters,
+  ApiAdventureSeasonBackfill,
   ApiAdventureWeekly,
   ApiGuild
 } from '../swagger/operations.js'
-import { type ActivityDayDetail, type AdventureActivity, toActivityDayRange } from './activity.js'
+import {
+  type ActivityDayDetail,
+  type ActivitySeason,
+  type AdventureActivity,
+  toActivityDayRange
+} from './activity.js'
 import type {
   AdventureCharacters,
   AdventureGuildService,
@@ -20,9 +26,8 @@ import type {
 export const ADVENTURE_GUILD_SERVICE = Symbol('ADVENTURE_GUILD_SERVICE')
 
 const SEASON_NUMBER_PATTERN = /^[1-9]\d{0,3}$/
-const activityQuery = z.object({
-  season: z.string().regex(SEASON_NUMBER_PATTERN).transform(Number).optional()
-})
+const seasonNumber = z.string().regex(SEASON_NUMBER_PATTERN).transform(Number)
+const activityQuery = z.object({ season: seasonNumber.optional() })
 
 @ApiTags('캐릭터')
 @Controller()
@@ -73,5 +78,20 @@ export class AdventureGuildController {
     }
 
     return this.service.adventureActivityDay(adventureName, day)
+  }
+
+  @Post('adventures/:adventureName/activity/seasons/:season/backfill')
+  @HttpCode(200)
+  @ApiAdventureSeasonBackfill()
+  adventureSeasonBackfill(
+    @Param('adventureName') adventureName: string,
+    @Param('season') season: string
+  ): Promise<ActivitySeason> {
+    const parsed = seasonNumber.safeParse(season)
+    if (!parsed.success) {
+      throw new CharacterDetailFailure('query')
+    }
+
+    return this.service.adventureSeasonBackfill(adventureName, parsed.data)
   }
 }
