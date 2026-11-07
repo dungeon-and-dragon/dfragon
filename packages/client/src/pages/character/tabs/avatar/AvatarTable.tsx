@@ -60,9 +60,15 @@ export function AvatarRow({ avatar }: { avatar: Avatar }): React.JSX.Element {
               <span aria-hidden="true" {...stylex.props(partStyles.iconSpace)} />
             )}
           </span>
-          <span {...stylex.props(styles.stack)}>
-            <ItemName name={item.itemName} rarity={item.rarity} />
-            {cloneName != null && <span {...stylex.props(styles.clone)}>{cloneName}</span>}
+          <span {...stylex.props(styles.names)}>
+            <span {...stylex.props(styles.name)}>
+              <ItemName name={item.itemName} rarity={item.rarity} />
+            </span>
+            {cloneName != null && (
+              <span title={cloneName} {...stylex.props(styles.clone)}>
+                {cloneName}
+              </span>
+            )}
           </span>
         </div>
       </td>
