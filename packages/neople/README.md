@@ -10,6 +10,7 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
   - `searchCharacters(serverId, query)`: 캐릭터 검색
   - `character(identity, section, signal)`: 캐릭터 기본 정보와 상세 섹션. 섹션 이름과 경로는 `NEOPLE_CHARACTER_SECTIONS`에 있습니다.
   - `characterBasic(identity)`: 캐릭터 기본 정보. 레벨, 직업, 명성, 모험단, 길드까지 검증하며 모험단 이름이 없으면 `api` 실패입니다.
+  - `characterSkillStyle(identity)`: 스킬 스타일. 응답 최상위의 기본 정보를 `characterBasic`과 같은 schema로 읽은 `basic`과, `characterSkillStyleSchema`로 바꾼 `skillStyle`을 함께 돌려주며 둘 중 하나라도 맞지 않으면 `api` 실패입니다.
   - `characterTimeline(identity, query)`: 타임라인 한 페이지. 다음 페이지는 `{ next }`만 보냅니다.
   - `multiItems(itemIds, signal)`: 여러 아이템의 공용 상세. 행은 호출한 쪽이 고르도록 `unknown[]`로 돌려줍니다.
   - `itemShop(itemId, signal)`: 아이템의 오늘의 등급
