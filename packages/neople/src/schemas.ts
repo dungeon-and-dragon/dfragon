@@ -126,6 +126,12 @@ export const characterSkillStyleSchema = z
 
 export type NeopleCharacterSkillStyle = z.output<typeof characterSkillStyleSchema>
 
+// /skill/style 응답은 최상위에 기본 정보도 함께 오므로 한 응답을 두 schema로 읽는다.
+export const characterBasicSkillStyleSchema = z.preprocess(
+  (body) => ({ basic: body, skillStyle: body }),
+  z.object({ basic: characterBasicSchema, skillStyle: characterSkillStyleSchema })
+)
+
 const TIMELINE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/
 
 export const timelinePageSchema = z.object({
