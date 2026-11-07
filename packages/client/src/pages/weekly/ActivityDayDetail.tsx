@@ -31,13 +31,8 @@ const ENHANCEMENT_STYLES: Readonly<Record<ActivityDayEnhancement['kind'], stylex
 
 type NameCount = AdventureActivityDay['raids'][number]
 
-function Group({ title, value }: { title: string; value: string }): React.JSX.Element {
-  return (
-    <div {...stylex.props(styles.group)}>
-      <span>{title}</span>
-      <span {...stylex.props(styles.number)}>{value}</span>
-    </div>
-  )
+function Group({ title }: { title: string }): React.JSX.Element {
+  return <div {...stylex.props(styles.group)}>{title}</div>
 }
 
 function ClearGroup({
@@ -51,11 +46,9 @@ function ClearGroup({
     return null
   }
 
-  const total = counts.reduce((sum, { count }) => sum + count, 0)
-
   return (
     <>
-      <Group title={title} value={`${numberFormat.format(total)}회`} />
+      <Group title={title} />
       {counts.map((clear) => (
         <div key={clear.name} {...stylex.props(styles.row)}>
           <span {...stylex.props(styles.text)}>{clear.name}</span>
@@ -99,7 +92,7 @@ function ItemGroup({ items }: { items: readonly ActivityDayItem[] }): React.JSX.
 
   return (
     <>
-      <Group title="아이템" value={`${numberFormat.format(items.length)}개`} />
+      <Group title="아이템" />
       {dayItemRows(items).map((row, index) => (
         <ItemRow key={index} row={row} />
       ))}
@@ -120,7 +113,7 @@ function EnhancementGroup({
 
   return (
     <>
-      <Group title="강화" value={`${numberFormat.format(enhancements.length)}회`} />
+      <Group title="강화" />
       {enhancements.slice(0, MAX_ENHANCEMENT_ROWS).map((enhancement, index) => (
         <TimelineRow key={index} at={enhancement.at}>
           <EnhancementResult {...enhancement} />
@@ -161,12 +154,10 @@ function DayRecords({ day }: { day: AdventureActivityDay }): React.JSX.Element {
 
 export function ActivityDayDetail({
   adventureName,
-  date,
-  total
+  date
 }: {
   adventureName: string
   date: string
-  total: number
 }): React.JSX.Element {
   const result = useAdventureActivityDay(adventureName, date)
 
@@ -174,7 +165,6 @@ export function ActivityDayDetail({
     <div {...stylex.props(styles.detail)}>
       <div {...stylex.props(styles.header)}>
         <span {...stylex.props(styles.date)}>{formatActivityDate(date)}</span>
-        <span {...stylex.props(styles.number)}>{numberFormat.format(total)}회</span>
       </div>
       {result.status === 'loading' && (
         <>
