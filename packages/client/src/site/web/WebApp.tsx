@@ -4,7 +4,8 @@ import {
   createRoute,
   createRouter,
   Outlet,
-  RouterProvider
+  RouterProvider,
+  useMatch
 } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState, type KeyboardEvent } from 'react'
@@ -112,10 +113,18 @@ function HomeScreen(): React.JSX.Element {
 }
 
 function SiteLayout(): React.JSX.Element {
+  const weekly = useMatch({ from: weeklyRoute.id, shouldThrow: false })
+
   return (
     <div {...stylex.props(styles.site)}>
       <GlobalBar />
-      <main {...stylex.props(styles.screen, styles.screenWidth(MAIN_WINDOW_WIDTH))}>
+      <main
+        {...stylex.props(
+          styles.screen,
+          weekly !== undefined && styles.sideRoomScreen,
+          styles.screenWidth(MAIN_WINDOW_WIDTH)
+        )}
+      >
         <Outlet />
       </main>
     </div>
