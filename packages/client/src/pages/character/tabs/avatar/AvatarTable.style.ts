@@ -7,5 +7,15 @@ export const styles = stylex.create({
   emblemColumn: { width: 260 },
   icons: { display: 'flex', gap: 4, flexShrink: 0 },
   stack: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 },
-  clone: { color: colors.fgSubtle, fontSize: 12, lineHeight: '16px' }
+  names: { display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 },
+  name: { flexShrink: 0, whiteSpace: 'nowrap' },
+  clone: {
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    color: colors.fgSubtle,
+    fontSize: 12,
+    lineHeight: '16px'
+  }
 })
