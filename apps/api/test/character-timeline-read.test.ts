@@ -211,7 +211,7 @@ test('형식이 다른 선택 필드는 null이나 false로 두고 이름, after
   )
 })
 
-test('기다리는 요청은 대기 중이던 그 캐릭터의 동기화가 끝난 뒤 풀리고 같은 동기화를 함께 기다린다', async () => {
+test('기다리는 요청은 그 캐릭터의 진행 중인 동기화가 끝난 뒤 풀리고 같은 동기화를 함께 기다린다', async () => {
   const gates = new Map([
     ['first', gate()],
     ['second', gate()],
@@ -227,14 +227,16 @@ test('기다리는 요청은 대기 중이던 그 캐릭터의 동기화가 끝�
   )
   queue.request({ serverId: 'siroco', characterId: 'first' })
   queue.request({ serverId: 'siroco', characterId: 'second' })
-  // 동시 처리가 2명이라 이 캐릭터는 대기열에 남는다.
   const waited = settled(queue.requestAndWait(character))
   const waitedAgain = settled(queue.requestAndWait(character))
+  await nextTurn()
+
+  assert.deepEqual(synced, ['first', 'second', character.characterId])
+  assert.equal(waited(), false)
 
   gates.get('first')!.release()
   await nextTurn()
 
-  assert.deepEqual(synced, ['first', 'second', character.characterId])
   assert.equal(waited(), false)
 
   gates.get(character.characterId)!.release()
@@ -262,7 +264,10 @@ test('동기화가 실패를 기록하지 못해도 기다리는 요청은 풀�
   assert.equal(reported, 1)
 })
 
-test('queue를 닫으면 대기열에서 기다리던 요청은 동기화 없이 풀리고 진행 중인 동기화는 끝을 기다린다', async () => {
+// 닫은 뒤 온 요청이 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
+test('queue를 닫으면 닫은 뒤 온 요청은 동기화 없이 풀리고 진행 중인 동기화는 끝을 기다린다', {
+  timeout: 10_000
+}, async () => {
   const running = gate()
   const synced: string[] = []
   const queue = createTimelineSyncQueue(
@@ -274,10 +279,9 @@ test('queue를 닫으면 대기열에서 기다리던 요청은 동기화 없이
   )
   queue.request({ serverId: 'siroco', characterId: 'first' })
   queue.request({ serverId: 'siroco', characterId: 'second' })
-  const waited = queue.requestAndWait(character)
 
   queue.close()
-  await waited
+  await queue.requestAndWait(character)
   await queue.requestAndWait({ serverId: 'siroco', characterId: 'after-close' })
   const runningWaited = settled(queue.requestAndWait({ serverId: 'siroco', characterId: 'first' }))
   await nextTurn()
