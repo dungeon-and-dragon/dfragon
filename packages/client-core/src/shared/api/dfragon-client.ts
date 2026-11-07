@@ -22,6 +22,7 @@ import {
   type FameRanking,
   type FameRankingFilter
 } from '../ranking/ranking-stats'
+import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '../ranking/skill-stats'
 import {
   characterDetailViewSchema,
   type CharacterDetailView
@@ -71,6 +72,7 @@ export type TimelinePageHttp<Item> = (
 ) => Promise<TimelinePage<Item>>
 export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
+export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
 export type GuildHttp = (guildId: string) => Promise<Guild>
 export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
 export type AdventureActivityHttp = (
@@ -100,6 +102,7 @@ export type DfragonClient = Readonly<{
   }>
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
+  skillStats: SkillStatsHttp
   adventures: Readonly<{
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
@@ -304,6 +307,8 @@ export function createDfragonClient({
       }
     },
     stats: () => requestJson('/stats', characterStatsSchema),
+    skillStats: ({ jobId, jobGrowId }) =>
+      requestJson('/stats/skills', skillStatsSchema, { searchParams: { jobId, jobGrowId } }),
     adventures: {
       async weekly(adventureName) {
         if (adventureName.trim() === '') {
