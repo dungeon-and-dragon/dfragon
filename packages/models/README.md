@@ -9,7 +9,7 @@
 
 ## 받기
 
-처음 checkout할 때 한 번 실행합니다. 두 원본 저장소는 비공개라 읽기 권한이 있는 GitHub 계정으로 받습니다. Product Images는 웹 이미지에 고정된 `ocr-finetuned` 커밋만, API 이미지에 `score-engine`만 가져오며, 저장소마다 읽기 전용 deploy key를 저장소 Secret(`OCR_MODELS_DEPLOY_KEY`, `SCORE_ENGINE_DEPLOY_KEY`)으로 받아 그 job의 submodule만 SSH로 받습니다. 예전 설정으로 `git submodule init`을 실행해 `.git/config`에 `update = none`이 남은 checkout은 엔진을 건너뛰므로, 아래 명령 전에 `git config --unset submodule.packages/models/score-engine.update`를 한 번 실행합니다.
+처음 checkout할 때 한 번 실행합니다. 두 원본 저장소는 비공개라 읽기 권한이 있는 GitHub 계정으로 받습니다. node1의 이미지 빌드는 웹 이미지에 고정된 `ocr-finetuned` 커밋만, API 이미지에 `score-engine`만 저장소마다 읽기 전용 deploy key로 받습니다. 예전 설정으로 `git submodule init`을 실행해 `.git/config`에 `update = none`이 남은 checkout은 엔진을 건너뛰므로, 아래 명령 전에 `git config --unset submodule.packages/models/score-engine.update`를 한 번 실행합니다.
 
 ```sh
 git submodule update --init --recursive

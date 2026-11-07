@@ -25,7 +25,7 @@ test('workflow는 비공개 registry 설정이나 registry 토큰을 설치에 �
     .map((name) => `.github/workflows/${name}`)
 
   assert.ok(
-    workflows.includes('.github/workflows/product-images.yml'),
+    workflows.includes('.github/workflows/dependency-snapshot.yml'),
     'workflow 목록을 찾지 못했다'
   )
 
