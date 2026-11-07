@@ -36,6 +36,10 @@ const raid = (time: string, raidName: string): TimelineEventRow => ({
   raidName,
   data: {}
 })
+const hardRaid = (time: string, raidName: string): TimelineEventRow => ({
+  ...raid(time, raidName),
+  data: { hard: true }
+})
 const legion = (time: string, regionName: string): TimelineEventRow => ({
   code: 209,
   occurredAt: at(time),
@@ -139,10 +143,28 @@ test('레이드와 레기온은 이름별로 많은 순으로 센다', () => {
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '디레지에 레이드', count: 2 },
-    { name: '무너진 성자 미카엘라', count: 1 }
+    { name: '디레지에 레이드', count: 2, hard: 0, normal: 2 },
+    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 }
   ])
   assert.deepEqual(summary.legions, [{ name: '아포칼립스', count: 1 }])
+})
+
+test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말로 세고 count는 둘의 합이다', () => {
+  const { summary } = activity({
+    clears: [
+      hardRaid('2026-07-18T12:00:00', '디레지에 레이드'),
+      hardRaid('2026-07-18T13:00:00', '디레지에 레이드'),
+      raid('2026-07-19T12:00:00', '디레지에 레이드'),
+      { ...raid('2026-07-19T13:00:00', '무너진 성자 미카엘라'), data: { hard: false } },
+      hardRaid('2026-07-20T12:00:00', '이내 황혼전')
+    ]
+  })
+
+  assert.deepEqual(summary.raids, [
+    { name: '디레지에 레이드', count: 3, hard: 2, normal: 1 },
+    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
+    { name: '이내 황혼전', count: 1, hard: 1, normal: 0 }
+  ])
 })
 
 test('아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급별로 세고 태초, 신화를 얻은 날을 표시한다', () => {
@@ -320,19 +342,19 @@ test('YYYY-MM-DD가 아니거나 없는 날짜면 하루 구간을 만들지 않
   }
 })
 
-test('하루 상세의 레이드와 레기온은 이름별로 많은 순으로 센다', () => {
+test('하루 상세의 레이드와 레기온은 이름별로 많은 순으로 세고 레이드는 하드, 노말을 나눈다', () => {
   const { raids, legions } = dayDetail({
     clears: [
       raid('2026-07-18T12:00:00', '무너진 성자 미카엘라'),
-      raid('2026-07-18T13:00:00', '디레지에 레이드'),
+      hardRaid('2026-07-18T13:00:00', '디레지에 레이드'),
       raid('2026-07-18T14:00:00', '디레지에 레이드'),
       legion('2026-07-18T15:00:00', '아포칼립스')
     ]
   })
 
   assert.deepEqual(raids, [
-    { name: '디레지에 레이드', count: 2 },
-    { name: '무너진 성자 미카엘라', count: 1 }
+    { name: '디레지에 레이드', count: 2, hard: 1, normal: 1 },
+    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 }
   ])
   assert.deepEqual(legions, [{ name: '아포칼립스', count: 1 }])
 })
