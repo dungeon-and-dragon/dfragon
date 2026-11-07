@@ -139,11 +139,12 @@ it('열은 순위, 캐릭터, 명성, 모험단, 길드이고 값이 없는 길�
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
-// 캐릭터 칸은 서버, 이름, 직업명 줄과 그 아래 레벨 줄로 나눠 읽는다.
 function characterLines(row: Element): (string | null)[] {
   const line = row.querySelector('a[href^="/c/"]')?.parentElement
+  const nameLine = line?.textContent ?? null
+  const levelLine = line?.nextElementSibling?.textContent ?? null
 
-  return [line?.textContent ?? null, line?.nextElementSibling?.textContent ?? null]
+  return [nameLine, levelLine]
 }
 
 it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 그 아래 줄에 레벨만 둔다', async () => {
