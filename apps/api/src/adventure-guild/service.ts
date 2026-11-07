@@ -1,11 +1,15 @@
-import type { StoredCharacter, StoredGuild } from '@dfragon/database'
+import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
 import type { RequestTimelineSync } from '../characters/timeline/queue.js'
+import type { SeasonBackfillQueue } from '../characters/timeline/season-backfill.js'
 import {
   type ActivityDayDetail,
   type ActivityDayRange,
+  type ActivitySeason,
   type AdventureActivity,
   type AdventureActivityRead,
+  type AdventureSeasonBackfillRead,
+  type StoredActivitySeason,
   emptySeasonActivity,
   toActivityDayDetail
 } from './activity.js'
@@ -35,7 +39,13 @@ export interface AdventureGuildReader {
     seasonId: number | undefined
   ): Promise<AdventureActivityRead | undefined>
   readAdventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
+  readAdventureSeasonBackfill(
+    adventureName: string,
+    seasonId: number
+  ): Promise<AdventureSeasonBackfillRead | undefined>
 }
+
+export type SeasonBackfillRequests = Pick<SeasonBackfillQueue, 'request' | 'has'>
 
 export interface AdventureGuildService {
   adventure(adventureName: string): Promise<AdventureCharacters>
@@ -43,6 +53,7 @@ export interface AdventureGuildService {
   adventureWeekly(adventureName: string): Promise<AdventureWeekly>
   adventureActivity(adventureName: string, seasonId: number | undefined): Promise<AdventureActivity>
   adventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
+  adventureSeasonBackfill(adventureName: string, seasonId: number): Promise<ActivitySeason>
 }
 
 function averageFame(members: readonly StoredCharacter[]): number | null {
@@ -56,8 +67,24 @@ function averageFame(members: readonly StoredCharacter[]): number | null {
 
 export function createAdventureGuildService(
   reader: AdventureGuildReader,
-  requestTimelineSync: RequestTimelineSync
+  requestTimelineSync: RequestTimelineSync,
+  seasonBackfill: SeasonBackfillRequests
 ): AdventureGuildService {
+  // 받는 중인지는 메모리 queue만 알아, DB에서 읽은 진행률에 여기서 붙인다.
+  const withRunning = (
+    { backfill, ...season }: StoredActivitySeason,
+    characters: readonly TimelineCharacter[]
+  ): ActivitySeason => {
+    if (backfill === undefined) {
+      return season
+    }
+    const running = characters.some((character) =>
+      seasonBackfill.has({ character, seasonId: season.id })
+    )
+
+    return { ...season, backfill: { ...backfill, running } }
+  }
+
   return {
     async adventure(adventureName) {
       const characters = await reader.readAdventureCharacters(adventureName)
@@ -92,14 +119,32 @@ export function createAdventureGuildService(
       for (const { serverId, characterId } of read.characters) {
         requestTimelineSync({ serverId, characterId })
       }
+      const seasons = read.activity.seasons.map((season) => withRunning(season, read.characters))
 
-      return read.activity
+      return { ...read.activity, seasons }
     },
     // 하루 상세는 시즌 조회가 이미 동기화를 건 뒤 화면이 부르므로 다시 걸지 않는다.
     adventureActivityDay(adventureName, day) {
       return reader.readAdventureActivityDay(adventureName, day)
+    },
+    // 받기는 기다리지 않고 queue에 넣은 직후의 진행률을 준다.
+    async adventureSeasonBackfill(adventureName, seasonId) {
+      const read = await reader.readAdventureSeasonBackfill(adventureName, seasonId)
+      if (read === undefined) {
+        throw new CharacterDetailFailure('query')
+      }
+      for (const job of read.jobs) {
+        seasonBackfill.request(job)
+      }
+
+      return withRunning(read.season, read.characters)
     }
   }
+}
+
+export const noSeasonBackfill: SeasonBackfillRequests = {
+  request: () => undefined,
+  has: () => false
 }
 
 export const emptyAdventureGuildService = createAdventureGuildService(
@@ -118,7 +163,9 @@ export const emptyAdventureGuildService = createAdventureGuildService(
       }
     },
     readAdventureActivityDay: async (_adventureName, day) =>
-      toActivityDayDetail(day, { clears: [], items: [] })
+      toActivityDayDetail(day, { clears: [], items: [] }),
+    readAdventureSeasonBackfill: async () => undefined
   },
-  () => undefined
+  () => undefined,
+  noSeasonBackfill
 )

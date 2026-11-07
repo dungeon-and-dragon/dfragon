@@ -345,6 +345,7 @@ test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백
       sync: async () => undefined,
       read: async () => EMPTY_CHARACTER_TIMELINE,
       readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
+      backfillSeason: async () => assert.fail('옛 시즌 받기를 부르면 안 된다'),
       backfillEnhancements: async (requested) => {
         backfilled.push(requested)
         await backfilling.promise
@@ -392,6 +393,7 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
       },
       read: async () => assert.fail('타임라인을 읽으면 안 된다'),
       readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
+      backfillSeason: async () => assert.fail('옛 시즌 받기를 부르면 안 된다'),
       backfillEnhancements: async () => {
         backfilled++
         await running.promise

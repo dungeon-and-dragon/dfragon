@@ -4,9 +4,11 @@ import {
   type StoredSeason,
   type TimelineCharacter,
   type TimelineEventRow,
+  type TimelineRange,
   readAdventureCharacters,
   readCharactersTimelineEvents,
   readCharactersTimelineItems,
+  readSeasonBackfillStates,
   readSeasons
 } from '@dfragon/database'
 import { addHours } from 'date-fns'
@@ -19,9 +21,18 @@ import {
   toClear,
   toEnhancement
 } from '../characters/timeline/read.js'
+import {
+  type SeasonBackfillJob,
+  type SeasonBackfillProgress,
+  isSeasonBackfilled,
+  toSeasonBackfillJobs,
+  toSeasonBackfillProgress,
+  toSeasonBackfillRange,
+  toSeasonTimelineStart
+} from '../characters/timeline/season-backfill.js'
 import { formatResetDate, formatSeoulTime, parseResetDate } from '../utils/seoul-time.js'
 
-// 타임라인은 중천(시즌 10)부터 받는다. 그 전 시즌에는 강화 백필 행만 있어 집계하지 않는다.
+// 타임라인 정기 동기화는 중천(시즌 10)부터 받는다. 그 전 시즌은 모험단 캐릭터가 모두 옛 시즌 받기를 끝내야 집계한다.
 const FIRST_COLLECTED_SEASON_ID = 10
 const HIGH_AMPLIFY_TARGET = 10
 const HIGH_REINFORCE_TARGET = 12
@@ -41,17 +52,25 @@ const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 type ItemRarityName = keyof typeof ITEM_RARITIES
 type ItemRarity = (typeof ITEM_RARITIES)[ItemRarityName]
 
-export type ActivitySeason = {
+export type SeasonBackfillStatus = SeasonBackfillProgress & { running: boolean }
+
+type ActivitySeasonOf<Backfill> = {
   id: number
   name: string
   startsAt: Date
   available: boolean
+  backfill?: Backfill
 }
+
+export type StoredActivitySeason = ActivitySeasonOf<SeasonBackfillProgress>
+
+export type ActivitySeason = ActivitySeasonOf<SeasonBackfillStatus>
 
 export type ActivitySeasonRange = {
   id: number
   startsAt: Date
   endsAt: Date | null
+  timelineStartsAt: Date
 }
 
 export type NameCount = {
@@ -95,14 +114,22 @@ export type SeasonActivity = {
   days: ActivityDay[]
 }
 
-export type AdventureActivity = SeasonActivity & {
-  seasons: ActivitySeason[]
+type AdventureActivityOf<Season> = SeasonActivity & {
+  seasons: Season[]
   season: ActivitySeasonRange | null
 }
 
+export type AdventureActivity = AdventureActivityOf<ActivitySeason>
+
 export type AdventureActivityRead = {
   characters: TimelineCharacter[]
-  activity: AdventureActivity
+  activity: AdventureActivityOf<StoredActivitySeason>
+}
+
+export type AdventureSeasonBackfillRead = {
+  characters: TimelineCharacter[]
+  season: StoredActivitySeason
+  jobs: SeasonBackfillJob[]
 }
 
 export type ActivityRecords = {
@@ -141,7 +168,10 @@ function isCollectedSeason(id: number): boolean {
   return id >= FIRST_COLLECTED_SEASON_ID
 }
 
-export function toActivitySeasons(seasons: readonly StoredSeason[], now: Date): ActivitySeason[] {
+export function toActivitySeasons(
+  seasons: readonly StoredSeason[],
+  now: Date
+): StoredActivitySeason[] {
   return seasons
     .filter(({ startsAt }) => startsAt <= now)
     .map(({ id, name, startsAt }) => ({
@@ -153,7 +183,7 @@ export function toActivitySeasons(seasons: readonly StoredSeason[], now: Date): 
 }
 
 export function findActivitySeason(
-  seasons: readonly ActivitySeason[],
+  seasons: readonly StoredActivitySeason[],
   seasonId: number | undefined
 ): ActivitySeasonRange | undefined {
   const index =
@@ -163,8 +193,39 @@ export function findActivitySeason(
     return undefined
   }
   const endsAt = seasons[index + 1]?.startsAt ?? null
+  const timelineStartsAt = toSeasonTimelineStart(season.startsAt)
 
-  return { id: season.id, startsAt: season.startsAt, endsAt }
+  return { id: season.id, startsAt: season.startsAt, endsAt, timelineStartsAt }
+}
+
+// 다음 시즌이 시작한 중천 전 시즌만 받을 수 있다.
+export function toSeasonBackfillRanges(
+  seasons: readonly StoredActivitySeason[]
+): Map<number, TimelineRange> {
+  const ranges = new Map<number, TimelineRange>()
+  for (const [index, { id, startsAt }] of seasons.entries()) {
+    const next = seasons[index + 1]
+    if (!isCollectedSeason(id) && next !== undefined) {
+      ranges.set(id, toSeasonBackfillRange(startsAt, next.startsAt))
+    }
+  }
+
+  return ranges
+}
+
+export function withSeasonBackfills(
+  seasons: readonly StoredActivitySeason[],
+  backfills: ReadonlyMap<number, SeasonBackfillProgress>
+): StoredActivitySeason[] {
+  return seasons.map((season) => {
+    const backfill = backfills.get(season.id)
+    if (backfill === undefined) {
+      return season
+    }
+    const available = isSeasonBackfilled(backfill)
+
+    return { ...season, available, backfill }
+  })
 }
 
 function occursIn(
@@ -416,26 +477,70 @@ async function readSeasonActivity(
   return toSeasonActivity(season, records)
 }
 
+async function readSeasonBackfills(
+  client: DatabaseClient,
+  characters: readonly TimelineCharacter[],
+  ranges: ReadonlyMap<number, TimelineRange>
+): Promise<Map<number, SeasonBackfillProgress>> {
+  const backfills = await Promise.all(
+    [...ranges].map(async ([seasonId, range]) => {
+      const states = await readSeasonBackfillStates(client, characters, seasonId)
+
+      return [seasonId, toSeasonBackfillProgress(range, characters.length, states)] as const
+    })
+  )
+
+  return new Map(backfills)
+}
+
 export async function readAdventureActivity(
   client: DatabaseClient,
   adventureName: string,
   seasonId: number | undefined,
   now: Date
 ): Promise<AdventureActivityRead | undefined> {
-  const seasons = toActivitySeasons(await readSeasons(client), now)
-  const season = findActivitySeason(seasons, seasonId)
+  const startedSeasons = toActivitySeasons(await readSeasons(client), now)
+  const season = findActivitySeason(startedSeasons, seasonId)
   if (season === undefined && seasonId !== undefined) {
     return undefined
   }
   const characters = await readAdventureCharacters(client, adventureName)
+  const backfills = await readSeasonBackfills(
+    client,
+    characters,
+    toSeasonBackfillRanges(startedSeasons)
+  )
+  const seasons = withSeasonBackfills(startedSeasons, backfills)
   if (season === undefined) {
     return { characters, activity: { seasons, season: null, ...emptySeasonActivity() } }
   }
-  const activity = isCollectedSeason(season.id)
+  const available = seasons.some(({ id, available }) => id === season.id && available)
+  const activity = available
     ? await readSeasonActivity(client, characters, season)
     : emptySeasonActivity()
 
   return { characters, activity: { seasons, season, ...activity } }
+}
+
+export async function readAdventureSeasonBackfill(
+  client: DatabaseClient,
+  adventureName: string,
+  seasonId: number,
+  now: Date
+): Promise<AdventureSeasonBackfillRead | undefined> {
+  const seasons = toActivitySeasons(await readSeasons(client), now)
+  const range = toSeasonBackfillRanges(seasons).get(seasonId)
+  const season = seasons.find(({ id }) => id === seasonId)
+  if (range === undefined || season === undefined) {
+    return undefined
+  }
+  const characters = await readAdventureCharacters(client, adventureName)
+  const states = await readSeasonBackfillStates(client, characters, seasonId)
+  const backfill = toSeasonBackfillProgress(range, characters.length, states)
+  const available = isSeasonBackfilled(backfill)
+  const jobs = toSeasonBackfillJobs(characters, seasonId, range, states)
+
+  return { characters, season: { ...season, available, backfill }, jobs }
 }
 
 export async function readAdventureActivityDay(

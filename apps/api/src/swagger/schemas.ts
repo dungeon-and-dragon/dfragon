@@ -198,6 +198,34 @@ const enhancementTargets = (description: string): SchemaObject => ({
     successes: activityCount
   })
 })
+const backfillRanges: SchemaObject = {
+  ...activityCount,
+  description: '캐릭터마다 시즌 구간을 90일 이하로 나눈 구간 수의 합'
+}
+const activitySeasonProperties: Record<string, SchemaObject> = {
+  id: { type: 'integer', description: '시즌 번호' },
+  name: text,
+  startsAt: timestamp,
+  available: {
+    type: 'boolean',
+    description:
+      '집계할 수 있는지. 중천(10) 이후 시즌은 늘 true, 그 전 시즌은 모험단 캐릭터가 모두 끝까지 받았을 때 true'
+  },
+  backfill: {
+    ...object({
+      done: { ...backfillRanges, description: '받은 구간 수' },
+      total: backfillRanges,
+      running: { type: 'boolean', description: '그 모험단 캐릭터 가운데 받는 중인 캐릭터가 있는지' }
+    }),
+    description: '중천 전 시즌의 옛 시즌 받기 상태. 중천 이후 시즌에는 없습니다'
+  }
+}
+const activitySeason: SchemaObject = {
+  type: 'object',
+  required: ['id', 'name', 'startsAt', 'available'],
+  additionalProperties: false,
+  properties: activitySeasonProperties
+}
 const storedCharacters = (description: string): SchemaObject => ({
   type: 'array',
   description,
@@ -426,18 +454,18 @@ export const apiSchemas: Record<string, SchemaObject> = {
     seasons: {
       type: 'array',
       description: '시작한 시즌, 오래된 순',
-      items: object({
-        id: { type: 'integer', description: '시즌 번호' },
-        name: text,
-        startsAt: timestamp,
-        available: { type: 'boolean', description: '타임라인을 받기 시작한 중천(10) 이후 시즌인지' }
-      })
+      items: activitySeason
     },
     season: {
       ...object({
         id: { type: 'integer' },
         startsAt: timestamp,
-        endsAt: { ...timestamp, nullable: true, description: '다음 시즌 시작. 지금 시즌은 null' }
+        endsAt: { ...timestamp, nullable: true, description: '다음 시즌 시작. 지금 시즌은 null' },
+        timelineStartsAt: {
+          ...timestamp,
+          description:
+            '타임라인 기록이 있을 수 있는 첫 시각. Neople이 2017-09-21 00:00 KST부터 주므로 마계(5)는 그 시각이고, 나머지는 startsAt과 같습니다'
+        }
       }),
       nullable: true,
       description: '집계한 시즌. 시즌이 없는 DB 설정 없는 API에서만 null'
@@ -482,6 +510,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
       })
     }
   }),
+  AdventureSeasonBackfill: activitySeason,
   AdventureActivityDay: object({
     date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
     raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),

@@ -47,6 +47,7 @@ async function listen(
       read: unused,
       readPage: unused,
       backfillEnhancements: unused,
+      backfillSeason: unused,
       close: async () => undefined
     },
     writeAccessLog: () => undefined
@@ -75,7 +76,8 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
     readGuild: async () => assert.fail('길드를 읽으면 안 된다'),
     readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
     readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
-    readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다')
+    readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+    readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
   })
   try {
     const answer = await getJson(
@@ -108,7 +110,8 @@ test('길드 조회는 명성이 있는 길드원만으로 평균 명성을 반�
     },
     readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
     readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
-    readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다')
+    readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+    readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
   })
   try {
     const { status, body } = await getJson(origin, '/guilds/synthetic-guild')
@@ -133,7 +136,8 @@ test('명성이 있는 길드원이 없으면 평균 명성은 null이다', asyn
     readGuild: async () => ({ guildName: '합성길드', members: [member('a', null)] }),
     readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
     readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
-    readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다')
+    readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+    readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
   })
   try {
     const { body } = await getJson(origin, '/guilds/synthetic-guild')
@@ -216,6 +220,9 @@ test('DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () =
     },
     readAdventureActivityDay: async () => {
       throw new Error('synthetic database failure')
+    },
+    readAdventureSeasonBackfill: async () => {
+      throw new Error('synthetic database failure')
     }
   })
   try {
@@ -230,6 +237,11 @@ test('DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () =
       assert.equal(status, 500, path)
       assert.equal(body.error.code, 'INTERNAL_SERVER_ERROR', path)
     }
+    const backfill = await fetch(new URL('/adventures/합성/activity/seasons/9/backfill', origin), {
+      method: 'POST'
+    })
+    assert.equal(backfill.status, 500)
+    assert.equal((await backfill.json()).error.code, 'INTERNAL_SERVER_ERROR')
   } finally {
     await app.close()
   }
@@ -306,7 +318,8 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
         return { clearNames: [{ kind: 'raid', name: '디레지에 레이드' }], characters }
       },
       readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
-      readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다')
+      readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+      readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
     },
     (character) => {
       requested.push(character)
