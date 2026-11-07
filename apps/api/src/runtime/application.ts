@@ -2,6 +2,7 @@ import {
   type DatabaseConfiguration,
   createDatabaseClient,
   readAdventureCharacters,
+  readAdventureNames,
   readCharacterStats,
   readFameRanking,
   readGuild,
@@ -34,6 +35,7 @@ import {
 } from '../adventure-guild/activity.js'
 import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../http.js'
+import type { CharacterSearchDependencies } from '../characters/types.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
 type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
@@ -44,7 +46,8 @@ function createDatabaseSubscribers(
 ): Pick<
   ApiHttpAppOptions,
   'timeline' | 'recordCharacterBasic' | 'adventureGuild' | 'rankingStats'
-> {
+> &
+  Pick<CharacterSearchDependencies, 'readAdventureNames'> {
   if (database === undefined) {
     return {}
   }
@@ -69,6 +72,7 @@ function createDatabaseSubscribers(
       close: () => client.$disconnect()
     },
     recordCharacterBasic: (basic) => recordCharacterBasic(client, basic),
+    readAdventureNames: (characters) => readAdventureNames(client, characters),
     adventureGuild: {
       readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),
       readGuild: (guildId) => readGuild(client, guildId),
@@ -90,14 +94,19 @@ function createDatabaseSubscribers(
 
 export function createApiRuntime(configuration: RuntimeConfiguration) {
   const neople = createNeopleClient(configuration.apiKey)
+  const { readAdventureNames: readCandidateAdventureNames, ...database } =
+    createDatabaseSubscribers(neople, configuration.database)
 
   return createApiHttpApp({
-    search: { searchCharacters: createNeopleCharacterSearch(neople) },
+    search: {
+      searchCharacters: createNeopleCharacterSearch(neople),
+      readAdventureNames: readCandidateAdventureNames
+    },
     details: {
       fetchDetails: createNeopleCharacterDetails(neople),
       catalog: createCatalogService(createNeopleCatalog(neople))
     },
-    ...createDatabaseSubscribers(neople, configuration.database),
+    ...database,
     todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
     trustedProxyHops: configuration.trustedProxyHops,
     httpsOptions: configuration.localHttps,

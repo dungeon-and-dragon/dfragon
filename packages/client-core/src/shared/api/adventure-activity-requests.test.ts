@@ -20,7 +20,7 @@ const activity: AdventureActivity = {
     timelineStartsAt: '2025-01-08T21:00:00.000Z'
   },
   summary: {
-    raids: [{ name: '합성 레이드', count: 3 }],
+    raids: [{ name: '합성 레이드', count: 3, hard: 1, normal: 2 }],
     legions: [],
     items: { legendary: 2, epic: 1, primeval: 0, mythic: 0 },
     enhancement: {
@@ -79,6 +79,17 @@ it('DB 설정이 없는 API의 빈 시즌 목록과 null 시즌도 읽는다', a
   await expect(read('합성 모험단', undefined)).resolves.toEqual(empty)
 })
 
+it('레이드 하드, 노말을 보내기 전의 API 응답도 읽는다', async () => {
+  const before = {
+    ...activity,
+    summary: { ...activity.summary, raids: [{ name: '합성 레이드', count: 3 }] }
+  }
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(before) }).adventures
+    .activity
+
+  await expect(read('합성 모험단', undefined)).resolves.toEqual(before)
+})
+
 it('빈 이름은 요청하지 않고 거부한다', async () => {
   const fetch = respond(activity)
   const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.activity
@@ -89,7 +100,7 @@ it('빈 이름은 요청하지 않고 거부한다', async () => {
 
 const day: AdventureActivityDay = {
   date: '2026-07-18',
-  raids: [{ name: '합성 레이드', count: 2 }],
+  raids: [{ name: '합성 레이드', count: 2, hard: 0, normal: 2 }],
   legions: [],
   items: [{ at: '2026-07-18T09:58:00+09:00', name: '합성 아이템', rarity: '레전더리' }],
   enhancements: [{ at: '2026-07-18T10:02:00+09:00', kind: 'amplify', target: 10, success: true }]

@@ -1,6 +1,6 @@
 import { LRUCache } from 'lru-cache'
 import type { CharacterCandidatesResult } from '../types/neople-character-search.js'
-import type { CharacterCandidatesResponse } from './types.js'
+import type { CandidateSource } from './types.js'
 
 const CANDIDATE_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 // A row measured about 0.4KB on the heap (2026-10-31) and one name has one row per server, 8 at most in practice, so
@@ -19,7 +19,7 @@ export function createCandidateCache() {
     async get(
       characterName: string,
       load: () => Promise<CharacterCandidatesResult>
-    ): Promise<CharacterCandidatesResponse> {
+    ): Promise<{ result: CharacterCandidatesResult; source: CandidateSource }> {
       const stored = cached.get(characterName)
       if (stored !== undefined) {
         return { result: stored, source: 'cache' }

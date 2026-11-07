@@ -1,4 +1,5 @@
 import type { SchemaObject } from '@nestjs/swagger'
+import { LEGION_RELEASE_ORDER, RAID_RELEASE_ORDER } from '../adventure-guild/activity.js'
 import { CHARACTER_ID_PATTERN_SOURCE } from '../characters/identity.js'
 import { characterDetailSections } from '../characters/details/sections.js'
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
@@ -184,10 +185,24 @@ const clearName = object({
   name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' }
 })
 const activityCount: SchemaObject = { type: 'integer', minimum: 0 }
+const releaseOrderDescription = (kind: string, releaseOrder: readonly string[]): string =>
+  `${kind} 이름별 클리어 수. 출시가 최근인 것부터(${releaseOrder.join(', ')})이고, 목록에 없는 이름은 그 뒤에 많은 순, 같으면 이름 순`
+const RAID_ORDER_DESCRIPTION = releaseOrderDescription('레이드(201, 210)', RAID_RELEASE_ORDER)
+const LEGION_ORDER_DESCRIPTION = releaseOrderDescription('레기온(209)', LEGION_RELEASE_ORDER)
 const activityNameCounts = (description: string): SchemaObject => ({
   type: 'array',
   description,
   items: object({ name: text, count: activityCount })
+})
+const activityRaidCounts = (description: string): SchemaObject => ({
+  type: 'array',
+  description,
+  items: object({
+    name: text,
+    count: { ...activityCount, description: 'hard와 normal의 합' },
+    hard: { ...activityCount, description: '하드로 클리어한 수(타임라인 data.hard가 true인 행)' },
+    normal: { ...activityCount, description: '하드가 아닌 클리어 수' }
+  })
 })
 const enhancementTargets = (description: string): SchemaObject => ({
   type: 'array',
@@ -232,43 +247,60 @@ const storedCharacters = (description: string): SchemaObject => ({
   items: storedCharacter
 })
 
+const characterSearchRowProperties: Record<string, SchemaObject> = {
+  characterId: {
+    type: 'string',
+    pattern: CHARACTER_ID_PATTERN_SOURCE,
+    minLength: 1,
+    maxLength: 256
+  },
+  characterName: text,
+  serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
+  serverName: text,
+  fame: { type: 'number', nullable: true },
+  jobName: {
+    type: 'string',
+    nullable: true,
+    description:
+      'Neople 검색 응답의 jobName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
+  },
+  jobGrowName: {
+    type: 'string',
+    nullable: true,
+    description:
+      'Neople 검색 응답의 jobGrowName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
+  },
+  imageUrl: {
+    type: 'string',
+    format: 'uri',
+    description: 'Neople 전체 캐릭터 이미지 URL. Web에서 파티원 얼굴 영역과 비교합니다.',
+    example: 'https://img-api.neople.co.kr/df/servers/cain/characters/character-id?zoom=1'
+  }
+}
+const CHARACTER_SEARCH_ORDER_DESCRIPTION =
+  'fame 내림차순, null은 마지막. 동률과 null은 공급자 순서 유지.'
+const characterSearchRows = (
+  description: string,
+  properties: Record<string, SchemaObject> = {}
+): SchemaObject =>
+  object({
+    rows: {
+      type: 'array',
+      description,
+      items: object({ ...characterSearchRowProperties, ...properties })
+    }
+  })
+
 export const apiSchemas: Record<string, SchemaObject> = {
   CatalogDetail: catalogDetail,
   ApiError: object({ error: object({ code: text, message: text }) }),
-  CharacterCandidatesResult: object({
-    rows: {
-      type: 'array',
-      description: 'fame 내림차순, null은 마지막. 동률과 null은 공급자 순서 유지.',
-      items: object({
-        characterId: {
-          type: 'string',
-          pattern: CHARACTER_ID_PATTERN_SOURCE,
-          minLength: 1,
-          maxLength: 256
-        },
-        characterName: text,
-        serverId: { type: 'string', enum: [...NEOPLE_SERVER_NAMES.keys()] },
-        serverName: text,
-        fame: { type: 'number', nullable: true },
-        jobName: {
-          type: 'string',
-          nullable: true,
-          description:
-            'Neople 검색 응답의 jobName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
-        },
-        jobGrowName: {
-          type: 'string',
-          nullable: true,
-          description:
-            'Neople 검색 응답의 jobGrowName. 문자열이 아니거나 비어 있으면 null이며 상세를 조회하지 않습니다.'
-        },
-        imageUrl: {
-          type: 'string',
-          format: 'uri',
-          description: 'Neople 전체 캐릭터 이미지 URL. Web에서 파티원 얼굴 영역과 비교합니다.',
-          example: 'https://img-api.neople.co.kr/df/servers/cain/characters/character-id?zoom=1'
-        }
-      })
+  CharacterCandidatesResult: characterSearchRows(CHARACTER_SEARCH_ORDER_DESCRIPTION),
+  CharacterCandidatesWithAdventureResult: characterSearchRows(CHARACTER_SEARCH_ORDER_DESCRIPTION, {
+    adventureName: {
+      type: 'string',
+      nullable: true,
+      description:
+        'DB에 저장된 그 캐릭터(서버, 캐릭터 ID)의 모험단명. 저장되지 않은 캐릭터와 DB 설정이 없는 API는 null입니다. 응답할 때마다 DB에서 읽어 24시간 후보 캐시에 들지 않습니다.'
     }
   }),
   CharacterDetails: object({
@@ -471,8 +503,8 @@ export const apiSchemas: Record<string, SchemaObject> = {
       description: '집계한 시즌. 시즌이 없는 DB 설정 없는 API에서만 null'
     },
     summary: object({
-      raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
-      legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+      raids: activityRaidCounts(RAID_ORDER_DESCRIPTION),
+      legions: activityNameCounts(LEGION_ORDER_DESCRIPTION),
       items: object({
         legendary: activityCount,
         epic: activityCount,
@@ -513,8 +545,8 @@ export const apiSchemas: Record<string, SchemaObject> = {
   AdventureSeasonBackfill: activitySeason,
   AdventureActivityDay: object({
     date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
-    raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
-    legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
+    raids: activityRaidCounts(RAID_ORDER_DESCRIPTION),
+    legions: activityNameCounts(LEGION_ORDER_DESCRIPTION),
     items: {
       type: 'array',
       description: '레전더리 이상 아이템 획득, 시각 순',
