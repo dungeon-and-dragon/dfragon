@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { setImmediate } from 'node:timers/promises'
 import type {
   CharacterBasicInput,
   CharacterSkillStyleInput,
@@ -51,16 +52,20 @@ const fetchAll: FetchSkillStyle = async (character) => ({ basic: basicOf(charact
 function memoryStore(sample: CollectedCharacter[]) {
   const recorded: Array<[CharacterBasicInput, CharacterSkillStyleInput]> = []
   const deleted: string[] = []
+  const fetchedBefore: Date[] = []
   const store: SkillStyleStore = {
     readJobs: async () => [job],
-    takeBatch: async (_job, skipped, limit) =>
-      sample
+    takeBatch: async (_job, before, skipped, limit) => {
+      fetchedBefore.push(before)
+
+      return sample
         .filter(
           ({ characterId }) =>
             !recorded.some(([basic]) => basic.characterId === characterId) &&
             !skipped.some((character) => character.characterId === characterId)
         )
-        .slice(0, limit),
+        .slice(0, limit)
+    },
     record: async (basic, style) => {
       recorded.push([basic, style])
     },
@@ -69,10 +74,11 @@ function memoryStore(sample: CollectedCharacter[]) {
     }
   }
 
-  return { store, recorded, deleted }
+  return { store, recorded, deleted, fetchedBefore }
 }
 
 const characters = ['c0', 'c1', 'c2'].map((characterId) => ({ serverId: 'cain', characterId }))
+const startedAt = new Date('2026-11-04T16:00:00Z')
 
 function passOf(
   store: SkillStyleStore,
@@ -82,7 +88,7 @@ function passOf(
   return {
     fetchSkillStyle,
     store,
-    requestIntervalMs: 0,
+    startedAt,
     concurrency: 1,
     report: (code) => reports.push(code)
   }
@@ -102,6 +108,45 @@ test('받은 기본 정보와 스킬 스타일을 받은 시각과 함께 저장
     { serverId: 'cain', characterId: 'c0', ...skillStyle, fetchedAt: undefined }
   )
   assert.ok(style.fetchedAt >= before && style.fetchedAt <= new Date())
+})
+
+test('대상 고르기에 회차 시작 시각을 넘긴다', async () => {
+  const memory = memoryStore(characters)
+
+  await runSkillStylePass(passOf(memory.store, fetchAll))
+
+  assert.ok(memory.fetchedBefore.length > 0)
+  assert.ok(memory.fetchedBefore.every((before) => before.getTime() === startedAt.getTime()))
+})
+
+test('동시 처리 수만큼 함께 부르고 그 수를 넘지 않으며 모두 저장한다', async () => {
+  const sample = Array.from({ length: 7 }, (_, index) => ({
+    serverId: 'cain',
+    characterId: `c${index}`
+  }))
+  const memory = memoryStore(sample)
+  let inFlight = 0
+  let maxInFlight = 0
+  const fetchSkillStyle: FetchSkillStyle = async (character) => {
+    inFlight++
+    maxInFlight = Math.max(maxInFlight, inFlight)
+    await setImmediate()
+    inFlight--
+
+    return fetchAll(character)
+  }
+
+  const result = await runSkillStylePass({
+    ...passOf(memory.store, fetchSkillStyle),
+    concurrency: 3
+  })
+
+  assert.equal(result, 'drained')
+  assert.equal(maxInFlight, 3)
+  assert.deepEqual(
+    memory.recorded.map(([basic]) => basic.characterId).sort(),
+    sample.map((character) => character.characterId)
+  )
 })
 
 test('한도 초과, 점검, timeout이면 저장도 삭제도 하지 않고 회차를 멈추며, 다음 회차에 같은 캐릭터부터 다시 부른다', async () => {
@@ -187,22 +232,21 @@ const collectorEnvironment = {
   DB_PASSWORD: 'synthetic'
 }
 
-test('스킬 스타일 worker 설정은 요청 상한 기본값이 5, 동시 처리 기본값이 1이며, 잘못된 입력은 값 없이 거절한다', () => {
-  const configuration = readSkillStyleCollectorConfiguration(collectorEnvironment)
-  assert.equal(configuration.requestsPerSecond, 5)
-  assert.equal(configuration.concurrency, 1)
-  const tuned = readSkillStyleCollectorConfiguration({
-    ...collectorEnvironment,
-    SKILL_STYLE_COLLECTOR_REQUESTS_PER_SECOND: '2.5',
-    SKILL_STYLE_COLLECTOR_CONCURRENCY: '4'
-  })
-  assert.deepEqual([tuned.requestsPerSecond, tuned.concurrency], [2.5, 4])
+test('스킬 스타일 worker 설정은 동시 처리 기본값이 1이며, 잘못된 입력은 값 없이 거절한다', () => {
+  assert.equal(readSkillStyleCollectorConfiguration(collectorEnvironment).concurrency, 1)
+  assert.equal(
+    readSkillStyleCollectorConfiguration({
+      ...collectorEnvironment,
+      SKILL_STYLE_COLLECTOR_CONCURRENCY: '4'
+    }).concurrency,
+    4
+  )
   const { DB_HOST: _, ...withoutDatabase } = collectorEnvironment
   const { NEOPLE_API_KEY: __, ...withoutKey } = collectorEnvironment
   for (const invalid of [
     withoutDatabase,
     withoutKey,
-    { ...collectorEnvironment, SKILL_STYLE_COLLECTOR_REQUESTS_PER_SECOND: '0' },
+    { ...collectorEnvironment, SKILL_STYLE_COLLECTOR_CONCURRENCY: '0' },
     { ...collectorEnvironment, SKILL_STYLE_COLLECTOR_CONCURRENCY: '33' }
   ]) {
     assert.throws(() => readSkillStyleCollectorConfiguration(invalid), {
