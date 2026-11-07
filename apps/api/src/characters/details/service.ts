@@ -54,7 +54,7 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
       }
       const character = await loadCharacter(identity, signal, timings)
       // 받은 뒤에 내서, 존재하지 않는 캐릭터 ID로 구독자가 기록을 만들지 않게 한다.
-      deps.characterEvents?.fetched(identity, character.payloads.basic)
+      deps.characterEvents?.fetched(identity, character.payloads, character.fetchedAt)
       signal.throwIfAborted()
       const reusable = bodies.get(character)
       if (reusable !== undefined) {
