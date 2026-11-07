@@ -40,7 +40,7 @@ const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
-type CellPayload = Readonly<{ date: string; total: number }>
+type CellPayload = Readonly<{ date: string }>
 type CellTooltip = ReturnType<typeof Tooltip.createHandle<CellPayload>>
 
 function isActivityKind(value: unknown): value is ActivityKind {
@@ -186,7 +186,7 @@ function HeatmapCell({
   return (
     <Tooltip.Trigger
       handle={tooltip}
-      payload={{ date: cell.date, total: dayCount(day, 'all') }}
+      payload={{ date: cell.date }}
       delay={0}
       closeDelay={0}
       render={<span {...props} />}
@@ -372,11 +372,7 @@ function HeatmapPanel({
         {({ payload }) =>
           payload !== undefined && (
             <Tooltip.Popup side="top" sideOffset={8}>
-              <ActivityDayDetail
-                adventureName={adventureName}
-                date={payload.date}
-                total={payload.total}
-              />
+              <ActivityDayDetail adventureName={adventureName} date={payload.date} />
             </Tooltip.Popup>
           )
         }
