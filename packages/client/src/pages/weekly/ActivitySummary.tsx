@@ -114,26 +114,34 @@ export function ActivitySummary({ summary }: { summary: Summary }): React.JSX.El
         <ClearRows counts={summary.legions} />
       </SummaryStat>
       <SummaryStat label="아이템" value={itemCount}>
-        <DetailRow
-          label="레전더리"
-          labelStyle={styles.legendary}
-          value={`${numberFormat.format(items.legendary)}개`}
-        />
-        <DetailRow
-          label="에픽"
-          labelStyle={styles.epic}
-          value={`${numberFormat.format(items.epic)}개`}
-        />
-        <DetailRow
-          label="태초"
-          labelStyle={styles.primordial}
-          value={`${numberFormat.format(items.primeval)}개`}
-        />
-        <DetailRow
-          label="신화"
-          labelStyle={styles.mythic}
-          value={`${numberFormat.format(items.mythic)}개`}
-        />
+        {items.legendary > 0 && (
+          <DetailRow
+            label="레전더리"
+            labelStyle={styles.legendary}
+            value={`${numberFormat.format(items.legendary)}개`}
+          />
+        )}
+        {items.epic > 0 && (
+          <DetailRow
+            label="에픽"
+            labelStyle={styles.epic}
+            value={`${numberFormat.format(items.epic)}개`}
+          />
+        )}
+        {items.primeval > 0 && (
+          <DetailRow
+            label="태초"
+            labelStyle={styles.primordial}
+            value={`${numberFormat.format(items.primeval)}개`}
+          />
+        )}
+        {items.mythic > 0 && (
+          <DetailRow
+            label="신화"
+            labelStyle={styles.mythic}
+            value={`${numberFormat.format(items.mythic)}개`}
+          />
+        )}
       </SummaryStat>
       <SummaryStat label="강화" value={enhancement.attempts}>
         <TargetRows title="증폭" targets={enhancement.amplify} labelStyle={styles.amplify} />
