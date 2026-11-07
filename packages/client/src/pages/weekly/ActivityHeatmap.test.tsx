@@ -122,6 +122,15 @@ function cellLabels(): string[] {
     .filter((label) => label.startsWith('4월 2일') || label.startsWith('4월 3일'))
 }
 
+function panelText(): string {
+  const text = container.querySelector('[role="tabpanel"]')?.textContent
+  if (text == null) {
+    return ''
+  }
+
+  return text
+}
+
 function popupText(): string[] {
   const popup = document.querySelector('[data-base-ui-portal] [data-open][data-base-ui-focusable]')
 
@@ -161,9 +170,7 @@ it('세로 탭은 전체를 고른 채 시작하고, 다른 탭을 누르면 패
   expect(tab('아이템').getAttribute('aria-selected')).toBe('true')
   expect(container.querySelectorAll('[role="tabpanel"]')).toHaveLength(1)
   expect(cellLabels()).toEqual(['4월 2일 아이템 10, 태초', '4월 3일 아이템 0'])
-  expect(container.querySelector('[role="tabpanel"]')?.textContent).toContain(
-    '레전더리 8에픽 1태초 1신화 0'
-  )
+  expect(panelText()).toContain('레전더리 8에픽 1태초 1')
 
   await act(async () => tab('강화').click())
   expect(cellLabels()).toEqual([
@@ -172,7 +179,30 @@ it('세로 탭은 전체를 고른 채 시작하고, 다른 탭을 누르면 패
   ])
 })
 
-it('칸에 처음 마우스를 올리면 그날 상세를 받아 시간순 아이템 8줄과 나머지 개수, 강화 단계와 결과를 보이고, 다시 올리면 받은 상세를 다시 쓴다', async () => {
+it('아이템 탭의 등급 뱃지는 개수가 0인 등급을 그리지 않는다', async () => {
+  await render({})
+  await act(async () => tab('아이템').click())
+
+  expect(panelText()).toContain('태초 1')
+  expect(panelText()).not.toContain('신화')
+})
+
+it('네 등급이 모두 0이면 아이템 탭에 등급 뱃지를 그리지 않는다', async () => {
+  const noItems = { legendary: 0, epic: 0, primeval: 0, mythic: 0 }
+  await render({
+    getAdventureActivity: async () => ({
+      ...activity,
+      summary: { ...activity.summary, items: noItems }
+    })
+  })
+  await act(async () => tab('아이템').click())
+
+  for (const rarity of ['레전더리', '에픽', '태초', '신화']) {
+    expect(panelText()).not.toContain(rarity)
+  }
+})
+
+it('칸에 처음 마우스를 올리면 그날 상세를 받아 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보이고, 다시 올리면 받은 상세를 다시 쓴다', async () => {
   const loaded = Promise.withResolvers<AdventureActivityDay>()
   const getAdventureActivityDay = vi
     .fn<ClientHost['getAdventureActivityDay']>()
@@ -191,14 +221,7 @@ it('칸에 처음 마우스를 올리면 그날 상세를 받아 시간순 아�
     '가 레이드2회',
     '아이템10개',
     '09:58합성 태초',
-    '21:00합성 레전더리 1',
-    '21:01합성 레전더리 2',
-    '21:02합성 레전더리 3',
-    '21:03합성 레전더리 4',
-    '21:04합성 레전더리 5',
-    '21:05합성 레전더리 6',
-    '21:06합성 레전더리 7',
-    '외 2개',
+    '레전더리9개',
     '강화1회',
     '00:29+15 실패'
   ])
