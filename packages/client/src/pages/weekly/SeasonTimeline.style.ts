@@ -5,6 +5,8 @@ const BAR_HEIGHT = 4
 const SEASON_MIN_WIDTH = 84
 const INDICATOR_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
 const FILL_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
+// gsap이 받는 중인 막대의 테두리에 이 이름의 CSS 변수를 돌리고, 테두리가 각도로 쓴다.
+const RING_ANGLE = 'calc(var(--season-ring-angle, 0) * 1deg)'
 
 export const styles = stylex.create({
   timeline: {
@@ -73,6 +75,17 @@ export const styles = stylex.create({
     transitionTimingFunction: FILL_EASE
   },
   fillLength: (progress: number) => ({ width: `${progress * 100}%` }),
+  backfillRing: {
+    position: 'absolute',
+    inset: -1,
+    padding: 1,
+    borderRadius: 2,
+    backgroundImage: `conic-gradient(from ${RING_ANGLE}, color-mix(in srgb, ${colors.rarityPrimordialStart} 45%, transparent) 0deg, color-mix(in srgb, ${colors.rarityPrimordialEnd} 45%, transparent) 220deg, ${colors.rarityPrimordialStart} 290deg, ${colors.rarityPrimordialEnd} 345deg, color-mix(in srgb, ${colors.rarityPrimordialStart} 45%, transparent) 360deg)`,
+    maskImage: 'linear-gradient(#000 0 0), linear-gradient(#000 0 0)',
+    maskClip: 'content-box, border-box',
+    maskComposite: 'exclude',
+    pointerEvents: 'none'
+  },
   name: {
     fontSize: 12,
     lineHeight: '16px',
