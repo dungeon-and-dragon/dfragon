@@ -1,5 +1,6 @@
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
 import { NeopleRequestFailure } from '@dfragon/neople'
+import { type CollectionResult, isNeopleUnavailable } from '../neople-collection/pace.js'
 
 export type CollectionFailure = `neople-${'internal' | 'api'}`
 
@@ -10,8 +11,6 @@ export interface CollectionStore {
 }
 
 export type FetchCharacterBasic = (character: CollectedCharacter) => Promise<CharacterBasicInput>
-
-export type CollectionResult = 'recorded' | 'failed' | 'unavailable'
 
 export async function collectCharacter(
   character: CollectedCharacter,
@@ -26,8 +25,7 @@ export async function collectCharacter(
       throw error
     }
 
-    // 한도 초과, 점검, timeout은 캐릭터 문제가 아니라 기록하지 않고 나중에 같은 캐릭터를 다시 부른다.
-    if (error.kind === 'unavailable' || error.kind === 'timeout') {
+    if (isNeopleUnavailable(error.kind)) {
       return 'unavailable'
     }
     await store.recordFailure(character, `neople-${error.kind}`)

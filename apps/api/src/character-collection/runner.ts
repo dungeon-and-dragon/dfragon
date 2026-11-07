@@ -1,8 +1,8 @@
 import { stat } from 'node:fs/promises'
-import { setTimeout } from 'node:timers/promises'
 import type { CollectedCharacter } from '@dfragon/database'
 import { type CollectionStore, type FetchCharacterBasic, collectCharacter } from './collect.js'
 import { type EnqueueCharacters, importCollectedCharacters } from './import.js'
+import { collectPaced } from '../neople-collection/pace.js'
 
 const COLLECTION_BATCH_SIZE = 100
 
@@ -61,27 +61,6 @@ async function importChangedFiles({
   return imported
 }
 
-async function collectBatch(
-  batch: readonly CollectedCharacter[],
-  { fetchBasic, store, requestIntervalMs, concurrency }: BatchCollectionDependencies
-): Promise<'collected' | 'unavailable'> {
-  for (let start = 0; start < batch.length; start += concurrency) {
-    const group = batch.slice(start, start + concurrency)
-    const startedAt = performance.now()
-    const results = await Promise.all(
-      group.map((character) => collectCharacter(character, fetchBasic, store))
-    )
-    if (results.includes('unavailable')) {
-      return 'unavailable'
-    }
-    // 묶음마다 요청 수만큼의 간격을 채워 평균 속도가 초당 상한을 넘지 않게 한다.
-    const remainingMs = group.length * requestIntervalMs - (performance.now() - startedAt)
-    await setTimeout(Math.max(0, remainingMs))
-  }
-
-  return 'collected'
-}
-
 async function drainQueue(
   dependencies: BatchCollectionDependencies & Pick<CollectionPassDependencies, 'report'>
 ): Promise<CollectionPassResult['outcome']> {
@@ -91,7 +70,9 @@ async function drainQueue(
       return 'drained'
     }
 
-    if ((await collectBatch(batch, dependencies)) === 'unavailable') {
+    const collect = (character: CollectedCharacter) =>
+      collectCharacter(character, dependencies.fetchBasic, dependencies.store)
+    if ((await collectPaced(batch, collect, dependencies)) === 'unavailable') {
       dependencies.report('CHARACTER_NEOPLE_UNAVAILABLE')
 
       return 'unavailable'
