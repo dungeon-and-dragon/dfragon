@@ -18,7 +18,7 @@ export const CHARACTER_TABS = [
   { id: 'equipment', label: '장비', Content: EquipmentTab },
   { id: 'oath', label: '서약', Content: OathTab },
   { id: 'skill', label: '스킬', Content: SkillTab },
-  { id: 'avatar', label: '아바타와 크리쳐', Content: AvatarCreatureTab },
+  { id: 'avatar', label: '아바타', Content: AvatarCreatureTab },
   { id: 'buff', label: '버프 강화', Content: BuffTab },
   { id: 'status', label: '스탯', Content: StatusTab },
   { id: 'timeline', label: '타임라인', Content: TimelineTab }
