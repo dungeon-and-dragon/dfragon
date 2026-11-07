@@ -31,13 +31,15 @@ export function CharacterTable({
   ranked = true,
   action,
   trailing,
-  affiliations = ALL_AFFILIATIONS
+  affiliations = ALL_AFFILIATIONS,
+  adventureBesideName = false
 }: {
   rows: readonly CharacterTableRow[]
   ranked?: boolean
   action?: CharacterTableAction
   trailing?: ReactNode
   affiliations?: readonly Affiliation[]
+  adventureBesideName?: boolean
 }): React.JSX.Element {
   return (
     <table {...stylex.props(styles.table)}>
@@ -84,7 +86,10 @@ export function CharacterTable({
               </td>
             )}
             <td {...stylex.props(styles.cell)}>
-              <CharacterCell character={row} />
+              <CharacterCell
+                character={row}
+                adventureName={adventureBesideName ? row.adventureName : null}
+              />
             </td>
             <td {...stylex.props(styles.cell, styles.right, styles.fame)}>
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
