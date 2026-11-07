@@ -52,6 +52,7 @@ export const styles = stylex.create({
     backgroundColor: colors.bgInset
   },
   identity: { display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0 },
+  line: { display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 },
   name: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -61,12 +62,17 @@ export const styles = stylex.create({
     lineHeight: '20px'
   },
   job: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    flexShrink: 0,
     whiteSpace: 'nowrap',
     fontSize: 12,
     lineHeight: '16px',
     color: colors.fgMuted
+  },
+  level: {
+    fontSize: 12,
+    lineHeight: '16px',
+    color: colors.fgSubtle,
+    fontVariantNumeric: 'tabular-nums'
   },
   server: {
     display: 'inline-flex',
