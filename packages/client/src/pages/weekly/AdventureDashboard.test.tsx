@@ -214,6 +214,18 @@ it('요약 숫자에 키보드 focus를 주면 내역이 열리고, 강화는 �
   ])
 })
 
+it('아이템 내역은 개수가 0인 등급 줄을 뺀다', async () => {
+  const items = { legendary: 7, epic: 0, primeval: 2, mythic: 0 }
+  await render(
+    async () => ({ ...currentSeason, summary: { ...currentSeason.summary, items } }),
+    undefined
+  )
+
+  await act(async () => stat('아이템').focus())
+
+  expect(tooltipRows()).toEqual(['레전더리7개', '태초2개'])
+})
+
 it('요약 숫자에 마우스를 올리면 내역이 열리고, 0인 숫자는 내역을 열지 않는다', async () => {
   await render(
     async () => ({ ...currentSeason, summary: { ...currentSeason.summary, legions: [] } }),
