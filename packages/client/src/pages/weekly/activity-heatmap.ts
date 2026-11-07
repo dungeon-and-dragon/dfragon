@@ -54,7 +54,7 @@ function monthStarting(weekStart: number): number | undefined {
 }
 
 export function buildHeatmapWeeks(season: SeasonRange, now: number): readonly HeatmapWeek[] {
-  const first = activityDateMs(Date.parse(season.startsAt))
+  const first = activityDateMs(Date.parse(season.timelineStartsAt))
   const last = lastSeasonDateMs(season, now)
   const today = activityDateMs(now)
   const firstWeekStart =

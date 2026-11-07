@@ -31,6 +31,11 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   타임라인 행에는 고유 ID가 없고 같은 분에 같은 내용의 행이 여러 개 있을 수 있어 중복 검사 대신 구간 교체로 맞춥니다. 구간 밖 행이 있으면 아무것도 바꾸지 않고 `RangeError`를 던집니다.
 - `replaceEnhancementBackfillRange(client, character, range, codes, items)`: 캐릭터 하나의 `[range.start, range.end]`에서 `codes`의 `timeline_items` 행만 교체하고 `timeline_sync_state.enhancement_backfilled_until`을 `range.end`로 옮깁니다.
   `replaceTimelineRange`와 같은 캐릭터 lock과 timeout을 쓰며, `timeline_events`, 다른 코드의 행과 `synced_until`은 바꾸지 않습니다. 구간 밖이거나 `codes`에 없는 행이 있으면 아무것도 바꾸지 않고 `RangeError`를 던집니다.
+- `replaceSeasonBackfillRange(client, character, seasonId, range, events, items)`: 옛 시즌 받기에서 캐릭터 하나의 `[range.start, range.end]` 타임라인을 교체합니다.
+  `replaceTimelineRange`와 같은 캐릭터 lock, timeout, 구간 검사로 그 구간의 `timeline_events`, `timeline_items` 행을 모든 코드에 대해 지운 뒤 넣으므로 강화 백필이 넣은 같은 구간의 행도 함께 바뀝니다.
+  같은 transaction에서 `timeline_season_backfill`의 그 캐릭터와 시즌 `backfilled_until`을 `range.end`로 옮기고, `synced_until`과 `enhancement_backfilled_until`은 바꾸지 않습니다.
+- `recordSeasonBackfillCompleted(client, character, seasonId)`: 그 캐릭터와 시즌의 `completed_at`을 지금으로 둡니다. 구간을 하나도 저장하지 않아 행이 없으면 Prisma 오류를 던집니다.
+- `readSeasonBackfillStates(client, characters, seasonId)`: `characters` 가운데 그 시즌 행이 있는 캐릭터의 받은 위치와 끝까지 받은 시각(`SeasonBackfillState`)을 서버, 캐릭터 id 순으로 돌려줍니다. 행이 없는 캐릭터는 결과에 없습니다.
 - `readEnhancementBackfilledUntil(client, character)`: `enhancement_backfilled_until`을 돌려주고, 행이나 값이 없으면 `null`입니다.
 - `readTimelineSyncState(client, character)`: `synced_until`, `last_succeeded_at`을 돌려주고, 행이 없으면 `undefined`입니다.
   첫 구간을 넣기 전에 실패만 기록된 캐릭터는 `syncedUntil`이 `null`입니다.
@@ -43,7 +48,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readCharactersTimelineItems(client, characters, codes, since, until)`: 여러 캐릭터의 `timeline_items`에서 `codes`의 `[since, until)` 행을 오래된 순으로 돌려주고, 행마다 `serverId`, `characterId`를 붙입니다. `until`을 주지 않으면 끝이 없습니다.
 - `readRecentTimelineItems(client, character, { codes, itemRarities, limit, before })`: `timeline_items`에서 `codes`의 행을 최근 순(`occurred_at`, `id` 내림차순)으로 `limit`개까지 돌려줍니다. `itemRarities`를 주면 그 `item_rarity`만 고르고, `before`(`occurredAt`, `id`)를 주면 그 행보다 앞선 행만 읽습니다.
   읽은 행의 `data`는 저장한 JSON 그대로이며 형식은 호출자가 확인합니다.
-- 입력 타입 `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `TimelineItemCursor`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `TimelineEventRow`, `CharacterTimelineEventRow`, `TimelineItemRow`, `CharacterTimelineItemRow`, `StoredSeason`을 함께 export합니다.
+- 입력 타입 `TimelineEventInput`, `TimelineItemInput`, `TimelineCharacter`, `TimelineRange`, `TimelineItemCursor`, `RecentTimelineItemQuery`와 결과 타입 `TimelineSyncState`, `SeasonBackfillState`, `TimelineEventRow`, `CharacterTimelineEventRow`, `TimelineItemRow`, `CharacterTimelineItemRow`, `StoredSeason`을 함께 export합니다.
 - `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다. API의 Neople key도 같은 함수로 읽습니다.
   `@dfragon/lib`는 Node 전용 runtime에 의존하지 않아야 해서 `node:fs`를 쓰는 이 함수를 이 package에 둡니다.
 
@@ -70,6 +75,7 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 | `timeline_events` | 코드 1xx, 2xx, 3xx 타임라인. partition이 없습니다 |
 | `timeline_items` | 코드 4xx, 5xx, 55x, 6xx 타임라인. `occurred_at` 기준 시즌별 range partition이며 PK는 `(id, occurred_at)`입니다 |
 | `timeline_sync_state` | 캐릭터별 `synced_until`, 마지막 시도와 성공 시각, 실패 이유, 강화, 증폭, 재련 백필 위치 `enhancement_backfilled_until` |
+| `timeline_season_backfill` | PK `(server_id, character_id, season_id)`. 옛 시즌 받기에서 저장한 마지막 구간 끝 `backfilled_until`과 시즌 끝까지 받은 시각 `completed_at` |
 
 `timeline_items`의 partition은 시즌마다 하나이고 이름은 `timeline_items_season_<시즌 id>`입니다.
 가장 앞의 `timeline_items_season_5`는 시즌 5 시작이 아니라 Neople 타임라인이 시작하는 `2017-09-21 00:00+09`부터이고, 그 전 행은 넣을 수 없습니다.

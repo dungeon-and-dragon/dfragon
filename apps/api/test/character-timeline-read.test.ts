@@ -318,6 +318,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
       },
       readPage: unused,
       backfillEnhancements: unused,
+      backfillSeason: unused,
       close: async () => undefined
     },
     todayGrade: { fetchShopGrade: unused },
@@ -459,6 +460,7 @@ test('이어 받기는 동기화를 기다리지 않고 before의 cursor로 목�
         return stored
       },
       backfillEnhancements: unused,
+      backfillSeason: unused,
       close: async () => undefined
     },
     todayGrade: { fetchShopGrade: unused },

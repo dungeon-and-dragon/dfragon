@@ -41,6 +41,7 @@ test('Swagger는 공개 API 경로만 문서화하고 provider를 호출하지 �
         'get /adventures/{adventureName}/weekly',
         'get /adventures/{adventureName}/activity',
         'get /adventures/{adventureName}/activity/days/{date}',
+        'post /adventures/{adventureName}/activity/seasons/{season}/backfill',
         'get /guilds/{guildId}',
         'get /rankings/fame',
         'get /stats',

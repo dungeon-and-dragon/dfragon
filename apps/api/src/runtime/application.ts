@@ -16,8 +16,10 @@ import { createNeopleCharacterTimeline } from '../characters/timeline/neople.js'
 import { backfillEnhancements } from '../characters/timeline/backfill.js'
 import {
   createDatabaseEnhancementBackfillStore,
+  createDatabaseSeasonBackfillStore,
   createDatabaseTimelineStore
 } from '../characters/timeline/store.js'
+import { backfillSeason } from '../characters/timeline/season-backfill.js'
 import {
   ENHANCEMENT_CODES,
   readCharacterTimeline,
@@ -25,7 +27,11 @@ import {
 } from '../characters/timeline/read.js'
 import { syncCharacterTimeline } from '../characters/timeline/sync.js'
 import { createNeopleShopGrade } from '../today-grade/neople.js'
-import { readAdventureActivity, readAdventureActivityDay } from '../adventure-guild/activity.js'
+import {
+  readAdventureActivity,
+  readAdventureActivityDay,
+  readAdventureSeasonBackfill
+} from '../adventure-guild/activity.js'
 import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../http.js'
 import type { readRuntimeConfiguration } from './configuration.js'
@@ -49,6 +55,7 @@ function createDatabaseSubscribers(
     fetchTimeline: createNeopleCharacterTimeline(neople, ENHANCEMENT_CODES),
     store: createDatabaseEnhancementBackfillStore(client)
   }
+  const seasonBackfill = { fetchTimeline, store: createDatabaseSeasonBackfillStore(client) }
 
   // 두 구독자가 client 하나를 함께 쓰며, 타임라인 구독자가 종료 때 닫는다.
 
@@ -56,6 +63,7 @@ function createDatabaseSubscribers(
     timeline: {
       sync: (character) => syncCharacterTimeline(character, { fetchTimeline, store }),
       backfillEnhancements: (character) => backfillEnhancements(character, backfill),
+      backfillSeason: (job) => backfillSeason(job, seasonBackfill),
       read: (character) => readCharacterTimeline(client, character, new Date()),
       readPage: (character, list, before) => readTimelinePage(client, character, list, before),
       close: () => client.$disconnect()
@@ -69,7 +77,9 @@ function createDatabaseSubscribers(
       readAdventureActivity: (adventureName, seasonId) =>
         readAdventureActivity(client, adventureName, seasonId, new Date()),
       readAdventureActivityDay: (adventureName, day) =>
-        readAdventureActivityDay(client, adventureName, day)
+        readAdventureActivityDay(client, adventureName, day),
+      readAdventureSeasonBackfill: (adventureName, seasonId) =>
+        readAdventureSeasonBackfill(client, adventureName, seasonId, new Date())
     },
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),

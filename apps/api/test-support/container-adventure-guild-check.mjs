@@ -14,8 +14,11 @@ import {
   emptySeasonActivity,
   readAdventureActivity,
   readAdventureActivityDay,
+  readAdventureSeasonBackfill,
   toActivityDayRange
 } from './dist/adventure-guild/activity.js'
+import { backfillSeason } from './dist/characters/timeline/season-backfill.js'
+import { createDatabaseSeasonBackfillStore } from './dist/characters/timeline/store.js'
 import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
@@ -253,7 +256,12 @@ try {
   }
   assert.deepEqual(activity.activity, {
     seasons: activity.activity.seasons,
-    season: { id: 11, startsAt: new Date('2026-03-26T06:00:00+09:00'), endsAt: null },
+    season: {
+      id: 11,
+      startsAt: new Date('2026-03-26T06:00:00+09:00'),
+      endsAt: null,
+      timelineStartsAt: new Date('2026-03-26T06:00:00+09:00')
+    },
     ...seasonActivity
   })
   const emptyActivity = async (name, seasonId) => {
@@ -273,7 +281,8 @@ try {
     season: {
       id: 10,
       startsAt: new Date('2025-01-09T06:00:00+09:00'),
-      endsAt: new Date('2026-03-26T06:00:00+09:00')
+      endsAt: new Date('2026-03-26T06:00:00+09:00'),
+      timelineStartsAt: new Date('2025-01-09T06:00:00+09:00')
     },
     ...emptySeasonActivity()
   })
@@ -281,11 +290,136 @@ try {
     season: {
       id: 9,
       startsAt: new Date('2023-09-14T06:00:00+09:00'),
-      endsAt: new Date('2025-01-09T06:00:00+09:00')
+      endsAt: new Date('2025-01-09T06:00:00+09:00'),
+      timelineStartsAt: new Date('2023-09-14T06:00:00+09:00')
     },
     ...emptySeasonActivity()
   })
   assert.equal(await readAdventureActivity(client, adventureName, 12, now), undefined)
+
+  // 옛 시즌 받기다. Neople 대신 합성 행을 주는 fake로 받고, 저장과 받은 위치는 실제 DB 함수로 남긴다.
+  const kst = (time) => new Date(`${time}+09:00`)
+  const oldSeasonRows = {
+    events: [
+      {
+        ...raid(201, '04-01T12:00:00', '합성 귀환 레이드'),
+        occurredAt: kst('2021-05-01T12:00:00')
+      },
+      { ...legion('04-01T12:00:00', '합성 귀환 레기온'), occurredAt: kst('2021-05-01T13:00:00') },
+      { ...raid(201, '04-01T12:00:00', '합성 NEXT 레이드'), occurredAt: kst('2022-05-01T12:00:00') }
+    ],
+    items: [
+      item(505, kst('2021-05-01T14:00:00'), '신화'),
+      item(402, kst('2021-05-01T15:00:00'), '에픽', { before: 9, after: 10, result: true })
+    ]
+  }
+  const fetched = []
+  const seasonBackfill = {
+    fetchTimeline: async (character, range) => {
+      fetched.push(range)
+      if (character.characterId !== 'adventure-high') {
+        return { events: [], items: [] }
+      }
+      const inRange = ({ occurredAt }) => occurredAt >= range.start && occurredAt <= range.end
+
+      return {
+        events: oldSeasonRows.events.filter(inRange),
+        items: oldSeasonRows.items.filter(inRange)
+      }
+    },
+    store: createDatabaseSeasonBackfillStore(client)
+  }
+  const returning = await readAdventureSeasonBackfill(client, adventureName, 7, now)
+  assert.deepEqual(returning.season, {
+    id: 7,
+    name: returning.season.name,
+    startsAt: kst('2020-01-09T06:00:00'),
+    available: false,
+    backfill: { done: 0, total: 36 }
+  })
+  assert.deepEqual(
+    returning.jobs.map(({ character: { characterId } }) => characterId),
+    adventure.map(({ characterId }) => characterId)
+  )
+  assert.equal(await readAdventureSeasonBackfill(client, adventureName, 10, now), undefined)
+  assert.equal(await readAdventureSeasonBackfill(client, adventureName, 12, now), undefined)
+  for (const job of returning.jobs) {
+    await backfillSeason(job, seasonBackfill)
+  }
+  assert.equal(fetched.length, 36)
+  const [nextJourneyFirst] = (await readAdventureSeasonBackfill(client, adventureName, 8, now)).jobs
+  await backfillSeason(nextJourneyFirst, seasonBackfill)
+
+  const returned = await readAdventureActivity(client, adventureName, 7, now)
+  assert.deepEqual(
+    returned.activity.seasons
+      .filter(({ id }) => id < 10)
+      .map(({ id, available, backfill }) => [id, available, backfill]),
+    [
+      [5, false, { done: 0, total: 16 }],
+      [6, false, { done: 0, total: 24 }],
+      [7, true, { done: 36, total: 36 }],
+      [8, false, { done: 7, total: 28 }],
+      [9, false, { done: 0, total: 24 }]
+    ]
+  )
+  const returnedActivity = {
+    summary: {
+      raids: [{ name: '합성 귀환 레이드', count: 1 }],
+      legions: [{ name: '합성 귀환 레기온', count: 1 }],
+      items: { legendary: 0, epic: 0, primeval: 0, mythic: 1 },
+      enhancement: {
+        ...emptySeasonActivity().summary.enhancement,
+        attempts: 1,
+        amplify: [{ target: 10, attempts: 1, successes: 1 }]
+      }
+    },
+    days: [
+      {
+        date: '2021-05-01',
+        raid: 1,
+        legion: 1,
+        item: 1,
+        enhance: 1,
+        primeval: false,
+        mythic: true,
+        highEnhancement: true
+      }
+    ]
+  }
+  assert.deepEqual(
+    { summary: returned.activity.summary, days: returned.activity.days },
+    returnedActivity
+  )
+  // 한 캐릭터만 받은 시즌은 그 캐릭터의 행이 있어도 집계하지 않는다.
+  assert.deepEqual(await emptyActivity(adventureName, 8), {
+    season: {
+      id: 8,
+      startsAt: kst('2022-03-17T06:00:00'),
+      endsAt: kst('2023-09-14T06:00:00'),
+      timelineStartsAt: kst('2022-03-17T06:00:00')
+    },
+    ...emptySeasonActivity()
+  })
+  assert.deepEqual((await readAdventureActivity(client, adventureName, 5, now)).activity.season, {
+    id: 5,
+    startsAt: returned.activity.seasons[0].startsAt,
+    endsAt: kst('2018-08-09T06:00:00'),
+    timelineStartsAt: kst('2017-09-21T00:00:00')
+  })
+  assert.deepEqual((await readAdventureSeasonBackfill(client, adventureName, 7, now)).jobs, [])
+  assert.deepEqual(
+    await readAdventureActivityDay(client, adventureName, toActivityDayRange('2021-05-01')),
+    {
+      date: '2021-05-01',
+      raids: [{ name: '합성 귀환 레이드', count: 1 }],
+      legions: [{ name: '합성 귀환 레기온', count: 1 }],
+      items: [{ at: '2021-05-01T14:00:00+09:00', name: null, rarity: '신화' }],
+      enhancements: [
+        { at: '2021-05-01T15:00:00+09:00', kind: 'amplify', target: 10, success: true }
+      ]
+    }
+  )
 
   // 다른 모험단(guild-no-fame)의 같은 날 기록은 빠지고, 05:59 레이드는 전날 상세에만 들어가는지 본다.
   const activityDay = {
@@ -374,6 +508,20 @@ try {
     await get(`/adventures/${encodeURIComponent(adventureName)}/activity/days/2026-04-02`),
     activityDay
   )
+  const returnedAnswer = await get(
+    `/adventures/${encodeURIComponent(adventureName)}/activity?season=7`
+  )
+  assert.deepEqual({ summary: returnedAnswer.summary, days: returnedAnswer.days }, returnedActivity)
+  // 모두 끝까지 받은 시즌이라 Neople을 부르지 않고 바로 다 받은 상태를 준다.
+  const backfillPath = (season) =>
+    new URL(
+      `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/${season}/backfill`,
+      'http://127.0.0.1:3000'
+    )
+  const backfillAnswer = await fetch(backfillPath(7), { method: 'POST' })
+  assert.equal(backfillAnswer.status, 200)
+  assert.deepEqual((await backfillAnswer.json()).backfill, { done: 36, total: 36, running: false })
+  assert.equal((await fetch(backfillPath(10), { method: 'POST' })).status, 400)
   assert.deepEqual(await get('/guilds/missing-guild'), {
     guildId: 'missing-guild',
     guildName: null,

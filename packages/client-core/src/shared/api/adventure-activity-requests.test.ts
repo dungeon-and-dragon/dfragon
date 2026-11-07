@@ -13,7 +13,12 @@ const activity: AdventureActivity = {
     { id: 9, name: '합성 시즌 9', startsAt: '2023-09-13T21:00:00.000Z', available: false },
     { id: 10, name: '합성 시즌 10', startsAt: '2025-01-08T21:00:00.000Z', available: true }
   ],
-  season: { id: 10, startsAt: '2025-01-08T21:00:00.000Z', endsAt: null },
+  season: {
+    id: 10,
+    startsAt: '2025-01-08T21:00:00.000Z',
+    endsAt: null,
+    timelineStartsAt: '2025-01-08T21:00:00.000Z'
+  },
   summary: {
     raids: [{ name: '합성 레이드', count: 3 }],
     legions: [],
@@ -97,5 +102,24 @@ it('모험단 이름과 날짜를 경로에 담아 하루 활동 상세를 읽�
   await expect(read('합성 모험단/1', '2026-07-18')).resolves.toEqual(day)
   expect(requestedUrl(fetch)).toBe(
     `${API_ORIGIN}/adventures/${encodeURIComponent('합성 모험단/1')}/activity/days/2026-07-18`
+  )
+})
+
+it('옛 시즌 받기는 시즌 번호를 경로에 담아 POST로 요청하고 그 시즌의 받기 상태를 돌려준다', async () => {
+  const season = {
+    id: 9,
+    name: '합성 시즌 9',
+    startsAt: '2023-09-13T21:00:00.000Z',
+    available: false,
+    backfill: { done: 12, total: 30, running: true }
+  }
+  const fetch = respond(season)
+  const backfill = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.backfillSeason
+
+  await expect(backfill('합성 모험단/1', 9)).resolves.toEqual(season)
+  const request = new Request(fetch.mock.calls[0][0])
+  expect(request.method).toBe('POST')
+  expect(request.url).toBe(
+    `${API_ORIGIN}/adventures/${encodeURIComponent('합성 모험단/1')}/activity/seasons/9/backfill`
   )
 })

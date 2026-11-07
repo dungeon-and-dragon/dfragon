@@ -29,13 +29,19 @@ afterEach(async () => {
   container.remove()
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 const activity: AdventureActivity = {
   seasons: [
     { id: 11, name: '합성 시즌 11', startsAt: '2026-03-25T21:00:00.000Z', available: true }
   ],
-  season: { id: 11, startsAt: '2026-03-25T21:00:00.000Z', endsAt: null },
+  season: {
+    id: 11,
+    startsAt: '2026-03-25T21:00:00.000Z',
+    endsAt: null,
+    timelineStartsAt: '2026-03-25T21:00:00.000Z'
+  },
   summary: {
     raids: [{ name: '가 레이드', count: 2 }],
     legions: [],
@@ -91,7 +97,8 @@ const april2: AdventureActivityDay = {
 }
 
 function render(
-  overrides: Partial<Pick<ClientHost, 'getAdventureActivity' | 'getAdventureActivityDay'>>
+  overrides: Partial<Pick<ClientHost, 'getAdventureActivity' | 'getAdventureActivityDay'>>,
+  season?: number
 ): Promise<void> {
   return act(async () =>
     root.render(
@@ -99,7 +106,7 @@ function render(
         value={createTestClientHost({ getAdventureActivity: async () => activity, ...overrides })}
       >
         <TestQueryClient>
-          <ActivityHeatmap adventureName="합성 모험단" season={undefined} />
+          <ActivityHeatmap adventureName="합성 모험단" season={season} />
         </TestQueryClient>
       </ClientHostContext>
     )
@@ -177,6 +184,40 @@ it('세로 탭은 전체를 고른 채 시작하고, 다른 탭을 누르면 패
     '4월 2일 강화 시도 0',
     '4월 3일 강화 시도 3, 10증폭이나 12강 이상 도전'
   ])
+})
+
+function scroller(): HTMLElement {
+  return container.querySelector('[role="tabpanel"] [role="img"]')!.parentElement!.parentElement!
+}
+
+it('처음 그릴 때와 탭을 바꿀 때 칸 영역을 가장 최근 주가 보이는 오른쪽 끝으로 스크롤한다', async () => {
+  vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(640)
+  await render({})
+  expect(scroller().scrollLeft).toBe(640)
+
+  await act(async () => tab('아이템').click())
+
+  expect(scroller().scrollLeft).toBe(640)
+})
+
+it('받아 둔 시즌으로 돌아와도 칸 영역을 다시 오른쪽 끝으로 스크롤한다', async () => {
+  vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(640)
+  const previous: AdventureActivity = {
+    ...activity,
+    season: { ...activity.season!, id: 10 }
+  }
+  const host = {
+    getAdventureActivity: async (_name: string, season: number | undefined) =>
+      season === 10 ? previous : activity
+  }
+  await render(host, 11)
+  scroller().scrollLeft = 0
+
+  await render(host, 10)
+  scroller().scrollLeft = 0
+  await render(host, 11)
+
+  expect(scroller().scrollLeft).toBe(640)
 })
 
 it('아이템 탭의 등급 뱃지는 개수가 0인 등급을 그리지 않는다', async () => {
