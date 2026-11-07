@@ -135,13 +135,14 @@ it('이름을 넣고 보기를 누르면 앞뒤 공백을 뺀 이름으로 조�
 
   expect(getAdventureWeekly).toHaveBeenCalledWith('합성 모험단')
   expect(useMyAdventureStore.getState().adventureName).toBe('합성 모험단')
-  expect(listName()).toBe('합성 모험단')
+  expect(container.querySelector('h1')?.textContent).toBe('합성 모험단')
 })
 
-it('클리어 이름 열을 응답 순서로 레이드, 레기온 묶음 아래 두고, 응답 순서의 캐릭터마다 클리어한 칸에만 체크를 둔다', async () => {
+it('표 위에 제목 없이 클리어 이름 열을 응답 순서로 레이드, 레기온 묶음 아래 두고, 응답 순서의 캐릭터마다 클리어한 칸에만 체크를 둔다', async () => {
   useMyAdventureStore.setState({ adventureName: '합성 모험단' })
   await render(async () => weekly)
 
+  expect(listName()).toBeUndefined()
   expect(headerRows()).toEqual([
     ['#', '캐릭터', '명성', '레이드', '레기온'],
     ['가 레이드', '나 레이드', '다 레기온']
