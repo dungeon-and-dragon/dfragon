@@ -150,9 +150,11 @@ function hover(element: HTMLElement): void {
   element.dispatchEvent(new MouseEvent('mouseenter'))
 }
 
+const FILL_WIDTH_PERCENT_PATTERN = /width: ([\d.]+)%/
+
 function filledPercent(name: string): number | undefined {
   const style = seasonButton(name).querySelector('i > i')?.getAttribute('style') ?? ''
-  const width = /width: ([\d.]+)%/.exec(style)?.[1]
+  const width = FILL_WIDTH_PERCENT_PATTERN.exec(style)?.[1]
   if (width === undefined) {
     return undefined
   }
@@ -285,6 +287,7 @@ it('받는 동안 시즌 활동을 다시 조회해 막대를 늘리고, 다 받
 
     await act(async () => vi.advanceTimersByTimeAsync(3000))
     expect(progressText('합성 시즌 9')).toBeUndefined()
+    expect(filledPercent('합성 시즌 9')).toBeUndefined()
     expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBeNull()
 
     const calls = getAdventureActivity.mock.calls.length
@@ -323,6 +326,34 @@ it('받다 멈춘 옛 시즌은 받은 만큼 채운 막대를 그대로 보이�
 
     await act(async () => vi.advanceTimersByTimeAsync(3000))
     expect(getAdventureActivity).toHaveBeenCalledTimes(2)
+    expect(filledPercent('합성 시즌 9')).toBe(60)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+it('받는 중에 받아 둔 다른 시즌으로 바꿔도 그 시즌 응답으로 진행 조회를 이어 간다', async () => {
+  vi.useFakeTimers()
+  try {
+    let backfill = { done: 12, total: 30, running: false }
+    const getAdventureActivity = vi.fn<ClientHost['getAdventureActivity']>(async (_, season) =>
+      withBackfill(season === 10 ? previousSeason : currentSeason, backfill)
+    )
+    const backfillAdventureSeason = vi.fn<ClientHost['backfillAdventureSeason']>(async () => {
+      backfill = { done: 12, total: 30, running: true }
+
+      return backfillSeason(withBackfill(currentSeason, backfill))
+    })
+    await render(getAdventureActivity, 10, vi.fn(), backfillAdventureSeason)
+    await render(getAdventureActivity, 11, vi.fn(), backfillAdventureSeason)
+    await act(async () => seasonButton('합성 시즌 9').click())
+
+    backfill = { done: 18, total: 30, running: true }
+    await render(getAdventureActivity, 10, vi.fn(), backfillAdventureSeason)
+    expect(getAdventureActivity).toHaveBeenCalledTimes(2)
+
+    await act(async () => vi.advanceTimersByTimeAsync(3000))
+    expect(getAdventureActivity).toHaveBeenLastCalledWith('합성 모험단', 10)
     expect(filledPercent('합성 시즌 9')).toBe(60)
   } finally {
     vi.useRealTimers()
