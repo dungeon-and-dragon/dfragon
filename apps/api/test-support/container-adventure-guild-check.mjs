@@ -221,8 +221,8 @@ try {
   const seasonActivity = {
     summary: {
       raids: [
-        { name: '디레지에 레이드', count: 1, hard: 1, normal: 0 },
         { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
+        { name: '디레지에 레이드', count: 1, hard: 1, normal: 0 },
         { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
       ],
       legions: [{ name: '아포칼립스', count: 1 }],
