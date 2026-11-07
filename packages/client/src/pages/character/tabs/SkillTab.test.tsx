@@ -338,3 +338,24 @@ it('스킬 체인을 쓰지 않는 캐릭터는 체인 없음 한 줄을 보인�
   expect(container.textContent).toContain('스킬 체인 없음')
   expect(container.querySelector('section[aria-label="스킬 체인"]')).toBeNull()
 })
+
+it('스킬 창이 있으면 그 전직의 스킬 채택률을 받고, 배운 스킬 목록이면 받지 않는다', async () => {
+  const getSkillStats = vi.fn(() => new Promise<never>(() => {}))
+  await render(
+    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG, getSkillStats }),
+    characterDetailFixture('dealer')
+  )
+
+  expect(getSkillStats).toHaveBeenCalledWith({
+    jobId: '0c1b401bb09241570d364420b3ba3fd7',
+    jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7'
+  })
+
+  getSkillStats.mockClear()
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  await render(createTestClientHost({ getSkillStats }), characterDetailFixture('dealer'))
+
+  expect(container.querySelector('[aria-label="배운 스킬"]')).not.toBeNull()
+  expect(getSkillStats).not.toHaveBeenCalled()
+})
