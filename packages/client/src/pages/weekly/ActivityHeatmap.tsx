@@ -19,6 +19,7 @@ import {
   type SeasonRange
 } from './activity-heatmap'
 import { ActivityDayDetail } from './ActivityDayDetail'
+import { wheelScrollTarget } from './heatmap-wheel'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
 
@@ -33,6 +34,7 @@ const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: s
 const ROW_LABELS = ['목', '', '토', '', '월', '', '수']
 const LEVEL_STYLES = [styles.empty, styles.level1, styles.level2, styles.level3, styles.level4]
 const RING_TURN_SECONDS = 4
+const WHEEL_SCROLL_SECONDS = 0.35
 
 const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
 
@@ -281,6 +283,64 @@ function useScrollToLatest(ref: RefObject<HTMLElement | null>): void {
   }, [ref])
 }
 
+function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
+  useEffect(() => {
+    const element = ref.current
+    if (element == null) {
+      return
+    }
+
+    let duration = 0
+    let target: number | undefined
+    const media = gsap.matchMedia()
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      duration = WHEEL_SCROLL_SECONDS
+
+      return () => {
+        duration = 0
+      }
+    })
+
+    function handleComplete(): void {
+      target = undefined
+    }
+
+    function handleWheel(event: WheelEvent): void {
+      if (element == null) {
+        return
+      }
+
+      const next = wheelScrollTarget({
+        deltaX: event.deltaX,
+        deltaY: event.deltaY,
+        from: target ?? element.scrollLeft,
+        max: element.scrollWidth - element.clientWidth
+      })
+      if (next === undefined) {
+        return
+      }
+
+      event.preventDefault()
+      target = next
+      gsap.to(element, {
+        scrollLeft: next,
+        duration,
+        ease: 'power2.out',
+        overwrite: true,
+        onComplete: handleComplete
+      })
+    }
+
+    element.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      element.removeEventListener('wheel', handleWheel)
+      gsap.killTweensOf(element)
+      media.revert()
+    }
+  }, [ref])
+}
+
 function HeatmapPanel({
   adventureName,
   activity,
@@ -300,6 +360,7 @@ function HeatmapPanel({
   const thresholds = levelThresholds(activity.days.map((day) => dayCount(day, kind)))
   const scroller = useRef<HTMLDivElement>(null)
   useScrollToLatest(scroller)
+  useWheelScroll(scroller)
 
   return (
     <>
