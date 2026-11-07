@@ -1,5 +1,6 @@
 import { tz } from '@date-fns/tz'
 import {
+  type Day,
   addDays,
   addHours,
   format,
@@ -30,14 +31,21 @@ export function parseSeoulTime(text: string, pattern: string): Date | null {
   return date
 }
 
-// 던파의 한 주는 목요일 06:00(KST)에 시작한다. 한국은 서머타임이 없어 시각을 더하고 빼도 어긋나지 않는다.
-export function startOfResetWeek(date: Date): Date {
-  const start = startOfWeek(subHours(date, RESET_HOUR), {
-    weekStartsOn: THURSDAY,
-    in: inSeoul
-  })
+export type SeoulWeeklyTime = {
+  weekday: Day
+  hour: number
+}
 
-  return new Date(addHours(start, RESET_HOUR))
+// 한국은 서머타임이 없어 시각을 더하고 빼도 어긋나지 않는다.
+export function latestSeoulWeeklyTime(date: Date, { weekday, hour }: SeoulWeeklyTime): Date {
+  const start = startOfWeek(subHours(date, hour), { weekStartsOn: weekday, in: inSeoul })
+
+  return new Date(addHours(start, hour))
+}
+
+// 던파의 한 주는 목요일 06:00(KST)에 시작한다.
+export function startOfResetWeek(date: Date): Date {
+  return latestSeoulWeeklyTime(date, { weekday: THURSDAY, hour: RESET_HOUR })
 }
 
 // 던파의 하루도 06:00(KST)에 바뀐다. 그 전 기록은 전날로 센다.
