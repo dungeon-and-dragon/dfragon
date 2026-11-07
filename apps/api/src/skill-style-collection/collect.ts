@@ -5,12 +5,13 @@ import type {
   SkillStyleSampleJob
 } from '@dfragon/database'
 import { type NeopleCharacterSkillStyle, NeopleRequestFailure } from '@dfragon/neople'
-import { type CollectionResult, isNeopleUnavailable } from '../neople-collection/pace.js'
+import { type CollectionResult, isNeopleUnavailable } from '../neople-collection/concurrency.js'
 
 export interface SkillStyleStore {
   readJobs(): Promise<SkillStyleSampleJob[]>
   takeBatch(
     job: SkillStyleSampleJob,
+    fetchedBefore: Date,
     skipped: readonly CollectedCharacter[],
     limit: number
   ): Promise<CollectedCharacter[]>

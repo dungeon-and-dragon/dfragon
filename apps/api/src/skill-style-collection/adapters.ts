@@ -15,8 +15,8 @@ export function createNeopleSkillStyle(neople: NeopleClient): FetchSkillStyle {
 export function createDatabaseSkillStyleStore(client: DatabaseClient): SkillStyleStore {
   return {
     readJobs: () => readSkillStyleSampleJobs(client),
-    takeBatch: (job, skipped, limit) =>
-      takeSkillStyleRefreshBatch(client, job, skipped, limit, new Date()),
+    takeBatch: (job, fetchedBefore, skipped, limit) =>
+      takeSkillStyleRefreshBatch(client, job, fetchedBefore, skipped, limit),
     record: (basic, style) => recordCharacterBasicAndSkillStyle(client, basic, style),
     deleteSkillStyle: (character) => deleteCharacterSkillStyle(client, character)
   }

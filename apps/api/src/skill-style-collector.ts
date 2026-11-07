@@ -8,9 +8,9 @@ import {
 } from './skill-style-collection/adapters.js'
 import { readSkillStyleCollectorConfiguration } from './skill-style-collection/configuration.js'
 import { runSkillStylePass } from './skill-style-collection/runner.js'
+import { latestRefreshStart, msUntilNextRefresh } from './skill-style-collection/schedule.js'
 
 const failureMessage = 'Skill style collector failed'
-const IDLE_MS = 60 * 60_000
 const UNAVAILABLE_PAUSE_MS = 60_000
 
 function report(code: string): void {
@@ -19,7 +19,7 @@ function report(code: string): void {
   )
 }
 
-// SIGTERM은 Node 기본 동작으로 끝낸다. 저장 전에 끝난 캐릭터는 갱신 시각이 그대로라 다음 시작 때 다시 고른다.
+// SIGTERM은 Node 기본 동작으로 끝낸다. 회차 시작 전에 받은 캐릭터만 고르므로, 다시 시작하면 끊긴 회차를 남은 캐릭터부터 잇는다.
 async function main(): Promise<never> {
   const configuration = readSkillStyleCollectorConfiguration(process.env)
   const client = createDatabaseClient(configuration.database)
@@ -29,11 +29,13 @@ async function main(): Promise<never> {
     const outcome = await runSkillStylePass({
       fetchSkillStyle,
       store,
-      requestIntervalMs: 1000 / configuration.requestsPerSecond,
+      startedAt: latestRefreshStart(new Date()),
       concurrency: configuration.concurrency,
       report
     })
-    await setTimeout(outcome === 'unavailable' ? UNAVAILABLE_PAUSE_MS : IDLE_MS)
+    await setTimeout(
+      outcome === 'unavailable' ? UNAVAILABLE_PAUSE_MS : msUntilNextRefresh(new Date())
+    )
   }
 }
 
