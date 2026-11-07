@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
+import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
 import { TestRouter } from '../testing/test-support/test-router'
 import { CharacterSearchBox } from './CharacterSearchBox'
 
@@ -112,4 +112,47 @@ it('최근 본 캐릭터가 있으면 지우기 버튼으로 비운 뒤 빈 이�
   await vi.waitFor(() =>
     expect(document.querySelector('[aria-label="최근 본 캐릭터"]')).not.toBeNull()
   )
+})
+
+function recentCharacter(
+  characterId: string,
+  characterName: string,
+  level: number
+): RecentCharacter {
+  return {
+    serverId: 'prey',
+    characterId,
+    characterName,
+    adventureName: null,
+    guildId: null,
+    guildName: null,
+    level,
+    jobName: '합성 직업',
+    jobGrowName: null,
+    fame: null,
+    viewedAt: 0
+  }
+}
+
+it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 그 아래 줄에 레벨만 둔다', async () => {
+  useRecentCharacterStore.setState({
+    recentCharacters: [
+      recentCharacter('recent-1', '만렙', 115),
+      recentCharacter('recent-2', '육성', 110)
+    ]
+  })
+  await renderSearchBox()
+
+  await act(async () => nameInput().focus())
+
+  const popup = await vi.waitFor(() => {
+    const element = document.querySelector('[aria-label="최근 본 캐릭터"]')
+    expect(element).not.toBeNull()
+
+    return element!
+  })
+  const lines = [...popup.querySelectorAll('li a')].map((item) =>
+    [...(item.children[1]?.children ?? [])].map((line) => line.textContent)
+  )
+  expect(lines).toEqual([['프레이만렙합성 직업'], ['프레이육성합성 직업', 'Lv.110']])
 })
