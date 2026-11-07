@@ -27,14 +27,12 @@ export const styles = stylex.create({
   brand: {
     display: 'flex',
     alignItems: 'center',
-    gap: space.s8,
     flexShrink: 0,
     color: colors.fgDefault,
     textDecoration: 'none',
     outline: { default: null, ':focus-visible': `2px solid ${colors.signal}` },
     outlineOffset: 2
   },
-  brandIcon: { display: 'block', imageRendering: 'pixelated' },
   name: {
     whiteSpace: 'nowrap',
     fontSize: 16,
