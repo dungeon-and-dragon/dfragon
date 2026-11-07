@@ -5,17 +5,15 @@ import { describe, expect, it } from 'vitest'
 import {
   classifyDNFRaidValueColumn,
   detectDNFRaidParticipantWindow,
-  type DNFRectangle,
   parseDNFRaidValueNotation,
   readDNFRaidParticipantMetadata
 } from '@dfragon/lib'
-import type { CharacterImage } from '../../src/preload/common/types/character'
+import { cropRegion } from '../shared/onnx-ocr'
 import { type CaseObservation, readJobText, type RowObservation, summarize } from './evaluate'
 import { createJobOcrReader, type JobOcrReader } from './job-ocr'
 import { loadCaseImage, readManifest } from './manifest'
 import { readRaidHeading, readValueHeadings, readValueTemplates } from './references'
 
-const RGBA_CHANNELS = 4
 const DEFAULT_OCR_MODEL = fileURLToPath(
   new URL('../../../models/ocr-finetuned/model.onnx', import.meta.url)
 )
@@ -27,19 +25,6 @@ const samples = process.env.DFRAGON_RAID_ROW_SAMPLES
 const reportPath = process.env.DFRAGON_RAID_ROW_REPORT
 const modelPath = process.env.DFRAGON_RAID_ROW_OCR_MODEL || DEFAULT_OCR_MODEL
 const dictionaryPath = process.env.DFRAGON_RAID_ROW_OCR_DICTIONARY || DEFAULT_OCR_DICTIONARY
-
-function crop(frame: CharacterImage, region: DNFRectangle): CharacterImage {
-  const rgba = new Uint8Array(region.width * region.height * RGBA_CHANNELS)
-  for (let y = 0; y < region.height; y += 1) {
-    const start = ((region.y + y) * frame.width + region.x) * RGBA_CHANNELS
-    rgba.set(
-      frame.rgba.subarray(start, start + region.width * RGBA_CHANNELS),
-      y * region.width * RGBA_CHANNELS
-    )
-  }
-
-  return { width: region.width, height: region.height, rgba }
-}
 
 describe.skipIf(samples === undefined || samples === '')('공대 행 판독 오프라인 평가', () => {
   it('표본마다 창 검출, 열 종류, 수치, 직업명을 읽고 정답과 비교한 요약을 출력한다', async () => {
@@ -88,7 +73,7 @@ describe.skipIf(samples === undefined || samples === '')('공대 행 판독 오�
           notation: valueText !== null ? parseDNFRaidValueNotation(valueText) : null,
           jobText:
             jobReader !== null
-              ? await readJobText(jobReader, crop(frame, detected.jobRegion))
+              ? await readJobText(jobReader, cropRegion(frame, detected.jobRegion))
               : null
         })
       }
