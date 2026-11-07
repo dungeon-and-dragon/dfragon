@@ -77,7 +77,6 @@ function ScrollingTable({ ranking }: { ranking: FameRanking }): React.JSX.Elemen
   return (
     <CharacterTable
       rows={characters.slice(0, visible)}
-      jobBesideName
       trailing={visible < characters.length ? <SkeletonRow rowRef={watchSkeleton} /> : undefined}
     />
   )
