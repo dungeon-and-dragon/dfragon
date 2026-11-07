@@ -21,18 +21,22 @@ export {
   readCurrentSeasonStart,
   readEnhancementBackfilledUntil,
   readRecentTimelineItems,
+  readSeasonBackfillStates,
   readSeasons,
   readTimelineEvents,
   readTimelineSyncState,
+  recordSeasonBackfillCompleted,
   recordTimelineSyncFailure,
   recordTimelineSyncSuccess,
   replaceEnhancementBackfillRange,
+  replaceSeasonBackfillRange,
   replaceTimelineRange
 } from './timeline.js'
 export type {
   CharacterTimelineEventRow,
   CharacterTimelineItemRow,
   RecentTimelineItemQuery,
+  SeasonBackfillState,
   StoredSeason,
   TimelineCharacter,
   TimelineEventInput,
