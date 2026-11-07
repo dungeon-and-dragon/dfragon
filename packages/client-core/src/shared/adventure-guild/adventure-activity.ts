@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 const count = z.number().int().nonnegative()
 const nameCount = z.object({ name: z.string(), count })
+// 하드, 노말을 보내기 전의 API와도 호환하도록 없으면 받지 않는다.
+const raidCount = nameCount.extend({ hard: count.optional(), normal: count.optional() })
 const enhancementTarget = z.object({ target: z.number().int(), attempts: count, successes: count })
 
 export const adventureActivitySchema = z.object({
@@ -23,7 +25,7 @@ export const adventureActivitySchema = z.object({
     })
     .nullable(),
   summary: z.object({
-    raids: z.array(nameCount),
+    raids: z.array(raidCount),
     legions: z.array(nameCount),
     items: z.object({ legendary: count, epic: count, primeval: count, mythic: count }),
     enhancement: z.object({
@@ -58,7 +60,7 @@ export type EnhancementTarget = ActivitySummary['enhancement']['amplify'][number
 
 export const adventureActivityDaySchema = z.object({
   date: z.iso.date(),
-  raids: z.array(nameCount),
+  raids: z.array(raidCount),
   legions: z.array(nameCount),
   items: z.array(
     z.object({ at: z.iso.datetime({ offset: true }), name: z.string(), rarity: z.string() })

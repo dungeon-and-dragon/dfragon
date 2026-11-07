@@ -189,6 +189,16 @@ const activityNameCounts = (description: string): SchemaObject => ({
   description,
   items: object({ name: text, count: activityCount })
 })
+const activityRaidCounts = (description: string): SchemaObject => ({
+  type: 'array',
+  description,
+  items: object({
+    name: text,
+    count: { ...activityCount, description: 'hard와 normal의 합' },
+    hard: { ...activityCount, description: '하드로 클리어한 수(타임라인 data.hard가 true인 행)' },
+    normal: { ...activityCount, description: '하드가 아닌 클리어 수' }
+  })
+})
 const enhancementTargets = (description: string): SchemaObject => ({
   type: 'array',
   description,
@@ -488,7 +498,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
       description: '집계한 시즌. 시즌이 없는 DB 설정 없는 API에서만 null'
     },
     summary: object({
-      raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
+      raids: activityRaidCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
       legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
       items: object({
         legendary: activityCount,
@@ -530,7 +540,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
   AdventureSeasonBackfill: activitySeason,
   AdventureActivityDay: object({
     date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
-    raids: activityNameCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
+    raids: activityRaidCounts('레이드(201, 210) 이름별 클리어 수, 많은 순'),
     legions: activityNameCounts('레기온(209) 이름별 클리어 수, 많은 순'),
     items: {
       type: 'array',
