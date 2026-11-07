@@ -47,6 +47,30 @@ const ITEM_CODES = new Set(ACQUISITION_CODES)
 // data.ticket은 강화권, 증폭권을 쓴 기록에만 있다. 운영 DB에서는 객체지만 안의 키를 확인하지 못해 값이 있는지만 본다.
 // 권은 그 단계에 직접 도전한 기록이 아니라 단계별 성공률에서 뺀다.
 const ticketData = z.object({ ticket: z.unknown().refine((ticket) => ticket != null) })
+// 출시가 최근인 것부터다(2026-11-07 저장소 소유자 결정). 새 레이드, 레기온은 맨 앞에 더한다.
+export const RAID_RELEASE_ORDER = [
+  '무너진 성자 미카엘라',
+  '디레지에 레이드',
+  '이내 황혼전',
+  '만들어진 신 나벨',
+  '아스라한',
+  '기계 혁명',
+  '혼돈의 오즈마',
+  '무형의 시로코',
+  '프레이-이시스',
+  '핀드워',
+  '루크',
+  '안톤'
+] as const
+export const LEGION_RELEASE_ORDER = [
+  '아포칼립스',
+  '베누스',
+  '깨어난 숲(극)',
+  '깨어난 숲(일반)',
+  '어둑섬',
+  '차원회랑',
+  '이스핀즈'
+] as const
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -297,8 +321,22 @@ function countRaid(counts: Map<string, RaidCount>, { name, hard }: TimelineClear
   counts.set(name, raid)
 }
 
-function toNameCounts<Count extends NameCount>(counts: ReadonlyMap<string, Count>): Count[] {
-  return [...counts.values()].sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : 1))
+function toNameCounts<Count extends NameCount>(
+  counts: ReadonlyMap<string, Count>,
+  releaseOrder: readonly string[]
+): Count[] {
+  const releaseRank = ({ name }: NameCount): number => {
+    const rank = releaseOrder.indexOf(name)
+    if (rank === -1) {
+      return releaseOrder.length
+    }
+
+    return rank
+  }
+
+  return [...counts.values()].sort(
+    (a, b) => releaseRank(a) - releaseRank(b) || b.count - a.count || (a.name < b.name ? -1 : 1)
+  )
 }
 
 function countTarget(
@@ -400,8 +438,8 @@ export function toSeasonActivity(
     }
   }
 
-  summary.raids = toNameCounts(raids)
-  summary.legions = toNameCounts(legions)
+  summary.raids = toNameCounts(raids, RAID_RELEASE_ORDER)
+  summary.legions = toNameCounts(legions, LEGION_RELEASE_ORDER)
   enhancement.amplify = toTargets(amplify)
   enhancement.reinforce = toTargets(reinforce)
 
@@ -457,8 +495,8 @@ export function toActivityDayDetail(
 
       return { at, kind, target: after, success: result }
     })
-  const raids = toNameCounts(raidCounts)
-  const legions = toNameCounts(legionCounts)
+  const raids = toNameCounts(raidCounts, RAID_RELEASE_ORDER)
+  const legions = toNameCounts(legionCounts, LEGION_RELEASE_ORDER)
 
   return { date: day.date, raids, legions, items, enhancements }
 }
