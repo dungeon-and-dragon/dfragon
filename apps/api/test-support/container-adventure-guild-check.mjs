@@ -3,6 +3,7 @@ import { setTimeout } from 'node:timers/promises'
 import {
   createDatabaseClient,
   readAdventureCharacters,
+  readAdventureNames,
   readDatabaseConfiguration,
   readGuild,
   recordCharacter,
@@ -20,6 +21,7 @@ import {
 import { backfillSeason } from './dist/characters/timeline/season-backfill.js'
 import { createDatabaseSeasonBackfillStore } from './dist/characters/timeline/store.js'
 import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
+import { createCharacterSearchService } from './dist/characters/search-service.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
 const job = {
@@ -141,7 +143,7 @@ try {
       { serverId: 'siroco', characterId: 'adventure-high' },
       [
         raid(201, '04-02T05:59:00', '무너진 성자 미카엘라'),
-        raid(210, '04-02T06:00:00', '디레지에 레이드'),
+        { ...raid(210, '04-02T06:00:00', '디레지에 레이드'), data: { hard: true } },
         raid(201, '04-02T06:30:00', '합성 목록 밖 레이드')
       ],
       [
@@ -219,9 +221,9 @@ try {
   const seasonActivity = {
     summary: {
       raids: [
-        { name: '디레지에 레이드', count: 1 },
-        { name: '무너진 성자 미카엘라', count: 1 },
-        { name: '합성 목록 밖 레이드', count: 1 }
+        { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
+        { name: '디레지에 레이드', count: 1, hard: 1, normal: 0 },
+        { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
       ],
       legions: [{ name: '아포칼립스', count: 1 }],
       items: { legendary: 0, epic: 0, primeval: 1, mythic: 0 },
@@ -365,7 +367,7 @@ try {
   )
   const returnedActivity = {
     summary: {
-      raids: [{ name: '합성 귀환 레이드', count: 1 }],
+      raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
       legions: [{ name: '합성 귀환 레기온', count: 1 }],
       items: { legendary: 0, epic: 0, primeval: 0, mythic: 1 },
       enhancement: {
@@ -412,7 +414,7 @@ try {
     await readAdventureActivityDay(client, adventureName, toActivityDayRange('2021-05-01')),
     {
       date: '2021-05-01',
-      raids: [{ name: '합성 귀환 레이드', count: 1 }],
+      raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
       legions: [{ name: '합성 귀환 레기온', count: 1 }],
       items: [{ at: '2021-05-01T14:00:00+09:00', name: null, rarity: '신화' }],
       enhancements: [
@@ -425,8 +427,8 @@ try {
   const activityDay = {
     date: '2026-04-02',
     raids: [
-      { name: '디레지에 레이드', count: 1 },
-      { name: '합성 목록 밖 레이드', count: 1 }
+      { name: '디레지에 레이드', count: 1, hard: 1, normal: 0 },
+      { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
     ],
     legions: [{ name: '아포칼립스', count: 1 }],
     items: [{ at: '2026-04-02T10:00:00+09:00', name: null, rarity: '태초' }],
@@ -436,7 +438,7 @@ try {
   assert.deepEqual(await readDay(adventureName, '2026-04-02'), activityDay)
   assert.deepEqual(await readDay(adventureName, '2026-04-01'), {
     date: '2026-04-01',
-    raids: [{ name: '무너진 성자 미카엘라', count: 1 }],
+    raids: [{ name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 }],
     legions: [],
     items: [],
     enhancements: []
@@ -529,6 +531,48 @@ try {
     averageFame: null,
     members: []
   })
+
+  // 후보 검색은 Neople 대신 합성 행을 돌려주고 모험단명만 DB에서 읽는다.
+  const candidateRow = (serverId, characterId) => ({
+    characterId,
+    characterName: '합성후보',
+    serverId,
+    serverName: null,
+    fame: null,
+    jobName: null,
+    jobGrowName: null
+  })
+  const candidates = createCharacterSearchService({
+    searchCharacters: async () => ({
+      rows: [
+        candidateRow('siroco', 'adventure-high'),
+        candidateRow('hilder', 'guild-no-fame'),
+        candidateRow('cain', 'candidate-not-stored')
+      ]
+    }),
+    readAdventureNames: (characters) => readAdventureNames(client, characters)
+  })
+  const candidatePath = `/characters/candidates?characterName=${encodeURIComponent('합성후보')}`
+  const candidateAdventures = async () => {
+    const { result, source } = await candidates.candidates(candidatePath)
+
+    return { source, names: result.rows.map(({ adventureName }) => adventureName) }
+  }
+  assert.deepEqual(await candidateAdventures(), {
+    source: 'neople',
+    names: [adventureName, '합성길드원모험단', null]
+  })
+  await recordCharacter(client, {
+    serverId: 'hilder',
+    characterId: 'guild-no-fame',
+    characterName: '합성guild-no-fame',
+    adventureName: '합성새길드원모험단'
+  })
+  assert.deepEqual(await candidateAdventures(), {
+    source: 'cache',
+    names: [adventureName, '합성새길드원모험단', null]
+  })
+  await candidates.onModuleDestroy()
 } finally {
   await client.$disconnect()
 }

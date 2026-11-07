@@ -17,6 +17,7 @@ import {
   ACQUISITION_CODES,
   CLEAR_CODES,
   ENHANCEMENT_CODES,
+  type TimelineClear,
   type TimelineEnhancement,
   toClear,
   toEnhancement
@@ -46,6 +47,30 @@ const ITEM_CODES = new Set(ACQUISITION_CODES)
 // data.ticket은 강화권, 증폭권을 쓴 기록에만 있다. 운영 DB에서는 객체지만 안의 키를 확인하지 못해 값이 있는지만 본다.
 // 권은 그 단계에 직접 도전한 기록이 아니라 단계별 성공률에서 뺀다.
 const ticketData = z.object({ ticket: z.unknown().refine((ticket) => ticket != null) })
+// 출시가 최근인 것부터다(2026-11-07 저장소 소유자 결정). 새 레이드, 레기온은 맨 앞에 더한다.
+export const RAID_RELEASE_ORDER = [
+  '무너진 성자 미카엘라',
+  '디레지에 레이드',
+  '이내 황혼전',
+  '만들어진 신 나벨',
+  '아스라한',
+  '기계 혁명',
+  '혼돈의 오즈마',
+  '무형의 시로코',
+  '프레이-이시스',
+  '핀드워',
+  '루크',
+  '안톤'
+] as const
+export const LEGION_RELEASE_ORDER = [
+  '아포칼립스',
+  '베누스',
+  '깨어난 숲(극)',
+  '깨어난 숲(일반)',
+  '어둑섬',
+  '차원회랑',
+  '이스핀즈'
+] as const
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -78,6 +103,11 @@ export type NameCount = {
   count: number
 }
 
+export type RaidCount = NameCount & {
+  hard: number
+  normal: number
+}
+
 export type EnhancementTarget = {
   target: number
   attempts: number
@@ -85,7 +115,7 @@ export type EnhancementTarget = {
 }
 
 export type ActivitySummary = {
-  raids: NameCount[]
+  raids: RaidCount[]
   legions: NameCount[]
   items: Record<ItemRarity, number>
   enhancement: {
@@ -158,7 +188,7 @@ export type ActivityDayEnhancement = {
 
 export type ActivityDayDetail = {
   date: string
-  raids: NameCount[]
+  raids: RaidCount[]
   legions: NameCount[]
   items: ActivityDayItem[]
   enhancements: ActivityDayEnhancement[]
@@ -274,14 +304,39 @@ export function emptySeasonActivity(): SeasonActivity {
   return { summary: emptySummary(), days: [] }
 }
 
-function countName(counts: Map<string, number>, name: string): void {
-  counts.set(name, (counts.get(name) ?? 0) + 1)
+function countName(counts: Map<string, NameCount>, name: string): void {
+  const counted = counts.get(name) ?? { name, count: 0 }
+  counted.count++
+  counts.set(name, counted)
 }
 
-function toNameCounts(counts: ReadonlyMap<string, number>): NameCount[] {
-  return [...counts]
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : 1))
+function countRaid(counts: Map<string, RaidCount>, { name, hard }: TimelineClear): void {
+  const raid = counts.get(name) ?? { name, count: 0, hard: 0, normal: 0 }
+  raid.count++
+  if (hard) {
+    raid.hard++
+  } else {
+    raid.normal++
+  }
+  counts.set(name, raid)
+}
+
+function toNameCounts<Count extends NameCount>(
+  counts: ReadonlyMap<string, Count>,
+  releaseOrder: readonly string[]
+): Count[] {
+  const releaseRank = ({ name }: NameCount): number => {
+    const rank = releaseOrder.indexOf(name)
+    if (rank === -1) {
+      return releaseOrder.length
+    }
+
+    return rank
+  }
+
+  return [...counts.values()].sort(
+    (a, b) => releaseRank(a) - releaseRank(b) || b.count - a.count || (a.name < b.name ? -1 : 1)
+  )
 }
 
 function countTarget(
@@ -315,8 +370,8 @@ export function toSeasonActivity(
   const inSeason = (record: { occurredAt: Date }) => occursIn(season, record)
   const summary = emptySummary()
   const { items, enhancement } = summary
-  const raids = new Map<string, number>()
-  const legions = new Map<string, number>()
+  const raids = new Map<string, RaidCount>()
+  const legions = new Map<string, NameCount>()
   const amplify = new Map<number, EnhancementTarget>()
   const reinforce = new Map<number, EnhancementTarget>()
   const days = new Map<string, ActivityDay>()
@@ -340,7 +395,7 @@ export function toSeasonActivity(
   for (const clear of records.clears.flatMap(toClear).filter(inSeason)) {
     const day = dayOf(clear.occurredAt)
     if (clear.kind === 'raid') {
-      countName(raids, clear.name)
+      countRaid(raids, clear)
       day.raid++
     } else {
       countName(legions, clear.name)
@@ -383,8 +438,8 @@ export function toSeasonActivity(
     }
   }
 
-  summary.raids = toNameCounts(raids)
-  summary.legions = toNameCounts(legions)
+  summary.raids = toNameCounts(raids, RAID_RELEASE_ORDER)
+  summary.legions = toNameCounts(legions, LEGION_RELEASE_ORDER)
   enhancement.amplify = toTargets(amplify)
   enhancement.reinforce = toTargets(reinforce)
 
@@ -411,10 +466,14 @@ export function toActivityDayDetail(
   records: ActivityRecords
 ): ActivityDayDetail {
   const onDay = (record: { occurredAt: Date }) => occursIn(day, record)
-  const raidCounts = new Map<string, number>()
-  const legionCounts = new Map<string, number>()
+  const raidCounts = new Map<string, RaidCount>()
+  const legionCounts = new Map<string, NameCount>()
   for (const clear of records.clears.flatMap(toClear).filter(onDay)) {
-    countName(clear.kind === 'raid' ? raidCounts : legionCounts, clear.name)
+    if (clear.kind === 'raid') {
+      countRaid(raidCounts, clear)
+    } else {
+      countName(legionCounts, clear.name)
+    }
   }
   const rows = records.items
     .filter(onDay)
@@ -436,8 +495,8 @@ export function toActivityDayDetail(
 
       return { at, kind, target: after, success: result }
     })
-  const raids = toNameCounts(raidCounts)
-  const legions = toNameCounts(legionCounts)
+  const raids = toNameCounts(raidCounts, RAID_RELEASE_ORDER)
+  const legions = toNameCounts(legionCounts, LEGION_RELEASE_ORDER)
 
   return { date: day.date, raids, legions, items, enhancements }
 }

@@ -36,6 +36,10 @@ const raid = (time: string, raidName: string): TimelineEventRow => ({
   raidName,
   data: {}
 })
+const hardRaid = (time: string, raidName: string): TimelineEventRow => ({
+  ...raid(time, raidName),
+  data: { hard: true }
+})
 const legion = (time: string, regionName: string): TimelineEventRow => ({
   code: 209,
   occurredAt: at(time),
@@ -127,22 +131,80 @@ test('지금 시즌은 끝이 없어 시작 뒤 기록을 모두 센다', () => 
   assert.deepEqual(current.summary.legions, [{ name: '아포칼립스', count: 1 }])
 })
 
-test('레이드와 레기온은 이름별로 많은 순으로 센다', () => {
+test('레이드와 레기온은 이름별로 세어 횟수와 관계없이 출시가 최근인 것부터 둔다', () => {
   const { summary } = activity({
     clears: [
-      raid('2026-07-18T12:00:00', '무너진 성자 미카엘라'),
-      raid('2026-07-18T13:00:00', '디레지에 레이드'),
+      raid('2026-07-18T12:00:00', '프레이-이시스'),
+      raid('2026-07-18T13:00:00', '무너진 성자 미카엘라'),
+      raid('2026-07-18T14:00:00', '디레지에 레이드'),
       raid('2026-07-19T12:00:00', '디레지에 레이드'),
-      legion('2026-07-18T14:00:00', '아포칼립스'),
-      { ...legion('2026-07-18T15:00:00', '아포칼립스'), data: {} }
+      legion('2026-07-18T14:00:00', '베누스'),
+      legion('2026-07-18T15:00:00', '베누스'),
+      legion('2026-07-18T16:00:00', '깨어난 숲(일반)'),
+      legion('2026-07-18T17:00:00', '깨어난 숲(일반)'),
+      legion('2026-07-18T18:00:00', '깨어난 숲(극)'),
+      legion('2026-07-18T19:00:00', '아포칼립스'),
+      { ...legion('2026-07-18T20:00:00', '아포칼립스'), data: {} }
     ]
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '디레지에 레이드', count: 2 },
-    { name: '무너진 성자 미카엘라', count: 1 }
+    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드', count: 2, hard: 0, normal: 2 },
+    { name: '프레이-이시스', count: 1, hard: 0, normal: 1 }
   ])
-  assert.deepEqual(summary.legions, [{ name: '아포칼립스', count: 1 }])
+  assert.deepEqual(summary.legions, [
+    { name: '아포칼립스', count: 1 },
+    { name: '베누스', count: 2 },
+    { name: '깨어난 숲(극)', count: 1 },
+    { name: '깨어난 숲(일반)', count: 2 }
+  ])
+})
+
+test('출시 순서 표에 없는 이름은 표에 있는 이름 뒤에 많은 순, 같으면 이름 순으로 둔다', () => {
+  const { summary } = activity({
+    clears: [
+      raid('2026-07-18T12:00:00', '합성 레이드 가'),
+      raid('2026-07-18T13:00:00', '합성 레이드 다'),
+      raid('2026-07-18T14:00:00', '합성 레이드 다'),
+      raid('2026-07-18T15:00:00', '합성 레이드 나'),
+      raid('2026-07-18T16:00:00', '합성 레이드 나'),
+      raid('2026-07-18T17:00:00', '프레이-이시스'),
+      raid('2026-07-18T17:10:00', '안톤'),
+      raid('2026-07-18T17:20:00', '루크'),
+      raid('2026-07-18T17:30:00', '루크'),
+      legion('2026-07-18T18:00:00', '합성 레기온'),
+      legion('2026-07-18T19:00:00', '합성 레기온'),
+      legion('2026-07-18T20:00:00', '이스핀즈')
+    ]
+  })
+
+  assert.deepEqual(
+    summary.raids.map(({ name }) => name),
+    ['프레이-이시스', '루크', '안톤', '합성 레이드 나', '합성 레이드 다', '합성 레이드 가']
+  )
+  assert.deepEqual(
+    summary.legions.map(({ name }) => name),
+    ['이스핀즈', '합성 레기온']
+  )
+})
+
+test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말로 세고 count는 둘의 합이다', () => {
+  const { summary } = activity({
+    clears: [
+      hardRaid('2026-07-18T12:00:00', '디레지에 레이드'),
+      hardRaid('2026-07-18T13:00:00', '디레지에 레이드'),
+      raid('2026-07-19T12:00:00', '디레지에 레이드'),
+      { ...raid('2026-07-19T13:00:00', '무너진 성자 미카엘라'), data: { hard: false } },
+      hardRaid('2026-07-20T12:00:00', '이내 황혼전')
+    ]
+  })
+
+  assert.deepEqual(summary.raids, [
+    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드', count: 3, hard: 2, normal: 1 },
+    { name: '이내 황혼전', count: 1, hard: 1, normal: 0 }
+  ])
 })
 
 test('아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급별로 세고 태초, 신화를 얻은 날을 표시한다', () => {
@@ -320,21 +382,31 @@ test('YYYY-MM-DD가 아니거나 없는 날짜면 하루 구간을 만들지 않
   }
 })
 
-test('하루 상세의 레이드와 레기온은 이름별로 많은 순으로 센다', () => {
+test('하루 상세도 레이드를 하드, 노말로 나누고 출시가 최근인 것부터, 표에 없는 이름은 뒤에 둔다', () => {
   const { raids, legions } = dayDetail({
     clears: [
+      raid('2026-07-18T11:00:00', '합성 레이드'),
+      raid('2026-07-18T11:30:00', '합성 레이드'),
       raid('2026-07-18T12:00:00', '무너진 성자 미카엘라'),
-      raid('2026-07-18T13:00:00', '디레지에 레이드'),
+      hardRaid('2026-07-18T13:00:00', '디레지에 레이드'),
       raid('2026-07-18T14:00:00', '디레지에 레이드'),
-      legion('2026-07-18T15:00:00', '아포칼립스')
+      legion('2026-07-18T15:00:00', '합성 레기온'),
+      legion('2026-07-18T15:30:00', '합성 레기온'),
+      legion('2026-07-18T16:00:00', '베누스'),
+      legion('2026-07-18T17:00:00', '아포칼립스')
     ]
   })
 
   assert.deepEqual(raids, [
-    { name: '디레지에 레이드', count: 2 },
-    { name: '무너진 성자 미카엘라', count: 1 }
+    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드', count: 2, hard: 1, normal: 1 },
+    { name: '합성 레이드', count: 2, hard: 0, normal: 2 }
   ])
-  assert.deepEqual(legions, [{ name: '아포칼립스', count: 1 }])
+  assert.deepEqual(legions, [
+    { name: '아포칼립스', count: 1 },
+    { name: '베누스', count: 1 },
+    { name: '합성 레기온', count: 2 }
+  ])
 })
 
 test('하루 상세의 아이템과 강화는 캐릭터와 들어온 순서에 상관없이 시각 순이다', () => {
