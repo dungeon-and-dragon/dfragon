@@ -39,8 +39,7 @@ DFRAGON_SKILLTAB_DIR=<출력 폴더> pnpm --filter @dfragon/web dev
 
 node1이 사이트를 공인 IP로 직접 내줍니다(ADR 0029). [`Dockerfile`](Dockerfile)이 `dist`를 Caddy가 내주는 이미지로 만들고, 운영 `https://dfragon.com`과 dev `https://dev.dfragon.com`은 같은 이미지를 각각 node1의 `web`, `web-dev` 컨테이너로 띄웁니다. 그 앞의 host Caddy가 TLS, `www.dfragon.com`에서 `https://dfragon.com`으로의 301 리디렉션, `/api/*`(`/api`를 뗀 경로로 API에 넘김), `/skilltab/*`과 dev의 `robots.txt`(`Disallow: /`)를 맡습니다. 컨테이너와 host Caddy 설정은 dfragon-infra 저장소에 있습니다.
 
-- 이미지 발행: PR 제목 scope가 `(build)`인 PR을 main에 merge하면 [Product Images](../../.github/workflows/product-images.yml)가 `ghcr.io/dungeon-and-dragon/dfragon/web:<commit SHA>`를 발행합니다([build-scope](../../scripts/README.md#build-scope), [서버 이미지](../api/README.md#서버-이미지)). 다른 PR의 merge는 이미지를 만들지 않습니다.
-- dev, 운영 배포: 운영자가 발행된 이미지를 골라 `web-dev`, `web`에 각각 배포합니다. 운영 배포 시점은 저장소 소유자가 정합니다.
+- dev, 운영 배포: node1이 운영자가 고른 main commit을 빌드해 `web-dev`, `web`에 각각 배포하며 절차는 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)에 있습니다([서버 이미지](../api/README.md#서버-이미지)). main merge는 이미지를 빌드하거나 배포하지 않습니다. 운영 배포 시점은 저장소 소유자가 정합니다.
 - PR 미리보기: 없습니다. PR의 화면은 로컬 `dev` 서버나 `build` 뒤 `preview`로 확인하고, merge 뒤에는 dev에 배포해 `https://dev.dfragon.com`에서 확인합니다.
 
 빌드는 `ocr-finetuned` submodule이 있어야 하며 OCR 자산(`/ocr/`)을 이미지에 그대로 넣습니다. OCR 모델과 WASM은 첫 붙여넣기나 첫 화면 공유 때 받으므로 닉네임 검색만 하는 방문자는 받지 않습니다.
