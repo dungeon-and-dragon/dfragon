@@ -10,14 +10,16 @@ export const adventureActivitySchema = z.object({
       id: z.number().int(),
       name: z.string(),
       startsAt: z.iso.datetime(),
-      available: z.boolean()
+      available: z.boolean(),
+      backfill: z.object({ done: count, total: count, running: z.boolean() }).optional()
     })
   ),
   season: z
     .object({
       id: z.number().int(),
       startsAt: z.iso.datetime(),
-      endsAt: z.iso.datetime().nullable()
+      endsAt: z.iso.datetime().nullable(),
+      timelineStartsAt: z.iso.datetime()
     })
     .nullable(),
   summary: z.object({
@@ -48,7 +50,9 @@ export const adventureActivitySchema = z.object({
 })
 
 export type AdventureActivity = z.infer<typeof adventureActivitySchema>
-export type ActivitySeason = AdventureActivity['seasons'][number]
+export const activitySeasonSchema = adventureActivitySchema.shape.seasons.element
+export type ActivitySeason = z.infer<typeof activitySeasonSchema>
+export type SeasonBackfill = NonNullable<ActivitySeason['backfill']>
 export type ActivitySummary = AdventureActivity['summary']
 export type EnhancementTarget = ActivitySummary['enhancement']['amplify'][number]
 

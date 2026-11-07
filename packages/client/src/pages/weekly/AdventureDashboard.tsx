@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { preload } from 'react-dom'
 import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
-import { useAdventureActivity } from '../../hooks/useAdventureActivity'
+import { useAdventureActivity, useBackfillAdventureSeason } from '../../hooks/useAdventureActivity'
 import { findSeasonRaidBackground } from '../../lib/season-raid-background'
 import { ActivitySummary, ActivitySummarySkeleton } from './ActivitySummary'
 import { styles } from './AdventureDashboard.style'
@@ -111,6 +111,7 @@ export function AdventureDashboard({
   onSeasonChange: (season: number) => void
 }): React.JSX.Element {
   const result = useAdventureActivity(adventureName, season)
+  const backfill = useBackfillAdventureSeason(adventureName)
   if (result.status === 'error') {
     return (
       <div {...stylex.props(styles.hero)}>
@@ -139,6 +140,7 @@ export function AdventureDashboard({
           seasons={activity.seasons}
           selectedId={seasonId}
           onSelect={onSeasonChange}
+          onBackfill={backfill}
         />
       ) : (
         <div aria-hidden="true" {...stylex.props(styles.timelinePlaceholder)} />

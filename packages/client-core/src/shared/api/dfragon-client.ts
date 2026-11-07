@@ -14,6 +14,8 @@ import {
 import {
   adventureActivityDaySchema,
   adventureActivitySchema,
+  activitySeasonSchema,
+  type ActivitySeason,
   type AdventureActivity,
   type AdventureActivityDay
 } from '../adventure-guild/adventure-activity'
@@ -85,6 +87,10 @@ export type AdventureActivityDayHttp = (
   adventureName: string,
   date: string
 ) => Promise<AdventureActivityDay>
+export type AdventureSeasonBackfillHttp = (
+  adventureName: string,
+  season: number
+) => Promise<ActivitySeason>
 export type TodayGradeHttp = () => Promise<TodayGrade>
 
 export type DfragonClient = Readonly<{
@@ -105,12 +111,14 @@ export type DfragonClient = Readonly<{
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
     activityDay: AdventureActivityDayHttp
+    backfillSeason: AdventureSeasonBackfillHttp
   }>
   guilds: Readonly<{ get: GuildHttp }>
   items: Readonly<{ todayGrade: TodayGradeHttp }>
 }>
 
 type JsonRequestOptions = {
+  method?: 'get' | 'post'
   searchParams?: Record<string, string>
   signal?: AbortSignal
   details?: boolean
@@ -143,10 +151,11 @@ function createJsonRequest(
   schema: Schema,
   options?: JsonRequestOptions
 ) => Promise<z.infer<Schema>> {
-  return async (path, schema, { searchParams, signal, details = true } = {}) => {
+  return async (path, schema, { method = 'get', searchParams, signal, details = true } = {}) => {
     try {
       signal?.throwIfAborted()
-      const request = http.get(`${apiOrigin}${path}`, {
+      const request = http(`${apiOrigin}${path}`, {
+        method,
         searchParams,
         headers: { Accept: 'application/json' },
         signal
@@ -337,6 +346,17 @@ export function createDfragonClient({
         return requestJson(
           `/adventures/${encodeURIComponent(adventureName)}/activity/days/${encodeURIComponent(date)}`,
           adventureActivityDaySchema
+        )
+      },
+      async backfillSeason(adventureName, season) {
+        if (adventureName.trim() === '') {
+          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+        }
+
+        return requestJson(
+          `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/${season}/backfill`,
+          activitySeasonSchema,
+          { method: 'post' }
         )
       }
     },
