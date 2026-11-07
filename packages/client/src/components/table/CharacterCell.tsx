@@ -17,19 +17,14 @@ export type CharacterCellCharacter = Pick<
 
 export function CharacterCell({
   character,
-  adventureName = null,
-  jobBesideName = false
+  adventureName = null
 }: {
   character: CharacterCellCharacter
   adventureName?: string | null
-  jobBesideName?: boolean
 }): React.JSX.Element {
   const grownJob = character.jobGrowName ?? character.jobName
   const job = grownJob != null ? formatJobName(grownJob) : null
-  const level = character.level != null ? `Lv.${character.level}` : null
-  const detailLevel = jobBesideName && isMaxLevel(character.level) ? null : level
-  const detailJob = jobBesideName ? null : job
-  const detail = [detailLevel, detailJob].filter((part) => part != null).join(' | ')
+  const showsLevel = character.level != null && !isMaxLevel(character.level)
 
   return (
     <div {...stylex.props(styles.cell)}>
@@ -55,9 +50,9 @@ export function CharacterCell({
               {adventureName}
             </Link>
           )}
-          {jobBesideName && job != null && <span {...stylex.props(styles.job)}>{job}</span>}
+          {job != null && <span {...stylex.props(styles.job)}>{job}</span>}
         </span>
-        {detail !== '' && <span {...stylex.props(styles.detail)}>{detail}</span>}
+        {showsLevel && <span {...stylex.props(styles.detail)}>{`Lv.${character.level}`}</span>}
       </span>
     </div>
   )
