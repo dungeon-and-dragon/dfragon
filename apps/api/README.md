@@ -40,7 +40,7 @@ Neople key는 시작할 때 `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE`의 절
 
 DB는 선택입니다. `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`과 `DB_PASSWORD` 또는 `DB_PASSWORD_FILE`의 절대 경로를 모두 지정하면 PostgreSQL을 쓰고, 모두 생략하면 DB 없이 뜹니다.
 일부만 지정하면 시작 전에 값 없이 실패합니다. 비밀번호는 Neople key처럼 읽되 끝의 줄바꿈과 공백까지 뺍니다.
-Prisma의 migration 기록 테이블 `_prisma_migrations`와 캐릭터, 모험단 테이블(`characters`, `adventures`), 수집 대기열(`character_collection`)과 타임라인 테이블(`seasons`, `timeline_events`, `timeline_items`, `timeline_sync_state`)을 만듭니다. 테이블은 [`@dfragon/database` 안내](../../packages/database/README.md#테이블)에 있습니다.
+Prisma의 migration 기록 테이블 `_prisma_migrations`와 캐릭터, 모험단 테이블(`characters`, `adventures`), 수집 대기열(`character_collection`)과 타임라인 테이블(`seasons`, `timeline_events`, `timeline_items`, `timeline_sync_state`, `timeline_season_backfill`)을 만듭니다. 테이블은 [`@dfragon/database` 안내](../../packages/database/README.md#테이블)에 있습니다.
 
 DB 설정이 있으면 listen 전에 [`@dfragon/database`](../../packages/database/README.md)가 `prisma migrate deploy`로 적용하지 않은 migration을 적용합니다.
 여러 인스턴스가 동시에 시작해도 Prisma가 잡는 PostgreSQL advisory lock으로 한 번만 적용하며, lock을 10초 안에 얻지 못한 인스턴스는 끝납니다.
@@ -403,6 +403,7 @@ API는 로그인 없이 `GET /version`으로 다음 정보를 제공합니다.
 이미지 실행 계약은 로컬에 있는 이미지로 `node apps/api/test-support/container-deployment.mjs dfragon-api:local`을 실행해
 확인합니다. UID, 읽기 전용 파일시스템, Neople key의 ENV, FILE, 기본 파일 입력, 잘못된 입력의 거절과 정상 종료를 봅니다.
 DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfragon-api:local`로 확인합니다.
+옛 시즌 받기는 합성 행으로 구간 양 끝 분의 교체, 강화 백필 행의 교체, 받은 위치 이동과 끝까지 받음 기록, 다른 캐릭터와 구간 밖 행, 정기 동기화와 강화 백필 위치를 바꾸지 않는 것을 봅니다.
 타임라인 조회는 합성 행으로 주간 경계 앞뒤, 시즌 경계, 최근 50개, 빈 캐릭터와 진행 중인 동기화를 기다린 조회를 봅니다.
 명성 랭킹과 통계는 합성 행으로 직업과 전직 필터, 명성이 없는 캐릭터 제외, 100명 상한, 명성 구간 경계, 직업별 평균 명성과 API의 통계 캐시를 봅니다.
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
