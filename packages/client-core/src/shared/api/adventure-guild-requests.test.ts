@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
 import type { StoredCharacter } from '../ranking/ranking-stats'
-import type { AdventureCharacters, Guild } from '../adventure-guild/adventure-guild'
+import type { Guild } from '../adventure-guild/adventure-guild'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
@@ -24,7 +24,6 @@ const character: StoredCharacter = {
   guildName: '합성 길드'
 }
 
-const adventure: AdventureCharacters = { adventureName: '합성 모험단', characters: [character] }
 const guild: Guild = {
   guildId: 'guild-1',
   guildName: '합성 길드',
@@ -32,16 +31,6 @@ const guild: Guild = {
   averageFame: 80123,
   members: [character]
 }
-
-it('모험단 응답을 읽고 한글 이름을 주소에 인코딩한다', async () => {
-  const fetch = respond(adventure)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.characters
-
-  await expect(read('합성 모험단')).resolves.toEqual(adventure)
-  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
-    `${API_ORIGIN}/adventures/${encodeURIComponent('합성 모험단')}/characters`
-  )
-})
 
 it('길드 응답을 읽고, 길드원이 없는 길드도 읽는다', async () => {
   const empty: Guild = { ...guild, guildName: null, memberCount: 0, averageFame: null, members: [] }
@@ -56,19 +45,12 @@ it('길드 응답을 읽고, 길드원이 없는 길드도 읽는다', async () 
   ).resolves.toEqual(empty)
 })
 
-it('빈 모험단을 읽고, 모르는 서버가 있는 응답과 오류 응답은 거부한다', async () => {
-  const empty: AdventureCharacters = { adventureName: '없는 모험단', characters: [] }
-
-  await expect(
-    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).adventures.characters(
-      '없는 모험단'
-    )
-  ).resolves.toEqual(empty)
+it('모르는 서버가 있는 길드 응답과 오류 응답은 거부한다', async () => {
   await expect(
     createDfragonClient({
       apiOrigin: API_ORIGIN,
-      fetch: respond({ ...adventure, characters: [{ ...character, serverId: 'unknown' }] })
-    }).adventures.characters('합성 모험단')
+      fetch: respond({ ...guild, members: [{ ...character, serverId: 'unknown' }] })
+    }).guilds.get('guild-1')
   ).rejects.toThrow()
   await expect(
     createDfragonClient({
