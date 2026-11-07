@@ -72,7 +72,7 @@ function memoryStore(initial?: TimelineSyncState) {
 
 const emptyInputs: TimelineInputs = { events: [], items: [] }
 
-test('같은 캐릭터를 대기 중이나 처리 중에 여러 번 넣어도 한 번만 동기화한다', async () => {
+test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기화하고 다른 캐릭터는 기다리지 않고 시작한다', async () => {
   const running = gate()
   const synced: TimelineCharacter[] = []
   const queue = createTimelineSyncQueue(
@@ -84,6 +84,7 @@ test('같은 캐릭터를 대기 중이나 처리 중에 여러 번 넣어도 �
   )
   const others = [
     { serverId: 'siroco', characterId: 'other-1' },
+    { serverId: 'siroco', characterId: 'other-2' },
     { serverId: 'cain', characterId: 'timeline-fixture' }
   ]
 
@@ -92,19 +93,21 @@ test('같은 캐릭터를 대기 중이나 처리 중에 여러 번 넣어도 �
   for (const other of others) {
     queue.request(other)
   }
-  queue.request(others[1]!)
+  queue.request(others[2]!)
   queue.request(character)
   await nextTurn()
 
-  assert.deepEqual(synced, [character, others[0]])
+  assert.deepEqual(synced, [character, ...others])
 
   running.release()
   await nextTurn()
+  queue.request(character)
+  await nextTurn()
 
-  assert.deepEqual(synced, [character, ...others])
+  assert.deepEqual(synced, [character, ...others, character])
 })
 
-test('동기화가 실패를 기록하지 못하면 보고하고 다음 캐릭터를 이어 처리한다', async () => {
+test('동기화가 실패를 기록하지 못하면 보고하고 다른 캐릭터와 그 캐릭터의 다음 요청은 막지 않는다', async () => {
   const running = gate()
   let reported = 0
   const synced: string[] = []
@@ -121,18 +124,23 @@ test('동기화가 실패를 기록하지 못하면 보고하고 다음 캐릭�
     }
   )
 
-  // 동시 처리 2개 가운데 실패한 슬롯이 비어야 세 번째가 시작한다.
-  for (const characterId of ['broken', 'second', 'third', 'fourth']) {
+  for (const characterId of ['broken', 'second', 'third']) {
     queue.request({ serverId: 'siroco', characterId })
   }
   await nextTurn()
 
   assert.equal(reported, 1)
   assert.deepEqual(synced, ['broken', 'second', 'third'])
+
+  queue.request({ serverId: 'siroco', characterId: 'broken' })
+  await nextTurn()
+
+  assert.equal(reported, 2)
+  assert.deepEqual(synced, ['broken', 'second', 'third', 'broken'])
   running.release()
 })
 
-test('queue를 닫으면 진행 중인 동기화는 두고 대기 중인 캐릭터는 시작하지 않는다', async () => {
+test('queue를 닫으면 진행 중인 동기화는 끝까지 두고 닫은 뒤 온 캐릭터는 시작하지 않는다', async () => {
   const running = gate()
   const synced: string[] = []
   const finished: string[] = []
@@ -145,7 +153,7 @@ test('queue를 닫으면 진행 중인 동기화는 두고 대기 중인 캐릭�
     () => assert.fail('동기화 실패가 보고되면 안 된다')
   )
 
-  for (const characterId of ['first', 'second', 'waiting']) {
+  for (const characterId of ['first', 'second', 'third']) {
     queue.request({ serverId: 'siroco', characterId })
   }
   queue.close()
@@ -153,8 +161,8 @@ test('queue를 닫으면 진행 중인 동기화는 두고 대기 중인 캐릭�
   running.release()
   await nextTurn()
 
-  assert.deepEqual(synced, ['first', 'second'])
-  assert.deepEqual(finished, ['first', 'second'])
+  assert.deepEqual(synced, ['first', 'second', 'third'])
+  assert.deepEqual(finished, ['first', 'second', 'third'])
 })
 
 test('마지막 성공이 1시간 이내면 Neople을 부르지 않는다', async () => {
@@ -373,7 +381,7 @@ test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백
 })
 
 // 닫기가 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
-test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 대기열을 버린 뒤 타임라인 저장소를 닫는다', {
+test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 타임라인 저장소를 닫는다', {
   timeout: 10_000
 }, async () => {
   const running = gate()
@@ -407,20 +415,19 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
   })
   await app.listen(0, '127.0.0.1')
   const origin = await app.getUrl()
-  // 동시 처리가 2명이라 세 번째 캐릭터는 대기열에 남는다.
-  for (const characterId of ['first', 'second', 'waiting']) {
+  for (const characterId of ['first', 'second', 'third']) {
     const response = await fetch(new URL(`/characters/siroco/${characterId}`, origin))
     assert.equal(response.status, 200)
   }
 
-  assert.equal(synced, 2)
-  assert.equal(backfilled, 2)
+  assert.equal(synced, 3)
+  assert.equal(backfilled, 3)
 
   await app.close()
   running.release()
   await nextTurn()
 
   assert.equal(closed, 1)
-  assert.equal(synced, 2)
-  assert.equal(backfilled, 2)
+  assert.equal(synced, 3)
+  assert.equal(backfilled, 3)
 })

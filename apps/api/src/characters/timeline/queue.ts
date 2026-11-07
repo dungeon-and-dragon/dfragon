@@ -1,7 +1,5 @@
 import type { TimelineCharacter } from '@dfragon/database'
 
-const TIMELINE_SYNC_CONCURRENCY = 2
-
 export type RequestTimelineSync = (character: TimelineCharacter) => void
 
 function characterKey({ serverId, characterId }: TimelineCharacter): string {
@@ -103,5 +101,5 @@ export function createTimelineSyncQueue(
   sync: (character: TimelineCharacter) => Promise<void>,
   reportFailure: () => void
 ): TimelineSyncQueue {
-  return createJobQueue(characterKey, sync, reportFailure, TIMELINE_SYNC_CONCURRENCY)
+  return createJobQueue(characterKey, sync, reportFailure, Number.POSITIVE_INFINITY)
 }
