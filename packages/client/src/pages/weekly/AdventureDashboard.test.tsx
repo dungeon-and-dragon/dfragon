@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -7,6 +8,7 @@ import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
+import { styles } from './SeasonTimeline.style'
 import { WeeklyScreen } from './WeeklyScreen'
 
 let container: HTMLDivElement
@@ -152,6 +154,7 @@ function hover(element: HTMLElement): void {
 }
 
 const FILL_WIDTH_PERCENT_PATTERN = /width: ([\d.]+)%/
+const FULL_WIDTH_PATTERN = /width: 100%/
 
 function filledPercent(name: string): number | undefined {
   const style = seasonButton(name).querySelector('i > i')?.getAttribute('style') ?? ''
@@ -448,46 +451,47 @@ it('레이드 내역은 하드와 노말이 모두 있으면 둘을 나눠 보�
   expect(tooltipRows()).toEqual(['가 레이드하드 24회 | 노말 31회', '나 레이드3회', '다 레이드7회'])
 })
 
-function backfillRing(name: string): Element | null {
-  return seasonButton(name).querySelector('i[aria-hidden="true"]')
+function primevalLayer(name: string): Element | null {
+  return seasonButton(name).querySelector(':scope > i[aria-hidden="true"]')
 }
 
-function stubReducedMotion(reduce: boolean): void {
-  vi.stubGlobal('matchMedia', (query: string) =>
-    Object.assign(new EventTarget(), {
-      matches: query === '(prefers-reduced-motion: no-preference)' ? !reduce : false,
-      media: query,
-      onchange: null,
-      addListener() {},
-      removeListener() {}
-    })
-  )
+function hasPrimeval(name: string): boolean | undefined {
+  return primevalLayer(name)
+    ?.className.split(' ')
+    .includes(stylex.props(styles.primevalOn).className!)
 }
 
 it.each([
   ['받는 중', { done: 12, total: 30, running: true }, false, true],
   ['멈춤', { done: 12, total: 30, running: false }, false, false],
   ['완료', { done: 30, total: 30, running: false }, true, false]
-])('옛 시즌 막대의 테두리는 받는 중일 때만 둔다: %s', async (_, backfill, available, ringed) => {
-  await render(async () => withBackfill(currentSeason, backfill, available), undefined)
+])(
+  '옛 시즌 막대는 받는 중일 때만 태초색으로 채우고 테두리는 두지 않는다: %s',
+  async (_, backfill, available, primeval) => {
+    await render(async () => withBackfill(currentSeason, backfill, available), undefined)
 
-  expect(backfillRing('합성 시즌 9') !== null).toBe(ringed)
-})
+    expect(hasPrimeval('합성 시즌 9')).toBe(primeval)
+    expect(seasonButton('합성 시즌 9').querySelectorAll('i[aria-hidden="true"]')).toHaveLength(1)
+  }
+)
 
-it('받는 중인 막대의 테두리 각도를 돌리고, 움직임 줄이기 설정이면 돌리지 않는다', async () => {
-  const running = withBackfill(currentSeason, { done: 12, total: 30, running: true })
-  const ringAngle = () =>
-    (backfillRing('합성 시즌 9') as HTMLElement | null)?.style.getPropertyValue(
-      '--season-ring-angle'
-    )
-  stubReducedMotion(false)
-  await render(async () => running, undefined)
-  expect(ringAngle()).not.toBe('')
+it('받기가 끝나도 같은 태초색 층이 남아 막대 끝까지 채우고 태초색을 끈다', async () => {
+  vi.useFakeTimers()
+  try {
+    const getAdventureActivity = vi
+      .fn<ClientHost['getAdventureActivity']>()
+      .mockResolvedValueOnce(withBackfill(currentSeason, { done: 24, total: 30, running: true }))
+      .mockResolvedValue(withBackfill(currentSeason, { done: 30, total: 30, running: false }, true))
+    await render(getAdventureActivity, undefined)
+    const layer = primevalLayer('합성 시즌 9')
+    expect(hasPrimeval('합성 시즌 9')).toBe(true)
 
-  await act(async () => root.unmount())
-  root = createRoot(container)
-  stubReducedMotion(true)
-  await render(async () => running, undefined)
-  expect(backfillRing('합성 시즌 9')).not.toBeNull()
-  expect(ringAngle()).toBe('')
+    await act(async () => vi.advanceTimersByTimeAsync(3000))
+
+    expect(primevalLayer('합성 시즌 9')).toBe(layer)
+    expect(hasPrimeval('합성 시즌 9')).toBe(false)
+    expect(layer?.getAttribute('style')).toMatch(FULL_WIDTH_PATTERN)
+  } finally {
+    vi.useRealTimers()
+  }
 })
