@@ -62,6 +62,25 @@ export const styles = stylex.create({
     '::placeholder': { color: colors.fgPlaceholder },
     '::-webkit-search-cancel-button': { display: 'none' }
   },
+  clear: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    width: 22,
+    height: '100%',
+    margin: 0,
+    padding: 0,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    color: { default: colors.fgMuted, ':hover': colors.fgDefault },
+    cursor: 'pointer',
+    outlineStyle: { default: 'none', ':focus-visible': 'solid' },
+    outlineWidth: 2,
+    outlineColor: colors.signal,
+    outlineOffset: -2
+  },
+  clearIcon: { width: 14, height: 14 },
   submit: {
     display: 'inline-flex',
     alignItems: 'center',

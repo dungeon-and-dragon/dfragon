@@ -16,6 +16,7 @@ import {
 } from '@dfragon/client-core/shared/api/character-schemas'
 import { characterSearchServerOptions } from '../constants/server-options'
 import { ChevronDownIcon } from './ChevronDownIcon'
+import { CloseIcon } from './CloseIcon'
 import { styles } from './CharacterSearchBox.style'
 import { RecentCharacterList } from './RecentCharacterList'
 import { SearchIcon } from './SearchIcon'
@@ -76,6 +77,11 @@ export function CharacterSearchBox(): React.JSX.Element {
     first.focus()
   }
 
+  function clearName(): void {
+    setName('')
+    inputRef.current?.focus()
+  }
+
   function handleScopeChange(next: string | null): void {
     if (next != null) {
       setScope(next)
@@ -122,6 +128,16 @@ export function CharacterSearchBox(): React.JSX.Element {
         onKeyDown={focusFirstResult}
         {...stylex.props(styles.input)}
       />
+      {name !== '' && (
+        <button
+          type="button"
+          aria-label="검색어 지우기"
+          onClick={clearName}
+          {...stylex.props(styles.clear)}
+        >
+          <CloseIcon {...stylex.props(styles.clearIcon)} />
+        </button>
+      )}
       <button type="submit" aria-label="검색" {...stylex.props(styles.submit)}>
         <SearchIcon {...stylex.props(styles.icon)} />
       </button>
