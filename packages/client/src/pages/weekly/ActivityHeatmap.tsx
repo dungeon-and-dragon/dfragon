@@ -117,21 +117,39 @@ function Legend({
   )
 }
 
-function ItemTags({ items }: { items: AdventureActivity['summary']['items'] }): React.JSX.Element {
+function ItemTags({
+  items
+}: {
+  items: AdventureActivity['summary']['items']
+}): React.JSX.Element | null {
+  if (items.legendary + items.epic + items.primeval + items.mythic === 0) {
+    return null
+  }
+
   return (
     <span {...stylex.props(styles.tags)}>
-      <span {...stylex.props(styles.tag, styles.legendary)}>
-        레전더리 {numberFormat.format(items.legendary)}
-      </span>
-      <span {...stylex.props(styles.tag, styles.epic)}>에픽 {numberFormat.format(items.epic)}</span>
-      <span {...stylex.props(styles.tag, styles.primordialTag)}>
-        <span {...stylex.props(styles.primordialText)}>
-          태초 {numberFormat.format(items.primeval)}
+      {items.legendary > 0 && (
+        <span {...stylex.props(styles.tag, styles.legendary)}>
+          레전더리 {numberFormat.format(items.legendary)}
         </span>
-      </span>
-      <span {...stylex.props(styles.tag, styles.mythicTag)}>
-        <span {...stylex.props(styles.mythicText)}>신화 {numberFormat.format(items.mythic)}</span>
-      </span>
+      )}
+      {items.epic > 0 && (
+        <span {...stylex.props(styles.tag, styles.epic)}>
+          에픽 {numberFormat.format(items.epic)}
+        </span>
+      )}
+      {items.primeval > 0 && (
+        <span {...stylex.props(styles.tag, styles.primordialTag)}>
+          <span {...stylex.props(styles.primordialText)}>
+            태초 {numberFormat.format(items.primeval)}
+          </span>
+        </span>
+      )}
+      {items.mythic > 0 && (
+        <span {...stylex.props(styles.tag, styles.mythicTag)}>
+          <span {...stylex.props(styles.mythicText)}>신화 {numberFormat.format(items.mythic)}</span>
+        </span>
+      )}
     </span>
   )
 }
