@@ -46,6 +46,8 @@ function detailOf(characterId: string): CharacterDetailView {
       characterName: `이름-${characterId}`,
       serverName: '카인',
       level: 115,
+      jobId: null,
+      jobGrowId: null,
       jobName: null,
       jobGrowName: null,
       fame: null,

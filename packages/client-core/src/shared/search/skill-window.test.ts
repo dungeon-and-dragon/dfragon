@@ -313,6 +313,21 @@ describe('스킬 개화, 강화', () => {
     })
   })
 
+  it('스킬 창 아이콘에 그 스킬의 개화 갈래 이름과 강화가 있는지를 둔다', () => {
+    const { character, style } = inquisitor()
+    const icons = skillWindowOf(INQUISITOR_CATALOG, character, style)?.icons ?? []
+    const upgradesOf = (skillName: string) => {
+      const icon = icons.find(({ name }) => name === skillName)
+
+      return [icon?.evolutionNames, icon?.enhanceable]
+    }
+
+    expect(upgradesOf('참수')).toEqual([['참수 1', '참수 2'], true])
+    expect(upgradesOf('세례의 불길')).toEqual([['세례의 불길 1', '세례의 불길 2'], false])
+    expect(upgradesOf('성화')).toEqual([null, true])
+    expect(upgradesOf('백스텝')).toEqual([null, false])
+  })
+
   it('개화는 그 전직이 배울 수 있는 스킬을 모두, 강화는 강화한 스킬만 습득 레벨 순으로 두고 고른 갈래를 표시한다', () => {
     const { character, style } = inquisitor()
     const board = skillUpgradeBoardOf(INQUISITOR_CATALOG, character, style)
