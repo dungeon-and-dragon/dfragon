@@ -116,6 +116,16 @@ it('버퍼 버프 강화 장비와 아바타는 한 테이블에서 장비 뒤�
   expect(rows[1]?.textContent).toContain('러블리 템포 스킬Lv +1')
 })
 
+it('버프 강화 표의 아바타 행은 클론 아이콘 자리를 비워 두지 않아 장비 행과 아이콘 칸 수가 같다', async () => {
+  await render(characterDetailFixture('buffer'))
+
+  const rows = [...section('버프 강화 장비, 아바타, 크리쳐')!.querySelectorAll('tbody tr')]
+  const iconCounts = rows.map(
+    (row) => row.querySelectorAll('td')[1]?.querySelectorAll('img, span[aria-hidden="true"]').length
+  )
+  expect(iconCounts).toEqual([1, 1])
+})
+
 it('딜러처럼 버프 강화 장비가 없으면 같은 테이블에 아바타 뒤로 크리쳐 행을 보인다', async () => {
   await render(characterDetailFixture('dealer'))
 
