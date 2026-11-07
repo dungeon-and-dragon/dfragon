@@ -1,7 +1,9 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, radius, space } from '@dfragon/ui/tokens.stylex'
+import { breakpoints } from '../../styles/breakpoints.stylex'
 
 const TAB_COLUMN_WIDTH = 120
+const TAB_OUTSIDE_GAP = 16
 const LABEL_COLUMN_WIDTH = 24
 const CELL_MIN_SIZE = 8
 const CELL_MAX_SIZE = 26
@@ -15,8 +17,12 @@ const RING_ANGLE = 'calc(var(--heatmap-ring-angle, 0) * 1deg)'
 
 export const styles = stylex.create({
   box: {
+    position: 'relative',
     display: 'grid',
-    gridTemplateColumns: `minmax(0, 1fr) ${TAB_COLUMN_WIDTH}px`,
+    gridTemplateColumns: {
+      default: `minmax(0, 1fr) ${TAB_COLUMN_WIDTH}px`,
+      [breakpoints.screenSideRoom]: 'minmax(0, 1fr)'
+    },
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: colors.borderDefault,
@@ -141,10 +147,14 @@ export const styles = stylex.create({
     backgroundImage: `conic-gradient(from ${RING_ANGLE}, color-mix(in srgb, ${colors.rarityMythicStart} 45%, transparent) 0deg, color-mix(in srgb, ${colors.rarityMythicEnd} 45%, transparent) 220deg, ${colors.rarityMythicStart} 290deg, ${colors.rarityMythicEnd} 345deg, color-mix(in srgb, ${colors.rarityMythicStart} 45%, transparent) 360deg)`
   },
   tabs: {
-    position: 'relative',
+    position: { default: 'relative', [breakpoints.screenSideRoom]: 'absolute' },
+    top: { default: null, [breakpoints.screenSideRoom]: 0 },
+    left: { default: null, [breakpoints.screenSideRoom]: '100%' },
     display: 'flex',
     flexDirection: 'column',
-    paddingBlock: space.s12,
+    width: { default: null, [breakpoints.screenSideRoom]: TAB_COLUMN_WIDTH },
+    marginLeft: { default: null, [breakpoints.screenSideRoom]: TAB_OUTSIDE_GAP },
+    paddingBlock: { default: space.s12, [breakpoints.screenSideRoom]: 0 },
     borderLeftWidth: 1,
     borderLeftStyle: 'solid',
     borderLeftColor: colors.borderDefault
