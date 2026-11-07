@@ -24,10 +24,10 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   이미 있는 행의 `fetched_at`이 `style.fetchedAt`보다 늦으면 바꾸지 않아, 캐시한 예전 응답이 그 뒤에 받은 행을 덮지 않습니다. `characters`에 없는 캐릭터는 FK 오류로 던집니다.
 - `recordCharacterBasicAndSkillStyle(client, basic, style)`: `recordCharacterBasic`과 같은 기본 정보 저장과 `recordCharacterSkillStyle`과 같은 스킬 스타일 저장을 한 transaction에서 합니다. 어느 하나가 실패하면 둘 다 남지 않습니다.
 - `deleteCharacterSkillStyle(client, character)`: 그 캐릭터의 스킬 스타일 행을 지웁니다. 행이 없으면 아무것도 바꾸지 않고, `characters` 행은 남깁니다.
-- `SKILL_STYLE_SAMPLE_TOP_PERCENT`(10), `SKILL_STYLE_REFRESH_DAYS`(7): 스킬 스타일 표본의 명성 상위 비율과 갱신 주기입니다. 갱신 worker와 집계가 같은 값을 씁니다.
+- `SKILL_STYLE_SAMPLE_TOP_PERCENT`(10): 스킬 스타일 표본의 명성 상위 비율입니다. 갱신 worker와 집계가 같은 값을 씁니다.
 - `skillStyleSampleSql({ jobId, jobGrowId })`: 그 전직의 표본(`server_id`, `character_id`, `fame`)을 고르는 SQL 조각입니다. 명성이 없는 행을 빼고 명성 내림차순 `percent_rank()`가 `SKILL_STYLE_SAMPLE_TOP_PERCENT`% 이내인 행이며, 같은 명성은 같은 순위라 함께 들거나 함께 빠집니다.
 - `readSkillStyleSampleJobs(client)`: 명성이 있는 캐릭터의 전직(`SkillStyleSampleJob`) 목록을 직업, 전직 id 순으로 돌려줍니다.
-- `takeSkillStyleRefreshBatch(client, job, skipped, limit, now)`: 그 전직의 표본 가운데 스킬 스타일이 없거나 `fetched_at`이 `now`보다 `SKILL_STYLE_REFRESH_DAYS`일 이상 앞선 캐릭터를, 없는 캐릭터 먼저, 오래된 순(같으면 서버, 캐릭터 id 순)으로 `limit`명까지 돌려줍니다. `skipped`의 캐릭터는 고르지 않습니다.
+- `takeSkillStyleRefreshBatch(client, job, fetchedBefore, skipped, limit)`: 그 전직의 표본 가운데 스킬 스타일이 없거나 `fetched_at`이 `fetchedBefore`보다 앞선 캐릭터를, 없는 캐릭터 먼저, 오래된 순(같으면 서버, 캐릭터 id 순)으로 `limit`명까지 돌려줍니다. `skipped`의 캐릭터는 고르지 않습니다.
 - `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `readAdventureCharacters(client, adventureName)`: 이름이 `adventureName`인 모험단의 캐릭터(`StoredCharacter`)를 서버를 가리지 않고 명성이 높은 순(명성이 없으면 뒤, 같으면 서버, 캐릭터 id 순)으로 돌려줍니다. `fetchedAt`은 `basic_fetched_at`입니다.
 - `readAdventureNames(client, characters)`: `characters`(서버, 캐릭터 ID) 가운데 `characters`에 저장된 캐릭터의 모험단 이름(`StoredAdventureName`)을 query 한 번으로 돌려줍니다. 저장되지 않은 캐릭터는 결과에 없고 순서는 정하지 않습니다.

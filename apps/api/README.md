@@ -268,16 +268,16 @@ Neople 연결 실패, 잘못된 key, 429와 503을 뺀 HTTP 오류도 `neople-ap
 
 ### 스킬 스타일 갱신 worker
 
-`node dist/skill-style-collector.js`는 명성 상위 캐릭터의 스킬 스타일을 주기적으로 다시 받는 별도 프로세스입니다. HTTP를 띄우지 않고 migration을 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
-입력은 Neople key, DB 설정(필수), `SKILL_STYLE_COLLECTOR_REQUESTS_PER_SECOND`(Neople 초당 요청 상한, 기본 5), `SKILL_STYLE_COLLECTOR_CONCURRENCY`(한 번에 함께 처리할 캐릭터 수, 1~32, 기본 1)입니다. 잘못된 입력은 `Skill style collector failed`와 nonzero exit로 끝납니다.
-속도 제한, 동시 처리와 한도 초과, 점검, timeout 처리는 캐릭터 수집 worker와 같은 함수를 씁니다. 두 worker와 상세 조회는 같은 Neople key를 나눠 쓰므로 초당 상한은 합계로 정합니다.
+`node dist/skill-style-collector.js`는 매주 목요일 01:00(KST)에 명성 상위 캐릭터의 스킬 스타일을 모두 다시 받는 별도 프로세스입니다. HTTP를 띄우지 않고 migration을 적용하지 않으므로, schema를 바꾼 API 이미지가 먼저 시작해야 합니다.
+입력은 Neople key, DB 설정(필수), `SKILL_STYLE_COLLECTOR_CONCURRENCY`(한 번에 함께 처리할 캐릭터 수, 1~32, 기본 1)입니다. 잘못된 입력은 `Skill style collector failed`와 nonzero exit로 끝납니다.
+초당 요청 상한은 두지 않아, 동시 처리 수만큼 묶어 부르고 묶음이 끝나면 바로 다음 묶음을 부릅니다. 동시 처리와 한도 초과, 점검, timeout 처리는 캐릭터 수집 worker와 같은 함수를 씁니다.
 
-1. 명성이 있는 캐릭터의 전직(`job_id`, `job_grow_id`) 목록을 읽고, 전직마다 표본을 고릅니다. 표본은 그 전직에서 명성 내림차순 `percent_rank()`가 상위 10% 이내인 캐릭터이며 명성이 없는 행은 뺍니다. 비율과 갱신 주기는 `@dfragon/database`의 `SKILL_STYLE_SAMPLE_TOP_PERCENT`, `SKILL_STYLE_REFRESH_DAYS`입니다.
-2. 표본 가운데 스킬 스타일을 받은 적 없거나 받은 지 7일 이상 지난 캐릭터를 받은 적 없는 캐릭터, 오래된 순(같으면 서버, 캐릭터 id 순)으로 100명씩 골라 `GET /df/servers/<serverId>/characters/<characterId>/skill/style`을 부릅니다. 대기열 테이블은 없고 매번 query로 고릅니다.
+1. 명성이 있는 캐릭터의 전직(`job_id`, `job_grow_id`) 목록을 읽고, 전직마다 표본을 고릅니다. 표본은 그 전직에서 명성 내림차순 `percent_rank()`가 상위 10% 이내인 캐릭터이며 명성이 없는 행은 뺍니다. 비율은 `@dfragon/database`의 `SKILL_STYLE_SAMPLE_TOP_PERCENT`입니다.
+2. 표본 가운데 스킬 스타일을 받은 적 없거나 이번 회차 시작(가장 최근의 목요일 01:00 KST) 전에 받은 캐릭터를, 받은 적 없는 캐릭터 먼저, 오래된 순(같으면 서버, 캐릭터 id 순)으로 100명씩 골라 `GET /df/servers/<serverId>/characters/<characterId>/skill/style`을 부릅니다. 대기열 테이블은 없고 매번 query로 고릅니다.
 3. 응답 최상위의 기본 정보를 캐릭터 수집 worker와 같은 writer로 `characters`에 쓰고, 스킬 스타일을 받은 시각과 함께 `character_skill_styles`에 쓰며 둘은 한 transaction입니다.
 4. 없는 캐릭터(`DNF001`)는 스킬 스타일 행을 지웁니다. 그 밖의 Neople 실패는 `SKILL_STYLE_NEOPLE_FAILED`를 stdout JSON 한 줄로 남기고, 이번 회차에서는 다시 고르지 않고 다음 회차에 다시 부릅니다.
-5. 한도 초과, 점검, timeout이면 저장하지 않고 `SKILL_STYLE_NEOPLE_UNAVAILABLE`을 남긴 뒤 1분 쉬고 처음부터 다시 고릅니다. 모든 전직에 대상이 없으면 1시간 쉽니다. DB 오류는 프로세스를 끝내므로 컨테이너 재시작 정책으로 다시 띄웁니다.
-6. 종료 처리는 따로 두지 않아 SIGTERM, SIGINT를 받으면 그대로 끝납니다. 저장 전에 끝난 캐릭터는 받은 시각이 그대로라 다음 시작 때 다시 고릅니다.
+5. 한도 초과, 점검, timeout이면 저장하지 않고 `SKILL_STYLE_NEOPLE_UNAVAILABLE`을 남긴 뒤 1분 쉬고 같은 회차를 남은 캐릭터부터 잇습니다. 모든 전직에 대상이 없으면 회차가 끝나 다음 목요일 01:00(KST)까지 쉽니다. 시작 시각은 `skill-style-collection/schedule.ts`의 `SKILL_STYLE_REFRESH_START`입니다. DB 오류는 프로세스를 끝내므로 컨테이너 재시작 정책으로 다시 띄웁니다.
+6. 종료 처리는 따로 두지 않아 SIGTERM, SIGINT를 받으면 그대로 끝납니다. 프로세스가 시작하면 가장 최근 목요일 01:00(KST)에 시작한 회차를 곧바로 이어 돌므로, 재시작이나 배포로 끊긴 회차도 남은 캐릭터부터 받습니다. 처음 띄우면 첫 회차를 바로 돌고, 이미 끝난 회차라면 그 회차에서 실패한 캐릭터만 다시 부릅니다.
 
 대상 고르기는 `characters`의 `(job_id, job_grow_id, fame DESC)` index로 전직 하나의 행만 읽고 `character_skill_styles`를 `(server_id, character_id)`로 붙이므로, 새 index를 두지 않습니다.
 로컬에서 합성 캐릭터 160만 명(전직 70개, 스킬 스타일 행 15만 개)일 때 전직 목록이 85ms, 전직 하나의 100명 고르기가 44ms였습니다.
@@ -421,7 +421,7 @@ PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
 수집 worker는 빈 대기열에서 DB에 붙은 채 실행 중인지, SIGTERM으로 끝나는지, `CHARACTER_IMPORT_FILES`가 없으면 `Character collector failed`로 끝나는지 봅니다. 대기열이 비어 있어 Neople은 부르지 않습니다.
-스킬 스타일 갱신은 합성 행으로 상위 10% 경계, 7일 앞뒤, 명성 없는 캐릭터와 다른 전직 제외, 받은 적 없는 캐릭터 먼저, 이번 회차에서 뺀 캐릭터, 기본 정보와 스킬 스타일의 함께 저장과 함께 되돌림, 행 삭제를 봅니다.
+스킬 스타일 갱신은 합성 행으로 상위 10% 경계, 회차 시작 앞뒤에 받은 행, 명성 없는 캐릭터와 다른 전직 제외, 받은 적 없는 캐릭터 먼저, 이번 회차에서 뺀 캐릭터, 기본 정보와 스킬 스타일의 함께 저장과 함께 되돌림, 행 삭제를 봅니다.
 갱신 worker는 DB에 붙어 네트워크 없는 컨테이너에서 Neople 실패를 남기고도 계속 도는지, SIGTERM으로 끝나는지, 잘못된 설정이면 `Skill style collector failed`로 끝나는지 봅니다.
 
 ### Migration 실패 복구
