@@ -51,3 +51,24 @@ export type AdventureActivity = z.infer<typeof adventureActivitySchema>
 export type ActivitySeason = AdventureActivity['seasons'][number]
 export type ActivitySummary = AdventureActivity['summary']
 export type EnhancementTarget = ActivitySummary['enhancement']['amplify'][number]
+
+export const adventureActivityDaySchema = z.object({
+  date: z.iso.date(),
+  raids: z.array(nameCount),
+  legions: z.array(nameCount),
+  items: z.array(
+    z.object({ at: z.iso.datetime({ offset: true }), name: z.string(), rarity: z.string() })
+  ),
+  enhancements: z.array(
+    z.object({
+      at: z.iso.datetime({ offset: true }),
+      kind: z.enum(['reinforce', 'amplify', 'refine']),
+      target: z.number().int(),
+      success: z.boolean()
+    })
+  )
+})
+
+export type AdventureActivityDay = z.infer<typeof adventureActivityDaySchema>
+export type ActivityDayItem = AdventureActivityDay['items'][number]
+export type ActivityDayEnhancement = AdventureActivityDay['enhancements'][number]

@@ -1,11 +1,13 @@
 import { Button, shapes, TextField, TextFieldInput } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { type ChangeEvent, type FormEvent, useState } from 'react'
+import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
 import { SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
+import { styles as listBoxStyles } from '../../components/table/ListBox.style'
 import { useRefreshAdventureActivity } from '../../hooks/useAdventureActivity'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from '../../hooks/useAdventureWeekly'
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
+import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
 import { WeeklyClearTable } from './WeeklyClearTable'
 import { styles } from './WeeklyScreen.style'
@@ -77,6 +79,7 @@ export function WeeklyScreen({
           )}
         </form>
       </div>
+      {adventureName != null && <ActivityHeatmap adventureName={adventureName} season={season} />}
       {adventureName != null ? (
         <WeeklyClearList adventureName={adventureName} />
       ) : (
@@ -88,12 +91,20 @@ export function WeeklyScreen({
   )
 }
 
+function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Element {
+  return (
+    <section aria-label="이번 주 클리어" {...stylex.props(listBoxStyles.box)}>
+      {children}
+    </section>
+  )
+}
+
 function WeeklyClearList({ adventureName }: { adventureName: string }): React.JSX.Element {
   const result = useAdventureWeekly(adventureName)
   switch (result.status) {
     case 'loading':
       return (
-        <ListBox name={adventureName}>
+        <WeeklyClearBox>
           <div aria-busy="true">
             <span role="status" {...stylex.props(shapes.srOnly)}>
               주간 던파를 받는 중입니다.
@@ -106,15 +117,15 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
               ))}
             />
           </div>
-        </ListBox>
+        </WeeklyClearBox>
       )
     case 'error':
       return (
-        <ListBox name={adventureName}>
+        <WeeklyClearBox>
           <p role="alert" {...stylex.props(styles.state, styles.error)}>
             {result.message}
           </p>
-        </ListBox>
+        </WeeklyClearBox>
       )
     case 'success':
       if (result.value.characters.length === 0) {
@@ -122,9 +133,9 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
       }
 
       return (
-        <ListBox name={adventureName}>
+        <WeeklyClearBox>
           <WeeklyClearTable clearNames={result.value.clearNames} rows={result.value.characters} />
-        </ListBox>
+        </WeeklyClearBox>
       )
   }
 }

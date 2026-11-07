@@ -27,6 +27,7 @@
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@xstate/react": "catalog:",
+    "gsap": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
