@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import { isMaxLevel } from '@dfragon/client-core/lib/character-level'
 import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import {
@@ -16,16 +17,19 @@ export type CharacterCellCharacter = Pick<
 
 export function CharacterCell({
   character,
-  adventureName = null
+  adventureName = null,
+  jobBesideName = false
 }: {
   character: CharacterCellCharacter
   adventureName?: string | null
+  jobBesideName?: boolean
 }): React.JSX.Element {
-  const job = character.jobGrowName ?? character.jobName
-  const details = [
-    character.level != null ? `Lv.${character.level}` : null,
-    job != null ? formatJobName(job) : null
-  ].filter((part) => part != null)
+  const grownJob = character.jobGrowName ?? character.jobName
+  const job = grownJob != null ? formatJobName(grownJob) : null
+  const level = character.level != null ? `Lv.${character.level}` : null
+  const detailLevel = jobBesideName && isMaxLevel(character.level) ? null : level
+  const detailJob = jobBesideName ? null : job
+  const detail = [detailLevel, detailJob].filter((part) => part != null).join(' | ')
 
   return (
     <div {...stylex.props(styles.cell)}>
@@ -51,8 +55,9 @@ export function CharacterCell({
               {adventureName}
             </Link>
           )}
+          {jobBesideName && job != null && <span {...stylex.props(styles.job)}>{job}</span>}
         </span>
-        <span {...stylex.props(styles.detail)}>{details.join(' | ')}</span>
+        {detail !== '' && <span {...stylex.props(styles.detail)}>{detail}</span>}
       </span>
     </div>
   )
