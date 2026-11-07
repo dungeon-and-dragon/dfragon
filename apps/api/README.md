@@ -329,79 +329,28 @@ URL, query, header, body, 오류 message와 캐릭터 ID, 이름은 남기지 �
 
 ## 서버 이미지
 
-[Product Images](../../.github/workflows/product-images.yml)는 이미지 입력이 바뀐 서비스의 이미지만 빌드합니다. 서비스는 API(`apps/api/**`)와
-웹([웹 이미지](../web/README.md#웹-이미지), `apps/web/**`)입니다.
-`packages/client/**`, `packages/client-core/**`, `packages/database/**`, `packages/lib/**`, `packages/neople/**`, `packages/licenses/**`, `packages/models/**`, `packages/ui/**`와 root package, lockfile, workspace 설정,
-이미지 workflow, 선택 도구, 커밋 정보 생성기(`scripts/server-build-info.mjs`) 변경은 두 이미지를 모두 빌드합니다.
-`packages/models/**`에는 submodule 커밋을 옮긴 변경도 들어가므로 점수 엔진이나 OCR 모델만 바꾼 PR도 이미지를 다시 빌드합니다.
-그 안의 `*.md` 문서는 이미지에 들어가지 않으므로 입력으로 보지 않습니다.
-지운 accounts, OCR 이미지는 더 빌드하지 않습니다.
-이미지 입력이 없는 문서 변경은 이미지 빌드, 발행을 건너뜁니다.
-PR 제목 scope가 `(build)`가 아닌 PR과 그 main push도 이미지를 빌드, 발행하지 않으며, 그 변경은 다음
-`(build)` main push가 함께 발행합니다. 규칙은 [build-scope 안내](../../scripts/README.md#build-scope)에 있습니다.
+API와 웹([웹 이미지](../web/README.md#웹-이미지)) 이미지는 node1이 운영자가 고른 main commit을 빌드해 배포합니다.
+빌드, 배포 절차와 이미지 이름, 비밀값 관리와 전달, Compose, SSH, 서버 권한의 원본은
+[인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)입니다. 제품 main merge는 이미지를 빌드하거나 배포하지 않습니다.
 
-Product Images는 main push에서만 실행하며 테스트 통과를 확인하지 않습니다. 테스트는 로컬의 `pnpm verify`가 맡습니다.
-main push 전체의 `before`부터 push한 commit까지 비교해 이미지를 선택하고 같은 commit으로
-빌드, 발행합니다. 후속 실행 때의 최신 main을 다시 선택하지 않습니다.
-main에서는 마지막으로 Product Images 전체가 성공한 실행의 source commit 이후 변경도
-포함합니다. 앞선 빌드, 발행의 취소나 실패로 발행되지 않은 변경은 다음 성공 실행에서
-반영합니다. 이전 성공 목록이 없거나 90일 보관 기한이 지났으면 모든 이미지를 빌드합니다.
-지우기 전의 목록에 남은 `ocr`, `accounts`는 이전 성공 목록에서만 무시합니다.
-선택 목록이 없거나 source commit이 다르면 실패하며 임의로 빌드를 생략하지 않습니다.
-
-이미지는 `ghcr.io/dungeon-and-dragon/dfragon/<service>:<40자리 commit SHA>`로 발행하고
-OCI `source`, `revision` label에 저장소와 commit을 기록합니다. 대상 플랫폼은 `linux/amd64` 하나입니다.
-같은 제품 commit을 `SOURCE_COMMIT` 빌드 인자로 전달해 이미지 내부 `/app/build-info.json`에도
-고정합니다. 빌드와 발행 전에 컨테이너를 시작하지 않고 파일을 추출해 서비스명과 commit을
-대조합니다. 이미지의 label, 내부 버전 정보와 인계 artifact가 같은 소스를 가리켜야 합니다.
-이미지 빌드 실패는 `Build image`, 인증, 발행, digest 확인
-실패는 각각 `Authenticate to GHCR`, `Publish the built image`, `Verify the registry digest`에서 확인합니다.
-Provenance 기록 실패는 `Attest the published image provenance`에서 확인합니다.
-선택한 이미지 빌드가 모두 성공해야 같은 목록의 발행 job이 시작됩니다.
-
-인프라에서는 성공한 발행 실행의 summary 또는 `image-handoff-<service>` artifact 안의 JSON을 사용합니다.
-파일은 다음 형식이며 `image`는 registry에서 조회, 확인한 digest reference입니다.
-Tag는 조회 편의용이고 배포 입력은 `image@sha256:digest`입니다.
-
-```json
-{
-  "service": "api",
-  "image": "ghcr.io/dungeon-and-dragon/dfragon/api@sha256:<registry-digest>",
-  "sourceCommit": "<40-character-commit-sha>"
-}
-```
-
-발행 job은 push한 digest에 build provenance attestation을 기록하고 GHCR에도 함께 올립니다.
-Attestation이 실패하면 handoff artifact를 올리지 않고 발행 실행도 실패합니다. 출처는
-`gh attestation verify oci://ghcr.io/dungeon-and-dragon/dfragon/<service>@sha256:<digest> -R dungeon-and-dragon/dfragon`으로
-확인하며 해당 이미지의 GHCR 조회 권한이 필요합니다.
-
-선택 job은 `contents: read`와 원본, 이전 성공 실행의 목록을 읽기 위한 `actions: read`,
-빌드 job은 `contents: read`, 발행 job은 `packages: write`와 provenance 서명용 `id-token: write`,
-`attestations: write`만 사용합니다.
-발행 job은 같은 실행의 이미지 archive를 받아 source, 플랫폼을 확인하고 push하며,
-앱 코드를 checkout하거나 실행하지 않습니다. 운영 secret, SSH, Tailscale 접근은 없습니다.
-GHCR의 공개 범위, 접근 정책은 workflow가 변경하지 않습니다. 인프라의 pull 인증은
-기존 package 접근 정책에 맞춰 별도로 준비해야 합니다.
-
-제품은 테스트, 빌드, 이미지 발행과 Dockerfile, 앱 실행 진입점을 소유합니다.
-이미지 선택, 비밀값 관리와 전달, Compose, SSH, 서버 권한, 배포 절차의 원본은
-[인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)입니다.
-제품 main merge는 운영 배포를 실행하지 않으며 Product Images는 인프라 checkout, 운영 credential에 의존하지 않습니다.
+제품은 테스트와 Dockerfile, 앱 실행 진입점을 소유합니다. node1 빌드는 테스트를 실행하지 않으며
+테스트는 로컬의 `pnpm verify`가 맡습니다. 대상 플랫폼은 `linux/amd64` 하나입니다.
+빌드한 제품 commit은 `SOURCE_COMMIT` 빌드 인자로 받아 이미지 내부 `/app/build-info.json`에 고정합니다.
+node1은 컨테이너를 시작하지 않고 이 파일을 꺼내 서비스명과 commit을 대조합니다.
 
 Dockerfile과 전용 ignore 파일은 `apps/api/`에 있습니다. 빌드 context는 제품 저장소 root이며
 `docker-entrypoint.sh`도 앱 옆에서 관리합니다. 의존성 설치에는 registry 토큰이나 BuildKit secret이 필요하지 않습니다.
 이미지는 점수 엔진 submodule의 Linux 엔진 `libdnfscore.so`와 `koffi`를 넣고, 엔진의 제3자 고지(`packages/licenses/notices/score-engine`)를 `dist/notices/score-engine`에 둡니다.
 Prisma schema engine이 OpenSSL 3용으로 설치되도록 빌드 단계에 `openssl`을, 런타임 이미지에 `libssl3`을 둡니다.
 엔진 파일이 없으면 빌드에 실패하므로, 로컬 빌드 전에 `git submodule update --init packages/models/score-engine`으로 엔진을 받습니다.
-Product Images의 API 빌드 job도 이 submodule만 저장소 Secret `SCORE_ENGINE_DEPLOY_KEY`의 읽기 전용 deploy key로 받습니다. 로컬 빌드는 다음과 같습니다.
+node1의 API 빌드도 이 submodule만 읽기 전용 deploy key로 받습니다. 로컬 빌드는 다음과 같습니다.
 
 ```sh
 docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .
 ```
 
 커밋 정보는 커밋한 checkout을 기준으로 넣습니다. 빌드 인자를 생략한 로컬 이미지는 `commit: null`로
-정보 없음을 명시합니다. 잘못된 SHA는 빌드에 실패하며, GitHub가 발행하는 이미지는 정확한 SHA가
+정보 없음을 명시합니다. 잘못된 SHA는 빌드에 실패하며, node1이 빌드한 이미지는 정확한 SHA가
 없으면 검증을 통과하지 못합니다. 비밀값은 빌드 인자로 전달하지 않습니다.
 
 ### 실행 중인 서버의 버전 조회
@@ -459,7 +408,7 @@ Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 Secret 파일의 host 경로와 network 이름은 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)의 현재 값을 확인해 씁니다.
 
 ```sh
-IMAGE=ghcr.io/dungeon-and-dragon/dfragon/api@sha256:<실패한 이미지 digest>
+IMAGE=localhost/dfragon/api:<실패한 이미지의 40자리 commit SHA>
 prisma_admin() {
   docker run --rm --read-only --user 1000:1000 --cap-drop ALL --network dfragon_backend \
     --env DB_HOST=postgres --env DB_PORT=5432 --env DB_NAME=dfragon --env DB_USERNAME=dfragon_api \

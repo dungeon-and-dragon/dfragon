@@ -6,7 +6,7 @@
 
 ## 루트 도구 회귀 검증
 
-`pnpm test:tooling`은 `scripts/test/*.test.mjs`를 모두 실행합니다. 작업 준비, 날짜, build-info, 이미지 선택, 앱 생성, 아이콘 생성, lint 플러그인, 포맷 정책, 표기와 문체 검사, 문서 링크와 경로 검사, 토큰 없는 의존성 설치, 의존성 snapshot 변환, `verify` 실행기와 workflow 연결의 회귀 검사가 포함됩니다. 어느 테스트든 실패하면 검사가 실패합니다. Root `pnpm test`는 [`pnpm verify`](#verify)를 실행합니다.
+`pnpm test:tooling`은 `scripts/test/*.test.mjs`를 모두 실행합니다. 작업 준비, 날짜, build-info, 앱 생성, 아이콘 생성, lint 플러그인, 포맷 정책, 표기와 문체 검사, 문서 링크와 경로 검사, 토큰 없는 의존성 설치, 의존성 snapshot 변환, `verify` 실행기의 회귀 검사가 포함됩니다. 어느 테스트든 실패하면 검사가 실패합니다. Root `pnpm test`는 [`pnpm verify`](#verify)를 실행합니다.
 
 앱 생성과 아이콘 생성 검사는 저장소 코드를 격리된 임시 디렉터리에 복사해 실제 CLI의 출력 파일, 입력 거절, 실패 코드, 정리를 확인합니다. 아이콘 생성 검사는 합성 PNG의 축소 결과만 확인하므로 제품 아이콘의 화질은 검증하지 않습니다.
 
@@ -94,35 +94,9 @@ pnpm check:docs
 
 검증: `node --test scripts/test/check-docs.test.mjs`, `node --check scripts/check-docs.mjs`.
 
-## `product-image-plan`
-
-Product Images의 변경 경로를 서비스별 빌드 목록으로 바꿉니다. 앱별 경로와 공용 입력은
-[서버 이미지 안내](../apps/api/README.md#서버-이미지)를 따릅니다.
-새 dependency 없이 Git과 Node.js 26을 사용합니다.
-
-`select <plan-file>`은 GitHub push event 파일과 checkout된 source commit을 확인하고,
-main push의 `before`부터 변경된 경로를 비교해 JSON 목록을 저장합니다.
-`baseline`으로 마지막 성공 발행 실행을 찾고 `catch-up <plan-file> [baseline-plan-file]`로
-아직 발행되지 않은 변경도 합칩니다. 성공 목록이 없거나 만료되었으면 전체 이미지 빌드로 복구합니다.
-`output <plan-file>`은 source commit, 서비스 목록을 검증한 뒤 `GITHUB_OUTPUT`에 matrix와
-`has_changes`를 기록합니다. 빈 목록이면 빌드, 발행을 건너뜁니다.
-`baseline`은 계획 artifact가 없는 성공 실행(build scope가 아닌 main push)을 건너뛰고 최근 30개 안에서 찾습니다.
-
-검증: `pnpm test:product-images`, `node --check scripts/product-image-plan.mjs`.
-
-## `build-scope`
-
-PR 제목, PR 작성자, 실행 event로 빌드할지 정해 `GITHUB_OUTPUT`에 `build=true` 또는 `build=false`를 기록합니다. [`build-scope.yml`](../.github/workflows/build-scope.yml)이 이 도구를 실행합니다. main push는 GitHub API로 commit을 merge한 PR을 찾고, 조회에 실패하면 빌드를 건너뛰지 않고 실패합니다. 새 dependency 없이 Node.js 26을 사용합니다.
-
-빌드는 비용이 큰 job이라 PR 제목이 `feat(build): ...`, `fix(build)!: ...`처럼 Conventional Commits scope가 `(build)`이거나, Dependabot PR이거나, Actions 페이지에서 수동 실행한 경우에만 실행합니다. main push는 그 commit을 merge한 PR의 제목으로 같은 규칙을 적용하며, Product Images의 이미지 빌드, 발행이 이 결과를 따릅니다. 제목은 PR을 열거나 새 commit을 push할 때 읽으므로, 열린 PR의 제목에 `(build)`를 붙였으면 새 commit을 push하거나 Actions 페이지에서 Product Images를 수동 실행합니다.
-
-배포 workflow는 [`product-images.yml`](../.github/workflows/product-images.yml)입니다. main push에서 API, 웹 이미지를 빌드해 GHCR에 발행하며([서버 이미지](../apps/api/README.md#서버-이미지)), node1의 운영자가 그 이미지를 배포합니다([Web 배포](../apps/web/README.md#배포)). 의존성 snapshot 제출은 [`dependency-snapshot`](#dependency-snapshot)에 있습니다. 저장소 Actions 설정은 외부 action을 40자리 commit SHA로 고정하도록 요구하므로 tag로 참조한 action은 실행되지 않습니다.
-
-검증: `node --test scripts/test/build-scope.test.mjs`, `node --check scripts/build-scope.mjs`.
-
 ## `dependency-snapshot`
 
-pnpm 11 이상의 lockfile은 pnpm 실행 파일을 담은 첫 YAML 문서와 workspace 의존성을 담은 마지막 문서로 나뉩니다. 현재 GitHub dependency graph는 이 lockfile에서 첫 문서의 package만 인식해 workspace의 전이 의존성이 Dependabot alerts에서 빠집니다. [`dependency-snapshot.yml`](../.github/workflows/dependency-snapshot.yml)은 main push에서 의존성 파일이 바뀌었을 때와 main에서 수동 실행했을 때 `pnpm sbom --sbom-format cyclonedx --lockfile-only` 결과를 이 도구로 Dependency submission snapshot으로 바꿔 제출합니다. 저장소 검사가 아니라 Dependabot alerts의 기준을 갱신하는 workflow이며, PR의 의존성 검토는 하지 않습니다.
+pnpm 11 이상의 lockfile은 pnpm 실행 파일을 담은 첫 YAML 문서와 workspace 의존성을 담은 마지막 문서로 나뉩니다. 현재 GitHub dependency graph는 이 lockfile에서 첫 문서의 package만 인식해 workspace의 전이 의존성이 Dependabot alerts에서 빠집니다. [`dependency-snapshot.yml`](../.github/workflows/dependency-snapshot.yml)은 main push에서 의존성 파일이 바뀌었을 때와 main에서 수동 실행했을 때 `pnpm sbom --sbom-format cyclonedx --lockfile-only` 결과를 이 도구로 Dependency submission snapshot으로 바꿔 제출합니다. 저장소 검사가 아니라 Dependabot alerts의 기준을 갱신하는 workflow이며, PR의 의존성 검토는 하지 않습니다. 저장소 Actions 설정은 외부 action을 40자리 commit SHA로 고정하도록 요구하므로 tag로 참조한 action은 실행되지 않습니다.
 
 인자는 `<cyclonedx-sbom-file> <snapshot-file>`이고 `SNAPSHOT_SHA`, `SNAPSHOT_REF`(`refs/heads/<branch>`), `GITHUB_WORKFLOW`, `GITHUB_JOB`, `GITHUB_RUN_ID`를 읽습니다. Workspace가 직접 의존하는 package는 `direct`, 나머지는 `indirect`로 기록합니다. pnpm이 개발 의존성으로만 도달한다고 표시한(`excluded`) package는 `development`, 나머지는 `runtime`입니다. peer 조합처럼 bom-ref만 다르고 purl이 같은 package는 하나로 합치며, 한 변형이라도 `direct`, `runtime`이면 그 값을 쓰고 하위 의존성은 중복 없이 모읍니다. 그래프가 불완전하거나 commit, branch 값이 올바르지 않으면 파일을 쓰지 않고 실패합니다.
 
@@ -141,7 +115,7 @@ node scripts/server-build-info.mjs api "$(git rev-parse HEAD)" build-info.json
 node --test scripts/test/server-build-info.test.mjs
 ```
 
-GitHub 이미지 빌드, 발행은 내장 정보와 선택한 정확한 commit을 추가로 대조합니다.
+node1의 이미지 빌드는 내장 정보와 선택한 commit을 추가로 대조합니다.
 실행 중인 서버 조회는 [제품 이미지 안내](../apps/api/README.md#실행-중인-서버의-버전-조회)를 참고합니다.
 
 ## `verify`
@@ -162,7 +136,7 @@ pnpm verify
 
 - `pnpm install --frozen-lockfile`로 의존성을 설치합니다. Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. API 이미지는 점수 엔진 submodule만 받습니다. 둘 다 받으려면 `git submodule update --init --recursive`를 실행합니다. API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 submodule에 있을 때만 실행합니다.
 
-로컬 통과는 Product Images의 이미지 빌드를 대신하지 않습니다. 실행기는 macOS, Linux에서 확인했고 Windows에서는 확인하지 않았습니다. `pnpm verify`로 실행하면 `npm_execpath`의 pnpm을 직접 시작하므로 `pnpm.cmd`만 있는 Windows 환경에서도 명령을 시작합니다. `node scripts/verify.mjs`로 직접 실행하면 shell 없이 `pnpm`을 찾으므로 이런 환경에서는 시작하지 못할 수 있습니다.
+로컬 통과는 node1의 이미지 빌드를 대신하지 않습니다. 실행기는 macOS, Linux에서 확인했고 Windows에서는 확인하지 않았습니다. `pnpm verify`로 실행하면 `npm_execpath`의 pnpm을 직접 시작하므로 `pnpm.cmd`만 있는 Windows 환경에서도 명령을 시작합니다. `node scripts/verify.mjs`로 직접 실행하면 shell 없이 `pnpm`을 찾으므로 이런 환경에서는 시작하지 못할 수 있습니다.
 
 ## Native validation
 
