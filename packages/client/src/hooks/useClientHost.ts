@@ -25,6 +25,7 @@ import type {
   FameRanking,
   FameRankingFilter
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
+import type { SkillStats, SkillStatsJob } from '@dfragon/client-core/shared/ranking/skill-stats'
 import type {
   CharacterTimeline,
   TimelineAcquisition,
@@ -72,6 +73,7 @@ export type ClientHost = Readonly<{
   getOathCatalog: () => Promise<OathCatalog | null>
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
+  getSkillStats: (job: SkillStatsJob) => Promise<SkillStats>
   getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
   getAdventureActivity: (
