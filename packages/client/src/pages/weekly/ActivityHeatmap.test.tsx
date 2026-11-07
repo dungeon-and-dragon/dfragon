@@ -29,6 +29,7 @@ afterEach(async () => {
   container.remove()
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 const activity: AdventureActivity = {
@@ -182,6 +183,20 @@ it('세로 탭은 전체를 고른 채 시작하고, 다른 탭을 누르면 패
     '4월 2일 강화 시도 0',
     '4월 3일 강화 시도 3, 10증폭이나 12강 이상 도전'
   ])
+})
+
+function scroller(): HTMLElement {
+  return container.querySelector('[role="tabpanel"] [role="img"]')!.parentElement!.parentElement!
+}
+
+it('처음 그릴 때와 탭을 바꿀 때 칸 영역을 가장 최근 주가 보이는 오른쪽 끝으로 스크롤한다', async () => {
+  vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(640)
+  await render({})
+  expect(scroller().scrollLeft).toBe(640)
+
+  await act(async () => tab('아이템').click())
+
+  expect(scroller().scrollLeft).toBe(640)
 })
 
 it('아이템 탭의 등급 뱃지는 개수가 0인 등급을 그리지 않는다', async () => {
