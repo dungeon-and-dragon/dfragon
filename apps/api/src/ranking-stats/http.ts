@@ -2,8 +2,8 @@ import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
-import { ApiFameRanking, ApiStats } from '../swagger/operations.js'
-import type { FameRanking, RankingStatsService, Stats } from './service.js'
+import { ApiFameRanking, ApiSkillStats, ApiStats } from '../swagger/operations.js'
+import type { FameRanking, RankingStatsService, SkillStats, Stats } from './service.js'
 
 export const RANKING_STATS_SERVICE = Symbol('RANKING_STATS_SERVICE')
 
@@ -13,6 +13,11 @@ const fameRankingQuery = z
     jobGrowId: z.string().min(1).optional()
   })
   .refine(({ jobId, jobGrowId }) => jobGrowId === undefined || jobId !== undefined)
+
+const skillStatsQuery = z.object({
+  jobId: z.string().min(1),
+  jobGrowId: z.string().min(1)
+})
 
 @ApiTags('캐릭터')
 @Controller()
@@ -34,5 +39,16 @@ export class RankingStatsController {
   @ApiStats()
   stats(): Promise<Stats> {
     return this.service.stats()
+  }
+
+  @Get('stats/skills')
+  @ApiSkillStats()
+  skillStats(@Query() query: unknown): Promise<SkillStats> {
+    const job = skillStatsQuery.safeParse(query)
+    if (!job.success) {
+      throw new CharacterDetailFailure('query')
+    }
+
+    return this.service.skillStats(job.data)
   }
 }
