@@ -1,6 +1,8 @@
+import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { ActivitySeason } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+import { type SeasonBar, seasonBar } from './season-bar'
 import { formatSeasonYear } from './season-format'
 import { styles } from './SeasonTimeline.style'
 
@@ -16,34 +18,61 @@ function seasonDays(seasons: readonly ActivitySeason[], index: number, now: numb
   return Math.max(1, Math.round((endsAt - startsAt) / DAY_MS))
 }
 
+function BackfillBar({ progress }: { progress: number }): React.JSX.Element {
+  return (
+    <i {...stylex.props(styles.bar, styles.barOff)}>
+      <i {...stylex.props(styles.fill, styles.fillLength(progress))} />
+    </i>
+  )
+}
+
 function SeasonButton({
   season,
   days,
   selected,
-  onSelect
+  onSelect,
+  onBackfill
 }: {
   season: ActivitySeason
   days: number
   selected: boolean
   onSelect: (seasonId: number) => void
+  onBackfill: (seasonId: number) => void
 }): React.JSX.Element {
+  const bar: SeasonBar = seasonBar(season)
+  const running = bar.state === 'backfill' && bar.running
+
   function handleClick(): void {
-    if (!selected) {
+    if (bar.state === 'ready' && !selected) {
       onSelect(season.id)
+    }
+
+    if (bar.state === 'backfill' && !bar.running) {
+      onBackfill(season.id)
     }
   }
 
   return (
     <button
       type="button"
-      disabled={!season.available}
+      disabled={bar.state === 'locked'}
+      aria-disabled={running ? 'true' : undefined}
+      aria-busy={running ? 'true' : undefined}
       aria-current={selected ? 'true' : undefined}
       onClick={handleClick}
       {...stylex.props(styles.season, stylex.defaultMarker(), styles.length(days))}
     >
-      <i
-        {...stylex.props(styles.bar, selected && styles.barOn, !season.available && styles.barOff)}
-      />
+      {bar.state === 'backfill' ? (
+        <BackfillBar progress={bar.progress} />
+      ) : (
+        <i
+          {...stylex.props(
+            styles.bar,
+            selected && styles.barOn,
+            bar.state === 'locked' && styles.barOff
+          )}
+        />
+      )}
       <span
         {...stylex.props(styles.name, selected && styles.nameOn, !season.available && styles.off)}
       >
@@ -52,6 +81,9 @@ function SeasonButton({
       <span {...stylex.props(styles.year, !season.available && styles.off)}>
         시즌 {season.id}, {formatSeasonYear(season.startsAt)}
       </span>
+      {bar.state === 'backfill' && (
+        <span {...stylex.props(shapes.srOnly)}>{Math.floor(bar.progress * 100)}%</span>
+      )}
     </button>
   )
 }
@@ -59,11 +91,13 @@ function SeasonButton({
 export function SeasonTimeline({
   seasons,
   selectedId,
-  onSelect
+  onSelect,
+  onBackfill
 }: {
   seasons: readonly ActivitySeason[]
   selectedId: number
   onSelect: (seasonId: number) => void
+  onBackfill: (seasonId: number) => void
 }): React.JSX.Element {
   const [now] = useState(Date.now)
   const timelineRef = useRef<HTMLElement>(null)
@@ -111,6 +145,7 @@ export function SeasonTimeline({
           days={seasonDays(seasons, index, now)}
           selected={season.id === selectedId}
           onSelect={onSelect}
+          onBackfill={onBackfill}
         />
       ))}
     </nav>

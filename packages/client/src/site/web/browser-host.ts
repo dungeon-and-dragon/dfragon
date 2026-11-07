@@ -479,6 +479,7 @@ export function installBrowserHost(
     getAdventureWeekly: dfragon.adventures.weekly,
     getAdventureActivity: dfragon.adventures.activity,
     getAdventureActivityDay: dfragon.adventures.activityDay,
+    backfillAdventureSeason: dfragon.adventures.backfillSeason,
     searchCharacters: dfragon.characters.search,
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
