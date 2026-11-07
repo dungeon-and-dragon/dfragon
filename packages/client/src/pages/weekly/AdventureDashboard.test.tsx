@@ -431,3 +431,19 @@ it('새로고침을 누르면 받아 둔 시즌 활동을 버리고 받는 중�
   ])
   expect(heroBusy()).toBe('false')
 })
+
+it('레이드 내역은 하드와 노말이 모두 있으면 둘을 나눠 보이고, 한쪽만 있거나 없는 응답은 합계만 응답 순서대로 보인다', async () => {
+  const raids = [
+    { name: '가 레이드', count: 55, hard: 24, normal: 31 },
+    { name: '나 레이드', count: 3, hard: 3, normal: 0 },
+    { name: '다 레이드', count: 7 }
+  ]
+  await render(
+    async () => ({ ...currentSeason, summary: { ...currentSeason.summary, raids } }),
+    undefined
+  )
+
+  await act(async () => stat('레이드').focus())
+
+  expect(tooltipRows()).toEqual(['가 레이드하드 24회 | 노말 31회', '나 레이드3회', '다 레이드7회'])
+})
