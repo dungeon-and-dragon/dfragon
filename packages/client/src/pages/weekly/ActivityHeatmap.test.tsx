@@ -243,7 +243,7 @@ it('네 등급이 모두 0이면 아이템 탭에 등급 뱃지를 그리지 않
   }
 })
 
-it('칸에 처음 마우스를 올리면 그날 상세를 받아 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보이고, 다시 올리면 받은 상세를 다시 쓴다', async () => {
+it('칸에 처음 마우스를 올리면 그날 상세를 받아 날짜와 묶음 제목은 합계 없이 두고, 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보이고, 다시 올리면 받은 상세를 다시 쓴다', async () => {
   const loaded = Promise.withResolvers<AdventureActivityDay>()
   const getAdventureActivityDay = vi
     .fn<ClientHost['getAdventureActivityDay']>()
@@ -253,17 +253,17 @@ it('칸에 처음 마우스를 올리면 그날 상세를 받아 8개가 넘는 
 
   await act(async () => hover(cell('4월 2일')))
   expect(getAdventureActivityDay).toHaveBeenCalledWith('합성 모험단', '2026-04-02')
-  expect(popupText()).toEqual(['4월 2일 (목)12회', '하루 활동을 받는 중입니다.', ''])
+  expect(popupText()).toEqual(['4월 2일 (목)', '하루 활동을 받는 중입니다.', ''])
 
   await act(async () => loaded.resolve(april2))
   expect(popupText()).toEqual([
-    '4월 2일 (목)12회',
-    '레이드2회',
+    '4월 2일 (목)',
+    '레이드',
     '가 레이드2회',
-    '아이템10개',
+    '아이템',
     '09:58합성 태초',
     '레전더리9개',
-    '강화1회',
+    '강화',
     '00:29+15 실패'
   ])
 
@@ -317,7 +317,7 @@ it('칸의 레이드 줄은 하드와 노말이 모두 있으면 둘을 나눠 �
   await act(async () => hover(cell('4월 2일')))
 
   expect(popupText().slice(1, 5)).toEqual([
-    '레이드12회',
+    '레이드',
     '가 레이드하드 1회 | 노말 1회',
     '나 레이드4회',
     '다 레이드6회'
