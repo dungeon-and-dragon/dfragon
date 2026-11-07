@@ -17,7 +17,7 @@ export class TimelineSyncSubscriber implements OnApplicationShutdown {
   }
 
   onApplicationShutdown(): Promise<void> {
-    // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, 대기열이 남으면 종료 뒤에도 계속 꺼내 받는다.
+    // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, queue를 닫지 않으면 종료 뒤에 온 요청도 동기화를 시작한다.
     this.queue.close()
     this.backfillQueue.close()
 
