@@ -142,13 +142,15 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
 })
 
-it('첫 화면은 전역 바에 브랜드, 현재 항목인 파티, 공대 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
+it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 파티, 공대 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
   const brand = header.querySelector('a[aria-label="던삐삐 첫 화면"]')!
   const grade = header.querySelector('[role="img"]')!
   expect(brand.getAttribute('href')).toBe('/')
+  expect(brand.textContent).toBe('던삐삐')
+  expect(brand.querySelector('img')).toBeNull()
   expect(globalMenu()).toEqual([
     ['파티, 공대', 'page'],
     ['랭킹', null],
