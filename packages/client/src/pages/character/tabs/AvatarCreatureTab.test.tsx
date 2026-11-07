@@ -39,10 +39,10 @@ function hasTone(element: Element | null | undefined, tone: stylex.StyleXStyles)
   return element.className.split(' ').includes(className)
 }
 
-// 이름 칸은 등급 색 이름과 클론 이름을 줄로 쌓으므로 줄마다 |로 나눠 읽는다.
+// 이름 칸은 등급 색 이름 오른쪽에 클론 이름을 붙이므로 둘을 |로 나눠 읽는다.
 function cellTexts(row: Element): string[] {
   return [...row.querySelectorAll('td')].map((cell) => {
-    const lines = [...cell.querySelectorAll('b, b + span')].map((line) => line.textContent)
+    const lines = [...cell.querySelectorAll('b, span[title]')].map((line) => line.textContent)
     if (lines.length === 0) {
       return cell.textContent
     }
@@ -76,6 +76,9 @@ it('딜러 아바타 표는 응답 순서대로 부위, 등급 색 이름과 클
   ])
   const [, avatarCell, , emblemCell] = rows[0]!.querySelectorAll('td')
   expect(hasTone(avatarCell?.querySelector('b'), rarityTones.rare)).toBe(true)
+  expect(avatarCell?.querySelector('span[title]')?.getAttribute('title')).toBe(
+    '인페르노의 장식핀[B타입]'
+  )
   expect(hasTone(emblemCell?.querySelector('b'), rarityTones.unique)).toBe(true)
 })
 
@@ -121,7 +124,7 @@ it('크리쳐 행 아래에 아티팩트 3개를 슬롯 색 점과 등급 색 �
   expect(hasTone(names[2], rarityTones.rare)).toBe(true)
 })
 
-it('클론이 아닌 아바타는 클론 줄을 두지 않고, 응답에 없는 아바타와 크리쳐는 그 칸을 생략한다', async () => {
+it('클론이 아닌 아바타는 클론 이름을 두지 않고, 응답에 없는 아바타와 크리쳐는 그 칸을 생략한다', async () => {
   const detail = characterDetailFixture('buffer')
   const [headgear] = detail.avatar
   await render({
