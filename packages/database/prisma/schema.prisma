@@ -39,6 +39,7 @@ model Character {
   guildId        String?   @map("guild_id")
   guildName      String?   @map("guild_name")
   basicFetchedAt DateTime? @map("basic_fetched_at") @db.Timestamptz(3)
+  skillStyle     CharacterSkillStyle?
 
   @@id([serverId, characterId])
   @@index([adventureId])
@@ -48,6 +49,21 @@ model Character {
   @@index([jobId, fame(sort: Desc)])
   @@index([jobId, jobGrowId, fame(sort: Desc)])
   @@map("characters")
+}
+
+model CharacterSkillStyle {
+  serverId     String    @map("server_id")
+  characterId  String    @map("character_id")
+  character    Character @relation(fields: [serverId, characterId], references: [serverId, characterId], onDelete: Cascade)
+  jobId        String    @map("job_id")
+  jobGrowId    String    @map("job_grow_id")
+  skills       Json
+  evolutions   Json
+  enhancements Json
+  fetchedAt    DateTime  @map("fetched_at") @db.Timestamptz(3)
+
+  @@id([serverId, characterId])
+  @@map("character_skill_styles")
 }
 
 model CharacterCollection {

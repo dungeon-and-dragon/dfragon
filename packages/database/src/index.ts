@@ -15,6 +15,12 @@ export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
+export { recordCharacterSkillStyle } from './skill-style.js'
+export type {
+  CharacterSkillStyleInput,
+  SkillStyleSelection,
+  SkillStyleSkill
+} from './skill-style.js'
 export {
   readCharactersTimelineEvents,
   readCharactersTimelineItems,
