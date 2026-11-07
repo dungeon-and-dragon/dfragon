@@ -40,6 +40,9 @@ const rankingStatsCheckPath = fileURLToPath(
 const skillStyleCheckPath = fileURLToPath(
   new URL('./container-skill-style-check.mjs', import.meta.url)
 )
+const skillStyleRefreshCheckPath = fileURLToPath(
+  new URL('./container-skill-style-refresh-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -275,6 +278,8 @@ try {
         `type=bind,source=${rankingStatsCheckPath},target=/app/container-ranking-stats-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${skillStyleCheckPath},target=/app/container-skill-style-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${skillStyleRefreshCheckPath},target=/app/container-skill-style-refresh-check.mjs,readonly`,
         imageId
       ])
     )
@@ -594,6 +599,16 @@ try {
     'skill-a'
   )
 
+  stage = 'skill style refresh targets and records'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-skill-style-refresh-check.mjs'
+  ])
+
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
   const collectorOptions = [
@@ -754,6 +769,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, skill style refresh targets, HTTP and database input rejection\n'
   )
 }
