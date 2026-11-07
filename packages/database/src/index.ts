@@ -21,7 +21,6 @@ export {
   recordCharacterSkillStyle
 } from './skill-style.js'
 export {
-  SKILL_STYLE_REFRESH_DAYS,
   SKILL_STYLE_SAMPLE_TOP_PERCENT,
   readSkillStyleSampleJobs,
   skillStyleSampleSql,

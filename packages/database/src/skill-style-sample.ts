@@ -4,10 +4,6 @@ import { Prisma } from './generated/prisma/client.js'
 
 export const SKILL_STYLE_SAMPLE_TOP_PERCENT = 10
 
-export const SKILL_STYLE_REFRESH_DAYS = 7
-
-const DAY_MS = 24 * 60 * 60 * 1000
-
 export type SkillStyleSampleJob = {
   jobId: string
   jobGrowId: string
@@ -38,11 +34,10 @@ export async function readSkillStyleSampleJobs(
 export async function takeSkillStyleRefreshBatch(
   client: DatabaseClient,
   job: SkillStyleSampleJob,
+  fetchedBefore: Date,
   skipped: readonly CollectedCharacter[],
-  limit: number,
-  now: Date
+  limit: number
 ): Promise<CollectedCharacter[]> {
-  const refreshedBefore = new Date(now.getTime() - SKILL_STYLE_REFRESH_DAYS * DAY_MS)
   const skippedServerIds = skipped.map((character) => character.serverId)
   const skippedCharacterIds = skipped.map((character) => character.characterId)
 
@@ -52,7 +47,7 @@ export async function takeSkillStyleRefreshBatch(
     LEFT JOIN "character_skill_styles" AS "style"
       ON "style"."server_id" = "sample"."server_id"
       AND "style"."character_id" = "sample"."character_id"
-    WHERE ("style"."fetched_at" IS NULL OR "style"."fetched_at" <= ${refreshedBefore})
+    WHERE ("style"."fetched_at" IS NULL OR "style"."fetched_at" < ${fetchedBefore})
       AND NOT EXISTS (
         SELECT 1
         FROM unnest(${skippedServerIds}::text[], ${skippedCharacterIds}::text[])
