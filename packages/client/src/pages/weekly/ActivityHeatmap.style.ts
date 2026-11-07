@@ -5,9 +5,11 @@ import { breakpoints } from '../../styles/breakpoints.stylex'
 const TAB_COLUMN_WIDTH = 120
 const TAB_OUTSIDE_GAP = 16
 const LABEL_COLUMN_WIDTH = 24
-const CELL_MIN_SIZE = 8
-const CELL_MAX_SIZE = 26
+// GitHub contribution 그래프처럼 칸 크기를 고정하고, 범례 견본과 같은 12px로 둔다.
+const CELL_SIZE = 12
 const CELL_GAP = 4
+// 테두리 빛(칸 밖 4px)과 마우스 테두리가 스크롤 영역에 잘리지 않게 둔다.
+const RING_ROOM = 4
 const LABEL_HEIGHT = 14
 const LEGEND_SWATCH_SIZE = 12
 const SKELETON_HEIGHT = 280
@@ -85,17 +87,31 @@ export const styles = stylex.create({
     height: LEGEND_SWATCH_SIZE,
     borderRadius: radius.control
   },
-  gridArea: { overflowX: 'auto', padding: space.s16, paddingTop: space.s12 },
+  gridArea: { display: 'flex', padding: space.s16, paddingTop: space.s12 },
+  dayLabels: {
+    display: 'grid',
+    flexShrink: 0,
+    gridTemplateRows: `${LABEL_HEIGHT}px repeat(7, ${CELL_SIZE}px)`,
+    gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px`,
+    rowGap: CELL_GAP,
+    alignItems: 'center',
+    paddingBlock: RING_ROOM
+  },
+  scroller: {
+    minWidth: 0,
+    overflowX: 'auto',
+    padding: RING_ROOM,
+    paddingInlineEnd: space.s12
+  },
   grid: {
     display: 'grid',
     gridAutoFlow: 'column',
-    gridTemplateRows: `${LABEL_HEIGHT}px repeat(7, auto)`,
+    gridTemplateRows: `${LABEL_HEIGHT}px repeat(7, ${CELL_SIZE}px)`,
+    gridAutoColumns: CELL_SIZE,
     gap: CELL_GAP,
-    alignItems: 'center'
+    alignItems: 'center',
+    width: 'max-content'
   },
-  columns: (weeks: number) => ({
-    gridTemplateColumns: `${LABEL_COLUMN_WIDTH}px repeat(${weeks}, minmax(${CELL_MIN_SIZE}px, ${CELL_MAX_SIZE}px))`
-  }),
   label: {
     fontSize: 11,
     lineHeight: `${LABEL_HEIGHT}px`,
@@ -105,7 +121,8 @@ export const styles = stylex.create({
   cell: {
     position: 'relative',
     display: 'block',
-    aspectRatio: '1',
+    width: CELL_SIZE,
+    height: CELL_SIZE,
     boxSizing: 'border-box',
     borderRadius: radius.control
   },
