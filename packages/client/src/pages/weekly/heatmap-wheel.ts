@@ -10,10 +10,11 @@ export function wheelScrollTarget({ deltaX, deltaY, from, max }: WheelScroll): n
     return undefined
   }
 
-  const target = Math.min(Math.max(from + deltaY, 0), max)
-  if (target === from) {
+  // 브라우저 확대에서는 끝의 scrollLeft가 소수라 끝까지 1px이 남지 않으면 끝으로 본다.
+  const room = deltaY > 0 ? max - from : from
+  if (room < 1) {
     return undefined
   }
 
-  return target
+  return Math.min(Math.max(from + deltaY, 0), max)
 }
