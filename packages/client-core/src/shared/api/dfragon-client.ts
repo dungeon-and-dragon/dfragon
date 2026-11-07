@@ -5,12 +5,7 @@ import type {
   CharacterIdentity
 } from '../../preload/common/types/character'
 import type { TodayGrade } from '../../preload/common/types/today-grade'
-import {
-  adventureCharactersSchema,
-  guildSchema,
-  type AdventureCharacters,
-  type Guild
-} from '../adventure-guild/adventure-guild'
+import { guildSchema, type Guild } from '../adventure-guild/adventure-guild'
 import {
   adventureActivityDaySchema,
   adventureActivitySchema,
@@ -76,7 +71,6 @@ export type TimelinePageHttp<Item> = (
 ) => Promise<TimelinePage<Item>>
 export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
-export type AdventureCharactersHttp = (adventureName: string) => Promise<AdventureCharacters>
 export type GuildHttp = (guildId: string) => Promise<Guild>
 export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
 export type AdventureActivityHttp = (
@@ -107,7 +101,6 @@ export type DfragonClient = Readonly<{
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
   adventures: Readonly<{
-    characters: AdventureCharactersHttp
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
     activityDay: AdventureActivityDayHttp
@@ -312,11 +305,6 @@ export function createDfragonClient({
     },
     stats: () => requestJson('/stats', characterStatsSchema),
     adventures: {
-      characters: (adventureName) =>
-        requestJson(
-          `/adventures/${encodeURIComponent(adventureName)}/characters`,
-          adventureCharactersSchema
-        ),
       async weekly(adventureName) {
         if (adventureName.trim() === '') {
           throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
