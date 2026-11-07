@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { characterDetailFixture } from '../../testing/fixtures/character-detail'
-import { type OathCatalog, oathCatalogSchema, oathSetBoardOf } from './oath-catalog'
+import { type OathCatalog, oathCatalogSchema, oathItemIconOf, oathSetBoardOf } from './oath-catalog'
 
 type Effects = OathCatalog['sets'][number]['options'][number]['effects']
 
@@ -32,6 +32,11 @@ const CATALOG: OathCatalog = oathCatalogSchema.parse({
         { name: '용투 : 승리의 함성', icon: 'oath/11.png', effects: effects('함성', null) }
       ]
     }
+  ],
+  items: [
+    { name: '영겁의 안개 서약', rarity: '레어', icon: 'oath-item/100610094.webp' },
+    { name: '영겁의 안개 서약', rarity: '태초', icon: 'oath-item/100610096.webp' },
+    { name: '영겁의 안개 서약', rarity: '알 수 없음', icon: 'oath-item/unknown.webp' }
   ]
 })
 
@@ -67,5 +72,24 @@ describe('서약 세트 선택지', () => {
 
   it('데이터에 없는 세트는 선택지를 만들지 않는다', () => {
     expect(oathSetBoardOf(CATALOG, { ...setInfoOf('dealer'), setId: 50000 })).toBeNull()
+  })
+})
+
+describe('서약 아이템 아이콘', () => {
+  it('이름이 같은 서약은 등급까지 같은 아이콘을 고른다', () => {
+    const item = { itemId: 'neople-hash', itemName: '영겁의 안개 서약' }
+
+    expect(oathItemIconOf(CATALOG, { ...item, rarity: 'primordial' })).toBe(
+      'oath-item/100610096.webp'
+    )
+    expect(oathItemIconOf(CATALOG, { ...item, rarity: 'rare' })).toBe('oath-item/100610094.webp')
+  })
+
+  it('데이터에 없는 이름이나 등급은 아이콘이 없다', () => {
+    const item = { itemId: 'neople-hash', itemName: '영겁의 안개 서약', rarity: 'epic' } as const
+
+    expect(oathItemIconOf(CATALOG, item)).toBeNull()
+    expect(oathItemIconOf(CATALOG, { ...item, itemName: '없는 서약', rarity: 'rare' })).toBeNull()
+    expect(oathItemIconOf(CATALOG, { ...item, rarity: null })).toBeNull()
   })
 })
