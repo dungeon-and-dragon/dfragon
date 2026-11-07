@@ -14,8 +14,9 @@ import {
 const job = { jobId: 'synthetic-refresh-job', jobGrowId: 'synthetic-refresh-grow' }
 const otherJob = { jobId: 'synthetic-refresh-other', jobGrowId: 'synthetic-refresh-grow' }
 const noFameJob = { jobId: 'synthetic-refresh-no-fame', jobGrowId: 'synthetic-refresh-grow' }
-const now = new Date('2026-11-08T00:00:00Z')
-const daysAgo = (days) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
+// 회차 시작 시각(2026-11-05 목 01:00 KST)이다.
+const startedAt = new Date('2026-11-04T16:00:00Z')
+const hoursFromStart = (hours) => new Date(startedAt.getTime() + hours * 60 * 60 * 1000)
 const basic = (characterId, fame, { jobId, jobGrowId } = job) => ({
   serverId: 'cain',
   characterId,
@@ -50,9 +51,9 @@ try {
   await recordCharacterBasic(client, basic('refresh-no-fame', null))
   await recordCharacterBasic(client, basic('refresh-other-job', 200_000, otherJob))
   await recordCharacterBasic(client, basic('refresh-no-fame-job', null, noFameJob))
-  // 8일 전에 받은 행은 갱신 대상이고, 6일 전에 받은 행은 아직 대상이 아니다.
-  await recordCharacterSkillStyle(client, style(refreshId(0), daysAgo(8)))
-  await recordCharacterSkillStyle(client, style(refreshId(1), daysAgo(6)))
+  // 회차 시작 전에 받은 행은 이번 회차에 다시 받고, 시작 뒤에 받은 행(상세 조회 포함)은 고르지 않는다.
+  await recordCharacterSkillStyle(client, style(refreshId(0), hoursFromStart(-1)))
+  await recordCharacterSkillStyle(client, style(refreshId(1), hoursFromStart(1)))
 
   const jobs = await readSkillStyleSampleJobs(client)
   assert.ok(jobs.some((row) => row.jobId === job.jobId && row.jobGrowId === job.jobGrowId))
@@ -60,19 +61,21 @@ try {
   assert.ok(!jobs.some((row) => row.jobId === noFameJob.jobId))
 
   // 받은 적 없는 캐릭터가 먼저이고, 상위 10% 밖, 명성 없는 캐릭터와 다른 전직은 고르지 않는다.
-  assert.deepEqual(ids(await takeSkillStyleRefreshBatch(client, job, [], 100, now)), [
+  assert.deepEqual(ids(await takeSkillStyleRefreshBatch(client, job, startedAt, [], 100)), [
     refreshId(2),
     refreshId(0)
   ])
-  assert.deepEqual(ids(await takeSkillStyleRefreshBatch(client, job, [], 1, now)), [refreshId(2)])
+  assert.deepEqual(ids(await takeSkillStyleRefreshBatch(client, job, startedAt, [], 1)), [
+    refreshId(2)
+  ])
   assert.deepEqual(
     ids(
       await takeSkillStyleRefreshBatch(
         client,
         job,
+        startedAt,
         [{ serverId: 'cain', characterId: refreshId(2) }],
-        100,
-        now
+        100
       )
     ),
     [refreshId(0)]
@@ -95,7 +98,7 @@ try {
   await recordCharacterBasicAndSkillStyle(
     client,
     basic(refreshId(2), 100_500),
-    style(refreshId(2), now, '갱신스킬')
+    style(refreshId(2), startedAt, '갱신스킬')
   )
   const refreshed = await client.character.findUnique({
     where: { serverId_characterId: { serverId: 'cain', characterId: refreshId(2) } },
@@ -103,9 +106,11 @@ try {
   })
   assert.deepEqual(refreshed, {
     fame: 100_500,
-    skillStyle: { skills: [{ name: '갱신스킬', level: 13 }], fetchedAt: now }
+    skillStyle: { skills: [{ name: '갱신스킬', level: 13 }], fetchedAt: startedAt }
   })
-  assert.deepEqual(ids(await takeSkillStyleRefreshBatch(client, job, [], 100, now)), [refreshId(0)])
+  assert.deepEqual(ids(await takeSkillStyleRefreshBatch(client, job, startedAt, [], 100)), [
+    refreshId(0)
+  ])
 
   await deleteCharacterSkillStyle(client, { serverId: 'cain', characterId: refreshId(0) })
   assert.equal(
