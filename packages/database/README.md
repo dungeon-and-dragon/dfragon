@@ -22,6 +22,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `recordCharacterBasic(client, basic)`: Neople 기본 정보(`CharacterBasicInput`)를 `recordCharacter`와 같은 모험단 규칙으로 `characters`에 저장하고 `basic_fetched_at`을 지금으로 둔 뒤, 같은 transaction에서 대기열 행을 지웁니다.
 - `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `readAdventureCharacters(client, adventureName)`: 이름이 `adventureName`인 모험단의 캐릭터(`StoredCharacter`)를 서버를 가리지 않고 명성이 높은 순(명성이 없으면 뒤, 같으면 서버, 캐릭터 id 순)으로 돌려줍니다. `fetchedAt`은 `basic_fetched_at`입니다.
+- `readAdventureNames(client, characters)`: `characters`(서버, 캐릭터 ID) 가운데 `characters`에 저장된 캐릭터의 모험단 이름(`StoredAdventureName`)을 query 한 번으로 돌려줍니다. 저장되지 않은 캐릭터는 결과에 없고 순서는 정하지 않습니다.
 - `readGuild(client, guildId)`: `guild_id`가 같은 캐릭터를 같은 순서로 읽고, 가장 최근에 받은 행의 길드 이름과 함께(`StoredGuild`) 돌려줍니다. 길드 ID는 서버가 달라도 같은 길드라 서버로 거르지 않습니다. 길드원이 없으면 이름은 `null`입니다.
 - `readFameRanking(client, { jobId, jobGrowId }, limit)`: 명성이 있는 캐릭터(`StoredCharacter`)를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 `limit`개까지 돌려줍니다. 주지 않은 조건은 거르지 않습니다.
 - `readCharacterStats(client)`: 전체 캐릭터 수, 서버별 캐릭터 수, 기본 정보를 받은 캐릭터의 직업과 전직별 수와 평균 명성(반올림 전), 명성 10,000 단위 구간별 수(`CharacterStats`)를 돌려줍니다. 서버와 직업은 많은 순, 구간은 캐릭터가 있는 구간만 낮은 순입니다.
