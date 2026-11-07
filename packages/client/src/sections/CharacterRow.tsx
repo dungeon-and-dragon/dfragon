@@ -1,5 +1,6 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import { formatJobName } from '@dfragon/client-core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import { MISSING_VALUE, tierLabels } from '@dfragon/client-core/constants/cards'
@@ -345,8 +346,8 @@ function FoundCells({
     <>
       <AdventureCell adventure={character.adventure} editing={editing} />
       <GuildCell guildId={character.guildId} guild={character.guild} />
-      <td title={character.job} {...stylex.props(styles.cell, styles.job)}>
-        {character.job}
+      <td title={formatJobName(character.job)} {...stylex.props(styles.cell, styles.job)}>
+        {formatJobName(character.job)}
       </td>
       <StatCells
         slot={slot}
