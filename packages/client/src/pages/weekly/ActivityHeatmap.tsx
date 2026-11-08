@@ -19,6 +19,7 @@ import {
 } from './activity-heatmap'
 import { ActivityDayDetail } from './ActivityDayDetail'
 import { useHeatmapRingSpin } from './animations/useHeatmapRingSpin'
+import { useHeatmapTooltipSlide } from './animations/useHeatmapTooltipSlide'
 import { useHeatmapWheelScroll } from './animations/useHeatmapWheelScroll'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
@@ -40,6 +41,9 @@ const numberFormat = new Intl.NumberFormat('ko-KR')
 
 type CellPayload = Readonly<{ date: string }>
 type CellTooltip = ReturnType<typeof Tooltip.createHandle<CellPayload>>
+
+// 칸 사이 4px 간격을 지나는 동안 닫히지 않을 만큼만 기다리고, 칸 영역을 벗어나면 곧 닫는다.
+const CELL_TOOLTIP_CLOSE_DELAY = 100
 
 function isActivityKind(value: unknown): value is ActivityKind {
   return KINDS.some(({ kind }) => kind === value)
@@ -186,7 +190,7 @@ function HeatmapCell({
       handle={tooltip}
       payload={{ date: cell.date }}
       delay={0}
-      closeDelay={0}
+      closeDelay={CELL_TOOLTIP_CLOSE_DELAY}
       render={<span {...props} />}
     >
       {highlight !== undefined && <Ring highlight={highlight} />}
@@ -233,6 +237,22 @@ function HeatmapGrid({
         })
       ])}
     </div>
+  )
+}
+
+function CellTooltipPopup({
+  adventureName,
+  date
+}: {
+  adventureName: string
+  date: string
+}): React.JSX.Element {
+  const popupRef = useHeatmapTooltipSlide(date)
+
+  return (
+    <Tooltip.Popup ref={popupRef} side="top" sideOffset={8}>
+      <ActivityDayDetail adventureName={adventureName} date={date} />
+    </Tooltip.Popup>
   )
 }
 
@@ -300,12 +320,10 @@ function HeatmapPanel({
           />
         </div>
       </div>
-      <Tooltip.Root handle={tooltip}>
+      <Tooltip.Root handle={tooltip} disableHoverablePopup>
         {({ payload }) =>
           payload !== undefined && (
-            <Tooltip.Popup side="top" sideOffset={8}>
-              <ActivityDayDetail adventureName={adventureName} date={payload.date} />
-            </Tooltip.Popup>
+            <CellTooltipPopup adventureName={adventureName} date={payload.date} />
           )
         }
       </Tooltip.Root>

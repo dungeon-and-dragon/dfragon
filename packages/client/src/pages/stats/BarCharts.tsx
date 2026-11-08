@@ -2,7 +2,7 @@ import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import gsap from 'gsap'
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
-import { cubicBezier, type Motion, useMotionAllowed } from '../../animations/gsap-motion'
+import { TOOLTIP_FADE, TOOLTIP_SLIDE, useMotionAllowed } from '../../animations/gsap-motion'
 import type { FameBar } from './stats-bars'
 import { styles } from './StatsScreen.style'
 
@@ -118,10 +118,6 @@ function heightOf(ratio: number): string {
 
   return `max(1px, ${ratio * 100}%)`
 }
-
-const TOOLTIP_EASE = cubicBezier('stats-tooltip', '0.2,0,0,1')
-const TOOLTIP_SLIDE: Motion = { seconds: 0.2, ease: TOOLTIP_EASE }
-const TOOLTIP_FADE: Motion = { seconds: 0.12, ease: TOOLTIP_EASE }
 
 type TooltipPlace = Readonly<{ x: number; y: number }>
 
