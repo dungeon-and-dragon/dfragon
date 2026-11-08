@@ -1,5 +1,10 @@
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
+import {
+  type MaleCrusaderRole,
+  learnedDealerSkillSql,
+  maleCrusaderRoleSql
+} from './male-crusader.js'
 import { type SkillStyleSampleJob, skillStyleSampleSql } from './skill-style-sample.js'
 
 export type SkillLevelCount = [level: number, count: number]
@@ -14,6 +19,10 @@ export type SkillSelectionCount = {
   name: string
   type1: number
   type2: number
+}
+
+export type JobSkillAdoptionQuery = SkillStyleSampleJob & {
+  role?: MaleCrusaderRole
 }
 
 export type JobSkillAdoption = {
@@ -40,8 +49,13 @@ function selectionCountsSql(column: 'evolutions' | 'enhancements'): Prisma.Sql {
 
 export async function readJobSkillAdoption(
   client: DatabaseClient,
-  job: SkillStyleSampleJob
+  { role, ...job }: JobSkillAdoptionQuery
 ): Promise<JobSkillAdoption> {
+  const roleCondition =
+    role !== undefined
+      ? Prisma.sql`AND ${maleCrusaderRoleSql(learnedDealerSkillSql(Prisma.sql`style.skills`), role)}`
+      : Prisma.empty
+
   // 전직을 바꾼 뒤 아직 다시 받지 않은 캐릭터는 예전 전직의 스킬이 남아 있어 뺀다.
   // FROM 없는 바깥 SELECT라 표본이 비어도 한 행이 나온다.
   const [adoption] = await client.$queryRaw<JobSkillAdoption[]>`
@@ -54,6 +68,7 @@ export async function readJobSkillAdoption(
         AND style.character_id = sample.character_id
         AND style.job_id = ${job.jobId}
         AND style.job_grow_id = ${job.jobGrowId}
+        ${roleCondition}
     ),
     skill_levels AS (
       SELECT skill->>'name' AS name, (skill->>'level')::int AS level, count(*)::int AS count

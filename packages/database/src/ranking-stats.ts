@@ -1,10 +1,16 @@
-import type { StoredCharacter } from './adventure-guild.js'
+import {
+  type StoredCharacter,
+  readStoredCharacterRows,
+  storedDealerSkillLearnedSql
+} from './adventure-guild.js'
 import type { DatabaseClient } from './client.js'
-import type { Prisma } from './generated/prisma/client.js'
+import { Prisma } from './generated/prisma/client.js'
+import { type MaleCrusaderRole, maleCrusaderRoleSql } from './male-crusader.js'
 
 export type FameRankingFilter = {
   jobId?: string
   jobGrowId?: string
+  role?: MaleCrusaderRole
 }
 
 export type ServerCount = {
@@ -36,37 +42,27 @@ export type CharacterStats = {
 
 const FAME_BUCKET_SIZE = 1_000
 
-export async function readFameRanking(
+export function readFameRanking(
   client: DatabaseClient,
-  { jobId, jobGrowId }: FameRankingFilter,
+  { jobId, jobGrowId, role }: FameRankingFilter,
   limit: number
 ): Promise<StoredCharacter[]> {
-  const rows = await client.character.findMany({
-    where: { fame: { not: null }, jobId, jobGrowId },
-    orderBy: [{ fame: 'desc' }, { serverId: 'asc' }, { characterId: 'asc' }],
-    take: limit,
-    select: {
-      serverId: true,
-      characterId: true,
-      characterName: true,
-      adventure: { select: { name: true } },
-      level: true,
-      jobId: true,
-      jobGrowId: true,
-      jobName: true,
-      jobGrowName: true,
-      fame: true,
-      guildId: true,
-      guildName: true,
-      basicFetchedAt: true
-    } satisfies Prisma.CharacterSelect
-  })
+  const conditions = [
+    Prisma.sql`c.fame IS NOT NULL`,
+    ...(jobId !== undefined ? [Prisma.sql`c.job_id = ${jobId}`] : []),
+    ...(jobGrowId !== undefined ? [Prisma.sql`c.job_grow_id = ${jobGrowId}`] : []),
+    ...(role !== undefined ? [maleCrusaderRoleSql(storedDealerSkillLearnedSql, role)] : [])
+  ]
 
-  return rows.map(({ adventure, basicFetchedAt, ...row }) => ({
-    ...row,
-    adventureName: adventure.name,
-    fetchedAt: basicFetchedAt
-  }))
+  // ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
+
+  return readStoredCharacterRows(
+    client,
+    Prisma.sql`
+      WHERE ${Prisma.join(conditions, ' AND ')}
+      ORDER BY c.fame DESC, c.server_id, c.character_id
+      LIMIT ${limit}`
+  )
 }
 
 async function readServerCounts(client: DatabaseClient): Promise<ServerCount[]> {

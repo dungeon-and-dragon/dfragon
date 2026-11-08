@@ -176,6 +176,13 @@ const storedCharacterProperties: Record<string, SchemaObject> = {
     ...timestamp,
     nullable: true,
     description: '이 행의 기본 정보를 Neople에서 받은 시각(basic_fetched_at). 받지 않은 행은 null'
+  },
+  role: {
+    type: 'string',
+    enum: ['dealer', 'buffer', 'synergy'],
+    nullable: true,
+    description:
+      '카드 role과 같은 전직 이름 기준이며 직업을 모르면 null. jobName이 프리스트(남)인 크루세이더는 저장된 스킬 스타일(받을 때의 전직이 지금 전직과 같은 행)에 용기의 은총이 있으면 dealer, 없으면 buffer이고 그런 행이 없으면 null.'
   }
 }
 const storedCharacter = object(storedCharacterProperties)

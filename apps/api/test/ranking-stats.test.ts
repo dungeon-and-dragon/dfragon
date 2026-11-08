@@ -4,6 +4,7 @@ import type {
   CharacterStats,
   FameRankingFilter,
   JobSkillAdoption,
+  JobSkillAdoptionQuery,
   SkillStyleSampleJob,
   StoredCharacter
 } from '@dfragon/database'
@@ -28,9 +29,16 @@ function character(characterId: string, fame: number): StoredCharacter {
     fame,
     guildId: null,
     guildName: null,
-    fetchedAt
+    fetchedAt,
+    dealerSkillLearned: null
   }
 }
+
+// Neople /df/jobs의 프리스트(남), 프리스트(여)와 眞 크루세이더 ID다.
+const malePriestJobId = 'f6a4ad30555b99b499c07835f87ce522'
+const femalePriestJobId = '0c1b401bb09241570d364420b3ba3fd7'
+const crusaderGrowId = '37495b941da3b1661bc900e68ef3b2c6'
+const maleCrusaderQuery = `jobId=${malePriestJobId}&jobGrowId=${crusaderGrowId}`
 
 const stats: CharacterStats = {
   total: 3,
@@ -122,10 +130,12 @@ test('명성 랭킹은 query의 직업과 전직, limit 100으로 읽고 serverI
 
     assert.equal(answer.status, 200)
     assert.deepEqual(answer.body, {
-      characters: [
-        { rank: 1, ...characters[0], fetchedAt: '2026-11-06T00:00:00.000Z' },
-        { rank: 2, ...characters[1], fetchedAt: '2026-11-06T00:00:00.000Z' }
-      ]
+      characters: characters.map(({ dealerSkillLearned, ...character }, index) => ({
+        rank: index + 1,
+        ...character,
+        fetchedAt: '2026-11-06T00:00:00.000Z',
+        role: 'dealer'
+      }))
     })
     assert.equal(all.status, 200)
     assert.deepEqual(reads, [
@@ -148,6 +158,71 @@ test('명성 랭킹은 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으
       const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
       assert.equal(status, 400, query)
       assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+    }
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹과 스킬 채택률은 남성 크루세이더의 role을 그대로 넘긴다', async () => {
+  const rankingReads: FameRankingFilter[] = []
+  const adoptionReads: JobSkillAdoptionQuery[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (filter) => {
+      rankingReads.push(filter)
+
+      return []
+    },
+    readJobSkillAdoption: async (job) => {
+      adoptionReads.push(job)
+
+      return adoption
+    }
+  })
+  try {
+    for (const role of ['dealer', 'buffer']) {
+      assert.equal(
+        (await getJson(origin, `/rankings/fame?${maleCrusaderQuery}&role=${role}`)).status,
+        200
+      )
+      assert.equal(
+        (await getJson(origin, `/stats/skills?${maleCrusaderQuery}&role=${role}`)).status,
+        200
+      )
+    }
+
+    const maleCrusader = { jobId: malePriestJobId, jobGrowId: crusaderGrowId }
+    assert.deepEqual(rankingReads, [
+      { ...maleCrusader, role: 'dealer' },
+      { ...maleCrusader, role: 'buffer' }
+    ])
+    assert.deepEqual(adoptionReads, [
+      { ...maleCrusader, role: 'dealer' },
+      { ...maleCrusader, role: 'buffer' }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('role은 남성 크루세이더 전직이 아니거나 값이 다르거나 중복이면 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+  try {
+    for (const query of [
+      `jobId=${femalePriestJobId}&jobGrowId=${crusaderGrowId}&role=dealer`,
+      `jobId=${malePriestJobId}&jobGrowId=618326026de1a1f1cfba5dbd0b8396e7&role=dealer`,
+      `jobId=${malePriestJobId}&role=buffer`,
+      'role=dealer',
+      `${maleCrusaderQuery}&role=synergy`,
+      `${maleCrusaderQuery}&role=`,
+      `${maleCrusaderQuery}&role=dealer&role=buffer`
+    ]) {
+      for (const path of ['/rankings/fame', '/stats/skills']) {
+        const { status, body } = await getJson(origin, `${path}?${query}`)
+        assert.equal(status, 400, `${path}?${query}`)
+        assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', `${path}?${query}`)
+      }
     }
   } finally {
     await app.close()
@@ -324,6 +399,39 @@ test('스킬 채택률은 전직마다 같은 날(KST)에는 DB를 한 번만 �
 
   assert.equal(reads.length, 3)
   assert.equal(nextDay.computedAt, '2026-11-06T15:00:00.000Z')
+})
+
+test('스킬 채택률은 같은 전직이라도 role마다 따로 계산하고 캐시한다', async () => {
+  const reads: JobSkillAdoptionQuery[] = []
+  const service = createRankingStatsService({
+    ...unusedReader,
+    readJobSkillAdoption: async (job) => {
+      reads.push(job)
+
+      return { ...adoption, sampleSize: reads.length }
+    }
+  })
+  const job = { jobId: malePriestJobId, jobGrowId: crusaderGrowId }
+  const dealer = { ...job, role: 'dealer' as const }
+  const buffer = { ...job, role: 'buffer' as const }
+
+  const [all, dealerStats, bufferStats] = await Promise.all([
+    service.skillStats(job),
+    service.skillStats(dealer),
+    service.skillStats(buffer)
+  ])
+  const cached = await Promise.all([
+    service.skillStats(job),
+    service.skillStats(dealer),
+    service.skillStats(buffer)
+  ])
+
+  assert.deepEqual(reads, [job, dealer, buffer])
+  assert.deepEqual(
+    [all, dealerStats, bufferStats].map(({ sampleSize }) => sampleSize),
+    [1, 2, 3]
+  )
+  assert.deepEqual(cached, [all, dealerStats, bufferStats])
 })
 
 test('스킬 채택률은 명성 있는 캐릭터가 없는 전직을 캐시하지 않는다', async () => {

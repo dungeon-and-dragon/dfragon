@@ -108,7 +108,8 @@ DB를 읽지 못하면 후보 응답도 실패합니다.
 { "guildId": "…", "guildName": "…", "memberCount": 42, "averageFame": 81234, "members": [ /* 캐릭터 행 */ ] }
 ```
 
-캐릭터 행은 `serverId`, `characterId`, `characterName`, `adventureName`, `level`, `jobId`, `jobGrowId`, `jobName`, `jobGrowName`, `fame`, `guildId`, `guildName`, `fetchedAt`(`basic_fetched_at`)입니다. 기본 정보를 받지 않은 행은 레벨, 직업, 명성, 길드와 `fetchedAt`이 `null`입니다.
+캐릭터 행은 `serverId`, `characterId`, `characterName`, `adventureName`, `level`, `jobId`, `jobGrowId`, `jobName`, `jobGrowName`, `fame`, `guildId`, `guildName`, `fetchedAt`(`basic_fetched_at`), `role`입니다. 기본 정보를 받지 않은 행은 레벨, 직업, 명성, 길드와 `fetchedAt`, `role`이 `null`입니다.
+`role`은 카드 `role`과 같은 전직 이름 기준으로 `dealer`나 `buffer`입니다. 남성 크루세이더는 `character_skill_styles`에 받을 때의 전직이 지금 전직과 같은 행이 있으면 그 `skills`에 `용기의 은총`이 있을 때 `dealer`, 없을 때 `buffer`이고, 그런 행이 없으면 `null`입니다.
 `guildName`은 가장 최근에 받은 길드원 행의 이름이고, `averageFame`은 명성이 있는 길드원의 평균을 반올림한 값입니다. 그런 길드원이 없으면 `null`입니다.
 DB에 없는 모험단과 길드, DB 설정이 없는 API는 빈 목록을 주며 이때 `guildName`, `averageFame`은 `null`입니다. 예전에 지운 `GET /adventures/characters`와는 다른 경로입니다.
 
@@ -245,7 +246,8 @@ DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.
 
 랭킹은 명성이 있는 캐릭터를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 100명까지 주고, `rank`는 1부터 매긴 순서입니다. 캐릭터 행은 모험단, 길드 조회와 같습니다.
 선택 query `jobId`, `jobGrowId`로 거르며 `jobGrowId`는 `jobId`와 함께 씁니다. 서버는 통합되어 있어 서버로 거르지 않습니다. 빈 값, 같은 key의 중복과 `jobId` 없는 `jobGrowId`는 400 `INVALID_CHARACTER_QUERY`이고, `serverId`를 포함한 다른 query key는 무시합니다.
-`characters`의 `(fame DESC)`, `(job_id, fame DESC)`, `(job_id, job_grow_id, fame DESC)` index로 읽습니다.
+선택 query `role`(`dealer`, `buffer`)은 `jobId`, `jobGrowId`가 남성 크루세이더(프리스트(남), 眞 크루세이더)일 때만 받고, 캐릭터 행의 `role`과 같은 기준으로 그 역할인 캐릭터만 줍니다. 스킬 스타일 행이 없는 캐릭터는 어느 쪽에도 넣지 않습니다. 다른 전직, `jobGrowId` 없는 요청, 다른 값과 같은 key의 중복은 400 `INVALID_CHARACTER_QUERY`입니다.
+`characters`의 `(fame DESC)`, `(job_id, fame DESC)`, `(job_id, job_grow_id, fame DESC)` index로 읽습니다. `role`이 있으면 전직 index로 명성 순으로 읽으며 행마다 스킬 스타일 PK로 역할을 거릅니다.
 
 통계는 첫 요청 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 요청은 한 계산을 함께 기다립니다. 실패는 캐시하지 않습니다. 캐시는 노드마다 따로 둡니다.
 `total`과 `servers`는 모든 캐릭터 행, `jobs`는 기본 정보를 받은 행을 직업과 전직(이름 포함)별로 센 값이고 많은 순입니다. `jobs`는 랭킹의 직업 필터 목록으로도 씁니다.
@@ -267,11 +269,12 @@ Neople을 부르지 않고 DB의 `characters`와 `character_skill_styles`를 읽
 ```
 
 - 두 query는 모두 필수이고, 빈 값과 같은 key의 중복은 400 `INVALID_CHARACTER_QUERY`입니다.
+- 선택 query `role`은 [명성 랭킹](#명성-랭킹과-통계)과 같이 남성 크루세이더일 때만 받고, 표본 가운데 그 역할로 판정된 캐릭터만 셉니다. 표본(`topCount`, `minFame`)은 `role`이 없을 때와 같습니다.
 - 표본은 그 전직에서 명성이 있는 캐릭터 가운데 명성 상위 `topCount`위까지(같은 명성은 같은 순위)이고, `minFame`은 표본의 최저 명성입니다(표본이 없으면 `null`).
 - `sampleSize`는 표본 가운데 스킬 스타일 행이 있고, 그 행을 받을 때의 전직이 지금 전직과 같은 캐릭터 수입니다. `skills`, `evolutions`, `enhancements`도 이 캐릭터만 셉니다.
 - `skills`의 `learned`는 그 스킬을 배운 캐릭터 수, `levels`는 `[레벨, 캐릭터 수]`를 레벨 순으로 둔 것입니다. 채택률의 분모는 `sampleSize`, 개화와 강화 비율의 분모는 그 스킬의 `learned`입니다.
 - 목록은 모두 스킬 이름 순입니다.
-- 전직마다 첫 요청 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 요청은 한 계산을 함께 기다립니다. 실패와 명성이 있는 캐릭터가 없는 전직(`minFame`이 `null`)은 캐시하지 않습니다.
+- 전직과 `role`마다 첫 요청 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 요청은 한 계산을 함께 기다립니다. 실패와 명성이 있는 캐릭터가 없는 전직(`minFame`이 `null`)은 캐시하지 않습니다.
 - 표본은 `characters`의 `(job_id, job_grow_id, fame DESC)` index로, 스킬 스타일은 PK로 읽습니다.
 - DB 설정이 없는 API는 `sampleSize` 0과 빈 목록을 줍니다.
 
@@ -424,6 +427,7 @@ DB를 붙인 실행은 `node apps/api/test-support/container-database.mjs dfrago
 검색 후보는 합성 검색 결과에 저장된 캐릭터와 없는 캐릭터의 모험단명을 붙이고, 모험단 이름이 바뀐 뒤 캐시에서 준 후보도 새 이름을 받는지 봅니다.
 타임라인 조회는 합성 행으로 주간 경계 앞뒤, 시즌 경계, 최근 50개, 빈 캐릭터와 진행 중인 동기화를 기다린 조회를 봅니다.
 명성 랭킹과 통계는 합성 행으로 직업과 전직 필터, 명성이 없는 캐릭터 제외, 100명 상한, 명성 구간 경계, 직업별 평균 명성과 API의 통계 캐시를 봅니다.
+남성 크루세이더는 합성 딜러, 버퍼, 스킬 스타일 행이 없거나 다른 전직으로 받은 캐릭터와 여성 크루세이더로 `role`별 랭킹과 채택률, 캐릭터 행의 `role`, 여성 크루세이더 `role` query의 400, `role`별로 나뉜 채택률 캐시를 봅니다.
 PostgreSQL 18.6 컨테이너에 `public` schema만 소유한 계정을 만들고, 테스트가 Prisma의 advisory lock을 잡은 동안 API 컨테이너 두 개가 기록 테이블을 만들지 않고 기다리는지 봅니다.
 Lock을 풀면 migration 적용, HTTP 기동, 정상 종료를 봅니다.
 실패하는 migration이 nonzero로 끝나고 실패로 기록되는지, 잘못된 비밀번호, 비밀번호 파일 누락, 일부만 있는 DB 설정이 nonzero로 끝나는지도 봅니다.
