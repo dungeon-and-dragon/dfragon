@@ -17,7 +17,8 @@ function character(index: number): CharacterDisplay {
     level: 115,
     jobName: '귀검사(남)',
     jobGrowName: '검신',
-    fame: 40000 + index
+    fame: 40000 + index,
+    role: null
   }
 }
 

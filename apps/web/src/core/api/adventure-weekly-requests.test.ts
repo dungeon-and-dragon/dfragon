@@ -28,6 +28,7 @@ const weekly: AdventureWeekly = {
       fame: 80123,
       guildId: null,
       guildName: null,
+      role: null,
       weeklyClears: [{ kind: 'raid', name: '합성 레이드' }]
     }
   ]

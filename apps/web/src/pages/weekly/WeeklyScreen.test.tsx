@@ -42,6 +42,7 @@ function weeklyCharacter(
     fame: 90000 - index,
     guildId: null,
     guildName: null,
+    role: null,
     weeklyClears
   }
 }

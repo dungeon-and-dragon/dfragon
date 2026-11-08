@@ -46,7 +46,8 @@ function rankedCharacter(rank: number): RankedCharacter {
     jobGrowName: '眞 합성 전직',
     fame: 100000 - rank,
     guildId: null,
-    guildName: '합성 길드'
+    guildName: '합성 길드',
+    role: null
   }
 }
 

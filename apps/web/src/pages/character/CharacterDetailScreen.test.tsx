@@ -10,6 +10,7 @@ import { toneClassesOf } from '../../testing/test-support/score-tone-class'
 import type { CharacterTab } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
 import { TestRouter } from '../../testing/test-support/test-router'
+import { useRecentCharacterStore } from '../../hooks/useRecentCharacterStore'
 
 type Card = NonNullable<CharacterDetailView['card']>
 type Score = NonNullable<Card['score']>
@@ -155,6 +156,19 @@ it('딜러 요약은 이름, 서버 칩과 전직과 레벨, 모험단과 길드
   expect(toneClassesOf(statValue('명성'))).toEqual(['fame'])
   expect(statValue('장비 점수').firstChild?.textContent).toBe('392,332')
   expect(toneClassesOf(statValue('장비 점수'))).toEqual(['dealer'])
+})
+
+it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최근 본 캐릭터에도 역할을 남긴다', async () => {
+  const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
+  await render(async () =>
+    detailOf({ character: maleCrusader, card: { role: 'buffer', score: null } })
+  )
+
+  expect(textLines()[1]).toBe('바칼크루세이더(버퍼)Lv.115')
+  expect(useRecentCharacterStore.getState().recentCharacters[0]).toMatchObject({
+    characterId: 'dealer-1',
+    role: 'buffer'
+  })
 })
 
 it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {
