@@ -11,9 +11,9 @@ export const styles = stylex.create({
     gap: space.s16,
     padding: space.s16,
     backgroundColor: colors.bgBar,
-    borderBottomWidth: 1,
-    borderBottomStyle: 'solid',
-    borderBottomColor: colors.borderDefault
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: colors.borderDefault
   },
   well: {
     position: 'relative',
