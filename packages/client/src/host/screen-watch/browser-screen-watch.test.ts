@@ -14,12 +14,16 @@ import {
   readRaidWindowValues,
   type RaidWindowTemplates
 } from '@dfragon/client-core/shared/raid/raid-window'
-import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
-import { decodeBrowserImage } from './browser-png'
+import { installBrowserHost } from '..'
+import type { AutoRoundSignal, BrowserHost } from '../client-host'
+import { decodeBrowserImage } from '../capture/browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { readTownIndicatorTemplate } from './browser-town-template'
 
-vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
+vi.mock('../capture/browser-png', () => ({
+  decodeBrowserImage: vi.fn(),
+  decodeBrowserPng: vi.fn()
+}))
 vi.mock('./browser-town-template', () => ({ readTownIndicatorTemplate: vi.fn() }))
 vi.mock('./browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
 // 검출기는 프레임마다 정한 장면으로 답하게 바꾸고, 같은 구성 판정은 screen-watch를 그대로 쓴다.
@@ -36,7 +40,6 @@ vi.mock('@dfragon/client-core/shared/raid/raid-window', async (importOriginal) =
 
 const API_ORIGIN = 'https://api.example.test'
 const image: CharacterImage = { width: 1, height: 1, rgba: new Uint8Array([1, 2, 3, 255]) }
-const sharedImage: CharacterImage = { width: 1, height: 1, rgba: new Uint8Array([9, 9, 9, 255]) }
 const file = new File([new Uint8Array([1])], 'shot.png', { type: 'image/png' })
 
 function pasteEvent(items: Array<Partial<DataTransferItem>>): Event {
@@ -53,16 +56,6 @@ function stubScreenShare(): { track: EventTarget & { stop: () => void }; getDisp
   vi.stubGlobal('navigator', { mediaDevices: { getDisplayMedia } })
 
   return { track, getDisplayMedia }
-}
-
-function stubVideoDecode(): void {
-  vi.mocked(decodeBrowserImage).mockImplementation(async (source) => {
-    if (source instanceof HTMLVideoElement) {
-      return sharedImage
-    }
-
-    return image
-  })
 }
 
 // 합성 장면이다. party, raid 값은 그 화면의 이름이고 null이면 그 화면의 창이 없다. 파티 이름은 partySlot 슬롯
@@ -212,89 +205,6 @@ afterEach(async () => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
   vi.resetAllMocks()
-})
-
-it('페이지에 이미지를 붙여 넣으면 알리고 readCaptureFrame이 그 이미지를 프레임으로 돌려준다', async () => {
-  const pasted = vi.fn()
-  const unsubscribe = host.onPastedFrame(pasted)
-  await expect(host.party.readCaptureFrame()).rejects.toThrow('NO_PASTED_FRAME')
-
-  document.dispatchEvent(pasteEvent([{ kind: 'string', type: 'text/plain' }]))
-  expect(pasted).not.toHaveBeenCalled()
-
-  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  expect(pasted).toHaveBeenCalledOnce()
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
-  expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(file)
-  unsubscribe()
-})
-
-it('붙여 넣은 이미지를 읽지 못하면 readCaptureFrame이 거절한다', async () => {
-  vi.mocked(decodeBrowserImage).mockRejectedValue(new Error('broken'))
-
-  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-
-  await expect(host.party.readCaptureFrame()).rejects.toThrow('broken')
-})
-
-it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이미지를 읽는다', async () => {
-  const { getDisplayMedia } = stubScreenShare()
-  stubVideoDecode()
-  const sourceId = await host.requestScreenShare()
-
-  expect(getDisplayMedia).toHaveBeenCalledExactlyOnceWith({
-    video: { displaySurface: 'window' },
-    audio: false
-  })
-  await expect(host.party.selectCaptureSource(sourceId!)).resolves.toEqual({
-    id: sourceId,
-    name: 'Dungeon & Fighter'
-  })
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
-
-  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
-})
-
-it('붙여넣기 회차를 받을 화면이 없을 때 붙여 넣은 이미지는 들지 않아 캡처 회차가 공유 화면을 읽는다', async () => {
-  stubScreenShare()
-  stubVideoDecode()
-  const sourceId = await host.requestScreenShare()
-  await host.party.selectCaptureSource(sourceId!)
-  unsubscribePastedFrame()
-
-  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-
-  expect(decodeBrowserImage).not.toHaveBeenCalledWith(file)
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
-})
-
-it('사용자가 공유를 멈추면 끝났다고 알리고, 앱이 끊은 공유와 거절한 요청은 알리지 않는다', async () => {
-  const { track } = stubScreenShare()
-  stubVideoDecode()
-  const ended = vi.fn()
-  const unsubscribe = host.onScreenShareEnded(ended)
-  const sourceId = await host.requestScreenShare()
-  document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await host.party.readCaptureFrame()
-
-  track.dispatchEvent(new Event('ended'))
-
-  expect(ended).toHaveBeenCalledOnce()
-  await expect(host.party.selectCaptureSource(sourceId!)).rejects.toThrow('SCREEN_SHARE_ENDED')
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
-
-  const next = stubScreenShare()
-  await host.requestScreenShare()
-  await host.party.selectCaptureSource('')
-  next.track.dispatchEvent(new Event('ended'))
-  expect(next.track.stop).toHaveBeenCalledOnce()
-
-  next.getDisplayMedia.mockRejectedValueOnce(new DOMException('denied', 'NotAllowedError'))
-  await expect(host.requestScreenShare()).resolves.toBeNull()
-  expect(ended).toHaveBeenCalledOnce()
-  unsubscribe()
 })
 
 it('공유한 동안 틱마다 지금 프레임을 판정하고, 마을에서 새 파티 구성이 2번 연속 보일 때만 시작 신호를 보낸다', async () => {
