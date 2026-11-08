@@ -1,4 +1,4 @@
-import type { Guild } from '#core/shared/adventure-guild/adventure-guild'
+import type { Guild } from '#core/adventure-guild/adventure-guild'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

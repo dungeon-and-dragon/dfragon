@@ -1,4 +1,4 @@
-import type { SlotCard } from '#core/lib/slot-cards'
+import type { SlotCard } from '#core/capture/slot-cards'
 
 export const LOOKUP_STEPS = ['이름 인식', '캐릭터 검색', '상세 정보 확인'] as const
 export type LookupStep = (typeof LOOKUP_STEPS)[number]

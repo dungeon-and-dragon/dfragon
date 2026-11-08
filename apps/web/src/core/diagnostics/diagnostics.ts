@@ -8,8 +8,8 @@ export const DIAGNOSTIC_MESSAGES = {
   SEARCH_UNAVAILABLE: '캐릭터 조회 서비스에 연결하지 못했습니다.',
   SEARCH_APPEARANCE_FALLBACK: '외형을 확인하지 못해 최고 명성 후보를 표시합니다.',
   SEARCH_RAID_ROW_FALLBACK: '공대 행의 직업과 수치를 확인하지 못해 최고 명성 후보를 표시합니다.',
-  RENDERER_ERROR: '화면 실행 중 오류가 발생했습니다.',
-  RENDERER_REJECTION: '화면의 비동기 작업 중 오류가 발생했습니다.'
+  PAGE_ERROR: '화면 실행 중 오류가 발생했습니다.',
+  PAGE_REJECTION: '화면의 비동기 작업 중 오류가 발생했습니다.'
 } as const
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_MESSAGES

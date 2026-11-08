@@ -1,5 +1,5 @@
-import type { ItemRarity } from '../shared/search/character-detail-display'
-import type { CharacterDetailView } from '../shared/search/character-detail-view'
+import type { ItemRarity } from './character-detail-display'
+import type { CharacterDetailView } from './character-detail-view'
 import {
   type ItemView,
   itemRarityOfGrade,

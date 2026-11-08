@@ -1,5 +1,5 @@
-import type { CharacterImage } from '../../types/character'
-import { SearchHttpFailure } from './http'
+import type { CharacterImage } from './character'
+import { SearchHttpFailure } from '../api/http'
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 const PNG_HEADER_BYTES = 33

@@ -1,5 +1,5 @@
-import type { SearchError, SearchErrorCode } from '../../types/search'
-import { SearchHttpFailure } from './http'
+import type { SearchError, SearchErrorCode } from './search'
+import { SearchHttpFailure } from '../api/http'
 
 export type SearchOperationFailure = {
   kind: 'failure'

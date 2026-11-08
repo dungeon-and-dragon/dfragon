@@ -1,17 +1,17 @@
-import { portraitFaceWindowOf } from '../shared/search/portrait-anchor'
-import type { SelectedCharacterSummary } from '../types/character'
-import { characterImageUrl } from '../shared/search/character-summary'
+import { portraitFaceWindowOf } from '../search/portrait-anchor'
+import type { SelectedCharacterSummary } from './character'
+import { characterImageUrl } from './character-summary'
 import {
   type CharacterChoice,
   SEARCH_ERRORS,
   type SearchError,
   type SearchSlot
-} from '../types/search'
-import { serverNames } from '../constants/servers'
-import { MISSING_VALUE } from '../constants/cards'
-import type { CardCharacter } from '../types/cards'
-import type { SearchMode } from '../types/search-mode'
-import type { ServerId } from '../types/servers'
+} from '../search/search'
+import { serverNames } from '../servers/servers'
+import { MISSING_VALUE } from '../capture/cards'
+import type { CardCharacter } from '../capture/cards-types'
+import type { SearchMode } from '../capture/search-mode'
+import type { ServerId } from '../servers/servers-types'
 
 function isServerId(value: string): value is ServerId {
   return Object.hasOwn(serverNames, value)

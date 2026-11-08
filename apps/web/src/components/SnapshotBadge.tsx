@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
-import { RAID_PARTY_SIZE } from '#core/constants/cards'
-import type { SnapshotMark } from '#core/lib/adventure-snapshot'
-import type { SearchMode } from '#core/types/search-mode'
+import { RAID_PARTY_SIZE } from '#core/capture/cards'
+import type { SnapshotMark } from '#core/capture/adventure-snapshot'
+import type { SearchMode } from '#core/capture/search-mode'
 import { SnapshotIcon } from './SnapshotIcon'
 import { styles } from './SnapshotBadge.style'
 

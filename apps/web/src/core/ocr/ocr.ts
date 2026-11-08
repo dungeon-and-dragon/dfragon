@@ -1,5 +1,5 @@
-import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
-import { REQUEST_TIMEOUT_MS } from '../constants/capture'
+import type { PartyOcrResult, PartyOcrWorker } from '../capture/capture-types'
+import { REQUEST_TIMEOUT_MS } from '../capture/capture'
 
 type Reply = { ready: true } | PartyOcrResult
 type WorkerMessage = Reply | { failed: true }

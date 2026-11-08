@@ -1,7 +1,7 @@
 import { env, InferenceSession, Tensor } from 'onnxruntime-web/webgpu'
 import { assertCtcLabels, decodeCtcCandidates } from './ctc-candidates'
 import { MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH, recognitionInputValues } from './paddle-recognition'
-import type { PartyOcrResult } from '../types/capture'
+import type { PartyOcrResult } from '../capture/capture-types'
 
 const DICTIONARY_CARRIAGE_RETURN_PATTERN = /\r/g
 const DICTIONARY_FINAL_NEWLINE_PATTERN = /\n$/

@@ -1,6 +1,6 @@
-import type { CtcCandidate } from '../lib/ctc-candidates'
-import type { RaidValueColumn } from './search'
-import type { CharacterImage } from './character'
+import type { CtcCandidate } from '../ocr/ctc-candidates'
+import type { RaidValueColumn } from '../search/search'
+import type { CharacterImage } from '../character/character'
 
 export type CaptureSource = {
   id: string

@@ -1,4 +1,4 @@
-import type { CharacterSearchRow } from './search'
+import type { CharacterSearchRow } from '../search/search'
 
 export type CharacterIdentity = Readonly<{ serverId: string; characterId: string }>
 

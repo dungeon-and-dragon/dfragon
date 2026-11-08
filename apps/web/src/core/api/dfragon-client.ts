@@ -1,6 +1,10 @@
 import { z } from 'zod'
-import type { CharacterCandidate, CharacterDetails, CharacterIdentity } from '../../types/character'
-import type { TodayGrade } from '../../types/today-grade'
+import type {
+  CharacterCandidate,
+  CharacterDetails,
+  CharacterIdentity
+} from '../character/character'
+import type { TodayGrade } from '../today-grade/today-grade-types'
 import { guildSchema, type Guild } from '../adventure-guild/adventure-guild'
 import {
   adventureActivityDaySchema,
@@ -22,7 +26,7 @@ import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '../rankin
 import {
   characterDetailViewSchema,
   type CharacterDetailView
-} from '../search/character-detail-view'
+} from '../character/character-detail-view'
 import {
   characterTimelineSchema,
   timelineAcquisitionPageSchema,
@@ -31,8 +35,8 @@ import {
   type TimelineAcquisition,
   type TimelineEnhancement,
   type TimelinePage
-} from '../search/character-timeline'
-import { SearchHttpFailure } from '../search/http'
+} from '../character/character-timeline'
+import { SearchHttpFailure } from './http'
 import {
   assertApiSuccess,
   createCharacterHttpClient,

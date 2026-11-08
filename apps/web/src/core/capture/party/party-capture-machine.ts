@@ -1,17 +1,20 @@
 import { assign, fromCallback, fromPromise, setup, type SnapshotFrom } from 'xstate'
-import type { CapturePhase } from '../types/capture'
-import type { CharacterImage } from '../types/character'
+import type { CapturePhase } from '../capture-types'
+import type { CharacterImage } from '../../character/character'
 import {
   beginCaptureSearch,
   getCapturingPhase,
   getObservedNickname,
   getRecognizeErrorStatus
-} from './capture-round'
-import type { OcrCaptureObservation } from './capture-search'
-import type { CaptureTexts } from './capture-texts'
-import type { OcrRecognition } from './ocr-worker-recognition'
+} from '../capture-round'
+import type { OcrCaptureObservation } from '../capture-search'
+import type { CaptureTexts } from '../capture-texts'
+import type { OcrRecognition } from '../../ocr/ocr-worker-recognition'
 import { recognizePartyFrame, type PartySlotRecognition } from './party-recognition'
-import { reportRendererDiagnostic, showRejectedOcrNickname } from './runtime-diagnostics'
+import {
+  reportRuntimeDiagnostic,
+  showRejectedOcrNickname
+} from '../../diagnostics/runtime-diagnostics'
 
 type CaptureInput = {
   texts: CaptureTexts
@@ -199,7 +202,7 @@ export const partyCaptureMachine = setup({
             onError: {
               target: '#partyCapture.captureFailed',
               actions: [
-                () => reportRendererDiagnostic('CAPTURE_START_FAILED'),
+                () => reportRuntimeDiagnostic('CAPTURE_START_FAILED'),
                 assign({ status: ({ context }) => context.effects.texts.partyStartFailed })
               ]
             }
@@ -217,7 +220,7 @@ export const partyCaptureMachine = setup({
             onError: {
               target: '#partyCapture.captureFailed',
               actions: [
-                () => reportRendererDiagnostic('CAPTURE_READ_FAILED'),
+                () => reportRuntimeDiagnostic('CAPTURE_READ_FAILED'),
                 assign({ status: ({ context }) => context.effects.texts.disconnected })
               ]
             }
@@ -234,7 +237,7 @@ export const partyCaptureMachine = setup({
                 target: '#partyCapture.captureFailed',
                 actions: [
                   assign({ results: ({ event }) => event.output }),
-                  () => reportRendererDiagnostic('OCR_FAILED'),
+                  () => reportRuntimeDiagnostic('OCR_FAILED'),
                   assign({ status: ({ context }) => context.effects.texts.partyOcrFailed })
                 ]
               },
@@ -253,7 +256,7 @@ export const partyCaptureMachine = setup({
             onError: {
               target: '#partyCapture.captureFailed',
               actions: [
-                () => reportRendererDiagnostic('OCR_FAILED'),
+                () => reportRuntimeDiagnostic('OCR_FAILED'),
                 assign({
                   status: ({ context, event }) =>
                     getRecognizeErrorStatus(event.error, context.effects.texts.partyOcrFailed)

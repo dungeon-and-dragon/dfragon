@@ -1,6 +1,6 @@
-import type { ServerId } from './servers'
-import type { CharacterFaceWindow, SearchSlot } from './search'
-import type { CharacterCard } from './character'
+import type { ServerId } from '../servers/servers-types'
+import type { CharacterFaceWindow, SearchSlot } from '../search/search'
+import type { CharacterCard } from '../character/character'
 
 export type SlotState = SearchSlot['state']
 

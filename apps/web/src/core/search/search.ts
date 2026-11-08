@@ -1,4 +1,4 @@
-import type { CharacterPortrait, SelectedCharacterSummary } from './character'
+import type { CharacterPortrait, SelectedCharacterSummary } from '../character/character'
 
 export const SEARCH_SLOT_COUNTS = { party: 4, raid: 12 } as const
 export type SearchSlotCount = (typeof SEARCH_SLOT_COUNTS)[keyof typeof SEARCH_SLOT_COUNTS]

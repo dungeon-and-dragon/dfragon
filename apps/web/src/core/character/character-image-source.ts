@@ -1,6 +1,6 @@
-import type { CharacterImage } from '../../types/character'
+import type { CharacterImage } from './character'
 import type { IdentityRequest } from '../api/dfragon-client'
-import { CompletedCache } from './completed-cache'
+import { CompletedCache } from '../search/completed-cache'
 
 export type CharacterImageHttp = (input: IdentityRequest) => Promise<CharacterImage>
 

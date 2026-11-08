@@ -3,15 +3,15 @@ import {
   createCaptureSearch,
   type CaptureSearch,
   type OcrCaptureObservation
-} from '#core/lib/capture-search'
-import { emptySearchSlots, fillSlots } from '#core/lib/slots'
-import type { SearchView } from '#core/types/search'
+} from '#core/capture/capture-search'
+import { emptySearchSlots, fillSlots } from '#core/capture/slots'
+import type { SearchView } from '#core/search/search'
 import type {
   OcrSearchObservation,
   SearchApi,
   SearchCommandResult,
   SearchSlotCount
-} from '#core/types/search'
+} from '#core/search/search'
 
 export type ManualCharacterLookup = SearchView & {
   lookupSlot: (slot: number, nickname: string, serverId?: string) => void

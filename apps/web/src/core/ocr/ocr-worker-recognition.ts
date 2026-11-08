@@ -1,4 +1,4 @@
-import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
+import type { PartyOcrResult, PartyOcrWorker } from '../capture/capture-types'
 import { createPartyOcrWorker } from './ocr'
 
 export type OcrRecognition = <T>(

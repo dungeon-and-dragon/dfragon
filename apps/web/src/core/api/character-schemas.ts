@@ -1,11 +1,11 @@
 import { z } from 'zod'
-import type { CharacterIdentity } from '../../types/character'
-import { SearchHttpFailure } from '../search/http'
+import type { CharacterIdentity } from '../character/character'
+import { SearchHttpFailure } from './http'
 import {
   CHARACTER_SERVER_NAMES as SERVER_NAMES,
   characterIdentitySchema as identitySchema,
   characterImageUrl
-} from '../search/character-summary'
+} from '../character/character-summary'
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
 const MIN_SEARCH_NAME_CODE_POINTS = 1

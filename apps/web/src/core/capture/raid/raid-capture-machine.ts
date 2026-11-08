@@ -1,18 +1,21 @@
 import { assign, fromPromise, setup, type SnapshotFrom } from 'xstate'
-import type { CapturePhase } from '../types/capture'
-import type { RaidFrameResult, RaidFrameRow } from '../types/capture'
-import type { RaidValueColumn } from '../types/search'
+import type { CapturePhase } from '../capture-types'
+import type { RaidFrameResult, RaidFrameRow } from '../capture-types'
+import type { RaidValueColumn } from '../../search/search'
 import {
   beginCaptureSearch,
   getCapturingPhase,
   getObservedNickname,
   getRecognizeErrorStatus
-} from './capture-round'
-import type { OcrCaptureObservation } from './capture-search'
-import type { CaptureTexts } from './capture-texts'
-import type { OcrRecognition } from './ocr-worker-recognition'
+} from '../capture-round'
+import type { OcrCaptureObservation } from '../capture-search'
+import type { CaptureTexts } from '../capture-texts'
+import type { OcrRecognition } from '../../ocr/ocr-worker-recognition'
 import { recognizeRaidRows, type RaidSlotRecognition } from './raid-recognition'
-import { reportRendererDiagnostic, showRejectedOcrNickname } from './runtime-diagnostics'
+import {
+  reportRuntimeDiagnostic,
+  showRejectedOcrNickname
+} from '../../diagnostics/runtime-diagnostics'
 
 const READY_STATUS = '캡처 버튼을 눌러 공대를 인식해 주세요.'
 
@@ -171,7 +174,7 @@ export const raidCaptureMachine = setup({
             onError: {
               target: '#raidCapture.failed',
               actions: [
-                () => reportRendererDiagnostic('CAPTURE_START_FAILED'),
+                () => reportRuntimeDiagnostic('CAPTURE_START_FAILED'),
                 assign({ status: ({ context }) => context.effects.texts.raidStartFailed })
               ]
             }
@@ -215,7 +218,7 @@ export const raidCaptureMachine = setup({
             onError: {
               target: '#raidCapture.failed',
               actions: [
-                () => reportRendererDiagnostic('CAPTURE_READ_FAILED'),
+                () => reportRuntimeDiagnostic('CAPTURE_READ_FAILED'),
                 assign({ status: ({ context }) => context.effects.texts.disconnected })
               ]
             }
@@ -235,7 +238,7 @@ export const raidCaptureMachine = setup({
                 guard: ({ event }) => event.output.some((result) => result.kind === 'failed'),
                 target: '#raidCapture.failed',
                 actions: [
-                  () => reportRendererDiagnostic('OCR_FAILED'),
+                  () => reportRuntimeDiagnostic('OCR_FAILED'),
                   assign({ status: ({ context }) => context.effects.texts.raidOcrFailed })
                 ]
               },
@@ -252,7 +255,7 @@ export const raidCaptureMachine = setup({
             onError: {
               target: '#raidCapture.failed',
               actions: [
-                () => reportRendererDiagnostic('OCR_FAILED'),
+                () => reportRuntimeDiagnostic('OCR_FAILED'),
                 assign({
                   status: ({ context, event }) =>
                     getRecognizeErrorStatus(event.error, context.effects.texts.raidOcrFailed)

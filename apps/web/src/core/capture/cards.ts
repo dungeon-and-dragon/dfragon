@@ -1,6 +1,6 @@
-import { SEARCH_SLOT_COUNTS } from '../types/search'
-import type { SeatLayout } from '../lib/seats'
-import type { CharacterTier } from '../types/cards'
+import { SEARCH_SLOT_COUNTS } from '../search/search'
+import type { SeatLayout } from './seats'
+import type { CharacterTier } from './cards-types'
 
 export const tierLabels: Readonly<Record<CharacterTier, string>> = { top: '상위', ranker: '랭커' }
 

@@ -1,7 +1,7 @@
-import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
-import type { CharacterImage, CharacterPortrait } from '../types/character'
+import type { PartyOcrResult, PartyOcrWorker } from '../capture-types'
+import type { CharacterImage, CharacterPortrait } from '../../character/character'
 import { capturePartyRecognitionInputs } from './party'
-import type { OcrNicknameRejection } from './runtime-diagnostics'
+import type { OcrNicknameRejection } from '../../diagnostics/runtime-diagnostics'
 
 const MAX_NICKNAME_CODE_POINTS = 12
 const UNPAIRED_SURROGATE_PATTERN = /[\uD800-\uDFFF]/u

@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import type { AdventureWeekly } from '#core/shared/adventure-guild/adventure-weekly'
+import type { AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

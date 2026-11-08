@@ -1,14 +1,14 @@
-import type { SearchSlot } from '../types/search'
-import type { CardCharacter, SlotState } from '../types/cards'
+import type { SearchSlot } from '../search/search'
+import type { CardCharacter, SlotState } from './cards-types'
 import type { SnapshotMark } from './adventure-snapshot'
 import type { CandidatePicker } from './candidate-picker'
-import type { SearchMode } from '../types/search-mode'
+import type { SearchMode } from './search-mode'
 import {
   type SlotNotice,
   searchSlotNotice,
   toCharacterCard,
   toChoiceCharacterCard
-} from './character-card'
+} from '../character/character-card'
 
 export type SlotCard = {
   state: SlotState

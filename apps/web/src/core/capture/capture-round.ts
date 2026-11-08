@@ -1,6 +1,6 @@
 import { fromPromise } from 'xstate'
-import type { CapturePhase } from '../types/capture'
-import type { FirstCandidate } from './party-recognition'
+import type { CapturePhase } from './capture-types'
+import type { FirstCandidate } from './party/party-recognition'
 
 export const beginCaptureSearch = fromPromise(
   async ({
