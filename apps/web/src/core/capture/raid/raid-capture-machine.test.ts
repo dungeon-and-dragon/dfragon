@@ -1,9 +1,9 @@
 import { createActor, waitFor } from 'xstate'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { getRaidCapturePhase, raidCaptureMachine } from './raid-capture-machine'
-import { WEB_CAPTURE_TEXTS } from './capture-texts'
-import { createSharedOcrWorker } from './ocr-worker-recognition'
-import type { RaidFrameResult } from '../types/capture'
+import { WEB_CAPTURE_TEXTS } from '../capture-texts'
+import { createSharedOcrWorker } from '../../ocr/ocr-worker-recognition'
+import type { RaidFrameResult } from '../capture-types'
 import type { RaidSlotRecognition } from './raid-recognition'
 
 const modules = vi.hoisted(() => ({
@@ -12,10 +12,10 @@ const modules = vi.hoisted(() => ({
   diagnostic: vi.fn(),
   rejected: vi.fn()
 }))
-vi.mock('./ocr', () => ({ createPartyOcrWorker: modules.worker }))
+vi.mock('../../ocr/ocr', () => ({ createPartyOcrWorker: modules.worker }))
 vi.mock('./raid-recognition', () => ({ recognizeRaidRows: modules.recognize }))
-vi.mock('./runtime-diagnostics', () => ({
-  reportRendererDiagnostic: modules.diagnostic,
+vi.mock('../../diagnostics/runtime-diagnostics', () => ({
+  reportRuntimeDiagnostic: modules.diagnostic,
   showRejectedOcrNickname: modules.rejected
 }))
 

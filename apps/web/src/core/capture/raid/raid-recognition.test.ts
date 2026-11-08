@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { recognizeRaidRows } from './raid-recognition'
-import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
+import type { PartyOcrResult, PartyOcrWorker } from '../capture-types'
 
 const recognize = vi.fn<PartyOcrWorker['recognize']>()
 // jsdom에는 canvas 구현이 없어 인식에 넘긴 canvas의 픽셀만 기록하는 2d 문맥을 둔다.

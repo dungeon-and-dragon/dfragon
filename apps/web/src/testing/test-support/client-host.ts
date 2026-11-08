@@ -1,9 +1,9 @@
 import { vi } from 'vitest'
-import { searchSnapshot } from '#core/testing/fixtures/search-test-fixture'
-import type { TodayGrade } from '#core/types/today-grade'
-import { SEARCH_SLOT_COUNTS } from '#core/types/search'
+import { searchSnapshot } from '#core/testing/search-test-fixture'
+import type { TodayGrade } from '#core/today-grade/today-grade-types'
+import { SEARCH_SLOT_COUNTS } from '#core/search/search'
 import type { ClientHost } from '../../host/client-host'
-import { emptySearchSlots } from '#core/lib/slots'
+import { emptySearchSlots } from '#core/capture/slots'
 
 type ClientHostOverrides = Partial<
   Pick<

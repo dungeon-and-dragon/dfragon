@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import type { CharacterStats } from '#core/shared/ranking/ranking-stats'
+import type { CharacterStats } from '#core/ranking/ranking-stats'
 import { fameBars, shareText } from './stats-bars'
 
 function statsOf(fameDistribution: CharacterStats['fameDistribution']): CharacterStats {

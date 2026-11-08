@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
-import { bufferCard, dealerCard } from '../testing/fixtures/character-cards'
-import type { CharacterCard } from '../types/cards'
+import { bufferCard, dealerCard } from '../testing/character-cards'
+import type { CharacterCard } from '../capture/cards-types'
 import { formatApproximateScore, toScoreView } from './card-score'
 
 it('카드 값이 없으면 점수 값 대신 null을 두고 라벨은 장비 점수로 둔다', () => {

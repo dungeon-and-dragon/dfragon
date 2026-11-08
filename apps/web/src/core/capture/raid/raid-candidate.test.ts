@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { CharacterCandidate } from '../../types/character'
+import type { CharacterCandidate } from '../../character/character'
 import {
   NO_RAID_OBSERVED_VALUES,
   planRaidComparison,

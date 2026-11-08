@@ -1,13 +1,8 @@
 import { expect, it, vi } from 'vitest'
 import { createCaptureSearch } from './capture-search'
-import {
-  CAPTURE_ID,
-  searchSnapshot,
-  searchSlot,
-  searchRow
-} from '../testing/fixtures/search-test-fixture'
-import type { SearchApi, SearchSnapshot } from '../types/search'
-import type { SearchView } from '../types/search'
+import { CAPTURE_ID, searchSnapshot, searchSlot, searchRow } from '../testing/search-test-fixture'
+import type { SearchApi, SearchSnapshot } from '../search/search'
+import type { SearchView } from '../search/search'
 
 it('공대 연결은 12자리 snapshot의 12번째 슬롯 결과를 보인다', async () => {
   const raidSlots = (slots: SearchSnapshot['slots'] = []): SearchSnapshot['slots'] =>

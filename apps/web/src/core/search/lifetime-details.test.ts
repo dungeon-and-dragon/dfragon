@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import type { MockedFunction } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '../../types/character'
+import type { CharacterCandidate, CharacterDetails } from '../character/character'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
 import { createCaptureSearchLifetime } from './capture-lifetime'
-import { deferred } from './async-test-fixture'
-import { SearchHttpFailure } from './http'
+import { deferred } from '../testing/async-test-fixture'
+import { SearchHttpFailure } from '../api/http'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 
 function candidate(name: string): CharacterCandidate {

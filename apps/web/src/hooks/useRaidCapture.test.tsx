@@ -3,22 +3,22 @@ import { act, useLayoutEffect, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useRaidCapture } from './useRaidCapture'
-import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
-import { createSharedOcrWorker } from '#core/lib/ocr-worker-recognition'
-import { emptySearchSlots } from '#core/lib/slots'
+import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
+import { createSharedOcrWorker } from '#core/ocr/ocr-worker-recognition'
+import { emptySearchSlots } from '#core/capture/slots'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext, type RaidCaptureHost } from '../host/client-host'
-import type { RaidSlotRecognition } from '#core/lib/raid-recognition'
-import { searchSnapshot } from '#core/testing/fixtures/search-test-fixture'
-import type { RaidFrameResult } from '#core/types/capture'
-import type { SearchApi, SearchSnapshot } from '#core/types/search'
+import type { RaidSlotRecognition } from '#core/capture/raid/raid-recognition'
+import { searchSnapshot } from '#core/testing/search-test-fixture'
+import type { RaidFrameResult } from '#core/capture/capture-types'
+import type { SearchApi, SearchSnapshot } from '#core/search/search'
 
 const raidMocks = vi.hoisted(() => ({ recognize: vi.fn() }))
-vi.mock('#core/lib/raid-recognition', () => ({
+vi.mock('#core/capture/raid/raid-recognition', () => ({
   recognizeRaidRows: raidMocks.recognize
 }))
 // 글자 인식 worker는 jsdom에서 띄울 수 없어 인식 결과만 테스트가 정한다.
-vi.mock('#core/lib/ocr', () => ({
+vi.mock('#core/ocr/ocr', () => ({
   createPartyOcrWorker: async () => ({ recognize: vi.fn(), terminate: () => {} })
 }))
 

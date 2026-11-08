@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest'
-import type { PartyOcrResult, PartyOcrWorker } from '../types/capture'
-import { WEB_CAPTURE_TEXTS } from './capture-texts'
+import type { PartyOcrResult, PartyOcrWorker } from '../capture/capture-types'
+import { WEB_CAPTURE_TEXTS } from '../capture/capture-texts'
 import { createSharedOcrWorker } from './ocr-worker-recognition'
 
 const mocks = vi.hoisted(() => ({ createPartyOcrWorker: vi.fn() }))

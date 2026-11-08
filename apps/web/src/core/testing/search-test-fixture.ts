@@ -4,7 +4,7 @@ import type {
   OcrSearchObservation,
   SearchSlot,
   SearchSnapshot
-} from '../../types/search'
+} from '../search/search'
 
 export const CAPTURE_ID = '00000000-0000-4000-8000-000000000011'
 export const REQUEST_ID = '00000000-0000-4000-8000-000000000012'

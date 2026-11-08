@@ -7,19 +7,22 @@ import type {
   CharacterImage,
   CharacterPortrait,
   SelectedCharacterSummary
-} from '../../types/character'
-import { deferred } from './async-test-fixture'
+} from '../character/character'
+import { deferred } from '../testing/async-test-fixture'
 import { runDetailsRequest, runSearchRequest, type IdentificationAdapters } from './request'
 import type { CharacterIdentificationInput } from './identify'
 import type { SearchOperationContext } from './operation'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
-import type { CharacterImageHttp } from './character-image-source'
-import { createCharacterImageCache, createCharacterImageSource } from './character-image-source'
-import { SearchHttpFailure } from './http'
+import type { CharacterImageHttp } from '../character/character-image-source'
+import {
+  createCharacterImageCache,
+  createCharacterImageSource
+} from '../character/character-image-source'
+import { SearchHttpFailure } from '../api/http'
 import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 import { PortraitComparisonBudgetExceededError } from './portrait-raster'
-import { dealerCard, scoredDealerCard } from '../../testing/fixtures/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '../testing/card-test-fixture'
 
 const FACE_SIZE = 8
 const FACE_LEFT_SHADE = 100

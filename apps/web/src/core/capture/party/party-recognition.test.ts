@@ -3,7 +3,7 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { capturePartyRecognitionInputs } from './party'
 import { recognizePartyFrame } from './party-recognition'
-import type { PartyOcrWorker } from '../types/capture'
+import type { PartyOcrWorker } from '../capture-types'
 
 vi.mock('./party', () => ({ capturePartyRecognitionInputs: vi.fn() }))
 

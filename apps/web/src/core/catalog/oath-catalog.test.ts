@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { characterDetailFixture } from '../../testing/fixtures/character-detail'
+import { characterDetailFixture } from '../testing/character-detail'
 import type { GameTextLines } from './game-text'
 import { type OathCatalog, oathCatalogSchema, oathItemIconOf, oathSetBoardOf } from './oath-catalog'
 
