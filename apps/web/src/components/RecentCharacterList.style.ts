@@ -19,6 +19,11 @@ export const styles = stylex.create({
     color: colors.fgDefault,
     outlineStyle: 'none'
   },
+  largePopup: {
+    width: 'var(--anchor-width)',
+    maxHeight: 'var(--available-height)',
+    paddingBlock: 0
+  },
   list: { margin: 0, padding: 0, listStyle: 'none' },
   item: {
     display: 'flex',
@@ -42,6 +47,15 @@ export const styles = stylex.create({
     transitionDuration: motion.durHover,
     transitionTimingFunction: motion.ease
   },
+  largeItem: {
+    flexGrow: 1,
+    minWidth: 0,
+    height: 44,
+    boxSizing: 'border-box',
+    gap: 10,
+    paddingBlock: 0,
+    paddingInlineEnd: 0
+  },
   well: {
     position: 'relative',
     flexShrink: 0,
@@ -51,6 +65,7 @@ export const styles = stylex.create({
     borderRadius: radius.control,
     backgroundColor: colors.bgInset
   },
+  largeWell: { width: 28, height: 34 },
   identity: { display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0 },
   line: { display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 },
   name: {
@@ -113,6 +128,31 @@ export const styles = stylex.create({
     borderBottomColor: colors.borderDefault
   },
   row: { position: 'relative' },
+  section: {
+    borderTopWidth: { default: 1, ':first-child': 0 },
+    borderTopStyle: 'solid',
+    borderTopColor: colors.borderDefault
+  },
+  sectionTitle: { backgroundColor: colors.bgInset },
+  sectionRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    paddingInlineEnd: 6,
+    borderBottomWidth: { default: 1, ':last-child': 0 },
+    borderBottomStyle: 'solid',
+    borderBottomColor: colors.borderDefault,
+    backgroundColor: { default: 'transparent', ':hover': colors.bgControl }
+  },
+  empty: {
+    display: 'flex',
+    alignItems: 'center',
+    height: 44,
+    margin: 0,
+    paddingInline: space.s12,
+    fontSize: 14,
+    lineHeight: '20px'
+  },
   remove: {
     position: 'absolute',
     insetInlineEnd: space.s12,
