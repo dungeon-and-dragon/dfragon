@@ -5,6 +5,7 @@ import { CharacterDetailFailure } from '../characters/details/errors.js'
 import {
   ApiAdventureActivity,
   ApiAdventureActivityDay,
+  ApiAdventureSeasonDays,
   ApiAdventureCharacters,
   ApiAdventureSeasonBackfill,
   ApiAdventureWeekly,
@@ -14,6 +15,7 @@ import {
   type ActivityDayDetail,
   type ActivitySeason,
   type AdventureActivity,
+  type AdventureSeasonDays,
   toActivityDayRange
 } from './activity.js'
 import type {
@@ -78,6 +80,20 @@ export class AdventureGuildController {
     }
 
     return this.service.adventureActivityDay(adventureName, day)
+  }
+
+  @Get('adventures/:adventureName/activity/seasons/:season/days')
+  @ApiAdventureSeasonDays()
+  adventureSeasonDays(
+    @Param('adventureName') adventureName: string,
+    @Param('season') season: string
+  ): Promise<AdventureSeasonDays> {
+    const parsed = seasonNumber.safeParse(season)
+    if (!parsed.success) {
+      throw new CharacterDetailFailure('query')
+    }
+
+    return this.service.adventureSeasonDays(adventureName, parsed.data)
   }
 
   @Post('adventures/:adventureName/activity/seasons/:season/backfill')

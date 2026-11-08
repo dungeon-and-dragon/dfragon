@@ -280,6 +280,28 @@ export function ApiAdventureSeasonBackfill() {
   )
 }
 
+export function ApiAdventureSeasonDays() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '모험단 시즌 하루 활동 상세 조회',
+      description:
+        '공개 API. 고른 시즌의 기록이 있는 날마다 하루 활동 상세를 날짜 순으로 반환합니다. 하루는 06:00 KST에 바뀝니다. 옛 시즌 받기가 끝나지 않으면 목록이 비고, 시작하지 않았거나 없는 시즌은 400입니다. 타임라인 동기화는 요청하지 않습니다.'
+    }),
+    ApiParam({
+      name: 'adventureName',
+      schema: { type: 'string' },
+      description: 'URL 인코딩한 모험단 이름'
+    }),
+    ApiParam({
+      name: 'season',
+      schema: { type: 'integer', minimum: 1 },
+      description: '시즌 번호'
+    }),
+    success('AdventureSeasonDays', '시즌 번호와 기록이 있는 날의 상세'),
+    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
 export function ApiAdventureActivityDay() {
   return applyDecorators(
     ApiOperation({

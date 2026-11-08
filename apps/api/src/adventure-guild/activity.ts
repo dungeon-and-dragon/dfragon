@@ -194,6 +194,11 @@ export type ActivityDayDetail = {
   enhancements: ActivityDayEnhancement[]
 }
 
+export type AdventureSeasonDays = {
+  season: number
+  days: ActivityDayDetail[]
+}
+
 function isCollectedSeason(id: number): boolean {
   return id >= FIRST_COLLECTED_SEASON_ID
 }
@@ -501,6 +506,44 @@ export function toActivityDayDetail(
   return { date: day.date, raids, legions, items, enhancements }
 }
 
+export function toSeasonDays(records: ActivityRecords): ActivityDayDetail[] {
+  const days = new Map<string, { clears: TimelineEventRow[]; items: CharacterTimelineItemRow[] }>()
+  const recordsFor = (occurredAt: Date) => {
+    const date = formatResetDate(occurredAt)
+    const dayRecords = days.get(date) ?? { clears: [], items: [] }
+    days.set(date, dayRecords)
+
+    return dayRecords
+  }
+  for (const clear of records.clears) {
+    recordsFor(clear.occurredAt).clears.push(clear)
+  }
+  for (const item of records.items) {
+    recordsFor(item.occurredAt).items.push(item)
+  }
+
+  return [...days.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .flatMap(([date, dayRecords]) => {
+      const day = toActivityDayRange(date)
+      if (day === undefined) {
+        throw new Error('Invalid activity day')
+      }
+      const detail = toActivityDayDetail(day, dayRecords)
+      const isEmpty =
+        detail.raids.length +
+          detail.legions.length +
+          detail.items.length +
+          detail.enhancements.length ===
+        0
+      if (isEmpty) {
+        return []
+      }
+
+      return [detail]
+    })
+}
+
 async function readActivityRecords(
   client: DatabaseClient,
   characters: readonly TimelineCharacter[],
@@ -552,12 +595,12 @@ async function readSeasonBackfills(
   return new Map(backfills)
 }
 
-export async function readAdventureActivity(
+async function readActivitySeasonContext(
   client: DatabaseClient,
   adventureName: string,
   seasonId: number | undefined,
   now: Date
-): Promise<AdventureActivityRead | undefined> {
+) {
   const startedSeasons = toActivitySeasons(await readSeasons(client), now)
   const season = findActivitySeason(startedSeasons, seasonId)
   if (season === undefined && seasonId !== undefined) {
@@ -570,6 +613,21 @@ export async function readAdventureActivity(
     toSeasonBackfillRanges(startedSeasons)
   )
   const seasons = withSeasonBackfills(startedSeasons, backfills)
+
+  return { characters, seasons, season }
+}
+
+export async function readAdventureActivity(
+  client: DatabaseClient,
+  adventureName: string,
+  seasonId: number | undefined,
+  now: Date
+): Promise<AdventureActivityRead | undefined> {
+  const context = await readActivitySeasonContext(client, adventureName, seasonId, now)
+  if (context === undefined) {
+    return undefined
+  }
+  const { characters, seasons, season } = context
   if (season === undefined) {
     return { characters, activity: { seasons, season: null, ...emptySeasonActivity() } }
   }
@@ -579,6 +637,32 @@ export async function readAdventureActivity(
     : emptySeasonActivity()
 
   return { characters, activity: { seasons, season, ...activity } }
+}
+
+export async function readAdventureSeasonDays(
+  client: DatabaseClient,
+  adventureName: string,
+  seasonId: number,
+  now: Date
+): Promise<AdventureSeasonDays | undefined> {
+  const context = await readActivitySeasonContext(client, adventureName, seasonId, now)
+  if (context === undefined || context.season === undefined) {
+    return undefined
+  }
+  const { characters, seasons, season } = context
+  const available = seasons.some(({ id, available }) => id === season.id && available)
+  if (!available) {
+    return { season: season.id, days: [] }
+  }
+  const records = await readActivityRecords(
+    client,
+    characters,
+    season.startsAt,
+    season.endsAt ?? now
+  )
+  const days = toSeasonDays(records)
+
+  return { season: season.id, days }
 }
 
 export async function readAdventureSeasonBackfill(
