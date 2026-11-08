@@ -97,13 +97,13 @@ it('제목 상자에 캐릭터 수와 마지막 업데이트로부터 지난 시
   expect(container.querySelector('header time')?.getAttribute('title')).toBe('11-06 00:30')
 })
 
-it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 직업 분포, 명성 분포, 직업별 평균 명성 순으로 그린다', async () => {
+it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 분포, 직업별 평균 명성 순으로 그린다', async () => {
   await render(async () => stats)
 
   expect([...container.querySelectorAll('h2')].map((name) => name.textContent)).toEqual([
     '서버 인구',
-    '직업 분포',
     '명성 분포',
+    '직업 분포',
     '직업별 평균 명성'
   ])
   expect(rowsOf('서버 인구')).toEqual([
