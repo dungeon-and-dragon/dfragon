@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, radius, shadow, space } from '@dfragon/ui/tokens.stylex'
+import { colors, motion, radius, shadow, space } from '@dfragon/ui/tokens.stylex'
 
 const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 72
@@ -47,6 +47,7 @@ export const styles = stylex.create({
   },
   barWidth: (percent: number) => ({ width: `${percent}%` }),
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
+  columnChart: { position: 'relative' },
   columns: {
     display: 'flex',
     gap: COLUMN_GAP,
@@ -55,7 +56,6 @@ export const styles = stylex.create({
     listStyle: 'none'
   },
   column: {
-    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
@@ -81,7 +81,10 @@ export const styles = stylex.create({
   columnBar: {
     width: '100%',
     borderRadius: 1,
-    backgroundColor: colors.borderStrong
+    backgroundColor: colors.borderStrong,
+    transitionProperty: 'background-color',
+    transitionDuration: motion.durHover,
+    transitionTimingFunction: motion.ease
   },
   columnBarActive: { backgroundColor: colors.fgMuted },
   columnHeight: (height: string) => ({ height }),
@@ -120,6 +123,14 @@ export const styles = stylex.create({
     transform: 'translateX(-50%)'
   },
   rowTooltip: { top: 'auto', bottom: ROW_TOOLTIP_OFFSET, left: '100%' },
+  columnTooltip: {
+    top: space.s16,
+    left: 0,
+    visibility: 'hidden',
+    opacity: 0,
+    pointerEvents: 'none',
+    transform: 'none'
+  },
   tooltipStart: { left: 0, transform: 'none' },
   tooltipEnd: { left: 'auto', right: 0, transform: 'none' },
   tooltipRange: { fontSize: 11, lineHeight: '14px', color: colors.fgSubtle },
