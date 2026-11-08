@@ -2,10 +2,12 @@ import { stylexOptions } from '@dfragon/ui/stylex-config'
 import stylex from '@stylexjs/unplugin'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { buildCommit } from './build-commit.ts'
 import { workspaceAliases } from './workspace-aliases.ts'
 
 export default defineConfig({
   plugins: [stylex.rollup(stylexOptions), react()],
+  define: { __BUILD_COMMIT__: JSON.stringify(buildCommit(process.env.SOURCE_COMMIT)) },
   resolve: { alias: workspaceAliases, dedupe: ['react', 'react-dom'] },
   test: {
     setupFiles: [
