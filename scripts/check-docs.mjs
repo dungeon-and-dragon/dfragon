@@ -394,6 +394,7 @@ function listRepositoryPaths(root) {
 }
 
 // build 산출물, 로컬 .env처럼 ignore 규칙에 걸리는 경로는 checkout마다 있고 없음이 달라 확인하지 않는다.
+// 디스크에 없는 경로는 git이 디렉터리인지 알 수 없어 디렉터리 전용 규칙(`dist/`)이 걸리지 않으므로 `/`를 붙인 경로도 함께 묻는다.
 function listIgnoredPaths(root, paths) {
   if (paths.length === 0) {
     return new Set()
@@ -402,7 +403,7 @@ function listIgnoredPaths(root, paths) {
   const result = spawnSync('git', ['check-ignore', '--no-index', '-z', '--stdin'], {
     cwd: root,
     encoding: 'utf8',
-    input: paths.join('\0')
+    input: paths.flatMap((path) => [path, `${path}/`]).join('\0')
   })
 
   // check-ignore는 ignore 대상이 하나도 없으면 1로 끝난다.
@@ -410,7 +411,9 @@ function listIgnoredPaths(root, paths) {
     throw new Error(`git check-ignore 실패: ${result.error?.message ?? result.stderr}`)
   }
 
-  return new Set(result.stdout.split('\0').filter((entry) => entry.length > 0))
+  const ignored = result.stdout.split('\0').filter((entry) => entry.length > 0)
+
+  return new Set(ignored.map((entry) => entry.replace(trailingSlashes, '')))
 }
 
 function checkRepository(root) {
