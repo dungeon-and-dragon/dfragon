@@ -152,6 +152,15 @@ function leave(element: HTMLElement): void {
   element.dispatchEvent(new MouseEvent('mouseleave'))
 }
 
+// 칸을 벗어난 뒤 닫힘 지연을 기다리려고 Base UI가 쓰는 setTimeout까지 가짜로 바꾼다.
+function fakeCloseTimers(): void {
+  vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'], now: Date.now() })
+}
+
+async function waitForClose(): Promise<void> {
+  await act(async () => vi.advanceTimersByTime(1000))
+}
+
 function stubReducedMotion(reduce: boolean): void {
   vi.stubGlobal('matchMedia', (query: string) =>
     Object.assign(new EventTarget(), {
@@ -267,9 +276,35 @@ it('칸에 처음 마우스를 올리면 그날 상세를 받아 날짜와 묶�
     '00:29+15 실패'
   ])
 
+  fakeCloseTimers()
   await act(async () => leave(cell('4월 2일')))
+  await waitForClose()
+  expect(popupText()).toEqual([])
   await act(async () => hover(cell('4월 2일')))
   expect(getAdventureActivityDay).toHaveBeenCalledTimes(1)
+})
+
+it('활동이 있는 칸에서 다른 활동이 있는 칸으로 옮기면 사이 간격을 지나는 동안 툴팁을 닫지 않고 내용을 그 날짜로 바꾼다', async () => {
+  await render({ getAdventureActivityDay: async (_name, date) => ({ ...april2, date }) })
+  await act(async () => hover(cell('4월 2일')))
+
+  await act(async () => leave(cell('4월 2일')))
+  expect(popupText()[0]).toBe('4월 2일 (목)')
+
+  await act(async () => hover(cell('4월 3일')))
+  expect(popupText()[0]).toBe('4월 3일 (금)')
+})
+
+it('칸 영역을 벗어나 머물면 툴팁을 닫는다', async () => {
+  await render({ getAdventureActivityDay: async () => april2 })
+  fakeCloseTimers()
+  await act(async () => hover(cell('4월 2일')))
+  expect(popupText()[0]).toBe('4월 2일 (목)')
+
+  await act(async () => leave(cell('4월 2일')))
+  await waitForClose()
+
+  expect(popupText()).toEqual([])
 })
 
 it('활동이 없는 날은 마우스를 올려도 상세를 받지 않는다', async () => {
