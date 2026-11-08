@@ -7,6 +7,7 @@ import type {
   AdventureActivityDay
 } from '#core/adventure-guild/adventure-activity'
 import { useAdventureActivityDay } from '../../hooks/useAdventureActivity'
+import type { ActivityKind } from './activity-heatmap'
 import { styles } from './ActivityDayDetail.style'
 import { formatClearCount } from './clear-count'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
@@ -141,23 +142,33 @@ function EnhancementResult({ kind, target, success }: ActivityDayEnhancement): R
   )
 }
 
-function DayRecords({ day }: { day: AdventureActivityDay }): React.JSX.Element {
+function DayRecords({
+  day,
+  kind
+}: {
+  day: AdventureActivityDay
+  kind: ActivityKind
+}): React.JSX.Element {
   return (
     <>
-      <ClearGroup title="레이드" counts={day.raids} />
-      <ClearGroup title="레기온" counts={day.legions} />
-      <ItemGroup items={day.items} />
-      <EnhancementGroup enhancements={day.enhancements} />
+      {(kind === 'all' || kind === 'raid') && <ClearGroup title="레이드" counts={day.raids} />}
+      {(kind === 'all' || kind === 'legion') && <ClearGroup title="레기온" counts={day.legions} />}
+      {(kind === 'all' || kind === 'item') && <ItemGroup items={day.items} />}
+      {(kind === 'all' || kind === 'enhance') && (
+        <EnhancementGroup enhancements={day.enhancements} />
+      )}
     </>
   )
 }
 
 export function ActivityDayDetail({
   adventureName,
-  date
+  date,
+  kind
 }: {
   adventureName: string
   date: string
+  kind: ActivityKind
 }): React.JSX.Element {
   const result = useAdventureActivityDay(adventureName, date)
 
@@ -179,7 +190,7 @@ export function ActivityDayDetail({
           {result.message}
         </span>
       )}
-      {result.status === 'success' && <DayRecords day={result.value} />}
+      {result.status === 'success' && <DayRecords day={result.value} kind={kind} />}
     </div>
   )
 }
