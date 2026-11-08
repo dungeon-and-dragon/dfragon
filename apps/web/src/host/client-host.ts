@@ -20,7 +20,7 @@ import type { AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import type {
   ActivitySeason,
   AdventureActivity,
-  AdventureActivityDay
+  AdventureActivitySeasonDays
 } from '#core/adventure-guild/adventure-activity'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'
@@ -66,7 +66,10 @@ export type ClientHost = Readonly<{
     adventureName: string,
     season: number | undefined
   ) => Promise<AdventureActivity>
-  getAdventureActivityDay: (adventureName: string, date: string) => Promise<AdventureActivityDay>
+  getAdventureActivitySeasonDays: (
+    adventureName: string,
+    season: number
+  ) => Promise<AdventureActivitySeasonDays>
   backfillAdventureSeason: (adventureName: string, season: number) => Promise<ActivitySeason>
   searchCharacters: (query: CharacterSearchQuery) => Promise<readonly SearchedCharacter[]>
 }>

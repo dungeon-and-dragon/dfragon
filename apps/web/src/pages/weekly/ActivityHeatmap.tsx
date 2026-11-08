@@ -3,7 +3,11 @@ import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
 import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
-import { useAdventureActivity } from '../../hooks/useAdventureActivity'
+import {
+  type AdventureActivitySeasonDaysResult,
+  useAdventureActivity,
+  useAdventureActivitySeasonDays
+} from '../../hooks/useAdventureActivity'
 import {
   type ActivityDay,
   type ActivityKind,
@@ -242,19 +246,19 @@ function HeatmapGrid({
 }
 
 function CellTooltipPopup({
-  adventureName,
   date,
-  kind
+  kind,
+  seasonDays
 }: {
-  adventureName: string
   date: string
   kind: ActivityKind
+  seasonDays: AdventureActivitySeasonDaysResult
 }): React.JSX.Element {
   const popupRef = useHeatmapTooltipSlide(date)
 
   return (
     <Tooltip.Popup ref={popupRef} side="top" sideOffset={8}>
-      <ActivityDayDetail adventureName={adventureName} date={date} kind={kind} />
+      <ActivityDayDetail date={date} kind={kind} seasonDays={seasonDays} />
     </Tooltip.Popup>
   )
 }
@@ -298,6 +302,7 @@ function HeatmapPanel({
   now: number
 }): React.JSX.Element {
   const [tooltip] = useState(() => Tooltip.createHandle<CellPayload>())
+  const seasonDays = useAdventureActivitySeasonDays(adventureName, season.id)
   const weeks = buildHeatmapWeeks(season, now)
   const days = new Map(activity.days.map((day) => [day.date, day]))
   const thresholds = levelThresholds(activity.days.map((day) => dayCount(day, kind)))
@@ -326,7 +331,7 @@ function HeatmapPanel({
       <Tooltip.Root handle={tooltip} disableHoverablePopup>
         {({ payload }) =>
           payload !== undefined && (
-            <CellTooltipPopup adventureName={adventureName} date={payload.date} kind={kind} />
+            <CellTooltipPopup date={payload.date} kind={kind} seasonDays={seasonDays} />
           )
         }
       </Tooltip.Root>
