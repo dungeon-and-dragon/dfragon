@@ -22,7 +22,12 @@ const ADVENTURE = 'adventure'
 const scopeOptions = [...characterSearchServerOptions, { id: ADVENTURE, label: '모험단' }]
 const MAX_CHARACTER_NAME_LENGTH = 12
 
-export function CharacterSearchBox(): React.JSX.Element {
+export function CharacterSearchBox({
+  size = 'medium'
+}: {
+  size?: 'medium' | 'large'
+}): React.JSX.Element {
+  const large = size === 'large'
   const navigate = useNavigate()
   const [scope, setScope] = useState(ALL_CHARACTER_SERVERS)
   const [name, setName] = useState('')
@@ -91,14 +96,17 @@ export function CharacterSearchBox(): React.JSX.Element {
       role="search"
       aria-label={isAdventure ? '모험단 검색' : '캐릭터 검색'}
       onSubmit={handleSubmit}
-      {...stylex.props(styles.box)}
+      {...stylex.props(styles.box, large && styles.largeBox)}
     >
       <BaseSelect.Root
         value={scope}
         onValueChange={handleScopeChange}
         items={scopeOptions.map((option) => ({ value: option.id, label: option.label }))}
       >
-        <BaseSelect.Trigger aria-label="검색 대상" {...stylex.props(styles.server)}>
+        <BaseSelect.Trigger
+          aria-label="검색 대상"
+          {...stylex.props(styles.server, large && styles.largeServer)}
+        >
           <BaseSelect.Value />
           <ChevronDownIcon {...stylex.props(styles.chevron)} />
         </BaseSelect.Trigger>
@@ -110,7 +118,7 @@ export function CharacterSearchBox(): React.JSX.Element {
           ))}
         </Select.Popup>
       </BaseSelect.Root>
-      <span aria-hidden="true" {...stylex.props(styles.divider)} />
+      <span aria-hidden="true" {...stylex.props(styles.divider, large && styles.largeDivider)} />
       <input
         ref={inputRef}
         type="search"
@@ -123,20 +131,24 @@ export function CharacterSearchBox(): React.JSX.Element {
         onChange={handleNameChange}
         onFocus={openRecent}
         onKeyDown={focusFirstResult}
-        {...stylex.props(styles.input)}
+        {...stylex.props(styles.input, large && styles.largeInput)}
       />
       {name !== '' && (
         <button
           type="button"
           aria-label="검색어 지우기"
           onClick={clearName}
-          {...stylex.props(styles.clear)}
+          {...stylex.props(styles.clear, large && styles.largeClear)}
         >
-          <CloseIcon {...stylex.props(styles.clearIcon)} />
+          <CloseIcon {...stylex.props(styles.clearIcon, large && styles.largeClearIcon)} />
         </button>
       )}
-      <button type="submit" aria-label="검색" {...stylex.props(styles.submit)}>
-        <SearchIcon {...stylex.props(styles.icon)} />
+      <button
+        type="submit"
+        aria-label="검색"
+        {...stylex.props(styles.submit, large && styles.largeSubmit)}
+      >
+        <SearchIcon {...stylex.props(styles.icon, large && styles.largeIcon)} />
       </button>
       <RecentCharacterList
         open={recentOpen && name === ''}
