@@ -128,7 +128,7 @@ function RefreshControl({
         disabled={refreshing || justFetched}
         onClick={onRefresh}
       >
-        <RefreshIcon {...stylex.props(refreshing && styles.spinning)} />
+        <RefreshIcon spinning={refreshing} />
         {refreshing ? '받는 중' : '갱신'}
       </Button>
       <time
