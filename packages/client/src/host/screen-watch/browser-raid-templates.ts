@@ -5,7 +5,7 @@ import fameHeadingUrl from '@dfragon/client-core/shared/raid/raid-value-heading-
 import valueGlyphsUrl from '@dfragon/client-core/shared/raid/raid-value-glyphs.png'
 import { sliceRaidValueGlyphs } from '@dfragon/client-core/shared/raid/raid-value-glyphs'
 import type { RaidWindowTemplates } from '@dfragon/client-core/shared/raid/raid-window'
-import { decodeBrowserPng } from '../capture/browser-png'
+import { decodeBrowserPng } from '../browser-png'
 
 let templates: Promise<RaidWindowTemplates> | null = null
 

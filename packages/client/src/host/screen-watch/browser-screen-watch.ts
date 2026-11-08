@@ -1,9 +1,7 @@
 import { detectDNFTownIndicator, type DNFParticipantFrame } from '@dfragon/lib'
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import type { AutoRoundSignal, BrowserHost, WatchedScreen } from '../client-host'
-import { decodeBrowserImage } from '../capture/browser-png'
-import type { createRoundFrames } from '../capture/round-frames'
-import type { ScreenShare } from '../capture/screen-share'
+import { decodeBrowserImage } from '../browser-png'
 import { createBackgroundLoad } from './background-load'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { readTownIndicatorTemplate } from './browser-town-template'
@@ -20,8 +18,8 @@ import {
 // 마을 자동 인식의 판정 주기는 약 1초이며 ms 단위로 맞추지 않는다.
 const SCREEN_WATCH_INTERVAL_MS = 1000
 
-export function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
-  onShareChanged: (share: ScreenShare | null) => void
+export function createScreenWatch(hold: (frame: Promise<CharacterImage>) => () => void): {
+  onShareChanged: (video: HTMLVideoElement | null) => void
   beginRoundRead: () => (kind: ScreenWatchKind, frame: CharacterImage) => Promise<void>
   setWatchedScreen: BrowserHost['setWatchedScreen']
   onAutoRound: BrowserHost['onAutoRound']
@@ -30,7 +28,7 @@ export function createScreenWatch(frames: ReturnType<typeof createRoundFrames>):
   const raidTemplates = createBackgroundLoad(readRaidWindowTemplates)
   let screen: WatchedScreen = { kind: 'party', roundRunning: false }
   let state = initialScreenWatchState
-  let active: ScreenShare | null = null
+  let active: HTMLVideoElement | null = null
   let timer: ReturnType<typeof setInterval> | undefined
   let releaseHeldFrame: (() => void) | null = null
   let startAutoRound: ((signal: AutoRoundSignal) => boolean) | null = null
@@ -73,11 +71,11 @@ export function createScreenWatch(frames: ReturnType<typeof createRoundFrames>):
   // 신호가 대기 중인 붙여넣기 프레임을 덮는다.
   function holdAutoRound(signal: AutoRoundSignal, frame: CharacterImage): void {
     if (startAutoRound?.(signal) === true) {
-      releaseHeldFrame = frames.hold(Promise.resolve(frame))
+      releaseHeldFrame = hold(Promise.resolve(frame))
     }
   }
 
-  async function tick(share: ScreenShare): Promise<void> {
+  async function tick(video: HTMLVideoElement): Promise<void> {
     const { kind } = screen
     const town = townTemplate()
     const readCrops = cropReader(kind)
@@ -90,7 +88,7 @@ export function createScreenWatch(frames: ReturnType<typeof createRoundFrames>):
     judging = true
     let frame: CharacterImage
     try {
-      frame = await decodeBrowserImage(share.video)
+      frame = await decodeBrowserImage(video)
     } catch {
       // 영상 프레임을 읽지 못한 틱은 건너뛰고 다음 틱에 다시 읽는다.
       return
@@ -108,27 +106,27 @@ export function createScreenWatch(frames: ReturnType<typeof createRoundFrames>):
   }
 
   return {
-    onShareChanged(share) {
+    onShareChanged(video) {
       clearInterval(timer)
       timer = undefined
       releaseHeldFrame?.()
       releaseHeldFrame = null
       state = initialScreenWatchState
       generation += 1
-      active = share
-      if (share !== null) {
+      active = video
+      if (video !== null) {
         // 첫 틱 전에 템플릿을 받기 시작한다.
         townTemplate()
         raidTemplates()
-        timer = setInterval(() => tick(share), SCREEN_WATCH_INTERVAL_MS)
+        timer = setInterval(() => tick(video), SCREEN_WATCH_INTERVAL_MS)
       }
     },
     // 회차가 프레임을 읽기 전의 공유를 잡아 두어, 읽는 동안 공유가 바뀌면 새 공유의 기준으로 기록하지 않는다.
     beginRoundRead() {
-      const share = active
+      const video = active
 
       return async (kind, frame) => {
-        if (share === null || active !== share) {
+        if (video === null || active !== video) {
           return
         }
         generation += 1
@@ -141,7 +139,7 @@ export function createScreenWatch(frames: ReturnType<typeof createRoundFrames>):
         } catch {
           // 이름 crop을 만들지 못한 프레임도 아래에서 빈 기준이 되어, 그 화면의 창이 다시 보이면 새 구성으로 본다.
         }
-        if (active === share) {
+        if (active === video) {
           state = recordScreenBaseline(state, kind, crops ?? [])
         }
       }
