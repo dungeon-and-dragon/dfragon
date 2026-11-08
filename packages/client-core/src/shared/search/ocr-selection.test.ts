@@ -66,15 +66,12 @@ describe('OCR로 고른 캐릭터의 카드 요약', () => {
     }
     const lifetime = createCaptureSearchLifetime({
       publish: vi.fn(),
-      isCurrent: () => true,
-      isCurrentOcr: () => true,
       runtime: {
         identification,
         reportDiagnostic: vi.fn()
       }
     })
-    const captureId = lifetime.begin({ windowGeneration: 1, sourceGeneration: 1 }).snapshot
-      .captureId!
+    const captureId = lifetime.begin().snapshot.captureId!
     lifetime.observeOcr({
       captureId,
       slot: 0,

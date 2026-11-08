@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest'
-import { createCaptureSearchLifetime, type CaptureBinding } from './capture-lifetime'
+import { createCaptureSearchLifetime } from './capture-lifetime'
 import { deferred } from './async-test-fixture'
 import { SearchHttpFailure } from './http'
 import type { SearchRuntime } from './request'
@@ -21,10 +21,6 @@ const rows: readonly CharacterCandidate[] = [
     jobGrowName: null
   }
 ]
-
-function binding(): Omit<CaptureBinding, 'captureId'> {
-  return { windowGeneration: 2, sourceGeneration: 3 }
-}
 
 function runtime(candidates: CharacterCandidatesHttp): SearchRuntime {
   return {
@@ -58,11 +54,9 @@ it('검색 불가 닉네임의 새 관측은 이전 HTTP를 취소하고 입력 
   const publish = vi.fn<(snapshot: SearchSnapshot) => void>()
   const lifetime = createCaptureSearchLifetime({
     publish,
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     runtime: runtime(http)
   })
-  const captureId = lifetime.begin(binding()).snapshot.captureId!
+  const captureId = lifetime.begin().snapshot.captureId!
   const pending = lifetime.observeOcr(
     ocr({ captureId, slot: 0, observationRevision: 1, nickname: '가나' })
   )
@@ -108,11 +102,9 @@ it('Stop은 모든 슬롯의 HTTP와 실패를 정리하고 새 수명을 늦은
   const publish = vi.fn<(snapshot: SearchSnapshot) => void>()
   const lifetime = createCaptureSearchLifetime({
     publish,
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     runtime: runtime(http)
   })
-  const oldCaptureId = lifetime.begin(binding()).snapshot.captureId!
+  const oldCaptureId = lifetime.begin().snapshot.captureId!
   for (const slot of [0, 1, 2]) {
     lifetime.observeOcr(
       ocr({ captureId: oldCaptureId, slot, observationRevision: 1, nickname: '가나' })
@@ -149,7 +141,7 @@ it('Stop은 모든 슬롯의 HTTP와 실패를 정리하고 새 수명을 늦은
   expect(publish).toHaveBeenCalledExactlyOnceWith(ended.snapshot)
   expect(http).toHaveBeenCalledTimes(3)
 
-  const newCaptureId = lifetime.begin(binding()).snapshot.captureId!
+  const newCaptureId = lifetime.begin().snapshot.captureId!
   expect(newCaptureId).not.toBe(oldCaptureId)
   lifetime.observeOcr(
     ocr({ captureId: newCaptureId, slot: 0, observationRevision: 1, nickname: '다라' })
@@ -172,8 +164,6 @@ it('pending 발행 중 새 관측이 요청을 대체하면 이전 요청의 HTT
   const http = vi.fn<CharacterCandidatesHttp>().mockResolvedValue([])
   const lifetime = createCaptureSearchLifetime({
     runtime: runtime(http),
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     publish: (snapshot) => {
       if (snapshot.slots[0].state === 'pending') {
         lifetime.observeOcr(
@@ -182,7 +172,7 @@ it('pending 발행 중 새 관측이 요청을 대체하면 이전 요청의 HTT
       }
     }
   })
-  const captureId = lifetime.begin(binding()).snapshot.captureId!
+  const captureId = lifetime.begin().snapshot.captureId!
 
   const result = lifetime.observeOcr(
     ocr({ captureId, slot: 0, observationRevision: 1, nickname: '가나' })
@@ -209,18 +199,14 @@ it('한 검색 수명의 종료는 다른 수명의 HTTP, 결과를 건드리지
   const secondHttp = vi.fn<CharacterCandidatesHttp>().mockReturnValue(secondResponse.promise)
   const first = createCaptureSearchLifetime({
     runtime: runtime(firstHttp),
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     publish: vi.fn()
   })
   const second = createCaptureSearchLifetime({
     runtime: runtime(secondHttp),
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     publish: vi.fn()
   })
-  const firstId = first.begin(binding()).snapshot.captureId!
-  const secondId = second.begin(binding()).snapshot.captureId!
+  const firstId = first.begin().snapshot.captureId!
+  const secondId = second.begin().snapshot.captureId!
   first.observeOcr(ocr({ captureId: firstId, slot: 0, observationRevision: 1, nickname: '가나' }))
   second.observeOcr(ocr({ captureId: secondId, slot: 0, observationRevision: 1, nickname: '다라' }))
   await vi.waitFor(() => expect(secondHttp).toHaveBeenCalledTimes(1))
@@ -245,37 +231,3 @@ it('한 검색 수명의 종료는 다른 수명의 HTTP, 결과를 건드리지
   expect(first.snapshot().slots.every((slot) => slot.state === 'idle')).toBe(true)
   second.end(secondId)
 })
-
-it.each(['성공', '실패'])(
-  '현재 binding을 확인할 수 없는 늦은 %s는 상태를 발행하지 않는다',
-  async (outcome) => {
-    const response = deferred<readonly CharacterCandidate[]>()
-    const http = vi.fn<CharacterCandidatesHttp>().mockReturnValue(response.promise)
-    const publish = vi.fn<(snapshot: SearchSnapshot) => void>()
-    let current = true
-    const lifetime = createCaptureSearchLifetime({
-      runtime: runtime(http),
-      isCurrent: () => current,
-      isCurrentOcr: () => true,
-      publish
-    })
-    const captureId = lifetime.begin(binding()).snapshot.captureId!
-    const pending = lifetime.observeOcr(
-      ocr({ captureId, slot: 0, observationRevision: 1, nickname: '가나' })
-    ).snapshot
-    await vi.waitFor(() => expect(http).toHaveBeenCalledTimes(1))
-    publish.mockClear()
-    current = false
-
-    if (outcome === '성공') {
-      response.resolve(rows)
-    } else {
-      response.reject(new Error('Synthetic transport failure'))
-    }
-    await flushCompletion()
-
-    expect(lifetime.snapshot()).toEqual(pending)
-    expect(publish).not.toHaveBeenCalled()
-    lifetime.invalidate()
-  }
-)

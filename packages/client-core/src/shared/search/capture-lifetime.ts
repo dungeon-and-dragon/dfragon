@@ -28,20 +28,12 @@ import type {
 
 export type CaptureBinding = Readonly<{
   captureId: string
-  windowGeneration: number
-  sourceGeneration: number
 }>
 
 type Options = {
   publish: (snapshot: SearchSnapshot) => void
-  isCurrent: (binding: CaptureBinding) => boolean
   runtime?: SearchRuntime
   slotCount?: SearchSlotCount
-  /**
-   * OCR 관측과 그 요청에만 더 요구하는 유효성. 회차를 시작한 게임 창 선택이 그대로인지 본다.
-   * 서버를 고른 조회는 이 조건과 무관하다.
-   */
-  isCurrentOcr: (binding: CaptureBinding) => boolean
 }
 
 function idleSlot({
@@ -68,7 +60,7 @@ export type CaptureSearchLifetime = {
   readonly current: CaptureBinding | null
   snapshot: () => SearchSnapshot
   result: (code?: SearchCommandError) => SearchCommandResult
-  begin: (binding: Omit<CaptureBinding, 'captureId'>) => SearchCommandResult
+  begin: () => SearchCommandResult
   end: (captureId: string) => SearchCommandResult
   invalidate: () => void
   /** 진행 중인 OCR에서 시작한 요청을 취소하고 그 슬롯을 비운다. 끝난 슬롯과 서버를 고른 조회는 유지한다. */
@@ -127,8 +119,8 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     return { ok: true, snapshot: currentSnapshot }
   }
 
-  function begin(nextBinding: Omit<CaptureBinding, 'captureId'>): SearchCommandResult {
-    binding = { ...nextBinding, captureId: crypto.randomUUID() }
+  function begin(): SearchCommandResult {
+    binding = { captureId: crypto.randomUUID() }
     emit()
 
     return result()
@@ -202,11 +194,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   }
 
   function observeOcr(input: OcrSearchObservation): SearchCommandResult {
-    if (
-      binding?.captureId !== input.captureId ||
-      !options.isCurrent(binding) ||
-      !options.isCurrentOcr(binding)
-    ) {
+    if (binding?.captureId !== input.captureId) {
       return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
     }
     const previous = slots[input.slot]
@@ -222,7 +210,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   }
 
   function lookup(input: ManualCharacterLookup): SearchCommandResult {
-    if (binding?.captureId !== input.captureId || !options.isCurrent(binding)) {
+    if (binding?.captureId !== input.captureId) {
       return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
     }
 
@@ -272,7 +260,7 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
     const ocrInput = 'candidateNicknames' in input ? cloneOcrInput(input) : null
     const manual = 'candidateNicknames' in input ? undefined : { serverId: input.serverId }
     cancelSlot(input.slot)
-    if (binding?.captureId !== input.captureId || !options.isCurrent(binding)) {
+    if (binding?.captureId !== input.captureId) {
       return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
     }
 
@@ -326,7 +314,6 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   function isCurrentSlot(request: RequestIdentity): boolean {
     return (
       binding != null &&
-      options.isCurrent(binding) &&
       binding.captureId === request.captureId &&
       slots[request.slot].requestId === request.requestId
     )
@@ -483,11 +470,6 @@ export function createCaptureSearchLifetime(options: Options): CaptureSearchLife
   }
 
   function emit(): void {
-    if (binding != null && !options.isCurrent(binding)) {
-      invalidate()
-
-      return
-    }
     revision += 1
     options.publish(snapshot())
     startPendingDetails()
