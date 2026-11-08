@@ -3,6 +3,7 @@ import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type {
   CharacterTimelineItemRow,
+  DatabaseClient,
   TimelineCharacter,
   TimelineEventRow
 } from '@dfragon/database'
@@ -12,6 +13,8 @@ import {
   type AdventureActivityRead,
   emptySeasonActivity,
   findActivitySeason,
+  readAdventureActivityDay,
+  readAdventureSeasonDays,
   toActivityDayDetail,
   toActivityDayRange,
   toActivitySeasons,
@@ -470,11 +473,119 @@ test('하루 상세의 강화는 종류, 도전한 단계 after와 성공 여부
   ])
 })
 
+test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 상세와 같으며 기록을 한 번씩 읽는다', async () => {
+  const now = at('2026-07-21T12:00:00')
+  const clears = [
+    raid('2026-07-18T05:59:00', '디레지에 레이드'),
+    legion('2026-07-18T06:00:00', '아포칼립스'),
+    legion('2025-01-09T06:00:00', '베누스'),
+    legion('2023-09-14T06:00:00', '이스핀즈'),
+    raid('2026-03-26T05:59:00', '안톤'),
+    raid('2026-07-21T12:00:00', '안톤')
+  ]
+  const items = [
+    acquisition('2026-07-20T10:00:00', '레어'),
+    enhancement(402, '2026-07-18T06:01:00', 9, 10, true),
+    { ...acquisition('2026-07-18T05:58:00', '에픽'), itemName: '합성 아이템' }
+  ]
+  let eventQueries = 0
+  let itemQueries = 0
+  let backfillComplete = false
+  const filter = <T extends { occurredAt: Date }>(
+    rows: T[],
+    args: { where: { occurredAt: { gte: Date; lt?: Date } } }
+  ) =>
+    rows.filter(
+      ({ occurredAt }) =>
+        occurredAt >= args.where.occurredAt.gte &&
+        (args.where.occurredAt.lt === undefined || occurredAt < args.where.occurredAt.lt)
+    )
+  const client = {
+    season: {
+      findMany: async () => [
+        { id: 9, name: '선계', startsAt: at('2023-09-14T06:00:00') },
+        { id: 10, name: '중천', startsAt: at('2025-01-09T06:00:00') },
+        { id: 11, name: '천해천', startsAt: season.startsAt },
+        { id: 12, name: '다음 시즌', startsAt: season.endsAt }
+      ]
+    },
+    $queryRaw: async () => [{ serverId: 'cain', characterId: 'synthetic' }],
+    timelineSeasonBackfill: {
+      findMany: async () =>
+        backfillComplete
+          ? [
+              {
+                serverId: 'cain',
+                characterId: 'synthetic',
+                backfilledUntil: at('2025-01-09T05:59:00'),
+                completedAt: now
+              }
+            ]
+          : []
+    },
+    timelineEvent: {
+      findMany: async (args: Parameters<typeof filter>[1]) => {
+        eventQueries++
+
+        return filter(clears, args)
+      }
+    },
+    timelineItem: {
+      findMany: async (args: Parameters<typeof filter>[1]) => {
+        itemQueries++
+
+        return filter(items, args)
+      }
+    }
+  } as unknown as DatabaseClient
+
+  const result = await readAdventureSeasonDays(client, '합성', 11, now)
+  assert.ok(result)
+  assert.equal(result.season, 11)
+  assert.deepEqual(
+    result.days.map(({ date }) => date),
+    ['2026-07-17', '2026-07-18']
+  )
+  assert.deepEqual(result.days[0], {
+    date: '2026-07-17',
+    raids: [{ name: '디레지에 레이드', count: 1, hard: 0, normal: 1 }],
+    legions: [],
+    items: [{ at: '2026-07-18T05:58:00+09:00', name: '합성 아이템', rarity: '에픽' }],
+    enhancements: []
+  })
+  assert.deepEqual(result.days[1], {
+    date: '2026-07-18',
+    raids: [],
+    legions: [{ name: '아포칼립스', count: 1 }],
+    items: [],
+    enhancements: [{ at: '2026-07-18T06:01:00+09:00', kind: 'amplify', target: 10, success: true }]
+  })
+  assert.deepEqual([eventQueries, itemQueries], [1, 1])
+  for (const detail of result.days) {
+    assert.deepEqual(detail, await readAdventureActivityDay(client, '합성', day(detail.date)))
+  }
+  assert.deepEqual(await readAdventureSeasonDays(client, '합성', 9, now), { season: 9, days: [] })
+  backfillComplete = true
+  assert.deepEqual(
+    (await readAdventureSeasonDays(client, '합성', 9, now))?.days.map(({ date }) => date),
+    ['2023-09-14']
+  )
+  assert.deepEqual(
+    (await readAdventureSeasonDays(client, '합성', 10, now))?.days.map(({ date }) => date),
+    ['2025-01-09', '2026-03-25']
+  )
+  assert.equal(await readAdventureSeasonDays(client, '합성', 12, now), undefined)
+  assert.equal(await readAdventureSeasonDays(client, '합성', 99, now), undefined)
+})
+
 async function listen(
   reader: Partial<
     Pick<
       AdventureGuildReader,
-      'readAdventureActivity' | 'readAdventureActivityDay' | 'readAdventureSeasonBackfill'
+      | 'readAdventureActivity'
+      | 'readAdventureActivityDay'
+      | 'readAdventureSeasonDays'
+      | 'readAdventureSeasonBackfill'
     >
   >,
   syncTimeline: (character: TimelineCharacter) => Promise<void>
@@ -490,6 +601,7 @@ async function listen(
       readAdventureWeeklyClears: unused,
       readAdventureActivity: unused,
       readAdventureActivityDay: unused,
+      readAdventureSeasonDays: unused,
       readAdventureSeasonBackfill: unused,
       ...reader
     },
@@ -660,6 +772,51 @@ test('하루 상세의 날짜가 YYYY-MM-DD가 아니거나 없는 날짜면 400
       assert.equal(response.status, 400, date)
       assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', date)
     }
+  } finally {
+    await app.close()
+  }
+})
+
+test('시즌 하루 상세는 시즌을 전달하고 동기화하지 않으며 잘못된 시즌에 query 오류를 준다', async () => {
+  const reads: [string, number][] = []
+  const requested: TimelineCharacter[] = []
+  const result = {
+    season: 11,
+    days: [dayDetail({ clears: [raid('2026-07-18T12:00:00', '디레지에 레이드')] })]
+  }
+  const { app, origin } = await listen(
+    {
+      readAdventureSeasonDays: async (name, seasonId) => {
+        reads.push([name, seasonId])
+        if (seasonId === 11) {
+          return result
+        }
+
+        return undefined
+      }
+    },
+    async (character) => {
+      requested.push(character)
+    }
+  )
+  try {
+    const name = encodeURIComponent('합성 모험단')
+    const response = await fetch(new URL(`/adventures/${name}/activity/seasons/11/days`, origin))
+    assert.equal(response.status, 200)
+    assert.deepEqual(await response.json(), result)
+    for (const value of ['0', '1.5', 'abc', '10000', '12', '99']) {
+      const invalid = await fetch(
+        new URL(`/adventures/${name}/activity/seasons/${value}/days`, origin)
+      )
+      assert.equal(invalid.status, 400, value)
+      assert.equal((await invalid.json()).error.code, 'INVALID_CHARACTER_QUERY', value)
+    }
+    assert.deepEqual(reads, [
+      ['합성 모험단', 11],
+      ['합성 모험단', 12],
+      ['합성 모험단', 99]
+    ])
+    assert.deepEqual(requested, [])
   } finally {
     await app.close()
   }
