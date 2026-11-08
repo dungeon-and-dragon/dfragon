@@ -24,11 +24,14 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
   이미 있는 행의 `fetched_at`이 `style.fetchedAt`보다 늦으면 바꾸지 않아, 캐시한 예전 응답이 그 뒤에 받은 행을 덮지 않습니다. `characters`에 없는 캐릭터는 FK 오류로 던집니다.
 - `recordCollectionFailure(client, character, failure)`: 대기열 행에 `attempted_at`과 `failure`를 남깁니다. 실패한 행은 다시 꺼내지 않고, 행이 없으면 아무것도 바꾸지 않습니다.
 - `readAdventureCharacters(client, adventureName)`: 이름이 `adventureName`인 모험단의 캐릭터(`StoredCharacter`)를 서버를 가리지 않고 명성이 높은 순(명성이 없으면 뒤, 같으면 서버, 캐릭터 id 순)으로 돌려줍니다. `fetchedAt`은 `basic_fetched_at`입니다.
+  `dealerSkillLearned`는 받을 때의 전직이 지금 전직과 같은 스킬 스타일 행의 `skills`에 `MALE_CRUSADER_DEALER_SKILL`이 있는지이고, 그런 행이 없으면 `null`입니다. 직업과 상관없이 모든 행에 붙고, 남성 크루세이더인지는 호출자가 봅니다.
 - `readAdventureNames(client, characters)`: `characters`(서버, 캐릭터 ID) 가운데 `characters`에 저장된 캐릭터의 모험단 이름(`StoredAdventureName`)을 query 한 번으로 돌려줍니다. 저장되지 않은 캐릭터는 결과에 없고 순서는 정하지 않습니다.
 - `readGuild(client, guildId)`: `guild_id`가 같은 캐릭터를 같은 순서로 읽고, 가장 최근에 받은 행의 길드 이름과 함께(`StoredGuild`) 돌려줍니다. 길드 ID는 서버가 달라도 같은 길드라 서버로 거르지 않습니다. 길드원이 없으면 이름은 `null`입니다.
-- `readFameRanking(client, { jobId, jobGrowId }, limit)`: 명성이 있는 캐릭터(`StoredCharacter`)를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 `limit`개까지 돌려줍니다. 주지 않은 조건은 거르지 않습니다.
-- `readJobSkillAdoption(client, { jobId, jobGrowId })`: 그 전직의 명성 상위 `SKILL_STYLE_SAMPLE_TOP_COUNT`위까지(명성 없는 행 제외) 가운데 같은 전직으로 받은 스킬 스타일 행이 있는 캐릭터를 세어, 표본 최저 명성, 센 캐릭터 수, 스킬별 배운 수와 레벨별 수, 개화와 강화의 type별 수(`JobSkillAdoption`)를 돌려줍니다. 목록은 스킬 이름 순입니다. 같은 명성은 같은 순위라 경계에서 함께 들거나 함께 빠집니다.
-- `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000): 스킬 채택 집계 표본의 명성 상위 순위입니다.
+- `readFameRanking(client, { jobId, jobGrowId, role }, limit)`: 명성이 있는 캐릭터(`StoredCharacter`)를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 `limit`개까지 돌려줍니다. 주지 않은 조건은 거르지 않습니다.
+  `role`(`MaleCrusaderRole`)을 주면 `dealerSkillLearned`가 `dealer`는 `true`, `buffer`는 `false`인 캐릭터만 고르고 `null`인 캐릭터는 뺍니다. 직업은 거르지 않으므로 남성 크루세이더 전직과 함께 주는 것은 호출자가 맡습니다.
+- `readJobSkillAdoption(client, { jobId, jobGrowId, role })`: 그 전직의 명성 상위 `SKILL_STYLE_SAMPLE_TOP_COUNT`위까지(명성 없는 행 제외) 가운데 같은 전직으로 받은 스킬 스타일 행이 있는 캐릭터(`role`을 주면 그 가운데 `readFameRanking`과 같은 기준으로 그 역할인 캐릭터)를 세어, 표본 최저 명성, 센 캐릭터 수, 스킬별 배운 수와 레벨별 수, 개화와 강화의 type별 수(`JobSkillAdoption`)를 돌려줍니다. 목록은 스킬 이름 순입니다. 같은 명성은 같은 순위라 경계에서 함께 들거나 함께 빠집니다.
+- `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000): 스킬 채택 집계 표본의 명성 상위 순위입니다. `role`을 줘도 표본과 `minFame`은 같습니다.
+- `MALE_CRUSADER_DEALER_SKILL`(`용기의 은총`): 남성 크루세이더가 배웠으면 딜러로 보는 스킬 이름입니다. API의 상세 카드 역할과 위 SQL 조건(`skills @> '[{"name": "용기의 은총"}]'`)이 함께 씁니다.
 - `readCharacterStats(client)`: 전체 캐릭터 수, 서버별 캐릭터 수, 기본 정보를 받은 캐릭터의 직업과 전직별 수와 평균 명성(반올림 전), 명성 10,000 단위 구간별 수(`CharacterStats`)를 돌려줍니다. 서버와 직업은 많은 순, 구간은 캐릭터가 있는 구간만 낮은 순입니다.
 - `replaceTimelineRange(client, character, range, events, items)`: 캐릭터 하나의 `[range.start, range.end]`(양 끝 포함) 타임라인을 교체합니다.
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
@@ -91,6 +94,7 @@ Prisma 설정은 `dist/prisma.config.js`, schema는 `prisma/schema.prisma`, migr
 교체 때 캐릭터와 구간으로 지우는 문장도 PostgreSQL 18의 skip scan으로 같은 index를 씁니다.
 로컬에서 items 200만 행의 구간 삭제가 0.7ms, events 200만 행에서 모험단 하나의 레이드 클리어 수가 1ms였습니다.
 명성 랭킹은 `characters`의 `(fame DESC)`, `(job_id, fame DESC)`, `(job_id, job_grow_id, fame DESC)` index로 거른 조건의 명성 순 앞부분만 읽습니다.
+남성 크루세이더 역할로 거른 랭킹도 전직 index를 명성 순으로 읽으며 행마다 `character_skill_styles` PK로 역할을 보고, 100명이 차면 멈춥니다.
 
 Migration CLI는 API의 `apps/api/.env`에서 DB 설정을 읽습니다.
 
