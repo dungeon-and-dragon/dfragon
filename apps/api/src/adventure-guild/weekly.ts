@@ -6,6 +6,7 @@ import {
   readAdventureCharacters,
   readCharactersTimelineEvents
 } from '@dfragon/database'
+import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
 import { CLEAR_CODES, type TimelineClear, toClear } from '../characters/timeline/read.js'
 import { startOfResetWeek } from '../utils/seoul-time.js'
 
@@ -18,7 +19,7 @@ const WEEKLY_CLEAR_NAMES: readonly ClearName[] = [
 
 export type ClearName = Pick<TimelineClear, 'kind' | 'name'>
 
-export type WeeklyCharacter = StoredCharacter & { weeklyClears: ClearName[] }
+export type WeeklyCharacter = CharacterRow & { weeklyClears: ClearName[] }
 
 export type AdventureWeeklyClears = {
   clearNames: ClearName[]
@@ -50,7 +51,7 @@ export function toAdventureWeeklyClears(
       clears.some(({ kind, name }) => kind === clearName.kind && name === clearName.name)
     )
 
-    return { ...character, weeklyClears: characterClears }
+    return { ...toCharacterRow(character), weeklyClears: characterClears }
   })
 
   const clearNames = [...WEEKLY_CLEAR_NAMES]

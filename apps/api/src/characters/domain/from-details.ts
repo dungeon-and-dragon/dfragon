@@ -1,3 +1,4 @@
+import type { StoredCharacter } from '@dfragon/database'
 import { textOrNull } from '@dfragon/lib/utils/shape-check'
 import { BufferCharacter, type Character, DealerCharacter } from './character.js'
 import { MaleCrusader } from './male-crusader.js'
@@ -22,18 +23,19 @@ function baseJobGrowName(jobGrowName: unknown): string | null {
   return name.slice(awakeningPrefix.length).trim()
 }
 
-export function characterFromDetails(
-  character: Record<string, unknown>,
-  skillStyle: unknown
+function characterFromJob(
+  jobName: unknown,
+  jobGrowName: unknown,
+  maleCrusader: () => MaleCrusader | null
 ): Character | null {
-  const job = baseJobGrowName(character.jobGrowName)
+  const job = baseJobGrowName(jobGrowName)
   if (job === null) {
     return null
   }
 
-  const isMaleCrusader = job === crusader && textOrNull(character.jobName) === malePriest
+  const isMaleCrusader = job === crusader && textOrNull(jobName) === malePriest
   if (isMaleCrusader) {
-    return new MaleCrusader(skillStyle)
+    return maleCrusader()
   }
 
   if (bufferJobs.has(job)) {
@@ -41,4 +43,27 @@ export function characterFromDetails(
   }
 
   return new DealerCharacter()
+}
+
+export function characterFromDetails(
+  character: Record<string, unknown>,
+  skillStyle: unknown
+): Character | null {
+  return characterFromJob(character.jobName, character.jobGrowName, () =>
+    MaleCrusader.fromSkillStyle(skillStyle)
+  )
+}
+
+export function characterFromStored({
+  jobName,
+  jobGrowName,
+  dealerSkillLearned
+}: StoredCharacter): Character | null {
+  return characterFromJob(jobName, jobGrowName, () => {
+    if (dealerSkillLearned === null) {
+      return null
+    }
+
+    return new MaleCrusader(dealerSkillLearned)
+  })
 }
