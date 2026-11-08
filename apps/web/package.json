@@ -10,32 +10,47 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "prepare:ocr-assets": "node ../../packages/client-core/scripts/prepare-ocr-assets.mjs public/ocr",
+    "prepare:ocr-assets": "node scripts/prepare-ocr-assets.mjs public/ocr",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
-    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
+    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check",
+    "test:portrait-evaluation": "tsc --noEmit -p scripts/portrait-evaluation/tsconfig.json && vitest run --config scripts/portrait-evaluation/vitest.config.ts",
+    "test:raid-row-evaluation": "tsc --noEmit -p scripts/raid-row-evaluation/tsconfig.json && vitest run --config scripts/raid-row-evaluation/vitest.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
-    "@dfragon/client": "workspace:*",
-    "@dfragon/client-core": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@dfragon/ui": "workspace:*",
     "@stylexjs/stylex": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@xstate/react": "catalog:",
+    "gsap": "catalog:",
+    "ky": "catalog:",
+    "onnxruntime-web": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "zod": "catalog:"
+    "xstate": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@dfragon/licenses": "workspace:*",
+    "@dfragon/models": "workspace:*",
     "@stylexjs/unplugin": "catalog:",
     "@types/node": "catalog:",
+    "@types/pngjs": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
+    "pngjs": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
+  },
+  "imports": {
+    "#core/*.png": "./src/core/*.png",
+    "#core/*": "./src/core/*.ts"
   }
 }

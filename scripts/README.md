@@ -148,7 +148,6 @@ pnpm verify
 | --- | --- |
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
-| 웹 앱 package | `pnpm --filter @dfragon/client-core --filter @dfragon/client run --sequential '/^(test\|lint)$/'` |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
 | Task 준비 tooling | 위 `node --test`와 `node --check` command |
 
@@ -170,7 +169,7 @@ node apps/api/test-support/container-database.mjs dfragon-api:local
 
 합성 비밀번호로 PostgreSQL 컨테이너와 internal network를 만들고, 시작 때 migration 적용, 다른 연결이 Prisma의 advisory lock을 잡은 동안 두 인스턴스의 대기, HTTP 기동, 실패한 migration의 nonzero 종료, 잘못된 DB 입력의 거절을 확인한 뒤 만든 컨테이너와 network를 지웁니다.
 
-웹 앱 package의 `test`는 `typecheck`를 포함하므로 위 조합에서 별도로 반복하지 않습니다. Web `build`도 `tsc -b`를 포함합니다. Web은 `@dfragon/client`, `@dfragon/client-core`를 번들하므로 두 package를 바꾸면 Web 검사도 함께 실행합니다. 빠른 feedback이 필요할 때는 기존 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
+Web의 `test`는 Vitest로 모든 웹 테스트를 실행하고, `build`는 `tsc -b`로 typecheck한 뒤 Vite production build를 실행합니다. 빠른 feedback이 필요할 때는 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
 
 API의 `test`는 `build`를 먼저 실행해 `dist`를 새로 만든 뒤 `.test-dist` compile과 test를 수행합니다. 위 API 조합은 이 build와 `tsconfig.test.json`의 compile을 포함하므로 같은 입력의 별도 typecheck를 반복하지 않습니다. 단독 `pnpm --filter @dfragon/api test`도 최신 production output을 검증합니다. Root `test`는 `pnpm verify`와 같습니다. 문서만 변경할 때 app build를 반복할 필요는 없습니다. 실행 결과에는 실제 검증 범위와 실행하지 못한 항목을 구분해 기록합니다.
 
