@@ -54,6 +54,7 @@ function rankedCharacter(rank: number, overrides: Partial<RankedCharacter> = {})
     fame: 100000 - rank,
     guildId: null,
     guildName: null,
+    role: null,
     ...overrides
   }
 }
@@ -151,6 +152,27 @@ it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니�
   const [maxLevel, belowMax] = bodyRows()
   expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직', null])
   expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직', 'Lv.110'])
+})
+
+it('남성 크루세이더만 역할을 알 때 전직에 역할을 붙이고, 모르거나 다른 직업이면 그대로 쓴다', async () => {
+  const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
+  await render(async () => ({
+    characters: [
+      rankedCharacter(1, { ...maleCrusader, role: 'dealer' }),
+      rankedCharacter(2, { ...maleCrusader, role: 'buffer' }),
+      rankedCharacter(3, { ...maleCrusader, role: null }),
+      rankedCharacter(4, { jobName: '프리스트(여)', jobGrowName: '眞 크루세이더', role: 'buffer' }),
+      rankedCharacter(5, { jobName: '프리스트(남)', jobGrowName: '眞 인파이터', role: 'dealer' })
+    ]
+  }))
+
+  expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
+    '카인합성1크루세이더(딜러)',
+    '카인합성2크루세이더(버퍼)',
+    '카인합성3크루세이더',
+    '카인합성4크루세이더',
+    '카인합성5인파이터'
+  ])
 })
 
 it('빈 랭킹은 목록 상자에 이름 한 줄만 둔다', async () => {

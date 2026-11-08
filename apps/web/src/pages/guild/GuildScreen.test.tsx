@@ -52,7 +52,8 @@ function member(index: number): StoredCharacter {
     jobGrowName: '眞 합성 전직',
     fame: 90000 - index,
     guildId: 'guild-1',
-    guildName: '합성 길드'
+    guildName: '합성 길드',
+    role: null
   }
 }
 

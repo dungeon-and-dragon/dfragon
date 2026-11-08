@@ -38,6 +38,7 @@ function favorite(overrides: Partial<FavoriteCharacter>): FavoriteCharacter {
     jobName: '합성 직업',
     jobGrowName: '眞 합성 전직',
     fame: 100000,
+    role: null,
     savedAt: 1,
     ...overrides
   }

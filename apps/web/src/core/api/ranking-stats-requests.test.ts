@@ -23,7 +23,8 @@ const ranking: FameRanking = {
       jobGrowName: '眞 합성 전직',
       fame: 80123,
       guildId: null,
-      guildName: null
+      guildName: null,
+      role: null
     }
   ]
 }

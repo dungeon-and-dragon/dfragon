@@ -15,7 +15,8 @@ const ALPHA: CharacterDisplay = {
   level: 115,
   jobName: '귀검사(남)',
   jobGrowName: '검신',
-  fame: 50000
+  fame: 50000,
+  role: null
 }
 const BETA = { ...ALPHA, characterId: 'beta-id', characterName: '베타' }
 
@@ -152,6 +153,14 @@ describe('브라우저 저장', () => {
     useFavoriteCharacterStore.persist.rehydrate()
 
     expect(storeState().favoriteCharacters).toEqual([saved])
+  })
+
+  it('역할을 저장하기 전의 항목은 역할을 모른다고 읽는다', () => {
+    const { role: _role, ...beforeRole } = { ...ALPHA, savedAt: 1 }
+    storeValue([beforeRole])
+    useFavoriteCharacterStore.persist.rehydrate()
+
+    expect(storeState().favoriteCharacters).toEqual([{ ...ALPHA, role: null, savedAt: 1 }])
   })
 
   it('다른 버전으로 저장된 값도 현재 형태로 읽어 오류 없이 이어 쓴다', () => {
