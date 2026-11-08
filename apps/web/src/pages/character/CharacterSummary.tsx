@@ -1,4 +1,4 @@
-import { shapes } from '@dfragon/ui'
+import { Button, shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { formatJobName } from '#core/character/job-format'
 import { grownJobName } from '#core/character/male-crusader'
@@ -11,13 +11,27 @@ import { Portrait } from '../../components/Portrait'
 import { characterDisplayOf } from '../../lib/stored-character'
 import { styles } from './CharacterSummary.style'
 import { FavoriteToggle } from '../../components/FavoriteToggle'
+import { RefreshIcon } from '../../components/RefreshIcon'
+import { useRefreshCharacterDetail } from '../../hooks/useCharacterDetail'
+import { useRefreshingNow } from '../../hooks/useRefreshingNow'
+import { formatSeoulDateTime, formatTimeAgo } from '#core/time-format'
 
 const integer = new Intl.NumberFormat('ko-KR')
+
+// API도 마지막으로 받은 지 1분 안의 강제 갱신에는 Neople을 다시 부르지 않고 받아 둔 응답을 준다.
+const REFRESH_INTERVAL_MS = 60_000
 
 export function CharacterSummary({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
   const favorite = characterDisplayOf(detail)
   const job = grownJobName(character, detail.card?.role ?? null)
+  const { refresh, refreshing } = useRefreshCharacterDetail()
+  const { lastSuccessfulFetchAt } = detail.freshness
+
+  function refreshCharacter(): void {
+    refresh({ serverId: character.serverId, characterId: character.characterId })
+  }
+
   const affiliations = [
     {
       id: 'adventure',
@@ -50,7 +64,11 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
   ].filter((affiliation) => affiliation.name != null)
 
   return (
-    <section aria-label="캐릭터 요약" {...stylex.props(styles.summary)}>
+    <section
+      aria-label="캐릭터 요약"
+      aria-busy={refreshing || undefined}
+      {...stylex.props(styles.summary)}
+    >
       <div {...stylex.props(styles.well)}>
         <Portrait src={characterImageUrl(character)} />
       </div>
@@ -58,6 +76,12 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <div {...stylex.props(styles.heading)}>
           <h1 {...stylex.props(styles.name)}>{character.characterName ?? MISSING_VALUE}</h1>
           {favorite != null && <FavoriteToggle character={favorite} />}
+          <RefreshControl
+            key={lastSuccessfulFetchAt}
+            fetchedAt={lastSuccessfulFetchAt}
+            refreshing={refreshing}
+            onRefresh={refreshCharacter}
+          />
         </div>
         <div {...stylex.props(styles.line)}>
           <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
@@ -80,6 +104,41 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
       <FameStat fame={character.fame} />
       <ScoreStat card={detail.card} />
     </section>
+  )
+}
+
+// 받은 시각이 바뀌면 이전 시각의 타이머를 버리도록 받은 시각을 key로 다시 그린다.
+function RefreshControl({
+  fetchedAt,
+  refreshing,
+  onRefresh
+}: {
+  fetchedAt: string
+  refreshing: boolean
+  onRefresh: () => void
+}): React.JSX.Element {
+  const now = useRefreshingNow(Date.parse(fetchedAt))
+  const justFetched = now - Date.parse(fetchedAt) < REFRESH_INTERVAL_MS
+
+  return (
+    <div {...stylex.props(styles.refresh)}>
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={refreshing || justFetched}
+        onClick={onRefresh}
+      >
+        <RefreshIcon {...stylex.props(refreshing && styles.spinning)} />
+        {refreshing ? '받는 중' : '갱신'}
+      </Button>
+      <time
+        dateTime={fetchedAt}
+        title={formatSeoulDateTime(fetchedAt, now)}
+        {...stylex.props(styles.fetchedAt)}
+      >
+        {justFetched ? '방금 전' : formatTimeAgo(fetchedAt, now)}
+      </time>
+    </div>
   )
 }
 

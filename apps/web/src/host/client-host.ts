@@ -43,6 +43,7 @@ export type ClientHost = Readonly<{
   raid: RaidCaptureHost
   getTodayGrade: () => Promise<TodayGrade>
   getCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
+  refreshCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
   getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
   getTimelineEnhancements: (
     identity: CharacterIdentity,

@@ -81,6 +81,7 @@ export const characterDetailViewSchema = z.object({
     guildId: text,
     guildName: text
   }),
+  freshness: z.object({ lastSuccessfulFetchAt: z.iso.datetime() }),
   card: apiCharacterCardSchema.nullable().catch(null),
   equipment: group({ equipment: list(equipmentItem), setItemInfo: list(setItem) }),
   creature: section({
