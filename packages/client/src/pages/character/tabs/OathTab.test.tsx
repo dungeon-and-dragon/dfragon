@@ -1,22 +1,27 @@
 // @vitest-environment jsdom
+import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { GameTextLines, GameTextTone } from '@dfragon/client-core/shared/search/game-text'
 import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
 import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
+import { toneStyles } from './GameText.style'
 import { OathTab } from './OathTab'
 
-function effects(primitive: string): OathCatalog['sets'][number]['options'][number]['effects'] {
+type Effects = OathCatalog['sets'][number]['options'][number]['effects']
+
+function effects(primitive: GameTextLines): Effects {
   return { rare: null, unique: null, legendary: null, epic: null, primitive }
 }
 
-// build-skilltab이 만드는 oath.json과 같은 모양의 합성 데이터다. 세트 번호와 고른 선택지 이름은 딜러 fixture의 용투 서약이다.
+// 데이터 묶음(oath.v2.json)과 같은 모양의 합성 데이터다. 세트 번호와 고른 선택지 이름은 딜러 fixture의 용투 서약이다.
 const OATH_CATALOG: OathCatalog = {
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
   sets: [
     {
       setId: 16204,
@@ -26,19 +31,24 @@ const OATH_CATALOG: OathCatalog = {
         {
           name: '용투 : 세계를 태우는 불꽃',
           icon: 'https://skilltab.test/oath/9.png',
-          effects: effects(
-            '<tst::primeval><tst::up_color>[투룡의 불꽃]<tst::default> [장비 발동 옵션]\\n모든 속도 +20%%\\n<tst::ui_disable>[용투장의 난 세트] 장착 시'
-          )
+          effects: effects([
+            [
+              { text: '[투룡의 불꽃]', tone: 'increase' },
+              { text: ' [장비 발동 옵션]', tone: 'default' }
+            ],
+            [{ text: '모든 속도 +20%', tone: 'rarity-primordial' }],
+            [{ text: '[용투장의 난 세트] 장착 시', tone: 'disabled' }]
+          ])
         },
         {
           name: '용투 : 용의 분노',
           icon: 'https://skilltab.test/oath/10.png',
-          effects: effects('분노')
+          effects: effects([[{ text: '분노', tone: 'rarity-primordial' }]])
         },
         {
           name: '용투 : 승리의 함성',
           icon: 'https://skilltab.test/oath/11.png',
-          effects: effects('함성')
+          effects: effects([[{ text: '[함성]', tone: 'increase' }]])
         }
       ]
     }
@@ -107,6 +117,15 @@ function strip(): Element {
   return found
 }
 
+function hasTone(segment: Element | null | undefined, tone: GameTextTone): boolean {
+  const { className } = stylex.props(toneStyles[tone])
+  if (segment == null || className === undefined) {
+    return false
+  }
+
+  return className.split(' ').every((name) => segment.className.split(' ').includes(name))
+}
+
 function lines(name: string): string[][] {
   return [...section(name).querySelectorAll('dl > div')].map((line) =>
     [...line.children].map((cell) => cell.textContent ?? '')
@@ -168,11 +187,23 @@ it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장�
   expect(
     [...(cards[0]?.querySelectorAll('p > span') ?? [])].map((line) => line.textContent)
   ).toEqual(['[투룡의 불꽃] [장비 발동 옵션]', '모든 속도 +20%', '[용투장의 난 세트] 장착 시'])
+  expect(cards.map((card) => card.textContent?.includes('선택'))).toEqual([true, false, false])
   expect(section('서약 본체').textContent).toContain('세계를 태우는 용투 서약655pt')
   expect(section('서약 본체').querySelector('img')?.getAttribute('src')).toBe(
     'https://skilltab.test/oath-item/primordial.webp'
   )
   expect(section('서약 결정').querySelectorAll('tbody tr')).toHaveLength(11)
+})
+
+it('고르지 않은 선택지 카드도 문구를 조각의 tone 색으로 그린다', async () => {
+  await render(
+    characterDetailFixture('dealer'),
+    createTestClientHost({ getOathCatalog: async () => OATH_CATALOG })
+  )
+
+  const [, rage, shout] = [...container.querySelectorAll('article')]
+  expect(hasTone(rage?.querySelector('p span span'), 'rarity-primordial')).toBe(true)
+  expect(hasTone(shout?.querySelector('p span span'), 'increase')).toBe(true)
 })
 
 it('서약 데이터에 없는 세트는 지금 화면대로 그린다', async () => {
