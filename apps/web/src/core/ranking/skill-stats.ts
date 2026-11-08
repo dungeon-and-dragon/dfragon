@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { MaleCrusaderRole } from '../character/male-crusader'
 
 const count = z.number().int().nonnegative()
 const upgradeCounts = z.object({ name: z.string(), type1: count, type2: count })
@@ -24,7 +25,11 @@ export const skillStatsSchema = z.object({
 })
 
 export type SkillStats = z.infer<typeof skillStatsSchema>
-export type SkillStatsJob = Readonly<{ jobId: string; jobGrowId: string }>
+export type SkillStatsJob = Readonly<{
+  jobId: string
+  jobGrowId: string
+  role: MaleCrusaderRole | null
+}>
 
 // 저장소 소유자가 계획 승인 때 받아들인 기본값이다(구현 문서 11). 표본이 이보다 적으면 수치를 숨긴다.
 export const SKILL_STATS_MIN_SAMPLE = 20
