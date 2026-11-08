@@ -168,13 +168,16 @@ test('엔진이 건너뛴 점수의 근사값은 approximate에 담고, 점수�
   assert.equal(missingCard.score, null)
 })
 
-test('캐시한 캐릭터를 다시 조회하면 점수를 다시 계산하지 않고, 강제 갱신은 다시 계산한다', async (t) => {
+test('캐시한 캐릭터는 점수를 다시 계산하지 않고, 1분이 지난 강제 갱신은 다시 계산한다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
+  t.mock.method(performance, 'now', () => Date.now())
   const { calls, calculateScore } = recordingScore(() => engineResult)
   const { identity, service } = fixtureService(t, 'dealer-blade', calculateScore)
 
   const first = await service.get(identity, signal, ignoredTimings)
   const cached = await service.get(identity, signal, ignoredTimings)
   assert.equal(calls.length, 1)
+  t.mock.timers.tick(2 * 60 * 1000)
   await service.refresh(identity, signal, ignoredTimings)
 
   assert.equal(cached.reused, true)
