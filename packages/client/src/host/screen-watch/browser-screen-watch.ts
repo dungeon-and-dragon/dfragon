@@ -1,7 +1,7 @@
 import { detectDNFTownIndicator, type DNFParticipantFrame } from '@dfragon/lib'
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import type { AutoRoundSignal, BrowserHost, WatchedScreen } from '../client-host'
-import { decodeBrowserImage } from '../capture/browser-png'
+import { decodeBrowserImage } from '../browser-png'
 import type { createRoundFrames } from '../capture/round-frames'
 import type { ScreenShare } from '../capture/screen-share'
 import { createBackgroundLoad } from './background-load'
