@@ -9,13 +9,13 @@ import type { CandidatePicker } from '#core/lib/candidate-picker'
 import type { SlotCard } from '#core/lib/slot-cards'
 import type { CharacterChoice } from '#core/types/search'
 import type { CardCharacter } from '#core/types/cards'
-import type { ServerSelect } from '../components/ServerSelect'
+import type { ServerSelect } from './ServerSelect'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import { toneClassesOf } from '../testing/test-support/score-tone-class'
 import { TestRouter } from '../testing/test-support/test-router'
 import { CharacterRow } from './CharacterRow'
 
-vi.mock('../components/ServerSelect', () => ({
+vi.mock('./ServerSelect', () => ({
   ServerSelect: ({ value, onValueChange, label, options }: ComponentProps<typeof ServerSelect>) => (
     <select
       aria-label={label}
