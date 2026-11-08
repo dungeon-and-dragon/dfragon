@@ -1,10 +1,14 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, radius, space } from '@dfragon/ui/tokens.stylex'
+import { colors, radius, shadow, space } from '@dfragon/ui/tokens.stylex'
 
 const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 72
 const BAR_HEIGHT = 8
+const COLUMN_TOOLTIP_SPACE = 44
 const COLUMN_CHART_HEIGHT = 160
+const COLUMN_GAP = 2
+const COLUMN_DIVIDER_WIDTH = 6
+const COLUMN_LABEL_HEIGHT = 14
 
 export const styles = stylex.create({
   screen: { display: 'flex', flexDirection: 'column', gap: space.s16, padding: space.s16 },
@@ -38,32 +42,83 @@ export const styles = stylex.create({
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   columns: {
     display: 'flex',
-    alignItems: 'flex-end',
-    gap: space.s4,
+    gap: COLUMN_GAP,
     margin: 0,
     padding: space.s16,
     listStyle: 'none'
   },
   column: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
     flexGrow: 1,
     flexBasis: 0,
     minWidth: 0,
-    gap: space.s4,
-    fontSize: 12,
-    lineHeight: '16px',
-    fontVariantNumeric: 'tabular-nums'
+    paddingTop: COLUMN_TOOLTIP_SPACE
   },
-  columnValue: { whiteSpace: 'nowrap', fontSize: 11 },
+  columnDivider: {
+    flexShrink: 0,
+    width: COLUMN_DIVIDER_WIDTH,
+    height: COLUMN_CHART_HEIGHT,
+    marginTop: COLUMN_TOOLTIP_SPACE,
+    backgroundImage: `linear-gradient(${colors.borderDefault}, ${colors.borderDefault})`,
+    backgroundSize: '1px 100%',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  },
   columnTrack: {
     display: 'flex',
     alignItems: 'flex-end',
-    width: '100%',
     height: COLUMN_CHART_HEIGHT
   },
-  columnBar: { width: '100%', borderRadius: radius.control, backgroundColor: colors.fgSubtle },
-  columnHeight: (percent: number) => ({ height: `${percent}%` }),
-  columnLabel: { color: colors.fgSubtle }
+  columnBar: {
+    width: '100%',
+    borderRadius: 1,
+    backgroundColor: colors.borderStrong
+  },
+  columnBarActive: { backgroundColor: colors.fgMuted },
+  columnHeight: (height: string) => ({ height }),
+  columnLabel: {
+    position: 'relative',
+    height: COLUMN_LABEL_HEIGHT,
+    marginTop: space.s4
+  },
+  columnLabelText: {
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontSize: 11,
+    lineHeight: `${COLUMN_LABEL_HEIGHT}px`,
+    whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums',
+    color: colors.fgSubtle
+  },
+  tooltip: {
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    zIndex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingBlock: 5,
+    paddingInline: space.s8,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: colors.borderStrong,
+    borderRadius: radius.control,
+    backgroundColor: colors.bgSurface,
+    boxShadow: shadow.popover,
+    whiteSpace: 'nowrap',
+    transform: 'translateX(-50%)'
+  },
+  tooltipStart: { left: 0, transform: 'none' },
+  tooltipEnd: { left: 'auto', right: 0, transform: 'none' },
+  tooltipRange: { fontSize: 11, lineHeight: '14px', color: colors.fgSubtle },
+  tooltipCount: {
+    fontSize: 12,
+    lineHeight: '16px',
+    fontWeight: 600,
+    fontVariantNumeric: 'tabular-nums'
+  }
 })

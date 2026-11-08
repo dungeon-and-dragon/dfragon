@@ -4,9 +4,9 @@ import { RelativeTime } from '../../components/RelativeTime'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useCharacterStats } from '../../hooks/useCharacterStats'
-import { type Bar, ColumnBars, RowBars } from './BarCharts'
+import { type Bar, FameColumns, RowBars } from './BarCharts'
 import { styles } from './StatsScreen.style'
-import { averageFameBars, fameBars, jobBars, serverBars } from './stats-bars'
+import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from './stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -45,7 +45,7 @@ export function StatsScreen(): React.JSX.Element {
           </TitleBox>
           <div {...stylex.props(styles.grid)}>
             <StatBox name="서버 인구" bars={serverBars(stats)} />
-            <StatBox name="명성 분포" bars={fameBars(stats)} vertical />
+            <FameBox bars={fameBars(stats)} />
             <StatBox name="직업 분포" bars={jobBars(stats)} />
             <StatBox name="직업별 평균 명성" bars={averageFameBars(stats)} />
           </div>
@@ -55,20 +55,26 @@ export function StatsScreen(): React.JSX.Element {
   }
 }
 
-function StatBox({
-  name,
-  bars,
-  vertical = false
-}: {
-  name: string
-  bars: readonly Bar[]
-  vertical?: boolean
-}): React.JSX.Element {
+function StatBox({ name, bars }: { name: string; bars: readonly Bar[] }): React.JSX.Element {
   if (bars.length === 0) {
     return <ListBox name={name} />
   }
 
   return (
-    <ListBox name={name}>{vertical ? <ColumnBars bars={bars} /> : <RowBars bars={bars} />}</ListBox>
+    <ListBox name={name}>
+      <RowBars bars={bars} />
+    </ListBox>
+  )
+}
+
+function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
+  if (bars.length === 0) {
+    return <ListBox name="명성 분포" />
+  }
+
+  return (
+    <ListBox name="명성 분포">
+      <FameColumns bars={bars} />
+    </ListBox>
   )
 }
