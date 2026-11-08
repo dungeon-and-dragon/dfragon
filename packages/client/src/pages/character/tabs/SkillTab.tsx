@@ -42,7 +42,7 @@ function SkillIcon({
   now
 }: {
   icon: SkillWindowIcon
-  marks: SkillMarks | null
+  marks: SkillMarks
   adoption: SkillAdoption | null
   now: number
 }): React.JSX.Element {
@@ -62,7 +62,7 @@ function SkillIcon({
       >
         <span {...stylex.props(styles.frame, picked && styles.picked)}>
           <SkillSprite icon={icon.icon} label={icon.name} dim={!icon.learned} />
-          {marks !== null && icon.evolution !== null && (
+          {icon.evolution !== null && (
             <img
               src={skillMarkOf(marks, 'evolution', icon.evolution)}
               alt=""
@@ -70,7 +70,7 @@ function SkillIcon({
               {...stylex.props(styles.evolutionMark, styles.scaledMark)}
             />
           )}
-          {marks !== null && icon.enhancement !== null && (
+          {icon.enhancement !== null && (
             <img
               src={skillMarkOf(marks, 'enhancement', icon.enhancement)}
               alt=""

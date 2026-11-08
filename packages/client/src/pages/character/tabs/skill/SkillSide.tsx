@@ -200,8 +200,8 @@ function EvolutionSection({
                         <b {...stylex.props(styles.tooltipTitle)}>
                           {`${EVOLUTION_NUMERALS[branch.type]} ${branch.name}`}
                         </b>
-                        <GameText text={branch.basicExplain} style={styles.tooltipSummary} />
-                        <GameText text={branch.explain} />
+                        <GameText lines={branch.basicExplain} style={styles.tooltipSummary} />
+                        <GameText lines={branch.explain} />
                       </>
                     }
                   />
