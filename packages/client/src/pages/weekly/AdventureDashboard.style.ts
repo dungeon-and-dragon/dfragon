@@ -63,6 +63,7 @@ export const styles = stylex.create({
     wordBreak: 'keep-all',
     overflowWrap: 'anywhere'
   },
+  nameRow: { display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', columnGap: space.s8 },
   seasonName: { fontSize: 24, lineHeight: '30px', fontWeight: 700 },
   start: {
     fontSize: 12,

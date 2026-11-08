@@ -7,7 +7,7 @@ import { useAdventureActivity, useBackfillAdventureSeason } from '../../hooks/us
 import { findSeasonRaidBackground } from '../../lib/season-raid-background'
 import { ActivitySummary, ActivitySummarySkeleton } from './ActivitySummary'
 import { styles } from './AdventureDashboard.style'
-import { formatSeasonStart } from './season-format'
+import { seasonPeriod } from './season-format'
 import { SeasonTimeline } from './SeasonTimeline'
 
 type Backdrop = Readonly<{ url: string | undefined; previous: string | undefined; fading: boolean }>
@@ -67,7 +67,13 @@ function DashboardHero({
   seasonId: number | undefined
   settled: boolean
 }): React.JSX.Element {
-  const season = activity?.seasons.find(({ id }) => id === seasonId)
+  const [now] = useState(Date.now)
+  const seasonIndex = activity?.seasons.findIndex(({ id }) => id === seasonId) ?? -1
+  const season = seasonIndex >= 0 ? activity?.seasons[seasonIndex] : undefined
+  const period =
+    season !== undefined
+      ? seasonPeriod(season.startsAt, activity?.seasons[seasonIndex + 1]?.startsAt, now)
+      : undefined
 
   return (
     <div aria-busy={!settled} {...stylex.props(styles.hero)}>
@@ -78,11 +84,14 @@ function DashboardHero({
         <h1 {...stylex.props(styles.title)}>{adventureName}</h1>
       </div>
       <div {...stylex.props(styles.bottom)}>
-        {season !== undefined && (
+        {season !== undefined && period !== undefined && (
           <div {...stylex.props(styles.content)}>
             <span {...stylex.props(styles.kind)}>시즌 {season.id}</span>
-            <b {...stylex.props(styles.seasonName)}>{season.name}</b>
-            <span {...stylex.props(styles.start)}>{formatSeasonStart(season.startsAt)}</span>
+            <div {...stylex.props(styles.nameRow)}>
+              <b {...stylex.props(styles.seasonName)}>{season.name}</b>
+              <span {...stylex.props(styles.start)}>{period.days}일</span>
+            </div>
+            <span {...stylex.props(styles.start)}>{period.range}</span>
           </div>
         )}
         {settled && activity !== undefined ? (
