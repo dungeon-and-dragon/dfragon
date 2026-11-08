@@ -11,6 +11,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState } from 'react'
 import { GlobalBar } from './components/GlobalBar'
+import { SiteFooter } from './components/SiteFooter'
 import { CONTENT_WIDTH } from './constants/layout'
 import { createQueryClient } from './lib/query-client'
 import { ClientHostContext, type BrowserHost } from './host/client-host'
@@ -23,6 +24,7 @@ import { CharacterDetailPage } from './pages/character/CharacterDetailPage'
 import { FavoritesScreen } from './pages/favorites/FavoritesScreen'
 import { GuildPage } from './pages/guild/GuildPage'
 import { HomePage } from './pages/home/HomePage'
+import { PrivacyScreen, TermsScreen } from './pages/legal/LegalScreen'
 import { NotFoundScreen } from './pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from './pages/rankings/ranking-search'
 import { RankingsPage } from './pages/rankings/RankingsPage'
@@ -59,6 +61,7 @@ function SiteLayout(): React.JSX.Element {
       >
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   )
 }
@@ -154,6 +157,18 @@ const favoritesRoute = createRoute({
   component: FavoritesScreen
 })
 
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/terms',
+  component: TermsScreen
+})
+
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: PrivacyScreen
+})
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   multisearchRoute,
@@ -165,7 +180,9 @@ const routeTree = rootRoute.addChildren([
   adventureRoute,
   guildRoute,
   legacyMyAdventureRoute,
-  favoritesRoute
+  favoritesRoute,
+  termsRoute,
+  privacyRoute
 ])
 
 function createWebRouter(host: BrowserHost) {
