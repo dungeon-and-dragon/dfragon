@@ -4,6 +4,7 @@ import { colors, radius, shadow, space } from '@dfragon/ui/tokens.stylex'
 const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 72
 const BAR_HEIGHT = 8
+const ROW_TOOLTIP_OFFSET = `calc(100% + ${space.s8})`
 const COLUMN_TOOLTIP_SPACE = 44
 const COLUMN_CHART_HEIGHT = 160
 const COLUMN_GAP = 2
@@ -37,7 +38,13 @@ export const styles = stylex.create({
   },
   rowName: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   track: { height: BAR_HEIGHT, borderRadius: radius.control, backgroundColor: colors.bgInset },
-  bar: { height: BAR_HEIGHT, borderRadius: radius.control, backgroundColor: colors.fgSubtle },
+  bar: {
+    position: 'relative',
+    display: 'block',
+    height: BAR_HEIGHT,
+    borderRadius: radius.control,
+    backgroundColor: colors.fgSubtle
+  },
   barWidth: (percent: number) => ({ width: `${percent}%` }),
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   columns: {
@@ -112,6 +119,7 @@ export const styles = stylex.create({
     whiteSpace: 'nowrap',
     transform: 'translateX(-50%)'
   },
+  rowTooltip: { top: 'auto', bottom: ROW_TOOLTIP_OFFSET, left: '100%' },
   tooltipStart: { left: 0, transform: 'none' },
   tooltipEnd: { left: 'auto', right: 0, transform: 'none' },
   tooltipRange: { fontSize: 11, lineHeight: '14px', color: colors.fgSubtle },

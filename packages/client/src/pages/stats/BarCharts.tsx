@@ -6,7 +6,7 @@ import { styles } from './StatsScreen.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-export type Bar = Readonly<{ key: string; name: string; value: number }>
+export type Bar = Readonly<{ key: string; name: string; value: number; share?: string }>
 
 function percentOf(value: number, max: number): number {
   if (max <= 0) {
@@ -21,16 +21,59 @@ export function RowBars({ bars }: { bars: readonly Bar[] }): React.JSX.Element {
 
   return (
     <ul {...stylex.props(styles.rows)}>
-      {bars.map(({ key, name, value }) => (
-        <li key={key} {...stylex.props(styles.row)}>
-          <span {...stylex.props(styles.rowName)}>{name}</span>
-          <span {...stylex.props(styles.track)}>
-            <span {...stylex.props(styles.bar, styles.barWidth(percentOf(value, max)))} />
-          </span>
-          <span {...stylex.props(styles.value)}>{integer.format(value)}</span>
-        </li>
+      {bars.map((bar) => (
+        <BarRow key={bar.key} bar={bar} percent={percentOf(bar.value, max)} />
       ))}
     </ul>
+  )
+}
+
+function BarRow({
+  bar: { name, value, share },
+  percent
+}: {
+  bar: Bar
+  percent: number
+}): React.JSX.Element {
+  const [active, setActive] = useState(false)
+  const { anchorRef, tooltipRef, align } = useTooltipAlign<HTMLSpanElement>(active, 'end')
+
+  function handleMouseEnter(): void {
+    setActive(share != null)
+  }
+
+  function handleMouseLeave(): void {
+    setActive(false)
+  }
+
+  return (
+    <li
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      {...stylex.props(styles.row)}
+    >
+      <span {...stylex.props(styles.rowName)}>{name}</span>
+      <span {...stylex.props(styles.track)}>
+        <span ref={anchorRef} {...stylex.props(styles.bar, styles.barWidth(percent))}>
+          {active && (
+            <span
+              ref={tooltipRef}
+              aria-hidden="true"
+              {...stylex.props(
+                styles.tooltip,
+                styles.rowTooltip,
+                align === 'start' && styles.tooltipStart,
+                align === 'end' && styles.tooltipEnd
+              )}
+            >
+              <span {...stylex.props(styles.tooltipCount)}>{share}</span>
+            </span>
+          )}
+        </span>
+      </span>
+      <span {...stylex.props(styles.value)}>{integer.format(value)}</span>
+      {share != null && <span {...stylex.props(shapes.srOnly)}>{share}</span>}
+    </li>
   )
 }
 
@@ -44,20 +87,55 @@ function heightOf(ratio: number): string {
 
 type TooltipAlign = 'center' | 'start' | 'end'
 
-function alignWithin(bar: HTMLElement, tooltip: HTMLElement, chart: HTMLElement): TooltipAlign {
-  const barBox = bar.getBoundingClientRect()
+type TooltipAnchor = 'center' | 'end'
+
+function anchorXOf(box: DOMRect, anchor: TooltipAnchor): number {
+  if (anchor === 'end') {
+    return box.right
+  }
+
+  return box.left + box.width / 2
+}
+
+function alignWithin(anchorX: number, tooltip: HTMLElement, chart: HTMLElement): TooltipAlign {
   const chartBox = chart.getBoundingClientRect()
-  const center = barBox.left + barBox.width / 2
   const half = tooltip.offsetWidth / 2
-  if (center - half < chartBox.left) {
+  if (anchorX - half < chartBox.left) {
     return 'start'
   }
 
-  if (center + half > chartBox.right) {
+  if (anchorX + half > chartBox.right) {
     return 'end'
   }
 
   return 'center'
+}
+
+function useTooltipAlign<T extends HTMLElement>(
+  active: boolean,
+  anchor: TooltipAnchor
+): {
+  anchorRef: React.RefObject<T | null>
+  tooltipRef: React.RefObject<HTMLSpanElement | null>
+  align: TooltipAlign
+} {
+  const [align, setAlign] = useState<TooltipAlign>('center')
+  const anchorRef = useRef<T>(null)
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+
+  useLayoutEffect(() => {
+    const chart = anchorRef.current?.closest('ul')
+    if (!active || anchorRef.current == null || tooltipRef.current == null || chart == null) {
+      setAlign('center')
+
+      return
+    }
+
+    const anchorX = anchorXOf(anchorRef.current.getBoundingClientRect(), anchor)
+    setAlign(alignWithin(anchorX, tooltipRef.current, chart))
+  }, [active, anchor])
+
+  return { anchorRef, tooltipRef, align }
 }
 
 export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
@@ -99,20 +177,11 @@ function FameColumn({
   onHover: (key: string) => void
   onLeave: () => void
 }): React.JSX.Element {
-  const [align, setAlign] = useState<TooltipAlign>('center')
-  const columnRef = useRef<HTMLLIElement>(null)
-  const tooltipRef = useRef<HTMLSpanElement>(null)
-
-  useLayoutEffect(() => {
-    const chart = columnRef.current?.parentElement
-    if (!active || columnRef.current == null || tooltipRef.current == null || chart == null) {
-      setAlign('center')
-
-      return
-    }
-
-    setAlign(alignWithin(columnRef.current, tooltipRef.current, chart))
-  }, [active])
+  const {
+    anchorRef: columnRef,
+    tooltipRef,
+    align
+  } = useTooltipAlign<HTMLLIElement>(active, 'center')
 
   function handleMouseEnter(): void {
     onHover(key)
