@@ -1,9 +1,15 @@
 import { IconButton } from '@dfragon/ui'
-import { StarIcon } from '../../components/StarIcon'
-import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
-import { type CharacterDisplay, isSameCharacter } from '../../lib/stored-character'
+import { StarIcon } from './StarIcon'
+import { useFavoriteCharacterStore } from '../hooks/useFavoriteCharacterStore'
+import { type CharacterDisplay, isSameCharacter } from '../lib/stored-character'
 
-export function FavoriteToggle({ character }: { character: CharacterDisplay }): React.JSX.Element {
+export function FavoriteToggle({
+  character,
+  onToggle
+}: {
+  character: CharacterDisplay
+  onToggle?: () => void
+}): React.JSX.Element {
   const favorite = useFavoriteCharacterStore((state) =>
     state.favoriteCharacters.some((saved) => isSameCharacter(saved, character))
   )
@@ -18,6 +24,7 @@ export function FavoriteToggle({ character }: { character: CharacterDisplay }): 
     } else {
       addFavoriteCharacter(character)
     }
+    onToggle?.()
   }
 
   return (

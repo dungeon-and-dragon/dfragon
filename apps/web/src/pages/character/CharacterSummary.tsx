@@ -9,7 +9,7 @@ import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { Portrait } from '../../components/Portrait'
 import { characterDisplaySchema } from '../../lib/stored-character'
 import { styles } from './CharacterSummary.style'
-import { FavoriteToggle } from './FavoriteToggle'
+import { FavoriteToggle } from '../../components/FavoriteToggle'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
