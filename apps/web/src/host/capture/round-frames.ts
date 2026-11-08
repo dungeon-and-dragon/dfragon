@@ -14,7 +14,7 @@ function findPastedImage(data: DataTransfer | null): File | null {
   return null
 }
 
-// 붙여 넣은 이미지와 마을 자동 인식이 판정에 쓴 프레임은 host가 들고 있다가 renderer가 시작한 회차의
+// 붙여 넣은 이미지와 마을 자동 인식이 판정에 쓴 프레임은 host가 들고 있다가 웹 앱에서 시작한 회차의
 // readCaptureFrame으로 돌려준다. 공유한 창이 있으면 그렇게 시작한 회차만 든 프레임을 읽고, 캡처 버튼 회차는
 // 공유 화면을 읽는다.
 export function createRoundFrames(share: ReturnType<typeof createScreenShare>): {

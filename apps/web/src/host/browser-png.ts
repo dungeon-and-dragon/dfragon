@@ -7,7 +7,7 @@ export function decodeBrowserPng(bytes: Uint8Array): Promise<CharacterImage> {
 }
 
 export async function decodeBrowserImage(image: Blob | HTMLVideoElement): Promise<CharacterImage> {
-  // Desktop의 pngjs처럼 파일의 픽셀 값을 그대로 비교하도록 색 공간 변환과 alpha 미리 곱하기를 끈다.
+  // 파일의 픽셀 값을 pngjs와 같이 그대로 비교하도록 색 공간 변환과 alpha 미리 곱하기를 끈다.
   const bitmap = await createImageBitmap(image, {
     colorSpaceConversion: 'none',
     premultiplyAlpha: 'none'

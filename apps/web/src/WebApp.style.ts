@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, font, space } from '@dfragon/ui/tokens.stylex'
-import { breakpoints } from '../../styles/breakpoints.stylex'
+import { breakpoints } from './styles/breakpoints.stylex'
 
 export const styles = stylex.create({
   site: {
