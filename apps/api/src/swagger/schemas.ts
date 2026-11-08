@@ -621,7 +621,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
   }),
   SkillStats: object({
     computedAt: { ...timestamp, description: '집계를 계산한 시각' },
-    topPercent: { type: 'integer', description: '표본으로 삼은 전직 안 명성 상위 비율(%)' },
+    topCount: { type: 'integer', description: '표본으로 삼은 전직 안 명성 상위 순위' },
     minFame: {
       type: 'integer',
       nullable: true,
