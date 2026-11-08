@@ -189,7 +189,7 @@ let unsubscribePastedFrame = (): void => {}
 beforeAll(() => {
   host = installBrowserHost(
     API_ORIGIN,
-    'https://site.example.test/skilltab/skilltab.v2.json',
+    'https://site.example.test/skilltab/skilltab.v3.json',
     'https://site.example.test/skilltab/oath.v2.json'
   )
 })
