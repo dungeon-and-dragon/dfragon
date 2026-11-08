@@ -284,6 +284,79 @@ it('칸에 처음 마우스를 올리면 그날 상세를 받아 날짜와 묶�
   expect(getAdventureActivityDay).toHaveBeenCalledTimes(1)
 })
 
+it('탭에 해당하는 묶음만 보이고 같은 날짜의 상세를 탭을 바꿔도 다시 쓴다', async () => {
+  const allKinds: AdventureActivity = {
+    ...activity,
+    days: [{ ...activity.days[0]!, legion: 1, enhance: 1 }]
+  }
+  const detail: AdventureActivityDay = {
+    ...april2,
+    legions: [{ name: '가 레기온', count: 1 }]
+  }
+  const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>(async () => detail)
+  await render({ getAdventureActivity: async () => allKinds, getAdventureActivityDay })
+
+  const date = '4월 2일 (목)'
+  const raid = ['레이드', '가 레이드2회']
+  const legion = ['레기온', '가 레기온1회']
+  const item = ['아이템', '09:58합성 태초', '레전더리9개']
+  const enhance = ['강화', '00:29+15 실패']
+
+  await act(async () => hover(cell('4월 2일')))
+  expect(popupText()).toEqual([date, ...raid, ...legion, ...item, ...enhance])
+
+  for (const [label, rows] of [
+    ['강화', enhance],
+    ['레이드', raid],
+    ['레기온', legion],
+    ['아이템', item]
+  ] as const) {
+    await act(async () => tab(label).click())
+    await act(async () => hover(cell('4월 2일')))
+    expect(popupText()).toEqual([date, ...rows])
+    expect(getAdventureActivityDay).toHaveBeenCalledTimes(1)
+  }
+})
+
+it.each([
+  ['레이드', '레이드 클리어'],
+  ['레기온', '레기온 클리어'],
+  ['강화', '강화 시도']
+])(
+  '아이템만 있는 날은 %s 탭에서 활동 없는 칸과 같고 상세를 받지 않는다',
+  async (label, cellName) => {
+    const itemOnly: AdventureActivity = {
+      ...activity,
+      days: [{ ...activity.days[0]!, raid: 0, primeval: false }]
+    }
+    const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>()
+    await render({ getAdventureActivity: async () => itemOnly, getAdventureActivityDay })
+    await act(async () => tab(label).click())
+
+    const zeroCell = cell('4월 2일')
+    expect(zeroCell.getAttribute('aria-label')).toBe(`4월 2일 ${cellName} 0`)
+    expect(zeroCell.className).toBe(cell('4월 4일').className)
+    await act(async () => hover(zeroCell))
+
+    expect(popupText()).toEqual([])
+    expect(getAdventureActivityDay).not.toHaveBeenCalled()
+  }
+)
+
+it('강화만 있는 날은 아이템 탭에서 활동 없는 칸과 같고 상세를 받지 않는다', async () => {
+  const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>()
+  await render({ getAdventureActivityDay })
+  await act(async () => tab('아이템').click())
+
+  const zeroCell = cell('4월 3일')
+  expect(zeroCell.getAttribute('aria-label')).toBe('4월 3일 아이템 0')
+  expect(zeroCell.className).toBe(cell('4월 4일').className)
+  await act(async () => hover(zeroCell))
+
+  expect(popupText()).toEqual([])
+  expect(getAdventureActivityDay).not.toHaveBeenCalled()
+})
+
 it('활동이 있는 칸에서 다른 활동이 있는 칸으로 옮기면 사이 간격을 지나는 동안 툴팁을 닫지 않고 내용을 그 날짜로 바꾼다', async () => {
   await render({ getAdventureActivityDay: async (_name, date) => ({ ...april2, date }) })
   await act(async () => hover(cell('4월 2일')))
