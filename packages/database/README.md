@@ -142,7 +142,7 @@ INSERT INTO "seasons" ("id", "name", "starts_at") VALUES (12, '시즌 이름', '
 COMMIT;
 ```
 
-웹 화면은 시각을 시즌 이름으로 바꿀 때 DB를 읽지 않고 [`time-format.ts`](../../apps/web/src/core/lib/time-format.ts)의 시즌 목록을 쓰므로, 같은 PR에서 그 목록 맨 앞에 새 시즌 이름과 시작 시각을 더합니다.
+웹 화면은 시각을 시즌 이름으로 바꿀 때 DB를 읽지 않고 [`time-format.ts`](../../apps/web/src/core/time-format.ts)의 시즌 목록을 쓰므로, 같은 PR에서 그 목록 맨 앞에 새 시즌 이름과 시작 시각을 더합니다.
 
 `ATTACH PARTITION`은 붙이는 partition의 행이 새 범위 안에 있는지 검사하므로, 새 시즌 시작 뒤의 행이 이미 있으면 실패하고 transaction 전체가 되돌려집니다.
 Prisma가 이 migration을 실패로 기록해 다음 `migrate deploy`가 `P3009`로 막히므로, 뒤에 migration을 더해서는 풀리지 않습니다.
