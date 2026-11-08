@@ -1,5 +1,5 @@
 import { installBrowserHost } from './host'
-import { WebApp } from './site/web/WebApp'
+import { WebApp } from './WebApp'
 
 // 개발 서버(vite.config.ts)와 배포한 사이트는 같은 origin의 /api 경로를 API로 넘긴다.
 const apiBaseUrl = `${window.location.origin}/api`
