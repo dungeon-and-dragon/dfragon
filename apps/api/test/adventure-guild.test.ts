@@ -8,6 +8,7 @@ import type {
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
+import type { CharacterRow } from '../src/characters/character-row.js'
 import { toAdventureWeeklyClears } from '../src/adventure-guild/weekly.js'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
@@ -28,8 +29,15 @@ function member(characterId: string, fame: number | null): StoredCharacter {
     fame,
     guildId: 'synthetic-guild',
     guildName: '합성길드',
-    fetchedAt
+    fetchedAt,
+    dealerSkillLearned: null
   }
+}
+
+function memberRow(characterId: string, fame: number | null): CharacterRow {
+  const { dealerSkillLearned, ...row } = member(characterId, fame)
+
+  return { ...row, role: 'dealer' }
 }
 
 async function listen(
@@ -89,7 +97,7 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
     assert.deepEqual(names, ['합성 모험단/1'])
     assert.deepEqual(answer.body, {
       adventureName: '합성 모험단/1',
-      characters: characters.map((character) => ({
+      characters: [memberRow('a', 70000), memberRow('b', null)].map((character) => ({
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z'
       }))
@@ -295,7 +303,7 @@ test('주간 클리어는 고정한 레이드, 레기온 열에 목요일 06:00�
       ['none', []]
     ]
   )
-  assert.deepEqual(weekly.characters.at(-1), { ...member('none', null), weeklyClears: [] })
+  assert.deepEqual(weekly.characters.at(-1), { ...memberRow('none', null), weeklyClears: [] })
 })
 
 test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝나기를 기다리지 않는다', async () => {
@@ -304,7 +312,7 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
   const syncing = new Promise<void>((resolve) => {
     release = resolve
   })
-  const characters = [member('a', 70000), member('b', null)].map((character) => ({
+  const characters = [memberRow('a', 70000), memberRow('b', null)].map((character) => ({
     ...character,
     weeklyClears: []
   }))
