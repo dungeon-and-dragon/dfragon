@@ -28,8 +28,25 @@ function seasonActivityKey(adventureName: string, season: number | undefined) {
   return [...seasonsActivityKey(adventureName), seasonKey] as const
 }
 
+function seasonDaysKey(adventureName: string, season: number) {
+  return [...activityKey(adventureName), 'days', season] as const
+}
+
 function backfillRunning({ seasons }: AdventureActivity): boolean {
   return seasons.some(({ backfill }) => backfill?.running === true)
+}
+
+function finishedBackfills(
+  previous: AdventureActivity | undefined,
+  next: AdventureActivity
+): number[] {
+  const running = new Set(
+    previous?.seasons.filter(({ backfill }) => backfill?.running === true).map(({ id }) => id)
+  )
+
+  return next.seasons
+    .filter(({ id, backfill }) => running.has(id) && backfill?.running !== true)
+    .map(({ id }) => id)
 }
 
 // 시즌을 바꾸는 동안 시즌 목록을 계속 그리도록 새 시즌을 받기 전까지 앞서 받은 응답을 previous로 돌려준다.
@@ -47,6 +64,14 @@ export function useAdventureActivity(
         queryKey: seasonActivityKey(adventureName, season),
         exact: true
       })
+
+      // 받는 동안 받은 시즌 하루 상세는 비어 있으므로, 받기가 끝난 응답에서 한 번만 다시 받는다.
+      const previous = queryClient.getQueryData<AdventureActivity>(
+        seasonActivityKey(adventureName, season)
+      )
+      for (const finished of finishedBackfills(previous, activity)) {
+        queryClient.invalidateQueries({ queryKey: seasonDaysKey(adventureName, finished) })
+      }
 
       // 진행 조회는 고른 시즌만 하므로, 받는 동안 열었던 다른 시즌 캐시에는 옛 받기 상태가 남는다.
       // 새 응답의 시즌 목록을 다른 캐시에도 넣어 시즌을 바꿀 때 이전 진행 상태로 돌아가지 않게 한다.
@@ -116,22 +141,22 @@ export function useBackfillAdventureSeason(adventureName: string): (seasonId: nu
   return mutate
 }
 
-export type AdventureActivityDayResult =
+export type AdventureActivitySeasonDaysResult =
   | Readonly<{ status: 'loading' }>
-  | Readonly<{ status: 'success'; value: AdventureActivityDay }>
+  | Readonly<{ status: 'success'; value: readonly AdventureActivityDay[] }>
   | Readonly<{ status: 'error'; message: string }>
 
-export function useAdventureActivityDay(
+export function useAdventureActivitySeasonDays(
   adventureName: string,
-  date: string
-): AdventureActivityDayResult {
-  const { getAdventureActivityDay } = useClientHost()
+  season: number
+): AdventureActivitySeasonDaysResult {
+  const { getAdventureActivitySeasonDays } = useClientHost()
   const { data, error } = useQuery({
-    queryKey: [...activityKey(adventureName), 'days', date],
-    queryFn: () => getAdventureActivityDay(adventureName, date)
+    queryKey: seasonDaysKey(adventureName, season),
+    queryFn: () => getAdventureActivitySeasonDays(adventureName, season)
   })
   if (data !== undefined) {
-    return { status: 'success', value: data }
+    return { status: 'success', value: data.days }
   }
 
   if (error != null) {
