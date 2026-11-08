@@ -9,7 +9,13 @@ const TAB_PADDING_INLINE = space.s12
 const TAB_PANEL_MIN_HEIGHT = 360
 
 export const styles = stylex.create({
-  root: { display: 'flex', flexDirection: 'column' },
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: colors.borderDefault
+  },
   list: {
     position: 'relative',
     display: 'flex',
