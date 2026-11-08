@@ -45,8 +45,8 @@ export function StatsScreen(): React.JSX.Element {
           </TitleBox>
           <div {...stylex.props(styles.grid)}>
             <StatBox name="서버 인구" bars={serverBars(stats)} />
-            <StatBox name="직업 분포" bars={jobBars(stats)} />
             <StatBox name="명성 분포" bars={fameBars(stats)} vertical />
+            <StatBox name="직업 분포" bars={jobBars(stats)} />
             <StatBox name="직업별 평균 명성" bars={averageFameBars(stats)} />
           </div>
         </div>
