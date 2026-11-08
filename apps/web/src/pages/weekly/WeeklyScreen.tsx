@@ -1,6 +1,7 @@
 import { Button, shapes, TextField, TextFieldInput } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
+import { RefreshIcon } from '../../components/RefreshIcon'
 import { SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { styles as listBoxStyles } from '../../components/table/ListBox.style'
@@ -16,10 +17,12 @@ const LOADING_ROWS = 5
 function AdventureNameForm({
   initialName,
   onAdventureOpen,
+  refreshing = false,
   onRefresh
 }: {
   initialName: string
   onAdventureOpen: (adventureName: string) => void
+  refreshing?: boolean
   onRefresh?: () => void
 }): React.JSX.Element {
   const [draft, setDraft] = useState(initialName)
@@ -52,8 +55,15 @@ function AdventureNameForm({
         보기
       </Button>
       {onRefresh != null && (
-        <Button type="button" size="sm" onClick={onRefresh}>
-          새로고침
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={refreshing}
+          onClick={onRefresh}
+        >
+          <RefreshIcon spinning={refreshing} />
+          {refreshing ? '받는 중' : '갱신'}
         </Button>
       )}
     </form>
@@ -88,10 +98,12 @@ export function WeeklyScreen({
 }): React.JSX.Element {
   const refreshActivity = useRefreshAdventureActivity()
   const refreshWeekly = useRefreshAdventureWeekly()
+  const [refreshing, setRefreshing] = useState(false)
 
-  function handleRefresh(): void {
-    refreshActivity(adventureName)
-    refreshWeekly(adventureName)
+  async function handleRefresh(): Promise<void> {
+    setRefreshing(true)
+    await Promise.all([refreshActivity(adventureName), refreshWeekly(adventureName)])
+    setRefreshing(false)
   }
 
   return (
@@ -105,6 +117,7 @@ export function WeeklyScreen({
         <AdventureNameForm
           initialName={adventureName}
           onAdventureOpen={onAdventureOpen}
+          refreshing={refreshing}
           onRefresh={handleRefresh}
         />
       </div>

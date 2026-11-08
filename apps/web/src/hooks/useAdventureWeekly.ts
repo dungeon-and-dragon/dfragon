@@ -13,10 +13,9 @@ export function useAdventureWeekly(adventureName: string): LoadedResult<Adventur
   return useLoadedResult(weeklyKey(adventureName), () => getAdventureWeekly(adventureName))
 }
 
-export function useRefreshAdventureWeekly(): (adventureName: string) => void {
+export function useRefreshAdventureWeekly(): (adventureName: string) => Promise<void> {
   const queryClient = useQueryClient()
 
-  return (adventureName) => {
-    queryClient.resetQueries({ queryKey: weeklyKey(adventureName), exact: true })
-  }
+  return (adventureName) =>
+    queryClient.invalidateQueries({ queryKey: weeklyKey(adventureName), exact: true })
 }

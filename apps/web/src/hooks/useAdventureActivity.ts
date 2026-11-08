@@ -143,10 +143,8 @@ export function useAdventureActivityDay(
   return LOADING
 }
 
-export function useRefreshAdventureActivity(): (adventureName: string) => void {
+export function useRefreshAdventureActivity(): (adventureName: string) => Promise<void> {
   const queryClient = useQueryClient()
 
-  return (adventureName) => {
-    queryClient.resetQueries({ queryKey: activityKey(adventureName) })
-  }
+  return (adventureName) => queryClient.invalidateQueries({ queryKey: activityKey(adventureName) })
 }

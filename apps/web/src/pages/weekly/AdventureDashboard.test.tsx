@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
+import type { AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
@@ -86,16 +87,28 @@ const previousSeason: AdventureActivity = {
   summary: { ...emptySummary, raids: [{ name: '라 레이드', count: 9 }] }
 }
 
+// 갱신은 주간 던파도 끝나야 버튼을 켜므로, 갱신 테스트는 끝나는 주간 던파 조회를 넘긴다.
+const emptyWeekly: AdventureWeekly = {
+  adventureName: '합성 모험단',
+  clearNames: [],
+  characters: []
+}
+
 function render(
   getAdventureActivity: ClientHost['getAdventureActivity'],
   season: number | undefined,
   onSeasonChange: (season: number) => void = vi.fn(),
-  backfillAdventureSeason?: ClientHost['backfillAdventureSeason']
+  backfillAdventureSeason?: ClientHost['backfillAdventureSeason'],
+  getAdventureWeekly: ClientHost['getAdventureWeekly'] = vi.fn(() => new Promise<never>(() => {}))
 ): Promise<void> {
   return act(async () =>
     root.render(
       <ClientHostContext
-        value={createTestClientHost({ getAdventureActivity, backfillAdventureSeason })}
+        value={createTestClientHost({
+          getAdventureActivity,
+          backfillAdventureSeason,
+          getAdventureWeekly
+        })}
       >
         <TestQueryClient>
           <TestRouter>
@@ -110,6 +123,10 @@ function render(
       </ClientHostContext>
     )
   )
+}
+
+function refreshButton(name: string): HTMLButtonElement {
+  return [...container.querySelectorAll('button')].find((button) => button.textContent === name)!
 }
 
 function seasonButton(name: string): HTMLButtonElement {
@@ -518,26 +535,47 @@ it('요약 숫자에 마우스를 올리면 내역이 열리고, 0인 숫자는 
   expect(tooltipRows()).toEqual(['가 레이드1,200회', '나 레이드3회'])
 })
 
-it('새로고침을 누르면 받아 둔 시즌 활동을 버리고 받는 중을 보인 뒤 같은 시즌을 다시 조회한다', async () => {
+it('갱신을 누르면 다시 받는 동안 받아 둔 시즌 활동을 그대로 두고, 같은 시즌을 다시 받으면 새 응답으로 그리고 버튼을 켠다', async () => {
   const refreshed = Promise.withResolvers<AdventureActivity>()
   const getAdventureActivity = vi
     .fn<ClientHost['getAdventureActivity']>()
     .mockResolvedValueOnce(previousSeason)
     .mockReturnValueOnce(refreshed.promise)
-  await render(getAdventureActivity, 10)
+  await render(getAdventureActivity, 10, vi.fn(), undefined, async () => emptyWeekly)
+  expect(statValues()[0]).toBe('9')
 
-  const refresh = [...container.querySelectorAll('button')].find(
-    (button) => button.textContent === '새로고침'
-  )!
-  await act(async () => refresh.click())
-  expect(heroBusy()).toBe('true')
+  await act(async () => refreshButton('갱신').click())
+  expect(refreshButton('받는 중').disabled).toBe(true)
+  expect(heroBusy()).toBe('false')
+  expect(statValues()[0]).toBe('9')
 
-  await act(async () => refreshed.resolve(previousSeason))
+  await act(async () =>
+    refreshed.resolve({
+      ...previousSeason,
+      summary: { ...previousSeason.summary, raids: [{ name: '라 레이드', count: 12 }] }
+    })
+  )
   expect(getAdventureActivity.mock.calls).toEqual([
     ['합성 모험단', 10],
     ['합성 모험단', 10]
   ])
-  expect(heroBusy()).toBe('false')
+  expect(statValues()[0]).toBe('12')
+  expect(refreshButton('갱신').disabled).toBe(false)
+})
+
+it('갱신이 실패하면 오류 문구 없이 받아 둔 시즌 활동을 두고 버튼을 다시 켠다', async () => {
+  const getAdventureActivity = vi
+    .fn<ClientHost['getAdventureActivity']>()
+    .mockResolvedValueOnce(previousSeason)
+    .mockRejectedValueOnce(new Error('합성 활동 오류'))
+  await render(getAdventureActivity, 10, vi.fn(), undefined, async () => emptyWeekly)
+
+  await act(async () => refreshButton('갱신').click())
+
+  expect(getAdventureActivity).toHaveBeenCalledTimes(2)
+  expect(container.querySelector('[role="alert"]')).toBeNull()
+  expect(statValues()[0]).toBe('9')
+  expect(refreshButton('갱신').disabled).toBe(false)
 })
 
 it('레이드 내역은 하드와 노말이 모두 있으면 둘을 나눠 보이고, 한쪽만 있거나 없는 응답은 합계만 응답 순서대로 보인다', async () => {
