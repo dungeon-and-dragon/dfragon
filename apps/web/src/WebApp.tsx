@@ -23,6 +23,7 @@ import { CharacterDetailPage } from './pages/character/CharacterDetailPage'
 import { FavoritesScreen } from './pages/favorites/FavoritesScreen'
 import { GuildPage } from './pages/guild/GuildPage'
 import { HomePage } from './pages/home/HomePage'
+import { PrivacyScreen, TermsScreen } from './pages/legal/LegalScreen'
 import { NotFoundScreen } from './pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from './pages/rankings/ranking-search'
 import { RankingsPage } from './pages/rankings/RankingsPage'
@@ -154,6 +155,18 @@ const favoritesRoute = createRoute({
   component: FavoritesScreen
 })
 
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/terms',
+  component: TermsScreen
+})
+
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: PrivacyScreen
+})
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   multisearchRoute,
@@ -165,7 +178,9 @@ const routeTree = rootRoute.addChildren([
   adventureRoute,
   guildRoute,
   legacyMyAdventureRoute,
-  favoritesRoute
+  favoritesRoute,
+  termsRoute,
+  privacyRoute
 ])
 
 function createWebRouter(host: BrowserHost) {
