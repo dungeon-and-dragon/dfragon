@@ -1,10 +1,10 @@
-import type { DiagnosticCode } from '@dfragon/client-core/preload/common/types/diagnostics'
+import type { DiagnosticCode } from '@dfragon/client-core/types/diagnostics'
 import {
   SEARCH_ACTIONS,
   SEARCH_COMMAND_ERRORS,
   SEARCH_SLOT_COUNTS,
   type SearchSnapshot
-} from '@dfragon/client-core/preload/common/types/search'
+} from '@dfragon/client-core/types/search'
 import { createCaptureSearchLifetime } from '@dfragon/client-core/shared/search/capture-lifetime'
 import type { DfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
 import { decodeCharacterImage } from '@dfragon/client-core/shared/search/character-image'

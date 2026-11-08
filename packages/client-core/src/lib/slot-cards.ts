@@ -1,4 +1,4 @@
-import type { SearchSlot } from '../preload/common/types/search'
+import type { SearchSlot } from '../types/search'
 import type { CardCharacter, SlotState } from '../types/cards'
 import type { SnapshotMark } from './adventure-snapshot'
 import type { CandidatePicker } from './candidate-picker'

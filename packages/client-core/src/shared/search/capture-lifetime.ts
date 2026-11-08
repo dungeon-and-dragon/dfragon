@@ -1,5 +1,5 @@
 import { isCharacterSearchNickname } from './identify'
-import { SEARCH_COMMAND_ERRORS } from '../../preload/common/types/search'
+import { SEARCH_COMMAND_ERRORS } from '../../types/search'
 import { createActor } from 'xstate'
 import {
   runDetailsRequest,
@@ -12,9 +12,9 @@ import {
   type SearchRequest,
   type RequestIdentity
 } from './slot-lifetime-machine'
-import { sameOcrSearchInput } from '../../preload/common/search/ocr-input'
-import { SEARCH_SLOT_COUNTS } from '../../preload/common/types/search'
-import type { SelectedCharacterSummary } from '../../preload/common/types/character'
+import { sameOcrSearchInput } from './ocr-input'
+import { SEARCH_SLOT_COUNTS } from '../../types/search'
+import type { SelectedCharacterSummary } from '../../types/character'
 import type {
   SearchCommandError,
   SearchCommandResult,
@@ -24,7 +24,7 @@ import type {
   SearchSlot,
   SearchSlotCount,
   SearchSnapshot
-} from '../../preload/common/types/search'
+} from '../../types/search'
 
 export type CaptureBinding = Readonly<{
   captureId: string

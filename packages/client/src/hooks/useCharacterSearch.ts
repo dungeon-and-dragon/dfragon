@@ -6,7 +6,7 @@ import {
   type CandidatePick,
   type CandidatePicker
 } from '@dfragon/client-core/lib/candidate-picker'
-import type { SearchSlotCount } from '@dfragon/client-core/preload/common/types/search'
+import type { SearchSlotCount } from '@dfragon/client-core/types/search'
 import type { CardSearchHost } from '../host/client-host'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 

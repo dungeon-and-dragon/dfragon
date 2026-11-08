@@ -1,18 +1,12 @@
 import { createContext, useContext } from 'react'
-import type {
-  CaptureSource,
-  RaidFrameResult
-} from '@dfragon/client-core/preload/common/types/capture'
-import type {
-  CharacterIdentity,
-  CharacterImage
-} from '@dfragon/client-core/preload/common/types/character'
+import type { CaptureSource, RaidFrameResult } from '@dfragon/client-core/types/capture'
+import type { CharacterIdentity, CharacterImage } from '@dfragon/client-core/types/character'
 import type {
   OcrSearchObservation,
   SearchApi,
   SearchCommandResult
-} from '@dfragon/client-core/preload/common/types/search'
-import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
+} from '@dfragon/client-core/types/search'
+import type { TodayGrade } from '@dfragon/client-core/types/today-grade'
 import type { Guild } from '@dfragon/client-core/shared/adventure-guild/adventure-guild'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'

@@ -1,6 +1,6 @@
 import ky, { isTimeoutError } from 'ky'
 import { z } from 'zod'
-import type { SearchErrorCode } from '../../preload/common/types/search'
+import type { SearchErrorCode } from '../../types/search'
 import { SearchHttpFailure } from '../search/http'
 
 const failureSchema = z.object({

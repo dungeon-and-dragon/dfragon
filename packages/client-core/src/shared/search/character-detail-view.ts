@@ -1,8 +1,5 @@
 import { z } from 'zod'
-import {
-  apiCharacterCardSchema,
-  characterIdentitySchema
-} from '../../preload/common/search/character-summary'
+import { apiCharacterCardSchema, characterIdentitySchema } from './character-summary'
 
 // API는 Neople의 시즌별 중첩 옵션을 고정 schema로 막지 않으므로, 상세 화면은 칸이 없거나 형태가 달라도 빈 값으로 읽는다.
 const text = z.string().nullable().catch(null)

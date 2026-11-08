@@ -1,4 +1,4 @@
-import type { CharacterCandidate } from '../../preload/common/types/character'
+import type { CharacterCandidate } from '../../types/character'
 
 export function orderedCandidates(candidates: readonly CharacterCandidate[]): CharacterCandidate[] {
   return candidates.toSorted((left, right) => {

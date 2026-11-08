@@ -1,6 +1,6 @@
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
 import type { MockedFunction } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
+import type { CharacterCandidate, CharacterDetails } from '../../types/character'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
 import { createCaptureSearchLifetime } from './capture-lifetime'
 import { deferred } from './async-test-fixture'

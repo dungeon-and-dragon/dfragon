@@ -1,4 +1,4 @@
-import type { SearchError, SearchErrorCode } from '../../preload/common/types/search'
+import type { SearchError, SearchErrorCode } from '../../types/search'
 import { SearchHttpFailure } from './http'
 
 export type SearchOperationFailure = {

@@ -8,7 +8,7 @@ import {
   createPortraitColorScorer,
   type PortraitColorScorer
 } from '../../src/shared/search/portrait-color'
-import type { CharacterImage } from '../../src/preload/common/types/character'
+import type { CharacterImage } from '../../src/types/character'
 import { type CaseResult, evaluateCase, summarize } from './evaluate'
 import { buildHudPortrait, hudFaceSize } from './hud-portrait'
 import {

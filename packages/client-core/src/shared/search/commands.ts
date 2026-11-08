@@ -5,10 +5,10 @@ import {
   SEARCH_ACTIONS,
   SEARCH_SLOT_COUNTS,
   type SearchSlotCount
-} from '../../preload/common/types/search'
+} from '../../types/search'
 import { z } from 'zod'
-import { CHARACTER_SERVER_NAMES } from '../../preload/common/search/character-summary'
-import type { OcrSearchObservation, SearchControl } from '../../preload/common/types/search'
+import { CHARACTER_SERVER_NAMES } from './character-summary'
+import type { OcrSearchObservation, SearchControl } from '../../types/search'
 
 const MAX_NICKNAME_INPUT_LENGTH = 24
 const text = z.string()
