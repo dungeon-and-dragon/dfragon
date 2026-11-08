@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPartyOcrWorker } from './ocr'
-import type { PartyOcrResult } from '../types/capture'
+import type { PartyOcrResult } from '../capture/capture-types'
 
 class NativeWorker {
   static latest: NativeWorker

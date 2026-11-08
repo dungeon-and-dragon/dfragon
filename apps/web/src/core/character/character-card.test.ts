@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { SelectedCharacterSummary } from '../types/character'
-import type { SearchSlot } from '../types/search'
-import { dealerCard } from '../testing/fixtures/character-cards'
+import type { SelectedCharacterSummary } from './character'
+import type { SearchSlot } from '../search/search'
+import { dealerCard } from '../testing/character-cards'
 import { searchSlotNotice, toCharacterCard } from './character-card'
 
 const summary: SelectedCharacterSummary = {

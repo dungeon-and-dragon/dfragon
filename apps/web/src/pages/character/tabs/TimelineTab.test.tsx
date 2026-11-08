@@ -4,13 +4,13 @@ import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
+import type { CharacterDetailView } from '#core/character/character-detail-view'
 import type {
   CharacterTimeline,
   TimelineAcquisition,
   TimelineEnhancement,
   TimelinePage
-} from '#core/shared/search/character-timeline'
+} from '#core/character/character-timeline'
 import { ClientHostContext, type ClientHost } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'

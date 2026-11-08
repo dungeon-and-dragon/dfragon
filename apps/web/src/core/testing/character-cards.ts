@@ -1,4 +1,4 @@
-import type { CharacterCard } from '../../types/cards'
+import type { CharacterCard } from '../capture/cards-types'
 
 // 캐릭터 면 카드 예시. 점수는 dnf-reverse-engineering golden 벡터의 가명 표본(딜러
 // `dealer-weapon-master-scored-0046ae4b`, 버퍼 `buffer-enchantress-scored-031ca272`)의 기대값이다.

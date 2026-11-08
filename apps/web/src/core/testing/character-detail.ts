@@ -1,9 +1,9 @@
-import buffer from '../../../../../api/test/fixtures/character-card-buffer.json'
-import dealer from '../../../../../api/test/fixtures/character-card-dealer.json'
+import buffer from '../../../../api/test/fixtures/character-card-buffer.json'
+import dealer from '../../../../api/test/fixtures/character-card-dealer.json'
 import {
   type CharacterDetailView,
   characterDetailViewSchema
-} from '../../shared/search/character-detail-view'
+} from '../character/character-detail-view'
 
 type Entry = { slotId?: string; [key: string]: unknown }
 type Basic = { serverId: string; characterId: string; [key: string]: unknown }

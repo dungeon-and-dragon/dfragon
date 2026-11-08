@@ -2,8 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { SeatAdventures } from '#core/lib/adventure-snapshot'
-import type { SearchMode } from '#core/types/search-mode'
+import type { SeatAdventures } from '#core/capture/adventure-snapshot'
+import type { SearchMode } from '#core/capture/search-mode'
 import { useAdventureSnapshot } from './useAdventureSnapshot'
 
 let container: HTMLDivElement

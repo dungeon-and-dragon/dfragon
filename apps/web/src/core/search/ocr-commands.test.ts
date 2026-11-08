@@ -12,7 +12,7 @@ const observation = {
   portrait
 }
 
-describe('OCR 관측 IPC의 제한된 입력 계약', () => {
+describe('OCR 관측 명령의 제한된 입력 계약', () => {
   it('한 글자와 12 code point 후보를 보정 없이 받는다', () => {
     const input = { ...observation, candidateNicknames: ['가', '😀'.repeat(12)] }
     expect(parseOcrSearchObservation([input])).toEqual(input)
