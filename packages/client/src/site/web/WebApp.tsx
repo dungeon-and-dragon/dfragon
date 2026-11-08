@@ -107,8 +107,10 @@ function HomeScreen(): React.JSX.Element {
     >
       <PastedFrameRounds host={host} />
       <AutoRounds host={host} />
-      <GameBar />
-      <SearchScreen captureSource={<ScreenShareChip host={host} />} />
+      <div {...stylex.props(styles.homeBox)}>
+        <GameBar />
+        <SearchScreen captureSource={<ScreenShareChip host={host} />} />
+      </div>
     </div>
   )
 }
