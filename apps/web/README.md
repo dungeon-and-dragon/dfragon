@@ -26,14 +26,9 @@ pnpm --filter @dfragon/web preview
 
 던파 창을 공유한 동안에는 약 1초마다 공유 화면을 보고, 게임이 마을에 있을 때 지금 화면의 구성이 바뀌면 그 화면의 회차를 자동으로 시작합니다. 파티 화면이면 게임의 파티 프레임만, 공대 화면이면 공대 상세 창만 보며, 자동 인식은 화면(파티, 공대)을 바꾸지 않습니다. 구성이 같으면 회차를 시작하지 않으므로 같은 구성을 다시 읽으려면 캡처 버튼을 누릅니다. 자동 인식 회차도 첫 화면을 보는 동안에만 시작합니다.
 
-캐릭터 상세의 스킬 탭은 게임 클라이언트에서 뽑은 스킬 창 데이터가 있어야 스킬 창 배치로 그립니다. 이 데이터는 저장소와 사이트 빌드에 넣지 않으며, 웹 앱은 같은 origin의 `/skilltab/skilltab.json`에서 받습니다. 이 주소가 404면(아직 올리지 않았으면) 배운 스킬을 습득 레벨 줄로 나눈 목록으로 보이고, 묶음에 없는 전직도 같은 목록으로 보입니다. 스킬 창 배치로 그릴 때는 그 전직의 스킬 채택률을 API `GET /stats/skills`에서 한 번 받아 스킬 아이콘 Tooltip에 채택률, 레벨 분포, 개화와 강화 비율, 표본 수와 기준 시각을 더합니다. 표본이 20명보다 적거나, 받는 중이거나, 받지 못했으면 Tooltip은 스킬 이름 한 줄입니다. 서약 탭의 세트 아이콘과 선택지 효과 카드는 `/skilltab/oath.json`에서 받으며, 404면 지금의 서약 한 줄로 보입니다.
+캐릭터 상세의 스킬 탭은 데이터 묶음이 있어야 스킬 창 배치로 그립니다. 웹 앱은 같은 origin의 `/skilltab/skilltab.v2.json`에서 받습니다. 이 주소가 404면 배운 스킬을 습득 레벨 줄로 나눈 목록으로 보이고, 묶음에 없는 전직도 같은 목록으로 보입니다. 스킬 창 배치로 그릴 때는 그 전직의 스킬 채택률을 API `GET /stats/skills`에서 한 번 받아 스킬 아이콘 Tooltip에 채택률, 레벨 분포, 개화와 강화 비율, 표본 수와 기준 시각을 더합니다. 표본이 20명보다 적거나, 받는 중이거나, 받지 못했으면 Tooltip은 스킬 이름 한 줄입니다. 서약 탭의 세트 아이콘과 선택지 효과 카드는 `/skilltab/oath.v2.json`에서 받으며, 404면 지금의 서약 한 줄로 보입니다.
 
-[`scripts/build-skilltab.mjs`](scripts/build-skilltab.mjs)가 추출한 묶음(`skilltab.json`과 `icons/<jobId>/<skillId>.png`)을 고치지 않고, 직업마다 아이콘을 한 장으로 묶은 sprite(`<PVF 해시 앞 8자리>/sprites/<jobId>.<내용 hash>.png`)와 sprite 안 위치를 적은 웹용 `skilltab.json`을 빈 출력 폴더에 만듭니다. `--extras`에 같은 판의 개화, 강화, 서약 묶음(`skillstyle.json`, `oath.json`, `icons/`)을 주면 스킬에 개화 설명과 강화가 바꾸는 값의 종류를 붙이고, 개화, 강화 표식(`<판>/marks/`), 서약 아이콘(`<판>/oath/`, `<판>/oath-set/`)과 웹용 `oath.json`을 함께 만듭니다. 판이 다르면 멈춥니다. `--oath-items`에 서약 아이템 아이콘 묶음(이름, 등급, 파일을 적은 `index.json`과 webp)을 더 주면 서약 본체 아이콘(`<판>/oath-item/`)을 복사하고 `oath.json`의 `items`에 이름과 등급별로 싣습니다. 서약 탭은 Neople 이미지 서버에 그림이 없는 서약 본체 아이콘을 여기서 찾습니다. 개발 서버에서는 그 출력 폴더를 `DFRAGON_SKILLTAB_DIR`로 주면 `/skilltab/` 아래에 내줍니다.
-
-```sh
-pnpm --filter @dfragon/web build:skilltab --extras <개화, 서약 묶음 폴더> <묶음 폴더> <출력 폴더>
-DFRAGON_SKILLTAB_DIR=<출력 폴더> pnpm --filter @dfragon/web dev
-```
+데이터 묶음의 형식은 [스킬 창 schema](../../packages/client-core/src/shared/search/skill-window.ts)와 [서약 schema](../../packages/client-core/src/shared/search/oath-catalog.ts)에 정의합니다. 개발 서버에서는 `DFRAGON_SKILLTAB_DIR`에 데이터 묶음 폴더를 주면 `/skilltab/` 아래에 내줍니다.
 
 ## 배포
 
@@ -55,16 +50,9 @@ docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-web:local
 ```
 
-### 스킬 창 데이터 올리기
+### 스킬 창, 서약 데이터
 
-스킬 창, 서약 데이터는 사이트 빌드와 이미지에 넣지 않고 node1의 `/srv/dfragon/skilltab` 폴더에 따로 둡니다. host Caddy가 이 폴더를 `/skilltab/*`로 내주며, dev와 운영이 같은 폴더를 쓰므로 한 번 올리면 두 사이트에 함께 보입니다. `skilltab.json`, `oath.json`은 `Cache-Control: no-cache`와 ETag로 매번 확인하고, 이름에 내용 hash가 있는 sprite와 아이콘은 1년 동안 캐시합니다.
-
-게임 패치로 묶음을 다시 뽑으면 저장소 소유자가 `build:skilltab` 출력 폴더의 내용을 이 폴더에 올립니다. 폴더는 `0755`, 파일은 `0644`로 둬 host Caddy가 읽게 합니다. `skilltab.json`, `oath.json`이 새 sprite와 아이콘을 가리키므로 그림을 모두 올린 뒤 이 두 파일을 마지막에 바꿉니다. 순서가 바뀌면 그 사이에 연 페이지가 아직 없는 그림을 부릅니다.
-
-```sh
-rsync -r --chmod=D0755,F0644 --exclude /skilltab.json --exclude /oath.json <출력 폴더>/ <node1>:/srv/dfragon/skilltab/
-rsync --chmod=F0644 <출력 폴더>/skilltab.json <출력 폴더>/oath.json <node1>:/srv/dfragon/skilltab/
-```
+dev와 운영은 같은 `/skilltab/` 데이터 묶음 폴더를 씁니다. JSON 파일은 `Cache-Control: no-cache`와 ETag로 매번 확인하고, 그림은 1년 동안 캐시합니다.
 
 ## 구성
 
