@@ -995,7 +995,7 @@ it('OCR 통지 응답이 유실되면 read로만 확인하고 같은 통지를 �
       ...searchSnapshot().slots.slice(1)
     ]
   })
-  api.notifyOcrCandidatesDetected.mockRejectedValueOnce(new Error('Synthetic IPC loss'))
+  api.notifyOcrCandidatesDetected.mockRejectedValueOnce(new Error('Synthetic notification loss'))
   search.controlCharacterSearch.mockResolvedValueOnce({ ok: true, snapshot: completed })
   const before = search.controlCharacterSearch.mock.calls.length
   await act(async () => recognition.resolve(ocrResult('Alice')))

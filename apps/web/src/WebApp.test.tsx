@@ -2,29 +2,29 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
-import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
-import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
-import { useSearchModeStore } from '../../hooks/useSearchModeStore'
-import { RANKING_JOBS } from '../../pages/rankings/ranking-jobs'
-import { installBrowserHost } from '../../host'
-import type { AutoRoundSignal, BrowserHost } from '../../host/client-host'
-import { decodeBrowserImage } from '../../host/browser-png'
-import { readRaidWindowTemplates } from '../../host/screen-watch/browser-raid-templates'
-import { readTownIndicatorTemplate } from '../../host/screen-watch/browser-town-template'
+import { useFavoriteCharacterStore } from './hooks/useFavoriteCharacterStore'
+import { useMyAdventureStore } from './hooks/useMyAdventureStore'
+import { useSearchModeStore } from './hooks/useSearchModeStore'
+import { RANKING_JOBS } from './pages/rankings/ranking-jobs'
+import { installBrowserHost } from './host'
+import type { AutoRoundSignal, BrowserHost } from './host/client-host'
+import { decodeBrowserImage } from './host/browser-png'
+import { readRaidWindowTemplates } from './host/screen-watch/browser-raid-templates'
+import { readTownIndicatorTemplate } from './host/screen-watch/browser-town-template'
 import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES } from '#core/shared/search/character-summary'
 import type { CharacterCandidate } from '#core/types/character'
 import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
-import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
+import { WEB_SCREEN_WATCH_TEXTS } from './components/web-capture-texts'
 
-vi.mock('../../host/browser-png', () => ({
+vi.mock('./host/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
   decodeBrowserPng: vi.fn()
 }))
-vi.mock('../../host/screen-watch/browser-raid-templates', () => ({
+vi.mock('./host/screen-watch/browser-raid-templates', () => ({
   readRaidWindowTemplates: vi.fn()
 }))
-vi.mock('../../host/screen-watch/browser-town-template', () => ({
+vi.mock('./host/screen-watch/browser-town-template', () => ({
   readTownIndicatorTemplate: vi.fn()
 }))
 
@@ -446,7 +446,7 @@ it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는
   expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
 })
 
-it('Desktop과 달리 문서 전체의 드래그를 막지 않는다', async () => {
+it('문서 전체의 드래그를 막지 않는다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
   const event = new Event('dragstart', { bubbles: true, cancelable: true })
 
