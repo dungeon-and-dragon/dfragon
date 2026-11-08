@@ -49,12 +49,12 @@ test('모든 명령이 성공하면 job 순서대로 실행하고 0을 반환한
 test('실패한 job의 남은 명령은 건너뛰고 다른 job은 계속 실행한 뒤 실패한 명령을 모두 보고한다', async (t) => {
   const result = await runFixtureJobs(t, [
     { job: 'static', steps: [['lint'], ['format', '3'], ['writing'], ['docs']] },
-    { job: 'desktop', steps: [['desktop-test', 'SIGTERM']] },
+    { job: 'api', steps: [['api-test', 'SIGTERM']] },
     { job: 'web', steps: [['web-test']] }
   ])
 
   assert.equal(result.code, 1)
-  assert.deepEqual(result.ran, ['lint', 'format', 'desktop-test', 'web-test'])
+  assert.deepEqual(result.ran, ['lint', 'format', 'api-test', 'web-test'])
   assert.ok(
     result.stderr.includes(
       `  static: ${result.commandText('format', '3')} (exit 3, 이후 명령 2개 미실행)\n`
@@ -63,7 +63,7 @@ test('실패한 job의 남은 명령은 건너뛰고 다른 job은 계속 실행
   )
   assert.ok(
     result.stderr.includes(
-      `  desktop: ${result.commandText('desktop-test', 'SIGTERM')} (signal SIGTERM)\n`
+      `  api: ${result.commandText('api-test', 'SIGTERM')} (signal SIGTERM)\n`
     ),
     result.stderr
   )

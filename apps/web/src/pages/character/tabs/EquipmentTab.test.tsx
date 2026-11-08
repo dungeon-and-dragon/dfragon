@@ -2,8 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
-import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
+import { characterDetailFixture } from '#core/testing/fixtures/character-detail'
 import { EquipmentTab } from './EquipmentTab'
 
 let container: HTMLDivElement

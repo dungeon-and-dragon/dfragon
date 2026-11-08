@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
-import type { CharacterImage } from '@dfragon/client-core/types/character'
+import type { CharacterImage } from '#core/types/character'
 import { decodeBrowserImage } from '../browser-png'
 import type { BrowserHost } from '../client-host'
 import { createRoundFrames } from './round-frames'

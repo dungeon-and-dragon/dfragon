@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import type { ActivityDayItem } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+import type { ActivityDayItem } from '#core/shared/adventure-guild/adventure-activity'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
 
 function items(rarities: readonly string[]): ActivityDayItem[] {

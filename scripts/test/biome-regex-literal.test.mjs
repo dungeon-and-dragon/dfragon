@@ -89,14 +89,14 @@ test('export const 초기값의 정규식 리터럴을 허용한다', async () =
 })
 
 const excludedFiles = [
-  'packages/client-core/src/regex.test.ts',
+  'apps/web/src/core/regex.test.ts',
   'apps/web/src/regex.spec.tsx',
   'apps/api/test/regex.ts',
   'apps/api/tests/regex.ts',
   'packages/ui/src/__tests__/regex.ts',
   'scripts/test/fixtures/regex.mjs',
-  'packages/client/src/fixture/regex.ts',
-  'packages/client/src/testing/regex.ts',
+  'apps/web/src/fixture/regex.ts',
+  'apps/web/src/testing/regex.ts',
   'apps/api/test-support/character-search-fixtures.mjs',
   'packages/ui/scripts/test-consumer-resolution.mjs',
   'packages/lib/generated/regex.ts',
@@ -118,7 +118,7 @@ for (const filePath of excludedFiles) {
 }
 
 const buildToolFiles = [
-  'packages/client-core/scripts/validate-ocr-model.mjs',
+  'apps/web/scripts/validate-ocr-model.mjs',
   'apps/web/vite.config.ts',
   'packages/ui/scripts/verify-build.mjs'
 ]

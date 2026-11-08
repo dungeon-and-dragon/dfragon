@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ActivitySeason } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+import type { ActivitySeason } from '#core/shared/adventure-guild/adventure-activity'
 import { backfillProgress, seasonBar } from './season-bar'
 
 const SEASON: ActivitySeason = {
