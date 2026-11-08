@@ -18,60 +18,92 @@ function percentOf(value: number, max: number): number {
   return (value / max) * 100
 }
 
+type ShownTooltip = Readonly<{ key: string | null; open: boolean }>
+
+const ROW_TOOLTIP_GAP = 8
+
 export function RowBars({ bars }: { bars: readonly Bar[] }): React.JSX.Element {
+  const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
+  const listRef = useRef<HTMLUListElement>(null)
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+  const barsRef = useRef(new Map<string, HTMLSpanElement>())
   const max = Math.max(0, ...bars.map(({ value }) => value))
+  const hasShare = bars.some(({ share }) => share != null)
+  const shownBar = bars.find(({ key }) => key === hover.key)
+  useTooltipSlide({
+    chartRef: listRef,
+    tooltipRef,
+    anchorsRef: barsRef,
+    shownKey: shownBar?.key,
+    open: hover.open,
+    bars,
+    placeOf: rowTooltipPlaceOf
+  })
+
+  function handleHover(key: string): void {
+    setHover({ key, open: true })
+  }
+
+  function handleLeave(): void {
+    setHover(({ key }) => ({ key, open: false }))
+  }
+
+  function registerBar(key: string, element: HTMLSpanElement): () => void {
+    barsRef.current.set(key, element)
+
+    return () => {
+      barsRef.current.delete(key)
+    }
+  }
 
   return (
-    <ul {...stylex.props(styles.rows)}>
-      {bars.map((bar) => (
-        <BarRow key={bar.key} bar={bar} percent={percentOf(bar.value, max)} />
-      ))}
-    </ul>
+    <div {...stylex.props(styles.chart)}>
+      <ul ref={listRef} onMouseLeave={handleLeave} {...stylex.props(styles.rows)}>
+        {bars.map((bar) => (
+          <BarRow
+            key={bar.key}
+            bar={bar}
+            percent={percentOf(bar.value, max)}
+            onHover={handleHover}
+            register={registerBar}
+          />
+        ))}
+      </ul>
+      {hasShare && (
+        <span ref={tooltipRef} aria-hidden="true" {...stylex.props(styles.tooltip)}>
+          {shownBar?.share != null && (
+            <span {...stylex.props(styles.tooltipCount)}>{shownBar.share}</span>
+          )}
+        </span>
+      )}
+    </div>
   )
 }
 
 function BarRow({
-  bar: { name, value, share },
-  percent
+  bar: { key, name, value, share },
+  percent,
+  onHover,
+  register
 }: {
   bar: Bar
   percent: number
+  onHover: (key: string) => void
+  register: (key: string, element: HTMLSpanElement) => () => void
 }): React.JSX.Element {
-  const [active, setActive] = useState(false)
-  const { anchorRef, tooltipRef, align } = useTooltipAlign<HTMLSpanElement>(active)
-
   function handleMouseEnter(): void {
-    setActive(share != null)
+    onHover(key)
   }
 
-  function handleMouseLeave(): void {
-    setActive(false)
+  function barRef(element: HTMLSpanElement): () => void {
+    return register(key, element)
   }
 
   return (
-    <li
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      {...stylex.props(styles.row)}
-    >
+    <li onMouseEnter={handleMouseEnter} {...stylex.props(styles.row)}>
       <span {...stylex.props(styles.rowName)}>{name}</span>
       <span {...stylex.props(styles.track)}>
-        <span ref={anchorRef} {...stylex.props(styles.bar, styles.barWidth(percent))}>
-          {active && (
-            <span
-              ref={tooltipRef}
-              aria-hidden="true"
-              {...stylex.props(
-                styles.tooltip,
-                styles.rowTooltip,
-                align === 'start' && styles.tooltipStart,
-                align === 'end' && styles.tooltipEnd
-              )}
-            >
-              <span {...stylex.props(styles.tooltipCount)}>{share}</span>
-            </span>
-          )}
-        </span>
+        <span ref={barRef} {...stylex.props(styles.bar, styles.barWidth(percent))} />
       </span>
       <span {...stylex.props(styles.value)}>{integer.format(value)}</span>
       {share != null && <span {...stylex.props(shapes.srOnly)}>{share}</span>}
@@ -87,81 +119,66 @@ function heightOf(ratio: number): string {
   return `max(1px, ${ratio * 100}%)`
 }
 
-type TooltipAlign = 'center' | 'start' | 'end'
-
-function alignWithin(anchorX: number, tooltip: HTMLElement, chart: HTMLElement): TooltipAlign {
-  const chartBox = chart.getBoundingClientRect()
-  const half = tooltip.offsetWidth / 2
-  if (anchorX - half < chartBox.left) {
-    return 'start'
-  }
-
-  if (anchorX + half > chartBox.right) {
-    return 'end'
-  }
-
-  return 'center'
-}
-
-function useTooltipAlign<T extends HTMLElement>(
-  active: boolean
-): {
-  anchorRef: React.RefObject<T | null>
-  tooltipRef: React.RefObject<HTMLSpanElement | null>
-  align: TooltipAlign
-} {
-  const [align, setAlign] = useState<TooltipAlign>('center')
-  const anchorRef = useRef<T>(null)
-  const tooltipRef = useRef<HTMLSpanElement>(null)
-
-  useLayoutEffect(() => {
-    const chart = anchorRef.current?.closest('ul')
-    if (!active || anchorRef.current == null || tooltipRef.current == null || chart == null) {
-      setAlign('center')
-
-      return
-    }
-
-    setAlign(
-      alignWithin(anchorRef.current.getBoundingClientRect().right, tooltipRef.current, chart)
-    )
-  }, [active])
-
-  return { anchorRef, tooltipRef, align }
-}
-
-const TOOLTIP_EASE = cubicBezier('fame-tooltip', '0.2,0,0,1')
+const TOOLTIP_EASE = cubicBezier('stats-tooltip', '0.2,0,0,1')
 const TOOLTIP_SLIDE: Motion = { seconds: 0.2, ease: TOOLTIP_EASE }
 const TOOLTIP_FADE: Motion = { seconds: 0.12, ease: TOOLTIP_EASE }
 
-type FameHover = Readonly<{ key: string | null; open: boolean }>
+type TooltipPlace = Readonly<{ x: number; y: number }>
 
-function tooltipXOf(column: HTMLElement, tooltip: HTMLElement, chart: HTMLElement): number {
+type PlaceTooltip = (anchor: HTMLElement, tooltip: HTMLElement, chart: HTMLElement) => TooltipPlace
+
+function clampWithin(chart: HTMLElement, tooltip: HTMLElement, center: number): number {
   const origin = chart.getBoundingClientRect().left
-  const columnBox = column.getBoundingClientRect()
-  const min = (chart.firstElementChild ?? column).getBoundingClientRect().left - origin
-  const max = (chart.lastElementChild ?? column).getBoundingClientRect().right - origin
-  const center = columnBox.left - origin + columnBox.width / 2
+  const first = chart.firstElementChild ?? chart
+  const last = chart.lastElementChild ?? chart
+  const min = first.getBoundingClientRect().left - origin
+  const max = last.getBoundingClientRect().right - origin
   const width = tooltip.offsetWidth
 
-  return gsap.utils.clamp(min, Math.max(min, max - width), center - width / 2)
+  return gsap.utils.clamp(min, Math.max(min, max - width), center - origin - width / 2)
+}
+
+function fameTooltipPlaceOf(
+  column: HTMLElement,
+  tooltip: HTMLElement,
+  chart: HTMLElement
+): TooltipPlace {
+  const columnBox = column.getBoundingClientRect()
+  const x = clampWithin(chart, tooltip, columnBox.left + columnBox.width / 2)
+
+  return { x, y: 0 }
+}
+
+function rowTooltipPlaceOf(
+  bar: HTMLElement,
+  tooltip: HTMLElement,
+  list: HTMLElement
+): TooltipPlace {
+  const barBox = bar.getBoundingClientRect()
+  const top = barBox.top - list.getBoundingClientRect().top
+  const x = clampWithin(list, tooltip, barBox.right)
+  const y = top - ROW_TOOLTIP_GAP - tooltip.offsetHeight
+
+  return { x, y }
 }
 
 // React가 툴팁의 transform, opacity, visibility를 inline style로 쓰면 tween 중간값이 덮이므로 GSAP만 쓴다.
-function useFameTooltipSlide({
+function useTooltipSlide({
   chartRef,
   tooltipRef,
-  columnsRef,
+  anchorsRef,
   shownKey,
   open,
-  bars
+  bars,
+  placeOf
 }: {
   chartRef: React.RefObject<HTMLElement | null>
   tooltipRef: React.RefObject<HTMLElement | null>
-  columnsRef: React.RefObject<ReadonlyMap<string, HTMLElement>>
+  anchorsRef: React.RefObject<ReadonlyMap<string, HTMLElement>>
   shownKey: string | undefined
   open: boolean
-  bars: readonly FameBar[]
+  bars: readonly unknown[]
+  placeOf: PlaceTooltip
 }): void {
   const allowed = useMotionAllowed()
 
@@ -172,8 +189,8 @@ function useFameTooltipSlide({
       return
     }
 
-    const column = shownKey != null ? columnsRef.current.get(shownKey) : undefined
-    if (!open || column == null) {
+    const anchor = shownKey != null ? anchorsRef.current.get(shownKey) : undefined
+    if (!open || anchor == null) {
       if (allowed.current) {
         gsap.to(tooltip, {
           autoAlpha: 0,
@@ -188,9 +205,9 @@ function useFameTooltipSlide({
       return
     }
 
-    const x = tooltipXOf(column, tooltip, chart)
+    const { x, y } = placeOf(anchor, tooltip, chart)
     if (!allowed.current) {
-      gsap.set(tooltip, { x, autoAlpha: 1, overwrite: true })
+      gsap.set(tooltip, { x, y, autoAlpha: 1, overwrite: true })
 
       return
     }
@@ -199,12 +216,13 @@ function useFameTooltipSlide({
     if (shown) {
       gsap.to(tooltip, {
         x,
+        y,
         duration: TOOLTIP_SLIDE.seconds,
         ease: TOOLTIP_SLIDE.ease,
         overwrite: 'auto'
       })
     } else {
-      gsap.set(tooltip, { x, overwrite: 'auto' })
+      gsap.set(tooltip, { x, y, overwrite: 'auto' })
     }
 
     gsap.to(tooltip, {
@@ -213,7 +231,7 @@ function useFameTooltipSlide({
       ease: TOOLTIP_FADE.ease,
       overwrite: 'auto'
     })
-  }, [chartRef, tooltipRef, columnsRef, shownKey, open, bars, allowed])
+  }, [chartRef, tooltipRef, anchorsRef, shownKey, open, bars, placeOf, allowed])
 
   useLayoutEffect(() => {
     const tooltip = tooltipRef.current
@@ -227,18 +245,19 @@ function useFameTooltipSlide({
 }
 
 export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
-  const [hover, setHover] = useState<FameHover>({ key: null, open: false })
+  const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
   const chartRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const columnsRef = useRef(new Map<string, HTMLLIElement>())
   const shownBar = bars.find(({ key }) => key === hover.key)
-  useFameTooltipSlide({
+  useTooltipSlide({
     chartRef,
     tooltipRef,
-    columnsRef,
+    anchorsRef: columnsRef,
     shownKey: shownBar?.key,
     open: hover.open,
-    bars
+    bars,
+    placeOf: fameTooltipPlaceOf
   })
 
   function handleHover(key: string): void {
@@ -258,7 +277,7 @@ export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.E
   }
 
   return (
-    <div {...stylex.props(styles.columnChart)}>
+    <div {...stylex.props(styles.chart)}>
       <ul ref={chartRef} onMouseLeave={handleLeave} {...stylex.props(styles.columns)}>
         {bars.map((bar, index) => {
           const startsFine = bar.fine && bars[index - 1]?.fine === false

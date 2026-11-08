@@ -4,7 +4,6 @@ import { colors, motion, radius, shadow, space } from '@dfragon/ui/tokens.stylex
 const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 72
 const BAR_HEIGHT = 8
-const ROW_TOOLTIP_OFFSET = `calc(100% + ${space.s8})`
 const COLUMN_TOOLTIP_SPACE = 44
 const COLUMN_CHART_HEIGHT = 160
 const COLUMN_GAP = 2
@@ -47,7 +46,7 @@ export const styles = stylex.create({
   },
   barWidth: (percent: number) => ({ width: `${percent}%` }),
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
-  columnChart: { position: 'relative' },
+  chart: { position: 'relative' },
   columns: {
     display: 'flex',
     gap: COLUMN_GAP,
@@ -106,7 +105,7 @@ export const styles = stylex.create({
   tooltip: {
     position: 'absolute',
     top: 0,
-    left: '50%',
+    left: 0,
     zIndex: 1,
     display: 'flex',
     flexDirection: 'column',
@@ -120,19 +119,11 @@ export const styles = stylex.create({
     backgroundColor: colors.bgSurface,
     boxShadow: shadow.popover,
     whiteSpace: 'nowrap',
-    transform: 'translateX(-50%)'
-  },
-  rowTooltip: { top: 'auto', bottom: ROW_TOOLTIP_OFFSET, left: '100%' },
-  columnTooltip: {
-    top: space.s16,
-    left: 0,
     visibility: 'hidden',
     opacity: 0,
-    pointerEvents: 'none',
-    transform: 'none'
+    pointerEvents: 'none'
   },
-  tooltipStart: { left: 0, transform: 'none' },
-  tooltipEnd: { left: 'auto', right: 0, transform: 'none' },
+  columnTooltip: { top: space.s16 },
   tooltipRange: { fontSize: 11, lineHeight: '14px', color: colors.fgSubtle },
   tooltipCount: {
     fontSize: 12,
