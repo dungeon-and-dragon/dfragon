@@ -53,7 +53,7 @@ const stats: CharacterStats = {
       averageFame: null
     }
   ],
-  fameDistribution: [{ from: 70000, to: 80000, count: 2 }]
+  fameDistribution: [{ from: 70000, to: 71000, count: 2 }]
 }
 
 const adoption: JobSkillAdoption = {

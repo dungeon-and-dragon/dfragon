@@ -10,6 +10,7 @@ import {
 // 합성 캐릭터다. 앞 단계가 넣은 행이 있어 통계는 넣기 전후의 차이로 확인한다.
 const jobId = 'synthetic-rank-job'
 const limitJobId = 'synthetic-limit-job'
+const bucketJobId = 'synthetic-bucket-job'
 const basic = (serverId, characterId, jobGrowId, fame, job = jobId) => ({
   serverId,
   characterId,
@@ -33,13 +34,16 @@ const serverCounts = ({ servers }) =>
 const client = createDatabaseClient(readDatabaseConfiguration(process.env))
 try {
   const before = await readCharacterStats(client)
-  // 구간 경계 앞뒤의 명성(69999, 70000, 79999, 80000)과 명성이 없는 캐릭터를 둔다.
+  // 1천 단위 구간 경계 앞뒤의 명성(69999, 70000, 79999, 80000, 124999, 125000)과 명성이 없는 캐릭터를 둔다.
   for (const character of [
     basic('cain', 'rank-a1', 'grow-a', 80000),
     basic('siroco', 'rank-a2', 'grow-a', 79999),
     basic('cain', 'rank-b1', 'grow-b', 70000),
     basic('cain', 'rank-b2', 'grow-b', 69999),
-    basic('bakal', 'rank-no-fame', 'grow-b', null)
+    basic('bakal', 'rank-no-fame', 'grow-b', null),
+    basic('bakal', 'bucket-1', 'grow-bucket', 124500, bucketJobId),
+    basic('bakal', 'bucket-2', 'grow-bucket', 124999, bucketJobId),
+    basic('bakal', 'bucket-3', 'grow-bucket', 125000, bucketJobId)
   ]) {
     await recordCharacterBasic(client, character)
   }
@@ -73,7 +77,7 @@ try {
   assert.equal(overall[0].fame, 200101)
 
   const after = await readCharacterStats(client)
-  assert.equal(after.total - before.total, 106)
+  assert.equal(after.total - before.total, 109)
   const serversBefore = serverCounts(before)
   assert.deepEqual(
     [...serverCounts(after)]
@@ -81,7 +85,7 @@ try {
       .filter(([, added]) => added > 0)
       .sort(),
     [
-      ['bakal', 1],
+      ['bakal', 4],
       ['cain', 3],
       ['prey', 101],
       ['siroco', 1]
@@ -93,10 +97,13 @@ try {
       .map(([from, { to, count }]) => [from, to, count - (bucketsBefore.get(from)?.count ?? 0)])
       .filter(([, , added]) => added > 0),
     [
-      [60000, 70000, 1],
-      [70000, 80000, 2],
-      [80000, 90000, 1],
-      [200000, 210000, 101]
+      [69000, 70000, 1],
+      [70000, 71000, 1],
+      [79000, 80000, 1],
+      [80000, 81000, 1],
+      [124000, 125000, 2],
+      [125000, 126000, 1],
+      [200000, 201000, 101]
     ]
   )
   assert.deepEqual(
