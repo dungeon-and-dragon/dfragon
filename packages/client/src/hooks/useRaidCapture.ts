@@ -4,7 +4,7 @@ import {
   getRaidCapturePhase,
   raidCaptureMachine
 } from '@dfragon/client-core/lib/raid-capture-machine'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/types/search'
 import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { RAID_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'

@@ -7,7 +7,7 @@ import { formatApproximateScore, toScoreView } from '@dfragon/client-core/lib/ca
 import {
   CHARACTER_SERVER_NAMES,
   characterImageUrl
-} from '@dfragon/client-core/preload/common/search/character-summary'
+} from '@dfragon/client-core/shared/search/character-summary'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import { Portrait } from '../../components/Portrait'
 import { characterDisplaySchema } from '../../lib/stored-character'

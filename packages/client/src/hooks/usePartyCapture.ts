@@ -12,7 +12,7 @@ import {
   getCapturePhase
 } from '@dfragon/client-core/lib/party-capture-machine'
 import type { CapturePhase } from '@dfragon/client-core/types/capture'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/types/search'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
 import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { useClientHost } from '../host/client-host'

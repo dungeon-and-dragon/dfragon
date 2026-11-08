@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router'
 import {
   CHARACTER_SERVER_NAMES,
   characterImageUrl
-} from '@dfragon/client-core/preload/common/search/character-summary'
+} from '@dfragon/client-core/shared/search/character-summary'
 import type { StoredCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import { Portrait } from '../Portrait'
 import { styles } from './CharacterCell.style'

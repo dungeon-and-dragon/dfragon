@@ -1,10 +1,6 @@
 import { z } from 'zod'
-import type {
-  CharacterCandidate,
-  CharacterDetails,
-  CharacterIdentity
-} from '../../preload/common/types/character'
-import type { TodayGrade } from '../../preload/common/types/today-grade'
+import type { CharacterCandidate, CharacterDetails, CharacterIdentity } from '../../types/character'
+import type { TodayGrade } from '../../types/today-grade'
 import { guildSchema, type Guild } from '../adventure-guild/adventure-guild'
 import {
   adventureActivityDaySchema,

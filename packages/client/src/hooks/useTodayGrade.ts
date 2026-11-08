@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
+import type { TodayGrade } from '@dfragon/client-core/types/today-grade'
 import { useClientHost } from '../host/client-host'
 
 // PC 시계가 API 서버보다 빠르면 만료가 이미 지난 값을 다시 받으므로, 다시 받는 간격을 1분 아래로 줄이지 않는다.

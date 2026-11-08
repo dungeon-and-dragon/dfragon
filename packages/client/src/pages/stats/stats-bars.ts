@@ -1,5 +1,5 @@
 import { formatJobName } from '@dfragon/client-core/lib/job-format'
-import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/preload/common/search/character-summary'
+import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/shared/search/character-summary'
 import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import type { Bar } from './BarCharts'
 

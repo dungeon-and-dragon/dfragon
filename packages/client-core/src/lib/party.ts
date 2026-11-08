@@ -5,8 +5,8 @@ import {
   type PartyFrameGeometry
 } from '@dfragon/lib'
 import { toBinarizedTextCanvas } from './nickname-pixels'
-import { SEARCH_SLOT_COUNTS } from '../preload/common/types/search'
-import type { CharacterImage, CharacterPortrait } from '../preload/common/types/character'
+import { SEARCH_SLOT_COUNTS } from '../types/search'
+import type { CharacterImage, CharacterPortrait } from '../types/character'
 import { cropPartyPortrait } from './party-portrait'
 
 const RGBA_CHANNELS = 4

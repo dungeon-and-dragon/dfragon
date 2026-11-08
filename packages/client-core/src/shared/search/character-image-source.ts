@@ -1,4 +1,4 @@
-import type { CharacterImage } from '../../preload/common/types/character'
+import type { CharacterImage } from '../../types/character'
 import type { IdentityRequest } from '../api/dfragon-client'
 import { CompletedCache } from './completed-cache'
 

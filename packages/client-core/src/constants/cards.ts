@@ -1,4 +1,4 @@
-import { SEARCH_SLOT_COUNTS } from '../preload/common/types/search'
+import { SEARCH_SLOT_COUNTS } from '../types/search'
 import type { SeatLayout } from '../lib/seats'
 import type { CharacterTier } from '../types/cards'
 

@@ -6,7 +6,7 @@ import {
   type SearchRuntime
 } from './request'
 import { reportSearchOutcome } from './diagnostics'
-import type { OcrSearchInput } from '../../preload/common/types/search'
+import type { OcrSearchInput } from '../../types/search'
 
 export type SearchRequest = {
   captureId: string
