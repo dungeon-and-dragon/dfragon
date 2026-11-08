@@ -111,3 +111,11 @@ it('메뉴에 없는 화면에서는 밑줄을 숨기고, 메뉴 항목 화면�
 
   expect(underline()).toEqual({ left: '180px', width: '80px', visibility: 'visible' })
 })
+
+it('멀티서치 주소에서 메뉴 항목을 현재 화면으로 표시한다', async () => {
+  await render('/multisearch')
+
+  expect(menuLinks()[0].getAttribute('href')).toBe('/multisearch')
+  expect(menuLinks()[0].getAttribute('aria-current')).toBe('page')
+  expect(underline()).toEqual({ left: '0px', width: '70px', visibility: 'visible' })
+})

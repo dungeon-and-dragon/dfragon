@@ -106,7 +106,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  window.history.replaceState(null, '', '/')
+  window.history.replaceState(null, '', '/multisearch')
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   // 라우터는 화면을 옮길 때 창 스크롤을 처음으로 돌리는데 jsdom에는 scrollTo가 없다.
   vi.stubGlobal('scrollTo', vi.fn())
@@ -150,7 +150,7 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
 })
 
-it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 멀티서치 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
+it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 멀티서치 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
@@ -159,6 +159,7 @@ it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목
   expect(brand.getAttribute('href')).toBe('/')
   expect(brand.textContent).toBe('던삐삐')
   expect(brand.querySelector('img')).toBeNull()
+  expect(header.querySelector('nav a')?.getAttribute('href')).toBe('/multisearch')
   expect(globalMenu()).toEqual([
     ['멀티서치', 'page'],
     ['랭킹', null],
@@ -183,6 +184,17 @@ it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목
   expect(seats()).toHaveLength(4)
 })
 
+it('/는 멀티서치로 replace 이동한다', async () => {
+  window.history.replaceState(null, '', '/guide')
+  window.history.pushState(null, '', '/')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await waitForPath('/multisearch')
+  expect(globalMenu()[0]).toEqual(['멀티서치', 'page'])
+  await act(async () => window.history.back())
+  await waitForPath('/guide')
+})
+
 it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 링크만 두고 링크를 누르면 파티 표로 간다', async () => {
   window.history.replaceState(null, '', '/guide?from=1')
   await act(async () => root.render(<WebApp host={host} />))
@@ -204,7 +216,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
 
   await act(async () => homeLink().click())
 
-  await waitForPath('/')
+  await waitForPath('/multisearch')
   expect(seats()).toHaveLength(4)
   expect(globalMenu()).toEqual([
     ['멀티서치', 'page'],
@@ -371,11 +383,11 @@ it('없는 주소 화면에서는 Alt+방향키를 브라우저의 뒤로, 앞�
   expect(event.defaultPrevented).toBe(false)
 })
 
-it('첫 화면에서 고친 이름과 맞바꾼 자리는 없는 주소 화면에 다녀와도 남는다', async () => {
+it('멀티서치에서 고친 이름과 맞바꾼 자리는 없는 주소 화면에 다녀와도 남는다', async () => {
   window.history.replaceState(null, '', '/guide')
   await act(async () => root.render(<WebApp host={host} />))
   await act(async () => homeLink().click())
-  await waitForPath('/')
+  await waitForPath('/multisearch')
   const input = seats()[0].querySelector<HTMLInputElement>('input[aria-label$="번 캐릭터 이름"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
@@ -397,7 +409,7 @@ it('첫 화면에서 고친 이름과 맞바꾼 자리는 없는 주소 화면�
   await waitForPath('/guide')
   expect(seats()).toHaveLength(0)
   await act(async () => window.history.forward())
-  await waitForPath('/')
+  await waitForPath('/multisearch')
 
   await vi.waitFor(() => expect(seats().map(nameOf)).toEqual(before))
 })
@@ -412,7 +424,7 @@ it('화면 공유는 없는 주소 화면에 다녀와도 연결된 채 남고, 
   window.history.replaceState(null, '', '/guide')
   await act(async () => root.render(<WebApp host={host} />))
   await act(async () => homeLink().click())
-  await waitForPath('/')
+  await waitForPath('/multisearch')
   const chip = (): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
   await act(async () => chip().click())
@@ -421,14 +433,14 @@ it('화면 공유는 없는 주소 화면에 다녀와도 연결된 채 남고, 
   await act(async () => window.history.back())
   await waitForPath('/guide')
   await act(async () => window.history.forward())
-  await waitForPath('/')
+  await waitForPath('/multisearch')
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
 
   await act(async () => window.history.back())
   await waitForPath('/guide')
   await act(async () => track.dispatchEvent(new Event('ended')))
   await act(async () => window.history.forward())
-  await waitForPath('/')
+  await waitForPath('/multisearch')
 
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
   expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
@@ -440,7 +452,7 @@ it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는
 
   await act(async () => pasteImage())
   await act(async () => homeLink().click())
-  await waitForPath('/')
+  await waitForPath('/multisearch')
 
   expect(decodeBrowserImage).not.toHaveBeenCalled()
   expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
@@ -466,7 +478,7 @@ it('창을 고르기 전에는 붙여넣기 안내를 보이고, 이미지를 �
   expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(expect.any(File))
 })
 
-it('첫 화면 자리 행의 Alt+방향키는 브라우저에 넘기지 않고 이름 칸에서는 막지 않는다', async () => {
+it('멀티서치 자리 행의 Alt+방향키는 브라우저에 넘기지 않고 이름 칸에서는 막지 않는다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
   const seat = container.querySelector<HTMLElement>('tr[aria-label*="번 자리"]')!
   const nameField = container.querySelector('input')!

@@ -9,15 +9,13 @@ import {
   useMatch
 } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { useEffect, useEffectEvent, useState, type KeyboardEvent } from 'react'
-import { GameBar } from './components/GameBar'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { GlobalBar } from './components/GlobalBar'
 import { CONTENT_WIDTH } from './constants/layout'
 import { createQueryClient } from './lib/query-client'
-import { ClientHostContext, type AutoRoundSignal, type BrowserHost } from './host/client-host'
+import { ClientHostContext, type BrowserHost } from './host/client-host'
 import { useScreenCaptureContext } from './hooks/useScreenCaptureContext'
 import { useMyAdventureStore } from './hooks/useMyAdventureStore'
-import { useSearchModeStore } from './hooks/useSearchModeStore'
 import { parseCharacterTabSearch } from './pages/character/character-tabs'
 import { parseCharacterSearch } from './pages/character-search/character-search-params'
 import { CharacterSearchPage } from './pages/character-search/CharacterSearchPage'
@@ -27,41 +25,13 @@ import { GuildPage } from './pages/guild/GuildPage'
 import { NotFoundScreen } from './pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from './pages/rankings/ranking-search'
 import { RankingsPage } from './pages/rankings/RankingsPage'
-import { SearchScreen } from './pages/search/SearchScreen'
+import { MultisearchPage } from './pages/multisearch/MultisearchPage'
 import { StatsScreen } from './pages/stats/StatsScreen'
 import { parseWeeklySearch } from './pages/weekly/weekly-search'
 import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
-import { ScreenShareChip } from './components/ScreenShareChip'
 import { styles } from './WebApp.style'
 import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
-
-const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
-
-function isTextField(target: EventTarget | null): boolean {
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    (target instanceof HTMLElement && target.isContentEditable)
-  )
-}
-
-// 자리 맞바꾸기의 Alt+방향키는 브라우저의 뒤로, 앞으로 가기와 겹친다. 가장자리 자리처럼 맞바꿀 상대가 없어 카드가
-// 처리하지 않은 키도 첫 화면 안에서는 페이지를 떠나지 않게 막는다.
-function keepSeatMoveKeys(event: KeyboardEvent<HTMLDivElement>): void {
-  if (event.altKey && ARROW_KEYS.has(event.key) && !isTextField(event.target)) {
-    event.preventDefault()
-  }
-}
-
-function PastedFrameRounds({ host }: { host: BrowserHost }): null {
-  const { startPastedRound } = useScreenCaptureContext()
-  const onPastedFrame = useEffectEvent(startPastedRound)
-
-  useEffect(() => host.onPastedFrame(onPastedFrame), [host])
-
-  return null
-}
 
 // 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 라우터 위에서 구독한다.
 function ScreenShareEndings({ host }: { host: BrowserHost }): null {
@@ -71,47 +41,6 @@ function ScreenShareEndings({ host }: { host: BrowserHost }): null {
   useEffect(() => host.onScreenShareEnded(onShareEnded), [host])
 
   return null
-}
-
-// 자동 인식은 웹의 화면을 바꾸지 않는다. 신호를 보낸 뒤 사용자가 화면을 바꿨거나 회차가 진행 중이면 시작하지 않는다.
-function AutoRounds({ host }: { host: BrowserHost }): null {
-  const { partyCapture, raidCapture, startPastedRound } = useScreenCaptureContext()
-  const kind = useSearchModeStore((state) => state.searchMode)
-  const phase = kind === 'party' ? partyCapture.phase : raidCapture.phase
-  const roundRunning = phase === 'recognizing'
-  const onAutoRound = useEffectEvent((signal: AutoRoundSignal): boolean => {
-    if (signal.kind !== kind || roundRunning) {
-      return false
-    }
-    startPastedRound()
-
-    return true
-  })
-
-  useEffect(() => host.setWatchedScreen({ kind, roundRunning }), [host, kind, roundRunning])
-  useEffect(() => host.onAutoRound(onAutoRound), [host])
-
-  return null
-}
-
-// 표 상태는 라우터 위의 ScreenCaptureProvider와 store가 가지므로 첫 화면을 떠나며 unmount해도 남는다. 붙여넣기와
-// 자동 인식 회차는 이 화면이 그려진 동안에만 구독한다.
-function HomeScreen(): React.JSX.Element {
-  const { host } = homeRoute.useRouteContext()
-
-  return (
-    <div
-      onKeyDown={keepSeatMoveKeys}
-      {...stylex.props(styles.home, styles.homeWidth(CONTENT_WIDTH))}
-    >
-      <PastedFrameRounds host={host} />
-      <AutoRounds host={host} />
-      <div {...stylex.props(styles.homeBox)}>
-        <GameBar />
-        <SearchScreen captureSource={<ScreenShareChip host={host} />} />
-      </div>
-    </div>
-  )
 }
 
 function SiteLayout(): React.JSX.Element {
@@ -141,7 +70,15 @@ const rootRoute = createRootRouteWithContext<{ host: BrowserHost }>()({
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomeScreen
+  beforeLoad: () => {
+    throw redirect({ to: '/multisearch', replace: true })
+  }
+})
+
+const multisearchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/multisearch',
+  component: MultisearchPage
 })
 
 const characterRoute = createRoute({
@@ -220,6 +157,7 @@ const favoritesRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   homeRoute,
+  multisearchRoute,
   characterRoute,
   characterSearchRoute,
   rankingsRoute,
