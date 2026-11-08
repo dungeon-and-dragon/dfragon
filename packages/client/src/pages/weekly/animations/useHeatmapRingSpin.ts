@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { type RefObject, useEffect } from 'react'
-import { MOTION_QUERY } from './gsap-motion'
+import { MOTION_QUERY } from '../../../animations/gsap-motion'
 
 const RING_TURN_SECONDS = 4
 
