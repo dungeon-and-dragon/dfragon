@@ -7,12 +7,12 @@ import type {
 import type { TodayGrade } from '../today-grade/today-grade-types'
 import { guildSchema, type Guild } from '../adventure-guild/adventure-guild'
 import {
-  adventureActivityDaySchema,
+  adventureActivitySeasonDaysSchema,
   adventureActivitySchema,
   activitySeasonSchema,
   type ActivitySeason,
   type AdventureActivity,
-  type AdventureActivityDay
+  type AdventureActivitySeasonDays
 } from '../adventure-guild/adventure-activity'
 import { adventureWeeklySchema, type AdventureWeekly } from '../adventure-guild/adventure-weekly'
 import {
@@ -79,10 +79,10 @@ export type AdventureActivityHttp = (
   adventureName: string,
   season: number | undefined
 ) => Promise<AdventureActivity>
-export type AdventureActivityDayHttp = (
+export type AdventureActivitySeasonDaysHttp = (
   adventureName: string,
-  date: string
-) => Promise<AdventureActivityDay>
+  season: number
+) => Promise<AdventureActivitySeasonDays>
 export type AdventureSeasonBackfillHttp = (
   adventureName: string,
   season: number
@@ -107,7 +107,7 @@ export type DfragonClient = Readonly<{
   adventures: Readonly<{
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
-    activityDay: AdventureActivityDayHttp
+    activitySeasonDays: AdventureActivitySeasonDaysHttp
     backfillSeason: AdventureSeasonBackfillHttp
   }>
   guilds: Readonly<{ get: GuildHttp }>
@@ -344,14 +344,14 @@ export function createDfragonClient({
           { searchParams: { ...(season !== undefined && { season: String(season) }) } }
         )
       },
-      async activityDay(adventureName, date) {
+      async activitySeasonDays(adventureName, season) {
         if (adventureName.trim() === '') {
           throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
         }
 
         return requestJson(
-          `/adventures/${encodeURIComponent(adventureName)}/activity/days/${encodeURIComponent(date)}`,
-          adventureActivityDaySchema
+          `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/${season}/days`,
+          adventureActivitySeasonDaysSchema
         )
       },
       async backfillSeason(adventureName, season) {

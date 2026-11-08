@@ -6,7 +6,7 @@ import type {
   ActivityDayItem,
   AdventureActivityDay
 } from '#core/adventure-guild/adventure-activity'
-import { useAdventureActivityDay } from '../../hooks/useAdventureActivity'
+import type { AdventureActivitySeasonDaysResult } from '../../hooks/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
 import { styles } from './ActivityDayDetail.style'
 import { formatClearCount } from './clear-count'
@@ -146,9 +146,13 @@ function DayRecords({
   day,
   kind
 }: {
-  day: AdventureActivityDay
+  day: AdventureActivityDay | undefined
   kind: ActivityKind
-}): React.JSX.Element {
+}): React.JSX.Element | null {
+  if (day === undefined) {
+    return null
+  }
+
   return (
     <>
       {(kind === 'all' || kind === 'raid') && <ClearGroup title="레이드" counts={day.raids} />}
@@ -162,22 +166,20 @@ function DayRecords({
 }
 
 export function ActivityDayDetail({
-  adventureName,
   date,
-  kind
+  kind,
+  seasonDays
 }: {
-  adventureName: string
   date: string
   kind: ActivityKind
+  seasonDays: AdventureActivitySeasonDaysResult
 }): React.JSX.Element {
-  const result = useAdventureActivityDay(adventureName, date)
-
   return (
     <div {...stylex.props(styles.detail)}>
       <div {...stylex.props(styles.header)}>
         <span {...stylex.props(styles.date)}>{formatActivityDate(date)}</span>
       </div>
-      {result.status === 'loading' && (
+      {seasonDays.status === 'loading' && (
         <>
           <span role="status" {...stylex.props(shapes.srOnly)}>
             하루 활동을 받는 중입니다.
@@ -185,12 +187,14 @@ export function ActivityDayDetail({
           <span aria-hidden="true" {...stylex.props(styles.bone)} />
         </>
       )}
-      {result.status === 'error' && (
+      {seasonDays.status === 'error' && (
         <span role="alert" {...stylex.props(styles.row, styles.failure)}>
-          {result.message}
+          {seasonDays.message}
         </span>
       )}
-      {result.status === 'success' && <DayRecords day={result.value} kind={kind} />}
+      {seasonDays.status === 'success' && (
+        <DayRecords day={seasonDays.value.find((day) => day.date === date)} kind={kind} />
+      )}
     </div>
   )
 }

@@ -58,7 +58,7 @@ export type SeasonBackfill = NonNullable<ActivitySeason['backfill']>
 export type ActivitySummary = AdventureActivity['summary']
 export type EnhancementTarget = ActivitySummary['enhancement']['amplify'][number]
 
-export const adventureActivityDaySchema = z.object({
+const adventureActivityDaySchema = z.object({
   date: z.iso.date(),
   raids: z.array(raidCount),
   legions: z.array(nameCount),
@@ -76,5 +76,12 @@ export const adventureActivityDaySchema = z.object({
 })
 
 export type AdventureActivityDay = z.infer<typeof adventureActivityDaySchema>
+
+export const adventureActivitySeasonDaysSchema = z.object({
+  season: z.number().int(),
+  days: z.array(adventureActivityDaySchema)
+})
+
+export type AdventureActivitySeasonDays = z.infer<typeof adventureActivitySeasonDaysSchema>
 export type ActivityDayItem = AdventureActivityDay['items'][number]
 export type ActivityDayEnhancement = AdventureActivityDay['enhancements'][number]
