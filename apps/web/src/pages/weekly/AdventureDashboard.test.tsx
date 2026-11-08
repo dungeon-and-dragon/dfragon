@@ -107,7 +107,11 @@ function render(
         value={createTestClientHost({
           getAdventureActivity,
           backfillAdventureSeason,
-          getAdventureWeekly
+          getAdventureWeekly,
+          getAdventureActivitySeasonDays: async (_name, seasonId) => ({
+            season: seasonId,
+            days: []
+          })
         })}
       >
         <TestQueryClient>
