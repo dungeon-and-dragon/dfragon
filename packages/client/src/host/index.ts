@@ -1,4 +1,4 @@
-import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
+import type { CharacterImage } from '@dfragon/client-core/types/character'
 import { createDfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
 import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
 import { startRendererDiagnostics } from '@dfragon/client-core/lib/runtime-diagnostics'

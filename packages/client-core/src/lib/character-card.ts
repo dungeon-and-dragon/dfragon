@@ -1,12 +1,12 @@
-import { portraitFaceWindowOf } from '../preload/common/search/portrait-anchor'
-import type { SelectedCharacterSummary } from '../preload/common/types/character'
-import { characterImageUrl } from '../preload/common/search/character-summary'
+import { portraitFaceWindowOf } from '../shared/search/portrait-anchor'
+import type { SelectedCharacterSummary } from '../types/character'
+import { characterImageUrl } from '../shared/search/character-summary'
 import {
   type CharacterChoice,
   SEARCH_ERRORS,
   type SearchError,
   type SearchSlot
-} from '../preload/common/types/search'
+} from '../types/search'
 import { serverNames } from '../constants/servers'
 import { MISSING_VALUE } from '../constants/cards'
 import type { CardCharacter } from '../types/cards'

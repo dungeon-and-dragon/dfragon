@@ -1,4 +1,4 @@
-import type { CharacterChoice, SearchSlot } from '../preload/common/types/search'
+import type { CharacterChoice, SearchSlot } from '../types/search'
 
 /**
  * 후보 창에서 누른 후보. 누른 후보의 직접 조회 결과에는 후보 목록이 없으므로, 확정한 뒤에도 칩을 남기려고 누를

@@ -1,4 +1,4 @@
-import type { SearchSlot } from '../preload/common/types/search'
+import type { SearchSlot } from '../types/search'
 
 export type SeatAdventures = readonly (string | null)[]
 

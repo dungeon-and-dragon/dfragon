@@ -1,4 +1,4 @@
-import type { SearchSlot } from '../preload/common/types/search'
+import type { SearchSlot } from '../types/search'
 import { serverNames } from '../constants/servers'
 import type { CardCharacter } from '../types/cards'
 import { toCharacterCard } from './character-card'

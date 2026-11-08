@@ -1,4 +1,4 @@
-import type { CharacterFaceWindow } from '../types/search'
+import type { CharacterFaceWindow } from '../../types/search'
 
 export type PortraitAnchor = Readonly<{ x: number; y: number }>
 
