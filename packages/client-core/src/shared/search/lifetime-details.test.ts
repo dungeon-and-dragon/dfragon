@@ -71,8 +71,6 @@ function fixture() {
   )
   const lifetime = createCaptureSearchLifetime({
     publish: vi.fn(),
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     runtime: {
       identification: {
         candidates,
@@ -84,7 +82,7 @@ function fixture() {
       reportDiagnostic: vi.fn()
     }
   })
-  const captureId = lifetime.begin({ windowGeneration: 1, sourceGeneration: 1 }).snapshot.captureId!
+  const captureId = lifetime.begin().snapshot.captureId!
   onTestFinished(() => lifetime.invalidate())
   for (const [slot, nickname] of NAMES.entries()) {
     lifetime.observeOcr({

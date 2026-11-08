@@ -97,8 +97,6 @@ function fixture(kind: 'party' | 'raid') {
   const getDetails = vi.fn<CharacterDetailsHttp>(async (identity) => details(identity))
   const lifetime = createCaptureSearchLifetime({
     publish: vi.fn(),
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
     slotCount: kind === 'raid' ? 12 : 4,
     runtime: {
       identification: {
@@ -115,10 +113,10 @@ function fixture(kind: 'party' | 'raid') {
   onTestFinished(() => lifetime.invalidate())
   let captureId = ''
   let revision = 0
-  // Desktop IPC와 웹처럼 새 회차의 BEGIN은 이전 수명을 끝낸 뒤 시작한다.
+  // 웹 host처럼 새 회차의 BEGIN은 이전 수명을 끝낸 뒤 시작한다.
   const beginRound = () => {
     lifetime.invalidate()
-    captureId = lifetime.begin({ windowGeneration: 1, sourceGeneration: 1 }).snapshot.captureId!
+    captureId = lifetime.begin().snapshot.captureId!
     revision = 0
   }
   const settled = async () => {
