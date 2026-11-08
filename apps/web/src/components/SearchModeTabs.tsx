@@ -1,7 +1,7 @@
 import { Tabs } from '@base-ui/react/tabs'
 import * as stylex from '@stylexjs/stylex'
 import { useSearchModeStore } from '../hooks/useSearchModeStore'
-import type { SearchMode } from '#core/types/search-mode'
+import type { SearchMode } from '#core/capture/search-mode'
 import { styles } from './SearchModeTabs.style'
 
 const SEARCH_MODES: readonly SearchMode[] = ['party', 'raid']

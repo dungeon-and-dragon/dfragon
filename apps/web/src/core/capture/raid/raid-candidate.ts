@@ -1,7 +1,7 @@
 import { parseDNFRaidValueNotation, type DNFRaidValueNotation } from '@dfragon/lib'
-import type { CharacterSelectionMethod, RaidRowObservation } from '../../types/search'
-import type { CharacterCandidate } from '../../types/character'
-import { orderedCandidates } from './candidate-order'
+import type { CharacterSelectionMethod, RaidRowObservation } from '../../search/search'
+import type { CharacterCandidate } from '../../character/character'
+import { orderedCandidates } from '../../search/candidate-order'
 import { matchJobName } from './raid-job-name'
 
 const FAME_MAX_DISTANCE = 2_000

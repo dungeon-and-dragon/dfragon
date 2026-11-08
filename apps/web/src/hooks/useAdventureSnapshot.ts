@@ -3,8 +3,8 @@ import {
   compareWithSnapshot,
   type SeatAdventures,
   type SnapshotMark
-} from '#core/lib/adventure-snapshot'
-import type { SearchMode } from '#core/types/search-mode'
+} from '#core/capture/adventure-snapshot'
+import type { SearchMode } from '#core/capture/search-mode'
 
 type AdventureSnapshot = {
   adventures: SeatAdventures

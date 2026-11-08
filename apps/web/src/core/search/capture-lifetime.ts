@@ -1,5 +1,5 @@
 import { isCharacterSearchNickname } from './identify'
-import { SEARCH_COMMAND_ERRORS } from '../../types/search'
+import { SEARCH_COMMAND_ERRORS } from './search'
 import { createActor } from 'xstate'
 import {
   runDetailsRequest,
@@ -12,9 +12,9 @@ import {
   type SearchRequest,
   type RequestIdentity
 } from './slot-lifetime-machine'
-import { sameOcrSearchInput } from './ocr-input'
-import { SEARCH_SLOT_COUNTS } from '../../types/search'
-import type { SelectedCharacterSummary } from '../../types/character'
+import { sameOcrSearchInput } from '../ocr/ocr-input'
+import { SEARCH_SLOT_COUNTS } from './search'
+import type { SelectedCharacterSummary } from '../character/character'
 import type {
   SearchCommandError,
   SearchCommandResult,
@@ -24,7 +24,7 @@ import type {
   SearchSlot,
   SearchSlotCount,
   SearchSnapshot
-} from '../../types/search'
+} from './search'
 
 export type CaptureBinding = Readonly<{
   captureId: string
@@ -498,7 +498,7 @@ function evidenceInput(evidence: OcrSearchInput | null, nickname: string): OcrSe
   return { ...evidence, candidateNicknames: [nickname] }
 }
 
-/** IPC 픽셀 참조를 복사해 요청과 다음 관측 비교에 같은 관측을 쓴다. 공대 행의 값은 그대로 함께 둔다. */
+/** 입력 픽셀을 복사해 요청과 다음 관측 비교가 같은 값을 쓰게 한다. 공대 행의 값은 그대로 함께 둔다. */
 function cloneOcrInput(input: OcrSearchInput): OcrSearchInput {
   const candidateNicknames = input.candidateNicknames.slice(0, 1)
   const raidRow = input.raidRow !== undefined ? { raidRow: { ...input.raidRow } } : {}

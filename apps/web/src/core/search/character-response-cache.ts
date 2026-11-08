@@ -1,4 +1,4 @@
-import type { CharacterCandidate, CharacterDetails } from '../../types/character'
+import type { CharacterCandidate, CharacterDetails } from '../character/character'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
 import { CompletedCache } from './completed-cache'
 

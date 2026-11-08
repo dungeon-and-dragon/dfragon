@@ -4,13 +4,13 @@ import type {
   CharacterSearchRow,
   CharacterSelectionMethod,
   OcrSearchInput
-} from '../../types/search'
+} from './search'
 import type {
   CharacterCandidate,
   SelectedCharacterSummary,
   CharacterJsonValue
-} from '../../types/character'
-import type { DiagnosticCode } from '../../types/diagnostics'
+} from '../character/character'
+import type { DiagnosticCode } from '../diagnostics/diagnostics'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,
@@ -20,10 +20,10 @@ import {
   type IdentificationServices,
   type RaidIdentificationServices
 } from './identify'
-import { toRaidObservedValues } from './raid-candidate'
-import { SearchHttpFailure } from './http'
+import { toRaidObservedValues } from '../capture/raid/raid-candidate'
+import { SearchHttpFailure } from '../api/http'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
-import type { CharacterImageHttp } from './character-image-source'
+import type { CharacterImageHttp } from '../character/character-image-source'
 import type { PortraitColorScorer } from './portrait-color'
 import { runSearchOperation, type SearchOperation, type SearchOperationFailure } from './operation'
 import { buildCharacterCard } from './card-assembler'

@@ -4,7 +4,7 @@ import {
   type CharacterSearchQuery,
   isSearchableCharacterName,
   type SearchedCharacter
-} from '#core/shared/api/character-schemas'
+} from '#core/api/character-schemas'
 import {
   CharacterTable,
   type CharacterTableRow,

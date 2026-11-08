@@ -1,9 +1,13 @@
-import type { PartyOcrWorker } from '../types/capture'
-import type { RaidFrameRow } from '../types/capture'
-import type { CharacterImage } from '../types/character'
-import { MAX_RAID_JOB_TEXT_LENGTH } from '../types/search'
-import { toRaidJobCanvas, toRaidNicknameCanvas } from './nickname-pixels'
-import { firstCandidate, type FirstCandidate, recognizeBinarizedText } from './party-recognition'
+import type { PartyOcrWorker } from '../capture-types'
+import type { RaidFrameRow } from '../capture-types'
+import type { CharacterImage } from '../../character/character'
+import { MAX_RAID_JOB_TEXT_LENGTH } from '../../search/search'
+import { toRaidJobCanvas, toRaidNicknameCanvas } from '../../ocr/nickname-pixels'
+import {
+  firstCandidate,
+  type FirstCandidate,
+  recognizeBinarizedText
+} from '../party/party-recognition'
 
 export type RaidSlotRecognition =
   | { kind: 'missing'; slot: number }

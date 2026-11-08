@@ -1,4 +1,4 @@
-import type { CharacterImage } from '#core/types/character'
+import type { CharacterImage } from '#core/character/character'
 import type { BrowserHost } from '../client-host'
 import { decodeBrowserImage } from '../browser-png'
 import { createListeners } from '../listeners'

@@ -1,4 +1,4 @@
-import type { CharacterCandidate } from '../../types/character'
+import type { CharacterCandidate } from '../character/character'
 
 export function orderedCandidates(candidates: readonly CharacterCandidate[]): CharacterCandidate[] {
   return candidates.toSorted((left, right) => {

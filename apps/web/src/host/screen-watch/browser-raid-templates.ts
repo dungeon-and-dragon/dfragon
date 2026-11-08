@@ -1,10 +1,10 @@
 import type { DNFParticipantFrame } from '@dfragon/lib'
-import raidHeadingUrl from '#core/shared/raid/raid-heading.png'
-import equipmentScoreHeadingUrl from '#core/shared/raid/raid-value-heading-equipment-score.png'
-import fameHeadingUrl from '#core/shared/raid/raid-value-heading-fame.png'
-import valueGlyphsUrl from '#core/shared/raid/raid-value-glyphs.png'
-import { sliceRaidValueGlyphs } from '#core/shared/raid/raid-value-glyphs'
-import type { RaidWindowTemplates } from '#core/shared/raid/raid-window'
+import raidHeadingUrl from '#core/capture/raid/raid-heading.png'
+import equipmentScoreHeadingUrl from '#core/capture/raid/raid-value-heading-equipment-score.png'
+import fameHeadingUrl from '#core/capture/raid/raid-value-heading-fame.png'
+import valueGlyphsUrl from '#core/capture/raid/raid-value-glyphs.png'
+import { sliceRaidValueGlyphs } from '#core/capture/raid/raid-value-glyphs'
+import type { RaidWindowTemplates } from '#core/capture/raid/raid-window'
 import { decodeBrowserPng } from '../browser-png'
 
 let templates: Promise<RaidWindowTemplates> | null = null

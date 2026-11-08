@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
-import { type ItemView, toItemView } from '#core/lib/character-item'
-import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
+import { type ItemView, toItemView } from '#core/character/character-item'
+import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { styles } from '../avatar/AvatarTable.style'
 import { AvatarRow } from '../avatar/AvatarTable'
 import { ItemCell } from '../equipment/item-parts'

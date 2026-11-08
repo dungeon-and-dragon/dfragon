@@ -5,7 +5,7 @@ import type {
   ActivityDayEnhancement,
   ActivityDayItem,
   AdventureActivityDay
-} from '#core/shared/adventure-guild/adventure-activity'
+} from '#core/adventure-guild/adventure-activity'
 import { useAdventureActivityDay } from '../../hooks/useAdventureActivity'
 import { styles } from './ActivityDayDetail.style'
 import { formatClearCount } from './clear-count'

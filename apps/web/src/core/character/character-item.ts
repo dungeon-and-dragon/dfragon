@@ -1,8 +1,4 @@
-import {
-  formatStatValue,
-  type ItemRarity,
-  itemRarityOf
-} from '../shared/search/character-detail-display'
+import { formatStatValue, type ItemRarity, itemRarityOf } from './character-detail-display'
 
 const ITEM_ICON_ORIGIN = 'https://img-api.neople.co.kr'
 

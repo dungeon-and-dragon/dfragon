@@ -1,4 +1,4 @@
-import type { CharacterImage, CharacterPortrait } from '../../types/character'
+import type { CharacterImage, CharacterPortrait } from '../character/character'
 import type { PortraitAnchor } from './portrait-anchor'
 import {
   ALPHA_CHANNEL,

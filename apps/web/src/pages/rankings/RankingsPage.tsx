@@ -1,5 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import type { FameRankingFilter } from '#core/shared/ranking/ranking-stats'
+import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import { RankingsScreen } from './RankingsScreen'
 
 const route = getRouteApi('/rankings')

@@ -1,3 +1,3 @@
-import type { serverNames } from '../constants/servers'
+import type { serverNames } from './servers'
 
 export type ServerId = keyof typeof serverNames

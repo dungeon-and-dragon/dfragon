@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { characterIdentitySchema } from '#core/shared/search/character-summary'
+import { characterIdentitySchema } from '#core/character/character-summary'
 
 const text = z.string().nullable()
 const count = z.number().nullable()

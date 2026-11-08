@@ -1,5 +1,5 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
-import { DIAGNOSTIC_MESSAGES, type DiagnosticCode } from '../types/diagnostics'
+import { DIAGNOSTIC_MESSAGES, type DiagnosticCode } from './diagnostics'
 
 let activeReport: ((code: DiagnosticCode) => void) | null = null
 
@@ -29,11 +29,11 @@ export function showRejectedOcrNickname({
   )
 }
 
-export function reportRendererDiagnostic(code: DiagnosticCode): void {
+export function reportRuntimeDiagnostic(code: DiagnosticCode): void {
   activeReport?.(code)
 }
 
-export function startRendererDiagnostics(): (code: DiagnosticCode) => void {
+export function startRuntimeDiagnostics(): (code: DiagnosticCode) => void {
   let disposed = false
   let lastCode: DiagnosticCode | null = null
 
@@ -47,8 +47,8 @@ export function startRendererDiagnostics(): (code: DiagnosticCode) => void {
   }
   activeReport = report
 
-  const onError = (): void => reportRendererDiagnostic('RENDERER_ERROR')
-  const onRejection = (): void => reportRendererDiagnostic('RENDERER_REJECTION')
+  const onError = (): void => reportRuntimeDiagnostic('PAGE_ERROR')
+  const onRejection = (): void => reportRuntimeDiagnostic('PAGE_REJECTION')
   window.addEventListener('error', onError)
   window.addEventListener('unhandledrejection', onRejection)
 

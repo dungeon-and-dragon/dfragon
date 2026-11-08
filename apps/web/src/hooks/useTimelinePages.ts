@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { TimelinePage } from '#core/shared/search/character-timeline'
+import type { TimelinePage } from '#core/character/character-timeline'
 
 export type TimelinePagesState =
   | Readonly<{ status: 'idle' }>

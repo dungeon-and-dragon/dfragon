@@ -1,6 +1,6 @@
 import type { DNFRectangle } from '@dfragon/lib'
-import type { RaidFrameResult, RaidFrameRow } from '../../types/capture'
-import type { CharacterImage } from '../../types/character'
+import type { RaidFrameResult, RaidFrameRow } from '../capture-types'
+import type { CharacterImage } from '../../character/character'
 import {
   cropRaidWindowNicknames,
   readRaidWindowValues,

@@ -1,7 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
-import type { ActivitySeason } from '#core/shared/adventure-guild/adventure-activity'
+import type { ActivitySeason } from '#core/adventure-guild/adventure-activity'
 import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
 import { usePrimevalFillFade } from './animations/usePrimevalFillFade'
 import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'

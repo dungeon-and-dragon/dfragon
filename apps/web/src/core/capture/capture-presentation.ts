@@ -1,4 +1,4 @@
-import type { CapturePhase } from '../types/capture'
+import type { CapturePhase } from './capture-types'
 import type { CaptureTexts } from './capture-texts'
 
 type CaptureControlInput = {

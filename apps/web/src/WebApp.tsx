@@ -34,7 +34,7 @@ import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
 import { ScreenShareChip } from './components/ScreenShareChip'
 import { styles } from './WebApp.style'
-import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
+import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
 
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 

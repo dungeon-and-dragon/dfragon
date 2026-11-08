@@ -1,4 +1,4 @@
-import type { ActivitySeason } from '#core/shared/adventure-guild/adventure-activity'
+import type { ActivitySeason } from '#core/adventure-guild/adventure-activity'
 
 export type SeasonBar =
   | Readonly<{ state: 'ready' }>

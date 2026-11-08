@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CharacterCardScore, CharacterIdentity } from '../../types/character'
+import type { CharacterCardScore, CharacterIdentity } from './character'
 
 const INVALID_CHARACTER_ID_CHARACTERS_PATTERN = /[^a-zA-Z0-9_-]/
 const MAX_CHARACTER_ID_LENGTH = 256

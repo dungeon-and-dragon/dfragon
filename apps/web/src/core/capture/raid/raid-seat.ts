@@ -1,4 +1,4 @@
-import { RAID_PARTY_SIZE } from '../constants/cards'
+import { RAID_PARTY_SIZE } from '../cards'
 
 const raidParties = ['R', 'Y', 'G'] as const
 

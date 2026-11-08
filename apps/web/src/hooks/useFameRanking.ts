@@ -1,4 +1,4 @@
-import type { FameRanking, FameRankingFilter } from '#core/shared/ranking/ranking-stats'
+import type { FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 
