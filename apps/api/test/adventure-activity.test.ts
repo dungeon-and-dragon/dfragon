@@ -210,7 +210,7 @@ test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말
   ])
 })
 
-test('레이드는 data.modeName의 단계별로 나눠 세고, modeName이 없으면 raidName 하나로 센다', () => {
+test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이드의 하드, 일반으로 나눠 센다', () => {
   const stage = (
     time: string,
     raidName: string,
@@ -224,22 +224,33 @@ test('레이드는 data.modeName의 단계별로 나눠 세고, modeName이 없�
       stage('2026-07-18T12:00:00', '기계 혁명', { modeName: '개전' }),
       stage('2026-07-18T13:00:00', '기계 혁명', { modeName: '바칼 레이드', hard: true }),
       stage('2026-07-18T14:00:00', '기계 혁명', { modeName: '바칼 레이드' }),
-      stage('2026-07-18T15:00:00', '디레지에 레이드', { modeName: '디레지에 : 서막' }),
-      stage('2026-07-18T16:00:00', '무너진 성자 미카엘라', {
+      stage('2026-07-18T15:00:00', '아스라한', { modeName: '무의 장막', hard: true }),
+      stage('2026-07-18T16:00:00', '디레지에 레이드', { modeName: '디레지에 : 서막' }),
+      stage('2026-07-18T17:00:00', '디레지에 레이드', { modeName: '디레지에 : 악연', hard: true }),
+      stage('2026-07-18T18:00:00', '디레지에 레이드', { modeName: '디레지에 : 종막' }),
+      stage('2026-07-18T19:00:00', '무너진 성자 미카엘라', {
         modeName: '미카엘라 : 종언서(하드)',
         hard: true
       }),
-      stage('2026-07-18T17:00:00', '무너진 성자 미카엘라', { modeName: '미카엘라 : 종언서' }),
-      raid('2026-07-18T18:00:00', '이내 황혼전')
+      stage('2026-07-18T20:00:00', '무너진 성자 미카엘라', { modeName: '미카엘라 : 종언서' }),
+      stage('2026-07-18T21:00:00', '무너진 성자 미카엘라', { modeName: '미카엘라 : 균열서' }),
+      hardRaid('2026-07-18T22:00:00', '무형의 시로코'),
+      raid('2026-07-18T23:00:00', '무형의 시로코')
     ]
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '무너진 성자 미카엘라 : 종언서', count: 2, hard: 1, normal: 1 },
-    { name: '디레지에 레이드 : 서막', count: 1, hard: 0, normal: 1 },
-    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
-    { name: '기계 혁명 : 바칼 레이드', count: 2, hard: 1, normal: 1 },
-    { name: '기계 혁명 : 개전', count: 1, hard: 0, normal: 1 }
+    { name: '무너진 성자 미카엘라 (하드)', count: 1, hard: 1, normal: 0 },
+    { name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 },
+    { name: '무너진 성자 미카엘라 (싱글/매칭)', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
+    { name: '디레지에 레이드 (일반)', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드 (매칭)', count: 1, hard: 0, normal: 1 },
+    { name: '아스라한 (개전)', count: 1, hard: 1, normal: 0 },
+    { name: '기계 혁명 (하드)', count: 1, hard: 1, normal: 0 },
+    { name: '기계 혁명 (일반)', count: 1, hard: 0, normal: 1 },
+    { name: '기계 혁명 (개전)', count: 1, hard: 0, normal: 1 },
+    { name: '무형의 시로코', count: 2, hard: 1, normal: 1 }
   ])
 })
 
