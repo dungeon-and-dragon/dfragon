@@ -119,3 +119,21 @@ it('멀티서치 주소에서 메뉴 항목을 현재 화면으로 표시한다'
   expect(menuLinks()[0].getAttribute('aria-current')).toBe('page')
   expect(underline()).toEqual({ left: '0px', width: '70px', visibility: 'visible' })
 })
+
+it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화면으로 가면 검색창을 다시 보인다', async () => {
+  await render('/')
+
+  expect(container.querySelector('form[role="search"]')).toBeNull()
+  expect(menuLinks().map((link) => link.getAttribute('aria-current'))).toEqual([
+    null,
+    null,
+    null,
+    null,
+    null
+  ])
+  expect(underline().visibility).toBe('hidden')
+
+  await act(async () => router.navigate({ to: '/rankings' }))
+
+  expect(container.querySelector('form[role="search"]')).not.toBeNull()
+})

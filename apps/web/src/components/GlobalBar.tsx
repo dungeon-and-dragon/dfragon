@@ -24,7 +24,8 @@ export function GlobalBar(): React.JSX.Element {
   const menuRef = useRef<HTMLElement>(null)
   const underlineRef = useRef<HTMLSpanElement>(null)
   // 지금 항목은 Link만 다시 그려 바뀌므로 주소가 바뀔 때 메뉴도 다시 그려 밑줄을 옮긴다.
-  useLocation({ select: (location) => location.pathname })
+  const pathname = useLocation({ select: (location) => location.pathname })
+  const isHome = pathname === '/'
   useIndicatorSlide({
     containerRef: menuRef,
     indicatorRef: underlineRef,
@@ -52,7 +53,7 @@ export function GlobalBar(): React.JSX.Element {
             </Link>
           ))}
         </nav>
-        <CharacterSearchBox />
+        {!isHome && <CharacterSearchBox />}
         <TodayGrade grade={grade} />
         <ColorModeToggle />
       </div>
