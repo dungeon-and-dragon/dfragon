@@ -176,6 +176,11 @@ export const RANKING_JOBS: readonly RankingJob[] = [
     jobId: 'b522a95d819a5559b775deb9a490e49a',
     name: '크리에이터',
     grows: [{ jobGrowId: '0a49d9c8b5e1358efff324e5cb11d41e', name: '眞 크리에이터' }]
+  },
+  {
+    jobId: '8d4d2001cdb357e41633c234eb7501b5',
+    name: '제국기사',
+    grows: [{ jobGrowId: '37495b941da3b1661bc900e68ef3b2c6', name: '眞 브레이커' }]
   }
 ]
 
