@@ -25,9 +25,6 @@ function markUrlsOf(marks: SkillMarks, catalogUrl: string): SkillMarks {
 function readSkillWindowCatalog(json: unknown, catalogUrl: string): SkillWindowCatalog {
   const { marks, ...catalog } = skillWindowCatalogSchema.parse(json)
   const jobs = catalog.jobs.map((job) => ({ ...job, sprite: absoluteUrl(job.sprite, catalogUrl) }))
-  if (marks === undefined) {
-    return { ...catalog, jobs }
-  }
 
   return { ...catalog, marks: markUrlsOf(marks, catalogUrl), jobs }
 }

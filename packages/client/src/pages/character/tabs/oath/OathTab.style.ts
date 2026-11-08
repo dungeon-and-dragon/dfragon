@@ -77,13 +77,32 @@ export const styles = stylex.create({
     boxShadow: `0 0 0 1px ${colors.signal}`,
     backgroundColor: colors.bgSurface
   },
-  optionIcon: {
+  optionIconColumn: {
     flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: space.s8
+  },
+  optionIcon: {
     width: OPTION_ICON_SIZE,
     height: OPTION_ICON_SIZE,
     borderRadius: OPTION_ICON_SIZE / 2
   },
   optionIconDim: { opacity: 0.4, filter: 'grayscale(0.8)' },
+  pickedBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 2,
+    height: 20,
+    paddingInline: 6,
+    borderRadius: radius.control,
+    backgroundColor: colors.signal,
+    color: colors.onSignal,
+    fontSize: 11,
+    lineHeight: '16px',
+    fontWeight: 600
+  },
   optionEffect: { flexGrow: 1, minWidth: 0, fontSize: 12, lineHeight: '18px' },
   bodyRow: {
     display: 'flex',

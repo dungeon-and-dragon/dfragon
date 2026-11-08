@@ -9,6 +9,7 @@ import {
   oathItemIconOf,
   oathSetBoardOf
 } from '@dfragon/client-core/shared/search/oath-catalog'
+import { CheckIcon } from '../../../components/CheckIcon'
 import { useOathCatalog } from '../../../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
@@ -89,14 +90,20 @@ function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): R
           aria-current={option.picked || undefined}
           {...stylex.props(styles.option, option.picked && styles.optionPicked)}
         >
-          <img
-            src={option.icon}
-            alt=""
-            {...stylex.props(styles.optionIcon, !option.picked && styles.optionIconDim)}
-          />
-          {option.effect !== null && (
-            <GameText text={option.effect} muted={!option.picked} style={styles.optionEffect} />
-          )}
+          <div {...stylex.props(styles.optionIconColumn)}>
+            <img
+              src={option.icon}
+              alt=""
+              {...stylex.props(styles.optionIcon, !option.picked && styles.optionIconDim)}
+            />
+            {option.picked && (
+              <span {...stylex.props(styles.pickedBadge)}>
+                <CheckIcon width={12} height={12} strokeWidth={3} />
+                선택
+              </span>
+            )}
+          </div>
+          {option.effect !== null && <GameText lines={option.effect} style={styles.optionEffect} />}
         </article>
       ))}
     </div>
