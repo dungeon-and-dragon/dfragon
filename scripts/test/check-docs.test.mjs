@@ -197,3 +197,31 @@ test('code span의 apps, packages, .github 경로가 없으면 보고하고 glob
   ])
   assert.match(result.stderr, /위반 4건/u)
 })
+
+test('디스크에 없는 ignore 대상 디렉터리를 /로 끝나게 적은 code span은 통과한다', async (t) => {
+  const result = await checkFixture(t, {
+    tracked: {
+      '.gitignore': '/packages/models/score-engine/\n',
+      'README.md': '# 안내\n\n`packages/models/score-engine/`는 로컬에만 있는 라이브러리 폴더다.\n',
+      'packages/models/README.md': '# 모델\n'
+    }
+  })
+
+  assert.equal(result.code, 0, result.stderr)
+})
+
+test('ignore 대상이 아닌 없는 디렉터리를 /로 끝나게 적은 code span은 보고한다', async (t) => {
+  const result = await checkFixture(t, {
+    tracked: {
+      '.gitignore': '/packages/models/score-engine/\n',
+      'README.md': '# 안내\n\n`packages/models/other-engine/`는 없는 폴더다.\n',
+      'packages/models/README.md': '# 모델\n'
+    }
+  })
+
+  assert.equal(result.code, 1)
+  assert.match(
+    result.stderr,
+    /README\.md:3: code span의 저장소 경로는 저장소에 있는 파일, 디렉터리를 가리킨다: packages\/models\/other-engine\n/u
+  )
+})
