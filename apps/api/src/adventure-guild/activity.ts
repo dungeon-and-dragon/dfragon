@@ -54,7 +54,8 @@ export const RAID_RELEASE_ORDER = [
   '이내 황혼전',
   '만들어진 신 나벨',
   '아스라한',
-  '기계 혁명',
+  '기계 혁명 : 바칼 레이드',
+  '기계 혁명 : 개전',
   '혼돈의 오즈마',
   '무형의 시로코',
   '프레이-이시스',
@@ -71,6 +72,8 @@ export const LEGION_RELEASE_ORDER = [
   '차원회랑',
   '이스핀즈'
 ] as const
+// Neople 타임라인은 개전과 바칼 레이드를 같은 raidName으로 주고 data.modeName으로만 나눈다.
+const MODE_SPLIT_RAID_NAME = '기계 혁명'
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -310,10 +313,19 @@ function countName(counts: Map<string, NameCount>, name: string): void {
   counts.set(name, counted)
 }
 
-function countRaid(counts: Map<string, RaidCount>, { name, hard }: TimelineClear): void {
+function toRaidCountName({ name, modeName }: TimelineClear): string {
+  if (name === MODE_SPLIT_RAID_NAME && modeName !== null) {
+    return `${name} : ${modeName}`
+  }
+
+  return name
+}
+
+function countRaid(counts: Map<string, RaidCount>, clear: TimelineClear): void {
+  const name = toRaidCountName(clear)
   const raid = counts.get(name) ?? { name, count: 0, hard: 0, normal: 0 }
   raid.count++
-  if (hard) {
+  if (clear.hard) {
     raid.hard++
   } else {
     raid.normal++
