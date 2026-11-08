@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { ItemView } from '../../lib/character-item'
+import { type GameTextLines, gameTextSchema } from './game-text'
 import { itemRarityOf } from './character-detail-display'
 import type { CharacterDetailView } from './character-detail-view'
 
@@ -10,7 +11,7 @@ type RarityFile = (typeof RARITY_FILES)[number]
 const optionSchema = z.object({
   name: z.string(),
   icon: z.string(),
-  effects: z.record(z.enum(RARITY_FILES), z.string().nullable())
+  effects: z.record(z.enum(RARITY_FILES), gameTextSchema.nullable())
 })
 
 const setSchema = z.object({
@@ -27,10 +28,9 @@ const itemSchema = z.object({
 })
 
 export const oathCatalogSchema = z.object({
-  pvfSha256: z.string(),
+  version: z.string(),
   sets: z.array(setSchema),
-  // 서약 아이템 아이콘을 싣기 전에 올린 oath.json에는 items가 없다.
-  items: z.array(itemSchema).default([])
+  items: z.array(itemSchema)
 })
 
 export type OathCatalog = z.infer<typeof oathCatalogSchema>
@@ -41,7 +41,7 @@ export type OathOptionCard = Readonly<{
   name: string
   icon: string
   picked: boolean
-  effect: string | null
+  effect: GameTextLines | null
 }>
 
 export type OathSetBoard = Readonly<{
