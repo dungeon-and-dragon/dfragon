@@ -38,9 +38,34 @@ export function useAdventureActivity(
   season: number | undefined
 ): AdventureActivityResult {
   const { getAdventureActivity } = useClientHost()
+  const queryClient = useQueryClient()
   const { data, error, isPlaceholderData } = useQuery({
     queryKey: seasonActivityKey(adventureName, season),
-    queryFn: () => getAdventureActivity(adventureName, season),
+    queryFn: async () => {
+      const activity = await getAdventureActivity(adventureName, season)
+      const currentQuery = queryClient.getQueryCache().find({
+        queryKey: seasonActivityKey(adventureName, season),
+        exact: true
+      })
+
+      // 진행 조회는 고른 시즌만 하므로, 받는 동안 열었던 다른 시즌 캐시에는 옛 받기 상태가 남는다.
+      // 새 응답의 시즌 목록을 다른 캐시에도 넣어 시즌을 바꿀 때 이전 진행 상태로 돌아가지 않게 한다.
+      queryClient.setQueriesData<AdventureActivity>(
+        {
+          queryKey: seasonsActivityKey(adventureName),
+          predicate: (query) => query !== currentQuery
+        },
+        (cached) => {
+          if (cached === undefined) {
+            return cached
+          }
+
+          return { ...cached, seasons: activity.seasons }
+        }
+      )
+
+      return activity
+    },
     placeholderData: keepPreviousData,
     refetchInterval: ({ state }) => {
       if (state.data !== undefined && backfillRunning(state.data)) {
