@@ -1,5 +1,5 @@
-import buffer from '../../../../../apps/api/test/fixtures/character-card-buffer.json'
-import dealer from '../../../../../apps/api/test/fixtures/character-card-dealer.json'
+import buffer from '../../../../../api/test/fixtures/character-card-buffer.json'
+import dealer from '../../../../../api/test/fixtures/character-card-dealer.json'
 import {
   type CharacterDetailView,
   characterDetailViewSchema

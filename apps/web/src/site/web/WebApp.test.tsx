@@ -12,9 +12,9 @@ import { decodeBrowserImage } from '../../host/browser-png'
 import { readRaidWindowTemplates } from '../../host/screen-watch/browser-raid-templates'
 import { readTownIndicatorTemplate } from '../../host/screen-watch/browser-town-template'
 import { WebApp } from './WebApp'
-import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/shared/search/character-summary'
-import type { CharacterCandidate } from '@dfragon/client-core/types/character'
-import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
+import { CHARACTER_SERVER_NAMES } from '#core/shared/search/character-summary'
+import type { CharacterCandidate } from '#core/types/character'
+import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
 import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
 vi.mock('../../host/browser-png', () => ({

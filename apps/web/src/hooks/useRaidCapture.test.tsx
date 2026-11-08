@@ -3,22 +3,22 @@ import { act, useLayoutEffect, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useRaidCapture } from './useRaidCapture'
-import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
-import { createSharedOcrWorker } from '@dfragon/client-core/lib/ocr-worker-recognition'
-import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
+import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
+import { createSharedOcrWorker } from '#core/lib/ocr-worker-recognition'
+import { emptySearchSlots } from '#core/lib/slots'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext, type RaidCaptureHost } from '../host/client-host'
-import type { RaidSlotRecognition } from '@dfragon/client-core/lib/raid-recognition'
-import { searchSnapshot } from '@dfragon/client-core/testing/fixtures/search-test-fixture'
-import type { RaidFrameResult } from '@dfragon/client-core/types/capture'
-import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/types/search'
+import type { RaidSlotRecognition } from '#core/lib/raid-recognition'
+import { searchSnapshot } from '#core/testing/fixtures/search-test-fixture'
+import type { RaidFrameResult } from '#core/types/capture'
+import type { SearchApi, SearchSnapshot } from '#core/types/search'
 
 const raidMocks = vi.hoisted(() => ({ recognize: vi.fn() }))
-vi.mock('@dfragon/client-core/lib/raid-recognition', () => ({
+vi.mock('#core/lib/raid-recognition', () => ({
   recognizeRaidRows: raidMocks.recognize
 }))
 // 글자 인식 worker는 jsdom에서 띄울 수 없어 인식 결과만 테스트가 정한다.
-vi.mock('@dfragon/client-core/lib/ocr', () => ({
+vi.mock('#core/lib/ocr', () => ({
   createPartyOcrWorker: async () => ({ recognize: vi.fn(), terminate: () => {} })
 }))
 

@@ -6,8 +6,8 @@ import {
   type SkillAdoptionTarget,
   type SkillStats,
   skillAdoptionOf
-} from '@dfragon/client-core/shared/ranking/skill-stats'
-import type { SkillMarks } from '@dfragon/client-core/shared/search/skill-window'
+} from '#core/shared/ranking/skill-stats'
+import type { SkillMarks } from '#core/shared/search/skill-window'
 import { SkillAdoptionTooltip } from './SkillAdoptionTooltip'
 
 const MARKS: SkillMarks = {

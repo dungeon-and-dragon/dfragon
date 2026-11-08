@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type {
   AdventureActivity,
   AdventureActivityDay
-} from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+} from '#core/shared/adventure-guild/adventure-activity'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'

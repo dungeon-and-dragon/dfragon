@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { GameTextLines, GameTextTone } from '@dfragon/client-core/shared/search/game-text'
+import type { GameTextLines, GameTextTone } from '#core/shared/search/game-text'
 import { GameText } from './GameText'
 import { toneStyles } from './GameText.style'
 

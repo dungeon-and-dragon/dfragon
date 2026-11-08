@@ -2,8 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CandidatePicker } from '@dfragon/client-core/lib/candidate-picker'
-import type { CharacterChoice } from '@dfragon/client-core/types/search'
+import type { CandidatePicker } from '#core/lib/candidate-picker'
+import type { CharacterChoice } from '#core/types/search'
 import { toneClassesOf } from '../testing/test-support/score-tone-class'
 import { CandidatePopover } from './CandidatePopover'
 
