@@ -20,7 +20,6 @@ export const styles = stylex.create({
     outline: { default: null, ':focus-visible': `2px solid ${colors.signal}` },
     outlineOffset: 2
   },
-  neopleLogo: { display: 'block' },
   divider: {
     flexShrink: 0,
     width: 1,
