@@ -173,7 +173,9 @@ test('저장한 본문은 Express json과 같은 바이트, Content-Type으로 �
   assert.deepEqual(reused.body, built.body)
 })
 
-test('강제 갱신 뒤에는 이전 본문 대신 새로 만든 본문을 보낸다', async (t) => {
+test('강제 갱신은 1분 안에 저장한 본문을 보내고 1분이 지나면 새 본문을 만든다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
+  t.mock.method(performance, 'now', () => Date.now())
   let fetches = 0
   const url = await startApp(
     t,
@@ -191,15 +193,28 @@ test('강제 갱신 뒤에는 이전 본문 대신 새로 만든 본문을 보�
 
     return detail.character.characterName
   }
-  await sendRaw('GET', url, {})
-  await sendRaw('GET', url, {})
+  const initial = await sendRaw('GET', url, {})
+  t.mock.timers.tick(30 * 1000)
+  const cachedFromGet = await sendRaw('POST', `${url}/refresh`, {})
+  assert.equal(cachedFromGet.status, 200)
+  assert.deepEqual(cachedFromGet.body, initial.body)
+  assert.equal(fetches, 1)
 
+  t.mock.timers.tick(60 * 1000)
   const refreshed = await sendRaw('POST', `${url}/refresh`, {})
+  t.mock.timers.tick(30 * 1000)
+  const cachedFromRefresh = await sendRaw('POST', `${url}/refresh`, {})
   const afterRefresh = await sendRaw('GET', url, {})
 
   assert.equal(refreshed.status, 200)
   assert.equal(characterName(refreshed), '조회 2')
   assert.equal(characterName(afterRefresh), '조회 2')
+  assert.deepEqual(cachedFromRefresh.body, refreshed.body)
   assert.deepEqual(afterRefresh.body, refreshed.body)
+  const freshness = (response: RawResponse) =>
+    (JSON.parse(response.body.toString()) as { freshness: { lastSuccessfulFetchAt: string } })
+      .freshness.lastSuccessfulFetchAt
+  assert.equal(freshness(initial), '2026-10-29T00:00:00.000Z')
+  assert.equal(freshness(refreshed), '2026-10-29T00:01:30.000Z')
   assert.equal(fetches, 2)
 })
