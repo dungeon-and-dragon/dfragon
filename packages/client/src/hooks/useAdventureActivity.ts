@@ -4,7 +4,7 @@ import type {
   AdventureActivity,
   AdventureActivityDay
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 
 export type AdventureActivityResult =
   | Readonly<{ status: 'loading' }>
