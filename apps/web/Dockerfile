@@ -3,20 +3,17 @@ WORKDIR /workspace
 RUN npm install --global pnpm@12.11.2
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/package.json
-COPY packages/client/package.json packages/client/package.json
-COPY packages/client-core/package.json packages/client-core/package.json
 COPY packages/lib/package.json packages/lib/package.json
 COPY packages/licenses/package.json packages/licenses/package.json
 COPY packages/models/package.json packages/models/package.json
 COPY packages/ui/package.json packages/ui/package.json
 RUN pnpm install --frozen-lockfile --filter @dfragon/web...
-COPY packages/client packages/client
-COPY packages/client-core packages/client-core
 COPY packages/lib packages/lib
 COPY packages/licenses packages/licenses
 COPY packages/ui packages/ui
 COPY packages/models/ocr-finetuned packages/models/ocr-finetuned
 COPY apps/web apps/web
+COPY apps/api/test/fixtures/character-card-buffer.json apps/api/test/fixtures/character-card-dealer.json apps/api/test/fixtures/
 RUN pnpm --filter @dfragon/web build
 ARG SOURCE_COMMIT=""
 COPY scripts/server-build-info.mjs scripts/server-build-info.mjs

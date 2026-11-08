@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
 import { characterDisplaySchema } from '../lib/stored-character'
 import { useFavoriteCharacterStore } from './useFavoriteCharacterStore'
 import { useRecentCharacterStore } from './useRecentCharacterStore'

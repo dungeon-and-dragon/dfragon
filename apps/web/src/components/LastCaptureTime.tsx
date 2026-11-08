@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { toElapsedTime } from '@dfragon/client-core/lib/time-format'
+import { toElapsedTime } from '#core/lib/time-format'
 import { useRefreshingNow } from '../hooks/useRefreshingNow'
 import { styles } from './LastCaptureTime.style'
 

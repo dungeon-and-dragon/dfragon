@@ -1,6 +1,6 @@
 import { Tabs } from '@base-ui/react/tabs'
 import * as stylex from '@stylexjs/stylex'
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
 import { CHARACTER_TABS, type CharacterTab, isCharacterTab } from './character-tabs'
 import { styles } from './CharacterTabs.style'
 

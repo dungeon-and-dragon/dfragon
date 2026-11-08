@@ -1,18 +1,14 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { formatJobName } from '@dfragon/client-core/lib/job-format'
+import { formatJobName } from '#core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
-import { MISSING_VALUE, tierLabels } from '@dfragon/client-core/constants/cards'
-import {
-  type ScoreView,
-  formatApproximateScore,
-  toScoreView
-} from '@dfragon/client-core/lib/card-score'
-import type { SlotNotice } from '@dfragon/client-core/lib/character-card'
-import type { SlotCard } from '@dfragon/client-core/lib/slot-cards'
-import type { CardCharacter } from '@dfragon/client-core/types/cards'
-import type { SearchMode } from '@dfragon/client-core/types/search-mode'
+import { MISSING_VALUE, tierLabels } from '#core/constants/cards'
+import { type ScoreView, formatApproximateScore, toScoreView } from '#core/lib/card-score'
+import type { SlotNotice } from '#core/lib/character-card'
+import type { SlotCard } from '#core/lib/slot-cards'
+import type { CardCharacter } from '#core/types/cards'
+import type { SearchMode } from '#core/types/search-mode'
 import { CandidatePopover } from '../components/CandidatePopover'
 import { CardAnnouncer } from '../components/CardAnnouncer'
 import { LookupProgress } from '../components/LookupProgress'

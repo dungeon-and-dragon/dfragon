@@ -1,38 +1,31 @@
 import { createContext, useContext } from 'react'
-import type { CaptureSource, RaidFrameResult } from '@dfragon/client-core/types/capture'
-import type { CharacterIdentity, CharacterImage } from '@dfragon/client-core/types/character'
-import type {
-  OcrSearchObservation,
-  SearchApi,
-  SearchCommandResult
-} from '@dfragon/client-core/types/search'
-import type { TodayGrade } from '@dfragon/client-core/types/today-grade'
-import type { Guild } from '@dfragon/client-core/shared/adventure-guild/adventure-guild'
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
-import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'
-import type {
-  CharacterSearchQuery,
-  SearchedCharacter
-} from '@dfragon/client-core/shared/api/character-schemas'
+import type { CaptureSource, RaidFrameResult } from '#core/types/capture'
+import type { CharacterIdentity, CharacterImage } from '#core/types/character'
+import type { OcrSearchObservation, SearchApi, SearchCommandResult } from '#core/types/search'
+import type { TodayGrade } from '#core/types/today-grade'
+import type { Guild } from '#core/shared/adventure-guild/adventure-guild'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
+import type { OathCatalog } from '#core/shared/search/oath-catalog'
+import type { CharacterSearchQuery, SearchedCharacter } from '#core/shared/api/character-schemas'
 import type {
   CharacterStats,
   FameRanking,
   FameRankingFilter
-} from '@dfragon/client-core/shared/ranking/ranking-stats'
-import type { SkillStats, SkillStatsJob } from '@dfragon/client-core/shared/ranking/skill-stats'
+} from '#core/shared/ranking/ranking-stats'
+import type { SkillStats, SkillStatsJob } from '#core/shared/ranking/skill-stats'
 import type {
   CharacterTimeline,
   TimelineAcquisition,
   TimelineEnhancement,
   TimelinePage
-} from '@dfragon/client-core/shared/search/character-timeline'
-import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
-import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
+} from '#core/shared/search/character-timeline'
+import type { SkillWindowCatalog } from '#core/shared/search/skill-window'
+import type { AdventureWeekly } from '#core/shared/adventure-guild/adventure-weekly'
 import type {
   ActivitySeason,
   AdventureActivity,
   AdventureActivityDay
-} from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+} from '#core/shared/adventure-guild/adventure-activity'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'
 

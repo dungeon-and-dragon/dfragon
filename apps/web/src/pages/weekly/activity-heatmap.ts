@@ -1,4 +1,4 @@
-import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+import type { AdventureActivity } from '#core/shared/adventure-guild/adventure-activity'
 
 export type ActivityKind = 'all' | 'raid' | 'legion' | 'item' | 'enhance'
 export type ActivityDay = AdventureActivity['days'][number]

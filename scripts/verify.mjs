@@ -36,9 +36,7 @@ export const checkJobs = [
       workspace('@dfragon/lib', 'test'),
       workspace('@dfragon/neople', 'test'),
       workspace('@dfragon/database', 'test'),
-      workspace('@dfragon/ui', 'test'),
-      workspace('@dfragon/client-core', 'test'),
-      workspace('@dfragon/client', 'test')
+      workspace('@dfragon/ui', 'test')
     ]
   },
   { job: 'api', commands: [workspace('@dfragon/api', 'test')] },

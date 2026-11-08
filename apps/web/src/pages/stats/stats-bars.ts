@@ -1,6 +1,6 @@
-import { formatJobName } from '@dfragon/client-core/lib/job-format'
-import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/shared/search/character-summary'
-import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
+import { formatJobName } from '#core/lib/job-format'
+import { CHARACTER_SERVER_NAMES } from '#core/shared/search/character-summary'
+import type { CharacterStats } from '#core/shared/ranking/ranking-stats'
 import type { Bar } from './BarCharts'
 
 const AWAKENING_MARK = '眞'

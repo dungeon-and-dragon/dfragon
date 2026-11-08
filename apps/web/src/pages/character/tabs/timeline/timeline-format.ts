@@ -1,7 +1,4 @@
-import type {
-  TimelineClear,
-  TimelineEnhancement
-} from '@dfragon/client-core/shared/search/character-timeline'
+import type { TimelineClear, TimelineEnhancement } from '#core/shared/search/character-timeline'
 
 export const CLEAR_KIND_LABELS = {
   raid: '레이드',

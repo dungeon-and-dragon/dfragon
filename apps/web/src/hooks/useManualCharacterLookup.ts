@@ -3,15 +3,15 @@ import {
   createCaptureSearch,
   type CaptureSearch,
   type OcrCaptureObservation
-} from '@dfragon/client-core/lib/capture-search'
-import { emptySearchSlots, fillSlots } from '@dfragon/client-core/lib/slots'
-import type { SearchView } from '@dfragon/client-core/types/search'
+} from '#core/lib/capture-search'
+import { emptySearchSlots, fillSlots } from '#core/lib/slots'
+import type { SearchView } from '#core/types/search'
 import type {
   OcrSearchObservation,
   SearchApi,
   SearchCommandResult,
   SearchSlotCount
-} from '@dfragon/client-core/types/search'
+} from '#core/types/search'
 
 export type ManualCharacterLookup = SearchView & {
   lookupSlot: (slot: number, nickname: string, serverId?: string) => void

@@ -1,10 +1,7 @@
 import { detectPartyFrameGeometry, type DNFParticipantFrame, type DNFRectangle } from '@dfragon/lib'
-import type { CharacterImage } from '@dfragon/client-core/types/character'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/types/search'
-import {
-  cropRaidWindowNicknames,
-  type RaidWindowTemplates
-} from '@dfragon/client-core/shared/raid/raid-window'
+import type { CharacterImage } from '#core/types/character'
+import { SEARCH_SLOT_COUNTS } from '#core/types/search'
+import { cropRaidWindowNicknames, type RaidWindowTemplates } from '#core/shared/raid/raid-window'
 import type { NameCrops } from './screen-watch'
 
 function copyRegion(frame: CharacterImage, region: DNFRectangle): DNFParticipantFrame {

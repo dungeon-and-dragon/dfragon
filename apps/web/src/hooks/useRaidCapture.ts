@@ -1,17 +1,14 @@
 import { useCallback, useEffect } from 'react'
 import { useMachine } from '@xstate/react'
-import {
-  getRaidCapturePhase,
-  raidCaptureMachine
-} from '@dfragon/client-core/lib/raid-capture-machine'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/types/search'
-import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
-import { RAID_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
+import { getRaidCapturePhase, raidCaptureMachine } from '#core/lib/raid-capture-machine'
+import { SEARCH_SLOT_COUNTS } from '#core/types/search'
+import { getRecognizedNicknames } from '#core/lib/recognized-nicknames'
+import { RAID_SEAT_LAYOUT } from '#core/constants/cards'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
 import { useClientHost } from '../host/client-host'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
-import type { OcrRecognition } from '@dfragon/client-core/lib/ocr-worker-recognition'
-import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
+import type { OcrRecognition } from '#core/lib/ocr-worker-recognition'
+import type { CaptureTexts } from '#core/lib/capture-texts'
 
 export type RaidCapture = {
   search: CharacterSearch

@@ -1,14 +1,11 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { formatJobName } from '@dfragon/client-core/lib/job-format'
+import { formatJobName } from '#core/lib/job-format'
 import { Link } from '@tanstack/react-router'
-import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import { formatApproximateScore, toScoreView } from '@dfragon/client-core/lib/card-score'
-import {
-  CHARACTER_SERVER_NAMES,
-  characterImageUrl
-} from '@dfragon/client-core/shared/search/character-summary'
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import { MISSING_VALUE } from '#core/constants/cards'
+import { formatApproximateScore, toScoreView } from '#core/lib/card-score'
+import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/shared/search/character-summary'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
 import { Portrait } from '../../components/Portrait'
 import { characterDisplaySchema } from '../../lib/stored-character'
 import { styles } from './CharacterSummary.style'

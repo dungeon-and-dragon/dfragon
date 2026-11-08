@@ -1,10 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { buffSkillInfoOf } from '@dfragon/client-core/shared/search/character-detail-display'
-import {
-  buffSkillIconOf,
-  type SkillIconImage
-} from '@dfragon/client-core/shared/search/skill-window'
+import { buffSkillInfoOf } from '#core/shared/search/character-detail-display'
+import { buffSkillIconOf, type SkillIconImage } from '#core/shared/search/skill-window'
 import { useSkillWindowCatalog } from '../../../hooks/useSkillWindowCatalog'
 import { BuffGearTable } from './buff/BuffGearTable'
 import { styles } from './buff/BuffTab.style'

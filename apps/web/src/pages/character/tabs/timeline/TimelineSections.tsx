@@ -6,7 +6,7 @@ import type {
   TimelineClear,
   TimelineClearCount,
   TimelineEnhancement
-} from '@dfragon/client-core/shared/search/character-timeline'
+} from '#core/shared/search/character-timeline'
 import type { TimelinePages } from '../../../../hooks/useTimelinePages'
 import {
   acquisitionRoute,

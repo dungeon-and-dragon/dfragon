@@ -2,8 +2,8 @@ import type {
   PortraitColorPolicy,
   PortraitColorScore,
   PortraitColorScorer
-} from '../../src/shared/search/portrait-color'
-import { portraitAnchorOf } from '../../src/shared/search/portrait-anchor'
+} from '../../src/core/shared/search/portrait-color'
+import { portraitAnchorOf } from '../../src/core/shared/search/portrait-anchor'
 import { buildHudPortrait } from './hud-portrait'
 import type { LoadedCase } from './manifest'
 

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { formatSeoulDateTime, formatTimeAgo } from '@dfragon/client-core/lib/time-format'
+import { formatSeoulDateTime, formatTimeAgo } from '#core/lib/time-format'
 import { useRefreshingNow } from '../hooks/useRefreshingNow'
 
 type RelativeTimeProps = { at: string; style?: stylex.StyleXStyles }

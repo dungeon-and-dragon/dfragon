@@ -1,5 +1,5 @@
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
-import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
+import type { CharacterTimeline } from '#core/shared/search/character-timeline'
 import { useClientHost } from '../host/client-host'
 import { useLoadedResult } from './useLoadedResult'
 

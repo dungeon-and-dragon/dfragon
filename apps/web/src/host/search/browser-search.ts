@@ -1,26 +1,23 @@
-import type { DiagnosticCode } from '@dfragon/client-core/types/diagnostics'
+import type { DiagnosticCode } from '#core/types/diagnostics'
 import {
   SEARCH_ACTIONS,
   SEARCH_COMMAND_ERRORS,
   SEARCH_SLOT_COUNTS,
   type SearchSnapshot
-} from '@dfragon/client-core/types/search'
-import { createCaptureSearchLifetime } from '@dfragon/client-core/shared/search/capture-lifetime'
-import type { DfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
-import { decodeCharacterImage } from '@dfragon/client-core/shared/search/character-image'
-import { createCharacterImageSource } from '@dfragon/client-core/shared/search/character-image-source'
+} from '#core/types/search'
+import { createCaptureSearchLifetime } from '#core/shared/search/capture-lifetime'
+import type { DfragonClient } from '#core/shared/api/dfragon-client'
+import { decodeCharacterImage } from '#core/shared/search/character-image'
+import { createCharacterImageSource } from '#core/shared/search/character-image-source'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
-} from '@dfragon/client-core/shared/search/character-response-cache'
-import {
-  parseOcrSearchObservation,
-  parseSearchControl
-} from '@dfragon/client-core/shared/search/commands'
-import { createPortraitColorScorer } from '@dfragon/client-core/shared/search/portrait-color'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from '@dfragon/client-core/shared/search/portrait-policy'
-import type { YieldToEventLoop } from '@dfragon/client-core/shared/search/portrait-raster'
-import type { SearchRuntime } from '@dfragon/client-core/shared/search/request'
+} from '#core/shared/search/character-response-cache'
+import { parseOcrSearchObservation, parseSearchControl } from '#core/shared/search/commands'
+import { createPortraitColorScorer } from '#core/shared/search/portrait-color'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '#core/shared/search/portrait-policy'
+import type { YieldToEventLoop } from '#core/shared/search/portrait-raster'
+import type { SearchRuntime } from '#core/shared/search/request'
 import type { CardSearchHost } from '../client-host'
 import { decodeBrowserPng } from '../browser-png'
 

@@ -1,15 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { Fragment } from 'react'
-import { formatSeoulDateTime } from '@dfragon/client-core/lib/time-format'
-import type {
-  SkillAdoption,
-  SkillUpgradeRates
-} from '@dfragon/client-core/shared/ranking/skill-stats'
-import {
-  type SkillMarks,
-  skillMarkOf,
-  type UpgradeType
-} from '@dfragon/client-core/shared/search/skill-window'
+import { formatSeoulDateTime } from '#core/lib/time-format'
+import type { SkillAdoption, SkillUpgradeRates } from '#core/shared/ranking/skill-stats'
+import { type SkillMarks, skillMarkOf, type UpgradeType } from '#core/shared/search/skill-window'
 import { styles } from './SkillAdoptionTooltip.style'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 

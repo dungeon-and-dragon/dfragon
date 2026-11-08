@@ -6,10 +6,6 @@
 !scripts/
 !scripts/server-build-info.mjs
 !packages/
-!packages/client/
-!packages/client/**
-!packages/client-core/
-!packages/client-core/**
 !packages/lib/
 !packages/lib/**
 !packages/licenses/
@@ -21,6 +17,11 @@
 !packages/models/ocr-finetuned/
 !packages/models/ocr-finetuned/**
 !apps/
+!apps/api/
+!apps/api/test/
+!apps/api/test/fixtures/
+!apps/api/test/fixtures/character-card-buffer.json
+!apps/api/test/fixtures/character-card-dealer.json
 !apps/web/
 !apps/web/**
 **/node_modules/

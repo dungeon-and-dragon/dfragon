@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
-import { fillSlots } from '@dfragon/client-core/lib/slots'
+import { fillSlots } from '#core/lib/slots'
 import {
   nextCandidatePick,
   toCandidatePicker,
   type CandidatePick,
   type CandidatePicker
-} from '@dfragon/client-core/lib/candidate-picker'
-import type { SearchSlotCount } from '@dfragon/client-core/types/search'
+} from '#core/lib/candidate-picker'
+import type { SearchSlotCount } from '#core/types/search'
 import type { CardSearchHost } from '../host/client-host'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 
