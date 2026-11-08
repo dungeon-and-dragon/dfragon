@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import type { CharacterIdentity } from '@dfragon/client-core/preload/common/types/character'
 import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
 import { useCharacterTimeline } from '../../../hooks/useCharacterTimeline'
-import { useClientHost } from '../../../hooks/useClientHost'
+import { useClientHost } from '../../../host/client-host'
 import { useTimelinePages } from '../../../hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
 import {

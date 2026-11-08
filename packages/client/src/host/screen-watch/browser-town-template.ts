@@ -1,5 +1,5 @@
 import type { DNFParticipantFrame } from '@dfragon/lib'
-import { decodeBrowserPng } from './browser-png'
+import { decodeBrowserPng } from '../capture/browser-png'
 import townIndicatorUrl from './town-indicator.png'
 
 let template: Promise<DNFParticipantFrame> | null = null
