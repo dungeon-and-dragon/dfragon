@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
-import { fameBars } from './stats-bars'
+import { fameBars, shareText } from './stats-bars'
 
 function statsOf(fameDistribution: CharacterStats['fameDistribution']): CharacterStats {
   return {
@@ -99,4 +99,11 @@ it('1만 단위 응답도 12만 미만은 4만 막대 셋으로 묶고 12만부�
 
 it('명성이 있는 캐릭터가 없으면 막대를 만들지 않는다', () => {
   expect(fameBars(statsOf([]))).toEqual([])
+})
+
+it('비율은 전체 캐릭터 수 대비 백분율을 소수 첫째 자리로 반올림해 적는다', () => {
+  expect(shareText(1_078_455, 2_624_132)).toBe('41.1%')
+  expect(shareText(2, 3)).toBe('66.7%')
+  expect(shareText(2_624_132, 2_624_132)).toBe('100.0%')
+  expect(shareText(0, 0)).toBe('0.0%')
 })
