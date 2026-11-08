@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
-import { FILL_GROW, fillWidth, useMotionAllowed, useTweenedStyle } from './gsap-motion'
+import { useMotionAllowed } from '../../../animations/gsap-motion'
+import { FILL_GROW, fillWidth, useTweenedStyle } from './gsap-motion'
 
 export function useBackfillFillGrow(ref: RefObject<HTMLElement | null>, progress: number): void {
   const allowed = useMotionAllowed()
