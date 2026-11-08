@@ -12,6 +12,10 @@ export function cubicBezier(id: string, curve: string): gsap.EaseFunction {
   return CustomEase.create(id, curve)
 }
 
+const TOOLTIP_EASE = cubicBezier('tooltip', '0.2,0,0,1')
+export const TOOLTIP_SLIDE: Motion = { seconds: 0.2, ease: TOOLTIP_EASE }
+export const TOOLTIP_FADE: Motion = { seconds: 0.12, ease: TOOLTIP_EASE }
+
 export function useMotionAllowed(): RefObject<boolean> {
   const allowed = useRef(false)
 
