@@ -10,6 +10,9 @@ import { styles } from './AvatarTable.style'
 type Avatar = CharacterDetailView['avatar'][number]
 
 export function AvatarTable({ avatars }: { avatars: readonly Avatar[] }): React.JSX.Element {
+  const aura = avatars.find((avatar) => avatar.slotId === 'AURORA')
+  const auraSkin = avatars.find((avatar) => avatar.slotId === 'AURA_SKIN')
+
   return (
     <table {...stylex.props(tableStyles.table)}>
       <thead>
@@ -32,9 +35,19 @@ export function AvatarTable({ avatars }: { avatars: readonly Avatar[] }): React.
         </tr>
       </thead>
       <tbody>
-        {avatars.map((avatar, index) => (
-          <AvatarRow key={avatar.slotId ?? index} avatar={avatar} />
-        ))}
+        {avatars.map((avatar, index) => {
+          if (avatar.slotId === 'AURA_SKIN' && aura != null) {
+            return null
+          }
+
+          const showsAuraSkinAsClone =
+            avatar.slotId === 'AURORA' && avatar.clone?.itemId == null && auraSkin != null
+          const displayedAvatar = showsAuraSkinAsClone
+            ? { ...avatar, clone: { itemId: auraSkin.itemId, itemName: auraSkin.itemName } }
+            : avatar
+
+          return <AvatarRow key={avatar.slotId ?? index} avatar={displayedAvatar} />
+        })}
       </tbody>
     </table>
   )
