@@ -17,3 +17,27 @@ body {
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
+
+/* StyleX로는 html의 data-color-mode를 조상으로 고를 수 없어 푸터의 모드별 Neople 로고를 여기서 고른다. StyleX의
+   display는 선택자 우선순위를 높여 이 숨김을 덮으므로 로고의 display도 여기서만 정한다. 고른 모드가 없으면 시스템 설정을
+   따르며, 숨긴 로고는 display: none이라 보조 기술에도 읽히지 않는다. */
+[data-neople-logo] {
+  display: block;
+}
+
+:root[data-color-mode='dark'] [data-neople-logo='light'],
+:root[data-color-mode='light'] [data-neople-logo='dark'] {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color-mode='light']) [data-neople-logo='light'] {
+    display: none;
+  }
+}
+
+@media not all and (prefers-color-scheme: dark) {
+  :root:not([data-color-mode='dark']) [data-neople-logo='dark'] {
+    display: none;
+  }
+}

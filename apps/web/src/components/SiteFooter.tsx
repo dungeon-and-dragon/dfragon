@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { Link } from '@tanstack/react-router'
-import neopleOpenApiLogo from '../assets/neople-open-api-gray.png'
+import neopleOpenApiColorLogo from '../assets/neople-open-api-color.png'
+import neopleOpenApiGrayLogo from '../assets/neople-open-api-gray.png'
 import { styles } from './SiteFooter.style'
 
 const NEOPLE_API_URL = 'https://developers.neople.co.kr'
@@ -15,11 +16,18 @@ export function SiteFooter(): React.JSX.Element {
         {...stylex.props(styles.neople)}
       >
         <img
-          src={neopleOpenApiLogo}
+          src={neopleOpenApiColorLogo}
           alt="Neople 오픈 API"
           width={86}
           height={24}
-          {...stylex.props(styles.neopleLogo)}
+          data-neople-logo="light"
+        />
+        <img
+          src={neopleOpenApiGrayLogo}
+          alt="Neople 오픈 API"
+          width={86}
+          height={24}
+          data-neople-logo="dark"
         />
       </a>
       <span aria-hidden="true" {...stylex.props(styles.divider)} />

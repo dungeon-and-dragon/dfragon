@@ -2,6 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
+import neopleOpenApiColorLogo from './assets/neople-open-api-color.png'
+import neopleOpenApiGrayLogo from './assets/neople-open-api-gray.png'
 import { useFavoriteCharacterStore } from './hooks/useFavoriteCharacterStore'
 import { useMyAdventureStore } from './hooks/useMyAdventureStore'
 import { useSearchModeStore } from './hooks/useSearchModeStore'
@@ -298,7 +300,16 @@ it('화면 상자 아래 푸터에 Neople 로고 링크와 두 약관 화면 링
   const neopleLink = footer.querySelector('a')!
   expect(main.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   expect(neopleLink.getAttribute('target')).toBe('_blank')
-  expect(neopleLink.querySelector('img')?.getAttribute('alt')).toBe('Neople 오픈 API')
+  expect(
+    [...neopleLink.querySelectorAll('img')].map((logo) => [
+      logo.dataset.neopleLogo,
+      logo.getAttribute('src'),
+      logo.getAttribute('alt')
+    ])
+  ).toEqual([
+    ['light', neopleOpenApiColorLogo, 'Neople 오픈 API'],
+    ['dark', neopleOpenApiGrayLogo, 'Neople 오픈 API']
+  ])
   expect(footerLinks()).toEqual([
     ['', 'https://developers.neople.co.kr', null],
     ['이용약관', '/terms', null],

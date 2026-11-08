@@ -41,4 +41,4 @@ pnpm workspace 모노레포입니다.
 
 배포한 사이트에 포함된 오픈소스 고지의 위치는 [Web 안내의 글꼴과 고지](apps/web/README.md#글꼴과-고지)에 있습니다.
 
-<a href="https://developers.neople.co.kr"><img src="apps/web/src/assets/neople-open-api.png" width="191" height="36" alt="Neople 오픈 API" /></a>
+<a href="https://developers.neople.co.kr"><picture><source media="(prefers-color-scheme: dark)" srcset="apps/web/src/assets/neople-open-api-gray.png" /><img src="apps/web/src/assets/neople-open-api-color.png" width="132" height="37" alt="Neople 오픈 API" /></picture></a>
