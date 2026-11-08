@@ -1,6 +1,11 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, radius, space } from '@dfragon/ui/tokens.stylex'
 
+const turn = stylex.keyframes({
+  from: { transform: 'rotate(0deg)' },
+  to: { transform: 'rotate(360deg)' }
+})
+
 const PORTRAIT_WIDTH = 96
 const PORTRAIT_HEIGHT = 112
 
@@ -33,6 +38,26 @@ export const styles = stylex.create({
   },
   heading: { display: 'flex', alignItems: 'center', gap: space.s8, minWidth: 0 },
   name: { margin: 0, fontSize: 20, lineHeight: '28px', fontWeight: 700 },
+  refresh: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: space.s8,
+    flexShrink: 0,
+    marginLeft: space.s8
+  },
+  spinning: {
+    animationName: { default: turn, '@media (prefers-reduced-motion: reduce)': 'none' },
+    animationDuration: '1s',
+    animationTimingFunction: 'linear',
+    animationIterationCount: 'infinite'
+  },
+  fetchedAt: {
+    fontSize: 12,
+    lineHeight: '16px',
+    color: colors.fgSubtle,
+    whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums'
+  },
   line: {
     display: 'flex',
     alignItems: 'center',

@@ -96,6 +96,7 @@ export type DfragonClient = Readonly<{
     image: CharacterPngHttp
     details: CharacterDetailsHttp
     detailView: CharacterDetailViewHttp
+    refresh: CharacterDetailViewHttp
     timeline: CharacterTimelineHttp
     timelineEnhancements: TimelinePageHttp<TimelineEnhancement>
     timelineAcquisitions: TimelinePageHttp<TimelineAcquisition>
@@ -266,6 +267,15 @@ export function createDfragonClient({
         return requestJson(
           characterPath(identity),
           characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity))
+        )
+      },
+      async refresh(identity) {
+        validateIdentity(identity)
+
+        return requestJson(
+          `${characterPath(identity)}/refresh`,
+          characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity)),
+          { method: 'post' }
         )
       },
       async timeline(identity) {

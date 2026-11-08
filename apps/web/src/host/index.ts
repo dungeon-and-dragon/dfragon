@@ -54,6 +54,7 @@ export function installBrowserHost(
     },
     getTodayGrade: dfragon.items.todayGrade,
     getCharacterDetail: dfragon.characters.detailView,
+    refreshCharacterDetail: dfragon.characters.refresh,
     getCharacterTimeline: dfragon.characters.timeline,
     getTimelineEnhancements: dfragon.characters.timelineEnhancements,
     getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
