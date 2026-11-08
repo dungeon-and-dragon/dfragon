@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { characterIdentitySchema, characterRole } from '../character/character-summary'
+import type { MaleCrusaderRole } from '../character/male-crusader'
 
 const nullableText = z.string().nullable()
 const count = z.number().int().nonnegative()
@@ -44,5 +45,9 @@ export type FameRanking = z.infer<typeof fameRankingSchema>
 export type RankedCharacter = FameRanking['characters'][number]
 export type CharacterStats = z.infer<typeof characterStatsSchema>
 
-/** `jobGrowId`는 `jobId`와 함께만 쓴다. */
-export type FameRankingFilter = Readonly<{ jobId?: string; jobGrowId?: string }>
+/** `jobGrowId`는 `jobId`와 함께, `role`은 남성 크루세이더 전직과 함께만 쓴다. */
+export type FameRankingFilter = Readonly<{
+  jobId?: string
+  jobGrowId?: string
+  role?: MaleCrusaderRole
+}>

@@ -1,8 +1,7 @@
 import { Chip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { formatJobName } from '#core/character/job-format'
 import type { FameRankingFilter } from '#core/ranking/ranking-stats'
-import { RANKING_JOBS } from './ranking-jobs'
+import { growFilter, growLabel, isGrowSelected, RANKING_JOBS } from './ranking-jobs'
 import { styles } from './RankingsScreen.style'
 
 export function RankingFilterBox({
@@ -45,12 +44,12 @@ export function RankingFilterBox({
             value={{ jobId: filter.jobId }}
             onSelect={onChange}
           />
-          {job?.grows.map(({ jobGrowId, name }) => (
+          {job?.grows.map((grow) => (
             <FilterChip
-              key={jobGrowId}
-              label={formatJobName(name)}
-              pressed={jobGrowId === filter.jobGrowId}
-              value={{ jobId: job.jobId, jobGrowId }}
+              key={`${grow.jobGrowId}/${grow.role}`}
+              label={growLabel(grow)}
+              pressed={isGrowSelected(grow, filter)}
+              value={growFilter(job, grow)}
               onSelect={onChange}
             />
           ))}

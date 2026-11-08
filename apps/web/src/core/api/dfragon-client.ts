@@ -301,7 +301,8 @@ export function createDfragonClient({
         return requestJson('/rankings/fame', fameRankingSchema, {
           searchParams: {
             ...(filter.jobId !== undefined && { jobId: filter.jobId }),
-            ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId })
+            ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
+            ...(filter.role !== undefined && { role: filter.role })
           }
         })
       }
