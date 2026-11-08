@@ -43,6 +43,9 @@ const skillStyleCheckPath = fileURLToPath(
 const skillAdoptionCheckPath = fileURLToPath(
   new URL('./container-skill-adoption-check.mjs', import.meta.url)
 )
+const maleCrusaderRoleCheckPath = fileURLToPath(
+  new URL('./container-male-crusader-role-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -280,6 +283,8 @@ try {
         `type=bind,source=${skillStyleCheckPath},target=/app/container-skill-style-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${skillAdoptionCheckPath},target=/app/container-skill-adoption-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${maleCrusaderRoleCheckPath},target=/app/container-male-crusader-role-check.mjs,readonly`,
         imageId
       ])
     )
@@ -607,6 +612,16 @@ try {
     apiNames[0],
     'node',
     '/app/container-skill-adoption-check.mjs'
+  ])
+
+  stage = 'male crusader role reads'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-male-crusader-role-check.mjs'
   ])
 
   stage = 'character collector waits on the empty queue and stops'
