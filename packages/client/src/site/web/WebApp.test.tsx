@@ -142,7 +142,7 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
 })
 
-it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 파티, 공대 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
+it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 멀티서치 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
@@ -152,7 +152,7 @@ it('첫 화면은 전역 바에 아이콘 없는 브랜드 글자, 현재 항목
   expect(brand.textContent).toBe('던삐삐')
   expect(brand.querySelector('img')).toBeNull()
   expect(globalMenu()).toEqual([
-    ['파티, 공대', 'page'],
+    ['멀티서치', 'page'],
     ['랭킹', null],
     ['통계', null],
     ['모험단', null],
@@ -184,7 +184,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(main.querySelector('p')?.textContent).toBe(`${window.location.host}/guide?from=1`)
   expect(homeLink().getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
-    ['파티, 공대', null],
+    ['멀티서치', null],
     ['랭킹', null],
     ['통계', null],
     ['모험단', null],
@@ -199,7 +199,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   await waitForPath('/')
   expect(seats()).toHaveLength(4)
   expect(globalMenu()).toEqual([
-    ['파티, 공대', 'page'],
+    ['멀티서치', 'page'],
     ['랭킹', null],
     ['통계', null],
     ['모험단', null],
@@ -212,7 +212,7 @@ it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 �
   await act(async () => root.render(<WebApp host={host} />))
 
   expect(globalMenu()).toEqual([
-    ['파티, 공대', null],
+    ['멀티서치', null],
     ['랭킹', 'page'],
     ['통계', null],
     ['모험단', null],
@@ -259,7 +259,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   await vi.waitFor(() => expect(container.querySelector('main h1')?.textContent).toBe('하늘'))
   expect(selectedTab()).toBe('스킬')
   expect(globalMenu()).toEqual([
-    ['파티, 공대', null],
+    ['멀티서치', null],
     ['랭킹', null],
     ['통계', null],
     ['모험단', null],
@@ -315,7 +315,7 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     '동네커피'
   )
   expect(globalMenu()).toEqual([
-    ['파티, 공대', null],
+    ['멀티서치', null],
     ['랭킹', null],
     ['통계', null],
     ['모험단', 'page'],
@@ -980,7 +980,7 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
   await waitForPath('/adventures')
   expect(container.querySelector('main h1')?.textContent).toBe('모험단')
   expect(globalMenu()).toEqual([
-    ['파티, 공대', null],
+    ['멀티서치', null],
     ['랭킹', null],
     ['통계', null],
     ['모험단', 'page'],
