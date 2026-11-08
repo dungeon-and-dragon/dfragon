@@ -2,7 +2,7 @@ import type {
   FameRanking,
   FameRankingFilter
 } from '@dfragon/client-core/shared/ranking/ranking-stats'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 
 export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRanking> {

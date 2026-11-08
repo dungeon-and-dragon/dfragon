@@ -20,7 +20,7 @@ import type {
 import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 import * as diagnostics from '@dfragon/client-core/lib/runtime-diagnostics'
 import { createTestClientHost } from '../testing/test-support/client-host'
-import { ClientHostContext } from './useClientHost'
+import { ClientHostContext } from '../host/client-host'
 import { usePartyCapture } from './usePartyCapture'
 
 const moduleMocks = vi.hoisted(() => {

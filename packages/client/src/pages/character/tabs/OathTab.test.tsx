@@ -7,7 +7,7 @@ import type { CharacterDetailView } from '@dfragon/client-core/shared/search/cha
 import type { GameTextLines, GameTextTone } from '@dfragon/client-core/shared/search/game-text'
 import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
-import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
+import { type ClientHost, ClientHostContext } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { toneStyles } from './GameText.style'

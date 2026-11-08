@@ -1,6 +1,6 @@
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
 import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { useLoadedResult } from './useLoadedResult'
 
 export type CharacterTimelineResult =

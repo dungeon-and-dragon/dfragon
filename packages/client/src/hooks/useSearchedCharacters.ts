@@ -2,7 +2,7 @@ import type {
   CharacterSearchQuery,
   SearchedCharacter
 } from '@dfragon/client-core/shared/api/character-schemas'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 
 export function useSearchedCharacters(

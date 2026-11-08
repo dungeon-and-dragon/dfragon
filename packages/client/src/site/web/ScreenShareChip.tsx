@@ -7,7 +7,7 @@ import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { getCaptureControlState } from '@dfragon/client-core/lib/capture-presentation'
 import type { CapturePhase } from '@dfragon/client-core/types/capture'
 import type { SearchMode } from '@dfragon/client-core/types/search-mode'
-import type { BrowserHost } from './browser-host'
+import type { BrowserHost } from '../../host/client-host'
 import { styles } from './ScreenShareChip.style'
 import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
