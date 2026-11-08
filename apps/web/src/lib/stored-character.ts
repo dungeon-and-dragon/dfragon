@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { characterIdentitySchema } from '#core/character/character-summary'
+import type { CharacterDetailView } from '#core/character/character-detail-view'
+import { characterIdentitySchema, characterRole } from '#core/character/character-summary'
 
 const text = z.string().nullable()
 const count = z.number().nullable()
@@ -12,12 +13,18 @@ export const characterDisplaySchema = characterIdentitySchema.extend({
   level: count,
   jobName: text,
   jobGrowName: text,
-  fame: count
+  fame: count,
+  // role을 저장하기 전에 남긴 항목은 role이 없으므로 null로 읽는다.
+  role: characterRole.catch(null)
 })
 
 export type CharacterKey = { serverId: string; characterId: string }
 
 export type CharacterDisplay = z.infer<typeof characterDisplaySchema>
+
+export function characterDisplayOf(detail: CharacterDetailView): CharacterDisplay | undefined {
+  return characterDisplaySchema.safeParse({ ...detail.character, role: detail.card?.role }).data
+}
 
 export function isSameCharacter(a: CharacterKey, b: CharacterKey): boolean {
   return a.serverId === b.serverId && a.characterId === b.characterId

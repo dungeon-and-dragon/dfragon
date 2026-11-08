@@ -54,6 +54,7 @@ function rankedCharacter(rank: number, overrides: Partial<RankedCharacter> = {})
     fame: 100000 - rank,
     guildId: null,
     guildName: null,
+    role: null,
     ...overrides
   }
 }
@@ -153,6 +154,27 @@ it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니�
   expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직', 'Lv.110'])
 })
 
+it('남성 크루세이더만 역할을 알 때 전직에 역할을 붙이고, 모르거나 다른 직업이면 그대로 쓴다', async () => {
+  const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
+  await render(async () => ({
+    characters: [
+      rankedCharacter(1, { ...maleCrusader, role: 'dealer' }),
+      rankedCharacter(2, { ...maleCrusader, role: 'buffer' }),
+      rankedCharacter(3, { ...maleCrusader, role: null }),
+      rankedCharacter(4, { jobName: '프리스트(여)', jobGrowName: '眞 크루세이더', role: 'buffer' }),
+      rankedCharacter(5, { jobName: '프리스트(남)', jobGrowName: '眞 인파이터', role: 'dealer' })
+    ]
+  }))
+
+  expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
+    '카인합성1크루세이더(딜러)',
+    '카인합성2크루세이더(버퍼)',
+    '카인합성3크루세이더',
+    '카인합성4크루세이더',
+    '카인합성5인파이터'
+  ])
+})
+
 it('빈 랭킹은 목록 상자에 이름 한 줄만 둔다', async () => {
   await render(async () => ({ characters: [] }))
 
@@ -206,4 +228,59 @@ it('필터에 맞춰 직업, 전직을 넘겨 조회하고 실패하면 오류�
     jobGrowId: job.grows[0].jobGrowId
   })
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('랭킹을 받지 못했습니다.')
+})
+
+const MALE_PRIEST = 'f6a4ad30555b99b499c07835f87ce522'
+const CRUSADER = '37495b941da3b1661bc900e68ef3b2c6'
+
+function chipLabels(): string[] {
+  const growRow = [...container.querySelectorAll('h2')].find(
+    (heading) => heading.textContent === '전직'
+  )
+
+  return [...(growRow?.parentElement?.querySelectorAll('button') ?? [])].map(
+    (button) => button.textContent ?? ''
+  )
+}
+
+it('프리스트(남)는 크루세이더 칩 대신 딜러, 버퍼 칩을 두고 고른 역할을 필터로 넘긴다', async () => {
+  const onFilterChange = vi.fn()
+  await render(async () => rankingOf(1), { jobId: MALE_PRIEST }, onFilterChange)
+
+  expect(chipLabels()).toEqual([
+    '전직 전체',
+    '크루세이더(딜러)',
+    '크루세이더(버퍼)',
+    '인파이터',
+    '퇴마사',
+    '어벤저'
+  ])
+  await act(async () => chip('크루세이더(버퍼)').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId: MALE_PRIEST,
+    jobGrowId: CRUSADER,
+    role: 'buffer'
+  })
+  await act(async () => chip('인파이터').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId: MALE_PRIEST,
+    jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7'
+  })
+})
+
+it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌린 채 목록 이름에 전직과 역할을 쓴다', async () => {
+  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
+  await render(getFameRanking, { jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' })
+
+  expect(getFameRanking).toHaveBeenCalledWith({
+    jobId: MALE_PRIEST,
+    jobGrowId: CRUSADER,
+    role: 'dealer'
+  })
+  expect(
+    container.querySelector('section[aria-label="프리스트(남) 크루세이더(딜러) 명성 랭킹"]')
+  ).not.toBeNull()
+  expect(chip('크루세이더(딜러)').hasAttribute('data-pressed')).toBe(true)
+  expect(chip('크루세이더(버퍼)').hasAttribute('data-pressed')).toBe(false)
+  expect(chip('전직 전체').hasAttribute('data-pressed')).toBe(false)
 })

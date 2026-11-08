@@ -5,5 +5,7 @@ import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 export function useSkillStats(job: SkillStatsJob): LoadedResult<SkillStats> {
   const { getSkillStats } = useClientHost()
 
-  return useLoadedResult(['skill-stats', job.jobId, job.jobGrowId], () => getSkillStats(job))
+  return useLoadedResult(['skill-stats', job.jobId, job.jobGrowId, job.role], () =>
+    getSkillStats(job)
+  )
 }

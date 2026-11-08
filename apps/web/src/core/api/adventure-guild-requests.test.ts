@@ -21,7 +21,8 @@ const character: StoredCharacter = {
   jobGrowName: '眞 합성 전직',
   fame: 80123,
   guildId: 'guild-1',
-  guildName: '합성 길드'
+  guildName: '합성 길드',
+  role: null
 }
 
 const guild: Guild = {

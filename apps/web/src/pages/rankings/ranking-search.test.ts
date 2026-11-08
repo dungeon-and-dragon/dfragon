@@ -42,3 +42,47 @@ it('같은 id의 전직이 여러 직업에 있어도 고른 직업의 전직만
     jobGrowId: sharedId
   })
 })
+
+const MALE_PRIEST = 'f6a4ad30555b99b499c07835f87ce522'
+const FEMALE_PRIEST = '0c1b401bb09241570d364420b3ba3fd7'
+const CRUSADER = '37495b941da3b1661bc900e68ef3b2c6'
+const INFIGHTER = '618326026de1a1f1cfba5dbd0b8396e7'
+
+it('남성 크루세이더는 딜러, 버퍼 역할까지 읽는다', () => {
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' })).toEqual({
+    jobId: MALE_PRIEST,
+    jobGrowId: CRUSADER,
+    role: 'dealer'
+  })
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'buffer' })).toEqual({
+    jobId: MALE_PRIEST,
+    jobGrowId: CRUSADER,
+    role: 'buffer'
+  })
+})
+
+it('남성 크루세이더가 아닌 전직에 붙은 역할은 버리고 전직 랭킹을 연다', () => {
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: INFIGHTER, role: 'dealer' })).toEqual({
+    jobId: MALE_PRIEST,
+    jobGrowId: INFIGHTER
+  })
+  expect(parseRankingSearch({ jobId: FEMALE_PRIEST, jobGrowId: CRUSADER, role: 'buffer' })).toEqual(
+    {
+      jobId: FEMALE_PRIEST,
+      jobGrowId: CRUSADER
+    }
+  )
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, role: 'dealer' })).toEqual({ jobId: MALE_PRIEST })
+})
+
+it('남성 크루세이더의 역할이 없거나 모르는 값이면 칩이 없는 전직이라 직업 랭킹을 연다', () => {
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: CRUSADER })).toEqual({
+    jobId: MALE_PRIEST
+  })
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'synergy' })).toEqual({
+    jobId: MALE_PRIEST
+  })
+  expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: ['dealer'] })).toEqual(
+    { jobId: MALE_PRIEST }
+  )
+})

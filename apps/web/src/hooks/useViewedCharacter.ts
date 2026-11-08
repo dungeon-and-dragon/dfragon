@@ -1,21 +1,24 @@
 import { useEffect } from 'react'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
-import { characterDisplaySchema } from '../lib/stored-character'
+import { characterDisplayOf } from '../lib/stored-character'
 import { useFavoriteCharacterStore } from './useFavoriteCharacterStore'
 import { useRecentCharacterStore } from './useRecentCharacterStore'
 
-export function useViewedCharacter(character: CharacterDetailView['character'] | null): void {
+export function useViewedCharacter(detail: CharacterDetailView | null): void {
   const addRecentCharacter = useRecentCharacterStore((state) => state.addRecentCharacter)
   const refreshFavoriteCharacter = useFavoriteCharacterStore(
     (state) => state.refreshFavoriteCharacter
   )
 
   useEffect(() => {
-    const display = characterDisplaySchema.safeParse(character).data
+    if (detail === null) {
+      return
+    }
+    const display = characterDisplayOf(detail)
     if (display == null) {
       return
     }
     addRecentCharacter(display)
     refreshFavoriteCharacter(display)
-  }, [character, addRecentCharacter, refreshFavoriteCharacter])
+  }, [detail, addRecentCharacter, refreshFavoriteCharacter])
 }

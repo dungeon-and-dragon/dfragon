@@ -3,8 +3,10 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
+import type { MaleCrusaderRole } from '#core/character/male-crusader'
 import type { GameTextLines } from '#core/catalog/game-text'
 import type { SkillWindowCatalog } from '#core/catalog/skill-window'
+import type { SkillStats } from '#core/ranking/skill-stats'
 import { characterDetailFixture } from '#core/testing/character-detail'
 import { type ClientHost, ClientHostContext } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
@@ -377,7 +379,8 @@ it('스킬 창이 있으면 그 전직의 스킬 채택률을 받고, 배운 스
 
   expect(getSkillStats).toHaveBeenCalledWith({
     jobId: '0c1b401bb09241570d364420b3ba3fd7',
-    jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7'
+    jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7',
+    role: null
   })
 
   getSkillStats.mockClear()
@@ -387,4 +390,130 @@ it('스킬 창이 있으면 그 전직의 스킬 채택률을 받고, 배운 스
 
   expect(container.querySelector('[aria-label="배운 스킬"]')).not.toBeNull()
   expect(getSkillStats).not.toHaveBeenCalled()
+})
+
+// 프리스트(남) 眞 크루세이더의 합성 배치다. 저장소 fixture의 스킬 구성은 그대로 두고 직업과 카드 역할만 바꾼다.
+const MALE_CRUSADER_CATALOG: SkillWindowCatalog = {
+  marks: MARKS,
+  job: {
+    jobId: 'priest',
+    jobName: '프리스트(남)',
+    sprite: 'https://skilltab.test/sprites/priest.png',
+    advancements: [
+      {
+        growtype: 1,
+        name: '크루세이더',
+        awakeningNames: ['眞 크루세이더'],
+        slots: [
+          { skillId: 1, col: 0, row: 0, nextSkills: [] },
+          { skillId: 2, col: 1, row: 0, nextSkills: [] }
+        ]
+      }
+    ],
+    skills: {
+      1: {
+        name: '용기의 은총',
+        kind: 'active',
+        requiredLevel: 15,
+        maxLevel: 20,
+        icon: { x: 0, y: 0 },
+        stage: false
+      },
+      2: {
+        name: '성령의 메이스',
+        kind: 'active',
+        requiredLevel: 15,
+        maxLevel: 20,
+        icon: { x: 28, y: 0 },
+        stage: false
+      }
+    }
+  }
+}
+
+const MALE_CRUSADER_JOB = {
+  jobId: 'f6a4ad30555b99b499c07835f87ce522',
+  jobGrowId: '37495b941da3b1661bc900e68ef3b2c6'
+}
+
+function maleCrusaderDetail(role: MaleCrusaderRole): CharacterDetailView {
+  const detail = characterDetailFixture(role)
+
+  return {
+    ...detail,
+    character: {
+      ...detail.character,
+      ...MALE_CRUSADER_JOB,
+      jobName: '프리스트(남)',
+      jobGrowName: '眞 크루세이더'
+    },
+    card: { role, score: null }
+  }
+}
+
+// 합성 딜러 표본이다.
+const DEALER_STATS: SkillStats = {
+  computedAt: '2026-11-08T15:00:00.000Z',
+  minFame: 70000,
+  sampleSize: 408,
+  skills: [
+    { name: '성령의 메이스', learned: 408, levels: [[20, 408]] },
+    { name: '용기의 은총', learned: 408, levels: [[15, 408]] }
+  ],
+  evolutions: [],
+  enhancements: []
+}
+
+// Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
+function hover(element: Element): Promise<void> {
+  return act(async () => {
+    element.dispatchEvent(new MouseEvent('mouseenter'))
+  })
+}
+
+async function tooltipOf(skillName: string): Promise<string | null> {
+  const icon = container.querySelector(`[role="img"][aria-label="${skillName}"]`)
+  const trigger = icon?.closest('[data-skill-id]')
+  if (trigger == null) {
+    throw new Error(`${skillName} 아이콘이 없다`)
+  }
+  await hover(trigger)
+  const tooltip = await vi.waitFor(() => {
+    const popup = document.querySelector('[data-base-ui-portal] > [data-open]')
+    if (popup === null) {
+      throw new Error(`${skillName} Tooltip이 열리지 않았다`)
+    }
+
+    return popup
+  })
+
+  return tooltip.textContent
+}
+
+it('남성 크루세이더는 카드 역할을 role로 보내 역할마다 따로 받는다', async () => {
+  const getSkillStats = vi.fn(() => new Promise<never>(() => {}))
+  const host = createTestClientHost({
+    getSkillWindowCatalog: async () => MALE_CRUSADER_CATALOG,
+    getSkillStats
+  })
+  await render(host, maleCrusaderDetail('dealer'))
+  await render(host, maleCrusaderDetail('buffer'))
+
+  expect(getSkillStats.mock.calls).toEqual([
+    [{ ...MALE_CRUSADER_JOB, role: 'dealer' }],
+    [{ ...MALE_CRUSADER_JOB, role: 'buffer' }]
+  ])
+})
+
+it('남성 크루세이더 Tooltip은 역할 표본 수를 쓰고 용기의 은총은 이름 한 줄이다', async () => {
+  await render(
+    createTestClientHost({
+      getSkillWindowCatalog: async () => MALE_CRUSADER_CATALOG,
+      getSkillStats: async () => DEALER_STATS
+    }),
+    maleCrusaderDetail('dealer')
+  )
+
+  expect(await tooltipOf('성령의 메이스')).toContain('딜러 표본 408명')
+  expect(await tooltipOf('용기의 은총')).toBe('용기의 은총')
 })
