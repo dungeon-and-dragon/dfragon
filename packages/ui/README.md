@@ -94,7 +94,7 @@ import { Typo } from '@dfragon/ui'
 
 | 소비자 | 연결 위치 |
 | --- | --- |
-| 웹 앱 package test | `packages/client/vitest.config.ts` |
+| 웹 앱 package test | `apps/web/vitest.config.ts` |
 | 공용 UI Example, test | `packages/ui/examples/vite.config.ts`, `packages/ui/vitest.config.ts` |
 | 공용 UI 산출물 소비 검사 | `packages/ui/test/build-consumer/vite.config.ts` |
 
@@ -148,7 +148,7 @@ Vitest는 TypeScript를 변환해 runtime assertion을 실행한다. Public API�
 
 `test/build-consumer`의 별도 tsconfig는 source paths 없이 `@dfragon/ui`와 `@dfragon/ui/typo`의 dist declaration을 browser의 `Bundler` module resolution으로 해석한다. 같은 package specifier와 소비자 소유 CSS를 별도 Vite fixture가 소비 앱과 같은 StyleX compiler로 번들링하며 임시 결과는 `packages/ui/node_modules/.tmp/build-consumer`에 둔다. 산출 CSS에 library StyleX 선언의 atomic class가 들어 있는지 확인한다. React 전용 `typo` entry는 Node ESM import와 React 렌더링도 확인한다. 전체 UI entry는 StyleX 컴파일이 필요한 browser용이므로 Node에서 직접 import하는 경로를 지원하지 않는다.
 
-`packages/client`, Example은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석한다. 소비 command 전에 library build를 실행할 필요가 없으며 dev에는 source 변경이 직접 반영된다. Exact alias는 `@dfragon/ui/foundation.css` subpath를 바꾸지 않는다. Package export의 ESM/declaration 산출물은 별도 library build로 계속 검증한다.
+`apps/web`, Example은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석한다. 소비 command 전에 library build를 실행할 필요가 없으며 dev에는 source 변경이 직접 반영된다. Exact alias는 `@dfragon/ui/foundation.css` subpath를 바꾸지 않는다. Package export의 ESM/declaration 산출물은 별도 library build로 계속 검증한다.
 
 ## 고지
 
@@ -158,6 +158,6 @@ Library, Example, Web build는 [`@dfragon/licenses`](../licenses/README.md)의 �
 
 각 browser entry는 `@dfragon/ui/tokens.css` 다음에 `@dfragon/ui/foundation.css`를 한 번 import한다. 이 별도 public asset은 system font stack과 body 초기화(여백, `--df-fg-default` 글자색, `--df-bg-canvas` 바탕)만 담당하며 library JS가 import하거나 dist에 CSS bundle로 출력하지 않는다. Root font-size는 지정하지 않는다.
 
-`packages/client`는 공용 Component와 토큰을 화면에서 직접 쓴다.
+`apps/web`은 공용 Component와 토큰을 화면에서 직접 쓴다.
 
 Browser에서는 `dev:examples`와 `preview:examples`를 확인한다.
