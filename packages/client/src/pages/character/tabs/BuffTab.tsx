@@ -43,7 +43,7 @@ function useBuffSkillIcon(
   { character }: CharacterTabProps['detail'],
   skillName: string | null
 ): SkillIconImage | null {
-  const catalog = useSkillWindowCatalog()
+  const catalog = useSkillWindowCatalog(character.jobName)
   if (skillName === null || catalog.status !== 'success' || catalog.value === null) {
     return null
   }
