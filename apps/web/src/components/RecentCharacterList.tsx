@@ -3,29 +3,36 @@ import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
 import { formatJobName } from '#core/character/job-format'
 import { Link } from '@tanstack/react-router'
-import type { KeyboardEvent, RefObject } from 'react'
+import { type KeyboardEvent, type RefObject, useId } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
+import { useFavoriteCharacterStore } from '../hooks/useFavoriteCharacterStore'
 import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
+import type { CharacterDisplay } from '../lib/stored-character'
 import { CardImage } from './CardImage'
+import { FavoriteToggle } from './FavoriteToggle'
 import { moveItemFocus } from './move-item-focus'
 import { styles } from './RecentCharacterList.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
+const SECTION_ROW_LIMIT = 5
 
 export function RecentCharacterList({
   open,
+  size = 'medium',
   anchor,
   input,
-  list,
+  popup,
   onClose
 }: {
   open: boolean
+  size?: 'medium' | 'large'
   anchor: RefObject<HTMLElement | null>
   input: RefObject<HTMLInputElement | null>
-  list: RefObject<HTMLUListElement | null>
+  popup: RefObject<HTMLDivElement | null>
   onClose: () => void
 }): React.JSX.Element {
+  const large = size === 'large'
   const recentCharacters = useRecentCharacterStore((state) => state.recentCharacters)
   const removeRecentCharacter = useRecentCharacterStore((state) => state.removeRecentCharacter)
 
@@ -37,7 +44,7 @@ export function RecentCharacterList({
 
   // 닫힌 뒤 초점을 이름 칸에 돌려주면 이름 칸이 목록을 또 열므로 닫을 때 초점을 옮기지 않는다. 항목에서 닫을 때만
   // 닫히기 전에 이름 칸으로 옮겨, 초점이 사라지지 않게 한다.
-  function handleListKeyDown(event: KeyboardEvent<HTMLUListElement>): void {
+  function handleListKeyDown(event: KeyboardEvent<HTMLElement>): void {
     if (event.key === 'Escape') {
       input.current?.focus()
 
@@ -52,33 +59,44 @@ export function RecentCharacterList({
   }
 
   return (
-    <Popover.Root open={open && recentCharacters.length > 0} onOpenChange={handleOpenChange}>
+    <Popover.Root
+      open={open && (large || recentCharacters.length > 0)}
+      onOpenChange={handleOpenChange}
+    >
       <Popover.Portal>
         <Popover.Positioner
           anchor={anchor}
           side="bottom"
-          align="end"
+          align={large ? 'start' : 'end'}
           sideOffset={6}
           {...stylex.props(styles.positioner)}
         >
           <Popover.Popup
-            aria-label="최근 본 캐릭터"
+            ref={popup}
+            aria-label={large ? '최근 본 캐릭터와 즐겨찾기' : '최근 본 캐릭터'}
             initialFocus={input}
             finalFocus={false}
-            {...stylex.props(styles.popup)}
+            onKeyDown={handleListKeyDown}
+            {...stylex.props(styles.popup, large && styles.largePopup)}
           >
-            <h3 {...stylex.props(styles.title)}>최근 본 캐릭터</h3>
-            <ul ref={list} onKeyDown={handleListKeyDown} {...stylex.props(styles.list)}>
-              {recentCharacters.map((character) => (
-                <li
-                  key={`${character.serverId}/${character.characterId}`}
-                  {...stylex.props(styles.row)}
-                >
-                  <RecentItem character={character} onPick={onClose} />
-                  <RemoveButton character={character} onRemove={remove} />
-                </li>
-              ))}
-            </ul>
+            {large ? (
+              <SavedCharacterSections input={input} onPick={onClose} />
+            ) : (
+              <>
+                <h3 {...stylex.props(styles.title)}>최근 본 캐릭터</h3>
+                <ul {...stylex.props(styles.list)}>
+                  {recentCharacters.map((character) => (
+                    <li
+                      key={`${character.serverId}/${character.characterId}`}
+                      {...stylex.props(styles.row)}
+                    >
+                      <RecentItem character={character} onPick={onClose} />
+                      <RemoveButton character={character} onRemove={remove} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
@@ -86,24 +104,99 @@ export function RecentCharacterList({
   )
 }
 
-function RecentItem({
-  character,
+function SavedCharacterSections({
+  input,
   onPick
 }: {
-  character: RecentCharacter
+  input: RefObject<HTMLInputElement | null>
+  onPick: () => void
+}): React.JSX.Element {
+  const recentCharacters = useRecentCharacterStore((state) => state.recentCharacters)
+  const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
+
+  // 즐겨찾기 절에서 별을 누르면 그 줄이 사라져 초점을 잃으므로 이름 칸으로 옮긴다.
+  function focusInput(): void {
+    input.current?.focus()
+  }
+
+  return (
+    <>
+      <SavedCharacterSection
+        title="최근 본 캐릭터"
+        emptyMessage="최근 본 캐릭터가 없습니다."
+        characters={recentCharacters.slice(0, SECTION_ROW_LIMIT)}
+        onPick={onPick}
+      />
+      <SavedCharacterSection
+        title="즐겨찾기"
+        emptyMessage="즐겨찾기한 캐릭터가 없습니다."
+        characters={favoriteCharacters.slice(0, SECTION_ROW_LIMIT)}
+        onPick={onPick}
+        onFavoriteToggle={focusInput}
+      />
+    </>
+  )
+}
+
+function SavedCharacterSection({
+  title,
+  emptyMessage,
+  characters,
+  onPick,
+  onFavoriteToggle
+}: {
+  title: string
+  emptyMessage: string
+  characters: CharacterDisplay[]
+  onPick: () => void
+  onFavoriteToggle?: () => void
+}): React.JSX.Element {
+  const titleId = useId()
+
+  return (
+    <section aria-labelledby={titleId} {...stylex.props(styles.section)}>
+      <h3 id={titleId} {...stylex.props(styles.title, styles.sectionTitle)}>
+        {title}
+      </h3>
+      {characters.length === 0 ? (
+        <p {...stylex.props(styles.empty)}>{emptyMessage}</p>
+      ) : (
+        <ul {...stylex.props(styles.list)}>
+          {characters.map((character) => (
+            <li
+              key={`${character.serverId}/${character.characterId}`}
+              {...stylex.props(styles.sectionRow)}
+            >
+              <RecentItem character={character} large onPick={onPick} />
+              <FavoriteToggle character={character} onToggle={onFavoriteToggle} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+function RecentItem({
+  character,
+  large = false,
+  onPick
+}: {
+  character: CharacterDisplay
+  large?: boolean
   onPick: () => void
 }): React.JSX.Element {
   const job = character.jobGrowName ?? character.jobName
-  const showsLevel = character.level != null && !isMaxLevel(character.level)
+  const showsLevel = !large && character.level != null && !isMaxLevel(character.level)
 
   return (
     <Link
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
-      {...stylex.props(styles.item)}
+      {...stylex.props(styles.item, large && styles.largeItem)}
     >
-      <span {...stylex.props(styles.well)}>
+      <span {...stylex.props(styles.well, large && styles.largeWell)}>
         <CardImage src={characterImageUrl(character)} />
       </span>
       <span {...stylex.props(styles.identity)}>

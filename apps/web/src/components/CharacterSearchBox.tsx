@@ -34,7 +34,7 @@ export function CharacterSearchBox({
   const [recentOpen, setRecentOpen] = useState(false)
   const boxRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const listRef = useRef<HTMLUListElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
   const isAdventure = scope === ADVENTURE
   const fieldName = isAdventure ? '모험단 이름' : '캐릭터 이름'
 
@@ -60,7 +60,7 @@ export function CharacterSearchBox({
 
   function openRecent(event: FocusEvent<HTMLInputElement>): void {
     const fromList =
-      event.relatedTarget instanceof Node && listRef.current?.contains(event.relatedTarget)
+      event.relatedTarget instanceof Node && popupRef.current?.contains(event.relatedTarget)
     if (!fromList) {
       setRecentOpen(true)
     }
@@ -71,7 +71,7 @@ export function CharacterSearchBox({
   }
 
   function focusFirstResult(event: KeyboardEvent<HTMLInputElement>): void {
-    const first = listRef.current?.querySelector('a')
+    const first = popupRef.current?.querySelector('a')
     if (event.key !== 'ArrowDown' || event.nativeEvent.isComposing || first == null) {
       return
     }
@@ -152,9 +152,10 @@ export function CharacterSearchBox({
       </button>
       <RecentCharacterList
         open={recentOpen && name === ''}
+        size={size}
         anchor={boxRef}
         input={inputRef}
-        list={listRef}
+        popup={popupRef}
         onClose={closeRecent}
       />
     </form>
