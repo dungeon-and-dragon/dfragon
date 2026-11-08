@@ -211,6 +211,30 @@ const activityRaidCounts = (description: string): SchemaObject => ({
     normal: { ...activityCount, description: '하드가 아닌 클리어 수' }
   })
 })
+const activityDayDetail = object({
+  date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
+  raids: activityRaidCounts(RAID_ORDER_DESCRIPTION),
+  legions: activityNameCounts(LEGION_ORDER_DESCRIPTION),
+  items: {
+    type: 'array',
+    description: '레전더리 이상 아이템 획득, 시각 순',
+    items: object({
+      at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
+      name: { ...text, nullable: true, description: 'item_name' },
+      rarity: { type: 'string', enum: ['레전더리', '에픽', '태초', '신화'] }
+    })
+  },
+  enhancements: {
+    type: 'array',
+    description: '강화, 증폭, 재련(401~403) 기록, 시각 순',
+    items: object({
+      at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
+      kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
+      target: { type: 'integer', description: '도전한 단계(타임라인 after)' },
+      success: { type: 'boolean' }
+    })
+  }
+})
 const enhancementTargets = (description: string): SchemaObject => ({
   type: 'array',
   description,
@@ -556,29 +580,10 @@ export const apiSchemas: Record<string, SchemaObject> = {
     }
   }),
   AdventureSeasonBackfill: activitySeason,
-  AdventureActivityDay: object({
-    date: { type: 'string', format: 'date', description: '06:00 KST에 바뀌는 하루' },
-    raids: activityRaidCounts(RAID_ORDER_DESCRIPTION),
-    legions: activityNameCounts(LEGION_ORDER_DESCRIPTION),
-    items: {
-      type: 'array',
-      description: '레전더리 이상 아이템 획득, 시각 순',
-      items: object({
-        at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
-        name: { ...text, nullable: true, description: 'item_name' },
-        rarity: { type: 'string', enum: ['레전더리', '에픽', '태초', '신화'] }
-      })
-    },
-    enhancements: {
-      type: 'array',
-      description: '강화, 증폭, 재련(401~403) 기록, 시각 순',
-      items: object({
-        at: { ...timestamp, description: '+09:00 offset을 붙인 KST 시각' },
-        kind: { type: 'string', enum: ['reinforce', 'amplify', 'refine'] },
-        target: { type: 'integer', description: '도전한 단계(타임라인 after)' },
-        success: { type: 'boolean' }
-      })
-    }
+  AdventureActivityDay: activityDayDetail,
+  AdventureSeasonDays: object({
+    season: { type: 'integer' },
+    days: { type: 'array', description: '활동이 있는 날만, 날짜 순', items: activityDayDetail }
   }),
   FameRanking: object({
     characters: {

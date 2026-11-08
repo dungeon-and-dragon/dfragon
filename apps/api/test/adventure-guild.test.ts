@@ -85,6 +85,7 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
     readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
     readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
     readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+    readAdventureSeasonDays: async () => assert.fail('시즌 하루 활동을 읽으면 안 된다'),
     readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
   })
   try {
@@ -119,6 +120,7 @@ test('길드 조회는 명성이 있는 길드원만으로 평균 명성을 반�
     readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
     readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
     readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+    readAdventureSeasonDays: async () => assert.fail('시즌 하루 활동을 읽으면 안 된다'),
     readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
   })
   try {
@@ -145,6 +147,7 @@ test('명성이 있는 길드원이 없으면 평균 명성은 null이다', asyn
     readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
     readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
     readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+    readAdventureSeasonDays: async () => assert.fail('시즌 하루 활동을 읽으면 안 된다'),
     readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
   })
   try {
@@ -229,6 +232,7 @@ test('DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () =
     readAdventureActivityDay: async () => {
       throw new Error('synthetic database failure')
     },
+    readAdventureSeasonDays: async () => assert.fail('시즌 하루 활동을 읽으면 안 된다'),
     readAdventureSeasonBackfill: async () => {
       throw new Error('synthetic database failure')
     }
@@ -327,6 +331,7 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
       },
       readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
       readAdventureActivityDay: async () => assert.fail('하루 활동을 읽으면 안 된다'),
+      readAdventureSeasonDays: async () => assert.fail('시즌 하루 활동을 읽으면 안 된다'),
       readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
     },
     (character) => {
