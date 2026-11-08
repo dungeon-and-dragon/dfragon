@@ -30,7 +30,6 @@ afterEach(async () => {
 
 // 저장소 fixture(아처 眞 뮤즈)의 버프 스킬 이름으로 만든 합성 배치다.
 const MUSE_CATALOG: SkillWindowCatalog = {
-  version: 'synthetic',
   marks: {
     evolution: [
       'https://skilltab.test/marks/evolution-1.png',
@@ -41,30 +40,29 @@ const MUSE_CATALOG: SkillWindowCatalog = {
       'https://skilltab.test/marks/enhancement-2.png'
     ]
   },
-  jobs: [
-    {
-      jobId: 'archer',
-      jobName: '아처',
-      sprite: 'https://skilltab.test/sprites/archer.png',
-      advancements: [
-        {
-          growtype: 1,
-          name: '뮤즈',
-          awakeningNames: ['眞 뮤즈'],
-          slots: [{ skillId: 48, col: 0, row: 3, nextSkills: [] }]
-        }
-      ],
-      skills: {
-        48: {
-          name: '러블리 템포',
-          kind: 'active',
-          requiredLevel: 30,
-          maxLevel: 40,
-          icon: { x: 56, y: 28 }
-        }
+  job: {
+    jobId: 'archer',
+    jobName: '아처',
+    sprite: 'https://skilltab.test/sprites/archer.png',
+    advancements: [
+      {
+        growtype: 1,
+        name: '뮤즈',
+        awakeningNames: ['眞 뮤즈'],
+        slots: [{ skillId: 48, col: 0, row: 3, nextSkills: [] }]
+      }
+    ],
+    skills: {
+      48: {
+        name: '러블리 템포',
+        kind: 'active',
+        requiredLevel: 30,
+        maxLevel: 40,
+        icon: { x: 56, y: 28 },
+        stage: false
       }
     }
-  ]
+  }
 }
 
 async function render(
