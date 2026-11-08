@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { characterIdentitySchema } from '../character/character-summary'
+import { characterIdentitySchema, characterRole } from '../character/character-summary'
 
 const nullableText = z.string().nullable()
 const count = z.number().int().nonnegative()
@@ -14,7 +14,8 @@ export const storedCharacterSchema = characterIdentitySchema.extend({
   jobGrowName: nullableText,
   fame: z.number().int().nullable(),
   guildId: nullableText,
-  guildName: nullableText
+  guildName: nullableText,
+  role: characterRole
 })
 
 export const fameRankingSchema = z.object({

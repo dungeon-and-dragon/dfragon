@@ -2,6 +2,7 @@ import { Popover } from '@base-ui/react/popover'
 import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
 import { formatJobName } from '#core/character/job-format'
+import { grownJobName } from '#core/character/male-crusader'
 import { Link } from '@tanstack/react-router'
 import { type KeyboardEvent, type RefObject, useId } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
@@ -186,7 +187,7 @@ function RecentItem({
   large?: boolean
   onPick: () => void
 }): React.JSX.Element {
-  const job = character.jobGrowName ?? character.jobName
+  const job = grownJobName(character, character.role)
   const showsLevel = !large && character.level != null && !isMaxLevel(character.level)
 
   return (
