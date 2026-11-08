@@ -55,6 +55,7 @@ function detailOf(characterId: string): CharacterDetailView {
       guildId: null,
       guildName: null
     },
+    freshness: { lastSuccessfulFetchAt: '2026-11-09T05:08:00.000Z' },
     card: null,
     equipment: { equipment: [], setItemInfo: [] },
     creature: null,

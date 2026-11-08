@@ -177,12 +177,13 @@ describe('캐릭터 상세 화면 응답', () => {
     )
   })
 
-  it('character만 있고 나머지 섹션이 통째로 없는 응답은 빈 섹션으로 읽는다', async () => {
-    const { character } = characterDetailResponse('dealer')
-    const detail = await load({ character })(identityOf({ character }))
+  it('character와 freshness만 있고 나머지 섹션이 통째로 없는 응답은 빈 섹션으로 읽는다', async () => {
+    const { character, freshness } = characterDetailResponse('dealer')
+    const detail = await load({ character, freshness })(identityOf({ character }))
 
     expect(detail).toEqual({
       character: expect.objectContaining({ characterId: character.characterId }),
+      freshness,
       card: null,
       equipment: { equipment: [], setItemInfo: [] },
       creature: null,

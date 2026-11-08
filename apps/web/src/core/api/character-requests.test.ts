@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { CHARACTER_SERVER_NAMES } from '../character/character-summary'
+import { characterDetailResponse } from '../testing/character-detail'
 import type { SearchErrorCode } from '../search/search'
 import { createDfragonClient } from './dfragon-client'
 
@@ -182,6 +183,24 @@ function searchRow(serverId: 'cain' | 'prey', characterId: string) {
     imageUrl: `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=1`
   }
 }
+
+describe('캐릭터 강제 갱신', () => {
+  it('그 캐릭터의 refresh 경로로 POST하고 상세 응답과 받은 시각을 준다', async () => {
+    const body = characterDetailResponse('dealer')
+    const identity = { serverId: body.character.serverId, characterId: body.character.characterId }
+    const options = respondWith(body, 200)
+
+    const detail = await createDfragonClient(options).characters.refresh(identity)
+
+    expect(detail.character).toMatchObject(identity)
+    expect(detail.freshness.lastSuccessfulFetchAt).toBe('2026-11-09T05:08:00.000Z')
+    const request = new Request(...options.fetch.mock.calls[0])
+    expect(request.method).toBe('POST')
+    expect(request.url).toBe(
+      `${API_ORIGIN}/characters/${identity.serverId}/${identity.characterId}/refresh`
+    )
+  })
+})
 
 describe('이름으로 시작하는 캐릭터 검색', () => {
   it('이름, 서버와 200명 상한을 query로 보내고 받은 순서대로 행을 준다', async () => {
