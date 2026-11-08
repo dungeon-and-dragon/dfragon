@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import type { AdventureWeekly } from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 
 function weeklyKey(adventureName: string) {

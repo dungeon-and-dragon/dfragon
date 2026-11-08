@@ -40,6 +40,8 @@ import type {
   AdventureActivityDay
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 
+import type { ScreenWatchKind } from './screen-watch/screen-watch'
+
 export type CardSearchHost = SearchApi & {
   notifyOcrCandidatesDetected: (observation: OcrSearchObservation) => Promise<SearchCommandResult>
 }
@@ -84,6 +86,19 @@ export type ClientHost = Readonly<{
   backfillAdventureSeason: (adventureName: string, season: number) => Promise<ActivitySeason>
   searchCharacters: (query: CharacterSearchQuery) => Promise<readonly SearchedCharacter[]>
 }>
+
+export type WatchedScreen = Readonly<{ kind: ScreenWatchKind; roundRunning: boolean }>
+
+export type AutoRoundSignal = Readonly<{ kind: ScreenWatchKind }>
+
+export type BrowserHost = ClientHost & {
+  onPastedFrame: (listener: () => void) => () => void
+  requestScreenShare: () => Promise<string | null>
+  onScreenShareEnded: (listener: () => void) => () => void
+  setWatchedScreen: (screen: WatchedScreen) => void
+  // listener는 회차를 시작했는지 돌려준다. 시작하지 않으면 host가 그 회차용으로 든 프레임을 놓는다.
+  onAutoRound: (listener: (signal: AutoRoundSignal) => boolean) => () => void
+}
 
 export const ClientHostContext = createContext<ClientHost | null>(null)
 

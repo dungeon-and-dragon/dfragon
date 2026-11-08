@@ -1,5 +1,5 @@
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { useLoadedResult } from './useLoadedResult'
 
 export type CharacterDetailResult =

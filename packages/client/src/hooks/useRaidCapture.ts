@@ -8,7 +8,7 @@ import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/se
 import { getRecognizedNicknames } from '@dfragon/client-core/lib/recognized-nicknames'
 import { RAID_SEAT_LAYOUT } from '@dfragon/client-core/constants/cards'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 import type { OcrRecognition } from '@dfragon/client-core/lib/ocr-worker-recognition'
 import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'

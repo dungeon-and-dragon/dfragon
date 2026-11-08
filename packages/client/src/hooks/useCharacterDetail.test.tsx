@@ -7,7 +7,7 @@ import type { CharacterDetailView } from '@dfragon/client-core/shared/search/cha
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { TestQueryClient } from '../testing/test-support/test-query-client'
 import { useCharacterDetail } from './useCharacterDetail'
-import { ClientHostContext, type ClientHost } from './useClientHost'
+import { ClientHostContext, type ClientHost } from '../host/client-host'
 
 function Harness({ characterId }: { characterId: string }): React.JSX.Element {
   const result = useCharacterDetail('cain', characterId)

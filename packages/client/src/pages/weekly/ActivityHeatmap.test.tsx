@@ -6,7 +6,7 @@ import type {
   AdventureActivity,
   AdventureActivityDay
 } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
-import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
+import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { ActivityHeatmap } from './ActivityHeatmap'

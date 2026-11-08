@@ -21,8 +21,8 @@ import { createPortraitColorScorer } from '@dfragon/client-core/shared/search/po
 import { INITIAL_PORTRAIT_COLOR_POLICY } from '@dfragon/client-core/shared/search/portrait-policy'
 import type { YieldToEventLoop } from '@dfragon/client-core/shared/search/portrait-raster'
 import type { SearchRuntime } from '@dfragon/client-core/shared/search/request'
-import type { CardSearchHost } from '../../hooks/useClientHost'
-import { decodeBrowserPng } from './browser-png'
+import type { CardSearchHost } from '../client-host'
+import { decodeBrowserPng } from '../capture/browser-png'
 
 // setTimeout은 중첩되면 4ms 이상 기다려 초상화 비교의 양보가 수 초로 늘어난다.
 function createMessageChannelYield(): YieldToEventLoop {

@@ -6,19 +6,27 @@ import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore
 import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import { RANKING_JOBS } from '../../pages/rankings/ranking-jobs'
-import { installBrowserHost, type AutoRoundSignal, type BrowserHost } from './browser-host'
-import { decodeBrowserImage } from './browser-png'
-import { readRaidWindowTemplates } from './browser-raid-templates'
-import { readTownIndicatorTemplate } from './browser-town-template'
+import { installBrowserHost } from '../../host'
+import type { AutoRoundSignal, BrowserHost } from '../../host/client-host'
+import { decodeBrowserImage } from '../../host/capture/browser-png'
+import { readRaidWindowTemplates } from '../../host/screen-watch/browser-raid-templates'
+import { readTownIndicatorTemplate } from '../../host/screen-watch/browser-town-template'
 import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/preload/common/search/character-summary'
 import type { CharacterCandidate } from '@dfragon/client-core/preload/common/types/character'
 import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
-vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
-vi.mock('./browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
-vi.mock('./browser-town-template', () => ({ readTownIndicatorTemplate: vi.fn() }))
+vi.mock('../../host/capture/browser-png', () => ({
+  decodeBrowserImage: vi.fn(),
+  decodeBrowserPng: vi.fn()
+}))
+vi.mock('../../host/screen-watch/browser-raid-templates', () => ({
+  readRaidWindowTemplates: vi.fn()
+}))
+vi.mock('../../host/screen-watch/browser-town-template', () => ({
+  readTownIndicatorTemplate: vi.fn()
+}))
 
 const API_BASE_URL = 'https://site.example.test/api'
 const pastedImage = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }

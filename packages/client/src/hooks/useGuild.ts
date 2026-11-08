@@ -1,5 +1,5 @@
 import type { Guild } from '@dfragon/client-core/shared/adventure-guild/adventure-guild'
-import { useClientHost } from './useClientHost'
+import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 
 export function useGuild(guildId: string): LoadedResult<Guild> {
