@@ -5,11 +5,26 @@ import type { Bar } from './BarCharts'
 
 const AWAKENING_MARK = '眞'
 
-export function serverBars({ servers }: CharacterStats): Bar[] {
+const percent = new Intl.NumberFormat('ko-KR', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1
+})
+
+export function shareText(count: number, total: number): string {
+  if (total <= 0) {
+    return percent.format(0)
+  }
+
+  return percent.format(count / total)
+}
+
+export function serverBars({ servers, total }: CharacterStats): Bar[] {
   return servers.map(({ serverId, count }) => ({
     key: serverId,
     name: CHARACTER_SERVER_NAMES[serverId],
-    value: count
+    value: count,
+    share: shareText(count, total)
   }))
 }
 
@@ -21,7 +36,8 @@ export function jobBars(stats: CharacterStats): Bar[] {
   return awakenedJobs(stats).map(({ jobId, jobGrowId, jobGrowName, count }) => ({
     key: `${jobId}/${jobGrowId}`,
     name: formatJobName(jobGrowName),
-    value: count
+    value: count,
+    share: shareText(count, stats.total)
   }))
 }
 

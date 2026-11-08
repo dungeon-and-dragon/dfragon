@@ -107,8 +107,8 @@ it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 
     '직업별 평균 명성'
   ])
   expect(rowsOf('서버 인구')).toEqual([
-    ['카인', '', '600'],
-    ['바칼', '', '300']
+    ['카인', '', '600', '0.0%'],
+    ['바칼', '', '300', '0.0%']
   ])
   expect(rowsOf('직업 분포').map(([name, , value]) => [name, value])).toEqual([
     ['전직1', '400'],
@@ -152,6 +152,45 @@ it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 �
     )
   })
   expect(fineBar.children).toHaveLength(3)
+})
+
+it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 떼면 지운다', async () => {
+  await render(async () => ({ ...stats, total: 1000 }))
+
+  const serverRow = boxOf('서버 인구').querySelector('li')!
+  const jobRow = boxOf('직업 분포').querySelector('li')!
+  expect(serverRow.querySelector('[aria-hidden="true"]')).toBeNull()
+
+  await act(async () => {
+    serverRow.dispatchEvent(
+      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
+    )
+  })
+  expect(serverRow.querySelector('[aria-hidden="true"]')?.textContent).toBe('60.0%')
+
+  await act(async () => {
+    serverRow.dispatchEvent(
+      new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body })
+    )
+    jobRow.dispatchEvent(
+      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
+    )
+  })
+  expect(serverRow.querySelector('[aria-hidden="true"]')).toBeNull()
+  expect(jobRow.querySelector('[aria-hidden="true"]')?.textContent).toBe('40.0%')
+  expect(rowsOf('직업 분포').map((row) => row.at(-1))).toEqual(['40.0%', '20.0%', '10.0%'])
+})
+
+it('직업별 평균 명성 행에는 마우스를 올려도 비율을 띄우지 않는다', async () => {
+  await render(async () => ({ ...stats, total: 1000 }))
+
+  const row = boxOf('직업별 평균 명성').querySelector('li')!
+  await act(async () => {
+    row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body }))
+  })
+
+  expect(row.querySelector('[aria-hidden="true"]')).toBeNull()
+  expect(row.textContent).not.toContain('%')
 })
 
 it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직업은 뺀다', async () => {
