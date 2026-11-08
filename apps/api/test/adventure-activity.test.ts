@@ -138,9 +138,9 @@ test('레이드와 레기온은 이름별로 세어 횟수와 관계없이 출�
   const { summary } = activity({
     clears: [
       raid('2026-07-18T12:00:00', '프레이-이시스'),
-      raid('2026-07-18T13:00:00', '무너진 성자 미카엘라'),
-      raid('2026-07-18T14:00:00', '디레지에 레이드'),
-      raid('2026-07-19T12:00:00', '디레지에 레이드'),
+      raid('2026-07-18T13:00:00', '이내 황혼전'),
+      raid('2026-07-18T14:00:00', '혼돈의 오즈마'),
+      raid('2026-07-19T12:00:00', '혼돈의 오즈마'),
       legion('2026-07-18T14:00:00', '베누스'),
       legion('2026-07-18T15:00:00', '베누스'),
       legion('2026-07-18T16:00:00', '깨어난 숲(일반)'),
@@ -152,8 +152,8 @@ test('레이드와 레기온은 이름별로 세어 횟수와 관계없이 출�
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
-    { name: '디레지에 레이드', count: 2, hard: 0, normal: 2 },
+    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
+    { name: '혼돈의 오즈마', count: 2, hard: 0, normal: 2 },
     { name: '프레이-이시스', count: 1, hard: 0, normal: 1 }
   ])
   assert.deepEqual(summary.legions, [
@@ -195,18 +195,62 @@ test('출시 순서 표에 없는 이름은 표에 있는 이름 뒤에 많은 �
 test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말로 세고 count는 둘의 합이다', () => {
   const { summary } = activity({
     clears: [
-      hardRaid('2026-07-18T12:00:00', '디레지에 레이드'),
-      hardRaid('2026-07-18T13:00:00', '디레지에 레이드'),
-      raid('2026-07-19T12:00:00', '디레지에 레이드'),
-      { ...raid('2026-07-19T13:00:00', '무너진 성자 미카엘라'), data: { hard: false } },
-      hardRaid('2026-07-20T12:00:00', '이내 황혼전')
+      hardRaid('2026-07-18T12:00:00', '혼돈의 오즈마'),
+      hardRaid('2026-07-18T13:00:00', '혼돈의 오즈마'),
+      raid('2026-07-19T12:00:00', '혼돈의 오즈마'),
+      { ...raid('2026-07-19T13:00:00', '이내 황혼전'), data: { hard: false } },
+      hardRaid('2026-07-20T12:00:00', '무형의 시로코')
     ]
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
-    { name: '디레지에 레이드', count: 3, hard: 2, normal: 1 },
-    { name: '이내 황혼전', count: 1, hard: 1, normal: 0 }
+    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
+    { name: '혼돈의 오즈마', count: 3, hard: 2, normal: 1 },
+    { name: '무형의 시로코', count: 1, hard: 1, normal: 0 }
+  ])
+})
+
+test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이드의 하드, 일반으로 나눠 센다', () => {
+  const stage = (
+    time: string,
+    raidName: string,
+    data: Record<string, unknown>
+  ): TimelineEventRow => ({
+    ...raid(time, raidName),
+    data
+  })
+  const { summary } = activity({
+    clears: [
+      stage('2026-07-18T12:00:00', '기계 혁명', { modeName: '개전' }),
+      stage('2026-07-18T13:00:00', '기계 혁명', { modeName: '바칼 레이드', hard: true }),
+      stage('2026-07-18T14:00:00', '기계 혁명', { modeName: '바칼 레이드' }),
+      stage('2026-07-18T15:00:00', '아스라한', { modeName: '무의 장막', hard: true }),
+      stage('2026-07-18T16:00:00', '디레지에 레이드', { modeName: '디레지에 : 서막' }),
+      stage('2026-07-18T17:00:00', '디레지에 레이드', { modeName: '디레지에 : 악연', hard: true }),
+      stage('2026-07-18T18:00:00', '디레지에 레이드', { modeName: '디레지에 : 종막' }),
+      stage('2026-07-18T19:00:00', '무너진 성자 미카엘라', {
+        modeName: '미카엘라 : 종언서(하드)',
+        hard: true
+      }),
+      stage('2026-07-18T20:00:00', '무너진 성자 미카엘라', { modeName: '미카엘라 : 종언서' }),
+      stage('2026-07-18T21:00:00', '무너진 성자 미카엘라', { modeName: '미카엘라 : 균열서' }),
+      hardRaid('2026-07-18T22:00:00', '무형의 시로코'),
+      raid('2026-07-18T23:00:00', '무형의 시로코')
+    ]
+  })
+
+  assert.deepEqual(summary.raids, [
+    { name: '무너진 성자 미카엘라 (하드)', count: 1, hard: 1, normal: 0 },
+    { name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 },
+    { name: '무너진 성자 미카엘라 (싱글/매칭)', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
+    { name: '디레지에 레이드 (일반)', count: 1, hard: 0, normal: 1 },
+    { name: '디레지에 레이드 (매칭)', count: 1, hard: 0, normal: 1 },
+    { name: '아스라한 (개전)', count: 1, hard: 1, normal: 0 },
+    { name: '기계 혁명 (하드)', count: 1, hard: 1, normal: 0 },
+    { name: '기계 혁명 (일반)', count: 1, hard: 0, normal: 1 },
+    { name: '기계 혁명 (개전)', count: 1, hard: 0, normal: 1 },
+    { name: '무형의 시로코', count: 2, hard: 1, normal: 1 }
   ])
 })
 
@@ -390,9 +434,9 @@ test('하루 상세도 레이드를 하드, 노말로 나누고 출시가 최근
     clears: [
       raid('2026-07-18T11:00:00', '합성 레이드'),
       raid('2026-07-18T11:30:00', '합성 레이드'),
-      raid('2026-07-18T12:00:00', '무너진 성자 미카엘라'),
-      hardRaid('2026-07-18T13:00:00', '디레지에 레이드'),
-      raid('2026-07-18T14:00:00', '디레지에 레이드'),
+      raid('2026-07-18T12:00:00', '이내 황혼전'),
+      hardRaid('2026-07-18T13:00:00', '혼돈의 오즈마'),
+      raid('2026-07-18T14:00:00', '혼돈의 오즈마'),
       legion('2026-07-18T15:00:00', '합성 레기온'),
       legion('2026-07-18T15:30:00', '합성 레기온'),
       legion('2026-07-18T16:00:00', '베누스'),
@@ -401,8 +445,8 @@ test('하루 상세도 레이드를 하드, 노말로 나누고 출시가 최근
   })
 
   assert.deepEqual(raids, [
-    { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
-    { name: '디레지에 레이드', count: 2, hard: 1, normal: 1 },
+    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
+    { name: '혼돈의 오즈마', count: 2, hard: 1, normal: 1 },
     { name: '합성 레이드', count: 2, hard: 0, normal: 2 }
   ])
   assert.deepEqual(legions, [

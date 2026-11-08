@@ -49,12 +49,22 @@ const ITEM_CODES = new Set(ACQUISITION_CODES)
 const ticketData = z.object({ ticket: z.unknown().refine((ticket) => ticket != null) })
 // 출시가 최근인 것부터다(2026-11-07 저장소 소유자 결정). 새 레이드, 레기온은 맨 앞에 더한다.
 export const RAID_RELEASE_ORDER = [
-  '무너진 성자 미카엘라',
-  '디레지에 레이드',
+  '무너진 성자 미카엘라 (하드)',
+  '무너진 성자 미카엘라 (일반)',
+  '무너진 성자 미카엘라 (싱글/매칭)',
+  '디레지에 레이드 (하드)',
+  '디레지에 레이드 (일반)',
+  '디레지에 레이드 (매칭)',
   '이내 황혼전',
-  '만들어진 신 나벨',
-  '아스라한',
-  '기계 혁명',
+  '만들어진 신 나벨 (하드)',
+  '만들어진 신 나벨 (일반)',
+  '만들어진 신 나벨 (싱글/매칭)',
+  '아스라한 (하드)',
+  '아스라한 (일반)',
+  '아스라한 (개전)',
+  '기계 혁명 (하드)',
+  '기계 혁명 (일반)',
+  '기계 혁명 (개전)',
   '혼돈의 오즈마',
   '무형의 시로코',
   '프레이-이시스',
@@ -71,6 +81,15 @@ export const LEGION_RELEASE_ORDER = [
   '차원회랑',
   '이스핀즈'
 ] as const
+// Neople 타임라인은 한 레이드의 본 레이드와 개전, 매칭 같은 단계를 같은 raidName으로 주고 data.modeName으로만 나눈다.
+// 표에 없는 modeName은 본 레이드로 보고 하드, 일반으로 나눈다. 값은 운영 DB에서 본 modeName이다(2026-11-09).
+const RAID_STAGE_LABELS = new Map([
+  ['미카엘라 : 균열서', '싱글/매칭'],
+  ['디레지에 : 서막', '매칭'],
+  ['무의지의 장벽', '싱글/매칭'],
+  ['무의 장막', '개전'],
+  ['개전', '개전']
+])
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -315,10 +334,22 @@ function countName(counts: Map<string, NameCount>, name: string): void {
   counts.set(name, counted)
 }
 
-function countRaid(counts: Map<string, RaidCount>, { name, hard }: TimelineClear): void {
+function toRaidCountName({ name, modeName, hard }: TimelineClear): string {
+  if (modeName === null) {
+    return name
+  }
+
+  const difficultyLabel = hard ? '하드' : '일반'
+  const label = RAID_STAGE_LABELS.get(modeName) ?? difficultyLabel
+
+  return `${name} (${label})`
+}
+
+function countRaid(counts: Map<string, RaidCount>, clear: TimelineClear): void {
+  const name = toRaidCountName(clear)
   const raid = counts.get(name) ?? { name, count: 0, hard: 0, normal: 0 }
   raid.count++
-  if (hard) {
+  if (clear.hard) {
     raid.hard++
   } else {
     raid.normal++
