@@ -66,14 +66,14 @@ function SkillIcon({
             <img
               src={skillMarkOf(marks, 'evolution', icon.evolution)}
               alt=""
-              {...stylex.props(styles.evolutionMark)}
+              {...stylex.props(styles.evolutionMark, styles.scaledMark)}
             />
           )}
           {marks !== null && icon.enhancement !== null && (
             <img
               src={skillMarkOf(marks, 'enhancement', icon.enhancement)}
               alt=""
-              {...stylex.props(styles.enhancementMark)}
+              {...stylex.props(styles.enhancementMark, styles.scaledMark)}
             />
           )}
         </span>
@@ -102,39 +102,41 @@ function SkillWindowGrid({
   const [now] = useState(Date.now)
 
   return (
-    <div
-      role="group"
-      aria-label="스킬 창"
-      {...stylex.props(styles.window, styles.windowSize(skillWindow.rows.length))}
-    >
-      {skillWindow.rows.map(({ row, requiredLevel }) => (
-        <div key={row}>
-          {row > COMMON_ROW && <div {...stylex.props(styles.rowLine, styles.rowTop(row))} />}
-          <span {...stylex.props(styles.rowLabel, styles.rowTop(row))}>
-            {row === COMMON_ROW ? '공용' : requiredLevel}
-          </span>
-        </div>
-      ))}
-      {skillWindow.icons.map((icon) => {
-        const adoption =
-          stats !== null
-            ? skillAdoptionOf(stats, {
-                name: icon.name,
-                evolutionNames: icon.evolutionNames,
-                hasEnhancement: icon.enhanceable
-              })
-            : null
+    <div {...stylex.props(styles.windowColumn)}>
+      <div
+        role="group"
+        aria-label="스킬 창"
+        {...stylex.props(styles.window, styles.windowSize(skillWindow.rows.length))}
+      >
+        {skillWindow.rows.map(({ row, requiredLevel }) => (
+          <div key={row}>
+            {row > COMMON_ROW && <div {...stylex.props(styles.rowLine, styles.rowTop(row))} />}
+            <span {...stylex.props(styles.rowLabel, styles.rowTop(row))}>
+              {row === COMMON_ROW ? '공용' : requiredLevel}
+            </span>
+          </div>
+        ))}
+        {skillWindow.icons.map((icon) => {
+          const adoption =
+            stats !== null
+              ? skillAdoptionOf(stats, {
+                  name: icon.name,
+                  evolutionNames: icon.evolutionNames,
+                  hasEnhancement: icon.enhanceable
+                })
+              : null
 
-        return (
-          <SkillIcon
-            key={`${icon.col},${icon.row}`}
-            icon={icon}
-            marks={skillWindow.marks}
-            adoption={adoption}
-            now={now}
-          />
-        )
-      })}
+          return (
+            <SkillIcon
+              key={`${icon.col},${icon.row}`}
+              icon={icon}
+              marks={skillWindow.marks}
+              adoption={adoption}
+              now={now}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
