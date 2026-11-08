@@ -197,15 +197,22 @@ function heroBusy(): string | null | undefined {
 }
 
 it('시즌을 고르지 않으면 지금 시즌을 받아 모험단 이름 위에 다른 글자 없이 시즌 이름, 시작일과 요약 숫자 4개를 보인다', async () => {
-  const getAdventureActivity = vi.fn<ClientHost['getAdventureActivity']>(async () => currentSeason)
-  await render(getAdventureActivity, undefined)
+  vi.useFakeTimers({ toFake: ['Date'], now: Date.parse('2026-11-08T03:00:00.000Z') })
+  try {
+    const getAdventureActivity = vi.fn<ClientHost['getAdventureActivity']>(
+      async () => currentSeason
+    )
+    await render(getAdventureActivity, undefined)
 
-  expect(getAdventureActivity).toHaveBeenCalledWith('합성 모험단', undefined)
-  expect(container.querySelector('h1')?.textContent).toBe('합성 모험단')
-  expect(container.querySelector('h1')?.parentElement?.textContent).toBe('합성 모험단')
-  expect(currentSeasonName()).toBe('합성 시즌 11')
-  expect(container.textContent).toContain('시즌 11합성 시즌 112026.03.26 ~')
-  expect(statValues()).toEqual(['1,203', '5', '14', '40'])
+    expect(getAdventureActivity).toHaveBeenCalledWith('합성 모험단', undefined)
+    expect(container.querySelector('h1')?.textContent).toBe('합성 모험단')
+    expect(container.querySelector('h1')?.parentElement?.textContent).toBe('합성 모험단')
+    expect(currentSeasonName()).toBe('합성 시즌 11')
+    expect(container.textContent).toContain('시즌 11합성 시즌 11228일2026.03.26 ~')
+    expect(statValues()).toEqual(['1,203', '5', '14', '40'])
+  } finally {
+    vi.useRealTimers()
+  }
 })
 
 it('시즌을 누르면 그 시즌 번호를 알리고, 바뀐 시즌을 받는 동안 시즌 목록과 고른 시즌을 그대로 보인 뒤 새 요약을 그린다', async () => {
@@ -225,7 +232,7 @@ it('시즌을 누르면 그 시즌 번호를 알리고, 바뀐 시즌을 받는 
   await render(getAdventureActivity, 10, onSeasonChange)
   expect(getAdventureActivity).toHaveBeenLastCalledWith('합성 모험단', 10)
   expect(currentSeasonName()).toBe('합성 시즌 10')
-  expect(container.textContent).toContain('시즌 10합성 시즌 102025.01.09 ~')
+  expect(container.textContent).toContain('시즌 10합성 시즌 10441일2025.01.09 ~ 2026.03.25')
   expect(heroBusy()).toBe('true')
   expect(container.querySelectorAll('[tabindex="0"]')).toHaveLength(0)
 
