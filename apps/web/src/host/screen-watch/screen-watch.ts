@@ -1,5 +1,5 @@
 import type { DNFParticipantFrame } from '@dfragon/lib'
-import { binarizeNicknamePixels, binarizeRaidNicknamePixels } from '#core/lib/nickname-pixels'
+import { binarizeNicknamePixels, binarizeRaidNicknamePixels } from '#core/ocr/nickname-pixels'
 
 export type ScreenWatchKind = 'party' | 'raid'
 

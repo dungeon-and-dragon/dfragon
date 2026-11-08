@@ -1,7 +1,7 @@
-import type { CharacterImage } from '#core/types/character'
-import { createDfragonClient } from '#core/shared/api/dfragon-client'
-import { toRaidFrameResult } from '#core/shared/raid/raid-frame'
-import { startRendererDiagnostics } from '#core/lib/runtime-diagnostics'
+import type { CharacterImage } from '#core/character/character'
+import { createDfragonClient } from '#core/api/dfragon-client'
+import { toRaidFrameResult } from '#core/capture/raid/raid-frame'
+import { startRuntimeDiagnostics } from '#core/diagnostics/runtime-diagnostics'
 import {
   createOathCatalogSource,
   createSkillWindowCatalogSource
@@ -23,7 +23,7 @@ export function installBrowserHost(
   skillWindowIndexUrl: string,
   oathCatalogUrl: string
 ): BrowserHost {
-  const reportDiagnostic = startRendererDiagnostics()
+  const reportDiagnostic = startRuntimeDiagnostics()
   const dfragon = createDfragonClient({ apiOrigin, fetch: browserFetch })
   const runtime = createBrowserSearchRuntime(dfragon, reportDiagnostic)
   const party = createBrowserCardSearch('party', runtime)

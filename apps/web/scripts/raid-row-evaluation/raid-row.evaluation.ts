@@ -9,7 +9,7 @@ import {
   parseDNFRaidValueNotation,
   readDNFRaidParticipantMetadata
 } from '@dfragon/lib'
-import type { CharacterImage } from '../../src/core/types/character'
+import type { CharacterImage } from '../../src/core/character/character'
 import { type CaseObservation, readJobText, type RowObservation, summarize } from './evaluate'
 import { createJobOcrReader, type JobOcrReader } from './job-ocr'
 import { loadCaseImage, readManifest } from './manifest'

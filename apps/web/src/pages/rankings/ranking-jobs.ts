@@ -1,4 +1,4 @@
-import type { FameRankingFilter } from '#core/shared/ranking/ranking-stats'
+import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 
 type RankingJob = Readonly<{
   jobId: string

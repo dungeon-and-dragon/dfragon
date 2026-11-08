@@ -1,23 +1,23 @@
-import type { DiagnosticCode } from '#core/types/diagnostics'
+import type { DiagnosticCode } from '#core/diagnostics/diagnostics'
 import {
   SEARCH_ACTIONS,
   SEARCH_COMMAND_ERRORS,
   SEARCH_SLOT_COUNTS,
   type SearchSnapshot
-} from '#core/types/search'
-import { createCaptureSearchLifetime } from '#core/shared/search/capture-lifetime'
-import type { DfragonClient } from '#core/shared/api/dfragon-client'
-import { decodeCharacterImage } from '#core/shared/search/character-image'
-import { createCharacterImageSource } from '#core/shared/search/character-image-source'
+} from '#core/search/search'
+import { createCaptureSearchLifetime } from '#core/search/capture-lifetime'
+import type { DfragonClient } from '#core/api/dfragon-client'
+import { decodeCharacterImage } from '#core/character/character-image'
+import { createCharacterImageSource } from '#core/character/character-image-source'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
-} from '#core/shared/search/character-response-cache'
-import { parseOcrSearchObservation, parseSearchControl } from '#core/shared/search/commands'
-import { createPortraitColorScorer } from '#core/shared/search/portrait-color'
-import { INITIAL_PORTRAIT_COLOR_POLICY } from '#core/shared/search/portrait-policy'
-import type { YieldToEventLoop } from '#core/shared/search/portrait-raster'
-import type { SearchRuntime } from '#core/shared/search/request'
+} from '#core/search/character-response-cache'
+import { parseOcrSearchObservation, parseSearchControl } from '#core/search/commands'
+import { createPortraitColorScorer } from '#core/search/portrait-color'
+import { INITIAL_PORTRAIT_COLOR_POLICY } from '#core/search/portrait-policy'
+import type { YieldToEventLoop } from '#core/search/portrait-raster'
+import type { SearchRuntime } from '#core/search/request'
 import type { CardSearchHost } from '../client-host'
 import { decodeBrowserPng } from '../browser-png'
 

@@ -1,5 +1,5 @@
-import { serverNames } from '#core/constants/servers'
-import { ALL_CHARACTER_SERVERS } from '#core/shared/api/character-schemas'
+import { serverNames } from '#core/servers/servers'
+import { ALL_CHARACTER_SERVERS } from '#core/api/character-schemas'
 
 export const serverOptions = Object.entries(serverNames).map(([id, label]) => ({ id, label }))
 

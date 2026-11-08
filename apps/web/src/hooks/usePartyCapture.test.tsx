@@ -8,17 +8,17 @@ import {
   searchRow,
   searchSnapshot,
   searchSlot
-} from '#core/testing/fixtures/search-test-fixture'
-import type { CharacterImage } from '#core/types/character'
+} from '#core/testing/search-test-fixture'
+import type { CharacterImage } from '#core/character/character'
 import type {
   CharacterChoice,
   SearchCommandResult,
   SearchControl,
   SearchSlot,
   SearchSnapshot
-} from '#core/types/search'
-import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
-import * as diagnostics from '#core/lib/runtime-diagnostics'
+} from '#core/search/search'
+import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
+import * as diagnostics from '#core/diagnostics/runtime-diagnostics'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext } from '../host/client-host'
 import { usePartyCapture } from './usePartyCapture'
@@ -33,15 +33,15 @@ const moduleMocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('#core/lib/ocr', async (importOriginal) => {
-  const ocr = { ...(await importOriginal<typeof import('#core/lib/ocr')>()) }
+vi.mock('#core/ocr/ocr', async (importOriginal) => {
+  const ocr = { ...(await importOriginal<typeof import('#core/ocr/ocr')>()) }
   ocr.createPartyOcrWorker = moduleMocks.createPartyOcrWorker
 
   return ocr
 })
 
-vi.mock('#core/lib/party', async (importOriginal) => {
-  const party = { ...(await importOriginal<typeof import('#core/lib/party')>()) }
+vi.mock('#core/capture/party/party', async (importOriginal) => {
+  const party = { ...(await importOriginal<typeof import('#core/capture/party/party')>()) }
   party.capturePartyRecognitionInputs = moduleMocks.capturePartyRecognitionInputs
 
   return party
@@ -542,7 +542,7 @@ it.each([
 ] as const)(
   '%s 실패는 진단과 자원 정리를 유지하고 캡처로 재시작한다',
   async (stage, status, code) => {
-    const report = vi.spyOn(diagnostics, 'reportRendererDiagnostic')
+    const report = vi.spyOn(diagnostics, 'reportRuntimeDiagnostic')
     const { worker } = captureResources()
     moduleMocks.createPartyOcrWorker.mockResolvedValue(worker)
     setSlots(0)
@@ -776,7 +776,7 @@ it('StrictMode 재마운트 뒤 선택, 회차와 종료 정리를 수행한다'
 it.each(['resolve', 'reject'] as const)(
   'unmount 뒤 늦은 worker 준비 %s는 결과나 진단을 남기지 않는다',
   async (outcome) => {
-    const report = vi.spyOn(diagnostics, 'reportRendererDiagnostic')
+    const report = vi.spyOn(diagnostics, 'reportRuntimeDiagnostic')
     const { worker } = captureResources()
     const pending = Promise.withResolvers<typeof worker>()
     moduleMocks.createPartyOcrWorker.mockReturnValueOnce(pending.promise)
@@ -803,7 +803,7 @@ it.each(['resolve', 'reject'] as const)(
 it.each(['failed', 'rejected'] as const)(
   '두 번째 슬롯 OCR 실패 시 뒤 슬롯이 %s여도 검색을 통지하지 않고 실패로 끝낸다',
   async (laterResult) => {
-    const report = vi.spyOn(diagnostics, 'reportRendererDiagnostic')
+    const report = vi.spyOn(diagnostics, 'reportRuntimeDiagnostic')
     const { worker } = captureResources()
     worker.recognize
       .mockRejectedValue(new Error('Worker unavailable'))

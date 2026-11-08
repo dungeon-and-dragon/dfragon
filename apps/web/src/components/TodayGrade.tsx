@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { GRADE_RARITY_NAMES, gradeRarity } from '#core/lib/today-grade'
+import { GRADE_RARITY_NAMES, gradeRarity } from '#core/today-grade/today-grade'
 import { styles } from './TodayGrade.style'
 
 export function TodayGrade({ grade }: { grade: number | null }): React.JSX.Element {

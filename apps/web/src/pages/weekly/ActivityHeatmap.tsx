@@ -2,7 +2,7 @@ import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
-import type { AdventureActivity } from '#core/shared/adventure-guild/adventure-activity'
+import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
 import { useAdventureActivity } from '../../hooks/useAdventureActivity'
 import {
   type ActivityDay,

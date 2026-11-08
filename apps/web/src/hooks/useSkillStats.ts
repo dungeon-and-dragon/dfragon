@@ -1,4 +1,4 @@
-import type { SkillStats, SkillStatsJob } from '#core/shared/ranking/skill-stats'
+import type { SkillStats, SkillStatsJob } from '#core/ranking/skill-stats'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

@@ -1,7 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
-import type { FameRanking, FameRankingFilter } from '#core/shared/ranking/ranking-stats'
+import type { FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
 import { CharacterTable, SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { useFameRanking } from '../../hooks/useFameRanking'

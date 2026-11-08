@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import type {
   ActivitySummary as Summary,
   EnhancementTarget
-} from '#core/shared/adventure-guild/adventure-activity'
+} from '#core/adventure-guild/adventure-activity'
 import { styles } from './ActivitySummary.style'
 import { formatClearCount } from './clear-count'
 

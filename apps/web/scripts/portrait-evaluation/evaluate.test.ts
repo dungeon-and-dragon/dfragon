@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   createPortraitColorScorer,
   type PortraitColorScorer
-} from '../../src/core/shared/search/portrait-color'
-import type { CharacterImage } from '../../src/core/types/character'
+} from '../../src/core/search/portrait-color'
+import type { CharacterImage } from '../../src/core/character/character'
 import { type CaseResult, evaluateCase, summarize } from './evaluate'
 import { buildHudPortrait, hudFaceSize } from './hud-portrait'
 import {

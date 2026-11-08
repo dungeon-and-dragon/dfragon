@@ -6,8 +6,8 @@ import {
   type SkillAdoptionTarget,
   type SkillStats,
   skillAdoptionOf
-} from '#core/shared/ranking/skill-stats'
-import type { SkillMarks } from '#core/shared/search/skill-window'
+} from '#core/ranking/skill-stats'
+import type { SkillMarks } from '#core/catalog/skill-window'
 import { SkillAdoptionTooltip } from './SkillAdoptionTooltip'
 
 const MARKS: SkillMarks = {

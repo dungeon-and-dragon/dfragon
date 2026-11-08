@@ -1,7 +1,7 @@
 import { Chip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { formatJobName } from '#core/lib/job-format'
-import type { FameRankingFilter } from '#core/shared/ranking/ranking-stats'
+import { formatJobName } from '#core/character/job-format'
+import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import { RANKING_JOBS } from './ranking-jobs'
 import { styles } from './RankingsScreen.style'
 

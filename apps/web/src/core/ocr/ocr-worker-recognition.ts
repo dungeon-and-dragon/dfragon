@@ -1,0 +1,132 @@
+import type { PartyOcrResult, PartyOcrWorker } from '../capture/capture-types'
+import { createPartyOcrWorker } from './ocr'
+
+export type OcrRecognition = <T>(
+  signal: AbortSignal,
+  failedStatus: string,
+  recognize: (recognizeText: PartyOcrWorker['recognize']) => Promise<T>
+) => Promise<T>
+
+export type SharedOcrWorker = {
+  prepare: () => void
+  recognize: OcrRecognition
+  release: () => void
+  isReady: () => boolean
+  subscribe: (listener: () => void) => () => void
+}
+
+type WorkerEntry = {
+  controller: AbortController
+  worker: Promise<PartyOcrWorker>
+}
+
+/**
+ * 모델 로드를 회차마다 반복하지 않도록 worker 하나를 회차 사이에 유지하고 파티와 공대 회차가 함께 쓴다.
+ * Worker는 한 번에 이미지 하나만 받으므로 인식 요청을 차례로 보내고, 취소된 회차의 남은 요청은 보내지 않는다.
+ */
+export function createSharedOcrWorker(prepareFailedStatus: string): SharedOcrWorker {
+  let current: WorkerEntry | null = null
+  let queue: Promise<unknown> = Promise.resolve()
+  let ready = false
+  const listeners = new Set<() => void>()
+
+  function setReady(next: boolean): void {
+    if (ready === next) {
+      return
+    }
+    ready = next
+    for (const listener of listeners) {
+      listener()
+    }
+  }
+
+  function acquire(): WorkerEntry {
+    if (current === null) {
+      const controller = new AbortController()
+      const entry = { controller, worker: createPartyOcrWorker(controller.signal) }
+      current = entry
+      entry.worker.then(
+        () => {
+          if (current === entry) {
+            setReady(true)
+          }
+        },
+        () => discard(entry)
+      )
+    }
+
+    return current
+  }
+
+  function discard(entry: WorkerEntry): void {
+    if (current !== entry) {
+      return
+    }
+    current = null
+    setReady(false)
+    entry.controller.abort()
+    entry.worker.then(
+      (worker) => worker.terminate(),
+      () => undefined
+    )
+  }
+
+  async function recognize<T>(
+    signal: AbortSignal,
+    failedStatus: string,
+    run: (recognizeText: PartyOcrWorker['recognize']) => Promise<T>
+  ): Promise<T> {
+    const entry = acquire()
+    const worker = await entry.worker.catch(() => {
+      throw new Error(prepareFailedStatus)
+    })
+    if (signal.aborted) {
+      throw new Error(prepareFailedStatus)
+    }
+
+    function recognizeText(image: HTMLCanvasElement): Promise<PartyOcrResult> {
+      const result = queue.then(() => {
+        signal.throwIfAborted()
+
+        // 시간 초과나 오류로 끝난 worker는 다음 회차가 새로 띄운다.
+
+        return worker.recognize(image).catch((error: unknown) => {
+          discard(entry)
+          throw error
+        })
+      })
+      queue = result.catch(() => undefined)
+
+      return result
+    }
+
+    try {
+      const results = await run(recognizeText)
+      signal.throwIfAborted()
+
+      return results
+    } catch {
+      throw new Error(failedStatus)
+    }
+  }
+
+  return {
+    prepare() {
+      acquire()
+    },
+    recognize,
+    release() {
+      if (current !== null) {
+        discard(current)
+      }
+    },
+    isReady: () => ready,
+    subscribe(listener) {
+      listeners.add(listener)
+
+      return () => {
+        listeners.delete(listener)
+      }
+    }
+  }
+}

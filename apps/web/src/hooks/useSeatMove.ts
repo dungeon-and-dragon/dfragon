@@ -7,7 +7,7 @@ import {
   useRef,
   useState
 } from 'react'
-import { neighborSeat, seatDirections, type SeatDirection } from '#core/lib/seats'
+import { neighborSeat, seatDirections, type SeatDirection } from '#core/capture/seats'
 import type { SeatArrangement } from './useSeatOrder'
 
 export type SeatMove = Pick<
