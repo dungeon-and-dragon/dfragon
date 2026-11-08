@@ -5,7 +5,6 @@ import { type SkillStats, skillAdoptionOf, skillStatsSchema } from './skill-stat
 function statsOf(overrides: Partial<SkillStats> = {}): SkillStats {
   return {
     computedAt: '2026-11-06T15:00:00.000Z',
-    topPercent: 10,
     minFame: 70000,
     sampleSize: 40,
     skills: [

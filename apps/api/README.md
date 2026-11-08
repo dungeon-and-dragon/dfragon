@@ -260,14 +260,14 @@ Neople을 부르지 않고 DB의 `characters`와 `character_skill_styles`를 읽
 스킬 스타일 행은 [상세 조회](#캐릭터-기본-정보-저장)가 저장한 것뿐이라, 표본 가운데 누군가 상세를 조회한 캐릭터만 셉니다.
 
 ```json
-{ "computedAt": "…", "topPercent": 10, "minFame": 100028, "sampleSize": 2316,
+{ "computedAt": "…", "topCount": 5000, "minFame": 100028, "sampleSize": 2316,
   "skills": [{ "name": "발도", "learned": 2201, "levels": [[1, 30], [13, 2171]] }],
   "evolutions": [{ "name": "발도", "type1": 1500, "type2": 650 }],
   "enhancements": [{ "name": "발도", "type1": 300, "type2": 1800 }] }
 ```
 
 - 두 query는 모두 필수이고, 빈 값과 같은 key의 중복은 400 `INVALID_CHARACTER_QUERY`입니다.
-- 표본은 그 전직에서 명성이 있는 캐릭터 가운데 명성 상위 `topPercent`%이고, `minFame`은 표본의 최저 명성입니다(표본이 없으면 `null`).
+- 표본은 그 전직에서 명성이 있는 캐릭터 가운데 명성 상위 `topCount`위까지(같은 명성은 같은 순위)이고, `minFame`은 표본의 최저 명성입니다(표본이 없으면 `null`).
 - `sampleSize`는 표본 가운데 스킬 스타일 행이 있고, 그 행을 받을 때의 전직이 지금 전직과 같은 캐릭터 수입니다. `skills`, `evolutions`, `enhancements`도 이 캐릭터만 셉니다.
 - `skills`의 `learned`는 그 스킬을 배운 캐릭터 수, `levels`는 `[레벨, 캐릭터 수]`를 레벨 순으로 둔 것입니다. 채택률의 분모는 `sampleSize`, 개화와 강화 비율의 분모는 그 스킬의 `learned`입니다.
 - 목록은 모두 스킬 이름 순입니다.

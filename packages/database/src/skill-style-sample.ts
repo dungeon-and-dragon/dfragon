@@ -1,6 +1,6 @@
 import { Prisma } from './generated/prisma/client.js'
 
-export const SKILL_STYLE_SAMPLE_TOP_PERCENT = 10
+export const SKILL_STYLE_SAMPLE_TOP_COUNT = 5000
 
 export type SkillStyleSampleJob = {
   jobId: string
@@ -12,9 +12,9 @@ export function skillStyleSampleSql({ jobId, jobGrowId }: SkillStyleSampleJob): 
     SELECT "server_id", "character_id", "fame"
     FROM (
       SELECT "server_id", "character_id", "fame",
-        percent_rank() OVER (ORDER BY "fame" DESC) AS "fame_rank"
+        rank() OVER (ORDER BY "fame" DESC) AS "fame_rank"
       FROM "characters"
       WHERE "job_id" = ${jobId} AND "job_grow_id" = ${jobGrowId} AND "fame" IS NOT NULL
     ) AS "ranked"
-    WHERE "fame_rank" <= ${SKILL_STYLE_SAMPLE_TOP_PERCENT}::float8 / 100`
+    WHERE "fame_rank" <= ${SKILL_STYLE_SAMPLE_TOP_COUNT}`
 }

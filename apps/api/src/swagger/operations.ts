@@ -338,7 +338,7 @@ export function ApiSkillStats() {
     ApiOperation({
       summary: '전직별 스킬 채택률 조회',
       description:
-        '공개 API. 한 전직에서 명성이 있는 캐릭터 가운데 명성 상위 topPercent%를 표본으로 삼고, 그 가운데 스킬 스타일을 받았고 받을 때의 전직이 지금 전직과 같은 캐릭터의 스킬별 배운 수와 레벨 분포, 스킬 개화와 강화를 고른 수를 반환합니다. 스킬 스타일은 상세 조회가 저장한 행만 셉니다. 채택률의 분모는 sampleSize, 개화와 강화 비율의 분모는 그 스킬의 learned입니다. 전직마다 처음 요청할 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 계산은 공유합니다. 실패와 명성 있는 캐릭터가 없는 전직은 캐시하지 않습니다. Neople을 부르지 않습니다. DB 설정이 없는 API는 sampleSize 0과 빈 목록을 반환합니다.'
+        '공개 API. 한 전직에서 명성이 있는 캐릭터 가운데 명성 상위 topCount위까지를 표본으로 삼고, 그 가운데 스킬 스타일을 받았고 받을 때의 전직이 지금 전직과 같은 캐릭터의 스킬별 배운 수와 레벨 분포, 스킬 개화와 강화를 고른 수를 반환합니다. 스킬 스타일은 상세 조회가 저장한 행만 셉니다. 채택률의 분모는 sampleSize, 개화와 강화 비율의 분모는 그 스킬의 learned입니다. 전직마다 처음 요청할 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 계산은 공유합니다. 실패와 명성 있는 캐릭터가 없는 전직은 캐시하지 않습니다. Neople을 부르지 않습니다. DB 설정이 없는 API는 sampleSize 0과 빈 목록을 반환합니다.'
     }),
     ApiQuery({ name: 'jobId', required: true, schema: { type: 'string', minLength: 1 } }),
     ApiQuery({ name: 'jobGrowId', required: true, schema: { type: 'string', minLength: 1 } }),
