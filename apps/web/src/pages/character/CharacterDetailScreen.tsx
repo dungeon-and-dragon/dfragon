@@ -19,7 +19,7 @@ export function CharacterDetailScreen({
   onTabChange: (tab: CharacterTab) => void
 }): React.JSX.Element {
   const result = useCharacterDetail(serverId, characterId)
-  useViewedCharacter(result.status === 'success' ? result.detail.character : null)
+  useViewedCharacter(result.status === 'success' ? result.detail : null)
   switch (result.status) {
     case 'loading':
       return (

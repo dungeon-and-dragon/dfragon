@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { Fragment } from 'react'
 import { formatSeoulDateTime } from '#core/time-format'
+import { MALE_CRUSADER_ROLE_LABELS, type MaleCrusaderRole } from '#core/character/male-crusader'
 import type { SkillAdoption, SkillUpgradeRates } from '#core/ranking/skill-stats'
 import { type SkillMarks, skillMarkOf, type UpgradeType } from '#core/catalog/skill-window'
 import { styles } from './SkillAdoptionTooltip.style'
@@ -52,14 +53,25 @@ function UpgradeRows({
   )
 }
 
+function sampleText(sampleSize: number, role: MaleCrusaderRole | null): string {
+  const sample = `표본 ${integer.format(sampleSize)}명`
+  if (role === null) {
+    return sample
+  }
+
+  return `${MALE_CRUSADER_ROLE_LABELS[role]} ${sample}`
+}
+
 export function SkillAdoptionTooltip({
   name,
   adoption,
+  role,
   marks,
   now
 }: {
   name: string
   adoption: SkillAdoption
+  role: MaleCrusaderRole | null
   marks: SkillMarks
   now: number
 }): React.JSX.Element {
@@ -100,7 +112,7 @@ export function SkillAdoptionTooltip({
         />
       )}
       <span {...stylex.props(styles.footer)}>
-        <span>{`표본 ${integer.format(adoption.sampleSize)}명`}</span>
+        <span>{sampleText(adoption.sampleSize, role)}</span>
         <span>{formatSeoulDateTime(adoption.computedAt, now)}</span>
       </span>
     </span>

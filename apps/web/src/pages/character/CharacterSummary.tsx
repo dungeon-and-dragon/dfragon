@@ -1,13 +1,14 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { formatJobName } from '#core/character/job-format'
+import { grownJobName } from '#core/character/male-crusader'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture/cards'
 import { formatApproximateScore, toScoreView } from '#core/character/card-score'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { Portrait } from '../../components/Portrait'
-import { characterDisplaySchema } from '../../lib/stored-character'
+import { characterDisplayOf } from '../../lib/stored-character'
 import { styles } from './CharacterSummary.style'
 import { FavoriteToggle } from '../../components/FavoriteToggle'
 
@@ -15,8 +16,8 @@ const integer = new Intl.NumberFormat('ko-KR')
 
 export function CharacterSummary({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
-  const favorite = characterDisplaySchema.safeParse(character).data
-  const job = character.jobGrowName ?? character.jobName
+  const favorite = characterDisplayOf(detail)
+  const job = grownJobName(character, detail.card?.role ?? null)
   const affiliations = [
     {
       id: 'adventure',

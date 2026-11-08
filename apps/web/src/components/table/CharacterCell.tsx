@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
 import { formatJobName } from '#core/character/job-format'
+import { grownJobName } from '#core/character/male-crusader'
 import { Link } from '@tanstack/react-router'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
@@ -9,7 +10,7 @@ import { styles } from './CharacterCell.style'
 
 export type CharacterCellCharacter = Pick<
   StoredCharacter,
-  'serverId' | 'characterId' | 'characterName' | 'level' | 'jobName' | 'jobGrowName'
+  'serverId' | 'characterId' | 'characterName' | 'level' | 'jobName' | 'jobGrowName' | 'role'
 >
 
 export function CharacterCell({
@@ -19,7 +20,7 @@ export function CharacterCell({
   character: CharacterCellCharacter
   adventureName?: string | null
 }): React.JSX.Element {
-  const grownJob = character.jobGrowName ?? character.jobName
+  const grownJob = grownJobName(character, character.role)
   const job = grownJob != null ? formatJobName(grownJob) : null
   const showsLevel = character.level != null && !isMaxLevel(character.level)
 

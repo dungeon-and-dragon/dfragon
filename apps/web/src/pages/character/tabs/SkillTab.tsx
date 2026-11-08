@@ -2,6 +2,12 @@ import { ProgressCircle, Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import {
+  isMaleCrusaderJob,
+  MALE_CRUSADER_DEALER_SKILL,
+  type MaleCrusaderRole,
+  maleCrusaderRoleOf
+} from '#core/character/male-crusader'
+import {
   type SkillAdoption,
   type SkillStats,
   type SkillStatsJob,
@@ -39,11 +45,13 @@ function SkillIcon({
   icon,
   marks,
   adoption,
+  role,
   now
 }: {
   icon: SkillWindowIcon
   marks: SkillMarks
   adoption: SkillAdoption | null
+  role: MaleCrusaderRole | null
   now: number
 }): React.JSX.Element {
   const picked = icon.evolution !== null || icon.enhancement !== null
@@ -85,7 +93,13 @@ function SkillIcon({
       </Tooltip.Trigger>
       <Tooltip.Popup>
         {adoption !== null ? (
-          <SkillAdoptionTooltip name={icon.name} adoption={adoption} marks={marks} now={now} />
+          <SkillAdoptionTooltip
+            name={icon.name}
+            adoption={adoption}
+            role={role}
+            marks={marks}
+            now={now}
+          />
         ) : (
           <span {...stylex.props(styles.tooltip)}>{icon.name}</span>
         )}
@@ -94,12 +108,30 @@ function SkillIcon({
   )
 }
 
+function adoptionOf(
+  stats: SkillStats | null,
+  role: MaleCrusaderRole | null,
+  icon: SkillWindowIcon
+): SkillAdoption | null {
+  if (stats === null || (role !== null && icon.name === MALE_CRUSADER_DEALER_SKILL)) {
+    return null
+  }
+
+  return skillAdoptionOf(stats, {
+    name: icon.name,
+    evolutionNames: icon.evolutionNames,
+    hasEnhancement: icon.enhanceable
+  })
+}
+
 function SkillWindowGrid({
   skillWindow,
-  stats
+  stats,
+  role
 }: {
   skillWindow: SkillWindow
   stats: SkillStats | null
+  role: MaleCrusaderRole | null
 }): React.JSX.Element {
   const [now] = useState(Date.now)
 
@@ -118,26 +150,16 @@ function SkillWindowGrid({
             </span>
           </div>
         ))}
-        {skillWindow.icons.map((icon) => {
-          const adoption =
-            stats !== null
-              ? skillAdoptionOf(stats, {
-                  name: icon.name,
-                  evolutionNames: icon.evolutionNames,
-                  hasEnhancement: icon.enhanceable
-                })
-              : null
-
-          return (
-            <SkillIcon
-              key={`${icon.col},${icon.row}`}
-              icon={icon}
-              marks={skillWindow.marks}
-              adoption={adoption}
-              now={now}
-            />
-          )
-        })}
+        {skillWindow.icons.map((icon) => (
+          <SkillIcon
+            key={`${icon.col},${icon.row}`}
+            icon={icon}
+            marks={skillWindow.marks}
+            adoption={adoptionOf(stats, role, icon)}
+            role={role}
+            now={now}
+          />
+        ))}
       </div>
     </div>
   )
@@ -156,6 +178,7 @@ function SkillWindowWithStats({
     <SkillWindowGrid
       skillWindow={skillWindow}
       stats={stats.status === 'success' ? stats.value : null}
+      role={job.role}
     />
   )
 }
@@ -237,10 +260,14 @@ function LearnedSkills({
 
   const { jobId, jobGrowId } = detail.character
   if (jobId === null || jobGrowId === null) {
-    return <SkillWindowGrid skillWindow={skillWindow} stats={null} />
+    return <SkillWindowGrid skillWindow={skillWindow} stats={null} role={null} />
   }
 
-  return <SkillWindowWithStats skillWindow={skillWindow} job={{ jobId, jobGrowId }} />
+  const role = isMaleCrusaderJob({ jobId, jobGrowId })
+    ? maleCrusaderRoleOf(detail.character, detail.card?.role ?? null)
+    : null
+
+  return <SkillWindowWithStats skillWindow={skillWindow} job={{ jobId, jobGrowId, role }} />
 }
 
 function SkillSideColumn({

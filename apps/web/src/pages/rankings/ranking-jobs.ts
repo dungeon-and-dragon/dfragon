@@ -1,9 +1,17 @@
+import { formatJobName } from '#core/character/job-format'
+import {
+  MALE_CRUSADER_JOB,
+  type MaleCrusaderRole,
+  withMaleCrusaderRole
+} from '#core/character/male-crusader'
 import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 
-type RankingJob = Readonly<{
+export type RankingGrow = Readonly<{ jobGrowId: string; name: string; role?: MaleCrusaderRole }>
+
+export type RankingJob = Readonly<{
   jobId: string
   name: string
-  grows: readonly Readonly<{ jobGrowId: string; name: string }>[]
+  grows: readonly RankingGrow[]
 }>
 
 // DB에 아직 없는 직업도 보이도록 응답이 아니라 고정 목록이다. id는 Neople 직업 정보 조회(/df/jobs)의 2026-11-06 응답에서
@@ -96,10 +104,11 @@ export const RANKING_JOBS: readonly RankingJob[] = [
     ]
   },
   {
-    jobId: 'f6a4ad30555b99b499c07835f87ce522',
+    jobId: MALE_CRUSADER_JOB.jobId,
     name: '프리스트(남)',
     grows: [
-      { jobGrowId: '37495b941da3b1661bc900e68ef3b2c6', name: '眞 크루세이더' },
+      { jobGrowId: MALE_CRUSADER_JOB.jobGrowId, name: '眞 크루세이더', role: 'dealer' },
+      { jobGrowId: MALE_CRUSADER_JOB.jobGrowId, name: '眞 크루세이더', role: 'buffer' },
       { jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7', name: '眞 인파이터' },
       { jobGrowId: '6d459bc74ba73ee4fe5cdc4655400193', name: '眞 퇴마사' },
       { jobGrowId: 'c9b492038ee3ca8d27d7004cf58d59f3', name: '眞 어벤저' }
@@ -184,12 +193,30 @@ export const RANKING_JOBS: readonly RankingJob[] = [
   }
 ]
 
-export function rankingName({ jobId }: FameRankingFilter): string {
-  const job = RANKING_JOBS.find((candidate) => candidate.jobId === jobId)
+export function growLabel({ name, role }: RankingGrow): string {
+  return withMaleCrusaderRole(formatJobName(name), role ?? null)
+}
 
+export function growFilter(job: RankingJob, { jobGrowId, role }: RankingGrow): FameRankingFilter {
+  return { jobId: job.jobId, jobGrowId, ...(role !== undefined && { role }) }
+}
+
+export function isGrowSelected(grow: RankingGrow, filter: FameRankingFilter): boolean {
+  return grow.jobGrowId === filter.jobGrowId && grow.role === filter.role
+}
+
+// 딜러, 버퍼 칩은 같은 전직 ID라 목록 이름에 전직과 역할까지 써서 구분한다. 다른 전직 칩은 직업 이름만 쓴다.
+export function rankingName(filter: FameRankingFilter): string {
+  const job = RANKING_JOBS.find((candidate) => candidate.jobId === filter.jobId)
   if (job === undefined) {
     return '명성 랭킹'
   }
 
-  return `${job.name} 명성 랭킹`
+  const roleGrow =
+    filter.role !== undefined ? job.grows.find((grow) => isGrowSelected(grow, filter)) : undefined
+  if (roleGrow === undefined) {
+    return `${job.name} 명성 랭킹`
+  }
+
+  return `${job.name} ${growLabel(roleGrow)} 명성 랭킹`
 }

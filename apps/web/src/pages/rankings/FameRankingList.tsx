@@ -46,7 +46,10 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
 
       return (
         <ListBox name={name}>
-          <ScrollingTable key={`${filter.jobId}/${filter.jobGrowId}`} ranking={result.value} />
+          <ScrollingTable
+            key={`${filter.jobId}/${filter.jobGrowId}/${filter.role}`}
+            ranking={result.value}
+          />
         </ListBox>
       )
   }

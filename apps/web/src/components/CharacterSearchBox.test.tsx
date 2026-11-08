@@ -104,6 +104,7 @@ it('최근 본 캐릭터가 있으면 지우기 버튼으로 비운 뒤 빈 이�
         jobName: null,
         jobGrowName: null,
         fame: 126965,
+        role: null,
         viewedAt: 0
       }
     ]
@@ -135,6 +136,7 @@ function recentCharacter(
     jobName: '합성 직업',
     jobGrowName: null,
     fame: null,
+    role: null,
     viewedAt: 0
   }
 }

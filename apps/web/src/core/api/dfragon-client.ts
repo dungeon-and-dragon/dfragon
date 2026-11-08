@@ -301,14 +301,17 @@ export function createDfragonClient({
         return requestJson('/rankings/fame', fameRankingSchema, {
           searchParams: {
             ...(filter.jobId !== undefined && { jobId: filter.jobId }),
-            ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId })
+            ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
+            ...(filter.role !== undefined && { role: filter.role })
           }
         })
       }
     },
     stats: () => requestJson('/stats', characterStatsSchema),
-    skillStats: ({ jobId, jobGrowId }) =>
-      requestJson('/stats/skills', skillStatsSchema, { searchParams: { jobId, jobGrowId } }),
+    skillStats: ({ jobId, jobGrowId, role }) =>
+      requestJson('/stats/skills', skillStatsSchema, {
+        searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
+      }),
     adventures: {
       async weekly(adventureName) {
         if (adventureName.trim() === '') {
