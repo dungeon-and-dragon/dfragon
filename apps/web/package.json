@@ -9,7 +9,6 @@
     "lint": "biome lint",
     "preview": "vite preview",
     "test": "vitest run",
-    "build:skilltab": "node scripts/build-skilltab.mjs",
     "typecheck": "tsc -b",
     "prepare:ocr-assets": "node ../../packages/client-core/scripts/prepare-ocr-assets.mjs public/ocr",
     "lint:fix": "biome lint --write",
@@ -35,7 +34,6 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
-    "pngjs": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
