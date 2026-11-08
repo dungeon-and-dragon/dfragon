@@ -12,7 +12,7 @@ import { TodayGrade } from './TodayGrade'
 type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
-  { label: '멀티서치', to: '/' },
+  { label: '멀티서치', to: '/multisearch' },
   { label: '랭킹', to: '/rankings' },
   { label: '통계', to: '/stats' },
   { label: '모험단', to: '/adventures' },
@@ -45,8 +45,7 @@ export function GlobalBar(): React.JSX.Element {
             <Link
               key={item.to}
               to={item.to}
-              // 첫 화면 주소는 모든 주소의 앞부분이라 같은 주소일 때만 지금 화면으로 본다.
-              activeOptions={{ exact: item.to === '/', includeSearch: false }}
+              activeOptions={{ includeSearch: false }}
               {...stylex.props(styles.menuItem)}
             >
               {item.label}
