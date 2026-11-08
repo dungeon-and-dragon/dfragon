@@ -2,7 +2,7 @@ import {
   type CharacterStats,
   type FameRankingFilter,
   type JobSkillAdoption,
-  SKILL_STYLE_SAMPLE_TOP_PERCENT,
+  SKILL_STYLE_SAMPLE_TOP_COUNT,
   type SkillStyleSampleJob,
   type StoredCharacter
 } from '@dfragon/database'
@@ -16,7 +16,7 @@ export type FameRanking = {
 
 export type Stats = CharacterStats & { computedAt: string }
 
-export type SkillStats = JobSkillAdoption & { computedAt: string; topPercent: number }
+export type SkillStats = JobSkillAdoption & { computedAt: string; topCount: number }
 
 export interface RankingStatsReader {
   readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
@@ -63,7 +63,7 @@ export function createRankingStatsService(
     const adoption = await reader.readJobSkillAdoption(job)
     const skillStats = {
       computedAt: computedAt.toISOString(),
-      topPercent: SKILL_STYLE_SAMPLE_TOP_PERCENT,
+      topCount: SKILL_STYLE_SAMPLE_TOP_COUNT,
       ...adoption
     }
     // 명성 있는 캐릭터가 없는 전직은 아무 문자열로 만들 수 있어, 캐시하면 query마다 메모리가 는다.

@@ -27,8 +27,8 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readAdventureNames(client, characters)`: `characters`(서버, 캐릭터 ID) 가운데 `characters`에 저장된 캐릭터의 모험단 이름(`StoredAdventureName`)을 query 한 번으로 돌려줍니다. 저장되지 않은 캐릭터는 결과에 없고 순서는 정하지 않습니다.
 - `readGuild(client, guildId)`: `guild_id`가 같은 캐릭터를 같은 순서로 읽고, 가장 최근에 받은 행의 길드 이름과 함께(`StoredGuild`) 돌려줍니다. 길드 ID는 서버가 달라도 같은 길드라 서버로 거르지 않습니다. 길드원이 없으면 이름은 `null`입니다.
 - `readFameRanking(client, { jobId, jobGrowId }, limit)`: 명성이 있는 캐릭터(`StoredCharacter`)를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 `limit`개까지 돌려줍니다. 주지 않은 조건은 거르지 않습니다.
-- `readJobSkillAdoption(client, { jobId, jobGrowId })`: 그 전직의 명성 상위 `SKILL_STYLE_SAMPLE_TOP_PERCENT`%(명성 없는 행 제외) 가운데 같은 전직으로 받은 스킬 스타일 행이 있는 캐릭터를 세어, 표본 최저 명성, 센 캐릭터 수, 스킬별 배운 수와 레벨별 수, 개화와 강화의 type별 수(`JobSkillAdoption`)를 돌려줍니다. 목록은 스킬 이름 순입니다. 같은 명성은 같은 순위라 경계에서 함께 들거나 함께 빠집니다.
-- `SKILL_STYLE_SAMPLE_TOP_PERCENT`(10): 스킬 채택 집계 표본의 명성 상위 비율입니다.
+- `readJobSkillAdoption(client, { jobId, jobGrowId })`: 그 전직의 명성 상위 `SKILL_STYLE_SAMPLE_TOP_COUNT`위까지(명성 없는 행 제외) 가운데 같은 전직으로 받은 스킬 스타일 행이 있는 캐릭터를 세어, 표본 최저 명성, 센 캐릭터 수, 스킬별 배운 수와 레벨별 수, 개화와 강화의 type별 수(`JobSkillAdoption`)를 돌려줍니다. 목록은 스킬 이름 순입니다. 같은 명성은 같은 순위라 경계에서 함께 들거나 함께 빠집니다.
+- `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000): 스킬 채택 집계 표본의 명성 상위 순위입니다.
 - `readCharacterStats(client)`: 전체 캐릭터 수, 서버별 캐릭터 수, 기본 정보를 받은 캐릭터의 직업과 전직별 수와 평균 명성(반올림 전), 명성 10,000 단위 구간별 수(`CharacterStats`)를 돌려줍니다. 서버와 직업은 많은 순, 구간은 캐릭터가 있는 구간만 낮은 순입니다.
 - `replaceTimelineRange(client, character, range, events, items)`: 캐릭터 하나의 `[range.start, range.end]`(양 끝 포함) 타임라인을 교체합니다.
   한 transaction 안에서 캐릭터 단위 `pg_advisory_xact_lock`을 잡고, `timeline_events`, `timeline_items`에서 그 구간의 행을 지운 뒤 새 행을 넣고, `timeline_sync_state.synced_until`을 `range.end`로 옮깁니다.
