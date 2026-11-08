@@ -33,6 +33,7 @@ import { createNeopleShopGrade } from '../today-grade/neople.js'
 import {
   readAdventureActivity,
   readAdventureActivityDay,
+  readAdventureSeasonDays,
   readAdventureSeasonBackfill
 } from '../adventure-guild/activity.js'
 import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
@@ -89,6 +90,8 @@ function createDatabaseSubscribers(
         readAdventureActivity(client, adventureName, seasonId, new Date()),
       readAdventureActivityDay: (adventureName, day) =>
         readAdventureActivityDay(client, adventureName, day),
+      readAdventureSeasonDays: (adventureName, seasonId) =>
+        readAdventureSeasonDays(client, adventureName, seasonId, new Date()),
       readAdventureSeasonBackfill: (adventureName, seasonId) =>
         readAdventureSeasonBackfill(client, adventureName, seasonId, new Date())
     },

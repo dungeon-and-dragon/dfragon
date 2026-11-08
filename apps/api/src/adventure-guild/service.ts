@@ -9,6 +9,7 @@ import {
   type ActivitySeason,
   type AdventureActivity,
   type AdventureActivityRead,
+  type AdventureSeasonDays,
   type AdventureSeasonBackfillRead,
   type StoredActivitySeason,
   emptySeasonActivity,
@@ -40,6 +41,10 @@ export interface AdventureGuildReader {
     seasonId: number | undefined
   ): Promise<AdventureActivityRead | undefined>
   readAdventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
+  readAdventureSeasonDays(
+    adventureName: string,
+    seasonId: number
+  ): Promise<AdventureSeasonDays | undefined>
   readAdventureSeasonBackfill(
     adventureName: string,
     seasonId: number
@@ -54,6 +59,7 @@ export interface AdventureGuildService {
   adventureWeekly(adventureName: string): Promise<AdventureWeekly>
   adventureActivity(adventureName: string, seasonId: number | undefined): Promise<AdventureActivity>
   adventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
+  adventureSeasonDays(adventureName: string, seasonId: number): Promise<AdventureSeasonDays>
   adventureSeasonBackfill(adventureName: string, seasonId: number): Promise<ActivitySeason>
 }
 
@@ -128,6 +134,14 @@ export function createAdventureGuildService(
     adventureActivityDay(adventureName, day) {
       return reader.readAdventureActivityDay(adventureName, day)
     },
+    async adventureSeasonDays(adventureName, seasonId) {
+      const days = await reader.readAdventureSeasonDays(adventureName, seasonId)
+      if (days === undefined) {
+        throw new CharacterDetailFailure('query')
+      }
+
+      return days
+    },
     // 받기는 기다리지 않고 queue에 넣은 직후의 진행률을 준다.
     async adventureSeasonBackfill(adventureName, seasonId) {
       const read = await reader.readAdventureSeasonBackfill(adventureName, seasonId)
@@ -165,6 +179,7 @@ export const emptyAdventureGuildService = createAdventureGuildService(
     },
     readAdventureActivityDay: async (_adventureName, day) =>
       toActivityDayDetail(day, { clears: [], items: [] }),
+    readAdventureSeasonDays: async () => undefined,
     readAdventureSeasonBackfill: async () => undefined
   },
   () => undefined,
