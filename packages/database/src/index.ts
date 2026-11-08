@@ -13,11 +13,14 @@ export { createDatabaseClient } from './client.js'
 export type { DatabaseClient } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
+export { MALE_CRUSADER_DEALER_SKILL } from './male-crusader.js'
+export type { MaleCrusaderRole } from './male-crusader.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
 export { readJobSkillAdoption } from './skill-adoption.js'
 export type {
   JobSkillAdoption,
+  JobSkillAdoptionQuery,
   SkillAdoption,
   SkillLevelCount,
   SkillSelectionCount
