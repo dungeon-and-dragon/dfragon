@@ -120,14 +120,20 @@ it('스킬 채택률은 전직을 query로 보내고 응답을 schema로 읽는�
   const fetch = respond({ ...skillStats, topCount: 5000 })
   const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).skillStats
 
-  await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1' })).resolves.toEqual(skillStats)
+  await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1', role: null })).resolves.toEqual(
+    skillStats
+  )
   expect(new Request(fetch.mock.calls[0][0]).url).toBe(
     `${API_ORIGIN}/stats/skills?jobId=job-1&jobGrowId=grow-1`
+  )
+  await read({ jobId: 'job-1', jobGrowId: 'grow-1', role: 'buffer' })
+  expect(new Request(fetch.mock.calls[1][0]).url).toBe(
+    `${API_ORIGIN}/stats/skills?jobId=job-1&jobGrowId=grow-1&role=buffer`
   )
   await expect(
     createDfragonClient({
       apiOrigin: API_ORIGIN,
       fetch: respond({ ...skillStats, sampleSize: undefined })
-    }).skillStats({ jobId: 'job-1', jobGrowId: 'grow-1' })
+    }).skillStats({ jobId: 'job-1', jobGrowId: 'grow-1', role: null })
   ).rejects.toThrow()
 })

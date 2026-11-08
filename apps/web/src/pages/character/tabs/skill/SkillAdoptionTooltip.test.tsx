@@ -8,6 +8,7 @@ import {
   skillAdoptionOf
 } from '#core/ranking/skill-stats'
 import type { SkillMarks } from '#core/catalog/skill-window'
+import type { MaleCrusaderRole } from '#core/character/male-crusader'
 import { SkillAdoptionTooltip } from './SkillAdoptionTooltip'
 
 const MARKS: SkillMarks = {
@@ -59,14 +60,23 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function renderTooltip(target: SkillAdoptionTarget): Promise<void> {
+async function renderTooltip(
+  target: SkillAdoptionTarget,
+  role: MaleCrusaderRole | null = null
+): Promise<void> {
   const adoption = skillAdoptionOf(STATS, target)
   if (adoption === null) {
     throw new Error('합성 집계의 표본이 20명보다 적다')
   }
   await act(async () =>
     root.render(
-      <SkillAdoptionTooltip name={target.name} adoption={adoption} marks={MARKS} now={NOW} />
+      <SkillAdoptionTooltip
+        name={target.name}
+        adoption={adoption}
+        role={role}
+        marks={MARKS}
+        now={NOW}
+      />
     )
   )
 }
@@ -113,4 +123,12 @@ it('개화, 강화가 없는 스킬은 그 줄을 두지 않는다', async () =>
     '상위 50% 41 상위 5% 50',
     '표본 2,316명 11-07 00:00'
   ])
+})
+
+it('남성 크루세이더의 역할 표본이면 표본 수 앞에 역할을 쓴다', async () => {
+  await renderTooltip({ name: '참수', evolutionNames: null, hasEnhancement: false }, 'dealer')
+  expect(lines().at(-1)).toBe('딜러 표본 2,316명 11-07 00:00')
+
+  await renderTooltip({ name: '참수', evolutionNames: null, hasEnhancement: false }, 'buffer')
+  expect(lines().at(-1)).toBe('버퍼 표본 2,316명 11-07 00:00')
 })
