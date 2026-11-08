@@ -4,7 +4,7 @@
 
 | 경로 | 내용 | 원본 | 소비 |
 | --- | --- | --- | --- |
-| `ocr-finetuned/` | OCR 파인튜닝 모델 `model.onnx`, 사전 `characters.txt`와 출처, 변경 고지 `NOTICE` | [dfragon-ocr-models](https://github.com/dungeon-and-dragon/dfragon-ocr-models), Apache-2.0 | client-core `ocr-model.config.mjs`, Web `prepare:ocr-assets` |
+| `ocr-finetuned/` | OCR 파인튜닝 모델 `model.onnx`, 사전 `characters.txt`와 출처, 변경 고지 `NOTICE` | [dfragon-ocr-models](https://github.com/dungeon-and-dragon/dfragon-ocr-models), Apache-2.0 | Web `apps/web/ocr-model.config.mjs`, Web `prepare:ocr-assets` |
 | `score-engine.lock.json` | API 이미지에 넣을 장비 점수, 버프 점수 엔진의 소스 commit, `VERSION`, `BUNDLE` | 비공개 엔진 저장소 `dnf-reverse-engineering` | node1의 API 이미지 빌드 |
 | `score-engine/` | lock의 엔진으로 빌드한 `libdnfscore.so`(Linux x64)나 로컬용 `libdnfscore.dylib`(macOS arm64), `dnfscore.dll`(Windows x64). Git이 추적하지 않습니다 | 위 lock의 엔진 commit | API 이미지(`apps/api/Dockerfile`), API 테스트 |
 
