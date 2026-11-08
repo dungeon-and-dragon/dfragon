@@ -24,7 +24,6 @@ const MARKS: SkillMarks = {
 // 합성 집계다. 스킬, 갈래 이름은 응답 형태만 맞춘 값이다.
 const STATS: SkillStats = {
   computedAt: '2026-11-06T15:00:00.000Z',
-  topPercent: 10,
   minFame: 70000,
   sampleSize: 2316,
   skills: [

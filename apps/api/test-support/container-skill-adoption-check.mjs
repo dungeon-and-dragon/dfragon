@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import {
+  SKILL_STYLE_SAMPLE_TOP_COUNT,
   createDatabaseClient,
   readDatabaseConfiguration,
   readJobSkillAdoption,
@@ -7,8 +8,8 @@ import {
   recordCharacterSkillStyle
 } from '@dfragon/database'
 
-// 합성 캐릭터다. 한 전직에 명성 있는 캐릭터 21명을 두어 상위 10%인 3명이 표본이 된다.
-// 3등의 percent_rank가 정확히 0.1이라 경계의 캐릭터가 표본에 드는지 확인한다.
+// 합성 캐릭터다. 한 전직에 명성 있는 캐릭터 5018명을 두어 상위 5000명이 표본이 된다.
+// adopt-19가 정확히 5000위라 경계의 캐릭터가 표본에 드는지 확인한다.
 const jobId = 'synthetic-adopt-job'
 const jobGrowId = 'synthetic-adopt-grow'
 const job = { jobId, jobGrowId }
@@ -56,6 +57,9 @@ try {
     enhancements: []
   })
 
+  for (let index = 1; index <= SKILL_STYLE_SAMPLE_TOP_COUNT - 3; index++) {
+    await recordCharacterBasic(client, basic(`adopt-filler-${index}`, 300000 + index))
+  }
   for (let index = 1; index <= 21; index++) {
     await recordCharacterBasic(client, basic(`adopt-${index}`, 100000 + index))
   }
@@ -116,7 +120,7 @@ try {
   const answer = await get()
   assert.deepEqual(
     { ...answer, computedAt: undefined },
-    { computedAt: undefined, topPercent: 10, ...expected }
+    { computedAt: undefined, topCount: SKILL_STYLE_SAMPLE_TOP_COUNT, ...expected }
   )
   await recordCharacterSkillStyle(client, style('adopt-20', learnedAll))
   assert.deepEqual(await get(), answer)

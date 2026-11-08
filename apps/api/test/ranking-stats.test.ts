@@ -317,7 +317,7 @@ test('스킬 채택률은 전직마다 같은 날(KST)에는 DB를 한 번만 �
   assert.deepEqual(reads, [job, otherJob])
   assert.equal(concurrent, first)
   assert.equal(sameDay, first)
-  assert.deepEqual(first, { computedAt: '2026-11-06T14:59:00.000Z', topPercent: 10, ...adoption })
+  assert.deepEqual(first, { computedAt: '2026-11-06T14:59:00.000Z', topCount: 5000, ...adoption })
 
   now = new Date('2026-11-06T15:00:00.000Z')
   const nextDay = await service.skillStats(job)
@@ -376,7 +376,7 @@ test('스킬 채택률 계산이 실패하면 500을 주고 실패를 캐시하�
       { ...retried.body, computedAt: undefined },
       {
         computedAt: undefined,
-        topPercent: 10,
+        topCount: 5000,
         ...adoption
       }
     )
@@ -422,7 +422,7 @@ test('DB 설정이 없는 API는 표본 0인 빈 스킬 채택률을 준다', as
       { ...body, computedAt: undefined },
       {
         computedAt: undefined,
-        topPercent: 10,
+        topCount: 5000,
         minFame: null,
         sampleSize: 0,
         skills: [],
