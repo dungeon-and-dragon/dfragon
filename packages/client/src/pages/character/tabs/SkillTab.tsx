@@ -66,6 +66,7 @@ function SkillIcon({
             <img
               src={skillMarkOf(marks, 'evolution', icon.evolution)}
               alt=""
+              draggable={false}
               {...stylex.props(styles.evolutionMark, styles.scaledMark)}
             />
           )}
@@ -73,6 +74,7 @@ function SkillIcon({
             <img
               src={skillMarkOf(marks, 'enhancement', icon.enhancement)}
               alt=""
+              draggable={false}
               {...stylex.props(styles.enhancementMark, styles.scaledMark)}
             />
           )}
@@ -171,7 +173,9 @@ function LearnedSkillRows({ rows }: { rows: readonly LearnedSkillRow[] }): React
               <li key={skill.skillId ?? index} {...stylex.props(styles.listRow)}>
                 <span>{skill.name}</span>
                 {skill.level !== null && (
-                  <span {...stylex.props(styles.subtle)}>{`Lv ${skill.level}`}</span>
+                  <span {...stylex.props(styles.subtle, styles.unselectable)}>
+                    {`Lv ${skill.level}`}
+                  </span>
                 )}
               </li>
             ))}

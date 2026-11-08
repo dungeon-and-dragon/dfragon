@@ -313,6 +313,19 @@ it('스킬 창 아이콘에 고른 개화 마름모와 강화 표식을 붙인�
   expect(marksOf('성화')).toEqual([])
 })
 
+it('스킬 창과 개화, 강화 표의 마크는 드래그되지 않는다', async () => {
+  await render(
+    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
+    characterDetailFixture('dealer')
+  )
+
+  for (const label of ['스킬 창', '스킬 개화', '스킬 강화']) {
+    const marks = container.querySelectorAll<HTMLImageElement>(`[aria-label="${label}"] img`)
+    expect(marks.length).toBeGreaterThan(0)
+    expect([...marks].every((mark) => !mark.draggable)).toBe(true)
+  }
+})
+
 it('스킬 트리 코드와 체인 스킬 이름을 보인다', async () => {
   await render(
     createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),

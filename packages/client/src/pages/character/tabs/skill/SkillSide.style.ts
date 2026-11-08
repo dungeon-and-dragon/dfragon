@@ -82,7 +82,12 @@ export const styles = stylex.create({
   },
   rowBody: { flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 },
   rowTitle: { display: 'flex', alignItems: 'baseline', gap: 6, fontWeight: 500 },
-  rowLevel: { color: colors.fgSubtle, fontSize: 11, fontVariantNumeric: 'tabular-nums' },
+  rowLevel: {
+    color: colors.fgSubtle,
+    fontSize: 11,
+    fontVariantNumeric: 'tabular-nums',
+    userSelect: 'none'
+  },
   branches: { display: 'flex', flexWrap: 'wrap', gap: 6 },
   branch: {
     display: 'inline-flex',
@@ -117,7 +122,8 @@ export const styles = stylex.create({
     position: 'relative',
     flexShrink: 0,
     width: SKILL_ICON_SIZE,
-    height: SKILL_ICON_SIZE
+    height: SKILL_ICON_SIZE,
+    userSelect: 'none'
   },
   skillIconPicked: { boxShadow: `0 0 0 2px ${colors.signal}` },
   emptyIcon: {

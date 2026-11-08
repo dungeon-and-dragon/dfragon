@@ -74,7 +74,9 @@ export function SkillChainSection({ chain }: { chain: SkillChain | null }): Reac
           <li key={`${name}-${index}`} {...stylex.props(styles.chainLink)}>
             <span {...stylex.props(styles.chainSkill)}>
               {icon !== null ? (
-                <SkillSprite icon={icon} />
+                <span {...stylex.props(styles.skillIcon)}>
+                  <SkillSprite icon={icon} />
+                </span>
               ) : (
                 <span aria-hidden="true" {...stylex.props(styles.skillIcon, styles.emptyIcon)} />
               )}
@@ -104,6 +106,7 @@ function Branch({
       <img
         src={mark}
         alt=""
+        draggable={false}
         {...stylex.props(styles.branchMark, !picked && styles.branchMarkDim)}
       />
       {label}
@@ -142,7 +145,12 @@ function UpgradeSkillIcon({
     <span {...stylex.props(styles.skillIcon, row.picked !== null && styles.skillIconPicked)}>
       <SkillSprite icon={row.icon} />
       {evolutionMark !== null && (
-        <img src={evolutionMark} alt="" {...stylex.props(markStyles.evolutionMark)} />
+        <img
+          src={evolutionMark}
+          alt=""
+          draggable={false}
+          {...stylex.props(markStyles.evolutionMark)}
+        />
       )}
     </span>
   )
