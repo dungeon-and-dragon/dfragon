@@ -82,6 +82,20 @@ function globalMenu(): [string | null, string | null][] {
   ])
 }
 
+function footerLinks(): [string | null, string | null, string | null][] {
+  return [...container.querySelectorAll('footer[aria-label="사이트 정보"] a')].map((link) => [
+    link.textContent,
+    link.getAttribute('href'),
+    link.getAttribute('aria-current')
+  ])
+}
+
+function footerLink(name: string): HTMLAnchorElement {
+  return [
+    ...container.querySelectorAll<HTMLAnchorElement>('footer[aria-label="사이트 정보"] a')
+  ].find((link) => link.textContent === name)!
+}
+
 function homeLink(): HTMLAnchorElement {
   return [...container.querySelectorAll<HTMLAnchorElement>('main a')].find(
     (link) => link.textContent === '첫 화면으로'
@@ -271,6 +285,44 @@ it.each([
     ])
   }
 )
+
+it('화면 상자 아래 푸터에 Neople 로고 링크와 두 약관 화면 링크를 두고 지금 화면 표시는 하지 않는다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const main = container.querySelector('main')!
+  const footer = container.querySelector('footer[aria-label="사이트 정보"]')!
+  const neopleLink = footer.querySelector('a')!
+  expect(main.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  expect(neopleLink.getAttribute('target')).toBe('_blank')
+  expect(neopleLink.querySelector('img')?.getAttribute('alt')).toBe('Neople 오픈 API')
+  expect(footerLinks()).toEqual([
+    ['', 'https://developers.neople.co.kr', null],
+    ['이용약관', '/terms', null],
+    ['개인정보처리방침', '/privacy', null]
+  ])
+})
+
+it('푸터의 약관 링크를 누르면 그 화면으로 가고 지금 화면의 링크만 현재 위치로 알린다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await act(async () => footerLink('이용약관').click())
+
+  await waitForPath('/terms')
+  expect(container.querySelector('main h1')?.textContent).toBe('이용약관')
+  expect(footerLinks().slice(1)).toEqual([
+    ['이용약관', '/terms', 'page'],
+    ['개인정보처리방침', '/privacy', null]
+  ])
+
+  await act(async () => footerLink('개인정보처리방침').click())
+
+  await waitForPath('/privacy')
+  expect(container.querySelector('main h1')?.textContent).toBe('개인정보처리방침')
+  expect(footerLinks().slice(1)).toEqual([
+    ['이용약관', '/terms', null],
+    ['개인정보처리방침', '/privacy', 'page']
+  ])
+})
 
 it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 지금 화면으로 표시한다', async () => {
   window.history.replaceState(null, '', `/rankings?jobId=${RANKING_JOBS[0]!.jobId}`)
