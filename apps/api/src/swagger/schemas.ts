@@ -611,7 +611,7 @@ export const apiSchemas: Record<string, SchemaObject> = {
     fameDistribution: {
       type: 'array',
       description:
-        '명성이 있는 캐릭터를 10,000 단위 구간으로 센 수. 캐릭터가 있는 구간만 낮은 순입니다.',
+        '명성이 있는 캐릭터를 1,000 단위 구간으로 센 수. 캐릭터가 있는 구간만 낮은 순입니다.',
       items: object({
         from: { type: 'integer', description: '구간 시작(포함)' },
         to: { type: 'integer', description: '구간 끝(제외)' },

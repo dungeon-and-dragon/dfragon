@@ -34,7 +34,7 @@ export type CharacterStats = {
   fameDistribution: FameBucket[]
 }
 
-const FAME_BUCKET_SIZE = 10_000
+const FAME_BUCKET_SIZE = 1_000
 
 export async function readFameRanking(
   client: DatabaseClient,
