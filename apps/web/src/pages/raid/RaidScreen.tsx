@@ -10,7 +10,7 @@ import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
 import { useClipboardCopy } from '../../hooks/useClipboardCopy'
 import { useRaidSlotCards } from '../../hooks/useRaidSlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { filledSlotCount } from '#core/lib/slot-cards'
+import { filledSlotCount } from '#core/capture/slot-cards'
 import { RaidPage } from './RaidPage'
 
 export function RaidScreen({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {

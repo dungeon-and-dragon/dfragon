@@ -1,9 +1,9 @@
 import * as stylex from '@stylexjs/stylex'
-import { isMaxLevel } from '#core/lib/character-level'
-import { formatJobName } from '#core/lib/job-format'
+import { isMaxLevel } from '#core/character/character-level'
+import { formatJobName } from '#core/character/job-format'
 import { Link } from '@tanstack/react-router'
-import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/shared/search/character-summary'
-import type { StoredCharacter } from '#core/shared/ranking/ranking-stats'
+import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
+import type { StoredCharacter } from '#core/ranking/ranking-stats'
 import { Portrait } from '../Portrait'
 import { styles } from './CharacterCell.style'
 

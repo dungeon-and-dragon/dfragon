@@ -10,10 +10,7 @@ import {
   useRef,
   useState
 } from 'react'
-import {
-  ALL_CHARACTER_SERVERS,
-  isSearchableCharacterName
-} from '#core/shared/api/character-schemas'
+import { ALL_CHARACTER_SERVERS, isSearchableCharacterName } from '#core/api/character-schemas'
 import { characterSearchServerOptions } from '../constants/server-options'
 import { ChevronDownIcon } from './ChevronDownIcon'
 import { CloseIcon } from './CloseIcon'

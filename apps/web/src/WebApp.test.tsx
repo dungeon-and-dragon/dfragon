@@ -12,9 +12,9 @@ import { decodeBrowserImage } from './host/browser-png'
 import { readRaidWindowTemplates } from './host/screen-watch/browser-raid-templates'
 import { readTownIndicatorTemplate } from './host/screen-watch/browser-town-template'
 import { WebApp } from './WebApp'
-import { CHARACTER_SERVER_NAMES } from '#core/shared/search/character-summary'
-import type { CharacterCandidate } from '#core/types/character'
-import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
+import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
+import type { CharacterCandidate } from '#core/character/character'
+import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
 import { WEB_SCREEN_WATCH_TEXTS } from './components/web-capture-texts'
 
 vi.mock('./host/browser-png', () => ({

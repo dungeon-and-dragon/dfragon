@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { FameRankingFilter } from '#core/shared/ranking/ranking-stats'
+import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import { RANKING_JOBS } from './ranking-jobs'
 
 const searchSchema = z.object({

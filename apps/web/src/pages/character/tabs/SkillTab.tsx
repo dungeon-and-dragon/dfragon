@@ -6,7 +6,7 @@ import {
   type SkillStats,
   type SkillStatsJob,
   skillAdoptionOf
-} from '#core/shared/ranking/skill-stats'
+} from '#core/ranking/skill-stats'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
@@ -21,7 +21,7 @@ import {
   skillUpgradeBoardOf,
   skillUpgradesOf,
   skillWindowOf
-} from '#core/shared/search/skill-window'
+} from '#core/catalog/skill-window'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
 import { useSkillStats } from '../../../hooks/useSkillStats'
 import { useSkillWindowCatalog } from '../../../hooks/useSkillWindowCatalog'

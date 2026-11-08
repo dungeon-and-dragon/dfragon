@@ -10,7 +10,7 @@ import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
 import { useClipboardCopy } from '../../hooks/useClipboardCopy'
 import { usePartySlotCards } from '../../hooks/usePartySlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { filledSlotCount } from '#core/lib/slot-cards'
+import { filledSlotCount } from '#core/capture/slot-cards'
 import { PartyPage } from './PartyPage'
 import { styles } from './PartyScreen.style'
 

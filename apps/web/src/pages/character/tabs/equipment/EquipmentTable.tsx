@@ -1,12 +1,12 @@
 import * as stylex from '@stylexjs/stylex'
-import { MISSING_VALUE } from '#core/constants/cards'
+import { MISSING_VALUE } from '#core/capture/cards'
 import type {
   EnchantOption,
   EquipmentReinforce,
   EquipmentRow,
   EquipmentView
-} from '#core/lib/character-equipment'
-import { formatPoint, type ItemView } from '#core/lib/character-item'
+} from '#core/character/character-equipment'
+import { formatPoint, type ItemView } from '#core/character/character-item'
 import { ItemCell } from './item-parts'
 import { styles as tableStyles } from './item-table.style'
 import { styles } from './EquipmentTable.style'

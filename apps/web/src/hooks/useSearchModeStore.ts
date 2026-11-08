@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SearchMode } from '#core/types/search-mode'
+import type { SearchMode } from '#core/capture/search-mode'
 
 export const useSearchModeStore = create<{
   searchMode: SearchMode

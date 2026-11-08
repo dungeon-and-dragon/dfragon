@@ -6,7 +6,7 @@ import type {
   TimelineClear,
   TimelineClearCount,
   TimelineEnhancement
-} from '#core/shared/search/character-timeline'
+} from '#core/character/character-timeline'
 import type { TimelinePages } from '../../../../hooks/useTimelinePages'
 import {
   acquisitionRoute,

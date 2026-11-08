@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
-import { fillSlots } from '#core/lib/slots'
+import { fillSlots } from '#core/capture/slots'
 import {
   nextCandidatePick,
   toCandidatePicker,
   type CandidatePick,
   type CandidatePicker
-} from '#core/lib/candidate-picker'
-import type { SearchSlotCount } from '#core/types/search'
+} from '#core/capture/candidate-picker'
+import type { SearchSlotCount } from '#core/search/search'
 import type { CardSearchHost } from '../host/client-host'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 

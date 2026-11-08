@@ -28,7 +28,7 @@ pnpm --filter @dfragon/web preview
 
 캐릭터 상세의 스킬 탭은 데이터 묶음이 있어야 스킬 창 배치로 그립니다. 웹 앱은 같은 origin의 `/skilltab/skilltab.v3.json` index를 한 번 받고, index가 가리키는 그 캐릭터 직업의 파일(`<판>/jobs/<jobId>.<내용 hash>.json`)만 받습니다. 버프 강화 탭의 버프 스킬 아이콘도 같은 직업 파일을 씁니다. index가 404거나 index에 그 직업이 없으면 직업 파일을 받지 않고 배운 스킬을 습득 레벨 줄로 나눈 목록으로 보이며, 묶음에 없는 전직과 직업 파일을 받지 못했을 때도 같은 목록으로 보입니다. 스킬 창 배치로 그릴 때는 그 전직의 스킬 채택률을 API `GET /stats/skills`에서 한 번 받아 스킬 아이콘 Tooltip에 채택률, 레벨 분포, 개화와 강화 비율, 표본 수와 기준 시각을 더합니다. 표본이 20명보다 적거나, 받는 중이거나, 받지 못했으면 Tooltip은 스킬 이름 한 줄입니다. 서약 탭의 세트 아이콘과 선택지 효과 카드는 `/skilltab/oath.v2.json`에서 받으며, 404면 지금의 서약 한 줄로 보입니다.
 
-데이터 묶음의 형식은 [스킬 창 schema](src/core/shared/search/skill-window.ts)와 [서약 schema](src/core/shared/search/oath-catalog.ts)에 정의합니다. 개발 서버에서는 `DFRAGON_SKILLTAB_DIR`에 데이터 묶음 폴더를 주면 `/skilltab/` 아래에 내줍니다.
+데이터 묶음의 형식은 [스킬 창 schema](src/core/catalog/skill-window.ts)와 [서약 schema](src/core/catalog/oath-catalog.ts)에 정의합니다. 개발 서버에서는 `DFRAGON_SKILLTAB_DIR`에 데이터 묶음 폴더를 주면 `/skilltab/` 아래에 내줍니다.
 
 ## 배포
 
@@ -80,11 +80,21 @@ dev와 운영은 같은 `/skilltab/` 데이터 묶음 폴더를 씁니다. `skil
 - `src/pages/`: 주소별 화면과 그 화면이 쓰는 컴포넌트, 로직을 둡니다.
 - `src/styles/`: 화면이 함께 쓰는 StyleX breakpoint를 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router 테스트 도구를 둡니다.
-- `src/core/constants/`: 검색 카드, 서버, 캡처의 공통 상수를 둡니다.
-- `src/core/lib/`: OCR, 이미지 처리, 파티와 공대 인식, 시간 표시 함수를 둡니다.
-- `src/core/shared/`: API 요청, 검색 상태, 캐릭터 상세와 공대 처리 로직을 둡니다.
+- `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
+- `src/core/api/`: 던삐삐 API 요청 함수와 응답 schema를 둡니다.
+- `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 검색 상태를 둡니다.
+- `src/core/capture/party/`: 파티 화면 인식과 파티 캡처 machine을 둡니다.
+- `src/core/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
+- `src/core/catalog/`: 스킬 창, 서약, 게임 문구 데이터 묶음의 schema를 둡니다.
+- `src/core/character/`: 캐릭터 상세, 장비, 서약, 카드 표시 함수와 캐릭터 타입을 둡니다.
+- `src/core/diagnostics/`: 브라우저 console에 남기는 진단 코드와 문구를 둡니다.
+- `src/core/ocr/`: OCR worker, 닉네임 이미지 처리와 인식 결과 선택을 둡니다.
+- `src/core/ranking/`: 명성 랭킹, 캐릭터 통계, 스킬 통계 응답 schema를 둡니다.
+- `src/core/search/`: 캐릭터 검색 요청, 식별, 초상화 비교와 검색 상태를 둡니다.
+- `src/core/servers/`: 서버 이름과 서버 ID 타입을 둡니다.
 - `src/core/testing/`: core와 UI 테스트가 함께 쓰는 fixture를 둡니다.
-- `src/core/types/`: 검색, 캐릭터, 캡처와 진단의 타입을 둡니다.
+- `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
+- `src/core/time-format.ts`: 경과 시간, 서울 시각, 시즌 이름 표시 함수를 둡니다.
 
 ## 라이트, 다크 모드
 

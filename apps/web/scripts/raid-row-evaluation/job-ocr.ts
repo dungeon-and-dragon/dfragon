@@ -1,14 +1,14 @@
 import { readFileSync } from 'node:fs'
 import { env, InferenceSession, Tensor } from 'onnxruntime-web/wasm'
-import { decodeCtcCandidates } from '../../src/core/lib/ctc-candidates'
-import { binarizeRaidTextPixels } from '../../src/core/lib/nickname-pixels'
+import { decodeCtcCandidates } from '../../src/core/ocr/ctc-candidates'
+import { binarizeRaidTextPixels } from '../../src/core/ocr/nickname-pixels'
 import {
   MODEL_INPUT_HEIGHT,
   MODEL_INPUT_WIDTH,
   normalizedBgr,
   normalizedNicknameBgr
-} from '../../src/core/lib/paddle-recognition'
-import type { CharacterImage } from '../../src/core/types/character'
+} from '../../src/core/ocr/paddle-recognition'
+import type { CharacterImage } from '../../src/core/character/character'
 import type { JobOcrPreprocessing } from './evaluate'
 
 const RGBA_CHANNELS = 4

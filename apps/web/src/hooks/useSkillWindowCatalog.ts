@@ -1,4 +1,4 @@
-import type { SkillWindowCatalog } from '#core/shared/search/skill-window'
+import type { SkillWindowCatalog } from '#core/catalog/skill-window'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

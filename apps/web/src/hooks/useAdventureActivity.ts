@@ -3,7 +3,7 @@ import type {
   ActivitySeason,
   AdventureActivity,
   AdventureActivityDay
-} from '#core/shared/adventure-guild/adventure-activity'
+} from '#core/adventure-guild/adventure-activity'
 import { useClientHost } from '../host/client-host'
 
 export type AdventureActivityResult =

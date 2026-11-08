@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
-import { type EquipmentView, toEquipmentView } from '#core/lib/character-equipment'
-import { formatPoint } from '#core/lib/character-item'
+import { type EquipmentView, toEquipmentView } from '#core/character/character-equipment'
+import { formatPoint } from '#core/character/character-item'
 import type { CharacterTabProps } from './character-tab-props'
 import { EquipmentTable } from './equipment/EquipmentTable'
 import { styles as tableStyles } from './equipment/item-table.style'

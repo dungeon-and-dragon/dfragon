@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import type { GameTextLines } from '#core/shared/search/game-text'
+import type { GameTextLines } from '#core/catalog/game-text'
 import { styles, toneStyles } from './GameText.style'
 
 export function GameText({

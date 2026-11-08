@@ -1,0 +1,67 @@
+import type { DNFRectangle } from '@dfragon/lib'
+import type { RaidFrameResult, RaidFrameRow } from '../capture-types'
+import type { CharacterImage } from '../../character/character'
+import {
+  cropRaidWindowNicknames,
+  readRaidWindowValues,
+  type RaidWindowTemplates
+} from './raid-window'
+
+const RGBA_CHANNELS = 4
+const ALPHA_CHANNEL = 3
+
+/** 다른 창에 가려 GDI가 투명하게 제외한 픽셀이 있으면 그 칸은 읽지 않는다. */
+function containsExcludedPixels(rgba: Uint8Array | Uint8ClampedArray): boolean {
+  for (let index = ALPHA_CHANNEL; index < rgba.length; index += RGBA_CHANNELS) {
+    if (rgba[index] === 0) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function copyRegion(frame: CharacterImage, region: DNFRectangle): CharacterImage | null {
+  const { x, y, width, height } = region
+  const rgba = new Uint8Array(width * height * RGBA_CHANNELS)
+  for (let line = 0; line < height; line += 1) {
+    const start = ((y + line) * frame.width + x) * RGBA_CHANNELS
+    rgba.set(
+      frame.rgba.subarray(start, start + width * RGBA_CHANNELS),
+      line * width * RGBA_CHANNELS
+    )
+  }
+  if (containsExcludedPixels(rgba)) {
+    return null
+  }
+
+  return { width, height, rgba }
+}
+
+export function toRaidFrameResult(
+  image: CharacterImage,
+  templates: RaidWindowTemplates
+): RaidFrameResult {
+  const detection = cropRaidWindowNicknames(image, templates)
+  if (detection.status === 'not-found') {
+    return { kind: 'missing', reason: 'not-found' }
+  }
+
+  if (detection.status !== 'found') {
+    return { kind: 'missing', reason: 'uncertain' }
+  }
+  const { valueColumn, valueTexts } = readRaidWindowValues(image, detection, templates)
+  const rows = detection.rows.map((row, index): RaidFrameRow | null => {
+    const crop = row.nicknameCrop
+    if (crop === null || containsExcludedPixels(crop.rgba)) {
+      return null
+    }
+    const { width, height } = crop
+    const nickname = { width, height, rgba: Uint8Array.from(crop.rgba) }
+    const job = copyRegion(image, row.jobRegion)
+
+    return { nickname, job, valueText: valueTexts[index] }
+  })
+
+  return { kind: 'rows', valueColumn, rows }
+}

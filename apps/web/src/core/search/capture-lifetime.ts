@@ -1,0 +1,517 @@
+import { isCharacterSearchNickname } from './identify'
+import { SEARCH_COMMAND_ERRORS } from './search'
+import { createActor } from 'xstate'
+import {
+  runDetailsRequest,
+  type DetailsOutcome,
+  type SearchOutcome,
+  type SearchRuntime
+} from './request'
+import {
+  slotLifetimeMachine,
+  type SearchRequest,
+  type RequestIdentity
+} from './slot-lifetime-machine'
+import { sameOcrSearchInput } from '../ocr/ocr-input'
+import { SEARCH_SLOT_COUNTS } from './search'
+import type { SelectedCharacterSummary } from '../character/character'
+import type {
+  SearchCommandError,
+  SearchCommandResult,
+  ManualCharacterLookup,
+  OcrSearchObservation,
+  OcrSearchInput,
+  SearchSlot,
+  SearchSlotCount,
+  SearchSnapshot
+} from './search'
+
+export type CaptureBinding = Readonly<{
+  captureId: string
+}>
+
+type Options = {
+  publish: (snapshot: SearchSnapshot) => void
+  runtime?: SearchRuntime
+  slotCount?: SearchSlotCount
+}
+
+function idleSlot({
+  slot,
+  observationRevision = 0
+}: {
+  slot: number
+  observationRevision?: number
+}): SearchSlot {
+  return {
+    slot,
+    observationRevision,
+    requestId: null,
+    nickname: null,
+    state: 'idle',
+    rows: [],
+    error: null
+  }
+}
+
+type DetailsJob = RequestIdentity & { controller: AbortController }
+
+export type CaptureSearchLifetime = {
+  readonly current: CaptureBinding | null
+  snapshot: () => SearchSnapshot
+  result: (code?: SearchCommandError) => SearchCommandResult
+  begin: () => SearchCommandResult
+  end: (captureId: string) => SearchCommandResult
+  invalidate: () => void
+  /** 진행 중인 OCR에서 시작한 요청을 취소하고 그 슬롯을 비운다. 끝난 슬롯과 서버를 고른 조회는 유지한다. */
+  cancelOcrRequests: () => void
+  observeOcr: (input: OcrSearchObservation) => SearchCommandResult
+  lookup: (input: ManualCharacterLookup) => SearchCommandResult
+}
+
+export function createCaptureSearchLifetime(options: Options): CaptureSearchLifetime {
+  let revision = 0
+  let binding: CaptureBinding | null = null
+  const slotIndexes = Array.from(
+    { length: options.slotCount ?? SEARCH_SLOT_COUNTS.party },
+    (_, slot) => slot
+  )
+  let slots = slotIndexes.map((slot) => idleSlot({ slot }))
+  const ocrInputs: Array<OcrSearchInput | null> = slotIndexes.map(() => null)
+  // 지금 요청이 OCR에서 왔는지와 따로, 자리의 마지막 OCR 관측을 서버 없는 직접 조회의 증거로 새 회차까지 둔다.
+  const ocrEvidence: Array<OcrSearchInput | null> = slotIndexes.map(() => null)
+  const actors = slotIndexes.map(() =>
+    createActor(slotLifetimeMachine, {
+      input: { canComplete, complete }
+    }).start()
+  )
+  const detailsJobs = new Map<number, DetailsJob>()
+
+  function snapshot(): SearchSnapshot {
+    const snapshotRevision = revision
+    const captureId = binding?.captureId ?? null
+    const snapshotSlots = slots.map((slot) => {
+      const error = slot.error
+      const copiedSlot = { ...slot }
+      const rows = slot.rows.map((row) => ({ ...row }))
+      copiedSlot.rows = rows
+      if (slot.selected !== undefined) {
+        copiedSlot.selected = { ...slot.selected }
+      }
+
+      if (slot.choices !== undefined) {
+        copiedSlot.choices = slot.choices.map((choice) => ({ ...choice }))
+      }
+      copiedSlot.error = error != null ? { ...error } : null
+
+      return copiedSlot
+    })
+
+    return { revision: snapshotRevision, captureId, slots: snapshotSlots }
+  }
+
+  function result(code?: SearchCommandError): SearchCommandResult {
+    const currentSnapshot = snapshot()
+    if (code != null) {
+      return { ok: false, error: { code }, snapshot: currentSnapshot }
+    }
+
+    return { ok: true, snapshot: currentSnapshot }
+  }
+
+  function begin(): SearchCommandResult {
+    binding = { captureId: crypto.randomUUID() }
+    emit()
+
+    return result()
+  }
+
+  function end(captureId: string): SearchCommandResult {
+    if (binding?.captureId === captureId) {
+      invalidate()
+    }
+
+    return result()
+  }
+
+  function invalidate(): void {
+    if (binding == null) {
+      return
+    }
+    binding = null
+    for (const slot of slotIndexes) {
+      cancelSlot(slot)
+      ocrEvidence[slot] = null
+    }
+    slots = slotIndexes.map((slot) => idleSlot({ slot }))
+    emit()
+  }
+
+  function promoteObservation(input: OcrSearchObservation): SearchCommandResult {
+    slots[input.slot] = { ...slots[input.slot], observationRevision: input.observationRevision }
+    actors[input.slot].send({ type: 'PROMOTE', observationRevision: input.observationRevision })
+    emit()
+
+    return result()
+  }
+
+  function cancelOcrRequests(): void {
+    let changed = false
+    for (const slot of slotIndexes) {
+      if (ocrInputs[slot] !== null && slots[slot].state === 'pending') {
+        cancelSlot(slot)
+        slots[slot] = idleSlot({ slot, observationRevision: slots[slot].observationRevision })
+        changed = true
+      }
+    }
+    // 이전 창에서 정한 슬롯의 상세도 받지 않는다. 고른 이름과 서버는 남기고 점수만 비운다.
+    const failedDetails = failPendingDetails((slot) => ocrInputs[slot] !== null)
+
+    if (changed || failedDetails) {
+      emit()
+    }
+  }
+
+  // 호출 제한을 받으면 아직 시작하지 않은 상세를 보내지 않는다. 이미 나간 다른 슬롯의 요청은 끝까지 받아 반영한다.
+  function failUnstartedDetails(): void {
+    failPendingDetails((slot) => !detailsJobs.has(slot))
+  }
+
+  function failPendingDetails(matches: (slot: number) => boolean): boolean {
+    let changed = false
+    for (const slot of slotIndexes) {
+      if (!matches(slot)) {
+        continue
+      }
+      cancelDetails(slot)
+      if (slots[slot].details === 'pending') {
+        slots[slot] = { ...slots[slot], details: 'failed' }
+        changed = true
+      }
+    }
+
+    return changed
+  }
+
+  function observeOcr(input: OcrSearchObservation): SearchCommandResult {
+    if (binding?.captureId !== input.captureId) {
+      return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
+    }
+    const previous = slots[input.slot]
+    if (input.observationRevision <= previous.observationRevision) {
+      return result()
+    }
+    const previousInput = ocrInputs[input.slot]
+    if (previousInput !== null && sameOcrSearchInput(previousInput, input)) {
+      return promoteObservation(input)
+    }
+
+    return startCharacterRequest(input)
+  }
+
+  function lookup(input: ManualCharacterLookup): SearchCommandResult {
+    if (binding?.captureId !== input.captureId) {
+      return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
+    }
+
+    if (input.observationRevision <= slots[input.slot].observationRevision) {
+      return result()
+    }
+
+    return startCharacterRequest(input)
+  }
+
+  function startCharacterRequest(
+    input: OcrSearchObservation | ManualCharacterLookup
+  ): SearchCommandResult {
+    const runtime = options.runtime
+    if (runtime !== undefined) {
+      return startRequest({ input, runtime })
+    }
+    cancelSlot(input.slot)
+    if ('candidateNicknames' in input) {
+      ocrInputs[input.slot] = cloneOcrInput(input)
+      ocrEvidence[input.slot] = ocrInputs[input.slot]
+    }
+    const code = isCharacterSearchNickname(input.nickname)
+      ? 'NEOPLE_UNAVAILABLE'
+      : 'INVALID_SEARCH_QUERY'
+    slots[input.slot] = {
+      slot: input.slot,
+      observationRevision: input.observationRevision,
+      requestId: crypto.randomUUID(),
+      nickname: input.nickname,
+      state: 'failure',
+      rows: [],
+      error: { code }
+    }
+    emit()
+
+    return result()
+  }
+
+  function startRequest({
+    input,
+    runtime
+  }: {
+    input: OcrSearchObservation | ManualCharacterLookup
+    runtime: SearchRuntime
+  }): SearchCommandResult {
+    const ocrInput = 'candidateNicknames' in input ? cloneOcrInput(input) : null
+    const manual = 'candidateNicknames' in input ? undefined : { serverId: input.serverId }
+    cancelSlot(input.slot)
+    if (binding?.captureId !== input.captureId) {
+      return result(SEARCH_COMMAND_ERRORS.STALE_SEARCH)
+    }
+
+    const requestId = crypto.randomUUID()
+    const isValidInput = isCharacterSearchNickname(input.nickname)
+    ocrInputs[input.slot] = ocrInput
+    if (ocrInput !== null) {
+      ocrEvidence[input.slot] = ocrInput
+    }
+    slots[input.slot] = {
+      slot: input.slot,
+      observationRevision: input.observationRevision,
+      requestId,
+      nickname: input.nickname,
+      state: isValidInput ? 'pending' : 'failure',
+      rows: [],
+      error: isValidInput ? null : { code: 'INVALID_SEARCH_QUERY' }
+    }
+    const request: SearchRequest = {
+      captureId: input.captureId,
+      slot: input.slot,
+      nickname: input.nickname,
+      observationRevision: input.observationRevision,
+      requestId,
+      runtime,
+      ocrInput: ocrInput ?? evidenceInput(ocrEvidence[input.slot], input.nickname),
+      manual
+    }
+    if (isValidInput) {
+      actors[input.slot].send({ type: 'PREPARE', request })
+    }
+    emit()
+    if (isValidInput) {
+      actors[input.slot].send({ type: 'EXECUTE', request })
+    }
+
+    return result()
+  }
+
+  function cancelSlot(slot: number): void {
+    actors[slot].send({ type: 'CANCEL' })
+    cancelDetails(slot)
+    ocrInputs[slot] = null
+  }
+
+  function cancelDetails(slot: number): void {
+    detailsJobs.get(slot)?.controller.abort()
+    detailsJobs.delete(slot)
+  }
+
+  function isCurrentSlot(request: RequestIdentity): boolean {
+    return (
+      binding != null &&
+      binding.captureId === request.captureId &&
+      slots[request.slot].requestId === request.requestId
+    )
+  }
+
+  function canComplete(request: SearchRequest): boolean {
+    return (
+      isCurrentSlot(request) &&
+      actors[request.slot].getSnapshot().context.request === request &&
+      slots[request.slot].observationRevision === request.observationRevision
+    )
+  }
+
+  function complete(request: SearchRequest, outcome: SearchOutcome): void {
+    const result = outcome
+    if (!canComplete(request) || result == null) {
+      return
+    }
+    const isSuccess = result.kind === 'success'
+    const completedSlot = { ...slots[request.slot] }
+    delete completedSlot.selected
+    delete completedSlot.selectionMethod
+    delete completedSlot.choices
+    delete completedSlot.details
+    delete completedSlot.detailsError
+    if (isSuccess) {
+      slots[request.slot] = {
+        ...completedSlot,
+        state: result.rows.length > 0 ? 'success' : 'empty',
+        rows: result.rows,
+        error: null
+      }
+      if (result.selected !== undefined) {
+        slots[request.slot] = {
+          ...slots[request.slot],
+          selected: result.selected.summary,
+          selectionMethod: result.selected.selectionMethod
+        }
+        if (result.selected.choices !== undefined) {
+          slots[request.slot] = { ...slots[request.slot], choices: result.selected.choices }
+        }
+
+        if (result.selected.details !== undefined) {
+          slots[request.slot] = { ...slots[request.slot], details: result.selected.details }
+        }
+      }
+    } else {
+      slots[request.slot] = {
+        ...completedSlot,
+        state: 'failure',
+        rows: [],
+        error: result.error
+      }
+    }
+    actors[request.slot].send({ type: 'FINISH', request })
+    if (!isSuccess && result.error.code === 'SEARCH_RATE_LIMITED') {
+      failUnstartedDetails()
+    }
+    emit()
+  }
+
+  /**
+   * 어느 슬롯이든 OCR로 조회 중이면 시작하지 않아, 회차의 모든 슬롯이 이름과 서버를 먼저 정한 뒤 상세를 받는다.
+   * 직접 조회는 같은 요청에서 상세까지 받으므로 기다리지 않는다.
+   */
+  function startPendingDetails(): void {
+    const runtime = options.runtime
+    const captureId = binding?.captureId
+    if (runtime === undefined || captureId === undefined) {
+      return
+    }
+
+    if (slots.some((slot) => slot.state === 'pending' && ocrInputs[slot.slot] !== null)) {
+      return
+    }
+    for (const slot of slots) {
+      const details = detailsToStart(slot, captureId)
+      if (details !== null) {
+        startDetails({ runtime, ...details })
+      }
+    }
+  }
+
+  function detailsToStart(
+    slot: SearchSlot,
+    captureId: string
+  ): { job: DetailsJob; summary: SelectedCharacterSummary } | null {
+    if (slot.details !== 'pending' || detailsJobs.has(slot.slot)) {
+      return null
+    }
+
+    if (slot.selected === undefined || slot.requestId === null) {
+      return null
+    }
+    const job = {
+      slot: slot.slot,
+      captureId,
+      requestId: slot.requestId,
+      controller: new AbortController()
+    }
+
+    return { job, summary: slot.selected }
+  }
+
+  function startDetails({
+    runtime,
+    job,
+    summary
+  }: {
+    runtime: SearchRuntime
+    job: DetailsJob
+    summary: SelectedCharacterSummary
+  }): void {
+    detailsJobs.set(job.slot, job)
+    runDetailsRequest({
+      runtime,
+      summary,
+      signal: job.controller.signal,
+      isCurrent: () => isCurrentDetails(job)
+    })
+      .catch((): DetailsOutcome => ({ kind: 'failure', error: { code: 'SEARCH_NETWORK_ERROR' } }))
+      .then((outcome) => finishDetails(job, outcome))
+  }
+
+  function isCurrentDetails(job: DetailsJob): boolean {
+    return (
+      detailsJobs.get(job.slot) === job &&
+      isCurrentSlot(job) &&
+      slots[job.slot].details === 'pending'
+    )
+  }
+
+  function finishDetails(job: DetailsJob, outcome: DetailsOutcome): void {
+    const isCurrent = isCurrentDetails(job)
+    if (detailsJobs.get(job.slot) === job) {
+      detailsJobs.delete(job.slot)
+    }
+
+    if (!isCurrent || outcome === null) {
+      return
+    }
+
+    if (outcome.kind === 'failure') {
+      slots[job.slot] = { ...slots[job.slot], details: 'failed', detailsError: outcome.error }
+      if (outcome.error.code === 'SEARCH_RATE_LIMITED') {
+        failUnstartedDetails()
+      }
+    } else {
+      const completedSlot = { ...slots[job.slot], selected: outcome.summary }
+      delete completedSlot.details
+      slots[job.slot] = completedSlot
+    }
+    emit()
+  }
+
+  function emit(): void {
+    revision += 1
+    options.publish(snapshot())
+    startPendingDetails()
+  }
+
+  return {
+    get current(): CaptureBinding | null {
+      return binding
+    },
+    snapshot,
+    result,
+    begin,
+    end,
+    invalidate,
+    cancelOcrRequests,
+    observeOcr,
+    lookup
+  }
+}
+
+function evidenceInput(evidence: OcrSearchInput | null, nickname: string): OcrSearchInput {
+  if (evidence === null) {
+    return { candidateNicknames: [nickname], portrait: null }
+  }
+
+  return { ...evidence, candidateNicknames: [nickname] }
+}
+
+/** 입력 픽셀을 복사해 요청과 다음 관측 비교가 같은 값을 쓰게 한다. 공대 행의 값은 그대로 함께 둔다. */
+function cloneOcrInput(input: OcrSearchInput): OcrSearchInput {
+  const candidateNicknames = input.candidateNicknames.slice(0, 1)
+  const raidRow = input.raidRow !== undefined ? { raidRow: { ...input.raidRow } } : {}
+  if (input.portrait === null) {
+    return { candidateNicknames, portrait: null, ...raidRow }
+  }
+  const { image, rasterScale, validMask } = input.portrait
+  const rgba = new Uint8Array(image.rgba)
+  const portrait = { image: { width: image.width, height: image.height, rgba }, rasterScale }
+  if (validMask === undefined) {
+    return { candidateNicknames, portrait, ...raidRow }
+  }
+  const copiedMask = new Uint8Array(validMask)
+
+  return { candidateNicknames, portrait: { ...portrait, validMask: copiedMask }, ...raidRow }
+}

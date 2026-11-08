@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { useId } from 'react'
-import type { SlotCard, SlotCardActions } from '#core/lib/slot-cards'
+import type { SlotCard, SlotCardActions } from '#core/capture/slot-cards'
 import { Seat } from '../../components/Seat'
 import { SeatMoveStatus } from '../../components/SeatMoveStatus'
 import { SeatTable } from '../../components/SeatTable'
