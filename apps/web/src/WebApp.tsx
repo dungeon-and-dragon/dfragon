@@ -22,6 +22,7 @@ import { CharacterSearchPage } from './pages/character-search/CharacterSearchPag
 import { CharacterDetailPage } from './pages/character/CharacterDetailPage'
 import { FavoritesScreen } from './pages/favorites/FavoritesScreen'
 import { GuildPage } from './pages/guild/GuildPage'
+import { HomePage } from './pages/home/HomePage'
 import { NotFoundScreen } from './pages/not-found/NotFoundScreen'
 import { parseRankingSearch } from './pages/rankings/ranking-search'
 import { RankingsPage } from './pages/rankings/RankingsPage'
@@ -70,9 +71,7 @@ const rootRoute = createRootRouteWithContext<{ host: BrowserHost }>()({
 const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  beforeLoad: () => {
-    throw redirect({ to: '/multisearch', replace: true })
-  }
+  component: HomePage
 })
 
 const multisearchRoute = createRoute({
