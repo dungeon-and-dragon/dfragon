@@ -168,6 +168,7 @@ function HeatmapCell({
     return <span aria-hidden="true" {...stylex.props(styles.cell, styles.future)} />
   }
 
+  const active = day !== undefined && dayCount(day, kind) > 0
   const props = {
     role: 'img',
     'aria-label': cellLabel(kind, cell.date, day),
@@ -176,10 +177,10 @@ function HeatmapCell({
       styles[kind],
       LEVEL_STYLES[level],
       cell.today && styles.today,
-      day !== undefined && styles.active
+      active && styles.active
     )
   }
-  if (day === undefined) {
+  if (day === undefined || !active) {
     return <span {...props} />
   }
 
@@ -242,16 +243,18 @@ function HeatmapGrid({
 
 function CellTooltipPopup({
   adventureName,
-  date
+  date,
+  kind
 }: {
   adventureName: string
   date: string
+  kind: ActivityKind
 }): React.JSX.Element {
   const popupRef = useHeatmapTooltipSlide(date)
 
   return (
     <Tooltip.Popup ref={popupRef} side="top" sideOffset={8}>
-      <ActivityDayDetail adventureName={adventureName} date={date} />
+      <ActivityDayDetail adventureName={adventureName} date={date} kind={kind} />
     </Tooltip.Popup>
   )
 }
@@ -323,7 +326,7 @@ function HeatmapPanel({
       <Tooltip.Root handle={tooltip} disableHoverablePopup>
         {({ payload }) =>
           payload !== undefined && (
-            <CellTooltipPopup adventureName={adventureName} date={payload.date} />
+            <CellTooltipPopup adventureName={adventureName} date={payload.date} kind={kind} />
           )
         }
       </Tooltip.Root>
