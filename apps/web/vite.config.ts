@@ -7,6 +7,7 @@ import { stylexOptions } from '@dfragon/ui/stylex-config'
 import { unplugin as stylex } from '@stylexjs/unplugin'
 import react from '@vitejs/plugin-react'
 import { defaultClientConditions, defineConfig, type Plugin } from 'vite'
+import { buildCommit } from './build-commit.ts'
 import { workspaceAliases } from './workspace-aliases.ts'
 
 const siteNotices = {
@@ -86,6 +87,7 @@ export default defineConfig({
     siteNotices,
     localSkillTab(process.env.DFRAGON_SKILLTAB_DIR)
   ],
+  define: { __BUILD_COMMIT__: JSON.stringify(buildCommit(process.env.SOURCE_COMMIT)) },
   worker: { format: 'es' },
   resolve: {
     alias: workspaceAliases,
