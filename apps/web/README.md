@@ -43,7 +43,7 @@ node1이 사이트를 공인 IP로 직접 내줍니다(ADR 0029). [`Dockerfile`]
 
 [`Caddyfile`](Caddyfile)은 모든 응답에 `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`를 붙여 페이지와 OCR worker를 cross-origin 격리하므로 OCR의 ONNX Runtime WASM이 여러 thread로 돕니다. `/assets/*`의 파일은 1년 동안 캐시하며, `/ocr/*`와 나머지 파일은 `Cache-Control: no-cache`와 ETag로 매번 확인합니다. 파일이 없는 주소는 `index.html`을 돌려주지만 `/assets/*`, `/ocr/*`에 없는 파일은 404입니다.
 
-배포 helper는 컨테이너를 `1000:1000` 사용자, 읽기 전용 root, capability 없음, tmpfs `/tmp`로 띄웁니다. 그래서 Caddy는 admin endpoint를 끄고 `:8080`에서 받으며 설정, 데이터 폴더를 `/tmp`에 둡니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받아 `/app/build-info.json`에 기록합니다. 저장소 root에서 같은 제약으로 띄워 확인합니다.
+배포 helper는 컨테이너를 `1000:1000` 사용자, 읽기 전용 root, capability 없음, tmpfs `/tmp`로 띄웁니다. 그래서 Caddy는 admin endpoint를 끄고 `:8080`에서 받으며 설정, 데이터 폴더를 `/tmp`에 둡니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받아 `/app/build-info.json`에 기록하고, Vite 빌드가 앞 7자리를 화면 왼쪽 아래에 박습니다. `SOURCE_COMMIT`이 없거나 비었으면 `dev` 서버와 빌드 모두 `dev`를 보입니다. 저장소 root에서 같은 제약으로 띄워 확인합니다.
 
 ```sh
 docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
