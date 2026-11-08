@@ -240,7 +240,7 @@ DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.
 
 ```json
 { "characters": [ { "rank": 1, /* 캐릭터 행 */ } ] }
-{ "computedAt": "…", "total": 558178, "servers": [{ "serverId": "cain", "count": 231502 }], "jobs": [{ "jobId": "…", "jobGrowId": "…", "jobName": "…", "jobGrowName": "…", "count": 113107, "averageFame": 80123 }], "fameDistribution": [{ "from": 70000, "to": 80000, "count": 51234 }] }
+{ "computedAt": "…", "total": 558178, "servers": [{ "serverId": "cain", "count": 231502 }], "jobs": [{ "jobId": "…", "jobGrowId": "…", "jobName": "…", "jobGrowName": "…", "count": 113107, "averageFame": 80123 }], "fameDistribution": [{ "from": 124000, "to": 125000, "count": 3123 }] }
 ```
 
 랭킹은 명성이 있는 캐릭터를 명성이 높은 순(같으면 서버, 캐릭터 id 순)으로 100명까지 주고, `rank`는 1부터 매긴 순서입니다. 캐릭터 행은 모험단, 길드 조회와 같습니다.
@@ -250,7 +250,7 @@ DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.
 통계는 첫 요청 때 계산해 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 요청은 한 계산을 함께 기다립니다. 실패는 캐시하지 않습니다. 캐시는 노드마다 따로 둡니다.
 `total`과 `servers`는 모든 캐릭터 행, `jobs`는 기본 정보를 받은 행을 직업과 전직(이름 포함)별로 센 값이고 많은 순입니다. `jobs`는 랭킹의 직업 필터 목록으로도 씁니다.
 `averageFame`은 명성이 있는 캐릭터의 평균을 반올림한 값이고, 그런 캐릭터가 없으면 `null`입니다.
-`fameDistribution`은 명성이 있는 캐릭터를 10,000 단위 구간(`from` 포함, `to` 제외)으로 센 값이며 캐릭터가 있는 구간만 낮은 순으로 줍니다.
+`fameDistribution`은 명성이 있는 캐릭터를 1,000 단위 구간(`from` 포함, `to` 제외)으로 센 값이며 캐릭터가 있는 구간만 낮은 순으로 줍니다.
 DB 설정이 없는 API는 빈 랭킹과, 0과 빈 목록인 통계를 줍니다.
 
 ### 스킬 채택률
