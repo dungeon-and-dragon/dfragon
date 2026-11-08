@@ -1,7 +1,7 @@
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import type { BrowserHost } from '../client-host'
-import { decodeBrowserImage } from './browser-png'
-import { createListeners } from './listeners'
+import { decodeBrowserImage } from '../browser-png'
+import { createListeners } from '../listeners'
 import type { createScreenShare } from './screen-share'
 
 function findPastedImage(data: DataTransfer | null): File | null {

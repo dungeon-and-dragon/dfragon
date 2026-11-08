@@ -30,8 +30,8 @@ export function installBrowserHost(
   const raid = createBrowserCardSearch('raid', runtime)
   const screenShare = createScreenShare()
   const roundFrames = createRoundFrames(screenShare)
-  const watch = createScreenWatch(roundFrames)
-  screenShare.onChanged(watch.onShareChanged)
+  const watch = createScreenWatch(roundFrames.hold)
+  screenShare.onChanged((share) => watch.onShareChanged(share?.video ?? null))
 
   async function readRoundFrame(kind: ScreenWatchKind): Promise<CharacterImage> {
     const recordRound = watch.beginRoundRead()

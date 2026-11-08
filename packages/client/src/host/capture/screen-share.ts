@@ -1,8 +1,8 @@
 import type { CaptureSource } from '@dfragon/client-core/preload/common/types/capture'
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
 import type { BrowserHost } from '../client-host'
-import { decodeBrowserImage } from './browser-png'
-import { createListeners } from './listeners'
+import { decodeBrowserImage } from '../browser-png'
+import { createListeners } from '../listeners'
 
 export type ScreenShare = { id: string; track: MediaStreamTrack; video: HTMLVideoElement }
 

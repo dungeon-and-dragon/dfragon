@@ -1,19 +1,13 @@
 // @vitest-environment jsdom
-import type { DNFParticipantFrame } from '@dfragon/lib'
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
 import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
-import type { RaidWindowTemplates } from '@dfragon/client-core/shared/raid/raid-window'
-import { installBrowserHost } from '..'
+import { decodeBrowserImage } from '../browser-png'
 import type { BrowserHost } from '../client-host'
-import { decodeBrowserImage } from './browser-png'
-import { readRaidWindowTemplates } from '../screen-watch/browser-raid-templates'
-import { readTownIndicatorTemplate } from '../screen-watch/browser-town-template'
+import { createRoundFrames } from './round-frames'
+import { createScreenShare } from './screen-share'
 
-vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
-vi.mock('../screen-watch/browser-town-template', () => ({ readTownIndicatorTemplate: vi.fn() }))
-vi.mock('../screen-watch/browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
+vi.mock('../browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
 
-const API_ORIGIN = 'https://api.example.test'
 const image: CharacterImage = { width: 1, height: 1, rgba: new Uint8Array([1, 2, 3, 255]) }
 const sharedImage: CharacterImage = { width: 1, height: 1, rgba: new Uint8Array([9, 9, 9, 255]) }
 const file = new File([new Uint8Array([1])], 'shot.png', { type: 'image/png' })
@@ -44,129 +38,109 @@ function stubVideoDecode(): void {
   })
 }
 
-const FRAME_SIZE = 32
-const townTemplate: DNFParticipantFrame = solid(0)
-const raidTemplates = {} as RaidWindowTemplates
-
-function solid(gray: number): CharacterImage {
-  const rgba = new Uint8Array(FRAME_SIZE * FRAME_SIZE * 4)
-  for (let index = 0; index < rgba.length; index += 4) {
-    rgba.set([gray, gray, gray, 255], index)
-  }
-
-  return { width: FRAME_SIZE, height: FRAME_SIZE, rgba }
-}
-
-let host: BrowserHost
+let share: ReturnType<typeof createScreenShare>
+let frames: ReturnType<typeof createRoundFrames>
+let onPastedFrame: BrowserHost['onPastedFrame']
 let unsubscribePastedFrame = (): void => {}
 
-// host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
+// 붙여넣기 listener는 페이지당 한 번 설치하고 해제하지 않으므로 테스트도 한 번만 설치한다.
 beforeAll(() => {
-  host = installBrowserHost(
-    API_ORIGIN,
-    'https://site.example.test/skilltab/skilltab.v3.json',
-    'https://site.example.test/skilltab/oath.v2.json'
-  )
+  share = createScreenShare()
+  frames = createRoundFrames(share)
+  onPastedFrame = frames.install()
 })
 
 beforeEach(() => {
   vi.mocked(decodeBrowserImage).mockResolvedValue(image)
-  vi.mocked(readTownIndicatorTemplate).mockResolvedValue(townTemplate)
-  vi.mocked(readRaidWindowTemplates).mockResolvedValue(raidTemplates)
   vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
   // 웹 앱 첫 화면처럼 붙여넣기 회차를 받을 화면이 있는 상태를 기본으로 둔다.
-  unsubscribePastedFrame = host.onPastedFrame(() => undefined)
+  unsubscribePastedFrame = onPastedFrame(() => undefined)
 })
 
-afterEach(async () => {
+afterEach(() => {
   unsubscribePastedFrame()
-  await host.party.selectCaptureSource('')
-  host.setWatchedScreen({ kind: 'party', roundRunning: false })
-  vi.useRealTimers()
+  share.select('')
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
   vi.resetAllMocks()
 })
 
-it('페이지에 이미지를 붙여 넣으면 알리고 readCaptureFrame이 그 이미지를 프레임으로 돌려준다', async () => {
+it('페이지에 이미지를 붙여 넣으면 알리고 회차가 그 이미지를 프레임으로 읽는다', async () => {
   const pasted = vi.fn()
-  const unsubscribe = host.onPastedFrame(pasted)
-  await expect(host.party.readCaptureFrame()).rejects.toThrow('NO_PASTED_FRAME')
+  const unsubscribe = onPastedFrame(pasted)
+  await expect(frames.read()).rejects.toThrow('NO_PASTED_FRAME')
 
   document.dispatchEvent(pasteEvent([{ kind: 'string', type: 'text/plain' }]))
   expect(pasted).not.toHaveBeenCalled()
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
   expect(pasted).toHaveBeenCalledOnce()
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
+  await expect(frames.read()).resolves.toEqual(image)
   expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(file)
   unsubscribe()
 })
 
-it('붙여 넣은 이미지를 읽지 못하면 readCaptureFrame이 거절한다', async () => {
+it('붙여 넣은 이미지를 읽지 못하면 회차의 프레임 읽기가 거절한다', async () => {
   vi.mocked(decodeBrowserImage).mockRejectedValue(new Error('broken'))
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
 
-  await expect(host.party.readCaptureFrame()).rejects.toThrow('broken')
+  await expect(frames.read()).rejects.toThrow('broken')
 })
 
 it('캡처 회차는 공유 화면을, 붙여넣기 회차는 붙여 넣은 이미지를 읽는다', async () => {
   const { getDisplayMedia } = stubScreenShare()
   stubVideoDecode()
-  const sourceId = await host.requestScreenShare()
+  const sourceId = await share.request()
 
   expect(getDisplayMedia).toHaveBeenCalledExactlyOnceWith({
     video: { displaySurface: 'window' },
     audio: false
   })
-  await expect(host.party.selectCaptureSource(sourceId!)).resolves.toEqual({
-    id: sourceId,
-    name: 'Dungeon & Fighter'
-  })
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
+  expect(share.select(sourceId!)).toEqual({ id: sourceId, name: 'Dungeon & Fighter' })
+  await expect(frames.read()).resolves.toEqual(sharedImage)
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
+  await expect(frames.read()).resolves.toEqual(image)
+  await expect(frames.read()).resolves.toEqual(sharedImage)
 })
 
 it('붙여넣기 회차를 받을 화면이 없을 때 붙여 넣은 이미지는 들지 않아 캡처 회차가 공유 화면을 읽는다', async () => {
   stubScreenShare()
   stubVideoDecode()
-  const sourceId = await host.requestScreenShare()
-  await host.party.selectCaptureSource(sourceId!)
+  const sourceId = await share.request()
+  share.select(sourceId!)
   unsubscribePastedFrame()
 
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
 
   expect(decodeBrowserImage).not.toHaveBeenCalledWith(file)
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(sharedImage)
+  await expect(frames.read()).resolves.toEqual(sharedImage)
 })
 
 it('사용자가 공유를 멈추면 끝났다고 알리고, 앱이 끊은 공유와 거절한 요청은 알리지 않는다', async () => {
   const { track } = stubScreenShare()
   stubVideoDecode()
   const ended = vi.fn()
-  const unsubscribe = host.onScreenShareEnded(ended)
-  const sourceId = await host.requestScreenShare()
+  const unsubscribe = share.onEnded(ended)
+  const sourceId = await share.request()
   document.dispatchEvent(pasteEvent([{ kind: 'file', type: 'image/png', getAsFile: () => file }]))
-  await host.party.readCaptureFrame()
+  await frames.read()
 
   track.dispatchEvent(new Event('ended'))
 
   expect(ended).toHaveBeenCalledOnce()
-  await expect(host.party.selectCaptureSource(sourceId!)).rejects.toThrow('SCREEN_SHARE_ENDED')
-  await expect(host.party.readCaptureFrame()).resolves.toEqual(image)
+  expect(() => share.select(sourceId!)).toThrow('SCREEN_SHARE_ENDED')
+  await expect(frames.read()).resolves.toEqual(image)
 
   const next = stubScreenShare()
-  await host.requestScreenShare()
-  await host.party.selectCaptureSource('')
+  await share.request()
+  share.select('')
   next.track.dispatchEvent(new Event('ended'))
   expect(next.track.stop).toHaveBeenCalledOnce()
 
   next.getDisplayMedia.mockRejectedValueOnce(new DOMException('denied', 'NotAllowedError'))
-  await expect(host.requestScreenShare()).resolves.toBeNull()
+  await expect(share.request()).resolves.toBeNull()
   expect(ended).toHaveBeenCalledOnce()
   unsubscribe()
 })
