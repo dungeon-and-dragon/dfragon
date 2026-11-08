@@ -89,5 +89,5 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
 }
 
 function tableRow(candidate: SearchedCharacter): CharacterTableRow {
-  return { ...candidate, level: null, guildId: null, guildName: null }
+  return { ...candidate, level: null, guildId: null, guildName: null, role: null }
 }

@@ -1,6 +1,7 @@
 import { portraitFaceWindowOf } from '../search/portrait-anchor'
 import type { SelectedCharacterSummary } from './character'
 import { characterImageUrl } from './character-summary'
+import { grownJobName } from './male-crusader'
 import {
   type CharacterChoice,
   SEARCH_ERRORS,
@@ -24,7 +25,7 @@ export function toCharacterCard(
     return undefined
   }
   const adventure = summary.adventureName ?? MISSING_VALUE
-  const job = summary.jobGrowName ?? summary.jobName ?? MISSING_VALUE
+  const job = grownJobName(summary, summary.card?.role ?? null) ?? MISSING_VALUE
 
   return {
     characterId: summary.characterId,
