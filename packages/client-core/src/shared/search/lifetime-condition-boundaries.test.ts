@@ -5,8 +5,8 @@ import { SearchHttpFailure } from './http'
 import type { SearchRuntime } from './request'
 import type { CharacterCandidatesHttp } from '../api/dfragon-client'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
-import type { CharacterCandidate } from '../../preload/common/types/character'
-import type { OcrSearchObservation, SearchSnapshot } from '../../preload/common/types/search'
+import type { CharacterCandidate } from '../../types/character'
+import type { OcrSearchObservation, SearchSnapshot } from '../../types/search'
 
 const rows: readonly CharacterCandidate[] = [
   {

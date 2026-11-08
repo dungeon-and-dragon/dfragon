@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
-import { searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
-import type { TodayGrade } from '@dfragon/client-core/preload/common/types/today-grade'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import { searchSnapshot } from '@dfragon/client-core/testing/fixtures/search-test-fixture'
+import type { TodayGrade } from '@dfragon/client-core/types/today-grade'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/types/search'
 import type { ClientHost } from '../../host/client-host'
 import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 

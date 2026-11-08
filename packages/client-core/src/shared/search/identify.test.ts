@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { MockedFunction } from 'vitest'
-import type {
-  CharacterCandidate,
-  CharacterImage,
-  CharacterPortrait
-} from '../../preload/common/types/character'
+import type { CharacterCandidate, CharacterImage, CharacterPortrait } from '../../types/character'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,

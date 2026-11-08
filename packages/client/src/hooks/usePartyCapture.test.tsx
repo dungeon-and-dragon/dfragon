@@ -8,15 +8,15 @@ import {
   searchRow,
   searchSnapshot,
   searchSlot
-} from '@dfragon/client-core/preload/api/search-test-fixture'
-import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
+} from '@dfragon/client-core/testing/fixtures/search-test-fixture'
+import type { CharacterImage } from '@dfragon/client-core/types/character'
 import type {
   CharacterChoice,
   SearchCommandResult,
   SearchControl,
   SearchSlot,
   SearchSnapshot
-} from '@dfragon/client-core/preload/common/types/search'
+} from '@dfragon/client-core/types/search'
 import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
 import * as diagnostics from '@dfragon/client-core/lib/runtime-diagnostics'
 import { createTestClientHost } from '../testing/test-support/client-host'

@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
+import type { CharacterCandidate, CharacterDetails } from '../../types/character'
 import type {
   ManualCharacterLookup,
   OcrSearchObservation,
   RaidRowObservation
-} from '../../preload/common/types/search'
+} from '../../types/search'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
 import type { CharacterImageHttp } from './character-image-source'
 import type { PortraitColorScorer } from './portrait-color'

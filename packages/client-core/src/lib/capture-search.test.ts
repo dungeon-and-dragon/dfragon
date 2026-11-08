@@ -4,14 +4,14 @@ import type {
   SearchApi,
   SearchCommandResult,
   SearchSnapshot
-} from '../preload/common/types/search'
-import type { CharacterPortrait } from '../preload/common/types/character'
+} from '../types/search'
+import type { CharacterPortrait } from '../types/character'
 import {
   CAPTURE_ID,
   searchRow,
   searchSlot,
   searchSnapshot
-} from '../preload/api/search-test-fixture'
+} from '../testing/fixtures/search-test-fixture'
 import type { SearchView } from '../types/search'
 import {
   createCaptureSearch,
