@@ -56,7 +56,8 @@ export const styles = stylex.create({
     lineHeight: scaled(14),
     color: colors.fgSubtle,
     fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    userSelect: 'none'
   },
   rowTop: (row: number) => ({ top: scaled(row * SKILL_CELL_HEIGHT) }),
   rowLine: {
@@ -99,7 +100,7 @@ export const styles = stylex.create({
   }),
   unlearned: { opacity: 0.3, filter: 'grayscale(1)' },
   // zoom은 아이콘과 함께 개화, 강화 표식과 선택 테두리도 같은 배율로 키운다.
-  frame: { position: 'relative', display: 'block', zoom: SKILL_WINDOW_SCALE },
+  frame: { position: 'relative', display: 'block', zoom: SKILL_WINDOW_SCALE, userSelect: 'none' },
   scaledMark: { imageRendering: 'auto' },
   picked: { boxShadow: `0 0 0 2px ${colors.signal}` },
   // 개화 마름모는 아이콘 아래 가운데에 걸치고, 강화 표식은 오른쪽 위에 둔다.
@@ -127,7 +128,8 @@ export const styles = stylex.create({
     fontWeight: 600,
     color: colors.fgMuted,
     fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    userSelect: 'none'
   },
   tooltip: { fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap' },
   side: { display: 'flex', flexDirection: 'column', gap: space.s24, minWidth: 0 },
@@ -148,6 +150,7 @@ export const styles = stylex.create({
     gap: space.s8
   },
   subtle: { color: colors.fgSubtle, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' },
+  unselectable: { userSelect: 'none' },
   levelRows: {
     display: 'flex',
     flexDirection: 'column',
