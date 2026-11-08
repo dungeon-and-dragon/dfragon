@@ -5,7 +5,6 @@ const upgradeCounts = z.object({ name: z.string(), type1: count, type2: count })
 
 export const skillStatsSchema = z.object({
   computedAt: z.iso.datetime(),
-  topPercent: z.number().positive(),
   minFame: z.number().int().nullable(),
   sampleSize: count,
   skills: z.array(
