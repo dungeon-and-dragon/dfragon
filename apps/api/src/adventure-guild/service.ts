@@ -1,4 +1,5 @@
 import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
+import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
 import type { RequestTimelineSync } from '../characters/timeline/queue.js'
 import type { SeasonBackfillQueue } from '../characters/timeline/season-backfill.js'
@@ -17,7 +18,7 @@ import type { AdventureWeeklyClears } from './weekly.js'
 
 export type AdventureCharacters = {
   adventureName: string
-  characters: StoredCharacter[]
+  characters: CharacterRow[]
 }
 
 export type AdventureWeekly = AdventureWeeklyClears & { adventureName: string }
@@ -27,7 +28,7 @@ export type GuildMembers = {
   guildName: string | null
   memberCount: number
   averageFame: number | null
-  members: StoredCharacter[]
+  members: CharacterRow[]
 }
 
 export interface AdventureGuildReader {
@@ -89,7 +90,7 @@ export function createAdventureGuildService(
     async adventure(adventureName) {
       const characters = await reader.readAdventureCharacters(adventureName)
 
-      return { adventureName, characters }
+      return { adventureName, characters: characters.map(toCharacterRow) }
     },
     async guild(guildId) {
       const { guildName, members } = await reader.readGuild(guildId)
@@ -99,7 +100,7 @@ export function createAdventureGuildService(
         guildName,
         memberCount: members.length,
         averageFame: averageFame(members),
-        members
+        members: members.map(toCharacterRow)
       }
     },
     async adventureWeekly(adventureName) {

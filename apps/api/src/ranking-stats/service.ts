@@ -2,16 +2,17 @@ import {
   type CharacterStats,
   type FameRankingFilter,
   type JobSkillAdoption,
+  type JobSkillAdoptionQuery,
   SKILL_STYLE_SAMPLE_TOP_COUNT,
-  type SkillStyleSampleJob,
   type StoredCharacter
 } from '@dfragon/database'
+import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
 import { startOfNextSeoulDay } from '../utils/seoul-time.js'
 
 export const FAME_RANKING_LIMIT = 100
 
 export type FameRanking = {
-  characters: (StoredCharacter & { rank: number })[]
+  characters: (CharacterRow & { rank: number })[]
 }
 
 export type Stats = CharacterStats & { computedAt: string }
@@ -21,13 +22,13 @@ export type SkillStats = JobSkillAdoption & { computedAt: string; topCount: numb
 export interface RankingStatsReader {
   readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
   readCharacterStats(): Promise<CharacterStats>
-  readJobSkillAdoption(job: SkillStyleSampleJob): Promise<JobSkillAdoption>
+  readJobSkillAdoption(job: JobSkillAdoptionQuery): Promise<JobSkillAdoption>
 }
 
 export interface RankingStatsService {
   fameRanking(filter: FameRankingFilter): Promise<FameRanking>
   stats(): Promise<Stats>
-  skillStats(job: SkillStyleSampleJob): Promise<SkillStats>
+  skillStats(job: JobSkillAdoptionQuery): Promise<SkillStats>
 }
 
 export function createRankingStatsService(
@@ -58,7 +59,7 @@ export function createRankingStatsService(
   const cachedSkillStats = new Map<string, { skillStats: SkillStats; expiresAt: Date }>()
   const loadingSkillStats = new Map<string, Promise<SkillStats>>()
 
-  const loadSkillStats = async (key: string, job: SkillStyleSampleJob): Promise<SkillStats> => {
+  const loadSkillStats = async (key: string, job: JobSkillAdoptionQuery): Promise<SkillStats> => {
     const computedAt = now()
     const adoption = await reader.readJobSkillAdoption(job)
     const skillStats = {
@@ -79,7 +80,10 @@ export function createRankingStatsService(
       const characters = await reader.readFameRanking(filter, FAME_RANKING_LIMIT)
 
       return {
-        characters: characters.map((character, index) => ({ rank: index + 1, ...character }))
+        characters: characters.map((character, index) => ({
+          rank: index + 1,
+          ...toCharacterRow(character)
+        }))
       }
     },
     async stats() {
@@ -93,7 +97,7 @@ export function createRankingStatsService(
       return loading
     },
     async skillStats(job) {
-      const key = JSON.stringify([job.jobId, job.jobGrowId])
+      const key = JSON.stringify([job.jobId, job.jobGrowId, job.role ?? null])
       const cachedJob = cachedSkillStats.get(key)
       if (cachedJob !== undefined && now() < cachedJob.expiresAt) {
         return cachedJob.skillStats

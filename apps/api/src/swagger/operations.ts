@@ -302,6 +302,14 @@ export function ApiAdventureActivityDay() {
   )
 }
 
+const maleCrusaderRoleQuery = ApiQuery({
+  name: 'role',
+  required: false,
+  schema: { type: 'string', enum: ['dealer', 'buffer'] },
+  description:
+    'jobId, jobGrowId가 남성 크루세이더(프리스트(남), 眞 크루세이더)일 때만 씁니다. 저장된 스킬 스타일(받을 때의 전직이 지금 전직과 같은 행)에 용기의 은총이 있으면 dealer, 없으면 buffer로 보고 그 역할의 캐릭터만 셉니다. 그런 행이 없는 캐릭터는 어느 쪽에도 넣지 않습니다. 다른 전직이나 jobGrowId 없는 요청은 400입니다.'
+})
+
 export function ApiFameRanking() {
   return applyDecorators(
     ApiOperation({
@@ -316,6 +324,7 @@ export function ApiFameRanking() {
       schema: { type: 'string', minLength: 1 },
       description: 'jobId와 함께 씁니다.'
     }),
+    maleCrusaderRoleQuery,
     success('FameRanking', '명성 순 캐릭터 목록 (없으면 빈 목록)'),
     errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
   )
@@ -342,6 +351,7 @@ export function ApiSkillStats() {
     }),
     ApiQuery({ name: 'jobId', required: true, schema: { type: 'string', minLength: 1 } }),
     ApiQuery({ name: 'jobGrowId', required: true, schema: { type: 'string', minLength: 1 } }),
+    maleCrusaderRoleQuery,
     success('SkillStats', '집계 시각, 표본 기준과 스킬별 채택 수'),
     errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
   )
