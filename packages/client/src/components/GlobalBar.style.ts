@@ -42,6 +42,7 @@ export const styles = stylex.create({
   },
   divider: { flexShrink: 0, width: 1, height: 20, backgroundColor: colors.borderDefault },
   menu: {
+    position: 'relative',
     display: 'flex',
     alignItems: 'stretch',
     alignSelf: 'stretch',
@@ -50,7 +51,6 @@ export const styles = stylex.create({
     overflowX: 'auto'
   },
   menuItem: {
-    position: 'relative',
     display: 'inline-flex',
     alignItems: 'center',
     flexShrink: 0,
@@ -70,9 +70,9 @@ export const styles = stylex.create({
   },
   underline: {
     position: 'absolute',
-    insetInline: space.s12,
     bottom: 0,
     height: 2,
-    backgroundColor: colors.signal
+    backgroundColor: colors.signal,
+    pointerEvents: 'none'
   }
 })

@@ -118,7 +118,7 @@ export function SeasonTimeline({
   const timelineRef = useRef<HTMLElement>(null)
   const indicatorRef = useRef<HTMLSpanElement>(null)
   const hasSelection = seasons.some(({ id }) => id === selectedId)
-  useSeasonIndicatorSlide({ timelineRef, indicatorRef, selectedId, seasons, hasSelection })
+  useSeasonIndicatorSlide({ timelineRef, indicatorRef })
 
   return (
     <nav ref={timelineRef} aria-label="시즌" {...stylex.props(styles.timeline)}>
