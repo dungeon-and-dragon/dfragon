@@ -354,6 +354,7 @@ function stubDetailFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
 
     return Response.json({
       character: { serverId: 'prey', characterId: 'buffer-1', characterName: '하늘', fame: 126965 },
+      freshness: { lastSuccessfulFetchAt: new Date().toISOString() },
       card: { role: 'buffer', score: null }
     })
   })
