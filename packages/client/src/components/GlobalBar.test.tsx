@@ -9,7 +9,7 @@ import {
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { ClientHostContext } from '../hooks/useClientHost'
+import { ClientHostContext } from '../host/client-host'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { GlobalBar } from './GlobalBar'
 

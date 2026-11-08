@@ -11,7 +11,7 @@ import type {
   TimelineEnhancement,
   TimelinePage
 } from '@dfragon/client-core/shared/search/character-timeline'
-import { ClientHostContext, type ClientHost } from '../../../hooks/useClientHost'
+import { ClientHostContext, type ClientHost } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { TimelineTab } from './TimelineTab'
