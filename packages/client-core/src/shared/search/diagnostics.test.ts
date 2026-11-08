@@ -1,7 +1,7 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { reportSearchOutcome } from './diagnostics'
-import type { SearchErrorCode } from '../../preload/common/types/search'
-import type { DiagnosticCode } from '../../preload/common/types/diagnostics'
+import type { SearchErrorCode } from '../../types/search'
+import type { DiagnosticCode } from '../../types/diagnostics'
 
 const report = vi.fn()
 

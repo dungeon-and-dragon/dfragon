@@ -1,12 +1,12 @@
-import type { CharacterChoice, CharacterSelectionMethod } from '../../preload/common/types/search'
+import type { CharacterChoice, CharacterSelectionMethod } from '../../types/search'
 import type {
   CharacterCandidate,
   CharacterIdentity,
   CharacterImage,
   CharacterPortrait
-} from '../../preload/common/types/character'
+} from '../../types/character'
 import { orderedCandidates } from './candidate-order'
-import { portraitAnchorOf, type PortraitAnchor } from '../../preload/common/search/portrait-anchor'
+import { portraitAnchorOf, type PortraitAnchor } from './portrait-anchor'
 import { planRaidComparison, selectRaidCandidate, type RaidObservedValues } from './raid-candidate'
 
 const MAX_OCR_NAMES = 2

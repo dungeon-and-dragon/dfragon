@@ -1,6 +1,6 @@
 import type { ServerId } from './servers'
-import type { CharacterFaceWindow, SearchSlot } from '../preload/common/types/search'
-import type { CharacterCard } from '../preload/common/types/character'
+import type { CharacterFaceWindow, SearchSlot } from './search'
+import type { CharacterCard } from './character'
 
 export type SlotState = SearchSlot['state']
 

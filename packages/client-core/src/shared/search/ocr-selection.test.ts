@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { CharacterDetails } from '../../preload/common/types/character'
+import type { CharacterDetails } from '../../types/character'
 import type { IdentificationAdapters } from './request'
 import { createCaptureSearchLifetime } from './capture-lifetime'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'

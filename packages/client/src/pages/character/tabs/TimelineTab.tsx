@@ -1,7 +1,7 @@
 import { ProgressCircle } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCallback } from 'react'
-import type { CharacterIdentity } from '@dfragon/client-core/preload/common/types/character'
+import type { CharacterIdentity } from '@dfragon/client-core/types/character'
 import type { CharacterTimeline } from '@dfragon/client-core/shared/search/character-timeline'
 import { useCharacterTimeline } from '../../../hooks/useCharacterTimeline'
 import { useClientHost } from '../../../host/client-host'

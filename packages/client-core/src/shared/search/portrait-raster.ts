@@ -1,4 +1,4 @@
-import type { CharacterImage, CharacterPortrait } from '../../preload/common/types/character'
+import type { CharacterImage, CharacterPortrait } from '../../types/character'
 
 export const RGBA_CHANNELS = 4
 export const ALPHA_CHANNEL = 3

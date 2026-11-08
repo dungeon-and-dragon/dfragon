@@ -8,7 +8,7 @@ import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
 import {
   CHARACTER_SERVER_NAMES,
   characterImageUrl
-} from '@dfragon/client-core/preload/common/search/character-summary'
+} from '@dfragon/client-core/shared/search/character-summary'
 import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
 import { CardImage } from './CardImage'
 import { moveItemFocus } from './move-item-focus'

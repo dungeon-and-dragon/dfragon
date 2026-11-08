@@ -1,11 +1,6 @@
 import { createActor } from 'xstate'
 import type { Actor, EventFrom, SnapshotFrom } from 'xstate'
-import type {
-  SearchApi,
-  SearchCommandResult,
-  SearchControl,
-  SearchSnapshot
-} from '../preload/common/types/search'
+import type { SearchApi, SearchCommandResult, SearchControl, SearchSnapshot } from '../types/search'
 import { readSearchSnapshot, searchConnectionMachine } from './search-connection-machine'
 
 type ConnectionActor = Actor<typeof searchConnectionMachine>

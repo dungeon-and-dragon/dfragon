@@ -1,6 +1,6 @@
 import { detectPartyFrameGeometry, type DNFParticipantFrame, type DNFRectangle } from '@dfragon/lib'
-import type { CharacterImage } from '@dfragon/client-core/preload/common/types/character'
-import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/preload/common/types/search'
+import type { CharacterImage } from '@dfragon/client-core/types/character'
+import { SEARCH_SLOT_COUNTS } from '@dfragon/client-core/types/search'
 import {
   cropRaidWindowNicknames,
   type RaidWindowTemplates

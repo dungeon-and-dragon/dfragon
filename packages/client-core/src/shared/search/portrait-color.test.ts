@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { CharacterImage, CharacterPortrait } from '../../preload/common/types/character'
-import type { PortraitAnchor } from '../../preload/common/search/portrait-anchor'
+import type { CharacterImage, CharacterPortrait } from '../../types/character'
+import type { PortraitAnchor } from './portrait-anchor'
 import {
   createPortraitColorScorer,
   type PortraitColorInput,

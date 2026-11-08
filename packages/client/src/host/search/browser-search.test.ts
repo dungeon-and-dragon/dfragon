@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import type { SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
+import type { SearchSnapshot } from '@dfragon/client-core/types/search'
 import { createDfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
 import { decodeBrowserPng } from '../browser-png'
 import { browserFetch, createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'

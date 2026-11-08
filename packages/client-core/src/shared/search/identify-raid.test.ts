@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { MockedFunction } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '../../preload/common/types/character'
-import type { RaidRowObservation } from '../../preload/common/types/search'
+import type { CharacterCandidate, CharacterDetails } from '../../types/character'
+import type { RaidRowObservation } from '../../types/search'
 import { deferred } from './async-test-fixture'
 import { runDetailsRequest, runSearchRequest } from './request'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
-import { dealerCard, scoredDealerCard } from '../../preload/common/search/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '../../testing/fixtures/card-test-fixture'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 
 // 합성 후보, 직업명, 점수만 쓰며 표본이나 플레이어 식별자는 넣지 않는다.

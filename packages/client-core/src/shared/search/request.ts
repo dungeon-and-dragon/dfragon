@@ -4,13 +4,13 @@ import type {
   CharacterSearchRow,
   CharacterSelectionMethod,
   OcrSearchInput
-} from '../../preload/common/types/search'
+} from '../../types/search'
 import type {
   CharacterCandidate,
   SelectedCharacterSummary,
   CharacterJsonValue
-} from '../../preload/common/types/character'
-import type { DiagnosticCode } from '../../preload/common/types/diagnostics'
+} from '../../types/character'
+import type { DiagnosticCode } from '../../types/diagnostics'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,
