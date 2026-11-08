@@ -1,5 +1,8 @@
 import { expect, it, vi } from 'vitest'
-import type { AdventureActivity, AdventureActivityDay } from '../adventure-guild/adventure-activity'
+import type {
+  AdventureActivity,
+  AdventureActivitySeasonDays
+} from '../adventure-guild/adventure-activity'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
@@ -98,21 +101,28 @@ it('빈 이름은 요청하지 않고 거부한다', async () => {
   expect(fetch).not.toHaveBeenCalled()
 })
 
-const day: AdventureActivityDay = {
-  date: '2026-07-18',
-  raids: [{ name: '합성 레이드', count: 2, hard: 0, normal: 2 }],
-  legions: [],
-  items: [{ at: '2026-07-18T09:58:00+09:00', name: '합성 아이템', rarity: '레전더리' }],
-  enhancements: [{ at: '2026-07-18T10:02:00+09:00', kind: 'amplify', target: 10, success: true }]
+const seasonDays: AdventureActivitySeasonDays = {
+  season: 12,
+  days: [
+    {
+      date: '2026-07-18',
+      raids: [{ name: '합성 레이드', count: 2, hard: 0, normal: 2 }],
+      legions: [],
+      items: [{ at: '2026-07-18T09:58:00+09:00', name: '합성 아이템', rarity: '레전더리' }],
+      enhancements: [
+        { at: '2026-07-18T10:02:00+09:00', kind: 'amplify', target: 10, success: true }
+      ]
+    }
+  ]
 }
 
-it('모험단 이름과 날짜를 경로에 담아 하루 활동 상세를 읽는다', async () => {
-  const fetch = respond(day)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.activityDay
+it('모험단 이름과 시즌 번호를 경로에 담아 그 시즌의 하루 활동 상세를 한 번에 읽는다', async () => {
+  const fetch = respond(seasonDays)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.activitySeasonDays
 
-  await expect(read('합성 모험단/1', '2026-07-18')).resolves.toEqual(day)
+  await expect(read('합성 모험단/1', 12)).resolves.toEqual(seasonDays)
   expect(requestedUrl(fetch)).toBe(
-    `${API_ORIGIN}/adventures/${encodeURIComponent('합성 모험단/1')}/activity/days/2026-07-18`
+    `${API_ORIGIN}/adventures/${encodeURIComponent('합성 모험단/1')}/activity/seasons/12/days`
   )
 })
 
