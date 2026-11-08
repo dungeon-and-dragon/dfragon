@@ -307,8 +307,10 @@ export function createDfragonClient({
       }
     },
     stats: () => requestJson('/stats', characterStatsSchema),
-    skillStats: ({ jobId, jobGrowId }) =>
-      requestJson('/stats/skills', skillStatsSchema, { searchParams: { jobId, jobGrowId } }),
+    skillStats: ({ jobId, jobGrowId, role }) =>
+      requestJson('/stats/skills', skillStatsSchema, {
+        searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
+      }),
     adventures: {
       async weekly(adventureName) {
         if (adventureName.trim() === '') {
