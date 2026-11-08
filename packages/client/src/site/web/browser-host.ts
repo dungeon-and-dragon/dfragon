@@ -433,7 +433,7 @@ function createScreenWatch(frames: ReturnType<typeof createRoundFrames>): {
 
 export function installBrowserHost(
   apiOrigin: string,
-  skillWindowCatalogUrl: string,
+  skillWindowIndexUrl: string,
   oathCatalogUrl: string
 ): BrowserHost {
   const reportDiagnostic = startRendererDiagnostics()
@@ -470,7 +470,7 @@ export function installBrowserHost(
     getCharacterTimeline: dfragon.characters.timeline,
     getTimelineEnhancements: dfragon.characters.timelineEnhancements,
     getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
-    getSkillWindowCatalog: createSkillWindowCatalogSource(skillWindowCatalogUrl),
+    getSkillWindowCatalog: createSkillWindowCatalogSource(skillWindowIndexUrl),
     getOathCatalog: createOathCatalogSource(oathCatalogUrl),
     getFameRanking: dfragon.rankings.fame,
     getCharacterStats: dfragon.stats,

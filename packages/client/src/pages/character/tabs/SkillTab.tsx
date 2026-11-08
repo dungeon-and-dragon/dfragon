@@ -271,7 +271,7 @@ function SkillSideColumn({
 }
 
 export function SkillTab({ detail }: CharacterTabProps): React.JSX.Element | null {
-  const catalog = useSkillWindowCatalog()
+  const catalog = useSkillWindowCatalog(detail.character.jobName)
   const style = detail.skillStyle?.style
   if (style == null) {
     return null

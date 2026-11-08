@@ -15,6 +15,7 @@ const skillSchema = z.object({
   requiredLevel: z.number().int().nullable(),
   maxLevel: z.number().int(),
   icon: z.object({ x: z.number().int(), y: z.number().int() }),
+  stage: z.boolean(),
   evolution: z.tuple([evolutionBranchSchema, evolutionBranchSchema]).optional(),
   enhancement: z.object({ 1: enhancementBranchSchema, 2: enhancementBranchSchema }).optional()
 })
@@ -36,7 +37,13 @@ const advancementSchema = z.object({
   slots: z.array(slotSchema)
 })
 
-const jobSchema = z.object({
+export const skillWindowIndexSchema = z.object({
+  version: z.string(),
+  marks: marksSchema,
+  jobs: z.array(z.object({ jobId: z.string(), jobName: z.string(), file: z.string() }))
+})
+
+export const skillWindowJobSchema = z.object({
   jobId: z.string(),
   jobName: z.string(),
   sprite: z.string(),
@@ -44,18 +51,14 @@ const jobSchema = z.object({
   skills: z.record(z.string(), skillSchema)
 })
 
-export const skillWindowCatalogSchema = z.object({
-  version: z.string(),
-  marks: marksSchema,
-  jobs: z.array(jobSchema)
-})
-
-export type SkillWindowCatalog = z.infer<typeof skillWindowCatalogSchema>
-type CatalogJob = SkillWindowCatalog['jobs'][number]
-type CatalogAdvancement = CatalogJob['advancements'][number]
-type CatalogSkill = CatalogJob['skills'][string]
+export type SkillWindowIndex = z.infer<typeof skillWindowIndexSchema>
+export type SkillWindowJob = z.infer<typeof skillWindowJobSchema>
+type CatalogAdvancement = SkillWindowJob['advancements'][number]
+type CatalogSkill = SkillWindowJob['skills'][string]
 
 export type SkillMarks = z.infer<typeof marksSchema>
+
+export type SkillWindowCatalog = Readonly<{ marks: SkillMarks; job: SkillWindowJob }>
 
 export type SkillStyle = NonNullable<NonNullable<CharacterDetailView['skillStyle']>['style']>
 export type LearnedSkill = SkillStyle['active'][number]
@@ -95,7 +98,7 @@ const BEFORE_ADVANCEMENT_GROWTYPE = 0
 // 두 직업은 전직 상태와 관계없이 growtype 0 배치를 쓴다.
 const SINGLE_TREE_JOB_NAMES: ReadonlySet<string> = new Set(['크리에이터', '다크나이트'])
 
-function advancementOf(job: CatalogJob, jobGrowName: string): CatalogAdvancement | undefined {
+function advancementOf(job: SkillWindowJob, jobGrowName: string): CatalogAdvancement | undefined {
   if (SINGLE_TREE_JOB_NAMES.has(job.jobName)) {
     return job.advancements.find(({ growtype }) => growtype === BEFORE_ADVANCEMENT_GROWTYPE)
   }
@@ -143,43 +146,35 @@ function rowsOf(icons: readonly SkillWindowIcon[]): SkillWindowRow[] {
   })
 }
 
-function jobCountWithSkill(catalog: SkillWindowCatalog, name: string): number {
-  return catalog.jobs.filter((job) =>
-    Object.values(job.skills).some((skill) => skill.name === name)
-  ).length
-}
+type CellCandidate = Readonly<{ icon: SkillWindowIcon; stage: boolean }>
 
-// 같은 칸에 스킬이 둘 놓인 곳은 한쪽이 모든 직업에 같은 이름으로 있는 단계 스킬(찰나의 깨달음, 각성의 실마리 등)이고,
-// 캐릭터는 眞 각성 전에 단계 스킬을, 뒤에 그 전직의 스킬을 배운다. 배운 스킬을 먼저 두고, 둘 다 배우지 않았으면 더 적은
-// 직업에 있는 스킬(그 전직의 스킬)을 둔다.
-function pickInCell(
-  catalog: SkillWindowCatalog,
-  candidates: readonly [SkillWindowIcon, ...SkillWindowIcon[]]
-): SkillWindowIcon {
+// 같은 칸에 스킬이 둘 놓인 곳은 한쪽이 여러 직업에 같은 이름으로 있는 단계 스킬(찰나의 깨달음, 각성의 실마리 등)이고,
+// 캐릭터는 眞 각성 전에 단계 스킬을, 뒤에 그 전직의 스킬을 배운다. 배운 스킬을 먼저 두고, 둘 다 배우지 않았으면 단계
+// 스킬이 아닌 쪽(그 전직의 스킬)을 둔다.
+function pickInCell(candidates: readonly [CellCandidate, ...CellCandidate[]]): SkillWindowIcon {
   return candidates.reduce((picked, candidate) => {
-    if (candidate.learned !== picked.learned) {
-      if (candidate.learned) {
+    if (candidate.icon.learned !== picked.icon.learned) {
+      if (candidate.icon.learned) {
         return candidate
       }
 
       return picked
     }
 
-    if (jobCountWithSkill(catalog, candidate.name) < jobCountWithSkill(catalog, picked.name)) {
+    if (picked.stage && !candidate.stage) {
       return candidate
     }
 
     return picked
-  })
+  }).icon
 }
 
-type SkillCharacter = Readonly<{ jobName: string | null; jobGrowName: string | null }>
+type SkillCharacter = Readonly<{ jobGrowName: string | null }>
 
-type SkillTree = Readonly<{ job: CatalogJob; advancement: CatalogAdvancement }>
+type SkillTree = Readonly<{ job: SkillWindowJob; advancement: CatalogAdvancement }>
 
-function skillTreeOf(catalog: SkillWindowCatalog, character: SkillCharacter): SkillTree | null {
-  const job = catalog.jobs.find(({ jobName }) => jobName === character.jobName)
-  if (job === undefined || character.jobGrowName == null) {
+function skillTreeOf({ job }: SkillWindowCatalog, character: SkillCharacter): SkillTree | null {
+  if (character.jobGrowName == null) {
     return null
   }
   const advancement = advancementOf(job, character.jobGrowName)
@@ -242,7 +237,7 @@ export function skillWindowOf(
   )
   const evolutionByName = pickedTypesByName(style, 'evolution')
   const enhancementByName = pickedTypesByName(style, 'enhancement')
-  const cells = new Map<string, [SkillWindowIcon, ...SkillWindowIcon[]]>()
+  const cells = new Map<string, [CellCandidate, ...CellCandidate[]]>()
   for (const { skillId, col, row } of advancement.slots) {
     const skill = job.skills[skillId]
     if (skill === undefined) {
@@ -263,11 +258,12 @@ export function skillWindowOf(
       evolutionNames: evolutionNamesOf(skill),
       enhanceable: skill.enhancement !== undefined
     }
+    const candidate = { icon, stage: skill.stage }
     const key = `${col},${row}`
     const sameCell = cells.get(key)
-    cells.set(key, sameCell !== undefined ? [...sameCell, icon] : [icon])
+    cells.set(key, sameCell !== undefined ? [...sameCell, candidate] : [candidate])
   }
-  const icons = [...cells.values()].map((candidates) => pickInCell(catalog, candidates))
+  const icons = [...cells.values()].map(pickInCell)
   const rows = rowsOf(icons)
 
   return { rows, icons, marks: catalog.marks }
@@ -325,7 +321,7 @@ function learnableSkillsOf({ job, advancement }: SkillTree): LearnableSkill[] {
 }
 
 function upgradeSkillOf(
-  job: CatalogJob,
+  job: SkillWindowJob,
   { skillId, skill }: LearnableSkill,
   picked: Map<string | null, UpgradeType>
 ): UpgradeSkill {
