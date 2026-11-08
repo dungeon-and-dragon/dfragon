@@ -2,6 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
 import type { AdventureWeekly, WeeklyCharacter } from '#core/adventure-guild/adventure-weekly'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
@@ -65,11 +66,14 @@ const weekly: AdventureWeekly = {
 
 function render(
   screen: React.JSX.Element,
-  getAdventureWeekly: ClientHost['getAdventureWeekly'] = vi.fn()
+  getAdventureWeekly: ClientHost['getAdventureWeekly'] = vi.fn(),
+  getAdventureActivity: ClientHost['getAdventureActivity'] = vi.fn(
+    () => new Promise<never>(() => {})
+  )
 ): Promise<void> {
   return act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getAdventureWeekly })}>
+      <ClientHostContext value={createTestClientHost({ getAdventureWeekly, getAdventureActivity })}>
         <TestQueryClient>
           <TestRouter>{screen}</TestRouter>
         </TestQueryClient>
@@ -91,6 +95,23 @@ function renderWeekly(
       onAdventureOpen={onAdventureOpen}
     />,
     getAdventureWeekly
+  )
+}
+
+// 갱신은 시즌 활동이 끝나야 버튼을 켜므로, 끝나는 시즌 활동 조회를 함께 넘긴다.
+function renderRefreshable(
+  getAdventureWeekly: ClientHost['getAdventureWeekly'],
+  getAdventureActivity: ClientHost['getAdventureActivity']
+): Promise<void> {
+  return render(
+    <WeeklyScreen
+      adventureName="합성 모험단"
+      season={undefined}
+      onSeasonChange={vi.fn()}
+      onAdventureOpen={vi.fn()}
+    />,
+    getAdventureWeekly,
+    getAdventureActivity
   )
 }
 
@@ -134,7 +155,7 @@ it('모험단 이름 입력 화면은 제목 한 줄과 빈 입력, 보기 버�
   expect(container.querySelector('section')).toBeNull()
   expect(container.querySelector('p')).toBeNull()
   expect(button('보기')).toBeDefined()
-  expect(button('새로고침')).toBeUndefined()
+  expect(button('갱신')).toBeUndefined()
   expect(getAdventureWeekly).not.toHaveBeenCalled()
 })
 
@@ -197,20 +218,52 @@ it('캐릭터가 없는 응답은 모험단 이름 한 줄만 둔다', async () 
   expect(container.querySelector('section p')).toBeNull()
 })
 
-it('새로고침을 누르면 받아 둔 표를 버리고 받는 중을 보인 뒤 같은 모험단을 다시 조회해 새 응답으로 그린다', async () => {
-  const refreshed = Promise.withResolvers<AdventureWeekly>()
+it('갱신을 누르면 다시 받는 동안 받아 둔 표와 받는 중 버튼을 두고, 두 요청이 모두 끝나면 새 주간 던파 표를 그리고 버튼을 켠다', async () => {
+  const refreshedWeekly = Promise.withResolvers<AdventureWeekly>()
+  const refreshedActivity = Promise.withResolvers<AdventureActivity>()
   const getAdventureWeekly = vi
     .fn<ClientHost['getAdventureWeekly']>()
     .mockResolvedValueOnce({ ...weekly, characters: [weekly.characters[1]] })
-    .mockReturnValueOnce(refreshed.promise)
-  await renderWeekly('합성 모험단', getAdventureWeekly)
+    .mockReturnValueOnce(refreshedWeekly.promise)
+  const getAdventureActivity = vi
+    .fn<ClientHost['getAdventureActivity']>()
+    .mockRejectedValueOnce(new Error('합성 활동 오류'))
+    .mockReturnValueOnce(refreshedActivity.promise)
+  await renderRefreshable(getAdventureWeekly, getAdventureActivity)
   expect(bodyRows()).toHaveLength(1)
 
-  await act(async () => button('새로고침')!.click())
-  expect(container.querySelector('section [aria-busy="true"]')).not.toBeNull()
-
-  await act(async () => refreshed.resolve(weekly))
-  expect(getAdventureWeekly.mock.calls).toEqual([['합성 모험단'], ['합성 모험단']])
+  await act(async () => button('갱신')!.click())
+  expect(button('받는 중')?.disabled).toBe(true)
   expect(container.querySelector('section [aria-busy="true"]')).toBeNull()
+  expect(bodyRows()).toHaveLength(1)
+
+  await act(async () => refreshedWeekly.resolve(weekly))
   expect(bodyRows()).toHaveLength(2)
+  expect(button('받는 중')?.disabled).toBe(true)
+
+  await act(async () => refreshedActivity.reject(new Error('합성 활동 오류')))
+  expect(getAdventureWeekly.mock.calls).toEqual([['합성 모험단'], ['합성 모험단']])
+  expect(getAdventureActivity.mock.calls).toEqual([
+    ['합성 모험단', undefined],
+    ['합성 모험단', undefined]
+  ])
+  expect(button('갱신')?.disabled).toBe(false)
+})
+
+it('갱신이 실패하면 오류 문구 없이 받아 둔 표를 두고 버튼을 다시 켠다', async () => {
+  const getAdventureWeekly = vi
+    .fn<ClientHost['getAdventureWeekly']>()
+    .mockResolvedValueOnce(weekly)
+    .mockRejectedValueOnce(new Error('합성 주간 오류'))
+  const getAdventureActivity = vi
+    .fn<ClientHost['getAdventureActivity']>()
+    .mockRejectedValue(new Error('합성 활동 오류'))
+  await renderRefreshable(getAdventureWeekly, getAdventureActivity)
+
+  await act(async () => button('갱신')!.click())
+
+  expect(getAdventureWeekly).toHaveBeenCalledTimes(2)
+  expect(bodyRows()).toHaveLength(2)
+  expect(container.querySelector('section [role="alert"]')).toBeNull()
+  expect(button('갱신')?.disabled).toBe(false)
 })
