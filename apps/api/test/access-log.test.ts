@@ -375,10 +375,13 @@ test('상세 요청 로그에는 Neople 단계별 대기 시간만 붙이고, �
   assert.equal(failed!.neopleShared, undefined)
 })
 
-test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 없이 responseCached로 표시하고 강제 갱신은 refresh route로 다시 받은 단계를 남기며 query가 붙거나 HEAD인 요청도 같은 route로 처리한다', {
+test('캐시한 강제 갱신과 상세 요청은 responseCached로 표시하고 다시 받은 강제 갱신은 단계 시간을 남긴다', {
   timeout: 5000
 }, async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
+  t.mock.method(performance, 'now', () => Date.now())
   const basicRequests: string[] = []
+  const sectionRequests: string[] = []
   const logs = collectAccessLogs()
   const app = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
@@ -392,6 +395,8 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
             )
             if (suffix === '') {
               basicRequests.push(request.method)
+            } else {
+              sectionRequests.push(suffix)
             }
 
             return Response.json({
@@ -416,12 +421,17 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
   const requests = [
     { method: 'GET', url: detailUrl, status: 200, characterName: '조회 1' },
     { method: 'GET', url: detailUrl, status: 200, characterName: '조회 1' },
+    { method: 'POST', url: `${detailUrl}/refresh`, status: 200, characterName: '조회 1' },
+    { method: 'POST', url: `${detailUrl}/refresh`, status: 200, characterName: '조회 2' },
     { method: 'POST', url: `${detailUrl}/refresh`, status: 200, characterName: '조회 2' },
     { method: 'GET', url: `${detailUrl}?force=1`, status: 200, characterName: '조회 2' },
     { method: 'HEAD', url: detailUrl, status: 200 },
     { method: 'POST', url: `${detailUrl}/refresh?force=1`, status: 200, characterName: '조회 3' }
   ]
   for (const [index, expected] of requests.entries()) {
+    if (index === 3 || index === 7) {
+      t.mock.timers.tick(2 * 60 * 1000)
+    }
     const response = await fetch(expected.url, { method: expected.method })
     assert.equal(response.status, expected.status, `${index}`)
     if (expected.characterName !== undefined) {
@@ -432,6 +442,7 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
   }
 
   assert.equal(basicRequests.length, 3)
+  assert.equal(sectionRequests.length, 30)
   const entries = logs.lines.map((line) => {
     const { route, neopleMs, responseCached } = readEntry(line).fields
 
@@ -443,7 +454,9 @@ test('저장한 응답을 다시 보낸 상세 요청 로그는 단계 시간 �
   assert.deepEqual(entries, [
     { route: detailRoute, stages: built, responseCached: undefined },
     { route: detailRoute, stages: [], responseCached: true },
+    { route: refreshRoute, stages: [], responseCached: true },
     { route: refreshRoute, stages: built, responseCached: undefined },
+    { route: refreshRoute, stages: [], responseCached: true },
     { route: detailRoute, stages: [], responseCached: true },
     { route: detailRoute, stages: [], responseCached: true },
     { route: refreshRoute, stages: built, responseCached: undefined }
