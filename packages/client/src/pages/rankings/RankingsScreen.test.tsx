@@ -181,6 +181,23 @@ it('고른 직업으로 목록 이름을 바꾸고, 앞의 眞을 뺀 전직 이
   expect(onFilterChange).toHaveBeenLastCalledWith({})
 })
 
+it('제국기사 칩을 고르면 목록 이름이 바뀌고, 브레이커 전직 칩으로 전직까지 넘긴다', async () => {
+  const jobId = '8d4d2001cdb357e41633c234eb7501b5'
+  const onFilterChange = vi.fn()
+  await render(async () => rankingOf(1), {}, onFilterChange)
+
+  await act(async () => chip('제국기사').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({ jobId })
+
+  await render(async () => rankingOf(1), { jobId }, onFilterChange)
+  expect(container.querySelector('section[aria-label="제국기사 명성 랭킹"]')).not.toBeNull()
+  await act(async () => chip('브레이커').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId,
+    jobGrowId: '37495b941da3b1661bc900e68ef3b2c6'
+  })
+})
+
 it('필터에 맞춰 직업, 전직을 넘겨 조회하고 실패하면 오류를 알린다', async () => {
   const [job] = RANKING_JOBS
   const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => {
