@@ -88,6 +88,12 @@ function homeLink(): HTMLAnchorElement {
   )!
 }
 
+async function openMultisearch(): Promise<void> {
+  const link = container.querySelector<HTMLAnchorElement>('nav[aria-label="전역 메뉴"] a')!
+  await act(async () => link.click())
+  await waitForPath('/multisearch')
+}
+
 async function waitForPath(pathname: string): Promise<void> {
   await vi.waitFor(() => expect(window.location.pathname).toBe(pathname))
 }
@@ -184,18 +190,37 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
   expect(seats()).toHaveLength(4)
 })
 
-it('/는 멀티서치로 replace 이동한다', async () => {
-  window.history.replaceState(null, '', '/guide')
-  window.history.pushState(null, '', '/')
+it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화면 상자에 큰 검색창과 명성 랭킹 제목만 둔다', async () => {
+  window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
 
-  await waitForPath('/multisearch')
-  expect(globalMenu()[0]).toEqual(['멀티서치', 'page'])
-  await act(async () => window.history.back())
-  await waitForPath('/guide')
+  const header = container.querySelector('header')!
+  expect(header.querySelector('form[role="search"]')).toBeNull()
+  expect(
+    [...header.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
+  ).toEqual(['다크 모드로 바꾸기'])
+  expect(globalMenu()).toEqual([
+    ['멀티서치', null],
+    ['랭킹', null],
+    ['통계', null],
+    ['모험단', null],
+    ['즐겨찾기', null]
+  ])
+
+  const main = container.querySelector('main')!
+  expect(
+    [...homeSearchBox().querySelectorAll('button, input[type="search"]')].map((control) =>
+      control.getAttribute('aria-label')
+    )
+  ).toEqual(['검색 대상', '캐릭터 이름', '검색'])
+  expect([...main.querySelectorAll('h1, h2, h3')].map((title) => title.textContent)).toEqual([
+    '명성 랭킹'
+  ])
+  expect(main.querySelector('p')).toBeNull()
+  expect(seats()).toHaveLength(0)
 })
 
-it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 링크만 두고 링크를 누르면 파티 표로 간다', async () => {
+it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 링크만 두고 링크를 누르면 메인 화면으로 간다', async () => {
   window.history.replaceState(null, '', '/guide?from=1')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -216,15 +241,10 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
 
   await act(async () => homeLink().click())
 
-  await waitForPath('/multisearch')
-  expect(seats()).toHaveLength(4)
-  expect(globalMenu()).toEqual([
-    ['멀티서치', 'page'],
-    ['랭킹', null],
-    ['통계', null],
-    ['모험단', null],
-    ['즐겨찾기', null]
-  ])
+  await waitForPath('/')
+  expect(homeSearchBox()).not.toBeNull()
+  expect(container.querySelector('main section h2')?.textContent).toBe('명성 랭킹')
+  expect(container.querySelector('header form[role="search"]')).toBeNull()
 })
 
 it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 지금 화면으로 표시한다', async () => {
@@ -383,11 +403,10 @@ it('없는 주소 화면에서는 Alt+방향키를 브라우저의 뒤로, 앞�
   expect(event.defaultPrevented).toBe(false)
 })
 
-it('멀티서치에서 고친 이름과 맞바꾼 자리는 없는 주소 화면에 다녀와도 남는다', async () => {
-  window.history.replaceState(null, '', '/guide')
+it('멀티서치에서 고친 이름과 맞바꾼 자리는 메인 화면에 다녀와도 남는다', async () => {
+  window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
-  await act(async () => homeLink().click())
-  await waitForPath('/multisearch')
+  await openMultisearch()
   const input = seats()[0].querySelector<HTMLInputElement>('input[aria-label$="번 캐릭터 이름"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
@@ -406,7 +425,7 @@ it('멀티서치에서 고친 이름과 맞바꾼 자리는 없는 주소 화면
   expect(before).toContain('남는이름')
 
   await act(async () => window.history.back())
-  await waitForPath('/guide')
+  await waitForPath('/')
   expect(seats()).toHaveLength(0)
   await act(async () => window.history.forward())
   await waitForPath('/multisearch')
@@ -414,30 +433,29 @@ it('멀티서치에서 고친 이름과 맞바꾼 자리는 없는 주소 화면
   await vi.waitFor(() => expect(seats().map(nameOf)).toEqual(before))
 })
 
-it('화면 공유는 없는 주소 화면에 다녀와도 연결된 채 남고, 다른 화면에서 공유를 멈추면 돌아왔을 때 연결 전이다', async () => {
+it('화면 공유는 메인 화면에 다녀와도 연결된 채 남고, 다른 화면에서 공유를 멈추면 돌아왔을 때 연결 전이다', async () => {
   // jsdom에는 화면 공유와 video 재생이 없어 getDisplayMedia가 돌려주는 track과 stream만 흉내 낸다.
   const track = Object.assign(new EventTarget(), { label: 'Dungeon & Fighter', stop: vi.fn() })
   vi.stubGlobal('navigator', {
     mediaDevices: { getDisplayMedia: vi.fn(async () => ({ getVideoTracks: () => [track] })) }
   })
   vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
-  window.history.replaceState(null, '', '/guide')
+  window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
-  await act(async () => homeLink().click())
-  await waitForPath('/multisearch')
+  await openMultisearch()
   const chip = (): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
   await act(async () => chip().click())
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
 
   await act(async () => window.history.back())
-  await waitForPath('/guide')
+  await waitForPath('/')
   await act(async () => window.history.forward())
   await waitForPath('/multisearch')
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
 
   await act(async () => window.history.back())
-  await waitForPath('/guide')
+  await waitForPath('/')
   await act(async () => track.dispatchEvent(new Event('ended')))
   await act(async () => window.history.forward())
   await waitForPath('/multisearch')
@@ -451,8 +469,7 @@ it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는
   await act(async () => root.render(<WebApp host={host} />))
 
   await act(async () => pasteImage())
-  await act(async () => homeLink().click())
-  await waitForPath('/multisearch')
+  await openMultisearch()
 
   expect(decodeBrowserImage).not.toHaveBeenCalled()
   expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
@@ -674,9 +691,13 @@ function searchBox(): HTMLFormElement {
   return container.querySelector<HTMLFormElement>('header form[role="search"]')!
 }
 
-async function chooseScope(label: string): Promise<void> {
+function homeSearchBox(): HTMLFormElement {
+  return container.querySelector<HTMLFormElement>('main form[role="search"]')!
+}
+
+async function chooseScope(label: string, box = searchBox()): Promise<void> {
   await act(async () =>
-    searchBox().querySelector<HTMLButtonElement>('button[aria-label="검색 대상"]')!.click()
+    box.querySelector<HTMLButtonElement>('button[aria-label="검색 대상"]')!.click()
   )
   const option = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
     (item) => item.textContent === label
@@ -684,8 +705,7 @@ async function chooseScope(label: string): Promise<void> {
   await act(async () => option.click())
 }
 
-async function searchName(name: string): Promise<void> {
-  const box = searchBox()
+async function searchName(name: string, box = searchBox()): Promise<void> {
   const input = box.querySelector<HTMLInputElement>('input[type="search"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, name)
@@ -832,6 +852,37 @@ it('모험단 검색을 제출하면 다듬은 이름의 모험단 대시보드�
   expect(container.querySelector('main h1')?.textContent).toBe('없는 모험단')
   expect(searchRequests(fetch)).toEqual([])
   expect(useMyAdventureStore.getState().adventureName).toBeNull()
+})
+
+it('메인 화면의 큰 검색창에 캐릭터 이름을 제출하면 전역 검색창처럼 검색 화면으로 가고, 그 화면의 전역 바에는 검색창이 다시 보인다', async () => {
+  const fetch = stubSearchFetch([candidateRow('큰검색', 'cain', 'home-1', 1000)])
+  window.history.replaceState(null, '', '/')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await searchName(' 큰검색 ', homeSearchBox())
+
+  await waitForPath('/search')
+  expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+    characterName: '큰검색',
+    serverId: 'all'
+  })
+  await vi.waitFor(() =>
+    expect(searchResultRows()).toEqual([['/c/cain/home-1', '카인큰검색크루세이더1,000']])
+  )
+  expect(searchRequests(fetch)).toHaveLength(1)
+  expect(container.querySelector('header form[role="search"]')).not.toBeNull()
+})
+
+it('메인 화면의 큰 검색창에서 모험단을 고르고 제출하면 그 모험단 대시보드로 간다', async () => {
+  stubAdventureFetch()
+  window.history.replaceState(null, '', '/')
+  await act(async () => root.render(<WebApp host={host} />))
+  await chooseScope('모험단', homeSearchBox())
+
+  await searchName('큰 모험단', homeSearchBox())
+
+  await waitForPath(`/adventures/${encodeURIComponent('큰 모험단')}`)
+  await vi.waitFor(() => expect(container.querySelector('main h1')?.textContent).toBe('큰 모험단'))
 })
 
 it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기본 동작을 막지 않고 표의 자리와 회차 안내를 바꾸지 않는다', async () => {
