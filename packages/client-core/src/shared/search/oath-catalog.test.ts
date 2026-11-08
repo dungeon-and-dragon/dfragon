@@ -1,22 +1,37 @@
 import { describe, expect, it } from 'vitest'
 import { characterDetailFixture } from '../../testing/fixtures/character-detail'
+import type { GameTextLines } from './game-text'
 import { type OathCatalog, oathCatalogSchema, oathItemIconOf, oathSetBoardOf } from './oath-catalog'
 
 type Effects = OathCatalog['sets'][number]['options'][number]['effects']
 
+function rareEffect(rare: string | null): GameTextLines | null {
+  if (rare === null) {
+    return null
+  }
+
+  return [[{ text: rare, tone: 'rarity-rare' }]]
+}
+
 function effects(name: string, rare: string | null): Effects {
   return {
-    rare,
-    unique: `${name} 유니크`,
-    legendary: `${name} 레전더리`,
-    epic: `${name} 에픽`,
-    primitive: `<tst::primeval>${name}\\n<tst::up_color>[강조]<tst::primeval> 태초`
+    rare: rareEffect(rare),
+    unique: [[{ text: `${name} 유니크`, tone: 'rarity-unique' }]],
+    legendary: [[{ text: `${name} 레전더리`, tone: 'rarity-legendary' }]],
+    epic: [[{ text: `${name} 에픽`, tone: 'rarity-epic' }]],
+    primitive: [
+      [{ text: name, tone: 'rarity-primordial' }],
+      [
+        { text: '[강조]', tone: 'increase' },
+        { text: ' 태초', tone: 'rarity-primordial' }
+      ]
+    ]
   }
 }
 
-// build-skilltab이 만드는 oath.json과 같은 모양의 합성 데이터다. 세트 번호와 선택지 이름은 저장소 fixture의 용투 서약이다.
+// 데이터 묶음(oath.v2.json)과 같은 모양의 합성 데이터다. 세트 번호와 선택지 이름은 저장소 fixture의 용투 서약이다.
 const CATALOG: OathCatalog = oathCatalogSchema.parse({
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
   sets: [
     {
       setId: 16204,
@@ -59,15 +74,23 @@ describe('서약 세트 선택지', () => {
       ['oath/10.png', false],
       ['oath/11.png', false]
     ])
-    expect(board?.options[0]?.effect).toBe(
-      '<tst::primeval>불꽃\\n<tst::up_color>[강조]<tst::primeval> 태초'
-    )
+    expect(board?.options[0]?.effect).toEqual([
+      [{ text: '불꽃', tone: 'rarity-primordial' }],
+      [
+        { text: '[강조]', tone: 'increase' },
+        { text: ' 태초', tone: 'rarity-primordial' }
+      ]
+    ])
   })
 
   it('"레어 Ⅱ"처럼 단계가 붙은 등급은 등급 이름의 파일을 쓰고, 그 파일이 없는 선택지는 문구가 없다', () => {
     const board = oathSetBoardOf(CATALOG, setInfoOf('buffer'))
 
-    expect(board?.options.map(({ effect }) => effect)).toEqual([null, '분노 레어', null])
+    expect(board?.options.map(({ effect }) => effect)).toEqual([
+      null,
+      [[{ text: '분노 레어', tone: 'rarity-rare' }]],
+      null
+    ])
   })
 
   it('데이터에 없는 세트는 선택지를 만들지 않는다', () => {

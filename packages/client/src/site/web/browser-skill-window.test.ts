@@ -1,11 +1,22 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest'
+import { ZodError } from 'zod'
 import { createOathCatalogSource, createSkillWindowCatalogSource } from './browser-skill-window'
 
-const CATALOG_URL = 'https://site.example.test/skilltab/skilltab.json'
+const CATALOG_URL = 'https://site.example.test/skilltab/skilltab.v2.json'
 
 const CATALOG_JSON = {
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
+  marks: {
+    evolution: [
+      '1d9658f7/marks/evolution-1.8df0e8da.png',
+      '1d9658f7/marks/evolution-2.b314323a.png'
+    ],
+    enhancement: [
+      '1d9658f7/marks/enhancement-1.77cf8f9d.png',
+      '1d9658f7/marks/enhancement-2.5be2681f.png'
+    ]
+  },
   jobs: [
     {
       jobId: 'priest',
@@ -23,7 +34,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-it('sprite 경로를 skilltab.json 주소 기준의 절대 주소로 바꾸고 한 번만 받는다', async () => {
+it('sprite 경로를 skilltab.v2.json 주소 기준의 절대 주소로 바꾸고 한 번만 받는다', async () => {
   const fetch = vi.fn(async () => Response.json(CATALOG_JSON))
   vi.stubGlobal('fetch', fetch)
   const load = createSkillWindowCatalogSource(CATALOG_URL)
@@ -37,39 +48,35 @@ it('sprite 경로를 skilltab.json 주소 기준의 절대 주소로 바꾸고 �
   expect(fetch).toHaveBeenCalledOnce()
 })
 
-it('개화, 강화 표식 경로도 skilltab.json 주소 기준의 절대 주소로 바꾼다', async () => {
-  const marks = {
-    evolution: [
-      '1d9658f7/marks/evolution-1.8df0e8da.png',
-      '1d9658f7/marks/evolution-2.b314323a.png'
-    ],
-    enhancement: [
-      '1d9658f7/marks/enhancement-1.77cf8f9d.png',
-      '1d9658f7/marks/enhancement-2.5be2681f.png'
-    ]
-  }
+it('개화, 강화 표식 경로도 skilltab.v2.json 주소 기준의 절대 주소로 바꾼다', async () => {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () => Response.json({ ...CATALOG_JSON, marks }))
+    vi.fn(async () => Response.json(CATALOG_JSON))
   )
 
   const catalog = await createSkillWindowCatalogSource(CATALOG_URL)()
 
-  expect(catalog?.marks?.evolution[1]).toBe(
+  expect(catalog?.marks.evolution[1]).toBe(
     'https://site.example.test/skilltab/1d9658f7/marks/evolution-2.b314323a.png'
   )
-  expect(catalog?.marks?.enhancement[0]).toBe(
+  expect(catalog?.marks.enhancement[0]).toBe(
     'https://site.example.test/skilltab/1d9658f7/marks/enhancement-1.77cf8f9d.png'
   )
 })
 
-it('서약 세트, 선택지 아이콘 경로를 oath.json 주소 기준의 절대 주소로 바꾼다', async () => {
-  const effects = { rare: null, unique: null, legendary: null, epic: null, primitive: '효과' }
+it('서약 세트, 선택지 아이콘 경로를 oath.v2.json 주소 기준의 절대 주소로 바꾼다', async () => {
+  const effects = {
+    rare: null,
+    unique: null,
+    legendary: null,
+    epic: null,
+    primitive: [[{ text: '효과', tone: 'rarity-primordial' }]]
+  }
   vi.stubGlobal(
     'fetch',
     vi.fn(async () =>
       Response.json({
-        pvfSha256: 'synthetic',
+        version: 'synthetic',
         sets: [
           {
             setId: 16204,
@@ -80,12 +87,13 @@ it('서약 세트, 선택지 아이콘 경로를 oath.json 주소 기준의 절�
             ]
           },
           { setId: 50000, name: '안개 서약', icon: null, options: [] }
-        ]
+        ],
+        items: []
       })
     )
   )
 
-  const catalog = await createOathCatalogSource('https://site.example.test/skilltab/oath.json')()
+  const catalog = await createOathCatalogSource('https://site.example.test/skilltab/oath.v2.json')()
 
   expect(catalog?.sets[0]?.icon).toBe(
     'https://site.example.test/skilltab/1d9658f7/oath-set/16204.0a1b2c3d.png'
@@ -94,15 +102,50 @@ it('서약 세트, 선택지 아이콘 경로를 oath.json 주소 기준의 절�
     'https://site.example.test/skilltab/1d9658f7/oath/9.4e5f6a7b.png'
   )
   expect(catalog?.sets[1]?.icon).toBeNull()
-  expect(catalog?.items).toEqual([])
 })
 
-it('서약 아이템 아이콘 경로도 oath.json 주소 기준의 절대 주소로 바꾼다', async () => {
+it('문구가 줄 목록이 아닌 서약 데이터는 받지 않는다', async () => {
   vi.stubGlobal(
     'fetch',
     vi.fn(async () =>
       Response.json({
-        pvfSha256: 'synthetic',
+        version: 'synthetic',
+        sets: [
+          {
+            setId: 16204,
+            name: '야망의 용투 서약',
+            icon: null,
+            options: [
+              {
+                name: '용투 : 세계를 태우는 불꽃',
+                icon: '1d9658f7/oath/9.4e5f6a7b.png',
+                effects: {
+                  rare: null,
+                  unique: null,
+                  legendary: null,
+                  epic: null,
+                  primitive: '효과'
+                }
+              }
+            ]
+          }
+        ],
+        items: []
+      })
+    )
+  )
+
+  await expect(
+    createOathCatalogSource('https://site.example.test/skilltab/oath.v2.json')()
+  ).rejects.toBeInstanceOf(ZodError)
+})
+
+it('서약 아이템 아이콘 경로도 oath.v2.json 주소 기준의 절대 주소로 바꾼다', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () =>
+      Response.json({
+        version: 'synthetic',
         sets: [],
         items: [
           {
@@ -115,7 +158,7 @@ it('서약 아이템 아이콘 경로도 oath.json 주소 기준의 절대 주�
     )
   )
 
-  const catalog = await createOathCatalogSource('https://site.example.test/skilltab/oath.json')()
+  const catalog = await createOathCatalogSource('https://site.example.test/skilltab/oath.v2.json')()
 
   expect(catalog?.items).toEqual([
     {
@@ -144,6 +187,6 @@ it('받지 못하면 실패를 알리고 다음 요청에서 다시 받는다', 
   const load = createSkillWindowCatalogSource(CATALOG_URL)
 
   await expect(load()).rejects.toThrow('HTTP 503')
-  await expect(load()).resolves.toMatchObject({ pvfSha256: 'synthetic' })
+  await expect(load()).resolves.toMatchObject({ version: 'synthetic' })
   expect(fetch).toHaveBeenCalledTimes(2)
 })

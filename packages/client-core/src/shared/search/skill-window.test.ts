@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { characterDetailFixture } from '../../testing/fixtures/character-detail'
+import type { GameTextLines } from './game-text'
 import {
   buffSkillIconOf,
   learnedSkillRowsOf,
@@ -21,9 +22,15 @@ function slot(skillId: number, col: number, row: number) {
   return { skillId, col, row, nextSkills: [] }
 }
 
-// 묶음(skilltab.json)과 같은 모양의 합성 데이터다. 두 직업 모두 찰나의 깨달음이 있어 직업마다의 스킬과 구분된다.
+const MARKS = {
+  evolution: ['marks/evolution-1.png', 'marks/evolution-2.png'],
+  enhancement: ['marks/enhancement-1.png', 'marks/enhancement-2.png']
+} satisfies SkillWindowCatalog['marks']
+
+// 데이터 묶음(skilltab.v2.json)과 같은 모양의 합성 데이터다. 두 직업 모두 찰나의 깨달음이 있어 직업마다의 스킬과 구분된다.
 const CATALOG: SkillWindowCatalog = {
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
+  marks: MARKS,
   jobs: [
     {
       jobId: 'priest',
@@ -222,27 +229,34 @@ it('스킬 개화와 강화는 skillId로 배운 스킬의 이름을 찾고 type
   ])
 })
 
+function gameText(text: string): GameTextLines {
+  return [[{ text, tone: 'default' }]]
+}
+
 function evolutionOf(name: string): NonNullable<Skill['evolution']> {
   return [
-    { name: `${name} 1`, basicExplain: `${name} 요약 1`, explain: `${name} 설명 1` },
-    { name: `${name} 2`, basicExplain: `${name} 요약 2`, explain: `${name} 설명 2` }
+    {
+      name: `${name} 1`,
+      basicExplain: gameText(`${name} 요약 1`),
+      explain: gameText(`${name} 설명 1`)
+    },
+    {
+      name: `${name} 2`,
+      basicExplain: gameText(`${name} 요약 2`),
+      explain: gameText(`${name} 설명 2`)
+    }
   ]
 }
 
 const ENHANCEMENT: NonNullable<Skill['enhancement']> = {
-  1: { explain: '데미지 증가' },
-  2: { explain: '데미지 증가, 쿨타임 감소' }
+  1: { explain: gameText('데미지 증가') },
+  2: { explain: gameText('데미지 증가, 쿨타임 감소') }
 }
-
-const MARKS = {
-  evolution: ['marks/evolution-1.png', 'marks/evolution-2.png'],
-  enhancement: ['marks/enhancement-1.png', 'marks/enhancement-2.png']
-} satisfies SkillWindowCatalog['marks']
 
 // 저장소 fixture(프리스트(여) 眞 이단심판관)의 개화, 강화, 스킬 체인 스킬 이름으로 만든 합성 배치다. 스킬 번호 9는 다른
 // 전직에만 있어 배울 수 없는 스킬이다.
 const INQUISITOR_CATALOG: SkillWindowCatalog = {
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
   marks: MARKS,
   jobs: [
     {
@@ -338,8 +352,18 @@ describe('스킬 개화, 강화', () => {
       ['참수', 2]
     ])
     expect(board?.evolutions[2]?.branches).toEqual([
-      { type: 1, name: '참수 1', basicExplain: '참수 요약 1', explain: '참수 설명 1' },
-      { type: 2, name: '참수 2', basicExplain: '참수 요약 2', explain: '참수 설명 2' }
+      {
+        type: 1,
+        name: '참수 1',
+        basicExplain: gameText('참수 요약 1'),
+        explain: gameText('참수 설명 1')
+      },
+      {
+        type: 2,
+        name: '참수 2',
+        basicExplain: gameText('참수 요약 2'),
+        explain: gameText('참수 설명 2')
+      }
     ])
     expect(board?.enhancements.map(({ name, picked }) => [name, picked])).toEqual([
       ['즉결심판', 1],
@@ -354,14 +378,6 @@ describe('스킬 개화, 강화', () => {
 
     expect(board?.enhancements).toEqual([])
     expect(board?.evolutions).toHaveLength(3)
-  })
-
-  it('개화, 강화 데이터를 넣지 않은 묶음이면 목록을 만들지 않는다', () => {
-    const { character, style } = inquisitor()
-    const { marks: _marks, ...withoutExtras } = INQUISITOR_CATALOG
-
-    expect(skillUpgradeBoardOf(withoutExtras, character, style)).toBeNull()
-    expect(skillWindowOf(withoutExtras, character, style)?.marks).toBeNull()
   })
 })
 

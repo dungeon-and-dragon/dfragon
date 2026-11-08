@@ -35,7 +35,7 @@ function UpgradeRows({
   kind: keyof SkillMarks
   rates: SkillUpgradeRates
   names: readonly [string, string]
-  marks: SkillMarks | null
+  marks: SkillMarks
 }): React.JSX.Element {
   return (
     <>
@@ -44,13 +44,11 @@ function UpgradeRows({
         {UPGRADE_TYPES.map((type, index) => (
           <Fragment key={type}>
             <span {...stylex.props(styles.branch)}>
-              {marks !== null && (
-                <img
-                  src={skillMarkOf(marks, kind, type)}
-                  alt={kind === 'evolution' ? EVOLUTION_NUMERALS[type] : ''}
-                  {...stylex.props(kind === 'evolution' ? styles.mark : styles.enhancementMark)}
-                />
-              )}
+              <img
+                src={skillMarkOf(marks, kind, type)}
+                alt={kind === 'evolution' ? EVOLUTION_NUMERALS[type] : ''}
+                {...stylex.props(kind === 'evolution' ? styles.mark : styles.enhancementMark)}
+              />
               {names[index]}
             </span>
             <span {...stylex.props(styles.value)}>{formatRate(rates[index])}</span>
@@ -69,7 +67,7 @@ export function SkillAdoptionTooltip({
 }: {
   name: string
   adoption: SkillAdoption
-  marks: SkillMarks | null
+  marks: SkillMarks
   now: number
 }): React.JSX.Element {
   const { levels, evolution, enhancement } = adoption

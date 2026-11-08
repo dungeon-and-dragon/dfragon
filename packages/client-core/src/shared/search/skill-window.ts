@@ -1,14 +1,14 @@
 import { z } from 'zod'
 import type { CharacterDetailView } from './character-detail-view'
+import { type GameTextLines, gameTextSchema } from './game-text'
 
 const evolutionBranchSchema = z.object({
   name: z.string(),
-  basicExplain: z.string(),
-  explain: z.string()
+  basicExplain: gameTextSchema,
+  explain: gameTextSchema
 })
-const enhancementBranchSchema = z.object({ explain: z.string() })
+const enhancementBranchSchema = z.object({ explain: gameTextSchema })
 
-// 개화, 강화와 표식은 detail-extras 묶음을 함께 넣어 만든 데이터에만 있다.
 const skillSchema = z.object({
   name: z.string(),
   kind: z.enum(['active', 'passive']),
@@ -45,8 +45,8 @@ const jobSchema = z.object({
 })
 
 export const skillWindowCatalogSchema = z.object({
-  pvfSha256: z.string(),
-  marks: marksSchema.optional(),
+  version: z.string(),
+  marks: marksSchema,
   jobs: z.array(jobSchema)
 })
 
@@ -85,7 +85,7 @@ export type SkillWindowRow = Readonly<{ row: number; requiredLevel: number | nul
 export type SkillWindow = Readonly<{
   rows: readonly SkillWindowRow[]
   icons: readonly SkillWindowIcon[]
-  marks: SkillMarks | null
+  marks: SkillMarks
 }>
 
 const BEFORE_ADVANCEMENT_GROWTYPE = 0
@@ -270,9 +270,7 @@ export function skillWindowOf(
   const icons = [...cells.values()].map((candidates) => pickInCell(catalog, candidates))
   const rows = rowsOf(icons)
 
-  const marks = catalog.marks ?? null
-
-  return { rows, icons, marks }
+  return { rows, icons, marks: catalog.marks }
 }
 
 type UpgradeSkill = Readonly<{
@@ -286,8 +284,8 @@ type UpgradeSkill = Readonly<{
 export type EvolutionBranch = Readonly<{
   type: UpgradeType
   name: string
-  basicExplain: string
-  explain: string
+  basicExplain: GameTextLines
+  explain: GameTextLines
 }>
 
 export type EnhancementBranch = Readonly<{ type: UpgradeType }>
@@ -357,7 +355,7 @@ export function skillUpgradeBoardOf(
   style: SkillStyle
 ): SkillUpgradeBoard | null {
   const tree = skillTreeOf(catalog, character)
-  if (tree === null || catalog.marks === undefined) {
+  if (tree === null) {
     return null
   }
   const learnable = learnableSkillsOf(tree)

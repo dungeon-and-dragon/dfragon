@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import type { GameTextLines } from '@dfragon/client-core/shared/search/game-text'
 import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
 import { characterDetailFixture } from '@dfragon/client-core/testing/fixtures/character-detail'
 import { type ClientHost, ClientHostContext } from '../../../hooks/useClientHost'
@@ -10,9 +11,25 @@ import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { SkillTab } from './SkillTab'
 
+const MARKS = {
+  evolution: [
+    'https://skilltab.test/marks/evolution-1.png',
+    'https://skilltab.test/marks/evolution-2.png'
+  ],
+  enhancement: [
+    'https://skilltab.test/marks/enhancement-1.png',
+    'https://skilltab.test/marks/enhancement-2.png'
+  ]
+} satisfies SkillWindowCatalog['marks']
+
+function gameText(text: string): GameTextLines {
+  return [[{ text, tone: 'default' }]]
+}
+
 // 저장소 fixture(프리스트(여) 眞 이단심판관)의 스킬 이름으로 만든 합성 배치다.
 const CATALOG: SkillWindowCatalog = {
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
+  marks: MARKS,
   jobs: [
     {
       jobId: 'at_priest',
@@ -49,28 +66,16 @@ const CATALOG: SkillWindowCatalog = {
   ]
 }
 
-const MARKS = {
-  evolution: [
-    'https://skilltab.test/marks/evolution-1.png',
-    'https://skilltab.test/marks/evolution-2.png'
-  ],
-  enhancement: [
-    'https://skilltab.test/marks/enhancement-1.png',
-    'https://skilltab.test/marks/enhancement-2.png'
-  ]
-} satisfies SkillWindowCatalog['marks']
-
 const [PRIEST] = CATALOG.jobs
 const [INQUISITOR] = PRIEST?.advancements ?? []
 if (PRIEST === undefined || INQUISITOR === undefined) {
   throw new Error('합성 배치에 직업이 없다')
 }
 
-// 개화, 강화 데이터를 함께 넣어 만든 묶음이다. fixture에서 세례의 불길은 개화 Ⅰ, 참수는 개화 Ⅱ와 강화 데미지를 골랐고,
+// 개화, 강화할 수 있는 스킬을 더한 배치다. fixture에서 세례의 불길은 개화 Ⅰ, 참수는 개화 Ⅱ와 강화 데미지를 골랐고,
 // 성화는 아무것도 고르지 않았다.
 const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
   ...CATALOG,
-  marks: MARKS,
   jobs: [
     {
       ...PRIEST,
@@ -96,10 +101,14 @@ const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
           evolution: [
             {
               name: '정화의 세례',
-              basicExplain: '범위 증가',
-              explain: '[세례의 불길]\\n범위 30%% 증가'
+              basicExplain: gameText('범위 증가'),
+              explain: [[{ text: '[세례의 불길]', tone: 'default' }], ...gameText('범위 30% 증가')]
             },
-            { name: '심판의 세례', basicExplain: '시전 시간 감소', explain: '시전 시간 감소' }
+            {
+              name: '심판의 세례',
+              basicExplain: gameText('시전 시간 감소'),
+              explain: gameText('시전 시간 감소')
+            }
           ]
         },
         4: {
@@ -109,12 +118,20 @@ const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
           maxLevel: 60,
           icon: { x: 84, y: 0 },
           evolution: [
-            { name: '단죄', basicExplain: '공격력 증가', explain: '공격력 증가' },
-            { name: '처형', basicExplain: '딜레이 캔슬', explain: '딜레이 캔슬' }
+            {
+              name: '단죄',
+              basicExplain: gameText('공격력 증가'),
+              explain: gameText('공격력 증가')
+            },
+            {
+              name: '처형',
+              basicExplain: gameText('딜레이 캔슬'),
+              explain: gameText('딜레이 캔슬')
+            }
           ],
           enhancement: {
-            1: { explain: '데미지 증가' },
-            2: { explain: '데미지 증가, 쿨타임 감소' }
+            1: { explain: gameText('데미지 증가') },
+            2: { explain: gameText('데미지 증가, 쿨타임 감소') }
           }
         },
         5: {
@@ -124,8 +141,8 @@ const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
           maxLevel: 60,
           icon: { x: 112, y: 0 },
           enhancement: {
-            1: { explain: '데미지 증가' },
-            2: { explain: '데미지 증가, 쿨타임 감소' }
+            1: { explain: gameText('데미지 증가') },
+            2: { explain: gameText('데미지 증가, 쿨타임 감소') }
           }
         }
       }

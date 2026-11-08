@@ -1,40 +1,29 @@
-export type GameTextTone = 'default' | 'accent' | 'subtle'
+import { z } from 'zod'
 
-export type GameTextSegment = Readonly<{ text: string; tone: GameTextTone }>
+const GAME_TEXT_TONES = [
+  'default',
+  'increase',
+  'decrease',
+  'amplify',
+  'enhance',
+  'refine',
+  'set',
+  'disabled',
+  'rarity-rare',
+  'rarity-unique',
+  'rarity-epic',
+  'rarity-legendary',
+  'rarity-chronicle',
+  'rarity-primordial'
+] as const
 
-export type GameTextLine = readonly GameTextSegment[]
+export type GameTextTone = (typeof GAME_TEXT_TONES)[number]
 
-// PVF 문구의 <tst::…> 표지는 다음 표지가 나올 때까지 적용된다. 강조와 비활성 말고는 등급 이름 같은 표지라 기본 색으로 둔다.
-const TONE_BY_MARKER: Readonly<Record<string, GameTextTone>> = {
-  up_color: 'accent',
-  ui_disable: 'subtle'
-}
-const MARKER_PATTERN = /<tst::([^>]*)>/
-// PVF 문구의 줄바꿈은 백슬래시와 n 두 글자다.
-const LINE_BREAK_PATTERN = /\\n|\n/
+// 데이터 묶음이 이 화면보다 먼저 새 tone을 쓰기 시작해도 묶음 전체를 버리지 않도록 기본 색으로 받는다.
+const toneSchema = z.string().pipe(z.enum(GAME_TEXT_TONES).catch('default'))
 
-export function gameTextLinesOf(raw: string): GameTextLine[] {
-  let current: GameTextSegment[] = []
-  const lines: GameTextSegment[][] = [current]
-  const parts = raw.replaceAll('%%', '%').split(MARKER_PATTERN)
-  let tone: GameTextTone = 'default'
-  for (const [index, part] of parts.entries()) {
-    const isMarker = index % 2 === 1
-    if (isMarker) {
-      tone = TONE_BY_MARKER[part] ?? 'default'
-      continue
-    }
-    for (const [lineIndex, text] of part.split(LINE_BREAK_PATTERN).entries()) {
-      if (lineIndex > 0) {
-        current = []
-        lines.push(current)
-      }
+const segmentSchema = z.object({ text: z.string(), tone: toneSchema })
 
-      if (text !== '') {
-        current.push({ text, tone })
-      }
-    }
-  }
+export const gameTextSchema = z.array(z.array(segmentSchema))
 
-  return lines
-}
+export type GameTextLines = z.infer<typeof gameTextSchema>

@@ -92,8 +92,8 @@ let host: BrowserHost
 beforeAll(() => {
   host = installBrowserHost(
     API_BASE_URL,
-    'https://site.example.test/skilltab/skilltab.json',
-    'https://site.example.test/skilltab/oath.json'
+    'https://site.example.test/skilltab/skilltab.v2.json',
+    'https://site.example.test/skilltab/oath.v2.json'
   )
 })
 
