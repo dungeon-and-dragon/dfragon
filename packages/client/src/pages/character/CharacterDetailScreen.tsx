@@ -33,10 +33,12 @@ export function CharacterDetailScreen({
       )
     case 'error':
       return (
-        <div {...stylex.props(styles.screen, styles.error)}>
-          <p role="alert" {...stylex.props(styles.message)}>
-            {result.message}
-          </p>
+        <div {...stylex.props(styles.screen)}>
+          <div {...stylex.props(styles.error)}>
+            <p role="alert" {...stylex.props(styles.message)}>
+              {result.message}
+            </p>
+          </div>
         </div>
       )
     case 'success':
