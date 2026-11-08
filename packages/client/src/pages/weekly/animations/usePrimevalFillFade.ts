@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
-import { FILL_GROW, fillWidth, type Motion, useMotionAllowed, useTweenedStyle } from './gsap-motion'
+import { type Motion, useMotionAllowed } from '../../../animations/gsap-motion'
+import { FILL_GROW, fillWidth, useTweenedStyle } from './gsap-motion'
 
 const FADE: Motion = { seconds: 0.5, ease: FILL_GROW.ease }
 

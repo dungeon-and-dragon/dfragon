@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
+import { indicatorSlide } from '../animations/indicator-slide.stylex'
 
 const active = ':is([data-active])'
 
@@ -33,6 +34,12 @@ export const styles = stylex.create({
     left: 'var(--active-tab-left)',
     width: 'var(--active-tab-width)',
     height: 2,
-    backgroundColor: colors.signal
+    backgroundColor: colors.signal,
+    transitionProperty: 'left, width',
+    transitionDuration: {
+      default: indicatorSlide.duration,
+      '@media (prefers-reduced-motion: reduce)': '0s'
+    },
+    transitionTimingFunction: `cubic-bezier(${indicatorSlide.curve})`
   }
 })

@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import { type RefObject, useEffect } from 'react'
 import { wheelAction } from '../heatmap-wheel'
-import { MOTION_QUERY } from './gsap-motion'
+import { MOTION_QUERY } from '../../../animations/gsap-motion'
 
 const WHEEL_SCROLL_SECONDS = 0.35
 
