@@ -124,6 +124,22 @@ it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 
   ])
 })
 
+function fameTooltipText(): string | null {
+  const tooltip = boxOf('명성 분포').querySelector<HTMLElement>('ul + [aria-hidden="true"]')!
+  if (tooltip.style.visibility === 'hidden') {
+    return null
+  }
+
+  return tooltip.textContent
+}
+
+function moveMouse(from: Element, to: Element): Promise<void> {
+  return act(async () => {
+    from.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: to }))
+    to.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: from }))
+  })
+}
+
 it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
   await render(async () => stats)
 
@@ -136,22 +152,33 @@ it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 �
     null,
     null
   ])
+  expect(fameTooltipText()).toBeNull()
+
   const fineBar = items.at(-1)!
-  expect(fineBar.children).toHaveLength(3)
+  await moveMouse(document.body, fineBar)
+  expect(fameTooltipText()).toBe('12.1만~12.2만66,392')
 
-  await act(async () => {
-    fineBar.dispatchEvent(
-      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
-    )
-  })
-  expect(fineBar.children[1]?.textContent).toBe('12.1만~12.2만66,392')
+  await moveMouse(fineBar, document.body)
+  expect(fameTooltipText()).toBeNull()
+})
 
-  await act(async () => {
-    fineBar.dispatchEvent(
-      new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body })
-    )
-  })
-  expect(fineBar.children).toHaveLength(3)
+it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫지 않고 다음 막대의 구간과 인원으로 바꾼다', async () => {
+  await render(async () => stats)
+
+  const chart = boxOf('명성 분포').querySelector('ul')!
+  const [, coarseBar, , divider, firstFineBar] = [...chart.querySelectorAll('li')]
+  await moveMouse(document.body, coarseBar!)
+  expect(fameTooltipText()).toBe('4만~8만10')
+
+  await moveMouse(coarseBar!, chart)
+  await moveMouse(chart, divider!)
+  expect(fameTooltipText()).toBe('4만~8만10')
+
+  await moveMouse(divider!, firstFineBar!)
+  expect(fameTooltipText()).toBe('12만~12.1만0')
+
+  await moveMouse(firstFineBar!, document.body)
+  expect(fameTooltipText()).toBeNull()
 })
 
 it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 떼면 지운다', async () => {
