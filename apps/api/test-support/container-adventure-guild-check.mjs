@@ -82,7 +82,8 @@ try {
     { ...high, fetchedAt: undefined },
     {
       ...basic('siroco', 'adventure-high', adventureName, 70000, guildId, '합성길드'),
-      fetchedAt: undefined
+      fetchedAt: undefined,
+      dealerSkillLearned: null
     }
   )
   assert.deepEqual(adventure.at(-1), {
@@ -98,7 +99,8 @@ try {
     fame: null,
     guildId: null,
     guildName: null,
-    fetchedAt: null
+    fetchedAt: null,
+    dealerSkillLearned: null
   })
 
   const guild = await readGuild(client, guildId)
@@ -202,7 +204,8 @@ try {
       ['adventure-no-basic', []]
     ]
   )
-  assert.deepEqual(weekly.characters.at(-1), { ...adventure.at(-1), weeklyClears: [] })
+  const { dealerSkillLearned, ...noBasic } = adventure.at(-1)
+  assert.deepEqual(weekly.characters.at(-1), { ...noBasic, role: null, weeklyClears: [] })
   assert.deepEqual(await readAdventureWeeklyClears(client, '없는모험단', now), {
     clearNames: fixedClearNames,
     characters: []
