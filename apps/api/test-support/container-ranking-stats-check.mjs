@@ -62,7 +62,8 @@ try {
     { ...top, fetchedAt: undefined },
     {
       ...basic('cain', 'rank-a1', 'grow-a', 80000),
-      fetchedAt: undefined
+      fetchedAt: undefined,
+      dealerSkillLearned: null
     }
   )
   assert.deepEqual(ids(await readFameRanking(client, { jobId, jobGrowId: 'grow-b' }, 100)), [
