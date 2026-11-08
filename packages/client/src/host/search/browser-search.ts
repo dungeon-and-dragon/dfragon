@@ -73,13 +73,11 @@ export function createBrowserCardSearch(
 ): CardSearchHost {
   const slotCount = SEARCH_SLOT_COUNTS[kind]
   const listeners = new Set<(snapshot: SearchSnapshot) => void>()
-  // 페이지 하나가 문서이자 캡처 소스라 Desktop처럼 창이나 문서가 바뀌어 수명이 끝나는 일이 없다.
   const lifetime = createCaptureSearchLifetime({
     runtime: kind === 'raid' ? { ...runtime, ocrIdentification: 'raid' } : runtime,
     slotCount,
-    isCurrent: () => true,
-    isCurrentOcr: () => true,
-    // IPC처럼 다음 microtask에 알려, listener가 수명 처리 도중에 다시 명령을 보내지 않게 한다.
+    // 수명은 발행 직후 대기 중인 상세 요청을 시작한다.
+    // 다음 microtask에 알려, listener가 그 사이에 다시 명령을 보내지 않게 한다.
     publish: (snapshot) =>
       queueMicrotask(() => {
         for (const listener of listeners) {
@@ -104,7 +102,7 @@ export function createBrowserCardSearch(
         case SEARCH_ACTIONS.BEGIN:
           lifetime.invalidate()
 
-          return lifetime.begin({ windowGeneration: 0, sourceGeneration: 0 })
+          return lifetime.begin()
       }
     },
     async notifyOcrCandidatesDetected(input) {
