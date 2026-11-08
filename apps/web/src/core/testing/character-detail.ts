@@ -39,13 +39,14 @@ function readFixture(role: 'dealer' | 'buffer'): Fixture {
   return structuredClone(FIXTURES[role])
 }
 
-// API의 상세 응답처럼 Neople 섹션 원문을 응답 키로 옮긴다. sections, freshness 같은 메타데이터는 화면이 읽지 않아 뺀다.
+// API의 상세 응답처럼 Neople 섹션 원문을 응답 키로 옮긴다. sections 같은 메타데이터는 화면이 읽지 않아 뺀다.
 export function characterDetailResponse(role: 'dealer' | 'buffer'): CharacterDetailBody {
   const { sections, card } = readFixture(role)
   const { serverId, characterId, ...basic } = sections.basic
 
   return {
     character: { serverId, characterId, serverName: '카인', ...basic },
+    freshness: { lastSuccessfulFetchAt: '2026-11-09T05:08:00.000Z' },
     status: { status: sections.status.status, buff: sections.status.buff },
     equipment: {
       equipment: sections.equipment.equipment,
