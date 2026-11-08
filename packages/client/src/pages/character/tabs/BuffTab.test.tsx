@@ -30,7 +30,17 @@ afterEach(async () => {
 
 // 저장소 fixture(아처 眞 뮤즈)의 버프 스킬 이름으로 만든 합성 배치다.
 const MUSE_CATALOG: SkillWindowCatalog = {
-  pvfSha256: 'synthetic',
+  version: 'synthetic',
+  marks: {
+    evolution: [
+      'https://skilltab.test/marks/evolution-1.png',
+      'https://skilltab.test/marks/evolution-2.png'
+    ],
+    enhancement: [
+      'https://skilltab.test/marks/enhancement-1.png',
+      'https://skilltab.test/marks/enhancement-2.png'
+    ]
+  },
   jobs: [
     {
       jobId: 'archer',
