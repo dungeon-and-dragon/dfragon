@@ -28,8 +28,7 @@ const DEV_API_PROXY = {
   rewrite: (path: string) => path.slice(API_PATH_PREFIX.length)
 }
 
-// 스킬 창 데이터는 저장소 밖에서 만들어 올리고, 배포된 사이트는 node1의 host Caddy가 /skilltab/ 아래로 내준다. 개발 서버는
-// DFRAGON_SKILLTAB_DIR에 build-skilltab.mjs의 출력 폴더를 주면 그 폴더를 같은 주소로 내준다.
+// 개발 서버는 DFRAGON_SKILLTAB_DIR에 데이터 묶음 폴더를 주면 그 폴더를 배포된 사이트와 같은 /skilltab/ 주소로 내준다.
 const SKILLTAB_PATH = '/skilltab/'
 const SKILLTAB_CONTENT_TYPES: Readonly<Record<string, string>> = {
   '.json': 'application/json',
