@@ -11,10 +11,40 @@ function seoulDateParts(at: string): Readonly<Record<string, string>> {
   )
 }
 
-export function formatSeasonStart(startsAt: string): string {
-  const { year, month, day } = seoulDateParts(startsAt)
+const DAY_MS = 24 * 60 * 60 * 1000
 
-  return `${year}.${month}.${day} ~`
+function seoulDayNumber(at: number): number {
+  const { year, month, day } = seoulDateParts(new Date(at).toISOString())
+
+  return Date.UTC(Number(year), Number(month) - 1, Number(day)) / DAY_MS
+}
+
+function formatDayNumber(day: number): string {
+  return new Date(day * DAY_MS).toISOString().slice(0, 10).replaceAll('-', '.')
+}
+
+export type SeasonPeriod = Readonly<{ range: string; days: number }>
+
+export function seasonPeriod(
+  startsAt: string,
+  nextStartsAt: string | undefined,
+  now: number
+): SeasonPeriod {
+  const first = seoulDayNumber(Date.parse(startsAt))
+  const start = formatDayNumber(first)
+
+  if (nextStartsAt === undefined) {
+    const range = `${start} ~`
+    const days = seoulDayNumber(now) - first + 1
+
+    return { range, days }
+  }
+
+  const last = seoulDayNumber(Date.parse(nextStartsAt)) - 1
+  const range = `${start} ~ ${formatDayNumber(last)}`
+  const days = last - first + 1
+
+  return { range, days }
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
