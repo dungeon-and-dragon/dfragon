@@ -3,8 +3,6 @@ import { colors, space } from '@dfragon/ui/tokens.stylex'
 
 const BAR_HEIGHT = 4
 const SEASON_MIN_WIDTH = 84
-const INDICATOR_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)'
-const FILL_EASE = 'cubic-bezier(0.4, 0, 0.2, 1)'
 
 export const styles = stylex.create({
   timeline: {
@@ -25,12 +23,6 @@ export const styles = stylex.create({
     pointerEvents: 'none',
     zIndex: 1
   },
-  sliding: {
-    transitionProperty: 'left, width',
-    transitionDuration: { default: '0.38s', '@media (prefers-reduced-motion: reduce)': '0s' },
-    transitionTimingFunction: INDICATOR_EASE
-  },
-  place: (left: number, width: number) => ({ left, width }),
   season: {
     position: 'relative',
     minWidth: SEASON_MIN_WIDTH,
@@ -67,12 +59,8 @@ export const styles = stylex.create({
     insetBlock: 0,
     left: 0,
     borderRadius: 1,
-    backgroundColor: colors.borderStrong,
-    transitionProperty: 'width',
-    transitionDuration: { default: '0.8s', '@media (prefers-reduced-motion: reduce)': '0s' },
-    transitionTimingFunction: FILL_EASE
+    backgroundColor: colors.borderStrong
   },
-  fillLength: (progress: number) => ({ width: `${progress * 100}%` }),
   primevalFill: {
     position: 'absolute',
     left: 0,
@@ -80,16 +68,8 @@ export const styles = stylex.create({
     height: BAR_HEIGHT,
     borderRadius: 1,
     backgroundImage: colors.rarityPrimordialGradient,
-    opacity: 0,
-    pointerEvents: 'none',
-    transitionProperty: 'width, opacity',
-    transitionDuration: {
-      default: '0.8s, 0.5s',
-      '@media (prefers-reduced-motion: reduce)': '0s'
-    },
-    transitionTimingFunction: FILL_EASE
+    pointerEvents: 'none'
   },
-  primevalOn: { opacity: 1 },
   name: {
     fontSize: 12,
     lineHeight: '16px',

@@ -1,8 +1,7 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import gsap from 'gsap'
-import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
 import type { AdventureActivity } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
 import { useAdventureActivity } from '../../hooks/useAdventureActivity'
 import {
@@ -19,7 +18,8 @@ import {
   type SeasonRange
 } from './activity-heatmap'
 import { ActivityDayDetail } from './ActivityDayDetail'
-import { wheelAction } from './heatmap-wheel'
+import { useHeatmapRingSpin } from './animations/useHeatmapRingSpin'
+import { useHeatmapWheelScroll } from './animations/useHeatmapWheelScroll'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
 
@@ -33,8 +33,6 @@ const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: s
 
 const ROW_LABELS = ['목', '', '토', '', '월', '', '수']
 const LEVEL_STYLES = [styles.empty, styles.level1, styles.level2, styles.level3, styles.level4]
-const RING_TURN_SECONDS = 4
-const WHEEL_SCROLL_SECONDS = 0.35
 
 const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
 
@@ -73,26 +71,6 @@ function cellLabel(kind: ActivityKind, date: string, day: ActivityDay | undefine
   }
 
   return `${label}, ${RING_LABELS[highlight]}`
-}
-
-function useRingRotation(ref: RefObject<HTMLElement | null>, enabled: boolean): void {
-  useEffect(() => {
-    const element = ref.current
-    if (!enabled || element == null) {
-      return
-    }
-
-    const media = gsap.matchMedia()
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(
-        element,
-        { '--heatmap-ring-angle': 0 },
-        { '--heatmap-ring-angle': 360, duration: RING_TURN_SECONDS, ease: 'none', repeat: -1 }
-      )
-    })
-
-    return () => media.revert()
-  }, [ref, enabled])
 }
 
 function Legend({
@@ -231,7 +209,7 @@ function HeatmapGrid({
 }): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
   const hasRing = [...days.values()].some((day) => ringHighlight(day, kind) !== undefined)
-  useRingRotation(ref, hasRing)
+  useHeatmapRingSpin(ref, hasRing)
 
   return (
     <div ref={ref} {...stylex.props(styles.grid)}>
@@ -283,72 +261,6 @@ function useScrollToLatest(ref: RefObject<HTMLElement | null>, seasonId: number)
   }, [ref, seasonId])
 }
 
-function useWheelScroll(ref: RefObject<HTMLElement | null>): void {
-  useEffect(() => {
-    const element = ref.current
-    if (element == null) {
-      return
-    }
-
-    let duration = 0
-    let target: number | undefined
-    let lastHeldAt: number | undefined
-    const media = gsap.matchMedia()
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      duration = WHEEL_SCROLL_SECONDS
-
-      return () => {
-        duration = 0
-      }
-    })
-
-    function handleComplete(): void {
-      target = undefined
-    }
-
-    function handleWheel(event: WheelEvent): void {
-      if (element == null) {
-        return
-      }
-
-      const action = wheelAction({
-        deltaX: event.deltaX,
-        deltaY: event.deltaY,
-        from: target ?? element.scrollLeft,
-        max: element.scrollWidth - element.clientWidth,
-        now: event.timeStamp,
-        lastHeldAt
-      })
-      if (action.kind === 'pass') {
-        return
-      }
-
-      event.preventDefault()
-      lastHeldAt = event.timeStamp
-      if (action.kind === 'hold') {
-        return
-      }
-
-      target = action.target
-      gsap.to(element, {
-        scrollLeft: action.target,
-        duration,
-        ease: 'power2.out',
-        overwrite: true,
-        onComplete: handleComplete
-      })
-    }
-
-    element.addEventListener('wheel', handleWheel, { passive: false })
-
-    return () => {
-      element.removeEventListener('wheel', handleWheel)
-      gsap.killTweensOf(element)
-      media.revert()
-    }
-  }, [ref])
-}
-
 function HeatmapPanel({
   adventureName,
   activity,
@@ -368,7 +280,7 @@ function HeatmapPanel({
   const thresholds = levelThresholds(activity.days.map((day) => dayCount(day, kind)))
   const scroller = useRef<HTMLDivElement>(null)
   useScrollToLatest(scroller, season.id)
-  useWheelScroll(scroller)
+  useHeatmapWheelScroll(scroller)
 
   return (
     <>

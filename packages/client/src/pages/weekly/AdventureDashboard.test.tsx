@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -8,7 +7,6 @@ import { ClientHostContext, type ClientHost } from '../../hooks/useClientHost'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import { TestRouter } from '../../testing/test-support/test-router'
-import { styles } from './SeasonTimeline.style'
 import { WeeklyScreen } from './WeeklyScreen'
 
 let container: HTMLDivElement
@@ -463,9 +461,12 @@ function primevalLayer(name: string): Element | null {
 }
 
 function hasPrimeval(name: string): boolean | undefined {
-  return primevalLayer(name)
-    ?.className.split(' ')
-    .includes(stylex.props(styles.primevalOn).className!)
+  const layer = primevalLayer(name)
+  if (!(layer instanceof HTMLElement)) {
+    return undefined
+  }
+
+  return layer.style.opacity === '1'
 }
 
 it.each([

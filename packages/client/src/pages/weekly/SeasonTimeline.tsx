@@ -1,13 +1,14 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ActivitySeason } from '@dfragon/client-core/shared/adventure-guild/adventure-activity'
+import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
+import { usePrimevalFillFade } from './animations/usePrimevalFillFade'
+import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'
 import { type SeasonBar, seasonBar } from './season-bar'
 import { styles } from './SeasonTimeline.style'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-
-type Placement = Readonly<{ left: number; width: number; sliding: boolean }>
 
 function seasonDays(seasons: readonly ActivitySeason[], index: number, now: number): number {
   const startsAt = Date.parse(seasons[index].startsAt)
@@ -18,9 +19,12 @@ function seasonDays(seasons: readonly ActivitySeason[], index: number, now: numb
 }
 
 function BackfillBar({ progress }: { progress: number }): React.JSX.Element {
+  const fillRef = useRef<HTMLElement>(null)
+  useBackfillFillGrow(fillRef, progress)
+
   return (
     <i {...stylex.props(styles.bar, styles.barOff)}>
-      <i {...stylex.props(styles.fill, styles.fillLength(progress))} />
+      <i ref={fillRef} {...stylex.props(styles.fill)} />
     </i>
   )
 }
@@ -51,6 +55,8 @@ function SeasonButton({
 }): React.JSX.Element {
   const bar: SeasonBar = seasonBar(season)
   const running = bar.state === 'backfill' && bar.running
+  const primevalRef = useRef<HTMLElement>(null)
+  usePrimevalFillFade(primevalRef, filledLength(bar), running)
 
   function handleClick(): void {
     if (bar.state === 'ready' && !selected) {
@@ -84,14 +90,7 @@ function SeasonButton({
         />
       )}
       {/* 받기가 끝나 막대가 바뀌어도 이 층은 남아 태초색이 서서히 사라지도록 막대 밖에 둔다. */}
-      <i
-        aria-hidden="true"
-        {...stylex.props(
-          styles.primevalFill,
-          styles.fillLength(filledLength(bar)),
-          running && styles.primevalOn
-        )}
-      />
+      <i ref={primevalRef} aria-hidden="true" {...stylex.props(styles.primevalFill)} />
       <span
         {...stylex.props(styles.name, selected && styles.nameOn, !season.available && styles.off)}
       >
@@ -117,42 +116,14 @@ export function SeasonTimeline({
 }): React.JSX.Element {
   const [now] = useState(Date.now)
   const timelineRef = useRef<HTMLElement>(null)
-  const [placement, setPlacement] = useState<Placement | null>(null)
-
-  const placedRef = useRef(false)
-
-  // 처음 그릴 때와 창 크기가 바뀔 때는 표시 막대를 미끄러지지 않고 고른 시즌 위에 바로 둔다.
-  useLayoutEffect(() => {
-    function place(sliding: boolean): void {
-      const selected = timelineRef.current?.querySelector<HTMLElement>('[aria-current="true"]')
-      setPlacement(
-        selected != null
-          ? { left: selected.offsetLeft, width: selected.offsetWidth, sliding }
-          : null
-      )
-    }
-    function placeWithoutSliding(): void {
-      place(false)
-    }
-
-    place(placedRef.current)
-    placedRef.current = true
-    window.addEventListener('resize', placeWithoutSliding)
-
-    return () => window.removeEventListener('resize', placeWithoutSliding)
-  }, [selectedId, seasons])
+  const indicatorRef = useRef<HTMLSpanElement>(null)
+  const hasSelection = seasons.some(({ id }) => id === selectedId)
+  useSeasonIndicatorSlide({ timelineRef, indicatorRef, selectedId, seasons, hasSelection })
 
   return (
     <nav ref={timelineRef} aria-label="시즌" {...stylex.props(styles.timeline)}>
-      {placement !== null && (
-        <span
-          aria-hidden="true"
-          {...stylex.props(
-            styles.indicator,
-            placement.sliding && styles.sliding,
-            styles.place(placement.left, placement.width)
-          )}
-        />
+      {hasSelection && (
+        <span ref={indicatorRef} aria-hidden="true" {...stylex.props(styles.indicator)} />
       )}
       {seasons.map((season, index) => (
         <SeasonButton
