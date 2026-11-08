@@ -14,8 +14,8 @@ COPY packages/ui packages/ui
 COPY packages/models/ocr-finetuned packages/models/ocr-finetuned
 COPY apps/web apps/web
 COPY apps/api/test/fixtures/character-card-buffer.json apps/api/test/fixtures/character-card-dealer.json apps/api/test/fixtures/
-RUN pnpm --filter @dfragon/web build
 ARG SOURCE_COMMIT=""
+RUN pnpm --filter @dfragon/web build
 COPY scripts/server-build-info.mjs scripts/server-build-info.mjs
 RUN node scripts/server-build-info.mjs web "$SOURCE_COMMIT" /workspace/build-info.json
 
