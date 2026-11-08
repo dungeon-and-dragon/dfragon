@@ -10,7 +10,7 @@ import { SEAT_TABLE_COLUMN_COUNT } from '../../components/SeatTable.columns'
 import { useSeatMove } from '../../hooks/useSeatMove'
 import type { SeatArrangement } from '../../hooks/useSeatOrder'
 import { isBusySlot } from '../../lib/card-presentation'
-import { CharacterRow } from '../../sections/CharacterRow'
+import { CharacterRow } from '../../components/CharacterRow'
 import { styles } from './RaidPage.style'
 
 const parties = Array.from({ length: RAID_PARTY_COUNT }, (_, party) =>

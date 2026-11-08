@@ -6,7 +6,7 @@ import { SeatMoveStatus } from '../../components/SeatMoveStatus'
 import { SeatTable } from '../../components/SeatTable'
 import { useSeatMove } from '../../hooks/useSeatMove'
 import type { SeatArrangement } from '../../hooks/useSeatOrder'
-import { CharacterRow } from '../../sections/CharacterRow'
+import { CharacterRow } from '../../components/CharacterRow'
 import { isBusySlot } from '../../lib/card-presentation'
 import { styles } from './PartyPage.style'
 

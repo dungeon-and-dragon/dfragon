@@ -10,29 +10,29 @@ import {
 } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState, type KeyboardEvent } from 'react'
-import { GameBar } from '../../components/GameBar'
-import { GlobalBar } from '../../components/GlobalBar'
-import { MAIN_WINDOW_WIDTH } from '../../constants/main-window-size'
-import { createQueryClient } from '../../lib/query-client'
-import { ClientHostContext, type AutoRoundSignal, type BrowserHost } from '../../host/client-host'
-import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { useMyAdventureStore } from '../../hooks/useMyAdventureStore'
-import { useSearchModeStore } from '../../hooks/useSearchModeStore'
-import { parseCharacterTabSearch } from '../../pages/character/character-tabs'
-import { parseCharacterSearch } from '../../pages/character-search/character-search-params'
-import { CharacterSearchPage } from '../../pages/character-search/CharacterSearchPage'
-import { CharacterDetailPage } from '../../pages/character/CharacterDetailPage'
-import { FavoritesScreen } from '../../pages/favorites/FavoritesScreen'
-import { GuildPage } from '../../pages/guild/GuildPage'
-import { NotFoundScreen } from '../../pages/not-found/NotFoundScreen'
-import { parseRankingSearch } from '../../pages/rankings/ranking-search'
-import { RankingsPage } from '../../pages/rankings/RankingsPage'
-import { SearchScreen } from '../../pages/search/SearchScreen'
-import { StatsScreen } from '../../pages/stats/StatsScreen'
-import { parseWeeklySearch } from '../../pages/weekly/weekly-search'
-import { AdventureEntryPage, WeeklyPage } from '../../pages/weekly/WeeklyPage'
-import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
-import { ScreenShareChip } from './ScreenShareChip'
+import { GameBar } from './components/GameBar'
+import { GlobalBar } from './components/GlobalBar'
+import { CONTENT_WIDTH } from './constants/layout'
+import { createQueryClient } from './lib/query-client'
+import { ClientHostContext, type AutoRoundSignal, type BrowserHost } from './host/client-host'
+import { useScreenCaptureContext } from './hooks/useScreenCaptureContext'
+import { useMyAdventureStore } from './hooks/useMyAdventureStore'
+import { useSearchModeStore } from './hooks/useSearchModeStore'
+import { parseCharacterTabSearch } from './pages/character/character-tabs'
+import { parseCharacterSearch } from './pages/character-search/character-search-params'
+import { CharacterSearchPage } from './pages/character-search/CharacterSearchPage'
+import { CharacterDetailPage } from './pages/character/CharacterDetailPage'
+import { FavoritesScreen } from './pages/favorites/FavoritesScreen'
+import { GuildPage } from './pages/guild/GuildPage'
+import { NotFoundScreen } from './pages/not-found/NotFoundScreen'
+import { parseRankingSearch } from './pages/rankings/ranking-search'
+import { RankingsPage } from './pages/rankings/RankingsPage'
+import { SearchScreen } from './pages/search/SearchScreen'
+import { StatsScreen } from './pages/stats/StatsScreen'
+import { parseWeeklySearch } from './pages/weekly/weekly-search'
+import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
+import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
+import { ScreenShareChip } from './components/ScreenShareChip'
 import { styles } from './WebApp.style'
 import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
 
@@ -102,7 +102,7 @@ function HomeScreen(): React.JSX.Element {
   return (
     <div
       onKeyDown={keepSeatMoveKeys}
-      {...stylex.props(styles.home, styles.homeWidth(MAIN_WINDOW_WIDTH))}
+      {...stylex.props(styles.home, styles.homeWidth(CONTENT_WIDTH))}
     >
       <PastedFrameRounds host={host} />
       <AutoRounds host={host} />
@@ -124,7 +124,7 @@ function SiteLayout(): React.JSX.Element {
         {...stylex.props(
           styles.screen,
           adventure !== undefined && styles.sideRoomScreen,
-          styles.screenWidth(MAIN_WINDOW_WIDTH)
+          styles.screenWidth(CONTENT_WIDTH)
         )}
       >
         <Outlet />

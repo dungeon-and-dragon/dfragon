@@ -1,1 +1,1 @@
-export const MAIN_WINDOW_WIDTH = 1080
+export const CONTENT_WIDTH = 1080
