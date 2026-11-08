@@ -11,6 +11,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState } from 'react'
 import { GlobalBar } from './components/GlobalBar'
+import { SiteFooter } from './components/SiteFooter'
 import { CONTENT_WIDTH } from './constants/layout'
 import { createQueryClient } from './lib/query-client'
 import { ClientHostContext, type BrowserHost } from './host/client-host'
@@ -60,6 +61,7 @@ function SiteLayout(): React.JSX.Element {
       >
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   )
 }

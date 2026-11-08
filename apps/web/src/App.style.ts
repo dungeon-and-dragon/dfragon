@@ -20,30 +20,6 @@ export const styles = stylex.create({
     borderBottomStyle: 'solid',
     borderBottomColor: colors.borderDefault
   },
-  footer: {
-    marginTop: 'auto',
-    paddingTop: 40,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    fontSize: 12,
-    lineHeight: '16px',
-    color: colors.fgSubtle
-  },
-  neople: {
-    display: 'block',
-    outline: { default: null, ':focus-visible': `2px solid ${colors.signal}` },
-    outlineOffset: 2
-  },
-  neopleLogo: { display: 'block' },
-  divider: {
-    flexShrink: 0,
-    width: 1,
-    height: 12,
-    backgroundColor: colors.borderDefault
-  },
-  footerItem: { paddingBlock: 4, paddingInline: 2 },
   buildCommit: {
     position: 'absolute',
     left: 16,
