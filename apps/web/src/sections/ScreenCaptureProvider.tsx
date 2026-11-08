@@ -1,0 +1,16 @@
+import type { ReactNode } from 'react'
+import { useScreenCapture } from '../hooks/useScreenCapture'
+import { ScreenCaptureContext } from '../hooks/useScreenCaptureContext'
+import type { CaptureTexts } from '#core/lib/capture-texts'
+
+export function ScreenCaptureProvider({
+  texts,
+  children
+}: {
+  texts: CaptureTexts
+  children: ReactNode
+}): React.JSX.Element {
+  const screenCapture = useScreenCapture(texts)
+
+  return <ScreenCaptureContext value={screenCapture}>{children}</ScreenCaptureContext>
+}

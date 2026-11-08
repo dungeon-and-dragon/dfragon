@@ -212,15 +212,7 @@
       }
     },
     {
-      "includes": [
-        "**/*.ts",
-        "**/*.mts",
-        "**/*.cts",
-        "**/*.tsx",
-        "apps/api/**",
-        "packages/client/**",
-        "packages/client-core/**"
-      ],
+      "includes": ["**/*.ts", "**/*.mts", "**/*.cts", "**/*.tsx", "apps/api/**", "apps/web/**"],
       "linter": {
         "rules": {
           "complexity": {
@@ -248,7 +240,7 @@
       }
     },
     {
-      "includes": ["packages/client/**", "packages/client-core/**"],
+      "includes": ["apps/web/**"],
       "linter": {
         "rules": {
           "security": {
@@ -262,12 +254,7 @@
       }
     },
     {
-      "includes": [
-        "packages/client/**/*.ts",
-        "packages/client/**/*.tsx",
-        "apps/web/**/*.ts",
-        "apps/web/**/*.tsx"
-      ],
+      "includes": ["apps/web/**/*.ts", "apps/web/**/*.tsx"],
       "linter": {
         "rules": {
           "correctness": {
@@ -287,28 +274,6 @@
     },
     {
       "includes": [
-        "packages/client/**/*.ts",
-        "packages/client/**/*.tsx",
-        "!**/*.test.*",
-        "!**/*.spec.*",
-        "!**/*.cy.*",
-        "!**/*.stories.*"
-      ],
-      "linter": {
-        "rules": {
-          "style": {
-            "useComponentExportOnlyModules": {
-              "level": "error",
-              "options": {
-                "allowConstantExport": true
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "includes": [
         "apps/web/**/*.ts",
         "apps/web/**/*.tsx",
         "!**/*.test.*",
@@ -320,7 +285,7 @@
         "rules": {
           "style": {
             "useComponentExportOnlyModules": {
-              "level": "warn",
+              "level": "error",
               "options": {
                 "allowConstantExport": true
               }
@@ -330,7 +295,7 @@
       }
     },
     {
-      "includes": ["packages/client-core/**"],
+      "includes": ["apps/web/src/core/**"],
       "linter": {
         "rules": {
           "style": {
@@ -338,10 +303,26 @@
               "level": "error",
               "options": {
                 "paths": {
-                  "react": "client-core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 @dfragon/client에 둔다.",
-                  "react-dom": "client-core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 @dfragon/client에 둔다.",
-                  "@dfragon/ui": "client-core는 화면과 무관한 로직이라 @dfragon/ui를 import하지 않는다. 화면 코드는 @dfragon/client에 둔다."
-                }
+                  "react": "src/core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다.",
+                  "react-dom": "src/core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다.",
+                  "@dfragon/ui": "src/core는 화면과 무관한 로직이라 @dfragon/ui를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
+                },
+                "patterns": [
+                  {
+                    "group": [
+                      "**/hooks/**",
+                      "**/components/**",
+                      "**/pages/**",
+                      "**/host/**",
+                      "**/site/**",
+                      "**/sections/**",
+                      "**/animations/**",
+                      "**/styles/**",
+                      "**/fixture/**"
+                    ],
+                    "message": "src/core는 UI 폴더를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
+                  }
+                ]
               }
             }
           }
