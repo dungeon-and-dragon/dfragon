@@ -191,6 +191,10 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
 })
 
 it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화면 상자에 큰 검색창과 명성 랭킹 제목만 둔다', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>(async () => Response.json({ characters: [] }))
+  )
   window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
 
