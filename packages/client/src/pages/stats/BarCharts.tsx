@@ -1,6 +1,8 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
+import gsap from 'gsap'
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
+import { cubicBezier, type Motion, useMotionAllowed } from '../../animations/gsap-motion'
 import type { FameBar } from './stats-bars'
 import { styles } from './StatsScreen.style'
 
@@ -36,7 +38,7 @@ function BarRow({
   percent: number
 }): React.JSX.Element {
   const [active, setActive] = useState(false)
-  const { anchorRef, tooltipRef, align } = useTooltipAlign<HTMLSpanElement>(active, 'end')
+  const { anchorRef, tooltipRef, align } = useTooltipAlign<HTMLSpanElement>(active)
 
   function handleMouseEnter(): void {
     setActive(share != null)
@@ -87,16 +89,6 @@ function heightOf(ratio: number): string {
 
 type TooltipAlign = 'center' | 'start' | 'end'
 
-type TooltipAnchor = 'center' | 'end'
-
-function anchorXOf(box: DOMRect, anchor: TooltipAnchor): number {
-  if (anchor === 'end') {
-    return box.right
-  }
-
-  return box.left + box.width / 2
-}
-
 function alignWithin(anchorX: number, tooltip: HTMLElement, chart: HTMLElement): TooltipAlign {
   const chartBox = chart.getBoundingClientRect()
   const half = tooltip.offsetWidth / 2
@@ -112,8 +104,7 @@ function alignWithin(anchorX: number, tooltip: HTMLElement, chart: HTMLElement):
 }
 
 function useTooltipAlign<T extends HTMLElement>(
-  active: boolean,
-  anchor: TooltipAnchor
+  active: boolean
 ): {
   anchorRef: React.RefObject<T | null>
   tooltipRef: React.RefObject<HTMLSpanElement | null>
@@ -131,38 +122,173 @@ function useTooltipAlign<T extends HTMLElement>(
       return
     }
 
-    const anchorX = anchorXOf(anchorRef.current.getBoundingClientRect(), anchor)
-    setAlign(alignWithin(anchorX, tooltipRef.current, chart))
-  }, [active, anchor])
+    setAlign(
+      alignWithin(anchorRef.current.getBoundingClientRect().right, tooltipRef.current, chart)
+    )
+  }, [active])
 
   return { anchorRef, tooltipRef, align }
 }
 
+const TOOLTIP_EASE = cubicBezier('fame-tooltip', '0.2,0,0,1')
+const TOOLTIP_SLIDE: Motion = { seconds: 0.2, ease: TOOLTIP_EASE }
+const TOOLTIP_FADE: Motion = { seconds: 0.12, ease: TOOLTIP_EASE }
+
+type FameHover = Readonly<{ key: string | null; open: boolean }>
+
+function tooltipXOf(column: HTMLElement, tooltip: HTMLElement, chart: HTMLElement): number {
+  const origin = chart.getBoundingClientRect().left
+  const columnBox = column.getBoundingClientRect()
+  const min = (chart.firstElementChild ?? column).getBoundingClientRect().left - origin
+  const max = (chart.lastElementChild ?? column).getBoundingClientRect().right - origin
+  const center = columnBox.left - origin + columnBox.width / 2
+  const width = tooltip.offsetWidth
+
+  return gsap.utils.clamp(min, Math.max(min, max - width), center - width / 2)
+}
+
+// React가 툴팁의 transform, opacity, visibility를 inline style로 쓰면 tween 중간값이 덮이므로 GSAP만 쓴다.
+function useFameTooltipSlide({
+  chartRef,
+  tooltipRef,
+  columnsRef,
+  shownKey,
+  open,
+  bars
+}: {
+  chartRef: React.RefObject<HTMLElement | null>
+  tooltipRef: React.RefObject<HTMLElement | null>
+  columnsRef: React.RefObject<ReadonlyMap<string, HTMLElement>>
+  shownKey: string | undefined
+  open: boolean
+  bars: readonly FameBar[]
+}): void {
+  const allowed = useMotionAllowed()
+
+  useLayoutEffect(() => {
+    const tooltip = tooltipRef.current
+    const chart = chartRef.current
+    if (tooltip == null || chart == null) {
+      return
+    }
+
+    const column = shownKey != null ? columnsRef.current.get(shownKey) : undefined
+    if (!open || column == null) {
+      if (allowed.current) {
+        gsap.to(tooltip, {
+          autoAlpha: 0,
+          duration: TOOLTIP_FADE.seconds,
+          ease: TOOLTIP_FADE.ease,
+          overwrite: 'auto'
+        })
+      } else {
+        gsap.set(tooltip, { autoAlpha: 0, overwrite: true })
+      }
+
+      return
+    }
+
+    const x = tooltipXOf(column, tooltip, chart)
+    if (!allowed.current) {
+      gsap.set(tooltip, { x, autoAlpha: 1, overwrite: true })
+
+      return
+    }
+
+    const shown = Number(gsap.getProperty(tooltip, 'opacity')) > 0
+    if (shown) {
+      gsap.to(tooltip, {
+        x,
+        duration: TOOLTIP_SLIDE.seconds,
+        ease: TOOLTIP_SLIDE.ease,
+        overwrite: 'auto'
+      })
+    } else {
+      gsap.set(tooltip, { x, overwrite: 'auto' })
+    }
+
+    gsap.to(tooltip, {
+      autoAlpha: 1,
+      duration: TOOLTIP_FADE.seconds,
+      ease: TOOLTIP_FADE.ease,
+      overwrite: 'auto'
+    })
+  }, [chartRef, tooltipRef, columnsRef, shownKey, open, bars, allowed])
+
+  useLayoutEffect(() => {
+    const tooltip = tooltipRef.current
+
+    return () => {
+      if (tooltip != null) {
+        gsap.killTweensOf(tooltip)
+      }
+    }
+  }, [tooltipRef, bars])
+}
+
 export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
-  const [hovered, setHovered] = useState<string | null>(null)
+  const [hover, setHover] = useState<FameHover>({ key: null, open: false })
+  const chartRef = useRef<HTMLUListElement>(null)
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+  const columnsRef = useRef(new Map<string, HTMLLIElement>())
+  const shownBar = bars.find(({ key }) => key === hover.key)
+  useFameTooltipSlide({
+    chartRef,
+    tooltipRef,
+    columnsRef,
+    shownKey: shownBar?.key,
+    open: hover.open,
+    bars
+  })
+
+  function handleHover(key: string): void {
+    setHover({ key, open: true })
+  }
 
   function handleLeave(): void {
-    setHovered(null)
+    setHover(({ key }) => ({ key, open: false }))
+  }
+
+  function registerColumn(key: string, element: HTMLLIElement): () => void {
+    columnsRef.current.set(key, element)
+
+    return () => {
+      columnsRef.current.delete(key)
+    }
   }
 
   return (
-    <ul {...stylex.props(styles.columns)}>
-      {bars.map((bar, index) => {
-        const startsFine = bar.fine && bars[index - 1]?.fine === false
+    <div {...stylex.props(styles.columnChart)}>
+      <ul ref={chartRef} onMouseLeave={handleLeave} {...stylex.props(styles.columns)}>
+        {bars.map((bar, index) => {
+          const startsFine = bar.fine && bars[index - 1]?.fine === false
 
-        return (
-          <Fragment key={bar.key}>
-            {startsFine && <li aria-hidden="true" {...stylex.props(styles.columnDivider)} />}
-            <FameColumn
-              bar={bar}
-              active={bar.key === hovered}
-              onHover={setHovered}
-              onLeave={handleLeave}
-            />
-          </Fragment>
-        )
-      })}
-    </ul>
+          return (
+            <Fragment key={bar.key}>
+              {startsFine && <li aria-hidden="true" {...stylex.props(styles.columnDivider)} />}
+              <FameColumn
+                bar={bar}
+                active={hover.open && bar.key === hover.key}
+                onHover={handleHover}
+                register={registerColumn}
+              />
+            </Fragment>
+          )
+        })}
+      </ul>
+      <span
+        ref={tooltipRef}
+        aria-hidden="true"
+        {...stylex.props(styles.tooltip, styles.columnTooltip)}
+      >
+        {shownBar != null && (
+          <>
+            <span {...stylex.props(styles.tooltipRange)}>{shownBar.range}</span>
+            <span {...stylex.props(styles.tooltipCount)}>{integer.format(shownBar.count)}</span>
+          </>
+        )}
+      </span>
+    </div>
   )
 }
 
@@ -170,45 +296,24 @@ function FameColumn({
   bar: { key, label, range, count, ratio },
   active,
   onHover,
-  onLeave
+  register
 }: {
   bar: FameBar
   active: boolean
   onHover: (key: string) => void
-  onLeave: () => void
+  register: (key: string, element: HTMLLIElement) => () => void
 }): React.JSX.Element {
-  const {
-    anchorRef: columnRef,
-    tooltipRef,
-    align
-  } = useTooltipAlign<HTMLLIElement>(active, 'center')
-
   function handleMouseEnter(): void {
     onHover(key)
   }
 
+  function columnRef(element: HTMLLIElement): () => void {
+    return register(key, element)
+  }
+
   return (
-    <li
-      ref={columnRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={onLeave}
-      {...stylex.props(styles.column)}
-    >
+    <li ref={columnRef} onMouseEnter={handleMouseEnter} {...stylex.props(styles.column)}>
       <span {...stylex.props(shapes.srOnly)}>{`${range} ${integer.format(count)}`}</span>
-      {active && (
-        <span
-          ref={tooltipRef}
-          aria-hidden="true"
-          {...stylex.props(
-            styles.tooltip,
-            align === 'start' && styles.tooltipStart,
-            align === 'end' && styles.tooltipEnd
-          )}
-        >
-          <span {...stylex.props(styles.tooltipRange)}>{range}</span>
-          <span {...stylex.props(styles.tooltipCount)}>{integer.format(count)}</span>
-        </span>
-      )}
       <span {...stylex.props(styles.columnTrack)}>
         <span
           {...stylex.props(
