@@ -37,7 +37,12 @@ export const styles = stylex.create({
   },
   rowName: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   track: { height: BAR_HEIGHT, borderRadius: radius.control, backgroundColor: colors.bgInset },
-  bar: { height: BAR_HEIGHT, borderRadius: radius.control, backgroundColor: colors.fgSubtle },
+  bar: {
+    display: 'block',
+    height: BAR_HEIGHT,
+    borderRadius: radius.control,
+    backgroundColor: colors.fgSubtle
+  },
   barWidth: (percent: number) => ({ width: `${percent}%` }),
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   columns: {
