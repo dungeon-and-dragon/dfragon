@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { CharacterImage } from '../../preload/common/types/character'
+import type { CharacterImage } from '../../types/character'
 import { createCharacterImageSource, type CharacterImageHttp } from './character-image-source'
 import { CompletedCache } from './completed-cache'
 

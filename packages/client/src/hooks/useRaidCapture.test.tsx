@@ -9,9 +9,9 @@ import { emptySearchSlots } from '@dfragon/client-core/lib/slots'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext, type RaidCaptureHost } from '../host/client-host'
 import type { RaidSlotRecognition } from '@dfragon/client-core/lib/raid-recognition'
-import { searchSnapshot } from '@dfragon/client-core/preload/api/search-test-fixture'
-import type { RaidFrameResult } from '@dfragon/client-core/preload/common/types/capture'
-import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/preload/common/types/search'
+import { searchSnapshot } from '@dfragon/client-core/testing/fixtures/search-test-fixture'
+import type { RaidFrameResult } from '@dfragon/client-core/types/capture'
+import type { SearchApi, SearchSnapshot } from '@dfragon/client-core/types/search'
 
 const raidMocks = vi.hoisted(() => ({ recognize: vi.fn() }))
 vi.mock('@dfragon/client-core/lib/raid-recognition', () => ({
