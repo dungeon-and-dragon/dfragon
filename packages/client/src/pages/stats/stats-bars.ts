@@ -3,7 +3,6 @@ import { CHARACTER_SERVER_NAMES } from '@dfragon/client-core/preload/common/sear
 import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
 import type { Bar } from './BarCharts'
 
-const FAME_BUCKET_UNIT = 10_000
 const AWAKENING_MARK = '眞'
 
 export function serverBars({ servers }: CharacterStats): Bar[] {
@@ -40,10 +39,90 @@ export function averageFameBars(stats: CharacterStats): Bar[] {
     .toSorted((a, b) => b.value - a.value)
 }
 
-export function fameBars({ fameDistribution }: CharacterStats): Bar[] {
-  return fameDistribution.map(({ from, count }) => ({
-    key: String(from),
-    name: `${from / FAME_BUCKET_UNIT}만`,
-    value: count
-  }))
+export type FameBar = Readonly<{
+  key: string
+  label: string | null
+  range: string
+  count: number
+  ratio: number
+  fine: boolean
+}>
+
+type FameBucket = CharacterStats['fameDistribution'][number]
+
+const FINE_FROM = 120_000
+const COARSE_WIDTH = 40_000
+const LABEL_STEP = 5_000
+const DENSITY_WIDTH = 1_000
+const MAN = 10_000
+
+const manwon = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1, useGrouping: false })
+
+function fameText(fame: number): string {
+  if (fame === 0) {
+    return '0'
+  }
+
+  return `${manwon.format(fame / MAN)}만`
+}
+
+function coarseBuckets(distribution: readonly FameBucket[]): FameBucket[] {
+  return Array.from({ length: FINE_FROM / COARSE_WIDTH }, (_, index) => {
+    const from = index * COARSE_WIDTH
+    const to = from + COARSE_WIDTH
+    const count = distribution
+      .filter((bucket) => bucket.from >= from && bucket.from < to)
+      .reduce((sum, bucket) => sum + bucket.count, 0)
+
+    return { from, to, count }
+  })
+}
+
+function fineBuckets(distribution: readonly FameBucket[]): FameBucket[] {
+  const received = distribution.filter(({ from }) => from >= FINE_FROM)
+  const highest = received.at(-1)
+  if (highest == null) {
+    return []
+  }
+
+  const width = highest.to - highest.from
+  const countByFrom = new Map(received.map(({ from, count }) => [from, count]))
+
+  return Array.from({ length: (highest.from - FINE_FROM) / width + 1 }, (_, index) => {
+    const from = FINE_FROM + index * width
+    const to = from + width
+    const count = countByFrom.get(from) ?? 0
+
+    return { from, to, count }
+  })
+}
+
+function densityOf({ from, to, count }: FameBucket): number {
+  return count / ((to - from) / DENSITY_WIDTH)
+}
+
+export function fameBars({ fameDistribution }: CharacterStats): FameBar[] {
+  if (fameDistribution.length === 0) {
+    return []
+  }
+
+  const distribution = fameDistribution.toSorted((a, b) => a.from - b.from)
+  const coarse = coarseBuckets(distribution)
+  const fine = fineBuckets(distribution)
+  const maxDensity = Math.max(...[...coarse, ...fine].map(densityOf))
+
+  function barOf(bucket: FameBucket, isFine: boolean): FameBar {
+    const { from, to, count } = bucket
+    const labeled = !isFine || from % LABEL_STEP === 0
+    const label = labeled ? fameText(from) : null
+    const range = `${fameText(from)}~${fameText(to)}`
+    const ratio = maxDensity > 0 ? densityOf(bucket) / maxDensity : 0
+
+    return { key: String(from), label, range, count, ratio, fine: isFine }
+  }
+
+  return [
+    ...coarse.map((bucket) => barOf(bucket, false)),
+    ...fine.map((bucket) => barOf(bucket, true))
+  ]
 }

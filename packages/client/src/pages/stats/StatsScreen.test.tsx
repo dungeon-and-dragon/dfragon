@@ -61,8 +61,8 @@ const stats: CharacterStats = {
     }
   ],
   fameDistribution: [
-    { from: 70000, to: 80000, count: 10 },
-    { from: 80000, to: 90000, count: 66392 }
+    { from: 70000, to: 71000, count: 10 },
+    { from: 121000, to: 122000, count: 66392 }
   ]
 }
 
@@ -83,7 +83,7 @@ function boxOf(name: string): HTMLElement {
 }
 
 function rowsOf(name: string): string[][] {
-  return [...boxOf(name).querySelectorAll('li')].map((row) =>
+  return [...boxOf(name).querySelectorAll('li:not([aria-hidden])')].map((row) =>
     [...row.children].map((cell) => cell.textContent ?? '')
   )
 }
@@ -116,9 +116,42 @@ it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 
     ['전직3', '100']
   ])
   expect(rowsOf('명성 분포')).toEqual([
-    ['10', '', '7만'],
-    ['6.6만', '', '8만']
+    ['0~4만 0', '', '0'],
+    ['4만~8만 10', '', '4만'],
+    ['8만~12만 0', '', '8만'],
+    ['12만~12.1만 0', '', '12만'],
+    ['12.1만~12.2만 66,392', '', '']
   ])
+})
+
+it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
+  await render(async () => stats)
+
+  const items = [...boxOf('명성 분포').querySelectorAll('li')]
+  expect(items.map((item) => item.getAttribute('aria-hidden'))).toEqual([
+    null,
+    null,
+    null,
+    'true',
+    null,
+    null
+  ])
+  const fineBar = items.at(-1)!
+  expect(fineBar.children).toHaveLength(3)
+
+  await act(async () => {
+    fineBar.dispatchEvent(
+      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
+    )
+  })
+  expect(fineBar.children[1]?.textContent).toBe('12.1만~12.2만66,392')
+
+  await act(async () => {
+    fineBar.dispatchEvent(
+      new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body })
+    )
+  })
+  expect(fineBar.children).toHaveLength(3)
 })
 
 it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직업은 뺀다', async () => {
