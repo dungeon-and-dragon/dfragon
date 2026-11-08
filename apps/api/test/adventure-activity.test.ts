@@ -207,6 +207,28 @@ test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말
   ])
 })
 
+test('기계 혁명은 data.modeName으로 바칼 레이드와 개전을 나눠 센다', () => {
+  const machineRevolution = (time: string, data: Record<string, unknown>): TimelineEventRow => ({
+    ...raid(time, '기계 혁명'),
+    data
+  })
+  const { summary } = activity({
+    clears: [
+      machineRevolution('2026-07-18T12:00:00', { modeName: '개전' }),
+      machineRevolution('2026-07-18T13:00:00', { modeName: '개전' }),
+      machineRevolution('2026-07-18T14:00:00', { modeName: '바칼 레이드', hard: true }),
+      machineRevolution('2026-07-18T15:00:00', { modeName: '바칼 레이드' }),
+      { ...raid('2026-07-18T16:00:00', '만들어진 신 나벨'), data: { modeName: '무지의 악' } }
+    ]
+  })
+
+  assert.deepEqual(summary.raids, [
+    { name: '만들어진 신 나벨', count: 1, hard: 0, normal: 1 },
+    { name: '기계 혁명 : 바칼 레이드', count: 2, hard: 1, normal: 1 },
+    { name: '기계 혁명 : 개전', count: 2, hard: 0, normal: 2 }
+  ])
+})
+
 test('아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급별로 세고 태초, 신화를 얻은 날을 표시한다', () => {
   const { summary, days } = activity({
     items: [
