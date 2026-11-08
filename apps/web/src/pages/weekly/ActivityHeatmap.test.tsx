@@ -4,8 +4,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type {
   AdventureActivity,
-  AdventureActivityDay
+  AdventureActivityDay,
+  AdventureActivitySeasonDays
 } from '#core/adventure-guild/adventure-activity'
+import { useRefreshAdventureActivity } from '../../hooks/useAdventureActivity'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
@@ -96,8 +98,22 @@ const april2: AdventureActivityDay = {
   enhancements: [{ at: '2026-04-03T00:29:00+09:00', kind: 'reinforce', target: 15, success: false }]
 }
 
+function seasonDays(...days: AdventureActivityDay[]): AdventureActivitySeasonDays {
+  return { season: 11, days }
+}
+
+function RefreshButton(): React.JSX.Element {
+  const refresh = useRefreshAdventureActivity()
+
+  return (
+    <button type="button" onClick={() => refresh('합성 모험단')}>
+      새로고침
+    </button>
+  )
+}
+
 function render(
-  overrides: Partial<Pick<ClientHost, 'getAdventureActivity' | 'getAdventureActivityDay'>>,
+  overrides: Partial<Pick<ClientHost, 'getAdventureActivity' | 'getAdventureActivitySeasonDays'>>,
   season?: number
 ): Promise<void> {
   return act(async () =>
@@ -106,11 +122,18 @@ function render(
         value={createTestClientHost({ getAdventureActivity: async () => activity, ...overrides })}
       >
         <TestQueryClient>
+          <RefreshButton />
           <ActivityHeatmap adventureName="합성 모험단" season={season} />
         </TestQueryClient>
       </ClientHostContext>
     )
   )
+}
+
+function refreshButton(): HTMLButtonElement {
+  return [...container.querySelectorAll('button')].find(
+    (element) => element.textContent === '새로고침'
+  )!
 }
 
 function tab(label: string): HTMLButtonElement {
@@ -252,19 +275,18 @@ it('네 등급이 모두 0이면 아이템 탭에 등급 뱃지를 그리지 않
   }
 })
 
-it('칸에 처음 마우스를 올리면 그날 상세를 받아 날짜와 묶음 제목은 합계 없이 두고, 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보이고, 다시 올리면 받은 상세를 다시 쓴다', async () => {
-  const loaded = Promise.withResolvers<AdventureActivityDay>()
-  const getAdventureActivityDay = vi
-    .fn<ClientHost['getAdventureActivityDay']>()
+it('히트맵을 그리면 시즌 하루 상세를 한 번 받고, 받기 전에 칸에 올리면 받는 중을 보이다가 날짜와 묶음 제목은 합계 없이 두고, 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보인다', async () => {
+  const loaded = Promise.withResolvers<AdventureActivitySeasonDays>()
+  const getAdventureActivitySeasonDays = vi
+    .fn<ClientHost['getAdventureActivitySeasonDays']>()
     .mockReturnValue(loaded.promise)
-  await render({ getAdventureActivityDay })
-  expect(getAdventureActivityDay).not.toHaveBeenCalled()
+  await render({ getAdventureActivitySeasonDays })
+  expect(getAdventureActivitySeasonDays).toHaveBeenCalledExactlyOnceWith('합성 모험단', 11)
 
   await act(async () => hover(cell('4월 2일')))
-  expect(getAdventureActivityDay).toHaveBeenCalledWith('합성 모험단', '2026-04-02')
   expect(popupText()).toEqual(['4월 2일 (목)', '하루 활동을 받는 중입니다.', ''])
 
-  await act(async () => loaded.resolve(april2))
+  await act(async () => loaded.resolve(seasonDays(april2)))
   expect(popupText()).toEqual([
     '4월 2일 (목)',
     '레이드',
@@ -275,16 +297,109 @@ it('칸에 처음 마우스를 올리면 그날 상세를 받아 날짜와 묶�
     '강화',
     '00:29+15 실패'
   ])
-
-  fakeCloseTimers()
-  await act(async () => leave(cell('4월 2일')))
-  await waitForClose()
-  expect(popupText()).toEqual([])
-  await act(async () => hover(cell('4월 2일')))
-  expect(getAdventureActivityDay).toHaveBeenCalledTimes(1)
 })
 
-it('탭에 해당하는 묶음만 보이고 같은 날짜의 상세를 탭을 바꿔도 다시 쓴다', async () => {
+it('시즌 하루 상세를 받은 뒤에는 처음 올리는 칸도 받는 중 없이 그날 기록을 보이고, 여러 칸을 훑어도 다시 요청하지 않는다', async () => {
+  const april3: AdventureActivityDay = {
+    date: '2026-04-03',
+    raids: [],
+    legions: [],
+    items: [],
+    enhancements: [{ at: '2026-04-03T10:00:00+09:00', kind: 'amplify', target: 12, success: true }]
+  }
+  const getAdventureActivitySeasonDays = vi
+    .fn<ClientHost['getAdventureActivitySeasonDays']>()
+    .mockResolvedValue(seasonDays(april2, april3))
+  await render({ getAdventureActivitySeasonDays })
+
+  await act(async () => hover(cell('4월 3일')))
+  expect(popupText()).toEqual(['4월 3일 (금)', '강화', '10:00+12 성공'])
+
+  await act(async () => leave(cell('4월 3일')))
+  await act(async () => hover(cell('4월 2일')))
+  expect(popupText()[1]).toBe('레이드')
+  expect(getAdventureActivitySeasonDays).toHaveBeenCalledTimes(1)
+})
+
+it('시즌 하루 상세를 받지 못하면 칸 Tooltip에 오류 문구를 보인다', async () => {
+  await render({
+    getAdventureActivitySeasonDays: async () => {
+      throw new Error('합성 오류 문구')
+    }
+  })
+
+  await act(async () => hover(cell('4월 2일')))
+
+  expect(popupText()).toEqual(['4월 2일 (목)', '합성 오류 문구'])
+})
+
+it('시즌을 바꾸면 그 시즌 하루 상세를 받고, 한 번 받은 시즌으로 돌아가면 다시 요청하지 않는다', async () => {
+  const previous: AdventureActivity = { ...activity, season: { ...activity.season!, id: 10 } }
+  const getAdventureActivitySeasonDays = vi
+    .fn<ClientHost['getAdventureActivitySeasonDays']>()
+    .mockImplementation(async (_name, season) => ({ season, days: [] }))
+  const host = {
+    getAdventureActivity: async (_name: string, season: number | undefined) =>
+      season === 10 ? previous : activity,
+    getAdventureActivitySeasonDays
+  }
+  await render(host, 11)
+  await render(host, 10)
+  await render(host, 11)
+
+  expect(getAdventureActivitySeasonDays.mock.calls).toEqual([
+    ['합성 모험단', 11],
+    ['합성 모험단', 10]
+  ])
+})
+
+it('받는 중인 옛 시즌은 3초마다 시즌 활동을 다시 조회해도 하루 상세를 다시 받지 않고, 받기가 끝나면 한 번 다시 받아 새 기록을 보인다', async () => {
+  vi.useFakeTimers({ now: Date.now() })
+  const withBackfill = (running: boolean): AdventureActivity => ({
+    ...activity,
+    seasons: [{ ...activity.seasons[0], backfill: { done: running ? 12 : 30, total: 30, running } }]
+  })
+  const getAdventureActivity = vi
+    .fn<ClientHost['getAdventureActivity']>()
+    .mockResolvedValueOnce(withBackfill(true))
+    .mockResolvedValueOnce(withBackfill(true))
+    .mockResolvedValue(withBackfill(false))
+  const getAdventureActivitySeasonDays = vi
+    .fn<ClientHost['getAdventureActivitySeasonDays']>()
+    .mockResolvedValueOnce(seasonDays())
+    .mockResolvedValue(seasonDays(april2))
+  await render({ getAdventureActivity, getAdventureActivitySeasonDays })
+
+  await act(async () => vi.advanceTimersByTimeAsync(3000))
+  expect(getAdventureActivity).toHaveBeenCalledTimes(2)
+  expect(getAdventureActivitySeasonDays).toHaveBeenCalledTimes(1)
+
+  await act(async () => vi.advanceTimersByTimeAsync(3000))
+  expect(getAdventureActivity).toHaveBeenCalledTimes(3)
+  expect(getAdventureActivitySeasonDays).toHaveBeenCalledTimes(2)
+
+  await act(async () => hover(cell('4월 2일')))
+  expect(popupText()[1]).toBe('레이드')
+})
+
+it('갱신하면 시즌 하루 상세도 다시 받고, 받는 동안 받아 둔 값을 보이다가 새 값으로 바꾼다', async () => {
+  const reloaded = Promise.withResolvers<AdventureActivitySeasonDays>()
+  const getAdventureActivitySeasonDays = vi
+    .fn<ClientHost['getAdventureActivitySeasonDays']>()
+    .mockResolvedValueOnce(seasonDays(april2))
+    .mockReturnValue(reloaded.promise)
+  await render({ getAdventureActivitySeasonDays })
+
+  await act(async () => refreshButton().click())
+  await act(async () => hover(cell('4월 2일')))
+  expect(getAdventureActivitySeasonDays).toHaveBeenCalledTimes(2)
+  expect(popupText()[1]).toBe('레이드')
+
+  await act(async () => reloaded.resolve(seasonDays({ ...april2, raids: [], items: [] })))
+  expect(popupText()).toEqual(['4월 2일 (목)', '강화', '00:29+15 실패'])
+})
+
+it('탭에 해당하는 묶음만 보이고 탭을 바꿔도 받아 둔 시즌 하루 상세를 다시 쓴다', async () => {
   const allKinds: AdventureActivity = {
     ...activity,
     days: [{ ...activity.days[0]!, legion: 1, enhance: 1 }]
@@ -293,8 +408,10 @@ it('탭에 해당하는 묶음만 보이고 같은 날짜의 상세를 탭을 �
     ...april2,
     legions: [{ name: '가 레기온', count: 1 }]
   }
-  const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>(async () => detail)
-  await render({ getAdventureActivity: async () => allKinds, getAdventureActivityDay })
+  const getAdventureActivitySeasonDays = vi
+    .fn<ClientHost['getAdventureActivitySeasonDays']>()
+    .mockResolvedValue(seasonDays(detail))
+  await render({ getAdventureActivity: async () => allKinds, getAdventureActivitySeasonDays })
 
   const date = '4월 2일 (목)'
   const raid = ['레이드', '가 레이드2회']
@@ -314,7 +431,7 @@ it('탭에 해당하는 묶음만 보이고 같은 날짜의 상세를 탭을 �
     await act(async () => tab(label).click())
     await act(async () => hover(cell('4월 2일')))
     expect(popupText()).toEqual([date, ...rows])
-    expect(getAdventureActivityDay).toHaveBeenCalledTimes(1)
+    expect(getAdventureActivitySeasonDays).toHaveBeenCalledTimes(1)
   }
 })
 
@@ -323,14 +440,16 @@ it.each([
   ['레기온', '레기온 클리어'],
   ['강화', '강화 시도']
 ])(
-  '아이템만 있는 날은 %s 탭에서 활동 없는 칸과 같고 상세를 받지 않는다',
+  '아이템만 있는 날은 %s 탭에서 활동 없는 칸과 같고 Tooltip을 열지 않는다',
   async (label, cellName) => {
     const itemOnly: AdventureActivity = {
       ...activity,
       days: [{ ...activity.days[0]!, raid: 0, primeval: false }]
     }
-    const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>()
-    await render({ getAdventureActivity: async () => itemOnly, getAdventureActivityDay })
+    await render({
+      getAdventureActivity: async () => itemOnly,
+      getAdventureActivitySeasonDays: async () => seasonDays(april2)
+    })
     await act(async () => tab(label).click())
 
     const zeroCell = cell('4월 2일')
@@ -339,13 +458,11 @@ it.each([
     await act(async () => hover(zeroCell))
 
     expect(popupText()).toEqual([])
-    expect(getAdventureActivityDay).not.toHaveBeenCalled()
   }
 )
 
-it('강화만 있는 날은 아이템 탭에서 활동 없는 칸과 같고 상세를 받지 않는다', async () => {
-  const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>()
-  await render({ getAdventureActivityDay })
+it('강화만 있는 날은 아이템 탭에서 활동 없는 칸과 같고 Tooltip을 열지 않는다', async () => {
+  await render({ getAdventureActivitySeasonDays: async () => seasonDays(april2) })
   await act(async () => tab('아이템').click())
 
   const zeroCell = cell('4월 3일')
@@ -354,11 +471,13 @@ it('강화만 있는 날은 아이템 탭에서 활동 없는 칸과 같고 상�
   await act(async () => hover(zeroCell))
 
   expect(popupText()).toEqual([])
-  expect(getAdventureActivityDay).not.toHaveBeenCalled()
 })
 
 it('활동이 있는 칸에서 다른 활동이 있는 칸으로 옮기면 사이 간격을 지나는 동안 툴팁을 닫지 않고 내용을 그 날짜로 바꾼다', async () => {
-  await render({ getAdventureActivityDay: async (_name, date) => ({ ...april2, date }) })
+  await render({
+    getAdventureActivitySeasonDays: async () =>
+      seasonDays(april2, { ...april2, date: '2026-04-03' })
+  })
   await act(async () => hover(cell('4월 2일')))
 
   await act(async () => leave(cell('4월 2일')))
@@ -369,7 +488,7 @@ it('활동이 있는 칸에서 다른 활동이 있는 칸으로 옮기면 사�
 })
 
 it('칸 영역을 벗어나 머물면 툴팁을 닫는다', async () => {
-  await render({ getAdventureActivityDay: async () => april2 })
+  await render({ getAdventureActivitySeasonDays: async () => seasonDays(april2) })
   fakeCloseTimers()
   await act(async () => hover(cell('4월 2일')))
   expect(popupText()[0]).toBe('4월 2일 (목)')
@@ -380,14 +499,13 @@ it('칸 영역을 벗어나 머물면 툴팁을 닫는다', async () => {
   expect(popupText()).toEqual([])
 })
 
-it('활동이 없는 날은 마우스를 올려도 상세를 받지 않는다', async () => {
-  const getAdventureActivityDay = vi.fn<ClientHost['getAdventureActivityDay']>()
-  await render({ getAdventureActivityDay })
+it('활동이 없는 날은 마우스를 올려도 Tooltip을 열지 않는다', async () => {
+  await render({ getAdventureActivitySeasonDays: async () => seasonDays(april2) })
 
   await act(async () => hover(cell('4월 4일')))
 
   expect(cell('4월 4일').getAttribute('aria-label')).toBe('4월 4일 활동 0')
-  expect(getAdventureActivityDay).not.toHaveBeenCalled()
+  expect(popupText()).toEqual([])
 })
 
 function ringAngle(): string | undefined {
@@ -419,7 +537,8 @@ it('칸의 레이드 줄은 하드와 노말이 모두 있으면 둘을 나눠 �
     { name: '다 레이드', count: 6 }
   ]
   await render({
-    getAdventureActivityDay: async () => ({ ...april2, raids, items: [], enhancements: [] })
+    getAdventureActivitySeasonDays: async () =>
+      seasonDays({ ...april2, raids, items: [], enhancements: [] })
   })
 
   await act(async () => hover(cell('4월 2일')))
