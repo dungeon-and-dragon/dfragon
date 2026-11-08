@@ -12,10 +12,14 @@ import {
 } from './skill-window'
 
 type Style = Parameters<typeof skillWindowOf>[2]
-type Skill = SkillWindowCatalog['jobs'][number]['skills'][string]
+type Skill = SkillWindowCatalog['job']['skills'][string]
 
 function skill(name: string, requiredLevel: number | null, kind: Skill['kind'] = 'active'): Skill {
-  return { name, kind, requiredLevel, maxLevel: 10, icon: { x: 0, y: 0 } }
+  return { name, kind, requiredLevel, maxLevel: 10, icon: { x: 0, y: 0 }, stage: false }
+}
+
+function stageSkill(name: string, requiredLevel: number): Skill {
+  return { ...skill(name, requiredLevel, 'passive'), stage: true }
 }
 
 function slot(skillId: number, col: number, row: number) {
@@ -27,65 +31,66 @@ const MARKS = {
   enhancement: ['marks/enhancement-1.png', 'marks/enhancement-2.png']
 } satisfies SkillWindowCatalog['marks']
 
-// 데이터 묶음(skilltab.v2.json)과 같은 모양의 합성 데이터다. 두 직업 모두 찰나의 깨달음이 있어 직업마다의 스킬과 구분된다.
+// 데이터 묶음의 직업 파일과 같은 모양의 합성 데이터다.
 const CATALOG: SkillWindowCatalog = {
-  version: 'synthetic',
   marks: MARKS,
-  jobs: [
-    {
-      jobId: 'priest',
-      jobName: '프리스트(남)',
-      sprite: 'sprites/priest.png',
-      advancements: [
-        { growtype: 0, name: '프리스트', awakeningNames: [], slots: [slot(1, 0, 0)] },
-        {
-          growtype: 1,
-          name: '크루세이더',
-          awakeningNames: ['홀리오더', '세인트', '眞 크루세이더'],
-          slots: [
-            slot(1, 0, 0),
-            slot(2, 3, 2),
-            slot(3, 5, 2),
-            slot(4, 6, 2),
-            slot(5, 1.4893617021276595, 4),
-            slot(6, 5, 15),
-            slot(7, 5, 15)
-          ]
-        },
-        { growtype: 2, name: '인파이터', awakeningNames: ['眞 인파이터'], slots: [slot(8, 2, 1)] }
-      ],
-      skills: {
-        1: skill('백스텝', 1),
-        2: { ...skill('슬로우 힐', 5), icon: { x: 28, y: 56 } },
-        3: skill('럭키 스트레이트', 5),
-        4: skill('세컨드 어퍼', 10),
-        5: skill('연환격', 15),
-        6: skill('찰나의 깨달음', 95, 'passive'),
-        7: skill('신의 대행자', 95, 'passive'),
-        8: skill('더킹', 1)
-      }
-    },
-    {
-      jobId: 'creator_mage',
-      jobName: '크리에이터',
-      sprite: 'sprites/creator_mage.png',
-      advancements: [
-        {
-          growtype: 0,
-          name: '크리에이터',
-          awakeningNames: [],
-          slots: [slot(1, 0.48936170212765956, 1), slot(2, 0, 0)]
-        },
-        {
-          growtype: 1,
-          name: '크리에이터',
-          awakeningNames: ['크리에이터', '크리에이터', '眞 크리에이터'],
-          slots: [slot(2, 0, 0)]
-        }
-      ],
-      skills: { 1: skill('화염', 1), 2: skill('찰나의 깨달음', 95, 'passive') }
+  job: {
+    jobId: 'priest',
+    jobName: '프리스트(남)',
+    sprite: 'sprites/priest.png',
+    advancements: [
+      { growtype: 0, name: '프리스트', awakeningNames: [], slots: [slot(1, 0, 0)] },
+      {
+        growtype: 1,
+        name: '크루세이더',
+        awakeningNames: ['홀리오더', '세인트', '眞 크루세이더'],
+        slots: [
+          slot(1, 0, 0),
+          slot(2, 3, 2),
+          slot(3, 5, 2),
+          slot(4, 6, 2),
+          slot(5, 1.4893617021276595, 4),
+          slot(6, 5, 15),
+          slot(7, 5, 15)
+        ]
+      },
+      { growtype: 2, name: '인파이터', awakeningNames: ['眞 인파이터'], slots: [slot(8, 2, 1)] }
+    ],
+    skills: {
+      1: skill('백스텝', 1),
+      2: { ...skill('슬로우 힐', 5), icon: { x: 28, y: 56 } },
+      3: skill('럭키 스트레이트', 5),
+      4: skill('세컨드 어퍼', 10),
+      5: skill('연환격', 15),
+      6: stageSkill('찰나의 깨달음', 95),
+      7: skill('신의 대행자', 95, 'passive'),
+      8: skill('더킹', 1)
     }
-  ]
+  }
+}
+
+const CREATOR_CATALOG: SkillWindowCatalog = {
+  marks: MARKS,
+  job: {
+    jobId: 'creator_mage',
+    jobName: '크리에이터',
+    sprite: 'sprites/creator_mage.png',
+    advancements: [
+      {
+        growtype: 0,
+        name: '크리에이터',
+        awakeningNames: [],
+        slots: [slot(1, 0.48936170212765956, 1), slot(2, 0, 0)]
+      },
+      {
+        growtype: 1,
+        name: '크리에이터',
+        awakeningNames: ['크리에이터', '크리에이터', '眞 크리에이터'],
+        slots: [slot(2, 0, 0)]
+      }
+    ],
+    skills: { 1: skill('화염', 1), 2: stageSkill('찰나의 깨달음', 95) }
+  }
 }
 
 function learned(name: string, level: number, requiredLevel: number | null = 1) {
@@ -96,7 +101,7 @@ function styleOf(active: Style['active'], passive: Style['passive'] = []): Style
   return { active, passive, evolution: [], enhancement: [], chain: null }
 }
 
-const CRUSADER = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
+const CRUSADER = { jobGrowName: '眞 크루세이더' }
 
 describe('스킬 창 배치', () => {
   it('각성 이름으로 전직을 골라, 배운 스킬에는 레벨을 두고 배우지 않은 스킬은 배우지 않은 칸으로 둔다', () => {
@@ -121,11 +126,7 @@ describe('스킬 창 배치', () => {
   })
 
   it('1차 전직 이름으로도 같은 전직을 고른다', () => {
-    const window = skillWindowOf(
-      CATALOG,
-      { jobName: '프리스트(남)', jobGrowName: '크루세이더' },
-      styleOf([])
-    )
+    const window = skillWindowOf(CATALOG, { jobGrowName: '크루세이더' }, styleOf([]))
 
     expect(window?.icons.map(({ name }) => name)).toContain('세컨드 어퍼')
   })
@@ -146,7 +147,7 @@ describe('스킬 창 배치', () => {
     expect(inCell?.map(({ name, level }) => [name, level])).toEqual([['찰나의 깨달음', 2]])
   })
 
-  it('같은 칸의 두 스킬을 다 배우지 않았거나 다 배웠으면 다른 직업에 없는 그 전직의 스킬을 둔다', () => {
+  it('같은 칸의 두 스킬을 다 배우지 않았거나 다 배웠으면 단계 스킬이 아닌 그 전직의 스킬을 둔다', () => {
     const none = skillWindowOf(CATALOG, CRUSADER, styleOf([]))
     const both = skillWindowOf(
       CATALOG,
@@ -171,11 +172,7 @@ describe('스킬 창 배치', () => {
 
   it('크리에이터는 전직 상태와 관계없이 growtype 0 배치를 쓴다', () => {
     for (const jobGrowName of ['크리에이터', '자각2', '眞 크리에이터']) {
-      const window = skillWindowOf(
-        CATALOG,
-        { jobName: '크리에이터', jobGrowName },
-        styleOf([learned('화염', 1)])
-      )
+      const window = skillWindowOf(CREATOR_CATALOG, { jobGrowName }, styleOf([learned('화염', 1)]))
 
       expect(window?.icons.find(({ name }) => name === '화염')).toMatchObject({
         col: 0.48936170212765956,
@@ -185,13 +182,8 @@ describe('스킬 창 배치', () => {
     }
   })
 
-  it('데이터에 없는 직업이나 전직은 배치가 없다', () => {
-    expect(
-      skillWindowOf(CATALOG, { jobName: '총검사', jobGrowName: '眞 요원' }, styleOf([]))
-    ).toBeNull()
-    expect(
-      skillWindowOf(CATALOG, { jobName: '프리스트(남)', jobGrowName: '프리스트(남)' }, styleOf([]))
-    ).toBeNull()
+  it('데이터에 없는 전직은 배치가 없다', () => {
+    expect(skillWindowOf(CATALOG, { jobGrowName: '프리스트(남)' }, styleOf([]))).toBeNull()
   })
 })
 
@@ -256,44 +248,41 @@ const ENHANCEMENT: NonNullable<Skill['enhancement']> = {
 // 저장소 fixture(프리스트(여) 眞 이단심판관)의 개화, 강화, 스킬 체인 스킬 이름으로 만든 합성 배치다. 스킬 번호 9는 다른
 // 전직에만 있어 배울 수 없는 스킬이다.
 const INQUISITOR_CATALOG: SkillWindowCatalog = {
-  version: 'synthetic',
   marks: MARKS,
-  jobs: [
-    {
-      jobId: 'at_priest',
-      jobName: '프리스트(여)',
-      sprite: 'sprites/at_priest.png',
-      advancements: [
-        {
-          growtype: 2,
-          name: '이단심판관',
-          awakeningNames: ['眞 이단심판관'],
-          slots: [
-            slot(1, 2, 8),
-            slot(2, 0, 7),
-            slot(3, 1, 7),
-            slot(4, 3, 6),
-            slot(5, 0, 6),
-            slot(6, 0, 0)
-          ]
-        },
-        { growtype: 3, name: '무녀', awakeningNames: ['眞 무녀'], slots: [slot(9, 0, 7)] }
-      ],
-      skills: {
-        1: { ...skill('참수', 45), evolution: evolutionOf('참수'), enhancement: ENHANCEMENT },
-        2: {
-          ...skill('즉결심판', 35),
-          evolution: evolutionOf('즉결심판'),
-          enhancement: ENHANCEMENT
-        },
-        3: { ...skill('세례의 불길', 35), evolution: evolutionOf('세례의 불길') },
-        4: { ...skill('성염의 쇄도', 30), icon: { x: 84, y: 28 } },
-        5: { ...skill('성화', 25), enhancement: ENHANCEMENT },
-        6: skill('백스텝', 1),
-        9: { ...skill('무녀의 스킬', 35), evolution: evolutionOf('무녀의 스킬') }
-      }
+  job: {
+    jobId: 'at_priest',
+    jobName: '프리스트(여)',
+    sprite: 'sprites/at_priest.png',
+    advancements: [
+      {
+        growtype: 2,
+        name: '이단심판관',
+        awakeningNames: ['眞 이단심판관'],
+        slots: [
+          slot(1, 2, 8),
+          slot(2, 0, 7),
+          slot(3, 1, 7),
+          slot(4, 3, 6),
+          slot(5, 0, 6),
+          slot(6, 0, 0)
+        ]
+      },
+      { growtype: 3, name: '무녀', awakeningNames: ['眞 무녀'], slots: [slot(9, 0, 7)] }
+    ],
+    skills: {
+      1: { ...skill('참수', 45), evolution: evolutionOf('참수'), enhancement: ENHANCEMENT },
+      2: {
+        ...skill('즉결심판', 35),
+        evolution: evolutionOf('즉결심판'),
+        enhancement: ENHANCEMENT
+      },
+      3: { ...skill('세례의 불길', 35), evolution: evolutionOf('세례의 불길') },
+      4: { ...skill('성염의 쇄도', 30), icon: { x: 84, y: 28 } },
+      5: { ...skill('성화', 25), enhancement: ENHANCEMENT },
+      6: skill('백스텝', 1),
+      9: { ...skill('무녀의 스킬', 35), evolution: evolutionOf('무녀의 스킬') }
     }
-  ]
+  }
 }
 
 function inquisitor() {

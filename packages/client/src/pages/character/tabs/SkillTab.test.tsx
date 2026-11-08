@@ -28,47 +28,46 @@ function gameText(text: string): GameTextLines {
 
 // 저장소 fixture(프리스트(여) 眞 이단심판관)의 스킬 이름으로 만든 합성 배치다.
 const CATALOG: SkillWindowCatalog = {
-  version: 'synthetic',
   marks: MARKS,
-  jobs: [
-    {
-      jobId: 'at_priest',
-      jobName: '프리스트(여)',
-      sprite: 'https://skilltab.test/sprites/at_priest.png',
-      advancements: [
-        {
-          growtype: 2,
-          name: '이단심판관',
-          awakeningNames: ['헬베루스', '인페르노', '眞 이단심판관'],
-          slots: [
-            { skillId: 1, col: 0, row: 0, nextSkills: [] },
-            { skillId: 2, col: 3, row: 1, nextSkills: [] }
-          ]
-        }
-      ],
-      skills: {
-        1: {
-          name: '기본기 숙련',
-          kind: 'passive',
-          requiredLevel: 1,
-          maxLevel: 115,
-          icon: { x: 0, y: 0 }
-        },
-        2: {
-          name: '배우지 않은 스킬',
-          kind: 'active',
-          requiredLevel: 1,
-          maxLevel: 10,
-          icon: { x: 28, y: 0 }
-        }
+  job: {
+    jobId: 'at_priest',
+    jobName: '프리스트(여)',
+    sprite: 'https://skilltab.test/sprites/at_priest.png',
+    advancements: [
+      {
+        growtype: 2,
+        name: '이단심판관',
+        awakeningNames: ['헬베루스', '인페르노', '眞 이단심판관'],
+        slots: [
+          { skillId: 1, col: 0, row: 0, nextSkills: [] },
+          { skillId: 2, col: 3, row: 1, nextSkills: [] }
+        ]
+      }
+    ],
+    skills: {
+      1: {
+        name: '기본기 숙련',
+        kind: 'passive',
+        requiredLevel: 1,
+        maxLevel: 115,
+        icon: { x: 0, y: 0 },
+        stage: false
+      },
+      2: {
+        name: '배우지 않은 스킬',
+        kind: 'active',
+        requiredLevel: 1,
+        maxLevel: 10,
+        icon: { x: 28, y: 0 },
+        stage: false
       }
     }
-  ]
+  }
 }
 
-const [PRIEST] = CATALOG.jobs
-const [INQUISITOR] = PRIEST?.advancements ?? []
-if (PRIEST === undefined || INQUISITOR === undefined) {
+const PRIEST = CATALOG.job
+const [INQUISITOR] = PRIEST.advancements
+if (INQUISITOR === undefined) {
   throw new Error('합성 배치에 직업이 없다')
 }
 
@@ -76,78 +75,79 @@ if (PRIEST === undefined || INQUISITOR === undefined) {
 // 성화는 아무것도 고르지 않았다.
 const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
   ...CATALOG,
-  jobs: [
-    {
-      ...PRIEST,
-      advancements: [
-        {
-          ...INQUISITOR,
-          slots: [
-            ...INQUISITOR.slots,
-            { skillId: 3, col: 1, row: 7, nextSkills: [] },
-            { skillId: 4, col: 2, row: 9, nextSkills: [] },
-            { skillId: 5, col: 3, row: 6, nextSkills: [] }
-          ]
+  job: {
+    ...PRIEST,
+    advancements: [
+      {
+        ...INQUISITOR,
+        slots: [
+          ...INQUISITOR.slots,
+          { skillId: 3, col: 1, row: 7, nextSkills: [] },
+          { skillId: 4, col: 2, row: 9, nextSkills: [] },
+          { skillId: 5, col: 3, row: 6, nextSkills: [] }
+        ]
+      }
+    ],
+    skills: {
+      ...PRIEST.skills,
+      3: {
+        name: '세례의 불길',
+        kind: 'active',
+        requiredLevel: 35,
+        maxLevel: 60,
+        icon: { x: 56, y: 0 },
+        stage: false,
+        evolution: [
+          {
+            name: '정화의 세례',
+            basicExplain: gameText('범위 증가'),
+            explain: [[{ text: '[세례의 불길]', tone: 'default' }], ...gameText('범위 30% 증가')]
+          },
+          {
+            name: '심판의 세례',
+            basicExplain: gameText('시전 시간 감소'),
+            explain: gameText('시전 시간 감소')
+          }
+        ]
+      },
+      4: {
+        name: '참수',
+        kind: 'active',
+        requiredLevel: 45,
+        maxLevel: 60,
+        icon: { x: 84, y: 0 },
+        stage: false,
+        evolution: [
+          {
+            name: '단죄',
+            basicExplain: gameText('공격력 증가'),
+            explain: gameText('공격력 증가')
+          },
+          {
+            name: '처형',
+            basicExplain: gameText('딜레이 캔슬'),
+            explain: gameText('딜레이 캔슬')
+          }
+        ],
+        enhancement: {
+          1: { explain: gameText('데미지 증가') },
+          2: { explain: gameText('데미지 증가, 쿨타임 감소') }
         }
-      ],
-      skills: {
-        ...PRIEST.skills,
-        3: {
-          name: '세례의 불길',
-          kind: 'active',
-          requiredLevel: 35,
-          maxLevel: 60,
-          icon: { x: 56, y: 0 },
-          evolution: [
-            {
-              name: '정화의 세례',
-              basicExplain: gameText('범위 증가'),
-              explain: [[{ text: '[세례의 불길]', tone: 'default' }], ...gameText('범위 30% 증가')]
-            },
-            {
-              name: '심판의 세례',
-              basicExplain: gameText('시전 시간 감소'),
-              explain: gameText('시전 시간 감소')
-            }
-          ]
-        },
-        4: {
-          name: '참수',
-          kind: 'active',
-          requiredLevel: 45,
-          maxLevel: 60,
-          icon: { x: 84, y: 0 },
-          evolution: [
-            {
-              name: '단죄',
-              basicExplain: gameText('공격력 증가'),
-              explain: gameText('공격력 증가')
-            },
-            {
-              name: '처형',
-              basicExplain: gameText('딜레이 캔슬'),
-              explain: gameText('딜레이 캔슬')
-            }
-          ],
-          enhancement: {
-            1: { explain: gameText('데미지 증가') },
-            2: { explain: gameText('데미지 증가, 쿨타임 감소') }
-          }
-        },
-        5: {
-          name: '성화',
-          kind: 'active',
-          requiredLevel: 25,
-          maxLevel: 60,
-          icon: { x: 112, y: 0 },
-          enhancement: {
-            1: { explain: gameText('데미지 증가') },
-            2: { explain: gameText('데미지 증가, 쿨타임 감소') }
-          }
+      },
+      5: {
+        name: '성화',
+        kind: 'active',
+        requiredLevel: 25,
+        maxLevel: 60,
+        icon: { x: 112, y: 0 },
+        stage: false,
+        enhancement: {
+          1: { explain: gameText('데미지 증가') },
+          2: { explain: gameText('데미지 증가, 쿨타임 감소') }
         }
       }
     }
-  ]
+  }
 }
 
 let container: HTMLDivElement
@@ -196,11 +196,10 @@ function iconTexts(): string[][] {
 }
 
 it('스킬 창 데이터가 있는 전직은 배치에 아이콘을 두고 배운 스킬에만 레벨을 보인다', async () => {
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG }),
-    characterDetailFixture('dealer')
-  )
+  const getSkillWindowCatalog = vi.fn(async () => CATALOG)
+  await render(createTestClientHost({ getSkillWindowCatalog }), characterDetailFixture('dealer'))
 
+  expect(getSkillWindowCatalog).toHaveBeenCalledWith('프리스트(여)')
   expect(iconTexts()).toEqual([
     ['기본기 숙련', spriteAt('0px 0px'), 'Lv 115'],
     ['배우지 않은 스킬', spriteAt('-28px 0px'), '']
