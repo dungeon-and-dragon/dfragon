@@ -10,7 +10,7 @@ import { TodayGrade } from './TodayGrade'
 type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
-  { label: '파티, 공대', to: '/' },
+  { label: '멀티서치', to: '/' },
   { label: '랭킹', to: '/rankings' },
   { label: '통계', to: '/stats' },
   { label: '모험단', to: '/adventures' },
