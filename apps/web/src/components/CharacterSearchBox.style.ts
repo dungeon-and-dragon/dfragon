@@ -99,5 +99,19 @@ export const styles = stylex.create({
     outlineColor: colors.signal,
     outlineOffset: -2
   },
-  icon: { width: 16, height: 16 }
+  icon: { width: 16, height: 16 },
+  largeBox: { width: 640, maxWidth: '100%', height: 48 },
+  largeServer: {
+    gap: 6,
+    paddingInlineStart: space.s16,
+    paddingInlineEnd: 10,
+    fontSize: 14,
+    lineHeight: '20px'
+  },
+  largeDivider: { height: 20 },
+  largeInput: { paddingInline: space.s12, fontSize: 16, lineHeight: '24px' },
+  largeClear: { width: 32 },
+  largeClearIcon: { width: 16, height: 16 },
+  largeSubmit: { width: 46 },
+  largeIcon: { width: 20, height: 20 }
 })
