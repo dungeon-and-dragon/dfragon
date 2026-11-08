@@ -49,11 +49,16 @@ const ITEM_CODES = new Set(ACQUISITION_CODES)
 const ticketData = z.object({ ticket: z.unknown().refine((ticket) => ticket != null) })
 // 출시가 최근인 것부터다(2026-11-07 저장소 소유자 결정). 새 레이드, 레기온은 맨 앞에 더한다.
 export const RAID_RELEASE_ORDER = [
-  '무너진 성자 미카엘라',
-  '디레지에 레이드',
+  '무너진 성자 미카엘라 : 종언서',
+  '무너진 성자 미카엘라 : 균열서',
+  '디레지에 레이드 : 종막',
+  '디레지에 레이드 : 악연',
+  '디레지에 레이드 : 서막',
   '이내 황혼전',
-  '만들어진 신 나벨',
-  '아스라한',
+  '만들어진 신 나벨 : 무지의 악',
+  '만들어진 신 나벨 : 무의지의 장벽',
+  '아스라한 : 안개의 신, 무',
+  '아스라한 : 무의 장막',
   '기계 혁명 : 바칼 레이드',
   '기계 혁명 : 개전',
   '혼돈의 오즈마',
@@ -72,8 +77,10 @@ export const LEGION_RELEASE_ORDER = [
   '차원회랑',
   '이스핀즈'
 ] as const
-// Neople 타임라인은 개전과 바칼 레이드를 같은 raidName으로 주고 data.modeName으로만 나눈다.
-const MODE_SPLIT_RAID_NAME = '기계 혁명'
+// Neople 타임라인은 한 레이드의 단계(기계 혁명의 개전, 바칼 레이드 등)를 같은 raidName으로 주고 data.modeName으로만 나눈다.
+// modeName은 "디레지에 : 서막"처럼 레이드 약칭을 앞에 붙이거나 "미카엘라 : 종언서(하드)"처럼 하드를 뒤에 붙이기도 해 둘을 뗀다.
+const MODE_PREFIX_SEPARATOR = ' : '
+const HARD_MODE_SUFFIX = '(하드)'
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -319,11 +326,13 @@ function countName(counts: Map<string, NameCount>, name: string): void {
 }
 
 function toRaidCountName({ name, modeName }: TimelineClear): string {
-  if (name === MODE_SPLIT_RAID_NAME && modeName !== null) {
-    return `${name} : ${modeName}`
+  if (modeName === null) {
+    return name
   }
 
-  return name
+  const stage = modeName.split(MODE_PREFIX_SEPARATOR).at(-1) ?? modeName
+
+  return `${name} : ${stage.replace(HARD_MODE_SUFFIX, '')}`
 }
 
 function countRaid(counts: Map<string, RaidCount>, clear: TimelineClear): void {
