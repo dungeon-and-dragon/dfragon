@@ -6,6 +6,7 @@ export const styles = stylex.create({
   site: {
     display: 'flex',
     flexDirection: 'column',
+    flexGrow: 1,
     color: colors.fgDefault,
     fontFamily: font.ui,
     wordBreak: 'keep-all',
