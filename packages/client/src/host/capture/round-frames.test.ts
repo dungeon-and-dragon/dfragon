@@ -5,11 +5,11 @@ import type { CharacterImage } from '@dfragon/client-core/preload/common/types/c
 import type { RaidWindowTemplates } from '@dfragon/client-core/shared/raid/raid-window'
 import { installBrowserHost } from '..'
 import type { BrowserHost } from '../client-host'
-import { decodeBrowserImage } from './browser-png'
+import { decodeBrowserImage } from '../browser-png'
 import { readRaidWindowTemplates } from '../screen-watch/browser-raid-templates'
 import { readTownIndicatorTemplate } from '../screen-watch/browser-town-template'
 
-vi.mock('./browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
+vi.mock('../browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
 vi.mock('../screen-watch/browser-town-template', () => ({ readTownIndicatorTemplate: vi.fn() }))
 vi.mock('../screen-watch/browser-raid-templates', () => ({ readRaidWindowTemplates: vi.fn() }))
 

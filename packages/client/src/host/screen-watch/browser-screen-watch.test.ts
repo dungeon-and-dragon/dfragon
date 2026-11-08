@@ -16,11 +16,11 @@ import {
 } from '@dfragon/client-core/shared/raid/raid-window'
 import { installBrowserHost } from '..'
 import type { AutoRoundSignal, BrowserHost } from '../client-host'
-import { decodeBrowserImage } from '../capture/browser-png'
+import { decodeBrowserImage } from '../browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { readTownIndicatorTemplate } from './browser-town-template'
 
-vi.mock('../capture/browser-png', () => ({
+vi.mock('../browser-png', () => ({
   decodeBrowserImage: vi.fn(),
   decodeBrowserPng: vi.fn()
 }))
