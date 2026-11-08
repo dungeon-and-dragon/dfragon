@@ -3,6 +3,7 @@ import type { NeopleStage, NeopleStageTimings, RecordNeopleStage } from './neopl
 import type { CharacterIdentity, FetchedCharacterPayloads } from './sections.js'
 
 export const CHARACTER_CACHE_TTL_MS = 60 * 60 * 1000
+export const CHARACTER_REFRESH_MIN_INTERVAL_MS = 60 * 1000
 // One character keeps about 35KB of raw sections plus the detail service's stored response (about 150KB), so
 // 1,000 characters stay near 185MB. A 2026-10-30 production load test (#870) held
 // RSS near 300MB with this cache full, against a container limit the operator reports as about 4GB.
@@ -141,6 +142,13 @@ export function createCharacterCache(fetchCharacter: FetchCharacter) {
   // A failed refresh leaves the previous entry untouched because only a successful fetch writes it.
   const refresh: LoadCharacter = async (identity, signal, timings) => {
     ensureOpen(signal)
+    const cached = fetched.get(cacheKey(identity))
+    if (
+      cached !== undefined &&
+      Date.now() - cached.fetchedAt.getTime() < CHARACTER_REFRESH_MIN_INTERVAL_MS
+    ) {
+      return cached
+    }
 
     return join(identity, signal, timings)
   }

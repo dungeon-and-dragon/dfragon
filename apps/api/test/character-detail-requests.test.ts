@@ -111,11 +111,14 @@ test('1시간 안에 다시 조회하면 Neople을 부르지 않고 1시간이 �
 })
 
 test('강제 갱신은 캐시를 건너뛰고 다시 받아 캐시를 덮어쓰며 이후 조회는 새 값을 받는다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
+  t.mock.method(performance, 'now', () => Date.now())
   const { neople, fetchDetails } = countingNeople()
   const service = createCharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
   t.after(() => service.onModuleDestroy())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
+  t.mock.timers.tick(2 * MINUTE_MS)
   const refreshed = await readDetail(service.refresh(identity, signal, ignoredTimings))
   const afterRefresh = await readDetail(service.get(identity, signal, ignoredTimings))
 
@@ -126,6 +129,8 @@ test('강제 갱신은 캐시를 건너뛰고 다시 받아 캐시를 덮어쓰�
 })
 
 test('강제 갱신이 실패하면 상세 조회와 같은 오류를 돌려주고 기존 캐시는 그대로 둔다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
+  t.mock.method(performance, 'now', () => Date.now())
   let calls = 0
   const service = createCharacterDetailService({
     calculateScore: noScore,
@@ -142,6 +147,7 @@ test('강제 갱신이 실패하면 상세 조회와 같은 오류를 돌려주�
   t.after(() => service.onModuleDestroy())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
+  t.mock.timers.tick(2 * MINUTE_MS)
   await assert.rejects(service.refresh(identity, signal, ignoredTimings), {
     status: 503,
     body: new CharacterDetailFailure('unavailable').body
@@ -153,6 +159,8 @@ test('강제 갱신이 실패하면 상세 조회와 같은 오류를 돌려주�
 })
 
 test('연결을 끊고 떠난 강제 갱신의 조회가 나중에 끝나도 기존 캐시를 덮어쓰지 않는다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
+  t.mock.method(performance, 'now', () => Date.now())
   let calls = 0
   const late = gate()
   // 공급자가 취소 신호를 무시하고 요청이 떠난 뒤에 성공하는 경우다.
@@ -171,6 +179,7 @@ test('연결을 끊고 떠난 강제 갱신의 조회가 나중에 끝나도 기
   t.after(() => service.onModuleDestroy())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
+  t.mock.timers.tick(2 * MINUTE_MS)
   const leaving = new AbortController()
   const abandoned = service.refresh(identity, leaving.signal, ignoredTimings)
   await nextTurn()
