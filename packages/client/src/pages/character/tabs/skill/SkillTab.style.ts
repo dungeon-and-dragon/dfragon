@@ -10,62 +10,73 @@ const SKILL_ROW_LABEL_WIDTH = 36
 const SIDE_COLUMN_WIDTH = 340
 const EVOLUTION_MARK_SIZE = 17
 const ENHANCEMENT_MARK_SIZE = 18
+const SKILL_WINDOW_BORDER_WIDTH = 1
+const SKILL_WINDOW_WIDTH = SKILL_ROW_LABEL_WIDTH + SKILL_WINDOW_COLUMNS * SKILL_CELL_WIDTH
+const SKILL_WINDOW_OUTER_WIDTH = SKILL_WINDOW_WIDTH + 2 * SKILL_WINDOW_BORDER_WIDTH
+
+// 스킬 창은 열 폭에 맞춰 커지고 지금 크기보다 작아지지 않는다. sprite의 전체 크기를 모르므로
+// background-size 대신 zoom으로 아이콘을 키우는데, zoom은 단위 없는 수만 받아 tan(atan2())로 길이 비율을 수로 바꾼다.
+const SKILL_WINDOW_SCALE = `max(1, tan(atan2(100cqi, ${SKILL_WINDOW_OUTER_WIDTH}px)))`
+const SKILL_WINDOW_UNIT = `(${SKILL_WINDOW_SCALE} * 1px)`
+
+const scaled = (px: number): string => `calc(${px} * ${SKILL_WINDOW_UNIT})`
 
 export const styles = stylex.create({
   root: {
     display: 'grid',
-    gridTemplateColumns: `max-content minmax(0, ${SIDE_COLUMN_WIDTH}px)`,
+    gridTemplateColumns: `minmax(max-content, 1fr) minmax(0, ${SIDE_COLUMN_WIDTH}px)`,
     alignItems: 'start',
     justifyContent: 'space-between',
     gap: space.s24,
     padding: space.s16
   },
+  windowColumn: { containerType: 'inline-size', minWidth: SKILL_WINDOW_OUTER_WIDTH },
   window: {
     position: 'relative',
     flexShrink: 0,
-    borderWidth: 1,
+    borderWidth: scaled(SKILL_WINDOW_BORDER_WIDTH),
     borderStyle: 'solid',
     borderColor: colors.borderDefault,
     borderRadius: radius.control,
     backgroundColor: colors.bgInset
   },
   windowSize: (rowCount: number) => ({
-    width: SKILL_ROW_LABEL_WIDTH + SKILL_WINDOW_COLUMNS * SKILL_CELL_WIDTH,
-    height: rowCount * SKILL_CELL_HEIGHT
+    width: scaled(SKILL_WINDOW_WIDTH),
+    height: scaled(rowCount * SKILL_CELL_HEIGHT)
   }),
   rowLabel: {
     position: 'absolute',
     left: 0,
-    width: SKILL_ROW_LABEL_WIDTH,
-    height: SKILL_CELL_HEIGHT,
+    width: scaled(SKILL_ROW_LABEL_WIDTH),
+    height: scaled(SKILL_CELL_HEIGHT),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: 11,
-    lineHeight: '14px',
+    fontSize: scaled(11),
+    lineHeight: scaled(14),
     color: colors.fgSubtle,
     fontVariantNumeric: 'tabular-nums',
     whiteSpace: 'nowrap'
   },
-  rowTop: (row: number) => ({ top: row * SKILL_CELL_HEIGHT }),
+  rowTop: (row: number) => ({ top: scaled(row * SKILL_CELL_HEIGHT) }),
   rowLine: {
     position: 'absolute',
     left: 0,
     right: 0,
     height: 0,
-    borderTopWidth: 1,
+    borderTopWidth: scaled(1),
     borderTopStyle: 'solid',
     borderTopColor: colors.borderDefault
   },
   icon: {
     position: 'absolute',
-    width: SKILL_CELL_WIDTH,
-    height: SKILL_CELL_HEIGHT,
+    width: scaled(SKILL_CELL_WIDTH),
+    height: scaled(SKILL_CELL_HEIGHT),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: space.s4,
+    gap: scaled(4),
     padding: 0,
     borderWidth: 0,
     backgroundColor: 'transparent',
@@ -73,8 +84,8 @@ export const styles = stylex.create({
     font: 'inherit'
   },
   iconPosition: (col: number, row: number) => ({
-    left: SKILL_ROW_LABEL_WIDTH + col * SKILL_CELL_WIDTH,
-    top: row * SKILL_CELL_HEIGHT
+    left: scaled(SKILL_ROW_LABEL_WIDTH + col * SKILL_CELL_WIDTH),
+    top: scaled(row * SKILL_CELL_HEIGHT)
   }),
   image: {
     display: 'block',
@@ -87,7 +98,9 @@ export const styles = stylex.create({
     backgroundPosition: `${-x}px ${-y}px`
   }),
   unlearned: { opacity: 0.3, filter: 'grayscale(1)' },
-  frame: { position: 'relative', display: 'block' },
+  // zoom은 아이콘과 함께 개화, 강화 표식과 선택 테두리도 같은 배율로 키운다.
+  frame: { position: 'relative', display: 'block', zoom: SKILL_WINDOW_SCALE },
+  scaledMark: { imageRendering: 'auto' },
   picked: { boxShadow: `0 0 0 2px ${colors.signal}` },
   // 개화 마름모는 아이콘 아래 가운데에 걸치고, 강화 표식은 오른쪽 위에 둔다.
   evolutionMark: {
@@ -108,9 +121,9 @@ export const styles = stylex.create({
     imageRendering: 'pixelated'
   },
   level: {
-    height: 10,
-    fontSize: 10,
-    lineHeight: '10px',
+    height: scaled(10),
+    fontSize: scaled(10),
+    lineHeight: scaled(10),
     fontWeight: 600,
     color: colors.fgMuted,
     fontVariantNumeric: 'tabular-nums',
@@ -135,6 +148,12 @@ export const styles = stylex.create({
     gap: space.s8
   },
   subtle: { color: colors.fgSubtle, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' },
-  levelRows: { display: 'flex', flexDirection: 'column', gap: space.s16, minWidth: 0 },
+  levelRows: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: space.s16,
+    minWidth: 0,
+    justifySelf: 'start'
+  },
   state: { display: 'flex', alignItems: 'center', minHeight: SKILL_CELL_HEIGHT }
 })
