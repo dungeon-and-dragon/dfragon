@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useScreenCapture } from '../hooks/useScreenCapture'
 import { ScreenCaptureContext } from '../hooks/useScreenCaptureContext'
-import type { CaptureTexts } from '@dfragon/client-core/lib/capture-texts'
+import type { CaptureTexts } from '#core/lib/capture-texts'
 
 export function ScreenCaptureProvider({
   texts,

@@ -1,11 +1,8 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import type {
-  ClearName,
-  WeeklyCharacter
-} from '@dfragon/client-core/shared/adventure-guild/adventure-weekly'
+import { MISSING_VALUE } from '#core/constants/cards'
+import type { ClearName, WeeklyCharacter } from '#core/shared/adventure-guild/adventure-weekly'
 import { CheckIcon } from '../../components/CheckIcon'
 import { CharacterCell } from '../../components/table/CharacterCell'
 import { styles as tableStyles } from '../../components/table/CharacterTable.style'

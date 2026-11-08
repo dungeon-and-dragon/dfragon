@@ -1,4 +1,4 @@
-import type { CharacterStats } from '@dfragon/client-core/shared/ranking/ranking-stats'
+import type { CharacterStats } from '#core/shared/ranking/ranking-stats'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

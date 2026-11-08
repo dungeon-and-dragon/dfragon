@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import type { SkillIconImage } from '@dfragon/client-core/shared/search/skill-window'
+import type { SkillIconImage } from '#core/shared/search/skill-window'
 import { styles } from './SkillTab.style'
 
 export function SkillSprite({

@@ -1,4 +1,4 @@
-import type { OathCatalog } from '@dfragon/client-core/shared/search/oath-catalog'
+import type { OathCatalog } from '#core/shared/search/oath-catalog'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

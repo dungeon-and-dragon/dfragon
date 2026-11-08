@@ -1,14 +1,14 @@
 import * as stylex from '@stylexjs/stylex'
-import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import { formatCount, formatPoint, type StatLine } from '@dfragon/client-core/lib/character-item'
-import { type OathView, toOathView } from '@dfragon/client-core/lib/character-oath'
+import { MISSING_VALUE } from '#core/constants/cards'
+import { formatCount, formatPoint, type StatLine } from '#core/lib/character-item'
+import { type OathView, toOathView } from '#core/lib/character-oath'
 import {
   type OathCatalog,
   type OathOptionCard,
   type OathSetBoard,
   oathItemIconOf,
   oathSetBoardOf
-} from '@dfragon/client-core/shared/search/oath-catalog'
+} from '#core/shared/search/oath-catalog'
 import { CheckIcon } from '../../../components/CheckIcon'
 import { useOathCatalog } from '../../../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'

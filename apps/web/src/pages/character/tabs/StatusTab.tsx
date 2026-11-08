@@ -1,9 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
-import {
-  formatStatValue,
-  statusElementOf
-} from '@dfragon/client-core/shared/search/character-detail-display'
-import type { CharacterDetailView } from '@dfragon/client-core/shared/search/character-detail-view'
+import { formatStatValue, statusElementOf } from '#core/shared/search/character-detail-display'
+import type { CharacterDetailView } from '#core/shared/search/character-detail-view'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as layout } from './avatar/detail-tab.style'
 import { styles } from './status/StatusTab.style'

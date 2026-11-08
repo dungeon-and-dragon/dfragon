@@ -1,4 +1,4 @@
-import type { SkillWindowCatalog } from '@dfragon/client-core/shared/search/skill-window'
+import type { SkillWindowCatalog } from '#core/shared/search/skill-window'
 import { useClientHost } from '../host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 

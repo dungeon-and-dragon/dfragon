@@ -1,12 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { useId } from 'react'
-import { RAID_PARTY_COUNT, RAID_PARTY_SIZE } from '@dfragon/client-core/constants/cards'
-import { type RaidParty, toRaidSeat } from '@dfragon/client-core/lib/raid-seat'
-import {
-  filledSlotCount,
-  type SlotCard,
-  type SlotCardActions
-} from '@dfragon/client-core/lib/slot-cards'
+import { RAID_PARTY_COUNT, RAID_PARTY_SIZE } from '#core/constants/cards'
+import { type RaidParty, toRaidSeat } from '#core/lib/raid-seat'
+import { filledSlotCount, type SlotCard, type SlotCardActions } from '#core/lib/slot-cards'
 import { Seat } from '../../components/Seat'
 import { SeatMoveStatus } from '../../components/SeatMoveStatus'
 import { SeatTable } from '../../components/SeatTable'

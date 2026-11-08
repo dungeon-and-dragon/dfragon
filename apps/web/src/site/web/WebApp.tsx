@@ -34,7 +34,7 @@ import { AdventureEntryPage, WeeklyPage } from '../../pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from '../../sections/ScreenCaptureProvider'
 import { ScreenShareChip } from './ScreenShareChip'
 import { styles } from './WebApp.style'
-import { WEB_CAPTURE_TEXTS } from '@dfragon/client-core/lib/capture-texts'
+import { WEB_CAPTURE_TEXTS } from '#core/lib/capture-texts'
 
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 

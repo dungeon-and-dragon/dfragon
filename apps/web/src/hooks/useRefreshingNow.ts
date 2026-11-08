@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getElapsedTimeRefreshDelay } from '@dfragon/client-core/lib/time-format'
+import { getElapsedTimeRefreshDelay } from '#core/lib/time-format'
 
 export function useRefreshingNow(at: number): number {
   const [now, setNow] = useState(() => Date.now())

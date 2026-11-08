@@ -1,7 +1,7 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
-import type { StoredCharacter } from '@dfragon/client-core/shared/ranking/ranking-stats'
+import type { StoredCharacter } from '#core/shared/ranking/ranking-stats'
 import type { LoadedResult } from '../../hooks/useLoadedResult'
 import { type Affiliation, CharacterTable, SkeletonRow } from './CharacterTable'
 import { styles } from './CharacterListBox.style'

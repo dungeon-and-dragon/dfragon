@@ -1,7 +1,4 @@
-import {
-  type OathCatalog,
-  oathCatalogSchema
-} from '@dfragon/client-core/shared/search/oath-catalog'
+import { type OathCatalog, oathCatalogSchema } from '#core/shared/search/oath-catalog'
 import {
   type SkillMarks,
   type SkillWindowCatalog,
@@ -9,7 +6,7 @@ import {
   type SkillWindowJob,
   skillWindowIndexSchema,
   skillWindowJobSchema
-} from '@dfragon/client-core/shared/search/skill-window'
+} from '#core/shared/search/skill-window'
 
 // 그림 경로는 데이터 파일 기준의 상대 경로라, 화면이 데이터 위치를 몰라도 되게 절대 주소로 바꿔 둔다.
 function absoluteUrl(path: string, catalogUrl: string): string {

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import type { ItemView } from '@dfragon/client-core/lib/character-item'
+import type { ItemView } from '#core/lib/character-item'
 import { ItemCell } from './item-parts'
 import { styles as tableStyles } from './item-table.style'
 import { styles } from './SlotItemTable.style'

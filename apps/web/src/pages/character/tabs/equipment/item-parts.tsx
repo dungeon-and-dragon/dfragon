@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
-import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import { type ItemView, itemIconUrl } from '@dfragon/client-core/lib/character-item'
-import type { ItemRarity } from '@dfragon/client-core/shared/search/character-detail-display'
+import { MISSING_VALUE } from '#core/constants/cards'
+import { type ItemView, itemIconUrl } from '#core/lib/character-item'
+import type { ItemRarity } from '#core/shared/search/character-detail-display'
 import { styles as rarityText } from '../avatar/ItemName.style'
 import { raritySolid, styles } from './item-parts.style'
 

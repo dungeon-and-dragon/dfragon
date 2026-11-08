@@ -1,17 +1,8 @@
-import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
-
-const LIBRARY_IMPORT_PATTERN = /^@dfragon\/lib$/
+import { workspaceAliases } from '../../workspace-aliases.ts'
 
 export default defineConfig({
-  resolve: {
-    alias: [
-      {
-        find: LIBRARY_IMPORT_PATTERN,
-        replacement: fileURLToPath(new URL('../../../lib/src/index.ts', import.meta.url))
-      }
-    ]
-  },
+  resolve: { alias: workspaceAliases },
   test: {
     include: ['scripts/portrait-evaluation/*.evaluation.ts'],
     fileParallelism: false,

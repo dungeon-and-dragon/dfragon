@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import type { FameRankingFilter } from '@dfragon/client-core/shared/ranking/ranking-stats'
+import type { FameRankingFilter } from '#core/shared/ranking/ranking-stats'
 import { TitleBox } from '../../components/table/TitleBox'
 import { FameRankingList } from './FameRankingList'
 import { RankingFilterBox } from './RankingFilterBox'

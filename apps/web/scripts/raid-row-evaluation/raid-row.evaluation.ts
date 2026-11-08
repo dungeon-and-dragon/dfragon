@@ -9,7 +9,7 @@ import {
   parseDNFRaidValueNotation,
   readDNFRaidParticipantMetadata
 } from '@dfragon/lib'
-import type { CharacterImage } from '../../src/types/character'
+import type { CharacterImage } from '../../src/core/types/character'
 import { type CaseObservation, readJobText, type RowObservation, summarize } from './evaluate'
 import { createJobOcrReader, type JobOcrReader } from './job-ocr'
 import { loadCaseImage, readManifest } from './manifest'
@@ -17,10 +17,10 @@ import { readRaidHeading, readValueHeadings, readValueTemplates } from './refere
 
 const RGBA_CHANNELS = 4
 const DEFAULT_OCR_MODEL = fileURLToPath(
-  new URL('../../../models/ocr-finetuned/model.onnx', import.meta.url)
+  new URL('../../../../packages/models/ocr-finetuned/model.onnx', import.meta.url)
 )
 const DEFAULT_OCR_DICTIONARY = fileURLToPath(
-  new URL('../../../models/ocr-finetuned/characters.txt', import.meta.url)
+  new URL('../../../../packages/models/ocr-finetuned/characters.txt', import.meta.url)
 )
 
 const samples = process.env.DFRAGON_RAID_ROW_SAMPLES

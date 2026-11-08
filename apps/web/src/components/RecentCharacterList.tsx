@@ -1,14 +1,11 @@
 import { Popover } from '@base-ui/react/popover'
 import * as stylex from '@stylexjs/stylex'
-import { isMaxLevel } from '@dfragon/client-core/lib/character-level'
-import { formatJobName } from '@dfragon/client-core/lib/job-format'
+import { isMaxLevel } from '#core/lib/character-level'
+import { formatJobName } from '#core/lib/job-format'
 import { Link } from '@tanstack/react-router'
 import type { KeyboardEvent, RefObject } from 'react'
-import { MISSING_VALUE } from '@dfragon/client-core/constants/cards'
-import {
-  CHARACTER_SERVER_NAMES,
-  characterImageUrl
-} from '@dfragon/client-core/shared/search/character-summary'
+import { MISSING_VALUE } from '#core/constants/cards'
+import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/shared/search/character-summary'
 import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
 import { CardImage } from './CardImage'
 import { moveItemFocus } from './move-item-focus'

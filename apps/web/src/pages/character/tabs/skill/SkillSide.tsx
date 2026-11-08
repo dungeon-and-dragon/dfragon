@@ -7,7 +7,7 @@ import {
   type SkillMarks,
   type SkillUpgradeBoard,
   skillMarkOf
-} from '@dfragon/client-core/shared/search/skill-window'
+} from '#core/shared/search/skill-window'
 import { CheckIcon } from '../../../../components/CheckIcon'
 import { CopyIcon } from '../../../../components/CopyIcon'
 import { useClipboardCopy } from '../../../../hooks/useClipboardCopy'

@@ -1,7 +1,7 @@
-import type { CharacterImage } from '@dfragon/client-core/types/character'
-import { createDfragonClient } from '@dfragon/client-core/shared/api/dfragon-client'
-import { toRaidFrameResult } from '@dfragon/client-core/shared/raid/raid-frame'
-import { startRendererDiagnostics } from '@dfragon/client-core/lib/runtime-diagnostics'
+import type { CharacterImage } from '#core/types/character'
+import { createDfragonClient } from '#core/shared/api/dfragon-client'
+import { toRaidFrameResult } from '#core/shared/raid/raid-frame'
+import { startRendererDiagnostics } from '#core/lib/runtime-diagnostics'
 import {
   createOathCatalogSource,
   createSkillWindowCatalogSource

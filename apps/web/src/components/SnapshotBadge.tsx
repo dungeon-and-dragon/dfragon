@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
-import { RAID_PARTY_SIZE } from '@dfragon/client-core/constants/cards'
-import type { SnapshotMark } from '@dfragon/client-core/lib/adventure-snapshot'
-import type { SearchMode } from '@dfragon/client-core/types/search-mode'
+import { RAID_PARTY_SIZE } from '#core/constants/cards'
+import type { SnapshotMark } from '#core/lib/adventure-snapshot'
+import type { SearchMode } from '#core/types/search-mode'
 import { SnapshotIcon } from './SnapshotIcon'
 import { styles } from './SnapshotBadge.style'
 

@@ -13,7 +13,7 @@ import {
 import {
   ALL_CHARACTER_SERVERS,
   isSearchableCharacterName
-} from '@dfragon/client-core/shared/api/character-schemas'
+} from '#core/shared/api/character-schemas'
 import { characterSearchServerOptions } from '../constants/server-options'
 import { ChevronDownIcon } from './ChevronDownIcon'
 import { CloseIcon } from './CloseIcon'

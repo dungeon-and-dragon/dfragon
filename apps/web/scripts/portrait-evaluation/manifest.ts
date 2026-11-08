@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { isAbsolute, join, relative, resolve } from 'node:path'
 import { PNG } from 'pngjs'
-import type { CharacterImage } from '../../src/types/character'
+import type { CharacterImage } from '../../src/core/types/character'
 
 const MANIFEST_FILE = 'manifest.json'
 

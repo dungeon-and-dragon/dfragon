@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   ALL_CHARACTER_SERVERS,
   type CharacterSearchQuery
-} from '@dfragon/client-core/shared/api/character-schemas'
+} from '#core/shared/api/character-schemas'
 import { characterSearchServerOptions } from '../../constants/server-options'
 
 const searchSchema = z.object({
