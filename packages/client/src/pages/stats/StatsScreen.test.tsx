@@ -124,8 +124,12 @@ it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 
   ])
 })
 
-function fameTooltipText(): string | null {
-  const tooltip = boxOf('명성 분포').querySelector<HTMLElement>('ul + [aria-hidden="true"]')!
+function tooltipOf(name: string): HTMLElement | null {
+  return boxOf(name).querySelector<HTMLElement>('ul + [aria-hidden="true"]')
+}
+
+function tooltipText(name: string): string | null {
+  const tooltip = tooltipOf(name)!
   if (tooltip.style.visibility === 'hidden') {
     return null
   }
@@ -152,14 +156,14 @@ it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 �
     null,
     null
   ])
-  expect(fameTooltipText()).toBeNull()
+  expect(tooltipText('명성 분포')).toBeNull()
 
   const fineBar = items.at(-1)!
   await moveMouse(document.body, fineBar)
-  expect(fameTooltipText()).toBe('12.1만~12.2만66,392')
+  expect(tooltipText('명성 분포')).toBe('12.1만~12.2만66,392')
 
   await moveMouse(fineBar, document.body)
-  expect(fameTooltipText()).toBeNull()
+  expect(tooltipText('명성 분포')).toBeNull()
 })
 
 it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫지 않고 다음 막대의 구간과 인원으로 바꾼다', async () => {
@@ -168,56 +172,59 @@ it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫�
   const chart = boxOf('명성 분포').querySelector('ul')!
   const [, coarseBar, , divider, firstFineBar] = [...chart.querySelectorAll('li')]
   await moveMouse(document.body, coarseBar!)
-  expect(fameTooltipText()).toBe('4만~8만10')
+  expect(tooltipText('명성 분포')).toBe('4만~8만10')
 
   await moveMouse(coarseBar!, chart)
   await moveMouse(chart, divider!)
-  expect(fameTooltipText()).toBe('4만~8만10')
+  expect(tooltipText('명성 분포')).toBe('4만~8만10')
 
   await moveMouse(divider!, firstFineBar!)
-  expect(fameTooltipText()).toBe('12만~12.1만0')
+  expect(tooltipText('명성 분포')).toBe('12만~12.1만0')
 
   await moveMouse(firstFineBar!, document.body)
-  expect(fameTooltipText()).toBeNull()
+  expect(tooltipText('명성 분포')).toBeNull()
 })
 
-it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 떼면 지운다', async () => {
+it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 목록을 벗어나면 지운다', async () => {
   await render(async () => ({ ...stats, total: 1000 }))
 
   const serverRow = boxOf('서버 인구').querySelector('li')!
   const jobRow = boxOf('직업 분포').querySelector('li')!
-  expect(serverRow.querySelector('[aria-hidden="true"]')).toBeNull()
+  expect(tooltipText('서버 인구')).toBeNull()
 
-  await act(async () => {
-    serverRow.dispatchEvent(
-      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
-    )
-  })
-  expect(serverRow.querySelector('[aria-hidden="true"]')?.textContent).toBe('60.0%')
+  await moveMouse(document.body, serverRow)
+  expect(tooltipText('서버 인구')).toBe('60.0%')
 
-  await act(async () => {
-    serverRow.dispatchEvent(
-      new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body })
-    )
-    jobRow.dispatchEvent(
-      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
-    )
-  })
-  expect(serverRow.querySelector('[aria-hidden="true"]')).toBeNull()
-  expect(jobRow.querySelector('[aria-hidden="true"]')?.textContent).toBe('40.0%')
+  await moveMouse(serverRow, jobRow)
+  expect(tooltipText('서버 인구')).toBeNull()
+  expect(tooltipText('직업 분포')).toBe('40.0%')
   expect(rowsOf('직업 분포').map((row) => row.at(-1))).toEqual(['40.0%', '20.0%', '10.0%'])
 })
 
-it('직업별 평균 명성 행에는 마우스를 올려도 비율을 띄우지 않는다', async () => {
+it('행 사이 간격을 지나도 비율 툴팁을 닫지 않고 다음 행의 비율로 바꾼다', async () => {
+  await render(async () => ({ ...stats, total: 1000 }))
+
+  const list = boxOf('서버 인구').querySelector('ul')!
+  const [firstRow, secondRow] = [...list.querySelectorAll('li')]
+  await moveMouse(document.body, firstRow!)
+  await moveMouse(firstRow!, list)
+  expect(tooltipText('서버 인구')).toBe('60.0%')
+
+  await moveMouse(list, secondRow!)
+  expect(tooltipText('서버 인구')).toBe('30.0%')
+
+  await moveMouse(secondRow!, document.body)
+  expect(tooltipText('서버 인구')).toBeNull()
+})
+
+it('직업별 평균 명성 행에는 마우스를 올려도 비율 툴팁이 없다', async () => {
   await render(async () => ({ ...stats, total: 1000 }))
 
   const row = boxOf('직업별 평균 명성').querySelector('li')!
-  await act(async () => {
-    row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body }))
-  })
+  await moveMouse(document.body, row)
 
-  expect(row.querySelector('[aria-hidden="true"]')).toBeNull()
-  expect(row.textContent).not.toContain('%')
+  expect(tooltipOf('직업별 평균 명성')).toBeNull()
+  expect(boxOf('직업별 평균 명성').textContent).not.toContain('%')
 })
 
 it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직업은 뺀다', async () => {
