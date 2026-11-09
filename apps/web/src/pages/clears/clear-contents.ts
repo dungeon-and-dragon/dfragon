@@ -5,7 +5,7 @@ import type {
   ClearJob,
   ClearWeek
 } from '#core/ranking/clear-stats'
-import type { Bar } from '../stats/BarCharts'
+import type { Bar } from '../../components/chart/RowBars'
 
 export type ContentRow = Readonly<{ label: string; contents: readonly ClearContent[] }>
 

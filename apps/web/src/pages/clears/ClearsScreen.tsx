@@ -8,7 +8,8 @@ import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useClearContentStats, useClearStats } from '../../hooks/useClearStats'
 import { findClearContentBackground } from '../../lib/clear-content-background'
-import { type Bar, type ColumnBar, ColumnBars, RowBars } from '../stats/BarCharts'
+import { type ColumnBar, Columns } from '../../components/chart/Columns'
+import { type Bar, RowBars } from '../../components/chart/RowBars'
 import { shareText } from '../stats/stats-bars'
 import { SeasonBackdrop } from '../weekly/AdventureDashboard'
 import {
@@ -89,7 +90,7 @@ export function ClearsScreen({
             {week === undefined && <p {...stylex.props(styles.empty)}>수집 기록이 없습니다.</p>}
             {week !== undefined && content.weeks.length > 1 && (
               <div {...stylex.props(styles.weekChart)}>
-                <ColumnBars bars={weekBars(content)} selectedKey={week.weekStart} />
+                <Columns groups={[weekBars(content)]} selectedKey={week.weekStart} />
               </div>
             )}
           </section>
@@ -233,7 +234,7 @@ function weekBars({ weeks, releasedAt }: ClearContent): ColumnBar[] {
     const share = shareText(cleared, population)
     const ratio = max > 0 ? cleared / max : 0
 
-    return { key: weekStart, label, range, count: cleared, share, ratio, fine: false }
+    return { key: weekStart, label, range, count: cleared, share, ratio }
   })
 }
 
