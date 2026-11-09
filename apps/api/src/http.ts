@@ -312,7 +312,7 @@ export async function createApiHttpApp({
   try {
     app.set('trust proxy', trustedProxyHops ?? false)
     // Nest 기본 logger는 끈 채로 두고, 다른 middleware의 거절까지 재도록 가장 먼저 등록한다.
-    app.use(createAccessLog(writeAccessLog))
+    app.use(createAccessLog(writeAccessLog, 'api'))
     app.use((_request: Request, response: Response, next: () => void) => {
       response.setHeader('Cache-Control', 'no-store')
       response.removeHeader('X-Powered-By')
