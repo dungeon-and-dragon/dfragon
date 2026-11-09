@@ -580,7 +580,6 @@ export const apiSchemas: Record<string, SchemaObject> = {
     }
   }),
   AdventureSeasonBackfill: activitySeason,
-  AdventureActivityDay: activityDayDetail,
   AdventureSeasonDays: object({
     season: { type: 'integer' },
     days: { type: 'array', description: '활동이 있는 날만, 날짜 순', items: activityDayDetail }

@@ -4,20 +4,13 @@ import { z } from 'zod'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
 import {
   ApiAdventureActivity,
-  ApiAdventureActivityDay,
   ApiAdventureSeasonDays,
   ApiAdventureCharacters,
   ApiAdventureSeasonBackfill,
   ApiAdventureWeekly,
   ApiGuild
 } from '../swagger/operations.js'
-import {
-  type ActivityDayDetail,
-  type ActivitySeason,
-  type AdventureActivity,
-  type AdventureSeasonDays,
-  toActivityDayRange
-} from './activity.js'
+import type { ActivitySeason, AdventureActivity, AdventureSeasonDays } from './activity.js'
 import type {
   AdventureCharacters,
   AdventureGuildService,
@@ -66,20 +59,6 @@ export class AdventureGuildController {
     }
 
     return this.service.adventureActivity(adventureName, parsed.data.season)
-  }
-
-  @Get('adventures/:adventureName/activity/days/:date')
-  @ApiAdventureActivityDay()
-  adventureActivityDay(
-    @Param('adventureName') adventureName: string,
-    @Param('date') date: string
-  ): Promise<ActivityDayDetail> {
-    const day = toActivityDayRange(date)
-    if (day === undefined) {
-      throw new CharacterDetailFailure('query')
-    }
-
-    return this.service.adventureActivityDay(adventureName, day)
   }
 
   @Get('adventures/:adventureName/activity/seasons/:season/days')
