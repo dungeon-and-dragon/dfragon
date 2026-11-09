@@ -5,7 +5,7 @@ const count = z.number().int().nonnegative()
 const upgradeCounts = z.object({ name: z.string(), type1: count, type2: count })
 
 export const skillStatsSchema = z.object({
-  computedAt: z.iso.datetime(),
+  computedAt: z.iso.datetime().nullable(),
   minFame: z.number().int().nullable(),
   sampleSize: count,
   skills: z.array(
@@ -46,7 +46,7 @@ export type SkillAdoption = Readonly<{
   evolution: SkillEvolutionRates | null
   enhancement: SkillUpgradeRates | null
   sampleSize: number
-  computedAt: string
+  computedAt: string | null
 }>
 
 export type SkillAdoptionTarget = Readonly<{
