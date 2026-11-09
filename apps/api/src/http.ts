@@ -19,7 +19,11 @@ import { createTodayGradeService } from './today-grade/service.js'
 import type { FetchShopGrade } from './today-grade/neople.js'
 import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
-import { type TimelineSyncQueue, createTimelineSyncQueue } from './characters/timeline/queue.js'
+import {
+  type JobQueueCounts,
+  type TimelineSyncQueue,
+  createTimelineSyncQueue
+} from './characters/timeline/queue.js'
 import {
   type SeasonBackfillJob,
   type SeasonBackfillQueue,
@@ -75,6 +79,7 @@ import {
 
 const TRAILING_SLASHES_PATTERN = /\/+$/
 const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
+const ENHANCEMENT_BACKFILL_QUEUE = Symbol('ENHANCEMENT_BACKFILL_QUEUE')
 const SEASON_BACKFILL_QUEUE = Symbol('SEASON_BACKFILL_QUEUE')
 
 function requestFailure(
@@ -140,6 +145,24 @@ export interface TimelineSyncOptions {
   readonly close: () => Promise<void>
 }
 
+const TIMELINE_QUEUES = [
+  { name: 'timeline-sync', token: TIMELINE_SYNC_QUEUE },
+  { name: 'enhancement-backfill', token: ENHANCEMENT_BACKFILL_QUEUE },
+  { name: 'season-backfill', token: SEASON_BACKFILL_QUEUE }
+] as const
+
+type TimelineQueueCount = JobQueueCounts & {
+  readonly name: (typeof TIMELINE_QUEUES)[number]['name']
+}
+
+// queue는 DB 설정(`timeline`)을 준 app에만 있어, 그 밖의 app에서 부르면 provider를 찾지 못해 던진다.
+export function readTimelineQueueCounts(app: INestApplication): TimelineQueueCount[] {
+  return TIMELINE_QUEUES.map(({ name, token }) => ({
+    name,
+    ...app.get<Pick<TimelineSyncQueue, 'counts'>>(token).counts()
+  }))
+}
+
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchDependencies
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'characterEvents'>
@@ -188,6 +211,13 @@ export async function createApiHttpApp({
             createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED'))
         },
         {
+          provide: ENHANCEMENT_BACKFILL_QUEUE,
+          useFactory: () =>
+            createTimelineSyncQueue(timeline.backfillEnhancements, () =>
+              reportCode('TIMELINE_BACKFILL_FAILED')
+            )
+        },
+        {
           provide: SEASON_BACKFILL_QUEUE,
           useFactory: () =>
             createSeasonBackfillQueue(timeline.backfillSeason, () =>
@@ -196,14 +226,16 @@ export async function createApiHttpApp({
         },
         {
           provide: TimelineSyncSubscriber,
-          inject: [TIMELINE_SYNC_QUEUE, SEASON_BACKFILL_QUEUE],
+          inject: [TIMELINE_SYNC_QUEUE, ENHANCEMENT_BACKFILL_QUEUE, SEASON_BACKFILL_QUEUE],
           // 타임라인 조회가 백필을 기다리지 않도록 백필은 따로 queue를 둔다.
-          useFactory: (queue: TimelineSyncQueue, seasonBackfillQueue: SeasonBackfillQueue) =>
+          useFactory: (
+            queue: TimelineSyncQueue,
+            enhancementBackfillQueue: TimelineSyncQueue,
+            seasonBackfillQueue: SeasonBackfillQueue
+          ) =>
             new TimelineSyncSubscriber(
               queue,
-              createTimelineSyncQueue(timeline.backfillEnhancements, () =>
-                reportCode('TIMELINE_BACKFILL_FAILED')
-              ),
+              enhancementBackfillQueue,
               seasonBackfillQueue,
               timeline.close
             )

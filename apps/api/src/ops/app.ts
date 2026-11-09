@@ -19,8 +19,14 @@ import {
   recordAccessLogErrorCode,
   writeAccessLogToStdout
 } from '../access-log.js'
+import {
+  OPS_COLLECTION_STORE,
+  OpsCollectionController,
+  type OpsCollectionStore
+} from './collection.js'
 import { OpsFailure } from './errors.js'
 import { OPS_JOB_STORE, OpsJobsController, type OpsJobStore } from './jobs.js'
+import { OPS_QUEUE_COUNTS, OpsQueuesController, type ReadQueueCounts } from './queues.js'
 
 const ACCESS_LOG_SERVICE = 'api-ops'
 const BODY_LIMIT = '16kb'
@@ -99,6 +105,8 @@ class OpsDatabaseConnection implements OnApplicationShutdown {
 
 export type OpsHttpAppOptions = {
   readonly jobs: OpsJobStore
+  readonly readQueueCounts: ReadQueueCounts
+  readonly collection: OpsCollectionStore
   readonly close?: () => Promise<void>
   readonly writeAccessLog?: AccessLogSink
 }
@@ -106,13 +114,17 @@ export type OpsHttpAppOptions = {
 /** 운영 경로는 이 app에만 등록하고 공개 app과 OpenAPI 문서에는 넣지 않는다. */
 export async function createOpsHttpApp({
   jobs,
+  readQueueCounts,
+  collection,
   close = async () => undefined,
   writeAccessLog = writeAccessLogToStdout
 }: OpsHttpAppOptions): Promise<INestApplication> {
   @Module({
-    controllers: [OpsJobsController],
+    controllers: [OpsJobsController, OpsQueuesController, OpsCollectionController],
     providers: [
       { provide: OPS_JOB_STORE, useValue: jobs },
+      { provide: OPS_QUEUE_COUNTS, useValue: readQueueCounts },
+      { provide: OPS_COLLECTION_STORE, useValue: collection },
       { provide: OpsDatabaseConnection, useFactory: () => new OpsDatabaseConnection(close) }
     ]
   })
