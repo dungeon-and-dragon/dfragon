@@ -101,7 +101,13 @@ function TargetRows({
   )
 }
 
-export function ActivitySummary({ summary }: { summary: Summary }): React.JSX.Element {
+export function ActivitySummary({
+  summary,
+  hasLegion
+}: {
+  summary: Summary
+  hasLegion: boolean
+}): React.JSX.Element {
   const { items, enhancement } = summary
   const itemCount = items.legendary + items.epic + items.primeval + items.mythic
   const hasTargets = enhancement.amplify.length > 0 || enhancement.reinforce.length > 0
@@ -111,9 +117,11 @@ export function ActivitySummary({ summary }: { summary: Summary }): React.JSX.El
       <SummaryStat label="레이드" value={sumCounts(summary.raids)}>
         <ClearRows counts={summary.raids} />
       </SummaryStat>
-      <SummaryStat label="레기온" value={sumCounts(summary.legions)}>
-        <ClearRows counts={summary.legions} />
-      </SummaryStat>
+      {hasLegion && (
+        <SummaryStat label="레기온" value={sumCounts(summary.legions)}>
+          <ClearRows counts={summary.legions} />
+        </SummaryStat>
+      )}
       <SummaryStat label="아이템" value={itemCount}>
         {items.legendary > 0 && (
           <DetailRow
@@ -162,10 +170,12 @@ export function ActivitySummary({ summary }: { summary: Summary }): React.JSX.El
   )
 }
 
-export function ActivitySummarySkeleton(): React.JSX.Element {
+export function ActivitySummarySkeleton({ hasLegion }: { hasLegion: boolean }): React.JSX.Element {
+  const labels = hasLegion ? ['레이드', '레기온', '아이템', '강화'] : ['레이드', '아이템', '강화']
+
   return (
     <div aria-hidden="true" {...stylex.props(styles.stats)}>
-      {['레이드', '레기온', '아이템', '강화'].map((label) => (
+      {labels.map((label) => (
         <div key={label} {...stylex.props(styles.stat)}>
           <span {...stylex.props(styles.label)}>{label}</span>
           <span {...stylex.props(styles.bone)} />
