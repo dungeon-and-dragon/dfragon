@@ -345,6 +345,7 @@ for (const [name, database, registered] of [
       localHttps: undefined,
       apiKey: 'synthetic-neople-key',
       database,
+      ops: undefined,
       scoreLibraryPath: null
     })
     t.after(() => app.close())
