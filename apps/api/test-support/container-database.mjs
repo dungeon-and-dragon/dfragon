@@ -541,7 +541,7 @@ try {
         "SELECT string_agg(character_id || ':' || coalesce(failure, '-'), ',' ORDER BY character_id) FROM character_collection"
       )
     ).stdout.trim(),
-    'collect-failed:neople-api,collect-no-basic:-'
+    'collect-failed:neople-api,collect-no-basic:-,collect-schema:-'
   )
   assert.equal(
     (
