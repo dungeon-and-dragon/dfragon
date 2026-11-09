@@ -11,6 +11,7 @@ import {
 import { readCollectorConfiguration } from './character-collection/configuration.js'
 import { runCollectionPass } from './character-collection/runner.js'
 import { createDatabaseJobStore } from './jobs/adapters.js'
+import { createDiscordJobAlert } from './jobs/alert.js'
 import { startJobScheduler } from './jobs/scheduler.js'
 import { createWorkerJobs } from './jobs/worker-jobs.js'
 
@@ -40,6 +41,10 @@ async function main(): Promise<never> {
   const fetchBasic = createNeopleCharacterBasic(neople)
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
+  const alert =
+    configuration.jobAlertWebhookUrl !== undefined
+      ? createDiscordJobAlert(configuration.jobAlertWebhookUrl)
+      : undefined
   await startJobScheduler({
     jobs: createWorkerJobs(client, {
       neople,
@@ -47,7 +52,8 @@ async function main(): Promise<never> {
       report
     }),
     store: createDatabaseJobStore(client),
-    report
+    report,
+    alert
   })
   let importedAt: ReadonlyMap<string, number> = new Map()
   for (;;) {
