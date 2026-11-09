@@ -132,3 +132,30 @@ model TimelineSeasonBackfill {
   @@id([serverId, characterId, seasonId])
   @@map("timeline_season_backfill")
 }
+
+model ContentClear {
+  contentId   String   @map("content_id")
+  kind        String
+  serverId    String   @map("server_id")
+  characterId String   @map("character_id")
+  weekStart   DateTime @map("week_start") @db.Timestamptz(3)
+  clearedAt   DateTime @map("cleared_at") @db.Timestamptz(3)
+  ratio       Int?
+
+  @@id([contentId, serverId, characterId, weekStart])
+  @@index([contentId, weekStart])
+  @@map("content_clears")
+}
+
+model ContentClearPopulation {
+  contentId   String   @map("content_id")
+  weekStart   DateTime @map("week_start") @db.Timestamptz(3)
+  population  Int
+  minFame     Int?     @map("min_fame")
+  jobs        Json
+  collectedAt DateTime @map("collected_at") @db.Timestamptz(3)
+  closed      Boolean  @default(false)
+
+  @@id([contentId, weekStart])
+  @@map("content_clear_populations")
+}
