@@ -14,9 +14,8 @@ import {
 import {
   emptySeasonActivity,
   readAdventureActivity,
-  readAdventureActivityDay,
-  readAdventureSeasonBackfill,
-  toActivityDayRange
+  readAdventureSeasonDays,
+  readAdventureSeasonBackfill
 } from './dist/adventure-guild/activity.js'
 import { backfillSeason } from './dist/characters/timeline/season-backfill.js'
 import { createDatabaseSeasonBackfillStore } from './dist/characters/timeline/store.js'
@@ -414,7 +413,9 @@ try {
   })
   assert.deepEqual((await readAdventureSeasonBackfill(client, adventureName, 7, now)).jobs, [])
   assert.deepEqual(
-    await readAdventureActivityDay(client, adventureName, toActivityDayRange('2021-05-01')),
+    (await readAdventureSeasonDays(client, adventureName, 7, now)).days.find(
+      ({ date }) => date === '2021-05-01'
+    ),
     {
       date: '2021-05-01',
       raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
@@ -437,21 +438,24 @@ try {
     items: [{ at: '2026-04-02T10:00:00+09:00', name: null, rarity: '태초' }],
     enhancements: [{ at: '2026-04-02T11:00:00+09:00', kind: 'amplify', target: 12, success: false }]
   }
-  const readDay = (name, date) => readAdventureActivityDay(client, name, toActivityDayRange(date))
-  assert.deepEqual(await readDay(adventureName, '2026-04-02'), activityDay)
-  assert.deepEqual(await readDay(adventureName, '2026-04-01'), {
-    date: '2026-04-01',
-    raids: [{ name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 }],
-    legions: [],
-    items: [],
-    enhancements: []
-  })
-  assert.deepEqual(await readDay('없는모험단', '2026-04-02'), {
-    date: '2026-04-02',
-    raids: [],
-    legions: [],
-    items: [],
-    enhancements: []
+  const seasonDays = await readAdventureSeasonDays(client, adventureName, 11, now)
+  assert.deepEqual(
+    seasonDays.days.find(({ date }) => date === '2026-04-02'),
+    activityDay
+  )
+  assert.deepEqual(
+    seasonDays.days.find(({ date }) => date === '2026-04-01'),
+    {
+      date: '2026-04-01',
+      raids: [{ name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 }],
+      legions: [],
+      items: [],
+      enhancements: []
+    }
+  )
+  assert.deepEqual(await readAdventureSeasonDays(client, '없는모험단', 11, now), {
+    season: 11,
+    days: []
   })
 
   // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결까지 확인한다.
@@ -509,8 +513,12 @@ try {
     seasonIds
   )
   assert.deepEqual({ summary: activityAnswer.summary, days: activityAnswer.days }, seasonActivity)
+  const seasonDaysAnswer = await get(
+    `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/11/days`
+  )
+  assert.equal(seasonDaysAnswer.season, 11)
   assert.deepEqual(
-    await get(`/adventures/${encodeURIComponent(adventureName)}/activity/days/2026-04-02`),
+    seasonDaysAnswer.days.find(({ date }) => date === '2026-04-02'),
     activityDay
   )
   const returnedAnswer = await get(
