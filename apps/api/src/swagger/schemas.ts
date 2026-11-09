@@ -675,7 +675,11 @@ export const apiSchemas: Record<string, SchemaObject> = {
     }
   }),
   Stats: object({
-    computedAt: { ...timestamp, description: '집계를 계산한 시각' },
+    computedAt: {
+      ...timestamp,
+      nullable: true,
+      description: '집계를 계산한 시각. 아직 저장된 집계가 없으면 null'
+    },
     total: { ...characterCount, description: 'DB에 저장된 캐릭터 수' },
     servers: {
       type: 'array',
@@ -710,7 +714,11 @@ export const apiSchemas: Record<string, SchemaObject> = {
     }
   }),
   SkillStats: object({
-    computedAt: { ...timestamp, description: '집계를 계산한 시각' },
+    computedAt: {
+      ...timestamp,
+      nullable: true,
+      description: '집계를 계산한 시각. 아직 저장된 집계가 없으면 null'
+    },
     topCount: { type: 'integer', description: '표본으로 삼은 전직 안 명성 상위 순위' },
     minFame: {
       type: 'integer',

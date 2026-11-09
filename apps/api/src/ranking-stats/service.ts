@@ -1,13 +1,14 @@
 import {
   type CharacterStats,
+  type CharacterStatsSnapshot,
   type FameRankingFilter,
   type JobSkillAdoption,
   type JobSkillAdoptionQuery,
+  type JobSkillAdoptionSnapshot,
   SKILL_STYLE_SAMPLE_TOP_COUNT,
   type StoredCharacter
 } from '@dfragon/database'
 import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
-import { startOfNextSeoulDay } from '../utils/seoul-time.js'
 
 export const FAME_RANKING_LIMIT = 100
 
@@ -15,14 +16,29 @@ export type FameRanking = {
   characters: (CharacterRow & { rank: number })[]
 }
 
-export type Stats = CharacterStats & { computedAt: string }
+export type Stats = CharacterStats & { computedAt: string | null }
 
-export type SkillStats = JobSkillAdoption & { computedAt: string; topCount: number }
+export type SkillStats = JobSkillAdoption & { computedAt: string | null; topCount: number }
 
 export interface RankingStatsReader {
   readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
-  readCharacterStats(): Promise<CharacterStats>
-  readJobSkillAdoption(job: JobSkillAdoptionQuery): Promise<JobSkillAdoption>
+  readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null>
+  readJobSkillAdoptionSnapshot(job: JobSkillAdoptionQuery): Promise<JobSkillAdoptionSnapshot | null>
+}
+
+const emptyCharacterStats: CharacterStats = {
+  total: 0,
+  servers: [],
+  jobs: [],
+  fameDistribution: []
+}
+
+const emptyJobSkillAdoption: JobSkillAdoption = {
+  minFame: null,
+  sampleSize: 0,
+  skills: [],
+  evolutions: [],
+  enhancements: []
 }
 
 export interface RankingStatsService {
@@ -42,44 +58,7 @@ export function roundAverageFame({ jobs, ...counts }: CharacterStats): Character
   }
 }
 
-export function createRankingStatsService(
-  reader: RankingStatsReader,
-  now: () => Date = () => new Date()
-): RankingStatsService {
-  let cached: { stats: Stats; expiresAt: Date } | undefined
-  let loading: Promise<Stats> | undefined
-
-  const load = async (): Promise<Stats> => {
-    const computedAt = now()
-    const stats = {
-      ...roundAverageFame(await reader.readCharacterStats()),
-      computedAt: computedAt.toISOString()
-    }
-    // 자정 직전에 시작한 집계가 자정 뒤에 끝나도 다음 날 첫 요청이 다시 계산하도록 시작 시각으로 만료를 정한다.
-    cached = { stats, expiresAt: startOfNextSeoulDay(computedAt) }
-
-    return stats
-  }
-
-  const cachedSkillStats = new Map<string, { skillStats: SkillStats; expiresAt: Date }>()
-  const loadingSkillStats = new Map<string, Promise<SkillStats>>()
-
-  const loadSkillStats = async (key: string, job: JobSkillAdoptionQuery): Promise<SkillStats> => {
-    const computedAt = now()
-    const adoption = await reader.readJobSkillAdoption(job)
-    const skillStats = {
-      computedAt: computedAt.toISOString(),
-      topCount: SKILL_STYLE_SAMPLE_TOP_COUNT,
-      ...adoption
-    }
-    // 명성 있는 캐릭터가 없는 전직은 아무 문자열로 만들 수 있어, 캐시하면 query마다 메모리가 는다.
-    if (adoption.minFame !== null) {
-      cachedSkillStats.set(key, { skillStats, expiresAt: startOfNextSeoulDay(computedAt) })
-    }
-
-    return skillStats
-  }
-
+export function createRankingStatsService(reader: RankingStatsReader): RankingStatsService {
   return {
     async fameRanking(filter) {
       const characters = await reader.readFameRanking(filter, FAME_RANKING_LIMIT)
@@ -92,42 +71,33 @@ export function createRankingStatsService(
       }
     },
     async stats() {
-      if (cached !== undefined && now() < cached.expiresAt) {
-        return cached.stats
+      const snapshot = await reader.readCharacterStatsSnapshot()
+      if (snapshot === null) {
+        return { ...emptyCharacterStats, computedAt: null }
       }
-      loading ??= load().finally(() => {
-        loading = undefined
-      })
+      const { computedAt: storedAt, ...stats } = snapshot
+      const computedAt = storedAt.toISOString()
 
-      return loading
+      return { ...stats, computedAt }
     },
     async skillStats(job) {
-      const key = JSON.stringify([job.jobId, job.jobGrowId, job.role ?? null])
-      const cachedJob = cachedSkillStats.get(key)
-      if (cachedJob !== undefined && now() < cachedJob.expiresAt) {
-        return cachedJob.skillStats
+      const snapshot = await reader.readJobSkillAdoptionSnapshot(job)
+      if (snapshot === null) {
+        return {
+          computedAt: null,
+          topCount: SKILL_STYLE_SAMPLE_TOP_COUNT,
+          ...emptyJobSkillAdoption
+        }
       }
-      let loadingJob = loadingSkillStats.get(key)
-      if (loadingJob === undefined) {
-        loadingJob = loadSkillStats(key, job).finally(() => {
-          loadingSkillStats.delete(key)
-        })
-        loadingSkillStats.set(key, loadingJob)
-      }
+      const computedAt = snapshot.computedAt.toISOString()
 
-      return loadingJob
+      return { computedAt, topCount: SKILL_STYLE_SAMPLE_TOP_COUNT, ...snapshot.adoption }
     }
   }
 }
 
 export const emptyRankingStatsReader: RankingStatsReader = {
   readFameRanking: async () => [],
-  readCharacterStats: async () => ({ total: 0, servers: [], jobs: [], fameDistribution: [] }),
-  readJobSkillAdoption: async () => ({
-    minFame: null,
-    sampleSize: 0,
-    skills: [],
-    evolutions: [],
-    enhancements: []
-  })
+  readCharacterStatsSnapshot: async () => null,
+  readJobSkillAdoptionSnapshot: async () => null
 }
