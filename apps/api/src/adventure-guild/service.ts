@@ -4,16 +4,13 @@ import { CharacterDetailFailure } from '../characters/details/errors.js'
 import type { RequestTimelineSync } from '../characters/timeline/queue.js'
 import type { SeasonBackfillQueue } from '../characters/timeline/season-backfill.js'
 import {
-  type ActivityDayDetail,
-  type ActivityDayRange,
   type ActivitySeason,
   type AdventureActivity,
   type AdventureActivityRead,
   type AdventureSeasonDays,
   type AdventureSeasonBackfillRead,
   type StoredActivitySeason,
-  emptySeasonActivity,
-  toActivityDayDetail
+  emptySeasonActivity
 } from './activity.js'
 import type { AdventureWeeklyClears } from './weekly.js'
 
@@ -40,7 +37,6 @@ export interface AdventureGuildReader {
     adventureName: string,
     seasonId: number | undefined
   ): Promise<AdventureActivityRead | undefined>
-  readAdventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
   readAdventureSeasonDays(
     adventureName: string,
     seasonId: number
@@ -58,7 +54,6 @@ export interface AdventureGuildService {
   guild(guildId: string): Promise<GuildMembers>
   adventureWeekly(adventureName: string): Promise<AdventureWeekly>
   adventureActivity(adventureName: string, seasonId: number | undefined): Promise<AdventureActivity>
-  adventureActivityDay(adventureName: string, day: ActivityDayRange): Promise<ActivityDayDetail>
   adventureSeasonDays(adventureName: string, seasonId: number): Promise<AdventureSeasonDays>
   adventureSeasonBackfill(adventureName: string, seasonId: number): Promise<ActivitySeason>
 }
@@ -130,10 +125,6 @@ export function createAdventureGuildService(
 
       return { ...read.activity, seasons }
     },
-    // 하루 상세는 시즌 조회가 이미 동기화를 건 뒤 화면이 부르므로 다시 걸지 않는다.
-    adventureActivityDay(adventureName, day) {
-      return reader.readAdventureActivityDay(adventureName, day)
-    },
     async adventureSeasonDays(adventureName, seasonId) {
       const days = await reader.readAdventureSeasonDays(adventureName, seasonId)
       if (days === undefined) {
@@ -177,8 +168,6 @@ export const emptyAdventureGuildService = createAdventureGuildService(
         activity: { seasons: [], season: null, ...emptySeasonActivity() }
       }
     },
-    readAdventureActivityDay: async (_adventureName, day) =>
-      toActivityDayDetail(day, { clears: [], items: [] }),
     readAdventureSeasonDays: async () => undefined,
     readAdventureSeasonBackfill: async () => undefined
   },

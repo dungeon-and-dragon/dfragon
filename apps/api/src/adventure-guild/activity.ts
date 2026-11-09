@@ -716,14 +716,3 @@ export async function readAdventureSeasonBackfill(
 
   return { characters, season: { ...season, available, backfill }, jobs }
 }
-
-export async function readAdventureActivityDay(
-  client: DatabaseClient,
-  adventureName: string,
-  day: ActivityDayRange
-): Promise<ActivityDayDetail> {
-  const characters = await readAdventureCharacters(client, adventureName)
-  const records = await readActivityRecords(client, characters, day.startsAt, day.endsAt)
-
-  return toActivityDayDetail(day, records)
-}
