@@ -56,3 +56,45 @@ assert.deepEqual(await unscheduled.json(), { error: { code: 'JOB_NOT_SCHEDULED' 
 
 assert.equal((await post('/api/jobs/ops-probe/runs', 'x', 'text/plain')).status, 415)
 assert.equal((await get('/api/jobs', 'http://127.0.0.1:3000')).status, 404)
+
+const queues = await get('/api/queues')
+assert.equal(queues.status, 200)
+assert.deepEqual(await queues.json(), {
+  queues: [
+    { name: 'timeline-sync', waiting: 0, running: 0 },
+    { name: 'enhancement-backfill', waiting: 0, running: 0 },
+    { name: 'season-backfill', waiting: 0, running: 0 }
+  ]
+})
+const readCollection = async () => {
+  const response = await get('/api/collection')
+  assert.equal(response.status, 200)
+
+  return response.json()
+}
+assert.deepEqual(await readCollection(), {
+  waiting: 1,
+  oldestQueuedAt: '2026-11-09T00:00:00.000Z',
+  failures: [
+    { failure: 'neople-api', count: 1, lastAttemptedAt: '2026-11-08T01:00:00.000Z' },
+    { failure: 'neople-internal', count: 1, lastAttemptedAt: '2026-11-08T02:00:00.000Z' }
+  ]
+})
+const requeueInternal = await post('/api/collection/requeue', { failure: 'neople-internal' })
+assert.equal(requeueInternal.status, 200)
+assert.deepEqual(await requeueInternal.json(), { requeued: 1 })
+const afterInternal = await readCollection()
+assert.deepEqual(
+  [afterInternal.waiting, afterInternal.failures.map(({ failure }) => failure)],
+  [2, ['neople-api']]
+)
+const requeueAll = await post('/api/collection/requeue', {})
+assert.deepEqual([requeueAll.status, await requeueAll.json()], [200, { requeued: 1 }])
+assert.deepEqual(await readCollection(), {
+  waiting: 3,
+  oldestQueuedAt: '2026-11-08T00:00:00.000Z',
+  failures: []
+})
+for (const path of ['/api/queues', '/api/collection']) {
+  assert.equal((await get(path, 'http://127.0.0.1:3000')).status, 404, path)
+}

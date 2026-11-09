@@ -98,8 +98,15 @@ function storedRun(overrides: Partial<StoredRun> & Pick<StoredRun, 'id' | 'jobNa
   }
 }
 
+const unusedCollection = async () => assert.fail('job 경로 테스트는 수집 대기열을 읽으면 안 된다')
+
 async function startOpsApp(t: test.TestContext, store: OpsJobStore, logs: string[] = []) {
-  const app = await createOpsHttpApp({ jobs: store, writeAccessLog: (line) => logs.push(line) })
+  const app = await createOpsHttpApp({
+    jobs: store,
+    readQueueCounts: () => assert.fail('job 경로 테스트는 queue를 읽으면 안 된다'),
+    collection: { readSummary: unusedCollection, requeue: unusedCollection },
+    writeAccessLog: (line) => logs.push(line)
+  })
   t.after(() => app.close())
   await app.listen(0, '127.0.0.1')
   const origin = await app.getUrl()
@@ -402,9 +409,10 @@ test('공개 app에는 운영 경로가 없다', async (t) => {
   await app.listen(0, '127.0.0.1')
   const origin = await app.getUrl()
 
-  for (const path of ['/api/jobs', '/jobs']) {
+  for (const path of ['/api/jobs', '/jobs', '/api/queues', '/queues', '/api/collection']) {
     assert.equal((await fetch(`${origin}${path}`)).status, 404, path)
   }
-  const pause = await fetch(`${origin}/api/jobs/stats/pause`, json({}))
-  assert.equal(pause.status, 404)
+  for (const path of ['/api/jobs/stats/pause', '/api/collection/requeue']) {
+    assert.equal((await fetch(`${origin}${path}`, json({}))).status, 404, path)
+  }
 })
