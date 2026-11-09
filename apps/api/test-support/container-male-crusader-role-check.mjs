@@ -5,7 +5,8 @@ import {
   readFameRanking,
   readJobSkillAdoption,
   recordCharacterBasic,
-  recordCharacterSkillStyle
+  recordCharacterSkillStyle,
+  saveJobSkillAdoption
 } from '@dfragon/database'
 
 // 합성 캐릭터다. 직업, 전직 ID는 Neople /df/jobs의 프리스트(남), 프리스트(여)와 眞 크루세이더다.
@@ -142,7 +143,7 @@ try {
   const allAdoption = await readJobSkillAdoption(client, maleCrusader)
   assert.deepEqual([allAdoption.minFame, allAdoption.sampleSize], [280000, 3])
 
-  // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 query 검사, 응답 행의 role과 role별 캐시를 확인한다.
+  // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 query 검사, 응답 행의 role과 role별 저장분 읽기를 확인한다.
   const request = (path) => fetch(new URL(path, 'http://127.0.0.1:3000'))
   const get = async (path) => {
     const response = await request(path)
@@ -197,8 +198,20 @@ try {
     expectedRowRoles
   )
 
+  const computedAt = new Date('2026-11-09T15:00:00.000Z')
+  for (const [role, adoption] of [
+    ['dealer', dealerAdoption],
+    ['buffer', bufferAdoption],
+    [undefined, allAdoption]
+  ]) {
+    await saveJobSkillAdoption(client, { ...maleCrusader, role, computedAt, adoption })
+  }
   const skillStats = async (query) => {
-    const { computedAt, topCount, ...adoption } = await get(`/stats/skills?${query}`)
+    const {
+      computedAt: _computedAt,
+      topCount: _topCount,
+      ...adoption
+    } = await get(`/stats/skills?${query}`)
 
     return adoption
   }

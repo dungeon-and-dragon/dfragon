@@ -6,6 +6,10 @@ import {
   readFameRanking,
   recordCharacterBasic
 } from '@dfragon/database'
+import {
+  createCharacterStatsJob,
+  createDatabaseStatsJobStore
+} from './dist/ranking-stats/stats-jobs.js'
 
 // 합성 캐릭터다. 앞 단계가 넣은 행이 있어 통계는 넣기 전후의 차이로 확인한다.
 const jobId = 'synthetic-rank-job'
@@ -129,7 +133,7 @@ try {
     ]
   )
 
-  // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결과 하루 캐시까지 확인한다.
+  // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결과 저장분 읽기까지 확인한다.
   const get = async (path) => {
     const response = await fetch(new URL(path, 'http://127.0.0.1:3000'))
     assert.equal(response.status, 200, path)
@@ -144,7 +148,20 @@ try {
       [2, 'rank-b2']
     ]
   )
+  assert.deepEqual(await get('/stats'), {
+    total: 0,
+    servers: [],
+    jobs: [],
+    fameDistribution: [],
+    computedAt: null
+  })
+  const statsJob = createCharacterStatsJob(createDatabaseStatsJobStore(client))
+  await statsJob.run({}, { reportProgress: () => {} })
+  const { computedAt } = await client.characterStatsSnapshot.findUniqueOrThrow({
+    where: { id: 1 }
+  })
   const statsAnswer = await get('/stats')
+  assert.equal(statsAnswer.computedAt, computedAt.toISOString())
   assert.equal(statsAnswer.total, after.total)
   assert.deepEqual(
     statsAnswer.jobs
@@ -155,7 +172,8 @@ try {
       ['grow-a', 80000]
     ]
   )
-  await recordCharacterBasic(client, basic('cain', 'rank-after-cache', 'grow-a', 90000))
+  // 요청은 계산하지 않으므로 저장 뒤 더한 캐릭터는 다음 job 실행 전까지 응답에 들지 않는다.
+  await recordCharacterBasic(client, basic('cain', 'rank-after-snapshot', 'grow-a', 90000))
   assert.deepEqual(await get('/stats'), statsAnswer)
 } finally {
   await client.$disconnect()
