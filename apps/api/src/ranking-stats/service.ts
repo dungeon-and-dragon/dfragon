@@ -31,6 +31,17 @@ export interface RankingStatsService {
   skillStats(job: JobSkillAdoptionQuery): Promise<SkillStats>
 }
 
+export function roundAverageFame({ jobs, ...counts }: CharacterStats): CharacterStats {
+  return {
+    ...counts,
+    jobs: jobs.map(({ averageFame, ...job }) => {
+      const roundedFame = averageFame !== null ? Math.round(averageFame) : null
+
+      return { ...job, averageFame: roundedFame }
+    })
+  }
+}
+
 export function createRankingStatsService(
   reader: RankingStatsReader,
   now: () => Date = () => new Date()
@@ -40,14 +51,8 @@ export function createRankingStatsService(
 
   const load = async (): Promise<Stats> => {
     const computedAt = now()
-    const { jobs, ...counts } = await reader.readCharacterStats()
     const stats = {
-      ...counts,
-      jobs: jobs.map(({ averageFame, ...job }) => {
-        const roundedFame = averageFame !== null ? Math.round(averageFame) : null
-
-        return { ...job, averageFame: roundedFame }
-      }),
+      ...roundAverageFame(await reader.readCharacterStats()),
       computedAt: computedAt.toISOString()
     }
     // 자정 직전에 시작한 집계가 자정 뒤에 끝나도 다음 날 첫 요청이 다시 계산하도록 시작 시각으로 만료를 정한다.
