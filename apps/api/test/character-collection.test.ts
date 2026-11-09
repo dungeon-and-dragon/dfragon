@@ -175,7 +175,6 @@ test('목록 파일 여러 개를 대기열에 넣고 대기열이 빌 때까지
       },
       fetchBasic: async (character) => basicOf(character),
       store: memory.store,
-      requestIntervalMs: 0,
       concurrency: 1,
       report: (code, details) => reports.push([code, details?.count])
     }
@@ -228,7 +227,6 @@ test('Neople을 쓸 수 없으면 실패로 기록하지 않고 멈추며, 다�
       return basicOf(character)
     },
     store: memory.store,
-    requestIntervalMs: 0,
     concurrency: 1,
     report: (code) => reports.push(code)
   }
@@ -272,7 +270,6 @@ test('동시 처리 수만큼 기본 정보를 함께 받고 그 수를 넘지 �
       return basicOf(character)
     },
     store: memory.store,
-    requestIntervalMs: 0,
     concurrency: 3,
     report: () => {}
   })
@@ -302,7 +299,6 @@ test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저�
       return basicOf(character)
     },
     store: memory.store,
-    requestIntervalMs: 0,
     concurrency: 2,
     report: () => {}
   }
