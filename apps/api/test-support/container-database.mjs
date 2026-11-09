@@ -46,6 +46,9 @@ const skillAdoptionCheckPath = fileURLToPath(
 const maleCrusaderRoleCheckPath = fileURLToPath(
   new URL('./container-male-crusader-role-check.mjs', import.meta.url)
 )
+const statsSnapshotCheckPath = fileURLToPath(
+  new URL('./container-stats-snapshot-check.mjs', import.meta.url)
+)
 const contentClearCheckPath = fileURLToPath(
   new URL('./container-content-clear-check.mjs', import.meta.url)
 )
@@ -290,6 +293,8 @@ try {
         `type=bind,source=${maleCrusaderRoleCheckPath},target=/app/container-male-crusader-role-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${contentClearCheckPath},target=/app/container-content-clear-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${statsSnapshotCheckPath},target=/app/container-stats-snapshot-check.mjs,readonly`,
         imageId
       ])
     )
@@ -319,7 +324,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '10'
+    '11'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -646,6 +651,16 @@ try {
   )
   await psql('DELETE FROM character_stats')
 
+  stage = 'stats snapshot jobs'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-stats-snapshot-check.mjs'
+  ])
+
   stage = 'content clear records'
   await docker([
     'exec',
@@ -747,14 +762,14 @@ try {
         ).stdout.trim()
       ) > 0
   )
-  stage = 'character collector registers jobs and runs the missed cleanup once'
+  stage = 'character collector registers jobs and runs each missed job once'
   await waitFor(
     async () =>
       (
         await psql(
-          "SELECT count(*) FROM job_runs WHERE job_name = 'job-run-cleanup' AND trigger = 'catchup' AND status = 'succeeded'"
+          "SELECT count(*) FROM job_runs WHERE trigger = 'catchup' AND status IN ('succeeded', 'failed')"
         )
-      ).stdout.trim() === '1'
+      ).stdout.trim() === '3'
   )
   assert.equal(
     (
@@ -762,15 +777,32 @@ try {
         "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'content-clear-collection:0 6 * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false'
+    'character-stats:0 0 * * *:true:object:false,content-clear-collection:0 6 * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false'
   )
   assert.equal(
     (
       await psql(
-        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs"
+        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption')"
       )
     ).stdout.trim(),
     'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1}'
+  )
+  // 통계 저장분은 이번 실행이 시작한 뒤에 계산했고, 스킬 채택률 진행률은 전직 수만큼 끝까지 남는다.
+  assert.equal(
+    (
+      await psql(
+        "SELECT r.status || ':' || (s.computed_at >= r.started_at) FROM job_runs r, character_stats s WHERE r.job_name = 'character-stats'"
+      )
+    ).stdout.trim(),
+    'succeeded:true'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT status || ':' || (progress_done = progress_total) || ':' || (progress_total = (summary->>'jobGrows')::int) || ':' || (progress_total > 0) || ':' || (summary->>'deleted') FROM job_runs WHERE job_name = 'skill-adoption'"
+      )
+    ).stdout.trim(),
+    'succeeded:true:true:true:0'
   )
 
   stage = 'character collector runs requested jobs'
@@ -917,6 +949,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables, job run uniqueness, character collector job registration, requested runs, start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, HTTP and database input rejection\n'
   )
 }
