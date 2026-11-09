@@ -334,15 +334,31 @@ function countName(counts: Map<string, NameCount>, name: string): void {
   counts.set(name, counted)
 }
 
-function toRaidCountName({ name, modeName, hard }: TimelineClear): string {
+export function toRaidStageLabel({
+  modeName,
+  hard
+}: Pick<TimelineClear, 'modeName' | 'hard'>): string | null {
   if (modeName === null) {
-    return name
+    return null
+  }
+
+  const stageLabel = RAID_STAGE_LABELS.get(modeName)
+  if (stageLabel !== undefined) {
+    return stageLabel
   }
 
   const difficultyLabel = hard ? '하드' : '일반'
-  const label = RAID_STAGE_LABELS.get(modeName) ?? difficultyLabel
 
-  return `${name} (${label})`
+  return difficultyLabel
+}
+
+function toRaidCountName(clear: TimelineClear): string {
+  const label = toRaidStageLabel(clear)
+  if (label === null) {
+    return clear.name
+  }
+
+  return `${clear.name} (${label})`
 }
 
 function countRaid(counts: Map<string, RaidCount>, clear: TimelineClear): void {
