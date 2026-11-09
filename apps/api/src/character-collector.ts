@@ -5,7 +5,8 @@ import { writeAccessLogToStdout } from './access-log.js'
 import {
   createDatabaseCollectionStore,
   createDatabaseEnqueue,
-  createNeopleCharacterBasic
+  createNeopleCharacterBasic,
+  paceNeopleRequests
 } from './character-collection/adapters.js'
 import { readCollectorConfiguration } from './character-collection/configuration.js'
 import { runCollectionPass } from './character-collection/runner.js'
@@ -32,7 +33,11 @@ function report(code: string, details?: Readonly<Record<string, unknown>>): void
 async function main(): Promise<never> {
   const configuration = readCollectorConfiguration(process.env)
   const client = createDatabaseClient(configuration.database)
-  const fetchBasic = createNeopleCharacterBasic(createNeopleClient(configuration.apiKey))
+  const neople = paceNeopleRequests(
+    createNeopleClient(configuration.apiKey),
+    configuration.requestsPerSecond
+  )
+  const fetchBasic = createNeopleCharacterBasic(neople)
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
   await startJobScheduler({
@@ -48,7 +53,6 @@ async function main(): Promise<never> {
       enqueue,
       fetchBasic,
       store,
-      requestIntervalMs: 1000 / configuration.requestsPerSecond,
       concurrency: configuration.concurrency,
       report
     })

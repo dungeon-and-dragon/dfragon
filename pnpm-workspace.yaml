@@ -39,6 +39,7 @@ catalog:
   ky: 2.2.0
   lru-cache: 11.5.3
   onnxruntime-web: 1.31.1
+  p-throttle: 8.1.1
   pngjs: 7.0.0
   prisma: 7.10.1
   react: 19.3.1
