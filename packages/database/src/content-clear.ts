@@ -1,4 +1,5 @@
 import type { DatabaseClient } from './client.js'
+import { Prisma } from './generated/prisma/client.js'
 
 export const CLEAR_POPULATION_SIZE = 100_000
 
@@ -153,4 +154,131 @@ export function readClearPopulation(client: DatabaseClient): Promise<ClearPopula
     WHERE fame IS NOT NULL
     ORDER BY fame DESC, server_id, character_id
     LIMIT ${CLEAR_POPULATION_SIZE}`
+}
+
+export type StoredClearPopulation = {
+  contentId: string
+  weekStart: Date
+  population: number
+  minFame: number | null
+  jobs: ClearPopulationJob[]
+  collectedAt: Date
+  closed: boolean
+}
+
+export type ClearWeekRatioCount = {
+  contentId: string
+  weekStart: Date
+  ratio: number | null
+  cleared: number
+}
+
+export type ClearJobCount = {
+  jobId: string | null
+  jobGrowId: string | null
+  jobName: string | null
+  jobGrowName: string | null
+  cleared: number
+}
+
+export type ClearAdventureSize = {
+  characters: number
+  adventures: number
+}
+
+export type ClearWeekSelection = {
+  contentId: string
+  kind: ContentClearKind
+  weekStart: Date
+}
+
+// 수집은 클리어 기록을 다 저장한 뒤 모집단을 저장하므로, 모집단의 마지막 수집 시각이 바뀌면 집계가 바뀐 것이다.
+export async function readContentClearCollectedAt(client: DatabaseClient): Promise<Date | null> {
+  const [row] = await client.$queryRaw<{ collectedAt: Date | null }[]>`
+    SELECT max(collected_at) AS "collectedAt" FROM content_clear_populations`
+
+  if (row === undefined) {
+    return null
+  }
+
+  return row.collectedAt
+}
+
+export function readContentClearPopulations(
+  client: DatabaseClient
+): Promise<StoredClearPopulation[]> {
+  return client.$queryRaw<StoredClearPopulation[]>`
+    SELECT
+      content_id AS "contentId",
+      week_start AS "weekStart",
+      population,
+      min_fame AS "minFame",
+      jobs,
+      collected_at AS "collectedAt",
+      closed
+    FROM content_clear_populations
+    ORDER BY content_id, week_start`
+}
+
+// 챌린지는 캐릭터당 처음 깬 주의 한 행이라 주별 수는 그 주에 새로 깬 수다.
+export function readContentClearWeekRatioCounts(
+  client: DatabaseClient
+): Promise<ClearWeekRatioCount[]> {
+  return client.$queryRaw<ClearWeekRatioCount[]>`
+    SELECT
+      content_id AS "contentId",
+      week_start AS "weekStart",
+      ratio,
+      count(*)::int AS cleared
+    FROM content_clears
+    GROUP BY content_id, week_start, ratio
+    ORDER BY content_id, week_start, ratio NULLS FIRST`
+}
+
+// 레이드는 그 주에 깬 캐릭터, 챌린지는 출시부터 그 주 끝까지 깬 캐릭터를 센다.
+function selectedClearsSql({ contentId, kind, weekStart }: ClearWeekSelection): Prisma.Sql {
+  const week =
+    kind === 'challenge'
+      ? Prisma.sql`clear.week_start <= ${weekStart}`
+      : Prisma.sql`clear.week_start = ${weekStart}`
+
+  return Prisma.sql`clear.content_id = ${contentId} AND ${week}`
+}
+
+export function readContentClearJobCounts(
+  client: DatabaseClient,
+  selection: ClearWeekSelection
+): Promise<ClearJobCount[]> {
+  return client.$queryRaw<ClearJobCount[]>`
+    SELECT
+      c.job_id AS "jobId",
+      c.job_grow_id AS "jobGrowId",
+      c.job_name AS "jobName",
+      c.job_grow_name AS "jobGrowName",
+      count(*)::int AS cleared
+    FROM content_clears clear
+    LEFT JOIN characters c
+      ON c.server_id = clear.server_id AND c.character_id = clear.character_id
+    WHERE ${selectedClearsSql(selection)}
+    GROUP BY c.job_id, c.job_grow_id, c.job_name, c.job_grow_name`
+}
+
+// 캐릭터 행이 없는 클리어는 혼자인 모험단으로 세어 분포의 캐릭터 합이 클리어 수와 같게 한다.
+export function readContentClearAdventureSizes(
+  client: DatabaseClient,
+  selection: ClearWeekSelection
+): Promise<ClearAdventureSize[]> {
+  return client.$queryRaw<ClearAdventureSize[]>`
+    SELECT characters, count(*)::int AS adventures
+    FROM (
+      SELECT count(*)::int AS characters
+      FROM content_clears clear
+      LEFT JOIN characters c
+        ON c.server_id = clear.server_id AND c.character_id = clear.character_id
+      LEFT JOIN adventures a ON a.id = c.adventure_id
+      WHERE ${selectedClearsSql(selection)}
+      GROUP BY coalesce('adventure/' || a.name, 'character/' || clear.server_id || '/' || clear.character_id)
+    ) adventure
+    GROUP BY characters
+    ORDER BY characters`
 }
