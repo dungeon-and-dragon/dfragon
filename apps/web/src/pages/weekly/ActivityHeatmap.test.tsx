@@ -142,6 +142,62 @@ function tab(label: string): HTMLButtonElement {
   )!
 }
 
+function tabLabels(): string[] {
+  return [...container.querySelectorAll('[role="tab"]')].map((element) => element.textContent ?? '')
+}
+
+it.each([5, 6, 7, 8, 9, 10, 11])(
+  '시즌 %i의 히트맵은 해당 시즌에 있는 활동 탭만 보인다',
+  async (id) => {
+    await render(
+      { getAdventureActivity: async () => ({ ...activity, season: { ...activity.season!, id } }) },
+      id
+    )
+
+    expect(tabLabels()).toEqual(
+      id <= 7
+        ? ['전체', '레이드', '아이템', '강화']
+        : ['전체', '레이드', '레기온', '아이템', '강화']
+    )
+  }
+)
+
+it('레기온을 고른 뒤 시즌 7로 바꾸면 전체로 돌아가고 다시 시즌 11로 바꿔도 유지한다', async () => {
+  const oldSeason = Promise.withResolvers<AdventureActivity>()
+  const host = {
+    getAdventureActivity: async (_name: string, season: number | undefined) =>
+      season === 7 ? oldSeason.promise : activity
+  }
+  await render(host, 11)
+  await act(async () => tab('레기온').click())
+  expect(tab('레기온').getAttribute('aria-selected')).toBe('true')
+
+  await render(host, 7)
+  await act(async () => oldSeason.resolve({ ...activity, season: { ...activity.season!, id: 7 } }))
+  expect(tabLabels()).toEqual(['전체', '레이드', '아이템', '강화'])
+  expect(tab('전체').getAttribute('aria-selected')).toBe('true')
+  expect(cellLabels()).toEqual(['4월 2일 활동 12', '4월 3일 활동 3'])
+
+  await render(host, 11)
+  expect(tab('전체').getAttribute('aria-selected')).toBe('true')
+  expect(tab('레기온').getAttribute('aria-selected')).toBe('false')
+})
+
+it('시즌 7을 받는 중에 이전 시즌으로 돌아가도 레기온 선택을 복원하지 않는다', async () => {
+  const oldSeason = Promise.withResolvers<AdventureActivity>()
+  const host = {
+    getAdventureActivity: async (_name: string, season: number | undefined) =>
+      season === 7 ? oldSeason.promise : activity
+  }
+  await render(host, 11)
+  await act(async () => tab('레기온').click())
+  await render(host, 7)
+  await render(host, 11)
+
+  expect(tab('전체').getAttribute('aria-selected')).toBe('true')
+  expect(tab('레기온').getAttribute('aria-selected')).toBe('false')
+})
+
 function cell(label: string): HTMLElement {
   return container.querySelector<HTMLElement>(`[role="img"][aria-label^="${label}"]`)!
 }

@@ -215,6 +215,55 @@ function heroBusy(): string | null | undefined {
   return container.querySelector('h1')?.closest('[aria-busy]')?.getAttribute('aria-busy')
 }
 
+function summaryLabels(): string[] {
+  const hero = container.querySelector('h1')?.closest('[aria-busy]')
+  const labels = ['레이드', '레기온', '아이템', '강화']
+
+  return [...(hero?.querySelectorAll('span') ?? [])]
+    .map((element) => element.textContent ?? '')
+    .filter((text) => labels.includes(text))
+}
+
+it.each([5, 6, 7, 8, 9, 10, 11])('시즌 %i의 요약은 해당 시즌에 있는 활동만 보인다', async (id) => {
+  const selected = {
+    ...currentSeason,
+    season: { ...currentSeason.season!, id },
+    summary: { ...currentSeason.summary, legions: [] }
+  }
+  await render(async () => selected, id)
+
+  expect(summaryLabels()).toEqual(
+    id <= 7 ? ['레이드', '아이템', '강화'] : ['레이드', '레기온', '아이템', '강화']
+  )
+  const values = [...container.querySelectorAll<HTMLElement>('[tabindex="0"] b')].map(
+    (element) => element.textContent
+  )
+  expect(values).toEqual(id <= 7 ? ['1,203', '14', '40'] : ['1,203', '0', '14', '40'])
+})
+
+it.each([7, 8])('시즌 %i를 받는 동안에도 해당 시즌의 요약 라벨을 보인다', async (id) => {
+  const loaded = Promise.withResolvers<AdventureActivity>()
+  await render(() => loaded.promise, id)
+
+  expect(heroBusy()).toBe('true')
+  expect(summaryLabels()).toEqual(
+    id === 7 ? ['레이드', '아이템', '강화'] : ['레이드', '레기온', '아이템', '강화']
+  )
+})
+
+it('시즌 11에서 시즌 7로 바꾸고 받는 동안 이전 시즌 대신 세 라벨을 보인다', async () => {
+  const loaded = Promise.withResolvers<AdventureActivity>()
+  const getAdventureActivity = vi
+    .fn<ClientHost['getAdventureActivity']>()
+    .mockResolvedValueOnce(currentSeason)
+    .mockReturnValueOnce(loaded.promise)
+  await render(getAdventureActivity, 11)
+  await render(getAdventureActivity, 7)
+
+  expect(heroBusy()).toBe('true')
+  expect(summaryLabels()).toEqual(['레이드', '아이템', '강화'])
+})
+
 it('시즌을 고르지 않으면 지금 시즌을 받아 모험단 이름 위에 다른 글자 없이 시즌 이름, 시작일과 요약 숫자 4개를 보인다', async () => {
   vi.useFakeTimers({ toFake: ['Date'], now: Date.parse('2026-11-08T03:00:00.000Z') })
   try {
