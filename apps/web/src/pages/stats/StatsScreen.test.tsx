@@ -269,6 +269,20 @@ it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
   expect(boxOf('서버 인구').textContent).toBe('서버 인구')
 })
 
+it('집계 시각이 null인 빈 통계는 마지막 업데이트 없이 표시한다', async () => {
+  await render(async () => ({
+    computedAt: null,
+    total: 0,
+    servers: [],
+    jobs: [],
+    fameDistribution: []
+  }))
+
+  expect(container.querySelector('header')?.textContent).toBe('캐릭터 통계캐릭터0')
+  expect(container.querySelector('header time')).toBeNull()
+  expect(container.querySelector('[role="alert"]')).toBeNull()
+})
+
 it('조회가 실패하면 오류를 알린다', async () => {
   await render(async () => {
     throw new Error('통계를 받지 못했습니다.')
