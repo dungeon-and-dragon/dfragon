@@ -159,3 +159,34 @@ model ContentClearPopulation {
   @@id([contentId, weekStart])
   @@map("content_clear_populations")
 }
+
+model Job {
+  name          String    @id
+  displayName   String    @map("display_name")
+  schedule      String?
+  argsSchema    Json      @map("args_schema")
+  delayMinutes  Int       @map("delay_minutes")
+  pausedAt      DateTime? @map("paused_at") @db.Timestamptz(3)
+  nextRunAt     DateTime? @map("next_run_at") @db.Timestamptz(3)
+  workerSeenAt  DateTime  @map("worker_seen_at") @db.Timestamptz(3)
+
+  @@map("jobs")
+}
+
+model JobRun {
+  id            Int       @id @default(autoincrement())
+  jobName       String    @map("job_name")
+  trigger       String
+  status        String
+  args          Json
+  requestedAt   DateTime  @default(now()) @map("requested_at") @db.Timestamptz(3)
+  startedAt     DateTime? @map("started_at") @db.Timestamptz(3)
+  finishedAt    DateTime? @map("finished_at") @db.Timestamptz(3)
+  progressDone  Int?      @map("progress_done")
+  progressTotal Int?      @map("progress_total")
+  summary       Json?
+  error         Json?
+
+  @@index([jobName, requestedAt(sort: Desc)])
+  @@map("job_runs")
+}
