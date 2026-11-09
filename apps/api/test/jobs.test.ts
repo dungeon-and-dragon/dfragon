@@ -8,6 +8,7 @@ import type {
   JobTrigger
 } from '@dfragon/database'
 import { z } from 'zod'
+import { type JobAlert, createDiscordJobAlert } from '../src/jobs/alert.js'
 import {
   type JobDefinition,
   type JobStore,
@@ -59,8 +60,14 @@ function memoryJobStore({ paused = [] as string[] } = {}) {
         .filter((run) => run.status === 'running')
         .map((run) => {
           run.status = 'interrupted'
+          assert(run.startedAt)
 
-          return { id: run.id, jobName: run.jobName }
+          return {
+            id: run.id,
+            jobName: run.jobName,
+            trigger: run.trigger,
+            startedAt: run.startedAt
+          }
         }),
     isPaused: async (name) => pausedJobs.has(name),
     readLastScheduledSuccess: async (name) =>
@@ -121,6 +128,17 @@ function emptyRun(jobName: string, trigger: JobTrigger, args: unknown): Omit<Sto
     progress: null,
     summary: null,
     error: null
+  }
+}
+
+function recordedAlerts() {
+  const alerts: JobAlert[] = []
+
+  return {
+    alerts,
+    alert: async (jobAlert: JobAlert) => {
+      alerts.push(jobAlert)
+    }
   }
 }
 
@@ -365,4 +383,153 @@ test('요청 행은 running을 거쳐 succeeded가 되고, schema에 맞지 않�
       { jobName: 'daily', status: 'failed', summary: null, errorCodes: ['INVALID_JOB_ARGS'] }
     ]
   )
+})
+
+test('실패한 실행만 job 이름, 계기, 오류 name과 code로 실패 알림을 한 번 보낸다', async () => {
+  const { store } = memoryJobStore()
+  const { report } = recordedEvents()
+  const { alerts, alert } = recordedAlerts()
+
+  await runScheduledJob(failingJob, 'catchup', { store, report, alert })
+  await runScheduledJob(dailyJob, 'schedule', { store, report, alert })
+
+  assert.deepEqual(
+    alerts.map(({ kind, job, trigger, errorChain }) => ({
+      kind,
+      job,
+      trigger,
+      errors: errorChain?.map(({ name, code }) => ({ name, code }))
+    })),
+    [
+      {
+        kind: 'failed',
+        job: 'failing',
+        trigger: 'catchup',
+        errors: [{ name: 'SyntheticFailure', code: 'SYNTHETIC_FAILURE' }]
+      }
+    ]
+  )
+})
+
+test('시작할 때 interrupted로 바꾼 실행마다 중단 알림을 보낸다', async () => {
+  const { store, seed } = memoryJobStore()
+  const { report } = recordedEvents()
+  const { alerts, alert } = recordedAlerts()
+  seed({
+    ...emptyRun(dailyJob.name, 'schedule', {}),
+    status: 'running',
+    startedAt: new Date(now.getTime() - 90_000)
+  })
+  seed({ ...emptyRun(dailyJob.name, 'manual', {}), status: 'succeeded', startedAt: now })
+
+  await registerWorkerJobs({ jobs: [dailyJob], store, report, alert }, now)
+
+  assert.deepEqual(alerts, [
+    { kind: 'interrupted', job: 'daily', trigger: 'schedule', elapsedMs: 90_000 }
+  ])
+})
+
+test('지연 기준 전에 끝난 실행은 지연 알림을 보내지 않는다', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] })
+  const { store } = memoryJobStore()
+  const { report } = recordedEvents()
+  const { alerts, alert } = recordedAlerts()
+
+  await runScheduledJob(dailyJob, 'schedule', { store, report, alert })
+  t.mock.timers.tick(30 * 60_000)
+
+  assert.deepEqual(alerts, [])
+})
+
+test('지연 기준을 넘겨도 실행 중이면 지연 알림을 그 실행에 한 번만 보낸다', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] })
+  const { store } = memoryJobStore()
+  const { report } = recordedEvents()
+  const { alerts, alert } = recordedAlerts()
+  let resolve = () => {}
+  const finish = new Promise<void>((settle) => {
+    resolve = settle
+  })
+  const slowJob = defineJob({
+    name: 'slow',
+    displayName: '느림',
+    argsSchema: z.object({}),
+    delayMinutes: 5,
+    run: async () => {
+      await finish
+
+      return undefined
+    }
+  })
+  const id = await store.startRun(slowJob.name, 'schedule')
+  assert(id !== undefined)
+
+  const running = executeJobRun(
+    slowJob,
+    { id, trigger: 'schedule', args: {} },
+    {
+      store,
+      report,
+      alert
+    }
+  )
+  t.mock.timers.tick(5 * 60_000)
+  t.mock.timers.tick(30 * 60_000)
+  resolve()
+  await running
+
+  assert.deepEqual(alerts, [
+    { kind: 'delayed', job: 'slow', trigger: 'schedule', elapsedMs: 5 * 60_000 }
+  ])
+})
+
+test('알림 전송이 실패해도 실행의 상태와 이력은 그대로이고 전송 실패만 로그로 남긴다', async () => {
+  const { store, runs } = memoryJobStore()
+  const { events, report } = recordedEvents()
+  const brokenAlert = async () => {
+    throw new SyntheticFailure()
+  }
+
+  await runScheduledJob(failingJob, 'catchup', { store, report, alert: brokenAlert })
+
+  assert.deepEqual(
+    runs.map(({ status, error }) => ({ status, errorCodes: error?.map(({ code }) => code) })),
+    [{ status: 'failed', errorCodes: ['SYNTHETIC_FAILURE'] }]
+  )
+  assert.deepEqual(
+    events.map(({ code }) => code),
+    ['JOB_RUN_STARTED', 'JOB_RUN_FAILED', 'JOB_ALERT_FAILED']
+  )
+})
+
+test('Discord 알림 본문에는 오류 message와 실행 인자가 없다', async () => {
+  const { store, request } = memoryJobStore()
+  const { report } = recordedEvents()
+  const bodies: unknown[] = []
+  // 실제 Discord로 보내지 않는 가짜 fetch이며 URL은 합성 값이다.
+  const fakeFetch: typeof fetch = async (input, init) => {
+    bodies.push(await new Request(input, init).json())
+
+    return new Response(null, { status: 204 })
+  }
+  const alert = createDiscordJobAlert('https://discord.test/api/webhooks/synthetic', fakeFetch)
+  const argumentJob = defineJob({
+    name: 'with-args',
+    displayName: '인자',
+    argsSchema: z.object({ target: z.string() }),
+    delayMinutes: 5,
+    run: async () => {
+      throw new SyntheticFailure()
+    }
+  })
+  request(argumentJob.name, { target: 'synthetic-argument-value' })
+
+  await runRequestedJobs({ jobs: [argumentJob], store, report, alert })
+
+  assert.equal(bodies.length, 1)
+  const serialized = JSON.stringify(bodies[0])
+  assert.match(serialized, /with-args/)
+  assert.match(serialized, /manual/)
+  assert.match(serialized, /SyntheticFailure\(SYNTHETIC_FAILURE\)/)
+  assert.doesNotMatch(serialized, /synthetic message|synthetic-argument-value/)
 })
