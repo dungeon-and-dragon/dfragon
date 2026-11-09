@@ -679,6 +679,13 @@ try {
     )
   )
   await psql('DELETE FROM job_runs')
+  // 시작한 worker가 interrupted로 바꿀 행과, 이력 정리 job이 지울 90일 지난 행과 남길 행이다.
+  await psql(
+    [
+      "INSERT INTO job_runs (job_name, trigger, status, args, started_at) VALUES ('job-run-cleanup', 'schedule', 'running', '{}', now())",
+      "INSERT INTO job_runs (job_name, trigger, status, args, finished_at) VALUES ('expired-probe', 'manual', 'succeeded', '{}', now() - interval '91 days'), ('kept-probe', 'manual', 'succeeded', '{}', now() - interval '89 days')"
+    ].join('; ')
+  )
 
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
@@ -717,6 +724,54 @@ try {
           )
         ).stdout.trim()
       ) > 0
+  )
+  stage = 'character collector registers jobs and runs the missed cleanup once'
+  await waitFor(
+    async () =>
+      (
+        await psql(
+          "SELECT count(*) FROM job_runs WHERE job_name = 'job-run-cleanup' AND trigger = 'catchup' AND status = 'succeeded'"
+        )
+      ).stdout.trim() === '1'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') FROM jobs"
+      )
+    ).stdout.trim(),
+    'job-run-cleanup:0 4 * * *:true:object'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs"
+      )
+    ).stdout.trim(),
+    'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1}'
+  )
+
+  stage = 'character collector runs requested jobs'
+  const requestCleanup = async (args) => {
+    await psql(
+      `INSERT INTO job_runs (job_name, trigger, status, args) VALUES ('job-run-cleanup', 'manual', 'requested', '${args}')`
+    )
+    await waitFor(
+      async () =>
+        (
+          await psql("SELECT count(*) FROM job_runs WHERE status IN ('requested', 'running')")
+        ).stdout.trim() === '0'
+    )
+  }
+  await requestCleanup('[]')
+  await requestCleanup('{}')
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(status || ':' || coalesce(error->0->>'code', '-') || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE trigger = 'manual' AND job_name = 'job-run-cleanup'"
+      )
+    ).stdout.trim(),
+    'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0}'
   )
   assert.equal(
     (await docker(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
@@ -840,6 +895,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, job run uniqueness, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, job run uniqueness, character collector job registration, requested runs, start and stop, HTTP and database input rejection\n'
   )
 }
