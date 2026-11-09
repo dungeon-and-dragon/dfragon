@@ -99,7 +99,7 @@ it('지금 항목이 바뀌면 메뉴의 밑줄 하나가 새 항목 아래로 �
 
   expect(adventures.getAttribute('aria-current')).toBe('page')
   expect(underlines()).toHaveLength(1)
-  expect(underline()).toEqual({ left: '270px', width: '85px', visibility: 'visible' })
+  expect(underline()).toEqual({ left: '360px', width: '90px', visibility: 'visible' })
 })
 
 it('메뉴에 없는 화면에서는 밑줄을 숨기고, 메뉴 항목 화면으로 오면 그 항목 아래에 다시 보인다', async () => {
@@ -125,6 +125,7 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
 
   expect(container.querySelector('form[role="search"]')).toBeNull()
   expect(menuLinks().map((link) => link.getAttribute('aria-current'))).toEqual([
+    null,
     null,
     null,
     null,
