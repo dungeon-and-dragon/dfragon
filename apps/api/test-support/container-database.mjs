@@ -564,6 +564,23 @@ try {
     '/app/container-adventure-guild-check.mjs'
   ])
 
+  stage = 'stats snapshot tables'
+  // 통계 저장분은 한 행만 두고, 스킬 채택률의 역할은 전체, 딜러, 버퍼만 받는다.
+  await psql(
+    "INSERT INTO character_stats (id, computed_at, total, servers, jobs, fame_distribution) VALUES (1, now(), 0, '[]', '[]', '[]')"
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO character_stats (id, computed_at, total, servers, jobs, fame_distribution) VALUES (2, now(), 0, '[]', '[]', '[]')"
+    )
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO job_skill_adoption (job_id, job_grow_id, role, computed_at, sample_size, skills, evolutions, enhancements) VALUES ('probe-job', 'probe-grow', 'unknown', now(), 0, '[]', '[]', '[]')"
+    )
+  )
+  await psql('DELETE FROM character_stats')
+
   stage = 'fame ranking and stats reads'
   assert.equal(
     (
@@ -633,23 +650,6 @@ try {
     'node',
     '/app/container-male-crusader-role-check.mjs'
   ])
-
-  stage = 'stats snapshot tables'
-  // 통계 저장분은 한 행만 두고, 스킬 채택률의 역할은 전체, 딜러, 버퍼만 받는다.
-  await psql(
-    "INSERT INTO character_stats (id, computed_at, total, servers, jobs, fame_distribution) VALUES (1, now(), 0, '[]', '[]', '[]')"
-  )
-  await assert.rejects(
-    psql(
-      "INSERT INTO character_stats (id, computed_at, total, servers, jobs, fame_distribution) VALUES (2, now(), 0, '[]', '[]', '[]')"
-    )
-  )
-  await assert.rejects(
-    psql(
-      "INSERT INTO job_skill_adoption (job_id, job_grow_id, role, computed_at, sample_size, skills, evolutions, enhancements) VALUES ('probe-job', 'probe-grow', 'unknown', now(), 0, '[]', '[]', '[]')"
-    )
-  )
-  await psql('DELETE FROM character_stats')
 
   stage = 'stats snapshot jobs'
   await docker([
