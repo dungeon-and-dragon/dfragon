@@ -27,6 +27,7 @@ import { useHeatmapTooltipSlide } from './animations/useHeatmapTooltipSlide'
 import { useHeatmapWheelScroll } from './animations/useHeatmapWheelScroll'
 import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
+import { seasonHasLegion } from './season-legion'
 
 const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: string }>[] = [
   { kind: 'all', label: '전체', cellLabel: '활동' },
@@ -349,6 +350,13 @@ export function ActivityHeatmap({
   const [kind, setKind] = useState<ActivityKind>('all')
   const [now] = useState(Date.now)
   const result = useAdventureActivity(adventureName, season)
+  const loadedSeasonId = result.status === 'success' ? result.value.season?.id : undefined
+  const seasonId = season ?? loadedSeasonId
+  const hasLegion = seasonHasLegion(seasonId)
+  if (!hasLegion && kind === 'legion') {
+    setKind('all')
+  }
+
   if (result.status === 'error') {
     return null
   }
@@ -362,6 +370,7 @@ export function ActivityHeatmap({
   if (range === null) {
     return null
   }
+  const kinds = hasLegion ? KINDS : KINDS.filter(({ kind: entryKind }) => entryKind !== 'legion')
 
   function handleValueChange(value: unknown): void {
     if (isActivityKind(value)) {
@@ -377,7 +386,7 @@ export function ActivityHeatmap({
       render={<section aria-label="시즌 활동" />}
       {...stylex.props(styles.box)}
     >
-      {KINDS.map(({ kind: panelKind }) => (
+      {kinds.map(({ kind: panelKind }) => (
         <Tabs.Panel key={panelKind} value={panelKind} {...stylex.props(styles.panel)}>
           <HeatmapPanel
             adventureName={adventureName}
@@ -389,7 +398,7 @@ export function ActivityHeatmap({
         </Tabs.Panel>
       ))}
       <Tabs.List aria-label="활동 종류" {...stylex.props(styles.tabs)}>
-        {KINDS.map(({ kind: tabKind, label }) => (
+        {kinds.map(({ kind: tabKind, label }) => (
           <Tabs.Tab key={tabKind} value={tabKind} {...stylex.props(styles.tab)}>
             {label}
           </Tabs.Tab>

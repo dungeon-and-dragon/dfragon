@@ -8,6 +8,7 @@ import { findSeasonRaidBackground } from '../../lib/season-raid-background'
 import { ActivitySummary, ActivitySummarySkeleton } from './ActivitySummary'
 import { styles } from './AdventureDashboard.style'
 import { seasonPeriod } from './season-format'
+import { seasonHasLegion } from './season-legion'
 import { SeasonTimeline } from './SeasonTimeline'
 
 type Backdrop = Readonly<{ url: string | undefined; previous: string | undefined; fading: boolean }>
@@ -74,6 +75,7 @@ function DashboardHero({
     season !== undefined
       ? seasonPeriod(season.startsAt, activity?.seasons[seasonIndex + 1]?.startsAt, now)
       : undefined
+  const hasLegion = seasonHasLegion(seasonId)
 
   return (
     <div aria-busy={!settled} {...stylex.props(styles.hero)}>
@@ -95,13 +97,13 @@ function DashboardHero({
           </div>
         )}
         {settled && activity !== undefined ? (
-          <ActivitySummary summary={activity.summary} />
+          <ActivitySummary summary={activity.summary} hasLegion={hasLegion} />
         ) : (
           <>
             <span role="status" {...stylex.props(shapes.srOnly)}>
               시즌 활동을 받는 중입니다.
             </span>
-            <ActivitySummarySkeleton />
+            <ActivitySummarySkeleton hasLegion={hasLegion} />
           </>
         )}
       </div>
