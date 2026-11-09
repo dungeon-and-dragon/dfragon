@@ -58,6 +58,8 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `timeline_items`: 코드 4xx, 5xx, 55x, 6xx 타임라인. 시즌별 range partition `timeline_items_season_<시즌 id>`입니다
 - `timeline_sync_state`: 캐릭터별 동기화, 강화 백필 위치
 - `timeline_season_backfill`: 캐릭터와 시즌별 옛 시즌 받기 위치
+- `jobs`: worker가 시작할 때 올린 배치 job 목록
+- `job_runs`: 배치 job 실행 한 번이 한 행인 실행 이력
 
 ## 검증
 
