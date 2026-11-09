@@ -32,7 +32,6 @@ import { syncCharacterTimeline } from '../characters/timeline/sync.js'
 import { createNeopleShopGrade } from '../today-grade/neople.js'
 import {
   readAdventureActivity,
-  readAdventureActivityDay,
   readAdventureSeasonDays,
   readAdventureSeasonBackfill
 } from '../adventure-guild/activity.js'
@@ -88,8 +87,6 @@ function createDatabaseSubscribers(
         readAdventureWeeklyClears(client, adventureName, new Date()),
       readAdventureActivity: (adventureName, seasonId) =>
         readAdventureActivity(client, adventureName, seasonId, new Date()),
-      readAdventureActivityDay: (adventureName, day) =>
-        readAdventureActivityDay(client, adventureName, day),
       readAdventureSeasonDays: (adventureName, seasonId) =>
         readAdventureSeasonDays(client, adventureName, seasonId, new Date()),
       readAdventureSeasonBackfill: (adventureName, seasonId) =>

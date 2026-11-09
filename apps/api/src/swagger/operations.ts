@@ -302,28 +302,6 @@ export function ApiAdventureSeasonDays() {
   )
 }
 
-export function ApiAdventureActivityDay() {
-  return applyDecorators(
-    ApiOperation({
-      summary: '모험단 하루 활동 상세 조회',
-      description:
-        '공개 API. DB에 저장된 그 모험단 캐릭터의 타임라인에서 하루(그날 06:00 KST부터 다음 날 06:00 KST 전까지)의 레이드, 레기온 이름별 클리어 수와 레전더리 이상 아이템 획득, 강화, 증폭, 재련 기록을 시각 순으로 모두 반환합니다. 기준은 모험단 시즌 활동 조회의 days와 같고, 강화 target은 타임라인의 after(도전한 단계)입니다. 동기화는 걸지 않아 응답은 지금 저장된 값입니다. DB에 없는 모험단과 DB 설정이 없는 API는 빈 목록을 줍니다.'
-    }),
-    ApiParam({
-      name: 'adventureName',
-      schema: { type: 'string' },
-      description: 'URL 인코딩한 모험단 이름'
-    }),
-    ApiParam({
-      name: 'date',
-      schema: { type: 'string', format: 'date' },
-      description: '06:00 KST에 바뀌는 하루의 날짜(YYYY-MM-DD)'
-    }),
-    success('AdventureActivityDay', '그날의 클리어 수와 아이템, 강화 기록'),
-    errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
-  )
-}
-
 const maleCrusaderRoleQuery = ApiQuery({
   name: 'role',
   required: false,
