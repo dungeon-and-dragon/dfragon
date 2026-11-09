@@ -1,10 +1,11 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { RelativeTime } from '../../components/RelativeTime'
+import { Columns } from '../../components/chart/Columns'
+import { type Bar, type BarTone, RowBars } from '../../components/chart/RowBars'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useCharacterStats } from '../../hooks/useCharacterStats'
-import { type Bar, FameColumns, RowBars } from './BarCharts'
 import { styles } from './StatsScreen.style'
 import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from './stats-bars'
 
@@ -49,7 +50,7 @@ export function StatsScreen(): React.JSX.Element {
             <StatBox name="서버 인구" bars={serverBars(stats)} />
             <FameBox bars={fameBars(stats)} />
             <StatBox name="직업 분포" bars={jobBars(stats)} />
-            <StatBox name="직업별 평균 명성" bars={averageFameBars(stats)} />
+            <StatBox name="직업별 평균 명성" bars={averageFameBars(stats)} tone="fame" />
           </div>
         </div>
       )
@@ -57,16 +58,31 @@ export function StatsScreen(): React.JSX.Element {
   }
 }
 
-function StatBox({ name, bars }: { name: string; bars: readonly Bar[] }): React.JSX.Element {
+function StatBox({
+  name,
+  bars,
+  tone
+}: {
+  name: string
+  bars: readonly Bar[]
+  tone?: BarTone
+}): React.JSX.Element {
   if (bars.length === 0) {
     return <ListBox name={name} />
   }
 
   return (
     <ListBox name={name}>
-      <RowBars bars={bars} />
+      <RowBars bars={bars} tone={tone} />
     </ListBox>
   )
+}
+
+function fameGroupsOf(bars: readonly FameBar[]): FameBar[][] {
+  const coarse = bars.filter(({ fine }) => !fine)
+  const fine = bars.filter(({ fine }) => fine)
+
+  return [coarse, fine].filter((group) => group.length > 0)
 }
 
 function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
@@ -76,7 +92,7 @@ function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
 
   return (
     <ListBox name="명성 분포">
-      <FameColumns bars={bars} />
+      <Columns groups={fameGroupsOf(bars)} />
     </ListBox>
   )
 }
