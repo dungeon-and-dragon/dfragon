@@ -1,7 +1,7 @@
 import { formatJobName } from '#core/character/job-format'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterStats } from '#core/ranking/ranking-stats'
-import type { Bar } from './BarCharts'
+import type { Bar } from '../../components/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
 
