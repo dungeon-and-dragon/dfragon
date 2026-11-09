@@ -196,6 +196,14 @@ it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최�
   })
 })
 
+it('겹치는 전직은 캐릭터 상세 요약에 성별을 보인다', async () => {
+  await render(async () =>
+    detailOf({ character: { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' } })
+  )
+
+  expect(textLines()[1]).toBe('바칼넨마스터 (여)Lv.115')
+})
+
 it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {
   await render(async () => detailOf())
 
