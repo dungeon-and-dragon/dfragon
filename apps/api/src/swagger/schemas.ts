@@ -3,6 +3,7 @@ import { LEGION_RELEASE_ORDER, RAID_RELEASE_ORDER } from '../adventure-guild/act
 import { CHARACTER_ID_PATTERN_SOURCE } from '../characters/identity.js'
 import { characterDetailSections } from '../characters/details/sections.js'
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
+import { CLEAR_CONTENTS } from '../content-clears/contents.js'
 
 const text: SchemaObject = { type: 'string' }
 const timestamp: SchemaObject = { type: 'string', format: 'date-time' }
@@ -187,6 +188,47 @@ const storedCharacterProperties: Record<string, SchemaObject> = {
 }
 const storedCharacter = object(storedCharacterProperties)
 const characterCount: SchemaObject = { type: 'integer', minimum: 0 }
+const clearContentHeader = {
+  id: { type: 'string', enum: CLEAR_CONTENTS.map(({ id }) => id) },
+  kind: { type: 'string', enum: ['raid', 'challenge'] },
+  name: text,
+  releasedAt: { ...timestamp, description: '출시 시각' },
+  latest: { type: 'boolean', description: '종류별 최신 컨텐츠 여부' }
+} satisfies Record<string, SchemaObject>
+const clearWeek = object({
+  weekStart: {
+    type: 'string',
+    format: 'date',
+    description: '목요일 06:00 KST에 시작하는 주의 첫날'
+  },
+  closed: { type: 'boolean', description: '주를 마감해 값이 더 바뀌지 않는지 여부' },
+  collectedAt: { ...timestamp, description: '이 주 모집단을 마지막으로 저장한 시각' },
+  population: { ...characterCount, description: '모집단 캐릭터 수' },
+  minFame: { type: 'integer', nullable: true, description: '모집단의 최저 명성' },
+  cleared: {
+    ...characterCount,
+    description: '레이드는 그 주에 깬 캐릭터 수, 챌린지는 출시부터 그 주 끝까지 깬 누적 수'
+  },
+  newlyCleared: {
+    ...characterCount,
+    nullable: true,
+    description: '챌린지를 그 주에 처음 깬 캐릭터 수. 레이드는 null'
+  },
+  ratios: {
+    type: 'array',
+    description:
+      '배율별 클리어 캐릭터 수. 합은 cleared와 같고 배율 없는 클리어(ratio null)가 먼저, 그 뒤 배율이 낮은 순입니다. 레이드는 그 주 첫 클리어의 배율로 셉니다.',
+    items: object({
+      ratio: { type: 'integer', nullable: true, description: '100에 더하는 퍼센트. 50이면 150%' },
+      cleared: characterCount
+    })
+  }
+})
+const clearWeeks: SchemaObject = {
+  type: 'array',
+  description: '모집단을 저장한 주. 이른 순이며 수집 기록이 없으면 빈 배열입니다.',
+  items: clearWeek
+}
 const clearName = object({
   kind: timelineClearKind,
   name: { ...text, description: '레이드는 raid_name, 레기온은 data.regionName' }
@@ -592,6 +634,43 @@ export const apiSchemas: Record<string, SchemaObject> = {
       items: object({
         rank: { type: 'integer', minimum: 1, description: '1부터 매긴 순서' },
         ...storedCharacterProperties
+      })
+    }
+  }),
+  ClearStats: object({
+    contents: {
+      type: 'array',
+      description: '집계 대상 컨텐츠. 코드에 둔 목록 순서입니다.',
+      items: object({ ...clearContentHeader, weeks: clearWeeks })
+    }
+  }),
+  ClearContentStats: object({
+    ...clearContentHeader,
+    week: {
+      ...clearWeek,
+      nullable: true,
+      description: '고른 주의 요약. 모집단을 저장한 주가 없으면 null'
+    },
+    jobs: {
+      type: 'array',
+      description:
+        '직업, 전직별 모집단 수와 클리어 수. 순서는 정하지 않습니다. 모집단에 없는 전직의 클리어는 population 0으로 넣어 cleared의 합이 week.cleared와 같습니다.',
+      items: object({
+        jobId: { ...text, nullable: true },
+        jobGrowId: { ...text, nullable: true },
+        jobName: { ...text, nullable: true },
+        jobGrowName: { ...text, nullable: true },
+        population: { ...characterCount, description: '그 주 모집단의 이 전직 캐릭터 수' },
+        cleared: { ...characterCount, description: '이 전직의 클리어 캐릭터 수' }
+      })
+    },
+    adventures: {
+      type: 'array',
+      description:
+        '클리어 캐릭터를 모험단으로 묶은 분포. characters가 작은 순이며 characters와 adventures를 곱해 더하면 week.cleared입니다.',
+      items: object({
+        characters: { type: 'integer', minimum: 1, description: '모험단 하나에서 깬 캐릭터 수' },
+        adventures: { type: 'integer', minimum: 1, description: '그만큼 깬 모험단 수' }
       })
     }
   }),

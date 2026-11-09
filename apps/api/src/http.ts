@@ -50,6 +50,12 @@ import {
   noSeasonBackfill
 } from './adventure-guild/service.js'
 import { RANKING_STATS_SERVICE, RankingStatsController } from './ranking-stats/http.js'
+import { CLEAR_STATS_SERVICE, ClearStatsController } from './content-clears/http.js'
+import {
+  type ClearStatsReader,
+  createClearStatsService,
+  emptyClearStatsReader
+} from './content-clears/stats.js'
 import {
   type RankingStatsReader,
   createRankingStatsService,
@@ -142,6 +148,7 @@ export interface ApiHttpAppOptions {
   readonly recordCharacterSkillStyle?: RecordCharacterSkillStyle
   readonly adventureGuild?: AdventureGuildReader
   readonly rankingStats?: RankingStatsReader
+  readonly clearStats?: ClearStatsReader
   readonly todayGrade: { fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly trustedProxyHops?: 1
@@ -151,7 +158,7 @@ export interface ApiHttpAppOptions {
   readonly scoreLibraryPath?: string | null
 }
 
-/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, skill styles, adventure, guild reads and fame rankings, stats. */
+/** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, skill styles, adventure, guild reads and fame rankings, stats, clear stats. */
 export async function createApiHttpApp({
   search,
   details,
@@ -160,6 +167,7 @@ export async function createApiHttpApp({
   recordCharacterSkillStyle,
   adventureGuild,
   rankingStats,
+  clearStats,
   todayGrade,
   fetchCharacterImage = createNeopleCharacterImage(),
   trustedProxyHops,
@@ -232,6 +240,7 @@ export async function createApiHttpApp({
       CharacterTimelineController,
       AdventureGuildController,
       RankingStatsController,
+      ClearStatsController,
       TodayGradeController
     ],
     providers: [
@@ -273,6 +282,10 @@ export async function createApiHttpApp({
       {
         provide: RANKING_STATS_SERVICE,
         useValue: createRankingStatsService(rankingStats ?? emptyRankingStatsReader)
+      },
+      {
+        provide: CLEAR_STATS_SERVICE,
+        useValue: createClearStatsService(clearStats ?? emptyClearStatsReader)
       },
       {
         provide: TODAY_GRADE_SERVICE,
