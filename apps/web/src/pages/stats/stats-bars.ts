@@ -1,7 +1,7 @@
 import { formatJobName } from '#core/character/job-format'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterStats } from '#core/ranking/ranking-stats'
-import type { Bar } from './BarCharts'
+import type { Bar, ColumnBar } from './BarCharts'
 
 const AWAKENING_MARK = '眞'
 
@@ -54,15 +54,6 @@ export function averageFameBars(stats: CharacterStats): Bar[] {
     })
     .toSorted((a, b) => b.value - a.value)
 }
-
-export type FameBar = Readonly<{
-  key: string
-  label: string | null
-  range: string
-  count: number
-  ratio: number
-  fine: boolean
-}>
 
 type FameBucket = CharacterStats['fameDistribution'][number]
 
@@ -117,7 +108,7 @@ function densityOf({ from, to, count }: FameBucket): number {
   return count / ((to - from) / DENSITY_WIDTH)
 }
 
-export function fameBars({ fameDistribution }: CharacterStats): FameBar[] {
+export function fameBars({ fameDistribution }: CharacterStats): ColumnBar[] {
   if (fameDistribution.length === 0) {
     return []
   }
@@ -127,7 +118,7 @@ export function fameBars({ fameDistribution }: CharacterStats): FameBar[] {
   const fine = fineBuckets(distribution)
   const maxDensity = Math.max(...[...coarse, ...fine].map(densityOf))
 
-  function barOf(bucket: FameBucket, isFine: boolean): FameBar {
+  function barOf(bucket: FameBucket, isFine: boolean): ColumnBar {
     const { from, to, count } = bucket
     const labeled = !isFine || from % LABEL_STEP === 0
     const label = labeled ? fameText(from) : null
