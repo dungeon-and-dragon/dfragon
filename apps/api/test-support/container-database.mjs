@@ -319,7 +319,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '9'
+    '10'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -629,6 +629,23 @@ try {
     '/app/container-male-crusader-role-check.mjs'
   ])
 
+  stage = 'stats snapshot tables'
+  // 통계 저장분은 한 행만 두고, 스킬 채택률의 역할은 전체, 딜러, 버퍼만 받는다.
+  await psql(
+    "INSERT INTO character_stats (id, computed_at, total, servers, jobs, fame_distribution) VALUES (1, now(), 0, '[]', '[]', '[]')"
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO character_stats (id, computed_at, total, servers, jobs, fame_distribution) VALUES (2, now(), 0, '[]', '[]', '[]')"
+    )
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO job_skill_adoption (job_id, job_grow_id, role, computed_at, sample_size, skills, evolutions, enhancements) VALUES ('probe-job', 'probe-grow', 'unknown', now(), 0, '[]', '[]', '[]')"
+    )
+  )
+  await psql('DELETE FROM character_stats')
+
   stage = 'content clear records'
   await docker([
     'exec',
@@ -895,6 +912,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, job run uniqueness, character collector job registration, requested runs, start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables, job run uniqueness, character collector job registration, requested runs, start and stop, HTTP and database input rejection\n'
   )
 }
