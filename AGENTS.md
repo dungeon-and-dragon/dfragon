@@ -4,7 +4,7 @@
 
 ## 먼저 읽을 곳
 
-- 각 app, package의 README와 `package.json`: 구조, 표준 명령, 실행 안내
+- 각 app, package의 README와 `package.json`: 설치, 실행, 빌드, 검증 명령과 입력, 폴더 위치. README에는 이 범위만 적고 동작 설명, 응답 필드의 뜻, 측정 근거, 운영 절차는 늘리지 않는다. 동작은 코드와 테스트가 원본이다.
 - [scripts 안내의 Native validation](scripts/README.md#native-validation): 로컬 실행과 변경 범위별 검증 명령
 
 ## 설치
