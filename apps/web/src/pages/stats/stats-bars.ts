@@ -1,7 +1,8 @@
 import { displayJobName } from '#core/character/job-display'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterStats } from '#core/ranking/ranking-stats'
-import type { Bar, ColumnBar } from './BarCharts'
+import type { ColumnBar } from '../../components/chart/Columns'
+import type { Bar } from '../../components/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
 
@@ -57,6 +58,8 @@ export function averageFameBars(stats: CharacterStats): Bar[] {
     .toSorted((a, b) => b.value - a.value)
 }
 
+export type FameBar = ColumnBar & Readonly<{ fine: boolean }>
+
 type FameBucket = CharacterStats['fameDistribution'][number]
 
 const FINE_FROM = 120_000
@@ -110,7 +113,7 @@ function densityOf({ from, to, count }: FameBucket): number {
   return count / ((to - from) / DENSITY_WIDTH)
 }
 
-export function fameBars({ fameDistribution }: CharacterStats): ColumnBar[] {
+export function fameBars({ fameDistribution }: CharacterStats): FameBar[] {
   if (fameDistribution.length === 0) {
     return []
   }
@@ -120,7 +123,7 @@ export function fameBars({ fameDistribution }: CharacterStats): ColumnBar[] {
   const fine = fineBuckets(distribution)
   const maxDensity = Math.max(...[...coarse, ...fine].map(densityOf))
 
-  function barOf(bucket: FameBucket, isFine: boolean): ColumnBar {
+  function barOf(bucket: FameBucket, isFine: boolean): FameBar {
     const { from, to, count } = bucket
     const labeled = !isFine || from % LABEL_STEP === 0
     const label = labeled ? fameText(from) : null
