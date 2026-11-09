@@ -12,14 +12,18 @@ export type { CollectedCharacter } from './character-collection.js'
 export { createDatabaseClient } from './client.js'
 export {
   CLEAR_POPULATION_SIZE,
+  finishContentClearCollection,
   readClearPopulation,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
+  readContentClearCollection,
   readContentClearJobCounts,
   readContentClearPopulations,
   readContentClearWeekRatioCounts,
+  recordContentClearCollectionProgress,
   recordContentClearPopulation,
-  recordContentClears
+  recordContentClears,
+  startContentClearCollection
 } from './content-clear.js'
 export type {
   ClearAdventureSize,
@@ -28,6 +32,7 @@ export type {
   ClearPopulationJob,
   ClearWeekRatioCount,
   ClearWeekSelection,
+  ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearKind,
   ContentClearPopulationInput,
