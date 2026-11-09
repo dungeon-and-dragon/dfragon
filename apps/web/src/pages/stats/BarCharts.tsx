@@ -3,12 +3,21 @@ import * as stylex from '@stylexjs/stylex'
 import gsap from 'gsap'
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { TOOLTIP_FADE, TOOLTIP_SLIDE, useMotionAllowed } from '../../animations/gsap-motion'
-import type { FameBar } from './stats-bars'
 import { styles } from './StatsScreen.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
 export type Bar = Readonly<{ key: string; name: string; value: number; share?: string }>
+
+export type ColumnBar = Readonly<{
+  key: string
+  label: string | null
+  range: string
+  count: number
+  share?: string
+  ratio: number
+  fine: boolean
+}>
 
 function percentOf(value: number, max: number): number {
   if (max <= 0) {
@@ -134,7 +143,7 @@ function clampWithin(chart: HTMLElement, tooltip: HTMLElement, center: number): 
   return gsap.utils.clamp(min, Math.max(min, max - width), center - origin - width / 2)
 }
 
-function fameTooltipPlaceOf(
+function columnTooltipPlaceOf(
   column: HTMLElement,
   tooltip: HTMLElement,
   chart: HTMLElement
@@ -240,20 +249,27 @@ function useTooltipSlide({
   }, [tooltipRef, bars])
 }
 
-export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
+export function ColumnBars({
+  bars,
+  selectedKey
+}: {
+  bars: readonly ColumnBar[]
+  selectedKey?: string
+}): React.JSX.Element {
   const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
   const chartRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const columnsRef = useRef(new Map<string, HTMLLIElement>())
-  const shownBar = bars.find(({ key }) => key === hover.key)
+  const shownKey = hover.open ? hover.key : (selectedKey ?? hover.key)
+  const shownBar = bars.find(({ key }) => key === shownKey)
   useTooltipSlide({
     chartRef,
     tooltipRef,
     anchorsRef: columnsRef,
     shownKey: shownBar?.key,
-    open: hover.open,
+    open: hover.open || selectedKey !== undefined,
     bars,
-    placeOf: fameTooltipPlaceOf
+    placeOf: columnTooltipPlaceOf
   })
 
   function handleHover(key: string): void {
@@ -281,9 +297,9 @@ export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.E
           return (
             <Fragment key={bar.key}>
               {startsFine && <li aria-hidden="true" {...stylex.props(styles.columnDivider)} />}
-              <FameColumn
+              <Column
                 bar={bar}
-                active={hover.open && bar.key === hover.key}
+                active={bar.key === shownKey && (hover.open || selectedKey !== undefined)}
                 onHover={handleHover}
                 register={registerColumn}
               />
@@ -299,7 +315,11 @@ export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.E
         {shownBar != null && (
           <>
             <span {...stylex.props(styles.tooltipRange)}>{shownBar.range}</span>
-            <span {...stylex.props(styles.tooltipCount)}>{integer.format(shownBar.count)}</span>
+            <span {...stylex.props(styles.tooltipCount)}>
+              {shownBar.share != null
+                ? `${integer.format(shownBar.count)}  ${shownBar.share}`
+                : integer.format(shownBar.count)}
+            </span>
           </>
         )}
       </span>
@@ -307,13 +327,13 @@ export function FameColumns({ bars }: { bars: readonly FameBar[] }): React.JSX.E
   )
 }
 
-function FameColumn({
-  bar: { key, label, range, count, ratio },
+function Column({
+  bar: { key, label, range, count, share, ratio },
   active,
   onHover,
   register
 }: {
-  bar: FameBar
+  bar: ColumnBar
   active: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLLIElement) => () => void
@@ -328,7 +348,9 @@ function FameColumn({
 
   return (
     <li ref={columnRef} onMouseEnter={handleMouseEnter} {...stylex.props(styles.column)}>
-      <span {...stylex.props(shapes.srOnly)}>{`${range} ${integer.format(count)}`}</span>
+      <span {...stylex.props(shapes.srOnly)}>
+        {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
+      </span>
       <span {...stylex.props(styles.columnTrack)}>
         <span
           {...stylex.props(

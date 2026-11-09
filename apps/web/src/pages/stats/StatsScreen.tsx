@@ -4,9 +4,9 @@ import { RelativeTime } from '../../components/RelativeTime'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useCharacterStats } from '../../hooks/useCharacterStats'
-import { type Bar, FameColumns, RowBars } from './BarCharts'
+import { type Bar, type ColumnBar, ColumnBars, RowBars } from './BarCharts'
 import { styles } from './StatsScreen.style'
-import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from './stats-bars'
+import { averageFameBars, fameBars, jobBars, serverBars } from './stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -69,14 +69,14 @@ function StatBox({ name, bars }: { name: string; bars: readonly Bar[] }): React.
   )
 }
 
-function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
+function FameBox({ bars }: { bars: readonly ColumnBar[] }): React.JSX.Element {
   if (bars.length === 0) {
     return <ListBox name="명성 분포" />
   }
 
   return (
     <ListBox name="명성 분포">
-      <FameColumns bars={bars} />
+      <ColumnBars bars={bars} />
     </ListBox>
   )
 }
