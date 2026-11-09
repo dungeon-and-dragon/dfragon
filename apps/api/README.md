@@ -19,6 +19,7 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 | `SEARCH_TRUST_PROXY` | 선택 | 단일 신뢰 proxy 뒤에서만 `single-hop` |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` 또는 `DB_PASSWORD_FILE` | 선택 | [DB와 migration](#db와-migration) 참고 |
 | `OPS_PORT` | 선택 | 운영 경로(`/api/jobs`)를 여는 별도 포트. DB 설정이 있어야 하고 `PORT`와 달라야 합니다. 없으면 열지 않습니다 |
+| `JOB_ALERT_DISCORD_WEBHOOK_URL` 또는 `JOB_ALERT_DISCORD_WEBHOOK_URL_FILE` | 선택 | 캐릭터 수집 worker가 job 알림을 보낼 Discord 웹훅 https URL. 없으면 알림 없이 실행합니다 |
 
 Secret은 직접 입력과 `_FILE` 가운데 하나만 지정합니다. 둘 다 지정하거나 빈 값, 상대 경로, 읽을 수 없는 파일이면 값과 경로 없이 시작 전에 실패합니다.
 파일은 UTF-8로 읽고 끝의 줄바꿈을 뺍니다. DB 비밀번호는 끝의 공백까지 뺍니다. 값을 바꾸면 앱을 다시 시작합니다.
