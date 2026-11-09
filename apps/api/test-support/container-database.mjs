@@ -314,7 +314,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '7'
+    '8'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -623,6 +623,14 @@ try {
     'node',
     '/app/container-male-crusader-role-check.mjs'
   ])
+
+  stage = 'content clear records'
+  assert.equal(
+    (
+      await psql("SELECT indexdef FROM pg_indexes WHERE indexname = 'content_clears_challenge_key'")
+    ).stdout.trim(),
+    "CREATE UNIQUE INDEX content_clears_challenge_key ON public.content_clears USING btree (content_id, server_id, character_id) WHERE (kind = 'challenge'::text)"
+  )
 
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
