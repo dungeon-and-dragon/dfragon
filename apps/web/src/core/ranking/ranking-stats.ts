@@ -24,7 +24,7 @@ export const fameRankingSchema = z.object({
 })
 
 export const characterStatsSchema = z.object({
-  computedAt: z.iso.datetime(),
+  computedAt: z.iso.datetime().nullable(),
   total: count,
   servers: z.array(z.object({ serverId: characterIdentitySchema.shape.serverId, count })),
   jobs: z.array(
