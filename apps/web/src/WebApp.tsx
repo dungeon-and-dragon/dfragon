@@ -30,6 +30,8 @@ import { parseRankingSearch } from './pages/rankings/ranking-search'
 import { RankingsPage } from './pages/rankings/RankingsPage'
 import { MultisearchPage } from './pages/multisearch/MultisearchPage'
 import { StatsScreen } from './pages/stats/StatsScreen'
+import { ClearsPage } from './pages/clears/ClearsPage'
+import { parseClearSearch } from './pages/clears/clear-search'
 import { parseWeeklySearch } from './pages/weekly/weekly-search'
 import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
@@ -110,6 +112,13 @@ const statsRoute = createRoute({
   component: StatsScreen
 })
 
+const clearsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/clears',
+  validateSearch: parseClearSearch,
+  component: ClearsPage
+})
+
 const adventureEntryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/adventures',
@@ -176,6 +185,7 @@ const routeTree = rootRoute.addChildren([
   characterSearchRoute,
   rankingsRoute,
   statsRoute,
+  clearsRoute,
   adventureEntryRoute,
   adventureRoute,
   guildRoute,
