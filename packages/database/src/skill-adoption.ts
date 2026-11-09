@@ -91,3 +91,40 @@ export async function readJobSkillAdoption(
 
   return adoption
 }
+
+export type JobSkillAdoptionSnapshot = JobSkillAdoptionQuery & {
+  computedAt: Date
+  adoption: JobSkillAdoption
+}
+
+export async function readFamedJobGrows(client: DatabaseClient): Promise<SkillStyleSampleJob[]> {
+  return client.$queryRaw<SkillStyleSampleJob[]>`
+    SELECT DISTINCT "job_id" AS "jobId", "job_grow_id" AS "jobGrowId"
+    FROM "characters"
+    WHERE "job_id" IS NOT NULL AND "job_grow_id" IS NOT NULL AND "fame" IS NOT NULL
+    ORDER BY 1, 2`
+}
+
+export async function saveJobSkillAdoption(
+  client: DatabaseClient,
+  { jobId, jobGrowId, role, computedAt, adoption }: JobSkillAdoptionSnapshot
+): Promise<void> {
+  const key = { jobId, jobGrowId, role: role ?? 'all' }
+  const values = { computedAt, ...adoption }
+  await client.jobSkillAdoptionSnapshot.upsert({
+    where: { jobId_jobGrowId_role: key },
+    create: { ...key, ...values },
+    update: values
+  })
+}
+
+export async function deleteJobSkillAdoptionComputedBefore(
+  client: DatabaseClient,
+  before: Date
+): Promise<number> {
+  const { count } = await client.jobSkillAdoptionSnapshot.deleteMany({
+    where: { computedAt: { lt: before } }
+  })
+
+  return count
+}
