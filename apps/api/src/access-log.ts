@@ -5,7 +5,6 @@ import { type ErrorChainEntry, describeErrorChain } from './error-chain.js'
 
 export type AccessLogSink = (line: string) => void
 
-const SERVICE = 'api'
 // 매칭된 route가 없으면 credential이 담길 수 있는 원문 경로 대신 고정 값을 남긴다.
 const UNMATCHED_ROUTE = '<unmatched>'
 const CORRELATION_ID_HEADER = 'X-Correlation-Id'
@@ -91,7 +90,7 @@ function readRouteTemplate(request: Request): string {
  * 저장한 결과를 보냈는지와 진행 중인 검색에 합류했는지만 붙인다. Correlation ID는
  * 클라이언트 값 대신 서버가 만들어 `X-Correlation-Id` 응답 header로도 돌려준다.
  */
-export function createAccessLog(sink: AccessLogSink) {
+export function createAccessLog(sink: AccessLogSink, service: string) {
   return (request: Request, response: Response, next: NextFunction): void => {
     const startedAt = performance.now()
     const correlationId = randomUUID()
@@ -104,7 +103,7 @@ export function createAccessLog(sink: AccessLogSink) {
       const errorChain = isServerError ? errorChains.get(response) : undefined
       const entry = {
         time: new Date().toISOString(),
-        service: SERVICE,
+        service,
         method: request.method,
         route: readRouteTemplate(request),
         status,

@@ -47,20 +47,28 @@ export {
   finishJobRun,
   interruptRunningJobRuns,
   isJobPaused,
+  readJobOverviews,
+  readJobRuns,
   readLastScheduledJobSuccess,
   recordJobNextRun,
   recordJobRunProgress,
   recordJobWorkerSeen,
   registerJobs,
+  requestJobRun,
+  setJobPaused,
   startJobRun
 } from './jobs.js'
 export type {
   ClaimedJobRun,
+  JobOverview,
+  JobPauseChange,
   JobRegistration,
   JobRunErrorEntry,
   JobRunOutcome,
   JobRunProgress,
+  JobRunRecord,
   JobRunReference,
+  JobRunRequest,
   JobRunSummary,
   JobTrigger
 } from './jobs.js'
