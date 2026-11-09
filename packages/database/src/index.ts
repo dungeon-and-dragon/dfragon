@@ -51,6 +51,7 @@ export {
 } from './jobs.js'
 export type {
   ClaimedJobRun,
+  InterruptedJobRun,
   JobRegistration,
   JobRunErrorEntry,
   JobRunOutcome,
