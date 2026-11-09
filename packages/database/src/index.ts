@@ -68,10 +68,16 @@ export { MALE_CRUSADER_DEALER_SKILL } from './male-crusader.js'
 export type { MaleCrusaderRole } from './male-crusader.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
-export { readJobSkillAdoption } from './skill-adoption.js'
+export {
+  deleteJobSkillAdoptionComputedBefore,
+  readFamedJobGrows,
+  readJobSkillAdoption,
+  saveJobSkillAdoption
+} from './skill-adoption.js'
 export type {
   JobSkillAdoption,
   JobSkillAdoptionQuery,
+  JobSkillAdoptionSnapshot,
   SkillAdoption,
   SkillLevelCount,
   SkillSelectionCount
@@ -116,9 +122,10 @@ export type {
   TimelineRange,
   TimelineSyncState
 } from './timeline.js'
-export { readCharacterStats, readFameRanking } from './ranking-stats.js'
+export { readCharacterStats, readFameRanking, saveCharacterStats } from './ranking-stats.js'
 export type {
   CharacterStats,
+  CharacterStatsSnapshot,
   FameBucket,
   FameRankingFilter,
   JobCount,
