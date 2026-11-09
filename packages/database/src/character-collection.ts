@@ -63,3 +63,50 @@ export async function recordCollectionFailure(
     data: { attemptedAt: new Date(), failure }
   })
 }
+
+export type CollectionFailureCount = {
+  failure: string
+  count: number
+  lastAttemptedAt: Date | null
+}
+
+export type CollectionSummary = {
+  waiting: number
+  oldestQueuedAt: Date | null
+  failures: CollectionFailureCount[]
+}
+
+export async function readCollectionSummary(client: DatabaseClient): Promise<CollectionSummary> {
+  const groups = await client.characterCollection.groupBy({
+    by: ['failure'],
+    _count: { _all: true },
+    _min: { queuedAt: true },
+    _max: { attemptedAt: true }
+  })
+  const waitingGroup = groups.find((group) => group.failure === null)
+  const waiting = waitingGroup?._count._all ?? 0
+  const oldestQueuedAt = waitingGroup?._min.queuedAt ?? null
+  const failures = groups
+    .flatMap(({ failure, _count, _max }) => {
+      if (failure === null) {
+        return []
+      }
+
+      return [{ failure, count: _count._all, lastAttemptedAt: _max.attemptedAt }]
+    })
+    .sort((a, b) => a.failure.localeCompare(b.failure))
+
+  return { waiting, oldestQueuedAt, failures }
+}
+
+export async function requeueCollectionFailures(
+  client: DatabaseClient,
+  failure: string | undefined
+): Promise<number> {
+  const { count } = await client.characterCollection.updateMany({
+    where: { failure: failure ?? { not: null } },
+    data: { failure: null, attemptedAt: null }
+  })
+
+  return count
+}
