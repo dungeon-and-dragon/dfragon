@@ -266,6 +266,9 @@ catalogs:
     onnxruntime-web:
       specifier: 1.31.1
       version: 1.31.1
+    p-throttle:
+      specifier: 8.1.1
+      version: 8.1.1
     pngjs:
       specifier: 7.0.0
       version: 7.0.0
@@ -388,6 +391,9 @@ importers:
       lru-cache:
         specifier: 'catalog:'
         version: 11.5.3
+      p-throttle:
+        specifier: 'catalog:'
+        version: 8.1.1
       reflect-metadata:
         specifier: 'catalog:'
         version: 0.2.2
@@ -2762,6 +2768,10 @@ packages:
 
   onnxruntime-web@1.31.1:
     resolution: {integrity: sha512-5GeH+bWQ+HxM10z7erGlsWqryrwMbSvm/1tkIsKTT48g0fI19VXVVC435t4t7VsPdSQeS7NmuZPXrQ73k82URw==}
+
+  p-throttle@8.1.1:
+    resolution: {integrity: sha512-xxWFBUyvbrQ10XC3VAr0SoXoOCKXqCX/yvbFIkBE98upphHFwjIKR6AId13ZH3jngFfF6yK43QTOtrngYAmFMA==}
+    engines: {node: '>=20'}
 
   parse5@8.0.1:
     resolution: {integrity: sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==}
@@ -5158,6 +5168,8 @@ snapshots:
       onnxruntime-common: 1.31.1
       platform: 1.3.6
       protobufjs: 7.6.6
+
+  p-throttle@8.1.1: {}
 
   parse5@8.0.1:
     dependencies:

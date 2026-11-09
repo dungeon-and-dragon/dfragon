@@ -33,6 +33,7 @@
     "date-fns": "catalog:",
     "koffi": "catalog:",
     "lru-cache": "catalog:",
+    "p-throttle": "catalog:",
     "reflect-metadata": "catalog:",
     "remeda": "catalog:",
     "rxjs": "catalog:",
