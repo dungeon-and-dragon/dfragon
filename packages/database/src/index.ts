@@ -10,6 +10,19 @@ export {
 } from './character-collection.js'
 export type { CollectedCharacter } from './character-collection.js'
 export { createDatabaseClient } from './client.js'
+export {
+  CLEAR_POPULATION_SIZE,
+  readClearPopulation,
+  recordContentClearPopulation,
+  recordContentClears
+} from './content-clear.js'
+export type {
+  ClearPopulationCharacter,
+  ClearPopulationJob,
+  ContentClearInput,
+  ContentClearKind,
+  ContentClearPopulationInput
+} from './content-clear.js'
 export type { DatabaseClient } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
