@@ -3,7 +3,7 @@ import {
   createDatabaseClient,
   readAdventureCharacters,
   readAdventureNames,
-  readCharacterStats,
+  readCharacterStatsSnapshot,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
   readContentClearJobCounts,
@@ -11,7 +11,7 @@ import {
   readContentClearWeekRatioCounts,
   readFameRanking,
   readGuild,
-  readJobSkillAdoption,
+  readJobSkillAdoptionSnapshot,
   recordCharacterBasic,
   recordCharacterSkillStyle
 } from '@dfragon/database'
@@ -100,8 +100,8 @@ function createDatabaseSubscribers(
     },
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
-      readCharacterStats: () => readCharacterStats(client),
-      readJobSkillAdoption: (job) => readJobSkillAdoption(client, job)
+      readCharacterStatsSnapshot: () => readCharacterStatsSnapshot(client),
+      readJobSkillAdoptionSnapshot: (job) => readJobSkillAdoptionSnapshot(client, job)
     },
     clearStats: {
       readCollectedAt: () => readContentClearCollectedAt(client),
