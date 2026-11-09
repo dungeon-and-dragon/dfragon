@@ -319,7 +319,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '8'
+    '9'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -645,6 +645,41 @@ try {
     "CREATE UNIQUE INDEX content_clears_challenge_key ON public.content_clears USING btree (content_id, server_id, character_id) WHERE (kind = 'challenge'::text)"
   )
 
+  stage = 'job run uniqueness'
+  assert.equal(
+    (
+      await psql("SELECT indexdef FROM pg_indexes WHERE indexname = 'job_runs_active_key'")
+    ).stdout.trim(),
+    "CREATE UNIQUE INDEX job_runs_active_key ON public.job_runs USING btree (job_name) WHERE (status = ANY (ARRAY['requested'::text, 'running'::text]))"
+  )
+  const insertProbeRun = (status) =>
+    psql(
+      `INSERT INTO job_runs (job_name, trigger, status, args) VALUES ('probe-job', 'manual', '${status}', '{}')`
+    )
+  await insertProbeRun('requested')
+  await assert.rejects(insertProbeRun('requested'))
+  await assert.rejects(insertProbeRun('running'))
+  await insertProbeRun('succeeded')
+  await psql(
+    "INSERT INTO job_runs (job_name, trigger, status, args) VALUES ('other-probe-job', 'manual', 'requested', '{}')"
+  )
+  await psql(
+    "UPDATE job_runs SET status = 'failed' WHERE job_name = 'probe-job' AND status = 'requested'"
+  )
+  await insertProbeRun('requested')
+  assert.equal(
+    (
+      await psql("SELECT string_agg(job_name || ':' || status, ',' ORDER BY id) FROM job_runs")
+    ).stdout.trim(),
+    'probe-job:failed,probe-job:succeeded,other-probe-job:requested,probe-job:requested'
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO job_runs (job_name, trigger, status, args) VALUES ('probe-job', 'unknown', 'succeeded', '{}')"
+    )
+  )
+  await psql('DELETE FROM job_runs')
+
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
   const collectorOptions = [
@@ -805,6 +840,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, character collector start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, job run uniqueness, character collector start and stop, HTTP and database input rejection\n'
   )
 }
