@@ -39,7 +39,7 @@ docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
 - `src/animations/`: 화면에서 함께 쓰는 전환 animation과 GSAP 설정을 둡니다.
-- `src/assets/`: 글꼴, 로고, 시즌 배경 이미지를 둡니다.
+- `src/assets/`: 글꼴, 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
 - `src/components/`: 웹 앱의 화면 컴포넌트와 스타일을 둡니다.
 - `src/constants/`: 화면 크기와 서버 선택지 상수를 둡니다.
 - `src/core/`: React와 UI 폴더를 import하지 않는 검색, 캡처, OCR 로직을 둡니다.

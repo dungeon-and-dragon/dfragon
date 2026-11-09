@@ -12,6 +12,7 @@ export type ColumnBar = Readonly<{
   label: string | null
   range: string
   count: number
+  share?: string
   ratio: number
 }>
 
@@ -35,23 +36,27 @@ function columnTooltipPlaceOf(
 }
 
 export function Columns({
-  groups
+  groups,
+  selectedKey
 }: {
   groups: readonly (readonly ColumnBar[])[]
+  selectedKey?: string
 }): React.JSX.Element {
   const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
   const chartRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const columnsRef = useRef(new Map<string, HTMLLIElement>())
   const bars = groups.flat()
-  const shownBar = bars.find(({ key }) => key === hover.key)
+  const open = hover.open || selectedKey !== undefined
+  const shownKey = hover.open ? hover.key : (selectedKey ?? hover.key)
+  const shownBar = bars.find(({ key }) => key === shownKey)
   useChartBarGrow(chartRef, COLUMN_BAR_GROW)
   useChartTooltipSlide({
     chartRef,
     tooltipRef,
     anchorsRef: columnsRef,
     shownKey: shownBar?.key,
-    open: hover.open,
+    open,
     bars,
     placeOf: columnTooltipPlaceOf
   })
@@ -82,8 +87,8 @@ export function Columns({
               <Column
                 key={bar.key}
                 bar={bar}
-                active={hover.open && bar.key === hover.key}
-                dimmed={hover.open && bar.key !== hover.key}
+                active={open && bar.key === shownKey}
+                dimmed={open && bar.key !== shownKey}
                 onHover={handleHover}
                 register={registerColumn}
               />
@@ -99,7 +104,11 @@ export function Columns({
         {shownBar != null && (
           <>
             <span {...stylex.props(styles.tooltipRange)}>{shownBar.range}</span>
-            <span {...stylex.props(styles.tooltipCount)}>{integer.format(shownBar.count)}</span>
+            <span {...stylex.props(styles.tooltipCount)}>
+              {shownBar.share != null
+                ? `${integer.format(shownBar.count)}  ${shownBar.share}`
+                : integer.format(shownBar.count)}
+            </span>
           </>
         )}
       </span>
@@ -108,7 +117,7 @@ export function Columns({
 }
 
 function Column({
-  bar: { key, label, range, count, ratio },
+  bar: { key, label, range, count, share, ratio },
   active,
   dimmed,
   onHover,
@@ -135,7 +144,9 @@ function Column({
       onMouseEnter={handleMouseEnter}
       {...stylex.props(styles.column)}
     >
-      <span {...stylex.props(shapes.srOnly)}>{`${range} ${integer.format(count)}`}</span>
+      <span {...stylex.props(shapes.srOnly)}>
+        {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
+      </span>
       <span {...stylex.props(styles.columnTrack)}>
         {ratio > 0 && (
           <span

@@ -1,6 +1,7 @@
-import { formatJobName } from '#core/character/job-format'
+import { displayJobName } from '#core/character/job-display'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterStats } from '#core/ranking/ranking-stats'
+import type { ColumnBar } from '../../components/chart/Columns'
 import type { Bar } from '../../components/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
@@ -33,36 +34,31 @@ function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
 }
 
 export function jobBars(stats: CharacterStats): Bar[] {
-  return awakenedJobs(stats).map(({ jobId, jobGrowId, jobGrowName, count }) => ({
-    key: `${jobId}/${jobGrowId}`,
-    name: formatJobName(jobGrowName),
-    value: count,
-    share: shareText(count, stats.total)
-  }))
+  return awakenedJobs(stats).map(({ jobId, jobGrowId, jobName, jobGrowName, count }) => {
+    const key = `${jobId}/${jobGrowId}`
+    const name = displayJobName({ jobName, jobGrowName })
+    const share = shareText(count, stats.total)
+
+    return { key, name, value: count, share }
+  })
 }
 
 export function averageFameBars(stats: CharacterStats): Bar[] {
   return awakenedJobs(stats)
-    .flatMap(({ jobId, jobGrowId, jobGrowName, averageFame }) => {
+    .flatMap(({ jobId, jobGrowId, jobName, jobGrowName, averageFame }) => {
       if (averageFame == null) {
         return []
       }
 
-      return [
-        { key: `${jobId}/${jobGrowId}`, name: formatJobName(jobGrowName), value: averageFame }
-      ]
+      const key = `${jobId}/${jobGrowId}`
+      const name = displayJobName({ jobName, jobGrowName })
+
+      return [{ key, name, value: averageFame }]
     })
     .toSorted((a, b) => b.value - a.value)
 }
 
-export type FameBar = Readonly<{
-  key: string
-  label: string | null
-  range: string
-  count: number
-  ratio: number
-  fine: boolean
-}>
+export type FameBar = ColumnBar & Readonly<{ fine: boolean }>
 
 type FameBucket = CharacterStats['fameDistribution'][number]
 

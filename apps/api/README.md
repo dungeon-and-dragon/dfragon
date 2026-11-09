@@ -3,6 +3,7 @@
 `apps/api`는 로그인 없는 공개 캐릭터 API(NestJS)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
 DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정보를 PostgreSQL에 저장하고, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
 같은 이미지의 캐릭터 수집 worker(`dist/character-collector.js`)는 캐릭터 목록 파일에 있는 캐릭터의 기본 정보를 DB에 쌓습니다.
+배치 job도 이 worker에서 돕니다. Job 실행 틀은 `src/jobs/`에 있고, worker가 돌릴 job은 `src/jobs/worker-jobs.ts`에 등록합니다.
 API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니다.
 
 ## 준비할 입력

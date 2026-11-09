@@ -11,3 +11,7 @@
   - 시즌 9 선계, 시즌 9 Act 4. 안개신 레이드: https://bbscdn.df.nexon.com/data6/commu/202404/5f551fc0-95b0-da3e-7d32-3e3dba38f74f.jpg, `8aa5f61a2310d6c9434f2d1941b11edd4165be5e496a1b05f28da8af090ba857`
   - 시즌 10 중천, 시즌 10 Act 2. RAID : 만들어진 신, 나벨: https://bbscdn.df.nexon.com/data6/commu/202504/0a536ffe-b27e-f519-88ec-41f7679cd035.jpg, `43d4bc97d9c035094a89d6115539c19544b6d2dad857380c378d47e24e02d68d`
   - 시즌 11 천해천, 시즌 11 Act 3. 무너진 성자 미카엘라: https://bbscdn.df.nexon.com/data6/commu/202608/05f32bfc-be16-c9fc-af00-70e9663729ed.jpg, `8f73710bfc518c840fa9477d872859842b3a03dd02cfccba19e5e6cec0740064`
+- 클리어 집계 배경 이미지(`apps/web/src/assets/clear-content-backgrounds/{diregie,inae,nightmare}.webp`): 위 월페이퍼 게시판에서 받은 1920×1080 JPEG 원본을 너비 1600px WebP로 줄인 것입니다. 권리와 사용 조건은 시즌 배경과 같고, `/clears` 요약의 컨텐츠 배경에만 어둡게 깔아 씁니다. 무너진 성자 미카엘라와 만들어진 신 나벨은 시즌 11, 시즌 10 배경을 그대로 씁니다. 원본의 SHA-256은 아래와 같습니다.
+  - 디레지에 레이드, 시즌 10 Act 5. 검은 질병의 디레지에: https://bbscdn.df.nexon.com/data6/commu/202512/7aeac868-9928-d7b5-30d2-e104a81d7b32.jpg, `36ea96c8f36ed4c943410fe0b8d646a54006a58c11995315f85531d09ad2a945`
+  - 이내 황혼전, 시즌 10 Act 4. 이내 황혼전: https://bbscdn.df.nexon.com/data6/commu/202508/1144f587-f8b2-e5df-24f4-48f1a2aaef04.jpg, `5e470e5d0c729b74d45b517aff97314953660d478eed55f8f4b79987f6150d24`
+  - 각인된 악몽 챌린지, 시즌 11 Act 3 외전. 각인된 악몽: https://bbscdn.df.nexon.com/data6/commu/202611/4f327972-c271-d5d3-1250-c17fe3540041.jpg, `ae58639cac5386f76a6af0765949adda97923e689982b5b184c4f663b1f30770`
