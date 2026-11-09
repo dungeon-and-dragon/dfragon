@@ -256,6 +256,28 @@ it('직업 분포와 직업별 평균 명성에서 眞이 붙지 않은 전직�
   expect(rowsOf('직업별 평균 명성').map(([name]) => name)).toEqual(['전직2', '전직1'])
 })
 
+it('겹치는 전직의 두 통계 막대에 성별을 표시한다', async () => {
+  await render(async () => ({
+    ...stats,
+    jobs: [
+      { ...stats.jobs[0], jobName: '격투가(남)', jobGrowName: '眞 넨마스터' },
+      { ...stats.jobs[1], jobName: '격투가(여)', jobGrowName: '眞 넨마스터' },
+      { ...stats.jobs[2], jobName: '귀검사(남)', jobGrowName: '眞 웨펀마스터', averageFame: 70000 }
+    ]
+  }))
+
+  expect(rowsOf('직업 분포').map(([name]) => name)).toEqual([
+    '넨마스터 (남)',
+    '넨마스터 (여)',
+    '웨펀마스터'
+  ])
+  expect(rowsOf('직업별 평균 명성').map(([name]) => name)).toEqual([
+    '넨마스터 (여)',
+    '넨마스터 (남)',
+    '웨펀마스터'
+  ])
+})
+
 it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
   await render(async () => ({
     ...stats,
