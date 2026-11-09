@@ -1,5 +1,6 @@
 import type { JobRunOutcome, JobRunProgress, JobTrigger } from '@dfragon/database'
 import { type ErrorChainEntry, describeErrorChain } from '../error-chain.js'
+import type { JobAlert, SendJobAlert } from './alert.js'
 import type { JobDefinition, JobStore, ReportJobEvent } from './definition.js'
 
 const PROGRESS_WRITE_INTERVAL_MS = 10_000
@@ -13,6 +14,7 @@ export type JobRunTarget = {
 export type JobRunDependencies = {
   store: JobStore
   report: ReportJobEvent
+  alert?: SendJobAlert
 }
 
 class InvalidJobArguments extends Error {
@@ -30,6 +32,24 @@ export function readErrorChain(error: unknown): ErrorChainEntry[] {
   } catch {
     // getter가 던지는 오류처럼 정제 결과를 믿을 수 없으면 원인 없이 실패만 남긴다.
     return []
+  }
+}
+
+/** 알림 전송이 실패해도 실행 결과와 이력은 그대로 두고 로그 한 줄만 남긴다. */
+export async function sendJobAlert(
+  { alert, report }: JobRunDependencies,
+  runId: number,
+  jobAlert: JobAlert
+): Promise<void> {
+  if (alert === undefined) {
+    return
+  }
+
+  try {
+    await alert(jobAlert)
+  } catch (error) {
+    // 웹훅 URL이 오류 message에 들어갈 수 있어 오류 chain만 남긴다.
+    report('JOB_ALERT_FAILED', { job: jobAlert.job, runId, errorChain: readErrorChain(error) })
   }
 }
 
@@ -53,8 +73,9 @@ async function runDefinition(
 export async function executeJobRun(
   definition: JobDefinition,
   target: JobRunTarget,
-  { store, report }: JobRunDependencies
+  dependencies: JobRunDependencies
 ): Promise<void> {
+  const { store, report } = dependencies
   const event = { job: definition.name, runId: target.id, trigger: target.trigger }
   const startedAt = performance.now()
   let progress: JobRunProgress | null = null
@@ -68,6 +89,15 @@ export async function executeJobRun(
       report('JOB_PROGRESS_RECORD_FAILED', { ...event, errorChain: readErrorChain(error) })
     })
   }, PROGRESS_WRITE_INTERVAL_MS)
+  const delayMs = definition.delayMinutes * 60_000
+  const delayAlert = setTimeout(() => {
+    sendJobAlert(dependencies, target.id, {
+      kind: 'delayed',
+      job: definition.name,
+      trigger: target.trigger,
+      elapsedMs: delayMs
+    })
+  }, delayMs)
   report('JOB_RUN_STARTED', event)
 
   let outcome: JobRunOutcome
@@ -80,6 +110,7 @@ export async function executeJobRun(
     outcome = { status: 'failed', progress, error: readErrorChain(error) }
   } finally {
     clearInterval(progressWriter)
+    clearTimeout(delayAlert)
   }
 
   const durationMs = Math.round(performance.now() - startedAt)
@@ -93,5 +124,15 @@ export async function executeJobRun(
     await store.finishRun(target.id, outcome)
   } catch (error) {
     report('JOB_RUN_RECORD_FAILED', { ...event, errorChain: readErrorChain(error) })
+  }
+
+  if (outcome.status === 'failed') {
+    await sendJobAlert(dependencies, target.id, {
+      kind: 'failed',
+      job: definition.name,
+      trigger: target.trigger,
+      elapsedMs: durationMs,
+      errorChain: outcome.error
+    })
   }
 }
