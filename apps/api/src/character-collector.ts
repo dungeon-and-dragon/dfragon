@@ -9,12 +9,15 @@ import {
 } from './character-collection/adapters.js'
 import { readCollectorConfiguration } from './character-collection/configuration.js'
 import { runCollectionPass } from './character-collection/runner.js'
+import { createDatabaseJobStore } from './jobs/adapters.js'
+import { startJobScheduler } from './jobs/scheduler.js'
+import { createWorkerJobs } from './jobs/worker-jobs.js'
 
 const failureMessage = 'Character collector failed'
 const IDLE_MS = 60_000
 const UNAVAILABLE_PAUSE_MS = 60_000
 
-function report(code: string, details?: Record<string, number>): void {
+function report(code: string, details?: Readonly<Record<string, unknown>>): void {
   writeAccessLogToStdout(
     JSON.stringify({
       time: new Date().toISOString(),
@@ -32,6 +35,11 @@ async function main(): Promise<never> {
   const fetchBasic = createNeopleCharacterBasic(createNeopleClient(configuration.apiKey))
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
+  await startJobScheduler({
+    jobs: createWorkerJobs(client),
+    store: createDatabaseJobStore(client),
+    report
+  })
   let importedAt: ReadonlyMap<string, number> = new Map()
   for (;;) {
     const pass = await runCollectionPass({

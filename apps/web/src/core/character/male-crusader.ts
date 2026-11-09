@@ -49,12 +49,3 @@ export function withMaleCrusaderRole(name: string, role: MaleCrusaderRole | null
 
   return `${name}(${MALE_CRUSADER_ROLE_LABELS[role]})`
 }
-
-export function grownJobName(character: JobNames, role: CharacterCardRole | null): string | null {
-  const job = character.jobGrowName ?? character.jobName
-  if (job === null) {
-    return null
-  }
-
-  return withMaleCrusaderRole(job, maleCrusaderRoleOf(character, role))
-}

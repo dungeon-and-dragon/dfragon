@@ -1,8 +1,7 @@
 import { Popover } from '@base-ui/react/popover'
 import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
-import { formatJobName } from '#core/character/job-format'
-import { grownJobName } from '#core/character/male-crusader'
+import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
 import { type KeyboardEvent, type RefObject, useId } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
@@ -187,7 +186,7 @@ function RecentItem({
   large?: boolean
   onPick: () => void
 }): React.JSX.Element {
-  const job = grownJobName(character, character.role)
+  const job = displayJobName(character, character.role)
   const showsLevel = !large && character.level != null && !isMaxLevel(character.level)
 
   return (
@@ -204,7 +203,7 @@ function RecentItem({
         <span {...stylex.props(styles.line)}>
           <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
           <span {...stylex.props(styles.name)}>{character.characterName}</span>
-          {job != null && <span {...stylex.props(styles.job)}>{formatJobName(job)}</span>}
+          {job != null && <span {...stylex.props(styles.job)}>{job}</span>}
         </span>
         {showsLevel && <span {...stylex.props(styles.level)}>{`Lv.${character.level}`}</span>}
       </span>

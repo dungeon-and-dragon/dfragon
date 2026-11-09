@@ -2,6 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { SHARED_GROW_JOB_NAMES } from '#core/character/job-display'
+import { formatJobName } from '#core/character/job-format'
 import type { FameRanking, FameRankingFilter, RankedCharacter } from '#core/ranking/ranking-stats'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
@@ -154,7 +156,7 @@ it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니�
   expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직', 'Lv.110'])
 })
 
-it('남성 크루세이더만 역할을 알 때 전직에 역할을 붙이고, 모르거나 다른 직업이면 그대로 쓴다', async () => {
+it('남성 크루세이더는 역할을 알면 역할을 붙이고 겹치는 전직은 성별을 붙인다', async () => {
   const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
   await render(async () => ({
     characters: [
@@ -162,16 +164,18 @@ it('남성 크루세이더만 역할을 알 때 전직에 역할을 붙이고, �
       rankedCharacter(2, { ...maleCrusader, role: 'buffer' }),
       rankedCharacter(3, { ...maleCrusader, role: null }),
       rankedCharacter(4, { jobName: '프리스트(여)', jobGrowName: '眞 크루세이더', role: 'buffer' }),
-      rankedCharacter(5, { jobName: '프리스트(남)', jobGrowName: '眞 인파이터', role: 'dealer' })
+      rankedCharacter(5, { jobName: '프리스트(남)', jobGrowName: '眞 인파이터', role: 'dealer' }),
+      rankedCharacter(6, { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' })
     ]
   }))
 
   expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
     '카인합성1크루세이더(딜러)',
     '카인합성2크루세이더(버퍼)',
-    '카인합성3크루세이더',
-    '카인합성4크루세이더',
-    '카인합성5인파이터'
+    '카인합성3크루세이더 (남)',
+    '카인합성4크루세이더 (여)',
+    '카인합성5인파이터 (남)',
+    '카인합성6넨마스터 (여)'
   ])
 })
 
@@ -283,4 +287,18 @@ it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌�
   expect(chip('크루세이더(딜러)').hasAttribute('data-pressed')).toBe(true)
   expect(chip('크루세이더(버퍼)').hasAttribute('data-pressed')).toBe(false)
   expect(chip('전직 전체').hasAttribute('data-pressed')).toBe(false)
+})
+
+it('겹치는 전직 목록은 랭킹의 두 직업 이상에 걸친 전직과 같다', () => {
+  const jobsByGrow = new Map<string, Set<string>>()
+  for (const job of RANKING_JOBS) {
+    for (const grow of job.grows) {
+      const name = formatJobName(grow.name)
+      const jobs = jobsByGrow.get(name) ?? new Set<string>()
+      jobs.add(job.jobId)
+      jobsByGrow.set(name, jobs)
+    }
+  }
+  const shared = [...jobsByGrow].filter(([, jobs]) => jobs.size > 1).map(([name]) => name)
+  expect([...SHARED_GROW_JOB_NAMES].sort()).toEqual(shared.sort())
 })
