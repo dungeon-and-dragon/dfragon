@@ -41,7 +41,11 @@ async function main(): Promise<never> {
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
   await startJobScheduler({
-    jobs: createWorkerJobs(client),
+    jobs: createWorkerJobs(client, {
+      neople,
+      concurrency: configuration.concurrency,
+      report
+    }),
     store: createDatabaseJobStore(client),
     report
   })
