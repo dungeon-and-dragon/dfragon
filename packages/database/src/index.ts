@@ -60,6 +60,7 @@ export {
 } from './jobs.js'
 export type {
   ClaimedJobRun,
+  InterruptedJobRun,
   JobOverview,
   JobPauseChange,
   JobRegistration,

@@ -32,6 +32,7 @@
     "dataloader": "catalog:",
     "date-fns": "catalog:",
     "koffi": "catalog:",
+    "ky": "catalog:",
     "lru-cache": "catalog:",
     "p-throttle": "catalog:",
     "reflect-metadata": "catalog:",
