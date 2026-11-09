@@ -28,6 +28,7 @@
     "@nestjs/event-emitter": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "@nestjs/swagger": "catalog:",
+    "croner": "catalog:",
     "dataloader": "catalog:",
     "date-fns": "catalog:",
     "koffi": "catalog:",

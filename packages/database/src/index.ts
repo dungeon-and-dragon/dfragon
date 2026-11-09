@@ -36,6 +36,29 @@ export type {
 export type { DatabaseClient } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
+export {
+  claimRequestedJobRun,
+  deleteJobRunsFinishedBefore,
+  finishJobRun,
+  interruptRunningJobRuns,
+  isJobPaused,
+  readLastScheduledJobSuccess,
+  recordJobNextRun,
+  recordJobRunProgress,
+  recordJobWorkerSeen,
+  registerJobs,
+  startJobRun
+} from './jobs.js'
+export type {
+  ClaimedJobRun,
+  JobRegistration,
+  JobRunErrorEntry,
+  JobRunOutcome,
+  JobRunProgress,
+  JobRunReference,
+  JobRunSummary,
+  JobTrigger
+} from './jobs.js'
 export { MALE_CRUSADER_DEALER_SKILL } from './male-crusader.js'
 export type { MaleCrusaderRole } from './male-crusader.js'
 export { applyMigrations } from './migrate.js'
