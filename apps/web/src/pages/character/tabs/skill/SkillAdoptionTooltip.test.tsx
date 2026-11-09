@@ -62,9 +62,10 @@ afterEach(async () => {
 
 async function renderTooltip(
   target: SkillAdoptionTarget,
-  role: MaleCrusaderRole | null = null
+  role: MaleCrusaderRole | null = null,
+  stats: SkillStats = STATS
 ): Promise<void> {
-  const adoption = skillAdoptionOf(STATS, target)
+  const adoption = skillAdoptionOf(stats, target)
   if (adoption === null) {
     throw new Error('합성 집계의 표본이 20명보다 적다')
   }
@@ -110,6 +111,21 @@ it('채택률, 레벨 상위 50%와 5%, 개화와 강화 비율, 표본과 기�
   expect([...container.querySelectorAll('img')].map((mark) => mark.getAttribute('src'))).toEqual([
     ...MARKS.evolution,
     ...MARKS.enhancement
+  ])
+})
+
+it('집계 시각이 null이면 표본은 표시하고 시각은 표시하지 않는다', async () => {
+  await renderTooltip({ name: '참수', evolutionNames: null, hasEnhancement: false }, null, {
+    ...STATS,
+    computedAt: null
+  })
+
+  expect(lines()).toEqual([
+    '참수',
+    '채택률 43.6%',
+    '레벨',
+    '상위 50% 41 상위 5% 50',
+    '표본 2,316명'
   ])
 })
 
