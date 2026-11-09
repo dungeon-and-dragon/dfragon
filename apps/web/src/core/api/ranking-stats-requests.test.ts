@@ -98,6 +98,14 @@ it('통계 응답과 빈 통계를 읽는다', async () => {
   ).resolves.toEqual(empty)
 })
 
+it('집계 시각이 null인 빈 통계 응답을 읽는다', async () => {
+  const empty = { computedAt: null, total: 0, servers: [], jobs: [], fameDistribution: [] }
+
+  await expect(
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).stats()
+  ).resolves.toEqual(empty)
+})
+
 it('집계 시각이 없는 통계 응답과 오류 응답은 거부한다', async () => {
   const { computedAt: _computedAt, ...withoutTime } = stats
 
@@ -140,4 +148,22 @@ it('스킬 채택률은 전직을 query로 보내고 응답을 schema로 읽는�
       fetch: respond({ ...skillStats, sampleSize: undefined })
     }).skillStats({ jobId: 'job-1', jobGrowId: 'grow-1', role: null })
   ).rejects.toThrow()
+})
+
+it('집계 시각이 null인 빈 스킬 채택률 응답을 읽는다', async () => {
+  const empty = {
+    computedAt: null,
+    minFame: null,
+    sampleSize: 0,
+    skills: [],
+    evolutions: [],
+    enhancements: []
+  }
+  await expect(
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).skillStats({
+      jobId: 'job-1',
+      jobGrowId: 'grow-1',
+      role: null
+    })
+  ).resolves.toEqual(empty)
 })
