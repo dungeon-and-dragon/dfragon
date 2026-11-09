@@ -1,7 +1,6 @@
 import { Button, shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { formatJobName } from '#core/character/job-format'
-import { grownJobName } from '#core/character/male-crusader'
+import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture/cards'
 import { formatApproximateScore, toScoreView } from '#core/character/card-score'
@@ -24,7 +23,7 @@ const REFRESH_INTERVAL_MS = 60_000
 export function CharacterSummary({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
   const favorite = characterDisplayOf(detail)
-  const job = grownJobName(character, detail.card?.role ?? null)
+  const job = displayJobName(character, detail.card?.role ?? null)
   const { refresh, refreshing } = useRefreshCharacterDetail()
   const { lastSuccessfulFetchAt } = detail.freshness
 
@@ -85,7 +84,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         </div>
         <div {...stylex.props(styles.line)}>
           <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
-          {job != null && <span {...stylex.props(styles.muted)}>{formatJobName(job)}</span>}
+          {job != null && <span {...stylex.props(styles.muted)}>{job}</span>}
           {character.level != null && (
             <span {...stylex.props(styles.level)}>{`Lv.${character.level}`}</span>
           )}

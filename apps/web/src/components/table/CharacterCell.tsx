@@ -1,7 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
-import { formatJobName } from '#core/character/job-format'
-import { grownJobName } from '#core/character/male-crusader'
+import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
@@ -20,8 +19,7 @@ export function CharacterCell({
   character: CharacterCellCharacter
   adventureName?: string | null
 }): React.JSX.Element {
-  const grownJob = grownJobName(character, character.role)
-  const job = grownJob != null ? formatJobName(grownJob) : null
+  const job = displayJobName(character, character.role)
   const showsLevel = character.level != null && !isMaxLevel(character.level)
 
   return (
