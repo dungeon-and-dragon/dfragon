@@ -123,3 +123,19 @@ export async function readCharacterStats(client: DatabaseClient): Promise<Charac
 
   return { total, servers, jobs, fameDistribution }
 }
+
+export type CharacterStatsSnapshot = CharacterStats & {
+  computedAt: Date
+}
+
+export async function saveCharacterStats(
+  client: DatabaseClient,
+  { computedAt, total, servers, jobs, fameDistribution }: CharacterStatsSnapshot
+): Promise<void> {
+  const values = { computedAt, total, servers, jobs, fameDistribution }
+  await client.characterStatsSnapshot.upsert({
+    where: { id: 1 },
+    create: values,
+    update: values
+  })
+}
