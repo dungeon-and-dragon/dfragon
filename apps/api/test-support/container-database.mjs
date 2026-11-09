@@ -46,6 +46,9 @@ const skillAdoptionCheckPath = fileURLToPath(
 const maleCrusaderRoleCheckPath = fileURLToPath(
   new URL('./container-male-crusader-role-check.mjs', import.meta.url)
 )
+const contentClearCheckPath = fileURLToPath(
+  new URL('./container-content-clear-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -285,6 +288,8 @@ try {
         `type=bind,source=${skillAdoptionCheckPath},target=/app/container-skill-adoption-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${maleCrusaderRoleCheckPath},target=/app/container-male-crusader-role-check.mjs,readonly`,
+        '--mount',
+        `type=bind,source=${contentClearCheckPath},target=/app/container-content-clear-check.mjs,readonly`,
         imageId
       ])
     )
@@ -625,6 +630,14 @@ try {
   ])
 
   stage = 'content clear records'
+  await docker([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-content-clear-check.mjs'
+  ])
   assert.equal(
     (
       await psql("SELECT indexdef FROM pg_indexes WHERE indexname = 'content_clears_challenge_key'")
