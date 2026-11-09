@@ -1,16 +1,20 @@
 import assert from 'node:assert/strict'
 import {
   createDatabaseClient,
+  finishContentClearCollection,
   readClearPopulation,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
+  readContentClearCollection,
   readContentClearJobCounts,
   readContentClearPopulations,
   readContentClearWeekRatioCounts,
   readDatabaseConfiguration,
   recordCharacterBasic,
+  recordContentClearCollectionProgress,
   recordContentClearPopulation,
-  recordContentClears
+  recordContentClears,
+  startContentClearCollection
 } from '@dfragon/database'
 import { createClearStatsService } from './dist/content-clears/stats.js'
 
@@ -325,6 +329,18 @@ try {
   )
   assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 4)
   assert.equal((await service.contentStats('engraved-nightmare-1', undefined)).week.cleared, 4)
+
+  // 수집 진행 위치는 끝나기 전까지만 남는다.
+  const collectionStartedAt = at('2026-11-10T06:00:00')
+  assert.equal(await readContentClearCollection(client), undefined)
+  await startContentClearCollection(client, collectionStartedAt)
+  await recordContentClearCollectionProgress(client, { startedAt: collectionStartedAt, done: 300 })
+  assert.deepEqual(await readContentClearCollection(client), {
+    startedAt: collectionStartedAt,
+    done: 300
+  })
+  await finishContentClearCollection(client, collectionStartedAt)
+  assert.equal(await readContentClearCollection(client), undefined)
 } finally {
   await client.$disconnect()
 }
