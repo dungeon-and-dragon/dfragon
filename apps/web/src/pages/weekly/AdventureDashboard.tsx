@@ -32,7 +32,7 @@ function BackdropLayer({
   )
 }
 
-function SeasonBackdrop({ url }: { url: string | undefined }): React.JSX.Element {
+export function SeasonBackdrop({ url }: { url: string | undefined }): React.JSX.Element {
   const [backdrop, setBackdrop] = useState<Backdrop>({ url, previous: undefined, fading: false })
   if (backdrop.url !== url) {
     setBackdrop({ url, previous: backdrop.url, fading: true })
