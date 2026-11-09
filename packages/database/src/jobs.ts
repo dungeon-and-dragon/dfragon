@@ -177,3 +177,130 @@ export async function deleteJobRunsFinishedBefore(
 
   return count
 }
+
+const jobRunSelect = {
+  id: true,
+  trigger: true,
+  status: true,
+  args: true,
+  requestedAt: true,
+  startedAt: true,
+  finishedAt: true,
+  progressDone: true,
+  progressTotal: true,
+  summary: true,
+  error: true
+} as const
+
+export type JobRunRecord = {
+  id: number
+  trigger: string
+  status: string
+  args: unknown
+  requestedAt: Date
+  startedAt: Date | null
+  finishedAt: Date | null
+  progressDone: number | null
+  progressTotal: number | null
+  summary: unknown
+  error: unknown
+}
+
+export type JobOverview = {
+  name: string
+  displayName: string
+  schedule: string | null
+  argsSchema: unknown
+  delayMinutes: number
+  pausedAt: Date | null
+  nextRunAt: Date | null
+  workerSeenAt: Date
+  activeRun: JobRunRecord | null
+  lastFinishedRun: JobRunRecord | null
+}
+
+export type JobRunRequest =
+  | { status: 'requested'; id: number }
+  | { status: 'not-found' }
+  | { status: 'active' }
+
+export type JobPauseChange = 'updated' | 'not-found' | 'not-scheduled'
+
+export async function readJobOverviews(client: DatabaseClient): Promise<JobOverview[]> {
+  const jobs = await client.job.findMany({ orderBy: { name: 'asc' } })
+  const overviews: JobOverview[] = []
+  for (const job of jobs) {
+    const activeRun = await client.jobRun.findFirst({
+      where: { jobName: job.name, status: { in: ['requested', 'running'] } },
+      select: jobRunSelect
+    })
+    const lastFinishedRun = await client.jobRun.findFirst({
+      where: { jobName: job.name, finishedAt: { not: null } },
+      orderBy: [{ finishedAt: 'desc' }, { id: 'desc' }],
+      select: jobRunSelect
+    })
+    overviews.push({ ...job, activeRun, lastFinishedRun })
+  }
+
+  return overviews
+}
+
+export async function readJobRuns(
+  client: DatabaseClient,
+  jobName: string,
+  { before, limit }: { before: number | undefined; limit: number }
+): Promise<JobRunRecord[] | undefined> {
+  const job = await client.job.findUnique({ where: { name: jobName }, select: { name: true } })
+  if (job === null) {
+    return undefined
+  }
+
+  return client.jobRun.findMany({
+    where: { jobName, id: before !== undefined ? { lt: before } : undefined },
+    orderBy: { id: 'desc' },
+    take: limit,
+    select: jobRunSelect
+  })
+}
+
+// 요청이나 실행 중인 행이 있으면 partial unique index 때문에 행을 만들지 않는다.
+export async function requestJobRun(
+  client: DatabaseClient,
+  jobName: string,
+  args: unknown
+): Promise<JobRunRequest> {
+  const [run] = await client.$queryRaw<Array<{ id: number }>>`
+    INSERT INTO "job_runs" ("job_name", "trigger", "status", "args")
+    SELECT "name", 'manual', 'requested', ${JSON.stringify(args)}::jsonb FROM "jobs" WHERE "name" = ${jobName}
+    ON CONFLICT DO NOTHING
+    RETURNING "id"`
+  if (run !== undefined) {
+    return { status: 'requested', id: run.id }
+  }
+  const job = await client.job.findUnique({ where: { name: jobName }, select: { name: true } })
+  if (job === null) {
+    return { status: 'not-found' }
+  }
+
+  return { status: 'active' }
+}
+
+export async function setJobPaused(
+  client: DatabaseClient,
+  jobName: string,
+  paused: boolean
+): Promise<JobPauseChange> {
+  const { count } = await client.job.updateMany({
+    where: { name: jobName, schedule: { not: null } },
+    data: { pausedAt: paused ? new Date() : null }
+  })
+  if (count > 0) {
+    return 'updated'
+  }
+  const job = await client.job.findUnique({ where: { name: jobName }, select: { name: true } })
+  if (job === null) {
+    return 'not-found'
+  }
+
+  return 'not-scheduled'
+}
