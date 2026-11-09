@@ -190,3 +190,29 @@ model JobRun {
   @@index([jobName, requestedAt(sort: Desc)])
   @@map("job_runs")
 }
+
+model CharacterStatsSnapshot {
+  id               Int      @id @default(1)
+  computedAt       DateTime @map("computed_at") @db.Timestamptz(3)
+  total            Int
+  servers          Json
+  jobs             Json
+  fameDistribution Json     @map("fame_distribution")
+
+  @@map("character_stats")
+}
+
+model JobSkillAdoptionSnapshot {
+  jobId        String   @map("job_id")
+  jobGrowId    String   @map("job_grow_id")
+  role         String
+  computedAt   DateTime @map("computed_at") @db.Timestamptz(3)
+  minFame      Int?     @map("min_fame")
+  sampleSize   Int      @map("sample_size")
+  skills       Json
+  evolutions   Json
+  enhancements Json
+
+  @@id([jobId, jobGrowId, role])
+  @@map("job_skill_adoption")
+}
