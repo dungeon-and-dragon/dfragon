@@ -11,12 +11,14 @@ import {
   readContentClearWeekRatioCounts,
   readFameRanking,
   readGuild,
+  readCollectionSummary,
   readJobOverviews,
   readJobRuns,
   readJobSkillAdoption,
   recordCharacterBasic,
   recordCharacterSkillStyle,
   requestJobRun,
+  requeueCollectionFailures,
   setJobPaused
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
@@ -48,6 +50,7 @@ import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../http.js'
 import type { CharacterSearchDependencies } from '../characters/types.js'
 import { createOpsHttpApp } from '../ops/app.js'
+import type { ReadQueueCounts } from '../ops/queues.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
 type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
@@ -140,7 +143,10 @@ export function createApiRuntime(configuration: RuntimeConfiguration) {
   })
 }
 
-export function createOpsRuntime(database: DatabaseConfiguration) {
+export function createOpsRuntime(
+  database: DatabaseConfiguration,
+  readQueueCounts: ReadQueueCounts
+) {
   const client = createDatabaseClient(database)
 
   return createOpsHttpApp({
@@ -149,6 +155,11 @@ export function createOpsRuntime(database: DatabaseConfiguration) {
       readRuns: (name, page) => readJobRuns(client, name, page),
       requestRun: (name, args) => requestJobRun(client, name, args),
       setPaused: (name, paused) => setJobPaused(client, name, paused)
+    },
+    readQueueCounts,
+    collection: {
+      readSummary: () => readCollectionSummary(client),
+      requeue: (failure) => requeueCollectionFailures(client, failure)
     },
     close: () => client.$disconnect()
   })
