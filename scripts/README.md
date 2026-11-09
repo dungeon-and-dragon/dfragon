@@ -6,240 +6,127 @@
 
 ## 루트 도구 회귀 검증
 
-`pnpm test:tooling`은 `scripts/test/*.test.mjs`를 모두 실행합니다. 작업 준비, 날짜, build-info, 앱 생성, 아이콘 생성, lint 플러그인, 포맷 정책, 표기와 문체 검사, 문서 링크와 경로 검사, 토큰 없는 의존성 설치, 의존성 snapshot 변환, `verify` 실행기의 회귀 검사가 포함됩니다. 어느 테스트든 실패하면 검사가 실패합니다. Root `pnpm test`는 [`pnpm verify`](#verify)를 실행합니다.
-
-앱 생성과 아이콘 생성 검사는 저장소 코드를 격리된 임시 디렉터리에 복사해 실제 CLI의 출력 파일, 입력 거절, 실패 코드, 정리를 확인합니다. 아이콘 생성 검사는 합성 PNG의 축소 결과만 확인하므로 제품 아이콘의 화질은 검증하지 않습니다.
-
-## 작업 시작
-
-명확한 요청은 안전한 작업 브랜치에서 바로 진행할 수 있습니다. 현재 checkout, base, 미commit 변경과 진행 작업을 확인한 뒤, 사용할 기준에서 `git switch -c fix-character-search`처럼 목적이 드러나는 이름을 정합니다. 격리가 필요하면 `git worktree add -b fix-character-search ../dfragon-search <확인한-base>`를 사용합니다. 기존 작업을 덮어쓰거나 main에 직접 commit, push하지 않습니다.
-
-## `start-task`
-
-Issue 기반 branch, worktree 준비가 필요한 경우의 선택적 도구입니다. 일반 개발의 선행 조건이 아닙니다. `project` 인자는 GitHub Project 번호가 아니라 아래 workspace 범위입니다.
-
-기존 OPEN Issue 확인, `origin/main` fetch, Issue별 branch와 worktree 생성을 한 번에 실행합니다. Git와 인증된 GitHub CLI가 필요하며, 대상 repository root에서 실행합니다.
-
-```bash
-node scripts/start-task.mjs api 123 fix-character-search ../dfragon-worktrees/api-123-fix-character-search
-```
-
-인자 순서는 `<project> <Issue 번호> <description> <새 worktree 경로>`입니다. 위 명령은 `api-123-fix-character-search` 브랜치를 만듭니다. `123`은 현재 저장소의 실제 OPEN Issue 번호로 바꿉니다. 마지막 인자는 아직 존재하지 않는 경로이며, 공백이 있으면 quote합니다. Base는 이번 fetch로 받은 main commit이며 현재 checkout의 미반영 변경은 포함하지 않습니다.
-
-`project`에는 `api`, `web`, `ui`, `cross`, `repo` 중 하나를 전달합니다. 이 명명법은 도구를 선택했을 때의 입력 계약이며 모든 작업 브랜치에 강제하지 않습니다. `description`은 `fix-character-search`처럼 변경 동사로 시작하는 소문자 설명을 정합니다. 스크립트는 소문자로 시작하고 소문자, 숫자를 하이픈 하나로 연결하는 형식을 검증하며, 동사 의미나 Issue 범위의 적합성은 담당자가 판단합니다.
-
-기존 브랜치, worktree를 바꾸거나 지우지 않으며, 같은 이름의 로컬 브랜치나 대상 경로가 이미 존재하면 생성을 거절합니다.
-
-Root alias `pnpm start-task api 123 fix-character-search ../dfragon-worktrees/api-123-fix-character-search`도 제공합니다. 새 checkout에서는 pnpm이 dependency install을 먼저 수행할 수 있으므로, 준비만 할 때는 위 Node command를 사용합니다.
-
-Issue 제목, URL, branch, 절대 worktree 경로, base SHA를 출력합니다. 기존 branch나 경로는 재사용하거나 덮어쓰지 않으며, 조회, fetch, 생성 실패 시 non-zero로 종료합니다. 생성 후 출력된 worktree로 이동해 작업합니다.
-
-이 command는 GitHub 내용을 변경하거나 install, commit, push를 실행하지 않습니다. 경로 충돌이나 생성 실패가 있으면 원인을 확인하고 필요한 정리는 native Git command로 수행합니다.
-
-```bash
-node --test scripts/test/start-task.test.mjs
-node --check scripts/start-task.mjs
-```
-
-## `statement-spacing`
-
-공통 Biome 포맷 뒤에 실행하는 문장 간격 도구입니다. Biome는 formatter plugin을 지원하지 않으므로 TypeScript parser로 문장 목록을 읽어 필요한 빈 줄만 추가합니다. 블록, 파일, `case`의 첫 문장이 아닌 `return`은 바로 윗줄을 빈 줄로 두고, 같은 문장 목록에서 연속되는 블록 `if` 사이에도 빈 줄 한 줄을 둡니다. 첫 문장 앞 빈 줄 제거, 여러 빈 줄의 수렴, `else`, `else if` 연결과 블록 없는 `if`의 배치는 Biome 출력을 따릅니다. 주석, 반환식, 문자열 값은 바꾸지 않습니다. 문장 바로 앞의 `biome-ignore` 주석은 문장에 붙은 것으로 보고 빈 줄을 그 위에 둡니다.
-
-Root와 각 workspace의 `format`, `format:check`가 Biome 다음에 `--write`, `--check`로 실행합니다. 실행 위치 아래의 Git 추적, 미추적 파일 중 Git ignore 대상이 아니고 root `biome.json`의 includes에 포함된 JavaScript/TypeScript만 처리합니다. 에디터의 Biome 포맷은 이 간격을 추가하지 않으므로 `format`으로 적용합니다. Biome를 갱신하거나 정책을 수정할 때 다음 회귀검사를 실행합니다.
-
-```sh
-pnpm test:format-policy
-node --check scripts/statement-spacing.mjs
-```
-
-## Biome lint 플러그인
-
-`scripts/biome/return-expression.grit`은 `return` 식의 삼항, `??`, 반환 객체 속성의 조건식을, `scripts/biome/regex-literal-constant.grit`은 `const` 초기값이 아닌 정규식 리터럴을 보고합니다. `let-branch-assignment.grit`은 `let`과 분기로 값 하나를 정하는 블록을, `hidden-screen-prop.grit`은 화면을 `hidden`으로 숨겨 마운트해 두는 prop을, `jsx-prop-callback.grit`은 JSX prop 자리에서 만드는 콜백을, `absent-first-conditional.grit`은 값이 없는 경우를 앞에 둔 삼항을 보고합니다. Root `biome.json`이 여섯 GritQL 플러그인을 등록하며 `return` 식 플러그인을 뺀 다섯 플러그인은 테스트 코드와 생성물을 제외하는 override에서만 붙습니다. `pnpm test:tooling`의 `biome-return-expression.test.mjs`, `biome-regex-literal.test.mjs`, `biome-refactoring-criteria.test.mjs`가 저장소 설정을 임시 디렉터리에 복사해 거부, 허용 사례와 제외 범위를 검증합니다.
-
-## `format-date`
-
-UTC ISO 시각을 한국 시간(`Asia/Seoul`)의 `2026년 9월 9일 00시 35분` 형식으로 출력합니다. 인자를 생략하면 현재 시각을 사용합니다.
-
-```bash
-node scripts/format-date.mjs '2026-09-08T15:35:00Z'
-node scripts/format-date.mjs
-```
-
-입력은 `YYYY-MM-DDTHH:mm:ssZ`이며 소수 초 1–3자리를 허용합니다. 잘못된 날짜나 시간대 없는 값은 오류로 거절합니다. `formatDate(timestamp)`를 import해 재사용할 수 있습니다.
-
-검증: `node --test scripts/test/format-date.test.mjs`, `node --check scripts/format-date.mjs`.
-
-## `check-writing`
-
-제품 이름 표기와 사용자 문구의 문체를 검사합니다. 인자가 없으면 Git이 추적하는 파일을 모두 읽고, 경로를 주면 현재 디렉터리 기준으로 그 파일만 검사합니다. NUL 바이트가 있는 이진 파일, submodule 항목과 검사 스크립트 자신, 그 테스트는 건너뜁니다. 위반은 `경로:줄: 규칙: 내용`으로 출력하고 non-zero로 종료합니다. `pnpm verify`가 `pnpm check:writing`을 실행합니다.
-
-```bash
-pnpm check:writing
-node scripts/check-writing.mjs apps/web/README.md
-```
-
-검증: `node --test scripts/test/check-writing.test.mjs`, `node --check scripts/check-writing.mjs`.
-
-## `check-docs`
-
-Git이 추적하는 파일과 ignore 대상이 아닌 새 파일 중 `*.md`의 상대 링크를 검사합니다. 링크한 파일, 디렉터리가 저장소에 있는지와 Markdown 대상의 `#anchor`가 그 문서의 heading과 맞는지 확인합니다. Anchor는 GitHub와 같은 규칙으로 만듭니다. Heading 글자를 소문자로 바꾸고 문자, 숫자, `_`, 공백, `-` 외의 문장부호를 지운 뒤 공백을 `-`로 바꾸며, 같은 heading이 다시 나오면 `-1`, `-2`를 붙입니다. 한국어 heading도 같은 규칙입니다.
-
-`#`로 시작하는 ATX heading만 anchor로 읽습니다. Front matter, code block, code span 안의 링크와 외부 URL, 코드 파일의 `#L10` 같은 줄 anchor는 검사하지 않습니다. 위반은 `경로:줄: 규칙: 링크나 경로`로 출력하고 non-zero로 종료합니다. `pnpm verify`가 `pnpm check:docs`를 실행합니다.
-
-Code span 전체가 `apps/`, `packages/`, `.github/`로 시작하는 저장소 경로이면 그 파일, 디렉터리가 있는지도 확인합니다. 아직 add하지 않은 새 파일도 있는 것으로 봅니다. `*`, `<이름>`, `...`이 든 glob, 플레이스홀더와 `:10`처럼 줄 번호를 붙인 표기, ignore 규칙에 걸리는 build 산출물과 `.env`, submodule 안의 파일은 건너뜁니다. Front matter가 `status: historical`인 문서는 과거 revision의 경로를 기록하므로 경로를 확인하지 않습니다. `scripts/...`, `docs/...`처럼 짧은 경로는 앱 디렉터리나 upstream 저장소 기준인 경우가 많아 확인하지 않습니다.
-
-```bash
-pnpm check:docs
-```
-
-검증: `node --test scripts/test/check-docs.test.mjs`, `node --check scripts/check-docs.mjs`.
-
-## `dependency-snapshot`
-
-pnpm 11 이상의 lockfile은 pnpm 실행 파일을 담은 첫 YAML 문서와 workspace 의존성을 담은 마지막 문서로 나뉩니다. 현재 GitHub dependency graph는 이 lockfile에서 첫 문서의 package만 인식해 workspace의 전이 의존성이 Dependabot alerts에서 빠집니다. [`dependency-snapshot.yml`](../.github/workflows/dependency-snapshot.yml)은 main push에서 의존성 파일이 바뀌었을 때와 main에서 수동 실행했을 때 `pnpm sbom --sbom-format cyclonedx --lockfile-only` 결과를 이 도구로 Dependency submission snapshot으로 바꿔 제출합니다. 저장소 검사가 아니라 Dependabot alerts의 기준을 갱신하는 workflow이며, PR의 의존성 검토는 하지 않습니다. 저장소 Actions 설정은 외부 action을 40자리 commit SHA로 고정하도록 요구하므로 tag로 참조한 action은 실행되지 않습니다.
-
-인자는 `<cyclonedx-sbom-file> <snapshot-file>`이고 `SNAPSHOT_SHA`, `SNAPSHOT_REF`(`refs/heads/<branch>`), `GITHUB_WORKFLOW`, `GITHUB_JOB`, `GITHUB_RUN_ID`를 읽습니다. Workspace가 직접 의존하는 package는 `direct`, 나머지는 `indirect`로 기록합니다. pnpm이 개발 의존성으로만 도달한다고 표시한(`excluded`) package는 `development`, 나머지는 `runtime`입니다. peer 조합처럼 bom-ref만 다르고 purl이 같은 package는 하나로 합치며, 한 변형이라도 `direct`, `runtime`이면 그 값을 쓰고 하위 의존성은 중복 없이 모읍니다. 그래프가 불완전하거나 commit, branch 값이 올바르지 않으면 파일을 쓰지 않고 실패합니다.
-
-GitHub는 workflow 이름과 job id로 만든 correlator마다 마지막 snapshot만 씁니다. 예전 Dependency Review workflow가 제출한 snapshot을 대체하도록 workflow 이름 `Dependency Review`와 job id `submit`을 유지합니다.
-
-검증: `node --test scripts/test/dependency-snapshot.test.mjs`, `node --check scripts/dependency-snapshot.mjs`.
-
-## `server-build-info`
-
-Docker 빌드에서 제품 commit과 서비스명을 고정 JSON 파일로 기록합니다. 커밋 정보는 CLI 인자로만
-받으며 런타임 환경변수나 GitHub의 최신 main을 읽지 않습니다. 허용 서비스는 `api`, `web`이고
-SHA는 소문자 40자리입니다. 로컬 빌드에서 빈 SHA를 전달하면 `commit: null`을 기록합니다.
-
-```sh
-node scripts/server-build-info.mjs api "$(git rev-parse HEAD)" build-info.json
-node --test scripts/test/server-build-info.test.mjs
-```
-
-node1의 이미지 빌드는 내장 정보와 선택한 commit을 추가로 대조합니다.
-실행 중인 서버 조회는 [제품 이미지 안내](../apps/api/README.md#실행-중인-서버의-버전-조회)를 참고합니다.
+`pnpm test:tooling`은 `scripts/test/*.test.mjs`를 모두 실행하며, 어느 테스트든 실패하면 실패합니다. Root `pnpm test`는 [`pnpm verify`](#verify)를 실행합니다.
 
 ## `verify`
 
-`pnpm verify`는 저장소 검사를 로컬에서 실행합니다. GitHub Actions에는 CI 검사가 없으므로 이 명령이 기본 검사입니다. Root `pnpm test`도 같은 명령입니다. 정적 검사(`lint`, `format:check`, `check:writing`, `check:docs`), 루트 도구 테스트, 공용 package와 웹 앱 package, API, Web job의 run 명령을 차례로 실행합니다.
-
-명령 목록은 `scripts/verify.mjs`에 있습니다.
-
-`pnpm install`이 설치하는 husky `pre-push` hook이 push 전에 `pnpm verify --reuse-pass`를 실행합니다. 실패하면 push가 중단됩니다. 의존성 설치는 먼저 끝냈다고 봅니다.
-
-`pnpm verify`가 통과하면 검사한 작업 트리 내용(untracked 파일 포함)의 tree hash를 worktree의 Git 디렉터리(`dfragon-verify/passed-tree`)에 기록합니다. 검사 중에 파일이 바뀌면 기록하지 않습니다. `--reuse-pass`로 실행하면 커밋하지 않은 변경이 없고 HEAD 내용이 기록과 같을 때 검사를 건너뜁니다. 직접 `pnpm verify`로 확인하고 커밋한 직후 push할 때 같은 검사를 다시 돌지 않게 하기 위해서입니다. 의존성 설치 상태, Git이 무시하는 파일(`.env` 등), Node.js 같은 실행 환경은 기록에 들어가지 않으므로 이것만 바꾼 뒤에는 `pnpm verify`를 직접 다시 실행합니다.
-
-Job 안에서는 앞 명령이 실패하면 남은 명령을 건너뛰고 다른 job은 계속 실행합니다. 끝에 실패한 job, 명령, 종료 코드와 건너뛴 명령 수를 모아 출력하고 non-zero로 종료합니다. Job끼리 같은 build 산출물을 쓰므로 병렬로 실행하지 않습니다. 의존성이 준비된 Apple silicon Mac에서 전체 실행에 약 3분 걸렸습니다.
+`pnpm verify`는 저장소 검사를 로컬에서 차례로 실행합니다. GitHub Actions에는 CI 검사가 없으므로 이 명령이 기본 검사이고, Root `pnpm test`도 같은 명령입니다. 명령 목록은 `scripts/verify.mjs`에 있습니다.
 
 ```bash
 pnpm verify
 ```
 
-- `pnpm install --frozen-lockfile`로 의존성을 설치합니다. Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. OCR 모델을 받으려면 `git submodule update --init --recursive`를 실행합니다. API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 `packages/models/score-engine/`에 있을 때만 실행합니다.
+- 의존성은 `pnpm install --frozen-lockfile`로 먼저 설치합니다.
+- Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. `git submodule update --init --recursive`로 받습니다.
+- API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 `packages/models/score-engine/`에 있을 때만 실행합니다.
+- 한 job에서 명령이 실패하면 그 job의 남은 명령을 건너뛰고, 끝에 실패를 모아 출력한 뒤 non-zero로 종료합니다.
 
-로컬 통과는 node1의 이미지 빌드를 대신하지 않습니다. 실행기는 macOS, Linux에서 확인했고 Windows에서는 확인하지 않았습니다. `pnpm verify`로 실행하면 `npm_execpath`의 pnpm을 직접 시작하므로 `pnpm.cmd`만 있는 Windows 환경에서도 명령을 시작합니다. `node scripts/verify.mjs`로 직접 실행하면 shell 없이 `pnpm`을 찾으므로 이런 환경에서는 시작하지 못할 수 있습니다.
+`pnpm install`이 설치하는 husky `pre-push` hook이 push 전에 `pnpm verify --reuse-pass`를 실행하고, 실패하면 push가 중단됩니다.
+`pnpm verify`가 통과하면 검사한 작업 트리 내용을 기록하고, `--reuse-pass`는 커밋하지 않은 변경이 없고 HEAD 내용이 기록과 같으면 검사를 건너뜁니다.
+의존성 설치 상태, `.env`처럼 Git이 무시하는 파일, Node.js 같은 실행 환경은 기록에 들어가지 않으므로 이것만 바꾼 뒤에는 `pnpm verify`를 직접 다시 실행합니다.
+
+로컬 통과는 node1의 이미지 빌드를 대신하지 않습니다. Windows에서는 `node scripts/verify.mjs` 대신 `pnpm verify`로 실행합니다.
 
 ## Native validation
 
-로컬 API는 앱 `package.json`의 `dev` 명령을 사용합니다. `pnpm --filter @dfragon/api dev`가 앱의 `.env`를 읽으며, 개인 홈의 별도 실행 파일은 필요하지 않습니다. 최초 준비는 [API 로컬 실행](../apps/api/README.md#로컬-개발-명령)을 참고합니다.
+로컬 API는 `pnpm --filter @dfragon/api dev`로 실행하며 앱의 `.env`를 읽습니다. 최초 준비는 [API 로컬 실행](../apps/api/README.md#로컬-개발-명령)을 참고합니다.
 
-실제 호출부, 소비자와 변경 위험에 맞는 command를 선택합니다. 아래 조합은 workspace 전반의 검사가 필요할 때의 예제이며 매 수정의 필수 목록이 아닙니다. 아래 [pnpm regex selector와 `--sequential`](https://pnpm.io/cli/run)은 선택한 script를 이름순으로 하나씩 실행하며 실패 시 non-zero로 종료합니다. 별도 validation runner나 dependency가 필요하지 않습니다.
+변경 범위에 맞는 command를 고릅니다. 아래 조합은 workspace 전반의 검사가 필요할 때의 예이며 매 수정의 필수 목록이 아닙니다. [pnpm regex selector와 `--sequential`](https://pnpm.io/cli/run)은 고른 script를 이름순으로 하나씩 실행하고 실패하면 non-zero로 종료합니다.
 
 | 변경 범위 | Repository root에서 실행할 command |
 | --- | --- |
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
-| Task 준비 tooling | 위 `node --test`와 `node --check` command |
+| 루트 도구 | `pnpm test:tooling`과 고친 스크립트의 `node --check` |
 
-정적 검사만 한 번에 실행할 때는 root에서 `pnpm check:static`을 사용합니다. `lint`, `format:check`, `check:writing`, `check:docs`를 `pnpm verify`와 같은 순서로 실행하며 먼저 실패한 검사에서 멈춥니다.
+정적 검사만 실행할 때는 `pnpm check:static`을 씁니다. `lint`, `format:check`, `check:writing`, `check:docs`를 `pnpm verify`와 같은 순서로 실행하고 먼저 실패한 검사에서 멈춥니다.
 
-API 이미지의 실행 계약은 아래 명령으로 검사합니다. Node.js 26, 같은 host의 Docker daemon(Docker Desktop 포함)과 로컬에 있는 Linux 앱 이미지가 필요합니다. [제품 이미지 안내](../apps/api/README.md#서버-이미지)의 빌드 결과를 사용하거나, 인자를 미리 pull한 검증 대상 이미지 reference로 바꿉니다.
+API의 `test`는 `build`로 `dist`를 새로 만든 뒤 test를 compile, 실행하므로 같은 입력의 typecheck를 따로 반복하지 않아도 됩니다. Web의 `build`는 `tsc -b`로 typecheck한 뒤 Vite production build를 실행합니다. 문서만 바꿨으면 app build를 반복하지 않아도 됩니다.
+
+API 이미지의 실행 계약과 DB를 붙인 실행은 아래 명령으로 검사합니다. Node.js 26, 같은 host의 Docker daemon(Docker Desktop 포함)과 로컬에 있는 Linux 앱 이미지가 필요하고, DB 검사는 PostgreSQL 이미지를 받을 수 있어야 합니다. 이미지는 [제품 이미지 안내](../apps/api/README.md#서버-이미지)로 빌드하거나, 인자를 미리 pull한 이미지 reference로 바꿉니다.
 
 ```bash
 node apps/api/test-support/container-deployment.mjs dfragon-api:local
-```
-
-이 검사는 이미지를 빌드하지 않고 합성 Neople key와 네트워크 없는 컨테이너로 entrypoint, secret 입력(ENV, FILE, 기본 파일), 실행 사용자, 읽기 전용 파일시스템, HTTP 기동, 잘못된 입력의 거절, 정상 종료를 확인하고 자체 컨테이너 정리를 시도합니다. 강제 종료, Docker 장애 시 컨테이너가 남을 수 있습니다. 운영 credential은 입력하지 않습니다.
-
-DB를 붙인 실행은 아래 명령으로 검사합니다. 같은 준비 조건에 PostgreSQL 이미지를 받을 수 있어야 합니다.
-
-```bash
 node apps/api/test-support/container-database.mjs dfragon-api:local
 ```
 
-합성 비밀번호로 PostgreSQL 컨테이너와 internal network를 만들고, 시작 때 migration 적용, 다른 연결이 Prisma의 advisory lock을 잡은 동안 두 인스턴스의 대기, HTTP 기동, 실패한 migration의 nonzero 종료, 잘못된 DB 입력의 거절을 확인한 뒤 만든 컨테이너와 network를 지웁니다.
+두 검사는 이미지를 빌드하지 않고 합성 Neople key, 합성 비밀번호만 씁니다. 운영 credential은 입력하지 않습니다. 만든 컨테이너와 network는 스스로 지우지만 강제 종료나 Docker 장애 때는 남을 수 있습니다.
 
-Web의 `test`는 Vitest로 모든 웹 테스트를 실행하고, `build`는 `tsc -b`로 typecheck한 뒤 Vite production build를 실행합니다. 빠른 feedback이 필요할 때는 개별 `test`, `lint`, `typecheck` command를 먼저 실행할 수 있습니다. 여러 범위에 실제 영향을 주면 필요한 검사를 조합합니다.
+## `check-writing`
 
-API의 `test`는 `build`를 먼저 실행해 `dist`를 새로 만든 뒤 `.test-dist` compile과 test를 수행합니다. 위 API 조합은 이 build와 `tsconfig.test.json`의 compile을 포함하므로 같은 입력의 별도 typecheck를 반복하지 않습니다. 단독 `pnpm --filter @dfragon/api test`도 최신 production output을 검증합니다. Root `test`는 `pnpm verify`와 같습니다. 문서만 변경할 때 app build를 반복할 필요는 없습니다. 실행 결과에는 실제 검증 범위와 실행하지 못한 항목을 구분해 기록합니다.
+제품 이름 표기와 사용자 문구의 문체를 검사합니다. 인자가 없으면 Git이 추적하는 파일을 모두 읽고, 경로를 주면 현재 디렉터리 기준으로 그 파일만 검사합니다. 이진 파일과 submodule은 건너뜁니다.
+위반은 `경로:줄: 규칙: 내용`으로 출력하고 non-zero로 종료합니다. `pnpm verify`가 `pnpm check:writing`을 실행합니다.
+
+```bash
+pnpm check:writing
+node scripts/check-writing.mjs apps/web/README.md
+```
+
+## `check-docs`
+
+`*.md`의 상대 링크가 저장소의 파일, 디렉터리를 가리키는지와 `#anchor`가 대상 문서의 heading과 맞는지 검사합니다. Anchor는 GitHub와 같은 규칙으로 만듭니다.
+Code span 전체가 `apps/`, `packages/`, `.github/`로 시작하는 저장소 경로이면 그 경로가 있는지도 봅니다. 외부 URL, code block 안의 링크, glob과 플레이스홀더는 검사하지 않습니다.
+위반은 `경로:줄: 규칙: 링크나 경로`로 출력하고 non-zero로 종료합니다. `pnpm verify`가 `pnpm check:docs`를 실행합니다.
+
+```bash
+pnpm check:docs
+```
+
+## `statement-spacing`
+
+공통 Biome 포맷 뒤에 실행하는 문장 간격 도구입니다. Biome가 하지 않는 `return` 앞과 연속된 블록 `if` 사이의 빈 줄만 더합니다.
+Root와 각 workspace의 `format`, `format:check`가 Biome 다음에 실행하므로 따로 부르지 않습니다. 에디터의 Biome 포맷은 이 빈 줄을 더하지 않으니 `pnpm format`으로 적용합니다. Biome를 갱신하거나 정책을 바꾸면 아래를 실행합니다.
+
+```sh
+pnpm test:format-policy
+```
+
+## Biome lint 플러그인
+
+`scripts/biome/`의 GritQL 플러그인 여섯 개(`return-expression`, `regex-literal-constant`, `let-branch-assignment`, `hidden-screen-prop`, `jsx-prop-callback`, `absent-first-conditional`)를 root `biome.json`이 등록하며 `pnpm lint`가 실행합니다.
+
+## `start-task`
+
+Issue 기반 branch와 worktree를 한 번에 준비하는 선택 도구입니다. 일반 개발의 선행 조건이 아닙니다. Git와 인증된 GitHub CLI가 필요합니다.
+
+```bash
+node scripts/start-task.mjs <project> <Issue 번호> <description> <새 worktree 경로>
+node scripts/start-task.mjs api 123 fix-character-search ../dfragon-worktrees/api-123-fix-character-search
+```
+
+`project`는 `api`, `web`, `ui`, `cross`, `repo` 가운데 하나입니다. 같은 이름의 branch나 경로가 이미 있으면 거절합니다.
+
+## `format-date`
+
+UTC ISO 시각을 한국 시간(`Asia/Seoul`)의 `2026년 9월 9일 00시 35분` 형식으로 출력합니다. 인자를 생략하면 현재 시각을 씁니다.
+
+```bash
+node scripts/format-date.mjs '2026-09-08T15:35:00Z'
+```
+
+## `dependency-snapshot`
+
+[`dependency-snapshot.yml`](../.github/workflows/dependency-snapshot.yml)이 main의 의존성 변경을 Dependabot alerts에 반영하려고, pnpm의 CycloneDX SBOM을 GitHub Dependency submission snapshot으로 바꿀 때 씁니다. 저장소 검사가 아닙니다.
+
+```bash
+node scripts/dependency-snapshot.mjs <cyclonedx-sbom-file> <snapshot-file>
+```
+
+## `server-build-info`
+
+Docker 빌드에서 제품 commit과 서비스명(`api`, `web`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
+
+```sh
+node scripts/server-build-info.mjs api "$(git rev-parse HEAD)" build-info.json
+```
+
+실행 중인 서버 조회는 [제품 이미지 안내](../apps/api/README.md#실행-중인-서버의-버전-조회)를 참고합니다.
 
 ## `create-app`
 
-새 애플리케이션 workspace를 생성합니다.
-
-저장소 루트에서 실행:
+`apps/<app-name>`에 새 애플리케이션 workspace를 만듭니다. 패키지명은 `@dfragon/<app-name>` 형식이고, 기존 디렉터리가 있으면 만들지 않습니다. 비어 있는 `dev`, `build`, `test` script는 생성 뒤 채웁니다.
 
 ```bash
 pnpm create-app --name @dfragon/party-api
 ```
-
-`-n` 축약 옵션도 지원합니다.
-
-```bash
-pnpm create-app -n @dfragon/party-api
-```
-
-스크립트 프로젝트의 생성기를 직접 실행할 수도 있습니다.
-
-```bash
-node scripts/create-app.mjs --name @dfragon/party-api
-```
-
-패키지명은 `@dfragon/<app-name>` 형식이어야 하며, 앱 이름은 소문자 영문, 숫자와 하이픈으로 구성해야 합니다.
-
-`@dfragon/party-api`의 생성 결과:
-
-```text
-apps/party-api/
-├── src/
-└── package.json
-```
-
-생성되는 `package.json`의 기본값:
-
-```json
-{
-  "name": "@dfragon/party-api",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "",
-    "build": "",
-    "test": "",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome lint"
-  }
-}
-```
-
-`dev`, `build`, `test` 스크립트는 비어 있으므로 생성 후 앱에 맞게 채웁니다.
-
-### 안전 규칙
-
-- 기존 `apps/<app-name>` 디렉터리가 있으면 생성하지 않고 종료합니다.
-- 기존 파일을 덮어쓰지 않습니다.
-- 생성기 자체는 `pnpm install`을 자동 실행하지 않습니다.
-- 생성 후 workspace 인식 여부는 다음 명령으로 확인할 수 있습니다.
-
-```bash
-pnpm list -r --depth -1
-```
-
-npm으로 루트 명령을 실행하는 경우에는 스크립트 인자 앞에 `--`를 추가합니다.
-
-```bash
-npm run create-app -- --name @dfragon/party-api
-```
-
-구현은 같은 디렉터리의 [`create-app.mjs`](./create-app.mjs)에 있습니다.
