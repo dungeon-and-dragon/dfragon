@@ -13,15 +13,25 @@ export { createDatabaseClient } from './client.js'
 export {
   CLEAR_POPULATION_SIZE,
   readClearPopulation,
+  readContentClearAdventureSizes,
+  readContentClearCollectedAt,
+  readContentClearJobCounts,
+  readContentClearPopulations,
+  readContentClearWeekRatioCounts,
   recordContentClearPopulation,
   recordContentClears
 } from './content-clear.js'
 export type {
+  ClearAdventureSize,
+  ClearJobCount,
   ClearPopulationCharacter,
   ClearPopulationJob,
+  ClearWeekRatioCount,
+  ClearWeekSelection,
   ContentClearInput,
   ContentClearKind,
-  ContentClearPopulationInput
+  ContentClearPopulationInput,
+  StoredClearPopulation
 } from './content-clear.js'
 export type { DatabaseClient } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
