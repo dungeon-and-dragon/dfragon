@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import { applyMigrations } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
+import { readTimelineQueueCounts } from './http.js'
 import { createApiRuntime, createOpsRuntime } from './runtime/application.js'
 import { readRuntimeConfiguration } from './runtime/configuration.js'
 
@@ -32,7 +33,7 @@ async function main(): Promise<void> {
     await listen(app, configuration.port)
     const { ops } = configuration
     if (ops !== undefined) {
-      const opsApp = await createOpsRuntime(ops.database)
+      const opsApp = await createOpsRuntime(ops.database, () => readTimelineQueueCounts(app))
       apps.push(opsApp)
       await listen(opsApp, ops.port)
     }

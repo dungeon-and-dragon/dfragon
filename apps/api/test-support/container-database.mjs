@@ -541,7 +541,7 @@ try {
         "SELECT string_agg(character_id || ':' || coalesce(failure, '-'), ',' ORDER BY character_id) FROM character_collection"
       )
     ).stdout.trim(),
-    'collect-failed:neople-api,collect-no-basic:-'
+    'collect-failed:neople-api,collect-no-basic:-,collect-schema:-'
   )
   assert.equal(
     (
@@ -849,7 +849,19 @@ try {
   await psql(
     "INSERT INTO jobs (name, display_name, schedule, args_schema, delay_minutes, worker_seen_at) VALUES ('ops-probe', 'ops probe', NULL, '{}', 10, now())"
   )
+  await psql(
+    "INSERT INTO character_collection (server_id, character_id, queued_at, attempted_at, failure) VALUES ('cain', 'ops-waiting', '2026-11-09T00:00:00Z', NULL, NULL), ('cain', 'ops-api', '2026-11-08T00:00:00Z', '2026-11-08T01:00:00Z', 'neople-api'), ('cain', 'ops-internal', '2026-11-08T00:00:00Z', '2026-11-08T02:00:00Z', 'neople-internal')"
+  )
   await docker(['exec', apiNames[0], 'node', '/app/container-ops-check.mjs'])
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(character_id || ':' || coalesce(failure, '-') || ':' || (attempted_at IS NULL), ',' ORDER BY character_id) FROM character_collection"
+      )
+    ).stdout.trim(),
+    'ops-api:-:true,ops-internal:-:true,ops-waiting:-:true'
+  )
+  await psql('DELETE FROM character_collection')
   assert.equal(
     (
       await psql(
@@ -976,6 +988,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops port job routes, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops port job, queue and collection routes, HTTP and database input rejection\n'
   )
 }
