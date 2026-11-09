@@ -160,6 +160,13 @@ model ContentClearPopulation {
   @@map("content_clear_populations")
 }
 
+model ContentClearCollection {
+  startedAt DateTime @id @map("started_at") @db.Timestamptz(3)
+  done      Int      @default(0)
+
+  @@map("content_clear_collections")
+}
+
 model Job {
   name          String    @id
   displayName   String    @map("display_name")

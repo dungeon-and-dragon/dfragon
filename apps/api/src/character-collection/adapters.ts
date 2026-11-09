@@ -6,10 +6,25 @@ import {
   takeCollectionBatch
 } from '@dfragon/database'
 import type { NeopleClient } from '@dfragon/neople'
+import pThrottle from 'p-throttle'
 import type { CollectionStore, FetchCharacterBasic } from './collect.js'
 import type { EnqueueCharacters } from './import.js'
 
-export function createNeopleCharacterBasic(neople: NeopleClient): FetchCharacterBasic {
+export type WorkerNeople = Pick<NeopleClient, 'characterBasic' | 'characterTimeline'>
+
+// 새 캐릭터 저장과 클리어 수집이 Neople 요청 속도 상한 하나를 나눠 쓴다. 기다리는 호출은 부른 순서대로 나가 한쪽이 계속 밀리지 않는다.
+export function paceNeopleRequests(neople: WorkerNeople, requestsPerSecond: number): WorkerNeople {
+  const throttle = pThrottle({ limit: 1, interval: 1000 / requestsPerSecond })
+
+  return {
+    characterBasic: throttle(neople.characterBasic),
+    characterTimeline: throttle(neople.characterTimeline)
+  }
+}
+
+export function createNeopleCharacterBasic(
+  neople: Pick<NeopleClient, 'characterBasic'>
+): FetchCharacterBasic {
   return (character) => neople.characterBasic(character)
 }
 

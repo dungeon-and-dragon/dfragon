@@ -139,6 +139,49 @@ export async function recordContentClearPopulation(
     WHERE NOT "content_clear_populations"."closed"`
 }
 
+export type ContentClearCollectionProgress = {
+  startedAt: Date
+  done: number
+}
+
+// 수집이 끝나기 전까지만 행이 있어, 다시 시작한 수집이 같은 시작 시각과 처리한 캐릭터 수로 이어 받는다.
+export async function readContentClearCollection(
+  client: DatabaseClient
+): Promise<ContentClearCollectionProgress | undefined> {
+  const progress = await client.contentClearCollection.findFirst({
+    orderBy: { startedAt: 'asc' },
+    select: { startedAt: true, done: true }
+  })
+
+  if (progress === null) {
+    return undefined
+  }
+
+  return progress
+}
+
+export async function startContentClearCollection(
+  client: DatabaseClient,
+  startedAt: Date
+): Promise<void> {
+  await client.contentClearCollection.create({ data: { startedAt } })
+}
+
+export async function recordContentClearCollectionProgress(
+  client: DatabaseClient,
+  progress: ContentClearCollectionProgress
+): Promise<void> {
+  const { startedAt, done } = progress
+  await client.contentClearCollection.update({ where: { startedAt }, data: { done } })
+}
+
+export async function finishContentClearCollection(
+  client: DatabaseClient,
+  startedAt: Date
+): Promise<void> {
+  await client.contentClearCollection.deleteMany({ where: { startedAt } })
+}
+
 // 명성 랭킹과 같은 순서다. ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
 export function readClearPopulation(client: DatabaseClient): Promise<ClearPopulationCharacter[]> {
   return client.$queryRaw<ClearPopulationCharacter[]>`

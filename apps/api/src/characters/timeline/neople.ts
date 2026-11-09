@@ -37,7 +37,7 @@ function toTimelineRow({ code, name, date, data }: NeopleTimelineRow): TimelineR
 
 // 문서에 code를 빼면 모든 코드가 온다는 설명이 없어 기본값으로 저장할 코드를 모두 적는다.
 export function createNeopleCharacterTimeline(
-  neople: NeopleClient,
+  neople: Pick<NeopleClient, 'characterTimeline'>,
   codes: readonly number[] = TIMELINE_CODES
 ): FetchCharacterTimeline {
   const codeQuery = codes.join(',')

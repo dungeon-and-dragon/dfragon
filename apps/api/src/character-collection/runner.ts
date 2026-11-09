@@ -1,5 +1,4 @@
 import { stat } from 'node:fs/promises'
-import { setTimeout } from 'node:timers/promises'
 import type { CollectedCharacter } from '@dfragon/database'
 import { type CollectionStore, type FetchCharacterBasic, collectCharacter } from './collect.js'
 import { type EnqueueCharacters, importCollectedCharacters } from './import.js'
@@ -12,7 +11,6 @@ export interface CollectionPassDependencies {
   enqueue: EnqueueCharacters
   fetchBasic: FetchCharacterBasic
   store: CollectionStore
-  requestIntervalMs: number
   concurrency: number
   report: (code: string, details?: Record<string, number>) => void
 }
@@ -29,7 +27,7 @@ type ImportDependencies = Pick<
 
 type BatchCollectionDependencies = Pick<
   CollectionPassDependencies,
-  'fetchBasic' | 'store' | 'requestIntervalMs' | 'concurrency'
+  'fetchBasic' | 'store' | 'concurrency'
 >
 
 async function modifiedTime(path: string): Promise<number | undefined> {
@@ -63,20 +61,16 @@ async function importChangedFiles({
 
 async function collectBatch(
   batch: readonly CollectedCharacter[],
-  { fetchBasic, store, requestIntervalMs, concurrency }: BatchCollectionDependencies
+  { fetchBasic, store, concurrency }: BatchCollectionDependencies
 ): Promise<'collected' | 'unavailable'> {
   for (let start = 0; start < batch.length; start += concurrency) {
     const group = batch.slice(start, start + concurrency)
-    const startedAt = performance.now()
     const results = await Promise.all(
       group.map((character) => collectCharacter(character, fetchBasic, store))
     )
     if (results.includes('unavailable')) {
       return 'unavailable'
     }
-    // 묶음마다 요청 수만큼의 간격을 채워 평균 속도가 초당 상한을 넘지 않게 한다.
-    const remainingMs = group.length * requestIntervalMs - (performance.now() - startedAt)
-    await setTimeout(Math.max(0, remainingMs))
   }
 
   return 'collected'
