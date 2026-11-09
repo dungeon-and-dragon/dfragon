@@ -72,6 +72,7 @@ export {
   deleteJobSkillAdoptionComputedBefore,
   readFamedJobGrows,
   readJobSkillAdoption,
+  readJobSkillAdoptionSnapshot,
   saveJobSkillAdoption
 } from './skill-adoption.js'
 export type {
@@ -122,7 +123,12 @@ export type {
   TimelineRange,
   TimelineSyncState
 } from './timeline.js'
-export { readCharacterStats, readFameRanking, saveCharacterStats } from './ranking-stats.js'
+export {
+  readCharacterStats,
+  readCharacterStatsSnapshot,
+  readFameRanking,
+  saveCharacterStats
+} from './ranking-stats.js'
 export type {
   CharacterStats,
   CharacterStatsSnapshot,
