@@ -4,6 +4,11 @@ import {
   readAdventureCharacters,
   readAdventureNames,
   readCharacterStats,
+  readContentClearAdventureSizes,
+  readContentClearCollectedAt,
+  readContentClearJobCounts,
+  readContentClearPopulations,
+  readContentClearWeekRatioCounts,
   readFameRanking,
   readGuild,
   readJobSkillAdoption,
@@ -52,6 +57,7 @@ function createDatabaseSubscribers(
   | 'recordCharacterSkillStyle'
   | 'adventureGuild'
   | 'rankingStats'
+  | 'clearStats'
 > &
   Pick<CharacterSearchDependencies, 'readAdventureNames'> {
   if (database === undefined) {
@@ -96,6 +102,13 @@ function createDatabaseSubscribers(
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
       readCharacterStats: () => readCharacterStats(client),
       readJobSkillAdoption: (job) => readJobSkillAdoption(client, job)
+    },
+    clearStats: {
+      readCollectedAt: () => readContentClearCollectedAt(client),
+      readPopulations: () => readContentClearPopulations(client),
+      readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
+      readJobCounts: (selection) => readContentClearJobCounts(client, selection),
+      readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection)
     }
   }
 }
