@@ -113,7 +113,9 @@ export function SkillAdoptionTooltip({
       )}
       <span {...stylex.props(styles.footer)}>
         <span>{sampleText(adoption.sampleSize, role)}</span>
-        <span>{formatSeoulDateTime(adoption.computedAt, now)}</span>
+        {adoption.computedAt !== null && (
+          <span>{formatSeoulDateTime(adoption.computedAt, now)}</span>
+        )}
       </span>
     </span>
   )

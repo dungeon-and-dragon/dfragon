@@ -38,10 +38,12 @@ export function StatsScreen(): React.JSX.Element {
         <div {...stylex.props(styles.screen)}>
           <TitleBox title="캐릭터 통계">
             <TitleStat label="캐릭터" value={integer.format(stats.total)} />
-            <TitleStat
-              label="마지막 업데이트 시간"
-              value={<RelativeTime at={stats.computedAt} />}
-            />
+            {stats.computedAt !== null && (
+              <TitleStat
+                label="마지막 업데이트 시간"
+                value={<RelativeTime at={stats.computedAt} />}
+              />
+            )}
           </TitleBox>
           <div {...stylex.props(styles.grid)}>
             <StatBox name="서버 인구" bars={serverBars(stats)} />
