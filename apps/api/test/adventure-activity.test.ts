@@ -13,7 +13,6 @@ import {
   type AdventureActivityRead,
   emptySeasonActivity,
   findActivitySeason,
-  readAdventureActivityDay,
   readAdventureSeasonDays,
   toActivityDayDetail,
   toActivityDayRange,
@@ -605,9 +604,6 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
     enhancements: [{ at: '2026-07-18T06:01:00+09:00', kind: 'amplify', target: 10, success: true }]
   })
   assert.deepEqual([eventQueries, itemQueries], [1, 1])
-  for (const detail of result.days) {
-    assert.deepEqual(detail, await readAdventureActivityDay(client, '합성', day(detail.date)))
-  }
   assert.deepEqual(await readAdventureSeasonDays(client, '합성', 9, now), { season: 9, days: [] })
   backfillComplete = true
   assert.deepEqual(
@@ -626,10 +622,7 @@ async function listen(
   reader: Partial<
     Pick<
       AdventureGuildReader,
-      | 'readAdventureActivity'
-      | 'readAdventureActivityDay'
-      | 'readAdventureSeasonDays'
-      | 'readAdventureSeasonBackfill'
+      'readAdventureActivity' | 'readAdventureSeasonDays' | 'readAdventureSeasonBackfill'
     >
   >,
   syncTimeline: (character: TimelineCharacter) => Promise<void>
@@ -644,7 +637,6 @@ async function listen(
       readGuild: unused,
       readAdventureWeeklyClears: unused,
       readAdventureActivity: unused,
-      readAdventureActivityDay: unused,
       readAdventureSeasonDays: unused,
       readAdventureSeasonBackfill: unused,
       ...reader
@@ -757,65 +749,6 @@ test('시즌 번호가 정수가 아니거나 없는 시즌이면 400 INVALID_CH
       assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
     }
     assert.deepEqual(reads, [99])
-  } finally {
-    await app.close()
-  }
-})
-
-test('하루 상세 조회는 06:00 KST부터의 하루 구간을 넘기고 동기화를 요청하지 않는다', async () => {
-  const reads: [string, unknown][] = []
-  const requested: TimelineCharacter[] = []
-  const detail = toActivityDayDetail(day('2026-07-18'), {
-    clears: [raid('2026-07-18T12:00:00', '디레지에 레이드')],
-    items: [acquisition('2026-07-18T09:58:00', '레전더리')]
-  })
-  const { app, origin } = await listen(
-    {
-      readAdventureActivityDay: async (adventureName, range) => {
-        reads.push([adventureName, range])
-
-        return detail
-      }
-    },
-    async (character) => {
-      requested.push(character)
-    }
-  )
-  try {
-    const name = encodeURIComponent('합성 모험단')
-    const response = await fetch(new URL(`/adventures/${name}/activity/days/2026-07-18`, origin))
-
-    assert.equal(response.status, 200)
-    assert.deepEqual(await response.json(), detail)
-    assert.deepEqual(reads, [
-      [
-        '합성 모험단',
-        {
-          date: '2026-07-18',
-          startsAt: at('2026-07-18T06:00:00'),
-          endsAt: at('2026-07-19T06:00:00')
-        }
-      ]
-    ])
-    assert.deepEqual(requested, [])
-  } finally {
-    await app.close()
-  }
-})
-
-test('하루 상세의 날짜가 YYYY-MM-DD가 아니거나 없는 날짜면 400 INVALID_CHARACTER_QUERY를 준다', async () => {
-  const { app, origin } = await listen(
-    { readAdventureActivityDay: async () => assert.fail('잘못된 날짜로 읽으면 안 된다') },
-    async () => undefined
-  )
-  try {
-    for (const date of ['2026-7-18', '20260718', '2026-02-30', 'today']) {
-      const response = await fetch(new URL(`/adventures/a/activity/days/${date}`, origin))
-      const body = await response.json()
-
-      assert.equal(response.status, 400, date)
-      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', date)
-    }
   } finally {
     await app.close()
   }
