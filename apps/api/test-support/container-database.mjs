@@ -52,6 +52,7 @@ const statsSnapshotCheckPath = fileURLToPath(
 const contentClearCheckPath = fileURLToPath(
   new URL('./container-content-clear-check.mjs', import.meta.url)
 )
+const opsCheckPath = fileURLToPath(new URL('./container-ops-check.mjs', import.meta.url))
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -265,8 +266,12 @@ try {
         name,
         ...runtimeOptions,
         ...databaseEnvironment,
+        '--env',
+        'OPS_PORT=3001',
         '--mount',
         `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`,
+        '--mount',
+        `type=bind,source=${opsCheckPath},target=/app/container-ops-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${runtimeCheckPath},target=/app/container-runtime-check.mjs,readonly`,
         '--mount',
@@ -838,6 +843,28 @@ try {
     '143'
   )
   await removeOwned(collectorName)
+
+  stage = 'ops port reads and writes jobs'
+  // 멈춘 worker가 요청 행을 집지 않아 요청됨 상태와 중복 거절을 그대로 확인한다.
+  await psql(
+    "INSERT INTO jobs (name, display_name, schedule, args_schema, delay_minutes, worker_seen_at) VALUES ('ops-probe', 'ops probe', NULL, '{}', 10, now())"
+  )
+  await docker(['exec', apiNames[0], 'node', '/app/container-ops-check.mjs'])
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(job_name || ':' || status || ':' || args::text, ',') FROM job_runs WHERE status = 'requested'"
+      )
+    ).stdout.trim(),
+    'job-run-cleanup:requested:{"probe": true}'
+  )
+  assert.equal(
+    (await psql("SELECT paused_at IS NULL FROM jobs WHERE name = 'job-run-cleanup'")).stdout.trim(),
+    't'
+  )
+  await psql(
+    "DELETE FROM job_runs WHERE status = 'requested'; DELETE FROM jobs WHERE name = 'ops-probe'"
+  )
   const missingImportFile = await docker(
     [
       'run',
@@ -949,6 +976,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops port job routes, HTTP and database input rejection\n'
   )
 }
