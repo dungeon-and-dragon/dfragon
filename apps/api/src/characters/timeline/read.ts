@@ -12,7 +12,7 @@ import {
 import { z } from 'zod'
 import { startOfResetWeek } from '../../utils/seoul-time.js'
 
-const RAID_CLEAR_CODES = [201, 210]
+export const RAID_CLEAR_CODES = [201, 210]
 const LEGION_CLEAR_CODE = 209
 export const CLEAR_CODES = [...RAID_CLEAR_CODES, LEGION_CLEAR_CODE]
 type ClearKind = 'raid' | 'legion'
