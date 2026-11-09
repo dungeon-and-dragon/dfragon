@@ -24,6 +24,12 @@ import {
 } from '../ranking/ranking-stats'
 import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '../ranking/skill-stats'
 import {
+  clearContentStatsSchema,
+  clearStatsSchema,
+  type ClearContentStats,
+  type ClearStats
+} from '../ranking/clear-stats'
+import {
   characterDetailViewSchema,
   type CharacterDetailView
 } from '../character/character-detail-view'
@@ -73,6 +79,11 @@ export type TimelinePageHttp<Item> = (
 export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
+export type ClearStatsHttp = () => Promise<ClearStats>
+export type ClearContentStatsHttp = (
+  contentId: string,
+  weekStart: string | undefined
+) => Promise<ClearContentStats>
 export type GuildHttp = (guildId: string) => Promise<Guild>
 export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
 export type AdventureActivityHttp = (
@@ -104,6 +115,8 @@ export type DfragonClient = Readonly<{
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
   skillStats: SkillStatsHttp
+  clearStats: ClearStatsHttp
+  clearContentStats: ClearContentStatsHttp
   adventures: Readonly<{
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
@@ -321,6 +334,11 @@ export function createDfragonClient({
     skillStats: ({ jobId, jobGrowId, role }) =>
       requestJson('/stats/skills', skillStatsSchema, {
         searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
+      }),
+    clearStats: () => requestJson('/stats/clears', clearStatsSchema),
+    clearContentStats: (contentId, weekStart) =>
+      requestJson(`/stats/clears/${encodeURIComponent(contentId)}`, clearContentStatsSchema, {
+        searchParams: { ...(weekStart !== undefined && { week: weekStart }) }
       }),
     adventures: {
       async weekly(adventureName) {

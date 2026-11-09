@@ -9,6 +9,7 @@ import type { OathCatalog } from '#core/catalog/oath-catalog'
 import type { CharacterSearchQuery, SearchedCharacter } from '#core/api/character-schemas'
 import type { CharacterStats, FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
 import type { SkillStats, SkillStatsJob } from '#core/ranking/skill-stats'
+import type { ClearContentStats, ClearStats } from '#core/ranking/clear-stats'
 import type {
   CharacterTimeline,
   TimelineAcquisition,
@@ -60,6 +61,11 @@ export type ClientHost = Readonly<{
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
   getSkillStats: (job: SkillStatsJob) => Promise<SkillStats>
+  getClearStats: () => Promise<ClearStats>
+  getClearContentStats: (
+    contentId: string,
+    weekStart: string | undefined
+  ) => Promise<ClearContentStats>
   getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
   getAdventureActivity: (
