@@ -319,7 +319,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '9'
+    '10'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -687,6 +687,11 @@ try {
     ].join('; ')
   )
 
+  // 클리어 수집 job은 정지해 두어 보충 실행으로 Neople을 부르지 않는다. 다시 등록해도 정지 시각은 남는다.
+  await psql(
+    "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now())"
+  )
+
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
   const collectorOptions = [
@@ -737,10 +742,10 @@ try {
   assert.equal(
     (
       await psql(
-        "SELECT name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') FROM jobs"
+        "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'job-run-cleanup:0 4 * * *:true:object'
+    'content-clear-collection:0 6 * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false'
   )
   assert.equal(
     (
