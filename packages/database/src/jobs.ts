@@ -16,6 +16,11 @@ export type JobRunReference = {
   jobName: string
 }
 
+export type InterruptedJobRun = JobRunReference & {
+  trigger: JobTrigger
+  startedAt: Date
+}
+
 export type ClaimedJobRun = JobRunReference & {
   args: unknown
 }
@@ -98,11 +103,13 @@ export async function readLastScheduledJobSuccess(
   return run.startedAt
 }
 
-export async function interruptRunningJobRuns(client: DatabaseClient): Promise<JobRunReference[]> {
-  return client.$queryRaw<JobRunReference[]>`
+export async function interruptRunningJobRuns(
+  client: DatabaseClient
+): Promise<InterruptedJobRun[]> {
+  return client.$queryRaw<InterruptedJobRun[]>`
     UPDATE "job_runs" SET "status" = 'interrupted', "finished_at" = now()
     WHERE "status" = 'running'
-    RETURNING "id", "job_name" AS "jobName"`
+    RETURNING "id", "job_name" AS "jobName", "trigger", "started_at" AS "startedAt"`
 }
 
 // 같은 job의 요청이나 실행 중인 행이 있으면 partial unique index 때문에 행을 만들지 않고 undefined를 돌려준다.
