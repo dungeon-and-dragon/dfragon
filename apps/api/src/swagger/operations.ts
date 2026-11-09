@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { CHARACTER_ID_PATTERN_SOURCE } from '../characters/identity.js'
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
+import { CLEAR_CONTENTS } from '../content-clears/contents.js'
 
 function success(schema: string, description: string) {
   return ApiResponse({
@@ -354,5 +355,43 @@ export function ApiSkillStats() {
     maleCrusaderRoleQuery,
     success('SkillStats', '집계 시각, 표본 기준과 스킬별 채택 수'),
     errors({ 400: 'INVALID_CHARACTER_QUERY', 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiClearStats() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '컨텐츠 클리어 집계 목록 조회',
+      description:
+        '공개 API. 클리어 집계 대상 컨텐츠와 모집단을 저장한 주별 요약을 반환합니다. 모집단은 수집 때 명성 상위 캐릭터이고, 레이드의 cleared는 그 주에 깬 캐릭터 수, 챌린지의 cleared는 출시부터 그 주 끝까지 깬 누적 수입니다. 클리어 기록과 모집단은 캐릭터 목록 worker가 저장하며 이 경로는 Neople을 부르지 않습니다. 결과는 API 메모리에 캐시하고, 요청마다 모집단의 마지막 수집 시각을 읽어 바뀌었으면 다시 계산합니다. 실패는 캐시하지 않습니다. DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로 반환합니다.'
+    }),
+    success('ClearStats', '컨텐츠별 주별 모집단, 클리어 수와 배율별 클리어 수'),
+    errors({ 500: 'INTERNAL_SERVER_ERROR' })
+  )
+}
+
+export function ApiClearContentStats() {
+  return applyDecorators(
+    ApiOperation({
+      summary: '컨텐츠 한 주의 클리어 집계 조회',
+      description:
+        '공개 API. 한 컨텐츠의 한 주 요약과 직업, 전직별 모집단과 클리어 수, 모험단별 클리어 캐릭터 수 분포를 반환합니다. 챌린지는 출시부터 그 주 끝까지 깬 캐릭터를 셉니다. 캐시와 갱신은 목록 조회와 같습니다. 모집단을 저장한 주가 없으면 week는 null이고 jobs, adventures는 빈 배열입니다.'
+    }),
+    ApiParam({
+      name: 'contentId',
+      schema: { type: 'string', enum: CLEAR_CONTENTS.map(({ id }) => id) }
+    }),
+    ApiQuery({
+      name: 'week',
+      required: false,
+      schema: { type: 'string', format: 'date' },
+      description: '목록의 weekStart 가운데 하나. 없으면 가장 최근 주입니다.'
+    }),
+    success('ClearContentStats', '한 주의 요약, 직업별 클리어와 모험단별 분포'),
+    errors({
+      400: 'INVALID_CHARACTER_QUERY',
+      404: 'CHARACTER_NOT_FOUND',
+      500: 'INTERNAL_SERVER_ERROR'
+    })
   )
 }
