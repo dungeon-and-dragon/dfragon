@@ -64,7 +64,7 @@ function jobPath(name: string, action: string): string {
 }
 
 export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsClient {
-  // 화면이 10초마다 다시 읽으므로 ky가 따로 재시도하지 않는다.
+  // 화면이 1초마다 다시 읽으므로 ky가 따로 재시도하지 않는다.
   const http: KyInstance = ky.create({
     baseUrl,
     fetch: transport,
