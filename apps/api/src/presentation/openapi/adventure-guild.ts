@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiQuery, type SchemaObject } from '@nestjs/swagger'
-import { LEGION_RELEASE_ORDER, RAID_RELEASE_ORDER } from '../../adventure-guild/activity.js'
+import { LEGION_RELEASE_ORDER, RAID_RELEASE_ORDER } from '../../domain/adventure-guild/activity.js'
 import {
   timestampSchema,
   objectSchema,

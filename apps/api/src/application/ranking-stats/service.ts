@@ -1,30 +1,18 @@
-import {
-  type CharacterStats,
-  type CharacterStatsSnapshot,
-  type FameRankingFilter,
-  type JobSkillAdoption,
-  type JobSkillAdoptionQuery,
-  type JobSkillAdoptionSnapshot,
-  SKILL_STYLE_SAMPLE_TOP_COUNT,
-  type StoredCharacter
+import type {
+  CharacterStats,
+  FameRankingFilter,
+  JobSkillAdoption,
+  JobSkillAdoptionQuery
 } from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
-
-export const FAME_RANKING_LIMIT = 100
-
-export type FameRanking = {
-  characters: (CharacterRow & { rank: number })[]
-}
-
-export type Stats = CharacterStats & { computedAt: string | null }
-
-export type SkillStats = JobSkillAdoption & { computedAt: string | null; topCount: number }
-
-export interface RankingStatsReader {
-  readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
-  readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null>
-  readJobSkillAdoptionSnapshot(job: JobSkillAdoptionQuery): Promise<JobSkillAdoptionSnapshot | null>
-}
+import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
+import { toCharacterRow } from '../../domain/character-row.js'
+import {
+  FAME_RANKING_LIMIT,
+  type FameRanking,
+  type Stats,
+  type SkillStats
+} from '../../domain/ranking-stats/stats.js'
+import type { RankingStatsReader } from './ports.js'
 
 const emptyCharacterStats: CharacterStats = {
   total: 0,
@@ -47,28 +35,19 @@ export interface RankingStatsService {
   skillStats(job: JobSkillAdoptionQuery): Promise<SkillStats>
 }
 
-export function roundAverageFame({ jobs, ...counts }: CharacterStats): CharacterStats {
-  return {
-    ...counts,
-    jobs: jobs.map(({ averageFame, ...job }) => {
-      const roundedFame = averageFame !== null ? Math.round(averageFame) : null
-
-      return { ...job, averageFame: roundedFame }
-    })
-  }
-}
-
 export function createRankingStatsService(reader: RankingStatsReader): RankingStatsService {
   return {
     async fameRanking(filter) {
       const characters = await reader.readFameRanking(filter, FAME_RANKING_LIMIT)
 
-      return {
-        characters: characters.map((character, index) => ({
-          rank: index + 1,
-          ...toCharacterRow(character)
-        }))
-      }
+      const rows = characters.map((character, index) => {
+        const rank = index + 1
+        const row = toCharacterRow(character)
+
+        return { rank, ...row }
+      })
+
+      return { characters: rows }
     },
     async stats() {
       const snapshot = await reader.readCharacterStatsSnapshot()

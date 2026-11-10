@@ -1,4 +1,21 @@
+import { z } from 'zod'
 import type { TimelineItemCursor, TimelineItemRow } from '@dfragon/database'
+
+// 저장한 data는 Neople 응답의 객체지만 행마다 필드가 다를 수 있어 쓰기 전에 확인한다.
+// Neople은 하드로 클리어한 레이드에만 hard: true를 넣고 나머지 행에는 칸을 두지 않는다.
+const raidClearData = z.object({
+  modeName: z.string().nullable().catch(null),
+  hard: z.boolean().catch(false)
+})
+const legionClearData = z.object({ regionName: z.string() })
+
+export function toTimelineClearData(code: number, value: unknown): TimelineClearRecord['data'] {
+  const parsed =
+    code === LEGION_CLEAR_CODE ? legionClearData.safeParse(value) : raidClearData.safeParse(value)
+  const data = parsed.success ? parsed.data : null
+
+  return data
+}
 
 export type TimelineClearRecord = {
   code: number
