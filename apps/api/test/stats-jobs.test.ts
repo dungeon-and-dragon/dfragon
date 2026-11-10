@@ -7,11 +7,11 @@ import type {
   JobSkillAdoptionQuery,
   SkillStyleSampleJob
 } from '@dfragon/database'
+import { type StatsJobStore } from '../src/application/ranking-stats/ports.js'
 import {
-  type StatsJobStore,
   createCharacterStatsJob,
   createSkillAdoptionJob
-} from '../src/ranking-stats/stats-jobs.js'
+} from '../src/application/ranking-stats/stats-jobs.js'
 
 // 합성 값이다. DB 읽기와 저장은 저장 행을 메모리에 두는 fake이며, 실제 DB의 덮어쓰기와 삭제는 container-stats-snapshot-check.mjs가 확인한다.
 const stats: CharacterStats = {

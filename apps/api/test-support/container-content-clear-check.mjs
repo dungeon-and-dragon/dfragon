@@ -16,7 +16,7 @@ import {
   recordContentClears,
   startContentClearCollection
 } from '@dfragon/database'
-import { createClearStatsService } from './dist/content-clears/stats.js'
+import { createClearStatsService } from './dist/application/content-clears/service.js'
 
 // 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 모집단의 맨 앞에 온다.
 const at = (time) => new Date(`${time}+09:00`)

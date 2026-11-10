@@ -8,12 +8,12 @@ import {
   recordCharacterBasic,
   recordCharacterSkillStyle
 } from '@dfragon/database'
-import { roundAverageFame } from './dist/ranking-stats/service.js'
+import { roundAverageFame } from './dist/domain/ranking-stats/stats.js'
 import {
   createCharacterStatsJob,
-  createDatabaseStatsJobStore,
   createSkillAdoptionJob
-} from './dist/ranking-stats/stats-jobs.js'
+} from './dist/application/ranking-stats/stats-jobs.js'
+import { createDatabaseStatsJobStore } from './dist/infrastructure/database/stats-jobs.js'
 
 // 합성 캐릭터다. 앞 단계가 넣은 행도 있어, 저장분은 같은 DB에서 바로 계산한 값과 비교한다.
 // Neople /df/jobs의 프리스트(남)와 眞 크루세이더 ID다.

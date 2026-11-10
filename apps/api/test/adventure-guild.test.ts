@@ -7,9 +7,9 @@ import type {
   TimelineCharacter
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
-import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
+import type { AdventureGuildReader } from '../src/application/adventure-guild/ports.js'
 import type { CharacterRow } from '../src/domain/character-row.js'
-import { toAdventureWeeklyClears } from '../src/adventure-guild/weekly.js'
+import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 
