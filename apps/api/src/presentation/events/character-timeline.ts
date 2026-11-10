@@ -1,8 +1,8 @@
 import type { OnApplicationShutdown } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { CHARACTER_FETCHED, type CharacterFetched } from '../events.js'
-import type { TimelineSyncQueue } from './queue.js'
-import type { SeasonBackfillQueue } from './season-backfill.js'
+import { CHARACTER_FETCHED, type CharacterFetched } from '../../domain/character-events.js'
+import type { TimelineSyncQueue } from '../../application/character-timeline/queue.js'
+import type { SeasonBackfillQueue } from '../../application/character-timeline/season-backfill.js'
 
 export class TimelineSyncSubscriber implements OnApplicationShutdown {
   constructor(

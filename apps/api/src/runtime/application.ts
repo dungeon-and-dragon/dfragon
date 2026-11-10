@@ -15,8 +15,6 @@ import {
   readJobOverviews,
   readJobRuns,
   readJobSkillAdoptionSnapshot,
-  recordCharacterBasic,
-  recordCharacterSkillStyle,
   requestJobRun,
   requeueCollectionFailures,
   setJobPaused
@@ -24,20 +22,21 @@ import {
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { createCatalogService } from '../application/character-catalog/service.js'
 import type { CharacterSearchDependencies } from '../application/character-search/service.js'
-import { createNeopleCharacterTimeline } from '../characters/timeline/neople.js'
-import { backfillEnhancements } from '../characters/timeline/backfill.js'
+import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
+import { createDatabaseCharacterBasicStore } from '../infrastructure/database/character-basic.js'
+import { backfillEnhancements } from '../application/character-timeline/backfill.js'
 import {
   createDatabaseEnhancementBackfillStore,
   createDatabaseSeasonBackfillStore,
   createDatabaseTimelineStore
-} from '../characters/timeline/store.js'
-import { backfillSeason } from '../characters/timeline/season-backfill.js'
+} from '../infrastructure/database/character-timeline-store.js'
+import { backfillSeason } from '../application/character-timeline/season-backfill.js'
 import {
-  ENHANCEMENT_CODES,
   readCharacterTimeline,
   readTimelinePage
-} from '../characters/timeline/read.js'
-import { syncCharacterTimeline } from '../characters/timeline/sync.js'
+} from '../infrastructure/database/character-timeline-read.js'
+import { ENHANCEMENT_CODES } from '../domain/character-timeline/project.js'
+import { syncCharacterTimeline } from '../application/character-timeline/sync.js'
 import { createNeopleCatalog } from '../infrastructure/neople/character-catalog.js'
 import { createNeopleCharacterDetails } from '../infrastructure/neople/character-detail.js'
 import { createNeopleCharacterSearch } from '../infrastructure/neople/character-search.js'
@@ -72,6 +71,7 @@ function createDatabaseSubscribers(
     return {}
   }
   const client = createDatabaseClient(database)
+  const basicStore = createDatabaseCharacterBasicStore(client)
   const fetchTimeline = createNeopleCharacterTimeline(neople)
   const store = createDatabaseTimelineStore(client)
   const backfill = {
@@ -91,8 +91,8 @@ function createDatabaseSubscribers(
       readPage: (character, list, before) => readTimelinePage(client, character, list, before),
       close: () => client.$disconnect()
     },
-    recordCharacterBasic: (basic) => recordCharacterBasic(client, basic),
-    recordCharacterSkillStyle: (style) => recordCharacterSkillStyle(client, style),
+    recordCharacterBasic: basicStore.recordBasic,
+    recordCharacterSkillStyle: basicStore.recordSkillStyle,
     readAdventureNames: (characters) => readAdventureNames(client, characters),
     adventureGuild: {
       readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),

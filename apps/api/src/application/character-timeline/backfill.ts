@@ -1,6 +1,9 @@
 import type { TimelineCharacter, TimelineItemInput, TimelineRange } from '@dfragon/database'
-import type { FetchCharacterTimeline } from './neople.js'
-import { NEOPLE_TIMELINE_START, splitTimelineRanges } from './ranges.js'
+import type { FetchCharacterTimeline } from './ports.js'
+import {
+  NEOPLE_TIMELINE_START,
+  splitTimelineRanges
+} from '../../domain/character-timeline/ranges.js'
 import { TIMELINE_COLLECTION_START } from './sync.js'
 
 const MINUTE_MS = 60_000

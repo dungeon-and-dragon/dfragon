@@ -1,26 +1,19 @@
-import type { TimelineRange } from '@dfragon/database'
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { forwardCause } from '../../error-chain.js'
 import { formatSeoulTime, parseSeoulTime } from '../../utils/seoul-time.js'
-import type { CharacterIdentity } from '../../domain/character-identity.js'
-import { TimelineFailure } from './errors.js'
+import type { FetchCharacterTimeline } from '../../application/character-timeline/ports.js'
+import { TimelineFailure } from '../../domain/character-timeline/failure.js'
 import {
   TIMELINE_CODES,
-  type TimelineInputs,
   type TimelineRow,
   isTimelineCode,
   toTimelineInputs
-} from './rows.js'
+} from '../../domain/character-timeline/rows.js'
 
 const PAGE_LIMIT = 100
 
 const REQUEST_DATE_FORMAT = "yyyyMMdd'T'HHmm"
 const ROW_DATE_FORMAT = 'yyyy-MM-dd HH:mm'
-
-export type FetchCharacterTimeline = (
-  identity: CharacterIdentity,
-  range: TimelineRange
-) => Promise<TimelineInputs>
 
 function toTimelineRow({ code, name, date, data }: NeopleTimelineRow): TimelineRow {
   if (!isTimelineCode(code)) {

@@ -13,15 +13,15 @@ import {
 } from '../src/adventure-guild/activity.js'
 import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { TimelineFailure } from '../src/characters/timeline/errors.js'
-import type { FetchCharacterTimeline } from '../src/characters/timeline/neople.js'
+import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
+import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
 import {
   type SeasonBackfillJob,
   type SeasonBackfillStore,
   backfillSeason,
   toSeasonBackfillJobs,
   toSeasonBackfillProgress
-} from '../src/characters/timeline/season-backfill.js'
+} from '../src/application/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/http.js'
 
 // 시즌 시작은 운영 DB seasons 표와 같은 값이고, 캐릭터와 타임라인은 합성이다.

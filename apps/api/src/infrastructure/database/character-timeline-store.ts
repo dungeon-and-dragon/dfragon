@@ -10,10 +10,10 @@ import {
   replaceSeasonBackfillRange,
   replaceTimelineRange
 } from '@dfragon/database'
-import type { EnhancementBackfillStore } from './backfill.js'
-import { ENHANCEMENT_CODES } from './read.js'
-import type { SeasonBackfillStore } from './season-backfill.js'
-import type { TimelineStore } from './sync.js'
+import type { EnhancementBackfillStore } from '../../application/character-timeline/backfill.js'
+import { ENHANCEMENT_CODES } from '../../domain/character-timeline/project.js'
+import type { SeasonBackfillStore } from '../../application/character-timeline/season-backfill.js'
+import type { TimelineStore } from '../../application/character-timeline/sync.js'
 
 export function createDatabaseTimelineStore(client: DatabaseClient): TimelineStore {
   return {

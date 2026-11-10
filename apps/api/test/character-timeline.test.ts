@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { TimelineFailure } from '../src/characters/timeline/errors.js'
-import { createNeopleCharacterTimeline } from '../src/characters/timeline/neople.js'
-import { splitTimelineRanges } from '../src/characters/timeline/ranges.js'
+import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
+import { createNeopleCharacterTimeline } from '../src/infrastructure/neople/character-timeline.js'
+import { splitTimelineRanges } from '../src/domain/character-timeline/ranges.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
 const range = {

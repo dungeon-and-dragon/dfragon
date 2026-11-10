@@ -6,8 +6,8 @@ import {
   emptyAdventureGuildService,
   noSeasonBackfill
 } from '../../adventure-guild/service.js'
-import type { TimelineSyncQueue } from '../../characters/timeline/queue.js'
-import type { SeasonBackfillQueue } from '../../characters/timeline/season-backfill.js'
+import type { TimelineSyncQueue } from '../../application/character-timeline/queue.js'
+import type { SeasonBackfillQueue } from '../../application/character-timeline/season-backfill.js'
 import { SEASON_BACKFILL_QUEUE, TIMELINE_SYNC_QUEUE } from './character-timeline.js'
 
 export interface AdventureGuildModuleOptions {
