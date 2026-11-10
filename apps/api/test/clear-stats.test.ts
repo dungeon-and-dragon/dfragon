@@ -8,7 +8,8 @@ import type {
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import type { ClearStats, ClearStatsReader } from '../src/content-clears/stats.js'
+import type { ClearStats } from '../src/domain/content-clears/stats.js'
+import type { ClearStatsReader } from '../src/application/content-clears/ports.js'
 import { createApiHttpApp } from '../src/http.js'
 
 // 합성 집계다. DB 읽기는 fake이며 SQL의 주 고르기, 직업과 모험단 묶기는 container-content-clear-check.mjs가 실제 DB로 확인한다.

@@ -9,7 +9,7 @@ import {
   toContentClearInput,
   toLatestContents,
   toPopulationMinFame
-} from '../src/content-clears/contents.js'
+} from '../src/domain/content-clears/contents.js'
 
 // 합성 타임라인 기록이다. data는 운영 DB에서 본 Neople 응답의 필드 모양을 따른다.
 const at = (time: string) => new Date(`${time}+09:00`)
