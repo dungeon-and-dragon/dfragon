@@ -1,9 +1,24 @@
 // Biome noRestrictedImports는 import type만 따로 허용하지 못해, 두 package의 값 import만 여기서 막는다.
 // 계층 폴더 사이의 방향은 root biome.json이 검사한다.
 const packageEntry = '^\\.\\./\\.\\./packages/(database|neople)/'
+const apiSourcePath = '^src/'
+const allowedApiSourcePath =
+  '^src/(?:(domain|application|infrastructure|presentation|runtime)/|(main|character-collector)\\.ts$)'
 
 export default {
   forbidden: [
+    ...[true, false].map((orphan) => {
+      const name = orphan ? 'api-source-location-orphan' : 'api-source-location-connected'
+
+      return {
+        name,
+        comment:
+          'API source는 domain/, application/, infrastructure/, presentation/, runtime/에 둔다. 계층 폴더 밖에는 진입 파일 main.ts, character-collector.ts만 둔다.',
+        severity: 'error',
+        from: { path: apiSourcePath, pathNot: allowedApiSourcePath, orphan },
+        to: {}
+      }
+    }),
     {
       name: 'domain-application-package-value',
       comment:
