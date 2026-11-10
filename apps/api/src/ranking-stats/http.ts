@@ -1,7 +1,9 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common'
+import { Controller, Get, Inject, Query, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../characters/details/errors.js'
+import { CharacterDetailFailure } from '../domain/character-failure.js'
+import { characterFailureResponse } from '../presentation/http/character-failures.js'
+import { FailureResponseFilter } from '../presentation/http/failure-response.js'
 import { isMaleCrusaderJob } from '../characters/domain/male-crusader.js'
 import { ApiFameRanking, ApiSkillStats, ApiStats } from '../presentation/openapi/ranking-stats.js'
 import type { FameRanking, RankingStatsService, SkillStats, Stats } from './service.js'
@@ -29,6 +31,7 @@ const skillStatsQuery = z
 
 @ApiTags('캐릭터')
 @Controller()
+@UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class RankingStatsController {
   constructor(@Inject(RANKING_STATS_SERVICE) private readonly service: RankingStatsService) {}
 

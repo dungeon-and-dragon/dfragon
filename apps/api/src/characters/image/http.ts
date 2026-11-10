@@ -1,7 +1,9 @@
-import { Controller, Get, Inject, Req, Res } from '@nestjs/common'
+import { Controller, Get, Inject, Req, Res, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request, Response } from 'express'
 import { sendWithCancellation } from '../../http-response.js'
+import { characterFailureResponse } from '../../presentation/http/character-failures.js'
+import { FailureResponseFilter } from '../../presentation/http/failure-response.js'
 import { ApiCharacterImage } from '../../presentation/openapi/character-image.js'
 import { parseCharacterIdentity } from '../identity.js'
 import type { FetchCharacterImage } from './neople.js'
@@ -12,6 +14,7 @@ const IMAGE_CACHE_CONTROL = 'private, max-age=3600'
 
 @ApiTags('캐릭터')
 @Controller('characters')
+@UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class CharacterImageController {
   constructor(@Inject(CHARACTER_IMAGE_FETCH) private readonly fetchImage: FetchCharacterImage) {}
 

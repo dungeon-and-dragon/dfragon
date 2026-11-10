@@ -1,5 +1,5 @@
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
-import { CharacterDetailFailure } from './details/errors.js'
+import { CharacterDetailFailure } from '../domain/character-failure.js'
 
 export const CHARACTER_ID_PATTERN = /^[a-zA-Z0-9_-]{1,256}$/
 export const CHARACTER_ID_PATTERN_SOURCE = CHARACTER_ID_PATTERN.source

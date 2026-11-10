@@ -463,6 +463,33 @@
           }
         }
       }
+    },
+    {
+      "includes": ["apps/api/src/http.ts", "apps/api/src/ops/app.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "./**",
+                      "../**",
+                      "!**/runtime/**",
+                      "!**/presentation/http/*.js",
+                      "!**/access-log.js",
+                      "!**/swagger/setup.js"
+                    ],
+                    "message": "앱을 만드는 파일은 기능의 module(runtime/modules/<기능>.ts), 앱 공통 설정(runtime/), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), access log, Swagger 설정만 import한다. 기능의 controller, service, reader, queue 연결은 runtime/modules/<기능>.ts에 두고 그 module을 import 목록에 더한다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

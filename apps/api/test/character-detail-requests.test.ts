@@ -6,7 +6,7 @@ import {
   type CharacterDetailResponse,
   createCharacterDetailService
 } from '../src/characters/details/service.js'
-import { CharacterDetailFailure } from '../src/characters/details/errors.js'
+import { CharacterDetailFailure } from '../src/domain/character-failure.js'
 import type { NeopleStageTimings } from '../src/characters/details/neople-stages.js'
 import type { CharacterPayloads } from '../src/characters/details/sections.js'
 
@@ -149,8 +149,8 @@ test('강제 갱신이 실패하면 상세 조회와 같은 오류를 돌려주�
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
   t.mock.timers.tick(2 * MINUTE_MS)
   await assert.rejects(service.refresh(identity, signal, ignoredTimings), {
-    status: 503,
-    body: new CharacterDetailFailure('unavailable').body
+    name: 'CharacterDetailFailure',
+    kind: 'unavailable'
   })
   const afterFailure = await readDetail(service.get(identity, signal, ignoredTimings))
 
@@ -482,14 +482,14 @@ test('공유 조회 실패 뒤 새 요청을 허용하고 서버 종료는 취�
   const first = service.get(identity, signal, ignoredTimings),
     second = service.get(identity, signal, ignoredTimings)
   const failures = Promise.all([
-    assert.rejects(first, { status: 503 }),
-    assert.rejects(second, { status: 503 })
+    assert.rejects(first, { kind: 'unavailable' }),
+    assert.rejects(second, { kind: 'unavailable' })
   ])
   await entered.promise
   finish.release()
   await failures
   assert.equal(calls, 1)
-  await assert.rejects(service.get(identity, signal, ignoredTimings), { status: 503 })
+  await assert.rejects(service.get(identity, signal, ignoredTimings), { kind: 'unavailable' })
   assert.equal(calls, 2)
 
   const start = gate(),
