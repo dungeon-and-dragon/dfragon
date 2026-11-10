@@ -9,7 +9,7 @@ import {
   ApiAdventureSeasonBackfill,
   ApiAdventureWeekly,
   ApiGuild
-} from '../swagger/operations.js'
+} from '../presentation/openapi/adventure-guild.js'
 import type { ActivitySeason, AdventureActivity, AdventureSeasonDays } from './activity.js'
 import type {
   AdventureCharacters,

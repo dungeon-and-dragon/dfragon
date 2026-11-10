@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
 import { isMaleCrusaderJob } from '../characters/domain/male-crusader.js'
-import { ApiFameRanking, ApiSkillStats, ApiStats } from '../swagger/operations.js'
+import { ApiFameRanking, ApiSkillStats, ApiStats } from '../presentation/openapi/ranking-stats.js'
 import type { FameRanking, RankingStatsService, SkillStats, Stats } from './service.js'
 
 export const RANKING_STATS_SERVICE = Symbol('RANKING_STATS_SERVICE')

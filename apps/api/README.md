@@ -36,7 +36,7 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 | `src/infrastructure/neople/<기능>.ts`, `src/infrastructure/database/<기능>.ts` | port의 구현 |
 | `src/presentation/http/<기능>/controller.ts` | controller와 service 주입 token |
 | `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
-| `src/presentation/openapi/<기능>.ts` | 경로 설명 decorator와 schema |
+| `src/presentation/openapi/<기능>.ts` | 경로 설명 decorator와 schema. schema 묶음은 `src/presentation/openapi/index.ts`의 목록에 더합니다 |
 | `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/http.ts`의 `imports`에 등록합니다 |
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`, `src/presentation/openapi/common.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
