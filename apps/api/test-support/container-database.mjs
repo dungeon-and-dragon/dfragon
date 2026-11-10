@@ -195,6 +195,26 @@ try {
     '0'
   )
 
+  stage = 'content clear reopen migration'
+  const reopenMigration = await readFile(
+    new URL(
+      '../../../packages/database/prisma/migrations/20261111180000_reopen_content_clear_weeks/migration.sql',
+      import.meta.url
+    ),
+    'utf8'
+  )
+  assert.equal(
+    (
+      await psql(
+        `CREATE TEMP TABLE content_clear_populations (closed boolean); INSERT INTO content_clear_populations VALUES (true), (false); CREATE TEMP TABLE content_clear_collections (started_at timestamptz); INSERT INTO content_clear_collections VALUES (now()); ${reopenMigration} SELECT (SELECT count(*) FROM content_clear_populations WHERE closed) || '/' || (SELECT count(*) FROM content_clear_populations) || '/' || (SELECT count(*) FROM content_clear_collections)`
+      )
+    ).stdout
+      .trim()
+      .split('\n')
+      .at(-1),
+    '0/2/0'
+  )
+
   stage = 'API role with public schema ownership only'
   await psql(
     [
@@ -349,7 +369,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '13'
+    '14'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),

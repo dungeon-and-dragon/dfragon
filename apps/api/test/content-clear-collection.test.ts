@@ -427,6 +427,48 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
   }
 })
 
+test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모 기준과 수로 덮어쓰고 마감한다', async () => {
+  const reopened = closedPastWeeks().map((stored) => ({
+    ...stored,
+    population: 100_000,
+    minFame: 125_871,
+    closed: false
+  }))
+  const { state, store } = memoryClearStore(
+    [character('a', 130_000), character('b', 110_000)],
+    reopened
+  )
+  const { neople, requests } = fakeNeople({ b: [nabelHard('2025-06-05 21:00')] })
+
+  await collect(store, neople, NOW)
+
+  assert.deepEqual(
+    requests
+      .filter(({ characterId }) => characterId === 'a')
+      .map(({ startDate, endDate }) => `${startDate}/${endDate}`),
+    [
+      '20250417T0600/20250715T0559',
+      '20250715T0600/20251012T0559',
+      '20251012T0600/20260109T0559',
+      '20260109T0600/20260408T0559',
+      '20260408T0600/20260706T0559',
+      '20260706T0600/20261003T0559',
+      '20261003T0600/20261110T1200'
+    ]
+  )
+  assert.deepEqual(storedClears(state), [
+    `nabel-hard/b/${at('2025-06-05T06:00').toISOString()}/null`
+  ])
+  for (const { contentId, weekStart } of reopened) {
+    const stored = state.populations.get(populationKey({ contentId, weekStart }))
+    assert.deepEqual(
+      [stored?.population, stored?.minFame, stored?.closed],
+      [2, 104_292, true],
+      `${contentId}/${formatResetDate(weekStart)}`
+    )
+  }
+})
+
 test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보충 대상이 된다', async () => {
   const { store } = memoryClearStore([])
   const job = createContentClearCollectionJob(store, {
