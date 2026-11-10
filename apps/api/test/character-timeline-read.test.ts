@@ -3,14 +3,14 @@ import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineEventRow, TimelineItemRow } from '@dfragon/database'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { createTimelineSyncQueue } from '../src/characters/timeline/queue.js'
+import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
 import {
   type CharacterTimeline,
   EMPTY_CHARACTER_TIMELINE,
   formatTimelineCursor,
-  parseTimelineCursor,
-  toCharacterTimeline
-} from '../src/characters/timeline/read.js'
+  parseTimelineCursor
+} from '../src/domain/character-timeline/project.js'
+import { parseCharacterTimelineRows } from '../src/infrastructure/database/character-timeline-read.js'
 import { createApiHttpApp } from '../src/http.js'
 import { startOfResetWeek } from '../src/utils/seoul-time.js'
 
@@ -82,7 +82,7 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
   const seasonStart = new Date('2026-03-26T06:00:00+09:00')
   const raid = { raidName: '나벨 레이드', data: { modeName: '나벨 : 무지의 악' } }
   const hardRaid = { raidName: '나벨 레이드', data: { modeName: '나벨 : 무지의 악', hard: true } }
-  const timeline = toCharacterTimeline(
+  const timeline = parseCharacterTimelineRows(
     {
       clears: [
         event({ code: 201, occurredAt: new Date('2026-03-26T05:59:00+09:00'), ...raid }),
@@ -140,7 +140,7 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
 
 test('강화, 증폭, 재련의 종류를 나누고 재련에 없는 before, safe는 null로 둔다', () => {
   const occurredAt = new Date('2026-11-05T12:00:00+09:00')
-  const timeline = toCharacterTimeline(
+  const timeline = parseCharacterTimelineRows(
     {
       clears: [],
       enhancements: [
@@ -177,7 +177,7 @@ test('강화, 증폭, 재련의 종류를 나누고 재련에 없는 before, saf
 
 test('형식이 다른 선택 필드는 null이나 false로 두고 이름, after, result가 맞지 않는 행은 뺀다', () => {
   const occurredAt = new Date('2026-11-05T12:00:00+09:00')
-  const timeline = toCharacterTimeline(
+  const timeline = parseCharacterTimelineRows(
     {
       clears: [
         event({ code: 201, raidName: '디레지에 레이드', data: { modeName: 3, hard: 'true' } }),
@@ -390,7 +390,7 @@ test('강화, 획득은 최근 50개를 주고, 더 있으면 50번째 행을 �
       })
     )
   const acquisitions = rows(51, 505)
-  const timeline = toCharacterTimeline(
+  const timeline = parseCharacterTimelineRows(
     {
       clears: [],
       enhancements: rows(50, 401, { after: 10, result: true }),

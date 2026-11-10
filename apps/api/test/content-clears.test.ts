@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { TimelineRow } from '../src/characters/timeline/rows.js'
+import type { TimelineRow } from '../src/domain/character-timeline/rows.js'
 import {
   CLEAR_CONTENTS,
   type ClearContent,
