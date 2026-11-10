@@ -15,9 +15,13 @@ import { createNeopleClearTimeline } from '../src/infrastructure/neople/content-
 import {
   createNeopleCharacterBasic,
   paceNeopleRequests
-} from '../src/character-collection/adapters.js'
-import type { CollectionStore } from '../src/character-collection/collect.js'
-import { runCollectionPass } from '../src/character-collection/runner.js'
+} from '../src/infrastructure/neople/character-collection.js'
+import type { CollectionStore } from '../src/application/character-collection/ports.js'
+import {
+  importCollectedCharacters,
+  readImportModifiedTime
+} from '../src/infrastructure/files/character-collection.js'
+import { runCollectionPass } from '../src/application/character-collection/runner.js'
 import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
 import {
   type ClearCollectionStore,
@@ -724,6 +728,8 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
   }
   const settled = { collection: false, clears: false }
   const collection = runCollectionPass({
+    readModifiedTime: readImportModifiedTime,
+    importCharacters: importCollectedCharacters,
     importFiles: [],
     importedAt: new Map(),
     enqueue: async () => {},

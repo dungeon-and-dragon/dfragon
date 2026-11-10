@@ -3,7 +3,7 @@ import test from 'node:test'
 import { createNeopleImageClientForTest, type FetchTransport } from '@dfragon/neople'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCharacterImage } from '../src/infrastructure/neople/character-image.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 const unusedProvider = async (): Promise<never> => {
   throw new Error('character image test must not call this provider')

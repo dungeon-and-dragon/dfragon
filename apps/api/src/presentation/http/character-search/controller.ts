@@ -1,10 +1,7 @@
 import { ApiTags } from '@nestjs/swagger'
 import { Controller, Get, Inject, Req, Res, UseFilters } from '@nestjs/common'
 import type { Request, Response } from 'express'
-import {
-  recordAccessLogCachedResponse,
-  recordAccessLogSharedNeopleFetch
-} from '../../../access-log.js'
+import { recordAccessLogCachedResponse, recordAccessLogSharedNeopleFetch } from '../access-log.js'
 import type {
   CharacterCandidatesResponse,
   CharacterSearchHttpService
@@ -13,7 +10,7 @@ import {
   parseCharacterCandidatesQuery,
   parseCharacterSearchQuery
 } from '../../../domain/character-search/query.js'
-import { respondWithCancellation, sendWithCancellation } from '../../../http-response.js'
+import { respondWithCancellation, sendWithCancellation } from '../http-response.js'
 import { ApiCharacterCandidates, ApiCharacterSearch } from '../../openapi/character-search.js'
 import { FailureResponseFilter } from '../failure-response.js'
 import { characterSearchFailureResponse } from './failures.js'

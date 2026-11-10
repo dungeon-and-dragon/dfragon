@@ -7,7 +7,7 @@ import { createCatalogService } from '../src/application/character-catalog/servi
 import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-events.js'
 import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
 import { createSeasonBackfillQueue } from '../src/application/character-timeline/season-backfill.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
 import type { OpsCollectionStore } from '../src/application/ops/ports.js'
 import { readTimelineQueueCounts } from '../src/runtime/modules/character-timeline.js'

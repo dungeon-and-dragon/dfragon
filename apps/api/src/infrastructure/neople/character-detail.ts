@@ -9,7 +9,7 @@ import type {
   CharacterPayloads
 } from '../../domain/character-detail/sections.js'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
-import { forwardCause } from '../../error-chain.js'
+import { forwardCause } from '../../domain/error-chain.js'
 
 function validateCharacterPayload(
   body: NeopleCharacter,

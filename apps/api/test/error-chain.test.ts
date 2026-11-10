@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { SanitizedFailure, describeErrorChain } from '../src/error-chain.js'
+import { SanitizedFailure, describeErrorChain } from '../src/domain/error-chain.js'
 
 // 정제 결과에 나오면 안 되는 값이다. 모두 합성 값이며 실제 credential이 아니다.
 const secret = 'fake-secret-detail-3e1d'

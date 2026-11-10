@@ -31,11 +31,11 @@ async function cruise(directory, outputType) {
   try {
     const { stdout } = await run(process.execPath, args, { cwd: directory })
 
-    return stdout
+    return { stdout, exitCode: 0 }
   } catch (error) {
     // 위반이 있으면 dependency-cruiser가 non-zero로 끝나지만 출력은 그대로 결과다.
     if (error.stdout) {
-      return error.stdout
+      return { stdout: error.stdout, exitCode: error.code }
     }
 
     throw error
@@ -65,13 +65,16 @@ export async function cruiseApiSamples(sources, { withPackages = true } = {}) {
       await writeFile(join(api, path), source)
     }
 
-    const report = JSON.parse(await cruise(api, 'json'))
+    const { stdout } = await cruise(api, 'json')
+    const report = JSON.parse(stdout)
     const violations = report.summary.violations.map(({ from, rule }) => ({
       from,
       rule: rule.name
     }))
 
-    return { violations, text: await cruise(api, 'err-long') }
+    const { stdout: text, exitCode } = await cruise(api, 'err-long')
+
+    return { violations, exitCode, text }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }

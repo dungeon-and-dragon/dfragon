@@ -51,12 +51,15 @@ const bareBuiltinImports = [
   ['application/today-grade/h.ts', 'http'],
   ['application/today-grade/i.ts', 'fs/promises'],
   ['infrastructure/database/c.ts', 'fs'],
-  ['presentation/http/today-grade/b.ts', 'crypto']
+  ['presentation/http/today-grade/b.ts', 'crypto'],
+  ['runtime/builtin.ts', 'fs'],
+  ['main.ts', 'fs'],
+  ['character-collector.ts', 'fs']
 ]
 
 const allowedImports = [
   ['domain/today-grade/a.ts', './grade.js'],
-  ['domain/today-grade/b.ts', '../../error-chain.js'],
+  ['domain/today-grade/b.ts', '../error-chain.js'],
   ['domain/today-grade/c.ts', '@dfragon/lib'],
   ['domain/today-grade/d.ts', 'date-fns'],
   ['application/today-grade/a.ts', '../../domain/today-grade/failure.js'],
@@ -72,31 +75,34 @@ const allowedImports = [
   ['presentation/http/today-grade/c.ts', '@nestjs/common'],
   ['runtime/modules/a.ts', '../../infrastructure/neople/today-grade.js'],
   ['runtime/modules/b.ts', '../../presentation/http/today-grade/controller.js'],
-  ['characters/a.ts', '../infrastructure/neople/today-grade.js']
+  ['main.ts', './runtime/application.js'],
+  ['character-collector.ts', './runtime/character-collector.js']
 ]
 
 // 앱을 만드는 파일은 경로가 정해져 있어, 파일마다 import 여러 줄을 한 sample에 넣고 줄 번호로 진단을 맞춘다.
 const appFiles = {
-  'http.ts': {
+  'runtime/api-app.ts': {
     rejected: [
-      './characters/http.js',
-      './characters/search-service.js',
-      './score/engine.js',
-      './build-info.js',
-      './swagger/operations.js',
-      './domain/character-failure.js',
-      './application/today-grade/service.js',
-      './infrastructure/neople/today-grade.js',
-      './presentation/http/today-grade/controller.js',
-      './presentation/http/character-search/failures.js',
-      './presentation/openapi/today-grade.js'
+      '../characters/http.js',
+      '../characters/search-service.js',
+      '../score/engine.js',
+      '../infrastructure/build-info.js',
+      '../swagger/operations.js',
+      '../domain/character-failure.js',
+      '../application/today-grade/service.js',
+      '../infrastructure/neople/today-grade.js',
+      '../presentation/http/today-grade/controller.js',
+      '../presentation/http/character-search/failures.js',
+      '../presentation/openapi/today-grade.js',
+      './modules-not-allowed.js',
+      './character-collector.js'
     ],
     allowed: [
-      './runtime/modules/today-grade.js',
-      './runtime/http-app.js',
-      './presentation/http/character-failures.js',
-      './access-log.js',
-      './swagger/setup.js',
+      './modules/today-grade.js',
+      './http-app.js',
+      '../presentation/http/character-failures.js',
+      '../presentation/http/access-log.js',
+      '../presentation/openapi/setup.js',
       '@nestjs/event-emitter'
     ]
   },
@@ -111,7 +117,7 @@ const appFiles = {
       './modules/ops-jobs.js',
       './http-app.js',
       '../presentation/http/ops-failures.js',
-      '../access-log.js',
+      '../presentation/http/access-log.js',
       'express'
     ]
   }
@@ -234,7 +240,8 @@ const packageCases = {
     ['src/infrastructure/neople/a.ts', importing('@dfragon/neople')],
     ['src/infrastructure/database/a.ts', importing('@dfragon/database')],
     ['src/runtime/modules/a.ts', importing('@dfragon/database')],
-    ['src/characters/a.ts', importing('@dfragon/neople')]
+    ['src/main.ts', importing('@dfragon/neople')],
+    ['src/character-collector.ts', importing('@dfragon/database')]
   ]
 }
 
@@ -253,7 +260,7 @@ for (const [file, , rule] of packageCases.rejected) {
   })
 }
 
-test('dependency-cruiser: import type과 infrastructure, runtime, 옛 폴더의 값 import는 허용한다', () => {
+test('dependency-cruiser: import type과 infrastructure, runtime, 진입 파일의 값 import는 허용한다', () => {
   const allowedFiles = new Set(packageCases.allowed.map(([file]) => file))
   assert.deepEqual(
     cruised.violations.filter(({ from }) => allowedFiles.has(from)),
@@ -278,4 +285,48 @@ test('dependency-cruiser: package 소스를 찾지 못하면 통과시키지 않
   assert.deepEqual(unresolved.violations, [
     { from: 'src/domain/today-grade/a.ts', rule: 'unresolved-package' }
   ])
+})
+
+test('dependency-cruiser: 계층 밖 파일은 import 유무와 다른 파일에서의 사용 여부에 관계없이 실패한다', async () => {
+  const result = await cruiseApiSamples({
+    'src/unlayered.ts': importing('./domain/value.js'),
+    'src/imported.ts': 'export const value = 1\n',
+    'src/empty.ts': '',
+    'src/old-folder/unused.ts': 'export const unused = 1\n',
+    'src/main.ts.backup.ts': '',
+    'src/character-collector.ts.backup.ts': '',
+    'src/domain/value.ts': 'export const value = 1\n',
+    'src/runtime/consumer.ts': importing('../imported.js')
+  })
+  assert.ok(result.exitCode > 0)
+  assert.deepEqual(
+    result.violations.sort((left, right) => left.from.localeCompare(right.from)),
+    [
+      { from: 'src/character-collector.ts.backup.ts', rule: 'api-source-location-orphan' },
+      { from: 'src/empty.ts', rule: 'api-source-location-orphan' },
+      { from: 'src/imported.ts', rule: 'api-source-location-connected' },
+      { from: 'src/main.ts.backup.ts', rule: 'api-source-location-orphan' },
+      { from: 'src/old-folder/unused.ts', rule: 'api-source-location-orphan' },
+      { from: 'src/unlayered.ts', rule: 'api-source-location-connected' }
+    ]
+  )
+  assert.ok(result.text.includes('계층 폴더 밖에는 진입 파일 main.ts, character-collector.ts만'))
+})
+
+test('dependency-cruiser: 진입 파일 둘과 다섯 계층 안의 import 없는 파일은 허용한다', async () => {
+  const result = await cruiseApiSamples(
+    Object.fromEntries(
+      [
+        'main.ts',
+        'character-collector.ts',
+        'domain/value.ts',
+        'application/value.ts',
+        'infrastructure/value.ts',
+        'presentation/value.ts',
+        'runtime/value.ts'
+      ].map((file) => [`src/${file}`, ''])
+    )
+  )
+  assert.equal(result.exitCode, 0)
+  assert.deepEqual(result.violations, [])
 })

@@ -7,18 +7,23 @@ import { setImmediate } from 'node:timers/promises'
 import { ZodError } from 'zod'
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
 import { NeopleRequestFailure } from '@dfragon/neople'
+import { CharacterCollectionFailure } from '../src/domain/character-collection/failure.js'
+import { collectCharacter } from '../src/application/character-collection/collect.js'
+import { createNeopleCharacterBasic } from '../src/infrastructure/neople/character-collection.js'
+import { readCollectorConfiguration } from '../src/runtime/collector-configuration.js'
 import {
-  type CollectionFailure,
-  type CollectionStore,
-  type FetchCharacterBasic,
-  collectCharacter
-} from '../src/character-collection/collect.js'
-import { readCollectorConfiguration } from '../src/character-collection/configuration.js'
-import { importCollectedCharacters } from '../src/character-collection/import.js'
+  importCollectedCharacters,
+  readImportModifiedTime
+} from '../src/infrastructure/files/character-collection.js'
+import type {
+  CollectionFailure,
+  CollectionStore,
+  FetchCharacterBasic
+} from '../src/application/character-collection/ports.js'
 import {
   type CollectionPassDependencies,
   runCollectionPass
-} from '../src/character-collection/runner.js'
+} from '../src/application/character-collection/runner.js'
 
 // 합성 캐릭터다.
 function basicOf({ serverId, characterId }: CollectedCharacter): CharacterBasicInput {
@@ -68,6 +73,50 @@ function memoryStore(queued: CollectedCharacter[]) {
 
 const first = { serverId: 'cain', characterId: 'first' }
 
+for (const [kind, outcome, failures] of [
+  ['api', 'failed', [['first', 'neople-api']]],
+  ['unavailable', 'unavailable', []],
+  ['timeout', 'unavailable', []],
+  ['internal', 'failed', [['first', 'neople-internal']]]
+] as const) {
+  test(`Neople ${kind} 실패는 같은 kind로 변환되고 수집에서 ${outcome}으로 처리된다`, async () => {
+    const fetchBasic = createNeopleCharacterBasic({
+      characterBasic: async () => {
+        throw new NeopleRequestFailure(kind)
+      }
+    })
+    await assert.rejects(fetchBasic(first), (error: unknown) => {
+      assert.ok(error instanceof CharacterCollectionFailure)
+      assert.equal(error.kind, kind)
+
+      return true
+    })
+    const memory = memoryStore([first])
+
+    assert.equal(await collectCharacter(first, fetchBasic, memory.store), outcome)
+    assert.deepEqual(memory.failures, failures)
+    assert.deepEqual(memory.recorded, [])
+  })
+}
+
+test('Neople 실패가 아닌 오류는 adapter와 수집 흐름에서 같은 오류로 다시 던지고 기록하지 않는다', async () => {
+  const original = new TypeError('synthetic Neople client bug')
+  const fetchBasic = createNeopleCharacterBasic({
+    characterBasic: async () => {
+      throw original
+    }
+  })
+  const memory = memoryStore([first])
+
+  await assert.rejects(fetchBasic(first), (error: unknown) => error === original)
+  await assert.rejects(
+    collectCharacter(first, fetchBasic, memory.store),
+    (error: unknown) => error === original
+  )
+  assert.deepEqual(memory.failures, [])
+  assert.deepEqual(memory.recorded, [])
+})
+
 test('기본 정보를 받으면 저장하고, 없는 캐릭터 같은 api 실패는 실패로 기록한다', async () => {
   const saved = memoryStore([first])
   assert.equal(await collectCharacter(first, async (c) => basicOf(c), saved.store), 'recorded')
@@ -75,7 +124,7 @@ test('기본 정보를 받으면 저장하고, 없는 캐릭터 같은 api 실�
 
   const failed = memoryStore([first])
   const notFound: FetchCharacterBasic = async () => {
-    throw new NeopleRequestFailure('api')
+    throw new CharacterCollectionFailure('api')
   }
   assert.equal(await collectCharacter(first, notFound, failed.store), 'failed')
   assert.deepEqual(failed.failures, [['first', 'neople-api']])
@@ -88,7 +137,7 @@ test('한도 초과, 점검, timeout은 기록하지 않고 unavailable을 돌�
     const result = await collectCharacter(
       first,
       async () => {
-        throw new NeopleRequestFailure(kind)
+        throw new CharacterCollectionFailure(kind)
       },
       store
     )
@@ -169,6 +218,8 @@ test('목록 파일 여러 개를 대기열에 넣고 대기열이 빌 때까지
     const memory = memoryStore([])
     const reports: Array<[string, number | undefined]> = []
     const dependencies: Omit<CollectionPassDependencies, 'importedAt'> = {
+      readModifiedTime: readImportModifiedTime,
+      importCharacters: importCollectedCharacters,
       importFiles: [listFile(1), listFile(2)],
       enqueue: async (characters) => {
         memory.queue.push(...characters)
@@ -215,13 +266,15 @@ test('Neople을 쓸 수 없으면 실패로 기록하지 않고 멈추며, 다�
   const reports: string[] = []
   let calls = 0
   const dependencies: CollectionPassDependencies = {
+    readModifiedTime: readImportModifiedTime,
+    importCharacters: importCollectedCharacters,
     importFiles: [join(tmpdir(), 'missing-character-list.jsonl')],
     importedAt: new Map(),
     enqueue: async () => {},
     fetchBasic: async (character) => {
       calls++
       if (calls === 1) {
-        throw new NeopleRequestFailure('unavailable')
+        throw new CharacterCollectionFailure('unavailable')
       }
 
       return basicOf(character)
@@ -258,6 +311,8 @@ test('동시 처리 수만큼 기본 정보를 함께 받고 그 수를 넘지 �
   let maxInFlight = 0
 
   const result = await runCollectionPass({
+    readModifiedTime: readImportModifiedTime,
+    importCharacters: importCollectedCharacters,
     importFiles: [],
     importedAt: new Map(),
     enqueue: async () => {},
@@ -287,13 +342,15 @@ test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저�
   const memory = memoryStore(queued)
   const called: string[] = []
   const dependencies: CollectionPassDependencies = {
+    readModifiedTime: readImportModifiedTime,
+    importCharacters: importCollectedCharacters,
     importFiles: [],
     importedAt: new Map(),
     enqueue: async () => {},
     fetchBasic: async (character) => {
       called.push(character.characterId)
       if (character.characterId === 'c1' && called.length <= 2) {
-        throw new NeopleRequestFailure('unavailable')
+        throw new CharacterCollectionFailure('unavailable')
       }
 
       return basicOf(character)

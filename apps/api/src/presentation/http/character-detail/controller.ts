@@ -5,14 +5,14 @@ import {
   recordAccessLogCachedResponse,
   recordAccessLogNeopleStage,
   recordAccessLogSharedNeopleFetch
-} from '../../../access-log.js'
+} from '../access-log.js'
 import type { NeopleStageTimings } from '../../../application/character-detail/neople-stages.js'
 import type {
   CharacterDetailResponse,
   CharacterDetailService
 } from '../../../application/character-detail/service.js'
 import { parseCharacterIdentity } from '../../../domain/character-identity.js'
-import { sendWithCancellation } from '../../../http-response.js'
+import { sendWithCancellation } from '../http-response.js'
 import { ApiCharacterDetails, ApiCharacterRefresh } from '../../openapi/character-details.js'
 import { characterFailureResponse } from '../character-failures.js'
 import { FailureResponseFilter } from '../failure-response.js'

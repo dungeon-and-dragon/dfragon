@@ -1,15 +1,6 @@
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
-import { NeopleRequestFailure } from '@dfragon/neople'
-
-export type CollectionFailure = `neople-${'internal' | 'api'}`
-
-export interface CollectionStore {
-  takeBatch(limit: number): Promise<CollectedCharacter[]>
-  recordBasic(basic: CharacterBasicInput): Promise<void>
-  recordFailure(character: CollectedCharacter, failure: CollectionFailure): Promise<void>
-}
-
-export type FetchCharacterBasic = (character: CollectedCharacter) => Promise<CharacterBasicInput>
+import { CharacterCollectionFailure } from '../../domain/character-collection/failure.js'
+import type { CollectionStore, FetchCharacterBasic } from './ports.js'
 
 export type CollectionResult = 'recorded' | 'failed' | 'unavailable'
 
@@ -22,7 +13,7 @@ export async function collectCharacter(
   try {
     basic = await fetchBasic(character)
   } catch (error) {
-    if (!(error instanceof NeopleRequestFailure)) {
+    if (!(error instanceof CharacterCollectionFailure)) {
       throw error
     }
 

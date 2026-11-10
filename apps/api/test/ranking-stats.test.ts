@@ -10,7 +10,7 @@ import type {
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { RankingStatsReader } from '../src/application/ranking-stats/ports.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 필터, 정렬과 집계는 container-ranking-stats-check.mjs가 실제 DB로 확인한다.
