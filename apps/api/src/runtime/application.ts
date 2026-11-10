@@ -40,7 +40,7 @@ import {
   readTimelinePage
 } from '../characters/timeline/read.js'
 import { syncCharacterTimeline } from '../characters/timeline/sync.js'
-import { createNeopleShopGrade } from '../today-grade/neople.js'
+import { createNeopleShopGrade } from '../infrastructure/neople/today-grade.js'
 import {
   readAdventureActivity,
   readAdventureSeasonDays,

@@ -13,7 +13,8 @@
     "verify:skills": "pnpm run build && node --import reflect-metadata test-support/verify-skill-calculation.mjs",
     "typecheck": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/neople build && tsc --noEmit -p tsconfig.test.json",
     "start": "node --import reflect-metadata dist/main.js",
-    "lint": "biome lint",
+    "lint": "biome lint && pnpm run lint:imports",
+    "lint:imports": "depcruise --config .dependency-cruiser.mjs --output-type err-long src",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
     "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
