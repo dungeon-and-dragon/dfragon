@@ -25,6 +25,9 @@ const collectorEnvironmentSchema = z.object({
     .default(DEFAULT_CONCURRENCY)
 })
 
+const HTTPS_PROTOCOL_PATTERN = /^https$/
+const jobAlertWebhookUrlSchema = z.url({ protocol: HTTPS_PROTOCOL_PATTERN }).optional()
+
 export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
   try {
     const {
@@ -37,8 +40,14 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
     if (apiKey === undefined || database === undefined) {
       throw new Error(invalidConfiguration)
     }
+    const jobAlertWebhookUrl = jobAlertWebhookUrlSchema.parse(
+      readSecretInput(
+        environment.JOB_ALERT_DISCORD_WEBHOOK_URL,
+        environment.JOB_ALERT_DISCORD_WEBHOOK_URL_FILE
+      )
+    )
 
-    return { apiKey, database, importFiles, requestsPerSecond, concurrency }
+    return { apiKey, database, importFiles, requestsPerSecond, concurrency, jobAlertWebhookUrl }
   } catch {
     // secret 파일 읽기 오류와 zod issue는 경로나 입력값을 담을 수 있다.
     throw new Error(invalidConfiguration)

@@ -18,6 +18,8 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 | `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. 없으면 점수 없이 실행합니다 |
 | `SEARCH_TRUST_PROXY` | 선택 | 단일 신뢰 proxy 뒤에서만 `single-hop` |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` 또는 `DB_PASSWORD_FILE` | 선택 | [DB와 migration](#db와-migration) 참고 |
+| `OPS_PORT` | 선택 | 운영 경로(`/api/jobs`)를 여는 별도 포트. DB 설정이 있어야 하고 `PORT`와 달라야 합니다. 없으면 열지 않습니다 |
+| `JOB_ALERT_DISCORD_WEBHOOK_URL` 또는 `JOB_ALERT_DISCORD_WEBHOOK_URL_FILE` | 선택 | 캐릭터 수집 worker가 job 알림을 보낼 Discord 웹훅 https URL. 없으면 알림 없이 실행합니다 |
 
 Secret은 직접 입력과 `_FILE` 가운데 하나만 지정합니다. 둘 다 지정하거나 빈 값, 상대 경로, 읽을 수 없는 파일이면 값과 경로 없이 시작 전에 실패합니다.
 파일은 UTF-8로 읽고 끝의 줄바꿈을 뺍니다. DB 비밀번호는 끝의 공백까지 뺍니다. 값을 바꾸면 앱을 다시 시작합니다.
@@ -72,6 +74,7 @@ docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 - Neople key는 직접 입력이나 `_FILE`로 받고, 둘 다 생략하면 `/run/secrets/neople_api_key`를 읽습니다.
 - DB 설정은 선택입니다. `DB_HOST`를 지정하고 비밀번호 입력을 둘 다 생략하면 `/run/secrets/db_password`를 읽습니다.
 - `SEARCH_TRUST_PROXY`는 생략하거나 단일 proxy 구성에서만 `single-hop`을 씁니다.
+- `OPS_PORT`는 선택입니다. 운영 경로에는 로그인이 없으므로 이 포트를 공개 인터넷에 열지 않습니다.
 - 기본 CMD는 API(`node --import reflect-metadata dist/main.js`)이고, 캐릭터 수집 worker는 CMD를 `node dist/character-collector.js`로 바꿔 실행합니다.
 
 ### 실행 중인 서버의 버전 조회

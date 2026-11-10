@@ -21,12 +21,18 @@ function queuedJob<Job>(job: Job): QueuedJob<Job> {
   return { job, finished, finish }
 }
 
+export type JobQueueCounts = {
+  readonly waiting: number
+  readonly running: number
+}
+
 export interface JobQueue<Key, Job extends Key = Key> {
   request(job: Job): void
   // request와 같이 넣고, 그 일이 성공하든 실패하든 끝나면 풀린다.
   // 닫을 때 대기열에 있던 요청과 닫은 뒤 새로 온 요청은 바로 풀리고, 진행 중인 일은 끝을 기다린다.
   requestAndWait(job: Job): Promise<void>
   has(key: Key): boolean
+  counts(): JobQueueCounts
   // 진행 중인 일은 그대로 두고 대기열을 버리며, 이후 요청은 무시한다.
   close(): void
 }
@@ -86,6 +92,9 @@ export function createJobQueue<Key, Job extends Key>(
       const queueKey = keyOf(key)
 
       return waiting.has(queueKey) || running.has(queueKey)
+    },
+    counts() {
+      return { waiting: waiting.size, running: running.size }
     },
     close() {
       closed = true
