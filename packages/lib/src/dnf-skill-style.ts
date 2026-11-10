@@ -1,0 +1,1 @@
+export const SKILL_STYLE_SAMPLE_TOP_COUNT = 5000

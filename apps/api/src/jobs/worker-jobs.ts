@@ -1,19 +1,15 @@
 import type { DatabaseClient } from '@dfragon/database'
-import {
-  type ClearCollectionJobDependencies,
-  createContentClearCollectionJob,
-  createDatabaseClearCollectionStore
-} from '../content-clears/collection-job.js'
-import {
-  type SkillStyleCollectionJobDependencies,
-  createDatabaseSkillStyleCollectionStore,
-  createSkillStyleCollectionJob
-} from '../ranking-stats/skill-style-collection.js'
+import { type ClearCollectionJobDependencies } from '../application/content-clears/ports.js'
+import { createContentClearCollectionJob } from '../application/content-clears/collection-job.js'
+import { createDatabaseClearCollectionStore } from '../infrastructure/database/content-clear-collection.js'
+import { type SkillStyleCollectionJobDependencies } from '../application/ranking-stats/ports.js'
+import { createDatabaseSkillStyleCollectionStore } from '../infrastructure/database/skill-style-collection.js'
+import { createSkillStyleCollectionJob } from '../application/ranking-stats/skill-style-collection.js'
 import {
   createCharacterStatsJob,
-  createDatabaseStatsJobStore,
   createSkillAdoptionJob
-} from '../ranking-stats/stats-jobs.js'
+} from '../application/ranking-stats/stats-jobs.js'
+import { createDatabaseStatsJobStore } from '../infrastructure/database/stats-jobs.js'
 import type { JobDefinition } from './definition.js'
 import { createJobRunCleanupJob } from './job-run-cleanup.js'
 

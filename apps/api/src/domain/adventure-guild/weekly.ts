@@ -1,15 +1,8 @@
-import {
-  type CharacterTimelineEventRow,
-  type DatabaseClient,
-  type StoredCharacter,
-  type TimelineCharacter,
-  readAdventureCharacters,
-  readCharactersTimelineEvents
-} from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
-import { CLEAR_CODES, type TimelineClear } from '../domain/character-timeline/project.js'
-import { parseTimelineClearRow } from '../infrastructure/database/character-timeline-read.js'
-import { startOfResetWeek } from '../utils/seoul-time.js'
+import type { StoredCharacter, TimelineCharacter } from '@dfragon/database'
+import { type CharacterRow, toCharacterRow } from '../character-row.js'
+import type { TimelineClear } from '../character-timeline/project.js'
+
+type WeeklyClearRecord = { serverId: string; characterId: string; clears: TimelineClear[] }
 
 // 열 이름은 Neople 타임라인의 raidName, regionName과 글자까지 같아야 클리어로 센다.
 const WEEKLY_CLEAR_NAMES: readonly ClearName[] = [
@@ -33,13 +26,13 @@ function characterKey({ serverId, characterId }: TimelineCharacter): string {
 
 export function toAdventureWeeklyClears(
   characters: readonly StoredCharacter[],
-  events: readonly CharacterTimelineEventRow[],
+  events: readonly WeeklyClearRecord[],
   weekStart: Date
 ): AdventureWeeklyClears {
   const weeklyClears = new Map<string, TimelineClear[]>()
   for (const event of events) {
     const character = characterKey(event)
-    for (const clear of parseTimelineClearRow(event)) {
+    for (const clear of event.clears) {
       if (clear.occurredAt >= weekStart) {
         weeklyClears.set(character, [...(weeklyClears.get(character) ?? []), clear])
       }
@@ -52,22 +45,12 @@ export function toAdventureWeeklyClears(
       clears.some(({ kind, name }) => kind === clearName.kind && name === clearName.name)
     )
 
-    return { ...toCharacterRow(character), weeklyClears: characterClears }
+    const row = toCharacterRow(character)
+
+    return { ...row, weeklyClears: characterClears }
   })
 
   const clearNames = [...WEEKLY_CLEAR_NAMES]
 
   return { clearNames, characters: weeklyCharacters }
-}
-
-export async function readAdventureWeeklyClears(
-  client: DatabaseClient,
-  adventureName: string,
-  now: Date
-): Promise<AdventureWeeklyClears> {
-  const weekStart = startOfResetWeek(now)
-  const characters = await readAdventureCharacters(client, adventureName)
-  const events = await readCharactersTimelineEvents(client, characters, CLEAR_CODES, weekStart)
-
-  return toAdventureWeeklyClears(characters, events, weekStart)
 }

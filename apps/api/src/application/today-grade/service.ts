@@ -1,7 +1,7 @@
 import { TodayGradeFailure, todayGradeFailure } from '../../domain/today-grade/failure.js'
 import { averageGradePercent } from '../../domain/today-grade/grade.js'
 import { TODAY_GRADE_ITEMS } from '../../domain/today-grade/items.js'
-import { startOfNextSeoulDay } from '../../utils/seoul-time.js'
+import { startOfNextSeoulDay } from '../../domain/seoul-time.js'
 import type { FetchShopGrade } from './ports.js'
 
 export interface TodayGrade {

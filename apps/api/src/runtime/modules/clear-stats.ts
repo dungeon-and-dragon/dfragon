@@ -1,10 +1,13 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { CLEAR_STATS_SERVICE, ClearStatsController } from '../../content-clears/http.js'
 import {
-  type ClearStatsReader,
+  CLEAR_STATS_SERVICE,
+  ClearStatsController
+} from '../../presentation/http/content-clears/controller.js'
+import { type ClearStatsReader } from '../../application/content-clears/ports.js'
+import {
   createClearStatsService,
   emptyClearStatsReader
-} from '../../content-clears/stats.js'
+} from '../../application/content-clears/service.js'
 
 export interface ClearStatsModuleOptions {
   readonly reader?: ClearStatsReader

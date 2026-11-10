@@ -6,10 +6,8 @@ import {
   readFameRanking,
   recordCharacterBasic
 } from '@dfragon/database'
-import {
-  createCharacterStatsJob,
-  createDatabaseStatsJobStore
-} from './dist/ranking-stats/stats-jobs.js'
+import { createCharacterStatsJob } from './dist/application/ranking-stats/stats-jobs.js'
+import { createDatabaseStatsJobStore } from './dist/infrastructure/database/stats-jobs.js'
 
 // 합성 캐릭터다. 앞 단계가 넣은 행이 있어 통계는 넣기 전후의 차이로 확인한다.
 const jobId = 'synthetic-rank-job'

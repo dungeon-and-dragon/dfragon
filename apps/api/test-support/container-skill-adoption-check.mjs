@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import {
-  SKILL_STYLE_SAMPLE_TOP_COUNT,
   createDatabaseClient,
   readDatabaseConfiguration,
   readJobSkillAdoption,
@@ -8,6 +7,7 @@ import {
   recordCharacterSkillStyle,
   saveJobSkillAdoption
 } from '@dfragon/database'
+import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 
 // 합성 캐릭터다. 한 전직에 명성 있는 캐릭터 5018명을 두어 상위 5000명이 표본이 된다.
 // adopt-19가 정확히 5000위라 경계의 캐릭터가 표본에 드는지 확인한다.

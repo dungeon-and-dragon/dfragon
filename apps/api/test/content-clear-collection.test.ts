@@ -10,23 +10,27 @@ import type {
 } from '@dfragon/database'
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { addWeeks } from 'date-fns'
+import { createNeopleClearTimeline } from '../src/infrastructure/neople/content-clear-collection.js'
 import {
   createNeopleCharacterBasic,
   paceNeopleRequests
 } from '../src/character-collection/adapters.js'
 import type { CollectionStore } from '../src/character-collection/collect.js'
 import { runCollectionPass } from '../src/character-collection/runner.js'
-import { createContentClearCollectionJob } from '../src/content-clears/collection-job.js'
+import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
 import {
   type ClearCollectionStore,
+  type ClearStatsReader
+} from '../src/application/content-clears/ports.js'
+import {
   UNAVAILABLE_PAUSE_MS,
   collectContentClears
-} from '../src/content-clears/collection.js'
-import { CLEAR_CONTENTS } from '../src/content-clears/contents.js'
-import { type ClearStatsReader, createClearStatsService } from '../src/content-clears/stats.js'
+} from '../src/application/content-clears/collection.js'
+import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
+import { createClearStatsService } from '../src/application/content-clears/service.js'
 import type { JobStore } from '../src/jobs/definition.js'
 import { findCatchupJobs } from '../src/jobs/scheduler.js'
-import { formatResetDate, startOfResetWeek } from '../src/utils/seoul-time.js'
+import { formatResetDate, startOfResetWeek } from '../src/domain/seoul-time.js'
 
 const at = (time: string) => new Date(`${time}:00+09:00`)
 const NOW = at('2026-11-10T12:00')
@@ -234,7 +238,7 @@ function collect(
 ) {
   return collectContentClears({
     store,
-    neople,
+    createFetchTimeline: createNeopleClearTimeline(neople),
     concurrency: 1,
     now: () => now,
     pause: async (ms) => {
@@ -472,7 +476,7 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
 test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보충 대상이 된다', async () => {
   const { store } = memoryClearStore([])
   const job = createContentClearCollectionJob(store, {
-    neople: fakeNeople({}).neople,
+    createFetchTimeline: createNeopleClearTimeline(fakeNeople({}).neople),
     concurrency: 1,
     report: () => {}
   })

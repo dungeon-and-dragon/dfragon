@@ -1,6 +1,8 @@
 import { setTimeout } from 'node:timers/promises'
 import { createDatabaseClient } from '@dfragon/database'
 import { createNeopleClient } from '@dfragon/neople'
+import { createNeopleClearTimeline } from './infrastructure/neople/content-clear-collection.js'
+import { createNeopleSkillStyle } from './infrastructure/neople/skill-style-collection.js'
 import { writeAccessLogToStdout } from './access-log.js'
 import {
   createDatabaseCollectionStore,
@@ -47,7 +49,8 @@ async function main(): Promise<never> {
       : undefined
   await startJobScheduler({
     jobs: createWorkerJobs(client, {
-      neople,
+      createFetchTimeline: createNeopleClearTimeline(neople),
+      fetchSkillStyle: createNeopleSkillStyle(neople),
       concurrency: configuration.concurrency,
       report
     }),

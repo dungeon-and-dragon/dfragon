@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common'
 import { ApiOperation, ApiParam, ApiQuery, type SchemaObject } from '@nestjs/swagger'
-import { CLEAR_CONTENTS } from '../../content-clears/contents.js'
+import { CLEAR_CONTENTS } from '../../domain/content-clears/contents.js'
 import {
   timestampSchema,
   objectSchema,

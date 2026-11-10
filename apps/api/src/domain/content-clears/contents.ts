@@ -1,14 +1,13 @@
 import type { ContentClearInput, ContentClearKind, TimelineCharacter } from '@dfragon/database'
 import { z } from 'zod'
-import { toRaidStageLabel } from '../adventure-guild/activity.js'
-import { RAID_CLEAR_CODES } from '../domain/character-timeline/project.js'
-import { parseTimelineClearRow } from '../infrastructure/database/character-timeline-read.js'
-import type { TimelineRow } from '../domain/character-timeline/rows.js'
-import { startOfResetWeek } from '../utils/seoul-time.js'
+import { toRaidStageLabel } from '../raid-stage.js'
+import { RAID_CLEAR_CODES, toClear, toTimelineClearData } from '../character-timeline/project.js'
+import type { TimelineRow } from '../character-timeline/rows.js'
+import { startOfResetWeek } from '../seoul-time.js'
 
 const BOX_ACQUISITION_CODE = 504
 
-// 클리어 기록은 parseTimelineClearRow의 이름(레이드는 raidName)과 활동 집계의 단계 라벨이 모두 같아야 맞는다.
+// 클리어 기록은 toClear의 이름(레이드는 raidName)과 활동 집계의 단계 라벨이 모두 같아야 맞는다.
 // 단계가 null이면 modeName이 없는 기록이다.
 export type ClearRecordRule = {
   type: 'clear'
@@ -124,7 +123,7 @@ function matchesClearRecord(rule: ClearRecordRule, row: TimelineRow): boolean {
   }
   const { raidName } = raidNameData.parse(row.data)
 
-  return parseTimelineClearRow({ ...row, raidName }).some(
+  return toClear({ ...row, raidName, data: toTimelineClearData(row.code, row.data) }).some(
     (clear) => clear.name === rule.name && toRaidStageLabel(clear) === rule.stage
   )
 }

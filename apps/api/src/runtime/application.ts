@@ -45,8 +45,8 @@ import {
   readAdventureActivity,
   readAdventureSeasonDays,
   readAdventureSeasonBackfill
-} from '../adventure-guild/activity.js'
-import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
+} from '../infrastructure/database/adventure-activity.js'
+import { readAdventureWeeklyClears } from '../infrastructure/database/adventure-weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../http.js'
 import { createOpsHttpApp } from '../ops/app.js'
 import type { ReadQueueCounts } from '../ops/queues.js'
