@@ -78,7 +78,6 @@ export type {
   JobRunSummary,
   JobTrigger
 } from './jobs.js'
-export { MALE_CRUSADER_DEALER_SKILL } from './male-crusader.js'
 export type { MaleCrusaderRole } from './male-crusader.js'
 export { applyMigrations } from './migrate.js'
 export { readSecretInput } from './secret-input.js'
