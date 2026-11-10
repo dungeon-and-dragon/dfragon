@@ -60,6 +60,15 @@ describe('운영 API 응답 검증', () => {
     await expect(client.readJobs()).rejects.toThrow()
   })
 
+  it('job 응답에 description이 없으면 응답을 거절한다', async () => {
+    const { description: _description, ...withoutDescription } = job({ name: 'stats' })
+    const client = clientWith(() =>
+      jsonResponse(200, { workerSeenAt: null, jobs: [withoutDescription] })
+    )
+
+    await expect(client.readJobs()).rejects.toThrow()
+  })
+
   it('수집 대기열의 시각이 ISO 문자열이 아니면 응답을 거절한다', async () => {
     const client = clientWith(() =>
       jsonResponse(200, { waiting: 3, oldestQueuedAt: 'yesterday', failures: [] })

@@ -14,6 +14,7 @@ export type RunBody = {
 export type JobBody = {
   name: string
   displayName: string
+  description: string
   schedule: string | null
   paused: boolean
   nextRunAt: string | null
@@ -61,6 +62,7 @@ export function run(overrides: Partial<RunBody> & Pick<RunBody, 'id'>): RunBody 
 export function job(overrides: Partial<JobBody> & Pick<JobBody, 'name'>): JobBody {
   return {
     displayName: overrides.name,
+    description: '',
     schedule: '0 0 * * *',
     paused: false,
     nextRunAt: '2026-11-10T15:00:00.000Z',

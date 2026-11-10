@@ -34,7 +34,7 @@ docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 ## 코드 위치
 
 - `src/OpsScreen.tsx`: 헤더, job 목록과 상세, queue, 수집 대기열을 한 화면에 둡니다.
-- `src/ops-queries.ts`: 10초마다 다시 읽는 조회와 실행, 정지, 되돌리기 요청을 둡니다.
+- `src/ops-queries.ts`: 1초마다 다시 읽는 조회와 실행, 정지, 되돌리기 요청을 둡니다.
 - `src/api/`: 운영 API 요청 함수와 응답 schema를 둡니다.
 - `src/components/`: 화면의 표, 상세, 팝오버와 스타일을 둡니다.
 - `src/format.ts`: 시각, 걸린 시간, 스케줄, 결과 요약 표시 함수를 둡니다.
