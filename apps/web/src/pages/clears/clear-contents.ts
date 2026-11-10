@@ -6,6 +6,7 @@ import type {
   ClearWeek
 } from '#core/ranking/clear-stats'
 import type { Bar } from '../../components/chart/RowBars'
+import { shareText } from '../stats/stats-bars'
 
 export type ContentRow = Readonly<{ label: string; contents: readonly ClearContent[] }>
 
@@ -73,19 +74,29 @@ export function ratioLabel(ratio: number | null): string {
   return `${100 + ratio}%`
 }
 
+function sumOf(values: readonly number[]): number {
+  return values.reduce((sum, value) => sum + value, 0)
+}
+
 export function ratioBars(week: ClearWeek): Bar[] {
+  const total = sumOf(week.ratios.map(({ cleared }) => cleared))
+
   return week.ratios.map(({ ratio, cleared }) => ({
     key: String(ratio),
     name: ratioLabel(ratio),
-    value: cleared
+    value: cleared,
+    share: shareText(cleared, total)
   }))
 }
 
 export function adventureBars(adventures: readonly ClearAdventureSize[]): Bar[] {
+  const total = sumOf(adventures.map(({ adventures: count }) => count))
+
   return adventures.map(({ characters, adventures: count }) => ({
     key: String(characters),
     name: `${characters}명`,
-    value: count
+    value: count,
+    share: shareText(count, total)
   }))
 }
 

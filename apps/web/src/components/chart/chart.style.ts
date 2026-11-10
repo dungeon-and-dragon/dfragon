@@ -1,21 +1,27 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, radius, shadow, space } from '@dfragon/ui/tokens.stylex'
+import { breakpoints } from '../../styles/breakpoints.stylex'
 
 const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 64
 const ROW_HEIGHT = 28
 const BAR_HEIGHT = 6
+const TABLE_BAR_HEIGHT = 4
 const EDGE_WIDTH = 2
 const EDGE_OVERHANG = 3
 const COLUMN_TOOLTIP_SPACE = 44
 const COLUMN_CHART_HEIGHT = 160
 const COLUMN_GAP = 2
+const NARROW_COLUMN_GAP = 1
+const MIN_COLUMN_WIDTH = 4
 const COLUMN_DIVIDER_WIDTH = 6
 const COLUMN_LABEL_HEIGHT = 14
 const CHART_PADDING = 16
 
 export const styles = stylex.create({
   chart: { position: 'relative' },
+  // 넓은 화면에서는 막대가 칸에 들어가므로 스크롤 영역을 두지 않는다. 두면 첫 축 라벨이 영역 밖으로 나간 만큼 잘린다.
+  chartScroll: { overflowX: { default: null, [breakpoints.screenNarrow]: 'auto' } },
   rows: { margin: 0, padding: CHART_PADDING, listStyle: 'none' },
   row: {
     display: 'grid',
@@ -42,6 +48,7 @@ export const styles = stylex.create({
       backgroundColor: colors.bgInset
     }
   },
+  tableRail: { height: TABLE_BAR_HEIGHT },
   rowMark: {
     position: 'absolute',
     left: 0,
@@ -96,6 +103,10 @@ export const styles = stylex.create({
       backgroundColor: colors.borderStrong
     }
   },
+  columnsScroll: {
+    minWidth: 'min-content',
+    gap: { default: COLUMN_GAP, [breakpoints.screenNarrow]: NARROW_COLUMN_GAP }
+  },
   column: {
     display: 'flex',
     flexDirection: 'column',
@@ -104,6 +115,7 @@ export const styles = stylex.create({
     minWidth: 0,
     paddingTop: COLUMN_TOOLTIP_SPACE
   },
+  columnScroll: { minWidth: MIN_COLUMN_WIDTH },
   columnDivider: {
     flexShrink: 0,
     width: COLUMN_DIVIDER_WIDTH,

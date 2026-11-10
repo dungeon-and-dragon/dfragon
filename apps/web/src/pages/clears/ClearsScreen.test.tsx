@@ -234,6 +234,100 @@ it('받은 주가 둘 이상이면 주차별 막대를 두고 고른 주의 클�
   )
 })
 
+function weeksFrom(first: string, count: number): ClearWeek[] {
+  return Array.from({ length: count }, (_, index) => {
+    const weekStart = new Date(Date.parse(first) + index * 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10)
+
+    return week(weekStart, index + 1)
+  })
+}
+
+const longRaid: ClearContent = {
+  id: 'nabel-normal',
+  kind: 'raid',
+  name: '만들어진 신 나벨 (일반)',
+  releasedAt: '2025-04-16T21:00:00.000Z',
+  latest: false,
+  weeks: weeksFrom('2025-04-17', 82)
+}
+
+function tooltipText(name: string): string | null {
+  const tooltip = boxOf(name).querySelector<HTMLElement>('ul + [aria-hidden="true"]')!
+  if (tooltip.style.visibility === 'hidden') {
+    return null
+  }
+
+  return tooltip.textContent
+}
+
+function moveMouse(from: Element, to: Element): Promise<void> {
+  return act(async () => {
+    from.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: to }))
+    to.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: from }))
+  })
+}
+
+it('받은 주가 한 해를 넘으면 주마다 막대를 두고 13주마다 연도를 붙인 축 라벨을 두며 고른 주의 tooltip으로 돌아온다', async () => {
+  await render(
+    { content: 'nabel-normal', week: '2025-10-16' },
+    { getClearStats: async () => ({ contents: [longRaid] }) }
+  )
+
+  const chart = boxOf('클리어').querySelector('ul')!
+  const columns = [...chart.querySelectorAll('li')]
+  expect(columns).toHaveLength(82)
+  expect(columns.map((column) => column.lastElementChild?.textContent).filter(Boolean)).toEqual([
+    '25-04-17',
+    '25-07-17',
+    '25-10-16',
+    '26-01-15',
+    '26-04-16',
+    '26-07-16',
+    '26-10-15'
+  ])
+  expect(tooltipText('클리어')).toBe('27주차 10-1627  2.7%')
+
+  await moveMouse(document.body, columns.at(-1)!)
+  expect(tooltipText('클리어')).toBe('82주차 11-0582  8.2%')
+
+  await moveMouse(columns.at(-1)!, document.body)
+  expect(tooltipText('클리어')).toBe('27주차 10-1627  2.7%')
+})
+
+it('받은 주가 한 해 안이면 4주마다 월과 날짜만 쓴 축 라벨을 둔다', async () => {
+  const halfYear = { ...longRaid, weeks: longRaid.weeks.slice(0, 14) }
+  await render(
+    { content: 'nabel-normal' },
+    { getClearStats: async () => ({ contents: [halfYear] }) }
+  )
+
+  const columns = [...boxOf('클리어').querySelectorAll('ul > li')]
+  expect(columns.map((column) => column.lastElementChild?.textContent).filter(Boolean)).toEqual([
+    '04-17',
+    '05-15',
+    '06-12',
+    '07-10'
+  ])
+})
+
+it('배율별 클리어와 모험단별 분포 행에 마우스를 올리면 그 표의 합계 대비 비율을 띄운다', async () => {
+  await render({})
+
+  const [baseRatio, highRatio] = [...boxOf('배율별 클리어').querySelectorAll('li')]
+  await moveMouse(document.body, baseRatio!)
+  expect(tooltipText('배율별 클리어')).toBe('90.0%')
+
+  await moveMouse(baseRatio!, highRatio!)
+  expect(tooltipText('배율별 클리어')).toBe('10.0%')
+
+  const [, twoCharacters] = [...boxOf('모험단별 분포').querySelectorAll('li')]
+  await moveMouse(highRatio!, twoCharacters!)
+  expect(tooltipText('배율별 클리어')).toBeNull()
+  expect(tooltipText('모험단별 분포')).toBe('7.0%')
+})
+
 it('레이드는 배율별 클리어와 모험단별 분포를 나란히 둔다', async () => {
   await render({})
 
@@ -247,24 +341,37 @@ it('레이드는 배율별 클리어와 모험단별 분포를 나란히 둔다'
   ])
 })
 
-it('직업별 클리어는 클리어 순 10줄만 보이고 모두 보기를 누르면 펼치며 클리어율 순으로 바꿀 수 있다', async () => {
+const PERCENT_VALUE_PATTERN = /([\d.]+)%/
+
+// 막대 길이는 StyleX가 inline CSS 변수로 쓰는 % 값으로 읽는다.
+function barPercentOf(row: Element): number {
+  const style = row.querySelector('[data-chart-mark]')?.getAttribute('style') ?? ''
+
+  return Number(PERCENT_VALUE_PATTERN.exec(style)?.[1])
+}
+
+it('직업별 클리어는 클리어 순 10줄을 전직, 모집단, 클리어, 클리어율 순으로 두고 막대는 보이는 전직의 최고 클리어율에 맞추며 모두 보기와 클리어율 순으로 바꿀 수 있다', async () => {
   await render({})
 
   const names = () =>
     [...boxOf('직업별 클리어').querySelectorAll('tbody th')].map((cell) => cell.textContent)
   expect(names()).toHaveLength(10)
   expect(names()[0]).toBe('眞 전직11')
+  expect(
+    [...boxOf('직업별 클리어').querySelectorAll('thead th')].map((cell) => cell.textContent)
+  ).toEqual(['전직', '모집단', '클리어', '클리어율'])
   const firstRow = boxOf('직업별 클리어').querySelector('tbody tr')!
   expect([...firstRow.children].map((cell) => cell.textContent)).toEqual([
     '眞 전직11',
-    '',
     '100',
     '11',
     '11.0%'
   ])
+  expect(barPercentOf(firstRow)).toBe(100)
 
   await click(buttonNamed('전직 12개 모두 보기'))
   expect(names()).toHaveLength(12)
+  expect(barPercentOf(firstRow)).toBeCloseTo(55)
   expect(buttonNamed('전직 12개 모두 보기')).toBeUndefined()
 
   expect(buttonNamed('클리어 순').getAttribute('aria-pressed')).toBe('true')
