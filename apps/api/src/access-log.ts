@@ -35,6 +35,12 @@ export function createStreamAccessLogSink(stream: Writable): AccessLogSink {
 
 export const writeAccessLogToStdout = createStreamAccessLogSink(process.stdout)
 
+export type ReportCode = (code: string) => void
+
+export function createCodeReport(sink: AccessLogSink, service: string): ReportCode {
+  return (code) => sink(JSON.stringify({ time: new Date().toISOString(), service, code }))
+}
+
 export function recordAccessLogErrorCode(response: Response, code: string): void {
   errorCodes.set(response, code)
 }

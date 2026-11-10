@@ -5,7 +5,7 @@ import type {
   ClearWeekSelection,
   StoredClearPopulation
 } from '@dfragon/database'
-import { CharacterDetailFailure } from '../characters/details/errors.js'
+import { CharacterDetailFailure } from '../domain/character-failure.js'
 import { formatResetDate } from '../utils/seoul-time.js'
 import { CLEAR_CONTENTS, type ClearContent, toLatestContents } from './contents.js'
 

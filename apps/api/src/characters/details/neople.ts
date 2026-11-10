@@ -1,6 +1,6 @@
 import { type NeopleCharacter, type NeopleClient, NeopleRequestFailure } from '@dfragon/neople'
 import { forwardCause } from '../../error-chain.js'
-import { CharacterDetailFailure } from './errors.js'
+import { CharacterDetailFailure } from '../../domain/character-failure.js'
 import { type RecordNeopleStage, elapsedMs } from './neople-stages.js'
 import { characterDetailSections } from './sections.js'
 import type {

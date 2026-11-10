@@ -1,4 +1,4 @@
-import { CharacterDetailFailure, characterDetailFailure } from './errors.js'
+import { CharacterDetailFailure, characterDetailFailure } from '../../domain/character-failure.js'
 import type { FetchCharacterDetails } from './neople.js'
 import { projectCharacterDetails, projectCharacterFreshness } from './project.js'
 import type { CharacterIdentity, FetchedCharacterPayloads } from './sections.js'
