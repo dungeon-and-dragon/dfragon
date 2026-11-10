@@ -345,6 +345,80 @@
       }
     },
     {
+      "includes": ["apps/web/src/components/**", "apps/web/src/hooks/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "../**/pages",
+                      "../**/pages/**",
+                      "./**/pages",
+                      "./**/pages/**",
+                      "#pages",
+                      "#pages/**",
+                      "#*/**/pages",
+                      "#*/**/pages/**"
+                    ],
+                    "message": "공용 components와 hooks는 pages/를 import하지 않는다. 화면 전용 코드는 pages/<화면>/에 두고, 여러 화면이 쓰는 코드는 공용 components/나 hooks/에 둔다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/src/host/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "../**/pages",
+                      "../**/pages/**",
+                      "./**/pages",
+                      "./**/pages/**",
+                      "#pages",
+                      "#pages/**",
+                      "#*/**/pages",
+                      "#*/**/pages/**",
+                      "../**/components",
+                      "../**/components/**",
+                      "./**/components",
+                      "./**/components/**",
+                      "#components",
+                      "#components/**",
+                      "#*/**/components",
+                      "#*/**/components/**",
+                      "../**/hooks",
+                      "../**/hooks/**",
+                      "./**/hooks",
+                      "./**/hooks/**",
+                      "#hooks",
+                      "#hooks/**",
+                      "#*/**/hooks",
+                      "#*/**/hooks/**"
+                    ],
+                    "message": "host는 pages/, components/, hooks/를 import하지 않는다. 화면 코드는 pages/에, 공용 UI는 components/나 hooks/에 두고 host를 가져다 쓴다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/api/src/domain/**"],
       "linter": {
         "rules": {
