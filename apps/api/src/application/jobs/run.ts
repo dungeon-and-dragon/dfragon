@@ -1,5 +1,5 @@
 import type { JobRunOutcome, JobRunProgress, JobTrigger } from '@dfragon/database'
-import { type ErrorChainEntry, describeErrorChain } from '../../error-chain.js'
+import { type ErrorChainEntry, describeErrorChain } from '../../domain/error-chain.js'
 import type { JobDefinition } from './definition.js'
 import type { JobAlert, JobStore, ReportJobEvent, SendJobAlert } from './ports.js'
 

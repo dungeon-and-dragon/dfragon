@@ -5,7 +5,7 @@ import {
 } from '../../infrastructure/neople/character-basic.js'
 import { CharacterBasicSubscriber } from '../../presentation/events/character-basic.js'
 import { type DynamicModule, Module } from '@nestjs/common'
-import type { ReportCode } from '../../access-log.js'
+import type { ReportCode } from '../../presentation/http/access-log.js'
 import {
   type RecordCharacterBasic,
   type RecordCharacterSkillStyle

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { Writable } from 'node:stream'
 import type { NextFunction, Request, Response } from 'express'
-import { type ErrorChainEntry, describeErrorChain } from './error-chain.js'
+import { type ErrorChainEntry, describeErrorChain } from '../../domain/error-chain.js'
 
 export type AccessLogSink = (line: string) => void
 

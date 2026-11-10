@@ -11,7 +11,7 @@ import {
   parseTimelineCursor
 } from '../src/domain/character-timeline/project.js'
 import { parseCharacterTimelineRows } from '../src/infrastructure/database/character-timeline-read.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { startOfResetWeek } from '../src/domain/seoul-time.js'
 
 const character = { serverId: 'siroco', characterId: 'timeline-read-fixture' }

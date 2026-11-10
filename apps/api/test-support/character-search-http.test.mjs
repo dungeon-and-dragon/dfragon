@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { request } from 'node:http'
 import { Buffer } from 'node:buffer'
 import { test } from 'node:test'
-import { createApiHttpApp } from '../dist/http.js'
+import { createApiHttpApp } from '../dist/runtime/api-app.js'
 import {
   unusedDetailProviders,
   unusedTodayGradeProvider,

@@ -1,7 +1,7 @@
 import type { ReadTimelinePage } from '../../application/character-timeline/ports.js'
 import { type DynamicModule, type INestApplication, Module } from '@nestjs/common'
 import type { TimelineCharacter } from '@dfragon/database'
-import type { ReportCode } from '../../access-log.js'
+import type { ReportCode } from '../../presentation/http/access-log.js'
 import {
   CHARACTER_TIMELINE_SERVICE,
   CharacterTimelineController

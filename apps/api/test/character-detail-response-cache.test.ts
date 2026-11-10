@@ -9,7 +9,7 @@ import type { FetchCatalog } from '../src/application/character-catalog/ports.js
 import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
 import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
 import { createCharacterDetailService } from '../src/application/character-detail/service.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
 const signal = new AbortController().signal
