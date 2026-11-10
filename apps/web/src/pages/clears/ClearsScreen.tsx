@@ -277,12 +277,12 @@ function BarBox({ name, bars }: { name: string; bars: readonly Bar[] }): React.J
 }
 
 const JOB_SORTS: readonly { sort: JobSort; label: string }[] = [
-  { sort: 'rate', label: '클리어율 순' },
-  { sort: 'cleared', label: '클리어 순' }
+  { sort: 'cleared', label: '클리어 순' },
+  { sort: 'rate', label: '클리어율 순' }
 ]
 
 function JobBox({ jobs }: { jobs: readonly ClearJob[] }): React.JSX.Element {
-  const [sort, setSort] = useState<JobSort>('rate')
+  const [sort, setSort] = useState<JobSort>('cleared')
   const [expanded, setExpanded] = useState(false)
   const rows = jobRows(jobs, sort)
   const shown = expanded ? rows : rows.slice(0, VISIBLE_JOB_COUNT)
