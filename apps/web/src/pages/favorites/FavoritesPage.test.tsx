@@ -7,7 +7,7 @@ import {
   useFavoriteCharacterStore
 } from '../../hooks/useFavoriteCharacterStore'
 import { TestRouter } from '../../testing/test-support/test-router'
-import { FavoritesScreen } from './FavoritesScreen'
+import { FavoritesPage } from './FavoritesPage'
 
 let container: HTMLDivElement
 let root: Root
@@ -49,7 +49,7 @@ async function render(favoriteCharacters: FavoriteCharacter[]): Promise<void> {
   await act(async () =>
     root.render(
       <TestRouter>
-        <FavoritesScreen />
+        <FavoritesPage />
       </TestRouter>
     )
   )

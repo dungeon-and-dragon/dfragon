@@ -4,10 +4,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { createDfragonClient } from '#core/api/dfragon-client'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
-import { createTestClientHost } from '../testing/test-support/client-host'
-import { TestQueryClient } from '../testing/test-support/test-query-client'
+import { createTestClientHost } from '../../../testing/test-support/client-host'
+import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { useCharacterDetail } from './useCharacterDetail'
-import { ClientHostContext, type ClientHost } from '../host/client-host'
+import { ClientHostContext, type ClientHost } from '../../../host/client-host'
 
 function Harness({ characterId }: { characterId: string }): React.JSX.Element {
   const result = useCharacterDetail('cain', characterId)

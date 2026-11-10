@@ -11,7 +11,7 @@ import { createSeatOrder, swapSeats } from '#core/capture/seats'
 import type { SlotNotice } from '#core/character/character-card'
 import { dealerCard } from '#core/testing/character-cards'
 import type { CardCharacter, SlotState } from '#core/capture/cards-types'
-import { RaidPage } from './RaidPage'
+import { RaidScreen } from './RaidScreen'
 import { TestRouter } from '../../testing/test-support/test-router'
 
 vi.mock('../../components/ServerSelect', () => ({
@@ -66,9 +66,9 @@ const member: CardCharacter = {
 }
 const idle: SlotState[] = Array.from({ length: 12 }, () => 'idle')
 
-type RenderProps = Partial<Omit<ComponentProps<typeof RaidPage>, 'slots' | 'seats' | 'actions'>> &
-  Partial<ComponentProps<typeof RaidPage>['seats']> &
-  Partial<ComponentProps<typeof RaidPage>['actions']> & {
+type RenderProps = Partial<Omit<ComponentProps<typeof RaidScreen>, 'slots' | 'seats' | 'actions'>> &
+  Partial<ComponentProps<typeof RaidScreen>['seats']> &
+  Partial<ComponentProps<typeof RaidScreen>['actions']> & {
     slots?: SlotState[]
     characters?: (CardCharacter | null)[]
     slotNotices?: (SlotNotice | undefined)[]
@@ -104,7 +104,7 @@ async function render({
   await act(async () =>
     root.render(
       <TestRouter>
-        <RaidPage
+        <RaidScreen
           resetKey="raid"
           {...props}
           seats={{ layout: RAID_SEAT_LAYOUT, seatOrder, canMoveSeats, swapSeats: swap }}
