@@ -1,8 +1,6 @@
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 
-export const CLEAR_POPULATION_SIZE = 100_000
-
 export type ContentClearKind = 'raid' | 'challenge'
 
 export type ContentClearInput = {
@@ -36,7 +34,7 @@ export type ContentClearPopulationInput = {
 export type ClearPopulationCharacter = {
   serverId: string
   characterId: string
-  fame: number
+  maxFame: number
   jobId: string | null
   jobGrowId: string | null
   jobName: string | null
@@ -182,21 +180,23 @@ export async function finishContentClearCollection(
   await client.contentClearCollection.deleteMany({ where: { startedAt } })
 }
 
-// 명성 랭킹과 같은 순서다. ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
-export function readClearPopulation(client: DatabaseClient): Promise<ClearPopulationCharacter[]> {
+// 최고 명성 index로 하한 이상만 읽는다. 같은 최고 명성은 서버, 캐릭터 순이라 다시 읽어도 순서가 같다.
+export function readClearPopulation(
+  client: DatabaseClient,
+  minMaxFame: number
+): Promise<ClearPopulationCharacter[]> {
   return client.$queryRaw<ClearPopulationCharacter[]>`
     SELECT
       server_id AS "serverId",
       character_id AS "characterId",
-      fame,
+      max_fame AS "maxFame",
       job_id AS "jobId",
       job_grow_id AS "jobGrowId",
       job_name AS "jobName",
       job_grow_name AS "jobGrowName"
     FROM characters
-    WHERE fame IS NOT NULL
-    ORDER BY fame DESC, server_id, character_id
-    LIMIT ${CLEAR_POPULATION_SIZE}`
+    WHERE max_fame >= ${minMaxFame}
+    ORDER BY max_fame DESC, server_id, character_id`
 }
 
 export type StoredClearPopulation = {

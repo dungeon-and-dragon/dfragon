@@ -16,7 +16,13 @@ import {
 } from '../characters/timeline/neople.js'
 import { splitTimelineRanges } from '../characters/timeline/ranges.js'
 import { startOfResetWeek } from '../utils/seoul-time.js'
-import { CLEAR_CONTENTS, type ClearContent, toContentClearInput } from './contents.js'
+import {
+  CLEAR_CONTENTS,
+  type ClearContent,
+  toCollectionMinFame,
+  toContentClearInput,
+  toPopulationMinFame
+} from './contents.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000
 
@@ -38,7 +44,7 @@ type ClearCollectionPlan = {
 }
 
 export type ClearCollectionStore = {
-  readPopulation(): Promise<ClearPopulationCharacter[]>
+  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]>
   readPopulations(): Promise<StoredClearPopulation[]>
   readProgress(): Promise<ContentClearCollectionProgress | undefined>
   startProgress(startedAt: Date): Promise<void>
@@ -183,6 +189,18 @@ function toPopulationJobs(population: readonly ClearPopulationCharacter[]): Clea
   return [...jobs.values()]
 }
 
+function toContentPopulation(
+  content: ClearContent,
+  population: readonly ClearPopulationCharacter[],
+  collectionMinFame: number
+): Pick<ContentClearPopulationInput, 'population' | 'minFame' | 'jobs'> {
+  const minFame = toPopulationMinFame(content, collectionMinFame)
+  const members = population.filter(({ maxFame }) => maxFame >= minFame)
+  const jobs = toPopulationJobs(members)
+
+  return { population: members.length, minFame, jobs }
+}
+
 async function readOrStartProgress(
   store: ClearCollectionStore,
   now: () => Date
@@ -215,7 +233,8 @@ export async function collectContentClears({
   const plannedWeeks = new Set(
     plan.weeks.map(({ contentId, weekStart }) => weekKey(contentId, weekStart))
   )
-  const population = await store.readPopulation()
+  const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
+  const population = await store.readPopulation(collectionMinFame)
   const counts = { requests: 0, clears: 0, skipped: 0 }
   const fetchTimeline = createNeopleCharacterTimeline(
     {
@@ -230,6 +249,7 @@ export async function collectContentClears({
   report('CONTENT_CLEAR_COLLECTION_STARTED', {
     startedAt: startedAt.toISOString(),
     done: resumedAt,
+    minFame: collectionMinFame,
     characters: population.length,
     ranges: plan.ranges.length
   })
@@ -257,16 +277,11 @@ export async function collectContentClears({
   }
 
   const collectedAt = now()
-  const jobs = toPopulationJobs(population)
-  const minFame = population.at(-1)?.fame ?? null
-  for (const week of plan.weeks) {
-    await store.recordPopulation({
-      ...week,
-      population: population.length,
-      minFame,
-      jobs,
-      collectedAt
-    })
+  for (const content of CLEAR_CONTENTS) {
+    const contentPopulation = toContentPopulation(content, population, collectionMinFame)
+    for (const week of plan.weeks.filter(({ contentId }) => contentId === content.id)) {
+      await store.recordPopulation({ ...week, ...contentPopulation, collectedAt })
+    }
   }
   await store.finishProgress(startedAt)
   const summary = { startedAt: startedAt.toISOString(), characters: population.length, ...counts }

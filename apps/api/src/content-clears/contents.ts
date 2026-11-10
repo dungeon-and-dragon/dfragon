@@ -29,6 +29,7 @@ export type ClearContent = {
   kind: ContentClearKind
   name: string
   releasedAt: Date
+  entryFame: number
   rule: ClearContentRule
 }
 
@@ -42,12 +43,14 @@ function raidClear(raidName: string, stage: string | null): ClearRecordRule {
 }
 
 // 출시일은 공식 업데이트 공지와 운영 DB의 첫 클리어 시각이 같은 날이다(2026-11-10). 업데이트는 06:00(KST) 초기화에 열린다.
+// 입장 명성은 공식 게임 가이드의 채널 입장 명성이며 일반과 하드가 같다(2026-11-10).
 export const CLEAR_CONTENTS: readonly ClearContent[] = [
   {
     id: 'nabel-normal',
     kind: 'raid',
     name: '만들어진 신 나벨 (일반)',
     releasedAt: new Date('2025-04-17T06:00:00+09:00'),
+    entryFame: 47_684,
     rule: raidClear('만들어진 신 나벨', '일반')
   },
   {
@@ -55,6 +58,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'raid',
     name: '만들어진 신 나벨 (하드)',
     releasedAt: new Date('2025-04-17T06:00:00+09:00'),
+    entryFame: 47_684,
     rule: raidClear('만들어진 신 나벨', '하드')
   },
   {
@@ -62,6 +66,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'raid',
     name: '이내 황혼전',
     releasedAt: new Date('2025-08-21T06:00:00+09:00'),
+    entryFame: 72_688,
     rule: raidClear('이내 황혼전', null)
   },
   {
@@ -69,6 +74,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'raid',
     name: '디레지에 레이드 (일반)',
     releasedAt: new Date('2025-12-04T06:00:00+09:00'),
+    entryFame: 63_257,
     rule: raidClear('디레지에 레이드', '일반')
   },
   {
@@ -76,6 +82,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'raid',
     name: '디레지에 레이드 (하드)',
     releasedAt: new Date('2026-02-05T06:00:00+09:00'),
+    entryFame: 63_257,
     rule: raidClear('디레지에 레이드', '하드')
   },
   {
@@ -83,6 +90,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'raid',
     name: '무너진 성자 미카엘라 (일반)',
     releasedAt: new Date('2026-08-06T06:00:00+09:00'),
+    entryFame: 104_292,
     rule: raidClear('무너진 성자 미카엘라', '일반')
   },
   {
@@ -90,6 +98,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'raid',
     name: '무너진 성자 미카엘라 (하드)',
     releasedAt: new Date('2026-08-06T06:00:00+09:00'),
+    entryFame: 104_292,
     rule: raidClear('무너진 성자 미카엘라', '하드')
   },
   // 챌린지 클리어는 클리어 기록으로 남지 않고 보상 칭호 "황혼의 악연을 끊은 자"를 상자에서 얻은 기록으로만 남는다.
@@ -98,6 +107,7 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
     kind: 'challenge',
     name: '각인된 악몽 "죽음을 딛고 선 자"',
     releasedAt: new Date('2026-11-05T06:00:00+09:00'),
+    entryFame: 119_414,
     rule: { type: 'item', code: BOX_ACQUISITION_CODE, itemId: '070577c19e70e3ea723bbc924b111a12' }
   }
 ]
@@ -196,4 +206,14 @@ export function toLatestContents(
   return contents.filter(
     (content) => seriesReleases.get(seriesOf(content)) === latestReleases.get(content.kind)
   )
+}
+
+// 종류별 최신 컨텐츠에 입장할 수 있는 캐릭터를 모두 받는 가장 낮은 최고 명성이다.
+export function toCollectionMinFame(contents: readonly ClearContent[] = CLEAR_CONTENTS): number {
+  return Math.min(...toLatestContents(contents).map(({ entryFame }) => entryFame))
+}
+
+// 수집 하한 아래 캐릭터는 받지 않으므로, 입장 명성이 수집 하한보다 낮은 컨텐츠의 분모는 수집 대상 전체다.
+export function toPopulationMinFame(content: ClearContent, collectionMinFame: number): number {
+  return Math.max(content.entryFame, collectionMinFame)
 }
