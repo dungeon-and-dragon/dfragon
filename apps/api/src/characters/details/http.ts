@@ -1,5 +1,8 @@
 import { ApiTags } from '@nestjs/swagger'
-import { ApiCharacterDetails, ApiCharacterRefresh } from '../../swagger/operations.js'
+import {
+  ApiCharacterDetails,
+  ApiCharacterRefresh
+} from '../../presentation/openapi/character-details.js'
 import { Controller, Get, Inject, Post, Req, Res } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { parseCharacterIdentity } from '../identity.js'

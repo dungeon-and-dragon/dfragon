@@ -2,7 +2,7 @@ import { Controller, Get, Inject, Param, Query } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../characters/details/errors.js'
-import { ApiClearContentStats, ApiClearStats } from '../swagger/operations.js'
+import { ApiClearContentStats, ApiClearStats } from '../presentation/openapi/content-clears.js'
 import type { ClearContentStats, ClearStats, ClearStatsService } from './stats.js'
 
 export const CLEAR_STATS_SERVICE = Symbol('CLEAR_STATS_SERVICE')

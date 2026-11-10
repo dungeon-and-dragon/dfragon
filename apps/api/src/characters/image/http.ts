@@ -2,7 +2,7 @@ import { Controller, Get, Inject, Req, Res } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request, Response } from 'express'
 import { sendWithCancellation } from '../../http-response.js'
-import { ApiCharacterImage } from '../../swagger/operations.js'
+import { ApiCharacterImage } from '../../presentation/openapi/character-image.js'
 import { parseCharacterIdentity } from '../identity.js'
 import type { FetchCharacterImage } from './neople.js'
 
