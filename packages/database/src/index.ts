@@ -4,11 +4,17 @@ export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
 export {
   enqueueCollectedCharacters,
+  readCollectionSummary,
   recordCharacterBasic,
   recordCollectionFailure,
+  requeueCollectionFailures,
   takeCollectionBatch
 } from './character-collection.js'
-export type { CollectedCharacter } from './character-collection.js'
+export type {
+  CollectedCharacter,
+  CollectionFailureCount,
+  CollectionSummary
+} from './character-collection.js'
 export { createDatabaseClient } from './client.js'
 export {
   CLEAR_POPULATION_SIZE,
@@ -47,20 +53,29 @@ export {
   finishJobRun,
   interruptRunningJobRuns,
   isJobPaused,
+  readJobOverviews,
+  readJobRuns,
   readLastScheduledJobSuccess,
   recordJobNextRun,
   recordJobRunProgress,
   recordJobWorkerSeen,
   registerJobs,
+  requestJobRun,
+  setJobPaused,
   startJobRun
 } from './jobs.js'
 export type {
   ClaimedJobRun,
+  InterruptedJobRun,
+  JobOverview,
+  JobPauseChange,
   JobRegistration,
   JobRunErrorEntry,
   JobRunOutcome,
   JobRunProgress,
+  JobRunRecord,
   JobRunReference,
+  JobRunRequest,
   JobRunSummary,
   JobTrigger
 } from './jobs.js'

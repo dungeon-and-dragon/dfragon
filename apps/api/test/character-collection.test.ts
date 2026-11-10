@@ -363,10 +363,23 @@ test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 �
     { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: 'fast' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '0' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '33' },
-    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '1.5' }
+    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '1.5' },
+    { ...collectorEnvironment, JOB_ALERT_DISCORD_WEBHOOK_URL: 'http://discord.test/webhook' },
+    { ...collectorEnvironment, JOB_ALERT_DISCORD_WEBHOOK_URL: '' }
   ]) {
     assert.throws(() => readCollectorConfiguration(invalid), {
       message: 'Invalid character collector configuration'
     })
   }
+})
+
+test('수집 worker 설정은 job 알림 웹훅이 없으면 알림 없이, 있으면 https URL로 받는다', () => {
+  assert.equal(readCollectorConfiguration(collectorEnvironment).jobAlertWebhookUrl, undefined)
+  assert.equal(
+    readCollectorConfiguration({
+      ...collectorEnvironment,
+      JOB_ALERT_DISCORD_WEBHOOK_URL: 'https://discord.test/api/webhooks/synthetic'
+    }).jobAlertWebhookUrl,
+    'https://discord.test/api/webhooks/synthetic'
+  )
 })

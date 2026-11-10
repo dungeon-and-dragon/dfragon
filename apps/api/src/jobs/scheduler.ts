@@ -1,7 +1,7 @@
 import { Cron } from 'croner'
 import { z } from 'zod'
 import type { JobDefinition } from './definition.js'
-import { type JobRunDependencies, executeJobRun, readErrorChain } from './run.js'
+import { type JobRunDependencies, executeJobRun, readErrorChain, sendJobAlert } from './run.js'
 
 const TIMEZONE = 'Asia/Seoul'
 const REQUEST_POLL_INTERVAL_MS = 5_000
@@ -32,9 +32,10 @@ function scheduledJobs(jobs: readonly JobDefinition[]): ScheduledJob[] {
 }
 
 export async function registerWorkerJobs(
-  { jobs, store, report }: JobSchedulerDependencies,
+  dependencies: JobSchedulerDependencies,
   now: Date
 ): Promise<void> {
+  const { jobs, store, report } = dependencies
   const nextRuns = new Map(
     scheduledJobs(jobs).map(({ definition, cron }) => [definition.name, cron.nextRun(now)])
   )
@@ -48,8 +49,15 @@ export async function registerWorkerJobs(
       nextRunAt: nextRuns.get(definition.name) ?? null
     }))
   )
-  for (const { id, jobName } of await store.interruptRunningRuns()) {
+  for (const { id, jobName, trigger, startedAt } of await store.interruptRunningRuns()) {
     report('JOB_RUN_INTERRUPTED', { job: jobName, runId: id })
+    // worker 시작이 Discord 응답을 기다리지 않게 한다.
+    sendJobAlert(dependencies, id, {
+      kind: 'interrupted',
+      job: jobName,
+      trigger,
+      elapsedMs: now.getTime() - startedAt.getTime()
+    })
   }
 }
 

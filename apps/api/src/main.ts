@@ -1,24 +1,44 @@
 import 'reflect-metadata'
 import { applyMigrations } from '@dfragon/database'
-import { createApiRuntime } from './runtime/application.js'
+import type { INestApplication } from '@nestjs/common'
+import { readTimelineQueueCounts } from './http.js'
+import { createApiRuntime, createOpsRuntime } from './runtime/application.js'
 import { readRuntimeConfiguration } from './runtime/configuration.js'
 
 const startupFailureMessage = 'API failed to start'
+
+async function closeAll(apps: readonly INestApplication[]): Promise<void> {
+  const results = await Promise.allSettled(apps.map((app) => app.close()))
+  if (results.some(({ status }) => status === 'rejected')) {
+    throw new Error(startupFailureMessage)
+  }
+}
 
 async function main(): Promise<void> {
   const configuration = await readRuntimeConfiguration(process.env)
   if (configuration.database !== undefined) {
     await applyMigrations()
   }
-  const app = await createApiRuntime(configuration)
-  try {
+  const listen = (app: INestApplication, port: number) => {
     if (configuration.localHttps !== undefined) {
-      await app.listen(configuration.port, '127.0.0.1')
-    } else {
-      await app.listen(configuration.port)
+      return app.listen(port, '127.0.0.1')
+    }
+
+    return app.listen(port)
+  }
+  const apps: INestApplication[] = []
+  try {
+    const app = await createApiRuntime(configuration)
+    apps.push(app)
+    await listen(app, configuration.port)
+    const { ops } = configuration
+    if (ops !== undefined) {
+      const opsApp = await createOpsRuntime(ops.database, () => readTimelineQueueCounts(app))
+      apps.push(opsApp)
+      await listen(opsApp, ops.port)
     }
   } catch (error) {
-    await app.close()
+    await closeAll(apps).catch(() => undefined)
     throw error
   }
 
@@ -26,7 +46,7 @@ async function main(): Promise<void> {
     // close가 열린 연결을 기다리며 끝나지 않으면 두 번째 signal은 Node 기본 동작으로 즉시 종료한다.
     process.off('SIGINT', shutdown)
     process.off('SIGTERM', shutdown)
-    app.close().catch(() => {
+    closeAll(apps).catch(() => {
       console.error(startupFailureMessage)
       process.exitCode = 1
     })

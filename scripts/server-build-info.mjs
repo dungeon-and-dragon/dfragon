@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 const SOURCE_COMMIT_PATTERN = /^[0-9a-f]{40}$/
 
-const SERVICES = ['api', 'web']
+const SERVICES = ['api', 'web', 'internal']
 
 export function createServerBuildInfo(service, commit) {
   if (!SERVICES.includes(service)) {

@@ -1,10 +1,10 @@
 import type {
   ClaimedJobRun,
+  InterruptedJobRun,
   JobRegistration,
   JobRunErrorEntry,
   JobRunOutcome,
   JobRunProgress,
-  JobRunReference,
   JobRunSummary,
   JobTrigger
 } from '@dfragon/database'
@@ -32,7 +32,7 @@ export function defineJob<Schema extends z.ZodType>(
 
 export type JobStore = {
   registerJobs: (jobs: readonly JobRegistration[]) => Promise<void>
-  interruptRunningRuns: () => Promise<JobRunReference[]>
+  interruptRunningRuns: () => Promise<InterruptedJobRun[]>
   isPaused: (name: string) => Promise<boolean>
   readLastScheduledSuccess: (name: string) => Promise<Date | undefined>
   startRun: (name: string, trigger: Exclude<JobTrigger, 'manual'>) => Promise<number | undefined>
