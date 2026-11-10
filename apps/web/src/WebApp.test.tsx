@@ -17,7 +17,7 @@ import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterCandidate } from '#core/character/character'
 import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
-import { WEB_SCREEN_WATCH_TEXTS } from './components/web-capture-texts'
+import { WEB_SCREEN_WATCH_TEXTS } from './pages/multisearch/components/web-capture-texts'
 
 vi.mock('./host/browser-png', () => ({
   decodeBrowserImage: vi.fn(),

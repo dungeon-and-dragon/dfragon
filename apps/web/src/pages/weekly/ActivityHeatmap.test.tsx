@@ -7,7 +7,7 @@ import type {
   AdventureActivityDay,
   AdventureActivitySeasonDays
 } from '#core/adventure-guild/adventure-activity'
-import { useRefreshAdventureActivity } from '../../hooks/useAdventureActivity'
+import { useRefreshAdventureActivity } from './hooks/useAdventureActivity'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'

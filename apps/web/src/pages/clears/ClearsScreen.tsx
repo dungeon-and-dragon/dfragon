@@ -6,14 +6,14 @@ import type { ClearContent, ClearJob, ClearWeek } from '#core/ranking/clear-stat
 import { styles as listBoxStyles } from '../../components/table/ListBox.style'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
-import { useClearContentStats, useClearStats } from '../../hooks/useClearStats'
+import { useClearContentStats, useClearStats } from './hooks/useClearStats'
 import { findClearContentBackground } from '../../lib/clear-content-background'
 import { type ColumnBar, Columns } from '../../components/chart/Columns'
 import { type Bar, RowBars } from '../../components/chart/RowBars'
-import { TableRail } from '../../components/chart/TableRail'
+import { TableRail } from './components/TableRail'
 import { ROW_BAR_GROW, useChartBarGrow } from '../../animations/useChartBarGrow'
-import { shareText } from '../stats/stats-bars'
-import { SeasonBackdrop } from '../weekly/AdventureDashboard'
+import { shareText } from '../../components/chart/stats-bars'
+import { SeasonBackdrop } from '../../components/SeasonBackdrop'
 import {
   adventureBars,
   contentKindLabel,

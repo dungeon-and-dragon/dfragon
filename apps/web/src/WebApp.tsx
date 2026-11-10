@@ -21,15 +21,15 @@ import { parseCharacterTabSearch } from './pages/character/character-tabs'
 import { parseCharacterSearch } from './pages/character-search/character-search-params'
 import { CharacterSearchPage } from './pages/character-search/CharacterSearchPage'
 import { CharacterDetailPage } from './pages/character/CharacterDetailPage'
-import { FavoritesScreen } from './pages/favorites/FavoritesScreen'
+import { FavoritesPage } from './pages/favorites/FavoritesPage'
 import { GuildPage } from './pages/guild/GuildPage'
 import { HomePage } from './pages/home/HomePage'
-import { PrivacyScreen, TermsScreen } from './pages/legal/LegalScreen'
-import { NotFoundScreen } from './pages/not-found/NotFoundScreen'
+import { PrivacyPage, TermsPage } from './pages/legal/LegalPage'
+import { NotFoundPage } from './pages/not-found/NotFoundPage'
 import { parseRankingSearch } from './pages/rankings/ranking-search'
 import { RankingsPage } from './pages/rankings/RankingsPage'
 import { MultisearchPage } from './pages/multisearch/MultisearchPage'
-import { StatsScreen } from './pages/stats/StatsScreen'
+import { StatsPage } from './pages/stats/StatsPage'
 import { ClearsPage } from './pages/clears/ClearsPage'
 import { parseClearSearch } from './pages/clears/clear-search'
 import { parseWeeklySearch } from './pages/weekly/weekly-search'
@@ -70,7 +70,7 @@ function SiteLayout(): React.JSX.Element {
 
 const rootRoute = createRootRouteWithContext<{ host: BrowserHost }>()({
   component: SiteLayout,
-  notFoundComponent: NotFoundScreen
+  notFoundComponent: NotFoundPage
 })
 
 const homeRoute = createRoute({
@@ -109,7 +109,7 @@ const rankingsRoute = createRoute({
 const statsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/stats',
-  component: StatsScreen
+  component: StatsPage
 })
 
 const clearsRoute = createRoute({
@@ -163,19 +163,19 @@ const legacyMyAdventureRoute = createRoute({
 const favoritesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/favorites',
-  component: FavoritesScreen
+  component: FavoritesPage
 })
 
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/terms',
-  component: TermsScreen
+  component: TermsPage
 })
 
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/privacy',
-  component: PrivacyScreen
+  component: PrivacyPage
 })
 
 const routeTree = rootRoute.addChildren([

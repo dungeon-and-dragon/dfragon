@@ -3,49 +3,14 @@ import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { preload } from 'react-dom'
 import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
-import { useAdventureActivity, useBackfillAdventureSeason } from '../../hooks/useAdventureActivity'
+import { SeasonBackdrop } from '../../components/SeasonBackdrop'
+import { useAdventureActivity, useBackfillAdventureSeason } from './hooks/useAdventureActivity'
 import { findSeasonRaidBackground } from '../../lib/season-raid-background'
 import { ActivitySummary, ActivitySummarySkeleton } from './ActivitySummary'
 import { styles } from './AdventureDashboard.style'
 import { seasonPeriod } from './season-format'
 import { seasonHasLegion } from './season-legion'
 import { SeasonTimeline } from './SeasonTimeline'
-
-type Backdrop = Readonly<{ url: string | undefined; previous: string | undefined; fading: boolean }>
-
-function BackdropLayer({
-  url,
-  fading
-}: {
-  url: string | undefined
-  fading: boolean
-}): React.JSX.Element {
-  return (
-    <div
-      aria-hidden="true"
-      {...stylex.props(
-        styles.backdrop,
-        url !== undefined && styles.backdropImage(url),
-        fading && styles.fading
-      )}
-    />
-  )
-}
-
-export function SeasonBackdrop({ url }: { url: string | undefined }): React.JSX.Element {
-  const [backdrop, setBackdrop] = useState<Backdrop>({ url, previous: undefined, fading: false })
-  if (backdrop.url !== url) {
-    setBackdrop({ url, previous: backdrop.url, fading: true })
-  }
-
-  return (
-    <>
-      {backdrop.fading && <BackdropLayer url={backdrop.previous} fading={false} />}
-      <BackdropLayer key={backdrop.url ?? ''} url={backdrop.url} fading={backdrop.fading} />
-      <div aria-hidden="true" {...stylex.props(styles.shade)} />
-    </>
-  )
-}
 
 // 시즌을 고르는 순간 배경이 크로스페이드되도록 고를 수 있는 시즌의 배경을 미리 받는다.
 function preloadSeasonBackgrounds(activity: AdventureActivity): void {
