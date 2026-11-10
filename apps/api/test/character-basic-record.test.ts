@@ -8,7 +8,7 @@ import {
   recordCharacterBasic
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
-import { CharacterBasicSubscriber } from '../src/characters/basic/subscriber.js'
+import { CharacterBasicSubscriber } from '../src/presentation/events/character-basic.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import type {
   CharacterPayload,

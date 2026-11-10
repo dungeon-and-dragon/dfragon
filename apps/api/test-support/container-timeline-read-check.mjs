@@ -4,9 +4,9 @@ import {
   readDatabaseConfiguration,
   replaceTimelineRange
 } from '@dfragon/database'
-import { createTimelineSyncQueue } from './dist/characters/timeline/queue.js'
-import { readCharacterTimeline } from './dist/characters/timeline/read.js'
-import { createCharacterTimelineService } from './dist/characters/timeline/service.js'
+import { createTimelineSyncQueue } from './dist/application/character-timeline/queue.js'
+import { readCharacterTimeline } from './dist/infrastructure/database/character-timeline-read.js'
+import { createCharacterTimelineService } from './dist/application/character-timeline/service.js'
 
 // 합성 캐릭터와 타임라인이다. 천해천(2026-03-26 06:00+09) 둘째 주 목요일 정오에 읽는다.
 const now = new Date('2026-04-02T12:00:00+09:00')

@@ -4,10 +4,10 @@ import type { TimelineItemInput, TimelineRange } from '@dfragon/database'
 import {
   type EnhancementBackfillStore,
   backfillEnhancements
-} from '../src/characters/timeline/backfill.js'
-import { TimelineFailure } from '../src/characters/timeline/errors.js'
-import type { FetchCharacterTimeline } from '../src/characters/timeline/neople.js'
-import type { TimelineInputs } from '../src/characters/timeline/rows.js'
+} from '../src/application/character-timeline/backfill.js'
+import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
+import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
+import type { TimelineInputs } from '../src/domain/character-timeline/rows.js'
 
 const character = { serverId: 'siroco', characterId: 'backfill-fixture' }
 const MINUTE_MS = 60 * 1000

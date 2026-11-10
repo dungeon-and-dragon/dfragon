@@ -7,22 +7,18 @@ import { CharacterDetailFailure } from '../src/domain/character-failure.js'
 import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
 import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
 import { createCharacterDetailService } from '../src/application/character-detail/service.js'
-import { TimelineFailure } from '../src/characters/timeline/errors.js'
-import type { FetchCharacterTimeline } from '../src/characters/timeline/neople.js'
-import { createTimelineSyncQueue } from '../src/characters/timeline/queue.js'
-import { EMPTY_CHARACTER_TIMELINE } from '../src/characters/timeline/read.js'
-import type { TimelineInputs } from '../src/characters/timeline/rows.js'
+import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
+import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
+import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
+import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
+import type { TimelineInputs } from '../src/domain/character-timeline/rows.js'
 import {
   type TimelineStore,
   type TimelineSyncFailure,
   syncCharacterTimeline
-} from '../src/characters/timeline/sync.js'
+} from '../src/application/character-timeline/sync.js'
 import { createApiHttpApp } from '../src/http.js'
-import {
-  CHARACTER_FETCHED,
-  CharacterEvents,
-  type CharacterFetched
-} from '../src/characters/events.js'
+import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-events.js'
 import type { CharacterIdentity } from '../src/domain/character-identity.js'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 
@@ -324,7 +320,12 @@ test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 
       return payloads
     },
     calculateScore: async () => null,
-    characterEvents: new CharacterEvents(emitter)
+    publishCharacterFetched: ({ serverId, characterId }, { basic, skill_style }, fetchedAt) => {
+      emitter.emit(
+        CHARACTER_FETCHED,
+        new CharacterFetched(serverId, characterId, basic, skill_style, fetchedAt)
+      )
+    }
   })
   t.after(() => service.onModuleDestroy())
 
