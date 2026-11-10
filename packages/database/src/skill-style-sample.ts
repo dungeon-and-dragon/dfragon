@@ -1,7 +1,6 @@
+import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
-
-export const SKILL_STYLE_SAMPLE_TOP_COUNT = 5000
 
 export type SkillStyleSampleJob = {
   jobId: string

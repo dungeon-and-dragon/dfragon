@@ -97,10 +97,7 @@ export type {
   SkillSelectionCount
 } from './skill-adoption.js'
 export { recordCharacterSkillStyle } from './skill-style.js'
-export {
-  SKILL_STYLE_SAMPLE_TOP_COUNT,
-  readSampleCharactersWithoutSkillStyle
-} from './skill-style-sample.js'
+export { readSampleCharactersWithoutSkillStyle } from './skill-style-sample.js'
 export type { SkillStyleSampleCharacter, SkillStyleSampleJob } from './skill-style-sample.js'
 export type {
   CharacterSkillStyleInput,
