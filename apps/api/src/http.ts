@@ -14,10 +14,6 @@ import { characterDetailFailure } from './characters/details/errors.js'
 import { CHARACTER_IMAGE_FETCH, CharacterImageController } from './characters/image/http.js'
 import { type FetchCharacterImage, createNeopleCharacterImage } from './characters/image/neople.js'
 import { NeopleSearchFailure } from './errors/neople-search.js'
-import { TODAY_GRADE_SERVICE, TodayGradeController } from './today-grade/http.js'
-import { createTodayGradeService } from './today-grade/service.js'
-import type { FetchShopGrade } from './today-grade/neople.js'
-import { type TodayGradeFailure, todayGradeFailure } from './today-grade/errors.js'
 import { setupSwagger } from './swagger/setup.js'
 import {
   type JobQueueCounts,
@@ -69,13 +65,9 @@ import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter'
 import type { TimelineCharacter } from '@dfragon/database'
 import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from './build-info.js'
 import { SCORE_ENGINE, type ScoreEngine, createScoreEngine } from './score/engine.js'
-import {
-  type AccessLogSink,
-  createAccessLog,
-  recordAccessLogErrorChain,
-  recordAccessLogErrorCode,
-  writeAccessLogToStdout
-} from './access-log.js'
+import { type AccessLogSink, createAccessLog, writeAccessLogToStdout } from './access-log.js'
+import { sendFailureResponse } from './presentation/http/failure-response.js'
+import { TodayGradeModule, type TodayGradeModuleOptions } from './runtime/modules/today-grade.js'
 
 const TRAILING_SLASHES_PATTERN = /\/+$/
 const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
@@ -85,17 +77,13 @@ const SEASON_BACKFILL_QUEUE = Symbol('SEASON_BACKFILL_QUEUE')
 function requestFailure(
   path: string,
   error: unknown
-): NeopleSearchFailure | TodayGradeFailure | ReturnType<typeof characterDetailFailure> {
+): NeopleSearchFailure | ReturnType<typeof characterDetailFailure> {
   if (path === '/characters' || path === '/characters/candidates') {
     if (error instanceof NeopleSearchFailure) {
       return error
     }
 
     return new NeopleSearchFailure('internal')
-  }
-
-  if (path === '/items/today-grade') {
-    return todayGradeFailure(error)
   }
 
   return characterDetailFailure(error)
@@ -119,11 +107,7 @@ class ApiHttpFilter implements ExceptionFilter {
       return
     }
     const path = request.path.toLowerCase().replace(TRAILING_SLASHES_PATTERN, '')
-    const failure = requestFailure(path, error)
-
-    recordAccessLogErrorCode(response, failure.body.error.code)
-    recordAccessLogErrorChain(response, error)
-    response.status(failure.status).json(failure.body)
+    sendFailureResponse(response, error, requestFailure(path, error))
   }
 }
 
@@ -172,7 +156,7 @@ export interface ApiHttpAppOptions {
   readonly adventureGuild?: AdventureGuildReader
   readonly rankingStats?: RankingStatsReader
   readonly clearStats?: ClearStatsReader
-  readonly todayGrade: { fetchShopGrade: FetchShopGrade }
+  readonly todayGrade: TodayGradeModuleOptions
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly trustedProxyHops?: 1
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
@@ -262,7 +246,7 @@ export async function createApiHttpApp({
       ]
     : []
   @Module({
-    imports: [EventEmitterModule.forRoot()],
+    imports: [EventEmitterModule.forRoot(), TodayGradeModule.register(todayGrade)],
     controllers: [
       HealthController,
       ApiVersionController,
@@ -272,8 +256,7 @@ export async function createApiHttpApp({
       CharacterTimelineController,
       AdventureGuildController,
       RankingStatsController,
-      ClearStatsController,
-      TodayGradeController
+      ClearStatsController
     ],
     providers: [
       { provide: API_BUILD_INFO, useValue: buildInfo },
@@ -318,10 +301,6 @@ export async function createApiHttpApp({
       {
         provide: CLEAR_STATS_SERVICE,
         useValue: createClearStatsService(clearStats ?? emptyClearStatsReader)
-      },
-      {
-        provide: TODAY_GRADE_SERVICE,
-        useValue: createTodayGradeService(todayGrade.fetchShopGrade)
       },
       {
         provide: SCORE_ENGINE,

@@ -3,11 +3,12 @@ import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
-import { TodayGradeFailure } from '../src/today-grade/errors.js'
-import { averageGradePercent } from '../src/today-grade/grade.js'
-import { TODAY_GRADE_ITEMS } from '../src/today-grade/items.js'
-import { createNeopleShopGrade, type FetchShopGrade } from '../src/today-grade/neople.js'
-import { createTodayGradeService } from '../src/today-grade/service.js'
+import type { FetchShopGrade } from '../src/application/today-grade/ports.js'
+import { createTodayGradeService } from '../src/application/today-grade/service.js'
+import { TodayGradeFailure, type TodayGradeFailureKind } from '../src/domain/today-grade/failure.js'
+import { averageGradePercent } from '../src/domain/today-grade/grade.js'
+import { TODAY_GRADE_ITEMS } from '../src/domain/today-grade/items.js'
+import { createNeopleShopGrade } from '../src/infrastructure/neople/today-grade.js'
 
 const signal = new AbortController().signal
 // 2026-10-30 12:00 KST
@@ -143,7 +144,7 @@ test('한 부위라도 실패하면 결과 없이 실패하고, 실패는 저장
 
   await assert.rejects(service.get(signal), (error) => {
     assert(error instanceof TodayGradeFailure)
-    assert.equal(error.status, 503)
+    assert.equal(error.kind, 'unavailable')
 
     return true
   })
@@ -180,43 +181,43 @@ test('상점 조회는 아이템마다 /df/items/{itemId}/shop을 부르고 item
 })
 
 test('Neople 오류 코드와 잘못된 등급 값을 오늘의 등급 오류로 바꾼다', async () => {
-  const cases: [string, Response, number][] = [
-    ['점검 오류 코드', jsonResponse({ error: { code: 'API002' } }, 503), 503],
+  const cases: [string, Response, TodayGradeFailureKind][] = [
+    ['점검 오류 코드', jsonResponse({ error: { code: 'API002' } }, 503), 'unavailable'],
     [
       '상점 조회 대상이 아닌 아이템',
       jsonResponse({ error: { status: 404, code: 'DNF003', message: 'NOT_FOUND_ITEM' } }, 404),
-      502
+      'api'
     ],
-    ['등급 값 없음', jsonResponse({ itemId: 'item-a', itemGradeName: '최상급' }), 502],
-    ['문자열 등급 값', jsonResponse({ itemId: 'item-a', itemGradeValue: '97' }), 502],
-    ['100을 넘는 등급 값', jsonResponse({ itemId: 'item-a', itemGradeValue: 101 }), 502],
-    ['JSON이 아닌 응답', new Response('<html>', { status: 200 }), 502]
+    ['등급 값 없음', jsonResponse({ itemId: 'item-a', itemGradeName: '최상급' }), 'api'],
+    ['문자열 등급 값', jsonResponse({ itemId: 'item-a', itemGradeValue: '97' }), 'api'],
+    ['100을 넘는 등급 값', jsonResponse({ itemId: 'item-a', itemGradeValue: 101 }), 'api'],
+    ['JSON이 아닌 응답', new Response('<html>', { status: 200 }), 'api']
   ]
-  for (const [name, response, status] of cases) {
+  for (const [name, response, kind] of cases) {
     const fetchShopGrade = createNeopleShopGrade(
       createNeopleClientForTest('synthetic-shop-key', { fetch: async () => response })
     )
     await assert.rejects(fetchShopGrade('item-a', signal), (error) => {
       assert(error instanceof TodayGradeFailure, name)
-      assert.equal(error.status, status, name)
+      assert.equal(error.kind, kind, name)
 
       return true
     })
   }
 })
 
-test('GET /items/today-grade는 등급 퍼센트와 만료 시각을, 실패하면 오류 본문을 준다', async (t) => {
+test('GET /items/today-grade는 등급 퍼센트와 만료 시각을, 실패하면 실패 종류별 오류 본문을 준다', async (t) => {
   const unusedProvider = async (): Promise<never> => {
     throw new Error('today grade test must not call character providers')
   }
-  let failing = true
+  let failure: Error | undefined
   const app = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: {
       fetchShopGrade: async () => {
-        if (failing) {
-          throw new TodayGradeFailure('timeout')
+        if (failure !== undefined) {
+          throw failure
         }
 
         return 85
@@ -228,20 +229,82 @@ test('GET /items/today-grade는 등급 퍼센트와 만료 시각을, 실패하�
   await app.listen(0, '127.0.0.1')
   const origin = await app.getUrl()
 
-  const failed = await fetch(`${origin}/items/today-grade`)
-  assert.equal(failed.status, 504)
-  assert.deepEqual(await failed.json(), {
-    error: {
-      code: 'NEOPLE_TIMEOUT',
-      message: '오늘의 등급 조회 시간이 초과됐습니다. 다시 시도해 주세요.'
-    }
-  })
+  const failures: [string, Error, number, string, string][] = [
+    [
+      'Neople 시간 초과',
+      new TodayGradeFailure('timeout'),
+      504,
+      'NEOPLE_TIMEOUT',
+      '오늘의 등급 조회 시간이 초과됐습니다. 다시 시도해 주세요.'
+    ],
+    [
+      'Neople 점검',
+      new TodayGradeFailure('unavailable'),
+      503,
+      'NEOPLE_UNAVAILABLE',
+      '현재 오늘의 등급을 조회할 수 없습니다. 잠시 후 다시 시도해 주세요.'
+    ],
+    [
+      'Neople 응답 오류',
+      new TodayGradeFailure('api'),
+      502,
+      'NEOPLE_API_ERROR',
+      '오늘의 등급 조회 중 오류가 발생했습니다.'
+    ],
+    [
+      '알 수 없는 오류',
+      new Error('unexpected'),
+      500,
+      'INTERNAL_SERVER_ERROR',
+      '서버 오류로 오늘의 등급을 처리하지 못했습니다.'
+    ]
+  ]
+  for (const [name, thrown, status, code, message] of failures) {
+    failure = thrown
+    const failed = await fetch(`${origin}/items/today-grade`)
+    assert.equal(failed.status, status, name)
+    assert.deepEqual(await failed.json(), { error: { code, message } }, name)
+  }
 
-  failing = false
+  failure = undefined
   const response = await fetch(`${origin}/items/today-grade`)
   assert.equal(response.status, 200)
   const body = (await response.json()) as { percent: unknown; expiresAt: unknown }
   assert.equal(body.percent, 85)
   assert.equal(typeof body.expiresAt, 'string')
   assert.ok(Date.parse(body.expiresAt as string) > Date.now())
+})
+
+test('GET /items/today-grade의 알 수 없는 오류는 access log에 오늘의 등급 internal code와 오류 chain을 남긴다', async (t) => {
+  const unusedProvider = async (): Promise<never> => {
+    throw new Error('today grade test must not call character providers')
+  }
+  const lines: string[] = []
+  const app = await createApiHttpApp({
+    search: { searchCharacters: unusedProvider },
+    details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+    todayGrade: {
+      fetchShopGrade: async () => {
+        throw new Error('unexpected')
+      }
+    },
+    writeAccessLog: (line) => lines.push(line)
+  })
+  t.after(() => app.close())
+  await app.listen(0, '127.0.0.1')
+  const origin = await app.getUrl()
+
+  const response = await fetch(`${origin}/items/today-grade`)
+  await response.arrayBuffer()
+  await app.close()
+
+  const [entry] = lines.map(
+    (line) => JSON.parse(line) as { status: number; code: string; errorChain: { name: string }[] }
+  )
+  assert.equal(entry?.status, 500)
+  assert.equal(entry?.code, 'INTERNAL_SERVER_ERROR')
+  assert.deepEqual(
+    entry?.errorChain.map(({ name }) => name),
+    ['TodayGradeFailure', 'Error']
+  )
 })

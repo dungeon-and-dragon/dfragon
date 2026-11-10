@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@dfragon/database": ["../../packages/database/src/index.ts"],
+      "@dfragon/neople": ["../../packages/neople/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
