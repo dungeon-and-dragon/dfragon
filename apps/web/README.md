@@ -40,13 +40,16 @@ docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
 - `src/animations/`: 화면에서 함께 쓰는 전환 animation과 GSAP 설정을 둡니다.
 - `src/assets/`: 글꼴, 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
-- `src/components/`: 웹 앱의 화면 컴포넌트와 스타일을 둡니다.
+- `src/components/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 컴포넌트와 스타일을 둡니다.
 - `src/constants/`: 화면 크기와 서버 선택지 상수를 둡니다.
 - `src/core/`: React와 UI 폴더를 import하지 않는 검색, 캡처, OCR 로직을 둡니다.
-- `src/hooks/`: 화면의 검색, 캡처, 상태를 연결하는 React hook을 둡니다.
+- `src/hooks/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 React hook과 store를 둡니다.
 - `src/host/`: 브라우저 API를 검색, 캡처, 클립보드 기능과 연결합니다.
 - `src/lib/`: 조회 캐시와 카드 표시, 저장된 캐릭터 처리 함수를 둡니다.
-- `src/pages/`: 주소별 화면과 그 화면이 쓰는 컴포넌트, 로직을 둡니다.
+- `src/pages/<화면>/`: 라우트나 다른 화면이 렌더링하는 진입 컴포넌트인 `*Page.tsx`와 화면 본체인 `*Screen.tsx`를 둡니다. 한 파일 화면은 `*Page.tsx`에 본체도 둡니다.
+- `src/pages/<화면>/components/`: 그 화면만 쓰는 컴포넌트와 스타일, 테스트를 둡니다.
+- `src/pages/<화면>/hooks/`: 그 화면만 쓰는 React hook과 store, 테스트를 둡니다.
+- `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.
 - `src/styles/`: 화면이 함께 쓰는 StyleX breakpoint를 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router 테스트 도구를 둡니다.
 - `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
