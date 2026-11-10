@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { URL } from 'node:url'
 import { createApiHttpApp } from '../dist/http.js'
-import { createCatalogService } from '../dist/characters/catalog/service.js'
+import { createCatalogService } from '../dist/application/character-catalog/service.js'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createNeopleCharacterSearch } from '../dist/characters/neople-character-search.js'
+import { createNeopleCharacterSearch } from '../dist/infrastructure/neople/character-search.js'
 
 export async function isolatedNeople() {
   const calls = []

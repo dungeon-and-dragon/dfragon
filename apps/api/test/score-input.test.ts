@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { unavailableDetail } from '../src/characters/catalog/types.js'
-import { toScoreEngineInput } from '../src/score/input.js'
+import { unavailableDetail } from '../src/domain/character-catalog/types.js'
+import { toScoreEngineInput } from '../src/domain/score/input.js'
 import { loadCatalog, payloadsFromEngineInput, readEngineInput } from './score-fixtures.js'
 
 function engraveItemIds(input: ReturnType<typeof readEngineInput>): string[] {

@@ -7,7 +7,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import type { ClearStats, ClearStatsReader } from '../src/content-clears/stats.js'
 import { createApiHttpApp } from '../src/http.js'
 

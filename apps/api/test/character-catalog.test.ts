@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createNeopleCatalog } from '../src/characters/catalog/neople.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import { enrichCharacterDetails } from '../src/characters/catalog/enrich.js'
-import type { projectCharacterDetails } from '../src/characters/details/project.js'
+import { createNeopleCatalog } from '../src/infrastructure/neople/character-catalog.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { enrichCharacterDetails } from '../src/application/character-catalog/enrich.js'
+import type { projectCharacterDetails } from '../src/domain/character-detail/project.js'
 
 const signal = new AbortController().signal
 const item = 'fixture-item'

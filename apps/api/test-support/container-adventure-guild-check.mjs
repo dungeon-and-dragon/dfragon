@@ -11,6 +11,7 @@ import {
   replaceEnhancementBackfillRange,
   replaceTimelineRange
 } from '@dfragon/database'
+import { neopleCharacterImageUrl } from '@dfragon/neople'
 import {
   emptySeasonActivity,
   readAdventureActivity,
@@ -20,7 +21,8 @@ import {
 import { backfillSeason } from './dist/characters/timeline/season-backfill.js'
 import { createDatabaseSeasonBackfillStore } from './dist/characters/timeline/store.js'
 import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
-import { createCharacterSearchService } from './dist/characters/search-service.js'
+import { createCharacterSearchService } from './dist/application/character-search/service.js'
+import { parseCharacterCandidatesQuery } from './dist/domain/character-search/query.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
 const job = {
@@ -562,11 +564,14 @@ try {
         candidateRow('cain', 'candidate-not-stored')
       ]
     }),
-    readAdventureNames: (characters) => readAdventureNames(client, characters)
+    readAdventureNames: (characters) => readAdventureNames(client, characters),
+    characterImageUrl: neopleCharacterImageUrl
   })
-  const candidatePath = `/characters/candidates?characterName=${encodeURIComponent('합성후보')}`
+  const candidateInput = parseCharacterCandidatesQuery(
+    `/characters/candidates?characterName=${encodeURIComponent('합성후보')}`
+  )
   const candidateAdventures = async () => {
-    const { result, source } = await candidates.candidates(candidatePath)
+    const { result, source } = await candidates.candidates(candidateInput)
 
     return { source, names: result.rows.map(({ adventureName }) => adventureName) }
   }
