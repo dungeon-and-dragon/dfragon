@@ -1,0 +1,78 @@
+import { execFile } from 'node:child_process'
+import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { promisify } from 'node:util'
+
+const run = promisify(execFile)
+const root = fileURLToPath(new URL('../../../', import.meta.url))
+// package exports가 bin을 내놓지 않아 진입 파일에서 bin 경로를 찾는다.
+const depcruise = fileURLToPath(
+  new URL('../../bin/dependency-cruiser.mjs', import.meta.resolve('dependency-cruiser'))
+)
+const apiConfigFiles = [
+  '.dependency-cruiser.mjs',
+  'tsconfig.json',
+  'tsconfig.dependency-cruiser.json'
+]
+const packageStub = 'export const value = 1\nexport type Value = number\n'
+
+async function cruise(directory, outputType) {
+  const args = [
+    depcruise,
+    '--config',
+    '.dependency-cruiser.mjs',
+    '--output-type',
+    outputType,
+    'src'
+  ]
+
+  try {
+    const { stdout } = await run(process.execPath, args, { cwd: directory })
+
+    return stdout
+  } catch (error) {
+    // 위반이 있으면 dependency-cruiser가 non-zero로 끝나지만 출력은 그대로 결과다.
+    if (error.stdout) {
+      return error.stdout
+    }
+
+    throw error
+  }
+}
+
+export async function cruiseApiSamples(sources, { withPackages = true } = {}) {
+  const directory = await mkdtemp(join(tmpdir(), 'dfragon-depcruise-'))
+  const api = join(directory, 'apps/api')
+
+  try {
+    await mkdir(api, { recursive: true })
+
+    for (const file of apiConfigFiles) {
+      await cp(join(root, 'apps/api', file), join(api, file))
+    }
+
+    if (withPackages) {
+      for (const name of ['database', 'neople']) {
+        await mkdir(join(directory, 'packages', name, 'src'), { recursive: true })
+        await writeFile(join(directory, 'packages', name, 'src/index.ts'), packageStub)
+      }
+    }
+
+    for (const [path, source] of Object.entries(sources)) {
+      await mkdir(dirname(join(api, path)), { recursive: true })
+      await writeFile(join(api, path), source)
+    }
+
+    const report = JSON.parse(await cruise(api, 'json'))
+    const violations = report.summary.violations.map(({ from, rule }) => ({
+      from,
+      rule: rule.name
+    }))
+
+    return { violations, text: await cruise(api, 'err-long') }
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+}
