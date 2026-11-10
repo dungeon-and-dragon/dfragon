@@ -1,5 +1,5 @@
 import type { NeopleFailureKind } from '@dfragon/neople'
-import { type FailureOptions, SanitizedFailure } from '../../error-chain.js'
+import { type FailureOptions, SanitizedFailure } from '../error-chain.js'
 
 export type TimelineFailureKind = NeopleFailureKind
 

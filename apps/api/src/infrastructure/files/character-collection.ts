@@ -1,6 +1,8 @@
 import { createReadStream } from 'node:fs'
+import { stat } from 'node:fs/promises'
 import { createInterface } from 'node:readline'
 import type { CollectedCharacter } from '@dfragon/database'
+import type { EnqueueCharacters } from '../../application/character-collection/ports.js'
 import { z } from 'zod'
 
 const IMPORT_BATCH_SIZE = 1000
@@ -11,7 +13,14 @@ const exportedCharacterSchema = z.object({
   key: z.string().min(1)
 })
 
-export type EnqueueCharacters = (characters: readonly CollectedCharacter[]) => Promise<void>
+export async function readImportModifiedTime(path: string): Promise<number | undefined> {
+  try {
+    return (await stat(path)).mtimeMs
+  } catch {
+    // 목록 파일이 아직 없을 수 있다.
+    return undefined
+  }
+}
 
 export async function importCollectedCharacters(
   path: string,

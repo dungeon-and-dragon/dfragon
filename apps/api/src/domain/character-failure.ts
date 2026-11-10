@@ -1,4 +1,4 @@
-import { type FailureOptions, SanitizedFailure } from '../error-chain.js'
+import { type FailureOptions, SanitizedFailure } from './error-chain.js'
 import { NeopleSearchFailure } from './character-search/failure.js'
 
 export type CharacterFailureKind =

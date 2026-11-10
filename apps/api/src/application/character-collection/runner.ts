@@ -1,14 +1,24 @@
-import { stat } from 'node:fs/promises'
 import type { CollectedCharacter } from '@dfragon/database'
-import { type CollectionStore, type FetchCharacterBasic, collectCharacter } from './collect.js'
-import { type EnqueueCharacters, importCollectedCharacters } from './import.js'
+import { collectCharacter } from './collect.js'
+import type {
+  CollectionStore,
+  FetchCharacterBasic,
+  EnqueueCharacters,
+  ReadModifiedTime,
+  ImportCharacters,
+  Pause
+} from './ports.js'
 
 const COLLECTION_BATCH_SIZE = 100
+const IDLE_MS = 60_000
+const UNAVAILABLE_PAUSE_MS = 60_000
 
 export interface CollectionPassDependencies {
   importFiles: readonly string[]
   importedAt: ReadonlyMap<string, number>
   enqueue: EnqueueCharacters
+  readModifiedTime: ReadModifiedTime
+  importCharacters: ImportCharacters
   fetchBasic: FetchCharacterBasic
   store: CollectionStore
   concurrency: number
@@ -22,7 +32,7 @@ export interface CollectionPassResult {
 
 type ImportDependencies = Pick<
   CollectionPassDependencies,
-  'importFiles' | 'importedAt' | 'enqueue' | 'report'
+  'importFiles' | 'importedAt' | 'enqueue' | 'readModifiedTime' | 'importCharacters' | 'report'
 >
 
 type BatchCollectionDependencies = Pick<
@@ -30,28 +40,21 @@ type BatchCollectionDependencies = Pick<
   'fetchBasic' | 'store' | 'concurrency'
 >
 
-async function modifiedTime(path: string): Promise<number | undefined> {
-  try {
-    return (await stat(path)).mtimeMs
-  } catch {
-    // 목록 파일이 아직 없을 수 있다.
-    return undefined
-  }
-}
-
 async function importChangedFiles({
   importFiles,
   importedAt,
   enqueue,
+  readModifiedTime,
+  importCharacters,
   report
 }: ImportDependencies): Promise<ReadonlyMap<string, number>> {
   const imported = new Map(importedAt)
   for (const importFile of importFiles) {
-    const listedAt = await modifiedTime(importFile)
+    const listedAt = await readModifiedTime(importFile)
     if (listedAt === undefined || listedAt === importedAt.get(importFile)) {
       continue
     }
-    const count = await importCollectedCharacters(importFile, enqueue)
+    const count = await importCharacters(importFile, enqueue)
     report('CHARACTER_IMPORT_DONE', { count })
     imported.set(importFile, listedAt)
   }
@@ -100,4 +103,15 @@ export async function runCollectionPass(
   const outcome = await drainQueue(dependencies)
 
   return { importedAt, outcome }
+}
+
+export async function runCharacterCollector(
+  dependencies: Omit<CollectionPassDependencies, 'importedAt'> & { pause: Pause }
+): Promise<never> {
+  let importedAt: ReadonlyMap<string, number> = new Map()
+  for (;;) {
+    const pass = await runCollectionPass({ ...dependencies, importedAt })
+    importedAt = pass.importedAt
+    await dependencies.pause(pass.outcome === 'unavailable' ? UNAVAILABLE_PAUSE_MS : IDLE_MS)
+  }
 }

@@ -1,43 +1,44 @@
 import 'reflect-metadata'
 import { type INestApplication, Module } from '@nestjs/common'
 import { EventEmitterModule } from '@nestjs/event-emitter'
-import { type AccessLogSink, createCodeReport, writeAccessLogToStdout } from './access-log.js'
-import { characterFailureResponse } from './presentation/http/character-failures.js'
-import { createHttpApp } from './runtime/http-app.js'
+import {
+  type AccessLogSink,
+  createCodeReport,
+  writeAccessLogToStdout
+} from '../presentation/http/access-log.js'
+import { characterFailureResponse } from '../presentation/http/character-failures.js'
+import { createHttpApp } from './http-app.js'
 import {
   AdventureGuildModule,
   type AdventureGuildModuleOptions
-} from './runtime/modules/adventure-guild.js'
+} from './modules/adventure-guild.js'
 import {
   CharacterBasicModule,
   type CharacterBasicModuleOptions
-} from './runtime/modules/character-basic.js'
+} from './modules/character-basic.js'
 import {
   CharacterDetailModule,
   type CharacterDetailModuleOptions
-} from './runtime/modules/character-detail.js'
+} from './modules/character-detail.js'
 import {
   CharacterImageModule,
   type CharacterImageModuleOptions
-} from './runtime/modules/character-image.js'
+} from './modules/character-image.js'
 import {
   CharacterSearchModule,
   type CharacterSearchModuleOptions
-} from './runtime/modules/character-search.js'
+} from './modules/character-search.js'
 import {
   CharacterTimelineModule,
   type CharacterTimelineModuleOptions
-} from './runtime/modules/character-timeline.js'
-import { ClearStatsModule, type ClearStatsModuleOptions } from './runtime/modules/clear-stats.js'
-import { HealthModule } from './runtime/modules/health.js'
-import {
-  RankingStatsModule,
-  type RankingStatsModuleOptions
-} from './runtime/modules/ranking-stats.js'
-import { ScoreEngineModule, type ScoreEngineModuleOptions } from './runtime/modules/score-engine.js'
-import { TodayGradeModule, type TodayGradeModuleOptions } from './runtime/modules/today-grade.js'
-import { VersionModule, type VersionModuleOptions } from './runtime/modules/version.js'
-import { setupSwagger } from './swagger/setup.js'
+} from './modules/character-timeline.js'
+import { ClearStatsModule, type ClearStatsModuleOptions } from './modules/clear-stats.js'
+import { HealthModule } from './modules/health.js'
+import { RankingStatsModule, type RankingStatsModuleOptions } from './modules/ranking-stats.js'
+import { ScoreEngineModule, type ScoreEngineModuleOptions } from './modules/score-engine.js'
+import { TodayGradeModule, type TodayGradeModuleOptions } from './modules/today-grade.js'
+import { VersionModule, type VersionModuleOptions } from './modules/version.js'
+import { setupSwagger } from '../presentation/openapi/setup.js'
 
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchModuleOptions

@@ -2,7 +2,7 @@ import type { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import type { Request, Response } from 'express'
 import { PRODUCT_NAME } from '@dfragon/lib'
-import { apiSchemas } from '../presentation/openapi/index.js'
+import { apiSchemas } from './index.js'
 
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
