@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
+import { breakpoints } from '../../styles/breakpoints.stylex'
 
 const HERO_MIN_HEIGHT = 220
 const KIND_COLUMN_WIDTH = 80
@@ -111,7 +112,10 @@ export const styles = stylex.create({
   },
   pair: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: {
+      default: 'repeat(2, minmax(0, 1fr))',
+      [breakpoints.screenNarrow]: 'minmax(0, 1fr)'
+    },
     alignItems: 'start',
     gap: space.s16
   },
