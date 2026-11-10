@@ -29,6 +29,7 @@ const summary: ClearStats = {
       kind: 'raid',
       name: '무너진 성자 미카엘라 (하드)',
       releasedAt: '2026-08-05T21:00:00.000Z',
+      entryFame: 104292,
       latest: true,
       weeks: [week]
     },
@@ -37,6 +38,7 @@ const summary: ClearStats = {
       kind: 'raid',
       name: '만들어진 신 나벨 (일반)',
       releasedAt: '2025-04-16T21:00:00.000Z',
+      entryFame: 104292,
       latest: false,
       weeks: []
     }
@@ -48,6 +50,7 @@ const detail: ClearContentStats = {
   kind: 'raid',
   name: '무너진 성자 미카엘라 (하드)',
   releasedAt: '2026-08-05T21:00:00.000Z',
+  entryFame: 104292,
   latest: true,
   week,
   jobs: [

@@ -3,7 +3,15 @@ import type { ClearContent, ClearJob } from '#core/ranking/clear-stats'
 import { contentRows, findSelectedContent, jobRows, ratioLabel } from './clear-contents'
 
 function content(id: string, kind: ClearContent['kind'], latest: boolean): ClearContent {
-  return { id, kind, name: id, releasedAt: '2026-08-05T21:00:00.000Z', latest, weeks: [] }
+  return {
+    id,
+    kind,
+    name: id,
+    releasedAt: '2026-08-05T21:00:00.000Z',
+    entryFame: 104292,
+    latest,
+    weeks: []
+  }
 }
 
 const contents = [
