@@ -1,14 +1,14 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { mapCharacterItems } from '../src/characters/catalog/items.js'
+import { mapCharacterItems } from '../src/domain/character-catalog/items.js'
 import {
   type CatalogDetail,
   isCatalogId,
   unavailableDetail
-} from '../src/characters/catalog/types.js'
-import { projectCharacterDetails } from '../src/characters/details/project.js'
-import type { CharacterPayloads } from '../src/characters/details/sections.js'
-import { type ScoreEngineInput, toScoreEngineInput } from '../src/score/input.js'
+} from '../src/domain/character-catalog/types.js'
+import { projectCharacterDetails } from '../src/domain/character-detail/project.js'
+import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
+import { type ScoreEngineInput, toScoreEngineInput } from '../src/domain/score/input.js'
 
 const SCORE_LIBRARY_FILE_NAMES: Readonly<Partial<Record<NodeJS.Platform, string>>> = {
   win32: 'dnfscore.dll',

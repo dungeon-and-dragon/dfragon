@@ -3,9 +3,9 @@ import { Writable } from 'node:stream'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { type AccessLogSink, createStreamAccessLogSink } from '../src/access-log.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import { createNeopleCharacterDetails } from '../src/characters/details/neople.js'
-import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
+import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
 import { createApiHttpApp } from '../src/http.js'
 
 const unusedProvider = async (): Promise<never> => {

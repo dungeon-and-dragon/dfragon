@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { readApiBuildInfo } from '../src/build-info.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
-import type { SearchCharacters } from '../src/types/neople-character-search.js'
+import type { SearchCharacters } from '../src/application/character-search/ports.js'
 
 const unusedSearchCharacters: SearchCharacters = async () => {
   throw new Error('build info requests must not search Neople characters')

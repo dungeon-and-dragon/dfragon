@@ -9,8 +9,11 @@ import {
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import { CharacterBasicSubscriber } from '../src/characters/basic/subscriber.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import type { CharacterPayload, CharacterPayloads } from '../src/characters/details/sections.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import type {
+  CharacterPayload,
+  CharacterPayloads
+} from '../src/domain/character-detail/sections.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/http.js'
 import { createApiRuntime } from '../src/runtime/application.js'
 

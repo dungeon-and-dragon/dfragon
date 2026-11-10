@@ -20,7 +20,7 @@ import {
   toSeasonActivity
 } from '../src/adventure-guild/activity.js'
 import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 
 // 합성 타임라인이다. 시즌 구간은 천해천 시작부터 가상의 다음 시즌 시작까지로 둔다.

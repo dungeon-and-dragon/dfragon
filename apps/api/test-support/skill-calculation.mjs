@@ -3,8 +3,8 @@ import { createRequire } from 'node:module'
 import { isAbsolute, join, relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
-import { parseCharacterSearchQuery } from '../dist/characters/query.js'
-import { CATALOG_LIMITS } from '../dist/characters/catalog/types.js'
+import { parseCharacterSearchQuery } from '../dist/domain/character-search/query.js'
+import { CATALOG_LIMITS } from '../dist/domain/character-catalog/types.js'
 
 const packageName = '@blahaj94/dfragon-skills'
 const failureMessages = {

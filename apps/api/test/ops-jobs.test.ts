@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { JobOverview, JobRunRecord } from '@dfragon/database'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 import { createOpsHttpApp } from '../src/ops/app.js'
 import type { OpsJobStore } from '../src/ops/jobs.js'

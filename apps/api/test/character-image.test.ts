@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleImageClientForTest, type FetchTransport } from '@dfragon/neople'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import { createNeopleCharacterImage } from '../src/characters/image/neople.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { createNeopleCharacterImage } from '../src/infrastructure/neople/character-image.js'
 import { createApiHttpApp } from '../src/http.js'
 
 const unusedProvider = async (): Promise<never> => {

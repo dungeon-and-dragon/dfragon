@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { projectCharacterCard } from '../src/characters/card/project.js'
-import { cardScoreCalculator } from '../src/characters/card/score.js'
-import type { CharacterCard } from '../src/characters/card/types.js'
-import { projectCharacterDetails } from '../src/characters/details/project.js'
-import type { CharacterDetailSection } from '../src/characters/details/sections.js'
+import { projectCharacterCard } from '../src/domain/character-card/project.js'
+import { cardScoreCalculator } from '../src/domain/character-card/score.js'
+import type { CharacterCard } from '../src/domain/character-card/types.js'
+import { projectCharacterDetails } from '../src/domain/character-detail/project.js'
+import type { CharacterDetailSection } from '../src/domain/character-detail/sections.js'
 
 function readFixture(role: 'dealer' | 'buffer') {
   const url = new URL(`../../test/fixtures/character-card-${role}.json`, import.meta.url)
