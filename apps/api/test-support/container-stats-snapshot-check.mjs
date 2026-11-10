@@ -3,20 +3,19 @@ import {
   createDatabaseClient,
   readCharacterStats,
   readDatabaseConfiguration,
-  readFameRanking,
   readFamedJobGrows,
   readJobSkillAdoption,
   recordCharacterBasic,
   recordCharacterSkillStyle
 } from '@dfragon/database'
-import { createRankingStatsService } from './dist/ranking-stats/service.js'
+import { roundAverageFame } from './dist/ranking-stats/service.js'
 import {
   createCharacterStatsJob,
   createDatabaseStatsJobStore,
   createSkillAdoptionJob
 } from './dist/ranking-stats/stats-jobs.js'
 
-// 합성 캐릭터다. 앞 단계가 넣은 행도 있어, 저장분은 같은 DB에서 요청 경로의 service가 계산한 값과 비교한다.
+// 합성 캐릭터다. 앞 단계가 넣은 행도 있어, 저장분은 같은 DB에서 바로 계산한 값과 비교한다.
 // Neople /df/jobs의 프리스트(남)와 眞 크루세이더 ID다.
 const maleCrusader = {
   jobId: 'f6a4ad30555b99b499c07835f87ce522',
@@ -64,13 +63,6 @@ try {
     style('snapshot-vanishing', vanishingJob, [{ name: '합성소멸', level: 1 }])
   )
 
-  // 요청 경로의 service는 하루 동안 캐시하므로 비교할 때마다 새로 만든다.
-  const createService = () =>
-    createRankingStatsService({
-      readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
-      readCharacterStats: () => readCharacterStats(client),
-      readJobSkillAdoption: (job) => readJobSkillAdoption(client, job)
-    })
   const store = createDatabaseStatsJobStore(client)
   const statsJob = createCharacterStatsJob(store)
   const skillJob = createSkillAdoptionJob(store)
@@ -85,23 +77,24 @@ try {
     client.jobSkillAdoptionSnapshot.findMany({
       orderBy: [{ jobId: 'asc' }, { jobGrowId: 'asc' }, { role: 'asc' }]
     })
-  const assertAdoptionMatchesService = async (rows) => {
-    const service = createService()
+  const assertAdoptionMatchesComputed = async (rows) => {
     for (const { jobId, jobGrowId, role, computedAt: _computedAt, ...stored } of rows) {
       const query = { jobId, jobGrowId, ...(role !== 'all' ? { role } : {}) }
-      const {
-        computedAt: _served,
-        topCount: _topCount,
-        ...served
-      } = await service.skillStats(query)
-      assert.deepEqual(stored, served, `${jobId}/${jobGrowId}/${role}`)
+      assert.deepEqual(
+        stored,
+        await readJobSkillAdoption(client, query),
+        `${jobId}/${jobGrowId}/${role}`
+      )
     }
   }
 
   const statsStartedAt = new Date()
   await statsJob.run({}, ignoreProgress)
   const storedStats = await readStoredStats()
-  assert.deepEqual(withoutComputedAt(storedStats), withoutComputedAt(await createService().stats()))
+  assert.deepEqual(
+    withoutComputedAt(storedStats),
+    roundAverageFame(await readCharacterStats(client))
+  )
   assert.ok(storedStats.computedAt >= statsStartedAt)
   await statsJob.run({}, ignoreProgress)
   assert.equal(await client.characterStatsSnapshot.count(), 1)
@@ -124,7 +117,7 @@ try {
     crusaderSamples.get('all'),
     crusaderSamples.get('dealer') + crusaderSamples.get('buffer')
   )
-  await assertAdoptionMatchesService(firstRows)
+  await assertAdoptionMatchesComputed(firstRows)
 
   await client.$executeRaw`UPDATE characters SET fame = NULL WHERE character_id = 'snapshot-vanishing'`
   await skillJob.run({}, ignoreProgress)
@@ -134,7 +127,7 @@ try {
   assert.ok(
     secondRows.every(({ computedAt }) => firstRows.every((first) => computedAt > first.computedAt))
   )
-  await assertAdoptionMatchesService(secondRows)
+  await assertAdoptionMatchesComputed(secondRows)
 } finally {
   await client.$disconnect()
 }

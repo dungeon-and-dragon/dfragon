@@ -5,7 +5,8 @@ import {
   readDatabaseConfiguration,
   readJobSkillAdoption,
   recordCharacterBasic,
-  recordCharacterSkillStyle
+  recordCharacterSkillStyle,
+  saveJobSkillAdoption
 } from '@dfragon/database'
 
 // 합성 캐릭터다. 한 전직에 명성 있는 캐릭터 5018명을 두어 상위 5000명이 표본이 된다.
@@ -117,11 +118,24 @@ try {
 
     return response.json()
   }
+  assert.deepEqual(await get(), {
+    computedAt: null,
+    topCount: SKILL_STYLE_SAMPLE_TOP_COUNT,
+    minFame: null,
+    sampleSize: 0,
+    skills: [],
+    evolutions: [],
+    enhancements: []
+  })
+  const computedAt = new Date('2026-11-08T15:00:00.000Z')
+  await saveJobSkillAdoption(client, { ...job, computedAt, adoption: expected })
   const answer = await get()
-  assert.deepEqual(
-    { ...answer, computedAt: undefined },
-    { computedAt: undefined, topCount: SKILL_STYLE_SAMPLE_TOP_COUNT, ...expected }
-  )
+  assert.deepEqual(answer, {
+    computedAt: computedAt.toISOString(),
+    topCount: SKILL_STYLE_SAMPLE_TOP_COUNT,
+    ...expected
+  })
+  // 요청은 계산하지 않으므로 저장 뒤 받은 스킬 스타일은 다음 job 실행 전까지 응답에 들지 않는다.
   await recordCharacterSkillStyle(client, style('adopt-20', learnedAll))
   assert.deepEqual(await get(), answer)
 } finally {

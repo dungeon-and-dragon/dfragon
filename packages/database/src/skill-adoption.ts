@@ -97,6 +97,14 @@ export type JobSkillAdoptionSnapshot = JobSkillAdoptionQuery & {
   adoption: JobSkillAdoption
 }
 
+function storedRole(role: MaleCrusaderRole | undefined): string {
+  if (role === undefined) {
+    return 'all'
+  }
+
+  return role
+}
+
 export async function readFamedJobGrows(client: DatabaseClient): Promise<SkillStyleSampleJob[]> {
   return client.$queryRaw<SkillStyleSampleJob[]>`
     SELECT DISTINCT "job_id" AS "jobId", "job_grow_id" AS "jobGrowId"
@@ -109,7 +117,7 @@ export async function saveJobSkillAdoption(
   client: DatabaseClient,
   { jobId, jobGrowId, role, computedAt, adoption }: JobSkillAdoptionSnapshot
 ): Promise<void> {
-  const key = { jobId, jobGrowId, role: role ?? 'all' }
+  const key = { jobId, jobGrowId, role: storedRole(role) }
   const values = { computedAt, ...adoption }
   await client.jobSkillAdoptionSnapshot.upsert({
     where: { jobId_jobGrowId_role: key },
@@ -127,4 +135,21 @@ export async function deleteJobSkillAdoptionComputedBefore(
   })
 
   return count
+}
+
+export async function readJobSkillAdoptionSnapshot(
+  client: DatabaseClient,
+  { jobId, jobGrowId, role }: JobSkillAdoptionQuery
+): Promise<JobSkillAdoptionSnapshot | null> {
+  const [row] = await client.$queryRaw<(JobSkillAdoption & { computedAt: Date })[]>`
+    SELECT computed_at AS "computedAt", min_fame AS "minFame", sample_size AS "sampleSize",
+      skills, evolutions, enhancements
+    FROM job_skill_adoption
+    WHERE job_id = ${jobId} AND job_grow_id = ${jobGrowId} AND role = ${storedRole(role)}`
+  if (row === undefined) {
+    return null
+  }
+  const { computedAt, ...adoption } = row
+
+  return { jobId, jobGrowId, role, computedAt, adoption }
 }

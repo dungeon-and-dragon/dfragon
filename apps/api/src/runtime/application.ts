@@ -3,7 +3,7 @@ import {
   createDatabaseClient,
   readAdventureCharacters,
   readAdventureNames,
-  readCharacterStats,
+  readCharacterStatsSnapshot,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
   readContentClearJobCounts,
@@ -14,7 +14,7 @@ import {
   readCollectionSummary,
   readJobOverviews,
   readJobRuns,
-  readJobSkillAdoption,
+  readJobSkillAdoptionSnapshot,
   recordCharacterBasic,
   recordCharacterSkillStyle,
   requestJobRun,
@@ -108,8 +108,8 @@ function createDatabaseSubscribers(
     },
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
-      readCharacterStats: () => readCharacterStats(client),
-      readJobSkillAdoption: (job) => readJobSkillAdoption(client, job)
+      readCharacterStatsSnapshot: () => readCharacterStatsSnapshot(client),
+      readJobSkillAdoptionSnapshot: (job) => readJobSkillAdoptionSnapshot(client, job)
     },
     clearStats: {
       readCollectedAt: () => readContentClearCollectedAt(client),

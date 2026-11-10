@@ -5,13 +5,13 @@ import type {
   FameRankingFilter,
   JobSkillAdoption,
   JobSkillAdoptionQuery,
-  SkillStyleSampleJob,
+  JobSkillAdoptionSnapshot,
   StoredCharacter
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import { createCatalogService } from '../src/characters/catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
-import { type RankingStatsReader, createRankingStatsService } from '../src/ranking-stats/service.js'
+import type { RankingStatsReader } from '../src/ranking-stats/service.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 필터, 정렬과 집계는 container-ranking-stats-check.mjs가 실제 DB로 확인한다.
 const fetchedAt = new Date('2026-11-06T00:00:00.000Z')
@@ -50,7 +50,7 @@ const stats: CharacterStats = {
       jobName: '귀검사(남)',
       jobGrowName: '眞 웨펀마스터',
       count: 2,
-      averageFame: 70000.5
+      averageFame: 70001
     },
     {
       jobId: 'synthetic-job',
@@ -81,10 +81,16 @@ const adoption: JobSkillAdoption = {
   enhancements: [{ name: '발도', type1: 0, type2: 2 }]
 }
 
+const computedAt = new Date('2026-11-06T15:00:00.000Z')
+
+function adoptionSnapshot(job: JobSkillAdoptionQuery): JobSkillAdoptionSnapshot {
+  return { ...job, computedAt, adoption }
+}
+
 const unusedReader: RankingStatsReader = {
   readFameRanking: async () => assert.fail('랭킹을 읽으면 안 된다'),
-  readCharacterStats: async () => assert.fail('통계를 읽으면 안 된다'),
-  readJobSkillAdoption: async () => assert.fail('스킬 채택률을 읽으면 안 된다')
+  readCharacterStatsSnapshot: async () => assert.fail('통계를 읽으면 안 된다'),
+  readJobSkillAdoptionSnapshot: async () => assert.fail('스킬 채택률을 읽으면 안 된다')
 }
 
 async function listen(
@@ -174,10 +180,10 @@ test('명성 랭킹과 스킬 채택률은 남성 크루세이더의 role을 그
 
       return []
     },
-    readJobSkillAdoption: async (job) => {
+    readJobSkillAdoptionSnapshot: async (job) => {
       adoptionReads.push(job)
 
-      return adoption
+      return adoptionSnapshot(job)
     }
   })
   try {
@@ -229,99 +235,58 @@ test('role은 남성 크루세이더 전직이 아니거나 값이 다르거나 
   }
 })
 
-test('통계는 직업별 평균 명성을 반올림하고 같은 날(KST)에는 DB를 한 번만 읽는다', async () => {
-  let reads = 0
-  // 2026-11-06 23:59 KST에 처음 계산하고, 1분 뒤인 다음 날 0시에 다시 계산해야 한다.
-  let now = new Date('2026-11-06T14:59:00.000Z')
-  const service = createRankingStatsService(
-    {
-      ...unusedReader,
-      readCharacterStats: async () => {
-        reads += 1
-
-        return stats
-      }
-    },
-    () => now
-  )
-
-  const [first, concurrent] = await Promise.all([service.stats(), service.stats()])
-  now = new Date('2026-11-06T14:59:59.999Z')
-  const sameDay = await service.stats()
-
-  assert.equal(reads, 1)
-  assert.equal(concurrent, first)
-  assert.equal(sameDay, first)
-  assert.deepEqual(first, {
-    ...stats,
-    jobs: [
-      { ...stats.jobs[0], averageFame: 70001 },
-      { ...stats.jobs[1], averageFame: null }
-    ],
-    computedAt: '2026-11-06T14:59:00.000Z'
-  })
-
-  now = new Date('2026-11-06T15:00:00.000Z')
-  const nextDay = await service.stats()
-
-  assert.equal(reads, 2)
-  assert.equal(nextDay.computedAt, '2026-11-06T15:00:00.000Z')
-})
-
-test('0시(KST) 직전에 시작해 0시 뒤에 끝난 통계는 다음 요청이 다시 계산한다', async () => {
-  let reads = 0
-  let finishRead: (() => void) | undefined
-  let now = new Date('2026-11-06T14:59:59.000Z')
-  const service = createRankingStatsService(
-    {
-      ...unusedReader,
-      readCharacterStats: async () => {
-        reads += 1
-        if (reads === 1) {
-          await new Promise<void>((resolve) => {
-            finishRead = resolve
-          })
-        }
-
-        return stats
-      }
-    },
-    () => now
-  )
-
-  const first = service.stats()
-  await Promise.resolve()
-  now = new Date('2026-11-06T15:00:01.000Z')
-  finishRead?.()
-  assert.equal((await first).computedAt, '2026-11-06T14:59:59.000Z')
-  const next = await service.stats()
-
-  assert.equal(reads, 2)
-  assert.equal(next.computedAt, '2026-11-06T15:00:01.000Z')
-})
-
-test('통계 계산이 실패하면 500을 주고 실패를 캐시하지 않는다', async () => {
-  let reads = 0
+test('통계는 요청마다 저장분을 읽어 저장된 값과 계산 시각을 준다', async () => {
+  let stored = { ...stats, computedAt }
   const { app, origin } = await listen({
     ...unusedReader,
-    readCharacterStats: async () => {
-      reads += 1
-      if (reads === 1) {
-        throw new Error('synthetic database failure')
-      }
+    readCharacterStatsSnapshot: async () => stored
+  })
+  try {
+    const first = await getJson(origin, '/stats')
+    const nextComputedAt = new Date('2026-11-07T15:00:00.000Z')
+    stored = { ...stats, total: 4, computedAt: nextComputedAt }
+    const next = await getJson(origin, '/stats')
 
-      return stats
+    assert.deepEqual(first, {
+      status: 200,
+      body: { ...stats, computedAt: '2026-11-06T15:00:00.000Z' }
+    })
+    assert.deepEqual(next, {
+      status: 200,
+      body: { ...stats, total: 4, computedAt: '2026-11-07T15:00:00.000Z' }
+    })
+  } finally {
+    await app.close()
+  }
+})
+
+test('통계 저장분이 없으면 0과 빈 목록, computedAt null을 준다', async () => {
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readCharacterStatsSnapshot: async () => null
+  })
+  try {
+    assert.deepEqual(await getJson(origin, '/stats'), {
+      status: 200,
+      body: { total: 0, servers: [], jobs: [], fameDistribution: [], computedAt: null }
+    })
+  } finally {
+    await app.close()
+  }
+})
+
+test('통계 저장분 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () => {
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readCharacterStatsSnapshot: async () => {
+      throw new Error('synthetic database failure')
     }
   })
   try {
-    const failed = await getJson(origin, '/stats')
-    const retried = await getJson(origin, '/stats')
+    const { status, body } = await getJson(origin, '/stats')
 
-    assert.equal(failed.status, 500)
-    assert.equal(failed.body.error.code, 'INTERNAL_SERVER_ERROR')
-    assert.equal(retried.status, 200)
-    assert.equal(retried.body.total, 3)
-    assert.equal(reads, 2)
+    assert.equal(status, 500)
+    assert.equal(body.error.code, 'INTERNAL_SERVER_ERROR')
   } finally {
     await app.close()
   }
@@ -344,154 +309,92 @@ test('명성 랭킹 DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준�
   }
 })
 
-test('DB 설정이 없는 API는 빈 랭킹과 0인 통계를 준다', async () => {
+test('DB 설정이 없는 API는 빈 랭킹과 0인 통계, computedAt null을 준다', async () => {
   const { app, origin } = await listen()
   try {
     assert.deepEqual(await getJson(origin, '/rankings/fame'), {
       status: 200,
       body: { characters: [] }
     })
-    const { status, body } = await getJson(origin, '/stats')
-
-    assert.equal(status, 200)
-    assert.deepEqual(
-      { ...body, computedAt: undefined },
-      { total: 0, servers: [], jobs: [], fameDistribution: [], computedAt: undefined }
-    )
-    assert.ok(!Number.isNaN(Date.parse(body.computedAt)))
+    assert.deepEqual(await getJson(origin, '/stats'), {
+      status: 200,
+      body: { total: 0, servers: [], jobs: [], fameDistribution: [], computedAt: null }
+    })
   } finally {
     await app.close()
   }
 })
 
-test('스킬 채택률은 전직마다 같은 날(KST)에는 DB를 한 번만 읽고 겹친 요청은 한 계산을 기다린다', async () => {
-  const reads: SkillStyleSampleJob[] = []
-  let now = new Date('2026-11-06T14:59:00.000Z')
-  const service = createRankingStatsService(
-    {
-      ...unusedReader,
-      readJobSkillAdoption: async (job) => {
-        reads.push(job)
-
-        return adoption
-      }
-    },
-    () => now
-  )
-  const job = { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }
-  const otherJob = { jobId: 'synthetic-job', jobGrowId: 'synthetic-other-grow' }
-
-  const [first, concurrent] = await Promise.all([
-    service.skillStats(job),
-    service.skillStats(job),
-    service.skillStats(otherJob)
-  ])
-  now = new Date('2026-11-06T14:59:59.999Z')
-  const sameDay = await service.skillStats(job)
-
-  assert.deepEqual(reads, [job, otherJob])
-  assert.equal(concurrent, first)
-  assert.equal(sameDay, first)
-  assert.deepEqual(first, { computedAt: '2026-11-06T14:59:00.000Z', topCount: 5000, ...adoption })
-
-  now = new Date('2026-11-06T15:00:00.000Z')
-  const nextDay = await service.skillStats(job)
-
-  assert.equal(reads.length, 3)
-  assert.equal(nextDay.computedAt, '2026-11-06T15:00:00.000Z')
-})
-
-test('스킬 채택률은 같은 전직이라도 role마다 따로 계산하고 캐시한다', async () => {
+test('스킬 채택률은 요청마다 그 전직의 저장분을 읽어 저장된 값, 계산 시각과 topCount를 준다', async () => {
   const reads: JobSkillAdoptionQuery[] = []
-  const service = createRankingStatsService({
-    ...unusedReader,
-    readJobSkillAdoption: async (job) => {
-      reads.push(job)
-
-      return { ...adoption, sampleSize: reads.length }
-    }
-  })
-  const job = { jobId: malePriestJobId, jobGrowId: crusaderGrowId }
-  const dealer = { ...job, role: 'dealer' as const }
-  const buffer = { ...job, role: 'buffer' as const }
-
-  const [all, dealerStats, bufferStats] = await Promise.all([
-    service.skillStats(job),
-    service.skillStats(dealer),
-    service.skillStats(buffer)
-  ])
-  const cached = await Promise.all([
-    service.skillStats(job),
-    service.skillStats(dealer),
-    service.skillStats(buffer)
-  ])
-
-  assert.deepEqual(reads, [job, dealer, buffer])
-  assert.deepEqual(
-    [all, dealerStats, bufferStats].map(({ sampleSize }) => sampleSize),
-    [1, 2, 3]
-  )
-  assert.deepEqual(cached, [all, dealerStats, bufferStats])
-})
-
-test('스킬 채택률은 명성 있는 캐릭터가 없는 전직을 캐시하지 않는다', async () => {
-  let reads = 0
-  const service = createRankingStatsService({
-    ...unusedReader,
-    readJobSkillAdoption: async () => {
-      reads += 1
-
-      return {
-        ...adoption,
-        minFame: null,
-        sampleSize: 0,
-        skills: [],
-        evolutions: [],
-        enhancements: []
-      }
-    }
-  })
-  const job = { jobId: 'unknown-job', jobGrowId: 'unknown-grow' }
-
-  await service.skillStats(job)
-  await service.skillStats(job)
-
-  assert.equal(reads, 2)
-})
-
-test('스킬 채택률 계산이 실패하면 500을 주고 실패를 캐시하지 않는다', async () => {
-  const reads: SkillStyleSampleJob[] = []
+  let sampleSize = adoption.sampleSize
   const { app, origin } = await listen({
     ...unusedReader,
-    readJobSkillAdoption: async (job) => {
+    readJobSkillAdoptionSnapshot: async (job) => {
       reads.push(job)
-      if (reads.length === 1) {
-        throw new Error('synthetic database failure')
-      }
 
-      return adoption
+      return { ...job, computedAt, adoption: { ...adoption, sampleSize } }
     }
   })
   try {
     const path = '/stats/skills?jobId=synthetic-job&jobGrowId=synthetic-grow'
-    const failed = await getJson(origin, path)
-    const retried = await getJson(origin, path)
+    const first = await getJson(origin, path)
+    sampleSize = 3
+    const next = await getJson(origin, path)
 
-    assert.equal(failed.status, 500)
-    assert.equal(failed.body.error.code, 'INTERNAL_SERVER_ERROR')
-    assert.equal(retried.status, 200)
+    assert.deepEqual(first, {
+      status: 200,
+      body: { computedAt: '2026-11-06T15:00:00.000Z', topCount: 5000, ...adoption }
+    })
+    assert.equal(next.body.sampleSize, 3)
+    const job = { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }
+    assert.deepEqual(reads, [job, job])
+  } finally {
+    await app.close()
+  }
+})
+
+test('스킬 채택률 저장분이 없는 전직은 표본 0인 빈 값과 computedAt null을 준다', async () => {
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readJobSkillAdoptionSnapshot: async () => null
+  })
+  try {
     assert.deepEqual(
-      { ...retried.body, computedAt: undefined },
+      await getJson(origin, '/stats/skills?jobId=unknown-job&jobGrowId=unknown-grow'),
       {
-        computedAt: undefined,
-        topCount: 5000,
-        ...adoption
+        status: 200,
+        body: {
+          computedAt: null,
+          topCount: 5000,
+          minFame: null,
+          sampleSize: 0,
+          skills: [],
+          evolutions: [],
+          enhancements: []
+        }
       }
     )
-    assert.deepEqual(reads, [
-      { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' },
-      { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }
-    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('스킬 채택률 저장분 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () => {
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readJobSkillAdoptionSnapshot: async () => {
+      throw new Error('synthetic database failure')
+    }
+  })
+  try {
+    const { status, body } = await getJson(
+      origin,
+      '/stats/skills?jobId=synthetic-job&jobGrowId=synthetic-grow'
+    )
+
+    assert.equal(status, 500)
+    assert.equal(body.error.code, 'INTERNAL_SERVER_ERROR')
   } finally {
     await app.close()
   }
@@ -517,28 +420,24 @@ test('스킬 채택률은 빈 값, 중복 query와 빠진 jobId, jobGrowId를 40
   }
 })
 
-test('DB 설정이 없는 API는 표본 0인 빈 스킬 채택률을 준다', async () => {
+test('DB 설정이 없는 API는 표본 0인 빈 스킬 채택률과 computedAt null을 준다', async () => {
   const { app, origin } = await listen()
   try {
-    const { status, body } = await getJson(
-      origin,
-      '/stats/skills?jobId=synthetic-job&jobGrowId=synthetic-grow'
-    )
-
-    assert.equal(status, 200)
     assert.deepEqual(
-      { ...body, computedAt: undefined },
+      await getJson(origin, '/stats/skills?jobId=synthetic-job&jobGrowId=synthetic-grow'),
       {
-        computedAt: undefined,
-        topCount: 5000,
-        minFame: null,
-        sampleSize: 0,
-        skills: [],
-        evolutions: [],
-        enhancements: []
+        status: 200,
+        body: {
+          computedAt: null,
+          topCount: 5000,
+          minFame: null,
+          sampleSize: 0,
+          skills: [],
+          evolutions: [],
+          enhancements: []
+        }
       }
     )
-    assert.ok(!Number.isNaN(Date.parse(body.computedAt)))
   } finally {
     await app.close()
   }
