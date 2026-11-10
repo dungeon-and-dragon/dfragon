@@ -20,6 +20,10 @@ parsePort('3000') // 3000
 - `@dfragon/lib/port`: `parsePort`는 ASCII 십진 정수 1~65535만 받고 나머지는 `Invalid server configuration`을 던집니다. API의 `PORT`와 `@dfragon/database`의 `DB_PORT`가 씁니다.
 - `matchesDNFSearchNicknamePolicy(nickname)`: 검색어가 Unicode code point 1~12개이고 앞뒤 공백이 없는지 확인합니다. 경계값은 `DNF_SEARCH_NICKNAME_LIMITS`에 있고 문자열을 trim, 정규화하지 않습니다.
 
+## 던파 게임 값
+
+`MALE_CRUSADER_DEALER_SKILL`(`용기의 은총`)은 남성 크루세이더를 딜러로 판정하는 스킬 이름입니다. API의 역할 판정과 `@dfragon/database`의 역할 SQL이 씁니다.
+
 ## 던파 캐릭터명 검사
 
 ```ts
