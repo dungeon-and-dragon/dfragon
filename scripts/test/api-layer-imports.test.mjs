@@ -100,16 +100,16 @@ const appFiles = {
       '@nestjs/event-emitter'
     ]
   },
-  'ops/app.ts': {
+  'runtime/ops-app.ts': {
     rejected: [
-      './jobs.js',
-      './errors.js',
+      '../application/jobs/run.js',
+      '../domain/ops/failure.js',
       '../characters/http.js',
       '../presentation/http/ops/a.js'
     ],
     allowed: [
-      '../runtime/modules/ops-jobs.js',
-      '../runtime/http-app.js',
+      './modules/ops-jobs.js',
+      './http-app.js',
       '../presentation/http/ops-failures.js',
       '../access-log.js',
       'express'

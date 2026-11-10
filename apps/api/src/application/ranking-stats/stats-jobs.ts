@@ -2,7 +2,7 @@ import type { MaleCrusaderRole, SkillStyleSampleJob } from '@dfragon/database'
 import { z } from 'zod'
 import { isMaleCrusaderJob } from '../../domain/male-crusader.js'
 import { roundAverageFame } from '../../domain/ranking-stats/stats.js'
-import { defineJob } from '../../jobs/definition.js'
+import { defineJob } from '../jobs/definition.js'
 import type { StatsJobStore } from './ports.js'
 
 const DAILY_AT_MIDNIGHT = '0 0 * * *'

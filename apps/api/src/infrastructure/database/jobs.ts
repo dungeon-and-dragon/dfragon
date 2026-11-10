@@ -11,7 +11,7 @@ import {
   registerJobs,
   startJobRun
 } from '@dfragon/database'
-import type { JobStore } from './definition.js'
+import type { JobStore } from '../../application/jobs/ports.js'
 
 export function createDatabaseJobStore(client: DatabaseClient): JobStore {
   return {

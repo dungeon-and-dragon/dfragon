@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers/promises'
 import { z } from 'zod'
-import { defineJob } from '../../jobs/definition.js'
+import { defineJob } from '../jobs/definition.js'
 import type { ClearCollectionJobDependencies, ClearCollectionStore } from './ports.js'
 import { collectContentClears } from './collection.js'
 

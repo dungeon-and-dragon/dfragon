@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { OPS_QUEUE_COUNTS, OpsQueuesController, type ReadQueueCounts } from '../../ops/queues.js'
+import type { ReadQueueCounts } from '../../application/ops/ports.js'
+import { OPS_QUEUE_COUNTS, OpsQueuesController } from '../../presentation/http/ops/queues.js'
 
 export interface OpsQueuesModuleOptions {
   readonly readQueueCounts: ReadQueueCounts

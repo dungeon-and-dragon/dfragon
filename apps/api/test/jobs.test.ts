@@ -8,20 +8,17 @@ import type {
   JobTrigger
 } from '@dfragon/database'
 import { z } from 'zod'
-import { type JobAlert, createDiscordJobAlert } from '../src/jobs/alert.js'
-import {
-  type JobDefinition,
-  type JobStore,
-  type ReportJobEvent,
-  defineJob
-} from '../src/jobs/definition.js'
-import { executeJobRun } from '../src/jobs/run.js'
+import { createJobSchedule } from '../src/infrastructure/jobs/scheduler.js'
+import { createDiscordJobAlert } from '../src/infrastructure/jobs/alert.js'
+import type { JobAlert, JobStore, ReportJobEvent } from '../src/application/jobs/ports.js'
+import { type JobDefinition, defineJob } from '../src/application/jobs/definition.js'
+import { executeJobRun } from '../src/application/jobs/run.js'
 import {
   findCatchupJobs,
   registerWorkerJobs,
   runRequestedJobs,
   runScheduledJob
-} from '../src/jobs/scheduler.js'
+} from '../src/application/jobs/scheduler.js'
 
 type StoredRun = {
   id: number
@@ -271,7 +268,7 @@ test('시작할 때 job 목록을 올리고 running으로 남은 행을 interrup
   seed({ ...emptyRun(dailyJob.name, 'schedule', {}), status: 'running', startedAt: now })
   seed({ ...emptyRun(dailyJob.name, 'schedule', {}), status: 'succeeded', startedAt: now })
 
-  await registerWorkerJobs({ jobs: [dailyJob, failingJob], store, report }, now)
+  await registerWorkerJobs({ jobs: [dailyJob, failingJob], store, report }, now, createJobSchedule)
 
   assert.deepEqual(
     runs.map(({ status }) => status),
@@ -322,7 +319,11 @@ test('보충은 수동이 아닌 마지막 성공 뒤의 다음 예정 시각이
       }
       const { report } = recordedEvents()
 
-      const catchup = await findCatchupJobs({ jobs: [dailyJob, failingJob], store, report }, now)
+      const catchup = await findCatchupJobs(
+        { jobs: [dailyJob, failingJob], store, report },
+        now,
+        createJobSchedule
+      )
 
       assert.deepEqual(
         catchup.map(({ name: jobName }) => jobName),
@@ -337,7 +338,7 @@ test('정지된 job은 보충과 정기 실행을 건너뛰고 요청 행은 실
   const { events, report } = recordedEvents()
   const dependencies = { jobs: [dailyJob], store, report }
 
-  assert.deepEqual(await findCatchupJobs(dependencies, now), [])
+  assert.deepEqual(await findCatchupJobs(dependencies, now, createJobSchedule), [])
   await runScheduledJob(dailyJob, 'schedule', { store, report })
   assert.deepEqual(events, [{ code: 'JOB_RUN_SKIPPED', job: 'daily', reason: 'paused' }])
   assert.deepEqual(runs, [])
@@ -426,7 +427,7 @@ test('시작할 때 interrupted로 바꾼 실행마다 중단 알림을 보낸�
   })
   seed({ ...emptyRun(dailyJob.name, 'manual', {}), status: 'succeeded', startedAt: now })
 
-  await registerWorkerJobs({ jobs: [dailyJob], store, report, alert }, now)
+  await registerWorkerJobs({ jobs: [dailyJob], store, report, alert }, now, createJobSchedule)
 
   assert.deepEqual(alerts, [
     { kind: 'interrupted', job: 'daily', trigger: 'schedule', elapsedMs: 90_000 }

@@ -1,11 +1,7 @@
-import { Cron } from 'croner'
 import { z } from 'zod'
 import type { JobDefinition } from './definition.js'
-import { type JobRunDependencies, executeJobRun, readErrorChain, sendJobAlert } from './run.js'
-
-const TIMEZONE = 'Asia/Seoul'
-const REQUEST_POLL_INTERVAL_MS = 1_000
-const WORKER_SEEN_INTERVAL_MS = 60_000
+import type { CreateJobSchedule, JobSchedule } from './ports.js'
+import { type JobRunDependencies, executeJobRun, sendJobAlert } from './run.js'
 
 export type JobSchedulerDependencies = JobRunDependencies & {
   jobs: readonly JobDefinition[]
@@ -15,29 +11,36 @@ type ScheduledJob = {
   definition: JobDefinition
   schedule: string
   /** 다음 실행 시각 계산에만 쓰고 발화하지 않는다. */
-  cron: Cron
+  cron: JobSchedule
 }
 
-function scheduledJobs(jobs: readonly JobDefinition[]): ScheduledJob[] {
+export function scheduledJobs(
+  jobs: readonly JobDefinition[],
+  createSchedule: CreateJobSchedule
+): ScheduledJob[] {
   return jobs.flatMap((definition) => {
     const { schedule } = definition
     if (schedule === undefined) {
       return []
     }
 
-    return [
-      { definition, schedule, cron: new Cron(schedule, { timezone: TIMEZONE, paused: true }) }
-    ]
+    const cron = createSchedule(schedule)
+
+    return [{ definition, schedule, cron }]
   })
 }
 
 export async function registerWorkerJobs(
   dependencies: JobSchedulerDependencies,
-  now: Date
+  now: Date,
+  createSchedule: CreateJobSchedule
 ): Promise<void> {
   const { jobs, store, report } = dependencies
   const nextRuns = new Map(
-    scheduledJobs(jobs).map(({ definition, cron }) => [definition.name, cron.nextRun(now)])
+    scheduledJobs(jobs, createSchedule).map(({ definition, cron }) => [
+      definition.name,
+      cron.nextRun(now)
+    ])
   )
   await store.registerJobs(
     jobs.map((definition) => ({
@@ -68,10 +71,11 @@ export async function registerWorkerJobs(
  */
 export async function findCatchupJobs(
   { jobs, store }: JobSchedulerDependencies,
-  now: Date
+  now: Date,
+  createSchedule: CreateJobSchedule
 ): Promise<JobDefinition[]> {
   const due: JobDefinition[] = []
-  for (const { definition, cron } of scheduledJobs(jobs)) {
+  for (const { definition, cron } of scheduledJobs(jobs, createSchedule)) {
     if (await store.isPaused(definition.name)) {
       continue
     }
@@ -133,33 +137,4 @@ export async function runRequestedJobs({
   }
 
   await Promise.all(runs)
-}
-
-/**
- * job 실행은 기다리지 않고 바로 돌아온다. 실행 중 취소와 종료 처리는 두지 않으며, 끝난 job이 남긴
- * running 행은 다음 시작 때 interrupted가 된다. worker 인스턴스가 하나라는 전제다.
- */
-export async function startJobScheduler(dependencies: JobSchedulerDependencies): Promise<void> {
-  const { store, report } = dependencies
-  const guard = (task: () => Promise<void>, job?: string) => {
-    task().catch((error: unknown) => {
-      report('JOB_SCHEDULER_FAILED', { job, errorChain: readErrorChain(error) })
-    })
-  }
-  const now = new Date()
-  await registerWorkerJobs(dependencies, now)
-  for (const definition of await findCatchupJobs(dependencies, now)) {
-    guard(() => runScheduledJob(definition, 'catchup', dependencies), definition.name)
-  }
-
-  for (const { definition, schedule } of scheduledJobs(dependencies.jobs)) {
-    const cron: Cron = new Cron(schedule, { timezone: TIMEZONE }, () => {
-      guard(async () => {
-        await store.recordNextRun(definition.name, cron.nextRun())
-        await runScheduledJob(definition, 'schedule', dependencies)
-      }, definition.name)
-    })
-  }
-  setInterval(() => guard(() => runRequestedJobs(dependencies)), REQUEST_POLL_INTERVAL_MS)
-  setInterval(() => guard(() => store.recordWorkerSeen()), WORKER_SEEN_INTERVAL_MS)
 }

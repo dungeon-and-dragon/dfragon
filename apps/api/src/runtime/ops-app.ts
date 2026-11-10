@@ -3,14 +3,11 @@ import { type INestApplication, Module } from '@nestjs/common'
 import type { NextFunction, Request, Response } from 'express'
 import { type AccessLogSink, writeAccessLogToStdout } from '../access-log.js'
 import { opsFailureResponse, unsupportedOpsMediaType } from '../presentation/http/ops-failures.js'
-import { createHttpApp } from '../runtime/http-app.js'
-import {
-  OpsCollectionModule,
-  type OpsCollectionModuleOptions
-} from '../runtime/modules/ops-collection.js'
-import { OpsDatabaseModule } from '../runtime/modules/ops-database.js'
-import { OpsJobsModule, type OpsJobsModuleOptions } from '../runtime/modules/ops-jobs.js'
-import { OpsQueuesModule, type OpsQueuesModuleOptions } from '../runtime/modules/ops-queues.js'
+import { createHttpApp } from './http-app.js'
+import { OpsCollectionModule, type OpsCollectionModuleOptions } from './modules/ops-collection.js'
+import { OpsDatabaseModule } from './modules/ops-database.js'
+import { OpsJobsModule, type OpsJobsModuleOptions } from './modules/ops-jobs.js'
+import { OpsQueuesModule, type OpsQueuesModuleOptions } from './modules/ops-queues.js'
 
 const BODY_LIMIT = '16kb'
 const SAFE_METHODS = new Set(['GET', 'HEAD'])

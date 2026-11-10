@@ -1,7 +1,7 @@
 import type { JobRunOutcome, JobRunProgress, JobTrigger } from '@dfragon/database'
-import { type ErrorChainEntry, describeErrorChain } from '../error-chain.js'
-import type { JobAlert, SendJobAlert } from './alert.js'
-import type { JobDefinition, JobStore, ReportJobEvent } from './definition.js'
+import { type ErrorChainEntry, describeErrorChain } from '../../error-chain.js'
+import type { JobDefinition } from './definition.js'
+import type { JobAlert, JobStore, ReportJobEvent, SendJobAlert } from './ports.js'
 
 const PROGRESS_WRITE_INTERVAL_MS = 1_000
 
