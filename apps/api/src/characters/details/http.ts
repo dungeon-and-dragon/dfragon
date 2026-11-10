@@ -3,7 +3,7 @@ import {
   ApiCharacterDetails,
   ApiCharacterRefresh
 } from '../../presentation/openapi/character-details.js'
-import { Controller, Get, Inject, Post, Req, Res } from '@nestjs/common'
+import { Controller, Get, Inject, Post, Req, Res, UseFilters } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { parseCharacterIdentity } from '../identity.js'
 import type { CharacterDetailResponse, CharacterDetailService } from './service.js'
@@ -14,6 +14,8 @@ import {
   recordAccessLogSharedNeopleFetch
 } from '../../access-log.js'
 import type { NeopleStageTimings } from './neople-stages.js'
+import { characterFailureResponse } from '../../presentation/http/character-failures.js'
+import { FailureResponseFilter } from '../../presentation/http/failure-response.js'
 
 export const CHARACTER_DETAIL_SERVICE = Symbol('CHARACTER_DETAIL_SERVICE')
 // The same Content-Type Express `json` sets, so a stored body goes out with the headers it always had.
@@ -21,6 +23,7 @@ const JSON_CONTENT_TYPE = 'application/json; charset=utf-8'
 
 @ApiTags('캐릭터')
 @Controller('characters')
+@UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class CharacterDetailController {
   constructor(@Inject(CHARACTER_DETAIL_SERVICE) private readonly service: CharacterDetailService) {}
 

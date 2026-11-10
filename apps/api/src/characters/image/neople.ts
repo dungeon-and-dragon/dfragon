@@ -4,7 +4,7 @@ import {
   createNeopleImageClient
 } from '@dfragon/neople'
 import { forwardCause } from '../../error-chain.js'
-import { CharacterDetailFailure } from '../details/errors.js'
+import { CharacterDetailFailure } from '../../domain/character-failure.js'
 import type { CharacterIdentity } from '../identity.js'
 
 export type FetchCharacterImage = (

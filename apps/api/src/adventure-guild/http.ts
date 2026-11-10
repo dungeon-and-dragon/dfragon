@@ -1,7 +1,9 @@
-import { Controller, Get, HttpCode, Inject, Param, Post, Query } from '@nestjs/common'
+import { Controller, Get, HttpCode, Inject, Param, Post, Query, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../characters/details/errors.js'
+import { CharacterDetailFailure } from '../domain/character-failure.js'
+import { characterFailureResponse } from '../presentation/http/character-failures.js'
+import { FailureResponseFilter } from '../presentation/http/failure-response.js'
 import {
   ApiAdventureActivity,
   ApiAdventureSeasonDays,
@@ -26,6 +28,7 @@ const activityQuery = z.object({ season: seasonNumber.optional() })
 
 @ApiTags('캐릭터')
 @Controller()
+@UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class AdventureGuildController {
   constructor(@Inject(ADVENTURE_GUILD_SERVICE) private readonly service: AdventureGuildService) {}
 

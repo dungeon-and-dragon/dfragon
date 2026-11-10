@@ -3,16 +3,19 @@ import {
   ApiCharacterCandidates,
   ApiCharacterSearch
 } from '../presentation/openapi/character-search.js'
-import { Controller, Get, Inject, Req, Res } from '@nestjs/common'
+import { Controller, Get, Inject, Req, Res, UseFilters } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { recordAccessLogCachedResponse, recordAccessLogSharedNeopleFetch } from '../access-log.js'
 import { respondWithCancellation, sendWithCancellation } from '../http-response.js'
+import { characterSearchFailureResponse } from '../presentation/http/character-search/failures.js'
+import { FailureResponseFilter } from '../presentation/http/failure-response.js'
 import type { CharacterCandidatesResponse, CharacterSearchHttpService } from './types.js'
 
 export const CHARACTER_SEARCH_SERVICE = Symbol('CHARACTER_SEARCH_SERVICE')
 
 @ApiTags('캐릭터')
 @Controller('characters')
+@UseFilters(new FailureResponseFilter(characterSearchFailureResponse))
 export class CharacterSearchController {
   constructor(
     @Inject(CHARACTER_SEARCH_SERVICE) private readonly service: CharacterSearchHttpService
