@@ -3,9 +3,9 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
-import { readApiBuildInfo } from '../src/build-info.js'
+import { readApiBuildInfo } from '../src/infrastructure/build-info.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 
 const unusedSearchCharacters: SearchCharacters = async () => {

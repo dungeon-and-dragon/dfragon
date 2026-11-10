@@ -11,7 +11,7 @@ import { CharacterDetailFailure, characterDetailFailure } from '../src/domain/ch
 import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
 import { parseCharacterIdentity } from '../src/domain/character-identity.js'
 import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { characterFailureResponse } from '../src/presentation/http/character-failures.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }

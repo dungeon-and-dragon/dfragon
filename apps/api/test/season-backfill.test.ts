@@ -26,7 +26,7 @@ import {
   type SeasonBackfillStore,
   backfillSeason
 } from '../src/application/character-timeline/season-backfill.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 시즌 시작은 운영 DB seasons 표와 같은 값이고, 캐릭터와 타임라인은 합성이다.
 const at = (time: string) => new Date(`${time}+09:00`)

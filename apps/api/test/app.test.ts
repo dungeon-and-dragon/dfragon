@@ -13,7 +13,7 @@ import { Test } from '@nestjs/testing'
 import type { Request, Response } from 'express'
 import { finalize } from 'rxjs'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 
 @Injectable()

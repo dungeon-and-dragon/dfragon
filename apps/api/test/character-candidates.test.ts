@@ -12,7 +12,7 @@ import { createNeopleCharacterSearch } from '../src/infrastructure/neople/charac
 import { createCharacterSearchService } from '../src/application/character-search/service.js'
 import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
 import { parseCharacterCandidatesQuery } from '../src/domain/character-search/query.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type {
   CharacterSearchRow,
   NeopleCharacterSearchInput,
