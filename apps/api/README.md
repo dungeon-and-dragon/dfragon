@@ -6,6 +6,41 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 배치 job도 이 worker에서 돕니다. Job 실행 틀은 `src/jobs/`에 있고, worker가 돌릴 job은 `src/jobs/worker-jobs.ts`에 등록합니다.
 API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니다.
 
+## 코드 위치
+
+`src/`는 계층 폴더로 나눕니다(ADR 0047).
+오늘의 등급이 이 구조로 옮긴 첫 기능이고, `characters/`, `adventure-guild/` 같은 나머지 기능 폴더는 차례로 옮깁니다.
+계층 폴더 사이의 import 방향은 `pnpm lint`가 검사하며, 옮기지 않은 기능 폴더는 검사하지 않습니다.
+
+| 폴더 | 담는 것 |
+| --- | --- |
+| `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일 |
+| `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
+| `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
+| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진으로 구현한 adapter |
+| `src/presentation/http/` | controller, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표 |
+| `src/presentation/openapi/` | 기능별 Swagger 설명과 schema |
+| `src/presentation/events/` | 이벤트 구독자 |
+| `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립 |
+| `src/runtime/modules/` | 기능별 Nest module |
+
+기능을 하나 더하면 아래 파일을 만듭니다.
+기능 폴더(`domain/<기능>/`, `application/<기능>/`, `presentation/http/<기능>/`) 안의 파일은 역할 이름으로, 여러 기능을 담는 폴더(`infrastructure/neople/`, `presentation/openapi/`, `runtime/modules/` 등) 안의 파일은 기능 이름으로 짓습니다.
+
+| 파일 | 내용 |
+| --- | --- |
+| `src/domain/<기능>/<내용>.ts` | 계산, 표, 타입. 이름은 담은 내용으로 짓습니다(예: `grade.ts`, `items.ts`) |
+| `src/domain/<기능>/failure.ts` | 실패 class와 실패 종류 |
+| `src/application/<기능>/service.ts` | service를 만드는 `create<기능>Service` |
+| `src/application/<기능>/ports.ts` | service가 받는 함수 타입 |
+| `src/infrastructure/neople/<기능>.ts`, `src/infrastructure/database/<기능>.ts` | port의 구현 |
+| `src/presentation/http/<기능>/controller.ts` | controller와 service 주입 token |
+| `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
+| `src/presentation/openapi/<기능>.ts` | 경로 설명 decorator와 schema |
+| `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/http.ts`의 `imports`에 등록합니다 |
+
+여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`, `src/presentation/openapi/common.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
+
 ## 준비할 입력
 
 `.env.example`을 앱의 `.env`로 복사해 채웁니다. 실제 secret은 Git 밖에서 관리하고, 운영 credential을 개발에 쓰지 않습니다.
