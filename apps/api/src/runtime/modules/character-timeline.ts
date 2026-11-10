@@ -12,8 +12,8 @@ import {
   createTimelineSyncQueue
 } from '../../application/character-timeline/queue.js'
 import type { CharacterTimeline } from '../../domain/character-timeline/project.js'
+import { type SeasonBackfillJob } from '../../domain/character-timeline/season-backfill.js'
 import {
-  type SeasonBackfillJob,
   type SeasonBackfillQueue,
   createSeasonBackfillQueue
 } from '../../application/character-timeline/season-backfill.js'

@@ -1,39 +1,19 @@
-import {
-  type CharacterTimelineItemRow,
-  type DatabaseClient,
-  type StoredSeason,
-  type TimelineCharacter,
-  type TimelineEventRow,
-  type TimelineRange,
-  readAdventureCharacters,
-  readCharactersTimelineEvents,
-  readCharactersTimelineItems,
-  readSeasonBackfillStates,
-  readSeasons
-} from '@dfragon/database'
+import type { StoredSeason, TimelineRange } from '@dfragon/database'
 import { addHours } from 'date-fns'
 import { z } from 'zod'
 import {
   ACQUISITION_CODES,
-  CLEAR_CODES,
-  ENHANCEMENT_CODES,
   type TimelineClear,
   type TimelineEnhancement
-} from '../domain/character-timeline/project.js'
+} from '../character-timeline/project.js'
 import {
-  parseTimelineClearRow,
-  parseTimelineEnhancementRow
-} from '../infrastructure/database/character-timeline-read.js'
-import {
-  type SeasonBackfillJob,
   type SeasonBackfillProgress,
   isSeasonBackfilled,
-  toSeasonBackfillJobs,
-  toSeasonBackfillProgress,
   toSeasonBackfillRange,
   toSeasonTimelineStart
-} from '../application/character-timeline/season-backfill.js'
-import { formatResetDate, formatSeoulTime, parseResetDate } from '../utils/seoul-time.js'
+} from '../character-timeline/season-backfill.js'
+import { formatResetDate, formatSeoulTime, parseResetDate } from '../seoul-time.js'
+import { toRaidStageLabel } from '../raid-stage.js'
 
 // 타임라인 정기 동기화는 중천(시즌 10)부터 받는다. 그 전 시즌은 모험단 캐릭터가 모두 옛 시즌 받기를 끝내야 집계한다.
 const FIRST_COLLECTED_SEASON_ID = 10
@@ -83,15 +63,6 @@ export const LEGION_RELEASE_ORDER = [
   '차원회랑',
   '이스핀즈'
 ] as const
-// Neople 타임라인은 한 레이드의 본 레이드와 개전, 매칭 같은 단계를 같은 raidName으로 주고 data.modeName으로만 나눈다.
-// 표에 없는 modeName은 본 레이드로 보고 하드, 일반으로 나눈다. 값은 운영 DB에서 본 modeName이다(2026-11-09).
-const RAID_STAGE_LABELS = new Map([
-  ['미카엘라 : 균열서', '싱글/매칭'],
-  ['디레지에 : 서막', '매칭'],
-  ['무의지의 장벽', '싱글/매칭'],
-  ['무의 장막', '개전'],
-  ['개전', '개전']
-])
 const ACTIVITY_DAY_HOURS = 24
 const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
@@ -165,27 +136,25 @@ export type SeasonActivity = {
   days: ActivityDay[]
 }
 
-type AdventureActivityOf<Season> = SeasonActivity & {
+export type AdventureActivityOf<Season> = SeasonActivity & {
   seasons: Season[]
   season: ActivitySeasonRange | null
 }
 
 export type AdventureActivity = AdventureActivityOf<ActivitySeason>
 
-export type AdventureActivityRead = {
-  characters: TimelineCharacter[]
-  activity: AdventureActivityOf<StoredActivitySeason>
-}
-
-export type AdventureSeasonBackfillRead = {
-  characters: TimelineCharacter[]
-  season: StoredActivitySeason
-  jobs: SeasonBackfillJob[]
+export type ActivityItem = {
+  code: number
+  occurredAt: Date
+  itemName: string | null
+  itemRarity: string | null
+  data: unknown
+  enhancements: TimelineEnhancement[]
 }
 
 export type ActivityRecords = {
-  clears: readonly TimelineEventRow[]
-  items: readonly CharacterTimelineItemRow[]
+  clears: readonly TimelineClear[]
+  items: readonly ActivityItem[]
 }
 
 export type ActivityDayRange = {
@@ -230,12 +199,11 @@ export function toActivitySeasons(
 ): StoredActivitySeason[] {
   return seasons
     .filter(({ startsAt }) => startsAt <= now)
-    .map(({ id, name, startsAt }) => ({
-      id,
-      name,
-      startsAt,
-      available: isCollectedSeason(id)
-    }))
+    .map(({ id, name, startsAt }) => {
+      const available = isCollectedSeason(id)
+
+      return { id, name, startsAt, available }
+    })
 }
 
 export function findActivitySeason(
@@ -295,10 +263,7 @@ function isItemRarityName(name: string): name is ItemRarityName {
   return Object.hasOwn(ITEM_RARITIES, name)
 }
 
-function toItemRarityName({
-  code,
-  itemRarity
-}: CharacterTimelineItemRow): ItemRarityName | undefined {
+function toItemRarityName({ code, itemRarity }: ActivityItem): ItemRarityName | undefined {
   if (!ITEM_CODES.has(code) || itemRarity === null || !isItemRarityName(itemRarity)) {
     return undefined
   }
@@ -306,7 +271,7 @@ function toItemRarityName({
   return itemRarity
 }
 
-function usedTicket({ data }: CharacterTimelineItemRow): boolean {
+function usedTicket({ data }: ActivityItem): boolean {
   return ticketData.safeParse(data).success
 }
 
@@ -327,31 +292,15 @@ function emptySummary(): ActivitySummary {
 }
 
 export function emptySeasonActivity(): SeasonActivity {
-  return { summary: emptySummary(), days: [] }
+  const summary = emptySummary()
+
+  return { summary, days: [] }
 }
 
 function countName(counts: Map<string, NameCount>, name: string): void {
   const counted = counts.get(name) ?? { name, count: 0 }
   counted.count++
   counts.set(name, counted)
-}
-
-export function toRaidStageLabel({
-  modeName,
-  hard
-}: Pick<TimelineClear, 'modeName' | 'hard'>): string | null {
-  if (modeName === null) {
-    return null
-  }
-
-  const stageLabel = RAID_STAGE_LABELS.get(modeName)
-  if (stageLabel !== undefined) {
-    return stageLabel
-  }
-
-  const difficultyLabel = hard ? '하드' : '일반'
-
-  return difficultyLabel
 }
 
 function toRaidCountName(clear: TimelineClear): string {
@@ -446,7 +395,7 @@ export function toSeasonActivity(
     return day
   }
 
-  for (const clear of records.clears.flatMap(parseTimelineClearRow).filter(inSeason)) {
+  for (const clear of records.clears.filter(inSeason)) {
     const day = dayOf(clear.occurredAt)
     if (clear.kind === 'raid') {
       countRaid(raids, clear)
@@ -469,7 +418,7 @@ export function toSeasonActivity(
     }
 
     const ticket = usedTicket(row)
-    for (const attempt of parseTimelineEnhancementRow(row)) {
+    for (const attempt of row.enhancements) {
       const day = dayOf(attempt.occurredAt)
       enhancement.attempts++
       day.enhance++
@@ -508,7 +457,9 @@ export function toActivityDayRange(date: string): ActivityDayRange | undefined {
     return undefined
   }
 
-  return { date, startsAt, endsAt: addHours(startsAt, ACTIVITY_DAY_HOURS) }
+  const endsAt = addHours(startsAt, ACTIVITY_DAY_HOURS)
+
+  return { date, startsAt, endsAt }
 }
 
 function formatActivityTime(occurredAt: Date): string {
@@ -522,7 +473,7 @@ export function toActivityDayDetail(
   const onDay = (record: { occurredAt: Date }) => occursIn(day, record)
   const raidCounts = new Map<string, RaidCount>()
   const legionCounts = new Map<string, NameCount>()
-  for (const clear of records.clears.flatMap(parseTimelineClearRow).filter(onDay)) {
+  for (const clear of records.clears.filter(onDay)) {
     if (clear.kind === 'raid') {
       countRaid(raidCounts, clear)
     } else {
@@ -543,7 +494,7 @@ export function toActivityDayDetail(
     return [{ at, name: row.itemName, rarity }]
   })
   const enhancements = rows
-    .flatMap(parseTimelineEnhancementRow)
+    .flatMap((row) => row.enhancements)
     .map(({ occurredAt, kind, after, result }): ActivityDayEnhancement => {
       const at = formatActivityTime(occurredAt)
 
@@ -556,7 +507,7 @@ export function toActivityDayDetail(
 }
 
 export function toSeasonDays(records: ActivityRecords): ActivityDayDetail[] {
-  const days = new Map<string, { clears: TimelineEventRow[]; items: CharacterTimelineItemRow[] }>()
+  const days = new Map<string, { clears: TimelineClear[]; items: ActivityItem[] }>()
   const recordsFor = (occurredAt: Date) => {
     const date = formatResetDate(occurredAt)
     const dayRecords = days.get(date) ?? { clears: [], items: [] }
@@ -591,146 +542,4 @@ export function toSeasonDays(records: ActivityRecords): ActivityDayDetail[] {
 
       return [detail]
     })
-}
-
-async function readActivityRecords(
-  client: DatabaseClient,
-  characters: readonly TimelineCharacter[],
-  since: Date,
-  until: Date | undefined
-): Promise<ActivityRecords> {
-  const [clears, items] = await Promise.all([
-    readCharactersTimelineEvents(client, characters, CLEAR_CODES, since, until),
-    readCharactersTimelineItems(
-      client,
-      characters,
-      [...ENHANCEMENT_CODES, ...ACQUISITION_CODES],
-      since,
-      until
-    )
-  ])
-
-  return { clears, items }
-}
-
-async function readSeasonActivity(
-  client: DatabaseClient,
-  characters: readonly TimelineCharacter[],
-  season: ActivitySeasonRange
-): Promise<SeasonActivity> {
-  const records = await readActivityRecords(
-    client,
-    characters,
-    season.startsAt,
-    season.endsAt ?? undefined
-  )
-
-  return toSeasonActivity(season, records)
-}
-
-async function readSeasonBackfills(
-  client: DatabaseClient,
-  characters: readonly TimelineCharacter[],
-  ranges: ReadonlyMap<number, TimelineRange>
-): Promise<Map<number, SeasonBackfillProgress>> {
-  const backfills = await Promise.all(
-    [...ranges].map(async ([seasonId, range]) => {
-      const states = await readSeasonBackfillStates(client, characters, seasonId)
-
-      return [seasonId, toSeasonBackfillProgress(range, characters.length, states)] as const
-    })
-  )
-
-  return new Map(backfills)
-}
-
-async function readActivitySeasonContext(
-  client: DatabaseClient,
-  adventureName: string,
-  seasonId: number | undefined,
-  now: Date
-) {
-  const startedSeasons = toActivitySeasons(await readSeasons(client), now)
-  const season = findActivitySeason(startedSeasons, seasonId)
-  if (season === undefined && seasonId !== undefined) {
-    return undefined
-  }
-  const characters = await readAdventureCharacters(client, adventureName)
-  const backfills = await readSeasonBackfills(
-    client,
-    characters,
-    toSeasonBackfillRanges(startedSeasons)
-  )
-  const seasons = withSeasonBackfills(startedSeasons, backfills)
-
-  return { characters, seasons, season }
-}
-
-export async function readAdventureActivity(
-  client: DatabaseClient,
-  adventureName: string,
-  seasonId: number | undefined,
-  now: Date
-): Promise<AdventureActivityRead | undefined> {
-  const context = await readActivitySeasonContext(client, adventureName, seasonId, now)
-  if (context === undefined) {
-    return undefined
-  }
-  const { characters, seasons, season } = context
-  if (season === undefined) {
-    return { characters, activity: { seasons, season: null, ...emptySeasonActivity() } }
-  }
-  const available = seasons.some(({ id, available }) => id === season.id && available)
-  const activity = available
-    ? await readSeasonActivity(client, characters, season)
-    : emptySeasonActivity()
-
-  return { characters, activity: { seasons, season, ...activity } }
-}
-
-export async function readAdventureSeasonDays(
-  client: DatabaseClient,
-  adventureName: string,
-  seasonId: number,
-  now: Date
-): Promise<AdventureSeasonDays | undefined> {
-  const context = await readActivitySeasonContext(client, adventureName, seasonId, now)
-  if (context === undefined || context.season === undefined) {
-    return undefined
-  }
-  const { characters, seasons, season } = context
-  const available = seasons.some(({ id, available }) => id === season.id && available)
-  if (!available) {
-    return { season: season.id, days: [] }
-  }
-  const records = await readActivityRecords(
-    client,
-    characters,
-    season.startsAt,
-    season.endsAt ?? now
-  )
-  const days = toSeasonDays(records)
-
-  return { season: season.id, days }
-}
-
-export async function readAdventureSeasonBackfill(
-  client: DatabaseClient,
-  adventureName: string,
-  seasonId: number,
-  now: Date
-): Promise<AdventureSeasonBackfillRead | undefined> {
-  const seasons = toActivitySeasons(await readSeasons(client), now)
-  const range = toSeasonBackfillRanges(seasons).get(seasonId)
-  const season = seasons.find(({ id }) => id === seasonId)
-  if (range === undefined || season === undefined) {
-    return undefined
-  }
-  const characters = await readAdventureCharacters(client, adventureName)
-  const states = await readSeasonBackfillStates(client, characters, seasonId)
-  const backfill = toSeasonBackfillProgress(range, characters.length, states)
-  const available = isSeasonBackfilled(backfill)
-  const jobs = toSeasonBackfillJobs(characters, seasonId, range, states)
-
-  return { characters, season: { ...season, available, backfill }, jobs }
 }

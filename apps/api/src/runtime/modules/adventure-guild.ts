@@ -1,11 +1,14 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { ADVENTURE_GUILD_SERVICE, AdventureGuildController } from '../../adventure-guild/http.js'
 import {
-  type AdventureGuildReader,
+  ADVENTURE_GUILD_SERVICE,
+  AdventureGuildController
+} from '../../presentation/http/adventure-guild/controller.js'
+import { type AdventureGuildReader } from '../../application/adventure-guild/ports.js'
+import {
   createAdventureGuildService,
   emptyAdventureGuildService,
   noSeasonBackfill
-} from '../../adventure-guild/service.js'
+} from '../../application/adventure-guild/service.js'
 import type { TimelineSyncQueue } from '../../application/character-timeline/queue.js'
 import type { SeasonBackfillQueue } from '../../application/character-timeline/season-backfill.js'
 import { SEASON_BACKFILL_QUEUE, TIMELINE_SYNC_QUEUE } from './character-timeline.js'

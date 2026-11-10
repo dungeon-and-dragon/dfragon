@@ -1,6 +1,6 @@
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { forwardCause } from '../../error-chain.js'
-import { formatSeoulTime, parseSeoulTime } from '../../utils/seoul-time.js'
+import { formatSeoulTime, parseSeoulTime } from '../../domain/seoul-time.js'
 import type { FetchCharacterTimeline } from '../../application/character-timeline/ports.js'
 import { TimelineFailure } from '../../domain/character-timeline/failure.js'
 import {

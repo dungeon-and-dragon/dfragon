@@ -1,53 +1,21 @@
-import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
-import { CharacterDetailFailure } from '../domain/character-failure.js'
-import type { RequestTimelineSync } from '../application/character-timeline/queue.js'
-import type { SeasonBackfillQueue } from '../application/character-timeline/season-backfill.js'
+import type { TimelineCharacter } from '@dfragon/database'
+import {
+  averageFame,
+  type AdventureCharacters,
+  type AdventureWeekly,
+  type GuildMembers
+} from '../../domain/adventure-guild/responses.js'
+import type { AdventureGuildReader, SeasonBackfillRequests } from './ports.js'
+import { toCharacterRow } from '../../domain/character-row.js'
+import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import type { RequestTimelineSync } from '../character-timeline/queue.js'
 import {
   type ActivitySeason,
   type AdventureActivity,
-  type AdventureActivityRead,
   type AdventureSeasonDays,
-  type AdventureSeasonBackfillRead,
   type StoredActivitySeason,
   emptySeasonActivity
-} from './activity.js'
-import type { AdventureWeeklyClears } from './weekly.js'
-
-export type AdventureCharacters = {
-  adventureName: string
-  characters: CharacterRow[]
-}
-
-export type AdventureWeekly = AdventureWeeklyClears & { adventureName: string }
-
-export type GuildMembers = {
-  guildId: string
-  guildName: string | null
-  memberCount: number
-  averageFame: number | null
-  members: CharacterRow[]
-}
-
-export interface AdventureGuildReader {
-  readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]>
-  readGuild(guildId: string): Promise<StoredGuild>
-  readAdventureWeeklyClears(adventureName: string): Promise<AdventureWeeklyClears>
-  readAdventureActivity(
-    adventureName: string,
-    seasonId: number | undefined
-  ): Promise<AdventureActivityRead | undefined>
-  readAdventureSeasonDays(
-    adventureName: string,
-    seasonId: number
-  ): Promise<AdventureSeasonDays | undefined>
-  readAdventureSeasonBackfill(
-    adventureName: string,
-    seasonId: number
-  ): Promise<AdventureSeasonBackfillRead | undefined>
-}
-
-export type SeasonBackfillRequests = Pick<SeasonBackfillQueue, 'request' | 'has'>
+} from '../../domain/adventure-guild/activity.js'
 
 export interface AdventureGuildService {
   adventure(adventureName: string): Promise<AdventureCharacters>
@@ -56,15 +24,6 @@ export interface AdventureGuildService {
   adventureActivity(adventureName: string, seasonId: number | undefined): Promise<AdventureActivity>
   adventureSeasonDays(adventureName: string, seasonId: number): Promise<AdventureSeasonDays>
   adventureSeasonBackfill(adventureName: string, seasonId: number): Promise<ActivitySeason>
-}
-
-function averageFame(members: readonly StoredCharacter[]): number | null {
-  const fames = members.map(({ fame }) => fame).filter((fame) => fame !== null)
-  if (fames.length === 0) {
-    return null
-  }
-
-  return Math.round(fames.reduce((sum, fame) => sum + fame, 0) / fames.length)
 }
 
 export function createAdventureGuildService(
@@ -91,18 +50,18 @@ export function createAdventureGuildService(
     async adventure(adventureName) {
       const characters = await reader.readAdventureCharacters(adventureName)
 
-      return { adventureName, characters: characters.map(toCharacterRow) }
+      const rows = characters.map(toCharacterRow)
+
+      return { adventureName, characters: rows }
     },
     async guild(guildId) {
       const { guildName, members } = await reader.readGuild(guildId)
 
-      return {
-        guildId,
-        guildName,
-        memberCount: members.length,
-        averageFame: averageFame(members),
-        members: members.map(toCharacterRow)
-      }
+      const memberCount = members.length
+      const meanFame = averageFame(members)
+      const rows = members.map(toCharacterRow)
+
+      return { guildId, guildName, memberCount, averageFame: meanFame, members: rows }
     },
     async adventureWeekly(adventureName) {
       const weekly = await reader.readAdventureWeeklyClears(adventureName)
@@ -163,10 +122,9 @@ export const emptyAdventureGuildService = createAdventureGuildService(
         return undefined
       }
 
-      return {
-        characters: [],
-        activity: { seasons: [], season: null, ...emptySeasonActivity() }
-      }
+      const activity = emptySeasonActivity()
+
+      return { characters: [], activity: { seasons: [], season: null, ...activity } }
     },
     readAdventureSeasonDays: async () => undefined,
     readAdventureSeasonBackfill: async () => undefined
