@@ -2,8 +2,8 @@ import { slotAdventureName } from '#core/capture/adventure-snapshot'
 import { seatValuesToSlotOrder } from '#core/capture/seats'
 import { toClipboardText } from '#core/capture/slot-clipboard'
 import { toSlotCards, type SlotCard } from '#core/capture/slot-cards'
-import { useAdventureSnapshot } from './useAdventureSnapshot'
-import type { PartyCapture } from './usePartyCapture'
+import { useAdventureSnapshot } from '../../../hooks/useAdventureSnapshot'
+import type { PartyCapture } from '../../../hooks/usePartyCapture'
 
 export function usePartySlotCards(capture: PartyCapture): {
   cards: SlotCard[]

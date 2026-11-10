@@ -11,7 +11,7 @@ import { characterDisplayOf } from '../../lib/stored-character'
 import { styles } from './CharacterSummary.style'
 import { FavoriteToggle } from '../../components/FavoriteToggle'
 import { RefreshIcon } from '../../components/RefreshIcon'
-import { useRefreshCharacterDetail } from '../../hooks/useCharacterDetail'
+import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
 import { useRefreshingNow } from '../../hooks/useRefreshingNow'
 import { formatSeoulDateTime, formatTimeAgo } from '#core/time-format'
 

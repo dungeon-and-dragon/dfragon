@@ -1,8 +1,8 @@
 import { displayJobName } from '#core/character/job-display'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterStats } from '#core/ranking/ranking-stats'
-import type { ColumnBar } from '../../components/chart/Columns'
-import type { Bar } from '../../components/chart/RowBars'
+import type { ColumnBar } from './Columns'
+import type { Bar } from './RowBars'
 
 const AWAKENING_MARK = '眞'
 

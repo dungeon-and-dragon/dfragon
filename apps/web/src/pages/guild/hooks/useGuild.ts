@@ -1,6 +1,6 @@
 import type { Guild } from '#core/adventure-guild/adventure-guild'
-import { useClientHost } from '../host/client-host'
-import { type LoadedResult, useLoadedResult } from './useLoadedResult'
+import { useClientHost } from '../../../host/client-host'
+import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 
 export function useGuild(guildId: string): LoadedResult<Guild> {
   const { getGuild } = useClientHost()

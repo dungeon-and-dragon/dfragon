@@ -6,7 +6,7 @@ import type {
   ClearWeek
 } from '#core/ranking/clear-stats'
 import type { Bar } from '../../components/chart/RowBars'
-import { shareText } from '../stats/stats-bars'
+import { shareText } from '../../components/chart/stats-bars'
 
 export type ContentRow = Readonly<{ label: string; contents: readonly ClearContent[] }>
 

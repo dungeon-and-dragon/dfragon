@@ -1,6 +1,6 @@
 import type { ClearContentStats, ClearStats } from '#core/ranking/clear-stats'
-import { useClientHost } from '../host/client-host'
-import { type LoadedResult, useLoadedResult } from './useLoadedResult'
+import { useClientHost } from '../../../host/client-host'
+import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 
 export function useClearStats(): LoadedResult<ClearStats> {
   const { getClearStats } = useClientHost()

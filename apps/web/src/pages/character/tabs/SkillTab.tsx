@@ -29,8 +29,8 @@ import {
   skillWindowOf
 } from '#core/catalog/skill-window'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
-import { useSkillStats } from '../../../hooks/useSkillStats'
-import { useSkillWindowCatalog } from '../../../hooks/useSkillWindowCatalog'
+import { useSkillStats } from '../hooks/useSkillStats'
+import { useSkillWindowCatalog } from '../hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as layout } from './avatar/detail-tab.style'
 import { SkillAdoptionTooltip } from './skill/SkillAdoptionTooltip'

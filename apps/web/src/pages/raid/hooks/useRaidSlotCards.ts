@@ -3,8 +3,8 @@ import { slotAdventureName } from '#core/capture/adventure-snapshot'
 import { seatValuesToSlotOrder } from '#core/capture/seats'
 import { toClipboardText } from '#core/capture/slot-clipboard'
 import { toSlotCards, type SlotCard } from '#core/capture/slot-cards'
-import { useAdventureSnapshot } from './useAdventureSnapshot'
-import type { RaidCapture } from './useRaidCapture'
+import { useAdventureSnapshot } from '../../../hooks/useAdventureSnapshot'
+import type { RaidCapture } from '../../../hooks/useRaidCapture'
 
 export function useRaidSlotCards(capture: RaidCapture): {
   cards: SlotCard[]

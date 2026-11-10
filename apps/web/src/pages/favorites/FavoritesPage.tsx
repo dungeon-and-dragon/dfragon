@@ -6,11 +6,11 @@ import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
 import type { CharacterKey } from '../../lib/stored-character'
-import { styles } from './FavoritesScreen.style'
+import { styles } from './FavoritesPage.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-export function FavoritesScreen(): React.JSX.Element {
+export function FavoritesPage(): React.JSX.Element {
   const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
   const empty = favoriteCharacters.length === 0
   const unfavorite: CharacterTableAction = {

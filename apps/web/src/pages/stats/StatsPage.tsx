@@ -5,13 +5,19 @@ import { Columns } from '../../components/chart/Columns'
 import { type Bar, type BarTone, RowBars } from '../../components/chart/RowBars'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
-import { useCharacterStats } from '../../hooks/useCharacterStats'
-import { styles } from './StatsScreen.style'
-import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from './stats-bars'
+import { useCharacterStats } from './hooks/useCharacterStats'
+import { styles } from './StatsPage.style'
+import {
+  averageFameBars,
+  type FameBar,
+  fameBars,
+  jobBars,
+  serverBars
+} from '../../components/chart/stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-export function StatsScreen(): React.JSX.Element {
+export function StatsPage(): React.JSX.Element {
   const result = useCharacterStats()
   switch (result.status) {
     case 'loading':

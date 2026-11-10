@@ -1,64 +1,70 @@
 import * as stylex from '@stylexjs/stylex'
-import { useId } from 'react'
-import type { SlotCard, SlotCardActions } from '#core/capture/slot-cards'
-import { Seat } from '../../components/Seat'
-import { SeatMoveStatus } from '../../components/SeatMoveStatus'
-import { SeatTable } from '../../components/SeatTable'
-import { useSeatMove } from '../../hooks/useSeatMove'
-import type { SeatArrangement } from '../../hooks/useSeatOrder'
-import { CharacterRow } from '../../components/CharacterRow'
-import { isBusySlot } from '../../lib/card-presentation'
+import type { ReactNode } from 'react'
+import { BoardHeader } from '../../components/BoardHeader'
+import { BoardTitle } from '../../components/BoardTitle'
+import { CaptureButton } from '../../components/CaptureButton'
+import { ClipboardCopyButton } from '../../components/ClipboardCopyButton'
+import { LastCaptureTime } from '../../components/LastCaptureTime'
+import { SnapshotToggle } from '../../components/SnapshotToggle'
+import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
+import { useClipboardCopy } from '../../hooks/useClipboardCopy'
+import { usePartySlotCards } from './hooks/usePartySlotCards'
+import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
+import { filledSlotCount } from '#core/capture/slot-cards'
+import { PartyScreen } from './PartyScreen'
 import { styles } from './PartyPage.style'
 
-export function PartyPage({
-  slots,
-  resetKey,
-  seats,
-  actions
-}: {
-  slots: readonly SlotCard[]
-  resetKey: string
-  seats: SeatArrangement
-  actions: SlotCardActions
-}): React.JSX.Element {
-  const { seatOrder, canMoveSeats } = seats
-  const { lookupSlot, pickCandidate, changeSnapshotAdventure } = actions
-  const hintId = useId()
-  const { moveSeat, notice } = useSeatMove({ resetKey, seats })
-
-  function renderSeat(slot: number, seat: number): React.JSX.Element {
-    const handleLookup = (nickname: string, serverId?: string): void =>
-      lookupSlot(slot, nickname, serverId)
-    const handlePickCandidate = (serverId: string): void => pickCandidate(slot, serverId)
-    const handleChangeSnapshotAdventure = (value: string): void =>
-      changeSnapshotAdventure(seat, value)
-
-    return (
-      <Seat
-        key={`${resetKey}-${slot}`}
-        label={`${seat + 1}번 자리`}
-        move={moveSeat(seat)}
-        busy={isBusySlot(slots[slot])}
-        describedBy={canMoveSeats ? hintId : undefined}
-      >
-        <CharacterRow
-          cardKey={{ id: `party-${slot}`, resetKey }}
-          card={slots[slot]}
-          slot={seat + 1}
-          seat={<span {...stylex.props(styles.seat)}>{seat + 1}</span>}
-          screen="party"
-          onLookup={handleLookup}
-          onPickCandidate={handlePickCandidate}
-          onChangeSnapshotAdventure={handleChangeSnapshotAdventure}
-        />
-      </Seat>
-    )
-  }
+export function PartyPage({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {
+  const { partyCapture: capture } = useScreenCaptureContext()
+  const { cards, snapshot, clipboardText } = usePartySlotCards(capture)
+  const { renderBoardHeader } = useBoardHeaderPortal()
+  const clipboard = useClipboardCopy(clipboardText)
 
   return (
-    <section aria-label="파티 캐릭터">
-      <SeatTable label="파티">{seatOrder.map(renderSeat)}</SeatTable>
-      <SeatMoveStatus hintId={hintId} layout={seats.layout} notice={notice} />
-    </section>
+    <div {...stylex.props(styles.party)}>
+      {renderBoardHeader(
+        <BoardHeader
+          start={
+            <>
+              <BoardTitle
+                label="파티"
+                filled={filledSlotCount(cards)}
+                total={cards.length}
+                round={snapshot.round}
+              />
+            </>
+          }
+          end={
+            <>
+              <LastCaptureTime at={capture.lastCompletedAt} />
+              {captureSource}
+              <SnapshotToggle
+                label="파티 모험단 순번 스냅샷"
+                active={snapshot.active}
+                disabled={!snapshot.active && filledSlotCount(cards) === 0}
+                onTake={snapshot.take}
+                onClear={snapshot.clear}
+              />
+              <ClipboardCopyButton status={clipboard.status} onCopy={clipboard.copy} />
+              <CaptureButton
+                target="파티"
+                disabled={!capture.canStartCapture}
+                onClick={capture.startRound}
+              />
+            </>
+          }
+        />
+      )}
+      <PartyScreen
+        resetKey={String(capture.round)}
+        slots={cards}
+        seats={capture.seats}
+        actions={{
+          lookupSlot: capture.search.lookupSlot,
+          pickCandidate: capture.search.pickCandidate,
+          changeSnapshotAdventure: snapshot.changeAdventure
+        }}
+      />
+    </div>
   )
 }

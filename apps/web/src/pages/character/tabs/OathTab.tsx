@@ -10,7 +10,7 @@ import {
   oathSetBoardOf
 } from '#core/catalog/oath-catalog'
 import { CheckIcon } from '../../../components/CheckIcon'
-import { useOathCatalog } from '../../../hooks/useOathCatalog'
+import { useOathCatalog } from '../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
 import { styles as tableStyles } from './equipment/item-table.style'

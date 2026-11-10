@@ -4,7 +4,7 @@ import type {
   AdventureActivity,
   AdventureActivityDay
 } from '#core/adventure-guild/adventure-activity'
-import { useClientHost } from '../host/client-host'
+import { useClientHost } from '../../../host/client-host'
 
 export type AdventureActivityResult =
   | Readonly<{ status: 'loading' }>

@@ -1,16 +1,16 @@
 import * as stylex from '@stylexjs/stylex'
 import { useId } from 'react'
-import { styles } from './LegalScreen.style'
+import { styles } from './LegalPage.style'
 
-export function TermsScreen(): React.JSX.Element {
-  return <LegalScreen title="이용약관" />
+export function TermsPage(): React.JSX.Element {
+  return <LegalPage title="이용약관" />
 }
 
-export function PrivacyScreen(): React.JSX.Element {
-  return <LegalScreen title="개인정보처리방침" />
+export function PrivacyPage(): React.JSX.Element {
+  return <LegalPage title="개인정보처리방침" />
 }
 
-function LegalScreen({ title }: { title: string }): React.JSX.Element {
+function LegalPage({ title }: { title: string }): React.JSX.Element {
   const titleId = useId()
 
   return (
