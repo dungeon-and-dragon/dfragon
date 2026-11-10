@@ -38,6 +38,7 @@ pnpm verify
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
+| 운영 화면 | `pnpm --filter @dfragon/internal run --sequential '/^(test\|lint\|build)$/'` |
 | 루트 도구 | `pnpm test:tooling`과 고친 스크립트의 `node --check` |
 
 정적 검사만 실행할 때는 `pnpm check:static`을 씁니다. `lint`, `format:check`, `check:writing`, `check:docs`를 `pnpm verify`와 같은 순서로 실행하고 먼저 실패한 검사에서 멈춥니다.
@@ -115,7 +116,7 @@ node scripts/dependency-snapshot.mjs <cyclonedx-sbom-file> <snapshot-file>
 
 ## `server-build-info`
 
-Docker 빌드에서 제품 commit과 서비스명(`api`, `web`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
+Docker 빌드에서 제품 commit과 서비스명(`api`, `web`, `internal`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
 
 ```sh
 node scripts/server-build-info.mjs api "$(git rev-parse HEAD)" build-info.json

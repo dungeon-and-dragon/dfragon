@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'Pretendard Variable';
+  src: url('./assets/fonts/PretendardVariable.woff2') format('woff2');
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  color: var(--df-fg-default);
+  background: var(--df-bg-canvas);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
