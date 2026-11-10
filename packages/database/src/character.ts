@@ -21,7 +21,7 @@ export type CharacterBasicInput = CharacterInput & {
 
 type CharacterDetails = Omit<
   Prisma.CharacterUncheckedCreateInput,
-  'serverId' | 'characterId' | 'adventureId'
+  'serverId' | 'characterId' | 'adventureId' | 'maxFame'
 >
 
 // timeline.ts의 캐릭터 lock(1175)과 다른 namespace다.
@@ -48,12 +48,18 @@ export async function writeCharacter(
       where: { serverId_characterId: { serverId, characterId } },
       data: details
     })
+    if (details.fame != null) {
+      await transaction.$executeRaw`
+        UPDATE "characters"
+        SET "max_fame" = GREATEST("max_fame", ${details.fame}::integer)
+        WHERE "server_id" = ${serverId} AND "character_id" = ${characterId}`
+    }
 
     return
   }
   const adventureId = await findOrCreateAdventureId(transaction, adventureName)
   await transaction.character.create({
-    data: { ...details, serverId, characterId, adventureId }
+    data: { ...details, serverId, characterId, adventureId, maxFame: details.fame ?? null }
   })
 }
 

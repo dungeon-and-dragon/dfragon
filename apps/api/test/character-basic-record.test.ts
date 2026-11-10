@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { CharacterBasicInput, CharacterSkillStyleInput } from '@dfragon/database'
+import {
+  type CharacterBasicInput,
+  type CharacterSkillStyleInput,
+  type DatabaseClient,
+  recordCharacter,
+  recordCharacterBasic
+} from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import { CharacterBasicSubscriber } from '../src/characters/basic/subscriber.js'
 import { createCatalogService } from '../src/characters/catalog/service.js'
@@ -23,6 +29,81 @@ const basicFields = {
   guildName: '합성길드',
   fame: 61234
 }
+const greatestMaxFamePattern = /GREATEST\("max_fame", \?::integer\)/
+const advisoryLockPattern = 'pg_advisory_xact_lock'
+
+function characterDatabase() {
+  let stored: { fame: number | null; maxFame: number | null } | null = null
+  const transaction = {
+    $executeRaw: async (sql: TemplateStringsArray, ...values: (number | string)[]) => {
+      if (sql.join('?').includes(advisoryLockPattern)) {
+        return 1
+      }
+      assert.match(sql.join('?'), greatestMaxFamePattern)
+      assert.ok(stored)
+      const fame = values[0]
+      assert.ok(typeof fame === 'number')
+      stored.maxFame = Math.max(stored.maxFame ?? fame, fame)
+
+      return 1
+    },
+    adventure: {
+      findFirst: async () => ({ id: 1n }),
+      update: async () => undefined
+    },
+    character: {
+      findUnique: async () => (stored === null ? null : { adventureId: 1n }),
+      create: async ({ data }: { data: { fame?: number | null; maxFame: number | null } }) => {
+        stored = { fame: data.fame ?? null, maxFame: data.maxFame }
+      },
+      update: async ({ data }: { data: { fame?: number | null } }) => {
+        assert.ok(stored)
+        if (data.fame !== undefined) {
+          stored.fame = data.fame
+        }
+      }
+    },
+    characterCollection: { deleteMany: async () => undefined }
+  }
+  const client = {
+    $transaction: async (callback: (value: typeof transaction) => Promise<void>) =>
+      callback(transaction)
+  } as unknown as DatabaseClient
+
+  return { client, read: () => stored }
+}
+
+test('처음 저장한 명성을 최고 명성으로 기록한다', async () => {
+  const database = characterDatabase()
+  await recordCharacterBasic(database.client, basicFields)
+  assert.deepEqual(database.read(), { fame: 61234, maxFame: 61234 })
+})
+
+for (const [name, fame, maxFame] of [
+  ['더 낮은 명성을 저장하면 최고 명성을 유지한다', 50000, 61234],
+  ['더 높은 명성을 저장하면 최고 명성을 갱신한다', 70000, 70000],
+  ['null 명성을 저장하면 최고 명성을 유지한다', null, 61234]
+] as const) {
+  test(name, async () => {
+    const database = characterDatabase()
+    await recordCharacterBasic(database.client, basicFields)
+    await recordCharacterBasic(database.client, { ...basicFields, fame })
+    assert.deepEqual(database.read(), { fame, maxFame })
+  })
+}
+
+test('명성 없이 처음 저장하면 최고 명성도 null이다', async () => {
+  const database = characterDatabase()
+  await recordCharacterBasic(database.client, { ...basicFields, fame: null })
+  assert.deepEqual(database.read(), { fame: null, maxFame: null })
+})
+
+test('명성을 전달하지 않는 저장은 기존 명성과 최고 명성을 유지한다', async () => {
+  const database = characterDatabase()
+  await recordCharacterBasic(database.client, basicFields)
+  await recordCharacter(database.client, basicFields)
+  assert.deepEqual(database.read(), { fame: 61234, maxFame: 61234 })
+})
 
 const skillStyle = {
   style: {
