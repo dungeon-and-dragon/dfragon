@@ -14,7 +14,7 @@ import type {
   CharacterPayload,
   CharacterPayloads
 } from '../src/domain/character-detail/sections.js'
-import { type ApiHttpAppOptions, createApiHttpApp } from '../src/http.js'
+import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 import { createApiRuntime } from '../src/runtime/application.js'
 
 // 합성 캐릭터다. 실제 Neople 응답처럼 모든 섹션에 기본 정보가 들어 있다.

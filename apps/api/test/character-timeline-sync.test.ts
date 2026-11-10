@@ -17,7 +17,7 @@ import {
   type TimelineSyncFailure,
   syncCharacterTimeline
 } from '../src/application/character-timeline/sync.js'
-import { createApiHttpApp } from '../src/http.js'
+import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-events.js'
 import type { CharacterIdentity } from '../src/domain/character-identity.js'
 import { EventEmitter2 } from '@nestjs/event-emitter'
