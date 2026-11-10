@@ -31,6 +31,8 @@ import { styles } from './ClearsScreen.style'
 const TITLE = '클리어 집계'
 const VISIBLE_JOB_COUNT = 10
 const WEEK_AXIS_STEP = 4
+const YEAR_WEEK_AXIS_STEP = 13
+const WEEKS_PER_YEAR = 52
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -89,8 +91,8 @@ export function ClearsScreen({
             <ClearHero content={content} week={week} onWeekSelect={selectWeek} />
             {week === undefined && <p {...stylex.props(styles.empty)}>수집 기록이 없습니다.</p>}
             {week !== undefined && content.weeks.length > 1 && (
-              <div {...stylex.props(styles.weekChart)}>
-                <Columns groups={[weekBars(content)]} selectedKey={week.weekStart} />
+              <div key={content.id} {...stylex.props(styles.weekChart)}>
+                <Columns groups={[weekBars(content)]} selectedKey={week.weekStart} scrollable />
               </div>
             )}
           </section>
@@ -225,11 +227,35 @@ function Figure({
   )
 }
 
+// 한 해를 넘기면 MM-DD가 겹치므로 연도를 붙이고, 라벨이 길어진 만큼 간격을 넓힌다.
+function weekAxisLabelOf(
+  weeks: readonly ClearWeek[]
+): (weekStart: string, index: number) => string | null {
+  if (weeks.length > WEEKS_PER_YEAR) {
+    return (weekStart, index) => {
+      if (index % YEAR_WEEK_AXIS_STEP !== 0) {
+        return null
+      }
+
+      return weekStart.slice(2)
+    }
+  }
+
+  return (weekStart, index) => {
+    if (index % WEEK_AXIS_STEP !== 0) {
+      return null
+    }
+
+    return weekStart.slice(5)
+  }
+}
+
 function weekBars({ weeks, releasedAt }: ClearContent): ColumnBar[] {
   const max = Math.max(0, ...weeks.map(({ cleared }) => cleared))
+  const axisLabelOf = weekAxisLabelOf(weeks)
 
   return weeks.map(({ weekStart, cleared, population }, index) => {
-    const label = index % WEEK_AXIS_STEP === 0 ? weekStart.slice(5) : null
+    const label = axisLabelOf(weekStart, index)
     const range = weekLabel(weekStart, releasedAt)
     const share = shareText(cleared, population)
     const ratio = max > 0 ? cleared / max : 0

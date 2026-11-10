@@ -1,6 +1,6 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { Fragment, useRef, useState } from 'react'
+import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { COLUMN_BAR_GROW, useChartBarGrow } from '../../animations/useChartBarGrow'
 import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
 import { styles } from './chart.style'
@@ -37,12 +37,15 @@ function columnTooltipPlaceOf(
 
 export function Columns({
   groups,
-  selectedKey
+  selectedKey,
+  scrollable = false
 }: {
   groups: readonly (readonly ColumnBar[])[]
   selectedKey?: string
+  scrollable?: boolean
 }): React.JSX.Element {
   const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
+  const scrollerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const columnsRef = useRef(new Map<string, HTMLLIElement>())
@@ -61,6 +64,13 @@ export function Columns({
     placeOf: columnTooltipPlaceOf
   })
 
+  useLayoutEffect(() => {
+    const scroller = scrollerRef.current
+    if (scrollable && scroller != null) {
+      scroller.scrollLeft = scroller.scrollWidth
+    }
+  }, [scrollable])
+
   function handleHover(key: string): void {
     setHover({ key, open: true })
   }
@@ -78,8 +88,12 @@ export function Columns({
   }
 
   return (
-    <div {...stylex.props(styles.chart)}>
-      <ul ref={chartRef} onMouseLeave={handleLeave} {...stylex.props(styles.columns)}>
+    <div ref={scrollerRef} {...stylex.props(styles.chart, scrollable && styles.chartScroll)}>
+      <ul
+        ref={chartRef}
+        onMouseLeave={handleLeave}
+        {...stylex.props(styles.columns, scrollable && styles.columnsScroll)}
+      >
         {groups.map((group, index) => (
           <Fragment key={group[0]?.key ?? index}>
             {index > 0 && <li aria-hidden="true" {...stylex.props(styles.columnDivider)} />}
@@ -89,6 +103,7 @@ export function Columns({
                 bar={bar}
                 active={open && bar.key === shownKey}
                 dimmed={open && bar.key !== shownKey}
+                scrollable={scrollable}
                 onHover={handleHover}
                 register={registerColumn}
               />
@@ -120,12 +135,14 @@ function Column({
   bar: { key, label, range, count, share, ratio },
   active,
   dimmed,
+  scrollable,
   onHover,
   register
 }: {
   bar: ColumnBar
   active: boolean
   dimmed: boolean
+  scrollable: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLLIElement) => () => void
 }): React.JSX.Element {
@@ -142,7 +159,7 @@ function Column({
       ref={columnRef}
       data-chart-item=""
       onMouseEnter={handleMouseEnter}
-      {...stylex.props(styles.column)}
+      {...stylex.props(styles.column, scrollable && styles.columnScroll)}
     >
       <span {...stylex.props(shapes.srOnly)}>
         {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
