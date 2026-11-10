@@ -89,6 +89,26 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
   }
 })
 
+test('스킬 스타일은 /skill/style 경로로 부르고 저장할 모양으로 바꿔 돌려준다', async () => {
+  const { neople, requests } = recordingClient({
+    jobId: 'job-1',
+    jobGrowId: 'grow-1',
+    skill: { style: { active: [{ skillId: 'skill-1', name: '합성 스킬', level: 13 }] } }
+  })
+
+  assert.deepEqual(await neople.characterSkillStyle(identity), {
+    jobId: 'job-1',
+    jobGrowId: 'grow-1',
+    skills: [{ name: '합성 스킬', level: 13 }],
+    evolutions: [],
+    enhancements: []
+  })
+  assert.equal(
+    requests[0].url,
+    'http://neople.test/df/servers/cain/characters/a%2Fb%20c/skill/style'
+  )
+})
+
 test('기본 정보에 명성, 길드가 없으면 null로 돌려준다', async () => {
   const { fame: _fame, guildId: _guildId, guildName: _guildName, ...withoutGuild } = basic
   const { neople } = recordingClient(withoutGuild)
