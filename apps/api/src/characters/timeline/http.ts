@@ -1,8 +1,10 @@
-import { Controller, Get, Inject, Query, Req } from '@nestjs/common'
+import { Controller, Get, Inject, Query, Req, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request } from 'express'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../details/errors.js'
+import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import { characterFailureResponse } from '../../presentation/http/character-failures.js'
+import { FailureResponseFilter } from '../../presentation/http/failure-response.js'
 import {
   ApiCharacterTimeline,
   ApiCharacterTimelineAcquisitions,
@@ -23,6 +25,7 @@ const pageQuery = z.object({ before: z.string() }).strict()
 
 @ApiTags('캐릭터')
 @Controller('characters')
+@UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class CharacterTimelineController {
   constructor(
     @Inject(CHARACTER_TIMELINE_SERVICE) private readonly service: CharacterTimelineService

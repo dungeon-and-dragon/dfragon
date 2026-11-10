@@ -332,7 +332,7 @@ try {
     challenge.week.cleared
   )
   assert.equal((await service.contentStats('diregie-hard', '2026-02-05')).week.cleared, 1)
-  await assert.rejects(service.contentStats('diregie-hard', '2026-02-19'), { status: 400 })
+  await assert.rejects(service.contentStats('diregie-hard', '2026-02-19'), { kind: 'query' })
 
   // 수집이 모집단을 저장하기 전의 클리어는 보이지 않고, 저장한 뒤의 요청은 새 값을 받는다.
   await recordContentClears(client, [

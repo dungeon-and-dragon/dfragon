@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { applyMigrations } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
-import { readTimelineQueueCounts } from './http.js'
+import { readTimelineQueueCounts } from './runtime/modules/character-timeline.js'
 import { createApiRuntime, createOpsRuntime } from './runtime/application.js'
 import { readRuntimeConfiguration } from './runtime/configuration.js'
 

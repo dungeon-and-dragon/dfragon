@@ -11,6 +11,7 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 `src/`는 계층 폴더로 나눕니다(ADR 0047).
 오늘의 등급이 이 구조로 옮긴 첫 기능이고, `characters/`, `adventure-guild/` 같은 나머지 기능 폴더는 차례로 옮깁니다.
 계층 폴더 사이의 import 방향은 `pnpm lint`가 검사하며, 옮기지 않은 기능 폴더는 검사하지 않습니다.
+앱을 만드는 `src/http.ts`(공개 API)와 `src/ops/app.ts`(운영 포트)가 기능의 module이 아닌 파일을 import하는 것도 `pnpm lint`가 막습니다.
 
 | 폴더 | 담는 것 |
 | --- | --- |
@@ -37,9 +38,11 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 | `src/presentation/http/<기능>/controller.ts` | controller와 service 주입 token |
 | `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
 | `src/presentation/openapi/<기능>.ts` | 경로 설명 decorator와 schema. schema 묶음은 `src/presentation/openapi/index.ts`의 목록에 더합니다 |
-| `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/http.ts`의 `imports`에 등록합니다 |
+| `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/http.ts`나 `src/ops/app.ts`의 `imports`에 등록합니다 |
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`, `src/presentation/openapi/common.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
+여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
+두 앱이 함께 쓰는 access log, `Cache-Control` 설정과 전역 예외 filter 등록은 `src/runtime/http-app.ts`에 있고, 404와 실패 응답을 만드는 filter는 `src/presentation/http/failure-response.ts`에 있습니다.
 
 ## 준비할 입력
 
