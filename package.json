@@ -9,7 +9,7 @@
     "start-task": "node scripts/start-task.mjs",
     "test": "pnpm verify",
     "verify": "node scripts/verify.mjs",
-    "lint": "biome lint && pnpm --filter @dfragon/api lint:imports",
+    "lint": "biome lint && pnpm --filter @dfragon/api lint:imports && pnpm --filter @dfragon/web lint:imports",
     "lint:fix": "biome lint --write",
     "format": "biome format --write && node scripts/statement-spacing.mjs --write",
     "format:check": "biome format && node scripts/statement-spacing.mjs --check",
