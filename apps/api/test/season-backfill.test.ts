@@ -12,7 +12,7 @@ import {
   withSeasonBackfills
 } from '../src/adventure-guild/activity.js'
 import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { TimelineFailure } from '../src/characters/timeline/errors.js'
 import type { FetchCharacterTimeline } from '../src/characters/timeline/neople.js'
 import {

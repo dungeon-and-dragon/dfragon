@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { OpenAPIObject } from '@nestjs/swagger'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 
 test('Swagger는 공개 API 경로만 문서화하고 provider를 호출하지 않는다', async (t) => {

@@ -1,11 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { parseCharacterSearchQuery } from '../dist/characters/query.js'
+import { parseCharacterSearchQuery } from '../dist/domain/character-search/query.js'
 
-const queryFailure = {
-  status: 400,
-  body: { error: { code: 'INVALID_SEARCH_QUERY', message: '검색 조건을 확인해 주세요.' } }
-}
+const queryFailure = { name: 'NeopleSearchFailure', kind: 'query' }
 
 test('검색 query는 한 번만 decode하고 생략한 옵션에만 기본값을 적용한다', async (t) => {
   const cases = [
@@ -151,6 +148,7 @@ test('검색 query는 잘못된 UTF-8, 구조, 숫자, 앞뒤 공백을 정제�
     ['빈 query', '/characters?'],
     ['필수 검색어 없음', '/characters?limit=10'],
     ['등호 없는 검색어', '/characters?characterName'],
+    ['빈 검색어', '/characters?characterName='],
     ['중복 검색어', '/characters?characterName=ab&%63haracterName=cd'],
     ['중복 서버', '/characters?characterName=ab&serverId=all&%73erverId=cain'],
     ['중복 limit', '/characters?characterName=ab&limit=1&%6Cimit=2'],

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest, type FetchTransport } from '@dfragon/neople'
-import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
-import { createNeopleCharacterDetails } from '../src/characters/details/neople.js'
-import { createNeopleCatalog } from '../src/characters/catalog/neople.js'
+import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
+import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
+import { createNeopleCatalog } from '../src/infrastructure/neople/character-catalog.js'
 
 // 2026-10-20 #778 결정으로 프로세스 전체 Neople 예산(최근 60초 600회, 동시 12회)을 없앴다.
 // 예전 상한보다 많이 보내 거절 없이 실제 transport 수가 맞는지 확인한다.

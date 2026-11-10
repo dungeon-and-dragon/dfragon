@@ -2,17 +2,22 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
 import type { TestContext } from 'node:test'
-import { createNeopleClientForTest, type NeopleTestDependencies } from '@dfragon/neople'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
-import { createCharacterSearchService } from '../src/characters/search-service.js'
-import { NeopleSearchFailure } from '../src/errors/neople-search.js'
+import {
+  createNeopleClientForTest,
+  neopleCharacterImageUrl,
+  type NeopleTestDependencies
+} from '@dfragon/neople'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
+import { createCharacterSearchService } from '../src/application/character-search/service.js'
+import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
+import { parseCharacterCandidatesQuery } from '../src/domain/character-search/query.js'
 import { createApiHttpApp } from '../src/http.js'
 import type {
   CharacterSearchRow,
   NeopleCharacterSearchInput,
   NeopleCharacterSearchResult
-} from '../src/types/neople-character-search.js'
+} from '../src/domain/character-search/types.js'
 
 const characterName = '후보이름'
 const candidatePath = `/characters/candidates?characterName=${encodeURIComponent(characterName)}`
@@ -518,8 +523,10 @@ function candidateRow(name: string, characterId: string): CharacterSearchRow {
   }
 }
 
-function candidateUrl(name: string): string {
-  return `/characters/candidates?characterName=${encodeURIComponent(name)}`
+function candidateInput(name: string): NeopleCharacterSearchInput {
+  return parseCharacterCandidatesQuery(
+    `/characters/candidates?characterName=${encodeURIComponent(name)}`
+  )
 }
 
 function createCountingSearch(
@@ -527,6 +534,7 @@ function createCountingSearch(
 ) {
   const names: string[] = []
   const service = createCharacterSearchService({
+    characterImageUrl: neopleCharacterImageUrl,
     searchCharacters: async (input) => {
       names.push(input.characterName)
 
@@ -545,11 +553,11 @@ test('24시간 안에 같은 이름을 다시 검색하면 Neople을 부르지 �
     rows: [candidateRow(input.characterName, `id-${names.length}`)]
   }))
 
-  const first = await service.candidates(candidateUrl(characterName))
+  const first = await service.candidates(candidateInput(characterName))
   t.mock.timers.tick(23 * HOUR_MS)
-  const withinDay = await service.candidates(candidateUrl(characterName))
+  const withinDay = await service.candidates(candidateInput(characterName))
   t.mock.timers.tick(2 * HOUR_MS)
-  const nextDay = await service.candidates(candidateUrl(characterName))
+  const nextDay = await service.candidates(candidateInput(characterName))
 
   assert.equal(names.length, 2)
   assert.equal(first.source, 'neople')
@@ -570,10 +578,10 @@ test('실패한 후보 검색과 빈 결과는 저장하지 않아 다음 요청
   const { service, names } = createCountingSearch(async () => outcomes[names.length - 1]!())
   t.after(() => service.onModuleDestroy())
 
-  await assert.rejects(service.candidates(candidateUrl(characterName)), NeopleSearchFailure)
-  const empty = await service.candidates(candidateUrl(characterName))
-  const created = await service.candidates(candidateUrl(characterName))
-  const cached = await service.candidates(candidateUrl(characterName))
+  await assert.rejects(service.candidates(candidateInput(characterName)), NeopleSearchFailure)
+  const empty = await service.candidates(candidateInput(characterName))
+  const created = await service.candidates(candidateInput(characterName))
+  const cached = await service.candidates(candidateInput(characterName))
 
   assert.deepEqual(empty.result, { rows: [] })
   assert.deepEqual(
@@ -601,9 +609,9 @@ test('같은 이름의 동시 후보 요청은 Neople 검색 하나를 함께 �
   t.after(() => service.onModuleDestroy())
 
   const concurrent = [
-    service.candidates(candidateUrl(characterName)),
-    service.candidates(candidateUrl(characterName)),
-    service.candidates(candidateUrl(characterName))
+    service.candidates(candidateInput(characterName)),
+    service.candidates(candidateInput(characterName)),
+    service.candidates(candidateInput(characterName))
   ]
   release()
   const results = await Promise.all(concurrent)
@@ -618,8 +626,8 @@ test('같은 이름의 동시 후보 요청은 Neople 검색 하나를 함께 �
   const failedName = '실패이름'
   fail = true
   const failures = await Promise.allSettled([
-    service.candidates(candidateUrl(failedName)),
-    service.candidates(candidateUrl(failedName))
+    service.candidates(candidateInput(failedName)),
+    service.candidates(candidateInput(failedName))
   ])
   assert.deepEqual(
     failures.map(({ status }) => status),
@@ -634,9 +642,9 @@ test('대소문자만 다른 이름은 따로 검색하고 따로 저장한다',
   }))
   t.after(() => service.onModuleDestroy())
 
-  const lower = await service.candidates(candidateUrl('exe'))
-  const upper = await service.candidates(candidateUrl('EXE'))
-  const lowerAgain = await service.candidates(candidateUrl('exe'))
+  const lower = await service.candidates(candidateInput('exe'))
+  const upper = await service.candidates(candidateInput('EXE'))
+  const lowerAgain = await service.candidates(candidateInput('exe'))
 
   assert.deepEqual(names, ['exe', 'EXE'])
   assert.deepEqual(
@@ -658,15 +666,15 @@ test('서버 종료 뒤에는 저장한 후보도 돌려주지 않고 진행 중
 
     return { rows: [candidateRow(input.characterName, 'fixture-id')] }
   })
-  await service.candidates(candidateUrl(storedName))
-  const pending = service.candidates(candidateUrl(characterName))
+  await service.candidates(candidateInput(storedName))
+  const pending = service.candidates(candidateInput(characterName))
 
   await service.onModuleDestroy()
   release()
 
   assert.equal((await pending).result.rows.length, 1)
   for (const name of [storedName, characterName]) {
-    await assert.rejects(service.candidates(candidateUrl(name)), NeopleSearchFailure)
+    await assert.rejects(service.candidates(candidateInput(name)), NeopleSearchFailure)
   }
   assert.equal(names.length, 2)
 })
@@ -674,6 +682,7 @@ test('서버 종료 뒤에는 저장한 후보도 돌려주지 않고 진행 중
 test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 저장되지 않은 캐릭터는 null이다', async () => {
   const reads: string[][] = []
   const service = createCharacterSearchService({
+    characterImageUrl: neopleCharacterImageUrl,
     searchCharacters: async (input) => ({
       rows: [
         candidateRow(input.characterName, 'stored'),
@@ -692,7 +701,7 @@ test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 �
     }
   })
 
-  const { result } = await service.candidates(candidateUrl(characterName))
+  const { result } = await service.candidates(candidateInput(characterName))
 
   assert.deepEqual(
     result.rows.map(({ serverId, characterId, adventureName }) => ({
@@ -713,6 +722,7 @@ test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로
   let adventureName = '옛모험단'
   let searches = 0
   const service = createCharacterSearchService({
+    characterImageUrl: neopleCharacterImageUrl,
     searchCharacters: async (input) => {
       searches++
 
@@ -721,9 +731,9 @@ test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로
     readAdventureNames: async () => [{ serverId: 'cain', characterId: 'renamed', adventureName }]
   })
 
-  const first = await service.candidates(candidateUrl(characterName))
+  const first = await service.candidates(candidateInput(characterName))
   adventureName = '새모험단'
-  const cached = await service.candidates(candidateUrl(characterName))
+  const cached = await service.candidates(candidateInput(characterName))
 
   assert.equal(searches, 1)
   assert.equal(cached.source, 'cache')
@@ -735,11 +745,12 @@ test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로
 
 test('후보가 없으면 모험단명을 읽지 않는다', async () => {
   const service = createCharacterSearchService({
+    characterImageUrl: neopleCharacterImageUrl,
     searchCharacters: async () => ({ rows: [] }),
     readAdventureNames: async () => {
       throw new Error('빈 후보는 DB를 읽지 않아야 한다')
     }
   })
 
-  assert.deepEqual((await service.candidates(candidateUrl(characterName))).result, { rows: [] })
+  assert.deepEqual((await service.candidates(candidateInput(characterName))).result, { rows: [] })
 })

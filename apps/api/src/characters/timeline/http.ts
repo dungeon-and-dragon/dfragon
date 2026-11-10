@@ -10,7 +10,7 @@ import {
   ApiCharacterTimelineAcquisitions,
   ApiCharacterTimelineEnhancements
 } from '../../presentation/openapi/character-timeline.js'
-import { parseCharacterIdentity } from '../identity.js'
+import { parseCharacterIdentity } from '../../domain/character-identity.js'
 import {
   type CharacterTimeline,
   parseTimelineCursor,

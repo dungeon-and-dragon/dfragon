@@ -1,6 +1,5 @@
+import { MALE_CRUSADER_DEALER_SKILL } from '@dfragon/lib'
 import { Prisma } from './generated/prisma/client.js'
-
-export const MALE_CRUSADER_DEALER_SKILL = '용기의 은총'
 
 export type MaleCrusaderRole = 'dealer' | 'buffer'
 

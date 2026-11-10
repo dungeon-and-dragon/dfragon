@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 import type { FetchShopGrade } from '../src/application/today-grade/ports.js'
 import { createTodayGradeService } from '../src/application/today-grade/service.js'

@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createNeopleCharacterSearch } from '../src/characters/neople-character-search.js'
-import { NEOPLE_SERVER_NAMES } from '../src/constants/neople-character-search.js'
-import { NeopleSearchFailure } from '../src/errors/neople-search.js'
+import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
+import { NEOPLE_SERVER_NAMES } from '../src/domain/neople-servers.js'
+import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
+import type { FailureResponse } from '../src/presentation/http/failure-response.js'
+import { characterSearchFailureResponse } from '../src/presentation/http/character-search/failures.js'
 
 const input = { characterName: '가나다', serverId: 'cain', limit: 10 }
 
@@ -23,16 +25,17 @@ async function expectFailure(
   status: number,
   code: string,
   message: string
-): Promise<NeopleSearchFailure> {
+): Promise<FailureResponse> {
   try {
     await promise
   } catch (error) {
     const isSearchFailure = error instanceof NeopleSearchFailure
     assert(isSearchFailure)
-    assert.equal(error.status, status)
-    assert.deepEqual(error.body, { error: { code, message } })
+    const response = characterSearchFailureResponse(error)
+    assert.equal(response.status, status)
+    assert.deepEqual(response.body, { error: { code, message } })
 
-    return error
+    return response
   }
   assert.fail('검색 실패를 예상했습니다.')
 }

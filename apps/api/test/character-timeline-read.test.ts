@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineEventRow, TimelineItemRow } from '@dfragon/database'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createTimelineSyncQueue } from '../src/characters/timeline/queue.js'
 import {
   type CharacterTimeline,

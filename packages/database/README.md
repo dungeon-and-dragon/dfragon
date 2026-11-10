@@ -22,7 +22,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readContentClearCollection`, `startContentClearCollection`, `recordContentClearCollectionProgress`, `finishContentClearCollection`: 클리어 수집의 진행 위치를 읽고 씁니다.
 - `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearJobCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 모집단, 주와 배율별 클리어 수, 한 주의 직업별 클리어 수와 모험단 크기 분포를 읽습니다.
 - `registerJobs`, `startJobRun`, `claimRequestedJobRun`, `finishJobRun`과 나머지 job 함수: 배치 job 목록과 실행 이력을 쓰고 읽습니다.
-- `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000), `MALE_CRUSADER_DEALER_SKILL`(`용기의 은총`): 스킬 채택 표본 순위와 남성 크루세이더 딜러 판정 스킬입니다.
+- `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000): 스킬 채택 표본 순위입니다.
 - `replaceTimelineRange`, `replaceEnhancementBackfillRange`, `replaceSeasonBackfillRange`: 캐릭터 하나의 타임라인 구간을 한 transaction에서 교체합니다.
 - `recordSeasonBackfillCompleted`, `readSeasonBackfillStates`, `readEnhancementBackfilledUntil`: 옛 시즌 받기와 강화 백필 위치를 기록, 조회합니다.
 - `readTimelineSyncState`, `recordTimelineSyncSuccess`, `recordTimelineSyncFailure`: 타임라인 동기화 상태를 읽고 기록합니다.

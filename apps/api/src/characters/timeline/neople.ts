@@ -2,7 +2,7 @@ import type { TimelineRange } from '@dfragon/database'
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { forwardCause } from '../../error-chain.js'
 import { formatSeoulTime, parseSeoulTime } from '../../utils/seoul-time.js'
-import type { CharacterIdentity } from '../details/sections.js'
+import type { CharacterIdentity } from '../../domain/character-identity.js'
 import { TimelineFailure } from './errors.js'
 import {
   TIMELINE_CODES,
