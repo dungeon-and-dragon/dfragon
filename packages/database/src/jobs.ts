@@ -5,6 +5,7 @@ export type JobTrigger = 'schedule' | 'catchup' | 'manual'
 export type JobRegistration = {
   name: string
   displayName: string
+  description: string
   schedule: string | null
   argsSchema: object
   delayMinutes: number
@@ -49,16 +50,25 @@ export async function registerJobs(
 ): Promise<void> {
   await client.$transaction(async (transaction) => {
     await transaction.job.deleteMany({ where: { name: { notIn: jobs.map(({ name }) => name) } } })
-    for (const { name, displayName, schedule, argsSchema, delayMinutes, nextRunAt } of jobs) {
+    for (const {
+      name,
+      displayName,
+      description,
+      schedule,
+      argsSchema,
+      delayMinutes,
+      nextRunAt
+    } of jobs) {
       await transaction.$executeRaw`
         INSERT INTO "jobs"
-          ("name", "display_name", "schedule", "args_schema", "delay_minutes", "next_run_at", "worker_seen_at")
+          ("name", "display_name", "description", "schedule", "args_schema", "delay_minutes", "next_run_at", "worker_seen_at")
         VALUES (
-          ${name}, ${displayName}, ${schedule}, ${JSON.stringify(argsSchema)}::jsonb, ${delayMinutes},
+          ${name}, ${displayName}, ${description}, ${schedule}, ${JSON.stringify(argsSchema)}::jsonb, ${delayMinutes},
           ${nextRunAt}, now()
         )
         ON CONFLICT ("name") DO UPDATE SET
           "display_name" = EXCLUDED."display_name",
+          "description" = EXCLUDED."description",
           "schedule" = EXCLUDED."schedule",
           "args_schema" = EXCLUDED."args_schema",
           "delay_minutes" = EXCLUDED."delay_minutes",
@@ -216,6 +226,7 @@ export type JobRunRecord = {
 export type JobOverview = {
   name: string
   displayName: string
+  description: string
   schedule: string | null
   argsSchema: unknown
   delayMinutes: number

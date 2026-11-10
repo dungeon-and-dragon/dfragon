@@ -72,6 +72,7 @@ function memoryOpsJobStore(jobs: StoredJob[], runs: StoredRun[] = []): OpsJobSto
 function storedJob(overrides: Partial<StoredJob> & Pick<StoredJob, 'name'>): StoredJob {
   return {
     displayName: overrides.name,
+    description: '',
     schedule: '0 0 * * *',
     argsSchema: { type: 'object' },
     delayMinutes: 10,
@@ -125,7 +126,11 @@ test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마
     t,
     memoryOpsJobStore(
       [
-        storedJob({ name: 'stats', workerSeenAt: new Date('2026-11-10T02:00:00Z') }),
+        storedJob({
+          name: 'stats',
+          description: '통계를 저장합니다.',
+          workerSeenAt: new Date('2026-11-10T02:00:00Z')
+        }),
         storedJob({
           name: 'skill-adoption',
           pausedAt: new Date('2026-11-10T01:00:00Z'),
@@ -165,6 +170,7 @@ test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마
   assert.deepEqual(stats, {
     name: 'stats',
     displayName: 'stats',
+    description: '통계를 저장합니다.',
     schedule: '0 0 * * *',
     paused: false,
     nextRunAt: '2026-11-10T15:00:00.000Z',
@@ -196,6 +202,7 @@ test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마
     }
   })
   assert.equal(skillAdoption.paused, true)
+  assert.equal(skillAdoption.description, '')
   assert.equal(skillAdoption.nextRunAt, null)
   assert.equal(skillAdoption.activeRun, null)
   assert.equal(skillAdoption.lastFinishedRun, null)

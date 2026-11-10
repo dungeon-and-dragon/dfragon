@@ -164,6 +164,7 @@ class SyntheticFailure extends Error {
 const dailyJob = defineJob({
   name: 'daily',
   displayName: '매일',
+  description: '매일 실행합니다.',
   schedule: '0 4 * * *',
   argsSchema: z.object({ limit: z.number().int().positive().default(10) }),
   delayMinutes: 5,
@@ -177,6 +178,7 @@ const dailyJob = defineJob({
 const failingJob = defineJob({
   name: 'failing',
   displayName: '실패',
+  description: '실패합니다.',
   argsSchema: z.object({}),
   delayMinutes: 5,
   run: async () => {
@@ -284,6 +286,7 @@ test('시작할 때 job 목록을 올리고 running으로 남은 행을 interrup
     ]
   )
   assert.equal(registered[0]?.delayMinutes, 5)
+  assert.equal(registered[0]?.description, '매일 실행합니다.')
   assert.deepEqual(registered[0]?.argsSchema, {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     type: 'object',
@@ -355,6 +358,7 @@ test('요청 행은 running을 거쳐 succeeded가 되고, schema에 맞지 않�
   const observedJob: JobDefinition = defineJob({
     name: 'observed',
     displayName: '관찰',
+    description: '실행을 관찰합니다.',
     argsSchema: z.object({ target: z.string() }),
     delayMinutes: 5,
     run: async () => {
@@ -453,6 +457,7 @@ test('지연 기준을 넘겨도 실행 중이면 지연 알림을 그 실행에
   const slowJob = defineJob({
     name: 'slow',
     displayName: '느림',
+    description: '천천히 실행합니다.',
     argsSchema: z.object({}),
     delayMinutes: 5,
     run: async () => {
@@ -516,6 +521,7 @@ test('Discord 알림 본문에는 오류 message와 실행 인자가 없다', as
   const argumentJob = defineJob({
     name: 'with-args',
     displayName: '인자',
+    description: '인자를 받습니다.',
     argsSchema: z.object({ target: z.string() }),
     delayMinutes: 5,
     run: async () => {
