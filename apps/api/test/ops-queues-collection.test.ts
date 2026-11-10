@@ -8,8 +8,8 @@ import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-eve
 import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
 import { createSeasonBackfillQueue } from '../src/application/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/http.js'
-import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/ops/app.js'
-import type { OpsCollectionStore } from '../src/ops/collection.js'
+import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
+import type { OpsCollectionStore } from '../src/application/ops/ports.js'
 import { readTimelineQueueCounts } from '../src/runtime/modules/character-timeline.js'
 
 function gate() {

@@ -3,8 +3,8 @@ import test from 'node:test'
 import type { JobOverview, JobRunRecord } from '@dfragon/database'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
-import { createOpsHttpApp } from '../src/ops/app.js'
-import type { OpsJobStore } from '../src/ops/jobs.js'
+import { createOpsHttpApp } from '../src/runtime/ops-app.js'
+import type { OpsJobStore } from '../src/application/ops/ports.js'
 
 type StoredJob = Omit<JobOverview, 'activeRun' | 'lastFinishedRun'>
 type StoredRun = JobRunRecord & { jobName: string }
