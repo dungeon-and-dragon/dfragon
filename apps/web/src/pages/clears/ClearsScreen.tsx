@@ -1,6 +1,6 @@
 import { Button, Chip, shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { formatSeoulDateTime } from '#core/time-format'
 import type { ClearContent, ClearJob, ClearWeek } from '#core/ranking/clear-stats'
 import { styles as listBoxStyles } from '../../components/table/ListBox.style'
@@ -10,6 +10,8 @@ import { useClearContentStats, useClearStats } from '../../hooks/useClearStats'
 import { findClearContentBackground } from '../../lib/clear-content-background'
 import { type ColumnBar, Columns } from '../../components/chart/Columns'
 import { type Bar, RowBars } from '../../components/chart/RowBars'
+import { TableRail } from '../../components/chart/TableRail'
+import { ROW_BAR_GROW, useChartBarGrow } from '../../animations/useChartBarGrow'
 import { shareText } from '../stats/stats-bars'
 import { SeasonBackdrop } from '../weekly/AdventureDashboard'
 import {
@@ -340,34 +342,7 @@ function JobBox({ jobs }: { jobs: readonly ClearJob[] }): React.JSX.Element {
           ))}
         </div>
       </div>
-      {rows.length > 0 && (
-        <table {...stylex.props(styles.jobTable)}>
-          <thead>
-            <tr>
-              <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadName)}>
-                전직
-              </th>
-              <th scope="col" {...stylex.props(styles.jobHead)}>
-                <span {...stylex.props(shapes.srOnly)}>클리어율 막대</span>
-              </th>
-              <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
-                모집단
-              </th>
-              <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
-                클리어
-              </th>
-              <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadRate)}>
-                클리어율
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((row) => (
-              <JobTableRow key={row.key} row={row} />
-            ))}
-          </tbody>
-        </table>
-      )}
+      {rows.length > 0 && <JobTable rows={shown} />}
       {!expanded && rows.length > VISIBLE_JOB_COUNT && (
         <div {...stylex.props(styles.more)}>
           <Button variant="secondary" onClick={expand}>
@@ -379,27 +354,87 @@ function JobBox({ jobs }: { jobs: readonly ClearJob[] }): React.JSX.Element {
   )
 }
 
+function JobTable({ rows }: { rows: readonly JobRow[] }): React.JSX.Element {
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null)
+  const bodyRef = useRef<HTMLTableSectionElement>(null)
+  const maxRate = Math.max(0, ...rows.map(({ rate }) => rate ?? 0))
+  useChartBarGrow(bodyRef, ROW_BAR_GROW)
+
+  function clearHover(): void {
+    setHoveredKey(null)
+  }
+
+  return (
+    <table {...stylex.props(styles.jobTable)}>
+      <thead>
+        <tr {...stylex.props(styles.jobHeadRow)}>
+          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadName)}>
+            전직
+          </th>
+          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
+            모집단
+          </th>
+          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
+            클리어
+          </th>
+          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadRate)}>
+            클리어율
+          </th>
+        </tr>
+      </thead>
+      <tbody ref={bodyRef} onMouseLeave={clearHover}>
+        {rows.map((row) => (
+          <JobTableRow
+            key={row.key}
+            row={row}
+            percent={maxRate > 0 ? ((row.rate ?? 0) / maxRate) * 100 : 0}
+            active={row.key === hoveredKey}
+            dimmed={hoveredKey !== null && row.key !== hoveredKey}
+            onHover={setHoveredKey}
+          />
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
 function JobTableRow({
-  row: { name, population, cleared, rate }
+  row: { key, name, population, cleared, rate },
+  percent,
+  active,
+  dimmed,
+  onHover
 }: {
   row: JobRow
+  percent: number
+  active: boolean
+  dimmed: boolean
+  onHover: (key: string) => void
 }): React.JSX.Element {
+  function handleMouseEnter(): void {
+    onHover(key)
+  }
+
   return (
-    <tr>
-      <th scope="row" {...stylex.props(styles.jobName)}>
+    <tr
+      data-chart-item=""
+      onMouseEnter={handleMouseEnter}
+      {...stylex.props(styles.jobRow, active && styles.jobRowActive)}
+    >
+      <th scope="row" {...stylex.props(styles.jobCell, styles.jobName)}>
         {name}
       </th>
-      <td {...stylex.props(styles.jobCell)}>
-        <span {...stylex.props(styles.track)}>
-          <span {...stylex.props(styles.bar, styles.barWidth((rate ?? 0) * 100))} />
-        </span>
-      </td>
       <td {...stylex.props(styles.jobCell, styles.jobValue, styles.jobPopulation)}>
         {integer.format(population)}
       </td>
       <td {...stylex.props(styles.jobCell, styles.jobValue)}>{integer.format(cleared)}</td>
-      <td {...stylex.props(styles.jobCell, styles.jobValue)}>
-        {rate === null ? '-' : shareText(cleared, population)}
+      <td {...stylex.props(styles.jobCell)}>
+        <span {...stylex.props(styles.jobRate)}>
+          <TableRail percent={percent} active={active} dimmed={dimmed} />
+          <span {...stylex.props(styles.jobValue)}>
+            {rate === null ? '-' : shareText(cleared, population)}
+          </span>
+        </span>
       </td>
     </tr>
   )
