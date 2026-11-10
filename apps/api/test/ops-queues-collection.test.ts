@@ -7,9 +7,10 @@ import { createCatalogService } from '../src/characters/catalog/service.js'
 import { CHARACTER_FETCHED, CharacterFetched } from '../src/characters/events.js'
 import { EMPTY_CHARACTER_TIMELINE } from '../src/characters/timeline/read.js'
 import { createSeasonBackfillQueue } from '../src/characters/timeline/season-backfill.js'
-import { createApiHttpApp, readTimelineQueueCounts } from '../src/http.js'
+import { createApiHttpApp } from '../src/http.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/ops/app.js'
 import type { OpsCollectionStore } from '../src/ops/collection.js'
+import { readTimelineQueueCounts } from '../src/runtime/modules/character-timeline.js'
 
 function gate() {
   let release!: () => void

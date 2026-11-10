@@ -119,7 +119,7 @@ test('상세 5건은 응답 전에 섹션 transport 13개 이상을 함께 연�
         details(identity, new AbortController().signal, () => undefined)
       )
     },
-    { status: 502 }
+    { kind: 'api' }
   )
 })
 
