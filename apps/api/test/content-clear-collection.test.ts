@@ -10,6 +10,7 @@ import type {
 } from '@dfragon/database'
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { addWeeks } from 'date-fns'
+import { createJobSchedule } from '../src/infrastructure/jobs/scheduler.js'
 import { createNeopleClearTimeline } from '../src/infrastructure/neople/content-clear-collection.js'
 import {
   createNeopleCharacterBasic,
@@ -28,8 +29,8 @@ import {
 } from '../src/application/content-clears/collection.js'
 import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
 import { createClearStatsService } from '../src/application/content-clears/service.js'
-import type { JobStore } from '../src/jobs/definition.js'
-import { findCatchupJobs } from '../src/jobs/scheduler.js'
+import type { JobStore } from '../src/application/jobs/ports.js'
+import { findCatchupJobs } from '../src/application/jobs/scheduler.js'
 import { formatResetDate, startOfResetWeek } from '../src/domain/seoul-time.js'
 
 const at = (time: string) => new Date(`${time}:00+09:00`)
@@ -496,9 +497,13 @@ test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보�
     recordWorkerSeen: unused
   }
   const dueAt = async (now: Date) =>
-    (await findCatchupJobs({ jobs: [job], store: jobStore, report: () => {} }, now)).map(
-      ({ name }) => name
-    )
+    (
+      await findCatchupJobs(
+        { jobs: [job], store: jobStore, report: () => {} },
+        now,
+        createJobSchedule
+      )
+    ).map(({ name }) => name)
 
   assert.deepEqual(await dueAt(at('2026-11-10T23:00')), [])
   assert.deepEqual(await dueAt(at('2026-11-11T05:30')), [])
