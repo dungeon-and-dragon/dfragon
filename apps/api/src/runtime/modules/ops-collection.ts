@@ -1,9 +1,9 @@
 import { type DynamicModule, Module } from '@nestjs/common'
+import type { OpsCollectionStore } from '../../application/ops/ports.js'
 import {
   OPS_COLLECTION_STORE,
-  OpsCollectionController,
-  type OpsCollectionStore
-} from '../../ops/collection.js'
+  OpsCollectionController
+} from '../../presentation/http/ops/collection.js'
 
 export interface OpsCollectionModuleOptions {
   readonly store: OpsCollectionStore

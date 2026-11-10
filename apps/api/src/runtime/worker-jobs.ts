@@ -10,8 +10,9 @@ import {
   createSkillAdoptionJob
 } from '../application/ranking-stats/stats-jobs.js'
 import { createDatabaseStatsJobStore } from '../infrastructure/database/stats-jobs.js'
-import type { JobDefinition } from './definition.js'
-import { createJobRunCleanupJob } from './job-run-cleanup.js'
+import type { JobDefinition } from '../application/jobs/definition.js'
+import { createDatabaseJobRunCleanup } from '../infrastructure/database/job-run-cleanup.js'
+import { createJobRunCleanupJob } from '../application/jobs/job-run-cleanup.js'
 
 export type WorkerJobDependencies = ClearCollectionJobDependencies &
   SkillStyleCollectionJobDependencies
@@ -23,7 +24,7 @@ export function createWorkerJobs(
   const statsStore = createDatabaseStatsJobStore(client)
 
   return [
-    createJobRunCleanupJob(client),
+    createJobRunCleanupJob(createDatabaseJobRunCleanup(client)),
     createContentClearCollectionJob(createDatabaseClearCollectionStore(client), collection),
     createSkillStyleCollectionJob(createDatabaseSkillStyleCollectionStore(client), collection),
     createCharacterStatsJob(statsStore),
