@@ -1,4 +1,4 @@
-import { shapes } from '@dfragon/ui'
+import { shapes, Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { Job } from '../api/ops-schemas'
 import {
@@ -58,17 +58,24 @@ function JobRow({
       {...stylex.props(tableStyles.row, tableStyles.tallRow, selected && tableStyles.selectedRow)}
     >
       <td {...stylex.props(tableStyles.cell)}>
-        <span {...stylex.props(textStyles.twoLine)}>
-          <button
-            type="button"
-            aria-pressed={selected}
-            onClick={handleSelect}
-            {...stylex.props(styles.name)}
-          >
-            {job.displayName}
-          </button>
-          <small {...stylex.props(textStyles.small)}>{job.name}</small>
-        </span>
+        <Tooltip.Root disabled={job.description === ''}>
+          <Tooltip.Trigger
+            render={
+              <span {...stylex.props(textStyles.twoLine)}>
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={handleSelect}
+                  {...stylex.props(styles.name)}
+                >
+                  {job.displayName}
+                </button>
+                <small {...stylex.props(textStyles.small)}>{job.name}</small>
+              </span>
+            }
+          />
+          <Tooltip.Popup align="start">{job.description}</Tooltip.Popup>
+        </Tooltip.Root>
       </td>
       <td {...stylex.props(tableStyles.cell)}>
         <ScheduleText schedule={job.schedule} stacked />

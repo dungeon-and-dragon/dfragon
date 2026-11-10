@@ -8,7 +8,7 @@ import {
 import { createContext, use } from 'react'
 import type { OpsClient } from './api/ops-client'
 
-export const REFRESH_INTERVAL_MS = 10_000
+export const REFRESH_INTERVAL_MS = 1_000
 
 const JOBS_KEY = ['jobs'] as const
 const QUEUES_KEY = ['queues'] as const

@@ -40,6 +40,7 @@ const argsSchemaSchema = z.object({
 const jobSchema = z.object({
   name: z.string().min(1),
   displayName: z.string(),
+  description: z.string(),
   schedule: z.string().nullable(),
   paused: z.boolean(),
   nextRunAt: timestamp.nullable(),
