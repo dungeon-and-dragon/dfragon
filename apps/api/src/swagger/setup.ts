@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import type { Request, Response } from 'express'
 import { PRODUCT_NAME } from '@dfragon/lib'
+import { todayGradeSchemas } from '../presentation/openapi/today-grade.js'
 import { apiSchemas } from './schemas.js'
 
 export function setupSwagger(app: INestApplication): void {
@@ -28,7 +29,7 @@ export function setupSwagger(app: INestApplication): void {
       const document = SwaggerModule.createDocument(app, config)
       document.components = {
         ...document.components,
-        schemas: { ...document.components?.schemas, ...apiSchemas }
+        schemas: { ...document.components?.schemas, ...apiSchemas, ...todayGradeSchemas }
       }
 
       return document
