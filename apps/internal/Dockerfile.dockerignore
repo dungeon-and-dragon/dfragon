@@ -1,0 +1,24 @@
+# Only build inputs enter the context; credentials must stay outside the checkout.
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!scripts/
+!scripts/server-build-info.mjs
+!packages/
+!packages/lib/
+!packages/lib/**
+!packages/licenses/
+!packages/licenses/**
+!packages/ui/
+!packages/ui/**
+!apps/
+!apps/internal/
+!apps/internal/**
+**/node_modules/
+**/dist/
+**/.git
+packages/lib/LICENSES/
+**/*.pem
+**/*.key
+**/.env*
