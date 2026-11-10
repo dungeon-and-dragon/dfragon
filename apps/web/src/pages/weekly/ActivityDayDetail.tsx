@@ -6,7 +6,7 @@ import type {
   ActivityDayItem,
   AdventureActivityDay
 } from '#core/adventure-guild/adventure-activity'
-import type { AdventureActivitySeasonDaysResult } from '../../hooks/useAdventureActivity'
+import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
 import { styles } from './ActivityDayDetail.style'
 import { formatClearCount } from './clear-count'
