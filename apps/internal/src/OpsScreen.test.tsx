@@ -7,7 +7,7 @@ import { createOpsClient } from './api/ops-client'
 import { OpsApp } from './OpsApp'
 import { FakeOpsApi, job, run } from './testing/fake-ops-api'
 
-// 화면이 읽는 시각(14:32:05 KST)을 고정한다. 10초 다시 읽기 timer는 진짜 timer라 테스트 안에서 돌지 않는다.
+// 화면이 읽는 시각(14:32:05 KST)을 고정한다. 1초 다시 읽기 timer는 진짜 timer라 테스트 안에서 돌지 않는다.
 const NOW = new Date('2026-11-10T05:32:05.000Z')
 
 let root: Root | undefined
@@ -117,7 +117,46 @@ function statsJob() {
   })
 }
 
+function tooltip(): Element | null {
+  return document.querySelector('[data-base-ui-portal] [data-open]')
+}
+
+function focusOn(element: HTMLElement): void {
+  act(() => element.focus())
+}
+
+function blurFrom(element: HTMLElement): void {
+  act(() => element.blur())
+}
+
 describe('운영 화면', () => {
+  it('job 이름에 focus를 주면 설명을 Tooltip으로 보이고 벗어나면 닫는다', async () => {
+    const api = new FakeOpsApi()
+    api.jobs = [{ ...statsJob(), description: '직업별 통계를 다시 계산한다' }]
+
+    await renderScreen(api)
+    focusOn(buttonIn(rowOf('통계'), '통계'))
+
+    await waitFor(() => expect(tooltip()).not.toBeNull())
+    expect(tooltip()?.textContent).toBe('직업별 통계를 다시 계산한다')
+
+    blurFrom(buttonIn(rowOf('통계'), '통계'))
+    await waitFor(() => expect(tooltip()).toBeNull())
+  })
+
+  it('설명이 빈 job은 Tooltip을 열지 않는다', async () => {
+    const api = new FakeOpsApi()
+    api.jobs = [statsJob()]
+
+    await renderScreen(api)
+    focusOn(buttonIn(rowOf('통계'), '통계'))
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      await flush()
+    }
+
+    expect(tooltip()).toBeNull()
+  })
+
   it('job 목록에 스케줄, 다음 실행, 마지막 실행과 걸린 시간, queue와 수집 대기열을 보인다', async () => {
     const api = new FakeOpsApi()
     api.jobs = [
