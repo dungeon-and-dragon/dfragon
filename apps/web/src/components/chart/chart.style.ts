@@ -6,6 +6,7 @@ const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 64
 const ROW_HEIGHT = 28
 const BAR_HEIGHT = 6
+const TABLE_BAR_HEIGHT = 4
 const EDGE_WIDTH = 2
 const EDGE_OVERHANG = 3
 const COLUMN_TOOLTIP_SPACE = 44
@@ -47,6 +48,7 @@ export const styles = stylex.create({
       backgroundColor: colors.bgInset
     }
   },
+  tableRail: { height: TABLE_BAR_HEIGHT },
   rowMark: {
     position: 'absolute',
     left: 0,
