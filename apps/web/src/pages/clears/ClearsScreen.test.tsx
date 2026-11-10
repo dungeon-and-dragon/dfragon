@@ -104,7 +104,7 @@ function detailOf(content: ClearContent, weekStart: string | undefined): ClearCo
     jobGrowId: `grow-${index}`,
     jobName: `직업${index}`,
     jobGrowName: `眞 전직${index}`,
-    population: 100,
+    population: index === 1 ? 5 : 100,
     cleared: index
   }))
 
@@ -247,7 +247,7 @@ it('레이드는 배율별 클리어와 모험단별 분포를 나란히 둔다'
   ])
 })
 
-it('직업별 클리어는 클리어율 순 10줄만 보이고 모두 보기를 누르면 펼치며 클리어 순으로 바꿀 수 있다', async () => {
+it('직업별 클리어는 클리어 순 10줄만 보이고 모두 보기를 누르면 펼치며 클리어율 순으로 바꿀 수 있다', async () => {
   await render({})
 
   const names = () =>
@@ -267,9 +267,16 @@ it('직업별 클리어는 클리어율 순 10줄만 보이고 모두 보기를 
   expect(names()).toHaveLength(12)
   expect(buttonNamed('전직 12개 모두 보기')).toBeUndefined()
 
-  await click(buttonNamed('클리어 순'))
   expect(buttonNamed('클리어 순').getAttribute('aria-pressed')).toBe('true')
-  expect(names().at(-1)).toBe('眞 전직0')
+  expect(
+    [...boxOf('직업별 클리어').querySelectorAll('button[aria-pressed]')].map(
+      (button) => button.textContent
+    )
+  ).toEqual(['클리어 순', '클리어율 순'])
+
+  await click(buttonNamed('클리어율 순'))
+  expect(buttonNamed('클리어율 순').getAttribute('aria-pressed')).toBe('true')
+  expect(names()[0]).toBe('眞 전직1')
 })
 
 it('챌린지는 이번 주 신규를 보이고 배율별 클리어 칸이 없으며 받은 주가 하나면 주차별 막대가 없다', async () => {
