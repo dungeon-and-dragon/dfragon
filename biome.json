@@ -343,6 +343,126 @@
           }
         }
       }
+    },
+    {
+      "includes": ["apps/api/src/domain/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "**/application/**",
+                      "**/infrastructure/**",
+                      "**/presentation/**",
+                      "**/runtime/**"
+                    ],
+                    "message": "domain은 다른 계층을 import하지 않는다. service와 port는 application/<기능>/, Neople과 DB 연결은 infrastructure/, controller와 Swagger는 presentation/에 두고, 그쪽에서 domain을 가져다 쓴다."
+                  },
+                  {
+                    "group": ["@nestjs/**", "express"],
+                    "message": "domain은 Nest, Express를 쓰지 않는다. controller와 decorator는 presentation/http/, module은 runtime/modules/에 둔다."
+                  },
+                  {
+                    "group": ["node:*", "node:*/**"],
+                    "message": "domain은 Node.js 내장 module을 쓰지 않는다. 파일, 네트워크, 프로세스를 쓰는 코드는 infrastructure/에 두고, application/<기능>/ports.ts의 함수 타입으로 받는다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/src/application/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/infrastructure/**", "**/presentation/**", "**/runtime/**"],
+                    "message": "application은 infrastructure, presentation, runtime을 import하지 않는다. 외부 호출은 application/<기능>/ports.ts에 함수 타입으로 적고 구현은 infrastructure/에, 연결은 runtime/modules/에 둔다."
+                  },
+                  {
+                    "group": ["@nestjs/**", "express"],
+                    "message": "application은 Nest, Express를 쓰지 않는다. controller는 presentation/http/, provider 등록은 runtime/modules/에 둔다."
+                  },
+                  {
+                    "group": [
+                      "node:fs",
+                      "node:fs/**",
+                      "node:net",
+                      "node:http",
+                      "node:https",
+                      "node:http2",
+                      "node:tls",
+                      "node:dgram",
+                      "node:dns",
+                      "node:dns/**",
+                      "node:child_process",
+                      "node:worker_threads",
+                      "ky",
+                      "koffi"
+                    ],
+                    "message": "application은 파일, 네트워크, native library를 직접 쓰지 않는다. application/<기능>/ports.ts에 함수 타입을 두고 구현은 infrastructure/에 둔다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/src/infrastructure/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/presentation/**", "**/runtime/**"],
+                    "message": "infrastructure는 presentation, runtime을 import하지 않는다. HTTP 응답으로 바꾸는 코드는 presentation/http/, provider 등록은 runtime/modules/에 둔다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/api/src/presentation/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/infrastructure/**", "**/runtime/**"],
+                    "message": "presentation은 infrastructure, runtime을 import하지 않는다. Neople과 DB 호출은 application의 service를 거치고, service와 adapter 연결은 runtime/modules/에 둔다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
