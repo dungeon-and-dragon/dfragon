@@ -5,8 +5,10 @@ import {
   CLEAR_CONTENTS,
   type ClearContent,
   findContentClear,
+  toCollectionMinFame,
   toContentClearInput,
-  toLatestContents
+  toLatestContents,
+  toPopulationMinFame
 } from '../src/content-clears/contents.js'
 
 // 합성 타임라인 기록이다. data는 운영 DB에서 본 Neople 응답의 필드 모양을 따른다.
@@ -151,6 +153,7 @@ test('더 늦게 출시한 항목을 더하면 그 종류의 최신이 바뀌고
     kind: 'raid',
     name: '합성 레이드 (일반)',
     releasedAt: at('2027-01-07T06:00:00'),
+    entryFame: 125_000,
     rule: { type: 'clear', codes: [201, 210], name: '합성 레이드', stage: '일반' }
   }
   // 묶음의 첫 출시일로 비교하므로, 기존 레이드에 더 늦게 더한 항목만으로는 그 레이드가 최신이 되지 않는다.
@@ -159,11 +162,33 @@ test('더 늦게 출시한 항목을 더하면 그 종류의 최신이 바뀌고
     kind: 'raid',
     name: '디레지에 레이드 (합성)',
     releasedAt: at('2027-02-04T06:00:00'),
+    entryFame: 30_000,
     rule: { type: 'clear', codes: [201, 210], name: '디레지에 레이드', stage: '합성' }
   }
 
   assert.deepEqual(
     toLatestContents([...CLEAR_CONTENTS, newRaid, lateDiregieMode]).map(({ id }) => id),
     ['engraved-nightmare-1', 'synthetic-raid-normal']
+  )
+  assert.equal(toCollectionMinFame([...CLEAR_CONTENTS, newRaid, lateDiregieMode]), 119_414)
+})
+
+test('수집 하한은 종류별 최신 컨텐츠의 입장 명성 가운데 가장 낮은 미카엘라의 104,292다', () => {
+  assert.equal(toCollectionMinFame(), 104_292)
+})
+
+test('분모 기준은 입장 명성이 수집 하한보다 높은 각인된 악몽만 입장 명성이고 레이드 7개 항목은 수집 하한이다', () => {
+  assert.deepEqual(
+    CLEAR_CONTENTS.map((content) => [content.id, toPopulationMinFame(content, 104_292)]),
+    [
+      ['nabel-normal', 104_292],
+      ['nabel-hard', 104_292],
+      ['inae-twilight', 104_292],
+      ['diregie-normal', 104_292],
+      ['diregie-hard', 104_292],
+      ['michaela-normal', 104_292],
+      ['michaela-hard', 104_292],
+      ['engraved-nightmare-1', 119_414]
+    ]
   )
 })
