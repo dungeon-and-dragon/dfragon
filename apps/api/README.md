@@ -9,17 +9,18 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 ## 코드 위치
 
 `src/`는 계층 폴더로 나눕니다(ADR 0047).
-오늘의 등급, 캐릭터 검색, 상세, 이미지, 점수 엔진, 타임라인, 기본 정보 기록, 이벤트, 모험단과 길드, 랭킹과 통계, 클리어 집계, 배치 job, 운영 포트를 이 구조로 옮겼고, 나머지 기능 폴더는 차례로 옮깁니다.
-계층 폴더 사이의 import 방향은 `pnpm lint`가 검사하며, 옮기지 않은 기능 폴더는 검사하지 않습니다.
-앱을 만드는 `src/http.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 기능의 module이 아닌 파일을 import하는 것도 `pnpm lint`가 막습니다.
+`src/` 바로 아래에는 진입 파일 `main.ts`, `character-collector.ts`와 다섯 계층 폴더만 둡니다.
+진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`, `dist/character-collector.js`로 실행합니다.
+계층 폴더 사이의 import 방향과 계층 밖 파일은 `pnpm lint`가 `src/` 전체에서 검사합니다.
+앱을 만드는 `src/runtime/api-app.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 기능의 module이 아닌 파일을 import하는 것도 `pnpm lint`가 막습니다.
 
 | 폴더 | 담는 것 |
 | --- | --- |
 | `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일 |
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
-| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림으로 구현한 adapter |
-| `src/presentation/http/` | controller, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표. 운영 포트 controller는 `ops/` |
+| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
+| `src/presentation/http/` | controller, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표, access log, HTTP 응답 helper. 운영 포트 controller는 `ops/` |
 | `src/presentation/openapi/` | 기능별 Swagger 설명과 schema |
 | `src/presentation/events/` | 이벤트 구독자 |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
@@ -38,11 +39,15 @@ API 계약은 실행 중인 서버의 `/docs`, `/docs/openapi.json`에 있습니
 | `src/presentation/http/<기능>/controller.ts` | controller와 service 주입 token |
 | `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
 | `src/presentation/openapi/<기능>.ts` | 경로 설명 decorator와 schema. schema 묶음은 `src/presentation/openapi/index.ts`의 목록에 더합니다 |
-| `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/http.ts`나 `src/runtime/ops-app.ts`의 `imports`에 등록합니다 |
+| `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/runtime/api-app.ts`나 `src/runtime/ops-app.ts`의 `imports`에 등록합니다 |
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`, `src/presentation/openapi/common.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
-두 앱이 함께 쓰는 access log, `Cache-Control` 설정과 전역 예외 filter 등록은 `src/runtime/http-app.ts`에 있고, 404와 실패 응답을 만드는 filter는 `src/presentation/http/failure-response.ts`에 있습니다.
+두 앱이 함께 쓰는 access log는 `src/presentation/http/access-log.ts`, HTTP 응답 helper는 `src/presentation/http/http-response.ts`에 있습니다.
+`Cache-Control` 설정과 전역 예외 filter 등록은 `src/runtime/http-app.ts`, 404와 실패 응답을 만드는 filter는 `src/presentation/http/failure-response.ts`에 있습니다.
+오류 chain 정제는 `src/domain/error-chain.ts`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 controller는 `src/presentation/http/version/controller.ts`, Swagger 설정은 `src/presentation/openapi/setup.ts`에 있습니다.
+캐릭터 목록 수집 흐름과 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
+Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
 
 ## 준비할 입력
 
