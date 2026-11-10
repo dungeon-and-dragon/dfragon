@@ -193,6 +193,7 @@ const clearContentHeader = {
   kind: { type: 'string', enum: ['raid', 'challenge'] },
   name: text,
   releasedAt: { ...timestamp, description: '출시 시각' },
+  entryFame: { type: 'integer', minimum: 0, description: '채널 입장 명성' },
   latest: { type: 'boolean', description: '종류별 최신 컨텐츠 여부' }
 } satisfies Record<string, SchemaObject>
 const clearWeek = object({
@@ -203,8 +204,16 @@ const clearWeek = object({
   },
   closed: { type: 'boolean', description: '주를 마감해 값이 더 바뀌지 않는지 여부' },
   collectedAt: { ...timestamp, description: '이 주 모집단을 마지막으로 저장한 시각' },
-  population: { ...characterCount, description: '모집단 캐릭터 수' },
-  minFame: { type: 'integer', nullable: true, description: '모집단의 최저 명성' },
+  population: {
+    ...characterCount,
+    description: '모집단(분모) 캐릭터 수. 최고 명성이 minFame 이상인 캐릭터입니다.'
+  },
+  minFame: {
+    type: 'integer',
+    nullable: true,
+    description:
+      '모집단을 가른 최고 명성 기준. entryFame과 종류별 최신 컨텐츠의 가장 낮은 entryFame 가운데 큰 값입니다. 상위 10만으로 저장한 주는 그때 상위 10만의 최저 명성입니다.'
+  },
   cleared: {
     ...characterCount,
     description: '레이드는 그 주에 깬 캐릭터 수, 챌린지는 출시부터 그 주 끝까지 깬 누적 수'
@@ -660,7 +669,10 @@ export const apiSchemas: Record<string, SchemaObject> = {
         jobGrowId: { ...text, nullable: true },
         jobName: { ...text, nullable: true },
         jobGrowName: { ...text, nullable: true },
-        population: { ...characterCount, description: '그 주 모집단의 이 전직 캐릭터 수' },
+        population: {
+          ...characterCount,
+          description: '그 주 모집단의 이 전직 캐릭터 수. week.minFame과 같은 기준'
+        },
         cleared: { ...characterCount, description: '이 전직의 클리어 캐릭터 수' }
       })
     },
