@@ -10,16 +10,20 @@ import type {
 import type { INestApplication } from '@nestjs/common'
 import {
   type ActivitySeasonRange,
-  type AdventureActivityRead,
   emptySeasonActivity,
   findActivitySeason,
-  readAdventureSeasonDays,
-  toActivityDayDetail,
   toActivityDayRange,
-  toActivitySeasons,
-  toSeasonActivity
-} from '../src/adventure-guild/activity.js'
-import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
+  toActivitySeasons
+} from '../src/domain/adventure-guild/activity.js'
+import {
+  type AdventureActivityRead,
+  type AdventureGuildReader
+} from '../src/application/adventure-guild/ports.js'
+import {
+  readAdventureSeasonDays,
+  parseActivityDayDetail as toActivityDayDetail,
+  parseSeasonActivity as toSeasonActivity
+} from '../src/infrastructure/database/adventure-activity.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 

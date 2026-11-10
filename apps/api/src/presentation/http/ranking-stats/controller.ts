@@ -1,12 +1,13 @@
 import { Controller, Get, Inject, Query, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../domain/character-failure.js'
-import { characterFailureResponse } from '../presentation/http/character-failures.js'
-import { FailureResponseFilter } from '../presentation/http/failure-response.js'
-import { isMaleCrusaderJob } from '../domain/male-crusader.js'
-import { ApiFameRanking, ApiSkillStats, ApiStats } from '../presentation/openapi/ranking-stats.js'
-import type { FameRanking, RankingStatsService, SkillStats, Stats } from './service.js'
+import { CharacterDetailFailure } from '../../../domain/character-failure.js'
+import { characterFailureResponse } from '../character-failures.js'
+import { FailureResponseFilter } from '../failure-response.js'
+import { isMaleCrusaderJob } from '../../../domain/male-crusader.js'
+import { ApiFameRanking, ApiSkillStats, ApiStats } from '../../openapi/ranking-stats.js'
+import type { FameRanking, SkillStats, Stats } from '../../../domain/ranking-stats/stats.js'
+import type { RankingStatsService } from '../../../application/ranking-stats/service.js'
 
 export const RANKING_STATS_SERVICE = Symbol('RANKING_STATS_SERVICE')
 

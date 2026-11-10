@@ -24,6 +24,8 @@ parsePort('3000') // 3000
 
 `MALE_CRUSADER_DEALER_SKILL`(`용기의 은총`)은 남성 크루세이더를 딜러로 판정하는 스킬 이름입니다. API의 역할 판정과 `@dfragon/database`의 역할 SQL이 씁니다.
 
+`SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 API의 스킬 채택률 응답과 `@dfragon/database`의 표본 SQL이 함께 쓰는 표본 순위입니다.
+
 ## 던파 캐릭터명 검사
 
 ```ts

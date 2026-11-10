@@ -14,7 +14,6 @@ import {
   ACQUISITION_CODES,
   CLEAR_CODES,
   ENHANCEMENT_CODES,
-  LEGION_CLEAR_CODE,
   TIMELINE_PAGE_SIZE,
   type CharacterTimeline,
   type TimelineClear,
@@ -26,10 +25,11 @@ import {
   toAcquisitionPage,
   toCharacterTimeline,
   toClear,
+  toTimelineClearData,
   toEnhancement,
   toEnhancementPage
 } from '../../domain/character-timeline/project.js'
-import { startOfResetWeek } from '../../utils/seoul-time.js'
+import { startOfResetWeek } from '../../domain/seoul-time.js'
 
 const ACQUISITION_RARITIES = ['에픽', '태초']
 const PAGE_QUERIES = {
@@ -37,13 +37,6 @@ const PAGE_QUERIES = {
   acquisitions: { codes: ACQUISITION_CODES, itemRarities: ACQUISITION_RARITIES }
 } satisfies Record<TimelinePageList, Pick<RecentTimelineItemQuery, 'codes' | 'itemRarities'>>
 
-// 저장한 data는 Neople 응답의 객체지만 행마다 필드가 다를 수 있어 쓰기 전에 확인한다.
-// Neople은 하드로 클리어한 레이드에만 hard: true를 넣고 나머지 행에는 칸을 두지 않는다.
-const raidClearData = z.object({
-  modeName: z.string().nullable().catch(null),
-  hard: z.boolean().catch(false)
-})
-const legionClearData = z.object({ regionName: z.string() })
 const enhancementData = z.object({
   before: z.number().nullable().catch(null),
   after: z.number(),
@@ -52,11 +45,7 @@ const enhancementData = z.object({
 })
 
 function parseClear(row: TimelineEventRow): TimelineClearRecord {
-  const parsed =
-    row.code === LEGION_CLEAR_CODE
-      ? legionClearData.safeParse(row.data)
-      : raidClearData.safeParse(row.data)
-  const data = parsed.success ? parsed.data : null
+  const data = toTimelineClearData(row.code, row.data)
 
   return { ...row, data }
 }

@@ -1,50 +1,15 @@
-import {
-  type CharacterStats,
-  type CharacterStatsSnapshot,
-  type DatabaseClient,
-  type JobSkillAdoption,
-  type JobSkillAdoptionQuery,
-  type JobSkillAdoptionSnapshot,
-  type MaleCrusaderRole,
-  type SkillStyleSampleJob,
-  deleteJobSkillAdoptionComputedBefore,
-  readCharacterStats,
-  readFamedJobGrows,
-  readJobSkillAdoption,
-  saveCharacterStats,
-  saveJobSkillAdoption
-} from '@dfragon/database'
+import type { MaleCrusaderRole, SkillStyleSampleJob } from '@dfragon/database'
 import { z } from 'zod'
-import { isMaleCrusaderJob } from '../domain/male-crusader.js'
-import { defineJob } from '../jobs/definition.js'
-import { roundAverageFame } from './service.js'
+import { isMaleCrusaderJob } from '../../domain/male-crusader.js'
+import { roundAverageFame } from '../../domain/ranking-stats/stats.js'
+import { defineJob } from '../../jobs/definition.js'
+import type { StatsJobStore } from './ports.js'
 
 const DAILY_AT_MIDNIGHT = '0 0 * * *'
 // 운영 크기 합성 데이터(캐릭터 55.8만, 스킬 스타일 40.4만 행, PostgreSQL 18.6)에서 통계는 0.3초, 스킬 채택률은
 // 82 전직에 22.5초 걸렸다. 운영 장비와 설정 차이를 감안해 열 배 넘게 둔다.
 const CHARACTER_STATS_DELAY_MINUTES = 5
 const SKILL_ADOPTION_DELAY_MINUTES = 10
-
-export type StatsJobStore = {
-  readCharacterStats(): Promise<CharacterStats>
-  saveCharacterStats(snapshot: CharacterStatsSnapshot): Promise<void>
-  readFamedJobGrows(): Promise<SkillStyleSampleJob[]>
-  readJobSkillAdoption(job: JobSkillAdoptionQuery): Promise<JobSkillAdoption>
-  saveJobSkillAdoption(snapshot: JobSkillAdoptionSnapshot): Promise<void>
-  deleteJobSkillAdoptionComputedBefore(before: Date): Promise<number>
-}
-
-export function createDatabaseStatsJobStore(client: DatabaseClient): StatsJobStore {
-  return {
-    readCharacterStats: () => readCharacterStats(client),
-    saveCharacterStats: (snapshot) => saveCharacterStats(client, snapshot),
-    readFamedJobGrows: () => readFamedJobGrows(client),
-    readJobSkillAdoption: (job) => readJobSkillAdoption(client, job),
-    saveJobSkillAdoption: (snapshot) => saveJobSkillAdoption(client, snapshot),
-    deleteJobSkillAdoptionComputedBefore: (before) =>
-      deleteJobSkillAdoptionComputedBefore(client, before)
-  }
-}
 
 export function createCharacterStatsJob(store: StatsJobStore, now: () => Date = () => new Date()) {
   return defineJob({

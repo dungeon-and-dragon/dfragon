@@ -1,11 +1,12 @@
 import { Controller, Get, Inject, Param, Query, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../domain/character-failure.js'
-import { characterFailureResponse } from '../presentation/http/character-failures.js'
-import { FailureResponseFilter } from '../presentation/http/failure-response.js'
-import { ApiClearContentStats, ApiClearStats } from '../presentation/openapi/content-clears.js'
-import type { ClearContentStats, ClearStats, ClearStatsService } from './stats.js'
+import { CharacterDetailFailure } from '../../../domain/character-failure.js'
+import { characterFailureResponse } from '../character-failures.js'
+import { FailureResponseFilter } from '../failure-response.js'
+import { ApiClearContentStats, ApiClearStats } from '../../openapi/content-clears.js'
+import type { ClearContentStats, ClearStats } from '../../../domain/content-clears/stats.js'
+import type { ClearStatsService } from '../../../application/content-clears/service.js'
 
 export const CLEAR_STATS_SERVICE = Symbol('CLEAR_STATS_SERVICE')
 

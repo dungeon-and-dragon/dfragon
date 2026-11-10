@@ -12,7 +12,7 @@ import {
 } from '../src/domain/character-timeline/project.js'
 import { parseCharacterTimelineRows } from '../src/infrastructure/database/character-timeline-read.js'
 import { createApiHttpApp } from '../src/http.js'
-import { startOfResetWeek } from '../src/utils/seoul-time.js'
+import { startOfResetWeek } from '../src/domain/seoul-time.js'
 
 const character = { serverId: 'siroco', characterId: 'timeline-read-fixture' }
 const unused = async (): Promise<never> => assert.fail('부르면 안 된다')

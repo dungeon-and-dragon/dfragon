@@ -12,15 +12,15 @@ import {
   replaceTimelineRange
 } from '@dfragon/database'
 import { neopleCharacterImageUrl } from '@dfragon/neople'
+import { emptySeasonActivity } from './dist/domain/adventure-guild/activity.js'
 import {
-  emptySeasonActivity,
   readAdventureActivity,
   readAdventureSeasonDays,
   readAdventureSeasonBackfill
-} from './dist/adventure-guild/activity.js'
+} from './dist/infrastructure/database/adventure-activity.js'
 import { backfillSeason } from './dist/application/character-timeline/season-backfill.js'
 import { createDatabaseSeasonBackfillStore } from './dist/infrastructure/database/character-timeline-store.js'
-import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
+import { readAdventureWeeklyClears } from './dist/infrastructure/database/adventure-weekly.js'
 import { createCharacterSearchService } from './dist/application/character-search/service.js'
 import { parseCharacterCandidatesQuery } from './dist/domain/character-search/query.js'
 

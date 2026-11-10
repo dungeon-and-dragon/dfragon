@@ -5,22 +5,26 @@ import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfr
 import type { INestApplication } from '@nestjs/common'
 import {
   type AdventureSeasonBackfillRead,
+  type AdventureGuildReader
+} from '../src/application/adventure-guild/ports.js'
+import {
   type StoredActivitySeason,
   emptySeasonActivity,
   toActivitySeasons,
   toSeasonBackfillRanges,
   withSeasonBackfills
-} from '../src/adventure-guild/activity.js'
-import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
+} from '../src/domain/adventure-guild/activity.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
 import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
 import {
   type SeasonBackfillJob,
-  type SeasonBackfillStore,
-  backfillSeason,
   toSeasonBackfillJobs,
   toSeasonBackfillProgress
+} from '../src/domain/character-timeline/season-backfill.js'
+import {
+  type SeasonBackfillStore,
+  backfillSeason
 } from '../src/application/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/http.js'
 

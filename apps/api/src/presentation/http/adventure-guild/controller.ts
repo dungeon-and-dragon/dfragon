@@ -1,9 +1,9 @@
 import { Controller, Get, HttpCode, Inject, Param, Post, Query, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../domain/character-failure.js'
-import { characterFailureResponse } from '../presentation/http/character-failures.js'
-import { FailureResponseFilter } from '../presentation/http/failure-response.js'
+import { CharacterDetailFailure } from '../../../domain/character-failure.js'
+import { characterFailureResponse } from '../character-failures.js'
+import { FailureResponseFilter } from '../failure-response.js'
 import {
   ApiAdventureActivity,
   ApiAdventureSeasonDays,
@@ -11,14 +11,18 @@ import {
   ApiAdventureSeasonBackfill,
   ApiAdventureWeekly,
   ApiGuild
-} from '../presentation/openapi/adventure-guild.js'
-import type { ActivitySeason, AdventureActivity, AdventureSeasonDays } from './activity.js'
+} from '../../openapi/adventure-guild.js'
+import type {
+  ActivitySeason,
+  AdventureActivity,
+  AdventureSeasonDays
+} from '../../../domain/adventure-guild/activity.js'
 import type {
   AdventureCharacters,
-  AdventureGuildService,
   AdventureWeekly,
   GuildMembers
-} from './service.js'
+} from '../../../domain/adventure-guild/responses.js'
+import type { AdventureGuildService } from '../../../application/adventure-guild/service.js'
 
 export const ADVENTURE_GUILD_SERVICE = Symbol('ADVENTURE_GUILD_SERVICE')
 
