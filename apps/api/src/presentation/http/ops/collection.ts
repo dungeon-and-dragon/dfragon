@@ -1,16 +1,12 @@
 import type { CollectionSummary } from '@dfragon/database'
 import { Body, Controller, Get, HttpCode, Inject, Post } from '@nestjs/common'
 import { z } from 'zod'
-import { OpsFailure } from './errors.js'
+import type { OpsCollectionStore } from '../../../application/ops/ports.js'
+import { OpsFailure } from '../../../domain/ops/failure.js'
 
 export const OPS_COLLECTION_STORE = Symbol('OPS_COLLECTION_STORE')
 
 const requeueBody = z.object({ failure: z.string().min(1).optional() })
-
-export type OpsCollectionStore = {
-  readSummary: () => Promise<CollectionSummary>
-  requeue: (failure: string | undefined) => Promise<number>
-}
 
 // 집계가 대기열 테이블 전체를 읽으므로 자주 다시 읽는 job 목록 경로와 나눠 둔다.
 @Controller('api/collection')

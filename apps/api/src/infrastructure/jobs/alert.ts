@@ -1,17 +1,8 @@
-import type { JobRunErrorEntry, JobTrigger } from '@dfragon/database'
+import type { JobRunErrorEntry } from '@dfragon/database'
 import { formatDuration, intervalToDuration } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import ky from 'ky'
-
-export type JobAlert = {
-  kind: 'failed' | 'interrupted' | 'delayed'
-  job: string
-  trigger: JobTrigger
-  elapsedMs: number
-  errorChain?: readonly JobRunErrorEntry[]
-}
-
-export type SendJobAlert = (alert: JobAlert) => Promise<void>
+import type { JobAlert, SendJobAlert } from '../../application/jobs/ports.js'
 
 const KIND_LABELS = { failed: '실패', interrupted: '중단', delayed: '지연' } as const
 

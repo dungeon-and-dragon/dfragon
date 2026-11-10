@@ -12,10 +12,10 @@ import {
 } from './character-collection/adapters.js'
 import { readCollectorConfiguration } from './character-collection/configuration.js'
 import { runCollectionPass } from './character-collection/runner.js'
-import { createDatabaseJobStore } from './jobs/adapters.js'
-import { createDiscordJobAlert } from './jobs/alert.js'
-import { startJobScheduler } from './jobs/scheduler.js'
-import { createWorkerJobs } from './jobs/worker-jobs.js'
+import { createDatabaseJobStore } from './infrastructure/database/jobs.js'
+import { createDiscordJobAlert } from './infrastructure/jobs/alert.js'
+import { startJobScheduler } from './infrastructure/jobs/scheduler.js'
+import { createWorkerJobs } from './runtime/worker-jobs.js'
 
 const failureMessage = 'Character collector failed'
 const IDLE_MS = 60_000

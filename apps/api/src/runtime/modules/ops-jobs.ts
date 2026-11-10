@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { OPS_JOB_STORE, OpsJobsController, type OpsJobStore } from '../../ops/jobs.js'
+import type { OpsJobStore } from '../../application/ops/ports.js'
+import { OPS_JOB_STORE, OpsJobsController } from '../../presentation/http/ops/jobs.js'
 
 export interface OpsJobsModuleOptions {
   readonly store: OpsJobStore

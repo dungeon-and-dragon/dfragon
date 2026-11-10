@@ -1,7 +1,8 @@
-import type { JobOverview, JobPauseChange, JobRunRecord, JobRunRequest } from '@dfragon/database'
+import type { JobOverview, JobPauseChange, JobRunRecord } from '@dfragon/database'
 import { Body, Controller, Get, HttpCode, Inject, Param, Post, Query } from '@nestjs/common'
 import { z } from 'zod'
-import { OpsFailure } from './errors.js'
+import type { OpsJobStore } from '../../../application/ops/ports.js'
+import { OpsFailure } from '../../../domain/ops/failure.js'
 
 export const OPS_JOB_STORE = Symbol('OPS_JOB_STORE')
 
@@ -17,16 +18,6 @@ const runPageQuery = z.object({
 })
 
 const runRequestBody = z.object({ args: z.unknown().optional() })
-
-export type OpsJobStore = {
-  readOverviews: () => Promise<JobOverview[]>
-  readRuns: (
-    name: string,
-    page: { before: number | undefined; limit: number }
-  ) => Promise<JobRunRecord[] | undefined>
-  requestRun: (name: string, args: unknown) => Promise<JobRunRequest>
-  setPaused: (name: string, paused: boolean) => Promise<JobPauseChange>
-}
 
 function runResponse(run: JobRunRecord) {
   const { progressDone, progressTotal, ...rest } = run
