@@ -4,6 +4,7 @@ import {
   characterBasicSchema,
   characterSearchSchema,
   characterSectionSchemas,
+  characterSkillStyleSchema,
   itemShopSchema,
   multiItemsSchema,
   skillSchema,
@@ -58,6 +59,11 @@ function makeClient(transport: Transport) {
       ),
     characterBasic: (identity: NeopleCharacterIdentity) =>
       transport.get(characterPath(identity), characterBasicSchema),
+    characterSkillStyle: (identity: NeopleCharacterIdentity) =>
+      transport.get(
+        `${characterPath(identity)}${NEOPLE_CHARACTER_SECTIONS.skill_style.path}`,
+        characterSkillStyleSchema
+      ),
     characterTimeline: (identity: NeopleCharacterIdentity, query: CharacterTimelineQuery) =>
       transport.get(`${characterPath(identity)}/timeline`, timelinePageSchema, {
         searchParams: { ...query }
