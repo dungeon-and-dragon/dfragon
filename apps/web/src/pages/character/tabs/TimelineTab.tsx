@@ -3,9 +3,9 @@ import * as stylex from '@stylexjs/stylex'
 import { useCallback } from 'react'
 import type { CharacterIdentity } from '#core/character/character'
 import type { CharacterTimeline } from '#core/character/character-timeline'
-import { useCharacterTimeline } from '../../../hooks/useCharacterTimeline'
+import { useCharacterTimeline } from '../hooks/useCharacterTimeline'
 import { useClientHost } from '../../../host/client-host'
-import { useTimelinePages } from '../../../hooks/useTimelinePages'
+import { useTimelinePages } from '../hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
 import {
   Acquisitions,

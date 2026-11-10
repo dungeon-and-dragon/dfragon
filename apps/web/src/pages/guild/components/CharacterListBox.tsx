@@ -2,10 +2,14 @@ import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
-import type { LoadedResult } from '../../hooks/useLoadedResult'
-import { type Affiliation, CharacterTable, SkeletonRow } from './CharacterTable'
+import type { LoadedResult } from '../../../hooks/useLoadedResult'
+import {
+  type Affiliation,
+  CharacterTable,
+  SkeletonRow
+} from '../../../components/table/CharacterTable'
 import { styles } from './CharacterListBox.style'
-import { ListBox } from './ListBox'
+import { ListBox } from '../../../components/table/ListBox'
 
 const PAGE_SIZE = 20
 const LOADING_ROWS = 5

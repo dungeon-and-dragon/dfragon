@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { attachBoardHeaderSlot } from '../hooks/useBoardHeaderPortal'
+import { attachBoardHeaderSlot } from '../../../hooks/useBoardHeaderPortal'
 import { styles } from './BoardHeaderSlot.style'
 
 export function BoardHeaderSlot(): React.JSX.Element {

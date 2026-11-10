@@ -7,7 +7,7 @@ import type {
   TimelineClearCount,
   TimelineEnhancement
 } from '#core/character/character-timeline'
-import type { TimelinePages } from '../../../../hooks/useTimelinePages'
+import type { TimelinePages } from '../../hooks/useTimelinePages'
 import {
   acquisitionRoute,
   CLEAR_KIND_LABELS,

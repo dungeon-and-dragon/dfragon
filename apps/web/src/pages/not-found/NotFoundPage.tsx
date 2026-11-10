@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex'
 import { Link, useLocation } from '@tanstack/react-router'
-import { styles } from './NotFoundScreen.style'
+import { styles } from './NotFoundPage.style'
 
-export function NotFoundScreen(): React.JSX.Element {
+export function NotFoundPage(): React.JSX.Element {
   const href = useLocation({ select: (location) => location.href })
 
   return (

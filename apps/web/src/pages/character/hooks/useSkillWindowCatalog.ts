@@ -1,6 +1,6 @@
 import type { SkillWindowCatalog } from '#core/catalog/skill-window'
-import { useClientHost } from '../host/client-host'
-import { type LoadedResult, useLoadedResult } from './useLoadedResult'
+import { useClientHost } from '../../../host/client-host'
+import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 
 export function useSkillWindowCatalog(
   jobName: string | null

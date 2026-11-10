@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex'
 import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
-import { indicatorSlide } from '../animations/indicator-slide.stylex'
+import { indicatorSlide } from '../../../animations/indicator-slide.stylex'
 
 const active = ':is([data-active])'
 

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { styles } from './chart.style'
+import { styles } from '../../../components/chart/chart.style'
 
 export function TableRail({
   percent,
