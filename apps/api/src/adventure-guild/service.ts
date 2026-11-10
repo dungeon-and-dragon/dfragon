@@ -1,5 +1,5 @@
 import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
+import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
 import { CharacterDetailFailure } from '../domain/character-failure.js'
 import type { RequestTimelineSync } from '../characters/timeline/queue.js'
 import type { SeasonBackfillQueue } from '../characters/timeline/season-backfill.js'

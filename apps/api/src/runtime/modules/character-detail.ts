@@ -1,15 +1,15 @@
 import { type DynamicModule, Module } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import {
-  CHARACTER_DETAIL_SERVICE,
-  CharacterDetailController
-} from '../../characters/details/http.js'
-import {
   type CharacterDetailDependencies,
   createCharacterDetailService
-} from '../../characters/details/service.js'
+} from '../../application/character-detail/service.js'
 import { CharacterEvents } from '../../characters/events.js'
-import { SCORE_ENGINE, type ScoreEngine } from '../../score/engine.js'
+import { SCORE_ENGINE, type ScoreEngine } from '../../infrastructure/score/engine.js'
+import {
+  CHARACTER_DETAIL_SERVICE,
+  CharacterDetailController
+} from '../../presentation/http/character-detail/controller.js'
 
 export type CharacterDetailModuleOptions = Omit<
   CharacterDetailDependencies,

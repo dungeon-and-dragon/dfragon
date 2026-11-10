@@ -1,6 +1,6 @@
 import type { EventEmitter2 } from '@nestjs/event-emitter'
-import type { CharacterPayloads } from './details/sections.js'
-import type { CharacterIdentity } from './identity.js'
+import type { CharacterIdentity } from '../domain/character-identity.js'
+import type { CharacterPayloads } from '../domain/character-detail/sections.js'
 
 export const CHARACTER_FETCHED = 'character.fetched'
 

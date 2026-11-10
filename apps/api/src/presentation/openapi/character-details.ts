@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common'
 import { ApiOperation, type SchemaObject } from '@nestjs/swagger'
-import { characterDetailSections } from '../../characters/details/sections.js'
+import { characterDetailSections } from '../../domain/character-detail/sections.js'
 import {
   timestampSchema,
   objectSchema,
