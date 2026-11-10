@@ -72,10 +72,10 @@ const nightmareTitle = (date: string) => boxRow(date, NIGHTMARE_TITLE_ID, '황�
 const otherBox = (date: string) => boxRow(date, 'fixture-item-box', '합성 상자 아이템')
 
 // 합성 캐릭터다.
-const character = (characterId: string, fame = 120_000): ClearPopulationCharacter => ({
+const character = (characterId: string, maxFame = 120_000): ClearPopulationCharacter => ({
   serverId: 'cain',
   characterId,
-  fame,
+  maxFame,
   jobId: 'job',
   jobGrowId: 'grow',
   jobName: '귀검사(남)',
@@ -148,12 +148,17 @@ function memoryClearStore(
 ) {
   const state = {
     population,
+    populationMinFames: [] as number[],
     populations: new Map(seeded.map((stored) => [populationKey(stored), stored])),
     clears: new Map<string, ContentClearInput>(),
     progress: undefined as ContentClearCollectionProgress | undefined
   }
   const store: ClearCollectionStore = {
-    readPopulation: async () => [...state.population],
+    readPopulation: async (minMaxFame) => {
+      state.populationMinFames.push(minMaxFame)
+
+      return state.population.filter(({ maxFame }) => maxFame >= minMaxFame)
+    },
     readPopulations: async () => [...state.populations.values()],
     readProgress: async () => (state.progress === undefined ? undefined : { ...state.progress }),
     startProgress: async (startedAt) => {
@@ -292,7 +297,7 @@ test('한 번 돌면 모집단 캐릭터마다 code 201, 210, 504로 지금 주�
   const stored = state.populations.get(
     populationKey({ contentId: 'michaela-hard', weekStart: CURRENT_WEEK })
   )
-  assert.equal(stored?.minFame, 121_000)
+  assert.equal(stored?.minFame, 104_292)
   assert.deepEqual(stored?.jobs, [
     {
       jobId: 'job',
@@ -375,6 +380,51 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
   assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(4, false))
   assert.deepEqual(populationsOf(state, at('2026-11-12T06:00')), [])
   assert.equal(state.progress, undefined)
+})
+
+test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모는 119,414 이상, 레이드 7개 항목의 분모는 수집 대상 전체이며 직업별 수도 같은 기준이다', async () => {
+  const other = (characterId: string, maxFame: number): ClearPopulationCharacter => ({
+    ...character(characterId, maxFame),
+    jobGrowId: 'other-grow',
+    jobGrowName: '眞 소드마스터'
+  })
+  const { state, store } = memoryClearStore(
+    [
+      character('a', 130_000),
+      other('b', 119_414),
+      other('c', 119_413),
+      character('d', 104_292),
+      character('e', 104_291)
+    ],
+    closedPastWeeks()
+  )
+  const { neople, requests } = fakeNeople({})
+
+  await collect(store, neople, NOW)
+
+  assert.deepEqual(state.populationMinFames, [104_292])
+  assert.deepEqual(
+    requests.map(({ characterId }) => characterId),
+    ['a', 'b', 'c', 'd']
+  )
+  const weekPopulation = (contentId: string) => {
+    const stored = state.populations.get(populationKey({ contentId, weekStart: CURRENT_WEEK }))
+    const jobs = stored?.jobs.map(({ jobGrowId, count }) => `${jobGrowId}/${count}`).sort()
+
+    return { population: stored?.population, minFame: stored?.minFame, jobs }
+  }
+  assert.deepEqual(weekPopulation('engraved-nightmare-1'), {
+    population: 2,
+    minFame: 119_414,
+    jobs: ['grow/1', 'other-grow/1']
+  })
+  for (const { id } of CLEAR_CONTENTS.filter(({ kind }) => kind === 'raid')) {
+    assert.deepEqual(
+      weekPopulation(id),
+      { population: 4, minFame: 104_292, jobs: ['grow/2', 'other-grow/2'] },
+      id
+    )
+  }
 })
 
 test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보충 대상이 된다', async () => {

@@ -18,7 +18,7 @@ import {
 } from '@dfragon/database'
 import { createClearStatsService } from './dist/content-clears/stats.js'
 
-// 합성 캐릭터와 클리어 기록이다. 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 모집단의 맨 앞에 온다.
+// 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 모집단의 맨 앞에 온다.
 const at = (time) => new Date(`${time}+09:00`)
 const basic = (
   serverId,
@@ -145,41 +145,63 @@ try {
     [{ population: 1200, minFame: 126000, jobCount: '1200', closed: true }]
   )
 
+  // 수집 하한(최신 컨텐츠의 가장 낮은 입장 명성)이다. 장비를 벗어 지금 명성이 내려간 캐릭터도 최고 명성으로 든다.
+  const collectionMinFame = 104292
   for (const character of [
     basic('siroco', 'clear-tie', 900000),
     basic('cain', 'clear-tie-2', 900000),
     basic('cain', 'clear-tie', 900000),
     basic('cain', 'clear-top', 900001),
+    basic('cain', 'clear-dropped', 900002),
+    basic('cain', 'clear-dropped', 1000),
+    basic('cain', 'clear-floor', collectionMinFame),
+    basic('cain', 'clear-below-floor', collectionMinFame - 1),
     basic('cain', 'clear-no-fame', null)
   ]) {
     await recordCharacterBasic(client, character)
   }
-  const characters = await readClearPopulation(client)
-  assert.deepEqual(characters.slice(0, 4), [
-    {
-      serverId: 'cain',
-      characterId: 'clear-top',
-      fame: 900001,
-      jobId: 'synthetic-clear-job',
-      jobGrowId: 'synthetic-clear-grow',
-      jobName: '합성직업',
-      jobGrowName: '합성전직'
-    },
-    ...[
-      ['cain', 'clear-tie'],
-      ['cain', 'clear-tie-2'],
-      ['siroco', 'clear-tie']
-    ].map(([serverId, characterId]) => ({
-      serverId,
-      characterId,
-      fame: 900000,
-      jobId: 'synthetic-clear-job',
-      jobGrowId: 'synthetic-clear-grow',
-      jobName: '합성직업',
-      jobGrowName: '합성전직'
-    }))
+  const populationCharacter = (serverId, characterId, maxFame) => ({
+    serverId,
+    characterId,
+    maxFame,
+    jobId: 'synthetic-clear-job',
+    jobGrowId: 'synthetic-clear-grow',
+    jobName: '합성직업',
+    jobGrowName: '합성전직'
+  })
+  const characters = await readClearPopulation(client, collectionMinFame)
+  assert.deepEqual(characters.slice(0, 5), [
+    populationCharacter('cain', 'clear-dropped', 900002),
+    populationCharacter('cain', 'clear-top', 900001),
+    populationCharacter('cain', 'clear-tie', 900000),
+    populationCharacter('cain', 'clear-tie-2', 900000),
+    populationCharacter('siroco', 'clear-tie', 900000)
   ])
-  assert.ok(characters.every(({ fame }) => fame !== null))
+  assert.deepEqual(
+    characters.filter(({ characterId }) => characterId.startsWith('clear-')).at(-1),
+    populationCharacter('cain', 'clear-floor', collectionMinFame)
+  )
+  assert.ok(characters.every(({ maxFame }) => maxFame >= collectionMinFame))
+  assert.ok(
+    !characters.some(({ characterId }) =>
+      ['clear-below-floor', 'clear-no-fame'].includes(characterId)
+    )
+  )
+
+  // 예전 상한 10만 명을 넘는 수집 대상도 모두 읽는다.
+  const bulkCharacters = 100001
+  await client.$executeRaw`
+    INSERT INTO characters (server_id, character_id, character_name, adventure_id, max_fame)
+    SELECT 'cain', 'clear-bulk-' || n, '합성대량' || n, adventure_id, ${collectionMinFame} + n
+    FROM generate_series(1, ${bulkCharacters}) AS n
+    CROSS JOIN (SELECT adventure_id FROM characters WHERE character_id = 'clear-top') adventure`
+  assert.equal(
+    (await readClearPopulation(client, collectionMinFame)).filter(({ characterId }) =>
+      characterId.startsWith('clear-bulk-')
+    ).length,
+    bulkCharacters
+  )
+  await client.$executeRaw`DELETE FROM characters WHERE character_id LIKE 'clear-bulk-%'`
 
   // 조회 경로가 읽는 집계다. 앞 단계의 clear-a, clear-b는 캐릭터 행이 없어 전직 없음, 혼자인 모험단으로 센다.
   for (const character of [
