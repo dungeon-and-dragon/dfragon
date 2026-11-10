@@ -116,13 +116,14 @@ try {
   const now = new Date('2026-04-02T12:00:00+09:00')
   const at = (time) => new Date(`2026-${time}+09:00`)
   const range = { start: at('03-01T00:00:00'), end: now }
-  const raid = (code, time, raidName) => ({
+  const raid = (code, time, raidName, data = {}) => ({
     code,
     occurredAt: at(time),
     name: '레이드',
     raidName,
-    data: {}
+    data
   })
+  const michaela = { modeName: '미카엘라 : 종언서' }
   const legion = (time, regionName) => ({
     code: 209,
     occurredAt: at(time),
@@ -143,8 +144,8 @@ try {
     [
       { serverId: 'siroco', characterId: 'adventure-high' },
       [
-        raid(201, '04-02T05:59:00', '무너진 성자 미카엘라'),
-        { ...raid(210, '04-02T06:00:00', '디레지에 레이드'), data: { hard: true } },
+        raid(201, '04-02T05:59:00', '무너진 성자 미카엘라', michaela),
+        raid(210, '04-02T06:00:00', '디레지에 레이드', { modeName: '디레지에 : 악연', hard: true }),
         raid(201, '04-02T06:30:00', '합성 목록 밖 레이드')
       ],
       [
@@ -164,7 +165,7 @@ try {
     ],
     [
       { serverId: 'hilder', characterId: 'guild-no-fame' },
-      [raid(201, '04-02T08:00:00', '무너진 성자 미카엘라')],
+      [raid(201, '04-02T08:00:00', '무너진 성자 미카엘라', michaela)],
       [item(505, at('04-02T09:00:00'), '신화')]
     ]
   ]
@@ -223,8 +224,8 @@ try {
   const seasonActivity = {
     summary: {
       raids: [
-        { name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 },
-        { name: '디레지에 레이드', count: 1, hard: 1, normal: 0 },
+        { name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 },
+        { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
         { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
       ],
       legions: [{ name: '아포칼립스', count: 1 }],
@@ -431,7 +432,7 @@ try {
   const activityDay = {
     date: '2026-04-02',
     raids: [
-      { name: '디레지에 레이드', count: 1, hard: 1, normal: 0 },
+      { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
       { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
     ],
     legions: [{ name: '아포칼립스', count: 1 }],
@@ -447,7 +448,7 @@ try {
     seasonDays.days.find(({ date }) => date === '2026-04-01'),
     {
       date: '2026-04-01',
-      raids: [{ name: '무너진 성자 미카엘라', count: 1, hard: 0, normal: 1 }],
+      raids: [{ name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 }],
       legions: [],
       items: [],
       enhancements: []
