@@ -115,4 +115,5 @@ export {
   DNF_SEARCH_NICKNAME_LIMITS,
   matchesDNFSearchNicknamePolicy
 } from './dnf-character-search.js'
+export { MALE_CRUSADER_DEALER_SKILL } from './dnf-male-crusader.js'
 export { PRODUCT_NAME } from './product.js'
