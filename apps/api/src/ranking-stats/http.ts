@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { CharacterDetailFailure } from '../domain/character-failure.js'
 import { characterFailureResponse } from '../presentation/http/character-failures.js'
 import { FailureResponseFilter } from '../presentation/http/failure-response.js'
-import { isMaleCrusaderJob } from '../characters/domain/male-crusader.js'
+import { isMaleCrusaderJob } from '../domain/male-crusader.js'
 import { ApiFameRanking, ApiSkillStats, ApiStats } from '../presentation/openapi/ranking-stats.js'
 import type { FameRanking, RankingStatsService, SkillStats, Stats } from './service.js'
 

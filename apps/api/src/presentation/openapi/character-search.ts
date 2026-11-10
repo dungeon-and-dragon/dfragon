@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common'
 import { ApiOperation, ApiQuery, type SchemaObject } from '@nestjs/swagger'
-import { CHARACTER_ID_PATTERN_SOURCE } from '../../characters/identity.js'
-import { NEOPLE_SERVER_NAMES } from '../../constants/neople-character-search.js'
+import { CHARACTER_ID_PATTERN_SOURCE } from '../../domain/character-identity.js'
+import { NEOPLE_SERVER_NAMES } from '../../domain/neople-servers.js'
 import {
   objectSchema,
   successResponse,

@@ -15,7 +15,7 @@ import {
   saveJobSkillAdoption
 } from '@dfragon/database'
 import { z } from 'zod'
-import { isMaleCrusaderJob } from '../characters/domain/male-crusader.js'
+import { isMaleCrusaderJob } from '../domain/male-crusader.js'
 import { defineJob } from '../jobs/definition.js'
 import { roundAverageFame } from './service.js'
 
