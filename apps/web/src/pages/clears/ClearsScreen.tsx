@@ -365,36 +365,38 @@ function JobTable({ rows }: { rows: readonly JobRow[] }): React.JSX.Element {
   }
 
   return (
-    <table {...stylex.props(styles.jobTable)}>
-      <thead>
-        <tr {...stylex.props(styles.jobHeadRow)}>
-          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadName)}>
-            전직
-          </th>
-          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
-            모집단
-          </th>
-          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
-            클리어
-          </th>
-          <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadRate)}>
-            클리어율
-          </th>
-        </tr>
-      </thead>
-      <tbody ref={bodyRef} onMouseLeave={clearHover}>
-        {rows.map((row) => (
-          <JobTableRow
-            key={row.key}
-            row={row}
-            percent={maxRate > 0 ? ((row.rate ?? 0) / maxRate) * 100 : 0}
-            active={row.key === hoveredKey}
-            dimmed={hoveredKey !== null && row.key !== hoveredKey}
-            onHover={setHoveredKey}
-          />
-        ))}
-      </tbody>
-    </table>
+    <div {...stylex.props(styles.jobTableScroll)}>
+      <table {...stylex.props(styles.jobTable)}>
+        <thead>
+          <tr {...stylex.props(styles.jobHeadRow)}>
+            <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadName)}>
+              전직
+            </th>
+            <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
+              모집단
+            </th>
+            <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
+              클리어
+            </th>
+            <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadRate)}>
+              클리어율
+            </th>
+          </tr>
+        </thead>
+        <tbody ref={bodyRef} onMouseLeave={clearHover}>
+          {rows.map((row) => (
+            <JobTableRow
+              key={row.key}
+              row={row}
+              percent={maxRate > 0 ? ((row.rate ?? 0) / maxRate) * 100 : 0}
+              active={row.key === hoveredKey}
+              dimmed={hoveredKey !== null && row.key !== hoveredKey}
+              onHover={setHoveredKey}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
