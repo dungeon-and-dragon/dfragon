@@ -30,6 +30,7 @@ export type ClearContentHeader = {
   kind: ClearContent['kind']
   name: string
   releasedAt: string
+  entryFame: number
   latest: boolean
 }
 
@@ -114,6 +115,7 @@ function toHeader(content: ClearContent, latestIds: ReadonlySet<string>): ClearC
     kind: content.kind,
     name: content.name,
     releasedAt: content.releasedAt.toISOString(),
+    entryFame: content.entryFame,
     latest: latestIds.has(content.id)
   }
 }
