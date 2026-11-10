@@ -130,6 +130,8 @@ export function createSkillStyleCollectionJob(
   return defineJob({
     name: 'skill-style-collection',
     displayName: '스킬 스타일 수집',
+    description:
+      '스킬 채택률 표본 가운데 스킬 스타일이 없는 캐릭터의 스킬 스타일을 Neople에서 받아 저장합니다. 다시 실행하면 남은 캐릭터부터 받습니다.',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
     run: (_args, { reportProgress }) =>
