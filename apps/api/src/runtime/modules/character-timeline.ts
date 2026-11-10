@@ -1,27 +1,27 @@
+import type { ReadTimelinePage } from '../../application/character-timeline/ports.js'
 import { type DynamicModule, type INestApplication, Module } from '@nestjs/common'
 import type { TimelineCharacter } from '@dfragon/database'
 import type { ReportCode } from '../../access-log.js'
 import {
   CHARACTER_TIMELINE_SERVICE,
   CharacterTimelineController
-} from '../../characters/timeline/http.js'
+} from '../../presentation/http/character-timeline/controller.js'
 import {
   type JobQueueCounts,
   type TimelineSyncQueue,
   createTimelineSyncQueue
-} from '../../characters/timeline/queue.js'
-import type { CharacterTimeline } from '../../characters/timeline/read.js'
+} from '../../application/character-timeline/queue.js'
+import type { CharacterTimeline } from '../../domain/character-timeline/project.js'
 import {
   type SeasonBackfillJob,
   type SeasonBackfillQueue,
   createSeasonBackfillQueue
-} from '../../characters/timeline/season-backfill.js'
+} from '../../application/character-timeline/season-backfill.js'
 import {
-  type ReadTimelinePage,
   createCharacterTimelineService,
   emptyCharacterTimelineService
-} from '../../characters/timeline/service.js'
-import { TimelineSyncSubscriber } from '../../characters/timeline/subscriber.js'
+} from '../../application/character-timeline/service.js'
+import { TimelineSyncSubscriber } from '../../presentation/events/character-timeline.js'
 
 export const TIMELINE_SYNC_QUEUE = Symbol('TIMELINE_SYNC_QUEUE')
 const ENHANCEMENT_BACKFILL_QUEUE = Symbol('ENHANCEMENT_BACKFILL_QUEUE')

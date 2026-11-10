@@ -16,10 +16,8 @@ export type CalculateScore = (
   signal: AbortSignal
 ) => Promise<ScoreEngineResult | null>
 
-export interface CharacterFetchedEvents {
-  fetched(
-    identity: CharacterIdentity,
-    payloads: Pick<CharacterPayloads, 'basic' | 'skill_style'>,
-    fetchedAt: Date
-  ): void
-}
+export type PublishCharacterFetched = (
+  identity: CharacterIdentity,
+  payloads: Pick<CharacterPayloads, 'basic' | 'skill_style'>,
+  fetchedAt: Date
+) => void

@@ -4,7 +4,7 @@ import {
   type CharacterDetailDependencies,
   createCharacterDetailService
 } from '../../application/character-detail/service.js'
-import { CharacterEvents } from '../../characters/events.js'
+import { CHARACTER_FETCHED, CharacterFetched } from '../../domain/character-events.js'
 import { SCORE_ENGINE, type ScoreEngine } from '../../infrastructure/score/engine.js'
 import {
   CHARACTER_DETAIL_SERVICE,
@@ -13,7 +13,7 @@ import {
 
 export type CharacterDetailModuleOptions = Omit<
   CharacterDetailDependencies,
-  'calculateScore' | 'characterEvents'
+  'calculateScore' | 'publishCharacterFetched'
 >
 
 @Module({})
@@ -30,7 +30,16 @@ export class CharacterDetailModule {
             createCharacterDetailService({
               ...options,
               calculateScore: engine.calculate,
-              characterEvents: new CharacterEvents(emitter)
+              publishCharacterFetched: (
+                { serverId, characterId },
+                { basic, skill_style },
+                fetchedAt
+              ) => {
+                emitter.emit(
+                  CHARACTER_FETCHED,
+                  new CharacterFetched(serverId, characterId, basic, skill_style, fetchedAt)
+                )
+              }
             })
         }
       ]

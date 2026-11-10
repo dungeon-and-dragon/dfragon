@@ -18,8 +18,8 @@ import {
   readAdventureSeasonDays,
   readAdventureSeasonBackfill
 } from './dist/adventure-guild/activity.js'
-import { backfillSeason } from './dist/characters/timeline/season-backfill.js'
-import { createDatabaseSeasonBackfillStore } from './dist/characters/timeline/store.js'
+import { backfillSeason } from './dist/application/character-timeline/season-backfill.js'
+import { createDatabaseSeasonBackfillStore } from './dist/infrastructure/database/character-timeline-store.js'
 import { readAdventureWeeklyClears } from './dist/adventure-guild/weekly.js'
 import { createCharacterSearchService } from './dist/application/character-search/service.js'
 import { parseCharacterCandidatesQuery } from './dist/domain/character-search/query.js'

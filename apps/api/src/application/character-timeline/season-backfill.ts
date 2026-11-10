@@ -1,8 +1,11 @@
 import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfragon/database'
-import type { FetchCharacterTimeline } from './neople.js'
+import type { FetchCharacterTimeline } from './ports.js'
 import { type JobQueue, createJobQueue } from './queue.js'
-import { NEOPLE_TIMELINE_START, splitTimelineRanges } from './ranges.js'
-import type { TimelineInputs } from './rows.js'
+import {
+  NEOPLE_TIMELINE_START,
+  splitTimelineRanges
+} from '../../domain/character-timeline/ranges.js'
+import type { TimelineInputs } from '../../domain/character-timeline/rows.js'
 
 const MINUTE_MS = 60_000
 // 운영 배포 뒤 실제 요청 수와 시간을 재 다시 정할 시작값이다(#1324).

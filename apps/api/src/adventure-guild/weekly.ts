@@ -7,7 +7,8 @@ import {
   readCharactersTimelineEvents
 } from '@dfragon/database'
 import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
-import { CLEAR_CODES, type TimelineClear, toClear } from '../characters/timeline/read.js'
+import { CLEAR_CODES, type TimelineClear } from '../domain/character-timeline/project.js'
+import { parseTimelineClearRow } from '../infrastructure/database/character-timeline-read.js'
 import { startOfResetWeek } from '../utils/seoul-time.js'
 
 // 열 이름은 Neople 타임라인의 raidName, regionName과 글자까지 같아야 클리어로 센다.
@@ -38,7 +39,7 @@ export function toAdventureWeeklyClears(
   const weeklyClears = new Map<string, TimelineClear[]>()
   for (const event of events) {
     const character = characterKey(event)
-    for (const clear of toClear(event)) {
+    for (const clear of parseTimelineClearRow(event)) {
       if (clear.occurredAt >= weekStart) {
         weeklyClears.set(character, [...(weeklyClears.get(character) ?? []), clear])
       }

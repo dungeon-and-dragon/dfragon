@@ -18,10 +18,12 @@ import {
   CLEAR_CODES,
   ENHANCEMENT_CODES,
   type TimelineClear,
-  type TimelineEnhancement,
-  toClear,
-  toEnhancement
-} from '../characters/timeline/read.js'
+  type TimelineEnhancement
+} from '../domain/character-timeline/project.js'
+import {
+  parseTimelineClearRow,
+  parseTimelineEnhancementRow
+} from '../infrastructure/database/character-timeline-read.js'
 import {
   type SeasonBackfillJob,
   type SeasonBackfillProgress,
@@ -30,7 +32,7 @@ import {
   toSeasonBackfillProgress,
   toSeasonBackfillRange,
   toSeasonTimelineStart
-} from '../characters/timeline/season-backfill.js'
+} from '../application/character-timeline/season-backfill.js'
 import { formatResetDate, formatSeoulTime, parseResetDate } from '../utils/seoul-time.js'
 
 // 타임라인 정기 동기화는 중천(시즌 10)부터 받는다. 그 전 시즌은 모험단 캐릭터가 모두 옛 시즌 받기를 끝내야 집계한다.
@@ -444,7 +446,7 @@ export function toSeasonActivity(
     return day
   }
 
-  for (const clear of records.clears.flatMap(toClear).filter(inSeason)) {
+  for (const clear of records.clears.flatMap(parseTimelineClearRow).filter(inSeason)) {
     const day = dayOf(clear.occurredAt)
     if (clear.kind === 'raid') {
       countRaid(raids, clear)
@@ -467,7 +469,7 @@ export function toSeasonActivity(
     }
 
     const ticket = usedTicket(row)
-    for (const attempt of toEnhancement(row)) {
+    for (const attempt of parseTimelineEnhancementRow(row)) {
       const day = dayOf(attempt.occurredAt)
       enhancement.attempts++
       day.enhance++
@@ -520,7 +522,7 @@ export function toActivityDayDetail(
   const onDay = (record: { occurredAt: Date }) => occursIn(day, record)
   const raidCounts = new Map<string, RaidCount>()
   const legionCounts = new Map<string, NameCount>()
-  for (const clear of records.clears.flatMap(toClear).filter(onDay)) {
+  for (const clear of records.clears.flatMap(parseTimelineClearRow).filter(onDay)) {
     if (clear.kind === 'raid') {
       countRaid(raidCounts, clear)
     } else {
@@ -541,7 +543,7 @@ export function toActivityDayDetail(
     return [{ at, name: row.itemName, rarity }]
   })
   const enhancements = rows
-    .flatMap(toEnhancement)
+    .flatMap(parseTimelineEnhancementRow)
     .map(({ occurredAt, kind, after, result }): ActivityDayEnhancement => {
       const at = formatActivityTime(occurredAt)
 

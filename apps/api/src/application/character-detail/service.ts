@@ -14,7 +14,7 @@ import { enrichCharacterDetails, hasUnavailableItemDetail } from '../character-c
 import type { CatalogService } from '../character-catalog/service.js'
 import { type LoadCharacter, createCharacterCache } from './character-cache.js'
 import { type NeopleStageTimings, elapsedMs } from './neople-stages.js'
-import type { CalculateScore, CharacterFetchedEvents, FetchCharacterDetails } from './ports.js'
+import type { CalculateScore, PublishCharacterFetched, FetchCharacterDetails } from './ports.js'
 
 export interface CharacterDetailResponse {
   body: Buffer
@@ -25,7 +25,7 @@ export interface CharacterDetailDependencies {
   fetchDetails: FetchCharacterDetails
   catalog: CatalogService
   calculateScore: CalculateScore
-  characterEvents?: CharacterFetchedEvents
+  publishCharacterFetched?: PublishCharacterFetched
 }
 
 export function createCharacterDetailService(deps: CharacterDetailDependencies) {
@@ -56,7 +56,7 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
       }
       const character = await loadCharacter(identity, signal, timings)
       // 받은 뒤에 내서, 존재하지 않는 캐릭터 ID로 구독자가 기록을 만들지 않게 한다.
-      deps.characterEvents?.fetched(identity, character.payloads, character.fetchedAt)
+      deps.publishCharacterFetched?.(identity, character.payloads, character.fetchedAt)
       signal.throwIfAborted()
       const reusable = bodies.get(character)
       if (reusable !== undefined) {
