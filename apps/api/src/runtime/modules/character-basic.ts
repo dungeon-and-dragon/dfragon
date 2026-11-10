@@ -1,10 +1,15 @@
+import { createCharacterBasicRecorder } from '../../application/character-basic/service.js'
+import {
+  parseCharacterBasic,
+  parseCharacterSkillStyle
+} from '../../infrastructure/neople/character-basic.js'
+import { CharacterBasicSubscriber } from '../../presentation/events/character-basic.js'
 import { type DynamicModule, Module } from '@nestjs/common'
 import type { ReportCode } from '../../access-log.js'
 import {
-  CharacterBasicSubscriber,
   type RecordCharacterBasic,
   type RecordCharacterSkillStyle
-} from '../../characters/basic/subscriber.js'
+} from '../../application/character-basic/ports.js'
 
 export interface CharacterBasicModuleOptions {
   readonly recordCharacterBasic?: RecordCharacterBasic
@@ -31,9 +36,13 @@ export class CharacterBasicModule {
           provide: CharacterBasicSubscriber,
           useFactory: () =>
             new CharacterBasicSubscriber(
-              recordCharacterBasic,
-              recordCharacterSkillStyle,
-              reportCode
+              createCharacterBasicRecorder({
+                recordBasic: recordCharacterBasic,
+                recordSkillStyle: recordCharacterSkillStyle,
+                parseBasic: parseCharacterBasic,
+                parseSkillStyle: parseCharacterSkillStyle,
+                reportFailure: reportCode
+              })
             )
         }
       ]

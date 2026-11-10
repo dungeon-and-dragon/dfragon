@@ -7,7 +7,7 @@ export class TimelineFailure extends SanitizedFailure {
   readonly kind: TimelineFailureKind
 
   constructor(kind: TimelineFailureKind, options: FailureOptions = {}) {
-    super('캐릭터 타임라인을 받지 못했습니다.', options)
+    super(`Timeline request failed: ${kind}`, options)
     this.name = 'TimelineFailure'
     this.kind = kind
   }
