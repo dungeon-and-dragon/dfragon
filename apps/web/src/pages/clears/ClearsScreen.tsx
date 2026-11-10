@@ -113,13 +113,15 @@ function ClearTitle({ week }: { week: ClearWeek | undefined }): React.JSX.Elemen
 
   return (
     <TitleBox title={TITLE}>
-      <TitleStat label="모집단" value={`명성 상위 ${integer.format(week.population)}`} />
       {week.minFame !== null && (
         <TitleStat
-          label="최저 명성"
-          value={<span {...stylex.props(styles.fame)}>{integer.format(week.minFame)}</span>}
+          label="기준 명성"
+          value={
+            <span {...stylex.props(styles.fame)}>{`${integer.format(week.minFame)} 이상`}</span>
+          }
         />
       )}
+      <TitleStat label="모집단" value={integer.format(week.population)} />
       <TitleStat label="수집 시각" value={formatSeoulDateTime(week.collectedAt, now)} />
     </TitleBox>
   )
