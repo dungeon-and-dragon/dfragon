@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { enrichCharacterDetails } from '../src/characters/catalog/enrich.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import type { CatalogDetail } from '../src/characters/catalog/types.js'
-import type { projectCharacterDetails } from '../src/characters/details/project.js'
+import { enrichCharacterDetails } from '../src/application/character-catalog/enrich.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import type { CatalogDetail } from '../src/domain/character-catalog/types.js'
+import type { projectCharacterDetails } from '../src/domain/character-detail/project.js'
 
 const signal = new AbortController().signal
 function catalogPayload(itemId: string) {

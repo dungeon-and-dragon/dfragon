@@ -22,10 +22,8 @@ import {
   setJobPaused
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
-import { createCatalogService } from '../characters/catalog/service.js'
-import { createNeopleCatalog } from '../characters/catalog/neople.js'
-import { createNeopleCharacterSearch } from '../characters/neople-character-search.js'
-import { createNeopleCharacterDetails } from '../characters/details/neople.js'
+import { createCatalogService } from '../application/character-catalog/service.js'
+import type { CharacterSearchDependencies } from '../application/character-search/service.js'
 import { createNeopleCharacterTimeline } from '../characters/timeline/neople.js'
 import { backfillEnhancements } from '../characters/timeline/backfill.js'
 import {
@@ -40,6 +38,9 @@ import {
   readTimelinePage
 } from '../characters/timeline/read.js'
 import { syncCharacterTimeline } from '../characters/timeline/sync.js'
+import { createNeopleCatalog } from '../infrastructure/neople/character-catalog.js'
+import { createNeopleCharacterDetails } from '../infrastructure/neople/character-detail.js'
+import { createNeopleCharacterSearch } from '../infrastructure/neople/character-search.js'
 import { createNeopleShopGrade } from '../infrastructure/neople/today-grade.js'
 import {
   readAdventureActivity,
@@ -48,7 +49,6 @@ import {
 } from '../adventure-guild/activity.js'
 import { readAdventureWeeklyClears } from '../adventure-guild/weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../http.js'
-import type { CharacterSearchDependencies } from '../characters/types.js'
 import { createOpsHttpApp } from '../ops/app.js'
 import type { ReadQueueCounts } from '../ops/queues.js'
 import type { readRuntimeConfiguration } from './configuration.js'

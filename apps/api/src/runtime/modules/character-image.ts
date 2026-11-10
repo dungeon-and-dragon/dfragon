@@ -1,9 +1,10 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { CHARACTER_IMAGE_FETCH, CharacterImageController } from '../../characters/image/http.js'
+import type { FetchCharacterImage } from '../../application/character-image/ports.js'
+import { createNeopleCharacterImage } from '../../infrastructure/neople/character-image.js'
 import {
-  type FetchCharacterImage,
-  createNeopleCharacterImage
-} from '../../characters/image/neople.js'
+  CHARACTER_IMAGE_FETCH,
+  CharacterImageController
+} from '../../presentation/http/character-image/controller.js'
 
 export interface CharacterImageModuleOptions {
   readonly fetchCharacterImage?: FetchCharacterImage

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { projectCharacterDetails } from '../src/characters/details/project.js'
+import { projectCharacterDetails } from '../src/domain/character-detail/project.js'
 import type {
   CharacterDetailSection,
   CharacterPayload,
   CharacterPayloads
-} from '../src/characters/details/sections.js'
+} from '../src/domain/character-detail/sections.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
 const common = { ...identity, characterName: '합성 캐릭터' }

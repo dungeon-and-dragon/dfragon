@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 
 const signal = new AbortController().signal
 const HOUR_MS = 60 * 60 * 1000

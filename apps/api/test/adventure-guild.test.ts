@@ -8,9 +8,9 @@ import type {
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
 import type { AdventureGuildReader } from '../src/adventure-guild/service.js'
-import type { CharacterRow } from '../src/characters/character-row.js'
+import type { CharacterRow } from '../src/domain/character-row.js'
 import { toAdventureWeeklyClears } from '../src/adventure-guild/weekly.js'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 정렬, 저장과 주간 경계는 container-adventure-guild-check.mjs가 실제 DB로 확인한다.

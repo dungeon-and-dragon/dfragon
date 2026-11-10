@@ -2,11 +2,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineCharacter, TimelineRange, TimelineSyncState } from '@dfragon/database'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { CharacterDetailFailure } from '../src/domain/character-failure.js'
-import type { NeopleStageTimings } from '../src/characters/details/neople-stages.js'
-import type { CharacterPayloads } from '../src/characters/details/sections.js'
-import { createCharacterDetailService } from '../src/characters/details/service.js'
+import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
+import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
+import { createCharacterDetailService } from '../src/application/character-detail/service.js'
 import { TimelineFailure } from '../src/characters/timeline/errors.js'
 import type { FetchCharacterTimeline } from '../src/characters/timeline/neople.js'
 import { createTimelineSyncQueue } from '../src/characters/timeline/queue.js'
@@ -23,7 +23,7 @@ import {
   CharacterEvents,
   type CharacterFetched
 } from '../src/characters/events.js'
-import type { CharacterIdentity } from '../src/characters/identity.js'
+import type { CharacterIdentity } from '../src/domain/character-identity.js'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 
 const character = { serverId: 'siroco', characterId: 'timeline-fixture' }

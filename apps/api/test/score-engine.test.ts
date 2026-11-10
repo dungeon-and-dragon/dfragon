@@ -1,8 +1,14 @@
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
 import test from 'node:test'
-import { type ScoreEngineDiagnostic, createScoreEngine } from '../src/score/engine.js'
-import type { ScoreWorkerMessage, ScoreWorkerRequest } from '../src/score/worker-protocol.js'
+import {
+  type ScoreEngineDiagnostic,
+  createScoreEngine
+} from '../src/infrastructure/score/engine.js'
+import type {
+  ScoreWorkerMessage,
+  ScoreWorkerRequest
+} from '../src/infrastructure/score/worker-protocol.js'
 import { readEngineInput } from './score-fixtures.js'
 
 const LIBRARY_PATH = '/synthetic/libdnfscore.so'

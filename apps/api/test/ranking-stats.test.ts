@@ -9,7 +9,7 @@ import type {
   StoredCharacter
 } from '@dfragon/database'
 import type { INestApplication } from '@nestjs/common'
-import { createCatalogService } from '../src/characters/catalog/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/http.js'
 import type { RankingStatsReader } from '../src/ranking-stats/service.js'
 

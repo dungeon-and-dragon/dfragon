@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict'
 import test, { type TestContext } from 'node:test'
-import { createCatalogService } from '../src/characters/catalog/service.js'
-import type { NeopleStageTimings } from '../src/characters/details/neople-stages.js'
-import { createCharacterDetailService } from '../src/characters/details/service.js'
+import { createCatalogService } from '../src/application/character-catalog/service.js'
+import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
+import { createCharacterDetailService } from '../src/application/character-detail/service.js'
 import { createApiHttpApp } from '../src/http.js'
-import type { ScoreEngine, ScoreEngineResult } from '../src/score/engine.js'
-import type { ScoreCalculator, ScoreEngineInput } from '../src/score/input.js'
-import { openNativeScore } from '../src/score/native.js'
+import type { ScoreEngine } from '../src/infrastructure/score/engine.js'
+import type { ScoreEngineResult } from '../src/domain/score/result.js'
+import type { ScoreCalculator, ScoreEngineInput } from '../src/domain/score/input.js'
+import { openNativeScore } from '../src/infrastructure/score/native.js'
 import {
   REAL_SCORE_LIBRARY_PATH,
   payloadsFromEngineInput,

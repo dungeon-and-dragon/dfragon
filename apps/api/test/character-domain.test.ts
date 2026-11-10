@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { StoredCharacter } from '@dfragon/database'
-import { toCharacterRow } from '../src/characters/character-row.js'
-import { MaleCrusader } from '../src/characters/domain/male-crusader.js'
+import { toCharacterRow } from '../src/domain/character-row.js'
+import { MaleCrusader } from '../src/domain/male-crusader.js'
 
 test('남성 크루세이더는 active나 passive에 용기의 은총이 있을 때만 딜러, 아니면 버퍼다', () => {
   for (const [skillStyle, role] of [

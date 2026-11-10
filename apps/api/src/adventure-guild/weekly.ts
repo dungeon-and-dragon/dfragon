@@ -6,7 +6,7 @@ import {
   readAdventureCharacters,
   readCharactersTimelineEvents
 } from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
+import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
 import { CLEAR_CODES, type TimelineClear, toClear } from '../characters/timeline/read.js'
 import { startOfResetWeek } from '../utils/seoul-time.js'
 

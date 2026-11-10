@@ -8,7 +8,7 @@ import {
   SKILL_STYLE_SAMPLE_TOP_COUNT,
   type StoredCharacter
 } from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../characters/character-row.js'
+import { type CharacterRow, toCharacterRow } from '../domain/character-row.js'
 
 export const FAME_RANKING_LIMIT = 100
 
