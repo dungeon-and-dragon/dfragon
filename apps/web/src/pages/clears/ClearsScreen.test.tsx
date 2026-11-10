@@ -57,6 +57,7 @@ const raid: ClearContent = {
   kind: 'raid',
   name: '무너진 성자 미카엘라 (하드)',
   releasedAt: RAID_RELEASE,
+  entryFame: 104292,
   latest: true,
   weeks: [week('2026-10-29', 200), week('2026-11-05', 100, { closed: false })]
 }
@@ -66,6 +67,7 @@ const challenge: ClearContent = {
   kind: 'challenge',
   name: '각인된 악몽 챌린지',
   releasedAt: '2026-11-04T21:00:00.000Z',
+  entryFame: 104292,
   latest: true,
   weeks: [
     week('2026-11-05', 69, {
@@ -81,6 +83,7 @@ const oldRaid: ClearContent = {
   kind: 'raid',
   name: '디레지에 레이드 (하드)',
   releasedAt: '2026-02-04T21:00:00.000Z',
+  entryFame: 104292,
   latest: false,
   weeks: [week('2026-02-05', 82, { collectedAt: '2026-02-11T20:00:00.000Z' })]
 }
@@ -90,6 +93,7 @@ const unseen: ClearContent = {
   kind: 'raid',
   name: '만들어진 신 나벨 (일반)',
   releasedAt: '2025-04-16T21:00:00.000Z',
+  entryFame: 104292,
   latest: false,
   weeks: []
 }
@@ -190,14 +194,14 @@ it('조회가 실패하면 제목 줄과 오류 한 줄을 둔다', async () => 
   )
 })
 
-it('주소에 컨텐츠가 없으면 최신 레이드의 마지막 주를 열고 모집단, 최저 명성, 수집 시각과 클리어 수, 비율을 보인다', async () => {
+it('주소에 컨텐츠가 없으면 최신 레이드의 마지막 주를 열고 기준 명성, 모집단, 수집 시각과 클리어 수, 비율을 보인다', async () => {
   const getClearContentStats = vi.fn(async (_contentId: string, weekStart: string | undefined) =>
     detailOf(raid, weekStart)
   )
   await render({}, { getClearContentStats })
 
   expect(container.querySelector('header')?.textContent).toBe(
-    '클리어 집계모집단명성 상위 1,000최저 명성125,871수집 시각11-10 05:12'
+    '클리어 집계기준 명성125,871 이상모집단1,000수집 시각11-10 05:12'
   )
   expect(
     [...boxOf('컨텐츠').querySelectorAll('h2')].map((row) => row.parentElement?.textContent)
@@ -249,6 +253,7 @@ const longRaid: ClearContent = {
   kind: 'raid',
   name: '만들어진 신 나벨 (일반)',
   releasedAt: '2025-04-16T21:00:00.000Z',
+  entryFame: 104292,
   latest: false,
   weeks: weeksFrom('2025-04-17', 82)
 }

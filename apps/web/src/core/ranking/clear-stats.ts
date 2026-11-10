@@ -10,6 +10,7 @@ const clearContentHeader = {
   kind: clearContentKindSchema,
   name: z.string(),
   releasedAt: z.iso.datetime(),
+  entryFame: count,
   latest: z.boolean()
 }
 
