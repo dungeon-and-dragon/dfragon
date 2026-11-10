@@ -12,10 +12,20 @@ const JOB_RATE_WIDTH = 152
 const JOB_RATE_VALUE_WIDTH = 48
 const JOB_NAME_MIN_WIDTH = 120
 const JOB_EDGE_PADDING = 16
+// 390px 창의 카드 안쪽 폭 356px에 표가 들어가도록 좁은 화면에서 열을 줄인다.
+const NARROW_JOB_VALUE_WIDTH = 56
+const NARROW_JOB_RATE_WIDTH = 104
+const NARROW_JOB_NAME_MIN_WIDTH = 72
 const JOB_TABLE_MIN_WIDTH =
   JOB_NAME_MIN_WIDTH +
   JOB_VALUE_WIDTH * 2 +
   JOB_RATE_WIDTH +
+  JOB_COLUMN_GAP * 3 +
+  JOB_EDGE_PADDING * 2
+const NARROW_JOB_TABLE_MIN_WIDTH =
+  NARROW_JOB_NAME_MIN_WIDTH +
+  NARROW_JOB_VALUE_WIDTH * 2 +
+  NARROW_JOB_RATE_WIDTH +
   JOB_COLUMN_GAP * 3 +
   JOB_EDGE_PADDING * 2
 
@@ -127,10 +137,14 @@ export const styles = stylex.create({
   },
   boxTitle: { margin: 0, fontSize: 'inherit', lineHeight: 'inherit', fontWeight: 'inherit' },
   sortChips: { display: 'flex', gap: 6 },
+  jobTableScroll: { overflowX: 'auto' },
   // 이름 칸만 남은 폭을 받으므로, 좁은 창에서 이름이 사라지지 않게 표가 줄어들 수 있는 폭을 막는다.
   jobTable: {
     width: '100%',
-    minWidth: JOB_TABLE_MIN_WIDTH,
+    minWidth: {
+      default: JOB_TABLE_MIN_WIDTH,
+      [breakpoints.screenNarrow]: NARROW_JOB_TABLE_MIN_WIDTH
+    },
     borderCollapse: 'collapse',
     tableLayout: 'fixed',
     fontSize: 13,
@@ -149,8 +163,12 @@ export const styles = stylex.create({
     ':last-child': { paddingRight: JOB_EDGE_PADDING }
   },
   jobHeadName: { textAlign: 'left' },
-  jobHeadValue: { width: JOB_VALUE_WIDTH },
-  jobHeadRate: { width: JOB_RATE_WIDTH },
+  jobHeadValue: {
+    width: { default: JOB_VALUE_WIDTH, [breakpoints.screenNarrow]: NARROW_JOB_VALUE_WIDTH }
+  },
+  jobHeadRate: {
+    width: { default: JOB_RATE_WIDTH, [breakpoints.screenNarrow]: NARROW_JOB_RATE_WIDTH }
+  },
   jobRow: {
     height: JOB_ROW_HEIGHT,
     borderTopWidth: 1,
