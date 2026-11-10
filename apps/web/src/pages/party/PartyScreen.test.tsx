@@ -2,7 +2,7 @@
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { PartyPage } from './PartyPage'
+import { PartyScreen } from './PartyScreen'
 import { PARTY_SEAT_LAYOUT } from '#core/capture/cards'
 import type { SnapshotMark } from '#core/capture/adventure-snapshot'
 import { createSeatOrder, swapSeats, type SeatOrder } from '#core/capture/seats'
@@ -55,7 +55,7 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-type RenderProps = Partial<Omit<ComponentProps<typeof PartyPage>, 'slots' | 'seats'>> & {
+type RenderProps = Partial<Omit<ComponentProps<typeof PartyScreen>, 'slots' | 'seats'>> & {
   slots: SlotState[]
   characters?: (CardCharacter | null)[]
   nicknames?: (string | null)[]
@@ -92,7 +92,7 @@ async function render({
   await act(async () =>
     root.render(
       <TestRouter>
-        <PartyPage
+        <PartyScreen
           resetKey="party"
           actions={{
             lookupSlot: vi.fn(),

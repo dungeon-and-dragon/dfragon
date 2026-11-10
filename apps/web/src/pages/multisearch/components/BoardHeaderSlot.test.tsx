@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { useBoardHeaderPortal } from '../hooks/useBoardHeaderPortal'
+import { useBoardHeaderPortal } from '../../../hooks/useBoardHeaderPortal'
 import { BoardHeaderSlot } from './BoardHeaderSlot'
 
 let root: Root
