@@ -18,7 +18,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readFameRanking`, `readCharacterStats`, `readJobSkillAdoption`: 명성 랭킹, 캐릭터 통계, 전직별 스킬 채택 수를 읽습니다.
 - `saveCharacterStats`, `readFamedJobGrows`, `saveJobSkillAdoption`, `deleteJobSkillAdoptionComputedBefore`: 통계 저장분을 덮어쓰고, 명성 있는 캐릭터의 전직 목록을 읽고, 스킬 채택 수 저장분을 덮어쓰거나 지난 행을 지웁니다.
 - `readCharacterStatsSnapshot`, `readJobSkillAdoptionSnapshot`: 통계와 전직별 스킬 채택 수 저장분을 읽고, 없으면 `null`을 돌려줍니다.
-- `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`, `CLEAR_POPULATION_SIZE`(100,000): 클리어 집계의 클리어 기록과 주별 모집단을 저장하고, 명성 상위 모집단을 읽습니다.
+- `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`: 클리어 집계의 클리어 기록과 주별 모집단을 저장하고, 최고 명성이 하한 이상인 모집단을 읽습니다.
 - `readContentClearCollection`, `startContentClearCollection`, `recordContentClearCollectionProgress`, `finishContentClearCollection`: 클리어 수집의 진행 위치를 읽고 씁니다.
 - `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearJobCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 모집단, 주와 배율별 클리어 수, 한 주의 직업별 클리어 수와 모험단 크기 분포를 읽습니다.
 - `registerJobs`, `startJobRun`, `claimRequestedJobRun`, `finishJobRun`과 나머지 job 함수: 배치 job 목록과 실행 이력을 쓰고 읽습니다.

@@ -110,6 +110,7 @@ test('클리어 목록은 레이드를 주마다 세고 배율별 수의 합이 
       kind: 'raid',
       name: '무너진 성자 미카엘라 (하드)',
       releasedAt: '2026-08-05T21:00:00.000Z',
+      entryFame: 104_292,
       latest: true,
       weeks: [
         {
