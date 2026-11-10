@@ -234,6 +234,84 @@ it('받은 주가 둘 이상이면 주차별 막대를 두고 고른 주의 클�
   )
 })
 
+function weeksFrom(first: string, count: number): ClearWeek[] {
+  return Array.from({ length: count }, (_, index) => {
+    const weekStart = new Date(Date.parse(first) + index * 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10)
+
+    return week(weekStart, index + 1)
+  })
+}
+
+const longRaid: ClearContent = {
+  id: 'nabel-normal',
+  kind: 'raid',
+  name: '만들어진 신 나벨 (일반)',
+  releasedAt: '2025-04-16T21:00:00.000Z',
+  latest: false,
+  weeks: weeksFrom('2025-04-17', 82)
+}
+
+function tooltipText(name: string): string | null {
+  const tooltip = boxOf(name).querySelector<HTMLElement>('ul + [aria-hidden="true"]')!
+  if (tooltip.style.visibility === 'hidden') {
+    return null
+  }
+
+  return tooltip.textContent
+}
+
+function moveMouse(from: Element, to: Element): Promise<void> {
+  return act(async () => {
+    from.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: to }))
+    to.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: from }))
+  })
+}
+
+it('받은 주가 한 해를 넘으면 주마다 막대를 두고 13주마다 연도를 붙인 축 라벨을 두며 고른 주의 tooltip으로 돌아온다', async () => {
+  await render(
+    { content: 'nabel-normal', week: '2025-10-16' },
+    { getClearStats: async () => ({ contents: [longRaid] }) }
+  )
+
+  const chart = boxOf('클리어').querySelector('ul')!
+  const columns = [...chart.querySelectorAll('li')]
+  expect(columns).toHaveLength(82)
+  expect(columns.map((column) => column.lastElementChild?.textContent).filter(Boolean)).toEqual([
+    '25-04-17',
+    '25-07-17',
+    '25-10-16',
+    '26-01-15',
+    '26-04-16',
+    '26-07-16',
+    '26-10-15'
+  ])
+  expect(tooltipText('클리어')).toBe('27주차 10-1627  2.7%')
+
+  await moveMouse(document.body, columns.at(-1)!)
+  expect(tooltipText('클리어')).toBe('82주차 11-0582  8.2%')
+
+  await moveMouse(columns.at(-1)!, document.body)
+  expect(tooltipText('클리어')).toBe('27주차 10-1627  2.7%')
+})
+
+it('받은 주가 한 해 안이면 4주마다 월과 날짜만 쓴 축 라벨을 둔다', async () => {
+  const halfYear = { ...longRaid, weeks: longRaid.weeks.slice(0, 14) }
+  await render(
+    { content: 'nabel-normal' },
+    { getClearStats: async () => ({ contents: [halfYear] }) }
+  )
+
+  const columns = [...boxOf('클리어').querySelectorAll('ul > li')]
+  expect(columns.map((column) => column.lastElementChild?.textContent).filter(Boolean)).toEqual([
+    '04-17',
+    '05-15',
+    '06-12',
+    '07-10'
+  ])
+})
+
 it('레이드는 배율별 클리어와 모험단별 분포를 나란히 둔다', async () => {
   await render({})
 
