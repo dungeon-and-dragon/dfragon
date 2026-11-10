@@ -212,7 +212,15 @@
       }
     },
     {
-      "includes": ["**/*.ts", "**/*.mts", "**/*.cts", "**/*.tsx", "apps/api/**", "apps/web/**"],
+      "includes": [
+        "**/*.ts",
+        "**/*.mts",
+        "**/*.cts",
+        "**/*.tsx",
+        "apps/api/**",
+        "apps/web/**",
+        "apps/internal/**"
+      ],
       "linter": {
         "rules": {
           "complexity": {
@@ -240,7 +248,7 @@
       }
     },
     {
-      "includes": ["apps/web/**"],
+      "includes": ["apps/web/**", "apps/internal/**"],
       "linter": {
         "rules": {
           "security": {
@@ -254,7 +262,12 @@
       }
     },
     {
-      "includes": ["apps/web/**/*.ts", "apps/web/**/*.tsx"],
+      "includes": [
+        "apps/web/**/*.ts",
+        "apps/web/**/*.tsx",
+        "apps/internal/**/*.ts",
+        "apps/internal/**/*.tsx"
+      ],
       "linter": {
         "rules": {
           "correctness": {
@@ -276,6 +289,8 @@
       "includes": [
         "apps/web/**/*.ts",
         "apps/web/**/*.tsx",
+        "apps/internal/**/*.ts",
+        "apps/internal/**/*.tsx",
         "!**/*.test.*",
         "!**/*.spec.*",
         "!**/*.cy.*",
