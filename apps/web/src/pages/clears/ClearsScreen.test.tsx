@@ -312,6 +312,22 @@ it('받은 주가 한 해 안이면 4주마다 월과 날짜만 쓴 축 라벨�
   ])
 })
 
+it('배율별 클리어와 모험단별 분포 행에 마우스를 올리면 그 표의 합계 대비 비율을 띄운다', async () => {
+  await render({})
+
+  const [baseRatio, highRatio] = [...boxOf('배율별 클리어').querySelectorAll('li')]
+  await moveMouse(document.body, baseRatio!)
+  expect(tooltipText('배율별 클리어')).toBe('90.0%')
+
+  await moveMouse(baseRatio!, highRatio!)
+  expect(tooltipText('배율별 클리어')).toBe('10.0%')
+
+  const [, twoCharacters] = [...boxOf('모험단별 분포').querySelectorAll('li')]
+  await moveMouse(highRatio!, twoCharacters!)
+  expect(tooltipText('배율별 클리어')).toBeNull()
+  expect(tooltipText('모험단별 분포')).toBe('7.0%')
+})
+
 it('레이드는 배율별 클리어와 모험단별 분포를 나란히 둔다', async () => {
   await render({})
 
