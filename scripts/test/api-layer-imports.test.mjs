@@ -75,6 +75,64 @@ const allowedImports = [
   ['characters/a.ts', '../infrastructure/neople/today-grade.js']
 ]
 
+// 앱을 만드는 파일은 경로가 정해져 있어, 파일마다 import 여러 줄을 한 sample에 넣고 줄 번호로 진단을 맞춘다.
+const appFiles = {
+  'http.ts': {
+    rejected: [
+      './characters/http.js',
+      './characters/search-service.js',
+      './score/engine.js',
+      './build-info.js',
+      './swagger/operations.js',
+      './domain/character-failure.js',
+      './application/today-grade/service.js',
+      './infrastructure/neople/today-grade.js',
+      './presentation/http/today-grade/controller.js',
+      './presentation/http/character-search/failures.js',
+      './presentation/openapi/today-grade.js'
+    ],
+    allowed: [
+      './runtime/modules/today-grade.js',
+      './runtime/http-app.js',
+      './presentation/http/character-failures.js',
+      './access-log.js',
+      './swagger/setup.js',
+      '@nestjs/event-emitter'
+    ]
+  },
+  'ops/app.ts': {
+    rejected: [
+      './jobs.js',
+      './errors.js',
+      '../characters/http.js',
+      '../presentation/http/ops/a.js'
+    ],
+    allowed: [
+      '../runtime/modules/ops-jobs.js',
+      '../runtime/http-app.js',
+      '../presentation/http/ops-failures.js',
+      '../access-log.js',
+      'express'
+    ]
+  }
+}
+
+function importingAll(sources) {
+  const imports = sources.map((source, index) => `import { value${index} } from '${source}'`)
+  const values = sources.map((_source, index) => `value${index}`)
+
+  return `${imports.join('\n')}\nexport const used = [${values.join(', ')}]\n`
+}
+
+function appSamples(kind) {
+  return Object.fromEntries(
+    Object.entries(appFiles).map(([file, sources]) => [
+      `${src}/${file}`,
+      importingAll(sources[kind])
+    ])
+  )
+}
+
 const rejectedSources = Object.fromEntries(
   [...rejectedImports, ...bareBuiltinImports].map(([file, source]) => [
     `${src}/${file}`,
@@ -85,9 +143,10 @@ const allowedSources = Object.fromEntries(
   allowedImports.map(([file, source]) => [`${src}/${file}`, importing(source)])
 )
 const typeOnlySource = `${src}/domain/today-grade/type-only.ts`
-const biomeRejected = await lintSamples(rejectedSources)
+const biomeRejected = await lintSamples({ ...rejectedSources, ...appSamples('rejected') })
 const biomeAllowed = await lintSamples({
   ...allowedSources,
+  ...appSamples('allowed'),
   [typeOnlySource]: typeImporting('express')
 })
 
@@ -111,6 +170,26 @@ for (const [file, source] of bareBuiltinImports) {
 for (const [file, source] of allowedImports) {
   test(`Biome: ${file}에서 ${source} import를 허용한다`, () => {
     assert.deepEqual(biomeAllowed.get(`${src}/${file}`), [])
+  })
+}
+
+for (const [file, { rejected, allowed }] of Object.entries(appFiles)) {
+  test(`Biome: 앱을 만드는 ${file}에서 기능의 module이 아닌 파일 import를 거부하고 runtime/modules/를 알린다`, () => {
+    const diagnostics = biomeRejected.get(`${src}/${file}`)
+    const reported = diagnostics
+      .map(({ category, location }) => [category, location.start.line])
+      .sort(([, left], [, right]) => left - right)
+    assert.deepEqual(
+      reported,
+      rejected.map((_source, index) => ['lint/style/noRestrictedImports', index + 1])
+    )
+    for (const { message } of diagnostics) {
+      assert.ok(message.includes('runtime/modules/<기능>.ts'), message)
+    }
+  })
+
+  test(`Biome: 앱을 만드는 ${file}에서 module, 앱 공통 설정, 공용 실패 표 import를 허용한다`, () => {
+    assert.deepEqual(biomeAllowed.get(`${src}/${file}`), [], allowed.join(', '))
   })
 }
 
