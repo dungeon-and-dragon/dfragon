@@ -1,5 +1,5 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import type { ReportCode } from '../../access-log.js'
+import type { ReportCode } from '../../presentation/http/access-log.js'
 import { SCORE_ENGINE, createScoreEngine } from '../../infrastructure/score/engine.js'
 
 export interface ScoreEngineModuleOptions {

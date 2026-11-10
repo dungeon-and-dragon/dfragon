@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common'
-import { API_BUILD_INFO, ApiVersionController, readApiBuildInfo } from '../../build-info.js'
+import { readApiBuildInfo } from '../../infrastructure/build-info.js'
+import { API_BUILD_INFO, ApiVersionController } from '../../presentation/http/version/controller.js'
 
 export interface VersionModuleOptions {
   readonly buildInfoPath?: string

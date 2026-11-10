@@ -2,7 +2,7 @@ import type { INestApplication, Type } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import type { Request, Response } from 'express'
-import { type AccessLogSink, createAccessLog } from '../access-log.js'
+import { type AccessLogSink, createAccessLog } from '../presentation/http/access-log.js'
 import {
   type FailureResponse,
   FailureResponseFilter

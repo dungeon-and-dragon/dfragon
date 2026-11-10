@@ -14,7 +14,7 @@ import type {
   NeopleCharacterSearchResult,
   NeopleCharacterSearchInput
 } from '../../domain/character-search/types.js'
-import { forwardCause } from '../../error-chain.js'
+import { forwardCause } from '../../domain/error-chain.js'
 
 const invalidResponse = (): NeopleSearchFailure => new NeopleSearchFailure('api')
 

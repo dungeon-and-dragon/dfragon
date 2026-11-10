@@ -1,4 +1,4 @@
-import { type FailureOptions, SanitizedFailure } from '../../error-chain.js'
+import { type FailureOptions, SanitizedFailure } from '../error-chain.js'
 
 export type TodayGradeFailureKind = 'internal' | 'api' | 'unavailable' | 'timeout'
 
