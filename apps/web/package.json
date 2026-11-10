@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "pnpm run prepare:ocr-assets && vite",
     "build": "pnpm run prepare:ocr-assets && tsc -b && vite build",
-    "lint": "biome lint",
+    "lint": "biome lint && pnpm run lint:imports",
+    "lint:imports": "depcruise --config .dependency-cruiser.mjs --output-type err-long src",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
