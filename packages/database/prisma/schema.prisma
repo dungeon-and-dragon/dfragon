@@ -170,6 +170,7 @@ model ContentClearCollection {
 model Job {
   name          String    @id
   displayName   String    @map("display_name")
+  description   String    @default("")
   schedule      String?
   argsSchema    Json      @map("args_schema")
   delayMinutes  Int       @map("delay_minutes")

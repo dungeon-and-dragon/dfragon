@@ -44,6 +44,7 @@ function jobResponse(job: JobOverview) {
   return {
     name: job.name,
     displayName: job.displayName,
+    description: job.description,
     schedule: job.schedule,
     paused,
     nextRunAt,

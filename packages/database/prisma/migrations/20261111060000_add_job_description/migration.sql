@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE "jobs" ADD COLUMN "description" TEXT NOT NULL DEFAULT '';
+
+COMMIT;
