@@ -50,6 +50,7 @@ export function createCharacterStatsJob(store: StatsJobStore, now: () => Date = 
   return defineJob({
     name: 'character-stats',
     displayName: '통계',
+    description: '통계 화면에 쓰는 집계를 계산해 저장합니다.',
     schedule: DAILY_AT_MIDNIGHT,
     argsSchema: z.object({}),
     delayMinutes: CHARACTER_STATS_DELAY_MINUTES,
@@ -75,6 +76,7 @@ export function createSkillAdoptionJob(store: StatsJobStore, now: () => Date = (
   return defineJob({
     name: 'skill-adoption',
     displayName: '스킬 채택률',
+    description: '전직별 스킬 채택률을 계산해 저장합니다.',
     schedule: DAILY_AT_MIDNIGHT,
     argsSchema: z.object({}),
     delayMinutes: SKILL_ADOPTION_DELAY_MINUTES,

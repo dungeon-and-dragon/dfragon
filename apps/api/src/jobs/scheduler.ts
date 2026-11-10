@@ -43,6 +43,7 @@ export async function registerWorkerJobs(
     jobs.map((definition) => ({
       name: definition.name,
       displayName: definition.displayName,
+      description: definition.description,
       schedule: definition.schedule ?? null,
       argsSchema: z.toJSONSchema(definition.argsSchema),
       delayMinutes: definition.delayMinutes,
