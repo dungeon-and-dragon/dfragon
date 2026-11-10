@@ -16,12 +16,7 @@ import {
 } from '../characters/timeline/neople.js'
 import { splitTimelineRanges } from '../characters/timeline/ranges.js'
 import { startOfResetWeek } from '../utils/seoul-time.js'
-import {
-  CLEAR_CONTENTS,
-  type ClearContent,
-  toContentClearInput,
-  toLatestContents
-} from './contents.js'
+import { CLEAR_CONTENTS, type ClearContent, toContentClearInput } from './contents.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000
 
@@ -85,65 +80,20 @@ function eachWeek(start: Date, last: Date): Date[] {
   return weeks
 }
 
-function openWeekTimes(stored: readonly StoredClearPopulation[]): number[] {
-  return stored.filter(({ closed }) => !closed).map(({ weekStart }) => weekStart.getTime())
-}
-
-// 레이드는 지금 주부터 받고 첫 주는 따로 채운다. 챌린지는 출시부터 누적으로 세므로 처음 한 번은 출시 주부터 받는다.
-function firstDailyWeek(
-  content: ClearContent,
-  stored: readonly StoredClearPopulation[],
-  currentWeek: Date
-): Date {
-  const openWeeks = openWeekTimes(stored)
-  if (openWeeks.length > 0) {
-    return new Date(Math.min(...openWeeks))
-  }
-
-  if (content.kind === 'challenge') {
-    return startOfResetWeek(content.releasedAt)
-  }
-
-  return currentWeek
-}
-
-// 새 컨텐츠에 밀려난 컨텐츠는 마감하지 않은 주만 끝까지 마저 받아 마감하고, 그 뒤로는 받지 않는다.
-function unclosedWeeks(stored: readonly StoredClearPopulation[]): Date[] {
-  const openWeeks = openWeekTimes(stored)
-  if (openWeeks.length === 0) {
-    return []
-  }
-
-  return eachWeek(new Date(Math.min(...openWeeks)), new Date(Math.max(...openWeeks)))
-}
-
-function needsFirstWeek(
-  content: ClearContent,
-  stored: readonly StoredClearPopulation[],
-  dailyWeeks: readonly Date[]
-): boolean {
-  const firstWeek = startOfResetWeek(content.releasedAt).getTime()
-  const filled = stored.some(({ weekStart, closed }) => closed && weekStart.getTime() === firstWeek)
-  const daily = dailyWeeks.some((week) => week.getTime() === firstWeek)
-
-  return !filled && !daily
-}
-
 function contentWeeks(
   content: ClearContent,
-  latestIds: ReadonlySet<string>,
   populations: readonly StoredClearPopulation[],
   currentWeek: Date
 ): Date[] {
-  const stored = populations.filter(({ contentId }) => contentId === content.id)
-  const dailyWeeks = latestIds.has(content.id)
-    ? eachWeek(firstDailyWeek(content, stored, currentWeek), currentWeek)
-    : unclosedWeeks(stored)
-  if (!needsFirstWeek(content, stored, dailyWeeks)) {
-    return dailyWeeks
-  }
+  const closedWeeks = new Set(
+    populations
+      .filter(({ contentId, closed }) => contentId === content.id && closed)
+      .map(({ weekStart }) => weekStart.getTime())
+  )
 
-  return [startOfResetWeek(content.releasedAt), ...dailyWeeks]
+  return eachWeek(startOfResetWeek(content.releasedAt), currentWeek).filter(
+    (week) => !closedWeeks.has(week.getTime())
+  )
 }
 
 // 이어지는 주는 한 구간으로 묶어 캐릭터당 요청을 줄인다. 구간이 90일을 넘으면 Neople 한도에 맞춰 나눈다.
@@ -167,7 +117,7 @@ function toRanges(weeks: readonly ClearCollectionWeek[], startedAt: Date): Timel
   )
 }
 
-/** 종류별 최신 컨텐츠의 마감하지 않은 주와, 아직 채우지 않은 출시 첫 주를 받는다. */
+/** 출시한 컨텐츠마다 출시 주부터 지금 주까지 가운데 마감하지 않은 주를 받는다. */
 function planClearCollection(
   contents: readonly ClearContent[],
   populations: readonly StoredClearPopulation[],
@@ -175,9 +125,8 @@ function planClearCollection(
 ): ClearCollectionPlan {
   const currentWeek = startOfResetWeek(startedAt)
   const released = contents.filter(({ releasedAt }) => releasedAt <= startedAt)
-  const latestIds = new Set(toLatestContents(released).map(({ id }) => id))
   const weeks = released.flatMap((content) =>
-    contentWeeks(content, latestIds, populations, currentWeek).map((weekStart) => ({
+    contentWeeks(content, populations, currentWeek).map((weekStart) => ({
       contentId: content.id,
       weekStart,
       closed: weekStart < currentWeek
