@@ -3,7 +3,7 @@ import { type ErrorChainEntry, describeErrorChain } from '../error-chain.js'
 import type { JobAlert, SendJobAlert } from './alert.js'
 import type { JobDefinition, JobStore, ReportJobEvent } from './definition.js'
 
-const PROGRESS_WRITE_INTERVAL_MS = 10_000
+const PROGRESS_WRITE_INTERVAL_MS = 1_000
 
 export type JobRunTarget = {
   id: number
@@ -81,7 +81,13 @@ export async function executeJobRun(
   let progress: JobRunProgress | null = null
   let writtenProgress: JobRunProgress | null = null
   const progressWriter = setInterval(() => {
-    if (progress === null || progress === writtenProgress) {
+    if (progress === null) {
+      return
+    }
+
+    const progressUnchanged =
+      progress.done === writtenProgress?.done && progress.total === writtenProgress.total
+    if (progressUnchanged) {
       return
     }
     writtenProgress = progress
