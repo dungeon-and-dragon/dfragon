@@ -7,7 +7,7 @@ import {
   ApiCharacterTimeline,
   ApiCharacterTimelineAcquisitions,
   ApiCharacterTimelineEnhancements
-} from '../../swagger/operations.js'
+} from '../../presentation/openapi/character-timeline.js'
 import { parseCharacterIdentity } from '../identity.js'
 import {
   type CharacterTimeline,

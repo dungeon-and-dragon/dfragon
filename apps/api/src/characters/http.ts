@@ -1,5 +1,8 @@
 import { ApiTags } from '@nestjs/swagger'
-import { ApiCharacterCandidates, ApiCharacterSearch } from '../swagger/operations.js'
+import {
+  ApiCharacterCandidates,
+  ApiCharacterSearch
+} from '../presentation/openapi/character-search.js'
 import { Controller, Get, Inject, Req, Res } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { recordAccessLogCachedResponse, recordAccessLogSharedNeopleFetch } from '../access-log.js'
