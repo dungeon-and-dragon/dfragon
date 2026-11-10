@@ -17,7 +17,6 @@ export type {
 } from './character-collection.js'
 export { createDatabaseClient } from './client.js'
 export {
-  CLEAR_POPULATION_SIZE,
   finishContentClearCollection,
   readClearPopulation,
   readContentClearAdventureSizes,

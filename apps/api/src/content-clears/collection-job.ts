@@ -28,7 +28,7 @@ export type ClearCollectionJobDependencies = Pick<
 
 export function createDatabaseClearCollectionStore(client: DatabaseClient): ClearCollectionStore {
   return {
-    readPopulation: () => readClearPopulation(client),
+    readPopulation: (minMaxFame) => readClearPopulation(client, minMaxFame),
     readPopulations: () => readContentClearPopulations(client),
     readProgress: () => readContentClearCollection(client),
     startProgress: (startedAt) => startContentClearCollection(client, startedAt),
@@ -47,7 +47,7 @@ export function createContentClearCollectionJob(
     name: 'content-clear-collection',
     displayName: '클리어 기록 수집',
     description:
-      '명성 상위 10만 캐릭터의 클리어 기록을 Neople에서 받아 저장합니다. 다른 수집과 Neople 요청 속도 상한을 나눠 씁니다.',
+      '최고 명성이 종류별 최신 컨텐츠의 입장 명성 이상인 캐릭터의 클리어 기록을 Neople에서 받아 저장합니다. 다른 수집과 Neople 요청 속도 상한을 나눠 씁니다.',
     schedule: '0 6 * * *',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
