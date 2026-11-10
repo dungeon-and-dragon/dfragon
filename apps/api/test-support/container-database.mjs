@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
@@ -175,6 +175,26 @@ try {
   }
   assert(ready)
 
+  stage = 'max fame migration backfill'
+  const maxFameMigration = await readFile(
+    new URL(
+      '../../../packages/database/prisma/migrations/20261111120000_add_character_max_fame/migration.sql',
+      import.meta.url
+    ),
+    'utf8'
+  )
+  assert.equal(
+    (
+      await psql(
+        `CREATE TEMP TABLE characters (fame integer); INSERT INTO characters VALUES (61234), (0), (NULL); ${maxFameMigration} SELECT count(*) FROM characters WHERE max_fame IS DISTINCT FROM fame`
+      )
+    ).stdout
+      .trim()
+      .split('\n')
+      .at(-1),
+    '0'
+  )
+
   stage = 'API role with public schema ownership only'
   await psql(
     [
@@ -329,7 +349,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '11'
+    '13'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -596,7 +616,8 @@ try {
     [
       'CREATE INDEX characters_fame_idx ON public.characters USING btree (fame DESC)',
       'CREATE INDEX characters_job_id_fame_idx ON public.characters USING btree (job_id, fame DESC)',
-      'CREATE INDEX characters_job_id_job_grow_id_fame_idx ON public.characters USING btree (job_id, job_grow_id, fame DESC)'
+      'CREATE INDEX characters_job_id_job_grow_id_fame_idx ON public.characters USING btree (job_id, job_grow_id, fame DESC)',
+      'CREATE INDEX characters_max_fame_idx ON public.characters USING btree (max_fame DESC)'
     ].join('\n')
   )
   await docker([

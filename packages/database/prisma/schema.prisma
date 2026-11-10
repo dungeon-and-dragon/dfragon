@@ -36,6 +36,7 @@ model Character {
   jobName        String?   @map("job_name")
   jobGrowName    String?   @map("job_grow_name")
   fame           Int?
+  maxFame        Int?      @map("max_fame")
   guildId        String?   @map("guild_id")
   guildName      String?   @map("guild_name")
   basicFetchedAt DateTime? @map("basic_fetched_at") @db.Timestamptz(3)
@@ -46,6 +47,7 @@ model Character {
   @@index([serverId, characterName])
   @@index([guildId])
   @@index([fame(sort: Desc)])
+  @@index([maxFame(sort: Desc)])
   @@index([jobId, fame(sort: Desc)])
   @@index([jobId, jobGrowId, fame(sort: Desc)])
   @@map("characters")
