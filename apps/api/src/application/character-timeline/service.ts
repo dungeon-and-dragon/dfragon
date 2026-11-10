@@ -1,18 +1,11 @@
-import type { TimelineCharacter, TimelineItemCursor } from '@dfragon/database'
+import type { TimelineCharacter } from '@dfragon/database'
+import type { ReadTimelinePage } from './ports.js'
 import type { TimelineSyncQueue } from './queue.js'
 import {
   type CharacterTimeline,
   EMPTY_CHARACTER_TIMELINE,
-  EMPTY_TIMELINE_PAGE,
-  type TimelineItemPage,
-  type TimelinePageList
-} from './read.js'
-
-export type ReadTimelinePage = (
-  character: TimelineCharacter,
-  list: TimelinePageList,
-  before: TimelineItemCursor
-) => Promise<TimelineItemPage>
+  EMPTY_TIMELINE_PAGE
+} from '../../domain/character-timeline/project.js'
 
 export interface CharacterTimelineService {
   get(character: TimelineCharacter): Promise<CharacterTimeline>

@@ -1,19 +1,24 @@
-import {
-  type DatabaseClient,
-  type TimelineCharacter,
-  type TimelineEventRow,
-  type TimelineItemCursor,
-  type TimelineItemRow,
-  type RecentTimelineItemQuery,
-  readCurrentSeasonStart,
-  readRecentTimelineItems,
-  readTimelineEvents
-} from '@dfragon/database'
-import { z } from 'zod'
-import { startOfResetWeek } from '../../utils/seoul-time.js'
+import type { TimelineItemCursor, TimelineItemRow } from '@dfragon/database'
+
+export type TimelineClearRecord = {
+  code: number
+  occurredAt: Date
+  raidName: string | null
+  data: { regionName: string } | { modeName: string | null; hard: boolean } | null
+}
+
+export type TimelineEnhancementRecord = {
+  id: bigint
+  code: number
+  occurredAt: Date
+  itemId: string | null
+  itemName: string | null
+  itemRarity: string | null
+  data: { before: number | null; after: number; result: boolean; safe: boolean | null } | null
+}
 
 export const RAID_CLEAR_CODES = [201, 210]
-const LEGION_CLEAR_CODE = 209
+export const LEGION_CLEAR_CODE = 209
 export const CLEAR_CODES = [...RAID_CLEAR_CODES, LEGION_CLEAR_CODE]
 type ClearKind = 'raid' | 'legion'
 type EnhancementKind = 'reinforce' | 'amplify' | 'refine'
@@ -28,8 +33,7 @@ export const ACQUISITION_CODES = [
   501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519,
   520, 521, 550, 551, 552, 553, 554, 555, 556, 557
 ]
-const ACQUISITION_RARITIES = ['에픽', '태초']
-const PAGE_SIZE = 50
+export const TIMELINE_PAGE_SIZE = 50
 // 15자리 ms는 언제나 올바른 Date이고, 18자리 id는 PostgreSQL bigint 범위를 넘지 않는다.
 const CURSOR_PATTERN = /^(\d{1,15})\.(\d{1,18})$/
 
@@ -88,8 +92,8 @@ export type CharacterTimeline = {
 }
 
 export type TimelineRecords = {
-  clears: readonly TimelineEventRow[]
-  enhancements: readonly TimelineItemRow[]
+  clears: readonly TimelineClearRecord[]
+  enhancements: readonly TimelineEnhancementRecord[]
   acquisitions: readonly TimelineItemRow[]
 }
 
@@ -104,43 +108,29 @@ export const EMPTY_CHARACTER_TIMELINE: CharacterTimeline = {
 
 export const EMPTY_TIMELINE_PAGE: TimelineItemPage = { items: [], nextCursor: null }
 
-const PAGE_QUERIES = {
-  enhancements: { codes: ENHANCEMENT_CODES },
-  acquisitions: { codes: ACQUISITION_CODES, itemRarities: ACQUISITION_RARITIES }
-} satisfies Record<TimelinePageList, Pick<RecentTimelineItemQuery, 'codes' | 'itemRarities'>>
-
-// 저장한 data는 Neople 응답의 객체지만 행마다 필드가 다를 수 있어 쓰기 전에 확인한다.
-// Neople은 하드로 클리어한 레이드에만 hard: true를 넣고 나머지 행에는 칸을 두지 않는다.
-const raidClearData = z.object({
-  modeName: z.string().nullable().catch(null),
-  hard: z.boolean().catch(false)
-})
-const legionClearData = z.object({ regionName: z.string() })
-const enhancementData = z.object({
-  before: z.number().nullable().catch(null),
-  after: z.number(),
-  result: z.boolean(),
-  safe: z.boolean().nullable().catch(null)
-})
-
-export function toClear({ code, occurredAt, raidName, data }: TimelineEventRow): TimelineClear[] {
-  if (code === LEGION_CLEAR_CODE) {
-    const legion = legionClearData.safeParse(data)
-    if (!legion.success) {
-      return []
-    }
-
-    return [
-      { kind: 'legion', name: legion.data.regionName, modeName: null, hard: false, occurredAt }
-    ]
-  }
-
-  const raid = raidClearData.safeParse(data)
-  if (raidName === null || !raid.success) {
+export function toClear({
+  code,
+  occurredAt,
+  raidName,
+  data
+}: TimelineClearRecord): TimelineClear[] {
+  if (data === null) {
     return []
   }
 
-  const { modeName, hard } = raid.data
+  if (code === LEGION_CLEAR_CODE) {
+    if (!('regionName' in data)) {
+      return []
+    }
+
+    return [{ kind: 'legion', name: data.regionName, modeName: null, hard: false, occurredAt }]
+  }
+
+  if (raidName === null || !('modeName' in data)) {
+    return []
+  }
+
+  const { modeName, hard } = data
 
   return [{ kind: 'raid', name: raidName, modeName, hard, occurredAt }]
 }
@@ -160,13 +150,13 @@ function countClears(clears: readonly TimelineClear[]): TimelineClearCount[] {
   return [...counts.values()]
 }
 
-export function toEnhancement(row: TimelineItemRow): TimelineEnhancement[] {
+export function toEnhancement(row: TimelineEnhancementRecord): TimelineEnhancement[] {
   const kind = ENHANCEMENT_KINDS.get(row.code)
-  const enhancement = enhancementData.safeParse(row.data)
-  if (kind === undefined || !enhancement.success) {
+  const enhancement = row.data
+  if (kind === undefined || enhancement === null) {
     return []
   }
-  const { before, after, result, safe } = enhancement.data
+  const { before, after, result, safe } = enhancement
 
   return [
     {
@@ -208,24 +198,28 @@ export function parseTimelineCursor(cursor: string): TimelineItemCursor | undefi
 }
 
 // 한 개를 더 읽어 다음 묶음이 있는지 본다. 형식이 맞지 않아 뺀 행이 있어도 cursor는 읽은 행으로 정한다.
-function toPage<Item>(
-  rows: readonly TimelineItemRow[],
-  toItems: (rows: readonly TimelineItemRow[]) => Item[]
+function toPage<Row extends TimelineItemCursor, Item>(
+  rows: readonly Row[],
+  toItems: (rows: readonly Row[]) => Item[]
 ): TimelinePage<Item> {
-  const page = rows.slice(0, PAGE_SIZE)
+  const page = rows.slice(0, TIMELINE_PAGE_SIZE)
   const last = page.at(-1)
   const items = toItems(page)
   const nextCursor =
-    rows.length > PAGE_SIZE && last !== undefined ? formatTimelineCursor(last) : null
+    rows.length > TIMELINE_PAGE_SIZE && last !== undefined ? formatTimelineCursor(last) : null
 
   return { items, nextCursor }
 }
 
-function toEnhancementPage(rows: readonly TimelineItemRow[]): TimelinePage<TimelineEnhancement> {
+export function toEnhancementPage(
+  rows: readonly TimelineEnhancementRecord[]
+): TimelinePage<TimelineEnhancement> {
   return toPage(rows, (page) => page.flatMap(toEnhancement))
 }
 
-function toAcquisitionPage(rows: readonly TimelineItemRow[]): TimelinePage<TimelineAcquisition> {
+export function toAcquisitionPage(
+  rows: readonly TimelineItemRow[]
+): TimelinePage<TimelineAcquisition> {
   return toPage(rows, (page) => page.map(toAcquisition))
 }
 
@@ -248,51 +242,4 @@ export function toCharacterTimeline(
     acquisitions: acquisitions.items,
     acquisitionsCursor: acquisitions.nextCursor
   }
-}
-
-function readPageRows(
-  client: DatabaseClient,
-  character: TimelineCharacter,
-  list: TimelinePageList,
-  before?: TimelineItemCursor
-): Promise<TimelineItemRow[]> {
-  return readRecentTimelineItems(client, character, {
-    ...PAGE_QUERIES[list],
-    limit: PAGE_SIZE + 1,
-    before
-  })
-}
-
-export async function readCharacterTimeline(
-  client: DatabaseClient,
-  character: TimelineCharacter,
-  now: Date
-): Promise<CharacterTimeline> {
-  const weekStart = startOfResetWeek(now)
-  const seasonStart = await readCurrentSeasonStart(client, now)
-  if (seasonStart === undefined) {
-    throw new Error('No season has started')
-  }
-  const since = new Date(Math.min(weekStart.getTime(), seasonStart.getTime()))
-  const [clears, enhancements, acquisitions] = await Promise.all([
-    readTimelineEvents(client, character, CLEAR_CODES, since),
-    readPageRows(client, character, 'enhancements'),
-    readPageRows(client, character, 'acquisitions')
-  ])
-
-  return toCharacterTimeline({ clears, enhancements, acquisitions }, weekStart, seasonStart)
-}
-
-export async function readTimelinePage(
-  client: DatabaseClient,
-  character: TimelineCharacter,
-  list: TimelinePageList,
-  before: TimelineItemCursor
-): Promise<TimelineItemPage> {
-  const rows = await readPageRows(client, character, list, before)
-  if (list === 'enhancements') {
-    return toEnhancementPage(rows)
-  }
-
-  return toAcquisitionPage(rows)
 }

@@ -2,22 +2,22 @@ import { Controller, Get, Inject, Query, Req, UseFilters } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request } from 'express'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../../domain/character-failure.js'
-import { characterFailureResponse } from '../../presentation/http/character-failures.js'
-import { FailureResponseFilter } from '../../presentation/http/failure-response.js'
+import { CharacterDetailFailure } from '../../../domain/character-failure.js'
+import { characterFailureResponse } from '../character-failures.js'
+import { FailureResponseFilter } from '../failure-response.js'
 import {
   ApiCharacterTimeline,
   ApiCharacterTimelineAcquisitions,
   ApiCharacterTimelineEnhancements
-} from '../../presentation/openapi/character-timeline.js'
-import { parseCharacterIdentity } from '../../domain/character-identity.js'
+} from '../../openapi/character-timeline.js'
+import { parseCharacterIdentity } from '../../../domain/character-identity.js'
 import {
   type CharacterTimeline,
   parseTimelineCursor,
   type TimelineItemPage,
   type TimelinePageList
-} from './read.js'
-import type { CharacterTimelineService } from './service.js'
+} from '../../../domain/character-timeline/project.js'
+import type { CharacterTimelineService } from '../../../application/character-timeline/service.js'
 
 export const CHARACTER_TIMELINE_SERVICE = Symbol('CHARACTER_TIMELINE_SERVICE')
 

@@ -9,12 +9,10 @@ import type {
 } from '@dfragon/database'
 import type { NeopleClient } from '@dfragon/neople'
 import { addWeeks, subMinutes } from 'date-fns'
-import { TimelineFailure } from '../characters/timeline/errors.js'
-import {
-  type FetchCharacterTimeline,
-  createNeopleCharacterTimeline
-} from '../characters/timeline/neople.js'
-import { splitTimelineRanges } from '../characters/timeline/ranges.js'
+import type { FetchCharacterTimeline } from '../application/character-timeline/ports.js'
+import { TimelineFailure } from '../domain/character-timeline/failure.js'
+import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
+import { splitTimelineRanges } from '../domain/character-timeline/ranges.js'
 import { startOfResetWeek } from '../utils/seoul-time.js'
 import {
   CLEAR_CONTENTS,
