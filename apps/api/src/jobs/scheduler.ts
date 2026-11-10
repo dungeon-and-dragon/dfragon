@@ -4,7 +4,7 @@ import type { JobDefinition } from './definition.js'
 import { type JobRunDependencies, executeJobRun, readErrorChain, sendJobAlert } from './run.js'
 
 const TIMEZONE = 'Asia/Seoul'
-const REQUEST_POLL_INTERVAL_MS = 5_000
+const REQUEST_POLL_INTERVAL_MS = 1_000
 const WORKER_SEEN_INTERVAL_MS = 60_000
 
 export type JobSchedulerDependencies = JobRunDependencies & {
