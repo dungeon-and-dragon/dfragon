@@ -139,3 +139,16 @@ export async function saveCharacterStats(
     update: values
   })
 }
+
+export async function readCharacterStatsSnapshot(
+  client: DatabaseClient
+): Promise<CharacterStatsSnapshot | null> {
+  const [snapshot] = await client.$queryRaw<CharacterStatsSnapshot[]>`
+    SELECT computed_at AS "computedAt", total, servers, jobs, fame_distribution AS "fameDistribution"
+    FROM character_stats`
+  if (snapshot === undefined) {
+    return null
+  }
+
+  return snapshot
+}
