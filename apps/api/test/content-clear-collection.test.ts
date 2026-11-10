@@ -561,6 +561,9 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
           guildName: null
         }
       },
+      characterSkillStyle: async () => {
+        throw new Error('이 테스트는 스킬 스타일을 부르지 않는다')
+      },
       characterTimeline: async () => {
         calls.push({ kind: 'timeline', at: Date.now() })
 
