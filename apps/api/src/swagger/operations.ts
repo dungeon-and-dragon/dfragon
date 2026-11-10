@@ -3,33 +3,7 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { CHARACTER_ID_PATTERN_SOURCE } from '../characters/identity.js'
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
 import { CLEAR_CONTENTS } from '../content-clears/contents.js'
-
-function success(schema: string, description: string) {
-  return ApiResponse({
-    status: 200,
-    description,
-    schema: { $ref: `#/components/schemas/${schema}` }
-  })
-}
-
-function errors(definitions: Record<number, string>) {
-  return applyDecorators(
-    ...Object.entries(definitions).map(([status, description]) =>
-      ApiResponse({
-        status: Number(status),
-        description,
-        content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } }
-      })
-    )
-  )
-}
-
-const neopleFailures = {
-  500: 'INTERNAL_SERVER_ERROR',
-  502: 'NEOPLE_API_ERROR',
-  503: 'NEOPLE_UNAVAILABLE',
-  504: 'NEOPLE_TIMEOUT'
-}
+import { errors, neopleFailures, success } from '../presentation/openapi/common.js'
 
 export function ApiCharacterSearch() {
   return applyDecorators(
@@ -172,18 +146,6 @@ export function ApiCharacterTimelineEnhancements() {
 
 export function ApiCharacterTimelineAcquisitions() {
   return timelinePage('acquisitions', '에픽, 태초 획득', 'TimelineAcquisitionPage')
-}
-
-export function ApiTodayGrade() {
-  return applyDecorators(
-    ApiOperation({
-      summary: '오늘의 등급 조회',
-      description:
-        '공개 API. 방어구 5, 악세서리 3, 특수장비 3부위의 엘더 페어리 장비(115레벨 레전더리) 11개를 Neople 상점 판매 정보 조회로 받아 오늘의 등급(itemGradeValue)의 평균을 반환합니다. 결과는 등급이 바뀌는 다음 0시(KST)까지 API 메모리에 캐시하고, 겹치는 조회는 공유합니다. 아이템 하나라도 실패하면 부분 결과 없이 실패하며 실패는 캐시하지 않습니다.'
-    }),
-    success('TodayGrade', '오늘의 등급 퍼센트와 만료 시각'),
-    errors(neopleFailures)
-  )
 }
 
 export function ApiAdventureCharacters() {

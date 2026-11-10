@@ -4,19 +4,9 @@ import { CHARACTER_ID_PATTERN_SOURCE } from '../characters/identity.js'
 import { characterDetailSections } from '../characters/details/sections.js'
 import { NEOPLE_SERVER_NAMES } from '../constants/neople-character-search.js'
 import { CLEAR_CONTENTS } from '../content-clears/contents.js'
+import { object, timestamp } from '../presentation/openapi/common.js'
 
 const text: SchemaObject = { type: 'string' }
-const timestamp: SchemaObject = { type: 'string', format: 'date-time' }
-function object(properties: Record<string, SchemaObject>): SchemaObject {
-  const required = Object.keys(properties)
-
-  return {
-    type: 'object',
-    required,
-    additionalProperties: false,
-    properties
-  }
-}
 
 const timelineClearKind: SchemaObject = { type: 'string', enum: ['raid', 'legion'] }
 const timelineCursor: SchemaObject = { ...text, nullable: true }
@@ -516,15 +506,6 @@ export const apiSchemas: Record<string, SchemaObject> = {
   }),
   TimelineEnhancementPage: timelinePage(timelineEnhancement),
   TimelineAcquisitionPage: timelinePage(timelineAcquisition),
-  TodayGrade: object({
-    percent: {
-      type: 'integer',
-      minimum: 0,
-      maximum: 100,
-      description: '11부위 대표 아이템 오늘의 등급(itemGradeValue)의 평균을 반올림한 값'
-    },
-    expiresAt: { ...timestamp, description: '등급이 바뀌는 다음 0시(KST)' }
-  }),
   AdventureCharacters: object({
     adventureName: text,
     characters: storedCharacters(
