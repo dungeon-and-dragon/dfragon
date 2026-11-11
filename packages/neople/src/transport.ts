@@ -9,7 +9,8 @@ import {
   NeopleRequestFailure,
   classifyNeopleUpstreamFailure,
   isCharacterNotFound,
-  neopleStatusFailureKind
+  neopleStatusFailureKind,
+  toUpstreamResponse
 } from './failure.js'
 
 export type FetchTransport = (request: Request, init?: RequestInit) => Promise<Response>
@@ -37,11 +38,17 @@ function readBody(rawBody: string, response: Response): unknown {
   try {
     body = JSON.parse(rawBody)
   } catch (error) {
-    throw new NeopleRequestFailure(neopleStatusFailureKind(response.status), { cause: error })
+    throw new NeopleRequestFailure(neopleStatusFailureKind(response.status), {
+      cause: error,
+      upstream: { status: response.status, code: undefined }
+    })
   }
   const failure = classifyNeopleUpstreamFailure(body, response.status, response.ok)
   if (failure) {
-    throw new NeopleRequestFailure(failure, { characterNotFound: isCharacterNotFound(body) })
+    throw new NeopleRequestFailure(failure, {
+      characterNotFound: isCharacterNotFound(body),
+      upstream: toUpstreamResponse(body, response.status)
+    })
   }
 
   return body
