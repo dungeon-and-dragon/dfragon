@@ -42,7 +42,11 @@ export async function collectSkillStyles({
     const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
     if (unavailable.length > 0) {
       if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-        report('SKILL_STYLE_NEOPLE_UNAVAILABLE', { done })
+        report('SKILL_STYLE_NEOPLE_UNAVAILABLE', {
+          done,
+          characters: group.length,
+          unavailable: unavailable.length
+        })
         await pause(UNAVAILABLE_PAUSE_MS)
         continue
       }
