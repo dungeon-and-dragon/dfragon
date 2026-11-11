@@ -9,7 +9,7 @@ import type {
   Pause
 } from './ports.js'
 
-const COLLECTION_BATCH_SIZE = 100
+const COLLECTION_BATCH_SIZE = 1024
 const IDLE_MS = 60_000
 const UNAVAILABLE_PAUSE_MS = 60_000
 
