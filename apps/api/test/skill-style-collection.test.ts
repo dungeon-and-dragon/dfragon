@@ -135,6 +135,10 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
   )
   assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
   assert.deepEqual(
+    reports.filter(([code]) => code === 'SKILL_STYLE_NEOPLE_UNAVAILABLE'),
+    Array(2).fill(['SKILL_STYLE_NEOPLE_UNAVAILABLE', { done: 0, characters: 2, unavailable: 1 }])
+  )
+  assert.deepEqual(
     reports.filter(([code]) => code === 'SKILL_STYLE_CHARACTER_SKIPPED'),
     [['SKILL_STYLE_CHARACTER_SKIPPED', { position: 1 }]]
   )

@@ -738,6 +738,13 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
     ['michaela-hard/a', 'michaela-hard/b', 'michaela-hard/c']
   )
   assert.deepEqual(
+    reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
+    Array(2).fill([
+      'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
+      { done: 0, characters: 3, unavailable: 1, timeout: 0 }
+    ])
+  )
+  assert.deepEqual(
     reports.filter(([code]) => code === 'CONTENT_CLEAR_CHARACTER_SKIPPED'),
     [['CONTENT_CLEAR_CHARACTER_SKIPPED', { position: 1 }]]
   )
@@ -796,6 +803,36 @@ test('두 번 연속 unavailable이던 캐릭터가 세 번째에 받아지면 �
   assert.deepEqual(
     storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
     ['michaela-hard/a', 'michaela-hard/b']
+  )
+})
+
+test('쉬었다 다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, 그 가운데 timeout 수를 남긴다', async () => {
+  const { store } = memoryClearStore(
+    [character('a'), character('b'), character('c')],
+    closedPastWeeks()
+  )
+  const { neople } = fakeNeople({}, ({ characterId }, previous) => {
+    if (previous.some((request) => request.characterId === characterId)) {
+      return undefined
+    }
+
+    if (characterId === 'a') {
+      return new NeopleRequestFailure('timeout')
+    }
+
+    if (characterId === 'b') {
+      return new NeopleRequestFailure('unavailable')
+    }
+
+    return undefined
+  })
+
+  const { summary, reports } = collectGroup(store, neople, 3)
+  await summary
+
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
+    [['CONTENT_CLEAR_NEOPLE_UNAVAILABLE', { done: 0, characters: 3, unavailable: 2, timeout: 1 }]]
   )
 })
 
