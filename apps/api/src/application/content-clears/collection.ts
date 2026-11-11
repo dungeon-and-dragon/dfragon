@@ -32,7 +32,7 @@ export type ClearCollectionSummary = {
 type CharacterClears =
   | { status: 'collected'; clears: ContentClearInput[] }
   | { status: 'skipped' }
-  | { status: 'unavailable' }
+  | { status: 'unavailable'; kind: 'unavailable' | 'timeout' }
 
 async function collectCharacterClears(
   character: ClearPopulationCharacter,
@@ -58,7 +58,7 @@ async function collectCharacterClears(
 
     // 한도 초과, 점검, timeout은 대개 캐릭터 문제가 아니라 쉬었다가 같은 캐릭터를 다시 부른다.
     if (error.kind === 'unavailable' || error.kind === 'timeout') {
-      return { status: 'unavailable' }
+      return { status: 'unavailable', kind: error.kind }
     }
 
     return { status: 'skipped' }
@@ -123,7 +123,14 @@ export async function collectContentClears({
     const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
     if (unavailable.length > 0) {
       if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-        report('CONTENT_CLEAR_NEOPLE_UNAVAILABLE', { done })
+        report('CONTENT_CLEAR_NEOPLE_UNAVAILABLE', {
+          done,
+          characters: group.length,
+          unavailable: unavailable.length,
+          timeout: results.filter(
+            (result) => result.status === 'unavailable' && result.kind === 'timeout'
+          ).length
+        })
         await pause(UNAVAILABLE_PAUSE_MS)
         continue
       }
