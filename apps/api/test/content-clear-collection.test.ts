@@ -683,6 +683,122 @@ test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Ne
   })
 })
 
+function collectGroup(
+  store: ClearCollectionStore,
+  neople: Pick<NeopleClient, 'characterTimeline'>,
+  concurrency: number
+) {
+  const pauses: number[] = []
+  const reports: [string, Readonly<Record<string, string | number>>][] = []
+  const summary = collectContentClears({
+    store,
+    createFetchTimeline: createNeopleClearTimeline(neople),
+    concurrency,
+    now: () => NOW,
+    pause: async (ms) => {
+      pauses.push(ms)
+    },
+    report: (code, details) => {
+      reports.push([code, details])
+    },
+    reportProgress: () => {}
+  })
+
+  return { summary, pauses, reports }
+}
+
+test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속 unavailable이면 그 캐릭터만 건너뛰고 나머지를 저장한 뒤 다음 묶음으로 넘어간다', async () => {
+  const { state, store } = memoryClearStore(
+    [character('a'), character('stuck'), character('b'), character('c')],
+    closedPastWeeks()
+  )
+  const { neople, requests } = fakeNeople(
+    {
+      a: [michaelaHard('2026-11-07 21:15')],
+      b: [michaelaHard('2026-11-08 21:15')],
+      c: [michaelaHard('2026-11-09 21:15')]
+    },
+    ({ characterId }) =>
+      characterId === 'stuck' ? new NeopleRequestFailure('unavailable') : undefined
+  )
+
+  const { summary, pauses, reports } = collectGroup(store, neople, 3)
+
+  assert.deepEqual(await summary, {
+    startedAt: NOW.toISOString(),
+    characters: 4,
+    requests: 10,
+    clears: 3,
+    skipped: 1
+  })
+  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.equal(requests.filter(({ characterId }) => characterId === 'stuck').length, 3)
+  assert.deepEqual(
+    storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
+    ['michaela-hard/a', 'michaela-hard/b', 'michaela-hard/c']
+  )
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'CONTENT_CLEAR_CHARACTER_SKIPPED'),
+    [['CONTENT_CLEAR_CHARACTER_SKIPPED', { position: 1 }]]
+  )
+  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(4, false))
+  assert.equal(state.progress, undefined)
+})
+
+test('묶음 전체가 unavailable이면 몇 번이 이어져도 건너뛰지 않고 진행 위치를 그대로 둔 채 같은 묶음을 다시 받는다', async () => {
+  const outageAttempts = 5
+  const memory = memoryClearStore([character('a'), character('b')], closedPastWeeks())
+  const progressDuringOutage: (number | undefined)[] = []
+  const { neople } = fakeNeople(
+    { a: [michaelaHard('2026-11-07 21:15')], b: [michaelaHard('2026-11-08 21:15')] },
+    ({ characterId }, previous) => {
+      const attempts = previous.filter((request) => request.characterId === characterId).length
+      if (attempts >= outageAttempts) {
+        return undefined
+      }
+      progressDuringOutage.push(memory.state.progress?.done)
+
+      return new NeopleRequestFailure('unavailable')
+    }
+  )
+
+  const { summary, pauses } = collectGroup(memory.store, neople, 2)
+
+  assert.deepEqual(await summary, {
+    startedAt: NOW.toISOString(),
+    characters: 2,
+    requests: 12,
+    clears: 2,
+    skipped: 0
+  })
+  assert.deepEqual(pauses, Array(outageAttempts).fill(UNAVAILABLE_PAUSE_MS))
+  assert.deepEqual(progressDuringOutage, Array(outageAttempts * 2).fill(0))
+  assert.deepEqual(
+    storedClears(memory.state).map((clear) => clear.split('/').slice(0, 2).join('/')),
+    ['michaela-hard/a', 'michaela-hard/b']
+  )
+})
+
+test('두 번 연속 unavailable이던 캐릭터가 세 번째에 받아지면 건너뛰지 않고 저장한다', async () => {
+  const { state, store } = memoryClearStore([character('a'), character('b')], closedPastWeeks())
+  const { neople } = fakeNeople(
+    { a: [michaelaHard('2026-11-07 21:15')], b: [michaelaHard('2026-11-08 21:15')] },
+    ({ characterId }, previous) =>
+      characterId === 'b' && previous.filter((request) => request.characterId === 'b').length < 2
+        ? new NeopleRequestFailure('unavailable')
+        : undefined
+  )
+
+  const { summary, pauses } = collectGroup(store, neople, 2)
+
+  assert.equal((await summary).skipped, 0)
+  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(
+    storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
+    ['michaela-hard/a', 'michaela-hard/b']
+  )
+})
+
 test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청이 함께 나가고, 두 작업의 요청을 합쳐도 초당 상한을 넘지 않는다', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
   const requestsPerSecond = 5
