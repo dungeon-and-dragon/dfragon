@@ -35,8 +35,17 @@ const upstreamCodeErrors = new Map<string, NeopleUpstreamFailureKind>([
 
 const CHARACTER_NOT_FOUND_CODE = 'DNF001'
 
+// 응답 본문의 다른 값이 로그로 나가지 않게 결과 코드표의 모양(영문 3자와 숫자 3자)일 때만 code로 본다.
+const UPSTREAM_CODE_PATTERN = /^[A-Z]{3}\d{3}$/
+
+export type NeopleUpstreamResponse = {
+  status: number
+  code: string | undefined
+}
+
 interface NeopleRequestFailureOptions extends ErrorOptions {
   characterNotFound?: boolean
+  upstream?: NeopleUpstreamResponse
 }
 
 /**
@@ -47,15 +56,17 @@ export class NeopleRequestFailure extends Error {
   readonly kind: NeopleFailureKind
   // DNF001이어도 kind는 그대로 두어 검색, 타임라인, 수집이 쓰는 분류를 바꾸지 않는다.
   readonly characterNotFound: boolean
+  readonly upstream: NeopleUpstreamResponse | undefined
 
   constructor(
     kind: NeopleFailureKind,
-    { characterNotFound = false, ...options }: NeopleRequestFailureOptions = {}
+    { characterNotFound = false, upstream, ...options }: NeopleRequestFailureOptions = {}
   ) {
     super(`Neople request failed: ${kind}`, options)
     this.name = 'NeopleRequestFailure'
     this.kind = kind
     this.characterNotFound = characterNotFound
+    this.upstream = upstream
   }
 }
 
@@ -88,6 +99,15 @@ export function classifyNeopleUpstreamFailure(
   }
 
   return neopleStatusFailureKind(status)
+}
+
+export function toUpstreamResponse(body: unknown, status: number): NeopleUpstreamResponse {
+  const code = upstreamErrorCode(body)
+  if (typeof code === 'string' && UPSTREAM_CODE_PATTERN.test(code)) {
+    return { status, code }
+  }
+
+  return { status, code: undefined }
 }
 
 export function isCharacterNotFound(body: unknown): boolean {
