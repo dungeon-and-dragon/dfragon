@@ -5,7 +5,7 @@ import { z } from 'zod'
 const invalidConfiguration = 'Invalid character collector configuration'
 const DEFAULT_REQUESTS_PER_SECOND = 5
 const DEFAULT_CONCURRENCY = 1
-const MAX_CONCURRENCY = 32
+const MAX_CONCURRENCY = 1024
 
 const collectorEnvironmentSchema = z.object({
   CHARACTER_IMPORT_FILES: z
