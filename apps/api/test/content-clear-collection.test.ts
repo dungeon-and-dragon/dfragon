@@ -741,7 +741,7 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
     reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
     Array(2).fill([
       'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
-      { done: 0, characters: 3, unavailable: 1, timeout: 0 }
+      { done: 0, characters: 3, unavailable: 1, reasons: 'unavailable=1' }
     ])
   )
   assert.deepEqual(
@@ -806,33 +806,41 @@ test('두 번 연속 unavailable이던 캐릭터가 세 번째에 받아지면 �
   )
 })
 
-test('쉬었다 다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, 그 가운데 timeout 수를 남긴다', async () => {
+test('쉬었다 다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, Neople이 거절한 status와 code별 수를 남긴다', async () => {
   const { store } = memoryClearStore(
-    [character('a'), character('b'), character('c')],
+    ['a', 'b', 'c', 'd', 'e'].map((id) => character(id)),
     closedPastWeeks()
   )
+  const failures: Record<string, NeopleRequestFailure> = {
+    a: new NeopleRequestFailure('timeout'),
+    b: new NeopleRequestFailure('unavailable', { upstream: { status: 429, code: 'API002' } }),
+    c: new NeopleRequestFailure('unavailable', { upstream: { status: 429, code: 'API002' } }),
+    d: new NeopleRequestFailure('unavailable', { upstream: { status: 503, code: undefined } })
+  }
   const { neople } = fakeNeople({}, ({ characterId }, previous) => {
     if (previous.some((request) => request.characterId === characterId)) {
       return undefined
     }
 
-    if (characterId === 'a') {
-      return new NeopleRequestFailure('timeout')
-    }
-
-    if (characterId === 'b') {
-      return new NeopleRequestFailure('unavailable')
-    }
-
-    return undefined
+    return failures[characterId]
   })
 
-  const { summary, reports } = collectGroup(store, neople, 3)
+  const { summary, reports } = collectGroup(store, neople, 5)
   await summary
 
   assert.deepEqual(
     reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
-    [['CONTENT_CLEAR_NEOPLE_UNAVAILABLE', { done: 0, characters: 3, unavailable: 2, timeout: 1 }]]
+    [
+      [
+        'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
+        {
+          done: 0,
+          characters: 5,
+          unavailable: 4,
+          reasons: '429/API002=2,503/none=1,timeout=1'
+        }
+      ]
+    ]
   )
 })
 
