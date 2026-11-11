@@ -108,6 +108,66 @@ for (const kind of ['unavailable', 'timeout'] as const) {
   })
 }
 
+test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속 unavailable이면 그 캐릭터만 건너뛰고 다음 묶음으로 넘어간다', async () => {
+  const { dependencies, saved, pauses, progress } = collection(
+    [character('a'), character('stuck'), character('c')],
+    (characterId) => {
+      if (characterId === 'stuck') {
+        throw new NeopleRequestFailure('unavailable')
+      }
+
+      return styleOf(characterId)
+    }
+  )
+  const reports: [string, Readonly<Record<string, string | number>>][] = []
+
+  const summary = await collectSkillStyles({
+    ...dependencies,
+    report: (code, details) => {
+      reports.push([code, details])
+    }
+  })
+
+  assert.deepEqual(summary, { characters: 3, saved: 2, skipped: 1 })
+  assert.deepEqual(
+    saved.map(({ characterId }) => characterId),
+    ['a', 'c']
+  )
+  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'SKILL_STYLE_CHARACTER_SKIPPED'),
+    [['SKILL_STYLE_CHARACTER_SKIPPED', { position: 1 }]]
+  )
+  assert.deepEqual(progress.at(-1), [3, 3])
+})
+
+test('묶음 전체가 unavailable이면 몇 번이 이어져도 건너뛰지 않고 같은 묶음을 다시 받는다', async () => {
+  const outageAttempts = 5
+  const { dependencies, saved, pauses, progress } = collection(
+    [character('a'), character('b')],
+    (characterId, attempt) => {
+      if (attempt <= outageAttempts) {
+        throw new NeopleRequestFailure('unavailable')
+      }
+
+      return styleOf(characterId)
+    }
+  )
+
+  const summary = await collectSkillStyles(dependencies)
+
+  assert.deepEqual(summary, { characters: 2, saved: 2, skipped: 0 })
+  assert.deepEqual(
+    saved.map(({ characterId }) => characterId),
+    ['a', 'b']
+  )
+  assert.deepEqual(pauses, Array(outageAttempts).fill(UNAVAILABLE_PAUSE_MS))
+  assert.deepEqual(progress, [
+    [0, 2],
+    [2, 2]
+  ])
+})
+
 test('Neople 실패가 아닌 오류는 수집을 실패로 끝낸다', async () => {
   const { dependencies, saved } = collection([character('a')], () => {
     throw new TypeError('합성 내부 오류')

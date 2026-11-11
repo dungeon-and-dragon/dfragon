@@ -16,6 +16,7 @@ import {
   toContentPopulation,
   weekKey
 } from '../../domain/content-clears/collection.js'
+import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
 import type { ClearCollectionStore, ClearCollectionDependencies } from './ports.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000
@@ -55,7 +56,7 @@ async function collectCharacterClears(
       throw error
     }
 
-    // 한도 초과, 점검, timeout은 캐릭터 문제가 아니라 쉬었다가 같은 캐릭터를 다시 부른다.
+    // 한도 초과, 점검, timeout은 대개 캐릭터 문제가 아니라 쉬었다가 같은 캐릭터를 다시 부른다.
     if (error.kind === 'unavailable' || error.kind === 'timeout') {
       return { status: 'unavailable' }
     }
@@ -112,23 +113,30 @@ export async function collectContentClears({
     ranges: plan.ranges.length
   })
 
+  const unavailableStreaks = createUnavailableStreaks<ClearPopulationCharacter>()
   let done = resumedAt
   while (done < population.length) {
     const group = population.slice(done, done + concurrency)
     const results = await Promise.all(
       group.map((character) => collectCharacterClears(character, plan, plannedWeeks, fetchTimeline))
     )
-    if (results.some(({ status }) => status === 'unavailable')) {
-      report('CONTENT_CLEAR_NEOPLE_UNAVAILABLE', { done })
-      await pause(UNAVAILABLE_PAUSE_MS)
-      continue
+    const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
+    if (unavailable.length > 0) {
+      if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
+        report('CONTENT_CLEAR_NEOPLE_UNAVAILABLE', { done })
+        await pause(UNAVAILABLE_PAUSE_MS)
+        continue
+      }
+      for (const character of unavailable) {
+        report('CONTENT_CLEAR_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+      }
     }
     const clears = results.flatMap((result) => (result.status === 'collected' ? result.clears : []))
     if (clears.length > 0) {
       await store.recordClears(clears)
     }
     counts.clears += clears.length
-    counts.skipped += results.filter(({ status }) => status === 'skipped').length
+    counts.skipped += results.filter(({ status }) => status !== 'collected').length
     done += group.length
     await store.recordProgress({ startedAt, done })
     reportProgress(done, population.length)
