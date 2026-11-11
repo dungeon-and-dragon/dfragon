@@ -1,6 +1,7 @@
 import { setTimeout } from 'node:timers/promises'
 import { z } from 'zod'
 import { defineJob } from '../jobs/definition.js'
+import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
 import type {
   SkillStyleCollectionStore,
   SkillStyleCollectionDependencies,
@@ -33,14 +34,21 @@ export async function collectSkillStyles({
   const counts = { saved: 0, skipped: 0 }
   reportProgress(0, targets.length)
 
+  const unavailableStreaks = createUnavailableStreaks<(typeof targets)[number]>()
   let done = 0
   while (done < targets.length) {
     const group = targets.slice(done, done + concurrency)
     const results = await Promise.all(group.map((character) => fetchSkillStyle(character, now)))
-    if (results.some(({ status }) => status === 'unavailable')) {
-      report('SKILL_STYLE_NEOPLE_UNAVAILABLE', { done })
-      await pause(UNAVAILABLE_PAUSE_MS)
-      continue
+    const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
+    if (unavailable.length > 0) {
+      if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
+        report('SKILL_STYLE_NEOPLE_UNAVAILABLE', { done })
+        await pause(UNAVAILABLE_PAUSE_MS)
+        continue
+      }
+      for (const character of unavailable) {
+        report('SKILL_STYLE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+      }
     }
     for (const result of results) {
       if (result.status === 'fetched') {
