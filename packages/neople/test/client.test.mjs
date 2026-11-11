@@ -202,6 +202,43 @@ test('실패 종류와 원인: 분류한 실패와 schema 불일치는 원인 �
   }
 })
 
+test('Neople이 응답한 실패에는 HTTP status와 결과 코드표 모양의 code만 남기고, 응답이 없는 실패에는 남기지 않는다', async () => {
+  const cases = [
+    {
+      name: '코드표의 code',
+      respond: () => Response.json({ error: { code: 'API002' } }, { status: 429 }),
+      upstream: { status: 429, code: 'API002' }
+    },
+    {
+      name: '코드표 모양이 아닌 code',
+      respond: () =>
+        Response.json({ error: { code: 'sensitive upstream value' } }, { status: 503 }),
+      upstream: { status: 503, code: undefined }
+    },
+    {
+      name: 'JSON이 아닌 503',
+      respond: () => new Response('<html>', { status: 503 }),
+      upstream: { status: 503, code: undefined }
+    },
+    {
+      name: '연결 실패',
+      respond: () => {
+        throw new TypeError('fetch failed')
+      },
+      upstream: undefined
+    }
+  ]
+  for (const { name, respond, upstream } of cases) {
+    const neople = createNeopleClientForTest(apiKey, { fetch: async () => respond() })
+    await assert.rejects(neople.itemShop('item', signal), (error) => {
+      assert(error instanceof NeopleRequestFailure, name)
+      assert.deepEqual(error.upstream, upstream, name)
+
+      return true
+    })
+  }
+})
+
 test('DNF001은 없는 캐릭터로 표시하되 분류는 api로 두고 다른 오류 code는 표시하지 않는다', async () => {
   for (const [code, characterNotFound] of [
     ['DNF001', true],
