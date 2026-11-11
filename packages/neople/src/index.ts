@@ -10,7 +10,8 @@ export {
 export {
   type NeopleFailureKind,
   NeopleRequestFailure,
-  type NeopleUpstreamFailureKind
+  type NeopleUpstreamFailureKind,
+  type NeopleUpstreamResponse
 } from './failure.js'
 export {
   type NeopleImageClient,
