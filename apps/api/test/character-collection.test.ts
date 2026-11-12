@@ -226,7 +226,7 @@ test('목록 파일 여러 개를 대기열에 넣고 대기열이 빌 때까지
       },
       fetchBasic: async (character) => basicOf(character),
       store: memory.store,
-      concurrency: 1,
+      readConcurrency: () => 1,
       report: (code, details) => reports.push([code, details?.count])
     }
 
@@ -280,7 +280,7 @@ test('Neople을 쓸 수 없으면 실패로 기록하지 않고 멈추며, 다�
       return basicOf(character)
     },
     store: memory.store,
-    concurrency: 1,
+    readConcurrency: () => 1,
     report: (code) => reports.push(code)
   }
 
@@ -325,7 +325,7 @@ test('동시 처리 수만큼 기본 정보를 함께 받고 그 수를 넘지 �
       return basicOf(character)
     },
     store: memory.store,
-    concurrency: 3,
+    readConcurrency: () => 3,
     report: () => {}
   })
 
@@ -335,6 +335,49 @@ test('동시 처리 수만큼 기본 정보를 함께 받고 그 수를 넘지 �
     memory.recorded.map((basic) => basic.characterId).sort(),
     queued.map((character) => character.characterId)
   )
+})
+
+test('동시 처리 수를 묶음마다 다시 읽어 바뀐 수만큼 함께 받는다', async () => {
+  const queued = Array.from({ length: 6 }, (_, index) => ({
+    serverId: 'cain',
+    characterId: `c${index}`
+  }))
+  const memory = memoryStore(queued)
+  const concurrencies = [1, 3, 2]
+  const groups: string[][] = []
+  let group: string[] = []
+
+  await runCollectionPass({
+    readModifiedTime: readImportModifiedTime,
+    importCharacters: importCollectedCharacters,
+    importFiles: [],
+    importedAt: new Map(),
+    enqueue: async () => {},
+    fetchBasic: async (character) => {
+      group.push(character.characterId)
+      await setImmediate()
+
+      return basicOf(character)
+    },
+    store: memory.store,
+    readConcurrency: () => {
+      if (group.length > 0) {
+        groups.push(group)
+        group = []
+      }
+
+      const concurrency = concurrencies[groups.length]
+      if (concurrency === undefined) {
+        throw new Error('6명을 세 묶음으로 받는다')
+      }
+
+      return concurrency
+    },
+    report: () => {}
+  })
+  groups.push(group)
+
+  assert.deepEqual(groups, [['c0'], ['c1', 'c2', 'c3'], ['c4', 'c5']])
 })
 
 test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저장하고 그 캐릭터만 다음 회차에 다시 부른다', async () => {
@@ -356,7 +399,7 @@ test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저�
       return basicOf(character)
     },
     store: memory.store,
-    concurrency: 2,
+    readConcurrency: () => 2,
     report: () => {}
   }
 
@@ -377,9 +420,8 @@ test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저�
   )
 })
 
-// 합성 key와 DB 입력이다. 실제 credential이 아니다.
+// 합성 DB 입력이다. 실제 credential이 아니다.
 const collectorEnvironment = {
-  NEOPLE_API_KEY: 'synthetic-neople-key',
   DB_HOST: 'postgres',
   DB_PORT: '5432',
   DB_NAME: 'dfragon',
@@ -388,7 +430,7 @@ const collectorEnvironment = {
   CHARACTER_IMPORT_FILES: '/data/1/characters.jsonl,/data/2/characters.jsonl'
 }
 
-test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 상한 기본값이 5, 동시 처리 기본값이 1이며, 잘못된 입력은 값 없이 거절한다', () => {
+test('수집 worker 설정은 Neople key 없이 읽히고, 목록 파일을 쉼표로 나눠 받으며 key당 요청 상한 기본값이 5, 동시 처리 기본값이 1이고, 잘못된 입력은 값 없이 거절한다', () => {
   const configuration = readCollectorConfiguration(collectorEnvironment)
   assert.deepEqual(configuration.importFiles, [
     '/data/1/characters.jsonl',
