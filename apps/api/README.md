@@ -11,7 +11,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 `src/` 바로 아래에는 진입 파일 `main.ts`, `character-collector.ts`와 다섯 계층 폴더만 둡니다.
 진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`, `dist/character-collector.js`로 실행합니다.
 계층 폴더 사이의 import 방향과 계층 밖 파일은 `pnpm lint`가 `src/` 전체에서 검사합니다.
-앱을 만드는 `src/runtime/api-app.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 기능의 module이 아닌 파일을 import하는 것도 `pnpm lint`가 막습니다.
+앱을 만드는 `src/runtime/api-app.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 기능의 module, 공개 app의 조립 함수(`src/runtime/api-services.ts`)가 아닌 파일을 import하는 것도 `pnpm lint`가 막습니다.
 
 | 폴더 | 담는 것 |
 | --- | --- |
@@ -20,9 +20,9 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
 | `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
 | `src/presentation/http/` | controller, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표, access log, HTTP 응답 helper. 운영 포트 controller는 `ops/` |
-| `src/presentation/events/` | 이벤트 구독자 |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
-| `src/runtime/modules/` | 기능별 Nest module |
+| `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
+| `src/runtime/modules/` | controller에 service를 넘기는 기능별 Nest module |
 
 기능을 하나 더하면 아래 파일을 만듭니다.
 기능 폴더(`domain/<기능>/`, `application/<기능>/`, `presentation/http/<기능>/`) 안의 파일은 역할 이름으로, 여러 기능을 담는 폴더(`infrastructure/neople/`, `runtime/modules/` 등) 안의 파일은 기능 이름으로 짓습니다.
@@ -36,6 +36,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/infrastructure/neople/<기능>.ts`, `src/infrastructure/database/<기능>.ts` | port의 구현 |
 | `src/presentation/http/<기능>/controller.ts` | controller와 service 주입 token |
 | `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
+| `src/runtime/api-services.ts` | 공개 app 기능의 service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
 | `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/runtime/api-app.ts`나 `src/runtime/ops-app.ts`의 `imports`에 등록합니다 |
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
