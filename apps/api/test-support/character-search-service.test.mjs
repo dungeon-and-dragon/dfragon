@@ -31,13 +31,13 @@ test('동시 검색 열두 건을 IP별 한도 없이 모두 공급자에 보낸
     }
     assert.equal(f.calls.length, 12)
   } finally {
-    await f.service.onModuleDestroy()
+    await f.service.close()
   }
 })
 
 test('종료 후 검색은 공급자를 호출하지 않는다', async () => {
   const f = fixture()
-  await f.service.onModuleDestroy()
+  await f.service.close()
   await assert.rejects(f.service.search(input), { name: 'NeopleSearchFailure', kind: 'internal' })
   assert.equal(f.calls.length, 0)
 })
@@ -68,6 +68,6 @@ test('공급자의 미분류 실패는 내부 오류로 정제하고 이후 검�
     }
     assert.equal(calls, 11)
   } finally {
-    await f.service.onModuleDestroy()
+    await f.service.close()
   }
 })

@@ -11,7 +11,10 @@ import type { HttpAppHandle } from './app-handle.js'
 
 const nestAppsForTest = new WeakMap<HttpAppHandle, NestExpressApplication>()
 
-export function createHttpAppHandle(app: NestExpressApplication): HttpAppHandle {
+export function createHttpAppHandle(
+  app: NestExpressApplication,
+  close: () => Promise<void> = () => app.close()
+): HttpAppHandle {
   const handle: HttpAppHandle = {
     listen: async (port, hostname) => {
       if (hostname !== undefined) {
@@ -21,7 +24,7 @@ export function createHttpAppHandle(app: NestExpressApplication): HttpAppHandle 
       }
     },
     getUrl: () => app.getUrl(),
-    close: () => app.close(),
+    close,
     getHttpServer: () => app.getHttpServer()
   }
   nestAppsForTest.set(handle, app)

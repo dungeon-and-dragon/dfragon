@@ -2,15 +2,14 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { CollectionSummary } from '@dfragon/database'
-import { EventEmitter2 } from '@nestjs/event-emitter'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-events.js'
+import type { CharacterIdentity } from '../src/domain/character-identity.js'
+import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
 import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
 import { createSeasonBackfillQueue } from '../src/application/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
 import type { OpsCollectionStore } from '../src/application/ops/ports.js'
-import { getNestAppForTest } from '../src/runtime/http-app.js'
 
 function gate() {
   let release!: () => void
@@ -106,12 +105,31 @@ test('queue 개수는 처리 중인 일과 동시 실행 한도에 막혀 기다
   assert.deepEqual(queue.counts(), { waiting: 0, running: 0 })
 })
 
+// 합성 캐릭터다. 상세 조회가 성공해야 타임라인 queue에 일이 들어간다.
+function detailPayloads(identity: CharacterIdentity): CharacterPayloads {
+  const common = { ...identity, characterName: '합성 캐릭터', jobId: 'job' }
+
+  return {
+    basic: { ...common },
+    status: { ...common, status: [], buff: [] },
+    equipment: { ...common, equipment: [], setItemInfo: [] },
+    avatar: { ...common, avatar: [] },
+    creature: { ...common, creature: null },
+    oath: { ...common, oath: null },
+    mist_assimilation: { ...common, mistAssimilation: null },
+    skill_style: { ...common, skill: { style: { active: [] } } },
+    buff_equipment: { ...common, skill: { buff: null } },
+    buff_avatar: { ...common, skill: { buff: null } },
+    buff_creature: { ...common, skill: { buff: null } }
+  }
+}
+
 test('운영 queue 경로는 공개 app의 타임라인 동기화, 강화 백필, 옛 시즌 백필 queue 개수를 각각 준다', async (t) => {
   const blocked = gate()
   const { app: publicApp, readQueueCounts } = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
-      fetchDetails: async () => assert.fail('상세 조회를 부르면 안 된다'),
+      fetchDetails: async (identity) => detailPayloads(identity),
       catalog: createCatalogService(async () => new Map())
     },
     timeline: {
@@ -133,18 +151,17 @@ test('운영 queue 경로는 공개 app의 타임라인 동기화, 강화 백필
     blocked.release()
     await publicApp.close()
   })
-  await getNestAppForTest(publicApp).init()
+  await publicApp.listen(0, '127.0.0.1')
+  const publicOrigin = await publicApp.getUrl()
   const request = await startOpsApp(t, {
     readQueueCounts,
     collection: unusedCollection
   })
 
   for (const characterId of ['first', 'second']) {
-    getNestAppForTest(publicApp)
-      .get(EventEmitter2)
-      .emit(CHARACTER_FETCHED, new CharacterFetched('cain', characterId, {}, {}, new Date()))
+    const detail = await fetch(`${publicOrigin}/characters/cain/${characterId}`)
+    assert.equal(detail.status, 200, characterId)
   }
-  await nextTurn()
   const response = await request('/api/queues')
 
   assert.equal(response.status, 200)

@@ -89,7 +89,7 @@ function fixtureService(
     catalog: createCatalogService(fetchCatalog),
     calculateScore
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   return { original, identity, service }
 }

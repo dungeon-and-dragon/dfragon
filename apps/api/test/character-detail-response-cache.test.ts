@@ -112,7 +112,7 @@ test('캐릭터 캐시가 맞은 GET은 공용 아이템을 다시 붙이지 않
     catalog,
     fetchDetails: async () => payloadsNamed('합성 캐릭터')
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const built = await service.get(identity, signal, ignoredTimings)
   const reused = await service.get(identity, signal, ignoredTimings)
@@ -138,7 +138,7 @@ test('공용 아이템이 unavailable인 응답은 저장하지 않아 다음 �
     catalog,
     fetchDetails: async () => payloadsNamed('합성 캐릭터')
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
   const itemStatus = (body: Buffer) => {
     const detail = JSON.parse(body.toString()) as {
       equipment: { equipment: { itemDetail: { status: string } }[] }

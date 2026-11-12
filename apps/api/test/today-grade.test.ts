@@ -123,7 +123,7 @@ test('서버를 종료하면 진행 중인 상점 조회를 취소하고 끝나�
   )
   const pending = service.get(signal)
 
-  await service.onModuleDestroy()
+  await service.close()
 
   assert.equal(signals.length, 11)
   assert.ok(signals.every((fetchSignal) => fetchSignal.aborted))
