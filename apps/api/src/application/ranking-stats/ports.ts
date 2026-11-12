@@ -43,7 +43,7 @@ export type SkillStyleCollectionStore = {
 
 export type SkillStyleCollectionJobDependencies = {
   fetchSkillStyle: FetchSkillStyle
-  concurrency: number
+  readConcurrency: () => number
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
 }
 

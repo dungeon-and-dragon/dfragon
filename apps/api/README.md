@@ -46,6 +46,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 오류 chain 정제는 `src/domain/error-chain.ts`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
 캐릭터 목록 수집 흐름과 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
+Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`에 있습니다.
 
 ## 준비할 입력
 
