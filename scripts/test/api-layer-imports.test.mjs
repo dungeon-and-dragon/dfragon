@@ -17,22 +17,19 @@ function typeImporting(source) {
 const rejectedImports = [
   ['domain/today-grade/a.ts', '../../application/today-grade/service.js', 'application/<기능>/'],
   ['domain/today-grade/b.ts', '../../infrastructure/neople/today-grade.js', 'infrastructure/'],
-  ['domain/today-grade/c.ts', '../../presentation/http/today-grade/controller.js', 'presentation/'],
-  ['domain/today-grade/d.ts', '../../runtime/modules/today-grade.js', 'application/<기능>/'],
-  ['domain/today-grade/e.ts', '@nestjs/common', 'presentation/http/'],
-  ['domain/today-grade/f.ts', 'express', 'runtime/modules/'],
+  ['domain/today-grade/c.ts', '../../presentation/http/today-grade/routes.js', 'presentation/'],
+  ['domain/today-grade/d.ts', '../../runtime/routes/api.js', 'application/<기능>/'],
   ['domain/today-grade/k.ts', 'hono', 'presentation/http/'],
   ['domain/today-grade/l.ts', 'hono/route', 'presentation/http/'],
-  ['domain/today-grade/m.ts', '@hono/node-server', 'runtime/modules/'],
+  ['domain/today-grade/m.ts', '@hono/node-server', 'runtime/routes/'],
   ['domain/today-grade/g.ts', 'node:crypto', 'infrastructure/'],
   ['domain/today-grade/h.ts', 'node:fs/promises', 'infrastructure/'],
   ['application/today-grade/a.ts', '../../infrastructure/neople/today-grade.js', 'ports.ts'],
   ['application/today-grade/b.ts', '../../presentation/http/today-grade/failures.js', 'ports.ts'],
-  ['application/today-grade/c.ts', '../../runtime/modules/today-grade.js', 'runtime/modules/'],
-  ['application/today-grade/d.ts', '@nestjs/common', 'presentation/http/'],
+  ['application/today-grade/c.ts', '../../runtime/routes/api.js', '연결은 runtime/에'],
   ['application/today-grade/j.ts', 'hono', 'presentation/http/'],
   ['application/today-grade/k.ts', 'hono/body-limit', 'presentation/http/'],
-  ['application/today-grade/l.ts', '@hono/node-server', 'runtime/modules/'],
+  ['application/today-grade/l.ts', '@hono/node-server', 'runtime/routes/'],
   ['application/today-grade/e.ts', 'node:fs/promises', 'infrastructure/'],
   ['application/today-grade/f.ts', 'node:http', 'infrastructure/'],
   ['application/today-grade/g.ts', 'ky', 'infrastructure/'],
@@ -41,13 +38,13 @@ const rejectedImports = [
     '../../presentation/http/today-grade/failures.js',
     'presentation/http/'
   ],
-  ['infrastructure/database/b.ts', '../../runtime/modules/today-grade.js', 'runtime/modules/'],
+  ['infrastructure/database/b.ts', '../../runtime/api-services.js', '연결은 runtime/에'],
   [
     'presentation/http/today-grade/a.ts',
     '../../../infrastructure/neople/today-grade.js',
     'application의 service'
   ],
-  ['presentation/events/b.ts', '../../runtime/modules/today-grade.js', 'runtime/modules/']
+  ['presentation/events/b.ts', '../../runtime/api-services.js', '연결은 runtime/에']
 ]
 
 // node: 접두 없는 내장 module은 먼저 node:를 붙이게 해, 붙인 뒤 위 규칙이 계층별로 거부하게 한다.
@@ -77,13 +74,12 @@ const allowedImports = [
   ['infrastructure/database/d.ts', 'node:fs/promises'],
   ['infrastructure/database/e.ts', 'node:fs'],
   ['presentation/http/today-grade/a.ts', '../../../application/today-grade/service.js'],
-  ['presentation/http/today-grade/c.ts', '@nestjs/common'],
   ['presentation/http/today-grade/d.ts', 'hono'],
   ['presentation/http/today-grade/e.ts', 'hono/route'],
   ['infrastructure/neople/d.ts', 'hono'],
   ['runtime/hono.ts', '@hono/node-server'],
-  ['runtime/modules/a.ts', '../../infrastructure/neople/today-grade.js'],
-  ['runtime/modules/b.ts', '../../presentation/http/today-grade/controller.js'],
+  ['runtime/api-services.ts', '../infrastructure/neople/today-grade.js'],
+  ['runtime/routes/a.ts', '../../presentation/http/today-grade/routes.js'],
   ['main.ts', './runtime/application.js'],
   ['character-collector.ts', './runtime/character-collector.js']
 ]
@@ -99,20 +95,20 @@ const appFiles = {
       '../domain/character-failure.js',
       '../application/today-grade/service.js',
       '../infrastructure/neople/today-grade.js',
-      '../presentation/http/today-grade/controller.js',
+      '../presentation/http/today-grade/routes.js',
       '../presentation/http/character-search/failures.js',
       '../presentation/openapi/setup.js',
-      './modules-not-allowed.js',
+      './routes-not-allowed.js',
       './character-collector.js'
     ],
     allowed: [
-      './modules/today-grade.js',
+      './routes/api.js',
       './api-services.js',
-      './http-app.js',
+      './hono-app.js',
       './app-handle.js',
       '../presentation/http/character-failures.js',
-      '../presentation/http/access-log.js',
-      '@nestjs/common'
+      '../presentation/http/access-log-sink.js',
+      'hono'
     ]
   },
   'runtime/ops-app.ts': {
@@ -123,11 +119,11 @@ const appFiles = {
       '../presentation/http/ops/a.js'
     ],
     allowed: [
-      './modules/ops.js',
+      './routes/ops.js',
       './hono-app.js',
       './app-handle.js',
       '../presentation/http/ops-failures.js',
-      '../presentation/http/access-log.js',
+      '../presentation/http/access-log-sink.js',
       'hono'
     ]
   }
@@ -163,7 +159,7 @@ const biomeRejected = await lintSamples({ ...rejectedSources, ...appSamples('rej
 const biomeAllowed = await lintSamples({
   ...allowedSources,
   ...appSamples('allowed'),
-  [typeOnlySource]: typeImporting('express')
+  [typeOnlySource]: typeImporting('hono')
 })
 
 for (const [file, source, destination] of rejectedImports) {
@@ -190,7 +186,7 @@ for (const [file, source] of allowedImports) {
 }
 
 for (const [file, { rejected, allowed }] of Object.entries(appFiles)) {
-  test(`Biome: 앱을 만드는 ${file}에서 기능의 module이 아닌 파일 import를 거부하고 runtime/modules/를 알린다`, () => {
+  test(`Biome: 앱을 만드는 ${file}에서 route를 모으는 파일이 아닌 기능 파일 import를 거부하고 runtime/routes/를 알린다`, () => {
     const diagnostics = biomeRejected.get(`${src}/${file}`)
     const reported = diagnostics
       .map(({ category, location }) => [category, location.start.line])
@@ -200,16 +196,16 @@ for (const [file, { rejected, allowed }] of Object.entries(appFiles)) {
       rejected.map((_source, index) => ['lint/style/noRestrictedImports', index + 1])
     )
     for (const { message } of diagnostics) {
-      assert.ok(message.includes('runtime/modules/<기능>.ts'), message)
+      assert.ok(message.includes('runtime/routes/<app>.ts'), message)
     }
   })
 
-  test(`Biome: 앱을 만드는 ${file}에서 module, 앱 공통 설정, 공용 실패 표 import를 허용한다`, () => {
+  test(`Biome: 앱을 만드는 ${file}에서 route를 모으는 파일, 앱 공통 설정, 공용 실패 표 import를 허용한다`, () => {
     assert.deepEqual(biomeAllowed.get(`${src}/${file}`), [], allowed.join(', '))
   })
 }
 
-test('Biome: domain은 import type이어도 Express를 가져오지 못한다', () => {
+test('Biome: domain은 import type이어도 Hono를 가져오지 못한다', () => {
   const diagnostics = biomeAllowed.get(typeOnlySource)
   assert.equal(diagnostics.length, 1, JSON.stringify(diagnostics))
   assert.equal(diagnostics[0].category, 'lint/style/noRestrictedImports')
@@ -249,7 +245,7 @@ const packageCases = {
     ['src/presentation/http/today-grade/b.ts', typeImporting('@dfragon/neople')],
     ['src/infrastructure/neople/a.ts', importing('@dfragon/neople')],
     ['src/infrastructure/database/a.ts', importing('@dfragon/database')],
-    ['src/runtime/modules/a.ts', importing('@dfragon/database')],
+    ['src/runtime/api-services.ts', importing('@dfragon/database')],
     ['src/main.ts', importing('@dfragon/neople')],
     ['src/character-collector.ts', importing('@dfragon/database')]
   ]

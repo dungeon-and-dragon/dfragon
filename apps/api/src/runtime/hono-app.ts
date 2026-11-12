@@ -1,15 +1,16 @@
 import { type Server, createServer } from 'node:http'
 import { createServer as createHttpsServer } from 'node:https'
 import { getRequestListener } from '@hono/node-server'
-import { Hono, type MiddlewareHandler } from 'hono'
-import type { AccessLogSink } from '../presentation/http/access-log-entry.js'
-import type { FailureResponse } from '../presentation/http/failure-response.js'
-import { type AccessLogEnv, createAccessLog } from '../presentation/http/hono-access-log.js'
+import { Hono } from 'hono'
+import { type AccessLogEnv, createAccessLog } from '../presentation/http/access-log.js'
+import type { AccessLogSink } from '../presentation/http/access-log-sink.js'
+import { setCommonHeaders } from '../presentation/http/common-headers.js'
 import {
+  type FailureResponse,
   createFailureHandler,
   notFoundResponse,
   respondToThrownValues
-} from '../presentation/http/hono-failure-response.js'
+} from '../presentation/http/failure-response.js'
 import type { HttpAppHandle } from './app-handle.js'
 
 export interface HonoAppOptions {
@@ -18,20 +19,13 @@ export interface HonoAppOptions {
   readonly toFailureResponse: (error: unknown) => FailureResponse
 }
 
-const setCommonHeaders: MiddlewareHandler = async (c, next) => {
-  await next()
-  if (!c.res.headers.has('Cache-Control')) {
-    c.res.headers.set('Cache-Control', 'no-store')
-  }
-}
-
 export function createHonoApp({
   accessLogService,
   writeAccessLog,
   toFailureResponse
 }: HonoAppOptions): Hono<AccessLogEnv> {
   const handleFailure = createFailureHandler(toFailureResponse)
-  // express처럼 끝의 `/`가 있어도 같은 경로로 본다.
+  // 끝의 `/`가 있어도 같은 경로로 본다.
   const app = new Hono<AccessLogEnv>({ strict: false })
   app.use(createAccessLog(writeAccessLog, accessLogService))
   app.use(setCommonHeaders)
@@ -44,8 +38,8 @@ export function createHonoApp({
 
 export interface HonoAppHandleOptions {
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
-  /** server가 닫혀 진행 중인 요청이 모두 끝난 뒤에 부른다. */
-  readonly close?: () => Promise<void>
+  /** handle을 닫을 때 부른다. server를 닫는 `closeServer`를 어느 단계에서 부를지 정한다. 없으면 server만 닫는다. */
+  readonly close?: (closeServer: () => Promise<void>) => Promise<void>
 }
 
 function createNodeServer(
@@ -64,10 +58,15 @@ function createNodeServer(
 
 export function createHonoAppHandle(
   app: Hono<AccessLogEnv>,
-  { httpsOptions, close }: HonoAppHandleOptions = {}
+  { httpsOptions, close = (closeServer) => closeServer() }: HonoAppHandleOptions = {}
 ): HttpAppHandle {
   const server = createNodeServer(app, httpsOptions)
   const protocol = httpsOptions !== undefined ? 'https' : 'http'
+  // 열린 요청이 모두 끝나야 끝난다. listen 전에 닫아도 실패하지 않도록 server가 넘기는 오류(ERR_SERVER_NOT_RUNNING)는 버린다.
+  const closeServer = () =>
+    new Promise<void>((resolve) => {
+      server.close(() => resolve())
+    })
 
   return {
     listen: (port, hostname) =>
@@ -87,13 +86,7 @@ export function createHonoAppHandle(
 
       return `${protocol}://${host}:${address.port}`
     },
-    close: async () => {
-      // listen 전에 닫아도 실패하지 않도록 server가 넘기는 오류(ERR_SERVER_NOT_RUNNING)는 버린다.
-      await new Promise<void>((resolve) => {
-        server.close(() => resolve())
-      })
-      await close?.()
-    },
+    close: () => close(closeServer),
     getHttpServer: () => server
   }
 }

@@ -14,6 +14,9 @@ import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { characterFailureResponse } from '../src/presentation/http/character-failures.js'
 
+// Hono app handle을 만들면 global Response가 바뀐다. 가짜 Neople 응답은 실제 fetch가 돌려주는 원래 class로 만든다.
+const NativeResponse = globalThis.Response
+
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
 const ignoreStage = () => undefined
 const basic = { ...identity, characterName: '테스트 캐릭터' }
@@ -91,7 +94,9 @@ test('공급자 알려진 code를 우선 분류하고 기본 조회 실패는 �
           calls++
           assert.equal(request.headers.get('apikey'), 'fake-key')
 
-          return new Response(typeof body === 'string' ? body : JSON.stringify(body), { status })
+          return new NativeResponse(typeof body === 'string' ? body : JSON.stringify(body), {
+            status
+          })
         }
       })
     )
@@ -124,7 +129,7 @@ test('Neople이 없는 캐릭터(DNF001)라고 답하면 상세 조회와 강제
           fetch: async (request) => {
             paths.push(new URL(request.url).pathname)
 
-            return Response.json(
+            return NativeResponse.json(
               { error: { status: 404, code: 'DNF001', message: 'NOT_FOUND_CHARACTER' } },
               { status: 404 }
             )
@@ -217,7 +222,7 @@ test('공급자가 header나 body를 보내지 않으면 HTTP client timeout 뒤
             return neverSettles(request.signal)
           }
 
-          return new Response(new ReadableStream({ pull }, { highWaterMark: 0 }))
+          return new NativeResponse(new ReadableStream({ pull }, { highWaterMark: 0 }))
         }
       })
     )
@@ -279,7 +284,7 @@ test('기본 응답 뒤 취소되면 남은 섹션은 전송하지 않는다', a
         started()
         await late
 
-        return Response.json(basic)
+        return NativeResponse.json(basic)
       }
     })
   )
@@ -301,7 +306,7 @@ test('이미 취소된 요청은 기본 조회도 전송하지 않는다', async
       fetch: async () => {
         calls++
 
-        return Response.json(basic)
+        return NativeResponse.json(basic)
       }
     })
   )
@@ -379,7 +384,7 @@ function loadWithSection(section: CharacterDetailSection, body: unknown) {
         const requested = sectionsByPath.get(new URL(request.url).pathname.slice(prefix.length))
         assert(requested)
 
-        return Response.json(requested === section ? body : completePayloads[requested])
+        return NativeResponse.json(requested === section ? body : completePayloads[requested])
       }
     })
   )
@@ -438,7 +443,7 @@ test('기본 식별 응답을 확인한 뒤 나머지 10개를 동시에 시작�
         }
         active--
 
-        return Response.json(completePayloads[section])
+        return NativeResponse.json(completePayloads[section])
       }
     })
   )
@@ -498,10 +503,10 @@ test('기본 응답 뒤 한 섹션이 실패하면 부분 성공을 반환하지
         const path = new URL(request.url).pathname
         paths.push(path)
         if (path.endsWith('/fixture-character')) {
-          return Response.json(basic)
+          return NativeResponse.json(basic)
         }
 
-        return Response.json({
+        return NativeResponse.json({
           error: { code: 'API901', message: 'private section failure' }
         })
       }
@@ -535,11 +540,13 @@ test('기본 응답 뒤 한 섹션이 실패하면 아직 진행 중인 다른 �
       fetch: async (request) => {
         const path = new URL(request.url).pathname
         if (path.endsWith('/fixture-character')) {
-          return Response.json(basic)
+          return NativeResponse.json(basic)
         }
 
         if (path.endsWith('/equip/equipment')) {
-          return Response.json({ error: { code: 'API901', message: 'private section failure' } })
+          return NativeResponse.json({
+            error: { code: 'API901', message: 'private section failure' }
+          })
         }
 
         pendingSignals.push(request.signal)

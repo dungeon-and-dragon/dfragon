@@ -52,4 +52,4 @@ COPY --chmod=755 apps/api/docker-entrypoint.sh /usr/local/bin/dfragon-api-entryp
 USER node
 EXPOSE 3000
 ENTRYPOINT ["dfragon-api-entrypoint"]
-CMD ["node", "--import", "reflect-metadata", "dist/main.js"]
+CMD ["node", "dist/main.js"]
