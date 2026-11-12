@@ -32,7 +32,7 @@ async function main(): Promise<void> {
     await listen(app, configuration.port)
     const { ops } = configuration
     if (ops !== undefined) {
-      const opsApp = await createOpsRuntime(ops.database, readQueueCounts)
+      const opsApp = createOpsRuntime(ops.database, readQueueCounts)
       apps.push(opsApp)
       await listen(opsApp, ops.port)
     }
