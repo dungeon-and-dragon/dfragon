@@ -24,7 +24,7 @@ export interface CharacterCandidatesResponse {
 export interface CharacterSearchHttpService {
   search(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResult>
   candidates(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResponse>
-  onModuleDestroy(): Promise<void>
+  close(): Promise<void>
 }
 
 const nameCollator = new Intl.Collator('ko')
@@ -123,7 +123,7 @@ export function createCharacterSearchService(
 
       return { result: named, source }
     },
-    async onModuleDestroy() {
+    async close() {
       closed = true
       candidateCache.close()
     }

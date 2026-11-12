@@ -100,7 +100,7 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
     refresh(identity: CharacterIdentity, signal: AbortSignal, timings: NeopleStageTimings) {
       return track(respond(identity, signal, timings, characters.refresh))
     },
-    async onModuleDestroy() {
+    async close() {
       shutdown.abort()
       await Promise.allSettled([...active, characters.close(), deps.catalog.close()])
     }

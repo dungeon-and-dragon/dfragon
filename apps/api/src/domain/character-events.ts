@@ -1,7 +1,5 @@
 import type { CharacterIdentity } from './character-identity.js'
 
-export const CHARACTER_FETCHED = 'character.fetched'
-
 export class CharacterFetched implements CharacterIdentity {
   constructor(
     readonly serverId: string,
