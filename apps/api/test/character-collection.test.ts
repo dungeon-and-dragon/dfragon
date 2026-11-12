@@ -420,9 +420,8 @@ test('묶음 안에서 한 명만 Neople을 쓸 수 없으면 나머지는 저�
   )
 })
 
-// 합성 key와 DB 입력이다. 실제 credential이 아니다.
+// 합성 DB 입력이다. 실제 credential이 아니다.
 const collectorEnvironment = {
-  NEOPLE_API_KEY: 'synthetic-neople-key',
   DB_HOST: 'postgres',
   DB_PORT: '5432',
   DB_NAME: 'dfragon',
@@ -431,7 +430,7 @@ const collectorEnvironment = {
   CHARACTER_IMPORT_FILES: '/data/1/characters.jsonl,/data/2/characters.jsonl'
 }
 
-test('수집 worker 설정은 목록 파일을 쉼표로 나눠 받고 요청 상한 기본값이 5, 동시 처리 기본값이 1이며, 잘못된 입력은 값 없이 거절한다', () => {
+test('수집 worker 설정은 Neople key 없이 읽히고, 목록 파일을 쉼표로 나눠 받으며 key당 요청 상한 기본값이 5, 동시 처리 기본값이 1이고, 잘못된 입력은 값 없이 거절한다', () => {
   const configuration = readCollectorConfiguration(collectorEnvironment)
   assert.deepEqual(configuration.importFiles, [
     '/data/1/characters.jsonl',

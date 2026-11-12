@@ -13,9 +13,14 @@ import { addWeeks } from 'date-fns'
 import { createJobSchedule } from '../src/infrastructure/jobs/scheduler.js'
 import { createNeopleClearTimeline } from '../src/infrastructure/neople/content-clear-collection.js'
 import {
+  type WorkerNeople,
   createNeopleCharacterBasic,
   paceNeopleRequests
 } from '../src/infrastructure/neople/character-collection.js'
+import {
+  type BatchNeopleKeyPool,
+  createBatchNeopleKeyPool
+} from '../src/infrastructure/neople/batch-key-pool.js'
 import type { CollectionStore } from '../src/application/character-collection/ports.js'
 import {
   importCollectedCharacters,
@@ -930,4 +935,247 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
     const inSecond = calls.filter(({ at: time }) => time >= start && time < start + 1000)
     assert.ok(inSecond.length <= requestsPerSecond)
   }
+})
+
+// key마다 받은 요청과 동시 요청 수를 세는 가짜 client다. 타임라인은 빈 기록을 준다. key는 합성 값이다.
+function fakeBatchKeys(
+  initialIds: number[],
+  concurrencyPerKey: number,
+  fail: (key: string, characterId: string) => Error | undefined = () => undefined
+) {
+  const keys = initialIds.map((id) => ({ id, key: `synthetic-key-${id}` }))
+  const requests: { key: string; characterId: string }[] = []
+  const active = new Map<string, number>()
+  const maxActive = new Map<string, number>()
+  const createNeople = (key: string): WorkerNeople => ({
+    characterBasic: async () => {
+      throw new Error('이 테스트는 기본 정보를 부르지 않는다')
+    },
+    characterSkillStyle: async () => {
+      throw new Error('이 테스트는 스킬 스타일을 부르지 않는다')
+    },
+    characterTimeline: async ({ characterId }) => {
+      requests.push({ key, characterId })
+      const running = (active.get(key) ?? 0) + 1
+      active.set(key, running)
+      const previousMax = maxActive.get(key) ?? 0
+      maxActive.set(key, Math.max(previousMax, running))
+
+      try {
+        await setImmediate()
+        const failure = fail(key, characterId)
+        if (failure !== undefined) {
+          throw failure
+        }
+
+        return { timeline: { rows: [], next: null } }
+      } finally {
+        active.set(key, (active.get(key) ?? 1) - 1)
+      }
+    }
+  })
+  const pool = createBatchNeopleKeyPool({
+    store: {
+      readUsableKeys: async () => [...keys],
+      recordRejected: async () => {}
+    },
+    createNeople,
+    concurrencyPerKey,
+    report: () => {}
+  })
+
+  return { keys, pool, requests, maxActive }
+}
+
+function collectWithKeys(
+  store: ClearCollectionStore,
+  pool: BatchNeopleKeyPool,
+  pause: (ms: number) => Promise<void> = async () => {}
+) {
+  const progress: number[] = []
+  const reports: [string, Readonly<Record<string, string | number>>][] = []
+  const createFetchTimeline = createNeopleClearTimeline(pool.neople)
+  const summary = collectContentClears({
+    store,
+    createFetchTimeline,
+    readConcurrency: pool.readConcurrency,
+    now: () => NOW,
+    pause,
+    report: (code, details) => {
+      reports.push([code, details])
+    },
+    reportProgress: (done) => {
+      progress.push(done)
+    }
+  })
+
+  return { summary, progress, reports }
+}
+
+const syntheticPopulation = (count: number) =>
+  Array.from({ length: count }, (_, index) => character(`c${index}`))
+
+const API002 = () =>
+  new NeopleRequestFailure('unavailable', { upstream: { status: 400, code: 'API002' } })
+
+test('key 3개에 key당 동시 수가 32이면 클리어 수집 묶음이 96명이고, 어느 key도 동시에 32건을 넘게 보내지 않는다', async () => {
+  const { store } = memoryClearStore(syntheticPopulation(200), closedPastWeeks())
+  const { pool, maxActive } = fakeBatchKeys([1, 2, 3], 32)
+  await pool.refresh()
+
+  const { summary, progress } = collectWithKeys(store, pool)
+
+  assert.equal((await summary).skipped, 0)
+  assert.deepEqual(progress, [96, 192, 200])
+  assert.deepEqual(
+    [...maxActive].sort(([left], [right]) => left.localeCompare(right)),
+    [
+      ['synthetic-key-1', 32],
+      ['synthetic-key-2', 32],
+      ['synthetic-key-3', 32]
+    ]
+  )
+})
+
+test('한 key가 API002를 받으면 그 요청은 다른 key로 받아 묶음이 쉬지 않고, 그 key는 60초 동안 새 요청을 받지 않는다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: NOW.getTime() })
+  const { store } = memoryClearStore(syntheticPopulation(8), closedPastWeeks())
+  let limited: { characterId: string; requestsBefore: number } | undefined
+  const { keys, pool, requests } = fakeBatchKeys([1, 2], 2, (key, characterId) => {
+    if (limited === undefined && key === 'synthetic-key-1') {
+      limited = { characterId, requestsBefore: requests.length }
+
+      return API002()
+    }
+
+    return undefined
+  })
+  await pool.refresh()
+  const pauses: number[] = []
+
+  const { summary } = collectWithKeys(store, pool, async (ms) => {
+    pauses.push(ms)
+  })
+
+  assert.equal((await summary).skipped, 0)
+  assert.deepEqual(pauses, [])
+  assert(limited !== undefined)
+  const afterLimit = requests.slice(limited.requestsBefore)
+  assert.ok(afterLimit.every(({ key }) => key === 'synthetic-key-2'))
+  assert.ok(afterLimit.some(({ characterId }) => characterId === limited?.characterId))
+
+  keys.splice(1, 1)
+  await pool.refresh()
+  t.mock.timers.tick(61_000)
+  await pool.neople.characterTimeline(character('later'), { next: 'synthetic' })
+  assert.equal(requests.at(-1)?.key, 'synthetic-key-1')
+})
+
+test('모든 key가 API002를 받으면 1분 쉬고 같은 묶음을 다시 보낸다', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: NOW.getTime() })
+  const { store } = memoryClearStore(syntheticPopulation(1), closedPastWeeks())
+  const limitedKeys = new Set<string>()
+  const { pool, requests } = fakeBatchKeys([1, 2], 1, (key) => {
+    if (limitedKeys.has(key)) {
+      return undefined
+    }
+
+    limitedKeys.add(key)
+
+    return API002()
+  })
+  await pool.refresh()
+  const pauses: number[] = []
+
+  const { summary, reports } = collectWithKeys(store, pool, async (ms) => {
+    pauses.push(ms)
+    t.mock.timers.tick(ms)
+  })
+
+  assert.equal((await summary).skipped, 0)
+  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
+    [
+      [
+        'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
+        { done: 0, characters: 1, unavailable: 1, reasons: 'all-resting=1' }
+      ]
+    ]
+  )
+  assert.deepEqual(
+    requests.map(({ key }) => key),
+    ['synthetic-key-1', 'synthetic-key-2', 'synthetic-key-1']
+  )
+})
+
+test('실행 중에 key를 더하거나 끄면 다음 묶음부터 묶음 크기와 요청을 받는 key가 바뀐다', async () => {
+  const memory = memoryClearStore(syntheticPopulation(10), closedPastWeeks())
+  const { keys, pool, requests } = fakeBatchKeys([1], 2)
+  await pool.refresh()
+  const store: ClearCollectionStore = {
+    ...memory.store,
+    recordProgress: async (progress) => {
+      await memory.store.recordProgress(progress)
+
+      if (progress.done === 2) {
+        keys.push({ id: 2, key: 'synthetic-key-2' })
+        await pool.refresh()
+      }
+
+      if (progress.done === 6) {
+        keys.splice(0, 1)
+        await pool.refresh()
+      }
+    }
+  }
+
+  const { summary, progress } = collectWithKeys(store, pool)
+
+  assert.equal((await summary).skipped, 0)
+  assert.deepEqual(progress, [2, 6, 8, 10])
+
+  const keysOf = (characterIds: string[]) =>
+    [
+      ...new Set(
+        requests
+          .filter(({ characterId }) => characterIds.includes(characterId))
+          .map(({ key }) => key)
+      )
+    ].sort()
+
+  assert.deepEqual(keysOf(['c0', 'c1']), ['synthetic-key-1'])
+  assert.deepEqual(keysOf(['c2', 'c3', 'c4', 'c5']), ['synthetic-key-1', 'synthetic-key-2'])
+  assert.deepEqual(keysOf(['c6', 'c7', 'c8', 'c9']), ['synthetic-key-2'])
+})
+
+test('켜진 key가 없으면 Neople을 부르지 않고 no-key로 남긴 뒤 1분 쉬고, key가 켜지면 이어서 받는다', async () => {
+  const { store } = memoryClearStore(syntheticPopulation(3), closedPastWeeks())
+  const { keys, pool, requests } = fakeBatchKeys([], 2)
+  await pool.refresh()
+  const requestsBeforeKey: number[] = []
+  const pauses: number[] = []
+
+  const { summary, progress, reports } = collectWithKeys(store, pool, async (ms) => {
+    pauses.push(ms)
+    requestsBeforeKey.push(requests.length)
+
+    if (requestsBeforeKey.length === 2) {
+      keys.push({ id: 1, key: 'synthetic-key-1' })
+      await pool.refresh()
+    }
+  })
+
+  assert.equal((await summary).skipped, 0)
+  assert.deepEqual(requestsBeforeKey, [0, 0])
+  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
+    Array(2).fill([
+      'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
+      { done: 0, characters: 1, unavailable: 1, reasons: 'no-key=1' }
+    ])
+  )
+  assert.deepEqual(progress, [2, 3])
+  assert.equal(requests.length, 3)
 })
