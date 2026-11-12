@@ -1,15 +1,9 @@
 import { Controller, Get, Inject, Query, Req, UseFilters } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
 import type { Request } from 'express'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../../../domain/character-failure.js'
 import { characterFailureResponse } from '../character-failures.js'
 import { FailureResponseFilter } from '../failure-response.js'
-import {
-  ApiCharacterTimeline,
-  ApiCharacterTimelineAcquisitions,
-  ApiCharacterTimelineEnhancements
-} from '../../openapi/character-timeline.js'
 import { parseCharacterIdentity } from '../../../domain/character-identity.js'
 import {
   type CharacterTimeline,
@@ -23,7 +17,6 @@ export const CHARACTER_TIMELINE_SERVICE = Symbol('CHARACTER_TIMELINE_SERVICE')
 
 const pageQuery = z.object({ before: z.string() }).strict()
 
-@ApiTags('캐릭터')
 @Controller('characters')
 @UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class CharacterTimelineController {
@@ -32,7 +25,6 @@ export class CharacterTimelineController {
   ) {}
 
   @Get(':serverId/:characterId/timeline')
-  @ApiCharacterTimeline()
   timeline(@Req() request: Request): Promise<CharacterTimeline> {
     const identity = parseCharacterIdentity(request.params.serverId, request.params.characterId)
 
@@ -40,13 +32,11 @@ export class CharacterTimelineController {
   }
 
   @Get(':serverId/:characterId/timeline/enhancements')
-  @ApiCharacterTimelineEnhancements()
   enhancements(@Req() request: Request, @Query() query: unknown): Promise<TimelineItemPage> {
     return this.page(request, query, 'enhancements')
   }
 
   @Get(':serverId/:characterId/timeline/acquisitions')
-  @ApiCharacterTimelineAcquisitions()
   acquisitions(@Req() request: Request, @Query() query: unknown): Promise<TimelineItemPage> {
     return this.page(request, query, 'acquisitions')
   }

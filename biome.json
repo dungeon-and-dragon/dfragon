@@ -445,7 +445,7 @@
                       "**/presentation/**",
                       "**/runtime/**"
                     ],
-                    "message": "domain은 다른 계층을 import하지 않는다. service와 port는 application/<기능>/, Neople과 DB 연결은 infrastructure/, controller와 Swagger는 presentation/에 두고, 그쪽에서 domain을 가져다 쓴다."
+                    "message": "domain은 다른 계층을 import하지 않는다. service와 port는 application/<기능>/, Neople과 DB 연결은 infrastructure/, controller는 presentation/에 두고, 그쪽에서 domain을 가져다 쓴다."
                   },
                   {
                     "group": ["@nestjs/**", "express"],
@@ -563,10 +563,9 @@
                       "../**",
                       "!./modules/**",
                       "!./http-app.js",
-                      "!**/presentation/http/*.js",
-                      "!**/presentation/openapi/setup.js"
+                      "!**/presentation/http/*.js"
                     ],
-                    "message": "앱을 만드는 파일은 기능의 module(runtime/modules/<기능>.ts), 앱 공통 설정(runtime/), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), access log, Swagger 설정만 import한다. 기능의 controller, service, reader, queue 연결은 runtime/modules/<기능>.ts에 두고 그 module을 import 목록에 더한다."
+                    "message": "앱을 만드는 파일은 기능의 module(runtime/modules/<기능>.ts), 앱 공통 설정(runtime/), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), access log만 import한다. 기능의 controller, service, reader, queue 연결은 runtime/modules/<기능>.ts에 두고 그 module을 import 목록에 더한다."
                   }
                 ]
               }
