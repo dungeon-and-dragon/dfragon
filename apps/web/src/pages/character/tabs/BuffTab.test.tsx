@@ -134,6 +134,69 @@ it('버프 강화 표의 아바타 행은 클론 아이콘 자리를 비워 두�
   expect(iconCounts).toEqual([1, 1])
 })
 
+it('버프 강화 장비 옵션에 스킬 강화와 능력치 마법부여를 순서대로 보인다', async () => {
+  const detail = characterDetailFixture('buffer')
+  const equipment = detail.buff.equipment!
+  const title = equipment.equipment[0]!
+  const creature = characterDetailFixture('dealer').buff.creature!
+
+  await render({
+    ...detail,
+    buff: {
+      ...detail.buff,
+      equipment: {
+        ...equipment,
+        equipment: [
+          {
+            ...title,
+            enchant: {
+              reinforceSkill: [
+                {
+                  skills: [
+                    { name: '추락하는 영혼', value: 2 },
+                    { name: '두 번째 스킬', value: 1 },
+                    { name: null, value: 1 },
+                    { name: '값 없는 스킬', value: null }
+                  ]
+                }
+              ],
+              status: [
+                { name: '지능', value: 100 },
+                { name: '힘', value: '-5' },
+                { name: null, value: 10 },
+                { name: '값 없는 능력치', value: null }
+              ]
+            }
+          },
+          { ...title, slotId: 'WEAPON', slotName: '무기', enchant: null },
+          {
+            ...title,
+            slotId: 'JACKET',
+            slotName: '상의 장비',
+            enchant: { reinforceSkill: [{ skills: [{ name: null, value: 1 }] }], status: [] }
+          }
+        ]
+      },
+      creature
+    }
+  })
+
+  const rows = [...section('버프 강화 장비, 아바타, 크리쳐')!.querySelectorAll('tbody tr')]
+  const titleOption = rows[0]!.querySelectorAll('td')[2]!
+  expect([...titleOption.querySelectorAll('span > span')].map((line) => line.textContent)).toEqual([
+    '추락하는 영혼 스킬Lv +2',
+    '두 번째 스킬 스킬Lv +1',
+    '지능 +100',
+    '힘 -5'
+  ])
+  expect(rows[0]!.querySelectorAll('td')[3]!.textContent).toBe('')
+  expect(rows[1]!.querySelectorAll('td')[2]!.textContent).toBe('')
+  expect(rows[2]!.querySelectorAll('td')[2]!.textContent).toBe('')
+  const creatureRow = rows.find((row) => row.querySelector('td')?.textContent === '크리쳐')!
+  expect(creatureRow.querySelectorAll('td')[2]!.textContent).toBe('')
+  expect(creatureRow.querySelectorAll('td')[3]!.textContent).toBe('')
+})
+
 it('딜러처럼 버프 강화 장비가 없으면 같은 테이블에 아바타 뒤로 크리쳐 행을 보인다', async () => {
   await render(characterDetailFixture('dealer'))
 
