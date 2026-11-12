@@ -1,6 +1,6 @@
 # 던삐삐 API
 
-`apps/api`는 로그인 없는 공개 캐릭터 API(NestJS)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
+`apps/api`는 로그인 없는 공개 캐릭터 API(Hono)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
 DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정보를 PostgreSQL에 저장하고, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
 같은 이미지의 캐릭터 수집 worker(`dist/character-collector.js`)는 캐릭터 목록 파일에 있는 캐릭터의 기본 정보를 DB에 쌓습니다.
 배치 job도 이 worker에서 돕니다. Job 정의와 실행 흐름은 `src/application/jobs/`, 예약과 알림은 `src/infrastructure/jobs/`, 실행 이력 DB adapter는 `src/infrastructure/database/`에 있고, worker가 돌릴 job은 `src/runtime/worker-jobs.ts`에 등록합니다.
@@ -11,7 +11,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 `src/` 바로 아래에는 진입 파일 `main.ts`, `character-collector.ts`와 다섯 계층 폴더만 둡니다.
 진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`, `dist/character-collector.js`로 실행합니다.
 계층 폴더 사이의 import 방향과 계층 밖 파일은 `pnpm lint`가 `src/` 전체에서 검사합니다.
-앱을 만드는 `src/runtime/api-app.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 기능의 module, 공개 app의 조립 함수(`src/runtime/api-services.ts`)가 아닌 파일을 import하는 것도 `pnpm lint`가 막습니다.
+앱을 만드는 `src/runtime/api-app.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 route를 모으는 파일(`src/runtime/routes/`), 공개 app의 조립 함수(`src/runtime/api-services.ts`)가 아닌 기능 파일을 import하는 것도 `pnpm lint`가 막습니다.
 
 | 폴더 | 담는 것 |
 | --- | --- |
@@ -19,13 +19,13 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
 | `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
-| `src/presentation/http/` | controller, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표, access log, HTTP 응답 helper. 운영 포트의 Hono route는 `ops/` |
+| `src/presentation/http/` | route, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표, access log. 운영 포트의 route는 `ops/` |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
 | `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
-| `src/runtime/modules/` | controller에 service를 넘기는 기능별 Nest module. 운영 포트는 route를 묶는 함수(`ops.ts`) |
+| `src/runtime/routes/` | 기능의 route에 service를 넘겨 app에 붙이는 함수. 공개 app은 `api.ts`, 운영 포트는 `ops.ts` |
 
 기능을 하나 더하면 아래 파일을 만듭니다.
-기능 폴더(`domain/<기능>/`, `application/<기능>/`, `presentation/http/<기능>/`) 안의 파일은 역할 이름으로, 여러 기능을 담는 폴더(`infrastructure/neople/`, `runtime/modules/` 등) 안의 파일은 기능 이름으로 짓습니다.
+기능 폴더(`domain/<기능>/`, `application/<기능>/`, `presentation/http/<기능>/`) 안의 파일은 역할 이름으로, 여러 기능을 담는 폴더(`infrastructure/neople/`, `infrastructure/database/` 등) 안의 파일은 기능 이름으로 짓습니다.
 
 | 파일 | 내용 |
 | --- | --- |
@@ -34,18 +34,16 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/application/<기능>/service.ts` | service를 만드는 `create<기능>Service` |
 | `src/application/<기능>/ports.ts` | service가 받는 함수 타입 |
 | `src/infrastructure/neople/<기능>.ts`, `src/infrastructure/database/<기능>.ts` | port의 구현 |
-| `src/presentation/http/<기능>/controller.ts` | controller와 service 주입 token |
+| `src/presentation/http/<기능>/routes.ts` | service를 받아 기능의 route 묶음을 만드는 `create<기능>Routes` |
 | `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
 | `src/runtime/api-services.ts` | 공개 app 기능의 service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
-| `src/runtime/modules/<기능>.ts` | 기능의 Nest module. 앱을 만드는 `src/runtime/api-app.ts`나 `src/runtime/ops-app.ts`의 `imports`에 등록합니다 |
+| `src/runtime/routes/api.ts` | 기능의 route 묶음을 공개 app의 경로에 붙입니다 |
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
-두 앱이 함께 쓰는 access log는 `src/presentation/http/access-log.ts`, HTTP 응답 helper는 `src/presentation/http/http-response.ts`에 있습니다.
-`Cache-Control` 설정과 전역 예외 filter 등록은 `src/runtime/http-app.ts`, 404와 실패 응답을 만드는 filter는 `src/presentation/http/failure-response.ts`에 있습니다.
-운영 app은 Hono로 만들며, Hono용 access log는 `src/presentation/http/hono-access-log.ts`, 404와 실패 응답은 `src/presentation/http/hono-failure-response.ts`, 공통 middleware 등록과 server 시작, 종료는 `src/runtime/hono-app.ts`에 있습니다.
-access log 한 줄을 만드는 코드(`src/presentation/http/access-log-entry.ts`)는 두 app이 함께 씁니다.
-오류 chain 정제는 `src/domain/error-chain.ts`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 controller는 `src/presentation/http/version/controller.ts`에 있습니다.
+두 앱이 함께 쓰는 access log는 `src/presentation/http/access-log.ts`, access log와 code 보고를 쓰는 곳은 `src/presentation/http/access-log-sink.ts`, 404와 실패 응답은 `src/presentation/http/failure-response.ts`, `Cache-Control`과 JSON `Content-Type`은 `src/presentation/http/common-headers.ts`에 있습니다.
+공통 middleware 등록과 server 시작, 종료는 `src/runtime/hono-app.ts`에 있습니다.
+오류 chain 정제는 `src/domain/error-chain.ts`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
 캐릭터 목록 수집 흐름과 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
 
