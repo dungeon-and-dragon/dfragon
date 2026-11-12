@@ -9,17 +9,12 @@ catalog:
   '@biomejs/biome': 2.6.3
   '@date-fns/tz': 1.5.0
   '@hono/node-server': 2.1.7
-  '@nestjs/common': 12.3.2
-  '@nestjs/core': 12.3.2
-  '@nestjs/platform-express': 12.3.2
-  '@nestjs/testing': 12.3.2
   '@prisma/adapter-pg': 7.10.1
   '@prisma/client': 7.10.1
   '@stylexjs/stylex': 0.19.1
   '@stylexjs/unplugin': 0.19.1
   '@tanstack/react-query': 5.104.5
   '@tanstack/react-router': 1.170.46
-  '@types/express': 5.0.6
   '@types/node': 26.6.5
   '@types/pngjs': 6.0.5
   '@types/react': 19.3.0
@@ -45,9 +40,7 @@ catalog:
   prisma: 7.10.1
   react: 19.3.1
   react-dom: 19.3.1
-  reflect-metadata: 0.2.2
   remeda: 2.56.0
-  rxjs: 7.8.2
   tar: 7.5.22
   typescript: 7.0.2
   'typescript-compiler-api': 'npm:typescript@6.0.2'
@@ -75,8 +68,6 @@ overrides:
   brace-expansion@1.1.18: 1.1.21
   brace-expansion@2.1.4: 2.1.7
   brace-expansion@5.0.9: 5.0.12
-  multer@2.4.0: 2.5.0
-  proxy-addr@2.0.7: 2.0.8
   source-map-js@1.2.1: 1.2.2
 
 minimumReleaseAgeExclude:
