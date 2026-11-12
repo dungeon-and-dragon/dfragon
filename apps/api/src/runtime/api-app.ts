@@ -20,7 +20,6 @@ import { TodayGradeModule } from './modules/today-grade.js'
 import { VersionModule } from './modules/version.js'
 
 export interface ApiHttpAppOptions extends ApiServicesOptions {
-  readonly trustedProxyHops?: 1
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
   readonly writeAccessLog?: AccessLogSink
 }
@@ -52,10 +51,7 @@ export async function createApiHttpApp(options: ApiHttpAppOptions) {
     accessLogService: 'api',
     writeAccessLog,
     toFailureResponse: characterFailureResponse,
-    httpsOptions: options.httpsOptions,
-    configure: (app) => {
-      app.set('trust proxy', options.trustedProxyHops ?? false)
-    }
+    httpsOptions: options.httpsOptions
   }).catch(async (error: unknown) => {
     // server를 만들지 못해도 이미 띄운 점수 worker가 process를 붙잡지 않게 멈춘다.
     await close(async () => undefined).catch(() => undefined)
