@@ -4,7 +4,7 @@ import type { JobOverview, JobRunRecord } from '@dfragon/database'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
-import type { OpsJobStore } from '../src/application/ops/ports.js'
+import type { OpsBatchNeopleKeyStore, OpsJobStore } from '../src/application/ops/ports.js'
 
 type StoredJob = Omit<JobOverview, 'activeRun' | 'lastFinishedRun'>
 type StoredRun = JobRunRecord & { jobName: string }
@@ -101,11 +101,21 @@ function storedRun(overrides: Partial<StoredRun> & Pick<StoredRun, 'id' | 'jobNa
 
 const unusedCollection = async () => assert.fail('job 경로 테스트는 수집 대기열을 읽으면 안 된다')
 
+const unusedBatchNeopleKeys = async () =>
+  assert.fail('job 경로 테스트는 batch key를 다루면 안 된다')
+const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
+  readKeys: unusedBatchNeopleKeys,
+  add: unusedBatchNeopleKeys,
+  setEnabled: unusedBatchNeopleKeys,
+  delete: unusedBatchNeopleKeys
+}
+
 async function startOpsApp(t: test.TestContext, store: OpsJobStore, logs: string[] = []) {
   const app = await createOpsHttpApp({
     jobs: store,
     readQueueCounts: () => assert.fail('job 경로 테스트는 queue를 읽으면 안 된다'),
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
+    batchNeopleKeys: unusedBatchNeopleKeyStore,
     writeAccessLog: (line) => logs.push(line)
   })
   t.after(() => app.close())

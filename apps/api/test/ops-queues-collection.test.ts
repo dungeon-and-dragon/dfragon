@@ -9,7 +9,7 @@ import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/proje
 import { createSeasonBackfillQueue } from '../src/application/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
-import type { OpsCollectionStore } from '../src/application/ops/ports.js'
+import type { OpsBatchNeopleKeyStore, OpsCollectionStore } from '../src/application/ops/ports.js'
 
 function gate() {
   let release!: () => void
@@ -22,6 +22,15 @@ function gate() {
 
 const unusedJobs = async () => assert.fail('queue, 수집 대기열 경로 테스트는 job을 읽으면 안 된다')
 
+const unusedBatchNeopleKeys = async () =>
+  assert.fail('queue, 수집 대기열 경로 테스트는 batch key를 다루면 안 된다')
+const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
+  readKeys: unusedBatchNeopleKeys,
+  add: unusedBatchNeopleKeys,
+  setEnabled: unusedBatchNeopleKeys,
+  delete: unusedBatchNeopleKeys
+}
+
 async function startOpsApp(
   t: test.TestContext,
   options: Pick<OpsHttpAppOptions, 'readQueueCounts' | 'collection'>
@@ -33,6 +42,7 @@ async function startOpsApp(
       requestRun: unusedJobs,
       setPaused: unusedJobs
     },
+    batchNeopleKeys: unusedBatchNeopleKeyStore,
     writeAccessLog: () => undefined,
     ...options
   })
