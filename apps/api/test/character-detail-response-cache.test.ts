@@ -85,7 +85,7 @@ async function startApp(
   fetchDetails: () => Promise<CharacterPayloads>,
   fetchCatalog: FetchCatalog
 ) {
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: {
       searchCharacters: async () => {
         throw new Error('response cache test must not search')

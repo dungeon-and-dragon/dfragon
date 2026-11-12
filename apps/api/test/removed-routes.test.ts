@@ -7,7 +7,7 @@ test('제거된 경로는 404를 반환하고 provider를 호출하지 않는다
   const unused = t.mock.fn(async (): Promise<never> => {
     throw new Error('removed routes must not call services')
   })
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused }

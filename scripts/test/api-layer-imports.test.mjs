@@ -98,6 +98,7 @@ const appFiles = {
     allowed: [
       './modules/today-grade.js',
       './http-app.js',
+      './app-handle.js',
       '../presentation/http/character-failures.js',
       '../presentation/http/access-log.js',
       '@nestjs/event-emitter'
@@ -113,6 +114,7 @@ const appFiles = {
     allowed: [
       './modules/ops-jobs.js',
       './http-app.js',
+      './app-handle.js',
       '../presentation/http/ops-failures.js',
       '../presentation/http/access-log.js',
       'express'

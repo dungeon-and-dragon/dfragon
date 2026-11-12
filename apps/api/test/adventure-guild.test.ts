@@ -6,7 +6,7 @@ import type {
   StoredCharacter,
   TimelineCharacter
 } from '@dfragon/database'
-import type { INestApplication } from '@nestjs/common'
+import type { HttpAppHandle } from '../src/runtime/app-handle.js'
 import type { AdventureGuildReader } from '../src/application/adventure-guild/ports.js'
 import type { CharacterRow } from '../src/domain/character-row.js'
 import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'
@@ -43,9 +43,9 @@ function memberRow(characterId: string, fame: number | null): CharacterRow {
 async function listen(
   adventureGuild?: AdventureGuildReader,
   syncTimeline?: (character: TimelineCharacter) => Promise<void>
-): Promise<{ app: INestApplication; origin: string }> {
+): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },

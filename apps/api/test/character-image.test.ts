@@ -22,7 +22,7 @@ function pngResponse(body: BodyInit = PNG_BYTES, headers: HeadersInit = {}) {
 }
 
 async function startApp(t: test.TestContext, transport: FetchTransport): Promise<string> {
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider },
