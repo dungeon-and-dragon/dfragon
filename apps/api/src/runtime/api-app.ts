@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { type INestApplication, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import {
   type AccessLogSink,
@@ -7,7 +7,8 @@ import {
   writeAccessLogToStdout
 } from '../presentation/http/access-log.js'
 import { characterFailureResponse } from '../presentation/http/character-failures.js'
-import { createHttpApp } from './http-app.js'
+import type { HttpAppHandle } from './app-handle.js'
+import { createHttpApp, createHttpAppHandle } from './http-app.js'
 import {
   AdventureGuildModule,
   type AdventureGuildModuleOptions
@@ -30,7 +31,8 @@ import {
 } from './modules/character-search.js'
 import {
   CharacterTimelineModule,
-  type CharacterTimelineModuleOptions
+  type CharacterTimelineModuleOptions,
+  readTimelineQueueCounts
 } from './modules/character-timeline.js'
 import { ClearStatsModule, type ClearStatsModuleOptions } from './modules/clear-stats.js'
 import { HealthModule } from './modules/health.js'
@@ -58,7 +60,10 @@ export interface ApiHttpAppOptions {
 }
 
 /** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, skill styles, adventure, guild reads and fame rankings, stats, clear stats. */
-export async function createApiHttpApp(options: ApiHttpAppOptions): Promise<INestApplication> {
+export async function createApiHttpApp(options: ApiHttpAppOptions): Promise<{
+  app: HttpAppHandle
+  readQueueCounts: () => ReturnType<typeof readTimelineQueueCounts>
+}> {
   const { writeAccessLog = writeAccessLogToStdout } = options
   const reportCode = createCodeReport(writeAccessLog, 'api')
   @Module({
@@ -84,7 +89,7 @@ export async function createApiHttpApp(options: ApiHttpAppOptions): Promise<INes
   })
   class ApiHttpModule {}
 
-  return createHttpApp(ApiHttpModule, {
+  const app = await createHttpApp(ApiHttpModule, {
     accessLogService: 'api',
     writeAccessLog,
     toFailureResponse: characterFailureResponse,
@@ -93,4 +98,10 @@ export async function createApiHttpApp(options: ApiHttpAppOptions): Promise<INes
       app.set('trust proxy', options.trustedProxyHops ?? false)
     }
   })
+  const handle = createHttpAppHandle(app)
+
+  return {
+    app: handle,
+    readQueueCounts: () => readTimelineQueueCounts(app)
+  }
 }

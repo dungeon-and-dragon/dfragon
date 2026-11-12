@@ -1,4 +1,4 @@
-import type { INestApplication, Type } from '@nestjs/common'
+import type { Type } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import type { NestExpressApplication } from '@nestjs/platform-express'
 import type { Request, Response } from 'express'
@@ -7,6 +7,37 @@ import {
   type FailureResponse,
   FailureResponseFilter
 } from '../presentation/http/failure-response.js'
+import type { HttpAppHandle } from './app-handle.js'
+
+const nestAppsForTest = new WeakMap<HttpAppHandle, NestExpressApplication>()
+
+export function createHttpAppHandle(app: NestExpressApplication): HttpAppHandle {
+  const handle: HttpAppHandle = {
+    listen: async (port, hostname) => {
+      if (hostname !== undefined) {
+        await app.listen(port, hostname)
+      } else {
+        await app.listen(port)
+      }
+    },
+    getUrl: () => app.getUrl(),
+    close: () => app.close(),
+    getHttpServer: () => app.getHttpServer()
+  }
+  nestAppsForTest.set(handle, app)
+
+  return handle
+}
+
+// 테스트에서만 쓰며 Nest를 제거할 때 함께 지운다.
+export function getNestAppForTest(handle: HttpAppHandle): NestExpressApplication {
+  const app = nestAppsForTest.get(handle)
+  if (app === undefined) {
+    throw new Error('HTTP app handle does not belong to a Nest app')
+  }
+
+  return app
+}
 
 export interface HttpAppOptions {
   readonly accessLogService: string
@@ -25,7 +56,7 @@ function setCommonHeaders(_request: Request, response: Response, next: () => voi
 export async function createHttpApp(
   module: Type,
   { accessLogService, writeAccessLog, toFailureResponse, httpsOptions, configure }: HttpAppOptions
-): Promise<INestApplication> {
+): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(module, {
     logger: false,
     bodyParser: false,
