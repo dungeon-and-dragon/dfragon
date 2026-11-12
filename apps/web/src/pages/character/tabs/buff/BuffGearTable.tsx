@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
+import { signedEnchantValue } from '#core/character/character-equipment'
 import { type ItemView, toItemView } from '#core/character/character-item'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { styles } from '../avatar/AvatarTable.style'
@@ -47,6 +48,7 @@ export function BuffGearTable({
             key={`equipment-${item.slotId ?? index}`}
             slot={item.slotName}
             item={toItemView(item)}
+            enchant={item.enchant}
           />
         ))}
         {avatars.map((avatar, index) => (
@@ -68,14 +70,40 @@ export function BuffGearTable({
   )
 }
 
-function ItemRow({ slot, item }: { slot: string | null; item: ItemView }): React.JSX.Element {
+function ItemRow({
+  slot,
+  item,
+  enchant = null
+}: {
+  slot: string | null
+  item: ItemView
+  enchant?: BuffEquipment['enchant']
+}): React.JSX.Element {
+  const skillLines = (enchant?.reinforceSkill ?? []).flatMap(({ skills }) =>
+    skills.flatMap(({ name, value }) =>
+      name != null && value != null ? [`${name} 스킬Lv ${signedEnchantValue(value)}`] : []
+    )
+  )
+  const statusLines = (enchant?.status ?? []).flatMap(({ name, value }) =>
+    name != null && value != null ? [`${name} ${signedEnchantValue(value)}`] : []
+  )
+  const lines = [...skillLines, ...statusLines]
+
   return (
     <tr {...stylex.props(tableStyles.row)}>
       <td {...stylex.props(tableStyles.cell, tableStyles.first, tableStyles.slot)}>{slot}</td>
       <td {...stylex.props(tableStyles.cell)}>
         <ItemCell item={item} tune={null} exalted={false} />
       </td>
-      <td {...stylex.props(tableStyles.cell)} />
+      <td {...stylex.props(tableStyles.cell)}>
+        {lines.length > 0 && (
+          <span {...stylex.props(styles.stack)}>
+            {lines.map((line, index) => (
+              <span key={index}>{line}</span>
+            ))}
+          </span>
+        )}
+      </td>
       <td {...stylex.props(tableStyles.cell, tableStyles.last)} />
     </tr>
   )
