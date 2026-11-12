@@ -47,7 +47,6 @@ export interface HttpAppOptions {
   readonly writeAccessLog: AccessLogSink
   readonly toFailureResponse: (error: unknown) => FailureResponse
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
-  readonly configure: (app: NestExpressApplication) => void
 }
 
 function setCommonHeaders(_request: Request, response: Response, next: () => void): void {
@@ -58,7 +57,7 @@ function setCommonHeaders(_request: Request, response: Response, next: () => voi
 
 export async function createHttpApp(
   module: Type,
-  { accessLogService, writeAccessLog, toFailureResponse, httpsOptions, configure }: HttpAppOptions
+  { accessLogService, writeAccessLog, toFailureResponse, httpsOptions }: HttpAppOptions
 ): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(module, {
     logger: false,
@@ -71,7 +70,6 @@ export async function createHttpApp(
     app.use(createAccessLog(writeAccessLog, accessLogService))
     app.use(setCommonHeaders)
     app.useGlobalFilters(new FailureResponseFilter(toFailureResponse))
-    configure(app)
 
     return app
   } catch (error) {

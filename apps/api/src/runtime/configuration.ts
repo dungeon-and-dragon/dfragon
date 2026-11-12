@@ -60,11 +60,6 @@ function readOps(
 export async function readRuntimeConfiguration(environment: NodeJS.ProcessEnv) {
   try {
     const port = parsePort(environment.PORT)
-    const proxyMode = environment.SEARCH_TRUST_PROXY
-    if (proxyMode !== undefined && proxyMode !== 'single-hop') {
-      throw new Error(invalidConfiguration)
-    }
-    const trustedProxyHops = proxyMode === 'single-hop' ? (1 as const) : undefined
     const apiKey = readSecretInput(environment.NEOPLE_API_KEY, environment.NEOPLE_API_KEY_FILE)
     if (apiKey === undefined) {
       throw new Error(invalidConfiguration)
@@ -79,7 +74,6 @@ export async function readRuntimeConfiguration(environment: NodeJS.ProcessEnv) {
 
     return {
       port,
-      trustedProxyHops,
       localHttps,
       apiKey,
       database,
