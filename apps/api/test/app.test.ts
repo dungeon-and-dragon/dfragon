@@ -1,34 +1,15 @@
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { createServer, type Server } from 'node:http'
+import { createServer } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import test from 'node:test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { Controller, Get, Injectable } from '@nestjs/common'
-import { Test } from '@nestjs/testing'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
-
-@Injectable()
-class GreetingService {
-  message(): string {
-    return 'hello'
-  }
-}
-
-@Controller()
-class TestController {
-  constructor(private readonly greetingService: GreetingService) {}
-
-  @Get('test')
-  getMessage(): string {
-    return this.greetingService.message()
-  }
-}
 
 const compiledMainPath = fileURLToPath(new URL('../../dist/main.js', import.meta.url))
 const apiRoot = fileURLToPath(new URL('../../', import.meta.url))
@@ -162,43 +143,6 @@ test('응답을 기다리던 클라이언트가 연결을 끊으면 진행 중�
   }
 })
 
-test('test module route는 listen 후 생성자로 주입한 provider의 응답을 HTTP로 제공한다', async () => {
-  assert.deepEqual(Reflect.getMetadata('design:paramtypes', TestController), [GreetingService])
-  const testingModule = await Test.createTestingModule({
-    controllers: [TestController],
-    providers: [GreetingService]
-  }).compile()
-  const app = testingModule.createNestApplication()
-
-  try {
-    await app.listen(0, '127.0.0.1')
-    const address = (app.getHttpServer() as Server).address()
-    assert(address !== null && typeof address !== 'string')
-    const response = await fetch(`http://127.0.0.1:${address.port}/test`)
-
-    assert.equal(response.status, 200)
-    assert.equal(await response.text(), 'hello')
-  } finally {
-    await app.close()
-  }
-})
-
-test('Nest 테스트 container는 provider를 교체한다', async () => {
-  const testingModule = await Test.createTestingModule({
-    controllers: [TestController],
-    providers: [GreetingService]
-  })
-    .overrideProvider(GreetingService)
-    .useValue({ message: () => 'overridden' })
-    .compile()
-
-  try {
-    assert.equal(testingModule.get(TestController).getMessage(), 'overridden')
-  } finally {
-    await testingModule.close()
-  }
-})
-
 test('compiled main은 잘못된 필수 설정을 거절하고 정제된 문구로 종료한다', async (t) => {
   // 실제 환경, credential은 상속하지 않고 합성 입력만 전달한다.
   const environment: NodeJS.ProcessEnv = {
@@ -218,7 +162,7 @@ test('compiled main은 잘못된 필수 설정을 거절하고 정제된 문구�
   for (const { name, change } of cases) {
     await t.test(name, async () => {
       await assert.rejects(
-        promisify(execFile)(process.execPath, ['--import', 'reflect-metadata', compiledMainPath], {
+        promisify(execFile)(process.execPath, [compiledMainPath], {
           cwd: apiRoot,
           env: { ...environment, ...change },
           timeout: 5000,
@@ -251,7 +195,7 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   const title = `compiled main은 listen 뒤 ${signal}를 받으면 앱을 닫고 exit code 0으로 끝난다`
   test(title, { timeout: 10_000 }, async (t) => {
     const port = await findFreePort()
-    const child = spawn(process.execPath, ['--import', 'reflect-metadata', compiledMainPath], {
+    const child = spawn(process.execPath, [compiledMainPath], {
       cwd: apiRoot,
       // 실제 환경, credential은 상속하지 않고 합성 입력만 전달한다.
       env: { PORT: String(port), NEOPLE_API_KEY: 'synthetic-private-api-key' },
