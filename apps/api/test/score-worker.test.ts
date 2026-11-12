@@ -173,7 +173,7 @@ test('실제 worker가 라이브러리를 열지 못하면 점수를 null로 두
     assert.equal(result, null)
     assert.deepEqual(reports, ['SCORE_ENGINE_UNAVAILABLE'])
   } finally {
-    await engine.onModuleDestroy()
+    await engine.close()
   }
 })
 
@@ -214,7 +214,7 @@ test(
       }
       assert.deepEqual(reports, [])
     } finally {
-      await engine.onModuleDestroy()
+      await engine.close()
     }
   }
 )

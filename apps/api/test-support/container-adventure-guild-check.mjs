@@ -589,7 +589,7 @@ try {
     source: 'cache',
     names: [adventureName, '합성새길드원모험단', null]
   })
-  await candidates.onModuleDestroy()
+  await candidates.close()
 } finally {
   await client.$disconnect()
 }
