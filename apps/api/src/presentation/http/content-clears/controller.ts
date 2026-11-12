@@ -1,10 +1,8 @@
 import { Controller, Get, Inject, Param, Query, UseFilters } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../../../domain/character-failure.js'
 import { characterFailureResponse } from '../character-failures.js'
 import { FailureResponseFilter } from '../failure-response.js'
-import { ApiClearContentStats, ApiClearStats } from '../../openapi/content-clears.js'
 import type { ClearContentStats, ClearStats } from '../../../domain/content-clears/stats.js'
 import type { ClearStatsService } from '../../../application/content-clears/service.js'
 
@@ -12,20 +10,17 @@ export const CLEAR_STATS_SERVICE = Symbol('CLEAR_STATS_SERVICE')
 
 const contentStatsQuery = z.object({ week: z.iso.date().optional() })
 
-@ApiTags('캐릭터')
 @Controller()
 @UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class ClearStatsController {
   constructor(@Inject(CLEAR_STATS_SERVICE) private readonly service: ClearStatsService) {}
 
   @Get('stats/clears')
-  @ApiClearStats()
   stats(): Promise<ClearStats> {
     return this.service.stats()
   }
 
   @Get('stats/clears/:contentId')
-  @ApiClearContentStats()
   contentStats(
     @Param('contentId') contentId: string,
     @Query() query: unknown

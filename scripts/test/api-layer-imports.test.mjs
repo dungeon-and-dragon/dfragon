@@ -41,7 +41,7 @@ const rejectedImports = [
     '../../../infrastructure/neople/today-grade.js',
     'application의 service'
   ],
-  ['presentation/openapi/b.ts', '../../runtime/modules/today-grade.js', 'runtime/modules/']
+  ['presentation/events/b.ts', '../../runtime/modules/today-grade.js', 'runtime/modules/']
 ]
 
 // node: 접두 없는 내장 module은 먼저 node:를 붙이게 해, 붙인 뒤 위 규칙이 계층별로 거부하게 한다.
@@ -71,7 +71,6 @@ const allowedImports = [
   ['infrastructure/database/d.ts', 'node:fs/promises'],
   ['infrastructure/database/e.ts', 'node:fs'],
   ['presentation/http/today-grade/a.ts', '../../../application/today-grade/service.js'],
-  ['presentation/http/today-grade/b.ts', '../../openapi/today-grade.js'],
   ['presentation/http/today-grade/c.ts', '@nestjs/common'],
   ['runtime/modules/a.ts', '../../infrastructure/neople/today-grade.js'],
   ['runtime/modules/b.ts', '../../presentation/http/today-grade/controller.js'],
@@ -87,13 +86,12 @@ const appFiles = {
       '../characters/search-service.js',
       '../score/engine.js',
       '../infrastructure/build-info.js',
-      '../swagger/operations.js',
       '../domain/character-failure.js',
       '../application/today-grade/service.js',
       '../infrastructure/neople/today-grade.js',
       '../presentation/http/today-grade/controller.js',
       '../presentation/http/character-search/failures.js',
-      '../presentation/openapi/today-grade.js',
+      '../presentation/openapi/setup.js',
       './modules-not-allowed.js',
       './character-collector.js'
     ],
@@ -102,7 +100,6 @@ const appFiles = {
       './http-app.js',
       '../presentation/http/character-failures.js',
       '../presentation/http/access-log.js',
-      '../presentation/openapi/setup.js',
       '@nestjs/event-emitter'
     ]
   },

@@ -1,17 +1,8 @@
 import { Controller, Get, HttpCode, Inject, Param, Post, Query, UseFilters } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../../../domain/character-failure.js'
 import { characterFailureResponse } from '../character-failures.js'
 import { FailureResponseFilter } from '../failure-response.js'
-import {
-  ApiAdventureActivity,
-  ApiAdventureSeasonDays,
-  ApiAdventureCharacters,
-  ApiAdventureSeasonBackfill,
-  ApiAdventureWeekly,
-  ApiGuild
-} from '../../openapi/adventure-guild.js'
 import type {
   ActivitySeason,
   AdventureActivity,
@@ -30,32 +21,27 @@ const SEASON_NUMBER_PATTERN = /^[1-9]\d{0,3}$/
 const seasonNumber = z.string().regex(SEASON_NUMBER_PATTERN).transform(Number)
 const activityQuery = z.object({ season: seasonNumber.optional() })
 
-@ApiTags('캐릭터')
 @Controller()
 @UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class AdventureGuildController {
   constructor(@Inject(ADVENTURE_GUILD_SERVICE) private readonly service: AdventureGuildService) {}
 
   @Get('adventures/:adventureName/characters')
-  @ApiAdventureCharacters()
   adventure(@Param('adventureName') adventureName: string): Promise<AdventureCharacters> {
     return this.service.adventure(adventureName)
   }
 
   @Get('guilds/:guildId')
-  @ApiGuild()
   guild(@Param('guildId') guildId: string): Promise<GuildMembers> {
     return this.service.guild(guildId)
   }
 
   @Get('adventures/:adventureName/weekly')
-  @ApiAdventureWeekly()
   adventureWeekly(@Param('adventureName') adventureName: string): Promise<AdventureWeekly> {
     return this.service.adventureWeekly(adventureName)
   }
 
   @Get('adventures/:adventureName/activity')
-  @ApiAdventureActivity()
   adventureActivity(
     @Param('adventureName') adventureName: string,
     @Query() query: unknown
@@ -69,7 +55,6 @@ export class AdventureGuildController {
   }
 
   @Get('adventures/:adventureName/activity/seasons/:season/days')
-  @ApiAdventureSeasonDays()
   adventureSeasonDays(
     @Param('adventureName') adventureName: string,
     @Param('season') season: string
@@ -84,7 +69,6 @@ export class AdventureGuildController {
 
   @Post('adventures/:adventureName/activity/seasons/:season/backfill')
   @HttpCode(200)
-  @ApiAdventureSeasonBackfill()
   adventureSeasonBackfill(
     @Param('adventureName') adventureName: string,
     @Param('season') season: string

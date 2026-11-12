@@ -1,4 +1,3 @@
-import { ApiTags } from '@nestjs/swagger'
 import { Controller, Get, Inject, Post, Req, Res, UseFilters } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import {
@@ -13,7 +12,6 @@ import type {
 } from '../../../application/character-detail/service.js'
 import { parseCharacterIdentity } from '../../../domain/character-identity.js'
 import { sendWithCancellation } from '../http-response.js'
-import { ApiCharacterDetails, ApiCharacterRefresh } from '../../openapi/character-details.js'
 import { characterFailureResponse } from '../character-failures.js'
 import { FailureResponseFilter } from '../failure-response.js'
 
@@ -21,14 +19,12 @@ export const CHARACTER_DETAIL_SERVICE = Symbol('CHARACTER_DETAIL_SERVICE')
 // The same Content-Type Express `json` sets, so a stored body goes out with the headers it always had.
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8'
 
-@ApiTags('캐릭터')
 @Controller('characters')
 @UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class CharacterDetailController {
   constructor(@Inject(CHARACTER_DETAIL_SERVICE) private readonly service: CharacterDetailService) {}
 
   @Get(':serverId/:characterId')
-  @ApiCharacterDetails()
   async detail(@Req() request: Request, @Res() response: Response): Promise<void> {
     const identity = readIdentity(request)
     const timings = accessLogTimings(response)
@@ -40,7 +36,6 @@ export class CharacterDetailController {
   }
 
   @Post(':serverId/:characterId/refresh')
-  @ApiCharacterRefresh()
   async refresh(@Req() request: Request, @Res() response: Response): Promise<void> {
     const identity = readIdentity(request)
     const timings = accessLogTimings(response)
