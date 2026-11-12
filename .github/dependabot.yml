@@ -21,6 +21,8 @@ updates:
     groups:
       nestjs:
         patterns: ['@nestjs/*']
+      hono:
+        patterns: ['hono', '@hono/*']
       vite-vitest:
         patterns: ['vite', 'vitest', '@vitejs/*', '@vitest/*']
       react:
