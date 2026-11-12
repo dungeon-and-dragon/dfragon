@@ -467,7 +467,6 @@ for (const [name, database, connected] of [
   test(name, async (t) => {
     const options = createApiRuntimeOptions({
       port: 0,
-      trustedProxyHops: undefined,
       localHttps: undefined,
       apiKey: 'synthetic-neople-key',
       database,
