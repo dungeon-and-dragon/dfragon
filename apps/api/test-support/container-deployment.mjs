@@ -139,6 +139,7 @@ try {
       ...runtimeOptions,
       '--env',
       'PORT=3000',
+      // 인프라 compose가 아직 넘기는 값이다. API는 읽지 않는다.
       '--env',
       'SEARCH_TRUST_PROXY=single-hop',
       ...serviceInput,

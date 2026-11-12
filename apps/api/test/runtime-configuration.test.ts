@@ -38,12 +38,11 @@ const databaseEnvironment = {
   DB_PASSWORD: 'synthetic-db-password'
 }
 
-test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 인증 입력을 무시한다', async () => {
+test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 인증 입력과 프록시 모드를 무시한다', async () => {
   const baseline = await readRuntimeConfiguration(environment)
   assert.deepEqual(baseline, {
     port: 3000,
     apiKey: 'synthetic',
-    trustedProxyHops: undefined,
     localHttps: undefined,
     database: undefined,
     ops: undefined,
@@ -53,6 +52,14 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 인증
     await readRuntimeConfiguration({ ...environment, AUTH_CONFIG_FILE: '/missing/auth.json' }),
     baseline
   )
+  // single-hop은 인프라 compose가 아직 넘기는 값이고, 그 밖의 값은 전에는 시작을 막았다.
+  for (const proxyMode of ['single-hop', 'unsafe-proxy', '']) {
+    assert.deepEqual(
+      await readRuntimeConfiguration({ ...environment, SEARCH_TRUST_PROXY: proxyMode }),
+      baseline,
+      proxyMode
+    )
+  }
   assert.equal(Object.hasOwn(baseline, 'issueAccessJwt'), false)
   await assert.rejects(
     readRuntimeConfiguration({ ...environment, NEOPLE_API_KEY: '' }),
@@ -218,16 +225,13 @@ test('runtime secret 파일은 원문을 유지하며 모호하거나 읽을 수
   }
 })
 
-test('runtime 필수 설정과 프록시 모드 오류는 secret과 원인 없이 정제한다', async (t) => {
+test('runtime 필수 설정 오류는 secret과 원인 없이 정제한다', async (t) => {
   const cases = [
     { name: 'PORT 누락', change: { PORT: undefined } },
     { name: 'PORT 빈 값', change: { PORT: '' } },
     { name: 'PORT 범위 초과', change: { PORT: '65536' } },
     { name: 'Neople key 누락', change: { NEOPLE_API_KEY: undefined } },
-    { name: 'Neople key 공백', change: { NEOPLE_API_KEY: ' \n' } },
-    { name: '프록시 모드 빈 값', change: { SEARCH_TRUST_PROXY: '' } },
-    { name: '프록시 모드 오타', change: { SEARCH_TRUST_PROXY: 'single-hop-private-marker' } },
-    { name: '프록시 hop 숫자', change: { SEARCH_TRUST_PROXY: '2' } }
+    { name: 'Neople key 공백', change: { NEOPLE_API_KEY: ' \n' } }
   ]
   for (const { name, change } of cases) {
     await t.test(name, async () => {
@@ -248,11 +252,6 @@ test('runtime 필수 설정과 프록시 모드 오류는 secret과 원인 없�
       )
     })
   }
-  assert.equal(
-    (await readRuntimeConfiguration({ ...environment, SEARCH_TRUST_PROXY: 'single-hop' }))
-      .trustedProxyHops,
-    1
-  )
 })
 
 test('로컬 HTTPS는 두 절대 파일 경로, 일치하는 loopback origin, 유효한 PEM을 요구한다', async (t) => {
