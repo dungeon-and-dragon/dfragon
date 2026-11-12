@@ -1,10 +1,11 @@
-import { type AccessLogSink, writeAccessLogToStdout } from '../presentation/http/access-log.js'
+import { type AccessLogSink, writeAccessLogToStdout } from '../presentation/http/access-log-sink.js'
 import { opsFailureResponse } from '../presentation/http/ops-failures.js'
 import type { HttpAppHandle } from './app-handle.js'
 import { createHonoApp, createHonoAppHandle } from './hono-app.js'
-import { type OpsRouteOptions, createOpsRoutes } from './modules/ops.js'
+import { type OpsRouteOptions, createOpsRoutes } from './routes/ops.js'
 
 export type OpsHttpAppOptions = OpsRouteOptions & {
+  /** server가 닫혀 진행 중인 요청이 모두 끝난 뒤에 부른다. */
   readonly close?: () => Promise<void>
   readonly writeAccessLog?: AccessLogSink
 }
@@ -22,5 +23,10 @@ export function createOpsHttpApp({
   })
   app.route('/', createOpsRoutes(routeOptions))
 
-  return createHonoAppHandle(app, { close })
+  return createHonoAppHandle(app, {
+    close: async (closeServer) => {
+      await closeServer()
+      await close?.()
+    }
+  })
 }

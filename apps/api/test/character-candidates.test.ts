@@ -19,6 +19,9 @@ import type {
   NeopleCharacterSearchResult
 } from '../src/domain/character-search/types.js'
 
+// Hono app handle을 만들면 global Response가 바뀐다. 가짜 Neople 응답은 실제 fetch가 돌려주는 원래 class로 만든다.
+const NativeResponse = globalThis.Response
+
 const characterName = '후보이름'
 const candidatePath = `/characters/candidates?characterName=${encodeURIComponent(characterName)}`
 const queryError = {
@@ -29,7 +32,7 @@ const providerError = {
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
+  return new NativeResponse(JSON.stringify(body), {
     status,
     headers: { 'content-type': 'application/json' }
   })

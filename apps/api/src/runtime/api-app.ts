@@ -1,26 +1,14 @@
-import 'reflect-metadata'
-import { Module } from '@nestjs/common'
 import {
   type AccessLogSink,
   createCodeReport,
   writeAccessLogToStdout
-} from '../presentation/http/access-log.js'
+} from '../presentation/http/access-log-sink.js'
 import { characterFailureResponse } from '../presentation/http/character-failures.js'
 import { type ApiServicesOptions, createApiServices } from './api-services.js'
-import { createHttpApp, createHttpAppHandle } from './http-app.js'
-import { AdventureGuildModule } from './modules/adventure-guild.js'
-import { CharacterDetailModule } from './modules/character-detail.js'
-import { CharacterImageModule } from './modules/character-image.js'
-import { CharacterSearchModule } from './modules/character-search.js'
-import { CharacterTimelineModule } from './modules/character-timeline.js'
-import { ClearStatsModule } from './modules/clear-stats.js'
-import { HealthModule } from './modules/health.js'
-import { RankingStatsModule } from './modules/ranking-stats.js'
-import { TodayGradeModule } from './modules/today-grade.js'
-import { VersionModule } from './modules/version.js'
+import { createHonoApp, createHonoAppHandle } from './hono-app.js'
+import { createApiRoutes } from './routes/api.js'
 
 export interface ApiHttpAppOptions extends ApiServicesOptions {
-  readonly trustedProxyHops?: 1
   readonly httpsOptions?: Readonly<{ cert: Buffer; key: Buffer }>
   readonly writeAccessLog?: AccessLogSink
 }
@@ -32,38 +20,21 @@ export async function createApiHttpApp(options: ApiHttpAppOptions) {
     options,
     createCodeReport(writeAccessLog, 'api')
   )
-  @Module({
-    imports: [
-      HealthModule,
-      VersionModule.register(services.buildInfo),
-      CharacterSearchModule.register(services.search),
-      CharacterDetailModule.register(services.details),
-      CharacterImageModule.register(services.fetchCharacterImage),
-      CharacterTimelineModule.register(services.timeline),
-      AdventureGuildModule.register(services.adventureGuild),
-      RankingStatsModule.register(services.rankingStats),
-      ClearStatsModule.register(services.clearStats),
-      TodayGradeModule.register(services.todayGrade)
-    ]
-  })
-  class ApiHttpModule {}
+  try {
+    const app = createHonoApp({
+      accessLogService: 'api',
+      writeAccessLog,
+      toFailureResponse: characterFailureResponse
+    })
+    app.route('/', createApiRoutes(services))
 
-  const app = await createHttpApp(ApiHttpModule, {
-    accessLogService: 'api',
-    writeAccessLog,
-    toFailureResponse: characterFailureResponse,
-    httpsOptions: options.httpsOptions,
-    configure: (app) => {
-      app.set('trust proxy', options.trustedProxyHops ?? false)
+    return {
+      app: createHonoAppHandle(app, { httpsOptions: options.httpsOptions, close }),
+      readQueueCounts
     }
-  }).catch(async (error: unknown) => {
+  } catch (error) {
     // server를 만들지 못해도 이미 띄운 점수 worker가 process를 붙잡지 않게 멈춘다.
     await close(async () => undefined).catch(() => undefined)
     throw error
-  })
-
-  return {
-    app: createHttpAppHandle(app, () => close(() => app.close())),
-    readQueueCounts
   }
 }

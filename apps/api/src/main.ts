@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import { applyMigrations } from '@dfragon/database'
 import type { HttpAppHandle } from './runtime/app-handle.js'
 import { createApiRuntime, createOpsRuntime } from './runtime/application.js'

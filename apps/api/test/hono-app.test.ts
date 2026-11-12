@@ -11,8 +11,8 @@ import {
   recordAccessLogCachedResponse,
   recordAccessLogNeopleStage,
   recordAccessLogSharedNeopleFetch
-} from '../src/presentation/http/hono-access-log.js'
-import { createFailureHandler } from '../src/presentation/http/hono-failure-response.js'
+} from '../src/presentation/http/access-log.js'
+import { createFailureHandler } from '../src/presentation/http/failure-response.js'
 import { createHonoApp, createHonoAppHandle } from '../src/runtime/hono-app.js'
 
 // Hono app handle을 만들면 global Response가 바뀌므로, 실제 fetch가 돌려주는 원래 class를 먼저 잡아 둔다.
@@ -267,7 +267,8 @@ test('이미 쓰는 port에 listen하면 reject하고, 그 뒤에 닫아도 clos
   const { port } = occupied.address() as AddressInfo
   let closeCount = 0
   const handle = createHonoAppHandle(testApp(), {
-    close: async () => {
+    close: async (closeServer) => {
+      await closeServer()
       closeCount += 1
     }
   })

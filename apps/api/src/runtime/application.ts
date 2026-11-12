@@ -137,7 +137,6 @@ export function createApiRuntimeOptions(configuration: RuntimeConfiguration): Ap
     },
     ...database,
     todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
-    trustedProxyHops: configuration.trustedProxyHops,
     httpsOptions: configuration.localHttps,
     scoreLibraryPath: configuration.scoreLibraryPath
   }

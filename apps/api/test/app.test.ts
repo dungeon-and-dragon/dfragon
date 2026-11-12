@@ -1,38 +1,15 @@
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { createServer, type Server } from 'node:http'
+import { createServer } from 'node:http'
 import type { AddressInfo } from 'node:net'
 import test from 'node:test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { Controller, Get, Injectable } from '@nestjs/common'
-import type { CallHandler } from '@nestjs/common'
-import { Test } from '@nestjs/testing'
-import type { Request, Response } from 'express'
-import { finalize } from 'rxjs'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
-import { getNestAppForTest } from '../src/runtime/http-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
-
-@Injectable()
-class GreetingService {
-  message(): string {
-    return 'hello'
-  }
-}
-
-@Controller()
-class TestController {
-  constructor(private readonly greetingService: GreetingService) {}
-
-  @Get('test')
-  getMessage(): string {
-    return this.greetingService.message()
-  }
-}
 
 const compiledMainPath = fileURLToPath(new URL('../../dist/main.js', import.meta.url))
 const apiRoot = fileURLToPath(new URL('../../', import.meta.url))
@@ -62,74 +39,49 @@ test('createApiHttpApp은 listen 전에는 port를 열지 않고 close 뒤 port�
   assert.equal(server.listening, false)
 })
 
-test('createApiHttpApp은 앱 설정의 trustedProxyHops를 Express trust proxy로 쓴다', async () => {
-  for (const [trustedProxyHops, expected] of [
-    [1, 1],
-    [undefined, false]
-  ] as const) {
-    const { app: handle } = await createApiHttpApp({
-      search: { searchCharacters: unusedSearchCharacters },
-      details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
-      todayGrade: { fetchShopGrade: unusedProvider },
-      trustedProxyHops
-    })
-    const app = getNestAppForTest(handle)
-
-    try {
-      assert.equal(app.getHttpAdapter().getInstance().get('trust proxy'), expected)
-    } finally {
-      await handle.close()
-    }
-  }
-})
-
-test('controller 전에 연결이 끊긴 검색, 상세 요청은 공급자를 호출하지 않는다', {
+test('handler 전에 연결이 끊긴 검색, 상세, 초상화, 오늘의 등급 요청은 공급자를 호출하지 않는다', {
   timeout: 5000
 }, async (t) => {
   const paths = [
     '/characters?characterName=ab',
     '/characters/candidates?characterName=ab',
-    '/characters/cain/fixture-character'
+    '/characters/cain/fixture-character',
+    '/characters/cain/fixture-character/image',
+    '/items/today-grade'
   ]
   const providerCalls: string[] = []
   const recordCall = (provider: string) => async (): Promise<never> => {
     providerCalls.push(provider)
     throw new Error('disconnected request must not call Neople')
   }
-  const { app: handle } = await createApiHttpApp({
-    search: { searchCharacters: recordCall('search') },
-    details: {
-      fetchDetails: recordCall('details'),
-      catalog: createCatalogService(recordCall('catalog'))
-    },
-    todayGrade: { fetchShopGrade: unusedProvider }
-  })
-  const app = getNestAppForTest(handle)
-  t.after(() => handle.close())
-  // 클라이언트가 요청을 보낸 직후 연결을 끊어 controller보다 socket 종료가 먼저인 상황을 만든다.
-  app.use((request: Request, _response: Response, next: () => void) => {
-    request.socket.destroy()
-    next()
-  })
-  // 요청은 socket 종료로 먼저 실패하므로, 공급자 호출 여부는 controller가 끝난 뒤에 확인한다.
   let handledCount = 0
   let markAllHandled!: () => void
   const allHandled = new Promise<void>((resolve) => {
     markAllHandled = resolve
   })
-  app.useGlobalInterceptors({
-    intercept: (_context: unknown, next: CallHandler) =>
-      next.handle().pipe(
-        finalize(() => {
-          handledCount += 1
-          if (handledCount === paths.length) {
-            markAllHandled()
-          }
-        })
-      )
+  const { app } = await createApiHttpApp({
+    search: { searchCharacters: recordCall('search') },
+    details: {
+      fetchDetails: recordCall('details'),
+      catalog: createCatalogService(recordCall('catalog'))
+    },
+    todayGrade: { fetchShopGrade: recordCall('todayGrade') },
+    fetchCharacterImage: recordCall('image'),
+    // 요청은 socket 종료로 먼저 실패한다. handler는 요청 event 안에서 시작하므로, 공급자 호출 여부는 socket이 닫혀 접근 로그가 남은 뒤에 확인한다.
+    writeAccessLog: () => {
+      handledCount += 1
+      if (handledCount === paths.length) {
+        markAllHandled()
+      }
+    }
   })
-  await handle.listen(0, '127.0.0.1')
-  const origin = await handle.getUrl()
+  t.after(() => app.close())
+  // 클라이언트가 요청을 보낸 직후 연결을 끊어 handler보다 socket 종료가 먼저인 상황을 만든다.
+  app.getHttpServer().prependListener('request', (request) => {
+    request.socket.destroy()
+  })
+  await app.listen(0, '127.0.0.1')
+  const origin = await app.getUrl()
 
   for (const path of paths) {
     await assert.rejects(fetch(`${origin}${path}`), path)
@@ -139,40 +91,55 @@ test('controller 전에 연결이 끊긴 검색, 상세 요청은 공급자를 �
   assert.deepEqual(providerCalls, [])
 })
 
-test('test module route는 listen 후 생성자로 주입한 provider의 응답을 HTTP로 제공한다', async () => {
-  assert.deepEqual(Reflect.getMetadata('design:paramtypes', TestController), [GreetingService])
-  const testingModule = await Test.createTestingModule({
-    controllers: [TestController],
-    providers: [GreetingService]
-  }).compile()
-  const app = testingModule.createNestApplication()
-
-  try {
-    await app.listen(0, '127.0.0.1')
-    const address = (app.getHttpServer() as Server).address()
-    assert(address !== null && typeof address !== 'string')
-    const response = await fetch(`http://127.0.0.1:${address.port}/test`)
-
-    assert.equal(response.status, 200)
-    assert.equal(await response.text(), 'hello')
-  } finally {
-    await app.close()
-  }
-})
-
-test('Nest 테스트 container는 provider를 교체한다', async () => {
-  const testingModule = await Test.createTestingModule({
-    controllers: [TestController],
-    providers: [GreetingService]
+function watchAbort() {
+  let markCalled!: () => void
+  const called = new Promise<void>((resolve) => {
+    markCalled = resolve
   })
-    .overrideProvider(GreetingService)
-    .useValue({ message: () => 'overridden' })
-    .compile()
+  let markAborted!: () => void
+  const aborted = new Promise<void>((resolve) => {
+    markAborted = resolve
+  })
+  const provider = (_identity: unknown, signal: AbortSignal): Promise<never> =>
+    new Promise((_resolve, reject) => {
+      signal.addEventListener('abort', () => {
+        markAborted()
+        reject(signal.reason)
+      })
+      markCalled()
+    })
 
-  try {
-    assert.equal(testingModule.get(TestController).getMessage(), 'overridden')
-  } finally {
-    await testingModule.close()
+  return { called, aborted, provider }
+}
+
+test('응답을 기다리던 클라이언트가 연결을 끊으면 진행 중인 상세, 초상화 공급자 호출을 취소한다', {
+  timeout: 5000
+}, async (t) => {
+  const details = watchAbort()
+  const image = watchAbort()
+  const { app } = await createApiHttpApp({
+    search: { searchCharacters: unusedSearchCharacters },
+    details: { fetchDetails: details.provider, catalog: createCatalogService(unusedProvider) },
+    todayGrade: { fetchShopGrade: unusedProvider },
+    fetchCharacterImage: image.provider,
+    writeAccessLog: () => undefined
+  })
+  t.after(() => app.close())
+  await app.listen(0, '127.0.0.1')
+  const origin = await app.getUrl()
+
+  for (const [path, { called, aborted }] of [
+    ['/characters/cain/fixture-character', details],
+    ['/characters/cain/fixture-character/image', image]
+  ] as const) {
+    const disconnect = new AbortController()
+    const pending = fetch(`${origin}${path}`, { signal: disconnect.signal }).catch(() => undefined)
+    await called
+    disconnect.abort()
+    await pending
+
+    // 공급자가 받은 signal이 abort되지 않으면 이 test가 timeout으로 실패한다.
+    await aborted
   }
 })
 
@@ -189,14 +156,13 @@ test('compiled main은 잘못된 필수 설정을 거절하고 정제된 문구�
     { name: 'Neople key 누락', change: { NEOPLE_API_KEY: undefined } },
     { name: 'Neople key 빈 값', change: { NEOPLE_API_KEY: '' } },
     { name: 'Neople key 공백', change: { NEOPLE_API_KEY: ' \n' } },
-    { name: '프록시 모드 오류', change: { SEARCH_TRUST_PROXY: 'unsafe-proxy' } },
     { name: 'TLS 파일 짝 누락', change: { LOCAL_HTTPS_CERT_FILE: '/missing/cert.pem' } },
     { name: '점수 엔진 상대 경로', change: { SCORE_LIBRARY_FILE: 'libdnfscore.so' } }
   ]
   for (const { name, change } of cases) {
     await t.test(name, async () => {
       await assert.rejects(
-        promisify(execFile)(process.execPath, ['--import', 'reflect-metadata', compiledMainPath], {
+        promisify(execFile)(process.execPath, [compiledMainPath], {
           cwd: apiRoot,
           env: { ...environment, ...change },
           timeout: 5000,
@@ -229,7 +195,7 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   const title = `compiled main은 listen 뒤 ${signal}를 받으면 앱을 닫고 exit code 0으로 끝난다`
   test(title, { timeout: 10_000 }, async (t) => {
     const port = await findFreePort()
-    const child = spawn(process.execPath, ['--import', 'reflect-metadata', compiledMainPath], {
+    const child = spawn(process.execPath, [compiledMainPath], {
       cwd: apiRoot,
       // 실제 환경, credential은 상속하지 않고 합성 입력만 전달한다.
       env: { PORT: String(port), NEOPLE_API_KEY: 'synthetic-private-api-key' },

@@ -5,11 +5,14 @@ import { createNeopleClientForTest } from '@dfragon/neople'
 import {
   type AccessLogSink,
   createStreamAccessLogSink
-} from '../src/presentation/http/access-log.js'
+} from '../src/presentation/http/access-log-sink.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+
+// Hono app handle을 만들면 global Response가 바뀐다. 가짜 Neople 응답은 실제 fetch가 돌려주는 원래 class로 만든다.
+const NativeResponse = globalThis.Response
 
 const unusedProvider = async (): Promise<never> => {
   throw new Error('access log test must not call this provider')
@@ -269,8 +272,11 @@ test('상세의 Neople 실패는 상세 오류와 원래 원인만 chain에 남�
 }, async (t) => {
   const responses = [
     () =>
-      Response.json({ error: { code: 'API901', message: secrets.errorDetail } }, { status: 503 }),
-    () => new Response(`not json ${secrets.errorDetail}`, { status: 503 })
+      NativeResponse.json(
+        { error: { code: 'API901', message: secrets.errorDetail } },
+        { status: 503 }
+      ),
+    () => new NativeResponse(`not json ${secrets.errorDetail}`, { status: 503 })
   ]
   const logs = collectAccessLogs()
   const { app } = await createApiHttpApp({
@@ -325,10 +331,12 @@ test('상세 요청 로그에는 Neople 단계별 대기 시간만 붙이고, �
             const [, characterId, suffix = ''] =
               detailPath.exec(new URL(request.url).pathname) ?? []
             if (characterId === failingCharacterId && suffix !== '') {
-              return Response.json({ error: { code: 'API901', message: secrets.errorDetail } })
+              return NativeResponse.json({
+                error: { code: 'API901', message: secrets.errorDetail }
+              })
             }
 
-            return Response.json({
+            return NativeResponse.json({
               serverId: 'siroco',
               characterId,
               characterName: secrets.characterName,
@@ -402,7 +410,7 @@ test('캐시한 강제 갱신과 상세 요청은 responseCached로 표시하고
               sectionRequests.push(suffix)
             }
 
-            return Response.json({
+            return NativeResponse.json({
               serverId: 'siroco',
               characterId: 'fixture-character',
               characterName: `조회 ${basicRequests.length}`,
@@ -484,7 +492,7 @@ test('후보 검색 요청 로그는 저장한 결과를 보낸 요청에 respon
             await gate
             const characterName = new URL(request.url).searchParams.get('characterName')
 
-            return Response.json({
+            return NativeResponse.json({
               rows: [{ characterId: 'fixture-character', characterName, serverId: 'cain', fame: 1 }]
             })
           }
