@@ -4,6 +4,8 @@ export type OpsFailureKind =
   | 'jobNotFound'
   | 'jobAlreadyRunning'
   | 'jobNotScheduled'
+  | 'batchNeopleKeyNotFound'
+  | 'batchNeopleKeyDuplicate'
   | 'internal'
 
 export class OpsFailure extends Error {
