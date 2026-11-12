@@ -226,3 +226,14 @@ model JobSkillAdoptionSnapshot {
   @@id([jobId, jobGrowId, role])
   @@map("job_skill_adoption")
 }
+
+model BatchNeopleKey {
+  id         Int       @id @default(autoincrement())
+  label      String
+  key        String    @unique
+  enabled    Boolean   @default(true)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  rejectedAt DateTime? @map("rejected_at") @db.Timestamptz(3)
+
+  @@map("batch_neople_keys")
+}
