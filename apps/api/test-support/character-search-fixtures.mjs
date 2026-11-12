@@ -96,7 +96,7 @@ export async function withSearchApp(operation, overrides = {}) {
     searchCharacters,
     ...overrides
   }
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: deps,
     details: unusedDetailProviders(),
     todayGrade: unusedTodayGradeProvider()

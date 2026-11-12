@@ -116,7 +116,7 @@ test('Neople이 없는 캐릭터(DNF001)라고 답하면 상세 조회와 강제
   const unused = async (): Promise<never> => {
     throw new Error('not found test must not call this provider')
   }
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: {
       fetchDetails: createNeopleCharacterDetails(

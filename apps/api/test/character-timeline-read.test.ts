@@ -302,7 +302,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
     enhancementsCursor: '1762311600000.42'
   }
   let synced = false
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     timeline: {
@@ -336,7 +336,7 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
 })
 
 test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 배열을, 이어 받기는 빈 목록을 주고 HEAD도 200으로 답하며 잘못된 캐릭터는 거절한다', async (t) => {
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
@@ -448,7 +448,7 @@ test('이어 받기는 동기화를 기다리지 않고 before의 cursor로 목�
     nextCursor: '1762311600000.7'
   }
   const reads: unknown[] = []
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     timeline: {

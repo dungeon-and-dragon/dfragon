@@ -11,7 +11,7 @@ import {
 
 async function withSearchBoundary(operation) {
   let upstreamCalls = 0
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: {
       async searchCharacters() {
         upstreamCalls++

@@ -196,7 +196,7 @@ test('실제 엔진을 연 API는 상세 응답에 golden 입력을 엔진에 �
     ['buffer-muse', 'buff']
   ] as const) {
     const { original, fetchDetails, fetchCatalog, identity } = fixtureSources(name)
-    const app = await createApiHttpApp({
+    const { app } = await createApiHttpApp({
       search: {
         searchCharacters: async () => {
           throw new Error('score test must not search')

@@ -14,6 +14,7 @@ import type { Request, Response } from 'express'
 import { finalize } from 'rxjs'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+import { getNestAppForTest } from '../src/runtime/http-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 
 @Injectable()
@@ -44,12 +45,12 @@ const unusedProvider = async (): Promise<never> => {
 }
 
 test('createApiHttpApp은 listen 전에는 port를 열지 않고 close 뒤 port를 닫는다', async () => {
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedSearchCharacters },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider }
   })
-  const server = app.getHttpServer() as Server
+  const server = app.getHttpServer()
 
   assert.equal(server.listening, false)
   try {
@@ -66,12 +67,13 @@ test('createApiHttpApp은 앱 설정의 trustedProxyHops를 Express trust proxy�
     [1, 1],
     [undefined, false]
   ] as const) {
-    const app = await createApiHttpApp({
+    const { app: handle } = await createApiHttpApp({
       search: { searchCharacters: unusedSearchCharacters },
       details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
       todayGrade: { fetchShopGrade: unusedProvider },
       trustedProxyHops
     })
+    const app = getNestAppForTest(handle)
 
     try {
       assert.equal(app.getHttpAdapter().getInstance().get('trust proxy'), expected)
@@ -94,7 +96,7 @@ test('controller 전에 연결이 끊긴 검색, 상세 요청은 공급자를 �
     providerCalls.push(provider)
     throw new Error('disconnected request must not call Neople')
   }
-  const app = await createApiHttpApp({
+  const { app: handle } = await createApiHttpApp({
     search: { searchCharacters: recordCall('search') },
     details: {
       fetchDetails: recordCall('details'),
@@ -102,7 +104,8 @@ test('controller 전에 연결이 끊긴 검색, 상세 요청은 공급자를 �
     },
     todayGrade: { fetchShopGrade: unusedProvider }
   })
-  t.after(() => app.close())
+  const app = getNestAppForTest(handle)
+  t.after(() => handle.close())
   // 클라이언트가 요청을 보낸 직후 연결을 끊어 controller보다 socket 종료가 먼저인 상황을 만든다.
   app.use((request: Request, _response: Response, next: () => void) => {
     request.socket.destroy()
@@ -125,8 +128,8 @@ test('controller 전에 연결이 끊긴 검색, 상세 요청은 공급자를 �
         })
       )
   })
-  await app.listen(0, '127.0.0.1')
-  const origin = await app.getUrl()
+  await handle.listen(0, '127.0.0.1')
+  const origin = await handle.getUrl()
 
   for (const path of paths) {
     await assert.rejects(fetch(`${origin}${path}`), path)
