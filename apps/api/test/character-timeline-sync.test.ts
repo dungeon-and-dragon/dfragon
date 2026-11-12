@@ -20,7 +20,7 @@ import {
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-events.js'
 import type { CharacterIdentity } from '../src/domain/character-identity.js'
-import { EventEmitter2 } from '@nestjs/event-emitter'
+import { EventEmitter } from 'node:events'
 
 const character = { serverId: 'siroco', characterId: 'timeline-fixture' }
 const MINUTE_MS = 60 * 1000
@@ -305,7 +305,7 @@ const payloads: CharacterPayloads = {
 
 test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 캐릭터를 받지 못하면 알리지 않는다', async (t) => {
   const fetched: CharacterIdentity[] = []
-  const emitter = new EventEmitter2()
+  const emitter = new EventEmitter()
   emitter.on(CHARACTER_FETCHED, ({ serverId, characterId }: CharacterFetched) =>
     fetched.push({ serverId, characterId })
   )
@@ -344,7 +344,7 @@ test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백
 }, async (t) => {
   const backfilling = gate()
   const backfilled: TimelineCharacter[] = []
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => payloads,
@@ -389,7 +389,7 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
   let closed = 0
   let synced = 0
   let backfilled = 0
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => payloads,

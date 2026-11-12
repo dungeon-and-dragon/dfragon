@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfragon/database'
-import type { INestApplication } from '@nestjs/common'
+import type { HttpAppHandle } from '../src/runtime/app-handle.js'
 import {
   type AdventureSeasonBackfillRead,
   type AdventureGuildReader
@@ -258,9 +258,9 @@ function gate() {
 async function listen(
   reader: Pick<AdventureGuildReader, 'readAdventureSeasonBackfill' | 'readAdventureActivity'>,
   backfill: (job: SeasonBackfillJob) => Promise<void>
-): Promise<{ app: INestApplication; origin: string }> {
+): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },

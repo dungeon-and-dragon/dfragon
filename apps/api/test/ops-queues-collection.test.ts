@@ -10,7 +10,7 @@ import { createSeasonBackfillQueue } from '../src/application/character-timeline
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
 import type { OpsCollectionStore } from '../src/application/ops/ports.js'
-import { readTimelineQueueCounts } from '../src/runtime/modules/character-timeline.js'
+import { getNestAppForTest } from '../src/runtime/http-app.js'
 
 function gate() {
   let release!: () => void
@@ -108,7 +108,7 @@ test('queue 개수는 처리 중인 일과 동시 실행 한도에 막혀 기다
 
 test('운영 queue 경로는 공개 app의 타임라인 동기화, 강화 백필, 옛 시즌 백필 queue 개수를 각각 준다', async (t) => {
   const blocked = gate()
-  const publicApp = await createApiHttpApp({
+  const { app: publicApp, readQueueCounts } = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => assert.fail('상세 조회를 부르면 안 된다'),
@@ -133,14 +133,14 @@ test('운영 queue 경로는 공개 app의 타임라인 동기화, 강화 백필
     blocked.release()
     await publicApp.close()
   })
-  await publicApp.init()
+  await getNestAppForTest(publicApp).init()
   const request = await startOpsApp(t, {
-    readQueueCounts: () => readTimelineQueueCounts(publicApp),
+    readQueueCounts,
     collection: unusedCollection
   })
 
   for (const characterId of ['first', 'second']) {
-    publicApp
+    getNestAppForTest(publicApp)
       .get(EventEmitter2)
       .emit(CHARACTER_FETCHED, new CharacterFetched('cain', characterId, {}, {}, new Date()))
   }

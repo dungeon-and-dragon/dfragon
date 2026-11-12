@@ -1,13 +1,12 @@
 import 'reflect-metadata'
 import { applyMigrations } from '@dfragon/database'
-import type { INestApplication } from '@nestjs/common'
-import { readTimelineQueueCounts } from './runtime/modules/character-timeline.js'
+import type { HttpAppHandle } from './runtime/app-handle.js'
 import { createApiRuntime, createOpsRuntime } from './runtime/application.js'
 import { readRuntimeConfiguration } from './runtime/configuration.js'
 
 const startupFailureMessage = 'API failed to start'
 
-async function closeAll(apps: readonly INestApplication[]): Promise<void> {
+async function closeAll(apps: readonly HttpAppHandle[]): Promise<void> {
   const results = await Promise.allSettled(apps.map((app) => app.close()))
   if (results.some(({ status }) => status === 'rejected')) {
     throw new Error(startupFailureMessage)
@@ -19,21 +18,21 @@ async function main(): Promise<void> {
   if (configuration.database !== undefined) {
     await applyMigrations()
   }
-  const listen = (app: INestApplication, port: number) => {
+  const listen = (app: HttpAppHandle, port: number) => {
     if (configuration.localHttps !== undefined) {
       return app.listen(port, '127.0.0.1')
     }
 
     return app.listen(port)
   }
-  const apps: INestApplication[] = []
+  const apps: HttpAppHandle[] = []
   try {
-    const app = await createApiRuntime(configuration)
+    const { app, readQueueCounts } = await createApiRuntime(configuration)
     apps.push(app)
     await listen(app, configuration.port)
     const { ops } = configuration
     if (ops !== undefined) {
-      const opsApp = await createOpsRuntime(ops.database, () => readTimelineQueueCounts(app))
+      const opsApp = await createOpsRuntime(ops.database, readQueueCounts)
       apps.push(opsApp)
       await listen(opsApp, ops.port)
     }

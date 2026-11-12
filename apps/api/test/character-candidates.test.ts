@@ -42,7 +42,7 @@ async function startApp(t: TestContext, dependencies: NeopleTestDependencies): P
   const unusedProvider = async (): Promise<never> => {
     throw new Error('candidate search must not call detail providers')
   }
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider }

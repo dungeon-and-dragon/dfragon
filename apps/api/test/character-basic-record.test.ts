@@ -7,7 +7,7 @@ import {
   recordCharacter,
   recordCharacterBasic
 } from '@dfragon/database'
-import type { INestApplication } from '@nestjs/common'
+import type { HttpAppHandle } from '../src/runtime/app-handle.js'
 import { CharacterBasicSubscriber } from '../src/presentation/events/character-basic.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import type {
@@ -16,6 +16,7 @@ import type {
 } from '../src/domain/character-detail/sections.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 import { createApiRuntime } from '../src/runtime/application.js'
+import { getNestAppForTest } from '../src/runtime/http-app.js'
 
 // 합성 캐릭터다. 실제 Neople 응답처럼 모든 섹션에 기본 정보가 들어 있다.
 const character = { serverId: 'cain', characterId: 'basic-fixture' }
@@ -145,8 +146,8 @@ async function listen(
     ApiHttpAppOptions,
     'details' | 'recordCharacterBasic' | 'recordCharacterSkillStyle' | 'writeAccessLog'
   >
-): Promise<{ app: INestApplication; origin: string }> {
-  const app = await createApiHttpApp({
+): Promise<{ app: HttpAppHandle; origin: string }> {
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     todayGrade: { fetchShopGrade: async () => assert.fail('오늘의 등급을 부르면 안 된다') },
     writeAccessLog: () => undefined,
@@ -423,7 +424,7 @@ for (const [name, database, registered] of [
   ]
 ] as const) {
   test(name, async (t) => {
-    const app = await createApiRuntime({
+    const { app } = await createApiRuntime({
       port: 0,
       trustedProxyHops: undefined,
       localHttps: undefined,
@@ -436,7 +437,7 @@ for (const [name, database, registered] of [
 
     const found = (() => {
       try {
-        app.get(CharacterBasicSubscriber)
+        getNestAppForTest(app).get(CharacterBasicSubscriber)
 
         return true
       } catch {

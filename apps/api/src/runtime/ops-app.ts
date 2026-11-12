@@ -1,9 +1,10 @@
 import 'reflect-metadata'
-import { type INestApplication, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import type { NextFunction, Request, Response } from 'express'
 import { type AccessLogSink, writeAccessLogToStdout } from '../presentation/http/access-log.js'
 import { opsFailureResponse, unsupportedOpsMediaType } from '../presentation/http/ops-failures.js'
-import { createHttpApp } from './http-app.js'
+import type { HttpAppHandle } from './app-handle.js'
+import { createHttpApp, createHttpAppHandle } from './http-app.js'
 import { OpsCollectionModule, type OpsCollectionModuleOptions } from './modules/ops-collection.js'
 import { OpsDatabaseModule } from './modules/ops-database.js'
 import { OpsJobsModule, type OpsJobsModuleOptions } from './modules/ops-jobs.js'
@@ -38,7 +39,7 @@ export async function createOpsHttpApp({
   collection,
   close = async () => undefined,
   writeAccessLog = writeAccessLogToStdout
-}: OpsHttpAppOptions): Promise<INestApplication> {
+}: OpsHttpAppOptions): Promise<HttpAppHandle> {
   @Module({
     imports: [
       OpsJobsModule.register({ store: jobs }),
@@ -49,7 +50,7 @@ export async function createOpsHttpApp({
   })
   class OpsHttpModule {}
 
-  return createHttpApp(OpsHttpModule, {
+  const app = await createHttpApp(OpsHttpModule, {
     accessLogService: 'api-ops',
     writeAccessLog,
     toFailureResponse: opsFailureResponse,
@@ -58,4 +59,6 @@ export async function createOpsHttpApp({
       app.useBodyParser('json', { limit: BODY_LIMIT })
     }
   })
+
+  return createHttpAppHandle(app)
 }

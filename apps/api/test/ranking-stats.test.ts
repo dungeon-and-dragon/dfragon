@@ -8,7 +8,7 @@ import type {
   JobSkillAdoptionSnapshot,
   StoredCharacter
 } from '@dfragon/database'
-import type { INestApplication } from '@nestjs/common'
+import type { HttpAppHandle } from '../src/runtime/app-handle.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { RankingStatsReader } from '../src/application/ranking-stats/ports.js'
@@ -95,9 +95,9 @@ const unusedReader: RankingStatsReader = {
 
 async function listen(
   rankingStats?: RankingStatsReader
-): Promise<{ app: INestApplication; origin: string }> {
+): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },

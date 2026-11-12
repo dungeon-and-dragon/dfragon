@@ -406,7 +406,7 @@ test('공개 app에는 운영 경로가 없다', async (t) => {
   const unused = async (): Promise<never> => {
     throw new Error('ops route test must not call services')
   }
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },

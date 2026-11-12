@@ -47,7 +47,7 @@ test('공개 version 응답은 캐시하지 않고 시작 시점 값을 유지�
   t.after(() => rm(directory, { recursive: true, force: true }))
   const path = join(directory, 'build-info.json')
   await writeFile(path, JSON.stringify({ service: 'api', commit }))
-  const app = await createApiHttpApp({ ...unusedProviders, buildInfoPath: path })
+  const { app } = await createApiHttpApp({ ...unusedProviders, buildInfoPath: path })
   try {
     await app.listen(0, '127.0.0.1')
     const origin = await app.getUrl()
@@ -67,7 +67,7 @@ test('공개 version 응답은 캐시하지 않고 시작 시점 값을 유지�
 test('이전 이미지에 메타데이터가 없어도 version 응답은 API 서비스를 식별한다', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'dfragon-api-version-old-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     ...unusedProviders,
     buildInfoPath: join(directory, 'missing.json')
   })
