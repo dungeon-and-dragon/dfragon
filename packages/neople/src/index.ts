@@ -9,6 +9,7 @@ export {
 } from './client.js'
 export {
   type NeopleFailureKind,
+  type NeopleKeyShortage,
   NeopleRequestFailure,
   type NeopleUpstreamFailureKind,
   type NeopleUpstreamResponse

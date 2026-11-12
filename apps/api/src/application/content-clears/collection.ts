@@ -34,7 +34,11 @@ type CharacterClears =
   | { status: 'skipped' }
   | { status: 'unavailable'; reason: string }
 
-function toUnavailableReason({ kind, upstream }: TimelineFailure): string {
+function toUnavailableReason({ kind, upstream, keyShortage }: TimelineFailure): string {
+  if (keyShortage !== undefined) {
+    return keyShortage
+  }
+
   if (upstream === undefined) {
     return kind
   }

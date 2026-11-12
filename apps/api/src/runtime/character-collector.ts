@@ -1,6 +1,11 @@
 import { setTimeout } from 'node:timers/promises'
-import { createDatabaseClient } from '@dfragon/database'
+import {
+  createDatabaseClient,
+  readUsableBatchNeopleKeys,
+  recordBatchNeopleKeyRejected
+} from '@dfragon/database'
 import { createNeopleClient } from '@dfragon/neople'
+import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
 import { createNeopleClearTimeline } from '../infrastructure/neople/content-clear-collection.js'
 import { createNeopleSkillStyle } from '../infrastructure/neople/skill-style-collection.js'
 import { writeAccessLogToStdout } from '../presentation/http/access-log-sink.js'
@@ -23,6 +28,8 @@ import { createDiscordJobAlert } from '../infrastructure/jobs/alert.js'
 import { startJobScheduler } from '../infrastructure/jobs/scheduler.js'
 import { createWorkerJobs } from './worker-jobs.js'
 
+const BATCH_KEY_REFRESH_MS = 5000
+
 function report(code: string, details?: Readonly<Record<string, unknown>>): void {
   writeAccessLogToStdout(
     JSON.stringify({
@@ -39,10 +46,25 @@ export async function startCharacterCollector(
   configuration: ReturnType<typeof readCollectorConfiguration>
 ): Promise<never> {
   const client = createDatabaseClient(configuration.database)
-  const neople = paceNeopleRequests(
-    createNeopleClient(configuration.apiKey),
-    configuration.requestsPerSecond
-  )
+  const keyPool = createBatchNeopleKeyPool({
+    store: {
+      readUsableKeys: () => readUsableBatchNeopleKeys(client),
+      recordRejected: (id) => recordBatchNeopleKeyRejected(client, id)
+    },
+    createNeople: (key) =>
+      paceNeopleRequests(createNeopleClient(key), configuration.requestsPerSecond),
+    concurrencyPerKey: configuration.concurrency,
+    report
+  })
+
+  await keyPool.refresh()
+  setInterval(() => {
+    keyPool.refresh().catch(() => {
+      report('BATCH_NEOPLE_KEY_READ_FAILED')
+    })
+  }, BATCH_KEY_REFRESH_MS)
+
+  const { neople, readConcurrency } = keyPool
   const fetchBasic = createNeopleCharacterBasic(neople)
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
@@ -54,7 +76,7 @@ export async function startCharacterCollector(
     jobs: createWorkerJobs(client, {
       createFetchTimeline: createNeopleClearTimeline(neople),
       fetchSkillStyle: createNeopleSkillStyle(neople),
-      readConcurrency: () => configuration.concurrency,
+      readConcurrency,
       report
     }),
     store: createDatabaseJobStore(client),
@@ -67,7 +89,7 @@ export async function startCharacterCollector(
     enqueue,
     fetchBasic,
     store,
-    readConcurrency: () => configuration.concurrency,
+    readConcurrency,
     report,
     readModifiedTime: readImportModifiedTime,
     importCharacters: importCollectedCharacters,
