@@ -386,3 +386,161 @@ describe('운영 화면', () => {
     })
   })
 })
+
+// batch key 원문은 모두 합성 값이며 실제 Neople key가 아니다.
+const NEW_KEY = 'synthetic-batch-key-0000-9d4e'
+
+function batchKeyRowOf(label: string): HTMLTableRowElement {
+  const row = [...section('batch key').querySelectorAll('tbody tr')].find(
+    (candidate) => candidate.querySelector('td')?.textContent === label
+  )
+
+  if (!(row instanceof HTMLTableRowElement)) {
+    throw new Error(`${label} 행이 없습니다.`)
+  }
+
+  return row
+}
+
+function batchKeyInput(id: 'batch-key-label' | 'batch-key-value'): HTMLInputElement {
+  const input = section('batch key').querySelector<HTMLInputElement>(`#${id}`)
+
+  if (input === null) {
+    throw new Error(`${id} 입력란이 없습니다.`)
+  }
+
+  return input
+}
+
+async function submitBatchKey(label: string, key: string): Promise<void> {
+  typeInto(batchKeyInput('batch-key-label'), label)
+  typeInto(batchKeyInput('batch-key-value'), key)
+  const form = batchKeyInput('batch-key-value').form as HTMLFormElement
+  act(() => form.requestSubmit())
+  await flush()
+}
+
+describe('batch key 패널', () => {
+  it('key를 추가하면 끝 4자로 목록에 나타나고 입력란을 비우며 원문은 화면 어디에도 없다', async () => {
+    const api = new FakeOpsApi()
+    await renderScreen(api)
+    expect(batchKeyInput('batch-key-value').type).toBe('password')
+
+    await submitBatchKey('batch5', NEW_KEY)
+
+    await waitFor(() => expect(batchKeyRowOf('batch5').textContent).toContain('••••9d4e'))
+    expect(api.writes()).toMatchObject([
+      {
+        method: 'POST',
+        path: '/api/batch-neople-keys',
+        contentType: 'application/json',
+        body: { label: 'batch5', key: NEW_KEY }
+      }
+    ])
+    expect(batchKeyRowOf('batch5').textContent).toContain('사용')
+    expect(section('batch key').querySelector('h2')?.textContent).toBe('batch key1')
+    expect(batchKeyInput('batch-key-label').value).toBe('')
+    expect(batchKeyInput('batch-key-value').value).toBe('')
+    expect(document.body.innerHTML).not.toContain(NEW_KEY)
+  })
+
+  it('사용 스위치를 끄면 꺼짐으로 바뀌고 다시 켜면 사용으로 돌아온다', async () => {
+    const api = new FakeOpsApi()
+    const added = api.addBatchKey('batch1', 'synthetic-batch-key-0001-3f9a')
+    await renderScreen(api)
+    const toggle = () => batchKeyRowOf('batch1').querySelector<HTMLElement>('[role="switch"]')
+
+    await click(toggle() as HTMLElement)
+    await waitFor(() => expect(batchKeyRowOf('batch1').textContent).toContain('꺼짐'))
+    expect(toggle()?.getAttribute('aria-checked')).toBe('false')
+
+    await click(toggle() as HTMLElement)
+    await waitFor(() => expect(batchKeyRowOf('batch1').textContent).toContain('사용'))
+    expect(api.writes().map(({ method, path }) => `${method} ${path}`)).toEqual([
+      `POST /api/batch-neople-keys/${added.id}/disable`,
+      `POST /api/batch-neople-keys/${added.id}/enable`
+    ])
+  })
+
+  it('Neople이 거절한 key는 거절됨과 거절 시각을 보이고 다시 켜면 사용으로 바뀐다', async () => {
+    const api = new FakeOpsApi()
+    api.addBatchKey('batch4', 'synthetic-batch-key-0004-41b2', {
+      enabled: false,
+      rejectedAt: '2026-11-10T06:04:00.000Z'
+    })
+    await renderScreen(api)
+
+    expect(batchKeyRowOf('batch4').textContent).toContain('거절됨11-10 15:04')
+
+    await click(batchKeyRowOf('batch4').querySelector('[role="switch"]') as HTMLElement)
+
+    await waitFor(() => expect(batchKeyRowOf('batch4').textContent).not.toContain('거절됨'))
+    expect(batchKeyRowOf('batch4').textContent).toContain('사용')
+    expect(batchKeyRowOf('batch4').textContent).not.toContain('15:04')
+  })
+
+  it('같은 key를 다시 넣으면 key 입력란 아래에 오류를 보이고 목록은 그대로다', async () => {
+    const api = new FakeOpsApi()
+    api.addBatchKey('batch1', NEW_KEY)
+    await renderScreen(api)
+
+    await submitBatchKey('batch5', NEW_KEY)
+
+    await waitFor(() =>
+      expect(section('batch key').querySelector('[role="alert"]')?.textContent).toBe(
+        '이미 있는 key입니다.'
+      )
+    )
+    expect(batchKeyInput('batch-key-value').getAttribute('aria-invalid')).toBe('true')
+    expect(section('batch key').querySelectorAll('tbody tr')).toHaveLength(1)
+    expect(api.batchKeys.map(({ label }) => label)).toEqual(['batch1'])
+  })
+
+  it('이름이 비면 오류를 보이고 key를 추가하지 않는다', async () => {
+    const api = new FakeOpsApi()
+    await renderScreen(api)
+
+    await submitBatchKey('  ', NEW_KEY)
+
+    await waitFor(() =>
+      expect(section('batch key').querySelector('[role="alert"]')?.textContent).toBe(
+        '이름과 key를 넣어야 합니다.'
+      )
+    )
+    expect(api.batchKeys).toEqual([])
+  })
+
+  it('key가 없으면 추가 줄 아래에 빈 목록 한 줄만 보인다', async () => {
+    const api = new FakeOpsApi()
+
+    await renderScreen(api)
+
+    expect(section('batch key').querySelector('table')).toBeNull()
+    expect(section('batch key').querySelector('p')?.textContent).toBe('batch key가 없습니다.')
+    expect(section('batch key').querySelector('h2')?.textContent).toBe('batch key0')
+  })
+
+  it('삭제는 이름을 확인한 뒤 요청하고 그 key가 목록에서 빠진다', async () => {
+    const api = new FakeOpsApi()
+    const added = api.addBatchKey('batch3', 'synthetic-batch-key-0003-8e5d')
+    await renderScreen(api)
+
+    await click(buttonIn(batchKeyRowOf('batch3'), '삭제'))
+    const dialog = document.body.querySelector<HTMLElement>('[role="alertdialog"]')
+    expect(dialog?.textContent).toContain('batch3 삭제')
+    expect(api.writes()).toEqual([])
+
+    await click(buttonIn(dialog as HTMLElement, '삭제'))
+
+    await waitFor(() =>
+      expect(section('batch key').querySelector('p')?.textContent).toBe('batch key가 없습니다.')
+    )
+    expect(api.writes()).toMatchObject([
+      {
+        method: 'DELETE',
+        path: `/api/batch-neople-keys/${added.id}`,
+        contentType: 'application/json'
+      }
+    ])
+  })
+})
