@@ -114,7 +114,7 @@ docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 - Neople key는 직접 입력이나 `_FILE`로 받고, 둘 다 생략하면 `/run/secrets/neople_api_key`를 읽습니다.
 - DB 설정은 선택입니다. `DB_HOST`를 지정하고 비밀번호 입력을 둘 다 생략하면 `/run/secrets/db_password`를 읽습니다.
 - `OPS_PORT`는 선택입니다. 운영 경로에는 로그인이 없으므로 이 포트를 공개 인터넷에 열지 않습니다.
-- 기본 CMD는 API(`node --import reflect-metadata dist/main.js`)이고, 캐릭터 수집 worker는 CMD를 `node dist/character-collector.js`로 바꿔 실행합니다.
+- 기본 CMD는 API(`node dist/main.js`)이고, 캐릭터 수집 worker는 CMD를 `node dist/character-collector.js`로 바꿔 실행합니다.
 
 ### 실행 중인 서버의 버전 조회
 
