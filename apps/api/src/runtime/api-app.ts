@@ -38,7 +38,6 @@ import { RankingStatsModule, type RankingStatsModuleOptions } from './modules/ra
 import { ScoreEngineModule, type ScoreEngineModuleOptions } from './modules/score-engine.js'
 import { TodayGradeModule, type TodayGradeModuleOptions } from './modules/today-grade.js'
 import { VersionModule, type VersionModuleOptions } from './modules/version.js'
-import { setupSwagger } from '../presentation/openapi/setup.js'
 
 export interface ApiHttpAppOptions {
   readonly search: CharacterSearchModuleOptions
@@ -92,7 +91,6 @@ export async function createApiHttpApp(options: ApiHttpAppOptions): Promise<INes
     httpsOptions: options.httpsOptions,
     configure: (app) => {
       app.set('trust proxy', options.trustedProxyHops ?? false)
-      setupSwagger(app)
     }
   })
 }

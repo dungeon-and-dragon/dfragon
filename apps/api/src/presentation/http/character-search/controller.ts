@@ -1,4 +1,3 @@
-import { ApiTags } from '@nestjs/swagger'
 import { Controller, Get, Inject, Req, Res, UseFilters } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { recordAccessLogCachedResponse, recordAccessLogSharedNeopleFetch } from '../access-log.js'
@@ -11,13 +10,11 @@ import {
   parseCharacterSearchQuery
 } from '../../../domain/character-search/query.js'
 import { respondWithCancellation, sendWithCancellation } from '../http-response.js'
-import { ApiCharacterCandidates, ApiCharacterSearch } from '../../openapi/character-search.js'
 import { FailureResponseFilter } from '../failure-response.js'
 import { characterSearchFailureResponse } from './failures.js'
 
 export const CHARACTER_SEARCH_SERVICE = Symbol('CHARACTER_SEARCH_SERVICE')
 
-@ApiTags('캐릭터')
 @Controller('characters')
 @UseFilters(new FailureResponseFilter(characterSearchFailureResponse))
 export class CharacterSearchController {
@@ -26,7 +23,6 @@ export class CharacterSearchController {
   ) {}
 
   @Get()
-  @ApiCharacterSearch()
   async search(@Req() request: Request, @Res() response: Response): Promise<void> {
     await respondWithCancellation(response, () =>
       this.service.search(parseCharacterSearchQuery(request.originalUrl))
@@ -34,7 +30,6 @@ export class CharacterSearchController {
   }
 
   @Get('candidates')
-  @ApiCharacterCandidates()
   async candidates(@Req() request: Request, @Res() response: Response): Promise<void> {
     await sendWithCancellation(
       response,

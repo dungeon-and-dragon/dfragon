@@ -31,7 +31,7 @@ export type OpsHttpAppOptions = {
   readonly writeAccessLog?: AccessLogSink
 }
 
-/** 운영 경로는 이 app에만 등록하고 공개 app과 OpenAPI 문서에는 넣지 않는다. */
+/** 운영 경로는 이 app에만 등록하고 공개 app에는 넣지 않는다. */
 export async function createOpsHttpApp({
   jobs,
   readQueueCounts,
