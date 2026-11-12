@@ -244,7 +244,7 @@ function collect(
   return collectContentClears({
     store,
     createFetchTimeline: createNeopleClearTimeline(neople),
-    concurrency: 1,
+    readConcurrency: () => 1,
     now: () => now,
     pause: async (ms) => {
       pauses.push(ms)
@@ -482,7 +482,7 @@ test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보�
   const { store } = memoryClearStore([])
   const job = createContentClearCollectionJob(store, {
     createFetchTimeline: createNeopleClearTimeline(fakeNeople({}).neople),
-    concurrency: 1,
+    readConcurrency: () => 1,
     report: () => {}
   })
   const unused = async () => {
@@ -693,7 +693,7 @@ function collectGroup(
   const summary = collectContentClears({
     store,
     createFetchTimeline: createNeopleClearTimeline(neople),
-    concurrency,
+    readConcurrency: () => concurrency,
     now: () => NOW,
     pause: async (ms) => {
       pauses.push(ms)
@@ -896,7 +896,7 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
     enqueue: async () => {},
     fetchBasic: createNeopleCharacterBasic(neople),
     store: collectionStore,
-    concurrency: 1,
+    readConcurrency: () => 1,
     report: () => {}
   }).finally(() => {
     settled.collection = true
