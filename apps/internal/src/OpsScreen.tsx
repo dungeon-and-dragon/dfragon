@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { BatchKeyPanel } from './components/BatchKeyPanel'
 import { CollectionPanel } from './components/CollectionPanel'
 import { JobDetail } from './components/JobDetail'
 import { JobTable } from './components/JobTable'
@@ -63,6 +64,7 @@ export function OpsScreen(): React.JSX.Element {
           <QueuePanel />
           <CollectionPanel />
         </div>
+        <BatchKeyPanel />
       </main>
     </div>
   )

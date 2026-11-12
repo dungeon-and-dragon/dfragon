@@ -1,6 +1,9 @@
 import ky, { type KyInstance, type KyResponse } from 'ky'
 import type { z } from 'zod'
 import {
+  type BatchKeyList,
+  batchKeyAdditionSchema,
+  batchKeyListSchema,
   type Collection,
   collectionSchema,
   failureSchema,
@@ -15,6 +18,7 @@ import {
 } from './ops-schemas'
 
 export const JOB_ALREADY_RUNNING = 'JOB_ALREADY_RUNNING'
+export const BATCH_NEOPLE_KEY_DUPLICATE = 'BATCH_NEOPLE_KEY_DUPLICATE'
 
 export class OpsRequestFailure extends Error {
   constructor(
@@ -34,6 +38,10 @@ export type OpsClient = {
   readQueues: () => Promise<QueueList>
   readCollection: () => Promise<Collection>
   requeue: (failure: string | undefined) => Promise<number>
+  readBatchKeys: () => Promise<BatchKeyList>
+  addBatchKey: (label: string, key: string) => Promise<void>
+  setBatchKeyEnabled: (id: number, enabled: boolean) => Promise<void>
+  deleteBatchKey: (id: number) => Promise<void>
 }
 
 async function throwFailure(response: KyResponse): Promise<never> {
@@ -57,6 +65,16 @@ async function expectNoContent(response: KyResponse): Promise<void> {
   if (!response.ok) {
     await throwFailure(response)
   }
+}
+
+function batchKeyPath(id: number, action?: string): string {
+  const path = `batch-neople-keys/${id}`
+
+  if (action === undefined) {
+    return path
+  }
+
+  return `${path}/${action}`
 }
 
 function jobPath(name: string, action: string): string {
@@ -97,6 +115,22 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
       )
 
       return requeued
+    },
+    readBatchKeys: async () => readBody(await http.get('batch-neople-keys'), batchKeyListSchema),
+    addBatchKey: async (label, key) => {
+      await readBody(
+        await http.post('batch-neople-keys', { json: { label, key } }),
+        batchKeyAdditionSchema
+      )
+    },
+    setBatchKeyEnabled: async (id, enabled) => {
+      const action = enabled ? 'enable' : 'disable'
+      const path = batchKeyPath(id, action)
+      await expectNoContent(await http.post(path, { json: {} }))
+    },
+    deleteBatchKey: async (id) => {
+      const path = batchKeyPath(id)
+      await expectNoContent(await http.delete(path, { json: {} }))
     }
   }
 }
