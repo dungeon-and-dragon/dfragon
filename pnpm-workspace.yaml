@@ -9,10 +9,10 @@ catalog:
   '@biomejs/biome': 2.6.3
   '@date-fns/tz': 1.5.0
   '@hono/node-server': 2.1.7
-  '@nestjs/common': 12.3.2
-  '@nestjs/core': 12.3.2
-  '@nestjs/platform-express': 12.3.2
-  '@nestjs/testing': 12.3.2
+  '@nestjs/common': 12.3.3
+  '@nestjs/core': 12.3.3
+  '@nestjs/platform-express': 12.3.3
+  '@nestjs/testing': 12.3.3
   '@prisma/adapter-pg': 7.10.1
   '@prisma/client': 7.10.1
   '@stylexjs/stylex': 0.19.1
