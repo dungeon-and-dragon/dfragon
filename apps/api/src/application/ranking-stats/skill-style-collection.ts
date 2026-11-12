@@ -24,7 +24,7 @@ export type SkillStyleCollectionSummary = {
 export async function collectSkillStyles({
   store,
   fetchSkillStyle,
-  concurrency,
+  readConcurrency,
   now,
   pause,
   report,
@@ -37,7 +37,7 @@ export async function collectSkillStyles({
   const unavailableStreaks = createUnavailableStreaks<(typeof targets)[number]>()
   let done = 0
   while (done < targets.length) {
-    const group = targets.slice(done, done + concurrency)
+    const group = targets.slice(done, done + readConcurrency())
     const results = await Promise.all(group.map((character) => fetchSkillStyle(character, now)))
     const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
     if (unavailable.length > 0) {

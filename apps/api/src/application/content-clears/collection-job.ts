@@ -10,7 +10,7 @@ const DELAY_MINUTES = 16 * 60
 
 export function createContentClearCollectionJob(
   store: ClearCollectionStore,
-  { createFetchTimeline, concurrency, report }: ClearCollectionJobDependencies
+  { createFetchTimeline, readConcurrency, report }: ClearCollectionJobDependencies
 ) {
   return defineJob({
     name: 'content-clear-collection',
@@ -24,7 +24,7 @@ export function createContentClearCollectionJob(
       collectContentClears({
         store,
         createFetchTimeline,
-        concurrency,
+        readConcurrency,
         now: () => new Date(),
         pause: (ms) => setTimeout(ms),
         report,
