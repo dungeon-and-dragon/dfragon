@@ -49,7 +49,7 @@ import {
 } from '../infrastructure/neople/character-basic.js'
 import { createNeopleCharacterImage } from '../infrastructure/neople/character-image.js'
 import { type ScoreEngineOptions, createScoreEngine } from '../infrastructure/score/engine.js'
-import type { ReportCode } from '../presentation/http/access-log.js'
+import type { ReportCode } from '../presentation/http/access-log-sink.js'
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
@@ -98,6 +98,8 @@ function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCod
 }
 
 type TimelineQueues = ReturnType<typeof createTimelineSync>['queues']
+
+export type ApiServices = Awaited<ReturnType<typeof createApiServices>>['services']
 
 function createAdventureGuild(
   reader: AdventureGuildReader | undefined,
