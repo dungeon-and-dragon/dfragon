@@ -22,7 +22,7 @@
 
 ## 작업 경계
 
-- main은 ruleset에 따라 PR로만 바꾼다. 작업 브랜치에서 PR을 열고, PR merge는 저장소 소유자가 하거나 소유자가 허락한 PR을 에이전트가 대신 한다. 에이전트는 ruleset이 요구하는 check가 있으면 현재 PR head에서 통과했을 때만 merge하며, 관리자 권한으로 ruleset을 건너뛰는 merge(`gh pr merge --admin`)는 하지 않는다.
+- main은 ruleset에 따라 PR로만 바꾼다. 작업 브랜치에서 PR을 열고, PR merge는 저장소 소유자가 하거나 에이전트가 대신 하며, 에이전트는 되돌리기 어려운 PR(PR 본문 Merge Risk의 `되돌리기: 어려움`)만 소유자 허락을 받고 merge한다. 에이전트는 ruleset이 요구하는 check가 있으면 현재 PR head에서 통과했을 때만 merge하며, 관리자 권한으로 ruleset을 건너뛰는 merge(`gh pr merge --admin`)는 하지 않는다.
 - PR merge에는 리뷰 승인을 요구하지 않는다. `.github/CODEOWNERS`는 리뷰 요청 대상만 정한다. 저장소 관리자는 PR merge 때 ruleset 조건을 건너뛸 수 있다.
 - `v*` tag 생성과 삭제, Release 게시는 저장소 소유자가 한다. Desktop 앱은 중단했고 소스는 `v1.0.2` tag에 있다(ADR 0008).
 - Ruleset, Secret, Environment와 저장소 설정도 저장소 소유자가 바꾼다.
