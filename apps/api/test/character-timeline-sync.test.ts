@@ -18,9 +18,7 @@ import {
   syncCharacterTimeline
 } from '../src/application/character-timeline/sync.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
-import { CHARACTER_FETCHED, CharacterFetched } from '../src/domain/character-events.js'
 import type { CharacterIdentity } from '../src/domain/character-identity.js'
-import { EventEmitter } from 'node:events'
 
 const character = { serverId: 'siroco', characterId: 'timeline-fixture' }
 const MINUTE_MS = 60 * 1000
@@ -305,10 +303,6 @@ const payloads: CharacterPayloads = {
 
 test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 캐릭터를 받지 못하면 알리지 않는다', async (t) => {
   const fetched: CharacterIdentity[] = []
-  const emitter = new EventEmitter()
-  emitter.on(CHARACTER_FETCHED, ({ serverId, characterId }: CharacterFetched) =>
-    fetched.push({ serverId, characterId })
-  )
   let found = true
   const service = createCharacterDetailService({
     catalog: createCatalogService(async () => new Map()),
@@ -320,14 +314,11 @@ test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 
       return payloads
     },
     calculateScore: async () => null,
-    publishCharacterFetched: ({ serverId, characterId }, { basic, skill_style }, fetchedAt) => {
-      emitter.emit(
-        CHARACTER_FETCHED,
-        new CharacterFetched(serverId, characterId, basic, skill_style, fetchedAt)
-      )
+    publishCharacterFetched: ({ serverId, characterId }) => {
+      fetched.push({ serverId, characterId })
     }
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   await service.get(character, signal, ignoredTimings)
   const cached = await service.get(character, signal, ignoredTimings)

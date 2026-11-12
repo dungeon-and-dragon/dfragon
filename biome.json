@@ -562,11 +562,12 @@
                       "./**",
                       "../**",
                       "!./modules/**",
+                      "!./api-services.js",
                       "!./http-app.js",
                       "!./app-handle.js",
                       "!**/presentation/http/*.js"
                     ],
-                    "message": "앱을 만드는 파일은 기능의 module(runtime/modules/<기능>.ts), 앱 공통 설정(runtime/), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), access log만 import한다. 기능의 controller, service, reader, queue 연결은 runtime/modules/<기능>.ts에 두고 그 module을 import 목록에 더한다."
+                    "message": "앱을 만드는 파일은 기능의 module(runtime/modules/<기능>.ts), 공개 app의 조립 함수(runtime/api-services.ts), 앱 공통 설정(runtime/), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), access log만 import한다. 기능의 controller 연결은 runtime/modules/<기능>.ts에 두고 그 module을 import 목록에 더한다. 공개 app의 service, queue, 종료 순서는 runtime/api-services.ts에 둔다."
                   }
                 ]
               }

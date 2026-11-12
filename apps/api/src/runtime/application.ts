@@ -80,7 +80,7 @@ function createDatabaseSubscribers(
   }
   const seasonBackfill = { fetchTimeline, store: createDatabaseSeasonBackfillStore(client) }
 
-  // 두 구독자가 client 하나를 함께 쓰며, 타임라인 구독자가 종료 때 닫는다.
+  // 아래 option이 client 하나를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 닫는다.
 
   return {
     timeline: {
@@ -121,12 +121,12 @@ function createDatabaseSubscribers(
   }
 }
 
-export function createApiRuntime(configuration: RuntimeConfiguration) {
+export function createApiRuntimeOptions(configuration: RuntimeConfiguration): ApiHttpAppOptions {
   const neople = createNeopleClient(configuration.apiKey)
   const { readAdventureNames: readCandidateAdventureNames, ...database } =
     createDatabaseSubscribers(neople, configuration.database)
 
-  return createApiHttpApp({
+  return {
     search: {
       searchCharacters: createNeopleCharacterSearch(neople),
       readAdventureNames: readCandidateAdventureNames
@@ -140,7 +140,11 @@ export function createApiRuntime(configuration: RuntimeConfiguration) {
     trustedProxyHops: configuration.trustedProxyHops,
     httpsOptions: configuration.localHttps,
     scoreLibraryPath: configuration.scoreLibraryPath
-  })
+  }
+}
+
+export function createApiRuntime(configuration: RuntimeConfiguration) {
+  return createApiHttpApp(createApiRuntimeOptions(configuration))
 }
 
 export function createOpsRuntime(

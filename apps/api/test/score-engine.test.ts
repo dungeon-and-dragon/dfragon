@@ -110,7 +110,7 @@ test('라이브러리 경로가 없으면 worker를 띄우지 않고 진단 없�
   const { engine, reports, spawned } = scoreEngine(null)
 
   assert.equal(await calculate(engine), null)
-  await engine.onModuleDestroy()
+  await engine.close()
   assert.deepEqual(spawned, [])
   assert.deepEqual(reports, [])
 })
@@ -277,7 +277,7 @@ test('module을 닫으면 worker를 끝내고 기다리던 점수를 비운 뒤 
   const { engine, workers, reports, spawned } = scoreEngine()
   const pending = calculate(engine)
 
-  await engine.onModuleDestroy()
+  await engine.close()
   workers[0]!.emit('exit', 1)
 
   assert.equal(await pending, null)

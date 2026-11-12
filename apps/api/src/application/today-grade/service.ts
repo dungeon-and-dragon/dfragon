@@ -68,7 +68,7 @@ export function createTodayGradeService(
         throw todayGradeFailure(error)
       }
     },
-    async onModuleDestroy() {
+    async close() {
       shutdown.abort()
       await loading?.catch(() => undefined)
     }

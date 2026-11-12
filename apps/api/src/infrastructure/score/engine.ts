@@ -4,8 +4,6 @@ import type { ScoreCalculator, ScoreEngineInput } from '../../domain/score/input
 import type { ScoreEngineResult } from '../../domain/score/result.js'
 import type { ScoreWorkerData, ScoreWorkerMessage, ScoreWorkerRequest } from './worker-protocol.js'
 
-export const SCORE_ENGINE = Symbol('SCORE_ENGINE')
-
 export type ScoreEngineDiagnostic = 'SCORE_ENGINE_UNAVAILABLE' | 'SCORE_ENGINE_FAILED'
 
 const nonblank = z.string().refine((value) => value.trim().length > 0)
@@ -189,7 +187,7 @@ export function createScoreEngine(options: ScoreEngineOptions) {
 
       return result
     },
-    async onModuleDestroy() {
+    async close() {
       if (running !== null) {
         await stop(running.worker, null)
       }
