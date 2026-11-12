@@ -17,7 +17,7 @@ import { type NeopleStageTimings, elapsedMs } from './neople-stages.js'
 import type { CalculateScore, PublishCharacterFetched, FetchCharacterDetails } from './ports.js'
 
 export interface CharacterDetailResponse {
-  body: Buffer
+  body: Buffer<ArrayBuffer>
   reused: boolean
 }
 
@@ -42,7 +42,7 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
   })
   // Keyed by the cached character object, a body lives exactly as long as that cache entry: an expired,
   // evicted or refreshed entry takes its body with it.
-  const bodies = new WeakMap<FetchedCharacterPayloads, Buffer>()
+  const bodies = new WeakMap<FetchedCharacterPayloads, Buffer<ArrayBuffer>>()
   const respond = async (
     identity: CharacterIdentity,
     requestSignal: AbortSignal,
@@ -73,8 +73,8 @@ export function createCharacterDetailService(deps: CharacterDetailDependencies) 
       const input = toScoreEngineInput(payloads, items)
       const result = await deps.calculateScore(input, cardScoreCalculator(unscored.role), signal)
       const card = withCardScore(unscored, result)
-      // Express `json` serializes with plain JSON.stringify unless the app sets a replacer, spaces or escape, and
-      // this app sets none, so the stored bytes match what `json` sent before.
+      // Plain JSON.stringify output with no replacer, spaces or HTML escaping, so the stored bytes match what a
+      // JSON response sends.
       const body = Buffer.from(JSON.stringify({ ...details, freshness, card }))
       // An unavailable item stays out of the stored body so the next request looks it up again.
       if (!bodies.has(character) && !hasUnavailableItemDetail(details)) {
