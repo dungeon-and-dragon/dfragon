@@ -1,11 +1,9 @@
 import { Controller, Get, Inject, Query, UseFilters } from '@nestjs/common'
-import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CharacterDetailFailure } from '../../../domain/character-failure.js'
 import { characterFailureResponse } from '../character-failures.js'
 import { FailureResponseFilter } from '../failure-response.js'
 import { isMaleCrusaderJob } from '../../../domain/male-crusader.js'
-import { ApiFameRanking, ApiSkillStats, ApiStats } from '../../openapi/ranking-stats.js'
 import type { FameRanking, SkillStats, Stats } from '../../../domain/ranking-stats/stats.js'
 import type { RankingStatsService } from '../../../application/ranking-stats/service.js'
 
@@ -30,14 +28,12 @@ const skillStatsQuery = z
   })
   .refine((query) => query.role === undefined || isMaleCrusaderJob(query))
 
-@ApiTags('캐릭터')
 @Controller()
 @UseFilters(new FailureResponseFilter(characterFailureResponse))
 export class RankingStatsController {
   constructor(@Inject(RANKING_STATS_SERVICE) private readonly service: RankingStatsService) {}
 
   @Get('rankings/fame')
-  @ApiFameRanking()
   fameRanking(@Query() query: unknown): Promise<FameRanking> {
     const filter = fameRankingQuery.safeParse(query)
     if (!filter.success) {
@@ -48,13 +44,11 @@ export class RankingStatsController {
   }
 
   @Get('stats')
-  @ApiStats()
   stats(): Promise<Stats> {
     return this.service.stats()
   }
 
   @Get('stats/skills')
-  @ApiSkillStats()
   skillStats(@Query() query: unknown): Promise<SkillStats> {
     const job = skillStatsQuery.safeParse(query)
     if (!job.success) {
