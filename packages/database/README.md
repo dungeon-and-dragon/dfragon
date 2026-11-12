@@ -28,6 +28,8 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readTimelineSyncState`, `recordTimelineSyncSuccess`, `recordTimelineSyncFailure`: 타임라인 동기화 상태를 읽고 기록합니다.
 - `readCurrentSeasonStart`, `readSeasons`: 지금 시즌의 시작 시각과 시즌 목록을 읽습니다.
 - `readTimelineEvents`, `readCharactersTimelineEvents`, `readCharactersTimelineItems`, `readRecentTimelineItems`: 저장한 타임라인 행을 읽습니다.
+- `readBatchNeopleKeys`, `addBatchNeopleKey`, `setBatchNeopleKeyEnabled`, `deleteBatchNeopleKey`: 운영 화면의 batch Neople key를 끝 4자로 읽고, 더하고, 켜고 끄고, 지웁니다.
+- `readUsableBatchNeopleKeys`, `recordBatchNeopleKeyRejected`: worker가 켜졌고 거절되지 않은 batch key의 id와 원문을 읽고, Neople이 거절한 key의 시각을 id로 남깁니다.
 - `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다.
 - 위 함수의 입력, 결과 타입을 함께 export합니다.
 

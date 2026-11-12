@@ -906,6 +906,15 @@ try {
   assert.equal(
     (
       await psql(
+        "SELECT string_agg(label || ':' || key || ':' || enabled || ':' || (rejected_at IS NULL), ',') FROM batch_neople_keys"
+      )
+    ).stdout.trim(),
+    'stored:synthetic-container-batch-key-4e7d:true:true'
+  )
+  await psql('DELETE FROM batch_neople_keys')
+  assert.equal(
+    (
+      await psql(
         "SELECT string_agg(job_name || ':' || status || ':' || args::text, ',') FROM job_runs WHERE status = 'requested'"
       )
     ).stdout.trim(),
@@ -1029,6 +1038,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops port job, queue and collection routes, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops port job, queue, collection and batch Neople key routes, HTTP and database input rejection\n'
   )
 }
