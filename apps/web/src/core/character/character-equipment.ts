@@ -114,7 +114,7 @@ function enchantValueText(value: StatValue): string {
   return `${formatStatValue(Number(number))}${unit}`
 }
 
-function signed(value: StatValue): string {
+export function signedEnchantValue(value: StatValue): string {
   const text = enchantValueText(value)
 
   if (text.startsWith('-') || text.startsWith('+')) {
@@ -161,7 +161,7 @@ export function groupEnchant(enchant: Enchant | null, role: EnchantRole): Enchan
   const emphasized = EMPHASIZED_ENCHANTS[role]
   const options = [...groups].map(([name, value]) => ({
     name,
-    label: `${name} ${signed(value)}`,
+    label: `${name} ${signedEnchantValue(value)}`,
     emphasized: emphasized.has(name)
   }))
   const sorted = options.toSorted((a, b) => {
