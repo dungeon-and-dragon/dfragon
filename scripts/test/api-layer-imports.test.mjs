@@ -97,11 +97,12 @@ const appFiles = {
     ],
     allowed: [
       './modules/today-grade.js',
+      './api-services.js',
       './http-app.js',
       './app-handle.js',
       '../presentation/http/character-failures.js',
       '../presentation/http/access-log.js',
-      '@nestjs/event-emitter'
+      '@nestjs/common'
     ]
   },
   'runtime/ops-app.ts': {

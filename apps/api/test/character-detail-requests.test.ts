@@ -93,7 +93,7 @@ test('1시간 안에 다시 조회하면 Neople을 부르지 않고 1시간이 �
   t.mock.method(performance, 'now', () => Date.now())
   const { neople, fetchDetails } = countingNeople()
   const service = createCharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const first = await readDetail(service.get(identity, signal, ignoredTimings))
   t.mock.timers.tick(59 * MINUTE_MS)
@@ -115,7 +115,7 @@ test('강제 갱신은 캐시를 건너뛰고 다시 받아 캐시를 덮어쓰�
   t.mock.method(performance, 'now', () => Date.now())
   const { neople, fetchDetails } = countingNeople()
   const service = createCharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
   t.mock.timers.tick(2 * MINUTE_MS)
@@ -144,7 +144,7 @@ test('강제 갱신이 실패하면 상세 조회와 같은 오류를 돌려주�
       return payloadsNamed(`조회 ${calls}`)
     }
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
   t.mock.timers.tick(2 * MINUTE_MS)
@@ -176,7 +176,7 @@ test('연결을 끊고 떠난 강제 갱신의 조회가 나중에 끝나도 기
       return payloadsNamed(`조회 ${calls}`)
     }
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
   t.mock.timers.tick(2 * MINUTE_MS)
@@ -210,7 +210,7 @@ test('같은 캐릭터를 받는 중이면 강제 갱신은 새로 부르지 않
   })
   t.after(async () => {
     finish.release()
-    await service.onModuleDestroy()
+    await service.close()
   })
   const joiner = collectTimings()
 
@@ -236,7 +236,7 @@ test('캐시가 맞은 요청은 저장한 응답 본문을 다시 쓰며 Neople
       return payloads
     }
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
   const miss = collectTimings(),
     hit = collectTimings()
 
@@ -259,7 +259,7 @@ test('상세 응답 JSON은 섹션마다 revision 1과 조회 시각을, freshne
     catalog,
     fetchDetails: async () => payloads
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const result = await readDetail(service.get(identity, signal, ignoredTimings))
 
@@ -324,7 +324,7 @@ test('겹친 요청은 작업을 공유하고 한 대기자의 연결 종료는 
   })
   t.after(async () => {
     finish.release()
-    await service.onModuleDestroy()
+    await service.close()
   })
   const disconnected = new AbortController()
   const first = service.get(identity, disconnected.signal, ignoredTimings)
@@ -358,7 +358,7 @@ test('겹친 요청의 대기자들은 같은 조회 시각의 freshness와 sect
   })
   t.after(async () => {
     finish.release()
-    await service.onModuleDestroy()
+    await service.close()
   })
   const RealDate = Date
   let now = RealDate.parse('2026-10-29T00:00:00.000Z')
@@ -409,7 +409,7 @@ test('공유 조회를 기다린 요청들은 늦게 합류해도 같은 Neople 
   })
   t.after(async () => {
     finish.release()
-    await service.onModuleDestroy()
+    await service.close()
   })
   const owner = collectTimings(),
     joiner = collectTimings()
@@ -451,7 +451,7 @@ test('마지막 대기자가 취소하면 공유 작업을 취소하고 새 요�
   })
   t.after(async () => {
     late.release()
-    await service.onModuleDestroy()
+    await service.close()
   })
   const controller = new AbortController(),
     first = service.get(identity, controller.signal, ignoredTimings),
@@ -478,7 +478,7 @@ test('공유 조회 실패 뒤 새 요청을 허용하고 서버 종료는 취�
       throw new CharacterDetailFailure('unavailable')
     }
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
   const first = service.get(identity, signal, ignoredTimings),
     second = service.get(identity, signal, ignoredTimings)
   const failures = Promise.all([
@@ -510,7 +510,7 @@ test('공유 조회 실패 뒤 새 요청을 허용하고 서버 종료는 취�
     rejected = assert.rejects(pending)
   await start.promise
   let closed = false
-  const closing = shutting.onModuleDestroy().then(() => {
+  const closing = shutting.close().then(() => {
     closed = true
   })
   await rejected
@@ -542,7 +542,7 @@ test('서버 종료는 진행 중인 공용 아이템 묶음 호출을 취소하
     rejected = assert.rejects(pending)
   await started.promise
   let closed = false
-  const closing = service.onModuleDestroy().then(() => {
+  const closing = service.close().then(() => {
     closed = true
   })
   await rejected
@@ -558,7 +558,7 @@ test('상세 응답은 기존 필드에 역할과 점수만 담은 card를 더�
     catalog,
     fetchDetails: async () => payloads
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const result = await readDetail(service.get(identity, signal, ignoredTimings))
 

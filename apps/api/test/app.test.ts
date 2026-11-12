@@ -78,7 +78,7 @@ test('createApiHttpApp은 앱 설정의 trustedProxyHops를 Express trust proxy�
     try {
       assert.equal(app.getHttpAdapter().getInstance().get('trust proxy'), expected)
     } finally {
-      await app.close()
+      await handle.close()
     }
   }
 })

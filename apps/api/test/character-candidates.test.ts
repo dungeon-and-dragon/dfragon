@@ -576,7 +576,7 @@ test('실패한 후보 검색과 빈 결과는 저장하지 않아 다음 요청
     () => ({ rows: [candidateRow(characterName, 'created-later')] })
   ]
   const { service, names } = createCountingSearch(async () => outcomes[names.length - 1]!())
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   await assert.rejects(service.candidates(candidateInput(characterName)), NeopleSearchFailure)
   const empty = await service.candidates(candidateInput(characterName))
@@ -606,7 +606,7 @@ test('같은 이름의 동시 후보 요청은 Neople 검색 하나를 함께 �
 
     return { rows: [candidateRow(input.characterName, 'shared-id')] }
   })
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const concurrent = [
     service.candidates(candidateInput(characterName)),
@@ -640,7 +640,7 @@ test('대소문자만 다른 이름은 따로 검색하고 따로 저장한다',
   const { service, names } = createCountingSearch(async (input) => ({
     rows: [candidateRow(input.characterName, `id-${input.characterName}`)]
   }))
-  t.after(() => service.onModuleDestroy())
+  t.after(() => service.close())
 
   const lower = await service.candidates(candidateInput('exe'))
   const upper = await service.candidates(candidateInput('EXE'))
@@ -669,7 +669,7 @@ test('서버 종료 뒤에는 저장한 후보도 돌려주지 않고 진행 중
   await service.candidates(candidateInput(storedName))
   const pending = service.candidates(candidateInput(characterName))
 
-  await service.onModuleDestroy()
+  await service.close()
   release()
 
   assert.equal((await pending).result.rows.length, 1)

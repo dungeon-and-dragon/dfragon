@@ -8,15 +8,13 @@ import {
   recordCharacterBasic
 } from '@dfragon/database'
 import type { HttpAppHandle } from '../src/runtime/app-handle.js'
-import { CharacterBasicSubscriber } from '../src/presentation/events/character-basic.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import type {
   CharacterPayload,
   CharacterPayloads
 } from '../src/domain/character-detail/sections.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
-import { createApiRuntime } from '../src/runtime/application.js'
-import { getNestAppForTest } from '../src/runtime/http-app.js'
+import { createApiRuntimeOptions } from '../src/runtime/application.js'
 
 // 합성 캐릭터다. 실제 Neople 응답처럼 모든 섹션에 기본 정보가 들어 있다.
 const character = { serverId: 'cain', characterId: 'basic-fixture' }
@@ -144,7 +142,7 @@ function payloadsWith(
 async function listen(
   options: Pick<
     ApiHttpAppOptions,
-    'details' | 'recordCharacterBasic' | 'recordCharacterSkillStyle' | 'writeAccessLog'
+    'details' | 'timeline' | 'recordCharacterBasic' | 'recordCharacterSkillStyle' | 'writeAccessLog'
   >
 ): Promise<{ app: HttpAppHandle; origin: string }> {
   const { app } = await createApiHttpApp({
@@ -242,6 +240,15 @@ test('모험단 이름이 없는 캐릭터는 저장하지 않고 상세 응답�
   assert.deepEqual(recorded, [])
 })
 
+// 받은 시각은 app마다 다르므로 그 시각이 들어간 필드는 비교하지 않는다.
+function withoutFetchTimes({
+  sections: _sections,
+  freshness: _freshness,
+  ...content
+}: Record<string, unknown>) {
+  return content
+}
+
 // 실패를 보고하지 않으면 멈추지 않고 실패하도록 timeout을 둔다.
 test('기본 정보 저장이 실패해도 상세 응답은 그대로이고 실패 code를 남긴다', {
   timeout: 10_000
@@ -273,15 +280,8 @@ test('기본 정보 저장이 실패해도 상세 응답은 그대로이고 실�
   const expected = await getDetails(withoutDatabase.origin)
   await reported
 
-  // 받은 시각은 두 앱이 다르므로 그 시각이 들어간 필드는 비교하지 않는다.
-  const { sections: _sections, freshness: _freshness, ...content } = response.body
-  const {
-    sections: _expectedSections,
-    freshness: _expectedFreshness,
-    ...expectedContent
-  } = expected.body
   assert.equal(response.status, 200)
-  assert.deepEqual(content, expectedContent)
+  assert.deepEqual(withoutFetchTimes(response.body), withoutFetchTimes(expected.body))
   assert.deepEqual(codes, ['CHARACTER_BASIC_RECORD_FAILED'])
 })
 
@@ -408,10 +408,51 @@ test('기본 정보를 저장하지 못하면 스킬 스타일도 저장하지 �
   assert.deepEqual(styles, [])
 })
 
-for (const [name, database, registered] of [
-  ['DB 설정이 없으면 기본 정보 구독자를 등록하지 않는다', undefined, false],
+test('타임라인 동기화 요청이 예외를 던져도 상세 응답은 그대로이고 기본 정보를 저장한다', async (t) => {
+  const payloads = payloadsWith(basicFields)
+  const recorded: CharacterBasicInput[] = []
+  let backfillRequests = 0
+  const throwing = await listen({
+    details: detailsReturning(payloads),
+    timeline: {
+      // queue가 일을 시작하는 자리에서 던져, 동기화를 요청한 구독 함수까지 예외가 올라간다.
+      sync: () => {
+        throw new Error('synthetic subscriber failure')
+      },
+      backfillEnhancements: async () => {
+        backfillRequests++
+      },
+      backfillSeason: async () => assert.fail('옛 시즌 받기를 부르면 안 된다'),
+      read: async () => assert.fail('타임라인을 읽으면 안 된다'),
+      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
+      close: async () => undefined
+    },
+    recordCharacterBasic: async (basic) => {
+      recorded.push(basic)
+    }
+  })
+  t.after(() => throwing.app.close())
+  const withoutDatabase = await listen({ details: detailsReturning(payloads) })
+  t.after(() => withoutDatabase.app.close())
+
+  const response = await getDetails(throwing.origin)
+  const expected = await getDetails(withoutDatabase.origin)
+
+  // 타임라인 구독 함수는 동기화 다음에 백필을 요청하므로, 백필 요청이 없어야 예외가 구독 함수 밖으로 나온 것이다.
+  assert.equal(backfillRequests, 0)
+  assert.equal(response.status, 200)
+  assert.deepEqual(withoutFetchTimes(response.body), withoutFetchTimes(expected.body))
+  assert.deepEqual(recorded, [basicFields])
+})
+
+for (const [name, database, connected] of [
   [
-    'DB 설정이 있으면 기본 정보 구독자를 등록한다',
+    'DB 설정이 없으면 공개 app에 타임라인 queue가 없고 기본 정보 기록 option도 없다',
+    undefined,
+    false
+  ],
+  [
+    'DB 설정이 있으면 공개 app에 타임라인 queue가 있고 기본 정보 기록 option도 있다',
     // 합성 값이며 실제 credential이 아니다. 연결은 첫 query 때 하므로 이 테스트는 DB에 연결하지 않는다.
     {
       host: '127.0.0.1',
@@ -424,7 +465,7 @@ for (const [name, database, registered] of [
   ]
 ] as const) {
   test(name, async (t) => {
-    const { app } = await createApiRuntime({
+    const options = createApiRuntimeOptions({
       port: 0,
       trustedProxyHops: undefined,
       localHttps: undefined,
@@ -433,18 +474,22 @@ for (const [name, database, registered] of [
       ops: undefined,
       scoreLibraryPath: null
     })
+    const { app, readQueueCounts } = await createApiHttpApp(options)
     t.after(() => app.close())
 
-    const found = (() => {
+    // 상세 조회가 타임라인 동기화를 요청할 queue는 DB 설정을 준 app에만 있고, 없는 app에서 세면 던진다.
+    const queueNames = (() => {
       try {
-        getNestAppForTest(app).get(CharacterBasicSubscriber)
-
-        return true
+        return readQueueCounts().map(({ name }) => name)
       } catch {
-        return false
+        return []
       }
     })()
 
-    assert.equal(found, registered)
+    const expectedQueueNames = connected
+      ? ['timeline-sync', 'enhancement-backfill', 'season-backfill']
+      : []
+    assert.deepEqual(queueNames, expectedQueueNames)
+    assert.equal(options.recordCharacterBasic !== undefined, connected)
   })
 }
