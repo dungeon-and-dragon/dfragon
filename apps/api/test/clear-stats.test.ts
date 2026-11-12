@@ -6,7 +6,7 @@ import type {
   ClearWeekSelection,
   StoredClearPopulation
 } from '@dfragon/database'
-import type { INestApplication } from '@nestjs/common'
+import type { HttpAppHandle } from '../src/runtime/app-handle.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
 import type { ClearStatsReader } from '../src/application/content-clears/ports.js'
@@ -70,11 +70,11 @@ function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader
 }
 
 async function listen(clearStats?: ClearStatsReader): Promise<{
-  app: INestApplication
+  app: HttpAppHandle
   origin: string
 }> {
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },

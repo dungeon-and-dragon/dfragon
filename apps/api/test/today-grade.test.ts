@@ -211,7 +211,7 @@ test('GET /items/today-grade는 등급 퍼센트와 만료 시각을, 실패하�
     throw new Error('today grade test must not call character providers')
   }
   let failure: Error | undefined
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: {
@@ -280,7 +280,7 @@ test('GET /items/today-grade의 알 수 없는 오류는 access log에 오늘의
     throw new Error('today grade test must not call character providers')
   }
   const lines: string[] = []
-  const app = await createApiHttpApp({
+  const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
     todayGrade: {
