@@ -21,12 +21,18 @@ const rejectedImports = [
   ['domain/today-grade/d.ts', '../../runtime/modules/today-grade.js', 'application/<기능>/'],
   ['domain/today-grade/e.ts', '@nestjs/common', 'presentation/http/'],
   ['domain/today-grade/f.ts', 'express', 'runtime/modules/'],
+  ['domain/today-grade/k.ts', 'hono', 'presentation/http/'],
+  ['domain/today-grade/l.ts', 'hono/route', 'presentation/http/'],
+  ['domain/today-grade/m.ts', '@hono/node-server', 'runtime/modules/'],
   ['domain/today-grade/g.ts', 'node:crypto', 'infrastructure/'],
   ['domain/today-grade/h.ts', 'node:fs/promises', 'infrastructure/'],
   ['application/today-grade/a.ts', '../../infrastructure/neople/today-grade.js', 'ports.ts'],
   ['application/today-grade/b.ts', '../../presentation/http/today-grade/failures.js', 'ports.ts'],
   ['application/today-grade/c.ts', '../../runtime/modules/today-grade.js', 'runtime/modules/'],
   ['application/today-grade/d.ts', '@nestjs/common', 'presentation/http/'],
+  ['application/today-grade/j.ts', 'hono', 'presentation/http/'],
+  ['application/today-grade/k.ts', 'hono/body-limit', 'presentation/http/'],
+  ['application/today-grade/l.ts', '@hono/node-server', 'runtime/modules/'],
   ['application/today-grade/e.ts', 'node:fs/promises', 'infrastructure/'],
   ['application/today-grade/f.ts', 'node:http', 'infrastructure/'],
   ['application/today-grade/g.ts', 'ky', 'infrastructure/'],
@@ -72,6 +78,10 @@ const allowedImports = [
   ['infrastructure/database/e.ts', 'node:fs'],
   ['presentation/http/today-grade/a.ts', '../../../application/today-grade/service.js'],
   ['presentation/http/today-grade/c.ts', '@nestjs/common'],
+  ['presentation/http/today-grade/d.ts', 'hono'],
+  ['presentation/http/today-grade/e.ts', 'hono/route'],
+  ['infrastructure/neople/d.ts', 'hono'],
+  ['runtime/hono.ts', '@hono/node-server'],
   ['runtime/modules/a.ts', '../../infrastructure/neople/today-grade.js'],
   ['runtime/modules/b.ts', '../../presentation/http/today-grade/controller.js'],
   ['main.ts', './runtime/application.js'],
@@ -113,12 +123,12 @@ const appFiles = {
       '../presentation/http/ops/a.js'
     ],
     allowed: [
-      './modules/ops-jobs.js',
-      './http-app.js',
+      './modules/ops.js',
+      './hono-app.js',
       './app-handle.js',
       '../presentation/http/ops-failures.js',
       '../presentation/http/access-log.js',
-      'express'
+      'hono'
     ]
   }
 }

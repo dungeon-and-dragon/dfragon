@@ -1,14 +1,10 @@
-import { Controller, Get, Inject } from '@nestjs/common'
+import { Hono } from 'hono'
 import type { ReadQueueCounts } from '../../../application/ops/ports.js'
 
-export const OPS_QUEUE_COUNTS = Symbol('OPS_QUEUE_COUNTS')
+export function createOpsQueueRoutes(readCounts: ReadQueueCounts): Hono {
+  const routes = new Hono()
 
-@Controller('api/queues')
-export class OpsQueuesController {
-  constructor(@Inject(OPS_QUEUE_COUNTS) private readonly readCounts: ReadQueueCounts) {}
+  routes.get('/', (c) => c.json({ queues: readCounts() }))
 
-  @Get()
-  queues() {
-    return { queues: this.readCounts() }
-  }
+  return routes
 }
