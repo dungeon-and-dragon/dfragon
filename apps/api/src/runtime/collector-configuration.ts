@@ -35,9 +35,8 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
       CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: requestsPerSecond,
       CHARACTER_COLLECTOR_CONCURRENCY: concurrency
     } = collectorEnvironmentSchema.parse(environment)
-    const apiKey = readSecretInput(environment.NEOPLE_API_KEY, environment.NEOPLE_API_KEY_FILE)
     const database = readDatabaseConfiguration(environment)
-    if (apiKey === undefined || database === undefined) {
+    if (database === undefined) {
       throw new Error(invalidConfiguration)
     }
     const jobAlertWebhookUrl = jobAlertWebhookUrlSchema.parse(
@@ -47,7 +46,7 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
       )
     )
 
-    return { apiKey, database, importFiles, requestsPerSecond, concurrency, jobAlertWebhookUrl }
+    return { database, importFiles, requestsPerSecond, concurrency, jobAlertWebhookUrl }
   } catch {
     // secret 파일 읽기 오류와 zod issue는 경로나 입력값을 담을 수 있다.
     throw new Error(invalidConfiguration)
