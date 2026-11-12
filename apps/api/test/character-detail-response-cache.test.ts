@@ -158,8 +158,8 @@ test('공용 아이템이 unavailable인 응답은 저장하지 않아 다음 �
   assert.equal(counter.loads, 2)
 })
 
-test('저장한 본문은 Express json과 같은 바이트, Content-Type으로 압축 없이 나간다', async (t) => {
-  // Express `json` escapes <, > and & only when the app turns on `json escape`, so the name checks it stays off.
+test('저장한 본문은 JSON.stringify 그대로의 바이트와 JSON Content-Type으로 압축 없이 나간다', async (t) => {
+  // The name checks that <, > and & go out unescaped.
   const url = await startApp(t, async () => payloadsNamed('합성 <캐릭터> & 이름'), foundItems)
 
   const built = await sendRaw('GET', url, { 'Accept-Encoding': 'br, gzip' })
