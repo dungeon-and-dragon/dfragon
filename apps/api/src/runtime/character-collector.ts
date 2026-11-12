@@ -54,7 +54,7 @@ export async function startCharacterCollector(
     jobs: createWorkerJobs(client, {
       createFetchTimeline: createNeopleClearTimeline(neople),
       fetchSkillStyle: createNeopleSkillStyle(neople),
-      concurrency: configuration.concurrency,
+      readConcurrency: () => configuration.concurrency,
       report
     }),
     store: createDatabaseJobStore(client),
@@ -67,7 +67,7 @@ export async function startCharacterCollector(
     enqueue,
     fetchBasic,
     store,
-    concurrency: configuration.concurrency,
+    readConcurrency: () => configuration.concurrency,
     report,
     readModifiedTime: readImportModifiedTime,
     importCharacters: importCollectedCharacters,

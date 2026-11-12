@@ -112,7 +112,7 @@ async function readOrStartProgress(
 export async function collectContentClears({
   store,
   createFetchTimeline,
-  concurrency,
+  readConcurrency,
   now,
   pause,
   report,
@@ -140,7 +140,7 @@ export async function collectContentClears({
   const unavailableStreaks = createUnavailableStreaks<ClearPopulationCharacter>()
   let done = resumedAt
   while (done < population.length) {
-    const group = population.slice(done, done + concurrency)
+    const group = population.slice(done, done + readConcurrency())
     const results = await Promise.all(
       group.map((character) => collectCharacterClears(character, plan, plannedWeeks, fetchTimeline))
     )
