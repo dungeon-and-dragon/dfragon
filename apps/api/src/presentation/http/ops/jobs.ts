@@ -1,10 +1,9 @@
 import type { JobOverview, JobPauseChange, JobRunRecord } from '@dfragon/database'
-import { Body, Controller, Get, HttpCode, Inject, Param, Post, Query } from '@nestjs/common'
+import { Hono } from 'hono'
 import { z } from 'zod'
 import type { OpsJobStore } from '../../../application/ops/ports.js'
 import { OpsFailure } from '../../../domain/ops/failure.js'
-
-export const OPS_JOB_STORE = Symbol('OPS_JOB_STORE')
+import { readJsonBody } from './json-request.js'
 
 const DEFAULT_RUN_PAGE_SIZE = 20
 const MAX_RUN_PAGE_SIZE = 100
@@ -67,43 +66,38 @@ function throwPauseFailure(change: JobPauseChange): void {
   }
 }
 
-@Controller('api/jobs')
-export class OpsJobsController {
-  constructor(@Inject(OPS_JOB_STORE) private readonly store: OpsJobStore) {}
+export function createOpsJobRoutes(store: OpsJobStore): Hono {
+  const routes = new Hono()
 
-  @Get()
-  async jobs() {
-    const overviews = await this.store.readOverviews()
+  routes.get('/', async (c) => {
+    const overviews = await store.readOverviews()
 
-    return { workerSeenAt: latestWorkerSeenAt(overviews), jobs: overviews.map(jobResponse) }
-  }
+    return c.json({ workerSeenAt: latestWorkerSeenAt(overviews), jobs: overviews.map(jobResponse) })
+  })
 
-  @Get(':name/runs')
-  async runs(@Param('name') name: string, @Query() query: unknown) {
-    const page = runPageQuery.safeParse(query)
+  routes.get('/:name/runs', async (c) => {
+    const page = runPageQuery.safeParse(c.req.query())
     if (!page.success) {
       throw new OpsFailure('request')
     }
     const { before, limit } = page.data
     // 다음 쪽이 있는지 알려고 한 행을 더 읽는다.
-    const runs = await this.store.readRuns(name, { before, limit: limit + 1 })
+    const runs = await store.readRuns(c.req.param('name'), { before, limit: limit + 1 })
     if (runs === undefined) {
       throw new OpsFailure('jobNotFound')
     }
     const pageRuns = runs.slice(0, limit)
     const nextBefore = runs.length > limit ? (pageRuns.at(-1)?.id ?? null) : null
 
-    return { runs: pageRuns.map(runResponse), nextBefore }
-  }
+    return c.json({ runs: pageRuns.map(runResponse), nextBefore })
+  })
 
-  @Post(':name/runs')
-  @HttpCode(202)
-  async requestRun(@Param('name') name: string, @Body() body: unknown) {
-    const request = runRequestBody.safeParse(body)
+  routes.post('/:name/runs', async (c) => {
+    const request = runRequestBody.safeParse(await readJsonBody(c))
     if (!request.success) {
       throw new OpsFailure('request')
     }
-    const result = await this.store.requestRun(name, request.data.args ?? {})
+    const result = await store.requestRun(c.req.param('name'), request.data.args ?? {})
     if (result.status === 'not-found') {
       throw new OpsFailure('jobNotFound')
     }
@@ -112,18 +106,20 @@ export class OpsJobsController {
       throw new OpsFailure('jobAlreadyRunning')
     }
 
-    return { id: result.id }
-  }
+    return c.json({ id: result.id }, 202)
+  })
 
-  @Post(':name/pause')
-  @HttpCode(204)
-  async pause(@Param('name') name: string): Promise<void> {
-    throwPauseFailure(await this.store.setPaused(name, true))
-  }
+  routes.post('/:name/pause', async (c) => {
+    throwPauseFailure(await store.setPaused(c.req.param('name'), true))
 
-  @Post(':name/resume')
-  @HttpCode(204)
-  async resume(@Param('name') name: string): Promise<void> {
-    throwPauseFailure(await this.store.setPaused(name, false))
-  }
+    return c.body(null, 204)
+  })
+
+  routes.post('/:name/resume', async (c) => {
+    throwPauseFailure(await store.setPaused(c.req.param('name'), false))
+
+    return c.body(null, 204)
+  })
+
+  return routes
 }

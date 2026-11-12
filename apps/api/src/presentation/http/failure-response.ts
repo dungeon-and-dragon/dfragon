@@ -1,10 +1,11 @@
 import { Catch, NotFoundException } from '@nestjs/common'
 import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
 import type { Request, Response } from 'express'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { recordAccessLogErrorChain, recordAccessLogErrorCode } from './access-log.js'
 
 export interface FailureResponse {
-  readonly status: number
+  readonly status: ContentfulStatusCode
   readonly body: { readonly error: { readonly code: string; readonly message?: string } }
 }
 
