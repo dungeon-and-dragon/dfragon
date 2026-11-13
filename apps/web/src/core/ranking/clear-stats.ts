@@ -29,24 +29,6 @@ export const clearStatsSchema = z.object({
   contents: z.array(z.object({ ...clearContentHeader, weeks: z.array(clearWeekSchema) }))
 })
 
-export const clearContentStatsSchema = z.object({
-  ...clearContentHeader,
-  week: clearWeekSchema.nullable(),
-  jobs: z.array(
-    z.object({
-      jobId: nullableText,
-      jobGrowId: nullableText,
-      jobName: nullableText,
-      jobGrowName: nullableText,
-      population: count,
-      cleared: count
-    })
-  ),
-  adventures: z.array(
-    z.object({ characters: z.number().int().positive(), adventures: z.number().int().positive() })
-  )
-})
-
 const fameDistributionSchema = z.object({
   p5: z.number(),
   p25: z.number(),
@@ -56,6 +38,55 @@ const fameDistributionSchema = z.object({
   max: z.number()
 })
 
+const clearJobSchema = z.object({
+  jobId: nullableText,
+  jobGrowId: nullableText,
+  jobName: nullableText,
+  jobGrowName: nullableText,
+  population: count,
+  cleared: count,
+  fame: fameDistributionSchema.nullable()
+})
+
+const clearTimesSchema = {
+  weekdays: z.array(z.object({ weekday: z.number().int().min(1).max(7), cleared: count })),
+  hours: z.array(z.object({ hour: z.number().int().min(0).max(23), cleared: count }))
+}
+
+const weekGroupSchema = z.object({ cleared: count, fame: fameDistributionSchema.nullable() })
+
+const stageCountsSchema = z.object({ same: count, other: count, none: count })
+
+export const clearContentStatsSchema = z.object({
+  ...clearContentHeader,
+  ...clearTimesSchema,
+  week: clearWeekSchema.nullable(),
+  jobs: z.array(clearJobSchema),
+  adventures: z.array(
+    z.object({ characters: z.number().int().positive(), adventures: z.number().int().positive() })
+  ),
+  weeklyClears: z.array(
+    z.object({
+      weekStart: z.iso.date(),
+      population: count,
+      firstCleared: count,
+      repeatCleared: count,
+      everCleared: count
+    })
+  ),
+  fameBands: z.array(z.object({ fame: count, population: count, cleared: count })),
+  weekOverWeek: z
+    .object({
+      both: weekGroupSchema,
+      returned: weekGroupSchema,
+      left: weekGroupSchema,
+      first: weekGroupSchema
+    })
+    .nullable(),
+  stageMoves: z.object({ hard: stageCountsSchema, normal: stageCountsSchema }).nullable(),
+  streaks: z.array(z.object({ weeks: z.number().int().positive(), characters: count })).nullable()
+})
+
 export const clearOverviewSchema = z.object({
   weekStart: z.iso.date().nullable(),
   contents: z.array(
@@ -63,22 +94,11 @@ export const clearOverviewSchema = z.object({
       id: z.string(),
       cleared: count,
       fame: fameDistributionSchema.nullable(),
-      jobs: z.array(
-        z.object({
-          jobId: nullableText,
-          jobGrowId: nullableText,
-          jobName: nullableText,
-          jobGrowName: nullableText,
-          population: count,
-          cleared: count,
-          fame: fameDistributionSchema.nullable()
-        })
-      ),
+      jobs: z.array(clearJobSchema),
       coClears: z.array(z.object({ id: z.string(), cleared: count }))
     })
   ),
-  weekdays: z.array(z.object({ weekday: z.number().int().min(1).max(7), cleared: count })),
-  hours: z.array(z.object({ hour: z.number().int().min(0).max(23), cleared: count }))
+  ...clearTimesSchema
 })
 
 export type ClearContentKind = z.infer<typeof clearContentKindSchema>
@@ -88,6 +108,9 @@ export type ClearContent = ClearStats['contents'][number]
 export type ClearContentStats = z.infer<typeof clearContentStatsSchema>
 export type ClearJob = ClearContentStats['jobs'][number]
 export type ClearAdventureSize = ClearContentStats['adventures'][number]
+export type ClearWeekOverWeek = NonNullable<ClearContentStats['weekOverWeek']>
+export type ClearStageMoves = NonNullable<ClearContentStats['stageMoves']>
+export type ClearTimes = Pick<ClearContentStats, 'weekdays' | 'hours'>
 export type ClearFameDistribution = z.infer<typeof fameDistributionSchema>
 export type ClearOverview = z.infer<typeof clearOverviewSchema>
 export type ClearOverviewContent = ClearOverview['contents'][number]
