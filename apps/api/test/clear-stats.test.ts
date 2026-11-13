@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type {
   ClearJobCount,
+  ClearJobFameSample,
   ClearWeekRatioCount,
   ClearWeekSelection,
   StoredClearPopulation
@@ -65,6 +66,10 @@ function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader
     readWeekRatioCounts: async () => counts,
     readJobCounts: async () => [],
     readAdventureSizes: async () => [],
+    readFames: async () => [],
+    readJobFames: async () => [],
+    readCoClears: async () => [],
+    readRaidTimes: async () => [],
     ...overrides
   }
 }
@@ -342,6 +347,301 @@ test('DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로, 상
       { week: detail.body.week, jobs: detail.body.jobs, adventures: detail.body.adventures },
       { week: null, jobs: [], adventures: [] }
     )
+  } finally {
+    await app.close()
+  }
+})
+
+const fameSample = (characters: number, low: number) => ({
+  characters,
+  quantiles: [low, low + 1, low + 2, low + 3, low + 4],
+  max: low + 5
+})
+
+test('전체 개요는 week가 없으면 가장 최근 주를 모든 컨텐츠에 읽고, 그 주를 저장한 컨텐츠만 준다', async () => {
+  const weekStarts: Date[] = []
+  const { app, origin } = await listen(
+    fakeReader({
+      readFames: async (weekStart) => {
+        weekStarts.push(weekStart)
+
+        return []
+      }
+    })
+  )
+  try {
+    const latest = await getJson(origin, '/stats/clears/overview')
+    const old = await getJson(origin, '/stats/clears/overview?week=2026-02-05')
+
+    assert.equal(latest.status, 200)
+    assert.equal(latest.body.weekStart, '2026-11-05')
+    assert.deepEqual(
+      latest.body.contents.map(({ id }: { id: string }) => id),
+      ['michaela-hard', 'engraved-nightmare-1']
+    )
+    assert.equal(old.body.weekStart, '2026-02-05')
+    assert.deepEqual(
+      old.body.contents.map(({ id }: { id: string }) => id),
+      ['diregie-hard']
+    )
+    assert.deepEqual(weekStarts, [week('2026-11-05'), week('2026-02-05')])
+  } finally {
+    await app.close()
+  }
+})
+
+test('전체 개요의 명성 분포는 분위수에 이름을 붙이고, 명성 있는 캐릭터가 20명 미만인 줄은 null이다', async () => {
+  const jobFames: ClearJobFameSample[] = [
+    {
+      contentId: 'michaela-hard',
+      ...job,
+      jobGrowName: '합성전직',
+      cleared: 21,
+      ...fameSample(20, 110_000)
+    },
+    {
+      contentId: 'michaela-hard',
+      ...job,
+      jobGrowId: 'synthetic-other',
+      jobGrowName: '합성다른전직',
+      cleared: 19,
+      ...fameSample(19, 120_000)
+    },
+    {
+      contentId: 'michaela-hard',
+      jobId: null,
+      jobGrowId: null,
+      jobName: null,
+      jobGrowName: null,
+      cleared: 1,
+      characters: 0,
+      quantiles: null,
+      max: null
+    }
+  ]
+  const { app, origin } = await listen(
+    fakeReader({
+      readFames: async () => [
+        { contentId: 'michaela-hard', ...fameSample(40, 100_000) },
+        { contentId: 'engraved-nightmare-1', ...fameSample(19, 130_000) }
+      ],
+      readJobFames: async () => jobFames
+    })
+  )
+  try {
+    const { status, body } = await getJson(origin, '/stats/clears/overview?week=2026-11-05')
+    const [michaela, challenge] = body.contents
+
+    assert.equal(status, 200)
+    assert.deepEqual(michaela.fame, {
+      p5: 100_000,
+      p25: 100_001,
+      median: 100_002,
+      p75: 100_003,
+      p95: 100_004,
+      max: 100_005
+    })
+    assert.equal(challenge.fame, null)
+    const jobs = [...michaela.jobs].sort((left, right) => right.cleared - left.cleared)
+    assert.deepEqual(
+      jobs.map(({ jobGrowId, population, cleared, fame }: Record<string, unknown>) => [
+        jobGrowId,
+        population,
+        cleared,
+        fame === null ? null : (fame as { median: number }).median
+      ]),
+      [
+        ['synthetic-grow', 1000, 21, 110_002],
+        ['synthetic-other', 0, 19, null],
+        [null, 0, 1, null]
+      ]
+    )
+    assert.equal(michaela.cleared, 41)
+  } finally {
+    await app.close()
+  }
+})
+
+test('함께 깬 컨텐츠는 그 주를 저장한 다른 컨텐츠마다 주고 기준 컨텐츠 자신은 넣지 않는다', async () => {
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [
+        ...populations,
+        population('michaela-normal', '2026-11-05', 500, false)
+      ],
+      readCoClears: async () => [
+        { contentId: 'michaela-hard', otherContentId: 'engraved-nightmare-1', cleared: 4 },
+        { contentId: 'engraved-nightmare-1', otherContentId: 'michaela-hard', cleared: 4 }
+      ]
+    })
+  )
+  try {
+    const { body } = await getJson(origin, '/stats/clears/overview')
+
+    assert.deepEqual(
+      body.contents.map(({ id, coClears }: { id: string; coClears: unknown }) => [id, coClears]),
+      [
+        [
+          'michaela-normal',
+          [
+            { id: 'michaela-hard', cleared: 0 },
+            { id: 'engraved-nightmare-1', cleared: 0 }
+          ]
+        ],
+        [
+          'michaela-hard',
+          [
+            { id: 'michaela-normal', cleared: 0 },
+            { id: 'engraved-nightmare-1', cleared: 4 }
+          ]
+        ],
+        [
+          'engraved-nightmare-1',
+          [
+            { id: 'michaela-normal', cleared: 0 },
+            { id: 'michaela-hard', cleared: 4 }
+          ]
+        ]
+      ]
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('요일은 목요일부터 일곱 칸, 시간대는 0시부터 스물네 칸이고 각 합이 레이드 클리어 수의 합과 같다', async () => {
+  const raidTimes = [
+    { weekday: 4, hour: 21, cleared: 3 },
+    { weekday: 6, hour: 21, cleared: 5 },
+    { weekday: 4, hour: 2, cleared: 2 },
+    { weekday: 3, hour: 0, cleared: 1 }
+  ]
+  const { app, origin } = await listen(fakeReader({ readRaidTimes: async () => raidTimes }))
+  try {
+    const { body } = await getJson(origin, '/stats/clears/overview')
+    const hours = new Array(24).fill(0)
+    hours[0] = 1
+    hours[2] = 2
+    hours[21] = 8
+
+    assert.deepEqual(body.weekdays, [
+      { weekday: 4, cleared: 5 },
+      { weekday: 5, cleared: 0 },
+      { weekday: 6, cleared: 5 },
+      { weekday: 7, cleared: 0 },
+      { weekday: 1, cleared: 0 },
+      { weekday: 2, cleared: 0 },
+      { weekday: 3, cleared: 1 }
+    ])
+    assert.deepEqual(
+      body.hours,
+      hours.map((cleared, hour) => ({ hour, cleared }))
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('전체 개요는 저장되지 않은 주와 잘못된 week를 400으로 거절하고, DB 설정이 없으면 빈 개요를 준다', async () => {
+  const { app, origin } = await listen(fakeReader())
+  try {
+    for (const path of [
+      '/stats/clears/overview?week=2026-11-12',
+      '/stats/clears/overview?week=2026-11-05T06:00:00%2B09:00'
+    ]) {
+      const { status, body } = await getJson(origin, path)
+      assert.equal(status, 400, path)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', path)
+    }
+  } finally {
+    await app.close()
+  }
+
+  const empty = await listen()
+  try {
+    const { status, body } = await getJson(empty.origin, '/stats/clears/overview')
+
+    assert.equal(status, 200)
+    assert.deepEqual(body, { weekStart: null, contents: [], weekdays: [], hours: [] })
+  } finally {
+    await empty.app.close()
+  }
+})
+
+test('전체 개요는 마지막 수집 시각이 같으면 다시 읽지 않고, 바뀌면 다음 요청부터 다시 읽는다', async () => {
+  let collectedAt = at('2026-11-10T06:30:00')
+  let reads = 0
+  const { app, origin } = await listen(
+    fakeReader({
+      readCollectedAt: async () => collectedAt,
+      readRaidTimes: async () => {
+        reads += 1
+
+        return [{ weekday: 4, hour: 21, cleared: reads }]
+      }
+    })
+  )
+  const thursdayCleared = async () =>
+    (await getJson(origin, '/stats/clears/overview')).body.weekdays[0].cleared
+  try {
+    assert.equal(await thursdayCleared(), 1)
+    assert.equal(await thursdayCleared(), 1)
+    assert.equal(reads, 1)
+
+    collectedAt = at('2026-11-11T06:30:00')
+    assert.equal(await thursdayCleared(), 2)
+  } finally {
+    await app.close()
+  }
+})
+
+// reader 행이 식별 필드를 함께 가져와도 응답으로 옮기지 않는지 본다. 값은 합성이다.
+const identifying = {
+  serverId: 'synthetic-server',
+  characterId: 'synthetic-character',
+  characterName: '합성캐릭터',
+  adventureName: '합성모험단',
+  guildName: '합성길드'
+}
+
+test('전체 개요 응답은 reader 행에 섞인 캐릭터, 모험단, 길드 값을 옮기지 않는다', async () => {
+  const fames = [{ contentId: 'michaela-hard', ...fameSample(40, 100_000), ...identifying }]
+  const jobFames = [
+    {
+      contentId: 'michaela-hard',
+      ...job,
+      jobGrowName: '합성전직',
+      cleared: 40,
+      ...fameSample(40, 100_000),
+      ...identifying
+    }
+  ]
+  const coClears = [
+    {
+      contentId: 'michaela-hard',
+      otherContentId: 'engraved-nightmare-1',
+      cleared: 4,
+      ...identifying
+    }
+  ]
+  const raidTimes = [{ weekday: 4, hour: 21, cleared: 40, ...identifying }]
+  const { app, origin } = await listen(
+    fakeReader({
+      readFames: async () => fames,
+      readJobFames: async () => jobFames,
+      readCoClears: async () => coClears,
+      readRaidTimes: async () => raidTimes
+    })
+  )
+  try {
+    const response = await fetch(new URL('/stats/clears/overview', origin))
+    const text = await response.text()
+
+    assert.equal(response.status, 200)
+    for (const [field, value] of Object.entries(identifying)) {
+      assert.ok(!text.includes(field), field)
+      assert.ok(!text.includes(value), value)
+    }
   } finally {
     await app.close()
   }
