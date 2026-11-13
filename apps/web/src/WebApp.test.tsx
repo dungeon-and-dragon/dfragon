@@ -480,14 +480,98 @@ it('모험단 주소는 저장한 모험단이 있으면 기록을 늘리지 않
   expect(window.history.length).toBe(historyLength)
 })
 
-it('컨텐츠를 고른 예전 클리어 주소는 기록을 늘리지 않고 같은 컨텐츠와 주의 상세 주소로 바꾼다', async () => {
+it('컨텐츠를 고른 예전 클리어 주소는 기록을 늘리지 않고 같은 컨텐츠 묶음과 단계, 주의 상세 주소로 바꾼다', async () => {
   window.history.replaceState(null, '', '/clears?content=nabel-hard&week=2026-11-05')
   const historyLength = window.history.length
   await act(async () => root.render(<WebApp host={host} />))
 
-  await waitForPath('/clears/nabel-hard')
-  expect(window.location.search).toBe('?week=2026-11-05')
+  await waitForPath('/clears/nabel')
+  expect(window.location.search).toBe('?stage=hard&week=2026-11-05')
   expect(window.history.length).toBe(historyLength)
+})
+
+it('컨텐츠 id로 연 클리어 상세 주소는 컨텐츠 묶음 주소와 단계 query로 바꾼다', async () => {
+  window.history.replaceState(null, '', '/clears/michaela-normal?week=2026-11-05')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await waitForPath('/clears/michaela')
+  expect(window.location.search).toBe('?stage=normal&week=2026-11-05')
+})
+
+function stubClearFetch(): void {
+  const week = {
+    weekStart: '2026-11-05',
+    closed: true,
+    collectedAt: '2026-11-11T22:00:00.000Z',
+    population: 1000,
+    minFame: 104292,
+    cleared: 50,
+    newlyCleared: null,
+    ratios: [{ ratio: null, cleared: 50 }]
+  }
+  const header = {
+    id: 'michaela-hard',
+    kind: 'raid',
+    name: '무너진 성자 미카엘라 (하드)',
+    releasedAt: '2026-08-05T21:00:00.000Z',
+    entryFame: 104292,
+    latest: true
+  }
+  const detail = {
+    ...header,
+    week,
+    jobs: [],
+    adventures: [],
+    weeklyClears: [],
+    fameBands: [],
+    weekOverWeek: null,
+    stageMoves: null,
+    streaks: null,
+    weekdays: [],
+    hours: []
+  }
+  const overview = { weekStart: '2026-11-05', contents: [], weekdays: [], hours: [] }
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>(async (...args) => {
+      const { pathname } = new URL(new Request(...args).url)
+      if (pathname.endsWith('/stats/clears')) {
+        return Response.json({ contents: [{ ...header, weeks: [week] }] })
+      }
+
+      if (pathname.endsWith('/stats/clears/overview')) {
+        return Response.json(overview)
+      }
+
+      if (pathname.endsWith('/stats/clears/michaela-hard')) {
+        return Response.json(detail)
+      }
+
+      return Response.json({
+        percent: 85,
+        expiresAt: new Date(Date.now() + 3_600_000).toISOString()
+      })
+    })
+  )
+}
+
+it('클리어 상세에서 고른 컨텐츠 카드를 다시 누르면 같은 주의 전체 개요로 돌아간다', async () => {
+  stubClearFetch()
+  window.history.replaceState(null, '', '/clears/michaela?week=2026-11-05')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const selected = await vi.waitFor(() => {
+    const card = container.querySelector('nav[aria-label="컨텐츠"] button[aria-pressed="true"]')
+    expect(card).not.toBeNull()
+
+    return card!
+  })
+  await act(async () => {
+    selected.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  })
+
+  await waitForPath('/clears')
+  expect(window.location.search).toBe('?week=2026-11-05')
 })
 
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
