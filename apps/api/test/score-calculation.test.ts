@@ -416,7 +416,7 @@ test('엔진 worker가 멈추면 남은 캐릭터를 받지 않고 실패하며 
   assert.equal(isEngineClosed(), true)
 })
 
-test('점수 계산 job은 기본으로 수요일 22시에 돌고, 설정한 일정이 있으면 그 일정으로 돈다', () => {
+test('점수 계산 job은 기본으로 수요일 22시에 돌고, 설정한 일정이 있으면 그 일정으로 돌며, 놓친 실행을 보충하지 않는다', () => {
   const { dependencies } = calculation([])
   const { store, openEngine, createSources, readConcurrency, report } = dependencies
   const jobDependencies = { openEngine, createSources, readConcurrency, report }
@@ -428,4 +428,5 @@ test('점수 계산 job은 기본으로 수요일 22시에 돌고, 설정한 일
   assert.equal(scheduled.schedule, DEFAULT_SCORE_CALCULATION_SCHEDULE)
   assert.equal(DEFAULT_SCORE_CALCULATION_SCHEDULE, '0 22 * * 3')
   assert.equal(configured.schedule, '30 20 * * 3')
+  assert.equal(scheduled.catchup, false)
 })
