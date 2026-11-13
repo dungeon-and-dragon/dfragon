@@ -52,6 +52,19 @@ function toColumns(clears: readonly ContentClearInput[]) {
   }
 }
 
+// 클리어를 처음 저장할 때만 그 시점 캐릭터의 최고 명성과 점수를 복사한다. 아래 ON CONFLICT 갱신은 이 칸을 바꾸지 않아,
+// 그 뒤 명성이나 점수가 바뀌거나 같은 기록을 다시 저장해도 복사한 값은 그대로이고, 비어 있던 지난 행도 채우지 않는다.
+const snapshotColumns = Prisma.sql`
+  "max_fame", "score", "score_kind", "score_engine_package", "score_engine_rules_rev", "score_engine_bundle_id"`
+const snapshotValues = Prisma.sql`
+  copied_character.max_fame, copied_score.score, copied_score.kind, copied_score.engine_package,
+  copied_score.engine_rules_rev, copied_score.engine_bundle_id`
+const snapshotJoins = Prisma.sql`
+  LEFT JOIN "characters" AS copied_character
+    ON copied_character.server_id = clear.server_id AND copied_character.character_id = clear.character_id
+  LEFT JOIN "character_scores" AS copied_score
+    ON copied_score.server_id = clear.server_id AND copied_score.character_id = clear.character_id`
+
 // 한 INSERT 안에서 같은 행을 두 번 고치면 PostgreSQL이 거절하므로 DISTINCT ON으로 가장 이른 클리어만 남긴다.
 // 이미 있는 행도 더 이른 클리어가 들어올 때만 바꿔, 같은 기록을 어떤 순서로 다시 저장해도 결과가 같다.
 async function recordRaidClears(
@@ -62,14 +75,19 @@ async function recordRaidClears(
 
   await client.$executeRaw`
     INSERT INTO "content_clears"
-      ("content_id", "kind", "server_id", "character_id", "week_start", "cleared_at", "ratio")
-    SELECT DISTINCT ON (content_id, server_id, character_id, week_start)
-      content_id, 'raid', server_id, character_id, week_start, cleared_at, ratio
-    FROM unnest(
-      ${contentIds}::text[], ${serverIds}::text[], ${characterIds}::text[],
-      ${weekStarts}::timestamptz[], ${clearedAts}::timestamptz[], ${ratios}::int[]
-    ) AS clear(content_id, server_id, character_id, week_start, cleared_at, ratio)
-    ORDER BY content_id, server_id, character_id, week_start, cleared_at
+      ("content_id", "kind", "server_id", "character_id", "week_start", "cleared_at", "ratio", ${snapshotColumns})
+    SELECT
+      clear.content_id, 'raid', clear.server_id, clear.character_id, clear.week_start, clear.cleared_at,
+      clear.ratio, ${snapshotValues}
+    FROM (
+      SELECT DISTINCT ON (content_id, server_id, character_id, week_start) *
+      FROM unnest(
+        ${contentIds}::text[], ${serverIds}::text[], ${characterIds}::text[],
+        ${weekStarts}::timestamptz[], ${clearedAts}::timestamptz[], ${ratios}::int[]
+      ) AS clear(content_id, server_id, character_id, week_start, cleared_at, ratio)
+      ORDER BY content_id, server_id, character_id, week_start, cleared_at
+    ) AS clear
+    ${snapshotJoins}
     ON CONFLICT ("content_id", "server_id", "character_id", "week_start") DO UPDATE SET
       "cleared_at" = EXCLUDED."cleared_at",
       "ratio" = EXCLUDED."ratio"
@@ -84,14 +102,19 @@ async function recordChallengeClears(
 
   await client.$executeRaw`
     INSERT INTO "content_clears"
-      ("content_id", "kind", "server_id", "character_id", "week_start", "cleared_at", "ratio")
-    SELECT DISTINCT ON (content_id, server_id, character_id)
-      content_id, 'challenge', server_id, character_id, week_start, cleared_at, ratio
-    FROM unnest(
-      ${contentIds}::text[], ${serverIds}::text[], ${characterIds}::text[],
-      ${weekStarts}::timestamptz[], ${clearedAts}::timestamptz[], ${ratios}::int[]
-    ) AS clear(content_id, server_id, character_id, week_start, cleared_at, ratio)
-    ORDER BY content_id, server_id, character_id, cleared_at
+      ("content_id", "kind", "server_id", "character_id", "week_start", "cleared_at", "ratio", ${snapshotColumns})
+    SELECT
+      clear.content_id, 'challenge', clear.server_id, clear.character_id, clear.week_start, clear.cleared_at,
+      clear.ratio, ${snapshotValues}
+    FROM (
+      SELECT DISTINCT ON (content_id, server_id, character_id) *
+      FROM unnest(
+        ${contentIds}::text[], ${serverIds}::text[], ${characterIds}::text[],
+        ${weekStarts}::timestamptz[], ${clearedAts}::timestamptz[], ${ratios}::int[]
+      ) AS clear(content_id, server_id, character_id, week_start, cleared_at, ratio)
+      ORDER BY content_id, server_id, character_id, cleared_at
+    ) AS clear
+    ${snapshotJoins}
     ON CONFLICT ("content_id", "server_id", "character_id") WHERE "kind" = 'challenge' DO UPDATE SET
       "week_start" = EXCLUDED."week_start",
       "cleared_at" = EXCLUDED."cleared_at",
