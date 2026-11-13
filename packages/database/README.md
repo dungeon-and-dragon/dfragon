@@ -61,6 +61,7 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `adventures`: 자체 id를 붙인 모험단과 지금 이름
 - `characters`: 캐릭터와 Neople 기본 정보
 - `character_skill_styles`: 캐릭터마다 최신 스킬 스타일 한 행
+- `character_scores`: 캐릭터마다 장비 점수나 버프 점수 한 행과 계산 시각, 엔진 버전
 - `character_collection`: 기본 정보를 받을 캐릭터 대기열
 - `seasons`: 게임 시즌 번호, 이름, 시작 시각
 - `timeline_events`: 코드 1xx, 2xx, 3xx 타임라인
