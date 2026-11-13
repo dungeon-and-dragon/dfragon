@@ -22,7 +22,9 @@ function validateCharacterPayload(
   return body
 }
 
-export function createNeopleCharacterDetails(neople: NeopleClient): FetchCharacterDetails {
+export function createNeopleCharacterDetails(
+  neople: Pick<NeopleClient, 'character'>
+): FetchCharacterDetails {
   return async (identity, requestSignal, recordStage) => {
     const failureController = new AbortController()
     const signal = AbortSignal.any([requestSignal, failureController.signal])

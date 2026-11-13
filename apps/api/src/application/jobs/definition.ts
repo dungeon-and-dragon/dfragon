@@ -11,6 +11,8 @@ export type JobDefinition<Schema extends z.ZodType = z.ZodType> = {
   description: string
   /** Asia/Seoul 기준 cron 식이다. 없으면 수동으로만 돈다. */
   schedule?: string
+  /** false면 놓친 정기 실행을 worker 시작 때 보충하지 않고 다음 예정 시각까지 기다린다. 없으면 보충한다. */
+  catchup?: boolean
   argsSchema: Schema
   delayMinutes: number
   run(args: z.output<Schema>, context: JobContext): Promise<JobRunSummary | undefined>

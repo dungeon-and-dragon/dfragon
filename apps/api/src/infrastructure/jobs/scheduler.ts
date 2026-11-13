@@ -18,6 +18,16 @@ export function createJobSchedule(schedule: string): JobSchedule {
   return new Cron(schedule, { timezone: TIMEZONE, paused: true })
 }
 
+export function isJobSchedule(schedule: string): boolean {
+  try {
+    createJobSchedule(schedule)
+
+    return true
+  } catch {
+    return false
+  }
+}
+
 /**
  * job 실행은 기다리지 않고 바로 돌아온다. 실행 중 취소와 종료 처리는 두지 않으며, 끝난 job이 남긴
  * running 행은 다음 시작 때 interrupted가 된다. worker 인스턴스가 하나라는 전제다.

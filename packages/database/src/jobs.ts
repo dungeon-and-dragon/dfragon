@@ -113,6 +113,28 @@ export async function readLastScheduledJobSuccess(
   return run.startedAt
 }
 
+export type FinishedJobRun = {
+  status: 'succeeded' | 'failed' | 'interrupted'
+  startedAt: Date
+  progressDone: number | null
+}
+
+export async function readLastFinishedJobRun(
+  client: DatabaseClient,
+  jobName: string
+): Promise<FinishedJobRun | undefined> {
+  const [run] = await client.$queryRaw<FinishedJobRun[]>`
+    SELECT "status", "started_at" AS "startedAt", "progress_done" AS "progressDone"
+    FROM "job_runs"
+    WHERE "job_name" = ${jobName}
+      AND "status" IN ('succeeded', 'failed', 'interrupted')
+      AND "started_at" IS NOT NULL
+    ORDER BY "started_at" DESC, "id" DESC
+    LIMIT 1`
+
+  return run
+}
+
 export async function interruptRunningJobRuns(
   client: DatabaseClient
 ): Promise<InterruptedJobRun[]> {
