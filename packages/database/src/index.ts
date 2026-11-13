@@ -29,6 +29,12 @@ export type {
   CollectionFailureCount,
   CollectionSummary
 } from './character-collection.js'
+export { recordClearRecords } from './clear-record.js'
+export type {
+  ClearRecordInput,
+  LegionClearRecordInput,
+  RaidClearRecordInput
+} from './clear-record.js'
 export { createDatabaseClient } from './client.js'
 export {
   finishContentClearCollection,
