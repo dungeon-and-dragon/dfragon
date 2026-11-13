@@ -25,8 +25,10 @@ import {
 import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '../ranking/skill-stats'
 import {
   clearContentStatsSchema,
+  clearOverviewSchema,
   clearStatsSchema,
   type ClearContentStats,
+  type ClearOverview,
   type ClearStats
 } from '../ranking/clear-stats'
 import {
@@ -84,6 +86,7 @@ export type ClearContentStatsHttp = (
   contentId: string,
   weekStart: string | undefined
 ) => Promise<ClearContentStats>
+export type ClearOverviewHttp = (weekStart: string) => Promise<ClearOverview>
 export type GuildHttp = (guildId: string) => Promise<Guild>
 export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
 export type AdventureActivityHttp = (
@@ -117,6 +120,7 @@ export type DfragonClient = Readonly<{
   skillStats: SkillStatsHttp
   clearStats: ClearStatsHttp
   clearContentStats: ClearContentStatsHttp
+  clearOverview: ClearOverviewHttp
   adventures: Readonly<{
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
@@ -339,6 +343,10 @@ export function createDfragonClient({
     clearContentStats: (contentId, weekStart) =>
       requestJson(`/stats/clears/${encodeURIComponent(contentId)}`, clearContentStatsSchema, {
         searchParams: { ...(weekStart !== undefined && { week: weekStart }) }
+      }),
+    clearOverview: (weekStart) =>
+      requestJson('/stats/clears/overview', clearOverviewSchema, {
+        searchParams: { week: weekStart }
       }),
     adventures: {
       async weekly(adventureName) {
