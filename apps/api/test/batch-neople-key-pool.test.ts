@@ -49,6 +49,12 @@ function fakeKeys(
     }
   }
   const createNeople = (key: string): WorkerNeople => ({
+    character: async () => {
+      throw new Error('이 테스트는 상세 섹션을 부르지 않는다')
+    },
+    multiItems: async () => {
+      throw new Error('이 테스트는 아이템 상세를 부르지 않는다')
+    },
     characterBasic: async () => {
       requests.push(key)
 
