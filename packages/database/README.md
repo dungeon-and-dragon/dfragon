@@ -21,6 +21,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`: 클리어 집계의 클리어 기록과 주별 모집단을 저장하고, 최고 명성이 하한 이상인 모집단을 읽습니다.
 - `readContentClearCollection`, `startContentClearCollection`, `recordContentClearCollectionProgress`, `finishContentClearCollection`: 클리어 수집의 진행 위치를 읽고 씁니다.
 - `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearJobCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 모집단, 주와 배율별 클리어 수, 한 주의 직업별 클리어 수와 모험단 크기 분포를 읽습니다.
+- `readContentClearFames`, `readContentClearJobFames`, `readContentClearCoClears`, `readContentClearRaidTimes`: 한 주의 모든 컨텐츠에서 클리어 캐릭터의 명성 분위수, 전직별 클리어 수와 명성 분위수, 함께 깬 컨텐츠 수, 레이드 클리어의 요일과 시간대별 수를 읽습니다.
 - `recordClearRecords`: 레이드, 레기온 클리어 기록을 캐릭터의 한 번 깬 기록마다 한 행으로 저장하고, 이미 있는 기록은 건너뜁니다.
 - `registerJobs`, `startJobRun`, `claimRequestedJobRun`, `finishJobRun`과 나머지 job 함수: 배치 job 목록과 실행 이력을 쓰고 읽습니다.
 - 스킬 채택 표본 순위 `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 `@dfragon/lib`에서 가져옵니다.
