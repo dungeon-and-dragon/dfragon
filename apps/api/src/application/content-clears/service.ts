@@ -1,6 +1,7 @@
 import type { StoredClearPopulation } from '@dfragon/database'
 import { subWeeks } from 'date-fns'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import { toRaidStageLabel } from '../../domain/raid-stage.js'
 import { formatResetDate } from '../../domain/seoul-time.js'
 import {
   CLEAR_CONTENTS,
@@ -12,8 +13,10 @@ import {
 import {
   type ClearContentStats,
   toClearContentStats,
-  toEmptyContentStats
+  toEmptyContentStats,
+  toLegionContentStats
 } from '../../domain/content-clears/detail.js'
+import { CLEAR_LEGIONS, toLegionSummaries } from '../../domain/content-clears/legions.js'
 import {
   type ClearOverview,
   toClearOverview,
@@ -65,11 +68,14 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
   }
 
   const loadSummary = async (): Promise<ClearSummary> => {
-    const [populations, counts] = await Promise.all([
+    const [populations, counts, legionCounts] = await Promise.all([
       reader.readPopulations(),
-      reader.readWeekRatioCounts()
+      reader.readWeekRatioCounts(),
+      reader.readLegionWeeks(CLEAR_LEGIONS.map(({ name }) => name))
     ])
-    const stats = toClearStats(populations, counts)
+    const { contents } = toClearStats(populations, counts)
+    const legions = toLegionSummaries(populations, legionCounts)
+    const stats = { contents, legions }
 
     return { stats, populations }
   }
@@ -80,6 +86,27 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     })
 
     return current.summary
+  }
+
+  // 단계 라벨은 수집 판정과 같은 함수로 정하고, 단계 라벨이 없는 기록(이내 황혼전)은 세지 않는다.
+  const loadStages = async (raidName: string, weekStart: Date) => {
+    const selection = { raidName, weekStart }
+    const modes = await reader.readRaidModes(selection)
+    const stages = modes.flatMap(({ modeName, hard }) => {
+      const stage = toRaidStageLabel({ modeName, hard: hard ?? false })
+
+      if (stage === null) {
+        return []
+      }
+
+      return [{ modeName, hard, stage }]
+    })
+
+    if (stages.length === 0) {
+      return []
+    }
+
+    return reader.readRaidStageCounts(selection, stages)
   }
 
   const loadContentStats = async (
@@ -97,22 +124,31 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     const raid = content.kind === 'raid'
     const pair = findStagePair(content)
     const minFame = population.minFame ?? toPopulationMinFame(content, toCollectionMinFame())
+    const comparison = { contentId: content.id, weekStart, previousWeekStart }
+    const raidName = content.rule.type === 'clear' ? content.rule.name : undefined
     const [
       jobFames,
+      jobScores,
       adventures,
       firstWeeks,
       fameBands,
+      scoreBands,
       times,
       weekGroups,
+      weekGroupScores,
       stageMoveCounts,
-      streaks
+      streaks,
+      stages
     ] = await Promise.all([
       reader.readContentJobFames(selection),
+      reader.readContentJobScores(selection),
       reader.readAdventureSizes(selection),
       reader.readFirstWeeks(content.id),
       reader.readFameBands(selection, minFame),
+      reader.readScoreBands(selection, minFame),
       reader.readContentTimes(selection),
-      raid ? reader.readWeekGroups({ contentId: content.id, weekStart, previousWeekStart }) : null,
+      raid ? reader.readWeekGroups(comparison) : null,
+      raid ? reader.readWeekGroupScores(comparison) : null,
       pair !== undefined
         ? reader.readStageMoves({
             hardContentId: pair.hard.id,
@@ -121,7 +157,8 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
             previousWeekStart
           })
         : null,
-      raid ? reader.readStreaks(selection) : null
+      raid ? reader.readStreaks(selection) : null,
+      raidName !== undefined ? loadStages(raidName, weekStart) : null
     ])
 
     const stageMoves =
@@ -129,13 +166,17 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
 
     return toClearContentStats(summary, population, {
       jobFames,
+      jobScores,
       adventures,
       firstWeeks,
       fameBands,
+      scoreBands,
       times,
       weekGroups,
+      weekGroupScores,
       stageMoves,
-      streaks
+      streaks,
+      stages
     })
   }
 
@@ -143,14 +184,23 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     weekStart: Date,
     populations: readonly StoredClearPopulation[]
   ): Promise<ClearOverview> => {
-    const [fames, jobFames, coClears, raidTimes] = await Promise.all([
+    const [fames, jobFames, scores, jobScores, coClears, raidTimes] = await Promise.all([
       reader.readFames(weekStart),
       reader.readJobFames(weekStart),
+      reader.readScores(weekStart),
+      reader.readJobScores(weekStart),
       reader.readCoClears(weekStart),
       reader.readRaidTimes(weekStart)
     ])
 
-    return toClearOverview(weekStart, populations, { fames, jobFames, coClears, raidTimes })
+    return toClearOverview(weekStart, populations, {
+      fames,
+      jobFames,
+      scores,
+      jobScores,
+      coClears,
+      raidTimes
+    })
   }
 
   return {
@@ -159,12 +209,13 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     },
     async contentStats(contentId, weekStart) {
       const content = CLEAR_CONTENTS.find(({ id }) => id === contentId)
-      if (content === undefined) {
+      const legion = CLEAR_LEGIONS.find(({ id }) => id === contentId)
+      if (content === undefined && legion === undefined) {
         throw new CharacterDetailFailure('notFound')
       }
       const current = await currentSnapshot()
       const { stats, populations } = await summaryOf(current)
-      const summary = stats.contents.find(({ id }) => id === contentId)
+      const summary = [...stats.contents, ...stats.legions].find(({ id }) => id === contentId)
       if (summary === undefined) {
         throw new CharacterDetailFailure('notFound')
       }
@@ -173,6 +224,11 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
         throw new CharacterDetailFailure('query')
       }
       const selectedWeek = weekStart ?? summary.weeks.at(-1)?.weekStart ?? null
+
+      if (content === undefined) {
+        return toLegionContentStats(summary, selectedWeek)
+      }
+
       const key = JSON.stringify([contentId, selectedWeek])
       const cached = current.contentStats.get(key)
       if (cached !== undefined) {
@@ -239,6 +295,14 @@ export const emptyClearStatsReader: ClearStatsReader = {
   readWeekGroups: async () => [],
   readStageMoves: async () => [],
   readStreaks: async () => [],
+  readLegionWeeks: async () => [],
+  readRaidModes: async () => [],
+  readRaidStageCounts: async () => [],
+  readContentJobScores: async () => [],
+  readWeekGroupScores: async () => [],
+  readScoreBands: async () => [],
+  readScores: async () => [],
+  readJobScores: async () => [],
   readFames: async () => [],
   readJobFames: async () => [],
   readCoClears: async () => [],

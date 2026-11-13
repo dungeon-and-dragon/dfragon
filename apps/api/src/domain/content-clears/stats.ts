@@ -1,4 +1,8 @@
-import type { ClearWeekRatioCount, StoredClearPopulation } from '@dfragon/database'
+import type {
+  ClearWeekRatioCount,
+  ContentClearKind,
+  StoredClearPopulation
+} from '@dfragon/database'
 import { formatResetDate } from '../seoul-time.js'
 import { CLEAR_CONTENTS, type ClearContent, toLatestContents } from './contents.js'
 
@@ -18,18 +22,20 @@ export type ClearWeek = {
   ratios: ClearRatioCount[]
 }
 
+// 레기온은 입장 명성을 정하지 않아 entryFame이 null이다.
 export type ClearContentHeader = {
   id: string
-  kind: ClearContent['kind']
+  kind: ContentClearKind | 'legion'
   name: string
   releasedAt: string
-  entryFame: number
+  entryFame: number | null
   latest: boolean
 }
 
 export type ClearContentSummary = ClearContentHeader & { weeks: ClearWeek[] }
 
-export type ClearStats = { contents: ClearContentSummary[] }
+// 레기온은 지금 웹이 받는 kind가 아니라 contents와 따로 둔다.
+export type ClearStats = { contents: ClearContentSummary[]; legions: ClearContentSummary[] }
 
 function sumCleared(counts: readonly { cleared: number }[]): number {
   return counts.reduce((total, { cleared }) => total + cleared, 0)
@@ -91,7 +97,7 @@ function toHeader(content: ClearContent, latestIds: ReadonlySet<string>): ClearC
 export function toClearStats(
   populations: readonly StoredClearPopulation[],
   counts: readonly ClearWeekRatioCount[]
-): ClearStats {
+): Pick<ClearStats, 'contents'> {
   const latestIds = new Set(toLatestContents(CLEAR_CONTENTS).map(({ id }) => id))
 
   const contents = CLEAR_CONTENTS.map((content) => {

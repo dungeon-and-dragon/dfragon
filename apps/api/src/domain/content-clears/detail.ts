@@ -1,25 +1,33 @@
 import type {
+  CharacterScoreKind,
   ClearAdventureSize,
   ClearFameBandCount,
   ClearFirstWeekCount,
   ClearJobFameSample,
+  ClearJobScoreSample,
+  ClearRecordStageCount,
+  ClearScoreBandCount,
   ClearStageMoveCount,
   ClearStagePrevious,
   ClearStreakCount,
   ClearTimeCount,
   ClearWeekGroup,
   ClearWeekGroupSample,
+  ClearWeekGroupScoreSample,
   StoredClearPopulation
 } from '@dfragon/database'
+import { RAID_STAGE_ORDER } from '../raid-stage.js'
 import { formatResetDate } from '../seoul-time.js'
 import type { ClearStagePair } from './contents.js'
 import {
   type ClearFameDistribution,
   type ClearJobStats,
+  type ClearScoreDistributions,
   type ClearTimes,
   toClearJobs,
   toClearTimes,
-  toFameDistribution
+  toFameDistribution,
+  toScoreDistributions
 } from './samples.js'
 import type { ClearContentHeader, ClearContentSummary, ClearWeek } from './stats.js'
 
@@ -34,7 +42,10 @@ export type ClearWeeklyClear = {
 export type ClearWeekGroupStats = {
   cleared: number
   fame: ClearFameDistribution | null
+  scores: ClearScoreDistributions
 }
+
+export type ClearScoreBand = Omit<ClearScoreBandCount, 'kind'>
 
 export type ClearStageMoves = {
   hard: Record<ClearStagePrevious, number>
@@ -51,11 +62,17 @@ export type ClearContentStats = ClearContentHeader &
     weekOverWeek: Record<ClearWeekGroup, ClearWeekGroupStats> | null
     stageMoves: ClearStageMoves | null
     streaks: ClearStreakCount[] | null
+    stages: ClearRecordStageCount[] | null
+    scoreBands: Record<CharacterScoreKind, ClearScoreBand[]>
   }
 
-// 레이드가 아니면 weekGroups, streaks가 null이고, 일반과 하드 짝이 없으면 stageMoves가 null이다.
+// 레이드가 아니면 weekGroups, weekGroupScores, streaks, stages가 null이고, 일반과 하드 짝이 없으면 stageMoves가 null이다.
 export type ClearContentSamples = {
   jobFames: readonly ClearJobFameSample[]
+  jobScores: readonly ClearJobScoreSample[]
+  scoreBands: readonly ClearScoreBandCount[]
+  weekGroupScores: readonly ClearWeekGroupScoreSample[] | null
+  stages: readonly ClearRecordStageCount[] | null
   adventures: ClearAdventureSize[]
   firstWeeks: readonly ClearFirstWeekCount[]
   fameBands: ClearFameBandCount[]
@@ -85,18 +102,20 @@ function toWeeklyClears(
 }
 
 function toWeekOverWeek(
-  samples: readonly ClearWeekGroupSample[]
+  samples: readonly ClearWeekGroupSample[],
+  scoreSamples: readonly ClearWeekGroupScoreSample[]
 ): Record<ClearWeekGroup, ClearWeekGroupStats> {
   const statsOf = (group: ClearWeekGroup): ClearWeekGroupStats => {
     const sample = samples.find((candidate) => candidate.group === group)
+    const scores = toScoreDistributions(scoreSamples.filter((score) => score.group === group))
 
     if (sample === undefined) {
-      return { cleared: 0, fame: null }
+      return { cleared: 0, fame: null, scores }
     }
 
     const fame = toFameDistribution(sample)
 
-    return { cleared: sample.cleared, fame }
+    return { cleared: sample.cleared, fame, scores }
   }
 
   const both = statsOf('both')
@@ -133,6 +152,37 @@ function toStageMoves({
   return { hard, normal }
 }
 
+function toScoreBands(
+  rows: readonly ClearScoreBandCount[]
+): Record<CharacterScoreKind, ClearScoreBand[]> {
+  const bandsOf = (kind: CharacterScoreKind) =>
+    rows
+      .filter((row) => row.kind === kind)
+      .map(({ score, population, cleared }) => ({ score, population, cleared }))
+
+  const equipment = bandsOf('equipment')
+  const buff = bandsOf('buff')
+
+  return { equipment, buff }
+}
+
+function toStages(counts: readonly ClearRecordStageCount[]): ClearRecordStageCount[] {
+  const orderOf = (stage: string) => {
+    const index = RAID_STAGE_ORDER.indexOf(stage)
+
+    if (index === -1) {
+      return RAID_STAGE_ORDER.length
+    }
+
+    return index
+  }
+
+  return counts.toSorted(
+    (left, right) =>
+      orderOf(left.stage) - orderOf(right.stage) || left.stage.localeCompare(right.stage)
+  )
+}
+
 export function toEmptyContentStats({
   weeks: _weeks,
   ...header
@@ -147,9 +197,22 @@ export function toEmptyContentStats({
     weekOverWeek: null,
     stageMoves: null,
     streaks: null,
+    stages: null,
+    scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []
   }
+}
+
+// 레기온 기록에는 전직, 배율, 단계, 점수가 없어 상세는 고른 주의 요약만 준다.
+export function toLegionContentStats(
+  summary: ClearContentSummary,
+  weekStart: string | null
+): ClearContentStats {
+  const week = summary.weeks.find((summaryWeek) => summaryWeek.weekStart === weekStart) ?? null
+  const empty = toEmptyContentStats(summary)
+
+  return { ...empty, week }
 }
 
 export function toClearContentStats(
@@ -159,11 +222,16 @@ export function toClearContentStats(
 ): ClearContentStats {
   const weekStart = formatResetDate(population.weekStart)
   const week = weeks.find((summaryWeek) => summaryWeek.weekStart === weekStart) ?? null
-  const jobs = toClearJobs(population, samples.jobFames)
+  const jobs = toClearJobs(population, samples.jobFames, samples.jobScores)
   const weeklyClears = toWeeklyClears(weeks, samples.firstWeeks)
-  const weekOverWeek = samples.weekGroups !== null ? toWeekOverWeek(samples.weekGroups) : null
+  const weekOverWeek =
+    samples.weekGroups !== null
+      ? toWeekOverWeek(samples.weekGroups, samples.weekGroupScores ?? [])
+      : null
   const stageMoves = samples.stageMoves !== null ? toStageMoves(samples.stageMoves) : null
   const times = toClearTimes(samples.times)
+  const stages = samples.stages !== null ? toStages(samples.stages) : null
+  const scoreBands = toScoreBands(samples.scoreBands)
 
   return {
     ...header,
@@ -175,6 +243,8 @@ export function toClearContentStats(
     weekOverWeek,
     stageMoves,
     streaks: samples.streaks,
+    stages,
+    scoreBands,
     ...times
   }
 }
