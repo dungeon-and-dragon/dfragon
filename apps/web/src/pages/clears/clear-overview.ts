@@ -3,7 +3,9 @@ import type {
   ClearAdventureSize,
   ClearContent,
   ClearOverview,
+  ClearOverviewContent,
   ClearOverviewJob,
+  ClearFameDistribution,
   ClearTimes,
   ClearWeek
 } from '#core/ranking/clear-stats'
@@ -14,11 +16,14 @@ import type { ChartX } from '../../components/chart/plot-layout'
 import type { Bar } from '../../components/chart/RowBars'
 import { shareText } from '../../components/chart/stats-bars'
 import { addDays } from './clear-weeks'
+import { type JobMetric, jobStatsOf } from './clear-scores'
 import {
   type ClearStage,
   contentLabelOf,
+  type GroupedContent,
   groupsOf,
   KIND_LABELS,
+  legendRankOf,
   orderedContents,
   placeOf
 } from './clear-groups'
@@ -231,46 +236,63 @@ export function clearRateChart(
   })
   const wanted = RATE_STAGES.find((option) => option.stage === stage)?.label
 
-  const series = groupsOf(contents).flatMap((group) => {
-    const picked = group.find(
-      ({ content, place }) =>
-        content.kind === 'raid' && (place.stage === null || place.stage === wanted)
-    )
-    if (picked === undefined) {
-      return []
+  const rankOf = (group: readonly GroupedContent[]) => {
+    const first = group[0]
+    if (first === undefined) {
+      return Number.POSITIVE_INFINITY
     }
 
-    const { content, place } = picked
-    const values = shown.map((start) => {
-      const week = weekOf(content, start)
-      if (week === undefined) {
-        return null
+    return legendRankOf(first.place.group)
+  }
+
+  const series = groupsOf(contents)
+    .toSorted((left, right) => rankOf(left) - rankOf(right))
+    .flatMap((group) => {
+      const picked = group.find(
+        ({ content, place }) =>
+          content.kind !== 'challenge' && (place.stage === null || place.stage === wanted)
+      )
+      if (picked === undefined) {
+        return []
       }
 
-      const rate = rateOf(week)
-      if (rate === null) {
-        return null
-      }
+      const { content, place } = picked
+      const values = shown.map((start) => {
+        const week = weekOf(content, start)
+        if (week === undefined) {
+          return null
+        }
 
-      return rate * 100
+        const rate = rateOf(week)
+        if (rate === null) {
+          return null
+        }
+
+        return rate * 100
+      })
+      const name = contentLabelOf(content)
+
+      return [{ key: content.id, name, color: place.group.color, values }]
     })
-    const name = contentLabelOf(content)
-
-    return [{ key: content.id, name, color: place.group.color, values }]
-  })
 
   return { x, series }
 }
 
 export function hasRateValues(contents: readonly ClearContent[]): boolean {
-  return contents.some(({ kind, weeks }) => kind === 'raid' && weeks.length > 0)
+  return contents.some(({ kind, weeks }) => kind !== 'challenge' && weeks.length > 0)
 }
 
-export function fameRows(overview: ClearOverview, contents: readonly ClearContent[]): BoxPlotRow[] {
+export function distributionRows(
+  overview: ClearOverview,
+  contents: readonly ClearContent[],
+  pick: (content: ClearOverviewContent) => ClearFameDistribution | null
+): BoxPlotRow[] {
   return overview.contents
-    .flatMap(({ id, fame }) => {
+    .flatMap((overviewContent) => {
+      const { id } = overviewContent
       const content = contents.find((candidate) => candidate.id === id)
-      if (content === undefined || fame === null) {
+      const stats = pick(overviewContent)
+      if (content === undefined || stats === null) {
         return []
       }
 
@@ -278,7 +300,7 @@ export function fameRows(overview: ClearOverview, contents: readonly ClearConten
       const sub = stage ?? undefined
       const faded = stage === '일반'
 
-      return [{ key: id, name: group.shortName, sub, color: group.color, faded, stats: fame }]
+      return [{ key: id, name: group.shortName, sub, color: group.color, faded, stats }]
     })
     .toSorted((left, right) => right.stats.median - left.stats.median)
 }
@@ -319,11 +341,8 @@ const UNKNOWN_JOB_NAME = '알 수 없음'
 
 export type JobRanks = Readonly<{ high: BoxPlotRow[]; low: BoxPlotRow[] }>
 
-function jobRowOf(job: ClearOverviewJob, rate: number): BoxPlotRow | null {
-  if (job.fame === null) {
-    return null
-  }
-
+function jobRowOf(job: ClearOverviewJob, rate: number, metric: JobMetric): BoxPlotRow {
+  const stats = jobStatsOf(job, metric)
   const name = job.jobGrowName ?? UNKNOWN_JOB_NAME
   const sub = job.jobName ?? undefined
   const value = percent.format(rate)
@@ -333,23 +352,21 @@ function jobRowOf(job: ClearOverviewJob, rate: number): BoxPlotRow | null {
     name,
     sub,
     color: colors.chart1,
-    stats: job.fame,
+    stats,
     value
   }
 }
 
-export function jobRanks(jobs: readonly ClearOverviewJob[]): JobRanks {
+// 명성과 장비 점수를 바꿔도 순위 목록이 같도록 명성 분포가 있는 전직으로 순위를 정한다.
+export function jobRanks(jobs: readonly ClearOverviewJob[], metric: JobMetric): JobRanks {
   const rows = jobs
     .flatMap((job) => {
-      if (job.population === 0) {
+      if (job.population === 0 || job.fame === null) {
         return []
       }
 
       const rate = job.cleared / job.population
-      const row = jobRowOf(job, rate)
-      if (row === null) {
-        return []
-      }
+      const row = jobRowOf(job, rate, metric)
 
       return [{ row, rate }]
     })

@@ -18,7 +18,7 @@ import {
   type ContentCard,
   contentCards,
   defaultBaseContentId,
-  fameRows,
+  distributionRows,
   findOverviewWeek,
   formatPercent,
   hasClearTimes,
@@ -38,7 +38,17 @@ import { ClearContentCards } from './components/ClearContentCards'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
 import { styles as layout } from './components/ClearPanel.style'
+import { useChoice } from './hooks/useChoice'
 import { useClearContentStats, useClearOverview, useClearStats } from './hooks/useClearStats'
+import {
+  formatScoreTick,
+  hasJobScores,
+  JOB_METRIC_PLOT_LABELS,
+  JOB_METRICS,
+  jobMetricTickOf,
+  scoreKindChoices
+} from './clear-scores'
+import { clearContentsOf } from './clear-groups'
 import { styles } from './ClearOverviewScreen.style'
 
 const OVERVIEW_LAST_ADVENTURE_SIZE = 13
@@ -87,7 +97,7 @@ export function ClearOverviewScreen({
         </div>
       )
     case 'success': {
-      const { contents } = result.value
+      const contents = clearContentsOf(result.value)
       const weeks = overviewWeeks(contents)
       const selected = findOverviewWeek(weeks, week)
       if (selected === undefined) {
@@ -212,12 +222,12 @@ function OverviewStats({
   weekStart: string
 }): React.JSX.Element {
   const options = baseContentOptions(overview, contents)
-  const fames = fameRows(overview, contents)
+  const fames = distributionRows(overview, contents, ({ fame }) => fame)
 
   return (
     <>
-      {fames.length > 0 && (
-        <div {...stylex.props(layout.row)}>
+      <div {...stylex.props(layout.row)}>
+        {fames.length > 0 && (
           <Panel name="클리어 캐릭터의 명성">
             <BoxPlotChart
               label="클리어 캐릭터의 명성"
@@ -226,8 +236,9 @@ function OverviewStats({
               formatValue={formatInteger}
             />
           </Panel>
-        </div>
-      )}
+        )}
+        <ScorePanel overview={overview} contents={contents} />
+      </div>
       <JobPanel overview={overview} contents={contents} options={options} />
       <div {...stylex.props(layout.row)}>
         {hasClearTimes(overview) && <ClearTimePanel times={overview} />}
@@ -238,7 +249,40 @@ function OverviewStats({
   )
 }
 
-const JOB_HEAD = { name: '전직', plot: '클리어 캐릭터의 명성', value: '클리어율' }
+function ScorePanel({
+  overview,
+  contents
+}: {
+  overview: ClearOverview
+  contents: readonly ClearContent[]
+}): React.JSX.Element | null {
+  const choices = scoreKindChoices(overview.contents.map(({ scores }) => scores))
+  const [kind, setKind] = useChoice(choices)
+  if (kind === undefined) {
+    return null
+  }
+
+  const rows = distributionRows(overview, contents, ({ scores }) => scores[kind])
+
+  return (
+    <Panel
+      name="클리어 캐릭터의 장비 점수"
+      controls={
+        choices.length > 1 && (
+          <ChoiceGroup label="점수 종류" choices={choices} value={kind} onChange={setKind} />
+        )
+      }
+    >
+      <BoxPlotChart
+        label="클리어 캐릭터의 장비 점수"
+        rows={rows}
+        formatTick={formatScoreTick}
+        formatValue={formatInteger}
+      />
+    </Panel>
+  )
+}
+
 const JOB_NAME_WIDTH = 150
 // 반 폭 열에 명성 눈금 여섯 개가 들어가지 않아 줄인다.
 const JOB_TICK_COUNT = 3
@@ -254,13 +298,16 @@ function JobPanel({
 }): React.JSX.Element | null {
   const [baseId, setBaseId] = useBaseContent(options, contents)
   const base = overview.contents.find(({ id }) => id === baseId)
+  const metricChoices = base !== undefined && hasJobScores(base.jobs) ? JOB_METRICS : []
+  const [chosenMetric, setMetric] = useChoice(metricChoices)
   if (base === undefined) {
     return null
   }
 
-  const { high, low } = jobRanks(base.jobs)
+  const metric = chosenMetric ?? 'fame'
+  const { high, low } = jobRanks(base.jobs, metric)
   const scale = boxPlotScale(
-    [...high, ...low].map(({ stats }) => stats),
+    [...high, ...low].flatMap(({ stats }) => stats ?? []),
     JOB_TICK_COUNT
   )
   if (scale == null) {
@@ -276,12 +323,17 @@ function JobPanel({
     <Panel
       name="전직별 클리어"
       controls={
-        <BaseContentSelect
-          label="전직별 클리어 기준 컨텐츠"
-          options={options}
-          value={base.id}
-          onChange={setBaseId}
-        />
+        <>
+          {metricChoices.length > 0 && (
+            <ChoiceGroup label="분포" choices={metricChoices} value={metric} onChange={setMetric} />
+          )}
+          <BaseContentSelect
+            label="전직별 클리어 기준 컨텐츠"
+            options={options}
+            value={base.id}
+            onChange={setBaseId}
+          />
+        </>
       }
     >
       <div {...stylex.props(styles.jobLists)}>
@@ -292,10 +344,10 @@ function JobPanel({
               label={name}
               rows={rows}
               scale={scale}
-              head={JOB_HEAD}
+              head={{ name: '전직', plot: JOB_METRIC_PLOT_LABELS[metric], value: '클리어율' }}
               nameWidth={JOB_NAME_WIDTH}
               legend={false}
-              formatTick={formatInteger}
+              formatTick={jobMetricTickOf(metric)}
               formatValue={formatInteger}
             />
           </div>
