@@ -42,6 +42,10 @@ export const styles = stylex.create({
     transitionDuration: motion.durHover,
     transitionTimingFunction: motion.ease
   },
+  selected: {
+    borderColor: { default: colors.signal, ':hover': colors.signal },
+    boxShadow: `inset 0 0 0 1px ${colors.signal}`
+  },
   image: {
     position: 'absolute',
     inset: 0,

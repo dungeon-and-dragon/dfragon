@@ -25,6 +25,7 @@ export const styles = stylex.create({
     transitionDuration: motion.durHover,
     transitionTimingFunction: motion.ease
   },
+  large: { height: 30, paddingInline: 16, fontSize: 13, lineHeight: '18px' },
   pressed: {
     backgroundColor: colors.signal,
     color: { default: colors.onSignal, ':hover': colors.onSignal },
