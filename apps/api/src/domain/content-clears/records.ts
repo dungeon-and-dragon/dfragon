@@ -4,6 +4,9 @@ import { LEGION_CLEAR_CODE, RAID_CLEAR_CODES } from '../character-timeline/proje
 import type { TimelineRow } from '../character-timeline/rows.js'
 import { startOfResetWeek } from '../seoul-time.js'
 
+// 베누스 첫 클리어 주다. 지난 레이드, 레기온 기록은 이 주부터 받는다.
+export const CLEAR_RECORD_BACKFILL_START = new Date('2025-02-06T06:00:00+09:00')
+
 // Neople은 하드로 깬 레이드에만 hard: true를 넣고, 단계나 공격대 이름이 없는 레이드는 칸을 두지 않는다.
 const raidRecordData = z.object({
   raidName: z.string(),

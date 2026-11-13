@@ -201,6 +201,13 @@ model ClearRecord {
   @@map("clear_records")
 }
 
+model ClearRecordBackfill {
+  startedAt DateTime @id @map("started_at") @db.Timestamptz(3)
+  done      Int      @default(0)
+
+  @@map("clear_record_backfills")
+}
+
 model Job {
   name          String    @id
   displayName   String    @map("display_name")

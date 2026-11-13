@@ -1,7 +1,16 @@
 import type { DatabaseClient } from '@dfragon/database'
-import { type ClearCollectionJobDependencies } from '../application/content-clears/ports.js'
-import { createContentClearCollectionJob } from '../application/content-clears/collection-job.js'
-import { createDatabaseClearCollectionStore } from '../infrastructure/database/content-clear-collection.js'
+import type {
+  ClearCollectionJobDependencies,
+  ClearRecordBackfillJobDependencies
+} from '../application/content-clears/ports.js'
+import {
+  createClearRecordBackfillJob,
+  createContentClearCollectionJob
+} from '../application/content-clears/collection-job.js'
+import {
+  createDatabaseClearCollectionStore,
+  createDatabaseClearRecordBackfillStore
+} from '../infrastructure/database/content-clear-collection.js'
 import { type SkillStyleCollectionJobDependencies } from '../application/ranking-stats/ports.js'
 import { createDatabaseSkillStyleCollectionStore } from '../infrastructure/database/skill-style-collection.js'
 import { createSkillStyleCollectionJob } from '../application/ranking-stats/skill-style-collection.js'
@@ -15,6 +24,7 @@ import { createDatabaseJobRunCleanup } from '../infrastructure/database/job-run-
 import { createJobRunCleanupJob } from '../application/jobs/job-run-cleanup.js'
 
 export type WorkerJobDependencies = ClearCollectionJobDependencies &
+  ClearRecordBackfillJobDependencies &
   SkillStyleCollectionJobDependencies
 
 export function createWorkerJobs(
@@ -26,6 +36,7 @@ export function createWorkerJobs(
   return [
     createJobRunCleanupJob(createDatabaseJobRunCleanup(client)),
     createContentClearCollectionJob(createDatabaseClearCollectionStore(client), collection),
+    createClearRecordBackfillJob(createDatabaseClearRecordBackfillStore(client), collection),
     createSkillStyleCollectionJob(createDatabaseSkillStyleCollectionStore(client), collection),
     createCharacterStatsJob(statsStore),
     createSkillAdoptionJob(statsStore)
