@@ -41,6 +41,8 @@ const count = (
   cleared: number
 ): ClearWeekRatioCount => ({ contentId, weekStart: week(date), ratio, cleared })
 
+const noScores = { equipment: null, buff: null }
+
 const populations = [
   population('michaela-hard', '2026-11-05', 1000, false),
   population('michaela-hard', '2026-10-29', 900),
@@ -74,6 +76,14 @@ function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader
     readWeekGroups: async () => [],
     readStageMoves: async () => [],
     readStreaks: async () => [],
+    readLegionWeeks: async () => [],
+    readRaidModes: async () => [],
+    readRaidStageCounts: async () => [],
+    readContentJobScores: async () => [],
+    readWeekGroupScores: async () => [],
+    readScoreBands: async () => [],
+    readScores: async () => [],
+    readJobScores: async () => [],
     readFames: async () => [],
     readJobFames: async () => [],
     readCoClears: async () => [],
@@ -248,14 +258,22 @@ test('컨텐츠 상세의 직업별 클리어 수는 모집단에 없는 전직�
     assert.equal(status, 200)
     const jobs = [...body.jobs].sort((left, right) => right.cleared - left.cleared)
     assert.deepEqual(jobs, [
-      { ...job, jobGrowName: '합성전직', population: 1000, cleared: 12, fame: null },
+      {
+        ...job,
+        jobGrowName: '합성전직',
+        population: 1000,
+        cleared: 12,
+        fame: null,
+        scores: noScores
+      },
       {
         ...job,
         jobGrowId: 'synthetic-other',
         jobGrowName: '합성다른전직',
         population: 0,
         cleared: 2,
-        fame: null
+        fame: null,
+        scores: noScores
       },
       {
         jobId: null,
@@ -264,7 +282,8 @@ test('컨텐츠 상세의 직업별 클리어 수는 모집단에 없는 전직�
         jobGrowName: null,
         population: 0,
         cleared: 1,
-        fame: null
+        fame: null,
+        scores: noScores
       }
     ])
     assert.deepEqual(body.adventures, adventures)
@@ -288,7 +307,7 @@ test('컨텐츠 상세는 저장되지 않은 주와 잘못된 week를 400, 모�
       assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', path)
     }
 
-    const unknown = await getJson(origin, '/stats/clears/legion-venus')
+    const unknown = await getJson(origin, '/stats/clears/legion-unknown')
     assert.equal(unknown.status, 404)
     assert.equal(unknown.body.error.code, 'CHARACTER_NOT_FOUND')
   } finally {
@@ -372,6 +391,8 @@ test('DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로, 상
       weekOverWeek: null,
       stageMoves: null,
       streaks: null,
+      stages: null,
+      scoreBands: { equipment: [], buff: [] },
       weekdays: [],
       hours: []
     })
@@ -894,6 +915,262 @@ test('분모 기준 명성이 저장되지 않은 주의 명성 구간은 지금
     await getJson(origin, '/stats/clears/michaela-hard')
 
     assert.deepEqual(minFames, [104_292])
+  } finally {
+    await app.close()
+  }
+})
+
+const legionWeek = (name: string, date: string, cleared: number) => ({
+  name,
+  weekStart: week(date),
+  cleared
+})
+
+test('목록은 레기온을 contents와 따로 주고, 레기온 기록이 없으면 그 레기온의 weeks가 빈 배열이다', async () => {
+  const { app, origin } = await listen(fakeReader())
+  try {
+    const { body } = await getJson(origin, '/stats/clears')
+
+    assert.ok(body.contents.every(({ kind }: { kind: string }) => kind !== 'legion'))
+    assert.deepEqual(
+      body.legions.map(({ id, kind, entryFame, latest, weeks }: Record<string, unknown>) => [
+        id,
+        kind,
+        entryFame,
+        latest,
+        weeks
+      ]),
+      [
+        ['legion-apocalypse', 'legion', null, true, []],
+        ['legion-venus', 'legion', null, false, []]
+      ]
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('레기온 주는 첫 기록 주부터 수집한 주마다 두고, 분모는 그 주 가장 큰 모집단이다', async () => {
+  const names: (readonly string[])[] = []
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [...populations, population('nabel-normal', '2026-11-05', 1500)],
+      readLegionWeeks: async (legionNames) => {
+        names.push(legionNames)
+
+        return [legionWeek('베누스', '2026-10-29', 3), legionWeek('베누스', '2026-11-05', 7)]
+      }
+    })
+  )
+  try {
+    const { body } = await getJson(origin, '/stats/clears')
+    const venus = contentOf({ contents: body.legions, legions: [] }, 'legion-venus')
+
+    assert.deepEqual(names, [['아포칼립스', '베누스']])
+    assert.deepEqual(
+      venus.weeks.map(({ weekStart, population, cleared, newlyCleared, ratios }) => ({
+        weekStart,
+        population,
+        cleared,
+        newlyCleared,
+        ratios
+      })),
+      [
+        {
+          weekStart: '2026-10-29',
+          population: 900,
+          cleared: 3,
+          newlyCleared: null,
+          ratios: [{ ratio: null, cleared: 3 }]
+        },
+        {
+          weekStart: '2026-11-05',
+          population: 1500,
+          cleared: 7,
+          newlyCleared: null,
+          ratios: [{ ratio: null, cleared: 7 }]
+        }
+      ]
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('레기온 상세는 고른 주의 요약만 주고 저장되지 않은 주는 400으로 거절한다', async () => {
+  const unread = async (): Promise<never> =>
+    assert.fail('레기온 상세에서 클리어 집계를 읽으면 안 된다')
+  const { app, origin } = await listen(
+    fakeReader({
+      readLegionWeeks: async () => [legionWeek('베누스', '2026-11-05', 7)],
+      readContentJobFames: unread,
+      readFirstWeeks: unread
+    })
+  )
+  try {
+    const detail = await getJson(origin, '/stats/clears/legion-venus')
+    const rejected = await getJson(origin, '/stats/clears/legion-venus?week=2026-10-29')
+
+    assert.equal(detail.status, 200)
+    assert.deepEqual(
+      {
+        kind: detail.body.kind,
+        entryFame: detail.body.entryFame,
+        weekStart: detail.body.week.weekStart,
+        cleared: detail.body.week.cleared,
+        jobs: detail.body.jobs,
+        stages: detail.body.stages
+      },
+      {
+        kind: 'legion',
+        entryFame: null,
+        weekStart: '2026-11-05',
+        cleared: 7,
+        jobs: [],
+        stages: null
+      }
+    )
+    assert.equal(rejected.status, 400)
+  } finally {
+    await app.close()
+  }
+})
+
+test('단계별 클리어는 수집 판정과 같은 단계 라벨로 묶어 읽고 단계표 순서로 준다', async () => {
+  const stageArguments: Parameters<ClearStatsReader['readRaidStageCounts']>[] = []
+  const { app, origin } = await listen(
+    fakeReader({
+      readRaidModes: async () => [
+        { modeName: '무너진 성자 미카엘라', hard: true },
+        { modeName: '미카엘라 : 균열서', hard: false },
+        { modeName: '무너진 성자 미카엘라', hard: false }
+      ],
+      readRaidStageCounts: async (selection, stages) => {
+        stageArguments.push([selection, stages])
+
+        return [
+          { stage: '하드', characters: 5 },
+          { stage: '일반', characters: 9 },
+          { stage: '싱글/매칭', characters: 4 }
+        ]
+      }
+    })
+  )
+  try {
+    const { body } = await getJson(origin, '/stats/clears/michaela-hard?week=2026-11-05')
+    const [[selection, stages]] = stageArguments
+
+    assert.equal(stageArguments.length, 1)
+    assert.deepEqual(selection, { raidName: '무너진 성자 미카엘라', weekStart: week('2026-11-05') })
+    assert.deepEqual(
+      stages.map(({ modeName, hard, stage }) => `${modeName}/${hard}/${stage}`).sort(),
+      [
+        '무너진 성자 미카엘라/false/일반',
+        '무너진 성자 미카엘라/true/하드',
+        '미카엘라 : 균열서/false/싱글/매칭'
+      ]
+    )
+    assert.deepEqual(body.stages, [
+      { stage: '싱글/매칭', characters: 4 },
+      { stage: '일반', characters: 9 },
+      { stage: '하드', characters: 5 }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('레이드 기록이 없거나 단계 라벨이 없는 주의 단계별 클리어는 빈 배열이고, 챌린지는 null이다', async () => {
+  const unread = async (): Promise<never> =>
+    assert.fail('단계 라벨이 없으면 단계별 수를 읽지 않는다')
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [...populations, population('inae-twilight', '2026-11-05', 700)],
+      readRaidModes: async ({ raidName }) =>
+        raidName === '이내 황혼전' ? [{ modeName: null, hard: false }] : [],
+      readRaidStageCounts: unread
+    })
+  )
+  try {
+    const inae = await getJson(origin, '/stats/clears/inae-twilight')
+    const michaela = await getJson(origin, '/stats/clears/michaela-hard')
+    const challenge = await getJson(origin, '/stats/clears/engraved-nightmare-1')
+
+    assert.deepEqual(inae.body.stages, [])
+    assert.deepEqual(michaela.body.stages, [])
+    assert.equal(challenge.body.stages, null)
+  } finally {
+    await app.close()
+  }
+})
+
+const scoreSample = (kind: 'equipment' | 'buff', characters: number, low: number) => ({
+  kind,
+  ...fameSample(characters, low)
+})
+
+test('점수 분포는 장비 점수와 버프 점수를 따로 두고 20명 미만이거나 점수가 없으면 null이다', async () => {
+  const { app, origin } = await listen(
+    fakeReader({
+      readScores: async () => [
+        { contentId: 'michaela-hard', ...scoreSample('equipment', 30, 900_000) },
+        { contentId: 'michaela-hard', ...scoreSample('buff', 19, 150_000) }
+      ],
+      readJobScores: async () => [
+        {
+          contentId: 'michaela-hard',
+          jobId: job.jobId,
+          jobGrowId: job.jobGrowId,
+          ...scoreSample('buff', 25, 160_000)
+        }
+      ]
+    })
+  )
+  try {
+    const { body } = await getJson(origin, '/stats/clears/overview')
+    const michaela = body.contents.find(({ id }: { id: string }) => id === 'michaela-hard')
+    const challenge = body.contents.find(({ id }: { id: string }) => id === 'engraved-nightmare-1')
+
+    assert.equal(michaela.scores.equipment.median, 900_002)
+    assert.equal(michaela.scores.buff, null)
+    assert.deepEqual(challenge.scores, noScores)
+    const grow = michaela.jobs.find(
+      ({ jobGrowId }: { jobGrowId: string }) => jobGrowId === job.jobGrowId
+    )
+    assert.deepEqual(
+      { equipment: grow.scores.equipment, buffMedian: grow.scores.buff.median },
+      { equipment: null, buffMedian: 160_002 }
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('상세의 그룹별 점수 분포와 점수 구간은 점수 종류마다 나누어 준다', async () => {
+  const { app, origin } = await listen(
+    fakeReader({
+      readWeekGroups: async () => [groupSample('both', 30, 30)],
+      readWeekGroupScores: async () => [
+        { group: 'both', ...scoreSample('equipment', 22, 800_000) },
+        { group: 'first', ...scoreSample('buff', 21, 140_000) }
+      ],
+      readScoreBands: async () => [
+        { kind: 'buff', score: 140_000, population: 30, cleared: 21 },
+        { kind: 'equipment', score: 800_000, population: 50, cleared: 22 }
+      ]
+    })
+  )
+  try {
+    const { body } = await getJson(origin, '/stats/clears/michaela-hard')
+
+    assert.equal(body.weekOverWeek.both.scores.equipment.median, 800_002)
+    assert.equal(body.weekOverWeek.both.scores.buff, null)
+    assert.equal(body.weekOverWeek.first.cleared, 0)
+    assert.equal(body.weekOverWeek.first.scores.buff.median, 140_002)
+    assert.deepEqual(body.scoreBands, {
+      equipment: [{ score: 800_000, population: 50, cleared: 22 }],
+      buff: [{ score: 140_000, population: 30, cleared: 21 }]
+    })
   } finally {
     await app.close()
   }
