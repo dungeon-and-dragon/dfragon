@@ -4,6 +4,7 @@ import {
   readClearPopulation,
   readContentClearCollection,
   readContentClearPopulations,
+  recordClearRecords,
   recordContentClearCollectionProgress,
   recordContentClearPopulation,
   recordContentClears,
@@ -19,6 +20,7 @@ export function createDatabaseClearCollectionStore(client: DatabaseClient): Clea
     startProgress: (startedAt) => startContentClearCollection(client, startedAt),
     recordProgress: (progress) => recordContentClearCollectionProgress(client, progress),
     recordClears: (clears) => recordContentClears(client, clears),
+    recordRecords: (records) => recordClearRecords(client, records),
     recordPopulation: (population) => recordContentClearPopulation(client, population),
     finishProgress: (startedAt) => finishContentClearCollection(client, startedAt)
   }

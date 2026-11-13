@@ -4,6 +4,7 @@ import type {
   ClearJobFameSample,
   ClearPopulationCharacter,
   ClearRaidTimeCount,
+  ClearRecordInput,
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
@@ -24,6 +25,7 @@ export type ClearCollectionStore = {
   startProgress(startedAt: Date): Promise<void>
   recordProgress(progress: ContentClearCollectionProgress): Promise<void>
   recordClears(clears: readonly ContentClearInput[]): Promise<void>
+  recordRecords(records: readonly ClearRecordInput[]): Promise<void>
   recordPopulation(population: ContentClearPopulationInput): Promise<void>
   finishProgress(startedAt: Date): Promise<void>
 }
