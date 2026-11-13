@@ -4,6 +4,8 @@ import type {
   ClearJobFameSample,
   ClearPopulationCharacter,
   ClearRaidTimeCount,
+  ClearRecordBackfillProgress,
+  ClearRecordInput,
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
@@ -24,6 +26,7 @@ export type ClearCollectionStore = {
   startProgress(startedAt: Date): Promise<void>
   recordProgress(progress: ContentClearCollectionProgress): Promise<void>
   recordClears(clears: readonly ContentClearInput[]): Promise<void>
+  recordRecords(records: readonly ClearRecordInput[]): Promise<void>
   recordPopulation(population: ContentClearPopulationInput): Promise<void>
   finishProgress(startedAt: Date): Promise<void>
 }
@@ -42,6 +45,25 @@ export type ClearCollectionJobDependencies = Pick<
   ClearCollectionDependencies,
   'createFetchTimeline' | 'readConcurrency' | 'report'
 >
+
+export type ClearRecordBackfillStore = {
+  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]>
+  readProgress(): Promise<ClearRecordBackfillProgress | undefined>
+  startProgress(startedAt: Date): Promise<void>
+  recordProgress(progress: ClearRecordBackfillProgress): Promise<void>
+  recordRecords(records: readonly ClearRecordInput[]): Promise<void>
+  finishProgress(startedAt: Date): Promise<void>
+}
+
+export type ClearRecordBackfillDependencies = Omit<ClearCollectionDependencies, 'store'> & {
+  store: ClearRecordBackfillStore
+}
+
+export type ClearRecordBackfillJobDependencies = {
+  createFetchRecordTimeline: CreateClearTimeline
+  readConcurrency: () => number
+  report: ClearCollectionDependencies['report']
+}
 
 export interface ClearStatsReader {
   readCollectedAt(): Promise<Date | null>

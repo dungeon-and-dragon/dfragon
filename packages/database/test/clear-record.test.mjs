@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict'
 import { readdir, readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { applyMigrations, createDatabaseClient, recordClearRecords } from '../dist/index.js'
+import {
+  applyMigrations,
+  createDatabaseClient,
+  finishClearRecordBackfill,
+  readClearRecordBackfill,
+  recordClearRecordBackfillProgress,
+  recordClearRecords,
+  startClearRecordBackfill
+} from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_CLEAR_RECORD_PORT
 const newMigration = '20261114120000_add_clear_records'
@@ -225,4 +233,25 @@ test('기존 테이블과 행이 있는 DB에 migration을 적용해도 기존 �
 
   await recordClearRecords(client, records)
   assert.deepEqual(await storedRows(client), expectedRows)
+})
+
+test('지난 기록 받기의 진행 위치를 시작하고 옮긴 값대로 읽고, 끝내면 읽히지 않는다', {
+  skip: port === undefined
+}, async (t) => {
+  const database = 'clear_record_backfill'
+  const startedAt = at('2026-11-14T03:00:00')
+
+  await recreateDatabase(database)
+
+  const client = connect(database)
+  t.after(() => client.$disconnect())
+  await runMigration(client, '20261114180000_add_clear_record_backfills')
+
+  assert.equal(await readClearRecordBackfill(client), undefined)
+  await startClearRecordBackfill(client, startedAt)
+  assert.deepEqual(await readClearRecordBackfill(client), { startedAt, done: 0 })
+  await recordClearRecordBackfillProgress(client, { startedAt, done: 3200 })
+  assert.deepEqual(await readClearRecordBackfill(client), { startedAt, done: 3200 })
+  await finishClearRecordBackfill(client, startedAt)
+  assert.equal(await readClearRecordBackfill(client), undefined)
 })
