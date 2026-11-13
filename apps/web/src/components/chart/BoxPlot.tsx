@@ -17,7 +17,7 @@ export type BoxPlotRow = Readonly<{
   sub?: string
   color: string
   faded?: boolean
-  stats: BoxStats
+  stats: BoxStats | null
   value?: string
 }>
 
@@ -177,7 +177,7 @@ type BoxPlotChartProps = Readonly<{
 }>
 
 export function BoxPlotChart(props: BoxPlotChartProps): React.JSX.Element | null {
-  const scale = props.scale ?? boxPlotScale(props.rows.map(({ stats }) => stats))
+  const scale = props.scale ?? boxPlotScale(props.rows.flatMap(({ stats }) => stats ?? []))
   if (props.rows.length === 0 || scale == null) {
     return null
   }
@@ -222,6 +222,10 @@ function BoxPlotChartPlot({
 
   function tooltipRows(row: BoxPlotRow): TooltipRow[] {
     const { stats, color } = row
+    if (stats === null) {
+      return []
+    }
+
     const whiskerRange = `${formatValue(stats.p5)} ~ ${formatValue(stats.p95)}`
     const boxRange = `${formatValue(stats.p25)} ~ ${formatValue(stats.p75)}`
     const median = formatValue(stats.median)
@@ -310,7 +314,7 @@ function BoxPlotChartRow({
   return (
     <li
       data-chart-item=""
-      onMouseEnter={handleMouseEnter}
+      onMouseEnter={stats !== null ? handleMouseEnter : undefined}
       {...stylex.props(boxPlotStyles.row, columns)}
     >
       <span {...stylex.props(boxPlotStyles.name)}>
@@ -319,14 +323,18 @@ function BoxPlotChartRow({
         <span {...stylex.props(shapes.srOnly)}>{description}</span>
       </span>
       <div ref={plotRef} {...stylex.props(boxPlotStyles.plotColumn)}>
-        <BoxPlot
-          stats={stats}
-          color={color}
-          faded={faded}
-          scale={scale}
-          width={width}
-          height={CHART_ROW_HEIGHT}
-        />
+        {stats !== null ? (
+          <BoxPlot
+            stats={stats}
+            color={color}
+            faded={faded}
+            scale={scale}
+            width={width}
+            height={CHART_ROW_HEIGHT}
+          />
+        ) : (
+          <div {...stylex.props(boxPlotStyles.emptyPlot(CHART_ROW_HEIGHT))} />
+        )}
       </div>
       {value != null && <span {...stylex.props(boxPlotStyles.value)}>{value}</span>}
     </li>
