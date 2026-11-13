@@ -7,11 +7,13 @@ export function ChoiceGroup<Value extends string>({
   label,
   choices,
   value,
+  large = false,
   onChange
 }: {
   label: string
   choices: readonly Choice<Value>[]
   value: Value
+  large?: boolean
   onChange: (value: Value) => void
 }): React.JSX.Element {
   return (
@@ -21,6 +23,7 @@ export function ChoiceGroup<Value extends string>({
           key={choice.value}
           choice={choice}
           pressed={choice.value === value}
+          large={large}
           onChange={onChange}
         />
       ))}
@@ -31,10 +34,12 @@ export function ChoiceGroup<Value extends string>({
 function ChoiceButton<Value extends string>({
   choice: { value, label },
   pressed,
+  large,
   onChange
 }: {
   choice: Choice<Value>
   pressed: boolean
+  large: boolean
   onChange: (value: Value) => void
 }): React.JSX.Element {
   function select(): void {
@@ -46,7 +51,7 @@ function ChoiceButton<Value extends string>({
       type="button"
       aria-pressed={pressed}
       onClick={select}
-      {...stylex.props(styles.option, pressed && styles.pressed)}
+      {...stylex.props(styles.option, large && styles.large, pressed && styles.pressed)}
     >
       {label}
     </button>

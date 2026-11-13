@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export type ClearSearch = { content?: string; week?: string }
 
-export type ClearWeekSearch = { week?: string }
+export type ClearDetailSearch = { stage?: string; week?: string }
 
 const weekSchema = z.iso.date().optional().catch(undefined)
 
@@ -11,7 +11,10 @@ const searchSchema = z.object({
   week: weekSchema
 })
 
-const weekSearchSchema = z.object({ week: weekSchema })
+const detailSearchSchema = z.object({
+  stage: z.string().optional().catch(undefined),
+  week: weekSchema
+})
 
 export function parseClearSearch(search: Record<string, unknown>): ClearSearch {
   const { content, week } = searchSchema.parse(search)
@@ -19,8 +22,8 @@ export function parseClearSearch(search: Record<string, unknown>): ClearSearch {
   return { content, week }
 }
 
-export function parseClearWeekSearch(search: Record<string, unknown>): ClearWeekSearch {
-  const { week } = weekSearchSchema.parse(search)
+export function parseClearDetailSearch(search: Record<string, unknown>): ClearDetailSearch {
+  const { stage, week } = detailSearchSchema.parse(search)
 
-  return { week }
+  return { stage, week }
 }

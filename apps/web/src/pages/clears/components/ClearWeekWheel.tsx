@@ -9,10 +9,12 @@ const WHEEL_STEP_DELTA = 40
 export function ClearWeekWheel({
   weeks,
   selected,
+  labelOf = weekRangeText,
   onSelect
 }: {
   weeks: readonly OverviewWeek[]
   selected: OverviewWeek
+  labelOf?: (weekStart: string) => string
   onSelect: (weekStart: string) => void
 }): React.JSX.Element {
   const wheelRef = useRef<HTMLDivElement>(null)
@@ -54,9 +56,9 @@ export function ClearWeekWheel({
 
   return (
     <div ref={wheelRef} role="group" aria-label="주 선택" {...stylex.props(styles.wheel)}>
-      <WheelRow week={previous} selected={false} onSelect={onSelect} />
-      <WheelRow week={selected} selected onSelect={onSelect} />
-      <WheelRow week={next} selected={false} onSelect={onSelect} />
+      <WheelRow week={previous} selected={false} labelOf={labelOf} onSelect={onSelect} />
+      <WheelRow week={selected} selected labelOf={labelOf} onSelect={onSelect} />
+      <WheelRow week={next} selected={false} labelOf={labelOf} onSelect={onSelect} />
     </div>
   )
 }
@@ -64,10 +66,12 @@ export function ClearWeekWheel({
 function WheelRow({
   week,
   selected,
+  labelOf,
   onSelect
 }: {
   week: OverviewWeek | undefined
   selected: boolean
+  labelOf: (weekStart: string) => string
   onSelect: (weekStart: string) => void
 }): React.JSX.Element {
   if (week === undefined) {
@@ -87,7 +91,7 @@ function WheelRow({
       onClick={select}
       {...stylex.props(styles.row, selected && styles.selected)}
     >
-      {weekRangeText(week.weekStart)}
+      {labelOf(week.weekStart)}
       {!week.closed && <small {...stylex.props(styles.open)}>집계 중</small>}
     </button>
   )
