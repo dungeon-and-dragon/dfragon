@@ -12,7 +12,7 @@ import { type ClientHost, ClientHostContext } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'
 import type { ClearSearch } from './clear-search'
-import { ClearsScreen } from './ClearsScreen'
+import { ClearContentScreen } from './ClearContentScreen'
 
 let container: HTMLDivElement
 let root: Root
@@ -139,7 +139,7 @@ function render(
     root.render(
       <ClientHostContext value={createTestClientHost({ getClearStats, getClearContentStats })}>
         <TestQueryClient>
-          <ClearsScreen search={search} onSearchChange={onSearchChange} />
+          <ClearContentScreen search={search} onSearchChange={onSearchChange} />
         </TestQueryClient>
       </ClientHostContext>
     )
@@ -194,14 +194,14 @@ it('조회가 실패하면 제목 줄과 오류 한 줄을 둔다', async () => 
   )
 })
 
-it('주소에 컨텐츠가 없으면 최신 레이드의 마지막 주를 열고 기준 명성, 모집단, 수집 시각과 클리어 수, 비율을 보인다', async () => {
+it('주소에 컨텐츠가 없으면 최신 레이드의 마지막 주를 열고 기준 명성, 캐릭터 수, 수집 시각과 클리어 수, 비율을 보인다', async () => {
   const getClearContentStats = vi.fn(async (_contentId: string, weekStart: string | undefined) =>
     detailOf(raid, weekStart)
   )
   await render({}, { getClearContentStats })
 
   expect(container.querySelector('header')?.textContent).toBe(
-    '클리어 집계기준 명성125,871 이상모집단1,000수집 시각11-10 05:12'
+    '클리어 집계기준 명성125,871 이상캐릭터 수1,000수집 시각11-10 05:12'
   )
   expect(
     [...boxOf('컨텐츠').querySelectorAll('h2')].map((row) => row.parentElement?.textContent)
@@ -355,7 +355,7 @@ function barPercentOf(row: Element): number {
   return Number(PERCENT_VALUE_PATTERN.exec(style)?.[1])
 }
 
-it('직업별 클리어는 클리어 순 10줄을 전직, 모집단, 클리어, 클리어율 순으로 두고 막대는 보이는 전직의 최고 클리어율에 맞추며 모두 보기와 클리어율 순으로 바꿀 수 있다', async () => {
+it('직업별 클리어는 클리어 순 10줄을 전직, 캐릭터 수, 클리어, 클리어율 순으로 두고 막대는 보이는 전직의 최고 클리어율에 맞추며 모두 보기와 클리어율 순으로 바꿀 수 있다', async () => {
   await render({})
 
   const names = () =>
@@ -364,7 +364,7 @@ it('직업별 클리어는 클리어 순 10줄을 전직, 모집단, 클리어, 
   expect(names()[0]).toBe('眞 전직11')
   expect(
     [...boxOf('직업별 클리어').querySelectorAll('thead th')].map((cell) => cell.textContent)
-  ).toEqual(['전직', '모집단', '클리어', '클리어율'])
+  ).toEqual(['전직', '캐릭터 수', '클리어', '클리어율'])
   const firstRow = boxOf('직업별 클리어').querySelector('tbody tr')!
   expect([...firstRow.children].map((cell) => cell.textContent)).toEqual([
     '眞 전직11',
