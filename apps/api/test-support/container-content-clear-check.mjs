@@ -4,10 +4,14 @@ import {
   finishContentClearCollection,
   readClearPopulation,
   readContentClearAdventureSizes,
+  readContentClearCoClears,
   readContentClearCollectedAt,
   readContentClearCollection,
+  readContentClearFames,
   readContentClearJobCounts,
+  readContentClearJobFames,
   readContentClearPopulations,
+  readContentClearRaidTimes,
   readContentClearWeekRatioCounts,
   readDatabaseConfiguration,
   recordCharacterBasic,
@@ -241,13 +245,18 @@ try {
     population(1000, false, 'engraved-nightmare-1', '2026-11-12T06:00:00', '2026-11-13T06:00:00')
   )
 
-  const service = createClearStatsService({
+  const reader = {
     readCollectedAt: () => readContentClearCollectedAt(client),
     readPopulations: () => readContentClearPopulations(client),
     readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
     readJobCounts: (selection) => readContentClearJobCounts(client, selection),
-    readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection)
-  })
+    readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
+    readFames: (weekStart) => readContentClearFames(client, weekStart),
+    readJobFames: (weekStart) => readContentClearJobFames(client, weekStart),
+    readCoClears: (weekStart) => readContentClearCoClears(client, weekStart),
+    readRaidTimes: (weekStart) => readContentClearRaidTimes(client, weekStart)
+  }
+  const service = createClearStatsService(reader)
   const weeksOf = async (contentId) =>
     (await service.stats()).contents.find(({ id }) => id === contentId).weeks
   const summary = (weeks) =>
@@ -351,6 +360,128 @@ try {
   )
   assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 4)
   assert.equal((await service.contentStats('engraved-nightmare-1', undefined)).week.cleared, 4)
+
+  // 전체 개요다. 명성이 다른 캐릭터 25명이 이번 주 미카엘라 하드를 깨고, 그 가운데 5명은 이번 주까지, 1명은 다음 주에 챌린지를 깬다.
+  const fameCharacters = Array.from({ length: 25 }, (_, index) => `clear-fame-${index + 1}`)
+  for (const [index, characterId] of fameCharacters.entries()) {
+    await recordCharacterBasic(
+      client,
+      basic('cain', characterId, 101000 + index * 1000, '합성클리어모험단3')
+    )
+  }
+  await recordContentClears(client, [
+    ...fameCharacters.map((characterId, index) =>
+      clear(
+        'michaela-hard',
+        'raid',
+        characterId,
+        index < 10 ? '2026-11-12T02:30:00' : '2026-11-05T07:00:00',
+        thisWeek
+      )
+    ),
+    ...fameCharacters
+      .slice(0, 5)
+      .map((characterId) =>
+        clear('engraved-nightmare-1', 'challenge', characterId, '2026-11-07T23:00:00', thisWeek)
+      ),
+    clear(
+      'engraved-nightmare-1',
+      'challenge',
+      fameCharacters[5],
+      '2026-11-13T23:00:00',
+      '2026-11-12T06:00:00'
+    )
+  ])
+  await recordContentClearPopulation(client, population(500, true, 'michaela-normal'))
+  // 위 service는 모집단의 마지막 수집 시각이 그대로라 캐시를 주므로 새 service로 읽는다.
+  const overviewService = createClearStatsService(reader)
+  const overview = await overviewService.overview('2026-11-05')
+  const overviewContent = (id) => overview.contents.find((content) => content.id === id)
+  const michaelaOverview = overviewContent('michaela-hard')
+  const challengeOverview = overviewContent('engraved-nightmare-1')
+  assert.deepEqual(
+    overview.contents.map(({ id, cleared }) => [id, cleared]),
+    [
+      ['michaela-normal', 1],
+      ['michaela-hard', 29],
+      ['engraved-nightmare-1', 7]
+    ]
+  )
+  // 명성이 있는 28명(1,000 세 명과 101,000~125,000)에서 p 분위수는 ceil(p × 28)번째로 작은 값이다.
+  assert.deepEqual(michaelaOverview.fame, {
+    p5: 1000,
+    p25: 104000,
+    median: 111000,
+    p75: 118000,
+    p95: 124000,
+    max: 125000
+  })
+  assert.equal(challengeOverview.fame, null)
+  assert.equal(
+    michaelaOverview.jobs.reduce((total, { cleared }) => total + cleared, 0),
+    (await overviewService.stats()).contents
+      .find(({ id }) => id === 'michaela-hard')
+      .weeks.find(({ weekStart }) => weekStart === '2026-11-05').cleared
+  )
+  assert.deepEqual(
+    michaelaOverview.jobs
+      .map(({ jobGrowId, cleared, fame }) => [jobKey({ jobGrowId }), cleared, fame?.median ?? null])
+      .sort(([left], [right]) => left.localeCompare(right)),
+    [
+      ['-', 1, null],
+      ['synthetic-clear-grow', 27, 112000],
+      ['synthetic-clear-other', 1, null]
+    ]
+  )
+  assert.deepEqual(
+    overview.contents.map(({ id, coClears }) => [id, coClears]),
+    [
+      [
+        'michaela-normal',
+        [
+          { id: 'michaela-hard', cleared: 1 },
+          { id: 'engraved-nightmare-1', cleared: 1 }
+        ]
+      ],
+      [
+        'michaela-hard',
+        [
+          { id: 'michaela-normal', cleared: 1 },
+          { id: 'engraved-nightmare-1', cleared: 6 }
+        ]
+      ],
+      [
+        'engraved-nightmare-1',
+        [
+          { id: 'michaela-normal', cleared: 1 },
+          { id: 'michaela-hard', cleared: 6 }
+        ]
+      ]
+    ]
+  )
+  // 목요일 02:30은 그 주 끝(다음 목요일 06:00 전)이라 같은 주의 목요일로 센다.
+  assert.deepEqual(overview.weekdays, [
+    { weekday: 4, cleared: 25 },
+    { weekday: 5, cleared: 2 },
+    { weekday: 6, cleared: 1 },
+    { weekday: 7, cleared: 2 },
+    { weekday: 1, cleared: 0 },
+    { weekday: 2, cleared: 0 },
+    { weekday: 3, cleared: 0 }
+  ])
+  assert.deepEqual(
+    overview.hours.filter(({ cleared }) => cleared > 0),
+    [
+      { hour: 2, cleared: 10 },
+      { hour: 7, cleared: 15 },
+      { hour: 20, cleared: 2 },
+      { hour: 21, cleared: 3 }
+    ]
+  )
+  const overviewJson = JSON.stringify(overview)
+  for (const identifier of ['"clear-', '합성clear', '합성클리어모험단']) {
+    assert.ok(!overviewJson.includes(identifier), identifier)
+  }
 
   // 수집 진행 위치는 끝나기 전까지만 남는다.
   const collectionStartedAt = at('2026-11-10T06:00:00')
