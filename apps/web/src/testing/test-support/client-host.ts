@@ -21,6 +21,7 @@ type ClientHostOverrides = Partial<
     | 'getSkillStats'
     | 'getClearStats'
     | 'getClearContentStats'
+    | 'getClearOverview'
     | 'getGuild'
     | 'getAdventureWeekly'
     | 'getAdventureActivity'
@@ -80,6 +81,7 @@ export function createTestClientHost({
     getSkillStats: vi.fn(() => new Promise<never>(() => {})),
     getClearStats: vi.fn(() => new Promise<never>(() => {})),
     getClearContentStats: vi.fn(() => new Promise<never>(() => {})),
+    getClearOverview: vi.fn(() => new Promise<never>(() => {})),
     getGuild: vi.fn(() => new Promise<never>(() => {})),
     getAdventureWeekly: vi.fn(() => new Promise<never>(() => {})),
     getAdventureActivity: vi.fn(() => new Promise<never>(() => {})),
