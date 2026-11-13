@@ -22,16 +22,25 @@ import { createDatabaseStatsJobStore } from '../infrastructure/database/stats-jo
 import type { JobDefinition } from '../application/jobs/definition.js'
 import { createDatabaseJobRunCleanup } from '../infrastructure/database/job-run-cleanup.js'
 import { createJobRunCleanupJob } from '../application/jobs/job-run-cleanup.js'
+import type { ScoreCalculationJobDependencies } from '../application/character-score/ports.js'
+import {
+  SCORE_CALCULATION_JOB_NAME,
+  createScoreCalculationJob
+} from '../application/character-score/calculation-job.js'
+import { createDatabaseScoreCalculationStore } from '../infrastructure/database/score-calculation.js'
 
 export type WorkerJobDependencies = ClearCollectionJobDependencies &
   ClearRecordBackfillJobDependencies &
-  SkillStyleCollectionJobDependencies
+  SkillStyleCollectionJobDependencies & {
+    score: ScoreCalculationJobDependencies & { schedule?: string }
+  }
 
 export function createWorkerJobs(
   client: DatabaseClient,
   collection: WorkerJobDependencies
 ): JobDefinition[] {
   const statsStore = createDatabaseStatsJobStore(client)
+  const { schedule: scoreSchedule, ...score } = collection.score
 
   return [
     createJobRunCleanupJob(createDatabaseJobRunCleanup(client)),
@@ -39,6 +48,11 @@ export function createWorkerJobs(
     createClearRecordBackfillJob(createDatabaseClearRecordBackfillStore(client), collection),
     createSkillStyleCollectionJob(createDatabaseSkillStyleCollectionStore(client), collection),
     createCharacterStatsJob(statsStore),
-    createSkillAdoptionJob(statsStore)
+    createSkillAdoptionJob(statsStore),
+    createScoreCalculationJob(
+      createDatabaseScoreCalculationStore(client, SCORE_CALCULATION_JOB_NAME),
+      score,
+      scoreSchedule
+    )
   ]
 }

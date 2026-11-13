@@ -29,6 +29,7 @@ import {
 import { createDatabaseJobStore } from '../infrastructure/database/jobs.js'
 import { createDiscordJobAlert } from '../infrastructure/jobs/alert.js'
 import { startJobScheduler } from '../infrastructure/jobs/scheduler.js'
+import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
 import { createWorkerJobs } from './worker-jobs.js'
 
 const BATCH_KEY_REFRESH_MS = 5000
@@ -71,6 +72,7 @@ export async function startCharacterCollector(
   const fetchBasic = createNeopleCharacterBasic(neople)
   const store = createDatabaseCollectionStore(client)
   const enqueue = createDatabaseEnqueue(client)
+  const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
   const alert =
     configuration.jobAlertWebhookUrl !== undefined
       ? createDiscordJobAlert(configuration.jobAlertWebhookUrl)
@@ -81,7 +83,14 @@ export async function startCharacterCollector(
       createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
       fetchSkillStyle: createNeopleSkillStyle(neople),
       readConcurrency,
-      report
+      report,
+      score: {
+        openEngine: openScoreEngine,
+        createSources: (onRequest) => createScoreSources(neople, onRequest),
+        readConcurrency,
+        report,
+        schedule: configuration.scoreCalculationSchedule
+      }
     }),
     store: createDatabaseJobStore(client),
     report,
