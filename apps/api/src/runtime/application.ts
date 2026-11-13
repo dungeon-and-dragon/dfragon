@@ -1,6 +1,9 @@
 import {
   type DatabaseConfiguration,
+  addBatchNeopleKey,
   createDatabaseClient,
+  deleteBatchNeopleKey,
+  readBatchNeopleKeys,
   readAdventureCharacters,
   readAdventureNames,
   readCharacterStatsSnapshot,
@@ -17,6 +20,7 @@ import {
   readJobSkillAdoptionSnapshot,
   requestJobRun,
   requeueCollectionFailures,
+  setBatchNeopleKeyEnabled,
   setJobPaused
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
@@ -163,6 +167,12 @@ export function createOpsRuntime(
     collection: {
       readSummary: () => readCollectionSummary(client),
       requeue: (failure) => requeueCollectionFailures(client, failure)
+    },
+    batchNeopleKeys: {
+      readKeys: () => readBatchNeopleKeys(client),
+      add: (input) => addBatchNeopleKey(client, input),
+      setEnabled: (id, enabled) => setBatchNeopleKeyEnabled(client, id, enabled),
+      delete: (id) => deleteBatchNeopleKey(client, id)
     },
     close: () => client.$disconnect()
   })

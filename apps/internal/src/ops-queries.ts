@@ -13,6 +13,7 @@ export const REFRESH_INTERVAL_MS = 1_000
 const JOBS_KEY = ['jobs'] as const
 const QUEUES_KEY = ['queues'] as const
 const COLLECTION_KEY = ['collection'] as const
+const BATCH_KEYS_KEY = ['batch-keys'] as const
 
 export const OpsClientContext = createContext<OpsClient | null>(null)
 
@@ -67,6 +68,16 @@ export function useCollection() {
   })
 }
 
+export function useBatchKeys() {
+  const client = useOpsClient()
+
+  return useQuery({
+    queryKey: BATCH_KEYS_KEY,
+    queryFn: client.readBatchKeys,
+    refetchInterval: REFRESH_INTERVAL_MS
+  })
+}
+
 type RunRequest = { name: string; args: Record<string, unknown> }
 
 export function useRequestRun(): UseMutationResult<void, Error, RunRequest> {
@@ -98,5 +109,39 @@ export function useRequeue(): UseMutationResult<number, Error, string | undefine
   return useMutation({
     mutationFn: (failure: string | undefined) => client.requeue(failure),
     onSettled: () => queryClient.invalidateQueries({ queryKey: COLLECTION_KEY })
+  })
+}
+
+type BatchKeyAddition = { label: string; key: string }
+
+export function useAddBatchKey(): UseMutationResult<void, Error, BatchKeyAddition> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ label, key }: BatchKeyAddition) => client.addBatchKey(label, key),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: BATCH_KEYS_KEY })
+  })
+}
+
+type BatchKeyEnabledChange = { id: number; enabled: boolean }
+
+export function useSetBatchKeyEnabled(): UseMutationResult<void, Error, BatchKeyEnabledChange> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, enabled }: BatchKeyEnabledChange) => client.setBatchKeyEnabled(id, enabled),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: BATCH_KEYS_KEY })
+  })
+}
+
+export function useDeleteBatchKey(): UseMutationResult<void, Error, number> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: number) => client.deleteBatchKey(id),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: BATCH_KEYS_KEY })
   })
 }

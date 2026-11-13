@@ -169,6 +169,22 @@ model ContentClearCollection {
   @@map("content_clear_collections")
 }
 
+model ClearRecord {
+  serverId    String   @map("server_id")
+  characterId String   @map("character_id")
+  kind        String
+  name        String
+  modeName    String?  @map("mode_name")
+  hard        Boolean?
+  partyName   String?  @map("party_name")
+  clearedAt   DateTime @map("cleared_at") @db.Timestamptz(3)
+  weekStart   DateTime @map("week_start") @db.Timestamptz(3)
+
+  @@id([serverId, characterId, clearedAt, kind, name])
+  @@index([kind, name, weekStart])
+  @@map("clear_records")
+}
+
 model Job {
   name          String    @id
   displayName   String    @map("display_name")
@@ -225,4 +241,15 @@ model JobSkillAdoptionSnapshot {
 
   @@id([jobId, jobGrowId, role])
   @@map("job_skill_adoption")
+}
+
+model BatchNeopleKey {
+  id         Int       @id @default(autoincrement())
+  label      String
+  key        String    @unique
+  enabled    Boolean   @default(true)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  rejectedAt DateTime? @map("rejected_at") @db.Timestamptz(3)
+
+  @@map("batch_neople_keys")
 }

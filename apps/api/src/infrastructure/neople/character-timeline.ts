@@ -55,7 +55,11 @@ export function createNeopleCharacterTimeline(
       return toTimelineInputs(rows)
     } catch (error) {
       if (error instanceof NeopleRequestFailure) {
-        throw new TimelineFailure(error.kind, { ...forwardCause(error), upstream: error.upstream })
+        throw new TimelineFailure(error.kind, {
+          ...forwardCause(error),
+          upstream: error.upstream,
+          keyShortage: error.keyShortage
+        })
       }
 
       if (error instanceof TimelineFailure) {

@@ -21,7 +21,7 @@ export interface CollectionPassDependencies {
   importCharacters: ImportCharacters
   fetchBasic: FetchCharacterBasic
   store: CollectionStore
-  concurrency: number
+  readConcurrency: () => number
   report: (code: string, details?: Record<string, number>) => void
 }
 
@@ -37,7 +37,7 @@ type ImportDependencies = Pick<
 
 type BatchCollectionDependencies = Pick<
   CollectionPassDependencies,
-  'fetchBasic' | 'store' | 'concurrency'
+  'fetchBasic' | 'store' | 'readConcurrency'
 >
 
 async function importChangedFiles({
@@ -64,16 +64,20 @@ async function importChangedFiles({
 
 async function collectBatch(
   batch: readonly CollectedCharacter[],
-  { fetchBasic, store, concurrency }: BatchCollectionDependencies
+  { fetchBasic, store, readConcurrency }: BatchCollectionDependencies
 ): Promise<'collected' | 'unavailable'> {
-  for (let start = 0; start < batch.length; start += concurrency) {
-    const group = batch.slice(start, start + concurrency)
+  let start = 0
+
+  while (start < batch.length) {
+    const group = batch.slice(start, start + readConcurrency())
     const results = await Promise.all(
       group.map((character) => collectCharacter(character, fetchBasic, store))
     )
     if (results.includes('unavailable')) {
       return 'unavailable'
     }
+
+    start += group.length
   }
 
   return 'collected'

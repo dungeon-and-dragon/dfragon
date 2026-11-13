@@ -3,13 +3,14 @@ import assert from 'node:assert/strict'
 const ops = 'http://127.0.0.1:3001'
 const timeout = () => AbortSignal.timeout(5000)
 const get = (path, origin = ops) => fetch(`${origin}${path}`, { signal: timeout() })
-const post = (path, body, contentType = 'application/json') =>
+const send = (method, path, body, contentType = 'application/json') =>
   fetch(`${ops}${path}`, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': contentType },
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: timeout()
   })
+const post = (path, body, contentType) => send('POST', path, body, contentType)
 const readJob = async (name) => {
   const response = await get('/api/jobs')
   assert.equal(response.status, 200)
@@ -98,3 +99,40 @@ assert.deepEqual(await readCollection(), {
 for (const path of ['/api/queues', '/api/collection']) {
   assert.equal((await get(path, 'http://127.0.0.1:3000')).status, 404, path)
 }
+
+// 합성 key다. 실제 Neople key가 아니다.
+const batchKey = 'synthetic-container-batch-key-4e7d'
+const readBatchKeys = async () => {
+  const response = await get('/api/batch-neople-keys')
+  assert.equal(response.status, 200)
+  const text = await response.text()
+  assert.equal(text.includes(batchKey), false)
+
+  return JSON.parse(text).keys
+}
+const addedKey = await post('/api/batch-neople-keys', { label: 'probe', key: batchKey })
+assert.equal(addedKey.status, 201)
+const { id: batchKeyId } = await addedKey.json()
+const duplicateKey = await post('/api/batch-neople-keys', { label: 'again', key: batchKey })
+assert.deepEqual(
+  [duplicateKey.status, await duplicateKey.json()],
+  [409, { error: { code: 'BATCH_NEOPLE_KEY_DUPLICATE' } }]
+)
+assert.equal((await post('/api/batch-neople-keys', { label: 'blank', key: '  ' })).status, 400)
+const [listedKey, ...otherKeys] = await readBatchKeys()
+assert.deepEqual(otherKeys, [])
+assert.deepEqual(
+  [listedKey.id, listedKey.label, listedKey.keySuffix, listedKey.enabled, listedKey.rejectedAt],
+  [batchKeyId, 'probe', '4e7d', true, null]
+)
+assert.ok(Date.parse(listedKey.createdAt) <= Date.now())
+assert.equal((await post(`/api/batch-neople-keys/${batchKeyId}/disable`)).status, 204)
+assert.equal((await readBatchKeys())[0].enabled, false)
+assert.equal((await post(`/api/batch-neople-keys/${batchKeyId}/enable`)).status, 204)
+assert.equal((await readBatchKeys())[0].enabled, true)
+assert.equal((await send('DELETE', `/api/batch-neople-keys/${batchKeyId}`)).status, 204)
+assert.deepEqual(await readBatchKeys(), [])
+assert.equal((await send('DELETE', `/api/batch-neople-keys/${batchKeyId}`)).status, 404)
+// 남은 행은 container-database.mjs가 DB로 확인한다.
+assert.equal((await post('/api/batch-neople-keys', { label: 'stored', key: batchKey })).status, 201)
+assert.equal((await get('/api/batch-neople-keys', 'http://127.0.0.1:3000')).status, 404)

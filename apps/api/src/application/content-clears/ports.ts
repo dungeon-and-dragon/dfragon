@@ -27,7 +27,7 @@ export type ClearCollectionStore = {
 export type ClearCollectionDependencies = {
   store: ClearCollectionStore
   createFetchTimeline: CreateClearTimeline
-  concurrency: number
+  readConcurrency: () => number
   now: () => Date
   pause: (ms: number) => Promise<void>
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
@@ -36,7 +36,7 @@ export type ClearCollectionDependencies = {
 
 export type ClearCollectionJobDependencies = Pick<
   ClearCollectionDependencies,
-  'createFetchTimeline' | 'concurrency' | 'report'
+  'createFetchTimeline' | 'readConcurrency' | 'report'
 >
 
 export interface ClearStatsReader {

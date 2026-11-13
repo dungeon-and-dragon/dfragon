@@ -1,5 +1,19 @@
 export { readAdventureCharacters, readAdventureNames, readGuild } from './adventure-guild.js'
 export type { StoredAdventureName, StoredCharacter, StoredGuild } from './adventure-guild.js'
+export {
+  addBatchNeopleKey,
+  deleteBatchNeopleKey,
+  readBatchNeopleKeys,
+  readUsableBatchNeopleKeys,
+  recordBatchNeopleKeyRejected,
+  setBatchNeopleKeyEnabled
+} from './batch-neople-key.js'
+export type {
+  BatchNeopleKeyAddition,
+  BatchNeopleKeyInput,
+  BatchNeopleKeySummary,
+  UsableBatchNeopleKey
+} from './batch-neople-key.js'
 export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
 export {
@@ -15,6 +29,12 @@ export type {
   CollectionFailureCount,
   CollectionSummary
 } from './character-collection.js'
+export { recordClearRecords } from './clear-record.js'
+export type {
+  ClearRecordInput,
+  LegionClearRecordInput,
+  RaidClearRecordInput
+} from './clear-record.js'
 export { createDatabaseClient } from './client.js'
 export {
   finishContentClearCollection,

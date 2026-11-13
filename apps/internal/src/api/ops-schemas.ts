@@ -74,6 +74,19 @@ export const collectionSchema = z.object({
 
 export const requeueSchema = z.object({ requeued: count })
 
+const batchKeySchema = z.object({
+  id: z.int().positive(),
+  label: z.string(),
+  keySuffix: z.string(),
+  enabled: z.boolean(),
+  createdAt: timestamp,
+  rejectedAt: timestamp.nullable()
+})
+
+export const batchKeyListSchema = z.object({ keys: z.array(batchKeySchema) })
+
+export const batchKeyAdditionSchema = z.object({ id: z.int().positive() })
+
 export const failureSchema = z.object({ error: z.object({ code: z.string() }) })
 
 export type RunTrigger = z.infer<typeof runTriggerSchema>
@@ -85,3 +98,5 @@ export type JobList = z.infer<typeof jobListSchema>
 export type RunPage = z.infer<typeof runPageSchema>
 export type QueueList = z.infer<typeof queueListSchema>
 export type Collection = z.infer<typeof collectionSchema>
+export type BatchKey = z.infer<typeof batchKeySchema>
+export type BatchKeyList = z.infer<typeof batchKeyListSchema>
