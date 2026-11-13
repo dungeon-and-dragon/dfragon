@@ -51,12 +51,14 @@ export function RowBars({
   bars,
   tone = 'count',
   max = Math.max(0, ...bars.map(({ value }) => value)),
-  formatValue
+  formatValue,
+  fill = false
 }: {
   bars: readonly Bar[]
   tone?: BarTone
   max?: number
   formatValue?: (value: number) => string
+  fill?: boolean
 }): React.JSX.Element {
   const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
   const listRef = useRef<HTMLUListElement>(null)
@@ -92,8 +94,12 @@ export function RowBars({
   }
 
   return (
-    <div {...stylex.props(styles.chart)}>
-      <ul ref={listRef} onMouseLeave={handleLeave} {...stylex.props(styles.rows)}>
+    <div {...stylex.props(styles.chart, fill && styles.chartFill)}>
+      <ul
+        ref={listRef}
+        onMouseLeave={handleLeave}
+        {...stylex.props(styles.rows, fill && styles.rowsFill)}
+      >
         {bars.map((bar) => (
           <BarRow
             key={bar.key}
@@ -102,6 +108,7 @@ export function RowBars({
             percent={percentOf(bar.value, max)}
             formatValue={formatValue ?? formatInteger}
             countUp={formatValue === undefined}
+            thick={fill}
             dimmed={hover.open && bar.key !== hover.key}
             onHover={handleHover}
             register={registerMark}
@@ -125,6 +132,7 @@ function BarRow({
   percent,
   formatValue,
   countUp,
+  thick,
   dimmed,
   onHover,
   register
@@ -134,6 +142,7 @@ function BarRow({
   percent: number
   formatValue: (value: number) => string
   countUp: boolean
+  thick: boolean
   dimmed: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLSpanElement) => () => void
@@ -153,7 +162,7 @@ function BarRow({
       <span data-chart-name="" {...stylex.props(styles.rowName)}>
         {name}
       </span>
-      <span {...stylex.props(styles.rail)}>
+      <span {...stylex.props(styles.rail, thick && styles.railThick)}>
         <span
           ref={markRef}
           data-chart-mark=""
@@ -163,6 +172,7 @@ function BarRow({
             {...stylex.props(
               styles.body,
               styles.rowBody,
+              thick && styles.rowBodyThick,
               fame ? styles.bodyFame : styles.bodyCount,
               dimmed && styles.bodyDimmed
             )}
