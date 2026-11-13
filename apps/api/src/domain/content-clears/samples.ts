@@ -1,6 +1,9 @@
 import type {
+  CharacterScoreKind,
   ClearFameQuantiles,
   ClearJobFameSample,
+  ClearJobScoreSample,
+  ClearScoreSample,
   ClearTimeCount,
   StoredClearPopulation
 } from '@dfragon/database'
@@ -21,6 +24,9 @@ export type ClearFameDistribution = {
   max: number
 }
 
+// 장비 점수는 딜러, 버프 점수는 버퍼의 점수라 한 분포에 섞이지 않는다.
+export type ClearScoreDistributions = Record<CharacterScoreKind, ClearFameDistribution | null>
+
 export type ClearJobStats = {
   jobId: string | null
   jobGrowId: string | null
@@ -29,6 +35,7 @@ export type ClearJobStats = {
   population: number
   cleared: number
   fame: ClearFameDistribution | null
+  scores: ClearScoreDistributions
 }
 
 export type ClearTimes = {
@@ -50,6 +57,25 @@ export function toFameDistribution({
   return { p5, p25, median, p75, p95, max }
 }
 
+export function toScoreDistributions(
+  samples: readonly ClearScoreSample[]
+): ClearScoreDistributions {
+  const distributionOf = (kind: CharacterScoreKind) => {
+    const sample = samples.find((candidate) => candidate.kind === kind)
+
+    if (sample === undefined) {
+      return null
+    }
+
+    return toFameDistribution(sample)
+  }
+
+  const equipment = distributionOf('equipment')
+  const buff = distributionOf('buff')
+
+  return { equipment, buff }
+}
+
 function toClearJobKey(job: { jobId: string | null; jobGrowId: string | null }): string {
   return JSON.stringify([job.jobId, job.jobGrowId])
 }
@@ -57,12 +83,20 @@ function toClearJobKey(job: { jobId: string | null; jobGrowId: string | null }):
 // 모집단을 저장한 뒤 전직을 바꾼 캐릭터처럼 모집단에 없는 전직의 클리어도 모집단 0으로 넣어, 클리어 수의 합이 그 주 클리어 수와 같게 한다.
 export function toClearJobs(
   population: StoredClearPopulation,
-  samples: readonly ClearJobFameSample[]
+  samples: readonly ClearJobFameSample[],
+  scoreSamples: readonly ClearJobScoreSample[]
 ): ClearJobStats[] {
+  const noScores = { equipment: null, buff: null }
   const jobs = new Map<string, ClearJobStats>()
 
   for (const { count, ...job } of population.jobs) {
-    jobs.set(toClearJobKey(job), { ...job, population: count, cleared: 0, fame: null })
+    jobs.set(toClearJobKey(job), {
+      ...job,
+      population: count,
+      cleared: 0,
+      fame: null,
+      scores: noScores
+    })
   }
 
   for (const sample of samples) {
@@ -75,14 +109,21 @@ export function toClearJobs(
       jobGrowName,
       population: 0,
       cleared: 0,
-      fame: null
+      fame: null,
+      scores: noScores
     }
     const fame = toFameDistribution(sample)
 
     jobs.set(key, { ...stats, cleared: stats.cleared + cleared, fame })
   }
 
-  return [...jobs.values()]
+  return [...jobs.values()].map((job) => {
+    const key = toClearJobKey(job)
+    const jobScores = scoreSamples.filter((sample) => toClearJobKey(sample) === key)
+    const scores = toScoreDistributions(jobScores)
+
+    return { ...job, scores }
+  })
 }
 
 function sumCleared<T extends { cleared: number }>(
