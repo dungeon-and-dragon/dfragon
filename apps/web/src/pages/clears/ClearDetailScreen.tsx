@@ -1,6 +1,11 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import type { ClearContent, ClearContentStats, ClearWeek } from '#core/ranking/clear-stats'
+import type {
+  ClearContent,
+  ClearContentStats,
+  ClearWeek,
+  ClearWeekOverWeek
+} from '#core/ranking/clear-stats'
 import { BarLineChart } from '../../components/chart/BarLineChart'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
 import { ChartLegend } from '../../components/chart/ChartLegend'
@@ -15,6 +20,8 @@ import {
   findGroup,
   findStage,
   ratioBars,
+  scoreBandColumns,
+  stageBars,
   type SplitCard,
   stageChoices,
   stageMoveCard,
@@ -24,7 +31,9 @@ import {
   weekNumberText,
   weekOverWeekCard
 } from './clear-detail'
-import { type GroupedContent, KIND_LABELS } from './clear-groups'
+import { clearContentsOf, type GroupedContent, KIND_LABELS } from './clear-groups'
+import { bandScoreKindChoices, formatScoreTick, scoreKindChoices } from './clear-scores'
+import { useChoice } from './hooks/useChoice'
 import {
   adventureColumns,
   type ContentCard,
@@ -110,7 +119,7 @@ export function ClearDetailScreen({
         </div>
       )
     case 'success': {
-      const { contents } = result.value
+      const contents = clearContentsOf(result.value)
       const group = findGroup(contents, contentKey)
       const chosen = group !== undefined ? findStage(group, stage) : undefined
       const selected =
@@ -284,9 +293,11 @@ function DetailStats({
   const { releasedAt } = content
   const weekly = weeklyClearChart(stats, releasedAt)
   const fameBands = fameBandChart(stats)
-  const groupRows = stats.weekOverWeek !== null ? weekGroupRows(stats.weekOverWeek) : []
+  const groupRows =
+    stats.weekOverWeek !== null ? weekGroupRows(stats.weekOverWeek, ({ fame }) => fame) : []
   const streaks = streakColumns(stats.streaks)
   const ratios = ratioBars(content, week)
+  const stages = stageBars(stats.stages)
   const adventures = adventureColumns(stats.adventures, DETAIL_LAST_ADVENTURE_SIZE)
   const hasAdventures = stats.adventures.length > 0
 
@@ -346,6 +357,7 @@ function DetailStats({
             />
           </Panel>
         )}
+        {stats.weekOverWeek !== null && <GroupScorePanel weekOverWeek={stats.weekOverWeek} />}
       </div>
       <div {...stylex.props(layout.row)}>
         {streaks.length > 0 && (
@@ -363,6 +375,14 @@ function DetailStats({
         )}
       </div>
       <div {...stylex.props(layout.row)}>
+        <ScoreBandPanel scoreBands={stats.scoreBands} />
+        {stages.length > 0 && (
+          <Panel name="단계별 클리어 캐릭터">
+            <RowBars bars={stages} fill />
+          </Panel>
+        )}
+      </div>
+      <div {...stylex.props(layout.row)}>
         {hasAdventures && (
           <Panel name="모험단당 클리어 캐릭터">
             <Columns groups={[adventures]} />
@@ -371,6 +391,60 @@ function DetailStats({
       </div>
       <ClearJobTable key={content.id} jobs={stats.jobs} />
     </>
+  )
+}
+
+function GroupScorePanel({
+  weekOverWeek
+}: Readonly<{ weekOverWeek: ClearWeekOverWeek }>): React.JSX.Element | null {
+  const { both, returned, left, first } = weekOverWeek
+  const choices = scoreKindChoices([both, returned, left, first].map(({ scores }) => scores))
+  const [kind, setKind] = useChoice(choices)
+  if (kind === undefined) {
+    return null
+  }
+
+  const rows = weekGroupRows(weekOverWeek, ({ scores }) => scores[kind])
+
+  return (
+    <Panel
+      name="클리어 캐릭터의 장비 점수"
+      controls={
+        choices.length > 1 && (
+          <ChoiceGroup label="점수 종류" choices={choices} value={kind} onChange={setKind} />
+        )
+      }
+    >
+      <BoxPlotChart
+        label="클리어 캐릭터의 장비 점수"
+        rows={rows}
+        formatTick={formatScoreTick}
+        formatValue={formatInteger}
+      />
+    </Panel>
+  )
+}
+
+function ScoreBandPanel({
+  scoreBands
+}: Readonly<{ scoreBands: ClearContentStats['scoreBands'] }>): React.JSX.Element | null {
+  const choices = bandScoreKindChoices(scoreBands)
+  const [kind, setKind] = useChoice(choices)
+  if (kind === undefined) {
+    return null
+  }
+
+  return (
+    <Panel
+      name="장비 점수 구간별 클리어율"
+      controls={
+        choices.length > 1 && (
+          <ChoiceGroup label="점수 종류" choices={choices} value={kind} onChange={setKind} />
+        )
+      }
+    >
+      <Columns groups={[scoreBandColumns(scoreBands[kind])]} />
+    </Panel>
   )
 }
 

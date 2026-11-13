@@ -111,10 +111,14 @@ const nightmare = content(
 )
 
 const stats: ClearStats = {
-  contents: [nabelHard, diregieHard, michaelaNormal, michaelaHard, nightmare]
+  contents: [nabelHard, diregieHard, michaelaNormal, michaelaHard, nightmare],
+  legions: []
 }
 
 const fame = { p5: 110000, p25: 118000, median: 122000, p75: 126000, p95: 132000, max: 140000 }
+const noScores = { equipment: null, buff: null }
+const equipment = { p5: 280000, p25: 310000, median: 330000, p75: 350000, p95: 380000, max: 420000 }
+const buff = { p5: 120000, p25: 140000, median: 150000, p75: 160000, p95: 180000, max: 200000 }
 
 function job(index: number, population: number, cleared: number): ClearOverviewJob {
   return {
@@ -124,7 +128,8 @@ function job(index: number, population: number, cleared: number): ClearOverviewJ
     jobGrowName: `眞 전직${index}`,
     population,
     cleared,
-    fame
+    fame,
+    scores: noScores
   }
 }
 
@@ -139,6 +144,7 @@ function overviewOf(weekStart: string): ClearOverview {
         id: 'michaela-normal',
         cleared: 100,
         fame: { ...fame, median: 121000 },
+        scores: noScores,
         jobs: [],
         coClears: []
       },
@@ -146,6 +152,7 @@ function overviewOf(weekStart: string): ClearOverview {
         id: 'michaela-hard',
         cleared: 60,
         fame: { ...fame, median: 125000 },
+        scores: noScores,
         jobs,
         coClears: [
           { id: 'michaela-normal', cleared: 6 },
@@ -153,7 +160,14 @@ function overviewOf(weekStart: string): ClearOverview {
           { id: 'engraved-nightmare-1', cleared: 30 }
         ]
       },
-      { id: 'engraved-nightmare-1', cleared: 6, fame: null, jobs: [], coClears: [] }
+      {
+        id: 'engraved-nightmare-1',
+        cleared: 6,
+        fame: null,
+        scores: noScores,
+        jobs: [],
+        coClears: []
+      }
     ],
     weekdays: [4, 5, 6, 7, 1, 2, 3].map((weekday) => ({
       weekday,
@@ -182,6 +196,8 @@ function contentStatsOf(contentId: string): ClearContentStats {
     weekOverWeek: null,
     stageMoves: null,
     streaks: null,
+    stages: null,
+    scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []
   }
@@ -292,7 +308,8 @@ it('수집한 주가 하나도 없으면 제목 줄 아래 한 줄만 두고 개
   const getClearOverview = vi.fn(async (selected: string) => overviewOf(selected))
   await render(undefined, {
     getClearStats: async () => ({
-      contents: stats.contents.map((item) => ({ ...item, weeks: [] }))
+      contents: stats.contents.map((item) => ({ ...item, weeks: [] })),
+      legions: []
     }),
     getClearOverview
   })
@@ -432,7 +449,7 @@ it('모험단당 클리어 캐릭터는 기준 컨텐츠의 상세를 그 주로
   expect(columns).toHaveLength(13)
 })
 
-it('값이 없는 통계는 패널을 두지 않는다', async () => {
+it('값이 없는 통계는 패널과 점수 전환을 두지 않는다', async () => {
   await render(undefined, {
     getClearOverview: async (selected) => ({
       ...overviewOf(selected),
@@ -461,4 +478,108 @@ it('개요 조회가 실패하면 카드와 주간 클리어율은 두고 오류
   expect(cards()).toHaveLength(3)
   expect(panelNames()).toEqual(['주간 클리어율'])
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('개요를 불러오지 못했습니다.')
+})
+
+function axisTicks(name: string): string[] {
+  return [...(panel(name)?.querySelectorAll('svg text') ?? [])].map(
+    (text) => text.textContent ?? ''
+  )
+}
+
+it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 두고 주간 클리어율에 레기온 선을 더한다', async () => {
+  const apocalypse = content(
+    'legion-apocalypse',
+    'legion',
+    '아포칼립스',
+    '2026-04-22T21:00:00.000Z',
+    recentWeeks([420, 400], 1000)
+  )
+  await render(undefined, {
+    getClearStats: async () => ({ ...stats, legions: [{ ...apocalypse, entryFame: null }] })
+  })
+
+  expect(cards().map((card) => card.slice(0, 8))).toEqual([
+    '챌린지각인된 악',
+    '레이드무너진 성',
+    '레기온아포칼립스',
+    '레이드만들어진 '
+  ])
+  expect(Object.keys(legendMarks())).toEqual([
+    '미카엘라 하드',
+    '디레지에 하드',
+    '나벨 하드',
+    '아포칼립스'
+  ])
+})
+
+it('점수가 있는 주에는 장비 점수 카드를 두고, 장비와 버프를 바꾸면 축이 그 점수 기준으로 바뀐다', async () => {
+  await render(undefined, {
+    getClearOverview: async (selected) => {
+      const overview = overviewOf(selected)
+      const contents = overview.contents.map((item) => ({ ...item, scores: { equipment, buff } }))
+
+      return { ...overview, contents }
+    }
+  })
+
+  expect(panelNames()).toContain('클리어 캐릭터의 장비 점수')
+  const equipmentTicks = axisTicks('클리어 캐릭터의 장비 점수')
+  expect(equipmentTicks).toContain('30만')
+
+  await click(buttonNamed('버프'))
+
+  const buffTicks = axisTicks('클리어 캐릭터의 장비 점수')
+  expect(buffTicks).toContain('14만')
+  expect(buffTicks).not.toEqual(equipmentTicks)
+})
+
+it('한 가지 점수만 있으면 장비 점수 카드에 전환을 두지 않는다', async () => {
+  await render(undefined, {
+    getClearOverview: async (selected) => {
+      const overview = overviewOf(selected)
+      const contents = overview.contents.map((item) => ({
+        ...item,
+        scores: { equipment, buff: null }
+      }))
+
+      return { ...overview, contents }
+    }
+  })
+
+  expect(panel('클리어 캐릭터의 장비 점수')?.querySelector('[aria-label="점수 종류"]')).toBeNull()
+})
+
+it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전환을 두고, 장비 점수로 바꿔도 같은 전직 목록에 점수 분포를 그린다', async () => {
+  await render(undefined, {
+    getClearOverview: async (selected) => {
+      const overview = overviewOf(selected)
+      const contents = overview.contents.map((item) => {
+        const jobs = item.jobs.map((candidate, index) => {
+          const scores = index === 0 ? noScores : { equipment, buff: null }
+
+          return { ...candidate, scores }
+        })
+
+        return { ...item, jobs }
+      })
+
+      return { ...overview, contents }
+    }
+  })
+
+  const jobPanel = panel('전직별 클리어')
+  const jobNames = () =>
+    [...(jobPanel?.querySelectorAll('li > span:first-child') ?? [])].map(
+      (name) => name.firstChild?.textContent
+    )
+  expect(jobPanel?.querySelector('[aria-label="분포"]')?.textContent).toBe('명성장비 점수')
+  expect(axisTicks('전직별 클리어')).toContain('120,000')
+  const fameNames = jobNames()
+
+  await click(buttonNamed('장비 점수'))
+
+  expect(jobPanel?.textContent).toContain('클리어 캐릭터의 장비 점수')
+  expect(axisTicks('전직별 클리어')).toContain('30만')
+  expect(jobNames()).toEqual(fameNames)
+  expect(jobNames()[0]).toBe('眞 전직0')
 })
