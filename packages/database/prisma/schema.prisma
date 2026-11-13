@@ -152,13 +152,19 @@ model TimelineSeasonBackfill {
 }
 
 model ContentClear {
-  contentId   String   @map("content_id")
-  kind        String
-  serverId    String   @map("server_id")
-  characterId String   @map("character_id")
-  weekStart   DateTime @map("week_start") @db.Timestamptz(3)
-  clearedAt   DateTime @map("cleared_at") @db.Timestamptz(3)
-  ratio       Int?
+  contentId           String   @map("content_id")
+  kind                String
+  serverId            String   @map("server_id")
+  characterId         String   @map("character_id")
+  weekStart           DateTime @map("week_start") @db.Timestamptz(3)
+  clearedAt           DateTime @map("cleared_at") @db.Timestamptz(3)
+  ratio               Int?
+  maxFame             Int?     @map("max_fame")
+  score               Int?
+  scoreKind           String?  @map("score_kind")
+  scoreEnginePackage  String?  @map("score_engine_package")
+  scoreEngineRulesRev String?  @map("score_engine_rules_rev")
+  scoreEngineBundleId String?  @map("score_engine_bundle_id")
 
   @@id([contentId, serverId, characterId, weekStart])
   @@index([contentId, weekStart])
