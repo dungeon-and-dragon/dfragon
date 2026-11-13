@@ -128,20 +128,22 @@ export function toClearStats(
   return { contents }
 }
 
+export function toClearJobKey(job: { jobId: string | null; jobGrowId: string | null }): string {
+  return JSON.stringify([job.jobId, job.jobGrowId])
+}
+
 // 모집단을 저장한 뒤 전직을 바꾼 캐릭터처럼 모집단에 없는 전직의 클리어도 모집단 0으로 넣어, 클리어 수의 합이 그 주 클리어 수와 같게 한다.
 export function toClearJobStats(
   population: StoredClearPopulation,
   clears: readonly ClearJobCount[]
 ): ClearJobStats[] {
   const jobs = new Map<string, ClearJobStats>()
-  const keyOf = (job: { jobId: string | null; jobGrowId: string | null }) =>
-    JSON.stringify([job.jobId, job.jobGrowId])
   for (const { count, ...job } of population.jobs) {
-    jobs.set(keyOf(job), { ...job, population: count, cleared: 0 })
+    jobs.set(toClearJobKey(job), { ...job, population: count, cleared: 0 })
   }
 
   for (const { cleared, ...job } of clears) {
-    const key = keyOf(job)
+    const key = toClearJobKey(job)
     const stats = jobs.get(key) ?? { ...job, population: 0, cleared: 0 }
     jobs.set(key, { ...stats, cleared: stats.cleared + cleared })
   }

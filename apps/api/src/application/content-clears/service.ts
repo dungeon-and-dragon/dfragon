@@ -3,6 +3,11 @@ import { CharacterDetailFailure } from '../../domain/character-failure.js'
 import { formatResetDate } from '../../domain/seoul-time.js'
 import { CLEAR_CONTENTS, type ClearContent } from '../../domain/content-clears/contents.js'
 import {
+  type ClearOverview,
+  toClearOverview,
+  toEmptyClearOverview
+} from '../../domain/content-clears/overview.js'
+import {
   type ClearStats,
   type ClearContentStats,
   type ClearContentSummary,
@@ -15,6 +20,7 @@ import type { ClearStatsReader } from './ports.js'
 export interface ClearStatsService {
   stats(): Promise<ClearStats>
   contentStats(contentId: string, weekStart: string | undefined): Promise<ClearContentStats>
+  overview(weekStart: string | undefined): Promise<ClearOverview>
 }
 
 type ClearSummary = {
@@ -26,6 +32,7 @@ type ClearSnapshot = {
   collectedAt: number | null
   summary?: Promise<ClearSummary>
   contentStats: Map<string, Promise<ClearContentStats>>
+  overviews: Map<string, Promise<ClearOverview>>
 }
 
 function cacheUntilFailure<T>(load: Promise<T>, forget: () => void): Promise<T> {
@@ -42,7 +49,7 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
   const currentSnapshot = async (): Promise<ClearSnapshot> => {
     const collectedAt = (await reader.readCollectedAt())?.getTime() ?? null
     if (snapshot?.collectedAt !== collectedAt) {
-      snapshot = { collectedAt, contentStats: new Map() }
+      snapshot = { collectedAt, contentStats: new Map(), overviews: new Map() }
     }
 
     return snapshot
@@ -83,6 +90,20 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     return toClearContentStats(summary, population, jobCounts, adventures)
   }
 
+  const loadOverview = async (
+    weekStart: Date,
+    populations: readonly StoredClearPopulation[]
+  ): Promise<ClearOverview> => {
+    const [fames, jobFames, coClears, raidTimes] = await Promise.all([
+      reader.readFames(weekStart),
+      reader.readJobFames(weekStart),
+      reader.readCoClears(weekStart),
+      reader.readRaidTimes(weekStart)
+    ])
+
+    return toClearOverview(weekStart, populations, { fames, jobFames, coClears, raidTimes })
+  }
+
   return {
     async stats() {
       return (await summaryOf(await currentSnapshot())).stats
@@ -118,6 +139,41 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
       current.contentStats.set(key, loading)
 
       return loading
+    },
+    async overview(weekStart) {
+      const current = await currentSnapshot()
+      const { populations } = await summaryOf(current)
+      const weekStarts = new Map(
+        populations.map((population) => [
+          formatResetDate(population.weekStart),
+          population.weekStart
+        ])
+      )
+
+      const selectedWeek = weekStart ?? [...weekStarts.keys()].sort().at(-1)
+
+      if (selectedWeek === undefined) {
+        return toEmptyClearOverview()
+      }
+
+      const selectedWeekStart = weekStarts.get(selectedWeek)
+
+      if (selectedWeekStart === undefined) {
+        throw new CharacterDetailFailure('query')
+      }
+
+      const cached = current.overviews.get(selectedWeek)
+
+      if (cached !== undefined) {
+        return cached
+      }
+
+      const loading = cacheUntilFailure(loadOverview(selectedWeekStart, populations), () => {
+        current.overviews.delete(selectedWeek)
+      })
+      current.overviews.set(selectedWeek, loading)
+
+      return loading
     }
   }
 }
@@ -127,5 +183,9 @@ export const emptyClearStatsReader: ClearStatsReader = {
   readPopulations: async () => [],
   readWeekRatioCounts: async () => [],
   readJobCounts: async () => [],
-  readAdventureSizes: async () => []
+  readAdventureSizes: async () => [],
+  readFames: async () => [],
+  readJobFames: async () => [],
+  readCoClears: async () => [],
+  readRaidTimes: async () => []
 }

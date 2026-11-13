@@ -8,9 +8,13 @@ import {
   readAdventureNames,
   readCharacterStatsSnapshot,
   readContentClearAdventureSizes,
+  readContentClearCoClears,
   readContentClearCollectedAt,
+  readContentClearFames,
   readContentClearJobCounts,
+  readContentClearJobFames,
   readContentClearPopulations,
+  readContentClearRaidTimes,
   readContentClearWeekRatioCounts,
   readFameRanking,
   readGuild,
@@ -120,7 +124,11 @@ function createDatabaseSubscribers(
       readPopulations: () => readContentClearPopulations(client),
       readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
       readJobCounts: (selection) => readContentClearJobCounts(client, selection),
-      readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection)
+      readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
+      readFames: (weekStart) => readContentClearFames(client, weekStart),
+      readJobFames: (weekStart) => readContentClearJobFames(client, weekStart),
+      readCoClears: (weekStart) => readContentClearCoClears(client, weekStart),
+      readRaidTimes: (weekStart) => readContentClearRaidTimes(client, weekStart)
     }
   }
 }
