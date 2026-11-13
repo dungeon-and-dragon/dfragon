@@ -37,7 +37,10 @@ import {
   collectContentClears
 } from '../src/application/content-clears/collection.js'
 import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
-import { createClearStatsService } from '../src/application/content-clears/service.js'
+import {
+  createClearStatsService,
+  emptyClearStatsReader
+} from '../src/application/content-clears/service.js'
 import type { JobStore } from '../src/application/jobs/ports.js'
 import { findCatchupJobs } from '../src/application/jobs/scheduler.js'
 import { formatResetDate, startOfResetWeek } from '../src/domain/seoul-time.js'
@@ -604,11 +607,9 @@ test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 �
   assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(1, false))
 
   const reader: ClearStatsReader = {
+    ...emptyClearStatsReader,
     readCollectedAt: async () => NOW,
-    readPopulations: async () => [...state.populations.values()],
-    readWeekRatioCounts: async () => [],
-    readJobCounts: async () => [],
-    readAdventureSizes: async () => []
+    readPopulations: async () => [...state.populations.values()]
   }
   const { contents } = await createClearStatsService(reader).stats()
   for (const content of CLEAR_CONTENTS) {
