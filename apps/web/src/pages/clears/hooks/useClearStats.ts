@@ -1,4 +1,4 @@
-import type { ClearContentStats, ClearStats } from '#core/ranking/clear-stats'
+import type { ClearContentStats, ClearOverview, ClearStats } from '#core/ranking/clear-stats'
 import { useClientHost } from '../../../host/client-host'
 import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 
@@ -17,4 +17,10 @@ export function useClearContentStats(
   return useLoadedResult(['clear-stats', contentId, weekStart], () =>
     getClearContentStats(contentId, weekStart)
   )
+}
+
+export function useClearOverview(weekStart: string): LoadedResult<ClearOverview> {
+  const { getClearOverview } = useClientHost()
+
+  return useLoadedResult(['clear-overview', weekStart], () => getClearOverview(weekStart))
 }
