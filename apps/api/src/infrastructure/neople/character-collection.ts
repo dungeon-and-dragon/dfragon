@@ -5,17 +5,19 @@ import { CharacterCollectionFailure } from '../../domain/character-collection/fa
 
 export type WorkerNeople = Pick<
   NeopleClient,
-  'characterBasic' | 'characterSkillStyle' | 'characterTimeline'
+  'character' | 'characterBasic' | 'characterSkillStyle' | 'characterTimeline' | 'multiItems'
 >
 
 // 새 캐릭터 저장과 클리어, 스킬 스타일 수집이 key 하나의 Neople 요청 속도 상한을 나눠 쓴다. 기다리는 호출은 부른 순서대로 나가 한쪽이 계속 밀리지 않는다.
 export function paceNeopleRequests(neople: WorkerNeople, requestsPerSecond: number): WorkerNeople {
   const throttle = pThrottle({ limit: 1, interval: 1000 / requestsPerSecond })
+  const character = throttle(neople.character)
   const characterBasic = throttle(neople.characterBasic)
   const characterSkillStyle = throttle(neople.characterSkillStyle)
   const characterTimeline = throttle(neople.characterTimeline)
+  const multiItems = throttle(neople.multiItems)
 
-  return { characterBasic, characterSkillStyle, characterTimeline }
+  return { character, characterBasic, characterSkillStyle, characterTimeline, multiItems }
 }
 
 export function createNeopleCharacterBasic(
