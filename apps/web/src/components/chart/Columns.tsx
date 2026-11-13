@@ -38,11 +38,13 @@ function columnTooltipPlaceOf(
 export function Columns({
   groups,
   selectedKey,
-  scrollable = false
+  scrollable = false,
+  height
 }: {
   groups: readonly (readonly ColumnBar[])[]
   selectedKey?: string
   scrollable?: boolean
+  height?: number
 }): React.JSX.Element {
   const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -106,6 +108,7 @@ export function Columns({
                 bar={bar}
                 dimmed={open && bar.key !== shownKey}
                 scrollable={scrollable}
+                height={height}
                 onHover={handleHover}
                 register={registerColumn}
               />
@@ -137,12 +140,14 @@ function Column({
   bar: { key, label, range, count, share, ratio },
   dimmed,
   scrollable,
+  height,
   onHover,
   register
 }: {
   bar: ColumnBar
   dimmed: boolean
   scrollable: boolean
+  height: number | undefined
   onHover: (key: string) => void
   register: (key: string, element: HTMLLIElement) => () => void
 }): React.JSX.Element {
@@ -164,7 +169,9 @@ function Column({
       <span {...stylex.props(shapes.srOnly)}>
         {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
       </span>
-      <span {...stylex.props(styles.columnTrack)}>
+      <span
+        {...stylex.props(styles.columnTrack, height !== undefined && styles.trackHeight(height))}
+      >
         {ratio > 0 && (
           <span
             data-chart-mark=""
