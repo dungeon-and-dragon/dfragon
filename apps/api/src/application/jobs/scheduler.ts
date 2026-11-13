@@ -67,7 +67,7 @@ export async function registerWorkerJobs(
 
 /**
  * 수동이 아닌 마지막 성공 실행 뒤의 다음 예정 시각이 지난 정기 job이다. 성공 이력이 없어도 들고,
- * 여러 번 놓쳤어도 한 번만 든다.
+ * 여러 번 놓쳤어도 한 번만 든다. 보충을 끈 job은 들지 않는다.
  */
 export async function findCatchupJobs(
   { jobs, store }: JobSchedulerDependencies,
@@ -76,7 +76,7 @@ export async function findCatchupJobs(
 ): Promise<JobDefinition[]> {
   const due: JobDefinition[] = []
   for (const { definition, cron } of scheduledJobs(jobs, createSchedule)) {
-    if (await store.isPaused(definition.name)) {
+    if (definition.catchup === false || (await store.isPaused(definition.name))) {
       continue
     }
     const lastSuccess = await store.readLastScheduledSuccess(definition.name)
