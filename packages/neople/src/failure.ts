@@ -43,9 +43,13 @@ export type NeopleUpstreamResponse = {
   code: string | undefined
 }
 
+// Neople 응답이 아니라 key를 나눠 쓰는 쪽이 요청 전에 정하므로 upstream 없이 온다.
+export type NeopleKeyShortage = 'no-key' | 'all-resting'
+
 interface NeopleRequestFailureOptions extends ErrorOptions {
   characterNotFound?: boolean
   upstream?: NeopleUpstreamResponse
+  keyShortage?: NeopleKeyShortage
 }
 
 /**
@@ -57,16 +61,23 @@ export class NeopleRequestFailure extends Error {
   // DNF001이어도 kind는 그대로 두어 검색, 타임라인, 수집이 쓰는 분류를 바꾸지 않는다.
   readonly characterNotFound: boolean
   readonly upstream: NeopleUpstreamResponse | undefined
+  readonly keyShortage: NeopleKeyShortage | undefined
 
   constructor(
     kind: NeopleFailureKind,
-    { characterNotFound = false, upstream, ...options }: NeopleRequestFailureOptions = {}
+    {
+      characterNotFound = false,
+      upstream,
+      keyShortage,
+      ...options
+    }: NeopleRequestFailureOptions = {}
   ) {
     super(`Neople request failed: ${kind}`, options)
     this.name = 'NeopleRequestFailure'
     this.kind = kind
     this.characterNotFound = characterNotFound
     this.upstream = upstream
+    this.keyShortage = keyShortage
   }
 }
 

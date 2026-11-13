@@ -47,7 +47,7 @@ function collection(targets: readonly SkillStyleSampleCharacter[], respond: Resp
         return respond(characterId, attempt)
       }
     }),
-    concurrency: 2,
+    readConcurrency: () => 2,
     now: () => NOW,
     pause: async (ms) => {
       pauses.push(ms)
@@ -183,9 +183,9 @@ test('Neople 실패가 아닌 오류는 수집을 실패로 끝낸다', async ()
 
 test('스킬 스타일 수집 job은 일정 없이 수동으로만 돈다', () => {
   const { dependencies } = collection([], styleOf)
-  const { store, fetchSkillStyle, concurrency, report } = dependencies
+  const { store, fetchSkillStyle, readConcurrency, report } = dependencies
 
-  const job = createSkillStyleCollectionJob(store, { fetchSkillStyle, concurrency, report })
+  const job = createSkillStyleCollectionJob(store, { fetchSkillStyle, readConcurrency, report })
 
   assert.equal(job.name, 'skill-style-collection')
   assert.equal(job.schedule, undefined)

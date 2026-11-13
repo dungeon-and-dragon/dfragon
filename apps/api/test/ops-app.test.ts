@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { once } from 'node:events'
 import { get } from 'node:http'
 import test from 'node:test'
-import type { OpsJobStore } from '../src/application/ops/ports.js'
+import type { OpsBatchNeopleKeyStore, OpsJobStore } from '../src/application/ops/ports.js'
 import { type OpsHttpAppOptions, createOpsHttpApp } from '../src/runtime/ops-app.js'
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
@@ -76,11 +76,20 @@ const statsOnlyJobs: OpsJobStore = {
 
 const unusedCollection = async () => assert.fail('이 테스트는 수집 대기열을 읽으면 안 된다')
 
+const unusedBatchNeopleKeys = async () => assert.fail('이 테스트는 batch key를 다루면 안 된다')
+const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
+  readKeys: unusedBatchNeopleKeys,
+  add: unusedBatchNeopleKeys,
+  setEnabled: unusedBatchNeopleKeys,
+  delete: unusedBatchNeopleKeys
+}
+
 function opsApp(options: Partial<OpsHttpAppOptions>) {
   return createOpsHttpApp({
     jobs: statsOnlyJobs,
     readQueueCounts: () => [],
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
+    batchNeopleKeys: unusedBatchNeopleKeyStore,
     writeAccessLog: () => undefined,
     ...options
   })

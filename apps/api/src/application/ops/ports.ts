@@ -1,4 +1,7 @@
 import type {
+  BatchNeopleKeyAddition,
+  BatchNeopleKeyInput,
+  BatchNeopleKeySummary,
   CollectionSummary,
   JobOverview,
   JobPauseChange,
@@ -19,6 +22,13 @@ export type OpsJobStore = {
 export type OpsCollectionStore = {
   readSummary: () => Promise<CollectionSummary>
   requeue: (failure: string | undefined) => Promise<number>
+}
+
+export type OpsBatchNeopleKeyStore = {
+  readKeys: () => Promise<BatchNeopleKeySummary[]>
+  add: (input: BatchNeopleKeyInput) => Promise<BatchNeopleKeyAddition>
+  setEnabled: (id: number, enabled: boolean) => Promise<boolean>
+  delete: (id: number) => Promise<boolean>
 }
 
 export type OpsQueueCount = {

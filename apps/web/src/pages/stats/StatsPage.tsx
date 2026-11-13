@@ -97,7 +97,7 @@ function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
   }
 
   return (
-    <ListBox name="명성 분포">
+    <ListBox name="명성 분포" fillHeight>
       <Columns groups={fameGroupsOf(bars)} />
     </ListBox>
   )

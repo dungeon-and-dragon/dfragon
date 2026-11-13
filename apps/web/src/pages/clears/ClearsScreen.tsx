@@ -434,7 +434,7 @@ function JobTableRow({
       <td {...stylex.props(styles.jobCell, styles.jobValue)}>{integer.format(cleared)}</td>
       <td {...stylex.props(styles.jobCell)}>
         <span {...stylex.props(styles.jobRate)}>
-          <TableRail percent={percent} active={active} dimmed={dimmed} />
+          <TableRail percent={percent} dimmed={dimmed} />
           <span {...stylex.props(styles.jobValue)}>
             {rate === null ? '-' : shareText(cleared, population)}
           </span>
