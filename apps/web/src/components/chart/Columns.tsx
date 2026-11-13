@@ -88,7 +88,10 @@ export function Columns({
   }
 
   return (
-    <div ref={scrollerRef} {...stylex.props(styles.chart, scrollable && styles.chartScroll)}>
+    <div
+      ref={scrollerRef}
+      {...stylex.props(styles.chart, styles.columnsChart, scrollable && styles.chartScroll)}
+    >
       <ul
         ref={chartRef}
         onMouseLeave={handleLeave}

@@ -16,6 +16,7 @@ const NARROW_COLUMN_GAP = 1
 const MIN_COLUMN_WIDTH = 4
 const COLUMN_DIVIDER_WIDTH = 6
 const COLUMN_LABEL_HEIGHT = 14
+const COLUMN_LABEL_GAP = 4
 const CHART_PADDING = 16
 
 export const styles = stylex.create({
@@ -71,9 +72,11 @@ export const styles = stylex.create({
   rowBody: { borderRadius: MARK_RADIUS },
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   valueFame: { color: colors.gameFame },
+  columnsChart: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
   columns: {
     position: 'relative',
     display: 'flex',
+    flexGrow: 1,
     gap: COLUMN_GAP,
     margin: 0,
     padding: CHART_PADDING,
@@ -83,7 +86,7 @@ export const styles = stylex.create({
       position: 'absolute',
       left: CHART_PADDING,
       right: CHART_PADDING,
-      top: CHART_PADDING + COLUMN_TOOLTIP_SPACE + COLUMN_CHART_HEIGHT,
+      bottom: CHART_PADDING + COLUMN_LABEL_GAP + COLUMN_LABEL_HEIGHT,
       height: 1,
       backgroundColor: colors.borderStrong
     }
@@ -104,8 +107,8 @@ export const styles = stylex.create({
   columnDivider: {
     flexShrink: 0,
     width: COLUMN_DIVIDER_WIDTH,
-    height: COLUMN_CHART_HEIGHT,
     marginTop: COLUMN_TOOLTIP_SPACE,
+    marginBottom: COLUMN_LABEL_GAP + COLUMN_LABEL_HEIGHT,
     backgroundImage: `linear-gradient(${colors.borderDefault}, ${colors.borderDefault})`,
     backgroundSize: '1px 100%',
     backgroundPosition: 'center',
@@ -113,16 +116,18 @@ export const styles = stylex.create({
   },
   columnTrack: {
     display: 'flex',
+    flexGrow: 1,
     alignItems: 'flex-end',
-    height: COLUMN_CHART_HEIGHT
+    minHeight: COLUMN_CHART_HEIGHT
   },
   columnMark: { position: 'relative', display: 'block', width: '100%', minHeight: MIN_MARK_SIZE },
   columnHeight: (percent: number) => ({ height: `${percent}%` }),
   columnBody: { borderTopLeftRadius: MARK_RADIUS, borderTopRightRadius: MARK_RADIUS },
   columnLabel: {
     position: 'relative',
+    flexShrink: 0,
     height: COLUMN_LABEL_HEIGHT,
-    marginTop: space.s4
+    marginTop: COLUMN_LABEL_GAP
   },
   columnLabelText: {
     position: 'absolute',
