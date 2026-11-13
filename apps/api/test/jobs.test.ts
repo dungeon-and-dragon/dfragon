@@ -333,6 +333,23 @@ test('보충은 수동이 아닌 마지막 성공 뒤의 다음 예정 시각이
   }
 })
 
+test('보충을 끈 정기 job은 성공 이력이 없어도 보충하지 않고, 같은 상태의 다른 job은 보충한다', async () => {
+  const { store } = memoryJobStore()
+  const { report } = recordedEvents()
+  const noCatchupJob = defineJob({ ...dailyJob, name: 'no-catchup', catchup: false })
+
+  const catchup = await findCatchupJobs(
+    { jobs: [dailyJob, noCatchupJob], store, report },
+    now,
+    createJobSchedule
+  )
+
+  assert.deepEqual(
+    catchup.map(({ name }) => name),
+    ['daily']
+  )
+})
+
 test('정지된 job은 보충과 정기 실행을 건너뛰고 요청 행은 실행한다', async () => {
   const { store, runs, request } = memoryJobStore({ paused: ['daily'] })
   const { events, report } = recordedEvents()
