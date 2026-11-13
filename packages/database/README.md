@@ -24,8 +24,10 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 모집단, 주와 배율별 클리어 수, 한 주의 모험단 크기 분포를 읽습니다.
 - `readContentClearFames`, `readContentClearJobFames`, `readContentClearCoClears`, `readContentClearRaidTimes`: 한 주의 모든 컨텐츠에서 클리어 캐릭터의 명성 분위수, 전직별 클리어 수와 명성 분위수, 함께 깬 컨텐츠 수, 레이드 클리어의 요일과 시간대별 수를 읽습니다.
 - `readSelectedContentClearJobFames`, `readSelectedContentClearTimes`, `readContentClearFirstWeeks`, `readContentClearFameBands`, `readContentClearWeekGroups`, `readContentClearStageMoves`, `readContentClearStreaks`: 컨텐츠 하나와 주 하나에서 전직별 클리어 수와 명성 분위수, 요일과 시간대별 수, 캐릭터가 처음 깬 주별 수, 명성 구간별 캐릭터 수와 클리어 수, 지난주 대비 그룹별 수와 명성 분위수, 일반과 하드 사이 이동 수, 연속 클리어 주 수 분포를 읽습니다.
+- `readContentClearScores`, `readContentClearJobScores`, `readSelectedContentClearJobScores`, `readContentClearWeekGroupScores`, `readContentClearScoreBands`: 클리어 행에 복사한 점수로 한 주의 컨텐츠별, 전직별, 지난주 대비 그룹별 점수 분위수와 점수 구간별 캐릭터 수와 클리어 수를 장비 점수와 버프 점수로 나누어 읽습니다.
 - `recordClearRecords`: 레이드, 레기온 클리어 기록을 캐릭터의 한 번 깬 기록마다 한 행으로 저장하고, 이미 있는 기록은 건너뜁니다.
 - `readClearRecordBackfill`, `startClearRecordBackfill`, `recordClearRecordBackfillProgress`, `finishClearRecordBackfill`: 지난 클리어 기록 받기의 진행 위치를 읽고 씁니다.
+- `readClearRecordLegionWeeks`, `readClearRecordRaidModes`, `readClearRecordRaidStageCounts`: 레기온마다 주별로 깬 캐릭터 수, 레이드 하나와 주 하나의 단계 기록 종류와 단계별 클리어 캐릭터 수를 읽습니다.
 - `registerJobs`, `startJobRun`, `claimRequestedJobRun`, `finishJobRun`과 나머지 job 함수: 배치 job 목록과 실행 이력을 쓰고 읽습니다.
 - 스킬 채택 표본 순위 `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 `@dfragon/lib`에서 가져옵니다.
 - `replaceTimelineRange`, `replaceEnhancementBackfillRange`, `replaceSeasonBackfillRange`: 캐릭터 하나의 타임라인 구간을 한 transaction에서 교체합니다.
