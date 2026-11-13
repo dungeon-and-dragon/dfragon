@@ -1,16 +1,23 @@
 import { getRouteApi } from '@tanstack/react-router'
-import type { ClearSearch } from './clear-search'
-import { ClearsScreen } from './ClearsScreen'
+import { ClearOverviewScreen } from './ClearOverviewScreen'
 
 const route = getRouteApi('/clears')
 
 export function ClearsPage(): React.JSX.Element {
-  const search = route.useSearch()
+  const { week } = route.useSearch()
   const navigate = route.useNavigate()
 
-  async function changeSearch(next: ClearSearch): Promise<void> {
-    await navigate({ search: next })
+  async function selectWeek(weekStart: string): Promise<void> {
+    await navigate({ search: { week: weekStart } })
   }
 
-  return <ClearsScreen search={search} onSearchChange={changeSearch} />
+  async function openContent(contentId: string, weekStart: string): Promise<void> {
+    await navigate({
+      to: '/clears/$contentId',
+      params: { contentId },
+      search: { week: weekStart }
+    })
+  }
+
+  return <ClearOverviewScreen week={week} onWeekSelect={selectWeek} onContentOpen={openContent} />
 }

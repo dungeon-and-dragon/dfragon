@@ -31,7 +31,8 @@ import { RankingsPage } from './pages/rankings/RankingsPage'
 import { MultisearchPage } from './pages/multisearch/MultisearchPage'
 import { StatsPage } from './pages/stats/StatsPage'
 import { ClearsPage } from './pages/clears/ClearsPage'
-import { parseClearSearch } from './pages/clears/clear-search'
+import { ClearContentPage } from './pages/clears/ClearContentPage'
+import { parseClearSearch, parseClearWeekSearch } from './pages/clears/clear-search'
 import { parseWeeklySearch } from './pages/weekly/weekly-search'
 import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
@@ -116,7 +117,25 @@ const clearsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/clears',
   validateSearch: parseClearSearch,
+  // 컨텐츠를 고른 예전 주소의 북마크가 깨지지 않게 그 컨텐츠의 상세로 넘긴다.
+  beforeLoad: ({ search: { content, week } }) => {
+    if (content !== undefined) {
+      throw redirect({
+        to: '/clears/$contentId',
+        params: { contentId: content },
+        search: { week },
+        replace: true
+      })
+    }
+  },
   component: ClearsPage
+})
+
+const clearContentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/clears/$contentId',
+  validateSearch: parseClearWeekSearch,
+  component: ClearContentPage
 })
 
 const adventureEntryRoute = createRoute({
@@ -186,6 +205,7 @@ const routeTree = rootRoute.addChildren([
   rankingsRoute,
   statsRoute,
   clearsRoute,
+  clearContentRoute,
   adventureEntryRoute,
   adventureRoute,
   guildRoute,

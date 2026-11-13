@@ -1,5 +1,10 @@
 import { expect, it, vi } from 'vitest'
-import type { ClearContentStats, ClearStats, ClearWeek } from '../ranking/clear-stats'
+import type {
+  ClearContentStats,
+  ClearOverview,
+  ClearStats,
+  ClearWeek
+} from '../ranking/clear-stats'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
@@ -127,4 +132,56 @@ it('모르는 종류나 날짜가 아닌 주, 0명 모험단이 있는 응답은
       fetch: respond({ ...detail, adventures: [{ characters: 0, adventures: 1 }] })
     }).clearContentStats('michaela-hard', undefined)
   ).rejects.toThrow()
+})
+
+const fame = { p5: 110000, p25: 118000, median: 122000, p75: 126000, p95: 132000, max: 140000 }
+
+const overview: ClearOverview = {
+  weekStart: '2026-11-05',
+  contents: [
+    {
+      id: 'michaela-hard',
+      cleared: 30,
+      fame,
+      jobs: [
+        {
+          jobId: 'job-1',
+          jobGrowId: 'grow-1',
+          jobName: '합성 직업',
+          jobGrowName: '眞 합성 전직',
+          population: 100,
+          cleared: 28,
+          fame: null
+        }
+      ],
+      coClears: [{ id: 'michaela-normal', cleared: 4 }]
+    }
+  ],
+  weekdays: [{ weekday: 6, cleared: 30 }],
+  hours: [{ hour: 21, cleared: 30 }]
+}
+
+it('전체 개요는 고른 주를 week query로 보내 컨텐츠별 분포와 요일, 시간대 클리어 수를 읽는다', async () => {
+  const fetch = respond(overview)
+
+  await expect(
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).clearOverview('2026-11-05')
+  ).resolves.toEqual(overview)
+  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
+    `${API_ORIGIN}/stats/clears/overview?week=2026-11-05`
+  )
+})
+
+it('요일이 1부터 7 밖이거나 분포 값이 빠진 전체 개요 응답은 거부한다', async () => {
+  const responses = [
+    { ...overview, weekdays: [{ weekday: 0, cleared: 30 }] },
+    { ...overview, contents: [{ ...overview.contents[0], fame: { median: 122000 } }] }
+  ]
+  for (const body of responses) {
+    await expect(
+      createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).clearOverview(
+        '2026-11-05'
+      )
+    ).rejects.toThrow()
+  }
 })

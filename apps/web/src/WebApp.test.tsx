@@ -480,6 +480,16 @@ it('모험단 주소는 저장한 모험단이 있으면 기록을 늘리지 않
   expect(window.history.length).toBe(historyLength)
 })
 
+it('컨텐츠를 고른 예전 클리어 주소는 기록을 늘리지 않고 같은 컨텐츠와 주의 상세 주소로 바꾼다', async () => {
+  window.history.replaceState(null, '', '/clears?content=nabel-hard&week=2026-11-05')
+  const historyLength = window.history.length
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await waitForPath('/clears/nabel-hard')
+  expect(window.location.search).toBe('?week=2026-11-05')
+  expect(window.history.length).toBe(historyLength)
+})
+
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
   stubDetailFetch()
   window.history.replaceState(null, '', `${DETAIL_PATH}?tab=unknown`)
