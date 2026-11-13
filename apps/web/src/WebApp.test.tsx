@@ -527,6 +527,8 @@ function stubClearFetch(): void {
     weekOverWeek: null,
     stageMoves: null,
     streaks: null,
+    stages: null,
+    scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []
   }
@@ -536,7 +538,7 @@ function stubClearFetch(): void {
     vi.fn<typeof fetch>(async (...args) => {
       const { pathname } = new URL(new Request(...args).url)
       if (pathname.endsWith('/stats/clears')) {
-        return Response.json({ contents: [{ ...header, weeks: [week] }] })
+        return Response.json({ contents: [{ ...header, weeks: [week] }], legions: [] })
       }
 
       if (pathname.endsWith('/stats/clears/overview')) {

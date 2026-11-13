@@ -99,7 +99,20 @@ const nightmare = content(
   [week(LAST_CLOSED_WEEK, 3), week(LATEST_WEEK, 6)]
 )
 
-const stats: ClearStats = { contents: [inae, michaelaNormal, michaelaHard, nightmare] }
+const apocalypse = content(
+  'legion-apocalypse',
+  'legion',
+  '아포칼립스',
+  '2026-04-22T21:00:00.000Z',
+  [week(LAST_CLOSED_WEEK, 400), week(LATEST_WEEK, 420)]
+)
+
+const stats: ClearStats = {
+  contents: [inae, michaelaNormal, michaelaHard, nightmare],
+  legions: [{ ...apocalypse, entryFame: null }]
+}
+
+const noScores = { equipment: null, buff: null }
 
 const fame = { p5: 110000, p25: 118000, median: 122000, p75: 126000, p95: 132000, max: 140000 }
 
@@ -111,7 +124,8 @@ function job(index: number, population: number, cleared: number, median: number)
     jobGrowName: `眞 전직${index}`,
     population,
     cleared,
-    fame: { ...fame, median }
+    fame: { ...fame, median },
+    scores: noScores
   }
 }
 
@@ -125,10 +139,10 @@ const jobs = Array.from({ length: 12 }, (_, index) => {
 })
 
 const RAID_WEEK_OVER_WEEK = {
-  both: { cleared: 40, fame },
-  returned: { cleared: 7, fame: null },
-  left: { cleared: 21, fame },
-  first: { cleared: 10, fame }
+  both: { cleared: 40, fame, scores: noScores },
+  returned: { cleared: 7, fame: null, scores: noScores },
+  left: { cleared: 21, fame, scores: noScores },
+  first: { cleared: 10, fame, scores: noScores }
 }
 
 const MICHAELA_STAGE_MOVES = {
@@ -142,12 +156,15 @@ const RAID_STREAKS = [
 ]
 
 function statsOf(contentId: string, weekStart: string): ClearContentStats {
-  const { weeks, ...header } = stats.contents.find(({ id }) => id === contentId)!
+  const { weeks, ...header } = [...stats.contents, ...stats.legions].find(
+    ({ id }) => id === contentId
+  )!
   const raid = header.kind === 'raid'
   const selected = weeks.find((candidate) => candidate.weekStart === weekStart) ?? null
   const weekOverWeek = raid ? RAID_WEEK_OVER_WEEK : null
   const stageMoves = contentId.startsWith('michaela') ? MICHAELA_STAGE_MOVES : null
   const streaks = raid ? RAID_STREAKS : null
+  const stages = raid ? [] : null
   const weekdays = [4, 5, 6, 7, 1, 2, 3].map((weekday) => {
     const cleared = weekday === 6 ? 50 : 1
 
@@ -178,6 +195,8 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
     weekOverWeek,
     stageMoves,
     streaks,
+    stages,
+    scoreBands: { equipment: [], buff: [] },
     weekdays,
     hours: Array.from({ length: 24 }, (_, hour) => ({ hour, cleared: hour }))
   }
@@ -280,7 +299,7 @@ it('고른 컨텐츠 카드를 눌린 상태로 두고, 고른 카드나 다른 
   await render({ contentKey: 'michaela', onContentOpen })
 
   const pressed = cardButtons().map((card) => card.getAttribute('aria-pressed'))
-  expect(pressed).toEqual(['false', 'true', 'false'])
+  expect(pressed).toEqual(['false', 'true', 'false', 'false'])
 
   await click(cardButtons()[1]!)
   expect(onContentOpen).toHaveBeenLastCalledWith('michaela')
@@ -433,4 +452,155 @@ it('컨텐츠 집계가 실패하면 컨텐츠 줄 아래 오류 한 줄을 둔�
 
   expect(panelNames()).toEqual(['컨텐츠'])
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('집계를 불러오지 못했습니다.')
+})
+
+const equipment = { p5: 280000, p25: 310000, median: 330000, p75: 350000, p95: 380000, max: 420000 }
+const buff = { p5: 120000, p25: 140000, median: 150000, p75: 160000, p95: 180000, max: 200000 }
+
+function scoredStatsOf(contentId: string, weekStart: string): ClearContentStats {
+  const base = statsOf(contentId, weekStart)
+  const scores = { equipment, buff }
+  const weekOverWeek = {
+    both: { ...RAID_WEEK_OVER_WEEK.both, scores },
+    returned: { ...RAID_WEEK_OVER_WEEK.returned, scores },
+    left: { ...RAID_WEEK_OVER_WEEK.left, scores },
+    first: { ...RAID_WEEK_OVER_WEEK.first, scores }
+  }
+
+  return {
+    ...base,
+    jobs: base.jobs.map((item) => ({ ...item, scores: { equipment, buff: null } })),
+    weekOverWeek,
+    stages: [
+      { stage: '싱글/매칭', characters: 180 },
+      { stage: '일반', characters: 90 },
+      { stage: '하드', characters: 50 }
+    ],
+    scoreBands: {
+      equipment: [
+        { score: 300000, population: 50, cleared: 10 },
+        { score: 350000, population: 400, cleared: 40 }
+      ],
+      buff: [{ score: 150000, population: 50, cleared: 5 }]
+    }
+  }
+}
+
+function panelTicks(name: string): string[] {
+  return [...(panel(name)?.querySelectorAll('svg text') ?? [])].map(
+    (text) => text.textContent ?? ''
+  )
+}
+
+it('점수와 단계별 기록이 있으면 그룹별 장비 점수, 장비 점수 구간별 클리어율, 단계별 클리어 캐릭터를 시안 자리에 둔다', async () => {
+  await render(
+    { contentKey: 'michaela', week: LAST_CLOSED_WEEK },
+    {
+      getClearContentStats: async (contentId, selected) =>
+        scoredStatsOf(contentId, selected ?? LATEST_WEEK)
+    }
+  )
+
+  expect(panelNames()).toEqual([
+    '컨텐츠',
+    '주차별 클리어',
+    '명성 구간',
+    '지난주 대비 이탈과 복귀',
+    '일반과 하드 사이 이동',
+    '클리어 캐릭터의 명성',
+    '클리어 캐릭터의 장비 점수',
+    '연속 클리어 주 수',
+    '클리어 요일과 시간대',
+    '배율별 클리어',
+    '장비 점수 구간별 클리어율',
+    '단계별 클리어 캐릭터',
+    '모험단당 클리어 캐릭터',
+    '전직별 클리어'
+  ])
+  const stageRows = [...(panel('단계별 클리어 캐릭터')?.querySelectorAll('li') ?? [])].map((row) =>
+    [...row.children].map((cell) => cell.textContent)
+  )
+  expect(stageRows).toEqual([
+    ['싱글/매칭', '', '180'],
+    ['일반', '', '90'],
+    ['하드', '', '50']
+  ])
+})
+
+it('그룹별 장비 점수는 장비와 버프를 바꾸면 축이 그 점수 기준으로 바뀐다', async () => {
+  await render(
+    { contentKey: 'michaela' },
+    {
+      getClearContentStats: async (contentId, selected) =>
+        scoredStatsOf(contentId, selected ?? LATEST_WEEK)
+    }
+  )
+
+  expect(panelTicks('클리어 캐릭터의 장비 점수')).toContain('30만')
+
+  await click(
+    panel('클리어 캐릭터의 장비 점수')!.querySelector('[aria-label="점수 종류"] button:last-child')!
+  )
+
+  expect(panelTicks('클리어 캐릭터의 장비 점수')).toContain('14만')
+})
+
+it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구간 캐릭터 가운데 클리어한 비율로 막대 높이를 둔다', async () => {
+  await render(
+    { contentKey: 'michaela' },
+    {
+      getClearContentStats: async (contentId, selected) =>
+        scoredStatsOf(contentId, selected ?? LATEST_WEEK)
+    }
+  )
+
+  const columns = [...(panel('장비 점수 구간별 클리어율')?.querySelectorAll('li') ?? [])]
+  expect(columns.map((column) => column.querySelector('span')?.textContent)).toEqual([
+    '300,000~ 10 20.0%',
+    '350,000~ 40 10.0%'
+  ])
+  const heights = columns.map((column) =>
+    column.querySelector('[data-chart-mark]')?.getAttribute('style')
+  )
+  expect(heights[0]).toContain('100%')
+  expect(heights[1]).toContain('50%')
+})
+
+it('전직 표는 전직 점수가 있으면 명성, 장비 점수 전환을 두고 장비 점수로 바꾸면 그 축을 쓴다', async () => {
+  await render(
+    { contentKey: 'michaela' },
+    {
+      getClearContentStats: async (contentId, selected) =>
+        scoredStatsOf(contentId, selected ?? LATEST_WEEK)
+    }
+  )
+
+  await click(buttonNamed('장비 점수'))
+
+  const head = panel('전직별 클리어')?.querySelector('thead')
+  expect(head?.textContent).toContain('클리어 캐릭터의 장비 점수')
+  expect(head?.textContent).toContain('30만')
+})
+
+it('점수와 단계별 기록이 없으면 점수 카드, 단계별 카드와 전직 표의 전환을 두지 않는다', async () => {
+  await render({ contentKey: 'michaela' })
+
+  expect(panelNames()).not.toContain('클리어 캐릭터의 장비 점수')
+  expect(panelNames()).not.toContain('장비 점수 구간별 클리어율')
+  expect(panelNames()).not.toContain('단계별 클리어 캐릭터')
+  expect(panel('전직별 클리어')?.querySelector('[aria-label="분포"]')).toBeNull()
+})
+
+it('레기온 상세는 단계 선택 없이 컨텐츠 줄만 두고 레기온 집계를 받는다', async () => {
+  const getClearContentStats = vi.fn(async (contentId: string, selected: string | undefined) =>
+    statsOf(contentId, selected ?? LATEST_WEEK)
+  )
+  await render({ contentKey: 'apocalypse' }, { getClearContentStats })
+
+  expect(getClearContentStats).toHaveBeenLastCalledWith('legion-apocalypse', LATEST_WEEK)
+  expect(container.querySelector('[aria-label="단계"]')).toBeNull()
+  expect(panel('컨텐츠')?.textContent).toContain('레기온 · 출시 2026-04-23아포칼립스')
+  expect(
+    cardButtons().find((card) => card.getAttribute('aria-pressed') === 'true')?.textContent
+  ).toMatch(/^레기온아포칼립스/)
 })
