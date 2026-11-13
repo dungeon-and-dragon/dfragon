@@ -8,6 +8,7 @@ import {
 } from '../application/adventure-guild/service.js'
 import type {
   RecordCharacterBasic,
+  RecordCharacterScore,
   RecordCharacterSkillStyle
 } from '../application/character-basic/ports.js'
 import { createCharacterBasicRecorder } from '../application/character-basic/service.js'
@@ -67,6 +68,7 @@ export interface ApiServicesOptions {
   readonly timeline?: TimelineSyncOptions
   readonly recordCharacterBasic?: RecordCharacterBasic
   readonly recordCharacterSkillStyle?: RecordCharacterSkillStyle
+  readonly recordCharacterScore?: RecordCharacterScore
   readonly adventureGuild?: AdventureGuildReader
   readonly rankingStats?: RankingStatsReader
   readonly clearStats?: ClearStatsReader
@@ -155,6 +157,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       createCharacterBasicRecorder({
         recordBasic: recordCharacterBasic,
         recordSkillStyle: options.recordCharacterSkillStyle,
+        recordScore: options.recordCharacterScore,
         parseBasic: parseCharacterBasic,
         parseSkillStyle: parseCharacterSkillStyle,
         reportFailure: reportCode
@@ -169,8 +172,20 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   const details = createCharacterDetailService({
     ...options.details,
     calculateScore: engine.calculate,
-    publishCharacterFetched: ({ serverId, characterId }, { basic, skill_style }, fetchedAt) => {
-      const event = new CharacterFetched(serverId, characterId, basic, skill_style, fetchedAt)
+    publishCharacterFetched: (
+      { serverId, characterId },
+      { basic, skill_style },
+      fetchedAt,
+      score
+    ) => {
+      const event = new CharacterFetched(
+        serverId,
+        characterId,
+        basic,
+        skill_style,
+        fetchedAt,
+        score
+      )
       for (const notify of subscribers) {
         try {
           notify(event)

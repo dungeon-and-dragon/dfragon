@@ -12,6 +12,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `recordCharacter(client, character)`: 캐릭터의 서버, id, 이름과 모험단을 기록합니다.
 - `recordCharacterBasic(client, basic)`: Neople 기본 정보를 저장하고 기본 정보 대기열 행을 지웁니다.
 - `recordCharacterSkillStyle(client, style)`: 캐릭터의 스킬 스타일을 덮어씁니다.
+- `recordCharacterScore(client, score)`: 캐릭터의 점수를 저장합니다. 엔진 버전과 점수 종류가 같으면 더 높은 점수만 남기고, 다르면 새 점수로 덮어씁니다.
 - `readSampleCharactersWithoutSkillStyle(client)`: 전직별 명성 상위 표본 가운데 지금 전직의 스킬 스타일이 저장되지 않은 캐릭터를 읽습니다.
 - `enqueueCollectedCharacters`, `takeCollectionBatch`, `recordCollectionFailure`: 기본 정보 대기열에 넣고, 꺼내고, 실패를 남깁니다.
 - `readAdventureCharacters`, `readAdventureNames`, `readGuild`: 모험단, 길드의 캐릭터와 캐릭터의 모험단 이름을 읽습니다.
