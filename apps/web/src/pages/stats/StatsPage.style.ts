@@ -6,7 +6,6 @@ export const styles = stylex.create({
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-    alignItems: 'start',
     gap: space.s16
   },
   state: { margin: 0, fontSize: 13, lineHeight: '18px', color: colors.fgDanger }
