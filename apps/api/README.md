@@ -57,7 +57,8 @@ Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infra
 | `PORT` | 필수 | ASCII 십진 정수 1~65535 |
 | `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE` | 필수 | Neople key 직접 입력 또는 key 파일의 절대 경로 |
 | `LOCAL_HTTPS_CERT_FILE`, `LOCAL_HTTPS_KEY_FILE`, `API_ORIGIN` | 로컬 개발 | [로컬 개발 명령](#로컬-개발-명령) 참고 |
-| `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. 없으면 점수 없이 실행합니다 |
+| `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. API는 없으면 점수 없이 실행하고, 캐릭터 수집 worker는 없으면 점수 계산 job만 실패로 끝냅니다 |
+| `SCORE_CALCULATION_SCHEDULE` | 선택 | 캐릭터 수집 worker의 점수 계산 job 일정(Asia/Seoul cron 식). 없으면 수요일 22:00입니다 |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` 또는 `DB_PASSWORD_FILE` | 선택 | [DB와 migration](#db와-migration) 참고 |
 | `OPS_PORT` | 선택 | 운영 경로(`/api/jobs`)를 여는 별도 포트. DB 설정이 있어야 하고 `PORT`와 달라야 합니다. 없으면 열지 않습니다 |
 | `JOB_ALERT_DISCORD_WEBHOOK_URL` 또는 `JOB_ALERT_DISCORD_WEBHOOK_URL_FILE` | 선택 | 캐릭터 수집 worker가 job 알림을 보낼 Discord 웹훅 https URL. 없으면 알림 없이 실행합니다 |
