@@ -80,7 +80,16 @@ export const colors = stylex.defineConsts({
   raidPartyYellow: 'var(--df-raid-party-yellow)',
   raidPartyYellowWeak: 'var(--df-raid-party-yellow-weak)',
   raidPartyGreen: 'var(--df-raid-party-green)',
-  raidPartyGreenWeak: 'var(--df-raid-party-green-weak)'
+  raidPartyGreenWeak: 'var(--df-raid-party-green-weak)',
+  chart1: 'var(--df-chart-1)',
+  chart2: 'var(--df-chart-2)',
+  chart3: 'var(--df-chart-3)',
+  chart4: 'var(--df-chart-4)',
+  chart5: 'var(--df-chart-5)',
+  chart6: 'var(--df-chart-6)',
+  chart7: 'var(--df-chart-7)',
+  chart8: 'var(--df-chart-8)',
+  chartBase: 'var(--df-chart-base)'
 })
 
 export const shadow = stylex.defineConsts({
