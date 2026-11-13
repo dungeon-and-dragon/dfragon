@@ -6,6 +6,7 @@ const NAME_COLUMN_WIDTH = 120
 const VALUE_COLUMN_WIDTH = 64
 const ROW_HEIGHT = 28
 const BAR_HEIGHT = 6
+const THICK_BAR_HEIGHT = 10
 const MIN_MARK_SIZE = 2
 const MARK_RADIUS = 3
 const COLUMN_TOOLTIP_SPACE = 44
@@ -20,6 +21,13 @@ const CHART_PADDING = 16
 
 export const styles = stylex.create({
   chart: { position: 'relative' },
+  chartFill: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
+  rowsFill: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    flexGrow: 1
+  },
   // 넓은 화면에서는 막대가 칸에 들어가므로 스크롤 영역을 두지 않는다. 두면 첫 축 라벨이 영역 밖으로 나간 만큼 잘린다.
   chartScroll: { overflowX: { default: null, [breakpoints.screenNarrow]: 'auto' } },
   rows: { margin: 0, padding: CHART_PADDING, listStyle: 'none' },
@@ -68,6 +76,8 @@ export const styles = stylex.create({
   bodyCount: { backgroundColor: colors.chart1 },
   bodyFame: { backgroundColor: colors.gameFame },
   rowBody: { borderRadius: MARK_RADIUS },
+  railThick: { height: THICK_BAR_HEIGHT },
+  rowBodyThick: { borderRadius: THICK_BAR_HEIGHT / 2 },
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   valueFame: { color: colors.gameFame },
   columnsChart: { display: 'flex', flexDirection: 'column', flexGrow: 1 },
