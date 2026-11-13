@@ -17,10 +17,20 @@ import {
   readContentClearStreaks,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
+  readClearRecordLegionWeeks,
+  readClearRecordRaidModes,
+  readClearRecordRaidStageCounts,
+  readContentClearJobScores,
+  readContentClearScoreBands,
+  readContentClearScores,
+  readContentClearWeekGroupScores,
   readDatabaseConfiguration,
   readSelectedContentClearJobFames,
+  readSelectedContentClearJobScores,
   readSelectedContentClearTimes,
   recordCharacterBasic,
+  recordCharacterScore,
+  recordClearRecords,
   recordContentClearCollectionProgress,
   recordContentClearPopulation,
   recordContentClears,
@@ -266,7 +276,16 @@ try {
     readFameBands: (selection, minFame) => readContentClearFameBands(client, selection, minFame),
     readWeekGroups: (comparison) => readContentClearWeekGroups(client, comparison),
     readStageMoves: (selection) => readContentClearStageMoves(client, selection),
-    readStreaks: (selection) => readContentClearStreaks(client, selection)
+    readStreaks: (selection) => readContentClearStreaks(client, selection),
+    readLegionWeeks: (names) => readClearRecordLegionWeeks(client, names),
+    readRaidModes: (selection) => readClearRecordRaidModes(client, selection),
+    readRaidStageCounts: (selection, stages) =>
+      readClearRecordRaidStageCounts(client, selection, stages),
+    readContentJobScores: (selection) => readSelectedContentClearJobScores(client, selection),
+    readWeekGroupScores: (comparison) => readContentClearWeekGroupScores(client, comparison),
+    readScoreBands: (selection, minFame) => readContentClearScoreBands(client, selection, minFame),
+    readScores: (weekStart) => readContentClearScores(client, weekStart),
+    readJobScores: (weekStart) => readContentClearJobScores(client, weekStart)
   }
   const service = createClearStatsService(reader)
   const weeksOf = async (contentId) =>
@@ -509,13 +528,15 @@ try {
   const detail = await createClearStatsService(reader).contentStats('michaela-hard', '2026-11-05')
   assert.equal(detail.week.cleared, 29)
   // 이번 주 첫 클리어 27명은 명성 1,000 두 명과 101,000~125,000이라 p 분위수는 ceil(p × 27)번째로 작은 값이다.
+  const noScores = { equipment: null, buff: null }
   assert.deepEqual(detail.weekOverWeek, {
-    both: { cleared: 1, fame: null },
-    returned: { cleared: 1, fame: null },
-    left: { cleared: 1, fame: null },
+    both: { cleared: 1, fame: null, scores: noScores },
+    returned: { cleared: 1, fame: null, scores: noScores },
+    left: { cleared: 1, fame: null, scores: noScores },
     first: {
       cleared: 27,
-      fame: { p5: 1000, p25: 105000, median: 112000, p75: 119000, p95: 124000, max: 125000 }
+      fame: { p5: 1000, p25: 105000, median: 112000, p75: 119000, p95: 124000, max: 125000 },
+      scores: noScores
     }
   })
   assert.deepEqual(detail.stageMoves, {
@@ -572,6 +593,133 @@ try {
     [challengeDetail.weekOverWeek, challengeDetail.stageMoves, challengeDetail.streaks],
     [null, null, null]
   )
+
+  // 레기온, 단계별 기록이다. clear-l1은 같은 주에 베누스를 두 번 깨고, 화면에 쓰지 않는 레기온 기록도 섞는다.
+  const record = (kind, characterId, name, clearedAt, weekStart, raid = {}) => ({
+    kind,
+    serverId: 'cain',
+    characterId,
+    name,
+    clearedAt: at(clearedAt),
+    weekStart: at(weekStart),
+    ...(kind === 'raid' ? { modeName: null, hard: false, partyName: null, ...raid } : {})
+  })
+  const michaelaRaid = '무너진 성자 미카엘라'
+  await recordClearRecords(client, [
+    record('legion', 'clear-l1', '베누스', '2026-11-06T20:00:00', thisWeek),
+    record('legion', 'clear-l1', '베누스', '2026-11-08T20:00:00', thisWeek),
+    record('legion', 'clear-l2', '베누스', '2026-11-07T20:00:00', thisWeek),
+    record('legion', 'clear-l2', '베누스', '2026-10-30T20:00:00', lastWeek),
+    record('legion', 'clear-l1', '어둑섬', '2026-11-07T20:00:00', thisWeek),
+    record('raid', 'clear-p', michaelaRaid, '2026-11-06T20:00:00', thisWeek, {
+      modeName: michaelaRaid,
+      hard: true
+    }),
+    record('raid', 'clear-p', michaelaRaid, '2026-11-07T20:00:00', thisWeek, {
+      modeName: michaelaRaid
+    }),
+    record('raid', 'clear-q', michaelaRaid, '2026-11-06T21:00:00', thisWeek, {
+      modeName: '미카엘라 : 균열서'
+    }),
+    record('raid', 'clear-q', michaelaRaid, '2026-11-08T21:00:00', thisWeek, {
+      modeName: '미카엘라 : 균열서'
+    }),
+    record('raid', 'clear-r', michaelaRaid, '2026-11-07T21:00:00', thisWeek, {
+      modeName: michaelaRaid
+    }),
+    record('raid', 'clear-r', michaelaRaid, '2026-10-30T21:00:00', lastWeek, {
+      modeName: michaelaRaid,
+      hard: true
+    })
+  ])
+
+  // 점수는 클리어 행에 복사한 값을 쓴다. 이번 주 미카엘라 하드에서 clear-fame-1~22는 엔진 A의 장비 점수,
+  // clear-fame-23~25는 엔진 B의 장비 점수, clear-e는 엔진 A의 버프 점수다.
+  const engineA = ['synthetic-engine', 'rules-a', 'bundle-a']
+  const engineB = ['synthetic-engine', 'rules-b', 'bundle-b']
+  const copyScore = (characterId, kind, score, [enginePackage, rulesRev, bundleId]) =>
+    client.$executeRaw`
+      UPDATE content_clears
+      SET score = ${score}, score_kind = ${kind}, score_engine_package = ${enginePackage},
+        score_engine_rules_rev = ${rulesRev}, score_engine_bundle_id = ${bundleId}
+      WHERE content_id = 'michaela-hard' AND character_id = ${characterId}
+        AND week_start = ${at(thisWeek)}`
+  for (const [index, characterId] of fameCharacters.entries()) {
+    const score = index < 22 ? 901000 + index * 1000 : 2000000
+    await copyScore(characterId, 'equipment', score, index < 22 ? engineA : engineB)
+  }
+  await copyScore('clear-e', 'buff', 150000, engineA)
+  // 복사한 명성이 있으면 캐릭터의 지금 최고 명성보다 먼저 쓴다.
+  await client.$executeRaw`
+    UPDATE content_clears SET max_fame = 130000
+    WHERE content_id = 'michaela-hard' AND character_id = 'clear-fame-25'
+      AND week_start = ${at(thisWeek)}`
+  for (const characterId of ['clear-top', 'clear-dropped']) {
+    await recordCharacterScore(client, {
+      serverId: 'cain',
+      characterId,
+      kind: 'equipment',
+      score: 905000,
+      calculatedAt: at('2026-11-10T06:00:00'),
+      engine: { package: engineA[0], rulesRev: engineA[1], bundleId: engineA[2] }
+    })
+  }
+
+  const scoredService = createClearStatsService(reader)
+  const scoredList = await scoredService.stats()
+  const venus = scoredList.legions.find(({ id }) => id === 'legion-venus')
+  assert.deepEqual(
+    venus.weeks.map(({ weekStart, cleared }) => [weekStart, cleared]),
+    [
+      ['2026-10-29', 1],
+      ['2026-11-05', 2],
+      ['2026-11-12', 0]
+    ]
+  )
+  assert.deepEqual(scoredList.legions.find(({ id }) => id === 'legion-apocalypse').weeks, [])
+  assert.ok(scoredList.contents.every(({ kind }) => kind !== 'legion'))
+
+  const scoredOverview = await scoredService.overview('2026-11-05')
+  const scoredMichaela = scoredOverview.contents.find(({ id }) => id === 'michaela-hard')
+  assert.equal(scoredMichaela.fame.max, 130000)
+  assert.deepEqual(scoredMichaela.scores, {
+    equipment: { p5: 902000, p25: 906000, median: 911000, p75: 917000, p95: 921000, max: 922000 },
+    buff: null
+  })
+  const scoredGrow = scoredMichaela.jobs.find(
+    ({ jobGrowId }) => jobGrowId === 'synthetic-clear-grow'
+  )
+  assert.equal(scoredGrow.scores.equipment.max, 922000)
+  assert.equal(scoredGrow.scores.buff, null)
+
+  const scoredDetail = await scoredService.contentStats('michaela-hard', '2026-11-05')
+  assert.deepEqual(scoredDetail.stages, [
+    { stage: '싱글/매칭', characters: 1 },
+    { stage: '일반', characters: 2 },
+    { stage: '하드', characters: 1 }
+  ])
+  assert.equal(scoredDetail.weekOverWeek.first.fame.max, 130000)
+  // 명성 구간은 분모와 같은 지금 최고 명성으로 세므로 복사한 명성 130,000은 구간에 쓰지 않는다.
+  assert.equal(
+    scoredDetail.fameBands.find(({ fame }) => fame === 130000),
+    undefined
+  )
+  assert.equal(scoredDetail.fameBands.find(({ fame }) => fame === 124000).cleared, 2)
+  assert.equal(scoredDetail.weekOverWeek.first.scores.equipment.max, 922000)
+  assert.equal(scoredDetail.weekOverWeek.first.scores.buff, null)
+  assert.deepEqual(scoredDetail.weekOverWeek.both.scores, { equipment: null, buff: null })
+  assert.deepEqual(scoredDetail.scoreBands, {
+    equipment: [{ score: 900000, population: 2, cleared: 22 }],
+    buff: [{ score: 150000, population: 0, cleared: 1 }]
+  })
+  const legionDetail = await scoredService.contentStats('legion-venus', '2026-11-05')
+  assert.deepEqual(
+    [legionDetail.kind, legionDetail.week.cleared, legionDetail.stages],
+    ['legion', 2, null]
+  )
+  const challengeScored = await scoredService.contentStats('engraved-nightmare-1', '2026-11-05')
+  assert.deepEqual(challengeScored.scoreBands, { equipment: [], buff: [] })
+  assert.equal(challengeScored.stages, null)
 
   // 수집 진행 위치는 끝나기 전까지만 남는다.
   const collectionStartedAt = at('2026-11-10T06:00:00')
