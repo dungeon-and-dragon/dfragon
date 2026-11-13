@@ -3,6 +3,7 @@ import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import type {
   ClearPopulationCharacter,
+  ClearRecordInput,
   CollectedCharacter,
   ContentClearCollectionProgress,
   ContentClearInput,
@@ -32,10 +33,8 @@ import {
   type ClearCollectionStore,
   type ClearStatsReader
 } from '../src/application/content-clears/ports.js'
-import {
-  UNAVAILABLE_PAUSE_MS,
-  collectContentClears
-} from '../src/application/content-clears/collection.js'
+import { collectContentClears } from '../src/application/content-clears/collection.js'
+import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
 import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
 import {
   createClearStatsService,
@@ -158,6 +157,15 @@ const clearKey = (clear: ContentClearInput) =>
     clear.kind === 'raid' ? clear.weekStart.getTime() : null
   ])
 
+const recordKey = (record: ClearRecordInput) =>
+  JSON.stringify([
+    record.serverId,
+    record.characterId,
+    record.clearedAt.getTime(),
+    record.kind,
+    record.name
+  ])
+
 // 저장 함수의 규칙(레이드는 주마다, 챌린지는 캐릭터당 가장 이른 클리어 한 행, 마감한 주의 모집단은 바꾸지 않음)을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
 function memoryClearStore(
   population: ClearPopulationCharacter[],
@@ -168,6 +176,7 @@ function memoryClearStore(
     populationMinFames: [] as number[],
     populations: new Map(seeded.map((stored) => [populationKey(stored), stored])),
     clears: new Map<string, ContentClearInput>(),
+    records: new Map<string, ClearRecordInput>(),
     progress: undefined as ContentClearCollectionProgress | undefined
   }
   const store: ClearCollectionStore = {
@@ -189,6 +198,13 @@ function memoryClearStore(
         const stored = state.clears.get(clearKey(clear))
         if (stored === undefined || stored.clearedAt > clear.clearedAt) {
           state.clears.set(clearKey(clear), clear)
+        }
+      }
+    },
+    recordRecords: async (records) => {
+      for (const record of records) {
+        if (!state.records.has(recordKey(record))) {
+          state.records.set(recordKey(record), record)
         }
       }
     },
@@ -279,7 +295,7 @@ const populationsOf = (state: ReturnType<typeof memoryClearStore>['state'], week
 const everyContent = (population: number, closed: boolean) =>
   CLEAR_CONTENTS.map(({ id }) => `${id}/${population}/${closed}`).sort()
 
-test('한 번 돌면 모집단 캐릭터마다 code 201, 210, 504로 지금 주를 한 번씩 요청하고 집계 대상 기록만 저장한다', async () => {
+test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 지금 주를 한 번씩 요청하고 집계 대상 기록만 클리어 집계에 저장한다', async () => {
   const { state, store } = memoryClearStore(
     [character('a', 130_000), character('b', 125_000), character('c', 121_000)],
     closedPastWeeks()
@@ -299,9 +315,24 @@ test('한 번 돌면 모집단 캐릭터마다 code 201, 210, 504로 지금 주�
   const summary = await collect(store, neople, NOW)
 
   assert.deepEqual(requests, [
-    { characterId: 'a', code: '201,210,504', startDate: '20261105T0600', endDate: '20261110T1200' },
-    { characterId: 'b', code: '201,210,504', startDate: '20261105T0600', endDate: '20261110T1200' },
-    { characterId: 'c', code: '201,210,504', startDate: '20261105T0600', endDate: '20261110T1200' }
+    {
+      characterId: 'a',
+      code: '201,209,210,504',
+      startDate: '20261105T0600',
+      endDate: '20261110T1200'
+    },
+    {
+      characterId: 'b',
+      code: '201,209,210,504',
+      startDate: '20261105T0600',
+      endDate: '20261110T1200'
+    },
+    {
+      characterId: 'c',
+      code: '201,209,210,504',
+      startDate: '20261105T0600',
+      endDate: '20261110T1200'
+    }
   ])
   const week = CURRENT_WEEK.toISOString()
   assert.deepEqual(storedClears(state), [
@@ -329,6 +360,7 @@ test('한 번 돌면 모집단 캐릭터마다 code 201, 210, 504로 지금 주�
     characters: 3,
     requests: 3,
     clears: 4,
+    records: 5,
     skipped: 0
   })
   assert.equal(state.progress, undefined)
@@ -685,6 +717,7 @@ test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Ne
     characters: 3,
     requests: 4,
     clears: 2,
+    records: 2,
     skipped: 1
   })
 })
@@ -735,6 +768,7 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
     characters: 4,
     requests: 10,
     clears: 3,
+    records: 3,
     skipped: 1
   })
   assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
@@ -782,6 +816,7 @@ test('묶음 전체가 unavailable이면 몇 번이 이어져도 건너뛰지 �
     characters: 2,
     requests: 12,
     clears: 2,
+    records: 2,
     skipped: 0
   })
   assert.deepEqual(pauses, Array(outageAttempts).fill(UNAVAILABLE_PAUSE_MS))
@@ -1179,4 +1214,59 @@ test('켜진 key가 없으면 Neople을 부르지 않고 no-key로 남긴 뒤 1�
   )
   assert.deepEqual(progress, [2, 3])
   assert.equal(requests.length, 3)
+})
+
+const storedRecords = (state: ReturnType<typeof memoryClearStore>['state']) =>
+  [...state.records.values()]
+    .map((record) => {
+      const stage =
+        record.kind === 'raid'
+          ? `${record.modeName ?? '-'}/${record.hard}/${record.partyName ?? '-'}`
+          : '-/-/-'
+
+      return `${record.kind}/${record.characterId}/${record.name}/${stage}/${record.clearedAt.toISOString()}/${record.weekStart.toISOString()}`
+    })
+    .sort()
+
+test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온 기록을 기록 테이블에 남기고 클리어 집계에는 일반, 하드 판정에 맞는 기록만 넣는다', async () => {
+  const { state, store } = memoryClearStore([character('a'), character('b')], closedPastWeeks())
+  const { neople } = fakeNeople({
+    a: [
+      michaelaMatching('2026-11-06 20:00'),
+      raidRow('2026-11-06 21:00', { raidName: '디레지에 레이드', modeName: '디레지에 : 서막' }),
+      raidRow('2026-11-06 22:00', { raidName: '기계 혁명', modeName: '개전' }),
+      michaelaNormal('2026-11-07 20:00', { raidPartyName: null }),
+      michaelaHard('2026-11-07 21:15'),
+      { ...michaelaHard('2026-11-08 21:00'), code: 210 },
+      legionRow('2026-11-08 22:00')
+    ],
+    b: [
+      raidRow('2026-11-09 20:00', { raidName: '이내 황혼전' }),
+      { code: 209, name: '레기온', date: '2026-11-09 21:00', data: { regionName: '합성 레기온' } }
+    ]
+  })
+
+  const summary = await collect(store, neople, NOW)
+
+  const week = CURRENT_WEEK.toISOString()
+  const recordAt = (time: string) => `${at(time).toISOString()}/${week}`
+  assert.deepEqual(storedRecords(state), [
+    `legion/a/베누스/-/-/-/${recordAt('2026-11-08T22:00')}`,
+    `legion/b/합성 레기온/-/-/-/${recordAt('2026-11-09T21:00')}`,
+    `raid/a/기계 혁명/개전/false/합성 공격대/${recordAt('2026-11-06T22:00')}`,
+    `raid/a/디레지에 레이드/디레지에 : 서막/false/합성 공격대/${recordAt('2026-11-06T21:00')}`,
+    `raid/a/무너진 성자 미카엘라/미카엘라 : 균열서/false/합성 공격대/${recordAt('2026-11-06T20:00')}`,
+    `raid/a/무너진 성자 미카엘라/미카엘라 : 종언서(하드)/true/합성 공격대/${recordAt('2026-11-07T21:15')}`,
+    `raid/a/무너진 성자 미카엘라/미카엘라 : 종언서(하드)/true/합성 공격대/${recordAt('2026-11-08T21:00')}`,
+    `raid/a/무너진 성자 미카엘라/미카엘라 : 종언서/false/-/${recordAt('2026-11-07T20:00')}`,
+    `raid/b/이내 황혼전/-/false/합성 공격대/${recordAt('2026-11-09T20:00')}`
+  ])
+  assert.deepEqual(storedClears(state), [
+    `inae-twilight/b/${week}/null`,
+    `michaela-hard/a/${week}/null`,
+    `michaela-normal/a/${week}/null`
+  ])
+  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(2, false))
+  assert.equal(summary.records, 9)
+  assert.equal(summary.clears, 4)
 })
