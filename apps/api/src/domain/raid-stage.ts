@@ -10,6 +10,9 @@ const RAID_STAGE_LABELS = new Map([
   ['개전', '개전']
 ])
 
+// 위 표에 라벨을 더하면 여기에도 더한다. 빠진 라벨은 클리어 집계의 단계별 수에서 맨 뒤로 밀린다.
+export const RAID_STAGE_ORDER: readonly string[] = ['싱글/매칭', '매칭', '개전', '일반', '하드']
+
 export function toRaidStageLabel({
   modeName,
   hard

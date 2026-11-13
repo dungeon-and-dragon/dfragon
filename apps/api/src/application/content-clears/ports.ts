@@ -1,5 +1,14 @@
 import type {
   ClearCoClearCount,
+  ClearContentScoreSample,
+  ClearJobScoreSample,
+  ClearRecordLegionWeek,
+  ClearRecordRaidMode,
+  ClearRecordRaidSelection,
+  ClearRecordRaidStage,
+  ClearRecordStageCount,
+  ClearScoreBandCount,
+  ClearWeekGroupScoreSample,
   ClearFameBandCount,
   ClearFameSample,
   ClearFirstWeekCount,
@@ -83,6 +92,17 @@ export interface ClearStatsReader {
   readWeekGroups(comparison: ClearWeekComparison): Promise<ClearWeekGroupSample[]>
   readStageMoves(selection: ClearStageMoveSelection): Promise<ClearStageMoveCount[]>
   readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]>
+  readLegionWeeks(names: readonly string[]): Promise<ClearRecordLegionWeek[]>
+  readRaidModes(selection: ClearRecordRaidSelection): Promise<ClearRecordRaidMode[]>
+  readRaidStageCounts(
+    selection: ClearRecordRaidSelection,
+    stages: readonly ClearRecordRaidStage[]
+  ): Promise<ClearRecordStageCount[]>
+  readContentJobScores(selection: ClearWeekSelection): Promise<ClearJobScoreSample[]>
+  readWeekGroupScores(comparison: ClearWeekComparison): Promise<ClearWeekGroupScoreSample[]>
+  readScoreBands(selection: ClearWeekSelection, minFame: number): Promise<ClearScoreBandCount[]>
+  readScores(weekStart: Date): Promise<ClearContentScoreSample[]>
+  readJobScores(weekStart: Date): Promise<ClearJobScoreSample[]>
   readFames(weekStart: Date): Promise<ClearFameSample[]>
   readJobFames(weekStart: Date): Promise<ClearJobFameSample[]>
   readCoClears(weekStart: Date): Promise<ClearCoClearCount[]>
