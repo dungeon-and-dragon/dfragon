@@ -6,7 +6,10 @@ import {
 } from '@dfragon/database'
 import { createNeopleClient } from '@dfragon/neople'
 import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
-import { createNeopleClearTimeline } from '../infrastructure/neople/content-clear-collection.js'
+import {
+  createNeopleClearRecordTimeline,
+  createNeopleClearTimeline
+} from '../infrastructure/neople/content-clear-collection.js'
 import { createNeopleSkillStyle } from '../infrastructure/neople/skill-style-collection.js'
 import { writeAccessLogToStdout } from '../presentation/http/access-log-sink.js'
 import {
@@ -75,6 +78,7 @@ export async function startCharacterCollector(
   await startJobScheduler({
     jobs: createWorkerJobs(client, {
       createFetchTimeline: createNeopleClearTimeline(neople),
+      createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
       fetchSkillStyle: createNeopleSkillStyle(neople),
       readConcurrency,
       report
