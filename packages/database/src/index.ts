@@ -106,6 +106,7 @@ export {
   isJobPaused,
   readJobOverviews,
   readJobRuns,
+  readLastFinishedJobRun,
   readLastScheduledJobSuccess,
   recordJobNextRun,
   recordJobRunProgress,
@@ -117,6 +118,7 @@ export {
 } from './jobs.js'
 export type {
   ClaimedJobRun,
+  FinishedJobRun,
   InterruptedJobRun,
   JobOverview,
   JobPauseChange,
