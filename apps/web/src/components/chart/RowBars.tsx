@@ -93,7 +93,6 @@ export function RowBars({
             bar={bar}
             tone={tone}
             percent={percentOf(bar.value, max)}
-            active={hover.open && bar.key === hover.key}
             dimmed={hover.open && bar.key !== hover.key}
             onHover={handleHover}
             register={registerMark}
@@ -115,7 +114,6 @@ function BarRow({
   bar: { key, name, value, share },
   tone,
   percent,
-  active,
   dimmed,
   onHover,
   register
@@ -123,7 +121,6 @@ function BarRow({
   bar: Bar
   tone: BarTone
   percent: number
-  active: boolean
   dimmed: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLSpanElement) => () => void
@@ -152,17 +149,9 @@ function BarRow({
           <span
             {...stylex.props(
               styles.body,
-              fame ? styles.rowBodyFame : styles.rowBodyCount,
-              active && styles.bodyActive,
+              styles.rowBody,
+              fame ? styles.bodyFame : styles.bodyCount,
               dimmed && styles.bodyDimmed
-            )}
-          />
-          <span
-            {...stylex.props(
-              styles.edge,
-              styles.rowEdge,
-              fame ? styles.edgeFame : styles.edgeCount,
-              dimmed && styles.edgeDimmed
             )}
           />
         </span>

@@ -7,8 +7,8 @@ const VALUE_COLUMN_WIDTH = 64
 const ROW_HEIGHT = 28
 const BAR_HEIGHT = 6
 const TABLE_BAR_HEIGHT = 4
-const EDGE_WIDTH = 2
-const EDGE_OVERHANG = 3
+const MIN_MARK_SIZE = 2
+const MARK_RADIUS = 3
 const COLUMN_TOOLTIP_SPACE = 44
 const COLUMN_CHART_HEIGHT = 160
 const COLUMN_GAP = 2
@@ -55,35 +55,20 @@ export const styles = stylex.create({
     top: 0,
     display: 'block',
     height: '100%',
-    minWidth: EDGE_WIDTH
+    minWidth: MIN_MARK_SIZE
   },
   rowWidth: (percent: number) => ({ width: `${percent}%` }),
   body: {
     position: 'absolute',
     inset: 0,
-    opacity: 0.7,
     transitionProperty: 'opacity',
     transitionDuration: motion.durHover,
     transitionTimingFunction: motion.ease
   },
-  bodyActive: { opacity: 1 },
   bodyDimmed: { opacity: 0.3 },
-  edge: {
-    position: 'absolute',
-    transitionProperty: 'opacity',
-    transitionDuration: motion.durHover,
-    transitionTimingFunction: motion.ease
-  },
-  edgeDimmed: { opacity: 0.45 },
-  rowBodyCount: {
-    backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${colors.fgDefault} 10%, transparent), color-mix(in srgb, ${colors.fgDefault} 80%, transparent))`
-  },
-  rowBodyFame: {
-    backgroundImage: `linear-gradient(90deg, color-mix(in srgb, ${colors.gameFame} 10%, transparent), color-mix(in srgb, ${colors.gameFame} 80%, transparent))`
-  },
-  rowEdge: { right: 0, top: -EDGE_OVERHANG, bottom: -EDGE_OVERHANG, width: EDGE_WIDTH },
-  edgeCount: { backgroundColor: colors.fgDefault },
-  edgeFame: { backgroundColor: colors.gameFame },
+  bodyCount: { backgroundColor: colors.chart1 },
+  bodyFame: { backgroundColor: colors.gameFame },
+  rowBody: { borderRadius: MARK_RADIUS },
   value: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   valueFame: { color: colors.gameFame },
   columns: {
@@ -131,12 +116,9 @@ export const styles = stylex.create({
     alignItems: 'flex-end',
     height: COLUMN_CHART_HEIGHT
   },
-  columnMark: { position: 'relative', display: 'block', width: '100%', minHeight: EDGE_WIDTH },
+  columnMark: { position: 'relative', display: 'block', width: '100%', minHeight: MIN_MARK_SIZE },
   columnHeight: (percent: number) => ({ height: `${percent}%` }),
-  columnBody: {
-    backgroundImage: `linear-gradient(0deg, color-mix(in srgb, ${colors.fgDefault} 6%, transparent), color-mix(in srgb, ${colors.fgDefault} 55%, transparent))`
-  },
-  columnEdge: { left: 0, right: 0, top: 0, height: EDGE_WIDTH },
+  columnBody: { borderTopLeftRadius: MARK_RADIUS, borderTopRightRadius: MARK_RADIUS },
   columnLabel: {
     position: 'relative',
     height: COLUMN_LABEL_HEIGHT,
