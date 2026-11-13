@@ -1,7 +1,19 @@
 import type { StoredClearPopulation } from '@dfragon/database'
+import { subWeeks } from 'date-fns'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
 import { formatResetDate } from '../../domain/seoul-time.js'
-import { CLEAR_CONTENTS, type ClearContent } from '../../domain/content-clears/contents.js'
+import {
+  CLEAR_CONTENTS,
+  type ClearContent,
+  findStagePair,
+  toCollectionMinFame,
+  toPopulationMinFame
+} from '../../domain/content-clears/contents.js'
+import {
+  type ClearContentStats,
+  toClearContentStats,
+  toEmptyContentStats
+} from '../../domain/content-clears/detail.js'
 import {
   type ClearOverview,
   toClearOverview,
@@ -9,11 +21,8 @@ import {
 } from '../../domain/content-clears/overview.js'
 import {
   type ClearStats,
-  type ClearContentStats,
   type ClearContentSummary,
-  toClearStats,
-  toEmptyContentStats,
-  toClearContentStats
+  toClearStats
 } from '../../domain/content-clears/stats.js'
 import type { ClearStatsReader } from './ports.js'
 
@@ -81,13 +90,53 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     if (population === undefined) {
       return toEmptyContentStats(summary)
     }
-    const selection = { contentId: content.id, kind: content.kind, weekStart: population.weekStart }
-    const [jobCounts, adventures] = await Promise.all([
-      reader.readJobCounts(selection),
-      reader.readAdventureSizes(selection)
+
+    const { weekStart } = population
+    const previousWeekStart = subWeeks(weekStart, 1)
+    const selection = { contentId: content.id, kind: content.kind, weekStart }
+    const raid = content.kind === 'raid'
+    const pair = findStagePair(content)
+    const minFame = population.minFame ?? toPopulationMinFame(content, toCollectionMinFame())
+    const [
+      jobFames,
+      adventures,
+      firstWeeks,
+      fameBands,
+      times,
+      weekGroups,
+      stageMoveCounts,
+      streaks
+    ] = await Promise.all([
+      reader.readContentJobFames(selection),
+      reader.readAdventureSizes(selection),
+      reader.readFirstWeeks(content.id),
+      reader.readFameBands(selection, minFame),
+      reader.readContentTimes(selection),
+      raid ? reader.readWeekGroups({ contentId: content.id, weekStart, previousWeekStart }) : null,
+      pair !== undefined
+        ? reader.readStageMoves({
+            hardContentId: pair.hard.id,
+            normalContentId: pair.normal.id,
+            weekStart,
+            previousWeekStart
+          })
+        : null,
+      raid ? reader.readStreaks(selection) : null
     ])
 
-    return toClearContentStats(summary, population, jobCounts, adventures)
+    const stageMoves =
+      pair !== undefined && stageMoveCounts !== null ? { pair, counts: stageMoveCounts } : null
+
+    return toClearContentStats(summary, population, {
+      jobFames,
+      adventures,
+      firstWeeks,
+      fameBands,
+      times,
+      weekGroups,
+      stageMoves,
+      streaks
+    })
   }
 
   const loadOverview = async (
@@ -182,8 +231,14 @@ export const emptyClearStatsReader: ClearStatsReader = {
   readCollectedAt: async () => null,
   readPopulations: async () => [],
   readWeekRatioCounts: async () => [],
-  readJobCounts: async () => [],
   readAdventureSizes: async () => [],
+  readContentJobFames: async () => [],
+  readContentTimes: async () => [],
+  readFirstWeeks: async () => [],
+  readFameBands: async () => [],
+  readWeekGroups: async () => [],
+  readStageMoves: async () => [],
+  readStreaks: async () => [],
   readFames: async () => [],
   readJobFames: async () => [],
   readCoClears: async () => [],
