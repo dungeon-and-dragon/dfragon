@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
+import { EventEmitter } from 'node:events'
 import test from 'node:test'
 import {
   type CharacterBasicInput,
+  type CharacterScoreInput,
   type CharacterSkillStyleInput,
   type DatabaseClient,
   recordCharacter,
@@ -13,6 +15,9 @@ import type {
   CharacterPayload,
   CharacterPayloads
 } from '../src/domain/character-detail/sections.js'
+import type { ScoreEngineResult } from '../src/domain/score/result.js'
+import type { ScoreWorker } from '../src/infrastructure/score/engine.js'
+import type { ScoreWorkerMessage } from '../src/infrastructure/score/worker-protocol.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 import { createApiRuntimeOptions } from '../src/runtime/application.js'
 
@@ -142,7 +147,14 @@ function payloadsWith(
 async function listen(
   options: Pick<
     ApiHttpAppOptions,
-    'details' | 'timeline' | 'recordCharacterBasic' | 'recordCharacterSkillStyle' | 'writeAccessLog'
+    | 'details'
+    | 'timeline'
+    | 'recordCharacterBasic'
+    | 'recordCharacterSkillStyle'
+    | 'recordCharacterScore'
+    | 'scoreLibraryPath'
+    | 'spawnScoreWorker'
+    | 'writeAccessLog'
   >
 ): Promise<{ app: HttpAppHandle; origin: string }> {
   const { app } = await createApiHttpApp({
@@ -154,6 +166,42 @@ async function listen(
   await app.listen(0, '127.0.0.1')
 
   return { app, origin: await app.getUrl() }
+}
+
+// 합성 결과다. 실제 엔진을 열지 않고, worker는 받은 요청마다 이 결과를 돌려주는 fake다.
+const engineResult: ScoreEngineResult = {
+  calculator: 'equipment',
+  score: 1741,
+  skipped: null,
+  approximate_score: null,
+  approximate_source: null,
+  warning: null,
+  versions: { package: 'dnfscore-native 0.4.2', rules_rev: 'rev14', bundle_id: 'phase32-rev14d' },
+  display: { role: 'dealer', switchingLevel: 3, buff30: null, buff50: null }
+}
+
+function scoring(
+  result: () => ScoreEngineResult
+): Pick<ApiHttpAppOptions, 'scoreLibraryPath' | 'spawnScoreWorker'> {
+  const worker = (): ScoreWorker => {
+    const events = new EventEmitter()
+    const on = events.on.bind(events)
+    const reply = (id: number): ScoreWorkerMessage => {
+      const text = JSON.stringify(result())
+
+      return { kind: 'result', id, text }
+    }
+
+    return {
+      postMessage: ({ id }) => {
+        queueMicrotask(() => events.emit('message', reply(id)))
+      },
+      on,
+      terminate: async () => undefined
+    }
+  }
+
+  return { scoreLibraryPath: '/synthetic/libdnfscore.so', spawnScoreWorker: worker }
 }
 
 function detailsReturning(payloads: CharacterPayloads): ApiHttpAppOptions['details'] {
@@ -378,21 +426,26 @@ test('스킬 스타일 저장이 실패해도 상세 응답은 그대로이고 �
   assert.deepEqual(codes, ['CHARACTER_SKILL_STYLE_RECORD_FAILED'])
 })
 
-test('기본 정보를 저장하지 못하면 스킬 스타일도 저장하지 않는다', {
+test('기본 정보를 저장하지 못하면 스킬 스타일과 점수도 저장하지 않는다', {
   timeout: 10_000
 }, async (t) => {
   const styles: CharacterSkillStyleInput[] = []
+  const scores: CharacterScoreInput[] = []
   let failureReported!: () => void
   const reported = new Promise<void>((resolve) => {
     failureReported = resolve
   })
   const { app, origin } = await listen({
     details: detailsReturning(payloadsWith(basicFields, skillStyle)),
+    ...scoring(() => engineResult),
     recordCharacterBasic: async () => {
       throw new Error('database closed')
     },
     recordCharacterSkillStyle: async (style) => {
       styles.push(style)
+    },
+    recordCharacterScore: async (score) => {
+      scores.push(score)
     },
     writeAccessLog: (line) => {
       if (JSON.parse(line).code !== undefined) {
@@ -402,10 +455,128 @@ test('기본 정보를 저장하지 못하면 스킬 스타일도 저장하지 �
   })
   t.after(() => app.close())
 
-  await getDetails(origin)
+  const { body } = await getDetails(origin)
   await reported
 
+  assert.equal(body.card.score.value, engineResult.score)
   assert.deepEqual(styles, [])
+  assert.deepEqual(scores, [])
+})
+
+test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류, 계산 시각, 엔진 버전과 함께 저장하고, 저장해 둔 응답을 다시 쓰면 저장하지 않는다', {
+  timeout: 10_000
+}, async (t) => {
+  let savedBasics = 0
+  const savedBasicsBeforeScore: number[] = []
+  const scores: CharacterScoreInput[] = []
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => engineResult),
+    recordCharacterBasic: async () => {
+      // 기본 정보보다 먼저 저장하면 characters 참조가 깨지므로, 늦게 끝나도 기다리는지 보려고 일부러 늦춘다.
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      savedBasics++
+    },
+    recordCharacterScore: async (score) => {
+      savedBasicsBeforeScore.push(savedBasics)
+      scores.push(score)
+    }
+  })
+  t.after(() => app.close())
+
+  const before = Date.now()
+  const first = await getDetails(origin)
+  const after = Date.now()
+  const cached = await getDetails(origin)
+  await waitUntil(() => savedBasics === 2)
+
+  assert.deepEqual(first.body.card, cached.body.card)
+  assert.deepEqual(savedBasicsBeforeScore, [1])
+  const [score] = scores
+  assert.ok(score.calculatedAt.getTime() >= before && score.calculatedAt.getTime() <= after)
+  assert.deepEqual(
+    { ...score, calculatedAt: undefined },
+    {
+      ...character,
+      kind: 'equipment',
+      score: 1741,
+      calculatedAt: undefined,
+      engine: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+    }
+  )
+})
+
+test('점수를 내지 못한 결과는 저장하지 않는다', { timeout: 10_000 }, async (t) => {
+  const scores: CharacterScoreInput[] = []
+  let savedBasic!: () => void
+  const basicSaved = new Promise<void>((resolve) => {
+    savedBasic = resolve
+  })
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => ({
+      ...engineResult,
+      score: null,
+      skipped: { kind: 'resolution', message: '판정 불가' },
+      approximate_score: 1650,
+      approximate_source: 'legacy_fusion_policy_a',
+      warning: '근사값, 1% 밖일 가능성 높음: 판정 불가'
+    })),
+    recordCharacterBasic: async () => {
+      savedBasic()
+    },
+    recordCharacterScore: async (score) => {
+      scores.push(score)
+    }
+  })
+  t.after(() => app.close())
+
+  const { body } = await getDetails(origin)
+  await basicSaved
+  // 점수 저장은 기본 정보 저장 다음 차례에 시작하므로, 그 차례가 지나도록 한 번 넘긴다.
+  await new Promise((resolve) => setTimeout(resolve, 10))
+
+  assert.equal(body.card.score.approximate.value, 1650)
+  assert.deepEqual(scores, [])
+})
+
+test('점수 저장이 실패해도 상세 응답은 그대로이고 실패 code를 남긴다', {
+  timeout: 10_000
+}, async (t) => {
+  const codes: string[] = []
+  let failureReported!: () => void
+  const reported = new Promise<void>((resolve) => {
+    failureReported = resolve
+  })
+  const failing = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => engineResult),
+    recordCharacterBasic: async () => undefined,
+    recordCharacterScore: async () => {
+      throw new Error('database closed')
+    },
+    writeAccessLog: (line) => {
+      const { code } = JSON.parse(line)
+      if (code !== undefined) {
+        codes.push(code)
+        failureReported()
+      }
+    }
+  })
+  t.after(() => failing.app.close())
+  const withoutDatabase = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => engineResult)
+  })
+  t.after(() => withoutDatabase.app.close())
+
+  const response = await getDetails(failing.origin)
+  const expected = await getDetails(withoutDatabase.origin)
+  await reported
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(withoutFetchTimes(response.body), withoutFetchTimes(expected.body))
+  assert.deepEqual(codes, ['CHARACTER_SCORE_RECORD_FAILED'])
 })
 
 test('타임라인 동기화 요청이 예외를 던져도 상세 응답은 그대로이고 기본 정보를 저장한다', async (t) => {

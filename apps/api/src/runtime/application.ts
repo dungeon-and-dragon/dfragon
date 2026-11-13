@@ -70,6 +70,7 @@ function createDatabaseSubscribers(
   | 'timeline'
   | 'recordCharacterBasic'
   | 'recordCharacterSkillStyle'
+  | 'recordCharacterScore'
   | 'adventureGuild'
   | 'rankingStats'
   | 'clearStats'
@@ -101,6 +102,7 @@ function createDatabaseSubscribers(
     },
     recordCharacterBasic: basicStore.recordBasic,
     recordCharacterSkillStyle: basicStore.recordSkillStyle,
+    recordCharacterScore: basicStore.recordScore,
     readAdventureNames: (characters) => readAdventureNames(client, characters),
     adventureGuild: {
       readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),
