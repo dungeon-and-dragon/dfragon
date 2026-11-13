@@ -3,7 +3,7 @@
  * aae3d0d(dfragon-design PR #45 merge)이다. 두 저장소 사이에 자동 동기화가 없으므로 이 파일은
  * 손으로 맞추고, 값을 바꿀 때 기준 commit도 함께 고친다.
  * 색 값은 2026-11-05, 11-06 결정의 무채색 팔레트와 게임 색이며 ADR 0009의 색 값을 대체한다. 바탕, 글자, 선과
- * 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류)과 게임 클라이언트 값을 쓰는 게임 색에만 쓴다.
+ * 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류), 게임 클라이언트 값을 쓰는 게임 색과 차트 계열 색에만 쓴다.
  * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 기본은 시스템 설정을 따르고, 사용자가 고른 모드는
  * html의 data-color-mode가 color-scheme을 고정한다. 브랜드 로고 색(--df-brand-*)은 그림 색이라 모드와 관계없이 같다.
  * 상황별 색의 옅은 면(--df-bg-*-weak)은 다크에서 그 색 14%, 라이트에서 10%다. 모험단, 길드 이름은 흐린 글자색, 명성
@@ -17,6 +17,8 @@
  *   --df-game-precision, --df-game-fame-label, --df-rarity-mythic, --df-rarity-*-gradient과 그 두 끝 색 --df-rarity-*-{start,end}
  * - 공대 파티 색 --df-raid-party-{red,yellow,green}과 그 면(ADR 0012의 표 행 자리 배지 값). 다크는 16% 면이고, 라이트는
  *   오류, 검색 실패, 성공의 라이트 값과 그 10% 면을 쓴다.
+ * - 차트 계열 색 --df-chart-1~8과 기준 항목 회색 --df-chart-base(ADR 0055). 계열 색은 1번부터 순서대로 쓴다. ADR 0055가
+ *   회색의 다크 값만 정해 라이트도 같은 값을 쓴다.
  * 숫자 글꼴 --df-font-num은 본문과 같은 Pretendard다(ADR 0011).
  * 자른 모서리 --df-cut(ADR 0010), 카드 상태의 꺾쇠, 빗금, 격자, 사선 간격, 그림 칸, 카드 면, 실패 면(ADR 0012),
  * 속성 색과 마법부여 종결, 준종결 색은 지웠다. 대화상자 뒤 막 --df-bg-overlay의 다크 값은 tokens.json의
@@ -113,6 +115,15 @@
   --df-raid-party-yellow-weak: light-dark(#8067071a, #e8c26229);
   --df-raid-party-green: light-dark(#047c06, #6cd268);
   --df-raid-party-green-weak: light-dark(#047c061a, #6cd26829);
+  --df-chart-1: light-dark(#2a78d6, #3987e5);
+  --df-chart-2: light-dark(#eb6834, #d95926);
+  --df-chart-3: light-dark(#1baf7a, #199e70);
+  --df-chart-4: light-dark(#eda100, #c98500);
+  --df-chart-5: light-dark(#e87ba4, #d55181);
+  --df-chart-6: light-dark(#008300, #008300);
+  --df-chart-7: light-dark(#6250d6, #9085e9);
+  --df-chart-8: light-dark(#e34948, #e66767);
+  --df-chart-base: light-dark(#6b6b74, #6b6b74);
   --df-shadow-popover: 0 8px 24px light-dark(rgb(0 0 0 / 12%), rgb(0 0 0 / 45%));
   --df-shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
 
