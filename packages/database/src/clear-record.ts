@@ -103,3 +103,69 @@ export async function finishClearRecordBackfill(
 ): Promise<void> {
   await client.clearRecordBackfill.deleteMany({ where: { startedAt } })
 }
+
+export type ClearRecordLegionWeek = {
+  name: string
+  weekStart: Date
+  cleared: number
+}
+
+export type ClearRecordRaidSelection = {
+  raidName: string
+  weekStart: Date
+}
+
+export type ClearRecordRaidMode = {
+  modeName: string | null
+  hard: boolean | null
+}
+
+export type ClearRecordRaidStage = ClearRecordRaidMode & { stage: string }
+
+export type ClearRecordStageCount = {
+  stage: string
+  characters: number
+}
+
+// 레기온은 한 캐릭터가 한 주에 여러 번 깨도 한 명으로 센다.
+export function readClearRecordLegionWeeks(
+  client: DatabaseClient,
+  names: readonly string[]
+): Promise<ClearRecordLegionWeek[]> {
+  return client.$queryRaw<ClearRecordLegionWeek[]>`
+    SELECT name, week_start AS "weekStart", count(DISTINCT (server_id, character_id))::int AS cleared
+    FROM clear_records
+    WHERE kind = 'legion' AND name = ANY(${names}::text[])
+    GROUP BY name, week_start
+    ORDER BY name, week_start`
+}
+
+export function readClearRecordRaidModes(
+  client: DatabaseClient,
+  { raidName, weekStart }: ClearRecordRaidSelection
+): Promise<ClearRecordRaidMode[]> {
+  return client.$queryRaw<ClearRecordRaidMode[]>`
+    SELECT DISTINCT mode_name AS "modeName", hard
+    FROM clear_records
+    WHERE kind = 'raid' AND name = ${raidName} AND week_start = ${weekStart}`
+}
+
+// 단계 라벨은 API가 modeName과 hard로 정해 넘기고, 같은 라벨의 여러 modeName을 깬 캐릭터는 한 명으로 센다.
+export function readClearRecordRaidStageCounts(
+  client: DatabaseClient,
+  { raidName, weekStart }: ClearRecordRaidSelection,
+  stages: readonly ClearRecordRaidStage[]
+): Promise<ClearRecordStageCount[]> {
+  return client.$queryRaw<ClearRecordStageCount[]>`
+    SELECT stage.stage, count(DISTINCT (record.server_id, record.character_id))::int AS characters
+    FROM clear_records record
+    JOIN unnest(
+      ${stages.map(({ modeName }) => modeName)}::text[],
+      ${stages.map(({ hard }) => hard)}::boolean[],
+      ${stages.map(({ stage }) => stage)}::text[]
+    ) AS stage(mode_name, hard, stage)
+      ON stage.mode_name IS NOT DISTINCT FROM record.mode_name
+      AND stage.hard IS NOT DISTINCT FROM record.hard
+    WHERE record.kind = 'raid' AND record.name = ${raidName} AND record.week_start = ${weekStart}
+    GROUP BY stage.stage`
+}
