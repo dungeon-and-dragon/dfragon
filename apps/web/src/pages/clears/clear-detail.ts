@@ -4,6 +4,7 @@ import type {
   ClearContentStats,
   ClearFameDistribution,
   ClearJob,
+  ClearScoreBand,
   ClearStageMoves,
   ClearWeek,
   ClearWeekOverWeek
@@ -20,6 +21,7 @@ import { shareText } from '../../components/chart/stats-bars'
 import { type ContentChoice, type GroupedContent, groupsOf } from './clear-groups'
 import { columnsOf, type OverviewWeek, weekRangeText } from './clear-overview'
 import { addDays, weekNumberOf } from './clear-weeks'
+import { formatScoreTick, type JobMetric, jobStatsOf } from './clear-scores'
 
 const integer = new Intl.NumberFormat('ko-KR')
 const percent = new Intl.NumberFormat('ko-KR', {
@@ -228,12 +230,17 @@ export function stageMoveCard(
   return { figures, rows, legend }
 }
 
-export function weekGroupRows({ both, returned, left, first }: ClearWeekOverWeek): BoxPlotRow[] {
+type WeekGroup = ClearWeekOverWeek['both']
+
+export function weekGroupRows(
+  { both, returned, left, first }: ClearWeekOverWeek,
+  pick: (group: WeekGroup) => ClearFameDistribution | null
+): BoxPlotRow[] {
   const groups: readonly [string, string, string, ClearFameDistribution | null][] = [
-    ['both', '두 주 모두 클리어', colors.chartBase, both.fame],
-    ['returned', '복귀', colors.chart3, returned.fame],
-    ['left', '이탈', colors.chart8, left.fame],
-    ['first', '첫 클리어', colors.chart1, first.fame]
+    ['both', '두 주 모두 클리어', colors.chartBase, pick(both)],
+    ['returned', '복귀', colors.chart3, pick(returned)],
+    ['left', '이탈', colors.chart8, pick(left)],
+    ['first', '첫 클리어', colors.chart1, pick(first)]
   ]
 
   return groups.flatMap(([key, name, color, stats]) => {
@@ -243,6 +250,34 @@ export function weekGroupRows({ both, returned, left, first }: ClearWeekOverWeek
 
     return [{ key, name, color, stats }]
   })
+}
+
+const SCORE_TICK_COUNT = 5
+
+// 막대 높이는 그 구간 캐릭터 가운데 클리어한 비율이고, 가장 높은 구간을 기준으로 맞춘다.
+export function scoreBandColumns(bands: readonly ClearScoreBand[]): ColumnBar[] {
+  const step = Math.max(1, Math.ceil(bands.length / SCORE_TICK_COUNT))
+  const rates = bands.map(({ population, cleared }) => (population > 0 ? cleared / population : 0))
+  const maxRate = Math.max(0, ...rates)
+
+  return bands.map(({ score, cleared }, index) => {
+    const rate = rates[index] ?? 0
+    const key = String(score)
+    const label = index % step === 0 ? formatScoreTick(score) : null
+    const range = `${integer.format(score)}~`
+    const share = percent.format(rate)
+    const ratio = maxRate > 0 ? rate / maxRate : 0
+
+    return { key, label, range, count: cleared, share, ratio }
+  })
+}
+
+export function stageBars(stages: ClearContentStats['stages']): Bar[] {
+  if (stages === null || !stages.some(({ characters }) => characters > 0)) {
+    return []
+  }
+
+  return stages.map(({ stage, characters }) => ({ key: stage, name: stage, value: characters }))
 }
 
 const STREAK_TICK_COUNT = 14
@@ -308,7 +343,7 @@ export type JobRow = Readonly<{
   sub: string | null
   counts: string
   rate: string
-  fame: ClearFameDistribution | null
+  stats: ClearFameDistribution | null
 }>
 
 type RankedJob = Readonly<{ row: JobRow; rate: number; cleared: number; median: number }>
@@ -316,18 +351,19 @@ type RankedJob = Readonly<{ row: JobRow; rate: number; cleared: number; median: 
 const UNKNOWN_JOB_NAME = '알 수 없음'
 const NO_RATE = '-'
 
-function rankedJob(job: ClearJob): RankedJob {
+function rankedJob(job: ClearJob, metric: JobMetric): RankedJob {
   const rate = job.population > 0 ? job.cleared / job.population : -1
   const name = job.jobGrowName ?? UNKNOWN_JOB_NAME
   const counts = `${integer.format(job.cleared)} / ${integer.format(job.population)}`
   const rateText = rate >= 0 ? percent.format(rate) : NO_RATE
+  const stats = jobStatsOf(job, metric)
   const row = {
     key: `${job.jobId}/${job.jobGrowId}`,
     name,
     sub: job.jobName,
     counts,
     rate: rateText,
-    fame: job.fame
+    stats
   }
   const median = job.fame?.median ?? -1
 
@@ -346,9 +382,9 @@ function compareJobs(sort: JobSort): (left: RankedJob, right: RankedJob) => numb
   return (left, right) => right.rate - left.rate || right.cleared - left.cleared
 }
 
-export function jobRows(jobs: readonly ClearJob[], sort: JobSort): JobRow[] {
+export function jobRows(jobs: readonly ClearJob[], sort: JobSort, metric: JobMetric): JobRow[] {
   return jobs
-    .map(rankedJob)
+    .map((job) => rankedJob(job, metric))
     .toSorted(compareJobs(sort))
     .map(({ row }) => row)
 }

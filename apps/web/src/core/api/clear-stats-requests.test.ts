@@ -47,8 +47,21 @@ const summary: ClearStats = {
       latest: false,
       weeks: []
     }
+  ],
+  legions: [
+    {
+      id: 'legion-venus',
+      kind: 'legion',
+      name: '베누스',
+      releasedAt: '2025-02-05T21:00:00.000Z',
+      entryFame: null,
+      latest: true,
+      weeks: [week]
+    }
   ]
 }
+
+const noScores = { equipment: null, buff: null }
 
 const detail: ClearContentStats = {
   id: 'michaela-hard',
@@ -66,7 +79,18 @@ const detail: ClearContentStats = {
       jobGrowName: '眞 합성 전직',
       population: 100,
       cleared: 28,
-      fame: { p5: 110000, p25: 118000, median: 122000, p75: 126000, p95: 132000, max: 140000 }
+      fame: { p5: 110000, p25: 118000, median: 122000, p75: 126000, p95: 132000, max: 140000 },
+      scores: {
+        equipment: {
+          p5: 300000,
+          p25: 320000,
+          median: 330000,
+          p75: 340000,
+          p95: 360000,
+          max: 380000
+        },
+        buff: null
+      }
     },
     {
       jobId: null,
@@ -75,7 +99,8 @@ const detail: ClearContentStats = {
       jobGrowName: null,
       population: 0,
       cleared: 2,
-      fame: null
+      fame: null,
+      scores: noScores
     }
   ],
   adventures: [
@@ -93,16 +118,24 @@ const detail: ClearContentStats = {
   ],
   fameBands: [{ fame: 104000, population: 500, cleared: 30 }],
   weekOverWeek: {
-    both: { cleared: 15, fame: null },
-    returned: { cleared: 3, fame: null },
-    left: { cleared: 4, fame: null },
-    first: { cleared: 10, fame: null }
+    both: { cleared: 15, fame: null, scores: noScores },
+    returned: { cleared: 3, fame: null, scores: noScores },
+    left: { cleared: 4, fame: null, scores: noScores },
+    first: { cleared: 10, fame: null, scores: noScores }
   },
   stageMoves: {
     hard: { same: 15, other: 3, none: 12 },
     normal: { same: 40, other: 2, none: 8 }
   },
   streaks: [{ weeks: 1, characters: 30 }],
+  stages: [
+    { stage: '싱글/매칭', characters: 50 },
+    { stage: '하드', characters: 30 }
+  ],
+  scoreBands: {
+    equipment: [{ score: 300000, population: 40, cleared: 12 }],
+    buff: []
+  },
   weekdays: [{ weekday: 6, cleared: 30 }],
   hours: [{ hour: 21, cleared: 30 }]
 }
@@ -140,6 +173,8 @@ it('수집한 주가 없거나 챌린지인 컨텐츠 집계는 week와 레이�
     weekOverWeek: null,
     stageMoves: null,
     streaks: null,
+    stages: null,
+    scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []
   }
@@ -155,8 +190,11 @@ it('수집한 주가 없거나 챌린지인 컨텐츠 집계는 week와 레이�
 it('모르는 종류나 날짜가 아닌 주, 0명 모험단이 있는 응답은 거부한다', async () => {
   const content = summary.contents[0]
   const responses = [
-    { contents: [{ ...content, kind: 'legion' }] },
-    { contents: [{ ...content, weeks: [{ ...week, weekStart: '2026-11-05T00:00:00.000Z' }] }] }
+    { ...summary, contents: [{ ...content, kind: 'world-boss' }] },
+    {
+      ...summary,
+      contents: [{ ...content, weeks: [{ ...week, weekStart: '2026-11-05T00:00:00.000Z' }] }]
+    }
   ]
   for (const body of responses) {
     await expect(
@@ -181,6 +219,7 @@ const overview: ClearOverview = {
       id: 'michaela-hard',
       cleared: 30,
       fame,
+      scores: { equipment: null, buff: fame },
       jobs: [
         {
           jobId: 'job-1',
@@ -189,7 +228,8 @@ const overview: ClearOverview = {
           jobGrowName: '眞 합성 전직',
           population: 100,
           cleared: 28,
-          fame: null
+          fame: null,
+          scores: noScores
         }
       ],
       coClears: [{ id: 'michaela-normal', cleared: 4 }]

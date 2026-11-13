@@ -33,6 +33,7 @@ export const boxPlotStyles = stylex.create({
   },
   sub: { fontSize: SUB_FONT_SIZE, color: colors.fgSubtle },
   plotColumn: { minWidth: 0 },
+  emptyPlot: (height: number) => ({ height }),
   svg: { display: 'block', overflow: 'visible' },
   whisker: { fill: 'none', strokeWidth: 1.5 },
   boxFaded: { fillOpacity: 0.5, strokeWidth: 1 },
