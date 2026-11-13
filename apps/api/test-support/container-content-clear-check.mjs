@@ -7,13 +7,19 @@ import {
   readContentClearCoClears,
   readContentClearCollectedAt,
   readContentClearCollection,
+  readContentClearFameBands,
   readContentClearFames,
-  readContentClearJobCounts,
+  readContentClearFirstWeeks,
   readContentClearJobFames,
   readContentClearPopulations,
   readContentClearRaidTimes,
+  readContentClearStageMoves,
+  readContentClearStreaks,
+  readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
   readDatabaseConfiguration,
+  readSelectedContentClearJobFames,
+  readSelectedContentClearTimes,
   recordCharacterBasic,
   recordContentClearCollectionProgress,
   recordContentClearPopulation,
@@ -249,12 +255,18 @@ try {
     readCollectedAt: () => readContentClearCollectedAt(client),
     readPopulations: () => readContentClearPopulations(client),
     readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
-    readJobCounts: (selection) => readContentClearJobCounts(client, selection),
     readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
     readFames: (weekStart) => readContentClearFames(client, weekStart),
     readJobFames: (weekStart) => readContentClearJobFames(client, weekStart),
     readCoClears: (weekStart) => readContentClearCoClears(client, weekStart),
-    readRaidTimes: (weekStart) => readContentClearRaidTimes(client, weekStart)
+    readRaidTimes: (weekStart) => readContentClearRaidTimes(client, weekStart),
+    readContentJobFames: (selection) => readSelectedContentClearJobFames(client, selection),
+    readContentTimes: (selection) => readSelectedContentClearTimes(client, selection),
+    readFirstWeeks: (contentId) => readContentClearFirstWeeks(client, contentId),
+    readFameBands: (selection, minFame) => readContentClearFameBands(client, selection, minFame),
+    readWeekGroups: (comparison) => readContentClearWeekGroups(client, comparison),
+    readStageMoves: (selection) => readContentClearStageMoves(client, selection),
+    readStreaks: (selection) => readContentClearStreaks(client, selection)
   }
   const service = createClearStatsService(reader)
   const weeksOf = async (contentId) =>
@@ -482,6 +494,84 @@ try {
   for (const identifier of ['"clear-', '합성clear', '합성클리어모험단']) {
     assert.ok(!overviewJson.includes(identifier), identifier)
   }
+
+  // 컨텐츠 상세다. 미카엘라 하드에서 clear-a는 3주 연속, clear-c는 지난주를 건너뛰고 복귀, clear-g는 이번 주에 이탈한다.
+  // 일반 단계는 clear-d가 지난주에만, clear-h가 두 주 모두 깬다.
+  const twoWeeksAgo = '2026-10-22T06:00:00'
+  await recordContentClears(client, [
+    clear('michaela-hard', 'raid', 'clear-a', '2026-10-23T20:00:00', twoWeeksAgo),
+    clear('michaela-hard', 'raid', 'clear-c', '2026-10-23T20:00:00', twoWeeksAgo),
+    clear('michaela-hard', 'raid', 'clear-g', '2026-10-30T20:00:00', lastWeek),
+    clear('michaela-normal', 'raid', 'clear-d', '2026-10-30T20:00:00', lastWeek),
+    clear('michaela-normal', 'raid', 'clear-h', '2026-10-30T20:00:00', lastWeek),
+    clear('michaela-normal', 'raid', 'clear-h', '2026-11-06T20:00:00', thisWeek)
+  ])
+  const detail = await createClearStatsService(reader).contentStats('michaela-hard', '2026-11-05')
+  assert.equal(detail.week.cleared, 29)
+  // 이번 주 첫 클리어 27명은 명성 1,000 두 명과 101,000~125,000이라 p 분위수는 ceil(p × 27)번째로 작은 값이다.
+  assert.deepEqual(detail.weekOverWeek, {
+    both: { cleared: 1, fame: null },
+    returned: { cleared: 1, fame: null },
+    left: { cleared: 1, fame: null },
+    first: {
+      cleared: 27,
+      fame: { p5: 1000, p25: 105000, median: 112000, p75: 119000, p95: 124000, max: 125000 }
+    }
+  })
+  assert.deepEqual(detail.stageMoves, {
+    hard: { same: 1, other: 1, none: 27 },
+    normal: { same: 1, other: 1, none: 0 }
+  })
+  assert.deepEqual(detail.streaks, [
+    { weeks: 1, characters: 28 },
+    { weeks: 3, characters: 1 }
+  ])
+  assert.deepEqual(detail.weeklyClears, [
+    {
+      weekStart: '2026-10-29',
+      population: 1100,
+      firstCleared: 1,
+      repeatCleared: 1,
+      everCleared: 3
+    },
+    {
+      weekStart: '2026-11-05',
+      population: 1200,
+      firstCleared: 27,
+      repeatCleared: 2,
+      everCleared: 30
+    }
+  ])
+  assert.equal(
+    detail.jobs.reduce((total, { cleared }) => total + cleared, 0),
+    detail.week.cleared
+  )
+  assert.equal(
+    detail.weekdays.reduce((total, { cleared }) => total + cleared, 0),
+    detail.week.cleared
+  )
+  assert.equal(
+    detail.hours.reduce((total, { cleared }) => total + cleared, 0),
+    detail.week.cleared
+  )
+  // 앞 단계가 넣은 캐릭터도 모집단에 들어 구간별 캐릭터 수는 합성 캐릭터만으로 정하지 않는다.
+  const bandOf = (fame) => detail.fameBands.find((band) => band.fame === fame)
+  assert.deepEqual(bandOf(0), { fame: 0, population: 0, cleared: 3 })
+  assert.equal(bandOf(124000).cleared, 2)
+  assert.ok(bandOf(900000).population >= 5)
+  assert.ok(detail.fameBands.every(({ fame, population }) => population === 0 || fame >= 126000))
+  assert.equal(
+    detail.fameBands.reduce((total, { cleared }) => total + cleared, 0),
+    28
+  )
+  const challengeDetail = await createClearStatsService(reader).contentStats(
+    'engraved-nightmare-1',
+    '2026-11-05'
+  )
+  assert.deepEqual(
+    [challengeDetail.weekOverWeek, challengeDetail.stageMoves, challengeDetail.streaks],
+    [null, null, null]
+  )
 
   // 수집 진행 위치는 끝나기 전까지만 남는다.
   const collectionStartedAt = at('2026-11-10T06:00:00')
