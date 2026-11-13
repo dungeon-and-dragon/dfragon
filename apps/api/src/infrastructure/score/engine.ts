@@ -187,6 +187,10 @@ export function createScoreEngine(options: ScoreEngineOptions) {
 
       return result
     },
+    /** 라이브러리를 열지 못했거나 worker가 멈추면 false가 되고, 그 뒤 계산은 모두 null이다. */
+    isRunning(): boolean {
+      return running !== null
+    },
     async close() {
       if (running !== null) {
         await stop(running.worker, null)
