@@ -216,14 +216,6 @@ export type ClearWeekRatioCount = {
   cleared: number
 }
 
-export type ClearJobCount = {
-  jobId: string | null
-  jobGrowId: string | null
-  jobName: string | null
-  jobGrowName: string | null
-  cleared: number
-}
-
 export type ClearAdventureSize = {
   characters: number
   adventures: number
@@ -288,24 +280,6 @@ function selectedClearsSql({ contentId, kind, weekStart }: ClearWeekSelection): 
   return Prisma.sql`clear.content_id = ${contentId} AND ${week}`
 }
 
-export function readContentClearJobCounts(
-  client: DatabaseClient,
-  selection: ClearWeekSelection
-): Promise<ClearJobCount[]> {
-  return client.$queryRaw<ClearJobCount[]>`
-    SELECT
-      c.job_id AS "jobId",
-      c.job_grow_id AS "jobGrowId",
-      c.job_name AS "jobName",
-      c.job_grow_name AS "jobGrowName",
-      count(*)::int AS cleared
-    FROM content_clears clear
-    LEFT JOIN characters c
-      ON c.server_id = clear.server_id AND c.character_id = clear.character_id
-    WHERE ${selectedClearsSql(selection)}
-    GROUP BY c.job_id, c.job_grow_id, c.job_name, c.job_grow_name`
-}
-
 // 캐릭터 행이 없는 클리어는 혼자인 모험단으로 세어 분포의 캐릭터 합이 클리어 수와 같게 한다.
 export function readContentClearAdventureSizes(
   client: DatabaseClient,
@@ -326,12 +300,13 @@ export function readContentClearAdventureSizes(
     ORDER BY characters`
 }
 
-export type ClearFameSample = {
-  contentId: string
+export type ClearFameQuantiles = {
   characters: number
   quantiles: number[] | null
   max: number | null
 }
+
+export type ClearFameSample = ClearFameQuantiles & { contentId: string }
 
 export type ClearJobFameSample = ClearFameSample & {
   jobId: string | null
@@ -347,7 +322,7 @@ export type ClearCoClearCount = {
   cleared: number
 }
 
-export type ClearRaidTimeCount = {
+export type ClearTimeCount = {
   weekday: number
   hour: number
   cleared: number
@@ -381,10 +356,7 @@ export function readContentClearFames(
     GROUP BY clear.content_id`
 }
 
-export function readContentClearJobFames(
-  client: DatabaseClient,
-  weekStart: Date
-): Promise<ClearJobFameSample[]> {
+function readJobFames(client: DatabaseClient, where: Prisma.Sql): Promise<ClearJobFameSample[]> {
   return client.$queryRaw<ClearJobFameSample[]>`
     SELECT
       clear.content_id AS "contentId",
@@ -397,8 +369,22 @@ export function readContentClearJobFames(
     FROM content_clears clear
     LEFT JOIN characters c
       ON c.server_id = clear.server_id AND c.character_id = clear.character_id
-    WHERE ${weekClearsSql(weekStart)}
+    WHERE ${where}
     GROUP BY clear.content_id, c.job_id, c.job_grow_id, c.job_name, c.job_grow_name`
+}
+
+export function readContentClearJobFames(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearJobFameSample[]> {
+  return readJobFames(client, weekClearsSql(weekStart))
+}
+
+export function readSelectedContentClearJobFames(
+  client: DatabaseClient,
+  selection: ClearWeekSelection
+): Promise<ClearJobFameSample[]> {
+  return readJobFames(client, selectedClearsSql(selection))
 }
 
 // 한 주로 고르면 컨텐츠마다 캐릭터당 한 행이라 짝지은 행 수가 두 컨텐츠를 함께 깬 캐릭터 수다.
@@ -424,16 +410,233 @@ export function readContentClearCoClears(
     GROUP BY base.content_id, other.content_id`
 }
 
+function readClearTimes(client: DatabaseClient, where: Prisma.Sql): Promise<ClearTimeCount[]> {
+  return client.$queryRaw<ClearTimeCount[]>`
+    SELECT
+      extract(isodow FROM clear.cleared_at AT TIME ZONE 'Asia/Seoul')::int AS weekday,
+      extract(hour FROM clear.cleared_at AT TIME ZONE 'Asia/Seoul')::int AS hour,
+      count(*)::int AS cleared
+    FROM content_clears clear
+    WHERE ${where}
+    GROUP BY 1, 2`
+}
+
 export function readContentClearRaidTimes(
   client: DatabaseClient,
   weekStart: Date
-): Promise<ClearRaidTimeCount[]> {
-  return client.$queryRaw<ClearRaidTimeCount[]>`
+): Promise<ClearTimeCount[]> {
+  return readClearTimes(client, Prisma.sql`clear.kind = 'raid' AND clear.week_start = ${weekStart}`)
+}
+
+export function readSelectedContentClearTimes(
+  client: DatabaseClient,
+  selection: ClearWeekSelection
+): Promise<ClearTimeCount[]> {
+  return readClearTimes(client, selectedClearsSql(selection))
+}
+
+export type ClearFirstWeekCount = {
+  weekStart: Date
+  characters: number
+}
+
+export type ClearFameBandCount = {
+  fame: number
+  population: number
+  cleared: number
+}
+
+export type ClearWeekComparison = {
+  contentId: string
+  weekStart: Date
+  previousWeekStart: Date
+}
+
+export type ClearWeekGroup = 'both' | 'left' | 'returned' | 'first'
+
+export type ClearWeekGroupSample = ClearFameQuantiles & {
+  group: ClearWeekGroup
+  cleared: number
+}
+
+export type ClearStageMoveSelection = {
+  hardContentId: string
+  normalContentId: string
+  weekStart: Date
+  previousWeekStart: Date
+}
+
+export type ClearStagePrevious = 'same' | 'other' | 'none'
+
+export type ClearStageMoveCount = {
+  contentId: string
+  previous: ClearStagePrevious
+  characters: number
+}
+
+export type ClearStreakCount = {
+  weeks: number
+  characters: number
+}
+
+export function readContentClearFirstWeeks(
+  client: DatabaseClient,
+  contentId: string
+): Promise<ClearFirstWeekCount[]> {
+  return client.$queryRaw<ClearFirstWeekCount[]>`
+    SELECT first_week AS "weekStart", count(*)::int AS characters
+    FROM (
+      SELECT min(week_start) AS first_week
+      FROM content_clears
+      WHERE content_id = ${contentId}
+      GROUP BY server_id, character_id
+    ) first_clear
+    GROUP BY first_week
+    ORDER BY first_week`
+}
+
+// 명성 구간의 캐릭터 수는 지난 주를 골라도 저장된 스냅샷이 없어 지금 최고 명성으로 센다.
+export function readContentClearFameBands(
+  client: DatabaseClient,
+  selection: ClearWeekSelection,
+  minFame: number
+): Promise<ClearFameBandCount[]> {
+  return client.$queryRaw<ClearFameBandCount[]>`
+    WITH population AS (
+      SELECT (max_fame / 2000) * 2000 AS fame, count(*)::int AS population
+      FROM characters
+      WHERE max_fame >= ${minFame}
+      GROUP BY 1
+    ),
+    cleared AS (
+      SELECT (c.max_fame / 2000) * 2000 AS fame, count(*)::int AS cleared
+      FROM content_clears clear
+      JOIN characters c
+        ON c.server_id = clear.server_id AND c.character_id = clear.character_id
+      WHERE ${selectedClearsSql(selection)} AND c.max_fame IS NOT NULL
+      GROUP BY 1
+    )
     SELECT
-      extract(isodow FROM cleared_at AT TIME ZONE 'Asia/Seoul')::int AS weekday,
-      extract(hour FROM cleared_at AT TIME ZONE 'Asia/Seoul')::int AS hour,
-      count(*)::int AS cleared
-    FROM content_clears
-    WHERE kind = 'raid' AND week_start = ${weekStart}
+      fame,
+      coalesce(population.population, 0) AS population,
+      coalesce(cleared.cleared, 0) AS cleared
+    FROM population
+    FULL JOIN cleared USING (fame)
+    ORDER BY fame`
+}
+
+// 이탈은 지난주에만, 복귀는 이번 주에만 깼고 지난주 전에 깬 적이 있는 캐릭터, 첫 클리어는 이번 주가 처음인 캐릭터다.
+export function readContentClearWeekGroups(
+  client: DatabaseClient,
+  { contentId, weekStart, previousWeekStart }: ClearWeekComparison
+): Promise<ClearWeekGroupSample[]> {
+  return client.$queryRaw<ClearWeekGroupSample[]>`
+    WITH current_week AS (
+      SELECT server_id, character_id
+      FROM content_clears
+      WHERE content_id = ${contentId} AND week_start = ${weekStart}
+    ),
+    previous_week AS (
+      SELECT server_id, character_id
+      FROM content_clears
+      WHERE content_id = ${contentId} AND week_start = ${previousWeekStart}
+    ),
+    grouped AS (
+      SELECT
+        server_id,
+        character_id,
+        CASE
+          WHEN current_week.server_id IS NULL THEN 'left'
+          WHEN previous_week.server_id IS NOT NULL THEN 'both'
+          WHEN EXISTS (
+            SELECT 1
+            FROM content_clears earlier
+            WHERE earlier.content_id = ${contentId}
+              AND earlier.server_id = current_week.server_id
+              AND earlier.character_id = current_week.character_id
+              AND earlier.week_start < ${previousWeekStart}
+          ) THEN 'returned'
+          ELSE 'first'
+        END AS "group"
+      FROM current_week
+      FULL JOIN previous_week USING (server_id, character_id)
+    )
+    SELECT grouped."group", count(*)::int AS cleared, ${fameSampleColumnsSql}
+    FROM grouped
+    LEFT JOIN characters c
+      ON c.server_id = grouped.server_id AND c.character_id = grouped.character_id
+    GROUP BY grouped."group"`
+}
+
+// 지난주에 두 단계를 모두 깼으면 같은 단계로 센다.
+export function readContentClearStageMoves(
+  client: DatabaseClient,
+  { hardContentId, normalContentId, weekStart, previousWeekStart }: ClearStageMoveSelection
+): Promise<ClearStageMoveCount[]> {
+  return client.$queryRaw<ClearStageMoveCount[]>`
+    SELECT
+      clear.content_id AS "contentId",
+      CASE
+        WHEN EXISTS (
+          SELECT 1
+          FROM content_clears previous
+          WHERE previous.content_id = clear.content_id
+            AND previous.server_id = clear.server_id
+            AND previous.character_id = clear.character_id
+            AND previous.week_start = ${previousWeekStart}
+        ) THEN 'same'
+        WHEN EXISTS (
+          SELECT 1
+          FROM content_clears previous
+          WHERE previous.content_id = CASE clear.content_id
+              WHEN ${hardContentId} THEN ${normalContentId}
+              ELSE ${hardContentId}
+            END
+            AND previous.server_id = clear.server_id
+            AND previous.character_id = clear.character_id
+            AND previous.week_start = ${previousWeekStart}
+        ) THEN 'other'
+        ELSE 'none'
+      END AS previous,
+      count(*)::int AS characters
+    FROM content_clears clear
+    WHERE clear.content_id IN (${hardContentId}, ${normalContentId})
+      AND clear.week_start = ${weekStart}
     GROUP BY 1, 2`
+}
+
+// 이번 주부터 거슬러 n번째 기록이 정확히 n-1주 전이면 그 n주는 끊기지 않고 이어진다.
+export function readContentClearStreaks(
+  client: DatabaseClient,
+  { contentId, weekStart }: Pick<ClearWeekSelection, 'contentId' | 'weekStart'>
+): Promise<ClearStreakCount[]> {
+  return client.$queryRaw<ClearStreakCount[]>`
+    WITH current_week AS (
+      SELECT server_id, character_id
+      FROM content_clears
+      WHERE content_id = ${contentId} AND week_start = ${weekStart}
+    ),
+    history AS (
+      SELECT
+        clear.server_id,
+        clear.character_id,
+        clear.week_start,
+        row_number() OVER (
+          PARTITION BY clear.server_id, clear.character_id ORDER BY clear.week_start DESC
+        ) AS position
+      FROM content_clears clear
+      JOIN current_week USING (server_id, character_id)
+      WHERE clear.content_id = ${contentId} AND clear.week_start <= ${weekStart}
+    ),
+    streak AS (
+      SELECT count(*) FILTER (
+        WHERE week_start = ${weekStart}::timestamptz - (position - 1) * interval '7 days'
+      )::int AS weeks
+      FROM history
+      GROUP BY server_id, character_id
+    )
+    SELECT weeks, count(*)::int AS characters
+    FROM streak
+    GROUP BY weeks
+    ORDER BY weeks`
 }
