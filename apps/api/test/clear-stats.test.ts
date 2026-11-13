@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type {
-  ClearJobCount,
   ClearJobFameSample,
+  ClearStageMoveSelection,
+  ClearWeekComparison,
+  ClearWeekGroupSample,
   ClearWeekRatioCount,
   ClearWeekSelection,
   StoredClearPopulation
@@ -64,8 +66,14 @@ function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader
     readCollectedAt: async () => at('2026-11-10T06:30:00'),
     readPopulations: async () => populations,
     readWeekRatioCounts: async () => counts,
-    readJobCounts: async () => [],
     readAdventureSizes: async () => [],
+    readContentJobFames: async () => [],
+    readContentTimes: async () => [],
+    readFirstWeeks: async () => [],
+    readFameBands: async () => [],
+    readWeekGroups: async () => [],
+    readStageMoves: async () => [],
+    readStreaks: async () => [],
     readFames: async () => [],
     readJobFames: async () => [],
     readCoClears: async () => [],
@@ -193,7 +201,7 @@ test('컨텐츠 상세는 week가 없으면 가장 최근 주를 읽고, 저장�
   const selections: ClearWeekSelection[] = []
   const { app, origin } = await listen(
     fakeReader({
-      readJobCounts: async (selection) => {
+      readContentJobFames: async (selection) => {
         selections.push(selection)
 
         return []
@@ -218,10 +226,11 @@ test('컨텐츠 상세는 week가 없으면 가장 최근 주를 읽고, 저장�
 })
 
 test('컨텐츠 상세의 직업별 클리어 수는 모집단에 없는 전직도 넣어 합이 그 주 클리어 수와 같다', async () => {
-  const jobCounts: ClearJobCount[] = [
-    { ...job, jobGrowName: '합성전직', cleared: 12 },
-    { ...job, jobGrowId: 'synthetic-other', jobGrowName: '합성다른전직', cleared: 2 },
-    { jobId: null, jobGrowId: null, jobName: null, jobGrowName: null, cleared: 1 }
+  const noFame = { contentId: 'michaela-hard', characters: 0, quantiles: null, max: null }
+  const jobFames: ClearJobFameSample[] = [
+    { ...noFame, ...job, jobGrowName: '합성전직', cleared: 12 },
+    { ...noFame, ...job, jobGrowId: 'synthetic-other', jobGrowName: '합성다른전직', cleared: 2 },
+    { ...noFame, jobId: null, jobGrowId: null, jobName: null, jobGrowName: null, cleared: 1 }
   ]
   const adventures = [
     { characters: 1, adventures: 5 },
@@ -229,7 +238,7 @@ test('컨텐츠 상세의 직업별 클리어 수는 모집단에 없는 전직�
   ]
   const { app, origin } = await listen(
     fakeReader({
-      readJobCounts: async () => jobCounts,
+      readContentJobFames: async () => jobFames,
       readAdventureSizes: async () => adventures
     })
   )
@@ -239,15 +248,24 @@ test('컨텐츠 상세의 직업별 클리어 수는 모집단에 없는 전직�
     assert.equal(status, 200)
     const jobs = [...body.jobs].sort((left, right) => right.cleared - left.cleared)
     assert.deepEqual(jobs, [
-      { ...job, jobGrowName: '합성전직', population: 1000, cleared: 12 },
+      { ...job, jobGrowName: '합성전직', population: 1000, cleared: 12, fame: null },
       {
         ...job,
         jobGrowId: 'synthetic-other',
         jobGrowName: '합성다른전직',
         population: 0,
-        cleared: 2
+        cleared: 2,
+        fame: null
       },
-      { jobId: null, jobGrowId: null, jobName: null, jobGrowName: null, population: 0, cleared: 1 }
+      {
+        jobId: null,
+        jobGrowId: null,
+        jobName: null,
+        jobGrowName: null,
+        population: 0,
+        cleared: 1,
+        fame: null
+      }
     ])
     assert.deepEqual(body.adventures, adventures)
     assert.equal(body.week.cleared, 15)
@@ -343,10 +361,20 @@ test('DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로, 상
     assert.ok(list.body.contents.length > 0)
     assert.ok(list.body.contents.every(({ weeks }: { weeks: unknown[] }) => weeks.length === 0))
     assert.equal(detail.status, 200)
-    assert.deepEqual(
-      { week: detail.body.week, jobs: detail.body.jobs, adventures: detail.body.adventures },
-      { week: null, jobs: [], adventures: [] }
-    )
+    const { weeks: _weeks, ...header } = contentOf(list.body, 'michaela-hard')
+    assert.deepEqual(detail.body, {
+      ...header,
+      week: null,
+      jobs: [],
+      adventures: [],
+      weeklyClears: [],
+      fameBands: [],
+      weekOverWeek: null,
+      stageMoves: null,
+      streaks: null,
+      weekdays: [],
+      hours: []
+    })
   } finally {
     await app.close()
   }
@@ -642,6 +670,230 @@ test('전체 개요 응답은 reader 행에 섞인 캐릭터, 모험단, 길드 
       assert.ok(!text.includes(field), field)
       assert.ok(!text.includes(value), value)
     }
+  } finally {
+    await app.close()
+  }
+})
+
+const groupSample = (group: ClearWeekGroupSample['group'], cleared: number, famed: number) => ({
+  group,
+  cleared,
+  ...fameSample(famed, 110_000)
+})
+
+test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 읽고 일반과 하드 짝으로 이동을 읽는다', async () => {
+  const comparisons: ClearWeekComparison[] = []
+  const stageSelections: ClearStageMoveSelection[] = []
+  const { app, origin } = await listen(
+    fakeReader({
+      readWeekGroups: async (comparison) => {
+        comparisons.push(comparison)
+
+        return [
+          groupSample('both', 9, 20),
+          groupSample('returned', 3, 3),
+          groupSample('first', 3, 3)
+        ]
+      },
+      readStageMoves: async (selection) => {
+        stageSelections.push(selection)
+
+        return [
+          { contentId: 'michaela-hard', previous: 'same', characters: 9 },
+          { contentId: 'michaela-hard', previous: 'other', characters: 4 },
+          { contentId: 'michaela-normal', previous: 'other', characters: 2 }
+        ]
+      },
+      readStreaks: async () => [
+        { weeks: 1, characters: 6 },
+        { weeks: 2, characters: 9 }
+      ]
+    })
+  )
+  try {
+    const { status, body } = await getJson(origin, '/stats/clears/michaela-hard?week=2026-11-05')
+
+    assert.equal(status, 200)
+    assert.deepEqual(comparisons, [
+      {
+        contentId: 'michaela-hard',
+        weekStart: week('2026-11-05'),
+        previousWeekStart: week('2026-10-29')
+      }
+    ])
+    assert.deepEqual(stageSelections, [
+      {
+        hardContentId: 'michaela-hard',
+        normalContentId: 'michaela-normal',
+        weekStart: week('2026-11-05'),
+        previousWeekStart: week('2026-10-29')
+      }
+    ])
+    assert.deepEqual(
+      Object.fromEntries(
+        Object.entries(body.weekOverWeek).map(([group, stats]) => {
+          const { cleared, fame } = stats as { cleared: number; fame: { median: number } | null }
+
+          return [group, [cleared, fame?.median ?? null]]
+        })
+      ),
+      { both: [9, 110_002], returned: [3, null], left: [0, null], first: [3, null] }
+    )
+    assert.deepEqual(body.stageMoves, {
+      hard: { same: 9, other: 4, none: 0 },
+      normal: { same: 0, other: 2, none: 0 }
+    })
+    assert.deepEqual(body.streaks, [
+      { weeks: 1, characters: 6 },
+      { weeks: 2, characters: 9 }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('챌린지 상세는 지난주 대비, 이동, 연속 주 수를 읽지 않고 null로 준다', async () => {
+  const unread = async (): Promise<never> => assert.fail('챌린지에서 읽으면 안 된다')
+  const { app, origin } = await listen(
+    fakeReader({ readWeekGroups: unread, readStageMoves: unread, readStreaks: unread })
+  )
+  try {
+    const { status, body } = await getJson(origin, '/stats/clears/engraved-nightmare-1')
+
+    assert.equal(status, 200)
+    assert.deepEqual(
+      { weekOverWeek: body.weekOverWeek, stageMoves: body.stageMoves, streaks: body.streaks },
+      { weekOverWeek: null, stageMoves: null, streaks: null }
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('일반과 하드가 따로 없는 레이드 상세는 이동을 읽지 않고 null로 준다', async () => {
+  const unread = async (): Promise<never> => assert.fail('짝이 없는 레이드에서 읽으면 안 된다')
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [...populations, population('inae-twilight', '2026-11-05', 700)],
+      readStageMoves: unread
+    })
+  )
+  try {
+    const { status, body } = await getJson(origin, '/stats/clears/inae-twilight')
+
+    assert.equal(status, 200)
+    assert.equal(body.stageMoves, null)
+    assert.notEqual(body.weekOverWeek, null)
+  } finally {
+    await app.close()
+  }
+})
+
+test('주차별 첫 클리어와 다시 클리어의 합은 그 주 클리어 수이고, 한 번이라도 깬 수는 그 주까지 처음 깬 수의 합이며 그 주 분모를 함께 준다', async () => {
+  const firstWeeks = [
+    { weekStart: week('2026-10-22'), characters: 2 },
+    { weekStart: week('2026-10-29'), characters: 5 },
+    { weekStart: week('2026-11-05'), characters: 4 }
+  ]
+  const { app, origin } = await listen(
+    fakeReader({
+      readFirstWeeks: async (contentId) =>
+        contentId === 'michaela-hard'
+          ? firstWeeks
+          : [
+              { weekStart: week('2026-10-29'), characters: 1 },
+              { weekStart: week('2026-11-05'), characters: 5 },
+              { weekStart: week('2026-11-12'), characters: 100 }
+            ]
+    })
+  )
+  try {
+    const raid = await getJson(origin, '/stats/clears/michaela-hard')
+    const challenge = await getJson(origin, '/stats/clears/engraved-nightmare-1')
+
+    assert.deepEqual(raid.body.weeklyClears, [
+      {
+        weekStart: '2026-10-29',
+        population: 900,
+        firstCleared: 5,
+        repeatCleared: 2,
+        everCleared: 7
+      },
+      {
+        weekStart: '2026-11-05',
+        population: 1000,
+        firstCleared: 4,
+        repeatCleared: 11,
+        everCleared: 11
+      }
+    ])
+    assert.deepEqual(challenge.body.weeklyClears, [
+      {
+        weekStart: '2026-11-05',
+        population: 1000,
+        firstCleared: 5,
+        repeatCleared: 1,
+        everCleared: 6
+      }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 구간은 그 주 모집단의 분모 기준 명성으로 읽고, 요일과 시간대는 그 컨텐츠와 그 주로 골라 읽는다', async () => {
+  const bandSelections: [ClearWeekSelection, number][] = []
+  const timeSelections: ClearWeekSelection[] = []
+  const fameBands = [
+    { fame: 124_000, population: 0, cleared: 2 },
+    { fame: 126_000, population: 40, cleared: 10 }
+  ]
+  const { app, origin } = await listen(
+    fakeReader({
+      readFameBands: async (selection, minFame) => {
+        bandSelections.push([selection, minFame])
+
+        return fameBands
+      },
+      readContentTimes: async (selection) => {
+        timeSelections.push(selection)
+
+        return [{ weekday: 5, hour: 21, cleared: 15 }]
+      }
+    })
+  )
+  try {
+    const { body } = await getJson(origin, '/stats/clears/michaela-hard?week=2026-11-05')
+    const selection = { contentId: 'michaela-hard', kind: 'raid', weekStart: week('2026-11-05') }
+
+    assert.deepEqual(bandSelections, [[selection, 126000]])
+    assert.deepEqual(timeSelections, [selection])
+    assert.deepEqual(body.fameBands, fameBands)
+    assert.deepEqual(body.weekdays[1], { weekday: 5, cleared: 15 })
+    assert.equal(body.hours[21].cleared, 15)
+  } finally {
+    await app.close()
+  }
+})
+
+test('분모 기준 명성이 저장되지 않은 주의 명성 구간은 지금 컨텐츠 목록의 분모 기준 명성으로 읽는다', async () => {
+  const minFames: number[] = []
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [
+        { ...population('michaela-hard', '2026-11-05', 1000), minFame: null }
+      ],
+      readFameBands: async (_selection, minFame) => {
+        minFames.push(minFame)
+
+        return []
+      }
+    })
+  )
+  try {
+    await getJson(origin, '/stats/clears/michaela-hard')
+
+    assert.deepEqual(minFames, [104_292])
   } finally {
     await app.close()
   }
