@@ -1,3 +1,4 @@
+import type { CharacterScoreKind } from './character-score.js'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 
@@ -359,12 +360,15 @@ function weekClearsSql(weekStart: Date): Prisma.Sql {
   )`
 }
 
+// 클리어할 때 복사한 명성을 먼저 쓰고, 복사 칸이 생기기 전에 저장한 행은 캐릭터의 지금 최고 명성을 쓴다.
+const clearFameSql = Prisma.sql`coalesce(clear.max_fame, c.max_fame)`
+
 // quantiles는 5%, 25%, 50%, 75%, 95% 순이다. percentile_disc는 저장된 명성 가운데 하나를 고르고,
 // 명성이 없는 캐릭터는 분위수와 characters에서 빠진다.
 const fameSampleColumnsSql = Prisma.sql`
-  count(c.max_fame)::int AS characters,
-  percentile_disc(ARRAY[0.05, 0.25, 0.5, 0.75, 0.95]) WITHIN GROUP (ORDER BY c.max_fame) AS quantiles,
-  max(c.max_fame) AS max`
+  count(${clearFameSql})::int AS characters,
+  percentile_disc(ARRAY[0.05, 0.25, 0.5, 0.75, 0.95]) WITHIN GROUP (ORDER BY ${clearFameSql}) AS quantiles,
+  max(${clearFameSql}) AS max`
 
 export function readContentClearFames(
   client: DatabaseClient,
@@ -519,6 +523,7 @@ export function readContentClearFirstWeeks(
 }
 
 // 명성 구간의 캐릭터 수는 지난 주를 골라도 저장된 스냅샷이 없어 지금 최고 명성으로 센다.
+// 클리어 수도 같은 기준으로 세야 구간의 클리어율이 분모를 넘지 않는다.
 export function readContentClearFameBands(
   client: DatabaseClient,
   selection: ClearWeekSelection,
@@ -548,19 +553,30 @@ export function readContentClearFameBands(
     ORDER BY fame`
 }
 
+const snapshotColumnsSql = Prisma.sql`
+  server_id, character_id, max_fame, score_kind, score,
+  score_engine_package, score_engine_rules_rev, score_engine_bundle_id`
+
 // 이탈은 지난주에만, 복귀는 이번 주에만 깼고 지난주 전에 깬 적이 있는 캐릭터, 첫 클리어는 이번 주가 처음인 캐릭터다.
-export function readContentClearWeekGroups(
-  client: DatabaseClient,
-  { contentId, weekStart, previousWeekStart }: ClearWeekComparison
-): Promise<ClearWeekGroupSample[]> {
-  return client.$queryRaw<ClearWeekGroupSample[]>`
-    WITH current_week AS (
-      SELECT server_id, character_id
+// 이탈은 지난주 행의 명성과 점수를, 나머지는 이번 주 행의 명성과 점수를 쓴다.
+function weekGroupsSql({
+  contentId,
+  weekStart,
+  previousWeekStart
+}: ClearWeekComparison): Prisma.Sql {
+  const pickSql = (column: string) =>
+    Prisma.sql`CASE WHEN current_week.server_id IS NULL
+      THEN previous_week.${Prisma.raw(column)} ELSE current_week.${Prisma.raw(column)} END
+      AS ${Prisma.raw(column)}`
+
+  return Prisma.sql`
+    current_week AS (
+      SELECT ${snapshotColumnsSql}
       FROM content_clears
       WHERE content_id = ${contentId} AND week_start = ${weekStart}
     ),
     previous_week AS (
-      SELECT server_id, character_id
+      SELECT ${snapshotColumnsSql}
       FROM content_clears
       WHERE content_id = ${contentId} AND week_start = ${previousWeekStart}
     ),
@@ -580,15 +596,29 @@ export function readContentClearWeekGroups(
               AND earlier.week_start < ${previousWeekStart}
           ) THEN 'returned'
           ELSE 'first'
-        END AS "group"
+        END AS "group",
+        ${pickSql('max_fame')},
+        ${pickSql('score_kind')},
+        ${pickSql('score')},
+        ${pickSql('score_engine_package')},
+        ${pickSql('score_engine_rules_rev')},
+        ${pickSql('score_engine_bundle_id')}
       FROM current_week
       FULL JOIN previous_week USING (server_id, character_id)
-    )
-    SELECT grouped."group", count(*)::int AS cleared, ${fameSampleColumnsSql}
-    FROM grouped
+    )`
+}
+
+export function readContentClearWeekGroups(
+  client: DatabaseClient,
+  comparison: ClearWeekComparison
+): Promise<ClearWeekGroupSample[]> {
+  return client.$queryRaw<ClearWeekGroupSample[]>`
+    WITH ${weekGroupsSql(comparison)}
+    SELECT clear."group", count(*)::int AS cleared, ${fameSampleColumnsSql}
+    FROM grouped clear
     LEFT JOIN characters c
-      ON c.server_id = grouped.server_id AND c.character_id = grouped.character_id
-    GROUP BY grouped."group"`
+      ON c.server_id = clear.server_id AND c.character_id = clear.character_id
+    GROUP BY clear."group"`
 }
 
 // 지난주에 두 단계를 모두 깼으면 같은 단계로 센다.
@@ -662,4 +692,169 @@ export function readContentClearStreaks(
     FROM streak
     GROUP BY weeks
     ORDER BY weeks`
+}
+
+export type ClearScoreSample = ClearFameQuantiles & { kind: CharacterScoreKind }
+
+export type ClearContentScoreSample = ClearScoreSample & { contentId: string }
+
+export type ClearJobScoreSample = ClearContentScoreSample & {
+  jobId: string | null
+  jobGrowId: string | null
+}
+
+export type ClearWeekGroupScoreSample = ClearScoreSample & { group: ClearWeekGroup }
+
+export type ClearScoreBandCount = {
+  kind: CharacterScoreKind
+  score: number
+  population: number
+  cleared: number
+}
+
+// 점수는 클리어할 때 복사한 값만 쓴다. 엔진 버전마다 같은 장비의 점수가 달라지므로, 고른 행 가운데
+// 가장 많은 버전(package, rules, bundle이 모두 같은 것)의 행만 남긴다. 같은 수면 버전 이름 순으로 앞의 것이다.
+function versionedScoresSql(columns: Prisma.Sql, from: Prisma.Sql, where: Prisma.Sql): Prisma.Sql {
+  return Prisma.sql`
+    scored AS (
+      SELECT
+        ${columns},
+        clear.score_kind AS kind,
+        clear.score,
+        clear.score_engine_package AS engine_package,
+        clear.score_engine_rules_rev AS engine_rules_rev,
+        clear.score_engine_bundle_id AS engine_bundle_id
+      FROM ${from}
+      WHERE ${where} AND clear.score IS NOT NULL
+    ),
+    engine AS (
+      SELECT engine_package, engine_rules_rev, engine_bundle_id
+      FROM scored
+      GROUP BY engine_package, engine_rules_rev, engine_bundle_id
+      ORDER BY count(*) DESC, engine_package, engine_rules_rev, engine_bundle_id
+      LIMIT 1
+    ),
+    versioned AS (
+      SELECT scored.*
+      FROM scored
+      JOIN engine USING (engine_package, engine_rules_rev, engine_bundle_id)
+    )`
+}
+
+const scoreSampleColumnsSql = Prisma.sql`
+  count(*)::int AS characters,
+  percentile_disc(ARRAY[0.05, 0.25, 0.5, 0.75, 0.95]) WITHIN GROUP (ORDER BY versioned.score) AS quantiles,
+  max(versioned.score) AS max`
+
+export function readContentClearScores(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearContentScoreSample[]> {
+  return client.$queryRaw<ClearContentScoreSample[]>`
+    WITH ${versionedScoresSql(
+      Prisma.sql`clear.content_id`,
+      Prisma.sql`content_clears clear`,
+      weekClearsSql(weekStart)
+    )}
+    SELECT versioned.content_id AS "contentId", versioned.kind, ${scoreSampleColumnsSql}
+    FROM versioned
+    GROUP BY versioned.content_id, versioned.kind`
+}
+
+function readJobScores(client: DatabaseClient, where: Prisma.Sql): Promise<ClearJobScoreSample[]> {
+  return client.$queryRaw<ClearJobScoreSample[]>`
+    WITH ${versionedScoresSql(
+      Prisma.sql`clear.content_id, c.job_id, c.job_grow_id`,
+      Prisma.sql`content_clears clear
+        LEFT JOIN characters c
+          ON c.server_id = clear.server_id AND c.character_id = clear.character_id`,
+      where
+    )}
+    SELECT
+      versioned.content_id AS "contentId",
+      versioned.job_id AS "jobId",
+      versioned.job_grow_id AS "jobGrowId",
+      versioned.kind,
+      ${scoreSampleColumnsSql}
+    FROM versioned
+    GROUP BY versioned.content_id, versioned.job_id, versioned.job_grow_id, versioned.kind`
+}
+
+export function readContentClearJobScores(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearJobScoreSample[]> {
+  return readJobScores(client, weekClearsSql(weekStart))
+}
+
+export function readSelectedContentClearJobScores(
+  client: DatabaseClient,
+  selection: ClearWeekSelection
+): Promise<ClearJobScoreSample[]> {
+  return readJobScores(client, selectedClearsSql(selection))
+}
+
+export function readContentClearWeekGroupScores(
+  client: DatabaseClient,
+  comparison: ClearWeekComparison
+): Promise<ClearWeekGroupScoreSample[]> {
+  return client.$queryRaw<ClearWeekGroupScoreSample[]>`
+    WITH ${weekGroupsSql(comparison)},
+    ${versionedScoresSql(Prisma.sql`clear."group"`, Prisma.sql`grouped clear`, Prisma.sql`TRUE`)}
+    SELECT versioned."group", versioned.kind, ${scoreSampleColumnsSql}
+    FROM versioned
+    GROUP BY versioned."group", versioned.kind`
+}
+
+// 구간 폭은 장비 점수 약 40만~140만, 버프 점수 약 10만~24만에서 구간이 20개 안팎이 되게 정했다.
+const SCORE_BAND_WIDTHS: Readonly<Record<CharacterScoreKind, number>> = {
+  equipment: 50_000,
+  buff: 10_000
+}
+
+// 구간별 캐릭터 수는 분모 기준 명성 이상인 캐릭터의 지금 점수 가운데 클리어 점수와 같은 엔진 버전만 센다.
+export function readContentClearScoreBands(
+  client: DatabaseClient,
+  selection: ClearWeekSelection,
+  minFame: number
+): Promise<ClearScoreBandCount[]> {
+  return client.$queryRaw<ClearScoreBandCount[]>`
+    WITH ${versionedScoresSql(
+      Prisma.sql`clear.server_id`,
+      Prisma.sql`content_clears clear`,
+      selectedClearsSql(selection)
+    )},
+    width AS (
+      SELECT *
+      FROM unnest(
+        ${Object.keys(SCORE_BAND_WIDTHS)}::text[],
+        ${Object.values(SCORE_BAND_WIDTHS)}::int[]
+      ) AS width(kind, size)
+    ),
+    population AS (
+      SELECT stored.kind, (stored.score / width.size) * width.size AS score, count(*)::int AS population
+      FROM character_scores stored
+      JOIN characters c ON c.server_id = stored.server_id AND c.character_id = stored.character_id
+      JOIN engine
+        ON engine.engine_package = stored.engine_package
+        AND engine.engine_rules_rev = stored.engine_rules_rev
+        AND engine.engine_bundle_id = stored.engine_bundle_id
+      JOIN width ON width.kind = stored.kind
+      WHERE c.max_fame >= ${minFame}
+      GROUP BY 1, 2
+    ),
+    cleared AS (
+      SELECT versioned.kind, (versioned.score / width.size) * width.size AS score, count(*)::int AS cleared
+      FROM versioned
+      JOIN width ON width.kind = versioned.kind
+      GROUP BY 1, 2
+    )
+    SELECT
+      kind,
+      score,
+      coalesce(population.population, 0) AS population,
+      coalesce(cleared.cleared, 0) AS cleared
+    FROM population
+    FULL JOIN cleared USING (kind, score)
+    ORDER BY kind, score`
 }
