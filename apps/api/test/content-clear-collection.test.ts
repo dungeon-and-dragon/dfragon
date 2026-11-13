@@ -3,6 +3,7 @@ import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import type {
   ClearPopulationCharacter,
+  ClearRecordBackfillProgress,
   ClearRecordInput,
   CollectedCharacter,
   ContentClearCollectionProgress,
@@ -12,7 +13,10 @@ import type {
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { addWeeks } from 'date-fns'
 import { createJobSchedule } from '../src/infrastructure/jobs/scheduler.js'
-import { createNeopleClearTimeline } from '../src/infrastructure/neople/content-clear-collection.js'
+import {
+  createNeopleClearRecordTimeline,
+  createNeopleClearTimeline
+} from '../src/infrastructure/neople/content-clear-collection.js'
 import {
   type WorkerNeople,
   createNeopleCharacterBasic,
@@ -31,10 +35,12 @@ import { runCollectionPass } from '../src/application/character-collection/runne
 import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
 import {
   type ClearCollectionStore,
+  type ClearRecordBackfillStore,
   type ClearStatsReader
 } from '../src/application/content-clears/ports.js'
 import { collectContentClears } from '../src/application/content-clears/collection.js'
 import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
+import { backfillClearRecords } from '../src/application/content-clears/record-backfill.js'
 import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
 import {
   createClearStatsService,
@@ -1269,4 +1275,192 @@ test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온
   assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(2, false))
   assert.equal(summary.records, 9)
   assert.equal(summary.clears, 4)
+})
+
+// 지난 기록 받기의 진행 위치만 따로 두고, 모집단과 기록은 클리어 수집 fake의 상태를 함께 쓴다.
+function memoryBackfillStore(memory: ReturnType<typeof memoryClearStore>) {
+  const progress = { current: undefined as ClearRecordBackfillProgress | undefined }
+  const store: ClearRecordBackfillStore = {
+    readPopulation: memory.store.readPopulation,
+    readProgress: async () => {
+      if (progress.current === undefined) {
+        return undefined
+      }
+
+      return { ...progress.current }
+    },
+    startProgress: async (startedAt) => {
+      progress.current = { startedAt, done: 0 }
+    },
+    recordProgress: async (next) => {
+      progress.current = { ...next }
+    },
+    recordRecords: memory.store.recordRecords,
+    finishProgress: async () => {
+      progress.current = undefined
+    }
+  }
+
+  return { progress, store }
+}
+
+function backfill(
+  store: ClearRecordBackfillStore,
+  neople: Pick<NeopleClient, 'characterTimeline'>,
+  now: Date,
+  reports: [string, Readonly<Record<string, string | number>>][] = [],
+  pauses: number[] = []
+) {
+  return backfillClearRecords({
+    store,
+    createFetchTimeline: createNeopleClearRecordTimeline(neople),
+    readConcurrency: () => 1,
+    now: () => now,
+    pause: async (ms) => {
+      pauses.push(ms)
+    },
+    report: (code, details) => {
+      reports.push([code, details])
+    },
+    reportProgress: () => {}
+  })
+}
+
+// 2025-02-06 06:00부터 89일씩 나눈 구간이다.
+const RECORD_BACKFILL_RANGES = [
+  '20250206T0600/20250506T0559',
+  '20250506T0600/20250803T0559',
+  '20250803T0600/20251031T0559',
+  '20251031T0600/20260128T0559',
+  '20260128T0600/20260427T0559',
+  '20260427T0600/20260725T0559',
+  '20260725T0600/20261022T0559'
+]
+
+test('지난 기록 받기는 2025-02-06부터 시작 시각까지 code 201, 209, 210만 받아 레이드, 레기온 기록을 저장한다', async () => {
+  const memory = memoryClearStore([character('a', 130_000), character('b')])
+  const { progress, store } = memoryBackfillStore(memory)
+  const { neople, requests } = fakeNeople({
+    a: [
+      raidRow('2025-02-05 23:00', { raidName: '합성 이전 레이드' }),
+      legionRow('2025-02-06 06:30'),
+      nabelHard('2025-06-05 21:00'),
+      michaelaMatching('2026-10-01 20:00')
+    ],
+    b: [michaelaHard('2026-11-07 21:15'), nightmareTitle('2026-11-06 23:59')]
+  })
+
+  const summary = await backfill(store, neople, NOW)
+
+  const ranges = [...RECORD_BACKFILL_RANGES, '20261022T0600/20261110T1200']
+
+  for (const characterId of ['a', 'b']) {
+    assert.deepEqual(
+      requests
+        .filter((request) => request.characterId === characterId)
+        .map(({ code, startDate, endDate }) => `${code}:${startDate}/${endDate}`),
+      ranges.map((range) => `201,209,210:${range}`)
+    )
+  }
+
+  assert.deepEqual(
+    storedRecords(memory.state).map((record) => record.split('/').slice(0, 3).join('/')),
+    [
+      'legion/a/베누스',
+      'raid/a/만들어진 신 나벨',
+      'raid/a/무너진 성자 미카엘라',
+      'raid/b/무너진 성자 미카엘라'
+    ]
+  )
+  assert.deepEqual(summary, {
+    startedAt: NOW.toISOString(),
+    characters: 2,
+    requests: 16,
+    records: 4,
+    skipped: 0
+  })
+  assert.equal(progress.current, undefined)
+})
+
+test('지난 기록 받기가 도중에 끝나면 다음 실행이 처음 시작 시각의 구간으로 처리한 캐릭터 다음부터 이어 받는다', async () => {
+  const memory = memoryClearStore(['a', 'b', 'c', 'd'].map((id) => character(id)))
+  const backfillMemory = memoryBackfillStore(memory)
+  let stopped = false
+  const store: ClearRecordBackfillStore = {
+    ...backfillMemory.store,
+    recordRecords: async (records) => {
+      if (!stopped && records.some(({ characterId }) => characterId === 'c')) {
+        stopped = true
+        throw new Error('worker stopped')
+      }
+
+      await backfillMemory.store.recordRecords(records)
+    }
+  }
+  const { neople, requests } = fakeNeople({
+    a: [nabelHard('2025-06-05 21:00')],
+    c: [legionRow('2025-03-01 20:00')],
+    d: [michaelaHard('2026-11-07 21:15')]
+  })
+
+  await assert.rejects(backfill(store, neople, NOW), { message: 'worker stopped' })
+  assert.equal(backfillMemory.progress.current?.done, 2)
+  const resumed = await backfill(store, neople, at('2026-11-12T07:00'))
+
+  const ranges = [...RECORD_BACKFILL_RANGES, '20261022T0600/20261110T1200']
+  const rangesOf = (characterId: string) =>
+    requests
+      .filter((request) => request.characterId === characterId)
+      .map(({ startDate, endDate }) => `${startDate}/${endDate}`)
+  assert.deepEqual(rangesOf('a'), ranges)
+  assert.deepEqual(rangesOf('b'), ranges)
+  assert.deepEqual(rangesOf('c'), [...ranges, ...ranges])
+  assert.deepEqual(rangesOf('d'), ranges)
+  assert.deepEqual(
+    storedRecords(memory.state).map((record) => record.split('/').slice(0, 3).join('/')),
+    ['legion/c/베누스', 'raid/a/만들어진 신 나벨', 'raid/d/무너진 성자 미카엘라']
+  )
+  assert.equal(resumed.startedAt, NOW.toISOString())
+  assert.equal(backfillMemory.progress.current, undefined)
+})
+
+test('지난 기록 받기도 Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Neople에 없는 캐릭터는 건너뛴다', async () => {
+  const memory = memoryClearStore([character('a'), character('missing'), character('b')])
+  const { store } = memoryBackfillStore(memory)
+  const { neople } = fakeNeople(
+    { a: [legionRow('2026-11-08 21:00')], b: [michaelaHard('2026-11-08 21:15')] },
+    (request, previous) => {
+      if (request.characterId === 'missing') {
+        return new NeopleRequestFailure('api', { characterNotFound: true })
+      }
+
+      if (request.characterId === 'a' && previous.length === 0) {
+        return new NeopleRequestFailure('unavailable')
+      }
+
+      return undefined
+    }
+  )
+
+  const reports: [string, Readonly<Record<string, string | number>>][] = []
+  const pauses: number[] = []
+
+  const summary = await backfill(store, neople, NOW, reports, pauses)
+
+  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'CLEAR_RECORD_BACKFILL_NEOPLE_UNAVAILABLE'),
+    [
+      [
+        'CLEAR_RECORD_BACKFILL_NEOPLE_UNAVAILABLE',
+        { done: 0, characters: 1, unavailable: 1, reasons: 'unavailable=1' }
+      ]
+    ]
+  )
+  assert.deepEqual(
+    storedRecords(memory.state).map((record) => record.split('/').slice(0, 2).join('/')),
+    ['legion/a', 'raid/b']
+  )
+  assert.equal(summary.records, 2)
+  assert.equal(summary.skipped, 1)
 })
