@@ -16,6 +16,8 @@ export type {
 } from './batch-neople-key.js'
 export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
+export { recordCharacterScore } from './character-score.js'
+export type { CharacterScoreInput, CharacterScoreKind } from './character-score.js'
 export {
   enqueueCollectedCharacters,
   readCollectionSummary,
