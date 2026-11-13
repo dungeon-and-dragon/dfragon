@@ -9,7 +9,7 @@ import type { OathCatalog } from '#core/catalog/oath-catalog'
 import type { CharacterSearchQuery, SearchedCharacter } from '#core/api/character-schemas'
 import type { CharacterStats, FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
 import type { SkillStats, SkillStatsJob } from '#core/ranking/skill-stats'
-import type { ClearContentStats, ClearStats } from '#core/ranking/clear-stats'
+import type { ClearContentStats, ClearOverview, ClearStats } from '#core/ranking/clear-stats'
 import type {
   CharacterTimeline,
   TimelineAcquisition,
@@ -66,6 +66,7 @@ export type ClientHost = Readonly<{
     contentId: string,
     weekStart: string | undefined
   ) => Promise<ClearContentStats>
+  getClearOverview: (weekStart: string) => Promise<ClearOverview>
   getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
   getAdventureActivity: (

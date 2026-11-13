@@ -18,8 +18,13 @@ export type BoxPlotRow = Readonly<{
   color: string
   faded?: boolean
   stats: BoxStats
+  value?: string
 }>
 
+export type BoxPlotHead = Readonly<{ name: string; plot: string; value: string }>
+
+const DEFAULT_NAME_WIDTH = 120
+const VALUE_WIDTH = 48
 const EDGE = 24
 const AXIS_HEIGHT = 14
 const AXIS_BASELINE = 11
@@ -165,11 +170,15 @@ type BoxPlotChartProps = Readonly<{
   rows: readonly BoxPlotRow[]
   formatTick: (value: number) => string
   formatValue: (value: number) => string
+  scale?: Scale
+  head?: BoxPlotHead
+  nameWidth?: number
+  legend?: boolean
 }>
 
 export function BoxPlotChart(props: BoxPlotChartProps): React.JSX.Element | null {
-  const scale = boxPlotScale(props.rows.map(({ stats }) => stats))
-  if (scale == null) {
+  const scale = props.scale ?? boxPlotScale(props.rows.map(({ stats }) => stats))
+  if (props.rows.length === 0 || scale == null) {
     return null
   }
 
@@ -181,7 +190,10 @@ function BoxPlotChartPlot({
   rows,
   scale,
   formatTick,
-  formatValue
+  formatValue,
+  head,
+  nameWidth = DEFAULT_NAME_WIDTH,
+  legend = true
 }: BoxPlotChartProps & { scale: Scale }): React.JSX.Element {
   const [hover, setHover] = useState<Hover>(NO_HOVER)
   const chartRef = useRef<HTMLDivElement>(null)
@@ -190,6 +202,9 @@ function BoxPlotChartPlot({
   const anchorsRef = useRef(new Map<string, HTMLElement>())
   const { width } = useChartSize(plotRef, { width: DEFAULT_PLOT_WIDTH, height: CHART_ROW_HEIGHT })
   const shownRow = rows.find(({ key }) => key === hover.key)
+  const hasValueColumn = head != null || rows.some(({ value }) => value != null)
+  const valueWidth = hasValueColumn ? VALUE_WIDTH : 0
+  const columns = boxPlotStyles.columns(nameWidth, valueWidth)
   useChartReveal(chartRef, BOX_PLOT_REVEAL)
   useChartTooltipSlide({
     chartRef,
@@ -227,6 +242,13 @@ function BoxPlotChartPlot({
   return (
     <div {...stylex.props(plotStyles.plot)}>
       <div ref={chartRef} role="group" aria-label={label} {...stylex.props(boxPlotStyles.chart)}>
+        {head != null && (
+          <div aria-hidden="true" {...stylex.props(boxPlotStyles.row, columns, boxPlotStyles.head)}>
+            <span>{head.name}</span>
+            <span>{head.plot}</span>
+            <span {...stylex.props(boxPlotStyles.value)}>{head.value}</span>
+          </div>
+        )}
         <ul onMouseLeave={handleLeave} {...stylex.props(boxPlotStyles.rows)}>
           {rows.map((row) => (
             <BoxPlotChartRow
@@ -234,6 +256,7 @@ function BoxPlotChartPlot({
               row={row}
               scale={scale}
               width={width}
+              columns={columns}
               description={tooltipRows(row)
                 .map(({ name, value }) => `${name} ${value}`)
                 .join(', ')}
@@ -242,7 +265,7 @@ function BoxPlotChartPlot({
             />
           ))}
         </ul>
-        <div {...stylex.props(boxPlotStyles.row)}>
+        <div {...stylex.props(boxPlotStyles.row, columns)}>
           <span />
           <div ref={plotRef} {...stylex.props(boxPlotStyles.plotColumn)}>
             <BoxPlotAxis scale={scale} width={width} formatTick={formatTick} />
@@ -250,15 +273,16 @@ function BoxPlotChartPlot({
         </div>
         <ChartTooltip tooltipRef={tooltipRef} title={shownTitle} rows={shownRows} />
       </div>
-      <BoxPlotLegend />
+      {legend && <BoxPlotLegend />}
     </div>
   )
 }
 
 function BoxPlotChartRow({
-  row: { key, name, sub, color, faded, stats },
+  row: { key, name, sub, color, faded, stats, value },
   scale,
   width,
+  columns,
   description,
   onHover,
   anchorsRef
@@ -266,6 +290,7 @@ function BoxPlotChartRow({
   row: BoxPlotRow
   scale: Scale
   width: number
+  columns: stylex.StyleXStyles
   description: string
   onHover: (hover: Hover) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
@@ -283,7 +308,11 @@ function BoxPlotChartRow({
   }
 
   return (
-    <li data-chart-item="" onMouseEnter={handleMouseEnter} {...stylex.props(boxPlotStyles.row)}>
+    <li
+      data-chart-item=""
+      onMouseEnter={handleMouseEnter}
+      {...stylex.props(boxPlotStyles.row, columns)}
+    >
       <span {...stylex.props(boxPlotStyles.name)}>
         {name}
         {sub != null && <small {...stylex.props(boxPlotStyles.sub)}> {sub}</small>}
@@ -299,6 +328,7 @@ function BoxPlotChartRow({
           height={CHART_ROW_HEIGHT}
         />
       </div>
+      {value != null && <span {...stylex.props(boxPlotStyles.value)}>{value}</span>}
     </li>
   )
 }

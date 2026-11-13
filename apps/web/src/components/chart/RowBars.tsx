@@ -43,18 +43,25 @@ function rowTooltipPlaceOf(
   return { x, y }
 }
 
+function formatInteger(value: number): string {
+  return integer.format(value)
+}
+
 export function RowBars({
   bars,
-  tone = 'count'
+  tone = 'count',
+  max = Math.max(0, ...bars.map(({ value }) => value)),
+  formatValue
 }: {
   bars: readonly Bar[]
   tone?: BarTone
+  max?: number
+  formatValue?: (value: number) => string
 }): React.JSX.Element {
   const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
   const listRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const marksRef = useRef(new Map<string, HTMLSpanElement>())
-  const max = Math.max(0, ...bars.map(({ value }) => value))
   const hasShare = bars.some(({ share }) => share != null)
   const shownBar = bars.find(({ key }) => key === hover.key)
   useChartBarGrow(listRef, ROW_BAR_GROW)
@@ -93,6 +100,8 @@ export function RowBars({
             bar={bar}
             tone={tone}
             percent={percentOf(bar.value, max)}
+            formatValue={formatValue ?? formatInteger}
+            countUp={formatValue === undefined}
             dimmed={hover.open && bar.key !== hover.key}
             onHover={handleHover}
             register={registerMark}
@@ -114,6 +123,8 @@ function BarRow({
   bar: { key, name, value, share },
   tone,
   percent,
+  formatValue,
+  countUp,
   dimmed,
   onHover,
   register
@@ -121,6 +132,8 @@ function BarRow({
   bar: Bar
   tone: BarTone
   percent: number
+  formatValue: (value: number) => string
+  countUp: boolean
   dimmed: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLSpanElement) => () => void
@@ -156,8 +169,11 @@ function BarRow({
           />
         </span>
       </span>
-      <span data-chart-count={value} {...stylex.props(styles.value, fame && styles.valueFame)}>
-        {integer.format(value)}
+      <span
+        data-chart-count={countUp ? value : undefined}
+        {...stylex.props(styles.value, fame && styles.valueFame)}
+      >
+        {formatValue(value)}
       </span>
       {share != null && <span {...stylex.props(shapes.srOnly)}>{share}</span>}
     </li>

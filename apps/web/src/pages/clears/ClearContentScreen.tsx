@@ -28,7 +28,7 @@ import {
 import type { ClearSearch } from './clear-search'
 import { seoulDateOf, weekLabel } from './clear-weeks'
 import { ClearWeekPicker } from './ClearWeekPicker'
-import { styles } from './ClearsScreen.style'
+import { styles } from './ClearContentScreen.style'
 
 const TITLE = '클리어 집계'
 const VISIBLE_JOB_COUNT = 10
@@ -38,7 +38,7 @@ const WEEKS_PER_YEAR = 52
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-export function ClearsScreen({
+export function ClearContentScreen({
   search,
   onSearchChange
 }: {
@@ -121,7 +121,7 @@ function ClearTitle({ week }: { week: ClearWeek | undefined }): React.JSX.Elemen
           }
         />
       )}
-      <TitleStat label="모집단" value={integer.format(week.population)} />
+      <TitleStat label="캐릭터 수" value={integer.format(week.population)} />
       <TitleStat label="수집 시각" value={formatSeoulDateTime(week.collectedAt, now)} />
     </TitleBox>
   )
@@ -375,7 +375,7 @@ function JobTable({ rows }: { rows: readonly JobRow[] }): React.JSX.Element {
               전직
             </th>
             <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
-              모집단
+              캐릭터 수
             </th>
             <th scope="col" {...stylex.props(styles.jobHead, styles.jobHeadValue)}>
               클리어

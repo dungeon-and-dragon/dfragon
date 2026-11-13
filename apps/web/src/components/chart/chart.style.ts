@@ -120,6 +120,7 @@ export const styles = stylex.create({
     alignItems: 'flex-end',
     minHeight: COLUMN_CHART_HEIGHT
   },
+  trackHeight: (height: number) => ({ minHeight: height }),
   columnMark: { position: 'relative', display: 'block', width: '100%', minHeight: MIN_MARK_SIZE },
   columnHeight: (percent: number) => ({ height: `${percent}%` }),
   columnBody: { borderTopLeftRadius: MARK_RADIUS, borderTopRightRadius: MARK_RADIUS },
