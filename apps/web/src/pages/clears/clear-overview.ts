@@ -2,9 +2,9 @@ import { colors } from '@dfragon/ui/tokens.stylex'
 import type {
   ClearAdventureSize,
   ClearContent,
-  ClearContentKind,
   ClearOverview,
   ClearOverviewJob,
+  ClearTimes,
   ClearWeek
 } from '#core/ranking/clear-stats'
 import type { BoxPlotRow } from '../../components/chart/BoxPlot'
@@ -14,62 +14,14 @@ import type { ChartX } from '../../components/chart/plot-layout'
 import type { Bar } from '../../components/chart/RowBars'
 import { shareText } from '../../components/chart/stats-bars'
 import { addDays } from './clear-weeks'
-
-export type ClearStage = '하드' | '일반'
-
-type ClearGroup = Readonly<{ key: string; name: string; shortName: string; color: string }>
-
-type ContentPlace = Readonly<{ group: ClearGroup; stage: ClearStage | null }>
-
-const MICHAELA: ClearGroup = {
-  key: 'michaela',
-  name: '무너진 성자 미카엘라',
-  shortName: '미카엘라',
-  color: colors.chart1
-}
-const DIREGIE: ClearGroup = {
-  key: 'diregie',
-  name: '디레지에 레이드',
-  shortName: '디레지에',
-  color: colors.chart2
-}
-const INAE: ClearGroup = {
-  key: 'inae',
-  name: '이내 황혼전',
-  shortName: '이내 황혼전',
-  color: colors.chart3
-}
-const NABEL: ClearGroup = {
-  key: 'nabel',
-  name: '만들어진 신 나벨',
-  shortName: '나벨',
-  color: colors.chart4
-}
-const NIGHTMARE: ClearGroup = {
-  key: 'nightmare',
-  name: '각인된 악몽',
-  shortName: '각인된 악몽',
-  color: colors.chart7
-}
-
-// 같은 레이드의 일반과 하드를 카드 하나로 묶고, 기간이나 전환을 바꿔도 같은 색을 쓰게 컨텐츠마다 묶음을 고정한다(ADR 0055).
-const CONTENT_PLACES = new Map<string, ContentPlace>([
-  ['michaela-hard', { group: MICHAELA, stage: '하드' }],
-  ['michaela-normal', { group: MICHAELA, stage: '일반' }],
-  ['diregie-hard', { group: DIREGIE, stage: '하드' }],
-  ['diregie-normal', { group: DIREGIE, stage: '일반' }],
-  ['inae-twilight', { group: INAE, stage: null }],
-  ['nabel-hard', { group: NABEL, stage: '하드' }],
-  ['nabel-normal', { group: NABEL, stage: '일반' }],
-  ['engraved-nightmare-1', { group: NIGHTMARE, stage: null }]
-])
-
-const STAGE_ORDER: readonly (ClearStage | null)[] = ['하드', '일반', null]
-
-const KIND_LABELS: Readonly<Record<ClearContentKind, string>> = {
-  raid: '레이드',
-  challenge: '챌린지'
-}
+import {
+  type ClearStage,
+  contentLabelOf,
+  groupsOf,
+  KIND_LABELS,
+  orderedContents,
+  placeOf
+} from './clear-groups'
 
 const percent = new Intl.NumberFormat('ko-KR', {
   style: 'percent',
@@ -78,25 +30,7 @@ const percent = new Intl.NumberFormat('ko-KR', {
 })
 const integer = new Intl.NumberFormat('ko-KR')
 
-function placeOf({ id, name }: ClearContent): ContentPlace {
-  const known = CONTENT_PLACES.get(id)
-  if (known !== undefined) {
-    return known
-  }
-
-  return { group: { key: id, name, shortName: name, color: colors.chartBase }, stage: null }
-}
-
-export function contentLabelOf(content: ClearContent): string {
-  const { group, stage } = placeOf(content)
-  if (stage === null) {
-    return group.shortName
-  }
-
-  return `${group.shortName} ${stage}`
-}
-
-function rateOf({ cleared, population }: ClearWeek): number | null {
+export function rateOf({ cleared, population }: ClearWeek): number | null {
   if (population <= 0) {
     return null
   }
@@ -104,7 +38,7 @@ function rateOf({ cleared, population }: ClearWeek): number | null {
   return cleared / population
 }
 
-function weekOf(content: ClearContent, weekStart: string): ClearWeek | undefined {
+export function weekOf(content: ClearContent, weekStart: string): ClearWeek | undefined {
   return content.weeks.find((week) => week.weekStart === weekStart)
 }
 
@@ -184,9 +118,11 @@ export type ContentCard = Readonly<{
   stages: readonly CardStage[]
 }>
 
-type GroupedContent = Readonly<{ content: ClearContent; place: ContentPlace }>
-
-function changeOf(content: ClearContent, weekStart: string, rate: number): CardStage['change'] {
+export function weekChangeOf(
+  content: ClearContent,
+  weekStart: string,
+  rate: number
+): CardStage['change'] {
   const previous = weekOf(content, addDays(weekStart, -7))
   const previousRate = previous !== undefined ? rateOf(previous) : null
   if (previousRate === null) {
@@ -205,26 +141,6 @@ function changeOf(content: ClearContent, weekStart: string, rate: number): CardS
   return { text: '0.0%p', trend: 'flat' }
 }
 
-function groupsOf(contents: readonly ClearContent[]): GroupedContent[][] {
-  const groups = new Map<string, GroupedContent[]>()
-  for (const content of contents) {
-    const place = placeOf(content)
-    groups.set(place.group.key, [...(groups.get(place.group.key) ?? []), { content, place }])
-  }
-
-  const releaseOf = (group: readonly GroupedContent[]) =>
-    Math.min(...group.map(({ content }) => Date.parse(content.releasedAt)))
-
-  return [...groups.values()]
-    .map((group) =>
-      group.toSorted(
-        (left, right) =>
-          STAGE_ORDER.indexOf(left.place.stage) - STAGE_ORDER.indexOf(right.place.stage)
-      )
-    )
-    .toSorted((left, right) => releaseOf(right) - releaseOf(left))
-}
-
 export function contentCards(contents: readonly ClearContent[], weekStart: string): ContentCard[] {
   return groupsOf(contents).flatMap((group) => {
     const stages = group.flatMap(({ content, place }) => {
@@ -235,7 +151,7 @@ export function contentCards(contents: readonly ClearContent[], weekStart: strin
       }
 
       const rateText = percent.format(rate)
-      const change = changeOf(content, weekStart, rate)
+      const change = weekChangeOf(content, weekStart, rate)
       const cleared = integer.format(week.cleared)
 
       return [{ contentId: content.id, stage: place.stage, rate: rateText, change, cleared }]
@@ -255,10 +171,6 @@ export function contentCards(contents: readonly ClearContent[], weekStart: strin
       }
     ]
   })
-}
-
-export function orderedContents(contents: readonly ClearContent[]): ClearContent[] {
-  return groupsOf(contents).flatMap((group) => group.map(({ content }) => content))
 }
 
 export type RatePeriod = 'quarter' | 'half' | 'year' | 'all'
@@ -461,7 +373,7 @@ const WEEKDAY_NAMES: Readonly<Record<number, string>> = {
 
 const HOUR_TICK_STEP = 6
 
-function columnsOf(
+export function columnsOf(
   counts: readonly { key: string; label: string | null; range: string; cleared: number }[]
 ): ColumnBar[] {
   const max = Math.max(0, ...counts.map(({ cleared }) => cleared))
@@ -475,9 +387,9 @@ function columnsOf(
   })
 }
 
-export function weekdayColumns(overview: ClearOverview): ColumnBar[] {
+export function weekdayColumns({ weekdays }: ClearTimes): ColumnBar[] {
   return columnsOf(
-    overview.weekdays.map(({ weekday, cleared }) => {
+    weekdays.map(({ weekday, cleared }) => {
       const key = String(weekday)
       const name = WEEKDAY_NAMES[weekday] ?? key
 
@@ -486,9 +398,9 @@ export function weekdayColumns(overview: ClearOverview): ColumnBar[] {
   )
 }
 
-export function hourColumns(overview: ClearOverview): ColumnBar[] {
+export function hourColumns({ hours }: ClearTimes): ColumnBar[] {
   return columnsOf(
-    overview.hours.map(({ hour, cleared }) => {
+    hours.map(({ hour, cleared }) => {
       const key = String(hour)
       const label = hour % HOUR_TICK_STEP === 0 ? `${hour}시` : null
 
@@ -497,8 +409,8 @@ export function hourColumns(overview: ClearOverview): ColumnBar[] {
   )
 }
 
-export function hasClearTimes(overview: ClearOverview): boolean {
-  return overview.weekdays.some(({ cleared }) => cleared > 0)
+export function hasClearTimes({ weekdays }: ClearTimes): boolean {
+  return weekdays.some(({ cleared }) => cleared > 0)
 }
 
 export function coClearBars(
@@ -531,14 +443,16 @@ export function formatPercent(value: number): string {
   return percent.format(value)
 }
 
-const LAST_ADVENTURE_SIZE = 13
-
-export function adventureColumns(adventures: readonly ClearAdventureSize[]): ColumnBar[] {
-  const sizes = Array.from({ length: LAST_ADVENTURE_SIZE }, (_, index) => index + 1)
+// 마지막 칸은 그 인원 이상을 모두 센다.
+export function adventureColumns(
+  adventures: readonly ClearAdventureSize[],
+  lastSize: number
+): ColumnBar[] {
+  const sizes = Array.from({ length: lastSize }, (_, index) => index + 1)
 
   return columnsOf(
     sizes.map((size) => {
-      const last = size === LAST_ADVENTURE_SIZE
+      const last = size === lastSize
       const cleared = adventures
         .filter(({ characters }) => (last ? characters >= size : characters === size))
         .reduce((sum, { adventures: count }) => sum + count, 0)

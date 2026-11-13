@@ -31,8 +31,9 @@ import { RankingsPage } from './pages/rankings/RankingsPage'
 import { MultisearchPage } from './pages/multisearch/MultisearchPage'
 import { StatsPage } from './pages/stats/StatsPage'
 import { ClearsPage } from './pages/clears/ClearsPage'
-import { ClearContentPage } from './pages/clears/ClearContentPage'
-import { parseClearSearch, parseClearWeekSearch } from './pages/clears/clear-search'
+import { ClearDetailPage } from './pages/clears/ClearDetailPage'
+import { contentAddressOf, isKnownContentId } from './pages/clears/clear-groups'
+import { parseClearDetailSearch, parseClearSearch } from './pages/clears/clear-search'
 import { parseWeeklySearch } from './pages/weekly/weekly-search'
 import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
@@ -120,10 +121,11 @@ const clearsRoute = createRoute({
   // 컨텐츠를 고른 예전 주소의 북마크가 깨지지 않게 그 컨텐츠의 상세로 넘긴다.
   beforeLoad: ({ search: { content, week } }) => {
     if (content !== undefined) {
+      const { group, stage } = contentAddressOf(content)
       throw redirect({
-        to: '/clears/$contentId',
-        params: { contentId: content },
-        search: { week },
+        to: '/clears/$content',
+        params: { content: group },
+        search: { stage, week },
         replace: true
       })
     }
@@ -133,9 +135,21 @@ const clearsRoute = createRoute({
 
 const clearContentRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/clears/$contentId',
-  validateSearch: parseClearWeekSearch,
-  component: ClearContentPage
+  path: '/clears/$content',
+  validateSearch: parseClearDetailSearch,
+  // 컨텐츠 id로 연 상세 주소의 북마크가 깨지지 않게 그 컨텐츠의 묶음 주소로 넘긴다.
+  beforeLoad: ({ params: { content }, search: { week } }) => {
+    if (isKnownContentId(content)) {
+      const { group, stage } = contentAddressOf(content)
+      throw redirect({
+        to: '/clears/$content',
+        params: { content: group },
+        search: { stage, week },
+        replace: true
+      })
+    }
+  },
+  component: ClearDetailPage
 })
 
 const adventureEntryRoute = createRoute({

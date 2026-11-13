@@ -11,12 +11,8 @@ export function ClearsPage(): React.JSX.Element {
     await navigate({ search: { week: weekStart } })
   }
 
-  async function openContent(contentId: string, weekStart: string): Promise<void> {
-    await navigate({
-      to: '/clears/$contentId',
-      params: { contentId },
-      search: { week: weekStart }
-    })
+  async function openContent(content: string, weekStart: string): Promise<void> {
+    await navigate({ to: '/clears/$content', params: { content }, search: { week: weekStart } })
   }
 
   return <ClearOverviewScreen week={week} onWeekSelect={selectWeek} onContentOpen={openContent} />
