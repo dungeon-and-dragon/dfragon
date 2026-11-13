@@ -60,3 +60,46 @@ export async function recordClearRecords(
     )
     ON CONFLICT ("server_id", "character_id", "cleared_at", "kind", "name") DO NOTHING`
 }
+
+export type ClearRecordBackfillProgress = {
+  startedAt: Date
+  done: number
+}
+
+// 지난 기록 받기가 끝나기 전까지만 행이 있어, 다시 시작한 실행이 같은 시작 시각과 처리한 캐릭터 수로 이어 받는다.
+export async function readClearRecordBackfill(
+  client: DatabaseClient
+): Promise<ClearRecordBackfillProgress | undefined> {
+  const progress = await client.clearRecordBackfill.findFirst({
+    orderBy: { startedAt: 'asc' },
+    select: { startedAt: true, done: true }
+  })
+
+  if (progress === null) {
+    return undefined
+  }
+
+  return progress
+}
+
+export async function startClearRecordBackfill(
+  client: DatabaseClient,
+  startedAt: Date
+): Promise<void> {
+  await client.clearRecordBackfill.create({ data: { startedAt } })
+}
+
+export async function recordClearRecordBackfillProgress(
+  client: DatabaseClient,
+  progress: ClearRecordBackfillProgress
+): Promise<void> {
+  const { startedAt, done } = progress
+  await client.clearRecordBackfill.update({ where: { startedAt }, data: { done } })
+}
+
+export async function finishClearRecordBackfill(
+  client: DatabaseClient,
+  startedAt: Date
+): Promise<void> {
+  await client.clearRecordBackfill.deleteMany({ where: { startedAt } })
+}
