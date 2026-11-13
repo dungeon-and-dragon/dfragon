@@ -1,17 +1,23 @@
 import type {
   ClearCoClearCount,
+  ClearFameBandCount,
   ClearFameSample,
+  ClearFirstWeekCount,
   ClearJobFameSample,
   ClearPopulationCharacter,
-  ClearRaidTimeCount,
   ClearRecordBackfillProgress,
   ClearRecordInput,
+  ClearStageMoveCount,
+  ClearStageMoveSelection,
+  ClearStreakCount,
+  ClearTimeCount,
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
   StoredClearPopulation,
   ClearAdventureSize,
-  ClearJobCount,
+  ClearWeekComparison,
+  ClearWeekGroupSample,
   ClearWeekRatioCount,
   ClearWeekSelection
 } from '@dfragon/database'
@@ -69,10 +75,16 @@ export interface ClearStatsReader {
   readCollectedAt(): Promise<Date | null>
   readPopulations(): Promise<StoredClearPopulation[]>
   readWeekRatioCounts(): Promise<ClearWeekRatioCount[]>
-  readJobCounts(selection: ClearWeekSelection): Promise<ClearJobCount[]>
   readAdventureSizes(selection: ClearWeekSelection): Promise<ClearAdventureSize[]>
+  readContentJobFames(selection: ClearWeekSelection): Promise<ClearJobFameSample[]>
+  readContentTimes(selection: ClearWeekSelection): Promise<ClearTimeCount[]>
+  readFirstWeeks(contentId: string): Promise<ClearFirstWeekCount[]>
+  readFameBands(selection: ClearWeekSelection, minFame: number): Promise<ClearFameBandCount[]>
+  readWeekGroups(comparison: ClearWeekComparison): Promise<ClearWeekGroupSample[]>
+  readStageMoves(selection: ClearStageMoveSelection): Promise<ClearStageMoveCount[]>
+  readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]>
   readFames(weekStart: Date): Promise<ClearFameSample[]>
   readJobFames(weekStart: Date): Promise<ClearJobFameSample[]>
   readCoClears(weekStart: Date): Promise<ClearCoClearCount[]>
-  readRaidTimes(weekStart: Date): Promise<ClearRaidTimeCount[]>
+  readRaidTimes(weekStart: Date): Promise<ClearTimeCount[]>
 }

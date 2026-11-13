@@ -217,3 +217,27 @@ export function toCollectionMinFame(contents: readonly ClearContent[] = CLEAR_CO
 export function toPopulationMinFame(content: ClearContent, collectionMinFame: number): number {
   return Math.max(content.entryFame, collectionMinFame)
 }
+
+export type ClearStagePair = {
+  hard: ClearContent
+  normal: ClearContent
+}
+
+// 이내 황혼전처럼 단계 라벨이 없는 레이드와 챌린지는 짝이 없다.
+export function findStagePair(
+  content: ClearContent,
+  contents: readonly ClearContent[] = CLEAR_CONTENTS
+): ClearStagePair | undefined {
+  const series = contents.filter((candidate) => seriesOf(candidate) === seriesOf(content))
+  const stageOf = (stage: string) =>
+    series.find(({ rule }) => rule.type === 'clear' && rule.stage === stage)
+
+  const hard = stageOf('하드')
+  const normal = stageOf('일반')
+
+  if (hard === undefined || normal === undefined) {
+    return undefined
+  }
+
+  return { hard, normal }
+}
