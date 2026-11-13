@@ -176,7 +176,14 @@ function contentStatsOf(contentId: string): ClearContentStats {
       { characters: 12, adventures: 3 },
       { characters: 13, adventures: 2 },
       { characters: 20, adventures: 5 }
-    ]
+    ],
+    weeklyClears: [],
+    fameBands: [],
+    weekOverWeek: null,
+    stageMoves: null,
+    streaks: null,
+    weekdays: [],
+    hours: []
   }
 }
 
@@ -186,7 +193,7 @@ type Loaders = Partial<
 
 type Handlers = Readonly<{
   onWeekSelect?: (weekStart: string) => void
-  onContentOpen?: (contentId: string, weekStart: string) => void
+  onContentOpen?: (contentKey: string, weekStart: string) => void
 }>
 
 function render(
@@ -341,14 +348,14 @@ it('휠의 이전 주와 다음 주를 누르면 그 주를 고르고, 고른 �
   ])
 })
 
-it('컨텐츠 카드를 누르면 그 컨텐츠의 첫 단계와 고른 주로 상세를 연다', async () => {
+it('컨텐츠 카드를 누르면 그 컨텐츠 묶음과 고른 주로 상세를 연다', async () => {
   const onContentOpen = vi.fn()
   await render(LAST_CLOSED_WEEK, {}, { onContentOpen })
 
   const card = [...container.querySelectorAll('nav[aria-label="컨텐츠"] > div > button')][1]!
   await click(card)
 
-  expect(onContentOpen).toHaveBeenCalledWith('michaela-hard', LAST_CLOSED_WEEK)
+  expect(onContentOpen).toHaveBeenCalledWith('michaela', LAST_CLOSED_WEEK)
 })
 
 it('주간 클리어율은 레이드만 단계별 선으로 그리고 기간을 줄여 선이 빠져도 남은 컨텐츠의 색을 바꾸지 않는다', async () => {

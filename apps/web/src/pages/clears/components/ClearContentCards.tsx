@@ -18,10 +18,12 @@ function edgesOf(track: HTMLElement): Edges {
 
 export function ClearContentCards({
   cards,
+  selectedKey,
   onOpen
 }: {
   cards: readonly ContentCard[]
-  onOpen: (contentId: string) => void
+  selectedKey?: string
+  onOpen: (card: ContentCard) => void
 }): React.JSX.Element {
   const trackRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState<Edges>(AT_BOTH_EDGES)
@@ -66,7 +68,7 @@ export function ClearContentCards({
     <nav aria-label="컨텐츠" {...stylex.props(styles.cards)}>
       <div ref={trackRef} {...stylex.props(styles.track)}>
         {cards.map((card) => (
-          <Card key={card.key} card={card} onOpen={onOpen} />
+          <Card key={card.key} card={card} selected={card.key === selectedKey} onOpen={onOpen} />
         ))}
       </div>
       {!edges.start && (
@@ -94,24 +96,29 @@ export function ClearContentCards({
 }
 
 function Card({
-  card: { kind, name, backgroundId, stages },
+  card,
+  selected,
   onOpen
 }: {
   card: ContentCard
-  onOpen: (contentId: string) => void
+  selected: boolean
+  onOpen: (card: ContentCard) => void
 }): React.JSX.Element {
+  const { kind, name, backgroundId, stages } = card
   const background = findClearContentBackground(backgroundId)
   const single = stages.length === 1
 
   function open(): void {
-    const first = stages[0]
-    if (first !== undefined) {
-      onOpen(first.contentId)
-    }
+    onOpen(card)
   }
 
   return (
-    <button type="button" onClick={open} {...stylex.props(styles.card)}>
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={open}
+      {...stylex.props(styles.card, selected && styles.selected)}
+    >
       {background !== undefined && (
         <span aria-hidden="true" {...stylex.props(styles.image, styles.imageUrl(background))} />
       )}

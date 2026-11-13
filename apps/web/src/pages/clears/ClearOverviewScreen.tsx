@@ -1,7 +1,6 @@
 import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
-import { type ReactNode, useState } from 'react'
-import { formatSeoulDateTime } from '#core/time-format'
+import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking/clear-stats'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
 import { BoxPlotLegend } from '../../components/chart/ChartLegend'
@@ -9,13 +8,14 @@ import { boxPlotScale } from '../../components/chart/chart-geometry'
 import { Columns } from '../../components/chart/Columns'
 import { LineChart } from '../../components/chart/LineChart'
 import { RowBars } from '../../components/chart/RowBars'
-import { TitleBox, TitleStat } from '../../components/table/TitleBox'
+import { TitleBox } from '../../components/table/TitleBox'
 import {
   adventureColumns,
   type BaseContentOption,
   baseContentOptions,
   clearRateChart,
   coClearBars,
+  type ContentCard,
   contentCards,
   defaultBaseContentId,
   fameRows,
@@ -23,7 +23,6 @@ import {
   formatPercent,
   hasClearTimes,
   hasRateValues,
-  hourColumns,
   jobRanks,
   type OverviewWeek,
   overviewWeeks,
@@ -31,18 +30,18 @@ import {
   RATE_STAGES,
   type RatePeriod,
   type RateStage,
-  weekdayColumns,
   weekSummaryOf
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
 import { ChoiceGroup } from './components/ChoiceGroup'
 import { ClearContentCards } from './components/ClearContentCards'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
+import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
+import { styles as layout } from './components/ClearPanel.style'
 import { useClearContentStats, useClearOverview, useClearStats } from './hooks/useClearStats'
 import { styles } from './ClearOverviewScreen.style'
 
-const TITLE = '클리어 집계'
-const TIME_COLUMN_HEIGHT = 64
+const OVERVIEW_LAST_ADVENTURE_SIZE = 13
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -65,24 +64,24 @@ export function ClearOverviewScreen({
 }: {
   week: string | undefined
   onWeekSelect: (weekStart: string) => void
-  onContentOpen: (contentId: string, weekStart: string) => void
+  onContentOpen: (contentKey: string, weekStart: string) => void
 }): React.JSX.Element {
   const result = useClearStats()
   switch (result.status) {
     case 'loading':
       return (
-        <div aria-busy="true" {...stylex.props(styles.screen)}>
+        <div aria-busy="true" {...stylex.props(layout.screen)}>
           <span role="status" {...stylex.props(shapes.srOnly)}>
             클리어 집계를 받는 중입니다.
           </span>
-          <TitleBox title={TITLE} />
+          <TitleBox title={CLEAR_TITLE} />
         </div>
       )
     case 'error':
       return (
-        <div {...stylex.props(styles.screen)}>
-          <TitleBox title={TITLE} />
-          <p role="alert" {...stylex.props(styles.state)}>
+        <div {...stylex.props(layout.screen)}>
+          <TitleBox title={CLEAR_TITLE} />
+          <p role="alert" {...stylex.props(layout.state)}>
             {result.message}
           </p>
         </div>
@@ -93,9 +92,9 @@ export function ClearOverviewScreen({
       const selected = findOverviewWeek(weeks, week)
       if (selected === undefined) {
         return (
-          <div {...stylex.props(styles.screen)}>
-            <TitleBox title={TITLE} />
-            <p {...stylex.props(styles.empty)}>수집 기록이 없습니다.</p>
+          <div {...stylex.props(layout.screen)}>
+            <TitleBox title={CLEAR_TITLE} />
+            <p {...stylex.props(layout.empty)}>수집 기록이 없습니다.</p>
           </div>
         )
       }
@@ -124,29 +123,26 @@ function Overview({
   weeks: readonly OverviewWeek[]
   selected: OverviewWeek
   onWeekSelect: (weekStart: string) => void
-  onContentOpen: (contentId: string, weekStart: string) => void
+  onContentOpen: (contentKey: string, weekStart: string) => void
 }): React.JSX.Element {
   const { weekStart } = selected
   const result = useClearOverview(weekStart)
 
-  function openContent(contentId: string): void {
-    onContentOpen(contentId, weekStart)
+  function openContent(card: ContentCard): void {
+    onContentOpen(card.key, weekStart)
   }
 
   return (
-    <div {...stylex.props(styles.screen)}>
-      <OverviewTitle
-        contents={contents}
-        weeks={weeks}
-        selected={selected}
-        onWeekSelect={onWeekSelect}
-      />
+    <div {...stylex.props(layout.screen)}>
+      <ClearTitle summary={weekSummaryOf(contents, weekStart)}>
+        <ClearWeekWheel weeks={weeks} selected={selected} onSelect={onWeekSelect} />
+      </ClearTitle>
       <ClearContentCards cards={contentCards(contents, weekStart)} onOpen={openContent} />
       {hasRateValues(contents) && (
         <ClearRatePanel contents={contents} weeks={weeks} weekStart={weekStart} />
       )}
       {result.status === 'error' && (
-        <p role="alert" {...stylex.props(styles.state)}>
+        <p role="alert" {...stylex.props(layout.state)}>
           {result.message}
         </p>
       )}
@@ -154,64 +150,6 @@ function Overview({
         <OverviewStats overview={result.value} contents={contents} weekStart={weekStart} />
       )}
     </div>
-  )
-}
-
-function OverviewTitle({
-  contents,
-  weeks,
-  selected,
-  onWeekSelect
-}: {
-  contents: readonly ClearContent[]
-  weeks: readonly OverviewWeek[]
-  selected: OverviewWeek
-  onWeekSelect: (weekStart: string) => void
-}): React.JSX.Element {
-  const [now] = useState(Date.now)
-  const summary = weekSummaryOf(contents, selected.weekStart)
-
-  return (
-    <header {...stylex.props(styles.title)}>
-      <h1 {...stylex.props(styles.titleText)}>{TITLE}</h1>
-      <ClearWeekWheel weeks={weeks} selected={selected} onSelect={onWeekSelect} />
-      {summary !== undefined && (
-        <div {...stylex.props(styles.titleStats)}>
-          {summary.minFame !== null && (
-            <TitleStat
-              label="기준 명성"
-              value={
-                <span {...stylex.props(styles.fame)}>
-                  {`${integer.format(summary.minFame)} 이상`}
-                </span>
-              }
-            />
-          )}
-          <TitleStat label="캐릭터 수" value={integer.format(summary.population)} />
-          <TitleStat label="수집 시각" value={formatSeoulDateTime(summary.collectedAt, now)} />
-        </div>
-      )}
-    </header>
-  )
-}
-
-function Panel({
-  name,
-  controls,
-  children
-}: {
-  name: string
-  controls?: ReactNode
-  children: ReactNode
-}): React.JSX.Element {
-  return (
-    <section aria-label={name} {...stylex.props(styles.panel)}>
-      <div {...stylex.props(styles.panelHead)}>
-        <h2 {...stylex.props(styles.panelTitle)}>{name}</h2>
-        {controls}
-      </div>
-      <div {...stylex.props(styles.panelBody)}>{children}</div>
-    </section>
   )
 }
 
@@ -279,7 +217,7 @@ function OverviewStats({
   return (
     <>
       {fames.length > 0 && (
-        <div {...stylex.props(styles.row)}>
+        <div {...stylex.props(layout.row)}>
           <Panel name="클리어 캐릭터의 명성">
             <BoxPlotChart
               label="클리어 캐릭터의 명성"
@@ -291,8 +229,8 @@ function OverviewStats({
         </div>
       )}
       <JobPanel overview={overview} contents={contents} options={options} />
-      <div {...stylex.props(styles.row)}>
-        {hasClearTimes(overview) && <ClearTimePanel overview={overview} />}
+      <div {...stylex.props(layout.row)}>
+        {hasClearTimes(overview) && <ClearTimePanel times={overview} />}
         <CoClearPanel overview={overview} contents={contents} options={options} />
         <AdventurePanel contents={contents} options={options} weekStart={weekStart} />
       </div>
@@ -349,7 +287,7 @@ function JobPanel({
       <div {...stylex.props(styles.jobLists)}>
         {lists.map(({ name, rows }) => (
           <div key={name} {...stylex.props(styles.jobList)}>
-            <p {...stylex.props(styles.subLabel, styles.jobListTitle)}>{name}</p>
+            <p {...stylex.props(layout.subLabel, styles.jobListTitle)}>{name}</p>
             <BoxPlotChart
               label={name}
               rows={rows}
@@ -365,21 +303,6 @@ function JobPanel({
       </div>
       <div {...stylex.props(styles.jobLegend)}>
         <BoxPlotLegend />
-      </div>
-    </Panel>
-  )
-}
-
-function ClearTimePanel({ overview }: { overview: ClearOverview }): React.JSX.Element {
-  return (
-    <Panel name="클리어 요일과 시간대">
-      <div {...stylex.props(styles.columnsBlock)}>
-        <p {...stylex.props(styles.subLabel, styles.columnsLabel)}>요일</p>
-        <Columns groups={[weekdayColumns(overview)]} height={TIME_COLUMN_HEIGHT} />
-      </div>
-      <div {...stylex.props(styles.columnsBlock)}>
-        <p {...stylex.props(styles.subLabel, styles.columnsLabel)}>시간대</p>
-        <Columns groups={[hourColumns(overview)]} height={TIME_COLUMN_HEIGHT} />
       </div>
     </Panel>
   )
@@ -419,7 +342,7 @@ function CoClearPanel({
       }
     >
       <div {...stylex.props(styles.coClearHead)}>
-        <span {...stylex.props(styles.subLabel)}>{`${option.label} 클리어 캐릭터`}</span>
+        <span {...stylex.props(layout.subLabel)}>{`${option.label} 클리어 캐릭터`}</span>
         <span {...stylex.props(styles.coClearCount)}>{integer.format(base.cleared)}</span>
       </div>
       <RowBars bars={bars} max={1} formatValue={formatPercent} />
@@ -480,12 +403,14 @@ function AdventureStats({
       }
     >
       {result.status === 'error' && (
-        <p role="alert" {...stylex.props(styles.bodyState)}>
+        <p role="alert" {...stylex.props(layout.bodyState)}>
           {result.message}
         </p>
       )}
       {result.status === 'success' && (
-        <Columns groups={[adventureColumns(result.value.adventures)]} />
+        <Columns
+          groups={[adventureColumns(result.value.adventures, OVERVIEW_LAST_ADVENTURE_SIZE)]}
+        />
       )}
     </Panel>
   )

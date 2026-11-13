@@ -65,7 +65,8 @@ const detail: ClearContentStats = {
       jobName: '합성 직업',
       jobGrowName: '眞 합성 전직',
       population: 100,
-      cleared: 28
+      cleared: 28,
+      fame: { p5: 110000, p25: 118000, median: 122000, p75: 126000, p95: 132000, max: 140000 }
     },
     {
       jobId: null,
@@ -73,13 +74,37 @@ const detail: ClearContentStats = {
       jobName: null,
       jobGrowName: null,
       population: 0,
-      cleared: 2
+      cleared: 2,
+      fame: null
     }
   ],
   adventures: [
     { characters: 1, adventures: 20 },
     { characters: 2, adventures: 5 }
-  ]
+  ],
+  weeklyClears: [
+    {
+      weekStart: '2026-11-05',
+      population: 100000,
+      firstCleared: 10,
+      repeatCleared: 20,
+      everCleared: 40
+    }
+  ],
+  fameBands: [{ fame: 104000, population: 500, cleared: 30 }],
+  weekOverWeek: {
+    both: { cleared: 15, fame: null },
+    returned: { cleared: 3, fame: null },
+    left: { cleared: 4, fame: null },
+    first: { cleared: 10, fame: null }
+  },
+  stageMoves: {
+    hard: { same: 15, other: 3, none: 12 },
+    normal: { same: 40, other: 2, none: 8 }
+  },
+  streaks: [{ weeks: 1, characters: 30 }],
+  weekdays: [{ weekday: 6, cleared: 30 }],
+  hours: [{ hour: 21, cleared: 30 }]
 }
 
 it('클리어 집계 목록 응답을 읽는다', async () => {
@@ -103,8 +128,21 @@ it('컨텐츠 집계는 고른 주를 week query로 보내고, 주를 고르지 
   expect(new Request(fetch.mock.calls[1][0]).url).toBe(`${API_ORIGIN}/stats/clears/michaela-hard`)
 })
 
-it('수집한 주가 없는 컨텐츠 집계는 week null과 빈 목록으로 읽는다', async () => {
-  const empty = { ...detail, week: null, jobs: [], adventures: [] }
+it('수집한 주가 없거나 챌린지인 컨텐츠 집계는 week와 레이드 전용 통계를 null로 읽는다', async () => {
+  const empty = {
+    ...detail,
+    kind: 'challenge',
+    week: null,
+    jobs: [],
+    adventures: [],
+    weeklyClears: [],
+    fameBands: [],
+    weekOverWeek: null,
+    stageMoves: null,
+    streaks: null,
+    weekdays: [],
+    hours: []
+  }
 
   await expect(
     createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).clearContentStats(
