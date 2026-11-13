@@ -88,7 +88,10 @@ export function Columns({
   }
 
   return (
-    <div ref={scrollerRef} {...stylex.props(styles.chart, scrollable && styles.chartScroll)}>
+    <div
+      ref={scrollerRef}
+      {...stylex.props(styles.chart, styles.columnsChart, scrollable && styles.chartScroll)}
+    >
       <ul
         ref={chartRef}
         onMouseLeave={handleLeave}
@@ -101,7 +104,6 @@ export function Columns({
               <Column
                 key={bar.key}
                 bar={bar}
-                active={open && bar.key === shownKey}
                 dimmed={open && bar.key !== shownKey}
                 scrollable={scrollable}
                 onHover={handleHover}
@@ -133,14 +135,12 @@ export function Columns({
 
 function Column({
   bar: { key, label, range, count, share, ratio },
-  active,
   dimmed,
   scrollable,
   onHover,
   register
 }: {
   bar: ColumnBar
-  active: boolean
   dimmed: boolean
   scrollable: boolean
   onHover: (key: string) => void
@@ -174,16 +174,8 @@ function Column({
               {...stylex.props(
                 styles.body,
                 styles.columnBody,
-                active && styles.bodyActive,
+                styles.bodyCount,
                 dimmed && styles.bodyDimmed
-              )}
-            />
-            <span
-              {...stylex.props(
-                styles.edge,
-                styles.columnEdge,
-                styles.edgeCount,
-                dimmed && styles.edgeDimmed
               )}
             />
           </span>

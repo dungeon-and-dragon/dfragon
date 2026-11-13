@@ -8,6 +8,7 @@ export const styles = stylex.create({
     borderStyle: 'solid',
     borderColor: colors.borderDefault
   },
+  fillHeight: { display: 'flex', flexDirection: 'column' },
   name: {
     display: 'flex',
     alignItems: 'center',

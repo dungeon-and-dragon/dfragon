@@ -3,11 +3,9 @@ import { styles } from '../../../components/chart/chart.style'
 
 export function TableRail({
   percent,
-  active,
   dimmed
 }: {
   percent: number
-  active: boolean
   dimmed: boolean
 }): React.JSX.Element {
   return (
@@ -16,17 +14,9 @@ export function TableRail({
         <span
           {...stylex.props(
             styles.body,
-            styles.rowBodyCount,
-            active && styles.bodyActive,
+            styles.rowBody,
+            styles.bodyCount,
             dimmed && styles.bodyDimmed
-          )}
-        />
-        <span
-          {...stylex.props(
-            styles.edge,
-            styles.rowEdge,
-            styles.edgeCount,
-            dimmed && styles.edgeDimmed
           )}
         />
       </span>
