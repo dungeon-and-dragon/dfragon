@@ -41,6 +41,18 @@ const NABEL: ClearGroup = {
   shortName: '나벨',
   color: colors.chart4
 }
+const APOCALYPSE: ClearGroup = {
+  key: 'apocalypse',
+  name: '아포칼립스',
+  shortName: '아포칼립스',
+  color: colors.chart5
+}
+const VENUS: ClearGroup = {
+  key: 'venus',
+  name: '베누스',
+  shortName: '베누스',
+  color: colors.chart6
+}
 const NIGHTMARE: ClearGroup = {
   key: 'nightmare',
   name: '각인된 악몽',
@@ -60,14 +72,31 @@ const CONTENT_PLACES = new Map<string, ContentPlace>([
   [
     'engraved-nightmare-1',
     { group: NIGHTMARE, stage: null, choice: { slug: '1', label: '죽음을 딛고 선 자' } }
-  ]
+  ],
+  ['legion-apocalypse', { group: APOCALYPSE, stage: null, choice: null }],
+  ['legion-venus', { group: VENUS, stage: null, choice: null }]
 ])
 
 const STAGE_ORDER: readonly (ClearStage | null)[] = ['하드', '일반', null]
 
+// 여러 컨텐츠를 겹친 차트의 범례는 차트 색 순서로 둔다.
+const LEGEND_ORDER = [MICHAELA, DIREGIE, INAE, NABEL, APOCALYPSE, VENUS, NIGHTMARE].map(
+  ({ key }) => key
+)
+
+export function legendRankOf({ key }: ClearGroup): number {
+  const rank = LEGEND_ORDER.indexOf(key)
+  if (rank === -1) {
+    return LEGEND_ORDER.length
+  }
+
+  return rank
+}
+
 export const KIND_LABELS: Readonly<Record<ClearContentKind, string>> = {
   raid: '레이드',
-  challenge: '챌린지'
+  challenge: '챌린지',
+  legion: '레기온'
 }
 
 export function placeOf({ id, name }: ClearContent): ContentPlace {
@@ -131,4 +160,14 @@ export function groupsOf(contents: readonly ClearContent[]): GroupedContent[][] 
 
 export function orderedContents(contents: readonly ClearContent[]): ClearContent[] {
   return groupsOf(contents).flatMap((group) => group.map(({ content }) => content))
+}
+
+export function clearContentsOf({
+  contents,
+  legions
+}: Readonly<{
+  contents: readonly ClearContent[]
+  legions: readonly ClearContent[]
+}>): ClearContent[] {
+  return [...contents, ...legions]
 }
