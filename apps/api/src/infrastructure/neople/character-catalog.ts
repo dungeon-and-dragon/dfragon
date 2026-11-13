@@ -23,7 +23,7 @@ function selectRequestedRows(rows: unknown[], itemIds: string[]): Map<string, Ch
   return payloads
 }
 
-export function createNeopleCatalog(neople: NeopleClient): FetchCatalog {
+export function createNeopleCatalog(neople: Pick<NeopleClient, 'multiItems'>): FetchCatalog {
   return async (itemIds, signal) => {
     if (
       itemIds.length === 0 ||

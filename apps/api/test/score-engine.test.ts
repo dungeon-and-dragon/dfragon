@@ -96,6 +96,7 @@ test('만들 때 라이브러리 경로로 worker 하나를 띄우고 모든 계
   assert.deepEqual(await first, engineResult)
   assert.deepEqual(await second, { ...engineResult, calculator: 'buff' })
   assert.deepEqual(spawned, [{ path: LIBRARY_PATH }])
+  assert.equal(engine.isRunning(), true)
   assert.deepEqual(
     workers[0]!.requests.map(({ input, calculator }) => ({ input, calculator })),
     [
@@ -110,6 +111,7 @@ test('라이브러리 경로가 없으면 worker를 띄우지 않고 진단 없�
   const { engine, reports, spawned } = scoreEngine(null)
 
   assert.equal(await calculate(engine), null)
+  assert.equal(engine.isRunning(), false)
   await engine.close()
   assert.deepEqual(spawned, [])
   assert.deepEqual(reports, [])
@@ -124,6 +126,7 @@ test('worker가 라이브러리를 열지 못하면 기다리던 계산을 비�
 
   assert.equal(await pending, null)
   assert.equal(await calculate(engine), null)
+  assert.equal(engine.isRunning(), false)
   assert.equal(workers[0]!.terminated, true)
   assert.equal(spawned.length, 1)
   assert.deepEqual(reports, ['SCORE_ENGINE_UNAVAILABLE'])

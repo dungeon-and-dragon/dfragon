@@ -477,6 +477,31 @@ test('수집 worker 설정은 Neople key 없이 읽히고, 목록 파일을 쉼�
   }
 })
 
+test('수집 worker 설정은 점수 엔진 경로와 점수 계산 일정이 없어도 읽히고, 있으면 절대 경로와 올바른 cron 식만 받는다', () => {
+  const defaults = readCollectorConfiguration(collectorEnvironment)
+  assert.equal(defaults.scoreLibraryPath, null)
+  assert.equal(defaults.scoreCalculationSchedule, undefined)
+
+  const configured = readCollectorConfiguration({
+    ...collectorEnvironment,
+    SCORE_LIBRARY_FILE: '/app/score/libdnfscore.so',
+    SCORE_CALCULATION_SCHEDULE: '30 20 * * 3'
+  })
+
+  assert.equal(configured.scoreLibraryPath, '/app/score/libdnfscore.so')
+  assert.equal(configured.scoreCalculationSchedule, '30 20 * * 3')
+
+  for (const invalid of [
+    { ...collectorEnvironment, SCORE_LIBRARY_FILE: 'libdnfscore.so' },
+    { ...collectorEnvironment, SCORE_CALCULATION_SCHEDULE: 'wednesday night' },
+    { ...collectorEnvironment, SCORE_CALCULATION_SCHEDULE: '' }
+  ]) {
+    assert.throws(() => readCollectorConfiguration(invalid), {
+      message: 'Invalid character collector configuration'
+    })
+  }
+})
+
 test('수집 worker 설정은 job 알림 웹훅이 없으면 알림 없이, 있으면 https URL로 받는다', () => {
   assert.equal(readCollectorConfiguration(collectorEnvironment).jobAlertWebhookUrl, undefined)
   assert.equal(

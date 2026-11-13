@@ -1,6 +1,7 @@
 import { isAbsolute } from 'node:path'
 import { readDatabaseConfiguration, readSecretInput } from '@dfragon/database'
 import { z } from 'zod'
+import { isJobSchedule } from '../infrastructure/jobs/scheduler.js'
 
 const invalidConfiguration = 'Invalid character collector configuration'
 const DEFAULT_REQUESTS_PER_SECOND = 5
@@ -22,7 +23,9 @@ const collectorEnvironmentSchema = z.object({
     .int()
     .min(1)
     .max(MAX_CONCURRENCY)
-    .default(DEFAULT_CONCURRENCY)
+    .default(DEFAULT_CONCURRENCY),
+  SCORE_LIBRARY_FILE: z.string().refine(isAbsolute).nullable().default(null),
+  SCORE_CALCULATION_SCHEDULE: z.string().refine(isJobSchedule).optional()
 })
 
 const HTTPS_PROTOCOL_PATTERN = /^https$/
@@ -33,7 +36,9 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
     const {
       CHARACTER_IMPORT_FILES: importFiles,
       CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: requestsPerSecond,
-      CHARACTER_COLLECTOR_CONCURRENCY: concurrency
+      CHARACTER_COLLECTOR_CONCURRENCY: concurrency,
+      SCORE_LIBRARY_FILE: scoreLibraryPath,
+      SCORE_CALCULATION_SCHEDULE: scoreCalculationSchedule
     } = collectorEnvironmentSchema.parse(environment)
     const database = readDatabaseConfiguration(environment)
     if (database === undefined) {
@@ -46,7 +51,15 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
       )
     )
 
-    return { database, importFiles, requestsPerSecond, concurrency, jobAlertWebhookUrl }
+    return {
+      database,
+      importFiles,
+      requestsPerSecond,
+      concurrency,
+      jobAlertWebhookUrl,
+      scoreLibraryPath,
+      scoreCalculationSchedule
+    }
   } catch {
     // secret 파일 읽기 오류와 zod issue는 경로나 입력값을 담을 수 있다.
     throw new Error(invalidConfiguration)
