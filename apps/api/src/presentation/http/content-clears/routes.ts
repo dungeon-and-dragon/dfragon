@@ -4,15 +4,24 @@ import type { ClearStatsService } from '../../../application/content-clears/serv
 import { CharacterDetailFailure } from '../../../domain/character-failure.js'
 import { readQuery } from '../request-query.js'
 
-const contentStatsQuery = z.object({ week: z.iso.date().optional() })
+const weekQuery = z.object({ week: z.iso.date().optional() })
 
 export function createClearStatsRoutes(service: ClearStatsService): Hono {
   const routes = new Hono()
 
   routes.get('/', async (c) => c.json(await service.stats()))
 
+  routes.get('/overview', async (c) => {
+    const parsed = weekQuery.safeParse(readQuery(c))
+    if (!parsed.success) {
+      throw new CharacterDetailFailure('query')
+    }
+
+    return c.json(await service.overview(parsed.data.week))
+  })
+
   routes.get('/:contentId', async (c) => {
-    const parsed = contentStatsQuery.safeParse(readQuery(c))
+    const parsed = weekQuery.safeParse(readQuery(c))
     if (!parsed.success) {
       throw new CharacterDetailFailure('query')
     }

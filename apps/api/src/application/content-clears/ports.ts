@@ -1,5 +1,9 @@
 import type {
+  ClearCoClearCount,
+  ClearFameSample,
+  ClearJobFameSample,
   ClearPopulationCharacter,
+  ClearRaidTimeCount,
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
@@ -45,4 +49,8 @@ export interface ClearStatsReader {
   readWeekRatioCounts(): Promise<ClearWeekRatioCount[]>
   readJobCounts(selection: ClearWeekSelection): Promise<ClearJobCount[]>
   readAdventureSizes(selection: ClearWeekSelection): Promise<ClearAdventureSize[]>
+  readFames(weekStart: Date): Promise<ClearFameSample[]>
+  readJobFames(weekStart: Date): Promise<ClearJobFameSample[]>
+  readCoClears(weekStart: Date): Promise<ClearCoClearCount[]>
+  readRaidTimes(weekStart: Date): Promise<ClearRaidTimeCount[]>
 }

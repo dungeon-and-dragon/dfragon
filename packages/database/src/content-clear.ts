@@ -325,3 +325,115 @@ export function readContentClearAdventureSizes(
     GROUP BY characters
     ORDER BY characters`
 }
+
+export type ClearFameSample = {
+  contentId: string
+  characters: number
+  quantiles: number[] | null
+  max: number | null
+}
+
+export type ClearJobFameSample = ClearFameSample & {
+  jobId: string | null
+  jobGrowId: string | null
+  jobName: string | null
+  jobGrowName: string | null
+  cleared: number
+}
+
+export type ClearCoClearCount = {
+  contentId: string
+  otherContentId: string
+  cleared: number
+}
+
+export type ClearRaidTimeCount = {
+  weekday: number
+  hour: number
+  cleared: number
+}
+
+// 모든 컨텐츠를 한 주로 고른다. 레이드는 그 주에 깬 캐릭터, 챌린지는 출시부터 그 주 끝까지 깬 캐릭터다.
+function weekClearsSql(weekStart: Date): Prisma.Sql {
+  return Prisma.sql`(
+    (clear.kind = 'raid' AND clear.week_start = ${weekStart})
+    OR (clear.kind = 'challenge' AND clear.week_start <= ${weekStart})
+  )`
+}
+
+// quantiles는 5%, 25%, 50%, 75%, 95% 순이다. percentile_disc는 저장된 명성 가운데 하나를 고르고,
+// 명성이 없는 캐릭터는 분위수와 characters에서 빠진다.
+const fameSampleColumnsSql = Prisma.sql`
+  count(c.max_fame)::int AS characters,
+  percentile_disc(ARRAY[0.05, 0.25, 0.5, 0.75, 0.95]) WITHIN GROUP (ORDER BY c.max_fame) AS quantiles,
+  max(c.max_fame) AS max`
+
+export function readContentClearFames(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearFameSample[]> {
+  return client.$queryRaw<ClearFameSample[]>`
+    SELECT clear.content_id AS "contentId", ${fameSampleColumnsSql}
+    FROM content_clears clear
+    LEFT JOIN characters c
+      ON c.server_id = clear.server_id AND c.character_id = clear.character_id
+    WHERE ${weekClearsSql(weekStart)}
+    GROUP BY clear.content_id`
+}
+
+export function readContentClearJobFames(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearJobFameSample[]> {
+  return client.$queryRaw<ClearJobFameSample[]>`
+    SELECT
+      clear.content_id AS "contentId",
+      c.job_id AS "jobId",
+      c.job_grow_id AS "jobGrowId",
+      c.job_name AS "jobName",
+      c.job_grow_name AS "jobGrowName",
+      count(*)::int AS cleared,
+      ${fameSampleColumnsSql}
+    FROM content_clears clear
+    LEFT JOIN characters c
+      ON c.server_id = clear.server_id AND c.character_id = clear.character_id
+    WHERE ${weekClearsSql(weekStart)}
+    GROUP BY clear.content_id, c.job_id, c.job_grow_id, c.job_name, c.job_grow_name`
+}
+
+// 한 주로 고르면 컨텐츠마다 캐릭터당 한 행이라 짝지은 행 수가 두 컨텐츠를 함께 깬 캐릭터 수다.
+export function readContentClearCoClears(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearCoClearCount[]> {
+  return client.$queryRaw<ClearCoClearCount[]>`
+    WITH selected AS (
+      SELECT clear.content_id, clear.server_id, clear.character_id
+      FROM content_clears clear
+      WHERE ${weekClearsSql(weekStart)}
+    )
+    SELECT
+      base.content_id AS "contentId",
+      other.content_id AS "otherContentId",
+      count(*)::int AS cleared
+    FROM selected base
+    JOIN selected other
+      ON other.server_id = base.server_id
+      AND other.character_id = base.character_id
+      AND other.content_id <> base.content_id
+    GROUP BY base.content_id, other.content_id`
+}
+
+export function readContentClearRaidTimes(
+  client: DatabaseClient,
+  weekStart: Date
+): Promise<ClearRaidTimeCount[]> {
+  return client.$queryRaw<ClearRaidTimeCount[]>`
+    SELECT
+      extract(isodow FROM cleared_at AT TIME ZONE 'Asia/Seoul')::int AS weekday,
+      extract(hour FROM cleared_at AT TIME ZONE 'Asia/Seoul')::int AS hour,
+      count(*)::int AS cleared
+    FROM content_clears
+    WHERE kind = 'raid' AND week_start = ${weekStart}
+    GROUP BY 1, 2`
+}
