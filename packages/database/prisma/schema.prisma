@@ -41,6 +41,7 @@ model Character {
   guildName      String?   @map("guild_name")
   basicFetchedAt DateTime? @map("basic_fetched_at") @db.Timestamptz(3)
   skillStyle     CharacterSkillStyle?
+  score          CharacterScore?
 
   @@id([serverId, characterId])
   @@index([adventureId])
@@ -66,6 +67,21 @@ model CharacterSkillStyle {
 
   @@id([serverId, characterId])
   @@map("character_skill_styles")
+}
+
+model CharacterScore {
+  serverId       String    @map("server_id")
+  characterId    String    @map("character_id")
+  character      Character @relation(fields: [serverId, characterId], references: [serverId, characterId], onDelete: Cascade)
+  kind           String
+  score          Int
+  calculatedAt   DateTime  @map("calculated_at") @db.Timestamptz(3)
+  enginePackage  String    @map("engine_package")
+  engineRulesRev String    @map("engine_rules_rev")
+  engineBundleId String    @map("engine_bundle_id")
+
+  @@id([serverId, characterId])
+  @@map("character_scores")
 }
 
 model CharacterCollection {
