@@ -13,7 +13,7 @@ import type { HttpAppHandle } from '@dfragon/http-server'
 import { CatalogService } from '../src/application/character-catalog/service.js'
 import { formatResetDate } from '../src/domain/seoul-time.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
-import type { ClearStatsReader } from '../src/application/content-clears/ports.js'
+import type { ClearStatsRepository } from '../src/application/content-clears/repository.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 합성 집계다. DB 읽기는 fake이며 SQL의 주 고르기, 직업과 모험단 묶기는 container-content-clear-check.mjs가 실제 DB로 확인한다.
@@ -64,7 +64,7 @@ const counts = [
   count('engraved-nightmare-1', '2026-11-12', null, 100)
 ]
 
-function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader {
+function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRepository {
   return {
     readCollectedAt: async () => at('2026-11-10T06:30:00'),
     readPopulations: async () => populations,
@@ -93,7 +93,7 @@ function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader
   }
 }
 
-async function listen(clearStats?: ClearStatsReader): Promise<{
+async function listen(clearStats?: ClearStatsRepository): Promise<{
   app: HttpAppHandle
   origin: string
   refreshClearStats: () => Promise<void>
@@ -733,7 +733,7 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
       return value
     }
   const base = fakeReader()
-  const reader: ClearStatsReader = {
+  const reader: ClearStatsRepository = {
     readCollectedAt: base.readCollectedAt,
     readPopulations: counted(base.readPopulations),
     readWeekRatioCounts: counted(base.readWeekRatioCounts),
@@ -1266,7 +1266,7 @@ test('레기온 상세는 고른 주의 요약만 주고 저장되지 않은 주
 })
 
 test('단계별 클리어는 수집 판정과 같은 단계 라벨로 묶어 읽고 단계표 순서로 준다', async () => {
-  const stageArguments: Parameters<ClearStatsReader['readRaidStageCounts']>[] = []
+  const stageArguments: Parameters<ClearStatsRepository['readRaidStageCounts']>[] = []
   const { app, origin } = await listen(
     fakeReader({
       readRaidModes: async () => [

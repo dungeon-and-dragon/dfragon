@@ -33,18 +33,18 @@ import {
 } from '../src/infrastructure/files/character-collection.js'
 import { runCollectionPass } from '../src/application/character-collection/runner.js'
 import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
-import { type ClearStatsReader } from '../src/application/content-clears/ports.js'
 import type {
   ClearCollectionRepository,
-  ClearRecordBackfillRepository
+  ClearRecordBackfillRepository,
+  ClearStatsRepository
 } from '../src/application/content-clears/repository.js'
 import { ContentClearCollectionService } from '../src/application/content-clears/collection.js'
 import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
 import { ClearRecordBackfillService } from '../src/application/content-clears/record-backfill.js'
 import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
 import {
-  createClearStatsService,
-  emptyClearStatsReader
+  ClearStatsService,
+  emptyClearStatsRepository
 } from '../src/application/content-clears/service.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 import { JobSchedulerService } from '../src/application/jobs/scheduler.js'
@@ -645,12 +645,12 @@ test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 �
   ])
   assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(1, false))
 
-  const reader: ClearStatsReader = {
-    ...emptyClearStatsReader,
+  const reader: ClearStatsRepository = {
+    ...emptyClearStatsRepository,
     readCollectedAt: async () => NOW,
     readPopulations: async () => [...state.populations.values()]
   }
-  const { contents } = await createClearStatsService(reader, () => undefined).stats()
+  const { contents } = await new ClearStatsService(reader, () => undefined).stats()
   for (const content of CLEAR_CONTENTS) {
     const releaseWeek = startOfResetWeek(content.releasedAt)
     const expected = [...weeksBefore(releaseWeek, CURRENT_WEEK), CURRENT_WEEK].map((week) =>

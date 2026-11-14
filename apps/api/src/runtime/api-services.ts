@@ -33,15 +33,15 @@ import {
   emptyCharacterTimelineRepository,
   noTimelineSync
 } from '../application/character-timeline/service.js'
-import type { ClearStatsReader } from '../application/content-clears/ports.js'
+import type { ClearStatsRepository } from '../application/content-clears/repository.js'
 import {
-  createClearStatsService,
-  emptyClearStatsReader
+  ClearStatsService,
+  emptyClearStatsRepository
 } from '../application/content-clears/service.js'
-import type { RankingStatsReader } from '../application/ranking-stats/ports.js'
+import type { RankingStatsRepository } from '../application/ranking-stats/repository.js'
 import {
-  createRankingStatsService,
-  emptyRankingStatsReader
+  RankingStatsService,
+  emptyRankingStatsRepository
 } from '../application/ranking-stats/service.js'
 import type { FetchShopGrade } from '../application/today-grade/ports.js'
 import { TodayGradeService } from '../application/today-grade/service.js'
@@ -78,8 +78,8 @@ export interface ApiServicesOptions {
   readonly recordCharacterSkillStyle?: CharacterBasicRepository['recordSkillStyle']
   readonly recordCharacterScore?: CharacterBasicRepository['recordScore']
   readonly adventureGuild?: AdventureGuildRepository
-  readonly rankingStats?: RankingStatsReader
-  readonly clearStats?: ClearStatsReader
+  readonly rankingStats?: RankingStatsRepository
+  readonly clearStats?: ClearStatsRepository
   readonly todayGrade: { readonly fetchShopGrade: FetchShopGrade }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly buildInfoPath?: string
@@ -247,8 +247,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     timelineSync?.service ??
     new CharacterTimelineService(emptyCharacterTimelineRepository, noTimelineSync)
   const adventureGuild = createAdventureGuild(options.adventureGuild, queues)
-  const rankingStats = createRankingStatsService(options.rankingStats ?? emptyRankingStatsReader)
-  const clearStats = createClearStatsService(options.clearStats ?? emptyClearStatsReader, () =>
+  const rankingStats = new RankingStatsService(options.rankingStats ?? emptyRankingStatsRepository)
+  const clearStats = new ClearStatsService(options.clearStats ?? emptyClearStatsRepository, () =>
     reportCode('CLEAR_STATS_REFRESH_FAILED')
   )
 
