@@ -45,7 +45,7 @@ const count = (
 const noScores = { equipment: null, buff: null }
 
 const populations = [
-  population('michaela-hard', '2026-11-05', 1000, false),
+  population('michaela-hard', '2026-11-05', 1000),
   population('michaela-hard', '2026-10-29', 900),
   population('diregie-hard', '2026-02-05', 800),
   population('diregie-hard', '2026-02-12', 850),
@@ -171,7 +171,7 @@ test('클리어 목록은 레이드를 주마다 세고 배율별 수의 합이 
         },
         {
           weekStart: '2026-11-05',
-          closed: false,
+          closed: true,
           collectedAt: '2026-11-09T21:30:00.000Z',
           population: 1000,
           minFame: 126000,
@@ -185,6 +185,29 @@ test('클리어 목록은 레이드를 주마다 세고 배율별 수의 합이 
         }
       ]
     })
+  } finally {
+    await app.close()
+  }
+})
+
+test('마감하지 않은 주는 클리어 목록에 넣지 않고 전체 개요의 기본 주로 고르지 않는다', async () => {
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [
+        ...populations,
+        population('michaela-hard', '2026-11-12', 1100, false)
+      ]
+    })
+  )
+  try {
+    const { body: stats } = await getJson(origin, '/stats/clears')
+    const { body: overview } = await getJson(origin, '/stats/clears/overview')
+
+    assert.deepEqual(
+      contentOf(stats, 'michaela-hard').weeks.map(({ weekStart }) => weekStart),
+      ['2026-10-29', '2026-11-05']
+    )
+    assert.equal(overview.weekStart, '2026-11-05')
   } finally {
     await app.close()
   }
@@ -541,7 +564,7 @@ test('함께 깬 컨텐츠는 그 주를 저장한 다른 컨텐츠마다 주고
     fakeReader({
       readPopulations: async () => [
         ...populations,
-        population('michaela-normal', '2026-11-05', 500, false)
+        population('michaela-normal', '2026-11-05', 500)
       ],
       readCoClears: async () => [
         { contentId: 'michaela-hard', otherContentId: 'engraved-nightmare-1', cleared: 4 },
