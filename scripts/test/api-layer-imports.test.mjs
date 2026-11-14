@@ -99,15 +99,14 @@ const appFiles = {
       '../presentation/http/character-search/failures.js',
       '../presentation/openapi/setup.js',
       './routes-not-allowed.js',
-      './character-collector.js'
+      './character-collector.js',
+      './hono-app.js'
     ],
     allowed: [
       './routes/api.js',
       './api-services.js',
-      './hono-app.js',
-      './app-handle.js',
       '../presentation/http/character-failures.js',
-      '../presentation/http/access-log-sink.js',
+      '@dfragon/http-server',
       'hono'
     ]
   },
@@ -116,14 +115,13 @@ const appFiles = {
       '../application/jobs/run.js',
       '../domain/ops/failure.js',
       '../characters/http.js',
-      '../presentation/http/ops/a.js'
+      '../presentation/http/ops/a.js',
+      './hono-app.js'
     ],
     allowed: [
       './routes/ops.js',
-      './hono-app.js',
-      './app-handle.js',
       '../presentation/http/ops-failures.js',
-      '../presentation/http/access-log-sink.js',
+      '@dfragon/http-server',
       'hono'
     ]
   }
@@ -200,7 +198,7 @@ for (const [file, { rejected, allowed }] of Object.entries(appFiles)) {
     }
   })
 
-  test(`Biome: 앱을 만드는 ${file}에서 route를 모으는 파일, 앱 공통 설정, 공용 실패 표 import를 허용한다`, () => {
+  test(`Biome: 앱을 만드는 ${file}에서 route를 모으는 파일, 공용 실패 표, 공용 HTTP 코드 import를 허용한다`, () => {
     assert.deepEqual(biomeAllowed.get(`${src}/${file}`), [], allowed.join(', '))
   })
 }

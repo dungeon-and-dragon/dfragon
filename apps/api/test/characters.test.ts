@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import type { FailureResponse } from '@dfragon/http-server'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
 import { NEOPLE_SERVER_NAMES } from '../src/domain/neople-servers.js'
 import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
-import type { FailureResponse } from '../src/presentation/http/failure-response.js'
 import { characterSearchFailureResponse } from '../src/presentation/http/character-search/failures.js'
 
 const input = { characterName: '가나다', serverId: 'cain', limit: 10 }
