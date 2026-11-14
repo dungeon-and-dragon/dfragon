@@ -538,6 +538,10 @@
                   {
                     "group": ["**/infrastructure/**", "**/runtime/**"],
                     "message": "presentation은 infrastructure, runtime을 import하지 않는다. Neople과 DB 호출은 application의 service를 거치고, service와 adapter 연결은 runtime/에 둔다."
+                  },
+                  {
+                    "group": ["**/application/**/repository.js"],
+                    "message": "presentation은 Repository를 import type으로도 가져오지 않는다. Controller는 application/<기능>/service.ts의 Service만 받고, Repository는 runtime/이 Service에 넣는다."
                   }
                 ]
               }
