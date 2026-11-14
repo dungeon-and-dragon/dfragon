@@ -1,7 +1,6 @@
 import {
   type DatabaseConfiguration,
   createDatabaseClient,
-  readAdventureCharacters,
   readAdventureNames,
   readCharacterStatsSnapshot,
   readClearRecordLegionWeeks,
@@ -25,7 +24,6 @@ import {
   readContentClearWeekGroupScores,
   readContentClearWeekRatioCounts,
   readFameRanking,
-  readGuild,
   readJobSkillAdoptionSnapshot,
   readSelectedContentClearJobFames,
   readSelectedContentClearJobScores,
@@ -54,12 +52,7 @@ import { createNeopleCatalog } from '../infrastructure/neople/character-catalog.
 import { createNeopleCharacterDetails } from '../infrastructure/neople/character-detail.js'
 import { createNeopleCharacterSearch } from '../infrastructure/neople/character-search.js'
 import { createNeopleShopGrade } from '../infrastructure/neople/today-grade.js'
-import {
-  readAdventureActivity,
-  readAdventureSeasonDays,
-  readAdventureSeasonBackfill
-} from '../infrastructure/database/adventure-activity.js'
-import { readAdventureWeeklyClears } from '../infrastructure/database/adventure-weekly.js'
+import { DatabaseAdventureGuildRepository } from '../infrastructure/database/adventure-guild.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
@@ -120,18 +113,7 @@ function createDatabaseSubscribers(
     recordCharacterSkillStyle: basicStore.recordSkillStyle,
     recordCharacterScore: basicStore.recordScore,
     readAdventureNames: (characters) => readAdventureNames(client, characters),
-    adventureGuild: {
-      readAdventureCharacters: (adventureName) => readAdventureCharacters(client, adventureName),
-      readGuild: (guildId) => readGuild(client, guildId),
-      readAdventureWeeklyClears: (adventureName) =>
-        readAdventureWeeklyClears(client, adventureName, new Date()),
-      readAdventureActivity: (adventureName, seasonId) =>
-        readAdventureActivity(client, adventureName, seasonId, new Date()),
-      readAdventureSeasonDays: (adventureName, seasonId) =>
-        readAdventureSeasonDays(client, adventureName, seasonId, new Date()),
-      readAdventureSeasonBackfill: (adventureName, seasonId) =>
-        readAdventureSeasonBackfill(client, adventureName, seasonId, new Date())
-    },
+    adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
       readCharacterStatsSnapshot: () => readCharacterStatsSnapshot(client),
