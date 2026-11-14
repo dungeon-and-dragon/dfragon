@@ -123,11 +123,11 @@ docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 
 ### 컨테이너 검사
 
-로컬 이미지로 이미지 실행 계약과 DB를 붙인 실행을 검사합니다.
+로컬 이미지로 이미지 실행 계약과 DB를 붙인 실행을 검사합니다. DB 검사는 [운영 app 이미지](../ops/README.md#서버-이미지)도 함께 띄웁니다.
 
 ```sh
 node apps/api/test-support/container-deployment.mjs dfragon-api:local
-node apps/api/test-support/container-database.mjs dfragon-api:local
+node apps/api/test-support/container-database.mjs dfragon-api:local dfragon-ops:local
 ```
 
 ## 비공개 스킬 패키지 검증
