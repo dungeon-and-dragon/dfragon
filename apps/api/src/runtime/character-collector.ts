@@ -26,7 +26,8 @@ import {
   importCollectedCharacters,
   readImportModifiedTime
 } from '../infrastructure/files/character-collection.js'
-import { createDatabaseJobStore } from '../infrastructure/database/jobs.js'
+import { JobSchedulerService } from '../application/jobs/scheduler.js'
+import { DatabaseJobRepository } from '../infrastructure/database/jobs.js'
 import { createDiscordJobAlert } from '../infrastructure/jobs/alert.js'
 import { startJobScheduler } from '../infrastructure/jobs/scheduler.js'
 import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
@@ -77,25 +78,26 @@ export async function startCharacterCollector(
     configuration.jobAlertWebhookUrl !== undefined
       ? createDiscordJobAlert(configuration.jobAlertWebhookUrl)
       : undefined
-  await startJobScheduler({
-    jobs: createWorkerJobs(client, {
-      createFetchTimeline: createNeopleClearTimeline(neople),
-      createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
-      fetchSkillStyle: createNeopleSkillStyle(neople),
+  const jobs = createWorkerJobs(client, {
+    createFetchTimeline: createNeopleClearTimeline(neople),
+    createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
+    fetchSkillStyle: createNeopleSkillStyle(neople),
+    readConcurrency,
+    report,
+    score: {
+      openEngine: openScoreEngine,
+      createSources: (onRequest) => createScoreSources(neople, onRequest),
       readConcurrency,
       report,
-      score: {
-        openEngine: openScoreEngine,
-        createSources: (onRequest) => createScoreSources(neople, onRequest),
-        readConcurrency,
-        report,
-        schedule: configuration.scoreCalculationSchedule
-      }
-    }),
-    store: createDatabaseJobStore(client),
+      schedule: configuration.scoreCalculationSchedule
+    }
+  })
+  const scheduler = new JobSchedulerService(new DatabaseJobRepository(client), {
+    jobs,
     report,
     alert
   })
+  await startJobScheduler(scheduler, report)
 
   return runCharacterCollector({
     importFiles: configuration.importFiles,

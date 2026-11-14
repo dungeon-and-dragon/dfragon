@@ -7,8 +7,9 @@ import type {
   JobSkillAdoptionQuery,
   SkillStyleSampleJob
 } from '@dfragon/database'
-import { type StatsJobStore } from '../src/application/ranking-stats/ports.js'
+import type { StatsJobRepository } from '../src/application/ranking-stats/repository.js'
 import {
+  StatsJobService,
   createCharacterStatsJob,
   createSkillAdoptionJob
 } from '../src/application/ranking-stats/stats-jobs.js'
@@ -70,7 +71,7 @@ function memoryStatsStore({
 } = {}) {
   const savedStats: CharacterStatsSnapshot[] = []
   const adoptionRows = new Map<string, { computedAt: Date; adoption: JobSkillAdoption }>()
-  const store: StatsJobStore = {
+  const store: StatsJobRepository = {
     readCharacterStats: async () => stats,
     saveCharacterStats: async (snapshot) => {
       savedStats.splice(0, savedStats.length, snapshot)
@@ -113,7 +114,9 @@ test('통계 job은 계산을 시작한 시각과 직업별 평균 명성을 반
 
     return store.readCharacterStats()
   }
-  const job = createCharacterStatsJob({ ...store, readCharacterStats: readWhileTimePasses }, clock)
+  const job = createCharacterStatsJob(
+    new StatsJobService({ ...store, readCharacterStats: readWhileTimePasses }, clock)
+  )
 
   const summary = await job.run({}, ignoreProgress)
 
@@ -134,7 +137,7 @@ test('통계 job은 계산을 시작한 시각과 직업별 평균 명성을 반
 
 test('스킬 채택률 job은 전직마다 저장하고 남성 크루세이더는 전체, 딜러, 버퍼를 따로 저장한다', async () => {
   const { store, adoptionRows } = memoryStatsStore({ famedJobGrows: [weaponMaster, maleCrusader] })
-  const job = createSkillAdoptionJob(store, sequentialClock())
+  const job = createSkillAdoptionJob(new StatsJobService(store, sequentialClock()))
   const progress: [number, number | undefined][] = []
 
   await job.run({}, { reportProgress: (done, total) => progress.push([done, total]) })
@@ -163,7 +166,7 @@ test('스킬 채택률 job은 전직마다 저장하고 남성 크루세이더�
 test('다시 돌리면 행을 덮어쓰고 명성 있는 캐릭터가 없어진 전직의 행만 지운다', async () => {
   const famedJobGrows = [weaponMaster, blade]
   const { store, adoptionRows } = memoryStatsStore({ famedJobGrows })
-  const job = createSkillAdoptionJob(store, sequentialClock())
+  const job = createSkillAdoptionJob(new StatsJobService(store, sequentialClock()))
   await job.run({}, ignoreProgress)
   const firstComputedAt = adoptionRows.get('synthetic-job/synthetic-grow/all')?.computedAt
 
@@ -188,7 +191,9 @@ test('중간 전직의 계산이 실패하면 지난 실행의 행을 지우지 
     adoption: adoptionFor(blade)
   })
 
-  await assert.rejects(createSkillAdoptionJob(store, sequentialClock()).run({}, ignoreProgress))
+  await assert.rejects(
+    createSkillAdoptionJob(new StatsJobService(store, sequentialClock())).run({}, ignoreProgress)
+  )
 
   assert.ok(adoptionRows.has('synthetic-job/old-grow/all'))
 })

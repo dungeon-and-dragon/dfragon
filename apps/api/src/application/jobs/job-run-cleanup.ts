@@ -1,11 +1,22 @@
 import { subDays } from 'date-fns'
 import { z } from 'zod'
 import { defineJob } from './definition.js'
-import type { DeleteJobRunsFinishedBefore } from './ports.js'
+import type { JobRunCleanupRepository } from './repository.js'
 
 const RETENTION_DAYS = 90
 
-export function createJobRunCleanupJob(deleteJobRunsFinishedBefore: DeleteJobRunsFinishedBefore) {
+export class JobRunCleanupService {
+  constructor(private readonly repository: JobRunCleanupRepository) {}
+
+  async cleanup(): Promise<{ deleted: number }> {
+    const before = subDays(new Date(), RETENTION_DAYS)
+    const deleted = await this.repository.deleteJobRunsFinishedBefore(before)
+
+    return { deleted }
+  }
+}
+
+export function createJobRunCleanupJob(service: JobRunCleanupService) {
   return defineJob({
     name: 'job-run-cleanup',
     displayName: '실행 이력 정리',
@@ -13,10 +24,6 @@ export function createJobRunCleanupJob(deleteJobRunsFinishedBefore: DeleteJobRun
     schedule: '0 4 * * *',
     argsSchema: z.object({}),
     delayMinutes: 5,
-    run: async () => {
-      const deleted = await deleteJobRunsFinishedBefore(subDays(new Date(), RETENTION_DAYS))
-
-      return { deleted }
-    }
+    run: () => service.cleanup()
   })
 }

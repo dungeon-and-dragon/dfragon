@@ -10,15 +10,11 @@ import type {
 import { z } from 'zod'
 import { createJobSchedule } from '../src/infrastructure/jobs/scheduler.js'
 import { createDiscordJobAlert } from '../src/infrastructure/jobs/alert.js'
-import type { JobAlert, JobStore, ReportJobEvent } from '../src/application/jobs/ports.js'
+import type { JobAlert, ReportJobEvent } from '../src/application/jobs/ports.js'
+import type { JobRepository } from '../src/application/jobs/repository.js'
 import { type JobDefinition, defineJob } from '../src/application/jobs/definition.js'
-import { executeJobRun } from '../src/application/jobs/run.js'
-import {
-  findCatchupJobs,
-  registerWorkerJobs,
-  runRequestedJobs,
-  runScheduledJob
-} from '../src/application/jobs/scheduler.js'
+import { JobRunService } from '../src/application/jobs/run.js'
+import { JobSchedulerService } from '../src/application/jobs/scheduler.js'
 
 type StoredRun = {
   id: number
@@ -48,7 +44,7 @@ function memoryJobStore({ paused = [] as string[] } = {}) {
 
     return id
   }
-  const store: JobStore = {
+  const store: JobRepository = {
     registerJobs: async (jobs) => {
       registered.splice(0, registered.length, ...jobs)
     },
@@ -190,7 +186,7 @@ test('성공한 실행은 succeeded와 결과 요약, 끝의 진행률을 남긴
   const { store, runs } = memoryJobStore()
   const { events, report } = recordedEvents()
 
-  await runScheduledJob(dailyJob, 'schedule', { store, report })
+  await new JobRunService(store, report).runScheduled(dailyJob, 'schedule')
 
   assert.deepEqual(
     runs.map(({ status, trigger, summary, progress }) => ({ status, trigger, summary, progress })),
@@ -215,7 +211,7 @@ test('예외를 던진 실행은 failed와 오류 name, code만 남기고 messag
   const id = await store.startRun(failingJob.name, 'catchup')
   assert(id !== undefined)
 
-  await executeJobRun(failingJob, { id, trigger: 'catchup', args: {} }, { store, report })
+  await new JobRunService(store, report).execute(failingJob, { id, trigger: 'catchup', args: {} })
 
   const [run] = runs
   assert.equal(run?.status, 'failed')
@@ -233,14 +229,14 @@ test('예외를 던진 실행은 failed와 오류 name, code만 남기고 messag
 test('이력을 쓰지 못해도 실행은 reject하지 않고 기록 실패를 로그로 남긴다', async () => {
   const { store } = memoryJobStore()
   const { events, report } = recordedEvents()
-  const brokenStore: JobStore = {
+  const brokenStore: JobRepository = {
     ...store,
     finishRun: async () => {
       throw new SyntheticFailure()
     }
   }
 
-  await runScheduledJob(failingJob, 'catchup', { store: brokenStore, report })
+  await new JobRunService(brokenStore, report).runScheduled(failingJob, 'catchup')
 
   assert.deepEqual(
     events.map(({ code }) => code),
@@ -253,7 +249,7 @@ test('같은 job의 요청이나 실행 중인 행이 있으면 정기 실행은
   const { events, report } = recordedEvents()
   request(dailyJob.name, {})
 
-  await runScheduledJob(dailyJob, 'schedule', { store, report })
+  await new JobRunService(store, report).runScheduled(dailyJob, 'schedule')
 
   assert.deepEqual(
     runs.map(({ status, trigger }) => ({ status, trigger })),
@@ -268,7 +264,10 @@ test('시작할 때 job 목록을 올리고 running으로 남은 행을 interrup
   seed({ ...emptyRun(dailyJob.name, 'schedule', {}), status: 'running', startedAt: now })
   seed({ ...emptyRun(dailyJob.name, 'schedule', {}), status: 'succeeded', startedAt: now })
 
-  await registerWorkerJobs({ jobs: [dailyJob, failingJob], store, report }, now, createJobSchedule)
+  await new JobSchedulerService(store, { jobs: [dailyJob, failingJob], report }).register(
+    now,
+    createJobSchedule
+  )
 
   assert.deepEqual(
     runs.map(({ status }) => status),
@@ -319,11 +318,10 @@ test('보충은 수동이 아닌 마지막 성공 뒤의 다음 예정 시각이
       }
       const { report } = recordedEvents()
 
-      const catchup = await findCatchupJobs(
-        { jobs: [dailyJob, failingJob], store, report },
-        now,
-        createJobSchedule
-      )
+      const catchup = await new JobSchedulerService(store, {
+        jobs: [dailyJob, failingJob],
+        report
+      }).findCatchupJobs(now, createJobSchedule)
 
       assert.deepEqual(
         catchup.map(({ name: jobName }) => jobName),
@@ -338,11 +336,10 @@ test('보충을 끈 정기 job은 성공 이력이 없어도 보충하지 않고
   const { report } = recordedEvents()
   const noCatchupJob = defineJob({ ...dailyJob, name: 'no-catchup', catchup: false })
 
-  const catchup = await findCatchupJobs(
-    { jobs: [dailyJob, noCatchupJob], store, report },
-    now,
-    createJobSchedule
-  )
+  const catchup = await new JobSchedulerService(store, {
+    jobs: [dailyJob, noCatchupJob],
+    report
+  }).findCatchupJobs(now, createJobSchedule)
 
   assert.deepEqual(
     catchup.map(({ name }) => name),
@@ -353,15 +350,15 @@ test('보충을 끈 정기 job은 성공 이력이 없어도 보충하지 않고
 test('정지된 job은 보충과 정기 실행을 건너뛰고 요청 행은 실행한다', async () => {
   const { store, runs, request } = memoryJobStore({ paused: ['daily'] })
   const { events, report } = recordedEvents()
-  const dependencies = { jobs: [dailyJob], store, report }
+  const scheduler = new JobSchedulerService(store, { jobs: [dailyJob], report })
 
-  assert.deepEqual(await findCatchupJobs(dependencies, now, createJobSchedule), [])
-  await runScheduledJob(dailyJob, 'schedule', { store, report })
+  assert.deepEqual(await scheduler.findCatchupJobs(now, createJobSchedule), [])
+  await new JobRunService(store, report).runScheduled(dailyJob, 'schedule')
   assert.deepEqual(events, [{ code: 'JOB_RUN_SKIPPED', job: 'daily', reason: 'paused' }])
   assert.deepEqual(runs, [])
 
   request(dailyJob.name, { limit: 3 })
-  await runRequestedJobs(dependencies)
+  await scheduler.runRequested()
 
   assert.deepEqual(
     runs.map(({ status, trigger, summary }) => ({ status, trigger, summary })),
@@ -390,7 +387,7 @@ test('요청 행은 running을 거쳐 succeeded가 되고, schema에 맞지 않�
   request(observedJob.name, { target: 'cain' })
   request(dailyJob.name, { limit: 'many' })
 
-  await runRequestedJobs({ jobs: [observedJob, dailyJob], store, report })
+  await new JobSchedulerService(store, { jobs: [observedJob, dailyJob], report }).runRequested()
 
   assert.deepEqual(statusesDuringRun, ['running'])
   assert.deepEqual(
@@ -412,8 +409,8 @@ test('실패한 실행만 job 이름, 계기, 오류 name과 code로 실패 알�
   const { report } = recordedEvents()
   const { alerts, alert } = recordedAlerts()
 
-  await runScheduledJob(failingJob, 'catchup', { store, report, alert })
-  await runScheduledJob(dailyJob, 'schedule', { store, report, alert })
+  await new JobRunService(store, report, alert).runScheduled(failingJob, 'catchup')
+  await new JobRunService(store, report, alert).runScheduled(dailyJob, 'schedule')
 
   assert.deepEqual(
     alerts.map(({ kind, job, trigger, errorChain }) => ({
@@ -444,7 +441,10 @@ test('시작할 때 interrupted로 바꾼 실행마다 중단 알림을 보낸�
   })
   seed({ ...emptyRun(dailyJob.name, 'manual', {}), status: 'succeeded', startedAt: now })
 
-  await registerWorkerJobs({ jobs: [dailyJob], store, report, alert }, now, createJobSchedule)
+  await new JobSchedulerService(store, { jobs: [dailyJob], report, alert }).register(
+    now,
+    createJobSchedule
+  )
 
   assert.deepEqual(alerts, [
     { kind: 'interrupted', job: 'daily', trigger: 'schedule', elapsedMs: 90_000 }
@@ -457,7 +457,7 @@ test('지연 기준 전에 끝난 실행은 지연 알림을 보내지 않는다
   const { report } = recordedEvents()
   const { alerts, alert } = recordedAlerts()
 
-  await runScheduledJob(dailyJob, 'schedule', { store, report, alert })
+  await new JobRunService(store, report, alert).runScheduled(dailyJob, 'schedule')
   t.mock.timers.tick(30 * 60_000)
 
   assert.deepEqual(alerts, [])
@@ -487,15 +487,11 @@ test('지연 기준을 넘겨도 실행 중이면 지연 알림을 그 실행에
   const id = await store.startRun(slowJob.name, 'schedule')
   assert(id !== undefined)
 
-  const running = executeJobRun(
-    slowJob,
-    { id, trigger: 'schedule', args: {} },
-    {
-      store,
-      report,
-      alert
-    }
-  )
+  const running = new JobRunService(store, report, alert).execute(slowJob, {
+    id,
+    trigger: 'schedule',
+    args: {}
+  })
   t.mock.timers.tick(5 * 60_000)
   t.mock.timers.tick(30 * 60_000)
   resolve()
@@ -513,7 +509,7 @@ test('알림 전송이 실패해도 실행의 상태와 이력은 그대로이�
     throw new SyntheticFailure()
   }
 
-  await runScheduledJob(failingJob, 'catchup', { store, report, alert: brokenAlert })
+  await new JobRunService(store, report, brokenAlert).runScheduled(failingJob, 'catchup')
 
   assert.deepEqual(
     runs.map(({ status, error }) => ({ status, errorCodes: error?.map(({ code }) => code) })),
@@ -548,7 +544,7 @@ test('Discord 알림 본문에는 오류 message와 실행 인자가 없다', as
   })
   request(argumentJob.name, { target: 'synthetic-argument-value' })
 
-  await runRequestedJobs({ jobs: [argumentJob], store, report, alert })
+  await new JobSchedulerService(store, { jobs: [argumentJob], report, alert }).runRequested()
 
   assert.equal(bodies.length, 1)
   const serialized = JSON.stringify(bodies[0])

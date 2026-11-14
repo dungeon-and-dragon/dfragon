@@ -1,7 +1,7 @@
 import { NeopleRequestFailure } from '@dfragon/neople'
 import { CatalogService } from '../application/character-catalog/service.js'
 import type {
-  ScoreCalculationJobDependencies,
+  ScoreCalculationPorts,
   ScoreSourceEvents,
   ScoreSources
 } from '../application/character-score/ports.js'
@@ -51,7 +51,7 @@ export function createScoreSources(
 export function createScoreEngineOpener(
   libraryPath: string | null,
   report: (code: string) => void
-): ScoreCalculationJobDependencies['openEngine'] {
+): ScoreCalculationPorts['openEngine'] {
   return () => {
     if (libraryPath === null) {
       return null

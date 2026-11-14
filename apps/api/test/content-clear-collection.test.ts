@@ -33,21 +33,21 @@ import {
 } from '../src/infrastructure/files/character-collection.js'
 import { runCollectionPass } from '../src/application/character-collection/runner.js'
 import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
-import {
-  type ClearCollectionStore,
-  type ClearRecordBackfillStore,
-  type ClearStatsReader
-} from '../src/application/content-clears/ports.js'
-import { collectContentClears } from '../src/application/content-clears/collection.js'
+import { type ClearStatsReader } from '../src/application/content-clears/ports.js'
+import type {
+  ClearCollectionRepository,
+  ClearRecordBackfillRepository
+} from '../src/application/content-clears/repository.js'
+import { ContentClearCollectionService } from '../src/application/content-clears/collection.js'
 import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
-import { backfillClearRecords } from '../src/application/content-clears/record-backfill.js'
+import { ClearRecordBackfillService } from '../src/application/content-clears/record-backfill.js'
 import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
 import {
   createClearStatsService,
   emptyClearStatsReader
 } from '../src/application/content-clears/service.js'
-import type { JobStore } from '../src/application/jobs/ports.js'
-import { findCatchupJobs } from '../src/application/jobs/scheduler.js'
+import type { JobRepository } from '../src/application/jobs/repository.js'
+import { JobSchedulerService } from '../src/application/jobs/scheduler.js'
 import { formatResetDate, startOfResetWeek } from '../src/domain/seoul-time.js'
 
 const at = (time: string) => new Date(`${time}:00+09:00`)
@@ -185,7 +185,7 @@ function memoryClearStore(
     records: new Map<string, ClearRecordInput>(),
     progress: undefined as ContentClearCollectionProgress | undefined
   }
-  const store: ClearCollectionStore = {
+  const store: ClearCollectionRepository = {
     readPopulation: async (minMaxFame) => {
       state.populationMinFames.push(minMaxFame)
 
@@ -266,22 +266,20 @@ const closedPastWeeks = (): StoredClearPopulation[] =>
   )
 
 function collect(
-  store: ClearCollectionStore,
+  store: ClearCollectionRepository,
   neople: Pick<NeopleClient, 'characterTimeline'>,
   now: Date,
   pauses: number[] = []
 ) {
-  return collectContentClears({
-    store,
+  return new ContentClearCollectionService(store, {
     createFetchTimeline: createNeopleClearTimeline(neople),
     readConcurrency: () => 1,
     now: () => now,
     pause: async (ms) => {
       pauses.push(ms)
     },
-    report: () => {},
-    reportProgress: () => {}
-  })
+    report: () => {}
+  }).collect(() => {})
 }
 
 const storedClears = (state: ReturnType<typeof memoryClearStore>['state']) =>
@@ -388,7 +386,7 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
   )
   const { state } = memory
   let stopped = false
-  const store: ClearCollectionStore = {
+  const store: ClearCollectionRepository = {
     ...memory.store,
     recordClears: async (clears) => {
       if (!stopped && clears.some(({ characterId }) => characterId === 'c')) {
@@ -526,15 +524,19 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
 
 test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보충 대상이 된다', async () => {
   const { store } = memoryClearStore([])
-  const job = createContentClearCollectionJob(store, {
-    createFetchTimeline: createNeopleClearTimeline(fakeNeople({}).neople),
-    readConcurrency: () => 1,
-    report: () => {}
-  })
+  const job = createContentClearCollectionJob(
+    new ContentClearCollectionService(store, {
+      createFetchTimeline: createNeopleClearTimeline(fakeNeople({}).neople),
+      readConcurrency: () => 1,
+      now: () => NOW,
+      pause: async () => {},
+      report: () => {}
+    })
+  )
   const unused = async () => {
     throw new Error('not used')
   }
-  const jobStore: JobStore = {
+  const jobStore: JobRepository = {
     registerJobs: unused,
     interruptRunningRuns: unused,
     isPaused: async () => false,
@@ -548,8 +550,7 @@ test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보�
   }
   const dueAt = async (now: Date) =>
     (
-      await findCatchupJobs(
-        { jobs: [job], store: jobStore, report: () => {} },
+      await new JobSchedulerService(jobStore, { jobs: [job], report: () => {} }).findCatchupJobs(
         now,
         createJobSchedule
       )
@@ -729,14 +730,13 @@ test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Ne
 })
 
 function collectGroup(
-  store: ClearCollectionStore,
+  store: ClearCollectionRepository,
   neople: Pick<NeopleClient, 'characterTimeline'>,
   concurrency: number
 ) {
   const pauses: number[] = []
   const reports: [string, Readonly<Record<string, string | number>>][] = []
-  const summary = collectContentClears({
-    store,
+  const summary = new ContentClearCollectionService(store, {
     createFetchTimeline: createNeopleClearTimeline(neople),
     readConcurrency: () => concurrency,
     now: () => NOW,
@@ -745,9 +745,8 @@ function collectGroup(
     },
     report: (code, details) => {
       reports.push([code, details])
-    },
-    reportProgress: () => {}
-  })
+    }
+  }).collect(() => {})
 
   return { summary, pauses, reports }
 }
@@ -1042,25 +1041,23 @@ function fakeBatchKeys(
 }
 
 function collectWithKeys(
-  store: ClearCollectionStore,
+  store: ClearCollectionRepository,
   pool: BatchNeopleKeyPool,
   pause: (ms: number) => Promise<void> = async () => {}
 ) {
   const progress: number[] = []
   const reports: [string, Readonly<Record<string, string | number>>][] = []
   const createFetchTimeline = createNeopleClearTimeline(pool.neople)
-  const summary = collectContentClears({
-    store,
+  const summary = new ContentClearCollectionService(store, {
     createFetchTimeline,
     readConcurrency: pool.readConcurrency,
     now: () => NOW,
     pause,
     report: (code, details) => {
       reports.push([code, details])
-    },
-    reportProgress: (done) => {
-      progress.push(done)
     }
+  }).collect((done) => {
+    progress.push(done)
   })
 
   return { summary, progress, reports }
@@ -1167,7 +1164,7 @@ test('실행 중에 key를 더하거나 끄면 다음 묶음부터 묶음 크기
   const memory = memoryClearStore(syntheticPopulation(10), closedPastWeeks())
   const { keys, pool, requests } = fakeBatchKeys([1], 2)
   await pool.refresh()
-  const store: ClearCollectionStore = {
+  const store: ClearCollectionRepository = {
     ...memory.store,
     recordProgress: async (progress) => {
       await memory.store.recordProgress(progress)
@@ -1292,7 +1289,7 @@ test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온
 // 지난 기록 받기의 진행 위치만 따로 두고, 모집단과 기록은 클리어 수집 fake의 상태를 함께 쓴다.
 function memoryBackfillStore(memory: ReturnType<typeof memoryClearStore>) {
   const progress = { current: undefined as ClearRecordBackfillProgress | undefined }
-  const store: ClearRecordBackfillStore = {
+  const store: ClearRecordBackfillRepository = {
     readPopulation: memory.store.readPopulation,
     readProgress: async () => {
       if (progress.current === undefined) {
@@ -1317,14 +1314,13 @@ function memoryBackfillStore(memory: ReturnType<typeof memoryClearStore>) {
 }
 
 function backfill(
-  store: ClearRecordBackfillStore,
+  store: ClearRecordBackfillRepository,
   neople: Pick<NeopleClient, 'characterTimeline'>,
   now: Date,
   reports: [string, Readonly<Record<string, string | number>>][] = [],
   pauses: number[] = []
 ) {
-  return backfillClearRecords({
-    store,
+  return new ClearRecordBackfillService(store, {
     createFetchTimeline: createNeopleClearRecordTimeline(neople),
     readConcurrency: () => 1,
     now: () => now,
@@ -1333,9 +1329,8 @@ function backfill(
     },
     report: (code, details) => {
       reports.push([code, details])
-    },
-    reportProgress: () => {}
-  })
+    }
+  }).backfill(() => {})
 }
 
 // 2025-02-06 06:00부터 89일씩 나눈 구간이다.
@@ -1398,7 +1393,7 @@ test('지난 기록 받기가 도중에 끝나면 다음 실행이 처음 시작
   const memory = memoryClearStore(['a', 'b', 'c', 'd'].map((id) => character(id)))
   const backfillMemory = memoryBackfillStore(memory)
   let stopped = false
-  const store: ClearRecordBackfillStore = {
+  const store: ClearRecordBackfillRepository = {
     ...backfillMemory.store,
     recordRecords: async (records) => {
       if (!stopped && records.some(({ characterId }) => characterId === 'c')) {

@@ -1,5 +1,11 @@
 import {
+  type CharacterStats,
+  type CharacterStatsSnapshot,
   type DatabaseClient,
+  type JobSkillAdoption,
+  type JobSkillAdoptionQuery,
+  type JobSkillAdoptionSnapshot,
+  type SkillStyleSampleJob,
   deleteJobSkillAdoptionComputedBefore,
   readCharacterStats,
   readFamedJobGrows,
@@ -7,16 +13,32 @@ import {
   saveCharacterStats,
   saveJobSkillAdoption
 } from '@dfragon/database'
-import type { StatsJobStore } from '../../application/ranking-stats/ports.js'
+import type { StatsJobRepository } from '../../application/ranking-stats/repository.js'
 
-export function createDatabaseStatsJobStore(client: DatabaseClient): StatsJobStore {
-  return {
-    readCharacterStats: () => readCharacterStats(client),
-    saveCharacterStats: (snapshot) => saveCharacterStats(client, snapshot),
-    readFamedJobGrows: () => readFamedJobGrows(client),
-    readJobSkillAdoption: (job) => readJobSkillAdoption(client, job),
-    saveJobSkillAdoption: (snapshot) => saveJobSkillAdoption(client, snapshot),
-    deleteJobSkillAdoptionComputedBefore: (before) =>
-      deleteJobSkillAdoptionComputedBefore(client, before)
+export class DatabaseStatsJobRepository implements StatsJobRepository {
+  constructor(private readonly client: DatabaseClient) {}
+
+  readCharacterStats(): Promise<CharacterStats> {
+    return readCharacterStats(this.client)
+  }
+
+  saveCharacterStats(snapshot: CharacterStatsSnapshot): Promise<void> {
+    return saveCharacterStats(this.client, snapshot)
+  }
+
+  readFamedJobGrows(): Promise<SkillStyleSampleJob[]> {
+    return readFamedJobGrows(this.client)
+  }
+
+  readJobSkillAdoption(job: JobSkillAdoptionQuery): Promise<JobSkillAdoption> {
+    return readJobSkillAdoption(this.client, job)
+  }
+
+  saveJobSkillAdoption(snapshot: JobSkillAdoptionSnapshot): Promise<void> {
+    return saveJobSkillAdoption(this.client, snapshot)
+  }
+
+  deleteJobSkillAdoptionComputedBefore(before: Date): Promise<number> {
+    return deleteJobSkillAdoptionComputedBefore(this.client, before)
   }
 }
