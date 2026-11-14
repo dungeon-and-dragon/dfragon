@@ -581,5 +581,5 @@ it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전�
   expect(jobPanel?.textContent).toContain('클리어 캐릭터의 장비 점수')
   expect(axisTicks('전직별 클리어')).toContain('30만')
   expect(jobNames()).toEqual(fameNames)
-  expect(jobNames()[0]).toBe('眞 전직0')
+  expect(jobNames()[0]).toBe('전직0')
 })

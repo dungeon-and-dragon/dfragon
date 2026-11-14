@@ -423,7 +423,7 @@ it('전직별 클리어는 클리어율 순 10줄에 클리어 / 캐릭터 수�
 
   const first = panel('전직별 클리어')?.querySelector('tbody tr')
   expect([...(first?.children ?? [])].map((cell) => cell.textContent)).toEqual([
-    '眞 전직6 직업6',
+    '전직6 직업6',
     '25 / 50',
     '최고 140,000, 95% 132,000, 75% 126,000, 중앙값 120,006, 25% 118,000, 5% 110,000',
     '50.0%'
@@ -431,10 +431,10 @@ it('전직별 클리어는 클리어율 순 10줄에 클리어 / 캐릭터 수�
   expect(jobNames()).toHaveLength(10)
 
   await click(buttonNamed('클리어 순'))
-  expect(jobNames()[0]).toBe('眞 전직11')
+  expect(jobNames()[0]).toBe('전직11')
 
   await click(buttonNamed('명성 순'))
-  expect(jobNames()[0]).toBe('眞 전직5')
+  expect(jobNames()[0]).toBe('전직5')
 
   await click(buttonNamed('전직 12개 모두 보기'))
   expect(jobNames()).toHaveLength(12)
@@ -450,7 +450,7 @@ it('전직별 클리어 줄에 마우스를 올리면 전직과 직업명 아래
 
   const tooltip = panel('전직별 클리어')?.querySelector('span[aria-hidden="true"]')
   const lines = [...(tooltip?.lastElementChild?.children ?? [])].map((line) => line.textContent)
-  expect(tooltip?.firstElementChild?.textContent).toBe('眞 전직6 직업6')
+  expect(tooltip?.firstElementChild?.textContent).toBe('전직6 직업6')
   expect(lines).toEqual([
     '최고140,000',
     '95%132,000',
