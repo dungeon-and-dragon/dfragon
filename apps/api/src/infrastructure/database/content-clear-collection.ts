@@ -1,5 +1,12 @@
 import {
+  type ClearPopulationCharacter,
+  type ClearRecordBackfillProgress,
+  type ClearRecordInput,
+  type ContentClearCollectionProgress,
+  type ContentClearInput,
+  type ContentClearPopulationInput,
   type DatabaseClient,
+  type StoredClearPopulation,
   finishClearRecordBackfill,
   finishContentClearCollection,
   readClearPopulation,
@@ -15,33 +22,74 @@ import {
   startContentClearCollection
 } from '@dfragon/database'
 import type {
-  ClearCollectionStore,
-  ClearRecordBackfillStore
-} from '../../application/content-clears/ports.js'
+  ClearCollectionRepository,
+  ClearRecordBackfillRepository
+} from '../../application/content-clears/repository.js'
 
-export function createDatabaseClearCollectionStore(client: DatabaseClient): ClearCollectionStore {
-  return {
-    readPopulation: (minMaxFame) => readClearPopulation(client, minMaxFame),
-    readPopulations: () => readContentClearPopulations(client),
-    readProgress: () => readContentClearCollection(client),
-    startProgress: (startedAt) => startContentClearCollection(client, startedAt),
-    recordProgress: (progress) => recordContentClearCollectionProgress(client, progress),
-    recordClears: (clears) => recordContentClears(client, clears),
-    recordRecords: (records) => recordClearRecords(client, records),
-    recordPopulation: (population) => recordContentClearPopulation(client, population),
-    finishProgress: (startedAt) => finishContentClearCollection(client, startedAt)
+export class DatabaseClearCollectionRepository implements ClearCollectionRepository {
+  constructor(private readonly client: DatabaseClient) {}
+
+  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]> {
+    return readClearPopulation(this.client, minMaxFame)
+  }
+
+  readPopulations(): Promise<StoredClearPopulation[]> {
+    return readContentClearPopulations(this.client)
+  }
+
+  readProgress(): Promise<ContentClearCollectionProgress | undefined> {
+    return readContentClearCollection(this.client)
+  }
+
+  startProgress(startedAt: Date): Promise<void> {
+    return startContentClearCollection(this.client, startedAt)
+  }
+
+  recordProgress(progress: ContentClearCollectionProgress): Promise<void> {
+    return recordContentClearCollectionProgress(this.client, progress)
+  }
+
+  recordClears(clears: readonly ContentClearInput[]): Promise<void> {
+    return recordContentClears(this.client, clears)
+  }
+
+  recordRecords(records: readonly ClearRecordInput[]): Promise<void> {
+    return recordClearRecords(this.client, records)
+  }
+
+  recordPopulation(population: ContentClearPopulationInput): Promise<void> {
+    return recordContentClearPopulation(this.client, population)
+  }
+
+  finishProgress(startedAt: Date): Promise<void> {
+    return finishContentClearCollection(this.client, startedAt)
   }
 }
 
-export function createDatabaseClearRecordBackfillStore(
-  client: DatabaseClient
-): ClearRecordBackfillStore {
-  return {
-    readPopulation: (minMaxFame) => readClearPopulation(client, minMaxFame),
-    readProgress: () => readClearRecordBackfill(client),
-    startProgress: (startedAt) => startClearRecordBackfill(client, startedAt),
-    recordProgress: (progress) => recordClearRecordBackfillProgress(client, progress),
-    recordRecords: (records) => recordClearRecords(client, records),
-    finishProgress: (startedAt) => finishClearRecordBackfill(client, startedAt)
+export class DatabaseClearRecordBackfillRepository implements ClearRecordBackfillRepository {
+  constructor(private readonly client: DatabaseClient) {}
+
+  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]> {
+    return readClearPopulation(this.client, minMaxFame)
+  }
+
+  readProgress(): Promise<ClearRecordBackfillProgress | undefined> {
+    return readClearRecordBackfill(this.client)
+  }
+
+  startProgress(startedAt: Date): Promise<void> {
+    return startClearRecordBackfill(this.client, startedAt)
+  }
+
+  recordProgress(progress: ClearRecordBackfillProgress): Promise<void> {
+    return recordClearRecordBackfillProgress(this.client, progress)
+  }
+
+  recordRecords(records: readonly ClearRecordInput[]): Promise<void> {
+    return recordClearRecords(this.client, records)
+  }
+
+  finishProgress(startedAt: Date): Promise<void> {
+    return finishClearRecordBackfill(this.client, startedAt)
   }
 }

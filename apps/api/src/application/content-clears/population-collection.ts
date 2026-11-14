@@ -11,7 +11,7 @@ export type CollectionProgress = {
   done: number
 }
 
-export type CollectionProgressStore = {
+export type CollectionProgressRepository = {
   readProgress(): Promise<CollectionProgress | undefined>
   startProgress(startedAt: Date): Promise<void>
 }
@@ -41,16 +41,16 @@ export type PopulationCollection = {
 }
 
 export async function readOrStartProgress(
-  store: CollectionProgressStore,
+  repository: CollectionProgressRepository,
   now: () => Date
 ): Promise<CollectionProgress> {
-  const progress = await store.readProgress()
+  const progress = await repository.readProgress()
   if (progress !== undefined) {
     return progress
   }
 
   const startedAt = now()
-  await store.startProgress(startedAt)
+  await repository.startProgress(startedAt)
 
   return { startedAt, done: 0 }
 }
