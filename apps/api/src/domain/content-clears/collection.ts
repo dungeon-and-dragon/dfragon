@@ -13,7 +13,6 @@ import { type ClearContent, toPopulationMinFame } from './contents.js'
 type ClearCollectionWeek = {
   contentId: string
   weekStart: Date
-  closed: boolean
 }
 
 export type ClearCollectionPlan = {
@@ -21,9 +20,9 @@ export type ClearCollectionPlan = {
   weeks: ClearCollectionWeek[]
 }
 
-function eachWeek(start: Date, last: Date): Date[] {
+function weeksBefore(start: Date, end: Date): Date[] {
   const weeks: Date[] = []
-  for (let week = start; week <= last; week = addWeeks(week, 1)) {
+  for (let week = start; week < end; week = addWeeks(week, 1)) {
     weeks.push(week)
   }
 
@@ -41,13 +40,13 @@ function contentWeeks(
       .map(({ weekStart }) => weekStart.getTime())
   )
 
-  return eachWeek(startOfResetWeek(content.releasedAt), currentWeek).filter(
+  return weeksBefore(startOfResetWeek(content.releasedAt), currentWeek).filter(
     (week) => !closedWeeks.has(week.getTime())
   )
 }
 
 // 이어지는 주는 한 구간으로 묶어 캐릭터당 요청을 줄인다. 구간이 90일을 넘으면 Neople 한도에 맞춰 나눈다.
-function toRanges(weeks: readonly ClearCollectionWeek[], startedAt: Date): TimelineRange[] {
+function toRanges(weeks: readonly ClearCollectionWeek[]): TimelineRange[] {
   const starts = [...new Set(weeks.map(({ weekStart }) => weekStart.getTime()))].sort(
     (left, right) => left - right
   )
@@ -62,28 +61,24 @@ function toRanges(weeks: readonly ClearCollectionWeek[], startedAt: Date): Timel
     }
   }
 
-  return runs.flatMap(({ start, end }) =>
-    splitTimelineRanges(start, end < startedAt ? subMinutes(end, 1) : startedAt)
-  )
+  return runs.flatMap(({ start, end }) => splitTimelineRanges(start, subMinutes(end, 1)))
 }
 
+// 진행 중인 주는 집계하지 않는다. 주가 끝난 뒤 한 번 받아 바로 마감한다.
 export function planClearCollection(
   contents: readonly ClearContent[],
   populations: readonly StoredClearPopulation[],
   startedAt: Date
 ): ClearCollectionPlan {
   const currentWeek = startOfResetWeek(startedAt)
-  const released = contents.filter(({ releasedAt }) => releasedAt <= startedAt)
-  const weeks = released.flatMap((content) =>
-    contentWeeks(content, populations, currentWeek).map((weekStart) => {
-      const contentId = content.id
-      const closed = weekStart < currentWeek
-
-      return { contentId, weekStart, closed }
-    })
+  const weeks = contents.flatMap((content) =>
+    contentWeeks(content, populations, currentWeek).map((weekStart) => ({
+      contentId: content.id,
+      weekStart
+    }))
   )
 
-  const ranges = toRanges(weeks, startedAt)
+  const ranges = toRanges(weeks)
 
   return { ranges, weeks }
 }
