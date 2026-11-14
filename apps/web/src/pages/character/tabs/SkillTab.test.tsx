@@ -471,23 +471,52 @@ function hover(element: Element): Promise<void> {
   })
 }
 
-async function tooltipOf(skillName: string): Promise<string | null> {
-  const icon = container.querySelector(`[role="img"][aria-label="${skillName}"]`)
-  const trigger = icon?.closest('[data-skill-id]')
-  if (trigger == null) {
-    throw new Error(`${skillName} 아이콘이 없다`)
-  }
+async function tooltipAt(trigger: Element): Promise<string | null> {
   await hover(trigger)
   const tooltip = await vi.waitFor(() => {
     const popup = document.querySelector('[data-base-ui-portal] > [data-open]')
     if (popup === null) {
-      throw new Error(`${skillName} Tooltip이 열리지 않았다`)
+      throw new Error('Tooltip이 열리지 않았다')
     }
 
     return popup
   })
+  const text = tooltip.textContent
+  await act(async () => {
+    trigger.dispatchEvent(new MouseEvent('mouseleave'))
+  })
+  await vi.waitFor(() => {
+    if (document.querySelector('[data-base-ui-portal] > [data-open]') !== null) {
+      throw new Error('Tooltip이 닫히지 않았다')
+    }
+  })
 
-  return tooltip.textContent
+  return text
+}
+
+function tooltipOf(skillName: string): Promise<string | null> {
+  const icon = container.querySelector(`[role="img"][aria-label="${skillName}"]`)
+  const trigger = icon?.closest('[data-skill-id]')
+
+  if (trigger == null) {
+    throw new Error(`${skillName} 아이콘이 없다`)
+  }
+
+  return tooltipAt(trigger)
+}
+
+function upgradeRowTriggers(label: string, skillName: string): { icon: Element; title: Element } {
+  const row = [...container.querySelectorAll(`section[aria-label="${label}"] li`)].find((item) =>
+    item.textContent?.startsWith(skillName)
+  )
+  const icon = row?.firstElementChild
+  const title = row?.lastElementChild?.firstElementChild
+
+  if (icon == null || title == null) {
+    throw new Error(`${label} 표에 ${skillName} 행이 없다`)
+  }
+
+  return { icon, title }
 }
 
 it('남성 크루세이더는 카드 역할을 role로 보내 역할마다 따로 받는다', async () => {
@@ -516,4 +545,61 @@ it('남성 크루세이더 Tooltip은 역할 표본 수를 쓰고 용기의 은�
 
   expect(await tooltipOf('성령의 메이스')).toContain('딜러 표본 408명')
   expect(await tooltipOf('용기의 은총')).toBe('용기의 은총')
+})
+
+// 합성 집계다. 표본 40명 가운데 참수를 20명이 배웠다.
+const UPGRADE_STATS: SkillStats = {
+  computedAt: '2026-11-08T15:00:00.000Z',
+  minFame: 70000,
+  sampleSize: 40,
+  skills: [
+    { name: '참수', learned: 20, levels: [[60, 20]] },
+    { name: '세례의 불길', learned: 40, levels: [[60, 40]] }
+  ],
+  evolutions: [
+    { name: '참수', type1: 5, type2: 15 },
+    { name: '세례의 불길', type1: 40, type2: 0 }
+  ],
+  enhancements: [{ name: '참수', type1: 10, type2: 10 }]
+}
+
+it('개화, 강화 행의 스킬 아이콘과 이름은 스킬 창 아이콘과 같은 채택률 Tooltip을 보이고 채택률은 한 번만 받는다', async () => {
+  const getSkillStats = vi.fn(async () => UPGRADE_STATS)
+  await render(
+    createTestClientHost({
+      getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES,
+      getSkillStats
+    }),
+    characterDetailFixture('dealer')
+  )
+
+  const windowTooltip = await tooltipOf('참수')
+  expect(windowTooltip).toContain('50.0%')
+  expect(windowTooltip).toContain('75.0%')
+
+  for (const label of ['스킬 개화', '스킬 강화']) {
+    const { icon, title } = upgradeRowTriggers(label, '참수')
+    expect(await tooltipAt(icon)).toBe(windowTooltip)
+    expect(await tooltipAt(title)).toBe(windowTooltip)
+  }
+
+  const evolution = upgradeRowTriggers('스킬 개화', '세례의 불길')
+  expect(await tooltipAt(evolution.title)).toBe(await tooltipOf('세례의 불길'))
+  expect(getSkillStats).toHaveBeenCalledTimes(1)
+})
+
+it('표본이 20명 미만이면 개화, 강화 행의 Tooltip은 스킬 이름 한 줄이다', async () => {
+  await render(
+    createTestClientHost({
+      getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES,
+      getSkillStats: async () => ({ ...UPGRADE_STATS, sampleSize: 19 })
+    }),
+    characterDetailFixture('dealer')
+  )
+
+  for (const label of ['스킬 개화', '스킬 강화']) {
+    const { icon, title } = upgradeRowTriggers(label, '참수')
+    expect(await tooltipAt(icon)).toBe('참수')
+    expect(await tooltipAt(title)).toBe('참수')
+  }
 })

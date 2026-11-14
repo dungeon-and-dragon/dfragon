@@ -1,22 +1,16 @@
-import { ProgressCircle, Tooltip } from '@dfragon/ui'
+import { ProgressCircle } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
+import type { CharacterDetailView } from '#core/character/character-detail-view'
 import {
   isMaleCrusaderJob,
-  MALE_CRUSADER_DEALER_SKILL,
   type MaleCrusaderRole,
   maleCrusaderRoleOf
 } from '#core/character/male-crusader'
-import {
-  type SkillAdoption,
-  type SkillStats,
-  type SkillStatsJob,
-  skillAdoptionOf
-} from '#core/ranking/skill-stats'
+import type { SkillStats, SkillStatsJob } from '#core/ranking/skill-stats'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
-  type SkillMarks,
   type SkillStyle,
   type SkillUpgrade,
   type SkillWindow,
@@ -33,7 +27,7 @@ import { useSkillStats } from '../hooks/useSkillStats'
 import { useSkillWindowCatalog } from '../hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { styles as layout } from './avatar/detail-tab.style'
-import { SkillAdoptionTooltip } from './skill/SkillAdoptionTooltip'
+import { type SkillAdoptionSource, SkillAdoptionHover } from './skill/SkillAdoptionTooltip'
 import { SkillChainSection, SkillTreeCode, SkillUpgradeSections } from './skill/SkillSide'
 import { styles as sideStyles } from './skill/SkillSide.style'
 import { SkillSprite } from './skill/SkillSprite'
@@ -43,98 +37,57 @@ const COMMON_ROW = 0
 
 function SkillIcon({
   icon,
-  marks,
-  adoption,
-  role,
-  now
+  source
 }: {
   icon: SkillWindowIcon
-  marks: SkillMarks
-  adoption: SkillAdoption | null
-  role: MaleCrusaderRole | null
-  now: number
+  source: SkillAdoptionSource
 }): React.JSX.Element {
   const picked = icon.evolution !== null || icon.enhancement !== null
 
   return (
-    <Tooltip.Root disableHoverablePopup>
-      <Tooltip.Trigger
-        delay={0}
-        closeDelay={0}
-        render={
-          <span
-            data-skill-id={icon.skillId}
-            {...stylex.props(styles.icon, styles.iconPosition(icon.col, icon.row))}
+    <SkillAdoptionHover
+      skill={icon}
+      source={source}
+      trigger={
+        <span
+          data-skill-id={icon.skillId}
+          {...stylex.props(styles.icon, styles.iconPosition(icon.col, icon.row))}
+        />
+      }
+    >
+      <span {...stylex.props(styles.frame, picked && styles.picked)}>
+        <SkillSprite icon={icon.icon} label={icon.name} dim={!icon.learned} />
+        {icon.evolution !== null && (
+          <img
+            src={skillMarkOf(source.marks, 'evolution', icon.evolution)}
+            alt=""
+            draggable={false}
+            {...stylex.props(styles.evolutionMark, styles.scaledMark)}
           />
-        }
-      >
-        <span {...stylex.props(styles.frame, picked && styles.picked)}>
-          <SkillSprite icon={icon.icon} label={icon.name} dim={!icon.learned} />
-          {icon.evolution !== null && (
-            <img
-              src={skillMarkOf(marks, 'evolution', icon.evolution)}
-              alt=""
-              draggable={false}
-              {...stylex.props(styles.evolutionMark, styles.scaledMark)}
-            />
-          )}
-          {icon.enhancement !== null && (
-            <img
-              src={skillMarkOf(marks, 'enhancement', icon.enhancement)}
-              alt=""
-              draggable={false}
-              {...stylex.props(styles.enhancementMark, styles.scaledMark)}
-            />
-          )}
-        </span>
-        <span {...stylex.props(styles.level)}>
-          {icon.learned && icon.level !== null ? `Lv ${icon.level}` : ''}
-        </span>
-      </Tooltip.Trigger>
-      <Tooltip.Popup>
-        {adoption !== null ? (
-          <SkillAdoptionTooltip
-            name={icon.name}
-            adoption={adoption}
-            role={role}
-            marks={marks}
-            now={now}
-          />
-        ) : (
-          <span {...stylex.props(styles.tooltip)}>{icon.name}</span>
         )}
-      </Tooltip.Popup>
-    </Tooltip.Root>
+        {icon.enhancement !== null && (
+          <img
+            src={skillMarkOf(source.marks, 'enhancement', icon.enhancement)}
+            alt=""
+            draggable={false}
+            {...stylex.props(styles.enhancementMark, styles.scaledMark)}
+          />
+        )}
+      </span>
+      <span {...stylex.props(styles.level)}>
+        {icon.learned && icon.level !== null ? `Lv ${icon.level}` : ''}
+      </span>
+    </SkillAdoptionHover>
   )
-}
-
-function adoptionOf(
-  stats: SkillStats | null,
-  role: MaleCrusaderRole | null,
-  icon: SkillWindowIcon
-): SkillAdoption | null {
-  if (stats === null || (role !== null && icon.name === MALE_CRUSADER_DEALER_SKILL)) {
-    return null
-  }
-
-  return skillAdoptionOf(stats, {
-    name: icon.name,
-    evolutionNames: icon.evolutionNames,
-    hasEnhancement: icon.enhanceable
-  })
 }
 
 function SkillWindowGrid({
   skillWindow,
-  stats,
-  role
+  source
 }: {
   skillWindow: SkillWindow
-  stats: SkillStats | null
-  role: MaleCrusaderRole | null
+  source: SkillAdoptionSource
 }): React.JSX.Element {
-  const [now] = useState(Date.now)
-
   return (
     <div {...stylex.props(styles.windowColumn)}>
       <div
@@ -151,35 +104,10 @@ function SkillWindowGrid({
           </div>
         ))}
         {skillWindow.icons.map((icon) => (
-          <SkillIcon
-            key={`${icon.col},${icon.row}`}
-            icon={icon}
-            marks={skillWindow.marks}
-            adoption={adoptionOf(stats, role, icon)}
-            role={role}
-            now={now}
-          />
+          <SkillIcon key={`${icon.col},${icon.row}`} icon={icon} source={source} />
         ))}
       </div>
     </div>
-  )
-}
-
-function SkillWindowWithStats({
-  skillWindow,
-  job
-}: {
-  skillWindow: SkillWindow
-  job: SkillStatsJob
-}): React.JSX.Element {
-  const stats = useSkillStats(job)
-
-  return (
-    <SkillWindowGrid
-      skillWindow={skillWindow}
-      stats={stats.status === 'success' ? stats.value : null}
-      role={job.role}
-    />
   )
 }
 
@@ -245,38 +173,29 @@ function loadedCatalog(
   return catalog.value
 }
 
-function LearnedSkills({
-  detail,
-  style,
-  catalog
-}: CharacterTabProps & {
-  style: SkillStyle
-  catalog: SkillWindowCatalog | null
-}): React.JSX.Element {
-  const skillWindow = catalog !== null ? skillWindowOf(catalog, detail.character, style) : null
-  if (skillWindow === null) {
-    return <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
-  }
+function skillStatsJobOf({ character, card }: CharacterDetailView): SkillStatsJob | null {
+  const { jobId, jobGrowId } = character
 
-  const { jobId, jobGrowId } = detail.character
   if (jobId === null || jobGrowId === null) {
-    return <SkillWindowGrid skillWindow={skillWindow} stats={null} role={null} />
+    return null
   }
 
   const role = isMaleCrusaderJob({ jobId, jobGrowId })
-    ? maleCrusaderRoleOf(detail.character, detail.card?.role ?? null)
+    ? maleCrusaderRoleOf(character, card?.role ?? null)
     : null
 
-  return <SkillWindowWithStats skillWindow={skillWindow} job={{ jobId, jobGrowId, role }} />
+  return { jobId, jobGrowId, role }
 }
 
 function SkillSideColumn({
   detail,
   style,
-  catalog
+  catalog,
+  source
 }: CharacterTabProps & {
   style: SkillStyle
   catalog: SkillWindowCatalog | null
+  source: SkillAdoptionSource | null
 }): React.JSX.Element {
   const hash = detail.skillStyle?.hash ?? null
   const board = catalog !== null ? skillUpgradeBoardOf(catalog, detail.character, style) : null
@@ -285,8 +204,8 @@ function SkillSideColumn({
     <div {...stylex.props(sideStyles.side)}>
       {hash !== null && <SkillTreeCode hash={hash} />}
       <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
-      {board !== null ? (
-        <SkillUpgradeSections board={board} />
+      {board !== null && source !== null ? (
+        <SkillUpgradeSections board={board} source={source} />
       ) : (
         <div {...stylex.props(sideStyles.fallback)}>
           <SkillUpgrades label="스킬 개화" upgrades={skillUpgradesOf(style, 'evolution')} />
@@ -294,6 +213,53 @@ function SkillSideColumn({
         </div>
       )}
     </div>
+  )
+}
+
+type SkillColumnsProps = CharacterTabProps & {
+  style: SkillStyle
+  catalog: SkillWindowCatalog | null
+  skillWindow: SkillWindow | null
+}
+
+function SkillColumns({
+  detail,
+  style,
+  catalog,
+  skillWindow,
+  stats,
+  role
+}: SkillColumnsProps & {
+  stats: SkillStats | null
+  role: MaleCrusaderRole | null
+}): React.JSX.Element {
+  const [now] = useState(Date.now)
+  const source = catalog !== null ? { stats, role, marks: catalog.marks, now } : null
+
+  return (
+    <div {...stylex.props(styles.root)}>
+      {skillWindow !== null && source !== null ? (
+        <SkillWindowGrid skillWindow={skillWindow} source={source} />
+      ) : (
+        <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
+      )}
+      <SkillSideColumn detail={detail} style={style} catalog={catalog} source={source} />
+    </div>
+  )
+}
+
+function SkillColumnsWithStats({
+  job,
+  ...props
+}: SkillColumnsProps & { job: SkillStatsJob }): React.JSX.Element {
+  const stats = useSkillStats(job)
+
+  return (
+    <SkillColumns
+      {...props}
+      stats={stats.status === 'success' ? stats.value : null}
+      role={job.role}
+    />
   )
 }
 
@@ -314,10 +280,30 @@ export function SkillTab({ detail }: CharacterTabProps): React.JSX.Element | nul
     )
   }
 
+  const loaded = loadedCatalog(catalog)
+  const skillWindow = loaded !== null ? skillWindowOf(loaded, detail.character, style) : null
+  const job = skillWindow !== null ? skillStatsJobOf(detail) : null
+
+  if (job === null) {
+    return (
+      <SkillColumns
+        detail={detail}
+        style={style}
+        catalog={loaded}
+        skillWindow={skillWindow}
+        stats={null}
+        role={null}
+      />
+    )
+  }
+
   return (
-    <div {...stylex.props(styles.root)}>
-      <LearnedSkills detail={detail} style={style} catalog={loadedCatalog(catalog)} />
-      <SkillSideColumn detail={detail} style={style} catalog={loadedCatalog(catalog)} />
-    </div>
+    <SkillColumnsWithStats
+      detail={detail}
+      style={style}
+      catalog={loaded}
+      skillWindow={skillWindow}
+      job={job}
+    />
   )
 }
