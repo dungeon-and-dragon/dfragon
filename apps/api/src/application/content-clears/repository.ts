@@ -2,11 +2,14 @@ import type {
   ClearAdventureSize,
   ClearCoClearCount,
   ClearContentScoreSample,
+  ClearContentWeek,
+  ClearContentWeekSamples,
   ClearFameBandCount,
   ClearFameSample,
   ClearFirstWeekCount,
   ClearJobFameSample,
   ClearJobScoreSample,
+  ClearOverviewWeekSamples,
   ClearPopulationCharacter,
   ClearRecordBackfillProgress,
   ClearRecordInput,
@@ -52,19 +55,14 @@ export interface ClearRecordBackfillRepository {
   finishProgress(startedAt: Date): Promise<void>
 }
 
-export interface ClearStatsRepository {
-  readCollectedAt(): Promise<Date | null>
-  readPopulations(): Promise<StoredClearPopulation[]>
-  readWeekRatioCounts(): Promise<ClearWeekRatioCount[]>
+export interface ClearSampleRepository {
   readAdventureSizes(selection: ClearWeekSelection): Promise<ClearAdventureSize[]>
   readContentJobFames(selection: ClearWeekSelection): Promise<ClearJobFameSample[]>
   readContentTimes(selection: ClearWeekSelection): Promise<ClearTimeCount[]>
-  readFirstWeeks(contentId: string): Promise<ClearFirstWeekCount[]>
   readFameBands(selection: ClearWeekSelection, minFame: number): Promise<ClearFameBandCount[]>
   readWeekGroups(comparison: ClearWeekComparison): Promise<ClearWeekGroupSample[]>
   readStageMoves(selection: ClearStageMoveSelection): Promise<ClearStageMoveCount[]>
   readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]>
-  readLegionWeeks(names: readonly string[]): Promise<ClearRecordLegionWeek[]>
   readRaidModes(selection: ClearRecordRaidSelection): Promise<ClearRecordRaidMode[]>
   readRaidStageCounts(
     selection: ClearRecordRaidSelection,
@@ -79,4 +77,30 @@ export interface ClearStatsRepository {
   readJobFames(weekStart: Date): Promise<ClearJobFameSample[]>
   readCoClears(weekStart: Date): Promise<ClearCoClearCount[]>
   readRaidTimes(weekStart: Date): Promise<ClearTimeCount[]>
+}
+
+export interface ClearStatsRepository extends ClearSampleRepository {
+  readCollectedAt(): Promise<Date | null>
+  readPopulations(): Promise<StoredClearPopulation[]>
+  readWeekRatioCounts(): Promise<ClearWeekRatioCount[]>
+  readFirstWeeks(contentId: string): Promise<ClearFirstWeekCount[]>
+  readLegionWeeks(names: readonly string[]): Promise<ClearRecordLegionWeek[]>
+  readContentWeekSamples(week: ClearContentWeek): Promise<ClearContentWeekSamples | null>
+  readOverviewSamples(weekStart: Date): Promise<ClearOverviewWeekSamples | null>
+}
+
+export interface ClearWeekSampleRepository extends ClearSampleRepository {
+  readPopulations(): Promise<StoredClearPopulation[]>
+  readContentWeekSampleWeeks(): Promise<ClearContentWeek[]>
+  readOverviewSampleWeeks(): Promise<Date[]>
+  recordContentWeekSamples(
+    week: ClearContentWeek,
+    samples: ClearContentWeekSamples,
+    computedAt: Date
+  ): Promise<void>
+  recordOverviewSamples(
+    weekStart: Date,
+    samples: ClearOverviewWeekSamples,
+    computedAt: Date
+  ): Promise<void>
 }

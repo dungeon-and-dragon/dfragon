@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type {
+  ClearContentWeekSamples,
   ClearJobFameSample,
   ClearStageMoveSelection,
   ClearWeekComparison,
@@ -69,6 +70,8 @@ function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRe
     readCollectedAt: async () => at('2026-11-10T06:30:00'),
     readPopulations: async () => populations,
     readWeekRatioCounts: async () => counts,
+    readContentWeekSamples: async () => null,
+    readOverviewSamples: async () => null,
     readAdventureSizes: async () => [],
     readContentJobFames: async () => [],
     readContentTimes: async () => [],
@@ -275,6 +278,80 @@ test('컨텐츠 상세는 week가 없으면 가장 최근 주를 읽고, 저장�
       { contentId: 'michaela-hard', kind: 'raid', weekStart: week('2026-11-05') },
       { contentId: 'diregie-hard', kind: 'raid', weekStart: week('2026-02-05') }
     ])
+  } finally {
+    await app.close()
+  }
+})
+
+const storedContentSamples: ClearContentWeekSamples = {
+  jobFames: [],
+  jobScores: [],
+  adventures: [{ characters: 2, adventures: 3 }],
+  fameBands: [],
+  scoreBands: [],
+  times: [],
+  weekGroups: [],
+  weekGroupScores: [],
+  stageMoves: [],
+  streaks: [{ weeks: 2, characters: 5 }],
+  stages: []
+}
+
+test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산하지 않고, 첫 클리어 주는 컨텐츠마다 한 번 읽는다', async () => {
+  const notComputed = async (): Promise<never> => assert.fail('저장한 주를 다시 계산하면 안 된다')
+  const firstWeekReads: string[] = []
+  const { app, origin } = await listen(
+    fakeReader({
+      readContentWeekSamples: async ({ contentId }) =>
+        contentId === 'michaela-hard' ? storedContentSamples : null,
+      readOverviewSamples: async () => ({
+        fames: [],
+        jobFames: [],
+        scores: [],
+        jobScores: [],
+        coClears: [
+          { contentId: 'michaela-hard', otherContentId: 'engraved-nightmare-1', cleared: 4 }
+        ],
+        raidTimes: []
+      }),
+      readFirstWeeks: async (contentId) => {
+        firstWeekReads.push(contentId)
+
+        return [{ weekStart: week('2026-10-29'), characters: 7 }]
+      },
+      readContentJobFames: notComputed,
+      readStreaks: notComputed,
+      readFames: notComputed,
+      readCoClears: notComputed
+    })
+  )
+  try {
+    const latest = await getJson(origin, '/stats/clears/michaela-hard?week=2026-11-05')
+    const previous = await getJson(origin, '/stats/clears/michaela-hard?week=2026-10-29')
+    const overview = await getJson(origin, '/stats/clears/overview?week=2026-11-05')
+
+    assert.equal(latest.status, 200)
+    assert.deepEqual(latest.body.adventures, [{ characters: 2, adventures: 3 }])
+    assert.deepEqual(latest.body.streaks, [{ weeks: 2, characters: 5 }])
+    assert.equal(previous.status, 200)
+    assert.deepEqual(
+      previous.body.weeklyClears.map(
+        ({ weekStart, firstCleared }: { weekStart: string; firstCleared: number }) => [
+          weekStart,
+          firstCleared
+        ]
+      ),
+      [
+        ['2026-10-29', 7],
+        ['2026-11-05', 0]
+      ]
+    )
+    assert.deepEqual(firstWeekReads, ['michaela-hard'])
+    assert.equal(overview.status, 200)
+    assert.deepEqual(
+      overview.body.contents.find(({ id }: { id: string }) => id === 'michaela-hard').coClears,
+      [{ id: 'engraved-nightmare-1', cleared: 4 }]
+    )
   } finally {
     await app.close()
   }
@@ -760,6 +837,8 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
     readCollectedAt: base.readCollectedAt,
     readPopulations: counted(base.readPopulations),
     readWeekRatioCounts: counted(base.readWeekRatioCounts),
+    readContentWeekSamples: counted(base.readContentWeekSamples),
+    readOverviewSamples: counted(base.readOverviewSamples),
     readAdventureSizes: counted(base.readAdventureSizes),
     readContentJobFames: counted(base.readContentJobFames),
     readContentTimes: counted(base.readContentTimes),

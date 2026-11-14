@@ -1,14 +1,10 @@
-import type { StoredClearPopulation } from '@dfragon/database'
-import { subWeeks } from 'date-fns'
+import type { ClearFirstWeekCount, StoredClearPopulation } from '@dfragon/database'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
-import { toRaidStageLabel } from '../../domain/raid-stage.js'
 import { formatResetDate } from '../../domain/seoul-time.js'
 import {
   CLEAR_CONTENTS,
   type ClearContent,
-  findStagePair,
-  toCollectionMinFame,
-  toPopulationMinFame
+  findStagePair
 } from '../../domain/content-clears/contents.js'
 import {
   type ClearContentStats,
@@ -28,6 +24,7 @@ import {
   toClearStats
 } from '../../domain/content-clears/stats.js'
 import type { ClearStatsRepository } from './repository.js'
+import { ClearSampleLoader } from './sample-loader.js'
 
 type ClearSummary = {
   stats: ClearStats
@@ -37,6 +34,7 @@ type ClearSummary = {
 type ClearSnapshot = {
   collectedAt: number | null
   summary?: Promise<ClearSummary>
+  firstWeeks: Map<string, Promise<ClearFirstWeekCount[]>>
   contentStats: Map<string, Promise<ClearContentStats>>
   overviews: Map<string, Promise<ClearOverview>>
 }
@@ -89,6 +87,7 @@ function createSerialQueue() {
 function emptySnapshot(collectedAt: number | null): ClearSnapshot {
   return {
     collectedAt,
+    firstWeeks: new Map(),
     contentStats: new Map(),
     overviews: new Map()
   }
@@ -98,13 +97,16 @@ function emptySnapshot(collectedAt: number | null): ClearSnapshot {
 // 그동안은 이전 시각의 결과를 준다.
 export class ClearStatsService {
   private readonly queue = createSerialQueue()
+  private readonly samples: ClearSampleLoader
   private served: ClearSnapshot | undefined
   private refreshing: ClearRefresh | undefined
 
   constructor(
     private readonly repository: ClearStatsRepository,
     private readonly reportRefreshFailure: () => void
-  ) {}
+  ) {
+    this.samples = new ClearSampleLoader(repository)
+  }
 
   async stats(): Promise<ClearStats> {
     return (await this.summaryOf(await this.currentSnapshot())).stats
@@ -162,28 +164,26 @@ export class ClearStatsService {
     return current.summary
   }
 
-  // 단계 라벨은 수집 판정과 같은 함수로 정하고, 단계 라벨이 없는 기록(이내 황혼전)은 세지 않는다.
-  private async loadStages(raidName: string, weekStart: Date) {
-    const selection = { raidName, weekStart }
-    const modes = await this.repository.readRaidModes(selection)
-    const stages = modes.flatMap(({ modeName, hard }) => {
-      const stage = toRaidStageLabel({ modeName, hard: hard ?? false })
+  private firstWeeksOf(current: ClearSnapshot, contentId: string): Promise<ClearFirstWeekCount[]> {
+    const cached = current.firstWeeks.get(contentId)
 
-      if (stage === null) {
-        return []
-      }
-
-      return [{ modeName, hard, stage }]
-    })
-
-    if (stages.length === 0) {
-      return []
+    if (cached !== undefined) {
+      return cached
     }
 
-    return this.repository.readRaidStageCounts(selection, stages)
+    const loading = cacheUntilFailure(this.repository.readFirstWeeks(contentId), () => {
+      current.firstWeeks.delete(contentId)
+    })
+
+    current.firstWeeks.set(contentId, loading)
+
+    return loading
   }
 
+  // 마감한 주는 worker가 저장한 재료를 읽고, 아직 저장하지 않은 주만 직접 계산한다. 첫 클리어 주는 다음 주의
+  // 클리어로도 바뀌어 저장하지 않고 수집 시각마다 컨텐츠별로 한 번 읽는다.
   private async loadContentStats(
+    current: ClearSnapshot,
     content: ClearContent,
     summary: ClearContentSummary,
     population: StoredClearPopulation | undefined
@@ -192,76 +192,29 @@ export class ClearStatsService {
       return toEmptyContentStats(summary)
     }
 
-    const { weekStart } = population
-    const previousWeekStart = subWeeks(weekStart, 1)
-    const selection = { contentId: content.id, kind: content.kind, weekStart }
-    const raid = content.kind === 'raid'
+    const week = { contentId: content.id, weekStart: population.weekStart }
+    const samples =
+      (await this.repository.readContentWeekSamples(week)) ??
+      (await this.samples.loadContent(content, population))
+    const firstWeeks = await this.firstWeeksOf(current, content.id)
     const pair = findStagePair(content)
-    const minFame = population.minFame ?? toPopulationMinFame(content, toCollectionMinFame())
-    const comparison = { contentId: content.id, weekStart, previousWeekStart }
-    const raidName = content.rule.type === 'clear' ? content.rule.name : undefined
-    const jobFames = await this.repository.readContentJobFames(selection)
-    const jobScores = await this.repository.readContentJobScores(selection)
-    const adventures = await this.repository.readAdventureSizes(selection)
-    const firstWeeks = await this.repository.readFirstWeeks(content.id)
-    const fameBands = await this.repository.readFameBands(selection, minFame)
-    const scoreBands = await this.repository.readScoreBands(selection, minFame)
-    const times = await this.repository.readContentTimes(selection)
-    const weekGroups = raid ? await this.repository.readWeekGroups(comparison) : null
-    const weekGroupScores = raid ? await this.repository.readWeekGroupScores(comparison) : null
-    const stageMoveCounts =
-      pair !== undefined
-        ? await this.repository.readStageMoves({
-            hardContentId: pair.hard.id,
-            normalContentId: pair.normal.id,
-            weekStart,
-            previousWeekStart
-          })
+    const stageMoves =
+      pair !== undefined && samples.stageMoves !== null
+        ? { pair, counts: samples.stageMoves }
         : null
 
-    const streaks = raid ? await this.repository.readStreaks(selection) : null
-    const stages = raidName !== undefined ? await this.loadStages(raidName, weekStart) : null
-
-    const stageMoves =
-      pair !== undefined && stageMoveCounts !== null ? { pair, counts: stageMoveCounts } : null
-
-    return toClearContentStats(summary, population, {
-      jobFames,
-      jobScores,
-      adventures,
-      firstWeeks,
-      fameBands,
-      scoreBands,
-      times,
-      weekGroups,
-      weekGroupScores,
-      stageMoves,
-      streaks,
-      stages
-    })
+    return toClearContentStats(summary, population, { ...samples, firstWeeks, stageMoves })
   }
 
   private async loadOverview(
     weekStart: Date,
     populations: readonly StoredClearPopulation[]
   ): Promise<ClearOverview> {
-    // 한 주의 모든 컨텐츠를 읽는 쿼리는 PostgreSQL이 병렬 worker로 돌린다. 여섯 개를 함께 보내면 worker들이
-    // 공유 메모리(shm)를 동시에 잡아 운영 DB에서 "could not resize shared memory segment"로 실패해 하나씩 읽는다.
-    const fames = await this.repository.readFames(weekStart)
-    const jobFames = await this.repository.readJobFames(weekStart)
-    const scores = await this.repository.readScores(weekStart)
-    const jobScores = await this.repository.readJobScores(weekStart)
-    const coClears = await this.repository.readCoClears(weekStart)
-    const raidTimes = await this.repository.readRaidTimes(weekStart)
+    const samples =
+      (await this.repository.readOverviewSamples(weekStart)) ??
+      (await this.samples.loadOverview(weekStart))
 
-    return toClearOverview(weekStart, populations, {
-      fames,
-      jobFames,
-      scores,
-      jobScores,
-      coClears,
-      raidTimes
-    })
+    return toClearOverview(weekStart, populations, samples)
   }
 
   private async contentStatsOf(
@@ -305,7 +258,7 @@ export class ClearStatsService {
     )
 
     const loading = cacheUntilFailure(
-      this.queue.run(() => this.loadContentStats(content, summary, population)),
+      this.queue.run(() => this.loadContentStats(current, content, summary, population)),
       () => {
         current.contentStats.delete(key)
       }
@@ -447,6 +400,8 @@ export const emptyClearStatsRepository: ClearStatsRepository = {
   readCollectedAt: async () => null,
   readPopulations: async () => [],
   readWeekRatioCounts: async () => [],
+  readContentWeekSamples: async () => null,
+  readOverviewSamples: async () => null,
   readAdventureSizes: async () => [],
   readContentJobFames: async () => [],
   readContentTimes: async () => [],
