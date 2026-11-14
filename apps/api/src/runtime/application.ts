@@ -39,7 +39,8 @@ import {
   requestJobRun,
   requeueCollectionFailures,
   setBatchNeopleKeyEnabled,
-  setJobPaused
+  setJobPaused,
+  writeTimelineQueueCounts
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { createCatalogService } from '../application/character-catalog/service.js'
@@ -122,6 +123,7 @@ function createDatabaseSubscribers(
       backfillSeason: (job) => backfillSeason(job, seasonBackfill),
       read: (character) => readCharacterTimeline(client, character, new Date()),
       readPage: (character, list, before) => readTimelinePage(client, character, list, before),
+      writeQueueCounts: (counts) => writeTimelineQueueCounts(client, counts),
       close: async () => {
         await Promise.all([client.$disconnect(), clearStatsClient.$disconnect()])
       }

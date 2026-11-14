@@ -22,8 +22,9 @@ import {
   type CharacterSearchDependencies,
   createCharacterSearchService
 } from '../application/character-search/service.js'
-import type { ReadTimelinePage } from '../application/character-timeline/ports.js'
+import type { ReadTimelinePage, WriteQueueCounts } from '../application/character-timeline/ports.js'
 import { createTimelineSyncQueue } from '../application/character-timeline/queue.js'
+import { startQueueCountsWriter } from '../application/character-timeline/queue-counts.js'
 import { createSeasonBackfillQueue } from '../application/character-timeline/season-backfill.js'
 import {
   createCharacterTimelineService,
@@ -58,6 +59,8 @@ export interface TimelineSyncOptions {
   readonly backfillSeason: (job: SeasonBackfillJob) => Promise<void>
   readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
   readonly readPage: ReadTimelinePage
+  // 있으면 queue의 대기, 처리 중 수를 주기마다 쓴다. 운영 경로가 이 값을 읽는다.
+  readonly writeQueueCounts?: WriteQueueCounts
   // 진행 중인 동기화를 기다리지 않고 닫는다.
   readonly close: () => Promise<void>
 }
@@ -77,6 +80,7 @@ export interface ApiServicesOptions {
   readonly buildInfoPath?: string
   readonly scoreLibraryPath?: string | null
   readonly spawnScoreWorker?: ScoreEngineOptions['spawn']
+  readonly queueCountsIntervalMs?: number
 }
 
 type CharacterFetchedSubscriber = (event: CharacterFetched) => void
@@ -142,6 +146,27 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   })
   const timelineSync = timeline && createTimelineSync(timeline, reportCode)
   const queues = timelineSync?.queues
+  // queue는 DB 설정(`timeline`)을 준 app에만 있어, 그 밖의 app에서 부르면 던진다.
+  const readQueueCounts = () => {
+    if (queues === undefined) {
+      throw new Error('Timeline queues need the timeline option')
+    }
+
+    return [
+      { name: 'timeline-sync', ...queues.sync.counts() },
+      { name: 'enhancement-backfill', ...queues.enhancementBackfill.counts() },
+      { name: 'season-backfill', ...queues.seasonBackfill.counts() }
+    ]
+  }
+
+  const queueCountsWriter =
+    timeline?.writeQueueCounts &&
+    startQueueCountsWriter(
+      readQueueCounts,
+      timeline.writeQueueCounts,
+      () => reportCode('TIMELINE_QUEUE_COUNTS_WRITE_FAILED'),
+      options.queueCountsIntervalMs
+    )
 
   // DB 설정이 없으면 구독 함수가 없어, 상세 조회가 캐릭터를 받아도 동기화와 기록을 하지 않는다.
   const subscribers: CharacterFetchedSubscriber[] = []
@@ -217,18 +242,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       todayGrade
     },
     refreshClearStats: () => clearStats.refresh(),
-    // queue는 DB 설정(`timeline`)을 준 app에만 있어, 그 밖의 app에서 부르면 던진다.
-    readQueueCounts() {
-      if (queues === undefined) {
-        throw new Error('Timeline queues need the timeline option')
-      }
-
-      return [
-        { name: 'timeline-sync', ...queues.sync.counts() },
-        { name: 'enhancement-backfill', ...queues.enhancementBackfill.counts() },
-        { name: 'season-backfill', ...queues.seasonBackfill.counts() }
-      ]
-    },
+    readQueueCounts,
     /** 한 단계가 실패해도 나머지 단계를 실행하고, 실패를 모아 던진다. */
     close(closeServer: () => Promise<void>): Promise<void> {
       return runCloseSteps([
@@ -238,6 +252,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
         () => todayGrade.close(),
         () => clearStats.close(),
         closeServer,
+        () => queueCountsWriter?.stop(),
         // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, queue를 닫지 않으면 대기열에 남은 일과 종료 뒤에 온 요청도 시작한다.
         () => queues?.sync.close(),
         () => queues?.enhancementBackfill.close(),
