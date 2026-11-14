@@ -136,7 +136,11 @@ type JsonRequestOptions = {
   searchParams?: Record<string, string>
   signal?: AbortSignal
   details?: boolean
+  timeout?: number
 }
+
+// API는 클리어 통계를 한 번에 하나씩 계산해, 미리 계산하지 않은 주는 앞 계산을 기다린 뒤 1분 가까이 더 걸린다.
+const CLEAR_STATS_TIMEOUT_MS = 120_000
 
 const CHARACTER_SEARCH_LIMIT = '200'
 
@@ -165,14 +169,19 @@ function createJsonRequest(
   schema: Schema,
   options?: JsonRequestOptions
 ) => Promise<z.infer<Schema>> {
-  return async (path, schema, { method = 'get', searchParams, signal, details = true } = {}) => {
+  return async (
+    path,
+    schema,
+    { method = 'get', searchParams, signal, details = true, timeout } = {}
+  ) => {
     try {
       signal?.throwIfAborted()
       const request = http(`${apiOrigin}${path}`, {
         method,
         searchParams,
         headers: { Accept: 'application/json' },
-        signal
+        signal,
+        timeout
       })
       const response = await request
       // ky의 body 메서드만 본문 읽기에도 timeout을 건다. await한 Response의 본문을 직접 읽으면 대기 상한이 없다.
@@ -339,14 +348,17 @@ export function createDfragonClient({
       requestJson('/stats/skills', skillStatsSchema, {
         searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
       }),
-    clearStats: () => requestJson('/stats/clears', clearStatsSchema),
+    clearStats: () =>
+      requestJson('/stats/clears', clearStatsSchema, { timeout: CLEAR_STATS_TIMEOUT_MS }),
     clearContentStats: (contentId, weekStart) =>
       requestJson(`/stats/clears/${encodeURIComponent(contentId)}`, clearContentStatsSchema, {
-        searchParams: { ...(weekStart !== undefined && { week: weekStart }) }
+        searchParams: { ...(weekStart !== undefined && { week: weekStart }) },
+        timeout: CLEAR_STATS_TIMEOUT_MS
       }),
     clearOverview: (weekStart) =>
       requestJson('/stats/clears/overview', clearOverviewSchema, {
-        searchParams: { week: weekStart }
+        searchParams: { week: weekStart },
+        timeout: CLEAR_STATS_TIMEOUT_MS
       }),
     adventures: {
       async weekly(adventureName) {
