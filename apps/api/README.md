@@ -43,15 +43,15 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/runtime/api-services.ts` | 공개 app 기능의 Service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
 | `src/runtime/routes/api.ts` | 기능의 Controller를 만들어 공개 app의 경로에 붙입니다 |
 
-모험단, 길드 조회(`adventure-guild`), 캐릭터 검색(`character-search`), 캐릭터 상세(`character-detail`), 캐릭터 카탈로그(`character-catalog`), 캐릭터 이미지(`character-image`), 오늘의 등급(`today-grade`), 캐릭터 타임라인(`character-timeline`), 캐릭터 기본 정보 기록(`character-basic`), 랭킹과 통계 조회(`ranking-stats`), 클리어 집계 조회(`content-clears`)가 이 형태입니다.
-worker의 job 실행과 예약, 실행 이력 정리(`jobs`), 클리어 기록 수집과 지난 기록 받기(`content-clears`), 통계 job과 스킬 스타일 수집(`ranking-stats`), 점수 계산(`character-score`)도 Controller와 DTO 없이 Service, Repository class 형태이며, Service는 기존 use case 파일에 두고 job 정의(`defineJob`)의 `run`이 Service를 부릅니다.
-나머지 기능은 아직 `create<기능>Service`, `create<기능>Routes` 함수와 `ports.ts`의 Store, Reader 형태로 남아 있습니다.
+Repository와 port를 쓰지 않는 경로(`health`, `version`)는 Controller만 둡니다.
+worker가 돌리는 기능은 HTTP 경로가 없어 Controller와 DTO 없이 Service와 Repository만 두고, job 정의(`defineJob`)의 `run`이 Service를 부릅니다.
+worker 기능의 Service는 `service.ts`가 아니라 기존 use case 파일(예: `application/content-clears/collection.ts`, `application/character-score/calculation-job.ts`)에 둡니다.
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
 두 앱이 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.
-오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
-캐릭터 목록 수집 흐름과 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
+오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/controller.ts`에 있습니다.
+캐릭터 목록 수집 Service, Repository interface와 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
 Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`에 있습니다.
 

@@ -1,12 +1,23 @@
 import type { BatchNeopleKeySummary } from '@dfragon/database'
 import { z } from 'zod'
+import { OpsFailure } from '../../../domain/failure.js'
 
 // batch_neople_keys.id가 int4라 9자리까지만 받는다.
 const POSITIVE_INT4_DIGITS = /^[1-9]\d{0,8}$/
 
-export const keyIdParam = z.string().regex(POSITIVE_INT4_DIGITS).transform(Number)
+const keyIdParam = z.string().regex(POSITIVE_INT4_DIGITS).transform(Number)
 
 export type KeyIdParam = z.infer<typeof keyIdParam>
+
+export function readKeyId(value: string): KeyIdParam {
+  const id = keyIdParam.safeParse(value)
+
+  if (!id.success) {
+    throw new OpsFailure('request')
+  }
+
+  return id.data
+}
 
 const trimmedText = z.string().trim().min(1)
 
