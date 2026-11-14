@@ -1,8 +1,19 @@
 import type { TooltipPlace } from '../../animations/useChartTooltipSlide'
-import type { BoxStats } from './chart-geometry'
+import { type BoxStats, boxPlotScale, type Scale } from './chart-geometry'
 import type { TooltipRow } from './plot-layout'
 
+export const BOX_PLOT_EDGE = 24
+
 const TOOLTIP_GAP = 8
+// 가장 긴 눈금 글자(예: 105,000)가 11px로 약 46px이라 글자 사이가 10px 넘게 남는 간격이다.
+const TICK_SPACING = 56
+const MIN_TICK_COUNT = 2
+
+export function boxPlotScaleFor(stats: readonly BoxStats[], width: number): Scale | undefined {
+  const tickCount = Math.max(MIN_TICK_COUNT, Math.floor((width - BOX_PLOT_EDGE * 2) / TICK_SPACING))
+
+  return boxPlotScale(stats, tickCount)
+}
 
 export function boxStatsTooltipRows(
   stats: BoxStats,
