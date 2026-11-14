@@ -1,10 +1,21 @@
+import { Tooltip, type TooltipPopupProps } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { Fragment } from 'react'
 import { formatSeoulDateTime } from '#core/time-format'
-import { MALE_CRUSADER_ROLE_LABELS, type MaleCrusaderRole } from '#core/character/male-crusader'
-import type { SkillAdoption, SkillUpgradeRates } from '#core/ranking/skill-stats'
+import {
+  MALE_CRUSADER_DEALER_SKILL,
+  MALE_CRUSADER_ROLE_LABELS,
+  type MaleCrusaderRole
+} from '#core/character/male-crusader'
+import {
+  type SkillAdoption,
+  type SkillStats,
+  type SkillUpgradeRates,
+  skillAdoptionOf
+} from '#core/ranking/skill-stats'
 import { type SkillMarks, skillMarkOf, type UpgradeType } from '#core/catalog/skill-window'
 import { styles } from './SkillAdoptionTooltip.style'
+import { styles as skillStyles } from './SkillTab.style'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 
 const UPGRADE_TYPES = [1, 2] as const satisfies readonly UpgradeType[]
@@ -118,5 +129,71 @@ export function SkillAdoptionTooltip({
         )}
       </span>
     </span>
+  )
+}
+
+export type SkillAdoptionSource = Readonly<{
+  stats: SkillStats | null
+  role: MaleCrusaderRole | null
+  marks: SkillMarks
+  now: number
+}>
+
+export type SkillAdoptionSkill = Readonly<{
+  name: string
+  evolutionNames: readonly [string, string] | null
+  enhanceable: boolean
+}>
+
+function adoptionOf(
+  { stats, role }: SkillAdoptionSource,
+  skill: SkillAdoptionSkill
+): SkillAdoption | null {
+  if (stats === null || (role !== null && skill.name === MALE_CRUSADER_DEALER_SKILL)) {
+    return null
+  }
+
+  return skillAdoptionOf(stats, {
+    name: skill.name,
+    evolutionNames: skill.evolutionNames,
+    hasEnhancement: skill.enhanceable
+  })
+}
+
+export function SkillAdoptionHover({
+  skill,
+  source,
+  trigger,
+  side,
+  children
+}: {
+  skill: SkillAdoptionSkill
+  source: SkillAdoptionSource
+  trigger: React.ReactElement
+  side?: TooltipPopupProps['side']
+  children: React.ReactNode
+}): React.JSX.Element {
+  const adoption = adoptionOf(source, skill)
+
+  return (
+    // Tooltip이 옆 스킬과 아래 행을 덮으므로, 마우스가 Tooltip으로 옮겨 가면 닫아 다른 스킬을 볼 수 있게 한다.
+    <Tooltip.Root disableHoverablePopup>
+      <Tooltip.Trigger delay={0} closeDelay={0} render={trigger}>
+        {children}
+      </Tooltip.Trigger>
+      <Tooltip.Popup side={side}>
+        {adoption !== null ? (
+          <SkillAdoptionTooltip
+            name={skill.name}
+            adoption={adoption}
+            role={source.role}
+            marks={source.marks}
+            now={source.now}
+          />
+        ) : (
+          <span {...stylex.props(skillStyles.tooltip)}>{skill.name}</span>
+        )}
+      </Tooltip.Popup>
+    </Tooltip.Root>
   )
 }

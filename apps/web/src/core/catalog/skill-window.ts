@@ -275,6 +275,8 @@ type UpgradeSkill = Readonly<{
   requiredLevel: number | null
   icon: SkillIconImage
   picked: UpgradeType | null
+  evolutionNames: readonly [string, string] | null
+  enhanceable: boolean
 }>
 
 export type EvolutionBranch = Readonly<{
@@ -332,7 +334,9 @@ function upgradeSkillOf(
     name: skill.name,
     requiredLevel: skill.requiredLevel,
     icon: { sprite: job.sprite, ...skill.icon },
-    picked: pickedType
+    picked: pickedType,
+    evolutionNames: evolutionNamesOf(skill),
+    enhanceable: skill.enhancement !== undefined
   }
 }
 

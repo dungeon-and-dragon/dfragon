@@ -81,7 +81,13 @@ export const styles = stylex.create({
     borderBottomColor: colors.borderDefault
   },
   rowBody: { flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 },
-  rowTitle: { display: 'flex', alignItems: 'baseline', gap: 6, fontWeight: 500 },
+  rowTitle: {
+    display: 'flex',
+    alignSelf: 'flex-start',
+    alignItems: 'baseline',
+    gap: 6,
+    fontWeight: 500
+  },
   rowLevel: {
     color: colors.fgSubtle,
     fontSize: 11,
