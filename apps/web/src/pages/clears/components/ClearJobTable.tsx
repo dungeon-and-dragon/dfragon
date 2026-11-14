@@ -6,11 +6,12 @@ import type { ClearJob } from '#core/ranking/clear-stats'
 import { useChartTooltipSlide } from '../../../animations/useChartTooltipSlide'
 import { BoxPlot, BoxPlotAxis } from '../../../components/chart/BoxPlot'
 import {
+  boxPlotScaleFor,
   boxPlotTooltipPlaceOf,
   boxStatsTooltipRows
 } from '../../../components/chart/box-plot-layout'
 import { BoxPlotLegend } from '../../../components/chart/ChartLegend'
-import { boxPlotScale, type Scale } from '../../../components/chart/chart-geometry'
+import type { Scale } from '../../../components/chart/chart-geometry'
 import { ChartTooltip } from '../../../components/chart/plot-parts'
 import { type Hover, NO_HOVER, type TooltipRow } from '../../../components/chart/plot-layout'
 import { useChartSize } from '../../../components/chart/useChartSize'
@@ -29,7 +30,6 @@ import { styles } from './ClearJobTable.style'
 
 const VISIBLE_JOB_COUNT = 10
 const PLOT_FALLBACK = { width: 320, height: 20 }
-const PLOT_TICK_COUNT = 4
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -49,10 +49,6 @@ export function ClearJobTable({ jobs }: { jobs: readonly ClearJob[] }): React.JS
   }
 
   const shown = expanded ? rows : rows.slice(0, VISIBLE_JOB_COUNT)
-  const scale = boxPlotScale(
-    shown.flatMap(({ stats }) => stats ?? []),
-    PLOT_TICK_COUNT
-  )
 
   function expand(): void {
     setExpanded(true)
@@ -70,7 +66,7 @@ export function ClearJobTable({ jobs }: { jobs: readonly ClearJob[] }): React.JS
         </>
       }
     >
-      <JobTable rows={shown} scale={scale} metric={metric} />
+      <JobTable rows={shown} metric={metric} />
       <div {...stylex.props(styles.foot)}>
         <BoxPlotLegend />
         {!expanded && rows.length > VISIBLE_JOB_COUNT && (
@@ -93,11 +89,9 @@ function statsRowsOf({ stats }: JobRow): TooltipRow[] {
 
 function JobTable({
   rows,
-  scale,
   metric
 }: {
   rows: readonly JobRow[]
-  scale: Scale | undefined
   metric: JobMetric
 }): React.JSX.Element {
   const [hover, setHover] = useState<Hover>(NO_HOVER)
@@ -107,6 +101,10 @@ function JobTable({
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const anchorsRef = useRef(new Map<string, HTMLElement>())
   const { width } = useChartSize(plotRef, PLOT_FALLBACK)
+  const scale = boxPlotScaleFor(
+    rows.flatMap(({ stats }) => stats ?? []),
+    width
+  )
   const shownRow = rows.find(({ key }) => key === hover.key)
   useChartTooltipSlide({
     chartRef,
@@ -131,7 +129,7 @@ function JobTable({
       <table {...stylex.props(styles.table)}>
         <thead>
           <tr {...stylex.props(styles.headRow)}>
-            <th scope="col" {...stylex.props(styles.head)}>
+            <th scope="col" {...stylex.props(styles.head, styles.headName)}>
               전직
             </th>
             <th scope="col" {...stylex.props(styles.head, styles.headCounts)}>

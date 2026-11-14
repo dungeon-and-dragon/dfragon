@@ -4,7 +4,6 @@ import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking/clear-stats'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
 import { BoxPlotLegend } from '../../components/chart/ChartLegend'
-import { boxPlotScale } from '../../components/chart/chart-geometry'
 import { Columns } from '../../components/chart/Columns'
 import { LineChart } from '../../components/chart/LineChart'
 import { RowBars } from '../../components/chart/RowBars'
@@ -283,9 +282,7 @@ function ScorePanel({
   )
 }
 
-const JOB_NAME_WIDTH = 150
-// 반 폭 열에 명성 눈금 여섯 개가 들어가지 않아 줄인다.
-const JOB_TICK_COUNT = 3
+const JOB_NAME_WIDTH = 140
 
 function JobPanel({
   overview,
@@ -306,11 +303,8 @@ function JobPanel({
 
   const metric = chosenMetric ?? 'fame'
   const { high, low } = jobRanks(base.jobs, metric)
-  const scale = boxPlotScale(
-    [...high, ...low].flatMap(({ stats }) => stats ?? []),
-    JOB_TICK_COUNT
-  )
-  if (scale == null) {
+  const domain = [...high, ...low].flatMap(({ stats }) => stats ?? [])
+  if (domain.length === 0) {
     return null
   }
 
@@ -343,7 +337,7 @@ function JobPanel({
             <BoxPlotChart
               label={name}
               rows={rows}
-              scale={scale}
+              domain={domain}
               head={{ name: '전직', plot: JOB_METRIC_PLOT_LABELS[metric], value: '클리어율' }}
               nameWidth={JOB_NAME_WIDTH}
               legend={false}
