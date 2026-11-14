@@ -11,12 +11,14 @@ import {
   readContentClearFames,
   readContentClearFirstWeeks,
   readContentClearJobFames,
+  readContentClearOverviewSamples,
   readContentClearPopulations,
   readContentClearRaidTimes,
   readContentClearStageMoves,
   readContentClearStreaks,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
+  readContentClearWeekSamples,
   readClearRecordLegionWeeks,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
@@ -285,7 +287,9 @@ try {
     readWeekGroupScores: (comparison) => readContentClearWeekGroupScores(client, comparison),
     readScoreBands: (selection, minFame) => readContentClearScoreBands(client, selection, minFame),
     readScores: (weekStart) => readContentClearScores(client, weekStart),
-    readJobScores: (weekStart) => readContentClearJobScores(client, weekStart)
+    readJobScores: (weekStart) => readContentClearJobScores(client, weekStart),
+    readContentWeekSamples: (week) => readContentClearWeekSamples(client, week),
+    readOverviewSamples: (weekStart) => readContentClearOverviewSamples(client, weekStart)
   }
   let refreshFailures = 0
   const reportRefreshFailure = () => {
