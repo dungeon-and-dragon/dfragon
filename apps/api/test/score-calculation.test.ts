@@ -9,15 +9,16 @@ import { type NeopleCharacterIdentity, NeopleRequestFailure } from '@dfragon/neo
 import {
   DEFAULT_SCORE_CALCULATION_SCHEDULE,
   SCORE_CALCULATION_JOB_NAME,
+  ScoreCalculationService,
   ScoreEngineUnavailable,
   UNAVAILABLE_PAUSE_MS,
-  calculateScores,
   createScoreCalculationJob
 } from '../src/application/character-score/calculation-job.js'
 import type {
-  ScoreCalculationDependencies,
+  ScoreCalculationPorts,
   ScoreEngineHandle
 } from '../src/application/character-score/ports.js'
+import type { ScoreCalculationRepository } from '../src/application/character-score/repository.js'
 import type { CharacterDetailSection } from '../src/domain/character-detail/sections.js'
 import type { ScoreEngineResult } from '../src/domain/score/result.js'
 import type { WorkerNeople } from '../src/infrastructure/neople/character-collection.js'
@@ -25,6 +26,15 @@ import { createScoreSources } from '../src/runtime/score-calculation.js'
 import { payloadsFromEngineInput, readEngineInput } from './score-fixtures.js'
 
 const NOW = new Date('2026-11-18T13:00:00Z')
+
+type ScoreCalculationDependencies = ScoreCalculationPorts & {
+  store: ScoreCalculationRepository
+  reportProgress: (done: number, total: number) => void
+}
+
+function calculateScores({ store, reportProgress, ...ports }: ScoreCalculationDependencies) {
+  return new ScoreCalculationService(store, ports).calculate(reportProgress)
+}
 
 // 합성 캐릭터와 섹션 응답이다. DB는 대상과 저장한 점수를 메모리에 두는 fake이고, 엔진은 캐릭터 ID로 결과를 고르는 fake다.
 const character = (characterId: string): ClearPopulationCharacter => ({
@@ -418,11 +428,11 @@ test('엔진 worker가 멈추면 남은 캐릭터를 받지 않고 실패하며 
 
 test('점수 계산 job은 기본으로 수요일 22시에 돌고, 설정한 일정이 있으면 그 일정으로 돌며, 놓친 실행을 보충하지 않는다', () => {
   const { dependencies } = calculation([])
-  const { store, openEngine, createSources, readConcurrency, report } = dependencies
-  const jobDependencies = { openEngine, createSources, readConcurrency, report }
+  const { store, reportProgress, ...ports } = dependencies
+  const service = new ScoreCalculationService(store, ports)
 
-  const scheduled = createScoreCalculationJob(store, jobDependencies)
-  const configured = createScoreCalculationJob(store, jobDependencies, '30 20 * * 3')
+  const scheduled = createScoreCalculationJob(service)
+  const configured = createScoreCalculationJob(service, '30 20 * * 3')
 
   assert.equal(scheduled.name, SCORE_CALCULATION_JOB_NAME)
   assert.equal(scheduled.schedule, DEFAULT_SCORE_CALCULATION_SCHEDULE)

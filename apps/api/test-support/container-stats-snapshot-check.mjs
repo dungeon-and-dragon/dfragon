@@ -10,10 +10,11 @@ import {
 } from '@dfragon/database'
 import { roundAverageFame } from './dist/domain/ranking-stats/stats.js'
 import {
+  StatsJobService,
   createCharacterStatsJob,
   createSkillAdoptionJob
 } from './dist/application/ranking-stats/stats-jobs.js'
-import { createDatabaseStatsJobStore } from './dist/infrastructure/database/stats-jobs.js'
+import { DatabaseStatsJobRepository } from './dist/infrastructure/database/stats-jobs.js'
 
 // 합성 캐릭터다. 앞 단계가 넣은 행도 있어, 저장분은 같은 DB에서 바로 계산한 값과 비교한다.
 // Neople /df/jobs의 프리스트(남)와 眞 크루세이더 ID다.
@@ -63,9 +64,9 @@ try {
     style('snapshot-vanishing', vanishingJob, [{ name: '합성소멸', level: 1 }])
   )
 
-  const store = createDatabaseStatsJobStore(client)
-  const statsJob = createCharacterStatsJob(store)
-  const skillJob = createSkillAdoptionJob(store)
+  const service = new StatsJobService(new DatabaseStatsJobRepository(client))
+  const statsJob = createCharacterStatsJob(service)
+  const skillJob = createSkillAdoptionJob(service)
   const readStoredStats = async () => {
     const { id: _id, ...stored } = await client.characterStatsSnapshot.findUniqueOrThrow({
       where: { id: 1 }
