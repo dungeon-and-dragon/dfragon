@@ -18,6 +18,7 @@ parsePort('3000') // 3000
 - `@dfragon/lib/utils/shape-check`: `isRecord`, `isFiniteNumber`, `isNonblankString`, `textOrNull`은 신뢰 경계를 넘어온 값의 모양만 확인하고 값을 바꾸지 않습니다.
 - `@dfragon/lib/utils/assert`: `assert(condition, failure?)`는 조건이 falsy이면 `AssertionError`, 받은 `Error`, 또는 함수가 돌려준 오류를 던지고, 통과하면 이후 코드의 타입을 좁힙니다. `node:assert`에 의존하지 않습니다.
 - `@dfragon/lib/port`: `parsePort`는 ASCII 십진 정수 1~65535만 받고 나머지는 `Invalid server configuration`을 던집니다. API의 `PORT`와 `@dfragon/database`의 `DB_PORT`가 씁니다.
+- `@dfragon/lib/error-chain`: 오류 chain 정제(`describeErrorChain`, `SanitizedFailure`, `forwardCause`). API의 실패 class와 `@dfragon/http-server`의 access log가 씁니다.
 - `matchesDNFSearchNicknamePolicy(nickname)`: 검색어가 Unicode code point 1~12개이고 앞뒤 공백이 없는지 확인합니다. 경계값은 `DNF_SEARCH_NICKNAME_LIMITS`에 있고 문자열을 trim, 정규화하지 않습니다.
 
 ## 던파 게임 값
