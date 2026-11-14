@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { readApiBuildInfo } from '../src/infrastructure/build-info.js'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 
@@ -16,7 +16,7 @@ const unusedProvider = async (): Promise<never> => {
 }
 const unusedProviders = {
   search: { searchCharacters: unusedSearchCharacters },
-  details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+  details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
   todayGrade: { fetchShopGrade: unusedProvider }
 }
 const commit = '1234567890abcdef1234567890abcdef12345678'

@@ -3,7 +3,7 @@ import { Writable } from 'node:stream'
 import test from 'node:test'
 import { type AccessLogSink, createStreamAccessLogSink } from '@dfragon/http-server'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
@@ -14,7 +14,7 @@ const NativeResponse = globalThis.Response
 const unusedProvider = async (): Promise<never> => {
   throw new Error('access log test must not call this provider')
 }
-const unusedCatalog = createCatalogService(unusedProvider)
+const unusedCatalog = new CatalogService(unusedProvider)
 const unusedDetails = { fetchDetails: unusedProvider, catalog: unusedCatalog }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
@@ -342,7 +342,7 @@ test('상세 요청 로그에는 Neople 단계별 대기 시간만 붙이고, �
           }
         })
       ),
-      catalog: createCatalogService(async (itemIds) => {
+      catalog: new CatalogService(async (itemIds) => {
         catalogRequests.push(itemIds)
 
         return new Map()
@@ -416,7 +416,7 @@ test('캐시한 강제 갱신과 상세 요청은 responseCached로 표시하고
           }
         })
       ),
-      catalog: createCatalogService(
+      catalog: new CatalogService(
         async (itemIds) => new Map(itemIds.map((itemId) => [itemId, { itemId }]))
       )
     },

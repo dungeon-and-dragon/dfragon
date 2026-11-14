@@ -3,7 +3,6 @@ import { setTimeout } from 'node:timers/promises'
 import {
   createDatabaseClient,
   readAdventureCharacters,
-  readAdventureNames,
   readDatabaseConfiguration,
   readGuild,
   recordCharacter,
@@ -21,7 +20,8 @@ import {
 import { backfillSeason } from './dist/application/character-timeline/season-backfill.js'
 import { createDatabaseSeasonBackfillStore } from './dist/infrastructure/database/character-timeline-store.js'
 import { readAdventureWeeklyClears } from './dist/infrastructure/database/adventure-weekly.js'
-import { createCharacterSearchService } from './dist/application/character-search/service.js'
+import { CharacterSearchService } from './dist/application/character-search/service.js'
+import { DatabaseCharacterSearchRepository } from './dist/infrastructure/database/character-search.js'
 import { parseCharacterCandidatesQuery } from './dist/domain/character-search/query.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
@@ -556,17 +556,17 @@ try {
     jobName: null,
     jobGrowName: null
   })
-  const candidates = createCharacterSearchService({
-    searchCharacters: async () => ({
+  const candidates = new CharacterSearchService(
+    new DatabaseCharacterSearchRepository(client),
+    async () => ({
       rows: [
         candidateRow('siroco', 'adventure-high'),
         candidateRow('hilder', 'guild-no-fame'),
         candidateRow('cain', 'candidate-not-stored')
       ]
     }),
-    readAdventureNames: (characters) => readAdventureNames(client, characters),
-    characterImageUrl: neopleCharacterImageUrl
-  })
+    neopleCharacterImageUrl
+  )
   const candidateInput = parseCharacterCandidatesQuery(
     `/characters/candidates?characterName=${encodeURIComponent('합성후보')}`
   )

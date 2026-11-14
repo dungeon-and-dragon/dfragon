@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
 import type { ScoreWorker } from '../src/infrastructure/score/engine.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
@@ -31,7 +31,7 @@ const unused = {
 
 const unusedDetails: ApiHttpAppOptions['details'] = {
   fetchDetails: async () => assert.fail('상세 조회를 부르면 안 된다'),
-  catalog: createCatalogService(async () => new Map())
+  catalog: new CatalogService(async () => new Map())
 }
 
 // 닫기가 진행 중인 조회를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
@@ -54,7 +54,7 @@ test('진행 중인 상세 조회가 있을 때 app을 닫으면 조회를 취�
           })
           markFetching()
         }),
-      catalog: createCatalogService(async () => new Map())
+      catalog: new CatalogService(async () => new Map())
     },
     scoreLibraryPath: SYNTHETIC_LIBRARY_PATH,
     spawnScoreWorker: () =>

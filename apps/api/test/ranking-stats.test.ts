@@ -9,7 +9,7 @@ import type {
   StoredCharacter
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { RankingStatsReader } from '../src/application/ranking-stats/ports.js'
 
@@ -99,7 +99,7 @@ async function listen(
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
     rankingStats,
     writeAccessLog: () => undefined

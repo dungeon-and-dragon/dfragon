@@ -1,14 +1,11 @@
 import assert from 'node:assert/strict'
 import { type IncomingHttpHeaders, request as sendHttpRequest } from 'node:http'
 import test, { type TestContext } from 'node:test'
-import {
-  type CatalogService,
-  createCatalogService
-} from '../src/application/character-catalog/service.js'
-import type { FetchCatalog } from '../src/application/character-catalog/ports.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
+import type { CharacterCatalog, FetchCatalog } from '../src/application/character-catalog/ports.js'
 import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
 import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
-import { createCharacterDetailService } from '../src/application/character-detail/service.js'
+import { CharacterDetailService } from '../src/application/character-detail/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 const identity = { serverId: 'siroco', characterId: 'fixture-character' }
@@ -40,9 +37,9 @@ const foundItems: FetchCatalog = async (itemIds) => {
 }
 
 function countingCatalog(fetchCatalog: FetchCatalog) {
-  const inner = createCatalogService(fetchCatalog)
+  const inner = new CatalogService(fetchCatalog)
   const counter = { loads: 0 }
-  const catalog: CatalogService = {
+  const catalog: CharacterCatalog = {
     load: (itemIds, loadSignal) => {
       counter.loads++
 
@@ -91,7 +88,7 @@ async function startApp(
         throw new Error('response cache test must not search')
       }
     },
-    details: { fetchDetails, catalog: createCatalogService(fetchCatalog) },
+    details: { fetchDetails, catalog: new CatalogService(fetchCatalog) },
     todayGrade: {
       fetchShopGrade: async () => {
         throw new Error('response cache test must not look up the shop grade')
@@ -107,7 +104,7 @@ async function startApp(
 
 test('캐릭터 캐시가 맞은 GET은 공용 아이템을 다시 붙이지 않고 처음 만든 본문 바이트를 그대로 돌려준다', async (t) => {
   const { counter, catalog } = countingCatalog(foundItems)
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => payloadsNamed('합성 캐릭터')
@@ -133,7 +130,7 @@ test('공용 아이템이 unavailable인 응답은 저장하지 않아 다음 �
 
     return foundItems(itemIds, catalogSignal)
   })
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => payloadsNamed('합성 캐릭터')

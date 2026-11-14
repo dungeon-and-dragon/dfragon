@@ -7,7 +7,7 @@ import test from 'node:test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 
@@ -24,7 +24,7 @@ const unusedProvider = async (): Promise<never> => {
 test('createApiHttpApp은 listen 전에는 port를 열지 않고 close 뒤 port를 닫는다', async () => {
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedSearchCharacters },
-    details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+    details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider }
   })
   const server = app.getHttpServer()
@@ -63,7 +63,7 @@ test('handler 전에 연결이 끊긴 검색, 상세, 초상화, 오늘의 등�
     search: { searchCharacters: recordCall('search') },
     details: {
       fetchDetails: recordCall('details'),
-      catalog: createCatalogService(recordCall('catalog'))
+      catalog: new CatalogService(recordCall('catalog'))
     },
     todayGrade: { fetchShopGrade: recordCall('todayGrade') },
     fetchCharacterImage: recordCall('image'),
@@ -119,7 +119,7 @@ test('응답을 기다리던 클라이언트가 연결을 끊으면 진행 중�
   const image = watchAbort()
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedSearchCharacters },
-    details: { fetchDetails: details.provider, catalog: createCatalogService(unusedProvider) },
+    details: { fetchDetails: details.provider, catalog: new CatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider },
     fetchCharacterImage: image.provider,
     writeAccessLog: () => undefined
