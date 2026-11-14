@@ -1,9 +1,9 @@
 import type { BatchNeopleKeySummary } from '@dfragon/database'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { OpsBatchNeopleKeyStore } from '../../../application/ops/ports.js'
-import { OpsFailure } from '../../../domain/ops/failure.js'
-import { readJsonBody } from './json-request.js'
+import type { OpsBatchNeopleKeyStore } from '../../../application/batch-neople-keys/ports.js'
+import { OpsFailure } from '../../../domain/failure.js'
+import { readJsonBody } from '../json-request.js'
 
 // batch_neople_keys.id가 int4라 9자리까지만 받는다.
 const POSITIVE_INT4_DIGITS = /^[1-9]\d{0,8}$/

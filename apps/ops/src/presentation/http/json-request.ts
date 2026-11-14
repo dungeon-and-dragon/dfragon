@@ -1,6 +1,6 @@
 import type { Context, MiddlewareHandler } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
-import { OpsFailure } from '../../../domain/ops/failure.js'
+import { OpsFailure } from '../../domain/failure.js'
 
 const BODY_LIMIT_BYTES = 16 * 1024
 const SAFE_METHODS = new Set(['GET', 'HEAD'])
