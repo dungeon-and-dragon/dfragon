@@ -13,7 +13,7 @@ import {
 import type {
   AdventureActivityRead,
   AdventureSeasonBackfillRead
-} from '../../application/adventure-guild/ports.js'
+} from '../../application/adventure-guild/repository.js'
 import {
   type ActivityDayDetail,
   type ActivityDayRange,

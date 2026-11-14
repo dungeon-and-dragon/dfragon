@@ -5,8 +5,8 @@ import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfr
 import type { HttpAppHandle } from '@dfragon/http-server'
 import {
   type AdventureSeasonBackfillRead,
-  type AdventureGuildReader
-} from '../src/application/adventure-guild/ports.js'
+  type AdventureGuildRepository
+} from '../src/application/adventure-guild/repository.js'
 import {
   type StoredActivitySeason,
   emptySeasonActivity,
@@ -256,7 +256,7 @@ function gate() {
 }
 
 async function listen(
-  reader: Pick<AdventureGuildReader, 'readAdventureSeasonBackfill' | 'readAdventureActivity'>,
+  reader: Pick<AdventureGuildRepository, 'readAdventureSeasonBackfill' | 'readAdventureActivity'>,
   backfill: (job: SeasonBackfillJob) => Promise<void>
 ): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('부르면 안 된다')

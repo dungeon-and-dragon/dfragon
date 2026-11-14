@@ -1,6 +1,6 @@
 import type { AccessLogEnv } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import { createAdventureGuildRoutes } from '../../presentation/http/adventure-guild/routes.js'
+import { AdventureGuildController } from '../../presentation/http/adventure-guild/controller.js'
 import { createCharacterDetailRoutes } from '../../presentation/http/character-detail/routes.js'
 import { createCharacterImageRoutes } from '../../presentation/http/character-image/routes.js'
 import { createCharacterSearchRoutes } from '../../presentation/http/character-search/routes.js'
@@ -20,7 +20,7 @@ export function createApiRoutes(services: ApiServices): Hono<AccessLogEnv> {
   routes.route('/characters', createCharacterDetailRoutes(services.details))
   routes.route('/characters', createCharacterImageRoutes(services.fetchCharacterImage))
   routes.route('/characters', createCharacterTimelineRoutes(services.timeline))
-  routes.route('/', createAdventureGuildRoutes(services.adventureGuild))
+  routes.route('/', new AdventureGuildController(services.adventureGuild).routes())
   routes.route('/', createRankingStatsRoutes(services.rankingStats))
   routes.route('/stats/clears', createClearStatsRoutes(services.clearStats))
   routes.route('/items', createTodayGradeRoutes(services.todayGrade))

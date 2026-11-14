@@ -7,7 +7,7 @@ import type {
   TimelineCharacter
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import type { AdventureGuildReader } from '../src/application/adventure-guild/ports.js'
+import type { AdventureGuildRepository } from '../src/application/adventure-guild/repository.js'
 import type { CharacterRow } from '../src/domain/character-row.js'
 import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
@@ -41,7 +41,7 @@ function memberRow(characterId: string, fame: number | null): CharacterRow {
 }
 
 async function listen(
-  adventureGuild?: AdventureGuildReader,
+  adventureGuild?: AdventureGuildRepository,
   syncTimeline?: (character: TimelineCharacter) => Promise<void>
 ): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
