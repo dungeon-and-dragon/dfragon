@@ -3,12 +3,22 @@ import test from 'node:test'
 import type { CharacterSkillStyleInput, SkillStyleSampleCharacter } from '@dfragon/database'
 import { type NeopleCharacterSkillStyle, NeopleRequestFailure } from '@dfragon/neople'
 import { createNeopleSkillStyle } from '../src/infrastructure/neople/skill-style-collection.js'
-import { type SkillStyleCollectionDependencies } from '../src/application/ranking-stats/ports.js'
+import type { SkillStyleCollectionPorts } from '../src/application/ranking-stats/ports.js'
+import type { SkillStyleCollectionRepository } from '../src/application/ranking-stats/repository.js'
 import {
+  SkillStyleCollectionService,
   UNAVAILABLE_PAUSE_MS,
-  collectSkillStyles,
   createSkillStyleCollectionJob
 } from '../src/application/ranking-stats/skill-style-collection.js'
+
+type SkillStyleCollectionDependencies = SkillStyleCollectionPorts & {
+  store: SkillStyleCollectionRepository
+  reportProgress: (done: number, total: number) => void
+}
+
+function collectSkillStyles({ store, reportProgress, ...ports }: SkillStyleCollectionDependencies) {
+  return new SkillStyleCollectionService(store, ports).collect(reportProgress)
+}
 
 const NOW = new Date('2026-11-10T03:00:00Z')
 
@@ -183,9 +193,9 @@ test('Neople 실패가 아닌 오류는 수집을 실패로 끝낸다', async ()
 
 test('스킬 스타일 수집 job은 일정 없이 수동으로만 돈다', () => {
   const { dependencies } = collection([], styleOf)
-  const { store, fetchSkillStyle, readConcurrency, report } = dependencies
+  const { store, reportProgress, ...ports } = dependencies
 
-  const job = createSkillStyleCollectionJob(store, { fetchSkillStyle, readConcurrency, report })
+  const job = createSkillStyleCollectionJob(new SkillStyleCollectionService(store, ports))
 
   assert.equal(job.name, 'skill-style-collection')
   assert.equal(job.schedule, undefined)
