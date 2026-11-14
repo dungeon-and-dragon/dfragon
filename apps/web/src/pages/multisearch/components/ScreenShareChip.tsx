@@ -49,6 +49,11 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
     }
   }
 
+  // 빈 선택은 브라우저에서 공유를 멈췄을 때처럼 공유 track과 마을 자동 인식을 함께 멈춘다.
+  function disconnect(): void {
+    selectSource('')
+  }
+
   return (
     <span {...stylex.props(styles.root)}>
       <HeaderTooltip label={status} disabled={status.length === 0}>
@@ -67,8 +72,10 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
         ) : (
           <button
             type="button"
-            aria-label={`화면 공유, ${state.label}`}
-            onClick={connect}
+            aria-label={
+              sourceReady ? `화면 공유 중지, ${state.label}` : `화면 공유, ${state.label}`
+            }
+            onClick={sourceReady ? disconnect : connect}
             {...stylex.props(styles.trigger)}
           >
             <StatusChip tone={state.tone} busy={state.busy} size="md">
