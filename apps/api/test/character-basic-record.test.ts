@@ -10,7 +10,7 @@ import {
   recordCharacterBasic
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import type {
   CharacterPayload,
   CharacterPayloads
@@ -207,7 +207,7 @@ function scoring(
 function detailsReturning(payloads: CharacterPayloads): ApiHttpAppOptions['details'] {
   return {
     fetchDetails: async () => payloads,
-    catalog: createCatalogService(async () => new Map())
+    catalog: new CatalogService(async () => new Map())
   }
 }
 
@@ -236,7 +236,7 @@ test('상세 조회는 캐시 적중에도 응답의 기본 정보를 저장한�
 
         return payloads
       },
-      catalog: createCatalogService(async () => new Map())
+      catalog: new CatalogService(async () => new Map())
     },
     recordCharacterBasic: async (basic) => {
       recorded.push(basic)
@@ -348,7 +348,7 @@ test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 �
 
         return payloads
       },
-      catalog: createCatalogService(async () => new Map())
+      catalog: new CatalogService(async () => new Map())
     },
     recordCharacterBasic: async () => {
       // 기본 정보보다 먼저 저장하면 characters 참조가 깨지므로, 늦게 끝나도 기다리는지 보려고 일부러 늦춘다.

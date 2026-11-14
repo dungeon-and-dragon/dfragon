@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleImageClientForTest, type FetchTransport } from '@dfragon/neople'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCharacterImage } from '../src/infrastructure/neople/character-image.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
@@ -24,7 +24,7 @@ function pngResponse(body: BodyInit = PNG_BYTES, headers: HeadersInit = {}) {
 async function startApp(t: test.TestContext, transport: FetchTransport): Promise<string> {
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
-    details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+    details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider },
     fetchCharacterImage: createNeopleCharacterImage(
       createNeopleImageClientForTest({ fetch: transport })
