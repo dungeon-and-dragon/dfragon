@@ -4,7 +4,7 @@ import { AdventureGuildController } from '../../presentation/http/adventure-guil
 import { CharacterDetailController } from '../../presentation/http/character-detail/controller.js'
 import { CharacterImageController } from '../../presentation/http/character-image/controller.js'
 import { CharacterSearchController } from '../../presentation/http/character-search/controller.js'
-import { createCharacterTimelineRoutes } from '../../presentation/http/character-timeline/routes.js'
+import { CharacterTimelineController } from '../../presentation/http/character-timeline/controller.js'
 import { createClearStatsRoutes } from '../../presentation/http/content-clears/routes.js'
 import { createHealthRoutes } from '../../presentation/http/health/routes.js'
 import { createRankingStatsRoutes } from '../../presentation/http/ranking-stats/routes.js'
@@ -19,7 +19,7 @@ export function createApiRoutes(services: ApiServices): Hono<AccessLogEnv> {
   routes.route('/characters', new CharacterSearchController(services.search).routes())
   routes.route('/characters', new CharacterDetailController(services.details).routes())
   routes.route('/characters', new CharacterImageController(services.characterImage).routes())
-  routes.route('/characters', createCharacterTimelineRoutes(services.timeline))
+  routes.route('/characters', new CharacterTimelineController(services.timeline).routes())
   routes.route('/', new AdventureGuildController(services.adventureGuild).routes())
   routes.route('/', createRankingStatsRoutes(services.rankingStats))
   routes.route('/stats/clears', createClearStatsRoutes(services.clearStats))

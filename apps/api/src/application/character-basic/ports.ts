@@ -1,15 +1,4 @@
-import type {
-  CharacterBasicInput,
-  CharacterScoreInput,
-  CharacterSkillStyleInput
-} from '@dfragon/database'
-import type { CharacterFetched } from '../../domain/character-events.js'
-
-export type RecordCharacterBasic = (basic: CharacterBasicInput) => Promise<void>
-
-export type RecordCharacterSkillStyle = (style: CharacterSkillStyleInput) => Promise<void>
-
-export type RecordCharacterScore = (score: CharacterScoreInput) => Promise<void>
+import type { CharacterBasicInput, CharacterSkillStyleInput } from '@dfragon/database'
 
 export type CharacterRecordFailure =
   | 'CHARACTER_BASIC_RECORD_FAILED'
@@ -23,5 +12,3 @@ export type ParseCharacterBasic = (
 export type ParseCharacterSkillStyle = (
   payload: Readonly<Record<string, unknown>>
 ) => Omit<CharacterSkillStyleInput, 'serverId' | 'characterId' | 'fetchedAt'> | undefined
-
-export type RecordFetchedCharacterBasic = (event: CharacterFetched) => void
