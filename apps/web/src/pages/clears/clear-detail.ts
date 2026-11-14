@@ -9,6 +9,7 @@ import type {
   ClearWeek,
   ClearWeekOverWeek
 } from '#core/ranking/clear-stats'
+import { jobLabelOf } from '#core/character/job-display'
 import type { BarSeries } from '../../components/chart/BarLineChart'
 import type { BoxPlotRow } from '../../components/chart/BoxPlot'
 import type { LegendItem } from '../../components/chart/ChartLegend'
@@ -353,14 +354,16 @@ const NO_RATE = '-'
 
 function rankedJob(job: ClearJob, metric: JobMetric): RankedJob {
   const rate = job.population > 0 ? job.cleared / job.population : -1
-  const name = job.jobGrowName ?? UNKNOWN_JOB_NAME
+  const label = jobLabelOf(job)
+  const name = label?.grow ?? UNKNOWN_JOB_NAME
+  const sub = label?.job ?? null
   const counts = `${integer.format(job.cleared)} / ${integer.format(job.population)}`
   const rateText = rate >= 0 ? percent.format(rate) : NO_RATE
   const stats = jobStatsOf(job, metric)
   const row = {
     key: `${job.jobId}/${job.jobGrowId}`,
     name,
-    sub: job.jobName,
+    sub,
     counts,
     rate: rateText,
     stats

@@ -44,6 +44,7 @@ export const plotStyles = stylex.create({
     transitionTimingFunction: motion.ease
   },
   barDimmed: { opacity: 0.3 },
+  faded: { opacity: 0.5 },
   hits: { position: 'absolute', inset: 0, margin: 0, padding: 0, listStyle: 'none' },
   hit: { position: 'absolute', top: 0, bottom: 0 },
   hitPlace: (left: number, width: number) => ({ left, width }),

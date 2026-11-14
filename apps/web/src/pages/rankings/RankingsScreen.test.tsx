@@ -2,8 +2,6 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { SHARED_GROW_JOB_NAMES } from '#core/character/job-display'
-import { formatJobName } from '#core/character/job-format'
 import type { FameRanking, FameRankingFilter, RankedCharacter } from '#core/ranking/ranking-stats'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
@@ -133,7 +131,7 @@ it('열은 순위, 캐릭터, 명성, 모험단, 길드이고 값이 없는 길�
   const [first, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['1', '카인합성1합성 전직', '99,999', '모험단1', '합성 길드'])
+  expect(first).toEqual(['1', '카인합성1합성 전직 합성 직업', '99,999', '모험단1', '합성 길드'])
   expect(fourth).toEqual(['4', '카인합성4합성 직업', '99,996', '모험단4', '-'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
@@ -152,11 +150,11 @@ it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니�
   }))
 
   const [maxLevel, belowMax] = bodyRows()
-  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직', null])
-  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직', 'Lv.110'])
+  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직 합성 직업', null])
+  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직 합성 직업', 'Lv.110'])
 })
 
-it('남성 크루세이더는 역할을 알면 역할을 붙이고 겹치는 전직은 성별을 붙인다', async () => {
+it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직 뒤에 직업명을 붙인다', async () => {
   const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
   await render(async () => ({
     characters: [
@@ -170,12 +168,12 @@ it('남성 크루세이더는 역할을 알면 역할을 붙이고 겹치는 전
   }))
 
   expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
-    '카인합성1크루세이더(딜러)',
-    '카인합성2크루세이더(버퍼)',
-    '카인합성3크루세이더 (남)',
-    '카인합성4크루세이더 (여)',
-    '카인합성5인파이터 (남)',
-    '카인합성6넨마스터 (여)'
+    '카인합성1크루세이더(딜러) 프리스트(남)',
+    '카인합성2크루세이더(버퍼) 프리스트(남)',
+    '카인합성3크루세이더 프리스트(남)',
+    '카인합성4크루세이더 프리스트(여)',
+    '카인합성5인파이터 프리스트(남)',
+    '카인합성6넨마스터 격투가(여)'
   ])
 })
 
@@ -287,18 +285,4 @@ it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌�
   expect(chip('크루세이더(딜러)').hasAttribute('data-pressed')).toBe(true)
   expect(chip('크루세이더(버퍼)').hasAttribute('data-pressed')).toBe(false)
   expect(chip('전직 전체').hasAttribute('data-pressed')).toBe(false)
-})
-
-it('겹치는 전직 목록은 랭킹의 두 직업 이상에 걸친 전직과 같다', () => {
-  const jobsByGrow = new Map<string, Set<string>>()
-  for (const job of RANKING_JOBS) {
-    for (const grow of job.grows) {
-      const name = formatJobName(grow.name)
-      const jobs = jobsByGrow.get(name) ?? new Set<string>()
-      jobs.add(job.jobId)
-      jobsByGrow.set(name, jobs)
-    }
-  }
-  const shared = [...jobsByGrow].filter(([, jobs]) => jobs.size > 1).map(([name]) => name)
-  expect([...SHARED_GROW_JOB_NAMES].sort()).toEqual(shared.sort())
 })

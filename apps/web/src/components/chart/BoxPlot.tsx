@@ -2,9 +2,15 @@ import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { BOX_PLOT_REVEAL, useChartReveal } from '../../animations/useChartReveal'
-import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
+import { useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
 import { BoxPlotLegend } from './ChartLegend'
-import { type BoxStats, boxPlotScale, positionOf, type Scale } from './chart-geometry'
+import {
+  BOX_PLOT_EDGE,
+  boxPlotScaleFor,
+  boxPlotTooltipPlaceOf,
+  boxStatsTooltipRows
+} from './box-plot-layout'
+import { type BoxStats, positionOf, type Scale } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
 import { type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
 import { plotStyles } from './plot.style'
@@ -25,7 +31,6 @@ export type BoxPlotHead = Readonly<{ name: string; plot: string; value: string }
 
 const DEFAULT_NAME_WIDTH = 120
 const VALUE_WIDTH = 48
-const EDGE = 24
 const AXIS_HEIGHT = 14
 const AXIS_BASELINE = 11
 const INLINE_HEIGHT = 20
@@ -34,10 +39,9 @@ const BOX_SHARE = 0.6
 const CAP_HALF = 4
 const DOT_SHARE = 0.15
 const DEFAULT_PLOT_WIDTH = 360
-const TOOLTIP_GAP = 8
 
 function xOf(value: number, scale: Scale, width: number): number {
-  return positionOf(value, scale, EDGE, width - EDGE)
+  return positionOf(value, scale, BOX_PLOT_EDGE, width - BOX_PLOT_EDGE)
 }
 
 export function BoxPlotAxis({
@@ -148,59 +152,43 @@ export function BoxPlot({
   )
 }
 
-function rowTooltipPlaceOf(
-  anchor: HTMLElement,
-  tooltip: HTMLElement,
-  chart: HTMLElement
-): TooltipPlace {
-  const chartBox = chart.getBoundingClientRect()
-  const anchorBox = anchor.getBoundingClientRect()
-  const right = anchorBox.right - chartBox.left + TOOLTIP_GAP
-  const fitsRight = right + tooltip.offsetWidth <= chartBox.width
-  const x = fitsRight
-    ? right
-    : Math.max(0, anchorBox.left - chartBox.left - TOOLTIP_GAP - tooltip.offsetWidth)
-  const y = anchorBox.top - chartBox.top + (anchorBox.height - tooltip.offsetHeight) / 2
-
-  return { x, y }
-}
-
 type BoxPlotChartProps = Readonly<{
   label: string
   rows: readonly BoxPlotRow[]
   formatTick: (value: number) => string
   formatValue: (value: number) => string
-  scale?: Scale
+  domain?: readonly BoxStats[]
   head?: BoxPlotHead
   nameWidth?: number
   legend?: boolean
 }>
 
 export function BoxPlotChart(props: BoxPlotChartProps): React.JSX.Element | null {
-  const scale = props.scale ?? boxPlotScale(props.rows.flatMap(({ stats }) => stats ?? []))
-  if (props.rows.length === 0 || scale == null) {
+  const domain = props.domain ?? props.rows.flatMap(({ stats }) => stats ?? [])
+  if (props.rows.length === 0 || domain.length === 0) {
     return null
   }
 
-  return <BoxPlotChartPlot {...props} scale={scale} />
+  return <BoxPlotChartPlot {...props} domain={domain} />
 }
 
 function BoxPlotChartPlot({
   label,
   rows,
-  scale,
+  domain,
   formatTick,
   formatValue,
   head,
   nameWidth = DEFAULT_NAME_WIDTH,
   legend = true
-}: BoxPlotChartProps & { scale: Scale }): React.JSX.Element {
+}: BoxPlotChartProps & { domain: readonly BoxStats[] }): React.JSX.Element | null {
   const [hover, setHover] = useState<Hover>(NO_HOVER)
   const chartRef = useRef<HTMLDivElement>(null)
   const plotRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const anchorsRef = useRef(new Map<string, HTMLElement>())
   const { width } = useChartSize(plotRef, { width: DEFAULT_PLOT_WIDTH, height: CHART_ROW_HEIGHT })
+  const scale = boxPlotScaleFor(domain, width)
   const shownRow = rows.find(({ key }) => key === hover.key)
   const hasValueColumn = head != null || rows.some(({ value }) => value != null)
   const valueWidth = hasValueColumn ? VALUE_WIDTH : 0
@@ -213,35 +201,28 @@ function BoxPlotChartPlot({
     shownKey: shownRow?.key,
     open: hover.open,
     bars: rows,
-    placeOf: rowTooltipPlaceOf
+    placeOf: boxPlotTooltipPlaceOf
   })
 
   function handleLeave(): void {
     setHover(({ key }) => ({ key, open: false }))
   }
 
-  function tooltipRows(row: BoxPlotRow): TooltipRow[] {
-    const { stats, color } = row
+  function tooltipRows({ stats, color }: BoxPlotRow): TooltipRow[] {
     if (stats === null) {
       return []
     }
 
-    const whiskerRange = `${formatValue(stats.p5)} ~ ${formatValue(stats.p95)}`
-    const boxRange = `${formatValue(stats.p25)} ~ ${formatValue(stats.p75)}`
-    const median = formatValue(stats.median)
-    const max = formatValue(stats.max)
-
-    return [
-      { key: 'p5', name: '5%~95%', color, value: whiskerRange },
-      { key: 'p25', name: '25%~75%', color, value: boxRange },
-      { key: 'median', name: '중앙값', color, value: median },
-      { key: 'max', name: '최고', color, value: max }
-    ]
+    return boxStatsTooltipRows(stats, color, formatValue)
   }
 
   const shownTitle =
     shownRow != null ? [shownRow.name, shownRow.sub].filter(Boolean).join(' ') : undefined
   const shownRows = shownRow != null ? tooltipRows(shownRow) : []
+
+  if (scale === undefined) {
+    return null
+  }
 
   return (
     <div {...stylex.props(plotStyles.plot)}>

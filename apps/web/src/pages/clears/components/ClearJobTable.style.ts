@@ -2,11 +2,12 @@ import * as stylex from '@stylexjs/stylex'
 import { colors, motion, space } from '@dfragon/ui/tokens.stylex'
 
 const ROW_HEIGHT = 32
-const COUNTS_WIDTH = 120
-const PLOT_WIDTH = 340
+const NAME_WIDTH = 184
+const COUNTS_WIDTH = 112
 const RATE_WIDTH = 64
 
 export const styles = stylex.create({
+  chart: { position: 'relative' },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
@@ -28,7 +29,8 @@ export const styles = stylex.create({
     ':first-child': { paddingLeft: space.s16, textAlign: 'left' },
     ':last-child': { paddingRight: space.s16 }
   },
-  headPlot: { width: PLOT_WIDTH, textAlign: 'left' },
+  headName: { width: NAME_WIDTH },
+  headPlot: { textAlign: 'left' },
   headCounts: { width: COUNTS_WIDTH },
   headRate: { width: RATE_WIDTH },
   axis: { display: 'block', marginTop: 4 },

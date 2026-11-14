@@ -2,7 +2,13 @@ import type { TooltipPlace } from '../../animations/useChartTooltipSlide'
 
 export type ChartX = Readonly<{ key: string; title: string; tick: string | null }>
 
-export type TooltipRow = Readonly<{ key: string; name: string; color: string; value: string }>
+export type TooltipRow = Readonly<{
+  key: string
+  name: string
+  color: string
+  faded?: boolean
+  value: string
+}>
 
 export type Hover = Readonly<{ key: string | null; open: boolean }>
 
