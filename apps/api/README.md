@@ -11,7 +11,8 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 `src/` 바로 아래에는 진입 파일 `main.ts`, `character-collector.ts`와 다섯 계층 폴더만 둡니다.
 진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`, `dist/character-collector.js`로 실행합니다.
 계층 폴더 사이의 import 방향과 계층 밖 파일은 `pnpm lint`가 `src/` 전체에서 검사합니다.
-앱을 만드는 `src/runtime/api-app.ts`(공개 API)와 `src/runtime/ops-app.ts`(운영 포트)가 route를 모으는 파일(`src/runtime/routes/`), 공개 app의 조립 함수(`src/runtime/api-services.ts`)가 아닌 기능 파일을 import하는 것도 `pnpm lint`가 막습니다.
+앱을 만드는 `src/runtime/api-app.ts`가 route를 모으는 파일(`src/runtime/routes/`), 공개 app의 조립 함수(`src/runtime/api-services.ts`)가 아닌 기능 파일을 import하는 것도 `pnpm lint`가 막습니다.
+운영 경로는 [운영 app](../ops/README.md)에 있습니다.
 
 | 폴더 | 담는 것 |
 | --- | --- |
@@ -19,10 +20,10 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
 | `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
-| `src/presentation/http/` | route, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표. 운영 포트의 route는 `ops/` |
+| `src/presentation/http/` | route, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표 |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
 | `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
-| `src/runtime/routes/` | 기능의 route에 service를 넘겨 app에 붙이는 함수. 공개 app은 `api.ts`, 운영 포트는 `ops.ts` |
+| `src/runtime/routes/` | 기능의 route에 service를 넘겨 공개 app에 붙이는 함수(`api.ts`) |
 
 기능을 하나 더하면 아래 파일을 만듭니다.
 기능 폴더(`domain/<기능>/`, `application/<기능>/`, `presentation/http/<기능>/`) 안의 파일은 역할 이름으로, 여러 기능을 담는 폴더(`infrastructure/neople/`, `infrastructure/database/` 등) 안의 파일은 기능 이름으로 짓습니다.
@@ -59,7 +60,6 @@ Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infra
 | `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. API는 없으면 점수 없이 실행하고, 캐릭터 수집 worker는 없으면 점수 계산 job만 실패로 끝냅니다 |
 | `SCORE_CALCULATION_SCHEDULE` | 선택 | 캐릭터 수집 worker의 점수 계산 job 일정(Asia/Seoul cron 식). 없으면 수요일 22:00입니다 |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` 또는 `DB_PASSWORD_FILE` | 선택 | [DB와 migration](#db와-migration) 참고 |
-| `OPS_PORT` | 선택 | 운영 경로(`/api/jobs`)를 여는 별도 포트. DB 설정이 있어야 하고 `PORT`와 달라야 합니다. 없으면 열지 않습니다 |
 | `JOB_ALERT_DISCORD_WEBHOOK_URL` 또는 `JOB_ALERT_DISCORD_WEBHOOK_URL_FILE` | 선택 | 캐릭터 수집 worker가 job 알림을 보낼 Discord 웹훅 https URL. 없으면 알림 없이 실행합니다 |
 
 Secret은 직접 입력과 `_FILE` 가운데 하나만 지정합니다. 둘 다 지정하거나 빈 값, 상대 경로, 읽을 수 없는 파일이면 값과 경로 없이 시작 전에 실패합니다.
@@ -114,7 +114,6 @@ docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 - `PORT`(운영은 3000)는 반드시 지정합니다. `EXPOSE 3000`은 기본값이 아닙니다.
 - Neople key는 직접 입력이나 `_FILE`로 받고, 둘 다 생략하면 `/run/secrets/neople_api_key`를 읽습니다.
 - DB 설정은 선택입니다. `DB_HOST`를 지정하고 비밀번호 입력을 둘 다 생략하면 `/run/secrets/db_password`를 읽습니다.
-- `OPS_PORT`는 선택입니다. 운영 경로에는 로그인이 없으므로 이 포트를 공개 인터넷에 열지 않습니다.
 - 기본 CMD는 API(`node dist/main.js`)이고, 캐릭터 수집 worker는 CMD를 `node dist/character-collector.js`로 바꿔 실행합니다.
 
 ### 실행 중인 서버의 버전 조회

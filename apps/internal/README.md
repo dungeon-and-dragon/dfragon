@@ -16,7 +16,7 @@ pnpm --filter @dfragon/internal preview
 
 `build`는 `tsc -b`와 Vite production build를 포함하므로 `typecheck`를 따로 실행할 필요가 없습니다. `pnpm verify`는 이 앱의 `test`, `build`를 실행합니다. 산출물은 `dist`에 생깁니다.
 
-`dev` 서버(`http://localhost:5174/`)는 `/api/*` 요청을 경로를 바꾸지 않고 로컬 API 운영 포트(`http://localhost:3444`)로 넘깁니다. 다른 포트로 띄운 API를 부르려면 `OPS_PORT`를 줍니다. API는 `OPS_PORT`와 DB 설정을 넣어 띄웁니다([API 입력](../api/README.md)).
+`dev` 서버(`http://localhost:5174/`)는 `/api/*` 요청을 경로를 바꾸지 않고 로컬 운영 app(`http://localhost:3444`)으로 넘깁니다. 다른 포트로 띄운 운영 app을 부르려면 `OPS_PORT`를 줍니다. 운영 app은 `PORT`와 DB 설정을 넣어 띄웁니다([운영 app 입력](../ops/README.md)).
 
 ```sh
 OPS_PORT=3544 pnpm --filter @dfragon/internal dev
