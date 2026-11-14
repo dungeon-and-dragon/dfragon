@@ -8,6 +8,8 @@ const WHEEL_GAP = 24
 export const styles = stylex.create({
   screen: { display: 'flex', flexDirection: 'column', gap: space.s16, padding: space.s16 },
   state: { margin: 0, fontSize: 13, lineHeight: '18px', color: colors.fgDanger },
+  // 주, 단계, 컨텐츠를 바꿔 집계를 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다.
+  pending: { minHeight: '100vh' },
   fame: { color: colors.gameFame },
   title: {
     display: 'flex',

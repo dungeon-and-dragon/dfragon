@@ -173,7 +173,11 @@ it('딜러 요약은 이름, 서버 칩과 전직과 레벨, 모험단과 길드
   const card: Card = { role: 'dealer', score: scoreOf({ value: 392332 }) }
   await render(async () => detailOf({ card }))
 
-  expect(textLines()).toEqual(['커피갱신30분 전', '바칼버서커Lv.115', '동네커피필로시스'])
+  expect(textLines()).toEqual([
+    '커피갱신30분 전',
+    '바칼버서커 귀검사(남)Lv.115',
+    '동네커피필로시스'
+  ])
   expect(summary().querySelector('img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/servers/bakal/characters/dealer-1?zoom=1'
   )
@@ -189,19 +193,19 @@ it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최�
     detailOf({ character: maleCrusader, card: { role: 'buffer', score: null } })
   )
 
-  expect(textLines()[1]).toBe('바칼크루세이더(버퍼)Lv.115')
+  expect(textLines()[1]).toBe('바칼크루세이더(버퍼) 프리스트(남)Lv.115')
   expect(useRecentCharacterStore.getState().recentCharacters[0]).toMatchObject({
     characterId: 'dealer-1',
     role: 'buffer'
   })
 })
 
-it('겹치는 전직은 캐릭터 상세 요약에 성별을 보인다', async () => {
+it('캐릭터 상세 요약의 전직 뒤에 직업명을 보인다', async () => {
   await render(async () =>
     detailOf({ character: { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' } })
   )
 
-  expect(textLines()[1]).toBe('바칼넨마스터 (여)Lv.115')
+  expect(textLines()[1]).toBe('바칼넨마스터 격투가(여)Lv.115')
 })
 
 it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking/clear-stats'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
 import { BoxPlotLegend } from '../../components/chart/ChartLegend'
-import { boxPlotScale } from '../../components/chart/chart-geometry'
 import { Columns } from '../../components/chart/Columns'
 import { LineChart } from '../../components/chart/LineChart'
 import { RowBars } from '../../components/chart/RowBars'
@@ -27,9 +26,7 @@ import {
   type OverviewWeek,
   overviewWeeks,
   RATE_PERIODS,
-  RATE_STAGES,
   type RatePeriod,
-  type RateStage,
   weekSummaryOf
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
@@ -151,6 +148,7 @@ function Overview({
       {hasRateValues(contents) && (
         <ClearRatePanel contents={contents} weeks={weeks} weekStart={weekStart} />
       )}
+      {result.status === 'loading' && <div aria-hidden="true" {...stylex.props(layout.pending)} />}
       {result.status === 'error' && (
         <p role="alert" {...stylex.props(layout.state)}>
           {result.message}
@@ -164,7 +162,6 @@ function Overview({
 }
 
 const PERIOD_CHOICES = RATE_PERIODS.map(({ period, label }) => ({ value: period, label }))
-const STAGE_CHOICES = RATE_STAGES.map(({ stage, label }) => ({ value: stage, label }))
 
 function ClearRatePanel({
   contents,
@@ -176,17 +173,13 @@ function ClearRatePanel({
   weekStart: string
 }): React.JSX.Element {
   const [period, setPeriod] = useState<RatePeriod>('half')
-  const [stage, setStage] = useState<RateStage>('hard')
-  const { x, series } = clearRateChart(contents, weeks, weekStart, period, stage)
+  const { x, series } = clearRateChart(contents, weeks, weekStart, period)
 
   return (
     <Panel
       name="주간 클리어율"
       controls={
-        <>
-          <ChoiceGroup label="기간" choices={PERIOD_CHOICES} value={period} onChange={setPeriod} />
-          <ChoiceGroup label="단계" choices={STAGE_CHOICES} value={stage} onChange={setStage} />
-        </>
+        <ChoiceGroup label="기간" choices={PERIOD_CHOICES} value={period} onChange={setPeriod} />
       }
     >
       <LineChart
@@ -283,9 +276,7 @@ function ScorePanel({
   )
 }
 
-const JOB_NAME_WIDTH = 150
-// 반 폭 열에 명성 눈금 여섯 개가 들어가지 않아 줄인다.
-const JOB_TICK_COUNT = 3
+const JOB_NAME_WIDTH = 140
 
 function JobPanel({
   overview,
@@ -306,11 +297,8 @@ function JobPanel({
 
   const metric = chosenMetric ?? 'fame'
   const { high, low } = jobRanks(base.jobs, metric)
-  const scale = boxPlotScale(
-    [...high, ...low].flatMap(({ stats }) => stats ?? []),
-    JOB_TICK_COUNT
-  )
-  if (scale == null) {
+  const domain = [...high, ...low].flatMap(({ stats }) => stats ?? [])
+  if (domain.length === 0) {
     return null
   }
 
@@ -343,7 +331,7 @@ function JobPanel({
             <BoxPlotChart
               label={name}
               rows={rows}
-              scale={scale}
+              domain={domain}
               head={{ name: '전직', plot: JOB_METRIC_PLOT_LABELS[metric], value: '클리어율' }}
               nameWidth={JOB_NAME_WIDTH}
               legend={false}

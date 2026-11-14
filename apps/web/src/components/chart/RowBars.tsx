@@ -7,7 +7,13 @@ import { styles } from './chart.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-export type Bar = Readonly<{ key: string; name: string; value: number; share?: string }>
+export type Bar = Readonly<{
+  key: string
+  name: string
+  sub?: string
+  value: number
+  share?: string
+}>
 
 export type BarTone = 'count' | 'fame'
 
@@ -65,6 +71,7 @@ export function RowBars({
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const marksRef = useRef(new Map<string, HTMLSpanElement>())
   const hasShare = bars.some(({ share }) => share != null)
+  const hasSub = bars.some(({ sub }) => sub != null)
   const shownBar = bars.find(({ key }) => key === hover.key)
   useChartBarGrow(listRef, ROW_BAR_GROW)
   useChartTooltipSlide({
@@ -109,6 +116,7 @@ export function RowBars({
             formatValue={formatValue ?? formatInteger}
             countUp={formatValue === undefined}
             thick={fill}
+            wideName={hasSub}
             dimmed={hover.open && bar.key !== hover.key}
             onHover={handleHover}
             register={registerMark}
@@ -127,12 +135,13 @@ export function RowBars({
 }
 
 function BarRow({
-  bar: { key, name, value, share },
+  bar: { key, name, sub, value, share },
   tone,
   percent,
   formatValue,
   countUp,
   thick,
+  wideName,
   dimmed,
   onHover,
   register
@@ -143,6 +152,7 @@ function BarRow({
   formatValue: (value: number) => string
   countUp: boolean
   thick: boolean
+  wideName: boolean
   dimmed: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLSpanElement) => () => void
@@ -158,9 +168,14 @@ function BarRow({
   }
 
   return (
-    <li data-chart-item="" onMouseEnter={handleMouseEnter} {...stylex.props(styles.row)}>
+    <li
+      data-chart-item=""
+      onMouseEnter={handleMouseEnter}
+      {...stylex.props(styles.row, wideName && styles.rowWideName)}
+    >
       <span data-chart-name="" {...stylex.props(styles.rowName)}>
         {name}
+        {sub != null && <small {...stylex.props(styles.rowSub)}> {sub}</small>}
       </span>
       <span {...stylex.props(styles.rail, thick && styles.railThick)}>
         <span

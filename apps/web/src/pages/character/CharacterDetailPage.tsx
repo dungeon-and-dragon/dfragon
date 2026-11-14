@@ -11,7 +11,7 @@ export function CharacterDetailPage(): React.JSX.Element {
 
   // 탭을 바꿀 때마다 기록을 쌓으면 뒤로 가기가 표 대신 이전 탭으로 가므로 지금 기록을 바꾼다.
   async function changeTab(next: CharacterTab): Promise<void> {
-    await navigate({ search: { tab: next }, replace: true })
+    await navigate({ search: { tab: next }, replace: true, resetScroll: false })
   }
 
   return (

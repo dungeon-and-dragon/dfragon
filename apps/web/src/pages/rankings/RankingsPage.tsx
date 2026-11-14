@@ -9,7 +9,7 @@ export function RankingsPage(): React.JSX.Element {
   const navigate = route.useNavigate()
 
   async function changeFilter(next: FameRankingFilter): Promise<void> {
-    await navigate({ search: next })
+    await navigate({ search: next, resetScroll: false })
   }
 
   return <RankingsScreen filter={filter} onFilterChange={changeFilter} />
