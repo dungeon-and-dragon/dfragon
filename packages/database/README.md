@@ -81,6 +81,7 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `character_stats`: worker job이 계산한 최신 캐릭터 통계 한 행
 - `job_skill_adoption`: worker job이 계산한 전직, 역할별 최신 스킬 채택 수
 - `batch_neople_keys`: worker가 쓰는 batch Neople key와 켜짐 여부, 거절 시각
+- `timeline_queue_counts`: API가 쓰는 타임라인 queue마다 대기, 처리 중 수 한 행
 
 ## 검증
 
