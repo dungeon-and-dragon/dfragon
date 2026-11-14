@@ -1,4 +1,4 @@
-import { type FailureOptions, SanitizedFailure } from '../error-chain.js'
+import { type FailureOptions, SanitizedFailure } from '@dfragon/lib/error-chain'
 
 export type CharacterSearchFailureKind = 'query' | 'internal' | 'api' | 'unavailable' | 'timeout'
 

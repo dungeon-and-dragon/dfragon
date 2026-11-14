@@ -1,5 +1,5 @@
+import type { AccessLogEnv } from '@dfragon/http-server'
 import type { Context } from 'hono'
-import type { AccessLogEnv } from './access-log.js'
 
 /**
  * 요청의 signal은 응답이 닫힐 때 abort되므로, handler에 닿기 전에 닫힌 socket은 signal로 알 수 없다.

@@ -8,6 +8,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./error-chain": {
+      "types": "./dist/error-chain.d.ts",
+      "import": "./dist/error-chain.js"
+    },
     "./port": {
       "types": "./dist/port.d.ts",
       "import": "./dist/port.js"

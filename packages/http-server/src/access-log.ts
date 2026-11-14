@@ -4,7 +4,7 @@ import type { HttpBindings } from '@hono/node-server'
 import type { Context, MiddlewareHandler } from 'hono'
 import { matchedRoutes } from 'hono/route'
 import { METHOD_NAME_ALL } from 'hono/router'
-import { type ErrorChainEntry, describeErrorChain } from '../../domain/error-chain.js'
+import { type ErrorChainEntry, describeErrorChain } from '@dfragon/lib/error-chain'
 import type { AccessLogSink } from './access-log-sink.js'
 
 // 매칭된 route가 없으면 credential이 담길 수 있는 원문 경로 대신 고정 값을 남긴다.

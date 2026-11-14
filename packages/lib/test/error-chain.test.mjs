@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { SanitizedFailure, describeErrorChain } from '../src/domain/error-chain.js'
+import { SanitizedFailure, describeErrorChain } from '@dfragon/lib/error-chain'
 
 // 정제 결과에 나오면 안 되는 값이다. 모두 합성 값이며 실제 credential이 아니다.
 const secret = 'fake-secret-detail-3e1d'
@@ -13,16 +13,16 @@ test('식별자 형식이 아닌 오류 이름과 code는 남기지 않는다', 
   const [entry] = describeErrorChain(error)
   const [numeric] = describeErrorChain(numericCode)
 
-  assert.equal(entry!.name, '<unnamed>')
-  assert.equal(entry!.code, undefined)
-  assert.equal(numeric!.code, undefined)
+  assert.equal(entry.name, '<unnamed>')
+  assert.equal(entry.code, undefined)
+  assert.equal(numeric.code, undefined)
   assert.equal(JSON.stringify([entry, numeric]).includes(secret), false)
 })
 
 test('원인은 다섯 단계까지만 따라가고 순환하는 cause에서도 끝난다', () => {
   const looping = new Error('looping')
   looping.cause = looping
-  let deep: Error = new Error('root')
+  let deep = new Error('root')
   for (let depth = 0; depth < 7; depth += 1) {
     deep = new Error(`depth ${depth}`, { cause: deep })
   }
@@ -54,7 +54,7 @@ test('{ cause }로 만든 failure는 원래 오류 object를 cause로 두지 않
 
 test('cause option이 없으면 sanitizedCause가 없고, 정제 중 예외가 나면 원인만 생략한다', () => {
   const unreadable = Object.defineProperty(new Error('getter'), 'name', {
-    get(): never {
+    get() {
       throw new Error(secret)
     }
   })
@@ -73,9 +73,9 @@ test('오류마다 stack frame은 다섯 줄, 한 줄은 300자까지만 남긴�
 
   const [entry] = describeErrorChain(error)
 
-  assert.equal(entry!.frames!.length, 5)
-  assert.equal(entry!.frames![0]!.length, 300)
-  assert.equal(entry!.frames![4], 'frame3 (file.js:1:1)')
+  assert.equal(entry.frames.length, 5)
+  assert.equal(entry.frames[0].length, 300)
+  assert.equal(entry.frames[4], 'frame3 (file.js:1:1)')
 })
 
 test('정제한 chain을 이은 failure를 다시 감싸도 오류는 다섯 개까지만 남긴다', () => {

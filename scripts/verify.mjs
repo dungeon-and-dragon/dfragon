@@ -35,6 +35,7 @@ export const checkJobs = [
       workspace('@dfragon/licenses', 'test'),
       workspace('@dfragon/lib', 'test'),
       workspace('@dfragon/neople', 'test'),
+      workspace('@dfragon/http-server', 'test'),
       workspace('@dfragon/database', 'test'),
       workspace('@dfragon/ui', 'test')
     ]

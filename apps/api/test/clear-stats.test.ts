@@ -9,7 +9,7 @@ import type {
   ClearWeekSelection,
   StoredClearPopulation
 } from '@dfragon/database'
-import type { HttpAppHandle } from '../src/runtime/app-handle.js'
+import type { HttpAppHandle } from '@dfragon/http-server'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { formatResetDate } from '../src/domain/seoul-time.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
