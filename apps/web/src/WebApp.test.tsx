@@ -642,13 +642,17 @@ it('화면 공유는 메인 화면에 다녀와도 연결된 채 남고, 다른 
   const chip = (): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
   await act(async () => chip().click())
-  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+  await vi.waitFor(() =>
+    expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
+  )
 
   await act(async () => window.history.back())
   await waitForPath('/')
   await act(async () => window.history.forward())
   await waitForPath('/multisearch')
-  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+  await vi.waitFor(() =>
+    expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
+  )
 
   await act(async () => window.history.back())
   await waitForPath('/')
@@ -751,7 +755,9 @@ it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 �
 
   await act(async () => chip().click())
 
-  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결됨'))
+  await vi.waitFor(() =>
+    expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
+  )
   expect(chip().textContent).toBe('게임 연결됨')
   expect(captureButton().disabled).toBe(false)
 
@@ -766,6 +772,45 @@ it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 �
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
   expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
   expect(captureButton().disabled).toBe(true)
+})
+
+it('공유가 연결된 동안 게임 연결 칩을 누르면 창 공유를 다시 요청하지 않고 공유를 끊으며, 끊은 뒤 다시 공유할 수 있다', async () => {
+  // jsdom에는 화면 공유와 video 재생이 없어 getDisplayMedia가 돌려주는 track과 stream만 흉내 낸다.
+  const track = Object.assign(new EventTarget(), { label: 'Dungeon & Fighter', stop: vi.fn() })
+  const getDisplayMedia = vi.fn(async () => ({ getVideoTracks: () => [track] }))
+  vi.stubGlobal('navigator', { mediaDevices: { getDisplayMedia } })
+  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+  await act(async () => root.render(<WebApp host={host} />))
+  const chip = (): HTMLButtonElement =>
+    container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
+  const captureButton = (): HTMLButtonElement =>
+    container.querySelector<HTMLButtonElement>('button[aria-label^="파티 캡처"]')!
+  await act(async () => chip().click())
+  await vi.waitFor(() =>
+    expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
+  )
+  await act(async () => captureButton().click())
+  // jsdom에는 Worker가 없어 회차가 OCR 준비 실패로 끝나므로, 공유가 남은 캡처 실패 칩에서 끊는다.
+  await vi.waitFor(() =>
+    expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 캡처 실패')
+  )
+
+  await act(async () => chip().click())
+
+  await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
+  expect(chip().textContent).toBe('화면 공유')
+  expect(getDisplayMedia).toHaveBeenCalledOnce()
+  expect(track.stop).toHaveBeenCalledOnce()
+  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(captureButton().disabled).toBe(true)
+
+  await act(async () => chip().click())
+
+  await vi.waitFor(() =>
+    expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
+  )
+  expect(getDisplayMedia).toHaveBeenCalledTimes(2)
+  await act(async () => host.party.selectCaptureSource(''))
 })
 
 it('host의 시작 신호를 받으면 지금 화면의 회차를 시작하고 화면은 바꾸지 않으며, 다른 화면의 신호와 진행 중의 신호는 무시한다', async () => {
