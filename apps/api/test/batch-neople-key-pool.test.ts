@@ -4,7 +4,7 @@ import { setImmediate } from 'node:timers/promises'
 import type { UsableBatchNeopleKey } from '@dfragon/database'
 import { type NeopleCharacterBasic, NeopleRequestFailure } from '@dfragon/neople'
 import {
-  type BatchNeopleKeyStore,
+  type BatchNeopleKeyRepository,
   createBatchNeopleKeyPool
 } from '../src/infrastructure/neople/batch-key-pool.js'
 import type { WorkerNeople } from '../src/infrastructure/neople/character-collection.js'
@@ -42,7 +42,7 @@ function fakeKeys(
   const requests: string[] = []
   const rejected: number[] = []
   const reports: [string, Readonly<Record<string, string | number>>][] = []
-  const store: BatchNeopleKeyStore = {
+  const store: BatchNeopleKeyRepository = {
     readUsableKeys: async () => keys.filter(({ id }) => !rejected.includes(id)),
     recordRejected: async (id) => {
       rejected.push(id)

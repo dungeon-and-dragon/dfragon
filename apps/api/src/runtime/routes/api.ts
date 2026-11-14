@@ -6,16 +6,16 @@ import { CharacterImageController } from '../../presentation/http/character-imag
 import { CharacterSearchController } from '../../presentation/http/character-search/controller.js'
 import { CharacterTimelineController } from '../../presentation/http/character-timeline/controller.js'
 import { ClearStatsController } from '../../presentation/http/content-clears/controller.js'
-import { createHealthRoutes } from '../../presentation/http/health/routes.js'
+import { HealthController } from '../../presentation/http/health/controller.js'
 import { RankingStatsController } from '../../presentation/http/ranking-stats/controller.js'
 import { TodayGradeController } from '../../presentation/http/today-grade/controller.js'
-import { createVersionRoutes } from '../../presentation/http/version/routes.js'
+import { VersionController } from '../../presentation/http/version/controller.js'
 import type { ApiServices } from '../api-services.js'
 
 export function createApiRoutes(services: ApiServices): Hono<AccessLogEnv> {
   const routes = new Hono<AccessLogEnv>()
-  routes.route('/health', createHealthRoutes())
-  routes.route('/version', createVersionRoutes(services.buildInfo))
+  routes.route('/health', new HealthController().routes())
+  routes.route('/version', new VersionController(services.buildInfo).routes())
   routes.route('/characters', new CharacterSearchController(services.search).routes())
   routes.route('/characters', new CharacterDetailController(services.details).routes())
   routes.route('/characters', new CharacterImageController(services.characterImage).routes())
