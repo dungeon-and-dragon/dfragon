@@ -649,7 +649,7 @@ test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 �
     readCollectedAt: async () => NOW,
     readPopulations: async () => [...state.populations.values()]
   }
-  const { contents } = await createClearStatsService(reader).stats()
+  const { contents } = await createClearStatsService(reader, () => undefined).stats()
   for (const content of CLEAR_CONTENTS) {
     const releaseWeek = startOfResetWeek(content.releasedAt)
     const expected = [...weeksBefore(releaseWeek, CURRENT_WEEK), CURRENT_WEEK].map((week) =>
