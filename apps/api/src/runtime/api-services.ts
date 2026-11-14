@@ -200,7 +200,9 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   const timelineService = timelineSync?.service ?? emptyCharacterTimelineService
   const adventureGuild = createAdventureGuild(options.adventureGuild, queues)
   const rankingStats = createRankingStatsService(options.rankingStats ?? emptyRankingStatsReader)
-  const clearStats = createClearStatsService(options.clearStats ?? emptyClearStatsReader)
+  const clearStats = createClearStatsService(options.clearStats ?? emptyClearStatsReader, () =>
+    reportCode('CLEAR_STATS_REFRESH_FAILED')
+  )
 
   return {
     services: {
@@ -214,6 +216,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       clearStats,
       todayGrade
     },
+    refreshClearStats: () => clearStats.refresh(),
     // queue는 DB 설정(`timeline`)을 준 app에만 있어, 그 밖의 app에서 부르면 던진다.
     readQueueCounts() {
       if (queues === undefined) {
@@ -233,6 +236,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
         () => search.close(),
         () => details.close(),
         () => todayGrade.close(),
+        () => clearStats.close(),
         closeServer,
         // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, queue를 닫지 않으면 대기열에 남은 일과 종료 뒤에 온 요청도 시작한다.
         () => queues?.sync.close(),

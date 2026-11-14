@@ -16,7 +16,7 @@ export interface ApiHttpAppOptions extends ApiServicesOptions {
 /** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, skill styles, adventure, guild reads and fame rankings, stats, clear stats. */
 export async function createApiHttpApp(options: ApiHttpAppOptions) {
   const { writeAccessLog = writeAccessLogToStdout } = options
-  const { services, readQueueCounts, close } = await createApiServices(
+  const { services, readQueueCounts, refreshClearStats, close } = await createApiServices(
     options,
     createCodeReport(writeAccessLog, 'api')
   )
@@ -30,7 +30,8 @@ export async function createApiHttpApp(options: ApiHttpAppOptions) {
 
     return {
       app: createHonoAppHandle(app, { httpsOptions: options.httpsOptions, close }),
-      readQueueCounts
+      readQueueCounts,
+      refreshClearStats
     }
   } catch (error) {
     // server를 만들지 못해도 이미 띄운 점수 worker가 process를 붙잡지 않게 멈춘다.
