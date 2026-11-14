@@ -1,9 +1,5 @@
 import { setTimeout } from 'node:timers/promises'
-import {
-  createDatabaseClient,
-  readUsableBatchNeopleKeys,
-  recordBatchNeopleKeyRejected
-} from '@dfragon/database'
+import { createDatabaseClient } from '@dfragon/database'
 import { writeAccessLogToStdout } from '@dfragon/http-server'
 import { createNeopleClient } from '@dfragon/neople'
 import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
@@ -17,11 +13,9 @@ import {
   paceNeopleRequests
 } from '../infrastructure/neople/character-collection.js'
 import type { readCollectorConfiguration } from './collector-configuration.js'
-import { runCharacterCollector } from '../application/character-collection/runner.js'
-import {
-  createDatabaseCollectionStore,
-  createDatabaseEnqueue
-} from '../infrastructure/database/character-collection.js'
+import { CharacterCollectionService } from '../application/character-collection/service.js'
+import { DatabaseBatchNeopleKeyRepository } from '../infrastructure/database/batch-neople-keys.js'
+import { DatabaseCollectionRepository } from '../infrastructure/database/character-collection.js'
 import {
   importCollectedCharacters,
   readImportModifiedTime
@@ -51,11 +45,9 @@ export async function startCharacterCollector(
   configuration: ReturnType<typeof readCollectorConfiguration>
 ): Promise<never> {
   const client = createDatabaseClient(configuration.database)
+  const keyRepository = new DatabaseBatchNeopleKeyRepository(client)
   const keyPool = createBatchNeopleKeyPool({
-    store: {
-      readUsableKeys: () => readUsableBatchNeopleKeys(client),
-      recordRejected: (id) => recordBatchNeopleKeyRejected(client, id)
-    },
+    store: keyRepository,
     createNeople: (key) =>
       paceNeopleRequests(createNeopleClient(key), configuration.requestsPerSecond),
     concurrencyPerKey: configuration.concurrency,
@@ -71,8 +63,6 @@ export async function startCharacterCollector(
 
   const { neople, readConcurrency } = keyPool
   const fetchBasic = createNeopleCharacterBasic(neople)
-  const store = createDatabaseCollectionStore(client)
-  const enqueue = createDatabaseEnqueue(client)
   const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
   const alert =
     configuration.jobAlertWebhookUrl !== undefined
@@ -99,15 +89,15 @@ export async function startCharacterCollector(
   })
   await startJobScheduler(scheduler, report)
 
-  return runCharacterCollector({
+  const collection = new CharacterCollectionService(new DatabaseCollectionRepository(client), {
     importFiles: configuration.importFiles,
-    enqueue,
     fetchBasic,
-    store,
     readConcurrency,
     report,
     readModifiedTime: readImportModifiedTime,
     importCharacters: importCollectedCharacters,
     pause: setTimeout
   })
+
+  return collection.run()
 }

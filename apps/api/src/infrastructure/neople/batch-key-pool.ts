@@ -8,13 +8,13 @@ const RATE_LIMITED_REST_MS = 60_000
 // 2026-11-12 실제 응답은 형식이 틀린 key에 401 API000, 형식만 맞는 없는 key에 401 API003이었다.
 const REJECTED_KEY_CODES: ReadonlySet<string> = new Set(['API000', 'API003', 'API004', 'API005'])
 
-export type BatchNeopleKeyStore = {
+export interface BatchNeopleKeyRepository {
   readUsableKeys(): Promise<UsableBatchNeopleKey[]>
   recordRejected(id: number): Promise<void>
 }
 
 export type BatchNeopleKeyPoolDependencies = {
-  store: BatchNeopleKeyStore
+  store: BatchNeopleKeyRepository
   createNeople: (key: string) => WorkerNeople
   concurrencyPerKey: number
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
