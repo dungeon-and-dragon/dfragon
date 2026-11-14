@@ -282,3 +282,11 @@ model BatchNeopleKey {
 
   @@map("batch_neople_keys")
 }
+
+model TimelineQueueCount {
+  name    String @id
+  waiting Int
+  running Int
+
+  @@map("timeline_queue_counts")
+}
