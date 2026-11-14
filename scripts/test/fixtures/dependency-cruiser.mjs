@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('../../../', import.meta.url))
 const depcruise = fileURLToPath(
   new URL('../../bin/dependency-cruiser.mjs', import.meta.resolve('dependency-cruiser'))
 )
-const apiConfigFiles = [
+const appConfigFiles = [
   '.dependency-cruiser.mjs',
   'tsconfig.json',
   'tsconfig.dependency-cruiser.json'
@@ -42,15 +42,15 @@ async function cruise(directory, outputType) {
   }
 }
 
-export async function cruiseApiSamples(sources, { withPackages = true } = {}) {
+export async function cruiseAppSamples(sources, { withPackages = true, app = 'api' } = {}) {
   const directory = await mkdtemp(join(tmpdir(), 'dfragon-depcruise-'))
-  const api = join(directory, 'apps/api')
+  const appDirectory = join(directory, 'apps', app)
 
   try {
-    await mkdir(api, { recursive: true })
+    await mkdir(appDirectory, { recursive: true })
 
-    for (const file of apiConfigFiles) {
-      await cp(join(root, 'apps/api', file), join(api, file))
+    for (const file of appConfigFiles) {
+      await cp(join(root, 'apps', app, file), join(appDirectory, file))
     }
 
     if (withPackages) {
@@ -61,18 +61,18 @@ export async function cruiseApiSamples(sources, { withPackages = true } = {}) {
     }
 
     for (const [path, source] of Object.entries(sources)) {
-      await mkdir(dirname(join(api, path)), { recursive: true })
-      await writeFile(join(api, path), source)
+      await mkdir(dirname(join(appDirectory, path)), { recursive: true })
+      await writeFile(join(appDirectory, path), source)
     }
 
-    const { stdout } = await cruise(api, 'json')
+    const { stdout } = await cruise(appDirectory, 'json')
     const report = JSON.parse(stdout)
     const violations = report.summary.violations.map(({ from, rule }) => ({
       from,
       rule: rule.name
     }))
 
-    const { stdout: text, exitCode } = await cruise(api, 'err-long')
+    const { stdout: text, exitCode } = await cruise(appDirectory, 'err-long')
 
     return { violations, exitCode, text }
   } finally {
