@@ -6,7 +6,7 @@ import {
 } from '@dfragon/database'
 import { createTimelineSyncQueue } from './dist/application/character-timeline/queue.js'
 import { readCharacterTimeline } from './dist/infrastructure/database/character-timeline-read.js'
-import { createCharacterTimelineService } from './dist/application/character-timeline/service.js'
+import { CharacterTimelineService } from './dist/application/character-timeline/service.js'
 
 // 합성 캐릭터와 타임라인이다. 천해천(2026-03-26 06:00+09) 둘째 주 목요일 정오에 읽는다.
 const now = new Date('2026-04-02T12:00:00+09:00')
@@ -142,11 +142,16 @@ try {
     () => assert.fail('동기화 실패가 보고되면 안 된다')
   )
   let readStarted = false
-  const service = createCharacterTimelineService(queue, (character) => {
-    readStarted = true
+  const service = new CharacterTimelineService(
+    {
+      readTimeline: (character) => {
+        readStarted = true
 
-    return readCharacterTimeline(client, character, now)
-  })
+        return readCharacterTimeline(client, character, now)
+      }
+    },
+    queue
+  )
   queue.request(waited)
   const answer = service.get(waited)
   await client.$queryRaw`SELECT 1`

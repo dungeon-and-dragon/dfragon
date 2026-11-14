@@ -22,10 +22,8 @@ import {
   toSeasonBackfillJobs,
   toSeasonBackfillProgress
 } from '../src/domain/character-timeline/season-backfill.js'
-import {
-  type SeasonBackfillStore,
-  backfillSeason
-} from '../src/application/character-timeline/season-backfill.js'
+import type { SeasonBackfillRepository } from '../src/application/character-timeline/repository.js'
+import { SeasonBackfillService } from '../src/application/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 시즌 시작은 운영 DB seasons 표와 같은 값이고, 캐릭터와 타임라인은 합성이다.
@@ -157,7 +155,7 @@ test('끝까지 받은 캐릭터는 받기 대상에서 빼고, 받는 중이던
 function memoryStore(initial?: SeasonBackfillState) {
   let current = initial
   const replaced: TimelineRange[] = []
-  const store: SeasonBackfillStore = {
+  const store: SeasonBackfillRepository = {
     readState: async () => current,
     replaceRange: async (requested, _seasonId, range) => {
       replaced.push(range)
@@ -185,7 +183,7 @@ test('처음 받으면 시즌 구간을 앞 구간부터 빈틈없이 모든 코
     return { events: [], items: [] }
   }
 
-  await backfillSeason(job(5), { fetchTimeline, store: fresh.store })
+  await new SeasonBackfillService(fresh.store, fetchTimeline).backfill(job(5))
 
   assert.deepEqual(fresh.replaced, requested)
   assert.equal(requested.length, 4)
@@ -207,7 +205,7 @@ test('받은 위치가 있으면 그다음 분부터 이어 받고, 끝까지 �
     return { events: [], items: [] }
   }
 
-  await backfillSeason(job(9), { fetchTimeline, store: resumed.store })
+  await new SeasonBackfillService(resumed.store, fetchTimeline).backfill(job(9))
 
   assert.deepEqual(requested, [
     { start: new Date(resumedAt.getTime() + MINUTE_MS), end: at('2025-01-09T05:59:00') }
@@ -215,10 +213,9 @@ test('받은 위치가 있으면 그다음 분부터 이어 받고, 끝까지 �
   assert.ok(resumed.state()?.completedAt)
 
   const completed = memoryStore(state(character, seasonRange(9).end, at('2026-11-01T00:00:00')))
-  await backfillSeason(job(9), {
-    fetchTimeline: async () => assert.fail('끝까지 받은 캐릭터는 Neople을 부르면 안 된다'),
-    store: completed.store
-  })
+  await new SeasonBackfillService(completed.store, async () =>
+    assert.fail('끝까지 받은 캐릭터는 Neople을 부르면 안 된다')
+  ).backfill(job(9))
 
   assert.deepEqual(completed.replaced, [])
 })
@@ -236,7 +233,7 @@ test('구간을 받다가 실패하면 저장한 구간까지 남기고 멈추�
   }
 
   await assert.rejects(
-    backfillSeason(job(7), { fetchTimeline, store: failing.store }),
+    new SeasonBackfillService(failing.store, fetchTimeline).backfill(job(7)),
     TimelineFailure
   )
 
