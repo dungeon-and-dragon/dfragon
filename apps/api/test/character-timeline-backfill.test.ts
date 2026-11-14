@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { TimelineItemInput, TimelineRange } from '@dfragon/database'
-import {
-  type EnhancementBackfillStore,
-  backfillEnhancements
-} from '../src/application/character-timeline/backfill.js'
+import { EnhancementBackfillService } from '../src/application/character-timeline/backfill.js'
+import type { EnhancementBackfillRepository } from '../src/application/character-timeline/repository.js'
 import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
 import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
 import type { TimelineInputs } from '../src/domain/character-timeline/rows.js'
@@ -20,7 +18,7 @@ const BACKFILL_END = new Date(SEASON_START.getTime() - MINUTE_MS)
 function memoryStore(initial: Date | null = null) {
   let backfilledUntil = initial
   const replaced: { range: TimelineRange; items: readonly TimelineItemInput[] }[] = []
-  const store: EnhancementBackfillStore = {
+  const store: EnhancementBackfillRepository = {
     readBackfilledUntil: async () => backfilledUntil,
     replaceRange: async (_character, range, items) => {
       replaced.push({ range, items })
@@ -55,7 +53,7 @@ test('처음 백필은 Neople 첫날부터 중천 시작 직전까지 빈틈없�
     return { events: [], items }
   }
 
-  await backfillEnhancements(character, { fetchTimeline, store: fresh.store })
+  await new EnhancementBackfillService(fresh.store, fetchTimeline).backfill(character)
 
   assert.deepEqual(rangesOf(fresh.replaced), requested)
   assert.equal(requested[0]!.start.getTime(), NEOPLE_START.getTime())
@@ -76,11 +74,11 @@ test('백필 위치가 있으면 그다음 분부터 이어 받고, 끝까지 �
     return { events: [], items: [] }
   }
 
-  await backfillEnhancements(character, { fetchTimeline, store: resumed.store })
+  await new EnhancementBackfillService(resumed.store, fetchTimeline).backfill(character)
 
   assert.deepEqual(requested, [{ start: new Date('2024-12-01T00:01:00+09:00'), end: BACKFILL_END }])
 
-  await backfillEnhancements(character, { fetchTimeline, store: resumed.store })
+  await new EnhancementBackfillService(resumed.store, fetchTimeline).backfill(character)
 
   assert.equal(requested.length, 1)
 })
@@ -98,7 +96,7 @@ test('세 번째 구간에서 Neople이 실패하면 앞 두 구간만 저장하
   }
 
   await assert.rejects(
-    backfillEnhancements(character, { fetchTimeline, store: fresh.store }),
+    new EnhancementBackfillService(fresh.store, fetchTimeline).backfill(character),
     TimelineFailure
   )
 

@@ -17,8 +17,8 @@ import {
   readAdventureSeasonDays,
   readAdventureSeasonBackfill
 } from './dist/infrastructure/database/adventure-activity.js'
-import { backfillSeason } from './dist/application/character-timeline/season-backfill.js'
-import { createDatabaseSeasonBackfillStore } from './dist/infrastructure/database/character-timeline-store.js'
+import { SeasonBackfillService } from './dist/application/character-timeline/season-backfill.js'
+import { DatabaseSeasonBackfillRepository } from './dist/infrastructure/database/character-timeline.js'
 import { readAdventureWeeklyClears } from './dist/infrastructure/database/adventure-weekly.js'
 import { CharacterSearchService } from './dist/application/character-search/service.js'
 import { DatabaseCharacterSearchRepository } from './dist/infrastructure/database/character-search.js'
@@ -321,8 +321,9 @@ try {
     ]
   }
   const fetched = []
-  const seasonBackfill = {
-    fetchTimeline: async (character, range) => {
+  const seasonBackfill = new SeasonBackfillService(
+    new DatabaseSeasonBackfillRepository(client),
+    async (character, range) => {
       fetched.push(range)
       if (character.characterId !== 'adventure-high') {
         return { events: [], items: [] }
@@ -333,9 +334,8 @@ try {
         events: oldSeasonRows.events.filter(inRange),
         items: oldSeasonRows.items.filter(inRange)
       }
-    },
-    store: createDatabaseSeasonBackfillStore(client)
-  }
+    }
+  )
   const returning = await readAdventureSeasonBackfill(client, adventureName, 7, now)
   assert.deepEqual(returning.season, {
     id: 7,
@@ -351,11 +351,11 @@ try {
   assert.equal(await readAdventureSeasonBackfill(client, adventureName, 10, now), undefined)
   assert.equal(await readAdventureSeasonBackfill(client, adventureName, 12, now), undefined)
   for (const job of returning.jobs) {
-    await backfillSeason(job, seasonBackfill)
+    await seasonBackfill.backfill(job)
   }
   assert.equal(fetched.length, 36)
   const [nextJourneyFirst] = (await readAdventureSeasonBackfill(client, adventureName, 8, now)).jobs
-  await backfillSeason(nextJourneyFirst, seasonBackfill)
+  await seasonBackfill.backfill(nextJourneyFirst)
 
   const returned = await readAdventureActivity(client, adventureName, 7, now)
   assert.deepEqual(
