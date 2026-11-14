@@ -88,3 +88,19 @@ export interface ClearStatsRepository extends ClearSampleRepository {
   readContentWeekSamples(week: ClearContentWeek): Promise<ClearContentWeekSamples | null>
   readOverviewSamples(weekStart: Date): Promise<ClearOverviewWeekSamples | null>
 }
+
+export interface ClearWeekSampleRepository extends ClearSampleRepository {
+  readPopulations(): Promise<StoredClearPopulation[]>
+  readContentWeekSampleWeeks(): Promise<ClearContentWeek[]>
+  readOverviewSampleWeeks(): Promise<Date[]>
+  recordContentWeekSamples(
+    week: ClearContentWeek,
+    samples: ClearContentWeekSamples,
+    computedAt: Date
+  ): Promise<void>
+  recordOverviewSamples(
+    weekStart: Date,
+    samples: ClearOverviewWeekSamples,
+    computedAt: Date
+  ): Promise<void>
+}

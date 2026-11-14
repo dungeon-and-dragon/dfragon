@@ -6,10 +6,13 @@ import type {
 } from '../application/content-clears/ports.js'
 import {
   createClearRecordBackfillJob,
+  createClearWeekSampleJob,
   createContentClearCollectionJob
 } from '../application/content-clears/collection-job.js'
 import { ContentClearCollectionService } from '../application/content-clears/collection.js'
 import { ClearRecordBackfillService } from '../application/content-clears/record-backfill.js'
+import { ClearWeekSampleService } from '../application/content-clears/week-samples.js'
+import { DatabaseClearStatsRepository } from '../infrastructure/database/clear-stats.js'
 import {
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository
@@ -71,6 +74,10 @@ export function createWorkerJobs(
     new DatabaseClearRecordBackfillRepository(client),
     { createFetchTimeline: createFetchRecordTimeline, readConcurrency, report, ...clock }
   )
+  const weekSampleService = new ClearWeekSampleService(
+    new DatabaseClearStatsRepository(client),
+    clock.now
+  )
   const skillStyleService = new SkillStyleCollectionService(
     new DatabaseSkillStyleCollectionRepository(client),
     { fetchSkillStyle, readConcurrency, report, ...clock }
@@ -85,6 +92,7 @@ export function createWorkerJobs(
     createJobRunCleanupJob(cleanupService),
     createContentClearCollectionJob(clearCollectionService),
     createClearRecordBackfillJob(recordBackfillService),
+    createClearWeekSampleJob(weekSampleService),
     createSkillStyleCollectionJob(skillStyleService),
     createCharacterStatsJob(statsService),
     createSkillAdoptionJob(statsService),
