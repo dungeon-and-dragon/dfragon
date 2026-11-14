@@ -1,4 +1,5 @@
 import type { TimelineCharacter } from '@dfragon/database'
+import type { ReportCode } from '@dfragon/http-server'
 import { neopleCharacterImageUrl } from '@dfragon/neople'
 import type { AdventureGuildReader } from '../application/adventure-guild/ports.js'
 import {
@@ -50,7 +51,6 @@ import {
 } from '../infrastructure/neople/character-basic.js'
 import { createNeopleCharacterImage } from '../infrastructure/neople/character-image.js'
 import { type ScoreEngineOptions, createScoreEngine } from '../infrastructure/score/engine.js'
-import type { ReportCode } from '../presentation/http/access-log-sink.js'
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>

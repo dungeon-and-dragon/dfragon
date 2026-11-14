@@ -1,3 +1,10 @@
+import {
+  type AccessLogEnv,
+  JSON_CONTENT_TYPE,
+  recordAccessLogCachedResponse,
+  recordAccessLogNeopleStage,
+  recordAccessLogSharedNeopleFetch
+} from '@dfragon/http-server'
 import { type Context, Hono } from 'hono'
 import type { NeopleStageTimings } from '../../../application/character-detail/neople-stages.js'
 import type {
@@ -5,13 +12,6 @@ import type {
   CharacterDetailService
 } from '../../../application/character-detail/service.js'
 import { parseCharacterIdentity } from '../../../domain/character-identity.js'
-import {
-  type AccessLogEnv,
-  recordAccessLogCachedResponse,
-  recordAccessLogNeopleStage,
-  recordAccessLogSharedNeopleFetch
-} from '../access-log.js'
-import { JSON_CONTENT_TYPE } from '../common-headers.js'
 import { respondUnlessDisconnected } from '../disconnected-request.js'
 
 type DetailContext = Context<AccessLogEnv, '/:serverId/:characterId'>

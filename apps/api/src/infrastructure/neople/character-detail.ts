@@ -1,3 +1,4 @@
+import { forwardCause } from '@dfragon/lib/error-chain'
 import { type NeopleCharacter, type NeopleClient, NeopleRequestFailure } from '@dfragon/neople'
 import { elapsedMs } from '../../application/character-detail/neople-stages.js'
 import type { FetchCharacterDetails } from '../../application/character-detail/ports.js'
@@ -9,7 +10,6 @@ import type {
   CharacterPayloads
 } from '../../domain/character-detail/sections.js'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
-import { forwardCause } from '../../domain/error-chain.js'
 
 function validateCharacterPayload(
   body: NeopleCharacter,

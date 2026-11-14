@@ -19,7 +19,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
 | `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
-| `src/presentation/http/` | route, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표, access log. 운영 포트의 route는 `ops/` |
+| `src/presentation/http/` | route, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표. 운영 포트의 route는 `ops/` |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
 | `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
 | `src/runtime/routes/` | 기능의 route에 service를 넘겨 app에 붙이는 함수. 공개 app은 `api.ts`, 운영 포트는 `ops.ts` |
@@ -39,11 +39,10 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/runtime/api-services.ts` | 공개 app 기능의 service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
 | `src/runtime/routes/api.ts` | 기능의 route 묶음을 공개 app의 경로에 붙입니다 |
 
-여러 기능이 함께 쓰는 코드는 `src/presentation/http/failure-response.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
+여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
-두 앱이 함께 쓰는 access log는 `src/presentation/http/access-log.ts`, access log와 code 보고를 쓰는 곳은 `src/presentation/http/access-log-sink.ts`, 404와 실패 응답은 `src/presentation/http/failure-response.ts`, `Cache-Control`과 JSON `Content-Type`은 `src/presentation/http/common-headers.ts`에 있습니다.
-공통 middleware 등록과 server 시작, 종료는 `src/runtime/hono-app.ts`에 있습니다.
-오류 chain 정제는 `src/domain/error-chain.ts`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
+두 앱이 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.
+오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
 캐릭터 목록 수집 흐름과 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
 Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`에 있습니다.

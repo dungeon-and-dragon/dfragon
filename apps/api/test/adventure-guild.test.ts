@@ -6,7 +6,7 @@ import type {
   StoredCharacter,
   TimelineCharacter
 } from '@dfragon/database'
-import type { HttpAppHandle } from '../src/runtime/app-handle.js'
+import type { HttpAppHandle } from '@dfragon/http-server'
 import type { AdventureGuildReader } from '../src/application/adventure-guild/ports.js'
 import type { CharacterRow } from '../src/domain/character-row.js'
 import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'

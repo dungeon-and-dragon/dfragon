@@ -1,7 +1,11 @@
-import { type AccessLogSink, writeAccessLogToStdout } from '../presentation/http/access-log-sink.js'
+import {
+  type AccessLogSink,
+  type HttpAppHandle,
+  createHonoApp,
+  createHonoAppHandle,
+  writeAccessLogToStdout
+} from '@dfragon/http-server'
 import { opsFailureResponse } from '../presentation/http/ops-failures.js'
-import type { HttpAppHandle } from './app-handle.js'
-import { createHonoApp, createHonoAppHandle } from './hono-app.js'
 import { type OpsRouteOptions, createOpsRoutes } from './routes/ops.js'
 
 export type OpsHttpAppOptions = OpsRouteOptions & {
