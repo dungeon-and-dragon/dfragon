@@ -346,7 +346,27 @@ const opsAllowedImports = [
   ['presentation/http/jobs/c.ts', '../../../application/jobs/ports.js'],
   ['presentation/http/jobs/d.ts', '../../../domain/failure.js'],
   ['presentation/http/jobs/e.ts', 'hono'],
+  ['presentation/http/jobs/f.ts', './dto.js'],
+  ['presentation/http/jobs/g.ts', '../../../application/jobs/service.js'],
+  ['application/jobs/c.ts', './repository.js'],
+  ['infrastructure/database/b.ts', '../../application/jobs/repository.js'],
   ['runtime/routes/a.ts', '../../presentation/http/jobs/routes.js']
+]
+// Controller가 Repository를 직접 부르지 못하게, 두 app의 presentation에서 값 import와 import type을 모두 막는다.
+const presentationRepositoryImports = [
+  [`${opsSrc}/presentation/http/jobs/g.ts`, importing('../../../application/jobs/repository.js')],
+  [
+    `${opsSrc}/presentation/http/jobs/h.ts`,
+    typeImporting('../../../application/jobs/repository.js')
+  ],
+  [
+    `${src}/presentation/http/today-grade/f.ts`,
+    importing('../../../application/today-grade/repository.js')
+  ],
+  [
+    `${src}/presentation/http/today-grade/g.ts`,
+    typeImporting('../../../application/today-grade/repository.js')
+  ]
 ]
 const opsRejectedSources = Object.fromEntries(
   opsRejectedImports.map(([file, source]) => [`${opsSrc}/${file}`, importing(source)])
@@ -354,8 +374,20 @@ const opsRejectedSources = Object.fromEntries(
 const opsAllowedSources = Object.fromEntries(
   opsAllowedImports.map(([file, source]) => [`${opsSrc}/${file}`, importing(source)])
 )
-const opsBiomeRejected = await lintSamples(opsRejectedSources)
+const opsBiomeRejected = await lintSamples({
+  ...opsRejectedSources,
+  ...Object.fromEntries(presentationRepositoryImports)
+})
 const opsBiomeAllowed = await lintSamples(opsAllowedSources)
+
+for (const [file, source] of presentationRepositoryImports) {
+  test(`Biome: ${file}의 ${source.split('\n', 1)[0]}를 거부하고 Service를 받으라고 알린다`, () => {
+    const diagnostics = opsBiomeRejected.get(file)
+    assert.equal(diagnostics.length, 1, JSON.stringify(diagnostics))
+    assert.equal(diagnostics[0].category, 'lint/style/noRestrictedImports')
+    assert.ok(diagnostics[0].message.includes('service.ts의 Service'), diagnostics[0].message)
+  })
+}
 
 for (const [file, source, destination] of opsRejectedImports) {
   test(`Biome: 운영 app의 ${file}에서 ${source} import를 거부하고 옮길 위치(${destination})를 알린다`, () => {
