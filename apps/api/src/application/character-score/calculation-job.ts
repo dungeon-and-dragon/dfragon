@@ -1,4 +1,3 @@
-import { setTimeout } from 'node:timers/promises'
 import type { ClearPopulationCharacter, FinishedJobRun } from '@dfragon/database'
 import { z } from 'zod'
 import type { CharacterPayloads } from '../../domain/character-detail/sections.js'
@@ -7,13 +6,8 @@ import { type CalculatedScore, toCalculatedScore } from '../../domain/score/calc
 import { defineJob } from '../jobs/definition.js'
 import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
 import { calculateCharacterScore } from './calculate.js'
-import type {
-  ScoreCalculationDependencies,
-  ScoreCalculationJobDependencies,
-  ScoreCalculationStore,
-  ScoreEngineHandle,
-  ScoreSources
-} from './ports.js'
+import type { ScoreCalculationPorts, ScoreEngineHandle, ScoreSources } from './ports.js'
+import type { ScoreCalculationRepository } from './repository.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000
 
@@ -132,100 +126,102 @@ function settle(
   return { status: 'scored', score: calculation.score }
 }
 
-/**
- * 진행 위치는 실행 이력의 진행률이다. 도중에 끝난 실행을 하루 안에 다시 실행하면 그 위치부터 이어 계산한다.
- * 대상은 클리어 기록 수집과 같은 순서로 다시 읽으므로, 그 사이 최고 명성이 바뀐 캐릭터만큼 위치가 어긋날 수 있다.
- */
-export async function calculateScores({
-  store,
-  openEngine,
-  createSources,
-  readConcurrency,
-  now,
-  pause,
-  report,
-  reportProgress
-}: ScoreCalculationDependencies): Promise<ScoreCalculationSummary> {
-  const engine = openEngine()
+export class ScoreCalculationService {
+  constructor(
+    private readonly repository: ScoreCalculationRepository,
+    private readonly ports: ScoreCalculationPorts
+  ) {}
 
-  if (engine === null) {
-    throw new ScoreEngineUnavailable('SCORE_ENGINE_NOT_CONFIGURED')
-  }
+  /**
+   * 진행 위치는 실행 이력의 진행률이다. 도중에 끝난 실행을 하루 안에 다시 실행하면 그 위치부터 이어 계산한다.
+   * 대상은 클리어 기록 수집과 같은 순서로 다시 읽으므로, 그 사이 최고 명성이 바뀐 캐릭터만큼 위치가 어긋날 수 있다.
+   */
+  async calculate(
+    reportProgress: (done: number, total: number) => void
+  ): Promise<ScoreCalculationSummary> {
+    const { openEngine, createSources, readConcurrency, now, pause, report } = this.ports
+    const engine = openEngine()
 
-  const counts = { saved: 0, skipped: 0, requests: 0 }
-  let itemLookupUnavailable = false
-  const sources = createSources({
-    onRequest: () => {
-      counts.requests++
-    },
-    onItemLookupUnavailable: () => {
-      itemLookupUnavailable = true
-    }
-  })
-
-  try {
-    const targets = await store.readTargets()
-    const resumedAt = resumePosition(await store.readLastFinishedRun(), now())
-    const unavailableStreaks = createUnavailableStreaks<ClearPopulationCharacter>()
-    let done = resumedAt
-
-    reportProgress(Math.min(resumedAt, targets.length), targets.length)
-
-    while (done < targets.length) {
-      const group = targets.slice(done, done + readConcurrency())
-
-      itemLookupUnavailable = false
-      const calculations = await Promise.all(
-        group.map((character) => calculateCharacter(character, sources, engine, now))
-      )
-      const results = calculations.map((calculation) => settle(calculation, itemLookupUnavailable))
-
-      // 라이브러리를 열지 못했거나 worker가 멈추면 계산이 모두 null이 되므로, 남은 캐릭터를 받지 않고 끝낸다.
-      if (!engine.isRunning()) {
-        throw new ScoreEngineUnavailable('SCORE_ENGINE_STOPPED')
-      }
-
-      const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
-
-      if (unavailable.length > 0) {
-        if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-          report('SCORE_NEOPLE_UNAVAILABLE', {
-            done,
-            characters: group.length,
-            unavailable: unavailable.length
-          })
-          await pause(UNAVAILABLE_PAUSE_MS)
-          continue
-        }
-
-        for (const character of unavailable) {
-          report('SCORE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
-        }
-      }
-
-      for (const [index, result] of results.entries()) {
-        if (result.status === 'scored') {
-          const { serverId, characterId } = group[index]!
-          await store.recordScore({ serverId, characterId, ...result.score })
-          counts.saved++
-        } else {
-          counts.skipped++
-        }
-      }
-
-      done += group.length
-      reportProgress(done, targets.length)
+    if (engine === null) {
+      throw new ScoreEngineUnavailable('SCORE_ENGINE_NOT_CONFIGURED')
     }
 
-    return { characters: targets.length, resumedAt, ...counts }
-  } finally {
-    await Promise.allSettled([engine.close(), sources.catalog.close()])
+    const counts = { saved: 0, skipped: 0, requests: 0 }
+    let itemLookupUnavailable = false
+    const sources = createSources({
+      onRequest: () => {
+        counts.requests++
+      },
+      onItemLookupUnavailable: () => {
+        itemLookupUnavailable = true
+      }
+    })
+
+    try {
+      const targets = await this.repository.readTargets()
+      const resumedAt = resumePosition(await this.repository.readLastFinishedRun(), now())
+      const unavailableStreaks = createUnavailableStreaks<ClearPopulationCharacter>()
+      let done = resumedAt
+
+      reportProgress(Math.min(resumedAt, targets.length), targets.length)
+
+      while (done < targets.length) {
+        const group = targets.slice(done, done + readConcurrency())
+
+        itemLookupUnavailable = false
+        const calculations = await Promise.all(
+          group.map((character) => calculateCharacter(character, sources, engine, now))
+        )
+        const results = calculations.map((calculation) =>
+          settle(calculation, itemLookupUnavailable)
+        )
+
+        // 라이브러리를 열지 못했거나 worker가 멈추면 계산이 모두 null이 되므로, 남은 캐릭터를 받지 않고 끝낸다.
+        if (!engine.isRunning()) {
+          throw new ScoreEngineUnavailable('SCORE_ENGINE_STOPPED')
+        }
+
+        const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
+
+        if (unavailable.length > 0) {
+          if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
+            report('SCORE_NEOPLE_UNAVAILABLE', {
+              done,
+              characters: group.length,
+              unavailable: unavailable.length
+            })
+            await pause(UNAVAILABLE_PAUSE_MS)
+            continue
+          }
+
+          for (const character of unavailable) {
+            report('SCORE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+          }
+        }
+
+        for (const [index, result] of results.entries()) {
+          if (result.status === 'scored') {
+            const { serverId, characterId } = group[index]!
+            await this.repository.recordScore({ serverId, characterId, ...result.score })
+            counts.saved++
+          } else {
+            counts.skipped++
+          }
+        }
+
+        done += group.length
+        reportProgress(done, targets.length)
+      }
+
+      return { characters: targets.length, resumedAt, ...counts }
+    } finally {
+      await Promise.allSettled([engine.close(), sources.catalog.close()])
+    }
   }
 }
 
 export function createScoreCalculationJob(
-  store: ScoreCalculationStore,
-  dependencies: ScoreCalculationJobDependencies,
+  service: ScoreCalculationService,
   schedule: string = DEFAULT_SCORE_CALCULATION_SCHEDULE
 ) {
   return defineJob({
@@ -238,13 +234,6 @@ export function createScoreCalculationJob(
     catchup: false,
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
-    run: (_args, { reportProgress }) =>
-      calculateScores({
-        ...dependencies,
-        store,
-        now: () => new Date(),
-        pause: (ms) => setTimeout(ms),
-        reportProgress
-      })
+    run: (_args, { reportProgress }) => service.calculate(reportProgress)
   })
 }

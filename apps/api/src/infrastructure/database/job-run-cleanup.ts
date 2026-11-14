@@ -1,6 +1,10 @@
 import { type DatabaseClient, deleteJobRunsFinishedBefore } from '@dfragon/database'
-import type { DeleteJobRunsFinishedBefore } from '../../application/jobs/ports.js'
+import type { JobRunCleanupRepository } from '../../application/jobs/repository.js'
 
-export function createDatabaseJobRunCleanup(client: DatabaseClient): DeleteJobRunsFinishedBefore {
-  return (before) => deleteJobRunsFinishedBefore(client, before)
+export class DatabaseJobRunCleanupRepository implements JobRunCleanupRepository {
+  constructor(private readonly client: DatabaseClient) {}
+
+  deleteJobRunsFinishedBefore(before: Date): Promise<number> {
+    return deleteJobRunsFinishedBefore(this.client, before)
+  }
 }

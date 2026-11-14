@@ -1,15 +1,20 @@
 import {
+  type CharacterSkillStyleInput,
   type DatabaseClient,
+  type SkillStyleSampleCharacter,
   readSampleCharactersWithoutSkillStyle,
   recordCharacterSkillStyle
 } from '@dfragon/database'
-import type { SkillStyleCollectionStore } from '../../application/ranking-stats/ports.js'
+import type { SkillStyleCollectionRepository } from '../../application/ranking-stats/repository.js'
 
-export function createDatabaseSkillStyleCollectionStore(
-  client: DatabaseClient
-): SkillStyleCollectionStore {
-  return {
-    readTargets: () => readSampleCharactersWithoutSkillStyle(client),
-    recordSkillStyle: (style) => recordCharacterSkillStyle(client, style)
+export class DatabaseSkillStyleCollectionRepository implements SkillStyleCollectionRepository {
+  constructor(private readonly client: DatabaseClient) {}
+
+  readTargets(): Promise<SkillStyleSampleCharacter[]> {
+    return readSampleCharactersWithoutSkillStyle(this.client)
+  }
+
+  recordSkillStyle(style: CharacterSkillStyleInput): Promise<void> {
+    return recordCharacterSkillStyle(this.client, style)
   }
 }

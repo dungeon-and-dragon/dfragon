@@ -1,16 +1,5 @@
-import type {
-  CharacterScoreInput,
-  ClearPopulationCharacter,
-  FinishedJobRun
-} from '@dfragon/database'
 import type { CharacterCatalog } from '../character-catalog/ports.js'
 import type { CalculateScore, FetchCharacterDetails } from '../character-detail/ports.js'
-
-export type ScoreCalculationStore = {
-  readTargets(): Promise<ClearPopulationCharacter[]>
-  readLastFinishedRun(): Promise<FinishedJobRun | undefined>
-  recordScore(score: CharacterScoreInput): Promise<void>
-}
 
 export type ScoreEngineHandle = {
   calculate: CalculateScore
@@ -29,18 +18,13 @@ export type ScoreSourceEvents = {
   onItemLookupUnavailable: () => void
 }
 
-export type ScoreCalculationJobDependencies = {
+export type ScoreCalculationPorts = {
   /** 라이브러리 경로 설정이 없으면 null이다. */
   openEngine: () => ScoreEngineHandle | null
   /** 실행마다 아이템 상세 캐시를 새로 둔다. */
   createSources: (events: ScoreSourceEvents) => ScoreSources
   readConcurrency: () => number
-  report: (code: string, details: Readonly<Record<string, string | number>>) => void
-}
-
-export type ScoreCalculationDependencies = ScoreCalculationJobDependencies & {
-  store: ScoreCalculationStore
   now: () => Date
   pause: (ms: number) => Promise<void>
-  reportProgress: (done: number, total: number) => void
+  report: (code: string, details: Readonly<Record<string, string | number>>) => void
 }
