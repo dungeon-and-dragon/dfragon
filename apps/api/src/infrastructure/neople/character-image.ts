@@ -1,3 +1,4 @@
+import { forwardCause } from '@dfragon/lib/error-chain'
 import {
   type NeopleImageClient,
   NeopleRequestFailure,
@@ -5,7 +6,6 @@ import {
 } from '@dfragon/neople'
 import type { FetchCharacterImage } from '../../application/character-image/ports.js'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
-import { forwardCause } from '../../domain/error-chain.js'
 
 export function createNeopleCharacterImage(
   images: NeopleImageClient = createNeopleImageClient()

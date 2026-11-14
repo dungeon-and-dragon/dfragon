@@ -1,3 +1,4 @@
+import { forwardCause } from '@dfragon/lib/error-chain'
 import { assert } from '@dfragon/lib/utils/assert'
 import { textOrNull } from '@dfragon/lib/utils/shape-check'
 import {
@@ -14,7 +15,6 @@ import type {
   NeopleCharacterSearchResult,
   NeopleCharacterSearchInput
 } from '../../domain/character-search/types.js'
-import { forwardCause } from '../../domain/error-chain.js'
 
 const invalidResponse = (): NeopleSearchFailure => new NeopleSearchFailure('api')
 
