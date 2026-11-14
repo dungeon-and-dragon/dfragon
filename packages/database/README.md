@@ -77,6 +77,8 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `timeline_season_backfill`: 캐릭터와 시즌별 옛 시즌 받기 위치
 - `clear_records`: 캐릭터의 레이드(모든 단계), 레기온 클리어 기록 한 번이 한 행
 - `clear_record_backfills`: 진행 중인 지난 클리어 기록 받기의 진행 위치
+- `content_clear_week_samples`: worker job이 계산한 마감한 주의 컨텐츠별 클리어 상세 재료
+- `content_clear_overview_samples`: worker job이 계산한 마감한 주의 클리어 전체 개요 재료
 - `jobs`: worker가 시작할 때 올린 배치 job 목록
 - `job_runs`: 배치 job 실행 한 번이 한 행인 실행 이력
 - `character_stats`: worker job이 계산한 최신 캐릭터 통계 한 행
