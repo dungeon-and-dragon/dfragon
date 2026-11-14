@@ -1,5 +1,5 @@
 import type { TimelineQueueCount } from '@dfragon/database'
-import type { WriteQueueCounts } from './ports.js'
+import type { TimelineQueueCountRepository } from './repository.js'
 
 const WRITE_INTERVAL_MS = 5000
 
@@ -14,7 +14,7 @@ export interface QueueCountsWriter {
  */
 export function startQueueCountsWriter(
   readCounts: () => readonly TimelineQueueCount[],
-  write: WriteQueueCounts,
+  write: TimelineQueueCountRepository['writeCounts'],
   reportFailure: () => void,
   intervalMs = WRITE_INTERVAL_MS
 ): QueueCountsWriter {
