@@ -36,7 +36,7 @@ import {
   recordContentClears,
   startContentClearCollection
 } from '@dfragon/database'
-import { createClearStatsService } from './dist/application/content-clears/service.js'
+import { ClearStatsService } from './dist/application/content-clears/service.js'
 
 // 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 모집단의 맨 앞에 온다.
 const at = (time) => new Date(`${time}+09:00`)
@@ -291,7 +291,7 @@ try {
   const reportRefreshFailure = () => {
     refreshFailures += 1
   }
-  const service = createClearStatsService(reader, reportRefreshFailure)
+  const service = new ClearStatsService(reader, reportRefreshFailure)
   const weeksOf = async (contentId) =>
     (await service.stats()).contents.find(({ id }) => id === contentId).weeks
   const summary = (weeks) =>
@@ -432,7 +432,7 @@ try {
   ])
   await recordContentClearPopulation(client, population(500, true, 'michaela-normal'))
   // 위 service는 모집단의 마지막 수집 시각이 그대로라 캐시를 주므로 새 service로 읽는다.
-  const overviewService = createClearStatsService(reader, reportRefreshFailure)
+  const overviewService = new ClearStatsService(reader, reportRefreshFailure)
   const overview = await overviewService.overview('2026-11-05')
   const overviewContent = (id) => overview.contents.find((content) => content.id === id)
   const michaelaOverview = overviewContent('michaela-hard')
@@ -532,7 +532,7 @@ try {
     clear('michaela-normal', 'raid', 'clear-h', '2026-10-30T20:00:00', lastWeek),
     clear('michaela-normal', 'raid', 'clear-h', '2026-11-06T20:00:00', thisWeek)
   ])
-  const detail = await createClearStatsService(reader, reportRefreshFailure).contentStats(
+  const detail = await new ClearStatsService(reader, reportRefreshFailure).contentStats(
     'michaela-hard',
     '2026-11-05'
   )
@@ -595,7 +595,7 @@ try {
     detail.fameBands.reduce((total, { cleared }) => total + cleared, 0),
     28
   )
-  const challengeDetail = await createClearStatsService(reader, reportRefreshFailure).contentStats(
+  const challengeDetail = await new ClearStatsService(reader, reportRefreshFailure).contentStats(
     'engraved-nightmare-1',
     '2026-11-05'
   )
@@ -675,7 +675,7 @@ try {
     })
   }
 
-  const scoredService = createClearStatsService(reader, reportRefreshFailure)
+  const scoredService = new ClearStatsService(reader, reportRefreshFailure)
   const scoredList = await scoredService.stats()
   const venus = scoredList.legions.find(({ id }) => id === 'legion-venus')
   assert.deepEqual(
