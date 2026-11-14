@@ -1,7 +1,6 @@
 import {
   type DatabaseConfiguration,
   createDatabaseClient,
-  readAdventureNames,
   readCharacterStatsSnapshot,
   readClearRecordLegionWeeks,
   readClearRecordRaidModes,
@@ -31,8 +30,7 @@ import {
   writeTimelineQueueCounts
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
-import { createCatalogService } from '../application/character-catalog/service.js'
-import type { CharacterSearchDependencies } from '../application/character-search/service.js'
+import { CatalogService } from '../application/character-catalog/service.js'
 import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
 import { createDatabaseCharacterBasicStore } from '../infrastructure/database/character-basic.js'
 import { backfillEnhancements } from '../application/character-timeline/backfill.js'
@@ -53,6 +51,7 @@ import { createNeopleCharacterDetails } from '../infrastructure/neople/character
 import { createNeopleCharacterSearch } from '../infrastructure/neople/character-search.js'
 import { createNeopleShopGrade } from '../infrastructure/neople/today-grade.js'
 import { DatabaseAdventureGuildRepository } from '../infrastructure/database/adventure-guild.js'
+import { DatabaseCharacterSearchRepository } from '../infrastructure/database/character-search.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
@@ -80,13 +79,14 @@ function createDatabaseSubscribers(
   | 'rankingStats'
   | 'clearStats'
 > &
-  Pick<CharacterSearchDependencies, 'readAdventureNames'> {
+  Pick<ApiHttpAppOptions['search'], 'readAdventureNames'> {
   if (database === undefined) {
     return {}
   }
   const client = createDatabaseClient(database)
   const clearStatsClient = createDatabaseClient(database, CLEAR_STATS_POOL)
   const basicStore = createDatabaseCharacterBasicStore(client)
+  const characterSearch = new DatabaseCharacterSearchRepository(client)
   const fetchTimeline = createNeopleCharacterTimeline(neople)
   const store = createDatabaseTimelineStore(client)
   const backfill = {
@@ -112,7 +112,7 @@ function createDatabaseSubscribers(
     recordCharacterBasic: basicStore.recordBasic,
     recordCharacterSkillStyle: basicStore.recordSkillStyle,
     recordCharacterScore: basicStore.recordScore,
-    readAdventureNames: (characters) => readAdventureNames(client, characters),
+    readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: {
       readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
@@ -166,7 +166,7 @@ export function createApiRuntimeOptions(configuration: RuntimeConfiguration): Ap
     },
     details: {
       fetchDetails: createNeopleCharacterDetails(neople),
-      catalog: createCatalogService(createNeopleCatalog(neople))
+      catalog: new CatalogService(createNeopleCatalog(neople))
     },
     ...database,
     todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
