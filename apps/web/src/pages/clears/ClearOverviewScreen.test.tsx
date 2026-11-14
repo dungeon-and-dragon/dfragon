@@ -276,6 +276,12 @@ function legendMarks(): Record<string, string | null | undefined> {
   )
 }
 
+function legendMarkClass(name: string): string | undefined {
+  const items = [...(panel('주간 클리어율')?.querySelectorAll('ul li') ?? [])]
+
+  return items.find((item) => item.textContent === name)?.querySelector('i')?.className
+}
+
 function click(element: Element): Promise<void> {
   return act(async () => {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }))
@@ -375,16 +381,24 @@ it('컨텐츠 카드를 누르면 그 컨텐츠 묶음과 고른 주로 상세�
   expect(onContentOpen).toHaveBeenCalledWith('michaela', LAST_CLOSED_WEEK)
 })
 
-it('주간 클리어율은 레이드만 단계별 선으로 그리고 기간을 줄여 선이 빠져도 남은 컨텐츠의 색을 바꾸지 않는다', async () => {
+it('주간 클리어율은 레이드의 하드와 일반 선을 함께 그리고 기간을 줄여 선이 빠져도 남은 컨텐츠의 색을 바꾸지 않는다', async () => {
   await render(undefined)
 
+  expect(panel('주간 클리어율')?.querySelector('[aria-label="단계"]')).toBeNull()
   const halfYear = legendMarks()
-  expect(Object.keys(halfYear)).toEqual(['미카엘라 하드', '디레지에 하드', '나벨 하드'])
+  expect(Object.keys(halfYear)).toEqual([
+    '미카엘라 하드',
+    '미카엘라 일반',
+    '디레지에 하드',
+    '나벨 하드'
+  ])
+  expect(halfYear['미카엘라 일반']).toBe(halfYear['미카엘라 하드'])
+  expect(legendMarkClass('미카엘라 일반')).not.toBe(legendMarkClass('미카엘라 하드'))
 
   await click(buttonNamed('3개월'))
 
   const quarter = legendMarks()
-  expect(Object.keys(quarter)).toEqual(['미카엘라 하드', '나벨 하드'])
+  expect(Object.keys(quarter)).toEqual(['미카엘라 하드', '미카엘라 일반', '나벨 하드'])
   expect(quarter['미카엘라 하드']).toBe(halfYear['미카엘라 하드'])
   expect(quarter['나벨 하드']).toBe(halfYear['나벨 하드'])
   expect(quarter['나벨 하드']).not.toBe(quarter['미카엘라 하드'])
@@ -506,6 +520,7 @@ it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 �
   ])
   expect(Object.keys(legendMarks())).toEqual([
     '미카엘라 하드',
+    '미카엘라 일반',
     '디레지에 하드',
     '나벨 하드',
     '아포칼립스'
