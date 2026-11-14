@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { URL } from 'node:url'
 import { createApiHttpApp } from '../dist/runtime/api-app.js'
-import { createCatalogService } from '../dist/application/character-catalog/service.js'
+import { CatalogService } from '../dist/application/character-catalog/service.js'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../dist/infrastructure/neople/character-search.js'
 
@@ -70,7 +70,7 @@ export function unusedDetailProviders() {
     throw new Error('검색 테스트가 상세 공급자를 호출함')
   }
 
-  return { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) }
+  return { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) }
 }
 
 export function unusedTodayGradeProvider() {

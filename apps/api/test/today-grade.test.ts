@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { FetchShopGrade } from '../src/application/today-grade/ports.js'
-import { createTodayGradeService } from '../src/application/today-grade/service.js'
+import { TodayGradeService } from '../src/application/today-grade/service.js'
 import { TodayGradeFailure, type TodayGradeFailureKind } from '../src/domain/today-grade/failure.js'
 import { averageGradePercent } from '../src/domain/today-grade/grade.js'
 import { TODAY_GRADE_ITEMS } from '../src/domain/today-grade/items.js'
@@ -45,7 +45,7 @@ test('11개 대표 아이템의 상점 등급 평균을 다음 0시까지 다시
   const { calls, fetchShopGrade } = recordingShopGrade((itemId) =>
     itemId === TODAY_GRADE_ITEMS[0].itemId ? 74 : 86
   )
-  const service = createTodayGradeService(fetchShopGrade, () => now)
+  const service = new TodayGradeService(fetchShopGrade, () => now)
   const expected = { percent: 85, expiresAt: nextMidnightKst }
 
   assert.deepEqual(await service.get(signal), expected)
@@ -65,7 +65,7 @@ test('11개 대표 아이템의 상점 등급 평균을 다음 0시까지 다시
 
 test('동시에 들어온 요청은 한 번의 조회를 함께 기다린다', async () => {
   const { calls, fetchShopGrade } = recordingShopGrade(() => 90)
-  const service = createTodayGradeService(fetchShopGrade, () => noonKst)
+  const service = new TodayGradeService(fetchShopGrade, () => noonKst)
   const [left, right] = await Promise.all([service.get(signal), service.get(signal)])
 
   assert.equal(calls.length, 11)
@@ -78,7 +78,7 @@ test('요청 하나의 연결이 끊겨도 함께 기다리던 다른 요청은 
     release = resolve
   })
   const fetchSignals: AbortSignal[] = []
-  const service = createTodayGradeService(
+  const service = new TodayGradeService(
     async (_itemId, fetchSignal) => {
       fetchSignals.push(fetchSignal)
       await gate
@@ -105,7 +105,7 @@ test('서버를 종료하면 진행 중인 상점 조회를 취소하고 끝나�
   const signals: AbortSignal[] = []
   let settledFetches = 0
   // 취소된 조회가 다음 timer에서야 끝나게 해, 종료가 그 끝을 기다리지 않으면 아래 개수가 0이 되게 한다.
-  const service = createTodayGradeService(
+  const service = new TodayGradeService(
     (_itemId, fetchSignal) =>
       new Promise<number>((_resolve, reject) => {
         signals.push(fetchSignal)
@@ -140,7 +140,7 @@ test('한 부위라도 실패하면 결과 없이 실패하고, 실패는 저장
 
     return 90
   })
-  const service = createTodayGradeService(fetchShopGrade, () => noonKst)
+  const service = new TodayGradeService(fetchShopGrade, () => noonKst)
 
   await assert.rejects(service.get(signal), (error) => {
     assert(error instanceof TodayGradeFailure)
@@ -213,7 +213,7 @@ test('GET /items/today-grade는 등급 퍼센트와 만료 시각을, 실패하�
   let failure: Error | undefined
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
-    details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+    details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
     todayGrade: {
       fetchShopGrade: async () => {
         if (failure !== undefined) {
@@ -282,7 +282,7 @@ test('GET /items/today-grade의 알 수 없는 오류는 access log에 오늘의
   const lines: string[] = []
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
-    details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+    details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
     todayGrade: {
       fetchShopGrade: async () => {
         throw new Error('unexpected')

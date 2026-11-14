@@ -5,20 +5,14 @@ import {
   recordAccessLogNeopleStage,
   recordAccessLogSharedNeopleFetch
 } from '@dfragon/http-server'
-import { type Context, Hono } from 'hono'
+import { Hono } from 'hono'
 import type { NeopleStageTimings } from '../../../application/character-detail/neople-stages.js'
 import type {
   CharacterDetailResponse,
   CharacterDetailService
 } from '../../../application/character-detail/service.js'
-import { parseCharacterIdentity } from '../../../domain/character-identity.js'
 import { respondUnlessDisconnected } from '../disconnected-request.js'
-
-type DetailContext = Context<AccessLogEnv, '/:serverId/:characterId'>
-
-function readIdentity(c: DetailContext) {
-  return parseCharacterIdentity(c.req.param('serverId'), c.req.param('characterId'))
-}
+import { type DetailContext, readIdentity } from './dto.js'
 
 function accessLogTimings(c: DetailContext): NeopleStageTimings {
   return {
@@ -36,24 +30,34 @@ function sendDetail(c: DetailContext, { body, reused }: CharacterDetailResponse)
   return c.body(body, 200, { 'Content-Type': JSON_CONTENT_TYPE })
 }
 
-export function createCharacterDetailRoutes(service: CharacterDetailService): Hono<AccessLogEnv> {
-  const routes = new Hono<AccessLogEnv>()
+export class CharacterDetailController {
+  constructor(private readonly service: CharacterDetailService) {}
 
-  routes.get('/:serverId/:characterId', (c) => {
-    const identity = readIdentity(c)
+  routes(): Hono<AccessLogEnv> {
+    const routes = new Hono<AccessLogEnv>()
 
-    return respondUnlessDisconnected(c, async (signal) =>
-      sendDetail(c, await service.get(identity, signal, accessLogTimings(c)))
-    )
-  })
+    routes.get('/:serverId/:characterId', (c) => {
+      const identity = readIdentity(c)
 
-  routes.post('/:serverId/:characterId/refresh', (c) => {
-    const identity = readIdentity(c)
+      return respondUnlessDisconnected(c, async (signal) => {
+        const timings = accessLogTimings(c)
+        const detail = await this.service.get(identity, signal, timings)
 
-    return respondUnlessDisconnected(c, async (signal) =>
-      sendDetail(c, await service.refresh(identity, signal, accessLogTimings(c)))
-    )
-  })
+        return sendDetail(c, detail)
+      })
+    })
 
-  return routes
+    routes.post('/:serverId/:characterId/refresh', (c) => {
+      const identity = readIdentity(c)
+
+      return respondUnlessDisconnected(c, async (signal) => {
+        const timings = accessLogTimings(c)
+        const detail = await this.service.refresh(identity, signal, timings)
+
+        return sendDetail(c, detail)
+      })
+    })
+
+    return routes
+  }
 }

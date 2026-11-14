@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCatalog } from '../src/infrastructure/neople/character-catalog.js'
 
 const signal = new AbortController().signal
@@ -13,7 +13,7 @@ function catalogPayload(itemId: string) {
 test('중복 참조를 한 번씩 조회하고 아이템은 15개 이내로 제공한다', async () => {
   const items = Array.from({ length: 17 }, (_, index) => 'item-' + index)
   const calls: string[][] = []
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     calls.push(itemIds)
 
     return new Map(itemIds.map((itemId) => [itemId, catalogPayload(itemId)]))

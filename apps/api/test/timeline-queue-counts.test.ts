@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineQueueCount } from '@dfragon/database'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { startQueueCountsWriter } from '../src/application/character-timeline/queue-counts.js'
 import { createSeasonBackfillQueue } from '../src/application/character-timeline/season-backfill.js'
 import type { CharacterIdentity } from '../src/domain/character-identity.js'
@@ -173,7 +173,7 @@ test('타임라인을 준 공개 app은 시작할 때 queue 3개의 수를 차�
   const unused = async () => assert.fail('queue 수 쓰기 테스트는 타임라인 일을 부르면 안 된다')
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(async () => new Map()) },
+    details: { fetchDetails: unused, catalog: new CatalogService(async () => new Map()) },
     timeline: {
       sync: unused,
       backfillEnhancements: unused,
@@ -272,7 +272,7 @@ test('공개 app은 타임라인 동기화, 강화 백필, 옛 시즌 백필 que
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async (identity) => detailPayloads(identity),
-      catalog: createCatalogService(async () => new Map())
+      catalog: new CatalogService(async () => new Map())
     },
     timeline: {
       sync: () => blocked.promise,

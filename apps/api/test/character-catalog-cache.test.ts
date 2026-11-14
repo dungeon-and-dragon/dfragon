@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 
 const signal = new AbortController().signal
 const HOUR_MS = 60 * 60 * 1000
@@ -11,7 +11,7 @@ function catalogPayload(itemId: string) {
 
 function recordingCatalog() {
   const calls: string[][] = []
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     calls.push(itemIds)
 
     return new Map(itemIds.map((itemId) => [itemId, catalogPayload(itemId)]))
@@ -50,7 +50,7 @@ test('동시에 들어온 두 요청의 아이템을 중복 없이 한 번의 �
 test('조회에 실패했거나 응답에 없던 아이템은 저장하지 않고 다음 요청이 다시 조회한다', async () => {
   const calls: string[][] = []
   let failing = true
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     calls.push(itemIds)
     if (failing) {
       throw new Error('failure')
@@ -103,7 +103,7 @@ test('한 요청이 취소돼도 함께 기다리던 요청은 결과를 받고 
   const released = new Promise<void>((resolve) => {
     release = resolve
   })
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     calls.push(itemIds)
     markStarted()
     await released

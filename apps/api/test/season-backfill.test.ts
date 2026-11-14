@@ -14,7 +14,7 @@ import {
   toSeasonBackfillRanges,
   withSeasonBackfills
 } from '../src/domain/adventure-guild/activity.js'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
 import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
 import {
@@ -262,7 +262,7 @@ async function listen(
   const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
     adventureGuild: {
       readAdventureCharacters: unused,

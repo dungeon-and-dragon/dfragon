@@ -15,12 +15,15 @@ import type {
 import { createCharacterBasicRecorder } from '../application/character-basic/service.js'
 import {
   type CharacterDetailDependencies,
-  createCharacterDetailService
+  CharacterDetailService
 } from '../application/character-detail/service.js'
 import type { FetchCharacterImage } from '../application/character-image/ports.js'
+import { CharacterImageService } from '../application/character-image/service.js'
+import type { SearchCharacters } from '../application/character-search/ports.js'
+import type { CharacterSearchRepository } from '../application/character-search/repository.js'
 import {
-  type CharacterSearchDependencies,
-  createCharacterSearchService
+  CharacterSearchService,
+  emptyCharacterSearchRepository
 } from '../application/character-search/service.js'
 import type { ReadTimelinePage, WriteQueueCounts } from '../application/character-timeline/ports.js'
 import { createTimelineSyncQueue } from '../application/character-timeline/queue.js'
@@ -41,7 +44,7 @@ import {
   emptyRankingStatsReader
 } from '../application/ranking-stats/service.js'
 import type { FetchShopGrade } from '../application/today-grade/ports.js'
-import { createTodayGradeService } from '../application/today-grade/service.js'
+import { TodayGradeService } from '../application/today-grade/service.js'
 import { CharacterFetched } from '../domain/character-events.js'
 import type { CharacterTimeline } from '../domain/character-timeline/project.js'
 import type { SeasonBackfillJob } from '../domain/character-timeline/season-backfill.js'
@@ -66,7 +69,10 @@ export interface TimelineSyncOptions {
 }
 
 export interface ApiServicesOptions {
-  readonly search: Omit<CharacterSearchDependencies, 'characterImageUrl'>
+  readonly search: {
+    readonly searchCharacters: SearchCharacters
+    readonly readAdventureNames?: CharacterSearchRepository['readAdventureNames']
+  }
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'publishCharacterFetched'>
   readonly timeline?: TimelineSyncOptions
   readonly recordCharacterBasic?: RecordCharacterBasic
@@ -195,11 +201,15 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     )
   }
 
-  const search = createCharacterSearchService({
-    ...options.search,
-    characterImageUrl: neopleCharacterImageUrl
-  })
-  const details = createCharacterDetailService({
+  const { searchCharacters, readAdventureNames } = options.search
+  const searchRepository: CharacterSearchRepository =
+    readAdventureNames !== undefined ? { readAdventureNames } : emptyCharacterSearchRepository
+  const search = new CharacterSearchService(
+    searchRepository,
+    searchCharacters,
+    neopleCharacterImageUrl
+  )
+  const details = new CharacterDetailService({
     ...options.details,
     calculateScore: engine.calculate,
     publishCharacterFetched: (
@@ -225,8 +235,10 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       }
     }
   })
-  const todayGrade = createTodayGradeService(options.todayGrade.fetchShopGrade)
-  const fetchCharacterImage = options.fetchCharacterImage ?? createNeopleCharacterImage()
+  const todayGrade = new TodayGradeService(options.todayGrade.fetchShopGrade)
+  const characterImage = new CharacterImageService(
+    options.fetchCharacterImage ?? createNeopleCharacterImage()
+  )
   const timelineService = timelineSync?.service ?? emptyCharacterTimelineService
   const adventureGuild = createAdventureGuild(options.adventureGuild, queues)
   const rankingStats = createRankingStatsService(options.rankingStats ?? emptyRankingStatsReader)
@@ -239,7 +251,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       buildInfo,
       search,
       details,
-      fetchCharacterImage,
+      characterImage,
       timeline: timelineService,
       adventureGuild,
       rankingStats,

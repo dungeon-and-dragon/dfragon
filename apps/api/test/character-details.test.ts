@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import type {
   CharacterDetailSection,
   CharacterPayloads
@@ -136,7 +136,7 @@ test('Neople이 없는 캐릭터(DNF001)라고 답하면 상세 조회와 강제
           }
         })
       ),
-      catalog: createCatalogService(unused)
+      catalog: new CatalogService(unused)
     },
     todayGrade: { fetchShopGrade: unused },
     writeAccessLog: () => undefined

@@ -7,9 +7,12 @@ import {
   neopleCharacterImageUrl,
   type NeopleTestDependencies
 } from '@dfragon/neople'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
-import { createCharacterSearchService } from '../src/application/character-search/service.js'
+import {
+  CharacterSearchService,
+  emptyCharacterSearchRepository
+} from '../src/application/character-search/service.js'
 import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
 import { parseCharacterCandidatesQuery } from '../src/domain/character-search/query.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
@@ -47,7 +50,7 @@ async function startApp(t: TestContext, dependencies: NeopleTestDependencies): P
   }
   const { app } = await createApiHttpApp({
     search: { searchCharacters },
-    details: { fetchDetails: unusedProvider, catalog: createCatalogService(unusedProvider) },
+    details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
     todayGrade: { fetchShopGrade: unusedProvider }
   })
   t.after(() => app.close())
@@ -536,14 +539,15 @@ function createCountingSearch(
   search: (input: NeopleCharacterSearchInput) => Promise<NeopleCharacterSearchResult>
 ) {
   const names: string[] = []
-  const service = createCharacterSearchService({
-    characterImageUrl: neopleCharacterImageUrl,
-    searchCharacters: async (input) => {
+  const service = new CharacterSearchService(
+    emptyCharacterSearchRepository,
+    async (input) => {
       names.push(input.characterName)
 
       return search(input)
-    }
-  })
+    },
+    neopleCharacterImageUrl
+  )
 
   return { service, names }
 }
@@ -684,9 +688,15 @@ test('서버 종료 뒤에는 저장한 후보도 돌려주지 않고 진행 중
 
 test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 저장되지 않은 캐릭터는 null이다', async () => {
   const reads: string[][] = []
-  const service = createCharacterSearchService({
-    characterImageUrl: neopleCharacterImageUrl,
-    searchCharacters: async (input) => ({
+  const service = new CharacterSearchService(
+    {
+      readAdventureNames: async (characters) => {
+        reads.push(characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`))
+
+        return [{ serverId: 'cain', characterId: 'stored', adventureName: '합성모험단' }]
+      }
+    },
+    async (input) => ({
       rows: [
         candidateRow(input.characterName, 'stored'),
         {
@@ -697,12 +707,8 @@ test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 �
         candidateRow(input.characterName, 'unknown')
       ]
     }),
-    readAdventureNames: async (characters) => {
-      reads.push(characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`))
-
-      return [{ serverId: 'cain', characterId: 'stored', adventureName: '합성모험단' }]
-    }
-  })
+    neopleCharacterImageUrl
+  )
 
   const { result } = await service.candidates(candidateInput(characterName))
 
@@ -724,15 +730,17 @@ test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 �
 test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로 읽는다', async () => {
   let adventureName = '옛모험단'
   let searches = 0
-  const service = createCharacterSearchService({
-    characterImageUrl: neopleCharacterImageUrl,
-    searchCharacters: async (input) => {
+  const service = new CharacterSearchService(
+    {
+      readAdventureNames: async () => [{ serverId: 'cain', characterId: 'renamed', adventureName }]
+    },
+    async (input) => {
       searches++
 
       return { rows: [candidateRow(input.characterName, 'renamed')] }
     },
-    readAdventureNames: async () => [{ serverId: 'cain', characterId: 'renamed', adventureName }]
-  })
+    neopleCharacterImageUrl
+  )
 
   const first = await service.candidates(candidateInput(characterName))
   adventureName = '새모험단'
@@ -747,13 +755,15 @@ test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로
 })
 
 test('후보가 없으면 모험단명을 읽지 않는다', async () => {
-  const service = createCharacterSearchService({
-    characterImageUrl: neopleCharacterImageUrl,
-    searchCharacters: async () => ({ rows: [] }),
-    readAdventureNames: async () => {
-      throw new Error('빈 후보는 DB를 읽지 않아야 한다')
-    }
-  })
+  const service = new CharacterSearchService(
+    {
+      readAdventureNames: async () => {
+        throw new Error('빈 후보는 DB를 읽지 않아야 한다')
+      }
+    },
+    async () => ({ rows: [] }),
+    neopleCharacterImageUrl
+  )
 
   assert.deepEqual((await service.candidates(candidateInput(characterName))).result, { rows: [] })
 })

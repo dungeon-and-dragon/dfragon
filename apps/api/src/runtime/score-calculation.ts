@@ -1,5 +1,5 @@
 import { NeopleRequestFailure } from '@dfragon/neople'
-import { createCatalogService } from '../application/character-catalog/service.js'
+import { CatalogService } from '../application/character-catalog/service.js'
 import type {
   ScoreCalculationJobDependencies,
   ScoreSourceEvents,
@@ -42,7 +42,7 @@ export function createScoreSources(
   }
 
   const fetchDetails = createNeopleCharacterDetails(counted)
-  const catalog = createCatalogService(createNeopleCatalog(counted))
+  const catalog = new CatalogService(createNeopleCatalog(counted))
 
   return { fetchDetails, catalog }
 }

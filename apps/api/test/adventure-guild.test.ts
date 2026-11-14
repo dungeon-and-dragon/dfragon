@@ -10,7 +10,7 @@ import type { HttpAppHandle } from '@dfragon/http-server'
 import type { AdventureGuildRepository } from '../src/application/adventure-guild/repository.js'
 import type { CharacterRow } from '../src/domain/character-row.js'
 import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 정렬, 저장과 주간 경계는 container-adventure-guild-check.mjs가 실제 DB로 확인한다.
@@ -47,7 +47,7 @@ async function listen(
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
     adventureGuild,
     timeline: syncTimeline && {

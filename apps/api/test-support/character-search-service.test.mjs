@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { neopleCharacterImageUrl } from '@dfragon/neople'
-import { createCharacterSearchService } from '../dist/application/character-search/service.js'
+import {
+  CharacterSearchService,
+  emptyCharacterSearchRepository
+} from '../dist/application/character-search/service.js'
 import { parseCharacterSearchQuery } from '../dist/domain/character-search/query.js'
 import { characterSearchFailureResponse } from '../dist/presentation/http/character-search/failures.js'
 
@@ -9,15 +12,18 @@ const input = parseCharacterSearchQuery('/characters?characterName=ab')
 
 function fixture(overrides = {}) {
   const calls = []
-  const service = createCharacterSearchService({
-    searchCharacters: async (input) => {
+  const searchCharacters =
+    overrides.searchCharacters ??
+    (async (input) => {
       calls.push(input)
 
       return { rows: [] }
-    },
-    characterImageUrl: neopleCharacterImageUrl,
-    ...overrides
-  })
+    })
+  const service = new CharacterSearchService(
+    emptyCharacterSearchRepository,
+    searchCharacters,
+    neopleCharacterImageUrl
+  )
 
   return { service, calls }
 }
