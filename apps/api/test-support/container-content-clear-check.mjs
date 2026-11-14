@@ -11,6 +11,7 @@ import {
   readContentClearFames,
   readContentClearFirstWeeks,
   readContentClearJobFames,
+  readContentClearOverviewSampleWeeks,
   readContentClearOverviewSamples,
   readContentClearPopulations,
   readContentClearRaidTimes,
@@ -18,6 +19,7 @@ import {
   readContentClearStreaks,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
+  readContentClearWeekSampleWeeks,
   readContentClearWeekSamples,
   readClearRecordLegionWeeks,
   readClearRecordRaidModes,
@@ -34,11 +36,14 @@ import {
   recordCharacterScore,
   recordClearRecords,
   recordContentClearCollectionProgress,
+  recordContentClearOverviewSamples,
   recordContentClearPopulation,
+  recordContentClearWeekSamples,
   recordContentClears,
   startContentClearCollection
 } from '@dfragon/database'
 import { ClearStatsService } from './dist/application/content-clears/service.js'
+import { ClearWeekSampleService } from './dist/application/content-clears/week-samples.js'
 
 // 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 모집단의 맨 앞에 온다.
 const at = (time) => new Date(`${time}+09:00`)
@@ -743,6 +748,49 @@ try {
   const challengeScored = await scoredService.contentStats('engraved-nightmare-1', '2026-11-05')
   assert.deepEqual(challengeScored.scoreBands, { equipment: [], buff: [] })
   assert.equal(challengeScored.stages, null)
+
+  // worker가 마감한 주마다 저장한 재료로 만든 상세와 전체 개요는 직접 계산한 값과 같다.
+  const weekSampleService = new ClearWeekSampleService(
+    {
+      ...reader,
+      readContentWeekSampleWeeks: () => readContentClearWeekSampleWeeks(client),
+      readOverviewSampleWeeks: () => readContentClearOverviewSampleWeeks(client),
+      recordContentWeekSamples: (week, samples, computedAt) =>
+        recordContentClearWeekSamples(client, week, samples, computedAt),
+      recordOverviewSamples: (weekStart, samples, computedAt) =>
+        recordContentClearOverviewSamples(client, weekStart, samples, computedAt)
+    },
+    () => at('2026-11-10T07:00:00')
+  )
+  await recordContentClearPopulation(
+    client,
+    population(1000, false, 'engraved-nightmare-1', '2026-11-19T06:00:00', '2026-11-20T06:00:00')
+  )
+  const recorded = await weekSampleService.recordMissing(() => undefined)
+  assert.ok(recorded.contents > 0 && recorded.overviews > 0)
+  assert.deepEqual(await weekSampleService.recordMissing(() => undefined), {
+    contents: 0,
+    overviews: 0
+  })
+  const overviewSampleWeeks = (await readContentClearOverviewSampleWeeks(client)).map((weekStart) =>
+    weekStart.getTime()
+  )
+  assert.ok(overviewSampleWeeks.includes(at(thisWeek).getTime()))
+  // 마감하지 않은 주는 컨텐츠 재료와 전체 개요 모두 저장하지 않는다.
+  const openWeek = at('2026-11-19T06:00:00').getTime()
+  assert.ok(!overviewSampleWeeks.includes(openWeek))
+  assert.ok(
+    (await readContentClearWeekSampleWeeks(client)).every(
+      ({ weekStart }) => weekStart.getTime() !== openWeek
+    )
+  )
+  const notComputed = async () => assert.fail('저장한 주를 다시 계산하면 안 된다')
+  const storedService = new ClearStatsService(
+    { ...reader, readContentJobFames: notComputed, readFames: notComputed },
+    reportRefreshFailure
+  )
+  assert.deepEqual(await storedService.contentStats('michaela-hard', '2026-11-05'), scoredDetail)
+  assert.deepEqual(await storedService.overview('2026-11-05'), scoredOverview)
 
   // 수집 진행 위치는 끝나기 전까지만 남는다.
   const collectionStartedAt = at('2026-11-10T06:00:00')
