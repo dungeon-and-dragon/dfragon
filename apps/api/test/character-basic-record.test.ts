@@ -641,7 +641,6 @@ for (const [name, database, connected] of [
       localHttps: undefined,
       apiKey: 'synthetic-neople-key',
       database,
-      ops: undefined,
       scoreLibraryPath: null
     })
     const { app, readQueueCounts } = await createApiHttpApp(options)
