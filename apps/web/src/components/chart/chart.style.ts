@@ -3,6 +3,7 @@ import { colors, motion, radius, shadow, space } from '@dfragon/ui/tokens.stylex
 import { breakpoints } from '../../styles/breakpoints.stylex'
 
 const NAME_COLUMN_WIDTH = 120
+const WIDE_NAME_COLUMN_WIDTH = 176
 const VALUE_COLUMN_WIDTH = 64
 const ROW_HEIGHT = 28
 const BAR_HEIGHT = 6
@@ -40,7 +41,11 @@ export const styles = stylex.create({
     fontSize: 13,
     lineHeight: '18px'
   },
+  rowWideName: {
+    gridTemplateColumns: `${WIDE_NAME_COLUMN_WIDTH}px minmax(0, 1fr) ${VALUE_COLUMN_WIDTH}px`
+  },
   rowName: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  rowSub: { fontSize: 11, color: colors.fgSubtle },
   rail: {
     position: 'relative',
     display: 'block',

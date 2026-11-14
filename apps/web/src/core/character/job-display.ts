@@ -2,22 +2,31 @@ import type { CharacterCardRole } from './character'
 import { formatJobName } from './job-format'
 import { maleCrusaderRoleOf, withMaleCrusaderRole } from './male-crusader'
 
-export const SHARED_GROW_JOB_NAMES: readonly string[] = [
-  '넨마스터',
-  '스트라이커',
-  '스트리트파이터',
-  '그래플러',
-  '레인저',
-  '런처',
-  '메카닉',
-  '스핏파이어',
-  '크루세이더',
-  '인파이터'
-]
-
-const JOB_GENDER_SUFFIX = /\((남|여)\)$/u
-
 type JobNames = Readonly<{ jobName: string | null; jobGrowName: string | null }>
+
+export type JobLabel = Readonly<{ grow: string; job: string | null }>
+
+export function jobLabelOf(
+  character: JobNames & { jobGrowName: string },
+  role?: CharacterCardRole | null
+): JobLabel
+export function jobLabelOf(character: JobNames, role?: CharacterCardRole | null): JobLabel | null
+export function jobLabelOf(
+  character: JobNames,
+  role: CharacterCardRole | null = null
+): JobLabel | null {
+  const name = character.jobGrowName ?? character.jobName
+  if (name === null) {
+    return null
+  }
+
+  const growName = formatJobName(name)
+  const grow = withMaleCrusaderRole(growName, maleCrusaderRoleOf(character, role))
+  const { jobName } = character
+  const job = character.jobGrowName !== null && jobName !== growName ? jobName : null
+
+  return { grow, job }
+}
 
 export function displayJobName(
   character: JobNames & { jobGrowName: string },
@@ -28,22 +37,14 @@ export function displayJobName(
   character: JobNames,
   role: CharacterCardRole | null = null
 ): string | null {
-  const job = character.jobGrowName ?? character.jobName
-  if (job === null) {
+  const label = jobLabelOf(character, role)
+  if (label === null) {
     return null
   }
 
-  const name = formatJobName(job)
-  const maleCrusaderRole = maleCrusaderRoleOf(character, role)
-  if (maleCrusaderRole !== null) {
-    return withMaleCrusaderRole(name, maleCrusaderRole)
+  if (label.job === null) {
+    return label.grow
   }
 
-  const gender = character.jobName?.match(JOB_GENDER_SUFFIX)?.[1]
-  const isSharedGrowJob = character.jobGrowName !== null && SHARED_GROW_JOB_NAMES.includes(name)
-  if (isSharedGrowJob && gender !== undefined) {
-    return `${name} (${gender})`
-  }
-
-  return name
+  return `${label.grow} ${label.job}`
 }

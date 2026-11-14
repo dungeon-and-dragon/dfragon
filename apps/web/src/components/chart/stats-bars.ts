@@ -1,4 +1,4 @@
-import { displayJobName } from '#core/character/job-display'
+import { type JobLabel, jobLabelOf } from '#core/character/job-display'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterStats } from '#core/ranking/ranking-stats'
 import type { ColumnBar } from './Columns'
@@ -29,6 +29,14 @@ export function serverBars({ servers, total }: CharacterStats): Bar[] {
   }))
 }
 
+function nameOf({ grow, job }: JobLabel): Pick<Bar, 'name' | 'sub'> {
+  if (job === null) {
+    return { name: grow }
+  }
+
+  return { name: grow, sub: job }
+}
+
 function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
   return jobs.filter(({ jobGrowName }) => jobGrowName.startsWith(AWAKENING_MARK))
 }
@@ -36,10 +44,11 @@ function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
 export function jobBars(stats: CharacterStats): Bar[] {
   return awakenedJobs(stats).map(({ jobId, jobGrowId, jobName, jobGrowName, count }) => {
     const key = `${jobId}/${jobGrowId}`
-    const name = displayJobName({ jobName, jobGrowName })
+    const label = jobLabelOf({ jobName, jobGrowName })
+    const names = nameOf(label)
     const share = shareText(count, stats.total)
 
-    return { key, name, value: count, share }
+    return { key, ...names, value: count, share }
   })
 }
 
@@ -51,9 +60,10 @@ export function averageFameBars(stats: CharacterStats): Bar[] {
       }
 
       const key = `${jobId}/${jobGrowId}`
-      const name = displayJobName({ jobName, jobGrowName })
+      const label = jobLabelOf({ jobName, jobGrowName })
+      const names = nameOf(label)
 
-      return [{ key, name, value: averageFame }]
+      return [{ key, ...names, value: averageFame }]
     })
     .toSorted((a, b) => b.value - a.value)
 }
