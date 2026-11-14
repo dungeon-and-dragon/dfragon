@@ -14,6 +14,8 @@ export type {
   BatchNeopleKeySummary,
   UsableBatchNeopleKey
 } from './batch-neople-key.js'
+export { readTimelineQueueCounts, writeTimelineQueueCounts } from './timeline-queue-count.js'
+export type { TimelineQueueCount } from './timeline-queue-count.js'
 export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
 export { recordCharacterScore } from './character-score.js'

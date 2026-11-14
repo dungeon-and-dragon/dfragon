@@ -87,7 +87,7 @@ const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
 function opsApp(options: Partial<OpsHttpAppOptions>) {
   return createOpsHttpApp({
     jobs: statsOnlyJobs,
-    readQueueCounts: () => [],
+    readQueueCounts: async () => [],
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
     writeAccessLog: () => undefined,

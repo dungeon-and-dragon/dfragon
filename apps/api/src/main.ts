@@ -25,14 +25,14 @@ async function startApps(configuration: RuntimeConfiguration): Promise<HttpAppHa
   const apps: HttpAppHandle[] = []
 
   try {
-    const { app, readQueueCounts } = await createApiRuntime(configuration)
+    const { app } = await createApiRuntime(configuration)
     const { ops } = configuration
 
     apps.push(app)
     await app.listen(configuration.port, hostname)
 
     if (ops !== undefined) {
-      const opsApp = createOpsRuntime(ops.database, readQueueCounts)
+      const opsApp = createOpsRuntime(ops.database)
 
       apps.push(opsApp)
       await opsApp.listen(ops.port, hostname)
