@@ -2,11 +2,14 @@ import {
   type ClearAdventureSize,
   type ClearCoClearCount,
   type ClearContentScoreSample,
+  type ClearContentWeek,
+  type ClearContentWeekSamples,
   type ClearFameBandCount,
   type ClearFameSample,
   type ClearFirstWeekCount,
   type ClearJobFameSample,
   type ClearJobScoreSample,
+  type ClearOverviewWeekSamples,
   type ClearRecordLegionWeek,
   type ClearRecordRaidMode,
   type ClearRecordRaidSelection,
@@ -35,6 +38,7 @@ import {
   readContentClearFirstWeeks,
   readContentClearJobFames,
   readContentClearJobScores,
+  readContentClearOverviewSamples,
   readContentClearPopulations,
   readContentClearRaidTimes,
   readContentClearScoreBands,
@@ -44,6 +48,7 @@ import {
   readContentClearWeekGroupScores,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
+  readContentClearWeekSamples,
   readSelectedContentClearJobFames,
   readSelectedContentClearJobScores,
   readSelectedContentClearTimes
@@ -146,5 +151,13 @@ export class DatabaseClearStatsRepository implements ClearStatsRepository {
 
   readRaidTimes(weekStart: Date): Promise<ClearTimeCount[]> {
     return readContentClearRaidTimes(this.client, weekStart)
+  }
+
+  readContentWeekSamples(week: ClearContentWeek): Promise<ClearContentWeekSamples | null> {
+    return readContentClearWeekSamples(this.client, week)
+  }
+
+  readOverviewSamples(weekStart: Date): Promise<ClearOverviewWeekSamples | null> {
+    return readContentClearOverviewSamples(this.client, weekStart)
   }
 }
