@@ -9,6 +9,7 @@ import type {
   ClearTimes,
   ClearWeek
 } from '#core/ranking/clear-stats'
+import { jobLabelOf } from '#core/character/job-display'
 import type { BoxPlotRow } from '../../components/chart/BoxPlot'
 import type { ColumnBar } from '../../components/chart/Columns'
 import type { LineSeries } from '../../components/chart/LineChart'
@@ -343,8 +344,9 @@ export type JobRanks = Readonly<{ high: BoxPlotRow[]; low: BoxPlotRow[] }>
 
 function jobRowOf(job: ClearOverviewJob, rate: number, metric: JobMetric): BoxPlotRow {
   const stats = jobStatsOf(job, metric)
-  const name = job.jobGrowName ?? UNKNOWN_JOB_NAME
-  const sub = job.jobName ?? undefined
+  const label = jobLabelOf(job)
+  const name = label?.grow ?? UNKNOWN_JOB_NAME
+  const sub = label?.job ?? undefined
   const value = percent.format(rate)
 
   return {
