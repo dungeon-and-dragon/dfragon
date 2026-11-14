@@ -45,7 +45,6 @@ test('API runtime 설정은 인증 secret, DB 입력 없이 읽고 이전 인증
     apiKey: 'synthetic',
     localHttps: undefined,
     database: undefined,
-    ops: undefined,
     scoreLibraryPath: null
   })
   assert.deepEqual(
@@ -143,24 +142,14 @@ test('DB 설정이 일부만 있거나 잘못되면 값 없이 시작 설정을 
   }
 })
 
-test('운영 포트는 DB 설정과 함께 공개 포트와 다른 값일 때만 읽는다', async () => {
-  const configuration = await readRuntimeConfiguration({
-    ...environment,
-    ...databaseEnvironment,
-    OPS_PORT: '3001'
-  })
+test('운영 app으로 옮긴 운영 포트 입력은 값과 관계없이 무시하고 읽는다', async () => {
+  const baseline = await readRuntimeConfiguration({ ...environment, ...databaseEnvironment })
 
-  assert.equal(configuration.ops?.port, 3001)
-  assert.deepEqual(configuration.ops?.database, configuration.database)
-  for (const change of [
-    { ...databaseEnvironment, OPS_PORT: '3000' },
-    { ...databaseEnvironment, OPS_PORT: '' },
-    { ...databaseEnvironment, OPS_PORT: '65536' },
-    { OPS_PORT: '3001' }
-  ]) {
-    await assert.rejects(
-      readRuntimeConfiguration({ ...environment, ...change }),
-      new Error('Invalid API runtime configuration')
+  for (const opsPort of ['3001', '3000', '', '65536']) {
+    assert.deepEqual(
+      await readRuntimeConfiguration({ ...environment, ...databaseEnvironment, OPS_PORT: opsPort }),
+      baseline,
+      opsPort
     )
   }
 })

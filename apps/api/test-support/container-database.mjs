@@ -8,9 +8,14 @@ import { setTimeout } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 
 const imageArguments = process.argv.slice(2)
-const [imageReference] = imageArguments
-if (imageArguments.length !== 1 || imageReference.trim() === '' || imageReference.startsWith('-')) {
-  process.stderr.write('Usage: node container-database.mjs IMAGE_REFERENCE\n')
+const [imageReference, opsImageReference] = imageArguments
+if (
+  imageArguments.length !== 2 ||
+  imageArguments.some((reference) => reference.trim() === '' || reference.startsWith('-'))
+) {
+  process.stderr.write(
+    'Usage: node container-database.mjs API_IMAGE_REFERENCE OPS_IMAGE_REFERENCE\n'
+  )
   process.exit(2)
 }
 // 운영 dfragon-db와 같은 PostgreSQL 18.6이다.
@@ -62,6 +67,7 @@ const postgresName = `dfragon-db-test-${runId}-postgres`
 const apiNames = [1, 2].map((index) => `dfragon-db-test-${runId}-api-${index}`)
 const failureName = `dfragon-db-test-${runId}-failure`
 const collectorName = `dfragon-db-test-${runId}-collector`
+const opsName = `dfragon-db-test-${runId}-ops`
 const labelKey = 'com.dfragon.image-test.run'
 const label = `${labelKey}=${runId}`
 // Docker CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
@@ -139,6 +145,8 @@ function psql(sql) {
 try {
   const [metadata] = JSON.parse((await docker(['image', 'inspect', imageReference])).stdout)
   const imageId = metadata.Id
+  const [opsMetadata] = JSON.parse((await docker(['image', 'inspect', opsImageReference])).stdout)
+  const opsImageId = opsMetadata.Id
   process.stdout.write(`Disposable api database test: ${runId}\n`)
 
   stage = 'PostgreSQL startup'
@@ -306,12 +314,11 @@ try {
         name,
         ...runtimeOptions,
         ...databaseEnvironment,
+        // 운영 app으로 옮긴 입력이 인프라에 남아 있어도 API는 무시하고 뜬다.
         '--env',
         'OPS_PORT=3001',
         '--mount',
         `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`,
-        '--mount',
-        `type=bind,source=${opsCheckPath},target=/app/container-ops-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${runtimeCheckPath},target=/app/container-runtime-check.mjs,readonly`,
         '--mount',
@@ -902,7 +909,32 @@ try {
         )
       ).stdout.trim() === 'enhancement-backfill:0:0,season-backfill:0:0,timeline-sync:0:0'
   )
-  await docker(['exec', apiNames[0], 'node', '/app/container-ops-check.mjs'])
+  // 운영 app 이미지를 API 컨테이너의 network namespace에 붙여, 운영 포트 3001과 공개 포트 3000을 같은 127.0.0.1에서 확인한다.
+  await docker([
+    'run',
+    '--detach',
+    '--name',
+    opsName,
+    '--label',
+    label,
+    '--network',
+    `container:${apiNames[0]}`,
+    '--read-only',
+    '--cap-drop',
+    'ALL',
+    '--security-opt',
+    'no-new-privileges',
+    '--init',
+    '--env',
+    'PORT=3001',
+    ...databaseEnvironment,
+    '--mount',
+    `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`,
+    '--mount',
+    `type=bind,source=${opsCheckPath},target=/app/container-ops-check.mjs,readonly`,
+    opsImageId
+  ])
+  await docker(['exec', opsName, 'node', '/app/container-ops-check.mjs'])
   assert.equal(
     (
       await psql(
@@ -1017,12 +1049,31 @@ try {
     assert.equal(result.stdout, '')
     assert.equal(result.stderr, 'API failed to start\n')
   }
+
+  stage = 'ops image build info and missing database input'
+  const opsBuildInfo = await docker([
+    'run',
+    '--rm',
+    '--entrypoint',
+    'cat',
+    opsImageId,
+    '/app/build-info.json'
+  ])
+  assert.equal(JSON.parse(opsBuildInfo.stdout).service, 'ops')
+  const opsWithoutDatabase = await docker(
+    ['run', '--rm', '--name', failureName, ...runtimeOptions, opsImageId],
+    { allowFailure: true }
+  )
+
+  assert.equal(opsWithoutDatabase.code, 1)
+  assert.equal(opsWithoutDatabase.stdout, '')
+  assert.equal(opsWithoutDatabase.stderr, 'Ops app failed to start\n')
 } catch {
   process.stderr.write(`api database image verification failed at ${stage}\n`)
   process.exitCode = 1
 } finally {
   const cleanup = [
-    ...[...apiNames, failureName, collectorName, postgresName].map(
+    ...[opsName, ...apiNames, failureName, collectorName, postgresName].map(
       (name) => () => removeOwned(name)
     ),
     async () => {
@@ -1047,6 +1098,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops port job, queue, collection and batch Neople key routes, HTTP and database input rejection\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement\n'
   )
 }

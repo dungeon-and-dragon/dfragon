@@ -1,0 +1,33 @@
+{
+  "name": "@dfragon/ops",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.11.1 <27"
+  },
+  "scripts": {
+    "dev": "pnpm run build && dotenv --no-expand -- pnpm run start",
+    "build": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/http-server build && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+    "test": "pnpm run build && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('.test-dist', { recursive: true, force: true })\" && tsc -p tsconfig.test.json && node --test \".test-dist/test/**/*.test.js\"",
+    "typecheck": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/http-server build && tsc --noEmit -p tsconfig.test.json",
+    "start": "node dist/main.js",
+    "lint": "biome lint && pnpm run lint:imports",
+    "lint:imports": "depcruise --config .dependency-cruiser.mjs --output-type err-long src",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
+    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
+  },
+  "dependencies": {
+    "@dfragon/database": "workspace:*",
+    "@dfragon/http-server": "workspace:*",
+    "@dfragon/lib": "workspace:*",
+    "hono": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "dotenv-cli": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { BatchNeopleKeySummary } from '@dfragon/database'
-import type { OpsBatchNeopleKeyStore } from '../src/application/ops/ports.js'
+import type { OpsBatchNeopleKeyStore } from '../src/application/batch-neople-keys/ports.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 
 // 합성 key다. 실제 Neople key가 아니다.

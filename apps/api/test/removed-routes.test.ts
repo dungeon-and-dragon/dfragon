@@ -34,3 +34,31 @@ test('제거된 경로는 404를 반환하고 provider를 호출하지 않는다
     await app.close()
   }
 })
+
+const json = (body: unknown): RequestInit => ({
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body)
+})
+
+test('공개 app에는 운영 경로가 없다', async (t) => {
+  const unused = async (): Promise<never> => {
+    throw new Error('ops route test must not call services')
+  }
+  const { app } = await createApiHttpApp({
+    search: { searchCharacters: unused },
+    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    todayGrade: { fetchShopGrade: unused },
+    writeAccessLog: () => undefined
+  })
+  t.after(() => app.close())
+  await app.listen(0, '127.0.0.1')
+  const origin = await app.getUrl()
+
+  for (const path of ['/api/jobs', '/jobs', '/api/queues', '/queues', '/api/collection']) {
+    assert.equal((await fetch(`${origin}${path}`)).status, 404, path)
+  }
+  for (const path of ['/api/jobs/stats/pause', '/api/collection/requeue']) {
+    assert.equal((await fetch(`${origin}${path}`, json({}))).status, 404, path)
+  }
+})

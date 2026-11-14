@@ -1,9 +1,9 @@
 import type { JobOverview, JobPauseChange, JobRunRecord } from '@dfragon/database'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { OpsJobStore } from '../../../application/ops/ports.js'
-import { OpsFailure } from '../../../domain/ops/failure.js'
-import { readJsonBody } from './json-request.js'
+import type { OpsJobStore } from '../../../application/jobs/ports.js'
+import { OpsFailure } from '../../../domain/failure.js'
+import { readJsonBody } from '../json-request.js'
 
 const DEFAULT_RUN_PAGE_SIZE = 20
 const MAX_RUN_PAGE_SIZE = 100

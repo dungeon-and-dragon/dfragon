@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { JobOverview, JobRunRecord } from '@dfragon/database'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
-import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
-import type { OpsBatchNeopleKeyStore, OpsJobStore } from '../src/application/ops/ports.js'
+import type { OpsBatchNeopleKeyStore } from '../src/application/batch-neople-keys/ports.js'
+import type { OpsJobStore } from '../src/application/jobs/ports.js'
 
 type StoredJob = Omit<JobOverview, 'activeRun' | 'lastFinishedRun'>
 type StoredRun = JobRunRecord & { jobName: string }
@@ -410,26 +409,4 @@ test('store가 실패하면 원인을 응답에 넣지 않고 500을 준다', as
 
   assert.equal(response.status, 500)
   assert.deepEqual(await response.json(), { error: { code: 'INTERNAL_SERVER_ERROR' } })
-})
-
-test('공개 app에는 운영 경로가 없다', async (t) => {
-  const unused = async (): Promise<never> => {
-    throw new Error('ops route test must not call services')
-  }
-  const { app } = await createApiHttpApp({
-    search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
-    todayGrade: { fetchShopGrade: unused },
-    writeAccessLog: () => undefined
-  })
-  t.after(() => app.close())
-  await app.listen(0, '127.0.0.1')
-  const origin = await app.getUrl()
-
-  for (const path of ['/api/jobs', '/jobs', '/api/queues', '/queues', '/api/collection']) {
-    assert.equal((await fetch(`${origin}${path}`)).status, 404, path)
-  }
-  for (const path of ['/api/jobs/stats/pause', '/api/collection/requeue']) {
-    assert.equal((await fetch(`${origin}${path}`, json({}))).status, 404, path)
-  }
 })

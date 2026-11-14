@@ -215,6 +215,7 @@
         "**/*.cts",
         "**/*.tsx",
         "apps/api/**",
+        "apps/ops/**",
         "apps/web/**",
         "apps/internal/**"
       ],
@@ -416,7 +417,7 @@
       }
     },
     {
-      "includes": ["apps/api/src/**"],
+      "includes": ["apps/api/src/**", "apps/ops/src/**"],
       "linter": {
         "rules": {
           "style": {
@@ -426,7 +427,7 @@
       }
     },
     {
-      "includes": ["apps/api/src/domain/**"],
+      "includes": ["apps/api/src/domain/**", "apps/ops/src/domain/**"],
       "linter": {
         "rules": {
           "style": {
@@ -460,7 +461,7 @@
       }
     },
     {
-      "includes": ["apps/api/src/application/**"],
+      "includes": ["apps/api/src/application/**", "apps/ops/src/application/**"],
       "linter": {
         "rules": {
           "style": {
@@ -504,7 +505,7 @@
       }
     },
     {
-      "includes": ["apps/api/src/infrastructure/**"],
+      "includes": ["apps/api/src/infrastructure/**", "apps/ops/src/infrastructure/**"],
       "linter": {
         "rules": {
           "style": {
@@ -525,7 +526,7 @@
       }
     },
     {
-      "includes": ["apps/api/src/presentation/**"],
+      "includes": ["apps/api/src/presentation/**", "apps/ops/src/presentation/**"],
       "linter": {
         "rules": {
           "style": {
@@ -575,7 +576,7 @@
       }
     },
     {
-      "includes": ["apps/api/src/runtime/api-app.ts", "apps/api/src/runtime/ops-app.ts"],
+      "includes": ["apps/api/src/runtime/api-app.ts", "apps/ops/src/runtime/ops-app.ts"],
       "linter": {
         "rules": {
           "style": {

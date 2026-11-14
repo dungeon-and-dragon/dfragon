@@ -27,6 +27,7 @@ pnpm workspace 모노레포입니다.
 | 경로 | 내용 |
 | --- | --- |
 | [`apps/api`](apps/api/README.md) | Neople 오픈 API를 조회해 캐시하는 공개 캐릭터 API |
+| [`apps/ops`](apps/ops/README.md) | 운영 화면이 부르는 job, queue, 수집 대기열, batch Neople key 경로를 내는 운영 app |
 | [`apps/web`](apps/web/README.md) | 웹 앱의 화면, 브라우저 host, OCR과 검색 로직(dfragon.com) |
 | [`packages/database`](packages/database/README.md) | API의 PostgreSQL 설정, Prisma migration과 migration CLI |
 | [`packages/lib`](packages/lib/README.md) | API와 웹 앱이 함께 쓰는 입력 규칙, 게임 UI 좌표, 픽셀 계산 |
