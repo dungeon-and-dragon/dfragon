@@ -36,6 +36,7 @@ import {
   readSelectedContentClearJobFames,
   readSelectedContentClearJobScores,
   readSelectedContentClearTimes,
+  readTimelineQueueCounts,
   requestJobRun,
   requeueCollectionFailures,
   setBatchNeopleKeyEnabled,
@@ -72,7 +73,6 @@ import {
 import { readAdventureWeeklyClears } from '../infrastructure/database/adventure-weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import { createOpsHttpApp } from './ops-app.js'
-import type { ReadQueueCounts } from '../application/ops/ports.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
 type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
@@ -214,10 +214,7 @@ export async function createApiRuntime(configuration: RuntimeConfiguration) {
   return runtime
 }
 
-export function createOpsRuntime(
-  database: DatabaseConfiguration,
-  readQueueCounts: ReadQueueCounts
-) {
+export function createOpsRuntime(database: DatabaseConfiguration) {
   const client = createDatabaseClient(database)
 
   return createOpsHttpApp({
@@ -227,7 +224,7 @@ export function createOpsRuntime(
       requestRun: (name, args) => requestJobRun(client, name, args),
       setPaused: (name, paused) => setJobPaused(client, name, paused)
     },
-    readQueueCounts,
+    readQueueCounts: () => readTimelineQueueCounts(client),
     collection: {
       readSummary: () => readCollectionSummary(client),
       requeue: (failure) => requeueCollectionFailures(client, failure)
