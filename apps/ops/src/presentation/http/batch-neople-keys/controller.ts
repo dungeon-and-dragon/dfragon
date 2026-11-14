@@ -3,22 +3,11 @@ import type { BatchNeopleKeyService } from '../../../application/batch-neople-ke
 import { OpsFailure } from '../../../domain/failure.js'
 import { readJsonBody } from '../json-request.js'
 import {
-  type KeyIdParam,
   addBody,
-  keyIdParam,
+  readKeyId,
   toBatchNeopleKeyAdditionResponse,
   toBatchNeopleKeyListResponse
 } from './dto.js'
-
-function readKeyId(value: string): KeyIdParam {
-  const id = keyIdParam.safeParse(value)
-
-  if (!id.success) {
-    throw new OpsFailure('request')
-  }
-
-  return id.data
-}
 
 export class BatchNeopleKeyController {
   constructor(private readonly service: BatchNeopleKeyService) {}
