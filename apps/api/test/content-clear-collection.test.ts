@@ -52,7 +52,8 @@ import { formatResetDate, startOfResetWeek } from '../src/domain/seoul-time.js'
 
 const at = (time: string) => new Date(`${time}:00+09:00`)
 const NOW = at('2026-11-10T12:00')
-const CURRENT_WEEK = at('2026-11-05T06:00')
+const LAST_WEEK = at('2026-11-05T06:00')
+const COLLECTED_AT = at('2026-11-12T07:00')
 const NIGHTMARE_TITLE_ID = '070577c19e70e3ea723bbc924b111a12'
 
 // 합성 타임라인 기록이다. data는 운영 DB에서 본 Neople 응답의 필드 모양을 따른다.
@@ -257,12 +258,10 @@ const raidFirstWeeks = (): StoredClearPopulation[] =>
     storedPopulation(id, startOfResetWeek(releasedAt))
   )
 
-// 지난 주를 모두 마감한 상태다. 챌린지의 출시 주는 지금 주라 마감한 주가 없다.
+// 지난주 전까지 모두 마감한 상태다. 챌린지의 출시 주는 지난주라 마감한 주가 없다.
 const closedPastWeeks = (): StoredClearPopulation[] =>
   CLEAR_CONTENTS.flatMap(({ id, releasedAt }) =>
-    weeksBefore(startOfResetWeek(releasedAt), CURRENT_WEEK).map((week) =>
-      storedPopulation(id, week)
-    )
+    weeksBefore(startOfResetWeek(releasedAt), LAST_WEEK).map((week) => storedPopulation(id, week))
   )
 
 function collect(
@@ -299,7 +298,7 @@ const populationsOf = (state: ReturnType<typeof memoryClearStore>['state'], week
 const everyContent = (population: number, closed: boolean) =>
   CLEAR_CONTENTS.map(({ id }) => `${id}/${population}/${closed}`).sort()
 
-test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 지금 주를 한 번씩 요청하고 집계 대상 기록만 클리어 집계에 저장한다', async () => {
+test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 끝난 지난주를 한 번씩 요청하고 집계 대상 기록만 클리어 집계에 저장한다', async () => {
   const { state, store } = memoryClearStore(
     [character('a', 130_000), character('b', 125_000), character('c', 121_000)],
     closedPastWeeks()
@@ -316,38 +315,38 @@ test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 지금
     b: [michaelaNormal('2026-11-09 10:00', { ratio: 50 })]
   })
 
-  const summary = await collect(store, neople, NOW)
+  const summary = await collect(store, neople, COLLECTED_AT)
 
   assert.deepEqual(requests, [
     {
       characterId: 'a',
       code: '201,209,210,504',
       startDate: '20261105T0600',
-      endDate: '20261110T1200'
+      endDate: '20261112T0559'
     },
     {
       characterId: 'b',
       code: '201,209,210,504',
       startDate: '20261105T0600',
-      endDate: '20261110T1200'
+      endDate: '20261112T0559'
     },
     {
       characterId: 'c',
       code: '201,209,210,504',
       startDate: '20261105T0600',
-      endDate: '20261110T1200'
+      endDate: '20261112T0559'
     }
   ])
-  const week = CURRENT_WEEK.toISOString()
+  const week = LAST_WEEK.toISOString()
   assert.deepEqual(storedClears(state), [
     `diregie-hard/a/${week}/null`,
     `engraved-nightmare-1/a/${week}/null`,
     `michaela-hard/a/${week}/null`,
     `michaela-normal/b/${week}/50`
   ])
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(3, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(3, true))
   const stored = state.populations.get(
-    populationKey({ contentId: 'michaela-hard', weekStart: CURRENT_WEEK })
+    populationKey({ contentId: 'michaela-hard', weekStart: LAST_WEEK })
   )
   assert.equal(stored?.minFame, 104_292)
   assert.deepEqual(stored?.jobs, [
@@ -360,7 +359,7 @@ test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 지금
     }
   ])
   assert.deepEqual(summary, {
-    startedAt: NOW.toISOString(),
+    startedAt: COLLECTED_AT.toISOString(),
     characters: 3,
     requests: 3,
     clears: 4,
@@ -402,12 +401,12 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
     d: [michaelaHard('2026-11-08 21:15'), michaelaHard('2026-11-11 23:00')]
   })
 
-  await assert.rejects(collect(store, neople, at('2026-11-11T20:00')), {
+  await assert.rejects(collect(store, neople, COLLECTED_AT), {
     message: 'worker stopped'
   })
-  await collect(store, neople, at('2026-11-12T07:00'))
+  await collect(store, neople, at('2026-11-19T07:00'))
 
-  const ranges = [...BACKFILL_RANGES, '20261010T0600/20261111T2000']
+  const ranges = [...BACKFILL_RANGES, '20261010T0600/20261112T0559']
   const rangesOf = (characterId: string) =>
     requests
       .filter((request) => request.characterId === characterId)
@@ -417,8 +416,8 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
   assert.deepEqual(rangesOf('c'), [...ranges, ...ranges])
   assert.deepEqual(rangesOf('d'), ranges)
   assert.deepEqual(storedClears(state), [
-    `michaela-hard/c/${CURRENT_WEEK.toISOString()}/null`,
-    `michaela-hard/d/${CURRENT_WEEK.toISOString()}/null`,
+    `michaela-hard/c/${LAST_WEEK.toISOString()}/null`,
+    `michaela-hard/d/${LAST_WEEK.toISOString()}/null`,
     `nabel-hard/c/${at('2025-06-05T06:00').toISOString()}/null`
   ])
   assert.deepEqual(populationsOf(state, at('2026-10-29T06:00')), [
@@ -430,7 +429,7 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
     'nabel-hard/4/true',
     'nabel-normal/4/true'
   ])
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(4, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(4, true))
   assert.deepEqual(populationsOf(state, at('2026-11-12T06:00')), [])
   assert.equal(state.progress, undefined)
 })
@@ -453,7 +452,7 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
   )
   const { neople, requests } = fakeNeople({})
 
-  await collect(store, neople, NOW)
+  await collect(store, neople, COLLECTED_AT)
 
   assert.deepEqual(state.populationMinFames, [104_292])
   assert.deepEqual(
@@ -461,7 +460,7 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
     ['a', 'b', 'c', 'd']
   )
   const weekPopulation = (contentId: string) => {
-    const stored = state.populations.get(populationKey({ contentId, weekStart: CURRENT_WEEK }))
+    const stored = state.populations.get(populationKey({ contentId, weekStart: LAST_WEEK }))
     const jobs = stored?.jobs.map(({ jobGrowId, count }) => `${jobGrowId}/${count}`).sort()
 
     return { population: stored?.population, minFame: stored?.minFame, jobs }
@@ -493,7 +492,7 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
   )
   const { neople, requests } = fakeNeople({ b: [nabelHard('2025-06-05 21:00')] })
 
-  await collect(store, neople, NOW)
+  await collect(store, neople, COLLECTED_AT)
 
   assert.deepEqual(
     requests
@@ -506,7 +505,7 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
       '20260109T0600/20260408T0559',
       '20260408T0600/20260706T0559',
       '20260706T0600/20261003T0559',
-      '20261003T0600/20261110T1200'
+      '20261003T0600/20261112T0559'
     ]
   )
   assert.deepEqual(storedClears(state), [
@@ -522,13 +521,13 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
   }
 })
 
-test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보충 대상이 된다', async () => {
+test('목요일 06:00 뒤에 성공한 수집은 다음 목요일 06:00이 지나야 보충 대상이 된다', async () => {
   const { store } = memoryClearStore([])
   const job = createContentClearCollectionJob(
     new ContentClearCollectionService(store, {
       createFetchTimeline: createNeopleClearTimeline(fakeNeople({}).neople),
       readConcurrency: () => 1,
-      now: () => NOW,
+      now: () => COLLECTED_AT,
       pause: async () => {},
       report: () => {}
     })
@@ -540,7 +539,7 @@ test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보�
     registerJobs: unused,
     interruptRunningRuns: unused,
     isPaused: async () => false,
-    readLastScheduledSuccess: async () => at('2026-11-10T06:00'),
+    readLastScheduledSuccess: async () => at('2026-11-12T06:00'),
     startRun: unused,
     claimRequestedRun: unused,
     recordProgress: unused,
@@ -556,13 +555,13 @@ test('같은 날 06:00 뒤에 성공한 수집은 다음 06:00이 지나야 보�
       )
     ).map(({ name }) => name)
 
-  assert.deepEqual(await dueAt(at('2026-11-10T23:00')), [])
-  assert.deepEqual(await dueAt(at('2026-11-11T05:30')), [])
-  assert.deepEqual(await dueAt(at('2026-11-11T06:30')), ['content-clear-collection'])
+  assert.deepEqual(await dueAt(at('2026-11-18T23:00')), [])
+  assert.deepEqual(await dueAt(at('2026-11-19T05:30')), [])
+  assert.deepEqual(await dueAt(at('2026-11-19T06:30')), ['content-clear-collection'])
 })
 
-test('목요일 06:00 뒤 첫 수집은 지난주 끝까지 받아 그 주를 마감하고, 마감한 주는 다음 수집이 바꾸지 않는다', async () => {
-  const lastWeek = CURRENT_WEEK
+test('주 중간 수집은 진행 중인 주를 받지 않고, 목요일 06:00 뒤 수집이 지난주 끝까지 받아 마감하며, 마감한 주는 다음 수집이 바꾸지 않는다', async () => {
+  const lastWeek = LAST_WEEK
   const thisWeek = at('2026-11-12T06:00')
   const memory = memoryClearStore([character('a'), character('b')], closedPastWeeks())
   const timelines: Record<string, NeopleTimelineRow[]> = {
@@ -572,26 +571,25 @@ test('목요일 06:00 뒤 첫 수집은 지난주 끝까지 받아 그 주를 �
   const { neople, requests } = fakeNeople(timelines)
 
   await collect(memory.store, neople, at('2026-11-11T20:00'))
-  await collect(memory.store, neople, at('2026-11-12T07:00'))
+  assert.deepEqual(populationsOf(memory.state, lastWeek), [])
+  await collect(memory.store, neople, COLLECTED_AT)
   const closedClears = storedClears(memory.state)
   memory.state.population = [character('a'), character('b'), character('c')]
   timelines.c = [michaelaHard('2026-11-10 21:00'), michaelaHard('2026-11-12 21:00')]
-  await collect(memory.store, neople, at('2026-11-13T07:00'))
+  await collect(memory.store, neople, at('2026-11-19T07:00'))
 
   assert.deepEqual(
     requests.map(({ characterId, startDate, endDate }) => `${characterId}/${startDate}/${endDate}`),
     [
-      'a/20261105T0600/20261111T2000',
-      'b/20261105T0600/20261111T2000',
-      'a/20261105T0600/20261112T0700',
-      'b/20261105T0600/20261112T0700',
-      'a/20261112T0600/20261113T0700',
-      'b/20261112T0600/20261113T0700',
-      'c/20261112T0600/20261113T0700'
+      'a/20261105T0600/20261112T0559',
+      'b/20261105T0600/20261112T0559',
+      'a/20261112T0600/20261119T0559',
+      'b/20261112T0600/20261119T0559',
+      'c/20261112T0600/20261119T0559'
     ]
   )
   assert.deepEqual(populationsOf(memory.state, lastWeek), everyContent(2, true))
-  assert.deepEqual(populationsOf(memory.state, thisWeek), everyContent(3, false))
+  assert.deepEqual(populationsOf(memory.state, thisWeek), everyContent(3, true))
   const lastWeekClears = (clears: string[]) =>
     clears.filter((clear) => clear.includes(lastWeek.toISOString()))
   assert.deepEqual(lastWeekClears(storedClears(memory.state)), lastWeekClears(closedClears))
@@ -601,10 +599,10 @@ test('목요일 06:00 뒤 첫 수집은 지난주 끝까지 받아 그 주를 �
   ])
 })
 
-test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 주를 받아 지난 주를 마감하고, 마감한 출시 첫 주는 바꾸지 않으며, 집계 목록이 빈 주 없이 준다', async () => {
+test('출시 첫 주와 마감하지 않은 지난주만 저장한 레이드는 그 사이 모든 주를 받아 마감하고, 마감한 출시 첫 주는 바꾸지 않으며, 다 마감한 뒤 수집은 요청하지 않고, 집계 목록이 빈 주 없이 준다', async () => {
   const seeded = [
     ...raidFirstWeeks(),
-    ...raidFirstWeeks().map(({ contentId }) => storedPopulation(contentId, CURRENT_WEEK, false))
+    ...raidFirstWeeks().map(({ contentId }) => storedPopulation(contentId, LAST_WEEK, false))
   ]
   const { state, store } = memoryClearStore([character('a')], seeded)
   const { neople, requests } = fakeNeople({
@@ -619,20 +617,17 @@ test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 �
     ]
   })
 
-  await collect(store, neople, NOW)
+  await collect(store, neople, COLLECTED_AT)
   const firstRequests = requests.map(({ startDate, endDate }) => `${startDate}/${endDate}`)
   requests.length = 0
-  await collect(store, neople, at('2026-11-11T12:00'))
+  await collect(store, neople, at('2026-11-13T12:00'))
 
-  assert.deepEqual(firstRequests, [...BACKFILL_RANGES, '20261010T0600/20261110T1200'])
-  assert.deepEqual(
-    requests.map(({ startDate, endDate }) => `${startDate}/${endDate}`),
-    ['20261105T0600/20261111T1200']
-  )
+  assert.deepEqual(firstRequests, [...BACKFILL_RANGES, '20261010T0600/20261112T0559'])
+  assert.deepEqual(requests, [])
   assert.deepEqual(storedClears(state), [
     `diregie-hard/a/${at('2026-02-12T06:00').toISOString()}/null`,
     `michaela-hard/a/${at('2026-08-20T06:00').toISOString()}/null`,
-    `michaela-hard/a/${CURRENT_WEEK.toISOString()}/null`,
+    `michaela-hard/a/${LAST_WEEK.toISOString()}/null`,
     `nabel-hard/a/${at('2025-05-01T06:00').toISOString()}/null`
   ])
   for (const first of raidFirstWeeks()) {
@@ -643,17 +638,17 @@ test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 �
     'nabel-hard/1/true',
     'nabel-normal/1/true'
   ])
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(1, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(1, true))
 
   const reader: ClearStatsRepository = {
     ...emptyClearStatsRepository,
-    readCollectedAt: async () => NOW,
+    readCollectedAt: async () => COLLECTED_AT,
     readPopulations: async () => [...state.populations.values()]
   }
   const { contents } = await new ClearStatsService(reader, () => undefined).stats()
   for (const content of CLEAR_CONTENTS) {
     const releaseWeek = startOfResetWeek(content.releasedAt)
-    const expected = [...weeksBefore(releaseWeek, CURRENT_WEEK), CURRENT_WEEK].map((week) =>
+    const expected = [...weeksBefore(releaseWeek, LAST_WEEK), LAST_WEEK].map((week) =>
       formatResetDate(week)
     )
     assert.deepEqual(
@@ -664,26 +659,26 @@ test('출시 첫 주와 지금 주만 저장한 레이드는 그 사이 모든 �
   }
 })
 
-test('새 컨텐츠에 밀려난 레이드도 이번 주 클리어를 저장하고, 다음 주 첫 수집이 그 주를 마감한다', async () => {
+test('새 컨텐츠에 밀려난 레이드도 주가 끝날 때마다 그 주 클리어를 저장하고 마감한다', async () => {
   const nextWeek = at('2026-11-12T06:00')
   const { state, store } = memoryClearStore([character('a')], closedPastWeeks())
   const { neople, requests } = fakeNeople({
     a: [diregieHard('2026-11-08 21:00'), nabelHard('2026-11-12 21:00')]
   })
 
-  await collect(store, neople, NOW)
-  await collect(store, neople, at('2026-11-13T07:00'))
+  await collect(store, neople, COLLECTED_AT)
+  await collect(store, neople, at('2026-11-19T07:00'))
 
   assert.deepEqual(
     requests.map(({ startDate, endDate }) => `${startDate}/${endDate}`),
-    ['20261105T0600/20261110T1200', '20261105T0600/20261113T0700']
+    ['20261105T0600/20261112T0559', '20261112T0600/20261119T0559']
   )
   assert.deepEqual(storedClears(state), [
-    `diregie-hard/a/${CURRENT_WEEK.toISOString()}/null`,
+    `diregie-hard/a/${LAST_WEEK.toISOString()}/null`,
     `nabel-hard/a/${nextWeek.toISOString()}/null`
   ])
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(1, true))
-  assert.deepEqual(populationsOf(state, nextWeek), everyContent(1, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(1, true))
+  assert.deepEqual(populationsOf(state, nextWeek), everyContent(1, true))
 })
 
 test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Neople에 없는 캐릭터는 건너뛴다', async () => {
@@ -707,7 +702,7 @@ test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Ne
   )
   const pauses: number[] = []
 
-  const summary = await collect(store, neople, NOW, pauses)
+  const summary = await collect(store, neople, COLLECTED_AT, pauses)
 
   assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS])
   assert.deepEqual(
@@ -718,9 +713,9 @@ test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Ne
     storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
     ['michaela-hard/a', 'michaela-hard/b']
   )
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(3, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(3, true))
   assert.deepEqual(summary, {
-    startedAt: NOW.toISOString(),
+    startedAt: COLLECTED_AT.toISOString(),
     characters: 3,
     requests: 4,
     clears: 2,
@@ -739,7 +734,7 @@ function collectGroup(
   const summary = new ContentClearCollectionService(store, {
     createFetchTimeline: createNeopleClearTimeline(neople),
     readConcurrency: () => concurrency,
-    now: () => NOW,
+    now: () => COLLECTED_AT,
     pause: async (ms) => {
       pauses.push(ms)
     },
@@ -769,7 +764,7 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
   const { summary, pauses, reports } = collectGroup(store, neople, 3)
 
   assert.deepEqual(await summary, {
-    startedAt: NOW.toISOString(),
+    startedAt: COLLECTED_AT.toISOString(),
     characters: 4,
     requests: 10,
     clears: 3,
@@ -793,7 +788,7 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
     reports.filter(([code]) => code === 'CONTENT_CLEAR_CHARACTER_SKIPPED'),
     [['CONTENT_CLEAR_CHARACTER_SKIPPED', { position: 1 }]]
   )
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(4, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(4, true))
   assert.equal(state.progress, undefined)
 })
 
@@ -817,7 +812,7 @@ test('묶음 전체가 unavailable이면 몇 번이 이어져도 건너뛰지 �
   const { summary, pauses } = collectGroup(memory.store, neople, 2)
 
   assert.deepEqual(await summary, {
-    startedAt: NOW.toISOString(),
+    startedAt: COLLECTED_AT.toISOString(),
     characters: 2,
     requests: 12,
     clears: 2,
@@ -957,7 +952,7 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
     ['a', 'b', 'c', 'd'].map((id) => character(id)),
     closedPastWeeks()
   )
-  const clears = collect(store, neople, NOW).finally(() => {
+  const clears = collect(store, neople, COLLECTED_AT).finally(() => {
     settled.clears = true
   })
   // 지연 없는 timer도 tick이 있어야 돌므로, 지금 시각의 timer를 먼저 돌린 뒤 시계를 넘긴다.
@@ -1051,7 +1046,7 @@ function collectWithKeys(
   const summary = new ContentClearCollectionService(store, {
     createFetchTimeline,
     readConcurrency: pool.readConcurrency,
-    now: () => NOW,
+    now: () => COLLECTED_AT,
     pause,
     report: (code, details) => {
       reports.push([code, details])
@@ -1089,7 +1084,7 @@ test('key 3개에 key당 동시 수가 32이면 클리어 수집 묶음이 96명
 })
 
 test('한 key가 API002를 받으면 그 요청은 다른 key로 받아 묶음이 쉬지 않고, 그 key는 60초 동안 새 요청을 받지 않는다', async (t) => {
-  t.mock.timers.enable({ apis: ['Date'], now: NOW.getTime() })
+  t.mock.timers.enable({ apis: ['Date'], now: COLLECTED_AT.getTime() })
   const { store } = memoryClearStore(syntheticPopulation(8), closedPastWeeks())
   let limited: { characterId: string; requestsBefore: number } | undefined
   const { keys, pool, requests } = fakeBatchKeys([1, 2], 2, (key, characterId) => {
@@ -1123,7 +1118,7 @@ test('한 key가 API002를 받으면 그 요청은 다른 key로 받아 묶음�
 })
 
 test('모든 key가 API002를 받으면 1분 쉬고 같은 묶음을 다시 보낸다', async (t) => {
-  t.mock.timers.enable({ apis: ['Date'], now: NOW.getTime() })
+  t.mock.timers.enable({ apis: ['Date'], now: COLLECTED_AT.getTime() })
   const { store } = memoryClearStore(syntheticPopulation(1), closedPastWeeks())
   const limitedKeys = new Set<string>()
   const { pool, requests } = fakeBatchKeys([1, 2], 1, (key) => {
@@ -1261,9 +1256,9 @@ test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온
     ]
   })
 
-  const summary = await collect(store, neople, NOW)
+  const summary = await collect(store, neople, COLLECTED_AT)
 
-  const week = CURRENT_WEEK.toISOString()
+  const week = LAST_WEEK.toISOString()
   const recordAt = (time: string) => `${at(time).toISOString()}/${week}`
   assert.deepEqual(storedRecords(state), [
     `legion/a/베누스/-/-/-/${recordAt('2026-11-08T22:00')}`,
@@ -1281,7 +1276,7 @@ test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온
     `michaela-hard/a/${week}/null`,
     `michaela-normal/a/${week}/null`
   ])
-  assert.deepEqual(populationsOf(state, CURRENT_WEEK), everyContent(2, false))
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(2, true))
   assert.equal(summary.records, 9)
   assert.equal(summary.clears, 4)
 })

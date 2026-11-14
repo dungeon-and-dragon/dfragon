@@ -830,7 +830,7 @@ try {
         "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'character-stats:0 0 * * *:true:object:false,content-clear-collection:0 6 * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,skill-adoption:0 0 * * *:true:object:false'
+    'character-stats:0 0 * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,skill-adoption:0 0 * * *:true:object:false'
   )
   assert.equal(
     (
