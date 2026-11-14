@@ -115,6 +115,19 @@ export type {
   ContentClearPopulationInput,
   StoredClearPopulation
 } from './content-clear.js'
+export {
+  readContentClearOverviewSampleWeeks,
+  readContentClearOverviewSamples,
+  readContentClearWeekSampleWeeks,
+  readContentClearWeekSamples,
+  recordContentClearOverviewSamples,
+  recordContentClearWeekSamples
+} from './content-clear-week-sample.js'
+export type {
+  ClearContentWeek,
+  ClearContentWeekSamples,
+  ClearOverviewWeekSamples
+} from './content-clear-week-sample.js'
 export type { DatabaseClient, DatabasePoolOptions } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
