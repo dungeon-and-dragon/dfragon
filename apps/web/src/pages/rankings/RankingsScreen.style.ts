@@ -31,6 +31,8 @@ export const styles = stylex.create({
     padding: 0,
     listStyle: 'none'
   },
+  // 필터를 바꿔 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다.
+  pending: { minHeight: '100vh' },
   state: {
     margin: 0,
     paddingBlock: space.s16,

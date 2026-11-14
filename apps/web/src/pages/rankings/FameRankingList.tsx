@@ -18,7 +18,7 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
     case 'loading':
       return (
         <ListBox name={name}>
-          <div aria-busy="true">
+          <div aria-busy="true" {...stylex.props(styles.pending)}>
             <span role="status" {...stylex.props(shapes.srOnly)}>
               랭킹을 받는 중입니다.
             </span>
