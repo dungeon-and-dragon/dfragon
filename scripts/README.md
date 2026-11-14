@@ -37,6 +37,7 @@ pnpm verify
 | --- | --- |
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
+| 공용 HTTP package | `pnpm --filter @dfragon/http-server run --sequential '/^(lint\|test)$/'`와 API 행 |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
 | 운영 화면 | `pnpm --filter @dfragon/internal run --sequential '/^(test\|lint\|build)$/'` |
 | 루트 도구 | `pnpm test:tooling`과 고친 스크립트의 `node --check` |
