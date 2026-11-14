@@ -644,6 +644,40 @@ test('전체 개요는 마지막 수집 시각이 같으면 다시 읽지 않고
   }
 })
 
+// 운영 DB에서 여섯 읽기를 함께 보내면 병렬 worker의 공유 메모리가 모자라 실패했다.
+test('전체 개요는 한 주의 모든 컨텐츠를 읽는 쿼리를 동시에 보내지 않는다', async () => {
+  let running = 0
+  let maxRunning = 0
+  const reading = async (): Promise<never[]> => {
+    running += 1
+    maxRunning = Math.max(maxRunning, running)
+    await new Promise((resolve) => setImmediate(resolve))
+    running -= 1
+
+    return []
+  }
+
+  const { app, origin } = await listen(
+    fakeReader({
+      readFames: reading,
+      readJobFames: reading,
+      readScores: reading,
+      readJobScores: reading,
+      readCoClears: reading,
+      readRaidTimes: reading
+    })
+  )
+
+  try {
+    const { status } = await getJson(origin, '/stats/clears/overview')
+
+    assert.equal(status, 200)
+    assert.equal(maxRunning, 1)
+  } finally {
+    await app.close()
+  }
+})
+
 // reader 행이 식별 필드를 함께 가져와도 응답으로 옮기지 않는지 본다. 값은 합성이다.
 const identifying = {
   serverId: 'synthetic-server',
