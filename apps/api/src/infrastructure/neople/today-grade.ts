@@ -1,7 +1,7 @@
+import { forwardCause } from '@dfragon/lib/error-chain'
 import { type NeopleClient, NeopleRequestFailure } from '@dfragon/neople'
 import type { FetchShopGrade } from '../../application/today-grade/ports.js'
 import { TodayGradeFailure } from '../../domain/today-grade/failure.js'
-import { forwardCause } from '../../domain/error-chain.js'
 
 export function createNeopleShopGrade(neople: NeopleClient): FetchShopGrade {
   return async (itemId, signal) => {
