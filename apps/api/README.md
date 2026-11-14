@@ -43,7 +43,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/runtime/api-services.ts` | 공개 app 기능의 Service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
 | `src/runtime/routes/api.ts` | 기능의 Controller를 만들어 공개 app의 경로에 붙입니다 |
 
-모험단, 길드 조회(`adventure-guild`), 캐릭터 검색(`character-search`), 캐릭터 상세(`character-detail`), 캐릭터 카탈로그(`character-catalog`), 캐릭터 이미지(`character-image`), 오늘의 등급(`today-grade`), 캐릭터 타임라인(`character-timeline`), 캐릭터 기본 정보 기록(`character-basic`)이 이 형태입니다.
+모험단, 길드 조회(`adventure-guild`), 캐릭터 검색(`character-search`), 캐릭터 상세(`character-detail`), 캐릭터 카탈로그(`character-catalog`), 캐릭터 이미지(`character-image`), 오늘의 등급(`today-grade`), 캐릭터 타임라인(`character-timeline`), 캐릭터 기본 정보 기록(`character-basic`), 랭킹과 통계 조회(`ranking-stats`), 클리어 집계 조회(`content-clears`)가 이 형태입니다.
 worker의 job 실행과 예약, 실행 이력 정리(`jobs`), 클리어 기록 수집과 지난 기록 받기(`content-clears`), 통계 job과 스킬 스타일 수집(`ranking-stats`), 점수 계산(`character-score`)도 Controller와 DTO 없이 Service, Repository class 형태이며, Service는 기존 use case 파일에 두고 job 정의(`defineJob`)의 `run`이 Service를 부릅니다.
 나머지 기능은 아직 `create<기능>Service`, `create<기능>Routes` 함수와 `ports.ts`의 Store, Reader 형태로 남아 있습니다.
 
