@@ -26,26 +26,23 @@ import {
   readJobSkillAdoptionSnapshot,
   readSelectedContentClearJobFames,
   readSelectedContentClearJobScores,
-  readSelectedContentClearTimes,
-  writeTimelineQueueCounts
+  readSelectedContentClearTimes
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '../application/character-catalog/service.js'
 import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
-import { createDatabaseCharacterBasicStore } from '../infrastructure/database/character-basic.js'
-import { backfillEnhancements } from '../application/character-timeline/backfill.js'
+import { DatabaseCharacterBasicRepository } from '../infrastructure/database/character-basic.js'
+import { EnhancementBackfillService } from '../application/character-timeline/backfill.js'
 import {
-  createDatabaseEnhancementBackfillStore,
-  createDatabaseSeasonBackfillStore,
-  createDatabaseTimelineStore
-} from '../infrastructure/database/character-timeline-store.js'
-import { backfillSeason } from '../application/character-timeline/season-backfill.js'
-import {
-  readCharacterTimeline,
-  readTimelinePage
-} from '../infrastructure/database/character-timeline-read.js'
+  DatabaseCharacterTimelineRepository,
+  DatabaseEnhancementBackfillRepository,
+  DatabaseSeasonBackfillRepository,
+  DatabaseTimelineQueueCountRepository,
+  DatabaseTimelineSyncRepository
+} from '../infrastructure/database/character-timeline.js'
+import { SeasonBackfillService } from '../application/character-timeline/season-backfill.js'
 import { ENHANCEMENT_CODES } from '../domain/character-timeline/project.js'
-import { syncCharacterTimeline } from '../application/character-timeline/sync.js'
+import { TimelineSyncService } from '../application/character-timeline/sync.js'
 import { createNeopleCatalog } from '../infrastructure/neople/character-catalog.js'
 import { createNeopleCharacterDetails } from '../infrastructure/neople/character-detail.js'
 import { createNeopleCharacterSearch } from '../infrastructure/neople/character-search.js'
@@ -85,33 +82,41 @@ function createDatabaseSubscribers(
   }
   const client = createDatabaseClient(database)
   const clearStatsClient = createDatabaseClient(database, CLEAR_STATS_POOL)
-  const basicStore = createDatabaseCharacterBasicStore(client)
+  const characterBasic = new DatabaseCharacterBasicRepository(client)
   const characterSearch = new DatabaseCharacterSearchRepository(client)
   const fetchTimeline = createNeopleCharacterTimeline(neople)
-  const store = createDatabaseTimelineStore(client)
-  const backfill = {
-    fetchTimeline: createNeopleCharacterTimeline(neople, ENHANCEMENT_CODES),
-    store: createDatabaseEnhancementBackfillStore(client)
-  }
-  const seasonBackfill = { fetchTimeline, store: createDatabaseSeasonBackfillStore(client) }
+  const timelineRead = new DatabaseCharacterTimelineRepository(client)
+  const timelineQueueCounts = new DatabaseTimelineQueueCountRepository(client)
+  const timelineSync = new TimelineSyncService(
+    new DatabaseTimelineSyncRepository(client),
+    fetchTimeline
+  )
+  const enhancementBackfill = new EnhancementBackfillService(
+    new DatabaseEnhancementBackfillRepository(client),
+    createNeopleCharacterTimeline(neople, ENHANCEMENT_CODES)
+  )
+  const seasonBackfill = new SeasonBackfillService(
+    new DatabaseSeasonBackfillRepository(client),
+    fetchTimeline
+  )
 
   // 클리어 통계는 clearStatsClient, 나머지 option은 client를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 둘 다 닫는다.
 
   return {
     timeline: {
-      sync: (character) => syncCharacterTimeline(character, { fetchTimeline, store }),
-      backfillEnhancements: (character) => backfillEnhancements(character, backfill),
-      backfillSeason: (job) => backfillSeason(job, seasonBackfill),
-      read: (character) => readCharacterTimeline(client, character, new Date()),
-      readPage: (character, list, before) => readTimelinePage(client, character, list, before),
-      writeQueueCounts: (counts) => writeTimelineQueueCounts(client, counts),
+      sync: (character) => timelineSync.sync(character),
+      backfillEnhancements: (character) => enhancementBackfill.backfill(character),
+      backfillSeason: (job) => seasonBackfill.backfill(job),
+      read: (character) => timelineRead.readTimeline(character),
+      readPage: (character, list, before) => timelineRead.readPage(character, list, before),
+      writeQueueCounts: (counts) => timelineQueueCounts.writeCounts(counts),
       close: async () => {
         await Promise.all([client.$disconnect(), clearStatsClient.$disconnect()])
       }
     },
-    recordCharacterBasic: basicStore.recordBasic,
-    recordCharacterSkillStyle: basicStore.recordSkillStyle,
-    recordCharacterScore: basicStore.recordScore,
+    recordCharacterBasic: (basic) => characterBasic.recordBasic(basic),
+    recordCharacterSkillStyle: (style) => characterBasic.recordSkillStyle(style),
+    recordCharacterScore: (score) => characterBasic.recordScore(score),
     readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: {

@@ -7,12 +7,8 @@ import {
   emptyAdventureGuildRepository,
   noSeasonBackfill
 } from '../application/adventure-guild/service.js'
-import type {
-  RecordCharacterBasic,
-  RecordCharacterScore,
-  RecordCharacterSkillStyle
-} from '../application/character-basic/ports.js'
-import { createCharacterBasicRecorder } from '../application/character-basic/service.js'
+import type { CharacterBasicRepository } from '../application/character-basic/repository.js'
+import { CharacterBasicService } from '../application/character-basic/service.js'
 import {
   type CharacterDetailDependencies,
   CharacterDetailService
@@ -25,13 +21,17 @@ import {
   CharacterSearchService,
   emptyCharacterSearchRepository
 } from '../application/character-search/service.js'
-import type { ReadTimelinePage, WriteQueueCounts } from '../application/character-timeline/ports.js'
 import { createTimelineSyncQueue } from '../application/character-timeline/queue.js'
 import { startQueueCountsWriter } from '../application/character-timeline/queue-counts.js'
+import type {
+  CharacterTimelineRepository,
+  TimelineQueueCountRepository
+} from '../application/character-timeline/repository.js'
 import { createSeasonBackfillQueue } from '../application/character-timeline/season-backfill.js'
 import {
-  createCharacterTimelineService,
-  emptyCharacterTimelineService
+  CharacterTimelineService,
+  emptyCharacterTimelineRepository,
+  noTimelineSync
 } from '../application/character-timeline/service.js'
 import type { ClearStatsReader } from '../application/content-clears/ports.js'
 import {
@@ -46,7 +46,6 @@ import {
 import type { FetchShopGrade } from '../application/today-grade/ports.js'
 import { TodayGradeService } from '../application/today-grade/service.js'
 import { CharacterFetched } from '../domain/character-events.js'
-import type { CharacterTimeline } from '../domain/character-timeline/project.js'
 import type { SeasonBackfillJob } from '../domain/character-timeline/season-backfill.js'
 import { readApiBuildInfo } from '../infrastructure/build-info.js'
 import {
@@ -60,10 +59,10 @@ export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>
   readonly backfillEnhancements: (character: TimelineCharacter) => Promise<void>
   readonly backfillSeason: (job: SeasonBackfillJob) => Promise<void>
-  readonly read: (character: TimelineCharacter) => Promise<CharacterTimeline>
-  readonly readPage: ReadTimelinePage
+  readonly read: CharacterTimelineRepository['readTimeline']
+  readonly readPage: CharacterTimelineRepository['readPage']
   // 있으면 queue의 대기, 처리 중 수를 주기마다 쓴다. 운영 경로가 이 값을 읽는다.
-  readonly writeQueueCounts?: WriteQueueCounts
+  readonly writeQueueCounts?: TimelineQueueCountRepository['writeCounts']
   // 진행 중인 동기화를 기다리지 않고 닫는다.
   readonly close: () => Promise<void>
 }
@@ -75,9 +74,9 @@ export interface ApiServicesOptions {
   }
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'publishCharacterFetched'>
   readonly timeline?: TimelineSyncOptions
-  readonly recordCharacterBasic?: RecordCharacterBasic
-  readonly recordCharacterSkillStyle?: RecordCharacterSkillStyle
-  readonly recordCharacterScore?: RecordCharacterScore
+  readonly recordCharacterBasic?: CharacterBasicRepository['recordBasic']
+  readonly recordCharacterSkillStyle?: CharacterBasicRepository['recordSkillStyle']
+  readonly recordCharacterScore?: CharacterBasicRepository['recordScore']
   readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsReader
   readonly clearStats?: ClearStatsReader
@@ -103,10 +102,13 @@ function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCod
     )
   }
 
-  return {
-    queues,
-    service: createCharacterTimelineService(queues.sync, timeline.read, timeline.readPage)
+  const repository: CharacterTimelineRepository = {
+    readTimeline: timeline.read,
+    readPage: timeline.readPage
   }
+  const service = new CharacterTimelineService(repository, queues.sync)
+
+  return { queues, service }
 }
 
 type TimelineQueues = ReturnType<typeof createTimelineSync>['queues']
@@ -189,16 +191,18 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   }
 
   if (recordCharacterBasic !== undefined) {
-    subscribers.push(
-      createCharacterBasicRecorder({
-        recordBasic: recordCharacterBasic,
-        recordSkillStyle: options.recordCharacterSkillStyle,
-        recordScore: options.recordCharacterScore,
-        parseBasic: parseCharacterBasic,
-        parseSkillStyle: parseCharacterSkillStyle,
-        reportFailure: reportCode
-      })
-    )
+    // 스킬 스타일이나 점수 기록 함수를 주지 않은 app은 그 기록을 하지 않는다.
+    const repository: CharacterBasicRepository = {
+      recordBasic: recordCharacterBasic,
+      recordSkillStyle: options.recordCharacterSkillStyle ?? (async () => undefined),
+      recordScore: options.recordCharacterScore ?? (async () => undefined)
+    }
+    const characterBasic = new CharacterBasicService(repository, {
+      parseBasic: parseCharacterBasic,
+      parseSkillStyle: parseCharacterSkillStyle,
+      reportFailure: reportCode
+    })
+    subscribers.push((event) => characterBasic.record(event))
   }
 
   const { searchCharacters, readAdventureNames } = options.search
@@ -239,7 +243,9 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   const characterImage = new CharacterImageService(
     options.fetchCharacterImage ?? createNeopleCharacterImage()
   )
-  const timelineService = timelineSync?.service ?? emptyCharacterTimelineService
+  const timelineService =
+    timelineSync?.service ??
+    new CharacterTimelineService(emptyCharacterTimelineRepository, noTimelineSync)
   const adventureGuild = createAdventureGuild(options.adventureGuild, queues)
   const rankingStats = createRankingStatsService(options.rankingStats ?? emptyRankingStatsReader)
   const clearStats = createClearStatsService(options.clearStats ?? emptyClearStatsReader, () =>
