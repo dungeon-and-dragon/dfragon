@@ -1,13 +1,14 @@
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
 import { CharacterCollectionFailure } from '../../domain/character-collection/failure.js'
-import type { CollectionStore, FetchCharacterBasic } from './ports.js'
+import type { FetchCharacterBasic } from './ports.js'
+import type { CollectionRepository } from './repository.js'
 
 export type CollectionResult = 'recorded' | 'failed' | 'unavailable'
 
 export async function collectCharacter(
   character: CollectedCharacter,
   fetchBasic: FetchCharacterBasic,
-  store: CollectionStore
+  repository: Pick<CollectionRepository, 'recordBasic' | 'recordFailure'>
 ): Promise<CollectionResult> {
   let basic: CharacterBasicInput
   try {
@@ -21,11 +22,13 @@ export async function collectCharacter(
     if (error.kind === 'unavailable' || error.kind === 'timeout') {
       return 'unavailable'
     }
-    await store.recordFailure(character, `neople-${error.kind}`)
+
+    await repository.recordFailure(character, `neople-${error.kind}`)
 
     return 'failed'
   }
-  await store.recordBasic(basic)
+
+  await repository.recordBasic(basic)
 
   return 'recorded'
 }

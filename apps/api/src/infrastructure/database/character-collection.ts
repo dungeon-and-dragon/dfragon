@@ -1,4 +1,6 @@
 import {
+  type CharacterBasicInput,
+  type CollectedCharacter,
   type DatabaseClient,
   enqueueCollectedCharacters,
   recordCharacterBasic,
@@ -6,18 +8,26 @@ import {
   takeCollectionBatch
 } from '@dfragon/database'
 import type {
-  CollectionStore,
-  EnqueueCharacters
-} from '../../application/character-collection/ports.js'
+  CollectionFailure,
+  CollectionRepository
+} from '../../application/character-collection/repository.js'
 
-export function createDatabaseCollectionStore(client: DatabaseClient): CollectionStore {
-  return {
-    takeBatch: (limit) => takeCollectionBatch(client, limit),
-    recordBasic: (basic) => recordCharacterBasic(client, basic),
-    recordFailure: (character, failure) => recordCollectionFailure(client, character, failure)
+export class DatabaseCollectionRepository implements CollectionRepository {
+  constructor(private readonly client: DatabaseClient) {}
+
+  takeBatch(limit: number): Promise<CollectedCharacter[]> {
+    return takeCollectionBatch(this.client, limit)
   }
-}
 
-export function createDatabaseEnqueue(client: DatabaseClient): EnqueueCharacters {
-  return (characters) => enqueueCollectedCharacters(client, characters)
+  recordBasic(basic: CharacterBasicInput): Promise<void> {
+    return recordCharacterBasic(this.client, basic)
+  }
+
+  recordFailure(character: CollectedCharacter, failure: CollectionFailure): Promise<void> {
+    return recordCollectionFailure(this.client, character, failure)
+  }
+
+  enqueue(characters: readonly CollectedCharacter[]): Promise<void> {
+    return enqueueCollectedCharacters(this.client, characters)
+  }
 }
