@@ -579,6 +579,42 @@ test('점수 저장이 실패해도 상세 응답은 그대로이고 실패 code
   assert.deepEqual(codes, ['CHARACTER_SCORE_RECORD_FAILED'])
 })
 
+test('스킬 스타일과 점수 기록 함수 없이 구성하면 기본 정보만 저장하고 실패 code를 남기지 않는다', {
+  timeout: 10_000
+}, async (t) => {
+  const recorded: CharacterBasicInput[] = []
+  const codes: string[] = []
+  let savedBasic!: () => void
+  const basicSaved = new Promise<void>((resolve) => {
+    savedBasic = resolve
+  })
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields, skillStyle)),
+    ...scoring(() => engineResult),
+    recordCharacterBasic: async (basic) => {
+      recorded.push(basic)
+      savedBasic()
+    },
+    writeAccessLog: (line) => {
+      const { code } = JSON.parse(line)
+      if (code !== undefined) {
+        codes.push(code)
+      }
+    }
+  })
+  t.after(() => app.close())
+
+  const { status, body } = await getDetails(origin)
+  await basicSaved
+  // 스킬 스타일, 점수 저장은 기본 정보 저장 다음 차례에 시작하므로, 그 차례가 지나도록 한 번 넘긴다.
+  await new Promise((resolve) => setTimeout(resolve, 10))
+
+  assert.equal(status, 200)
+  assert.equal(body.card.score.value, engineResult.score)
+  assert.deepEqual(recorded, [basicFields])
+  assert.deepEqual(codes, [])
+})
+
 test('타임라인 동기화 요청이 예외를 던져도 상세 응답은 그대로이고 기본 정보를 저장한다', async (t) => {
   const payloads = payloadsWith(basicFields)
   const recorded: CharacterBasicInput[] = []
