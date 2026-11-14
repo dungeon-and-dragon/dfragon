@@ -54,13 +54,15 @@ it('선택한 기본 정보와 명성 0을 보존하고 main이 넘기지 않은
   expect(toCharacterCard({ ...summary, serverId: 'unknown' })).toBeUndefined()
 })
 
-it('남성 크루세이더 카드의 전직은 카드 역할을 붙이고, 역할을 모르면 성별을 붙인다', () => {
+it('남성 크루세이더 카드의 전직은 카드 역할을 붙이고 뒤에 직업명을 붙인다', () => {
   const maleCrusader = { ...summary, jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
 
-  expect(toCharacterCard({ ...maleCrusader, card: dealerCard })?.job).toBe('크루세이더(딜러)')
-  expect(toCharacterCard({ ...maleCrusader, card: null })?.job).toBe('크루세이더 (남)')
+  expect(toCharacterCard({ ...maleCrusader, card: dealerCard })?.job).toBe(
+    '크루세이더(딜러) 프리스트(남)'
+  )
+  expect(toCharacterCard({ ...maleCrusader, card: null })?.job).toBe('크루세이더 프리스트(남)')
   expect(toCharacterCard({ ...maleCrusader, jobName: '프리스트(여)', card: dealerCard })?.job).toBe(
-    '크루세이더 (여)'
+    '크루세이더 프리스트(여)'
   )
 })
 
