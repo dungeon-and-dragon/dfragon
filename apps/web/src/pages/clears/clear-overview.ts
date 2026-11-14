@@ -195,13 +195,6 @@ const PERIOD_WEEKS: Readonly<Record<RatePeriod, number>> = {
   all: Number.POSITIVE_INFINITY
 }
 
-export type RateStage = 'hard' | 'normal'
-
-export const RATE_STAGES: readonly { stage: RateStage; label: ClearStage }[] = [
-  { stage: 'hard', label: '하드' },
-  { stage: 'normal', label: '일반' }
-]
-
 const AXIS_STEP = 4
 
 function axisTickOf(count: number): (weekStart: string, index: number) => string | null {
@@ -221,8 +214,7 @@ export function clearRateChart(
   contents: readonly ClearContent[],
   weeks: readonly OverviewWeek[],
   weekStart: string,
-  period: RatePeriod,
-  stage: RateStage
+  period: RatePeriod
 ): RateChart {
   const shown = weeks
     .filter((week) => week.weekStart <= weekStart)
@@ -235,7 +227,6 @@ export function clearRateChart(
 
     return { key: start, title, tick }
   })
-  const wanted = RATE_STAGES.find((option) => option.stage === stage)?.label
 
   const rankOf = (group: readonly GroupedContent[]) => {
     const first = group[0]
@@ -248,33 +239,31 @@ export function clearRateChart(
 
   const series = groupsOf(contents)
     .toSorted((left, right) => rankOf(left) - rankOf(right))
-    .flatMap((group) => {
-      const picked = group.find(
-        ({ content, place }) =>
-          content.kind !== 'challenge' && (place.stage === null || place.stage === wanted)
-      )
-      if (picked === undefined) {
-        return []
-      }
-
-      const { content, place } = picked
-      const values = shown.map((start) => {
-        const week = weekOf(content, start)
-        if (week === undefined) {
-          return null
+    .flatMap((group) =>
+      group.flatMap(({ content, place }) => {
+        if (content.kind === 'challenge') {
+          return []
         }
 
-        const rate = rateOf(week)
-        if (rate === null) {
-          return null
-        }
+        const values = shown.map((start) => {
+          const week = weekOf(content, start)
+          if (week === undefined) {
+            return null
+          }
 
-        return rate * 100
+          const rate = rateOf(week)
+          if (rate === null) {
+            return null
+          }
+
+          return rate * 100
+        })
+        const name = contentLabelOf(content)
+        const faded = place.stage === '일반'
+
+        return [{ key: content.id, name, color: place.group.color, faded, values }]
       })
-      const name = contentLabelOf(content)
-
-      return [{ key: content.id, name, color: place.group.color, values }]
-    })
+    )
 
   return { x, series }
 }

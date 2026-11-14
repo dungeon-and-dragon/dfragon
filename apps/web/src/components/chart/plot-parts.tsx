@@ -17,9 +17,15 @@ export function ChartTooltip({
     <span ref={tooltipRef} aria-hidden="true" {...stylex.props(styles.tooltip)}>
       {title != null && <span {...stylex.props(styles.tooltipRange)}>{title}</span>}
       <span {...stylex.props(plotStyles.tooltipRows)}>
-        {rows.map(({ key, name, color, value }) => (
+        {rows.map(({ key, name, color, faded, value }) => (
           <span key={key} {...stylex.props(plotStyles.tooltipRow)}>
-            <i {...stylex.props(plotStyles.swatch, plotStyles.background(color))} />
+            <i
+              {...stylex.props(
+                plotStyles.swatch,
+                plotStyles.background(color),
+                faded && plotStyles.faded
+              )}
+            />
             <span {...stylex.props(plotStyles.tooltipName)}>{name}</span>
             <span {...stylex.props(plotStyles.tooltipValue)}>{value}</span>
           </span>

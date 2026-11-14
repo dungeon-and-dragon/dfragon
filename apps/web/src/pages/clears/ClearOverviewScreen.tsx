@@ -26,9 +26,7 @@ import {
   type OverviewWeek,
   overviewWeeks,
   RATE_PERIODS,
-  RATE_STAGES,
   type RatePeriod,
-  type RateStage,
   weekSummaryOf
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
@@ -163,7 +161,6 @@ function Overview({
 }
 
 const PERIOD_CHOICES = RATE_PERIODS.map(({ period, label }) => ({ value: period, label }))
-const STAGE_CHOICES = RATE_STAGES.map(({ stage, label }) => ({ value: stage, label }))
 
 function ClearRatePanel({
   contents,
@@ -175,17 +172,13 @@ function ClearRatePanel({
   weekStart: string
 }): React.JSX.Element {
   const [period, setPeriod] = useState<RatePeriod>('half')
-  const [stage, setStage] = useState<RateStage>('hard')
-  const { x, series } = clearRateChart(contents, weeks, weekStart, period, stage)
+  const { x, series } = clearRateChart(contents, weeks, weekStart, period)
 
   return (
     <Panel
       name="주간 클리어율"
       controls={
-        <>
-          <ChoiceGroup label="기간" choices={PERIOD_CHOICES} value={period} onChange={setPeriod} />
-          <ChoiceGroup label="단계" choices={STAGE_CHOICES} value={stage} onChange={setStage} />
-        </>
+        <ChoiceGroup label="기간" choices={PERIOD_CHOICES} value={period} onChange={setPeriod} />
       }
     >
       <LineChart
