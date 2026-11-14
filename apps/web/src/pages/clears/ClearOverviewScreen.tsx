@@ -148,6 +148,7 @@ function Overview({
       {hasRateValues(contents) && (
         <ClearRatePanel contents={contents} weeks={weeks} weekStart={weekStart} />
       )}
+      {result.status === 'loading' && <div aria-hidden="true" {...stylex.props(layout.pending)} />}
       {result.status === 'error' && (
         <p role="alert" {...stylex.props(layout.state)}>
           {result.message}
