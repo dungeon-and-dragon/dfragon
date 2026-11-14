@@ -138,7 +138,8 @@ export class ClearStatsService {
   }
 
   private async loadSummary(): Promise<ClearSummary> {
-    const populations = await this.repository.readPopulations()
+    // 마감하지 않은 주는 다 받지 않은 값이라 보여 주지 않는다.
+    const populations = (await this.repository.readPopulations()).filter(({ closed }) => closed)
     const counts = await this.repository.readWeekRatioCounts()
     const legionCounts = await this.repository.readLegionWeeks(
       CLEAR_LEGIONS.map(({ name }) => name)
