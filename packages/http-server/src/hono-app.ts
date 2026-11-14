@@ -2,15 +2,15 @@ import { type Server, createServer } from 'node:http'
 import { createServer as createHttpsServer } from 'node:https'
 import { getRequestListener } from '@hono/node-server'
 import { Hono } from 'hono'
-import { type AccessLogEnv, createAccessLog } from '../presentation/http/access-log.js'
-import type { AccessLogSink } from '../presentation/http/access-log-sink.js'
-import { setCommonHeaders } from '../presentation/http/common-headers.js'
+import { type AccessLogEnv, createAccessLog } from './access-log.js'
+import type { AccessLogSink } from './access-log-sink.js'
+import { setCommonHeaders } from './common-headers.js'
 import {
   type FailureResponse,
   createFailureHandler,
   notFoundResponse,
   respondToThrownValues
-} from '../presentation/http/failure-response.js'
+} from './failure-response.js'
 import type { HttpAppHandle } from './app-handle.js'
 
 export interface HonoAppOptions {

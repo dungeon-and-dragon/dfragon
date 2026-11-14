@@ -546,6 +546,35 @@
       }
     },
     {
+      "includes": ["packages/http-server/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@dfragon/api",
+                      "@dfragon/api/**",
+                      "@dfragon/database",
+                      "@dfragon/database/**",
+                      "@dfragon/neople",
+                      "@dfragon/neople/**",
+                      "**/apps/**"
+                    ],
+                    "message": "공용 HTTP package는 앱과 DB, Neople 코드를 import하지 않는다. 앱마다 다른 실패 표와 route는 각 앱에 두고 createHonoApp의 option으로 넘긴다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/api/src/runtime/api-app.ts", "apps/api/src/runtime/ops-app.ts"],
       "linter": {
         "rules": {
@@ -560,11 +589,9 @@
                       "../**",
                       "!./routes/**",
                       "!./api-services.js",
-                      "!./hono-app.js",
-                      "!./app-handle.js",
                       "!**/presentation/http/*.js"
                     ],
-                    "message": "앱을 만드는 파일은 route를 모으는 파일(runtime/routes/<app>.ts), 공개 app의 조립 함수(runtime/api-services.ts), 앱 공통 설정(runtime/), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), access log만 import한다. 기능의 route는 presentation/http/<기능>/에 두고 runtime/routes/<app>.ts에서 app에 붙인다. 공개 app의 service, queue, 종료 순서는 runtime/api-services.ts에 둔다."
+                    "message": "앱을 만드는 파일은 route를 모으는 파일(runtime/routes/<app>.ts), 공개 app의 조립 함수(runtime/api-services.ts), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), 공용 HTTP 코드(@dfragon/http-server)만 import한다. 기능의 route는 presentation/http/<기능>/에 두고 runtime/routes/<app>.ts에서 app에 붙인다. 공개 app의 service, queue, 종료 순서는 runtime/api-services.ts에 둔다."
                   }
                 ]
               }

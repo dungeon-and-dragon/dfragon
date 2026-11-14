@@ -338,6 +338,9 @@ importers:
       '@dfragon/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@dfragon/http-server':
+        specifier: workspace:*
+        version: link:../../packages/http-server
       '@dfragon/lib':
         specifier: workspace:*
         version: link:../../packages/lib
@@ -558,6 +561,25 @@ importers:
       dotenv-cli:
         specifier: 'catalog:'
         version: 11.1.0
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/http-server:
+    dependencies:
+      '@dfragon/lib':
+        specifier: workspace:*
+        version: link:../lib
+      '@hono/node-server':
+        specifier: 'catalog:'
+        version: 2.1.7(hono@4.13.18)
+      hono:
+        specifier: 'catalog:'
+        version: 4.13.18
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
