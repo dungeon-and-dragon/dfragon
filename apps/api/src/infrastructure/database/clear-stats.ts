@@ -38,6 +38,7 @@ import {
   readContentClearFirstWeeks,
   readContentClearJobFames,
   readContentClearJobScores,
+  readContentClearOverviewSampleWeeks,
   readContentClearOverviewSamples,
   readContentClearPopulations,
   readContentClearRaidTimes,
@@ -48,14 +49,22 @@ import {
   readContentClearWeekGroupScores,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
+  readContentClearWeekSampleWeeks,
   readContentClearWeekSamples,
   readSelectedContentClearJobFames,
   readSelectedContentClearJobScores,
-  readSelectedContentClearTimes
+  readSelectedContentClearTimes,
+  recordContentClearOverviewSamples,
+  recordContentClearWeekSamples
 } from '@dfragon/database'
-import type { ClearStatsRepository } from '../../application/content-clears/repository.js'
+import type {
+  ClearStatsRepository,
+  ClearWeekSampleRepository
+} from '../../application/content-clears/repository.js'
 
-export class DatabaseClearStatsRepository implements ClearStatsRepository {
+export class DatabaseClearStatsRepository
+  implements ClearStatsRepository, ClearWeekSampleRepository
+{
   constructor(private readonly client: DatabaseClient) {}
 
   readCollectedAt(): Promise<Date | null> {
@@ -159,5 +168,29 @@ export class DatabaseClearStatsRepository implements ClearStatsRepository {
 
   readOverviewSamples(weekStart: Date): Promise<ClearOverviewWeekSamples | null> {
     return readContentClearOverviewSamples(this.client, weekStart)
+  }
+
+  readContentWeekSampleWeeks(): Promise<ClearContentWeek[]> {
+    return readContentClearWeekSampleWeeks(this.client)
+  }
+
+  readOverviewSampleWeeks(): Promise<Date[]> {
+    return readContentClearOverviewSampleWeeks(this.client)
+  }
+
+  recordContentWeekSamples(
+    week: ClearContentWeek,
+    samples: ClearContentWeekSamples,
+    computedAt: Date
+  ): Promise<void> {
+    return recordContentClearWeekSamples(this.client, week, samples, computedAt)
+  }
+
+  recordOverviewSamples(
+    weekStart: Date,
+    samples: ClearOverviewWeekSamples,
+    computedAt: Date
+  ): Promise<void> {
+    return recordContentClearOverviewSamples(this.client, weekStart, samples, computedAt)
   }
 }
