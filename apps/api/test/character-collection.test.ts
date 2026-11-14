@@ -16,14 +16,30 @@ import {
   readImportModifiedTime
 } from '../src/infrastructure/files/character-collection.js'
 import type {
-  CollectionFailure,
-  CollectionStore,
+  CharacterCollectionPorts,
   FetchCharacterBasic
 } from '../src/application/character-collection/ports.js'
-import {
-  type CollectionPassDependencies,
-  runCollectionPass
-} from '../src/application/character-collection/runner.js'
+import type {
+  CollectionFailure,
+  CollectionRepository
+} from '../src/application/character-collection/repository.js'
+import { CharacterCollectionService } from '../src/application/character-collection/service.js'
+
+type CollectionStore = Omit<CollectionRepository, 'enqueue'>
+
+type CollectionPassDependencies = Omit<CharacterCollectionPorts, 'pause'> & {
+  store: CollectionStore
+  enqueue: CollectionRepository['enqueue']
+  importedAt: ReadonlyMap<string, number>
+}
+
+function runCollectionPass({ store, enqueue, importedAt, ...ports }: CollectionPassDependencies) {
+  const pause = async () => {}
+
+  return new CharacterCollectionService({ ...store, enqueue }, { ...ports, pause }).runPass(
+    importedAt
+  )
+}
 
 // 합성 캐릭터다.
 function basicOf({ serverId, characterId }: CollectedCharacter): CharacterBasicInput {

@@ -26,12 +26,12 @@ import {
   type BatchNeopleKeyPool,
   createBatchNeopleKeyPool
 } from '../src/infrastructure/neople/batch-key-pool.js'
-import type { CollectionStore } from '../src/application/character-collection/ports.js'
+import type { CollectionRepository } from '../src/application/character-collection/repository.js'
 import {
   importCollectedCharacters,
   readImportModifiedTime
 } from '../src/infrastructure/files/character-collection.js'
-import { runCollectionPass } from '../src/application/character-collection/runner.js'
+import { CharacterCollectionService } from '../src/application/character-collection/service.js'
 import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
 import type {
   ClearCollectionRepository,
@@ -928,26 +928,29 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
   )
   let queueOpen = true
   let queued = 0
-  const collectionStore: CollectionStore = {
+  const collectionStore: Omit<CollectionRepository, 'enqueue'> = {
     takeBatch: async (): Promise<CollectedCharacter[]> =>
       queueOpen ? [{ serverId: 'cain', characterId: `queued-${queued++}` }] : [],
     recordBasic: async () => {},
     recordFailure: async () => {}
   }
   const settled = { collection: false, clears: false }
-  const collection = runCollectionPass({
-    readModifiedTime: readImportModifiedTime,
-    importCharacters: importCollectedCharacters,
-    importFiles: [],
-    importedAt: new Map(),
-    enqueue: async () => {},
-    fetchBasic: createNeopleCharacterBasic(neople),
-    store: collectionStore,
-    readConcurrency: () => 1,
-    report: () => {}
-  }).finally(() => {
-    settled.collection = true
-  })
+  const collection = new CharacterCollectionService(
+    { ...collectionStore, enqueue: async () => {} },
+    {
+      readModifiedTime: readImportModifiedTime,
+      importCharacters: importCollectedCharacters,
+      importFiles: [],
+      fetchBasic: createNeopleCharacterBasic(neople),
+      readConcurrency: () => 1,
+      report: () => {},
+      pause: async () => {}
+    }
+  )
+    .runPass(new Map())
+    .finally(() => {
+      settled.collection = true
+    })
   const { store } = memoryClearStore(
     ['a', 'b', 'c', 'd'].map((id) => character(id)),
     closedPastWeeks()
