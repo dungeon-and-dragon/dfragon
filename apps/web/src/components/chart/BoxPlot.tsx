@@ -2,8 +2,9 @@ import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { BOX_PLOT_REVEAL, useChartReveal } from '../../animations/useChartReveal'
-import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
+import { useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
 import { BoxPlotLegend } from './ChartLegend'
+import { boxPlotTooltipPlaceOf, boxStatsTooltipRows } from './box-plot-layout'
 import { type BoxStats, boxPlotScale, positionOf, type Scale } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
 import { type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
@@ -34,7 +35,6 @@ const BOX_SHARE = 0.6
 const CAP_HALF = 4
 const DOT_SHARE = 0.15
 const DEFAULT_PLOT_WIDTH = 360
-const TOOLTIP_GAP = 8
 
 function xOf(value: number, scale: Scale, width: number): number {
   return positionOf(value, scale, EDGE, width - EDGE)
@@ -148,23 +148,6 @@ export function BoxPlot({
   )
 }
 
-function rowTooltipPlaceOf(
-  anchor: HTMLElement,
-  tooltip: HTMLElement,
-  chart: HTMLElement
-): TooltipPlace {
-  const chartBox = chart.getBoundingClientRect()
-  const anchorBox = anchor.getBoundingClientRect()
-  const right = anchorBox.right - chartBox.left + TOOLTIP_GAP
-  const fitsRight = right + tooltip.offsetWidth <= chartBox.width
-  const x = fitsRight
-    ? right
-    : Math.max(0, anchorBox.left - chartBox.left - TOOLTIP_GAP - tooltip.offsetWidth)
-  const y = anchorBox.top - chartBox.top + (anchorBox.height - tooltip.offsetHeight) / 2
-
-  return { x, y }
-}
-
 type BoxPlotChartProps = Readonly<{
   label: string
   rows: readonly BoxPlotRow[]
@@ -213,30 +196,19 @@ function BoxPlotChartPlot({
     shownKey: shownRow?.key,
     open: hover.open,
     bars: rows,
-    placeOf: rowTooltipPlaceOf
+    placeOf: boxPlotTooltipPlaceOf
   })
 
   function handleLeave(): void {
     setHover(({ key }) => ({ key, open: false }))
   }
 
-  function tooltipRows(row: BoxPlotRow): TooltipRow[] {
-    const { stats, color } = row
+  function tooltipRows({ stats, color }: BoxPlotRow): TooltipRow[] {
     if (stats === null) {
       return []
     }
 
-    const whiskerRange = `${formatValue(stats.p5)} ~ ${formatValue(stats.p95)}`
-    const boxRange = `${formatValue(stats.p25)} ~ ${formatValue(stats.p75)}`
-    const median = formatValue(stats.median)
-    const max = formatValue(stats.max)
-
-    return [
-      { key: 'p5', name: '5%~95%', color, value: whiskerRange },
-      { key: 'p25', name: '25%~75%', color, value: boxRange },
-      { key: 'median', name: '중앙값', color, value: median },
-      { key: 'max', name: '최고', color, value: max }
-    ]
+    return boxStatsTooltipRows(stats, color, formatValue)
   }
 
   const shownTitle =
