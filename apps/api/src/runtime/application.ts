@@ -76,6 +76,15 @@ import type { readRuntimeConfiguration } from './configuration.js'
 
 type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
 
+// 클리어 통계는 계산을 한 번에 하나씩 돌리고(연결 1개), 마지막 수집 시각 읽기에 1개를 남긴다. 따로 둔 풀이라 통계 쿼리가
+// 오래 걸려도 다른 경로의 연결을 잡지 않는다. pg 기본값은 연결을 끝없이 기다리므로 대기에도 상한을 둔다.
+// 운영의 첫 계산은 쿼리 12개를 함께 보낸 상세 하나가 길어야 55초였으므로, 쿼리 하나가 3분을 넘으면 비정상으로 보고 끊는다.
+const CLEAR_STATS_POOL = {
+  maxConnections: 2,
+  connectionTimeoutMs: 10_000,
+  statementTimeoutMs: 180_000
+}
+
 function createDatabaseSubscribers(
   neople: NeopleClient,
   database: DatabaseConfiguration | undefined
@@ -94,6 +103,7 @@ function createDatabaseSubscribers(
     return {}
   }
   const client = createDatabaseClient(database)
+  const clearStatsClient = createDatabaseClient(database, CLEAR_STATS_POOL)
   const basicStore = createDatabaseCharacterBasicStore(client)
   const fetchTimeline = createNeopleCharacterTimeline(neople)
   const store = createDatabaseTimelineStore(client)
@@ -103,7 +113,7 @@ function createDatabaseSubscribers(
   }
   const seasonBackfill = { fetchTimeline, store: createDatabaseSeasonBackfillStore(client) }
 
-  // 아래 option이 client 하나를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 닫는다.
+  // 클리어 통계는 clearStatsClient, 나머지 option은 client를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 둘 다 닫는다.
 
   return {
     timeline: {
@@ -112,7 +122,9 @@ function createDatabaseSubscribers(
       backfillSeason: (job) => backfillSeason(job, seasonBackfill),
       read: (character) => readCharacterTimeline(client, character, new Date()),
       readPage: (character, list, before) => readTimelinePage(client, character, list, before),
-      close: () => client.$disconnect()
+      close: async () => {
+        await Promise.all([client.$disconnect(), clearStatsClient.$disconnect()])
+      }
     },
     recordCharacterBasic: basicStore.recordBasic,
     recordCharacterSkillStyle: basicStore.recordSkillStyle,
@@ -136,31 +148,36 @@ function createDatabaseSubscribers(
       readJobSkillAdoptionSnapshot: (job) => readJobSkillAdoptionSnapshot(client, job)
     },
     clearStats: {
-      readCollectedAt: () => readContentClearCollectedAt(client),
-      readPopulations: () => readContentClearPopulations(client),
-      readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
-      readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
-      readContentJobFames: (selection) => readSelectedContentClearJobFames(client, selection),
-      readContentTimes: (selection) => readSelectedContentClearTimes(client, selection),
-      readFirstWeeks: (contentId) => readContentClearFirstWeeks(client, contentId),
-      readFameBands: (selection, minFame) => readContentClearFameBands(client, selection, minFame),
-      readWeekGroups: (comparison) => readContentClearWeekGroups(client, comparison),
-      readStageMoves: (selection) => readContentClearStageMoves(client, selection),
-      readStreaks: (selection) => readContentClearStreaks(client, selection),
-      readLegionWeeks: (names) => readClearRecordLegionWeeks(client, names),
-      readRaidModes: (selection) => readClearRecordRaidModes(client, selection),
+      readCollectedAt: () => readContentClearCollectedAt(clearStatsClient),
+      readPopulations: () => readContentClearPopulations(clearStatsClient),
+      readWeekRatioCounts: () => readContentClearWeekRatioCounts(clearStatsClient),
+      readAdventureSizes: (selection) =>
+        readContentClearAdventureSizes(clearStatsClient, selection),
+      readContentJobFames: (selection) =>
+        readSelectedContentClearJobFames(clearStatsClient, selection),
+      readContentTimes: (selection) => readSelectedContentClearTimes(clearStatsClient, selection),
+      readFirstWeeks: (contentId) => readContentClearFirstWeeks(clearStatsClient, contentId),
+      readFameBands: (selection, minFame) =>
+        readContentClearFameBands(clearStatsClient, selection, minFame),
+      readWeekGroups: (comparison) => readContentClearWeekGroups(clearStatsClient, comparison),
+      readStageMoves: (selection) => readContentClearStageMoves(clearStatsClient, selection),
+      readStreaks: (selection) => readContentClearStreaks(clearStatsClient, selection),
+      readLegionWeeks: (names) => readClearRecordLegionWeeks(clearStatsClient, names),
+      readRaidModes: (selection) => readClearRecordRaidModes(clearStatsClient, selection),
       readRaidStageCounts: (selection, stages) =>
-        readClearRecordRaidStageCounts(client, selection, stages),
-      readContentJobScores: (selection) => readSelectedContentClearJobScores(client, selection),
-      readWeekGroupScores: (comparison) => readContentClearWeekGroupScores(client, comparison),
+        readClearRecordRaidStageCounts(clearStatsClient, selection, stages),
+      readContentJobScores: (selection) =>
+        readSelectedContentClearJobScores(clearStatsClient, selection),
+      readWeekGroupScores: (comparison) =>
+        readContentClearWeekGroupScores(clearStatsClient, comparison),
       readScoreBands: (selection, minFame) =>
-        readContentClearScoreBands(client, selection, minFame),
-      readScores: (weekStart) => readContentClearScores(client, weekStart),
-      readJobScores: (weekStart) => readContentClearJobScores(client, weekStart),
-      readFames: (weekStart) => readContentClearFames(client, weekStart),
-      readJobFames: (weekStart) => readContentClearJobFames(client, weekStart),
-      readCoClears: (weekStart) => readContentClearCoClears(client, weekStart),
-      readRaidTimes: (weekStart) => readContentClearRaidTimes(client, weekStart)
+        readContentClearScoreBands(clearStatsClient, selection, minFame),
+      readScores: (weekStart) => readContentClearScores(clearStatsClient, weekStart),
+      readJobScores: (weekStart) => readContentClearJobScores(clearStatsClient, weekStart),
+      readFames: (weekStart) => readContentClearFames(clearStatsClient, weekStart),
+      readJobFames: (weekStart) => readContentClearJobFames(clearStatsClient, weekStart),
+      readCoClears: (weekStart) => readContentClearCoClears(clearStatsClient, weekStart),
+      readRaidTimes: (weekStart) => readContentClearRaidTimes(clearStatsClient, weekStart)
     }
   }
 }

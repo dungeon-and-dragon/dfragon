@@ -113,7 +113,7 @@ export type {
   ContentClearPopulationInput,
   StoredClearPopulation
 } from './content-clear.js'
-export type { DatabaseClient } from './client.js'
+export type { DatabaseClient, DatabasePoolOptions } from './client.js'
 export { readDatabaseConfiguration } from './configuration.js'
 export type { DatabaseConfiguration } from './configuration.js'
 export {
