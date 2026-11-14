@@ -1,9 +1,6 @@
 import {
   type DatabaseConfiguration,
-  addBatchNeopleKey,
   createDatabaseClient,
-  deleteBatchNeopleKey,
-  readBatchNeopleKeys,
   readAdventureCharacters,
   readAdventureNames,
   readCharacterStatsSnapshot,
@@ -29,18 +26,10 @@ import {
   readContentClearWeekRatioCounts,
   readFameRanking,
   readGuild,
-  readCollectionSummary,
-  readJobOverviews,
-  readJobRuns,
   readJobSkillAdoptionSnapshot,
   readSelectedContentClearJobFames,
   readSelectedContentClearJobScores,
   readSelectedContentClearTimes,
-  readTimelineQueueCounts,
-  requestJobRun,
-  requeueCollectionFailures,
-  setBatchNeopleKeyEnabled,
-  setJobPaused,
   writeTimelineQueueCounts
 } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
@@ -72,7 +61,6 @@ import {
 } from '../infrastructure/database/adventure-activity.js'
 import { readAdventureWeeklyClears } from '../infrastructure/database/adventure-weekly.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
-import { createOpsHttpApp } from './ops-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
 type RuntimeConfiguration = Awaited<ReturnType<typeof readRuntimeConfiguration>>
@@ -212,29 +200,4 @@ export async function createApiRuntime(configuration: RuntimeConfiguration) {
   runtime.refreshClearStats()
 
   return runtime
-}
-
-export function createOpsRuntime(database: DatabaseConfiguration) {
-  const client = createDatabaseClient(database)
-
-  return createOpsHttpApp({
-    jobs: {
-      readOverviews: () => readJobOverviews(client),
-      readRuns: (name, page) => readJobRuns(client, name, page),
-      requestRun: (name, args) => requestJobRun(client, name, args),
-      setPaused: (name, paused) => setJobPaused(client, name, paused)
-    },
-    readQueueCounts: () => readTimelineQueueCounts(client),
-    collection: {
-      readSummary: () => readCollectionSummary(client),
-      requeue: (failure) => requeueCollectionFailures(client, failure)
-    },
-    batchNeopleKeys: {
-      readKeys: () => readBatchNeopleKeys(client),
-      add: (input) => addBatchNeopleKey(client, input),
-      setEnabled: (id, enabled) => setBatchNeopleKeyEnabled(client, id, enabled),
-      delete: (id) => deleteBatchNeopleKey(client, id)
-    },
-    close: () => client.$disconnect()
-  })
 }

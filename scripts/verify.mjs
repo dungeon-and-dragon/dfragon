@@ -41,6 +41,7 @@ export const checkJobs = [
     ]
   },
   { job: 'api', commands: [workspace('@dfragon/api', 'test')] },
+  { job: 'ops', commands: [workspace('@dfragon/ops', 'test')] },
   {
     job: 'web',
     commands: [workspace('@dfragon/web', 'test'), workspace('@dfragon/web', 'build')]
