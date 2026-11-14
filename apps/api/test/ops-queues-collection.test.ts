@@ -164,7 +164,7 @@ test('운영 queue 경로는 공개 app의 타임라인 동기화, 강화 백필
   await publicApp.listen(0, '127.0.0.1')
   const publicOrigin = await publicApp.getUrl()
   const request = await startOpsApp(t, {
-    readQueueCounts,
+    readQueueCounts: async () => readQueueCounts(),
     collection: unusedCollection
   })
 
@@ -182,6 +182,22 @@ test('운영 queue 경로는 공개 app의 타임라인 동기화, 강화 백필
       { name: 'season-backfill', waiting: 0, running: 0 }
     ]
   })
+})
+
+test('운영 queue 경로는 저장된 queue 수를 읽어 주고, 저장된 행이 없으면 빈 목록을 준다', async (t) => {
+  const stored = [{ name: 'season-backfill', waiting: 3, running: 1 }]
+  let rows: typeof stored = []
+  const request = await startOpsApp(t, {
+    readQueueCounts: async () => rows,
+    collection: unusedCollection
+  })
+
+  const empty = await request('/api/queues')
+  rows = stored
+  const written = await request('/api/queues')
+
+  assert.deepEqual([empty.status, await empty.json()], [200, { queues: [] }])
+  assert.deepEqual([written.status, await written.json()], [200, { queues: stored }])
 })
 
 test('수집 대기열 현황 경로는 대기 수, 가장 오래된 대기 시각, 실패 종류별 건수와 마지막 시도 시각을 JSON으로 준다', async (t) => {

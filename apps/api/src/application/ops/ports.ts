@@ -37,4 +37,4 @@ export type OpsQueueCount = {
   readonly running: number
 }
 
-export type ReadQueueCounts = () => readonly OpsQueueCount[]
+export type ReadQueueCounts = () => Promise<readonly OpsQueueCount[]>
