@@ -263,3 +263,42 @@ it('요일이 1부터 7 밖이거나 분포 값이 빠진 전체 개요 응답�
     ).rejects.toThrow()
   }
 })
+
+function hanging() {
+  return vi.fn<typeof globalThis.fetch>(
+    (input) =>
+      new Promise((_resolve, reject) => {
+        const { signal } = new Request(input)
+        signal.addEventListener('abort', () => reject(signal.reason))
+      })
+  )
+}
+
+function settled(promise: Promise<unknown>) {
+  const state: { error?: unknown } = {}
+  promise.catch((error: unknown) => {
+    state.error = error
+  })
+
+  return state
+}
+
+// API는 클리어 통계를 한 번에 하나씩 계산해, 미리 계산하지 않은 주는 다른 요청의 10초 timeout을 넘긴다.
+it('클리어 통계 요청은 10초가 지나도 끊기지 않고, 다른 요청은 10초에 끊긴다', async () => {
+  vi.useFakeTimers()
+  try {
+    const client = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: hanging() })
+    const clearRequests = [
+      client.clearStats(),
+      client.clearOverview('2026-11-05'),
+      client.clearContentStats('michaela-hard', '2026-11-05')
+    ].map(settled)
+    const stats = settled(client.stats())
+
+    await vi.advanceTimersByTimeAsync(11_000)
+    expect(stats.error).toMatchObject({ code: 'SEARCH_TIMEOUT' })
+    expect(clearRequests.map(({ error }) => error)).toEqual([undefined, undefined, undefined])
+  } finally {
+    vi.useRealTimers()
+  }
+})

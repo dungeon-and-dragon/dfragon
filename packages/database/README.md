@@ -8,7 +8,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 
 - `readDatabaseConfiguration(environment)`: DB 입력 다섯 개를 읽어 설정이나 `undefined`를 돌려주고, 일부만 있으면 던집니다.
 - `applyMigrations()`: 현재 프로세스의 DB 입력으로 `prisma migrate deploy`를 실행합니다.
-- `createDatabaseClient(configuration)`: `@prisma/adapter-pg`를 쓰는 Prisma client(`DatabaseClient`)를 만듭니다. 끝낼 때 호출자가 `$disconnect()`를 부릅니다.
+- `createDatabaseClient(configuration, pool?)`: `@prisma/adapter-pg`를 쓰는 Prisma client(`DatabaseClient`)를 만듭니다. `pool`로 연결 수, 연결 대기 상한, statement timeout을 정합니다. 끝낼 때 호출자가 `$disconnect()`를 부릅니다.
 - `recordCharacter(client, character)`: 캐릭터의 서버, id, 이름과 모험단을 기록합니다.
 - `recordCharacterBasic(client, basic)`: Neople 기본 정보를 저장하고 기본 정보 대기열 행을 지웁니다.
 - `recordCharacterSkillStyle(client, style)`: 캐릭터의 스킬 스타일을 덮어씁니다.
