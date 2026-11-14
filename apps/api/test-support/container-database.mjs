@@ -893,6 +893,15 @@ try {
   await psql(
     "INSERT INTO character_collection (server_id, character_id, queued_at, attempted_at, failure) VALUES ('cain', 'ops-waiting', '2026-11-09T00:00:00Z', NULL, NULL), ('cain', 'ops-api', '2026-11-08T00:00:00Z', '2026-11-08T01:00:00Z', 'neople-api'), ('cain', 'ops-internal', '2026-11-08T00:00:00Z', '2026-11-08T02:00:00Z', 'neople-internal')"
   )
+  // 운영 경로는 API가 쓴 queue 수를 테이블에서 읽는다. 앞 단계에서 끝난 일의 수는 다음 쓰기 주기에 0으로 써진다.
+  await waitFor(
+    async () =>
+      (
+        await psql(
+          "SELECT string_agg(name || ':' || waiting || ':' || running, ',' ORDER BY name) FROM timeline_queue_counts"
+        )
+      ).stdout.trim() === 'enhancement-backfill:0:0,season-backfill:0:0,timeline-sync:0:0'
+  )
   await docker(['exec', apiNames[0], 'node', '/app/container-ops-check.mjs'])
   assert.equal(
     (
