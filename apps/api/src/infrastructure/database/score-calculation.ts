@@ -1,19 +1,30 @@
 import {
+  type CharacterScoreInput,
+  type ClearPopulationCharacter,
   type DatabaseClient,
+  type FinishedJobRun,
   readClearPopulation,
   readLastFinishedJobRun,
   recordCharacterScore
 } from '@dfragon/database'
-import type { ScoreCalculationStore } from '../../application/character-score/ports.js'
+import type { ScoreCalculationRepository } from '../../application/character-score/repository.js'
 import { CLEAR_CONTENTS, toCollectionMinFame } from '../../domain/content-clears/contents.js'
 
-export function createDatabaseScoreCalculationStore(
-  client: DatabaseClient,
-  jobName: string
-): ScoreCalculationStore {
-  return {
-    readTargets: () => readClearPopulation(client, toCollectionMinFame(CLEAR_CONTENTS)),
-    readLastFinishedRun: () => readLastFinishedJobRun(client, jobName),
-    recordScore: (score) => recordCharacterScore(client, score)
+export class DatabaseScoreCalculationRepository implements ScoreCalculationRepository {
+  constructor(
+    private readonly client: DatabaseClient,
+    private readonly jobName: string
+  ) {}
+
+  readTargets(): Promise<ClearPopulationCharacter[]> {
+    return readClearPopulation(this.client, toCollectionMinFame(CLEAR_CONTENTS))
+  }
+
+  readLastFinishedRun(): Promise<FinishedJobRun | undefined> {
+    return readLastFinishedJobRun(this.client, this.jobName)
+  }
+
+  recordScore(score: CharacterScoreInput): Promise<void> {
+    return recordCharacterScore(this.client, score)
   }
 }

@@ -13,16 +13,10 @@ import type {
   ClearFameSample,
   ClearFirstWeekCount,
   ClearJobFameSample,
-  ClearPopulationCharacter,
-  ClearRecordBackfillProgress,
-  ClearRecordInput,
   ClearStageMoveCount,
   ClearStageMoveSelection,
   ClearStreakCount,
   ClearTimeCount,
-  ContentClearCollectionProgress,
-  ContentClearInput,
-  ContentClearPopulationInput,
   StoredClearPopulation,
   ClearAdventureSize,
   ClearWeekComparison,
@@ -34,50 +28,12 @@ import type { FetchCharacterTimeline } from '../character-timeline/ports.js'
 
 export type CreateClearTimeline = (onRequest: () => void) => FetchCharacterTimeline
 
-export type ClearCollectionStore = {
-  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]>
-  readPopulations(): Promise<StoredClearPopulation[]>
-  readProgress(): Promise<ContentClearCollectionProgress | undefined>
-  startProgress(startedAt: Date): Promise<void>
-  recordProgress(progress: ContentClearCollectionProgress): Promise<void>
-  recordClears(clears: readonly ContentClearInput[]): Promise<void>
-  recordRecords(records: readonly ClearRecordInput[]): Promise<void>
-  recordPopulation(population: ContentClearPopulationInput): Promise<void>
-  finishProgress(startedAt: Date): Promise<void>
-}
-
-export type ClearCollectionDependencies = {
-  store: ClearCollectionStore
+export type ClearCollectionPorts = {
   createFetchTimeline: CreateClearTimeline
   readConcurrency: () => number
   now: () => Date
   pause: (ms: number) => Promise<void>
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
-  reportProgress: (done: number, total: number) => void
-}
-
-export type ClearCollectionJobDependencies = Pick<
-  ClearCollectionDependencies,
-  'createFetchTimeline' | 'readConcurrency' | 'report'
->
-
-export type ClearRecordBackfillStore = {
-  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]>
-  readProgress(): Promise<ClearRecordBackfillProgress | undefined>
-  startProgress(startedAt: Date): Promise<void>
-  recordProgress(progress: ClearRecordBackfillProgress): Promise<void>
-  recordRecords(records: readonly ClearRecordInput[]): Promise<void>
-  finishProgress(startedAt: Date): Promise<void>
-}
-
-export type ClearRecordBackfillDependencies = Omit<ClearCollectionDependencies, 'store'> & {
-  store: ClearRecordBackfillStore
-}
-
-export type ClearRecordBackfillJobDependencies = {
-  createFetchRecordTimeline: CreateClearTimeline
-  readConcurrency: () => number
-  report: ClearCollectionDependencies['report']
 }
 
 export interface ClearStatsReader {

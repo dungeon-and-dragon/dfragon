@@ -1,12 +1,8 @@
-import { setTimeout } from 'node:timers/promises'
 import { z } from 'zod'
 import { defineJob } from '../jobs/definition.js'
 import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
-import type {
-  SkillStyleCollectionStore,
-  SkillStyleCollectionDependencies,
-  SkillStyleCollectionJobDependencies
-} from './ports.js'
+import type { SkillStyleCollectionPorts } from './ports.js'
+import type { SkillStyleCollectionRepository } from './repository.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000
 
@@ -20,59 +16,58 @@ export type SkillStyleCollectionSummary = {
   skipped: number
 }
 
-/** 저장한 캐릭터는 다음 실행의 대상에서 빠지므로, 도중에 끝난 수집은 다시 실행하면 남은 캐릭터부터 받는다. */
-export async function collectSkillStyles({
-  store,
-  fetchSkillStyle,
-  readConcurrency,
-  now,
-  pause,
-  report,
-  reportProgress
-}: SkillStyleCollectionDependencies): Promise<SkillStyleCollectionSummary> {
-  const targets = await store.readTargets()
-  const counts = { saved: 0, skipped: 0 }
-  reportProgress(0, targets.length)
+export class SkillStyleCollectionService {
+  constructor(
+    private readonly repository: SkillStyleCollectionRepository,
+    private readonly ports: SkillStyleCollectionPorts
+  ) {}
 
-  const unavailableStreaks = createUnavailableStreaks<(typeof targets)[number]>()
-  let done = 0
-  while (done < targets.length) {
-    const group = targets.slice(done, done + readConcurrency())
-    const results = await Promise.all(group.map((character) => fetchSkillStyle(character, now)))
-    const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
-    if (unavailable.length > 0) {
-      if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-        report('SKILL_STYLE_NEOPLE_UNAVAILABLE', {
-          done,
-          characters: group.length,
-          unavailable: unavailable.length
-        })
-        await pause(UNAVAILABLE_PAUSE_MS)
-        continue
+  /** 저장한 캐릭터는 다음 실행의 대상에서 빠지므로, 도중에 끝난 수집은 다시 실행하면 남은 캐릭터부터 받는다. */
+  async collect(
+    reportProgress: (done: number, total: number) => void
+  ): Promise<SkillStyleCollectionSummary> {
+    const { fetchSkillStyle, readConcurrency, now, pause, report } = this.ports
+    const targets = await this.repository.readTargets()
+    const counts = { saved: 0, skipped: 0 }
+    reportProgress(0, targets.length)
+
+    const unavailableStreaks = createUnavailableStreaks<(typeof targets)[number]>()
+    let done = 0
+    while (done < targets.length) {
+      const group = targets.slice(done, done + readConcurrency())
+      const results = await Promise.all(group.map((character) => fetchSkillStyle(character, now)))
+      const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
+      if (unavailable.length > 0) {
+        if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
+          report('SKILL_STYLE_NEOPLE_UNAVAILABLE', {
+            done,
+            characters: group.length,
+            unavailable: unavailable.length
+          })
+          await pause(UNAVAILABLE_PAUSE_MS)
+          continue
+        }
+        for (const character of unavailable) {
+          report('SKILL_STYLE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+        }
       }
-      for (const character of unavailable) {
-        report('SKILL_STYLE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+      for (const result of results) {
+        if (result.status === 'fetched') {
+          await this.repository.recordSkillStyle(result.style)
+          counts.saved++
+        } else {
+          counts.skipped++
+        }
       }
+      done += group.length
+      reportProgress(done, targets.length)
     }
-    for (const result of results) {
-      if (result.status === 'fetched') {
-        await store.recordSkillStyle(result.style)
-        counts.saved++
-      } else {
-        counts.skipped++
-      }
-    }
-    done += group.length
-    reportProgress(done, targets.length)
+
+    return { characters: targets.length, ...counts }
   }
-
-  return { characters: targets.length, ...counts }
 }
 
-export function createSkillStyleCollectionJob(
-  store: SkillStyleCollectionStore,
-  dependencies: SkillStyleCollectionJobDependencies
-) {
+export function createSkillStyleCollectionJob(service: SkillStyleCollectionService) {
   return defineJob({
     name: 'skill-style-collection',
     displayName: '스킬 스타일 수집',
@@ -80,13 +75,6 @@ export function createSkillStyleCollectionJob(
       '스킬 채택률 표본 가운데 스킬 스타일이 없는 캐릭터의 스킬 스타일을 Neople에서 받아 저장합니다. 다시 실행하면 남은 캐릭터부터 받습니다.',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
-    run: (_args, { reportProgress }) =>
-      collectSkillStyles({
-        ...dependencies,
-        store,
-        now: () => new Date(),
-        pause: (ms) => setTimeout(ms),
-        reportProgress
-      })
+    run: (_args, { reportProgress }) => service.collect(reportProgress)
   })
 }
