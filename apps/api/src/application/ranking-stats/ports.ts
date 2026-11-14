@@ -1,18 +1,4 @@
-import type {
-  CharacterStatsSnapshot,
-  FameRankingFilter,
-  JobSkillAdoptionQuery,
-  JobSkillAdoptionSnapshot,
-  StoredCharacter,
-  CharacterSkillStyleInput,
-  SkillStyleSampleCharacter
-} from '@dfragon/database'
-
-export interface RankingStatsReader {
-  readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
-  readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null>
-  readJobSkillAdoptionSnapshot(job: JobSkillAdoptionQuery): Promise<JobSkillAdoptionSnapshot | null>
-}
+import type { CharacterSkillStyleInput, SkillStyleSampleCharacter } from '@dfragon/database'
 
 export type FetchedSkillStyle =
   | { status: 'fetched'; style: CharacterSkillStyleInput }

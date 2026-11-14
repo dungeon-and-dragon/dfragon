@@ -1,33 +1,4 @@
-import {
-  type DatabaseConfiguration,
-  createDatabaseClient,
-  readCharacterStatsSnapshot,
-  readClearRecordLegionWeeks,
-  readClearRecordRaidModes,
-  readClearRecordRaidStageCounts,
-  readContentClearAdventureSizes,
-  readContentClearCoClears,
-  readContentClearCollectedAt,
-  readContentClearFameBands,
-  readContentClearFames,
-  readContentClearFirstWeeks,
-  readContentClearJobFames,
-  readContentClearJobScores,
-  readContentClearPopulations,
-  readContentClearRaidTimes,
-  readContentClearScoreBands,
-  readContentClearScores,
-  readContentClearStageMoves,
-  readContentClearStreaks,
-  readContentClearWeekGroups,
-  readContentClearWeekGroupScores,
-  readContentClearWeekRatioCounts,
-  readFameRanking,
-  readJobSkillAdoptionSnapshot,
-  readSelectedContentClearJobFames,
-  readSelectedContentClearJobScores,
-  readSelectedContentClearTimes
-} from '@dfragon/database'
+import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '../application/character-catalog/service.js'
 import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
@@ -49,6 +20,8 @@ import { createNeopleCharacterSearch } from '../infrastructure/neople/character-
 import { createNeopleShopGrade } from '../infrastructure/neople/today-grade.js'
 import { DatabaseAdventureGuildRepository } from '../infrastructure/database/adventure-guild.js'
 import { DatabaseCharacterSearchRepository } from '../infrastructure/database/character-search.js'
+import { DatabaseClearStatsRepository } from '../infrastructure/database/clear-stats.js'
+import { DatabaseRankingStatsRepository } from '../infrastructure/database/ranking-stats.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
@@ -119,43 +92,8 @@ function createDatabaseSubscribers(
     recordCharacterScore: (score) => characterBasic.recordScore(score),
     readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
-    rankingStats: {
-      readFameRanking: (filter, limit) => readFameRanking(client, filter, limit),
-      readCharacterStatsSnapshot: () => readCharacterStatsSnapshot(client),
-      readJobSkillAdoptionSnapshot: (job) => readJobSkillAdoptionSnapshot(client, job)
-    },
-    clearStats: {
-      readCollectedAt: () => readContentClearCollectedAt(clearStatsClient),
-      readPopulations: () => readContentClearPopulations(clearStatsClient),
-      readWeekRatioCounts: () => readContentClearWeekRatioCounts(clearStatsClient),
-      readAdventureSizes: (selection) =>
-        readContentClearAdventureSizes(clearStatsClient, selection),
-      readContentJobFames: (selection) =>
-        readSelectedContentClearJobFames(clearStatsClient, selection),
-      readContentTimes: (selection) => readSelectedContentClearTimes(clearStatsClient, selection),
-      readFirstWeeks: (contentId) => readContentClearFirstWeeks(clearStatsClient, contentId),
-      readFameBands: (selection, minFame) =>
-        readContentClearFameBands(clearStatsClient, selection, minFame),
-      readWeekGroups: (comparison) => readContentClearWeekGroups(clearStatsClient, comparison),
-      readStageMoves: (selection) => readContentClearStageMoves(clearStatsClient, selection),
-      readStreaks: (selection) => readContentClearStreaks(clearStatsClient, selection),
-      readLegionWeeks: (names) => readClearRecordLegionWeeks(clearStatsClient, names),
-      readRaidModes: (selection) => readClearRecordRaidModes(clearStatsClient, selection),
-      readRaidStageCounts: (selection, stages) =>
-        readClearRecordRaidStageCounts(clearStatsClient, selection, stages),
-      readContentJobScores: (selection) =>
-        readSelectedContentClearJobScores(clearStatsClient, selection),
-      readWeekGroupScores: (comparison) =>
-        readContentClearWeekGroupScores(clearStatsClient, comparison),
-      readScoreBands: (selection, minFame) =>
-        readContentClearScoreBands(clearStatsClient, selection, minFame),
-      readScores: (weekStart) => readContentClearScores(clearStatsClient, weekStart),
-      readJobScores: (weekStart) => readContentClearJobScores(clearStatsClient, weekStart),
-      readFames: (weekStart) => readContentClearFames(clearStatsClient, weekStart),
-      readJobFames: (weekStart) => readContentClearJobFames(clearStatsClient, weekStart),
-      readCoClears: (weekStart) => readContentClearCoClears(clearStatsClient, weekStart),
-      readRaidTimes: (weekStart) => readContentClearRaidTimes(clearStatsClient, weekStart)
-    }
+    rankingStats: new DatabaseRankingStatsRepository(client),
+    clearStats: new DatabaseClearStatsRepository(clearStatsClient)
   }
 }
 
