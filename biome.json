@@ -542,6 +542,10 @@
                   {
                     "group": ["**/application/**/repository.js"],
                     "message": "presentation은 Repository를 import type으로도 가져오지 않는다. Controller는 application/<기능>/service.ts의 Service만 받고, Repository는 runtime/이 Service에 넣는다."
+                  },
+                  {
+                    "group": ["**/application/**/ports.js"],
+                    "message": "presentation은 port를 import type으로도 가져오지 않는다. Controller는 application/<기능>/service.ts의 Service만 받고, Neople 호출, queue 같은 port는 runtime/이 Service에 넣는다."
                   }
                 ]
               }
