@@ -7,7 +7,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 
 ## 코드 위치
 
-`src/`는 계층 폴더로 나눕니다(ADR 0047).
+`src/`는 계층 폴더로 나눕니다(ADR 0047, ADR 0057).
 `src/` 바로 아래에는 진입 파일 `main.ts`, `character-collector.ts`와 다섯 계층 폴더만 둡니다.
 진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`, `dist/character-collector.js`로 실행합니다.
 계층 폴더 사이의 import 방향과 계층 밖 파일은 `pnpm lint`가 `src/` 전체에서 검사합니다.
@@ -18,12 +18,12 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | --- | --- |
 | `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일 |
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
-| `src/application/<기능>/` | service(use case)와 service가 받는 함수 타입(port) |
-| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
-| `src/presentation/http/` | route, 요청 파싱, 실패를 HTTP 응답으로 바꾸는 표 |
+| `src/application/<기능>/` | Service, Service가 받는 Repository interface와 DB가 아닌 의존성의 함수 타입(port) |
+| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약과 알림, 파일 읽기로 구현한 adapter |
+| `src/presentation/http/` | Controller, 요청과 응답 DTO, 실패를 HTTP 응답으로 바꾸는 표 |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
 | `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
-| `src/runtime/routes/` | 기능의 route에 service를 넘겨 공개 app에 붙이는 함수(`api.ts`) |
+| `src/runtime/routes/` | 기능의 Controller에 Service를 넘겨 공개 app에 붙이는 함수(`api.ts`) |
 
 기능을 하나 더하면 아래 파일을 만듭니다.
 기능 폴더(`domain/<기능>/`, `application/<기능>/`, `presentation/http/<기능>/`) 안의 파일은 역할 이름으로, 여러 기능을 담는 폴더(`infrastructure/neople/`, `infrastructure/database/` 등) 안의 파일은 기능 이름으로 짓습니다.
@@ -32,13 +32,19 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | --- | --- |
 | `src/domain/<기능>/<내용>.ts` | 계산, 표, 타입. 이름은 담은 내용으로 짓습니다(예: `grade.ts`, `items.ts`) |
 | `src/domain/<기능>/failure.ts` | 실패 class와 실패 종류 |
-| `src/application/<기능>/service.ts` | service를 만드는 `create<기능>Service` |
-| `src/application/<기능>/ports.ts` | service가 받는 함수 타입 |
-| `src/infrastructure/neople/<기능>.ts`, `src/infrastructure/database/<기능>.ts` | port의 구현 |
-| `src/presentation/http/<기능>/routes.ts` | service를 받아 기능의 route 묶음을 만드는 `create<기능>Routes` |
+| `src/application/<기능>/service.ts` | 판단, 조합과 실패 종류를 던지는 `<기능>Service` class. constructor는 Repository, port 순서로 받습니다 |
+| `src/application/<기능>/repository.ts` | Service가 받는 DB 읽기와 쓰기 `<기능>Repository` interface |
+| `src/application/<기능>/ports.ts` | Neople 호출, queue처럼 DB가 아닌 의존성의 함수 타입 |
+| `src/infrastructure/database/<기능>.ts` | `@dfragon/database` 함수를 부르는 `Database<기능>Repository` class |
+| `src/infrastructure/neople/<기능>.ts` | port의 Neople 구현 |
+| `src/presentation/http/<기능>/dto.ts` | 요청 zod schema와 `z.infer` type, 응답 type과 `to<X>Response` 함수 |
+| `src/presentation/http/<기능>/controller.ts` | Service를 받아 `routes()`로 기능의 route 묶음을 만드는 `<기능>Controller` class |
 | `src/presentation/http/<기능>/failures.ts` | 실패 종류를 status, `error.code`, `error.message`로 바꾸는 표 |
-| `src/runtime/api-services.ts` | 공개 app 기능의 service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
-| `src/runtime/routes/api.ts` | 기능의 route 묶음을 공개 app의 경로에 붙입니다 |
+| `src/runtime/api-services.ts` | 공개 app 기능의 Service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
+| `src/runtime/routes/api.ts` | 기능의 Controller를 만들어 공개 app의 경로에 붙입니다 |
+
+모험단, 길드 조회(`adventure-guild`)가 이 형태입니다.
+나머지 기능은 아직 `create<기능>Service`, `create<기능>Routes` 함수와 `ports.ts`의 Store, Reader 형태로 남아 있습니다.
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
