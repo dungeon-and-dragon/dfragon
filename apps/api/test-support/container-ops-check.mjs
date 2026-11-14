@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { setTimeout } from 'node:timers/promises'
 
 const ops = 'http://127.0.0.1:3001'
 const timeout = () => AbortSignal.timeout(5000)
@@ -18,6 +19,20 @@ const readJob = async (name) => {
   assert.notEqual(workerSeenAt, null)
 
   return jobs.find((job) => job.name === name)
+}
+
+// 운영 app 컨테이너를 띄운 직후에 실행되므로 listen할 때까지 기다린다.
+for (let attempt = 1; ; attempt += 1) {
+  try {
+    await fetch(`${ops}/api/queues`, { signal: timeout() })
+    break
+  } catch (error) {
+    if (attempt === 50) {
+      throw error
+    }
+
+    await setTimeout(200)
+  }
 }
 
 const cleanup = await readJob('job-run-cleanup')
