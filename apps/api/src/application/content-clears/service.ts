@@ -184,14 +184,14 @@ export function createClearStatsService(reader: ClearStatsReader): ClearStatsSer
     weekStart: Date,
     populations: readonly StoredClearPopulation[]
   ): Promise<ClearOverview> => {
-    const [fames, jobFames, scores, jobScores, coClears, raidTimes] = await Promise.all([
-      reader.readFames(weekStart),
-      reader.readJobFames(weekStart),
-      reader.readScores(weekStart),
-      reader.readJobScores(weekStart),
-      reader.readCoClears(weekStart),
-      reader.readRaidTimes(weekStart)
-    ])
+    // 한 주의 모든 컨텐츠를 읽는 쿼리는 PostgreSQL이 병렬 worker로 돌린다. 여섯 개를 함께 보내면 worker들이
+    // 공유 메모리(shm)를 동시에 잡아 운영 DB에서 "could not resize shared memory segment"로 실패해 하나씩 읽는다.
+    const fames = await reader.readFames(weekStart)
+    const jobFames = await reader.readJobFames(weekStart)
+    const scores = await reader.readScores(weekStart)
+    const jobScores = await reader.readJobScores(weekStart)
+    const coClears = await reader.readCoClears(weekStart)
+    const raidTimes = await reader.readRaidTimes(weekStart)
 
     return toClearOverview(weekStart, populations, {
       fames,
