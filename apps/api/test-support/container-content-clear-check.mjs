@@ -287,7 +287,11 @@ try {
     readScores: (weekStart) => readContentClearScores(client, weekStart),
     readJobScores: (weekStart) => readContentClearJobScores(client, weekStart)
   }
-  const service = createClearStatsService(reader)
+  let refreshFailures = 0
+  const reportRefreshFailure = () => {
+    refreshFailures += 1
+  }
+  const service = createClearStatsService(reader, reportRefreshFailure)
   const weeksOf = async (contentId) =>
     (await service.stats()).contents.find(({ id }) => id === contentId).weeks
   const summary = (weeks) =>
@@ -374,7 +378,7 @@ try {
   assert.equal((await service.contentStats('diregie-hard', '2026-02-05')).week.cleared, 1)
   await assert.rejects(service.contentStats('diregie-hard', '2026-02-19'), { kind: 'query' })
 
-  // 수집이 모집단을 저장하기 전의 클리어는 보이지 않고, 저장한 뒤의 요청은 새 값을 받는다.
+  // 수집이 모집단을 저장하기 전의 클리어는 보이지 않는다. 저장한 뒤의 요청은 새 결과를 미리 계산하는 동안 이전 값을 받고, 계산이 끝나면 새 값을 받는다.
   await recordContentClears(client, [
     clear(
       'engraved-nightmare-1',
@@ -389,6 +393,9 @@ try {
     client,
     population(1000, false, 'engraved-nightmare-1', '2026-11-12T06:00:00', '2026-11-14T06:00:00')
   )
+  assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 3)
+  await service.refresh()
+  assert.equal(refreshFailures, 0)
   assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 4)
   assert.equal((await service.contentStats('engraved-nightmare-1', undefined)).week.cleared, 4)
 
@@ -425,7 +432,7 @@ try {
   ])
   await recordContentClearPopulation(client, population(500, true, 'michaela-normal'))
   // 위 service는 모집단의 마지막 수집 시각이 그대로라 캐시를 주므로 새 service로 읽는다.
-  const overviewService = createClearStatsService(reader)
+  const overviewService = createClearStatsService(reader, reportRefreshFailure)
   const overview = await overviewService.overview('2026-11-05')
   const overviewContent = (id) => overview.contents.find((content) => content.id === id)
   const michaelaOverview = overviewContent('michaela-hard')
@@ -525,7 +532,10 @@ try {
     clear('michaela-normal', 'raid', 'clear-h', '2026-10-30T20:00:00', lastWeek),
     clear('michaela-normal', 'raid', 'clear-h', '2026-11-06T20:00:00', thisWeek)
   ])
-  const detail = await createClearStatsService(reader).contentStats('michaela-hard', '2026-11-05')
+  const detail = await createClearStatsService(reader, reportRefreshFailure).contentStats(
+    'michaela-hard',
+    '2026-11-05'
+  )
   assert.equal(detail.week.cleared, 29)
   // 이번 주 첫 클리어 27명은 명성 1,000 두 명과 101,000~125,000이라 p 분위수는 ceil(p × 27)번째로 작은 값이다.
   const noScores = { equipment: null, buff: null }
@@ -585,7 +595,7 @@ try {
     detail.fameBands.reduce((total, { cleared }) => total + cleared, 0),
     28
   )
-  const challengeDetail = await createClearStatsService(reader).contentStats(
+  const challengeDetail = await createClearStatsService(reader, reportRefreshFailure).contentStats(
     'engraved-nightmare-1',
     '2026-11-05'
   )
@@ -665,7 +675,7 @@ try {
     })
   }
 
-  const scoredService = createClearStatsService(reader)
+  const scoredService = createClearStatsService(reader, reportRefreshFailure)
   const scoredList = await scoredService.stats()
   const venus = scoredList.legions.find(({ id }) => id === 'legion-venus')
   assert.deepEqual(
