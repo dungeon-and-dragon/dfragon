@@ -43,7 +43,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
 두 앱이 함께 쓰는 access log는 `src/presentation/http/access-log.ts`, access log와 code 보고를 쓰는 곳은 `src/presentation/http/access-log-sink.ts`, 404와 실패 응답은 `src/presentation/http/failure-response.ts`, `Cache-Control`과 JSON `Content-Type`은 `src/presentation/http/common-headers.ts`에 있습니다.
 공통 middleware 등록과 server 시작, 종료는 `src/runtime/hono-app.ts`에 있습니다.
-오류 chain 정제는 `src/domain/error-chain.ts`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
+오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/routes.ts`에 있습니다.
 캐릭터 목록 수집 흐름과 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
 Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`에 있습니다.
