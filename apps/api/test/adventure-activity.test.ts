@@ -17,8 +17,8 @@ import {
 } from '../src/domain/adventure-guild/activity.js'
 import {
   type AdventureActivityRead,
-  type AdventureGuildReader
-} from '../src/application/adventure-guild/ports.js'
+  type AdventureGuildRepository
+} from '../src/application/adventure-guild/repository.js'
 import {
   readAdventureSeasonDays,
   parseActivityDayDetail as toActivityDayDetail,
@@ -625,7 +625,7 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
 async function listen(
   reader: Partial<
     Pick<
-      AdventureGuildReader,
+      AdventureGuildRepository,
       'readAdventureActivity' | 'readAdventureSeasonDays' | 'readAdventureSeasonBackfill'
     >
   >,
