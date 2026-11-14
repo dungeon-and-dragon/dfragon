@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import type { OpsCollectionStore } from '../../../application/ops/ports.js'
-import { OpsFailure } from '../../../domain/ops/failure.js'
-import { readJsonBody } from './json-request.js'
+import type { OpsCollectionStore } from '../../../application/collection/ports.js'
+import { OpsFailure } from '../../../domain/failure.js'
+import { readJsonBody } from '../json-request.js'
 
 const requeueBody = z.object({ failure: z.string().min(1).optional() })
 

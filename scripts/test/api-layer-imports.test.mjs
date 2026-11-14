@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { lintSamples } from './fixtures/biome-lint.mjs'
-import { cruiseApiSamples } from './fixtures/dependency-cruiser.mjs'
+import { cruiseAppSamples } from './fixtures/dependency-cruiser.mjs'
 
 const src = 'apps/api/src'
 
@@ -86,7 +86,7 @@ const allowedImports = [
 
 // 앱을 만드는 파일은 경로가 정해져 있어, 파일마다 import 여러 줄을 한 sample에 넣고 줄 번호로 진단을 맞춘다.
 const appFiles = {
-  'runtime/api-app.ts': {
+  'apps/api/src/runtime/api-app.ts': {
     rejected: [
       '../characters/http.js',
       '../characters/search-service.js',
@@ -110,20 +110,15 @@ const appFiles = {
       'hono'
     ]
   },
-  'runtime/ops-app.ts': {
+  'apps/ops/src/runtime/ops-app.ts': {
     rejected: [
-      '../application/jobs/run.js',
-      '../domain/ops/failure.js',
+      '../application/jobs/ports.js',
+      '../domain/failure.js',
       '../characters/http.js',
-      '../presentation/http/ops/a.js',
+      '../presentation/http/jobs/routes.js',
       './hono-app.js'
     ],
-    allowed: [
-      './routes/ops.js',
-      '../presentation/http/ops-failures.js',
-      '@dfragon/http-server',
-      'hono'
-    ]
+    allowed: ['./routes/ops.js', '../presentation/http/failures.js', '@dfragon/http-server', 'hono']
   }
 }
 
@@ -136,10 +131,7 @@ function importingAll(sources) {
 
 function appSamples(kind) {
   return Object.fromEntries(
-    Object.entries(appFiles).map(([file, sources]) => [
-      `${src}/${file}`,
-      importingAll(sources[kind])
-    ])
+    Object.entries(appFiles).map(([file, sources]) => [file, importingAll(sources[kind])])
   )
 }
 
@@ -185,7 +177,7 @@ for (const [file, source] of allowedImports) {
 
 for (const [file, { rejected, allowed }] of Object.entries(appFiles)) {
   test(`Biome: 앱을 만드는 ${file}에서 route를 모으는 파일이 아닌 기능 파일 import를 거부하고 runtime/routes/를 알린다`, () => {
-    const diagnostics = biomeRejected.get(`${src}/${file}`)
+    const diagnostics = biomeRejected.get(file)
     const reported = diagnostics
       .map(({ category, location }) => [category, location.start.line])
       .sort(([, left], [, right]) => left - right)
@@ -199,7 +191,7 @@ for (const [file, { rejected, allowed }] of Object.entries(appFiles)) {
   })
 
   test(`Biome: 앱을 만드는 ${file}에서 route를 모으는 파일, 공용 실패 표, 공용 HTTP 코드 import를 허용한다`, () => {
-    assert.deepEqual(biomeAllowed.get(`${src}/${file}`), [], allowed.join(', '))
+    assert.deepEqual(biomeAllowed.get(file), [], allowed.join(', '))
   })
 }
 
@@ -249,7 +241,7 @@ const packageCases = {
   ]
 }
 
-const cruised = await cruiseApiSamples(
+const cruised = await cruiseAppSamples(
   Object.fromEntries(
     [...packageCases.rejected, ...packageCases.allowed].map(([file, source]) => [file, source])
   )
@@ -282,7 +274,7 @@ test('dependency-cruiser: 위반 메시지가 값 import를 둘 위치를 알린
 })
 
 test('dependency-cruiser: package 소스를 찾지 못하면 통과시키지 않고 실패한다', async () => {
-  const unresolved = await cruiseApiSamples(
+  const unresolved = await cruiseAppSamples(
     { 'src/domain/today-grade/a.ts': typeImporting('@dfragon/database') },
     { withPackages: false }
   )
@@ -292,7 +284,7 @@ test('dependency-cruiser: package 소스를 찾지 못하면 통과시키지 않
 })
 
 test('dependency-cruiser: 계층 밖 파일은 import 유무와 다른 파일에서의 사용 여부에 관계없이 실패한다', async () => {
-  const result = await cruiseApiSamples({
+  const result = await cruiseAppSamples({
     'src/unlayered.ts': importing('./domain/value.js'),
     'src/imported.ts': 'export const value = 1\n',
     'src/empty.ts': '',
@@ -318,7 +310,7 @@ test('dependency-cruiser: 계층 밖 파일은 import 유무와 다른 파일에
 })
 
 test('dependency-cruiser: 진입 파일 둘과 다섯 계층 안의 import 없는 파일은 허용한다', async () => {
-  const result = await cruiseApiSamples(
+  const result = await cruiseAppSamples(
     Object.fromEntries(
       [
         'main.ts',
@@ -333,4 +325,111 @@ test('dependency-cruiser: 진입 파일 둘과 다섯 계층 안의 import 없�
   )
   assert.equal(result.exitCode, 0)
   assert.deepEqual(result.violations, [])
+})
+
+// 운영 app도 같은 계층 폴더라 API와 같은 규칙이 걸리는지 대표 사례로 확인한다.
+const opsSrc = 'apps/ops/src'
+const opsRejectedImports = [
+  ['domain/jobs/a.ts', '../../application/jobs/ports.js', 'application/<기능>/'],
+  ['domain/jobs/b.ts', 'hono', 'presentation/http/'],
+  ['application/jobs/a.ts', '../../presentation/http/jobs/routes.js', 'ports.ts'],
+  ['application/jobs/b.ts', 'node:fs', 'infrastructure/'],
+  ['infrastructure/database/a.ts', '../../runtime/application.js', '연결은 runtime/에'],
+  [
+    'presentation/http/jobs/a.ts',
+    '../../../infrastructure/database/jobs.js',
+    'application의 service'
+  ],
+  ['presentation/http/jobs/b.ts', '../../../runtime/application.js', 'application의 service']
+]
+const opsAllowedImports = [
+  ['presentation/http/jobs/c.ts', '../../../application/jobs/ports.js'],
+  ['presentation/http/jobs/d.ts', '../../../domain/failure.js'],
+  ['presentation/http/jobs/e.ts', 'hono'],
+  ['runtime/routes/a.ts', '../../presentation/http/jobs/routes.js']
+]
+const opsRejectedSources = Object.fromEntries(
+  opsRejectedImports.map(([file, source]) => [`${opsSrc}/${file}`, importing(source)])
+)
+const opsAllowedSources = Object.fromEntries(
+  opsAllowedImports.map(([file, source]) => [`${opsSrc}/${file}`, importing(source)])
+)
+const opsBiomeRejected = await lintSamples(opsRejectedSources)
+const opsBiomeAllowed = await lintSamples(opsAllowedSources)
+
+for (const [file, source, destination] of opsRejectedImports) {
+  test(`Biome: 운영 app의 ${file}에서 ${source} import를 거부하고 옮길 위치(${destination})를 알린다`, () => {
+    const diagnostics = opsBiomeRejected.get(`${opsSrc}/${file}`)
+    assert.equal(diagnostics.length, 1, JSON.stringify(diagnostics))
+    assert.equal(diagnostics[0].category, 'lint/style/noRestrictedImports')
+    assert.ok(diagnostics[0].message.includes(destination), diagnostics[0].message)
+  })
+}
+
+for (const [file, source] of opsAllowedImports) {
+  test(`Biome: 운영 app의 ${file}에서 ${source} import를 허용한다`, () => {
+    assert.deepEqual(opsBiomeAllowed.get(`${opsSrc}/${file}`), [])
+  })
+}
+
+const opsPackageCases = {
+  rejected: [
+    [
+      'src/presentation/http/jobs/a.ts',
+      importing('@dfragon/database'),
+      'presentation-package-value'
+    ],
+    [
+      'src/application/jobs/a.ts',
+      importing('@dfragon/database'),
+      'domain-application-package-value'
+    ]
+  ],
+  allowed: [
+    ['src/presentation/http/jobs/b.ts', typeImporting('@dfragon/database')],
+    ['src/application/jobs/b.ts', typeImporting('@dfragon/database')],
+    ['src/runtime/application.ts', importing('@dfragon/database')],
+    ['src/main.ts', importing('./runtime/application.js')]
+  ]
+}
+const opsCruised = await cruiseAppSamples(
+  Object.fromEntries([...opsPackageCases.rejected, ...opsPackageCases.allowed]),
+  { app: 'ops' }
+)
+
+for (const [file, , rule] of opsPackageCases.rejected) {
+  test(`dependency-cruiser: 운영 app의 ${file}에서 package 값 import를 ${rule}로 거부한다`, () => {
+    assert.deepEqual(
+      opsCruised.violations.filter(({ from }) => from === file),
+      [{ from: file, rule }]
+    )
+  })
+}
+
+test('dependency-cruiser: 운영 app의 import type과 runtime, 진입 파일의 값 import는 허용한다', () => {
+  const allowedFiles = new Set(opsPackageCases.allowed.map(([file]) => file))
+  assert.deepEqual(
+    opsCruised.violations.filter(({ from }) => allowedFiles.has(from)),
+    []
+  )
+})
+
+test('dependency-cruiser: 운영 app의 계층 밖 파일과 API의 worker 진입 파일 이름은 실패한다', async () => {
+  const result = await cruiseAppSamples(
+    {
+      'src/unlayered.ts': '',
+      'src/character-collector.ts': '',
+      'src/main.ts': '',
+      'src/domain/value.ts': ''
+    },
+    { app: 'ops' }
+  )
+
+  assert.deepEqual(
+    result.violations.sort((left, right) => left.from.localeCompare(right.from)),
+    [
+      { from: 'src/character-collector.ts', rule: 'ops-source-location-orphan' },
+      { from: 'src/unlayered.ts', rule: 'ops-source-location-orphan' }
+    ]
+  )
 })

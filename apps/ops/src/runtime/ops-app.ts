@@ -5,7 +5,7 @@ import {
   createHonoAppHandle,
   writeAccessLogToStdout
 } from '@dfragon/http-server'
-import { opsFailureResponse } from '../presentation/http/ops-failures.js'
+import { opsFailureResponse } from '../presentation/http/failures.js'
 import { type OpsRouteOptions, createOpsRoutes } from './routes/ops.js'
 
 export type OpsHttpAppOptions = OpsRouteOptions & {

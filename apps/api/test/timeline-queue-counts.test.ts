@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineQueueCount } from '@dfragon/database'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { startQueueCountsWriter } from '../src/application/character-timeline/queue-counts.js'
+import { createSeasonBackfillQueue } from '../src/application/character-timeline/season-backfill.js'
+import type { CharacterIdentity } from '../src/domain/character-identity.js'
+import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
 import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
@@ -208,4 +212,98 @@ test('타임라인을 준 공개 app은 시작할 때 queue 3개의 수를 차�
     logs.some((line) => JSON.parse(line).code === 'TIMELINE_QUEUE_COUNTS_WRITE_FAILED'),
     logs.join('\n')
   )
+})
+
+function gate() {
+  let release!: () => void
+  const promise = new Promise<void>((resolve) => {
+    release = resolve
+  })
+
+  return { promise, release }
+}
+
+test('queue 개수는 처리 중인 일과 동시 실행 한도에 막혀 기다리는 일을 따로 세고, 닫으면 대기만 비운다', async () => {
+  const running = gate()
+  const queue = createSeasonBackfillQueue(
+    () => running.promise,
+    () => assert.fail('백필 실패가 보고되면 안 된다')
+  )
+  const range = { start: new Date('2025-01-09T00:00:00Z'), end: new Date('2025-03-01T00:00:00Z') }
+  for (const characterId of ['a', 'b', 'c', 'd']) {
+    queue.request({ character: { serverId: 'cain', characterId }, seasonId: 1, range })
+  }
+  queue.request({ character: { serverId: 'cain', characterId: 'a' }, seasonId: 1, range })
+
+  assert.deepEqual(queue.counts(), { waiting: 2, running: 2 })
+
+  queue.close()
+
+  assert.deepEqual(queue.counts(), { waiting: 0, running: 2 })
+
+  running.release()
+  await nextTurn()
+
+  assert.deepEqual(queue.counts(), { waiting: 0, running: 0 })
+})
+
+// 합성 캐릭터다. 상세 조회가 성공해야 타임라인 queue에 일이 들어간다.
+function detailPayloads(identity: CharacterIdentity): CharacterPayloads {
+  const common = { ...identity, characterName: '합성 캐릭터', jobId: 'job' }
+
+  return {
+    basic: { ...common },
+    status: { ...common, status: [], buff: [] },
+    equipment: { ...common, equipment: [], setItemInfo: [] },
+    avatar: { ...common, avatar: [] },
+    creature: { ...common, creature: null },
+    oath: { ...common, oath: null },
+    mist_assimilation: { ...common, mistAssimilation: null },
+    skill_style: { ...common, skill: { style: { active: [] } } },
+    buff_equipment: { ...common, skill: { buff: null } },
+    buff_avatar: { ...common, skill: { buff: null } },
+    buff_creature: { ...common, skill: { buff: null } }
+  }
+}
+
+test('공개 app은 타임라인 동기화, 강화 백필, 옛 시즌 백필 queue 개수를 각각 센다', async (t) => {
+  const blocked = gate()
+  const { app: publicApp, readQueueCounts } = await createApiHttpApp({
+    search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
+    details: {
+      fetchDetails: async (identity) => detailPayloads(identity),
+      catalog: createCatalogService(async () => new Map())
+    },
+    timeline: {
+      sync: () => blocked.promise,
+      backfillEnhancements: async ({ characterId }) => {
+        if (characterId === 'first') {
+          await blocked.promise
+        }
+      },
+      backfillSeason: async () => assert.fail('옛 시즌 받기를 부르면 안 된다'),
+      read: async () => EMPTY_CHARACTER_TIMELINE,
+      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
+      close: async () => undefined
+    },
+    todayGrade: { fetchShopGrade: async () => assert.fail('오늘의 등급을 부르면 안 된다') },
+    writeAccessLog: () => undefined
+  })
+  t.after(async () => {
+    blocked.release()
+    await publicApp.close()
+  })
+  await publicApp.listen(0, '127.0.0.1')
+  const publicOrigin = await publicApp.getUrl()
+
+  for (const characterId of ['first', 'second']) {
+    const detail = await fetch(`${publicOrigin}/characters/cain/${characterId}`)
+    assert.equal(detail.status, 200, characterId)
+  }
+
+  assert.deepEqual(readQueueCounts(), [
+    { name: 'timeline-sync', waiting: 0, running: 2 },
+    { name: 'enhancement-backfill', waiting: 0, running: 1 },
+    { name: 'season-backfill', waiting: 0, running: 0 }
+  ])
 })
