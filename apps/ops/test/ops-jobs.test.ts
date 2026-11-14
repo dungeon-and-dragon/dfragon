@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { JobOverview, JobRunRecord } from '@dfragon/database'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
-import type { OpsBatchNeopleKeyStore } from '../src/application/batch-neople-keys/ports.js'
-import type { OpsJobStore } from '../src/application/jobs/ports.js'
+import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { JobRepository } from '../src/application/jobs/repository.js'
 
 type StoredJob = Omit<JobOverview, 'activeRun' | 'lastFinishedRun'>
 type StoredRun = JobRunRecord & { jobName: string }
@@ -11,7 +11,7 @@ type StoredRun = JobRunRecord & { jobName: string }
 const isActive = (run: StoredRun) => run.status === 'requested' || run.status === 'running'
 
 // DB 함수(readJobOverviews 등)의 반환 계약과 같은 job의 요청, 실행 중 행을 하나만 두는 제약을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
-function memoryOpsJobStore(jobs: StoredJob[], runs: StoredRun[] = []): OpsJobStore {
+function memoryOpsJobStore(jobs: StoredJob[], runs: StoredRun[] = []): JobRepository {
   const find = (name: string) => jobs.find((job) => job.name === name)
   const record = ({ jobName: _jobName, ...run }: StoredRun): JobRunRecord => run
 
@@ -102,14 +102,14 @@ const unusedCollection = async () => assert.fail('job 경로 테스트는 수집
 
 const unusedBatchNeopleKeys = async () =>
   assert.fail('job 경로 테스트는 batch key를 다루면 안 된다')
-const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
+const unusedBatchNeopleKeyStore: BatchNeopleKeyRepository = {
   readKeys: unusedBatchNeopleKeys,
   add: unusedBatchNeopleKeys,
   setEnabled: unusedBatchNeopleKeys,
   delete: unusedBatchNeopleKeys
 }
 
-async function startOpsApp(t: test.TestContext, store: OpsJobStore, logs: string[] = []) {
+async function startOpsApp(t: test.TestContext, store: JobRepository, logs: string[] = []) {
   const app = await createOpsHttpApp({
     jobs: store,
     readQueueCounts: () => assert.fail('job 경로 테스트는 queue를 읽으면 안 된다'),

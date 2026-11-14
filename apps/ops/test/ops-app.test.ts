@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import { once } from 'node:events'
 import { get } from 'node:http'
 import test from 'node:test'
-import type { OpsBatchNeopleKeyStore } from '../src/application/batch-neople-keys/ports.js'
-import type { OpsJobStore } from '../src/application/jobs/ports.js'
+import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { JobRepository } from '../src/application/jobs/repository.js'
 import { type OpsHttpAppOptions, createOpsHttpApp } from '../src/runtime/ops-app.js'
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
@@ -62,7 +62,7 @@ function readEntry(line: string) {
 }
 
 // 이름이 stats인 job 하나만 있는 것처럼 답하며 DB를 쓰지 않는다.
-const statsOnlyJobs: OpsJobStore = {
+const statsOnlyJobs: JobRepository = {
   readOverviews: async () => [],
   readRuns: async (name) => {
     if (name === 'stats') {
@@ -78,7 +78,7 @@ const statsOnlyJobs: OpsJobStore = {
 const unusedCollection = async () => assert.fail('이 테스트는 수집 대기열을 읽으면 안 된다')
 
 const unusedBatchNeopleKeys = async () => assert.fail('이 테스트는 batch key를 다루면 안 된다')
-const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
+const unusedBatchNeopleKeyStore: BatchNeopleKeyRepository = {
   readKeys: unusedBatchNeopleKeys,
   add: unusedBatchNeopleKeys,
   setEnabled: unusedBatchNeopleKeys,

@@ -22,7 +22,7 @@ export default {
     {
       name: 'domain-application-package-value',
       comment:
-        'domain, application은 @dfragon/database를 import type으로만 쓴다. 값이 필요한 코드는 infrastructure/database/에 두고 application/<기능>/ports.ts의 함수 타입으로 받는다.',
+        'domain, application은 @dfragon/database를 import type으로만 쓴다. 값이 필요한 코드는 infrastructure/database/의 Repository 구현에 두고 application/<기능>/repository.ts의 interface로 받는다.',
       severity: 'error',
       from: { path: '^src/(domain|application)/' },
       to: { path: packageEntry, dependencyTypesNot: ['type-only'] }
