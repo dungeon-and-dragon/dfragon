@@ -113,7 +113,12 @@ export class ContentClearCollectionService {
     for (const content of CLEAR_CONTENTS) {
       const contentPopulation = toContentPopulation(content, population, collectionMinFame)
       for (const week of plan.weeks.filter(({ contentId }) => contentId === content.id)) {
-        await this.repository.recordPopulation({ ...week, ...contentPopulation, collectedAt })
+        await this.repository.recordPopulation({
+          ...week,
+          ...contentPopulation,
+          collectedAt,
+          closed: true
+        })
       }
     }
     await this.repository.finishProgress(startedAt)
