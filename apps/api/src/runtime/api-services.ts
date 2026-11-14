@@ -1,10 +1,10 @@
 import type { TimelineCharacter } from '@dfragon/database'
 import type { ReportCode } from '@dfragon/http-server'
 import { neopleCharacterImageUrl } from '@dfragon/neople'
-import type { AdventureGuildReader } from '../application/adventure-guild/ports.js'
+import type { AdventureGuildRepository } from '../application/adventure-guild/repository.js'
 import {
-  createAdventureGuildService,
-  emptyAdventureGuildService,
+  AdventureGuildService,
+  emptyAdventureGuildRepository,
   noSeasonBackfill
 } from '../application/adventure-guild/service.js'
 import type {
@@ -72,7 +72,7 @@ export interface ApiServicesOptions {
   readonly recordCharacterBasic?: RecordCharacterBasic
   readonly recordCharacterSkillStyle?: RecordCharacterSkillStyle
   readonly recordCharacterScore?: RecordCharacterScore
-  readonly adventureGuild?: AdventureGuildReader
+  readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsReader
   readonly clearStats?: ClearStatsReader
   readonly todayGrade: { readonly fetchShopGrade: FetchShopGrade }
@@ -108,17 +108,22 @@ type TimelineQueues = ReturnType<typeof createTimelineSync>['queues']
 export type ApiServices = Awaited<ReturnType<typeof createApiServices>>['services']
 
 function createAdventureGuild(
-  reader: AdventureGuildReader | undefined,
+  repository: AdventureGuildRepository | undefined,
   queues: TimelineQueues | undefined
-) {
-  if (reader === undefined) {
-    return emptyAdventureGuildService
+): AdventureGuildService {
+  if (repository === undefined) {
+    return new AdventureGuildService(
+      emptyAdventureGuildRepository,
+      () => undefined,
+      noSeasonBackfill
+    )
   }
+
   // 타임라인 queue는 DB 설정이 있을 때만 있어, 테스트처럼 모험단 읽기만 준 앱은 동기화를 요청하지 않는다.
   const requestTimelineSync = queues?.sync.request ?? (() => undefined)
   const seasonBackfill = queues?.seasonBackfill ?? noSeasonBackfill
 
-  return createAdventureGuildService(reader, requestTimelineSync, seasonBackfill)
+  return new AdventureGuildService(repository, requestTimelineSync, seasonBackfill)
 }
 
 async function runCloseSteps(steps: readonly (() => unknown)[]): Promise<void> {
