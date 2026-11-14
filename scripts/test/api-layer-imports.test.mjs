@@ -62,7 +62,7 @@ const bareBuiltinImports = [
 
 const allowedImports = [
   ['domain/today-grade/a.ts', './grade.js'],
-  ['domain/today-grade/b.ts', '../error-chain.js'],
+  ['domain/today-grade/b.ts', '@dfragon/lib/error-chain'],
   ['domain/today-grade/c.ts', '@dfragon/lib'],
   ['domain/today-grade/d.ts', 'date-fns'],
   ['application/today-grade/a.ts', '../../domain/today-grade/failure.js'],
