@@ -2,10 +2,10 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import test from 'node:test'
+import type { FailureResponse } from '@dfragon/http-server'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
 import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
-import type { FailureResponse } from '../src/presentation/http/failure-response.js'
 import { characterSearchFailureResponse } from '../src/presentation/http/character-search/failures.js'
 
 interface Loopback {

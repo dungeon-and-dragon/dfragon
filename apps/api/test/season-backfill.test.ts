@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfragon/database'
-import type { HttpAppHandle } from '../src/runtime/app-handle.js'
+import type { HttpAppHandle } from '@dfragon/http-server'
 import {
   type AdventureSeasonBackfillRead,
   type AdventureGuildReader

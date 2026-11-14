@@ -7,7 +7,7 @@ import type {
   TimelineCharacter,
   TimelineEventRow
 } from '@dfragon/database'
-import type { HttpAppHandle } from '../src/runtime/app-handle.js'
+import type { HttpAppHandle } from '@dfragon/http-server'
 import {
   type ActivitySeasonRange,
   emptySeasonActivity,

@@ -1,11 +1,8 @@
 import assert from 'node:assert/strict'
 import { Writable } from 'node:stream'
 import test from 'node:test'
+import { type AccessLogSink, createStreamAccessLogSink } from '@dfragon/http-server'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import {
-  type AccessLogSink,
-  createStreamAccessLogSink
-} from '../src/presentation/http/access-log-sink.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
 import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
