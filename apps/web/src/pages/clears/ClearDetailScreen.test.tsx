@@ -425,7 +425,7 @@ it('전직별 클리어는 클리어율 순 10줄에 클리어 / 캐릭터 수�
   expect([...(first?.children ?? [])].map((cell) => cell.textContent)).toEqual([
     '眞 전직6 직업6',
     '25 / 50',
-    '중앙값 120,006',
+    '최고 140,000, 95% 132,000, 75% 126,000, 중앙값 120,006, 25% 118,000, 5% 110,000',
     '50.0%'
   ])
   expect(jobNames()).toHaveLength(10)
@@ -438,6 +438,27 @@ it('전직별 클리어는 클리어율 순 10줄에 클리어 / 캐릭터 수�
 
   await click(buttonNamed('전직 12개 모두 보기'))
   expect(jobNames()).toHaveLength(12)
+})
+
+it('전직별 클리어 줄에 마우스를 올리면 전직과 직업명 아래 분포 값 여섯 개를 띄운다', async () => {
+  await render({ contentKey: 'michaela' })
+
+  const row = panel('전직별 클리어')?.querySelector('tbody tr')
+  await act(async () => {
+    row?.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body }))
+  })
+
+  const tooltip = panel('전직별 클리어')?.querySelector('span[aria-hidden="true"]')
+  const lines = [...(tooltip?.lastElementChild?.children ?? [])].map((line) => line.textContent)
+  expect(tooltip?.firstElementChild?.textContent).toBe('眞 전직6 직업6')
+  expect(lines).toEqual([
+    '최고140,000',
+    '95%132,000',
+    '75%126,000',
+    '중앙값120,006',
+    '25%118,000',
+    '5%110,000'
+  ])
 })
 
 it('컨텐츠 집계가 실패하면 컨텐츠 줄 아래 오류 한 줄을 둔다', async () => {
