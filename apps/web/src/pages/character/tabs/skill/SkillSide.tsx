@@ -12,6 +12,7 @@ import { CheckIcon } from '../../../../components/CheckIcon'
 import { CopyIcon } from '../../../../components/CopyIcon'
 import { useClipboardCopy } from '../../../../hooks/useClipboardCopy'
 import { GameText } from '../GameText'
+import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { SkillSprite } from './SkillSprite'
 import { styles as tableStyles } from '../equipment/item-table.style'
 import { styles } from './SkillSide.style'
@@ -134,15 +135,27 @@ function Branch({
   )
 }
 
+// 표가 화면 오른쪽 끝 열이라 Tooltip을 왼쪽에 띄워 잘리지 않게 한다.
+const ADOPTION_SIDE = 'left'
+
 function UpgradeSkillIcon({
   row,
-  evolutionMark
+  evolutionMark,
+  source
 }: {
   row: EvolutionRow | EnhancementRow
   evolutionMark: string | null
+  source: SkillAdoptionSource
 }): React.JSX.Element {
   return (
-    <span {...stylex.props(styles.skillIcon, row.picked !== null && styles.skillIconPicked)}>
+    <SkillAdoptionHover
+      skill={row}
+      source={source}
+      side={ADOPTION_SIDE}
+      trigger={
+        <span {...stylex.props(styles.skillIcon, row.picked !== null && styles.skillIconPicked)} />
+      }
+    >
       <SkillSprite icon={row.icon} />
       {evolutionMark !== null && (
         <img
@@ -152,27 +165,40 @@ function UpgradeSkillIcon({
           {...stylex.props(markStyles.evolutionMark)}
         />
       )}
-    </span>
+    </SkillAdoptionHover>
   )
 }
 
-function RowTitle({ row }: { row: EvolutionRow | EnhancementRow }): React.JSX.Element {
+function RowTitle({
+  row,
+  source
+}: {
+  row: EvolutionRow | EnhancementRow
+  source: SkillAdoptionSource
+}): React.JSX.Element {
   return (
-    <span {...stylex.props(styles.rowTitle)}>
+    <SkillAdoptionHover
+      skill={row}
+      source={source}
+      side={ADOPTION_SIDE}
+      trigger={<span {...stylex.props(styles.rowTitle)} />}
+    >
       {row.name}
       {row.requiredLevel !== null && (
         <span {...stylex.props(styles.rowLevel)}>{`${row.requiredLevel}레벨`}</span>
       )}
-    </span>
+    </SkillAdoptionHover>
   )
 }
 
 function EvolutionSection({
   rows,
-  marks
+  marks,
+  source
 }: {
   rows: readonly EvolutionRow[]
   marks: SkillMarks
+  source: SkillAdoptionSource
 }): React.JSX.Element {
   return (
     <section aria-label="스킬 개화">
@@ -185,9 +211,10 @@ function EvolutionSection({
               evolutionMark={
                 row.picked !== null ? skillMarkOf(marks, 'evolution', row.picked) : null
               }
+              source={source}
             />
             <div {...stylex.props(styles.rowBody)}>
-              <RowTitle row={row} />
+              <RowTitle row={row} source={source} />
               <div {...stylex.props(styles.branches)}>
                 {row.branches.map((branch) => (
                   <Branch
@@ -217,10 +244,12 @@ function EvolutionSection({
 
 function EnhancementSection({
   rows,
-  marks
+  marks,
+  source
 }: {
   rows: readonly EnhancementRow[]
   marks: SkillMarks
+  source: SkillAdoptionSource
 }): React.JSX.Element {
   if (rows.length === 0) {
     return <h2 {...stylex.props(tableStyles.heading)}>스킬 강화 없음</h2>
@@ -232,9 +261,9 @@ function EnhancementSection({
       <ul {...stylex.props(styles.rows)}>
         {rows.map((row) => (
           <li key={row.skillId} {...stylex.props(styles.row)}>
-            <UpgradeSkillIcon row={row} evolutionMark={null} />
+            <UpgradeSkillIcon row={row} evolutionMark={null} source={source} />
             <div {...stylex.props(styles.rowBody)}>
-              <RowTitle row={row} />
+              <RowTitle row={row} source={source} />
               <div {...stylex.props(styles.branches)}>
                 {row.branches.map((branch) => (
                   <Branch
@@ -253,11 +282,17 @@ function EnhancementSection({
   )
 }
 
-export function SkillUpgradeSections({ board }: { board: SkillUpgradeBoard }): React.JSX.Element {
+export function SkillUpgradeSections({
+  board,
+  source
+}: {
+  board: SkillUpgradeBoard
+  source: SkillAdoptionSource
+}): React.JSX.Element {
   return (
     <>
-      <EvolutionSection rows={board.evolutions} marks={board.marks} />
-      <EnhancementSection rows={board.enhancements} marks={board.marks} />
+      <EvolutionSection rows={board.evolutions} marks={board.marks} source={source} />
+      <EnhancementSection rows={board.enhancements} marks={board.marks} source={source} />
     </>
   )
 }
