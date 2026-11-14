@@ -11,6 +11,7 @@ import type {
 } from '@dfragon/database'
 import type { HttpAppHandle } from '../src/runtime/app-handle.js'
 import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { formatResetDate } from '../src/domain/seoul-time.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
 import type { ClearStatsReader } from '../src/application/content-clears/ports.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
@@ -95,9 +96,10 @@ function fakeReader(overrides: Partial<ClearStatsReader> = {}): ClearStatsReader
 async function listen(clearStats?: ClearStatsReader): Promise<{
   app: HttpAppHandle
   origin: string
+  refreshClearStats: () => Promise<void>
 }> {
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
-  const { app } = await createApiHttpApp({
+  const { app, refreshClearStats } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: createCatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
@@ -106,7 +108,27 @@ async function listen(clearStats?: ClearStatsReader): Promise<{
   })
   await app.listen(0, '127.0.0.1')
 
-  return { app, origin: await app.getUrl() }
+  return { app, origin: await app.getUrl(), refreshClearStats }
+}
+
+function gate() {
+  let open!: () => void
+  let reached!: () => void
+  const opened = new Promise<void>((resolve) => {
+    open = resolve
+  })
+  const arrived = new Promise<void>((resolve) => {
+    reached = resolve
+  })
+
+  return {
+    open,
+    arrived,
+    async pass() {
+      reached()
+      await opened
+    }
+  }
 }
 
 async function getJson(origin: string, path: string) {
@@ -315,11 +337,11 @@ test('컨텐츠 상세는 저장되지 않은 주와 잘못된 week를 400, 모�
   }
 })
 
-test('클리어 집계는 마지막 수집 시각이 같으면 캐시를 쓰고, 바뀌면 다음 요청부터 새 값을 준다', async () => {
+test('클리어 집계는 마지막 수집 시각이 같으면 캐시를 쓰고, 바뀌면 새 값을 미리 계산하는 동안 이전 값을 준다', async () => {
   let collectedAt = at('2026-11-10T06:30:00')
   let cleared = 10
   let reads = 0
-  const { app, origin } = await listen(
+  const { app, origin, refreshClearStats } = await listen(
     fakeReader({
       readCollectedAt: async () => collectedAt,
       readWeekRatioCounts: async () => {
@@ -341,8 +363,11 @@ test('클리어 집계는 마지막 수집 시각이 같으면 캐시를 쓰고,
     assert.equal(reads, 1)
 
     collectedAt = at('2026-11-11T06:30:00')
+    assert.equal(await michaelaCleared(), 10)
+    await refreshClearStats()
     assert.equal(await michaelaCleared(), 20)
     assert.equal((await getJson(origin, '/stats/clears/michaela-hard')).body.week.cleared, 20)
+    assert.equal(reads, 2)
   } finally {
     await app.close()
   }
@@ -617,10 +642,10 @@ test('전체 개요는 저장되지 않은 주와 잘못된 week를 400으로 �
   }
 })
 
-test('전체 개요는 마지막 수집 시각이 같으면 다시 읽지 않고, 바뀌면 다음 요청부터 다시 읽는다', async () => {
+test('전체 개요는 마지막 수집 시각이 같으면 다시 읽지 않고, 바뀌면 미리 계산한 새 값을 준다', async () => {
   let collectedAt = at('2026-11-10T06:30:00')
   let reads = 0
-  const { app, origin } = await listen(
+  const { app, origin, refreshClearStats } = await listen(
     fakeReader({
       readCollectedAt: async () => collectedAt,
       readRaidTimes: async () => {
@@ -638,7 +663,177 @@ test('전체 개요는 마지막 수집 시각이 같으면 다시 읽지 않고
     assert.equal(reads, 1)
 
     collectedAt = at('2026-11-11T06:30:00')
+    assert.equal(await thursdayCleared(), 1)
+    await refreshClearStats()
+    assert.equal(reads, 2)
     assert.equal(await thursdayCleared(), 2)
+    assert.equal(reads, 2)
+  } finally {
+    await app.close()
+  }
+})
+
+test('미리 계산은 최신 주의 전체 개요와 컨텐츠마다 가장 최근 주의 상세를 계산해, 그 뒤 요청은 다시 계산하지 않는다', async () => {
+  const overviewWeeks: string[] = []
+  const detailWeeks: string[] = []
+  const { app, origin, refreshClearStats } = await listen(
+    fakeReader({
+      readFames: async (weekStart) => {
+        overviewWeeks.push(formatResetDate(weekStart))
+
+        return []
+      },
+      readContentJobFames: async ({ contentId, weekStart }) => {
+        detailWeeks.push(`${contentId}/${formatResetDate(weekStart)}`)
+
+        return []
+      }
+    })
+  )
+  try {
+    await refreshClearStats()
+    const expectedDetails = [
+      'diregie-hard/2026-02-12',
+      'engraved-nightmare-1/2026-11-05',
+      'michaela-hard/2026-11-05'
+    ]
+
+    assert.deepEqual(overviewWeeks, ['2026-11-05'])
+    assert.deepEqual(detailWeeks.toSorted(), expectedDetails)
+
+    for (const path of [
+      '/stats/clears',
+      '/stats/clears/overview',
+      '/stats/clears/michaela-hard',
+      '/stats/clears/diregie-hard',
+      '/stats/clears/engraved-nightmare-1'
+    ]) {
+      assert.equal((await getJson(origin, path)).status, 200, path)
+    }
+    assert.deepEqual(overviewWeeks, ['2026-11-05'])
+    assert.deepEqual(detailWeeks.toSorted(), expectedDetails)
+  } finally {
+    await app.close()
+  }
+})
+
+// 운영 장애(2026-11-14): 상세 하나가 쿼리 12개를 함께 보내고 상세 요청 여러 개가 함께 돌아 DB 연결을 모두 잡았다.
+test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기는 한 번에 하나씩 보낸다', async () => {
+  let running = 0
+  let maxRunning = 0
+  const counted =
+    <Args extends unknown[], T>(read: (...args: Args) => Promise<T>) =>
+    async (...args: Args): Promise<T> => {
+      running += 1
+      maxRunning = Math.max(maxRunning, running)
+      await new Promise((resolve) => setImmediate(resolve))
+      const value = await read(...args)
+      running -= 1
+
+      return value
+    }
+  const base = fakeReader()
+  const reader: ClearStatsReader = {
+    readCollectedAt: base.readCollectedAt,
+    readPopulations: counted(base.readPopulations),
+    readWeekRatioCounts: counted(base.readWeekRatioCounts),
+    readAdventureSizes: counted(base.readAdventureSizes),
+    readContentJobFames: counted(base.readContentJobFames),
+    readContentTimes: counted(base.readContentTimes),
+    readFirstWeeks: counted(base.readFirstWeeks),
+    readFameBands: counted(base.readFameBands),
+    readWeekGroups: counted(base.readWeekGroups),
+    readStageMoves: counted(base.readStageMoves),
+    readStreaks: counted(base.readStreaks),
+    readLegionWeeks: counted(base.readLegionWeeks),
+    readRaidModes: counted(base.readRaidModes),
+    readRaidStageCounts: counted(base.readRaidStageCounts),
+    readContentJobScores: counted(base.readContentJobScores),
+    readWeekGroupScores: counted(base.readWeekGroupScores),
+    readScoreBands: counted(base.readScoreBands),
+    readScores: counted(base.readScores),
+    readJobScores: counted(base.readJobScores),
+    readFames: counted(base.readFames),
+    readJobFames: counted(base.readJobFames),
+    readCoClears: counted(base.readCoClears),
+    readRaidTimes: counted(base.readRaidTimes)
+  }
+
+  const { app, origin } = await listen(reader)
+  try {
+    const paths = [
+      '/stats/clears',
+      '/stats/clears/overview',
+      '/stats/clears/overview?week=2026-02-05',
+      '/stats/clears/michaela-hard',
+      '/stats/clears/michaela-hard?week=2026-10-29',
+      '/stats/clears/diregie-hard?week=2026-02-05',
+      '/stats/clears/engraved-nightmare-1'
+    ]
+    const responses = await Promise.all(paths.map((path) => getJson(origin, path)))
+
+    assert.deepEqual(
+      responses.map(({ status }) => status),
+      paths.map(() => 200)
+    )
+    assert.equal(maxRunning, 1)
+  } finally {
+    await app.close()
+  }
+})
+
+test('새 값을 미리 계산하는 동안 이전 결과에 없는 주를 고른 요청은 남은 미리 계산을 다 기다리지 않고 지금 도는 계산 다음에 계산한다', async () => {
+  let collectedAt = at('2026-11-10T06:30:00')
+  const overviewGate = gate()
+  let gated = false
+  let requestArrived: () => void = () => undefined
+  const detailWeeks: string[] = []
+  const { app, origin, refreshClearStats } = await listen(
+    fakeReader({
+      readCollectedAt: async () => {
+        requestArrived()
+
+        return collectedAt
+      },
+      readFames: async () => {
+        if (gated) {
+          await overviewGate.pass()
+        }
+
+        return []
+      },
+      readContentJobFames: async ({ contentId, weekStart }) => {
+        detailWeeks.push(`${contentId}/${formatResetDate(weekStart)}`)
+
+        return []
+      }
+    })
+  )
+  try {
+    await refreshClearStats()
+    detailWeeks.length = 0
+    gated = true
+    collectedAt = at('2026-11-11T06:30:00')
+    const refreshed = refreshClearStats()
+    await overviewGate.arrived
+
+    const arrived = new Promise<void>((resolve) => {
+      requestArrived = resolve
+    })
+    const old = getJson(origin, '/stats/clears/diregie-hard?week=2026-02-05')
+    await arrived
+    // 마지막 수집 시각을 읽은 요청이 줄에 들어갈 때까지 한 번 양보한 뒤 미리 계산을 이어 가게 한다.
+    await new Promise((resolve) => setImmediate(resolve))
+    overviewGate.open()
+
+    assert.equal((await old).status, 200)
+    await refreshed
+    assert.equal(detailWeeks[0], 'diregie-hard/2026-02-05')
+    assert.deepEqual(detailWeeks.slice(1).toSorted(), [
+      'diregie-hard/2026-02-12',
+      'engraved-nightmare-1/2026-11-05',
+      'michaela-hard/2026-11-05'
+    ])
   } finally {
     await app.close()
   }
