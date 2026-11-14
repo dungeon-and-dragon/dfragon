@@ -20,6 +20,7 @@ export type LineSeries = Readonly<{
   key: string
   name: string
   color: string
+  faded?: boolean
   values: readonly (number | null)[]
 }>
 
@@ -120,7 +121,7 @@ function LinePlot({
   }
 
   function rowsAt(index: number) {
-    return drawn.flatMap(({ key, name, color, values }) => {
+    return drawn.flatMap(({ key, name, color, faded, values }) => {
       const value = values[index]
 
       if (value == null) {
@@ -129,7 +130,7 @@ function LinePlot({
 
       const formatted = formatValue(value)
 
-      return [{ key, name, color, value: formatted }]
+      return [{ key, name, color, faded, value: formatted }]
     })
   }
 
@@ -151,7 +152,13 @@ function LinePlot({
   return (
     <div {...stylex.props(plotStyles.plot)}>
       <ChartLegend
-        items={drawn.map(({ key, name, color }) => ({ key, name, color, mark: 'line' }))}
+        items={drawn.map(({ key, name, color, faded }) => ({
+          key,
+          name,
+          color,
+          faded,
+          mark: 'line'
+        }))}
       />
       <div
         ref={areaRef}
@@ -209,17 +216,21 @@ function LinePlot({
             />
           )}
           <g data-chart-reveal="">
-            {drawn.flatMap(({ key, color, values }) =>
+            {drawn.flatMap(({ key, color, faded, values }) =>
               definedRuns(values).map((run) => (
                 <path
                   key={`${key}-${run[0]?.index}`}
                   d={polylinePath(run.map(pointOf))}
-                  {...stylex.props(plotStyles.line, plotStyles.stroke(color))}
+                  {...stylex.props(
+                    plotStyles.line,
+                    plotStyles.stroke(color),
+                    faded && plotStyles.faded
+                  )}
                 />
               ))
             )}
           </g>
-          {drawn.map(({ key, color, values }) => {
+          {drawn.map(({ key, color, faded, values }) => {
             const end = lastDefined(values)
 
             if (end == null) {
@@ -233,12 +244,16 @@ function LinePlot({
                 cx={xOf(end.index)}
                 cy={yOf(end.value)}
                 r={END_DOT_RADIUS}
-                {...stylex.props(plotStyles.endDot, plotStyles.fill(color))}
+                {...stylex.props(
+                  plotStyles.endDot,
+                  plotStyles.fill(color),
+                  faded && plotStyles.faded
+                )}
               />
             )
           })}
           {hoverIndex >= 0 &&
-            drawn.map(({ key, color, values }) => {
+            drawn.map(({ key, color, faded, values }) => {
               const value = values[hoverIndex]
 
               if (value == null) {
@@ -251,7 +266,11 @@ function LinePlot({
                   cx={xOf(hoverIndex)}
                   cy={yOf(value)}
                   r={HOVER_DOT_RADIUS}
-                  {...stylex.props(plotStyles.openDot, plotStyles.stroke(color))}
+                  {...stylex.props(
+                    plotStyles.openDot,
+                    plotStyles.stroke(color),
+                    faded && plotStyles.faded
+                  )}
                 />
               )
             })}

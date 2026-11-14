@@ -4,7 +4,13 @@ import { plotStyles } from './plot.style'
 
 export type LegendMark = 'line' | 'block'
 
-export type LegendItem = Readonly<{ key: string; name: string; color: string; mark: LegendMark }>
+export type LegendItem = Readonly<{
+  key: string
+  name: string
+  color: string
+  faded?: boolean
+  mark: LegendMark
+}>
 
 const MIN_LEGEND_ITEMS = 2
 
@@ -21,14 +27,15 @@ export function ChartLegend({
 
   return (
     <ul {...stylex.props(plotStyles.legend, below && plotStyles.legendBelow)}>
-      {items.map(({ key, name, color, mark }) => (
+      {items.map(({ key, name, color, faded, mark }) => (
         <li key={key} {...stylex.props(plotStyles.legendItem)}>
           <i
             aria-hidden="true"
             {...stylex.props(
               plotStyles.legendMark,
               mark === 'line' && plotStyles.legendLine,
-              plotStyles.background(color)
+              plotStyles.background(color),
+              faded && plotStyles.faded
             )}
           />
           {name}
