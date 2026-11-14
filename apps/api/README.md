@@ -43,7 +43,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/runtime/api-services.ts` | 공개 app 기능의 Service를 만들어 `services`에 더합니다. 닫을 것이 있으면 종료 순서에 더합니다 |
 | `src/runtime/routes/api.ts` | 기능의 Controller를 만들어 공개 app의 경로에 붙입니다 |
 
-모험단, 길드 조회(`adventure-guild`)가 이 형태입니다.
+모험단, 길드 조회(`adventure-guild`), 캐릭터 검색(`character-search`), 캐릭터 상세(`character-detail`), 캐릭터 카탈로그(`character-catalog`), 캐릭터 이미지(`character-image`), 오늘의 등급(`today-grade`)이 이 형태입니다.
 나머지 기능은 아직 `create<기능>Service`, `create<기능>Routes` 함수와 `ports.ts`의 Store, Reader 형태로 남아 있습니다.
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
