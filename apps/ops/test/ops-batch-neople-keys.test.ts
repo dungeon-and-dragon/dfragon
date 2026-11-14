@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { BatchNeopleKeySummary } from '@dfragon/database'
-import type { OpsBatchNeopleKeyStore } from '../src/application/batch-neople-keys/ports.js'
+import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 
 // 합성 key다. 실제 Neople key가 아니다.
@@ -16,7 +16,7 @@ const unusedCollection = async () =>
 function memoryStore() {
   const added: { label: string; key: string }[] = []
   const rows = new Map<number, BatchNeopleKeySummary & { key: string }>()
-  const store: OpsBatchNeopleKeyStore = {
+  const store: BatchNeopleKeyRepository = {
     // 원문을 담은 행을 그대로 돌려줘 경로가 응답 field를 고르는지 확인한다.
     readKeys: async () => [...rows.values()],
     add: async (input) => {
@@ -60,7 +60,7 @@ function memoryStore() {
 
 async function startOpsApp(
   t: test.TestContext,
-  batchNeopleKeys: OpsBatchNeopleKeyStore,
+  batchNeopleKeys: BatchNeopleKeyRepository,
   logs: string[] = []
 ) {
   const app = await createOpsHttpApp({
@@ -214,7 +214,7 @@ test('JSON이 아닌 요청은 415, 본문 한도를 넘는 요청은 400으로 
 test('접근 로그에는 추가 요청이 실패해도 key 원문이 남지 않는다', async (t) => {
   const logs: string[] = []
   const { store } = memoryStore()
-  const failing: OpsBatchNeopleKeyStore = {
+  const failing: BatchNeopleKeyRepository = {
     ...store,
     add: async ({ key }) => {
       throw new Error(`duplicate key value (key)=(${key})`)
