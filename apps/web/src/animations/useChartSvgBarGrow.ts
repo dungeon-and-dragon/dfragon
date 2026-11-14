@@ -17,9 +17,11 @@ export function useChartSvgBarGrow(chartRef: RefObject<HTMLElement | null>): voi
 
     const timeline = gsap.timeline()
     for (const [index, bar] of chart.querySelectorAll('[data-chart-bar]').entries()) {
+      // 기준점을 끝값에만 두면 GSAP가 scaleY 0인 상태에서 기준점 이동을 메우는 이동값을 더해, 막대가 자라는 동안
+      // 차트 위로 올라가 있다가 clearProps 때 제자리로 돌아온다. 시작값에도 같은 기준점을 둔다.
       timeline.fromTo(
         bar,
-        { scaleY: 0 },
+        { scaleY: 0, transformOrigin: '50% 100%' },
         {
           scaleY: 1,
           transformOrigin: '50% 100%',
