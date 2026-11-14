@@ -7,6 +7,7 @@ const PLOT_WIDTH = 340
 const RATE_WIDTH = 64
 
 export const styles = stylex.create({
+  chart: { position: 'relative' },
   table: {
     width: '100%',
     borderCollapse: 'collapse',

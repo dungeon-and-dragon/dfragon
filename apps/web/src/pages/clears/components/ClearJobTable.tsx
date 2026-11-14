@@ -3,9 +3,16 @@ import * as stylex from '@stylexjs/stylex'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import { useRef, useState } from 'react'
 import type { ClearJob } from '#core/ranking/clear-stats'
+import { useChartTooltipSlide } from '../../../animations/useChartTooltipSlide'
 import { BoxPlot, BoxPlotAxis } from '../../../components/chart/BoxPlot'
+import {
+  boxPlotTooltipPlaceOf,
+  boxStatsTooltipRows
+} from '../../../components/chart/box-plot-layout'
 import { BoxPlotLegend } from '../../../components/chart/ChartLegend'
 import { boxPlotScale, type Scale } from '../../../components/chart/chart-geometry'
+import { ChartTooltip } from '../../../components/chart/plot-parts'
+import { type Hover, NO_HOVER, type TooltipRow } from '../../../components/chart/plot-layout'
 import { useChartSize } from '../../../components/chart/useChartSize'
 import { JOB_SORTS, type JobRow, type JobSort, jobRows } from '../clear-detail'
 import {
@@ -76,6 +83,14 @@ export function ClearJobTable({ jobs }: { jobs: readonly ClearJob[] }): React.JS
   )
 }
 
+function statsRowsOf({ stats }: JobRow): TooltipRow[] {
+  if (stats === null) {
+    return []
+  }
+
+  return boxStatsTooltipRows(stats, colors.chart1, formatInteger)
+}
+
 function JobTable({
   rows,
   scale,
@@ -85,62 +100,115 @@ function JobTable({
   scale: Scale | undefined
   metric: JobMetric
 }): React.JSX.Element {
+  const [hover, setHover] = useState<Hover>(NO_HOVER)
   const formatTick = jobMetricTickOf(metric)
+  const chartRef = useRef<HTMLDivElement>(null)
   const plotRef = useRef<HTMLSpanElement>(null)
+  const tooltipRef = useRef<HTMLSpanElement>(null)
+  const anchorsRef = useRef(new Map<string, HTMLElement>())
   const { width } = useChartSize(plotRef, PLOT_FALLBACK)
+  const shownRow = rows.find(({ key }) => key === hover.key)
+  useChartTooltipSlide({
+    chartRef,
+    tooltipRef,
+    anchorsRef,
+    shownKey: shownRow?.key,
+    open: hover.open,
+    bars: rows,
+    placeOf: boxPlotTooltipPlaceOf
+  })
+
+  function handleLeave(): void {
+    setHover(({ key }) => ({ key, open: false }))
+  }
+
+  const shownTitle =
+    shownRow != null ? [shownRow.name, shownRow.sub].filter(Boolean).join(' ') : undefined
+  const shownRows = shownRow != null ? statsRowsOf(shownRow) : []
 
   return (
-    <table {...stylex.props(styles.table)}>
-      <thead>
-        <tr {...stylex.props(styles.headRow)}>
-          <th scope="col" {...stylex.props(styles.head)}>
-            전직
-          </th>
-          <th scope="col" {...stylex.props(styles.head, styles.headCounts)}>
-            클리어 / 캐릭터 수
-          </th>
-          <th scope="col" {...stylex.props(styles.head, styles.headPlot)}>
-            {JOB_METRIC_PLOT_LABELS[metric]}
-            <span ref={plotRef} {...stylex.props(styles.axis)}>
-              {scale !== undefined && (
-                <BoxPlotAxis scale={scale} width={width} formatTick={formatTick} />
-              )}
-            </span>
-          </th>
-          <th scope="col" {...stylex.props(styles.head, styles.headRate)}>
-            클리어율
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <JobTableRow key={row.key} row={row} scale={scale} width={width} />
-        ))}
-      </tbody>
-    </table>
+    <div ref={chartRef} {...stylex.props(styles.chart)}>
+      <table {...stylex.props(styles.table)}>
+        <thead>
+          <tr {...stylex.props(styles.headRow)}>
+            <th scope="col" {...stylex.props(styles.head)}>
+              전직
+            </th>
+            <th scope="col" {...stylex.props(styles.head, styles.headCounts)}>
+              클리어 / 캐릭터 수
+            </th>
+            <th scope="col" {...stylex.props(styles.head, styles.headPlot)}>
+              {JOB_METRIC_PLOT_LABELS[metric]}
+              <span ref={plotRef} {...stylex.props(styles.axis)}>
+                {scale !== undefined && (
+                  <BoxPlotAxis scale={scale} width={width} formatTick={formatTick} />
+                )}
+              </span>
+            </th>
+            <th scope="col" {...stylex.props(styles.head, styles.headRate)}>
+              클리어율
+            </th>
+          </tr>
+        </thead>
+        <tbody onMouseLeave={handleLeave}>
+          {rows.map((row) => (
+            <JobTableRow
+              key={row.key}
+              row={row}
+              scale={scale}
+              width={width}
+              onHover={setHover}
+              anchorsRef={anchorsRef}
+            />
+          ))}
+        </tbody>
+      </table>
+      <ChartTooltip tooltipRef={tooltipRef} title={shownTitle} rows={shownRows} />
+    </div>
   )
 }
 
 function JobTableRow({
-  row: { name, sub, counts, rate, stats },
+  row,
   scale,
-  width
+  width,
+  onHover,
+  anchorsRef
 }: {
   row: JobRow
   scale: Scale | undefined
   width: number
+  onHover: (hover: Hover) => void
+  anchorsRef: React.RefObject<Map<string, HTMLElement>>
 }): React.JSX.Element {
+  const { key, name, sub, counts, rate, stats } = row
+  const description = statsRowsOf(row)
+    .map(({ name: statName, value }) => `${statName} ${value}`)
+    .join(', ')
+
+  function handleMouseEnter(): void {
+    onHover({ key, open: true })
+  }
+
+  function plotRef(element: HTMLTableCellElement): () => void {
+    anchorsRef.current.set(key, element)
+
+    return () => {
+      anchorsRef.current.delete(key)
+    }
+  }
+
   return (
-    <tr {...stylex.props(styles.row)}>
+    <tr onMouseEnter={stats !== null ? handleMouseEnter : undefined} {...stylex.props(styles.row)}>
       <th scope="row" {...stylex.props(styles.cell, styles.name)}>
         {name}
         {sub !== null && <small {...stylex.props(styles.sub)}> {sub}</small>}
       </th>
       <td {...stylex.props(styles.cell, styles.value, styles.muted)}>{counts}</td>
-      <td {...stylex.props(styles.cell)}>
+      <td ref={plotRef} {...stylex.props(styles.cell)}>
         {stats !== null && scale !== undefined && (
           <>
-            <span {...stylex.props(shapes.srOnly)}>{`중앙값 ${formatInteger(stats.median)}`}</span>
+            <span {...stylex.props(shapes.srOnly)}>{description}</span>
             <BoxPlot stats={stats} color={colors.chart1} scale={scale} width={width} />
           </>
         )}
