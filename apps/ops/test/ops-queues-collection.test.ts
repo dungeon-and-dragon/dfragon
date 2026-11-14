@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { CollectionSummary } from '@dfragon/database'
-import type { OpsBatchNeopleKeyStore } from '../src/application/batch-neople-keys/ports.js'
-import type { OpsCollectionStore } from '../src/application/collection/ports.js'
+import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { CollectionRepository } from '../src/application/collection/repository.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
 
 const unusedJobs = async () => assert.fail('queue, 수집 대기열 경로 테스트는 job을 읽으면 안 된다')
 
 const unusedBatchNeopleKeys = async () =>
   assert.fail('queue, 수집 대기열 경로 테스트는 batch key를 다루면 안 된다')
-const unusedBatchNeopleKeyStore: OpsBatchNeopleKeyStore = {
+const unusedBatchNeopleKeyStore: BatchNeopleKeyRepository = {
   readKeys: unusedBatchNeopleKeys,
   add: unusedBatchNeopleKeys,
   setEnabled: unusedBatchNeopleKeys,
@@ -38,7 +38,7 @@ async function startOpsApp(
   return (path: string, init: RequestInit = {}) => fetch(`${origin}${path}`, init)
 }
 
-const unusedCollection: OpsCollectionStore = {
+const unusedCollection: CollectionRepository = {
   readSummary: async () => assert.fail('queue 경로 테스트는 수집 대기열을 읽으면 안 된다'),
   requeue: async () => assert.fail('queue 경로 테스트는 수집 대기열을 바꾸면 안 된다')
 }
@@ -55,7 +55,7 @@ const summary: CollectionSummary = {
 // 집계와 되돌리기 SQL은 컨테이너 검사가 실제 DB로 확인하고, 이 fake는 경로가 받은 failure와 돌려줄 값만 다룬다.
 function recordingCollectionStore() {
   const requeued: (string | undefined)[] = []
-  const store: OpsCollectionStore = {
+  const store: CollectionRepository = {
     readSummary: async () => summary,
     requeue: async (failure) => {
       requeued.push(failure)
