@@ -2,12 +2,20 @@ import type {
   CharacterSkillStyleInput,
   CharacterStats,
   CharacterStatsSnapshot,
+  FameRankingFilter,
   JobSkillAdoption,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
   SkillStyleSampleCharacter,
-  SkillStyleSampleJob
+  SkillStyleSampleJob,
+  StoredCharacter
 } from '@dfragon/database'
+
+export interface RankingStatsRepository {
+  readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
+  readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null>
+  readJobSkillAdoptionSnapshot(job: JobSkillAdoptionQuery): Promise<JobSkillAdoptionSnapshot | null>
+}
 
 export interface StatsJobRepository {
   readCharacterStats(): Promise<CharacterStats>

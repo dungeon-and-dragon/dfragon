@@ -11,7 +11,7 @@ import type {
 import type { HttpAppHandle } from '@dfragon/http-server'
 import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
-import type { RankingStatsReader } from '../src/application/ranking-stats/ports.js'
+import type { RankingStatsRepository } from '../src/application/ranking-stats/repository.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 필터, 정렬과 집계는 container-ranking-stats-check.mjs가 실제 DB로 확인한다.
 const fetchedAt = new Date('2026-11-06T00:00:00.000Z')
@@ -87,14 +87,14 @@ function adoptionSnapshot(job: JobSkillAdoptionQuery): JobSkillAdoptionSnapshot 
   return { ...job, computedAt, adoption }
 }
 
-const unusedReader: RankingStatsReader = {
+const unusedReader: RankingStatsRepository = {
   readFameRanking: async () => assert.fail('랭킹을 읽으면 안 된다'),
   readCharacterStatsSnapshot: async () => assert.fail('통계를 읽으면 안 된다'),
   readJobSkillAdoptionSnapshot: async () => assert.fail('스킬 채택률을 읽으면 안 된다')
 }
 
 async function listen(
-  rankingStats?: RankingStatsReader
+  rankingStats?: RankingStatsRepository
 ): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
   const { app } = await createApiHttpApp({
