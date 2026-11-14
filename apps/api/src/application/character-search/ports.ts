@@ -1,4 +1,3 @@
-import type { StoredAdventureName } from '@dfragon/database'
 import type { CharacterIdentity } from '../../domain/character-identity.js'
 import type {
   NeopleCharacterSearchInput,
@@ -8,9 +7,5 @@ import type {
 export type SearchCharacters = (
   input: NeopleCharacterSearchInput
 ) => Promise<NeopleCharacterSearchResult>
-
-export type ReadAdventureNames = (
-  characters: readonly { serverId: string; characterId: string }[]
-) => Promise<StoredAdventureName[]>
 
 export type CharacterImageUrl = (identity: CharacterIdentity) => string

@@ -3,7 +3,7 @@ import type {
   ClearPopulationCharacter,
   FinishedJobRun
 } from '@dfragon/database'
-import type { CatalogService } from '../character-catalog/service.js'
+import type { CharacterCatalog } from '../character-catalog/ports.js'
 import type { CalculateScore, FetchCharacterDetails } from '../character-detail/ports.js'
 
 export type ScoreCalculationStore = {
@@ -20,7 +20,7 @@ export type ScoreEngineHandle = {
 
 export type ScoreSources = {
   fetchDetails: FetchCharacterDetails
-  catalog: CatalogService
+  catalog: CharacterCatalog
 }
 
 export type ScoreSourceEvents = {

@@ -3,7 +3,7 @@ import { LRUCache } from 'lru-cache'
 import { CATALOG_LIMITS, unavailableDetail } from '../../domain/character-catalog/types.js'
 import type { CatalogDetail } from '../../domain/character-catalog/types.js'
 import type { CharacterPayload } from '../../domain/character-detail/sections.js'
-import type { FetchCatalog } from './ports.js'
+import type { CharacterCatalog, FetchCatalog } from './ports.js'
 
 const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 // One catalog item is about 1KB of JSON, so 10,000 items keep the cache near 10MB.
@@ -20,72 +20,79 @@ function waitForAbort(signal: AbortSignal) {
   })
 }
 
-export function createCatalogService(fetchCatalog: FetchCatalog) {
-  const shutdown = new AbortController()
-  const pendingBatches = new Set<Promise<unknown>>()
-  const batches = new DataLoader<string, FetchedCatalogItem | undefined>(
-    async (itemIds) => {
-      // A batch can serve several requests, so only shutdown, not one request's disconnect, cancels it.
-      const batch = fetchCatalog([...itemIds], shutdown.signal)
-      pendingBatches.add(batch)
-      batch.finally(() => pendingBatches.delete(batch)).catch(() => undefined)
-      const payloads = await batch
-      const fetchedAt = new Date().toISOString()
+export class CatalogService implements CharacterCatalog {
+  private readonly shutdown = new AbortController()
+  private readonly pendingBatches = new Set<Promise<unknown>>()
+  private readonly batches: DataLoader<string, FetchedCatalogItem | undefined>
+  private readonly items: LRUCache<string, FetchedCatalogItem>
 
-      return itemIds.map((itemId) => {
-        const data = payloads.get(itemId)
-        if (data === undefined) {
-          return undefined
-        }
+  constructor(private readonly fetchCatalog: FetchCatalog) {
+    this.batches = new DataLoader<string, FetchedCatalogItem | undefined>(
+      async (itemIds) => {
+        // A batch can serve several requests, so only shutdown, not one request's disconnect, cancels it.
+        const batch = this.fetchCatalog([...itemIds], this.shutdown.signal)
+        this.pendingBatches.add(batch)
+        batch.finally(() => this.pendingBatches.delete(batch)).catch(() => undefined)
+        const payloads = await batch
+        const fetchedAt = new Date().toISOString()
 
-        return { data, fetchedAt }
-      })
-    },
-    // The cache below already shares in-flight lookups by item ID.
-    { cache: false, maxBatchSize: CATALOG_LIMITS.maximumBatchKeys }
-  )
-  // A rejected or undefined fetch leaves no entry, so failed and missing items are fetched again.
-  const items = new LRUCache<string, FetchedCatalogItem>({
-    max: CATALOG_CACHE_MAX_ITEMS,
-    ttl: CATALOG_CACHE_TTL_MS,
-    fetchMethod: (itemId) => batches.load(itemId)
-  })
-
-  return {
-    async load(itemIds: string[], requestSignal: AbortSignal): Promise<Map<string, CatalogDetail>> {
-      const unique = [...new Set(itemIds)]
-      const details = new Map<string, CatalogDetail>(
-        unique.map((itemId) => [itemId, unavailableDetail])
-      )
-      requestSignal.throwIfAborted()
-      if (unique.length === 0) {
-        return details
-      }
-      // A malformed upstream character cannot turn a public request into unbounded fan-out.
-      const bounded = unique.slice(0, CATALOG_LIMITS.maximumReferencesPerLoad)
-      const loading = Promise.all(
-        bounded.map(async (itemId) => {
-          try {
-            const item = await items.fetch(itemId)
-            if (item !== undefined) {
-              details.set(itemId, { ...item, status: 'fresh' })
-            }
-          } catch {
-            // A failed lookup leaves the reference unavailable; the character response still succeeds.
+        return itemIds.map((itemId) => {
+          const data = payloads.get(itemId)
+          if (data === undefined) {
+            return undefined
           }
-        })
-      )
-      // A disconnected request stops waiting; its lookups still fill the cache for later requests.
-      await Promise.race([loading, waitForAbort(requestSignal)])
-      requestSignal.throwIfAborted()
 
+          return { data, fetchedAt }
+        })
+      },
+      // The cache below already shares in-flight lookups by item ID.
+      { cache: false, maxBatchSize: CATALOG_LIMITS.maximumBatchKeys }
+    )
+
+    // A rejected or undefined fetch leaves no entry, so failed and missing items are fetched again.
+    this.items = new LRUCache<string, FetchedCatalogItem>({
+      max: CATALOG_CACHE_MAX_ITEMS,
+      ttl: CATALOG_CACHE_TTL_MS,
+      fetchMethod: (itemId) => this.batches.load(itemId)
+    })
+  }
+
+  async load(itemIds: string[], requestSignal: AbortSignal): Promise<Map<string, CatalogDetail>> {
+    const unique = [...new Set(itemIds)]
+    const details = new Map<string, CatalogDetail>(
+      unique.map((itemId) => [itemId, unavailableDetail])
+    )
+
+    requestSignal.throwIfAborted()
+
+    if (unique.length === 0) {
       return details
-    },
-    async close() {
-      shutdown.abort()
-      await Promise.allSettled([...pendingBatches])
     }
+
+    // A malformed upstream character cannot turn a public request into unbounded fan-out.
+    const bounded = unique.slice(0, CATALOG_LIMITS.maximumReferencesPerLoad)
+    const loading = Promise.all(
+      bounded.map(async (itemId) => {
+        try {
+          const item = await this.items.fetch(itemId)
+          if (item !== undefined) {
+            details.set(itemId, { ...item, status: 'fresh' })
+          }
+        } catch {
+          // A failed lookup leaves the reference unavailable; the character response still succeeds.
+        }
+      })
+    )
+
+    // A disconnected request stops waiting; its lookups still fill the cache for later requests.
+    await Promise.race([loading, waitForAbort(requestSignal)])
+    requestSignal.throwIfAborted()
+
+    return details
+  }
+
+  async close(): Promise<void> {
+    this.shutdown.abort()
+    await Promise.allSettled([...this.pendingBatches])
   }
 }
-
-export type CatalogService = ReturnType<typeof createCatalogService>
