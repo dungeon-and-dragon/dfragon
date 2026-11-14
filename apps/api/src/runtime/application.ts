@@ -203,8 +203,13 @@ export function createApiRuntimeOptions(configuration: RuntimeConfiguration): Ap
   }
 }
 
-export function createApiRuntime(configuration: RuntimeConfiguration) {
-  return createApiHttpApp(createApiRuntimeOptions(configuration))
+export async function createApiRuntime(configuration: RuntimeConfiguration) {
+  const runtime = await createApiHttpApp(createApiRuntimeOptions(configuration))
+
+  // 첫 요청이 계산을 기다리지 않게 listen을 기다리지 않고 최신 주를 미리 계산한다. 실패는 진단 code로 남고 던지지 않는다.
+  runtime.refreshClearStats()
+
+  return runtime
 }
 
 export function createOpsRuntime(
