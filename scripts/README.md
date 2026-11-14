@@ -47,11 +47,11 @@ pnpm verify
 
 API의 `test`는 `build`로 `dist`를 새로 만든 뒤 test를 compile, 실행하므로 같은 입력의 typecheck를 따로 반복하지 않아도 됩니다. Web의 `build`는 `tsc -b`로 typecheck한 뒤 Vite production build를 실행합니다. 문서만 바꿨으면 app build를 반복하지 않아도 됩니다.
 
-API 이미지의 실행 계약과 DB를 붙인 실행은 아래 명령으로 검사합니다. Node.js 26, 같은 host의 Docker daemon(Docker Desktop 포함)과 로컬에 있는 Linux 앱 이미지가 필요하고, DB 검사는 PostgreSQL 이미지를 받을 수 있어야 합니다. 이미지는 [제품 이미지 안내](../apps/api/README.md#서버-이미지)로 빌드하거나, 인자를 미리 pull한 이미지 reference로 바꿉니다.
+API 이미지의 실행 계약과, API와 운영 app 이미지에 DB를 붙인 실행은 아래 명령으로 검사합니다. Node.js 26, 같은 host의 Docker daemon(Docker Desktop 포함)과 로컬에 있는 Linux 앱 이미지가 필요하고, DB 검사는 PostgreSQL 이미지를 받을 수 있어야 합니다. 이미지는 [API 이미지 안내](../apps/api/README.md#서버-이미지)와 [운영 app 이미지 안내](../apps/ops/README.md#서버-이미지)로 빌드하거나, 인자를 미리 pull한 이미지 reference로 바꿉니다.
 
 ```bash
 node apps/api/test-support/container-deployment.mjs dfragon-api:local
-node apps/api/test-support/container-database.mjs dfragon-api:local
+node apps/api/test-support/container-database.mjs dfragon-api:local dfragon-ops:local
 ```
 
 두 검사는 이미지를 빌드하지 않고 합성 Neople key, 합성 비밀번호만 씁니다. 운영 credential은 입력하지 않습니다. 만든 컨테이너와 network는 스스로 지우지만 강제 종료나 Docker 장애 때는 남을 수 있습니다.
@@ -118,7 +118,7 @@ node scripts/dependency-snapshot.mjs <cyclonedx-sbom-file> <snapshot-file>
 
 ## `server-build-info`
 
-Docker 빌드에서 제품 commit과 서비스명(`api`, `web`, `internal`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
+Docker 빌드에서 제품 commit과 서비스명(`api`, `ops`, `web`, `internal`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
 
 ```sh
 node scripts/server-build-info.mjs api "$(git rev-parse HEAD)" build-info.json
