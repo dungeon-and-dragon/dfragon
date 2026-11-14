@@ -4,6 +4,7 @@ import {
   readUsableBatchNeopleKeys,
   recordBatchNeopleKeyRejected
 } from '@dfragon/database'
+import { writeAccessLogToStdout } from '@dfragon/http-server'
 import { createNeopleClient } from '@dfragon/neople'
 import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
 import {
@@ -11,7 +12,6 @@ import {
   createNeopleClearTimeline
 } from '../infrastructure/neople/content-clear-collection.js'
 import { createNeopleSkillStyle } from '../infrastructure/neople/skill-style-collection.js'
-import { writeAccessLogToStdout } from '../presentation/http/access-log-sink.js'
 import {
   createNeopleCharacterBasic,
   paceNeopleRequests

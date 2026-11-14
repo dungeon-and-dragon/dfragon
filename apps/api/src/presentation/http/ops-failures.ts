@@ -1,5 +1,5 @@
+import type { FailureResponse } from '@dfragon/http-server'
 import { type OpsFailureKind, OpsFailure } from '../../domain/ops/failure.js'
-import type { FailureResponse } from './failure-response.js'
 
 const failureResponses = {
   request: { status: 400, body: { error: { code: 'INVALID_OPS_REQUEST' } } },

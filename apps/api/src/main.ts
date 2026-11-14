@@ -1,5 +1,5 @@
 import { applyMigrations } from '@dfragon/database'
-import type { HttpAppHandle } from './runtime/app-handle.js'
+import type { HttpAppHandle } from '@dfragon/http-server'
 import { createApiRuntime, createOpsRuntime } from './runtime/application.js'
 import { readRuntimeConfiguration } from './runtime/configuration.js'
 

@@ -1,5 +1,5 @@
+import type { AccessLogEnv } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import type { AccessLogEnv } from '../../presentation/http/access-log.js'
 import { createAdventureGuildRoutes } from '../../presentation/http/adventure-guild/routes.js'
 import { createCharacterDetailRoutes } from '../../presentation/http/character-detail/routes.js'
 import { createCharacterImageRoutes } from '../../presentation/http/character-image/routes.js'
