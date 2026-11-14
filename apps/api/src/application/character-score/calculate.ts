@@ -8,7 +8,7 @@ import type {
 import { toScoreEngineInput } from '../../domain/score/input.js'
 import type { ScoreEngineResult } from '../../domain/score/result.js'
 import { enrichCharacterDetails, hasUnavailableItemDetail } from '../character-catalog/enrich.js'
-import type { CatalogService } from '../character-catalog/service.js'
+import type { CharacterCatalog } from '../character-catalog/ports.js'
 import type { CalculateScore } from '../character-detail/ports.js'
 
 export type CharacterScoreCalculation = {
@@ -21,7 +21,7 @@ export type CharacterScoreCalculation = {
 export async function calculateCharacterScore(
   identity: CharacterIdentity,
   { payloads, fetchedAt }: FetchedCharacterPayloads,
-  catalog: CatalogService,
+  catalog: CharacterCatalog,
   calculateScore: CalculateScore,
   signal: AbortSignal
 ): Promise<CharacterScoreCalculation> {

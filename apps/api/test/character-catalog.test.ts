@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCatalog } from '../src/infrastructure/neople/character-catalog.js'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { enrichCharacterDetails } from '../src/application/character-catalog/enrich.js'
 import type { projectCharacterDetails } from '../src/domain/character-detail/project.js'
 
@@ -18,7 +18,7 @@ test('중복을 제거한 128개까지만 조회하고 15개 이하 배치 9개�
   let active = 0,
     peak = 0,
     count = 0
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     assert(itemIds.length <= 15)
     active++
     peak = Math.max(active, peak)
@@ -46,7 +46,7 @@ test('중복을 제거한 128개까지만 조회하고 15개 이하 배치 9개�
 
 test('연결이 이미 끊긴 요청은 공용 아이템을 조회하지 않는다', async () => {
   let calls = 0
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     calls++
 
     return catalogPayloads(itemIds)
@@ -98,7 +98,7 @@ test('공급자 응답을 요청 itemId로 대응하고 옵션을 보존하며 �
   await assert.rejects(unavailable([item], signal), { message: 'Catalog lookup failed' })
   // 503은 HTTP client 기본 재시도 대상이지만 공용 상세 조회는 재시도하지 않는다.
   assert.equal(unavailableCalls, 1)
-  const service = createCatalogService(async () => {
+  const service = new CatalogService(async () => {
     throw new Error('secret upstream message')
   })
   const result = await service.load([item], signal)
@@ -142,7 +142,7 @@ test('14개 장비 슬롯, 마법부여 스킬 옵션, 체인 null과 캐릭터 
   }
   const original = structuredClone(details)
   let requested = 0
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     requested += itemIds.length
 
     return new Map(

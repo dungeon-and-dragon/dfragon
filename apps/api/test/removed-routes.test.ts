@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 test('제거된 경로는 404를 반환하고 provider를 호출하지 않는다', async (t) => {
@@ -9,7 +9,7 @@ test('제거된 경로는 404를 반환하고 provider를 호출하지 않는다
   })
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     todayGrade: { fetchShopGrade: unused }
   })
   try {
@@ -47,7 +47,7 @@ test('공개 app에는 운영 경로가 없다', async (t) => {
   }
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
     writeAccessLog: () => undefined
   })

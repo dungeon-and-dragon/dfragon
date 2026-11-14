@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { enrichCharacterDetails } from '../src/application/character-catalog/enrich.js'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import type { CatalogDetail } from '../src/domain/character-catalog/types.js'
 import type { projectCharacterDetails } from '../src/domain/character-detail/project.js'
 
@@ -55,7 +55,7 @@ test('장착 부속에 공용 상세를 연결하고 원본, 빈 슬롯, 서약 
   const details = fixture(),
     original = structuredClone(details),
     calls: string[] = []
-  const service = createCatalogService(async (itemIds) => {
+  const service = new CatalogService(async (itemIds) => {
     calls.push(...itemIds)
 
     return new Map(
@@ -105,7 +105,7 @@ test('공용 상세 실패에도 미장착 null과 빈 배열을 그대로 유�
     details.oath = null
     details.buff.avatar = { avatar: value }
     details.buff.creature = { creature: value }
-    const service = createCatalogService(async () => {
+    const service = new CatalogService(async () => {
       throw new Error('failure')
     })
     const { details: result } = await enrichCharacterDetails(details, service, signal)
@@ -153,7 +153,7 @@ test('잘못된 참조는 조회하지 않고 반복 아이템은 한 번씩 연
   }
   const original = structuredClone(details)
   const requested: string[] = []
-  const catalog = createCatalogService(async (itemIds) => {
+  const catalog = new CatalogService(async (itemIds) => {
     requested.push(...itemIds)
 
     return new Map(itemIds.map((itemId) => [itemId, catalogPayload(itemId)]))
@@ -193,7 +193,7 @@ test('예약된 itemDetail은 공용 조회값으로 교체하고 캐릭터 옵�
     future: { retained: true }
   }
   const original = structuredClone(details)
-  const catalog = createCatalogService(async (itemIds) => {
+  const catalog = new CatalogService(async (itemIds) => {
     return new Map(
       itemIds.map((itemId) => [itemId, { ...catalogPayload(itemId), tune: { level: 0 } }])
     )

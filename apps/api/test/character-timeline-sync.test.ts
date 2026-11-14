@@ -2,11 +2,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineCharacter, TimelineRange, TimelineSyncState } from '@dfragon/database'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { CharacterDetailFailure } from '../src/domain/character-failure.js'
 import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
 import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
-import { createCharacterDetailService } from '../src/application/character-detail/service.js'
+import { CharacterDetailService } from '../src/application/character-detail/service.js'
 import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
 import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
 import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
@@ -304,8 +304,8 @@ const payloads: CharacterPayloads = {
 test('상세 조회는 캐시 적중에도 캐릭터를 받았다고 알리고, 캐릭터를 받지 못하면 알리지 않는다', async (t) => {
   const fetched: CharacterIdentity[] = []
   let found = true
-  const service = createCharacterDetailService({
-    catalog: createCatalogService(async () => new Map()),
+  const service = new CharacterDetailService({
+    catalog: new CatalogService(async () => new Map()),
     fetchDetails: async () => {
       if (!found) {
         throw new CharacterDetailFailure('api')
@@ -339,7 +339,7 @@ test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => payloads,
-      catalog: createCatalogService(async () => new Map())
+      catalog: new CatalogService(async () => new Map())
     },
     timeline: {
       sync: async () => undefined,
@@ -384,7 +384,7 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => payloads,
-      catalog: createCatalogService(async () => new Map())
+      catalog: new CatalogService(async () => new Map())
     },
     timeline: {
       sync: async () => {

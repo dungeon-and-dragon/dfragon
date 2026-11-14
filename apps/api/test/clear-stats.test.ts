@@ -10,7 +10,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import { formatResetDate } from '../src/domain/seoul-time.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
 import type { ClearStatsReader } from '../src/application/content-clears/ports.js'
@@ -101,7 +101,7 @@ async function listen(clearStats?: ClearStatsReader): Promise<{
   const unused = async (): Promise<never> => assert.fail('Neople을 부르면 안 된다')
   const { app, refreshClearStats } = await createApiHttpApp({
     search: { searchCharacters: unused },
-    details: { fetchDetails: unused, catalog: createCatalogService(unused) },
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     todayGrade: { fetchShopGrade: unused },
     clearStats,
     writeAccessLog: () => undefined

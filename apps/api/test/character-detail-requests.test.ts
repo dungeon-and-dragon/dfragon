@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import {
   type CharacterDetailResponse,
-  createCharacterDetailService
+  CharacterDetailService
 } from '../src/application/character-detail/service.js'
 import { CharacterDetailFailure } from '../src/domain/character-failure.js'
 import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
@@ -13,7 +13,7 @@ import type { CharacterPayloads } from '../src/domain/character-detail/sections.
 const identity = { serverId: 'siroco', characterId: 'refresh-fixture' }
 const ignoredTimings: NeopleStageTimings = { record: () => undefined, markShared: () => undefined }
 const signal = new AbortController().signal
-const catalog = createCatalogService(async () => new Map())
+const catalog = new CatalogService(async () => new Map())
 const noScore = async () => null
 const MINUTE_MS = 60 * 1000
 const common = { ...identity, characterName: '합성 캐릭터', jobId: 'job' }
@@ -92,7 +92,7 @@ test('1시간 안에 다시 조회하면 Neople을 부르지 않고 1시간이 �
   t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: Date.parse('2026-10-29T00:00:00Z') })
   t.mock.method(performance, 'now', () => Date.now())
   const { neople, fetchDetails } = countingNeople()
-  const service = createCharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
+  const service = new CharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
   t.after(() => service.close())
 
   const first = await readDetail(service.get(identity, signal, ignoredTimings))
@@ -114,7 +114,7 @@ test('강제 갱신은 캐시를 건너뛰고 다시 받아 캐시를 덮어쓰�
   t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
   t.mock.method(performance, 'now', () => Date.now())
   const { neople, fetchDetails } = countingNeople()
-  const service = createCharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
+  const service = new CharacterDetailService({ catalog, fetchDetails, calculateScore: noScore })
   t.after(() => service.close())
 
   const cached = await readDetail(service.get(identity, signal, ignoredTimings))
@@ -132,7 +132,7 @@ test('강제 갱신이 실패하면 상세 조회와 같은 오류를 돌려주�
   t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-29T00:00:00Z') })
   t.mock.method(performance, 'now', () => Date.now())
   let calls = 0
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => {
@@ -164,7 +164,7 @@ test('연결을 끊고 떠난 강제 갱신의 조회가 나중에 끝나도 기
   let calls = 0
   const late = gate()
   // 공급자가 취소 신호를 무시하고 요청이 떠난 뒤에 성공하는 경우다.
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => {
@@ -197,7 +197,7 @@ test('같은 캐릭터를 받는 중이면 강제 갱신은 새로 부르지 않
   const entered = gate(),
     finish = gate()
   let calls = 0
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => {
@@ -226,7 +226,7 @@ test('같은 캐릭터를 받는 중이면 강제 갱신은 새로 부르지 않
 })
 
 test('캐시가 맞은 요청은 저장한 응답 본문을 다시 쓰며 Neople, 공용 아이템 시간 없이 공유로 표시하지 않는다', async (t) => {
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async (_identity, _signal, recordStage) => {
@@ -254,7 +254,7 @@ test('캐시가 맞은 요청은 저장한 응답 본문을 다시 쓰며 Neople
 test('상세 응답 JSON은 섹션마다 revision 1과 조회 시각을, freshness에 조회 시각과 1시간 뒤 만료를 담는다', async (t) => {
   const fetchedAt = '2026-10-29T00:00:00.000Z'
   t.mock.timers.enable({ apis: ['Date'], now: Date.parse(fetchedAt) })
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => payloads
@@ -310,7 +310,7 @@ test('겹친 요청은 작업을 공유하고 한 대기자의 연결 종료는 
     finish = gate()
   let calls = 0,
     sharedSignal: AbortSignal | undefined
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async (_identity, s) => {
@@ -345,7 +345,7 @@ test('겹친 요청의 대기자들은 같은 조회 시각의 freshness와 sect
   const entered = gate(),
     finish = gate()
   let calls = 0
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => {
@@ -394,7 +394,7 @@ test('공유 조회를 기다린 요청들은 늦게 합류해도 같은 Neople 
   const basicDone = gate(),
     finish = gate()
   let calls = 0
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async (_identity, _signal, recordStage) => {
@@ -435,7 +435,7 @@ test('마지막 대기자가 취소하면 공유 작업을 취소하고 새 요�
     late = gate()
   let calls = 0,
     abortedSignal: AbortSignal | undefined
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async (_identity, s) => {
@@ -468,7 +468,7 @@ test('공유 조회 실패 뒤 새 요청을 허용하고 서버 종료는 취�
   const entered = gate(),
     finish = gate()
   let calls = 0
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => {
@@ -495,7 +495,7 @@ test('공유 조회 실패 뒤 새 요청을 허용하고 서버 종료는 취�
   const start = gate(),
     cleanup = gate(),
     stopped = new AbortController()
-  const shutting = createCharacterDetailService({
+  const shutting = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async (_identity, s) => {
@@ -524,9 +524,9 @@ test('서버 종료는 진행 중인 공용 아이템 묶음 호출을 취소하
   const started = gate(),
     cleanup = gate(),
     stopped = new AbortController()
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
-    catalog: createCatalogService(async (_itemIds, batchSignal) => {
+    catalog: new CatalogService(async (_itemIds, batchSignal) => {
       started.release()
       batchSignal.addEventListener('abort', () => stopped.abort(), { once: true })
       await cleanup.promise
@@ -553,7 +553,7 @@ test('서버 종료는 진행 중인 공용 아이템 묶음 호출을 취소하
 })
 
 test('상세 응답은 기존 필드에 역할과 점수만 담은 card를 더한다', async (t) => {
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     calculateScore: noScore,
     catalog,
     fetchDetails: async () => payloads

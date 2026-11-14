@@ -8,47 +8,66 @@ import type {
   NeopleCharacterSearchResult
 } from '../../domain/character-search/types.js'
 import { type CandidateSource, createCandidateCache } from './candidate-cache.js'
-import type { CharacterImageUrl, ReadAdventureNames, SearchCharacters } from './ports.js'
-
-export interface CharacterSearchDependencies {
-  readonly searchCharacters: SearchCharacters
-  readonly readAdventureNames?: ReadAdventureNames
-  readonly characterImageUrl: CharacterImageUrl
-}
+import type { CharacterImageUrl, SearchCharacters } from './ports.js'
+import type { CharacterSearchRepository } from './repository.js'
 
 export interface CharacterCandidatesResponse {
   result: CharacterCandidatesWithAdventureResult
   source: CandidateSource
 }
 
-export interface CharacterSearchHttpService {
-  search(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResult>
-  candidates(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResponse>
-  close(): Promise<void>
-}
-
 const nameCollator = new Intl.Collator('ko')
 
-export function createCharacterSearchService(
-  dependencies: CharacterSearchDependencies
-): CharacterSearchHttpService {
-  const { searchCharacters, readAdventureNames, characterImageUrl } = dependencies
-  const candidateCache = createCandidateCache()
-  let closed = false
+export class CharacterSearchService {
+  private readonly candidateCache = createCandidateCache()
+  private closed = false
 
-  const assertOpen = (): void => {
-    if (closed) {
+  constructor(
+    private readonly repository: CharacterSearchRepository,
+    private readonly searchCharacters: SearchCharacters,
+    private readonly characterImageUrl: CharacterImageUrl
+  ) {}
+
+  async search(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResult> {
+    const rows = (await this.loadRows(input)).toSorted((left, right) =>
+      nameCollator.compare(left.characterName, right.characterName)
+    )
+
+    return { rows }
+  }
+
+  async candidates(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResponse> {
+    this.assertOpen()
+
+    // 키는 요청 이름 그대로다. Neople match는 대소문자를 무시하지만 후보에는 요청 이름과 정확히 같은 이름만 남는다.
+
+    const { result, source } = await this.candidateCache.get(input.characterName, () =>
+      this.loadCandidates(input)
+    )
+
+    const named = await this.withAdventureNames(result)
+
+    return { result: named, source }
+  }
+
+  async close(): Promise<void> {
+    this.closed = true
+    this.candidateCache.close()
+  }
+
+  private assertOpen(): void {
+    if (this.closed) {
       throw new NeopleSearchFailure('internal')
     }
   }
 
-  const search = async (
+  private async searchNeople(
     input: NeopleCharacterSearchInput
-  ): Promise<NeopleCharacterSearchResult> => {
-    assertOpen()
+  ): Promise<NeopleCharacterSearchResult> {
+    this.assertOpen()
 
     try {
-      return await searchCharacters(input)
+      return await this.searchCharacters(input)
     } catch (error) {
       if (error instanceof NeopleSearchFailure) {
         throw error
@@ -57,23 +76,21 @@ export function createCharacterSearchService(
     }
   }
 
-  const loadRows = async (
-    input: NeopleCharacterSearchInput
-  ): Promise<CharacterImageCandidate[]> => {
-    const result = await search(input)
+  private async loadRows(input: NeopleCharacterSearchInput): Promise<CharacterImageCandidate[]> {
+    const result = await this.searchNeople(input)
 
     return result.rows.map((candidate): CharacterImageCandidate => {
-      const imageUrl = characterImageUrl(candidate)
+      const imageUrl = this.characterImageUrl(candidate)
 
       return { ...candidate, imageUrl }
     })
   }
 
-  const loadCandidates = async (
+  private async loadCandidates(
     input: NeopleCharacterSearchInput
-  ): Promise<CharacterCandidatesResult> => {
+  ): Promise<CharacterCandidatesResult> {
     const rows = sortBy(
-      await loadRows(input),
+      await this.loadRows(input),
       [(row) => row.fame === null, 'asc'],
       [(row) => row.fame ?? 0, 'desc']
     )
@@ -82,10 +99,10 @@ export function createCharacterSearchService(
   }
 
   // 모험단명은 캐시하지 않아 DB에 새로 저장된 모험단명이 캐시된 후보에도 바로 붙는다.
-  const withAdventureNames = async ({
+  private async withAdventureNames({
     rows
-  }: CharacterCandidatesResult): Promise<CharacterCandidatesWithAdventureResult> => {
-    const stored = readAdventureNames && rows.length > 0 ? await readAdventureNames(rows) : []
+  }: CharacterCandidatesResult): Promise<CharacterCandidatesWithAdventureResult> {
+    const stored = rows.length > 0 ? await this.repository.readAdventureNames(rows) : []
     const names = new Map(
       stored.map(({ serverId, characterId, adventureName }) => [
         `${serverId}/${characterId}`,
@@ -101,31 +118,8 @@ export function createCharacterSearchService(
 
     return { rows: candidates }
   }
+}
 
-  return {
-    async search(input) {
-      const rows = (await loadRows(input)).toSorted((left, right) =>
-        nameCollator.compare(left.characterName, right.characterName)
-      )
-
-      return { rows }
-    },
-    async candidates(input) {
-      assertOpen()
-
-      // 키는 요청 이름 그대로다. Neople match는 대소문자를 무시하지만 후보에는 요청 이름과 정확히 같은 이름만 남는다.
-
-      const { result, source } = await candidateCache.get(input.characterName, () =>
-        loadCandidates(input)
-      )
-
-      const named = await withAdventureNames(result)
-
-      return { result: named, source }
-    },
-    async close() {
-      closed = true
-      candidateCache.close()
-    }
-  }
+export const emptyCharacterSearchRepository: CharacterSearchRepository = {
+  readAdventureNames: async () => []
 }

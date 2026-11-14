@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test, { type TestContext } from 'node:test'
-import { createCatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '../src/application/character-catalog/service.js'
 import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
-import { createCharacterDetailService } from '../src/application/character-detail/service.js'
+import { CharacterDetailService } from '../src/application/character-detail/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { ScoreEngine } from '../src/infrastructure/score/engine.js'
 import type { ScoreEngineResult } from '../src/domain/score/result.js'
@@ -84,9 +84,9 @@ function fixtureService(
   calculateScore: ScoreEngine['calculate']
 ) {
   const { original, fetchDetails, fetchCatalog, identity } = fixtureSources(name)
-  const service = createCharacterDetailService({
+  const service = new CharacterDetailService({
     fetchDetails,
-    catalog: createCatalogService(fetchCatalog),
+    catalog: new CatalogService(fetchCatalog),
     calculateScore
   })
   t.after(() => service.close())
@@ -202,7 +202,7 @@ test('실제 엔진을 연 API는 상세 응답에 golden 입력을 엔진에 �
           throw new Error('score test must not search')
         }
       },
-      details: { fetchDetails, catalog: createCatalogService(fetchCatalog) },
+      details: { fetchDetails, catalog: new CatalogService(fetchCatalog) },
       todayGrade: {
         fetchShopGrade: async () => {
           throw new Error('score test must not look up the shop grade')
