@@ -331,10 +331,7 @@ try {
       cleared,
       newlyCleared
     ]),
-    [
-      ['2026-11-05', 2, 2],
-      ['2026-11-12', 3, 1]
-    ]
+    [['2026-11-05', 2, 2]]
   )
   assert.deepEqual(
     summary(await weeksOf('diregie-hard')).map(({ weekStart, cleared }) => [weekStart, cleared]),
@@ -362,8 +359,11 @@ try {
     { characters: 1, adventures: 2 },
     { characters: 2, adventures: 1 }
   ])
-  const challenge = await service.contentStats('engraved-nightmare-1', '2026-11-12')
-  assert.equal(challenge.week.cleared, 3)
+  await assert.rejects(service.contentStats('engraved-nightmare-1', '2026-11-12'), {
+    kind: 'query'
+  })
+  const challenge = await service.contentStats('engraved-nightmare-1', '2026-11-05')
+  assert.equal(challenge.week.cleared, 2)
   assert.equal(
     challenge.jobs.reduce((total, { cleared }) => total + cleared, 0),
     challenge.week.cleared
@@ -378,7 +378,7 @@ try {
   assert.equal((await service.contentStats('diregie-hard', '2026-02-05')).week.cleared, 1)
   await assert.rejects(service.contentStats('diregie-hard', '2026-02-19'), { kind: 'query' })
 
-  // 수집이 모집단을 저장하기 전의 클리어는 보이지 않는다. 저장한 뒤의 요청은 새 결과를 미리 계산하는 동안 이전 값을 받고, 계산이 끝나면 새 값을 받는다.
+  // 마감하지 않은 주는 보이지 않는다. 마감한 모집단을 저장한 뒤의 요청은 새 결과를 미리 계산하는 동안 이전 값을 받고, 계산이 끝나면 새 값을 받는다.
   await recordContentClears(client, [
     clear(
       'engraved-nightmare-1',
@@ -388,15 +388,24 @@ try {
       '2026-11-12T06:00:00'
     )
   ])
-  assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 3)
+  const latestWeekOf = async (contentId) => {
+    const { weekStart, cleared } = (await weeksOf(contentId)).at(-1)
+
+    return { weekStart, cleared }
+  }
+  const closedWeek = { weekStart: '2026-11-05', cleared: 2 }
+  assert.deepEqual(await latestWeekOf('engraved-nightmare-1'), closedWeek)
   await recordContentClearPopulation(
     client,
-    population(1000, false, 'engraved-nightmare-1', '2026-11-12T06:00:00', '2026-11-14T06:00:00')
+    population(1000, true, 'engraved-nightmare-1', '2026-11-12T06:00:00', '2026-11-14T06:00:00')
   )
-  assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 3)
+  assert.deepEqual(await latestWeekOf('engraved-nightmare-1'), closedWeek)
   await service.refresh()
   assert.equal(refreshFailures, 0)
-  assert.equal((await weeksOf('engraved-nightmare-1')).at(-1).cleared, 4)
+  assert.deepEqual(await latestWeekOf('engraved-nightmare-1'), {
+    weekStart: '2026-11-12',
+    cleared: 4
+  })
   assert.equal((await service.contentStats('engraved-nightmare-1', undefined)).week.cleared, 4)
 
   // 전체 개요다. 명성이 다른 캐릭터 25명이 이번 주 미카엘라 하드를 깨고, 그 가운데 5명은 이번 주까지, 1명은 다음 주에 챌린지를 깬다.
