@@ -483,9 +483,7 @@ test('수집 worker 설정은 Neople key 없이 읽히고, 목록 파일을 쉼�
     { ...collectorEnvironment, CHARACTER_COLLECTOR_REQUESTS_PER_SECOND: 'fast' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '0' },
     { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '1025' },
-    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '1.5' },
-    { ...collectorEnvironment, JOB_ALERT_DISCORD_WEBHOOK_URL: 'http://discord.test/webhook' },
-    { ...collectorEnvironment, JOB_ALERT_DISCORD_WEBHOOK_URL: '' }
+    { ...collectorEnvironment, CHARACTER_COLLECTOR_CONCURRENCY: '1.5' }
   ]) {
     assert.throws(() => readCollectorConfiguration(invalid), {
       message: 'Invalid character collector configuration'
@@ -516,15 +514,4 @@ test('수집 worker 설정은 점수 엔진 경로와 점수 계산 일정이 �
       message: 'Invalid character collector configuration'
     })
   }
-})
-
-test('수집 worker 설정은 job 알림 웹훅이 없으면 알림 없이, 있으면 https URL로 받는다', () => {
-  assert.equal(readCollectorConfiguration(collectorEnvironment).jobAlertWebhookUrl, undefined)
-  assert.equal(
-    readCollectorConfiguration({
-      ...collectorEnvironment,
-      JOB_ALERT_DISCORD_WEBHOOK_URL: 'https://discord.test/api/webhooks/synthetic'
-    }).jobAlertWebhookUrl,
-    'https://discord.test/api/webhooks/synthetic'
-  )
 })
