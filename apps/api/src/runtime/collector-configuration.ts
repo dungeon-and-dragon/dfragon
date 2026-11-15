@@ -1,5 +1,5 @@
 import { isAbsolute } from 'node:path'
-import { readDatabaseConfiguration, readSecretInput } from '@dfragon/database'
+import { readDatabaseConfiguration } from '@dfragon/database'
 import { z } from 'zod'
 import { isJobSchedule } from '../infrastructure/jobs/scheduler.js'
 
@@ -28,9 +28,6 @@ const collectorEnvironmentSchema = z.object({
   SCORE_CALCULATION_SCHEDULE: z.string().refine(isJobSchedule).optional()
 })
 
-const HTTPS_PROTOCOL_PATTERN = /^https$/
-const jobAlertWebhookUrlSchema = z.url({ protocol: HTTPS_PROTOCOL_PATTERN }).optional()
-
 export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
   try {
     const {
@@ -44,19 +41,12 @@ export function readCollectorConfiguration(environment: NodeJS.ProcessEnv) {
     if (database === undefined) {
       throw new Error(invalidConfiguration)
     }
-    const jobAlertWebhookUrl = jobAlertWebhookUrlSchema.parse(
-      readSecretInput(
-        environment.JOB_ALERT_DISCORD_WEBHOOK_URL,
-        environment.JOB_ALERT_DISCORD_WEBHOOK_URL_FILE
-      )
-    )
 
     return {
       database,
       importFiles,
       requestsPerSecond,
       concurrency,
-      jobAlertWebhookUrl,
       scoreLibraryPath,
       scoreCalculationSchedule
     }

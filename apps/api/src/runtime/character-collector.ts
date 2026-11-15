@@ -22,7 +22,6 @@ import {
 } from '../infrastructure/files/character-collection.js'
 import { JobSchedulerService } from '../application/jobs/scheduler.js'
 import { DatabaseJobRepository } from '../infrastructure/database/jobs.js'
-import { createDiscordJobAlert } from '../infrastructure/jobs/alert.js'
 import { startJobScheduler } from '../infrastructure/jobs/scheduler.js'
 import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
 import { createWorkerJobs } from './worker-jobs.js'
@@ -64,10 +63,6 @@ export async function startCharacterCollector(
   const { neople, readConcurrency } = keyPool
   const fetchBasic = createNeopleCharacterBasic(neople)
   const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
-  const alert =
-    configuration.jobAlertWebhookUrl !== undefined
-      ? createDiscordJobAlert(configuration.jobAlertWebhookUrl)
-      : undefined
   const jobs = createWorkerJobs(client, {
     createFetchTimeline: createNeopleClearTimeline(neople),
     createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
@@ -84,8 +79,7 @@ export async function startCharacterCollector(
   })
   const scheduler = new JobSchedulerService(new DatabaseJobRepository(client), {
     jobs,
-    report,
-    alert
+    report
   })
   await startJobScheduler(scheduler, report)
 
