@@ -18,7 +18,7 @@ export class JobSchedulerService {
     private readonly repository: JobRepository,
     private readonly ports: JobSchedulerPorts
   ) {
-    this.runs = new JobRunService(repository, ports.report, ports.alert)
+    this.runs = new JobRunService(repository, ports.report)
   }
 
   scheduledJobs(createSchedule: CreateJobSchedule): ScheduledJob[] {
@@ -53,20 +53,8 @@ export class JobSchedulerService {
         nextRunAt: nextRuns.get(definition.name) ?? null
       }))
     )
-    for (const {
-      id,
-      jobName,
-      trigger,
-      startedAt
-    } of await this.repository.interruptRunningRuns()) {
+    for (const { id, jobName } of await this.repository.interruptRunningRuns()) {
       report('JOB_RUN_INTERRUPTED', { job: jobName, runId: id })
-      // worker 시작이 Discord 응답을 기다리지 않게 한다.
-      this.runs.sendAlert(id, {
-        kind: 'interrupted',
-        job: jobName,
-        trigger,
-        elapsedMs: now.getTime() - startedAt.getTime()
-      })
     }
   }
 

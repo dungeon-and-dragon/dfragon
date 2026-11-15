@@ -365,9 +365,6 @@ importers:
       koffi:
         specifier: 'catalog:'
         version: 3.3.7
-      ky:
-        specifier: 'catalog:'
-        version: 2.2.0
       lru-cache:
         specifier: 'catalog:'
         version: 11.5.3
