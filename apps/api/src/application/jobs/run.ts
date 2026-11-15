@@ -1,7 +1,7 @@
 import type { JobRunOutcome, JobRunProgress, JobTrigger } from '@dfragon/database'
 import { type ErrorChainEntry, describeErrorChain } from '@dfragon/lib/error-chain'
 import type { JobDefinition } from './definition.js'
-import type { JobAlert, ReportJobEvent, SendJobAlert } from './ports.js'
+import type { ReportJobEvent } from './ports.js'
 import type { JobRepository } from './repository.js'
 
 const PROGRESS_WRITE_INTERVAL_MS = 1_000
@@ -49,27 +49,8 @@ async function runDefinition(
 export class JobRunService {
   constructor(
     private readonly repository: JobRepository,
-    private readonly report: ReportJobEvent,
-    private readonly alert?: SendJobAlert
+    private readonly report: ReportJobEvent
   ) {}
-
-  /** 알림 전송이 실패해도 실행 결과와 이력은 그대로 두고 로그 한 줄만 남긴다. */
-  async sendAlert(runId: number, jobAlert: JobAlert): Promise<void> {
-    if (this.alert === undefined) {
-      return
-    }
-
-    try {
-      await this.alert(jobAlert)
-    } catch (error) {
-      // 웹훅 URL이 오류 message에 들어갈 수 있어 오류 chain만 남긴다.
-      this.report('JOB_ALERT_FAILED', {
-        job: jobAlert.job,
-        runId,
-        errorChain: readErrorChain(error)
-      })
-    }
-  }
 
   /** 실패도 이력과 로그로 남기고 던지지 않아, job 하나가 worker의 다른 일을 멈추지 않는다. */
   async execute(definition: JobDefinition, target: JobRunTarget): Promise<void> {
@@ -92,15 +73,6 @@ export class JobRunService {
         this.report('JOB_PROGRESS_RECORD_FAILED', { ...event, errorChain: readErrorChain(error) })
       })
     }, PROGRESS_WRITE_INTERVAL_MS)
-    const delayMs = definition.delayMinutes * 60_000
-    const delayAlert = setTimeout(() => {
-      this.sendAlert(target.id, {
-        kind: 'delayed',
-        job: definition.name,
-        trigger: target.trigger,
-        elapsedMs: delayMs
-      })
-    }, delayMs)
     this.report('JOB_RUN_STARTED', event)
 
     let outcome: JobRunOutcome
@@ -113,7 +85,6 @@ export class JobRunService {
       outcome = { status: 'failed', progress, error: readErrorChain(error) }
     } finally {
       clearInterval(progressWriter)
-      clearTimeout(delayAlert)
     }
 
     const durationMs = Math.round(performance.now() - startedAt)
@@ -127,16 +98,6 @@ export class JobRunService {
       await this.repository.finishRun(target.id, outcome)
     } catch (error) {
       this.report('JOB_RUN_RECORD_FAILED', { ...event, errorChain: readErrorChain(error) })
-    }
-
-    if (outcome.status === 'failed') {
-      await this.sendAlert(target.id, {
-        kind: 'failed',
-        job: definition.name,
-        trigger: target.trigger,
-        elapsedMs: durationMs,
-        errorChain: outcome.error
-      })
     }
   }
 
