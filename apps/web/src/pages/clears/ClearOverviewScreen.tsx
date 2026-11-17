@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking/clear-stats'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
@@ -33,7 +32,7 @@ import { ChoiceGroup } from './components/ChoiceGroup'
 import { ClearContentCards } from './components/ClearContentCards'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
-import { styles as layout } from './components/ClearPanel.style'
+import { clearClasses } from './components/clear-classes'
 import { useChoice } from './hooks/useChoice'
 import { useClearContentStats, useClearOverview, useClearStats } from './hooks/useClearStats'
 import {
@@ -45,7 +44,6 @@ import {
   scoreKindChoices
 } from './clear-scores'
 import { clearContentsOf } from './clear-groups'
-import { styles } from './ClearOverviewScreen.style'
 
 const OVERVIEW_LAST_ADVENTURE_SIZE = 13
 
@@ -76,7 +74,7 @@ export function ClearOverviewScreen({
   switch (result.status) {
     case 'loading':
       return (
-        <div aria-busy="true" {...stylex.props(layout.screen)}>
+        <div aria-busy="true" className={clearClasses.screen}>
           <span role="status" className="sr-only">
             클리어 집계를 받는 중입니다.
           </span>
@@ -85,9 +83,9 @@ export function ClearOverviewScreen({
       )
     case 'error':
       return (
-        <div {...stylex.props(layout.screen)}>
+        <div className={clearClasses.screen}>
           <TitleBox title={CLEAR_TITLE} />
-          <p role="alert" {...stylex.props(layout.state)}>
+          <p role="alert" className={clearClasses.state}>
             {result.message}
           </p>
         </div>
@@ -98,9 +96,9 @@ export function ClearOverviewScreen({
       const selected = findOverviewWeek(weeks, week)
       if (selected === undefined) {
         return (
-          <div {...stylex.props(layout.screen)}>
+          <div className={clearClasses.screen}>
             <TitleBox title={CLEAR_TITLE} />
-            <p {...stylex.props(layout.empty)}>수집 기록이 없습니다.</p>
+            <p className={clearClasses.empty}>수집 기록이 없습니다.</p>
           </div>
         )
       }
@@ -139,7 +137,7 @@ function Overview({
   }
 
   return (
-    <div {...stylex.props(layout.screen)}>
+    <div className={clearClasses.screen}>
       <ClearTitle summary={weekSummaryOf(contents, weekStart)}>
         <ClearWeekWheel weeks={weeks} selected={selected} onSelect={onWeekSelect} />
       </ClearTitle>
@@ -147,9 +145,9 @@ function Overview({
       {hasRateValues(contents) && (
         <ClearRatePanel contents={contents} weeks={weeks} weekStart={weekStart} />
       )}
-      {result.status === 'loading' && <div aria-hidden="true" {...stylex.props(layout.pending)} />}
+      {result.status === 'loading' && <div aria-hidden="true" className={clearClasses.pending} />}
       {result.status === 'error' && (
-        <p role="alert" {...stylex.props(layout.state)}>
+        <p role="alert" className={clearClasses.state}>
           {result.message}
         </p>
       )}
@@ -218,7 +216,7 @@ function OverviewStats({
 
   return (
     <>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {fames.length > 0 && (
           <Panel name="클리어 캐릭터의 명성">
             <BoxPlotChart
@@ -232,7 +230,7 @@ function OverviewStats({
         <ScorePanel overview={overview} contents={contents} />
       </div>
       <JobPanel overview={overview} contents={contents} options={options} />
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {hasClearTimes(overview) && <ClearTimePanel times={overview} />}
         <CoClearPanel overview={overview} contents={contents} options={options} />
         <AdventurePanel contents={contents} options={options} weekStart={weekStart} />
@@ -323,10 +321,10 @@ function JobPanel({
         </>
       }
     >
-      <div {...stylex.props(styles.jobLists)}>
+      <div className="grid grid-cols-2 gap-x-4 max-sm:grid-cols-1">
         {lists.map(({ name, rows }) => (
-          <div key={name} {...stylex.props(styles.jobList)}>
-            <p {...stylex.props(layout.subLabel, styles.jobListTitle)}>{name}</p>
+          <div key={name} className="flex min-w-0 flex-col">
+            <p className={`${clearClasses.subLabel} px-4 pt-4`}>{name}</p>
             <BoxPlotChart
               label={name}
               rows={rows}
@@ -340,7 +338,7 @@ function JobPanel({
           </div>
         ))}
       </div>
-      <div {...stylex.props(styles.jobLegend)}>
+      <div className="px-4 pb-4">
         <BoxPlotLegend />
       </div>
     </Panel>
@@ -380,9 +378,11 @@ function CoClearPanel({
         />
       }
     >
-      <div {...stylex.props(styles.coClearHead)}>
-        <span {...stylex.props(layout.subLabel)}>{`${option.label} 클리어 캐릭터`}</span>
-        <span {...stylex.props(styles.coClearCount)}>{integer.format(base.cleared)}</span>
+      <div className="flex flex-col gap-0.5 px-4 pt-4">
+        <span className={clearClasses.subLabel}>{`${option.label} 클리어 캐릭터`}</span>
+        <span className="font-mono text-xl font-semibold tabular-nums">
+          {integer.format(base.cleared)}
+        </span>
       </div>
       <RowBars bars={bars} max={1} formatValue={formatPercent} />
     </Panel>
@@ -442,7 +442,7 @@ function AdventureStats({
       }
     >
       {result.status === 'error' && (
-        <p role="alert" {...stylex.props(layout.bodyState)}>
+        <p role="alert" className={clearClasses.bodyState}>
           {result.message}
         </p>
       )}
