@@ -1,17 +1,14 @@
 import { Field } from '@base-ui/react/field'
 import { Input } from '@base-ui/react/input'
-import * as stylex from '@stylexjs/stylex'
 import { createContext, useContext, type ComponentType, type ReactNode, type Ref } from 'react'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { styles } from './text-field.style'
 
 type TextFieldSize = 'sm' | 'md' | 'lg'
 
-type TextFieldState = { invalid: boolean; disabled: boolean; size: TextFieldSize }
+type TextFieldState = { invalid: boolean; size: TextFieldSize }
 
 const TextFieldStateContext = createContext<TextFieldState>({
   invalid: false,
-  disabled: false,
   size: 'md'
 })
 
@@ -33,14 +30,8 @@ export function TextField({
   ref
 }: TextFieldProps) {
   return (
-    <Field.Root
-      ref={ref}
-      name={name}
-      invalid={invalid}
-      disabled={disabled}
-      {...stylex.props(styles.field)}
-    >
-      <TextFieldStateContext value={{ invalid, disabled, size }}>{children}</TextFieldStateContext>
+    <Field.Root ref={ref} name={name} invalid={invalid} disabled={disabled} className="field">
+      <TextFieldStateContext value={{ invalid, size }}>{children}</TextFieldStateContext>
     </Field.Root>
   )
 }
@@ -51,7 +42,7 @@ function TextFieldLabelImpl({ className, style, ...props }: TextFieldLabelProps 
   return (
     <Field.Label
       {...props}
-      {...withForwardedStyle(stylex.props(styles.label), { className, style })}
+      {...withForwardedStyle({ className: 'field-label' }, { className, style })}
     />
   )
 }
@@ -67,20 +58,13 @@ function TextFieldInputImpl({
   style,
   ...inputProps
 }: TextFieldInputProps & ForwardedStyle) {
-  const { invalid, disabled, size } = useContext(TextFieldStateContext)
+  const { size } = useContext(TextFieldStateContext)
 
   return (
-    <div
-      {...stylex.props(
-        styles.box,
-        styles[size],
-        invalid && styles.invalid,
-        disabled && styles.disabled
-      )}
-    >
+    <div className={`field-box field-box-${size}`}>
       <Input
         {...inputProps}
-        {...withForwardedStyle(stylex.props(styles.input), { className, style })}
+        {...withForwardedStyle({ className: 'field-input' }, { className, style })}
       />
     </div>
   )
@@ -98,7 +82,7 @@ function TextFieldDescriptionImpl({
   return (
     <Field.Description
       {...props}
-      {...withForwardedStyle(stylex.props(styles.description), { className, style })}
+      {...withForwardedStyle({ className: 'field-description' }, { className, style })}
     />
   )
 }
@@ -118,7 +102,7 @@ function TextFieldErrorImpl({ className, style, ...props }: TextFieldErrorProps 
     <Field.Error
       match
       {...props}
-      {...withForwardedStyle(stylex.props(styles.error), { className, style })}
+      {...withForwardedStyle({ className: 'field-error' }, { className, style })}
     />
   )
 }

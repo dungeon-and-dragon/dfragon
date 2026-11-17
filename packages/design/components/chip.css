@@ -1,0 +1,60 @@
+/*
+ * <button class="chip" aria-pressed="false">원본</button>. 켜짐은 Base UI Toggle이 붙이는 data-pressed다.
+ */
+.chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  height: var(--spacing-control-sm);
+  margin: 0;
+  padding-inline: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background-color: var(--color-canvas);
+  color: var(--color-fg-muted);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: var(--font-weight-normal);
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: color, background-color, border-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--color-line-strong);
+  color: var(--color-fg);
+}
+
+.chip[data-pressed] {
+  border-color: var(--color-signal);
+  background-color: var(--color-signal);
+  color: var(--color-on-signal);
+  font-weight: var(--font-weight-medium);
+}
+
+.chip[data-pressed]:hover:not(:disabled) {
+  border-color: var(--color-signal-hover);
+  background-color: var(--color-signal-hover);
+  color: var(--color-on-signal);
+}
+
+.chip:disabled {
+  border-color: var(--color-line);
+  background-color: var(--color-canvas);
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.chip[data-pressed]:disabled {
+  border-color: var(--color-control);
+  background-color: var(--color-control);
+}

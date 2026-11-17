@@ -4,6 +4,7 @@
 @import '@dfragon/design/theme.css';
 @import '@dfragon/design/base.css' layer(base);
 @import '@dfragon/ui/tokens.css';
+@import '@dfragon/design/components.css' layer(components);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
 @source '../src';

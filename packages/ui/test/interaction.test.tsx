@@ -26,7 +26,6 @@ import {
   type IconButtonProps,
   type TextFieldInputProps
 } from '../src/index'
-import { colors } from '../src/tokens.stylex'
 
 let container: HTMLDivElement
 let root: Root
@@ -169,22 +168,16 @@ describe('Button의 클릭과 disabled, loading 상태', () => {
     }
   })
 
-  // jsdom은 계산된 스타일을 모르므로 글자를 투명하게만 가리는 스타일 계약은 확인하지 못한다.
-  it('loading 중에도 글자가 보조 기술에서 가려지지 않고 접근 가능한 이름으로 남는다', async () => {
+  // jsdom은 계산된 스타일을 모르므로 글자를 투명하게 가리고 호를 그리는 CSS는 확인하지 못한다.
+  it('loading 중에도 글자가 접근 가능한 이름으로 남고 data-loading으로 진행 표시를 켠다', async () => {
     await render(
       <Button variant="primary" loading>
         검색
       </Button>
     )
     const button = getByRole('button', '검색')
-    const label = Array.from(button.querySelectorAll('span'))
-      .filter((candidate) => candidate.textContent === '검색')
-      .at(-1)
 
-    expect(label?.closest('[aria-hidden="true"]')).toBeNull()
-    expect(
-      button.querySelector('[role="progressbar"]')?.closest('[aria-hidden="true"]')
-    ).not.toBeNull()
+    expect(button.hasAttribute('data-loading')).toBe(true)
   })
 
   it('화면이 넘긴 type과 ref를 native button에 전달한다', async () => {
@@ -377,16 +370,6 @@ function SettingsIcon() {
   return <svg data-testid="settings-icon" viewBox="0 0 24 24" />
 }
 
-// StyleX의 atomic class 이름은 속성, 값, 조건에서 정해지므로, 같은 선언을 여기서 만들면 같은 class가 나온다.
-// jsdom은 CSS를 계산하지 않으므로 눌림 테두리가 aria-pressed 조건으로 붙었는지를 class로 확인한다.
-const pressedRingClass = stylex.props(
-  stylex.create({
-    ring: {
-      boxShadow: { default: null, ':is([aria-pressed="true"])': `inset 0 0 0 2px ${colors.signal}` }
-    }
-  }).ring
-).className
-
 describe('IconButton의 이름, 클릭, disabled', () => {
   it('아이콘만 보이는 버튼이 aria-label을 이름으로 갖고 클릭과 ref를 전달한다', async () => {
     const onClick = vi.fn<NonNullable<IconButtonProps['onClick']>>()
@@ -415,7 +398,7 @@ describe('IconButton의 이름, 클릭, disabled', () => {
     expect(onClick).not.toHaveBeenCalled()
   })
 
-  // jsdom은 계산된 크기를 모르므로 크기마다 다른 StyleX class가 붙는지만 확인한다.
+  // jsdom은 계산된 크기를 모르므로 크기마다 다른 class가 붙는지만 확인한다.
   it('상단 바 크기 bar와 헤더 도구 크기 lg는 기본 md와 다른 외형을 쓴다', async () => {
     await render(
       <>
@@ -451,7 +434,6 @@ describe('IconButton의 이름, 클릭, disabled', () => {
     expect(on.getAttribute('aria-pressed')).toBe('true')
     expect(direct.getAttribute('aria-pressed')).toBe('true')
     expect(plain.hasAttribute('aria-pressed')).toBe(false)
-    expect(on.className.split(' ')).toContain(pressedRingClass)
     for (const button of [off, direct, plain]) {
       expect(button.className).toBe(on.className)
     }
