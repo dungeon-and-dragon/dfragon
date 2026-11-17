@@ -3,6 +3,7 @@ import { createDatabaseClient } from '@dfragon/database'
 import { writeAccessLogToStdout } from '@dfragon/http-server'
 import { createNeopleClient } from '@dfragon/neople'
 import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
+import { parseCharacterBasic } from '../infrastructure/neople/character-basic.js'
 import {
   createNeopleClearRecordTimeline,
   createNeopleClearTimeline
@@ -73,6 +74,7 @@ export async function startCharacterCollector(
       openEngine: openScoreEngine,
       createSources: (onRequest) => createScoreSources(neople, onRequest),
       readConcurrency,
+      parseBasic: parseCharacterBasic,
       report,
       schedule: configuration.scoreCalculationSchedule
     }

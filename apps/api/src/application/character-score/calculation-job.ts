@@ -1,7 +1,11 @@
 import type { ClearPopulationCharacter, FinishedJobRun } from '@dfragon/database'
 import { z } from 'zod'
-import type { CharacterPayloads } from '../../domain/character-detail/sections.js'
+import type {
+  CharacterPayloads,
+  FetchedCharacterPayloads
+} from '../../domain/character-detail/sections.js'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import { toSectionBodies } from '../../domain/character-history/section-body.js'
 import { type CalculatedScore, toCalculatedScore } from '../../domain/score/calculated.js'
 import { defineJob } from '../jobs/definition.js'
 import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
@@ -32,17 +36,28 @@ export type ScoreCalculationSummary = {
   resumedAt: number
   saved: number
   skipped: number
+  historySaved: number
+  historyFailed: number
   requests: number
 }
 
+// 상세를 받지 못한 캐릭터는 fetched가 null이다.
 type CharacterScoreResult =
-  | { status: 'scored'; score: CalculatedScore }
-  | { status: 'skipped' }
+  | { status: 'scored'; score: CalculatedScore; fetched: FetchedCharacterPayloads }
+  | { status: 'skipped'; fetched: FetchedCharacterPayloads | null }
   | { status: 'unavailable' }
 
 type CharacterCalculation =
-  | Exclude<CharacterScoreResult, { status: 'scored' }>
-  | { status: 'calculated'; score: CalculatedScore | null; missingItems: boolean }
+  | { status: 'skipped'; fetched: null }
+  | { status: 'unavailable' }
+  | {
+      status: 'calculated'
+      score: CalculatedScore | null
+      missingItems: boolean
+      fetched: FetchedCharacterPayloads
+    }
+
+type HistoryOutcome = 'saved' | 'failed' | 'none'
 
 export class ScoreEngineUnavailable extends Error {
   readonly code: 'SCORE_ENGINE_NOT_CONFIGURED' | 'SCORE_ENGINE_STOPPED'
@@ -87,20 +102,21 @@ async function calculateCharacter(
       return { status: 'unavailable' }
     }
 
-    return { status: 'skipped' }
+    return { status: 'skipped', fetched: null }
   }
 
   const fetchedAt = now()
+  const fetched = { payloads, fetchedAt }
   const { result, missingItems } = await calculateCharacterScore(
     identity,
-    { payloads, fetchedAt },
+    fetched,
     catalog,
     engine.calculate,
     NEVER_ABORTED
   )
   const score = toCalculatedScore(result, now())
 
-  return { status: 'calculated', score, missingItems }
+  return { status: 'calculated', score, missingItems, fetched }
 }
 
 /**
@@ -119,11 +135,13 @@ function settle(
     return { status: 'unavailable' }
   }
 
-  if (calculation.score === null) {
-    return { status: 'skipped' }
+  const { score, fetched } = calculation
+
+  if (score === null) {
+    return { status: 'skipped', fetched }
   }
 
-  return { status: 'scored', score: calculation.score }
+  return { status: 'scored', score, fetched }
 }
 
 export class ScoreCalculationService {
@@ -146,7 +164,7 @@ export class ScoreCalculationService {
       throw new ScoreEngineUnavailable('SCORE_ENGINE_NOT_CONFIGURED')
     }
 
-    const counts = { saved: 0, skipped: 0, requests: 0 }
+    const counts = { saved: 0, skipped: 0, historySaved: 0, historyFailed: 0, requests: 0 }
     let itemLookupUnavailable = false
     const sources = createSources({
       onRequest: () => {
@@ -199,13 +217,24 @@ export class ScoreCalculationService {
           }
         }
 
+        // 캐릭터마다 DB transaction이 둘 늘어 차례로 저장하면 92만 명에 몇 시간이 더해지므로, 묶음 안의 캐릭터는 함께 저장한다.
+        const histories = await Promise.all(
+          results.map((result, index) => this.recordResult(group[index]!, result, done + index))
+        )
+
         for (const [index, result] of results.entries()) {
           if (result.status === 'scored') {
-            const { serverId, characterId } = group[index]!
-            await this.repository.recordScore({ serverId, characterId, ...result.score })
             counts.saved++
           } else {
             counts.skipped++
+          }
+
+          if (histories[index] === 'saved') {
+            counts.historySaved++
+          }
+
+          if (histories[index] === 'failed') {
+            counts.historyFailed++
           }
         }
 
@@ -216,6 +245,66 @@ export class ScoreCalculationService {
       return { characters: targets.length, resumedAt, ...counts }
     } finally {
       await Promise.allSettled([engine.close(), sources.catalog.close()])
+    }
+  }
+
+  private async recordResult(
+    character: ClearPopulationCharacter,
+    result: CharacterScoreResult,
+    position: number
+  ): Promise<HistoryOutcome> {
+    if (result.status === 'unavailable') {
+      return 'none'
+    }
+
+    const { serverId, characterId } = character
+
+    if (result.status === 'scored') {
+      await this.repository.recordScore({ serverId, characterId, ...result.score })
+    }
+
+    if (result.fetched === null) {
+      return 'none'
+    }
+
+    const score = result.status === 'scored' ? result.score : null
+
+    return this.saveHistory(result.fetched, score, position)
+  }
+
+  // 이력의 최신 값과 characters가 어긋나지 않게 받은 기본 정보로 characters를 덮어쓴 뒤 이력을 저장한다.
+  // 이력 행이 characters를 참조하므로 순서를 바꾸지 않는다.
+  private async saveHistory(
+    { payloads, fetchedAt }: FetchedCharacterPayloads,
+    score: CalculatedScore | null,
+    position: number
+  ): Promise<HistoryOutcome> {
+    const basic = this.ports.parseBasic(payloads.basic)
+
+    // 모험단 이름이 없는 캐릭터처럼 characters에 넣을 수 없는 응답은 상세 조회와 같게 저장하지 않는다.
+    if (basic === undefined) {
+      return 'none'
+    }
+
+    const { serverId, characterId, ...basicColumns } = basic
+    const sections = toSectionBodies(payloads)
+
+    try {
+      await this.repository.recordBasic(basic)
+      await this.repository.recordHistory({
+        serverId,
+        characterId,
+        observedAt: fetchedAt,
+        basic: basicColumns,
+        sections,
+        score
+      })
+
+      return 'saved'
+    } catch {
+      this.ports.report('SCORE_HISTORY_RECORD_FAILED', { position })
+
+      return 'failed'
     }
   }
 }
