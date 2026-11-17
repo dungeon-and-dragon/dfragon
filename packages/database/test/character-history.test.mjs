@@ -5,6 +5,7 @@ import {
   createDatabaseClient,
   readCharacterHistory,
   readCharacterHistorySnapshot,
+  readCharacterSectionHistory,
   recordCharacter,
   recordCharacterHistory
 } from '../dist/index.js'
@@ -397,4 +398,28 @@ test('characters에 없는 캐릭터는 FK 오류로 실패하고, 캐릭터를 
   await recordCharacterHistory(client, historyOf(key, nov16At2200))
   await client.$executeRaw`DELETE FROM "characters" WHERE "server_id" = ${key.serverId} AND "character_id" = ${key.characterId}`
   assert.deepEqual(await countRows(key), { basic: 0, section: 0, score: 0 })
+})
+
+test('섹션 이력 읽기는 고른 섹션의 행만 받은 시각 순으로 본문과 함께 준다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('history-sections')
+  const changedEquipment = { equipment: [{ slotId: 'WEAPON', itemId: 'item-a', reinforce: 13 }] }
+  const changedStatus = { status: [{ name: '힘', value: 1300 }], buff: [] }
+
+  await recordCharacterHistory(client, historyOf(key, nov16At2200))
+  await recordCharacterHistory(
+    client,
+    historyOf(key, nov17At0900, {
+      sections: { ...sections, equipment: changedEquipment, status: changedStatus }
+    })
+  )
+
+  const rows = await readCharacterSectionHistory(client, key, ['equipment', 'creature'])
+
+  assert.deepEqual(rows, [
+    { section: 'creature', observedAt: nov16At2200, data: sections.creature },
+    { section: 'equipment', observedAt: nov16At2200, data: sections.equipment },
+    { section: 'equipment', observedAt: nov17At0900, data: changedEquipment }
+  ])
 })

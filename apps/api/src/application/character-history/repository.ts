@@ -1,5 +1,6 @@
 import type {
   StoredCharacterHistory,
+  StoredCharacterSection,
   StoredCharacterHistorySnapshot,
   TimelineEventRow
 } from '@dfragon/database'
@@ -12,10 +13,15 @@ export interface CharacterHistoryRepository {
     at: Date
   ): Promise<StoredCharacterHistorySnapshot | null>
   readNameChangeEvents(character: CharacterIdentity): Promise<TimelineEventRow[]>
+  readSections(
+    character: CharacterIdentity,
+    sections: readonly string[]
+  ): Promise<StoredCharacterSection[]>
 }
 
 export const emptyCharacterHistoryRepository: CharacterHistoryRepository = {
   readHistory: async () => ({ basics: [], scores: [], sectionChanges: [] }),
   readSnapshot: async () => null,
-  readNameChangeEvents: async () => []
+  readNameChangeEvents: async () => [],
+  readSections: async () => []
 }

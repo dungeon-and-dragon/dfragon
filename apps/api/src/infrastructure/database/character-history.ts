@@ -2,9 +2,11 @@ import {
   type DatabaseClient,
   type StoredCharacterHistory,
   type StoredCharacterHistorySnapshot,
+  type StoredCharacterSection,
   type TimelineEventRow,
   readCharacterHistory,
   readCharacterHistorySnapshot,
+  readCharacterSectionHistory,
   readTimelineEvents
 } from '@dfragon/database'
 import type { CharacterHistoryRepository } from '../../application/character-history/repository.js'
@@ -30,5 +32,12 @@ export class DatabaseCharacterHistoryRepository implements CharacterHistoryRepos
 
   readNameChangeEvents(character: CharacterIdentity): Promise<TimelineEventRow[]> {
     return readTimelineEvents(this.client, character, nameChangeCodes, everySync)
+  }
+
+  readSections(
+    character: CharacterIdentity,
+    sections: readonly string[]
+  ): Promise<StoredCharacterSection[]> {
+    return readCharacterSectionHistory(this.client, character, sections)
   }
 }

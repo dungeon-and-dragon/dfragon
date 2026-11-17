@@ -6,6 +6,7 @@ import type {
 } from '@dfragon/database'
 import { z } from 'zod'
 import type { CharacterCardScore } from '../character-card/types.js'
+import type { CharacterChangePoint } from './changes.js'
 
 export const CHARACTER_NAME_CHANGE_CODES = { character: 102, adventure: 105 } as const
 
@@ -31,6 +32,7 @@ export type CharacterHistory = {
   scores: CharacterHistoryScoreChange[]
   sectionChanges: Record<string, string[]>
   nameChanges: CharacterNameChange[]
+  changes: CharacterChangePoint[]
 }
 
 const nameChangeKinds = new Map<number, CharacterNameChangeKind>(
@@ -92,7 +94,8 @@ function projectScoreChange(score: StoredCharacterScoreHistory): CharacterHistor
 
 export function projectCharacterHistory(
   stored: StoredCharacterHistory,
-  nameChanges: CharacterNameChange[]
+  nameChanges: CharacterNameChange[],
+  changes: CharacterChangePoint[]
 ): CharacterHistory {
   const lastBasic = stored.basics.at(-1)
   const lastSeenAt = lastBasic?.lastSeenAt.toISOString() ?? null
@@ -110,5 +113,5 @@ export function projectCharacterHistory(
     sectionChanges[section].push(observedAt.toISOString())
   }
 
-  return { lastSeenAt, basics, scores, sectionChanges, nameChanges }
+  return { lastSeenAt, basics, scores, sectionChanges, nameChanges, changes }
 }

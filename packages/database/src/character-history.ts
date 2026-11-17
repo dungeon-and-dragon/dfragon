@@ -44,6 +44,12 @@ export type StoredCharacterHistory = {
   sectionChanges: StoredCharacterSectionChange[]
 }
 
+export type StoredCharacterSection = {
+  section: string
+  observedAt: Date
+  data: CharacterSectionBody
+}
+
 export type StoredCharacterHistorySnapshot = {
   // 고른 기본 정보, 점수, 섹션 행 가운데 가장 늦게 받은 시각이다. 그 시각에 받은 값이 이 스냅샷 전체와 같다.
   observedAt: Date
@@ -238,6 +244,19 @@ export async function readCharacterHistory(
   ])
 
   return { basics, scores, sectionChanges }
+}
+
+export function readCharacterSectionHistory(
+  client: DatabaseClient,
+  { serverId, characterId }: CharacterHistoryKey,
+  sections: readonly string[]
+): Promise<StoredCharacterSection[]> {
+  return client.$queryRaw<StoredCharacterSection[]>`
+    SELECT "section", "observed_at" AS "observedAt", "data"
+    FROM "character_section_history"
+    WHERE "server_id" = ${serverId} AND "character_id" = ${characterId}
+      AND "section" = ANY(${[...sections]}::text[])
+    ORDER BY "observed_at", "section"`
 }
 
 export async function readCharacterHistorySnapshot(
