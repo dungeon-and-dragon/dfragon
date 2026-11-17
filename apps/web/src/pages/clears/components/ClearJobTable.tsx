@@ -1,6 +1,4 @@
 import { Button } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
-import { colors } from '@dfragon/ui/tokens.stylex'
 import { useRef, useState } from 'react'
 import type { ClearJob } from '#core/ranking/clear-stats'
 import { useChartTooltipSlide } from '../../../animations/useChartTooltipSlide'
@@ -26,10 +24,13 @@ import {
 import { useChoice } from '../hooks/useChoice'
 import { ChoiceGroup } from './ChoiceGroup'
 import { Panel } from './ClearPanel'
-import { styles } from './ClearJobTable.style'
+import { tableClasses } from '../../../components/table/table-classes'
 
 const VISIBLE_JOB_COUNT = 10
 const PLOT_FALLBACK = { width: 320, height: 20 }
+const PLOT_COLOR = 'var(--color-chart-1)'
+const HEAD = `${tableClasses.headCell} py-1 align-top`
+const VALUE = 'text-right font-mono tabular-nums'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -67,7 +68,7 @@ export function ClearJobTable({ jobs }: { jobs: readonly ClearJob[] }): React.JS
       }
     >
       <JobTable rows={shown} metric={metric} />
-      <div {...stylex.props(styles.foot)}>
+      <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
         <BoxPlotLegend />
         {!expanded && rows.length > VISIBLE_JOB_COUNT && (
           <Button variant="secondary" onClick={expand}>
@@ -84,7 +85,7 @@ function statsRowsOf({ stats }: JobRow): TooltipRow[] {
     return []
   }
 
-  return boxStatsTooltipRows(stats, colors.chart1, formatInteger)
+  return boxStatsTooltipRows(stats, PLOT_COLOR, formatInteger)
 }
 
 function JobTable({
@@ -125,43 +126,49 @@ function JobTable({
   const shownRows = shownRow != null ? statsRowsOf(shownRow) : []
 
   return (
-    <div ref={chartRef} {...stylex.props(styles.chart)}>
-      <table {...stylex.props(styles.table)}>
-        <thead>
-          <tr {...stylex.props(styles.headRow)}>
-            <th scope="col" {...stylex.props(styles.head, styles.headName)}>
-              전직
-            </th>
-            <th scope="col" {...stylex.props(styles.head, styles.headCounts)}>
-              클리어 / 캐릭터 수
-            </th>
-            <th scope="col" {...stylex.props(styles.head, styles.headPlot)}>
-              {JOB_METRIC_PLOT_LABELS[metric]}
-              <span ref={plotRef} {...stylex.props(styles.axis)}>
-                {scale !== undefined && (
-                  <BoxPlotAxis scale={scale} width={width} formatTick={formatTick} />
-                )}
-              </span>
-            </th>
-            <th scope="col" {...stylex.props(styles.head, styles.headRate)}>
-              클리어율
-            </th>
-          </tr>
-        </thead>
-        <tbody onMouseLeave={handleLeave}>
-          {rows.map((row) => (
-            <JobTableRow
-              key={row.key}
-              row={row}
-              scale={scale}
-              width={width}
-              onHover={setHover}
-              anchorsRef={anchorsRef}
-            />
-          ))}
-        </tbody>
-      </table>
-      <ChartTooltip tooltipRef={tooltipRef} title={shownTitle} rows={shownRows} />
+    // 넓은 화면에서는 스크롤 영역을 두지 않는다. 두면 아래쪽 행의 툴팁이 영역 밖으로 나간 만큼 잘린다.
+    <div className="max-sm:overflow-x-auto">
+      <div ref={chartRef} className="relative max-sm:min-w-180">
+        <table className={tableClasses.table}>
+          <thead>
+            <tr>
+              <th scope="col" className={`${HEAD} w-46 text-left`}>
+                전직
+              </th>
+              <th scope="col" className={`${HEAD} w-28 text-right`}>
+                클리어 / 캐릭터 수
+              </th>
+              <th scope="col" className={`${HEAD} text-left`}>
+                {JOB_METRIC_PLOT_LABELS[metric]}
+                <span ref={plotRef} className="mt-1 block">
+                  {scale !== undefined && (
+                    <BoxPlotAxis scale={scale} width={width} formatTick={formatTick} />
+                  )}
+                </span>
+              </th>
+              <th scope="col" className={`${HEAD} w-16 text-right`}>
+                클리어율
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            onMouseLeave={handleLeave}
+            className={`${tableClasses.body} [&>tr:last-child>th]:border-b-0`}
+          >
+            {rows.map((row) => (
+              <JobTableRow
+                key={row.key}
+                row={row}
+                scale={scale}
+                width={width}
+                onHover={setHover}
+                anchorsRef={anchorsRef}
+              />
+            ))}
+          </tbody>
+        </table>
+        <ChartTooltip tooltipRef={tooltipRef} title={shownTitle} rows={shownRows} />
+      </div>
     </div>
   )
 }
@@ -197,21 +204,24 @@ function JobTableRow({
   }
 
   return (
-    <tr onMouseEnter={stats !== null ? handleMouseEnter : undefined} {...stylex.props(styles.row)}>
-      <th scope="row" {...stylex.props(styles.cell, styles.name)}>
+    <tr
+      onMouseEnter={stats !== null ? handleMouseEnter : undefined}
+      className={`${tableClasses.row} transition-colors duration-(--duration-hover) ease-standard`}
+    >
+      <th scope="row" className={`${tableClasses.cell} truncate text-left font-normal`}>
         {name}
-        {sub !== null && <small {...stylex.props(styles.sub)}> {sub}</small>}
+        {sub !== null && <small className="text-xs text-fg-subtle"> {sub}</small>}
       </th>
-      <td {...stylex.props(styles.cell, styles.value, styles.muted)}>{counts}</td>
-      <td ref={plotRef} {...stylex.props(styles.cell)}>
+      <td className={`${tableClasses.cell} ${VALUE} text-fg-muted`}>{counts}</td>
+      <td ref={plotRef} className={tableClasses.cell}>
         {stats !== null && scale !== undefined && (
           <>
             <span className="sr-only">{description}</span>
-            <BoxPlot stats={stats} color={colors.chart1} scale={scale} width={width} />
+            <BoxPlot stats={stats} color={PLOT_COLOR} scale={scale} width={width} />
           </>
         )}
       </td>
-      <td {...stylex.props(styles.cell, styles.value)}>{rate}</td>
+      <td className={`${tableClasses.cell} ${VALUE}`}>{rate}</td>
     </tr>
   )
 }

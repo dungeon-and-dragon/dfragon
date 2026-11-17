@@ -1,11 +1,10 @@
-import * as stylex from '@stylexjs/stylex'
 import { type ReactNode, useState } from 'react'
 import { formatSeoulDateTime } from '#core/time-format'
 import type { ClearTimes } from '#core/ranking/clear-stats'
 import { Columns } from '../../../components/chart/Columns'
 import { TitleStat } from '../../../components/table/TitleBox'
 import { hourColumns, type WeekSummary, weekdayColumns } from '../clear-overview'
-import { styles } from './ClearPanel.style'
+import { clearClasses } from './clear-classes'
 
 export const CLEAR_TITLE = '클리어 집계'
 const TIME_COLUMN_HEIGHT = 64
@@ -22,23 +21,29 @@ export function ClearTitle({
   const [now] = useState(Date.now)
 
   return (
-    <header {...stylex.props(styles.title)}>
-      <h1 {...stylex.props(styles.titleText)}>{CLEAR_TITLE}</h1>
+    <header className="box-border flex min-h-16 flex-wrap items-center gap-4 rounded-panel border border-line bg-canvas p-4">
+      <h1 className="my-0 mr-6 ml-0 text-xl font-semibold tracking-heading">{CLEAR_TITLE}</h1>
       {children}
       {summary !== undefined && (
-        <div {...stylex.props(styles.titleStats)}>
+        <div className="ml-auto flex flex-wrap gap-x-6 gap-y-2 max-sm:gap-x-4">
           {summary.minFame !== null && (
             <TitleStat
               label="기준 명성"
+              numeric={false}
               value={
-                <span {...stylex.props(styles.fame)}>
-                  {`${integer.format(summary.minFame)} 이상`}
+                <span className="text-game-fame">
+                  <span className="font-mono tabular-nums">{integer.format(summary.minFame)}</span>
+                  {' 이상'}
                 </span>
               }
             />
           )}
           <TitleStat label="캐릭터 수" value={integer.format(summary.population)} />
-          <TitleStat label="수집 시각" value={formatSeoulDateTime(summary.collectedAt, now)} />
+          <TitleStat
+            label="수집 시각"
+            numeric={false}
+            value={formatSeoulDateTime(summary.collectedAt, now)}
+          />
         </div>
       )}
     </header>
@@ -59,13 +64,14 @@ export function Panel({
   return (
     <section
       aria-label={name}
-      {...stylex.props(styles.panel, grow !== undefined && styles.panelGrow(grow))}
+      className="flex min-w-0 grow basis-0 flex-col rounded-panel border border-line bg-canvas"
+      style={grow !== undefined ? { flexGrow: grow } : undefined}
     >
-      <div {...stylex.props(styles.panelHead)}>
-        <h2 {...stylex.props(styles.panelTitle)}>{name}</h2>
+      <div className="flex min-h-11 flex-wrap items-center gap-2 border-b border-line px-4 py-1.5">
+        <h2 className="m-0 grow text-base font-semibold tracking-heading">{name}</h2>
         {controls}
       </div>
-      <div {...stylex.props(styles.panelBody)}>{children}</div>
+      <div className="flex grow flex-col">{children}</div>
     </section>
   )
 }
@@ -73,12 +79,12 @@ export function Panel({
 export function ClearTimePanel({ times }: { times: ClearTimes }): React.JSX.Element {
   return (
     <Panel name="클리어 요일과 시간대">
-      <div {...stylex.props(styles.columnsBlock)}>
-        <p {...stylex.props(styles.subLabel, styles.columnsLabel)}>요일</p>
+      <div className="relative flex grow flex-col">
+        <p className={`${clearClasses.subLabel} absolute top-4 left-4`}>요일</p>
         <Columns groups={[weekdayColumns(times)]} height={TIME_COLUMN_HEIGHT} />
       </div>
-      <div {...stylex.props(styles.columnsBlock)}>
-        <p {...stylex.props(styles.subLabel, styles.columnsLabel)}>시간대</p>
+      <div className="relative flex grow flex-col">
+        <p className={`${clearClasses.subLabel} absolute top-4 left-4`}>시간대</p>
         <Columns groups={[hourColumns(times)]} height={TIME_COLUMN_HEIGHT} />
       </div>
     </Panel>
