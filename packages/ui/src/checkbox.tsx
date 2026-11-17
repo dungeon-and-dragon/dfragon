@@ -1,10 +1,7 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox'
-import * as stylex from '@stylexjs/stylex'
 import type { ComponentType, HTMLAttributes } from 'react'
-import { controlStyles } from './control.style'
 import { CheckIcon, DashIcon } from './icons'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { styles } from './checkbox.style'
 
 export type CheckboxProps = Omit<PublicProps<typeof BaseCheckbox.Root>, 'children'>
 
@@ -21,12 +18,9 @@ function CheckboxImpl({ className, style, ...props }: CheckboxProps & ForwardedS
   return (
     <BaseCheckbox.Root
       {...props}
-      {...withForwardedStyle(stylex.props(styles.root, controlStyles.focusRing), {
-        className,
-        style
-      })}
+      {...withForwardedStyle({ className: 'checkbox' }, { className, style })}
     >
-      <BaseCheckbox.Indicator {...stylex.props(styles.indicator)} render={renderIndicator} />
+      <BaseCheckbox.Indicator className="checkbox-indicator" render={renderIndicator} />
     </BaseCheckbox.Root>
   )
 }

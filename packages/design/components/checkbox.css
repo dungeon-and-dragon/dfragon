@@ -1,0 +1,45 @@
+/*
+ * <span class="checkbox" role="checkbox" data-checked><span class="checkbox-indicator"><svg /></span></span>.
+ * 켜짐은 data-checked, 일부 선택은 data-indeterminate, 비활성은 data-disabled다.
+ */
+.checkbox {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-line-input);
+  border-radius: var(--radius-badge);
+  background-color: var(--color-canvas);
+  color: var(--color-on-signal);
+  cursor: pointer;
+  transition-property: background-color, border-color;
+  transition-duration: var(--duration-state);
+  transition-timing-function: var(--ease-standard);
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.checkbox:is([data-checked], [data-indeterminate]) {
+  border-color: var(--color-signal);
+  background-color: var(--color-signal);
+}
+
+.checkbox[data-disabled] {
+  border-color: var(--color-line);
+  background-color: var(--color-control);
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.checkbox-indicator {
+  display: inline-flex;
+  font-size: var(--text-sm);
+}

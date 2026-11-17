@@ -74,3 +74,42 @@ export const States: Story = {
     </div>
   )
 }
+
+export const Focus: Story = {
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('input')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="grid max-w-sm gap-6">
+      <div className="field">
+        <label className="field-label" htmlFor="html-name">
+          기본
+        </label>
+        <div className="field-box field-box-md">
+          <input id="html-name" className="field-input" placeholder="이름을 입력합니다" />
+        </div>
+      </div>
+      <div className="field" data-invalid="">
+        <label className="field-label" htmlFor="html-invalid">
+          오류
+        </label>
+        <div className="field-box field-box-md">
+          <input id="html-invalid" className="field-input" defaultValue="가" aria-invalid="true" />
+        </div>
+        <p className="field-description">두 글자 이상 입력합니다.</p>
+        <p className="field-error">두 글자 이상 입력해 주세요.</p>
+      </div>
+      <div className="field" data-disabled="">
+        <label className="field-label" htmlFor="html-disabled">
+          비활성
+        </label>
+        <div className="field-box field-box-md">
+          <input id="html-disabled" className="field-input" defaultValue="바꿀 수 없음" disabled />
+        </div>
+      </div>
+    </div>
+  )
+}

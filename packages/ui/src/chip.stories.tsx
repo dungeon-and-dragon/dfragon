@@ -29,3 +29,28 @@ export const States: Story = {
     </div>
   )
 }
+
+export const Focus: Story = {
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('button')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-2">
+      <button type="button" className="chip" aria-pressed="false">
+        꺼짐
+      </button>
+      <button type="button" className="chip" aria-pressed="true" data-pressed="">
+        켜짐
+      </button>
+      <button type="button" className="chip" aria-pressed="false" disabled>
+        꺼진 비활성
+      </button>
+      <button type="button" className="chip" aria-pressed="true" data-pressed="" disabled>
+        켜진 비활성
+      </button>
+    </div>
+  )
+}

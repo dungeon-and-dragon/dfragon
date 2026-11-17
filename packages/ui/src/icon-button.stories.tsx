@@ -42,3 +42,33 @@ export const States: Story = {
     </div>
   )
 }
+
+export const Focus: Story = {
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('button')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-3">
+      {SIZES.map((size) => (
+        <button key={size} type="button" className={`icon-btn icon-btn-${size}`} aria-label="닫기">
+          <span aria-hidden="true">
+            <CloseIcon />
+          </span>
+        </button>
+      ))}
+      <button type="button" className="icon-btn icon-btn-lg" aria-label="켜짐" aria-pressed="true">
+        <span aria-hidden="true">
+          <CloseIcon />
+        </span>
+      </button>
+      <button type="button" className="icon-btn icon-btn-md" aria-label="비활성" disabled>
+        <span aria-hidden="true">
+          <CloseIcon />
+        </span>
+      </button>
+    </div>
+  )
+}

@@ -5,11 +5,14 @@
   "type": "module",
   "exports": {
     "./theme.css": "./theme.css",
-    "./base.css": "./base.css"
+    "./base.css": "./base.css",
+    "./components.css": "./components.css"
   },
   "files": [
     "theme.css",
     "base.css",
+    "components.css",
+    "components",
     "fonts",
     "README.md"
   ],

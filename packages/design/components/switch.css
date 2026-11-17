@@ -1,0 +1,57 @@
+/*
+ * <button class="switch" role="switch" data-checked><span class="switch-thumb" data-checked></span></button>.
+ * 켜짐은 data-checked, 비활성은 data-disabled를 root와 thumb에 함께 붙인다.
+ */
+.switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  box-sizing: border-box;
+  width: 40px;
+  height: 22px;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--color-line-input);
+  border-radius: var(--radius-control);
+  background-color: var(--color-inset);
+  cursor: pointer;
+  transition-property: background-color, border-color;
+  transition-duration: var(--duration-state);
+  transition-timing-function: var(--ease-standard);
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.switch[data-checked] {
+  border-color: var(--color-signal);
+  background-color: var(--color-signal);
+}
+
+.switch[data-disabled] {
+  border-color: var(--color-line);
+  background-color: var(--color-control);
+  cursor: not-allowed;
+}
+
+.switch-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-badge);
+  background-color: var(--color-fg-subtle);
+  transition-property: transform, background-color;
+  transition-duration: var(--duration-state);
+  transition-timing-function: var(--ease-standard);
+}
+
+.switch-thumb[data-checked] {
+  background-color: var(--color-on-signal);
+  transform: translateX(18px);
+}
+
+.switch-thumb[data-disabled] {
+  background-color: var(--color-fg-disabled);
+}

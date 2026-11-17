@@ -1,8 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ComponentType, ReactNode } from 'react'
-import { controlStyles } from './control.style'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { styles } from './icon-button.style'
 
 export type IconButtonProps = Omit<PublicProps<'button'>, 'children'> & {
   'aria-label': string
@@ -23,19 +20,9 @@ function IconButtonImpl({
     <button
       {...buttonProps}
       aria-pressed={pressed ?? buttonProps['aria-pressed']}
-      {...withForwardedStyle(
-        stylex.props(
-          styles.root,
-          controlStyles.focusRing,
-          controlStyles.hoverTransition,
-          styles[size]
-        ),
-        { className, style }
-      )}
+      {...withForwardedStyle({ className: `icon-btn icon-btn-${size}` }, { className, style })}
     >
-      <span aria-hidden="true" {...stylex.props(styles.icon)}>
-        {icon}
-      </span>
+      <span aria-hidden="true">{icon}</span>
     </button>
   )
 }

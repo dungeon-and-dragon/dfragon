@@ -1,0 +1,7 @@
+/* 컴포넌트 클래스. 앱 전역 CSS가 components layer로 한 번 불러온다. */
+@import './components/button.css';
+@import './components/icon-button.css';
+@import './components/text-field.css';
+@import './components/switch.css';
+@import './components/checkbox.css';
+@import './components/chip.css';
