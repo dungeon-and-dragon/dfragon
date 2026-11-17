@@ -11,6 +11,7 @@ import {
   LoadingIndicator,
   Menu,
   NumericText,
+  Popover,
   ProgressCircle,
   Select,
   StatusChip,
@@ -35,6 +36,8 @@ import {
   type MenuItemProps,
   type MenuPopupProps,
   type MenuRadioItemProps,
+  type PopoverPopupProps,
+  type PopoverTitleProps,
   type ProgressCircleProps,
   type SelectItemProps,
   type SelectPopupProps,
@@ -75,6 +78,8 @@ type PublicPropKeys =
   | keyof CheckboxProps
   | keyof ChipProps
   | keyof TooltipPopupProps
+  | keyof PopoverPopupProps
+  | keyof PopoverTitleProps
   | keyof StatusChipProps
 
 expectTypeOf<Extract<PublicPropKeys, 'style' | 'className'>>().toEqualTypeOf<never>()
@@ -226,6 +231,13 @@ export const behaviorExamples = (
     <Switch aria-label="자동 캡처" defaultChecked />
     <Checkbox aria-label="저장" indeterminate />
     <Chip defaultPressed>원본</Chip>
+    <Popover.Root>
+      <Popover.Trigger render={<Button size="sm" />}>열기</Popover.Trigger>
+      <Popover.Popup side="bottom" align="end" initialFocus={false}>
+        <Popover.Title>제목</Popover.Title>
+        <Popover.Close render={<Button size="sm" />}>닫기</Popover.Close>
+      </Popover.Popup>
+    </Popover.Root>
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger render={<IconButton aria-label="도움말" icon={<svg />} />} />

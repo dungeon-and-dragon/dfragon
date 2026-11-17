@@ -9,6 +9,7 @@ import {
   Kbd,
   Menu,
   NumericText,
+  Popover,
   Select,
   StatusChip,
   StepDots,
@@ -79,6 +80,7 @@ const IMPLICIT_ROLES: Record<string, string> = {
   tab: '[role="tab"]',
   tablist: '[role="tablist"]',
   tabpanel: '[role="tabpanel"]',
+  dialog: '[role="dialog"]',
   switch: '[role="switch"]',
   checkbox: '[role="checkbox"]',
   status: '[role="status"]'
@@ -608,6 +610,48 @@ describe('Menu radio 항목의 키보드 선택과 포커스 복귀', () => {
 
     await vi.waitFor(() => expect(queryByRole('menu')).toBeNull())
     expect(onValueChange).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
+  })
+})
+
+describe('Popover의 열고 닫기와 focus 복귀', () => {
+  function SnapshotPopover() {
+    return (
+      <Popover.Root>
+        <Popover.Trigger render={<Button />}>고정</Popover.Trigger>
+        <Popover.Popup>
+          <Popover.Title>고정을 취소하시겠습니까?</Popover.Title>
+          <Popover.Close render={<Button />}>유지</Popover.Close>
+        </Popover.Popup>
+      </Popover.Root>
+    )
+  }
+
+  it('trigger를 누르면 body portal에 열리고 Escape로 닫으면 trigger로 focus를 돌려준다', async () => {
+    await render(<SnapshotPopover />)
+    const trigger = getByRole('button', '고정')
+
+    await click(trigger)
+    const popup = await vi.waitFor(() => getByRole('dialog', '고정을 취소하시겠습니까?'))
+    expect(container.contains(popup)).toBe(false)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    await vi.waitFor(() => expect(popup.contains(document.activeElement)).toBe(true))
+
+    await press(document.activeElement as HTMLElement, 'Escape')
+
+    await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'))
+    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
+  })
+
+  it('Close 버튼으로 닫으면 trigger로 focus를 돌려준다', async () => {
+    await render(<SnapshotPopover />)
+    const trigger = getByRole('button', '고정')
+    await click(trigger)
+    const popup = await vi.waitFor(() => getByRole('dialog', '고정을 취소하시겠습니까?'))
+
+    await click(getByRole('button', '유지', popup))
+
+    await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'))
     await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
   })
 })
