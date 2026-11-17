@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { ControlSurface } from './surface'
 import { Tabs } from './tabs'
 
 const TABS = [
@@ -9,10 +8,10 @@ const TABS = [
   { value: 'creature', label: '크리처', disabled: true }
 ]
 
-function CharacterTabs({ surface }: { surface?: ControlSurface }) {
+function CharacterTabs() {
   return (
     <Tabs.Root defaultValue="equipment">
-      <Tabs.List aria-label="캐릭터 정보" surface={surface}>
+      <Tabs.List aria-label="캐릭터 정보">
         {TABS.map((tab) => (
           <Tabs.Tab key={tab.value} value={tab.value} disabled={tab.disabled}>
             {tab.label}
@@ -30,9 +29,7 @@ function CharacterTabs({ surface }: { surface?: ControlSurface }) {
 
 const meta = {
   title: 'Components/Tabs',
-  component: CharacterTabs,
-  args: { surface: 'default' },
-  argTypes: { surface: { control: 'inline-radio', options: ['default', 'card'] } }
+  component: CharacterTabs
 } satisfies Meta<typeof CharacterTabs>
 
 export default meta
@@ -41,13 +38,27 @@ type Story = StoryObj<typeof meta>
 
 export const Playground: Story = {}
 
-export const Card: Story = {
-  args: { surface: 'card' },
-  decorators: [
-    (Story) => (
-      <div className="max-w-md bg-surface">
-        <Story />
-      </div>
-    )
-  ]
+export const Focus: Story = {
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('[role="tab"]')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="tabs" role="tablist" aria-label="캐릭터 정보">
+      <button type="button" className="tab" role="tab" aria-selected="true">
+        장비
+      </button>
+      <button type="button" className="tab" role="tab" aria-selected="false">
+        버프
+      </button>
+      <button type="button" className="tab" role="tab" aria-selected="false">
+        아바타
+      </button>
+      <button type="button" className="tab" role="tab" aria-selected="false" data-disabled="">
+        크리처
+      </button>
+    </div>
+  )
 }

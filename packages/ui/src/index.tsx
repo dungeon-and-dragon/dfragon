@@ -16,7 +16,6 @@ export type {
   TextFieldLabelProps,
   TextFieldProps
 } from './text-field'
-export type { ControlSurface } from './surface'
 export { Select } from './select'
 export type {
   SelectGroupLabelProps,
