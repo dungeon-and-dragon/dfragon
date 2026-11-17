@@ -21,6 +21,8 @@ const NARROW_SCREEN_VARIANT_PATTERN = /@media \(width < 600px\)\s*\{\s*\.max-sm\
 const FONT_FACE_PATTERN =
   /@font-face\s*\{[^}]*url\('\.\/fonts\/([^']+)'\)[^}]*font-weight:\s*(\d+);[^}]*\}/g
 const FONT_FILE_WEIGHT_PATTERN = /-(Regular|Medium|SemiBold|Bold)\.woff2$/
+const WEAK_TOKEN_PATTERN = /(--color-[a-z-]+-weak):\s*light-dark\(([^,]+),\s*([^)]+)\)/g
+const OPAQUE_HEX_PATTERN = /^#[0-9a-f]{6}$/
 const FONT_FILE_WEIGHTS = { Regular: '400', Medium: '500', SemiBold: '600', Bold: '700' }
 
 const theme = await readFile(new URL('../theme.css', import.meta.url), 'utf8')
@@ -62,6 +64,17 @@ async function compiledUtilities(candidates) {
 
 test('theme.css의 변수는 한 번만 정의한다', () => {
   assert.equal(new Set(definedThemeNames).size, definedThemeNames.length)
+})
+
+test('옅은 면 토큰은 행 바탕과 섞이지 않게 라이트, 다크 모두 불투명 색이다', () => {
+  const weakTokens = [...theme.matchAll(WEAK_TOKEN_PATTERN)]
+
+  assert.notEqual(weakTokens.length, 0)
+
+  for (const [, name, light, dark] of weakTokens) {
+    assert.match(light, OPAQUE_HEX_PATTERN, name)
+    assert.match(dark, OPAQUE_HEX_PATTERN, name)
+  }
 })
 
 test('reduced-motion은 theme.css에 있는 변수만 바꾼다', () => {
