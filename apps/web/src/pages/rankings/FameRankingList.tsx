@@ -1,11 +1,9 @@
-import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
 import type { FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
 import { CharacterTable, SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { useFameRanking } from '../../hooks/useFameRanking'
 import { rankingName } from './ranking-jobs'
-import { styles } from './RankingsScreen.style'
 
 const PAGE_SIZE = 20
 const LOADING_ROWS = 5
@@ -17,7 +15,8 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
     case 'loading':
       return (
         <ListBox name={name}>
-          <div aria-busy="true" {...stylex.props(styles.pending)}>
+          {/* 필터를 바꿔 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다. */}
+          <div aria-busy="true" className="min-h-screen">
             <span role="status" className="sr-only">
               랭킹을 받는 중입니다.
             </span>
@@ -33,7 +32,7 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
     case 'error':
       return (
         <ListBox name={name}>
-          <p role="alert" {...stylex.props(styles.state)}>
+          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
             {result.message}
           </p>
         </ListBox>

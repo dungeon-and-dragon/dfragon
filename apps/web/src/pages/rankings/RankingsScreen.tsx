@@ -1,9 +1,7 @@
-import * as stylex from '@stylexjs/stylex'
 import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import { TitleBox } from '../../components/table/TitleBox'
 import { FameRankingList } from './FameRankingList'
 import { RankingFilterBox } from './RankingFilterBox'
-import { styles } from './RankingsScreen.style'
 
 export function RankingsScreen({
   filter,
@@ -13,7 +11,7 @@ export function RankingsScreen({
   onFilterChange: (filter: FameRankingFilter) => void
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.screen)}>
+    <div className="flex flex-col gap-4 p-4">
       <TitleBox title="명성 랭킹" />
       <RankingFilterBox filter={filter} onChange={onFilterChange} />
       <FameRankingList filter={filter} />
