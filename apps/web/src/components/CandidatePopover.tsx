@@ -1,4 +1,4 @@
-import { Popover } from '@base-ui/react/popover'
+import { Popover } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { type KeyboardEvent, useRef, useState } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
@@ -57,41 +57,35 @@ export function CandidatePopover({
         {`후보 ${count}`}
         <ChevronDownIcon {...stylex.props(styles.chevron)} />
       </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner
-          side="bottom"
-          align="start"
-          sideOffset={6}
-          {...stylex.props(styles.positioner)}
+      <Popover.Popup
+        side="bottom"
+        align="start"
+        sideOffset={6}
+        aria-label={`${slot}번 후보 고르기`}
+        initialFocus={shownRef}
+        {...stylex.props(styles.popup)}
+      >
+        <div
+          role="group"
+          aria-label={`${slot}번 같은 이름 후보`}
+          onKeyDown={moveTileFocus}
+          {...stylex.props(styles.tiles)}
         >
-          <Popover.Popup
-            aria-label={`${slot}번 후보 고르기`}
-            initialFocus={shownRef}
-            {...stylex.props(styles.popup)}
-          >
-            <div
-              role="group"
-              aria-label={`${slot}번 같은 이름 후보`}
-              onKeyDown={moveTileFocus}
-              {...stylex.props(styles.tiles)}
-            >
-              {picker.choices.map((choice) => {
-                const shown = choice.serverId === picker.shownServerId
+          {picker.choices.map((choice) => {
+            const shown = choice.serverId === picker.shownServerId
 
-                return (
-                  <CandidateTile
-                    key={choice.serverId}
-                    ref={shown ? shownRef : undefined}
-                    choice={choice}
-                    shown={shown}
-                    onPick={handlePick}
-                  />
-                )
-              })}
-            </div>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
+            return (
+              <CandidateTile
+                key={choice.serverId}
+                ref={shown ? shownRef : undefined}
+                choice={choice}
+                shown={shown}
+                onPick={handlePick}
+              />
+            )
+          })}
+        </div>
+      </Popover.Popup>
     </Popover.Root>
   )
 }
