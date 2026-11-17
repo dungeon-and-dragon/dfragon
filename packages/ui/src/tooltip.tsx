@@ -1,8 +1,6 @@
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
-import * as stylex from '@stylexjs/stylex'
 import type { ComponentType } from 'react'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { styles } from './tooltip.style'
 
 export type TooltipPopupProps = PublicProps<typeof BaseTooltip.Popup> &
   Pick<BaseTooltip.Portal.Props, 'container'> &
@@ -23,11 +21,11 @@ function TooltipPopupImpl({
         side={side}
         align={align}
         sideOffset={sideOffset}
-        {...stylex.props(styles.positioner)}
+        className="tooltip-positioner"
       >
         <BaseTooltip.Popup
           {...props}
-          {...withForwardedStyle(stylex.props(styles.popup), { className, style })}
+          {...withForwardedStyle({ className: 'tooltip' }, { className, style })}
         />
       </BaseTooltip.Positioner>
     </BaseTooltip.Portal>

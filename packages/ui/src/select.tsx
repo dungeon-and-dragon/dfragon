@@ -1,21 +1,14 @@
 import { Select as BaseSelect } from '@base-ui/react/select'
-import * as stylex from '@stylexjs/stylex'
-import type { ComponentType } from 'react'
-import { controlStyles } from './control.style'
+import type { ComponentType, CSSProperties } from 'react'
 import { ChevronDownIcon } from './icons'
-import { listboxStyles } from './listbox.style'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { styles } from './select.style'
-import type { ControlSurface } from './surface'
 
 export type SelectTriggerProps = PublicProps<typeof BaseSelect.Trigger> & {
   size?: '2xs' | 'xs' | 'sm' | 'md'
-  surface?: ControlSurface
 }
 
 function SelectTriggerImpl({
   size = 'sm',
-  surface = 'default',
   children,
   className,
   style,
@@ -24,21 +17,10 @@ function SelectTriggerImpl({
   return (
     <BaseSelect.Trigger
       {...props}
-      data-surface={surface}
-      {...withForwardedStyle(
-        stylex.props(
-          styles.trigger,
-          controlStyles.focusRing,
-          controlStyles.hoverTransition,
-          styles[size],
-          surface === 'card' && styles.cardTrigger,
-          size === '2xs' && styles.mutedText
-        ),
-        { className, style }
-      )}
+      {...withForwardedStyle({ className: `select select-${size}` }, { className, style })}
     >
       {children}
-      <BaseSelect.Icon {...stylex.props(styles.icon)}>
+      <BaseSelect.Icon className="select-icon">
         <ChevronDownIcon />
       </BaseSelect.Icon>
     </BaseSelect.Trigger>
@@ -53,7 +35,7 @@ function SelectValueImpl({ className, style, ...props }: SelectValueProps & Forw
   return (
     <BaseSelect.Value
       {...props}
-      {...withForwardedStyle(stylex.props(styles.value), { className, style })}
+      {...withForwardedStyle({ className: 'select-value' }, { className, style })}
     />
   )
 }
@@ -63,16 +45,18 @@ const SelectValue: ComponentType<SelectValueProps> = SelectValueImpl
 export type SelectPopupProps = PublicProps<typeof BaseSelect.Popup> &
   Pick<BaseSelect.Portal.Props, 'container'> &
   Pick<BaseSelect.Positioner.Props, 'side' | 'align' | 'sideOffset'> & {
-    surface?: ControlSurface
     columns?: number
   }
+
+function listGridStyle(columns: number): CSSProperties {
+  return { '--listbox-columns': columns } as CSSProperties
+}
 
 function SelectPopupImpl({
   container,
   side = 'bottom',
   align = 'start',
   sideOffset = 4,
-  surface = 'default',
   columns,
   children,
   className,
@@ -81,7 +65,7 @@ function SelectPopupImpl({
   'aria-labelledby': labelledBy,
   ...props
 }: SelectPopupProps & ForwardedStyle) {
-  const gridStyle = surface === 'card' ? styles.cardGrid : styles.grid
+  const isGrid = columns !== undefined
 
   return (
     <BaseSelect.Portal container={container}>
@@ -90,25 +74,18 @@ function SelectPopupImpl({
         side={side}
         align={align}
         sideOffset={sideOffset}
-        {...stylex.props(listboxStyles.positioner)}
+        className="listbox-positioner"
       >
         <BaseSelect.Popup
           {...props}
-          data-surface={surface}
-          {...withForwardedStyle(
-            stylex.props(
-              listboxStyles.popup,
-              surface === 'card' && listboxStyles.cardPopup,
-              stylex.defaultMarker()
-            ),
-            { className, style }
-          )}
+          {...withForwardedStyle({ className: 'listbox' }, { className, style })}
         >
           {/* Popup은 presentation이고 listbox 역할은 List가 가지므로 이름은 List에 붙인다. */}
           <BaseSelect.List
             aria-label={label}
             aria-labelledby={labelledBy}
-            {...stylex.props(columns !== undefined && gridStyle(columns))}
+            className={isGrid ? 'listbox-grid' : undefined}
+            style={isGrid ? listGridStyle(columns) : undefined}
           >
             {children}
           </BaseSelect.List>
@@ -131,12 +108,10 @@ function SelectItemImpl({
   return (
     <BaseSelect.Item
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.item, styles.item), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-item' }, { className, style })}
     >
       {/* Base UI는 children이 없으면 체크 이모지를 넣으므로 null을 넘긴다. */}
-      <BaseSelect.ItemIndicator {...stylex.props(listboxStyles.marker)}>
-        {null}
-      </BaseSelect.ItemIndicator>
+      <BaseSelect.ItemIndicator className="listbox-marker">{null}</BaseSelect.ItemIndicator>
       {children}
     </BaseSelect.Item>
   )
@@ -154,7 +129,7 @@ function SelectGroupLabelImpl({
   return (
     <BaseSelect.GroupLabel
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.groupLabel), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-group-label' }, { className, style })}
     />
   )
 }
@@ -171,7 +146,7 @@ function SelectSeparatorImpl({
   return (
     <BaseSelect.Separator
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.separator), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-separator' }, { className, style })}
     />
   )
 }

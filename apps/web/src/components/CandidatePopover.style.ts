@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, radius, shadow } from '@dfragon/ui/tokens.stylex'
+import { colors, motion, radius } from '@dfragon/ui/tokens.stylex'
 
 const accentWeak = `color-mix(in srgb, ${colors.accent} 14%, transparent)`
 
@@ -38,18 +38,7 @@ export const styles = stylex.create({
     transitionTimingFunction: motion.ease
   },
   chevron: { width: 10, height: 10, strokeWidth: 3 },
-  positioner: { zIndex: 110, outlineStyle: 'none' },
-  popup: {
-    boxSizing: 'border-box',
-    padding: 8,
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: colors.borderStrong,
-    borderRadius: 0,
-    backgroundColor: colors.bgSurface,
-    boxShadow: shadow.popover,
-    outlineStyle: 'none'
-  },
+  popup: { padding: 8 },
   tiles: { display: 'flex', gap: 6 },
   tile: {
     position: 'relative',

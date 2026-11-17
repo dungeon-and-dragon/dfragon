@@ -11,6 +11,7 @@ import {
   LoadingIndicator,
   Menu,
   NumericText,
+  Popover,
   ProgressCircle,
   Select,
   StatusChip,
@@ -29,13 +30,14 @@ import {
   type ButtonProps,
   type CheckboxProps,
   type ChipProps,
-  type ControlSurface,
   type IconButtonProps,
   type KbdProps,
   type KbdSurface,
   type MenuItemProps,
   type MenuPopupProps,
   type MenuRadioItemProps,
+  type PopoverPopupProps,
+  type PopoverTitleProps,
   type ProgressCircleProps,
   type SelectItemProps,
   type SelectPopupProps,
@@ -76,6 +78,8 @@ type PublicPropKeys =
   | keyof CheckboxProps
   | keyof ChipProps
   | keyof TooltipPopupProps
+  | keyof PopoverPopupProps
+  | keyof PopoverTitleProps
   | keyof StatusChipProps
 
 expectTypeOf<Extract<PublicPropKeys, 'style' | 'className'>>().toEqualTypeOf<never>()
@@ -97,10 +101,6 @@ expectTypeOf<StatusChipTone>().toEqualTypeOf<
 expectTypeOf<StatusChipProps['busy']>().toEqualTypeOf<boolean | undefined>()
 expectTypeOf<StepDotsProps['size']>().toEqualTypeOf<4 | 5 | undefined>()
 expectTypeOf<StatusChipProps['size']>().toEqualTypeOf<'sm' | 'md' | undefined>()
-expectTypeOf<ControlSurface>().toEqualTypeOf<'default' | 'card'>()
-expectTypeOf<SelectTriggerProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
-expectTypeOf<SelectPopupProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
-expectTypeOf<TabsListProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
 expectTypeOf<KbdSurface>().toEqualTypeOf<'default' | 'signal'>()
 expectTypeOf<KbdProps['surface']>().toEqualTypeOf<KbdSurface | undefined>()
 
@@ -223,7 +223,7 @@ export const behaviorExamples = (
       </Menu.Popup>
     </Menu.Root>
     <Tabs.Root defaultValue="collection">
-      <Tabs.List aria-label="도구" surface="card">
+      <Tabs.List aria-label="도구">
         <Tabs.Tab value="collection">수집</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="collection">수집 패널</Tabs.Panel>
@@ -231,6 +231,13 @@ export const behaviorExamples = (
     <Switch aria-label="자동 캡처" defaultChecked />
     <Checkbox aria-label="저장" indeterminate />
     <Chip defaultPressed>원본</Chip>
+    <Popover.Root>
+      <Popover.Trigger render={<Button size="sm" />}>열기</Popover.Trigger>
+      <Popover.Popup side="bottom" align="end" initialFocus={false}>
+        <Popover.Title>제목</Popover.Title>
+        <Popover.Close render={<Button size="sm" />}>닫기</Popover.Close>
+      </Popover.Popup>
+    </Popover.Root>
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger render={<IconButton aria-label="도움말" icon={<svg />} />} />

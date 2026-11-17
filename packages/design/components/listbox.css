@@ -1,0 +1,98 @@
+/*
+ * Select와 Menu의 목록.
+ * <div class="listbox-positioner"><div class="listbox">
+ *   <div class="listbox-item" role="option" data-selected><span class="listbox-marker"></span>시로코</div>
+ *   <div class="listbox-group-label">, <div class="listbox-separator">
+ * </div></div>
+ * 강조는 data-highlighted, 선택은 data-selected나 data-checked, 비활성은 data-disabled다.
+ * 격자 목록은 목록 요소에 listbox-grid와 --listbox-columns를 둔다.
+ */
+.listbox-positioner {
+  z-index: var(--z-popover);
+  outline: none;
+}
+
+.listbox {
+  box-sizing: border-box;
+  min-width: max(112px, var(--anchor-width, 0px));
+  max-height: var(--available-height, none);
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-panel);
+  background-color: var(--color-canvas);
+  box-shadow: var(--shadow-popover);
+  color: var(--color-fg-muted);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  outline: none;
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-state);
+  transition-timing-function: var(--ease-standard);
+}
+
+.listbox:is([data-starting-style], [data-ending-style]) {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.listbox-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--listbox-columns), minmax(max-content, 1fr));
+  gap: 2px;
+}
+
+.listbox-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--spacing-control-sm);
+  padding-inline: 12px;
+  border-radius: var(--radius-control);
+  outline: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition-property: color, background-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.listbox-item[data-highlighted] {
+  background-color: var(--color-inset);
+  color: var(--color-fg);
+}
+
+.listbox-item:is([data-selected], [data-checked]) {
+  color: var(--color-fg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.listbox-item[data-disabled] {
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.listbox-marker {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 2px;
+  background-color: var(--color-signal);
+}
+
+.listbox-group-label {
+  padding: 4px 12px;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.listbox-separator {
+  height: 1px;
+  margin-block: 4px;
+  background-color: var(--color-line);
+}

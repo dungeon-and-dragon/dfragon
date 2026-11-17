@@ -1,4 +1,4 @@
-import { Popover } from '@base-ui/react/popover'
+import { Popover } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
 import { displayJobName } from '#core/character/job-display'
@@ -63,43 +63,37 @@ export function RecentCharacterList({
       open={open && (large || recentCharacters.length > 0)}
       onOpenChange={handleOpenChange}
     >
-      <Popover.Portal>
-        <Popover.Positioner
-          anchor={anchor}
-          side="bottom"
-          align={large ? 'start' : 'end'}
-          sideOffset={6}
-          {...stylex.props(styles.positioner)}
-        >
-          <Popover.Popup
-            ref={popup}
-            aria-label={large ? '최근 본 캐릭터와 즐겨찾기' : '최근 본 캐릭터'}
-            initialFocus={input}
-            finalFocus={false}
-            onKeyDown={handleListKeyDown}
-            {...stylex.props(styles.popup, large && styles.largePopup)}
-          >
-            {large ? (
-              <SavedCharacterSections input={input} onPick={onClose} />
-            ) : (
-              <>
-                <h3 {...stylex.props(styles.title)}>최근 본 캐릭터</h3>
-                <ul {...stylex.props(styles.list)}>
-                  {recentCharacters.map((character) => (
-                    <li
-                      key={`${character.serverId}/${character.characterId}`}
-                      {...stylex.props(styles.row)}
-                    >
-                      <RecentItem character={character} onPick={onClose} />
-                      <RemoveButton character={character} onRemove={remove} />
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
+      <Popover.Popup
+        anchor={anchor}
+        side="bottom"
+        align={large ? 'start' : 'end'}
+        sideOffset={6}
+        ref={popup}
+        aria-label={large ? '최근 본 캐릭터와 즐겨찾기' : '최근 본 캐릭터'}
+        initialFocus={input}
+        finalFocus={false}
+        onKeyDown={handleListKeyDown}
+        {...stylex.props(styles.popup, large && styles.largePopup)}
+      >
+        {large ? (
+          <SavedCharacterSections input={input} onPick={onClose} />
+        ) : (
+          <>
+            <h3 {...stylex.props(styles.title)}>최근 본 캐릭터</h3>
+            <ul {...stylex.props(styles.list)}>
+              {recentCharacters.map((character) => (
+                <li
+                  key={`${character.serverId}/${character.characterId}`}
+                  {...stylex.props(styles.row)}
+                >
+                  <RecentItem character={character} onPick={onClose} />
+                  <RemoveButton character={character} onRemove={remove} />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </Popover.Popup>
     </Popover.Root>
   )
 }
