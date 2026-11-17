@@ -4,6 +4,7 @@
 @import '@dfragon/design/theme.css';
 @import '@dfragon/design/base.css' layer(base);
 @import '@dfragon/ui/tokens.css';
+@import '@dfragon/design/components.css' layer(components);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
 /* 탭마다 내용 높이가 달라 스크롤바가 생기고 사라져도 가운데 정렬한 탭과 nav가 옆으로 밀리지 않게 자리를 남긴다. */

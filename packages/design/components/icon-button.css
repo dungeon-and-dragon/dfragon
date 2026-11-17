@@ -1,0 +1,78 @@
+/*
+ * <button class="icon-btn icon-btn-md" aria-label="닫기"><svg /></button>. 크기는 icon-btn-sm 32, icon-btn-md 40,
+ * icon-btn-bar 36(상단 바), icon-btn-lg 48(화면 헤더, 면 있음)이다. aria-pressed="true"면 켜진 토글로 그린다.
+ */
+.icon-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition-property: color, background-color, box-shadow;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.icon-btn > * {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.icon-btn-sm {
+  width: var(--spacing-control-sm);
+  height: var(--spacing-control-sm);
+  font-size: var(--text-base);
+}
+
+.icon-btn-md {
+  width: var(--spacing-control-md);
+  height: var(--spacing-control-md);
+  font-size: var(--text-xl);
+}
+
+.icon-btn-bar {
+  width: 36px;
+  height: 36px;
+  font-size: var(--text-xl);
+}
+
+.icon-btn-lg {
+  width: var(--spacing-control-lg);
+  height: var(--spacing-control-lg);
+  background-color: var(--color-inset);
+  font-size: 24px;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background-color: var(--color-inset);
+  color: var(--color-fg);
+}
+
+.icon-btn-lg:hover:not(:disabled) {
+  background-color: var(--color-control);
+}
+
+.icon-btn[aria-pressed='true'] {
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 2px var(--color-signal);
+}
+
+.icon-btn:disabled {
+  cursor: not-allowed;
+}
+
+.icon-btn:disabled:not([aria-pressed='true']) {
+  color: var(--color-fg-disabled);
+}
