@@ -1,6 +1,6 @@
 # 공용 UI
 
-`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이, 외형은 `--df-*` 토큰만 쓰는 StyleX가 맡는다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
+`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이 맡는다. 외형은 `--df-*` 토큰만 쓰는 StyleX로 그리며, `@dfragon/design`의 CSS 클래스로 옮기는 중이다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
 
 ## Public API
 
