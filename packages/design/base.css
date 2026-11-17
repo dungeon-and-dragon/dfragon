@@ -1,0 +1,33 @@
+@font-face {
+  font-family: 'Pretendard Variable';
+  src: url('./fonts/PretendardVariable.woff2') format('woff2');
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 기본은 시스템 설정을 따르고, 사용자가 고른 모드는 html의 data-color-mode가 color-scheme만 고정한다. */
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-color-mode='light'] {
+  color-scheme: light;
+}
+
+:root[data-color-mode='dark'] {
+  color-scheme: dark;
+}
+
+/* Root font-size는 지정하지 않는다. */
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  color: var(--color-fg);
+  background: var(--color-canvas);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}

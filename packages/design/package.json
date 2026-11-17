@@ -1,0 +1,25 @@
+{
+  "name": "@dfragon/design",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./theme.css": "./theme.css",
+    "./base.css": "./base.css"
+  },
+  "files": [
+    "theme.css",
+    "base.css",
+    "fonts",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.node.mjs",
+    "lint": "biome lint",
+    "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
+    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
+  },
+  "devDependencies": {
+    "tailwindcss": "catalog:"
+  }
+}
