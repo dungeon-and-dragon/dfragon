@@ -5,8 +5,8 @@ export type PublicProps<T extends ElementType> = Omit<
   'style' | 'className'
 >
 
-// 공개 타입은 className, style을 받지 않지만, 기존 화면이 배치용 stylex.props를 펼쳐 넘기는
-// 경로는 구현이 받아 자기 StyleX class 뒤에 합친다. 구현 함수만 이 타입을 받는다.
+// 공개 타입은 className, style을 받지 않지만, Base UI의 render 합성이 넘기는 className, style은
+// 구현이 받아 자기 class 뒤에 합친다. 구현 함수만 이 타입을 받는다.
 export type ForwardedStyle = {
   className?: string
   style?: CSSProperties

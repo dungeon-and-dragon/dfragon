@@ -19,7 +19,6 @@
     "@dfragon/design": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@dfragon/ui": "workspace:*",
-    "@stylexjs/stylex": "catalog:",
     "@tanstack/react-query": "catalog:",
     "ky": "catalog:",
     "react": "catalog:",
@@ -29,7 +28,6 @@
   "devDependencies": {
     "@dfragon/licenses": "workspace:*",
     "@storybook/react-vite": "catalog:",
-    "@stylexjs/unplugin": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

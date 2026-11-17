@@ -7,7 +7,6 @@
  * 반투명이면 hover, 선택 행 바탕과 섞여 어두워져 글자 명암비가 떨어진다.
  * 글자, radius, breakpoint, 곡선은 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
  * 원색 단계(--gray-*)는 :root에 두어 utility가 생기지 않게 하고, 역할 이름만 @theme로 내보낸다.
- * StyleX 화면은 packages/ui/tokens.css의 --df-* 별칭으로 같은 변수를 읽는다.
  */
 :root {
   --gray-0: #ffffff;
@@ -31,7 +30,7 @@
   --gray-950: #0a0a0b;
 }
 
-/* StyleX 화면의 --df-* 별칭이 utility로 쓰이지 않은 토큰도 읽으므로 static으로 모든 변수를 낸다. */
+/* 화면의 inline style과 캔버스 시안이 utility로 쓰이지 않은 토큰도 읽으므로 static으로 모든 변수를 낸다. */
 @theme static {
   --color-*: initial;
   --font-*: initial;
@@ -206,7 +205,7 @@
   /* 패널 */
   --radius-panel: 4px;
 
-  /* 팝오버, 후보 목록, listbox. StyleX 화면이 적어 둔 값과 같다. */
+  /* 팝오버, 후보 목록, listbox */
   --z-popover: 110;
   /* 툴팁 */
   --z-tooltip: 120;
