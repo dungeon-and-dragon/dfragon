@@ -7,7 +7,6 @@ import type {
 import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
 import { formatClearCount } from './clear-count'
-import { INVERSE_SCHEME } from './tooltip-classes'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
@@ -186,7 +185,7 @@ export function ActivityDayDetail({
   seasonDays: AdventureActivitySeasonDaysResult
 }): React.JSX.Element {
   return (
-    <div className={`flex w-64 flex-col text-fg ${INVERSE_SCHEME}`}>
+    <div className="flex w-64 flex-col text-fg">
       <div className="mb-0.5 flex justify-between gap-4 border-b border-line pb-1.5 text-xs text-fg-muted">
         <span className="text-fg">{formatActivityDate(date)}</span>
       </div>
