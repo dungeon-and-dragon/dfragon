@@ -4,6 +4,7 @@ import {
   projectCharacterFreshness
 } from '../../domain/character-detail/project.js'
 import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import { CHANGE_SECTIONS, projectCharacterChanges } from '../../domain/character-history/changes.js'
 import {
   type CharacterHistory,
   projectCharacterHistory,
@@ -27,14 +28,17 @@ export class CharacterHistoryService {
 
   // 저장한 값만 읽고 타임라인 동기화를 걸거나 기다리지 않는다.
   async readHistory(character: CharacterIdentity): Promise<CharacterHistory> {
-    const [stored, events] = await Promise.all([
+    const [stored, events, sections] = await Promise.all([
       this.repository.readHistory(character),
-      this.repository.readNameChangeEvents(character)
+      this.repository.readNameChangeEvents(character),
+      this.repository.readSections(character, CHANGE_SECTIONS)
     ])
 
     const nameChanges = projectNameChanges(events)
+    const firstObservedAt = stored.basics[0]?.observedAt ?? null
+    const changes = projectCharacterChanges(firstObservedAt, sections)
 
-    return projectCharacterHistory(stored, nameChanges)
+    return projectCharacterHistory(stored, nameChanges, changes)
   }
 
   /** 그 시각의 상세를 지금 상세 조회와 같은 투영, 공용 아이템 상세 연결로 만들고, 점수는 다시 계산하지 않는다. */
