@@ -1,3 +1,4 @@
+import type { ParseCharacterBasic } from '../character-basic/ports.js'
 import type { CharacterCatalog } from '../character-catalog/ports.js'
 import type { CalculateScore, FetchCharacterDetails } from '../character-detail/ports.js'
 
@@ -24,6 +25,7 @@ export type ScoreCalculationPorts = {
   /** 실행마다 아이템 상세 캐시를 새로 둔다. */
   createSources: (events: ScoreSourceEvents) => ScoreSources
   readConcurrency: () => number
+  parseBasic: ParseCharacterBasic
   now: () => Date
   pause: (ms: number) => Promise<void>
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
