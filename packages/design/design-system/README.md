@@ -27,7 +27,7 @@ DFragon 웹과 운영 화면이 쓰는 토큰, 글꼴, 컴포넌트 CSS입니다
 ## CSS로 쓰기
 
 - 저장소 화면은 Tailwind CSS로 `theme.css`를 컴파일합니다. 토큰은 `bg-canvas`, `text-fg-muted`, `border-line` 같은 utility와 `var(--color-canvas)` 같은 CSS 변수로 씁니다.
-- 컴포넌트 모양은 디자인 패키지의 컴포넌트 클래스(`btn`, `icon-btn`, `field`, `switch`, `checkbox`, `chip`)로 쓰고, 화면 배치는 utility나 inline style로 씁니다. 상태는 `disabled`, `aria-pressed`, `data-checked` 같은 속성으로 그립니다.
+- 컴포넌트 모양은 디자인 패키지의 컴포넌트 클래스(`btn`, `icon-btn`, `field`, `switch`, `checkbox`, `chip`, `select`, `listbox`, `tabs`, `tooltip`, `popover`, `status-chip`, `step-dots`, `progress`, `loading`, `kbd`, `num`)로 쓰고, 화면 배치는 utility나 inline style로 씁니다. 상태는 `disabled`, `aria-pressed`, `data-checked` 같은 속성으로 그립니다.
 - Tailwind CSS의 preflight는 쓰지 않습니다. 필요한 초기화는 `base.css`와 각 컴포넌트 클래스가 가집니다.
 - 색 모드는 `html`의 `data-color-mode`(`light`, `dark`)가 `color-scheme`을 고정하고, 없으면 시스템 설정을 따릅니다. 이 시스템의 preview에서는 `html`의 `data-theme`도 같은 뜻입니다.
 
