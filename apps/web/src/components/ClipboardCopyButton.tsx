@@ -1,11 +1,7 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ClipboardCopyStatus } from '../hooks/useClipboardCopy'
 import { CheckIcon } from './CheckIcon'
 import { CopyIcon } from './CopyIcon'
-import { HeaderTooltip } from './HeaderTooltip'
-import { triggerStyles } from './HeaderTooltip.style'
-import { toolStyles } from './HeaderTool.style'
-import { styles } from './ClipboardCopyButton.style'
+import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'
 
@@ -22,20 +18,26 @@ export function ClipboardCopyButton({
   return (
     <>
       {status === 'failed' && (
-        <p title={FAILURE_MESSAGE} {...stylex.props(styles.failure)}>
-          <span aria-hidden="true" {...stylex.props(styles.failureMark)}>
+        <p
+          title={FAILURE_MESSAGE}
+          className="m-0 flex min-w-0 items-center gap-2 text-xs whitespace-nowrap text-fg-muted"
+        >
+          <span
+            aria-hidden="true"
+            className="flex size-4.5 shrink-0 items-center justify-center rounded-control bg-danger-weak text-sm font-semibold text-fg-danger"
+          >
             !
           </span>
-          <span {...stylex.props(styles.failureText)}>{FAILURE_MESSAGE}</span>
+          <span className="min-w-0 truncate">{FAILURE_MESSAGE}</span>
         </p>
       )}
       <HeaderTooltip label="복사하기">
-        <span {...stylex.props(triggerStyles.wrapper)}>
+        <span className={tooltipTriggerClass}>
           <button
             type="button"
             aria-label="클립보드로 복사"
             onClick={onCopy}
-            {...stylex.props(toolStyles.button)}
+            className="icon-btn icon-btn-sm"
           >
             <Icon width={16} height={16} />
           </button>

@@ -1,9 +1,11 @@
-import * as stylex from '@stylexjs/stylex'
 import { RAID_PARTY_SIZE } from '#core/capture/cards'
 import type { SnapshotMark } from '#core/capture/adventure-snapshot'
 import type { SearchMode } from '#core/capture/search-mode'
 import { SnapshotIcon } from './SnapshotIcon'
-import { styles } from './SnapshotBadge.style'
+
+const badgeClass =
+  'box-border inline-flex h-4.5 items-center gap-0.75 rounded-badge border px-1 text-2xs font-semibold whitespace-nowrap'
+const orderClass = 'font-mono tabular-nums'
 
 function seatOrderLabel(seat: number, screen: SearchMode): string {
   if (screen === 'party') {
@@ -26,7 +28,7 @@ export function SnapshotBadge({
       <span
         role="img"
         aria-label="스냅샷에 없는 모험단"
-        {...stylex.props(styles.badge, styles.absent)}
+        className={`${badgeClass} border-current text-fg-danger`}
       >
         <SnapshotIcon filled width={10} height={10} />
         <span aria-hidden="true">없음</span>
@@ -40,7 +42,7 @@ export function SnapshotBadge({
     <span
       role="img"
       aria-label={label}
-      {...stylex.props(styles.badge, styles.order, mark.kind === 'moved' && styles.moved)}
+      className={`${badgeClass} ${orderClass} ${mark.kind === 'moved' ? 'border-signal bg-signal text-on-signal' : 'border-current text-signal'}`}
     >
       <SnapshotIcon filled width={10} height={10} />
       <span aria-hidden="true">{order}</span>

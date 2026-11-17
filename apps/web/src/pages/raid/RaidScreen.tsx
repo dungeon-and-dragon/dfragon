@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useId } from 'react'
 import { RAID_PARTY_COUNT, RAID_PARTY_SIZE } from '#core/capture/cards'
 import { type RaidParty, toRaidSeat } from '#core/capture/raid/raid-seat'
@@ -11,16 +10,18 @@ import { useSeatMove } from '../../hooks/useSeatMove'
 import type { SeatArrangement } from '../../hooks/useSeatOrder'
 import { isBusySlot } from '../../lib/card-presentation'
 import { CharacterRow } from '../../components/CharacterRow'
-import { styles } from './RaidScreen.style'
 
 const parties = Array.from({ length: RAID_PARTY_COUNT }, (_, party) =>
   Array.from({ length: RAID_PARTY_SIZE }, (_, member) => party * RAID_PARTY_SIZE + member)
 )
 
-const partyStyles: Readonly<Record<RaidParty, stylex.StyleXStyles>> = {
-  R: styles.red,
-  Y: styles.yellow,
-  G: styles.green
+const badgeClass =
+  'box-border inline-flex h-4.5 items-center rounded-badge px-1.25 text-2xs font-semibold whitespace-nowrap'
+
+const partyClasses: Readonly<Record<RaidParty, string>> = {
+  R: 'bg-raid-party-red-weak text-raid-party-red',
+  Y: 'bg-raid-party-yellow-weak text-raid-party-yellow',
+  G: 'bg-raid-party-green-weak text-raid-party-green'
 }
 
 export function RaidScreen({
@@ -62,7 +63,7 @@ export function RaidScreen({
           card={slots[slot]}
           slot={seat + 1}
           seat={
-            <span {...stylex.props(styles.badge, partyStyles[raidSeat.party])}>
+            <span className={`${badgeClass} ${partyClasses[raidSeat.party]}`}>
               {raidSeat.label}
             </span>
           }
@@ -87,16 +88,16 @@ export function RaidScreen({
           const found = filledSlotCount(partySeats.map((seat) => slots[seatOrder[seat]]))
 
           return [
-            <tr key={partyLabelId} {...stylex.props(styles.partyRow)}>
+            <tr key={partyLabelId} className="h-8 border-b border-line bg-canvas">
               <td
                 id={partyLabelId}
                 colSpan={SEAT_TABLE_COLUMN_COUNT}
-                {...stylex.props(styles.partyCell)}
+                className="px-4 py-0 text-left text-xs font-medium"
               >
-                <span {...stylex.props(styles.badge, partyStyles[partyName])}>
+                <span className={`${badgeClass} ${partyClasses[partyName]}`}>
                   {`${partyName} 파티`}
                 </span>
-                <span {...stylex.props(styles.count)}>{`${found}/${RAID_PARTY_SIZE}`}</span>
+                <span className="ml-2 font-mono tabular-nums text-fg-subtle">{`${found}/${RAID_PARTY_SIZE}`}</span>
               </td>
             </tr>,
             ...partySeats.map((seat) => renderSeat(seat, partyLabelId))

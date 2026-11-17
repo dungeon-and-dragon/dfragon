@@ -1,7 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import { attachBoardHeaderSlot } from '../../../hooks/useBoardHeaderPortal'
-import { styles } from './BoardHeaderSlot.style'
 
 export function BoardHeaderSlot(): React.JSX.Element {
-  return <div ref={attachBoardHeaderSlot} {...stylex.props(styles.slot)} />
+  return <div ref={attachBoardHeaderSlot} className="flex min-w-0 grow items-center" />
 }

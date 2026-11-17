@@ -1,5 +1,4 @@
 import { Popover } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
 import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
@@ -12,10 +11,13 @@ import type { CharacterDisplay } from '../lib/stored-character'
 import { CardImage } from './CardImage'
 import { FavoriteToggle } from './FavoriteToggle'
 import { moveItemFocus } from './move-item-focus'
-import { styles } from './RecentCharacterList.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 const SECTION_ROW_LIMIT = 5
+
+const titleClass =
+  'm-0 flex h-8 items-center border-b border-line px-3 text-xs font-medium text-fg-subtle'
+const listClass = 'm-0 list-none p-0'
 
 export function RecentCharacterList({
   open,
@@ -73,25 +75,24 @@ export function RecentCharacterList({
         initialFocus={input}
         finalFocus={false}
         onKeyDown={handleListKeyDown}
-        {...stylex.props(styles.popup, large && styles.largePopup)}
       >
+        {/* 팝오버 테두리 1px씩을 빼 팝오버 바깥 폭이 기준 폭과 같게 한다. */}
         {large ? (
-          <SavedCharacterSections input={input} onPick={onClose} />
+          <div className="max-h-[calc(var(--available-height)-2px)] w-[calc(var(--anchor-width)-2px)] overflow-y-auto">
+            <SavedCharacterSections input={input} onPick={onClose} />
+          </div>
         ) : (
-          <>
-            <h3 {...stylex.props(styles.title)}>최근 본 캐릭터</h3>
-            <ul {...stylex.props(styles.list)}>
+          <div className="box-border max-h-[calc(min(480px,var(--available-height))-2px)] w-[418px] overflow-y-auto py-1">
+            <h3 className={titleClass}>최근 본 캐릭터</h3>
+            <ul className={listClass}>
               {recentCharacters.map((character) => (
-                <li
-                  key={`${character.serverId}/${character.characterId}`}
-                  {...stylex.props(styles.row)}
-                >
+                <li key={`${character.serverId}/${character.characterId}`} className="relative">
                   <RecentItem character={character} onPick={onClose} />
                   <RemoveButton character={character} onRemove={remove} />
                 </li>
               ))}
             </ul>
-          </>
+          </div>
         )}
       </Popover.Popup>
     </Popover.Root>
@@ -148,18 +149,18 @@ function SavedCharacterSection({
   const titleId = useId()
 
   return (
-    <section aria-labelledby={titleId} {...stylex.props(styles.section)}>
-      <h3 id={titleId} {...stylex.props(styles.title, styles.sectionTitle)}>
+    <section aria-labelledby={titleId} className="border-t border-line first:border-t-0">
+      <h3 id={titleId} className={`${titleClass} bg-surface`}>
         {title}
       </h3>
       {characters.length === 0 ? (
-        <p {...stylex.props(styles.empty)}>{emptyMessage}</p>
+        <p className="m-0 flex h-11 items-center px-3 text-sm">{emptyMessage}</p>
       ) : (
-        <ul {...stylex.props(styles.list)}>
+        <ul className={listClass}>
           {characters.map((character) => (
             <li
               key={`${character.serverId}/${character.characterId}`}
-              {...stylex.props(styles.sectionRow)}
+              className="flex items-center gap-1.5 border-b border-line pr-1.5 transition-colors duration-(--duration-hover) ease-standard last:border-b-0 hover:bg-inset"
             >
               <RecentItem character={character} large onPick={onPick} />
               <FavoriteToggle character={character} onToggle={onFavoriteToggle} />
@@ -188,20 +189,30 @@ function RecentItem({
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
-      {...stylex.props(styles.item, large && styles.largeItem)}
+      className={`flex items-center pl-3 text-fg no-underline transition-colors duration-(--duration-hover) ease-standard -outline-offset-2 outline-none hover:bg-inset focus-visible:bg-inset focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal ${large ? 'box-border h-11 min-w-0 grow gap-2.5' : 'gap-3 py-1.5 pr-11'}`}
     >
-      <span {...stylex.props(styles.well, large && styles.largeWell)}>
+      <span
+        className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-8.5 w-7' : 'size-9'}`}
+      >
         <CardImage src={characterImageUrl(character)} />
       </span>
-      <span {...stylex.props(styles.identity)}>
-        <span {...stylex.props(styles.line)}>
-          <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
-          <span {...stylex.props(styles.name)}>{character.characterName}</span>
-          {job != null && <span {...stylex.props(styles.job)}>{job}</span>}
+      <span className="flex min-w-0 grow flex-col">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-control px-1.5 text-xs font-medium text-fg-muted">
+            {CHARACTER_SERVER_NAMES[character.serverId]}
+          </span>
+          <span className="truncate text-sm font-semibold">{character.characterName}</span>
+          {job != null && (
+            <span className="shrink-0 text-xs whitespace-nowrap text-fg-muted">{job}</span>
+          )}
         </span>
-        {showsLevel && <span {...stylex.props(styles.level)}>{`Lv.${character.level}`}</span>}
+        {showsLevel && (
+          <span className="font-mono text-xs tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>
+        )}
       </span>
-      <span {...stylex.props(styles.fame, character.fame == null && styles.missing)}>
+      <span
+        className={`min-w-16 shrink-0 text-right font-mono text-sm font-semibold tabular-nums ${character.fame == null ? 'text-fg-subtle' : 'text-game-fame'}`}
+      >
         {character.fame != null ? integer.format(character.fame) : MISSING_VALUE}
       </span>
     </Link>
@@ -224,9 +235,13 @@ function RemoveButton({
       type="button"
       aria-label={`${character.characterName} 최근 목록에서 지우기`}
       onClick={handleClick}
-      {...stylex.props(styles.remove)}
+      className="absolute end-3 top-1/2 m-0 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-fg-muted transition-colors duration-(--duration-hover) ease-standard -outline-offset-2 outline-none hover:bg-control-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal"
     >
-      <svg aria-hidden="true" viewBox="0 0 24 24" {...stylex.props(styles.removeIcon)}>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="size-3 fill-none stroke-current stroke-[2.5] [stroke-linecap:round]"
+      >
         <path d="M6 6l12 12M18 6 6 18" />
       </svg>
     </button>

@@ -1,7 +1,19 @@
-import * as stylex from '@stylexjs/stylex'
 import { type FocusEvent, type ReactNode, useState } from 'react'
 import type { SeatMove } from '../hooks/useSeatMove'
-import { styles } from './Seat.style'
+
+const seatClass =
+  'h-row border-b border-line -outline-offset-2 transition-[background-color,opacity] duration-(--duration-hover) ease-standard hover:bg-surface'
+const focusOutlineClass =
+  'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal'
+const dropOutlineClass = 'outline-2 outline-solid outline-signal'
+
+function seatStateClass(draggable: boolean, drag: SeatMove['drag']): string {
+  const cursor = draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+  const outline = drag === 'target' ? dropOutlineClass : focusOutlineClass
+  const opacity = drag === 'source' ? ' opacity-35' : ''
+
+  return `${cursor} ${outline}${opacity}`
+}
 
 export function Seat({
   label,
@@ -44,12 +56,7 @@ export function Seat({
       onFocus={onFocus}
       onBlur={onBlur}
       {...handlers}
-      {...stylex.props(
-        styles.seat,
-        draggable && styles.movable,
-        drag === 'source' && styles.dragSource,
-        drag === 'target' && styles.dragTarget
-      )}
+      className={`${seatClass} ${seatStateClass(draggable, drag)}`}
     >
       {children}
     </tr>
