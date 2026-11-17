@@ -1,18 +1,18 @@
 /*
  * DFragon 디자인 토큰의 원본. 값은 이 파일에서만 고친다.
- * 색 값은 2026-11-05, 11-06 결정의 무채색 팔레트와 게임 색이며 ADR 0009의 색 값을 대체한다. 바탕, 글자, 선과
- * 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류), 게임 클라이언트 값을 쓰는 게임 색과 차트 계열 색에만 쓴다.
+ * 바탕, 글자, 선과 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류), 게임 클라이언트 값을 쓰는 게임 색과
+ * 차트 계열 색에만 쓴다. 게임 색 밖의 강조 색은 두지 않는다.
  * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 모드 고르기는 base.css가 color-scheme으로 한다.
- * 브랜드 로고 색(--color-brand-*)은 그림 색이라 모드와 관계없이 같다.
  * 상황별 색의 옅은 면(--color-*-weak)은 다크에서 그 색 14%, 라이트에서 10%다.
+ * 글자, radius, breakpoint, 곡선은 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
  * 원색 단계(--gray-*)는 :root에 두어 utility가 생기지 않게 하고, 역할 이름만 @theme로 내보낸다.
  * StyleX 화면은 packages/ui/tokens.css의 --df-* 별칭으로 같은 변수를 읽는다.
  */
 :root {
   --gray-0: #ffffff;
-  --gray-25: #fafafa;
+  --gray-40: #f7f7f8;
   --gray-50: #f4f4f5;
-  --gray-75: #eeeef0;
+  --gray-60: #f0f0f2;
   --gray-100: #e4e4e7;
   --gray-150: #d8d8dd;
   --gray-200: #c8c8ce;
@@ -27,24 +27,27 @@
   --gray-825: #242427;
   --gray-850: #1c1c1f;
   --gray-900: #151517;
-  --gray-925: #101012;
   --gray-950: #0a0a0b;
 }
 
 /* StyleX 화면의 --df-* 별칭이 utility로 쓰이지 않은 토큰도 읽으므로 static으로 모든 변수를 낸다. */
 @theme static {
   --color-*: initial;
+  --font-*: initial;
+  --font-weight-*: initial;
+  --text-*: initial;
+  --leading-*: initial;
+  --tracking-*: initial;
+  --radius-*: initial;
+  --breakpoint-*: initial;
+  --ease-*: initial;
 
-  /* 페이지 바탕 */
+  /* 페이지, 패널, 상단 바의 바탕 */
   --color-canvas: light-dark(var(--gray-0), var(--gray-950));
-  /* 상단 바, 운영 화면 머리 */
-  --color-bar: light-dark(var(--gray-25), var(--gray-925));
-  /* 팝오버, 패널, 강조한 행의 면 */
-  --color-surface: light-dark(var(--gray-50), var(--gray-900));
-  /* 검색 칸, 표 안쪽 칸 */
-  --color-inset: light-dark(var(--gray-75), var(--gray-850));
-  /* 탭 줄의 띠 */
-  --color-stripe: light-dark(var(--gray-75), var(--gray-850));
+  /* 표 머리글, hover한 행, 팝오버의 면 */
+  --color-surface: light-dark(var(--gray-40), var(--gray-900));
+  /* 배지, 이미지 자리, hover한 버튼, 검색 칸 */
+  --color-inset: light-dark(var(--gray-60), var(--gray-850));
   /* 보조 버튼, 칩, 선택 칸 */
   --color-control: light-dark(var(--gray-100), var(--gray-825));
   /* 보조 버튼, 칩의 hover */
@@ -63,13 +66,6 @@
   --color-signal-hover: light-dark(var(--gray-750), var(--gray-0));
   /* 주 버튼, 선택 칩 위 글자 */
   --color-on-signal: light-dark(var(--gray-0), var(--gray-950));
-  /* 보드 제목, 후보 팝오버의 포인트 */
-  --color-accent: light-dark(#796939, #d6c592);
-  /* 로고 그림. 지금 쓰는 곳은 없다. */
-  --color-brand-logo: #e83830;
-  --color-brand-dragon: #e83830;
-  --color-brand-cream: #f8e8c8;
-  --color-brand-outline: #000000;
 
   /* 본문 글자 */
   --color-fg: light-dark(var(--gray-950), var(--gray-50));
@@ -92,14 +88,14 @@
   /* 길드 이름 */
   --color-fg-guild: light-dark(var(--gray-600), var(--gray-300));
 
-  /* 구분선, 패널 테두리 */
-  --color-border: light-dark(var(--gray-100), var(--gray-800));
-  /* 강한 구분선, 보조 버튼 테두리 */
-  --color-border-strong: light-dark(var(--gray-200), var(--gray-700));
+  /* 패널 테두리, 행 사이 선 */
+  --color-line: light-dark(var(--gray-100), var(--gray-800));
+  /* 버튼 테두리, 강한 구분선 */
+  --color-line-strong: light-dark(var(--gray-200), var(--gray-700));
   /* 입력 칸 테두리 */
-  --color-border-input: light-dark(var(--gray-350), var(--gray-500));
+  --color-line-input: light-dark(var(--gray-350), var(--gray-500));
   /* 오류 입력 칸 테두리 */
-  --color-border-danger: light-dark(#d2080d, #fe352c);
+  --color-line-danger: light-dark(#d2080d, #fe352c);
 
   /* 명성 상위 표시 */
   --color-tier-top: light-dark(#1e7b31, #4aa256);
@@ -191,7 +187,7 @@
   /* 툴팁 */
   --shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
 
-  /* 간격 단위. StyleX 화면은 이 값의 1, 2, 3, 4, 6배를 쓴다. */
+  /* 간격 단위. 간격은 이 값의 배수로 쓴다(p-3은 12px, gap-0.5는 2px). */
   --spacing: 4px;
   /* 상단 바 높이 */
   --spacing-topbar: 48px;
@@ -199,13 +195,27 @@
   --spacing-control-sm: 32px;
   --spacing-control-md: 40px;
   --spacing-control-lg: 48px;
+  /* 표의 행 높이 */
+  --spacing-row: 48px;
 
-  /* 운영 화면 패널 */
-  --radius-panel: 0;
-  /* 버튼, 입력 칸, 칩 */
-  --radius-control: 2px;
+  /* 배지, 태그 */
+  --radius-badge: 2px;
+  /* 버튼, 입력 칸, 칩, 이미지 자리 */
+  --radius-control: 3px;
+  /* 패널 */
+  --radius-panel: 4px;
 
-  /* 전환, 움직임 곡선 */
+  /* 팝오버, 후보 목록, listbox. StyleX 화면이 적어 둔 값과 같다. */
+  --z-popover: 110;
+  /* 툴팁 */
+  --z-tooltip: 120;
+
+  /* 이 폭부터 휴대폰보다 넓은 화면으로 본다. 그보다 좁은 화면은 max-sm으로 고른다. */
+  --breakpoint-sm: 600px;
+  /* 화면 상자 옆에 세로 탭을 둘 자리가 생기는 폭 */
+  --breakpoint-xl: 1367px;
+
+  /* 전환, 움직임 곡선. GSAP으로 움직이는 곳도 같은 곡선을 쓴다. */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   /* hover 전환 */
   --duration-hover: 120ms;
@@ -218,14 +228,45 @@
   /* 실시간 표시 점의 깜빡임 */
   --beat: 0.9s;
 
-  /* 본문 글꼴(ADR 0011) */
-  --font-ui:
-    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
-    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  /* 숫자 글꼴. 본문과 같은 Pretendard다. */
-  --font-num:
-    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
-    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  /* 본문 글꼴 */
+  --font-sans:
+    'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+  /* 숫자 글꼴. 명성, 점수, 순위, 레벨, 강화 수치, 퍼센트에만 쓰고 한글 라벨에는 쓰지 않는다. */
+  --font-mono: 'Monoplex KR', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* 본문 */
+  --font-weight-normal: 400;
+  /* 라벨, 표 머리글, 메뉴, 버튼, 배지 */
+  --font-weight-medium: 500;
+  /* 이름, 강조한 숫자, 패널 제목, 선택한 탭 */
+  --font-weight-semibold: 600;
+  /* 화면 제목, 상단 바의 제품 이름 */
+  --font-weight-bold: 700;
+
+  /* 태그 */
+  --text-2xs: 11px;
+  --text-2xs--line-height: 16px;
+  /* 라벨, 표 머리글, 배지, 보조 문구 */
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  /* 본문, 표, 버튼, 메뉴 */
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  /* 패널 제목, 큰 입력 칸 */
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  /* 캐릭터 이름, 요약 숫자 */
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  /* 화면 제목 */
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+
+  /* 패널 제목, 캐릭터 이름 */
+  --tracking-heading: -0.01em;
+  /* 화면 제목 */
+  --tracking-display: -0.02em;
 }
 
 @media (prefers-reduced-motion: reduce) {
