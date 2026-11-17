@@ -1,15 +1,14 @@
 import { Tooltip } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { buffSkillInfoOf } from '#core/character/character-detail-display'
 import { buffSkillIconOf, type SkillIconImage } from '#core/catalog/skill-window'
 import { useSkillWindowCatalog } from '../hooks/useSkillWindowCatalog'
 import { BuffGearTable } from './buff/BuffGearTable'
-import { styles } from './buff/BuffTab.style'
 import type { CharacterTabProps } from './character-tab-props'
-import { styles as partStyles } from './equipment/item-parts.style'
-import { styles as tableStyles } from './equipment/item-table.style'
+import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { SkillSprite } from './skill/SkillSprite'
-import { styles as skillStyles } from './skill/SkillTab.style'
+import { SKILL_TOOLTIP } from './skill/skill-classes'
+
+const SKILL_NAME = 'm-0 text-sm font-semibold'
 
 export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   const { buff } = detail
@@ -20,13 +19,13 @@ export function BuffTab({ detail }: CharacterTabProps): React.JSX.Element {
   const icon = useBuffSkillIcon(detail, skillInfo?.name ?? null)
 
   return (
-    <div {...stylex.props(tableStyles.root)}>
+    <div className={itemTableClasses.root}>
       {skillInfo?.name != null && (
         <BuffSkill name={skillInfo.name} icon={icon} option={skillInfo.option} />
       )}
       {(equipment.length > 0 || avatars.length > 0 || creatures.length > 0) && (
         <section aria-label="버프 강화 장비, 아바타, 크리쳐">
-          <h3 {...stylex.props(tableStyles.heading)}>장비, 아바타, 크리쳐</h3>
+          <h3 className={itemTableClasses.heading}>장비, 아바타, 크리쳐</h3>
           <BuffGearTable equipment={equipment} avatars={avatars} creatures={creatures} />
         </section>
       )}
@@ -56,16 +55,16 @@ function BuffSkillName({
   icon: SkillIconImage | null
 }): React.JSX.Element {
   if (icon === null) {
-    return <h2 {...stylex.props(styles.skillName)}>{name}</h2>
+    return <h2 className={SKILL_NAME}>{name}</h2>
   }
 
   return (
     <Tooltip.Root>
-      <Tooltip.Trigger delay={0} closeDelay={0} render={<h2 {...stylex.props(styles.skillName)} />}>
+      <Tooltip.Trigger delay={0} closeDelay={0} render={<h2 className={SKILL_NAME} />}>
         <SkillSprite icon={icon} label={name} />
       </Tooltip.Trigger>
       <Tooltip.Popup>
-        <span {...stylex.props(skillStyles.tooltip)}>{name}</span>
+        <span className={SKILL_TOOLTIP}>{name}</span>
       </Tooltip.Popup>
     </Tooltip.Root>
   )
@@ -82,11 +81,11 @@ function BuffSkill({
 }): React.JSX.Element {
   return (
     <section aria-label="버프 스킬">
-      <div {...stylex.props(partStyles.strip)}>
-        <span {...stylex.props(partStyles.stripLabel)}>버프 스킬</span>
+      <div className={itemClasses.strip}>
+        <span className={itemClasses.stripLabel}>버프 스킬</span>
         <BuffSkillName name={name} icon={icon} />
         {option?.level != null && (
-          <span {...stylex.props(partStyles.stripMuted)}>{`Lv.${option.level}`}</span>
+          <span className={itemClasses.stripNumber}>{`Lv.${option.level}`}</span>
         )}
       </div>
     </section>

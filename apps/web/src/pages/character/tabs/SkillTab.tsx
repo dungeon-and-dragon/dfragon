@@ -1,5 +1,4 @@
 import { ProgressCircle } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import {
@@ -26,14 +25,50 @@ import type { LoadedResult } from '../../../hooks/useLoadedResult'
 import { useSkillStats } from '../hooks/useSkillStats'
 import { useSkillWindowCatalog } from '../hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
-import { styles as layout } from './avatar/detail-tab.style'
+import { detailTabClasses as layout } from './detail-tab-classes'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './skill/SkillAdoptionTooltip'
 import { SkillChainSection, SkillTreeCode, SkillUpgradeSections } from './skill/SkillSide'
-import { styles as sideStyles } from './skill/SkillSide.style'
+import { ENHANCEMENT_MARK, EVOLUTION_MARK } from './skill/skill-classes'
 import { SkillSprite } from './skill/SkillSprite'
-import { styles } from './skill/SkillTab.style'
 
 const COMMON_ROW = 0
+
+// 스킬 창은 11열(col 0~10)이다. 아이콘은 직업 sprite에서 28×28씩 잘라 그린다.
+const SKILL_WINDOW_COLUMNS = 11
+const SKILL_CELL_WIDTH = 44
+const SKILL_CELL_HEIGHT = 48
+const SKILL_ROW_LABEL_WIDTH = 36
+const SKILL_WINDOW_BORDER_WIDTH = 1
+const SKILL_WINDOW_WIDTH = SKILL_ROW_LABEL_WIDTH + SKILL_WINDOW_COLUMNS * SKILL_CELL_WIDTH
+const SKILL_WINDOW_OUTER_WIDTH = SKILL_WINDOW_WIDTH + 2 * SKILL_WINDOW_BORDER_WIDTH
+
+// 스킬 창은 열 폭에 맞춰 커지고 지금 크기보다 작아지지 않는다. sprite의 전체 크기를 모르므로
+// background-size 대신 zoom으로 아이콘을 키우는데, zoom은 단위 없는 수만 받아 tan(atan2())로 길이 비율을 수로 바꾼다.
+// 배율이 열 폭에서 정해져 Tailwind CSS class로 적을 수 없어 길이는 style로 준다.
+const SKILL_WINDOW_SCALE = `max(1, tan(atan2(100cqi, ${SKILL_WINDOW_OUTER_WIDTH}px)))`
+const SKILL_WINDOW_UNIT = `(${SKILL_WINDOW_SCALE} * 1px)`
+
+const scaled = (px: number): string => `calc(${px} * ${SKILL_WINDOW_UNIT})`
+
+const ROW_LABEL_SIZE = {
+  width: scaled(SKILL_ROW_LABEL_WIDTH),
+  height: scaled(SKILL_CELL_HEIGHT),
+  fontSize: scaled(11),
+  lineHeight: scaled(14)
+}
+const ROW_LINE_BORDER = { borderTop: `${scaled(1)} solid var(--color-line)` }
+const ICON_SIZE = {
+  width: scaled(SKILL_CELL_WIDTH),
+  height: scaled(SKILL_CELL_HEIGHT),
+  gap: scaled(4)
+}
+const LEVEL_SIZE = { height: scaled(10), fontSize: scaled(10), lineHeight: scaled(10) }
+
+const LIST = 'm-0 flex list-none flex-col gap-1 p-0'
+const LIST_ROW = 'flex items-baseline justify-between gap-2'
+const SUBTLE = 'whitespace-nowrap text-fg-subtle'
+const ROOT =
+  'grid grid-cols-[minmax(max-content,1fr)_minmax(0,340px)] items-start justify-between gap-6 p-4 text-sm max-sm:grid-cols-1 max-sm:overflow-x-auto'
 
 function SkillIcon({
   icon,
@@ -51,18 +86,27 @@ function SkillIcon({
       trigger={
         <span
           data-skill-id={icon.skillId}
-          {...stylex.props(styles.icon, styles.iconPosition(icon.col, icon.row))}
+          className="absolute flex flex-col items-center justify-center border-0 bg-transparent p-0 text-inherit"
+          style={{
+            ...ICON_SIZE,
+            left: scaled(SKILL_ROW_LABEL_WIDTH + icon.col * SKILL_CELL_WIDTH),
+            top: scaled(icon.row * SKILL_CELL_HEIGHT)
+          }}
         />
       }
     >
-      <span {...stylex.props(styles.frame, picked && styles.picked)}>
+      {/* zoom은 아이콘과 함께 개화, 강화 표식과 선택 테두리도 같은 배율로 키운다. */}
+      <span
+        className={`relative block select-none ${picked ? 'shadow-[0_0_0_2px_var(--color-signal)]' : ''}`}
+        style={{ zoom: SKILL_WINDOW_SCALE }}
+      >
         <SkillSprite icon={icon.icon} label={icon.name} dim={!icon.learned} />
         {icon.evolution !== null && (
           <img
             src={skillMarkOf(source.marks, 'evolution', icon.evolution)}
             alt=""
             draggable={false}
-            {...stylex.props(styles.evolutionMark, styles.scaledMark)}
+            className={EVOLUTION_MARK}
           />
         )}
         {icon.enhancement !== null && (
@@ -70,11 +114,14 @@ function SkillIcon({
             src={skillMarkOf(source.marks, 'enhancement', icon.enhancement)}
             alt=""
             draggable={false}
-            {...stylex.props(styles.enhancementMark, styles.scaledMark)}
+            className={ENHANCEMENT_MARK}
           />
         )}
       </span>
-      <span {...stylex.props(styles.level)}>
+      <span
+        className="font-mono font-semibold whitespace-nowrap text-fg-muted tabular-nums select-none"
+        style={LEVEL_SIZE}
+      >
         {icon.learned && icon.level !== null ? `Lv ${icon.level}` : ''}
       </span>
     </SkillAdoptionHover>
@@ -89,16 +136,29 @@ function SkillWindowGrid({
   source: SkillAdoptionSource
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.windowColumn)}>
+    <div className="@container" style={{ minWidth: SKILL_WINDOW_OUTER_WIDTH }}>
       <div
         role="group"
         aria-label="스킬 창"
-        {...stylex.props(styles.window, styles.windowSize(skillWindow.rows.length))}
+        className="relative shrink-0 rounded-control border-solid border-line bg-inset"
+        style={{
+          borderWidth: scaled(SKILL_WINDOW_BORDER_WIDTH),
+          width: scaled(SKILL_WINDOW_WIDTH),
+          height: scaled(skillWindow.rows.length * SKILL_CELL_HEIGHT)
+        }}
       >
         {skillWindow.rows.map(({ row, requiredLevel }) => (
           <div key={row}>
-            {row > COMMON_ROW && <div {...stylex.props(styles.rowLine, styles.rowTop(row))} />}
-            <span {...stylex.props(styles.rowLabel, styles.rowTop(row))}>
+            {row > COMMON_ROW && (
+              <div
+                className="absolute inset-x-0 h-0"
+                style={{ ...ROW_LINE_BORDER, top: scaled(row * SKILL_CELL_HEIGHT) }}
+              />
+            )}
+            <span
+              className={`absolute left-0 flex items-center justify-center whitespace-nowrap text-fg-subtle select-none ${row === COMMON_ROW ? '' : 'font-mono tabular-nums'}`}
+              style={{ ...ROW_LABEL_SIZE, top: scaled(row * SKILL_CELL_HEIGHT) }}
+            >
               {row === COMMON_ROW ? '공용' : requiredLevel}
             </span>
           </div>
@@ -113,18 +173,18 @@ function SkillWindowGrid({
 
 function LearnedSkillRows({ rows }: { rows: readonly LearnedSkillRow[] }): React.JSX.Element {
   return (
-    <div aria-label="배운 스킬" {...stylex.props(styles.levelRows)}>
+    <div aria-label="배운 스킬" className="flex min-w-0 flex-col gap-4 justify-self-start">
       {rows.map(({ requiredLevel, skills }) => (
-        <section key={requiredLevel ?? 'none'} {...stylex.props(layout.section)}>
-          <h3 {...stylex.props(layout.heading)}>
+        <section key={requiredLevel ?? 'none'} className={layout.section}>
+          <h3 className={layout.heading}>
             {requiredLevel !== null ? `${requiredLevel}레벨` : '습득 레벨 없음'}
           </h3>
-          <ul {...stylex.props(styles.list)}>
+          <ul className={LIST}>
             {skills.map((skill, index) => (
-              <li key={skill.skillId ?? index} {...stylex.props(styles.listRow)}>
+              <li key={skill.skillId ?? index} className={LIST_ROW}>
                 <span>{skill.name}</span>
                 {skill.level !== null && (
-                  <span {...stylex.props(styles.subtle, styles.unselectable)}>
+                  <span className={`${SUBTLE} font-mono tabular-nums select-none`}>
                     {`Lv ${skill.level}`}
                   </span>
                 )}
@@ -149,13 +209,13 @@ function SkillUpgrades({
   }
 
   return (
-    <section aria-label={label} {...stylex.props(layout.section)}>
-      <h3 {...stylex.props(layout.heading)}>{label}</h3>
-      <ul {...stylex.props(styles.list)}>
+    <section aria-label={label} className={layout.section}>
+      <h3 className={layout.heading}>{label}</h3>
+      <ul className={LIST}>
         {upgrades.map((upgrade, index) => (
-          <li key={upgrade.skillId ?? index} {...stylex.props(styles.listRow)}>
+          <li key={upgrade.skillId ?? index} className={LIST_ROW}>
             <span>{upgrade.name ?? upgrade.skillId}</span>
-            <span {...stylex.props(styles.subtle)}>{upgrade.type}</span>
+            <span className={`${SUBTLE} font-mono tabular-nums`}>{upgrade.type}</span>
           </li>
         ))}
       </ul>
@@ -201,13 +261,13 @@ function SkillSideColumn({
   const board = catalog !== null ? skillUpgradeBoardOf(catalog, detail.character, style) : null
 
   return (
-    <div {...stylex.props(sideStyles.side)}>
+    <div className="min-w-0 overflow-hidden rounded-panel border border-line">
       {hash !== null && <SkillTreeCode hash={hash} />}
       <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
       {board !== null && source !== null ? (
         <SkillUpgradeSections board={board} source={source} />
       ) : (
-        <div {...stylex.props(sideStyles.fallback)}>
+        <div className="flex flex-col gap-6 p-4">
           <SkillUpgrades label="스킬 개화" upgrades={skillUpgradesOf(style, 'evolution')} />
           <SkillUpgrades label="스킬 강화" upgrades={skillUpgradesOf(style, 'enhancement')} />
         </div>
@@ -237,7 +297,7 @@ function SkillColumns({
   const source = catalog !== null ? { stats, role, marks: catalog.marks, now } : null
 
   return (
-    <div {...stylex.props(styles.root)}>
+    <div className={ROOT}>
       {skillWindow !== null && source !== null ? (
         <SkillWindowGrid skillWindow={skillWindow} source={source} />
       ) : (
@@ -272,8 +332,8 @@ export function SkillTab({ detail }: CharacterTabProps): React.JSX.Element | nul
 
   if (catalog.status === 'loading') {
     return (
-      <div aria-busy="true" {...stylex.props(styles.root)}>
-        <div {...stylex.props(styles.state)}>
+      <div aria-busy="true" className={ROOT}>
+        <div className="flex min-h-12 items-center">
           <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
         </div>
       </div>

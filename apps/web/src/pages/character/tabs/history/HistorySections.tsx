@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { itemRarityOfGrade } from '#core/character/character-item'
 import {
   ARTIFACT_PART,
@@ -9,29 +8,38 @@ import {
   SET_PART
 } from '#core/character/character-history'
 import { formatSeoulFullDateTime } from '#core/time-format'
+import { itemTableClasses } from '../equipment/item-classes'
 import { ItemName } from '../equipment/item-parts'
 import { FIELD_LABELS, formatFieldValue, NAME_CHANGE_LABELS } from './history-format'
-import { styles } from './HistoryTab.style'
 
-const AFTER_TONES: Partial<Record<HistoryFieldChange['field'], stylex.StyleXStyles>> = {
-  reinforce: styles.enhance,
-  amplify: styles.amplify,
-  refine: styles.refine,
-  enchant: styles.enchant
+const AFTER_TONES: Partial<Record<HistoryFieldChange['field'], string>> = {
+  reinforce: 'text-game-enhance',
+  amplify: 'text-game-amplify',
+  refine: 'text-game-refine',
+  enchant: 'text-game-enchant'
 }
+
+const BEFORE = 'text-fg-subtle tabular-nums'
+const AFTER = 'font-semibold tabular-nums'
+const CHANGES = 'm-0 list-none p-0'
+const CHANGE = 'flex flex-wrap items-center gap-x-1.5 gap-y-0.5 border-b border-line px-4 py-2.5'
+const CHANGE_SLOT = 'w-14 shrink-0 text-fg-subtle'
+const BADGE =
+  'inline-flex h-5 items-center rounded-badge bg-inset px-1.5 text-xs font-medium whitespace-nowrap text-fg-muted'
+const { head: HEAD, cell: CELL, row: ROW, body: BODY } = itemTableClasses
 
 export function Heading({ title, count }: { title: string; count?: number }): React.JSX.Element {
   return (
-    <h2 {...stylex.props(styles.heading)}>
+    <h2 className={itemTableClasses.heading}>
       {title}
-      {count !== undefined && <span {...stylex.props(styles.headingCount)}>{count}</span>}
+      {count !== undefined && <span className={itemTableClasses.count}>{count}</span>}
     </h2>
   )
 }
 
 function Arrow(): React.JSX.Element {
   return (
-    <span aria-label="에서" {...stylex.props(styles.arrow)}>
+    <span aria-label="에서" className="mx-0.5 text-fg-subtle">
       →
     </span>
   )
@@ -42,11 +50,11 @@ function FieldChange({ change }: { change: HistoryFieldChange }): React.JSX.Elem
 
   return (
     <>
-      <span {...stylex.props(styles.changeField)}>{FIELD_LABELS[field]}</span>
-      {name !== null && <span {...stylex.props(styles.changeOption)}>{name}</span>}
-      <span {...stylex.props(styles.before)}>{formatFieldValue(field, before)}</span>
+      <span className="ms-1.5 text-fg-subtle">{FIELD_LABELS[field]}</span>
+      {name !== null && <span className="text-fg-muted">{name}</span>}
+      <span className={BEFORE}>{formatFieldValue(field, before)}</span>
       <Arrow />
-      <span {...stylex.props(styles.after, AFTER_TONES[field])}>
+      <span className={`${AFTER} ${AFTER_TONES[field] ?? ''}`}>
         {formatFieldValue(field, after)}
       </span>
     </>
@@ -66,7 +74,7 @@ function ReplacedItem({
     <>
       {replaced !== null && (
         <>
-          <span {...stylex.props(styles.before)}>{replaced.itemName}</span>
+          <span className={BEFORE}>{replaced.itemName}</span>
           <Arrow />
         </>
       )}
@@ -79,8 +87,8 @@ function ChangeLine({ item }: { item: HistoryChangeItem }): React.JSX.Element {
   switch (item.kind) {
     case 'equipment':
       return (
-        <li {...stylex.props(styles.change)}>
-          <span {...stylex.props(styles.changeSlot)}>{item.slotName}</span>
+        <li className={CHANGE}>
+          <span className={CHANGE_SLOT}>{item.slotName}</span>
           {item.fields.length === 0 ? (
             <ReplacedItem {...item} />
           ) : (
@@ -95,16 +103,16 @@ function ChangeLine({ item }: { item: HistoryChangeItem }): React.JSX.Element {
       )
     case 'artifact':
       return (
-        <li {...stylex.props(styles.change)}>
-          <span {...stylex.props(styles.changeSlot)}>{ARTIFACT_PART}</span>
+        <li className={CHANGE}>
+          <span className={CHANGE_SLOT}>{ARTIFACT_PART}</span>
           <ReplacedItem {...item} />
         </li>
       )
     case 'set':
       return (
-        <li {...stylex.props(styles.change)}>
-          <span {...stylex.props(styles.changeSlot)}>{SET_PART}</span>
-          <b {...stylex.props(styles.after)}>{item.setItemName}</b>
+        <li className={CHANGE}>
+          <span className={CHANGE_SLOT}>{SET_PART}</span>
+          <b className={AFTER}>{item.setItemName}</b>
           {item.fields.map((change) => (
             <FieldChange key={change.field} change={change} />
           ))}
@@ -129,8 +137,8 @@ export function HistoryChanges({ point }: { point: HistoryPoint }): React.JSX.El
     return (
       <>
         <Heading title="변경점" count={1} />
-        <ul {...stylex.props(styles.changes)}>
-          <li {...stylex.props(styles.change, styles.first)}>첫 기록</li>
+        <ul className={CHANGES}>
+          <li className={`${CHANGE} text-fg-subtle`}>첫 기록</li>
         </ul>
       </>
     )
@@ -139,7 +147,7 @@ export function HistoryChanges({ point }: { point: HistoryPoint }): React.JSX.El
   return (
     <>
       <Heading title="변경점" count={point.items.length} />
-      <ul {...stylex.props(styles.changes)}>
+      <ul className={CHANGES}>
         {point.items.map((item) => (
           <ChangeLine key={changeKey(item)} item={item} />
         ))}
@@ -147,9 +155,9 @@ export function HistoryChanges({ point }: { point: HistoryPoint }): React.JSX.El
       {point.unchanged.length > 0 && (
         <>
           <Heading title="그대로" />
-          <ul {...stylex.props(styles.unchanged)}>
+          <ul className="m-0 flex list-none flex-wrap gap-1 px-4 py-3">
             {point.unchanged.map((label) => (
-              <li key={label} {...stylex.props(styles.chip)}>
+              <li key={label} className={BADGE}>
                 {label}
               </li>
             ))}
@@ -172,35 +180,37 @@ export function NameChanges({
   return (
     <section aria-label="이름 변경">
       <Heading title="이름 변경" count={changes.length} />
-      <table {...stylex.props(styles.table)}>
+      <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th scope="col" {...stylex.props(styles.th, styles.thTime)}>
+            <th scope="col" className={`${HEAD} w-40`}>
               일시
             </th>
-            <th scope="col" {...stylex.props(styles.th, styles.thKind)}>
+            <th scope="col" className={`${HEAD} w-24`}>
               종류
             </th>
-            <th scope="col" {...stylex.props(styles.th, styles.tdName)}>
+            <th scope="col" className={HEAD}>
               이름
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className={BODY}>
           {changes.toReversed().map(({ kind, at, before, after }, index) => (
-            <tr key={`${index}-${kind}-${at}`} {...stylex.props(styles.row)}>
-              <td {...stylex.props(styles.td, styles.tdTime)}>{formatSeoulFullDateTime(at)}</td>
-              <td {...stylex.props(styles.td)}>
-                <span {...stylex.props(styles.kind)}>{NAME_CHANGE_LABELS[kind]}</span>
+            <tr key={`${index}-${kind}-${at}`} className={ROW}>
+              <td
+                className={`${CELL} font-mono text-xs whitespace-nowrap text-fg-subtle tabular-nums`}
+              >
+                {formatSeoulFullDateTime(at)}
               </td>
-              <td {...stylex.props(styles.td, styles.tdName)}>
-                <span {...stylex.props(styles.nameBefore)}>{before}</span>
-                <span aria-label="에서" {...stylex.props(styles.nameArrow)}>
+              <td className={CELL}>
+                <span className={BADGE}>{NAME_CHANGE_LABELS[kind]}</span>
+              </td>
+              <td className={CELL}>
+                <span className="text-fg-subtle">{before}</span>
+                <span aria-label="에서" className="mx-1.5 text-fg-subtle">
                   →
                 </span>
-                <span
-                  {...stylex.props(styles.nameAfter, kind === 'adventure' && styles.adventureAfter)}
-                >
+                <span className={`font-semibold ${kind === 'adventure' ? 'text-fg-muted' : ''}`}>
                   {after}
                 </span>
               </td>

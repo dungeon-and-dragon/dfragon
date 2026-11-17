@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { MISSING_VALUE } from '#core/capture/cards'
 import { formatCount, formatPoint, type StatLine } from '#core/character/character-item'
 import { type OathView, toOathView } from '#core/character/character-oath'
@@ -13,10 +12,16 @@ import { CheckIcon } from '../../../components/CheckIcon'
 import { useOathCatalog } from '../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
-import { styles as tableStyles } from './equipment/item-table.style'
+import { itemClasses, itemTableClasses, raritySolidOf } from './equipment/item-classes'
 import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
-import { raritySolid, styles as partStyles } from './equipment/item-parts.style'
-import { styles } from './oath/OathTab.style'
+
+const { table, head, headEnd, body, row, cell, slot, number, muted, heading, count } =
+  itemTableClasses
+// 진의 단계처럼 값이 글자인 줄도 있어, 숫자로만 된 값에만 숫자 글꼴을 쓴다.
+const NUMERIC_TEXT = /^[\d.,+\-%\s]+$/
+const OPTION = 'm-0 flex items-start gap-3.5 rounded-control border px-4 py-3.5'
+const OPTION_IDLE = 'border-dashed border-line-strong bg-canvas'
+const OPTION_PICKED = 'border-solid border-signal bg-surface shadow-[0_0_0_1px_var(--color-signal)]'
 
 export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null {
   const catalog = useOathCatalog()
@@ -30,7 +35,7 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
   const board = loaded !== null && setInfo !== null ? oathSetBoardOf(loaded, setInfo) : null
 
   return (
-    <div {...stylex.props(tableStyles.root)}>
+    <div className={itemTableClasses.root}>
       {board !== null ? (
         <>
           <OathSetCard view={view} board={board} />
@@ -42,8 +47,8 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
           icon={loaded !== null && view.info !== null ? oathItemIconOf(loaded, view.info) : null}
         />
       )}
-      <div {...stylex.props(styles.body)}>
-        <div {...stylex.props(styles.main)}>
+      <div className="flex items-start max-sm:flex-col">
+        <div className="min-w-0 grow border-e border-line max-sm:w-full max-sm:border-e-0">
           {loaded !== null && board !== null && <OathBody view={view} catalog={loaded} />}
           <OathCrystals view={view} />
         </div>
@@ -65,15 +70,19 @@ function OathSetCard({
   }
 
   return (
-    <div {...stylex.props(styles.setCard)}>
-      <span {...stylex.props(styles.setIconWell, raritySolid[set.rarity ?? 'unknown'])}>
-        {board.icon !== null && <img src={board.icon} alt="" {...stylex.props(styles.setIcon)} />}
+    <div className="flex items-center gap-5 border-b border-line p-4">
+      <span
+        className={`box-border flex size-14 shrink-0 items-center justify-center rounded-control border border-current bg-inset ${raritySolidOf(set.rarity)}`}
+      >
+        {board.icon !== null && (
+          <img src={board.icon} alt="" className="size-10 [image-rendering:pixelated]" />
+        )}
       </span>
-      <span {...stylex.props(styles.setTitle)}>
+      <span className="flex flex-wrap items-center gap-2 text-base">
         <ItemName name={set.name} rarity={set.rarity} />
         {set.rarityName !== null && <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>}
         {set.point !== null && (
-          <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(set.point)}</span>
+          <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
         )}
       </span>
     </div>
@@ -82,28 +91,30 @@ function OathSetCard({
 
 function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.options)}>
+    <div className="grid grid-cols-3 gap-3 border-b border-line p-4 max-sm:grid-cols-1">
       {options.map((option) => (
         <article
           key={option.name}
           aria-label={option.name}
           aria-current={option.picked || undefined}
-          {...stylex.props(styles.option, option.picked && styles.optionPicked)}
+          className={`${OPTION} ${option.picked ? OPTION_PICKED : OPTION_IDLE}`}
         >
-          <div {...stylex.props(styles.optionIconColumn)}>
+          <div className="flex shrink-0 flex-col items-center gap-2">
             <img
               src={option.icon}
               alt=""
-              {...stylex.props(styles.optionIcon, !option.picked && styles.optionIconDim)}
+              className={`size-11.5 rounded-full ${option.picked ? '' : 'opacity-40 grayscale-80'}`}
             />
             {option.picked && (
-              <span {...stylex.props(styles.pickedBadge)}>
+              <span className="inline-flex h-5 items-center gap-0.5 rounded-badge bg-signal px-1.5 text-2xs font-semibold text-on-signal">
                 <CheckIcon width={12} height={12} strokeWidth={3} />
                 선택
               </span>
             )}
           </div>
-          {option.effect !== null && <GameText lines={option.effect} style={styles.optionEffect} />}
+          {option.effect !== null && (
+            <GameText lines={option.effect} className="min-w-0 grow text-xs/4.5" />
+          )}
         </article>
       ))}
     </div>
@@ -123,15 +134,15 @@ function OathBody({
 
   return (
     <section aria-label="서약 본체">
-      <h2 {...stylex.props(tableStyles.heading)}>서약 본체</h2>
-      <div {...stylex.props(styles.bodyRow)}>
-        <div {...stylex.props(partStyles.item)}>
+      <h2 className={heading}>서약 본체</h2>
+      <div className="flex h-row items-center gap-2.5 border-b border-line px-4">
+        <div className={itemClasses.item}>
           <ItemIcon itemId={info.itemId} src={oathItemIconOf(catalog, info)} rarity={info.rarity} />
           <ItemName name={info.itemName} rarity={info.rarity} />
         </div>
-        <span {...stylex.props(partStyles.spacer)} />
+        <span className={itemClasses.spacer} />
         {info.setPoint !== null && (
-          <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(info.setPoint)}</span>
+          <span className={itemClasses.stripNumber}>{formatPoint(info.setPoint)}</span>
         )}
       </div>
     </section>
@@ -150,30 +161,30 @@ function OathStrip({
   }
 
   return (
-    <div {...stylex.props(partStyles.strip)}>
+    <div className={itemClasses.strip}>
       {info !== null && (
-        <span {...stylex.props(partStyles.itemText)}>
-          <span {...stylex.props(partStyles.stripLabel)}>서약</span>
+        <span className={itemClasses.itemText}>
+          <span className={itemClasses.stripLabel}>서약</span>
           {icon !== null && <ItemIcon itemId={info.itemId} src={icon} rarity={info.rarity} />}
           <ItemName name={info.itemName} rarity={info.rarity} />
           {info.setPoint !== null && (
-            <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(info.setPoint)}</span>
+            <span className={itemClasses.stripNumber}>{formatPoint(info.setPoint)}</span>
           )}
         </span>
       )}
-      <span {...stylex.props(partStyles.spacer)} />
+      <span className={itemClasses.spacer} />
       {set !== null && (
-        <span {...stylex.props(partStyles.itemText)}>
-          <span {...stylex.props(partStyles.stripLabel)}>서약 세트</span>
+        <span className={itemClasses.itemText}>
+          <span className={itemClasses.stripLabel}>서약 세트</span>
           <ItemName name={set.name} rarity={set.rarity} />
           {set.optionName !== null && (
-            <span {...stylex.props(partStyles.stripMuted)}>{set.optionName}</span>
+            <span className={itemClasses.stripMuted}>{set.optionName}</span>
           )}
           {set.rarityName !== null && (
             <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>
           )}
           {set.point !== null && (
-            <span {...stylex.props(partStyles.stripMuted)}>{formatPoint(set.point)}</span>
+            <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
           )}
         </span>
       )}
@@ -188,65 +199,37 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
 
   return (
     <section aria-label="서약 결정">
-      <h2 {...stylex.props(tableStyles.heading)}>
-        서약 결정 <span {...stylex.props(tableStyles.count)}>{formatCount(crystals.length)}</span>
+      <h2 className={heading}>
+        서약 결정 <span className={count}>{formatCount(crystals.length)}</span>
       </h2>
-      <table {...stylex.props(tableStyles.table)}>
+      <table className={table}>
         <thead>
           <tr>
-            <th
-              scope="col"
-              {...stylex.props(tableStyles.head, tableStyles.first, styles.slotColumn)}
-            >
+            <th scope="col" className={`${head} w-14`}>
               칸
             </th>
-            <th scope="col" {...stylex.props(tableStyles.head)}>
+            <th scope="col" className={head}>
               결정
             </th>
-            <th
-              scope="col"
-              {...stylex.props(
-                tableStyles.head,
-                tableStyles.end,
-                tableStyles.last,
-                styles.pointColumn
-              )}
-            >
+            <th scope="col" className={`${headEnd} w-27.5`}>
               세트 포인트
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className={body}>
           {crystals.map((crystal, index) => (
-            <tr key={`${crystal.slot}-${index}`} {...stylex.props(tableStyles.row)}>
-              <td
-                {...stylex.props(
-                  tableStyles.cell,
-                  tableStyles.first,
-                  tableStyles.slot,
-                  tableStyles.number
-                )}
-              >
-                {crystal.slot ?? MISSING_VALUE}
-              </td>
-              <td {...stylex.props(tableStyles.cell)}>
-                <div {...stylex.props(partStyles.item)}>
+            <tr key={`${crystal.slot}-${index}`} className={row}>
+              <td className={`${cell} ${slot} ${number}`}>{crystal.slot ?? MISSING_VALUE}</td>
+              <td className={cell}>
+                <div className={itemClasses.item}>
                   <ItemIcon itemId={crystal.itemId} rarity={crystal.rarity} />
-                  <span {...stylex.props(partStyles.itemText)}>
+                  <span className={itemClasses.itemText}>
                     <ItemName name={crystal.itemName} rarity={crystal.rarity} />
                     <TuneNumeral numeral={crystal.tune} />
                   </span>
                 </div>
               </td>
-              <td
-                {...stylex.props(
-                  tableStyles.cell,
-                  tableStyles.end,
-                  tableStyles.last,
-                  tableStyles.number,
-                  tableStyles.muted
-                )}
-              >
+              <td className={`${cell} text-right ${number} ${muted}`}>
                 {crystal.setPoint !== null ? formatPoint(crystal.setPoint) : MISSING_VALUE}
               </td>
             </tr>
@@ -263,7 +246,7 @@ function OathEffects({
   view: OathView
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.side)}>
+    <div className="w-120 shrink-0 max-sm:w-full">
       <StatSection title="서약 세트 효과" lines={setStatus} />
       <StatSection title="서약의 가호" lines={blessing} />
       {upgrade !== null && <StatSection title={upgrade.title} lines={upgrade.lines} />}
@@ -284,12 +267,19 @@ function StatSection({
 
   return (
     <section aria-label={title ?? undefined}>
-      {title !== null && <h2 {...stylex.props(tableStyles.heading)}>{title}</h2>}
-      <dl {...stylex.props(styles.list)}>
+      {title !== null && <h2 className={heading}>{title}</h2>}
+      <dl className="m-0 p-0">
         {lines.map(({ name, value }, index) => (
-          <div key={`${name}-${index}`} {...stylex.props(styles.line)}>
-            <dt {...stylex.props(styles.term)}>{name}</dt>
-            <dd {...stylex.props(styles.value)}>{value}</dd>
+          <div
+            key={`${name}-${index}`}
+            className="flex min-h-10 items-center justify-between gap-3 border-b border-line px-4"
+          >
+            <dt className="text-fg-muted">{name}</dt>
+            <dd
+              className={`m-0 font-semibold ${NUMERIC_TEXT.test(value) ? 'font-mono tabular-nums' : ''}`}
+            >
+              {value}
+            </dd>
           </div>
         ))}
       </dl>

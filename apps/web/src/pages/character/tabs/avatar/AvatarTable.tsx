@@ -1,55 +1,54 @@
-import * as stylex from '@stylexjs/stylex'
 import { toItemView } from '#core/character/character-item'
 import { avatarSlotLabel } from '#core/character/character-detail-display'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
+import { itemClasses, itemTableClasses } from '../equipment/item-classes'
 import { ItemIcon, ItemName } from '../equipment/item-parts'
-import { styles as partStyles } from '../equipment/item-parts.style'
-import { styles as tableStyles } from '../equipment/item-table.style'
-import { styles } from './AvatarTable.style'
+import { avatarClasses } from './avatar-classes'
 
 type Avatar = CharacterDetailView['avatar'][number]
+
+const { scroll, table, head, body, row, cell, slot } = itemTableClasses
 
 export function AvatarTable({ avatars }: { avatars: readonly Avatar[] }): React.JSX.Element {
   const aura = avatars.find((avatar) => avatar.slotId === 'AURORA')
   const auraSkin = avatars.find((avatar) => avatar.slotId === 'AURA_SKIN')
 
   return (
-    <table {...stylex.props(tableStyles.table)}>
-      <thead>
-        <tr>
-          <th scope="col" {...stylex.props(tableStyles.head, tableStyles.first, styles.slotColumn)}>
-            부위
-          </th>
-          <th scope="col" {...stylex.props(tableStyles.head)}>
-            아바타
-          </th>
-          <th scope="col" {...stylex.props(tableStyles.head, styles.optionColumn)}>
-            옵션
-          </th>
-          <th
-            scope="col"
-            {...stylex.props(tableStyles.head, tableStyles.last, styles.emblemColumn)}
-          >
-            엠블렘
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {avatars.map((avatar, index) => {
-          if (avatar.slotId === 'AURA_SKIN' && aura != null) {
-            return null
-          }
+    <div className={scroll}>
+      <table className={`${table} min-w-200`}>
+        <thead>
+          <tr>
+            <th scope="col" className={`${head} ${avatarClasses.slotColumn}`}>
+              부위
+            </th>
+            <th scope="col" className={head}>
+              아바타
+            </th>
+            <th scope="col" className={`${head} ${avatarClasses.optionColumn}`}>
+              옵션
+            </th>
+            <th scope="col" className={`${head} ${avatarClasses.emblemColumn}`}>
+              엠블렘
+            </th>
+          </tr>
+        </thead>
+        <tbody className={body}>
+          {avatars.map((avatar, index) => {
+            if (avatar.slotId === 'AURA_SKIN' && aura != null) {
+              return null
+            }
 
-          const showsAuraSkinAsClone =
-            avatar.slotId === 'AURORA' && avatar.clone?.itemId == null && auraSkin != null
-          const displayedAvatar = showsAuraSkinAsClone
-            ? { ...avatar, clone: { itemId: auraSkin.itemId, itemName: auraSkin.itemName } }
-            : avatar
+            const showsAuraSkinAsClone =
+              avatar.slotId === 'AURORA' && avatar.clone?.itemId == null && auraSkin != null
+            const displayedAvatar = showsAuraSkinAsClone
+              ? { ...avatar, clone: { itemId: auraSkin.itemId, itemName: auraSkin.itemName } }
+              : avatar
 
-          return <AvatarRow key={avatar.slotId ?? index} avatar={displayedAvatar} />
-        })}
-      </tbody>
-    </table>
+            return <AvatarRow key={avatar.slotId ?? index} avatar={displayedAvatar} />
+          })}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -65,34 +64,32 @@ export function AvatarRow({
   const cloneName = avatar.clone?.itemName ?? null
 
   return (
-    <tr {...stylex.props(tableStyles.row)}>
-      <td {...stylex.props(tableStyles.cell, tableStyles.first, tableStyles.slot)}>
-        {avatarSlotLabel(avatar.slotName)}
-      </td>
-      <td {...stylex.props(tableStyles.cell)}>
-        <div {...stylex.props(partStyles.item)}>
-          <span {...stylex.props(styles.icons)}>
+    <tr className={row}>
+      <td className={`${cell} ${slot}`}>{avatarSlotLabel(avatar.slotName)}</td>
+      <td className={cell}>
+        <div className={itemClasses.item}>
+          <span className="flex shrink-0 gap-1">
             <ItemIcon itemId={item.itemId} rarity={item.rarity} />
             {cloneId != null && <ItemIcon itemId={cloneId} rarity={null} />}
             {cloneId == null && cloneIconSpace && (
-              <span aria-hidden="true" {...stylex.props(partStyles.iconSpace)} />
+              <span aria-hidden="true" className={itemClasses.iconSpace} />
             )}
           </span>
-          <span {...stylex.props(styles.names)}>
-            <span {...stylex.props(styles.name)}>
+          <span className="flex min-w-0 items-baseline gap-2">
+            <span className="shrink-0 whitespace-nowrap">
               <ItemName name={item.itemName} rarity={item.rarity} />
             </span>
             {cloneName != null && (
-              <span title={cloneName} {...stylex.props(styles.clone)}>
+              <span title={cloneName} className={avatarClasses.clone}>
                 {cloneName}
               </span>
             )}
           </span>
         </div>
       </td>
-      <td {...stylex.props(tableStyles.cell)}>{avatar.optionAbility}</td>
-      <td {...stylex.props(tableStyles.cell, tableStyles.last)}>
-        <span {...stylex.props(styles.stack)}>
+      <td className={cell}>{avatar.optionAbility}</td>
+      <td className={cell}>
+        <span className={avatarClasses.stack}>
           {avatar.emblems.map((emblem, index) => {
             if (emblem.itemName == null) {
               return null
