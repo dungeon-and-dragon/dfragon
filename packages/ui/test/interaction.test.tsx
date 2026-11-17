@@ -20,7 +20,6 @@ import {
   TextFieldError,
   TextFieldInput,
   TextFieldLabel,
-  Typo,
   type ButtonProps,
   type IconButtonProps,
   type TextFieldInputProps
@@ -339,11 +338,11 @@ describe('TextField의 controlled 입력과 접근성 연결', () => {
     )
   })
 
-  it('render로 합성한 Typo input에 label과 값이 연결된다', async () => {
+  it('render로 합성한 input에 label과 값이 연결된다', async () => {
     const ref = createRef<HTMLInputElement>()
     function SearchField() {
       const [query, setQuery] = useState('')
-      const input = <Typo.txtS as="input" ref={ref} />
+      const input = <input ref={ref} />
 
       return (
         <TextField>
@@ -775,7 +774,7 @@ describe('StatusChip의 상태 알림 범위', () => {
 })
 
 describe('StatusChip의 tone과 진행 표시', () => {
-  it('tone마다 다른 외형을 쓰고 진행 중이면 사각 점 대신 점 세 개를 둔다', async () => {
+  it('tone을 data 속성으로 드러내고 진행 중이면 점 대신 점 세 개를 둔다', async () => {
     await render(
       <>
         <StatusChip tone="neutral">준비 중</StatusChip>
@@ -789,7 +788,7 @@ describe('StatusChip의 tone과 진행 표시', () => {
       </>
     )
     const chips = [...container.querySelectorAll<HTMLElement>('[data-tone]')]
-    const [neutral, success, danger, warning, done, busy] = chips
+    const [, , , , done, busy] = chips
 
     expect(chips.map((chip) => chip.dataset.tone)).toEqual([
       'neutral',
@@ -799,9 +798,6 @@ describe('StatusChip의 tone과 진행 표시', () => {
       'signal',
       'signal'
     ])
-    expect(
-      new Set([neutral, success, danger, warning, done].map((chip) => chip.className)).size
-    ).toBe(5)
     expect(done.hasAttribute('data-busy')).toBe(false)
     expect(done.querySelectorAll('[aria-hidden="true"]')).toHaveLength(1)
     expect(busy.hasAttribute('data-busy')).toBe(true)
@@ -812,7 +808,7 @@ describe('StatusChip의 tone과 진행 표시', () => {
 })
 
 describe('StepDots', () => {
-  it('세 점이 서로 다른 지연으로 차례로 켜지고 크기에 따라 점 모양이 다르다', async () => {
+  it('보조 기술에 숨긴 점 세 개를 두고 크기를 클래스로 고른다', async () => {
     await render(
       <>
         <StepDots />
@@ -820,17 +816,16 @@ describe('StepDots', () => {
       </>
     )
     const [small, large] = [...container.children]
-    const delays = [...small.children].map((dot) => dot.className)
 
     expect(small.getAttribute('aria-hidden')).toBe('true')
     expect(small.children).toHaveLength(3)
-    expect(new Set(delays).size).toBe(3)
-    expect(large.children[0].className).not.toBe(small.children[0].className)
+    expect(small.classList.contains('step-dots-4')).toBe(true)
+    expect(large.classList.contains('step-dots-5')).toBe(true)
   })
 })
 
 describe('Kbd의 면', () => {
-  it('신호색 면의 키캡은 기본 키캡과 다른 외형을 쓰고 면을 data 속성으로 드러낸다', async () => {
+  it('키캡의 면을 data 속성으로 드러낸다', async () => {
     await render(
       <>
         <Kbd>Alt</Kbd>
@@ -841,7 +836,6 @@ describe('Kbd의 면', () => {
 
     expect(plain.dataset.surface).toBe('default')
     expect(signal.dataset.surface).toBe('signal')
-    expect(signal.className).not.toBe(plain.className)
     expect(signal.textContent).toBe('R')
   })
 })

@@ -1,4 +1,4 @@
-import { Button, shapes, Tooltip } from '@dfragon/ui'
+import { Button, Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import {
   type EnhancementRow,
@@ -36,7 +36,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
             코드 복사
           </span>
         </Button>
-        <span role="status" {...stylex.props(shapes.srOnly)}>
+        <span role="status" className="sr-only">
           {clipboard.status === 'copied' && '스킬 트리 코드를 복사했습니다.'}
           {clipboard.status === 'failed' && '클립보드에 복사하지 못했습니다.'}
         </span>

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { Button, shapes, StatusChip } from '@dfragon/ui'
+import { Button, StatusChip } from '@dfragon/ui'
 import { HeaderTooltip } from '../../../components/HeaderTooltip'
 import { MonitorIcon } from './MonitorIcon'
 import { useScreenCaptureContext } from '../../../hooks/useScreenCaptureContext'
@@ -84,7 +84,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
           </button>
         )}
       </HeaderTooltip>
-      <span role="status" data-capture-announcer="" {...stylex.props(shapes.srOnly)}>
+      <span role="status" data-capture-announcer="" className="sr-only">
         {status}
       </span>
     </span>

@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -133,11 +132,9 @@ function hasStyle(element: Element, style: keyof typeof expectedColors): boolean
   return names.every((name) => element.classList.contains(name))
 }
 
-const srOnlySelector = `.${stylex.props(shapes.srOnly).className!.split(' ').join('.')}`
-
 function visibleText(element: Element): string {
   const copy = element.cloneNode(true) as HTMLElement
-  for (const hidden of copy.querySelectorAll(`[aria-hidden="true"], ${srOnlySelector}`)) {
+  for (const hidden of copy.querySelectorAll('[aria-hidden="true"], .sr-only')) {
     hidden.remove()
   }
 

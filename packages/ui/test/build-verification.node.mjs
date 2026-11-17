@@ -9,7 +9,7 @@ import { test } from 'node:test'
 const verifyScript = fileURLToPath(new URL('../scripts/verify-build.mjs', import.meta.url))
 const indexSource = `import { Dialog } from "@base-ui/react/dialog";\nimport * as stylex from "@stylexjs/stylex";\nimport React from "react";\nimport { jsx } from "react/jsx-runtime";\nimport { colors } from "./tokens.stylex.js";\nexport { Dialog, React, colors, jsx, stylex };\n`
 const tokensSource = `import * as stylex from "@stylexjs/stylex";\nconst colors = stylex.defineConsts({ signal: "var(--df-signal)" });\nexport { colors };\n`
-const libraryFiles = ['index.js', 'tokens.stylex.js', 'typo.js']
+const libraryFiles = ['index.js', 'tokens.stylex.js']
 const tokensStyles = ':root{--df-bg-canvas:var(--color-canvas)}'
 const foundationStyles =
   'body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}'
@@ -24,12 +24,7 @@ async function createLibraryFixture(context) {
   await writeFile(join(output, 'notices/bundle-files.json'), JSON.stringify(libraryFiles))
   await writeFile(join(output, 'index.js'), indexSource)
   await writeFile(join(output, 'tokens.stylex.js'), tokensSource)
-  await writeFile(
-    join(output, 'typo.js'),
-    `import { jsx } from 'react/jsx-runtime';\nexport const Typo = jsx;\n`
-  )
   await writeFile(join(output, 'index.d.ts'), 'export declare const Button: unknown;\n')
-  await writeFile(join(output, 'typo.d.ts'), 'export declare const Typo: unknown;\n')
   await writeFile(
     join(output, 'tokens.stylex.d.ts'),
     'export declare const colors: { signal: string };\n'
@@ -141,23 +136,8 @@ for (const { name, styles } of [
   })
 }
 
-test('공개 ESM, 선언 파일과 React 전용 Typo 산출물을 허용한다', async (context) => {
+test('공개 ESM과 선언 파일 산출물을 허용한다', async (context) => {
   const output = await createLibraryFixture(context)
-  const result = inspect(output)
-  assert.equal(result.status, 0, result.stderr)
-})
-
-test('Typo가 순수 React chunk를 통해 구현을 재수출해도 허용한다', async (context) => {
-  const output = await createLibraryFixture(context)
-  await writeFile(join(output, 'typo.js'), `export { Typo } from './react-helper.js';\n`)
-  await writeFile(
-    join(output, 'react-helper.js'),
-    `import { createElement } from 'react';\nexport const Typo = createElement;\n`
-  )
-  await writeFile(
-    join(output, 'notices/bundle-files.json'),
-    JSON.stringify([...libraryFiles, 'react-helper.js'])
-  )
   const result = inspect(output)
   assert.equal(result.status, 0, result.stderr)
 })
@@ -172,13 +152,13 @@ test('tokens.stylex.d.ts가 없으면 실패한다', async (context) => {
 
 test('생성 JS 목록에 tokens.stylex.js가 없으면 실패한다', async (context) => {
   const output = await createLibraryFixture(context)
-  await writeFile(join(output, 'notices/bundle-files.json'), '["index.js","typo.js"]')
+  await writeFile(join(output, 'notices/bundle-files.json'), '["index.js"]')
   const result = inspect(output)
   assert.notEqual(result.status, 0)
   assert.match(result.stderr, /Shared tokens stay in tokens\.stylex\.js/)
 })
 
-for (const file of ['index.js', 'index.d.ts', 'typo.js', 'typo.d.ts']) {
+for (const file of ['index.js', 'index.d.ts']) {
   test(`공개 산출물 ${file}이 누락되면 실패한다`, async (context) => {
     const output = await createLibraryFixture(context)
     await rm(join(output, file))
@@ -196,39 +176,21 @@ for (const file of ['index.js', 'index.d.ts', 'typo.js', 'typo.d.ts']) {
 for (const { name, file, source, failure } of [
   {
     name: '선언에 pnpm 내부 경로가 남은 경우',
-    file: 'typo.d.ts',
-    source: 'export { Typo } from "../node_modules/.pnpm/react/index";\n',
-    failure: /Portable browser declaration: typo\.d\.ts/
+    file: 'index.d.ts',
+    source: 'export { Button } from "../node_modules/.pnpm/react/index";\n',
+    failure: /Portable browser declaration: index\.d\.ts/
   },
   {
     name: '선언이 node: 접두사 없이 Node builtin을 가져오는 경우',
-    file: 'typo.d.ts',
+    file: 'index.d.ts',
     source: 'export type { ReadStream } from "fs";\n',
-    failure: /Portable browser declaration: typo\.d\.ts/
+    failure: /Portable browser declaration: index\.d\.ts/
   },
   {
     name: '선언이 import type 표현식으로 Node builtin을 참조하는 경우',
-    file: 'typo.d.ts',
+    file: 'index.d.ts',
     source: 'export type NodeStream = import("fs").ReadStream;\n',
-    failure: /Portable browser declaration: typo\.d\.ts/
-  },
-  {
-    name: 'Typo가 Base UI runtime을 가져오는 경우',
-    file: 'typo.js',
-    source: `export { Field } from '@base-ui/react/field';\n`,
-    failure: /React-only Typo entry/
-  },
-  {
-    name: 'Typo가 다른 library chunk를 통해 공용 runtime을 가져오는 경우',
-    file: 'typo.js',
-    source: `export { Typo } from './index.js';\n`,
-    failure: /React-only Typo entry/
-  },
-  {
-    name: 'Typo가 StyleX runtime을 가져오는 경우',
-    file: 'typo.js',
-    source: `import * as stylex from '@stylexjs/stylex';\nexport const Typo = stylex.props;\n`,
-    failure: /React-only Typo entry/
+    failure: /Portable browser declaration: index\.d\.ts/
   },
   {
     name: 'library JS가 StyleX 주입 runtime을 가져오는 경우',

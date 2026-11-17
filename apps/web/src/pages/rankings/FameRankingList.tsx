@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
 import type { FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
@@ -19,7 +18,7 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
       return (
         <ListBox name={name}>
           <div aria-busy="true" {...stylex.props(styles.pending)}>
-            <span role="status" {...stylex.props(shapes.srOnly)}>
+            <span role="status" className="sr-only">
               랭킹을 받는 중입니다.
             </span>
             <CharacterTable

@@ -1,4 +1,4 @@
-import { shapes, Tooltip } from '@dfragon/ui'
+import { Tooltip } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { Job } from '../api/ops-schemas'
 import {
@@ -138,7 +138,7 @@ export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): 
                 <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>걸린 시간</th>
                 <th {...stylex.props(tableStyles.headerCell)}>정기 실행</th>
                 <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>
-                  <span {...stylex.props(shapes.srOnly)}>실행</span>
+                  <span className="sr-only">실행</span>
                 </th>
               </tr>
             </thead>

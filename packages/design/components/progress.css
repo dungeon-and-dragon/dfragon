@@ -1,0 +1,83 @@
+/*
+ * ProgressCircle과 LoadingIndicator.
+ * <svg class="progress progress-40" data-tone="neutral" role="progressbar">…</svg>
+ * 크기는 progress-24, progress-40, progress-inherit(1em), tone은 data-tone(neutral, brand, staticWhite, inherit)이다.
+ * 값이 없는 원은 data-indeterminate로 끊어 돌고, 동작 줄이기에서는 멈춘다.
+ * <span class="loading"><span class="loading-label">검색</span><span class="loading-indicator"><svg …/></span></span>
+ */
+.progress {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  color: var(--color-fg-muted);
+}
+
+.progress-24 {
+  width: 24px;
+  height: 24px;
+}
+
+.progress-40 {
+  width: 40px;
+  height: 40px;
+}
+
+.progress-inherit {
+  width: 1em;
+  height: 1em;
+}
+
+.progress[data-tone='brand'] {
+  color: var(--color-signal);
+}
+
+.progress[data-tone='staticWhite'] {
+  color: var(--color-fg);
+}
+
+.progress[data-tone='inherit'] {
+  color: currentColor;
+}
+
+.progress-track {
+  stroke: var(--color-line);
+}
+
+.progress-range {
+  stroke: currentColor;
+}
+
+.progress[data-indeterminate] {
+  transform-origin: center;
+  animation: progress-turn var(--beat) steps(8, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress[data-indeterminate] {
+    animation: none;
+  }
+}
+
+@keyframes progress-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
+/* visibility와 달리 접근 가능한 이름은 남는다. */
+.loading-label {
+  grid-area: 1 / 1;
+  opacity: 0;
+}
+
+.loading-indicator {
+  display: inline-flex;
+  grid-area: 1 / 1;
+  font-size: 1.25em;
+}
