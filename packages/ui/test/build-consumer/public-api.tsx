@@ -4,8 +4,6 @@ import {
   Button,
   Checkbox,
   Chip,
-  ContentStack,
-  ExampleSection,
   IconButton,
   Kbd,
   LoadingIndicator,
@@ -14,7 +12,6 @@ import {
   ProgressCircle,
   Select,
   StatusChip,
-  SupportingText,
   Switch,
   Tabs,
   TextField,
@@ -22,10 +19,7 @@ import {
   TextFieldError,
   TextFieldInput,
   TextFieldLabel,
-  Tooltip,
-  Typo,
-  shapes,
-  typographyVariants
+  Tooltip
 } from '@dfragon/ui'
 import type {
   ButtonProps,
@@ -37,28 +31,20 @@ import type {
   TextFieldErrorProps,
   TextFieldInputProps,
   TextFieldLabelProps,
-  TextFieldProps,
-  TypoProps,
-  TypoTag,
-  TypoVariant
+  TextFieldProps
 } from '@dfragon/ui'
-import { Typo as StandaloneTypo, typographyVariants as standaloneVariants } from '@dfragon/ui/typo'
-import type { TypoProps as StandaloneTypoProps } from '@dfragon/ui/typo'
 import { colors, motion } from '@dfragon/ui/tokens.stylex'
 
 export const components = [
   Button,
   Checkbox,
   Chip,
-  ContentStack,
-  ExampleSection,
   IconButton,
   Kbd,
   LoadingIndicator,
   NumericText,
   ProgressCircle,
   StatusChip,
-  SupportingText,
   Switch,
   TextField,
   TextFieldDescription,
@@ -82,10 +68,6 @@ export type PublicProps = {
   iconButton: IconButtonProps
   selectPopup: SelectPopupProps
   statusChip: StatusChipProps
-  typo: TypoProps<'button'>
-  standaloneTypo: StandaloneTypoProps<'a'>
-  tag: TypoTag
-  variant: TypoVariant
 }
 
 export const button = (
@@ -119,27 +101,12 @@ export const statusChip = (
   </StatusChip>
 )
 export const numeric = <NumericText value={414806} />
-export const paragraph = <Typo.txtM style={typographyVariants.txtM}>공개 entry</Typo.txtM>
-export const link = (
-  <StandaloneTypo.txtM
-    as="a"
-    href="/example"
-    ref={createRef<HTMLAnchorElement>()}
-    style={standaloneVariants.txtM}
-  >
-    React 전용 entry
-  </StandaloneTypo.txtM>
-)
-
 const consumerStyles = stylex.create({
   signal: { backgroundColor: colors.signal, transitionDuration: motion.durHover }
 })
 export const signalSurface = <div {...stylex.props(consumerStyles.signal)} />
-export const srOnlyShape = <span {...stylex.props(shapes.srOnly)} />
 
 // @ts-expect-error 공개 Button은 화면별 className override를 허용하지 않는다.
 export const unsupportedAppearance = <Button className="override" />
-// @ts-expect-error 기본 p 태그에는 anchor 전용 href를 전달할 수 없다.
-export const unsupportedNativeAttribute = <StandaloneTypo.txtM href="/example" />
 // @ts-expect-error 내부 source는 package export가 아니다.
 export type InternalSourceEntry = typeof import('@dfragon/ui/src/button')

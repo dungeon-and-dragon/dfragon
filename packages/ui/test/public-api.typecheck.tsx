@@ -1,11 +1,9 @@
-import { createRef, type ChangeEvent, type CSSProperties, type MouseEvent, type Ref } from 'react'
+import { createRef, type ChangeEvent, type MouseEvent, type Ref } from 'react'
 import { expectTypeOf } from 'vitest'
 import {
   Button,
   Checkbox,
   Chip,
-  ContentStack,
-  ExampleSection,
   IconButton,
   Kbd,
   LoadingIndicator,
@@ -16,7 +14,6 @@ import {
   Select,
   StatusChip,
   StepDots,
-  SupportingText,
   Switch,
   Tabs,
   TextField,
@@ -25,8 +22,6 @@ import {
   TextFieldInput,
   TextFieldLabel,
   Tooltip,
-  Typo,
-  typographyVariants,
   type ButtonProps,
   type CheckboxProps,
   type ChipProps,
@@ -53,8 +48,7 @@ import {
   type TextFieldInputProps,
   type TextFieldLabelProps,
   type TextFieldProps,
-  type TooltipPopupProps,
-  type TypoProps
+  type TooltipPopupProps
 } from '@dfragon/ui'
 
 type PublicPropKeys =
@@ -108,56 +102,46 @@ const buttonRef = createRef<HTMLButtonElement>()
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
 const svgRef = createRef<SVGSVGElement>()
-const headingRef = createRef<HTMLHeadingElement>()
-const paragraphRef = createRef<HTMLParagraphElement>()
-const captionRef = createRef<HTMLSpanElement>()
-const anchorRef = createRef<HTMLAnchorElement>()
 
 export const componentExamples = (
-  <ContentStack>
-    <ExampleSection title="작업 상태">
-      <Button
-        ref={buttonRef}
-        type="button"
-        variant="primary"
-        size="lg"
-        loading
-        disabled
-        aria-label="작업 실행"
-        onClick={(event) => {
-          expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLButtonElement>>()
+  <>
+    <Button
+      ref={buttonRef}
+      type="button"
+      variant="primary"
+      size="lg"
+      loading
+      disabled
+      aria-label="작업 실행"
+      onClick={(event) => {
+        expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLButtonElement>>()
+      }}
+    >
+      실행
+    </Button>
+    <ProgressCircle ref={svgRef} value={50} size="24" tone="brand" aria-label="진행률" />
+    <LoadingIndicator>불러오는 중</LoadingIndicator>
+    <TextField ref={divRef} invalid size="lg">
+      <TextFieldLabel>표시 이름</TextFieldLabel>
+      <TextFieldInput
+        ref={inputRef}
+        name="displayName"
+        placeholder="이름 입력"
+        autoComplete="off"
+        required
+        readOnly
+        value="예시"
+        onValueChange={(value) => {
+          expectTypeOf(value).toEqualTypeOf<string>()
         }}
-      >
-        실행
-      </Button>
-      <ProgressCircle ref={svgRef} value={50} size="24" tone="brand" aria-label="진행률" />
-      <LoadingIndicator>불러오는 중</LoadingIndicator>
-      <TextField ref={divRef} invalid size="lg">
-        <TextFieldLabel>표시 이름</TextFieldLabel>
-        <TextFieldInput
-          ref={inputRef}
-          name="displayName"
-          placeholder="이름 입력"
-          autoComplete="off"
-          required
-          readOnly
-          value="예시"
-          onValueChange={(value) => {
-            expectTypeOf(value).toEqualTypeOf<string>()
-          }}
-          onChange={(event) => {
-            expectTypeOf(event).toExtend<ChangeEvent<HTMLInputElement>>()
-          }}
-        />
-        <TextFieldDescription>예시 이름입니다.</TextFieldDescription>
-        <TextFieldError>이름을 입력하세요.</TextFieldError>
-      </TextField>
-      <TextField>
-        <TextFieldLabel>검색</TextFieldLabel>
-        <TextFieldInput render={<Typo.txtS as="input" />} />
-      </TextField>
-    </ExampleSection>
-  </ContentStack>
+        onChange={(event) => {
+          expectTypeOf(event).toExtend<ChangeEvent<HTMLInputElement>>()
+        }}
+      />
+      <TextFieldDescription>예시 이름입니다.</TextFieldDescription>
+      <TextFieldError>이름을 입력하세요.</TextFieldError>
+    </TextField>
+  </>
 )
 
 export const designExamples = (
@@ -264,79 +248,6 @@ export const invalidDesignExamples = (
   </>
 )
 
-expectTypeOf<TypoProps<'a'>['ref']>().toEqualTypeOf<Ref<HTMLAnchorElement> | undefined>()
-expectTypeOf<TypoProps<'input'>['ref']>().toEqualTypeOf<Ref<HTMLInputElement> | undefined>()
-expectTypeOf<TypoProps['ref']>().toEqualTypeOf<Ref<HTMLParagraphElement> | undefined>()
-expectTypeOf<typeof typographyVariants.h1>().toExtend<CSSProperties>()
-
-export const typographyExamples = (
-  <>
-    <Typo.h1 ref={headingRef}>제목 1</Typo.h1>
-    <Typo.h2 ref={headingRef}>제목 2</Typo.h2>
-    <Typo.h3 ref={headingRef}>제목 3</Typo.h3>
-    <Typo.h4 ref={headingRef}>제목 4</Typo.h4>
-    <Typo.h5 ref={headingRef}>제목 5</Typo.h5>
-    <Typo.h6 ref={headingRef}>제목 6</Typo.h6>
-    <Typo.txtL ref={paragraphRef}>큰 본문</Typo.txtL>
-    <Typo.txtM
-      ref={paragraphRef}
-      className="description"
-      style={{ margin: 8, display: 'block' }}
-      color="blue"
-      align="center"
-      weight={500}
-      onClick={(event) => {
-        expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLParagraphElement>>()
-      }}
-    >
-      본문
-    </Typo.txtM>
-    <Typo.txtS ref={paragraphRef}>작은 본문</Typo.txtS>
-    <Typo.caption ref={captionRef}>설명</Typo.caption>
-    <Typo.h1
-      as="a"
-      ref={anchorRef}
-      href="/about"
-      target="_blank"
-      onClick={(event) => {
-        expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLAnchorElement>>()
-      }}
-    >
-      소개
-    </Typo.h1>
-    <Typo.txtM
-      as="button"
-      ref={buttonRef}
-      type="button"
-      disabled
-      onClick={(event) => {
-        expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLButtonElement>>()
-      }}
-    >
-      실행
-    </Typo.txtM>
-    <Typo.txtM
-      as="input"
-      ref={inputRef}
-      type="search"
-      defaultValue="예시"
-      onChange={(event) => {
-        expectTypeOf(event).toEqualTypeOf<ChangeEvent<HTMLInputElement>>()
-      }}
-    />
-    <Typo.txtM as="label" htmlFor="name">
-      이름
-    </Typo.txtM>
-    <Typo.h1
-      onClick={(event) => {
-        expectTypeOf(event).toEqualTypeOf<MouseEvent<HTMLHeadingElement>>()
-      }}
-    >
-      기본 제목
-    </Typo.h1>
-  </>
-)
-
 export const invalidComponentExamples = (
   <>
     {/* @ts-expect-error Button의 임의 inline style은 공개 prop이 아니다. */}
@@ -357,40 +268,5 @@ export const invalidComponentExamples = (
     <ProgressCircle ref={inputRef} />
     {/* @ts-expect-error TextFieldInput의 ref는 input element를 가리킨다. */}
     <TextFieldInput ref={buttonRef} />
-    {/* @ts-expect-error ExampleSection은 제목을 요구한다. */}
-    <ExampleSection>본문</ExampleSection>
-    {/* @ts-expect-error SupportingText는 children만 받는다. */}
-    <SupportingText color="red">설명</SupportingText>
-  </>
-)
-
-export const invalidTypographyExamples = (
-  <>
-    {/* @ts-expect-error 기본 heading의 href로 as 태그를 추론하지 않는다. */}
-    <Typo.h1 href="/about">잘못된 제목</Typo.h1>
-    {/* @ts-expect-error 기본 본문의 htmlFor로 as 태그를 추론하지 않는다. */}
-    <Typo.txtM htmlFor="name">잘못된 본문</Typo.txtM>
-    {/* @ts-expect-error button은 href를 받지 않는다. */}
-    <Typo.txtM as="button" href="/about">
-      잘못된 버튼
-    </Typo.txtM>
-    {/* @ts-expect-error 링크는 disabled를 받지 않는다. */}
-    <Typo.h1 as="a" disabled>
-      잘못된 링크
-    </Typo.h1>
-    {/* @ts-expect-error as는 유효한 HTML 태그여야 한다. */}
-    <Typo.h1 as="invalid-tag">잘못된 태그</Typo.h1>
-    {/* @ts-expect-error SVG 태그는 HTML as 계약에 포함되지 않는다. */}
-    <Typo.caption as="svg">잘못된 SVG</Typo.caption>
-    {/* @ts-expect-error as는 custom component가 아닌 HTML 태그를 받는다. */}
-    <Typo.h1 as={Button}>잘못된 custom component</Typo.h1>
-    {/* @ts-expect-error input ref는 링크를 가리킬 수 없다. */}
-    <Typo.txtM as="a" ref={inputRef}>
-      잘못된 ref
-    </Typo.txtM>
-    {/* @ts-expect-error SVG ref로 기본 heading의 태그를 추론하지 않는다. */}
-    <Typo.h1 ref={svgRef}>잘못된 heading ref</Typo.h1>
-    {/* @ts-expect-error variant는 각 공개 컴포넌트가 결정하는 내부 prop이다. */}
-    <Typo.txtM variant="h1">잘못된 variant</Typo.txtM>
   </>
 )
