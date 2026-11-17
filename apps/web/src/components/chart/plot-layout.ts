@@ -20,7 +20,8 @@ export const TOOLTIP_CLASS =
 export const TOOLTIP_TITLE_CLASS = 'text-xs text-fg-subtle'
 export const TOOLTIP_COUNT_CLASS = 'font-mono text-xs font-semibold tabular-nums'
 export const LINE_CLASS = 'fill-none stroke-2 [stroke-linecap:round] [stroke-linejoin:round]'
-export const AXIS_TEXT_CLASS = 'fill-fg-subtle font-mono text-2xs tabular-nums'
+// 눈금 글자는 "12.5만"처럼 한글 단위가 섞여 숫자 글꼴을 쓰지 않는다. Monoplex KR의 한글은 전각이라 좁은 막대 아래 라벨이 겹친다.
+export const AXIS_TEXT_CLASS = 'fill-fg-subtle text-2xs tabular-nums'
 
 const AXIS_CHAR_WIDTH = 7
 const AXIS_GAP = 10
