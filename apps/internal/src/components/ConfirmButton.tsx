@@ -1,9 +1,7 @@
 import { Popover } from '@base-ui/react/popover'
 import { Button } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
-import { styles } from './ConfirmButton.style'
-import { popoverStyles, textStyles } from './panel.style'
+import { popoverClasses, textClasses } from './panel-classes'
 
 type ConfirmButtonProps = {
   label: string
@@ -12,7 +10,7 @@ type ConfirmButtonProps = {
   disabled: boolean
   pending: boolean
   failed: boolean
-  popupStyle: stylex.StyleXStyles
+  popupClassName: string
   onOpen: () => void
   onConfirm: (close: () => void) => void
 }
@@ -24,7 +22,7 @@ export function ConfirmButton({
   disabled,
   pending,
   failed,
-  popupStyle,
+  popupClassName,
   onOpen,
   onConfirm
 }: ConfirmButtonProps): React.JSX.Element {
@@ -57,20 +55,20 @@ export function ConfirmButton({
           side="bottom"
           align="end"
           sideOffset={8}
-          {...stylex.props(popoverStyles.positioner)}
+          className={popoverClasses.positioner}
         >
           <Popover.Popup
             role="alertdialog"
             initialFocus={cancelRef}
-            {...stylex.props(popoverStyles.popup, popupStyle)}
+            className={`${popoverClasses.popup} ${popupClassName}`}
           >
-            <Popover.Title {...stylex.props(popoverStyles.title)}>{title}</Popover.Title>
+            <Popover.Title className={popoverClasses.title}>{title}</Popover.Title>
             {failed && (
-              <p role="alert" {...stylex.props(textStyles.error, styles.error)}>
+              <p role="alert" className={`${textClasses.error} px-3 pt-2`}>
                 요청에 실패했습니다.
               </p>
             )}
-            <div {...stylex.props(popoverStyles.actions)}>
+            <div className={`${popoverClasses.actions} pt-3`}>
               <Popover.Close ref={cancelRef} render={<Button variant="secondary" size="sm" />}>
                 취소
               </Popover.Close>

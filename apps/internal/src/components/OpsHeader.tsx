@@ -1,10 +1,14 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
 import { IconButton } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { EMPTY_VALUE, formatAgo, formatClockMinute, formatClockSecond } from '../format'
-import { styles } from './OpsHeader.style'
+import { FOCUS_RING } from './panel-classes'
 
 const WORKER_STALE_MS = 5 * 60_000
+
+const STATUS = 'inline-flex items-center gap-1.5 whitespace-nowrap text-xs'
+const STATUS_VALUE = 'font-mono font-semibold tabular-nums'
+const DIVIDER = 'h-5 w-px shrink-0 bg-line max-sm:hidden'
+const NAV_LINK = `inline-flex h-topbar items-center gap-1.5 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors duration-(--duration-hover) ease-standard hover:bg-surface hover:text-fg max-sm:h-11 ${FOCUS_RING}`
 
 const TOOL_LINKS = [
   { label: 'Grafana', href: '/grafana/' },
@@ -58,9 +62,9 @@ function WorkerSeen({ seenAt, readAt }: { seenAt: Date; readAt: Date }): React.J
   const stale = age > WORKER_STALE_MS
 
   return (
-    <span {...stylex.props(styles.status, stale && styles.stale)}>
+    <span className={`${STATUS} ${stale ? 'text-fg-warning' : 'text-fg-muted'}`}>
       worker
-      <b {...stylex.props(styles.statusValue, stale && styles.stale)}>
+      <b className={`${STATUS_VALUE} ${stale ? 'text-fg-warning' : 'text-fg'}`}>
         {formatClockMinute(seenAt)}
       </b>
       <span>{formatAgo(age)}</span>
@@ -70,40 +74,37 @@ function WorkerSeen({ seenAt, readAt }: { seenAt: Date; readAt: Date }): React.J
 
 export function OpsHeader({ workerSeenAt, readAt, onRefresh }: OpsHeaderProps): React.JSX.Element {
   return (
-    <header {...stylex.props(styles.bar)}>
-      <div {...stylex.props(styles.inner)}>
-        <a href="/" {...stylex.props(styles.brand)}>
-          <span {...stylex.props(styles.product)}>{PRODUCT_NAME}</span>
-          <span {...stylex.props(styles.area)}>운영</span>
+    <header className="self-stretch border-b border-line bg-canvas">
+      <div className="mx-auto box-border flex h-topbar w-300 min-w-0 max-w-full items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-y-0 max-sm:pb-2">
+        <a
+          href="/"
+          className={`flex shrink-0 items-center gap-2 text-fg no-underline ${FOCUS_RING}`}
+        >
+          <span className="text-base font-bold tracking-heading">{PRODUCT_NAME}</span>
+          <span className="text-sm font-medium text-fg-muted">운영</span>
         </a>
-        <span aria-hidden="true" {...stylex.props(styles.divider)} />
-        <nav aria-label="운영 도구" {...stylex.props(styles.nav)}>
+        <span aria-hidden="true" className={DIVIDER} />
+        <nav aria-label="운영 도구" className="flex h-topbar min-w-0 items-stretch max-sm:h-11">
           {TOOL_LINKS.map(({ label, href }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-              {...stylex.props(styles.navLink)}
-            >
+            <a key={label} href={href} target="_blank" rel="noreferrer" className={NAV_LINK}>
               {label}
-              <span {...stylex.props(styles.external)}>
+              <span className="inline-flex text-fg-subtle">
                 <ExternalIcon />
               </span>
             </a>
           ))}
         </nav>
-        <span {...stylex.props(styles.spacer)} />
+        <span className="grow" />
         {workerSeenAt != null && readAt !== undefined ? (
           <WorkerSeen seenAt={workerSeenAt} readAt={readAt} />
         ) : (
-          <span {...stylex.props(styles.status)}>
-            worker <b {...stylex.props(styles.statusValue)}>{EMPTY_VALUE}</b>
+          <span className={`${STATUS} text-fg-muted`}>
+            worker <b className={`${STATUS_VALUE} text-fg-subtle`}>{EMPTY_VALUE}</b>
           </span>
         )}
-        <span aria-hidden="true" {...stylex.props(styles.divider)} />
-        <span {...stylex.props(styles.status)}>
-          <b {...stylex.props(styles.readAt)}>
+        <span aria-hidden="true" className={DIVIDER} />
+        <span className={`${STATUS} text-fg-muted`}>
+          <b className="font-mono font-medium tabular-nums">
             {readAt !== undefined ? formatClockSecond(readAt) : EMPTY_VALUE}
           </b>
         </span>
