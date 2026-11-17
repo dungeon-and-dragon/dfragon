@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { createRef } from 'react'
 import {
   Button,
@@ -33,7 +32,6 @@ import type {
   TextFieldLabelProps,
   TextFieldProps
 } from '@dfragon/ui'
-import { colors, motion } from '@dfragon/ui/tokens.stylex'
 
 export const components = [
   Button,
@@ -101,10 +99,6 @@ export const statusChip = (
   </StatusChip>
 )
 export const numeric = <NumericText value={414806} />
-const consumerStyles = stylex.create({
-  signal: { backgroundColor: colors.signal, transitionDuration: motion.durHover }
-})
-export const signalSurface = <div {...stylex.props(consumerStyles.signal)} />
 
 // @ts-expect-error 공개 Button은 화면별 className override를 허용하지 않는다.
 export const unsupportedAppearance = <Button className="override" />
