@@ -103,6 +103,18 @@ function lockCharacter(
   return transaction.$executeRaw`SELECT pg_advisory_xact_lock(${timelineLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
 }
 
+function toEventData({ serverId, characterId }: TimelineCharacter, event: TimelineEventInput) {
+  return {
+    serverId,
+    characterId,
+    code: event.code,
+    occurredAt: event.occurredAt,
+    name: event.name,
+    raidName: event.raidName,
+    data: toJson(event.data)
+  }
+}
+
 function toItemData({ serverId, characterId }: TimelineCharacter, item: TimelineItemInput) {
   return {
     serverId,
@@ -143,15 +155,7 @@ async function replaceRangeRows(
   await transaction.timelineEvent.deleteMany({ where: { serverId, characterId, occurredAt } })
   await transaction.timelineItem.deleteMany({ where: { serverId, characterId, occurredAt } })
   await transaction.timelineEvent.createMany({
-    data: events.map((event) => ({
-      serverId,
-      characterId,
-      code: event.code,
-      occurredAt: event.occurredAt,
-      name: event.name,
-      raidName: event.raidName,
-      data: toJson(event.data)
-    }))
+    data: events.map((event) => toEventData(character, event))
   })
   await transaction.timelineItem.createMany({
     data: items.map((item) => toItemData(character, item))
@@ -186,20 +190,30 @@ export async function replaceEnhancementBackfillRange(
   character: TimelineCharacter,
   range: TimelineRange,
   codes: readonly number[],
+  events: readonly TimelineEventInput[],
   items: readonly TimelineItemInput[]
 ): Promise<void> {
-  // 백필 코드가 아닌 행을 넣으면 정기 동기화가 받은 같은 구간의 행과 겹쳐도 지워지지 않는다.
-  if (!items.every((item) => isInRange(item.occurredAt, range) && codes.includes(item.code))) {
+  assertRowsInRange(range, events, items)
+  // 백필 코드가 아닌 행을 넣으면 같은 구간을 다시 교체할 때 지워지지 않고 두 번 들어간다.
+  if (![...events, ...items].every((row) => codes.includes(row.code))) {
     throw new RangeError('Timeline row outside replaced backfill')
   }
+
   const { serverId, characterId } = character
-  const occurredAt = { gte: range.start, lte: range.end }
+  const where = {
+    serverId,
+    characterId,
+    code: { in: [...codes] },
+    occurredAt: { gte: range.start, lte: range.end }
+  }
 
   await client.$transaction(
     async (transaction) => {
       await lockCharacter(transaction, character)
-      await transaction.timelineItem.deleteMany({
-        where: { serverId, characterId, code: { in: [...codes] }, occurredAt }
+      await transaction.timelineEvent.deleteMany({ where })
+      await transaction.timelineItem.deleteMany({ where })
+      await transaction.timelineEvent.createMany({
+        data: events.map((event) => toEventData(character, event))
       })
       await transaction.timelineItem.createMany({
         data: items.map((item) => toItemData(character, item))

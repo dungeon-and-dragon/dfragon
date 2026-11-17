@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { TimelineItemInput, TimelineRange } from '@dfragon/database'
+import type { TimelineEventInput, TimelineItemInput, TimelineRange } from '@dfragon/database'
 import { EnhancementBackfillService } from '../src/application/character-timeline/backfill.js'
 import type { EnhancementBackfillRepository } from '../src/application/character-timeline/repository.js'
 import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
@@ -17,11 +17,11 @@ const BACKFILL_END = new Date(SEASON_START.getTime() - MINUTE_MS)
 // 저장 함수와 같은 상태 전이를 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
 function memoryStore(initial: Date | null = null) {
   let backfilledUntil = initial
-  const replaced: { range: TimelineRange; items: readonly TimelineItemInput[] }[] = []
+  const replaced: { range: TimelineRange; inputs: TimelineInputs }[] = []
   const store: EnhancementBackfillRepository = {
     readBackfilledUntil: async () => backfilledUntil,
-    replaceRange: async (_character, range, items) => {
-      replaced.push({ range, items })
+    replaceRange: async (_character, range, inputs) => {
+      replaced.push({ range, inputs })
       backfilledUntil = range.end
     }
   }
@@ -39,18 +39,29 @@ const enhancement: TimelineItemInput = {
   data: { before: 9, after: 10, result: true }
 }
 
+const nameChange: TimelineEventInput = {
+  code: 102,
+  occurredAt: new Date('2017-10-01T00:00:00+09:00'),
+  name: '캐릭터명 변경',
+  raidName: null,
+  data: { beforeName: '합성이전', afterName: '합성이후' }
+}
+
 function rangesOf(replaced: { range: TimelineRange }[]): TimelineRange[] {
   return replaced.map(({ range }) => range)
 }
 
-test('처음 백필은 Neople 첫날부터 중천 시작 직전까지 빈틈없이 앞 구간부터 받아 저장한다', async () => {
+test('처음 백필은 Neople 첫날부터 중천 시작 직전까지 빈틈없이 앞 구간부터 받아 이름 변경과 강화 기록을 함께 저장한다', async () => {
   const fresh = memoryStore()
   const requested: TimelineRange[] = []
+  const firstInputs = { events: [nameChange], items: [enhancement] }
   const fetchTimeline: FetchCharacterTimeline = async (_identity, range) => {
     requested.push(range)
-    const items = requested.length === 1 ? [enhancement] : []
+    if (requested.length === 1) {
+      return firstInputs
+    }
 
-    return { events: [], items }
+    return { events: [], items: [] }
   }
 
   await new EnhancementBackfillService(fresh.store, fetchTimeline).backfill(character)
@@ -61,7 +72,7 @@ test('처음 백필은 Neople 첫날부터 중천 시작 직전까지 빈틈없�
   for (const [index, range] of requested.slice(1).entries()) {
     assert.equal(range.start.getTime(), requested[index]!.end.getTime() + MINUTE_MS)
   }
-  assert.deepEqual(fresh.replaced[0]!.items, [enhancement])
+  assert.deepEqual(fresh.replaced[0]!.inputs, firstInputs)
   assert.equal(fresh.backfilledUntil()?.getTime(), BACKFILL_END.getTime())
 })
 

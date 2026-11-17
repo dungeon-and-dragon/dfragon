@@ -21,6 +21,7 @@ try {
     { serverId: 'cain', characterId: 'synthetic-character' },
     { start: new Date('2019-12-01T00:00:00+09:00'), end: new Date('2020-02-01T00:00:00+09:00') },
     [401, 402, 403],
+    [],
     [amplify]
   )
 } finally {

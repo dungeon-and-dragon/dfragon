@@ -2,7 +2,6 @@ import type {
   SeasonBackfillState,
   TimelineCharacter,
   TimelineItemCursor,
-  TimelineItemInput,
   TimelineQueueCount,
   TimelineRange,
   TimelineSyncState
@@ -40,7 +39,7 @@ export interface EnhancementBackfillRepository {
   replaceRange(
     character: TimelineCharacter,
     range: TimelineRange,
-    items: readonly TimelineItemInput[]
+    inputs: TimelineInputs
   ): Promise<void>
 }
 
