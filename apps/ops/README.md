@@ -1,4 +1,4 @@
-# 던삐삐 운영 app
+# DFragon 운영 app
 
 `apps/ops`는 운영 화면(`apps/internal`)이 부르는 job, 타임라인 queue 현황, 수집 대기열, batch Neople key 경로(`/api/*`)를 내는 Hono app입니다.
 로그인이 없으므로 공개 인터넷에 열지 않습니다.

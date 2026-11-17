@@ -1,6 +1,6 @@
 # Web
 
-던삐삐 웹 앱 정적 사이트입니다. `dfragon.com`에 올리며, 설치 없이 캐릭터와 모험단을 찾고 멀티서치에서 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 파티, 공대를 확인합니다. 데스크톱 브라우저용입니다.
+DFragon 웹 앱 정적 사이트입니다. `dfragon.com`에 올리며, 설치 없이 캐릭터와 모험단을 찾고 멀티서치에서 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 파티, 공대를 확인합니다. 데스크톱 브라우저용입니다.
 
 ## 실행과 검증
 
@@ -53,7 +53,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/styles/`: 화면이 함께 쓰는 StyleX breakpoint를 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router 테스트 도구를 둡니다.
 - `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
-- `src/core/api/`: 던삐삐 API 요청 함수와 응답 schema를 둡니다.
+- `src/core/api/`: DFragon API 요청 함수와 응답 schema를 둡니다.
 - `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 검색 상태를 둡니다.
 - `src/core/capture/party/`: 파티 화면 인식과 파티 캡처 machine을 둡니다.
 - `src/core/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
