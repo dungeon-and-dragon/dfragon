@@ -64,3 +64,30 @@ export const States: Story = {
     </div>
   )
 }
+
+export const Focus: Story = {
+  args: { variant: 'primary' },
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('button')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="grid gap-3">
+      {VARIANTS.map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          <button type="button" className={`btn btn-${variant} btn-md`}>
+            기본
+          </button>
+          <button type="button" className={`btn btn-${variant} btn-md`} disabled>
+            비활성
+          </button>
+          <button type="button" className={`btn btn-${variant} btn-md`} data-loading="">
+            진행 중
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
