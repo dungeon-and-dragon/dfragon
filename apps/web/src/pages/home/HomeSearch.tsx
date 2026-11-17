@@ -1,10 +1,8 @@
-import * as stylex from '@stylexjs/stylex'
 import { CharacterSearchBox } from '../../components/CharacterSearchBox'
-import { styles } from './HomeSearch.style'
 
 export function HomeSearch(): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.hero)}>
+    <div className="flex min-w-0 flex-[999_1_520px] items-start">
       <CharacterSearchBox size="large" />
     </div>
   )

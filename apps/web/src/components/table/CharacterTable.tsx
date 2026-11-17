@@ -44,7 +44,9 @@ export function CharacterTable({
 }): React.JSX.Element {
   return (
     <div className={tableClasses.scroll}>
-      <table className={tableClasses.table}>
+      <table
+        className={`${tableClasses.table} ${affiliations.length > 0 ? tableClasses.wideTable : ''}`}
+      >
         <colgroup>
           {ranked && <col className={tableClasses.rankColumn} />}
           <col />

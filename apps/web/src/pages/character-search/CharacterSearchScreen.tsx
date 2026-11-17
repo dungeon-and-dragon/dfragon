@@ -1,5 +1,3 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import {
   type CharacterSearchQuery,
   isSearchableCharacterName,
@@ -14,7 +12,6 @@ import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { characterSearchServerOptions } from '../../constants/server-options'
 import { useSearchedCharacters } from './hooks/useSearchedCharacters'
-import { styles } from './CharacterSearchScreen.style'
 
 const LOADING_ROWS = 5
 const NO_AFFILIATIONS = [] as const
@@ -27,9 +24,9 @@ export function CharacterSearchScreen({
   const server = characterSearchServerOptions.find(({ id }) => id === query.serverId)
 
   return (
-    <div {...stylex.props(styles.screen)}>
+    <div className="flex flex-col gap-4 p-4">
       <TitleBox title="캐릭터 검색">
-        {server != null && <TitleStat label="서버" value={server.label} />}
+        {server != null && <TitleStat label="서버" value={server.label} numeric={false} />}
       </TitleBox>
       {isSearchableCharacterName(query.characterName) ? (
         <SearchedCharacterList query={query} />
@@ -48,7 +45,7 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
       return (
         <ListBox name={name}>
           <div aria-busy="true">
-            <span role="status" {...stylex.props(shapes.srOnly)}>
+            <span role="status" className="sr-only">
               캐릭터를 찾는 중입니다.
             </span>
             <CharacterTable
@@ -65,7 +62,7 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
     case 'error':
       return (
         <ListBox name={name}>
-          <p role="alert" {...stylex.props(styles.state)}>
+          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
             {result.message}
           </p>
         </ListBox>
