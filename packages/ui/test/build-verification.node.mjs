@@ -14,7 +14,7 @@ const tokensStyles = ':root{--df-bg-canvas:var(--color-canvas)}'
 const foundationStyles =
   'body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}'
 const appFontStyles =
-  "body{font-family:'Pretendard Variable',system-ui,'Apple SD Gothic Neo',sans-serif}"
+  "body{font-family:'IBM Plex Sans KR',system-ui,'Apple SD Gothic Neo',sans-serif}"
 
 async function createLibraryFixture(context) {
   const output = await mkdtemp(join(tmpdir(), 'dfragon-ui-build-'))
