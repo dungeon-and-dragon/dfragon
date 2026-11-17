@@ -14,6 +14,14 @@ export type Hover = Readonly<{ key: string | null; open: boolean }>
 
 export const NO_HOVER: Hover = { key: null, open: false }
 
+// 처음에는 숨겨 두고, useChartTooltipSlide의 GSAP이 inline style의 visibility, opacity로 보이고 숨긴다.
+export const TOOLTIP_CLASS =
+  'pointer-events-none invisible absolute left-0 z-1 flex flex-col items-start rounded-control border border-line-strong bg-surface px-2 py-[5px] whitespace-nowrap opacity-0 shadow-popover'
+export const TOOLTIP_TITLE_CLASS = 'text-xs text-fg-subtle'
+export const TOOLTIP_COUNT_CLASS = 'font-mono text-xs font-semibold tabular-nums'
+export const LINE_CLASS = 'fill-none stroke-2 [stroke-linecap:round] [stroke-linejoin:round]'
+export const AXIS_TEXT_CLASS = 'fill-fg-subtle font-mono text-2xs tabular-nums'
+
 const AXIS_CHAR_WIDTH = 7
 const AXIS_GAP = 10
 const TOOLTIP_GAP = 12

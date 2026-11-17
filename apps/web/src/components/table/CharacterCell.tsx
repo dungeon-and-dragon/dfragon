@@ -1,11 +1,9 @@
-import * as stylex from '@stylexjs/stylex'
 import { isMaxLevel } from '#core/character/character-level'
 import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
 import { Portrait } from '../Portrait'
-import { styles } from './CharacterCell.style'
 
 export type CharacterCellCharacter = Pick<
   StoredCharacter,
@@ -23,17 +21,19 @@ export function CharacterCell({
   const showsLevel = character.level != null && !isMaxLevel(character.level)
 
   return (
-    <div {...stylex.props(styles.cell)}>
-      <span {...stylex.props(styles.well)}>
+    <div className="flex min-w-0 items-center gap-2.5">
+      <span className="relative h-9 w-8 shrink-0 overflow-hidden rounded-control bg-inset">
         <Portrait src={characterImageUrl(character)} />
       </span>
-      <span {...stylex.props(styles.identity)}>
-        <span {...stylex.props(styles.line)}>
-          <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-1.5 text-xs font-medium text-fg-muted">
+            {CHARACTER_SERVER_NAMES[character.serverId]}
+          </span>
           <Link
             to="/c/$serverId/$characterId"
             params={{ serverId: character.serverId, characterId: character.characterId }}
-            {...stylex.props(styles.name)}
+            className="shrink-0 text-sm font-semibold whitespace-nowrap text-fg no-underline hover:underline"
           >
             {character.characterName}
           </Link>
@@ -41,14 +41,16 @@ export function CharacterCell({
             <Link
               to="/adventures/$adventureName"
               params={{ adventureName }}
-              {...stylex.props(styles.adventure)}
+              className="truncate text-xs text-fg-muted no-underline hover:underline"
             >
               {adventureName}
             </Link>
           )}
-          {job != null && <span {...stylex.props(styles.job)}>{job}</span>}
+          {job != null && <span className="min-w-0 truncate text-xs text-fg-subtle">{job}</span>}
         </span>
-        {showsLevel && <span {...stylex.props(styles.detail)}>{`Lv.${character.level}`}</span>}
+        {showsLevel && (
+          <span className="truncate font-mono text-xs tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>
+        )}
       </span>
     </div>
   )

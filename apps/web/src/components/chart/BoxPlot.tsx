@@ -1,5 +1,3 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { BOX_PLOT_REVEAL, useChartReveal } from '../../animations/useChartReveal'
 import { useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
@@ -12,9 +10,7 @@ import {
 } from './box-plot-layout'
 import { type BoxStats, positionOf, type Scale } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
-import { type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
-import { plotStyles } from './plot.style'
-import { boxPlotStyles } from './box-plot.style'
+import { AXIS_TEXT_CLASS, type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
 import { useChartSize } from './useChartSize'
 
 export type BoxPlotRow = Readonly<{
@@ -30,7 +26,8 @@ export type BoxPlotRow = Readonly<{
 export type BoxPlotHead = Readonly<{ name: string; plot: string; value: string }>
 
 const DEFAULT_NAME_WIDTH = 120
-const VALUE_WIDTH = 48
+// Monoplex KR의 숫자와 쉼표는 0.528em이라 14px로 7자(예: 120,000)가 약 52px다.
+const VALUE_WIDTH = 64
 const AXIS_HEIGHT = 14
 const AXIS_BASELINE = 11
 const INLINE_HEIGHT = 20
@@ -39,6 +36,17 @@ const BOX_SHARE = 0.6
 const CAP_HALF = 4
 const DOT_SHARE = 0.15
 const DEFAULT_PLOT_WIDTH = 360
+const ROW_CLASS = 'grid items-center gap-x-2'
+const VALUE_CLASS = 'text-right font-mono text-sm tabular-nums'
+
+function gridColumnsOf(nameWidth: number, valueWidth: number): React.CSSProperties {
+  const gridTemplateColumns =
+    valueWidth > 0
+      ? `${nameWidth}px minmax(0, 1fr) ${valueWidth}px`
+      : `${nameWidth}px minmax(0, 1fr)`
+
+  return { gridTemplateColumns }
+}
 
 function xOf(value: number, scale: Scale, width: number): number {
   return positionOf(value, scale, BOX_PLOT_EDGE, width - BOX_PLOT_EDGE)
@@ -59,7 +67,7 @@ export function BoxPlotAxis({
       width={width}
       height={AXIS_HEIGHT}
       viewBox={`0 0 ${width} ${AXIS_HEIGHT}`}
-      {...stylex.props(boxPlotStyles.svg)}
+      className="block overflow-visible"
     >
       {scale.ticks.map((tick) => (
         <text
@@ -67,7 +75,7 @@ export function BoxPlotAxis({
           x={xOf(tick, scale, width)}
           y={AXIS_BASELINE}
           textAnchor="middle"
-          {...stylex.props(plotStyles.axisText)}
+          className={AXIS_TEXT_CLASS}
         >
           {formatTick(tick)}
         </text>
@@ -107,7 +115,7 @@ export function BoxPlot({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      {...stylex.props(boxPlotStyles.svg)}
+      className="block overflow-visible"
     >
       {scale.ticks.map((tick) => (
         <line
@@ -116,29 +124,26 @@ export function BoxPlot({
           x2={xOf(tick, scale, width)}
           y1={0}
           y2={height}
-          {...stylex.props(plotStyles.grid)}
+          className="stroke-inset stroke-1"
         />
       ))}
       <g data-chart-reveal="">
-        <path d={whisker} {...stylex.props(boxPlotStyles.whisker, plotStyles.stroke(color))} />
+        <path d={whisker} className="fill-none stroke-[1.5]" style={{ stroke: color }} />
         <rect
           x={boxLeft}
           y={boxTop}
           width={Math.max(boxRight - boxLeft, 1)}
           height={boxHeight}
           rx={2}
-          {...stylex.props(
-            plotStyles.fill(color),
-            faded && boxPlotStyles.boxFaded,
-            faded && plotStyles.stroke(color)
-          )}
+          className={faded ? '[fill-opacity:0.5] stroke-1' : undefined}
+          style={faded ? { fill: color, stroke: color } : { fill: color }}
         />
         <line
           x1={median}
           x2={median}
           y1={boxTop}
           y2={boxTop + boxHeight}
-          {...stylex.props(boxPlotStyles.median)}
+          className="stroke-canvas stroke-2"
         />
       </g>
       <circle
@@ -146,7 +151,7 @@ export function BoxPlot({
         cx={xOf(stats.max, scale, width)}
         cy={middle}
         r={height * DOT_SHARE}
-        {...stylex.props(plotStyles.fill(color))}
+        style={{ fill: color }}
       />
     </svg>
   )
@@ -192,7 +197,7 @@ function BoxPlotChartPlot({
   const shownRow = rows.find(({ key }) => key === hover.key)
   const hasValueColumn = head != null || rows.some(({ value }) => value != null)
   const valueWidth = hasValueColumn ? VALUE_WIDTH : 0
-  const columns = boxPlotStyles.columns(nameWidth, valueWidth)
+  const columns = gridColumnsOf(nameWidth, valueWidth)
   useChartReveal(chartRef, BOX_PLOT_REVEAL)
   useChartTooltipSlide({
     chartRef,
@@ -225,16 +230,20 @@ function BoxPlotChartPlot({
   }
 
   return (
-    <div {...stylex.props(plotStyles.plot)}>
-      <div ref={chartRef} role="group" aria-label={label} {...stylex.props(boxPlotStyles.chart)}>
+    <div className="relative flex grow flex-col p-4">
+      <div ref={chartRef} role="group" aria-label={label} className="relative">
         {head != null && (
-          <div aria-hidden="true" {...stylex.props(boxPlotStyles.row, columns, boxPlotStyles.head)}>
+          <div
+            aria-hidden="true"
+            className={`${ROW_CLASS} h-5.5 text-xs text-fg-subtle`}
+            style={columns}
+          >
             <span>{head.name}</span>
             <span>{head.plot}</span>
-            <span {...stylex.props(boxPlotStyles.value)}>{head.value}</span>
+            <span className="text-right text-sm">{head.value}</span>
           </div>
         )}
-        <ul onMouseLeave={handleLeave} {...stylex.props(boxPlotStyles.rows)}>
+        <ul onMouseLeave={handleLeave} className="m-0 list-none p-0">
           {rows.map((row) => (
             <BoxPlotChartRow
               key={row.key}
@@ -250,9 +259,9 @@ function BoxPlotChartPlot({
             />
           ))}
         </ul>
-        <div {...stylex.props(boxPlotStyles.row, columns)}>
+        <div className={ROW_CLASS} style={columns}>
           <span />
-          <div ref={plotRef} {...stylex.props(boxPlotStyles.plotColumn)}>
+          <div ref={plotRef} className="min-w-0">
             <BoxPlotAxis scale={scale} width={width} formatTick={formatTick} />
           </div>
         </div>
@@ -275,7 +284,7 @@ function BoxPlotChartRow({
   row: BoxPlotRow
   scale: Scale
   width: number
-  columns: stylex.StyleXStyles
+  columns: React.CSSProperties
   description: string
   onHover: (hover: Hover) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
@@ -296,14 +305,15 @@ function BoxPlotChartRow({
     <li
       data-chart-item=""
       onMouseEnter={stats !== null ? handleMouseEnter : undefined}
-      {...stylex.props(boxPlotStyles.row, columns)}
+      className={ROW_CLASS}
+      style={columns}
     >
-      <span {...stylex.props(boxPlotStyles.name)}>
+      <span className="truncate text-xs text-fg-muted">
         {name}
-        {sub != null && <small {...stylex.props(boxPlotStyles.sub)}> {sub}</small>}
-        <span {...stylex.props(shapes.srOnly)}>{description}</span>
+        {sub != null && <small className="text-xs text-fg-subtle"> {sub}</small>}
+        <span className="sr-only">{description}</span>
       </span>
-      <div ref={plotRef} {...stylex.props(boxPlotStyles.plotColumn)}>
+      <div ref={plotRef} className="min-w-0">
         {stats !== null ? (
           <BoxPlot
             stats={stats}
@@ -314,10 +324,10 @@ function BoxPlotChartRow({
             height={CHART_ROW_HEIGHT}
           />
         ) : (
-          <div {...stylex.props(boxPlotStyles.emptyPlot(CHART_ROW_HEIGHT))} />
+          <div style={{ height: CHART_ROW_HEIGHT }} />
         )}
       </div>
-      {value != null && <span {...stylex.props(boxPlotStyles.value)}>{value}</span>}
+      {value != null && <span className={VALUE_CLASS}>{value}</span>}
     </li>
   )
 }

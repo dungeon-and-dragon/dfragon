@@ -1,0 +1,46 @@
+import type { RankedCharacter } from '#core/ranking/ranking-stats'
+
+const SERVERS = ['cain', 'bakal', 'diregie', 'casillas', 'hilder'] as const
+const JOBS = [
+  ['귀검사(남)', '眞 웨펀마스터'],
+  ['귀검사(남)', '眞 버서커'],
+  ['거너(여)', '眞 레인저'],
+  ['프리스트(남)', '眞 크루세이더'],
+  ['마법사(여)', '眞 인챈트리스']
+] as const
+
+// 이름과 소속은 실제 캐릭터가 아닌 합성 값이다.
+export function storyRankedCharacters(count: number): RankedCharacter[] {
+  return Array.from({ length: count }, (_, index) => {
+    const number = index + 1
+    const jobIndex = index % JOBS.length
+    const [jobName, jobGrowName] = JOBS[jobIndex]!
+    const serverId = SERVERS[index % SERVERS.length]!
+    const adventureName = `모험단${(index % 7) + 1}`
+    const fame = 136_647 - index * 37
+    const belowMaxLevel = index % 6 === 5
+    const guildless = index % 4 === 3
+    const guildNumber = (index % 3) + 1
+    const level = belowMaxLevel ? 114 : 115
+    const guildId = guildless ? null : `guild-${guildNumber}`
+    const guildName = guildless ? null : `길드${guildNumber}`
+    const role = jobGrowName === '眞 크루세이더' ? 'buffer' : 'dealer'
+
+    return {
+      rank: number,
+      serverId,
+      characterId: `story-character-${number}`,
+      characterName: `캐릭터${number}`,
+      adventureName,
+      level,
+      jobId: `job-${jobIndex}`,
+      jobGrowId: `grow-${jobIndex}`,
+      jobName,
+      jobGrowName,
+      fame,
+      guildId,
+      guildName,
+      role
+    }
+  })
+}

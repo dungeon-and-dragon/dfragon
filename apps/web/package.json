@@ -40,6 +40,7 @@
   "devDependencies": {
     "@dfragon/licenses": "workspace:*",
     "@dfragon/models": "workspace:*",
+    "@storybook/react-vite": "catalog:",
     "@stylexjs/unplugin": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",

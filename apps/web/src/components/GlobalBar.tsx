@@ -1,12 +1,10 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
-import * as stylex from '@stylexjs/stylex'
 import { Link, type LinkProps, useLocation } from '@tanstack/react-router'
 import { useRef } from 'react'
 import { useIndicatorSlide } from '../animations/useIndicatorSlide'
 import { useTodayGrade } from '../hooks/useTodayGrade'
 import { CharacterSearchBox } from './CharacterSearchBox'
 import { ColorModeToggle } from './ColorModeToggle'
-import { styles } from './GlobalBar.style'
 import { TodayGrade } from './TodayGrade'
 
 type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
@@ -35,20 +33,34 @@ export function GlobalBar(): React.JSX.Element {
   })
 
   return (
-    <header {...stylex.props(styles.bar)}>
-      <div {...stylex.props(styles.inner)}>
-        <Link to="/" aria-label={`${PRODUCT_NAME} 첫 화면`} {...stylex.props(styles.brand)}>
-          <span {...stylex.props(styles.name)}>{PRODUCT_NAME}</span>
+    <header className="shrink-0 border-b border-line bg-canvas text-fg">
+      <div className="mx-auto box-border flex h-topbar w-270 max-w-full min-w-0 items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0 max-sm:pt-2">
+        <Link
+          to="/"
+          aria-label={`${PRODUCT_NAME} 첫 화면`}
+          className="flex shrink-0 items-center text-fg no-underline outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+        >
+          <span className="text-base font-bold tracking-heading whitespace-nowrap">
+            {PRODUCT_NAME}
+          </span>
         </Link>
-        <span aria-hidden="true" {...stylex.props(styles.divider)} />
-        <nav ref={menuRef} aria-label="전역 메뉴" {...stylex.props(styles.menu)}>
-          <span ref={underlineRef} aria-hidden="true" {...stylex.props(styles.underline)} />
+        <span aria-hidden="true" className="h-5 w-px shrink-0 bg-line max-sm:hidden" />
+        <nav
+          ref={menuRef}
+          aria-label="전역 메뉴"
+          className="relative flex min-w-0 grow items-stretch self-stretch overflow-x-auto max-sm:order-last max-sm:h-10 max-sm:basis-full"
+        >
+          <span
+            ref={underlineRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-0 h-0.5 bg-signal"
+          />
           {GLOBAL_MENU.map((item) => (
             <Link
               key={item.to}
               to={item.to}
               activeOptions={{ includeSearch: false }}
-              {...stylex.props(styles.menuItem)}
+              className="inline-flex shrink-0 items-center px-3 text-sm font-medium whitespace-nowrap text-fg-muted no-underline transition-colors duration-(--duration-hover) ease-standard outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-signal aria-[current=page]:font-semibold aria-[current=page]:text-fg"
             >
               {item.label}
             </Link>

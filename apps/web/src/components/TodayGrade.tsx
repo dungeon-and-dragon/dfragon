@@ -1,15 +1,18 @@
-import * as stylex from '@stylexjs/stylex'
-import { GRADE_RARITY_NAMES, gradeRarity } from '#core/today-grade/today-grade'
-import { styles } from './TodayGrade.style'
+import { GRADE_RARITY_NAMES, type GradeRarity, gradeRarity } from '#core/today-grade/today-grade'
+
+const percent = 'shrink-0 font-mono text-base font-semibold whitespace-nowrap tabular-nums'
+
+const RARITY_CLASSES: Record<GradeRarity, string> = {
+  common: 'text-rarity-common',
+  uncommon: 'text-rarity-uncommon',
+  epic: 'text-rarity-epic',
+  primordial: 'bg-(image:--gradient-rarity-primordial) bg-clip-text text-transparent'
+}
 
 export function TodayGrade({ grade }: { grade: number | null }): React.JSX.Element {
   if (grade == null) {
     return (
-      <span
-        role="img"
-        aria-label="오늘 등급 정보 없음"
-        {...stylex.props(styles.percent, styles.unknown)}
-      >
+      <span role="img" aria-label="오늘 등급 정보 없음" className={`${percent} text-fg-muted`}>
         -%
       </span>
     )
@@ -20,7 +23,7 @@ export function TodayGrade({ grade }: { grade: number | null }): React.JSX.Eleme
     <span
       role="img"
       aria-label={`오늘 등급 ${grade}퍼센트, ${GRADE_RARITY_NAMES[rarity]}`}
-      {...stylex.props(styles.percent, styles[rarity])}
+      className={`${percent} ${RARITY_CLASSES[rarity]}`}
     >
       {grade}%
     </span>

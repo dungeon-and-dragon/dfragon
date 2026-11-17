@@ -1,16 +1,11 @@
 // @vitest-environment jsdom
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import * as stylex from '@stylexjs/stylex'
-import { colors } from '@dfragon/ui/tokens.stylex'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { NameField, type NameFieldProps } from './NameField'
 
-// jsdom은 테두리 색을 계산하지 않으므로 같은 선언에서 나온 class를 칸이 가졌는지로 확인한다.
-const vacantBorder = stylex.create({
-  input: { borderColor: { default: colors.borderInput, ':focus': colors.signal } }
-})
-const vacantClasses = stylex.props(vacantBorder.input).className!.split(' ')
+// jsdom은 테두리 색을 계산하지 않으므로 hover 없이도 입력 칸 테두리색 utility를 가졌는지로 확인한다.
+const vacantClasses = ['border-line-input']
 
 let root: Root
 let container: HTMLElement
