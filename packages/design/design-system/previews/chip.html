@@ -1,0 +1,23 @@
+<!-- @dsCard group="Components" height=100 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px">
+      <button class="chip" aria-pressed="false">원본</button>
+      <button class="chip" aria-pressed="true" data-pressed>장비</button>
+      <button class="chip" aria-pressed="false" disabled>비활성</button>
+      <button class="chip" aria-pressed="true" data-pressed disabled>선택 비활성</button>
+    </div>
+  </body>
+</html>

@@ -2,6 +2,8 @@ node_modules
 /packages/lib/LICENSES/
 .codex/
 apps/web/public/ocr
+# packages/design build:design-system output for the Design System artifact and canvas.
+/packages/design/out/
 # The node1 build puts the score engine it built from score-engine.lock.json here; local runs can too.
 /packages/models/score-engine/
 /.artifacts/workflow.png

@@ -1,0 +1,41 @@
+<!-- @dsCard group="Components" height=280 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: flex; gap: 16px; align-items: flex-start">
+      <div class="listbox-positioner" style="width: 200px">
+        <div class="listbox" role="listbox">
+          <div class="listbox-group-label">서버</div>
+          <div class="listbox-item" role="option" data-selected>
+            <span class="listbox-marker"></span>시로코
+          </div>
+          <div class="listbox-item" role="option" data-highlighted>카인</div>
+          <div class="listbox-item" role="option">디레지에</div>
+          <div class="listbox-separator"></div>
+          <div class="listbox-item" role="option" data-disabled>프레이</div>
+        </div>
+      </div>
+      <div class="listbox-positioner" style="width: 280px">
+        <div class="listbox listbox-grid" role="listbox" style="--listbox-columns: 2">
+          <div class="listbox-item" role="option" data-selected>
+            <span class="listbox-marker"></span>시로코
+          </div>
+          <div class="listbox-item" role="option">카인</div>
+          <div class="listbox-item" role="option">디레지에</div>
+          <div class="listbox-item" role="option">바칼</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
