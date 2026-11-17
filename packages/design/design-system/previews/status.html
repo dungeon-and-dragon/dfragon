@@ -1,0 +1,46 @@
+<!-- @dsCard group="Components" height=100 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px">
+      <span class="status-chip status-chip-sm" data-tone="neutral"
+        ><span class="status-dot" aria-hidden="true"></span>대기</span
+      >
+      <span class="status-chip status-chip-sm" data-tone="success"
+        ><span class="status-dot" aria-hidden="true"></span>연결됨</span
+      >
+      <span class="status-chip status-chip-sm" data-tone="danger"
+        ><span class="status-dot" aria-hidden="true"></span>조회 실패</span
+      >
+      <span class="status-chip status-chip-sm" data-tone="warning"
+        ><span class="status-dot" aria-hidden="true"></span>확인 필요</span
+      >
+      <span class="status-chip status-chip-sm" data-tone="signal"
+        ><span class="status-dot" aria-hidden="true"></span>인식 완료</span
+      >
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <span class="status-chip status-chip-md" data-tone="signal" data-busy
+        ><span class="step-dots step-dots-4" aria-hidden="true"
+          ><span></span><span></span><span></span></span
+        >인식 중</span
+      >
+      <span class="text-fg-muted" style="display: inline-flex; gap: 8px; align-items: center"
+        ><span class="step-dots step-dots-5" aria-hidden="true"
+          ><span></span><span></span><span></span></span
+        >불러오는 중</span
+      >
+    </div>
+  </body>
+</html>
