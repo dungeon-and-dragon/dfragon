@@ -70,9 +70,19 @@ const collectorName = `dfragon-db-test-${runId}-collector`
 const opsName = `dfragon-db-test-${runId}-ops`
 const labelKey = 'com.dfragon.image-test.run'
 const label = `${labelKey}=${runId}`
-// Docker CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
-const dockerEnvironment = Object.fromEntries(
-  ['PATH', 'HOME', 'DOCKER_CONFIG', 'DOCKER_HOST', 'DOCKER_CONTEXT', 'DOCKER_TLS_VERIFY']
+// Podman CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
+const podmanEnvironment = Object.fromEntries(
+  [
+    'PATH',
+    'HOME',
+    'TMPDIR',
+    'XDG_RUNTIME_DIR',
+    'XDG_CONFIG_HOME',
+    'XDG_DATA_HOME',
+    'CONTAINER_HOST',
+    'CONTAINER_CONNECTION',
+    'CONTAINERS_CONF'
+  ]
     .filter((name) => process.env[name] !== undefined)
     .map((name) => [name, process.env[name]])
 )
@@ -80,18 +90,18 @@ let stage = 'image verification'
 let directory
 let networkCreated = false
 
-function docker(args, { allowFailure = false, timeout = 60_000 } = {}) {
+function podman(args, { allowFailure = false, timeout = 60_000 } = {}) {
   return new Promise((resolve, reject) => {
     execFile(
-      'docker',
+      'podman',
       args,
-      { env: dockerEnvironment, timeout, killSignal: 'SIGKILL' },
+      { env: podmanEnvironment, timeout, killSignal: 'SIGKILL' },
       (error, stdout, stderr) => {
         const code = error == null ? 0 : (error.code ?? 1)
         const signal = error?.signal ?? null
         const failed = code !== 0 || signal !== null
         if (failed && (!allowFailure || typeof code !== 'number' || signal !== null)) {
-          reject(new Error(`Docker command failed: ${args[0]}`))
+          reject(new Error(`Podman command failed: ${args[0]}`))
 
           return
         }
@@ -102,19 +112,19 @@ function docker(args, { allowFailure = false, timeout = 60_000 } = {}) {
 }
 
 async function removeOwned(name) {
-  const names = await docker([
+  const names = await podman([
     'container',
     'ls',
     '--all',
     '--filter',
-    `name=^/${name}$`,
+    `name=^${name}$`,
     '--format',
     '{{.Names}}'
   ])
   if (names.stdout.trim() === '') {
     return
   }
-  const owner = await docker([
+  const owner = await podman([
     'container',
     'inspect',
     name,
@@ -122,11 +132,11 @@ async function removeOwned(name) {
     `{{ index .Config.Labels "${labelKey}" }}`
   ])
   assert.equal(owner.stdout.trim(), runId)
-  await docker(['rm', '--force', name])
+  await podman(['rm', '--force', name])
 }
 
 function psql(sql) {
-  return docker([
+  return podman([
     'exec',
     postgresName,
     'psql',
@@ -143,20 +153,20 @@ function psql(sql) {
 }
 
 try {
-  const [metadata] = JSON.parse((await docker(['image', 'inspect', imageReference])).stdout)
+  const [metadata] = JSON.parse((await podman(['image', 'inspect', imageReference])).stdout)
   const imageId = metadata.Id
-  const [opsMetadata] = JSON.parse((await docker(['image', 'inspect', opsImageReference])).stdout)
+  const [opsMetadata] = JSON.parse((await podman(['image', 'inspect', opsImageReference])).stdout)
   const opsImageId = opsMetadata.Id
   process.stdout.write(`Disposable api database test: ${runId}\n`)
 
   stage = 'PostgreSQL startup'
-  await docker(['pull', '--quiet', postgresImage], { timeout: 600_000 })
-  await docker(['network', 'create', '--internal', '--label', label, networkName])
+  await podman(['pull', '--quiet', postgresImage], { timeout: 600_000 })
+  await podman(['network', 'create', '--internal', '--label', label, networkName])
   networkCreated = true
   // 합성 비밀번호이며 실제 credential이 아니다.
   const superuserPassword = randomBytes(24).toString('hex')
   const apiPassword = randomBytes(24).toString('hex')
-  await docker([
+  await podman([
     'run',
     '--detach',
     '--name',
@@ -293,7 +303,7 @@ try {
     assert.fail('condition not reached')
   }
   // 다른 인스턴스가 migration 중인 상황을 만들려고 테스트 연결이 먼저 lock을 잡아 둔다.
-  await docker([
+  await podman([
     'exec',
     '--detach',
     postgresName,
@@ -307,7 +317,7 @@ try {
   await waitFor(async () => (await advisoryLockCount(true)) === 1)
   await Promise.all(
     apiNames.map((name) =>
-      docker([
+      podman([
         'run',
         '--detach',
         '--name',
@@ -361,7 +371,7 @@ try {
   )
   stage = 'HTTP after migration'
   await Promise.all(
-    apiNames.map((name) => docker(['exec', name, 'node', '/app/container-runtime-check.mjs']))
+    apiNames.map((name) => podman(['exec', name, 'node', '/app/container-runtime-check.mjs']))
   )
   stage = 'migration history table'
   assert.equal(
@@ -446,7 +456,7 @@ try {
       )
     ).stdout.trim()
   const replaceTimeline = (copies) =>
-    docker([
+    podman([
       'exec',
       '--env',
       'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -469,7 +479,7 @@ try {
 
   stage = 'timeline replacement waits for the character lock'
   // 교체가 캐릭터 lock을 잡지 않으면 겹친 두 교체가 서로의 행을 지우지 못해 행이 두 번 들어간다.
-  await docker([
+  await podman([
     'exec',
     '--detach',
     postgresName,
@@ -501,7 +511,7 @@ try {
     "INSERT INTO timeline_items (server_id, character_id, code, occurred_at, name, data) VALUES ('cain', 'synthetic-character', 505, '2020-01-01 00:00+09', 'kept-backfill', '{}'), ('cain', 'synthetic-character', 402, '2020-02-01 00:01+09', 'kept-backfill', '{}')"
   )
   const backfill = () =>
-    docker([
+    podman([
       'exec',
       '--env',
       'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -535,7 +545,7 @@ try {
   )
 
   stage = 'old season backfill'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -545,7 +555,7 @@ try {
   ])
 
   stage = 'timeline read'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -555,7 +565,7 @@ try {
   ])
 
   stage = 'character and adventure'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -574,7 +584,7 @@ try {
   )
 
   stage = 'character collection queue'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -607,7 +617,7 @@ try {
     ).stdout.trim(),
     'CREATE INDEX characters_guild_id_idx ON public.characters USING btree (guild_id)'
   )
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -647,7 +657,7 @@ try {
       'CREATE INDEX characters_max_fame_idx ON public.characters USING btree (max_fame DESC)'
     ].join('\n')
   )
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -657,7 +667,7 @@ try {
   ])
 
   stage = 'skill style upsert'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -685,7 +695,7 @@ try {
   )
 
   stage = 'skill adoption reads'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -695,7 +705,7 @@ try {
   ])
 
   stage = 'male crusader role reads'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -705,7 +715,7 @@ try {
   ])
 
   stage = 'stats snapshot jobs'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -715,7 +725,7 @@ try {
   ])
 
   stage = 'content clear records'
-  await docker([
+  await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
@@ -785,7 +795,7 @@ try {
     '--mount',
     `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`
   ]
-  await docker([
+  await podman([
     'run',
     '--detach',
     '--name',
@@ -798,7 +808,7 @@ try {
     'dist/character-collector.js'
   ])
   const collectorAddress = (
-    await docker([
+    await podman([
       'inspect',
       '--format',
       `{{(index .NetworkSettings.Networks "${networkName}").IPAddress}}`,
@@ -881,12 +891,12 @@ try {
     'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0}'
   )
   assert.equal(
-    (await docker(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
+    (await podman(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
     'true'
   )
-  await docker(['stop', '--time', '15', collectorName])
+  await podman(['stop', '--time', '15', collectorName])
   assert.equal(
-    (await docker(['inspect', '--format', '{{.State.ExitCode}}', collectorName])).stdout.trim(),
+    (await podman(['inspect', '--format', '{{.State.ExitCode}}', collectorName])).stdout.trim(),
     // 종료 처리를 두지 않아 SIGTERM의 기본 동작(128 + 15)으로 끝난다.
     '143'
   )
@@ -910,7 +920,7 @@ try {
       ).stdout.trim() === 'enhancement-backfill:0:0,season-backfill:0:0,timeline-sync:0:0'
   )
   // 운영 app 이미지를 API 컨테이너의 network namespace에 붙여, 운영 포트 3001과 공개 포트 3000을 같은 127.0.0.1에서 확인한다.
-  await docker([
+  await podman([
     'run',
     '--detach',
     '--name',
@@ -934,7 +944,7 @@ try {
     `type=bind,source=${opsCheckPath},target=/app/container-ops-check.mjs,readonly`,
     opsImageId
   ])
-  await docker(['exec', opsName, 'node', '/app/container-ops-check.mjs'])
+  await podman(['exec', opsName, 'node', '/app/container-ops-check.mjs'])
   assert.equal(
     (
       await psql(
@@ -968,7 +978,7 @@ try {
   await psql(
     "DELETE FROM job_runs WHERE status = 'requested'; DELETE FROM jobs WHERE name = 'ops-probe'"
   )
-  const missingImportFile = await docker(
+  const missingImportFile = await podman(
     [
       'run',
       '--rm',
@@ -985,17 +995,19 @@ try {
   assert.equal(missingImportFile.stderr, 'Character collector failed\n')
 
   stage = 'graceful stop'
+  // Podman은 network namespace를 빌려 쓰는 컨테이너가 남아 있으면 빌려준 API 컨테이너를 지우지 않는다.
+  await removeOwned(opsName)
   for (const name of apiNames) {
-    await docker(['stop', '--time', '15', name])
+    await podman(['stop', '--time', '15', name])
     assert.equal(
-      (await docker(['inspect', '--format', '{{.State.ExitCode}}', name])).stdout.trim(),
+      (await podman(['inspect', '--format', '{{.State.ExitCode}}', name])).stdout.trim(),
       '0'
     )
     await removeOwned(name)
   }
 
   stage = 'failed migration fails closed'
-  const failedMigration = await docker(
+  const failedMigration = await podman(
     [
       'run',
       '--rm',
@@ -1015,7 +1027,7 @@ try {
   assert.equal(failedMigration.stdout, '')
   assert.equal(failedMigration.stderr, 'API failed to start\n')
   // 연결이나 import 실패와 구분하려고, fixture의 두 번째 문장이 실제로 실패했는지 PostgreSQL 로그로 확인한다.
-  assert.match((await docker(['logs', postgresName])).stderr, pgcryptoPermissionDeniedPattern)
+  assert.match((await podman(['logs', postgresName])).stderr, pgcryptoPermissionDeniedPattern)
   // Prisma는 실패한 migration을 실패로 기록해 해결하기 전까지 다음 적용을 막는다. BEGIN, COMMIT으로 감싼 앞 문장은 되돌려진다.
   assert.equal(
     (
@@ -1040,7 +1052,7 @@ try {
     ['--env', `DB_HOST=${postgresName}`, ...wrongPasswordMount],
     ['--env', 'DB_PORT=5432', '--env', 'DB_PASSWORD=synthetic']
   ]) {
-    const result = await docker(
+    const result = await podman(
       ['run', '--rm', '--name', failureName, ...runtimeOptions, ...invalid, imageId],
       { allowFailure: true }
     )
@@ -1051,7 +1063,7 @@ try {
   }
 
   stage = 'ops image build info and missing database input'
-  const opsBuildInfo = await docker([
+  const opsBuildInfo = await podman([
     'run',
     '--rm',
     '--entrypoint',
@@ -1060,7 +1072,7 @@ try {
     '/app/build-info.json'
   ])
   assert.equal(JSON.parse(opsBuildInfo.stdout).service, 'ops')
-  const opsWithoutDatabase = await docker(
+  const opsWithoutDatabase = await podman(
     ['run', '--rm', '--name', failureName, ...runtimeOptions, opsImageId],
     { allowFailure: true }
   )
@@ -1078,7 +1090,7 @@ try {
     ),
     async () => {
       if (networkCreated) {
-        await docker(['network', 'rm', networkName])
+        await podman(['network', 'rm', networkName])
       }
     },
     async () => {
