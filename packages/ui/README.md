@@ -1,6 +1,6 @@
 # 공용 UI
 
-`@dfragon/ui`는 던삐삐 디자인 토큰과 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이, 외형은 `--df-*` 토큰만 쓰는 StyleX가 맡는다. 제품 data, event, platform 연결은 소비 app이 소유한다.
+`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이, 외형은 `--df-*` 토큰만 쓰는 StyleX가 맡는다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
 
 ## Public API
 
@@ -28,8 +28,7 @@ Entry는 다음과 같다.
 - `@dfragon/ui`: 위 Component와 공용 `stylex.create`인 `shapes`(`srOnly`). StyleX compiler가 필요하다.
 - `@dfragon/ui/tokens.stylex`: `colors`, `shadow`, `space`, `radius`, `size`, `motion`, `font` 토큰 상수. Source를 가리켜 library를 먼저 빌드하지 않아도 된다.
 - `@dfragon/ui/typo`: Typo만 내보내는 React 전용 entry. Base UI와 StyleX 없이 쓴다.
-- `@dfragon/ui/tokens.css`: `--df-*` 변수와 라이트, 다크 모드 값.
-- `@dfragon/ui/foundation.css`: system font stack과 body 초기화(여백, 글자색, 바탕). Root font-size는 지정하지 않는다.
+- `@dfragon/ui/tokens.css`: `--df-*` 이름을 `@dfragon/design/theme.css`의 변수로 잇는 별칭.
 
 `@base-ui/react`, React, React DOM과 `@stylexjs/stylex`는 peer이다. Library build는 이들을 external로 두고 CSS를 출력하지 않는다.
 
@@ -38,9 +37,9 @@ Entry는 다음과 같다.
 `@dfragon/ui/stylex-config`는 모든 앱과 Example, test가 쓰는 compiler 옵션이다. Browser runtime에서 import하지 않는다. StyleX runtime과 compiler 버전은 `pnpm-workspace.yaml`의 catalog에 두고, 앱 manifest는 `@stylexjs/stylex`와 개발 의존성 `@stylexjs/unplugin`을 `catalog:`로 참조한다.
 
 - `runtimeInjection: false`로 production CSS를 빌드 때 추출한다. 주입 runtime(`@stylexjs/stylex/lib/stylex-inject`)은 쓰지 않는다.
-- `useCSSLayers: false`로 공용 토큰 CSS, foundation, 앱 전역 글꼴 CSS와 같은 cascade에서 조합한다.
+- `useCSSLayers: false`로 StyleX 규칙을 cascade layer 밖에 둔다. 같은 요소의 같은 속성에서는 layer 안의 Tailwind CSS utility보다 StyleX가 이긴다.
 - Vite에서는 StyleX를 React plugin보다 먼저 실행한다. Vitest는 HTTP/HMR timer가 없는 Rollup adapter를 쓴다.
-- 모든 browser entry는 `@dfragon/ui/tokens.css`, `@dfragon/ui/foundation.css`, 앱 전역 글꼴 CSS 순서로 한 번 import한다. 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
+- 모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/ui/tokens.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
 
 연결 위치는 웹 앱 package test의 `apps/web/vitest.config.ts`, 공용 UI Example과 test의 `packages/ui/examples/vite.config.ts`, `packages/ui/vitest.config.ts`, 공용 UI 산출물 소비 검사의 `packages/ui/test/build-consumer/vite.config.ts`다.
 
