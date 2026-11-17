@@ -4,6 +4,8 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { LineChart, type LineSeries } from './LineChart'
 
+const PATH_X_PATTERN = /[ML]([\d.]+) /g
+
 let container: HTMLDivElement
 let root: Root
 
@@ -95,6 +97,64 @@ describe('LineChart', () => {
     )
 
     expect(container.innerHTML).toBe('')
+  })
+
+  it('timeAxis를 넘기면 칸을 칸마다 둔 at 값의 비율로 두고 축 글자는 ticks로 둔다', async () => {
+    const timed = [
+      { key: 'first', title: '처음', tick: '1주차', at: 0 },
+      { key: 'second', title: '중간', tick: null, at: 10 },
+      { key: 'third', title: '끝', tick: null, at: 40 }
+    ]
+
+    await render(
+      <LineChart
+        label="명성 추이"
+        x={timed}
+        series={[series(1, [10, 20, 30])]}
+        formatTick={formatPercent}
+        formatValue={formatPercent}
+        timeAxis={{ min: 0, max: 40, ticks: [{ at: 20, label: '중간' }] }}
+      />
+    )
+
+    const path = container.querySelector('path')?.getAttribute('d') ?? ''
+    const xs = [...path.matchAll(PATH_X_PATTERN)].map((match) => Number(match[1]))
+    const [first = 0, second = 0, third = 0] = xs
+    const axisTexts = [...container.querySelectorAll('text')].map((text) => text.textContent)
+
+    expect((second - first) / (third - first)).toBeCloseTo(0.25)
+    expect(axisTexts).toContain('중간')
+    expect(axisTexts).not.toContain('1주차')
+  })
+
+  it('selectedKey 칸에 세로선과 빈 점을 두고, fitValues면 0이 아닌 값부터 축을 둔다', async () => {
+    await render(
+      <LineChart
+        label="명성 추이"
+        x={weeks.slice(0, 3)}
+        series={[series(1, [134000, 135000, 136000])]}
+        formatTick={String}
+        formatValue={String}
+        selectedKey="week-1"
+        fitValues
+      />
+    )
+
+    const path = container.querySelector('path')?.getAttribute('d') ?? ''
+    const secondX = [...path.matchAll(PATH_X_PATTERN)].map((match) => match[1])[1]
+    const crosshair = [...container.querySelectorAll('line')].find(
+      (line) => line.getAttribute('x1') === line.getAttribute('x2')
+    )
+    const openDots = [...container.querySelectorAll('circle')].filter(
+      (circle) => !circle.hasAttribute('data-chart-end')
+    )
+    const ticks = [...container.querySelectorAll('text')].map((text) => text.textContent)
+
+    expect(Number(crosshair?.getAttribute('x1')).toFixed(1)).toBe(Number(secondX).toFixed(1))
+    expect(openDots.map((dot) => Number(dot.getAttribute('cx')).toFixed(1))).toEqual([
+      Number(secondX).toFixed(1)
+    ])
+    expect(ticks).not.toContain('0')
   })
 
   it('빈 값으로 그린 뒤 값이 들어오면 그때 차트 크기를 재기 시작한다', async () => {
