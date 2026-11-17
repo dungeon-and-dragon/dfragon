@@ -34,16 +34,16 @@ Entry는 다음과 같다.
 
 ## 공통 StyleX 설정
 
-`@dfragon/ui/stylex-config`는 모든 앱과 Example, test가 쓰는 compiler 옵션이다. Browser runtime에서 import하지 않는다. StyleX runtime과 compiler 버전은 `pnpm-workspace.yaml`의 catalog에 두고, 앱 manifest는 `@stylexjs/stylex`와 개발 의존성 `@stylexjs/unplugin`을 `catalog:`로 참조한다.
+`@dfragon/ui/stylex-config`는 모든 앱과 Storybook, test가 쓰는 compiler 옵션이다. Browser runtime에서 import하지 않는다. StyleX runtime과 compiler 버전은 `pnpm-workspace.yaml`의 catalog에 두고, 앱 manifest는 `@stylexjs/stylex`와 개발 의존성 `@stylexjs/unplugin`을 `catalog:`로 참조한다.
 
 - `runtimeInjection: false`로 production CSS를 빌드 때 추출한다. 주입 runtime(`@stylexjs/stylex/lib/stylex-inject`)은 쓰지 않는다.
 - `useCSSLayers: false`로 StyleX 규칙을 cascade layer 밖에 둔다. 같은 요소의 같은 속성에서는 layer 안의 Tailwind CSS utility보다 StyleX가 이긴다.
 - Vite에서는 StyleX를 React plugin보다 먼저 실행한다. Vitest는 HTTP/HMR timer가 없는 Rollup adapter를 쓴다.
 - 모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/ui/tokens.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
 
-연결 위치는 웹 앱 package test의 `apps/web/vitest.config.ts`, 공용 UI Example과 test의 `packages/ui/examples/vite.config.ts`, `packages/ui/vitest.config.ts`, 공용 UI 산출물 소비 검사의 `packages/ui/test/build-consumer/vite.config.ts`다.
+연결 위치는 웹 앱 package test의 `apps/web/vitest.config.ts`, 공용 UI test의 `packages/ui/vitest.config.ts`, Storybook의 `apps/storybook/.storybook/main.ts`, 공용 UI 산출물 소비 검사의 `packages/ui/test/build-consumer/vite.config.ts`다.
 
-공식 [unplugin 설정](https://stylexjs.com/docs/api/configuration/unplugin/)과 [Vite 연결](https://stylexjs.com/docs/learn/installation/vite/)을 따른다. `apps/web`과 Example은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석하므로 library build 없이 source 변경이 반영된다.
+공식 [unplugin 설정](https://stylexjs.com/docs/api/configuration/unplugin/)과 [Vite 연결](https://stylexjs.com/docs/learn/installation/vite/)을 따른다. `apps/web`은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석하므로 library build 없이 source 변경이 반영된다.
 
 ## Command
 
@@ -51,13 +51,11 @@ Repository root에서 실행한다.
 
 - `pnpm --filter @dfragon/ui build`: ESM bundle, declaration 생성 뒤 public package export의 소비 검사.
 - `pnpm --filter @dfragon/ui verify:build`: 기존 library 산출물의 export, dependency, CSS, 고지, declaration과 Vite 소비 fixture 검사.
-- `pnpm --filter @dfragon/ui dev:examples`: 독립 Vite Example.
-- `pnpm --filter @dfragon/ui build:examples` / `preview:examples`: production Example 생성, 확인.
+- `pnpm --filter @dfragon/storybook dev`: 컴포넌트 옆 `src/*.stories.tsx`를 Storybook에서 본다.
 - `pnpm --filter @dfragon/ui test`: typecheck, Vitest interaction과 Typo, 빌드 검사 도구의 Node 회귀를 차례로 실행한다.
 - `pnpm --filter @dfragon/ui exec vitest run test/interaction.test.tsx`: 고른 runtime 테스트만 실행한다. 파일 인수를 aggregate `test`에 넘기지 않는다.
-- `pnpm --filter @dfragon/ui typecheck`: src, test, examples를 `tsc --noEmit`으로 검사한다.
+- `pnpm --filter @dfragon/ui typecheck`: src, test를 `tsc --noEmit`으로 검사한다.
 - `pnpm --filter @dfragon/ui test:tooling`: 임시 산출물로 빌드 검사 도구를 확인한다. Library 선행 build 없이 실행한다.
-- `pnpm --filter @dfragon/ui test:consumer-lifecycle`: POSIX detached child/group 종료 검사. 일반 `test`와 분리하며 macOS에서 검증한다.
 - `pnpm --filter @dfragon/ui lint`
 - `node packages/ui/scripts/verify-build.mjs library packages/ui/dist`: library 산출물 검사.
 - `node packages/ui/scripts/verify-build.mjs consumer <산출물 경로>`: 소비 앱 산출물 검사.
@@ -65,8 +63,8 @@ Repository root에서 실행한다.
 
 ## 고지
 
-Library, Example, Web build는 [`@dfragon/licenses`](../licenses/README.md)의 공용 `uiNotices` plugin으로 bundle 입력의 dependency license/NOTICE와 module, chunk 목록을 산출물 `notices`에 기록하며 absolute filesystem path는 남기지 않는다. `@dfragon/ui`에는 외부 source를 복사해 고친 코드가 없어 별도 수정 고지를 두지 않는다.
+Library, Web build는 [`@dfragon/licenses`](../licenses/README.md)의 공용 `uiNotices` plugin으로 bundle 입력의 dependency license/NOTICE와 module, chunk 목록을 산출물 `notices`에 기록하며 absolute filesystem path는 남기지 않는다. `@dfragon/ui`에는 외부 source를 복사해 고친 코드가 없어 별도 수정 고지를 두지 않는다.
 
 ## 소비 entry와 실제 UI 확인
 
-`apps/web`은 공용 Component와 토큰을 화면에서 직접 쓴다. 공용 UI 변경은 `dev:examples`, `preview:examples`와 변경한 소비 앱 화면을 브라우저에서 확인한다.
+`apps/web`은 공용 Component와 토큰을 화면에서 직접 쓴다. 공용 UI 변경은 Storybook과 변경한 소비 앱 화면을 브라우저에서 확인한다.
