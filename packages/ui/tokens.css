@@ -1,13 +1,14 @@
 /*
  * StyleX 화면이 쓰는 --df-* 이름을 @dfragon/design/theme.css의 변수로 잇는 별칭이다. 값은 theme.css에서만 고친다.
+ * 새 방향에 없는 옛 이름은 같은 자리의 새 토큰을 가리킨다.
  * StyleX 화면을 모두 Tailwind CSS로 옮기면 이 파일과 tokens.stylex.ts를 지운다.
  */
 :root {
   --df-bg-canvas: var(--color-canvas);
-  --df-bg-bar: var(--color-bar);
+  --df-bg-bar: var(--color-canvas);
   --df-bg-surface: var(--color-surface);
   --df-bg-inset: var(--color-inset);
-  --df-bg-stripe: var(--color-stripe);
+  --df-bg-stripe: var(--color-inset);
   --df-bg-control: var(--color-control);
   --df-bg-control-hover: var(--color-control-hover);
   --df-bg-success-weak: var(--color-success-weak);
@@ -17,8 +18,7 @@
   --df-signal: var(--color-signal);
   --df-signal-hover: var(--color-signal-hover);
   --df-on-signal: var(--color-on-signal);
-  --df-accent: var(--color-accent);
-  --df-brand-logo: var(--color-brand-logo);
+  --df-accent: var(--color-signal);
   --df-fg-default: var(--color-fg);
   --df-fg-muted: var(--color-fg-muted);
   --df-fg-subtle: var(--color-fg-subtle);
@@ -29,10 +29,10 @@
   --df-fg-warning: var(--color-fg-warning);
   --df-fg-adventure: var(--color-fg-adventure);
   --df-fg-guild: var(--color-fg-guild);
-  --df-border-default: var(--color-border);
-  --df-border-strong: var(--color-border-strong);
-  --df-border-input: var(--color-border-input);
-  --df-border-danger: var(--color-border-danger);
+  --df-border-default: var(--color-line);
+  --df-border-strong: var(--color-line-strong);
+  --df-border-input: var(--color-line-input);
+  --df-border-danger: var(--color-line-danger);
   --df-tier-top: var(--color-tier-top);
   --df-tier-ranker: var(--color-tier-ranker);
   --df-score-dealer: var(--color-score-dealer);
@@ -46,9 +46,6 @@
   --df-card-fg-subtle: var(--color-card-fg-subtle);
   --df-card-signal: var(--color-card-signal);
   --df-card-failure: var(--color-card-failure);
-  --df-brand-dragon: var(--color-brand-dragon);
-  --df-brand-cream: var(--color-brand-cream);
-  --df-brand-outline: var(--color-brand-outline);
   --df-rarity-common: var(--color-rarity-common);
   --df-rarity-uncommon: var(--color-rarity-uncommon);
   --df-rarity-rare: var(--color-rarity-rare);
@@ -108,6 +105,6 @@
   --df-dur-count: var(--duration-count);
   --df-cycle: var(--cycle);
   --df-beat: var(--beat);
-  --df-font-ui: var(--font-ui);
-  --df-font-num: var(--font-num);
+  --df-font-ui: var(--font-sans);
+  --df-font-num: var(--font-mono);
 }

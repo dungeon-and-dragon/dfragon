@@ -48,7 +48,7 @@ export const Sizes: Story = {
     <div className="flex flex-wrap items-center gap-4 text-fg">
       <ProgressCircle size="24" value={60} aria-label="24" />
       <ProgressCircle size="40" value={60} aria-label="40" />
-      <span className="text-5xl">
+      <span className="text-display">
         <ProgressCircle size="inherit" value={60} aria-label="글자 크기" />
       </span>
     </div>

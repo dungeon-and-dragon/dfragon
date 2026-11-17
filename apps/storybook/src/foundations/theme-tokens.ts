@@ -4,13 +4,23 @@ export type ThemeToken = {
   note: string | null
 }
 
-export type TokenSection = 'color' | 'typography' | 'spacing' | 'radius' | 'shadow' | 'motion'
+export type TokenSection =
+  | 'color'
+  | 'typography'
+  | 'spacing'
+  | 'radius'
+  | 'layer'
+  | 'breakpoint'
+  | 'shadow'
+  | 'motion'
 
 const SECTION_PREFIXES: Readonly<Record<TokenSection, readonly string[]>> = {
   color: ['--gray-', '--color-', '--gradient-'],
   typography: ['--font-', '--text-', '--leading-', '--tracking-'],
   spacing: ['--spacing'],
   radius: ['--radius-'],
+  layer: ['--z-'],
+  breakpoint: ['--breakpoint-'],
   shadow: ['--shadow-', '--inset-shadow-', '--drop-shadow-'],
   motion: ['--ease-', '--duration-', '--animate-', '--cycle', '--beat']
 }

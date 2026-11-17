@@ -7,7 +7,12 @@ import { fileURLToPath } from 'node:url'
 import { clientNotices } from '../src/vite.ts'
 import { createPackageFixture } from './fixtures.ts'
 
-const clientNoticeFiles = ['LUCIDE-LICENSE', 'NOTICE.md', 'PRETENDARD-LICENSE']
+const clientNoticeFiles = [
+  'IBM-PLEX-SANS-KR-LICENSE',
+  'LUCIDE-LICENSE',
+  'MONOPLEX-KR-LICENSE',
+  'NOTICE.md'
+]
 const copyCommand = fileURLToPath(new URL('../src/copy-notices.mjs', import.meta.url))
 
 test('클라이언트 UI 자산 plugin은 글꼴, 아이콘, 자산 고지를 원문 그대로 낸다', () => {

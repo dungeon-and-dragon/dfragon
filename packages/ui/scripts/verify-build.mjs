@@ -123,7 +123,7 @@ const cssFiles = files.filter((file) => {
 
 const NONPORTABLE_DECLARATION_PATTERN = /node:|NodeJS|\.pnpm/
 const STYLESHEET_IMPORT_PATTERN = /\.css(?:$|\?)/
-const TOKENS_DEFINITION_PATTERN = /--df-brand-dragon\s*:/g
+const TOKENS_DEFINITION_PATTERN = /--df-bg-canvas\s*:/g
 // @dfragon/design/base.css의 system font stack 첫머리로 센다. 앱 전역 글꼴 CSS의 대체 글꼴 목록은 세지 않는다.
 const BASE_FONT_FAMILY_PATTERN =
   /(?:^|[;{])\s*font-family\s*:\s*-apple-system\s*,\s*BlinkMacSystemFont\s*,\s*['"]?Apple SD Gothic Neo/g
