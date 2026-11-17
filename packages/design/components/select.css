@@ -1,0 +1,94 @@
+/*
+ * <button class="select select-sm"><span class="select-value">시로코</span><span class="select-icon"><svg /></span></button>.
+ * 크기는 select-2xs(표 행의 작은 칩, 테두리 없음), select-xs, select-sm, select-md다. 열림은 data-popup-open이다.
+ */
+.select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding-inline: 10px 6px;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--color-canvas);
+  color: var(--color-fg);
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition-property: color, background-color, border-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.select:hover:not(:disabled) {
+  background-color: var(--color-surface);
+}
+
+.select[data-popup-open] {
+  border-color: var(--color-signal);
+}
+
+.select:disabled {
+  border-color: var(--color-line);
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.select-2xs {
+  height: 20px;
+  gap: 2px;
+  padding-inline: 6px 4px;
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--color-fg-muted);
+  font-size: var(--text-2xs);
+  line-height: var(--text-2xs--line-height);
+}
+
+.select-2xs:hover:not(:disabled),
+.select-2xs[data-popup-open] {
+  border-color: transparent;
+  background-color: var(--color-inset);
+  color: var(--color-fg);
+}
+
+.select-xs {
+  height: 24px;
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+}
+
+.select-sm {
+  height: var(--spacing-control-sm);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+.select-md {
+  height: var(--spacing-control-md);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+.select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.select-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  transition: transform var(--duration-state) var(--ease-standard);
+}
+
+.select[data-popup-open] .select-icon {
+  transform: scaleY(-1);
+}

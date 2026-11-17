@@ -43,3 +43,17 @@ export const Playground: Story = {}
 export const Open: Story = {
   args: { defaultOpen: true }
 }
+
+export const Focus: Story = {
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('button')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="tooltip" role="tooltip">
+      장비점수는 장비와 버프로 계산합니다.
+    </div>
+  )
+}
