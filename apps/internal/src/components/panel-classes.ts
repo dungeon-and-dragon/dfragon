@@ -1,0 +1,48 @@
+export const FOCUS_RING =
+  'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal focus-visible:outline-offset-2'
+
+// field-box의 :focus-within 테두리가 focus를 보이므로 브라우저 outline은 끈다.
+export const FIELD_INPUT = 'field-box box-border w-full font-sans outline-none'
+
+export const panelClasses = {
+  box: 'relative min-w-0 overflow-hidden rounded-panel border border-line bg-canvas',
+  heading: 'm-0 flex min-h-11 items-center gap-2 border-b border-line px-4 text-base font-semibold',
+  headingCount: 'font-mono text-xs font-medium tabular-nums text-fg-subtle',
+  headingActions: 'ml-auto flex items-center gap-2',
+  sectionHeading: 'flex min-h-11 items-center border-b border-line px-4 text-sm font-semibold',
+  empty: 'm-0 px-4 py-12 text-center text-sm font-semibold',
+  scroll: 'overflow-x-auto'
+} as const
+
+const HEAD_CELL =
+  'h-9 whitespace-nowrap border-b border-line bg-surface px-3 text-xs font-medium text-fg-subtle first:pl-4 last:pr-4'
+const CELL =
+  'h-row whitespace-nowrap border-b border-line px-3 py-1.5 align-middle first:pl-4 last:pr-4'
+
+export const tableClasses = {
+  table: 'w-full border-collapse',
+  body: '[&>tr:last-child>td]:border-b-0',
+  headCell: `${HEAD_CELL} text-left`,
+  headCellEnd: `${HEAD_CELL} text-right`,
+  row: 'transition-colors duration-(--duration-hover) ease-standard hover:bg-surface',
+  selectedRow: 'bg-surface',
+  cell: CELL,
+  cellEnd: `${CELL} text-right`
+} as const
+
+export const textClasses = {
+  muted: 'text-fg-muted',
+  subtle: 'text-fg-subtle',
+  numeric: 'font-mono tabular-nums',
+  twoLine: 'flex flex-col',
+  small: 'text-xs text-fg-subtle',
+  error: 'm-0 text-sm text-fg-danger',
+  inline: 'inline-flex items-center gap-2'
+} as const
+
+export const popoverClasses = {
+  positioner: 'popover-positioner',
+  popup: 'popover flex flex-col whitespace-normal text-left font-sans text-sm',
+  title: 'popover-title px-3 pt-3',
+  actions: 'flex justify-end gap-2 px-3 pb-3'
+} as const

@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { BatchKeyPanel } from './components/BatchKeyPanel'
@@ -6,10 +5,9 @@ import { CollectionPanel } from './components/CollectionPanel'
 import { JobDetail } from './components/JobDetail'
 import { JobTable } from './components/JobTable'
 import { OpsHeader } from './components/OpsHeader'
-import { panelStyles } from './components/panel.style'
+import { panelClasses } from './components/panel-classes'
 import { QueuePanel } from './components/QueuePanel'
 import { useJobs } from './ops-queries'
-import { styles } from './OpsScreen.style'
 
 function JobsSection({
   selectedName,
@@ -25,9 +23,9 @@ function JobsSection({
     }
 
     return (
-      <section aria-label="job" {...stylex.props(panelStyles.box)}>
-        <h2 {...stylex.props(panelStyles.heading)}>Job</h2>
-        <p role="alert" {...stylex.props(panelStyles.empty)}>
+      <section aria-label="job" className={panelClasses.box}>
+        <h2 className={panelClasses.heading}>Job</h2>
+        <p role="alert" className={panelClasses.empty}>
           job 목록을 읽지 못했습니다.
         </p>
       </section>
@@ -56,11 +54,11 @@ export function OpsScreen(): React.JSX.Element {
   }
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div className="flex min-h-screen flex-col items-center bg-canvas pb-12 font-sans text-sm text-fg">
       <OpsHeader workerSeenAt={jobs.data?.workerSeenAt} readAt={readAt} onRefresh={handleRefresh} />
-      <main {...stylex.props(styles.main)}>
+      <main className="mt-6 box-border flex w-300 max-w-full flex-col gap-4 px-4">
         <JobsSection selectedName={selectedName} onSelect={setSelectedName} />
-        <div {...stylex.props(styles.queues)}>
+        <div className="grid grid-cols-2 items-start gap-4 max-[800px]:grid-cols-1">
           <QueuePanel />
           <CollectionPanel />
         </div>
