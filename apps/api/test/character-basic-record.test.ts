@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events'
 import test from 'node:test'
 import {
   type CharacterBasicInput,
+  type CharacterHistoryInput,
   type CharacterScoreInput,
   type CharacterSkillStyleInput,
   type DatabaseClient,
@@ -152,6 +153,7 @@ async function listen(
     | 'recordCharacterBasic'
     | 'recordCharacterSkillStyle'
     | 'recordCharacterScore'
+    | 'recordCharacterHistory'
     | 'scoreLibraryPath'
     | 'spawnScoreWorker'
     | 'writeAccessLog'
@@ -426,11 +428,12 @@ test('스킬 스타일 저장이 실패해도 상세 응답은 그대로이고 �
   assert.deepEqual(codes, ['CHARACTER_SKILL_STYLE_RECORD_FAILED'])
 })
 
-test('기본 정보를 저장하지 못하면 스킬 스타일과 점수도 저장하지 않는다', {
+test('기본 정보를 저장하지 못하면 스킬 스타일, 점수, 이력도 저장하지 않는다', {
   timeout: 10_000
 }, async (t) => {
   const styles: CharacterSkillStyleInput[] = []
   const scores: CharacterScoreInput[] = []
+  const histories: CharacterHistoryInput[] = []
   let failureReported!: () => void
   const reported = new Promise<void>((resolve) => {
     failureReported = resolve
@@ -447,6 +450,9 @@ test('기본 정보를 저장하지 못하면 스킬 스타일과 점수도 저�
     recordCharacterScore: async (score) => {
       scores.push(score)
     },
+    recordCharacterHistory: async (history) => {
+      histories.push(history)
+    },
     writeAccessLog: (line) => {
       if (JSON.parse(line).code !== undefined) {
         failureReported()
@@ -461,6 +467,7 @@ test('기본 정보를 저장하지 못하면 스킬 스타일과 점수도 저�
   assert.equal(body.card.score.value, engineResult.score)
   assert.deepEqual(styles, [])
   assert.deepEqual(scores, [])
+  assert.deepEqual(histories, [])
 })
 
 test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류, 계산 시각, 엔진 버전과 함께 저장하고, 저장해 둔 응답을 다시 쓰면 저장하지 않는다', {
@@ -613,6 +620,145 @@ test('스킬 스타일과 점수 기록 함수 없이 구성하면 기본 정보
   assert.equal(body.card.score.value, engineResult.score)
   assert.deepEqual(recorded, [basicFields])
   assert.deepEqual(codes, [])
+})
+
+const { serverId: _serverId, characterId: _characterId, ...basicColumns } = basicFields
+
+// payloadsWith가 섹션마다 붙인 본문에서 기본 정보 칸만 뺀 값이다.
+const expectedSectionBodies = {
+  status: { status: [], buff: [] },
+  equipment: { equipment: [], setItemInfo: [] },
+  avatar: { avatar: [] },
+  creature: { creature: null },
+  oath: { oath: null },
+  mist_assimilation: { mistAssimilation: null },
+  skill_style: { skill: { style: { active: [] } } },
+  buff_equipment: { skill: { buff: null } },
+  buff_avatar: { skill: { buff: null } },
+  buff_creature: { skill: { buff: null } }
+}
+
+test('상세 조회는 기본 정보를 저장하고 점수 계산이 끝난 뒤 받은 시각, 기본 정보, 헤더를 뺀 섹션 10개, 점수를 이력으로 저장하고, 캐시 적중에는 같은 시각으로 점수 없이 저장한다', {
+  timeout: 10_000
+}, async (t) => {
+  let savedBasics = 0
+  const savedBasicsBeforeHistory: number[] = []
+  const histories: CharacterHistoryInput[] = []
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => engineResult),
+    recordCharacterBasic: async () => {
+      // 기본 정보보다 먼저 저장하면 characters 참조가 깨지므로, 늦게 끝나도 기다리는지 보려고 일부러 늦춘다.
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      savedBasics++
+    },
+    recordCharacterHistory: async (history) => {
+      savedBasicsBeforeHistory.push(savedBasics)
+      histories.push(history)
+    }
+  })
+  t.after(() => app.close())
+
+  const before = Date.now()
+  await getDetails(origin)
+  const after = Date.now()
+  await getDetails(origin)
+  await waitUntil(() => histories.length === 2)
+
+  const [first, cached] = histories
+
+  assert.deepEqual(savedBasicsBeforeHistory, [1, 2])
+  assert.ok(first.observedAt.getTime() >= before && first.observedAt.getTime() <= after)
+  assert.deepEqual(
+    { ...first, observedAt: undefined, score: undefined },
+    {
+      ...character,
+      observedAt: undefined,
+      basic: basicColumns,
+      sections: expectedSectionBodies,
+      score: undefined
+    }
+  )
+  assert.deepEqual(
+    {
+      kind: first.score?.kind,
+      score: first.score?.score,
+      engine: first.score?.engine
+    },
+    {
+      kind: 'equipment',
+      score: 1741,
+      engine: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+    }
+  )
+  assert.deepEqual(cached, { ...first, score: null })
+})
+
+test('엔진이 점수를 내지 못한 캐릭터도 기본 정보와 섹션 이력을 저장한다', {
+  timeout: 10_000
+}, async (t) => {
+  const histories: CharacterHistoryInput[] = []
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => ({
+      ...engineResult,
+      score: null,
+      skipped: { kind: 'resolution', message: '판정 불가' }
+    })),
+    recordCharacterBasic: async () => undefined,
+    recordCharacterHistory: async (history) => {
+      histories.push(history)
+    }
+  })
+  t.after(() => app.close())
+
+  await getDetails(origin)
+  await waitUntil(() => histories.length === 1)
+
+  const [history] = histories
+  assert.equal(history.score, null)
+  assert.deepEqual(history.basic, basicColumns)
+  assert.deepEqual(history.sections, expectedSectionBodies)
+})
+
+test('이력 저장이 실패해도 상세 응답의 상태 코드와 본문은 그대로이고 실패 code를 남긴다', {
+  timeout: 10_000
+}, async (t) => {
+  const codes: string[] = []
+  let failureReported!: () => void
+  const reported = new Promise<void>((resolve) => {
+    failureReported = resolve
+  })
+  const failing = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => engineResult),
+    recordCharacterBasic: async () => undefined,
+    recordCharacterScore: async () => undefined,
+    recordCharacterHistory: async () => {
+      throw new Error('database closed')
+    },
+    writeAccessLog: (line) => {
+      const { code } = JSON.parse(line)
+      if (code !== undefined) {
+        codes.push(code)
+        failureReported()
+      }
+    }
+  })
+  t.after(() => failing.app.close())
+  const withoutDatabase = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => engineResult)
+  })
+  t.after(() => withoutDatabase.app.close())
+
+  const response = await getDetails(failing.origin)
+  const expected = await getDetails(withoutDatabase.origin)
+  await reported
+
+  assert.equal(response.status, expected.status)
+  assert.deepEqual(withoutFetchTimes(response.body), withoutFetchTimes(expected.body))
+  assert.deepEqual(codes, ['CHARACTER_HISTORY_RECORD_FAILED'])
 })
 
 test('타임라인 동기화 요청이 예외를 던져도 상세 응답은 그대로이고 기본 정보를 저장한다', async (t) => {

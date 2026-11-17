@@ -19,7 +19,7 @@ export type CalculateScore = (
 
 export type PublishCharacterFetched = (
   identity: CharacterIdentity,
-  payloads: Pick<CharacterPayloads, 'basic' | 'skill_style'>,
+  payloads: CharacterPayloads,
   fetchedAt: Date,
   score: Promise<CalculatedScore | null>
 ) => void

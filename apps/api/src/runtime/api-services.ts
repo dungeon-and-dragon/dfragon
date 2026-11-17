@@ -77,6 +77,7 @@ export interface ApiServicesOptions {
   readonly recordCharacterBasic?: CharacterBasicRepository['recordBasic']
   readonly recordCharacterSkillStyle?: CharacterBasicRepository['recordSkillStyle']
   readonly recordCharacterScore?: CharacterBasicRepository['recordScore']
+  readonly recordCharacterHistory?: CharacterBasicRepository['recordHistory']
   readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsRepository
   readonly clearStats?: ClearStatsRepository
@@ -191,11 +192,12 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   }
 
   if (recordCharacterBasic !== undefined) {
-    // 스킬 스타일이나 점수 기록 함수를 주지 않은 app은 그 기록을 하지 않는다.
+    // 스킬 스타일, 점수, 이력 기록 함수를 주지 않은 app은 그 기록을 하지 않는다.
     const repository: CharacterBasicRepository = {
       recordBasic: recordCharacterBasic,
       recordSkillStyle: options.recordCharacterSkillStyle ?? (async () => undefined),
-      recordScore: options.recordCharacterScore ?? (async () => undefined)
+      recordScore: options.recordCharacterScore ?? (async () => undefined),
+      recordHistory: options.recordCharacterHistory ?? (async () => undefined)
     }
     const characterBasic = new CharacterBasicService(repository, {
       parseBasic: parseCharacterBasic,
@@ -216,20 +218,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   const details = new CharacterDetailService({
     ...options.details,
     calculateScore: engine.calculate,
-    publishCharacterFetched: (
-      { serverId, characterId },
-      { basic, skill_style },
-      fetchedAt,
-      score
-    ) => {
-      const event = new CharacterFetched(
-        serverId,
-        characterId,
-        basic,
-        skill_style,
-        fetchedAt,
-        score
-      )
+    publishCharacterFetched: ({ serverId, characterId }, payloads, fetchedAt, score) => {
+      const event = new CharacterFetched(serverId, characterId, payloads, fetchedAt, score)
       for (const notify of subscribers) {
         try {
           notify(event)
