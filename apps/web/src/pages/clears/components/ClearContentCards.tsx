@@ -141,7 +141,7 @@ function Card({
         />
       )}
       <span aria-hidden="true" className={SHADE} />
-      <span className="relative text-xs font-medium text-fg-muted">{kind}</span>
+      <span className="relative text-xs font-medium text-fg">{kind}</span>
       <span className="relative mt-auto text-base font-semibold">{name}</span>
       <span className="relative mt-2.5 flex gap-5">
         {stages.map((stage) => (
