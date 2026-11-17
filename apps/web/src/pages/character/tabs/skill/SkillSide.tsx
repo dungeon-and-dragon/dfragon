@@ -1,5 +1,4 @@
 import { Button, Tooltip } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import {
   type EnhancementRow,
   type EvolutionRow,
@@ -14,10 +13,22 @@ import { useClipboardCopy } from '../../../../hooks/useClipboardCopy'
 import { GameText } from '../GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { SkillSprite } from './SkillSprite'
-import { styles as tableStyles } from '../equipment/item-table.style'
-import { styles } from './SkillSide.style'
-import { styles as markStyles } from './SkillTab.style'
+import { itemTableClasses } from '../equipment/item-classes'
+import { EVOLUTION_MARK, PIXELATED } from './skill-classes'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
+
+const { heading: HEADING } = itemTableClasses
+const SKILL_ICON = 'relative size-7 shrink-0 select-none'
+const PICKED_RING = 'shadow-[0_0_0_2px_var(--color-signal)]'
+const BRANCH =
+  'm-0 box-border inline-flex h-7 cursor-default items-center gap-1.5 rounded-control border px-2 [font-family:inherit] text-xs'
+const BRANCH_IDLE = 'border-dashed border-line-strong bg-surface text-fg-subtle hover:bg-control'
+const BRANCH_PICKED =
+  'border-solid border-signal bg-inset font-semibold text-fg shadow-[0_0_0_1px_var(--color-signal)]'
+const ROWS = 'm-0 list-none p-0'
+const ROW = 'box-border flex min-h-14 items-center gap-3 border-b border-line px-4 py-2'
+const ROW_BODY = 'flex min-w-0 grow flex-col gap-1.5'
+const BRANCHES = 'flex flex-wrap gap-1.5'
 
 export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
   const clipboard = useClipboardCopy(hash)
@@ -25,13 +36,16 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
 
   return (
     <section aria-label="스킬 트리 코드">
-      <h2 {...stylex.props(tableStyles.heading)}>스킬 트리 코드</h2>
-      <div {...stylex.props(styles.codeRow)}>
-        <code title={hash} {...stylex.props(styles.code)}>
+      <h2 className={HEADING}>스킬 트리 코드</h2>
+      <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
+        <code
+          title={hash}
+          className="box-border h-7 min-w-0 grow truncate rounded-control border border-line bg-surface px-2 font-mono text-xs/6.5 text-fg-muted"
+        >
           {hash}
         </code>
         <Button size="sm" onClick={clipboard.copy}>
-          <span {...stylex.props(styles.copyLabel)}>
+          <span className="inline-flex items-center gap-1.5">
             <Icon width={14} height={14} />
             코드 복사
           </span>
@@ -55,7 +69,7 @@ function ChevronRight(): React.JSX.Element {
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
-      {...stylex.props(styles.chainArrow)}
+      className="mt-2 shrink-0 text-fg-subtle"
     >
       <path d="m9 18 6-6-6-6" />
     </svg>
@@ -64,22 +78,25 @@ function ChevronRight(): React.JSX.Element {
 
 export function SkillChainSection({ chain }: { chain: SkillChain | null }): React.JSX.Element {
   if (chain === null) {
-    return <h2 {...stylex.props(tableStyles.heading)}>스킬 체인 없음</h2>
+    return <h2 className={HEADING}>스킬 체인 없음</h2>
   }
 
   return (
     <section aria-label="스킬 체인">
-      <h2 {...stylex.props(tableStyles.heading)}>스킬 체인</h2>
-      <ol {...stylex.props(styles.chain)}>
+      <h2 className={HEADING}>스킬 체인</h2>
+      <ol className="m-0 flex list-none flex-wrap items-start gap-y-2 border-b border-line px-4 py-3.5">
         {chain.skills.map(({ name, icon }, index) => (
-          <li key={`${name}-${index}`} {...stylex.props(styles.chainLink)}>
-            <span {...stylex.props(styles.chainSkill)}>
+          <li key={`${name}-${index}`} className="flex items-start gap-0.5">
+            <span className="flex w-16 flex-col items-center gap-1.5 text-center text-2xs text-fg-muted">
               {icon !== null ? (
-                <span {...stylex.props(styles.skillIcon)}>
+                <span className={SKILL_ICON}>
                   <SkillSprite icon={icon} />
                 </span>
               ) : (
-                <span aria-hidden="true" {...stylex.props(styles.skillIcon, styles.emptyIcon)} />
+                <span
+                  aria-hidden="true"
+                  className={`${SKILL_ICON} box-border rounded-control border border-line-strong bg-inset`}
+                />
               )}
               {name}
             </span>
@@ -108,15 +125,15 @@ function Branch({
         src={mark}
         alt=""
         draggable={false}
-        {...stylex.props(styles.branchMark, !picked && styles.branchMarkDim)}
+        className={`size-[17px] ${PIXELATED} ${picked ? '' : 'opacity-45'}`}
       />
       {label}
     </>
   )
-  const branchStyle = stylex.props(styles.branch, picked && styles.branchPicked)
+  const branchClassName = `${BRANCH} ${picked ? BRANCH_PICKED : BRANCH_IDLE}`
   if (tooltip === undefined) {
     return (
-      <span aria-current={picked || undefined} {...branchStyle}>
+      <span aria-current={picked || undefined} className={branchClassName}>
         {content}
       </span>
     )
@@ -125,11 +142,18 @@ function Branch({
   return (
     // 설명 창이 아래 갈래를 덮으므로, 마우스가 설명 창으로 옮겨 가면 닫아 다른 갈래를 볼 수 있게 한다.
     <Tooltip.Root disableHoverablePopup>
-      <Tooltip.Trigger delay={0} closeDelay={0} aria-current={picked || undefined} {...branchStyle}>
+      <Tooltip.Trigger
+        delay={0}
+        closeDelay={0}
+        aria-current={picked || undefined}
+        className={branchClassName}
+      >
         {content}
       </Tooltip.Trigger>
       <Tooltip.Popup side="bottom" align="end">
-        <span {...stylex.props(styles.tooltip)}>{tooltip}</span>
+        <span className="flex w-85 flex-col gap-2 py-1 text-xs/4.5 break-keep whitespace-normal">
+          {tooltip}
+        </span>
       </Tooltip.Popup>
     </Tooltip.Root>
   )
@@ -152,9 +176,7 @@ function UpgradeSkillIcon({
       skill={row}
       source={source}
       side={ADOPTION_SIDE}
-      trigger={
-        <span {...stylex.props(styles.skillIcon, row.picked !== null && styles.skillIconPicked)} />
-      }
+      trigger={<span className={`${SKILL_ICON} ${row.picked !== null ? PICKED_RING : ''}`} />}
     >
       <SkillSprite icon={row.icon} />
       {evolutionMark !== null && (
@@ -162,7 +184,7 @@ function UpgradeSkillIcon({
           src={evolutionMark}
           alt=""
           draggable={false}
-          {...stylex.props(markStyles.evolutionMark)}
+          className={`${EVOLUTION_MARK} ${PIXELATED}`}
         />
       )}
     </SkillAdoptionHover>
@@ -181,11 +203,11 @@ function RowTitle({
       skill={row}
       source={source}
       side={ADOPTION_SIDE}
-      trigger={<span {...stylex.props(styles.rowTitle)} />}
+      trigger={<span className="flex items-baseline gap-1.5 self-start font-medium" />}
     >
       {row.name}
       {row.requiredLevel !== null && (
-        <span {...stylex.props(styles.rowLevel)}>{`${row.requiredLevel}레벨`}</span>
+        <span className="text-2xs text-fg-subtle select-none">{`${row.requiredLevel}레벨`}</span>
       )}
     </SkillAdoptionHover>
   )
@@ -202,10 +224,10 @@ function EvolutionSection({
 }): React.JSX.Element {
   return (
     <section aria-label="스킬 개화">
-      <h2 {...stylex.props(tableStyles.heading)}>스킬 개화</h2>
-      <ul {...stylex.props(styles.rows)}>
+      <h2 className={HEADING}>스킬 개화</h2>
+      <ul className={ROWS}>
         {rows.map((row) => (
-          <li key={row.skillId} {...stylex.props(styles.row)}>
+          <li key={row.skillId} className={ROW}>
             <UpgradeSkillIcon
               row={row}
               evolutionMark={
@@ -213,9 +235,9 @@ function EvolutionSection({
               }
               source={source}
             />
-            <div {...stylex.props(styles.rowBody)}>
+            <div className={ROW_BODY}>
               <RowTitle row={row} source={source} />
-              <div {...stylex.props(styles.branches)}>
+              <div className={BRANCHES}>
                 {row.branches.map((branch) => (
                   <Branch
                     key={branch.type}
@@ -224,10 +246,10 @@ function EvolutionSection({
                     label={branch.name}
                     tooltip={
                       <>
-                        <b {...stylex.props(styles.tooltipTitle)}>
+                        <b className="font-semibold">
                           {`${EVOLUTION_NUMERALS[branch.type]} ${branch.name}`}
                         </b>
-                        <GameText lines={branch.basicExplain} style={styles.tooltipSummary} />
+                        <GameText lines={branch.basicExplain} className="text-fg-muted" />
                         <GameText lines={branch.explain} />
                       </>
                     }
@@ -252,19 +274,19 @@ function EnhancementSection({
   source: SkillAdoptionSource
 }): React.JSX.Element {
   if (rows.length === 0) {
-    return <h2 {...stylex.props(tableStyles.heading)}>스킬 강화 없음</h2>
+    return <h2 className={HEADING}>스킬 강화 없음</h2>
   }
 
   return (
     <section aria-label="스킬 강화">
-      <h2 {...stylex.props(tableStyles.heading)}>스킬 강화</h2>
-      <ul {...stylex.props(styles.rows)}>
+      <h2 className={HEADING}>스킬 강화</h2>
+      <ul className={ROWS}>
         {rows.map((row) => (
-          <li key={row.skillId} {...stylex.props(styles.row)}>
+          <li key={row.skillId} className={ROW}>
             <UpgradeSkillIcon row={row} evolutionMark={null} source={source} />
-            <div {...stylex.props(styles.rowBody)}>
+            <div className={ROW_BODY}>
               <RowTitle row={row} source={source} />
-              <div {...stylex.props(styles.branches)}>
+              <div className={BRANCHES}>
                 {row.branches.map((branch) => (
                   <Branch
                     key={branch.type}

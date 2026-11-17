@@ -1,21 +1,20 @@
-import * as stylex from '@stylexjs/stylex'
 import { toItemView } from '#core/character/character-item'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { type SlotItemRow, SlotItemTable } from '../equipment/SlotItemTable'
-import { styles } from './CreatureTable.style'
+import { artifactDotClasses } from './avatar-classes'
 
 type Creature = NonNullable<CharacterDetailView['creature']>
 
-const ARTIFACT_DOT_TONES: Readonly<Record<string, typeof styles.red>> = {
-  RED: styles.red,
-  BLUE: styles.blue,
-  GREEN: styles.green
+const ARTIFACT_DOT_TONES: Readonly<Record<string, string>> = {
+  RED: artifactDotClasses.red,
+  BLUE: artifactDotClasses.blue,
+  GREEN: artifactDotClasses.green
 }
 
-function artifactDotTone(slotColor: string | null) {
+function artifactDotTone(slotColor: string | null): string {
   const tone = slotColor != null ? ARTIFACT_DOT_TONES[slotColor] : undefined
   if (tone == null) {
-    return null
+    return ''
   }
 
   return tone
@@ -33,10 +32,10 @@ function creatureRows(creature: Creature): SlotItemRow[] {
       {
         key,
         slot: (
-          <span {...stylex.props(styles.slot)}>
+          <span className="inline-flex items-center gap-2">
             <span
               aria-hidden="true"
-              {...stylex.props(styles.dot, artifactDotTone(artifact.slotColor))}
+              className={`size-2 shrink-0 rounded-badge ${artifactDotTone(artifact.slotColor)}`}
             />
             아티팩트
           </span>

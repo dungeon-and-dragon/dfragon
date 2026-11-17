@@ -1,21 +1,20 @@
-import * as stylex from '@stylexjs/stylex'
 import type { GameTextLines } from '#core/catalog/game-text'
-import { styles, toneStyles } from './GameText.style'
+import { gameTextToneClasses } from './game-text-tones'
 
 export function GameText({
   lines,
-  style
+  className = ''
 }: {
   lines: GameTextLines
-  style?: stylex.StyleXStyles
+  className?: string
 }): React.JSX.Element {
   return (
-    <p {...stylex.props(styles.text, style)}>
+    <p className={`m-0 ${className}`}>
       {lines.map((line, lineIndex) => (
         // 문구에는 같은 줄이 되풀이되기도 하고 순서가 바뀌지 않아 줄 번호를 key로 쓴다.
-        <span key={`line-${lineIndex}`} {...stylex.props(styles.line)}>
+        <span key={`line-${lineIndex}`} className="block min-h-lh whitespace-pre-wrap">
           {line.map(({ text, tone }, segmentIndex) => (
-            <span key={`segment-${segmentIndex}`} {...stylex.props(toneStyles[tone])}>
+            <span key={`segment-${segmentIndex}`} className={gameTextToneClasses[tone]}>
               {text}
             </span>
           ))}

@@ -1,5 +1,3 @@
-import { colors } from '@dfragon/ui/tokens.stylex'
-import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { toScoreView } from '#core/character/card-score'
 import type { CharacterIdentity } from '#core/character/character'
@@ -18,7 +16,6 @@ import type { CharacterTabProps } from './character-tab-props'
 import { historyTimeAxis } from './history/history-chart'
 import { type Delta, deltaOf, formatOptional, integer, MISSING } from './history/history-format'
 import { Heading, HistoryChanges, NameChanges } from './history/HistorySections'
-import { styles } from './history/HistoryTab.style'
 
 const CHART_HEIGHT = 226
 const CHART_BONE_HEIGHT = 296
@@ -30,6 +27,17 @@ const TILE_COUNT = 4
 const CHANGE_BONE_HEIGHTS = [32, 38, 38, 38]
 
 type ScoreLabel = ReturnType<typeof toScoreView>['label']
+
+const LINE = 'border-b border-line'
+const POINT_COLUMNS = 'grid grid-cols-[400px_minmax(0,1fr)] max-sm:grid-cols-1'
+const FAME = 'text-game-fame'
+const STRIP = `box-border flex min-h-11 items-center px-4 py-2 ${LINE}`
+const DELTA_TONES = { up: 'text-game-increase', down: 'text-game-decrease' } as const
+const POINT =
+  'relative m-0 box-border flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-none border-0 px-4 py-2 text-left [font-family:inherit] text-sm text-fg outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-signal'
+const POINT_IDLE = 'bg-transparent hover:bg-surface'
+const POINT_SELECTED =
+  'bg-surface before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-signal'
 
 export function HistoryTab({ detail }: CharacterTabProps): React.JSX.Element {
   const { serverId, characterId } = detail.character
@@ -43,8 +51,8 @@ export function HistoryTab({ detail }: CharacterTabProps): React.JSX.Element {
       return <HistorySkeleton />
     case 'error':
       return (
-        <div {...stylex.props(styles.message)}>
-          <p role="alert" {...stylex.props(styles.error)}>
+        <div className="p-4">
+          <p role="alert" className="m-0 text-sm text-fg-danger">
             이력을 받지 못했습니다.
           </p>
         </div>
@@ -81,12 +89,14 @@ function HistoryContent({
     points.findIndex(({ observedAt }) => observedAt === selectedAt)
   )
   const selected = points[selectedIndex]
-  const scoreTone = calculator === 'buff' ? styles.buffer : styles.dealer
+  const scoreTone = calculator === 'buff' ? 'text-score-buffer' : 'text-score-dealer'
 
   if (selected === undefined) {
     return (
       <div>
-        <p {...stylex.props(styles.empty)}>저장된 이력이 없습니다.</p>
+        <p className={`m-0 px-4 py-12 text-center text-sm font-semibold ${LINE}`}>
+          저장된 이력이 없습니다.
+        </p>
         <NameChanges changes={history.nameChanges} />
       </div>
     )
@@ -107,8 +117,8 @@ function HistoryContent({
         />
       )}
       <Heading title="시점" count={points.length} />
-      <div {...stylex.props(styles.points)}>
-        <ul {...stylex.props(styles.pointList)}>
+      <div className={`${POINT_COLUMNS} ${LINE}`}>
+        <ul className="m-0 flex list-none flex-col border-e border-line p-0 max-sm:border-e-0">
           {points.map((point) => (
             <PointButton
               key={point.observedAt}
@@ -144,7 +154,7 @@ function PointButton({
   point: HistoryPoint
   selected: boolean
   time: string
-  scoreTone: stylex.StyleXStyles
+  scoreTone: string
   onSelect: (observedAt: string) => void
 }): React.JSX.Element {
   function handleClick(): void {
@@ -152,20 +162,22 @@ function PointButton({
   }
 
   return (
-    <li>
+    <li className={LINE}>
       <button
         type="button"
         aria-pressed={selected}
         onClick={handleClick}
-        {...stylex.props(styles.point, selected && styles.pointSelected)}
+        className={`${POINT} ${selected ? POINT_SELECTED : POINT_IDLE}`}
       >
-        <span {...stylex.props(styles.pointTime, selected && styles.pointTimeSelected)}>
+        <span
+          className={`w-24 shrink-0 font-mono tabular-nums ${selected ? 'font-semibold text-fg' : 'font-medium text-fg-muted'}`}
+        >
           {time}
         </span>
-        <span {...stylex.props(styles.pointParts)}>{partsText(point)}</span>
-        <span {...stylex.props(styles.pointValues)}>
-          <span {...stylex.props(styles.fame)}>{formatOptional(point.fame)}</span>
-          <span {...stylex.props(scoreTone)}>{formatOptional(point.score)}</span>
+        <span className="min-w-0 truncate text-xs text-fg-muted">{partsText(point)}</span>
+        <span className="ms-auto flex flex-col items-end font-mono text-xs tabular-nums">
+          <span className={FAME}>{formatOptional(point.fame)}</span>
+          <span className={scoreTone}>{formatOptional(point.score)}</span>
         </span>
       </button>
     </li>
@@ -202,20 +214,20 @@ function HistoryCharts({
   const fames = ordered.map(({ fame }) => fame)
   const scores = ordered.map(({ score }) => score)
   const charts = [
-    { key: 'fame', name: '명성', color: colors.gameFame, values: fames },
-    { key: 'score', name: scoreLabel, color: colors.chart1, values: scores }
+    { key: 'fame', name: '명성', color: 'var(--color-game-fame)', values: fames },
+    { key: 'score', name: scoreLabel, color: 'var(--color-chart-1)', values: scores }
   ]
 
   return (
-    <div {...stylex.props(styles.charts)}>
+    <div className={`grid grid-cols-2 gap-4 p-4 max-sm:grid-cols-1 ${LINE}`}>
       {charts.map((series) => (
         <section
           key={series.key}
           aria-label={`${series.name} 추이`}
-          {...stylex.props(styles.panel)}
+          className="flex min-w-0 flex-col rounded-panel border border-line bg-canvas"
         >
-          <div {...stylex.props(styles.strip)}>
-            <h3 {...stylex.props(styles.stripTitle)}>{series.name}</h3>
+          <div className={STRIP}>
+            <h3 className="m-0 text-sm font-semibold">{series.name}</h3>
           </div>
           <LineChart
             label={`${series.name} 추이`}
@@ -246,13 +258,13 @@ function PointSummary({
   point: HistoryPoint
   previous: HistoryPoint | undefined
   scoreLabel: ScoreLabel
-  scoreTone: stylex.StyleXStyles
+  scoreTone: string
   time: string
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.summary)}>
-      <div {...stylex.props(styles.strip)}>
-        <b {...stylex.props(styles.stripTime)}>{time}</b>
+    <div className="min-w-0">
+      <div className={STRIP}>
+        <b className="font-mono text-sm font-semibold tabular-nums">{time}</b>
       </div>
       <SummaryBody
         identity={identity}
@@ -276,15 +288,15 @@ function SummaryBody({
   point: HistoryPoint
   previous: HistoryPoint | undefined
   scoreLabel: ScoreLabel
-  scoreTone: stylex.StyleXStyles
+  scoreTone: string
 }): React.JSX.Element {
   const current = useHistorySnapshot(identity, point.observedAt)
   const before = useHistorySnapshot(identity, previous?.observedAt ?? null)
 
   if (current.status === 'error' || before.status === 'error') {
     return (
-      <div {...stylex.props(styles.message)}>
-        <p role="alert" {...stylex.props(styles.error)}>
+      <div className="p-4">
+        <p role="alert" className="m-0 text-sm text-fg-danger">
           시점 요약을 받지 못했습니다.
         </p>
       </div>
@@ -302,11 +314,11 @@ function SummaryBody({
 
   return (
     <>
-      <dl {...stylex.props(styles.tiles)}>
+      <dl className={`m-0 grid grid-cols-4 max-sm:grid-cols-2 ${LINE}`}>
         <Tile
           label="명성"
           value={formatOptional(point.fame)}
-          tone={styles.fame}
+          tone={FAME}
           delta={deltaOf(point.fame, previous?.fame)}
         />
         <Tile
@@ -339,20 +351,18 @@ function Tile({
 }: {
   label: string
   value: string
-  tone?: stylex.StyleXStyles
+  tone?: string
   delta: Delta
 }): React.JSX.Element {
+  const deltaTone = delta.direction !== null ? DELTA_TONES[delta.direction] : 'text-fg-subtle'
+
   return (
-    <div {...stylex.props(styles.tile)}>
-      <dt {...stylex.props(styles.tileLabel)}>{label}</dt>
-      <dd {...stylex.props(styles.tileValue, tone)}>{value}</dd>
-      <dd
-        {...stylex.props(
-          styles.tileDelta,
-          delta.direction === 'up' && styles.up,
-          delta.direction === 'down' && styles.down
-        )}
-      >
+    <div className="m-0 flex flex-col gap-0.5 border-s border-line px-4 pt-3.5 pb-4 first:border-s-0">
+      <dt className="text-xs text-fg-subtle">{label}</dt>
+      <dd className={`m-0 font-mono text-xl/8 font-semibold tabular-nums ${tone ?? ''}`}>
+        {value}
+      </dd>
+      <dd className={`ms-0 mt-1 text-right font-mono text-2xs tabular-nums ${deltaTone}`}>
         {delta.text}
       </dd>
     </div>
@@ -360,7 +370,7 @@ function Tile({
 }
 
 function Bone({ height }: { height: number }): React.JSX.Element {
-  return <span {...stylex.props(styles.bone, styles.boneHeight(height))} />
+  return <span className="block rounded-control bg-surface" style={{ height }} />
 }
 
 function HistorySkeleton(): React.JSX.Element {
@@ -369,12 +379,12 @@ function HistorySkeleton(): React.JSX.Element {
       <span role="status" className="sr-only">
         이력을 받는 중입니다.
       </span>
-      <div aria-hidden="true" {...stylex.props(styles.skeletonCharts)}>
+      <div aria-hidden="true" className={`grid grid-cols-2 gap-4 p-4 ${LINE}`}>
         <Bone height={CHART_BONE_HEIGHT} />
         <Bone height={CHART_BONE_HEIGHT} />
       </div>
-      <div aria-hidden="true" {...stylex.props(styles.skeletonBody)}>
-        <div {...stylex.props(styles.skeletonColumn)}>
+      <div aria-hidden="true" className={`${POINT_COLUMNS} gap-4 p-4`}>
+        <div className="flex flex-col gap-2">
           {Array.from({ length: POINT_BONE_COUNT }, (_, index) => (
             <Bone key={index} height={POINT_BONE_HEIGHT} />
           ))}
@@ -391,12 +401,12 @@ function SummarySkeleton(): React.JSX.Element {
       <span role="status" className="sr-only">
         시점 요약을 받는 중입니다.
       </span>
-      <div aria-hidden="true" {...stylex.props(styles.skeletonTiles)}>
+      <div aria-hidden="true" className={`grid grid-cols-4 gap-2 p-4 ${LINE}`}>
         {Array.from({ length: TILE_COUNT }, (_, index) => (
           <Bone key={index} height={TILE_BONE_HEIGHT} />
         ))}
       </div>
-      <div aria-hidden="true" {...stylex.props(styles.skeletonRows)}>
+      <div aria-hidden="true" className="flex flex-col gap-2 p-4">
         {CHANGE_BONE_HEIGHTS.map((height, index) => (
           <Bone key={index} height={height} />
         ))}
