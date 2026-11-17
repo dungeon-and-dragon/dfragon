@@ -1,6 +1,8 @@
 /*
  * <div class="tooltip-positioner"><div class="tooltip" role="tooltip">설명</div></div>.
  * 열리고 닫힐 때 Base UI가 붙이는 data-starting-style, data-ending-style 동안 투명해진다.
+ * 화면과 반대 색 모드로 그려, 안에 둔 글자가 어떤 색 토큰을 써도 반전된 면 위에서 읽힌다.
+ * 화면의 색 모드는 base.css처럼 html의 data-color-mode, 없으면 시스템 설정으로 정한다.
  */
 .tooltip-positioner {
   z-index: var(--z-tooltip);
@@ -9,14 +11,25 @@
 .tooltip {
   padding: 4px 8px;
   border-radius: var(--radius-control);
-  background-color: var(--color-signal);
+  color-scheme: dark;
+  background-color: var(--color-canvas);
   box-shadow: var(--shadow-tooltip);
-  color: var(--color-on-signal);
+  color: var(--color-fg);
   font-size: var(--text-xs);
   line-height: var(--text-xs--line-height);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   transition: opacity var(--duration-hover) var(--ease-standard);
+}
+
+:root[data-color-mode='dark'] .tooltip {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color-mode='light']) .tooltip {
+    color-scheme: light;
+  }
 }
 
 .tooltip:is([data-starting-style], [data-ending-style]) {
