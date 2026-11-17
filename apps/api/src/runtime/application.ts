@@ -3,7 +3,10 @@ import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '../application/character-catalog/service.js'
 import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
 import { DatabaseCharacterBasicRepository } from '../infrastructure/database/character-basic.js'
-import { EnhancementBackfillService } from '../application/character-timeline/backfill.js'
+import {
+  ENHANCEMENT_BACKFILL_CODES,
+  EnhancementBackfillService
+} from '../application/character-timeline/backfill.js'
 import {
   DatabaseCharacterTimelineRepository,
   DatabaseEnhancementBackfillRepository,
@@ -12,7 +15,6 @@ import {
   DatabaseTimelineSyncRepository
 } from '../infrastructure/database/character-timeline.js'
 import { SeasonBackfillService } from '../application/character-timeline/season-backfill.js'
-import { ENHANCEMENT_CODES } from '../domain/character-timeline/project.js'
 import { TimelineSyncService } from '../application/character-timeline/sync.js'
 import { createNeopleCatalog } from '../infrastructure/neople/character-catalog.js'
 import { createNeopleCharacterDetails } from '../infrastructure/neople/character-detail.js'
@@ -66,7 +68,7 @@ function createDatabaseSubscribers(
   )
   const enhancementBackfill = new EnhancementBackfillService(
     new DatabaseEnhancementBackfillRepository(client),
-    createNeopleCharacterTimeline(neople, ENHANCEMENT_CODES)
+    createNeopleCharacterTimeline(neople, ENHANCEMENT_BACKFILL_CODES)
   )
   const seasonBackfill = new SeasonBackfillService(
     new DatabaseSeasonBackfillRepository(client),
