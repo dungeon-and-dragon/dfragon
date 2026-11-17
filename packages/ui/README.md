@@ -1,6 +1,6 @@
 # 공용 UI
 
-`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이 맡는다. 외형은 `Button`, `IconButton`, `TextField`, `Switch`, `Checkbox`, `Chip`, `Select`, `Menu`, `Tabs`, `Tooltip`, `Popover`가 `@dfragon/design/components.css`의 클래스로, 나머지는 `--df-*` 토큰만 쓰는 StyleX로 그린다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
+`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이 맡는다. 외형은 모두 `@dfragon/design/components.css`의 클래스로 그린다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
 
 ## Public API
 
@@ -15,20 +15,17 @@
 | `Switch`, `Checkbox`, `Chip` | `Switch`, `Checkbox`, `Toggle` | 한 요소로 쓰는 켜고 끄는 컨트롤. 이름은 감싼 label이나 `aria-label`로 준다. |
 | `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 신호색 면에 반전 글자다. |
 | `Popover` | `Popover` | `Root`, `Trigger`, `Popup`(Portal, Positioner, Popup. `anchor`, `side`, `align`, `sideOffset`을 받는다), `Title`, `Close`. 면, 테두리, 그림자만 그리고 안쪽 배치와 폭은 화면이 정한다. |
-| `StatusChip` | `span` | tone `neutral`(`fg.subtle`), `success`, `danger`, `warning`(주의, `fg.warning`), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색 12% 안팎의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 `StepDots`를 둔다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 28이다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
-| `StepDots` | plain | 글자색 사각 점 세 개가 `motion.beat`마다 `steps()`로 차례로 켜진다. `size` 4(상태 칩 안, 3px 간격)와 5(목록 안내, 4px 간격). 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
+| `StatusChip` | `span` | tone `neutral`, `success`, `danger`, `warning`(주의), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 `StepDots`를 둔다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 28이다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
+| `StepDots` | plain | 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜진다. `size` 4(상태 칩 안, 3px 간격)와 5(목록 안내, 4px 간격). 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG | 값이 없으면 `steps()`로 끊어 도는 호, 있으면 진행 호. |
-| `Kbd`, `NumericText` | plain | 단축키(22px 키캡, 숫자 글꼴 14 700. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 숫자 글꼴(`font.num`, `tabular-nums`)과 400ms 증가. |
-| `ContentStack`, `ExampleSection`, `SupportingText` | plain | 예제와 단순 화면의 세로 묶음, 제목, 보조 글자. |
-| `Typo` | plain | `Typo.h1`–`h6`, `txtL`, `txtM`, `txtS`, `caption`과 `typographyVariants`, `TypoProps`, `TypoTag`, `TypoVariant` 타입. |
+| `Kbd`, `NumericText` | plain | 단축키(22px 키캡, 숫자 글꼴. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 숫자 글꼴(`--font-mono`, `tabular-nums`)과 `--duration-count` 동안의 증가. |
 
 공개 타입은 `className`, `style`을 받지 않는다. Base UI 부품 그대로인 `Select.Root`, `Menu.Root` 같은 부품은 Base UI 문서의 API를 따른다.
 
 Entry는 다음과 같다.
 
-- `@dfragon/ui`: 위 Component와 공용 `stylex.create`인 `shapes`(`srOnly`). StyleX compiler가 필요하다.
+- `@dfragon/ui`: 위 Component. 앱에서 눈에는 숨기고 보조 기술이 읽게 할 글자는 Tailwind CSS의 `sr-only`를 쓴다.
 - `@dfragon/ui/tokens.stylex`: `colors`, `shadow`, `space`, `radius`, `size`, `motion`, `font` 토큰 상수. Source를 가리켜 library를 먼저 빌드하지 않아도 된다.
-- `@dfragon/ui/typo`: Typo만 내보내는 React 전용 entry. Base UI와 StyleX 없이 쓴다.
 - `@dfragon/ui/tokens.css`: `--df-*` 이름을 `@dfragon/design/theme.css`의 변수로 잇는 별칭.
 
 `@base-ui/react`, React, React DOM과 `@stylexjs/stylex`는 peer이다. Library build는 이들을 external로 두고 CSS를 출력하지 않는다.
@@ -53,7 +50,7 @@ Repository root에서 실행한다.
 - `pnpm --filter @dfragon/ui build`: ESM bundle, declaration 생성 뒤 public package export의 소비 검사.
 - `pnpm --filter @dfragon/ui verify:build`: 기존 library 산출물의 export, dependency, CSS, 고지, declaration과 Vite 소비 fixture 검사.
 - `pnpm --filter @dfragon/storybook dev`: 컴포넌트 옆 `src/*.stories.tsx`를 Storybook에서 본다.
-- `pnpm --filter @dfragon/ui test`: typecheck, Vitest interaction과 Typo, 빌드 검사 도구의 Node 회귀를 차례로 실행한다.
+- `pnpm --filter @dfragon/ui test`: typecheck, Vitest interaction, 빌드 검사 도구의 Node 회귀를 차례로 실행한다.
 - `pnpm --filter @dfragon/ui exec vitest run test/interaction.test.tsx`: 고른 runtime 테스트만 실행한다. 파일 인수를 aggregate `test`에 넘기지 않는다.
 - `pnpm --filter @dfragon/ui typecheck`: src, test를 `tsc --noEmit`으로 검사한다.
 - `pnpm --filter @dfragon/ui test:tooling`: 임시 산출물로 빌드 검사 도구를 확인한다. Library 선행 build 없이 실행한다.
