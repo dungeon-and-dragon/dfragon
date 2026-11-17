@@ -50,6 +50,10 @@ export const checkJobs = [
   {
     job: 'internal',
     commands: [workspace('@dfragon/internal', 'test'), workspace('@dfragon/internal', 'build')]
+  },
+  {
+    job: 'storybook',
+    commands: [workspace('@dfragon/storybook', 'test'), workspace('@dfragon/storybook', 'build')]
   }
 ]
 

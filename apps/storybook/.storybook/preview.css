@@ -1,0 +1,10 @@
+@layer theme, base, components, utilities;
+/* 웹 화면과 같은 모양으로 그리도록 apps/web/src/site.css와 같은 순서로 불러오고 preflight는 넣지 않는다. */
+@import 'tailwindcss/theme.css' layer(theme);
+@import '@dfragon/design/theme.css';
+@import '@dfragon/design/base.css' layer(base);
+@import '@dfragon/ui/tokens.css';
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@source '../src';
+@source '../../../packages/ui/src';

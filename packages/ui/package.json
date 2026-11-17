@@ -55,7 +55,8 @@
     "@stylexjs/unplugin": "catalog:",
     "@dfragon/design": "workspace:*",
     "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "@storybook/react-vite": "catalog:"
   },
   "files": [
     "dist",
