@@ -13,7 +13,7 @@
 | `Menu` | `Menu` | `Root`, `Trigger`(외형 없음, `render`로 연결), `Popup`, `Item`, `RadioGroup`, `RadioItem`, `Group`, `GroupLabel`, `Separator`. |
 | `Tabs` | `Tabs` | `Root`, `List`(현재 탭 아래로 움직이는 2px 선 포함), `Tab`, `Panel`. |
 | `Switch`, `Checkbox`, `Chip` | `Switch`, `Checkbox`, `Toggle` | 한 요소로 쓰는 켜고 끄는 컨트롤. 이름은 감싼 label이나 `aria-label`로 준다. |
-| `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 신호색 면에 반전 글자다. |
+| `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 화면과 반대 색 모드로 그려, 안에 둔 글자가 어떤 색 토큰을 써도 읽힌다. |
 | `Popover` | `Popover` | `Root`, `Trigger`, `Popup`(Portal, Positioner, Popup. `anchor`, `side`, `align`, `sideOffset`을 받는다), `Title`, `Close`. 면, 테두리, 그림자만 그리고 안쪽 배치와 폭은 화면이 정한다. |
 | `StatusChip` | `span` | tone `neutral`, `success`, `danger`, `warning`(주의), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 `StepDots`를 둔다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 28이다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
 | `StepDots` | plain | 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜진다. `size` 4(상태 칩 안, 3px 간격)와 5(목록 안내, 4px 간격). 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
