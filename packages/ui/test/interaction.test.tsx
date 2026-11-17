@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { act, createRef, useState, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -22,7 +21,6 @@ import {
   TextFieldLabel,
   Typo,
   type ButtonProps,
-  type ControlSurface,
   type IconButtonProps,
   type TextFieldInputProps
 } from '../src/index'
@@ -108,10 +106,6 @@ function getByRole(role: string, name?: string, scope: ParentNode = document) {
   }
 
   return result
-}
-
-function allByRole(role: string, scope: ParentNode = document) {
-  return Array.from(scope.querySelectorAll<HTMLElement>(IMPLICIT_ROLES[role]))
 }
 
 function describedTexts(target: HTMLElement) {
@@ -440,13 +434,6 @@ describe('IconButton의 이름, 클릭, disabled', () => {
   })
 })
 
-// 목록 항목과 탭의 면 스타일은 StyleX marker가 붙은 조상의 data-surface를 읽는다.
-const surfaceMarkerClass = stylex.props(stylex.defaultMarker()).className
-
-function surfaceOf(element: HTMLElement) {
-  return element.closest(`.${surfaceMarkerClass}[data-surface]`)?.getAttribute('data-surface')
-}
-
 const servers = [
   { id: 'cain', label: '카인' },
   { id: 'diregie', label: '디레지에' },
@@ -455,11 +442,9 @@ const servers = [
 
 function ServerSelect({
   onValueChange,
-  surface,
   columns
 }: {
   onValueChange: (value: string | null) => void
-  surface?: ControlSurface
   columns?: number
 }) {
   const [value, setValue] = useState<string | null>('siroco')
@@ -473,10 +458,10 @@ function ServerSelect({
       }}
       items={servers.map((server) => ({ value: server.id, label: server.label }))}
     >
-      <Select.Trigger size="xs" aria-label="서버" surface={surface}>
+      <Select.Trigger size="xs" aria-label="서버">
         <Select.Value />
       </Select.Trigger>
-      <Select.Popup aria-label="서버 목록" surface={surface} columns={columns}>
+      <Select.Popup aria-label="서버 목록" columns={columns}>
         {servers.map((server) => (
           <Select.Item key={server.id} value={server.id}>
             <Select.ItemText>{server.label}</Select.ItemText>
@@ -513,57 +498,6 @@ describe('Select의 키보드 선택과 포커스 복귀', () => {
     await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
   })
 
-  it('카드 위 칩은 body portal의 목록 항목까지 카드 면으로 그리고 같은 키보드 조작을 유지한다', async () => {
-    const onValueChange = vi.fn<(value: string | null) => void>()
-    await render(<ServerSelect onValueChange={onValueChange} surface="card" />)
-    const trigger = getByRole('combobox', '서버')
-    expect(trigger.dataset.surface).toBe('card')
-    trigger.focus()
-
-    await press(trigger, 'ArrowDown')
-    const listbox = await vi.waitFor(() => getByRole('listbox', '서버 목록'))
-    expect(container.contains(listbox)).toBe(false)
-    const options = allByRole('option', listbox)
-    expect(options.map(surfaceOf)).toEqual(['card', 'card', 'card'])
-    const current = getByRole('option', '시로코', listbox)
-    await vi.waitFor(() => expect(document.activeElement).toBe(current))
-    await press(current, 'ArrowUp')
-    const previous = getByRole('option', '디레지에', listbox)
-    await vi.waitFor(() => expect(document.activeElement).toBe(previous))
-    await press(previous, 'Enter')
-
-    expect(onValueChange).toHaveBeenLastCalledWith('diregie')
-    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
-  })
-
-  it('기본 칩과 목록 항목은 모드 면으로 그리고 카드 면과 다른 외형을 쓴다', async () => {
-    await render(
-      <>
-        <ServerSelect onValueChange={vi.fn()} />
-        <ServerSelect onValueChange={vi.fn()} surface="card" />
-      </>
-    )
-    const [plain, onCard] = allByRole('combobox')
-    expect(plain.dataset.surface).toBe('default')
-    expect(onCard.className).not.toBe(plain.className)
-
-    await click(plain)
-    const plainList = await vi.waitFor(() => getByRole('listbox', '서버 목록'))
-    const plainOption = getByRole('option', '카인', plainList)
-    expect(surfaceOf(plainOption)).toBe('default')
-    await press(plainOption, 'Escape')
-    await vi.waitFor(() => expect(plain.getAttribute('aria-expanded')).toBe('false'))
-
-    await click(onCard)
-    await vi.waitFor(() => expect(onCard.getAttribute('aria-expanded')).toBe('true'))
-    const cardList = document.getElementById(onCard.getAttribute('aria-controls') ?? '')
-    if (cardList == null) {
-      throw new Error('테스트 준비: 카드 목록이 없습니다.')
-    }
-    const cardOption = getByRole('option', '카인', cardList)
-    expect(surfaceOf(cardOption)).toBe('card')
-  })
-
   it('columns를 주면 목록을 그 수의 열로 늘어놓고 화살표로 읽는 순서대로 옮긴다', async () => {
     const onValueChange = vi.fn<(value: string | null) => void>()
     await render(<ServerSelect onValueChange={onValueChange} columns={2} />)
@@ -572,7 +506,8 @@ describe('Select의 키보드 선택과 포커스 복귀', () => {
 
     await press(trigger, 'ArrowDown')
     const listbox = await vi.waitFor(() => getByRole('listbox', '서버 목록'))
-    expect(listbox.getAttribute('style')).toContain('repeat(2, auto)')
+    expect(listbox.classList.contains('listbox-grid')).toBe(true)
+    expect(listbox.style.getPropertyValue('--listbox-columns')).toBe('2')
     const current = getByRole('option', '시로코', listbox)
     await vi.waitFor(() => expect(document.activeElement).toBe(current))
     await press(current, 'ArrowUp')
@@ -588,7 +523,7 @@ describe('Select의 키보드 선택과 포커스 복귀', () => {
     const trigger = getByRole('combobox', '서버')
     await click(trigger)
     const listbox = await vi.waitFor(() => getByRole('listbox', '서버 목록'))
-    expect(listbox.getAttribute('style') ?? '').not.toContain('repeat(')
+    expect(listbox.classList.contains('listbox-grid')).toBe(false)
   })
 
   it('Escape로 닫으면 값을 바꾸지 않고 trigger로 focus를 돌려준다', async () => {
@@ -707,10 +642,10 @@ describe('Tabs의 키보드 이동과 패널 연결', () => {
     expect(panel.getAttribute('aria-labelledby')).toBe(labeling.id)
   })
 
-  it('카드 면 탭은 카드 면으로 표시하고 비활성 탭을 고르지 않는다', async () => {
+  it('비활성 탭은 눌러도 고르지 않는다', async () => {
     await render(
       <Tabs.Root defaultValue="character">
-        <Tabs.List aria-label="카드 면" surface="card">
+        <Tabs.List aria-label="캐릭터 정보">
           <Tabs.Tab value="character">캐릭터</Tabs.Tab>
           <Tabs.Tab value="equipment" disabled>
             장비
@@ -720,8 +655,6 @@ describe('Tabs의 키보드 이동과 패널 연결', () => {
         <Tabs.Panel value="equipment">장비 패널</Tabs.Panel>
       </Tabs.Root>
     )
-    expect(getByRole('tablist', '카드 면').dataset.surface).toBe('card')
-    expect(surfaceOf(getByRole('tab', '캐릭터'))).toBe('card')
     const equipment = getByRole('tab', '장비')
     expect(equipment.getAttribute('aria-disabled')).toBe('true')
 
