@@ -42,6 +42,9 @@ model Character {
   basicFetchedAt DateTime? @map("basic_fetched_at") @db.Timestamptz(3)
   skillStyle     CharacterSkillStyle?
   score          CharacterScore?
+  basicHistory   CharacterBasicHistory[]
+  sectionHistory CharacterSectionHistory[]
+  scoreHistory   CharacterScoreHistory[]
 
   @@id([serverId, characterId])
   @@index([adventureId])
@@ -82,6 +85,65 @@ model CharacterScore {
 
   @@id([serverId, characterId])
   @@map("character_scores")
+}
+
+model CharacterBasicHistory {
+  serverId      String    @map("server_id")
+  characterId   String    @map("character_id")
+  character     Character @relation(fields: [serverId, characterId], references: [serverId, characterId], onDelete: Cascade)
+  observedAt    DateTime  @map("observed_at") @db.Timestamptz(3)
+  lastSeenAt    DateTime  @map("last_seen_at") @db.Timestamptz(3)
+  characterName String    @map("character_name")
+  adventureName String    @map("adventure_name")
+  level         Int
+  jobId         String    @map("job_id")
+  jobGrowId     String    @map("job_grow_id")
+  jobName       String    @map("job_name")
+  jobGrowName   String    @map("job_grow_name")
+  fame          Int?
+  guildId       String?   @map("guild_id")
+  guildName     String?   @map("guild_name")
+
+  @@id([serverId, characterId, observedAt])
+  @@map("character_basic_history")
+}
+
+model CharacterSectionHistory {
+  serverId    String    @map("server_id")
+  characterId String    @map("character_id")
+  character   Character @relation(fields: [serverId, characterId], references: [serverId, characterId], onDelete: Cascade)
+  section     String
+  observedAt  DateTime  @map("observed_at") @db.Timestamptz(3)
+  contentHash String    @map("content_hash") @db.Uuid
+  data        Json
+
+  @@id([serverId, characterId, section, observedAt])
+  @@map("character_section_history")
+}
+
+model CharacterScoreHistory {
+  serverId    String      @map("server_id")
+  characterId String      @map("character_id")
+  character   Character   @relation(fields: [serverId, characterId], references: [serverId, characterId], onDelete: Cascade)
+  observedAt  DateTime    @map("observed_at") @db.Timestamptz(3)
+  kind        String
+  score       Int
+  engineId    Int         @map("engine_id")
+  engine      ScoreEngine @relation(fields: [engineId], references: [id])
+
+  @@id([serverId, characterId, observedAt])
+  @@map("character_score_history")
+}
+
+model ScoreEngine {
+  id           Int                     @id @default(autoincrement())
+  package      String
+  rulesRev     String                  @map("rules_rev")
+  bundleId     String                  @map("bundle_id")
+  scoreHistory CharacterScoreHistory[]
+
+  @@unique([package, rulesRev, bundleId])
+  @@map("score_engines")
 }
 
 model CharacterCollection {
