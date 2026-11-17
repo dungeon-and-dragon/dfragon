@@ -758,9 +758,6 @@ importers:
       '@stylexjs/unplugin':
         specifier: 'catalog:'
         version: 0.19.1(supports-color@7.2.0)(unplugin@2.3.11)
-      '@tailwindcss/vite':
-        specifier: 'catalog:'
-        version: 4.3.5(vite@8.3.6(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
@@ -782,9 +779,6 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
-      tailwindcss:
-        specifier: 'catalog:'
-        version: 4.3.5
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

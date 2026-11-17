@@ -18,5 +18,5 @@
       "@dfragon/ui/typo": ["./src/typo.tsx"]
     }
   },
-  "include": ["src", "test", "vitest.config.ts", "build", "vite.config.ts", "examples"]
+  "include": ["src", "test", "vitest.config.ts", "build", "vite.config.ts"]
 }
