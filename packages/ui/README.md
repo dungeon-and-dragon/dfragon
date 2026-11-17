@@ -1,13 +1,13 @@
 # 공용 UI
 
-`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이 맡는다. 외형은 `--df-*` 토큰만 쓰는 StyleX로 그리며, `@dfragon/design`의 CSS 클래스로 옮기는 중이다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
+`@dfragon/ui`는 Base UI(`@base-ui/react`) 기반 공용 Component를 제공한다. 동작과 접근성은 Base UI 부품이 맡는다. 외형은 `Button`, `IconButton`, `TextField`, `Switch`, `Checkbox`, `Chip`이 `@dfragon/design/components.css`의 클래스로, 나머지는 `--df-*` 토큰만 쓰는 StyleX로 그린다. 토큰 값은 `@dfragon/design`에 있다. 제품 data, event, platform 연결은 소비 app이 소유한다.
 
 ## Public API
 
 | Component | 바탕 | 요약 |
 | --- | --- | --- |
-| `Button` | native `button` | `variant` `primary`, `secondary`(기본), `ghost`, `danger`와 `size` `sm`, `md`(기본), `lg`(32, 40, 48px). `primary`는 신호색 면이다. `loading`은 진행 원을 겹치고 클릭을 막지 않는다. |
-| `IconButton` | native `button` | 회색 면 없이 hover 때 아이콘이 밝아진다. `aria-label`, `icon` 필수, `size` `sm` 32, `md` 40, `bar` 36(상단 바 도구 버튼, 아이콘 20), `lg` 48(화면 헤더 도구 버튼, 아이콘 24, `bg.inset` 면). `pressed`를 주면 켜고 끄는 토글로 `aria-pressed`를 전하고 켜진 동안 아이콘과 안쪽 2px 선이 신호색이다. |
+| `Button` | native `button` | `variant` `primary`, `secondary`(기본), `ghost`, `danger`와 `size` `sm`, `md`(기본), `lg`(32, 40, 48px). `primary`는 신호색 면이다. `loading`은 `data-loading`으로 글자를 투명하게 가리고 진행 호를 그리며 클릭을 막지 않는다. |
+| `IconButton` | native `button` | 평소에는 면이 없고 hover 때 `inset` 면에 아이콘이 밝아진다. `aria-label`, `icon` 필수, `size` `sm` 32, `md` 40, `bar` 36(상단 바 도구 버튼, 아이콘 20), `lg` 48(화면 헤더 도구 버튼, 아이콘 24, `inset` 면). `pressed`를 주면 켜고 끄는 토글로 `aria-pressed`를 전하고 켜진 동안 안쪽 2px 선이 신호색이다. |
 | `TextField`, `TextFieldLabel`, `TextFieldInput`, `TextFieldDescription`, `TextFieldError` | `Field`, `Input` | `TextField`가 `invalid`, `disabled`, `name`, `size` `sm`, `md`, `lg`를 받고, 안에 둔 라벨, 설명, 오류를 입력에 연결한다. 글자는 각 부품의 `children`으로 주며 `TextFieldError`는 `invalid`일 때만 보인다. `value`, `defaultValue`, `onValueChange(value)`, `readOnly`, `required`는 `TextFieldInput`이 받고, 입력 요소 합성은 `render`다. |
 | `Select` | `Select` | `Root`, `Trigger`(칩, `size` `2xs`, `xs`, `sm`, `md`. `2xs`는 표 행의 서버 칩으로 높이 20, 글자 11 500에 흐린 글자이고 올리면 밝아진다), `Value`, `Popup`(Portal, Positioner, Popup, List), `Item`, `ItemText`, `Group`, `GroupLabel`, `Separator`. 캐릭터 행에서는 `Trigger`와 `Popup`에 `surface="card"`를 넘긴다. 이 칩은 열어도 신호색으로 채우지 않고 올린 면에 밝은 글자이며, 목록은 표 행 위 팝오버(`bg.surface` 면, `border.strong` 1px 테두리, 그림자, 84×32px 항목 격자)다. `Popup`의 `columns`는 항목을 그 수의 열로 읽는 순서대로 늘어놓는 격자 목록이고, 없으면 한 줄 목록이다. |
 | `Menu` | `Menu` | `Root`, `Trigger`(외형 없음, `render`로 연결), `Popup`, `Item`, `RadioGroup`, `RadioItem`, `Group`, `GroupLabel`, `Separator`. |
@@ -39,7 +39,7 @@ Entry는 다음과 같다.
 - `runtimeInjection: false`로 production CSS를 빌드 때 추출한다. 주입 runtime(`@stylexjs/stylex/lib/stylex-inject`)은 쓰지 않는다.
 - `useCSSLayers: false`로 StyleX 규칙을 cascade layer 밖에 둔다. 같은 요소의 같은 속성에서는 layer 안의 Tailwind CSS utility보다 StyleX가 이긴다.
 - Vite에서는 StyleX를 React plugin보다 먼저 실행한다. Vitest는 HTTP/HMR timer가 없는 Rollup adapter를 쓴다.
-- 모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/ui/tokens.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
+- 모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/ui/tokens.css`, `@dfragon/design/components.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
 
 연결 위치는 웹 앱 package test의 `apps/web/vitest.config.ts`, 공용 UI test의 `packages/ui/vitest.config.ts`, Storybook의 `apps/storybook/.storybook/main.ts`, 공용 UI 산출물 소비 검사의 `packages/ui/test/build-consumer/vite.config.ts`다.
 
