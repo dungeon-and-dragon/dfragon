@@ -1,4 +1,4 @@
-// 동작 줄이기 설정에서는 tokens.css가 시간을 0으로 두므로 바로 최종값을 보인다.
+// 동작 줄이기 설정에서는 @dfragon/design/theme.css가 시간을 0으로 두므로 바로 최종값을 보인다.
 
 const DURATION_PATTERN = /^(-?[\d.]+)(ms|s)$/
 const CUBIC_BEZIER_PATTERN = /^cubic-bezier\(([^)]+)\)$/
