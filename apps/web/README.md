@@ -50,7 +50,6 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/pages/<화면>/components/`: 그 화면만 쓰는 컴포넌트와 스타일, 테스트를 둡니다.
 - `src/pages/<화면>/hooks/`: 그 화면만 쓰는 React hook과 store, 테스트를 둡니다.
 - `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.
-- `src/styles/`: 화면이 함께 쓰는 StyleX breakpoint를 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router 테스트 도구를 둡니다.
 - `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
 - `src/core/api/`: DFragon API 요청 함수와 응답 schema를 둡니다.

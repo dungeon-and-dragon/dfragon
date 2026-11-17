@@ -17,7 +17,6 @@
     "@dfragon/design": "workspace:*",
     "@dfragon/ui": "workspace:*",
     "@storybook/react-vite": "catalog:",
-    "@stylexjs/unplugin": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",

@@ -7,10 +7,9 @@ import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
 
 const verifyScript = fileURLToPath(new URL('../scripts/verify-build.mjs', import.meta.url))
-const indexSource = `import { Dialog } from "@base-ui/react/dialog";\nimport * as stylex from "@stylexjs/stylex";\nimport React from "react";\nimport { jsx } from "react/jsx-runtime";\nimport { colors } from "./tokens.stylex.js";\nexport { Dialog, React, colors, jsx, stylex };\n`
-const tokensSource = `import * as stylex from "@stylexjs/stylex";\nconst colors = stylex.defineConsts({ signal: "var(--df-signal)" });\nexport { colors };\n`
-const libraryFiles = ['index.js', 'tokens.stylex.js']
-const tokensStyles = ':root{--df-bg-canvas:var(--color-canvas)}'
+const indexSource = `import { Dialog } from "@base-ui/react/dialog";\nimport React from "react";\nimport { jsx } from "react/jsx-runtime";\nexport { Dialog, React, jsx };\n`
+const libraryFiles = ['index.js']
+const themeStyles = ':root{--color-canvas:light-dark(#fff,#151517)}'
 const foundationStyles =
   'body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}'
 const appFontStyles =
@@ -23,12 +22,7 @@ async function createLibraryFixture(context) {
   await writeFile(join(output, 'notices/bundle-modules.json'), '[]')
   await writeFile(join(output, 'notices/bundle-files.json'), JSON.stringify(libraryFiles))
   await writeFile(join(output, 'index.js'), indexSource)
-  await writeFile(join(output, 'tokens.stylex.js'), tokensSource)
   await writeFile(join(output, 'index.d.ts'), 'export declare const Button: unknown;\n')
-  await writeFile(
-    join(output, 'tokens.stylex.d.ts'),
-    'export declare const colors: { signal: string };\n'
-  )
 
   return output
 }
@@ -52,12 +46,12 @@ async function createConsumerFixture(context, styles) {
   ]
   await writeFile(join(output, 'notices/bundle-modules.json'), JSON.stringify(graph))
   await writeFile(join(output, 'notices/THIRD-PARTY.txt'), 'MIT License fixture\n')
-  await writeFile(join(output, 'styles.css'), `${tokensStyles}${styles}`)
+  await writeFile(join(output, 'styles.css'), `${themeStyles}${styles}`)
 
   return output
 }
 
-test('Base UI 사본 하나와 tokens.css, 공용 글꼴 한 번이 있는 소비자 빌드를 허용한다', async (context) => {
+test('Base UI 사본 하나와 theme.css, 공용 글꼴 한 번이 있는 소비자 빌드를 허용한다', async (context) => {
   const output = await createConsumerFixture(context, foundationStyles)
   const result = inspect(output, 'consumer')
   assert.equal(result.status, 0, result.stderr)
@@ -121,10 +115,10 @@ for (const { name, styles } of [
 }
 
 for (const { name, styles } of [
-  { name: 'tokens.css를 import하지 않은 경우', styles: foundationStyles },
+  { name: 'theme.css를 import하지 않은 경우', styles: foundationStyles },
   {
-    name: 'tokens.css가 두 번 출력된 경우',
-    styles: `${tokensStyles}${tokensStyles}${foundationStyles}`
+    name: 'theme.css가 두 번 출력된 경우',
+    styles: `${themeStyles}${themeStyles}${foundationStyles}`
   }
 ]) {
   test(`${name} 소비자 빌드 검사에 실패한다`, async (context) => {
@@ -132,7 +126,7 @@ for (const { name, styles } of [
     await writeFile(join(output, 'styles.css'), styles)
     const result = inspect(output, 'consumer')
     assert.notEqual(result.status, 0)
-    assert.match(result.stderr, /Consumer must import tokens\.css once/)
+    assert.match(result.stderr, /Consumer must import @dfragon\/design\/theme\.css once/)
   })
 }
 
@@ -140,22 +134,6 @@ test('공개 ESM과 선언 파일 산출물을 허용한다', async (context) =>
   const output = await createLibraryFixture(context)
   const result = inspect(output)
   assert.equal(result.status, 0, result.stderr)
-})
-
-test('tokens.stylex.d.ts가 없으면 실패한다', async (context) => {
-  const output = await createLibraryFixture(context)
-  await rm(join(output, 'tokens.stylex.d.ts'))
-  const result = inspect(output)
-  assert.notEqual(result.status, 0)
-  assert.match(result.stderr, /Token declaration: tokens\.stylex\.d\.ts/)
-})
-
-test('생성 JS 목록에 tokens.stylex.js가 없으면 실패한다', async (context) => {
-  const output = await createLibraryFixture(context)
-  await writeFile(join(output, 'notices/bundle-files.json'), '["index.js"]')
-  const result = inspect(output)
-  assert.notEqual(result.status, 0)
-  assert.match(result.stderr, /Shared tokens stay in tokens\.stylex\.js/)
 })
 
 for (const file of ['index.js', 'index.d.ts']) {
@@ -193,33 +171,9 @@ for (const { name, file, source, failure } of [
     failure: /Portable browser declaration: index\.d\.ts/
   },
   {
-    name: 'library JS가 StyleX 주입 runtime을 가져오는 경우',
-    file: 'index.js',
-    source: `${indexSource}import '@stylexjs/stylex/lib/stylex-inject';\n`,
-    failure: /Library must import only @stylexjs\/stylex/
-  },
-  {
-    name: '토큰 상수가 다른 이름으로 export된 경우',
-    file: 'tokens.stylex.js',
-    source: `import * as stylex from "@stylexjs/stylex";\nconst t = stylex.defineConsts({ signal: "var(--df-signal)" });\nexport { t as colors };\n`,
-    failure: /Token constants keep the same export name: t/
-  },
-  {
-    name: 'tokens.stylex.js에 토큰 상수가 없는 경우',
-    file: 'tokens.stylex.js',
-    source: `export const colors = { signal: "var(--df-signal)" };\n`,
-    failure: /Token constants: tokens\.stylex\.js/
-  },
-  {
-    name: '토큰 상수가 index.js에 합쳐진 경우',
-    file: 'index.js',
-    source: `import * as stylex from "@stylexjs/stylex";\nexport const colors = stylex.defineConsts({ signal: "var(--df-signal)" });\n`,
-    failure: /defineConsts only in tokens\.stylex\.js: index\.js/
-  },
-  {
     name: 'library JS가 소비자 소유 CSS를 가져오는 경우',
     file: 'index.js',
-    source: `${indexSource}import '@dfragon/ui/tokens.css';\n`,
+    source: `${indexSource}import '@dfragon/design/components.css';\n`,
     failure: /Library must not import CSS/
   },
   {

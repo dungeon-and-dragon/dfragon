@@ -180,7 +180,6 @@ async function render(host: ClientHost, detail: CharacterDetailView): Promise<vo
   )
 }
 
-// jsdom은 StyleX의 동적 값을 CSS 변수로만 받으므로, style 속성에 sprite 주소와 위치가 들어갔는지 본다.
 function spriteAt(position: string): unknown {
   return expect.stringMatching(
     new RegExp(`url\\("https://skilltab\\.test/sprites/at_priest\\.png"\\).*${position}`)

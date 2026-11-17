@@ -22,26 +22,15 @@
 
 공개 타입은 `className`, `style`을 받지 않는다. Base UI 부품 그대로인 `Select.Root`, `Menu.Root` 같은 부품은 Base UI 문서의 API를 따른다.
 
-Entry는 다음과 같다.
+Entry는 `@dfragon/ui` 하나다. 앱에서 눈에는 숨기고 보조 기술이 읽게 할 글자는 Tailwind CSS의 `sr-only`를 쓴다.
 
-- `@dfragon/ui`: 위 Component. 앱에서 눈에는 숨기고 보조 기술이 읽게 할 글자는 Tailwind CSS의 `sr-only`를 쓴다.
-- `@dfragon/ui/tokens.stylex`: `colors`, `shadow`, `space`, `radius`, `size`, `motion`, `font` 토큰 상수. Source를 가리켜 library를 먼저 빌드하지 않아도 된다.
-- `@dfragon/ui/tokens.css`: `--df-*` 이름을 `@dfragon/design/theme.css`의 변수로 잇는 별칭.
+`@base-ui/react`, React, React DOM은 peer이다. Library build는 이들을 external로 두고 CSS를 출력하지 않는다.
 
-`@base-ui/react`, React, React DOM과 `@stylexjs/stylex`는 peer이다. Library build는 이들을 external로 두고 CSS를 출력하지 않는다.
+## 소비 앱의 CSS
 
-## 공통 StyleX 설정
+모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/design/components.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
 
-`@dfragon/ui/stylex-config`는 모든 앱과 Storybook, test가 쓰는 compiler 옵션이다. Browser runtime에서 import하지 않는다. StyleX runtime과 compiler 버전은 `pnpm-workspace.yaml`의 catalog에 두고, 앱 manifest는 `@stylexjs/stylex`와 개발 의존성 `@stylexjs/unplugin`을 `catalog:`로 참조한다.
-
-- `runtimeInjection: false`로 production CSS를 빌드 때 추출한다. 주입 runtime(`@stylexjs/stylex/lib/stylex-inject`)은 쓰지 않는다.
-- `useCSSLayers: false`로 StyleX 규칙을 cascade layer 밖에 둔다. 같은 요소의 같은 속성에서는 layer 안의 Tailwind CSS utility보다 StyleX가 이긴다.
-- Vite에서는 StyleX를 React plugin보다 먼저 실행한다. Vitest는 HTTP/HMR timer가 없는 Rollup adapter를 쓴다.
-- 모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/ui/tokens.css`, `@dfragon/design/components.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
-
-연결 위치는 웹 앱 package test의 `apps/web/vitest.config.ts`, 공용 UI test의 `packages/ui/vitest.config.ts`, Storybook의 `apps/storybook/.storybook/main.ts`, 공용 UI 산출물 소비 검사의 `packages/ui/test/build-consumer/vite.config.ts`다.
-
-공식 [unplugin 설정](https://stylexjs.com/docs/api/configuration/unplugin/)과 [Vite 연결](https://stylexjs.com/docs/learn/installation/vite/)을 따른다. `apps/web`은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석하므로 library build 없이 source 변경이 반영된다.
+`apps/web`은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석하므로 library build 없이 source 변경이 반영된다.
 
 ## Command
 

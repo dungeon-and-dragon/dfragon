@@ -7,14 +7,11 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./tokens.css": "./tokens.css",
-    "./tokens.stylex": "./src/tokens.stylex.ts",
-    "./stylex-config": "./stylex.config.ts"
+    }
   },
   "scripts": {
     "test": "pnpm typecheck && vitest run && pnpm test:tooling",
-    "test:tooling": "node --test test/build-verification.node.mjs test/tokens.node.mjs",
+    "test:tooling": "node --test test/build-verification.node.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint",
     "build": "vite build && tsc -p tsconfig.build.json && pnpm verify:build",
@@ -25,7 +22,6 @@
   },
   "peerDependencies": {
     "@base-ui/react": "catalog:",
-    "@stylexjs/stylex": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
@@ -43,16 +39,11 @@
     "vitest": "catalog:",
     "@types/node": "catalog:",
     "@dfragon/licenses": "workspace:*",
-    "@stylexjs/stylex": "catalog:",
-    "@stylexjs/unplugin": "catalog:",
     "@dfragon/design": "workspace:*",
     "@storybook/react-vite": "catalog:"
   },
   "files": [
     "dist",
-    "README.md",
-    "tokens.css",
-    "src/tokens.stylex.ts",
-    "stylex.config.ts"
+    "README.md"
   ]
 }

@@ -3,8 +3,6 @@ import { readFile } from 'node:fs/promises'
 import { extname, join, normalize, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { clientNotices, uiNotices } from '@dfragon/licenses/vite'
-import { stylexOptions } from '@dfragon/ui/stylex-config'
-import { unplugin as stylex } from '@stylexjs/unplugin'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defaultClientConditions, defineConfig, type Plugin } from 'vite'
@@ -81,7 +79,6 @@ function localSkillTab(directory: string | undefined): Plugin {
 
 export default defineConfig({
   plugins: [
-    stylex.vite(stylexOptions),
     tailwindcss(),
     react(),
     uiNotices(),
