@@ -3,7 +3,8 @@
  * 바탕, 글자, 선과 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류), 게임 클라이언트 값을 쓰는 게임 색과
  * 차트 계열 색에만 쓴다. 게임 색 밖의 강조 색은 두지 않는다.
  * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 모드 고르기는 base.css가 color-scheme으로 한다.
- * 상황별 색의 옅은 면(--color-*-weak)은 다크에서 그 색 14%, 라이트에서 10%다.
+ * 상황별 색의 옅은 면(--color-*-weak)은 canvas 위에 그 색을 다크 14%, 라이트 10%로 섞은 불투명 값이다.
+ * 반투명이면 hover, 선택 행 바탕과 섞여 어두워져 글자 명암비가 떨어진다.
  * 글자, radius, breakpoint, 곡선은 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
  * 원색 단계(--gray-*)는 :root에 두어 utility가 생기지 않게 하고, 역할 이름만 @theme로 내보낸다.
  * StyleX 화면은 packages/ui/tokens.css의 --df-* 별칭으로 같은 변수를 읽는다.
@@ -53,11 +54,11 @@
   /* 보조 버튼, 칩의 hover */
   --color-control-hover: light-dark(var(--gray-150), var(--gray-750));
   /* 성공 상태 칩 면 */
-  --color-success-weak: light-dark(#047c061a, #00d80924);
+  --color-success-weak: light-dark(#e5f2e6, #09270b);
   /* 오류 상태 칩, 복사 실패 면 */
-  --color-danger-weak: light-dark(#d2080d1a, #fe352c24);
+  --color-danger-weak: light-dark(#fae6e6, #2c1010);
   /* 경고 상태 칩 면 */
-  --color-warning-weak: light-dark(#8e62001a, #ffb40024);
+  --color-warning-weak: light-dark(#f3efe5, #2d2209);
   /* 대화상자 뒤 막. 지금 쓰는 곳은 없다. */
   --color-overlay: light-dark(#0a0a0b66, #08080ab8);
   /* 주 버튼, 선택 표시, focus 테두리 */
@@ -150,13 +151,13 @@
   /* 명성 이름표. 지금 쓰는 곳은 없다. */
   --color-game-fame-label: light-dark(#82672d, #a0844b);
 
-  /* 공대 화면의 파티 자리 배지(ADR 0012). 다크는 16% 면이고, 라이트는 오류, 검색 실패, 성공의 라이트 값과 그 10% 면이다. */
+  /* 공대 화면의 파티 자리 배지(ADR 0012). 다크 면은 canvas 위 16%이고, 라이트는 오류, 검색 실패, 성공의 라이트 값과 canvas 위 10% 면이다. */
   --color-raid-party-red: light-dark(#d2080d, #ff8f82);
-  --color-raid-party-red-weak: light-dark(#d2080d1a, #ff7a6e29);
+  --color-raid-party-red-weak: light-dark(#fae6e6, #311c1b);
   --color-raid-party-yellow: light-dark(#806707, #e8c262);
-  --color-raid-party-yellow-weak: light-dark(#8067071a, #e8c26229);
+  --color-raid-party-yellow-weak: light-dark(#f2f0e6, #2e2819);
   --color-raid-party-green: light-dark(#047c06, #6cd268);
-  --color-raid-party-green-weak: light-dark(#047c061a, #6cd26829);
+  --color-raid-party-green-weak: light-dark(#e5f2e6, #1a2a1a);
 
   /* 차트 계열 색(ADR 0055). 1번부터 순서대로 쓴다. */
   --color-chart-1: light-dark(#2a78d6, #3987e5);
