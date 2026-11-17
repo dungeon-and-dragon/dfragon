@@ -25,7 +25,7 @@ function CountUpDemo() {
   const handleClick = () => setValue((current) => current + 18_215)
 
   return (
-    <div className="flex items-center gap-4 text-2xl text-fg">
+    <div className="flex items-center gap-4 text-xl text-fg">
       <NumericText value={value} />
       <Button size="sm" onClick={handleClick}>
         올리기

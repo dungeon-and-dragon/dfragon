@@ -8,7 +8,8 @@ import {
   Section,
   ShadowTokens,
   SpacingTokens,
-  TypographyTokens
+  TypographyTokens,
+  ValueTokens
 } from './sections'
 import { readThemeTokens, tokensIn } from './theme-tokens'
 
@@ -62,6 +63,22 @@ export const Radius: Story = {
   render: () => (
     <Section title="Radius">
       <RadiusTokens tokens={tokensIn(tokens, 'radius')} />
+    </Section>
+  )
+}
+
+export const Layer: Story = {
+  render: () => (
+    <Section title="z-index">
+      <ValueTokens tokens={tokensIn(tokens, 'layer')} />
+    </Section>
+  )
+}
+
+export const Breakpoint: Story = {
+  render: () => (
+    <Section title="Breakpoint">
+      <ValueTokens tokens={tokensIn(tokens, 'breakpoint')} />
     </Section>
   )
 }
