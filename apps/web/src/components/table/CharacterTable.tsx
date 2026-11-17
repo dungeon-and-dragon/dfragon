@@ -1,12 +1,10 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode, Ref } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
-import { styles } from './CharacterTable.style'
 import { RankBadge } from './RankBadge'
+import { tableClasses } from './table-classes'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -22,6 +20,9 @@ export type CharacterTableAction = {
 }
 
 export type Affiliation = 'adventure' | 'guild'
+
+const { headCell, cell } = tableClasses
+const link = 'text-inherit no-underline hover:underline'
 
 const ALL_AFFILIATIONS: readonly Affiliation[] = ['adventure', 'guild']
 const AFFILIATION_HEADINGS: Record<Affiliation, string> = { adventure: '모험단', guild: '길드' }
@@ -42,74 +43,71 @@ export function CharacterTable({
   adventureBesideName?: boolean
 }): React.JSX.Element {
   return (
-    <table {...stylex.props(styles.table)}>
-      <colgroup>
-        {ranked && <col {...stylex.props(styles.rankColumn)} />}
-        <col />
-        <col {...stylex.props(styles.fameColumn)} />
-        {affiliations.map((affiliation) => (
-          <col key={affiliation} {...stylex.props(styles.affiliationColumn)} />
-        ))}
-        {action != null && <col {...stylex.props(styles.actionColumn)} />}
-      </colgroup>
-      <thead>
-        <tr>
-          {ranked && (
-            <th scope="col" {...stylex.props(styles.headCell, styles.center)}>
-              #
-            </th>
-          )}
-          <th scope="col" {...stylex.props(styles.headCell)}>
-            캐릭터
-          </th>
-          <th scope="col" {...stylex.props(styles.headCell, styles.right)}>
-            명성
-          </th>
+    <div className={tableClasses.scroll}>
+      <table className={tableClasses.table}>
+        <colgroup>
+          {ranked && <col className={tableClasses.rankColumn} />}
+          <col />
+          <col className={tableClasses.fameColumn} />
           {affiliations.map((affiliation) => (
-            <th key={affiliation} scope="col" {...stylex.props(styles.headCell, styles.center)}>
-              {AFFILIATION_HEADINGS[affiliation]}
-            </th>
+            <col key={affiliation} className="w-40" />
           ))}
-          {action != null && (
-            <th scope="col" {...stylex.props(styles.headCell)}>
-              <span {...stylex.props(shapes.srOnly)}>{action.name}</span>
-            </th>
-          )}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={`${row.serverId}/${row.characterId}`}>
+          {action != null && <col className="w-14" />}
+        </colgroup>
+        <thead>
+          <tr>
             {ranked && (
-              <td {...stylex.props(styles.cell, styles.center)}>
-                {row.rank != null && <RankBadge rank={row.rank} />}
-              </td>
+              <th scope="col" className={`${headCell} text-center`}>
+                #
+              </th>
             )}
-            <td {...stylex.props(styles.cell)}>
-              <CharacterCell
-                character={row}
-                adventureName={adventureBesideName ? row.adventureName : null}
-              />
-            </td>
-            <td {...stylex.props(styles.cell, styles.right, styles.fame)}>
-              {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
-            </td>
+            <th scope="col" className={`${headCell} text-left`}>
+              캐릭터
+            </th>
+            <th scope="col" className={`${headCell} text-right`}>
+              명성
+            </th>
             {affiliations.map((affiliation) => (
-              <td
-                key={affiliation}
-                {...stylex.props(styles.cell, styles.center, styles.affiliation)}
-              >
-                <AffiliationLink affiliation={affiliation} character={row} />
-              </td>
+              <th key={affiliation} scope="col" className={`${headCell} text-center`}>
+                {AFFILIATION_HEADINGS[affiliation]}
+              </th>
             ))}
             {action != null && (
-              <td {...stylex.props(styles.cell, styles.center)}>{action.render(row)}</td>
+              <th scope="col" className={`${headCell} text-left`}>
+                <span className="sr-only">{action.name}</span>
+              </th>
             )}
           </tr>
-        ))}
-        {trailing}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className={tableClasses.body}>
+          {rows.map((row) => (
+            <tr key={`${row.serverId}/${row.characterId}`} className={tableClasses.row}>
+              {ranked && (
+                <td className={`${cell} text-center`}>
+                  {row.rank != null && <RankBadge rank={row.rank} />}
+                </td>
+              )}
+              <td className={cell}>
+                <CharacterCell
+                  character={row}
+                  adventureName={adventureBesideName ? row.adventureName : null}
+                />
+              </td>
+              <td className={`${cell} ${tableClasses.fame}`}>
+                {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
+              </td>
+              {affiliations.map((affiliation) => (
+                <td key={affiliation} className={`${cell} truncate text-center text-fg-adventure`}>
+                  <AffiliationLink affiliation={affiliation} character={row} />
+                </td>
+              ))}
+              {action != null && <td className={`${cell} text-center`}>{action.render(row)}</td>}
+            </tr>
+          ))}
+          {trailing}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -129,7 +127,7 @@ function AffiliationLink({
       <Link
         to="/adventures/$adventureName"
         params={{ adventureName: character.adventureName }}
-        {...stylex.props(styles.link)}
+        className={link}
       >
         {character.adventureName}
       </Link>
@@ -145,11 +143,7 @@ function AffiliationLink({
   }
 
   return (
-    <Link
-      to="/guilds/$guildId"
-      params={{ guildId: character.guildId }}
-      {...stylex.props(styles.link)}
-    >
+    <Link to="/guilds/$guildId" params={{ guildId: character.guildId }} className={link}>
       {character.guildName}
     </Link>
   )
@@ -167,29 +161,29 @@ export function SkeletonRow({
   return (
     <tr ref={rowRef} aria-hidden="true">
       {ranked && (
-        <td {...stylex.props(styles.cell, styles.center)}>
+        <td className={`${cell} text-center`}>
           <Bone width={24} height={20} />
         </td>
       )}
-      <td {...stylex.props(styles.cell)}>
-        <div {...stylex.props(styles.boneCharacter)}>
-          <Bone width={40} height={48} />
-          <div {...stylex.props(styles.boneLines)}>
+      <td className={cell}>
+        <div className="flex items-center gap-2.5">
+          <Bone width={32} height={36} />
+          <div className="flex flex-col gap-1.5">
             <Bone width={140} height={14} />
             <Bone width={96} height={12} />
           </div>
         </div>
       </td>
-      <td {...stylex.props(styles.cell)}>
+      <td className={cell}>
         <Bone width={64} height={14} />
       </td>
       {affiliations.map((affiliation) => (
-        <td key={affiliation} {...stylex.props(styles.cell)} />
+        <td key={affiliation} className={cell} />
       ))}
     </tr>
   )
 }
 
 function Bone({ width, height }: { width: number; height: number }): React.JSX.Element {
-  return <span {...stylex.props(styles.bone, styles.boneSize(width, height))} />
+  return <span className="block rounded-control bg-inset" style={{ width, height }} />
 }

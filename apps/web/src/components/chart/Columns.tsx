@@ -1,9 +1,7 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { COLUMN_BAR_GROW, useChartBarGrow } from '../../animations/useChartBarGrow'
 import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
-import { styles } from './chart.style'
+import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS, TOOLTIP_TITLE_CLASS } from './plot-layout'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -17,6 +15,15 @@ export type ColumnBar = Readonly<{
 }>
 
 type ShownTooltip = Readonly<{ key: string | null; open: boolean }>
+
+// 넓은 화면에서는 막대가 칸에 들어가므로 스크롤 영역을 두지 않는다. 두면 첫 축 라벨이 영역 밖으로 나간 만큼 잘린다.
+const NARROW_SCROLL_CLASS = 'max-sm:overflow-x-auto'
+// 축 선은 아래 padding 16px, 라벨 위 간격 4px, 라벨 높이 14px를 더한 34px 위에 긋는다.
+const COLUMNS_CLASS =
+  "relative m-0 flex grow list-none gap-0.5 p-4 after:absolute after:inset-x-4 after:bottom-[34px] after:h-px after:bg-line-strong after:content-['']"
+// 세로 구분선은 위 툴팁 자리 44px와 아래 라벨 자리 18px를 비운다.
+const COLUMN_DIVIDER_CLASS =
+  'mt-11 mb-4.5 w-1.5 shrink-0 bg-[linear-gradient(var(--color-line),var(--color-line))] bg-size-[1px_100%] bg-center bg-no-repeat'
 
 function columnTooltipPlaceOf(
   column: HTMLElement,
@@ -92,16 +99,16 @@ export function Columns({
   return (
     <div
       ref={scrollerRef}
-      {...stylex.props(styles.chart, styles.columnsChart, scrollable && styles.chartScroll)}
+      className={`relative flex grow flex-col ${scrollable ? NARROW_SCROLL_CLASS : ''}`}
     >
       <ul
         ref={chartRef}
         onMouseLeave={handleLeave}
-        {...stylex.props(styles.columns, scrollable && styles.columnsScroll)}
+        className={`${COLUMNS_CLASS} ${scrollable ? 'min-w-min max-sm:gap-px' : ''}`}
       >
         {groups.map((group, index) => (
           <Fragment key={group[0]?.key ?? index}>
-            {index > 0 && <li aria-hidden="true" {...stylex.props(styles.columnDivider)} />}
+            {index > 0 && <li aria-hidden="true" className={COLUMN_DIVIDER_CLASS} />}
             {group.map((bar) => (
               <Column
                 key={bar.key}
@@ -116,15 +123,11 @@ export function Columns({
           </Fragment>
         ))}
       </ul>
-      <span
-        ref={tooltipRef}
-        aria-hidden="true"
-        {...stylex.props(styles.tooltip, styles.columnTooltip)}
-      >
+      <span ref={tooltipRef} aria-hidden="true" className={`${TOOLTIP_CLASS} top-4`}>
         {shownBar != null && (
           <>
-            <span {...stylex.props(styles.tooltipRange)}>{shownBar.range}</span>
-            <span {...stylex.props(styles.tooltipCount)}>
+            <span className={TOOLTIP_TITLE_CLASS}>{shownBar.range}</span>
+            <span className={TOOLTIP_COUNT_CLASS}>
               {shownBar.share != null
                 ? `${integer.format(shownBar.count)}  ${shownBar.share}`
                 : integer.format(shownBar.count)}
@@ -164,32 +167,33 @@ function Column({
       ref={columnRef}
       data-chart-item=""
       onMouseEnter={handleMouseEnter}
-      {...stylex.props(styles.column, scrollable && styles.columnScroll)}
+      className={`flex grow basis-0 flex-col pt-11 ${scrollable ? 'min-w-1' : 'min-w-0'}`}
     >
-      <span {...stylex.props(shapes.srOnly)}>
+      <span className="sr-only">
         {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
       </span>
       <span
-        {...stylex.props(styles.columnTrack, height !== undefined && styles.trackHeight(height))}
+        className="flex min-h-40 grow items-end"
+        style={height !== undefined ? { minHeight: height } : undefined}
       >
         {ratio > 0 && (
           <span
             data-chart-mark=""
-            {...stylex.props(styles.columnMark, styles.columnHeight(ratio * 100))}
+            className="relative block h-(--bar-height) min-h-0.5 w-full"
+            style={{ '--bar-height': `${ratio * 100}%` }}
           >
             <span
-              {...stylex.props(
-                styles.body,
-                styles.columnBody,
-                styles.bodyCount,
-                dimmed && styles.bodyDimmed
-              )}
+              className={`absolute inset-0 rounded-t-[3px] bg-chart-1 transition-opacity duration-(--duration-hover) ease-standard ${dimmed ? 'opacity-30' : ''}`}
             />
           </span>
         )}
       </span>
-      <span aria-hidden="true" {...stylex.props(styles.columnLabel)}>
-        {label != null && <span {...stylex.props(styles.columnLabelText)}>{label}</span>}
+      <span aria-hidden="true" className="relative mt-1 h-3.5 shrink-0">
+        {label != null && (
+          <span className="absolute left-1/2 -translate-x-1/2 font-mono text-2xs leading-3.5 whitespace-nowrap text-fg-subtle tabular-nums">
+            {label}
+          </span>
+        )}
       </span>
     </li>
   )

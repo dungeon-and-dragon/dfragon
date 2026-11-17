@@ -1,8 +1,4 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
-import { styles } from './chart.style'
-import type { ChartX, TooltipRow } from './plot-layout'
-import { plotStyles } from './plot.style'
+import { type ChartX, TOOLTIP_CLASS, TOOLTIP_TITLE_CLASS, type TooltipRow } from './plot-layout'
 
 export function ChartTooltip({
   tooltipRef,
@@ -14,20 +10,17 @@ export function ChartTooltip({
   rows: readonly TooltipRow[]
 }): React.JSX.Element {
   return (
-    <span ref={tooltipRef} aria-hidden="true" {...stylex.props(styles.tooltip)}>
-      {title != null && <span {...stylex.props(styles.tooltipRange)}>{title}</span>}
-      <span {...stylex.props(plotStyles.tooltipRows)}>
+    <span ref={tooltipRef} aria-hidden="true" className={`${TOOLTIP_CLASS} top-0`}>
+      {title != null && <span className={TOOLTIP_TITLE_CLASS}>{title}</span>}
+      <span className="mt-0.5 flex flex-col gap-0.5">
         {rows.map(({ key, name, color, faded, value }) => (
-          <span key={key} {...stylex.props(plotStyles.tooltipRow)}>
+          <span key={key} className="flex items-center gap-1.5 text-xs tabular-nums">
             <i
-              {...stylex.props(
-                plotStyles.swatch,
-                plotStyles.background(color),
-                faded && plotStyles.faded
-              )}
+              className={`h-2 w-2 shrink-0 rounded-[2px] ${faded ? 'opacity-50' : ''}`}
+              style={{ backgroundColor: color }}
             />
-            <span {...stylex.props(plotStyles.tooltipName)}>{name}</span>
-            <span {...stylex.props(plotStyles.tooltipValue)}>{value}</span>
+            <span className="text-fg-muted">{name}</span>
+            <span className="ml-auto pl-3 font-mono font-semibold">{value}</span>
           </span>
         ))}
       </span>
@@ -51,7 +44,7 @@ export function HitList({
   register: (key: string, element: HTMLLIElement) => () => void
 }): React.JSX.Element {
   return (
-    <ul onMouseLeave={onLeave} {...stylex.props(plotStyles.hits)}>
+    <ul onMouseLeave={onLeave} className="absolute inset-0 m-0 list-none p-0">
       {x.map(({ key }, index) => (
         <HitArea
           key={key}
@@ -91,9 +84,10 @@ function HitArea({
     <li
       ref={hitRef}
       onMouseEnter={handleMouseEnter}
-      {...stylex.props(plotStyles.hit, plotStyles.hitPlace(left, width))}
+      className="absolute top-0 bottom-0"
+      style={{ left, width }}
     >
-      <span {...stylex.props(shapes.srOnly)}>{text}</span>
+      <span className="sr-only">{text}</span>
     </li>
   )
 }

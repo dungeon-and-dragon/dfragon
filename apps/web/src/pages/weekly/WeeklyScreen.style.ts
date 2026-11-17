@@ -42,7 +42,6 @@ export const styles = stylex.create({
   },
   error: { color: colors.fgDanger },
   clearColumn: { width: CLEAR_COLUMN_WIDTH },
-  clearName: { wordBreak: 'keep-all', overflowWrap: 'anywhere' },
   check: {
     display: 'inline-block',
     width: CLEAR_MARK_SIZE,

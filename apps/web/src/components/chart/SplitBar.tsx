@@ -1,12 +1,9 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { SPLIT_BAR_REVEAL, useChartReveal } from '../../animations/useChartReveal'
 import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
 import { splitLabelShown } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
 import { type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
-import { splitBarStyles } from './split-bar.style'
 
 export type SplitSegment = Readonly<{
   key: string
@@ -17,6 +14,8 @@ export type SplitSegment = Readonly<{
 }>
 
 const TOOLTIP_GAP = 6
+const SEGMENT_CLASS =
+  'relative flex min-w-0.5 items-center overflow-hidden rounded-[3px] transition-opacity duration-(--duration-hover) ease-standard'
 const percent = new Intl.NumberFormat('ko-KR', { style: 'percent', maximumFractionDigits: 1 })
 
 function belowTooltipPlaceOf(
@@ -99,8 +98,12 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
   const hoveredRows = hovered != null ? tooltipRows(hovered) : []
 
   return (
-    <div ref={chartRef} role="group" aria-label={label} {...stylex.props(splitBarStyles.chart)}>
-      <ul data-chart-reveal="" onMouseLeave={handleLeave} {...stylex.props(splitBarStyles.bar)}>
+    <div ref={chartRef} role="group" aria-label={label} className="relative">
+      <ul
+        data-chart-reveal=""
+        onMouseLeave={handleLeave}
+        className="m-0 flex h-7 list-none gap-0.5 p-0"
+      >
         {shown.map((segment) => (
           <Segment
             key={segment.key}
@@ -145,19 +148,24 @@ function Segment({
     <li
       ref={segmentRef}
       onMouseEnter={handleMouseEnter}
-      {...stylex.props(
-        splitBarStyles.segment,
-        dimmed && splitBarStyles.segmentDimmed,
-        splitBarStyles.grow(value),
-        splitBarStyles.colors(color, textColor)
-      )}
+      className={`${SEGMENT_CLASS} ${dimmed ? 'opacity-45' : ''}`}
+      style={{
+        flexGrow: value,
+        flexShrink: 1,
+        flexBasis: 0,
+        backgroundColor: color,
+        color: textColor
+      }}
     >
       {text != null && (
-        <span aria-hidden="true" {...stylex.props(splitBarStyles.label)}>
+        <span
+          aria-hidden="true"
+          className="pl-2 font-mono text-xs font-semibold whitespace-nowrap tabular-nums"
+        >
           {text}
         </span>
       )}
-      <span {...stylex.props(shapes.srOnly)}>{description}</span>
+      <span className="sr-only">{description}</span>
     </li>
   )
 }
