@@ -448,7 +448,7 @@ export function ActivityHeatmap({
           <Tabs.Tab
             key={tabKind}
             value={tabKind}
-            className="m-0 block w-full cursor-pointer border-0 bg-transparent py-1.5 pr-0 pl-3 text-left font-sans text-sm font-medium text-fg-muted outline-none hover:text-fg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-signal data-active:font-semibold data-active:text-fg"
+            className="m-0 block w-full cursor-pointer border-0 bg-transparent py-1.5 pr-0 pl-3 text-left font-sans text-sm font-medium text-fg-muted outline-none hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal data-active:font-semibold data-active:text-fg"
           >
             {label}
           </Tabs.Tab>
