@@ -3,11 +3,13 @@ WORKDIR /workspace
 RUN npm install --global pnpm@12.11.2
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/package.json
+COPY packages/design/package.json packages/design/package.json
 COPY packages/lib/package.json packages/lib/package.json
 COPY packages/licenses/package.json packages/licenses/package.json
 COPY packages/models/package.json packages/models/package.json
 COPY packages/ui/package.json packages/ui/package.json
 RUN pnpm install --frozen-lockfile --filter @dfragon/web...
+COPY packages/design packages/design
 COPY packages/lib packages/lib
 COPY packages/licenses packages/licenses
 COPY packages/ui packages/ui

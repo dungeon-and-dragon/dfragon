@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@base-ui/react": "catalog:",
+    "@dfragon/design": "workspace:*",
     "@dfragon/lib": "workspace:*",
     "@dfragon/ui": "workspace:*",
     "@stylexjs/stylex": "catalog:",
@@ -28,11 +29,13 @@
   "devDependencies": {
     "@dfragon/licenses": "workspace:*",
     "@stylexjs/unplugin": "catalog:",
+    "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"

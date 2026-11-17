@@ -40,4 +40,3 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/format.ts`: 시각, 걸린 시간, 스케줄, 결과 요약 표시 함수를 둡니다.
 - `src/run-args.ts`: 인자 schema로 입력 칸을 정하고 입력값을 인자로 바꿉니다.
 - `src/testing/`: 테스트 setup과 운영 API를 흉내 내는 fake를 둡니다.
-- `src/assets/fonts/`: 웹과 같은 Pretendard Variable 글꼴입니다.

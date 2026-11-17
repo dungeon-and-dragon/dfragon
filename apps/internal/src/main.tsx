@@ -1,5 +1,3 @@
-import '@dfragon/ui/tokens.css'
-import '@dfragon/ui/foundation.css'
 import './app.css'
 import { QueryClient } from '@tanstack/react-query'
 import { StrictMode } from 'react'
