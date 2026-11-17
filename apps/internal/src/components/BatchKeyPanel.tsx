@@ -1,4 +1,4 @@
-import { Button, shapes, Switch } from '@dfragon/ui'
+import { Button, Switch } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { BATCH_NEOPLE_KEY_DUPLICATE, OpsRequestFailure } from '../api/ops-client'
@@ -201,7 +201,7 @@ function BatchKeyTable({ keys }: { keys: readonly BatchKey[] }): React.JSX.Eleme
           <th {...stylex.props(tableStyles.headerCell)}>추가</th>
           <th {...stylex.props(tableStyles.headerCell)}>사용</th>
           <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>
-            <span {...stylex.props(shapes.srOnly)}>삭제</span>
+            <span className="sr-only">삭제</span>
           </th>
         </tr>
       </thead>

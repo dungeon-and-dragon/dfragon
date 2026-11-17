@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import type { ActivitySeason } from '#core/adventure-guild/adventure-activity'
@@ -97,7 +96,7 @@ function SeasonButton({
         {season.name}
       </span>
       {bar.state === 'backfill' && (
-        <span {...stylex.props(shapes.srOnly)}>{Math.floor(bar.progress * 100)}%</span>
+        <span className="sr-only">{Math.floor(bar.progress * 100)}%</span>
       )}
     </button>
   )

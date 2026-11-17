@@ -1,4 +1,3 @@
-import { Typo } from '@dfragon/ui'
 import { useState } from 'react'
 import * as stylex from '@stylexjs/stylex'
 import type { CharacterFaceWindow } from '#core/search/search'
@@ -13,14 +12,17 @@ export function CardImage({
 }): React.JSX.Element {
   const [failedSource, setFailedSource] = useState<string>()
   if (src == null || failedSource === src) {
+    const placeholder = stylex.props(styles.placeholder)
+
     return (
-      <Typo.caption
+      <span
         role="img"
         aria-label="캐릭터 이미지 없음"
-        {...stylex.props(styles.placeholder)}
+        className={`${placeholder.className ?? ''} text-xs`}
+        style={placeholder.style}
       >
         —
-      </Typo.caption>
+      </span>
     )
   }
 

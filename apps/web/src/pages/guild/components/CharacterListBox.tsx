@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
@@ -32,7 +31,7 @@ export function CharacterListBox({
       return (
         <ListBox name={name}>
           <div aria-busy="true">
-            <span role="status" {...stylex.props(shapes.srOnly)}>
+            <span role="status" className="sr-only">
               목록을 받는 중입니다.
             </span>
             <CharacterTable

@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
@@ -109,7 +108,7 @@ function ClearMark({ cleared }: { cleared: boolean }): React.JSX.Element {
       ) : (
         <span aria-hidden="true" {...stylex.props(styles.blank)} />
       )}
-      <span {...stylex.props(shapes.srOnly)}>{cleared ? '클리어' : '클리어 안 함'}</span>
+      <span className="sr-only">{cleared ? '클리어' : '클리어 안 함'}</span>
     </>
   )
 }
