@@ -20,10 +20,10 @@ export const InheritedSize: Story = {
       <span className="text-sm">
         <LoadingIndicator {...args} />
       </span>
-      <span className="text-2xl">
+      <span className="text-xl">
         <LoadingIndicator {...args} />
       </span>
-      <span className="text-5xl text-fg-muted">
+      <span className="text-display text-fg-muted">
         <LoadingIndicator {...args} />
       </span>
     </div>
