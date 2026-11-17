@@ -1,3 +1,5 @@
+import type { CharacterHistoryBasic } from '@dfragon/database'
+import type { CharacterIdentity } from '../character-identity.js'
 import {
   type CharacterDetailSection,
   type CharacterPayload,
@@ -36,4 +38,40 @@ export function toSectionBodies(payloads: CharacterPayloads): CharacterSectionBo
   })
 
   return Object.fromEntries(bodies) as CharacterSectionBodies
+}
+
+// Neople 기본 정보 섹션과 같은 key 순서다. 받을 때 빠졌던 길드, 명성은 null로 붙지만 상세 투영은 둘을 같게 본다.
+export function toCharacterHeader(
+  { serverId, characterId }: CharacterIdentity,
+  basic: CharacterHistoryBasic
+): CharacterPayload {
+  return {
+    serverId,
+    characterId,
+    characterName: basic.characterName,
+    level: basic.level,
+    jobId: basic.jobId,
+    jobGrowId: basic.jobGrowId,
+    jobName: basic.jobName,
+    jobGrowName: basic.jobGrowName,
+    fame: basic.fame,
+    adventureName: basic.adventureName,
+    guildId: basic.guildId,
+    guildName: basic.guildName
+  }
+}
+
+export function restoreCharacterPayloads(
+  header: CharacterPayload,
+  bodies: Readonly<Record<string, CharacterPayload>>
+): CharacterPayloads {
+  const sections = historySections.map((section) => {
+    const restored = restoreCharacterHeader(header, bodies[section] ?? {})
+
+    return [section, restored] as const
+  })
+
+  const restoredSections = Object.fromEntries(sections)
+
+  return { basic: header, ...restoredSections } as CharacterPayloads
 }

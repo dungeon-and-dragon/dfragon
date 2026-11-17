@@ -45,6 +45,8 @@ export type StoredCharacterHistory = {
 }
 
 export type StoredCharacterHistorySnapshot = {
+  // 고른 기본 정보, 점수, 섹션 행 가운데 가장 늦게 받은 시각이다. 그 시각에 받은 값이 이 스냅샷 전체와 같다.
+  observedAt: Date
   basic: StoredCharacterBasicHistory
   score: StoredCharacterScoreHistory | null
   sections: Record<string, CharacterSectionBody>
@@ -255,8 +257,8 @@ export async function readCharacterHistorySnapshot(
       orderBy: { observedAt: 'desc' },
       select: scoreColumns
     }),
-    client.$queryRaw<{ section: string; data: CharacterSectionBody }[]>`
-      SELECT DISTINCT ON ("section") "section", "data"
+    client.$queryRaw<{ section: string; observedAt: Date; data: CharacterSectionBody }[]>`
+      SELECT DISTINCT ON ("section") "section", "observed_at" AS "observedAt", "data"
       FROM "character_section_history"
       WHERE "server_id" = ${serverId} AND "character_id" = ${characterId} AND "observed_at" <= ${at}
       ORDER BY "section", "observed_at" DESC`
@@ -267,6 +269,8 @@ export async function readCharacterHistorySnapshot(
   }
 
   const sections = Object.fromEntries(sectionRows.map(({ section, data }) => [section, data]))
+  const observedTimes = [basic, score, ...sectionRows].flatMap((row) => row?.observedAt ?? [])
+  const observedAt = new Date(Math.max(...observedTimes.map((time) => time.getTime())))
 
-  return { basic, score, sections }
+  return { observedAt, basic, score, sections }
 }
