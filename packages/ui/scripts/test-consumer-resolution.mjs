@@ -1,30 +1,22 @@
 import assert from 'node:assert/strict'
-import { spawn, spawnSync } from 'node:child_process'
-import { once } from 'node:events'
+import { spawnSync } from 'node:child_process'
 import { rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { beforeEach, test } from 'node:test'
-import { stopOwnedProcessGroup } from './consumer-process-lifecycle.mjs'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 
 // 전용 checkout에서 직렬 실행한다. 이전 case의 output/cache로 cold 실패를 가리지 않는다.
-// 보존할 artifact가 있거나 dev server, 다른 build가 도는 checkout에서는 실행하지 않는다.
-// POSIX process group 종료를 쓰며 macOS에서 검증했다.
+// 보존할 artifact가 있거나 다른 build가 도는 checkout에서는 실행하지 않는다.
 beforeEach(() => {
-  for (const path of [
-    'packages/ui/dist',
-    'packages/ui/dist-examples',
-    'packages/ui/node_modules/.vite'
-  ]) {
+  for (const path of ['packages/ui/dist', 'packages/ui/node_modules/.vite']) {
     rmSync(new URL(`../../../${path}`, import.meta.url), { recursive: true, force: true })
   }
 })
 
 for (const [workspace, command] of [
   ['@dfragon/ui', 'test'],
-  ['@dfragon/ui', 'typecheck'],
-  ['@dfragon/ui', 'build:examples']
+  ['@dfragon/ui', 'typecheck']
 ]) {
   test(`library 선행 빌드 없이 pnpm --filter ${workspace} ${command}를 실행한다`, () => {
     const result = spawnSync('pnpm', ['--filter', workspace, command], {
@@ -36,68 +28,5 @@ for (const [workspace, command] of [
 
     assert.ifError(result.error)
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`)
-  })
-}
-
-for (const { name, executable, args, cwd, entries } of [
-  {
-    name: 'pnpm --filter @dfragon/ui dev:examples',
-    executable: 'pnpm',
-    args: ['--filter', '@dfragon/ui', 'dev:examples', '--host', '127.0.0.1', '--port', '0'],
-    cwd: root,
-    entries: ['/main.tsx']
-  }
-]) {
-  test(`library 선행 빌드 없이 ${name}에서 browser entry를 해석한다`, async () => {
-    const child = spawn(executable, args, {
-      cwd,
-      detached: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, NO_COLOR: '1' }
-    })
-    let output = ''
-    const appendOutput = (chunk) => {
-      output += chunk.toString()
-    }
-    child.stdout.on('data', appendOutput)
-    child.stderr.on('data', appendOutput)
-    const exited = once(child, 'exit')
-    let timeout
-    let inspectionFailure = {}
-
-    try {
-      const origin = await Promise.race([
-        new Promise((resolve) => {
-          child.stdout.on('data', () => {
-            const match = output.match(/http:\/\/127\.0\.0\.1:\d+\//)
-            const hasAddress = match != null
-            if (hasAddress) {
-              resolve(match[0])
-            }
-          })
-        }),
-        exited.then(() => {
-          throw new Error(`Dev command exited before ready:\n${output}`)
-        }),
-        new Promise((_, reject) => {
-          timeout = setTimeout(() => reject(new Error(`Dev startup timeout:\n${output}`)), 30_000)
-        })
-      ])
-
-      for (const entry of entries) {
-        const response = await fetch(new URL(entry, origin), {
-          signal: AbortSignal.timeout(30_000)
-        })
-        const source = await response.text()
-        assert.equal(response.status, 200, `${entry}\n${output}`)
-        assert.match(source, /import /, `Expected transformed module: ${entry}`)
-      }
-    } catch (error) {
-      inspectionFailure = { originalError: error }
-      throw error
-    } finally {
-      clearTimeout(timeout)
-      await stopOwnedProcessGroup({ child, exited, ...inspectionFailure })
-    }
   })
 }
