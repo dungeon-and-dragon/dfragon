@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { preload } from 'react-dom'
 import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
@@ -6,10 +5,15 @@ import { SeasonBackdrop } from '../../components/SeasonBackdrop'
 import { useAdventureActivity, useBackfillAdventureSeason } from './hooks/useAdventureActivity'
 import { findSeasonRaidBackground } from '../../lib/season-raid-background'
 import { ActivitySummary, ActivitySummarySkeleton } from './ActivitySummary'
-import { styles } from './AdventureDashboard.style'
 import { seasonPeriod } from './season-format'
 import { seasonHasLegion } from './season-legion'
 import { SeasonTimeline } from './SeasonTimeline'
+
+const HERO =
+  'relative flex min-h-55 flex-col justify-between gap-6 overflow-hidden border-t border-line bg-canvas px-4 pt-5 pb-4'
+const CONTENT = 'relative flex flex-col gap-0.5'
+const TITLE = 'm-0 text-xl font-semibold tracking-heading break-keep [overflow-wrap:anywhere]'
+const PERIOD = 'font-mono text-xs tabular-nums text-fg-muted'
 
 // 시즌을 고르는 순간 배경이 크로스페이드되도록 고를 수 있는 시즌의 배경을 미리 받는다.
 function preloadSeasonBackgrounds(activity: AdventureActivity): void {
@@ -42,22 +46,22 @@ function DashboardHero({
   const hasLegion = seasonHasLegion(seasonId)
 
   return (
-    <div aria-busy={!settled} {...stylex.props(styles.hero)}>
+    <div aria-busy={!settled} className={HERO}>
       <SeasonBackdrop
         url={seasonId !== undefined ? findSeasonRaidBackground(seasonId) : undefined}
       />
-      <div {...stylex.props(styles.content)}>
-        <h1 {...stylex.props(styles.title)}>{adventureName}</h1>
+      <div className={CONTENT}>
+        <h1 className={TITLE}>{adventureName}</h1>
       </div>
-      <div {...stylex.props(styles.bottom)}>
+      <div className="relative flex flex-wrap items-end justify-between gap-4">
         {season !== undefined && period !== undefined && (
-          <div {...stylex.props(styles.content)}>
-            <span {...stylex.props(styles.kind)}>시즌 {season.id}</span>
-            <div {...stylex.props(styles.nameRow)}>
-              <b {...stylex.props(styles.seasonName)}>{season.name}</b>
-              <span {...stylex.props(styles.start)}>{period.days}일</span>
+          <div className={CONTENT}>
+            <span className="text-xs font-medium text-fg-muted">시즌 {season.id}</span>
+            <div className="flex flex-wrap items-baseline gap-x-2">
+              <b className="text-base font-semibold">{season.name}</b>
+              <span className={PERIOD}>{period.days}일</span>
             </div>
-            <span {...stylex.props(styles.start)}>{period.range}</span>
+            <span className={PERIOD}>{period.range}</span>
           </div>
         )}
         {settled && activity !== undefined ? (
@@ -88,11 +92,11 @@ export function AdventureDashboard({
   const backfill = useBackfillAdventureSeason(adventureName)
   if (result.status === 'error') {
     return (
-      <div {...stylex.props(styles.hero)}>
-        <div {...stylex.props(styles.content)}>
-          <h1 {...stylex.props(styles.title)}>{adventureName}</h1>
+      <div className={HERO}>
+        <div className={CONTENT}>
+          <h1 className={TITLE}>{adventureName}</h1>
         </div>
-        <p role="alert" {...stylex.props(styles.state)}>
+        <p role="alert" className="m-0 text-sm text-fg-danger">
           {result.message}
         </p>
       </div>
@@ -116,7 +120,7 @@ export function AdventureDashboard({
           onBackfill={backfill}
         />
       ) : (
-        <div aria-hidden="true" {...stylex.props(styles.timelinePlaceholder)} />
+        <div aria-hidden="true" className="h-13" />
       )}
       <DashboardHero
         adventureName={adventureName}
