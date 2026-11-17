@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { formatJobName } from '#core/character/job-format'
 import { Link } from '@tanstack/react-router'
@@ -479,9 +478,7 @@ function FameCell({
 
 function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
   const { value, tone, approximate, description } = score
-  const note = description !== undefined && (
-    <span {...stylex.props(shapes.srOnly)}>{description}</span>
-  )
+  const note = description !== undefined && <span className="sr-only">{description}</span>
 
   return (
     <td {...stylex.props(styles.cell, styles.end)}>

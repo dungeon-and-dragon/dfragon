@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
@@ -367,7 +366,7 @@ function Bone({ height }: { height: number }): React.JSX.Element {
 function HistorySkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true">
-      <span role="status" {...stylex.props(shapes.srOnly)}>
+      <span role="status" className="sr-only">
         이력을 받는 중입니다.
       </span>
       <div aria-hidden="true" {...stylex.props(styles.skeletonCharts)}>
@@ -389,7 +388,7 @@ function HistorySkeleton(): React.JSX.Element {
 function SummarySkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true">
-      <span role="status" {...stylex.props(shapes.srOnly)}>
+      <span role="status" className="sr-only">
         시점 요약을 받는 중입니다.
       </span>
       <div aria-hidden="true" {...stylex.props(styles.skeletonTiles)}>

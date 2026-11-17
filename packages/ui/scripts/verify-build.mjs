@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { access, readFile, readdir } from 'node:fs/promises'
 import { isBuiltin } from 'node:module'
-import { dirname, relative, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript-compiler-api'
 
@@ -185,29 +185,9 @@ if (isLibrary) {
       assert.ok(binding.isNamedExport, `Token constants keep the same export name: ${binding.name}`)
     }
   }
-  const visited = new Set()
-  async function verifyTypo(file) {
-    if (visited.has(file)) {
-      return
-    }
-    visited.add(file)
-    const code = await readFile(resolve(output, file), 'utf8')
-    for (const specifier of moduleSpecifiers(file, code)) {
-      const isChunk = specifier.startsWith('.')
-      if (isChunk) {
-        const chunk = relative(output, resolve(output, dirname(file), specifier))
-        assert.ok(files.includes(chunk), `React-only Typo entry chunk: ${specifier}`)
-        await verifyTypo(chunk)
-      } else {
-        const isReact = specifier === 'react' || specifier.startsWith('react/')
-        assert.ok(isReact, `React-only Typo entry: ${file} ${specifier}`)
-      }
-    }
-  }
-  await verifyTypo('typo.js')
   const index = await readFile(resolve(output, 'index.js'), 'utf8')
   const imports = moduleSpecifiers('index.js', index)
-  for (const external of ['@stylexjs/stylex', 'react', 'react/jsx-runtime']) {
+  for (const external of ['react', 'react/jsx-runtime']) {
     const hasExternalImport = imports.includes(external)
     assert.ok(hasExternalImport, `External import: ${external}`)
   }

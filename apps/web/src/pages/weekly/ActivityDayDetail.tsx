@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import type {
@@ -181,7 +180,7 @@ export function ActivityDayDetail({
       </div>
       {seasonDays.status === 'loading' && (
         <>
-          <span role="status" {...stylex.props(shapes.srOnly)}>
+          <span role="status" className="sr-only">
             하루 활동을 받는 중입니다.
           </span>
           <span aria-hidden="true" {...stylex.props(styles.bone)} />

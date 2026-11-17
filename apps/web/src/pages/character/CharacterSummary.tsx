@@ -1,4 +1,4 @@
-import { Button, shapes } from '@dfragon/ui'
+import { Button } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
@@ -180,9 +180,7 @@ function FameStat({ fame }: { fame: number | null }): React.JSX.Element {
 
 function ScoreStat({ card }: { card: CharacterDetailView['card'] }): React.JSX.Element {
   const { label, tone, value, approximate, description } = toScoreView(card)
-  const note = description !== undefined && (
-    <span {...stylex.props(shapes.srOnly)}>{description}</span>
-  )
+  const note = description !== undefined && <span className="sr-only">{description}</span>
 
   return (
     <div {...stylex.props(styles.stat)}>

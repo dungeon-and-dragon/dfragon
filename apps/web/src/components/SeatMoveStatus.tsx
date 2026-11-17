@@ -1,5 +1,3 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import type { SeatMoveNotice } from '../hooks/useSeatMove'
 import { seatDirections, type SeatDirection, type SeatLayout } from '#core/capture/seats'
 
@@ -25,13 +23,13 @@ export function SeatMoveStatus({
 
   return (
     <>
-      <span id={hintId} {...stylex.props(shapes.srOnly)}>
+      <span id={hintId} className="sr-only">
         {`Alt와 방향키로 ${directions.join(', ')} 자리와 맞바꿉니다.`}
       </span>
-      <span role="status" {...stylex.props(shapes.srOnly)}>
+      <span role="status" className="sr-only">
         {notice.sequence % 2 === 1 ? notice.text : ''}
       </span>
-      <span role="status" {...stylex.props(shapes.srOnly)}>
+      <span role="status" className="sr-only">
         {notice.sequence % 2 === 0 ? notice.text : ''}
       </span>
     </>
