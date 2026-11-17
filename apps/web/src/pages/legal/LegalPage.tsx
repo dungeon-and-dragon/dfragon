@@ -1,6 +1,4 @@
-import * as stylex from '@stylexjs/stylex'
 import { useId } from 'react'
-import { styles } from './LegalPage.style'
 
 export function TermsPage(): React.JSX.Element {
   return <LegalPage title="이용약관" />
@@ -14,14 +12,14 @@ function LegalPage({ title }: { title: string }): React.JSX.Element {
   const titleId = useId()
 
   return (
-    <div {...stylex.props(styles.screen)}>
-      <article aria-labelledby={titleId} {...stylex.props(styles.box)}>
-        <div {...stylex.props(styles.header)}>
-          <h1 id={titleId} {...stylex.props(styles.title)}>
+    <div className="p-4">
+      <article aria-labelledby={titleId} className="rounded-panel border border-line bg-canvas">
+        <div className="flex min-h-11 items-center border-b border-line px-4">
+          <h1 id={titleId} className="m-0 text-base font-semibold">
             {title}
           </h1>
         </div>
-        <div {...stylex.props(styles.body)} />
+        <div className="min-h-120" />
       </article>
     </div>
   )

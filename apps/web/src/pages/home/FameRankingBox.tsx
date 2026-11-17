@@ -1,5 +1,3 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import {
   type Affiliation,
   CharacterTable,
@@ -7,7 +5,6 @@ import {
 } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { useFameRanking } from '../../hooks/useFameRanking'
-import { styles } from './FameRankingBox.style'
 
 const NAME = '명성 랭킹'
 const SHOWN_COUNT = 3
@@ -17,7 +14,7 @@ const ALL_JOBS = {}
 
 export function FameRankingBox(): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.box)}>
+    <div className="min-w-0 flex-[1_1_400px]">
       <FameRankingTop />
     </div>
   )
@@ -30,7 +27,7 @@ function FameRankingTop(): React.JSX.Element {
       return (
         <ListBox name={NAME}>
           <div aria-busy="true">
-            <span role="status" {...stylex.props(shapes.srOnly)}>
+            <span role="status" className="sr-only">
               랭킹을 받는 중입니다.
             </span>
             <CharacterTable
@@ -46,7 +43,7 @@ function FameRankingTop(): React.JSX.Element {
     case 'error':
       return (
         <ListBox name={NAME}>
-          <p role="alert" {...stylex.props(styles.state)}>
+          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
             {result.message}
           </p>
         </ListBox>

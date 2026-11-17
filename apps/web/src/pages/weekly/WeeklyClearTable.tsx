@@ -40,7 +40,7 @@ export function WeeklyClearTable({
   const headRows = clearNames.length > 0 ? 2 : 1
 
   return (
-    <table className={tableClasses.table}>
+    <table className={`${tableClasses.table} ${tableClasses.wideTable}`}>
       <colgroup>
         <col className={tableClasses.rankColumn} />
         <col />
