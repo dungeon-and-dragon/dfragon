@@ -8,6 +8,11 @@ import {
   noSeasonBackfill
 } from '../application/adventure-guild/service.js'
 import type { CharacterBasicRepository } from '../application/character-basic/repository.js'
+import {
+  type CharacterHistoryRepository,
+  emptyCharacterHistoryRepository
+} from '../application/character-history/repository.js'
+import { CharacterHistoryService } from '../application/character-history/service.js'
 import { CharacterBasicService } from '../application/character-basic/service.js'
 import {
   type CharacterDetailDependencies,
@@ -78,6 +83,7 @@ export interface ApiServicesOptions {
   readonly recordCharacterSkillStyle?: CharacterBasicRepository['recordSkillStyle']
   readonly recordCharacterScore?: CharacterBasicRepository['recordScore']
   readonly recordCharacterHistory?: CharacterBasicRepository['recordHistory']
+  readonly characterHistory?: CharacterHistoryRepository
   readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsRepository
   readonly clearStats?: ClearStatsRepository
@@ -229,6 +235,10 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       }
     }
   })
+  const characterHistory = new CharacterHistoryService(
+    options.characterHistory ?? emptyCharacterHistoryRepository,
+    options.details.catalog
+  )
   const todayGrade = new TodayGradeService(options.todayGrade.fetchShopGrade)
   const characterImage = new CharacterImageService(
     options.fetchCharacterImage ?? createNeopleCharacterImage()
@@ -247,6 +257,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       buildInfo,
       search,
       details,
+      characterHistory,
       characterImage,
       timeline: timelineService,
       adventureGuild,

@@ -2,6 +2,7 @@ import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/datab
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '../application/character-catalog/service.js'
 import { createNeopleCharacterTimeline } from '../infrastructure/neople/character-timeline.js'
+import { DatabaseCharacterHistoryRepository } from '../infrastructure/database/character-history.js'
 import { DatabaseCharacterBasicRepository } from '../infrastructure/database/character-basic.js'
 import {
   ENHANCEMENT_BACKFILL_CODES,
@@ -48,6 +49,7 @@ function createDatabaseSubscribers(
   | 'recordCharacterSkillStyle'
   | 'recordCharacterScore'
   | 'recordCharacterHistory'
+  | 'characterHistory'
   | 'adventureGuild'
   | 'rankingStats'
   | 'clearStats'
@@ -94,6 +96,7 @@ function createDatabaseSubscribers(
     recordCharacterSkillStyle: (style) => characterBasic.recordSkillStyle(style),
     recordCharacterScore: (score) => characterBasic.recordScore(score),
     recordCharacterHistory: (history) => characterBasic.recordHistory(history),
+    characterHistory: new DatabaseCharacterHistoryRepository(client),
     readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: new DatabaseRankingStatsRepository(client),

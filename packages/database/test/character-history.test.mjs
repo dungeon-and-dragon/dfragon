@@ -357,6 +357,7 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
   const between = await readCharacterHistorySnapshot(client, key, nov13At0000)
   assert.deepEqual(between.sections, { ...sections, equipment: secondEquipment })
   assert.equal(between.basic.fame, 99000)
+  assert.deepEqual(between.observedAt, nov12At2200)
   assert.deepEqual(between.score, {
     observedAt: nov12At2200,
     kind: 'equipment',
@@ -368,6 +369,7 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
   assert.deepEqual(first.sections, { ...sections, equipment: firstEquipment })
   assert.equal(first.basic.fame, basic.fame)
   assert.equal(first.score.score, 1741)
+  assert.deepEqual(first.observedAt, nov10At2200)
 
   const latest = await readCharacterHistorySnapshot(client, key, nov20At0000)
   assert.deepEqual(latest.sections, {
@@ -375,6 +377,8 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
     equipment: secondEquipment,
     avatar: secondAvatar
   })
+  // 기본 정보와 점수는 12일 행이 최신이지만 아바타가 14일에 바뀌었으므로 스냅샷은 14일에 받은 값이다.
+  assert.deepEqual(latest.observedAt, nov14At2200)
 
   assert.equal(await readCharacterHistorySnapshot(client, key, nov10At215959), null)
 })
