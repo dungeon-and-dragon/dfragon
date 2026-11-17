@@ -1,0 +1,117 @@
+<!-- @dsCard group="Components" height=80 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+      <svg
+        class="progress progress-40"
+        data-tone="neutral"
+        viewBox="0 0 24 24"
+        fill="none"
+        role="progressbar"
+        aria-label="불러오는 중"
+        data-indeterminate
+      >
+        <circle
+          class="progress-range"
+          cx="12"
+          cy="12"
+          r="9"
+          stroke-width="3"
+          stroke-linecap="square"
+          stroke-dasharray="14.14 56.55"
+          transform="rotate(-90 12 12)"
+        />
+        <circle
+          class="progress-range"
+          cx="12"
+          cy="12"
+          r="9"
+          stroke-width="3"
+          stroke-linecap="square"
+          stroke-dasharray="14.14 56.55"
+          transform="rotate(90 12 12)"
+        />
+      </svg>
+      <svg
+        class="progress progress-40"
+        data-tone="brand"
+        viewBox="0 0 24 24"
+        fill="none"
+        role="progressbar"
+        aria-label="진행률"
+        aria-valuenow="60"
+      >
+        <circle class="progress-track" cx="12" cy="12" r="9" stroke-width="3" />
+        <circle
+          class="progress-range"
+          cx="12"
+          cy="12"
+          r="9"
+          stroke-width="3"
+          stroke-linecap="square"
+          stroke-dasharray="33.93 56.55"
+          transform="rotate(-90 12 12)"
+        />
+      </svg>
+      <svg
+        class="progress progress-24"
+        data-tone="neutral"
+        viewBox="0 0 24 24"
+        fill="none"
+        role="progressbar"
+        aria-label="진행률"
+        aria-valuenow="30"
+      >
+        <circle class="progress-track" cx="12" cy="12" r="9" stroke-width="3" />
+        <circle
+          class="progress-range"
+          cx="12"
+          cy="12"
+          r="9"
+          stroke-width="3"
+          stroke-linecap="square"
+          stroke-dasharray="16.96 56.55"
+          transform="rotate(-90 12 12)"
+        />
+      </svg>
+      <button class="btn btn-primary btn-md">
+        <span class="loading"
+          ><span class="loading-label">검색</span
+          ><span class="loading-indicator"
+            ><svg
+              class="progress progress-inherit"
+              data-tone="inherit"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              data-indeterminate
+            >
+              <circle
+                class="progress-range"
+                cx="12"
+                cy="12"
+                r="9"
+                stroke-width="3"
+                stroke-linecap="square"
+                stroke-dasharray="14.14 56.55"
+                transform="rotate(-90 12 12)"
+              />
+            </svg></span
+          ></span
+        >
+      </button>
+    </div>
+  </body>
+</html>
