@@ -1,11 +1,9 @@
-import * as stylex from '@stylexjs/stylex'
 import { toElapsedTime } from '#core/time-format'
 import { useRefreshingNow } from '../hooks/useRefreshingNow'
-import { styles } from './LastCaptureTime.style'
 
 export function LastCaptureTime({ at }: { at: number | null }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.root)}>
+    <div className="mr-2 flex h-8 shrink-0 items-center text-xs whitespace-nowrap">
       {/* 완료 시각이 바뀌면 이전 시각의 타이머를 버리고 새 시각부터 다시 잰다. */}
       {at !== null && <CaptureTimeValue key={at} at={at} />}
     </div>
@@ -16,8 +14,8 @@ function CaptureTimeValue({ at }: { at: number }): React.JSX.Element {
   const time = toElapsedTime(useRefreshingNow(at) - at)
 
   return (
-    <time dateTime={new Date(at).toISOString()} {...stylex.props(styles.value)}>
-      <span {...stylex.props(styles.number)}>{time.value}</span>
+    <time dateTime={new Date(at).toISOString()} className="text-fg-muted">
+      <span className="font-mono text-sm font-semibold tabular-nums text-fg">{time.value}</span>
       {time.unit} 전
     </time>
   )

@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { formatJobName } from '#core/character/job-format'
 import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
@@ -6,7 +5,7 @@ import { MISSING_VALUE, tierLabels } from '#core/capture/cards'
 import { type ScoreView, formatApproximateScore, toScoreView } from '#core/character/card-score'
 import type { SlotNotice } from '#core/character/character-card'
 import type { SlotCard } from '#core/capture/slot-cards'
-import type { CardCharacter } from '#core/capture/cards-types'
+import type { CardCharacter, CharacterTier } from '#core/capture/cards-types'
 import type { SearchMode } from '#core/capture/search-mode'
 import { CandidatePopover } from './CandidatePopover'
 import { CardAnnouncer } from './CardAnnouncer'
@@ -21,9 +20,32 @@ import { type LookupDraft, useLookupDraft } from '../hooks/useLookupDraft'
 import { useServerMenu } from '../hooks/useServerMenu'
 import type { SlotCardKey } from '../hooks/useSlotCardStore'
 import { getLookupStep, type LookupStep } from '../lib/card-presentation'
-import { styles } from './CharacterRow.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
+
+const cellBaseClass = 'overflow-hidden px-3 align-middle text-ellipsis first:pl-4 last:pr-4'
+const cellClass = `${cellBaseClass} whitespace-nowrap`
+const endCellClass = `${cellClass} text-right`
+const numberClass = 'font-mono font-semibold tabular-nums'
+const tagClass =
+  'box-border inline-flex h-4.5 shrink-0 items-center rounded-badge border border-current px-1 text-2xs font-semibold whitespace-nowrap'
+const linkClass = 'text-inherit no-underline hover:underline'
+
+const tierClasses: Readonly<Record<CharacterTier, string>> = {
+  top: 'text-tier-top',
+  ranker: 'text-tier-ranker'
+}
+
+const scoreToneClasses: Readonly<Record<NonNullable<ScoreView['tone']>, string>> = {
+  dealer: 'text-score-dealer',
+  buffer: 'text-score-buffer'
+}
+
+const noticeToneClasses: Readonly<Record<SlotNotice['tone'], string>> = {
+  failure: 'text-card-failure',
+  error: 'text-fg-danger',
+  estimate: 'text-fg-warning'
+}
 
 const shortScoreLabels: Readonly<Record<ScoreView['label'], string>> = {
   '장비 점수': '장비',
@@ -81,10 +103,12 @@ export function CharacterRow({
 
   return (
     <>
-      <td {...stylex.props(styles.cell, styles.seat)}>{seat}</td>
-      <td {...stylex.props(styles.cell)}>
-        <div {...stylex.props(styles.character)}>
-          <div {...stylex.props(styles.well, shown === undefined && styles.wellEmpty)}>
+      <td className={cellClass}>{seat}</td>
+      <td className={cellClass}>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div
+            className={`relative size-9 shrink-0 overflow-hidden rounded-control ${shown === undefined ? 'bg-surface' : 'bg-inset'}`}
+          >
             {shown !== undefined && (
               <RowPortrait character={shown} face={screen === 'raid' ? shown.face : undefined} />
             )}
@@ -96,12 +120,12 @@ export function CharacterRow({
             onKeyDown={serverMenu.openOnTab}
           />
           {shown?.tier !== undefined && (
-            <span {...stylex.props(styles.badge, styles[shown.tier])}>
+            <span className={`${tagClass} ${tierClasses[shown.tier]}`}>
               {tierLabels[shown.tier]}
             </span>
           )}
           {estimated && (
-            <span title={notice?.text} {...stylex.props(styles.badge, styles.estimate)}>
+            <span title={notice?.text} className={`${tagClass} text-fg-warning`}>
               추정
             </span>
           )}
@@ -113,7 +137,7 @@ export function CharacterRow({
           </CardAnnouncer>
         </div>
       </td>
-      <td {...stylex.props(styles.cell)}>
+      <td className={cellClass}>
         <ServerSelect
           label={`${slot}번 서버`}
           value={draft.serverId}
@@ -133,7 +157,7 @@ export function CharacterRow({
         snapshotAdventureInput={snapshotAdventureInput}
         onChangeSnapshotAdventure={onChangeSnapshotAdventure}
       />
-      <td {...stylex.props(styles.cell, styles.snapshot)}>
+      <td className={cellClass}>
         {snapshotShown && snapshotMark !== undefined && (
           <SnapshotBadge mark={snapshotMark} screen={screen} />
         )}
@@ -161,7 +185,7 @@ function RowPortrait({
       params={{ serverId: character.serverId, characterId: character.characterId }}
       aria-label={`${character.name} 상세`}
       draggable={false}
-      {...stylex.props(styles.portraitLink)}
+      className="absolute inset-0 cursor-pointer rounded-[inherit] -outline-offset-2 outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal"
     >
       {portrait}
     </Link>
@@ -225,7 +249,7 @@ function DetailCells({
   if (lookupStep === '이름 인식' || lookupStep === '캐릭터 검색') {
     return (
       <>
-        <td colSpan={3} {...stylex.props(styles.cell)}>
+        <td colSpan={3} className={cellClass}>
           <LookupProgress slot={slot} step={lookupStep} />
         </td>
         <MissingCell end />
@@ -237,7 +261,7 @@ function DetailCells({
   if (found !== undefined && card.picking === true) {
     return (
       <>
-        <td colSpan={3} {...stylex.props(styles.cell)}>
+        <td colSpan={3} className={cellClass}>
           <LookupProgress slot={slot} step="상세 정보 확인" />
         </td>
         <FameCell fame={found.fame} tier={found.tier} />
@@ -283,7 +307,7 @@ function MissingCharacterCells({
   if (snapshotAdventureInput !== undefined) {
     return (
       <>
-        <td {...stylex.props(styles.cell)}>
+        <td className={cellClass}>
           <SnapshotAdventureField
             slot={slot}
             value={snapshotAdventureInput}
@@ -313,7 +337,7 @@ function MissingCharacterCells({
 
   return (
     <>
-      <td colSpan={3} {...stylex.props(styles.cell)}>
+      <td colSpan={3} className={cellClass}>
         <NoticeText notice={notice} />
       </td>
       <MissingCell end />
@@ -341,7 +365,7 @@ function FoundCells({
     <>
       <AdventureCell adventure={character.adventure} editing={editing} />
       <GuildCell guildId={character.guildId} guild={character.guild} />
-      <td title={formatJobName(character.job)} {...stylex.props(styles.cell, styles.job)}>
+      <td title={formatJobName(character.job)} className={`${cellClass} text-fg-muted`}>
         {formatJobName(character.job)}
       </td>
       <StatCells
@@ -363,11 +387,11 @@ function AdventureCell({
   editing: boolean
 }): React.JSX.Element {
   if (editing) {
-    return <td {...stylex.props(styles.cell, styles.subtle)}>Enter로 조회</td>
+    return <td className={`${cellClass} text-fg-subtle`}>Enter로 조회</td>
   }
 
   return (
-    <td title={adventure} {...stylex.props(styles.cell, styles.adventure)}>
+    <td title={adventure} className={`${cellClass} text-fg-adventure`}>
       {adventure === MISSING_VALUE ? (
         adventure
       ) : (
@@ -375,7 +399,7 @@ function AdventureCell({
           to="/adventures/$adventureName"
           params={{ adventureName: adventure }}
           draggable={false}
-          {...stylex.props(styles.link)}
+          className={linkClass}
         >
           {adventure}
         </Link>
@@ -392,18 +416,13 @@ function GuildCell({
   guild: string | null | undefined
 }): React.JSX.Element {
   if (guild == null) {
-    return <td {...stylex.props(styles.cell, styles.missing)}>{MISSING_VALUE}</td>
+    return <td className={`${cellClass} text-fg-subtle`}>{MISSING_VALUE}</td>
   }
 
   return (
-    <td {...stylex.props(styles.cell, styles.guild)}>
+    <td className={`${cellClass} text-fg-guild`}>
       {guildId != null ? (
-        <Link
-          to="/guilds/$guildId"
-          params={{ guildId }}
-          draggable={false}
-          {...stylex.props(styles.link)}
-        >
+        <Link to="/guilds/$guildId" params={{ guildId }} draggable={false} className={linkClass}>
           {guild}
         </Link>
       ) : (
@@ -428,7 +447,7 @@ function StatCells({
 }): React.JSX.Element {
   if (scorePending) {
     return (
-      <td colSpan={2} {...stylex.props(styles.cell, styles.end)}>
+      <td colSpan={2} className={endCellClass}>
         <LookupProgress slot={slot} step="상세 정보 확인" />
       </td>
     )
@@ -436,7 +455,7 @@ function StatCells({
 
   if (notice?.tone === 'error') {
     return (
-      <td colSpan={2} {...stylex.props(styles.cell, styles.end, styles.wrap)}>
+      <td colSpan={2} className={`${cellBaseClass} text-right text-xs whitespace-normal`}>
         <NoticeText notice={notice} />
       </td>
     )
@@ -463,13 +482,7 @@ function FameCell({
 
   return (
     <td
-      {...stylex.props(
-        styles.cell,
-        styles.end,
-        styles.number,
-        styles.fame,
-        tier !== undefined && styles[tier]
-      )}
+      className={`${endCellClass} ${numberClass} ${tier !== undefined ? tierClasses[tier] : 'text-game-fame'}`}
     >
       {integer.format(fame)}
     </td>
@@ -481,22 +494,18 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
   const note = description !== undefined && <span className="sr-only">{description}</span>
 
   return (
-    <td {...stylex.props(styles.cell, styles.end)}>
-      <span {...stylex.props(styles.scoreLabel)}>{shortScoreLabels[score.label]}</span>
+    <td className={endCellClass}>
+      <span className="mr-1.5 text-2xs text-fg-subtle">{shortScoreLabels[score.label]}</span>
       {value != null ? (
         <span
           title={description}
-          {...stylex.props(
-            styles.number,
-            tone !== null && styles[tone],
-            approximate && styles.approximate
-          )}
+          className={`${numberClass}${tone !== null ? ` ${scoreToneClasses[tone]}` : ''}${approximate ? ' border-b border-dotted border-fg-subtle' : ''}`}
         >
           {approximate ? formatApproximateScore(value) : integer.format(value)}
           {note}
         </span>
       ) : (
-        <span {...stylex.props(styles.number, styles.missing)}>
+        <span className={`${numberClass} text-fg-subtle`}>
           {MISSING_VALUE}
           {note}
         </span>
@@ -507,7 +516,11 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
 
 function MissingCell({ end = false }: { end?: boolean }): React.JSX.Element {
   return (
-    <td {...stylex.props(styles.cell, styles.missing, end && styles.end, end && styles.number)}>
+    <td
+      className={
+        end ? `${endCellClass} ${numberClass} text-fg-subtle` : `${cellClass} text-fg-subtle`
+      }
+    >
       {MISSING_VALUE}
     </td>
   )
@@ -515,8 +528,11 @@ function MissingCell({ end = false }: { end?: boolean }): React.JSX.Element {
 
 function NoticeText({ notice }: { notice: SlotNotice }): React.JSX.Element {
   return (
-    <span title={notice.text} {...stylex.props(styles.notice, styles[notice.tone])}>
-      <span aria-hidden="true" {...stylex.props(styles.mark)}>
+    <span
+      title={notice.text}
+      className={`overflow-hidden text-ellipsis ${noticeToneClasses[notice.tone]}`}
+    >
+      <span aria-hidden="true" className="mr-1.5 font-semibold">
         !
       </span>
       {notice.text}

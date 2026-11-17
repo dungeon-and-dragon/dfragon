@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import { BoardHeader } from '../../components/BoardHeader'
 import { BoardTitle } from '../../components/BoardTitle'
@@ -12,7 +11,6 @@ import { usePartySlotCards } from './hooks/usePartySlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { filledSlotCount } from '#core/capture/slot-cards'
 import { PartyScreen } from './PartyScreen'
-import { styles } from './PartyPage.style'
 
 export function PartyPage({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {
   const { partyCapture: capture } = useScreenCaptureContext()
@@ -21,7 +19,7 @@ export function PartyPage({ captureSource }: { captureSource: ReactNode }): Reac
   const clipboard = useClipboardCopy(clipboardText)
 
   return (
-    <div {...stylex.props(styles.party)}>
+    <div className="flex flex-col gap-4">
       {renderBoardHeader(
         <BoardHeader
           start={

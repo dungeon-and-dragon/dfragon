@@ -1,6 +1,4 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import { styles } from './BoardHeader.style'
 
 export function BoardHeader({
   start,
@@ -10,9 +8,9 @@ export function BoardHeader({
   end: ReactNode
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.header)}>
-      <div {...stylex.props(styles.start)}>{start}</div>
-      <div {...stylex.props(styles.end)}>{end}</div>
+    <div className="flex min-w-0 grow items-center gap-4">
+      <div className="flex min-w-0 items-baseline gap-2">{start}</div>
+      <div className="ml-auto flex shrink-0 items-center gap-1">{end}</div>
     </div>
   )
 }

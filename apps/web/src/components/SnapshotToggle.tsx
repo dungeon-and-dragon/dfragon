@@ -1,11 +1,7 @@
 import { Button, Popover, type PopoverChangeEventDetails } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { useRef } from 'react'
-import { HeaderTooltip } from './HeaderTooltip'
-import { triggerStyles } from './HeaderTooltip.style'
-import { toolStyles } from './HeaderTool.style'
+import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 import { SnapshotIcon } from './SnapshotIcon'
-import { styles } from './SnapshotToggle.style'
 
 export function SnapshotToggle({
   label,
@@ -33,7 +29,7 @@ export function SnapshotToggle({
   return (
     <Popover.Root onOpenChange={handleOpenChange}>
       <HeaderTooltip label={tooltipLabel}>
-        <span {...stylex.props(triggerStyles.wrapper)}>
+        <span className={tooltipTriggerClass}>
           <Popover.Trigger
             disabled={disabled}
             render={
@@ -41,7 +37,7 @@ export function SnapshotToggle({
                 type="button"
                 aria-label={label}
                 aria-pressed={active}
-                {...stylex.props(toolStyles.button)}
+                className="icon-btn icon-btn-sm"
               >
                 <SnapshotIcon filled={active} width={16} height={16} />
               </button>
@@ -55,16 +51,17 @@ export function SnapshotToggle({
         sideOffset={8}
         role="alertdialog"
         initialFocus={cancelRef}
-        {...stylex.props(styles.popup)}
       >
-        <Popover.Title>고정을 취소하시겠습니까?</Popover.Title>
-        <div {...stylex.props(styles.actions)}>
-          <Popover.Close ref={cancelRef} render={<Button variant="secondary" size="sm" />}>
-            유지
-          </Popover.Close>
-          <Popover.Close render={<Button variant="primary" size="sm" />} onClick={onClear}>
-            고정 취소
-          </Popover.Close>
+        <div className="box-border flex w-55 flex-col gap-3 px-3.5 pt-3.5 pb-3">
+          <Popover.Title>고정을 취소하시겠습니까?</Popover.Title>
+          <div className="flex justify-end gap-2">
+            <Popover.Close ref={cancelRef} render={<Button variant="secondary" size="sm" />}>
+              유지
+            </Popover.Close>
+            <Popover.Close render={<Button variant="primary" size="sm" />} onClick={onClear}>
+              고정 취소
+            </Popover.Close>
+          </div>
         </div>
       </Popover.Popup>
     </Popover.Root>

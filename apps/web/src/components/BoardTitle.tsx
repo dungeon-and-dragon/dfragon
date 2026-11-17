@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
-import { styles } from './BoardTitle.style'
-
 export function BoardTitle({
   label,
   filled,
@@ -14,16 +11,16 @@ export function BoardTitle({
 }): React.JSX.Element {
   return (
     <>
-      <h1 {...stylex.props(styles.heading)}>{label}</h1>
-      <span {...stylex.props(styles.number)}>
+      <h1 className="m-0 shrink-0 text-base font-semibold tracking-heading text-fg">{label}</h1>
+      <span className="shrink-0 font-mono text-base font-semibold tabular-nums text-fg">
         {filled}
-        <span {...stylex.props(styles.total)}>/{total}</span>
+        <span className="text-fg-subtle">/{total}</span>
       </span>
       {round !== null && (
         <span
           aria-label={`${round}번째 ${label}`}
           role="img"
-          {...stylex.props(styles.number, styles.round)}
+          className="shrink-0 font-mono text-base font-semibold tabular-nums text-fg"
         >
           #{round}
         </span>

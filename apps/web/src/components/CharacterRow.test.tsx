@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -9,7 +8,6 @@ import type { SlotCard } from '#core/capture/slot-cards'
 import type { CharacterChoice } from '#core/search/search'
 import type { CardCharacter } from '#core/capture/cards-types'
 import type { ServerSelect } from './ServerSelect'
-import { colors } from '@dfragon/ui/tokens.stylex'
 import { toneClassesOf } from '../testing/test-support/score-tone-class'
 import { TestRouter } from '../testing/test-support/test-router'
 import { CharacterRow } from './CharacterRow'
@@ -118,18 +116,16 @@ function cell(column: string): HTMLTableCellElement | undefined {
   return undefined
 }
 
-// jsdom은 색을 계산하지 않으므로 같은 선언에서 나온 atomic class를 요소가 가졌는지로 색을 확인한다.
-const expectedColors = stylex.create({
-  failure: { color: colors.cardFailure },
-  error: { color: colors.fgDanger },
-  signalFill: { backgroundColor: colors.signal },
-  danger: { color: colors.fgDanger }
-})
+// jsdom은 색을 계산하지 않으므로 요소가 그 색의 Tailwind CSS utility를 가졌는지로 색을 확인한다.
+const expectedColors = {
+  failure: 'text-card-failure',
+  error: 'text-fg-danger',
+  signalFill: 'bg-signal',
+  danger: 'text-fg-danger'
+} as const
 
 function hasStyle(element: Element, style: keyof typeof expectedColors): boolean {
-  const names = stylex.props(expectedColors[style]).className!.split(' ')
-
-  return names.every((name) => element.classList.contains(name))
+  return element.classList.contains(expectedColors[style])
 }
 
 function visibleText(element: Element): string {

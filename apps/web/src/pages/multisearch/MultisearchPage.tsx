@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { getRouteApi } from '@tanstack/react-router'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
 import { GameBar } from './components/GameBar'
@@ -8,7 +7,6 @@ import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import type { AutoRoundSignal, BrowserHost } from '../../host/client-host'
 import { SearchScreen } from '../search/SearchScreen'
-import { styles } from './MultisearchPage.style'
 
 const route = getRouteApi('/multisearch')
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
@@ -64,14 +62,19 @@ function AutoRounds({ host }: { host: BrowserHost }): null {
 export function MultisearchPage(): React.JSX.Element {
   const { host } = route.useRouteContext()
 
+  return <MultisearchBoard host={host} />
+}
+
+export function MultisearchBoard({ host }: { host: BrowserHost }): React.JSX.Element {
   return (
     <div
       onKeyDown={keepSeatMoveKeys}
-      {...stylex.props(styles.page, styles.pageWidth(CONTENT_WIDTH))}
+      className="box-border flex flex-col p-4"
+      style={{ minWidth: CONTENT_WIDTH }}
     >
       <PastedFrameRounds host={host} />
       <AutoRounds host={host} />
-      <div {...stylex.props(styles.box)}>
+      <div className="flex flex-col rounded-panel border border-line bg-canvas">
         <GameBar />
         <SearchScreen captureSource={<ScreenShareChip host={host} />} />
       </div>
