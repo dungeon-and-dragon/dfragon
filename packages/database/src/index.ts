@@ -21,6 +21,7 @@ export type { CharacterBasicInput, CharacterInput } from './character.js'
 export {
   readCharacterHistory,
   readCharacterHistorySnapshot,
+  readCharacterSectionHistory,
   recordCharacterHistory
 } from './character-history.js'
 export type {
@@ -33,6 +34,7 @@ export type {
   StoredCharacterHistory,
   StoredCharacterHistorySnapshot,
   StoredCharacterScoreHistory,
+  StoredCharacterSection,
   StoredCharacterSectionChange
 } from './character-history.js'
 export { recordCharacterScore } from './character-score.js'
