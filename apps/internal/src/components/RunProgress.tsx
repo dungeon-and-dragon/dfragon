@@ -1,7 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import type { Run } from '../api/ops-schemas'
 import { formatCount } from '../format'
-import { styles } from './RunProgress.style'
 
 type Progress = NonNullable<Run['progress']>
 
@@ -27,13 +25,16 @@ export function RunProgress({
       : formatCount(progress.done)
 
   return (
-    <span {...stylex.props(styles.progress)}>
+    <span className="inline-flex items-center gap-2">
       {percent !== undefined && (
-        <span aria-hidden="true" {...stylex.props(styles.track, wide && styles.wideTrack)}>
-          <i {...stylex.props(styles.fill, styles.fillWidth(percent))} />
+        <span
+          aria-hidden="true"
+          className={`shrink-0 overflow-hidden rounded-badge bg-control ${wide ? 'h-2 w-80 max-sm:w-40' : 'h-1.5 w-22'}`}
+        >
+          <i className="block h-full bg-fg-muted" style={{ width: `${percent}%` }} />
         </span>
       )}
-      <b {...stylex.props(styles.count)}>{countText}</b>
+      <b className="font-mono font-medium tabular-nums">{countText}</b>
     </span>
   )
 }

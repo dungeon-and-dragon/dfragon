@@ -1,5 +1,4 @@
 import { Button, Switch } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { BATCH_NEOPLE_KEY_DUPLICATE, OpsRequestFailure } from '../api/ops-client'
 import type { BatchKey } from '../api/ops-schemas'
@@ -10,9 +9,8 @@ import {
   useDeleteBatchKey,
   useSetBatchKeyEnabled
 } from '../ops-queries'
-import { styles } from './BatchKeyPanel.style'
 import { ConfirmButton } from './ConfirmButton'
-import { panelStyles, tableStyles, textStyles } from './panel.style'
+import { FIELD_INPUT, panelClasses, tableClasses, textClasses } from './panel-classes'
 import { type BatchKeyStatus, BatchKeyStatusTag } from './RunStatusTag'
 
 const KEY_MASK = '••••'
@@ -75,9 +73,13 @@ function AddBatchKeyForm(): React.JSX.Element {
   }
 
   return (
-    <form aria-label="batch key 추가" onSubmit={handleSubmit} {...stylex.props(styles.addRow)}>
-      <div {...stylex.props(styles.field, styles.labelField)}>
-        <label htmlFor={LABEL_INPUT_ID} {...stylex.props(styles.label)}>
+    <form
+      aria-label="batch key 추가"
+      onSubmit={handleSubmit}
+      className="m-0 flex items-end gap-3 border-b border-line px-4 py-3 max-sm:flex-wrap"
+    >
+      <div className="field w-50 max-sm:w-full">
+        <label htmlFor={LABEL_INPUT_ID} className="field-label">
           이름
         </label>
         <input
@@ -86,11 +88,14 @@ function AddBatchKeyForm(): React.JSX.Element {
           autoComplete="off"
           value={label}
           onChange={handleLabelChange}
-          {...stylex.props(styles.input)}
+          className={`${FIELD_INPUT} field-box-md`}
         />
       </div>
-      <div {...stylex.props(styles.field, styles.keyField)}>
-        <label htmlFor={KEY_INPUT_ID} {...stylex.props(styles.label)}>
+      <div
+        className="field w-90 max-sm:w-full"
+        data-invalid={message !== undefined ? '' : undefined}
+      >
+        <label htmlFor={KEY_INPUT_ID} className="field-label">
           key
         </label>
         <input
@@ -101,10 +106,10 @@ function AddBatchKeyForm(): React.JSX.Element {
           aria-invalid={message !== undefined}
           aria-describedby={message !== undefined ? KEY_ERROR_ID : undefined}
           onChange={handleKeyChange}
-          {...stylex.props(styles.input, message !== undefined && styles.invalidInput)}
+          className={`${FIELD_INPUT} field-box-md`}
         />
         {message !== undefined && (
-          <p id={KEY_ERROR_ID} role="alert" {...stylex.props(textStyles.error, styles.error)}>
+          <p id={KEY_ERROR_ID} role="alert" className="field-error">
             {message}
           </p>
         )}
@@ -148,7 +153,7 @@ function DeleteBatchKeyButton({ batchKey }: { batchKey: BatchKey }): React.JSX.E
       disabled={false}
       pending={deleteKey.isPending}
       failed={deleteKey.isError}
-      popupStyle={styles.popup}
+      popupClassName="w-60"
       onOpen={deleteKey.reset}
       onConfirm={handleConfirm}
     />
@@ -159,31 +164,31 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
   const { label, keySuffix, createdAt, rejectedAt } = batchKey
 
   return (
-    <tr {...stylex.props(tableStyles.row)}>
-      <td {...stylex.props(tableStyles.cell, styles.name)}>{label}</td>
-      <td {...stylex.props(tableStyles.cell)}>
-        <span {...stylex.props(styles.mask)}>
+    <tr className={tableClasses.row}>
+      <td className={`${tableClasses.cell} font-semibold`}>{label}</td>
+      <td className={tableClasses.cell}>
+        <span className="font-mono tabular-nums text-fg-muted">
           {KEY_MASK}
-          <b {...stylex.props(styles.suffix)}>{keySuffix}</b>
+          <b className="font-medium text-fg">{keySuffix}</b>
         </span>
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
-        <span {...stylex.props(styles.status)}>
+      <td className={tableClasses.cell}>
+        <span className={textClasses.inline}>
           <BatchKeyStatusTag status={statusOf(batchKey)} />
           {rejectedAt !== null && (
-            <span {...stylex.props(textStyles.muted, textStyles.numeric)}>
+            <span className={`${textClasses.muted} ${textClasses.numeric}`}>
               {formatDateMinute(rejectedAt)}
             </span>
           )}
         </span>
       </td>
-      <td {...stylex.props(tableStyles.cell, textStyles.muted, tableStyles.numeric)}>
+      <td className={`${tableClasses.cell} ${textClasses.muted} ${textClasses.numeric}`}>
         {formatDateMinute(createdAt)}
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
+      <td className={tableClasses.cell}>
         <EnabledSwitch batchKey={batchKey} />
       </td>
-      <td {...stylex.props(tableStyles.cell, tableStyles.end)}>
+      <td className={tableClasses.cellEnd}>
         <DeleteBatchKeyButton batchKey={batchKey} />
       </td>
     </tr>
@@ -192,20 +197,20 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
 
 function BatchKeyTable({ keys }: { keys: readonly BatchKey[] }): React.JSX.Element {
   return (
-    <table {...stylex.props(tableStyles.table)}>
+    <table className={tableClasses.table}>
       <thead>
         <tr>
-          <th {...stylex.props(tableStyles.headerCell)}>이름</th>
-          <th {...stylex.props(tableStyles.headerCell)}>key</th>
-          <th {...stylex.props(tableStyles.headerCell)}>상태</th>
-          <th {...stylex.props(tableStyles.headerCell)}>추가</th>
-          <th {...stylex.props(tableStyles.headerCell)}>사용</th>
-          <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>
+          <th className={tableClasses.headCell}>이름</th>
+          <th className={tableClasses.headCell}>key</th>
+          <th className={tableClasses.headCell}>상태</th>
+          <th className={tableClasses.headCell}>추가</th>
+          <th className={tableClasses.headCell}>사용</th>
+          <th className={tableClasses.headCellEnd}>
             <span className="sr-only">삭제</span>
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className={tableClasses.body}>
         {keys.map((batchKey) => (
           <BatchKeyRow key={batchKey.id} batchKey={batchKey} />
         ))}
@@ -219,18 +224,22 @@ export function BatchKeyPanel(): React.JSX.Element {
   const keys = batchKeys.data?.keys
 
   return (
-    <section aria-label="batch key" {...stylex.props(panelStyles.box)}>
-      <h2 {...stylex.props(panelStyles.heading)}>
+    <section aria-label="batch key" className={panelClasses.box}>
+      <h2 className={panelClasses.heading}>
         batch key
         {keys !== undefined && (
-          <span {...stylex.props(panelStyles.headingCount)}>{formatCount(keys.length)}</span>
+          <span className={panelClasses.headingCount}>{formatCount(keys.length)}</span>
         )}
       </h2>
       <AddBatchKeyForm />
       {keys !== undefined && keys.length === 0 && (
-        <p {...stylex.props(panelStyles.empty)}>batch key가 없습니다.</p>
+        <p className={panelClasses.empty}>batch key가 없습니다.</p>
       )}
-      {keys !== undefined && keys.length > 0 && <BatchKeyTable keys={keys} />}
+      {keys !== undefined && keys.length > 0 && (
+        <div className={panelClasses.scroll}>
+          <BatchKeyTable keys={keys} />
+        </div>
+      )}
     </section>
   )
 }

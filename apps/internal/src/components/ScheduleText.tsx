@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import { describeSchedule } from '../format'
-import { textStyles } from './panel.style'
+import { textClasses } from './panel-classes'
 
 export function ScheduleText({
   schedule,
@@ -10,25 +9,26 @@ export function ScheduleText({
   stacked?: boolean
 }): React.JSX.Element {
   if (schedule === null) {
-    return <span {...stylex.props(textStyles.subtle)}>수동</span>
+    return <span className={textClasses.subtle}>수동</span>
   }
   const description = describeSchedule(schedule)
   if (description === undefined) {
-    return <span {...stylex.props(textStyles.numeric)}>{schedule}</span>
+    return <span className={textClasses.numeric}>{schedule}</span>
   }
 
   if (stacked) {
     return (
-      <span {...stylex.props(textStyles.twoLine)}>
+      <span className={textClasses.twoLine}>
         <span>{description}</span>
-        <small {...stylex.props(textStyles.small)}>{schedule}</small>
+        <small className={`${textClasses.small} ${textClasses.numeric}`}>{schedule}</small>
       </span>
     )
   }
 
   return (
     <span>
-      {description} <span {...stylex.props(textStyles.subtle)}>{schedule}</span>
+      {description}{' '}
+      <span className={`${textClasses.subtle} ${textClasses.numeric}`}>{schedule}</span>
     </span>
   )
 }

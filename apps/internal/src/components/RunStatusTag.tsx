@@ -1,14 +1,33 @@
-import * as stylex from '@stylexjs/stylex'
 import type { RunStatus } from '../api/ops-schemas'
 import { STATUS_LABELS } from '../format'
-import { styles } from './RunStatusTag.style'
+
+type StatusTone = 'neutral' | 'signal' | 'success' | 'danger' | 'warning'
+
+// status-chip-sm의 좌우 여백은 앞에 둘 점 몫으로 다르다. 점 없이 쓰므로 좌우를 같게 맞춘다.
+const TAG = 'status-chip status-chip-sm shrink-0 px-2'
+
+const RUN_STATUS_TONES = {
+  requested: 'neutral',
+  running: 'signal',
+  succeeded: 'success',
+  failed: 'danger',
+  interrupted: 'warning'
+} as const satisfies Record<RunStatus, StatusTone>
 
 export function RunStatusTag({ status }: { status: RunStatus }): React.JSX.Element {
-  return <span {...stylex.props(styles.tag, styles[status])}>{STATUS_LABELS[status]}</span>
+  return (
+    <span className={TAG} data-tone={RUN_STATUS_TONES[status]}>
+      {STATUS_LABELS[status]}
+    </span>
+  )
 }
 
 export function PausedTag(): React.JSX.Element {
-  return <span {...stylex.props(styles.tag, styles.paused)}>정지</span>
+  return (
+    <span className={TAG} data-tone="neutral">
+      정지
+    </span>
+  )
 }
 
 const BATCH_KEY_STATUS_LABELS = {
@@ -19,15 +38,15 @@ const BATCH_KEY_STATUS_LABELS = {
 
 export type BatchKeyStatus = keyof typeof BATCH_KEY_STATUS_LABELS
 
-const BATCH_KEY_STATUS_STYLES = {
-  enabled: styles.succeeded,
-  disabled: styles.paused,
-  rejected: styles.failed
-} as const satisfies Record<BatchKeyStatus, unknown>
+const BATCH_KEY_STATUS_TONES = {
+  enabled: 'success',
+  disabled: 'neutral',
+  rejected: 'danger'
+} as const satisfies Record<BatchKeyStatus, StatusTone>
 
 export function BatchKeyStatusTag({ status }: { status: BatchKeyStatus }): React.JSX.Element {
   return (
-    <span {...stylex.props(styles.tag, BATCH_KEY_STATUS_STYLES[status])}>
+    <span className={TAG} data-tone={BATCH_KEY_STATUS_TONES[status]}>
       {BATCH_KEY_STATUS_LABELS[status]}
     </span>
   )

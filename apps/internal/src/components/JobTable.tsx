@@ -1,5 +1,4 @@
 import { Tooltip } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import type { Job } from '../api/ops-schemas'
 import {
   EMPTY_VALUE,
@@ -8,13 +7,14 @@ import {
   formatDuration,
   runDuration
 } from '../format'
-import { styles } from './JobTable.style'
-import { panelStyles, tableStyles, textStyles } from './panel.style'
+import { FOCUS_RING, panelClasses, tableClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'
 import { RunProgress } from './RunProgress'
 import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
+
+const NAME_BUTTON = `m-0 cursor-pointer border-0 bg-transparent p-0 text-left font-sans text-sm font-semibold text-fg hover:underline ${FOCUS_RING}`
 
 type JobTableProps = {
   jobs: readonly Job[]
@@ -29,10 +29,10 @@ function NextRun({ job }: { job: Job }): React.JSX.Element {
   }
 
   if (job.nextRunAt === null) {
-    return <span {...stylex.props(textStyles.subtle)}>{EMPTY_VALUE}</span>
+    return <span className={textClasses.subtle}>{EMPTY_VALUE}</span>
   }
 
-  return <span {...stylex.props(textStyles.numeric)}>{formatDateMinute(job.nextRunAt)}</span>
+  return <span className={textClasses.numeric}>{formatDateMinute(job.nextRunAt)}</span>
 }
 
 function JobRow({
@@ -48,70 +48,71 @@ function JobRow({
 }): React.JSX.Element {
   const { activeRun, lastFinishedRun } = job
   const lastDuration = lastFinishedRun !== null ? runDuration(lastFinishedRun, now) : undefined
+  const rowClassName = selected
+    ? `${tableClasses.row} ${tableClasses.selectedRow}`
+    : tableClasses.row
 
   function handleSelect(): void {
     onSelect(job.name)
   }
 
   return (
-    <tr
-      {...stylex.props(tableStyles.row, tableStyles.tallRow, selected && tableStyles.selectedRow)}
-    >
-      <td {...stylex.props(tableStyles.cell)}>
+    <tr className={rowClassName}>
+      <td className={tableClasses.cell}>
         <Tooltip.Root disabled={job.description === ''}>
           <Tooltip.Trigger
             render={
-              <span {...stylex.props(textStyles.twoLine)}>
+              <span className={textClasses.twoLine}>
                 <button
                   type="button"
                   aria-pressed={selected}
                   onClick={handleSelect}
-                  {...stylex.props(styles.name)}
+                  className={NAME_BUTTON}
                 >
                   {job.displayName}
                 </button>
-                <small {...stylex.props(textStyles.small)}>{job.name}</small>
+                <small className={textClasses.small}>{job.name}</small>
               </span>
             }
           />
           <Tooltip.Popup align="start">{job.description}</Tooltip.Popup>
         </Tooltip.Root>
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
+      <td className={tableClasses.cell}>
         <ScheduleText schedule={job.schedule} stacked />
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
+      <td className={tableClasses.cell}>
         <NextRun job={job} />
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
+      <td className={tableClasses.cell}>
         {activeRun !== null && (
-          <span {...stylex.props(textStyles.inline)}>
+          <span className={textClasses.inline}>
             <RunStatusTag status={activeRun.status} />
             {activeRun.progress !== null && <RunProgress progress={activeRun.progress} />}
           </span>
         )}
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
+      <td className={tableClasses.cell}>
         {lastFinishedRun?.finishedAt != null && (
-          <span {...stylex.props(textStyles.inline)}>
+          <span className={textClasses.inline}>
             <RunStatusTag status={lastFinishedRun.status} />
-            <span {...stylex.props(textStyles.muted, textStyles.numeric)}>
+            <span className={`${textClasses.muted} ${textClasses.numeric}`}>
               {formatDateSecond(lastFinishedRun.finishedAt)}
             </span>
           </span>
         )}
       </td>
-      <td {...stylex.props(tableStyles.cell, tableStyles.end, tableStyles.numeric)}>
+      <td className={`${tableClasses.cellEnd} ${textClasses.numeric}`}>
         {lastDuration !== undefined && formatDuration(lastDuration)}
       </td>
-      <td {...stylex.props(tableStyles.cell)}>
+      <td className={tableClasses.cell}>
         {job.schedule !== null ? (
           <PauseSwitch job={job} />
         ) : (
-          <span {...stylex.props(textStyles.subtle)}>{EMPTY_VALUE}</span>
+          <span className={textClasses.subtle}>{EMPTY_VALUE}</span>
         )}
       </td>
-      <td {...stylex.props(tableStyles.cell, tableStyles.end)}>
+      <td className={tableClasses.cellEnd}>
         <RunJobButton job={job} variant="secondary" />
       </td>
     </tr>
@@ -120,29 +121,29 @@ function JobRow({
 
 export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): React.JSX.Element {
   return (
-    <section aria-label="job" {...stylex.props(panelStyles.box)}>
-      <h2 {...stylex.props(panelStyles.heading)}>
+    <section aria-label="job" className={panelClasses.box}>
+      <h2 className={panelClasses.heading}>
         Job
-        {jobs.length > 0 && <span {...stylex.props(panelStyles.headingCount)}>{jobs.length}</span>}
+        {jobs.length > 0 && <span className={panelClasses.headingCount}>{jobs.length}</span>}
       </h2>
       {jobs.length > 0 ? (
-        <div {...stylex.props(panelStyles.scroll)}>
-          <table {...stylex.props(tableStyles.table)}>
+        <div className={panelClasses.scroll}>
+          <table className={tableClasses.table}>
             <thead>
               <tr>
-                <th {...stylex.props(tableStyles.headerCell)}>이름</th>
-                <th {...stylex.props(tableStyles.headerCell)}>스케줄</th>
-                <th {...stylex.props(tableStyles.headerCell)}>다음 실행</th>
-                <th {...stylex.props(tableStyles.headerCell)}>진행</th>
-                <th {...stylex.props(tableStyles.headerCell)}>마지막 실행</th>
-                <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>걸린 시간</th>
-                <th {...stylex.props(tableStyles.headerCell)}>정기 실행</th>
-                <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>
+                <th className={tableClasses.headCell}>이름</th>
+                <th className={tableClasses.headCell}>스케줄</th>
+                <th className={tableClasses.headCell}>다음 실행</th>
+                <th className={tableClasses.headCell}>진행</th>
+                <th className={tableClasses.headCell}>마지막 실행</th>
+                <th className={tableClasses.headCellEnd}>걸린 시간</th>
+                <th className={tableClasses.headCell}>정기 실행</th>
+                <th className={tableClasses.headCellEnd}>
                   <span className="sr-only">실행</span>
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className={tableClasses.body}>
               {jobs.map((job) => (
                 <JobRow
                   key={job.name}
@@ -156,7 +157,7 @@ export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): 
           </table>
         </div>
       ) : (
-        <p {...stylex.props(panelStyles.empty)}>등록된 job이 없습니다.</p>
+        <p className={panelClasses.empty}>등록된 job이 없습니다.</p>
       )}
     </section>
   )
