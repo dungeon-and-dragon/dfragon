@@ -268,21 +268,21 @@ for (const { title, documents } of [
 test('고정 버전의 upstream 원문을 완전한 내용으로 보완하고 기존 고지도 유지한다', (t) => {
   const { pkg } = createPackageFixture(t)
   const original = readFileSync(
-    new URL('../notices/upstream/stylex-LICENSE.txt', import.meta.url),
+    new URL('../notices/upstream/remeda-2.53.0-LICENSE.txt', import.meta.url),
     'utf8'
   )
-  const directory = pkg('@stylexjs/stylex', {
-    manifest: { version: '0.19.1' },
+  const directory = pkg('remeda', {
+    manifest: { version: '2.53.0' },
     documents: { NOTICE: 'Installed attribution fixture\r\n' }
   })
 
   assert.deepEqual(packageNotice(directory), {
-    name: '@stylexjs/stylex',
-    version: '0.19.1',
+    name: 'remeda',
+    version: '2.53.0',
     license: 'MIT',
     documents: [
       { name: 'NOTICE', text: 'Installed attribution fixture\r\n' },
-      { name: 'upstream/stylex-LICENSE.txt', text: original }
+      { name: 'upstream/remeda-2.53.0-LICENSE.txt', text: original }
     ]
   })
 })
@@ -290,28 +290,28 @@ test('고정 버전의 upstream 원문을 완전한 내용으로 보완하고 �
 test('원문이 없는 패키지는 등록된 버전만 보완하고 다른 버전에는 적용하지 않는다', (t) => {
   const { pkg } = createPackageFixture(t)
   const original = readFileSync(
-    new URL('../notices/upstream/stylex-LICENSE.txt', import.meta.url),
+    new URL('../notices/upstream/remeda-2.53.0-LICENSE.txt', import.meta.url),
     'utf8'
   )
-  const supported = pkg('@stylexjs/stylex', {
-    manifest: { version: '0.19.1' },
+  const supported = pkg('remeda', {
+    manifest: { version: '2.53.0' },
     documents: {}
   })
 
   assert.deepEqual(packageNotice(supported), {
-    name: '@stylexjs/stylex',
-    version: '0.19.1',
+    name: 'remeda',
+    version: '2.53.0',
     license: 'MIT',
-    documents: [{ name: 'upstream/stylex-LICENSE.txt', text: original }]
+    documents: [{ name: 'upstream/remeda-2.53.0-LICENSE.txt', text: original }]
   })
-  const unsupported = pkg('@stylexjs/stylex', {
+  const unsupported = pkg('remeda', {
     from: pkg('different-owner'),
     manifest: { version: '99.0.0' },
     documents: {}
   })
   assert.throws(() => packageNotice(unsupported), {
     name: 'Error',
-    message: 'Missing license text for @stylexjs/stylex@99.0.0'
+    message: 'Missing license text for remeda@99.0.0'
   })
 })
 
@@ -364,7 +364,7 @@ test('Koffi 플랫폼 패키지는 같은 버전의 부모 보완 원문들을 �
 test('보완 원문의 checksum 불일치는 격리된 사본에서 빌드를 실패시킨다', async (t) => {
   const { pkg, writeFile, writeManifest } = createPackageFixture(t)
   const original = readFileSync(
-    new URL('../notices/upstream/stylex-LICENSE.txt', import.meta.url),
+    new URL('../notices/upstream/remeda-2.53.0-LICENSE.txt', import.meta.url),
     'utf8'
   )
   writeManifest('isolated-tool', { type: 'module' })
@@ -376,22 +376,25 @@ test('보완 원문의 checksum 불일치는 격리된 사본에서 빌드를 �
     'isolated-tool/overrides.json',
     readFileSync(new URL('../overrides.json', import.meta.url), 'utf8')
   )
-  writeFile('isolated-tool/notices/upstream/stylex-LICENSE.txt', original)
+  writeFile('isolated-tool/notices/upstream/remeda-2.53.0-LICENSE.txt', original)
   const isolatedCollector: typeof import('../src/collect.ts') = await import(
     pathToFileURL(source).href
   )
-  const directory = pkg('@stylexjs/stylex', {
-    manifest: { version: '0.19.1' },
+  const directory = pkg('remeda', {
+    manifest: { version: '2.53.0' },
     documents: {}
   })
 
   assert.deepEqual(isolatedCollector.packageNotice(directory).documents, [
-    { name: 'upstream/stylex-LICENSE.txt', text: original }
+    { name: 'upstream/remeda-2.53.0-LICENSE.txt', text: original }
   ])
-  writeFile('isolated-tool/notices/upstream/stylex-LICENSE.txt', `${original}\nAltered fixture\n`)
+  writeFile(
+    'isolated-tool/notices/upstream/remeda-2.53.0-LICENSE.txt',
+    `${original}\nAltered fixture\n`
+  )
   assert.throws(() => isolatedCollector.packageNotice(directory), {
     name: 'Error',
-    message: 'License checksum mismatch for @stylexjs/stylex@0.19.1'
+    message: 'License checksum mismatch for remeda@2.53.0'
   })
 })
 
