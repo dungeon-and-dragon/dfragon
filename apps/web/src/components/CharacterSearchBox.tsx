@@ -21,7 +21,7 @@ const scopeOptions = [...characterSearchServerOptions, { id: ADVENTURE, label: '
 const MAX_CHARACTER_NAME_LENGTH = 12
 
 const iconButton =
-  'm-0 inline-flex h-full shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-fg-muted outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-signal'
+  'm-0 inline-flex h-full shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-fg-muted outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal'
 const SIZE_CLASSES = {
   medium: {
     box: 'h-control-sm w-66 max-sm:w-auto max-sm:min-w-0 max-sm:flex-1',
@@ -128,7 +128,7 @@ export function CharacterSearchBox({
       >
         <BaseSelect.Trigger
           aria-label="검색 대상"
-          className={`m-0 inline-flex h-full shrink-0 cursor-pointer items-center border-0 bg-transparent font-medium whitespace-nowrap text-fg-muted [font-family:inherit] outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-signal ${sizeClasses.server}`}
+          className={`m-0 inline-flex h-full shrink-0 cursor-pointer items-center border-0 bg-transparent font-medium whitespace-nowrap text-fg-muted [font-family:inherit] outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal ${sizeClasses.server}`}
         >
           <BaseSelect.Value />
           <ChevronDownIcon className="size-3" />
