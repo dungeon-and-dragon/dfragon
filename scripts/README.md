@@ -118,7 +118,7 @@ node scripts/dependency-snapshot.mjs <cyclonedx-sbom-file> <snapshot-file>
 
 ## `server-build-info`
 
-Docker 빌드에서 제품 commit과 서비스명(`api`, `ops`, `web`, `internal`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
+이미지 빌드에서 제품 commit과 서비스명(`api`, `ops`, `web`, `internal`)을 고정 JSON 파일로 기록합니다. 빈 SHA를 주면 `commit: null`을 기록합니다.
 
 ```sh
 node scripts/server-build-info.mjs api "$(git rev-parse HEAD)" build-info.json

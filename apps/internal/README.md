@@ -27,8 +27,8 @@ OPS_PORT=3544 pnpm --filter @dfragon/internal dev
 [`Dockerfile`](Dockerfile)이 `dist`를 [`Caddyfile`](Caddyfile)의 Caddy가 내주는 이미지로 만듭니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받아 `/app/build-info.json`에 남깁니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
 
 ```sh
-docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/internal/Dockerfile -t dfragon-internal:local .
-docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-internal:local
+podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/internal/Dockerfile -t dfragon-internal:local .
+podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-internal:local
 ```
 
 ## 코드 위치
