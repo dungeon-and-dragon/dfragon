@@ -1,1 +1,1 @@
-export const PRODUCT_NAME = '던삐삐'
+export const PRODUCT_NAME = 'DFragon'
