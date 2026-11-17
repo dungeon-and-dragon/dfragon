@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -10,7 +9,7 @@ import { characterDetailFixture } from '#core/testing/character-detail'
 import { type ClientHost, ClientHostContext } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
-import { toneStyles } from './GameText.style'
+import { gameTextToneClasses } from './game-text-tones'
 import { OathTab } from './OathTab'
 
 type Effects = OathCatalog['sets'][number]['options'][number]['effects']
@@ -118,8 +117,8 @@ function strip(): Element {
 }
 
 function hasTone(segment: Element | null | undefined, tone: GameTextTone): boolean {
-  const { className } = stylex.props(toneStyles[tone])
-  if (segment == null || className === undefined) {
+  const className = gameTextToneClasses[tone]
+  if (segment == null || className === '') {
     return false
   }
 
