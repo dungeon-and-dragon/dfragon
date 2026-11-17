@@ -1,4 +1,3 @@
-import { colors } from '@dfragon/ui/tokens.stylex'
 import type {
   ClearContent,
   ClearContentStats,
@@ -96,13 +95,13 @@ export function weeklyClearChart(
     return (everCleared / population) * 100
   })
   const bars = [
-    { key: 'repeat', name: '다시 클리어', color: colors.chartBase, values: repeat },
-    { key: 'first', name: '첫 클리어', color: colors.chart1, values: first }
+    { key: 'repeat', name: '다시 클리어', color: 'var(--color-chart-base)', values: repeat },
+    { key: 'first', name: '첫 클리어', color: 'var(--color-chart-1)', values: first }
   ]
   const line = {
     key: 'ever',
     name: '한 번이라도 깬 캐릭터 비율',
-    color: colors.chart2,
+    color: 'var(--color-chart-2)',
     values: ever
   }
 
@@ -133,10 +132,10 @@ export function fameBandChart({ fameBands }: ClearContentStats): FameBandChart {
     return (band.cleared / band.population) * 100
   })
   const bars = [
-    { key: 'population', name: '캐릭터 수', color: colors.chartBase, values: population },
-    { key: 'cleared', name: '클리어', color: colors.chart1, values: cleared }
+    { key: 'population', name: '캐릭터 수', color: 'var(--color-chart-base)', values: population },
+    { key: 'cleared', name: '클리어', color: 'var(--color-chart-1)', values: cleared }
   ]
-  const line = { key: 'rate', name: '클리어율', color: colors.chart2, values: rate }
+  const line = { key: 'rate', name: '클리어율', color: 'var(--color-chart-2)', values: rate }
 
   return { x, bars, line }
 }
@@ -157,7 +156,7 @@ export type SplitCard = Readonly<{
 }>
 
 function segment(key: string, name: string, value: number, color: string): SplitSegment {
-  return { key, name, value, color, textColor: colors.fgDefault }
+  return { key, name, value, color, textColor: 'var(--color-fg)' }
 }
 
 function splitRow(key: string, label: string, segments: SplitSegment[]): SplitRow {
@@ -185,10 +184,10 @@ export function weekOverWeekCard(
     { label: '복귀', value: returnedCount },
     { label: '첫 클리어', value: firstCount }
   ]
-  const bothSegment = segment('both', '두 주 모두 클리어', both.cleared, colors.chartBase)
-  const leftSegment = segment('left', '이탈', left.cleared, colors.chart8)
-  const returnedSegment = segment('returned', '복귀', returned.cleared, colors.chart3)
-  const firstSegment = segment('first', '첫 클리어', first.cleared, colors.chart1)
+  const bothSegment = segment('both', '두 주 모두 클리어', both.cleared, 'var(--color-chart-base)')
+  const leftSegment = segment('left', '이탈', left.cleared, 'var(--color-chart-8)')
+  const returnedSegment = segment('returned', '복귀', returned.cleared, 'var(--color-chart-3)')
+  const firstSegment = segment('first', '첫 클리어', first.cleared, 'var(--color-chart-1)')
   const previous = splitRow('previous', previousWeekText(weekStart, releasedAt), [
     bothSegment,
     leftSegment
@@ -217,9 +216,9 @@ export function stageMoveCard(
   const previous = previousWeekText(weekStart, releasedAt)
   const current = weekNumberText(weekStart, releasedAt)
   const segmentsOf = (counts: ClearStageMoves['hard']) => [
-    segment('same', `${previous}에도 같은 단계`, counts.same, colors.chartBase),
-    segment('other', `${previous}에는 다른 단계`, counts.other, colors.chart7),
-    segment('none', `${previous} 클리어 없음`, counts.none, colors.borderStrong)
+    segment('same', `${previous}에도 같은 단계`, counts.same, 'var(--color-chart-base)'),
+    segment('other', `${previous}에는 다른 단계`, counts.other, 'var(--color-chart-7)'),
+    segment('none', `${previous} 클리어 없음`, counts.none, 'var(--color-line-strong)')
   ]
   const hardSegments = segmentsOf(hard)
   const rows = [
@@ -238,10 +237,10 @@ export function weekGroupRows(
   pick: (group: WeekGroup) => ClearFameDistribution | null
 ): BoxPlotRow[] {
   const groups: readonly [string, string, string, ClearFameDistribution | null][] = [
-    ['both', '두 주 모두 클리어', colors.chartBase, pick(both)],
-    ['returned', '복귀', colors.chart3, pick(returned)],
-    ['left', '이탈', colors.chart8, pick(left)],
-    ['first', '첫 클리어', colors.chart1, pick(first)]
+    ['both', '두 주 모두 클리어', 'var(--color-chart-base)', pick(both)],
+    ['returned', '복귀', 'var(--color-chart-3)', pick(returned)],
+    ['left', '이탈', 'var(--color-chart-8)', pick(left)],
+    ['first', '첫 클리어', 'var(--color-chart-1)', pick(first)]
   ]
 
   return groups.flatMap(([key, name, color, stats]) => {

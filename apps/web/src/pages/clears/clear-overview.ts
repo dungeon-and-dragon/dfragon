@@ -1,4 +1,3 @@
-import { colors } from '@dfragon/ui/tokens.stylex'
 import type {
   ClearAdventureSize,
   ClearContent,
@@ -342,7 +341,7 @@ function jobRowOf(job: ClearOverviewJob, rate: number, metric: JobMetric): BoxPl
     key: `${job.jobId}/${job.jobGrowId}`,
     name,
     sub,
-    color: colors.chart1,
+    color: 'var(--color-chart-1)',
     stats,
     value
   }
