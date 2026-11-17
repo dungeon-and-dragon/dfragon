@@ -5,7 +5,6 @@ import type {
   EnhancementTarget
 } from '#core/adventure-guild/adventure-activity'
 import { formatClearCount } from './clear-count'
-import { INVERSE_SCHEME } from './tooltip-classes'
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
@@ -56,7 +55,7 @@ function SummaryStat({
         </b>
       </Tooltip.Trigger>
       <Tooltip.Popup side="bottom" align="start" sideOffset={8}>
-        <div className={`flex min-w-50 flex-col text-fg ${INVERSE_SCHEME}`}>{children}</div>
+        <div className="flex min-w-50 flex-col text-fg">{children}</div>
       </Tooltip.Popup>
     </Tooltip.Root>
   )
