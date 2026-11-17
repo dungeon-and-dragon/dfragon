@@ -108,6 +108,7 @@ function repository(
     readHistory: async () => storedHistory,
     readSnapshot: async () => snapshotOf(null),
     readNameChangeEvents: async () => nameChangeEvents,
+    readSections: async () => [],
     ...overrides
   }
 }
@@ -175,7 +176,8 @@ test('history는 기본 정보, 점수, 섹션별 변경 시각을 주고 타임
         before: '예전모험단',
         after: '합성모험단'
       }
-    ]
+    ],
+    changes: [{ observedAt: firstAt.toISOString(), first: true, items: [] }]
   })
 })
 
@@ -195,7 +197,14 @@ test('이력이 없는 캐릭터의 history는 빈 목록이고 snapshot은 404�
 
   assert.deepEqual(history, {
     status: 200,
-    body: { lastSeenAt: null, basics: [], scores: [], sectionChanges: {}, nameChanges: [] }
+    body: {
+      lastSeenAt: null,
+      basics: [],
+      scores: [],
+      sectionChanges: {},
+      nameChanges: [],
+      changes: []
+    }
   })
   assert.equal(snapshot.status, 404)
   assert.equal(snapshot.body.error.code, 'CHARACTER_NOT_FOUND')
@@ -213,7 +222,8 @@ test('DB 설정이 없는 API는 history에 빈 목록, snapshot에 404를 준�
     basics: [],
     scores: [],
     sectionChanges: {},
-    nameChanges: []
+    nameChanges: [],
+    changes: []
   })
   assert.equal(snapshot.status, 404)
 })
@@ -307,4 +317,59 @@ test('점수 이력이 없는 시각의 snapshot은 card.score가 null이다', a
 
   assert.equal(status, 200)
   assert.equal(body.card.score, null)
+})
+
+test('history의 변경점은 저장한 장비 섹션끼리 비교한 시점만 주고, 엔진 버전만 다른 점수 행은 시점을 만들지 않는다', async (t) => {
+  const bodies = toSectionBodies(sections)
+  const equipment = bodies.equipment.equipment as Record<string, unknown>[]
+  const refinedEquipment = equipment.map((item) =>
+    item.slotId === 'WEAPON' ? { ...item, refine: 8 } : item
+  )
+  const refined = { ...bodies.equipment, equipment: refinedEquipment }
+  const engineChangedAt = new Date('2026-11-15T13:00:00Z')
+  const requestedSections: (readonly string[])[] = []
+  const { app, origin } = await listen({
+    details: { fetchDetails: unused, catalog: new CatalogService(unused) },
+    characterHistory: repository({
+      readHistory: async () => ({
+        ...storedHistory,
+        scores: [
+          { observedAt: firstAt, kind: 'equipment', score: 1741, engine },
+          {
+            observedAt: engineChangedAt,
+            kind: 'equipment',
+            score: 1741,
+            engine: { ...engine, bundleId: 'phase33-rev15a' }
+          }
+        ]
+      }),
+      readSections: async (_character, requested) => {
+        requestedSections.push(requested)
+
+        return [
+          { section: 'equipment', observedAt: firstAt, data: bodies.equipment },
+          { section: 'equipment', observedAt: secondAt, data: refined }
+        ]
+      }
+    })
+  })
+  t.after(() => app.close())
+
+  const { body } = await getJson(origin, historyPath)
+
+  assert.equal(requestedSections.length, 1)
+  assert.deepEqual(new Set(requestedSections[0]), new Set(['equipment', 'creature']))
+  assert.deepEqual(
+    body.changes.map(({ observedAt, first }: { observedAt: string; first: boolean }) => ({
+      observedAt,
+      first
+    })),
+    [
+      { observedAt: firstAt.toISOString(), first: true },
+      { observedAt: secondAt.toISOString(), first: false }
+    ]
+  )
+  assert.deepEqual(body.changes[1].items[0].fields, [
+    { field: 'refine', name: null, before: 0, after: 8 }
+  ])
 })
