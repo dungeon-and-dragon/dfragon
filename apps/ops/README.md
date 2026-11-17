@@ -46,8 +46,8 @@ pnpm --filter @dfragon/ops run --sequential '/^(lint|test)$/'
 
 ## 서버 이미지
 
-운영 app 이미지는 node1이 운영자가 고른 main commit을 빌드해 배포합니다.
-빌드, 배포 절차는 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)를 따릅니다.
+운영 app 이미지는 운영자가 고른 main commit을 인프라의 빌드 노드가 빌드해 배포합니다.
+빌드, 배포 절차는 [인프라 fleet 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/fleet/README.md#배포)를 따릅니다.
 
 ```sh
 podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/ops/Dockerfile -t dfragon-ops:local .
