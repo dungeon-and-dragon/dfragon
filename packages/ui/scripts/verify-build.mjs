@@ -31,58 +31,6 @@ function moduleSpecifiers(file, code) {
   return specifiers
 }
 
-// 소비자 StyleX는 import 경로가 .stylex로 끝나는 파일에서, 같은 이름으로 export된 defineConsts만 읽는다.
-function defineConstsBindings(file, code) {
-  const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest)
-  const bindings = []
-  const sameNameExports = new Set()
-  function visit(node) {
-    if (ts.isVariableStatement(node)) {
-      const isExportedDeclaration =
-        node.modifiers?.some((modifier) => {
-          const isExportModifier = modifier.kind === ts.SyntaxKind.ExportKeyword
-
-          return isExportModifier
-        }) === true
-      for (const declaration of node.declarationList.declarations) {
-        const initializer = declaration.initializer
-        const isConstsCall =
-          ts.isIdentifier(declaration.name) &&
-          initializer !== undefined &&
-          ts.isCallExpression(initializer) &&
-          ts.isPropertyAccessExpression(initializer.expression) &&
-          initializer.expression.name.text === 'defineConsts'
-        if (isConstsCall) {
-          bindings.push({ name: declaration.name.text, isExportedDeclaration })
-        }
-      }
-    }
-
-    const isLocalExportList =
-      ts.isExportDeclaration(node) &&
-      !node.moduleSpecifier &&
-      node.exportClause &&
-      ts.isNamedExports(node.exportClause)
-    if (isLocalExportList) {
-      for (const specifier of node.exportClause.elements) {
-        const localName = specifier.propertyName?.text ?? specifier.name.text
-        const isSameName = localName === specifier.name.text
-        if (isSameName) {
-          sameNameExports.add(localName)
-        }
-      }
-    }
-    ts.forEachChild(node, visit)
-  }
-  visit(source)
-
-  return bindings.map((binding) => {
-    const isNamedExport = binding.isExportedDeclaration || sameNameExports.has(binding.name)
-
-    return { name: binding.name, isNamedExport }
-  })
-}
-
 const [mode, outputPath] = process.argv.slice(2)
 const isLibrary = mode === 'library'
 const isConsumer = mode === 'consumer'
@@ -123,7 +71,7 @@ const cssFiles = files.filter((file) => {
 
 const NONPORTABLE_DECLARATION_PATTERN = /node:|NodeJS|\.pnpm/
 const STYLESHEET_IMPORT_PATTERN = /\.css(?:$|\?)/
-const TOKENS_DEFINITION_PATTERN = /--df-bg-canvas\s*:/g
+const THEME_DEFINITION_PATTERN = /--color-canvas\s*:/g
 // @dfragon/design/base.css의 system font stack 첫머리로 센다. 앱 전역 글꼴 CSS의 대체 글꼴 목록은 세지 않는다.
 const BASE_FONT_FAMILY_PATTERN =
   /(?:^|[;{])\s*font-family\s*:\s*-apple-system\s*,\s*BlinkMacSystemFont\s*,\s*['"]?Apple SD Gothic Neo/g
@@ -148,14 +96,6 @@ if (isLibrary) {
     for (const specifier of moduleSpecifiers(file, code)) {
       const isStylesheet = STYLESHEET_IMPORT_PATTERN.test(specifier)
       assert.equal(isStylesheet, false, `Library must not import CSS: ${file} ${specifier}`)
-      // 소비 앱 compiler가 stylex.create를 정적 CSS로 바꾼다. 주입 runtime은 CSP 경로를 깨뜨린다.
-      const isStylexPackage = specifier.startsWith('@stylexjs/')
-      const isStylexRuntime = specifier === '@stylexjs/stylex'
-      const isAllowedStylexImport = !isStylexPackage || isStylexRuntime
-      assert.ok(
-        isAllowedStylexImport,
-        `Library must import only @stylexjs/stylex: ${file} ${specifier}`
-      )
       // external로 남는 경우도 막는다.
       const isSeedPackage =
         specifier.startsWith('@seed-design/') || specifier.startsWith('@karrotmarket/')
@@ -163,28 +103,6 @@ if (isLibrary) {
     }
   }
 
-  const tokenFiles = javaScriptFiles.filter((file) => {
-    const isStylexFile = file.endsWith('.stylex.js')
-
-    return isStylexFile
-  })
-  assert.deepEqual(tokenFiles, ['tokens.stylex.js'], 'Shared tokens stay in tokens.stylex.js')
-  const hasTokenDeclaration = files.includes('tokens.stylex.d.ts')
-  assert.ok(hasTokenDeclaration, 'Token declaration: tokens.stylex.d.ts')
-  for (const file of javaScriptFiles) {
-    const code = await readFile(resolve(output, file), 'utf8')
-    const bindings = defineConstsBindings(file, code)
-    const isTokenFile = tokenFiles.includes(file)
-    if (!isTokenFile) {
-      assert.equal(bindings.length, 0, `defineConsts only in tokens.stylex.js: ${file}`)
-      continue
-    }
-    const hasBindings = bindings.length > 0
-    assert.ok(hasBindings, `Token constants: ${file}`)
-    for (const binding of bindings) {
-      assert.ok(binding.isNamedExport, `Token constants keep the same export name: ${binding.name}`)
-    }
-  }
   const index = await readFile(resolve(output, 'index.js'), 'utf8')
   const imports = moduleSpecifiers('index.js', index)
   for (const external of ['react', 'react/jsx-runtime']) {
@@ -221,9 +139,9 @@ if (isLibrary) {
   assert.equal(cssFiles.length, 1, 'Consumer must emit one combined stylesheet')
   const styles = await readFile(resolve(output, cssFiles[0]), 'utf8')
   assert.equal(
-    styles.match(TOKENS_DEFINITION_PATTERN)?.length,
+    styles.match(THEME_DEFINITION_PATTERN)?.length,
     1,
-    'Consumer must import tokens.css once'
+    'Consumer must import @dfragon/design/theme.css once'
   )
   assert.equal(styles.match(BASE_FONT_FAMILY_PATTERN)?.length, 1, 'Shared base font stack once')
   const licenses = await readFile(resolve(output, 'notices/THIRD-PARTY.txt'), 'utf8')

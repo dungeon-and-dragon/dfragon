@@ -35,7 +35,7 @@ export function SearchModeTabs(): React.JSX.Element {
             {SEARCH_MODE_LABELS[mode]}
           </Tabs.Tab>
         ))}
-        {/* 상단 바 표시 막대(indicatorSlide)와 같은 길이와 곡선으로 미끄러진다. */}
+        {/* 상단 바 표시 막대(useIndicatorSlide)와 같은 길이와 곡선으로 미끄러진다. */}
         <Tabs.Indicator className="absolute -bottom-px left-(--active-tab-left) h-0.5 w-(--active-tab-width) bg-signal transition-[left,width] duration-380 ease-standard motion-reduce:duration-0" />
       </Tabs.List>
     </Tabs.Root>
