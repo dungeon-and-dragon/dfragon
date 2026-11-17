@@ -1,8 +1,10 @@
 import { Chip } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import { growFilter, growLabel, isGrowSelected, RANKING_JOBS } from './ranking-jobs'
-import { styles } from './RankingsScreen.style'
+
+const FILTER_ROW = 'flex items-start gap-4'
+const FILTER_LABEL = 'm-0 w-12 shrink-0 text-xs/8 font-medium text-fg-subtle'
+const CHIPS = 'm-0 flex list-none flex-wrap gap-1.5 p-0'
 
 export function RankingFilterBox({
   filter,
@@ -14,10 +16,10 @@ export function RankingFilterBox({
   const job = RANKING_JOBS.find(({ jobId }) => jobId === filter.jobId)
 
   return (
-    <div {...stylex.props(styles.filter)}>
-      <div {...stylex.props(styles.filterRow)}>
-        <h2 {...stylex.props(styles.filterLabel)}>직업</h2>
-        <ul {...stylex.props(styles.chips)}>
+    <div className="flex flex-col gap-3 rounded-panel border border-line bg-canvas p-4">
+      <div className={FILTER_ROW}>
+        <h2 className={FILTER_LABEL}>직업</h2>
+        <ul className={CHIPS}>
           <FilterChip
             label="직업 전체"
             pressed={job === undefined}
@@ -35,9 +37,9 @@ export function RankingFilterBox({
           ))}
         </ul>
       </div>
-      <div {...stylex.props(styles.filterRow)}>
-        <h2 {...stylex.props(styles.filterLabel)}>전직</h2>
-        <ul {...stylex.props(styles.chips)}>
+      <div className={FILTER_ROW}>
+        <h2 className={FILTER_LABEL}>전직</h2>
+        <ul className={CHIPS}>
           <FilterChip
             label="전직 전체"
             pressed={filter.jobGrowId === undefined}
