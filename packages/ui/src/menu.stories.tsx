@@ -49,3 +49,31 @@ export const Playground: Story = {}
 export const Open: Story = {
   args: { defaultOpen: true }
 }
+
+export const Focus: Story = {
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>('button')?.focus()
+  }
+}
+
+export const Html: Story = {
+  render: () => (
+    <div className="listbox inline-block" role="menu" aria-label="검색 방식">
+      <div className="listbox-group-label">방식</div>
+      <div className="listbox-item" role="menuitemradio" aria-checked="true" data-checked="">
+        <span className="listbox-marker" />
+        파티
+      </div>
+      <div className="listbox-item" role="menuitemradio" aria-checked="false" data-highlighted="">
+        공대
+      </div>
+      <div className="listbox-separator" role="separator" />
+      <div className="listbox-item" role="menuitem">
+        최근 검색 지우기
+      </div>
+      <div className="listbox-item" role="menuitem" aria-disabled="true" data-disabled="">
+        내보내기
+      </div>
+    </div>
+  )
+}

@@ -16,7 +16,6 @@ export type {
   TextFieldLabelProps,
   TextFieldProps
 } from './text-field'
-export type { ControlSurface } from './surface'
 export { Select } from './select'
 export type {
   SelectGroupLabelProps,
@@ -42,6 +41,8 @@ export { Checkbox } from './checkbox'
 export type { CheckboxProps } from './checkbox'
 export { Chip } from './chip'
 export type { ChipProps } from './chip'
+export { Popover } from './popover'
+export type { PopoverChangeEventDetails, PopoverPopupProps, PopoverTitleProps } from './popover'
 export { Tooltip } from './tooltip'
 export type { TooltipPopupProps } from './tooltip'
 export { StatusChip } from './status-chip'

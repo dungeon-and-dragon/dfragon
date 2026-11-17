@@ -1,9 +1,6 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu'
-import * as stylex from '@stylexjs/stylex'
 import type { ComponentType } from 'react'
-import { listboxStyles } from './listbox.style'
 import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './public-props'
-import { styles } from './menu.style'
 
 export type MenuPopupProps = PublicProps<typeof BaseMenu.Popup> &
   Pick<BaseMenu.Portal.Props, 'container'> &
@@ -24,11 +21,11 @@ function MenuPopupImpl({
         side={side}
         align={align}
         sideOffset={sideOffset}
-        {...stylex.props(listboxStyles.positioner)}
+        className="listbox-positioner"
       >
         <BaseMenu.Popup
           {...props}
-          {...withForwardedStyle(stylex.props(listboxStyles.popup), { className, style })}
+          {...withForwardedStyle({ className: 'listbox' }, { className, style })}
         />
       </BaseMenu.Positioner>
     </BaseMenu.Portal>
@@ -43,7 +40,7 @@ function MenuItemImpl({ className, style, ...props }: MenuItemProps & ForwardedS
   return (
     <BaseMenu.Item
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.item, styles.item), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-item' }, { className, style })}
     />
   )
 }
@@ -61,11 +58,9 @@ function MenuRadioItemImpl({
   return (
     <BaseMenu.RadioItem
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.item, styles.item), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-item' }, { className, style })}
     >
-      <BaseMenu.RadioItemIndicator {...stylex.props(listboxStyles.marker)}>
-        {null}
-      </BaseMenu.RadioItemIndicator>
+      <BaseMenu.RadioItemIndicator className="listbox-marker">{null}</BaseMenu.RadioItemIndicator>
       {children}
     </BaseMenu.RadioItem>
   )
@@ -79,7 +74,7 @@ function MenuGroupLabelImpl({ className, style, ...props }: MenuGroupLabelProps 
   return (
     <BaseMenu.GroupLabel
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.groupLabel), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-group-label' }, { className, style })}
     />
   )
 }
@@ -92,7 +87,7 @@ function MenuSeparatorImpl({ className, style, ...props }: MenuSeparatorProps & 
   return (
     <BaseMenu.Separator
       {...props}
-      {...withForwardedStyle(stylex.props(listboxStyles.separator), { className, style })}
+      {...withForwardedStyle({ className: 'listbox-separator' }, { className, style })}
     />
   )
 }
