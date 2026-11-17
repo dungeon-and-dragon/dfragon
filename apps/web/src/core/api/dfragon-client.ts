@@ -44,6 +44,7 @@ import {
   type TimelineEnhancement,
   type TimelinePage
 } from '../character/character-timeline'
+import { characterHistorySchema, type CharacterHistory } from '../character/character-history'
 import { SearchHttpFailure } from './http'
 import {
   assertApiSuccess,
@@ -74,6 +75,11 @@ export type CharacterPngHttp = (input: IdentityRequest) => Promise<Uint8Array>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
 export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
 export type CharacterTimelineHttp = (identity: CharacterIdentity) => Promise<CharacterTimeline>
+export type CharacterHistoryHttp = (identity: CharacterIdentity) => Promise<CharacterHistory>
+export type CharacterHistorySnapshotHttp = (
+  identity: CharacterIdentity,
+  at: string
+) => Promise<CharacterDetailView>
 export type TimelinePageHttp<Item> = (
   identity: CharacterIdentity,
   before: string
@@ -114,6 +120,8 @@ export type DfragonClient = Readonly<{
     timeline: CharacterTimelineHttp
     timelineEnhancements: TimelinePageHttp<TimelineEnhancement>
     timelineAcquisitions: TimelinePageHttp<TimelineAcquisition>
+    history: CharacterHistoryHttp
+    historySnapshot: CharacterHistorySnapshotHttp
   }>
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
@@ -325,6 +333,20 @@ export function createDfragonClient({
           `${characterPath(identity)}/timeline/acquisitions`,
           timelineAcquisitionPageSchema,
           { searchParams: { before } }
+        )
+      },
+      async history(identity) {
+        validateIdentity(identity)
+
+        return requestJson(`${characterPath(identity)}/history`, characterHistorySchema)
+      },
+      async historySnapshot(identity, at) {
+        validateIdentity(identity)
+
+        return requestJson(
+          `${characterPath(identity)}/history/snapshot`,
+          characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity)),
+          { searchParams: { at } }
         )
       }
     },
