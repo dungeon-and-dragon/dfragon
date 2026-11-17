@@ -1,38 +1,18 @@
-import { colors } from '@dfragon/ui/tokens.stylex'
-import * as stylex from '@stylexjs/stylex'
-
-// StyleX의 atomic class 이름은 속성과 값에서 정해지므로, 같은 선언을 여기서 만들면 컴포넌트가 점수나 명성 숫자에
-// 칠한 색과 같은 class가 나온다. jsdom은 색을 계산하지 않으므로 숫자가 어느 색 class를 가졌는지로 확인한다.
-// Tailwind CSS로 옮긴 화면은 색 utility 이름으로 알아본다. StyleX를 지우면 Tailwind CSS 이름만 남긴다.
-const tones = stylex.create({
-  dealer: { color: colors.scoreDealer },
-  buffer: { color: colors.scoreBuffer },
-  fame: { color: colors.gameFame },
-  top: { color: colors.tierTop },
-  ranker: { color: colors.tierRanker }
-})
-
-const TONE_UTILITIES: Record<keyof typeof tones, string> = {
+// jsdom은 색을 계산하지 않으므로 숫자가 어느 색 utility를 가졌는지로 점수나 명성 색을 확인한다.
+const TONE_UTILITIES = {
   dealer: 'text-score-dealer',
   buffer: 'text-score-buffer',
   fame: 'text-game-fame',
   top: 'text-tier-top',
   ranker: 'text-tier-ranker'
-}
+} as const
 
-function toneClass(tone: keyof typeof tones): string {
-  const { className } = stylex.props(tones[tone])
-  if (className === undefined) {
-    throw new Error(`${tone} 톤의 class가 없습니다.`)
-  }
+type Tone = keyof typeof TONE_UTILITIES
 
-  return className
-}
-
-export function toneClassesOf(element: Element): (keyof typeof tones)[] {
+export function toneClassesOf(element: Element): Tone[] {
   const classes = element.className.split(' ')
 
-  return (['dealer', 'buffer', 'fame', 'top', 'ranker'] as const).filter(
-    (tone) => classes.includes(toneClass(tone)) || classes.includes(TONE_UTILITIES[tone])
+  return (['dealer', 'buffer', 'fame', 'top', 'ranker'] as const).filter((tone) =>
+    classes.includes(TONE_UTILITIES[tone])
   )
 }
