@@ -3,7 +3,6 @@ import {
   type SeasonBackfillState,
   type TimelineCharacter,
   type TimelineItemCursor,
-  type TimelineItemInput,
   type TimelineQueueCount,
   type TimelineRange,
   type TimelineSyncState,
@@ -25,12 +24,12 @@ import type {
   TimelineQueueCountRepository,
   TimelineSyncRepository
 } from '../../application/character-timeline/repository.js'
+import { ENHANCEMENT_BACKFILL_CODES } from '../../application/character-timeline/backfill.js'
 import type { TimelineSyncFailure } from '../../application/character-timeline/sync.js'
-import {
-  type CharacterTimeline,
-  ENHANCEMENT_CODES,
-  type TimelineItemPage,
-  type TimelinePageList
+import type {
+  CharacterTimeline,
+  TimelineItemPage,
+  TimelinePageList
 } from '../../domain/character-timeline/project.js'
 import type { TimelineInputs } from '../../domain/character-timeline/rows.js'
 import { readCharacterTimeline, readTimelinePage } from './character-timeline-read.js'
@@ -85,9 +84,16 @@ export class DatabaseEnhancementBackfillRepository implements EnhancementBackfil
   replaceRange(
     character: TimelineCharacter,
     range: TimelineRange,
-    items: readonly TimelineItemInput[]
+    { events, items }: TimelineInputs
   ): Promise<void> {
-    return replaceEnhancementBackfillRange(this.client, character, range, ENHANCEMENT_CODES, items)
+    return replaceEnhancementBackfillRange(
+      this.client,
+      character,
+      range,
+      ENHANCEMENT_BACKFILL_CODES,
+      events,
+      items
+    )
   }
 }
 
