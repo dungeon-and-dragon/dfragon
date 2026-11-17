@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { dirname } from 'node:path'
 import { test } from 'node:test'
@@ -18,6 +18,11 @@ const SEMIBOLD_UTILITY_PATTERN = /\.font-semibold\s*\{/
 const MONO_FONT_UTILITY_PATTERN = /\.font-mono\s*\{/
 const CONTROL_RADIUS_UTILITY_PATTERN = /\.rounded-control\s*\{/
 const NARROW_SCREEN_VARIANT_PATTERN = /@media \(width < 600px\)\s*\{\s*\.max-sm\\:hidden/
+const FONT_FACE_PATTERN =
+  /@font-face\s*\{[^}]*url\('\.\/fonts\/([^']+)'\)[^}]*font-weight:\s*(\d+);[^}]*\}/g
+const FONT_FILE_WEIGHT_PATTERN = /-(Regular|Medium|SemiBold|Bold)\.woff2$/
+const FONT_FILE_WEIGHTS = { Regular: '400', Medium: '500', SemiBold: '600', Bold: '700' }
+
 const theme = await readFile(new URL('../theme.css', import.meta.url), 'utf8')
 const base = await readFile(new URL('../base.css', import.meta.url), 'utf8')
 
@@ -142,5 +147,21 @@ test('utility를 쓰지 않은 토큰도 CSS 변수로 낸다', async () => {
   const css = await compiledUtilities([])
   for (const name of ['--color-game-fame-label', '--gradient-rarity-mythic', '--beat']) {
     assert.match(css, new RegExp(`${name}:`), name)
+  }
+})
+
+test('base.css의 @font-face는 fonts 폴더의 woff2와 하나씩 맞고 파일 이름의 굵기를 쓴다', async () => {
+  const faces = [...base.matchAll(FONT_FACE_PATTERN)].map(([, file, weight]) => {
+    return { file, weight }
+  })
+  const files = (await readdir(new URL('../fonts/', import.meta.url))).filter((file) => {
+    const isFont = file.endsWith('.woff2')
+
+    return isFont
+  })
+  assert.deepEqual(faces.map((face) => face.file).toSorted(), files.toSorted())
+  for (const { file, weight } of faces) {
+    const name = FONT_FILE_WEIGHT_PATTERN.exec(file)?.[1]
+    assert.equal(weight, FONT_FILE_WEIGHTS[name], file)
   }
 })
