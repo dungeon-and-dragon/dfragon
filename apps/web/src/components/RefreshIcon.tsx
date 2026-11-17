@@ -1,19 +1,4 @@
-import * as stylex from '@stylexjs/stylex'
 import type { SVGProps } from 'react'
-
-const turn = stylex.keyframes({
-  from: { transform: 'rotate(0deg)' },
-  to: { transform: 'rotate(360deg)' }
-})
-
-const styles = stylex.create({
-  spinning: {
-    animationName: { default: turn, '@media (prefers-reduced-motion: reduce)': 'none' },
-    animationDuration: '1s',
-    animationTimingFunction: 'linear',
-    animationIterationCount: 'infinite'
-  }
-})
 
 // Lucide refresh-cw
 export function RefreshIcon({
@@ -31,7 +16,7 @@ export function RefreshIcon({
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      {...stylex.props(spinning && styles.spinning)}
+      className={spinning ? 'animate-spin motion-reduce:animate-none' : undefined}
       {...props}
     >
       <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
