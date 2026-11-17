@@ -285,3 +285,39 @@ describe('캐릭터 이미지 요청', () => {
     await expect(readImage(new Response(null, { status })).read).rejects.toMatchObject({ code })
   })
 })
+
+describe('캐릭터 이력 요청', () => {
+  const history = { basics: [], scores: [], sectionChanges: {}, nameChanges: [], changes: [] }
+
+  it('이력은 history 경로로, 과거 시점 상세는 snapshot 경로에 at query를 붙여 받는다', async () => {
+    const snapshot = characterDetailResponse('dealer')
+    const identity = {
+      serverId: snapshot.character.serverId,
+      characterId: snapshot.character.characterId
+    }
+    const fetch = vi
+      .fn<typeof globalThis.fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify(history), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(snapshot), { status: 200 }))
+    const client = createDfragonClient({ apiOrigin: API_ORIGIN, fetch })
+
+    await expect(client.characters.history(identity)).resolves.toEqual(history)
+    await client.characters.historySnapshot(identity, '2026-11-17T13:09:00.000Z')
+
+    const urls = fetch.mock.calls.map(([input]) => new URL((input as Request).url))
+    expect(urls.map(({ pathname }) => pathname)).toEqual([
+      `/characters/${identity.serverId}/${identity.characterId}/history`,
+      `/characters/${identity.serverId}/${identity.characterId}/history/snapshot`
+    ])
+    expect(urls[1]?.searchParams.get('at')).toBe('2026-11-17T13:09:00.000Z')
+  })
+
+  it('변경점 changes가 없는 이력 응답은 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
+    const { changes: _changes, ...withoutChanges } = history
+    const client = createDfragonClient(respondWith(withoutChanges, 200))
+
+    await expect(
+      client.characters.history({ serverId: 'cain', characterId: 'character-1' })
+    ).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
+  })
+})
