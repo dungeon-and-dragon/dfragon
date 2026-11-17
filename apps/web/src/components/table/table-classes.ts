@@ -1,6 +1,7 @@
 export const tableClasses = {
   scroll: 'overflow-x-auto',
-  table: 'w-full min-w-180 table-fixed border-collapse',
+  table: 'w-full table-fixed border-collapse',
+  wideTable: 'min-w-180',
   body: '[&>tr:last-child>td]:border-b-0',
   row: 'hover:bg-surface',
   headCell:

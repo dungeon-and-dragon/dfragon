@@ -1,11 +1,9 @@
-import * as stylex from '@stylexjs/stylex'
 import { FameRankingBox } from './FameRankingBox'
 import { HomeSearch } from './HomeSearch'
-import { styles } from './HomePage.style'
 
 export function HomePage(): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.screen)}>
+    <div className="flex flex-wrap items-start gap-x-20 gap-y-12 px-4 pt-18 pb-16 max-sm:pt-10">
       <HomeSearch />
       <FameRankingBox />
     </div>
