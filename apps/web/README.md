@@ -31,8 +31,8 @@ node1이 운영자가 고른 main commit을 빌드해 운영 `https://dfragon.co
 [`Dockerfile`](Dockerfile)이 `dist`를 [`Caddyfile`](Caddyfile)의 Caddy가 내주는 이미지로 만듭니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
 
 ```sh
-docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
-docker run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-web:local
+podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
+podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-web:local
 ```
 
 ## 코드 위치

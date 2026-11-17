@@ -50,7 +50,7 @@ pnpm --filter @dfragon/ops run --sequential '/^(lint|test)$/'
 빌드, 배포 절차는 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)를 따릅니다.
 
 ```sh
-docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/ops/Dockerfile -t dfragon-ops:local .
+podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/ops/Dockerfile -t dfragon-ops:local .
 ```
 
 이미지는 UID/GID `1000:1000`으로 실행합니다.

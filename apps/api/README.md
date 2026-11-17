@@ -108,9 +108,10 @@ API 이미지는 node1이 운영자가 고른 main commit을 빌드해 배포합
 빌드, 배포 절차와 이미지 이름, 비밀값 전달, Compose, 서버 권한은 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)를 따릅니다.
 
 로컬 빌드는 [엔진 라이브러리를 직접 빌드해](../../packages/models/README.md) `packages/models/score-engine/libdnfscore.so`에 둔 뒤 실행합니다. 엔진 파일이 없으면 빌드에 실패합니다.
+Apple Silicon Mac에서는 `~/.config/containers/containers.conf`의 `[machine]`에 `provider = "applehv"`, `rosetta = true`를 두고 `podman machine`을 만듭니다. qemu 에뮬레이션에서는 빌드 안의 API 테스트가 5초 timeout을 넘겨 실패합니다.
 
 ```sh
-docker build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .
+podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/api/Dockerfile -t dfragon-api:local .
 ```
 
 `SOURCE_COMMIT`을 생략한 이미지는 commit 정보 없이(`commit: null`) 만들어집니다. 비밀값은 빌드 인자나 Dockerfile `ENV`로 넣지 않습니다.
