@@ -47,6 +47,7 @@ function createDatabaseSubscribers(
   | 'recordCharacterBasic'
   | 'recordCharacterSkillStyle'
   | 'recordCharacterScore'
+  | 'recordCharacterHistory'
   | 'adventureGuild'
   | 'rankingStats'
   | 'clearStats'
@@ -92,6 +93,7 @@ function createDatabaseSubscribers(
     recordCharacterBasic: (basic) => characterBasic.recordBasic(basic),
     recordCharacterSkillStyle: (style) => characterBasic.recordSkillStyle(style),
     recordCharacterScore: (score) => characterBasic.recordScore(score),
+    recordCharacterHistory: (history) => characterBasic.recordHistory(history),
     readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: new DatabaseRankingStatsRepository(client),
