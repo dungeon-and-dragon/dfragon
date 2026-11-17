@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import type {
   ActivityDayEnhancement,
@@ -7,8 +6,8 @@ import type {
 } from '#core/adventure-guild/adventure-activity'
 import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
-import { styles } from './ActivityDayDetail.style'
 import { formatClearCount } from './clear-count'
+import { INVERSE_SCHEME } from './tooltip-classes'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
@@ -16,23 +15,34 @@ const MAX_ENHANCEMENT_ROWS = 8
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
-const RARITY_STYLES: Readonly<Record<string, stylex.StyleXStyles>> = {
-  레전더리: styles.legendary,
-  에픽: styles.epic,
-  태초: styles.primordial,
-  신화: styles.mythic
+const GRADIENT_TEXT = 'bg-clip-text text-transparent'
+
+const RARITY_TONES: Readonly<Record<string, string>> = {
+  레전더리: 'text-rarity-legendary',
+  에픽: 'text-rarity-epic',
+  태초: `bg-(image:--gradient-rarity-primordial) ${GRADIENT_TEXT}`,
+  신화: `bg-(image:--gradient-rarity-mythic) ${GRADIENT_TEXT}`
 }
 
-const ENHANCEMENT_STYLES: Readonly<Record<ActivityDayEnhancement['kind'], stylex.StyleXStyles>> = {
-  reinforce: styles.reinforce,
-  amplify: styles.amplify,
-  refine: styles.refine
+const ENHANCEMENT_TONES: Readonly<Record<ActivityDayEnhancement['kind'], string>> = {
+  reinforce: 'text-game-enhance',
+  amplify: 'text-game-amplify',
+  refine: 'text-game-refine'
 }
+
+const ROW = 'flex py-0.75 text-xs'
+const SPREAD_ROW = `${ROW} justify-between gap-4`
+const TEXT = 'min-w-0 overflow-hidden text-ellipsis'
+const COUNT = 'font-mono tabular-nums text-fg-muted'
 
 type NameCount = AdventureActivityDay['raids'][number]
 
 function Group({ title }: { title: string }): React.JSX.Element {
-  return <div {...stylex.props(styles.group)}>{title}</div>
+  return (
+    <div className="flex justify-between gap-4 pt-1.5 pb-0.5 text-xs font-medium text-fg-subtle">
+      {title}
+    </div>
+  )
 }
 
 function ClearGroup({
@@ -50,9 +60,9 @@ function ClearGroup({
     <>
       <Group title={title} />
       {counts.map((clear) => (
-        <div key={clear.name} {...stylex.props(styles.row)}>
-          <span {...stylex.props(styles.text)}>{clear.name}</span>
-          <span {...stylex.props(styles.number, styles.muted)}>{formatClearCount(clear)}</span>
+        <div key={clear.name} className={SPREAD_ROW}>
+          <span className={TEXT}>{clear.name}</span>
+          <span className={COUNT}>{formatClearCount(clear)}</span>
         </div>
       ))}
     </>
@@ -61,9 +71,11 @@ function ClearGroup({
 
 function TimelineRow({ at, children }: { at: string; children: ReactNode }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.row, styles.timelineRow)}>
-      <span {...stylex.props(styles.number, styles.time)}>{formatSeoulTime(at)}</span>
-      <span {...stylex.props(styles.text)}>{children}</span>
+    <div className={`${ROW} justify-start gap-2`}>
+      <span className="w-9 shrink-0 font-mono tabular-nums text-fg-subtle">
+        {formatSeoulTime(at)}
+      </span>
+      <span className={TEXT}>{children}</span>
     </div>
   )
 }
@@ -78,9 +90,9 @@ function ItemRow({ row }: { row: DayItemRow }): React.JSX.Element {
   }
 
   return (
-    <div {...stylex.props(styles.row)}>
-      <span {...stylex.props(styles.text, RARITY_STYLES[row.rarity])}>{row.rarity}</span>
-      <span {...stylex.props(styles.number, styles.muted)}>{numberFormat.format(row.count)}개</span>
+    <div className={SPREAD_ROW}>
+      <span className={`${TEXT} ${RARITY_TONES[row.rarity] ?? ''}`}>{row.rarity}</span>
+      <span className={COUNT}>{numberFormat.format(row.count)}개</span>
     </div>
   )
 }
@@ -120,21 +132,21 @@ function EnhancementGroup({
         </TimelineRow>
       ))}
       {rest > 0 && (
-        <div {...stylex.props(styles.row, styles.muted)}>외 {numberFormat.format(rest)}회</div>
+        <div className={`${SPREAD_ROW} text-fg-muted`}>외 {numberFormat.format(rest)}회</div>
       )}
     </>
   )
 }
 
 function ItemName({ name, rarity }: ActivityDayItem): React.JSX.Element {
-  return <span {...stylex.props(RARITY_STYLES[rarity])}>{name}</span>
+  return <span className={RARITY_TONES[rarity]}>{name}</span>
 }
 
 function EnhancementResult({ kind, target, success }: ActivityDayEnhancement): React.JSX.Element {
   return (
     <>
-      <b {...stylex.props(styles.target, ENHANCEMENT_STYLES[kind])}>+{target}</b>{' '}
-      <span {...stylex.props(success ? styles.success : styles.failure)}>
+      <b className={`font-mono font-semibold tabular-nums ${ENHANCEMENT_TONES[kind]}`}>+{target}</b>{' '}
+      <span className={success ? 'text-fg-success' : 'text-fg-danger'}>
         {success ? '성공' : '실패'}
       </span>
     </>
@@ -174,20 +186,20 @@ export function ActivityDayDetail({
   seasonDays: AdventureActivitySeasonDaysResult
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.detail)}>
-      <div {...stylex.props(styles.header)}>
-        <span {...stylex.props(styles.date)}>{formatActivityDate(date)}</span>
+    <div className={`flex w-64 flex-col text-fg ${INVERSE_SCHEME}`}>
+      <div className="mb-0.5 flex justify-between gap-4 border-b border-line pb-1.5 text-xs text-fg-muted">
+        <span className="text-fg">{formatActivityDate(date)}</span>
       </div>
       {seasonDays.status === 'loading' && (
         <>
           <span role="status" className="sr-only">
             하루 활동을 받는 중입니다.
           </span>
-          <span aria-hidden="true" {...stylex.props(styles.bone)} />
+          <span aria-hidden="true" className="my-1 block h-12 rounded-control bg-control" />
         </>
       )}
       {seasonDays.status === 'error' && (
-        <span role="alert" {...stylex.props(styles.row, styles.failure)}>
+        <span role="alert" className={`${SPREAD_ROW} text-fg-danger`}>
           {seasonDays.message}
         </span>
       )}

@@ -1,14 +1,19 @@
 import { Tooltip } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import type {
   ActivitySummary as Summary,
   EnhancementTarget
 } from '#core/adventure-guild/adventure-activity'
-import { styles } from './ActivitySummary.style'
 import { formatClearCount } from './clear-count'
+import { INVERSE_SCHEME } from './tooltip-classes'
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
+
+const STATS = 'flex gap-8'
+const STAT =
+  'flex flex-col items-start outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
+const STAT_LABEL = 'text-xs font-medium whitespace-nowrap text-fg-subtle'
+const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 
 type NameCount = Summary['raids'][number]
 
@@ -18,17 +23,17 @@ function sumCounts(counts: readonly NameCount[]): number {
 
 function DetailRow({
   label,
-  labelStyle,
+  labelTone,
   value
 }: {
   label: ReactNode
-  labelStyle?: stylex.StyleXStyles
+  labelTone?: string
   value: string
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.row)}>
-      <span {...stylex.props(labelStyle)}>{label}</span>
-      <span {...stylex.props(styles.count)}>{value}</span>
+    <div className="flex justify-between gap-4 py-1 text-xs">
+      <span className={labelTone}>{label}</span>
+      <span className="font-mono tabular-nums text-fg-muted">{value}</span>
     </div>
   )
 }
@@ -44,16 +49,14 @@ function SummaryStat({
 }): React.JSX.Element {
   return (
     <Tooltip.Root disabled={value === 0}>
-      <Tooltip.Trigger
-        delay={0}
-        closeDelay={0}
-        render={<div tabIndex={0} {...stylex.props(styles.stat)} />}
-      >
-        <span {...stylex.props(styles.label)}>{label}</span>
-        <b {...stylex.props(styles.value)}>{numberFormat.format(value)}</b>
+      <Tooltip.Trigger delay={0} closeDelay={0} render={<div tabIndex={0} className={STAT} />}>
+        <span className={STAT_LABEL}>{label}</span>
+        <b className="font-mono text-xl font-semibold tabular-nums [text-shadow:0_1px_8px_color-mix(in_srgb,var(--color-canvas)_60%,transparent)]">
+          {numberFormat.format(value)}
+        </b>
       </Tooltip.Trigger>
       <Tooltip.Popup side="bottom" align="start" sideOffset={8}>
-        <div {...stylex.props(styles.detail)}>{children}</div>
+        <div className={`flex min-w-50 flex-col text-fg ${INVERSE_SCHEME}`}>{children}</div>
       </Tooltip.Popup>
     </Tooltip.Root>
   )
@@ -76,11 +79,11 @@ function successRate({ attempts, successes }: EnhancementTarget): string {
 function TargetRows({
   title,
   targets,
-  labelStyle
+  labelTone
 }: {
   title: string
   targets: readonly EnhancementTarget[]
-  labelStyle: stylex.StyleXStyles
+  labelTone: string
 }): React.JSX.Element | null {
   if (targets.length === 0) {
     return null
@@ -88,12 +91,12 @@ function TargetRows({
 
   return (
     <>
-      <div {...stylex.props(styles.group)}>{title}</div>
+      <div className="pt-1.5 pb-0.5 text-xs font-medium text-fg-subtle">{title}</div>
       {targets.toReversed().map((target) => (
         <DetailRow
           key={target.target}
           label={`+${target.target}`}
-          labelStyle={labelStyle}
+          labelTone={`font-mono tabular-nums ${labelTone}`}
           value={successRate(target)}
         />
       ))}
@@ -113,7 +116,7 @@ export function ActivitySummary({
   const hasTargets = enhancement.amplify.length > 0 || enhancement.reinforce.length > 0
 
   return (
-    <div {...stylex.props(styles.stats)}>
+    <div className={STATS}>
       <SummaryStat label="레이드" value={sumCounts(summary.raids)}>
         <ClearRows counts={summary.raids} />
       </SummaryStat>
@@ -126,36 +129,36 @@ export function ActivitySummary({
         {items.legendary > 0 && (
           <DetailRow
             label="레전더리"
-            labelStyle={styles.legendary}
+            labelTone="text-rarity-legendary"
             value={`${numberFormat.format(items.legendary)}개`}
           />
         )}
         {items.epic > 0 && (
           <DetailRow
             label="에픽"
-            labelStyle={styles.epic}
+            labelTone="text-rarity-epic"
             value={`${numberFormat.format(items.epic)}개`}
           />
         )}
         {items.primeval > 0 && (
           <DetailRow
             label="태초"
-            labelStyle={styles.primordial}
+            labelTone={`bg-(image:--gradient-rarity-primordial) ${GRADIENT_TEXT}`}
             value={`${numberFormat.format(items.primeval)}개`}
           />
         )}
         {items.mythic > 0 && (
           <DetailRow
             label="신화"
-            labelStyle={styles.mythic}
+            labelTone={`bg-(image:--gradient-rarity-mythic) ${GRADIENT_TEXT}`}
             value={`${numberFormat.format(items.mythic)}개`}
           />
         )}
       </SummaryStat>
       <SummaryStat label="강화" value={enhancement.attempts}>
-        <TargetRows title="증폭" targets={enhancement.amplify} labelStyle={styles.amplify} />
-        <TargetRows title="강화" targets={enhancement.reinforce} labelStyle={styles.reinforce} />
-        {hasTargets && <div {...stylex.props(styles.divider)} />}
+        <TargetRows title="증폭" targets={enhancement.amplify} labelTone="text-game-amplify" />
+        <TargetRows title="강화" targets={enhancement.reinforce} labelTone="text-game-enhance" />
+        {hasTargets && <div className="mt-1 border-t border-line" />}
         <DetailRow
           label="10증폭 미만"
           value={`${numberFormat.format(enhancement.amplifyBelow10)}회`}
@@ -174,11 +177,11 @@ export function ActivitySummarySkeleton({ hasLegion }: { hasLegion: boolean }): 
   const labels = hasLegion ? ['레이드', '레기온', '아이템', '강화'] : ['레이드', '아이템', '강화']
 
   return (
-    <div aria-hidden="true" {...stylex.props(styles.stats)}>
+    <div aria-hidden="true" className={STATS}>
       {labels.map((label) => (
-        <div key={label} {...stylex.props(styles.stat)}>
-          <span {...stylex.props(styles.label)}>{label}</span>
-          <span {...stylex.props(styles.bone)} />
+        <div key={label} className={STAT}>
+          <span className={STAT_LABEL}>{label}</span>
+          <span className="my-1 block h-5 w-10 rounded-control bg-inset" />
         </div>
       ))}
     </div>

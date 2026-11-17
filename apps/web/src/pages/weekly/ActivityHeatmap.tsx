@@ -1,6 +1,5 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
 import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
 import {
@@ -25,7 +24,6 @@ import { ActivityDayDetail } from './ActivityDayDetail'
 import { useHeatmapRingSpin } from './animations/useHeatmapRingSpin'
 import { useHeatmapTooltipSlide } from './animations/useHeatmapTooltipSlide'
 import { useHeatmapWheelScroll } from './animations/useHeatmapWheelScroll'
-import { styles } from './ActivityHeatmap.style'
 import { formatMonthDay } from './season-format'
 import { seasonHasLegion } from './season-legion'
 
@@ -38,7 +36,45 @@ const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: s
 ]
 
 const ROW_LABELS = ['목', '', '토', '', '월', '', '수']
-const LEVEL_STYLES = [styles.empty, styles.level1, styles.level2, styles.level3, styles.level4]
+
+const KIND_TONES: Readonly<Record<ActivityKind, string>> = {
+  all: 'text-fg',
+  raid: 'text-fg-success',
+  legion: 'text-fg-success',
+  item: 'text-rarity-epic',
+  enhance: 'text-game-enhance'
+}
+const LEVEL_FILLS = [
+  'bg-inset',
+  'bg-[color-mix(in_srgb,currentColor_22%,var(--color-inset))]',
+  'bg-[color-mix(in_srgb,currentColor_46%,var(--color-inset))]',
+  'bg-[color-mix(in_srgb,currentColor_73%,var(--color-inset))]',
+  'bg-current'
+]
+
+// GitHub contribution 그래프처럼 칸 크기를 고정하고, 범례 견본과 같은 12px로 둔다.
+const CELL = 'relative box-border block size-3 rounded-control'
+const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
+const LABEL = 'text-2xs leading-3.5 whitespace-nowrap text-fg-subtle'
+const TAG =
+  'box-border inline-flex h-4.5 items-center rounded-badge border border-current px-1.25 text-2xs font-medium whitespace-nowrap tabular-nums'
+const GRADIENT_TEXT = 'bg-clip-text text-transparent'
+const BOX =
+  'relative grid grid-cols-[minmax(0,1fr)_120px] rounded-panel border border-line bg-canvas xl:grid-cols-[minmax(0,1fr)]'
+
+// gsap이 heatmap 격자에 --heatmap-ring-angle을 돌리고, 테두리가 상속받아 각도로 쓴다.
+const RING =
+  'pointer-events-none absolute rounded-[3px] [mask-clip:content-box,border-box] [mask-composite:exclude] [mask-image:linear-gradient(#000_0_0),linear-gradient(#000_0_0)]'
+const RING_FRAMES: Readonly<Record<'frame' | 'glow', string>> = {
+  frame: '-inset-[3px] p-0.5',
+  glow: '-inset-1 p-[3px] opacity-35 blur-[3px]'
+}
+const RING_FILLS: Readonly<Record<RingHighlight, string>> = {
+  primeval:
+    'bg-[image:conic-gradient(from_calc(var(--heatmap-ring-angle,0)*1deg),color-mix(in_srgb,var(--color-rarity-primordial-start)_45%,transparent)_0deg,color-mix(in_srgb,var(--color-rarity-primordial-end)_45%,transparent)_220deg,var(--color-rarity-primordial-start)_290deg,var(--color-rarity-primordial-end)_345deg,color-mix(in_srgb,var(--color-rarity-primordial-start)_45%,transparent)_360deg)]',
+  mythic:
+    'bg-[image:conic-gradient(from_calc(var(--heatmap-ring-angle,0)*1deg),color-mix(in_srgb,var(--color-rarity-mythic-start)_45%,transparent)_0deg,color-mix(in_srgb,var(--color-rarity-mythic-end)_45%,transparent)_220deg,var(--color-rarity-mythic-start)_290deg,var(--color-rarity-mythic-end)_345deg,color-mix(in_srgb,var(--color-rarity-mythic-start)_45%,transparent)_360deg)]'
+}
 
 const RING_LABELS = { primeval: '태초', mythic: '신화' } as const
 
@@ -95,10 +131,13 @@ function Legend({
   }
 
   return (
-    <div aria-hidden="true" {...stylex.props(styles.legend)}>
+    <div
+      aria-hidden="true"
+      className="ms-auto flex items-center gap-1 text-2xs tabular-nums text-fg-subtle"
+    >
       0
-      {LEVEL_STYLES.map((level, index) => (
-        <span key={index} {...stylex.props(styles.swatch, styles[kind], level)} />
+      {LEVEL_FILLS.map((fill, index) => (
+        <span key={index} className={`size-3 rounded-control ${KIND_TONES[kind]} ${fill}`} />
       ))}
       {numberFormat.format(top)}
       {unitOf(kind)} 이상
@@ -116,27 +155,27 @@ function ItemTags({
   }
 
   return (
-    <span {...stylex.props(styles.tags)}>
+    <span className="flex gap-2">
       {items.legendary > 0 && (
-        <span {...stylex.props(styles.tag, styles.legendary)}>
+        <span className={`${TAG} text-rarity-legendary`}>
           레전더리 {numberFormat.format(items.legendary)}
         </span>
       )}
       {items.epic > 0 && (
-        <span {...stylex.props(styles.tag, styles.epic)}>
-          에픽 {numberFormat.format(items.epic)}
-        </span>
+        <span className={`${TAG} text-rarity-epic`}>에픽 {numberFormat.format(items.epic)}</span>
       )}
       {items.primeval > 0 && (
-        <span {...stylex.props(styles.tag, styles.primordialTag)}>
-          <span {...stylex.props(styles.primordialText)}>
+        <span className={`${TAG} text-rarity-primordial`}>
+          <span className={`bg-(image:--gradient-rarity-primordial) ${GRADIENT_TEXT}`}>
             태초 {numberFormat.format(items.primeval)}
           </span>
         </span>
       )}
       {items.mythic > 0 && (
-        <span {...stylex.props(styles.tag, styles.mythicTag)}>
-          <span {...stylex.props(styles.mythicText)}>신화 {numberFormat.format(items.mythic)}</span>
+        <span className={`${TAG} text-rarity-mythic`}>
+          <span className={`bg-(image:--gradient-rarity-mythic) ${GRADIENT_TEXT}`}>
+            신화 {numberFormat.format(items.mythic)}
+          </span>
         </span>
       )}
     </span>
@@ -146,8 +185,8 @@ function ItemTags({
 function Ring({ highlight }: { highlight: RingHighlight }): React.JSX.Element {
   return (
     <>
-      <i aria-hidden="true" {...stylex.props(styles.ring, styles.glow, styles[highlight])} />
-      <i aria-hidden="true" {...stylex.props(styles.ring, styles[highlight])} />
+      <i aria-hidden="true" className={`${RING} ${RING_FRAMES.glow} ${RING_FILLS[highlight]}`} />
+      <i aria-hidden="true" className={`${RING} ${RING_FRAMES.frame} ${RING_FILLS[highlight]}`} />
     </>
   )
 }
@@ -170,21 +209,18 @@ function HeatmapCell({
   }
 
   if (cell.state === 'future') {
-    return <span aria-hidden="true" {...stylex.props(styles.cell, styles.future)} />
+    return <span aria-hidden="true" className={`${CELL} border border-dashed border-line`} />
   }
 
   const active = day !== undefined && dayCount(day, kind) > 0
+  const todayOutline = cell.today ? ' outline-1 outline-offset-1 outline-fg' : ''
+  const activeHover = active ? ' cursor-default hover:shadow-[0_0_0_2px_var(--color-fg)]' : ''
   const props = {
     role: 'img',
     'aria-label': cellLabel(kind, cell.date, day),
-    ...stylex.props(
-      styles.cell,
-      styles[kind],
-      LEVEL_STYLES[level],
-      cell.today && styles.today,
-      active && styles.active
-    )
+    className: `${CELL} ${KIND_TONES[kind]} ${LEVEL_FILLS[level]}${todayOutline}${activeHover}`
   }
+
   if (day === undefined || !active) {
     return <span {...props} />
   }
@@ -222,9 +258,12 @@ function HeatmapGrid({
   useHeatmapRingSpin(ref, hasRing)
 
   return (
-    <div ref={ref} {...stylex.props(styles.grid)}>
+    <div
+      ref={ref}
+      className={`grid w-max grid-flow-col auto-cols-[12px] items-center gap-1 ${ROWS}`}
+    >
       {weeks.flatMap((week, weekIndex) => [
-        <span key={`month-${weekIndex}`} aria-hidden="true" {...stylex.props(styles.label)}>
+        <span key={`month-${weekIndex}`} aria-hidden="true" className={LABEL}>
           {week.month !== undefined && `${week.month}월`}
         </span>,
         ...week.days.map((cell, dayIndex) => {
@@ -266,10 +305,13 @@ function CellTooltipPopup({
 
 function DayLabels(): React.JSX.Element {
   return (
-    <div aria-hidden="true" {...stylex.props(styles.dayLabels)}>
+    <div
+      aria-hidden="true"
+      className={`grid shrink-0 grid-cols-[24px] items-center gap-y-1 py-1 ${ROWS}`}
+    >
       <span />
       {ROW_LABELS.map((label, index) => (
-        <span key={index} {...stylex.props(styles.label)}>
+        <span key={index} className={LABEL}>
           {label}
         </span>
       ))}
@@ -313,13 +355,14 @@ function HeatmapPanel({
 
   return (
     <>
-      <div {...stylex.props(styles.head)}>
+      <div className="flex min-h-4.5 items-center justify-between gap-4 px-4 pt-3">
         {kind === 'item' && <ItemTags items={activity.summary.items} />}
         <Legend kind={kind} thresholds={thresholds} />
       </div>
-      <div {...stylex.props(styles.gridArea)}>
+      <div className="flex px-4 pt-3 pb-4">
         <DayLabels />
-        <div ref={scroller} {...stylex.props(styles.scroller)}>
+        {/* 테두리 빛(칸 밖 4px)과 마우스 테두리가 스크롤 영역에 잘리지 않게 둔다. */}
+        <div ref={scroller} className="min-w-0 overflow-x-auto py-1 pr-3 pl-1">
           <HeatmapGrid
             kind={kind}
             weeks={weeks}
@@ -363,7 +406,7 @@ export function ActivityHeatmap({
 
   const activity = result.status === 'success' && !result.previous ? result.value : undefined
   if (activity === undefined) {
-    return <div aria-hidden="true" {...stylex.props(styles.box, styles.skeleton)} />
+    return <div aria-hidden="true" className={`${BOX} min-h-70`} />
   }
 
   const range = activity.season
@@ -384,10 +427,10 @@ export function ActivityHeatmap({
       onValueChange={handleValueChange}
       orientation="vertical"
       render={<section aria-label="시즌 활동" />}
-      {...stylex.props(styles.box)}
+      className={BOX}
     >
       {kinds.map(({ kind: panelKind }) => (
-        <Tabs.Panel key={panelKind} value={panelKind} {...stylex.props(styles.panel)}>
+        <Tabs.Panel key={panelKind} value={panelKind} className="min-w-0 outline-none">
           <HeatmapPanel
             adventureName={adventureName}
             activity={activity}
@@ -397,13 +440,20 @@ export function ActivityHeatmap({
           />
         </Tabs.Panel>
       ))}
-      <Tabs.List aria-label="활동 종류" {...stylex.props(styles.tabs)}>
+      <Tabs.List
+        aria-label="활동 종류"
+        className="relative flex flex-col border-l border-line py-3 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-30 xl:py-0"
+      >
         {kinds.map(({ kind: tabKind, label }) => (
-          <Tabs.Tab key={tabKind} value={tabKind} {...stylex.props(styles.tab)}>
+          <Tabs.Tab
+            key={tabKind}
+            value={tabKind}
+            className="m-0 block w-full cursor-pointer border-0 bg-transparent py-1.5 pr-0 pl-3 text-left font-sans text-sm font-medium text-fg-muted outline-none hover:text-fg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-signal data-active:font-semibold data-active:text-fg"
+          >
             {label}
           </Tabs.Tab>
         ))}
-        <Tabs.Indicator {...stylex.props(styles.indicator)} />
+        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-0.5 bg-signal transition-[top,height] duration-(--duration-hover) ease-standard" />
       </Tabs.List>
     </Tabs.Root>
   )

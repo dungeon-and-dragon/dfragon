@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { Guild } from '#core/adventure-guild/adventure-guild'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
@@ -6,7 +5,6 @@ import { CharacterListBox } from './components/CharacterListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useGuild } from './hooks/useGuild'
 import type { LoadedResult } from '../../hooks/useLoadedResult'
-import { styles } from './GuildScreen.style'
 
 const DEFAULT_TITLE = '길드'
 const integer = new Intl.NumberFormat('ko-KR')
@@ -17,7 +15,7 @@ export function GuildScreen({ guildId }: { guildId: string }): React.JSX.Element
     result.status === 'success' ? { status: 'success', value: result.value.members } : result
 
   return (
-    <div {...stylex.props(styles.screen)}>
+    <div className="flex flex-col gap-4 p-4">
       <TitleBox title={guildTitle(result)}>
         {result.status === 'success' && <GuildStats guild={result.value} />}
       </TitleBox>
