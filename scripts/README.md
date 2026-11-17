@@ -25,7 +25,7 @@ pnpm verify
 `pnpm verify`가 통과하면 검사한 작업 트리 내용을 기록하고, `--reuse-pass`는 커밋하지 않은 변경이 없고 HEAD 내용이 기록과 같으면 검사를 건너뜁니다.
 의존성 설치 상태, `.env`처럼 Git이 무시하는 파일, Node.js 같은 실행 환경은 기록에 들어가지 않으므로 이것만 바꾼 뒤에는 `pnpm verify`를 직접 다시 실행합니다.
 
-로컬 통과는 node1의 이미지 빌드를 대신하지 않습니다. Windows에서는 `node scripts/verify.mjs` 대신 `pnpm verify`로 실행합니다.
+로컬 통과는 인프라 빌드 노드의 이미지 빌드를 대신하지 않습니다. Windows에서는 `node scripts/verify.mjs` 대신 `pnpm verify`로 실행합니다.
 
 ## Native validation
 

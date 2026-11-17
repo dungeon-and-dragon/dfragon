@@ -24,7 +24,7 @@ pnpm --filter @dfragon/web preview
 
 ## 배포
 
-node1이 운영자가 고른 main commit을 빌드해 운영 `https://dfragon.com`(`web`)과 dev `https://dev.dfragon.com`(`web-dev`)에 배포합니다(ADR 0029). 절차는 [인프라 운영 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/deploy/linux/README.md)에 있습니다([서버 이미지](../api/README.md#서버-이미지)). main merge는 이미지를 빌드하거나 배포하지 않습니다. PR 미리보기는 없으며, PR의 화면은 로컬 `dev` 서버나 `build` 뒤 `preview`로 확인합니다.
+운영자가 고른 main commit을 인프라의 빌드 노드가 빌드해 운영 `https://dfragon.com`(`web`)과 dev `https://dev.dfragon.com`(`web-dev`)에 배포합니다(ADR 0029). 절차는 [인프라 fleet 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/fleet/README.md#배포)에 있습니다([서버 이미지](../api/README.md#서버-이미지)). main merge는 이미지를 빌드하거나 배포하지 않습니다. PR 미리보기는 없으며, PR의 화면은 로컬 `dev` 서버나 `build` 뒤 `preview`로 확인합니다.
 
 ### 웹 이미지
 
