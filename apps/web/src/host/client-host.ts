@@ -17,6 +17,7 @@ import type {
   TimelinePage
 } from '#core/character/character-timeline'
 import type { SkillWindowCatalog } from '#core/catalog/skill-window'
+import type { CharacterHistory } from '#core/character/character-history'
 import type { AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import type {
   ActivitySeason,
@@ -54,6 +55,11 @@ export type ClientHost = Readonly<{
     identity: CharacterIdentity,
     before: string
   ) => Promise<TimelinePage<TimelineAcquisition>>
+  getCharacterHistory: (identity: CharacterIdentity) => Promise<CharacterHistory>
+  getCharacterHistorySnapshot: (
+    identity: CharacterIdentity,
+    at: string
+  ) => Promise<CharacterDetailView>
   // 스킬 창 데이터를 아직 올리지 않았거나 그 직업이 데이터에 없으면 null을 돌려준다.
   getSkillWindowCatalog: (jobName: string) => Promise<SkillWindowCatalog | null>
   // 서약 데이터를 아직 올리지 않았으면 null을 돌려준다.

@@ -58,6 +58,8 @@ export function installBrowserHost(
     getCharacterTimeline: dfragon.characters.timeline,
     getTimelineEnhancements: dfragon.characters.timelineEnhancements,
     getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
+    getCharacterHistory: dfragon.characters.history,
+    getCharacterHistorySnapshot: dfragon.characters.historySnapshot,
     getSkillWindowCatalog: createSkillWindowCatalogSource(skillWindowIndexUrl),
     getOathCatalog: createOathCatalogSource(oathCatalogUrl),
     getFameRanking: dfragon.rankings.fame,

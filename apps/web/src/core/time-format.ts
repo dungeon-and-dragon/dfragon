@@ -59,6 +59,28 @@ export function formatSeoulDateTime(at: string, now: number): string {
   return `${seoulDate(time, now)} ${hour}:${minute}`
 }
 
+const seoulYear = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric' })
+
+export function formatSeoulFullDateTime(at: string): string {
+  const time = Date.parse(at)
+  const year = seoulYear.formatToParts(time).find(({ type }) => type === 'year')?.value
+  const { month, day, hour, minute } = seoulParts(time)
+
+  return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
+export function formatSeoulMonthDay(at: number): string {
+  const { month, day } = seoulParts(at)
+
+  return `${month}-${day}`
+}
+
+export function formatSeoulTime(at: number): string {
+  const { hour, minute } = seoulParts(at)
+
+  return `${hour}:${minute}`
+}
+
 // API DB의 seasons 테이블과 같은 값이다. 새 시즌을 넣는 migration을 더할 때 맨 앞에 같이 더한다.
 const SEASONS = [
   { name: '천해천', startsAt: Date.parse('2026-03-26T06:00:00+09:00') },
