@@ -1,13 +1,14 @@
 import gsap from 'gsap'
 import { type RefObject, useEffectEvent, useLayoutEffect, useRef } from 'react'
 import { cubicBezier, type Motion, useMotionAllowed } from './gsap-motion'
-import { indicatorSlide } from './indicator-slide.stylex'
 
 type Placement = Readonly<{ element: HTMLElement; left: number; width: number }>
 
+// GSAP은 CSS 변수를 읽지 못해 theme.css의 --ease-standard와 같은 곡선을 숫자로 적는다.
+// 길이는 다중 검색 탭 표시 막대의 CSS transition(duration-380)과 맞춘다.
 const SLIDE: Motion = {
-  seconds: Number.parseFloat(indicatorSlide.duration),
-  ease: cubicBezier('indicator-slide', indicatorSlide.curve)
+  seconds: 0.38,
+  ease: cubicBezier('indicator-slide', '0.2, 0, 0, 1')
 }
 
 function measure(
