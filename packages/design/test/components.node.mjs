@@ -15,6 +15,7 @@ const RUNTIME_VARIABLES = new Set([
 ])
 const REDUCED_MOTION_RULE_START = '@media (prefers-reduced-motion: reduce) {'
 const COLOR_LITERAL_PATTERN = /#[0-9a-f]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch)\(/i
+const TRANSPARENT_STATUS_BACKGROUND_PATTERN = /--status-bg:[^;]*transparent/
 
 const componentsDirectory = new URL('../components/', import.meta.url)
 const theme = await readFile(new URL('../theme.css', import.meta.url), 'utf8')
@@ -55,6 +56,12 @@ test('컴포넌트 CSS는 색 값을 직접 적지 않는다', () => {
   for (const { file, source } of components) {
     assert.doesNotMatch(source, COLOR_LITERAL_PATTERN, file)
   }
+})
+
+test('상태 칩 면은 행 바탕이 비치지 않게 transparent와 섞지 않는다', async () => {
+  const status = await readFile(new URL('status.css', componentsDirectory), 'utf8')
+
+  assert.doesNotMatch(status, TRANSPARENT_STATUS_BACKGROUND_PATTERN)
 })
 
 test('동작 줄이기에서 상태 칩 점, 진행 점, 진행 원의 움직임을 끈다', async () => {
