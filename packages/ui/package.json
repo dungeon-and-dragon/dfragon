@@ -10,10 +10,6 @@
     },
     "./tokens.css": "./tokens.css",
     "./tokens.stylex": "./src/tokens.stylex.ts",
-    "./typo": {
-      "types": "./dist/typo.d.ts",
-      "import": "./dist/typo.js"
-    },
     "./stylex-config": "./stylex.config.ts"
   },
   "scripts": {

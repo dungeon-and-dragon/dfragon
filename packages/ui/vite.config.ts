@@ -22,7 +22,6 @@ export default defineConfig({
       // import 경로가 .stylex로 끝나는 파일의 defineConsts만 다른 모듈에서 읽는다.
       entry: {
         index: 'src/index.tsx',
-        typo: 'src/typo.tsx',
         'tokens.stylex': 'src/tokens.stylex.ts'
       },
       formats: ['es'],

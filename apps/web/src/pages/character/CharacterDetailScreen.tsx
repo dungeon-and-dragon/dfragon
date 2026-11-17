@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useCharacterDetail } from './hooks/useCharacterDetail'
 import { useViewedCharacter } from './hooks/useViewedCharacter'
@@ -24,7 +23,7 @@ export function CharacterDetailScreen({
     case 'loading':
       return (
         <div aria-busy="true" {...stylex.props(styles.screen)}>
-          <span role="status" {...stylex.props(shapes.srOnly)}>
+          <span role="status" className="sr-only">
             캐릭터 정보를 받는 중입니다.
           </span>
           <CharacterSummarySkeleton />

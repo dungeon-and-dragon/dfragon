@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { EMPTY_VALUE, formatCount, formatDateMinute } from '../format'
 import { useCollection } from '../ops-queries'
@@ -49,7 +48,7 @@ export function CollectionPanel(): React.JSX.Element {
               <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>건수</th>
               <th {...stylex.props(tableStyles.headerCell)}>마지막 시도</th>
               <th {...stylex.props(tableStyles.headerCell, tableStyles.end)}>
-                <span {...stylex.props(shapes.srOnly)}>되돌리기</span>
+                <span className="sr-only">되돌리기</span>
               </th>
             </tr>
           </thead>

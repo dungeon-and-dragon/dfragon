@@ -13,6 +13,7 @@ const RUNTIME_VARIABLES = new Set([
   '--active-tab-width',
   '--listbox-columns'
 ])
+const REDUCED_MOTION_RULE_START = '@media (prefers-reduced-motion: reduce) {'
 const COLOR_LITERAL_PATTERN = /#[0-9a-f]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch)\(/i
 
 const componentsDirectory = new URL('../components/', import.meta.url)
@@ -53,5 +54,23 @@ test('컴포넌트 CSS는 theme.css, 같은 파일, 실행 중에 붙는 변수�
 test('컴포넌트 CSS는 색 값을 직접 적지 않는다', () => {
   for (const { file, source } of components) {
     assert.doesNotMatch(source, COLOR_LITERAL_PATTERN, file)
+  }
+})
+
+test('동작 줄이기에서 상태 칩 점, 진행 점, 진행 원의 움직임을 끈다', async () => {
+  const status = await readFile(new URL('status.css', componentsDirectory), 'utf8')
+  const progress = await readFile(new URL('progress.css', componentsDirectory), 'utf8')
+  const reducedRules = [status, progress]
+    .map((source) => source.slice(source.indexOf(REDUCED_MOTION_RULE_START)))
+    .join('\n')
+
+  for (const selector of [
+    ".status-chip[data-tone='success'] .status-dot",
+    '.step-dots > span',
+    '.progress[data-indeterminate]'
+  ]) {
+    const rule = reducedRules.slice(reducedRules.indexOf(`${selector} {`))
+    assert.notEqual(reducedRules.indexOf(`${selector} {`), -1, selector)
+    assert.match(rule.slice(0, rule.indexOf('}')), /animation:\s*none/, selector)
   }
 })

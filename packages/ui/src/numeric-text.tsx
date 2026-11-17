@@ -1,8 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { parseDuration, parseEasing } from './count-up'
-import { shapes } from './shapes'
-import { styles } from './numeric-text.style'
 
 const defaultFormatter = new Intl.NumberFormat('ko-KR')
 
@@ -19,8 +16,8 @@ function readTokens(element: HTMLElement | null) {
   const computed = getComputedStyle(element)
 
   return {
-    duration: computed.getPropertyValue('--df-dur-count'),
-    easing: computed.getPropertyValue('--df-ease')
+    duration: computed.getPropertyValue('--duration-count'),
+    easing: computed.getPropertyValue('--ease-standard')
   }
 }
 
@@ -63,9 +60,9 @@ export function NumericText({
   }, [value, countUp])
 
   return (
-    <span ref={element} {...stylex.props(styles.root)}>
+    <span ref={element} className="num">
       <span aria-hidden="true">{format(shown)}</span>
-      <span {...stylex.props(shapes.srOnly)}>{format(value)}</span>
+      <span className="num-label">{format(value)}</span>
     </span>
   )
 }

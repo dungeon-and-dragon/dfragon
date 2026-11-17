@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking/clear-stats'
@@ -78,7 +77,7 @@ export function ClearOverviewScreen({
     case 'loading':
       return (
         <div aria-busy="true" {...stylex.props(layout.screen)}>
-          <span role="status" {...stylex.props(shapes.srOnly)}>
+          <span role="status" className="sr-only">
             클리어 집계를 받는 중입니다.
           </span>
           <TitleBox title={CLEAR_TITLE} />

@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { RelativeTime } from '../../components/RelativeTime'
 import { Columns } from '../../components/chart/Columns'
@@ -23,7 +22,7 @@ export function StatsPage(): React.JSX.Element {
     case 'loading':
       return (
         <div aria-busy="true" {...stylex.props(styles.screen)}>
-          <span role="status" {...stylex.props(shapes.srOnly)}>
+          <span role="status" className="sr-only">
             통계를 받는 중입니다.
           </span>
           <TitleBox title="캐릭터 통계" />

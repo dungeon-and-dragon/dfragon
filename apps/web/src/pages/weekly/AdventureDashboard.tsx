@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { preload } from 'react-dom'
@@ -65,7 +64,7 @@ function DashboardHero({
           <ActivitySummary summary={activity.summary} hasLegion={hasLegion} />
         ) : (
           <>
-            <span role="status" {...stylex.props(shapes.srOnly)}>
+            <span role="status" className="sr-only">
               시즌 활동을 받는 중입니다.
             </span>
             <ActivitySummarySkeleton hasLegion={hasLegion} />

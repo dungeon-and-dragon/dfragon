@@ -1,4 +1,3 @@
-import { shapes } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import type { ClipboardCopyStatus } from '../hooks/useClipboardCopy'
 import { CheckIcon } from './CheckIcon'
@@ -43,7 +42,7 @@ export function ClipboardCopyButton({
         </span>
       </HeaderTooltip>
       {/* 화면 밖에 두어 헤더 컨트롤 사이 간격을 바꾸지 않는다. */}
-      <span role="status" data-clipboard-announcer="" {...stylex.props(shapes.srOnly)}>
+      <span role="status" data-clipboard-announcer="" className="sr-only">
         {announcement}
       </span>
     </>

@@ -1,4 +1,4 @@
-import { Button, shapes } from '@dfragon/ui'
+import { Button } from '@dfragon/ui'
 import * as stylex from '@stylexjs/stylex'
 import { colors } from '@dfragon/ui/tokens.stylex'
 import { useRef, useState } from 'react'
@@ -206,7 +206,7 @@ function JobTableRow({
       <td ref={plotRef} {...stylex.props(styles.cell)}>
         {stats !== null && scale !== undefined && (
           <>
-            <span {...stylex.props(shapes.srOnly)}>{description}</span>
+            <span className="sr-only">{description}</span>
             <BoxPlot stats={stats} color={colors.chart1} scale={scale} width={width} />
           </>
         )}
