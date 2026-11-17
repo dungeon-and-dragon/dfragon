@@ -1,34 +1,22 @@
-import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import { type ItemView, itemIconUrl } from '#core/character/character-item'
 import type { ItemRarity } from '#core/character/character-detail-display'
-import { styles as rarityText } from '../avatar/ItemName.style'
-import { raritySolid, styles } from './item-parts.style'
+import { itemClasses, raritySolidOf, rarityTextClasses } from './item-classes'
 
 type Tone = Readonly<{ rarity: ItemRarity | null }>
-
-function textTone({ rarity }: Tone) {
-  const key = rarity ?? 'unknown'
-
-  return rarityText[key]
-}
-
-function solidTone({ rarity }: Tone) {
-  const key = rarity ?? 'unknown'
-
-  return raritySolid[key]
-}
 
 export function ItemIcon({
   itemId,
   src,
-  ...tone
+  rarity
 }: Tone & { itemId: string | null; src?: string | null }): React.JSX.Element {
   // Neople 이미지 서버에 그림이 없는 아이템(서약 본체 등)은 404라 빈 칸으로 둔다.
   const [failedItemId, setFailedItemId] = useState<string | null>(null)
+  const className = `${itemClasses.icon} ${raritySolidOf(rarity)}`
+
   if (itemId === null || itemId === failedItemId) {
-    return <span aria-hidden="true" {...stylex.props(styles.icon, solidTone(tone))} />
+    return <span aria-hidden="true" className={className} />
   }
 
   function handleError(): void {
@@ -41,20 +29,30 @@ export function ItemIcon({
       alt=""
       loading="lazy"
       onError={handleError}
-      {...stylex.props(styles.icon, solidTone(tone))}
+      className={className}
     />
   )
 }
 
-export function ItemName({ name, ...tone }: Tone & { name: string | null }): React.JSX.Element {
-  return <b {...stylex.props(styles.name, textTone(tone))}>{name ?? MISSING_VALUE}</b>
+export function ItemName({ name, rarity }: Tone & { name: string | null }): React.JSX.Element {
+  return (
+    <b className={`${itemClasses.name} ${rarityTextClasses[rarity ?? 'unknown']}`}>
+      {name ?? MISSING_VALUE}
+    </b>
+  )
 }
 
 export function RarityBadge({
   children,
-  ...tone
+  rarity
 }: Tone & { children: React.ReactNode }): React.JSX.Element {
-  return <span {...stylex.props(styles.badge, solidTone(tone))}>{children}</span>
+  return (
+    <span
+      className={`box-border inline-flex h-4.5 shrink-0 items-center rounded-badge border border-current px-1.25 text-2xs font-medium whitespace-nowrap ${raritySolidOf(rarity)}`}
+    >
+      {children}
+    </span>
+  )
 }
 
 export function TuneNumeral({ numeral }: { numeral: string | null }): React.JSX.Element | null {
@@ -62,7 +60,7 @@ export function TuneNumeral({ numeral }: { numeral: string | null }): React.JSX.
     return null
   }
 
-  return <span {...stylex.props(styles.tune)}>{numeral}</span>
+  return <span className="text-xs font-semibold text-fg-muted">{numeral}</span>
 }
 
 export function ItemCell({
@@ -75,9 +73,9 @@ export function ItemCell({
   exalted: boolean
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.item)}>
+    <div className={itemClasses.item}>
       <ItemIcon itemId={item.itemId} rarity={item.rarity} />
-      <span {...stylex.props(styles.itemText)}>
+      <span className={itemClasses.itemText}>
         <ItemName name={item.itemName} rarity={item.rarity} />
         <TuneNumeral numeral={tune} />
         {exalted && <RarityBadge rarity={item.rarity}>유일</RarityBadge>}

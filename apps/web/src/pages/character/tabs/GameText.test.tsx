@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { GameTextLines, GameTextTone } from '#core/catalog/game-text'
 import { GameText } from './GameText'
-import { toneStyles } from './GameText.style'
+import { gameTextToneClasses } from './game-text-tones'
 
 let container: HTMLDivElement
 let root: Root
@@ -32,8 +31,8 @@ function linesOf(): Element[] {
 }
 
 function classesOf(tone: GameTextTone): string[] {
-  const { className } = stylex.props(toneStyles[tone])
-  if (className === undefined) {
+  const className = gameTextToneClasses[tone]
+  if (className === '') {
     throw new Error(`${tone} 색 class가 없다`)
   }
 

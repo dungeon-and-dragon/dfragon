@@ -1,7 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import type { CharacterFaceWindow } from '#core/search/search'
 import { CardImage } from './CardImage'
-import { styles } from './Portrait.style'
 
 export function Portrait({
   src,
@@ -11,7 +9,7 @@ export function Portrait({
   face?: CharacterFaceWindow | null
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.portrait)}>
+    <div className="absolute inset-0">
       <CardImage src={src} face={face} />
     </div>
   )

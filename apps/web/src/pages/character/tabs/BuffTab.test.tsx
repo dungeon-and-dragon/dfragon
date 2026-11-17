@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -9,7 +8,7 @@ import { characterDetailFixture } from '#core/testing/character-detail'
 import { type ClientHost, ClientHostContext } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
-import { styles as rarityTones } from './avatar/ItemName.style'
+import { rarityTextClasses } from './equipment/item-classes'
 import { BuffTab } from './BuffTab'
 
 let container: HTMLDivElement
@@ -104,7 +103,7 @@ it('스킬 창 데이터에 그 전직의 버프 스킬이 있으면 이름 대�
   expect(name.textContent).toBe('')
   const icon = name.querySelector('[role="img"]')
   expect(icon?.getAttribute('aria-label')).toBe('러블리 템포')
-  // jsdom은 StyleX의 동적 값을 CSS 변수로만 받으므로, style 속성에 sprite 주소와 위치가 들어갔는지 본다.
+  // jsdom은 배경 그림을 계산하지 않으므로, style 속성에 sprite 주소와 위치가 들어갔는지 본다.
   expect(icon?.getAttribute('style')).toMatch(
     /url\("https:\/\/skilltab\.test\/sprites\/archer\.png"\).*-56px -28px/
   )
@@ -119,8 +118,7 @@ it('버퍼 버프 강화 장비와 아바타는 한 테이블에서 장비 뒤�
   expect(rows.map((row) => row.querySelector('td')?.textContent)).toEqual(['칭호', '상의'])
   const item = rows[0]!.querySelectorAll('td')[1]
   expect(item?.textContent).toBe('모험가의 의지[빛]')
-  const { className } = stylex.props(rarityTones.rare)
-  expect(item?.querySelector('b')?.className.split(' ')).toContain(className)
+  expect(item?.querySelector('b')?.className.split(' ')).toContain(rarityTextClasses.rare)
   expect(rows[1]?.textContent).toContain('러블리 템포 스킬Lv +1')
 })
 

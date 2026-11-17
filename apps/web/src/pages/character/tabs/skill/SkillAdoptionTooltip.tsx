@@ -1,5 +1,4 @@
 import { Tooltip, type TooltipPopupProps } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { Fragment } from 'react'
 import { formatSeoulDateTime } from '#core/time-format'
 import {
@@ -14,13 +13,17 @@ import {
   skillAdoptionOf
 } from '#core/ranking/skill-stats'
 import { type SkillMarks, skillMarkOf, type UpgradeType } from '#core/catalog/skill-window'
-import { styles } from './SkillAdoptionTooltip.style'
-import { styles as skillStyles } from './SkillTab.style'
+import { PIXELATED, SKILL_TOOLTIP } from './skill-classes'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 
 const UPGRADE_TYPES = [1, 2] as const satisfies readonly UpgradeType[]
 
 const integer = new Intl.NumberFormat('ko-KR')
+
+const ROWS = 'grid grid-cols-[auto_auto] items-center gap-x-5 gap-y-0.5'
+const LABEL = 'text-fg-muted'
+const VALUE = 'text-right font-mono tabular-nums'
+const HEADING = 'mt-1 text-2xs text-fg-subtle'
 
 function formatRate(rate: number): string {
   return `${(rate * 100).toFixed(1)}%`
@@ -44,19 +47,19 @@ function UpgradeRows({
 }): React.JSX.Element {
   return (
     <>
-      <span {...stylex.props(styles.heading)}>{UPGRADE_LABELS[kind]}</span>
-      <span {...stylex.props(styles.rows)}>
+      <span className={HEADING}>{UPGRADE_LABELS[kind]}</span>
+      <span className={ROWS}>
         {UPGRADE_TYPES.map((type, index) => (
           <Fragment key={type}>
-            <span {...stylex.props(styles.branch)}>
+            <span className="inline-flex items-center gap-1.5">
               <img
                 src={skillMarkOf(marks, kind, type)}
                 alt={kind === 'evolution' ? EVOLUTION_NUMERALS[type] : ''}
-                {...stylex.props(kind === 'evolution' ? styles.mark : styles.enhancementMark)}
+                className={`${kind === 'evolution' ? 'size-[17px]' : 'size-4.5'} ${PIXELATED}`}
               />
               {names[index]}
             </span>
-            <span {...stylex.props(styles.value)}>{formatRate(rates[index])}</span>
+            <span className={VALUE}>{formatRate(rates[index])}</span>
           </Fragment>
         ))}
       </span>
@@ -89,20 +92,21 @@ export function SkillAdoptionTooltip({
   const { levels, evolution, enhancement } = adoption
 
   return (
-    <span {...stylex.props(styles.root)}>
-      <span {...stylex.props(styles.name)}>{name}</span>
-      <span {...stylex.props(styles.rows)}>
-        <span {...stylex.props(styles.label)}>채택률</span>
-        <span {...stylex.props(styles.value)}>{formatRate(adoption.adoption)}</span>
+    // 시안의 Tooltip은 위아래 8px이라 공통 Tooltip 틀(6px)에 2px을 더한다. 최소 폭 200px에서 좌우 여백 24px을 뺀 176px이다.
+    <span className="flex min-w-44 flex-col gap-1 py-0.5 text-xs">
+      <span className="text-sm font-semibold">{name}</span>
+      <span className={ROWS}>
+        <span className={LABEL}>채택률</span>
+        <span className={VALUE}>{formatRate(adoption.adoption)}</span>
       </span>
       {levels !== null && (
         <>
-          <span {...stylex.props(styles.heading)}>레벨</span>
-          <span {...stylex.props(styles.rows)}>
-            <span {...stylex.props(styles.label)}>상위 50%</span>
-            <span {...stylex.props(styles.value)}>{levels.p50}</span>
-            <span {...stylex.props(styles.label)}>상위 5%</span>
-            <span {...stylex.props(styles.value)}>{levels.p95}</span>
+          <span className={HEADING}>레벨</span>
+          <span className={ROWS}>
+            <span className={LABEL}>상위 50%</span>
+            <span className={VALUE}>{levels.p50}</span>
+            <span className={LABEL}>상위 5%</span>
+            <span className={VALUE}>{levels.p95}</span>
           </span>
         </>
       )}
@@ -122,7 +126,7 @@ export function SkillAdoptionTooltip({
           marks={marks}
         />
       )}
-      <span {...stylex.props(styles.footer)}>
+      <span className="mt-1 flex justify-between gap-4 border-t border-line pt-1.5 text-2xs text-fg-subtle tabular-nums">
         <span>{sampleText(adoption.sampleSize, role)}</span>
         {adoption.computedAt !== null && (
           <span>{formatSeoulDateTime(adoption.computedAt, now)}</span>
@@ -191,7 +195,7 @@ export function SkillAdoptionHover({
             now={source.now}
           />
         ) : (
-          <span {...stylex.props(skillStyles.tooltip)}>{skill.name}</span>
+          <span className={SKILL_TOOLTIP}>{skill.name}</span>
         )}
       </Tooltip.Popup>
     </Tooltip.Root>
