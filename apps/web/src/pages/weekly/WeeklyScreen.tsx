@@ -4,7 +4,6 @@ import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'reac
 import { RefreshIcon } from '../../components/RefreshIcon'
 import { SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
-import { styles as listBoxStyles } from '../../components/table/ListBox.style'
 import { useRefreshAdventureActivity } from './hooks/useAdventureActivity'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from './hooks/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'
@@ -129,7 +128,10 @@ export function WeeklyScreen({
 
 function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Element {
   return (
-    <section aria-label="이번 주 클리어" {...stylex.props(listBoxStyles.box)}>
+    <section
+      aria-label="이번 주 클리어"
+      className="min-w-0 overflow-x-auto rounded-panel border border-line bg-canvas"
+    >
       {children}
     </section>
   )

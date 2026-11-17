@@ -39,7 +39,7 @@ function countUp(timeline: gsap.core.Timeline, count: HTMLElement, at: number, s
 }
 
 // 차트를 처음 그릴 때 한 번만 재생한다. 끝난 뒤 값이 바뀌면 React가 쓴 새 길이와 숫자가 바로 보인다.
-// StyleX는 길이를 CSS 변수로 넘겨 inline 길이가 비어 있으므로, 잰 길이까지 자란 뒤 inline 값을 지워 % 길이로 돌려놓는다.
+// 막대는 길이를 CSS 변수로 넘겨 inline 길이가 비어 있으므로, 잰 길이까지 자란 뒤 inline 값을 지워 % 길이로 돌려놓는다.
 export function useChartBarGrow(chartRef: RefObject<HTMLElement | null>, grow: BarGrow): void {
   const allowed = useMotionAllowed()
 

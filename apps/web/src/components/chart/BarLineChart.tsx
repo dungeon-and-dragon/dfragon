@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { LINE_REVEAL, useChartReveal } from '../../animations/useChartReveal'
 import { useChartSvgBarGrow } from '../../animations/useChartSvgBarGrow'
@@ -20,12 +19,13 @@ import { ChartTooltip, HitList } from './plot-parts'
 import {
   axisWidth,
   besideTooltipPlaceOf,
+  AXIS_TEXT_CLASS,
+  LINE_CLASS,
   type ChartX,
   type Hover,
   NO_HOVER,
   type TooltipRow
 } from './plot-layout'
-import { plotStyles } from './plot.style'
 import { useChartSize } from './useChartSize'
 
 export type BarSeries = Readonly<{
@@ -189,20 +189,21 @@ function BarLinePlot({
   const places = x.map((_, index) => ({ left: left + step * index, width: step }))
 
   return (
-    <div {...stylex.props(plotStyles.plot)}>
+    <div className="relative flex grow flex-col p-4">
       <ChartLegend items={legend} />
       <div
         ref={areaRef}
         role="group"
         aria-label={label}
-        {...stylex.props(plotStyles.area, plotStyles.areaHeight(height))}
+        className="relative grow"
+        style={{ minHeight: height }}
       >
         <svg
           aria-hidden="true"
           width={size.width}
           height={size.height}
           viewBox={`0 0 ${size.width} ${size.height}`}
-          {...stylex.props(plotStyles.svg)}
+          className="absolute inset-0 block overflow-visible"
         >
           {selectedIndex >= 0 && (
             <rect
@@ -210,7 +211,7 @@ function BarLinePlot({
               y={TOP}
               width={step}
               height={plotBottom - TOP}
-              {...stylex.props(plotStyles.selected)}
+              className="fill-inset"
             />
           )}
           {barScale.ticks.map((tick, index) => (
@@ -220,13 +221,13 @@ function BarLinePlot({
                 x2={right}
                 y1={barY(tick)}
                 y2={barY(tick)}
-                {...stylex.props(index === 0 ? plotStyles.base : plotStyles.grid)}
+                className={index === 0 ? 'stroke-line-strong stroke-1' : 'stroke-inset stroke-1'}
               />
               <text
                 x={left - TICK_LABEL_OFFSET * 2}
                 y={barY(tick) + TICK_LABEL_OFFSET}
                 textAnchor="end"
-                {...stylex.props(plotStyles.axisText)}
+                className={AXIS_TEXT_CLASS}
               >
                 {formats.barTick(tick)}
               </text>
@@ -238,7 +239,7 @@ function BarLinePlot({
                 key={tick}
                 x={right + TICK_LABEL_OFFSET * 2}
                 y={lineY(tick) + TICK_LABEL_OFFSET}
-                {...stylex.props(plotStyles.axisText, plotStyles.axisTextStrong)}
+                className={`${AXIS_TEXT_CLASS} fill-fg`}
               >
                 {formats.lineTick(tick)}
               </text>
@@ -247,10 +248,7 @@ function BarLinePlot({
             <g
               key={key}
               data-chart-bar=""
-              {...stylex.props(
-                plotStyles.bar,
-                hoverIndex >= 0 && hoverIndex !== index && plotStyles.barDimmed
-              )}
+              className={`transition-opacity duration-(--duration-hover) ease-standard ${hoverIndex >= 0 && hoverIndex !== index ? 'opacity-30' : ''}`}
             >
               {barPiecesAt(bars, layout, index).map((piece) => {
                 const barX = centerOf(index) - barWidth / 2
@@ -259,9 +257,7 @@ function BarLinePlot({
                 const radius = piece.rounded ? BAR_RADIUS : 0
                 const path = topRoundedBarPath({ x: barX, width: barWidth, top, bottom, radius })
 
-                return (
-                  <path key={piece.key} d={path} {...stylex.props(plotStyles.fill(piece.color))} />
-                )
+                return <path key={piece.key} d={path} style={{ fill: piece.color }} />
               })}
             </g>
           ))}
@@ -273,7 +269,7 @@ function BarLinePlot({
                   x={centerOf(index)}
                   y={size.height - X_LABEL_BASELINE}
                   textAnchor="middle"
-                  {...stylex.props(plotStyles.axisText)}
+                  className={AXIS_TEXT_CLASS}
                 >
                   {tick}
                 </text>
@@ -285,7 +281,8 @@ function BarLinePlot({
                 <path
                   key={run[0]?.index}
                   d={polylinePath(run.map(linePointOf))}
-                  {...stylex.props(plotStyles.line, plotStyles.stroke(line.color))}
+                  className={LINE_CLASS}
+                  style={{ stroke: line.color }}
                 />
               ))}
               {definedRuns(line.values)
@@ -297,7 +294,8 @@ function BarLinePlot({
                     cx={centerOf(index)}
                     cy={lineY(value)}
                     r={POINT_RADIUS}
-                    {...stylex.props(plotStyles.openDot, plotStyles.stroke(line.color))}
+                    className="fill-canvas stroke-2"
+                    style={{ stroke: line.color }}
                   />
                 ))}
             </g>
@@ -308,7 +306,8 @@ function BarLinePlot({
               cx={centerOf(end.index)}
               cy={lineY(end.value)}
               r={END_DOT_RADIUS}
-              {...stylex.props(plotStyles.endDot, plotStyles.fill(line.color))}
+              className="stroke-canvas stroke-2"
+              style={{ fill: line.color }}
             />
           )}
         </svg>

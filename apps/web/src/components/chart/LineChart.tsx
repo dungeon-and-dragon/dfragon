@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { LINE_REVEAL, useChartReveal } from '../../animations/useChartReveal'
 import { useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
@@ -12,8 +11,15 @@ import {
   positionOf
 } from './chart-geometry'
 import { ChartTooltip, HitList } from './plot-parts'
-import { axisWidth, besideTooltipPlaceOf, type ChartX, type Hover, NO_HOVER } from './plot-layout'
-import { plotStyles } from './plot.style'
+import {
+  AXIS_TEXT_CLASS,
+  LINE_CLASS,
+  axisWidth,
+  besideTooltipPlaceOf,
+  type ChartX,
+  type Hover,
+  NO_HOVER
+} from './plot-layout'
 import { useChartSize } from './useChartSize'
 
 export type LineSeries = Readonly<{
@@ -185,7 +191,7 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
   })
 
   return (
-    <div {...stylex.props(plotStyles.plot)}>
+    <div className="relative flex grow flex-col p-4">
       <ChartLegend
         items={drawn.map(({ key, name, color, faded }) => ({
           key,
@@ -199,14 +205,15 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
         ref={areaRef}
         role="group"
         aria-label={label}
-        {...stylex.props(plotStyles.area, plotStyles.areaHeight(height))}
+        className="relative grow"
+        style={{ minHeight: height }}
       >
         <svg
           aria-hidden="true"
           width={size.width}
           height={size.height}
           viewBox={`0 0 ${size.width} ${size.height}`}
-          {...stylex.props(plotStyles.svg)}
+          className="absolute inset-0 block overflow-visible"
         >
           {scale.ticks.map((tick, index) => (
             <g key={tick}>
@@ -215,13 +222,13 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
                 x2={right}
                 y1={yOf(tick)}
                 y2={yOf(tick)}
-                {...stylex.props(index === 0 ? plotStyles.base : plotStyles.grid)}
+                className={index === 0 ? 'stroke-line-strong stroke-1' : 'stroke-inset stroke-1'}
               />
               <text
                 x={left - TICK_LABEL_OFFSET * 2}
                 y={yOf(tick) + TICK_LABEL_OFFSET}
                 textAnchor="end"
-                {...stylex.props(plotStyles.axisText)}
+                className={AXIS_TEXT_CLASS}
               >
                 {formatTick(tick)}
               </text>
@@ -233,7 +240,7 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
               x={xAt(at)}
               y={size.height - X_LABEL_BASELINE}
               textAnchor="middle"
-              {...stylex.props(plotStyles.axisText)}
+              className={AXIS_TEXT_CLASS}
             >
               {label}
             </text>
@@ -247,7 +254,7 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
                     x={xOf(index)}
                     y={size.height - X_LABEL_BASELINE}
                     textAnchor={anchorOf(index, x.length)}
-                    {...stylex.props(plotStyles.axisText)}
+                    className={AXIS_TEXT_CLASS}
                   >
                     {tick}
                   </text>
@@ -259,7 +266,7 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
               x2={xOf(crosshairIndex)}
               y1={TOP}
               y2={plotBottom}
-              {...stylex.props(plotStyles.crosshair)}
+              className="stroke-line-strong stroke-1"
             />
           )}
           <g data-chart-reveal="">
@@ -268,11 +275,8 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
                 <path
                   key={`${key}-${run[0]?.index}`}
                   d={polylinePath(run.map(pointOf))}
-                  {...stylex.props(
-                    plotStyles.line,
-                    plotStyles.stroke(color),
-                    faded && plotStyles.faded
-                  )}
+                  className={`${LINE_CLASS} ${faded ? 'opacity-50' : ''}`}
+                  style={{ stroke: color }}
                 />
               ))
             )}
@@ -291,11 +295,8 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
                 cx={xOf(end.index)}
                 cy={yOf(end.value)}
                 r={END_DOT_RADIUS}
-                {...stylex.props(
-                  plotStyles.endDot,
-                  plotStyles.fill(color),
-                  faded && plotStyles.faded
-                )}
+                className={`stroke-canvas stroke-2 ${faded ? 'opacity-50' : ''}`}
+                style={{ fill: color }}
               />
             )
           })}
@@ -313,11 +314,8 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
                   cx={xOf(crosshairIndex)}
                   cy={yOf(value)}
                   r={hoverIndex >= 0 ? HOVER_DOT_RADIUS : END_DOT_RADIUS}
-                  {...stylex.props(
-                    plotStyles.openDot,
-                    plotStyles.stroke(color),
-                    faded && plotStyles.faded
-                  )}
+                  className={`fill-canvas stroke-2 ${faded ? 'opacity-50' : ''}`}
+                  style={{ stroke: color }}
                 />
               )
             })}

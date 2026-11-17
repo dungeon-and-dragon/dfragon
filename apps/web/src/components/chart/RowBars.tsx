@@ -1,9 +1,7 @@
-import { shapes } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import { ROW_BAR_GROW, useChartBarGrow } from '../../animations/useChartBarGrow'
 import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
-import { styles } from './chart.style'
+import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS } from './plot-layout'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -21,6 +19,12 @@ type ShownTooltip = Readonly<{ key: string | null; open: boolean }>
 
 const TOOLTIP_GAP = 8
 const TOOLTIP_INSIDE_GAP = 10
+// 값 열은 Monoplex KR 14px 숫자 9자(예: 1,914,430, 약 67px)가 한 줄에 들어가는 폭이다.
+const ROW_COLUMNS_CLASS = 'grid-cols-[120px_minmax(0,1fr)_80px]'
+const WIDE_NAME_ROW_COLUMNS_CLASS = 'grid-cols-[176px_minmax(0,1fr)_80px]'
+const BODY_CLASS = 'absolute inset-0 transition-opacity duration-(--duration-hover) ease-standard'
+const RAIL_CLASS =
+  "relative block before:absolute before:inset-x-0 before:top-1/2 before:-mt-[0.5px] before:h-px before:bg-inset before:content-['']"
 
 function percentOf(value: number, max: number): number {
   if (max <= 0) {
@@ -101,11 +105,11 @@ export function RowBars({
   }
 
   return (
-    <div {...stylex.props(styles.chart, fill && styles.chartFill)}>
+    <div className={`relative ${fill ? 'flex grow flex-col' : ''}`}>
       <ul
         ref={listRef}
         onMouseLeave={handleLeave}
-        {...stylex.props(styles.rows, fill && styles.rowsFill)}
+        className={`m-0 list-none p-4 ${fill ? 'flex grow flex-col justify-around' : ''}`}
       >
         {bars.map((bar) => (
           <BarRow
@@ -124,10 +128,8 @@ export function RowBars({
         ))}
       </ul>
       {hasShare && (
-        <span ref={tooltipRef} aria-hidden="true" {...stylex.props(styles.tooltip)}>
-          {shownBar?.share != null && (
-            <span {...stylex.props(styles.tooltipCount)}>{shownBar.share}</span>
-          )}
+        <span ref={tooltipRef} aria-hidden="true" className={`${TOOLTIP_CLASS} top-0`}>
+          {shownBar?.share != null && <span className={TOOLTIP_COUNT_CLASS}>{shownBar.share}</span>}
         </span>
       )}
     </div>
@@ -171,36 +173,31 @@ function BarRow({
     <li
       data-chart-item=""
       onMouseEnter={handleMouseEnter}
-      {...stylex.props(styles.row, wideName && styles.rowWideName)}
+      className={`grid h-7 items-center gap-x-3 text-sm ${wideName ? WIDE_NAME_ROW_COLUMNS_CLASS : ROW_COLUMNS_CLASS}`}
     >
-      <span data-chart-name="" {...stylex.props(styles.rowName)}>
+      <span data-chart-name="" className="truncate">
         {name}
-        {sub != null && <small {...stylex.props(styles.rowSub)}> {sub}</small>}
+        {sub != null && <small className="text-xs text-fg-subtle"> {sub}</small>}
       </span>
-      <span {...stylex.props(styles.rail, thick && styles.railThick)}>
+      <span className={`${RAIL_CLASS} ${thick ? 'h-2.5' : 'h-1.5'}`}>
         <span
           ref={markRef}
           data-chart-mark=""
-          {...stylex.props(styles.rowMark, styles.rowWidth(percent))}
+          className="absolute top-0 left-0 block h-full w-(--bar-width) min-w-0.5"
+          style={{ '--bar-width': `${percent}%` }}
         >
           <span
-            {...stylex.props(
-              styles.body,
-              styles.rowBody,
-              thick && styles.rowBodyThick,
-              fame ? styles.bodyFame : styles.bodyCount,
-              dimmed && styles.bodyDimmed
-            )}
+            className={`${BODY_CLASS} ${thick ? 'rounded-[5px]' : 'rounded-[3px]'} ${fame ? 'bg-game-fame' : 'bg-chart-1'} ${dimmed ? 'opacity-30' : ''}`}
           />
         </span>
       </span>
       <span
         data-chart-count={countUp ? value : undefined}
-        {...stylex.props(styles.value, fame && styles.valueFame)}
+        className={`text-right font-mono tabular-nums ${fame ? 'text-game-fame' : ''}`}
       >
         {formatValue(value)}
       </span>
-      {share != null && <span {...stylex.props(shapes.srOnly)}>{share}</span>}
+      {share != null && <span className="sr-only">{share}</span>}
     </li>
   )
 }

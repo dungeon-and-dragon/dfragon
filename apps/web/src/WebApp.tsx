@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import {
   createRootRouteWithContext,
   createRoute,
@@ -37,7 +36,6 @@ import { parseClearDetailSearch, parseClearSearch } from './pages/clears/clear-s
 import { parseWeeklySearch } from './pages/weekly/weekly-search'
 import { AdventureEntryPage, WeeklyPage } from './pages/weekly/WeeklyPage'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
-import { styles } from './WebApp.style'
 import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
 
 // 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 라우터 위에서 구독한다.
@@ -54,14 +52,14 @@ function SiteLayout(): React.JSX.Element {
   const adventure = useMatch({ from: adventureRoute.id, shouldThrow: false })
 
   return (
-    <div {...stylex.props(styles.site)}>
+    <div className="flex grow flex-col font-sans text-fg">
       <GlobalBar />
+      {/* 좁은 창에서는 페이지 대신 화면 상자 안에서 가로로 스크롤한다. 안의 보조 기술용 absolute 요소가 상자 밖 페이지를
+          기준으로 놓이면 overflow에 잘리지 않고 페이지를 넓히므로 상자를 기준으로 삼는다. 모험단 세로 탭은 상자 양옆에
+          자리가 있는 넓은 창에서 상자 밖 여백에 놓이므로, 그 화면만 잘리지 않게 스크롤을 두지 않는다. */}
       <main
-        {...stylex.props(
-          styles.screen,
-          adventure !== undefined && styles.sideRoomScreen,
-          styles.screenWidth(CONTENT_WIDTH)
-        )}
+        className={`relative mt-6 box-border flex max-w-full flex-col self-center overflow-x-auto bg-canvas${adventure !== undefined ? ' xl:overflow-x-visible' : ''}`}
+        style={{ width: CONTENT_WIDTH }}
       >
         <Outlet />
       </main>

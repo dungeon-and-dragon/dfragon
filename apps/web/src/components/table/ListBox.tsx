@@ -1,6 +1,4 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import { styles } from './ListBox.style'
 
 export function ListBox({
   name,
@@ -12,8 +10,15 @@ export function ListBox({
   children?: ReactNode
 }): React.JSX.Element {
   return (
-    <section aria-label={name} {...stylex.props(styles.box, fillHeight && styles.fillHeight)}>
-      <h2 {...stylex.props(styles.name, children != null && styles.divider)}>{name}</h2>
+    <section
+      aria-label={name}
+      className={`min-w-0 overflow-hidden rounded-panel border border-line bg-canvas${fillHeight ? ' flex flex-col' : ''}`}
+    >
+      <h2
+        className={`m-0 flex min-h-11 items-center px-4 text-base font-semibold${children != null ? ' border-b border-line' : ''}`}
+      >
+        {name}
+      </h2>
       {children}
     </section>
   )
