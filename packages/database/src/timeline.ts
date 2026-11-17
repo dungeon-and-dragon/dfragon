@@ -359,6 +359,7 @@ export function readSeasons(client: DatabaseClient): Promise<StoredSeason[]> {
   })
 }
 
+// Neople은 시각을 분 단위로, 행을 최신 순으로 주고 그 순서대로 저장하므로 같은 시각에서는 id가 클수록 오래된 기록이다.
 export function readTimelineEvents(
   client: DatabaseClient,
   character: TimelineCharacter,
@@ -369,7 +370,7 @@ export function readTimelineEvents(
 
   return client.timelineEvent.findMany({
     where: { serverId, characterId, code: { in: [...codes] }, occurredAt: { gte: since } },
-    orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+    orderBy: [{ occurredAt: 'asc' }, { id: 'desc' }],
     select: { code: true, occurredAt: true, name: true, raidName: true, data: true }
   })
 }
@@ -387,7 +388,7 @@ export function readCharactersTimelineEvents(
       code: { in: [...codes] },
       occurredAt: { gte: since, lt: until }
     },
-    orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+    orderBy: [{ occurredAt: 'asc' }, { id: 'desc' }],
     select: {
       serverId: true,
       characterId: true,
@@ -413,7 +414,7 @@ export function readCharactersTimelineItems(
       code: { in: [...codes] },
       occurredAt: { gte: since, lt: until }
     },
-    orderBy: [{ occurredAt: 'asc' }, { id: 'asc' }],
+    orderBy: [{ occurredAt: 'asc' }, { id: 'desc' }],
     select: {
       serverId: true,
       characterId: true,
@@ -444,10 +445,10 @@ export function readRecentTimelineItems(
       itemRarity: itemRarities && { in: [...itemRarities] },
       OR: before && [
         { occurredAt: { lt: before.occurredAt } },
-        { occurredAt: before.occurredAt, id: { lt: before.id } }
+        { occurredAt: before.occurredAt, id: { gt: before.id } }
       ]
     },
-    orderBy: [{ occurredAt: 'desc' }, { id: 'desc' }],
+    orderBy: [{ occurredAt: 'desc' }, { id: 'asc' }],
     take: limit,
     select: {
       id: true,
