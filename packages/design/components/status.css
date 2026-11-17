@@ -8,7 +8,7 @@
  */
 .status-chip {
   --status-fg: var(--color-fg-subtle);
-  --status-bg: color-mix(in srgb, var(--color-fg-subtle) 12%, transparent);
+  --status-bg: color-mix(in srgb, var(--color-fg-subtle) 12%, var(--color-canvas));
 
   display: inline-flex;
   align-items: center;
@@ -50,7 +50,7 @@
 
 .status-chip[data-tone='signal'] {
   --status-fg: var(--color-signal);
-  --status-bg: color-mix(in srgb, var(--color-signal) 12%, transparent);
+  --status-bg: color-mix(in srgb, var(--color-signal) 12%, var(--color-canvas));
 }
 
 .status-dot {
