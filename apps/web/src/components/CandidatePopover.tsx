@@ -1,5 +1,4 @@
 import { Popover } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { type KeyboardEvent, useRef, useState } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { CandidatePicker } from '#core/capture/candidate-picker'
@@ -8,9 +7,11 @@ import type { CharacterChoice } from '#core/search/search'
 import { CardImage } from './CardImage'
 import { CheckIcon } from './CheckIcon'
 import { ChevronDownIcon } from './ChevronDownIcon'
-import { styles } from './CandidatePopover.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
+
+const focusRingClass =
+  'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal focus-visible:outline-offset-2'
 
 const TILE_STEPS: Readonly<Record<string, number>> = {
   ArrowLeft: -1,
@@ -52,10 +53,10 @@ export function CandidatePopover({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
         aria-label={`${slot}번 후보 고르기, 후보 ${count}`}
-        {...stylex.props(styles.chip)}
+        className={`m-0 box-border inline-flex h-4.5 shrink-0 cursor-pointer items-center gap-0.75 rounded-badge border border-current bg-transparent px-1 text-2xs font-semibold whitespace-nowrap text-signal [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard hover:bg-inset data-popup-open:bg-inset ${focusRingClass}`}
       >
         {`후보 ${count}`}
-        <ChevronDownIcon {...stylex.props(styles.chevron)} />
+        <ChevronDownIcon className="size-2.5 stroke-3" />
       </Popover.Trigger>
       <Popover.Popup
         side="bottom"
@@ -63,13 +64,12 @@ export function CandidatePopover({
         sideOffset={6}
         aria-label={`${slot}번 후보 고르기`}
         initialFocus={shownRef}
-        {...stylex.props(styles.popup)}
       >
         <div
           role="group"
           aria-label={`${slot}번 같은 이름 후보`}
           onKeyDown={moveTileFocus}
-          {...stylex.props(styles.tiles)}
+          className="flex gap-1.5 p-2"
         >
           {picker.choices.map((choice) => {
             const shown = choice.serverId === picker.shownServerId
@@ -114,22 +114,22 @@ function CandidateTile({
       aria-label={`${server}, 명성 ${fame}${adventure}${state}`}
       aria-pressed={shown}
       onClick={handleClick}
-      {...stylex.props(styles.tile, shown && styles.shown)}
+      className={`relative m-0 box-border flex w-16 cursor-pointer flex-col rounded-control border bg-transparent p-0 text-left text-fg [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard ${shown ? 'border-signal shadow-[0_0_0_1px_var(--color-signal)]' : 'border-transparent hover:border-line-input'} ${focusRingClass}`}
     >
-      <span {...stylex.props(styles.well)}>
+      <span className="relative block size-15.5 overflow-hidden bg-inset">
         <CardImage src={characterImageUrl(choice)} />
       </span>
       {shown && (
-        <span {...stylex.props(styles.check)}>
-          <CheckIcon {...stylex.props(styles.checkIcon)} />
+        <span className="absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-control bg-signal text-on-signal">
+          <CheckIcon className="size-2.5 stroke-4" />
         </span>
       )}
-      <span aria-hidden="true" {...stylex.props(styles.server)}>
+      <span aria-hidden="true" className="truncate px-1 pt-0.75 text-2xs text-fg-muted">
         {server}
       </span>
       <span
         aria-hidden="true"
-        {...stylex.props(styles.fame, choice.fame !== null && styles.fameValue)}
+        className={`px-1 pb-1 font-mono text-xs font-semibold tabular-nums ${choice.fame !== null ? 'text-game-fame' : 'text-fg-subtle'}`}
       >
         {fame}
       </span>

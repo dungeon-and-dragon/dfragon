@@ -1,7 +1,19 @@
-import { useState } from 'react'
-import * as stylex from '@stylexjs/stylex'
+import { type CSSProperties, useState } from 'react'
+import { PORTRAIT_CANVAS_WIDTH } from '#core/search/portrait-anchor'
 import type { CharacterFaceWindow } from '#core/search/search'
-import { styles } from './CardImage.style'
+
+function percentOfFace(value: number, faceWidth: number): string {
+  return `${(value / faceWidth) * 100}%`
+}
+
+// 칸이 정사각형이라 얼굴 칸 폭을 기준으로 한 비율을 가로, 세로 위치에 함께 쓴다.
+function faceWindowStyle({ x, y, width: faceWidth }: CharacterFaceWindow): CSSProperties {
+  const left = percentOfFace(-x, faceWidth)
+  const top = percentOfFace(-y, faceWidth)
+  const width = percentOfFace(PORTRAIT_CANVAS_WIDTH, faceWidth)
+
+  return { left, top, width }
+}
 
 export function CardImage({
   src,
@@ -12,14 +24,11 @@ export function CardImage({
 }): React.JSX.Element {
   const [failedSource, setFailedSource] = useState<string>()
   if (src == null || failedSource === src) {
-    const placeholder = stylex.props(styles.placeholder)
-
     return (
       <span
         role="img"
         aria-label="캐릭터 이미지 없음"
-        className={`${placeholder.className ?? ''} text-xs`}
-        style={placeholder.style}
+        className="grid size-full place-items-center text-xs text-card-fg-muted"
       >
         —
       </span>
@@ -34,9 +43,12 @@ export function CardImage({
       alt="캐릭터"
       draggable={false}
       onError={handleError}
-      {...stylex.props(
-        face != null ? styles.faceWindow(face.x, face.y, face.width) : [styles.image, styles.zoom]
-      )}
+      className={
+        face != null
+          ? 'absolute h-auto max-w-none [image-rendering:pixelated]'
+          : 'size-full scale-170 object-contain'
+      }
+      style={face != null ? faceWindowStyle(face) : undefined}
     />
   )
 }

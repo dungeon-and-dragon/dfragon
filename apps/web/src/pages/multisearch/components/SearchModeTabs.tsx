@@ -1,8 +1,6 @@
 import { Tabs } from '@base-ui/react/tabs'
-import * as stylex from '@stylexjs/stylex'
 import { useSearchModeStore } from '../../../hooks/useSearchModeStore'
 import type { SearchMode } from '#core/capture/search-mode'
-import { styles } from './SearchModeTabs.style'
 
 const SEARCH_MODES: readonly SearchMode[] = ['party', 'raid']
 
@@ -26,14 +24,19 @@ export function SearchModeTabs(): React.JSX.Element {
   }
 
   return (
-    <Tabs.Root value={searchMode} onValueChange={handleValueChange} {...stylex.props(styles.root)}>
-      <Tabs.List aria-label="화면" {...stylex.props(styles.list)}>
+    <Tabs.Root
+      value={searchMode}
+      onValueChange={handleValueChange}
+      className="flex shrink-0 self-stretch"
+    >
+      <Tabs.List aria-label="화면" className="relative flex items-stretch">
         {SEARCH_MODES.map((mode) => (
-          <Tabs.Tab key={mode} value={mode} {...stylex.props(styles.tab)}>
+          <Tabs.Tab key={mode} value={mode} className="tab h-auto">
             {SEARCH_MODE_LABELS[mode]}
           </Tabs.Tab>
         ))}
-        <Tabs.Indicator {...stylex.props(styles.indicator)} />
+        {/* 상단 바 표시 막대(indicatorSlide)와 같은 길이와 곡선으로 미끄러진다. */}
+        <Tabs.Indicator className="absolute -bottom-px left-(--active-tab-left) h-0.5 w-(--active-tab-width) bg-signal transition-[left,width] duration-380 ease-standard motion-reduce:duration-0" />
       </Tabs.List>
     </Tabs.Root>
   )

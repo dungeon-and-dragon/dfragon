@@ -1,6 +1,20 @@
-import * as stylex from '@stylexjs/stylex'
 import { LOOKUP_STEPS, type LookupStep } from '../lib/card-presentation'
-import { styles } from './LookupProgress.style'
+
+// design의 status-live keyframes가 이 점의 깜박임(불투명에서 0.35로)과 같아 그것을 쓴다.
+const activeDotClass =
+  'bg-signal animate-[status-live_var(--beat)_steps(1,end)_infinite] motion-reduce:animate-none'
+
+function dotClass(index: number, current: number): string {
+  if (index === current) {
+    return activeDotClass
+  }
+
+  if (index < current) {
+    return 'bg-signal'
+  }
+
+  return 'bg-line-strong'
+}
 
 export function LookupProgress({
   slot,
@@ -19,17 +33,13 @@ export function LookupProgress({
       aria-valuemax={LOOKUP_STEPS.length}
       aria-valuenow={current}
       aria-valuetext={`${step} 중`}
-      {...stylex.props(styles.progress)}
+      className="inline-flex items-center gap-2 text-xs text-fg-muted"
     >
-      <span aria-hidden="true" {...stylex.props(styles.dots)}>
+      <span aria-hidden="true" className="inline-flex items-center gap-1">
         {LOOKUP_STEPS.map((name, index) => (
           <span
             key={name}
-            {...stylex.props(
-              styles.dot,
-              index < current && styles.done,
-              index === current && styles.active
-            )}
+            className={`size-1.25 shrink-0 rounded-full ${dotClass(index, current)}`}
           />
         ))}
       </span>

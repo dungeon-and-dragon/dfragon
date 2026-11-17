@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useId } from 'react'
 import type { SlotCard, SlotCardActions } from '#core/capture/slot-cards'
 import { Seat } from '../../components/Seat'
@@ -8,7 +7,6 @@ import { useSeatMove } from '../../hooks/useSeatMove'
 import type { SeatArrangement } from '../../hooks/useSeatOrder'
 import { CharacterRow } from '../../components/CharacterRow'
 import { isBusySlot } from '../../lib/card-presentation'
-import { styles } from './PartyScreen.style'
 
 export function PartyScreen({
   slots,
@@ -45,7 +43,7 @@ export function PartyScreen({
           cardKey={{ id: `party-${slot}`, resetKey }}
           card={slots[slot]}
           slot={seat + 1}
-          seat={<span {...stylex.props(styles.seat)}>{seat + 1}</span>}
+          seat={<span className="font-mono tabular-nums text-fg-subtle">{seat + 1}</span>}
           screen="party"
           onLookup={handleLookup}
           onPickCandidate={handlePickCandidate}
