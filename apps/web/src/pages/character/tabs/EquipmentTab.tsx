@@ -1,17 +1,15 @@
-import * as stylex from '@stylexjs/stylex'
 import { type EquipmentView, toEquipmentView } from '#core/character/character-equipment'
 import { formatPoint } from '#core/character/character-item'
 import type { CharacterTabProps } from './character-tab-props'
 import { EquipmentTable } from './equipment/EquipmentTable'
-import { styles as tableStyles } from './equipment/item-table.style'
+import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { ItemName, RarityBadge } from './equipment/item-parts'
-import { styles } from './equipment/item-parts.style'
 
 export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
   const view = toEquipmentView(detail)
 
   return (
-    <div {...stylex.props(tableStyles.root)}>
+    <div className={itemTableClasses.root}>
       <EquipmentStrip view={view} />
       <EquipmentTable view={view} />
     </div>
@@ -26,24 +24,24 @@ function EquipmentStrip({ view }: { view: EquipmentView }): React.JSX.Element | 
   }
 
   return (
-    <div {...stylex.props(styles.strip)}>
+    <div className={itemClasses.strip}>
       {sets.map((set, index) => (
-        <span key={`${set.name}-${index}`} {...stylex.props(styles.itemText)}>
-          <span {...stylex.props(styles.stripLabel)}>세트</span>
+        <span key={`${set.name}-${index}`} className={itemClasses.itemText}>
+          <span className={itemClasses.stripLabel}>세트</span>
           <ItemName name={set.name} rarity={set.rarity} />
           {set.rarityName !== null && (
             <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>
           )}
           {set.point !== null && (
-            <span {...stylex.props(styles.stripMuted)}>{formatPoint(set.point)}</span>
+            <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
           )}
         </span>
       ))}
-      <span {...stylex.props(styles.spacer)} />
+      <span className={itemClasses.spacer} />
       {mistLevel !== null && (
-        <span {...stylex.props(styles.itemText)}>
-          <span {...stylex.props(styles.stripLabel)}>안개 융화</span>
-          <b {...stylex.props(styles.name, tableStyles.number)}>{`Lv.${mistLevel}`}</b>
+        <span className={itemClasses.itemText}>
+          <span className={itemClasses.stripLabel}>안개 융화</span>
+          <b className={`${itemClasses.name} ${itemTableClasses.number}`}>{`Lv.${mistLevel}`}</b>
         </span>
       )}
     </div>

@@ -1,5 +1,4 @@
 import { Button } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture/cards'
@@ -8,7 +7,6 @@ import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/chara
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { Portrait } from '../../components/Portrait'
 import { characterDisplayOf } from '../../lib/stored-character'
-import { styles } from './CharacterSummary.style'
 import { FavoriteToggle } from '../../components/FavoriteToggle'
 import { RefreshIcon } from '../../components/RefreshIcon'
 import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
@@ -19,6 +17,17 @@ const integer = new Intl.NumberFormat('ko-KR')
 
 // API도 마지막으로 받은 지 1분 안의 강제 갱신에는 Neople을 다시 부르지 않고 받아 둔 응답을 준다.
 const REFRESH_INTERVAL_MS = 60_000
+
+const SUMMARY = 'flex flex-wrap items-center gap-5 rounded-panel border border-line bg-canvas p-5'
+const WELL = 'relative h-28 w-24 shrink-0 overflow-hidden rounded-control bg-inset'
+const IDENTITY = 'flex min-w-0 grow basis-70 flex-col gap-1.5'
+const STATS = 'flex shrink-0 gap-10'
+const STAT = 'flex min-w-26 flex-col items-end gap-0.5'
+const STAT_LABEL = 'text-xs font-medium text-fg-subtle'
+const STAT_VALUE = 'font-mono text-xl font-semibold tabular-nums'
+const LINE = 'flex items-center gap-2 whitespace-nowrap'
+const LINK = 'no-underline hover:text-fg hover:underline'
+const SCORE_TONES = { dealer: 'text-score-dealer', buffer: 'text-score-buffer' } as const
 
 export function CharacterSummary({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
@@ -35,12 +44,12 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
     {
       id: 'adventure',
       name: character.adventureName,
-      tone: styles.adventure,
+      tone: 'text-fg-adventure',
       link: character.adventureName != null && (
         <Link
           to="/adventures/$adventureName"
           params={{ adventureName: character.adventureName }}
-          {...stylex.props(styles.adventure, styles.link)}
+          className={`text-fg-adventure ${LINK}`}
         >
           {character.adventureName}
         </Link>
@@ -49,12 +58,12 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
     {
       id: 'guild',
       name: character.guildName,
-      tone: styles.guild,
+      tone: 'text-fg-guild',
       link: character.guildId != null && (
         <Link
           to="/guilds/$guildId"
           params={{ guildId: character.guildId }}
-          {...stylex.props(styles.guild, styles.link)}
+          className={`text-fg-guild ${LINK}`}
         >
           {character.guildName}
         </Link>
@@ -63,17 +72,15 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
   ].filter((affiliation) => affiliation.name != null)
 
   return (
-    <section
-      aria-label="캐릭터 요약"
-      aria-busy={refreshing || undefined}
-      {...stylex.props(styles.summary)}
-    >
-      <div {...stylex.props(styles.well)}>
+    <section aria-label="캐릭터 요약" aria-busy={refreshing || undefined} className={SUMMARY}>
+      <div className={WELL}>
         <Portrait src={characterImageUrl(character)} />
       </div>
-      <div {...stylex.props(styles.identity)}>
-        <div {...stylex.props(styles.heading)}>
-          <h1 {...stylex.props(styles.name)}>{character.characterName ?? MISSING_VALUE}</h1>
+      <div className={IDENTITY}>
+        <div className="flex min-w-0 items-center gap-2">
+          <h1 className="m-0 text-xl font-semibold tracking-heading">
+            {character.characterName ?? MISSING_VALUE}
+          </h1>
           {favorite != null && <FavoriteToggle character={favorite} />}
           <RefreshControl
             key={lastSuccessfulFetchAt}
@@ -82,26 +89,30 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
             onRefresh={refreshCharacter}
           />
         </div>
-        <div {...stylex.props(styles.line)}>
-          <span {...stylex.props(styles.server)}>{CHARACTER_SERVER_NAMES[character.serverId]}</span>
-          {job != null && <span {...stylex.props(styles.muted)}>{job}</span>}
+        <div className={LINE}>
+          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-1.5 text-xs font-medium text-fg-muted">
+            {CHARACTER_SERVER_NAMES[character.serverId]}
+          </span>
+          {job != null && <span className="text-fg-muted">{job}</span>}
           {character.level != null && (
-            <span {...stylex.props(styles.level)}>{`Lv.${character.level}`}</span>
+            <span className="font-mono tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>
           )}
         </div>
         {affiliations.length > 0 && (
-          <div {...stylex.props(styles.line)}>
+          <div className={LINE}>
             {affiliations.map(({ id, name, tone, link }, index) => (
-              <span key={id} {...stylex.props(styles.affiliation)}>
-                {index > 0 && <span aria-hidden="true" {...stylex.props(styles.divider)} />}
-                {link || <span {...stylex.props(tone)}>{name}</span>}
+              <span key={id} className="inline-flex items-center gap-2">
+                {index > 0 && <span aria-hidden="true" className="h-2.5 w-px bg-line-strong" />}
+                {link || <span className={tone}>{name}</span>}
               </span>
             ))}
           </div>
         )}
       </div>
-      <FameStat fame={character.fame} />
-      <ScoreStat card={detail.card} />
+      <div className={STATS}>
+        <FameStat fame={character.fame} />
+        <ScoreStat card={detail.card} />
+      </div>
     </section>
   )
 }
@@ -120,7 +131,7 @@ function RefreshControl({
   const justFetched = now - Date.parse(fetchedAt) < REFRESH_INTERVAL_MS
 
   return (
-    <div {...stylex.props(styles.refresh)}>
+    <div className="ml-2 flex shrink-0 items-center gap-2">
       <Button
         size="sm"
         variant="secondary"
@@ -133,7 +144,7 @@ function RefreshControl({
       <time
         dateTime={fetchedAt}
         title={formatSeoulDateTime(fetchedAt, now)}
-        {...stylex.props(styles.fetchedAt)}
+        className="text-xs whitespace-nowrap text-fg-subtle"
       >
         {justFetched ? '방금 전' : formatTimeAgo(fetchedAt, now)}
       </time>
@@ -144,35 +155,37 @@ function RefreshControl({
 // 요약과 같은 칸 크기로 그려, 받은 뒤 요약이 들어와도 아래 탭 줄이 움직이지 않게 한다.
 export function CharacterSummarySkeleton(): React.JSX.Element {
   return (
-    <div aria-hidden="true" {...stylex.props(styles.summary)}>
-      <div {...stylex.props(styles.well)} />
-      <div {...stylex.props(styles.identity)}>
+    <div aria-hidden="true" className={SUMMARY}>
+      <div className={WELL} />
+      <div className={IDENTITY}>
         <Bone width={160} height={28} />
         <Bone width={200} height={20} />
-        <Bone width={140} height={18} />
+        <Bone width={140} height={20} />
       </div>
-      {[0, 1].map((stat) => (
-        <div key={stat} {...stylex.props(styles.stat)}>
-          <Bone width={40} height={14} />
-          <Bone width={96} height={24} />
-        </div>
-      ))}
+      <div className={STATS}>
+        {[0, 1].map((stat) => (
+          <div key={stat} className={STAT}>
+            <Bone width={40} height={16} />
+            <Bone width={96} height={28} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
 function Bone({ width, height }: { width: number; height: number }): React.JSX.Element {
-  return <span {...stylex.props(styles.bone, styles.boneSize(width, height))} />
+  return <span className="block rounded-control bg-inset" style={{ width, height }} />
 }
 
 function FameStat({ fame }: { fame: number | null }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.stat)}>
-      <span {...stylex.props(styles.statLabel)}>명성</span>
+    <div className={STAT}>
+      <span className={STAT_LABEL}>명성</span>
       {fame != null ? (
-        <span {...stylex.props(styles.statValue, styles.fame)}>{integer.format(fame)}</span>
+        <span className={`${STAT_VALUE} text-game-fame`}>{integer.format(fame)}</span>
       ) : (
-        <span {...stylex.props(styles.statValue, styles.missing)}>{MISSING_VALUE}</span>
+        <span className={`${STAT_VALUE} text-fg-subtle`}>{MISSING_VALUE}</span>
       )}
     </div>
   )
@@ -181,24 +194,19 @@ function FameStat({ fame }: { fame: number | null }): React.JSX.Element {
 function ScoreStat({ card }: { card: CharacterDetailView['card'] }): React.JSX.Element {
   const { label, tone, value, approximate, description } = toScoreView(card)
   const note = description !== undefined && <span className="sr-only">{description}</span>
+  const toneClass = tone !== null ? SCORE_TONES[tone] : ''
+  const approximateClass = approximate ? 'border-b border-dotted border-fg-subtle' : ''
 
   return (
-    <div {...stylex.props(styles.stat)}>
-      <span {...stylex.props(styles.statLabel)}>{label}</span>
+    <div className={STAT}>
+      <span className={STAT_LABEL}>{label}</span>
       {value != null ? (
-        <span
-          title={description}
-          {...stylex.props(
-            styles.statValue,
-            tone !== null && styles[tone],
-            approximate && styles.approximate
-          )}
-        >
+        <span title={description} className={`${STAT_VALUE} ${toneClass} ${approximateClass}`}>
           {approximate ? formatApproximateScore(value) : integer.format(value)}
           {note}
         </span>
       ) : (
-        <span {...stylex.props(styles.statValue, styles.missing)}>
+        <span className={`${STAT_VALUE} text-fg-subtle`}>
           {MISSING_VALUE}
           {note}
         </span>

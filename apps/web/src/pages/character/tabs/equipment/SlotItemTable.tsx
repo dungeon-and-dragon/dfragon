@@ -1,10 +1,10 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ItemView } from '#core/character/character-item'
+import { itemTableClasses } from './item-classes'
 import { ItemCell } from './item-parts'
-import { styles as tableStyles } from './item-table.style'
-import { styles } from './SlotItemTable.style'
 
 export type SlotItemRow = Readonly<{ key: string; slot: React.ReactNode; item: ItemView }>
+
+const { table, head, body, row, cell, slot: slotCell } = itemTableClasses
 
 export function SlotItemTable({
   itemLabel,
@@ -14,22 +14,22 @@ export function SlotItemTable({
   rows: readonly SlotItemRow[]
 }): React.JSX.Element {
   return (
-    <table {...stylex.props(tableStyles.table)}>
+    <table className={table}>
       <thead>
         <tr>
-          <th scope="col" {...stylex.props(tableStyles.head, tableStyles.first, styles.slotColumn)}>
+          <th scope="col" className={`${head} w-24`}>
             부위
           </th>
-          <th scope="col" {...stylex.props(tableStyles.head, tableStyles.last)}>
+          <th scope="col" className={head}>
             {itemLabel}
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className={body}>
         {rows.map(({ key, slot, item }) => (
-          <tr key={key} {...stylex.props(tableStyles.row)}>
-            <td {...stylex.props(tableStyles.cell, tableStyles.first, tableStyles.slot)}>{slot}</td>
-            <td {...stylex.props(tableStyles.cell, tableStyles.last)}>
+          <tr key={key} className={row}>
+            <td className={`${cell} ${slotCell}`}>{slot}</td>
+            <td className={cell}>
               <ItemCell item={item} tune={null} exalted={false} />
             </td>
           </tr>

@@ -1,9 +1,7 @@
-import * as stylex from '@stylexjs/stylex'
 import { formatStatValue, statusElementOf } from '#core/character/character-detail-display'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import type { CharacterTabProps } from './character-tab-props'
-import { styles as layout } from './avatar/detail-tab.style'
-import { styles } from './status/StatusTab.style'
+import { detailTabClasses as layout } from './detail-tab-classes'
 
 type NamedStat = CharacterDetailView['status']['status'][number]
 type StatusBuff = CharacterDetailView['status']['buff'][number]
@@ -13,27 +11,32 @@ export function StatusTab({ detail }: CharacterTabProps): React.JSX.Element {
   const buffs = detail.status.buff.filter((buff) => buff.name != null)
 
   return (
-    <div {...stylex.props(layout.tab)}>
+    <div className={layout.tab}>
       {stats.length > 0 && (
-        <dl aria-label="스탯" {...stylex.props(styles.grid)}>
+        <dl aria-label="스탯" className="m-0 grid grid-cols-4 gap-x-6 max-sm:grid-cols-2">
           {stats.map((stat) => (
-            <div key={stat.name} {...stylex.props(styles.stat)}>
-              <dt {...stylex.props(styles.name)}>
+            <div
+              key={stat.name}
+              className="flex min-w-0 items-center justify-between gap-2 border-b border-line py-2.5"
+            >
+              <dt className="m-0 flex min-w-0 items-center gap-1 text-fg-muted">
                 {/* 속성 아이콘 그림이 저장소에 들어오기 전까지 자리만 둔다. */}
                 {statusElementOf(stat.name) != null && (
-                  <span aria-hidden="true" {...stylex.props(styles.elementIcon)} />
+                  <span aria-hidden="true" className="size-4 shrink-0" />
                 )}
                 {stat.name}
               </dt>
-              <dd {...stylex.props(styles.value)}>{formatStatValue(stat.value)}</dd>
+              <dd className="m-0 shrink-0 font-mono text-fg tabular-nums">
+                {formatStatValue(stat.value)}
+              </dd>
             </div>
           ))}
         </dl>
       )}
       {buffs.length > 0 && (
-        <section aria-label="적용 중인 버프" {...stylex.props(layout.section)}>
-          <h2 {...stylex.props(layout.heading)}>적용 중인 버프</h2>
-          <ul {...stylex.props(styles.buffs)}>
+        <section aria-label="적용 중인 버프" className={layout.section}>
+          <h2 className={layout.heading}>적용 중인 버프</h2>
+          <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {buffs.map((buff) => (
               <StatusBuffRow key={buff.name} buff={buff} />
             ))}
@@ -57,10 +60,12 @@ function StatusBuffRow({ buff }: { buff: StatusBuff }): React.JSX.Element {
     .join(', ')
 
   return (
-    <li {...stylex.props(styles.buff)}>
-      <span {...stylex.props(styles.buffName)}>{buff.name}</span>
-      {buff.level != null && <span {...stylex.props(styles.buffLevel)}>{`Lv.${buff.level}`}</span>}
-      {values !== '' && <span {...stylex.props(styles.buffStatus)}>{values}</span>}
+    <li className="flex items-baseline gap-2">
+      <span className="font-semibold">{buff.name}</span>
+      {buff.level != null && (
+        <span className="font-mono text-fg-subtle tabular-nums">{`Lv.${buff.level}`}</span>
+      )}
+      {values !== '' && <span className="text-fg-muted tabular-nums">{values}</span>}
     </li>
   )
 }
