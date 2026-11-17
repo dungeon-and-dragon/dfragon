@@ -1,6 +1,4 @@
 // @vitest-environment jsdom
-import { colors } from '@dfragon/ui/tokens.stylex'
-import * as stylex from '@stylexjs/stylex'
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -31,13 +29,12 @@ vi.mock('../../components/ServerSelect', () => ({
   )
 }))
 
-// StyleX의 atomic class 이름은 속성과 값에서 정해지므로, 같은 선언을 여기서 만들면 같은 class가 나온다.
-// jsdom은 색을 계산하지 않으므로 자리 배지가 파티 색의 옅은 면과 글자를 쓰는지 class로 확인한다.
-const expectedPartyFill = stylex.create({
-  red: { backgroundColor: colors.raidPartyRedWeak, color: colors.raidPartyRed },
-  yellow: { backgroundColor: colors.raidPartyYellowWeak, color: colors.raidPartyYellow },
-  green: { backgroundColor: colors.raidPartyGreenWeak, color: colors.raidPartyGreen }
-})
+// jsdom은 색을 계산하지 않으므로 자리 배지가 파티 색의 옅은 면과 글자를 쓰는지 Tailwind CSS utility로 확인한다.
+const expectedPartyFill = {
+  red: ['bg-raid-party-red-weak', 'text-raid-party-red'],
+  yellow: ['bg-raid-party-yellow-weak', 'text-raid-party-yellow'],
+  green: ['bg-raid-party-green-weak', 'text-raid-party-green']
+} as const
 
 let root: Root
 let container: HTMLDivElement
@@ -163,10 +160,6 @@ function moveNotices(): (string | null)[] {
   )
 }
 
-function classesOf(style: stylex.StyleXStyles): string[] {
-  return (stylex.props(style).className ?? '').split(' ').filter(Boolean)
-}
-
 it('R, Y, G 파티마다 파티 헤더 행에 파티 배지와 찾은 수를 두고 그 아래 네 자리 행을 놓는다', async () => {
   await render({ characters: [member, member, null, null, member] })
 
@@ -215,7 +208,7 @@ it('자리 배지는 R, Y, G와 파티 안 순번을 그 파티 색의 옅은 �
     [11, expectedPartyFill.green]
   ] as const
   for (const [index, fill] of fills) {
-    expect([...badges[index].classList]).toEqual(expect.arrayContaining(classesOf(fill)))
+    expect([...badges[index].classList]).toEqual(expect.arrayContaining([...fill]))
   }
 })
 

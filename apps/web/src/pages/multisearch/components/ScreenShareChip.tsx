@@ -1,6 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import { Button, StatusChip } from '@dfragon/ui'
-import { HeaderTooltip } from '../../../components/HeaderTooltip'
+import { HeaderTooltip, tooltipTriggerClass } from '../../../components/HeaderTooltip'
 import { MonitorIcon } from './MonitorIcon'
 import { useScreenCaptureContext } from '../../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../../hooks/useSearchModeStore'
@@ -8,7 +7,6 @@ import { getCaptureControlState } from '#core/capture/capture-presentation'
 import type { CapturePhase } from '#core/capture/capture-types'
 import type { SearchMode } from '#core/capture/search-mode'
 import type { BrowserHost } from '../../../host/client-host'
-import { styles } from './ScreenShareChip.style'
 import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
 function getScreenShareStatus(
@@ -55,10 +53,11 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
   }
 
   return (
-    <span {...stylex.props(styles.root)}>
+    // 보드 헤더 끝의 도구 간격(4px)에 더해 마지막 캡처 시각, 스냅샷과 12px씩 띄운다.
+    <span className="mr-2 inline-flex">
       <HeaderTooltip label={status} disabled={status.length === 0}>
         {sharePrompt ? (
-          <span {...stylex.props(styles.wrapper)}>
+          <span className={tooltipTriggerClass}>
             <Button
               variant="primary"
               size="sm"
@@ -76,7 +75,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
               sourceReady ? `화면 공유 중지, ${state.label}` : `화면 공유, ${state.label}`
             }
             onClick={sourceReady ? disconnect : connect}
-            {...stylex.props(styles.trigger)}
+            className="m-0 inline-flex cursor-pointer rounded-badge border-0 bg-transparent p-0 text-inherit [font:inherit] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-signal"
           >
             <StatusChip tone={state.tone} busy={state.busy} size="md">
               {state.label}
