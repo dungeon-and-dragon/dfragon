@@ -1,4 +1,3 @@
-import { colors } from '@dfragon/ui/tokens.stylex'
 import type { ClearContent, ClearContentKind } from '#core/ranking/clear-stats'
 
 export type ClearStage = '하드' | '일반'
@@ -21,43 +20,43 @@ const MICHAELA: ClearGroup = {
   key: 'michaela',
   name: '무너진 성자 미카엘라',
   shortName: '미카엘라',
-  color: colors.chart1
+  color: 'var(--color-chart-1)'
 }
 const DIREGIE: ClearGroup = {
   key: 'diregie',
   name: '디레지에 레이드',
   shortName: '디레지에',
-  color: colors.chart2
+  color: 'var(--color-chart-2)'
 }
 const INAE: ClearGroup = {
   key: 'inae',
   name: '이내 황혼전',
   shortName: '이내 황혼전',
-  color: colors.chart3
+  color: 'var(--color-chart-3)'
 }
 const NABEL: ClearGroup = {
   key: 'nabel',
   name: '만들어진 신 나벨',
   shortName: '나벨',
-  color: colors.chart4
+  color: 'var(--color-chart-4)'
 }
 const APOCALYPSE: ClearGroup = {
   key: 'apocalypse',
   name: '아포칼립스',
   shortName: '아포칼립스',
-  color: colors.chart5
+  color: 'var(--color-chart-5)'
 }
 const VENUS: ClearGroup = {
   key: 'venus',
   name: '베누스',
   shortName: '베누스',
-  color: colors.chart6
+  color: 'var(--color-chart-6)'
 }
 const NIGHTMARE: ClearGroup = {
   key: 'nightmare',
   name: '각인된 악몽',
   shortName: '각인된 악몽',
-  color: colors.chart7
+  color: 'var(--color-chart-7)'
 }
 
 // 같은 레이드의 일반과 하드를 카드 하나로 묶고, 기간이나 전환을 바꿔도 같은 색을 쓰게 컨텐츠마다 묶음을 고정한다(ADR 0055).
@@ -105,7 +104,7 @@ export function placeOf({ id, name }: ClearContent): ContentPlace {
     return known
   }
 
-  const group = { key: id, name, shortName: name, color: colors.chartBase }
+  const group = { key: id, name, shortName: name, color: 'var(--color-chart-base)' }
 
   return { group, stage: null, choice: null }
 }

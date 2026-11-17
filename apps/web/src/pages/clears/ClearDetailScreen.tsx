@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import type {
   ClearContent,
   ClearContentStats,
@@ -49,15 +48,15 @@ import { ChoiceGroup } from './components/ChoiceGroup'
 import { ClearContentCards } from './components/ClearContentCards'
 import { ClearJobTable } from './components/ClearJobTable'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
-import { styles as layout } from './components/ClearPanel.style'
+import { clearClasses } from './components/clear-classes'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { useClearContentStats, useClearStats } from './hooks/useClearStats'
-import { styles } from './ClearDetailScreen.style'
 
 const DETAIL_LAST_ADVENTURE_SIZE = 17
 const WIDE_PANEL = 2
 // 1440×900 창에서 스크롤 없이 첫 줄 차트의 아래 끝까지 보이게 공용 기본 높이보다 낮춘다.
 const FIRST_ROW_CHART_HEIGHT = 180
+const TONE_CLASSES = { up: 'text-fg-success', down: 'text-fg-danger' } as const
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -101,7 +100,7 @@ export function ClearDetailScreen({
   switch (result.status) {
     case 'loading':
       return (
-        <div aria-busy="true" {...stylex.props(layout.screen)}>
+        <div aria-busy="true" className={clearClasses.screen}>
           <span role="status" className="sr-only">
             클리어 집계를 받는 중입니다.
           </span>
@@ -110,9 +109,9 @@ export function ClearDetailScreen({
       )
     case 'error':
       return (
-        <div {...stylex.props(layout.screen)}>
+        <div className={clearClasses.screen}>
           <TitleBox title={CLEAR_TITLE} />
-          <p role="alert" {...stylex.props(layout.state)}>
+          <p role="alert" className={clearClasses.state}>
             {result.message}
           </p>
         </div>
@@ -125,9 +124,9 @@ export function ClearDetailScreen({
         chosen !== undefined ? findOverviewWeek(contentWeeks(chosen.content), week) : undefined
       if (group === undefined || chosen === undefined || selected === undefined) {
         return (
-          <div {...stylex.props(layout.screen)}>
+          <div className={clearClasses.screen}>
             <TitleBox title={CLEAR_TITLE} />
-            <p {...stylex.props(layout.empty)}>수집 기록이 없습니다.</p>
+            <p className={clearClasses.empty}>수집 기록이 없습니다.</p>
           </div>
         )
       }
@@ -170,7 +169,7 @@ function Detail({
   }
 
   return (
-    <div {...stylex.props(layout.screen)}>
+    <div className={clearClasses.screen}>
       <ClearTitle summary={week} />
       <ClearContentCards
         cards={contentCards(contents, weekStart)}
@@ -185,9 +184,9 @@ function Detail({
         onStageSelect={onStageSelect}
         onWeekSelect={onWeekSelect}
       />
-      {result.status === 'loading' && <div aria-hidden="true" {...stylex.props(layout.pending)} />}
+      {result.status === 'loading' && <div aria-hidden="true" className={clearClasses.pending} />}
       {result.status === 'error' && (
-        <p role="alert" {...stylex.props(layout.state)}>
+        <p role="alert" className={clearClasses.state}>
           {result.message}
         </p>
       )}
@@ -223,10 +222,13 @@ function ContentHead({
   }
 
   return (
-    <section aria-label="컨텐츠" {...stylex.props(styles.head)}>
-      <div {...stylex.props(styles.headName)}>
-        <span {...stylex.props(styles.headKind)}>{kind}</span>
-        <h2 {...stylex.props(styles.headTitle)}>{place.group.name}</h2>
+    <section
+      aria-label="컨텐츠"
+      className="flex flex-wrap items-center gap-6 rounded-panel border border-line bg-canvas px-4 py-2"
+    >
+      <div className="flex flex-col gap-0.5">
+        <span className="text-xs font-medium text-fg-muted tabular-nums">{kind}</span>
+        <h2 className="m-0 text-xl font-semibold tracking-heading">{place.group.name}</h2>
       </div>
       {place.choice !== null && (
         <ChoiceGroup
@@ -238,7 +240,7 @@ function ContentHead({
         />
       )}
       {week !== undefined && (
-        <dl {...stylex.props(styles.figures)}>
+        <dl className="my-0 mr-0 ml-auto flex gap-6">
           <Figure label="클리어 캐릭터" value={integer.format(week.cleared)} />
           <Figure label="클리어 비율" value={shareText(week.cleared, week.population)} />
           {change !== null && (
@@ -266,14 +268,10 @@ function Figure({
   tone
 }: Readonly<{ label: string; value: string; tone?: 'up' | 'down' }>): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.figure)}>
-      <dt {...stylex.props(styles.figureLabel)}>{label}</dt>
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-xs font-medium text-fg-subtle">{label}</dt>
       <dd
-        {...stylex.props(
-          styles.figureValue,
-          tone === 'up' && styles.up,
-          tone === 'down' && styles.down
-        )}
+        className={`m-0 font-mono text-xl font-semibold tabular-nums ${tone !== undefined ? TONE_CLASSES[tone] : ''}`}
       >
         {value}
       </dd>
@@ -303,7 +301,7 @@ function DetailStats({
 
   return (
     <>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {weekly.x.length > 0 && (
           <Panel name="주차별 클리어" grow={WIDE_PANEL}>
             <BarLineChart
@@ -332,7 +330,7 @@ function DetailStats({
           </Panel>
         )}
       </div>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {stats.weekOverWeek !== null && (
           <SplitPanel
             name="지난주 대비 이탈과 복귀"
@@ -346,7 +344,7 @@ function DetailStats({
           />
         )}
       </div>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {groupRows.length > 0 && (
           <Panel name="클리어 캐릭터의 명성">
             <BoxPlotChart
@@ -359,7 +357,7 @@ function DetailStats({
         )}
         {stats.weekOverWeek !== null && <GroupScorePanel weekOverWeek={stats.weekOverWeek} />}
       </div>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {streaks.length > 0 && (
           <Panel name="연속 클리어 주 수">
             <Columns groups={[streaks]} />
@@ -367,14 +365,14 @@ function DetailStats({
         )}
         {hasClearTimes(stats) && <ClearTimePanel times={stats} />}
       </div>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {ratios.length > 0 && (
           <Panel name="배율별 클리어">
             <RowBars bars={ratios} />
           </Panel>
         )}
       </div>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         <ScoreBandPanel scoreBands={stats.scoreBands} />
         {stages.length > 0 && (
           <Panel name="단계별 클리어 캐릭터">
@@ -382,7 +380,7 @@ function DetailStats({
           </Panel>
         )}
       </div>
-      <div {...stylex.props(layout.row)}>
+      <div className={clearClasses.row}>
         {hasAdventures && (
           <Panel name="모험단당 클리어 캐릭터">
             <Columns groups={[adventures]} />
@@ -454,18 +452,18 @@ function SplitPanel({
 }: Readonly<{ name: string; card: SplitCard }>): React.JSX.Element {
   return (
     <Panel name={name}>
-      <div {...stylex.props(styles.splitBody)}>
-        <dl {...stylex.props(styles.splitFigures)}>
+      <div className="flex flex-col gap-3 p-4">
+        <dl className="m-0 flex gap-6">
           {card.figures.map(({ label, value }) => (
             <Figure key={label} label={label} value={value} />
           ))}
         </dl>
-        <div {...stylex.props(styles.splitRows)}>
+        <div className="mt-auto flex flex-col gap-2">
           {card.rows.map(({ key, label, total, segments }) => (
-            <div key={key} {...stylex.props(styles.splitRow)}>
-              <span {...stylex.props(styles.splitLabel)}>
-                <span {...stylex.props(styles.splitWeek)}>{label}</span>
-                <span {...stylex.props(styles.splitTotal)}>{total}</span>
+            <div key={key} className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-3">
+              <span className="flex flex-col">
+                <span className="text-xs text-fg-subtle">{label}</span>
+                <span className="font-mono text-sm tabular-nums">{total}</span>
               </span>
               <SplitBar label={label} segments={segments} formatValue={formatInteger} />
             </div>

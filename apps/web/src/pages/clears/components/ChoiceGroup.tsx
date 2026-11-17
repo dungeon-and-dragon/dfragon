@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
-import { styles } from './ChoiceGroup.style'
-
 export type Choice<Value extends string> = Readonly<{ value: Value; label: string }>
 
 export function ChoiceGroup<Value extends string>({
@@ -17,7 +14,7 @@ export function ChoiceGroup<Value extends string>({
   onChange: (value: Value) => void
 }): React.JSX.Element {
   return (
-    <div role="group" aria-label={label} {...stylex.props(styles.group)}>
+    <div role="group" aria-label={label} className="flex shrink-0 flex-wrap gap-1.5">
       {choices.map((choice) => (
         <ChoiceButton
           key={choice.value}
@@ -50,8 +47,10 @@ function ChoiceButton<Value extends string>({
     <button
       type="button"
       aria-pressed={pressed}
+      // chip 클래스는 Base UI Toggle이 붙이는 data-pressed로 켜짐을 그린다.
+      data-pressed={pressed ? '' : undefined}
       onClick={select}
-      {...stylex.props(styles.option, large && styles.large, pressed && styles.pressed)}
+      className={`chip ${large ? 'h-control-md px-4' : ''}`}
     >
       {label}
     </button>

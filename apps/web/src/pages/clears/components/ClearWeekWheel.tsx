@@ -1,10 +1,14 @@
-import * as stylex from '@stylexjs/stylex'
 import { useEffect, useEffectEvent, useRef } from 'react'
 import { type OverviewWeek, weekRangeText } from '../clear-overview'
-import { styles } from './ClearWeekWheel.style'
 
 // 트랙패드는 작은 delta를 연달아 보내므로 한 칸씩 넘기도록 모아서 센다.
 const WHEEL_STEP_DELTA = 40
+
+const ROW =
+  'm-0 flex items-center justify-center gap-1.5 bg-transparent p-0 [font-family:inherit] tabular-nums transition-colors duration-(--duration-hover) ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
+const ROW_IDLE = 'h-7 cursor-pointer border-0 text-sm text-fg-subtle hover:text-fg'
+const ROW_SELECTED =
+  'h-8.5 cursor-default border-x-0 border-y border-line-input text-base font-semibold text-fg'
 
 export function ClearWeekWheel({
   weeks,
@@ -55,7 +59,7 @@ export function ClearWeekWheel({
   }, [])
 
   return (
-    <div ref={wheelRef} role="group" aria-label="주 선택" {...stylex.props(styles.wheel)}>
+    <div ref={wheelRef} role="group" aria-label="주 선택" className="flex w-46 shrink-0 flex-col">
       <WheelRow week={previous} selected={false} labelOf={labelOf} onSelect={onSelect} />
       <WheelRow week={selected} selected labelOf={labelOf} onSelect={onSelect} />
       <WheelRow week={next} selected={false} labelOf={labelOf} onSelect={onSelect} />
@@ -75,7 +79,7 @@ function WheelRow({
   onSelect: (weekStart: string) => void
 }): React.JSX.Element {
   if (week === undefined) {
-    return <span aria-hidden="true" {...stylex.props(styles.empty)} />
+    return <span aria-hidden="true" className="h-7" />
   }
 
   function select(): void {
@@ -89,10 +93,14 @@ function WheelRow({
       type="button"
       aria-pressed={selected}
       onClick={select}
-      {...stylex.props(styles.row, selected && styles.selected)}
+      className={`${ROW} ${selected ? ROW_SELECTED : ROW_IDLE}`}
     >
       {labelOf(week.weekStart)}
-      {!week.closed && <small {...stylex.props(styles.open)}>집계 중</small>}
+      {!week.closed && (
+        <small className="inline-flex h-5 items-center rounded-badge bg-inset px-1.5 text-xs font-medium text-fg-muted">
+          집계 중
+        </small>
+      )}
     </button>
   )
 }
