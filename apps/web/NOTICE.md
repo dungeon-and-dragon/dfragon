@@ -1,4 +1,4 @@
-# 던삐삐 웹사이트 자산
+# DFragon 웹사이트 자산
 
 - Neople Open API 공식표기 로고(컬러, 132×37px): Neople Developers BI 가이드 https://developers.neople.co.kr/contents/bi 의 로고 다운로드(png.zip, https://d-fighter.dn.nexoncdn.co.kr/samsungdnf/neople/swf/2017/png.zip, SHA-256 `c8279ce11e36cf176c4cea21da6e87e12da72ce27d817e1ef5524d90a7a01467`)에서 받은 `공식표기_color.png`입니다. SHA-256 `e789be4a2b90f8623dfb32f6328ad532d175576ccc0d0009115a0dfda800e16d`. 권리는 NEOPLE/NEXON에 있으며 별도 오픈소스 라이선스를 부여하지 않고, 가이드가 안내한 대로 사이트 첫 화면 아래와 저장소 README의 출처 표기에만 쓰며 https://developers.neople.co.kr 로 연결합니다. 밝은 바탕(라이트 모드)에 씁니다.
 - Neople Open API 공식표기 로고(회색, 132×37px): 같은 png.zip의 `공식표기_gray.png`입니다. SHA-256 `3f4cebc2efa89b4141e933441f98dc07f8d7268d36fb50c55112204b37f34c89`. 어두운 바탕(다크 모드)의 사이트 첫 화면 아래에 쓰며 권리와 사용 조건은 위 컬러 로고와 같습니다.

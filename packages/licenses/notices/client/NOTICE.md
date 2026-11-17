@@ -1,4 +1,4 @@
-# 던삐삐 웹 클라이언트 UI 자산
+# DFragon 웹 클라이언트 UI 자산
 
 - Pretendard Variable: Pretendard 1.3.9 npm 패키지(https://www.npmjs.com/package/pretendard/v/1.3.9 , 저장소 https://github.com/orioncactus/pretendard )의 `dist/web/variable/woff2/PretendardVariable.woff2`를 수정 없이 `packages/design/fonts`에 둡니다. SHA-256: `9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4`. Kil Hyung-jin의 글꼴이며 같은 패키지의 `dist/LICENSE.txt`(SHA-256 `b04538c9abec39a3db75108cf0af0fd9c77032fe8aa2cf38345b4d250e98e38e`)인 OFL 1.1 전체 고지는 같은 폴더의 `PRETENDARD-LICENSE`에 있습니다.
 - 카메라, 테마 전환(해, 달), 새 버전 Release 열기, 캡처 창 선택(모니터, 체크, 화살표, 새로고침) SVG: Lucide 형태를 사용합니다. 출처: https://lucide.dev/icons . ISC와 Feather 파생 아이콘의 MIT 고지는 같은 폴더의 `LUCIDE-LICENSE`에 있습니다.
