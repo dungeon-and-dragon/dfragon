@@ -56,7 +56,7 @@ const DETAIL_LAST_ADVENTURE_SIZE = 17
 const WIDE_PANEL = 2
 // 1440×900 창에서 스크롤 없이 첫 줄 차트의 아래 끝까지 보이게 공용 기본 높이보다 낮춘다.
 const FIRST_ROW_CHART_HEIGHT = 180
-const TONE_CLASSES = { up: 'text-chart-1', down: 'text-chart-8' } as const
+const TONE_CLASSES = { up: 'text-fg-success', down: 'text-fg-danger' } as const
 
 const integer = new Intl.NumberFormat('ko-KR')
 
