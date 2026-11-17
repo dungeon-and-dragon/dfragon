@@ -11,7 +11,7 @@ const numberFormat = new Intl.NumberFormat('ko-KR')
 
 const STATS = 'flex gap-8'
 const STAT =
-  'flex flex-col items-start outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
+  'flex flex-col items-start outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-signal'
 const STAT_LABEL = 'text-xs font-medium whitespace-nowrap text-fg-subtle'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 
