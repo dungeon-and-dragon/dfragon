@@ -1,4 +1,3 @@
-import type * as stylex from '@stylexjs/stylex'
 import type { ComponentPropsWithRef, CSSProperties, ElementType } from 'react'
 
 export type PublicProps<T extends ElementType> = Omit<
@@ -14,7 +13,7 @@ export type ForwardedStyle = {
 }
 
 export function withForwardedStyle(
-  own: ReturnType<typeof stylex.props>,
+  own: ForwardedStyle,
   { className, style }: ForwardedStyle
 ): ForwardedStyle {
   const classNames = [own.className, className].filter((name) => {

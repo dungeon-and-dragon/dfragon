@@ -1,7 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import { StepDots } from './step-dots'
-import { styles } from './status-chip.style'
 
 export type StatusChipTone = 'neutral' | 'success' | 'danger' | 'warning' | 'signal'
 
@@ -19,16 +17,9 @@ export function StatusChip({ tone, role, size = 'sm', busy = false, children }: 
       role={role}
       data-tone={tone}
       data-busy={busy ? '' : undefined}
-      {...stylex.props(styles.root, styles[size], styles[tone])}
+      className={`status-chip status-chip-${size}`}
     >
-      {busy ? (
-        <StepDots />
-      ) : (
-        <span
-          aria-hidden="true"
-          {...stylex.props(styles.dot, tone === 'success' && styles.liveDot)}
-        />
-      )}
+      {busy ? <StepDots /> : <span aria-hidden="true" className="status-dot" />}
       {children}
     </span>
   )
