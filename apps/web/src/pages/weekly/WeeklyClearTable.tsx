@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { ClearName, WeeklyCharacter } from '#core/adventure-guild/adventure-weekly'
@@ -6,7 +5,6 @@ import { CheckIcon } from '../../components/CheckIcon'
 import { CharacterCell } from '../../components/table/CharacterCell'
 import { tableClasses } from '../../components/table/table-classes'
 import { RankBadge } from '../../components/table/RankBadge'
-import { styles } from './WeeklyScreen.style'
 
 const { headCell, cell } = tableClasses
 
@@ -45,7 +43,7 @@ export function WeeklyClearTable({
         <col />
         <col className={tableClasses.fameColumn} />
         {clearNames.map(({ kind, name }) => (
-          <col key={`${kind}/${name}`} {...stylex.props(styles.clearColumn)} />
+          <col key={`${kind}/${name}`} className="w-24" />
         ))}
       </colgroup>
       <thead>
@@ -104,9 +102,12 @@ function ClearMark({ cleared }: { cleared: boolean }): React.JSX.Element {
   return (
     <>
       {cleared ? (
-        <CheckIcon {...stylex.props(styles.check)} />
+        <CheckIcon className="inline-block size-4 align-middle text-fg-success" />
       ) : (
-        <span aria-hidden="true" {...stylex.props(styles.blank)} />
+        <span
+          aria-hidden="true"
+          className="box-border inline-block size-4 rounded-control border border-dashed border-line-input align-middle"
+        />
       )}
       <span className="sr-only">{cleared ? '클리어' : '클리어 안 함'}</span>
     </>

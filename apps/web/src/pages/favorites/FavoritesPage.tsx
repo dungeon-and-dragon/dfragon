@@ -1,12 +1,10 @@
 import { IconButton } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { StarIcon } from '../../components/StarIcon'
 import { CharacterTable, type CharacterTableAction } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
 import type { CharacterKey } from '../../lib/stored-character'
-import { styles } from './FavoritesPage.style'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -19,7 +17,7 @@ export function FavoritesPage(): React.JSX.Element {
   }
 
   return (
-    <div {...stylex.props(styles.screen)}>
+    <div className="flex flex-col gap-4 p-4">
       <TitleBox title="즐겨찾기">
         {empty ? null : (
           <TitleStat label="캐릭터" value={integer.format(favoriteCharacters.length)} />
@@ -27,7 +25,9 @@ export function FavoritesPage(): React.JSX.Element {
       </TitleBox>
       <ListBox name="즐겨찾기한 캐릭터">
         {empty ? (
-          <p {...stylex.props(styles.empty)}>즐겨찾기한 캐릭터가 없습니다.</p>
+          <p className="m-0 px-4 py-12 text-center text-sm font-semibold text-fg">
+            즐겨찾기한 캐릭터가 없습니다.
+          </p>
         ) : (
           <CharacterTable rows={favoriteCharacters} ranked={false} action={unfavorite} />
         )}

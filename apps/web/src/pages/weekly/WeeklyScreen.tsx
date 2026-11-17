@@ -1,5 +1,4 @@
 import { Button, TextField, TextFieldInput } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
 import { RefreshIcon } from '../../components/RefreshIcon'
 import { SkeletonRow } from '../../components/table/CharacterTable'
@@ -9,9 +8,11 @@ import { useAdventureWeekly, useRefreshAdventureWeekly } from './hooks/useAdvent
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
 import { WeeklyClearTable } from './WeeklyClearTable'
-import { styles } from './WeeklyScreen.style'
 
 const LOADING_ROWS = 5
+
+const SCREEN = 'flex flex-col gap-4 p-4'
+const DASHBOARD = 'overflow-hidden rounded-panel border border-line bg-canvas'
 
 function AdventureNameForm({
   initialName,
@@ -39,17 +40,21 @@ function AdventureNameForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} {...stylex.props(styles.form)}>
-      <TextField size="sm">
-        <TextFieldInput
-          aria-label="모험단"
-          autoComplete="off"
-          spellCheck={false}
-          value={draft}
-          onChange={handleDraftChange}
-          {...stylex.props(styles.adventureInput)}
-        />
-      </TextField>
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-center gap-2 border-t border-line px-4 py-3"
+    >
+      <div className="w-56 max-sm:min-w-0 max-sm:flex-1">
+        <TextField size="sm">
+          <TextFieldInput
+            aria-label="모험단"
+            autoComplete="off"
+            spellCheck={false}
+            value={draft}
+            onChange={handleDraftChange}
+          />
+        </TextField>
+      </div>
       <Button type="submit" variant="primary" size="sm">
         보기
       </Button>
@@ -75,9 +80,9 @@ export function AdventureEntryScreen({
   onAdventureOpen: (adventureName: string) => void
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.screen)}>
-      <div {...stylex.props(styles.dashboard)}>
-        <h1 {...stylex.props(styles.emptyTitle)}>모험단</h1>
+    <div className={SCREEN}>
+      <div className={DASHBOARD}>
+        <h1 className="m-0 p-4 text-xl font-semibold tracking-heading">모험단</h1>
         <AdventureNameForm initialName="" onAdventureOpen={onAdventureOpen} />
       </div>
     </div>
@@ -106,8 +111,8 @@ export function WeeklyScreen({
   }
 
   return (
-    <div {...stylex.props(styles.screen)}>
-      <div {...stylex.props(styles.dashboard)}>
+    <div className={SCREEN}>
+      <div className={DASHBOARD}>
         <AdventureDashboard
           adventureName={adventureName}
           season={season}
@@ -160,7 +165,7 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
     case 'error':
       return (
         <WeeklyClearBox>
-          <p role="alert" {...stylex.props(styles.state, styles.error)}>
+          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
             {result.message}
           </p>
         </WeeklyClearBox>
