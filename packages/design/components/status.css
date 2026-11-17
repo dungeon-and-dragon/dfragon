@@ -1,0 +1,134 @@
+/*
+ * StatusChip과 StepDots.
+ * <span class="status-chip status-chip-sm" data-tone="success"><span class="status-dot"></span>연결됨</span>
+ * tone은 data-tone(neutral, success, danger, warning, signal), 크기는 status-chip-sm, status-chip-md다.
+ * success 점은 박자 두 번 주기로 깜박인다. 진행 중이면 점 대신 step-dots를 둔다.
+ * <span class="step-dots step-dots-4" aria-hidden="true"><span></span><span></span><span></span></span>
+ * 동작 줄이기에서는 점이 모두 켜진 채 멈춘다.
+ */
+.status-chip {
+  --status-fg: var(--color-fg-subtle);
+  --status-bg: color-mix(in srgb, var(--color-fg-subtle) 12%, transparent);
+
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-badge);
+  background-color: var(--status-bg);
+  color: var(--status-fg);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.status-chip-sm {
+  gap: 6px;
+  height: 24px;
+  padding-inline: 8px 10px;
+}
+
+.status-chip-md {
+  gap: 8px;
+  height: 28px;
+  padding-inline: 10px 12px;
+}
+
+.status-chip[data-tone='success'] {
+  --status-fg: var(--color-fg-success);
+  --status-bg: var(--color-success-weak);
+}
+
+.status-chip[data-tone='danger'] {
+  --status-fg: var(--color-fg-danger);
+  --status-bg: var(--color-danger-weak);
+}
+
+.status-chip[data-tone='warning'] {
+  --status-fg: var(--color-fg-warning);
+  --status-bg: var(--color-warning-weak);
+}
+
+.status-chip[data-tone='signal'] {
+  --status-fg: var(--color-signal);
+  --status-bg: color-mix(in srgb, var(--color-signal) 12%, transparent);
+}
+
+.status-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.status-chip[data-tone='success'] .status-dot {
+  animation: status-live calc(var(--beat) * 2) steps(1, end) infinite;
+}
+
+.step-dots {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.step-dots > span {
+  background-color: currentColor;
+  opacity: 0.25;
+  animation: step-dots-blip var(--beat) steps(1, end) infinite;
+}
+
+.step-dots > span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.step-dots > span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.step-dots-4 {
+  gap: 3px;
+}
+
+.step-dots-4 > span {
+  width: 4px;
+  height: 4px;
+}
+
+.step-dots-5 {
+  gap: 4px;
+}
+
+.step-dots-5 > span {
+  width: 5px;
+  height: 5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-chip[data-tone='success'] .status-dot {
+    animation: none;
+  }
+
+  .step-dots > span {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+@keyframes status-live {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes step-dots-blip {
+  0% {
+    opacity: 1;
+  }
+
+  33% {
+    opacity: 0.25;
+  }
+}

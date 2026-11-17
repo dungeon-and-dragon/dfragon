@@ -48,3 +48,24 @@ export const Busy: Story = {
     </div>
   )
 }
+
+export const Html: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-2">
+      {TONES.map((tone) => (
+        <span key={tone} className="status-chip status-chip-sm" data-tone={tone}>
+          <span className="status-dot" aria-hidden="true" />
+          {tone}
+        </span>
+      ))}
+      <span className="status-chip status-chip-md" data-tone="signal" data-busy="">
+        <span className="step-dots step-dots-4" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </span>
+        인식 중
+      </span>
+    </div>
+  )
+}

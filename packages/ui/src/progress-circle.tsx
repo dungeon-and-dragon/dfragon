@@ -1,7 +1,5 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ComponentPropsWithRef, ComponentType } from 'react'
 import { type ForwardedStyle, withForwardedStyle } from './public-props'
-import { styles } from './progress-circle.style'
 
 const RADIUS = 9
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
@@ -17,8 +15,6 @@ export type ProgressCircleProps = Omit<
   size?: '24' | '40' | 'inherit'
   tone?: 'neutral' | 'brand' | 'staticWhite' | 'inherit'
 }
-
-const sizeStyles = { '24': styles.size24, '40': styles.size40, inherit: styles.sizeInherit }
 
 function determinateArc(value: number, minValue: number, maxValue: number) {
   const range = maxValue - minValue
@@ -59,18 +55,12 @@ function ProgressCircleImpl({
       aria-valuemax={isDeterminate ? maxValue : undefined}
       aria-valuenow={isDeterminate ? value : undefined}
       {...svgProps}
-      {...withForwardedStyle(
-        stylex.props(
-          styles.root,
-          sizeStyles[size],
-          styles[tone],
-          !isDeterminate && styles.spinning
-        ),
-        { className, style }
-      )}
+      data-tone={tone}
+      data-indeterminate={isDeterminate ? undefined : ''}
+      {...withForwardedStyle({ className: `progress progress-${size}` }, { className, style })}
     >
       {isDeterminate && (
-        <circle cx="12" cy="12" r={RADIUS} strokeWidth="3" {...stylex.props(styles.track)} />
+        <circle cx="12" cy="12" r={RADIUS} strokeWidth="3" className="progress-track" />
       )}
       <circle
         cx="12"
@@ -80,7 +70,7 @@ function ProgressCircleImpl({
         strokeLinecap="square"
         strokeDasharray={arcDasharray}
         transform="rotate(-90 12 12)"
-        {...stylex.props(styles.range)}
+        className="progress-range"
       />
       {!isDeterminate && (
         <circle
@@ -91,7 +81,7 @@ function ProgressCircleImpl({
           strokeLinecap="square"
           strokeDasharray={indeterminateDasharray}
           transform="rotate(90 12 12)"
-          {...stylex.props(styles.range)}
+          className="progress-range"
         />
       )}
     </svg>
