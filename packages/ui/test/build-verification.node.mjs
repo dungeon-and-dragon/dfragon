@@ -121,7 +121,7 @@ for (const { name, styles } of [
     const output = await createConsumerFixture(context, styles)
     const result = inspect(output, 'consumer')
     assert.notEqual(result.status, 0)
-    assert.match(result.stderr, /Shared foundation font stack once/)
+    assert.match(result.stderr, /Shared base font stack once/)
   })
 }
 

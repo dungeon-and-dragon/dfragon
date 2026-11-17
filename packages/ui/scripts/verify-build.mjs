@@ -124,8 +124,8 @@ const cssFiles = files.filter((file) => {
 const NONPORTABLE_DECLARATION_PATTERN = /node:|NodeJS|\.pnpm/
 const STYLESHEET_IMPORT_PATTERN = /\.css(?:$|\?)/
 const TOKENS_DEFINITION_PATTERN = /--df-brand-dragon\s*:/g
-// foundation.css의 system font stack 첫머리로 센다. 앱 전역 글꼴 CSS의 대체 글꼴 목록은 세지 않는다.
-const FOUNDATION_FONT_FAMILY_PATTERN =
+// @dfragon/design/base.css의 system font stack 첫머리로 센다. 앱 전역 글꼴 CSS의 대체 글꼴 목록은 세지 않는다.
+const BASE_FONT_FAMILY_PATTERN =
   /(?:^|[;{])\s*font-family\s*:\s*-apple-system\s*,\s*BlinkMacSystemFont\s*,\s*['"]?Apple SD Gothic Neo/g
 
 if (isLibrary) {
@@ -245,11 +245,7 @@ if (isLibrary) {
     1,
     'Consumer must import tokens.css once'
   )
-  assert.equal(
-    styles.match(FOUNDATION_FONT_FAMILY_PATTERN)?.length,
-    1,
-    'Shared foundation font stack once'
-  )
+  assert.equal(styles.match(BASE_FONT_FAMILY_PATTERN)?.length, 1, 'Shared base font stack once')
   const licenses = await readFile(resolve(output, 'notices/THIRD-PARTY.txt'), 'utf8')
   const hasMitLicense = licenses.includes('MIT License')
   assert.ok(hasMitLicense, 'Bundled dependency license text retained')

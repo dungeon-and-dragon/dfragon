@@ -1,0 +1,6 @@
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import '@dfragon/design/theme.css';
+@import '@dfragon/design/base.css' layer(base);
+@import '@dfragon/ui/tokens.css';
+@import 'tailwindcss/utilities.css' layer(utilities);

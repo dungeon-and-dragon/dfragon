@@ -6,6 +6,8 @@
 !scripts/
 !scripts/server-build-info.mjs
 !packages/
+!packages/design/
+!packages/design/**
 !packages/lib/
 !packages/lib/**
 !packages/licenses/

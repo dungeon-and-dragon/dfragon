@@ -1,0 +1,237 @@
+/*
+ * 던삐삐 디자인 토큰의 원본. 값은 이 파일에서만 고친다.
+ * 색 값은 2026-11-05, 11-06 결정의 무채색 팔레트와 게임 색이며 ADR 0009의 색 값을 대체한다. 바탕, 글자, 선과
+ * 신호색은 무채색이고, 색은 상황별 색(성공, 경고, 검색 실패, 오류), 게임 클라이언트 값을 쓰는 게임 색과 차트 계열 색에만 쓴다.
+ * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 모드 고르기는 base.css가 color-scheme으로 한다.
+ * 브랜드 로고 색(--color-brand-*)은 그림 색이라 모드와 관계없이 같다.
+ * 상황별 색의 옅은 면(--color-*-weak)은 다크에서 그 색 14%, 라이트에서 10%다.
+ * 원색 단계(--gray-*)는 :root에 두어 utility가 생기지 않게 하고, 역할 이름만 @theme로 내보낸다.
+ * StyleX 화면은 packages/ui/tokens.css의 --df-* 별칭으로 같은 변수를 읽는다.
+ */
+:root {
+  --gray-0: #ffffff;
+  --gray-25: #fafafa;
+  --gray-50: #f4f4f5;
+  --gray-75: #eeeef0;
+  --gray-100: #e4e4e7;
+  --gray-150: #d8d8dd;
+  --gray-200: #c8c8ce;
+  --gray-300: #a9a9b2;
+  --gray-350: #8a8a94;
+  --gray-400: #85858f;
+  --gray-500: #6b6b74;
+  --gray-600: #55555c;
+  --gray-700: #3b3b41;
+  --gray-750: #2e2e32;
+  --gray-800: #252529;
+  --gray-825: #242427;
+  --gray-850: #1c1c1f;
+  --gray-900: #151517;
+  --gray-925: #101012;
+  --gray-950: #0a0a0b;
+}
+
+/* StyleX 화면의 --df-* 별칭이 utility로 쓰이지 않은 토큰도 읽으므로 static으로 모든 변수를 낸다. */
+@theme static {
+  --color-*: initial;
+
+  /* 페이지 바탕 */
+  --color-canvas: light-dark(var(--gray-0), var(--gray-950));
+  /* 상단 바, 운영 화면 머리 */
+  --color-bar: light-dark(var(--gray-25), var(--gray-925));
+  /* 팝오버, 패널, 강조한 행의 면 */
+  --color-surface: light-dark(var(--gray-50), var(--gray-900));
+  /* 검색 칸, 표 안쪽 칸 */
+  --color-inset: light-dark(var(--gray-75), var(--gray-850));
+  /* 탭 줄의 띠 */
+  --color-stripe: light-dark(var(--gray-75), var(--gray-850));
+  /* 보조 버튼, 칩, 선택 칸 */
+  --color-control: light-dark(var(--gray-100), var(--gray-825));
+  /* 보조 버튼, 칩의 hover */
+  --color-control-hover: light-dark(var(--gray-150), var(--gray-750));
+  /* 성공 상태 칩 면 */
+  --color-success-weak: light-dark(#047c061a, #00d80924);
+  /* 오류 상태 칩, 복사 실패 면 */
+  --color-danger-weak: light-dark(#d2080d1a, #fe352c24);
+  /* 경고 상태 칩 면 */
+  --color-warning-weak: light-dark(#8e62001a, #ffb40024);
+  /* 대화상자 뒤 막. 지금 쓰는 곳은 없다. */
+  --color-overlay: light-dark(#0a0a0b66, #08080ab8);
+  /* 주 버튼, 선택 표시, focus 테두리 */
+  --color-signal: light-dark(var(--gray-950), var(--gray-50));
+  /* 주 버튼 hover */
+  --color-signal-hover: light-dark(var(--gray-750), var(--gray-0));
+  /* 주 버튼, 선택 칩 위 글자 */
+  --color-on-signal: light-dark(var(--gray-0), var(--gray-950));
+  /* 보드 제목, 후보 팝오버의 포인트 */
+  --color-accent: light-dark(#796939, #d6c592);
+  /* 로고 그림. 지금 쓰는 곳은 없다. */
+  --color-brand-logo: #e83830;
+  --color-brand-dragon: #e83830;
+  --color-brand-cream: #f8e8c8;
+  --color-brand-outline: #000000;
+
+  /* 본문 글자 */
+  --color-fg: light-dark(var(--gray-950), var(--gray-50));
+  /* 보조 글자 */
+  --color-fg-muted: light-dark(var(--gray-600), var(--gray-300));
+  /* 흐린 보조 글자 */
+  --color-fg-subtle: light-dark(var(--gray-500), var(--gray-400));
+  /* 입력 칸 placeholder */
+  --color-fg-placeholder: light-dark(var(--gray-500), var(--gray-400));
+  /* 비활성 글자 */
+  --color-fg-disabled: light-dark(var(--gray-300), var(--gray-600));
+  /* 성공 글자 */
+  --color-fg-success: light-dark(#047c06, #00d809);
+  /* 오류 글자 */
+  --color-fg-danger: light-dark(#d2080d, #fe352c);
+  /* 경고 글자 */
+  --color-fg-warning: light-dark(#8e6200, #ffb400);
+  /* 모험단 이름 */
+  --color-fg-adventure: light-dark(var(--gray-600), var(--gray-300));
+  /* 길드 이름 */
+  --color-fg-guild: light-dark(var(--gray-600), var(--gray-300));
+
+  /* 구분선, 패널 테두리 */
+  --color-border: light-dark(var(--gray-100), var(--gray-800));
+  /* 강한 구분선, 보조 버튼 테두리 */
+  --color-border-strong: light-dark(var(--gray-200), var(--gray-700));
+  /* 입력 칸 테두리 */
+  --color-border-input: light-dark(var(--gray-350), var(--gray-500));
+  /* 오류 입력 칸 테두리 */
+  --color-border-danger: light-dark(#d2080d, #fe352c);
+
+  /* 명성 상위 표시 */
+  --color-tier-top: light-dark(#1e7b31, #4aa256);
+  /* 랭커 표시 */
+  --color-tier-ranker: light-dark(#1e7b31, #4aa256);
+  /* 딜러 점수 */
+  --color-score-dealer: light-dark(#3e62d5, #5f88ff);
+  /* 버퍼 점수 */
+  --color-score-buffer: light-dark(#4a7606, #97e334);
+
+  /* 공용 컴포넌트(listbox, select, tabs)의 카드 면 */
+  --color-card-control: light-dark(var(--gray-100), var(--gray-825));
+  --color-card-control-hover: light-dark(var(--gray-150), var(--gray-750));
+  --color-card-border: light-dark(var(--gray-100), var(--gray-800));
+  --color-card-border-strong: light-dark(var(--gray-200), var(--gray-700));
+  --color-card-fg: light-dark(var(--gray-950), var(--gray-50));
+  --color-card-fg-muted: light-dark(var(--gray-600), var(--gray-300));
+  --color-card-fg-subtle: light-dark(var(--gray-500), var(--gray-400));
+  --color-card-signal: light-dark(var(--gray-950), var(--gray-50));
+  /* 검색 실패 행 */
+  --color-card-failure: light-dark(#806707, #ffd54a);
+
+  /* 아이템 이름, 오늘의 등급의 레어리티 */
+  --color-rarity-common: light-dark(var(--gray-950), var(--gray-50));
+  --color-rarity-uncommon: light-dark(#077487, #68d5ed);
+  --color-rarity-rare: light-dark(#8e43d5, #b36bff);
+  --color-rarity-unique: light-dark(#b808b8, #ff00ff);
+  --color-rarity-epic: light-dark(#8e6200, #ffb400);
+  --color-rarity-legendary: light-dark(#aa4f07, #ff7800);
+  --color-rarity-chronicle: light-dark(#c73039, #ff6666);
+  /* 태초. 그라데이션을 쓸 수 없는 좁은 자리의 단색 */
+  --color-rarity-primordial: light-dark(#0a7858, #59e2b0);
+  /* 태초 그라데이션의 두 끝 */
+  --color-rarity-primordial-start: light-dark(#007c16, #5aff62);
+  --color-rarity-primordial-end: light-dark(#04729e, #58c6ff);
+  /* 신화. 그라데이션을 쓸 수 없는 좁은 자리의 단색 */
+  --color-rarity-mythic: light-dark(#9b584f, #e2988e);
+  /* 신화 그라데이션의 두 끝 */
+  --color-rarity-mythic-start: light-dark(#7e6908, #ffd61d);
+  --color-rarity-mythic-end: light-dark(#a12ed7, #c659ff);
+
+  /* 장비, 타임라인, 주간 활동의 게임 글자 */
+  --color-game-enhance: light-dark(#077487, #68d5ed);
+  --color-game-refine: light-dark(#8e43d5, #b36bff);
+  --color-game-amplify: light-dark(#b808b8, #ff00ff);
+  --color-game-enchant: light-dark(#037a46, #68eda1);
+  --color-game-set: light-dark(#4a7606, #97e334);
+  --color-game-increase: light-dark(#1e7b31, #4aa256);
+  --color-game-fame: light-dark(#1e7b31, #4aa256);
+  --color-game-decrease: light-dark(#bc3232, #e35752);
+  --color-game-precision: light-dark(#796939, #d6c592);
+  /* 명성 이름표. 지금 쓰는 곳은 없다. */
+  --color-game-fame-label: light-dark(#82672d, #a0844b);
+
+  /* 공대 화면의 파티 자리 배지(ADR 0012). 다크는 16% 면이고, 라이트는 오류, 검색 실패, 성공의 라이트 값과 그 10% 면이다. */
+  --color-raid-party-red: light-dark(#d2080d, #ff8f82);
+  --color-raid-party-red-weak: light-dark(#d2080d1a, #ff7a6e29);
+  --color-raid-party-yellow: light-dark(#806707, #e8c262);
+  --color-raid-party-yellow-weak: light-dark(#8067071a, #e8c26229);
+  --color-raid-party-green: light-dark(#047c06, #6cd268);
+  --color-raid-party-green-weak: light-dark(#047c061a, #6cd26829);
+
+  /* 차트 계열 색(ADR 0055). 1번부터 순서대로 쓴다. */
+  --color-chart-1: light-dark(#2a78d6, #3987e5);
+  --color-chart-2: light-dark(#eb6834, #d95926);
+  --color-chart-3: light-dark(#1baf7a, #199e70);
+  --color-chart-4: light-dark(#eda100, #c98500);
+  --color-chart-5: light-dark(#e87ba4, #d55181);
+  --color-chart-6: light-dark(#008300, #008300);
+  --color-chart-7: light-dark(#6250d6, #9085e9);
+  --color-chart-8: light-dark(#e34948, #e66767);
+  /* 차트의 기준 항목. ADR 0055가 다크 값만 정해 라이트도 같다. */
+  --color-chart-base: light-dark(var(--gray-500), var(--gray-500));
+
+  /* 태초, 신화 아이템 이름의 세로 그라데이션 */
+  --gradient-rarity-primordial: linear-gradient(
+    180deg,
+    var(--color-rarity-primordial-start),
+    var(--color-rarity-primordial-end)
+  );
+  --gradient-rarity-mythic: linear-gradient(
+    180deg,
+    var(--color-rarity-mythic-start),
+    var(--color-rarity-mythic-end)
+  );
+
+  /* 팝오버, 후보 목록, listbox */
+  --shadow-popover: 0 8px 24px light-dark(rgb(0 0 0 / 12%), rgb(0 0 0 / 45%));
+  /* 툴팁 */
+  --shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
+
+  /* 간격 단위. StyleX 화면은 이 값의 1, 2, 3, 4, 6배를 쓴다. */
+  --spacing: 4px;
+  /* 상단 바 높이 */
+  --spacing-topbar: 48px;
+  /* 버튼, 입력 칸 높이 */
+  --spacing-control-sm: 32px;
+  --spacing-control-md: 40px;
+  --spacing-control-lg: 48px;
+
+  /* 운영 화면 패널 */
+  --radius-panel: 0;
+  /* 버튼, 입력 칸, 칩 */
+  --radius-control: 2px;
+
+  /* 전환, 움직임 곡선 */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  /* hover 전환 */
+  --duration-hover: 120ms;
+  /* 열림, 선택 같은 상태 전환 */
+  --duration-state: 180ms;
+  /* 숫자 증가(NumericText) */
+  --duration-count: 400ms;
+  /* 반복 움직임의 한 바퀴. 지금 쓰는 곳은 없다. */
+  --cycle: 4s;
+  /* 실시간 표시 점의 깜빡임 */
+  --beat: 0.9s;
+
+  /* 본문 글꼴(ADR 0011) */
+  --font-ui:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  /* 숫자 글꼴. 본문과 같은 Pretendard다. */
+  --font-num:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-hover: 0ms;
+    --duration-state: 0ms;
+    --duration-count: 0ms;
+  }
+}
