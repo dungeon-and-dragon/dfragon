@@ -15,7 +15,11 @@ const SHADE =
   'absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--color-canvas)_70%,transparent)_0%,color-mix(in_srgb,var(--color-canvas)_20%,transparent)_30%,color-mix(in_srgb,var(--color-canvas)_92%,transparent)_78%)]'
 const PAGER =
   'absolute top-1/2 z-1 -mt-4.5 inline-flex size-9 p-0 cursor-pointer items-center justify-center rounded-full border border-line-strong bg-surface text-fg transition-colors duration-(--duration-hover) ease-standard hover:bg-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
-const TREND_CLASSES = { up: 'text-chart-1', down: 'text-chart-8', flat: 'text-fg-muted' } as const
+const TREND_CLASSES = {
+  up: 'text-fg-success',
+  down: 'text-fg-danger',
+  flat: 'text-fg-muted'
+} as const
 
 function edgesOf(track: HTMLElement): Edges {
   const start = track.scrollLeft <= 0
