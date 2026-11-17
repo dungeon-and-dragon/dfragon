@@ -1,6 +1,5 @@
 import { Popover } from '@base-ui/react/popover'
 import { Button } from '@dfragon/ui'
-import * as stylex from '@stylexjs/stylex'
 import { type FormEvent, useState } from 'react'
 import { JOB_ALREADY_RUNNING, OpsRequestFailure } from '../api/ops-client'
 import type { Job } from '../api/ops-schemas'
@@ -14,8 +13,7 @@ import {
   choicesOf,
   isNumberField
 } from '../run-args'
-import { popoverStyles, textStyles } from './panel.style'
-import { styles } from './RunJobButton.style'
+import { FIELD_INPUT, popoverClasses, textClasses } from './panel-classes'
 
 type RunJobButtonProps = {
   job: Job
@@ -69,13 +67,18 @@ function ArgField({
   }
 
   return (
-    <div {...stylex.props(styles.field)}>
-      <label htmlFor={id} {...stylex.props(styles.label)}>
+    <div className="field px-3 pt-3">
+      <label htmlFor={id} className="field-label">
         {input.name}
-        <em {...stylex.props(styles.note)}>{fieldNote(input)}</em>
+        <em className="ml-1.5 font-normal not-italic text-fg-subtle">{fieldNote(input)}</em>
       </label>
       {choices !== undefined ? (
-        <select id={id} value={value} onChange={handleChange} {...stylex.props(styles.input)}>
+        <select
+          id={id}
+          value={value}
+          onChange={handleChange}
+          className={`${FIELD_INPUT} field-box-sm`}
+        >
           <option value="">{EMPTY_VALUE}</option>
           {choices.map((choice) => (
             <option key={choice} value={choice}>
@@ -90,7 +93,7 @@ function ArgField({
           step={input.field.type === 'integer' ? 1 : undefined}
           value={value}
           onChange={handleChange}
-          {...stylex.props(styles.input)}
+          className={`${FIELD_INPUT} field-box-sm`}
         />
       )}
     </div>
@@ -133,11 +136,11 @@ function ArgsPopover({
           side="bottom"
           align="end"
           sideOffset={8}
-          {...stylex.props(popoverStyles.positioner)}
+          className={popoverClasses.positioner}
         >
-          <Popover.Popup {...stylex.props(popoverStyles.popup, styles.popup)}>
+          <Popover.Popup className={`${popoverClasses.popup} w-80`}>
             <form onSubmit={handleSubmit}>
-              <Popover.Title {...stylex.props(popoverStyles.title)}>인자</Popover.Title>
+              <Popover.Title className={popoverClasses.title}>인자</Popover.Title>
               {inputs.map((input) => (
                 <ArgField
                   key={input.name}
@@ -147,7 +150,7 @@ function ArgsPopover({
                   onChange={handleDraftChange}
                 />
               ))}
-              <div {...stylex.props(popoverStyles.actions, styles.actions)}>
+              <div className={`${popoverClasses.actions} pt-4`}>
                 <Popover.Close render={<Button variant="secondary" size="sm" />}>
                   취소
                 </Popover.Close>
@@ -178,9 +181,9 @@ export function RunJobButton({ job, variant }: RunJobButtonProps): React.JSX.Ele
   }
 
   return (
-    <span {...stylex.props(textStyles.inline)}>
+    <span className={textClasses.inline}>
       {message !== undefined && (
-        <p role="alert" {...stylex.props(textStyles.error)}>
+        <p role="alert" className={textClasses.error}>
           {message}
         </p>
       )}

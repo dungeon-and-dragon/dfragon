@@ -1,7 +1,6 @@
 import { formatCount } from '../format'
 import { useRequeue } from '../ops-queries'
 import { ConfirmButton } from './ConfirmButton'
-import { styles } from './RequeueButton.style'
 
 type RequeueButtonProps = {
   label: string
@@ -30,7 +29,7 @@ export function RequeueButton({
       disabled={count === 0}
       pending={requeue.isPending}
       failed={requeue.isError}
-      popupStyle={styles.popup}
+      popupClassName="w-65"
       onOpen={requeue.reset}
       onConfirm={handleConfirm}
     />
