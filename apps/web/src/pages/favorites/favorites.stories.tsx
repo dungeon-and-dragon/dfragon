@@ -1,0 +1,33 @@
+import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
+import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { storyFavoriteCharacters } from '../../testing/story-support/story-adventure'
+import { FavoritesPage } from './FavoritesPage'
+
+const meta = {
+  title: 'Screens/즐겨찾기',
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <StoryFrame>
+      <div className="mx-auto mt-6 w-270 max-w-full">
+        <FavoritesPage />
+      </div>
+    </StoryFrame>
+  )
+} satisfies Meta
+
+export default meta
+
+type Story = StoryObj<typeof meta>
+
+export const 즐겨찾기: Story = {
+  beforeEach: () => {
+    useFavoriteCharacterStore.setState({ favoriteCharacters: storyFavoriteCharacters })
+  }
+}
+
+export const 비어있음: Story = {
+  beforeEach: () => {
+    useFavoriteCharacterStore.setState({ favoriteCharacters: [] })
+  }
+}
