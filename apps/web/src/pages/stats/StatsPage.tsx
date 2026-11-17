@@ -1,11 +1,9 @@
-import * as stylex from '@stylexjs/stylex'
 import { RelativeTime } from '../../components/RelativeTime'
 import { Columns } from '../../components/chart/Columns'
 import { type Bar, type BarTone, RowBars } from '../../components/chart/RowBars'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
 import { useCharacterStats } from './hooks/useCharacterStats'
-import { styles } from './StatsPage.style'
 import {
   averageFameBars,
   type FameBar,
@@ -15,13 +13,14 @@ import {
 } from '../../components/chart/stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
+const SCREEN = 'flex flex-col gap-4 p-4'
 
 export function StatsPage(): React.JSX.Element {
   const result = useCharacterStats()
   switch (result.status) {
     case 'loading':
       return (
-        <div aria-busy="true" {...stylex.props(styles.screen)}>
+        <div aria-busy="true" className={SCREEN}>
           <span role="status" className="sr-only">
             통계를 받는 중입니다.
           </span>
@@ -30,9 +29,9 @@ export function StatsPage(): React.JSX.Element {
       )
     case 'error':
       return (
-        <div {...stylex.props(styles.screen)}>
+        <div className={SCREEN}>
           <TitleBox title="캐릭터 통계" />
-          <p role="alert" {...stylex.props(styles.state)}>
+          <p role="alert" className="m-0 text-sm text-fg-danger">
             {result.message}
           </p>
         </div>
@@ -41,17 +40,18 @@ export function StatsPage(): React.JSX.Element {
       const stats = result.value
 
       return (
-        <div {...stylex.props(styles.screen)}>
+        <div className={SCREEN}>
           <TitleBox title="캐릭터 통계">
             <TitleStat label="캐릭터" value={integer.format(stats.total)} />
             {stats.computedAt !== null && (
               <TitleStat
                 label="마지막 업데이트 시간"
                 value={<RelativeTime at={stats.computedAt} />}
+                numeric={false}
               />
             )}
           </TitleBox>
-          <div {...stylex.props(styles.grid)}>
+          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
             <StatBox name="서버 인구" bars={serverBars(stats)} />
             <FameBox bars={fameBars(stats)} />
             <StatBox name="직업 분포" bars={jobBars(stats)} />

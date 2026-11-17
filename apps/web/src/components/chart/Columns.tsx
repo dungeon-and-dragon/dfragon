@@ -190,7 +190,7 @@ function Column({
       </span>
       <span aria-hidden="true" className="relative mt-1 h-3.5 shrink-0">
         {label != null && (
-          <span className="absolute left-1/2 -translate-x-1/2 font-mono text-2xs leading-3.5 whitespace-nowrap text-fg-subtle tabular-nums">
+          <span className="absolute left-1/2 -translate-x-1/2 text-2xs leading-3.5 whitespace-nowrap text-fg-subtle tabular-nums">
             {label}
           </span>
         )}
