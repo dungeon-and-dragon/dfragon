@@ -19,9 +19,19 @@ const runtimeName = `dfragon-image-${runId}`
 const maintenanceName = `${runtimeName}-command`
 const labelKey = 'com.dfragon.image-test.run'
 const label = `${labelKey}=${runId}`
-// Docker CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
-const dockerEnvironment = Object.fromEntries(
-  ['PATH', 'HOME', 'DOCKER_CONFIG', 'DOCKER_HOST', 'DOCKER_CONTEXT', 'DOCKER_TLS_VERIFY']
+// Podman CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
+const podmanEnvironment = Object.fromEntries(
+  [
+    'PATH',
+    'HOME',
+    'TMPDIR',
+    'XDG_RUNTIME_DIR',
+    'XDG_CONFIG_HOME',
+    'XDG_DATA_HOME',
+    'CONTAINER_HOST',
+    'CONTAINER_CONNECTION',
+    'CONTAINERS_CONF'
+  ]
     .filter((name) => process.env[name] !== undefined)
     .map((name) => [name, process.env[name]])
 )
@@ -39,20 +49,20 @@ function checkSignal() {
     throw new Error('Image test interrupted')
   }
 }
-function docker(args, { allowFailure = false } = {}) {
+function podman(args, { allowFailure = false } = {}) {
   checkSignal()
 
   return new Promise((resolve, reject) => {
     execFile(
-      'docker',
+      'podman',
       args,
-      { env: dockerEnvironment, timeout: 60_000, killSignal: 'SIGKILL' },
+      { env: podmanEnvironment, timeout: 60_000, killSignal: 'SIGKILL' },
       (error, stdout, stderr) => {
         const code = error == null ? 0 : (error.code ?? 1)
         const signal = error?.signal ?? null
         const failed = code !== 0 || signal !== null
         if (failed && (!allowFailure || typeof code !== 'number' || signal !== null)) {
-          reject(new Error(`Docker command failed: ${args[0]}`))
+          reject(new Error(`Podman command failed: ${args[0]}`))
 
           return
         }
@@ -62,8 +72,8 @@ function docker(args, { allowFailure = false } = {}) {
   })
 }
 async function removeOwned(name) {
-  const filter = `name=^/${name}$`
-  const names = await docker([
+  const filter = `name=^${name}$`
+  const names = await podman([
     'container',
     'ls',
     '--all',
@@ -76,7 +86,7 @@ async function removeOwned(name) {
     return
   }
   assert.equal(names.stdout.trim(), name)
-  const owner = await docker([
+  const owner = await podman([
     'container',
     'inspect',
     name,
@@ -84,11 +94,11 @@ async function removeOwned(name) {
     `{{ index .Config.Labels "${labelKey}" }}`
   ])
   assert.equal(owner.stdout.trim(), runId)
-  await docker(['rm', '--force', name])
+  await podman(['rm', '--force', name])
 }
 
 try {
-  const [metadata] = JSON.parse((await docker(['image', 'inspect', imageReference])).stdout)
+  const [metadata] = JSON.parse((await podman(['image', 'inspect', imageReference])).stdout)
   assert.equal(metadata.Config.User, 'node')
   assert.equal(metadata.Os, 'linux')
   const imageId = metadata.Id
@@ -131,7 +141,7 @@ try {
       }
     }
     stage = 'compiled product startup'
-    await docker([
+    await podman([
       'run',
       '--detach',
       '--name',
@@ -139,7 +149,7 @@ try {
       ...runtimeOptions,
       '--env',
       'PORT=3000',
-      // 인프라 compose가 아직 넘기는 값이다. API는 읽지 않는다.
+      // 인프라 fleet이 아직 넘기는 값이다. API는 읽지 않는다.
       '--env',
       'SEARCH_TRUST_PROXY=single-hop',
       ...serviceInput,
@@ -147,21 +157,22 @@ try {
       `type=bind,source=${runtimeCheckPath},target=/app/container-runtime-check.mjs,readonly`,
       imageId
     ])
-    const [runtime] = JSON.parse((await docker(['container', 'inspect', runtimeName])).stdout)
+    const [runtime] = JSON.parse((await podman(['container', 'inspect', runtimeName])).stdout)
     assert.equal(runtime.Config.User, 'node')
     assert(runtime.HostConfig.ReadonlyRootfs)
-    assert(runtime.HostConfig.CapDrop.includes('ALL'))
+    // Podman은 CapDrop에 ALL 대신 뺀 capability를 하나씩 적으므로 남은 capability를 본다.
+    assert.equal(runtime.EffectiveCaps, null)
     assert(runtime.HostConfig.SecurityOpt.some((value) => value.startsWith('no-new-privileges')))
     const runtimeMounts = runtime.Mounts.filter((mount) => mount.Type === 'bind')
     assert.deepEqual(runtimeMounts.map((mount) => mount.Destination).sort(), expectedMounts.sort())
     assert(runtimeMounts.every((mount) => mount.RW === false))
     stage = 'UID, read-only filesystem, secrets and HTTP'
-    await docker(['exec', runtimeName, 'node', '/app/container-runtime-check.mjs'])
+    await podman(['exec', runtimeName, 'node', '/app/container-runtime-check.mjs'])
 
     stage = 'graceful stop'
-    await docker(['stop', '--time', '15', runtimeName])
+    await podman(['stop', '--time', '15', runtimeName])
     assert.equal(
-      (await docker(['inspect', '--format', '{{.State.ExitCode}}', runtimeName])).stdout.trim(),
+      (await podman(['inspect', '--format', '{{.State.ExitCode}}', runtimeName])).stdout.trim(),
       '0'
     )
     await removeOwned(runtimeName)
@@ -173,7 +184,7 @@ try {
     ['--env', 'NEOPLE_API_KEY_FILE=/run/missing-secret'],
     ['--env', 'NEOPLE_API_KEY=synthetic', '--env', 'NEOPLE_API_KEY_FILE=/run/missing-secret']
   ]) {
-    const result = await docker(
+    const result = await podman(
       [
         'run',
         '--rm',
