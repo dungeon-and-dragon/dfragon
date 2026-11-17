@@ -73,6 +73,6 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 서드파티 고지는 화면에 링크하지 않고 빌드 산출물의 `notices`에 둡니다. 배포하면 `https://dfragon.com/notices/` 아래에서 볼 수 있습니다.
 
 - `notices/THIRD-PARTY.txt`: 번들 입력 package의 license와 NOTICE
-- `notices/client/`: 글꼴(Pretendard Variable)과 Lucide 아이콘 고지
+- `notices/client/`: 글꼴(IBM Plex Sans KR, Monoplex KR)과 Lucide 아이콘 고지
 - `notices/site/NOTICE.md`: Neople Open API 로고(컬러, 회색)의 출처, 권리([원본](NOTICE.md))
 - `ocr/`: OCR 모델과 ONNX Runtime의 license, NOTICE
