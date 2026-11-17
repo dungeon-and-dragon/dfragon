@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act, type ComponentProps } from 'react'
 import { createRoot } from 'react-dom/client'
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
@@ -148,7 +147,7 @@ it('서버를 고르지 않으면 트리거에 서버를 표시하고 선택된 
   expect(options.filter((item) => item.getAttribute('aria-selected') === 'true')).toEqual([])
 })
 
-it('행의 칩과 목록을 카드 면으로 그리고 키보드로 열어 고른다', async () => {
+it('행의 칩을 키보드로 열어 고르면 값을 전달하고 칩으로 돌아온다', async () => {
   const onValueChange = vi.fn()
   await act(async () =>
     root.render(
@@ -165,7 +164,6 @@ it('행의 칩과 목록을 카드 면으로 그리고 키보드로 열어 고�
     )
   )
   const trigger = document.querySelector<HTMLButtonElement>('[aria-label="1번 서버"]')!
-  expect(trigger.dataset.surface).toBe('card')
   trigger.focus()
   await act(async () =>
     trigger.dispatchEvent(
@@ -174,13 +172,6 @@ it('행의 칩과 목록을 카드 면으로 그리고 키보드로 열어 고�
   )
   const listbox = await vi.waitFor(() => document.querySelector('[role="listbox"]')!)
   const options = [...listbox.querySelectorAll<HTMLElement>('[role="option"]')]
-  // 목록 항목의 카드 면 스타일은 StyleX marker가 붙은 조상의 data-surface를 읽는다.
-  const surfaceMarker = stylex.props(stylex.defaultMarker()).className
-  expect(
-    options.map((option) =>
-      option.closest(`.${surfaceMarker}[data-surface]`)?.getAttribute('data-surface')
-    )
-  ).toEqual(['card', 'card', 'card'])
   const current = options.find((option) => option.textContent === '시로코')!
   await vi.waitFor(() => expect(document.activeElement).toBe(current))
   await act(async () =>
@@ -253,7 +244,7 @@ it('서버 8개를 4열 목록으로 연다', async () => {
   const field = document.querySelector<HTMLButtonElement>('[aria-label="칸 안 서버"]')!
   await act(async () => field.click())
   const fieldList = document.querySelector('[role="listbox"][aria-label="칸 안 서버"]')!
-  expect(fieldList.getAttribute('style')).toContain('repeat(4, 84px)')
+  expect((fieldList as HTMLElement).style.getPropertyValue('--listbox-columns')).toBe('4')
   expect(fieldList.querySelectorAll('[role="option"]')).toHaveLength(8)
 })
 

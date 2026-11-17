@@ -29,7 +29,6 @@ import {
   type ButtonProps,
   type CheckboxProps,
   type ChipProps,
-  type ControlSurface,
   type IconButtonProps,
   type KbdProps,
   type KbdSurface,
@@ -97,10 +96,6 @@ expectTypeOf<StatusChipTone>().toEqualTypeOf<
 expectTypeOf<StatusChipProps['busy']>().toEqualTypeOf<boolean | undefined>()
 expectTypeOf<StepDotsProps['size']>().toEqualTypeOf<4 | 5 | undefined>()
 expectTypeOf<StatusChipProps['size']>().toEqualTypeOf<'sm' | 'md' | undefined>()
-expectTypeOf<ControlSurface>().toEqualTypeOf<'default' | 'card'>()
-expectTypeOf<SelectTriggerProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
-expectTypeOf<SelectPopupProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
-expectTypeOf<TabsListProps['surface']>().toEqualTypeOf<ControlSurface | undefined>()
 expectTypeOf<KbdSurface>().toEqualTypeOf<'default' | 'signal'>()
 expectTypeOf<KbdProps['surface']>().toEqualTypeOf<KbdSurface | undefined>()
 
@@ -223,7 +218,7 @@ export const behaviorExamples = (
       </Menu.Popup>
     </Menu.Root>
     <Tabs.Root defaultValue="collection">
-      <Tabs.List aria-label="도구" surface="card">
+      <Tabs.List aria-label="도구">
         <Tabs.Tab value="collection">수집</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="collection">수집 패널</Tabs.Panel>
