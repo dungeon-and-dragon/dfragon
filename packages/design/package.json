@@ -17,6 +17,7 @@
     "README.md"
   ],
   "scripts": {
+    "build:design-system": "node scripts/build-design-system.mjs",
     "test": "node --test test/*.node.mjs",
     "lint": "biome lint",
     "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",

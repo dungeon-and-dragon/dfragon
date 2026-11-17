@@ -1,0 +1,85 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+    }
+    .cover {
+      position: relative;
+      width: 960px;
+      height: 288px;
+      overflow: hidden;
+      background: var(--color-canvas);
+      font-family: var(--font-sans);
+    }
+    .cover svg {
+      position: absolute;
+      inset: 0;
+    }
+    .signal {
+      fill: var(--color-signal);
+    }
+    .surface {
+      fill: var(--color-surface);
+    }
+    .control {
+      fill: var(--color-control);
+    }
+    .legendary {
+      fill: var(--color-rarity-legendary);
+    }
+    .unique {
+      fill: var(--color-rarity-unique);
+    }
+    .rule {
+      stroke: var(--color-line-strong);
+      stroke-width: 1;
+    }
+    .text {
+      position: absolute;
+      left: 48px;
+      bottom: 40px;
+      max-width: 400px;
+    }
+    .name {
+      margin: 0;
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 0.95;
+      color: var(--color-fg);
+    }
+    .tagline {
+      margin: 16px 0 0;
+      font-size: 14px;
+      color: var(--color-fg-muted);
+    }
+    </style>
+  </head>
+  <body>
+    <div class="cover">
+      <!--
+        blocks: color-signal 240x288, color-surface 240x192, color-control 240x96, color-rarity-legendary 96x96, color-rarity-unique 48x48
+        arrangement: 무채색 slab 셋이 x=480부터 flush하게 붙고 게임 색 둘이 control 줄 끝에 작게 앉는다
+        pattern: 표와 숫자가 빽빽한 무채색 UI라 color-line-strong hairline 세 줄로 행 경계를 긋는다
+        scales: spacing 4px의 배수(48, 96, 192, 240), radius-panel 0
+      -->
+      <svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+        <rect class="signal" x="720" y="0" width="240" height="288" />
+        <rect class="surface" x="480" y="0" width="240" height="192" />
+        <rect class="control" x="480" y="192" width="240" height="96" />
+        <rect class="legendary" x="624" y="192" width="96" height="96" />
+        <rect class="unique" x="576" y="240" width="48" height="48" />
+        <line class="rule" x1="480" y1="48" x2="720" y2="48" />
+        <line class="rule" x1="480" y1="96" x2="720" y2="96" />
+        <line class="rule" x1="480" y1="144" x2="720" y2="144" />
+      </svg>
+      <div class="text">
+        <h1 class="name">DFragon<br />디자인 시스템</h1>
+        <p class="tagline">무채색 바탕 위에서 색은 게임과 상태만 말합니다.</p>
+      </div>
+    </div>
+  </body>
+</html>

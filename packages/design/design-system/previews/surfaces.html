@@ -1,0 +1,72 @@
+<!-- @dsCard group="Foundations" height=320 page -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      font-size: 14px;
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0">
+      <div class="bg-canvas" style="padding: 16px; height: 120px">
+        <div>canvas</div>
+        <div class="text-fg-muted">fg-muted</div>
+      </div>
+      <div class="bg-surface" style="padding: 16px; height: 120px">
+        <div>surface</div>
+        <div class="text-fg-muted">fg-muted</div>
+      </div>
+      <div class="bg-inset" style="padding: 16px; height: 120px">
+        <div>inset</div>
+        <div class="text-fg-subtle">fg-subtle</div>
+      </div>
+      <div class="bg-control" style="padding: 16px; height: 120px">
+        <div>control</div>
+        <div class="text-fg-subtle">fg-subtle</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; padding: 16px">
+      <span
+        class="bg-signal text-on-signal"
+        style="
+          display: inline-flex;
+          align-items: center;
+          height: var(--spacing-control-sm);
+          padding-inline: 12px;
+          border-radius: var(--radius-control);
+        "
+        >signal</span
+      >
+      <span
+        class="bg-control text-fg border-line-strong"
+        style="
+          display: inline-flex;
+          align-items: center;
+          height: var(--spacing-control-sm);
+          padding-inline: 12px;
+          border-width: 1px;
+          border-style: solid;
+          border-radius: var(--radius-control);
+        "
+        >control</span
+      >
+      <span class="text-fg-success">fg-success</span>
+      <span class="text-fg-warning">fg-warning</span>
+      <span class="text-fg-danger">fg-danger</span>
+    </div>
+    <div style="display: flex; gap: 16px; padding: 0 16px 16px; font-family: var(--font-mono)">
+      <span class="text-rarity-common">common</span>
+      <span class="text-rarity-uncommon">uncommon</span>
+      <span class="text-rarity-rare">rare</span>
+      <span class="text-rarity-unique">unique</span>
+      <span class="text-rarity-legendary">legendary</span>
+      <span class="text-rarity-epic">epic</span>
+      <span class="text-rarity-chronicle">chronicle</span>
+    </div>
+  </body>
+</html>
