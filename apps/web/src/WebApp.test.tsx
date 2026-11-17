@@ -176,10 +176,10 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
-  const brand = header.querySelector('a[aria-label="던삐삐 첫 화면"]')!
+  const brand = header.querySelector('a[aria-label="DFragon 첫 화면"]')!
   const grade = header.querySelector('[role="img"]')!
   expect(brand.getAttribute('href')).toBe('/')
-  expect(brand.textContent).toBe('던삐삐')
+  expect(brand.textContent).toBe('DFragon')
   expect(brand.querySelector('img')).toBeNull()
   expect(header.querySelector('nav a')?.getAttribute('href')).toBe('/multisearch')
   expect(globalMenu()).toEqual([
