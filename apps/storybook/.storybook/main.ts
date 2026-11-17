@@ -1,6 +1,4 @@
 import type { StorybookConfig } from '@storybook/react-vite'
-import { stylexOptions } from '@dfragon/ui/stylex-config'
-import { unplugin as stylex } from '@stylexjs/unplugin'
 import tailwindcss from '@tailwindcss/vite'
 import { workspaceAliases } from '../../web/workspace-aliases.ts'
 
@@ -14,8 +12,7 @@ const config: StorybookConfig = {
   ],
   core: { disableTelemetry: true, disableWhatsNewNotifications: true },
   viteFinal(viteConfig) {
-    // StyleX는 React plugin이 JSX를 바꾸기 전에 stylex.create를 읽어야 하므로 framework가 넣은 plugin보다 앞에 둔다.
-    const plugins = [stylex.vite(stylexOptions), tailwindcss(), ...(viteConfig.plugins ?? [])]
+    const plugins = [tailwindcss(), ...(viteConfig.plugins ?? [])]
 
     return {
       ...viteConfig,

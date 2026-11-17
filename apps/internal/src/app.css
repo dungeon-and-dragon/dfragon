@@ -1,8 +1,7 @@
 @layer theme, base, components, utilities;
-/* Tailwind CSS의 preflight는 StyleX로 남은 화면의 브라우저 기본 모양(제목, 목록, 링크, 버튼)을 바꾸므로 theme과 utilities만 불러온다. */
+/* 캔버스 시안에는 Tailwind CSS의 preflight가 없어 화면도 theme과 utilities만 불러온다. 초기화는 base.css와 컴포넌트 클래스가 한다. */
 @import 'tailwindcss/theme.css' layer(theme);
 @import '@dfragon/design/theme.css';
 @import '@dfragon/design/base.css' layer(base);
-@import '@dfragon/ui/tokens.css';
 @import '@dfragon/design/components.css' layer(components);
 @import 'tailwindcss/utilities.css' layer(utilities);
