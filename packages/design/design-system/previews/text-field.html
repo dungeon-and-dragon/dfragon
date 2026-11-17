@@ -1,0 +1,41 @@
+<!-- @dsCard group="Components" height=280 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px">
+      <div class="field">
+        <label class="field-label">캐릭터 이름</label>
+        <div class="field-box field-box-md">
+          <input class="field-input" placeholder="이름을 입력" />
+        </div>
+        <p class="field-description">2~12자</p>
+      </div>
+      <div class="field" data-invalid>
+        <label class="field-label">캐릭터 이름</label>
+        <div class="field-box field-box-md"><input class="field-input" value="가" /></div>
+        <p class="field-error">두 글자 이상 입력하세요.</p>
+      </div>
+      <div class="field" data-disabled>
+        <label class="field-label">모험단</label>
+        <div class="field-box field-box-md">
+          <input class="field-input" value="비활성" disabled />
+        </div>
+      </div>
+      <div style="display: grid; gap: 8px">
+        <div class="field-box field-box-sm"><input class="field-input" placeholder="작게" /></div>
+        <div class="field-box field-box-lg"><input class="field-input" placeholder="크게" /></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" height=200 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px">
+      <button class="btn btn-primary btn-md">검색</button>
+      <button class="btn btn-secondary btn-md">취소</button>
+      <button class="btn btn-ghost btn-md">더 보기</button>
+      <button class="btn btn-danger btn-md">삭제</button>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px">
+      <button class="btn btn-primary btn-sm">작게</button>
+      <button class="btn btn-primary btn-md">보통</button>
+      <button class="btn btn-primary btn-lg">크게</button>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px">
+      <button class="btn btn-primary btn-md" disabled>비활성</button>
+      <button class="btn btn-secondary btn-md" disabled>비활성</button>
+      <button class="btn btn-primary btn-md" data-loading>불러오는 중</button>
+    </div>
+  </body>
+</html>
