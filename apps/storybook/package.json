@@ -1,0 +1,33 @@
+{
+  "name": "@dfragon/storybook",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev --port 6006 --no-open",
+    "build": "tsc --noEmit && storybook build --output-dir dist",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write && node ../../scripts/statement-spacing.mjs --write",
+    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
+  },
+  "devDependencies": {
+    "@dfragon/design": "workspace:*",
+    "@dfragon/ui": "workspace:*",
+    "@storybook/react-vite": "catalog:",
+    "@stylexjs/unplugin": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "storybook": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}
