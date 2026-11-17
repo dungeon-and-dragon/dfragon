@@ -1,21 +1,14 @@
-@font-face {
-  font-family: 'Pretendard Variable';
-  src: url('./assets/fonts/PretendardVariable.woff2') format('woff2');
-  font-weight: 45 920;
-  font-style: normal;
-  font-display: swap;
-}
+@layer theme, base, components, utilities;
+/* Tailwind CSS의 preflight는 StyleX로 남은 화면의 브라우저 기본 모양(제목, 목록, 링크, 버튼)을 바꾸므로 theme과 utilities만 불러온다. */
+@import 'tailwindcss/theme.css' layer(theme);
+@import '@dfragon/design/theme.css';
+@import '@dfragon/design/base.css' layer(base);
+@import '@dfragon/ui/tokens.css';
+@import 'tailwindcss/utilities.css' layer(utilities);
 
 /* 탭마다 내용 높이가 달라 스크롤바가 생기고 사라져도 가운데 정렬한 탭과 nav가 옆으로 밀리지 않게 자리를 남긴다. */
 html {
   scrollbar-gutter: stable;
-}
-
-body {
-  color: var(--df-fg-default);
-  background: var(--df-bg-canvas);
-  word-break: keep-all;
-  overflow-wrap: anywhere;
 }
 
 /* StyleX로는 html의 data-color-mode를 조상으로 고를 수 없어 푸터의 모드별 Neople 로고를 여기서 고른다. StyleX의
