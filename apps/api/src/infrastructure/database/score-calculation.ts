@@ -1,10 +1,14 @@
 import {
+  type CharacterBasicInput,
+  type CharacterHistoryInput,
   type CharacterScoreInput,
   type ClearPopulationCharacter,
   type DatabaseClient,
   type FinishedJobRun,
   readClearPopulation,
   readLastFinishedJobRun,
+  recordCharacterBasic,
+  recordCharacterHistory,
   recordCharacterScore
 } from '@dfragon/database'
 import type { ScoreCalculationRepository } from '../../application/character-score/repository.js'
@@ -26,5 +30,13 @@ export class DatabaseScoreCalculationRepository implements ScoreCalculationRepos
 
   recordScore(score: CharacterScoreInput): Promise<void> {
     return recordCharacterScore(this.client, score)
+  }
+
+  recordBasic(basic: CharacterBasicInput): Promise<void> {
+    return recordCharacterBasic(this.client, basic)
+  }
+
+  recordHistory(history: CharacterHistoryInput): Promise<void> {
+    return recordCharacterHistory(this.client, history)
   }
 }

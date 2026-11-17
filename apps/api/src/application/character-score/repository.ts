@@ -1,4 +1,6 @@
 import type {
+  CharacterBasicInput,
+  CharacterHistoryInput,
   CharacterScoreInput,
   ClearPopulationCharacter,
   FinishedJobRun
@@ -8,4 +10,6 @@ export interface ScoreCalculationRepository {
   readTargets(): Promise<ClearPopulationCharacter[]>
   readLastFinishedRun(): Promise<FinishedJobRun | undefined>
   recordScore(score: CharacterScoreInput): Promise<void>
+  recordBasic(basic: CharacterBasicInput): Promise<void>
+  recordHistory(history: CharacterHistoryInput): Promise<void>
 }
