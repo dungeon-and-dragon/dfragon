@@ -1,23 +1,15 @@
 import * as stylex from '@stylexjs/stylex'
-import { colors, motion, radius, shadow, space } from '@dfragon/ui/tokens.stylex'
+import { colors, motion, radius, space } from '@dfragon/ui/tokens.stylex'
 
 const REMOVE_SIZE = 24
 
 export const styles = stylex.create({
-  positioner: { zIndex: 110, outlineStyle: 'none' },
   popup: {
     boxSizing: 'border-box',
     width: 420,
     maxHeight: 'min(480px, var(--available-height))',
     overflowY: 'auto',
-    paddingBlock: space.s4,
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: colors.borderStrong,
-    backgroundColor: colors.bgSurface,
-    boxShadow: shadow.popover,
-    color: colors.fgDefault,
-    outlineStyle: 'none'
+    paddingBlock: space.s4
   },
   largePopup: {
     width: 'var(--anchor-width)',

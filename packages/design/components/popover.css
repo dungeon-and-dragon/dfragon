@@ -1,0 +1,36 @@
+/*
+ * <div class="popover-positioner"><div class="popover" role="dialog">
+ *   <h2 class="popover-title">고정을 취소하시겠습니까?</h2>
+ * </div></div>.
+ * 안쪽 배치와 폭은 화면이 정한다. 열리고 닫힐 때 data-starting-style, data-ending-style 동안 투명해진다.
+ */
+.popover-positioner {
+  z-index: var(--z-popover);
+  outline: none;
+}
+
+.popover {
+  box-sizing: border-box;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-panel);
+  background-color: var(--color-canvas);
+  box-shadow: var(--shadow-popover);
+  color: var(--color-fg);
+  outline: none;
+  transition-property: opacity, transform;
+  transition-duration: var(--duration-state);
+  transition-timing-function: var(--ease-standard);
+}
+
+.popover:is([data-starting-style], [data-ending-style]) {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.popover-title {
+  margin: 0;
+  color: var(--color-fg);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: var(--font-weight-semibold);
+}
