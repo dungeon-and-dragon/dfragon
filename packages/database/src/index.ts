@@ -18,6 +18,23 @@ export { readTimelineQueueCounts, writeTimelineQueueCounts } from './timeline-qu
 export type { TimelineQueueCount } from './timeline-queue-count.js'
 export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
+export {
+  readCharacterHistory,
+  readCharacterHistorySnapshot,
+  recordCharacterHistory
+} from './character-history.js'
+export type {
+  CharacterHistoryBasic,
+  CharacterHistoryInput,
+  CharacterHistoryKey,
+  CharacterHistoryScore,
+  CharacterSectionBody,
+  StoredCharacterBasicHistory,
+  StoredCharacterHistory,
+  StoredCharacterHistorySnapshot,
+  StoredCharacterScoreHistory,
+  StoredCharacterSectionChange
+} from './character-history.js'
 export { recordCharacterScore } from './character-score.js'
 export type { CharacterScoreInput, CharacterScoreKind } from './character-score.js'
 export {
