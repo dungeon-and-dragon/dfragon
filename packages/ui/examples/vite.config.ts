@@ -1,4 +1,5 @@
 import stylex from '@stylexjs/unplugin'
+import tailwindcss from '@tailwindcss/vite'
 import { stylexOptions } from '../stylex.config.ts'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
@@ -10,7 +11,7 @@ const SHARED_UI_IMPORT_PATTERN = /^@dfragon\/ui$/
 export default defineConfig({
   base: './',
   root: fileURLToPath(new URL('./', import.meta.url)),
-  plugins: [stylex.vite(stylexOptions), react(), uiNotices()],
+  plugins: [stylex.vite(stylexOptions), tailwindcss(), react(), uiNotices()],
   resolve: {
     alias: [
       {
