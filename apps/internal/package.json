@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@dfragon/licenses": "workspace:*",
+    "@storybook/react-vite": "catalog:",
     "@stylexjs/unplugin": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",
