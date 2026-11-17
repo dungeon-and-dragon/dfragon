@@ -1,4 +1,3 @@
-import * as stylex from '@stylexjs/stylex'
 import { useCallback, useState } from 'react'
 import type { StoredCharacter } from '#core/ranking/ranking-stats'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
@@ -7,7 +6,6 @@ import {
   CharacterTable,
   SkeletonRow
 } from '../../../components/table/CharacterTable'
-import { styles } from './CharacterListBox.style'
 import { ListBox } from '../../../components/table/ListBox'
 
 const PAGE_SIZE = 20
@@ -47,7 +45,7 @@ export function CharacterListBox({
     case 'error':
       return (
         <ListBox name={name}>
-          <p role="alert" {...stylex.props(styles.state)}>
+          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
             {result.message}
           </p>
         </ListBox>

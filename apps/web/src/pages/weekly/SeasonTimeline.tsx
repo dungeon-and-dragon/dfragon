@@ -1,13 +1,13 @@
-import * as stylex from '@stylexjs/stylex'
 import { useRef, useState } from 'react'
 import type { ActivitySeason } from '#core/adventure-guild/adventure-activity'
 import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
 import { usePrimevalFillFade } from './animations/usePrimevalFillFade'
 import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'
 import { type SeasonBar, seasonBar } from './season-bar'
-import { styles } from './SeasonTimeline.style'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+const BAR = 'absolute inset-x-0 top-0 h-1 rounded-[1px]'
 
 function seasonDays(seasons: readonly ActivitySeason[], index: number, now: number): number {
   const startsAt = Date.parse(seasons[index].startsAt)
@@ -22,8 +22,8 @@ function BackfillBar({ progress }: { progress: number }): React.JSX.Element {
   useBackfillFillGrow(fillRef, progress)
 
   return (
-    <i {...stylex.props(styles.bar, styles.barOff)}>
-      <i ref={fillRef} {...stylex.props(styles.fill)} />
+    <i className={`${BAR} bg-inset`}>
+      <i ref={fillRef} className="absolute inset-y-0 left-0 rounded-[1px] bg-line-strong" />
     </i>
   )
 }
@@ -37,6 +37,30 @@ function filledLength(bar: SeasonBar): number {
     case 'backfill':
       return bar.progress
   }
+}
+
+function barTone(bar: SeasonBar, selected: boolean): string {
+  if (bar.state === 'locked') {
+    return 'bg-inset'
+  }
+
+  if (selected) {
+    return 'bg-line-strong'
+  }
+
+  return 'bg-line-strong group-hover:bg-line-input'
+}
+
+function nameTone(season: ActivitySeason, selected: boolean): string {
+  if (!season.available) {
+    return 'text-fg-subtle'
+  }
+
+  if (selected) {
+    return 'text-fg'
+  }
+
+  return 'text-fg-muted group-hover:text-fg'
 }
 
 function SeasonButton({
@@ -75,23 +99,22 @@ function SeasonButton({
       aria-busy={running ? 'true' : undefined}
       aria-current={selected ? 'true' : undefined}
       onClick={handleClick}
-      {...stylex.props(styles.season, stylex.defaultMarker(), styles.length(days))}
+      className="group relative m-0 flex min-w-21 shrink basis-0 cursor-pointer flex-col items-start gap-0.5 border-0 bg-transparent px-0 pt-2.5 pb-0 text-left text-inherit [font:inherit] disabled:cursor-default aria-disabled:cursor-default"
+      style={{ flexGrow: days }}
     >
       {bar.state === 'backfill' ? (
         <BackfillBar progress={bar.progress} />
       ) : (
-        <i
-          {...stylex.props(
-            styles.bar,
-            selected && styles.barOn,
-            bar.state === 'locked' && styles.barOff
-          )}
-        />
+        <i className={`${BAR} ${barTone(bar, selected)}`} />
       )}
       {/* 받기가 끝나 막대가 바뀌어도 이 층은 남아 태초색이 서서히 사라지도록 막대 밖에 둔다. */}
-      <i ref={primevalRef} aria-hidden="true" {...stylex.props(styles.primevalFill)} />
+      <i
+        ref={primevalRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-0 h-1 rounded-[1px] bg-(image:--gradient-rarity-primordial)"
+      />
       <span
-        {...stylex.props(styles.name, selected && styles.nameOn, !season.available && styles.off)}
+        className={`text-xs whitespace-nowrap ${selected ? 'font-semibold' : 'font-medium'} ${nameTone(season, selected)}`}
       >
         {season.name}
       </span>
@@ -120,9 +143,13 @@ export function SeasonTimeline({
   useSeasonIndicatorSlide({ timelineRef, indicatorRef })
 
   return (
-    <nav ref={timelineRef} aria-label="시즌" {...stylex.props(styles.timeline)}>
+    <nav ref={timelineRef} aria-label="시즌" className="relative flex gap-0.5 px-4 pt-3 pb-3.5">
       {hasSelection && (
-        <span ref={indicatorRef} aria-hidden="true" {...stylex.props(styles.indicator)} />
+        <span
+          ref={indicatorRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute top-3 z-1 h-1 rounded-[1px] bg-signal"
+        />
       )}
       {seasons.map((season, index) => (
         <SeasonButton
