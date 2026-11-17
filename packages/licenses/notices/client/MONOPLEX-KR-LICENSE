@@ -1,14 +1,42 @@
-Copyright (c) 2021, Kil Hyung-jin (https://github.com/orioncactus/pretendard),
-with Reserved Font Name Pretendard.
+Copyright (c) 2021, Kim Yangsu with Reserved Font Name "Monoplex"
 
-This Font Software is licensed under the SIL Open Font License, Version 1.1.
-This license is copied below, and is also available with a FAQ at:
-https://scripts.sil.org/OFL
+Monoplex Font Software is licensed under the SIL Open Font License, Version 1.1.
+The build recipe (https://github.com/y-kim/monoplex) and the build tool it drives,
+hapchija (https://github.com/y-kim/hapchija), are licensed under the MIT License.
 
+The fonts carry the copyrights below. Every one of them is licensed under the
+SIL Open Font License, Version 1.1.
 
------------------------------------------------------------
-SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
------------------------------------------------------------
+- Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+  https://github.com/IBM/plex/
+  IBM Plex Mono, IBM Plex Sans KR, IBM Plex Sans JP, IBM Plex Sans TC and
+  IBM Plex Sans SC. Nearly every glyph comes from these.
+
+- Copyright (c) 2021, Yuko Otawara with Reserved Font Name "PlemolJP"
+  https://github.com/yuru7/PlemolJP
+  The half-width box drawing and block glyphs, U+2500-U+259F. These were drawn
+  for PlemolJP; they are not IBM Plex outlines. The .sfd file that holds them
+  (source/AdjustedGlyphs/Box_Drawing_half.sfd) still names IBM Plex Sans JP in
+  its header because it was saved out of a working copy of that font, but the
+  outlines in it are original work.
+
+- Copyright (c) 2014, Ryan L McIntyre (https://ryanlmcintyre.com)
+  https://github.com/ryanoasis/nerd-fonts
+  Nerd Font variants only. Those variants take icon glyphs, and nothing else,
+  from Blex Mono Nerd Font. The icon sets are the work of their own authors and
+  keep their own licenses; the upstream release does not restate them.
+  Pomicons (U+E000-E00A) are not included.
+
+IBM Plex® is a trademark of IBM Corp, registered in many jurisdictions
+worldwide. This notice is carried in the fonts' name table, as OFL FAQ 3.7 asks.
+
+Special thanks to PlemolJP (https://github.com/yuru7/PlemolJP). Monoplex began
+as a fork of its generate script, and this repository's history still starts
+there. hapchija has since been rewritten and carries no PlemolJP code.
+
+## SIL Open Font License
+
+Version 1.1 - 26 February 2007
 
 PREAMBLE
 The goals of the Open Font License (OFL) are to stimulate worldwide
@@ -19,7 +47,7 @@ with others.
 
 The OFL allows the licensed fonts to be used, studied, modified and
 redistributed freely as long as they are not sold by themselves. The
-fonts, including any derivative works, can be bundled, embedded, 
+fonts, including any derivative works, can be bundled, embedded,
 redistributed and/or sold with any software provided that any reserved
 names are not used by derivative works. The fonts and derivatives,
 however, cannot be released under any other type of license. The
@@ -38,7 +66,7 @@ copyright statement(s).
 distributed by the Copyright Holder(s).
 
 "Modified Version" refers to any derivative made by adding to, deleting,
-or substituting -- in part or in whole -- any of the components of the
+or substituting — in part or in whole — any of the components of the
 Original Version, by changing formats or by porting the Font Software to a
 new environment.
 
@@ -92,3 +120,27 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
+## MIT License
+
+Copyright (c) 2021 Kim Yangsu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+

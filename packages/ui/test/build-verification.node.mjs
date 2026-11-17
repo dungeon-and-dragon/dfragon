@@ -10,11 +10,11 @@ const verifyScript = fileURLToPath(new URL('../scripts/verify-build.mjs', import
 const indexSource = `import { Dialog } from "@base-ui/react/dialog";\nimport * as stylex from "@stylexjs/stylex";\nimport React from "react";\nimport { jsx } from "react/jsx-runtime";\nimport { colors } from "./tokens.stylex.js";\nexport { Dialog, React, colors, jsx, stylex };\n`
 const tokensSource = `import * as stylex from "@stylexjs/stylex";\nconst colors = stylex.defineConsts({ signal: "var(--df-signal)" });\nexport { colors };\n`
 const libraryFiles = ['index.js', 'tokens.stylex.js', 'typo.js']
-const tokensStyles = ':root{--df-brand-dragon:#e83830}'
+const tokensStyles = ':root{--df-bg-canvas:var(--color-canvas)}'
 const foundationStyles =
   'body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}'
 const appFontStyles =
-  "body{font-family:'Pretendard Variable',system-ui,'Apple SD Gothic Neo',sans-serif}"
+  "body{font-family:'IBM Plex Sans KR',system-ui,'Apple SD Gothic Neo',sans-serif}"
 
 async function createLibraryFixture(context) {
   const output = await mkdtemp(join(tmpdir(), 'dfragon-ui-build-'))

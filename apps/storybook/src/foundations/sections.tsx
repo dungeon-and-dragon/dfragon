@@ -24,7 +24,7 @@ function TokenValue({ children }: { children: ReactNode }) {
 }
 
 function TokenRows({ children }: { children: ReactNode }) {
-  return <div className="grid divide-y divide-border border-y border-border">{children}</div>
+  return <div className="grid divide-y divide-line border-y border-line">{children}</div>
 }
 
 function TokenRow({ children }: { children: ReactNode }) {
@@ -46,7 +46,7 @@ function SchemeSample({ scheme, children }: { scheme: ColorScheme; children: Rea
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="grid gap-4 text-fg">
-      <h2 className="m-0 text-lg font-semibold">{title}</h2>
+      <h2 className="m-0 text-base font-semibold">{title}</h2>
       {children}
     </section>
   )
@@ -57,7 +57,7 @@ export function PrimitiveScale({ tokens }: { tokens: readonly ThemeToken[] }) {
     <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-3">
       {tokens.map((token) => (
         <div key={token.name} className="grid gap-1">
-          <div className="h-12 border border-border" style={{ background: `var(${token.name})` }} />
+          <div className="h-12 border border-line" style={{ background: `var(${token.name})` }} />
           <code className="font-mono text-xs text-fg">{token.name}</code>
           <TokenValue>{token.value}</TokenValue>
         </div>
@@ -86,7 +86,7 @@ export function ColorTokens({
                 <SchemeSample key={scheme} scheme={scheme}>
                   <div className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-3">
                     <div
-                      className="h-8 border border-border"
+                      className="h-8 border border-line"
                       style={{ background: `var(${token.name})` }}
                     />
                     <div className="grid gap-0.5">
@@ -164,6 +164,19 @@ export function SpacingTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   )
 }
 
+export function ValueTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
+  return (
+    <TokenRows>
+      {tokens.map((token) => (
+        <TokenRow key={token.name}>
+          <TokenName token={token} />
+          <TokenValue>{token.value}</TokenValue>
+        </TokenRow>
+      ))}
+    </TokenRows>
+  )
+}
+
 export function RadiusTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   return (
     <TokenRows>
@@ -221,7 +234,7 @@ function EasingCurve({ value }: { value: string }) {
 
   return (
     <svg viewBox="-4 -4 108 108" className="size-24 overflow-visible" aria-hidden="true">
-      <rect x="0" y="0" width="100" height="100" fill="none" className="stroke-border" />
+      <rect x="0" y="0" width="100" height="100" fill="none" className="stroke-line" />
       <path
         d={`M0 100 C${x1} ${100 - y1}, ${x2} ${100 - y2}, 100 0`}
         fill="none"
@@ -244,7 +257,7 @@ function PlayButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="h-8 shrink-0 cursor-pointer border border-border-strong bg-control px-3 text-xs text-fg"
+      className="h-8 shrink-0 cursor-pointer border border-line-strong bg-control px-3 text-xs text-fg"
     >
       재생
     </button>
