@@ -3,6 +3,7 @@ import { AvatarCreatureTab } from './tabs/AvatarCreatureTab'
 import { BuffTab } from './tabs/BuffTab'
 import type { CharacterTabProps } from './tabs/character-tab-props'
 import { EquipmentTab } from './tabs/EquipmentTab'
+import { HistoryTab } from './tabs/HistoryTab'
 import { OathTab } from './tabs/OathTab'
 import { SkillTab } from './tabs/SkillTab'
 import { StatusTab } from './tabs/StatusTab'
@@ -21,7 +22,8 @@ export const CHARACTER_TABS = [
   { id: 'avatar', label: '아바타', Content: AvatarCreatureTab },
   { id: 'buff', label: '버프 강화', Content: BuffTab },
   { id: 'status', label: '스탯', Content: StatusTab },
-  { id: 'timeline', label: '타임라인', Content: TimelineTab }
+  { id: 'timeline', label: '타임라인', Content: TimelineTab },
+  { id: 'history', label: '이력', Content: HistoryTab }
 ] as const satisfies readonly CharacterTabEntry[]
 
 export type CharacterTab = (typeof CHARACTER_TABS)[number]['id']

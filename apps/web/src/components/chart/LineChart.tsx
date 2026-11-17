@@ -24,6 +24,16 @@ export type LineSeries = Readonly<{
   values: readonly (number | null)[]
 }>
 
+export type LineAxisTick = Readonly<{ at: number; label: string }>
+
+export type LineTimeAxis = Readonly<{ min: number; max: number; ticks: readonly LineAxisTick[] }>
+
+export type TimedChartX = ChartX & Readonly<{ at: number }>
+
+type LineXAxis =
+  | Readonly<{ x: readonly ChartX[]; timeAxis?: undefined }>
+  | Readonly<{ x: readonly TimedChartX[]; timeAxis: LineTimeAxis }>
+
 const DEFAULT_WIDTH = 640
 const DEFAULT_HEIGHT = 250
 const TOP = 8
@@ -35,14 +45,16 @@ const Y_TICK_SPACING = 30
 const END_DOT_RADIUS = 4
 const HOVER_DOT_RADIUS = 5
 
-type LineChartProps = Readonly<{
-  label: string
-  x: readonly ChartX[]
-  series: readonly LineSeries[]
-  formatTick: (value: number) => string
-  formatValue: (value: number) => string
-  height?: number
-}>
+type LineChartProps = LineXAxis &
+  Readonly<{
+    label: string
+    series: readonly LineSeries[]
+    formatTick: (value: number) => string
+    formatValue: (value: number) => string
+    height?: number
+    selectedKey?: string
+    fitValues?: boolean
+  }>
 
 export function LineChart(props: LineChartProps): React.JSX.Element | null {
   if (!hasLineValues(props.series) || props.x.length === 0) {
@@ -52,14 +64,19 @@ export function LineChart(props: LineChartProps): React.JSX.Element | null {
   return <LinePlot {...props} />
 }
 
-function LinePlot({
-  label,
-  x,
-  series,
-  formatTick,
-  formatValue,
-  height = DEFAULT_HEIGHT
-}: LineChartProps): React.JSX.Element {
+function LinePlot(props: LineChartProps): React.JSX.Element {
+  const {
+    label,
+    x,
+    series,
+    formatTick,
+    formatValue,
+    height = DEFAULT_HEIGHT,
+    timeAxis,
+    selectedKey,
+    fitValues = false
+  } = props
+  const times = timesOf(props)
   const [hover, setHover] = useState<Hover>(NO_HOVER)
   const areaRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
@@ -67,6 +84,8 @@ function LinePlot({
   const size = useChartSize(areaRef, { width: DEFAULT_WIDTH, height })
   const drawn = series.filter(({ values }) => values.some((value) => value != null))
   const hoverIndex = hover.open ? x.findIndex(({ key }) => key === hover.key) : -1
+  const selectedIndex = hoverIndex < 0 ? x.findIndex(({ key }) => key === selectedKey) : -1
+  const crosshairIndex = hoverIndex >= 0 ? hoverIndex : selectedIndex
   useChartReveal(areaRef, LINE_REVEAL)
   useChartTooltipSlide({
     chartRef: areaRef,
@@ -80,17 +99,33 @@ function LinePlot({
 
   const values = drawn.flatMap(({ values }) => values.filter((value) => value != null))
   const plotBottom = size.height - BOTTOM
-  const scale = niceScale(0, Math.max(0, ...values), tickCountOf(plotBottom - TOP))
+  const low = fitValues ? Math.min(...values) : 0
+  const scale = niceScale(low, Math.max(low, ...values), tickCountOf(plotBottom - TOP))
   const left = axisWidth(scale.ticks.map(formatTick))
   const right = size.width - RIGHT
   const step = x.length > 1 ? (right - left) / (x.length - 1) : right - left
+  const timedXs = times?.map(xAt)
 
   function xOf(index: number): number {
+    const timed = timedXs?.[index]
+
+    if (timed !== undefined) {
+      return timed
+    }
+
     if (x.length > 1) {
       return left + index * step
     }
 
     return (left + right) / 2
+  }
+
+  function xAt(at: number): number {
+    if (timeAxis === undefined || timeAxis.max === timeAxis.min) {
+      return (left + right) / 2
+    }
+
+    return left + ((at - timeAxis.min) / (timeAxis.max - timeAxis.min)) * (right - left)
   }
 
   function yOf(value: number): number {
@@ -143,8 +178,8 @@ function LinePlot({
 
   const places = x.map((_, index) => {
     const center = xOf(index)
-    const start = Math.max(left, center - step / 2)
-    const end = Math.min(right, center + step / 2)
+    const start = index > 0 ? (xOf(index - 1) + center) / 2 : left
+    const end = index < x.length - 1 ? (center + xOf(index + 1)) / 2 : right
 
     return { left: start, width: end - start }
   })
@@ -192,24 +227,36 @@ function LinePlot({
               </text>
             </g>
           ))}
-          {x.map(
-            ({ key, tick }, index) =>
-              tick != null && (
-                <text
-                  key={key}
-                  x={xOf(index)}
-                  y={size.height - X_LABEL_BASELINE}
-                  textAnchor={anchorOf(index, x.length)}
-                  {...stylex.props(plotStyles.axisText)}
-                >
-                  {tick}
-                </text>
-              )
-          )}
-          {hoverIndex >= 0 && (
+          {timeAxis?.ticks.map(({ at, label }) => (
+            <text
+              key={at}
+              x={xAt(at)}
+              y={size.height - X_LABEL_BASELINE}
+              textAnchor="middle"
+              {...stylex.props(plotStyles.axisText)}
+            >
+              {label}
+            </text>
+          ))}
+          {timeAxis === undefined &&
+            x.map(
+              ({ key, tick }, index) =>
+                tick != null && (
+                  <text
+                    key={key}
+                    x={xOf(index)}
+                    y={size.height - X_LABEL_BASELINE}
+                    textAnchor={anchorOf(index, x.length)}
+                    {...stylex.props(plotStyles.axisText)}
+                  >
+                    {tick}
+                  </text>
+                )
+            )}
+          {crosshairIndex >= 0 && (
             <line
-              x1={xOf(hoverIndex)}
-              x2={xOf(hoverIndex)}
+              x1={xOf(crosshairIndex)}
+              x2={xOf(crosshairIndex)}
               y1={TOP}
               y2={plotBottom}
               {...stylex.props(plotStyles.crosshair)}
@@ -252,9 +299,9 @@ function LinePlot({
               />
             )
           })}
-          {hoverIndex >= 0 &&
+          {crosshairIndex >= 0 &&
             drawn.map(({ key, color, faded, values }) => {
-              const value = values[hoverIndex]
+              const value = values[crosshairIndex]
 
               if (value == null) {
                 return null
@@ -263,9 +310,9 @@ function LinePlot({
               return (
                 <circle
                   key={key}
-                  cx={xOf(hoverIndex)}
+                  cx={xOf(crosshairIndex)}
                   cy={yOf(value)}
-                  r={HOVER_DOT_RADIUS}
+                  r={hoverIndex >= 0 ? HOVER_DOT_RADIUS : END_DOT_RADIUS}
                   {...stylex.props(
                     plotStyles.openDot,
                     plotStyles.stroke(color),
@@ -291,6 +338,14 @@ function LinePlot({
       </div>
     </div>
   )
+}
+
+function timesOf(axis: LineXAxis): readonly number[] | null {
+  if (axis.timeAxis === undefined) {
+    return null
+  }
+
+  return axis.x.map(({ at }) => at)
 }
 
 function hasLineValues(series: readonly LineSeries[]): boolean {
