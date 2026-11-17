@@ -1,15 +1,16 @@
 // @vitest-environment jsdom
-import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { itemIconUrl } from '#core/character/character-item'
 import { characterDetailFixture } from '#core/testing/character-detail'
-import { styles as dotTones } from './avatar/CreatureTable.style'
-import { styles as rarityTones } from './avatar/ItemName.style'
-import { styles as avatarStyles } from './avatar/AvatarTable.style'
+import { artifactDotClasses as dotTones, avatarClasses } from './avatar/avatar-classes'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
-import { styles as partStyles, raritySolid } from './equipment/item-parts.style'
+import {
+  itemClasses,
+  raritySolidClasses as raritySolid,
+  rarityTextClasses as rarityTones
+} from './equipment/item-classes'
 
 let container: HTMLDivElement
 let root: Root
@@ -31,13 +32,12 @@ async function render(detail: Parameters<typeof AvatarCreatureTab>[0]['detail'])
   await act(async () => root.render(<AvatarCreatureTab detail={detail} />))
 }
 
-function hasTone(element: Element | null | undefined, tone: stylex.StyleXStyles): boolean {
-  const { className } = stylex.props(tone)
-  if (element == null || className === undefined) {
+function hasTone(element: Element | null | undefined, tone: string): boolean {
+  if (element == null) {
     return false
   }
 
-  return element.className.split(' ').includes(className)
+  return element.className.split(' ').includes(tone)
 }
 
 // 이름 칸은 등급 색 이름 오른쪽에 클론 이름을 붙이므로 둘을 |로 나눠 읽는다.
@@ -116,7 +116,7 @@ it('아바타 아이콘 오른쪽에 클론 아이콘을 보이고, 클론이 �
   const topCell = avatarCell(rows[3]!)
   expect(topCell.querySelectorAll('img')).toHaveLength(1)
   const space = topCell.querySelector('img + span[aria-hidden="true"]')
-  const spaceClasses = stylex.props(partStyles.iconSpace).className?.split(' ') ?? []
+  const spaceClasses = itemClasses.iconSpace.split(' ')
   expect(spaceClasses.length).toBeGreaterThan(0)
   expect(spaceClasses.every((name) => space?.classList.contains(name))).toBe(true)
 
@@ -154,7 +154,7 @@ it('오라 스킨을 별도 행 대신 오라 이름과 아이콘 오른쪽에 �
   const skinName = auraCell.querySelector('span[title]')
   expect(skinName?.textContent).toBe(auraSkin.itemName)
   expect(skinName?.getAttribute('title')).toBe(auraSkin.itemName)
-  const cloneClasses = stylex.props(avatarStyles.clone).className?.split(' ') ?? []
+  const cloneClasses = avatarClasses.clone.split(' ')
   expect(cloneClasses.length).toBeGreaterThan(0)
   expect(cloneClasses.every((name) => skinName?.classList.contains(name))).toBe(true)
 })

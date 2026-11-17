@@ -1,6 +1,4 @@
 // @vitest-environment jsdom
-import { colors } from '@dfragon/ui/tokens.stylex'
-import * as stylex from '@stylexjs/stylex'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -16,19 +14,19 @@ import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
 import { TimelineTab } from './TimelineTab'
 
-// jsdom은 색을 계산하지 않으므로 같은 선언으로 만든 StyleX class가 붙었는지로 색을 확인한다.
-const tones = stylex.create({
-  reinforce: { color: colors.gameEnhance },
-  amplify: { color: colors.gameAmplify },
-  refine: { color: colors.gameRefine },
-  success: { color: colors.fgSuccess },
-  failure: { color: colors.fgDanger },
-  epic: { color: colors.rarityEpic },
-  primordial: { color: colors.rarityPrimordial }
-})
+// jsdom은 색을 계산하지 않으므로 색 utility class가 붙었는지로 색을 확인한다.
+const tones = {
+  reinforce: 'text-game-enhance',
+  amplify: 'text-game-amplify',
+  refine: 'text-game-refine',
+  success: 'text-fg-success',
+  failure: 'text-fg-danger',
+  epic: 'text-rarity-epic',
+  primordial: 'text-rarity-primordial'
+} as const
 
 function hasTone(element: Element, tone: keyof typeof tones): boolean {
-  return element.className.split(' ').includes(stylex.props(tones[tone]).className ?? '')
+  return element.className.split(' ').includes(tones[tone])
 }
 
 function detailOf(characterId = 'character-1'): CharacterDetailView {
