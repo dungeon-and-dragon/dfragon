@@ -180,6 +180,7 @@ try {
     { serverId: 'siroco', characterId: 'adventure-high' },
     { start: new Date('2024-01-01T00:00:00+09:00'), end: new Date('2024-01-31T00:00:00+09:00') },
     [401, 402, 403],
+    [],
     [
       item(401, new Date('2024-01-10T12:00:00+09:00'), '에픽', {
         before: 11,
