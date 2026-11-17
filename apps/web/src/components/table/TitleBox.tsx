@@ -1,6 +1,4 @@
-import * as stylex from '@stylexjs/stylex'
 import type { ReactNode } from 'react'
-import { styles } from './TitleBox.style'
 
 export function TitleBox({
   title,
@@ -10,9 +8,9 @@ export function TitleBox({
   children?: ReactNode
 }): React.JSX.Element {
   return (
-    <header {...stylex.props(styles.box)}>
-      <h1 {...stylex.props(styles.title)}>{title}</h1>
-      {children != null && <div {...stylex.props(styles.side)}>{children}</div>}
+    <header className="flex min-h-16 items-center justify-between gap-4 rounded-panel border border-line bg-canvas px-4 max-sm:flex-wrap max-sm:py-3">
+      <h1 className="m-0 text-xl font-semibold tracking-heading">{title}</h1>
+      {children != null && <div className="flex items-center gap-6">{children}</div>}
     </header>
   )
 }
@@ -25,9 +23,9 @@ export function TitleStat({
   value: ReactNode
 }): React.JSX.Element {
   return (
-    <div {...stylex.props(styles.stat)}>
-      <span {...stylex.props(styles.statLabel)}>{label}</span>
-      <span {...stylex.props(styles.statValue)}>{value}</span>
+    <div className="flex flex-col items-end gap-0.5">
+      <span className="text-xs font-medium text-fg-subtle">{label}</span>
+      <span className="font-mono text-xl font-semibold tabular-nums">{value}</span>
     </div>
   )
 }

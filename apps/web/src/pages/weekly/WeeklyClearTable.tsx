@@ -5,9 +5,11 @@ import { MISSING_VALUE } from '#core/capture/cards'
 import type { ClearName, WeeklyCharacter } from '#core/adventure-guild/adventure-weekly'
 import { CheckIcon } from '../../components/CheckIcon'
 import { CharacterCell } from '../../components/table/CharacterCell'
-import { styles as tableStyles } from '../../components/table/CharacterTable.style'
+import { tableClasses } from '../../components/table/table-classes'
 import { RankBadge } from '../../components/table/RankBadge'
 import { styles } from './WeeklyScreen.style'
+
+const { headCell, cell } = tableClasses
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -38,41 +40,28 @@ export function WeeklyClearTable({
   const headRows = clearNames.length > 0 ? 2 : 1
 
   return (
-    <table {...stylex.props(tableStyles.table)}>
+    <table className={tableClasses.table}>
       <colgroup>
-        <col {...stylex.props(tableStyles.rankColumn)} />
+        <col className={tableClasses.rankColumn} />
         <col />
-        <col {...stylex.props(tableStyles.fameColumn)} />
+        <col className={tableClasses.fameColumn} />
         {clearNames.map(({ kind, name }) => (
           <col key={`${kind}/${name}`} {...stylex.props(styles.clearColumn)} />
         ))}
       </colgroup>
       <thead>
         <tr>
-          <th
-            scope="col"
-            rowSpan={headRows}
-            {...stylex.props(tableStyles.headCell, tableStyles.center)}
-          >
+          <th scope="col" rowSpan={headRows} className={`${headCell} text-center`}>
             #
           </th>
-          <th scope="col" rowSpan={headRows} {...stylex.props(tableStyles.headCell)}>
+          <th scope="col" rowSpan={headRows} className={`${headCell} text-left`}>
             캐릭터
           </th>
-          <th
-            scope="col"
-            rowSpan={headRows}
-            {...stylex.props(tableStyles.headCell, tableStyles.right)}
-          >
+          <th scope="col" rowSpan={headRows} className={`${headCell} text-right`}>
             명성
           </th>
           {groups.map(({ label, span }) => (
-            <th
-              key={label}
-              scope="colgroup"
-              colSpan={span}
-              {...stylex.props(tableStyles.headCell, tableStyles.center)}
-            >
+            <th key={label} scope="colgroup" colSpan={span} className={`${headCell} text-center`}>
               {label}
             </th>
           ))}
@@ -80,34 +69,27 @@ export function WeeklyClearTable({
         {clearNames.length > 0 && (
           <tr>
             {clearNames.map(({ kind, name }) => (
-              <th
-                key={`${kind}/${name}`}
-                scope="col"
-                {...stylex.props(tableStyles.headCell, tableStyles.center, styles.clearName)}
-              >
+              <th key={`${kind}/${name}`} scope="col" className={`${headCell} text-center`}>
                 {name}
               </th>
             ))}
           </tr>
         )}
       </thead>
-      <tbody>
+      <tbody className={tableClasses.body}>
         {rows.map((row, index) => (
-          <tr key={`${row.serverId}/${row.characterId}`}>
-            <td {...stylex.props(tableStyles.cell, tableStyles.center)}>
+          <tr key={`${row.serverId}/${row.characterId}`} className={tableClasses.row}>
+            <td className={`${cell} text-center`}>
               <RankBadge rank={index + 1} />
             </td>
-            <td {...stylex.props(tableStyles.cell)}>
+            <td className={cell}>
               <CharacterCell character={row} />
             </td>
-            <td {...stylex.props(tableStyles.cell, tableStyles.right, tableStyles.fame)}>
+            <td className={`${cell} ${tableClasses.fame}`}>
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
             </td>
             {clearNames.map((clearName) => (
-              <td
-                key={`${clearName.kind}/${clearName.name}`}
-                {...stylex.props(tableStyles.cell, tableStyles.center)}
-              >
+              <td key={`${clearName.kind}/${clearName.name}`} className={`${cell} text-center`}>
                 <ClearMark cleared={isCleared(row, clearName)} />
               </td>
             ))}
