@@ -41,7 +41,9 @@ pnpm verify
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
 | 운영 app | `pnpm --filter @dfragon/ops run --sequential '/^(lint\|test)$/'` |
 | 운영 화면 | `pnpm --filter @dfragon/internal run --sequential '/^(test\|lint\|build)$/'` |
-| 디자인 package | `pnpm --filter @dfragon/design run --sequential '/^(lint\|test)$/'`와 Web, 운영 화면 행 |
+| 디자인 package | `pnpm --filter @dfragon/design run --sequential '/^(lint\|test)$/'`와 Web, 운영 화면, Storybook 행 |
+| 공용 UI | `pnpm --filter @dfragon/ui run --sequential '/^(lint\|test)$/'`와 Web, 운영 화면, Storybook 행 |
+| Storybook | `pnpm --filter @dfragon/storybook run --sequential '/^(test\|lint\|build)$/'` |
 | 루트 도구 | `pnpm test:tooling`과 고친 스크립트의 `node --check` |
 
 정적 검사만 실행할 때는 `pnpm check:static`을 씁니다. `lint`, `format:check`, `check:writing`, `check:docs`를 `pnpm verify`와 같은 순서로 실행하고 먼저 실패한 검사에서 멈춥니다.
