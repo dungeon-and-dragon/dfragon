@@ -31,10 +31,10 @@ async function checkFixture(t, files) {
   }
 }
 
-test('던삐삐 표기, 식별자, 합니다체와 하세요체는 통과한다', async (t) => {
+test('DFragon 표기, 식별자, 합니다체와 하세요체는 통과한다', async (t) => {
   const result = await checkFixture(t, {
     'allowed.md': [
-      '던삐삐 Desktop은 던파 창을 찾습니다.',
+      'DFragon Desktop은 던파 창을 찾습니다.',
       '포터블 파일 이름은 DFragon 접두어로 시작합니다.',
       'DFRAGON_DISTRIBUTION_API_ORIGIN=https://api.example.test',
       '__DFRAGON_CHANNEL__, @dfragon/ui, dfragon://auth/callback, notices/DFRAGON-MODIFICATIONS.txt',
