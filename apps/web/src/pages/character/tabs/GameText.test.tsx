@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { GameTextLines, GameTextTone } from '#core/catalog/game-text'
+import type { GameTextLines, GameTextTone } from '#core/catalog'
 import { GameText } from './GameText'
 import { gameTextToneClasses } from './game-text-tones'
 

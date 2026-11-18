@@ -1,12 +1,15 @@
-import type { SnapshotMark } from '#core/capture/adventure-snapshot'
-import { toCandidatePicker } from '#core/capture/candidate-picker'
-import type { CharacterCard, CharacterTier } from '#core/capture/cards-types'
-import { type SlotCard, toSlotCards } from '#core/capture/slot-cards'
-import type { SearchMode } from '#core/capture/search-mode'
-import type { SelectedCharacterSummary } from '#core/character/character'
-import type { CharacterChoice, SearchSlot, SearchSnapshot } from '#core/search/search'
-import { bufferCard, dealerCard } from '#core/testing/character-cards'
-import { CAPTURE_ID } from '#core/testing/search-test-fixture'
+import {
+  type CharacterCard,
+  type CharacterTier,
+  type SearchMode,
+  type SlotCard,
+  type SnapshotMark,
+  toCandidatePicker,
+  toSlotCards
+} from '#core/capture'
+import type { SelectedCharacterSummary } from '#core/character'
+import type { CharacterChoice, SearchSlot, SearchSnapshot } from '#core/search'
+import { bufferCard, CAPTURE_ID, dealerCard } from '#core/testing'
 import type { BrowserHost } from '../../host/client-host'
 import characterImage from '../fixtures/mvp/assets/character.png'
 import { createStoryClientHost } from './story-host'

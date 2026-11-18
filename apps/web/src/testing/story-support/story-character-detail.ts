@@ -1,10 +1,6 @@
-import type { GameTextLines } from '#core/catalog/game-text'
-import type { OathCatalog } from '#core/catalog/oath-catalog'
-import type { SkillWindowCatalog } from '#core/catalog/skill-window'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
-import type { CharacterHistory } from '#core/character/character-history'
-import type { CharacterTimeline } from '#core/character/character-timeline'
-import { characterDetailFixture } from '#core/testing/character-detail'
+import type { GameTextLines, OathCatalog, SkillWindowCatalog } from '#core/catalog'
+import type { CharacterDetailView, CharacterHistory, CharacterTimeline } from '#core/character'
+import { characterDetailFixture } from '#core/testing'
 
 // 캐릭터 상세 화면 테스트의 fixture를 story에 옮긴 값이다. 이름, 소속과 그림 주소는 실제 캐릭터가 아닌 합성 값이다.
 
