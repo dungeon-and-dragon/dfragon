@@ -169,9 +169,11 @@
 }
 
 .stat-value {
+  font-family: var(--font-mono);
   font-size: var(--text-xl);
   line-height: var(--text-xl--line-height);
   font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (width < 600px) {
