@@ -1,12 +1,8 @@
-import {
-  CHARACTER_SERVER_NAMES,
-  characterImageUrl,
-  displayJobName,
-  isMaxLevel
-} from '#core/character'
+import { characterImageUrl, displayJobName, isMaxLevel } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import type { StoredCharacter } from '#core/ranking'
 import { Portrait } from '#components/Portrait'
+import { ServerBadge } from '#components/ServerBadge'
 
 export type CharacterCellCharacter = Pick<
   StoredCharacter,
@@ -30,9 +26,7 @@ export function CharacterCell({
       </span>
       <span className="flex min-w-0 flex-col gap-1">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="badge bg-inset text-fg-muted">
-            {CHARACTER_SERVER_NAMES[character.serverId]}
-          </span>
+          <ServerBadge serverId={character.serverId} />
           <Link
             to="/c/$serverId/$characterId"
             params={{ serverId: character.serverId, characterId: character.characterId }}

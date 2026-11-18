@@ -1,13 +1,9 @@
 import { CloseIcon, Popover } from '@dfragon/ui'
-import {
-  CHARACTER_SERVER_NAMES,
-  characterImageUrl,
-  displayJobName,
-  isMaxLevel
-} from '#core/character'
+import { characterImageUrl, displayJobName, isMaxLevel } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import { type KeyboardEvent, type RefObject, useId } from 'react'
 import { MISSING_VALUE } from '#core/capture'
+import { ServerBadge } from '#components/ServerBadge'
 import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
 import { type RecentCharacter, useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
 import type { CharacterDisplay } from '#lib/stored-character'
@@ -198,9 +194,7 @@ function RecentItem({
       </span>
       <span className="flex min-w-0 grow flex-col">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="badge bg-control text-fg-muted">
-            {CHARACTER_SERVER_NAMES[character.serverId]}
-          </span>
+          <ServerBadge serverId={character.serverId} surface="control" />
           <span className="truncate text-sm font-semibold">{character.characterName}</span>
           {job != null && (
             <span className="shrink-0 text-xs whitespace-nowrap text-fg-muted">{job}</span>
