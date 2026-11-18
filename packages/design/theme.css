@@ -5,7 +5,7 @@
  * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 모드 고르기는 base.css가 color-scheme으로 한다.
  * 상황별 색의 옅은 면(--color-*-weak)은 canvas 위에 그 색을 다크 14%, 라이트 10%로 섞은 불투명 값이다.
  * 반투명이면 hover, 선택 행 바탕과 섞여 어두워져 글자 명암비가 떨어진다.
- * 글자, radius, breakpoint, 곡선, 간격, 컨테이너 폭은 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
+ * 글자, radius, breakpoint, 곡선, 간격, 컨테이너 폭, 그림자, animate는 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
  * 원색 단계(--gray-*)는 :root에 두어 utility가 생기지 않게 하고, 역할 이름만 @theme로 내보낸다.
  */
 :root {
@@ -43,6 +43,11 @@
   --ease-*: initial;
   --spacing-*: initial;
   --container-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --animate-*: initial;
 
   /* 페이지, 패널, 상단 바의 바탕 */
   --color-canvas: light-dark(var(--gray-0), var(--gray-950));
@@ -188,6 +193,8 @@
   --shadow-popover: 0 8px 24px light-dark(rgb(0 0 0 / 12%), rgb(0 0 0 / 45%));
   /* 툴팁 */
   --shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
+  /* 선택 표시. 신호색 1px 선(border-signal) 바깥에 1px을 더해 2px 선으로 보이게 한다. */
+  --shadow-selected: 0 0 0 1px var(--color-signal);
 
   /* 간격 단계. 이름은 Tailwind CSS의 숫자다(p-3은 12px). 여기 없는 숫자는 utility가 생기지 않는다. */
   --spacing-0: 0px;
@@ -230,10 +237,12 @@
   /* 패널 */
   --radius-panel: 4px;
 
+  /* 같은 상자 안에서 형제 요소 위에 올리는 tooltip, 넘김 버튼, 선택 막대 */
+  --z-index-raised: 1;
   /* 팝오버, 후보 목록, listbox */
-  --z-popover: 110;
+  --z-index-popover: 110;
   /* 툴팁 */
-  --z-tooltip: 120;
+  --z-index-tooltip: 120;
 
   /* 이 폭부터 휴대폰보다 넓은 화면으로 본다. 그보다 좁은 화면은 max-sm으로 고른다. */
   --breakpoint-sm: 600px;
@@ -244,6 +253,9 @@
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   /* hover 전환 */
   --duration-hover: 120ms;
+  /* transition-colors처럼 시간을 적지 않은 전환은 hover 전환이다. */
+  --default-transition-duration: var(--duration-hover);
+  --default-transition-timing-function: var(--ease-standard);
   /* 열림, 선택 같은 상태 전환 */
   --duration-state: 180ms;
   /* 숫자 증가(NumericText) */
@@ -252,6 +264,8 @@
   --cycle: 4s;
   /* 실시간 표시 점의 깜빡임 */
   --beat: 0.9s;
+  /* 새로고침, 불러오는 중의 회전. 버튼과 progress의 spinner처럼 8단으로 돈다. */
+  --animate-spin: spin var(--beat) steps(8, end) infinite;
 
   /* 본문 글꼴 */
   --font-sans:
@@ -268,6 +282,9 @@
   --font-weight-semibold: 600;
   /* 화면 제목, 상단 바의 제품 이름 */
   --font-weight-bold: 700;
+
+  /* 여러 줄인 게임 효과 문구(text-xs) */
+  --leading-relaxed: 20px;
 
   /* 태그 */
   --text-2xs: 11px;
@@ -292,6 +309,12 @@
   --tracking-heading: -0.01em;
   /* 화면 제목 */
   --tracking-display: -0.02em;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

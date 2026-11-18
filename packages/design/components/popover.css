@@ -5,7 +5,7 @@
  * 안쪽 배치와 폭은 화면이 정한다. 열리고 닫힐 때 data-starting-style, data-ending-style 동안 투명해진다.
  */
 .popover-positioner {
-  z-index: var(--z-popover);
+  z-index: var(--z-index-popover);
   outline: none;
 }
 
