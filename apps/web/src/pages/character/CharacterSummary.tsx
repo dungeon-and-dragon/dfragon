@@ -19,10 +19,10 @@ const integer = new Intl.NumberFormat('ko-KR')
 const REFRESH_INTERVAL_MS = 60_000
 
 const SUMMARY = 'flex flex-wrap items-center gap-6 rounded-panel border border-line bg-canvas p-6'
-const WELL = 'relative h-28 w-24 shrink-0 overflow-hidden rounded-control bg-inset'
-const IDENTITY = 'flex min-w-0 grow basis-70 flex-col gap-2'
+const WELL = 'relative h-[112px] w-[96px] shrink-0 overflow-hidden rounded-control bg-inset'
+const IDENTITY = 'flex min-w-0 grow basis-[280px] flex-col gap-2'
 const STATS = 'flex shrink-0 gap-12'
-const STAT = 'flex min-w-26 flex-col items-end gap-1'
+const STAT = 'flex min-w-[104px] flex-col items-end gap-1'
 const STAT_LABEL = 'text-xs font-medium text-fg-subtle'
 const STAT_VALUE = 'font-mono text-xl font-semibold tabular-nums'
 const LINE = 'flex items-center gap-2 whitespace-nowrap'
@@ -90,7 +90,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
           />
         </div>
         <div className={LINE}>
-          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-2 text-xs font-medium text-fg-muted">
+          <span className="badge bg-inset text-fg-muted">
             {CHARACTER_SERVER_NAMES[character.serverId]}
           </span>
           {job != null && <span className="text-fg-muted">{job}</span>}
@@ -102,7 +102,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
           <div className={LINE}>
             {affiliations.map(({ id, name, tone, link }, index) => (
               <span key={id} className="inline-flex items-center gap-2">
-                {index > 0 && <span aria-hidden="true" className="h-2.5 w-px bg-line-strong" />}
+                {index > 0 && <span aria-hidden="true" className="h-[10px] w-px bg-line-strong" />}
                 {link || <span className={tone}>{name}</span>}
               </span>
             ))}

@@ -14,7 +14,7 @@ import {
   WeeklyClears
 } from './timeline/TimelineSections'
 
-const STATE = 'flex min-h-90 items-center justify-center gap-2 px-4 text-center text-sm'
+const STATE = 'flex min-h-[360px] items-center justify-center gap-2 px-4 text-center text-sm'
 
 export function TimelineTab({ detail }: CharacterTabProps): React.JSX.Element {
   const result = useCharacterTimeline(detail)

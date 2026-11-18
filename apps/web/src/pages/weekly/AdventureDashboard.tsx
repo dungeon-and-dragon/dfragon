@@ -10,7 +10,7 @@ import { seasonHasLegion } from './season-legion'
 import { SeasonTimeline } from './SeasonTimeline'
 
 const HERO =
-  'relative flex min-h-55 flex-col justify-between gap-6 overflow-hidden border-t border-line bg-canvas px-4 pt-6 pb-4'
+  'relative flex min-h-[220px] flex-col justify-between gap-6 overflow-hidden border-t border-line bg-canvas px-4 pt-6 pb-4'
 const CONTENT = 'relative flex flex-col gap-1'
 const TITLE = 'm-0 text-xl font-semibold tracking-heading break-keep [overflow-wrap:anywhere]'
 const PERIOD = 'font-mono text-xs tabular-nums text-fg-muted'
@@ -120,7 +120,7 @@ export function AdventureDashboard({
           onBackfill={backfill}
         />
       ) : (
-        <div aria-hidden="true" className="h-13" />
+        <div aria-hidden="true" className="h-[52px]" />
       )}
       <DashboardHero
         adventureName={adventureName}

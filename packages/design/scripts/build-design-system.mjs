@@ -49,6 +49,7 @@ const FAMILY_BY_PREFIX = [
   ['--spacing', 'spacing'],
   ['--height-', 'size'],
   ['--container-', 'size'],
+  ['--size-', 'size'],
   ['--radius-', 'radius'],
   ['--ease-', 'easing'],
   ['--duration-', 'duration'],

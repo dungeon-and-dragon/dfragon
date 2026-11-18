@@ -55,7 +55,7 @@ function UpgradeRows({
               <img
                 src={skillMarkOf(marks, kind, type)}
                 alt={kind === 'evolution' ? EVOLUTION_NUMERALS[type] : ''}
-                className={`${kind === 'evolution' ? 'size-[17px]' : 'size-4.5'} ${PIXELATED}`}
+                className={`${kind === 'evolution' ? 'size-[17px]' : 'size-[18px]'} ${PIXELATED}`}
               />
               {names[index]}
             </span>
@@ -93,7 +93,7 @@ export function SkillAdoptionTooltip({
 
   return (
     // 시안의 Tooltip은 위아래 8px이라 공통 Tooltip 틀(4px)에 4px을 더한다. 최소 폭 200px에서 좌우 여백 24px을 뺀 176px이다.
-    <span className="flex min-w-44 flex-col gap-1 py-1 text-xs">
+    <span className="flex min-w-[176px] flex-col gap-1 py-1 text-xs">
       <span className="text-sm font-semibold">{name}</span>
       <span className={ROWS}>
         <span className={LABEL}>채택률</span>

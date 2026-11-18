@@ -55,9 +55,8 @@ const LEVEL_FILLS = [
 // GitHub contribution 그래프처럼 칸 크기를 고정하고, 범례 견본과 같은 12px로 둔다.
 const CELL = 'relative box-border block size-3 rounded-control'
 const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
-const LABEL = 'text-2xs leading-3.5 whitespace-nowrap text-fg-subtle'
-const TAG =
-  'box-border inline-flex h-4.5 items-center rounded-badge border border-current px-1 text-2xs font-medium whitespace-nowrap tabular-nums'
+const LABEL = 'text-2xs leading-[14px] whitespace-nowrap text-fg-subtle'
+const TAG = 'badge badge-sm border border-current tabular-nums'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 const BOX =
   'relative grid grid-cols-[minmax(0,1fr)_120px] rounded-panel border border-line bg-canvas xl:grid-cols-[minmax(0,1fr)]'
@@ -66,7 +65,7 @@ const BOX =
 const RING =
   'pointer-events-none absolute rounded-[3px] [mask-clip:content-box,border-box] [mask-composite:exclude] [mask-image:linear-gradient(#000_0_0),linear-gradient(#000_0_0)]'
 const RING_FRAMES: Readonly<Record<'frame' | 'glow', string>> = {
-  frame: '-inset-[3px] p-0.5',
+  frame: '-inset-[3px] p-[2px]',
   glow: '-inset-1 p-[3px] opacity-35 blur-[3px]'
 }
 const RING_FILLS: Readonly<Record<RingHighlight, string>> = {
@@ -355,7 +354,7 @@ function HeatmapPanel({
 
   return (
     <>
-      <div className="flex min-h-4.5 items-center justify-between gap-4 px-4 pt-3">
+      <div className="flex min-h-[18px] items-center justify-between gap-4 px-4 pt-3">
         {kind === 'item' && <ItemTags items={activity.summary.items} />}
         <Legend kind={kind} thresholds={thresholds} />
       </div>
@@ -406,7 +405,7 @@ export function ActivityHeatmap({
 
   const activity = result.status === 'success' && !result.previous ? result.value : undefined
   if (activity === undefined) {
-    return <div aria-hidden="true" className={`${BOX} min-h-70`} />
+    return <div aria-hidden="true" className={`${BOX} min-h-[280px]`} />
   }
 
   const range = activity.season
@@ -442,7 +441,7 @@ export function ActivityHeatmap({
       ))}
       <Tabs.List
         aria-label="활동 종류"
-        className="relative flex flex-col border-l border-line py-3 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-30 xl:py-0"
+        className="relative flex flex-col border-l border-line py-3 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-[120px] xl:py-0"
       >
         {kinds.map(({ kind: tabKind, label }) => (
           <Tabs.Tab
@@ -453,7 +452,7 @@ export function ActivityHeatmap({
             {label}
           </Tabs.Tab>
         ))}
-        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-0.5 bg-signal transition-[top,height] duration-(--duration-hover) ease-standard" />
+        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-[2px] bg-signal transition-[top,height] duration-(--duration-hover) ease-standard" />
       </Tabs.List>
     </Tabs.Root>
   )

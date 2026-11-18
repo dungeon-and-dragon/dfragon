@@ -43,7 +43,7 @@ export function WeeklyClearTable({
         <col />
         <col className={tableClasses.fameColumn} />
         {clearNames.map(({ kind, name }) => (
-          <col key={`${kind}/${name}`} className="w-24" />
+          <col key={`${kind}/${name}`} className="w-[96px]" />
         ))}
       </colgroup>
       <thead>
@@ -102,7 +102,7 @@ function ClearMark({ cleared }: { cleared: boolean }): React.JSX.Element {
   return (
     <>
       {cleared ? (
-        <CheckIcon className="inline-block size-4 align-middle text-fg-success" />
+        <CheckIcon className="inline-block size-icon-sm align-middle text-fg-success" />
       ) : (
         <span
           aria-hidden="true"

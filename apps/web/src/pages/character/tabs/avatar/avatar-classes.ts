@@ -1,7 +1,7 @@
 export const avatarClasses = {
-  slotColumn: 'w-22',
-  optionColumn: 'w-60',
-  emblemColumn: 'w-65',
+  slotColumn: 'w-[88px]',
+  optionColumn: 'w-[240px]',
+  emblemColumn: 'w-[260px]',
   clone: 'min-w-0 truncate text-xs text-fg-subtle',
   stack: 'flex min-w-0 flex-col gap-1'
 } as const

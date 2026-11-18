@@ -1,0 +1,23 @@
+/*
+ * <span class="badge bg-inset text-fg-muted">본캐</span>, 작은 태그는 <span class="badge badge-sm border border-current">105</span>.
+ * 색, 테두리, 굵기는 화면이 utility로 정한다.
+ */
+.badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  box-sizing: border-box;
+  height: 20px;
+  padding-inline: 8px;
+  border-radius: var(--radius-badge);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.badge-sm {
+  padding-inline: 4px;
+  font-size: var(--text-2xs);
+  line-height: var(--text-2xs--line-height);
+}

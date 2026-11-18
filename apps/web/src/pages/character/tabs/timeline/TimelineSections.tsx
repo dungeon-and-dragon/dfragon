@@ -35,11 +35,10 @@ const ENHANCEMENT_KIND_TONES: Readonly<Record<TimelineEnhancement['kind'], strin
   refine: 'text-game-refine'
 }
 
-const BADGE =
-  'inline-flex h-5 shrink-0 items-center rounded-badge px-2 text-xs font-medium whitespace-nowrap text-fg-muted'
+const BADGE = 'badge text-fg-muted'
 const TABLE = 'w-full table-fixed border-collapse'
 const CELL = 'h-row truncate border-t border-line px-3 first:pl-4 last:pr-4'
-const TIME_COLUMN = 'w-28'
+const TIME_COLUMN = 'w-[112px]'
 const MORE =
   'flex min-h-12 items-center justify-center gap-2 border-t border-line px-4 text-fg-muted'
 
@@ -210,10 +209,10 @@ export function Enhancements({
       <table className={TABLE}>
         <colgroup>
           <col className={TIME_COLUMN} />
-          <col className="w-14" />
+          <col className="w-[56px]" />
           <col />
-          <col className="w-20" />
-          <col className="w-24" />
+          <col className="w-[80px]" />
+          <col className="w-[96px]" />
         </colgroup>
         <thead>
           <tr>
@@ -274,7 +273,7 @@ export function Acquisitions({
         <colgroup>
           <col className={TIME_COLUMN} />
           <col />
-          <col className="w-35" />
+          <col className="w-[140px]" />
         </colgroup>
         <thead>
           <tr>

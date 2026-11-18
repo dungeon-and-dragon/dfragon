@@ -29,7 +29,7 @@ export function RunProgress({
       {percent !== undefined && (
         <span
           aria-hidden="true"
-          className={`shrink-0 overflow-hidden rounded-badge bg-control ${wide ? 'h-2 w-80 max-sm:w-40' : 'h-1.5 w-22'}`}
+          className={`shrink-0 overflow-hidden rounded-badge bg-control ${wide ? 'h-2 w-[320px] max-sm:w-[160px]' : 'h-[6px] w-[88px]'}`}
         >
           <i className="block h-full bg-fg-muted" style={{ width: `${percent}%` }} />
         </span>

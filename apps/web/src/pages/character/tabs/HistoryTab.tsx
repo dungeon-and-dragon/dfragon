@@ -34,10 +34,10 @@ const FAME = 'text-game-fame'
 const STRIP = `box-border flex min-h-12 items-center px-4 py-2 ${LINE}`
 const DELTA_TONES = { up: 'text-game-increase', down: 'text-game-decrease' } as const
 const POINT =
-  'relative m-0 box-border flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-none border-0 px-4 py-2 text-left [font-family:inherit] text-sm text-fg outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal'
+  'relative m-0 box-border flex min-h-[56px] w-full cursor-pointer items-center gap-3 rounded-none border-0 px-4 py-2 text-left [font-family:inherit] text-sm text-fg outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal'
 const POINT_IDLE = 'bg-transparent hover:bg-surface'
 const POINT_SELECTED =
-  'bg-surface before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-signal'
+  'bg-surface before:absolute before:inset-y-0 before:left-0 before:w-[2px] before:bg-signal'
 
 export function HistoryTab({ detail }: CharacterTabProps): React.JSX.Element {
   const { serverId, characterId } = detail.character
@@ -170,7 +170,7 @@ function PointButton({
         className={`${POINT} ${selected ? POINT_SELECTED : POINT_IDLE}`}
       >
         <span
-          className={`w-24 shrink-0 font-mono tabular-nums ${selected ? 'font-semibold text-fg' : 'font-medium text-fg-muted'}`}
+          className={`w-[96px] shrink-0 font-mono tabular-nums ${selected ? 'font-semibold text-fg' : 'font-medium text-fg-muted'}`}
         >
           {time}
         </span>
@@ -359,7 +359,7 @@ function Tile({
   return (
     <div className="m-0 flex flex-col gap-1 border-s border-line p-4 first:border-s-0">
       <dt className="text-xs text-fg-subtle">{label}</dt>
-      <dd className={`m-0 font-mono text-xl/8 font-semibold tabular-nums ${tone ?? ''}`}>
+      <dd className={`m-0 font-mono text-xl leading-8 font-semibold tabular-nums ${tone ?? ''}`}>
         {value}
       </dd>
       <dd className={`ms-0 mt-1 text-right font-mono text-2xs tabular-nums ${deltaTone}`}>

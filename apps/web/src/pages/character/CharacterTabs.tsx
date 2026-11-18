@@ -5,7 +5,7 @@ import { CHARACTER_TABS, type CharacterTab, isCharacterTab } from './character-t
 const ROOT = 'flex flex-col rounded-panel border border-line bg-canvas'
 // 내용이 아직 없는 탭과 받는 중, 오류 상태가 같은 높이를 차지해 패널이 접히지 않게 한다.
 const PANEL =
-  'min-h-90 rounded-b-panel text-sm outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal'
+  'min-h-[360px] rounded-b-panel text-sm outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal'
 
 export function CharacterTabs({
   tab,
@@ -46,7 +46,7 @@ export function CharacterTabsSkeleton(): React.JSX.Element {
     <div aria-hidden="true" className={ROOT}>
       <div className="flex h-12 shrink-0 items-center gap-6 overflow-hidden border-b border-line px-4">
         {CHARACTER_TABS.map(({ id }) => (
-          <span key={id} className="block h-3.5 w-14 rounded-control bg-inset" />
+          <span key={id} className="block h-[14px] w-[56px] rounded-control bg-inset" />
         ))}
       </div>
       <div className={PANEL} />

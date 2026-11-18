@@ -24,7 +24,7 @@ export function BuffGearTable({
 }): React.JSX.Element {
   return (
     <div className={scroll}>
-      <table className={`${table} min-w-200`}>
+      <table className={`${table} min-w-[800px]`}>
         <thead>
           <tr>
             <th scope="col" className={`${head} ${avatarClasses.slotColumn}`}>
