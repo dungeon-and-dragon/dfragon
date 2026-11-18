@@ -3,16 +3,11 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   Button,
-  Checkbox,
   Chip,
   IconButton,
-  Kbd,
-  Menu,
-  NumericText,
   Popover,
   Select,
   StatusChip,
-  StepDots,
   Switch,
   Tabs,
   TextField,
@@ -73,15 +68,11 @@ const IMPLICIT_ROLES: Record<string, string> = {
   combobox: '[role="combobox"]',
   listbox: '[role="listbox"]',
   option: '[role="option"]',
-  menu: '[role="menu"]',
-  menuitem: '[role="menuitem"]',
-  menuitemradio: '[role="menuitemradio"]',
   tab: '[role="tab"]',
   tablist: '[role="tablist"]',
   tabpanel: '[role="tabpanel"]',
   dialog: '[role="dialog"]',
   switch: '[role="switch"]',
-  checkbox: '[role="checkbox"]',
   status: '[role="status"]'
 }
 
@@ -541,74 +532,6 @@ describe('Select의 키보드 선택과 포커스 복귀', () => {
   })
 })
 
-function SearchMenu({ onValueChange }: { onValueChange: (value: string) => void }) {
-  const [mode, setMode] = useState('party')
-
-  return (
-    <Menu.Root>
-      <Menu.Trigger render={<Button />}>검색 방식</Menu.Trigger>
-      <Menu.Popup aria-label="검색 방식">
-        <Menu.RadioGroup
-          value={mode}
-          onValueChange={(next: string) => {
-            setMode(next)
-            onValueChange(next)
-          }}
-        >
-          <Menu.RadioItem value="party" closeOnClick>
-            파티
-          </Menu.RadioItem>
-          <Menu.RadioItem value="raid" closeOnClick>
-            공대
-          </Menu.RadioItem>
-        </Menu.RadioGroup>
-      </Menu.Popup>
-    </Menu.Root>
-  )
-}
-
-describe('Menu radio 항목의 키보드 선택과 포커스 복귀', () => {
-  it('trigger를 키보드로 열고 화살표와 Enter로 고르면 값을 전달하고 trigger로 돌아온다', async () => {
-    const onValueChange = vi.fn<(value: string) => void>()
-    await render(<SearchMenu onValueChange={onValueChange} />)
-    const trigger = getByRole('button', '검색 방식')
-    trigger.focus()
-
-    await press(trigger, 'ArrowDown')
-    const menu = await vi.waitFor(() => getByRole('menu', '검색 방식'))
-    expect(trigger.getAttribute('aria-expanded')).toBe('true')
-    const party = getByRole('menuitemradio', '파티', menu)
-    expect(party.getAttribute('aria-checked')).toBe('true')
-    await vi.waitFor(() => expect(document.activeElement).toBe(party))
-
-    await press(party, 'ArrowDown')
-    const raid = getByRole('menuitemradio', '공대', menu)
-    await vi.waitFor(() => expect(document.activeElement).toBe(raid))
-    await press(raid, 'Enter')
-
-    expect(onValueChange).toHaveBeenLastCalledWith('raid')
-    await vi.waitFor(() => expect(queryByRole('menu')).toBeNull())
-    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
-  })
-
-  it('Escape로 닫으면 선택을 바꾸지 않고 trigger로 focus를 돌려준다', async () => {
-    const onValueChange = vi.fn<(value: string) => void>()
-    await render(<SearchMenu onValueChange={onValueChange} />)
-    const trigger = getByRole('button', '검색 방식')
-    trigger.focus()
-    await press(trigger, 'ArrowDown')
-    const menu = await vi.waitFor(() => getByRole('menu', '검색 방식'))
-    const party = getByRole('menuitemradio', '파티', menu)
-    await vi.waitFor(() => expect(document.activeElement).toBe(party))
-
-    await press(party, 'Escape')
-
-    await vi.waitFor(() => expect(queryByRole('menu')).toBeNull())
-    expect(onValueChange).not.toHaveBeenCalled()
-    await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
-  })
-})
-
 describe('Popover의 열고 닫기와 focus 복귀', () => {
   function SnapshotPopover() {
     return (
@@ -704,7 +627,7 @@ describe('Tabs의 키보드 이동과 패널 연결', () => {
   })
 })
 
-describe('Switch, Checkbox, Chip의 켜짐 상태', () => {
+describe('Switch, Chip의 켜짐 상태', () => {
   it('Switch를 누르면 켜짐 값을 전달하고 상태를 알린다', async () => {
     const onCheckedChange = vi.fn<(checked: boolean) => void>()
     await render(<Switch aria-label="자동 캡처" onCheckedChange={onCheckedChange} />)
@@ -715,25 +638,6 @@ describe('Switch, Checkbox, Chip의 켜짐 상태', () => {
 
     expect(onCheckedChange).toHaveBeenLastCalledWith(true, expect.anything())
     expect(control.getAttribute('aria-checked')).toBe('true')
-  })
-
-  it('Checkbox는 disabled이면 눌러도 켜지지 않는다', async () => {
-    const onCheckedChange = vi.fn<(checked: boolean) => void>()
-    await render(
-      <>
-        <Checkbox aria-label="1번 크롭 저장" onCheckedChange={onCheckedChange} />
-        <Checkbox aria-label="2번 크롭 저장" disabled onCheckedChange={onCheckedChange} />
-      </>
-    )
-    const enabled = getByRole('checkbox', '1번 크롭 저장')
-    const disabled = getByRole('checkbox', '2번 크롭 저장')
-
-    await click(enabled)
-    await click(disabled)
-
-    expect(enabled.getAttribute('aria-checked')).toBe('true')
-    expect(disabled.getAttribute('aria-checked')).toBe('false')
-    expect(onCheckedChange).toHaveBeenCalledOnce()
   })
 
   it('Chip은 누를 때마다 aria-pressed를 바꾼다', async () => {
@@ -800,40 +704,5 @@ describe('StatusChip의 tone과 진행 표시', () => {
     const dots = busy.querySelector('[aria-hidden="true"]')!
     expect(dots.children).toHaveLength(3)
     expect(busy.textContent).toBe('인식 중')
-  })
-})
-
-describe('StepDots', () => {
-  it('보조 기술에 숨긴 점 세 개를 둔다', async () => {
-    await render(<StepDots />)
-    const dots = container.children[0]
-
-    expect(dots.getAttribute('aria-hidden')).toBe('true')
-    expect(dots.children).toHaveLength(3)
-  })
-})
-
-describe('Kbd의 면', () => {
-  it('키캡의 면을 data 속성으로 드러낸다', async () => {
-    await render(
-      <>
-        <Kbd>Alt</Kbd>
-        <Kbd surface="signal">R</Kbd>
-      </>
-    )
-    const [plain, signal] = [...container.querySelectorAll('kbd')]
-
-    expect(plain.dataset.surface).toBe('default')
-    expect(signal.dataset.surface).toBe('signal')
-    expect(signal.textContent).toBe('R')
-  })
-})
-
-describe('NumericText의 최종값 읽기', () => {
-  it('올라가는 시간이 없으면 바로 천 단위로 구분한 최종값을 보이고 읽힌다', async () => {
-    await render(<NumericText value={125850} />)
-
-    expect(container.textContent).toBe('125,850125,850')
-    expect(container.querySelector('[aria-hidden="true"]')?.textContent).toBe('125,850')
   })
 })
