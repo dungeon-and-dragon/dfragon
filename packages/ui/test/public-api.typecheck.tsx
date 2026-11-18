@@ -6,7 +6,6 @@ import {
   ChipGroup,
   IconButton,
   Popover,
-  ProgressCircle,
   Select,
   StatusChip,
   Switch,
@@ -23,7 +22,6 @@ import {
   type IconButtonProps,
   type PopoverPopupProps,
   type PopoverTitleProps,
-  type ProgressCircleProps,
   type SelectItemProps,
   type SelectPopupProps,
   type SelectTriggerProps,
@@ -43,7 +41,6 @@ import {
 type PublicPropKeys =
   | keyof ButtonProps
   | keyof IconButtonProps
-  | keyof ProgressCircleProps
   | keyof TextFieldProps
   | keyof TextFieldLabelProps
   | keyof TextFieldInputProps
@@ -70,7 +67,6 @@ expectTypeOf<ButtonProps['variant']>().toEqualTypeOf<
 expectTypeOf<ButtonProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
 expectTypeOf<IconButtonProps['ref']>().toEqualTypeOf<Ref<HTMLButtonElement> | undefined>()
 expectTypeOf<IconButtonProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
-expectTypeOf<ProgressCircleProps['ref']>().toEqualTypeOf<Ref<SVGSVGElement> | undefined>()
 expectTypeOf<TextFieldProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>()
 expectTypeOf<TextFieldProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
 expectTypeOf<TextFieldErrorProps>().not.toHaveProperty('match')
@@ -84,7 +80,6 @@ expectTypeOf<StatusChipProps['size']>().toEqualTypeOf<'sm' | 'md' | undefined>()
 const buttonRef = createRef<HTMLButtonElement>()
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
-const svgRef = createRef<SVGSVGElement>()
 
 export const componentExamples = (
   <>
@@ -102,7 +97,6 @@ export const componentExamples = (
     >
       실행
     </Button>
-    <ProgressCircle ref={svgRef} value={50} size="24" tone="brand" aria-label="진행률" />
     <TextField ref={divRef} invalid size="lg">
       <TextFieldLabel>표시 이름</TextFieldLabel>
       <TextFieldInput
@@ -235,8 +229,6 @@ export const invalidComponentExamples = (
     <TextField size="medium">{null}</TextField>
     {/* @ts-expect-error TextFieldInput은 자식 요소 합성에 render를 쓴다. */}
     <TextFieldInput asChild />
-    {/* @ts-expect-error ProgressCircle의 ref는 SVG element를 가리킨다. */}
-    <ProgressCircle ref={inputRef} />
     {/* @ts-expect-error TextFieldInput의 ref는 input element를 가리킨다. */}
     <TextFieldInput ref={buttonRef} />
   </>
