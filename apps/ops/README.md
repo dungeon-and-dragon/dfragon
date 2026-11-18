@@ -17,6 +17,12 @@
 | Repository 계약 | `src/application/<기능>/repository.ts` | Service가 받는 `<기능>Repository` interface |
 | Repository 구현 | `src/infrastructure/database/<기능>.ts` | `@dfragon/database` 함수를 부르는 `Database<기능>Repository` |
 
+기능 폴더(`domain/<기능>/`, `application/<기능>/`, `infrastructure/<기술>/`, `presentation/http/<기능>/`)에는 `index.ts`를 둡니다(ADR 0070).
+`index.ts`는 폴더 밖에서 쓰는 이름만 `export { 이름 } from './파일.js'`로 다시 내보냅니다.
+폴더 밖에서는 `'../../application/<기능>/index.js'`처럼 `index.js`만 import하고, 같은 폴더 안의 파일끼리는 직접 import합니다.
+`application/<기능>/repository.ts`, `ports.ts`는 `index.ts`가 다시 내보내지 않고, infrastructure와 runtime이 파일을 직접 import합니다.
+계층 폴더 바로 아래의 파일과 `src/runtime/`은 파일을 직접 import합니다.
+
 여러 기능이 함께 쓰는 실패 종류는 `src/domain/failure.ts`, 실패 응답 표는 `src/presentation/http/failures.ts`, JSON 본문 검사와 읽기는 `src/presentation/http/json-request.ts`에 있습니다.
 `src/runtime/application.ts`가 Repository를, `src/runtime/routes/ops.ts`가 Service와 Controller를 `new`로 만들어 경로에 붙입니다.
 
