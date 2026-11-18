@@ -214,6 +214,17 @@ export type {
   SkillLevelCount,
   SkillSelectionCount
 } from './skill-adoption.js'
+export { readSetAdoption, replaceSetAdoption } from './set-adoption.js'
+export type {
+  EquipmentSetCount,
+  OathOptionCount,
+  OathSetCount,
+  SetAdoption,
+  SetAdoptionJob,
+  SetAdoptionQuery,
+  SetAdoptionReplacement,
+  SetComboCount
+} from './set-adoption.js'
 export { recordCharacterSkillStyle } from './skill-style.js'
 export { readSampleCharactersWithoutSkillStyle } from './skill-style-sample.js'
 export type { SkillStyleSampleCharacter, SkillStyleSampleJob } from './skill-style-sample.js'

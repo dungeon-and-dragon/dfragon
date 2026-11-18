@@ -1,6 +1,6 @@
 import type { MaleCrusaderRole, SkillStyleSampleJob } from '@dfragon/database'
 import { z } from 'zod'
-import { isMaleCrusaderJob } from '@dfragon/server-core/domain/male-crusader.js'
+import { MALE_CRUSADER_JOB, isMaleCrusaderJob } from '@dfragon/server-core/domain/male-crusader.js'
 import { roundAverageFame } from '#domain/ranking-stats/index.js'
 import { defineJob } from '#application/jobs/index.js'
 import type { StatsJobRepository } from './repository.js'
@@ -10,6 +10,8 @@ const DAILY_AT_MIDNIGHT = '0 0 * * *'
 // 82 전직에 22.5초 걸렸다. 운영 장비와 설정 차이를 감안해 열 배 넘게 둔다.
 const CHARACTER_STATS_DELAY_MINUTES = 5
 const SKILL_ADOPTION_DELAY_MINUTES = 10
+// 세트를 받은 캐릭터 100만 명의 합성 데이터(PostgreSQL 18.7)에서 2~3초 걸렸다. 위와 같이 넉넉히 둔다.
+const SET_ADOPTION_DELAY_MINUTES = 5
 
 function rolesOf(job: SkillStyleSampleJob): (MaleCrusaderRole | undefined)[] {
   if (isMaleCrusaderJob(job)) {
@@ -52,6 +54,16 @@ export class StatsJobService {
 
     return { jobGrows: jobGrows.length, deleted }
   }
+
+  async computeSetAdoption(): Promise<{ combinations: number }> {
+    const computedAt = this.now()
+    const combinations = await this.repository.replaceSetAdoption({
+      computedAt,
+      maleCrusader: MALE_CRUSADER_JOB
+    })
+
+    return { combinations }
+  }
 }
 
 export function createCharacterStatsJob(service: StatsJobService) {
@@ -75,5 +87,18 @@ export function createSkillAdoptionJob(service: StatsJobService) {
     argsSchema: z.object({}),
     delayMinutes: SKILL_ADOPTION_DELAY_MINUTES,
     run: (_args, { reportProgress }) => service.computeSkillAdoption(reportProgress)
+  })
+}
+
+export function createSetAdoptionJob(service: StatsJobService) {
+  return defineJob({
+    name: 'set-adoption',
+    displayName: '세트 선택 비율',
+    description:
+      '세트 값을 받은 캐릭터의 장비 세트, 서약 세트 선택 수를 전직별로 계산해 저장합니다.',
+    schedule: DAILY_AT_MIDNIGHT,
+    argsSchema: z.object({}),
+    delayMinutes: SET_ADOPTION_DELAY_MINUTES,
+    run: () => service.computeSetAdoption()
   })
 }

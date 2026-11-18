@@ -6,6 +6,8 @@ import type {
   JobSkillAdoption,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
+  SetAdoption,
+  SetAdoptionQuery,
   StoredCharacter
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
@@ -90,7 +92,8 @@ function adoptionSnapshot(job: JobSkillAdoptionQuery): JobSkillAdoptionSnapshot 
 const unusedReader: RankingStatsRepository = {
   readFameRanking: async () => assert.fail('랭킹을 읽으면 안 된다'),
   readCharacterStatsSnapshot: async () => assert.fail('통계를 읽으면 안 된다'),
-  readJobSkillAdoptionSnapshot: async () => assert.fail('스킬 채택률을 읽으면 안 된다')
+  readJobSkillAdoptionSnapshot: async () => assert.fail('스킬 채택률을 읽으면 안 된다'),
+  readSetAdoption: async () => assert.fail('세트 선택 수를 읽으면 안 된다')
 }
 
 async function listen(
@@ -153,7 +156,7 @@ test('명성 랭킹은 query의 직업과 전직, limit 100으로 읽고 serverI
   }
 })
 
-test('명성 랭킹은 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으로 거절한다', async () => {
+test('명성 랭킹과 세트 선택 수는 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으로 거절한다', async () => {
   const { app, origin } = await listen(unusedReader)
   try {
     for (const query of [
@@ -161,9 +164,11 @@ test('명성 랭킹은 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으
       'jobId=',
       'jobGrowId=synthetic-grow'
     ]) {
-      const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
-      assert.equal(status, 400, query)
-      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+      for (const path of ['/rankings/fame', '/stats/sets']) {
+        const { status, body } = await getJson(origin, `${path}?${query}`)
+        assert.equal(status, 400, `${path}?${query}`)
+        assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', `${path}?${query}`)
+      }
     }
   } finally {
     await app.close()
@@ -224,7 +229,7 @@ test('role은 남성 크루세이더 전직이 아니거나 값이 다르거나 
       `${maleCrusaderQuery}&role=`,
       `${maleCrusaderQuery}&role=dealer&role=buffer`
     ]) {
-      for (const path of ['/rankings/fame', '/stats/skills']) {
+      for (const path of ['/rankings/fame', '/stats/skills', '/stats/sets']) {
         const { status, body } = await getJson(origin, `${path}?${query}`)
         assert.equal(status, 400, `${path}?${query}`)
         assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', `${path}?${query}`)
@@ -309,7 +314,60 @@ test('명성 랭킹 DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준�
   }
 })
 
-test('DB 설정이 없는 API는 빈 랭킹과 0인 통계, computedAt null을 준다', async () => {
+const setAdoption: SetAdoption = {
+  computedAt,
+  sampleSize: 3,
+  equipmentSets: [
+    { setId: 'set-fairy', name: '소울 페어리 세트', count: 2 },
+    { setId: null, name: null, count: 1 }
+  ],
+  oathSets: [
+    {
+      setId: 16204,
+      name: '야망의 용투 서약',
+      count: 2,
+      options: [{ name: '용투 : 세계를 태우는 불꽃', count: 2 }]
+    },
+    { setId: null, name: null, count: 1, options: [{ name: null, count: 1 }] }
+  ],
+  combos: [
+    { equipmentSetId: 'set-fairy', oathSetId: 16204, count: 2 },
+    { equipmentSetId: null, oathSetId: null, count: 1 }
+  ]
+}
+
+test('세트 선택 수는 요청마다 query의 직업, 전직, 남성 크루세이더 role로 저장분을 읽어 계산 시각과 함께 준다', async () => {
+  const reads: SetAdoptionQuery[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readSetAdoption: async (query) => {
+      reads.push(query)
+
+      return setAdoption
+    }
+  })
+  try {
+    const all = await getJson(origin, '/stats/sets')
+    const job = await getJson(origin, '/stats/sets?jobId=synthetic-job')
+    const dealer = await getJson(origin, `/stats/sets?${maleCrusaderQuery}&role=dealer`)
+
+    assert.deepEqual(all, {
+      status: 200,
+      body: { ...setAdoption, computedAt: '2026-11-06T15:00:00.000Z' }
+    })
+    assert.equal(job.status, 200)
+    assert.equal(dealer.status, 200)
+    assert.deepEqual(reads, [
+      {},
+      { jobId: 'synthetic-job' },
+      { jobId: malePriestJobId, jobGrowId: crusaderGrowId, role: 'dealer' }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('DB 설정이 없는 API는 빈 랭킹, 0인 통계와 세트 선택 수, computedAt null을 준다', async () => {
   const { app, origin } = await listen()
   try {
     assert.deepEqual(await getJson(origin, '/rankings/fame'), {
@@ -319,6 +377,10 @@ test('DB 설정이 없는 API는 빈 랭킹과 0인 통계, computedAt null을 �
     assert.deepEqual(await getJson(origin, '/stats'), {
       status: 200,
       body: { total: 0, servers: [], jobs: [], fameDistribution: [], computedAt: null }
+    })
+    assert.deepEqual(await getJson(origin, '/stats/sets?jobId=synthetic-job'), {
+      status: 200,
+      body: { computedAt: null, sampleSize: 0, equipmentSets: [], oathSets: [], combos: [] }
     })
   } finally {
     await app.close()

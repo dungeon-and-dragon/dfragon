@@ -5,11 +5,13 @@ import {
   type JobSkillAdoption,
   type JobSkillAdoptionQuery,
   type JobSkillAdoptionSnapshot,
+  type SetAdoptionReplacement,
   type SkillStyleSampleJob,
   deleteJobSkillAdoptionComputedBefore,
   readCharacterStats,
   readFamedJobGrows,
   readJobSkillAdoption,
+  replaceSetAdoption,
   saveCharacterStats,
   saveJobSkillAdoption
 } from '@dfragon/database'
@@ -40,5 +42,9 @@ export class DatabaseStatsJobRepository implements StatsJobRepository {
 
   deleteJobSkillAdoptionComputedBefore(before: Date): Promise<number> {
     return deleteJobSkillAdoptionComputedBefore(this.client, before)
+  }
+
+  replaceSetAdoption(replacement: SetAdoptionReplacement): Promise<number> {
+    return replaceSetAdoption(this.client, replacement)
   }
 }

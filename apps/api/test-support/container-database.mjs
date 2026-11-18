@@ -54,6 +54,9 @@ const maleCrusaderRoleCheckPath = fileURLToPath(
 const statsSnapshotCheckPath = fileURLToPath(
   new URL('./container-stats-snapshot-check.mjs', import.meta.url)
 )
+const setAdoptionCheckPath = fileURLToPath(
+  new URL('./container-set-adoption-check.mjs', import.meta.url)
+)
 const contentClearCheckPath = fileURLToPath(
   new URL('./container-content-clear-check.mjs', import.meta.url)
 )
@@ -431,7 +434,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '25'
+    '26'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -757,6 +760,9 @@ try {
   stage = 'stats snapshot jobs'
   await runWorkerCheck(statsSnapshotCheckPath)
 
+  stage = 'set adoption job'
+  await runWorkerCheck(setAdoptionCheckPath)
+
   stage = 'content clear records'
   await podman([
     'exec',
@@ -867,7 +873,7 @@ try {
         await psql(
           "SELECT count(*) FROM job_runs WHERE trigger = 'catchup' AND status IN ('succeeded', 'failed')"
         )
-      ).stdout.trim() === '3'
+      ).stdout.trim() === '4'
   )
   assert.equal(
     (
@@ -875,12 +881,12 @@ try {
         "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,skill-adoption:0 0 * * *:true:object:false'
+    'character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false'
   )
   assert.equal(
     (
       await psql(
-        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption')"
+        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption', 'set-adoption')"
       )
     ).stdout.trim(),
     'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1}'
@@ -901,6 +907,14 @@ try {
       )
     ).stdout.trim(),
     'succeeded:true:true:true:0'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT status || ':' || (summary ? 'combinations') FROM job_runs WHERE job_name = 'set-adoption'"
+      )
+    ).stdout.trim(),
+    'succeeded:true'
   )
 
   stage = 'character collector runs requested jobs'
@@ -1147,6 +1161,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }

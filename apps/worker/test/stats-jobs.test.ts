@@ -5,16 +5,19 @@ import type {
   CharacterStatsSnapshot,
   JobSkillAdoption,
   JobSkillAdoptionQuery,
+  SetAdoptionReplacement,
   SkillStyleSampleJob
 } from '@dfragon/database'
 import type { StatsJobRepository } from '../src/application/ranking-stats/repository.js'
 import {
   StatsJobService,
   createCharacterStatsJob,
+  createSetAdoptionJob,
   createSkillAdoptionJob
 } from '../src/application/ranking-stats/stats-jobs.js'
 
-// 합성 값이다. DB 읽기와 저장은 저장 행을 메모리에 두는 fake이며, 실제 DB의 덮어쓰기와 삭제는 container-stats-snapshot-check.mjs가 확인한다.
+// 합성 값이다. DB 읽기와 저장은 저장 행을 메모리에 두는 fake이며, 실제 DB의 덮어쓰기와 삭제는 container-stats-snapshot-check.mjs가,
+// 세트 선택 수의 집계와 교체는 container-set-adoption-check.mjs가 확인한다.
 const stats: CharacterStats = {
   total: 3,
   servers: [{ serverId: 'cain', count: 3 }],
@@ -71,6 +74,7 @@ function memoryStatsStore({
 } = {}) {
   const savedStats: CharacterStatsSnapshot[] = []
   const adoptionRows = new Map<string, { computedAt: Date; adoption: JobSkillAdoption }>()
+  const setReplacements: SetAdoptionReplacement[] = []
   const store: StatsJobRepository = {
     readCharacterStats: async () => stats,
     saveCharacterStats: async (snapshot) => {
@@ -97,10 +101,15 @@ function memoryStatsStore({
       }
 
       return deleted
+    },
+    replaceSetAdoption: async (replacement) => {
+      setReplacements.push(replacement)
+
+      return 42
     }
   }
 
-  return { store, savedStats, adoptionRows }
+  return { store, savedStats, adoptionRows, setReplacements }
 }
 
 const ignoreProgress = { reportProgress: () => {} }
@@ -196,4 +205,16 @@ test('중간 전직의 계산이 실패하면 지난 실행의 행을 지우지 
   )
 
   assert.ok(adoptionRows.has('synthetic-job/old-grow/all'))
+})
+
+test('세트 선택 비율 job은 매일 0시에 돌며 계산을 시작한 시각과 남성 크루세이더 전직으로 표를 바꾸고 조합 수를 남긴다', async () => {
+  const { store, setReplacements } = memoryStatsStore()
+  const job = createSetAdoptionJob(new StatsJobService(store, sequentialClock()))
+
+  const summary = await job.run({}, ignoreProgress)
+
+  assert.equal(job.name, 'set-adoption')
+  assert.equal(job.schedule, '0 0 * * *')
+  assert.deepEqual(setReplacements, [{ computedAt: minutesAfterMidnight(0), maleCrusader }])
+  assert.deepEqual(summary, { combinations: 42 })
 })
