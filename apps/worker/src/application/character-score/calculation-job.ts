@@ -1,6 +1,7 @@
 import type { ClearPopulationCharacter, FinishedJobRun } from '@dfragon/database'
 import { z } from 'zod'
 import type {
+  CharacterIdentity,
   CharacterPayloads,
   FetchedCharacterPayloads
 } from '@dfragon/server-core/domain/character-detail/index.js'
@@ -290,6 +291,7 @@ export class ScoreCalculationService {
 
     try {
       await this.repository.recordBasic(basic)
+      await this.saveSets({ serverId, characterId }, payloads, fetchedAt, position)
       await this.repository.recordHistory({
         serverId,
         characterId,
@@ -304,6 +306,26 @@ export class ScoreCalculationService {
       this.ports.report('SCORE_HISTORY_RECORD_FAILED', { position })
 
       return 'failed'
+    }
+  }
+
+  // 세트 값은 통계와 랭킹 필터에만 쓰므로, 저장하지 못해도 이력은 저장하고 결과 요약의 이력 수에 넣지 않는다.
+  private async saveSets(
+    character: CharacterIdentity,
+    payloads: CharacterPayloads,
+    fetchedAt: Date,
+    position: number
+  ): Promise<void> {
+    const sets = this.ports.parseSets(payloads)
+
+    if (sets === undefined) {
+      return
+    }
+
+    try {
+      await this.repository.recordSets({ ...character, ...sets, fetchedAt })
+    } catch {
+      this.ports.report('SCORE_SETS_RECORD_FAILED', { position })
     }
   }
 }
