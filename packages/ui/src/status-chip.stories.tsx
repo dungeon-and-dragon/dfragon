@@ -59,7 +59,7 @@ export const Html: Story = {
         </span>
       ))}
       <span className="status-chip status-chip-md" data-tone="signal" data-busy="">
-        <span className="step-dots step-dots-4" aria-hidden="true">
+        <span className="step-dots" aria-hidden="true">
           <span />
           <span />
           <span />

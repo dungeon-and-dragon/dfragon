@@ -24,6 +24,11 @@
   transition-timing-function: var(--ease-standard);
 }
 
+.chip-md {
+  height: var(--height-control-md);
+  padding-inline: 16px;
+}
+
 .chip:focus-visible {
   outline: 2px solid var(--color-signal);
   outline-offset: 2px;

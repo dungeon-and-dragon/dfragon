@@ -4,7 +4,7 @@ import { type ForwardedStyle, type PublicProps, withForwardedStyle } from './pub
 export type IconButtonProps = Omit<PublicProps<'button'>, 'children'> & {
   'aria-label': string
   icon: ReactNode
-  size?: 'sm' | 'md' | 'bar' | 'lg'
+  size?: 'sm' | 'md' | 'lg'
   pressed?: boolean
 }
 

@@ -1,6 +1,6 @@
 /*
  * <button class="icon-btn icon-btn-md" aria-label="닫기"><svg /></button>. 크기는 icon-btn-sm 32, icon-btn-md 40,
- * icon-btn-bar 36(상단 바), icon-btn-lg 48(화면 헤더, 면 있음)이다. aria-pressed="true"면 켜진 토글로 그린다.
+ * icon-btn-lg 48(화면 헤더, 면 있음)이다. aria-pressed="true"면 켜진 토글로 그린다.
  */
 .icon-btn {
   display: inline-flex;
@@ -39,12 +39,6 @@
 .icon-btn-md {
   width: var(--height-control-md);
   height: var(--height-control-md);
-  font-size: var(--text-xl);
-}
-
-.icon-btn-bar {
-  width: 36px;
-  height: 36px;
   font-size: var(--text-xl);
 }
 

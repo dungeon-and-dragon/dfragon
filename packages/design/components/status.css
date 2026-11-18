@@ -3,7 +3,7 @@
  * <span class="status-chip status-chip-sm" data-tone="success"><span class="status-dot"></span>연결됨</span>
  * tone은 data-tone(neutral, success, danger, warning, signal), 크기는 status-chip-sm, status-chip-md다.
  * success 점은 박자 두 번 주기로 깜박인다. 진행 중이면 점 대신 step-dots를 둔다.
- * <span class="step-dots step-dots-4" aria-hidden="true"><span></span><span></span><span></span></span>
+ * <span class="step-dots" aria-hidden="true"><span></span><span></span><span></span></span>
  * 동작 줄이기에서는 점이 모두 켜진 채 멈춘다.
  */
 .status-chip {
@@ -22,15 +22,15 @@
 }
 
 .status-chip-sm {
-  gap: 6px;
-  height: 24px;
-  padding-inline: 8px 10px;
+  gap: 8px;
+  height: var(--height-control-xs);
+  padding-inline: 8px 12px;
 }
 
 .status-chip-md {
   gap: 8px;
-  height: 28px;
-  padding-inline: 10px 12px;
+  height: var(--height-control-sm);
+  padding-inline: 12px;
 }
 
 .status-chip[data-tone='success'] {
@@ -55,8 +55,8 @@
 
 .status-dot {
   flex-shrink: 0;
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: currentColor;
 }
@@ -68,9 +68,12 @@
 .step-dots {
   display: inline-flex;
   flex-shrink: 0;
+  gap: 4px;
 }
 
 .step-dots > span {
+  width: 4px;
+  height: 4px;
   background-color: currentColor;
   opacity: 0.25;
   animation: step-dots-blip var(--beat) steps(1, end) infinite;
@@ -82,24 +85,6 @@
 
 .step-dots > span:nth-child(3) {
   animation-delay: 0.3s;
-}
-
-.step-dots-4 {
-  gap: 3px;
-}
-
-.step-dots-4 > span {
-  width: 4px;
-  height: 4px;
-}
-
-.step-dots-5 {
-  gap: 4px;
-}
-
-.step-dots-5 > span {
-  width: 5px;
-  height: 5px;
 }
 
 @media (prefers-reduced-motion: reduce) {
