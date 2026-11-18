@@ -3,12 +3,13 @@ import test from 'node:test'
 import type {
   CharacterStats,
   FameRankingFilter,
+  FameRankingPosition,
   JobSkillAdoption,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
   SetAdoption,
-  SetAdoptionQuery,
-  StoredCharacter
+  RankedStoredCharacter,
+  SetAdoptionQuery
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
@@ -17,7 +18,7 @@ import type { RankingStatsRepository } from '../src/application/ranking-stats/re
 
 // 합성 캐릭터다. DB 읽기는 fake이며 필터, 정렬과 집계는 container-ranking-stats-check.mjs가 실제 DB로 확인한다.
 const fetchedAt = new Date('2026-11-06T00:00:00.000Z')
-function character(characterId: string, fame: number): StoredCharacter {
+function character(characterId: string, fame: number): RankedStoredCharacter {
   return {
     serverId: 'cain',
     characterId,
@@ -32,7 +33,9 @@ function character(characterId: string, fame: number): StoredCharacter {
     guildId: null,
     guildName: null,
     fetchedAt,
-    dealerSkillLearned: null
+    dealerSkillLearned: null,
+    equipmentSet: null,
+    oathSet: null
   }
 }
 
@@ -119,13 +122,20 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('명성 랭킹은 query의 직업과 전직, limit 100으로 읽고 serverId는 무시하며 1부터 rank를 붙인다', async () => {
-  const reads: [FameRankingFilter, number][] = []
-  const characters = [character('a', 80000), character('b', 70000)]
+test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1명을 더해 101명을 읽고 serverId는 무시하며 1부터 rank를 붙인다', async () => {
+  const reads: [FameRankingFilter, number, FameRankingPosition | undefined][] = []
+  const characters = [
+    {
+      ...character('a', 80000),
+      equipmentSet: { id: 'set-fairy', name: '소울 페어리 세트' },
+      oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' }
+    },
+    character('b', 70000)
+  ]
   const { app, origin } = await listen({
     ...unusedReader,
-    readFameRanking: async (filter, limit) => {
-      reads.push([filter, limit])
+    readFameRanking: async (filter, limit, after) => {
+      reads.push([filter, limit, after])
 
       return characters
     }
@@ -144,13 +154,119 @@ test('명성 랭킹은 query의 직업과 전직, limit 100으로 읽고 serverI
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z',
         role: 'dealer'
-      }))
+      })),
+      nextCursor: null
     })
     assert.equal(all.status, 200)
     assert.deepEqual(reads, [
-      [{ jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }, 100],
-      [{}, 100]
+      [{ jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }, 101, undefined],
+      [{}, 101, undefined]
     ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹은 세트 필터를 직업 필터와 함께 넘긴다', async () => {
+  const reads: FameRankingFilter[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (filter) => {
+      reads.push(filter)
+
+      return []
+    }
+  })
+  try {
+    const query =
+      'jobId=synthetic-job&jobGrowId=synthetic-grow&equipmentSetId=set-fairy&oathSetId=16204&oathSetOption=용투'
+    const { status } = await getJson(origin, `/rankings/fame?${encodeURI(query)}`)
+
+    assert.equal(status, 200)
+    assert.deepEqual(reads, [
+      {
+        jobId: 'synthetic-job',
+        jobGrowId: 'synthetic-grow',
+        equipmentSetId: 'set-fairy',
+        oathSetId: 16204,
+        oathSetOption: '용투'
+      }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+// fake DB가 받은 위치 뒤의 행만 주도록 해, API가 마지막 행으로 cursor를 만들고 rank를 잇는지 본다.
+test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor로 다음 page를 이어 rank를 매기며 마지막 page는 null이다', async () => {
+  const sorted = Array.from({ length: 150 }, (_, index) =>
+    character(`p${String(index).padStart(3, '0')}`, 90000 - Math.floor(index / 2))
+  )
+  const afters: (FameRankingPosition | undefined)[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (_filter, limit, after) => {
+      afters.push(after)
+      const start =
+        after === undefined
+          ? 0
+          : sorted.findIndex((row) => row.characterId === after.characterId) + 1
+
+      return sorted.slice(start, start + limit)
+    }
+  })
+  try {
+    const first = await getJson(origin, '/rankings/fame')
+    const second = await getJson(
+      origin,
+      `/rankings/fame?cursor=${encodeURIComponent(first.body.nextCursor)}`
+    )
+    const ranks = [...first.body.characters, ...second.body.characters].map(
+      ({ rank }: { rank: number }) => rank
+    )
+    const ids = [...first.body.characters, ...second.body.characters].map(
+      ({ characterId }: { characterId: string }) => characterId
+    )
+
+    assert.equal(first.body.characters.length, 100)
+    assert.equal(typeof first.body.nextCursor, 'string')
+    assert.equal(second.body.characters.length, 50)
+    assert.equal(second.body.nextCursor, null)
+    assert.deepEqual(
+      ranks,
+      Array.from({ length: 150 }, (_, index) => index + 1)
+    )
+    assert.deepEqual(
+      ids,
+      sorted.map(({ characterId }) => characterId)
+    )
+    assert.deepEqual(afters, [
+      undefined,
+      { fame: 90000 - 49, serverId: 'cain', characterId: 'p099' }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹은 oathSetId 없는 oathSetOption, 숫자가 아닌 oathSetId, 해석할 수 없는 cursor와 빈 세트 값을 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+  try {
+    for (const query of [
+      'oathSetOption=%EC%9A%A9%ED%88%AC',
+      'oathSetId=abc',
+      'oathSetId=0',
+      'oathSetId=16204&oathSetId=16205',
+      'equipmentSetId=',
+      'equipmentSetId=set-a&equipmentSetId=set-b',
+      'cursor=',
+      'cursor=not-a-cursor',
+      `cursor=${Buffer.from('[1,"cain"]').toString('base64url')}`
+    ]) {
+      const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
+      assert.equal(status, 400, query)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+    }
   } finally {
     await app.close()
   }
@@ -372,7 +488,7 @@ test('DB 설정이 없는 API는 빈 랭킹, 0인 통계와 세트 선택 수, c
   try {
     assert.deepEqual(await getJson(origin, '/rankings/fame'), {
       status: 200,
-      body: { characters: [] }
+      body: { characters: [], nextCursor: null }
     })
     assert.deepEqual(await getJson(origin, '/stats'), {
       status: 200,
