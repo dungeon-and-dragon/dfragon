@@ -40,6 +40,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 자기 폴더 밖의 source는 `#<폴더>/...` alias로 가져오고, 같은 폴더 안에서는 `./...`를 씁니다.
 화면 폴더 밖에서는 `#pages/<화면>`, core 밖에서는 `#core/<도메인>`으로 가져오며, 같은 화면 안과 core 도메인 사이는 파일까지 적습니다.
 
+- `public/data/event-rewards.v1.json`: 공식 이벤트의 보상과 획득 조건을 옮긴 데이터 파일을 두는 위치입니다. 형식은 [이벤트 보상 schema](src/core/catalog/event-rewards.ts)에 있습니다.
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
 - `src/animations/`: 화면에서 함께 쓰는 전환 animation과 GSAP 설정을 둡니다.
 - `src/assets/`: 글꼴, 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
@@ -61,7 +62,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 검색 상태를 둡니다.
 - `src/core/capture/party/`: 파티 화면 인식과 파티 캡처 machine을 둡니다.
 - `src/core/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
-- `src/core/catalog/`: 스킬 창, 서약, 게임 문구 데이터 묶음의 schema를 둡니다.
+- `src/core/catalog/`: 스킬 창, 서약, 게임 문구 데이터 묶음과 이벤트 보상 데이터 파일의 schema를 둡니다.
 - `src/core/character/`: 캐릭터 상세, 장비, 서약, 카드 표시 함수와 캐릭터 타입을 둡니다.
 - `src/core/diagnostics/`: 브라우저 console에 남기는 진단 코드와 문구를 둡니다.
 - `src/core/ocr/`: OCR worker, 닉네임 이미지 처리와 인식 결과 선택을 둡니다.
