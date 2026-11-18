@@ -200,7 +200,7 @@ export function growFilter(job: RankingJob, { jobGrowId, role }: RankingGrow): F
   return { jobId: job.jobId, jobGrowId, ...(role !== undefined && { role }) }
 }
 
-export function isGrowSelected(grow: RankingGrow, filter: FameRankingFilter): boolean {
+function isGrowSelected(grow: RankingGrow, filter: FameRankingFilter): boolean {
   return grow.jobGrowId === filter.jobGrowId && grow.role === filter.role
 }
 
