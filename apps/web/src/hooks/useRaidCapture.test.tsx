@@ -10,8 +10,8 @@ import {
   WEB_CAPTURE_TEXTS
 } from '#core/capture'
 import { createSharedOcrWorker } from '#core/ocr'
-import { createTestClientHost } from '../testing/test-support/client-host'
-import { ClientHostContext, type RaidCaptureHost } from '../host/client-host'
+import { createTestClientHost } from '#testing/test-support/client-host'
+import { ClientHostContext, type RaidCaptureHost } from '#host/client-host'
 import { searchSnapshot } from '#core/testing'
 import type { SearchApi, SearchSnapshot } from '#core/search'
 

@@ -2,7 +2,7 @@ import { vi } from 'vitest'
 import { searchSnapshot } from '#core/testing'
 import type { TodayGrade } from '#core/today-grade'
 import { SEARCH_SLOT_COUNTS } from '#core/search'
-import type { ClientHost } from '../../host/client-host'
+import type { ClientHost } from '#host/client-host'
 import { emptySearchSlots } from '#core/capture'
 
 type ClientHostOverrides = Partial<

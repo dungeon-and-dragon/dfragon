@@ -4,11 +4,11 @@ import { createRoot } from 'react-dom/client'
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
 import type { SearchMode } from '#core/capture'
 import { CharacterRow } from './CharacterRow'
-import { previewCharacter } from '../testing/fixtures/mvp/fixture'
+import { previewCharacter } from '#testing/fixtures/mvp/fixture'
 import { serverNames } from '#core/servers'
-import { useServerMenu } from '../hooks/useServerMenu'
+import { useServerMenu } from '#hooks/useServerMenu'
 import { ServerSelect } from './ServerSelect'
-import { TestRouter } from '../testing/test-support/test-router'
+import { TestRouter } from '#testing/test-support/test-router'
 
 let root: ReturnType<typeof createRoot>
 beforeEach(() => {

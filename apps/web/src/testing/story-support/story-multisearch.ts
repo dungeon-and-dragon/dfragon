@@ -10,8 +10,8 @@ import {
 import type { SelectedCharacterSummary } from '#core/character'
 import type { CharacterChoice, SearchSlot, SearchSnapshot } from '#core/search'
 import { bufferCard, CAPTURE_ID, dealerCard } from '#core/testing'
-import type { BrowserHost } from '../../host/client-host'
-import characterImage from '../fixtures/mvp/assets/character.png'
+import type { BrowserHost } from '#host/client-host'
+import characterImage from '#testing/fixtures/mvp/assets/character.png'
 import { createStoryClientHost } from './story-host'
 
 // 멀티서치 표에 넣을 검색 결과와 행 값이다. 이름, 소속은 실제 캐릭터가 아닌 합성 값이다.

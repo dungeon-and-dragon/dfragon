@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
 import type { CharacterImage } from '#core/character'
-import { decodeBrowserImage } from '../browser-png'
-import type { BrowserHost } from '../client-host'
+import { decodeBrowserImage } from '#host/browser-png'
+import type { BrowserHost } from '#host/client-host'
 import { createRoundFrames } from './round-frames'
 import { createScreenShare } from './screen-share'
 
-vi.mock('../browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
+vi.mock('#host/browser-png', () => ({ decodeBrowserImage: vi.fn(), decodeBrowserPng: vi.fn() }))
 
 const image: CharacterImage = { width: 1, height: 1, rgba: new Uint8Array([1, 2, 3, 255]) }
 const sharedImage: CharacterImage = { width: 1, height: 1, rgba: new Uint8Array([9, 9, 9, 255]) }

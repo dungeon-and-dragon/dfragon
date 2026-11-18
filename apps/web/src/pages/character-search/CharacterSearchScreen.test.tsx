@@ -2,10 +2,10 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { ClientHostContext, type ClientHost } from '../../host/client-host'
-import { createTestClientHost } from '../../testing/test-support/client-host'
-import { TestQueryClient } from '../../testing/test-support/test-query-client'
-import { TestRouter } from '../../testing/test-support/test-router'
+import { ClientHostContext, type ClientHost } from '#host/client-host'
+import { createTestClientHost } from '#testing/test-support/client-host'
+import { TestQueryClient } from '#testing/test-support/test-query-client'
+import { TestRouter } from '#testing/test-support/test-router'
 import { CharacterSearchScreen } from './CharacterSearchScreen'
 
 let container: HTMLDivElement
