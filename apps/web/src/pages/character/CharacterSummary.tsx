@@ -1,6 +1,5 @@
 import { Button, RefreshIcon } from '@dfragon/ui'
 import {
-  CHARACTER_SERVER_NAMES,
   type CharacterDetailView,
   characterImageUrl,
   displayJobName,
@@ -10,6 +9,7 @@ import {
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture'
 import { Portrait } from '#components/Portrait'
+import { ServerBadge } from '#components/ServerBadge'
 import { characterDisplayOf } from '#lib/stored-character'
 import { FavoriteToggle } from '#components/FavoriteToggle'
 import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
@@ -87,9 +87,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
           />
         </div>
         <div className={LINE}>
-          <span className="badge bg-inset text-fg-muted">
-            {CHARACTER_SERVER_NAMES[character.serverId]}
-          </span>
+          <ServerBadge serverId={character.serverId} />
           {job != null && <span className="text-fg-muted">{job}</span>}
           {character.level != null && (
             <span className="num text-fg-subtle">{`Lv.${character.level}`}</span>
