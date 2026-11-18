@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import {
   type CharacterDetailResponse,
   CharacterDetailService
 } from '../src/application/character-detail/service.js'
-import { CharacterDetailFailure } from '../src/domain/character-failure.js'
-import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
-import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/neople-stages.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
 
 const identity = { serverId: 'siroco', characterId: 'refresh-fixture' }
 const ignoredTimings: NeopleStageTimings = { record: () => undefined, markShared: () => undefined }

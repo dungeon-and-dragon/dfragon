@@ -3,9 +3,9 @@ import test from 'node:test'
 import type { TimelineEventInput, TimelineItemInput, TimelineRange } from '@dfragon/database'
 import { EnhancementBackfillService } from '../src/application/character-timeline/backfill.js'
 import type { EnhancementBackfillRepository } from '../src/application/character-timeline/repository.js'
-import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
-import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
-import type { TimelineInputs } from '../src/domain/character-timeline/rows.js'
+import { TimelineFailure } from '@dfragon/server-core/domain/character-timeline/failure.js'
+import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
+import type { TimelineInputs } from '@dfragon/server-core/domain/character-timeline/rows.js'
 
 const character = { serverId: 'siroco', characterId: 'backfill-fixture' }
 const MINUTE_MS = 60 * 1000

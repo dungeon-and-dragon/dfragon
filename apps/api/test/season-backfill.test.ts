@@ -14,9 +14,9 @@ import {
   toSeasonBackfillRanges,
   withSeasonBackfills
 } from '../src/domain/adventure-guild/activity.js'
-import { CatalogService } from '../src/application/character-catalog/service.js'
-import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
-import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { TimelineFailure } from '@dfragon/server-core/domain/character-timeline/failure.js'
+import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import {
   type SeasonBackfillJob,
   toSeasonBackfillJobs,

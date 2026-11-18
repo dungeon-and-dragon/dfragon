@@ -2,23 +2,23 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineCharacter, TimelineRange, TimelineSyncState } from '@dfragon/database'
-import { CatalogService } from '../src/application/character-catalog/service.js'
-import { CharacterDetailFailure } from '../src/domain/character-failure.js'
-import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
-import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/neople-stages.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
 import { CharacterDetailService } from '../src/application/character-detail/service.js'
-import { TimelineFailure } from '../src/domain/character-timeline/failure.js'
-import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
+import { TimelineFailure } from '@dfragon/server-core/domain/character-timeline/failure.js'
+import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
-import { EMPTY_CHARACTER_TIMELINE } from '../src/domain/character-timeline/project.js'
-import type { TimelineInputs } from '../src/domain/character-timeline/rows.js'
+import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/project.js'
+import type { TimelineInputs } from '@dfragon/server-core/domain/character-timeline/rows.js'
 import type { TimelineSyncRepository } from '../src/application/character-timeline/repository.js'
 import {
   type TimelineSyncFailure,
   TimelineSyncService
 } from '../src/application/character-timeline/sync.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
-import type { CharacterIdentity } from '../src/domain/character-identity.js'
+import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 
 const character = { serverId: 'siroco', characterId: 'timeline-fixture' }
 const MINUTE_MS = 60 * 1000

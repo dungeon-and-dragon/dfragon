@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict'
 import { type IncomingHttpHeaders, request as sendHttpRequest } from 'node:http'
 import test, { type TestContext } from 'node:test'
-import { CatalogService } from '../src/application/character-catalog/service.js'
-import type { CharacterCatalog, FetchCatalog } from '../src/application/character-catalog/ports.js'
-import type { NeopleStageTimings } from '../src/application/character-detail/neople-stages.js'
-import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import type {
+  CharacterCatalog,
+  FetchCatalog
+} from '@dfragon/server-core/application/character-catalog/ports.js'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/neople-stages.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
 import { CharacterDetailService } from '../src/application/character-detail/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 

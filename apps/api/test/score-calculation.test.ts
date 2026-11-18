@@ -21,12 +21,15 @@ import type {
   ScoreEngineHandle
 } from '../src/application/character-score/ports.js'
 import type { ScoreCalculationRepository } from '../src/application/character-score/repository.js'
-import type { CharacterDetailSection } from '../src/domain/character-detail/sections.js'
-import type { ScoreEngineResult } from '../src/domain/score/result.js'
-import { parseCharacterBasic } from '../src/infrastructure/neople/character-basic.js'
+import type { CharacterDetailSection } from '@dfragon/server-core/domain/character-detail/sections.js'
+import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/result.js'
+import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
 import type { WorkerNeople } from '../src/infrastructure/neople/character-collection.js'
 import { createScoreSources } from '../src/runtime/score-calculation.js'
-import { payloadsFromEngineInput, readEngineInput } from './score-fixtures.js'
+import {
+  payloadsFromEngineInput,
+  readEngineInput
+} from '@dfragon/server-core/test/score-fixtures.js'
 
 const NOW = new Date('2026-11-18T13:00:00Z')
 
