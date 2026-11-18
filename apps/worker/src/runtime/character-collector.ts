@@ -7,6 +7,7 @@ import {
   createNeopleClearRecordTimeline,
   createNeopleClearTimeline,
   createNeopleSkillStyle,
+  createNeopleFameSearch,
   createNeopleCharacterBasic,
   paceNeopleRequests
 } from '#infrastructure/neople/index.js'
@@ -65,6 +66,7 @@ export async function startCharacterCollector(
     createFetchTimeline: createNeopleClearTimeline(neople),
     createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
     fetchSkillStyle: createNeopleSkillStyle(neople),
+    ...createNeopleFameSearch(neople),
     readConcurrency,
     report,
     score: {
