@@ -3,6 +3,7 @@ import {
   readStoredCharacterRows,
   storedDealerSkillLearnedSql
 } from './adventure-guild.js'
+import type { CharacterEquipmentSet, CharacterOathSet } from './character-sets.js'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 import { type MaleCrusaderRole, maleCrusaderRoleSql } from './male-crusader.js'
@@ -11,6 +12,63 @@ export type FameRankingFilter = {
   jobId?: string
   jobGrowId?: string
   role?: MaleCrusaderRole
+  equipmentSetId?: string
+  oathSetId?: number
+  oathSetOption?: string
+}
+
+export type FameRankingPosition = {
+  fame: number
+  serverId: string
+  characterId: string
+}
+
+export type RankedStoredCharacter = StoredCharacter & {
+  equipmentSet: CharacterEquipmentSet | null
+  oathSet: CharacterOathSet | null
+}
+
+type RankedRow = StoredCharacter & {
+  equipmentSetId: string | null
+  equipmentSetName: string | null
+  oathSetId: number | null
+  oathSetName: string | null
+  oathSetOption: string | null
+}
+
+const setColumns = Prisma.sql`,
+  c.equipment_set_id AS "equipmentSetId",
+  c.equipment_set_name AS "equipmentSetName",
+  c.oath_set_id AS "oathSetId",
+  c.oath_set_name AS "oathSetName",
+  c.oath_set_option AS "oathSetOption"`
+
+function toRankedCharacter({
+  equipmentSetId,
+  equipmentSetName,
+  oathSetId,
+  oathSetName,
+  oathSetOption,
+  ...character
+}: RankedRow): RankedStoredCharacter {
+  // 저장 함수가 세트 id와 이름을 함께 쓰므로 둘 중 하나만 있는 행은 없다.
+  const equipmentSet =
+    equipmentSetId !== null && equipmentSetName !== null
+      ? { id: equipmentSetId, name: equipmentSetName }
+      : null
+  const oathSet =
+    oathSetId !== null && oathSetName !== null
+      ? { id: oathSetId, name: oathSetName, option: oathSetOption }
+      : null
+
+  return { ...character, equipmentSet, oathSet }
+}
+
+// 명성은 내림차순, 서버와 캐릭터 ID는 오름차순이라 row 비교 하나로 쓸 수 없다.
+// 앞의 fame <= 조건이 index 범위가 되어 이전 page의 행을 다시 훑지 않는다(합성 100만 행에서 365ms가 0.4ms로 줄었다).
+function afterPositionSql({ fame, serverId, characterId }: FameRankingPosition): Prisma.Sql {
+  return Prisma.sql`c.fame <= ${fame}
+    AND (c.fame < ${fame} OR (c.server_id, c.character_id) > (${serverId}, ${characterId}))`
 }
 
 export type ServerCount = {
@@ -42,27 +100,35 @@ export type CharacterStats = {
 
 const FAME_BUCKET_SIZE = 1_000
 
-export function readFameRanking(
+export async function readFameRanking(
   client: DatabaseClient,
-  { jobId, jobGrowId, role }: FameRankingFilter,
-  limit: number
-): Promise<StoredCharacter[]> {
+  filter: FameRankingFilter,
+  limit: number,
+  after?: FameRankingPosition
+): Promise<RankedStoredCharacter[]> {
+  const { jobId, jobGrowId, role, equipmentSetId, oathSetId, oathSetOption } = filter
   const conditions = [
     Prisma.sql`c.fame IS NOT NULL`,
     ...(jobId !== undefined ? [Prisma.sql`c.job_id = ${jobId}`] : []),
     ...(jobGrowId !== undefined ? [Prisma.sql`c.job_grow_id = ${jobGrowId}`] : []),
-    ...(role !== undefined ? [maleCrusaderRoleSql(storedDealerSkillLearnedSql, role)] : [])
+    ...(role !== undefined ? [maleCrusaderRoleSql(storedDealerSkillLearnedSql, role)] : []),
+    ...(equipmentSetId !== undefined ? [Prisma.sql`c.equipment_set_id = ${equipmentSetId}`] : []),
+    ...(oathSetId !== undefined ? [Prisma.sql`c.oath_set_id = ${oathSetId}::int`] : []),
+    ...(oathSetOption !== undefined ? [Prisma.sql`c.oath_set_option = ${oathSetOption}`] : []),
+    ...(after !== undefined ? [afterPositionSql(after)] : [])
   ]
 
   // ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
-
-  return readStoredCharacterRows(
+  const rows = await readStoredCharacterRows<RankedRow>(
     client,
     Prisma.sql`
       WHERE ${Prisma.join(conditions, ' AND ')}
       ORDER BY c.fame DESC, c.server_id, c.character_id
-      LIMIT ${limit}`
+      LIMIT ${limit}`,
+    setColumns
   )
+
+  return rows.map(toRankedCharacter)
 }
 
 async function readServerCounts(client: DatabaseClient): Promise<ServerCount[]> {
