@@ -171,7 +171,11 @@ export function createBatchNeopleKeyPool({
       characterSkillStyle: (identity) => dispatch((neople) => neople.characterSkillStyle(identity)),
       characterTimeline: (identity, query) =>
         dispatch((neople) => neople.characterTimeline(identity, query)),
-      multiItems: (itemIds, signal) => dispatch((neople) => neople.multiItems(itemIds, signal))
+      charactersFame: (serverId, query) =>
+        dispatch((neople) => neople.charactersFame(serverId, query)),
+      jobs: () => dispatch((neople) => neople.jobs()),
+      multiItems: (itemIds, signal) => dispatch((neople) => neople.multiItems(itemIds, signal)),
+      servers: () => dispatch((neople) => neople.servers())
     },
     async refresh() {
       const keys = await store.readUsableKeys()
