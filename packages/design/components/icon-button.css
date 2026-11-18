@@ -31,14 +31,14 @@
 }
 
 .icon-btn-sm {
-  width: var(--spacing-control-sm);
-  height: var(--spacing-control-sm);
+  width: var(--height-control-sm);
+  height: var(--height-control-sm);
   font-size: var(--text-base);
 }
 
 .icon-btn-md {
-  width: var(--spacing-control-md);
-  height: var(--spacing-control-md);
+  width: var(--height-control-md);
+  height: var(--height-control-md);
   font-size: var(--text-xl);
 }
 
@@ -49,8 +49,8 @@
 }
 
 .icon-btn-lg {
-  width: var(--spacing-control-lg);
-  height: var(--spacing-control-lg);
+  width: var(--height-control-lg);
+  height: var(--height-control-lg);
   background-color: var(--color-inset);
   font-size: 24px;
 }

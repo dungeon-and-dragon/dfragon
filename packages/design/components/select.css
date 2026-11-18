@@ -66,13 +66,13 @@
 }
 
 .select-sm {
-  height: var(--spacing-control-sm);
+  height: var(--height-control-sm);
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
 }
 
 .select-md {
-  height: var(--spacing-control-md);
+  height: var(--height-control-md);
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
 }

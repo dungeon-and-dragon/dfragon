@@ -52,7 +52,7 @@ function Screen({
   const { serverId, characterId } = storyCharacterDetail(role).character
 
   return (
-    <div className="mx-auto mt-6 w-300 max-w-full">
+    <div className="page mt-6">
       <CharacterDetailScreen
         serverId={serverId}
         characterId={characterId}

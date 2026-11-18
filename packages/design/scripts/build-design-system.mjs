@@ -47,6 +47,8 @@ const FAMILY_BY_PREFIX = [
   ['--shadow-', 'shadow'],
   ['--gradient-', 'gradient'],
   ['--spacing', 'spacing'],
+  ['--height-', 'size'],
+  ['--container-', 'size'],
   ['--radius-', 'radius'],
   ['--ease-', 'easing'],
   ['--duration-', 'duration'],
@@ -61,7 +63,7 @@ const FAMILY_BY_PREFIX = [
 ]
 
 // artifact가 section 이름만 key에서 따오는 family다. 값은 단일 CSS 값이어야 한다.
-const PLAIN_FAMILIES = ['zIndex', 'breakpoint', 'fontWeight', 'tracking']
+const PLAIN_FAMILIES = ['size', 'zIndex', 'breakpoint', 'fontWeight', 'tracking']
 const LISTED_FAMILIES = [
   'color',
   'spacing',

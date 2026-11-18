@@ -42,7 +42,7 @@ function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
 
   return (
     <StoryFrame host={host}>
-      <div className="mx-auto mt-6 w-270 max-w-full">
+      <div className="page mt-6">
         <WeeklyScreen
           adventureName={STORY_ADVENTURE_NAME}
           season={season}
@@ -69,7 +69,7 @@ export const 받지못함: Story = {
 export const 모험단입력: Story = {
   render: () => (
     <StoryFrame>
-      <div className="mx-auto mt-6 w-270 max-w-full">
+      <div className="page mt-6">
         <AdventureEntryScreen onAdventureOpen={ignoreOpen} />
       </div>
     </StoryFrame>
