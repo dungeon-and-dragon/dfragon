@@ -25,9 +25,10 @@ export class RankingStatsController {
         throw new CharacterDetailFailure('query')
       }
 
-      const characters = await this.service.fameRanking(filter.data)
+      const { cursor, ...rankingFilter } = filter.data
+      const page = await this.service.fameRanking(rankingFilter, cursor)
 
-      return c.json(toFameRankingResponse(characters))
+      return c.json(toFameRankingResponse(page))
     })
 
     routes.get('/stats', async (c) => {
