@@ -15,6 +15,7 @@ export type FameRankingFilter = {
   equipmentSetId?: string
   oathSetId?: number
   oathSetOption?: string
+  itemIds?: readonly string[]
 }
 
 export type FameRankingPosition = {
@@ -66,6 +67,58 @@ function toRankedCharacter({
 
 // 명성은 내림차순, 서버와 캐릭터 ID는 오름차순이라 row 비교 하나로 쓸 수 없다.
 // 앞의 fame <= 조건이 index 범위가 되어 이전 page의 행을 다시 훑지 않는다(합성 100만 행에서 365ms가 0.4ms로 줄었다).
+// 낀 캐릭터가 이 수보다 적은 아이템은 그 캐릭터를 먼저 모아 명성 순으로 정렬하고, 많으면 명성 index를 따라 읽으며 거른다.
+// planner는 드문 아이템에도 명성 순서로 읽어, 합성 100만 명에서 50명이 낀 아이템이 4.7초, 아무도 끼지 않은 아이템이 3.1초였다.
+// 먼저 모으는 형태는 30만 명이 낀 아이템에서 page마다 0.7초였다. 아이템 하나만 걸었을 때 1만 명에서 두 형태가 87ms, 238ms, 2만 명에서 162ms, 132ms라
+// 만나는 지점은 그 사이이고, 그 구간의 아래쪽인 1만 명으로 잡았다.
+const GATHER_WEARERS_BELOW = 10_000
+
+async function readWearerCount(client: DatabaseClient, itemId: string): Promise<number> {
+  const [row] = await client.$queryRaw<{ count: number }[]>`
+    SELECT count(*)::int AS count
+    FROM (SELECT 1 FROM character_items WHERE item_id = ${itemId} LIMIT ${GATHER_WEARERS_BELOW}) bounded`
+
+  if (row === undefined) {
+    return 0
+  }
+
+  return row.count
+}
+
+async function pickGatheredItem(
+  client: DatabaseClient,
+  itemIds: readonly string[]
+): Promise<string | undefined> {
+  const counts = await Promise.all(
+    itemIds.map(async (itemId) => {
+      const count = await readWearerCount(client, itemId)
+
+      return { itemId, count }
+    })
+  )
+  const [rarest] = counts.toSorted((left, right) => left.count - right.count)
+
+  if (rarest === undefined || rarest.count >= GATHER_WEARERS_BELOW) {
+    return undefined
+  }
+
+  return rarest.itemId
+}
+
+// OFFSET 0이 subquery를 바깥으로 풀지 못하게 막아, planner가 다시 명성 순서로 읽는 계획을 고르지 않는다.
+function gatheredWearersSql(itemId: string): Prisma.Sql {
+  return Prisma.sql`JOIN (
+    SELECT server_id, character_id FROM character_items WHERE item_id = ${itemId} OFFSET 0
+  ) gathered ON gathered.server_id = c.server_id AND gathered.character_id = c.character_id`
+}
+
+function wearsItemSql(itemId: string): Prisma.Sql {
+  return Prisma.sql`EXISTS (
+    SELECT 1 FROM character_items item
+    WHERE item.server_id = c.server_id AND item.character_id = c.character_id AND item.item_id = ${itemId}
+  )`
+}
+
 function afterPositionSql({ fame, serverId, characterId }: FameRankingPosition): Prisma.Sql {
   return Prisma.sql`c.fame <= ${fame}
     AND (c.fame < ${fame} OR (c.server_id, c.character_id) > (${serverId}, ${characterId}))`
@@ -106,7 +159,8 @@ export async function readFameRanking(
   limit: number,
   after?: FameRankingPosition
 ): Promise<RankedStoredCharacter[]> {
-  const { jobId, jobGrowId, role, equipmentSetId, oathSetId, oathSetOption } = filter
+  const { jobId, jobGrowId, role, equipmentSetId, oathSetId, oathSetOption, itemIds = [] } = filter
+  const gatheredItem = await pickGatheredItem(client, itemIds)
   const conditions = [
     Prisma.sql`c.fame IS NOT NULL`,
     ...(jobId !== undefined ? [Prisma.sql`c.job_id = ${jobId}`] : []),
@@ -115,8 +169,10 @@ export async function readFameRanking(
     ...(equipmentSetId !== undefined ? [Prisma.sql`c.equipment_set_id = ${equipmentSetId}`] : []),
     ...(oathSetId !== undefined ? [Prisma.sql`c.oath_set_id = ${oathSetId}::int`] : []),
     ...(oathSetOption !== undefined ? [Prisma.sql`c.oath_set_option = ${oathSetOption}`] : []),
+    ...itemIds.filter((itemId) => itemId !== gatheredItem).map(wearsItemSql),
     ...(after !== undefined ? [afterPositionSql(after)] : [])
   ]
+  const gatheredJoin = gatheredItem !== undefined ? gatheredWearersSql(gatheredItem) : Prisma.empty
 
   // ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
   const rows = await readStoredCharacterRows<RankedRow>(
@@ -125,7 +181,8 @@ export async function readFameRanking(
       WHERE ${Prisma.join(conditions, ' AND ')}
       ORDER BY c.fame DESC, c.server_id, c.character_id
       LIMIT ${limit}`,
-    setColumns
+    setColumns,
+    gatheredJoin
   )
 
   return rows.map(toRankedCharacter)
