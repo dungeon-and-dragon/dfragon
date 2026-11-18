@@ -21,7 +21,7 @@ const { heading: HEADING } = itemTableClasses
 const SKILL_ICON = 'relative size-game-icon shrink-0 select-none'
 const PICKED_RING = 'outline-1 -outline-offset-1 outline-solid outline-signal shadow-selected'
 const BRANCH =
-  'm-0 box-border inline-flex h-[28px] cursor-default items-center gap-2 rounded-control border px-2 [font-family:inherit] text-xs'
+  'box-border inline-flex h-[28px] cursor-default items-center gap-2 rounded-control border px-2 text-xs'
 const BRANCH_IDLE = 'border-dashed border-line-strong bg-surface text-fg-subtle hover:bg-control'
 const BRANCH_PICKED = 'border-solid border-signal bg-inset font-semibold text-fg shadow-selected'
 const ROWS = 'm-0 list-none p-0'
