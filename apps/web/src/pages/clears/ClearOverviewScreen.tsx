@@ -390,9 +390,7 @@ function CoClearPanel({
     >
       <div className="flex flex-col gap-1 px-4 pt-4">
         <span className={clearClasses.subLabel}>{`${option.label} 클리어 캐릭터`}</span>
-        <span className="font-mono text-xl font-semibold tabular-nums">
-          {integer.format(base.cleared)}
-        </span>
+        <span className="num text-xl font-semibold">{integer.format(base.cleared)}</span>
       </div>
       <RowBars bars={bars} max={1} formatValue={formatPercent} />
     </Panel>

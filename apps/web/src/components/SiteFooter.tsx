@@ -3,7 +3,7 @@ import neopleOpenApiColorLogo from '../assets/neople-open-api-color.png'
 import neopleOpenApiGrayLogo from '../assets/neople-open-api-gray.png'
 
 const link =
-  'p-1 text-fg-subtle no-underline focus-ring hover:text-fg hover:underline aria-[current=page]:font-semibold aria-[current=page]:text-fg'
+  'link p-1 text-fg-subtle focus-ring aria-[current=page]:font-semibold aria-[current=page]:text-fg'
 
 const NEOPLE_API_URL = 'https://developers.neople.co.kr'
 

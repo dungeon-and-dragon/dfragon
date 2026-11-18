@@ -13,22 +13,21 @@ export function ScheduleText({
   }
   const description = describeSchedule(schedule)
   if (description === undefined) {
-    return <span className={textClasses.numeric}>{schedule}</span>
+    return <span className="num">{schedule}</span>
   }
 
   if (stacked) {
     return (
       <span className={textClasses.twoLine}>
         <span>{description}</span>
-        <small className={`${textClasses.small} ${textClasses.numeric}`}>{schedule}</small>
+        <small className={`${textClasses.small} num`}>{schedule}</small>
       </span>
     )
   }
 
   return (
     <span>
-      {description}{' '}
-      <span className={`${textClasses.subtle} ${textClasses.numeric}`}>{schedule}</span>
+      {description} <span className={`${textClasses.subtle} num`}>{schedule}</span>
     </span>
   )
 }

@@ -23,9 +23,8 @@ import { getLookupStep, type LookupStep } from '../lib/card-presentation'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-const numberClass = 'font-mono font-semibold tabular-nums'
+const numberClass = 'num font-semibold'
 const tagClass = 'badge badge-sm border border-current font-semibold'
-const linkClass = 'text-inherit no-underline hover:underline'
 
 const tierClasses: Readonly<Record<CharacterTier, string>> = {
   top: 'text-tier-top',
@@ -100,12 +99,10 @@ export function CharacterRow({
   return (
     <>
       <td>{seat}</td>
-      {/* 초상화(36px)가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
+      {/* 초상화 옆 이름 입력칸이 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
       <td className="py-0">
         <div className="flex min-w-0 items-center gap-3">
-          <div
-            className={`relative size-[36px] shrink-0 overflow-hidden rounded-control ${shown === undefined ? 'bg-surface' : 'bg-inset'}`}
-          >
+          <div className={`portrait portrait-sm${shown === undefined ? ' bg-surface' : ''}`}>
             {shown !== undefined && (
               <RowPortrait character={shown} face={screen === 'raid' ? shown.face : undefined} />
             )}
@@ -396,7 +393,7 @@ function AdventureCell({
           to="/adventures/$adventureName"
           params={{ adventureName: adventure }}
           draggable={false}
-          className={linkClass}
+          className="link"
         >
           {adventure}
         </Link>
@@ -419,7 +416,7 @@ function GuildCell({
   return (
     <td className="text-fg-guild">
       {guildId != null ? (
-        <Link to="/guilds/$guildId" params={{ guildId }} draggable={false} className={linkClass}>
+        <Link to="/guilds/$guildId" params={{ guildId }} draggable={false} className="link">
           {guild}
         </Link>
       ) : (

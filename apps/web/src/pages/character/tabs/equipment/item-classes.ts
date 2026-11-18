@@ -41,16 +41,14 @@ export const itemClasses = {
   itemText: 'flex min-w-0 flex-wrap items-center gap-2',
   strip:
     'box-border flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-4 py-2',
-  stripLabel: 'text-xs font-medium text-fg-subtle',
   stripMuted: 'text-fg-muted',
-  stripNumber: 'font-mono tabular-nums text-fg-muted',
+  stripNumber: 'num text-fg-muted',
   spacer: 'grow'
 } as const
 
 export const itemTableClasses = {
   root: 'text-sm',
   slot: 'text-xs whitespace-nowrap text-fg-subtle',
-  number: 'font-mono tabular-nums',
   muted: 'text-fg-muted',
   missing: 'text-fg-subtle',
   heading: 'section-title',

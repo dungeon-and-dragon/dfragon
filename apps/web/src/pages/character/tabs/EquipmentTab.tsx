@@ -27,7 +27,7 @@ function EquipmentStrip({ view }: { view: EquipmentView }): React.JSX.Element | 
     <div className={itemClasses.strip}>
       {sets.map((set, index) => (
         <span key={`${set.name}-${index}`} className={itemClasses.itemText}>
-          <span className={itemClasses.stripLabel}>세트</span>
+          <span className="label">세트</span>
           <ItemName name={set.name} rarity={set.rarity} />
           {set.rarityName !== null && (
             <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>
@@ -40,8 +40,8 @@ function EquipmentStrip({ view }: { view: EquipmentView }): React.JSX.Element | 
       <span className={itemClasses.spacer} />
       {mistLevel !== null && (
         <span className={itemClasses.itemText}>
-          <span className={itemClasses.stripLabel}>안개 융화</span>
-          <b className={`${itemClasses.name} ${itemTableClasses.number}`}>{`Lv.${mistLevel}`}</b>
+          <span className="label">안개 융화</span>
+          <b className={`${itemClasses.name} num`}>{`Lv.${mistLevel}`}</b>
         </span>
       )}
     </div>

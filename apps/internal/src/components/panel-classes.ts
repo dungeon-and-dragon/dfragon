@@ -9,7 +9,6 @@ export const panelClasses = {
 export const textClasses = {
   muted: 'text-fg-muted',
   subtle: 'text-fg-subtle',
-  numeric: 'font-mono tabular-nums',
   twoLine: 'flex flex-col',
   small: 'text-xs text-fg-subtle',
   error: 'm-0 text-sm text-fg-danger',

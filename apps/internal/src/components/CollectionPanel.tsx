@@ -3,8 +3,6 @@ import { useCollection } from '../ops-queries'
 import { panelClasses, textClasses } from './panel-classes'
 import { RequeueButton } from './RequeueButton'
 
-const FIGURE_VALUE = 'm-0 font-mono font-semibold tabular-nums'
-
 export function CollectionPanel(): React.JSX.Element {
   const collection = useCollection()
   const summary = collection.data
@@ -25,14 +23,14 @@ export function CollectionPanel(): React.JSX.Element {
         </span>
       </h2>
       {summary !== undefined && (
-        <dl className="m-0 flex gap-12 border-b border-line p-4 max-sm:gap-6">
-          <div className="flex flex-col gap-1">
-            <dt className="text-xs font-medium text-fg-subtle">대기</dt>
-            <dd className={`${FIGURE_VALUE} text-xl`}>{formatCount(summary.waiting)}</dd>
+        <dl className="flex gap-12 border-b border-line p-4 max-sm:gap-6">
+          <div className="stat">
+            <dt className="stat-label">대기</dt>
+            <dd className="stat-value">{formatCount(summary.waiting)}</dd>
           </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-xs font-medium text-fg-subtle">가장 오래된 대기</dt>
-            <dd className={`${FIGURE_VALUE} text-base`}>
+          <div className="stat">
+            <dt className="stat-label">가장 오래된 대기</dt>
+            <dd className="stat-value">
               {summary.oldestQueuedAt !== null
                 ? formatDateMinute(summary.oldestQueuedAt)
                 : EMPTY_VALUE}
@@ -57,8 +55,8 @@ export function CollectionPanel(): React.JSX.Element {
               {failures.map(({ failure, count, lastAttemptedAt }) => (
                 <tr key={failure}>
                   <td>{failure}</td>
-                  <td className={`text-right ${textClasses.numeric}`}>{formatCount(count)}</td>
-                  <td className={`${textClasses.muted} ${textClasses.numeric}`}>
+                  <td className="table-num">{formatCount(count)}</td>
+                  <td className={`${textClasses.muted} num`}>
                     {lastAttemptedAt !== null ? formatDateMinute(lastAttemptedAt) : EMPTY_VALUE}
                   </td>
                   <td className="text-right">

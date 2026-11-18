@@ -224,7 +224,7 @@ function ContentHead({
   return (
     <section aria-label="컨텐츠" className="section flex flex-wrap items-center gap-6 px-4">
       <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-fg-muted tabular-nums">{kind}</span>
+        <span className="label tabular-nums">{kind}</span>
         <h2 className="screen-title">{place.group.name}</h2>
       </div>
       {place.choice !== null && (
@@ -237,7 +237,7 @@ function ContentHead({
         />
       )}
       {week !== undefined && (
-        <dl className="my-0 mr-0 ml-auto flex gap-6">
+        <dl className="ml-auto flex gap-6">
           <Figure label="클리어 캐릭터" value={integer.format(week.cleared)} />
           <Figure label="클리어 비율" value={shareText(week.cleared, week.population)} />
           {change !== null && (
@@ -265,13 +265,9 @@ function Figure({
   tone
 }: Readonly<{ label: string; value: string; tone?: 'up' | 'down' }>): React.JSX.Element {
   return (
-    <div className="flex flex-col gap-1">
-      <dt className="text-xs font-medium text-fg-subtle">{label}</dt>
-      <dd
-        className={`m-0 font-mono text-xl font-semibold tabular-nums ${tone !== undefined ? TONE_CLASSES[tone] : ''}`}
-      >
-        {value}
-      </dd>
+    <div className="stat">
+      <dt className="stat-label">{label}</dt>
+      <dd className={`stat-value ${tone !== undefined ? TONE_CLASSES[tone] : ''}`}>{value}</dd>
     </div>
   )
 }
@@ -450,7 +446,7 @@ function SplitPanel({
   return (
     <Panel name={name}>
       <div className="flex flex-col gap-3 p-4">
-        <dl className="m-0 flex gap-6">
+        <dl className="flex gap-6">
           {card.figures.map(({ label, value }) => (
             <Figure key={label} label={label} value={value} />
           ))}
@@ -460,7 +456,7 @@ function SplitPanel({
             <div key={key} className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-3">
               <span className="flex flex-col">
                 <span className="text-xs text-fg-subtle">{label}</span>
-                <span className="font-mono text-sm tabular-nums">{total}</span>
+                <span className="num text-sm">{total}</span>
               </span>
               <SplitBar label={label} segments={segments} formatValue={formatInteger} />
             </div>

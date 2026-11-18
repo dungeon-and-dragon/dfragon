@@ -161,16 +161,14 @@ function Stage({
 }): React.JSX.Element {
   return (
     <span className="flex flex-col">
-      {stage !== null && <span className="text-xs font-medium text-fg-muted">{stage}</span>}
-      <span className="font-mono text-xl font-semibold tabular-nums">{rate}</span>
+      {stage !== null && <span className="label">{stage}</span>}
+      <span className="num text-xl font-semibold">{rate}</span>
       {change !== null && (
-        <span
-          className={`font-mono text-xs font-semibold tabular-nums ${TREND_CLASSES[change.trend]}`}
-        >
+        <span className={`num text-xs font-semibold ${TREND_CLASSES[change.trend]}`}>
           {change.text}
         </span>
       )}
-      <span className="mt-1 font-mono text-xs text-fg-muted tabular-nums">{cleared}</span>
+      <span className="mt-1 num text-xs text-fg-muted">{cleared}</span>
     </span>
   )
 }

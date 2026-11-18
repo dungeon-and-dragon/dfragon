@@ -22,7 +22,7 @@ const integer = new Intl.NumberFormat('ko-KR')
 
 const ROWS = 'grid grid-cols-[auto_auto] items-center gap-x-6 gap-y-1'
 const LABEL = 'text-fg-muted'
-const VALUE = 'text-right font-mono tabular-nums'
+const VALUE = 'text-right num'
 const HEADING = 'mt-1 text-2xs text-fg-subtle'
 
 function formatRate(rate: number): string {

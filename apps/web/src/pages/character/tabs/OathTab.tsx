@@ -15,7 +15,7 @@ import { GameText } from './GameText'
 import { itemClasses, itemTableClasses, raritySolidOf } from './equipment/item-classes'
 import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
 
-const { slot, number, muted, heading, count } = itemTableClasses
+const { slot, muted, heading, count } = itemTableClasses
 // 진의 단계처럼 값이 글자인 줄도 있어, 숫자로만 된 값에만 숫자 글꼴을 쓴다.
 const NUMERIC_TEXT = /^[\d.,+\-%\s]+$/
 const OPTION = 'm-0 flex items-start gap-4 rounded-control border p-4'
@@ -163,7 +163,7 @@ function OathStrip({
     <div className={itemClasses.strip}>
       {info !== null && (
         <span className={itemClasses.itemText}>
-          <span className={itemClasses.stripLabel}>서약</span>
+          <span className="label">서약</span>
           {icon !== null && <ItemIcon itemId={info.itemId} src={icon} rarity={info.rarity} />}
           <ItemName name={info.itemName} rarity={info.rarity} />
           {info.setPoint !== null && (
@@ -174,7 +174,7 @@ function OathStrip({
       <span className={itemClasses.spacer} />
       {set !== null && (
         <span className={itemClasses.itemText}>
-          <span className={itemClasses.stripLabel}>서약 세트</span>
+          <span className="label">서약 세트</span>
           <ItemName name={set.name} rarity={set.rarity} />
           {set.optionName !== null && (
             <span className={itemClasses.stripMuted}>{set.optionName}</span>
@@ -216,7 +216,7 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
         <tbody>
           {crystals.map((crystal, index) => (
             <tr key={`${crystal.slot}-${index}`}>
-              <td className={`${slot} ${number}`}>{crystal.slot ?? MISSING_VALUE}</td>
+              <td className={`${slot} num`}>{crystal.slot ?? MISSING_VALUE}</td>
               <td>
                 <div className={itemClasses.item}>
                   <ItemIcon itemId={crystal.itemId} rarity={crystal.rarity} />
@@ -265,18 +265,14 @@ function StatSection({
   return (
     <section aria-label={title ?? undefined}>
       {title !== null && <h2 className={heading}>{title}</h2>}
-      <dl className="m-0 p-0">
+      <dl>
         {lines.map(({ name, value }, index) => (
           <div
             key={`${name}-${index}`}
             className="flex min-h-[40px] items-center justify-between gap-3 border-b border-line px-4"
           >
             <dt className="text-fg-muted">{name}</dt>
-            <dd
-              className={`m-0 font-semibold ${NUMERIC_TEXT.test(value) ? 'font-mono tabular-nums' : ''}`}
-            >
-              {value}
-            </dd>
+            <dd className={`font-semibold ${NUMERIC_TEXT.test(value) ? 'num' : ''}`}>{value}</dd>
           </div>
         ))}
       </dl>
