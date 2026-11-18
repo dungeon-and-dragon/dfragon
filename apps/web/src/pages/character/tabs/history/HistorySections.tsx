@@ -8,14 +8,13 @@ import {
   SET_PART
 } from '#core/character'
 import { formatSeoulFullDateTime } from '#core/time-format'
+import { enhancementKindClasses } from '../../../../components/game-colors'
 import { itemTableClasses } from '../equipment/item-classes'
 import { ItemName } from '../equipment/item-parts'
 import { FIELD_LABELS, formatFieldValue, NAME_CHANGE_LABELS } from './history-format'
 
 const AFTER_TONES: Partial<Record<HistoryFieldChange['field'], string>> = {
-  reinforce: 'text-game-enhance',
-  amplify: 'text-game-amplify',
-  refine: 'text-game-refine',
+  ...enhancementKindClasses,
   enchant: 'text-game-enchant'
 }
 

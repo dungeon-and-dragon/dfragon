@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { ActivitySeason } from '#core/adventure-guild'
+import { rarityGradientFills } from '../../components/game-colors'
 import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
 import { usePrimevalFillFade } from './animations/usePrimevalFillFade'
 import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'
@@ -111,7 +112,7 @@ function SeasonButton({
       <i
         ref={primevalRef}
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-0 h-1 rounded-[1px] bg-(image:--gradient-rarity-primordial)"
+        className={`pointer-events-none absolute top-0 left-0 h-1 rounded-[1px] ${rarityGradientFills.primordial}`}
       />
       <span
         className={`text-xs whitespace-nowrap ${selected ? 'font-semibold' : 'font-medium'} ${nameTone(season, selected)}`}

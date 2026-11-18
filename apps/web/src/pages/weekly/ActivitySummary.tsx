@@ -1,6 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import type { ActivitySummary as Summary, EnhancementTarget } from '#core/adventure-guild'
+import { enhancementTextClasses, rarityTextClasses } from '../../components/game-colors'
 import { formatClearCount } from './clear-count'
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
@@ -8,7 +9,6 @@ const numberFormat = new Intl.NumberFormat('ko-KR')
 const STATS = 'flex gap-8'
 const STAT = 'stat items-start focus-ring'
 const STAT_LABEL = 'stat-label whitespace-nowrap'
-const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 
 type NameCount = Summary['raids'][number]
 
@@ -124,35 +124,43 @@ export function ActivitySummary({
         {items.legendary > 0 && (
           <DetailRow
             label="레전더리"
-            labelTone="text-rarity-legendary"
+            labelTone={rarityTextClasses.legendary}
             value={`${numberFormat.format(items.legendary)}개`}
           />
         )}
         {items.epic > 0 && (
           <DetailRow
             label="에픽"
-            labelTone="text-rarity-epic"
+            labelTone={rarityTextClasses.epic}
             value={`${numberFormat.format(items.epic)}개`}
           />
         )}
         {items.primeval > 0 && (
           <DetailRow
             label="태초"
-            labelTone={`bg-(image:--gradient-rarity-primordial) ${GRADIENT_TEXT}`}
+            labelTone={rarityTextClasses.primordial}
             value={`${numberFormat.format(items.primeval)}개`}
           />
         )}
         {items.mythic > 0 && (
           <DetailRow
             label="신화"
-            labelTone={`bg-(image:--gradient-rarity-mythic) ${GRADIENT_TEXT}`}
+            labelTone={rarityTextClasses.mythic}
             value={`${numberFormat.format(items.mythic)}개`}
           />
         )}
       </SummaryStat>
       <SummaryStat label="강화" value={enhancement.attempts}>
-        <TargetRows title="증폭" targets={enhancement.amplify} labelTone="text-game-amplify" />
-        <TargetRows title="강화" targets={enhancement.reinforce} labelTone="text-game-enhance" />
+        <TargetRows
+          title="증폭"
+          targets={enhancement.amplify}
+          labelTone={enhancementTextClasses.amplify}
+        />
+        <TargetRows
+          title="강화"
+          targets={enhancement.reinforce}
+          labelTone={enhancementTextClasses.enhance}
+        />
         {hasTargets && <div className="mt-1 border-t border-line" />}
         <DetailRow
           label="10증폭 미만"
