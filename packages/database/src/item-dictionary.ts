@@ -12,6 +12,16 @@ export type UnlistedAcquisitionQuery = {
   since: Date
 }
 
+export async function readItemDictionary(
+  client: DatabaseClient,
+  itemIds: readonly string[]
+): Promise<ItemDictionaryEntry[]> {
+  return client.item.findMany({
+    where: { itemId: { in: [...new Set(itemIds)] } },
+    select: { itemId: true, availableLevel: true, itemType: true }
+  })
+}
+
 export async function readUnlistedItemIds(
   client: DatabaseClient,
   itemIds: readonly string[]
