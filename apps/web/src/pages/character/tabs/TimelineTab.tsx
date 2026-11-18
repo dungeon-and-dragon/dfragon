@@ -1,8 +1,8 @@
-import { ProgressCircle } from '@dfragon/ui'
 import { useCallback } from 'react'
 import type { CharacterIdentity } from '#core/character/character'
 import type { CharacterTimeline } from '#core/character/character-timeline'
 import { useCharacterTimeline } from '../hooks/useCharacterTimeline'
+import { LoadingLine } from '../../../components/LoadingLine'
 import { useClientHost } from '../../../host/client-host'
 import { useTimelinePages } from '../hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
@@ -14,25 +14,21 @@ import {
   WeeklyClears
 } from './timeline/TimelineSections'
 
-const STATE = 'flex min-h-[360px] items-center justify-center gap-2 px-4 text-center text-sm'
-
 export function TimelineTab({ detail }: CharacterTabProps): React.JSX.Element {
   const result = useCharacterTimeline(detail)
   switch (result.status) {
     case 'loading':
       return (
-        <div aria-busy="true" className={`${STATE} text-fg-muted`}>
-          <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
+        <div aria-busy="true" className="state state-pending">
+          <LoadingLine />
           <span role="status">타임라인을 받는 중입니다. 처음 조회하면 몇 초 걸릴 수 있습니다.</span>
         </div>
       )
     case 'error':
       return (
-        <div className={`${STATE} text-fg-danger`}>
-          <p role="alert" className="m-0">
-            {result.message}
-          </p>
-        </div>
+        <p role="alert" className="state state-error">
+          {result.message}
+        </p>
       )
     case 'success': {
       const { serverId, characterId } = detail.character

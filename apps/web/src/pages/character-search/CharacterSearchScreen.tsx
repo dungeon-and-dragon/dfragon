@@ -31,7 +31,9 @@ export function CharacterSearchScreen({
       {isSearchableCharacterName(query.characterName) ? (
         <SearchedCharacterList query={query} />
       ) : (
-        <ListBox name="검색할 수 없는 이름입니다." />
+        <ListBox name={query.characterName}>
+          <p className="state">검색할 수 없는 이름입니다.</p>
+        </ListBox>
       )}
     </div>
   )
@@ -62,14 +64,18 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
     case 'error':
       return (
         <ListBox name={name}>
-          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
+          <p role="alert" className="state state-error">
             {result.message}
           </p>
         </ListBox>
       )
     case 'success':
       if (result.value.length === 0) {
-        return <ListBox name="캐릭터를 찾지 못했습니다." />
+        return (
+          <ListBox name={name}>
+            <p className="state">캐릭터를 찾지 못했습니다.</p>
+          </ListBox>
+        )
       }
 
       return (

@@ -7,7 +7,6 @@ import { ClipboardCopyButton } from '../../components/ClipboardCopyButton'
 import { LastCaptureTime } from '../../components/LastCaptureTime'
 import { SnapshotToggle } from '../../components/SnapshotToggle'
 import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
-import { useClipboardCopy } from '../../hooks/useClipboardCopy'
 import { useRaidSlotCards } from './hooks/useRaidSlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { filledSlotCount } from '#core/capture/slot-cards'
@@ -20,7 +19,6 @@ export function RaidPage({ captureSource }: { captureSource: ReactNode }): React
     ? '검색 연결을 확인하지 못했습니다. 앱 화면을 다시 열어 주세요.'
     : ''
   const { renderBoardHeader } = useBoardHeaderPortal()
-  const clipboard = useClipboardCopy(clipboardText)
 
   return (
     <>
@@ -48,7 +46,7 @@ export function RaidPage({ captureSource }: { captureSource: ReactNode }): React
                 onTake={snapshot.take}
                 onClear={snapshot.clear}
               />
-              <ClipboardCopyButton status={clipboard.status} onCopy={clipboard.copy} />
+              <ClipboardCopyButton text={clipboardText} />
               <CaptureButton
                 target="공대"
                 disabled={!capture.canStartCapture}

@@ -6,7 +6,6 @@ import { ClipboardCopyButton } from '../../components/ClipboardCopyButton'
 import { LastCaptureTime } from '../../components/LastCaptureTime'
 import { SnapshotToggle } from '../../components/SnapshotToggle'
 import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
-import { useClipboardCopy } from '../../hooks/useClipboardCopy'
 import { usePartySlotCards } from './hooks/usePartySlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { filledSlotCount } from '#core/capture/slot-cards'
@@ -16,7 +15,6 @@ export function PartyPage({ captureSource }: { captureSource: ReactNode }): Reac
   const { partyCapture: capture } = useScreenCaptureContext()
   const { cards, snapshot, clipboardText } = usePartySlotCards(capture)
   const { renderBoardHeader } = useBoardHeaderPortal()
-  const clipboard = useClipboardCopy(clipboardText)
 
   return (
     <div className="flex flex-col gap-4">
@@ -43,7 +41,7 @@ export function PartyPage({ captureSource }: { captureSource: ReactNode }): Reac
                 onTake={snapshot.take}
                 onClear={snapshot.clear}
               />
-              <ClipboardCopyButton status={clipboard.status} onCopy={clipboard.copy} />
+              <ClipboardCopyButton text={clipboardText} />
               <CaptureButton
                 target="파티"
                 disabled={!capture.canStartCapture}

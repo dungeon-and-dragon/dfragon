@@ -96,7 +96,7 @@ export function AdventureDashboard({
         <div className={CONTENT}>
           <h1 className={TITLE}>{adventureName}</h1>
         </div>
-        <p role="alert" className="m-0 text-sm text-fg-danger">
+        <p role="alert" className="state state-error">
           {result.message}
         </p>
       </div>

@@ -2,8 +2,7 @@
 export const FIELD_INPUT = 'field-box box-border w-full font-sans outline-none'
 
 export const panelClasses = {
-  box: 'section min-w-0',
-  empty: 'm-0 px-4 py-12 text-center text-sm font-semibold'
+  box: 'section min-w-0'
 } as const
 
 export const textClasses = {

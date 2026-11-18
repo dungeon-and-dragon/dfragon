@@ -24,9 +24,7 @@ export function FavoritesPage(): React.JSX.Element {
       </TitleBox>
       <ListBox name="즐겨찾기한 캐릭터">
         {empty ? (
-          <p className="m-0 px-4 py-12 text-center text-sm font-semibold text-fg">
-            즐겨찾기한 캐릭터가 없습니다.
-          </p>
+          <p className="state">즐겨찾기한 캐릭터가 없습니다.</p>
         ) : (
           <CharacterTable rows={favoriteCharacters} ranked={false} action={unfavorite} />
         )}
