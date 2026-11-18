@@ -10,8 +10,7 @@ import { WeeklyClearTable } from './WeeklyClearTable'
 
 const LOADING_ROWS = 5
 
-const SCREEN = 'flex flex-col gap-4 p-4'
-const DASHBOARD = 'overflow-hidden rounded-panel border border-line bg-canvas'
+const SCREEN = 'flex flex-col'
 
 function AdventureNameForm({
   initialName,
@@ -41,7 +40,7 @@ function AdventureNameForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 border-t border-line px-4 py-3"
+      className="flex items-center gap-2 border-t border-line px-4 py-3 first:border-t-0"
     >
       <div className="w-[224px] max-sm:min-w-0 max-sm:flex-1">
         <TextField size="sm">
@@ -82,8 +81,10 @@ export function AdventureEntryScreen({
 }): React.JSX.Element {
   return (
     <div className={SCREEN}>
-      <div className={DASHBOARD}>
-        <h1 className="m-0 p-4 text-xl font-semibold tracking-heading">모험단</h1>
+      <header className="section screen-head">
+        <h1 className="screen-title">모험단</h1>
+      </header>
+      <div className="section">
         <AdventureNameForm initialName="" onAdventureOpen={onAdventureOpen} />
       </div>
     </div>
@@ -113,7 +114,7 @@ export function WeeklyScreen({
 
   return (
     <div className={SCREEN}>
-      <div className={DASHBOARD}>
+      <div className="section">
         <AdventureDashboard
           adventureName={adventureName}
           season={season}
@@ -134,11 +135,8 @@ export function WeeklyScreen({
 
 function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Element {
   return (
-    <section
-      aria-label="이번 주 클리어"
-      className="min-w-0 overflow-x-auto rounded-panel border border-line bg-canvas"
-    >
-      {children}
+    <section aria-label="이번 주 클리어" className="section min-w-0">
+      <div className="overflow-x-auto">{children}</div>
     </section>
   )
 }

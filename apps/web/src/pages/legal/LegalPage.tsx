@@ -12,15 +12,11 @@ function LegalPage({ title }: { title: string }): React.JSX.Element {
   const titleId = useId()
 
   return (
-    <div className="p-4">
-      <article aria-labelledby={titleId} className="rounded-panel border border-line bg-canvas">
-        <div className="flex min-h-12 items-center border-b border-line px-4">
-          <h1 id={titleId} className="m-0 text-base font-semibold">
-            {title}
-          </h1>
-        </div>
-        <div className="min-h-[480px]" />
-      </article>
-    </div>
+    <article aria-labelledby={titleId} className="section">
+      <h1 id={titleId} className="section-title">
+        {title}
+      </h1>
+      <div className="min-h-[480px]" />
+    </article>
   )
 }

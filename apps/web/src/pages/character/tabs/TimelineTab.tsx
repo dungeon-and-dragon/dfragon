@@ -69,10 +69,10 @@ function TimelineContent({
   )
 
   return (
-    <div className="flex flex-col gap-4 p-4 text-sm">
+    <div className="flex flex-col divide-y divide-line text-sm">
       <WeeklyClears clears={timeline.weeklyClears} />
       <SeasonClears counts={timeline.seasonClears} />
-      <div className="grid grid-cols-[minmax(0,1fr)_500px] items-start gap-4 max-sm:grid-cols-1">
+      <div className="grid grid-cols-[minmax(0,1fr)_500px] divide-x divide-line max-sm:grid-cols-1 max-sm:divide-x-0 max-sm:divide-y">
         <Enhancements enhancements={enhancements.items} more={<TimelineMore {...enhancements} />} />
         <Acquisitions acquisitions={acquisitions.items} more={<TimelineMore {...acquisitions} />} />
       </div>

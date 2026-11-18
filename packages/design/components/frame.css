@@ -1,0 +1,206 @@
+/*
+ * 전역 바와 화면 틀이다.
+ * <header class="topbar"><div class="page">…<span class="divider-v"></span>…</div></header>
+ * <main class="page screen">
+ *   <header class="section screen-head"><h1 class="screen-title">모험단1</h1>
+ *     <div class="stat"><span class="stat-label">캐릭터</span><span class="stat-value">24</span></div></header>
+ *   <section class="section"><h2 class="section-title">캐릭터<span class="section-title-count">24</span>
+ *     <span class="section-title-actions">…</span></h2>…</section>
+ *   <div class="section section-cols"><section>…</section><section>…</section></div>
+ * </main>
+ * 구획 아래 가로 선은 창 전체 폭으로 그려 화면 상자 밖으로 나가므로, 화면을 담은 상자가 overflow-x: clip으로 자른다.
+ */
+.topbar {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-line);
+  background-color: var(--color-canvas);
+  color: var(--color-fg);
+}
+
+.topbar > .page {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  height: var(--height-topbar);
+  padding-inline: 16px;
+}
+
+.divider-v {
+  flex-shrink: 0;
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-line);
+}
+
+.screen {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  border-inline: 1px solid var(--color-line);
+}
+
+.section {
+  position: relative;
+  padding-block: 24px;
+}
+
+.section::after {
+  content: '';
+  position: absolute;
+  right: -100vw;
+  bottom: -1px;
+  left: -100vw;
+  height: 1px;
+  background-color: var(--color-line);
+}
+
+/* 가로 선과 화면 양옆 세로 선이 만나는 두 점에 7px 표식을 둔다. 표식 가운데가 1px 선의 가운데에 온다. */
+.section::before {
+  content: '';
+  position: absolute;
+  z-index: var(--z-index-raised);
+  right: -4px;
+  bottom: -4px;
+  left: -4px;
+  height: 7px;
+  background:
+    linear-gradient(var(--color-canvas) 0 0) left 1px top 1px / 5px 5px no-repeat,
+    linear-gradient(var(--color-canvas) 0 0) right 1px top 1px / 5px 5px no-repeat,
+    linear-gradient(var(--color-line-strong) 0 0) left top / 7px 7px no-repeat,
+    linear-gradient(var(--color-line-strong) 0 0) right top / 7px 7px no-repeat;
+}
+
+.section-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-block: 0;
+}
+
+.section-cols > * {
+  min-width: 0;
+  padding-block: 24px;
+}
+
+.section-cols > * + * {
+  border-left: 1px solid var(--color-line);
+}
+
+/* 선, 표식과 위아래 여백은 바깥 구획이 맡으므로, 다른 구획 안에 들어온 구획은 자기 선을 긋지 않고 나란한 칸이 아니면 여백도 두지 않는다. */
+.section .section::before,
+.section .section::after {
+  content: none;
+}
+
+.section .section:not(.section-cols > *) {
+  padding-block: 0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: var(--height-row);
+  margin: 0;
+  padding-inline: 16px;
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.section-title:last-child {
+  border-bottom: 0;
+}
+
+/* 제목 줄에 동작을 함께 두면 줄은 div, 제목은 그 안의 heading이라 heading이 줄의 글자를 따른다. */
+.section-title :is(h1, h2, h3) {
+  margin: 0;
+  font: inherit;
+}
+
+.section-title-count {
+  color: var(--color-fg-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.section-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.screen-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding-inline: 16px;
+}
+
+.screen-title {
+  margin: 0;
+  font-size: var(--text-xl);
+  line-height: var(--text-xl--line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-heading);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.stat-label {
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  line-height: var(--text-xl--line-height);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (width < 600px) {
+  .screen {
+    border-inline: 0;
+  }
+
+  .section,
+  .section-cols > * {
+    padding-block: 16px;
+  }
+
+  .section::before {
+    content: none;
+  }
+
+  .section-cols {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 0;
+  }
+
+  .section-cols > * + * {
+    border-top: 1px solid var(--color-line);
+    border-left: 0;
+  }
+
+  .screen-head {
+    flex-wrap: wrap;
+  }
+}

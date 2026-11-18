@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { ClientHost } from '../../host/client-host'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { createStoryClientHost } from '../../testing/story-support/story-host'
 import { storyCharacterStats } from '../../testing/story-support/story-stats'
 import { StatsPage } from './StatsPage'
@@ -33,9 +34,9 @@ const failedHost = createStoryClientHost({
 function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
   return (
     <StoryFrame host={host}>
-      <div className="page mt-6">
+      <StoryScreen>
         <StatsPage />
-      </div>
+      </StoryScreen>
     </StoryFrame>
   )
 }

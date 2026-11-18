@@ -222,13 +222,10 @@ function ContentHead({
   }
 
   return (
-    <section
-      aria-label="컨텐츠"
-      className="flex flex-wrap items-center gap-6 rounded-panel border border-line bg-canvas px-4 py-2"
-    >
+    <section aria-label="컨텐츠" className="section flex flex-wrap items-center gap-6 px-4">
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-fg-muted tabular-nums">{kind}</span>
-        <h2 className="m-0 text-xl font-semibold tracking-heading">{place.group.name}</h2>
+        <h2 className="screen-title">{place.group.name}</h2>
       </div>
       {place.choice !== null && (
         <ChipGroup

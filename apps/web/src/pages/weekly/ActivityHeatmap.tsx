@@ -58,8 +58,7 @@ const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
 const LABEL = 'text-2xs whitespace-nowrap text-fg-subtle'
 const TAG = 'badge badge-sm border border-current tabular-nums'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
-const BOX =
-  'relative grid grid-cols-[minmax(0,1fr)_120px] rounded-panel border border-line bg-canvas xl:grid-cols-[minmax(0,1fr)]'
+const BOX = 'section grid grid-cols-[minmax(0,1fr)_120px] xl:grid-cols-[minmax(0,1fr)] py-0'
 
 // gsap이 heatmap 격자에 --heatmap-ring-angle을 돌리고, 테두리가 상속받아 각도로 쓴다.
 const RING =
@@ -354,11 +353,11 @@ function HeatmapPanel({
 
   return (
     <>
-      <div className="flex min-h-[18px] items-center justify-between gap-4 px-4 pt-3">
+      <div className="flex min-h-[18px] items-center justify-between gap-4 px-4 pt-6 max-sm:pt-4">
         {kind === 'item' && <ItemTags items={activity.summary.items} />}
         <Legend kind={kind} thresholds={thresholds} />
       </div>
-      <div className="flex px-4 pt-3 pb-4">
+      <div className="flex px-4 pt-3 pb-6 max-sm:pb-4">
         <DayLabels />
         {/* 테두리 빛(칸 밖 4px)과 마우스 테두리가 스크롤 영역에 잘리지 않게 둔다. */}
         <div ref={scroller} className="min-w-0 overflow-x-auto py-1 pr-3 pl-1">
@@ -441,13 +440,13 @@ export function ActivityHeatmap({
       ))}
       <Tabs.List
         aria-label="활동 종류"
-        className="relative flex flex-col border-l border-line py-3 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-[120px] xl:py-0"
+        className="relative flex flex-col border-l border-line py-6 max-sm:py-4 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-[120px] xl:py-0"
       >
         {kinds.map(({ kind: tabKind, label }) => (
           <Tabs.Tab
             key={tabKind}
             value={tabKind}
-            className="block w-full cursor-pointer py-2 pr-0 pl-3 text-left text-sm font-medium text-fg-muted focus-ring-inset hover:text-fg data-active:font-semibold data-active:text-fg"
+            className="block w-full cursor-pointer py-2 px-4 text-left text-sm font-medium text-fg-muted focus-ring-inset hover:text-fg data-active:font-semibold data-active:text-fg"
           >
             {label}
           </Tabs.Tab>

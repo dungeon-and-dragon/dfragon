@@ -56,14 +56,11 @@ function TimelineGroup({
   children: ReactNode
 }): React.JSX.Element {
   return (
-    <section
-      aria-label={title}
-      className="min-w-0 overflow-hidden rounded-panel border border-line"
-    >
-      <h2 className="m-0 box-border flex min-h-12 items-center gap-2 border-b border-line px-4 text-xs font-medium whitespace-nowrap text-fg-subtle">
-        <span className="text-sm font-semibold text-fg">{title}</span>
-        <span className="font-mono tabular-nums">{count}</span>
-        {note !== undefined && <span>{note}</span>}
+    <section aria-label={title} className="min-w-0">
+      <h2 className="section-title whitespace-nowrap">
+        <span>{title}</span>
+        <span className="section-title-count">{count}</span>
+        {note !== undefined && <span className="text-xs font-medium text-fg-subtle">{note}</span>}
       </h2>
       {count === 0 ? <p className="m-0 px-4 py-3 text-fg-subtle">{emptyText}</p> : children}
     </section>
@@ -168,7 +165,7 @@ export function SeasonClears({
       count={counts.length}
       emptyText="이번 시즌 클리어 기록이 없습니다."
     >
-      <ul className="m-0 flex list-none flex-wrap gap-2 p-3">
+      <ul className="m-0 flex list-none flex-wrap gap-2 px-4 py-3">
         {counts.map((count) => (
           <li
             key={`${count.kind}-${count.name}-${count.hard}`}
