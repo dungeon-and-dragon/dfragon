@@ -30,6 +30,7 @@ import {
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
 import { ClearContentCards } from './components/ClearContentCards'
+import { ClearScreenSkeleton, ClearStatsSkeleton } from './components/ClearSkeleton'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
 import { clearClasses } from './components/clear-classes'
@@ -73,14 +74,7 @@ export function ClearOverviewScreen({
   const result = useClearStats()
   switch (result.status) {
     case 'loading':
-      return (
-        <div aria-busy="true" className={clearClasses.screen}>
-          <span role="status" className="sr-only">
-            클리어 집계를 받는 중입니다.
-          </span>
-          <TitleBox title={CLEAR_TITLE} />
-        </div>
-      )
+      return <ClearScreenSkeleton />
     case 'error':
       return (
         <div className={clearClasses.screen}>
@@ -145,7 +139,7 @@ function Overview({
       {hasRateValues(contents) && (
         <ClearRatePanel contents={contents} weeks={weeks} weekStart={weekStart} />
       )}
-      {result.status === 'loading' && <div aria-hidden="true" className={clearClasses.pending} />}
+      {result.status === 'loading' && <ClearStatsSkeleton />}
       {result.status === 'error' && (
         <p role="alert" className={clearClasses.state}>
           {result.message}
