@@ -43,11 +43,10 @@ function charactersOf(
 const idsOf = (characters: readonly CollectedCharacter[]) =>
   characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`).sort()
 
-// 문서의 제약(명성 범위 2,000, 요청한 limit까지, 명성 내림차순)대로 답하는 가짜 Neople이고, 대기열은 메모리에 둔다.
+// 실제 응답처럼(명성 범위 2,000, 양 끝 명성 포함, 요청한 limit까지, 명성 내림차순) 답하는 가짜 Neople이고, 대기열은 메모리에 둔다.
 function discovery(
   population: readonly SyntheticCharacter[],
-  fail: (request: FameRequest, attempt: number) => Error | undefined = () => undefined,
-  lowerBound: 'inclusive' | 'exclusive' = 'inclusive'
+  fail: (request: FameRequest, attempt: number) => Error | undefined = () => undefined
 ) {
   const queued: CollectedCharacter[] = []
   const pauses: number[] = []
@@ -78,19 +77,12 @@ function discovery(
       const minFame = query.minFame ?? maxFame - FAME_SEARCH_RANGE
       assert.ok(maxFame - minFame <= FAME_SEARCH_RANGE)
 
-      const reachesMinFame = (fame: number) => {
-        if (lowerBound === 'exclusive') {
-          return fame > minFame
-        }
-
-        return fame >= minFame
-      }
       const rows = population
         .filter(
           (character) =>
             (serverId === 'all' || character.serverId === serverId) &&
             (query.jobGrowId === undefined || character.jobGrowId === query.jobGrowId) &&
-            reachesMinFame(character.fame) &&
+            character.fame >= minFame &&
             character.fame <= maxFame
         )
         .sort((left, right) => right.fame - left.fame)
@@ -153,6 +145,16 @@ test('서버와 1차 전직마다 최고 명성에서 0까지 내려가며 찾�
   )
 })
 
+test('구간의 양 끝 명성에 있는 캐릭터도 빠뜨리거나 두 번 받지 않는다', async () => {
+  const population = charactersOf('cain', 'grow-a1', [50_000, 48_000, 47_999, 45_999, 45_998])
+  const { discover, queued } = discovery(population)
+
+  const summary = await discover()
+
+  assert.deepEqual(idsOf(queued), idsOf(population))
+  assert.equal(summary.listed, population.length)
+})
+
 test('한 구간에 한 번에 받는 수보다 많은 캐릭터가 있어도 가장 낮은 명성부터 이어 받아 모두 찾는다', async () => {
   // 명성 2,000 범위 안에 650명을 두고, 같은 명성을 가진 캐릭터도 셋씩 둔다.
   const crowded = Array.from({ length: 650 }, (_, index) => 49_900 - Math.floor(index / 3))
@@ -165,15 +167,6 @@ test('한 구간에 한 번에 받는 수보다 많은 캐릭터가 있어도 �
   await discover()
 
   assert.deepEqual([...new Set(idsOf(queued))], idsOf(population))
-})
-
-test('Neople이 구간의 최소 명성을 빼고 답해도 경계 명성의 캐릭터를 다음 구간에서 찾는다', async () => {
-  const population = charactersOf('cain', 'grow-a1', [50_000, 48_000, 46_000])
-  const { discover, queued } = discovery(population, undefined, 'exclusive')
-
-  await discover()
-
-  assert.deepEqual(idsOf(queued), idsOf(population))
 })
 
 test('한 명성에 한 번에 받는 수보다 많은 캐릭터가 몰리면 받은 만큼만 넣고 그 아래 명성으로 내려간다', async () => {
@@ -202,7 +195,7 @@ for (const kind of ['unavailable', 'timeout'] as const) {
     const population = charactersOf('cain', 'grow-a1', [50_000, 19_999])
     const { discover, queued, pauses, reports } = discovery(population, (request, attempt) => {
       const failing =
-        request.serverId === 'cain' && request.jobGrowId === 'grow-a1' && request.maxFame === 20_000
+        request.serverId === 'cain' && request.jobGrowId === 'grow-a1' && request.maxFame === 50_000
 
       if (failing && attempt === 1) {
         return new NeopleRequestFailure(kind)
@@ -219,7 +212,7 @@ for (const kind of ['unavailable', 'timeout'] as const) {
     assert.deepEqual(reports, [
       [
         'CHARACTER_DISCOVERY_NEOPLE_UNAVAILABLE',
-        { serverId: 'cain', jobId: 'job-a', jobGrowId: 'grow-a1', maxFame: 20_000 }
+        { serverId: 'cain', jobId: 'job-a', jobGrowId: 'grow-a1', maxFame: 50_000 }
       ]
     ])
   })
@@ -229,7 +222,7 @@ test('명성 검색이 그 밖의 실패로 답한 서버와 전직만 건너뛰
   const broken = charactersOf('cain', 'grow-a2', [50_000, 10])
   const healthy = charactersOf('siroco', 'grow-b1', [30_001])
   const { discover, queued, pauses, reports } = discovery([...broken, ...healthy], (request) => {
-    const failing = request.jobGrowId === 'grow-a2' && request.maxFame === 48_000
+    const failing = request.jobGrowId === 'grow-a2' && request.maxFame === 47_999
 
     if (failing) {
       return new NeopleRequestFailure('api')
@@ -246,8 +239,8 @@ test('명성 검색이 그 밖의 실패로 답한 서버와 전직만 건너뛰
   assert.deepEqual(
     reports.map(([code, { serverId, maxFame }]) => [code, serverId, maxFame]),
     [
-      ['CHARACTER_DISCOVERY_TARGET_SKIPPED', 'cain', 48_000],
-      ['CHARACTER_DISCOVERY_TARGET_SKIPPED', 'siroco', 48_000]
+      ['CHARACTER_DISCOVERY_TARGET_SKIPPED', 'cain', 47_999],
+      ['CHARACTER_DISCOVERY_TARGET_SKIPPED', 'siroco', 47_999]
     ]
   )
 })
@@ -270,7 +263,7 @@ test('최고 명성을 받지 못하면 아무것도 넣지 않고 실패 종류
   assert.deepEqual(queued, [])
 })
 
-test('다음 최대 명성: 덜 찬 구간은 구간의 최소 명성으로, 꽉 찬 구간은 받은 가장 낮은 명성으로 내려간다', () => {
+test('다음 최대 명성: 덜 찬 구간은 구간의 최소 명성 바로 아래로, 꽉 찬 구간은 받은 가장 낮은 명성으로 내려간다', () => {
   const full = (fame: number) => Array.from({ length: FAME_SEARCH_LIMIT }, () => fame)
   const fullAbove = [...full(49_500).slice(1), 49_200]
   const fullAtMax = full(50_000)
@@ -280,9 +273,9 @@ test('다음 최대 명성: 덜 찬 구간은 구간의 최소 명성으로, 꽉
       name: '덜 찬 구간',
       window: { minFame: 48_000, maxFame: 50_000 },
       fames: [49_000],
-      next: 48_000
+      next: 47_999
     },
-    { name: '빈 구간', window: { minFame: 48_000, maxFame: 50_000 }, fames: [], next: 48_000 },
+    { name: '빈 구간', window: { minFame: 48_000, maxFame: 50_000 }, fames: [], next: 47_999 },
     {
       name: '0까지 받은 구간',
       window: { minFame: 0, maxFame: 1_500 },
