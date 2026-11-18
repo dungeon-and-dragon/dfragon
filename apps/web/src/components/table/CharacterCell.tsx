@@ -2,6 +2,7 @@ import { characterImageUrl, displayJobName, isMaxLevel } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import type { StoredCharacter } from '#core/ranking'
 import { Portrait } from '#components/Portrait'
+import { PortraitPreview } from '#components/PortraitPreview'
 import { ServerBadge } from '#components/ServerBadge'
 
 export type CharacterCellCharacter = Pick<
@@ -18,12 +19,15 @@ export function CharacterCell({
 }): React.JSX.Element {
   const job = displayJobName(character, character.role)
   const showsLevel = character.level != null && !isMaxLevel(character.level)
+  const image = characterImageUrl(character)
 
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="portrait portrait-sm">
-        <Portrait src={characterImageUrl(character)} />
-      </span>
+      <PortraitPreview src={image}>
+        <span className="portrait portrait-sm">
+          <Portrait src={image} />
+        </span>
+      </PortraitPreview>
       <span className="flex min-w-0 items-center gap-2">
         <ServerBadge serverId={character.serverId} />
         <Link
