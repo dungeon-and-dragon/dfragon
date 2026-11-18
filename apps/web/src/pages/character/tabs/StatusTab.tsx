@@ -1,4 +1,9 @@
-import { type CharacterDetailView, formatStatValue, statusElementOf } from '#core/character'
+import {
+  type CharacterDetailView,
+  formatStatValue,
+  type StatusLine,
+  toStatusLayout
+} from '#core/character'
 import type { CharacterTabProps } from './character-tab-props'
 import { detailTabClasses as layout } from './detail-tab-classes'
 
@@ -6,30 +11,13 @@ type NamedStat = CharacterDetailView['status']['status'][number]
 type StatusBuff = CharacterDetailView['status']['buff'][number]
 
 export function StatusTab({ detail }: CharacterTabProps): React.JSX.Element {
-  const stats = detail.status.status.filter(isShownStat)
+  const { main, rest } = toStatusLayout(detail.status.status.filter(isShownStat))
   const buffs = detail.status.buff.filter((buff) => buff.name != null)
 
   return (
     <div className={layout.tab}>
-      {stats.length > 0 && (
-        <dl aria-label="스탯" className="grid grid-cols-4 gap-x-6 max-sm:grid-cols-2">
-          {stats.map((stat) => (
-            <div
-              key={stat.name}
-              className="flex min-w-0 items-center justify-between gap-2 border-b border-line py-3"
-            >
-              <dt className="flex min-w-0 items-center gap-1 text-fg-muted">
-                {/* 속성 아이콘 그림이 저장소에 들어오기 전까지 자리만 둔다. */}
-                {statusElementOf(stat.name) != null && (
-                  <span aria-hidden="true" className="size-4 shrink-0" />
-                )}
-                {stat.name}
-              </dt>
-              <dd className="shrink-0 num text-fg">{formatStatValue(stat.value)}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
+      {main.length > 0 && <StatGrid label="스탯" stats={main} />}
+      {rest.length > 0 && <StatGrid label="그 밖의 스탯" stats={rest} spaced />}
       {buffs.length > 0 && (
         <section aria-label="적용 중인 버프" className={layout.section}>
           <h2 className={layout.heading}>적용 중인 버프</h2>
@@ -41,6 +29,39 @@ export function StatusTab({ detail }: CharacterTabProps): React.JSX.Element {
         </section>
       )}
     </div>
+  )
+}
+
+function StatGrid({
+  label,
+  stats,
+  spaced = false
+}: {
+  label: string
+  stats: StatusLine[]
+  spaced?: boolean
+}): React.JSX.Element {
+  return (
+    <dl
+      aria-label={label}
+      className={`grid grid-cols-4 gap-x-6 max-sm:grid-cols-2${spaced ? ' mt-8' : ''}`}
+    >
+      {stats.map((stat) => (
+        <div
+          key={stat.name}
+          className="flex min-w-0 items-center justify-between gap-2 border-b border-line py-3"
+        >
+          <dt
+            className={`flex min-w-0 items-center gap-1 ${stat.emphasized ? 'font-semibold text-fg' : 'text-fg-muted'}`}
+          >
+            {stat.name}
+          </dt>
+          <dd className={`shrink-0 num text-fg${stat.emphasized ? ' font-semibold' : ''}`}>
+            {formatStatValue(stat.value)}
+          </dd>
+        </div>
+      ))}
+    </dl>
   )
 }
 

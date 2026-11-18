@@ -96,7 +96,7 @@ export function weeklyClearChart(
   })
   const bars = [
     { key: 'repeat', name: '다시 클리어', color: 'var(--color-chart-base)', values: repeat },
-    { key: 'first', name: '첫 클리어', color: 'var(--color-chart-1)', values: first }
+    { key: 'first', name: '신규', color: 'var(--color-chart-1)', values: first }
   ]
   const line = {
     key: 'ever',
@@ -140,7 +140,7 @@ export function fameBandChart({ fameBands }: ClearContentStats): FameBandChart {
   return { x, bars, line }
 }
 
-export type Figure = Readonly<{ label: string; value: string }>
+export type Figure = Readonly<{ label: string; to?: string; value: string }>
 
 export type SplitRow = Readonly<{
   key: string
@@ -182,12 +182,12 @@ export function weekOverWeekCard(
   const figures = [
     { label: '이탈', value: leftCount },
     { label: '복귀', value: returnedCount },
-    { label: '첫 클리어', value: firstCount }
+    { label: '신규', value: firstCount }
   ]
-  const bothSegment = segment('both', '두 주 모두 클리어', both.cleared, 'var(--color-chart-base)')
+  const bothSegment = segment('both', '잔존', both.cleared, 'var(--color-chart-base)')
   const leftSegment = segment('left', '이탈', left.cleared, 'var(--color-chart-8)')
   const returnedSegment = segment('returned', '복귀', returned.cleared, 'var(--color-chart-3)')
-  const firstSegment = segment('first', '첫 클리어', first.cleared, 'var(--color-chart-1)')
+  const firstSegment = segment('first', '신규', first.cleared, 'var(--color-chart-1)')
   const previous = splitRow('previous', previousWeekText(weekStart, releasedAt), [
     bothSegment,
     leftSegment
@@ -210,15 +210,14 @@ export function stageMoveCard(
   const toHardCount = integer.format(hard.other)
   const toNormalCount = integer.format(normal.other)
   const figures = [
-    { label: '일반에서 하드로', value: toHardCount },
-    { label: '하드에서 일반으로', value: toNormalCount }
+    { label: '일반', to: '하드', value: toHardCount },
+    { label: '하드', to: '일반', value: toNormalCount }
   ]
-  const previous = previousWeekText(weekStart, releasedAt)
   const current = weekNumberText(weekStart, releasedAt)
   const segmentsOf = (counts: ClearStageMoves['hard']) => [
-    segment('same', `${previous}에도 같은 단계`, counts.same, 'var(--color-chart-base)'),
-    segment('other', `${previous}에는 다른 단계`, counts.other, 'var(--color-chart-7)'),
-    segment('none', `${previous} 클리어 없음`, counts.none, 'var(--color-line-strong)')
+    segment('same', '같은 단계', counts.same, 'var(--color-chart-base)'),
+    segment('other', '이동', counts.other, 'var(--color-chart-7)'),
+    segment('none', '클리어 없음', counts.none, 'var(--color-line-strong)')
   ]
   const hardSegments = segmentsOf(hard)
   const rows = [
@@ -237,10 +236,10 @@ export function weekGroupRows(
   pick: (group: WeekGroup) => ClearFameDistribution | null
 ): BoxPlotRow[] {
   const groups: readonly [string, string, string, ClearFameDistribution | null][] = [
-    ['both', '두 주 모두 클리어', 'var(--color-chart-base)', pick(both)],
+    ['both', '잔존', 'var(--color-chart-base)', pick(both)],
     ['returned', '복귀', 'var(--color-chart-3)', pick(returned)],
     ['left', '이탈', 'var(--color-chart-8)', pick(left)],
-    ['first', '첫 클리어', 'var(--color-chart-1)', pick(first)]
+    ['first', '신규', 'var(--color-chart-1)', pick(first)]
   ]
 
   return groups.flatMap(([key, name, color, stats]) => {

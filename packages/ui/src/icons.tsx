@@ -39,6 +39,14 @@ export function ChevronRightIcon(props: IconProps): React.JSX.Element {
   )
 }
 
+export function ArrowRightIcon(props: IconProps): React.JSX.Element {
+  return (
+    <LineIcon {...props}>
+      <path vectorEffect="non-scaling-stroke" d="M4 12h16M14 6l6 6-6 6" />
+    </LineIcon>
+  )
+}
+
 export function CheckIcon(props: IconProps): React.JSX.Element {
   return (
     <LineIcon {...props}>

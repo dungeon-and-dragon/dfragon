@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import themeSource from '@dfragon/design/theme.css?raw'
 import {
+  ArrowRightIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -44,6 +45,7 @@ const containerTokens = sizeTokens.filter((token) => token.name.startsWith('--co
 const iconTokens = sizeTokens.filter((token) => token.name.startsWith('--size-'))
 const iconSizeTokens = iconTokens.filter((token) => token.name.startsWith('--size-icon-'))
 const ICONS = [
+  { name: 'ArrowRightIcon', Icon: ArrowRightIcon },
   { name: 'CheckIcon', Icon: CheckIcon },
   { name: 'ChevronDownIcon', Icon: ChevronDownIcon },
   { name: 'ChevronRightIcon', Icon: ChevronRightIcon },

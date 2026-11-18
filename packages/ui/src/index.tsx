@@ -42,6 +42,7 @@ export type { TooltipPopupProps } from './tooltip'
 export { StatusChip } from './status-chip'
 export type { StatusChipProps, StatusChipTone } from './status-chip'
 export {
+  ArrowRightIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,

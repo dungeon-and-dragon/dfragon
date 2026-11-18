@@ -157,22 +157,9 @@ const FILLED: CharacterTimeline = {
 
 let container: HTMLDivElement
 let root: Root
-let observed: { callback: IntersectionObserverCallback; target: Element }[]
-
-class FakeIntersectionObserver {
-  constructor(private readonly callback: IntersectionObserverCallback) {}
-  observe(target: Element): void {
-    observed.push({ callback: this.callback, target })
-  }
-  disconnect(): void {
-    observed = observed.filter((entry) => entry.callback !== this.callback)
-  }
-}
 
 beforeEach(() => {
-  observed = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
-  vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
   // 2026-11-06 12:00 KST. 타이머는 그대로 두고 지금 시각만 고정한다.
   vi.useFakeTimers({ now: new Date('2026-11-06T03:00:00.000Z'), toFake: ['Date'] })
   container = document.createElement('div')
@@ -216,14 +203,14 @@ function rowsOf(title: string): string[][] {
   )
 }
 
-function reachEnd(title: string): Promise<void> {
-  return act(async () => {
-    for (const { callback, target } of observed) {
-      if (group(title).contains(target)) {
-        callback([{ isIntersecting: true, target } as IntersectionObserverEntry], {} as never)
-      }
-    }
-  })
+function moreButton(title: string): HTMLButtonElement | undefined {
+  return [...group(title).querySelectorAll('button')].find(
+    (button) => button.textContent === '불러오기'
+  )
+}
+
+function clickMore(title: string): Promise<void> {
+  return act(async () => moreButton(title)!.click())
 }
 
 function cellsOf(title: string, row: number): HTMLElement[] {
@@ -252,28 +239,35 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시�
   })
 })
 
-it('이번 주 클리어는 종류, 이름, 하드 배지와 난이도(없으면 생략), 지난 시간을 보이고 한국 시간 MM-DD HH:mm은 title로 두며, 시즌은 하드를 나눈 횟수 칩을 보인다', async () => {
+it('이번 주 클리어는 최근 순으로 종류, 하드 배지, 이름, 난이도(없으면 생략), 지난 시간을 보이고 한국 시간 MM-DD HH:mm은 title로 두며, 시즌은 종류 뒤 하드 배지로 나눈 횟수 칩을 보이며, 하드 배지는 붉은색이다', async () => {
   await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
 
   expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '3'])
   expect(rowsOf('이번 주 클리어')).toEqual([
-    ['레이드', '디레지에 레이드', '하드', '디레지에 : 악연', '14시간 전'],
+    ['레기온', '베누스', '11시간 전'],
     ['레이드', '나벨 레이드', '나벨 : 무지의 악', '14시간 전'],
-    ['레기온', '베누스', '11시간 전']
+    ['레이드', '하드', '디레지에 레이드', '디레지에 : 악연', '14시간 전']
   ])
   expect(
     [...group('이번 주 클리어').querySelectorAll('time')].map((time) => [time.dateTime, time.title])
   ).toEqual([
-    ['2026-11-05T12:30:00.000Z', '11-05 21:30'],
+    ['2026-11-05T15:05:00.000Z', '11-06 00:05'],
     ['2026-11-05T13:00:00.000Z', '11-05 22:00'],
-    ['2026-11-05T15:05:00.000Z', '11-06 00:05']
+    ['2026-11-05T12:30:00.000Z', '11-05 21:30']
   ])
   expect(rowsOf('시즌 클리어 횟수')).toEqual([
-    ['레이드', '디레지에 레이드', '하드', '3'],
-    ['레이드', '나벨 레이드', '하드', '2'],
+    ['레이드', '하드', '디레지에 레이드', '3'],
+    ['레이드', '하드', '나벨 레이드', '2'],
     ['레이드', '나벨 레이드', '1'],
     ['레기온', '베누스', '12']
   ])
+
+  const hardBadges = [...container.querySelectorAll('span')].filter(
+    (badge) => badge.textContent === '하드'
+  )
+
+  expect(hardBadges).toHaveLength(3)
+  expect(hardBadges.every((badge) => badge.classList.contains('text-fg-danger'))).toBe(true)
 })
 
 it('강화 표는 종류별 색, 등급 색 장비, 전과 후 수치(재련은 후 수치만), 결과 색과 안전 배지를 보인다', async () => {
@@ -397,7 +391,7 @@ const PAGED: CharacterTimeline = {
   acquisitionsCursor: 'acquisition-cursor-1'
 }
 
-it('강화, 획득 목록의 끝이 화면에 들어오면 그 목록의 cursor로 다음 묶음을 받아 뒤에 붙이고, cursor가 없으면 더 받지 않는다', async () => {
+it('강화, 획득 목록은 받아 둔 줄이 모자라면 불러오기를 눌렀을 때 그 목록의 cursor로 다음 묶음을 받아 뒤에 붙이고, cursor가 없으면 불러오기를 두지 않는다', async () => {
   const getTimelineEnhancements = vi
     .fn<ClientHost['getTimelineEnhancements']>()
     .mockResolvedValueOnce({
@@ -415,10 +409,11 @@ it('강화, 획득 목록의 끝이 화면에 들어오면 그 목록의 cursor�
   })
   await render(host, detailOf())
 
-  await reachEnd('강화, 증폭, 재련')
-  await reachEnd('강화, 증폭, 재련')
+  await clickMore('강화, 증폭, 재련')
+  await clickMore('강화, 증폭, 재련')
 
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화', '둘째 강화', '셋째 강화'])
+  expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
   expect(headerOf('강화, 증폭, 재련')).toEqual(['강화, 증폭, 재련', '3'])
   expect(getTimelineEnhancements.mock.calls).toEqual([
     [{ serverId: 'cain', characterId: 'character-1' }, 'enhancement-cursor-1'],
@@ -427,20 +422,36 @@ it('강화, 획득 목록의 끝이 화면에 들어오면 그 목록의 cursor�
   expect(itemNames('획득')).toEqual(['첫 획득'])
   expect(getTimelineAcquisitions).not.toHaveBeenCalled()
 
-  await reachEnd('획득')
-  await reachEnd('강화, 증폭, 재련')
-  await reachEnd('획득')
+  await clickMore('획득')
 
   expect(itemNames('획득')).toEqual(['첫 획득', '둘째 획득'])
+  expect(moreButton('획득')).toBeUndefined()
   expect(getTimelineAcquisitions).toHaveBeenCalledExactlyOnceWith(
     { serverId: 'cain', characterId: 'character-1' },
     'acquisition-cursor-1'
   )
   expect(getTimelineEnhancements).toHaveBeenCalledTimes(2)
-  expect(observed).toHaveLength(0)
 })
 
-it('다음 묶음을 받는 동안 받는 중을 알리고 끝을 다시 지나도 겹쳐 받지 않으며, 실패하면 오류와 다시 시도를 보이고 다시 시도하면 같은 cursor로 받는다', async () => {
+it('강화, 증폭, 재련은 처음 10줄만 보이고 다음 묶음이 없으면 불러오기로 받아 둔 나머지 줄만 보인다', async () => {
+  const getTimelineEnhancements = vi.fn<ClientHost['getTimelineEnhancements']>()
+  const twelve = Array.from({ length: 12 }, (_, index) => enhancement(`강화 ${index + 1}`))
+  const host = createTestClientHost({
+    getCharacterTimeline: async () => ({ ...EMPTY, enhancements: twelve }),
+    getTimelineEnhancements
+  })
+  await render(host, detailOf())
+
+  expect(itemNames('강화, 증폭, 재련')).toHaveLength(10)
+
+  await clickMore('강화, 증폭, 재련')
+
+  expect(itemNames('강화, 증폭, 재련')).toHaveLength(12)
+  expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
+  expect(getTimelineEnhancements).not.toHaveBeenCalled()
+})
+
+it('다음 묶음을 받는 동안 불러오기 대신 받는 중을 알리고, 실패하면 오류와 다시 시도를 보이고 다시 시도하면 같은 cursor로 받는다', async () => {
   const pending = Promise.withResolvers<TimelinePage<TimelineEnhancement>>()
   const getTimelineEnhancements = vi
     .fn<ClientHost['getTimelineEnhancements']>()
@@ -452,9 +463,9 @@ it('다음 묶음을 받는 동안 받는 중을 알리고 끝을 다시 지나�
   })
   await render(host, detailOf())
 
-  await reachEnd('강화, 증폭, 재련')
-  await reachEnd('강화, 증폭, 재련')
+  await clickMore('강화, 증폭, 재련')
 
+  expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
   expect(group('강화, 증폭, 재련').querySelector('[role="status"]')?.textContent).toBe(
     '기록을 더 받는 중입니다.'
   )
@@ -467,7 +478,7 @@ it('다음 묶음을 받는 동안 받는 중을 알리고 끝을 다시 지나�
     '검색 시간이 초과됐습니다. 다시 시도해 주세요.'
   )
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화'])
-  expect(observed.some(({ target }) => group('강화, 증폭, 재련').contains(target))).toBe(false)
+  expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
 
   await act(async () => group('강화, 증폭, 재련').querySelector('button')!.click())
 
@@ -498,7 +509,7 @@ it('5분이 지나 다시 연 탭은 받아 둔 타임라인을 먼저 그리고
   await render(host, detailOf())
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화'])
 
-  await reachEnd('강화, 증폭, 재련')
+  await clickMore('강화, 증폭, 재련')
   expect(getTimelineEnhancements).toHaveBeenCalledExactlyOnceWith(
     { serverId: 'cain', characterId: 'character-1' },
     'enhancement-cursor-1'

@@ -5,20 +5,17 @@ import { BoxPlotChart } from '#components/chart/BoxPlot'
 import { BoxPlotLegend } from '#components/chart/ChartLegend'
 import { Columns } from '#components/chart/Columns'
 import { LineChart } from '#components/chart/LineChart'
-import { RowBars } from '#components/chart/RowBars'
 import { TitleBox } from '#components/table/TitleBox'
 import {
   adventureColumns,
   type BaseContentOption,
   baseContentOptions,
   clearRateChart,
-  coClearBars,
   type ContentCard,
   contentCards,
   defaultBaseContentId,
   distributionRows,
   findOverviewWeek,
-  formatPercent,
   hasClearTimes,
   hasRateValues,
   jobRanks,
@@ -231,7 +228,6 @@ function OverviewStats({
       <JobPanel overview={overview} contents={contents} options={options} />
       <div className={clearClasses.row}>
         {hasClearTimes(overview) && <ClearTimePanel times={overview} />}
-        <CoClearPanel overview={overview} contents={contents} options={options} />
         <AdventurePanel contents={contents} options={options} weekStart={weekStart} />
       </div>
     </>
@@ -349,48 +345,6 @@ function JobPanel({
   )
 }
 
-function CoClearPanel({
-  overview,
-  contents,
-  options
-}: {
-  overview: ClearOverview
-  contents: readonly ClearContent[]
-  options: readonly BaseContentOption[]
-}): React.JSX.Element | null {
-  const [baseId, setBaseId] = useBaseContent(options, contents)
-  const base = overview.contents.find(({ id }) => id === baseId)
-  const option = options.find(({ id }) => id === baseId)
-  if (base === undefined || option === undefined) {
-    return null
-  }
-
-  const bars = coClearBars(overview, contents, base.id)
-  if (bars.length === 0) {
-    return null
-  }
-
-  return (
-    <Panel
-      name="함께 깬 컨텐츠"
-      controls={
-        <BaseContentSelect
-          label="함께 깬 컨텐츠 기준 컨텐츠"
-          options={options}
-          value={base.id}
-          onChange={setBaseId}
-        />
-      }
-    >
-      <div className="stat px-4 pt-4">
-        <span className="stat-label">{`${option.label} 클리어 캐릭터`}</span>
-        <span className="stat-value">{integer.format(base.cleared)}</span>
-      </div>
-      <RowBars bars={bars} max={1} formatValue={formatPercent} />
-    </Panel>
-  )
-}
-
 function AdventurePanel({
   contents,
   options,
@@ -433,10 +387,10 @@ function AdventureStats({
 
   return (
     <Panel
-      name="모험단당 클리어 캐릭터"
+      name="모험단 기준 클리어 횟수"
       controls={
         <BaseContentSelect
-          label="모험단당 클리어 캐릭터 기준 컨텐츠"
+          label="모험단 기준 클리어 횟수 기준 컨텐츠"
           options={options}
           value={baseId}
           onChange={onBaseChange}

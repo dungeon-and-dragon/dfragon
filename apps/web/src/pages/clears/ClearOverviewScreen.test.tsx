@@ -145,28 +145,21 @@ function overviewOf(weekStart: string): ClearOverview {
         cleared: 100,
         fame: { ...fame, median: 121000 },
         scores: noScores,
-        jobs: [],
-        coClears: []
+        jobs: []
       },
       {
         id: 'michaela-hard',
         cleared: 60,
         fame: { ...fame, median: 125000 },
         scores: noScores,
-        jobs,
-        coClears: [
-          { id: 'michaela-normal', cleared: 6 },
-          { id: 'nightmare-unknown', cleared: 1 },
-          { id: 'engraved-nightmare-1', cleared: 30 }
-        ]
+        jobs
       },
       {
         id: 'engraved-nightmare-1',
         cleared: 6,
         fame: null,
         scores: noScores,
-        jobs: [],
-        coClears: []
+        jobs: []
       }
     ],
     weekdays: [4, 5, 6, 7, 1, 2, 3].map((weekday) => ({
@@ -435,26 +428,18 @@ it('전직별 클리어는 첫 레이드를 기준으로 클리어율이 높은 
   ])
 })
 
-it('함께 깬 컨텐츠는 기준 컨텐츠의 클리어 수와 다른 컨텐츠를 함께 깬 비율을 높은 순으로 둔다', async () => {
+it('함께 깬 컨텐츠 패널은 두지 않는다', async () => {
   await render(undefined)
 
-  const coClear = panel('함께 깬 컨텐츠')
-  expect(coClear?.textContent).toContain('미카엘라 하드 클리어 캐릭터60')
-  const rows = [...(coClear?.querySelectorAll('li') ?? [])].map((row) =>
-    [...row.children].slice(0, 3).map((cell) => cell.textContent)
-  )
-  expect(rows).toEqual([
-    ['각인된 악몽', '', '50.0%'],
-    ['미카엘라 일반', '', '10.0%']
-  ])
+  expect(panel('함께 깬 컨텐츠')).toBeNull()
 })
 
-it('모험단당 클리어 캐릭터는 기준 컨텐츠의 상세를 그 주로 받아 1명부터 12명과 13명 이상으로 센다', async () => {
+it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주로 받아 1명부터 12명과 13명 이상으로 센다', async () => {
   const getClearContentStats = vi.fn(async (contentId: string) => contentStatsOf(contentId))
   await render(undefined, { getClearContentStats })
 
   expect(getClearContentStats).toHaveBeenCalledWith('michaela-hard', LATEST_WEEK)
-  const columns = [...(panel('모험단당 클리어 캐릭터')?.querySelectorAll('li') ?? [])].map(
+  const columns = [...(panel('모험단 기준 클리어 횟수')?.querySelectorAll('li') ?? [])].map(
     (column) => column.querySelector('span')?.textContent
   )
   expect(columns.at(0)).toMatch(/^1명 40 /)
@@ -470,8 +455,7 @@ it('값이 없는 통계는 패널과 점수 전환을 두지 않는다', async 
       contents: overviewOf(selected).contents.map((item) => ({
         ...item,
         fame: null,
-        jobs: [],
-        coClears: []
+        jobs: []
       })),
       weekdays: [4, 5, 6, 7, 1, 2, 3].map((weekday) => ({ weekday, cleared: 0 })),
       hours: []

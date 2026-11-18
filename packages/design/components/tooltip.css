@@ -35,3 +35,23 @@
 .tooltip:is([data-starting-style], [data-ending-style]) {
   opacity: 0;
 }
+
+/*
+ * <div class="tooltip"><img class="tooltip-portrait" alt=""></div>. 캐릭터 썸네일에 마우스를 올렸을 때의 확대 이미지다.
+ * Neople 캐릭터 이미지(zoom=1)의 원본 크기로 전신을 그리고, PC 화면으로 보는 1024px보다 좁은 화면에서는 그리지 않는다.
+ */
+.tooltip:has(> .tooltip-portrait) {
+  padding: 4px;
+}
+
+.tooltip-portrait {
+  display: block;
+  width: 200px;
+  height: 230px;
+}
+
+@media (width < 1024px) {
+  .tooltip-positioner:has(.tooltip-portrait) {
+    display: none;
+  }
+}

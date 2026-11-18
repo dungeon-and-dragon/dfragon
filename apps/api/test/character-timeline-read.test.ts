@@ -77,11 +77,14 @@ test('한 주는 목요일 06:00(KST)에 시작한다', () => {
   }
 })
 
-test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시즌 클리어는 종류, 이름, 하드 여부별로 센다', () => {
+test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시즌 클리어는 종류, 이름, 하드 여부별로 세어 최근에 나온 컨텐츠부터 둔다', () => {
   const weekStart = new Date('2026-11-05T06:00:00+09:00')
   const seasonStart = new Date('2026-03-26T06:00:00+09:00')
-  const raid = { raidName: '나벨 레이드', data: { modeName: '나벨 : 무지의 악' } }
-  const hardRaid = { raidName: '나벨 레이드', data: { modeName: '나벨 : 무지의 악', hard: true } }
+  const raid = { raidName: '만들어진 신 나벨', data: { modeName: '나벨 : 무지의 악' } }
+  const hardRaid = {
+    raidName: '만들어진 신 나벨',
+    data: { modeName: '나벨 : 무지의 악', hard: true }
+  }
   const timeline = parseCharacterTimelineRows(
     {
       clears: [
@@ -110,7 +113,7 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
   assert.deepEqual(timeline.weeklyClears, [
     {
       kind: 'raid',
-      name: '나벨 레이드',
+      name: '만들어진 신 나벨',
       modeName: '나벨 : 무지의 악',
       hard: true,
       occurredAt: weekStart
@@ -131,9 +134,9 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
     }
   ])
   assert.deepEqual(timeline.seasonClears, [
-    { kind: 'raid', name: '나벨 레이드', hard: false, count: 1 },
-    { kind: 'raid', name: '나벨 레이드', hard: true, count: 2 },
     { kind: 'raid', name: '이내 황혼전', hard: false, count: 1 },
+    { kind: 'raid', name: '만들어진 신 나벨', hard: false, count: 1 },
+    { kind: 'raid', name: '만들어진 신 나벨', hard: true, count: 2 },
     { kind: 'legion', name: '베누스', hard: false, count: 1 }
   ])
 })

@@ -130,7 +130,7 @@ export const 나눈막대: Story = {
         segments={[
           {
             key: 'both',
-            name: '두 주 모두 클리어',
+            name: '잔존',
             value: 760,
             color: 'var(--color-chart-3)',
             textColor: SEGMENT_TEXT
@@ -144,7 +144,7 @@ export const 나눈막대: Story = {
           },
           {
             key: 'first',
-            name: '첫 클리어',
+            name: '신규',
             value: 110,
             color: 'var(--color-chart-4)',
             textColor: SEGMENT_TEXT

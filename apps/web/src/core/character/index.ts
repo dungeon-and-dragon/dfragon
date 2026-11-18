@@ -49,7 +49,7 @@ export {
 export type { ItemView, StatLine } from './character-item'
 export { isMaxLevel } from './character-level'
 export { toOathView } from './character-oath'
-export type { OathView } from './character-oath'
+export type { OathUpgradeChoice, OathView } from './character-oath'
 export {
   CHARACTER_SERVER_NAMES,
   characterIdentitySchema,
@@ -77,3 +77,11 @@ export {
   withMaleCrusaderRole
 } from './male-crusader'
 export type { MaleCrusaderRole } from './male-crusader'
+export {
+  EQUIPMENT_SET_POINT_BONUS,
+  formatSetPointBonus,
+  OATH_SET_POINT_BONUS
+} from './set-point-bonus'
+export type { SetPointBonusRule } from './set-point-bonus'
+export { toStatusLayout } from './status-layout'
+export type { StatusLine } from './status-layout'
