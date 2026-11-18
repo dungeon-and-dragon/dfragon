@@ -1,10 +1,6 @@
 import { Worker } from 'node:worker_threads'
 import { z } from 'zod'
-import type {
-  ScoreCalculator,
-  ScoreEngineInput,
-  ScoreEngineResult
-} from '../../domain/score/index.js'
+import type { ScoreCalculator, ScoreEngineInput, ScoreEngineResult } from '#domain/score/index.js'
 import type { ScoreWorkerData, ScoreWorkerMessage, ScoreWorkerRequest } from './worker-protocol.js'
 
 export type ScoreEngineDiagnostic = 'SCORE_ENGINE_UNAVAILABLE' | 'SCORE_ENGINE_FAILED'

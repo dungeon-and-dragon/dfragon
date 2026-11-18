@@ -4,13 +4,13 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import { subWeeks } from 'date-fns'
-import { toRaidStageLabel } from '../../domain/raid-stage.js'
+import { toRaidStageLabel } from '#domain/raid-stage.js'
 import {
   type ClearContent,
   findStagePair,
   toCollectionMinFame,
   toPopulationMinFame
-} from '../../domain/content-clears/index.js'
+} from '#domain/content-clears/index.js'
 import type { ClearSampleRepository } from './repository.js'
 
 export class ClearSampleLoader {

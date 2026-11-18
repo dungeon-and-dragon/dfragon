@@ -6,9 +6,9 @@ import {
   type AdventureSeasonDays,
   type AdventureWeeklyClears,
   averageFame
-} from '../../../domain/adventure-guild/index.js'
+} from '#domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
-import { type CharacterRow, toCharacterRow } from '../../../domain/character-row.js'
+import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 
 const SEASON_NUMBER_PATTERN = /^[1-9]\d{0,3}$/
 const seasonNumber = z.string().regex(SEASON_NUMBER_PATTERN).transform(Number)

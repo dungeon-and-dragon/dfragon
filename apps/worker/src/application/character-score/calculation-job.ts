@@ -7,7 +7,7 @@ import type {
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import { type CalculatedScore, toCalculatedScore } from '@dfragon/server-core/domain/score/index.js'
-import { defineJob, createUnavailableStreaks } from '../jobs/index.js'
+import { defineJob, createUnavailableStreaks } from '#application/jobs/index.js'
 import { calculateCharacterScore } from './calculate.js'
 import type { ScoreCalculationPorts, ScoreEngineHandle, ScoreSources } from './ports.js'
 import type { ScoreCalculationRepository } from './repository.js'

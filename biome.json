@@ -459,6 +459,39 @@
       }
     },
     {
+      "includes": ["apps/api/src/**", "apps/ops/src/**", "apps/worker/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@dfragon/api",
+                      "@dfragon/api/**",
+                      "@dfragon/worker",
+                      "@dfragon/worker/**",
+                      "**/apps/api/**",
+                      "**/apps/worker/**",
+                      "../**/api/**",
+                      "../**/worker/**"
+                    ],
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/api/**", "!../**/worker/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/api/src/domain/**", "apps/ops/src/domain/**", "apps/worker/src/domain/**"],
       "linter": {
         "rules": {
@@ -486,7 +519,11 @@
                       "**/application/**",
                       "**/infrastructure/**",
                       "**/presentation/**",
-                      "**/runtime/**"
+                      "**/runtime/**",
+                      "#application/**",
+                      "#infrastructure/**",
+                      "#presentation/**",
+                      "#runtime/**"
                     ],
                     "message": "domain은 다른 계층을 import하지 않는다. service와 port는 application/<기능>/, Neople과 DB 연결은 infrastructure/, route는 presentation/에 두고, 그쪽에서 domain을 가져다 쓴다."
                   },
@@ -497,6 +534,10 @@
                   {
                     "group": ["node:*", "node:*/**"],
                     "message": "domain은 Node.js 내장 module을 쓰지 않는다. 파일, 네트워크, 프로세스를 쓰는 코드는 infrastructure/에 두고, application/<기능>/ports.ts의 함수 타입으로 받는다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/api/**", "!../**/worker/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }
@@ -533,7 +574,14 @@
                     "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
-                    "group": ["**/infrastructure/**", "**/presentation/**", "**/runtime/**"],
+                    "group": [
+                      "**/infrastructure/**",
+                      "**/presentation/**",
+                      "**/runtime/**",
+                      "#infrastructure/**",
+                      "#presentation/**",
+                      "#runtime/**"
+                    ],
                     "message": "application은 infrastructure, presentation, runtime을 import하지 않는다. 외부 호출은 application/<기능>/ports.ts에 함수 타입으로 적고 구현은 infrastructure/에, 연결은 runtime/에 둔다."
                   },
                   {
@@ -558,6 +606,10 @@
                       "koffi"
                     ],
                     "message": "application은 파일, 네트워크, native library를 직접 쓰지 않는다. application/<기능>/ports.ts에 함수 타입을 두고 구현은 infrastructure/에 둔다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/api/**", "!../**/worker/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }
@@ -594,8 +646,17 @@
                     "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
-                    "group": ["**/presentation/**", "**/runtime/**"],
+                    "group": [
+                      "**/presentation/**",
+                      "**/runtime/**",
+                      "#presentation/**",
+                      "#runtime/**"
+                    ],
                     "message": "infrastructure는 presentation, runtime을 import하지 않는다. HTTP 응답으로 바꾸는 코드는 presentation/http/, service에 넘기는 연결은 runtime/에 둔다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/api/**", "!../**/worker/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }
@@ -628,16 +689,25 @@
                     "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
-                    "group": ["**/infrastructure/**", "**/runtime/**"],
+                    "group": [
+                      "**/infrastructure/**",
+                      "**/runtime/**",
+                      "#infrastructure/**",
+                      "#runtime/**"
+                    ],
                     "message": "presentation은 infrastructure, runtime을 import하지 않는다. Neople과 DB 호출은 application의 service를 거치고, service와 adapter 연결은 runtime/에 둔다."
                   },
                   {
-                    "group": ["**/application/**/repository.js"],
+                    "group": ["**/application/**/repository.js", "#application/**/repository.js"],
                     "message": "presentation은 Repository를 import type으로도 가져오지 않는다. Controller는 application/<기능>/service.ts의 Service만 받고, Repository는 runtime/이 Service에 넣는다."
                   },
                   {
-                    "group": ["**/application/**/ports.js"],
+                    "group": ["**/application/**/ports.js", "#application/**/ports.js"],
                     "message": "presentation은 port를 import type으로도 가져오지 않는다. Controller는 application/<기능>/service.ts의 Service만 받고, Neople 호출, queue 같은 port는 runtime/이 Service에 넣는다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/api/**", "!../**/worker/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }
@@ -710,6 +780,44 @@
       }
     },
     {
+      "includes": ["packages/server-core/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@dfragon/api",
+                      "@dfragon/api/**",
+                      "@dfragon/ops",
+                      "@dfragon/ops/**",
+                      "@dfragon/worker",
+                      "@dfragon/worker/**",
+                      "@dfragon/http-server",
+                      "@dfragon/http-server/**",
+                      "hono",
+                      "hono/**",
+                      "@hono/**",
+                      "**/apps/**"
+                    ],
+                    "message": "server-core는 API와 worker가 함께 쓰는 코드라 앱, 공용 HTTP 코드, Hono를 import하지 않는다. route, HTTP 응답과 앱 하나만 쓰는 코드는 그 앱에 둔다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/apps/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["packages/server-core/src/domain/**"],
       "linter": {
         "rules": {
@@ -736,12 +844,21 @@
                     "message": "server-core는 API와 worker가 함께 쓰는 코드라 앱, 공용 HTTP 코드, Hono를 import하지 않는다. route, HTTP 응답과 앱 하나만 쓰는 코드는 그 앱에 둔다."
                   },
                   {
-                    "group": ["**/application/**", "**/infrastructure/**"],
+                    "group": [
+                      "**/application/**",
+                      "**/infrastructure/**",
+                      "#application/**",
+                      "#infrastructure/**"
+                    ],
                     "message": "server-core의 domain은 다른 계층을 import하지 않는다. port는 application/<기능>/, Neople, DB, 점수 엔진 연결은 infrastructure/에 두고, 그쪽에서 domain을 가져다 쓴다."
                   },
                   {
                     "group": ["node:*", "node:*/**"],
                     "message": "server-core의 domain은 Node.js 내장 module을 쓰지 않는다. 파일, 네트워크, 프로세스를 쓰는 코드는 infrastructure/에 두고, application/<기능>/ports.ts의 함수 타입으로 받는다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/apps/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }
@@ -777,7 +894,7 @@
                     "message": "server-core는 API와 worker가 함께 쓰는 코드라 앱, 공용 HTTP 코드, Hono를 import하지 않는다. route, HTTP 응답과 앱 하나만 쓰는 코드는 그 앱에 둔다."
                   },
                   {
-                    "group": ["**/infrastructure/**"],
+                    "group": ["**/infrastructure/**", "#infrastructure/**"],
                     "message": "server-core의 application은 infrastructure를 import하지 않는다. 외부 호출은 application/<기능>/ports.ts에 함수 타입으로 적고 구현은 infrastructure/에 둔다."
                   },
                   {
@@ -798,6 +915,10 @@
                       "koffi"
                     ],
                     "message": "server-core의 application은 파일, 네트워크, native library를 직접 쓰지 않는다. application/<기능>/ports.ts에 함수 타입을 두고 구현은 infrastructure/에 둔다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/apps/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }
@@ -834,9 +955,17 @@
                       "../**",
                       "!./routes/**",
                       "!./api-services.js",
-                      "!**/presentation/http/*.js"
+                      "!**/presentation/http/*.js",
+                      "#*/**",
+                      "!#runtime/routes/**",
+                      "!#runtime/api-services.js",
+                      "!#presentation/http/*.js"
                     ],
                     "message": "앱을 만드는 파일은 route를 모으는 파일(runtime/routes/<app>.ts), 공개 app의 조립 함수(runtime/api-services.ts), 여러 기능이 함께 쓰는 실패 표(presentation/http/ 바로 아래), 공용 HTTP 코드(@dfragon/http-server)만 import한다. 기능의 route는 presentation/http/<기능>/에 두고 runtime/routes/<app>.ts에서 app에 붙인다. 공개 app의 service, queue, 종료 순서는 runtime/api-services.ts에 둔다."
+                  },
+                  {
+                    "group": ["../*", "../**", "!../**/api/**", "!../**/worker/**"],
+                    "message": "자기 폴더 밖의 파일은 상대 경로 대신 #<계층>/... alias로 가져온다. 같은 폴더의 파일만 ./로 가져온다."
                   }
                 ]
               }

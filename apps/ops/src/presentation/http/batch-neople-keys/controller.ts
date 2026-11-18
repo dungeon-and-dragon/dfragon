@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
-import type { BatchNeopleKeyService } from '../../../application/batch-neople-keys/index.js'
-import { OpsFailure } from '../../../domain/failure.js'
-import { readJsonBody } from '../json-request.js'
+import type { BatchNeopleKeyService } from '#application/batch-neople-keys/index.js'
+import { OpsFailure } from '#domain/failure.js'
+import { readJsonBody } from '#presentation/http/json-request.js'
 import {
   addBody,
   readKeyId,

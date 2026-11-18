@@ -9,18 +9,18 @@ import {
   createNeopleSkillStyle,
   createNeopleCharacterBasic,
   paceNeopleRequests
-} from '../infrastructure/neople/index.js'
+} from '#infrastructure/neople/index.js'
 import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { readCollectorConfiguration } from './collector-configuration.js'
-import { CharacterCollectionService } from '../application/character-collection/index.js'
+import { CharacterCollectionService } from '#application/character-collection/index.js'
 import {
   DatabaseBatchNeopleKeyRepository,
   DatabaseCollectionRepository,
   DatabaseJobRepository
-} from '../infrastructure/database/index.js'
-import { importCollectedCharacters, readImportModifiedTime } from '../infrastructure/files/index.js'
-import { JobSchedulerService } from '../application/jobs/index.js'
-import { startJobScheduler } from '../infrastructure/jobs/index.js'
+} from '#infrastructure/database/index.js'
+import { importCollectedCharacters, readImportModifiedTime } from '#infrastructure/files/index.js'
+import { JobSchedulerService } from '#application/jobs/index.js'
+import { startJobScheduler } from '#infrastructure/jobs/index.js'
 import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
 import { createWorkerJobs } from './worker-jobs.js'
 

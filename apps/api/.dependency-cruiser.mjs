@@ -43,7 +43,7 @@ export default {
     {
       name: 'feature-folder-index',
       comment:
-        "기능 폴더(domain/<기능>/, application/<기능>/, infrastructure/<기술>/, presentation/http/<기능>/) 밖에서는 그 폴더의 index.js만 import한다. 필요한 이름을 그 폴더의 index.ts에 export { 이름 } from './파일.js'로 더하고 '../../application/<기능>/index.js'처럼 가져온다. application/<기능>/repository.ts, ports.ts는 infrastructure, runtime이 직접 import한다.",
+        "기능 폴더(domain/<기능>/, application/<기능>/, infrastructure/<기술>/, presentation/http/<기능>/) 밖에서는 그 폴더의 index.js만 import한다. 필요한 이름을 그 폴더의 index.ts에 export { 이름 } from './파일.js'로 더하고 '#application/<기능>/index.js'처럼 가져온다. application/<기능>/repository.ts, ports.ts는 infrastructure, runtime이 직접 import한다.",
       severity: 'error',
       // dependency-cruiser는 to의 $1을 from.path의 첫 group(가져오는 파일의 폴더)으로 바꾼다.
       from: { path: '^(src/.+)/[^/]+$' },

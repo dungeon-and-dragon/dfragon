@@ -60,7 +60,7 @@ import {
 import type {
   ClearStatsRepository,
   ClearWeekSampleRepository
-} from '../../application/content-clears/repository.js'
+} from '#application/content-clears/repository.js'
 
 export class DatabaseClearStatsRepository
   implements ClearStatsRepository, ClearWeekSampleRepository

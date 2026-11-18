@@ -1,11 +1,11 @@
-import type { CharacterIdentity } from '../../domain/character-identity.js'
-import type { CharacterPayloads } from '../../domain/character-detail/index.js'
+import type { CharacterIdentity } from '#domain/character-identity.js'
+import type { CharacterPayloads } from '#domain/character-detail/index.js'
 import type {
   CalculatedScore,
   ScoreCalculator,
   ScoreEngineInput,
   ScoreEngineResult
-} from '../../domain/score/index.js'
+} from '#domain/score/index.js'
 import type { RecordNeopleStage } from './neople-stages.js'
 
 export type FetchCharacterDetails = (

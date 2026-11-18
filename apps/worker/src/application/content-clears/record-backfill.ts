@@ -4,10 +4,7 @@ import {
   CLEAR_CONTENTS,
   toCollectionMinFame
 } from '@dfragon/server-core/domain/content-clears/index.js'
-import {
-  CLEAR_RECORD_BACKFILL_START,
-  toClearRecordInput
-} from '../../domain/content-clears/index.js'
+import { CLEAR_RECORD_BACKFILL_START, toClearRecordInput } from '#domain/content-clears/index.js'
 import type { ClearCollectionPorts } from './ports.js'
 import { collectPopulation, readOrStartProgress } from './population-collection.js'
 import type { ClearRecordBackfillRepository } from './repository.js'

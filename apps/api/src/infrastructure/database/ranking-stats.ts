@@ -9,7 +9,7 @@ import {
   readFameRanking,
   readJobSkillAdoptionSnapshot
 } from '@dfragon/database'
-import type { RankingStatsRepository } from '../../application/ranking-stats/repository.js'
+import type { RankingStatsRepository } from '#application/ranking-stats/repository.js'
 
 export class DatabaseRankingStatsRepository implements RankingStatsRepository {
   constructor(private readonly client: DatabaseClient) {}

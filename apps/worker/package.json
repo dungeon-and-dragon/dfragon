@@ -3,6 +3,28 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#domain/*": {
+      "types": "./src/domain/*",
+      "dfragon-worker-test": "./.test-dist/src/domain/*",
+      "default": "./dist/domain/*"
+    },
+    "#application/*": {
+      "types": "./src/application/*",
+      "dfragon-worker-test": "./.test-dist/src/application/*",
+      "default": "./dist/application/*"
+    },
+    "#infrastructure/*": {
+      "types": "./src/infrastructure/*",
+      "dfragon-worker-test": "./.test-dist/src/infrastructure/*",
+      "default": "./dist/infrastructure/*"
+    },
+    "#runtime/*": {
+      "types": "./src/runtime/*",
+      "dfragon-worker-test": "./.test-dist/src/runtime/*",
+      "default": "./dist/runtime/*"
+    }
+  },
   "engines": {
     "node": ">=26.11.1 <27"
   },
@@ -19,7 +41,7 @@
   ],
   "scripts": {
     "build": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/neople --filter @dfragon/http-server --filter @dfragon/server-core build && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
-    "test": "pnpm run build && pnpm --filter @dfragon/server-core build:test && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('.test-dist', { recursive: true, force: true })\" && tsc -p tsconfig.test.json && node --test \".test-dist/test/**/*.test.js\"",
+    "test": "pnpm run build && pnpm --filter @dfragon/server-core build:test && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('.test-dist', { recursive: true, force: true })\" && tsc -p tsconfig.test.json && node --conditions=dfragon-worker-test --test \".test-dist/test/**/*.test.js\"",
     "typecheck": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/neople --filter @dfragon/http-server --filter @dfragon/server-core build && pnpm --filter @dfragon/server-core build:test && tsc --noEmit -p tsconfig.test.json",
     "start": "node dist/main.js",
     "lint": "biome lint && pnpm run lint:imports",

@@ -4,12 +4,12 @@ import type {
   ScoreCalculationPorts,
   ScoreSourceEvents,
   ScoreSources
-} from '../application/character-score/ports.js'
+} from '#application/character-score/ports.js'
 import {
   createNeopleCatalog,
   createNeopleCharacterDetails
 } from '@dfragon/server-core/infrastructure/neople/index.js'
-import type { WorkerNeople } from '../infrastructure/neople/index.js'
+import type { WorkerNeople } from '#infrastructure/neople/index.js'
 import { createScoreEngine } from '@dfragon/server-core/infrastructure/score/index.js'
 
 type ScoreNeople = Pick<WorkerNeople, 'character' | 'multiItems'>

@@ -3,6 +3,23 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#domain/*": {
+      "types": "./src/domain/*",
+      "dfragon-server-core-test": "./.test-dist/src/domain/*",
+      "default": "./dist/domain/*"
+    },
+    "#application/*": {
+      "types": "./src/application/*",
+      "dfragon-server-core-test": "./.test-dist/src/application/*",
+      "default": "./dist/application/*"
+    },
+    "#infrastructure/*": {
+      "types": "./src/infrastructure/*",
+      "dfragon-server-core-test": "./.test-dist/src/infrastructure/*",
+      "default": "./dist/infrastructure/*"
+    }
+  },
   "exports": {
     "./*.js": {
       "types": "./dist/*.d.ts",
@@ -21,7 +38,7 @@
   "scripts": {
     "build": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/neople build && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.json",
     "build:test": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('.test-dist', { recursive: true, force: true })\" && tsc -p tsconfig.test.json",
-    "test": "pnpm build && pnpm build:test && node --test \".test-dist/test/**/*.test.js\"",
+    "test": "pnpm build && pnpm build:test && node --conditions=dfragon-server-core-test --test \".test-dist/test/**/*.test.js\"",
     "lint": "biome lint && pnpm run lint:imports",
     "lint:imports": "depcruise --config .dependency-cruiser.mjs --output-type err-long src",
     "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"

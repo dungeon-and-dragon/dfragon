@@ -1,5 +1,5 @@
 import type { JobOverview, JobPauseChange, JobRunRecord } from '@dfragon/database'
-import { OpsFailure } from '../../domain/failure.js'
+import { OpsFailure } from '#domain/failure.js'
 import type { JobRepository } from './repository.js'
 
 export type JobList = {

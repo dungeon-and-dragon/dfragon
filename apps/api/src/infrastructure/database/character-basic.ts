@@ -9,7 +9,7 @@ import {
   recordCharacterScore,
   recordCharacterSkillStyle
 } from '@dfragon/database'
-import type { CharacterBasicRepository } from '../../application/character-basic/repository.js'
+import type { CharacterBasicRepository } from '#application/character-basic/repository.js'
 
 export class DatabaseCharacterBasicRepository implements CharacterBasicRepository {
   constructor(private readonly client: DatabaseClient) {}

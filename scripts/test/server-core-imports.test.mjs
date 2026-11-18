@@ -4,6 +4,23 @@ import { lintSamples } from './fixtures/biome-lint.mjs'
 import { cruiseAppSamples } from './fixtures/dependency-cruiser.mjs'
 
 const src = 'packages/server-core/src'
+const CLI_WHITESPACE_PATTERN = /\s+/g
+
+for (const folder of ['domain', 'application', 'infrastructure']) {
+  const file = `${src}/${folder}/alias-check.ts`
+
+  for (const source of ['../sibling.js', '../../sibling.js', '../neighbor/file.js']) {
+    test(`Biome: ${file}에서 ${source} import를 거부한다`, async () => {
+      const sample = importing(source)
+      const diagnostics = await lintSamples({ [file]: sample })
+      const reported = diagnostics.get(file)
+
+      assert.equal(reported.length, 1)
+      assert.equal(reported[0].category, 'lint/style/noRestrictedImports')
+      assert.ok(reported[0].message.includes('#<계층>/...'))
+    })
+  }
+}
 
 function importing(source) {
   return `import { value } from '${source}'\nexport const used = value\n`
@@ -17,17 +34,13 @@ function typeImporting(source) {
 const rejectedImports = [
   ['domain/score/a.ts', '@dfragon/http-server', '그 앱에 둔다'],
   ['domain/score/b.ts', 'hono', '그 앱에 둔다'],
-  ['domain/score/c.ts', '../../infrastructure/score/engine.js', 'infrastructure/'],
-  ['domain/score/d.ts', '../../application/character-catalog/ports.js', 'application/<기능>/'],
+  ['domain/score/c.ts', '#infrastructure/score/engine.js', 'infrastructure/'],
+  ['domain/score/d.ts', '#application/character-catalog/ports.js', 'application/<기능>/'],
   ['domain/score/e.ts', 'node:fs', 'infrastructure/'],
   ['domain/score/f.ts', '@dfragon/worker', '그 앱에 둔다'],
   ['application/character-catalog/a.ts', '@dfragon/api', '그 앱에 둔다'],
   ['application/character-catalog/d.ts', '@dfragon/worker/runtime/worker-jobs.js', '그 앱에 둔다'],
-  [
-    'application/character-catalog/b.ts',
-    '../../infrastructure/neople/character-catalog.js',
-    'ports.ts'
-  ],
+  ['application/character-catalog/b.ts', '#infrastructure/neople/character-catalog.js', 'ports.ts'],
   ['application/character-catalog/c.ts', 'koffi', 'infrastructure/'],
   [
     'infrastructure/score/a.ts',
@@ -41,9 +54,9 @@ const rejectedImports = [
 const allowedImports = [
   ['domain/score/a.ts', './result.js'],
   ['domain/score/b.ts', '@dfragon/lib/error-chain'],
-  ['application/character-catalog/a.ts', '../../domain/character-catalog/types.js'],
+  ['application/character-catalog/a.ts', '#domain/character-catalog/types.js'],
   ['application/character-catalog/b.ts', 'lru-cache'],
-  ['infrastructure/score/a.ts', '../../domain/score/input.js'],
+  ['infrastructure/score/a.ts', '#domain/score/input.js'],
   ['infrastructure/score/b.ts', 'koffi'],
   ['infrastructure/neople/a.ts', '@dfragon/neople'],
   ['infrastructure/database/a.ts', 'node:fs']
@@ -171,17 +184,17 @@ const featureFolderCases = {
   rejected: [
     [
       'src/infrastructure/neople/a.ts',
-      importing('../../application/character-catalog/service.js'),
+      importing('#application/character-catalog/service.js'),
       'feature-folder-index'
     ],
     [
       'src/application/character-catalog/a.ts',
-      typeImporting('../../domain/character-timeline/rows.js'),
+      typeImporting('#domain/character-timeline/rows.js'),
       'feature-folder-index'
     ],
     [
       'src/infrastructure/database/a.ts',
-      importing('../neople/character-catalog.js'),
+      importing('#infrastructure/neople/character-catalog.js'),
       'feature-folder-index'
     ],
     [
@@ -196,23 +209,20 @@ const featureFolderCases = {
     ]
   ],
   allowed: [
-    ['src/infrastructure/database/b.ts', importing('../../application/character-catalog/index.js')],
-    ['src/application/character-catalog/b.ts', importing('../../domain/seoul-time.js')],
+    ['src/infrastructure/database/b.ts', importing('#application/character-catalog/index.js')],
+    ['src/application/character-catalog/b.ts', importing('#domain/seoul-time.js')],
     [
       'src/application/character-catalog/c.ts',
-      typeImporting('../../domain/character-timeline/index.js')
+      typeImporting('#domain/character-timeline/index.js')
     ],
     ['src/infrastructure/neople/b.ts', importing('./character-catalog.js')],
-    ['src/infrastructure/database/c.ts', importing('../neople/index.js')],
+    ['src/infrastructure/database/c.ts', importing('#infrastructure/neople/index.js')],
     ['src/application/character-catalog/d.ts', importing('./service.js')],
     [
       'src/infrastructure/database/d.ts',
-      typeImporting('../../application/character-catalog/repository.js')
+      typeImporting('#application/character-catalog/repository.js')
     ],
-    [
-      'src/infrastructure/neople/c.ts',
-      typeImporting('../../application/character-catalog/ports.js')
-    ]
+    ['src/infrastructure/neople/c.ts', typeImporting('#application/character-catalog/ports.js')]
   ]
 }
 const featureFolderCruised = await cruiseAppSamples(
@@ -248,7 +258,9 @@ test('dependency-cruiser: server-core의 index.js, 같은 폴더 파일, 계층 
 
 test('dependency-cruiser: server-core 기능 폴더의 안쪽 파일을 직접 import하면 index.js로 가져오라고 알린다', () => {
   assert.ok(
-    featureFolderCruised.text.includes("'../../application/<기능>/index.js'처럼 가져온다"),
+    featureFolderCruised.text
+      .replace(CLI_WHITESPACE_PATTERN, ' ')
+      .includes("'#application/<기능>/index.js'처럼 가져온다"),
     featureFolderCruised.text
   )
 })
@@ -278,4 +290,38 @@ test('dependency-cruiser: server-core에서 import type만으로 이은 순환�
     { workspace: 'packages/server-core' }
   )
   assert.deepEqual(result.violations, [])
+})
+
+test('dependency-cruiser: server-core의 기능 폴더 사이 alias 실행 순환은 거부하고 import type 순환은 허용한다', async () => {
+  const execution = await cruiseAppSamples(
+    {
+      'src/domain/a/index.ts': "export { a } from './x.js'\n",
+      'src/domain/a/x.ts': "import { b } from '#domain/b/index.js'\nexport const a = () => b\n",
+      'src/domain/b/index.ts': "export { b } from './y.js'\n",
+      'src/domain/b/y.ts': "import { a } from '#domain/a/index.js'\nexport const b = () => a\n"
+    },
+    { workspace: 'packages/server-core' }
+  )
+  const typeOnly = await cruiseAppSamples(
+    {
+      'src/domain/a/index.ts': "export type { A } from './x.js'\n",
+      'src/domain/a/x.ts':
+        "import type { B } from '#domain/b/index.js'\nexport type A = { b?: B }\n",
+      'src/domain/b/index.ts': "export type { B } from './y.js'\n",
+      'src/domain/b/y.ts':
+        "import type { A } from '#domain/a/index.js'\nexport type B = { a?: A }\n"
+    },
+    { workspace: 'packages/server-core' }
+  )
+
+  assert.ok(execution.exitCode > 0)
+  assert.ok(execution.violations.length > 0)
+  assert.ok(
+    execution.violations.every(({ rule }) => rule === 'no-circular'),
+    JSON.stringify(execution.violations)
+  )
+  assert.ok(execution.text.includes('src/domain/a/x.ts'), execution.text)
+  assert.ok(execution.text.includes('src/domain/b/y.ts'), execution.text)
+  assert.equal(typeOnly.exitCode, 0)
+  assert.deepEqual(typeOnly.violations, [])
 })

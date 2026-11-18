@@ -20,7 +20,7 @@ const sectionOrder: Record<CharacterDetailSection, true> = {
 
 export const characterDetailSections = Object.keys(sectionOrder) as CharacterDetailSection[]
 
-export type { CharacterIdentity } from '../character-identity.js'
+export type { CharacterIdentity } from '#domain/character-identity.js'
 
 export type CharacterPayload = Record<string, unknown>
 

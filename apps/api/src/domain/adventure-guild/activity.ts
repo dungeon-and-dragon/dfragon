@@ -11,7 +11,7 @@ import {
   isSeasonBackfilled,
   toSeasonBackfillRange,
   toSeasonTimelineStart
-} from '../character-timeline/index.js'
+} from '#domain/character-timeline/index.js'
 import {
   formatResetDate,
   formatSeoulTime,

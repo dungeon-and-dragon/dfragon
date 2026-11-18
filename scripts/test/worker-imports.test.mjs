@@ -5,6 +5,7 @@ import { cruiseAppSamples } from './fixtures/dependency-cruiser.mjs'
 
 const api = 'apps/api'
 const worker = 'apps/worker'
+const CLI_WHITESPACE_PATTERN = /\s+/g
 
 function importing(source) {
   return `import { value } from '${source}'\nexport const used = value\n`
@@ -17,6 +18,16 @@ function typeImporting(source) {
 // [파일, import 대상, 메시지에 있어야 할 문구]
 const boundary = '함께 쓰는 코드는 @dfragon/server-core에 둔다'
 const rejectedImports = [
+  [`${worker}/src/domain/jobs/infra.ts`, '#infrastructure/jobs/index.js', 'infrastructure/'],
+  [`${worker}/src/domain/jobs/http.ts`, '#presentation/http/jobs/index.js', 'presentation/'],
+  [`${worker}/src/domain/jobs/runtime.ts`, '#runtime/worker-jobs.js', 'application/<기능>/'],
+  [`${worker}/src/application/jobs/http.ts`, '#presentation/http/jobs/index.js', 'ports.ts'],
+  [`${worker}/src/application/jobs/runtime.ts`, '#runtime/worker-jobs.js', '연결은 runtime/에'],
+  [
+    `${worker}/src/infrastructure/jobs/http.ts`,
+    '#presentation/http/jobs/index.js',
+    'presentation/http/'
+  ],
   [`${api}/src/runtime/a.ts`, '@dfragon/worker/runtime/run-character-collector.js', boundary],
   [`${api}/src/main.ts`, '@dfragon/worker/runtime/run-character-collector.js', boundary],
   [`${api}/src/domain/today-grade/a.ts`, '@dfragon/worker/domain/ranking-stats/stats.js', boundary],
@@ -49,19 +60,23 @@ const rejectedImports = [
     boundary
   ],
   // worker 경계 규칙이 함께 걸려도 계층 규칙이 그대로 남는지 확인한다.
-  [`${worker}/src/domain/jobs/b.ts`, '../../application/jobs/run.js', 'application/<기능>/'],
+  [`${worker}/src/domain/jobs/b.ts`, '#application/jobs/run.js', 'application/<기능>/'],
   [`${worker}/src/domain/jobs/c.ts`, 'node:fs', 'infrastructure/'],
-  [`${worker}/src/application/jobs/b.ts`, '../../infrastructure/jobs/scheduler.js', 'ports.ts'],
+  [`${worker}/src/application/jobs/b.ts`, '#infrastructure/jobs/scheduler.js', 'ports.ts'],
   [`${worker}/src/application/jobs/c.ts`, 'node:worker_threads', 'infrastructure/'],
-  [`${worker}/src/infrastructure/jobs/a.ts`, '../../runtime/worker-jobs.js', '연결은 runtime/에'],
+  [`${worker}/src/infrastructure/jobs/a.ts`, '#runtime/worker-jobs.js', '연결은 runtime/에'],
   [
     `${api}/src/domain/today-grade/b.ts`,
-    '../../application/today-grade/service.js',
+    '#application/today-grade/service.js',
     'application/<기능>/'
   ],
   [`${api}/src/application/today-grade/b.ts`, 'koffi', 'infrastructure/']
 ]
 const allowedImports = [
+  [`${worker}/src/domain/jobs/alias.ts`, '#domain/failure.js'],
+  [`${worker}/src/application/jobs/alias.ts`, '#domain/failure.js'],
+  [`${worker}/src/infrastructure/jobs/alias.ts`, '#application/jobs/ports.js'],
+  [`${worker}/src/runtime/alias.ts`, '#infrastructure/jobs/index.js'],
   [`${worker}/src/main.ts`, './runtime/run-character-collector.js'],
   [`${worker}/src/runtime/a.ts`, '@dfragon/server-core/infrastructure/score/engine.js'],
   [`${worker}/src/application/jobs/a.ts`, '@dfragon/server-core/domain/seoul-time.js'],
@@ -190,17 +205,17 @@ const featureFolderCases = {
   rejected: [
     [
       'src/runtime/worker-jobs.ts',
-      importing('../application/ranking-stats/service.js'),
+      importing('#application/ranking-stats/service.js'),
       'feature-folder-index'
     ],
     [
       'src/infrastructure/database/a.ts',
-      typeImporting('../../domain/ranking-stats/stats.js'),
+      typeImporting('#domain/ranking-stats/stats.js'),
       'feature-folder-index'
     ],
     [
       'src/runtime/scheduler.ts',
-      importing('../infrastructure/jobs/scheduler.js'),
+      importing('#infrastructure/jobs/scheduler.js'),
       'feature-folder-index'
     ],
     [
@@ -215,17 +230,14 @@ const featureFolderCases = {
     ]
   ],
   allowed: [
-    ['src/runtime/stats-jobs.ts', importing('../application/ranking-stats/index.js')],
-    ['src/application/ranking-stats/b.ts', importing('../../domain/failure.js')],
+    ['src/runtime/stats-jobs.ts', importing('#application/ranking-stats/index.js')],
+    ['src/application/ranking-stats/b.ts', importing('#domain/failure.js')],
     ['src/infrastructure/jobs/a.ts', importing('./scheduler.js')],
-    ['src/runtime/jobs.ts', importing('../infrastructure/jobs/index.js')],
+    ['src/runtime/jobs.ts', importing('#infrastructure/jobs/index.js')],
     ['src/application/ranking-stats/a.ts', importing('./service.js')],
-    [
-      'src/infrastructure/database/b.ts',
-      importing('../../application/ranking-stats/repository.js')
-    ],
-    ['src/infrastructure/neople/a.ts', typeImporting('../../application/ranking-stats/ports.js')],
-    ['src/runtime/character-collector.ts', importing('../application/ranking-stats/ports.js')]
+    ['src/infrastructure/database/b.ts', importing('#application/ranking-stats/repository.js')],
+    ['src/infrastructure/neople/a.ts', typeImporting('#application/ranking-stats/ports.js')],
+    ['src/runtime/character-collector.ts', importing('#application/ranking-stats/ports.js')]
   ]
 }
 const featureFolderCruised = await cruiseAppSamples(
@@ -260,7 +272,9 @@ test('dependency-cruiser: 기능 폴더의 index.js, 같은 폴더 파일, 계�
 
 test('dependency-cruiser: 기능 폴더 안쪽 파일을 직접 import하면 index.js로 가져오라고 알린다', () => {
   assert.ok(
-    featureFolderCruised.text.includes("'../../application/<기능>/index.js'처럼 가져온다"),
+    featureFolderCruised.text
+      .replace(CLI_WHITESPACE_PATTERN, ' ')
+      .includes("'#application/<기능>/index.js'처럼 가져온다"),
     featureFolderCruised.text
   )
 })
@@ -290,6 +304,40 @@ test('dependency-cruiser: import type만으로 이은 순환은 허용한다', a
     { app: 'worker' }
   )
   assert.deepEqual(result.violations, [])
+})
+
+test('dependency-cruiser: worker의 기능 폴더 사이 alias 실행 순환은 거부하고 import type 순환은 허용한다', async () => {
+  const execution = await cruiseAppSamples(
+    {
+      'src/domain/a/index.ts': "export { a } from './x.js'\n",
+      'src/domain/a/x.ts': "import { b } from '#domain/b/index.js'\nexport const a = () => b\n",
+      'src/domain/b/index.ts': "export { b } from './y.js'\n",
+      'src/domain/b/y.ts': "import { a } from '#domain/a/index.js'\nexport const b = () => a\n"
+    },
+    { app: 'worker' }
+  )
+  const typeOnly = await cruiseAppSamples(
+    {
+      'src/domain/a/index.ts': "export type { A } from './x.js'\n",
+      'src/domain/a/x.ts':
+        "import type { B } from '#domain/b/index.js'\nexport type A = { b?: B }\n",
+      'src/domain/b/index.ts': "export type { B } from './y.js'\n",
+      'src/domain/b/y.ts':
+        "import type { A } from '#domain/a/index.js'\nexport type B = { a?: A }\n"
+    },
+    { app: 'worker' }
+  )
+
+  assert.ok(execution.exitCode > 0)
+  assert.ok(execution.violations.length > 0)
+  assert.ok(
+    execution.violations.every(({ rule }) => rule === 'no-circular'),
+    JSON.stringify(execution.violations)
+  )
+  assert.ok(execution.text.includes('src/domain/a/x.ts'), execution.text)
+  assert.ok(execution.text.includes('src/domain/b/y.ts'), execution.text)
+  assert.equal(typeOnly.exitCode, 0)
+  assert.deepEqual(typeOnly.violations, [])
 })
 
 const serverCoreTargets = Object.fromEntries(

@@ -1,8 +1,5 @@
 import type { SeasonBackfillState, TimelineRange } from '@dfragon/database'
-import type {
-  SeasonBackfillJob,
-  SeasonBackfillTarget
-} from '../../domain/character-timeline/index.js'
+import type { SeasonBackfillJob, SeasonBackfillTarget } from '#domain/character-timeline/index.js'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import { type JobQueue, createJobQueue } from './queue.js'
 import type { SeasonBackfillRepository } from './repository.js'

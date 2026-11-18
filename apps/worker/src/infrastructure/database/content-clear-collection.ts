@@ -24,7 +24,7 @@ import {
 import type {
   ClearCollectionRepository,
   ClearRecordBackfillRepository
-} from '../../application/content-clears/repository.js'
+} from '#application/content-clears/repository.js'
 
 export class DatabaseClearCollectionRepository implements ClearCollectionRepository {
   constructor(private readonly client: DatabaseClient) {}
