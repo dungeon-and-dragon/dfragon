@@ -38,7 +38,7 @@ export function GlobalBar(): React.JSX.Element {
         <Link
           to="/"
           aria-label={`${PRODUCT_NAME} 첫 화면`}
-          className="flex shrink-0 items-center text-fg no-underline outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-signal"
+          className="flex shrink-0 items-center text-fg no-underline focus-ring"
         >
           <span className="text-base font-bold tracking-heading whitespace-nowrap">
             {PRODUCT_NAME}
@@ -60,7 +60,7 @@ export function GlobalBar(): React.JSX.Element {
               key={item.to}
               to={item.to}
               activeOptions={{ includeSearch: false }}
-              className="inline-flex shrink-0 items-center px-3 text-sm font-medium whitespace-nowrap text-fg-muted no-underline transition-colors outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal aria-[current=page]:font-semibold aria-[current=page]:text-fg"
+              className="inline-flex shrink-0 items-center px-3 text-sm font-medium whitespace-nowrap text-fg-muted no-underline transition-colors focus-ring-inset hover:text-fg aria-[current=page]:font-semibold aria-[current=page]:text-fg"
             >
               {item.label}
             </Link>

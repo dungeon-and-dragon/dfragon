@@ -3,7 +3,7 @@ import neopleOpenApiColorLogo from '../assets/neople-open-api-color.png'
 import neopleOpenApiGrayLogo from '../assets/neople-open-api-gray.png'
 
 const link =
-  'p-1 text-fg-subtle no-underline outline-none hover:text-fg hover:underline focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-signal aria-[current=page]:font-semibold aria-[current=page]:text-fg'
+  'p-1 text-fg-subtle no-underline focus-ring hover:text-fg hover:underline aria-[current=page]:font-semibold aria-[current=page]:text-fg'
 
 const NEOPLE_API_URL = 'https://developers.neople.co.kr'
 
@@ -17,7 +17,7 @@ export function SiteFooter(): React.JSX.Element {
         href={NEOPLE_API_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="block outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-signal"
+        className="block focus-ring"
       >
         <img
           src={neopleOpenApiColorLogo}

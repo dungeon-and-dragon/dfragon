@@ -3,8 +3,7 @@ import type { SeatMove } from '../hooks/useSeatMove'
 
 const seatClass =
   'h-row border-b border-line -outline-offset-2 transition-[background-color,opacity] hover:bg-surface'
-const focusOutlineClass =
-  'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal'
+const focusOutlineClass = 'focus-ring-inset'
 const dropOutlineClass = 'outline-2 outline-solid outline-signal'
 
 function seatStateClass(draggable: boolean, drag: SeatMove['drag']): string {
