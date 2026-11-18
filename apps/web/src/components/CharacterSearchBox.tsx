@@ -31,7 +31,7 @@ const SIZE_CLASSES = {
     clear: 'w-6',
     clearIcon: 'size-[14px]',
     submit: 'w-8',
-    icon: 'size-4'
+    icon: 'size-icon-sm'
   },
   large: {
     box: 'h-control-lg w-[640px] max-w-full',
@@ -39,7 +39,7 @@ const SIZE_CLASSES = {
     divider: 'h-6',
     input: 'px-3 text-base',
     clear: 'w-8',
-    clearIcon: 'size-4',
+    clearIcon: 'size-icon-sm',
     submit: 'w-12',
     icon: 'size-icon-md'
   }

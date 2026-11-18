@@ -46,7 +46,7 @@
   width: var(--height-control-lg);
   height: var(--height-control-lg);
   background-color: var(--color-inset);
-  font-size: 24px;
+  font-size: var(--size-icon-lg);
 }
 
 .icon-btn:hover:not(:disabled) {
