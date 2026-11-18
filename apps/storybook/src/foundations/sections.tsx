@@ -358,8 +358,23 @@ function LoopRow({ token }: { token: ThemeToken }) {
       <TokenName token={token} />
       <div className="flex items-center gap-4">
         <div
-          className="size-4 shrink-0 animate-pulse bg-signal"
-          style={{ animationDuration: `var(${token.name})` }}
+          className="size-4 shrink-0 bg-signal"
+          style={{ animation: `status-live var(${token.name}) steps(1, end) infinite` }}
+        />
+        <TokenValue>{token.value}</TokenValue>
+      </div>
+    </TokenRow>
+  )
+}
+
+function AnimateRow({ token }: { token: ThemeToken }) {
+  return (
+    <TokenRow>
+      <TokenName token={token} />
+      <div className="flex items-center gap-4">
+        <div
+          className="size-4 shrink-0 rounded-full border-2 border-solid border-signal border-r-transparent"
+          style={{ animation: `var(${token.name})` }}
         />
         <TokenValue>{token.value}</TokenValue>
       </div>
@@ -373,12 +388,22 @@ export function MotionTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   return (
     <TokenRows>
       {tokens.map((token) => {
-        if (token.name.startsWith('--ease-')) {
+        if (
+          token.name.startsWith('--ease-') ||
+          token.name === '--default-transition-timing-function'
+        ) {
           return <EasingRow key={token.name} token={token} />
         }
 
-        if (token.name.startsWith('--duration-')) {
+        if (
+          token.name.startsWith('--duration-') ||
+          token.name === '--default-transition-duration'
+        ) {
           return <DurationRow key={token.name} token={token} easing={easing} />
+        }
+
+        if (token.name.startsWith('--animate-')) {
+          return <AnimateRow key={token.name} token={token} />
         }
 
         return <LoopRow key={token.name} token={token} />

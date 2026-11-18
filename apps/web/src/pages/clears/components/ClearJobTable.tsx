@@ -206,7 +206,7 @@ function JobTableRow({
   return (
     <tr
       onMouseEnter={stats !== null ? handleMouseEnter : undefined}
-      className={`${tableClasses.row} transition-colors duration-(--duration-hover) ease-standard`}
+      className={`${tableClasses.row} transition-colors`}
     >
       <th scope="row" className={`${tableClasses.cell} truncate text-left font-normal`}>
         {name}

@@ -165,6 +165,41 @@ test('간격과 컨테이너 폭 utility는 theme.css의 단계로만 만든다'
   assert.doesNotMatch(css, /--spacing:\s/)
 })
 
+test('그림자, animate는 theme.css의 단계로만 만들고 z-index와 줄 높이의 이름 있는 단계도 utility로 낸다', async () => {
+  const stepUtilities = [
+    'z-raised',
+    'z-popover',
+    'z-tooltip',
+    'shadow-popover',
+    'shadow-selected',
+    'animate-spin',
+    'leading-relaxed'
+  ]
+  const closedUtilities = [
+    'shadow-sm',
+    'inset-shadow-sm',
+    'drop-shadow-md',
+    'text-shadow-sm',
+    'animate-ping',
+    'animate-pulse'
+  ]
+  const css = await compiledUtilities([...stepUtilities, ...closedUtilities])
+
+  for (const name of stepUtilities) {
+    assert.ok(css.includes(`.${name} {`), name)
+  }
+
+  for (const name of closedUtilities) {
+    assert.ok(!css.includes(`.${name} {`), name)
+  }
+})
+
+test('시간을 적지 않은 전환은 hover 시간과 곡선을 쓴다', () => {
+  const tokens = block(theme, '@theme static {')
+  assert.match(tokens, /--default-transition-duration:\s*var\(--duration-hover\);/)
+  assert.match(tokens, /--default-transition-timing-function:\s*var\(--ease-standard\);/)
+})
+
 test('utility를 쓰지 않은 토큰도 CSS 변수로 낸다', async () => {
   const css = await compiledUtilities([])
   for (const name of ['--color-game-fame-label', '--gradient-rarity-mythic', '--beat']) {

@@ -5,7 +5,7 @@
  * 화면의 색 모드는 base.css처럼 html의 data-color-mode, 없으면 시스템 설정으로 정한다.
  */
 .tooltip-positioner {
-  z-index: var(--z-tooltip);
+  z-index: var(--z-index-tooltip);
 }
 
 .tooltip {
