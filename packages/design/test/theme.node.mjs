@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict'
 import { readdir, readFile } from 'node:fs/promises'
-import { createRequire } from 'node:module'
-import { dirname } from 'node:path'
 import { test } from 'node:test'
-import { compile } from 'tailwindcss'
+import { compiledUtilities } from './tailwind.mjs'
 
 const VARIABLE_DEFINITION_PATTERN = /(--[a-z0-9-]+)\s*:/g
 const REDUCED_MOTION_RULE_START = '@media (prefers-reduced-motion: reduce) {'
@@ -43,24 +41,6 @@ function definedNames(source) {
 const themeNames = definedNames(block(theme, '@theme static {'))
 const primitiveNames = definedNames(block(theme, ':root {'))
 const definedThemeNames = [...themeNames, ...primitiveNames]
-
-const require = createRequire(import.meta.url)
-const tailwindRoot = dirname(require.resolve('tailwindcss/package.json'))
-
-async function loadStylesheet(id, basedir) {
-  const path = require.resolve(id, { paths: [basedir] })
-  const base = dirname(path)
-  const content = await readFile(path, 'utf8')
-
-  return { path, base, content }
-}
-
-async function compiledUtilities(candidates) {
-  const source = `@import 'tailwindcss/theme.css';\n${theme}\n@import 'tailwindcss/utilities.css';`
-  const compiler = await compile(source, { base: tailwindRoot, loadStylesheet })
-
-  return compiler.build(candidates)
-}
 
 test('theme.css의 변수는 한 번만 정의한다', () => {
   assert.equal(new Set(definedThemeNames).size, definedThemeNames.length)
@@ -167,6 +147,22 @@ test('크기 토큰은 높이, 폭 utility만 만들고 간격 utility는 만들
   for (const name of leakedUtilities) {
     assert.doesNotMatch(css, new RegExp(`\\.${name}\\s*\\{`), name)
   }
+})
+
+test('간격과 컨테이너 폭 utility는 theme.css의 단계로만 만든다', async () => {
+  const stepUtilities = ['p-0', 'gap-1', 'mt-3', 'px-6', 'size-4', 'min-h-12', 'leading-8', 'w-16']
+  const closedUtilities = ['p-5', 'gap-1.5', 'w-22', 'h-11', 'size-7', 'leading-5', 'max-w-sm']
+  const css = await compiledUtilities([...stepUtilities, ...closedUtilities])
+
+  for (const name of stepUtilities) {
+    assert.ok(css.includes(`.${name} {`), name)
+  }
+
+  for (const name of closedUtilities) {
+    assert.ok(!css.includes(`.${name.replace('.', '\\.')} {`), name)
+  }
+
+  assert.doesNotMatch(css, /--spacing:\s/)
 })
 
 test('utility를 쓰지 않은 토큰도 CSS 변수로 낸다', async () => {
