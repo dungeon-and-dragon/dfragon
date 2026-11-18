@@ -1,4 +1,4 @@
-import { Button, Switch } from '@dfragon/ui'
+import { Button, ConfirmPopover, Popover, Switch } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { BATCH_NEOPLE_KEY_DUPLICATE, OpsRequestFailure } from '../api/ops-client'
 import type { BatchKey } from '../api/ops-schemas'
@@ -9,7 +9,6 @@ import {
   useDeleteBatchKey,
   useSetBatchKeyEnabled
 } from '../ops-queries'
-import { ConfirmButton } from './ConfirmButton'
 import { FIELD_INPUT, panelClasses, textClasses } from './panel-classes'
 import { type BatchKeyStatus, BatchKeyStatusTag } from './RunStatusTag'
 
@@ -141,22 +140,14 @@ function EnabledSwitch({ batchKey }: { batchKey: BatchKey }): React.JSX.Element 
 function DeleteBatchKeyButton({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
   const deleteKey = useDeleteBatchKey()
 
-  function handleConfirm(close: () => void): void {
-    deleteKey.mutate(batchKey.id, { onSuccess: close })
+  function deleteBatchKey(): Promise<unknown> {
+    return deleteKey.mutateAsync(batchKey.id)
   }
 
   return (
-    <ConfirmButton
-      label="삭제"
-      title={`${batchKey.label} 삭제`}
-      confirmLabel="삭제"
-      disabled={false}
-      pending={deleteKey.isPending}
-      failed={deleteKey.isError}
-      popupClassName="w-[240px]"
-      onOpen={deleteKey.reset}
-      onConfirm={handleConfirm}
-    />
+    <ConfirmPopover title={`${batchKey.label} 삭제`} confirmLabel="삭제" onConfirm={deleteBatchKey}>
+      <Popover.Trigger render={<Button size="sm" />}>삭제</Popover.Trigger>
+    </ConfirmPopover>
   )
 }
 
@@ -228,9 +219,7 @@ export function BatchKeyPanel(): React.JSX.Element {
         )}
       </h2>
       <AddBatchKeyForm />
-      {keys !== undefined && keys.length === 0 && (
-        <p className={panelClasses.empty}>batch key가 없습니다.</p>
-      )}
+      {keys !== undefined && keys.length === 0 && <p className="state">batch key가 없습니다.</p>}
       {keys !== undefined && keys.length > 0 && (
         <div className="table-scroll">
           <BatchKeyTable keys={keys} />

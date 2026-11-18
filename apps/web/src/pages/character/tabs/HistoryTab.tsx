@@ -47,11 +47,9 @@ export function HistoryTab({ detail }: CharacterTabProps): React.JSX.Element {
       return <HistorySkeleton />
     case 'error':
       return (
-        <div className="p-4">
-          <p role="alert" className="m-0 text-sm text-fg-danger">
-            이력을 받지 못했습니다.
-          </p>
-        </div>
+        <p role="alert" className="state state-error">
+          이력을 받지 못했습니다.
+        </p>
       )
     case 'success':
       return (
@@ -90,9 +88,7 @@ function HistoryContent({
   if (selected === undefined) {
     return (
       <div>
-        <p className={`m-0 px-4 py-12 text-center text-sm font-semibold ${LINE}`}>
-          저장된 이력이 없습니다.
-        </p>
+        <p className={`state ${LINE}`}>저장된 이력이 없습니다.</p>
         <NameChanges changes={history.nameChanges} />
       </div>
     )
@@ -291,11 +287,9 @@ function SummaryBody({
 
   if (current.status === 'error' || before.status === 'error') {
     return (
-      <div className="p-4">
-        <p role="alert" className="m-0 text-sm text-fg-danger">
-          시점 요약을 받지 못했습니다.
-        </p>
-      </div>
+      <p role="alert" className="state state-error">
+        시점 요약을 받지 못했습니다.
+      </p>
     )
   }
 

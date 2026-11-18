@@ -1,5 +1,5 @@
-import { Button, ProgressCircle } from '@dfragon/ui'
-import { type ReactNode, useCallback } from 'react'
+import { Button } from '@dfragon/ui'
+import type { ReactNode } from 'react'
 import type {
   TimelineAcquisition,
   TimelineClear,
@@ -13,7 +13,9 @@ import {
   ENHANCEMENT_KIND_LABELS,
   formatEnhancementValue
 } from './timeline-format'
+import { LoadingLine } from '../../../../components/LoadingLine'
 import { RelativeTime } from '../../../../components/RelativeTime'
+import { useInfiniteScrollRef } from '../../../../hooks/useInfiniteScrollRef'
 import { raritySolidClasses } from '../equipment/item-classes'
 
 const RARITY_TONES: Readonly<Record<string, string>> = {
@@ -37,8 +39,8 @@ const ENHANCEMENT_KIND_TONES: Readonly<Record<TimelineEnhancement['kind'], strin
 const BADGE = 'badge text-fg-muted'
 const TABLE = 'table table-fixed'
 const TIME_COLUMN = 'w-[112px]'
-const MORE =
-  'flex min-h-12 items-center justify-center gap-2 border-t border-line px-4 text-fg-muted'
+const MORE = 'min-h-12 border-t border-line'
+const MORE_STATE = `${MORE} flex-row py-0`
 
 function TimelineGroup({
   title,
@@ -70,19 +72,8 @@ export function TimelineMore({
   state,
   loadMore
 }: Pick<TimelinePages<unknown>, 'state' | 'loadMore'>): React.JSX.Element | null {
-  const watchEnd = useCallback(
-    (element: HTMLDivElement) => {
-      const observer = new IntersectionObserver((entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          loadMore()
-        }
-      })
-      observer.observe(element)
+  const watchEnd = useInfiniteScrollRef<HTMLDivElement>(loadMore)
 
-      return () => observer.disconnect()
-    },
-    [loadMore]
-  )
   switch (state.status) {
     case 'end':
       return null
@@ -90,15 +81,15 @@ export function TimelineMore({
       return <div ref={watchEnd} aria-hidden="true" className={MORE} />
     case 'loading':
       return (
-        <div aria-busy="true" className={MORE}>
-          <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
+        <div aria-busy="true" className={`state state-pending ${MORE_STATE}`}>
+          <LoadingLine short />
           <span role="status">기록을 더 받는 중입니다.</span>
         </div>
       )
     case 'error':
       return (
-        <div className={MORE}>
-          <p role="alert" className="m-0 text-fg-danger">
+        <div className={`state state-error ${MORE_STATE}`}>
+          <p role="alert" className="m-0">
             {state.message}
           </p>
           <Button variant="secondary" size="sm" onClick={loadMore}>
