@@ -1,7 +1,7 @@
+import { CheckIcon } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { ClearName, WeeklyCharacter } from '#core/adventure-guild/adventure-weekly'
-import { CheckIcon } from '../../components/CheckIcon'
 import { CharacterCell } from '../../components/table/CharacterCell'
 import { tableClasses } from '../../components/table/table-classes'
 import { RankBadge } from '../../components/table/RankBadge'

@@ -1,4 +1,4 @@
-import { Popover } from '@dfragon/ui'
+import { CloseIcon, Popover } from '@dfragon/ui'
 import { isMaxLevel } from '#core/character/character-level'
 import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
@@ -237,13 +237,7 @@ function RemoveButton({
       onClick={handleClick}
       className="absolute end-3 top-1/2 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-control text-fg-muted transition-colors focus-ring-inset hover:bg-control-hover hover:text-fg"
     >
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        className="size-3 fill-none stroke-current stroke-[2.5] [stroke-linecap:round]"
-      >
-        <path d="M6 6l12 12M18 6 6 18" />
-      </svg>
+      <CloseIcon className="size-icon-sm" />
     </button>
   )
 }
