@@ -2,8 +2,7 @@
 
 `apps/api`는 로그인 없는 공개 캐릭터 API(Hono)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
 DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정보를 PostgreSQL에 저장하고, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
-같은 이미지의 캐릭터 수집 worker(`dist/character-collector.js`)는 캐릭터 목록 파일에 있는 캐릭터의 기본 정보를 DB에 쌓습니다.
-배치 job도 이 worker에서 돕니다. Job 정의와 실행 흐름은 `src/application/jobs/`, 예약은 `src/infrastructure/jobs/`, 실행 이력 DB adapter는 `src/infrastructure/database/`에 있고, worker가 돌릴 job은 `src/runtime/worker-jobs.ts`에 등록합니다.
+같은 이미지의 캐릭터 수집 worker(`dist/character-collector.js`)는 [`apps/worker`](../worker/README.md)에 있습니다.
 
 ## 코드 위치
 
@@ -16,12 +15,12 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 
 | 폴더 | 담는 것 |
 | --- | --- |
-| `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일 |
+| `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일. `character-collector.ts`는 `@dfragon/worker`의 시작 함수만 부릅니다 |
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | Service, Service가 받는 Repository interface와 DB가 아닌 의존성의 함수 타입(port) |
-| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기, job 예약, 파일 읽기로 구현한 adapter |
+| `src/infrastructure/neople/`, `src/infrastructure/database/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기로 구현한 adapter |
 | `src/presentation/http/` | Controller, 요청과 응답 DTO, 실패를 HTTP 응답으로 바꾸는 표 |
-| `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
+| `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립 |
 | `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
 | `src/runtime/routes/` | 기능의 Controller에 Service를 넘겨 공개 app에 붙이는 함수(`api.ts`) |
 
@@ -44,17 +43,12 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/runtime/routes/api.ts` | 기능의 Controller를 만들어 공개 app의 경로에 붙입니다 |
 
 Repository와 port를 쓰지 않는 경로(`health`, `version`)는 Controller만 둡니다.
-worker가 돌리는 기능은 HTTP 경로가 없어 Controller와 DTO 없이 Service와 Repository만 두고, job 정의(`defineJob`)의 `run`이 Service를 부릅니다.
-worker 기능의 Service는 `service.ts`가 아니라 기존 use case 파일(예: `application/content-clears/collection.ts`, `application/character-score/calculation-job.ts`)에 둡니다.
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `packages/server-core/src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
 두 앱이 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.
 API와 캐릭터 수집 worker가 함께 쓰는 캐릭터 상세, 공용 아이템, 점수 엔진, 타임라인, 클리어 통계 코드는 [`@dfragon/server-core`](../../packages/server-core/README.md)에 있습니다.
 오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/controller.ts`에 있습니다.
-캐릭터 목록 수집 Service, Repository interface와 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
-Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
-Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`에 있습니다.
 
 ## 준비할 입력
 
@@ -65,8 +59,7 @@ Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infra
 | `PORT` | 필수 | ASCII 십진 정수 1~65535 |
 | `NEOPLE_API_KEY` 또는 `NEOPLE_API_KEY_FILE` | 필수 | Neople key 직접 입력 또는 key 파일의 절대 경로 |
 | `LOCAL_HTTPS_CERT_FILE`, `LOCAL_HTTPS_KEY_FILE`, `API_ORIGIN` | 로컬 개발 | [로컬 개발 명령](#로컬-개발-명령) 참고 |
-| `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. API는 없으면 점수 없이 실행하고, 캐릭터 수집 worker는 없으면 점수 계산 job만 실패로 끝냅니다 |
-| `SCORE_CALCULATION_SCHEDULE` | 선택 | 캐릭터 수집 worker의 점수 계산 job 일정(Asia/Seoul cron 식). 없으면 수요일 22:00입니다 |
+| `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. 없으면 점수 없이 실행합니다 |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` 또는 `DB_PASSWORD_FILE` | 선택 | [DB와 migration](#db와-migration) 참고 |
 
 Secret은 직접 입력과 `_FILE` 가운데 하나만 지정합니다. 둘 다 지정하거나 빈 값, 상대 경로, 읽을 수 없는 파일이면 값과 경로 없이 시작 전에 실패합니다.

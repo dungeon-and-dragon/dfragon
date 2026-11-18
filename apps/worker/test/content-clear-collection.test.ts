@@ -37,15 +37,10 @@ import type {
   ClearCollectionRepository,
   ClearRecordBackfillRepository
 } from '../src/application/content-clears/repository.js'
-import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ContentClearCollectionService } from '../src/application/content-clears/collection.js'
 import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
 import { ClearRecordBackfillService } from '../src/application/content-clears/record-backfill.js'
 import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/contents.js'
-import {
-  ClearStatsService,
-  emptyClearStatsRepository
-} from '../src/application/content-clears/service.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 import { JobSchedulerService } from '../src/application/jobs/scheduler.js'
 import { formatResetDate, startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
@@ -599,7 +594,7 @@ test('주 중간 수집은 진행 중인 주를 받지 않고, 목요일 06:00 �
   ])
 })
 
-test('출시 첫 주와 마감하지 않은 지난주만 저장한 레이드는 그 사이 모든 주를 받아 마감하고, 마감한 출시 첫 주는 바꾸지 않으며, 다 마감한 뒤 수집은 요청하지 않고, 집계 목록이 빈 주 없이 준다', async () => {
+test('출시 첫 주와 마감하지 않은 지난주만 저장한 레이드는 그 사이 모든 주를 받아 마감하고, 마감한 출시 첫 주는 바꾸지 않으며, 다 마감한 뒤 수집은 요청하지 않고, 마감한 모집단을 빈 주 없이 남긴다', async () => {
   const seeded = [
     ...raidFirstWeeks(),
     ...raidFirstWeeks().map(({ contentId }) => storedPopulation(contentId, LAST_WEEK, false))
@@ -640,22 +635,17 @@ test('출시 첫 주와 마감하지 않은 지난주만 저장한 레이드는 
   ])
   assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(1, true))
 
-  const reader: ClearStatsRepository = {
-    ...emptyClearStatsRepository,
-    readCollectedAt: async () => COLLECTED_AT,
-    readPopulations: async () => [...state.populations.values()]
-  }
-  const { contents } = await new ClearStatsService(reader, () => undefined).stats()
   for (const content of CLEAR_CONTENTS) {
     const releaseWeek = startOfResetWeek(content.releasedAt)
     const expected = [...weeksBefore(releaseWeek, LAST_WEEK), LAST_WEEK].map((week) =>
       formatResetDate(week)
     )
-    assert.deepEqual(
-      contents.find(({ id }) => id === content.id)?.weeks.map(({ weekStart }) => weekStart),
-      expected,
-      content.id
-    )
+    const closedWeeks = [...state.populations.values()]
+      .filter(({ contentId, closed }) => contentId === content.id && closed)
+      .map(({ weekStart }) => weekStart)
+      .toSorted((left, right) => left.getTime() - right.getTime())
+      .map((week) => formatResetDate(week))
+    assert.deepEqual(closedWeeks, expected, content.id)
   }
 })
 
