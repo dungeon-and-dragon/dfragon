@@ -1,11 +1,11 @@
 import type { TimelineCharacter } from '@dfragon/database'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import type { EnhancementBackfillRepository } from './repository.js'
-import { ENHANCEMENT_CODES } from '@dfragon/server-core/domain/character-timeline/project.js'
 import {
+  ENHANCEMENT_CODES,
   NEOPLE_TIMELINE_START,
   splitTimelineRanges
-} from '@dfragon/server-core/domain/character-timeline/ranges.js'
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import { TIMELINE_COLLECTION_START } from './sync.js'
 
 // 정기 동기화가 받지 않는 중천 전의 캐릭터명 변경(102), 모험단명 변경(105)도 같은 요청으로 받는다.

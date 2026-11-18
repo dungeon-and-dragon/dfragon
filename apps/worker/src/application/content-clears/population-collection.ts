@@ -1,7 +1,9 @@
 import type { ClearPopulationCharacter, TimelineRange } from '@dfragon/database'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
-import { TimelineFailure } from '@dfragon/server-core/domain/character-timeline/failure.js'
-import type { TimelineRow } from '@dfragon/server-core/domain/character-timeline/rows.js'
+import {
+  TimelineFailure,
+  type TimelineRow
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import { createUnavailableStreaks } from '../jobs/index.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000

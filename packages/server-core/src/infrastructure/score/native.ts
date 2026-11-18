@@ -1,5 +1,5 @@
 import koffi from 'koffi'
-import type { ScoreCalculator, ScoreEngineInput } from '../../domain/score/input.js'
+import type { ScoreCalculator, ScoreEngineInput } from '../../domain/score/index.js'
 
 const SCORE_SUCCESS = 0
 

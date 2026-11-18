@@ -3,13 +3,10 @@ import { z } from 'zod'
 import type {
   CharacterPayloads,
   FetchedCharacterPayloads
-} from '@dfragon/server-core/domain/character-detail/sections.js'
+} from '@dfragon/server-core/domain/character-detail/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
-import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
-import {
-  type CalculatedScore,
-  toCalculatedScore
-} from '@dfragon/server-core/domain/score/calculated.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
+import { type CalculatedScore, toCalculatedScore } from '@dfragon/server-core/domain/score/index.js'
 import { defineJob, createUnavailableStreaks } from '../jobs/index.js'
 import { calculateCharacterScore } from './calculate.js'
 import type { ScoreCalculationPorts, ScoreEngineHandle, ScoreSources } from './ports.js'

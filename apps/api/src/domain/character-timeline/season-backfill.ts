@@ -2,7 +2,7 @@ import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfr
 import {
   NEOPLE_TIMELINE_START,
   splitTimelineRanges
-} from '@dfragon/server-core/domain/character-timeline/ranges.js'
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 
 const MINUTE_MS = 60_000
 

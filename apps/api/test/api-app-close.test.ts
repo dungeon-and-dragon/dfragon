@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
-import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/project.js'
-import type { ScoreWorker } from '@dfragon/server-core/infrastructure/score/engine.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
+import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/index.js'
+import type { ScoreWorker } from '@dfragon/server-core/infrastructure/score/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 실제 라이브러리를 열지 않는다. worker는 테스트가 준 fake다.

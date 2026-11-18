@@ -1,5 +1,5 @@
-import type { CatalogDetail } from '../../domain/character-catalog/types.js'
-import type { CharacterPayload } from '../../domain/character-detail/sections.js'
+import type { CatalogDetail } from '../../domain/character-catalog/index.js'
+import type { CharacterPayload } from '../../domain/character-detail/index.js'
 
 export type FetchCatalog = (
   itemIds: string[],

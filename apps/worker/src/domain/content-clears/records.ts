@@ -2,9 +2,9 @@ import type { ClearRecordInput, TimelineCharacter } from '@dfragon/database'
 import { z } from 'zod'
 import {
   LEGION_CLEAR_CODE,
-  RAID_CLEAR_CODES
-} from '@dfragon/server-core/domain/character-timeline/project.js'
-import type { TimelineRow } from '@dfragon/server-core/domain/character-timeline/rows.js'
+  RAID_CLEAR_CODES,
+  type TimelineRow
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 // 베누스 첫 클리어 주다. 지난 레이드, 레기온 기록은 이 주부터 받는다.

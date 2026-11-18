@@ -18,7 +18,7 @@ import type {
 } from '@dfragon/database'
 import { RAID_STAGE_ORDER } from '@dfragon/server-core/domain/raid-stage.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
-import type { ClearStagePair } from '@dfragon/server-core/domain/content-clears/contents.js'
+import type { ClearStagePair } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   type ClearFameDistribution,
   type ClearJobStats,

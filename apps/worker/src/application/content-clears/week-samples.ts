@@ -2,9 +2,9 @@ import type { StoredClearPopulation } from '@dfragon/database'
 import {
   CLEAR_CONTENTS,
   type ClearContent
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 import type { ClearWeekSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
-import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/sample-loader.js'
+import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/index.js'
 
 export type ClearWeekSampleSummary = {
   contents: number

@@ -11,7 +11,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'

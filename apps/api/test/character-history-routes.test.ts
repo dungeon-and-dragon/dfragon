@@ -7,10 +7,10 @@ import type {
   TimelineEventRow
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterHistoryRepository } from '../src/application/character-history/repository.js'
-import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
-import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
 const unused = async (): Promise<never> => assert.fail('부르면 안 된다')

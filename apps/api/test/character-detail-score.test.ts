@@ -1,13 +1,18 @@
 import assert from 'node:assert/strict'
 import test, { type TestContext } from 'node:test'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
-import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/neople-stages.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/index.js'
 import { CharacterDetailService } from '../src/application/character-detail/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
-import type { ScoreEngine } from '@dfragon/server-core/infrastructure/score/engine.js'
-import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/result.js'
-import type { ScoreCalculator, ScoreEngineInput } from '@dfragon/server-core/domain/score/input.js'
-import { openNativeScore } from '@dfragon/server-core/infrastructure/score/native.js'
+import type {
+  ScoreEngineResult,
+  ScoreCalculator,
+  ScoreEngineInput
+} from '@dfragon/server-core/domain/score/index.js'
+import {
+  type ScoreEngine,
+  openNativeScore
+} from '@dfragon/server-core/infrastructure/score/index.js'
 import {
   REAL_SCORE_LIBRARY_PATH,
   payloadsFromEngineInput,

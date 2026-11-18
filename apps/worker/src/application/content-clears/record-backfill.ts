@@ -1,9 +1,9 @@
 import type { ClearRecordInput } from '@dfragon/database'
-import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/ranges.js'
+import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   CLEAR_CONTENTS,
   toCollectionMinFame
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   CLEAR_RECORD_BACKFILL_START,
   toClearRecordInput

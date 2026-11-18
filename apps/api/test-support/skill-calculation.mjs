@@ -4,7 +4,7 @@ import { isAbsolute, join, relative } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 import { parseCharacterSearchQuery } from '../dist/domain/character-search/query.js'
-import { CATALOG_LIMITS } from '@dfragon/server-core/domain/character-catalog/types.js'
+import { CATALOG_LIMITS } from '@dfragon/server-core/domain/character-catalog/index.js'
 
 const packageName = '@blahaj94/dfragon-skills'
 const failureMessages = {

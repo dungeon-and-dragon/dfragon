@@ -8,7 +8,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
-import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/contents.js'
+import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   type ClearFameDistribution,
   type ClearJobStats,

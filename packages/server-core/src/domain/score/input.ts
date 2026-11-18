@@ -1,5 +1,5 @@
-import type { CatalogDetail } from '../character-catalog/types.js'
-import type { CharacterPayload, CharacterPayloads } from '../character-detail/sections.js'
+import type { CatalogDetail } from '../character-catalog/index.js'
+import type { CharacterPayload, CharacterPayloads } from '../character-detail/index.js'
 
 export type ScoreCalculator = 'equipment' | 'buff'
 

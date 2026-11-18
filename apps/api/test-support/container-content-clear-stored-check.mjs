@@ -7,7 +7,7 @@ import {
   recordContentClearCollectionProgress,
   startContentClearCollection
 } from '@dfragon/database'
-import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/clear-stats.js'
+import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { ClearStatsService } from './dist/application/content-clears/service.js'
 
 const at = (time) => new Date(`${time}+09:00`)

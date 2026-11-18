@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { URL } from 'node:url'
 import { createApiHttpApp } from '../dist/runtime/api-app.js'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../dist/infrastructure/neople/character-search.js'
 

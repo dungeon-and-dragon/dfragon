@@ -1,8 +1,8 @@
-import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/project.js'
+import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/index.js'
 import {
   projectCharacterDetails,
   projectCharacterFreshness
-} from '@dfragon/server-core/domain/character-detail/project.js'
+} from '@dfragon/server-core/domain/character-detail/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import {
   CHANGE_SECTIONS,
@@ -15,9 +15,9 @@ import {
 import {
   restoreCharacterPayloads,
   toCharacterHeader
-} from '@dfragon/server-core/domain/character-history/section-body.js'
+} from '@dfragon/server-core/domain/character-history/index.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
-import { enrichCharacterDetails } from '@dfragon/server-core/application/character-catalog/enrich.js'
+import { enrichCharacterDetails } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import type { CharacterHistoryRepository } from './repository.js'
 
