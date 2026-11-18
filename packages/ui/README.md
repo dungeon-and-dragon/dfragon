@@ -19,8 +19,9 @@
 | `StepDots` | plain | 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜진다. 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG | 값이 없으면 `steps()`로 끊어 도는 호, 있으면 진행 호. |
 | `Kbd`, `NumericText` | plain | 단축키(24px 키캡, 숫자 글꼴. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 숫자 글꼴(`--font-mono`, `tabular-nums`)과 `--duration-count` 동안의 증가. |
+| `CameraIcon`, `CheckIcon`, `ChevronDownIcon`, `ChevronRightIcon`, `CloseIcon`, `CopyIcon`, `DashIcon`, `ExternalLinkIcon`, `MonitorIcon`, `MoonIcon`, `PinIcon`, `RefreshIcon`, `SearchIcon`, `StarIcon`, `SunIcon` | `svg` | 글자색 선 아이콘. 크기는 부모 글자 크기(`1em`)이고, 따로 정할 때는 `size-icon-sm`, `size-icon-md`, `size-icon-lg`만 쓴다. `PinIcon`, `StarIcon`은 `filled`로 면을 채운다. |
 
-공개 타입은 `className`, `style`을 받지 않는다. Base UI 부품 그대로인 `Select.Root`, `Menu.Root` 같은 부품은 Base UI 문서의 API를 따른다.
+공개 타입은 `className`, `style`을 받지 않는다. 아이콘은 `svg` 속성을 그대로 받아 `className`으로 크기, 색, 배치를 정한다. Base UI 부품 그대로인 `Select.Root`, `Menu.Root` 같은 부품은 Base UI 문서의 API를 따른다.
 
 Entry는 `@dfragon/ui` 하나다. 앱에서 눈에는 숨기고 보조 기술이 읽게 할 글자는 Tailwind CSS의 `sr-only`를 쓴다.
 
