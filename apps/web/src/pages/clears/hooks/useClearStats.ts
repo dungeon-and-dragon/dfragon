@@ -1,4 +1,4 @@
-import type { ClearContentStats, ClearOverview, ClearStats } from '#core/ranking/clear-stats'
+import type { ClearContentStats, ClearOverview, ClearStats } from '#core/ranking'
 import { useClientHost } from '../../../host/client-host'
 import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 

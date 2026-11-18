@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { FameRanking, RankedCharacter } from '#core/ranking/ranking-stats'
+import type { FameRanking, RankedCharacter } from '#core/ranking'
 import { ClientHostContext, type ClientHost } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'

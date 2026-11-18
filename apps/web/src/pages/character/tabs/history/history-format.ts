@@ -1,6 +1,10 @@
-import { signedEnchantValue } from '#core/character/character-equipment'
-import type { HistoryFieldChange, HistoryNameChange } from '#core/character/character-history'
-import { formatPoint, tuneNumeral } from '#core/character/character-item'
+import {
+  formatPoint,
+  type HistoryFieldChange,
+  type HistoryNameChange,
+  signedEnchantValue,
+  tuneNumeral
+} from '#core/character'
 
 export const MISSING = '-'
 

@@ -1,7 +1,7 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
-import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
+import type { AdventureActivity } from '#core/adventure-guild'
 import {
   type AdventureActivitySeasonDaysResult,
   useAdventureActivity,

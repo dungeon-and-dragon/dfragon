@@ -1,4 +1,4 @@
-import type { ActivityDayItem } from '#core/adventure-guild/adventure-activity'
+import type { ActivityDayItem } from '#core/adventure-guild'
 
 export type DayItemRow =
   | Readonly<{ kind: 'item'; item: ActivityDayItem }>

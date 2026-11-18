@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useInfiniteScrollRef } from '../../hooks/useInfiniteScrollRef'
-import type { FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
+import type { FameRanking, FameRankingFilter } from '#core/ranking'
 import { CharacterTable, SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { useFameRanking } from '../../hooks/useFameRanking'

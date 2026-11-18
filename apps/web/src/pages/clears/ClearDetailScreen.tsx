@@ -1,10 +1,5 @@
 import { ChipGroup } from '@dfragon/ui'
-import type {
-  ClearContent,
-  ClearContentStats,
-  ClearWeek,
-  ClearWeekOverWeek
-} from '#core/ranking/clear-stats'
+import type { ClearContent, ClearContentStats, ClearWeek, ClearWeekOverWeek } from '#core/ranking'
 import { BarLineChart } from '../../components/chart/BarLineChart'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
 import { ChartLegend } from '../../components/chart/ChartLegend'

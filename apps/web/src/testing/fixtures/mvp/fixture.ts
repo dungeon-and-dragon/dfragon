@@ -1,7 +1,7 @@
-import type { SelectedCharacterSummary } from '#core/character/character'
-import type { CharacterChoice, SearchSlot } from '#core/search/search'
-import { bufferCard, dealerCard } from '#core/testing/character-cards'
-import type { CardCharacter, CharacterCard } from '#core/capture/cards-types'
+import type { SelectedCharacterSummary } from '#core/character'
+import type { CharacterChoice, SearchSlot } from '#core/search'
+import { bufferCard, dealerCard } from '#core/testing'
+import type { CardCharacter, CharacterCard } from '#core/capture'
 import characterImage from './assets/character.png'
 
 export const previewCharacter: CardCharacter = {

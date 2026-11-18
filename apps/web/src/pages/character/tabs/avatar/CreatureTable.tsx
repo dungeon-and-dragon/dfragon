@@ -1,5 +1,4 @@
-import { toItemView } from '#core/character/character-item'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import { type CharacterDetailView, toItemView } from '#core/character'
 import { type SlotItemRow, SlotItemTable } from '../equipment/SlotItemTable'
 import { artifactDotClasses } from './avatar-classes'
 

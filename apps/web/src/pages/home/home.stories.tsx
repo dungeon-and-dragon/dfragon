@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
+import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
 import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '../../testing/story-support/story-characters'

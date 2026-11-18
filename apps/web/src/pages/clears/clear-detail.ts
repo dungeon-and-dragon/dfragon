@@ -7,8 +7,8 @@ import type {
   ClearStageMoves,
   ClearWeek,
   ClearWeekOverWeek
-} from '#core/ranking/clear-stats'
-import { jobLabelOf } from '#core/character/job-display'
+} from '#core/ranking'
+import { jobLabelOf } from '#core/character'
 import type { BarSeries } from '../../components/chart/BarLineChart'
 import type { BoxPlotRow } from '../../components/chart/BoxPlot'
 import type { LegendItem } from '../../components/chart/ChartLegend'

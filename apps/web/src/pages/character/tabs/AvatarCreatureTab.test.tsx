@@ -2,8 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { itemIconUrl } from '#core/character/character-item'
-import { characterDetailFixture } from '#core/testing/character-detail'
+import { itemIconUrl } from '#core/character'
+import { characterDetailFixture } from '#core/testing'
 import { artifactDotClasses as dotTones, avatarClasses } from './avatar/avatar-classes'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
 import {

@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
-import type { CharacterIdentity } from '#core/character/character'
-import type { CharacterTimeline } from '#core/character/character-timeline'
+import type { CharacterIdentity, CharacterTimeline } from '#core/character'
 import { useCharacterTimeline } from '../hooks/useCharacterTimeline'
 import { LoadingLine } from '../../../components/LoadingLine'
 import { useClientHost } from '../../../host/client-host'

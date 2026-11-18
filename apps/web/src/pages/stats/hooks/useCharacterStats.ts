@@ -1,4 +1,4 @@
-import type { CharacterStats } from '#core/ranking/ranking-stats'
+import type { CharacterStats } from '#core/ranking'
 import { useClientHost } from '../../../host/client-host'
 import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 

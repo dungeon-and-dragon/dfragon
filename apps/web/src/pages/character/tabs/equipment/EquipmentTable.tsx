@@ -1,11 +1,12 @@
-import { MISSING_VALUE } from '#core/capture/cards'
-import type {
-  EnchantOption,
-  EquipmentReinforce,
-  EquipmentRow,
-  EquipmentView
-} from '#core/character/character-equipment'
-import { formatPoint, type ItemView } from '#core/character/character-item'
+import { MISSING_VALUE } from '#core/capture'
+import {
+  type EnchantOption,
+  type EquipmentReinforce,
+  type EquipmentRow,
+  type EquipmentView,
+  formatPoint,
+  type ItemView
+} from '#core/character'
 import { itemTableClasses } from './item-classes'
 import { ItemCell } from './item-parts'
 

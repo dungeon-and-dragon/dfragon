@@ -1,6 +1,6 @@
 import { Button, ChipGroup } from '@dfragon/ui'
 import { useRef, useState } from 'react'
-import type { ClearJob } from '#core/ranking/clear-stats'
+import type { ClearJob } from '#core/ranking'
 import { useChartTooltipSlide } from '../../../animations/useChartTooltipSlide'
 import { BoxPlot, BoxPlotAxis } from '../../../components/chart/BoxPlot'
 import {
