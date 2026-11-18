@@ -180,6 +180,28 @@ test('base.css의 글꼴 파일을 모두 fonts에 넣고 tokens.json에 적는�
   }
 })
 
+test('숫자 글꼴의 % 전용 face는 굵기마다 unicode-range를 tokens.json에 적고 전체 face보다 뒤에 둔다', async () => {
+  const tokens = await readJson('tokens.json')
+  const baseCss = await readFile(new URL('../base.css', import.meta.url), 'utf8')
+  const percentFonts = tokens.type.fonts.filter((font) => {
+    return font.family === 'Monoplex KR' && font.unicodeRange === 'U+0025'
+  })
+  const monoFaces = readFontFaces(baseCss).filter((face) => face.family === 'Monoplex KR')
+  const lastFullFace = monoFaces.findLastIndex((face) => face.unicodeRange === undefined)
+  const firstPercentFace = monoFaces.findIndex((face) => face.unicodeRange === 'U+0025')
+
+  assert.deepEqual(
+    percentFonts.map(({ file, weight }) => `${weight} ${file}`),
+    [
+      '400 fonts/IBMPlexSansKR-Regular.woff2',
+      '500 fonts/IBMPlexSansKR-Medium.woff2',
+      '600 fonts/IBMPlexSansKR-SemiBold.woff2',
+      '700 fonts/IBMPlexSansKR-Bold.woff2'
+    ]
+  )
+  assert.ok(lastFullFace < firstPercentFace)
+})
+
 test('컴파일한 CSS는 저장소 토큰이 artifact의 tokens.css를 이기게 theme layer 밖에 둔다', async () => {
   const css = await readFile(join(projectDirectory, 'components', 'bundle.css'), 'utf8')
 
