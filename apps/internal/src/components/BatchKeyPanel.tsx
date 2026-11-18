@@ -10,7 +10,7 @@ import {
   useSetBatchKeyEnabled
 } from '../ops-queries'
 import { ConfirmButton } from './ConfirmButton'
-import { FIELD_INPUT, panelClasses, tableClasses, textClasses } from './panel-classes'
+import { FIELD_INPUT, panelClasses, textClasses } from './panel-classes'
 import { type BatchKeyStatus, BatchKeyStatusTag } from './RunStatusTag'
 
 const KEY_MASK = '••••'
@@ -164,15 +164,15 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
   const { label, keySuffix, createdAt, rejectedAt } = batchKey
 
   return (
-    <tr className={tableClasses.row}>
-      <td className={`${tableClasses.cell} font-semibold`}>{label}</td>
-      <td className={tableClasses.cell}>
+    <tr>
+      <td className="font-semibold">{label}</td>
+      <td>
         <span className="font-mono tabular-nums text-fg-muted">
           {KEY_MASK}
           <b className="font-medium text-fg">{keySuffix}</b>
         </span>
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         <span className={textClasses.inline}>
           <BatchKeyStatusTag status={statusOf(batchKey)} />
           {rejectedAt !== null && (
@@ -182,13 +182,13 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
           )}
         </span>
       </td>
-      <td className={`${tableClasses.cell} ${textClasses.muted} ${textClasses.numeric}`}>
+      <td className={`${textClasses.muted} ${textClasses.numeric}`}>
         {formatDateMinute(createdAt)}
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         <EnabledSwitch batchKey={batchKey} />
       </td>
-      <td className={tableClasses.cellEnd}>
+      <td className="text-right">
         <DeleteBatchKeyButton batchKey={batchKey} />
       </td>
     </tr>
@@ -197,20 +197,20 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
 
 function BatchKeyTable({ keys }: { keys: readonly BatchKey[] }): React.JSX.Element {
   return (
-    <table className={tableClasses.table}>
+    <table className="table">
       <thead>
         <tr>
-          <th className={tableClasses.headCell}>이름</th>
-          <th className={tableClasses.headCell}>key</th>
-          <th className={tableClasses.headCell}>상태</th>
-          <th className={tableClasses.headCell}>추가</th>
-          <th className={tableClasses.headCell}>사용</th>
-          <th className={tableClasses.headCellEnd}>
+          <th>이름</th>
+          <th>key</th>
+          <th>상태</th>
+          <th>추가</th>
+          <th>사용</th>
+          <th className="table-num">
             <span className="sr-only">삭제</span>
           </th>
         </tr>
       </thead>
-      <tbody className={tableClasses.body}>
+      <tbody>
         {keys.map((batchKey) => (
           <BatchKeyRow key={batchKey.id} batchKey={batchKey} />
         ))}
@@ -236,7 +236,7 @@ export function BatchKeyPanel(): React.JSX.Element {
         <p className={panelClasses.empty}>batch key가 없습니다.</p>
       )}
       {keys !== undefined && keys.length > 0 && (
-        <div className={panelClasses.scroll}>
+        <div className="table-scroll">
           <BatchKeyTable keys={keys} />
         </div>
       )}

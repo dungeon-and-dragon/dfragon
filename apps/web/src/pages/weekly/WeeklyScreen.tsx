@@ -136,7 +136,7 @@ export function WeeklyScreen({
 function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Element {
   return (
     <section aria-label="이번 주 클리어" className="section min-w-0">
-      <div className="overflow-x-auto">{children}</div>
+      <div className="table-scroll">{children}</div>
     </section>
   )
 }

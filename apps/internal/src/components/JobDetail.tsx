@@ -11,7 +11,7 @@ import {
 } from '../format'
 import { useJobRuns } from '../ops-queries'
 import { argInputs } from '../run-args'
-import { panelClasses, tableClasses, textClasses } from './panel-classes'
+import { panelClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'
 import { RunProgress } from './RunProgress'
@@ -71,24 +71,22 @@ function RunRow({ run, now }: { run: Run; now: Date }): React.JSX.Element {
   const [error] = run.error ?? []
 
   return (
-    <tr className={tableClasses.row}>
-      <td className={`${tableClasses.cell} ${textClasses.muted}`}>{TRIGGER_LABELS[run.trigger]}</td>
-      <td className={tableClasses.cell}>
+    <tr>
+      <td className={`${textClasses.muted}`}>{TRIGGER_LABELS[run.trigger]}</td>
+      <td>
         <RunStatusTag status={run.status} />
       </td>
-      <td className={`${tableClasses.cell} ${textClasses.numeric}`}>
+      <td className={`${textClasses.numeric}`}>
         {run.startedAt !== null ? formatDateSecond(run.startedAt) : <Blank />}
       </td>
-      <td className={`${tableClasses.cellEnd} ${textClasses.numeric}`}>
+      <td className={`text-right ${textClasses.numeric}`}>
         {duration !== undefined ? formatDuration(duration) : <Blank />}
       </td>
-      <td className={tableClasses.cell}>
-        {run.progress !== null ? <RunProgress progress={run.progress} /> : <Blank />}
-      </td>
-      <td className={`${tableClasses.cell} ${textClasses.numeric}`}>
+      <td>{run.progress !== null ? <RunProgress progress={run.progress} /> : <Blank />}</td>
+      <td className={`${textClasses.numeric}`}>
         {run.summary !== null ? formatSummary(run.summary) : <Blank />}
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         {error !== undefined ? (
           <span className={textClasses.twoLine}>
             <span>{error.name}</span>
@@ -113,20 +111,20 @@ function RunHistory({ job, now }: { job: Job; now: Date }): React.JSX.Element {
   return (
     <>
       <div className="section-title">실행 이력</div>
-      <div className={panelClasses.scroll}>
-        <table className={tableClasses.table}>
+      <div className="table-scroll">
+        <table className="table">
           <thead>
             <tr>
-              <th className={tableClasses.headCell}>계기</th>
-              <th className={tableClasses.headCell}>상태</th>
-              <th className={tableClasses.headCell}>시작</th>
-              <th className={tableClasses.headCellEnd}>걸린 시간</th>
-              <th className={tableClasses.headCell}>진행률</th>
-              <th className={tableClasses.headCell}>결과</th>
-              <th className={tableClasses.headCell}>오류</th>
+              <th>계기</th>
+              <th>상태</th>
+              <th>시작</th>
+              <th className="table-num">걸린 시간</th>
+              <th>진행률</th>
+              <th>결과</th>
+              <th>오류</th>
             </tr>
           </thead>
-          <tbody className={tableClasses.body}>
+          <tbody>
             {rows.map((run) => (
               <RunRow key={run.id} run={run} now={now} />
             ))}

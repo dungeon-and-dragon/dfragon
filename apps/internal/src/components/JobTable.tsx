@@ -7,7 +7,7 @@ import {
   formatDuration,
   runDuration
 } from '../format'
-import { panelClasses, tableClasses, textClasses } from './panel-classes'
+import { panelClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'
 import { RunProgress } from './RunProgress'
@@ -49,17 +49,14 @@ function JobRow({
 }): React.JSX.Element {
   const { activeRun, lastFinishedRun } = job
   const lastDuration = lastFinishedRun !== null ? runDuration(lastFinishedRun, now) : undefined
-  const rowClassName = selected
-    ? `${tableClasses.row} ${tableClasses.selectedRow}`
-    : tableClasses.row
 
   function handleSelect(): void {
     onSelect(job.name)
   }
 
   return (
-    <tr className={rowClassName}>
-      <td className={tableClasses.cell}>
+    <tr aria-selected={selected}>
+      <td>
         <Tooltip.Root disabled={job.description === ''}>
           <Tooltip.Trigger
             render={
@@ -79,13 +76,13 @@ function JobRow({
           <Tooltip.Popup align="start">{job.description}</Tooltip.Popup>
         </Tooltip.Root>
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         <ScheduleText schedule={job.schedule} stacked />
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         <NextRun job={job} />
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         {activeRun !== null && (
           <span className={textClasses.inline}>
             <RunStatusTag status={activeRun.status} />
@@ -93,7 +90,7 @@ function JobRow({
           </span>
         )}
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         {lastFinishedRun?.finishedAt != null && (
           <span className={textClasses.inline}>
             <RunStatusTag status={lastFinishedRun.status} />
@@ -103,17 +100,17 @@ function JobRow({
           </span>
         )}
       </td>
-      <td className={`${tableClasses.cellEnd} ${textClasses.numeric}`}>
+      <td className={`text-right ${textClasses.numeric}`}>
         {lastDuration !== undefined && formatDuration(lastDuration)}
       </td>
-      <td className={tableClasses.cell}>
+      <td>
         {job.schedule !== null ? (
           <PauseSwitch job={job} />
         ) : (
           <span className={textClasses.subtle}>{EMPTY_VALUE}</span>
         )}
       </td>
-      <td className={tableClasses.cellEnd}>
+      <td className="text-right">
         <RunJobButton job={job} variant="secondary" />
       </td>
     </tr>
@@ -128,23 +125,23 @@ export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): 
         {jobs.length > 0 && <span className="section-title-count">{jobs.length}</span>}
       </h2>
       {jobs.length > 0 ? (
-        <div className={panelClasses.scroll}>
-          <table className={tableClasses.table}>
+        <div className="table-scroll">
+          <table className="table">
             <thead>
               <tr>
-                <th className={tableClasses.headCell}>이름</th>
-                <th className={tableClasses.headCell}>스케줄</th>
-                <th className={tableClasses.headCell}>다음 실행</th>
-                <th className={tableClasses.headCell}>진행</th>
-                <th className={tableClasses.headCell}>마지막 실행</th>
-                <th className={tableClasses.headCellEnd}>걸린 시간</th>
-                <th className={tableClasses.headCell}>정기 실행</th>
-                <th className={tableClasses.headCellEnd}>
+                <th>이름</th>
+                <th>스케줄</th>
+                <th>다음 실행</th>
+                <th>진행</th>
+                <th>마지막 실행</th>
+                <th className="table-num">걸린 시간</th>
+                <th>정기 실행</th>
+                <th className="table-num">
                   <span className="sr-only">실행</span>
                 </th>
               </tr>
             </thead>
-            <tbody className={tableClasses.body}>
+            <tbody>
               {jobs.map((job) => (
                 <JobRow
                   key={job.name}

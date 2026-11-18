@@ -33,7 +33,7 @@ export function CharacterCell({
           <Link
             to="/c/$serverId/$characterId"
             params={{ serverId: character.serverId, characterId: character.characterId }}
-            className="shrink-0 text-sm font-semibold whitespace-nowrap text-fg no-underline hover:underline"
+            className="min-w-0 truncate text-sm font-semibold text-fg no-underline hover:underline"
           >
             {character.characterName}
           </Link>
@@ -46,7 +46,9 @@ export function CharacterCell({
               {adventureName}
             </Link>
           )}
-          {job != null && <span className="min-w-0 truncate text-xs text-fg-subtle">{job}</span>}
+          {job != null && (
+            <span className="min-w-0 flex-1 truncate text-xs text-fg-subtle">{job}</span>
+          )}
         </span>
         {showsLevel && (
           <span className="truncate font-mono text-xs tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>

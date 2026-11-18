@@ -11,7 +11,7 @@ type BuffEquipment = NonNullable<Buff['equipment']>['equipment'][number]
 type BuffAvatar = NonNullable<Buff['avatar']>['avatar'][number]
 type BuffCreature = NonNullable<Buff['creature']>['creature'][number]
 
-const { scroll, table, head, body, row, cell, slot: slotCell } = itemTableClasses
+const { slot: slotCell } = itemTableClasses
 
 export function BuffGearTable({
   equipment,
@@ -23,25 +23,23 @@ export function BuffGearTable({
   creatures: readonly BuffCreature[]
 }): React.JSX.Element {
   return (
-    <div className={scroll}>
-      <table className={`${table} min-w-[800px]`}>
+    <div className="table-scroll">
+      <table className="table table-wrap min-w-[800px]">
         <thead>
           <tr>
-            <th scope="col" className={`${head} ${avatarClasses.slotColumn}`}>
+            <th scope="col" className={`${avatarClasses.slotColumn}`}>
               부위
             </th>
-            <th scope="col" className={head}>
-              아이템
-            </th>
-            <th scope="col" className={`${head} ${avatarClasses.optionColumn}`}>
+            <th scope="col">아이템</th>
+            <th scope="col" className={`${avatarClasses.optionColumn}`}>
               옵션
             </th>
-            <th scope="col" className={`${head} ${avatarClasses.emblemColumn}`}>
+            <th scope="col" className={`${avatarClasses.emblemColumn}`}>
               엠블렘
             </th>
           </tr>
         </thead>
-        <tbody className={body}>
+        <tbody>
           {equipment.map((item, index) => (
             <ItemRow
               key={`equipment-${item.slotId ?? index}`}
@@ -90,12 +88,12 @@ function ItemRow({
   const lines = [...skillLines, ...statusLines]
 
   return (
-    <tr className={row}>
-      <td className={`${cell} ${slotCell}`}>{slot}</td>
-      <td className={cell}>
+    <tr>
+      <td className={`${slotCell}`}>{slot}</td>
+      <td>
         <ItemCell item={item} tune={null} exalted={false} />
       </td>
-      <td className={cell}>
+      <td>
         {lines.length > 0 && (
           <span className={avatarClasses.stack}>
             {lines.map((line, index) => (
@@ -104,7 +102,7 @@ function ItemRow({
           </span>
         )}
       </td>
-      <td className={cell} />
+      <td />
     </tr>
   )
 }

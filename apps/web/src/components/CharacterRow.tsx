@@ -23,9 +23,6 @@ import { getLookupStep, type LookupStep } from '../lib/card-presentation'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-const cellBaseClass = 'overflow-hidden px-3 align-middle text-ellipsis first:pl-4 last:pr-4'
-const cellClass = `${cellBaseClass} whitespace-nowrap`
-const endCellClass = `${cellClass} text-right`
 const numberClass = 'font-mono font-semibold tabular-nums'
 const tagClass = 'badge badge-sm border border-current font-semibold'
 const linkClass = 'text-inherit no-underline hover:underline'
@@ -102,8 +99,9 @@ export function CharacterRow({
 
   return (
     <>
-      <td className={cellClass}>{seat}</td>
-      <td className={cellClass}>
+      <td>{seat}</td>
+      {/* 초상화(36px)가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
+      <td className="py-0">
         <div className="flex min-w-0 items-center gap-3">
           <div
             className={`relative size-[36px] shrink-0 overflow-hidden rounded-control ${shown === undefined ? 'bg-surface' : 'bg-inset'}`}
@@ -136,7 +134,7 @@ export function CharacterRow({
           </CardAnnouncer>
         </div>
       </td>
-      <td className={cellClass}>
+      <td>
         <ServerSelect
           label={`${slot}번 서버`}
           value={draft.serverId}
@@ -156,7 +154,7 @@ export function CharacterRow({
         snapshotAdventureInput={snapshotAdventureInput}
         onChangeSnapshotAdventure={onChangeSnapshotAdventure}
       />
-      <td className={cellClass}>
+      <td>
         {snapshotShown && snapshotMark !== undefined && (
           <SnapshotBadge mark={snapshotMark} screen={screen} />
         )}
@@ -248,7 +246,7 @@ function DetailCells({
   if (lookupStep === '이름 인식' || lookupStep === '캐릭터 검색') {
     return (
       <>
-        <td colSpan={3} className={cellClass}>
+        <td colSpan={3}>
           <LookupProgress slot={slot} step={lookupStep} />
         </td>
         <MissingCell end />
@@ -260,7 +258,7 @@ function DetailCells({
   if (found !== undefined && card.picking === true) {
     return (
       <>
-        <td colSpan={3} className={cellClass}>
+        <td colSpan={3}>
           <LookupProgress slot={slot} step="상세 정보 확인" />
         </td>
         <FameCell fame={found.fame} tier={found.tier} />
@@ -306,7 +304,7 @@ function MissingCharacterCells({
   if (snapshotAdventureInput !== undefined) {
     return (
       <>
-        <td className={cellClass}>
+        <td>
           <SnapshotAdventureField
             slot={slot}
             value={snapshotAdventureInput}
@@ -336,7 +334,7 @@ function MissingCharacterCells({
 
   return (
     <>
-      <td colSpan={3} className={cellClass}>
+      <td colSpan={3}>
         <NoticeText notice={notice} />
       </td>
       <MissingCell end />
@@ -364,7 +362,7 @@ function FoundCells({
     <>
       <AdventureCell adventure={character.adventure} editing={editing} />
       <GuildCell guildId={character.guildId} guild={character.guild} />
-      <td title={formatJobName(character.job)} className={`${cellClass} text-fg-muted`}>
+      <td title={formatJobName(character.job)} className="text-fg-muted">
         {formatJobName(character.job)}
       </td>
       <StatCells
@@ -386,11 +384,11 @@ function AdventureCell({
   editing: boolean
 }): React.JSX.Element {
   if (editing) {
-    return <td className={`${cellClass} text-fg-subtle`}>Enter로 조회</td>
+    return <td className="text-fg-subtle">Enter로 조회</td>
   }
 
   return (
-    <td title={adventure} className={`${cellClass} text-fg-adventure`}>
+    <td title={adventure} className="text-fg-adventure">
       {adventure === MISSING_VALUE ? (
         adventure
       ) : (
@@ -415,11 +413,11 @@ function GuildCell({
   guild: string | null | undefined
 }): React.JSX.Element {
   if (guild == null) {
-    return <td className={`${cellClass} text-fg-subtle`}>{MISSING_VALUE}</td>
+    return <td className="text-fg-subtle">{MISSING_VALUE}</td>
   }
 
   return (
-    <td className={`${cellClass} text-fg-guild`}>
+    <td className="text-fg-guild">
       {guildId != null ? (
         <Link to="/guilds/$guildId" params={{ guildId }} draggable={false} className={linkClass}>
           {guild}
@@ -446,7 +444,7 @@ function StatCells({
 }): React.JSX.Element {
   if (scorePending) {
     return (
-      <td colSpan={2} className={endCellClass}>
+      <td colSpan={2} className="text-right">
         <LookupProgress slot={slot} step="상세 정보 확인" />
       </td>
     )
@@ -454,7 +452,7 @@ function StatCells({
 
   if (notice?.tone === 'error') {
     return (
-      <td colSpan={2} className={`${cellBaseClass} text-right text-xs whitespace-normal`}>
+      <td colSpan={2} className="text-right text-xs whitespace-normal">
         <NoticeText notice={notice} />
       </td>
     )
@@ -481,7 +479,7 @@ function FameCell({
 
   return (
     <td
-      className={`${endCellClass} ${numberClass} ${tier !== undefined ? tierClasses[tier] : 'text-game-fame'}`}
+      className={`text-right ${numberClass} ${tier !== undefined ? tierClasses[tier] : 'text-game-fame'}`}
     >
       {integer.format(fame)}
     </td>
@@ -493,7 +491,7 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
   const note = description !== undefined && <span className="sr-only">{description}</span>
 
   return (
-    <td className={endCellClass}>
+    <td className="text-right">
       <span className="mr-2 text-2xs text-fg-subtle">{shortScoreLabels[score.label]}</span>
       {value != null ? (
         <span
@@ -515,11 +513,7 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
 
 function MissingCell({ end = false }: { end?: boolean }): React.JSX.Element {
   return (
-    <td
-      className={
-        end ? `${endCellClass} ${numberClass} text-fg-subtle` : `${cellClass} text-fg-subtle`
-      }
-    >
+    <td className={end ? `text-right ${numberClass} text-fg-subtle` : 'text-fg-subtle'}>
       {MISSING_VALUE}
     </td>
   )
