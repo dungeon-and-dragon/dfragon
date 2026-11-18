@@ -1,6 +1,8 @@
+import apocalypse from '#assets/clear-content-backgrounds/apocalypse.webp'
 import diregie from '#assets/clear-content-backgrounds/diregie.webp'
 import inae from '#assets/clear-content-backgrounds/inae.webp'
 import nightmare from '#assets/clear-content-backgrounds/nightmare.webp'
+import venus from '#assets/clear-content-backgrounds/venus.webp'
 import season10 from '#assets/season-raid-backgrounds/season-10.webp'
 import season11 from '#assets/season-raid-backgrounds/season-11.webp'
 
@@ -13,7 +15,9 @@ const CLEAR_CONTENT_BACKGROUNDS = new Map<string, string>([
   ['diregie-hard', diregie],
   ['michaela-normal', season11],
   ['michaela-hard', season11],
-  ['engraved-nightmare-1', nightmare]
+  ['engraved-nightmare-1', nightmare],
+  ['legion-apocalypse', apocalypse],
+  ['legion-venus', venus]
 ])
 
 export function findClearContentBackground(contentId: string): string | undefined {
