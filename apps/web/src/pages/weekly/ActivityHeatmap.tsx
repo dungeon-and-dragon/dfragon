@@ -66,7 +66,7 @@ const BOX =
 const RING =
   'pointer-events-none absolute rounded-[3px] [mask-clip:content-box,border-box] [mask-composite:exclude] [mask-image:linear-gradient(#000_0_0),linear-gradient(#000_0_0)]'
 const RING_FRAMES: Readonly<Record<'frame' | 'glow', string>> = {
-  frame: '-inset-[3px] p-1',
+  frame: '-inset-[3px] p-0.5',
   glow: '-inset-1 p-[3px] opacity-35 blur-[3px]'
 }
 const RING_FILLS: Readonly<Record<RingHighlight, string>> = {
