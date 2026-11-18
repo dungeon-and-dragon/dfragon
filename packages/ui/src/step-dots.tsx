@@ -1,10 +1,6 @@
-export type StepDotsProps = {
-  size?: 4 | 5
-}
-
-export function StepDots({ size = 4 }: StepDotsProps) {
+export function StepDots() {
   return (
-    <span aria-hidden="true" className={`step-dots step-dots-${size}`}>
+    <span aria-hidden="true" className="step-dots">
       <span />
       <span />
       <span />

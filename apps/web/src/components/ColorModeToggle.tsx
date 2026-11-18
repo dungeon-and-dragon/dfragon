@@ -49,7 +49,6 @@ export function ColorModeToggle(): React.JSX.Element {
 
   return (
     <IconButton
-      size="bar"
       aria-label={SWITCH_LABELS[nextColorMode]}
       icon={nextColorMode === 'light' ? <SunIcon /> : <MoonIcon />}
       onClick={handleClick}

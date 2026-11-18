@@ -190,7 +190,8 @@
   /* 간격 단위. 간격은 이 값의 배수로 쓴다(p-3은 12px, gap-0.5는 2px). */
   --spacing: 4px;
 
-  /* 버튼, 입력 칸, 칩의 높이. 정사각 버튼은 폭에도 쓴다. */
+  /* 버튼, 입력 칸, 칩, 선택 칸, 상태 칩의 높이. 정사각 버튼은 폭에도 쓴다. */
+  --height-control-xs: 24px;
   --height-control-sm: 32px;
   --height-control-md: 40px;
   --height-control-lg: 48px;
