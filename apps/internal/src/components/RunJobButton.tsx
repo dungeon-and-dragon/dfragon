@@ -183,7 +183,7 @@ export function RunJobButton({ job, variant }: RunJobButtonProps): React.JSX.Ele
   return (
     <span className={textClasses.inline}>
       {message !== undefined && (
-        <p role="alert" className={textClasses.error}>
+        <p role="alert" className="state state-error">
           {message}
         </p>
       )}

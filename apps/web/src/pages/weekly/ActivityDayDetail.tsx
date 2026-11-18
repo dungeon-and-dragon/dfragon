@@ -192,9 +192,9 @@ export function ActivityDayDetail({
         </>
       )}
       {seasonDays.status === 'error' && (
-        <span role="alert" className={`${SPREAD_ROW} text-fg-danger`}>
+        <p role="alert" className="state state-error">
           {seasonDays.message}
-        </span>
+        </p>
       )}
       {seasonDays.status === 'success' && (
         <DayRecords day={seasonDays.value.find((day) => day.date === date)} kind={kind} />

@@ -10,7 +10,6 @@ export const textClasses = {
   subtle: 'text-fg-subtle',
   twoLine: 'flex flex-col',
   small: 'text-xs text-fg-subtle',
-  error: 'm-0 text-sm text-fg-danger',
   inline: 'inline-flex items-center gap-2'
 } as const
 
