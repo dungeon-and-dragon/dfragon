@@ -1,8 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import themeSource from '@dfragon/design/theme.css?raw'
 import {
+  CameraIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  CopyIcon,
+  DashIcon,
+  ExternalLinkIcon,
+  MonitorIcon,
+  MoonIcon,
+  PinIcon,
+  RefreshIcon,
+  SearchIcon,
+  StarIcon,
+  SunIcon
+} from '@dfragon/ui'
+import {
   ColorTokens,
   HeightTokens,
+  IconSet,
   MotionTokens,
   PrimitiveScale,
   RadiusTokens,
@@ -24,6 +42,26 @@ const sizeTokens = tokensIn(tokens, 'size')
 const heightTokens = sizeTokens.filter((token) => token.name.startsWith('--height-'))
 const containerTokens = sizeTokens.filter((token) => token.name.startsWith('--container-'))
 const iconTokens = sizeTokens.filter((token) => token.name.startsWith('--size-'))
+const iconSizeTokens = iconTokens.filter((token) => token.name.startsWith('--size-icon-'))
+const ICONS = [
+  { name: 'CameraIcon', Icon: CameraIcon },
+  { name: 'CheckIcon', Icon: CheckIcon },
+  { name: 'ChevronDownIcon', Icon: ChevronDownIcon },
+  { name: 'ChevronRightIcon', Icon: ChevronRightIcon },
+  { name: 'CloseIcon', Icon: CloseIcon },
+  { name: 'CopyIcon', Icon: CopyIcon },
+  { name: 'DashIcon', Icon: DashIcon },
+  { name: 'ExternalLinkIcon', Icon: ExternalLinkIcon },
+  { name: 'MonitorIcon', Icon: MonitorIcon },
+  { name: 'MoonIcon', Icon: MoonIcon },
+  { name: 'PinIcon', Icon: PinIcon },
+  { name: 'PinIcon filled', Icon: PinIcon, props: { filled: true } },
+  { name: 'RefreshIcon', Icon: RefreshIcon },
+  { name: 'SearchIcon', Icon: SearchIcon },
+  { name: 'StarIcon', Icon: StarIcon },
+  { name: 'StarIcon filled', Icon: StarIcon, props: { filled: true } },
+  { name: 'SunIcon', Icon: SunIcon }
+] as const
 
 const meta = {
   title: 'Foundations'
@@ -78,6 +116,14 @@ export const Size: Story = {
         <ValueTokens tokens={containerTokens} />
       </Section>
     </div>
+  )
+}
+
+export const Icon: Story = {
+  render: () => (
+    <Section title="아이콘">
+      <IconSet icons={ICONS} sizes={iconSizeTokens} />
+    </Section>
   )
 }
 
