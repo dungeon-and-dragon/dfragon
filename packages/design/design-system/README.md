@@ -20,14 +20,15 @@ DFragon 웹과 운영 화면이 쓰는 토큰, 글꼴, 컴포넌트 CSS입니다
 - 상태 칩의 면은 `color-*-weak`, 글자는 `color-fg-success`, `color-fg-warning`, `color-fg-danger`입니다.
 - 차트는 `color-chart-1`부터 순서대로 쓰고, 기준 항목은 `color-chart-base`입니다. 차트에 게임 색이나 그라데이션을 쓰지 않습니다.
 - 간격은 `spacing-0`부터 `spacing-16`까지 아홉 단계(0, 4, 8, 12, 16, 24, 32, 48, 64px)만 씁니다. 버튼과 입력 칸 높이는 `height-control-*`, 상단 바 높이는 `height-topbar`, 표 행 높이는 `height-row`, 화면 상자 폭은 `container-page`입니다.
-- 모서리는 `radius-badge`(배지), `radius-control`(버튼, 입력 칸, 칩), `radius-panel`(패널)만 씁니다.
+- 모서리는 `radius-badge`(배지), `radius-control`(버튼, 입력 칸, 칩), `radius-panel`(고르는 카드)만 씁니다.
 - 글자는 `text-*` 단계로 쓰고 줄 높이는 단계에 들어 있습니다. 굵기는 `font-weight-*` 넷만 씁니다.
 - 전환은 `ease-standard` 곡선에 `duration-hover`, `duration-state`를 씁니다. 움직임을 줄인 설정에서는 duration이 0이 됩니다.
 
 ## CSS로 쓰기
 
 - 저장소 화면은 Tailwind CSS로 `theme.css`를 컴파일합니다. 토큰은 `bg-canvas`, `text-fg-muted`, `border-line` 같은 utility와 `var(--color-canvas)` 같은 CSS 변수로 씁니다.
-- 컴포넌트 모양은 디자인 패키지의 컴포넌트 클래스(`btn`, `icon-btn`, `field`, `switch`, `chip`, `badge`, `select`, `listbox`, `tabs`, `tooltip`, `popover`, `status-chip`, `step-dots`, `progress`, `page`)로 쓰고, 화면 배치는 utility나 inline style로 씁니다. 상태는 `disabled`, `aria-pressed`, `data-checked` 같은 속성으로 그립니다.
+- 컴포넌트 모양은 디자인 패키지의 컴포넌트 클래스(`btn`, `icon-btn`, `field`, `switch`, `chip`, `badge`, `select`, `listbox`, `tabs`, `tooltip`, `popover`, `status-chip`, `step-dots`, `progress`, `page`, `topbar`, `divider-v`, `screen`, `section`, `section-cols`, `section-title`, `screen-head`, `screen-title`, `stat`)로 쓰고, 화면 배치는 utility나 inline style로 씁니다. 상태는 `disabled`, `aria-pressed`, `data-checked` 같은 속성으로 그립니다.
+- 화면은 카드 상자 대신 선으로 구획을 나눕니다. 화면 상자(`screen`) 양옆 세로 선, 구획(`section`) 아래 창 전체 폭 가로 선과 두 선이 만나는 표식이 틀이고, 구획 안의 행과 줄은 좌우 16px에서 글자가 시작합니다. 600px 미만에서는 가로 선만 남습니다.
 - Tailwind CSS의 preflight는 쓰지 않습니다. 필요한 초기화는 `base.css`와 각 컴포넌트 클래스가 가집니다.
 - 색 모드는 `html`의 `data-color-mode`(`light`, `dark`)가 `color-scheme`을 고정하고, 없으면 시스템 설정을 따릅니다. 이 시스템의 preview에서는 `html`의 `data-theme`도 같은 뜻입니다.
 
