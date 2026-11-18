@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import {
   storyClearContentStats,
   storyClearOverview,
@@ -27,10 +28,6 @@ const host = createStoryClientHost({
   getClearContentStats: async (contentId, weekStart) =>
     storyClearContentStats(contentId, weekStart ?? LATEST_WEEK)
 })
-
-function Screen({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return <div className="page mt-6">{children}</div>
-}
 
 function Overview(): React.JSX.Element {
   const [week, setWeek] = useState<string>()
@@ -65,9 +62,9 @@ function Detail(): React.JSX.Element {
 export const 개요: Story = {
   render: () => (
     <StoryFrame host={host}>
-      <Screen>
+      <StoryScreen>
         <Overview />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -75,9 +72,9 @@ export const 개요: Story = {
 export const 컨텐츠상세: Story = {
   render: () => (
     <StoryFrame host={host}>
-      <Screen>
+      <StoryScreen>
         <Detail />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -85,9 +82,9 @@ export const 컨텐츠상세: Story = {
 export const 받는중: Story = {
   render: () => (
     <StoryFrame>
-      <Screen>
+      <StoryScreen>
         <Overview />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }

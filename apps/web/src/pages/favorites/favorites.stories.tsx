@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { storyFavoriteCharacters } from '../../testing/story-support/story-adventure'
 import { FavoritesPage } from './FavoritesPage'
 
@@ -9,9 +10,9 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   render: () => (
     <StoryFrame>
-      <div className="page mt-6">
+      <StoryScreen>
         <FavoritesPage />
-      </div>
+      </StoryScreen>
     </StoryFrame>
   )
 } satisfies Meta

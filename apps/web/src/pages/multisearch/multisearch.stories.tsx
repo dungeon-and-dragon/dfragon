@@ -9,6 +9,7 @@ import { ScreenCaptureProvider } from '../../components/ScreenCaptureProvider'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import type { SeatArrangement } from '../../hooks/useSeatOrder'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import {
   createStoryMultisearchHost,
   storyPartyCards,
@@ -48,11 +49,13 @@ function useStorySeats(mode: SearchMode): SeatArrangement {
 
 function Frame({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <div className="page mt-6 overflow-x-auto">
-      <div className="box-border min-w-page p-4">
-        <div className="rounded-panel border border-line bg-canvas">{children}</div>
+    <StoryScreen>
+      <div className="section">
+        <div className="overflow-x-auto">
+          <div className="min-w-[1078px]">{children}</div>
+        </div>
       </div>
-    </div>
+    </StoryScreen>
   )
 }
 
@@ -87,9 +90,9 @@ function Board({ mode }: { mode: SearchMode }): React.JSX.Element {
   return (
     <StoryFrame host={host}>
       <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-        <div className="page mt-6 overflow-x-auto">
+        <StoryScreen>
           <MultisearchBoard host={host} />
-        </div>
+        </StoryScreen>
       </ScreenCaptureProvider>
     </StoryFrame>
   )
