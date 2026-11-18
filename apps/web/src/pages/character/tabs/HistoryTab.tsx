@@ -10,8 +10,8 @@ import {
   toScoreView
 } from '#core/character'
 import { formatSeoulDateTime } from '#core/time-format'
-import { LineChart } from '../../../components/chart/LineChart'
-import { useCharacterHistory, useHistorySnapshot } from '../hooks/useCharacterHistory'
+import { LineChart } from '#components/chart/LineChart'
+import { useCharacterHistory, useHistorySnapshot } from '#pages/character/hooks/useCharacterHistory'
 import type { CharacterTabProps } from './character-tab-props'
 import { historyTimeAxis } from './history/history-chart'
 import { type Delta, deltaOf, formatOptional, integer, MISSING } from './history/history-format'

@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ActivitySeason, AdventureActivity, AdventureActivityDay } from '#core/adventure-guild'
-import { useClientHost } from '../../../host/client-host'
+import { useClientHost } from '#host/client-host'
 
 export type AdventureActivityResult =
   | Readonly<{ status: 'loading' }>

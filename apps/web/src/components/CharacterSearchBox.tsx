@@ -10,7 +10,7 @@ import {
   useState
 } from 'react'
 import { ALL_CHARACTER_SERVERS, isSearchableCharacterName } from '#core/api'
-import { characterSearchServerOptions } from '../constants/server-options'
+import { characterSearchServerOptions } from '#constants/server-options'
 import { RecentCharacterList } from './RecentCharacterList'
 
 const ADVENTURE = 'adventure'

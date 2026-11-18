@@ -8,7 +8,7 @@ import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActi
 import type { ActivityKind } from './activity-heatmap'
 import { formatClearCount } from './clear-count'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
-import { enhancementKindClasses, rarityTextOfName } from '../../components/game-colors'
+import { enhancementKindClasses, rarityTextOfName } from '#components/game-colors'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
 const MAX_ENHANCEMENT_ROWS = 8

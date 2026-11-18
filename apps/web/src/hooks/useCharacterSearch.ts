@@ -7,7 +7,7 @@ import {
   toCandidatePicker
 } from '#core/capture'
 import type { SearchSlotCount } from '#core/search'
-import type { CardSearchHost } from '../host/client-host'
+import type { CardSearchHost } from '#host/client-host'
 import { useManualCharacterLookup, type ManualCharacterLookup } from './useManualCharacterLookup'
 
 export type CharacterSearch = ManualCharacterLookup & {

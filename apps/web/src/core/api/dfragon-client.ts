@@ -3,9 +3,9 @@ import type {
   CharacterCandidate,
   CharacterDetails,
   CharacterIdentity
-} from '../character/character'
-import type { TodayGrade } from '../today-grade/today-grade-types'
-import { guildSchema, type Guild } from '../adventure-guild/adventure-guild'
+} from '#core/character/character'
+import type { TodayGrade } from '#core/today-grade/today-grade-types'
+import { guildSchema, type Guild } from '#core/adventure-guild/adventure-guild'
 import {
   adventureActivitySeasonDaysSchema,
   adventureActivitySchema,
@@ -13,16 +13,16 @@ import {
   type ActivitySeason,
   type AdventureActivity,
   type AdventureActivitySeasonDays
-} from '../adventure-guild/adventure-activity'
-import { adventureWeeklySchema, type AdventureWeekly } from '../adventure-guild/adventure-weekly'
+} from '#core/adventure-guild/adventure-activity'
+import { adventureWeeklySchema, type AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import {
   characterStatsSchema,
   fameRankingSchema,
   type CharacterStats,
   type FameRanking,
   type FameRankingFilter
-} from '../ranking/ranking-stats'
-import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '../ranking/skill-stats'
+} from '#core/ranking/ranking-stats'
+import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '#core/ranking/skill-stats'
 import {
   clearContentStatsSchema,
   clearOverviewSchema,
@@ -30,11 +30,11 @@ import {
   type ClearContentStats,
   type ClearOverview,
   type ClearStats
-} from '../ranking/clear-stats'
+} from '#core/ranking/clear-stats'
 import {
   characterDetailViewSchema,
   type CharacterDetailView
-} from '../character/character-detail-view'
+} from '#core/character/character-detail-view'
 import {
   characterTimelineSchema,
   timelineAcquisitionPageSchema,
@@ -43,8 +43,8 @@ import {
   type TimelineAcquisition,
   type TimelineEnhancement,
   type TimelinePage
-} from '../character/character-timeline'
-import { characterHistorySchema, type CharacterHistory } from '../character/character-history'
+} from '#core/character/character-timeline'
+import { characterHistorySchema, type CharacterHistory } from '#core/character/character-history'
 import { SearchHttpFailure } from './http'
 import {
   assertApiSuccess,

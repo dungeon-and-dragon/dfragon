@@ -1,5 +1,5 @@
-import type { CharacterPortrait } from '../character/character'
-import type { OcrSearchInput, RaidRowObservation } from '../search/search'
+import type { CharacterPortrait } from '#core/character/character'
+import type { OcrSearchInput, RaidRowObservation } from '#core/search/search'
 
 const RGBA_CHANNELS = 4
 const ALPHA_CHANNEL = 3

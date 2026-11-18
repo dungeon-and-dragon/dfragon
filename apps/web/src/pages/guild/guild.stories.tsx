@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { ClientHost } from '../../host/client-host'
-import { StoryFrame } from '../../testing/story-support/StoryFrame'
-import { StoryScreen } from '../../testing/story-support/StoryScreen'
-import { storyGuild } from '../../testing/story-support/story-adventure'
-import { createStoryClientHost } from '../../testing/story-support/story-host'
+import type { ClientHost } from '#host/client-host'
+import { StoryFrame } from '#testing/story-support/StoryFrame'
+import { StoryScreen } from '#testing/story-support/StoryScreen'
+import { storyGuild } from '#testing/story-support/story-adventure'
+import { createStoryClientHost } from '#testing/story-support/story-host'
 import { GuildScreen } from './GuildScreen'
 
 const meta = {

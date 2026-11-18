@@ -1,12 +1,12 @@
 import { useId } from 'react'
 import type { SlotCard, SlotCardActions } from '#core/capture'
-import { Seat } from '../../components/Seat'
-import { SeatMoveStatus } from '../../components/SeatMoveStatus'
-import { SeatTable } from '../../components/SeatTable'
-import { useSeatMove } from '../../hooks/useSeatMove'
-import type { SeatArrangement } from '../../hooks/useSeatOrder'
-import { CharacterRow } from '../../components/CharacterRow'
-import { isBusySlot } from '../../lib/card-presentation'
+import { Seat } from '#components/Seat'
+import { SeatMoveStatus } from '#components/SeatMoveStatus'
+import { SeatTable } from '#components/SeatTable'
+import { useSeatMove } from '#hooks/useSeatMove'
+import type { SeatArrangement } from '#hooks/useSeatOrder'
+import { CharacterRow } from '#components/CharacterRow'
+import { isBusySlot } from '#lib/card-presentation'
 
 export function PartyScreen({
   slots,

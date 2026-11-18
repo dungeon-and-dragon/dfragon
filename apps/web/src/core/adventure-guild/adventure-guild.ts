@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { storedCharacterSchema } from '../ranking/ranking-stats'
+import { storedCharacterSchema } from '#core/ranking/ranking-stats'
 
 export const guildSchema = z.object({
   guildId: z.string(),

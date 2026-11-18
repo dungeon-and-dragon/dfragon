@@ -9,8 +9,8 @@ import type {
   CharacterCandidate,
   SelectedCharacterSummary,
   CharacterJsonValue
-} from '../character/character'
-import type { DiagnosticCode } from '../diagnostics/diagnostics'
+} from '#core/character/character'
+import type { DiagnosticCode } from '#core/diagnostics/diagnostics'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,
@@ -20,10 +20,10 @@ import {
   type IdentificationServices,
   type RaidIdentificationServices
 } from './identify'
-import { toRaidObservedValues } from '../capture/raid/raid-candidate'
-import { SearchHttpFailure } from '../api/http'
-import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
-import type { CharacterImageHttp } from '../character/character-image-source'
+import { toRaidObservedValues } from '#core/capture/raid/raid-candidate'
+import { SearchHttpFailure } from '#core/api/http'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '#core/api/dfragon-client'
+import type { CharacterImageHttp } from '#core/character/character-image-source'
 import type { PortraitColorScorer } from './portrait-color'
 import { runSearchOperation, type SearchOperation, type SearchOperationFailure } from './operation'
 import { buildCharacterCard } from './card-assembler'

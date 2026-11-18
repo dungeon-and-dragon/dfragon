@@ -1,20 +1,20 @@
 import { assign, fromCallback, fromPromise, setup, type SnapshotFrom } from 'xstate'
-import type { CapturePhase } from '../capture-types'
-import type { CharacterImage } from '../../character/character'
+import type { CapturePhase } from '#core/capture/capture-types'
+import type { CharacterImage } from '#core/character/character'
 import {
   beginCaptureSearch,
   getCapturingPhase,
   getObservedNickname,
   getRecognizeErrorStatus
-} from '../capture-round'
-import type { OcrCaptureObservation } from '../capture-search'
-import type { CaptureTexts } from '../capture-texts'
-import type { OcrRecognition } from '../../ocr/ocr-worker-recognition'
+} from '#core/capture/capture-round'
+import type { OcrCaptureObservation } from '#core/capture/capture-search'
+import type { CaptureTexts } from '#core/capture/capture-texts'
+import type { OcrRecognition } from '#core/ocr/ocr-worker-recognition'
 import { recognizePartyFrame, type PartySlotRecognition } from './party-recognition'
 import {
   reportRuntimeDiagnostic,
   showRejectedOcrNickname
-} from '../../diagnostics/runtime-diagnostics'
+} from '#core/diagnostics/runtime-diagnostics'
 
 type CaptureInput = {
   texts: CaptureTexts

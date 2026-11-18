@@ -1,13 +1,9 @@
 import { useCallback, useState } from 'react'
-import { useInfiniteScrollRef } from '../../../hooks/useInfiniteScrollRef'
+import { useInfiniteScrollRef } from '#hooks/useInfiniteScrollRef'
 import type { StoredCharacter } from '#core/ranking'
-import type { LoadedResult } from '../../../hooks/useLoadedResult'
-import {
-  type Affiliation,
-  CharacterTable,
-  SkeletonRow
-} from '../../../components/table/CharacterTable'
-import { ListBox } from '../../../components/table/ListBox'
+import type { LoadedResult } from '#hooks/useLoadedResult'
+import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
+import { ListBox } from '#components/table/ListBox'
 
 const PAGE_SIZE = 20
 const LOADING_ROWS = 5

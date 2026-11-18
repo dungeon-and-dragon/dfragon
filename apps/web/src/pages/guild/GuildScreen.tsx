@@ -2,9 +2,9 @@ import { MISSING_VALUE } from '#core/capture'
 import type { Guild } from '#core/adventure-guild'
 import type { StoredCharacter } from '#core/ranking'
 import { CharacterListBox } from './components/CharacterListBox'
-import { TitleBox, TitleStat } from '../../components/table/TitleBox'
+import { TitleBox, TitleStat } from '#components/table/TitleBox'
 import { useGuild } from './hooks/useGuild'
-import type { LoadedResult } from '../../hooks/useLoadedResult'
+import type { LoadedResult } from '#hooks/useLoadedResult'
 
 const DEFAULT_TITLE = '길드'
 const integer = new Intl.NumberFormat('ko-KR')

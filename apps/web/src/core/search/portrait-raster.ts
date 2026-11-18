@@ -1,4 +1,4 @@
-import type { CharacterImage, CharacterPortrait } from '../character/character'
+import type { CharacterImage, CharacterPortrait } from '#core/character/character'
 
 export const RGBA_CHANNELS = 4
 export const ALPHA_CHANNEL = 3

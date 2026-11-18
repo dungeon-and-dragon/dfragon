@@ -4,9 +4,9 @@ import {
   PartyFrameGeometryError,
   type PartyFrameGeometry
 } from '@dfragon/lib'
-import { toBinarizedTextCanvas } from '../../ocr/nickname-pixels'
-import { SEARCH_SLOT_COUNTS } from '../../search/search'
-import type { CharacterImage, CharacterPortrait } from '../../character/character'
+import { toBinarizedTextCanvas } from '#core/ocr/nickname-pixels'
+import { SEARCH_SLOT_COUNTS } from '#core/search/search'
+import type { CharacterImage, CharacterPortrait } from '#core/character/character'
 import { cropPartyPortrait } from './party-portrait'
 
 const RGBA_CHANNELS = 4

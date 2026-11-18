@@ -1,5 +1,5 @@
 import { Select } from '@dfragon/ui'
-import type { BaseContentOption } from '../clear-overview'
+import type { BaseContentOption } from '#pages/clears/clear-overview'
 
 export function BaseContentSelect({
   label,

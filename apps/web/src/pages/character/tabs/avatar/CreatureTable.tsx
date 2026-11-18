@@ -1,5 +1,5 @@
 import { type CharacterDetailView, toItemView } from '#core/character'
-import { type SlotItemRow, SlotItemTable } from '../equipment/SlotItemTable'
+import { type SlotItemRow, SlotItemTable } from '#pages/character/tabs/equipment/SlotItemTable'
 import { artifactDotClasses } from './avatar-classes'
 
 type Creature = NonNullable<CharacterDetailView['creature']>

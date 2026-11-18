@@ -8,14 +8,14 @@ import {
   type SlotCardActions,
   toRaidSeat
 } from '#core/capture'
-import { Seat } from '../../components/Seat'
-import { SeatMoveStatus } from '../../components/SeatMoveStatus'
-import { SeatTable } from '../../components/SeatTable'
-import { SEAT_TABLE_COLUMN_COUNT } from '../../components/SeatTable.columns'
-import { useSeatMove } from '../../hooks/useSeatMove'
-import type { SeatArrangement } from '../../hooks/useSeatOrder'
-import { isBusySlot } from '../../lib/card-presentation'
-import { CharacterRow } from '../../components/CharacterRow'
+import { Seat } from '#components/Seat'
+import { SeatMoveStatus } from '#components/SeatMoveStatus'
+import { SeatTable } from '#components/SeatTable'
+import { SEAT_TABLE_COLUMN_COUNT } from '#components/SeatTable.columns'
+import { useSeatMove } from '#hooks/useSeatMove'
+import type { SeatArrangement } from '#hooks/useSeatOrder'
+import { isBusySlot } from '#lib/card-presentation'
+import { CharacterRow } from '#components/CharacterRow'
 
 const parties = Array.from({ length: RAID_PARTY_COUNT }, (_, party) =>
   Array.from({ length: RAID_PARTY_SIZE }, (_, member) => party * RAID_PARTY_SIZE + member)

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import type { ActivitySeason } from '#core/adventure-guild'
-import { rarityGradientFills } from '../../components/game-colors'
+import { rarityGradientFills } from '#components/game-colors'
 import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
 import { usePrimevalFillFade } from './animations/usePrimevalFillFade'
 import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'

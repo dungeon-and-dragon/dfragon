@@ -1,13 +1,13 @@
 import { ChipGroup } from '@dfragon/ui'
 import type { ClearContent, ClearContentStats, ClearWeek, ClearWeekOverWeek } from '#core/ranking'
-import { BarLineChart } from '../../components/chart/BarLineChart'
-import { BoxPlotChart } from '../../components/chart/BoxPlot'
-import { ChartLegend } from '../../components/chart/ChartLegend'
-import { Columns } from '../../components/chart/Columns'
-import { RowBars } from '../../components/chart/RowBars'
-import { SplitBar } from '../../components/chart/SplitBar'
-import { shareText } from '../../components/chart/stats-bars'
-import { TitleBox } from '../../components/table/TitleBox'
+import { BarLineChart } from '#components/chart/BarLineChart'
+import { BoxPlotChart } from '#components/chart/BoxPlot'
+import { ChartLegend } from '#components/chart/ChartLegend'
+import { Columns } from '#components/chart/Columns'
+import { RowBars } from '#components/chart/RowBars'
+import { SplitBar } from '#components/chart/SplitBar'
+import { shareText } from '#components/chart/stats-bars'
+import { TitleBox } from '#components/table/TitleBox'
 import {
   contentWeeks,
   fameBandChart,

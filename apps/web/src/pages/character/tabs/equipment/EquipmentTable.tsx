@@ -7,7 +7,7 @@ import {
   formatPoint,
   type ItemView
 } from '#core/character'
-import { enhancementTextClasses } from '../../../../components/game-colors'
+import { enhancementTextClasses } from '#components/game-colors'
 import { itemTableClasses } from './item-classes'
 import { ItemCell } from './item-parts'
 

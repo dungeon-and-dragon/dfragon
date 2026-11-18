@@ -8,9 +8,9 @@ import {
   SET_PART
 } from '#core/character'
 import { formatSeoulFullDateTime } from '#core/time-format'
-import { enhancementKindClasses } from '../../../../components/game-colors'
-import { itemTableClasses } from '../equipment/item-classes'
-import { ItemName } from '../equipment/item-parts'
+import { enhancementKindClasses } from '#components/game-colors'
+import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
+import { ItemName } from '#pages/character/tabs/equipment/item-parts'
 import { FIELD_LABELS, formatFieldValue, NAME_CHANGE_LABELS } from './history-format'
 
 const AFTER_TONES: Partial<Record<HistoryFieldChange['field'], string>> = {

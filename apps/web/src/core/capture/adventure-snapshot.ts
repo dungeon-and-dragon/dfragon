@@ -1,4 +1,4 @@
-import type { SearchSlot } from '../search/search'
+import type { SearchSlot } from '#core/search/search'
 
 export type SeatAdventures = readonly (string | null)[]
 

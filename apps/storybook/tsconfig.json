@@ -1,4 +1,5 @@
 {
+  "extends": "../web/tsconfig.paths.json",
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],

@@ -1,4 +1,4 @@
-import type { TooltipPlace } from '../../animations/useChartTooltipSlide'
+import type { TooltipPlace } from '#animations/useChartTooltipSlide'
 
 export type ChartX = Readonly<{ key: string; title: string; tick: string | null }>
 
