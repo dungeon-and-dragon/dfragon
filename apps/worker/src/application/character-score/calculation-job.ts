@@ -10,8 +10,7 @@ import {
   type CalculatedScore,
   toCalculatedScore
 } from '@dfragon/server-core/domain/score/calculated.js'
-import { defineJob } from '../jobs/definition.js'
-import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
+import { defineJob, createUnavailableStreaks } from '../jobs/index.js'
 import { calculateCharacterScore } from './calculate.js'
 import type { ScoreCalculationPorts, ScoreEngineHandle, ScoreSources } from './ports.js'
 import type { ScoreCalculationRepository } from './repository.js'

@@ -6,7 +6,7 @@ import type {
   ScoreSources
 } from '../application/character-score/ports.js'
 import { createNeopleCatalog } from '@dfragon/server-core/infrastructure/neople/character-catalog.js'
-import type { WorkerNeople } from '../infrastructure/neople/character-collection.js'
+import type { WorkerNeople } from '../infrastructure/neople/index.js'
 import { createNeopleCharacterDetails } from '@dfragon/server-core/infrastructure/neople/character-detail.js'
 import { createScoreEngine } from '@dfragon/server-core/infrastructure/score/engine.js'
 

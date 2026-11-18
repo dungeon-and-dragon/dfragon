@@ -2,28 +2,25 @@ import { setTimeout } from 'node:timers/promises'
 import { createDatabaseClient } from '@dfragon/database'
 import { writeAccessLogToStdout } from '@dfragon/http-server'
 import { createNeopleClient } from '@dfragon/neople'
-import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
-import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
 import {
+  createBatchNeopleKeyPool,
   createNeopleClearRecordTimeline,
-  createNeopleClearTimeline
-} from '../infrastructure/neople/content-clear-collection.js'
-import { createNeopleSkillStyle } from '../infrastructure/neople/skill-style-collection.js'
-import {
+  createNeopleClearTimeline,
+  createNeopleSkillStyle,
   createNeopleCharacterBasic,
   paceNeopleRequests
-} from '../infrastructure/neople/character-collection.js'
+} from '../infrastructure/neople/index.js'
+import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
 import type { readCollectorConfiguration } from './collector-configuration.js'
-import { CharacterCollectionService } from '../application/character-collection/service.js'
-import { DatabaseBatchNeopleKeyRepository } from '../infrastructure/database/batch-neople-keys.js'
-import { DatabaseCollectionRepository } from '../infrastructure/database/character-collection.js'
+import { CharacterCollectionService } from '../application/character-collection/index.js'
 import {
-  importCollectedCharacters,
-  readImportModifiedTime
-} from '../infrastructure/files/character-collection.js'
-import { JobSchedulerService } from '../application/jobs/scheduler.js'
-import { DatabaseJobRepository } from '../infrastructure/database/jobs.js'
-import { startJobScheduler } from '../infrastructure/jobs/scheduler.js'
+  DatabaseBatchNeopleKeyRepository,
+  DatabaseCollectionRepository,
+  DatabaseJobRepository
+} from '../infrastructure/database/index.js'
+import { importCollectedCharacters, readImportModifiedTime } from '../infrastructure/files/index.js'
+import { JobSchedulerService } from '../application/jobs/index.js'
+import { startJobScheduler } from '../infrastructure/jobs/index.js'
 import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
 import { createWorkerJobs } from './worker-jobs.js'
 

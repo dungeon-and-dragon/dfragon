@@ -1,6 +1,5 @@
 import { z } from 'zod'
-import { defineJob } from '../jobs/definition.js'
-import { createUnavailableStreaks } from '../jobs/unavailable-streaks.js'
+import { defineJob, createUnavailableStreaks } from '../jobs/index.js'
 import type { SkillStyleCollectionPorts } from './ports.js'
 import type { SkillStyleCollectionRepository } from './repository.js'
 
