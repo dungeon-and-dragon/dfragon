@@ -593,3 +593,123 @@ test('dependency-cruiser: 운영 app의 계층 밖 파일은 실패한다', asyn
     [{ from: 'src/unlayered.ts', rule: 'ops-source-location-orphan' }]
   )
 })
+
+// 기능 폴더 밖에서 import하는 대상 파일이 있어야 dependency-cruiser가 경로를 풀어 규칙을 적용한다.
+const opsFeatureFolderTargets = Object.fromEntries(
+  [
+    'src/application/jobs/service.ts',
+    'src/application/jobs/repository.ts',
+    'src/application/jobs/ports.ts',
+    'src/infrastructure/database/jobs.ts',
+    'src/presentation/http/jobs/controller.ts',
+    'src/presentation/http/jobs/index.ts',
+    'src/presentation/http/failures.ts',
+    'src/presentation/http/json-request.ts',
+    'src/domain/failure.ts',
+    'src/application/queues/ports.ts'
+  ].map((file) => [file, exporting])
+)
+const opsFeatureFolderCases = {
+  rejected: [
+    [
+      'src/presentation/http/jobs/a.ts',
+      importing('../../../application/jobs/service.js'),
+      'feature-folder-index'
+    ],
+    [
+      'src/runtime/database.ts',
+      typeImporting('../infrastructure/database/jobs.js'),
+      'feature-folder-index'
+    ],
+    [
+      'src/runtime/routes/ops.ts',
+      importing('../../presentation/http/jobs/controller.js'),
+      'feature-folder-index'
+    ],
+    [
+      'src/application/jobs/index.ts',
+      `export { value } from './repository.js'\n`,
+      'application-index-contract'
+    ],
+    [
+      'src/application/queues/index.ts',
+      `export type { Value } from './ports.js'\n`,
+      'application-index-contract'
+    ]
+  ],
+  allowed: [
+    ['src/presentation/http/jobs/b.ts', importing('../../../application/jobs/index.js')],
+    ['src/presentation/http/jobs/c.ts', importing('../failures.js')],
+    ['src/presentation/http/jobs/e.ts', importing('../json-request.js')],
+    ['src/application/jobs/b.ts', importing('../../domain/failure.js')],
+    ['src/presentation/http/jobs/d.ts', importing('./controller.js')],
+    ['src/application/jobs/a.ts', importing('./service.js')],
+    ['src/infrastructure/database/b.ts', importing('../../application/jobs/repository.js')],
+    ['src/infrastructure/database/c.ts', typeImporting('../../application/jobs/ports.js')],
+    ['src/runtime/application.ts', importing('../application/jobs/ports.js')]
+  ]
+}
+const opsFeatureFolderCruised = await cruiseAppSamples(
+  {
+    ...opsFeatureFolderTargets,
+    ...Object.fromEntries(
+      [...opsFeatureFolderCases.rejected, ...opsFeatureFolderCases.allowed].map(
+        ([file, source]) => [file, source]
+      )
+    )
+  },
+  { app: 'ops' }
+)
+
+for (const [file, , rule] of opsFeatureFolderCases.rejected) {
+  test(`dependency-cruiser: 운영 app의 ${file} import를 ${rule}로 거부한다`, () => {
+    assert.deepEqual(
+      opsFeatureFolderCruised.violations.filter(({ from }) => from === file),
+      [{ from: file, rule }]
+    )
+  })
+}
+
+test('dependency-cruiser: 운영 app에서 기능 폴더의 index.js, 같은 폴더 파일, 계층 폴더 바로 아래 파일, repository.ts와 ports.ts import는 허용한다', () => {
+  const allowedFiles = new Set(opsFeatureFolderCases.allowed.map(([file]) => file))
+  assert.deepEqual(
+    opsFeatureFolderCruised.violations.filter(({ from }) => allowedFiles.has(from)),
+    []
+  )
+})
+
+test('dependency-cruiser: 운영 app의 기능 폴더 안쪽 파일을 직접 import하면 index.js로 가져오라고 알린다', () => {
+  assert.ok(
+    opsFeatureFolderCruised.text.includes("'../../application/<기능>/index.js'처럼 가져온다"),
+    opsFeatureFolderCruised.text
+  )
+})
+
+test('dependency-cruiser: 운영 app에서 실행할 때 생기는 순환 import를 no-circular로 거부한다', async () => {
+  const result = await cruiseAppSamples(
+    {
+      'src/application/jobs/a.ts': `import { b } from './b.js'\nexport const a = () => b\n`,
+      'src/application/jobs/b.ts': `import { a } from './a.js'\nexport const b = () => a\n`
+    },
+    { app: 'ops' }
+  )
+
+  assert.ok(result.exitCode > 0)
+  assert.ok(result.violations.length > 0)
+  assert.ok(
+    result.violations.every(({ rule }) => rule === 'no-circular'),
+    JSON.stringify(result.violations)
+  )
+})
+
+test('dependency-cruiser: 운영 app의 import type만으로 이은 순환은 허용한다', async () => {
+  const result = await cruiseAppSamples(
+    {
+      'src/application/jobs/c.ts': `import type { D } from './d.js'\nexport type C = { d?: D }\n`,
+      'src/application/jobs/d.ts': `import type { C } from './c.js'\nexport type D = { c?: C }\n`
+    },
+    { app: 'ops' }
+  )
+
+  assert.deepEqual(result.violations, [])
+})
