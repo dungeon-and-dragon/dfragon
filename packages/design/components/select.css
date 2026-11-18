@@ -92,3 +92,15 @@
 .select[data-popup-open] .select-icon {
   transform: scaleY(-1);
 }
+
+@media (width < 600px) {
+  .select-2xs {
+    position: relative;
+  }
+
+  .select-2xs::before {
+    content: '';
+    position: absolute;
+    inset: -9px -5px;
+  }
+}

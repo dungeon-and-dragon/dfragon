@@ -70,3 +70,15 @@
   border-color: var(--color-control);
   background-color: var(--color-control);
 }
+
+@media (width < 600px) {
+  .chip:not(.chip-md) {
+    position: relative;
+  }
+
+  .chip:not(.chip-md)::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+  }
+}

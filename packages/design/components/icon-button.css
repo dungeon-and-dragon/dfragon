@@ -70,3 +70,15 @@
 .icon-btn:disabled:not([aria-pressed='true']) {
   color: var(--color-fg-disabled);
 }
+
+@media (width < 600px) {
+  .icon-btn-sm {
+    position: relative;
+  }
+
+  .icon-btn-sm::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+  }
+}
