@@ -27,7 +27,7 @@ const rejectedImports = [
 const allowedImports = [
   ['components/allowed.ts', '../hooks/useShared'],
   ['hooks/allowed.ts', '../components/Shared'],
-  ['host/allowed.ts', '#core/search/search'],
+  ['host/allowed.ts', '#core/search'],
   ['host/package.ts', '@dfragon/ui/components/Thing'],
   ['host/package-index.ts', '@dfragon/ui/hooks'],
   ['core/allowed.ts', './search/search']
@@ -91,7 +91,23 @@ const screenAllowed = [
   ['src/pages/a/rankings.ts', '../rankings'],
   ['src/router.ts', './pages/rankings'],
   ['src/router.test.ts', './pages/b'],
-  ['src/pages/a/core.ts', '#core/search/search']
+  ['src/pages/a/core.ts', '#core/search']
+]
+
+const coreRejected = [
+  ['src/pages/a/core-detail.ts', '#core/character/character-detail-view'],
+  ['src/lib/core-relative.ts', '../core/character/character-detail-view'],
+  ['src/testing/core-nested.ts', '../core/character/nested/helper'],
+  ['src/core-boundary.test.ts', './core/character/character-detail-view']
+]
+
+const coreAllowed = [
+  ['src/pages/a/core-character.ts', '#core/character'],
+  ['src/core/character/same.ts', './character-detail-view'],
+  ['src/core/search/other-domain.ts', '../character/character-detail-view'],
+  ['src/core/search/other-alias.ts', '#core/character/character-detail-view'],
+  ['src/pages/a/core-time.ts', '#core/time-format'],
+  ['src/pages/a/core-image.ts', '#core/capture/raid/heading.png']
 ]
 
 const run = promisify(execFile)
@@ -111,7 +127,9 @@ async function cruiseSamples() {
     }
 
     const files = Object.fromEntries(
-      [...screenRejected, ...screenAllowed].map(([file, source]) => [file, importing(source)])
+      [...screenRejected, ...screenAllowed, ...coreRejected, ...coreAllowed].map(
+        ([file, source]) => [file, importing(source)]
+      )
     )
 
     for (const file of [
@@ -124,13 +142,31 @@ async function cruiseSamples() {
       'src/pages/b/BScreen.tsx',
       'src/pages/rankings/RankingsScreen.tsx',
       'src/hooks/useShared.ts',
-      'src/core/search/search.ts'
+      'src/core/search/search.ts',
+      'src/core/character/character-detail-view.ts',
+      'src/core/character/nested/helper.ts',
+      'src/core/time-format.ts',
+      'src/core/capture/raid/heading.png'
     ]) {
       files[file] = 'export const value = 1\n'
     }
 
     files['src/pages/b/index.ts'] = "export { value } from './BPage'\n"
     files['src/pages/rankings/index.ts'] = "export { value } from './RankingsScreen'\n"
+    files['src/core/search/index.ts'] = "export { value } from './search'\n"
+    files['src/core/character/index.ts'] = "export { value } from './character-detail-view'\n"
+    files['src/cycles/value-a.ts'] =
+      "import { b } from './value-b'\nexport function a() { return b }\n"
+    files['src/cycles/value-b.ts'] =
+      "import { a } from './value-a'\nexport function b() { return a }\n"
+    files['src/cycles/type-a.ts'] =
+      "import type { B } from './type-b'\nexport type A = { other?: B }\n"
+    files['src/cycles/type-b.ts'] =
+      "import type { A } from './type-a'\nexport type B = { other?: A }\n"
+    files['src/cycles/mixed-a.ts'] =
+      "import type { B } from './mixed-b'\nexport type A = B\nexport const value = 1\n"
+    files['src/cycles/mixed-b.ts'] =
+      "import { value } from './mixed-a'\nexport type B = { value: number }\nexport const used = value\n"
 
     for (const [file, contents] of Object.entries(files)) {
       await mkdir(dirname(join(web, file)), { recursive: true })
@@ -162,14 +198,25 @@ async function cruiseSamples() {
 
     const report = JSON.parse((await cruise('json')).stdout)
     const { stdout: text, exitCode } = await cruise('err-long', 'src/WebApp.ts')
+    const { stdout: coreText, exitCode: coreExitCode } = await cruise(
+      'err-long',
+      'src/pages/a/core-detail.ts'
+    )
 
-    return { report, text, exitCode }
+    const { stdout: cycleText, exitCode: cycleExitCode } = await cruise(
+      'err-long',
+      'src/cycles/value-a.ts'
+    )
+
+    return { report, text, exitCode, coreText, coreExitCode, cycleText, cycleExitCode }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
 }
 
-const { report, text, exitCode } = await cruiseSamples()
+const { report, text, exitCode, coreText, coreExitCode, cycleText, cycleExitCode } =
+  await cruiseSamples()
+
 for (const [file, source, ruleName] of screenRejected) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 거부한다`, () => {
     assert.deepEqual(
@@ -178,7 +225,7 @@ for (const [file, source, ruleName] of screenRejected) {
     )
   })
 }
-for (const [file, source] of screenAllowed) {
+for (const [file, source] of [...screenAllowed, ...coreAllowed]) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 허용한다`, () => {
     assert.deepEqual(
       report.summary.violations.filter(({ from }) => from === file),
@@ -192,11 +239,43 @@ for (const [file, source] of screenAllowed) {
 
 test('dependency-cruiser: #core alias를 실제 소스로 해석한다', () => {
   const module = report.modules.find(({ source }) => source === 'src/pages/a/core.ts')
-  assert.equal(module.dependencies[0].resolved, 'src/core/search/search.ts')
+  assert.equal(module.dependencies[0].resolved, 'src/core/search/index.ts')
 })
 
 test('dependency-cruiser: 화면 파일 직접 import는 실패하고 폴더 경로와 공용 코드 위치를 알린다', () => {
   assert.ok(exitCode > 0)
   assert.ok(text.includes('pages/<화면>(예: pages/rankings)처럼 폴더 경로로 import한다.'), text)
   assert.ok(text.includes('components/나 hooks/'), text)
+})
+
+for (const [file, source] of coreRejected) {
+  test(`dependency-cruiser: core 밖 ${file}에서 ${source} 직접 import를 거부한다`, () => {
+    assert.deepEqual(
+      report.summary.violations.filter(({ from }) => from === file).map(({ rule }) => rule),
+      [{ name: 'core-folder-index', severity: 'error' }]
+    )
+  })
+}
+
+test('dependency-cruiser: core 직접 import는 실패하고 #core/character 경로를 안내한다', () => {
+  assert.ok(coreExitCode > 0)
+  assert.ok(coreText.includes('#core/<도메인>(예: #core/character)으로 가져온다.'), coreText)
+})
+
+test('dependency-cruiser: #core/character는 도메인 index.ts로 풀린다', () => {
+  const module = report.modules.find(({ source }) => source === 'src/pages/a/core-character.ts')
+  assert.equal(module.dependencies[0].resolved, 'src/core/character/index.ts')
+})
+
+test('dependency-cruiser: value import 순환은 실패하고 type-only 경로가 낀 순환은 허용한다', () => {
+  const cycles = report.summary.violations.filter(({ rule }) => rule.name === 'no-circular')
+  const members = new Set(cycles.flatMap(({ cycle }) => cycle.map(({ name }) => name)))
+  assert.deepEqual(members, new Set(['src/cycles/value-a.ts', 'src/cycles/value-b.ts']))
+  assert.ok(cycleExitCode > 0)
+  assert.ok(cycleText.includes('error no-circular'), cycleText)
+
+  for (const file of ['type-a', 'type-b', 'mixed-a', 'mixed-b']) {
+    const module = report.modules.find(({ source }) => source === `src/cycles/${file}.ts`)
+    assert.equal(module.dependencies[0].couldNotResolve, false)
+  }
 })
