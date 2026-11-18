@@ -63,6 +63,43 @@
   font-display: swap;
 }
 
+/* 숫자 글꼴의 % 모양이 숫자와 어울리지 않아 같은 family 안에서 %만 본문 글꼴 파일로 그린다. 겹치는 unicode-range는 나중에 적은 face가 이긴다. */
+@font-face {
+  font-family: 'Monoplex KR';
+  src: url('./fonts/IBMPlexSansKR-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0025;
+}
+
+@font-face {
+  font-family: 'Monoplex KR';
+  src: url('./fonts/IBMPlexSansKR-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0025;
+}
+
+@font-face {
+  font-family: 'Monoplex KR';
+  src: url('./fonts/IBMPlexSansKR-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0025;
+}
+
+@font-face {
+  font-family: 'Monoplex KR';
+  src: url('./fonts/IBMPlexSansKR-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0025;
+}
+
 /* 기본은 시스템 설정을 따르고, 사용자가 고른 모드는 html의 data-color-mode가 color-scheme만 고정한다. */
 :root {
   color-scheme: light dark;
