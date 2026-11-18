@@ -5,6 +5,7 @@ import {
   type CharacterBasicInput,
   type CharacterHistoryInput,
   type CharacterScoreInput,
+  type CharacterSetsInput,
   type CharacterSkillStyleInput,
   type DatabaseClient,
   recordCharacter,
@@ -156,6 +157,7 @@ async function listen(
     | 'recordCharacterSkillStyle'
     | 'recordCharacterScore'
     | 'recordCharacterHistory'
+    | 'recordCharacterSets'
     | 'scoreLibraryPath'
     | 'spawnScoreWorker'
     | 'writeAccessLog'
@@ -430,18 +432,126 @@ test('스킬 스타일 저장이 실패해도 상세 응답은 그대로이고 �
   assert.deepEqual(codes, ['CHARACTER_SKILL_STYLE_RECORD_FAILED'])
 })
 
-test('기본 정보를 저장하지 못하면 스킬 스타일, 점수, 이력도 저장하지 않는다', {
+function payloadsWithSets(): CharacterPayloads {
+  const payloads = payloadsWith(basicFields)
+
+  return {
+    ...payloads,
+    equipment: {
+      ...payloads.equipment,
+      equipment: [{ slotName: '상의', setItemId: 'synthetic-set', setItemName: '합성 세트' }],
+      setItemInfo: [
+        {
+          setItemId: 'synthetic-set',
+          setItemName: '합성 등급 세트',
+          active: { setPoint: { current: 2550 } }
+        }
+      ]
+    },
+    oath: {
+      ...payloads.oath,
+      oath: { setInfo: { setId: 16204, setName: '합성 서약', setOptionName: '합성 선택지' } }
+    }
+  }
+}
+
+test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 세트를 저장하고, 캐시 적중에도 같은 시각으로 저장한다', {
   timeout: 10_000
 }, async (t) => {
+  let savedBasics = 0
+  const savedBasicsBeforeSets: number[] = []
+  const sets: CharacterSetsInput[] = []
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWithSets()),
+    recordCharacterBasic: async () => {
+      // 기본 정보보다 먼저 저장하면 characters 행이 없어 세트가 남지 않으므로, 늦게 끝나도 기다리는지 보려고 일부러 늦춘다.
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      savedBasics++
+    },
+    recordCharacterSets: async (input) => {
+      savedBasicsBeforeSets.push(savedBasics)
+      sets.push(input)
+    }
+  })
+  t.after(() => app.close())
+
+  const before = Date.now()
+  await getDetails(origin)
+  // 캐시 적중 때 지금 시각을 쓰면 첫 저장과 달라지도록 두 번째 조회 전에 시각을 넘긴다.
+  await new Promise((resolve) => setTimeout(resolve, 10))
+  const beforeCachedRequest = Date.now()
+  await getDetails(origin)
+  await waitUntil(() => sets.length === 2)
+
+  const [first, second] = sets
+
+  assert.ok(savedBasicsBeforeSets.every((count, index) => count >= index + 1))
+  assert.ok(first.fetchedAt.getTime() >= before)
+  assert.ok(second.fetchedAt.getTime() < beforeCachedRequest)
+  assert.deepEqual(second, first)
+  assert.deepEqual(
+    { ...first, fetchedAt: undefined },
+    {
+      ...character,
+      equipmentSet: { id: 'synthetic-set', name: '합성 세트' },
+      oathSet: { id: 16204, name: '합성 서약', option: '합성 선택지' },
+      fetchedAt: undefined
+    }
+  )
+})
+
+test('세트 저장이 실패해도 상세 응답은 그대로이고 실패 code를 남긴다', {
+  timeout: 10_000
+}, async (t) => {
+  const payloads = payloadsWithSets()
+  const codes: string[] = []
+  let failureReported!: () => void
+  const reported = new Promise<void>((resolve) => {
+    failureReported = resolve
+  })
+  const failing = await listen({
+    details: detailsReturning(payloads),
+    recordCharacterBasic: async () => undefined,
+    recordCharacterSets: async () => {
+      throw new Error('database closed')
+    },
+    writeAccessLog: (line) => {
+      const { code } = JSON.parse(line)
+      if (code !== undefined) {
+        codes.push(code)
+        failureReported()
+      }
+    }
+  })
+  t.after(() => failing.app.close())
+  const withoutDatabase = await listen({ details: detailsReturning(payloads) })
+  t.after(() => withoutDatabase.app.close())
+
+  const response = await getDetails(failing.origin)
+  const expected = await getDetails(withoutDatabase.origin)
+  await reported
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(withoutFetchTimes(response.body), withoutFetchTimes(expected.body))
+  assert.deepEqual(codes, ['CHARACTER_SETS_RECORD_FAILED'])
+})
+
+test('기본 정보를 저장하지 못하면 스킬 스타일, 점수, 이력, 세트도 저장하지 않는다', {
+  timeout: 10_000
+}, async (t) => {
+  const withSets = payloadsWithSets()
+  const withSkillStyle = payloadsWith(basicFields, skillStyle)
+  const payloads = { ...withSets, skill_style: withSkillStyle.skill_style }
   const styles: CharacterSkillStyleInput[] = []
   const scores: CharacterScoreInput[] = []
   const histories: CharacterHistoryInput[] = []
+  const sets: CharacterSetsInput[] = []
   let failureReported!: () => void
   const reported = new Promise<void>((resolve) => {
     failureReported = resolve
   })
   const { app, origin } = await listen({
-    details: detailsReturning(payloadsWith(basicFields, skillStyle)),
+    details: detailsReturning(payloads),
     ...scoring(() => engineResult),
     recordCharacterBasic: async () => {
       throw new Error('database closed')
@@ -454,6 +564,9 @@ test('기본 정보를 저장하지 못하면 스킬 스타일, 점수, 이력�
     },
     recordCharacterHistory: async (history) => {
       histories.push(history)
+    },
+    recordCharacterSets: async (input) => {
+      sets.push(input)
     },
     writeAccessLog: (line) => {
       if (JSON.parse(line).code !== undefined) {
@@ -470,6 +583,7 @@ test('기본 정보를 저장하지 못하면 스킬 스타일, 점수, 이력�
   assert.deepEqual(styles, [])
   assert.deepEqual(scores, [])
   assert.deepEqual(histories, [])
+  assert.deepEqual(sets, [])
 })
 
 test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류, 계산 시각, 엔진 버전과 함께 저장하고, 저장해 둔 응답을 다시 쓰면 저장하지 않는다', {
