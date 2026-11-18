@@ -168,10 +168,8 @@ export function storyGuild(memberCount: number): Guild {
     guildId: 'guild-1',
     guildName: '길드1'
   }))
-  const totalFame = guildMembers.reduce((total, { fame }) => total + (fame ?? 0), 0)
-  const averageFame = memberCount > 0 ? Math.round(totalFame / memberCount) : null
 
-  return { guildId: 'guild-1', guildName: '길드1', memberCount, averageFame, members: guildMembers }
+  return { guildId: 'guild-1', guildName: '길드1', memberCount, members: guildMembers }
 }
 
 export const storyFavoriteCharacters: FavoriteCharacter[] = storyRankedCharacters(6).map(

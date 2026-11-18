@@ -62,7 +62,6 @@ function guildOf(count: number, overrides: Partial<Guild> = {}): Guild {
     guildId: 'guild-1',
     guildName: '합성 길드',
     memberCount: count,
-    averageFame: 81234,
     members: Array.from({ length: count }, (_, index) => member(index + 1)),
     ...overrides
   }
@@ -94,14 +93,14 @@ function reachEnd(): Promise<void> {
   })
 }
 
-it('제목 상자에 길드 이름, 길드원 수, 평균 명성을 두고 열은 순번, 캐릭터, 명성, 모험단이다', async () => {
+it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐릭터, 명성, 모험단이다', async () => {
   const getGuild = vi.fn<ClientHost['getGuild']>(async () => guildOf(2))
   await render(getGuild)
 
   expect(getGuild).toHaveBeenCalledWith('guild-1')
   expect(container.querySelector('h1')?.textContent).toBe('합성 길드')
-  const stats = [...container.querySelectorAll('header div')].map((stat) => stat.textContent)
-  expect(stats).toEqual(expect.arrayContaining(['길드원2', '평균 명성81,234']))
+  const stats = [...container.querySelectorAll('header .stat')].map((stat) => stat.textContent)
+  expect(stats).toEqual(['길드원2'])
   expect(container.querySelector('section')?.getAttribute('aria-label')).toBe('길드원')
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
     '#',
@@ -132,13 +131,13 @@ it('길드원 45명 가운데 처음 20명을 그리고 끝에 닿을 때마다 
   expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
 })
 
-it('길드원이 없으면 목록 상자에 빈 문구만 두고 평균 명성은 -다', async () => {
-  await render(async () => guildOf(0, { guildName: null, averageFame: null }))
+it('길드원이 없으면 목록 상자에 빈 문구만 두고 길드원 수는 0이다', async () => {
+  await render(async () => guildOf(0, { guildName: null }))
 
   expect(container.querySelector('section p')?.textContent).toBe('저장된 캐릭터가 없습니다.')
   expect(container.querySelector('section table')).toBeNull()
   expect(container.querySelector('h1')?.textContent).toBe('길드')
-  expect([...container.querySelectorAll('header div')].map((stat) => stat.textContent)).toEqual(
-    expect.arrayContaining(['길드원0', '평균 명성-'])
-  )
+  expect([...container.querySelectorAll('header .stat')].map((stat) => stat.textContent)).toEqual([
+    '길드원0'
+  ])
 })
