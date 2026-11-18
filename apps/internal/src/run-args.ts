@@ -1,4 +1,4 @@
-import type { ArgField, Job } from './api/ops-schemas'
+import type { ArgField, Job } from '#ops-api/ops-schemas'
 
 export type ArgInput = {
   name: string

@@ -1,4 +1,4 @@
-import type { Run, RunStatus, RunTrigger } from './api/ops-schemas'
+import type { Run, RunStatus, RunTrigger } from '#ops-api/ops-schemas'
 
 export const EMPTY_VALUE = '—'
 

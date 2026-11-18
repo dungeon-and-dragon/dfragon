@@ -1,12 +1,12 @@
 import { Tooltip } from '@dfragon/ui'
-import type { Job } from '../api/ops-schemas'
+import type { Job } from '#ops-api/ops-schemas'
 import {
   EMPTY_VALUE,
   formatDateMinute,
   formatDateSecond,
   formatDuration,
   runDuration
-} from '../format'
+} from '#app/format'
 import { panelClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'

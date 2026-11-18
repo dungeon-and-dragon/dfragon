@@ -1,6 +1,6 @@
 import { Button, ConfirmPopover, Popover } from '@dfragon/ui'
-import { formatCount } from '../format'
-import { useRequeue } from '../ops-queries'
+import { formatCount } from '#app/format'
+import { useRequeue } from '#app/ops-queries'
 
 type RequeueButtonProps = {
   label: string
