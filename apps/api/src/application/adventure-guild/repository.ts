@@ -2,10 +2,10 @@ import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/d
 import type {
   AdventureActivityOf,
   AdventureSeasonDays,
+  AdventureWeeklyClears,
   StoredActivitySeason
-} from '../../domain/adventure-guild/activity.js'
-import type { AdventureWeeklyClears } from '../../domain/adventure-guild/weekly.js'
-import type { SeasonBackfillJob } from '../../domain/character-timeline/season-backfill.js'
+} from '../../domain/adventure-guild/index.js'
+import type { SeasonBackfillJob } from '../../domain/character-timeline/index.js'
 
 export type AdventureActivityRead = {
   characters: TimelineCharacter[]

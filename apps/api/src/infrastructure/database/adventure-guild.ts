@@ -10,8 +10,10 @@ import type {
   AdventureGuildRepository,
   AdventureSeasonBackfillRead
 } from '../../application/adventure-guild/repository.js'
-import type { AdventureSeasonDays } from '../../domain/adventure-guild/activity.js'
-import type { AdventureWeeklyClears } from '../../domain/adventure-guild/weekly.js'
+import type {
+  AdventureSeasonDays,
+  AdventureWeeklyClears
+} from '../../domain/adventure-guild/index.js'
 import {
   readAdventureActivity,
   readAdventureSeasonBackfill,

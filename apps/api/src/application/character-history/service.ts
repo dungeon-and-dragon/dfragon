@@ -4,13 +4,14 @@ import {
   projectCharacterFreshness
 } from '@dfragon/server-core/domain/character-detail/project.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
-import { CHANGE_SECTIONS, projectCharacterChanges } from '../../domain/character-history/changes.js'
 import {
+  CHANGE_SECTIONS,
   type CharacterHistory,
+  projectCharacterChanges,
   projectCharacterHistory,
   projectHistoryScore,
   projectNameChanges
-} from '../../domain/character-history/project.js'
+} from '../../domain/character-history/index.js'
 import {
   restoreCharacterPayloads,
   toCharacterHeader

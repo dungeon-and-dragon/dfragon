@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { ClearStatsService } from '../../../application/content-clears/service.js'
+import type { ClearStatsService } from '../../../application/content-clears/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { readQuery } from '../request-query.js'
 import {
