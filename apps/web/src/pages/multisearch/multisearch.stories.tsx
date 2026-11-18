@@ -15,8 +15,8 @@ import {
   storyPartyCards,
   storyRaidCards
 } from '../../testing/story-support/story-multisearch'
-import { PartyScreen } from '../party/PartyScreen'
-import { RaidScreen } from '../raid/RaidScreen'
+import { PartyScreen } from '../party'
+import { RaidScreen } from '../raid'
 import { MultisearchBoard } from './MultisearchPage'
 
 const meta = {
