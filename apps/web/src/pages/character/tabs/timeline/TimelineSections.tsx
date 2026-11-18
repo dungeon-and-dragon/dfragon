@@ -36,7 +36,7 @@ const ENHANCEMENT_KIND_TONES: Readonly<Record<TimelineEnhancement['kind'], strin
 }
 
 const BADGE =
-  'inline-flex h-5 shrink-0 items-center rounded-badge px-1.5 text-xs font-medium whitespace-nowrap text-fg-muted'
+  'inline-flex h-5 shrink-0 items-center rounded-badge px-2 text-xs font-medium whitespace-nowrap text-fg-muted'
 const TABLE = 'w-full table-fixed border-collapse'
 const CELL = 'h-row truncate border-t border-line px-3 first:pl-4 last:pr-4'
 const TIME_COLUMN = 'w-28'
@@ -61,7 +61,7 @@ function TimelineGroup({
       aria-label={title}
       className="min-w-0 overflow-hidden rounded-panel border border-line"
     >
-      <h2 className="m-0 box-border flex min-h-11 items-center gap-2 border-b border-line px-4 text-xs font-medium whitespace-nowrap text-fg-subtle">
+      <h2 className="m-0 box-border flex min-h-12 items-center gap-2 border-b border-line px-4 text-xs font-medium whitespace-nowrap text-fg-subtle">
         <span className="text-sm font-semibold text-fg">{title}</span>
         <span className="font-mono tabular-nums">{count}</span>
         {note !== undefined && <span>{note}</span>}
@@ -173,7 +173,7 @@ export function SeasonClears({
         {counts.map((count) => (
           <li
             key={`${count.kind}-${count.name}-${count.hard}`}
-            className="inline-flex h-8 items-center gap-1.5 rounded-control bg-control px-2 whitespace-nowrap"
+            className="inline-flex h-8 items-center gap-2 rounded-control bg-control px-2 whitespace-nowrap"
           >
             <span className={`${BADGE} bg-canvas`}>{CLEAR_KIND_LABELS[count.kind]}</span>
             <span>{count.name}</span>
@@ -240,7 +240,7 @@ export function Enhancements({
                 {formatEnhancementValue(enhancement)}
               </td>
               <td className={CELL}>
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-2">
                   <span className={enhancement.result ? 'text-fg-success' : 'text-fg-danger'}>
                     {enhancement.result ? '성공' : '실패'}
                   </span>

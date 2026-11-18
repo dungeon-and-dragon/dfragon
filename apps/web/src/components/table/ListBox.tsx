@@ -15,7 +15,7 @@ export function ListBox({
       className={`min-w-0 overflow-hidden rounded-panel border border-line bg-canvas${fillHeight ? ' flex flex-col' : ''}`}
     >
       <h2
-        className={`m-0 flex min-h-11 items-center px-4 text-base font-semibold${children != null ? ' border-b border-line' : ''}`}
+        className={`m-0 flex min-h-12 items-center px-4 text-base font-semibold${children != null ? ' border-b border-line' : ''}`}
       >
         {name}
       </h2>

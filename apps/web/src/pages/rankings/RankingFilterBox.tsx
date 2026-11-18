@@ -4,7 +4,7 @@ import { growFilter, growLabel, isGrowSelected, RANKING_JOBS } from './ranking-j
 
 const FILTER_ROW = 'flex items-start gap-4'
 const FILTER_LABEL = 'm-0 w-12 shrink-0 text-xs/8 font-medium text-fg-subtle'
-const CHIPS = 'm-0 flex list-none flex-wrap gap-1.5 p-0'
+const CHIPS = 'm-0 flex list-none flex-wrap gap-2 p-0'
 
 export function RankingFilterBox({
   filter,

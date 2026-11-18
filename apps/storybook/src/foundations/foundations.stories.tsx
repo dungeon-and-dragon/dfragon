@@ -33,7 +33,7 @@ type Story = StoryObj<typeof meta>
 
 export const Color: Story = {
   render: () => (
-    <div className="grid gap-10">
+    <div className="grid gap-12">
       <Section title="원색 단계">
         <PrimitiveScale tokens={primitiveTokens} />
       </Section>

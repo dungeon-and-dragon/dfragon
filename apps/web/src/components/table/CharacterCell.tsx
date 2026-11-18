@@ -21,13 +21,13 @@ export function CharacterCell({
   const showsLevel = character.level != null && !isMaxLevel(character.level)
 
   return (
-    <div className="flex min-w-0 items-center gap-2.5">
+    <div className="flex min-w-0 items-center gap-3">
       <span className="relative h-9 w-8 shrink-0 overflow-hidden rounded-control bg-inset">
         <Portrait src={characterImageUrl(character)} />
       </span>
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="flex min-w-0 items-center gap-1.5">
-          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-1.5 text-xs font-medium text-fg-muted">
+      <span className="flex min-w-0 flex-col gap-1">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-2 text-xs font-medium text-fg-muted">
             {CHARACTER_SERVER_NAMES[character.serverId]}
           </span>
           <Link

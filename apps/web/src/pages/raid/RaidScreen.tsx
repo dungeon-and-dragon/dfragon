@@ -16,7 +16,7 @@ const parties = Array.from({ length: RAID_PARTY_COUNT }, (_, party) =>
 )
 
 const badgeClass =
-  'box-border inline-flex h-4.5 items-center rounded-badge px-1.25 text-2xs font-semibold whitespace-nowrap'
+  'box-border inline-flex h-4.5 items-center rounded-badge px-1 text-2xs font-semibold whitespace-nowrap'
 
 const partyClasses: Readonly<Record<RaidParty, string>> = {
   R: 'bg-raid-party-red-weak text-raid-party-red',

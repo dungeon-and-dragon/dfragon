@@ -102,7 +102,7 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
       <ul
         data-chart-reveal=""
         onMouseLeave={handleLeave}
-        className="m-0 flex h-7 list-none gap-0.5 p-0"
+        className="m-0 flex h-7 list-none gap-1 p-0"
       >
         {shown.map((segment) => (
           <Segment

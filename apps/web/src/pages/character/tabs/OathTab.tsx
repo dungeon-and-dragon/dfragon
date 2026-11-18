@@ -19,7 +19,7 @@ const { table, head, headEnd, body, row, cell, slot, number, muted, heading, cou
   itemTableClasses
 // 진의 단계처럼 값이 글자인 줄도 있어, 숫자로만 된 값에만 숫자 글꼴을 쓴다.
 const NUMERIC_TEXT = /^[\d.,+\-%\s]+$/
-const OPTION = 'm-0 flex items-start gap-3.5 rounded-control border px-4 py-3.5'
+const OPTION = 'm-0 flex items-start gap-4 rounded-control border p-4'
 const OPTION_IDLE = 'border-dashed border-line-strong bg-canvas'
 const OPTION_PICKED = 'border-solid border-signal bg-surface shadow-[0_0_0_1px_var(--color-signal)]'
 
@@ -70,7 +70,7 @@ function OathSetCard({
   }
 
   return (
-    <div className="flex items-center gap-5 border-b border-line p-4">
+    <div className="flex items-center gap-6 border-b border-line p-4">
       <span
         className={`box-border flex size-14 shrink-0 items-center justify-center rounded-control border border-current bg-inset ${raritySolidOf(set.rarity)}`}
       >
@@ -106,7 +106,7 @@ function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): R
               className={`size-11.5 rounded-full ${option.picked ? '' : 'opacity-40 grayscale-80'}`}
             />
             {option.picked && (
-              <span className="inline-flex h-5 items-center gap-0.5 rounded-badge bg-signal px-1.5 text-2xs font-semibold text-on-signal">
+              <span className="inline-flex h-5 items-center gap-1 rounded-badge bg-signal px-2 text-2xs font-semibold text-on-signal">
                 <CheckIcon width={12} height={12} strokeWidth={3} />
                 선택
               </span>
@@ -135,7 +135,7 @@ function OathBody({
   return (
     <section aria-label="서약 본체">
       <h2 className={heading}>서약 본체</h2>
-      <div className="flex h-row items-center gap-2.5 border-b border-line px-4">
+      <div className="flex h-row items-center gap-3 border-b border-line px-4">
         <div className={itemClasses.item}>
           <ItemIcon itemId={info.itemId} src={oathItemIconOf(catalog, info)} rarity={info.rarity} />
           <ItemName name={info.itemName} rarity={info.rarity} />

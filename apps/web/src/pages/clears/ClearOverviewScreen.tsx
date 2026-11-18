@@ -378,7 +378,7 @@ function CoClearPanel({
         />
       }
     >
-      <div className="flex flex-col gap-0.5 px-4 pt-4">
+      <div className="flex flex-col gap-1 px-4 pt-4">
         <span className={clearClasses.subLabel}>{`${option.label} 클리어 캐릭터`}</span>
         <span className="font-mono text-xl font-semibold tabular-nums">
           {integer.format(base.cleared)}

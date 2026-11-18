@@ -90,7 +90,7 @@ function TargetRows({
 
   return (
     <>
-      <div className="pt-1.5 pb-0.5 text-xs font-medium text-fg-subtle">{title}</div>
+      <div className="pt-2 pb-1 text-xs font-medium text-fg-subtle">{title}</div>
       {targets.toReversed().map((target) => (
         <DetailRow
           key={target.target}

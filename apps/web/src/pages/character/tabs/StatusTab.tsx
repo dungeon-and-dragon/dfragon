@@ -17,7 +17,7 @@ export function StatusTab({ detail }: CharacterTabProps): React.JSX.Element {
           {stats.map((stat) => (
             <div
               key={stat.name}
-              className="flex min-w-0 items-center justify-between gap-2 border-b border-line py-2.5"
+              className="flex min-w-0 items-center justify-between gap-2 border-b border-line py-3"
             >
               <dt className="m-0 flex min-w-0 items-center gap-1 text-fg-muted">
                 {/* 속성 아이콘 그림이 저장소에 들어오기 전까지 자리만 둔다. */}
