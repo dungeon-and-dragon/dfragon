@@ -37,8 +37,9 @@ pnpm verify
 | --- | --- |
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
+| worker | `pnpm --filter @dfragon/worker run --sequential '/^(lint\|test)$/'`와 API 행 |
 | 공용 HTTP package | `pnpm --filter @dfragon/http-server run --sequential '/^(lint\|test)$/'`와 API 행 |
-| API, worker 공용 package | `pnpm --filter @dfragon/server-core run --sequential '/^(lint\|test)$/'`와 API 행 |
+| API, worker 공용 package | `pnpm --filter @dfragon/server-core run --sequential '/^(lint\|test)$/'`와 API, worker 행 |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
 | 운영 app | `pnpm --filter @dfragon/ops run --sequential '/^(lint\|test)$/'` |
 | 운영 화면 | `pnpm --filter @dfragon/internal run --sequential '/^(test\|lint\|build)$/'` |
