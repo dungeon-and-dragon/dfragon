@@ -12,6 +12,7 @@
 | `Select` | `Select` | `Root`, `Trigger`(`size` `2xs`, `xs`, `sm`, `md`. `2xs`는 표 행의 서버 칩으로 높이 24에 테두리가 없고 흐린 글자이며 올리거나 열면 면이 생긴다), `Value`, `Popup`(Portal, Positioner, Popup, List), `Item`, `ItemText`, `Group`, `GroupLabel`, `Separator`. `Popup`의 `columns`는 항목을 그 수의 열로 읽는 순서대로 늘어놓는 격자 목록이고, 없으면 한 줄 목록이다. |
 | `Tabs` | `Tabs` | `Root`, `List`(현재 탭 아래로 움직이는 2px 선 포함), `Tab`, `Panel`. |
 | `Switch`, `Chip` | `Switch`, `Toggle` | 한 요소로 쓰는 켜고 끄는 컨트롤. 이름은 감싼 label이나 `aria-label`로 준다. |
+| `ChipGroup` | `ToggleGroup`, `Toggle` | `items`(`value`, `label`) 가운데 하나만 고르는 칩 묶음. 고른 칩을 다시 눌러도 선택이 풀리지 않는다. 화살표로 칩 사이를 옮기고 Tab은 묶음에서 칩 하나에만 멈춘다. `size` `sm`(기본), `md`(32, 40px). 이름은 `aria-label`이나 보이는 라벨의 `aria-labelledby`로 준다. |
 | `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 화면과 반대 색 모드로 그려, 안에 둔 글자가 어떤 색 토큰을 써도 읽힌다. |
 | `Popover` | `Popover` | `Root`, `Trigger`, `Popup`(Portal, Positioner, Popup. `anchor`, `side`, `align`, `sideOffset`을 받는다), `Title`, `Close`. 면, 테두리, 그림자만 그리고 안쪽 배치와 폭은 화면이 정한다. |
 | `StatusChip` | `span` | tone `neutral`, `success`, `danger`, `warning`(주의), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜지고, 동작 줄이기에서는 모두 켠 채 멈춘다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 32다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
