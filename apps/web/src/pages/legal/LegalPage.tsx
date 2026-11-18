@@ -14,7 +14,7 @@ function LegalPage({ title }: { title: string }): React.JSX.Element {
   return (
     <div className="p-4">
       <article aria-labelledby={titleId} className="rounded-panel border border-line bg-canvas">
-        <div className="flex min-h-11 items-center border-b border-line px-4">
+        <div className="flex min-h-12 items-center border-b border-line px-4">
           <h1 id={titleId} className="m-0 text-base font-semibold">
             {title}
           </h1>

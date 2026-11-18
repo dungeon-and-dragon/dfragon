@@ -20,7 +20,7 @@ const UPGRADE_TYPES = [1, 2] as const satisfies readonly UpgradeType[]
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-const ROWS = 'grid grid-cols-[auto_auto] items-center gap-x-5 gap-y-0.5'
+const ROWS = 'grid grid-cols-[auto_auto] items-center gap-x-6 gap-y-1'
 const LABEL = 'text-fg-muted'
 const VALUE = 'text-right font-mono tabular-nums'
 const HEADING = 'mt-1 text-2xs text-fg-subtle'
@@ -51,7 +51,7 @@ function UpgradeRows({
       <span className={ROWS}>
         {UPGRADE_TYPES.map((type, index) => (
           <Fragment key={type}>
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-2">
               <img
                 src={skillMarkOf(marks, kind, type)}
                 alt={kind === 'evolution' ? EVOLUTION_NUMERALS[type] : ''}
@@ -92,8 +92,8 @@ export function SkillAdoptionTooltip({
   const { levels, evolution, enhancement } = adoption
 
   return (
-    // 시안의 Tooltip은 위아래 8px이라 공통 Tooltip 틀(6px)에 2px을 더한다. 최소 폭 200px에서 좌우 여백 24px을 뺀 176px이다.
-    <span className="flex min-w-44 flex-col gap-1 py-0.5 text-xs">
+    // 시안의 Tooltip은 위아래 8px이라 공통 Tooltip 틀(4px)에 4px을 더한다. 최소 폭 200px에서 좌우 여백 24px을 뺀 176px이다.
+    <span className="flex min-w-44 flex-col gap-1 py-1 text-xs">
       <span className="text-sm font-semibold">{name}</span>
       <span className={ROWS}>
         <span className={LABEL}>채택률</span>
@@ -126,7 +126,7 @@ export function SkillAdoptionTooltip({
           marks={marks}
         />
       )}
-      <span className="mt-1 flex justify-between gap-4 border-t border-line pt-1.5 text-2xs text-fg-subtle tabular-nums">
+      <span className="mt-1 flex justify-between gap-4 border-t border-line pt-2 text-2xs text-fg-subtle tabular-nums">
         <span>{sampleText(adoption.sampleSize, role)}</span>
         {adoption.computedAt !== null && (
           <span>{formatSeoulDateTime(adoption.computedAt, now)}</span>

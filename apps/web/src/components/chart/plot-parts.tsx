@@ -12,9 +12,9 @@ export function ChartTooltip({
   return (
     <span ref={tooltipRef} aria-hidden="true" className={`${TOOLTIP_CLASS} top-0`}>
       {title != null && <span className={TOOLTIP_TITLE_CLASS}>{title}</span>}
-      <span className="mt-0.5 flex flex-col gap-0.5">
+      <span className="mt-1 flex flex-col gap-1">
         {rows.map(({ key, name, color, faded, value }) => (
-          <span key={key} className="flex items-center gap-1.5 text-xs tabular-nums">
+          <span key={key} className="flex items-center gap-2 text-xs tabular-nums">
             <i
               className={`h-2 w-2 shrink-0 rounded-[2px] ${faded ? 'opacity-50' : ''}`}
               style={{ backgroundColor: color }}

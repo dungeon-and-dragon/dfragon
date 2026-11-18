@@ -67,7 +67,7 @@ export function Panel({
       className="flex min-w-0 grow basis-0 flex-col rounded-panel border border-line bg-canvas"
       style={grow !== undefined ? { flexGrow: grow } : undefined}
     >
-      <div className="flex min-h-11 flex-wrap items-center gap-2 border-b border-line px-4 py-1.5">
+      <div className="flex min-h-12 flex-wrap items-center gap-2 border-b border-line px-4 py-2">
         <h2 className="m-0 grow text-base font-semibold tracking-heading">{name}</h2>
         {controls}
       </div>

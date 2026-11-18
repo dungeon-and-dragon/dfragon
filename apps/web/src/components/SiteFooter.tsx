@@ -3,7 +3,7 @@ import neopleOpenApiColorLogo from '../assets/neople-open-api-color.png'
 import neopleOpenApiGrayLogo from '../assets/neople-open-api-gray.png'
 
 const link =
-  'px-0.5 py-1 text-fg-subtle no-underline outline-none hover:text-fg hover:underline focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-signal aria-[current=page]:font-semibold aria-[current=page]:text-fg'
+  'p-1 text-fg-subtle no-underline outline-none hover:text-fg hover:underline focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-signal aria-[current=page]:font-semibold aria-[current=page]:text-fg'
 
 const NEOPLE_API_URL = 'https://developers.neople.co.kr'
 
@@ -11,7 +11,7 @@ export function SiteFooter(): React.JSX.Element {
   return (
     <footer
       aria-label="사이트 정보"
-      className="mt-auto flex items-center justify-center gap-3 pt-10 text-xs text-fg-subtle"
+      className="mt-auto flex items-center justify-center gap-3 pt-12 text-xs text-fg-subtle"
     >
       <a
         href={NEOPLE_API_URL}

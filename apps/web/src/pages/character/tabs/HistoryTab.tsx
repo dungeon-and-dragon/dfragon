@@ -31,7 +31,7 @@ type ScoreLabel = ReturnType<typeof toScoreView>['label']
 const LINE = 'border-b border-line'
 const POINT_COLUMNS = 'grid grid-cols-[400px_minmax(0,1fr)] max-sm:grid-cols-1'
 const FAME = 'text-game-fame'
-const STRIP = `box-border flex min-h-11 items-center px-4 py-2 ${LINE}`
+const STRIP = `box-border flex min-h-12 items-center px-4 py-2 ${LINE}`
 const DELTA_TONES = { up: 'text-game-increase', down: 'text-game-decrease' } as const
 const POINT =
   'relative m-0 box-border flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-none border-0 px-4 py-2 text-left [font-family:inherit] text-sm text-fg outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal'
@@ -357,7 +357,7 @@ function Tile({
   const deltaTone = delta.direction !== null ? DELTA_TONES[delta.direction] : 'text-fg-subtle'
 
   return (
-    <div className="m-0 flex flex-col gap-0.5 border-s border-line px-4 pt-3.5 pb-4 first:border-s-0">
+    <div className="m-0 flex flex-col gap-1 border-s border-line p-4 first:border-s-0">
       <dt className="text-xs text-fg-subtle">{label}</dt>
       <dd className={`m-0 font-mono text-xl/8 font-semibold tabular-nums ${tone ?? ''}`}>
         {value}

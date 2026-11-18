@@ -9,8 +9,8 @@ export type LegendItem = Readonly<{
 }>
 
 const MIN_LEGEND_ITEMS = 2
-const LEGEND_CLASS = 'm-0 flex list-none flex-wrap gap-x-4 gap-y-1.5 p-0 text-xs text-fg-muted'
-const LEGEND_ITEM_CLASS = 'flex items-center gap-1.5'
+const LEGEND_CLASS = 'm-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-xs text-fg-muted'
+const LEGEND_ITEM_CLASS = 'flex items-center gap-2'
 const MARK_CLASS = 'shrink-0 h-2 w-2 rounded-[2px]'
 const LINE_MARK_CLASS = 'shrink-0 h-0.5 w-3.5 rounded-none'
 const WIDE_MARK_CLASS = 'shrink-0 h-2 w-3.5 rounded-[2px]'
@@ -28,7 +28,7 @@ export function ChartLegend({
   }
 
   return (
-    <ul className={`${LEGEND_CLASS} ${below ? 'mt-3' : 'mb-2.5'}`}>
+    <ul className={`${LEGEND_CLASS} ${below ? 'mt-3' : 'mb-3'}`}>
       {items.map(({ key, name, color, faded, mark }) => (
         <li key={key} className={LEGEND_ITEM_CLASS}>
           <i

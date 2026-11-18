@@ -70,7 +70,7 @@ function ArgField({
     <div className="field px-3 pt-3">
       <label htmlFor={id} className="field-label">
         {input.name}
-        <em className="ml-1.5 font-normal not-italic text-fg-subtle">{fieldNote(input)}</em>
+        <em className="ml-2 font-normal not-italic text-fg-subtle">{fieldNote(input)}</em>
       </label>
       {choices !== undefined ? (
         <select

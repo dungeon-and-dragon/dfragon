@@ -99,7 +99,7 @@ function SeasonButton({
       aria-busy={running ? 'true' : undefined}
       aria-current={selected ? 'true' : undefined}
       onClick={handleClick}
-      className="group relative m-0 flex min-w-21 shrink basis-0 cursor-pointer flex-col items-start gap-0.5 border-0 bg-transparent px-0 pt-2.5 pb-0 text-left text-inherit [font:inherit] disabled:cursor-default aria-disabled:cursor-default"
+      className="group relative m-0 flex min-w-21 shrink basis-0 cursor-pointer flex-col items-start gap-1 border-0 bg-transparent px-0 pt-3 pb-0 text-left text-inherit [font:inherit] disabled:cursor-default aria-disabled:cursor-default"
       style={{ flexGrow: days }}
     >
       {bar.state === 'backfill' ? (
@@ -143,7 +143,7 @@ export function SeasonTimeline({
   useSeasonIndicatorSlide({ timelineRef, indicatorRef })
 
   return (
-    <nav ref={timelineRef} aria-label="시즌" className="relative flex gap-0.5 px-4 pt-3 pb-3.5">
+    <nav ref={timelineRef} aria-label="시즌" className="relative flex gap-1 px-4 pt-3 pb-4">
       {hasSelection && (
         <span
           ref={indicatorRef}

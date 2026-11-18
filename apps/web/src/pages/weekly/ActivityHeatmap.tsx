@@ -57,7 +57,7 @@ const CELL = 'relative box-border block size-3 rounded-control'
 const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
 const LABEL = 'text-2xs leading-3.5 whitespace-nowrap text-fg-subtle'
 const TAG =
-  'box-border inline-flex h-4.5 items-center rounded-badge border border-current px-1.25 text-2xs font-medium whitespace-nowrap tabular-nums'
+  'box-border inline-flex h-4.5 items-center rounded-badge border border-current px-1 text-2xs font-medium whitespace-nowrap tabular-nums'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 const BOX =
   'relative grid grid-cols-[minmax(0,1fr)_120px] rounded-panel border border-line bg-canvas xl:grid-cols-[minmax(0,1fr)]'
@@ -66,7 +66,7 @@ const BOX =
 const RING =
   'pointer-events-none absolute rounded-[3px] [mask-clip:content-box,border-box] [mask-composite:exclude] [mask-image:linear-gradient(#000_0_0),linear-gradient(#000_0_0)]'
 const RING_FRAMES: Readonly<Record<'frame' | 'glow', string>> = {
-  frame: '-inset-[3px] p-0.5',
+  frame: '-inset-[3px] p-1',
   glow: '-inset-1 p-[3px] opacity-35 blur-[3px]'
 }
 const RING_FILLS: Readonly<Record<RingHighlight, string>> = {
@@ -448,7 +448,7 @@ export function ActivityHeatmap({
           <Tabs.Tab
             key={tabKind}
             value={tabKind}
-            className="m-0 block w-full cursor-pointer border-0 bg-transparent py-1.5 pr-0 pl-3 text-left font-sans text-sm font-medium text-fg-muted outline-none hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal data-active:font-semibold data-active:text-fg"
+            className="m-0 block w-full cursor-pointer border-0 bg-transparent py-2 pr-0 pl-3 text-left font-sans text-sm font-medium text-fg-muted outline-none hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal data-active:font-semibold data-active:text-fg"
           >
             {label}
           </Tabs.Tab>
