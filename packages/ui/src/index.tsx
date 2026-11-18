@@ -42,19 +42,19 @@ export type { TooltipPopupProps } from './tooltip'
 export { StatusChip } from './status-chip'
 export type { StatusChipProps, StatusChipTone } from './status-chip'
 export {
-  CameraIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   CloseIcon,
   CopyIcon,
   ExternalLinkIcon,
+  HeartIcon,
   MonitorIcon,
   MoonIcon,
   PinIcon,
   RefreshIcon,
   SearchIcon,
-  StarIcon,
-  SunIcon
+  SunIcon,
+  ViewfinderIcon
 } from './icons'
 export type { FillableIconProps, IconProps } from './icons'
