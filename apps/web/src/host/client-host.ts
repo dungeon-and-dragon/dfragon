@@ -1,29 +1,36 @@
 import { createContext, useContext } from 'react'
-import type { CaptureSource, RaidFrameResult } from '#core/capture/capture-types'
-import type { CharacterIdentity, CharacterImage } from '#core/character/character'
-import type { OcrSearchObservation, SearchApi, SearchCommandResult } from '#core/search/search'
-import type { TodayGrade } from '#core/today-grade/today-grade-types'
-import type { Guild } from '#core/adventure-guild/adventure-guild'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
-import type { OathCatalog } from '#core/catalog/oath-catalog'
-import type { CharacterSearchQuery, SearchedCharacter } from '#core/api/character-schemas'
-import type { CharacterStats, FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
-import type { SkillStats, SkillStatsJob } from '#core/ranking/skill-stats'
-import type { ClearContentStats, ClearOverview, ClearStats } from '#core/ranking/clear-stats'
+import type { CaptureSource, RaidFrameResult } from '#core/capture'
 import type {
+  CharacterDetailView,
+  CharacterHistory,
+  CharacterIdentity,
+  CharacterImage,
   CharacterTimeline,
   TimelineAcquisition,
   TimelineEnhancement,
   TimelinePage
-} from '#core/character/character-timeline'
-import type { SkillWindowCatalog } from '#core/catalog/skill-window'
-import type { CharacterHistory } from '#core/character/character-history'
-import type { AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
+} from '#core/character'
+import type { OcrSearchObservation, SearchApi, SearchCommandResult } from '#core/search'
+import type { TodayGrade } from '#core/today-grade'
 import type {
   ActivitySeason,
   AdventureActivity,
-  AdventureActivitySeasonDays
-} from '#core/adventure-guild/adventure-activity'
+  AdventureActivitySeasonDays,
+  AdventureWeekly,
+  Guild
+} from '#core/adventure-guild'
+import type { OathCatalog, SkillWindowCatalog } from '#core/catalog'
+import type { CharacterSearchQuery, SearchedCharacter } from '#core/api'
+import type {
+  CharacterStats,
+  ClearContentStats,
+  ClearOverview,
+  ClearStats,
+  FameRanking,
+  FameRankingFilter,
+  SkillStats,
+  SkillStatsJob
+} from '#core/ranking'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'
 

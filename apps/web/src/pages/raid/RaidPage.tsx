@@ -9,7 +9,7 @@ import { SnapshotToggle } from '../../components/SnapshotToggle'
 import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
 import { useRaidSlotCards } from './hooks/useRaidSlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { filledSlotCount } from '#core/capture/slot-cards'
+import { filledSlotCount } from '#core/capture'
 import { RaidScreen } from './RaidScreen'
 
 export function RaidPage({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {

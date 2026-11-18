@@ -1,4 +1,4 @@
-import type { ItemRarity } from '#core/character/character-detail-display'
+import type { ItemRarity } from '#core/character'
 
 type RarityKey = ItemRarity | 'unknown'
 

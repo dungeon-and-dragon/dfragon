@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { MISSING_VALUE } from '#core/capture/cards'
-import { type ItemView, itemIconUrl } from '#core/character/character-item'
-import type { ItemRarity } from '#core/character/character-detail-display'
+import { MISSING_VALUE } from '#core/capture'
+import { itemIconUrl, type ItemRarity, type ItemView } from '#core/character'
 import { itemClasses, raritySolidOf, rarityTextClasses } from './item-classes'
 
 type Tone = Readonly<{ rarity: ItemRarity | null }>

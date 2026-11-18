@@ -5,14 +5,14 @@ import {
   MALE_CRUSADER_DEALER_SKILL,
   MALE_CRUSADER_ROLE_LABELS,
   type MaleCrusaderRole
-} from '#core/character/male-crusader'
+} from '#core/character'
 import {
   type SkillAdoption,
   type SkillStats,
   type SkillUpgradeRates,
   skillAdoptionOf
-} from '#core/ranking/skill-stats'
-import { type SkillMarks, skillMarkOf, type UpgradeType } from '#core/catalog/skill-window'
+} from '#core/ranking'
+import { type SkillMarks, skillMarkOf, type UpgradeType } from '#core/catalog'
 import { PIXELATED, SKILL_TOOLTIP } from './skill-classes'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 

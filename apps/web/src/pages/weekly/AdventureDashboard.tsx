@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { preload } from 'react-dom'
-import type { AdventureActivity } from '#core/adventure-guild/adventure-activity'
+import type { AdventureActivity } from '#core/adventure-guild'
 import { SeasonBackdrop } from '../../components/SeasonBackdrop'
 import { useAdventureActivity, useBackfillAdventureSeason } from './hooks/useAdventureActivity'
 import { findSeasonRaidBackground } from '../../lib/season-raid-background'
