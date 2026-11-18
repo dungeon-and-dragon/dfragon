@@ -42,15 +42,18 @@ async function cruise(directory, outputType) {
   }
 }
 
-export async function cruiseAppSamples(sources, { withPackages = true, app = 'api' } = {}) {
+export async function cruiseAppSamples(
+  sources,
+  { withPackages = true, app = 'api', workspace = join('apps', app) } = {}
+) {
   const directory = await mkdtemp(join(tmpdir(), 'dfragon-depcruise-'))
-  const appDirectory = join(directory, 'apps', app)
+  const appDirectory = join(directory, workspace)
 
   try {
     await mkdir(appDirectory, { recursive: true })
 
     for (const file of appConfigFiles) {
-      await cp(join(root, 'apps', app, file), join(appDirectory, file))
+      await cp(join(root, workspace, file), join(appDirectory, file))
     }
 
     if (withPackages) {

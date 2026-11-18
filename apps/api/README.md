@@ -19,7 +19,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일 |
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | Service, Service가 받는 Repository interface와 DB가 아닌 의존성의 함수 타입(port) |
-| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/score/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기, 점수 엔진, job 예약, 파일 읽기로 구현한 adapter |
+| `src/infrastructure/neople/`, `src/infrastructure/database/`, `src/infrastructure/jobs/`, `src/infrastructure/files/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기, job 예약, 파일 읽기로 구현한 adapter |
 | `src/presentation/http/` | Controller, 요청과 응답 DTO, 실패를 HTTP 응답으로 바꾸는 표 |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립, worker의 job 목록 |
 | `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
@@ -48,8 +48,9 @@ worker가 돌리는 기능은 HTTP 경로가 없어 Controller와 DTO 없이 Ser
 worker 기능의 Service는 `service.ts`가 아니라 기존 use case 파일(예: `application/content-clears/collection.ts`, `application/character-score/calculation-job.ts`)에 둡니다.
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
-여러 기능이 함께 쓰는 실패는 `src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
+여러 기능이 함께 쓰는 실패는 `packages/server-core/src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
 두 앱이 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.
+API와 캐릭터 수집 worker가 함께 쓰는 캐릭터 상세, 공용 아이템, 점수 엔진, 타임라인, 클리어 통계 코드는 [`@dfragon/server-core`](../../packages/server-core/README.md)에 있습니다.
 오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/controller.ts`에 있습니다.
 캐릭터 목록 수집 Service, Repository interface와 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있습니다.
@@ -99,7 +100,7 @@ TLS 파일의 key 일치와 localhost, port 입력은 listen 전에 확인하며
 pnpm --filter @dfragon/api test
 ```
 
-HTTP, 설정과 build를 검증합니다. `packages/models/score-engine/`에 엔진 라이브러리가 없으면 실제 엔진 계산과 점수 worker를 띄운 종료 확인만 건너뜁니다.
+HTTP, 설정과 build를 검증합니다. `packages/models/score-engine/`에 엔진 라이브러리가 없으면 실제 엔진을 연 상세 응답 확인만 건너뜁니다.
 변경 범위별 명령 조합은 [Native validation](../../scripts/README.md#native-validation)을 따릅니다. 로컬 성공은 실제 DNS, TLS 검증을 대신하지 않습니다.
 
 ## 서버 이미지

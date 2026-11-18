@@ -1,0 +1,45 @@
+{
+  "name": "@dfragon/server-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*.js": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    },
+    "./test/score-fixtures.js": {
+      "types": "./.test-dist/test/score-fixtures.d.ts",
+      "import": "./.test-dist/test/score-fixtures.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "pnpm --filter @dfragon/lib --filter @dfragon/database --filter @dfragon/neople build && node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.json",
+    "build:test": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('.test-dist', { recursive: true, force: true })\" && tsc -p tsconfig.test.json",
+    "test": "pnpm build && pnpm build:test && node --test \".test-dist/test/**/*.test.js\"",
+    "lint": "biome lint && pnpm run lint:imports",
+    "lint:imports": "depcruise --config .dependency-cruiser.mjs --output-type err-long src",
+    "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
+  },
+  "dependencies": {
+    "@date-fns/tz": "catalog:",
+    "@dfragon/database": "workspace:*",
+    "@dfragon/lib": "workspace:*",
+    "@dfragon/neople": "workspace:*",
+    "dataloader": "catalog:",
+    "date-fns": "catalog:",
+    "koffi": "catalog:",
+    "lru-cache": "catalog:",
+    "remeda": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

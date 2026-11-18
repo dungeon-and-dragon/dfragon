@@ -1,4 +1,4 @@
-import type { CharacterIdentity } from '../../domain/character-identity.js'
+import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 import type { FetchCharacterImage } from './ports.js'
 
 export class CharacterImageService {

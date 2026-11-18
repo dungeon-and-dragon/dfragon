@@ -3,7 +3,7 @@ import type { Context } from 'hono'
 import {
   type CharacterIdentity,
   parseCharacterIdentity
-} from '../../../domain/character-identity.js'
+} from '@dfragon/server-core/domain/character-identity.js'
 
 export function readIdentity(
   c: Context<AccessLogEnv, '/:serverId/:characterId/image'>

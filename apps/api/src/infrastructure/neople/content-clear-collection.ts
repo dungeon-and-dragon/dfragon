@@ -1,8 +1,8 @@
 import type { NeopleClient } from '@dfragon/neople'
 import type { CreateClearTimeline } from '../../application/content-clears/ports.js'
-import { CLEAR_CODES } from '../../domain/character-timeline/project.js'
-import { CLEAR_CONTENTS } from '../../domain/content-clears/contents.js'
-import { createNeopleCharacterTimeline } from './character-timeline.js'
+import { CLEAR_CODES } from '@dfragon/server-core/domain/character-timeline/project.js'
+import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/contents.js'
+import { createNeopleCharacterTimeline } from '@dfragon/server-core/infrastructure/neople/character-timeline.js'
 
 const sortCodes = (codes: readonly number[]) =>
   [...new Set(codes)].sort((left, right) => left - right)

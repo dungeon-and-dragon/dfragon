@@ -1,11 +1,11 @@
 import type { AccessLogEnv } from '@dfragon/http-server'
 import type { Context } from 'hono'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../../../domain/character-failure.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import {
   type CharacterIdentity,
   parseCharacterIdentity
-} from '../../../domain/character-identity.js'
+} from '@dfragon/server-core/domain/character-identity.js'
 
 export type HistoryContext = Context<AccessLogEnv, '/:serverId/:characterId/*'>
 

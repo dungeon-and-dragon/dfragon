@@ -1,21 +1,40 @@
-import { projectCharacterCard } from '../../domain/character-card/project.js'
-import { cardScoreCalculator, withCardScore } from '../../domain/character-card/score.js'
+import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/project.js'
+import {
+  cardScoreCalculator,
+  withCardScore
+} from '@dfragon/server-core/domain/character-card/score.js'
 import {
   projectCharacterDetails,
   projectCharacterFreshness
-} from '../../domain/character-detail/project.js'
+} from '@dfragon/server-core/domain/character-detail/project.js'
 import type {
   CharacterIdentity,
   FetchedCharacterPayloads
-} from '../../domain/character-detail/sections.js'
-import { CharacterDetailFailure, characterDetailFailure } from '../../domain/character-failure.js'
-import { type CalculatedScore, toCalculatedScore } from '../../domain/score/calculated.js'
-import { toScoreEngineInput } from '../../domain/score/input.js'
-import { enrichCharacterDetails, hasUnavailableItemDetail } from '../character-catalog/enrich.js'
-import type { CharacterCatalog } from '../character-catalog/ports.js'
+} from '@dfragon/server-core/domain/character-detail/sections.js'
+import {
+  CharacterDetailFailure,
+  characterDetailFailure
+} from '@dfragon/server-core/domain/character-failure.js'
+import {
+  type CalculatedScore,
+  toCalculatedScore
+} from '@dfragon/server-core/domain/score/calculated.js'
+import { toScoreEngineInput } from '@dfragon/server-core/domain/score/input.js'
+import {
+  enrichCharacterDetails,
+  hasUnavailableItemDetail
+} from '@dfragon/server-core/application/character-catalog/enrich.js'
+import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import { type LoadCharacter, createCharacterCache } from './character-cache.js'
-import { type NeopleStageTimings, elapsedMs } from './neople-stages.js'
-import type { CalculateScore, PublishCharacterFetched, FetchCharacterDetails } from './ports.js'
+import {
+  type NeopleStageTimings,
+  elapsedMs
+} from '@dfragon/server-core/application/character-detail/neople-stages.js'
+import type {
+  CalculateScore,
+  PublishCharacterFetched,
+  FetchCharacterDetails
+} from '@dfragon/server-core/application/character-detail/ports.js'
 
 export interface CharacterDetailResponse {
   body: Buffer<ArrayBuffer>

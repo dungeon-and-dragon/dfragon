@@ -24,6 +24,11 @@ const rejectedImports = [
   ['domain/today-grade/m.ts', '@hono/node-server', 'runtime/routes/'],
   ['domain/today-grade/g.ts', 'node:crypto', 'infrastructure/'],
   ['domain/today-grade/h.ts', 'node:fs/promises', 'infrastructure/'],
+  [
+    'domain/today-grade/n.ts',
+    '@dfragon/server-core/infrastructure/neople/character-detail.js',
+    'infrastructure/'
+  ],
   ['application/today-grade/a.ts', '../../infrastructure/neople/today-grade.js', 'ports.ts'],
   ['application/today-grade/b.ts', '../../presentation/http/today-grade/failures.js', 'ports.ts'],
   ['application/today-grade/c.ts', '../../runtime/routes/api.js', '연결은 runtime/에'],
@@ -33,6 +38,16 @@ const rejectedImports = [
   ['application/today-grade/e.ts', 'node:fs/promises', 'infrastructure/'],
   ['application/today-grade/f.ts', 'node:http', 'infrastructure/'],
   ['application/today-grade/g.ts', 'ky', 'infrastructure/'],
+  [
+    'application/today-grade/m.ts',
+    '@dfragon/server-core/infrastructure/score/engine.js',
+    'ports.ts'
+  ],
+  [
+    'presentation/http/today-grade/c.ts',
+    '@dfragon/server-core/infrastructure/neople/character-detail.js',
+    'application의 service'
+  ],
   [
     'infrastructure/neople/a.ts',
     '../../presentation/http/today-grade/failures.js',
@@ -68,6 +83,9 @@ const allowedImports = [
   ['application/today-grade/a.ts', '../../domain/today-grade/failure.js'],
   ['application/today-grade/b.ts', './ports.js'],
   ['application/today-grade/c.ts', 'lru-cache'],
+  ['application/today-grade/d.ts', '@dfragon/server-core/domain/score/input.js'],
+  ['application/today-grade/e.ts', '@dfragon/server-core/application/character-catalog/service.js'],
+  ['runtime/score.ts', '@dfragon/server-core/infrastructure/score/engine.js'],
   ['infrastructure/neople/a.ts', '../../application/today-grade/ports.js'],
   ['infrastructure/neople/b.ts', '../../domain/today-grade/failure.js'],
   ['infrastructure/neople/c.ts', '@dfragon/neople'],

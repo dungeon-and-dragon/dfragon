@@ -1,5 +1,5 @@
 import { sortBy } from 'remeda'
-import { NeopleSearchFailure } from '../../domain/character-search/failure.js'
+import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import type {
   CharacterCandidatesWithAdventureResult,
   CharacterCandidatesResult,
