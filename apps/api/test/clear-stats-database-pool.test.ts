@@ -6,7 +6,7 @@ import {
   type DatabaseConfiguration,
   recordContentClearPopulation
 } from '@dfragon/database'
-import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/contents.js'
+import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/index.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { createApiRuntimeOptions } from '../src/runtime/application.js'
 import { readRuntimeConfiguration } from '../src/runtime/configuration.js'

@@ -2,9 +2,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import type { StoredCharacterSection } from '@dfragon/database'
-import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
 import { projectCharacterChanges } from '../src/domain/character-history/changes.js'
-import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 
 type Body = Record<string, unknown>
 type Item = Record<string, unknown>
