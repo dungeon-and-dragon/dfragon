@@ -2,18 +2,12 @@ import { createRef, type ChangeEvent, type MouseEvent, type Ref } from 'react'
 import { expectTypeOf } from 'vitest'
 import {
   Button,
-  Checkbox,
   Chip,
   IconButton,
-  Kbd,
-  LoadingIndicator,
-  Menu,
-  NumericText,
   Popover,
   ProgressCircle,
   Select,
   StatusChip,
-  StepDots,
   Switch,
   Tabs,
   TextField,
@@ -23,14 +17,8 @@ import {
   TextFieldLabel,
   Tooltip,
   type ButtonProps,
-  type CheckboxProps,
   type ChipProps,
   type IconButtonProps,
-  type KbdProps,
-  type KbdSurface,
-  type MenuItemProps,
-  type MenuPopupProps,
-  type MenuRadioItemProps,
   type PopoverPopupProps,
   type PopoverTitleProps,
   type ProgressCircleProps,
@@ -62,13 +50,9 @@ type PublicPropKeys =
   | keyof SelectTriggerProps
   | keyof SelectPopupProps
   | keyof SelectItemProps
-  | keyof MenuPopupProps
-  | keyof MenuItemProps
-  | keyof MenuRadioItemProps
   | keyof TabsListProps
   | keyof TabsTabProps
   | keyof SwitchProps
-  | keyof CheckboxProps
   | keyof ChipProps
   | keyof TooltipPopupProps
   | keyof PopoverPopupProps
@@ -93,8 +77,6 @@ expectTypeOf<StatusChipTone>().toEqualTypeOf<
 >()
 expectTypeOf<StatusChipProps['busy']>().toEqualTypeOf<boolean | undefined>()
 expectTypeOf<StatusChipProps['size']>().toEqualTypeOf<'sm' | 'md' | undefined>()
-expectTypeOf<KbdSurface>().toEqualTypeOf<'default' | 'signal'>()
-expectTypeOf<KbdProps['surface']>().toEqualTypeOf<KbdSurface | undefined>()
 
 const buttonRef = createRef<HTMLButtonElement>()
 const inputRef = createRef<HTMLInputElement>()
@@ -118,7 +100,6 @@ export const componentExamples = (
       실행
     </Button>
     <ProgressCircle ref={svgRef} value={50} size="24" tone="brand" aria-label="진행률" />
-    <LoadingIndicator>불러오는 중</LoadingIndicator>
     <TextField ref={divRef} invalid size="lg">
       <TextFieldLabel>표시 이름</TextFieldLabel>
       <TextFieldInput
@@ -158,13 +139,9 @@ export const designExamples = (
     <StatusChip tone="signal" role="status" busy>
       인식 중
     </StatusChip>
-    <StepDots />
     <StatusChip tone="success" size="md">
       창 감지됨
     </StatusChip>
-    <Kbd>Alt</Kbd>
-    <Kbd surface="signal">R</Kbd>
-    <NumericText value={125850} format={(value) => `${value}`} countUp={false} />
   </>
 )
 
@@ -189,21 +166,6 @@ export const behaviorExamples = (
         <Select.Separator />
       </Select.Popup>
     </Select.Root>
-    <Menu.Root>
-      <Menu.Trigger render={<Button variant="ghost" />}>검색</Menu.Trigger>
-      <Menu.Popup aria-label="검색" container={divRef}>
-        <Menu.RadioGroup value="party">
-          <Menu.RadioItem value="party" closeOnClick>
-            파티
-          </Menu.RadioItem>
-        </Menu.RadioGroup>
-        <Menu.Separator />
-        <Menu.Group>
-          <Menu.GroupLabel>창</Menu.GroupLabel>
-          <Menu.Item onClick={() => undefined}>새로고침</Menu.Item>
-        </Menu.Group>
-      </Menu.Popup>
-    </Menu.Root>
     <Tabs.Root defaultValue="collection">
       <Tabs.List aria-label="도구">
         <Tabs.Tab value="collection">수집</Tabs.Tab>
@@ -211,7 +173,6 @@ export const behaviorExamples = (
       <Tabs.Panel value="collection">수집 패널</Tabs.Panel>
     </Tabs.Root>
     <Switch aria-label="자동 캡처" defaultChecked />
-    <Checkbox aria-label="저장" indeterminate />
     <Chip defaultPressed>원본</Chip>
     <Popover.Root>
       <Popover.Trigger render={<Button size="sm" />}>열기</Popover.Trigger>
@@ -237,8 +198,6 @@ export const invalidDesignExamples = (
     <IconButton className="square" aria-label="설정" icon={<svg />} />
     {/* @ts-expect-error StatusChip tone은 디자인 상태 tone 중 하나여야 한다. 대기 톤은 주의 톤으로 바뀌었다. */}
     <StatusChip tone="waiting">상태</StatusChip>
-    {/* @ts-expect-error StepDots는 크기를 받지 않는다. */}
-    <StepDots size={5} />
     {/* @ts-expect-error IconButton은 외형 variant를 받지 않는다. */}
     <IconButton variant="ghost" aria-label="설정" icon={<svg />} />
     {/* @ts-expect-error Select trigger 크기는 2xs, xs, sm, md 중 하나다. */}
