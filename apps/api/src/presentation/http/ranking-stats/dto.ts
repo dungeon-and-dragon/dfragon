@@ -3,6 +3,7 @@ import type {
   CharacterStatsSnapshot,
   JobSkillAdoption,
   JobSkillAdoptionSnapshot,
+  SetAdoption,
   StoredCharacter
 } from '@dfragon/database'
 import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
@@ -22,6 +23,12 @@ export const fameRankingQuery = z
   .refine((query) => query.role === undefined || isMaleCrusaderJob(query))
 
 export type FameRankingQuery = z.infer<typeof fameRankingQuery>
+
+export const setStatsQuery = fameRankingQuery
+
+export type SetStatsResponse = Omit<SetAdoption, 'computedAt'> & {
+  computedAt: string | null
+}
 
 export const skillStatsQuery = z
   .object({
@@ -111,4 +118,10 @@ export function toSkillStatsResponse(
   const computedAt = snapshot.computedAt.toISOString()
 
   return { computedAt, topCount: SKILL_STYLE_SAMPLE_TOP_COUNT, ...snapshot.adoption }
+}
+
+export function toSetStatsResponse({ computedAt, ...adoption }: SetAdoption): SetStatsResponse {
+  const storedAt = computedAt?.toISOString() ?? null
+
+  return { computedAt: storedAt, ...adoption }
 }
