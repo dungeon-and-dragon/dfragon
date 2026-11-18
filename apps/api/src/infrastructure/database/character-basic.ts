@@ -2,11 +2,13 @@ import {
   type CharacterBasicInput,
   type CharacterHistoryInput,
   type CharacterScoreInput,
+  type CharacterSetsInput,
   type CharacterSkillStyleInput,
   type DatabaseClient,
   recordCharacterBasic,
   recordCharacterHistory,
   recordCharacterScore,
+  recordCharacterSets,
   recordCharacterSkillStyle
 } from '@dfragon/database'
 import type { CharacterBasicRepository } from '#application/character-basic/repository.js'
@@ -28,5 +30,9 @@ export class DatabaseCharacterBasicRepository implements CharacterBasicRepositor
 
   recordHistory(history: CharacterHistoryInput): Promise<void> {
     return recordCharacterHistory(this.client, history)
+  }
+
+  recordSets(sets: CharacterSetsInput): Promise<void> {
+    return recordCharacterSets(this.client, sets)
   }
 }

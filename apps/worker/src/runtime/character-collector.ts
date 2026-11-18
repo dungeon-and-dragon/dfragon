@@ -11,7 +11,10 @@ import {
   createNeopleCharacterBasic,
   paceNeopleRequests
 } from '#infrastructure/neople/index.js'
-import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/index.js'
+import {
+  parseCharacterBasic,
+  parseCharacterSets
+} from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { readCollectorConfiguration } from './collector-configuration.js'
 import { CharacterCollectionService } from '#application/character-collection/index.js'
 import {
@@ -74,6 +77,7 @@ export async function startCharacterCollector(
       createSources: (onRequest) => createScoreSources(neople, onRequest),
       readConcurrency,
       parseBasic: parseCharacterBasic,
+      parseSets: parseCharacterSets,
       report,
       schedule: configuration.scoreCalculationSchedule
     }
