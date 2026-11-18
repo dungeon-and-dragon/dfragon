@@ -5,7 +5,7 @@ import { ScreenShareChip } from './components/ScreenShareChip'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import type { AutoRoundSignal, BrowserHost } from '../../host/client-host'
-import { SearchScreen } from '../search/SearchScreen'
+import { SearchScreen } from '../search'
 
 const route = getRouteApi('/multisearch')
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])

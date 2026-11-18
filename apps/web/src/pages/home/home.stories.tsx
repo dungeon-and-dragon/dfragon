@@ -4,9 +4,9 @@ import { StoryFrame } from '../../testing/story-support/StoryFrame'
 import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '../../testing/story-support/story-characters'
 import { createStoryClientHost } from '../../testing/story-support/story-host'
-import { CharacterSearchScreen } from '../character-search/CharacterSearchScreen'
-import { NotFoundPage } from '../not-found/NotFoundPage'
-import { TermsPage } from '../legal/LegalPage'
+import { CharacterSearchScreen } from '../character-search'
+import { NotFoundPage } from '../not-found'
+import { TermsPage } from '../legal'
 import { HomePage } from './HomePage'
 
 const meta = {
