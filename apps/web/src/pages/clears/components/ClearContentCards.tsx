@@ -93,7 +93,7 @@ export function ClearContentCards({
           onClick={previous}
           className={`${PAGER} left-0 sm:-left-[18px]`}
         >
-          <ChevronDownIcon className="size-4 rotate-90" />
+          <ChevronDownIcon className="size-icon-sm rotate-90" />
         </button>
       )}
       {!edges.end && (
@@ -103,7 +103,7 @@ export function ClearContentCards({
           onClick={next}
           className={`${PAGER} right-0 sm:-right-[18px]`}
         >
-          <ChevronDownIcon className="size-4 -rotate-90" />
+          <ChevronDownIcon className="size-icon-sm -rotate-90" />
         </button>
       )}
     </nav>
