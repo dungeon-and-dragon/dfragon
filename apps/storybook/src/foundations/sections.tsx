@@ -89,7 +89,7 @@ export function ColorTokens({
                       className="h-8 border border-line"
                       style={{ background: `var(${token.name})` }}
                     />
-                    <div className="grid gap-0.5">
+                    <div className="grid gap-1">
                       <span className="text-xs text-fg-muted">{label}</span>
                       <TokenValue>{values[scheme]}</TokenValue>
                     </div>

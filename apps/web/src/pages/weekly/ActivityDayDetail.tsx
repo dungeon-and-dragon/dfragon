@@ -29,7 +29,7 @@ const ENHANCEMENT_TONES: Readonly<Record<ActivityDayEnhancement['kind'], string>
   refine: 'text-game-refine'
 }
 
-const ROW = 'flex py-0.75 text-xs'
+const ROW = 'flex py-1 text-xs'
 const SPREAD_ROW = `${ROW} justify-between gap-4`
 const TEXT = 'min-w-0 overflow-hidden text-ellipsis'
 const COUNT = 'font-mono tabular-nums text-fg-muted'
@@ -38,7 +38,7 @@ type NameCount = AdventureActivityDay['raids'][number]
 
 function Group({ title }: { title: string }): React.JSX.Element {
   return (
-    <div className="flex justify-between gap-4 pt-1.5 pb-0.5 text-xs font-medium text-fg-subtle">
+    <div className="flex justify-between gap-4 pt-2 pb-1 text-xs font-medium text-fg-subtle">
       {title}
     </div>
   )
@@ -186,7 +186,7 @@ export function ActivityDayDetail({
 }): React.JSX.Element {
   return (
     <div className="flex w-64 flex-col text-fg">
-      <div className="mb-0.5 flex justify-between gap-4 border-b border-line pb-1.5 text-xs text-fg-muted">
+      <div className="mb-1 flex justify-between gap-4 border-b border-line pb-2 text-xs text-fg-muted">
         <span className="text-fg">{formatActivityDate(date)}</span>
       </div>
       {seasonDays.status === 'loading' && (

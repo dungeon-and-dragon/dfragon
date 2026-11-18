@@ -4,7 +4,7 @@ import type { SearchMode } from '#core/capture/search-mode'
 import { SnapshotIcon } from './SnapshotIcon'
 
 const badgeClass =
-  'box-border inline-flex h-4.5 items-center gap-0.75 rounded-badge border px-1 text-2xs font-semibold whitespace-nowrap'
+  'box-border inline-flex h-4.5 items-center gap-1 rounded-badge border px-1 text-2xs font-semibold whitespace-nowrap'
 const orderClass = 'font-mono tabular-nums'
 
 function seatOrderLabel(seat: number, screen: SearchMode): string {

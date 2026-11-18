@@ -154,13 +154,13 @@ function SavedCharacterSection({
         {title}
       </h3>
       {characters.length === 0 ? (
-        <p className="m-0 flex h-11 items-center px-3 text-sm">{emptyMessage}</p>
+        <p className="m-0 flex h-12 items-center px-3 text-sm">{emptyMessage}</p>
       ) : (
         <ul className={listClass}>
           {characters.map((character) => (
             <li
               key={`${character.serverId}/${character.characterId}`}
-              className="flex items-center gap-1.5 border-b border-line pr-1.5 transition-colors duration-(--duration-hover) ease-standard last:border-b-0 hover:bg-inset"
+              className="flex items-center gap-2 border-b border-line pr-2 transition-colors duration-(--duration-hover) ease-standard last:border-b-0 hover:bg-inset"
             >
               <RecentItem character={character} large onPick={onPick} />
               <FavoriteToggle character={character} onToggle={onFavoriteToggle} />
@@ -189,7 +189,7 @@ function RecentItem({
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
-      className={`flex items-center pl-3 text-fg no-underline transition-colors duration-(--duration-hover) ease-standard -outline-offset-2 outline-none hover:bg-inset focus-visible:bg-inset focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal ${large ? 'box-border h-11 min-w-0 grow gap-2.5' : 'gap-3 py-1.5 pr-11'}`}
+      className={`flex items-center pl-3 text-fg no-underline transition-colors duration-(--duration-hover) ease-standard -outline-offset-2 outline-none hover:bg-inset focus-visible:bg-inset focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
     >
       <span
         className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-8.5 w-7' : 'size-9'}`}
@@ -197,8 +197,8 @@ function RecentItem({
         <CardImage src={characterImageUrl(character)} />
       </span>
       <span className="flex min-w-0 grow flex-col">
-        <span className="flex min-w-0 items-center gap-1.5">
-          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-control px-1.5 text-xs font-medium text-fg-muted">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-control px-2 text-xs font-medium text-fg-muted">
             {CHARACTER_SERVER_NAMES[character.serverId]}
           </span>
           <span className="truncate text-sm font-semibold">{character.characterName}</span>

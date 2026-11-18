@@ -105,7 +105,7 @@ export function CharacterRow({
     <>
       <td className={cellClass}>{seat}</td>
       <td className={cellClass}>
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-3">
           <div
             className={`relative size-9 shrink-0 overflow-hidden rounded-control ${shown === undefined ? 'bg-surface' : 'bg-inset'}`}
           >
@@ -495,7 +495,7 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
 
   return (
     <td className={endCellClass}>
-      <span className="mr-1.5 text-2xs text-fg-subtle">{shortScoreLabels[score.label]}</span>
+      <span className="mr-2 text-2xs text-fg-subtle">{shortScoreLabels[score.label]}</span>
       {value != null ? (
         <span
           title={description}
@@ -532,7 +532,7 @@ function NoticeText({ notice }: { notice: SlotNotice }): React.JSX.Element {
       title={notice.text}
       className={`overflow-hidden text-ellipsis ${noticeToneClasses[notice.tone]}`}
     >
-      <span aria-hidden="true" className="mr-1.5 font-semibold">
+      <span aria-hidden="true" className="mr-2 font-semibold">
         !
       </span>
       {notice.text}

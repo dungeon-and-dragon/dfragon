@@ -25,12 +25,12 @@ export function CollectionPanel(): React.JSX.Element {
         </span>
       </h2>
       {summary !== undefined && (
-        <dl className="m-0 flex gap-10 border-b border-line p-4 max-sm:gap-6">
-          <div className="flex flex-col gap-0.5">
+        <dl className="m-0 flex gap-12 border-b border-line p-4 max-sm:gap-6">
+          <div className="flex flex-col gap-1">
             <dt className="text-xs font-medium text-fg-subtle">대기</dt>
             <dd className={`${FIGURE_VALUE} text-xl`}>{formatCount(summary.waiting)}</dd>
           </div>
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-1">
             <dt className="text-xs font-medium text-fg-subtle">가장 오래된 대기</dt>
             <dd className={`${FIGURE_VALUE} text-base`}>
               {summary.oldestQueuedAt !== null

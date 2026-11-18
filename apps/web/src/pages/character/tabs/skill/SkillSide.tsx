@@ -21,14 +21,14 @@ const { heading: HEADING } = itemTableClasses
 const SKILL_ICON = 'relative size-7 shrink-0 select-none'
 const PICKED_RING = 'shadow-[0_0_0_2px_var(--color-signal)]'
 const BRANCH =
-  'm-0 box-border inline-flex h-7 cursor-default items-center gap-1.5 rounded-control border px-2 [font-family:inherit] text-xs'
+  'm-0 box-border inline-flex h-7 cursor-default items-center gap-2 rounded-control border px-2 [font-family:inherit] text-xs'
 const BRANCH_IDLE = 'border-dashed border-line-strong bg-surface text-fg-subtle hover:bg-control'
 const BRANCH_PICKED =
   'border-solid border-signal bg-inset font-semibold text-fg shadow-[0_0_0_1px_var(--color-signal)]'
 const ROWS = 'm-0 list-none p-0'
 const ROW = 'box-border flex min-h-14 items-center gap-3 border-b border-line px-4 py-2'
-const ROW_BODY = 'flex min-w-0 grow flex-col gap-1.5'
-const BRANCHES = 'flex flex-wrap gap-1.5'
+const ROW_BODY = 'flex min-w-0 grow flex-col gap-2'
+const BRANCHES = 'flex flex-wrap gap-2'
 
 export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
   const clipboard = useClipboardCopy(hash)
@@ -37,7 +37,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
   return (
     <section aria-label="스킬 트리 코드">
       <h2 className={HEADING}>스킬 트리 코드</h2>
-      <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
+      <div className="flex items-center gap-2 border-b border-line px-4 py-3">
         <code
           title={hash}
           className="box-border h-7 min-w-0 grow truncate rounded-control border border-line bg-surface px-2 font-mono text-xs/6.5 text-fg-muted"
@@ -45,7 +45,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
           {hash}
         </code>
         <Button size="sm" onClick={clipboard.copy}>
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-2">
             <Icon width={14} height={14} />
             코드 복사
           </span>
@@ -84,10 +84,10 @@ export function SkillChainSection({ chain }: { chain: SkillChain | null }): Reac
   return (
     <section aria-label="스킬 체인">
       <h2 className={HEADING}>스킬 체인</h2>
-      <ol className="m-0 flex list-none flex-wrap items-start gap-y-2 border-b border-line px-4 py-3.5">
+      <ol className="m-0 flex list-none flex-wrap items-start gap-y-2 border-b border-line px-4 py-4">
         {chain.skills.map(({ name, icon }, index) => (
-          <li key={`${name}-${index}`} className="flex items-start gap-0.5">
-            <span className="flex w-16 flex-col items-center gap-1.5 text-center text-2xs text-fg-muted">
+          <li key={`${name}-${index}`} className="flex items-start gap-1">
+            <span className="flex w-16 flex-col items-center gap-2 text-center text-2xs text-fg-muted">
               {icon !== null ? (
                 <span className={SKILL_ICON}>
                   <SkillSprite icon={icon} />
@@ -203,7 +203,7 @@ function RowTitle({
       skill={row}
       source={source}
       side={ADOPTION_SIDE}
-      trigger={<span className="flex items-baseline gap-1.5 self-start font-medium" />}
+      trigger={<span className="flex items-baseline gap-2 self-start font-medium" />}
     >
       {row.name}
       {row.requiredLevel !== null && (

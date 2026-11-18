@@ -38,10 +38,10 @@ export const itemClasses = {
   icon: 'box-border block size-7 shrink-0 rounded-badge border border-current bg-inset object-contain',
   iconSpace: 'size-7 shrink-0',
   name: 'font-semibold',
-  item: 'flex min-w-0 items-center gap-2.5',
-  itemText: 'flex min-w-0 flex-wrap items-center gap-1.5',
+  item: 'flex min-w-0 items-center gap-3',
+  itemText: 'flex min-w-0 flex-wrap items-center gap-2',
   strip:
-    'box-border flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line px-4 py-2',
+    'box-border flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 border-b border-line px-4 py-2',
   stripLabel: 'text-xs font-medium text-fg-subtle',
   stripMuted: 'text-fg-muted',
   stripNumber: 'font-mono tabular-nums text-fg-muted',
@@ -56,12 +56,12 @@ export const itemTableClasses = {
   headEnd: `${tableClasses.headCell} box-border text-right whitespace-nowrap`,
   body: tableClasses.body,
   row: tableClasses.row,
-  cell: 'h-row border-b border-line px-3 py-1.5 align-middle first:pl-4 last:pr-4',
+  cell: 'h-row border-b border-line px-3 py-2 align-middle first:pl-4 last:pr-4',
   slot: 'text-xs whitespace-nowrap text-fg-subtle',
   number: 'font-mono tabular-nums',
   muted: 'text-fg-muted',
   missing: 'text-fg-subtle',
   heading:
-    'm-0 box-border flex min-h-11 items-center gap-2 border-b border-line px-4 text-sm font-semibold',
+    'm-0 box-border flex min-h-12 items-center gap-2 border-b border-line px-4 text-sm font-semibold',
   count: 'font-mono font-medium tabular-nums text-fg-muted'
 } as const

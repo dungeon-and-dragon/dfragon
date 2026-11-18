@@ -19,7 +19,7 @@ import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
 
 const FACT =
-  'flex flex-col gap-0.5 border-r border-line px-4 py-3 last:border-r-0 max-sm:even:border-r-0 max-sm:nth-[-n+2]:border-b'
+  'flex flex-col gap-1 border-r border-line px-4 py-3 last:border-r-0 max-sm:even:border-r-0 max-sm:nth-[-n+2]:border-b'
 const ACTIVE_VALUE = 'font-mono font-medium tabular-nums text-fg'
 
 function Blank(): React.JSX.Element {
@@ -45,7 +45,7 @@ function ActiveRun({ run, now }: { run: Run; now: Date }): React.JSX.Element {
     <div className="flex flex-wrap items-center gap-4 border-b border-line px-4 py-3">
       <RunStatusTag status={run.status} />
       {run.progress !== null && <RunProgress progress={run.progress} wide />}
-      <span className="flex flex-wrap gap-x-5 text-fg-muted">
+      <span className="flex flex-wrap gap-x-6 text-fg-muted">
         <span>{TRIGGER_LABELS[run.trigger]}</span>
         {run.startedAt !== null ? (
           <span>

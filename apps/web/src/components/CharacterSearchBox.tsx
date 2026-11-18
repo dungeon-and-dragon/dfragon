@@ -25,7 +25,7 @@ const iconButton =
 const SIZE_CLASSES = {
   medium: {
     box: 'h-control-sm w-66 max-sm:w-auto max-sm:min-w-0 max-sm:flex-1',
-    server: 'gap-0.5 pr-1.5 pl-2 text-sm',
+    server: 'gap-1 px-2 text-sm',
     divider: 'h-4',
     input: 'px-2 text-sm',
     clear: 'w-6',
@@ -35,7 +35,7 @@ const SIZE_CLASSES = {
   },
   large: {
     box: 'h-control-lg w-160 max-w-full',
-    server: 'gap-1.5 pr-2.5 pl-4 text-sm',
+    server: 'gap-2 pr-3 pl-4 text-sm',
     divider: 'h-5',
     input: 'px-3 text-base',
     clear: 'w-8',

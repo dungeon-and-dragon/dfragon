@@ -5,10 +5,10 @@ import { FOCUS_RING } from './panel-classes'
 
 const WORKER_STALE_MS = 5 * 60_000
 
-const STATUS = 'inline-flex items-center gap-1.5 whitespace-nowrap text-xs'
+const STATUS = 'inline-flex items-center gap-2 whitespace-nowrap text-xs'
 const STATUS_VALUE = 'font-mono font-semibold tabular-nums'
 const DIVIDER = 'h-5 w-px shrink-0 bg-line max-sm:hidden'
-const NAV_LINK = `inline-flex h-topbar items-center gap-1.5 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors duration-(--duration-hover) ease-standard hover:bg-surface hover:text-fg max-sm:h-11 ${FOCUS_RING}`
+const NAV_LINK = `inline-flex h-topbar items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors duration-(--duration-hover) ease-standard hover:bg-surface hover:text-fg max-sm:h-12 ${FOCUS_RING}`
 
 const TOOL_LINKS = [
   { label: 'Grafana', href: '/grafana/' },
@@ -84,7 +84,7 @@ export function OpsHeader({ workerSeenAt, readAt, onRefresh }: OpsHeaderProps): 
           <span className="text-sm font-medium text-fg-muted">운영</span>
         </a>
         <span aria-hidden="true" className={DIVIDER} />
-        <nav aria-label="운영 도구" className="flex h-topbar min-w-0 items-stretch max-sm:h-11">
+        <nav aria-label="운영 도구" className="flex h-topbar min-w-0 items-stretch max-sm:h-12">
           {TOOL_LINKS.map(({ label, href }) => (
             <a key={label} href={href} target="_blank" rel="noreferrer" className={NAV_LINK}>
               {label}
