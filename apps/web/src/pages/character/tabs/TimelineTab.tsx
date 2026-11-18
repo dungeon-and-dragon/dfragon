@@ -1,9 +1,9 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import type { CharacterIdentity, CharacterTimeline } from '#core/character'
 import { useCharacterTimeline } from '#pages/character/hooks/useCharacterTimeline'
 import { LoadingLine } from '#components/LoadingLine'
 import { useClientHost } from '#host/client-host'
-import { useTimelinePages } from '#pages/character/hooks/useTimelinePages'
+import { type TimelinePages, useTimelinePages } from '#pages/character/hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
 import {
   Acquisitions,
@@ -37,6 +37,39 @@ export function TimelineTab({ detail }: CharacterTabProps): React.JSX.Element {
   }
 }
 
+const ROWS_PER_STEP = 10
+
+function useShownRows<Item>(pages: TimelinePages<Item>): {
+  items: readonly Item[]
+  more: React.JSX.Element
+} {
+  const [shown, setShown] = useState(ROWS_PER_STEP)
+  const { items, state, loadMore } = pages
+  const canShowMore = items.length > shown || state.status === 'idle'
+  const shownItems = items.slice(0, shown)
+
+  function showMore(): void {
+    const next = shown + ROWS_PER_STEP
+
+    setShown(next)
+
+    if (items.length < next) {
+      loadMore()
+    }
+  }
+
+  const more = (
+    <TimelineMore
+      canShowMore={canShowMore}
+      state={state}
+      onShowMore={showMore}
+      onRetry={loadMore}
+    />
+  )
+
+  return { items: shownItems, more }
+}
+
 function TimelineContent({
   identity,
   timeline
@@ -63,13 +96,16 @@ function TimelineContent({
     )
   )
 
+  const shownEnhancements = useShownRows(enhancements)
+  const shownAcquisitions = useShownRows(acquisitions)
+
   return (
     <div className="flex flex-col divide-y divide-line text-sm">
       <WeeklyClears clears={timeline.weeklyClears} />
       <SeasonClears counts={timeline.seasonClears} />
       <div className="grid grid-cols-[minmax(0,1fr)_500px] divide-x divide-line max-sm:grid-cols-1 max-sm:divide-x-0 max-sm:divide-y">
-        <Enhancements enhancements={enhancements.items} more={<TimelineMore {...enhancements} />} />
-        <Acquisitions acquisitions={acquisitions.items} more={<TimelineMore {...acquisitions} />} />
+        <Enhancements enhancements={shownEnhancements.items} more={shownEnhancements.more} />
+        <Acquisitions acquisitions={shownAcquisitions.items} more={shownAcquisitions.more} />
       </div>
     </div>
   )

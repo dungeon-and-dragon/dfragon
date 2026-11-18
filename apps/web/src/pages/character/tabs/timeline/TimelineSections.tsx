@@ -6,7 +6,7 @@ import type {
   TimelineClearCount,
   TimelineEnhancement
 } from '#core/character'
-import type { TimelinePages } from '#pages/character/hooks/useTimelinePages'
+import type { TimelinePagesState } from '#pages/character/hooks/useTimelinePages'
 import {
   acquisitionRoute,
   CLEAR_KIND_LABELS,
@@ -15,10 +15,10 @@ import {
 } from './timeline-format'
 import { LoadingLine } from '#components/LoadingLine'
 import { RelativeTime } from '#components/RelativeTime'
-import { useInfiniteScrollRef } from '#hooks/useInfiniteScrollRef'
 import { enhancementKindClasses, raritySolidOfName } from '#components/game-colors'
 
 const BADGE = 'badge text-fg-muted'
+const HARD_BADGE = 'badge bg-danger-weak text-fg-danger'
 const TABLE = 'table table-fixed'
 const TIME_COLUMN = 'w-[112px]'
 const MORE = 'min-h-12 border-t border-line'
@@ -49,37 +49,50 @@ function TimelineGroup({
   )
 }
 
-// 목록 끝의 빈 줄이 화면에 들어오면 다음 묶음을 받는다. 받은 뒤 다시 그린 빈 줄이 아직 화면 안이면 이어서 받는다.
 export function TimelineMore({
+  canShowMore,
   state,
-  loadMore
-}: Pick<TimelinePages<unknown>, 'state' | 'loadMore'>): React.JSX.Element | null {
-  const watchEnd = useInfiniteScrollRef<HTMLDivElement>(loadMore)
-
-  switch (state.status) {
-    case 'end':
-      return null
-    case 'idle':
-      return <div ref={watchEnd} aria-hidden="true" className={MORE} />
-    case 'loading':
-      return (
-        <div aria-busy="true" className={`state state-pending ${MORE_STATE}`}>
-          <LoadingLine short />
-          <span role="status">기록을 더 받는 중입니다.</span>
-        </div>
-      )
-    case 'error':
-      return (
-        <div className={`state state-error ${MORE_STATE}`}>
-          <p role="alert" className="m-0">
-            {state.message}
-          </p>
-          <Button variant="secondary" size="sm" onClick={loadMore}>
-            다시 시도
-          </Button>
-        </div>
-      )
+  onShowMore,
+  onRetry
+}: {
+  canShowMore: boolean
+  state: TimelinePagesState
+  onShowMore: () => void
+  onRetry: () => void
+}): React.JSX.Element | null {
+  if (state.status === 'loading') {
+    return (
+      <div aria-busy="true" className={`state state-pending ${MORE_STATE}`}>
+        <LoadingLine short />
+        <span role="status">기록을 더 받는 중입니다.</span>
+      </div>
+    )
   }
+
+  if (state.status === 'error') {
+    return (
+      <div className={`state state-error ${MORE_STATE}`}>
+        <p role="alert" className="m-0">
+          {state.message}
+        </p>
+        <Button variant="secondary" size="sm" onClick={onRetry}>
+          다시 시도
+        </Button>
+      </div>
+    )
+  }
+
+  if (!canShowMore) {
+    return null
+  }
+
+  return (
+    <div className={`${MORE} flex items-center justify-center`}>
+      <Button variant="secondary" size="sm" onClick={onShowMore}>
+        불러오기
+      </Button>
+    </div>
+  )
 }
 
 function ItemName({
@@ -98,6 +111,8 @@ function ItemName({
 }
 
 export function WeeklyClears({ clears }: { clears: readonly TimelineClear[] }): React.JSX.Element {
+  const recentFirst = clears.toSorted((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt))
+
   return (
     <TimelineGroup
       title="이번 주 클리어"
@@ -105,14 +120,14 @@ export function WeeklyClears({ clears }: { clears: readonly TimelineClear[] }): 
       emptyText="이번 주 클리어 기록이 없습니다."
     >
       <ul className="m-0 list-none p-0">
-        {clears.map((clear, index) => (
+        {recentFirst.map((clear, index) => (
           <li
             key={`${clear.occurredAt}-${index}`}
             className="flex min-h-12 items-center gap-2 border-t border-line px-4 first:border-t-0"
           >
             <span className={`${BADGE} bg-inset`}>{CLEAR_KIND_LABELS[clear.kind]}</span>
+            {clear.hard && <span className={HARD_BADGE}>하드</span>}
             <span className="truncate font-semibold">{clear.name}</span>
-            {clear.hard && <span className={`${BADGE} bg-inset`}>하드</span>}
             {clear.modeName != null && (
               <span className="whitespace-nowrap text-fg-muted">{clear.modeName}</span>
             )}
@@ -145,8 +160,8 @@ export function SeasonClears({
             className="inline-flex h-8 items-center gap-2 rounded-control bg-control px-2 whitespace-nowrap"
           >
             <span className={`${BADGE} bg-canvas`}>{CLEAR_KIND_LABELS[count.kind]}</span>
+            {count.hard && <span className={HARD_BADGE}>하드</span>}
             <span>{count.name}</span>
-            {count.hard && <span className={`${BADGE} bg-canvas`}>하드</span>}
             <span className="num font-semibold">{count.count}</span>
           </li>
         ))}
