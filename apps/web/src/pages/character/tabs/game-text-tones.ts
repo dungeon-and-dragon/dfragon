@@ -1,18 +1,17 @@
 import type { GameTextTone } from '#core/catalog'
+import { enhancementTextClasses, rarityTextClasses } from '../../../components/game-colors'
 
 export const gameTextToneClasses: Readonly<Record<GameTextTone, string>> = {
   default: '',
   increase: 'text-game-increase',
   decrease: 'text-game-decrease',
-  amplify: 'text-game-amplify',
-  enhance: 'text-game-enhance',
-  refine: 'text-game-refine',
+  ...enhancementTextClasses,
   set: 'text-game-set',
   disabled: 'text-fg-subtle',
-  'rarity-rare': 'text-rarity-rare',
-  'rarity-unique': 'text-rarity-unique',
-  'rarity-epic': 'text-rarity-epic',
-  'rarity-legendary': 'text-rarity-legendary',
-  'rarity-chronicle': 'text-rarity-chronicle',
-  'rarity-primordial': 'bg-(image:--gradient-rarity-primordial) bg-clip-text text-transparent'
+  'rarity-rare': rarityTextClasses.rare,
+  'rarity-unique': rarityTextClasses.unique,
+  'rarity-epic': rarityTextClasses.epic,
+  'rarity-legendary': rarityTextClasses.legendary,
+  'rarity-chronicle': rarityTextClasses.chronicle,
+  'rarity-primordial': rarityTextClasses.primordial
 }

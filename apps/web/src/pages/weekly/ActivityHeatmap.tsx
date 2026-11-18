@@ -3,6 +3,11 @@ import { Tooltip } from '@dfragon/ui'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
 import type { AdventureActivity } from '#core/adventure-guild'
 import {
+  enhancementTextClasses,
+  rarityTextClasses,
+  raritySolidClasses
+} from '../../components/game-colors'
+import {
   type AdventureActivitySeasonDaysResult,
   useAdventureActivity,
   useAdventureActivitySeasonDays
@@ -41,8 +46,8 @@ const KIND_TONES: Readonly<Record<ActivityKind, string>> = {
   all: 'text-fg',
   raid: 'text-fg-success',
   legion: 'text-fg-success',
-  item: 'text-rarity-epic',
-  enhance: 'text-game-enhance'
+  item: raritySolidClasses.epic,
+  enhance: enhancementTextClasses.enhance
 }
 const LEVEL_FILLS = [
   'bg-inset',
@@ -57,7 +62,6 @@ const CELL = 'relative box-border block size-3 rounded-control'
 const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
 const LABEL = 'text-2xs whitespace-nowrap text-fg-subtle'
 const TAG = 'badge badge-sm border border-current tabular-nums'
-const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 const BOX = 'section grid grid-cols-[minmax(0,1fr)_120px] xl:grid-cols-[minmax(0,1fr)] py-0'
 
 // gsap이 heatmap 격자에 --heatmap-ring-angle을 돌리고, 테두리가 상속받아 각도로 쓴다.
@@ -152,25 +156,25 @@ function ItemTags({
   return (
     <span className="flex gap-2">
       {items.legendary > 0 && (
-        <span className={`${TAG} text-rarity-legendary`}>
+        <span className={`${TAG} ${raritySolidClasses.legendary}`}>
           레전더리 {numberFormat.format(items.legendary)}
         </span>
       )}
       {items.epic > 0 && (
-        <span className={`${TAG} text-rarity-epic`}>에픽 {numberFormat.format(items.epic)}</span>
+        <span className={`${TAG} ${raritySolidClasses.epic}`}>
+          에픽 {numberFormat.format(items.epic)}
+        </span>
       )}
       {items.primeval > 0 && (
-        <span className={`${TAG} text-rarity-primordial`}>
-          <span className={`bg-(image:--gradient-rarity-primordial) ${GRADIENT_TEXT}`}>
+        <span className={`${TAG} ${raritySolidClasses.primordial}`}>
+          <span className={rarityTextClasses.primordial}>
             태초 {numberFormat.format(items.primeval)}
           </span>
         </span>
       )}
       {items.mythic > 0 && (
-        <span className={`${TAG} text-rarity-mythic`}>
-          <span className={`bg-(image:--gradient-rarity-mythic) ${GRADIENT_TEXT}`}>
-            신화 {numberFormat.format(items.mythic)}
-          </span>
+        <span className={`${TAG} ${raritySolidClasses.mythic}`}>
+          <span className={rarityTextClasses.mythic}>신화 {numberFormat.format(items.mythic)}</span>
         </span>
       )}
     </span>
