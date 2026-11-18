@@ -100,14 +100,12 @@ function HistoryContent({
 
   return (
     <div>
-      {points.length > 1 && (
-        <HistoryCharts
-          points={points}
-          selected={selected}
-          scoreLabel={scoreLabel}
-          formatTime={formatTime}
-        />
-      )}
+      <HistoryCharts
+        points={points}
+        selected={selected}
+        scoreLabel={scoreLabel}
+        formatTime={formatTime}
+      />
       <Heading title="시점" count={points.length} />
       <div className={`${POINT_COLUMNS} ${LINE}`}>
         <ul className="m-0 flex list-none flex-col border-e border-line p-0 max-sm:border-e-0">
