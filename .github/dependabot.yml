@@ -39,7 +39,7 @@ updates:
 
   # Dependabot reads literal FROM images without resolving ARG defaults.
   - package-ecosystem: docker
-    directories: ['/apps/api', '/apps/ops']
+    directories: ['/apps/api', '/apps/ops', '/apps/worker']
     schedule:
       interval: monthly
     cooldown:
