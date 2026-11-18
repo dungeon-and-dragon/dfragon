@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { QueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { createOpsClient } from './api/ops-client'
+import { createOpsClient } from '#ops-api/ops-client'
 import { OpsApp } from './OpsApp'
-import { FakeOpsApi, job, type RunBody, run } from './testing/fake-ops-api'
+import { FakeOpsApi, job, type RunBody, run } from '#ops-testing/fake-ops-api'
 
 const meta = {
   title: 'Screens/운영',

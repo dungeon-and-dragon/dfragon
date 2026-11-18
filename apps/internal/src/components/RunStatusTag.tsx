@@ -1,5 +1,5 @@
-import type { RunStatus } from '../api/ops-schemas'
-import { STATUS_LABELS } from '../format'
+import type { RunStatus } from '#ops-api/ops-schemas'
+import { STATUS_LABELS } from '#app/format'
 
 type StatusTone = 'neutral' | 'signal' | 'success' | 'danger' | 'warning'
 

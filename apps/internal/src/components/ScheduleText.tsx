@@ -1,4 +1,4 @@
-import { describeSchedule } from '../format'
+import { describeSchedule } from '#app/format'
 import { textClasses } from './panel-classes'
 
 export function ScheduleText({

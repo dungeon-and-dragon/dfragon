@@ -311,6 +311,26 @@
       }
     },
     {
+      "includes": ["apps/internal/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["../*", "../**"],
+                    "message": "상위 폴더 상대 경로 대신 #ops-<폴더>/... 또는 #app/... alias로 가져온다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/web/src/**"],
       "linter": {
         "rules": {
