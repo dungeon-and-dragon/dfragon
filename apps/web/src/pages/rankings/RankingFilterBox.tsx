@@ -1,6 +1,6 @@
 import { ChipGroup, type ChipGroupItem } from '@dfragon/ui'
 import { useId } from 'react'
-import type { FameRankingFilter } from '#core/ranking/ranking-stats'
+import type { FameRankingFilter } from '#core/ranking'
 import {
   growFilter,
   growLabel,

@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { CharacterIdentity } from '#core/character/character'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import type { CharacterDetailView, CharacterIdentity } from '#core/character'
 import { useClientHost } from '../../../host/client-host'
 import { useLoadedResult } from '../../../hooks/useLoadedResult'
 

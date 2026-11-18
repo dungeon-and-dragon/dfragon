@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import type { SlotCard, SlotCardActions } from '#core/capture/slot-cards'
+import type { SlotCard, SlotCardActions } from '#core/capture'
 import { Seat } from '../../components/Seat'
 import { SeatMoveStatus } from '../../components/SeatMoveStatus'
 import { SeatTable } from '../../components/SeatTable'

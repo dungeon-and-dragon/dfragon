@@ -1,10 +1,14 @@
 import { Button, RefreshIcon } from '@dfragon/ui'
-import { displayJobName } from '#core/character/job-display'
+import {
+  CHARACTER_SERVER_NAMES,
+  type CharacterDetailView,
+  characterImageUrl,
+  displayJobName,
+  formatApproximateScore,
+  toScoreView
+} from '#core/character'
 import { Link } from '@tanstack/react-router'
-import { MISSING_VALUE } from '#core/capture/cards'
-import { formatApproximateScore, toScoreView } from '#core/character/card-score'
-import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import { MISSING_VALUE } from '#core/capture'
 import { Portrait } from '../../components/Portrait'
 import { characterDisplayOf } from '../../lib/stored-character'
 import { FavoriteToggle } from '../../components/FavoriteToggle'

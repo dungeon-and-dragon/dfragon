@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { CardCharacter } from '#core/capture/cards-types'
+import type { CardCharacter } from '#core/capture'
 import {
   type SlotCardKey,
   type StoredLookupDraft,

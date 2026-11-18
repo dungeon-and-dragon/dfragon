@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import type { ActivitySeason } from '#core/adventure-guild/adventure-activity'
+import type { ActivitySeason } from '#core/adventure-guild'
 import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
 import { usePrimevalFillFade } from './animations/usePrimevalFillFade'
 import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'

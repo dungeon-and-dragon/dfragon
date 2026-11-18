@@ -1,7 +1,10 @@
-import { slotAdventureName } from '#core/capture/adventure-snapshot'
-import { seatValuesToSlotOrder } from '#core/capture/seats'
-import { toClipboardText } from '#core/capture/slot-clipboard'
-import { toSlotCards, type SlotCard } from '#core/capture/slot-cards'
+import {
+  seatValuesToSlotOrder,
+  slotAdventureName,
+  type SlotCard,
+  toClipboardText,
+  toSlotCards
+} from '#core/capture'
 import { useAdventureSnapshot } from '../../../hooks/useAdventureSnapshot'
 import type { PartyCapture } from '../../../hooks/usePartyCapture'
 

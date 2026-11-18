@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { FameRankingFilter } from '#core/ranking/ranking-stats'
+import type { FameRankingFilter } from '#core/ranking'
 import type { ClientHost } from '../../host/client-host'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
 import { StoryScreen } from '../../testing/story-support/StoryScreen'

@@ -7,16 +7,18 @@ import {
   useSyncExternalStore
 } from 'react'
 import { useMachine } from '@xstate/react'
-import { partyCaptureMachine, getCapturePhase } from '#core/capture/party/party-capture-machine'
-import type { CapturePhase } from '#core/capture/capture-types'
-import { SEARCH_SLOT_COUNTS } from '#core/search/search'
+import {
+  type CapturePhase,
+  type CaptureTexts,
+  getCapturePhase,
+  PARTY_SEAT_LAYOUT,
+  partyCaptureMachine
+} from '#core/capture'
+import { SEARCH_SLOT_COUNTS } from '#core/search'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
-import { getRecognizedNicknames } from '#core/ocr/recognized-nicknames'
+import { createSharedOcrWorker, getRecognizedNicknames, type OcrRecognition } from '#core/ocr'
 import { useClientHost } from '../host/client-host'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
-import { PARTY_SEAT_LAYOUT } from '#core/capture/cards'
-import { createSharedOcrWorker, type OcrRecognition } from '#core/ocr/ocr-worker-recognition'
-import type { CaptureTexts } from '#core/capture/capture-texts'
 
 export type CaptureSourceSelection = {
   selectedSourceId: string

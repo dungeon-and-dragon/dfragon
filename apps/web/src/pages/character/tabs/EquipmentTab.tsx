@@ -1,5 +1,4 @@
-import { type EquipmentView, toEquipmentView } from '#core/character/character-equipment'
-import { formatPoint } from '#core/character/character-item'
+import { type EquipmentView, formatPoint, toEquipmentView } from '#core/character'
 import type { CharacterTabProps } from './character-tab-props'
 import { EquipmentTable } from './equipment/EquipmentTable'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'

@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { toScoreView } from '#core/character/card-score'
-import type { CharacterIdentity } from '#core/character/character'
 import {
   type CharacterHistory,
+  type CharacterIdentity,
+  formatPoint,
   type HistoryPoint,
   type ScoreCalculator,
   toHistoryPoints,
-  toHistorySnapshotSummary
-} from '#core/character/character-history'
-import { formatPoint } from '#core/character/character-item'
+  toHistorySnapshotSummary,
+  toScoreView
+} from '#core/character'
 import { formatSeoulDateTime } from '#core/time-format'
 import { LineChart } from '../../../components/chart/LineChart'
 import { useCharacterHistory, useHistorySnapshot } from '../hooks/useCharacterHistory'
