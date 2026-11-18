@@ -13,7 +13,7 @@ import {
   saveCharacterStats,
   saveJobSkillAdoption
 } from '@dfragon/database'
-import type { StatsJobRepository } from '../../application/ranking-stats/repository.js'
+import type { StatsJobRepository } from '#application/ranking-stats/repository.js'
 
 export class DatabaseStatsJobRepository implements StatsJobRepository {
   constructor(private readonly client: DatabaseClient) {}

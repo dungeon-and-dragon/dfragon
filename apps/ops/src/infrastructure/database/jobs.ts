@@ -9,7 +9,7 @@ import {
   requestJobRun,
   setJobPaused
 } from '@dfragon/database'
-import type { JobRepository } from '../../application/jobs/repository.js'
+import type { JobRepository } from '#application/jobs/repository.js'
 
 export class DatabaseJobRepository implements JobRepository {
   constructor(private readonly client: DatabaseClient) {}

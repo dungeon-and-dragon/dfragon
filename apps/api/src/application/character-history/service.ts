@@ -11,7 +11,7 @@ import {
   projectCharacterHistory,
   projectHistoryScore,
   projectNameChanges
-} from '../../domain/character-history/index.js'
+} from '#domain/character-history/index.js'
 import {
   restoreCharacterPayloads,
   toCharacterHeader

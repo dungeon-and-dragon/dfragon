@@ -1,11 +1,11 @@
 import type { CharacterHistoryBasic } from '@dfragon/database'
-import type { CharacterIdentity } from '../character-identity.js'
+import type { CharacterIdentity } from '#domain/character-identity.js'
 import {
   type CharacterDetailSection,
   type CharacterPayload,
   type CharacterPayloads,
   characterDetailSections
-} from '../character-detail/index.js'
+} from '#domain/character-detail/index.js'
 
 export type CharacterHistorySection = Exclude<CharacterDetailSection, 'basic'>
 

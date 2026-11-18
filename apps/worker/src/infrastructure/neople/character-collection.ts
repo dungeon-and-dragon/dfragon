@@ -1,7 +1,7 @@
 import { type NeopleClient, NeopleRequestFailure } from '@dfragon/neople'
 import pThrottle from 'p-throttle'
-import type { FetchCharacterBasic } from '../../application/character-collection/ports.js'
-import { CharacterCollectionFailure } from '../../domain/character-collection/index.js'
+import type { FetchCharacterBasic } from '#application/character-collection/ports.js'
+import { CharacterCollectionFailure } from '#domain/character-collection/index.js'
 
 export type WorkerNeople = Pick<
   NeopleClient,

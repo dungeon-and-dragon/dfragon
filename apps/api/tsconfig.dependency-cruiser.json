@@ -2,6 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
+      "#domain/*": ["./src/domain/*"],
+      "#application/*": ["./src/application/*"],
+      "#infrastructure/*": ["./src/infrastructure/*"],
+      "#presentation/*": ["./src/presentation/*"],
+      "#runtime/*": ["./src/runtime/*"],
       "@dfragon/database": ["../../packages/database/src/index.ts"],
       "@dfragon/neople": ["../../packages/neople/src/index.ts"],
       "@dfragon/server-core/*": ["../../packages/server-core/src/*"]

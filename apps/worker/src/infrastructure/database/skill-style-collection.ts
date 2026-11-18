@@ -5,7 +5,7 @@ import {
   readSampleCharactersWithoutSkillStyle,
   recordCharacterSkillStyle
 } from '@dfragon/database'
-import type { SkillStyleCollectionRepository } from '../../application/ranking-stats/repository.js'
+import type { SkillStyleCollectionRepository } from '#application/ranking-stats/repository.js'
 
 export class DatabaseSkillStyleCollectionRepository implements SkillStyleCollectionRepository {
   constructor(private readonly client: DatabaseClient) {}

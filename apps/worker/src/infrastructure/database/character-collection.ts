@@ -10,7 +10,7 @@ import {
 import type {
   CollectionFailure,
   CollectionRepository
-} from '../../application/character-collection/repository.js'
+} from '#application/character-collection/repository.js'
 
 export class DatabaseCollectionRepository implements CollectionRepository {
   constructor(private readonly client: DatabaseClient) {}

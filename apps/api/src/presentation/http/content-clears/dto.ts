@@ -1,9 +1,5 @@
 import { z } from 'zod'
-import type {
-  ClearContentStats,
-  ClearOverview,
-  ClearStats
-} from '../../../domain/content-clears/index.js'
+import type { ClearContentStats, ClearOverview, ClearStats } from '#domain/content-clears/index.js'
 
 export const weekQuery = z.object({ week: z.iso.date().optional() })
 

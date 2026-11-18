@@ -1,31 +1,31 @@
 import type { TimelineCharacter } from '@dfragon/database'
 import type { ReportCode } from '@dfragon/http-server'
 import { neopleCharacterImageUrl } from '@dfragon/neople'
-import type { AdventureGuildRepository } from '../application/adventure-guild/repository.js'
+import type { AdventureGuildRepository } from '#application/adventure-guild/repository.js'
 import {
   AdventureGuildService,
   emptyAdventureGuildRepository,
   noSeasonBackfill
-} from '../application/adventure-guild/index.js'
-import type { CharacterBasicRepository } from '../application/character-basic/repository.js'
+} from '#application/adventure-guild/index.js'
+import type { CharacterBasicRepository } from '#application/character-basic/repository.js'
 import {
   type CharacterHistoryRepository,
   emptyCharacterHistoryRepository
-} from '../application/character-history/repository.js'
-import { CharacterHistoryService } from '../application/character-history/index.js'
-import { CharacterBasicService } from '../application/character-basic/index.js'
+} from '#application/character-history/repository.js'
+import { CharacterHistoryService } from '#application/character-history/index.js'
+import { CharacterBasicService } from '#application/character-basic/index.js'
 import {
   type CharacterDetailDependencies,
   CharacterDetailService
-} from '../application/character-detail/index.js'
-import type { FetchCharacterImage } from '../application/character-image/ports.js'
-import { CharacterImageService } from '../application/character-image/index.js'
-import type { SearchCharacters } from '../application/character-search/ports.js'
-import type { CharacterSearchRepository } from '../application/character-search/repository.js'
+} from '#application/character-detail/index.js'
+import type { FetchCharacterImage } from '#application/character-image/ports.js'
+import { CharacterImageService } from '#application/character-image/index.js'
+import type { SearchCharacters } from '#application/character-search/ports.js'
+import type { CharacterSearchRepository } from '#application/character-search/repository.js'
 import {
   CharacterSearchService,
   emptyCharacterSearchRepository
-} from '../application/character-search/index.js'
+} from '#application/character-search/index.js'
 import {
   CharacterTimelineService,
   createSeasonBackfillQueue,
@@ -33,31 +33,28 @@ import {
   emptyCharacterTimelineRepository,
   noTimelineSync,
   startQueueCountsWriter
-} from '../application/character-timeline/index.js'
+} from '#application/character-timeline/index.js'
 import type {
   CharacterTimelineRepository,
   TimelineQueueCountRepository
-} from '../application/character-timeline/repository.js'
+} from '#application/character-timeline/repository.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
-import {
-  ClearStatsService,
-  emptyClearStatsRepository
-} from '../application/content-clears/index.js'
-import type { RankingStatsRepository } from '../application/ranking-stats/repository.js'
+import { ClearStatsService, emptyClearStatsRepository } from '#application/content-clears/index.js'
+import type { RankingStatsRepository } from '#application/ranking-stats/repository.js'
 import {
   RankingStatsService,
   emptyRankingStatsRepository
-} from '../application/ranking-stats/index.js'
-import type { FetchShopGrade } from '../application/today-grade/ports.js'
-import { TodayGradeService } from '../application/today-grade/index.js'
-import { CharacterFetched } from '../domain/character-events.js'
-import type { SeasonBackfillJob } from '../domain/character-timeline/index.js'
-import { readApiBuildInfo } from '../infrastructure/build-info.js'
+} from '#application/ranking-stats/index.js'
+import type { FetchShopGrade } from '#application/today-grade/ports.js'
+import { TodayGradeService } from '#application/today-grade/index.js'
+import { CharacterFetched } from '#domain/character-events.js'
+import type { SeasonBackfillJob } from '#domain/character-timeline/index.js'
+import { readApiBuildInfo } from '#infrastructure/build-info.js'
 import {
   parseCharacterBasic,
   parseCharacterSkillStyle
 } from '@dfragon/server-core/infrastructure/neople/index.js'
-import { createNeopleCharacterImage } from '../infrastructure/neople/index.js'
+import { createNeopleCharacterImage } from '#infrastructure/neople/index.js'
 import {
   type ScoreEngineOptions,
   createScoreEngine

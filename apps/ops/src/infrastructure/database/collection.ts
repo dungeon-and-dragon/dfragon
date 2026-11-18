@@ -4,7 +4,7 @@ import {
   readCollectionSummary,
   requeueCollectionFailures
 } from '@dfragon/database'
-import type { CollectionRepository } from '../../application/collection/repository.js'
+import type { CollectionRepository } from '#application/collection/repository.js'
 
 export class DatabaseCollectionRepository implements CollectionRepository {
   constructor(private readonly client: DatabaseClient) {}

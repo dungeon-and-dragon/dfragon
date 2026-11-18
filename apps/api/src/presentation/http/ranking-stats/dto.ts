@@ -7,7 +7,7 @@ import type {
 } from '@dfragon/database'
 import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 import { z } from 'zod'
-import { type CharacterRow, toCharacterRow } from '../../../domain/character-row.js'
+import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 import { isMaleCrusaderJob } from '@dfragon/server-core/domain/male-crusader.js'
 
 const role = z.enum(['dealer', 'buffer']).optional()

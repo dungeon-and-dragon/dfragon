@@ -1,5 +1,5 @@
 import type { StoredCharacter, TimelineCharacter } from '@dfragon/database'
-import { type CharacterRow, toCharacterRow } from '../character-row.js'
+import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 import type { TimelineClear } from '@dfragon/server-core/domain/character-timeline/index.js'
 
 type WeeklyClearRecord = { serverId: string; characterId: string; clears: TimelineClear[] }

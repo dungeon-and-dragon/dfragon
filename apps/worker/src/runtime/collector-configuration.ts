@@ -1,7 +1,7 @@
 import { isAbsolute } from 'node:path'
 import { readDatabaseConfiguration } from '@dfragon/database'
 import { z } from 'zod'
-import { isJobSchedule } from '../infrastructure/jobs/index.js'
+import { isJobSchedule } from '#infrastructure/jobs/index.js'
 
 const invalidConfiguration = 'Invalid character collector configuration'
 const DEFAULT_REQUESTS_PER_SECOND = 5

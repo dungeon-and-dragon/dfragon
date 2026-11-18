@@ -1,6 +1,6 @@
 import type { BatchNeopleKeySummary } from '@dfragon/database'
 import { z } from 'zod'
-import { OpsFailure } from '../../../domain/failure.js'
+import { OpsFailure } from '#domain/failure.js'
 
 // batch_neople_keys.id가 int4라 9자리까지만 받는다.
 const POSITIVE_INT4_DIGITS = /^[1-9]\d{0,8}$/

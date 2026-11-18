@@ -11,7 +11,7 @@ import {
   recordCharacterHistory,
   recordCharacterScore
 } from '@dfragon/database'
-import type { ScoreCalculationRepository } from '../../application/character-score/repository.js'
+import type { ScoreCalculationRepository } from '#application/character-score/repository.js'
 import {
   CLEAR_CONTENTS,
   toCollectionMinFame
