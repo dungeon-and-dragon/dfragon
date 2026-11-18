@@ -3,18 +3,18 @@ import { execFile } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 
 const imageArguments = process.argv.slice(2)
-const [imageReference, opsImageReference] = imageArguments
+const [imageReference, opsImageReference, workerImageReference] = imageArguments
 if (
-  imageArguments.length !== 2 ||
+  imageArguments.length !== 3 ||
   imageArguments.some((reference) => reference.trim() === '' || reference.startsWith('-'))
 ) {
   process.stderr.write(
-    'Usage: node container-database.mjs API_IMAGE_REFERENCE OPS_IMAGE_REFERENCE\n'
+    'Usage: node container-database.mjs API_IMAGE_REFERENCE OPS_IMAGE_REFERENCE WORKER_IMAGE_REFERENCE\n'
   )
   process.exit(2)
 }
@@ -57,6 +57,12 @@ const statsSnapshotCheckPath = fileURLToPath(
 const contentClearCheckPath = fileURLToPath(
   new URL('./container-content-clear-check.mjs', import.meta.url)
 )
+const clearWeekSamplesCheckPath = fileURLToPath(
+  new URL('./container-clear-week-samples-check.mjs', import.meta.url)
+)
+const contentClearStoredCheckPath = fileURLToPath(
+  new URL('./container-content-clear-stored-check.mjs', import.meta.url)
+)
 const opsCheckPath = fileURLToPath(new URL('./container-ops-check.mjs', import.meta.url))
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
@@ -68,6 +74,7 @@ const apiNames = [1, 2].map((index) => `dfragon-db-test-${runId}-api-${index}`)
 const failureName = `dfragon-db-test-${runId}-failure`
 const collectorName = `dfragon-db-test-${runId}-collector`
 const opsName = `dfragon-db-test-${runId}-ops`
+const workerCheckName = `dfragon-db-test-${runId}-worker-check`
 const labelKey = 'com.dfragon.image-test.run'
 const label = `${labelKey}=${runId}`
 // Podman CLI가 쓰는 변수만 넘기고 상위 프로세스의 credential은 넘기지 않는다.
@@ -157,6 +164,10 @@ try {
   const imageId = metadata.Id
   const [opsMetadata] = JSON.parse((await podman(['image', 'inspect', opsImageReference])).stdout)
   const opsImageId = opsMetadata.Id
+  const [workerMetadata] = JSON.parse(
+    (await podman(['image', 'inspect', workerImageReference])).stdout
+  )
+  const workerImageId = workerMetadata.Id
   process.stdout.write(`Disposable api database test: ${runId}\n`)
 
   stage = 'PostgreSQL startup'
@@ -281,6 +292,42 @@ try {
     '--env',
     'DB_USERNAME=dfragon_api'
   ]
+  const workerOptions = [
+    '--platform',
+    `${workerMetadata.Os}/${workerMetadata.Architecture}${workerMetadata.Variant ? `/${workerMetadata.Variant}` : ''}`,
+    '--label',
+    label,
+    '--read-only',
+    '--cap-drop',
+    'ALL',
+    '--security-opt',
+    'no-new-privileges',
+    '--tmpfs',
+    '/tmp:size=16m,mode=1777',
+    '--init',
+    ...databaseEnvironment,
+    '--mount',
+    `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`
+  ]
+  // worker 코드를 쓰는 검사는 worker 이미지에서 돌리고, API 경로도 부르는 검사가 있어 API 컨테이너의 network namespace에 붙인다.
+  const runWorkerCheck = (checkPath) => {
+    const target = `/app/${basename(checkPath)}`
+
+    return podman([
+      'run',
+      '--rm',
+      '--name',
+      workerCheckName,
+      ...workerOptions,
+      '--network',
+      `container:${apiNames[0]}`,
+      '--mount',
+      `type=bind,source=${checkPath},target=${target},readonly`,
+      workerImageId,
+      'node',
+      target
+    ])
+  }
 
   stage = 'migration waits for the advisory lock'
   // Prisma migrate가 PostgreSQL에서 잡는 advisory lock key다. 10초 안에 얻지 못하면 실패한다.
@@ -346,8 +393,6 @@ try {
         '--mount',
         `type=bind,source=${adventureGuildCheckPath},target=/app/container-adventure-guild-check.mjs,readonly`,
         '--mount',
-        `type=bind,source=${rankingStatsCheckPath},target=/app/container-ranking-stats-check.mjs,readonly`,
-        '--mount',
         `type=bind,source=${skillStyleCheckPath},target=/app/container-skill-style-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${skillAdoptionCheckPath},target=/app/container-skill-adoption-check.mjs,readonly`,
@@ -356,7 +401,7 @@ try {
         '--mount',
         `type=bind,source=${contentClearCheckPath},target=/app/container-content-clear-check.mjs,readonly`,
         '--mount',
-        `type=bind,source=${statsSnapshotCheckPath},target=/app/container-stats-snapshot-check.mjs,readonly`,
+        `type=bind,source=${contentClearStoredCheckPath},target=/app/container-content-clear-stored-check.mjs,readonly`,
         imageId
       ])
     )
@@ -657,14 +702,7 @@ try {
       'CREATE INDEX characters_max_fame_idx ON public.characters USING btree (max_fame DESC)'
     ].join('\n')
   )
-  await podman([
-    'exec',
-    '--env',
-    'DB_PASSWORD_FILE=/run/secrets/db_password',
-    apiNames[0],
-    'node',
-    '/app/container-ranking-stats-check.mjs'
-  ])
+  await runWorkerCheck(rankingStatsCheckPath)
 
   stage = 'skill style upsert'
   await podman([
@@ -715,14 +753,7 @@ try {
   ])
 
   stage = 'stats snapshot jobs'
-  await podman([
-    'exec',
-    '--env',
-    'DB_PASSWORD_FILE=/run/secrets/db_password',
-    apiNames[0],
-    'node',
-    '/app/container-stats-snapshot-check.mjs'
-  ])
+  await runWorkerCheck(statsSnapshotCheckPath)
 
   stage = 'content clear records'
   await podman([
@@ -732,6 +763,15 @@ try {
     apiNames[0],
     'node',
     '/app/container-content-clear-check.mjs'
+  ])
+  await runWorkerCheck(clearWeekSamplesCheckPath)
+  await podman([
+    'exec',
+    '--env',
+    'DB_PASSWORD_FILE=/run/secrets/db_password',
+    apiNames[0],
+    'node',
+    '/app/container-content-clear-stored-check.mjs'
   ])
   assert.equal(
     (
@@ -789,12 +829,7 @@ try {
 
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
-  const collectorOptions = [
-    ...runtimeOptions,
-    ...databaseEnvironment,
-    '--mount',
-    `type=bind,source=${join(directory, 'db_password')},target=/run/secrets/db_password,readonly`
-  ]
+  const collectorOptions = [...workerOptions, '--network', networkName]
   await podman([
     'run',
     '--detach',
@@ -803,9 +838,7 @@ try {
     ...collectorOptions,
     '--env',
     'CHARACTER_IMPORT_FILES=/data/1/characters.jsonl,/data/2/characters.jsonl',
-    imageId,
-    'node',
-    'dist/character-collector.js'
+    workerImageId
   ])
   const collectorAddress = (
     await podman([
@@ -979,16 +1012,7 @@ try {
     "DELETE FROM job_runs WHERE status = 'requested'; DELETE FROM jobs WHERE name = 'ops-probe'"
   )
   const missingImportFile = await podman(
-    [
-      'run',
-      '--rm',
-      '--name',
-      collectorName,
-      ...collectorOptions,
-      imageId,
-      'node',
-      'dist/character-collector.js'
-    ],
+    ['run', '--rm', '--name', collectorName, ...collectorOptions, workerImageId],
     { allowFailure: true }
   )
   assert.equal(missingImportFile.code, 1)
@@ -1080,12 +1104,23 @@ try {
   assert.equal(opsWithoutDatabase.code, 1)
   assert.equal(opsWithoutDatabase.stdout, '')
   assert.equal(opsWithoutDatabase.stderr, 'Ops app failed to start\n')
+
+  stage = 'worker image build info'
+  const workerBuildInfo = await podman([
+    'run',
+    '--rm',
+    '--entrypoint',
+    'cat',
+    workerImageId,
+    '/app/build-info.json'
+  ])
+  assert.equal(JSON.parse(workerBuildInfo.stdout).service, 'worker')
 } catch {
   process.stderr.write(`api database image verification failed at ${stage}\n`)
   process.exitCode = 1
 } finally {
   const cleanup = [
-    ...[opsName, ...apiNames, failureName, collectorName, postgresName].map(
+    ...[workerCheckName, opsName, ...apiNames, failureName, collectorName, postgresName].map(
       (name) => () => removeOwned(name)
     ),
     async () => {
@@ -1110,6 +1145,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement\n'
+    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }
