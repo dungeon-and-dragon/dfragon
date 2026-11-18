@@ -15,7 +15,7 @@ function typeImporting(source) {
 }
 
 // [파일, import 대상, 메시지에 있어야 할 문구]
-const boundary = 'apps/api/src/character-collector.ts 하나만'
+const boundary = '함께 쓰는 코드는 @dfragon/server-core에 둔다'
 const rejectedImports = [
   [`${api}/src/runtime/a.ts`, '@dfragon/worker/runtime/run-character-collector.js', boundary],
   [`${api}/src/main.ts`, '@dfragon/worker/runtime/run-character-collector.js', boundary],
@@ -38,6 +38,16 @@ const rejectedImports = [
   [`${worker}/test/c.test.ts`, '../../api/dist/runtime/api-services.js', boundary],
   [`${api}/test/b.test.ts`, '../../worker/test/fixtures.js', boundary],
   [`${api}/test-support/verify-sample.mjs`, '@dfragon/worker/application/jobs/run.js', boundary],
+  [
+    `${api}/src/character-collector.ts`,
+    '@dfragon/worker/runtime/run-character-collector.js',
+    boundary
+  ],
+  [
+    `${api}/test-support/container-sample-check.mjs`,
+    '@dfragon/worker/application/jobs/run.js',
+    boundary
+  ],
   // worker 경계 규칙이 함께 걸려도 계층 규칙이 그대로 남는지 확인한다.
   [`${worker}/src/domain/jobs/b.ts`, '../../application/jobs/run.js', 'application/<기능>/'],
   [`${worker}/src/domain/jobs/c.ts`, 'node:fs', 'infrastructure/'],
@@ -52,8 +62,6 @@ const rejectedImports = [
   [`${api}/src/application/today-grade/b.ts`, 'koffi', 'infrastructure/']
 ]
 const allowedImports = [
-  [`${api}/src/character-collector.ts`, '@dfragon/worker/runtime/run-character-collector.js'],
-  [`${api}/test-support/container-sample-check.mjs`, '@dfragon/worker/application/jobs/run.js'],
   [`${worker}/src/main.ts`, './runtime/run-character-collector.js'],
   [`${worker}/src/runtime/a.ts`, '@dfragon/server-core/infrastructure/score/engine.js'],
   [`${worker}/src/application/jobs/a.ts`, '@dfragon/server-core/domain/seoul-time.js'],
