@@ -189,7 +189,7 @@ function RecentItem({
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
-      className={`flex items-center pl-3 text-fg no-underline transition-colors -outline-offset-2 outline-none hover:bg-inset focus-visible:bg-inset focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
+      className={`flex items-center pl-3 text-fg no-underline transition-colors focus-ring-inset hover:bg-inset focus-visible:bg-inset ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
     >
       <span
         className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-[34px] w-[28px]' : 'size-[36px]'}`}
@@ -235,7 +235,7 @@ function RemoveButton({
       type="button"
       aria-label={`${character.characterName} 최근 목록에서 지우기`}
       onClick={handleClick}
-      className="absolute end-3 top-1/2 m-0 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-fg-muted transition-colors -outline-offset-2 outline-none hover:bg-control-hover hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal"
+      className="absolute end-3 top-1/2 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-control text-fg-muted transition-colors focus-ring-inset hover:bg-control-hover hover:text-fg"
     >
       <svg
         aria-hidden="true"
