@@ -7,7 +7,9 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
 ## 공개 export
 
 - `createNeopleClient(apiKey)`: Neople Open API client를 만듭니다. 메서드마다 응답을 schema로 검증하고, schema에서 추론한 타입을 돌려줍니다.
+  - `servers()`, `jobs()`: 서버 목록과 직업, 전직 목록
   - `searchCharacters(serverId, query)`: 캐릭터 검색
+  - `charactersFame(serverId, query)`: 명성 범위로 찾은 캐릭터. `serverId`가 `all`이면 모든 서버에서 찾습니다.
   - `character(identity, section, signal)`: 캐릭터 기본 정보와 상세 섹션. 섹션 이름과 경로는 `NEOPLE_CHARACTER_SECTIONS`에 있습니다.
   - `characterBasic(identity)`: 캐릭터 기본 정보. 레벨, 직업, 명성, 모험단, 길드까지 검증하며 모험단 이름이 없으면 `api` 실패입니다.
   - `characterSkillStyle(identity)`: 캐릭터 스킬 스타일. `characterSkillStyleSchema`로 바꾼 값을 돌려주며 schema에 맞지 않으면 `api` 실패입니다.

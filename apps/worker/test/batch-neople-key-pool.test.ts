@@ -55,6 +55,15 @@ function fakeKeys(
     multiItems: async () => {
       throw new Error('이 테스트는 아이템 상세를 부르지 않는다')
     },
+    servers: async () => {
+      throw new Error('이 테스트는 서버 목록을 부르지 않는다')
+    },
+    jobs: async () => {
+      throw new Error('이 테스트는 직업 목록을 부르지 않는다')
+    },
+    charactersFame: async () => {
+      throw new Error('이 테스트는 명성 검색을 부르지 않는다')
+    },
     characterBasic: async () => {
       requests.push(key)
 
