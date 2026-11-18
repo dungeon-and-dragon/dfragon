@@ -4,8 +4,10 @@ import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-fa
 import { readQuery } from '#presentation/http/request-query.js'
 import {
   fameRankingQuery,
+  setStatsQuery,
   skillStatsQuery,
   toFameRankingResponse,
+  toSetStatsResponse,
   toSkillStatsResponse,
   toStatsResponse
 } from './dto.js'
@@ -44,6 +46,18 @@ export class RankingStatsController {
       const snapshot = await this.service.skillStats(job.data)
 
       return c.json(toSkillStatsResponse(snapshot))
+    })
+
+    routes.get('/stats/sets', async (c) => {
+      const query = setStatsQuery.safeParse(readQuery(c))
+
+      if (!query.success) {
+        throw new CharacterDetailFailure('query')
+      }
+
+      const adoption = await this.service.setStats(query.data)
+
+      return c.json(toSetStatsResponse(adoption))
     })
 
     return routes
