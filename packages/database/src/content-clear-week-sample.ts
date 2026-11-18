@@ -2,7 +2,6 @@ import type { ClearRecordStageCount } from './clear-record.js'
 import type { DatabaseClient } from './client.js'
 import type {
   ClearAdventureSize,
-  ClearCoClearCount,
   ClearContentScoreSample,
   ClearFameBandCount,
   ClearFameSample,
@@ -35,7 +34,6 @@ export type ClearOverviewWeekSamples = {
   jobFames: ClearJobFameSample[]
   scores: ClearContentScoreSample[]
   jobScores: ClearJobScoreSample[]
-  coClears: ClearCoClearCount[]
   raidTimes: ClearTimeCount[]
 }
 

@@ -78,7 +78,6 @@ export {
   finishContentClearCollection,
   readClearPopulation,
   readContentClearAdventureSizes,
-  readContentClearCoClears,
   readContentClearCollectedAt,
   readContentClearCollection,
   readContentClearFameBands,
@@ -105,7 +104,6 @@ export {
 } from './content-clear.js'
 export type {
   ClearAdventureSize,
-  ClearCoClearCount,
   ClearContentScoreSample,
   ClearFameBandCount,
   ClearFameQuantiles,

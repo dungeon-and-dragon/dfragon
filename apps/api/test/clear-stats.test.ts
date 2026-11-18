@@ -90,7 +90,6 @@ function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRe
     readJobScores: async () => [],
     readFames: async () => [],
     readJobFames: async () => [],
-    readCoClears: async () => [],
     readRaidTimes: async () => [],
     ...overrides
   }
@@ -300,20 +299,20 @@ const storedContentSamples: ClearContentWeekSamples = {
 test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산하지 않고, 첫 클리어 주는 컨텐츠마다 한 번 읽는다', async () => {
   const notComputed = async (): Promise<never> => assert.fail('저장한 주를 다시 계산하면 안 된다')
   const firstWeekReads: string[] = []
+  // 함께 깬 컨텐츠 수를 지우기 전에 저장한 재료 행에는 그 키가 남아 있다.
+  const legacyOverviewSamples = {
+    fames: [],
+    jobFames: [],
+    scores: [],
+    jobScores: [],
+    coClears: [{ contentId: 'michaela-hard', otherContentId: 'engraved-nightmare-1', cleared: 4 }],
+    raidTimes: []
+  }
   const { app, origin } = await listen(
     fakeReader({
       readContentWeekSamples: async ({ contentId }) =>
         contentId === 'michaela-hard' ? storedContentSamples : null,
-      readOverviewSamples: async () => ({
-        fames: [],
-        jobFames: [],
-        scores: [],
-        jobScores: [],
-        coClears: [
-          { contentId: 'michaela-hard', otherContentId: 'engraved-nightmare-1', cleared: 4 }
-        ],
-        raidTimes: []
-      }),
+      readOverviewSamples: async () => legacyOverviewSamples,
       readFirstWeeks: async (contentId) => {
         firstWeekReads.push(contentId)
 
@@ -321,8 +320,7 @@ test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산
       },
       readContentJobFames: notComputed,
       readStreaks: notComputed,
-      readFames: notComputed,
-      readCoClears: notComputed
+      readFames: notComputed
     })
   )
   try {
@@ -348,10 +346,11 @@ test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산
     )
     assert.deepEqual(firstWeekReads, ['michaela-hard'])
     assert.equal(overview.status, 200)
-    assert.deepEqual(
-      overview.body.contents.find(({ id }: { id: string }) => id === 'michaela-hard').coClears,
-      [{ id: 'engraved-nightmare-1', cleared: 4 }]
+    const hardContent = overview.body.contents.find(
+      ({ id }: { id: string }) => id === 'michaela-hard'
     )
+
+    assert.deepEqual(Object.keys(hardContent), ['id', 'cleared', 'fame', 'scores', 'jobs'])
   } finally {
     await app.close()
   }
@@ -636,48 +635,17 @@ test('전체 개요의 명성 분포는 분위수에 이름을 붙이고, 명성
   }
 })
 
-test('함께 깬 컨텐츠는 그 주를 저장한 다른 컨텐츠마다 주고 기준 컨텐츠 자신은 넣지 않는다', async () => {
-  const { app, origin } = await listen(
-    fakeReader({
-      readPopulations: async () => [
-        ...populations,
-        population('michaela-normal', '2026-11-05', 500)
-      ],
-      readCoClears: async () => [
-        { contentId: 'michaela-hard', otherContentId: 'engraved-nightmare-1', cleared: 4 },
-        { contentId: 'engraved-nightmare-1', otherContentId: 'michaela-hard', cleared: 4 }
-      ]
-    })
-  )
+test('쿼리로 계산한 전체 개요의 컨텐츠는 함께 깬 컨텐츠 수를 주지 않는다', async () => {
+  const { app, origin } = await listen(fakeReader())
   try {
-    const { body } = await getJson(origin, '/stats/clears/overview')
+    const { status, body } = await getJson(origin, '/stats/clears/overview')
 
-    assert.deepEqual(
-      body.contents.map(({ id, coClears }: { id: string; coClears: unknown }) => [id, coClears]),
-      [
-        [
-          'michaela-normal',
-          [
-            { id: 'michaela-hard', cleared: 0 },
-            { id: 'engraved-nightmare-1', cleared: 0 }
-          ]
-        ],
-        [
-          'michaela-hard',
-          [
-            { id: 'michaela-normal', cleared: 0 },
-            { id: 'engraved-nightmare-1', cleared: 4 }
-          ]
-        ],
-        [
-          'engraved-nightmare-1',
-          [
-            { id: 'michaela-normal', cleared: 0 },
-            { id: 'michaela-hard', cleared: 4 }
-          ]
-        ]
-      ]
-    )
+    assert.equal(status, 200)
+    assert.ok(body.contents.length > 0)
+
+    for (const content of body.contents) {
+      assert.deepEqual(Object.keys(content), ['id', 'cleared', 'fame', 'scores', 'jobs'])
+    }
   } finally {
     await app.close()
   }
@@ -857,7 +825,6 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
     readJobScores: counted(base.readJobScores),
     readFames: counted(base.readFames),
     readJobFames: counted(base.readJobFames),
-    readCoClears: counted(base.readCoClears),
     readRaidTimes: counted(base.readRaidTimes)
   }
 
@@ -941,7 +908,7 @@ test('새 값을 미리 계산하는 동안 이전 결과에 없는 주를 고�
   }
 })
 
-// 운영 DB에서 여섯 읽기를 함께 보내면 병렬 worker의 공유 메모리가 모자라 실패했다.
+// 운영 DB에서 한 주의 모든 컨텐츠 읽기를 함께 보내면 병렬 worker의 공유 메모리가 모자라 실패했다.
 test('전체 개요는 한 주의 모든 컨텐츠를 읽는 쿼리를 동시에 보내지 않는다', async () => {
   let running = 0
   let maxRunning = 0
@@ -960,7 +927,6 @@ test('전체 개요는 한 주의 모든 컨텐츠를 읽는 쿼리를 동시에
       readJobFames: reading,
       readScores: reading,
       readJobScores: reading,
-      readCoClears: reading,
       readRaidTimes: reading
     })
   )
@@ -996,20 +962,11 @@ test('전체 개요 응답은 reader 행에 섞인 캐릭터, 모험단, 길드 
       ...identifying
     }
   ]
-  const coClears = [
-    {
-      contentId: 'michaela-hard',
-      otherContentId: 'engraved-nightmare-1',
-      cleared: 4,
-      ...identifying
-    }
-  ]
   const raidTimes = [{ weekday: 4, hour: 21, cleared: 40, ...identifying }]
   const { app, origin } = await listen(
     fakeReader({
       readFames: async () => fames,
       readJobFames: async () => jobFames,
-      readCoClears: async () => coClears,
       readRaidTimes: async () => raidTimes
     })
   )

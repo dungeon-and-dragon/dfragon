@@ -65,16 +65,15 @@ export class ClearSampleLoader {
   }
 
   async loadOverview(weekStart: Date): Promise<ClearOverviewWeekSamples> {
-    // 한 주의 모든 컨텐츠를 읽는 쿼리는 PostgreSQL이 병렬 worker로 돌린다. 여섯 개를 함께 보내면 worker들이
+    // 한 주의 모든 컨텐츠를 읽는 쿼리는 PostgreSQL이 병렬 worker로 돌린다. 다섯 개를 함께 보내면 worker들이
     // 공유 메모리(shm)를 동시에 잡아 운영 DB에서 "could not resize shared memory segment"로 실패해 하나씩 읽는다.
     const fames = await this.repository.readFames(weekStart)
     const jobFames = await this.repository.readJobFames(weekStart)
     const scores = await this.repository.readScores(weekStart)
     const jobScores = await this.repository.readJobScores(weekStart)
-    const coClears = await this.repository.readCoClears(weekStart)
     const raidTimes = await this.repository.readRaidTimes(weekStart)
 
-    return { fames, jobFames, scores, jobScores, coClears, raidTimes }
+    return { fames, jobFames, scores, jobScores, raidTimes }
   }
 
   // 단계 라벨은 수집 판정과 같은 함수로 정하고, 단계 라벨이 없는 기록(이내 황혼전)은 세지 않는다.

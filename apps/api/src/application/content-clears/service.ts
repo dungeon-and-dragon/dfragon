@@ -417,6 +417,5 @@ export const emptyClearStatsRepository: ClearStatsRepository = {
   readJobScores: async () => [],
   readFames: async () => [],
   readJobFames: async () => [],
-  readCoClears: async () => [],
   readRaidTimes: async () => []
 }
