@@ -353,9 +353,6 @@ importers:
       '@dfragon/server-core':
         specifier: workspace:*
         version: link:../../packages/server-core
-      '@dfragon/worker':
-        specifier: workspace:*
-        version: link:../worker
       '@hono/node-server':
         specifier: 'catalog:'
         version: 2.1.7(hono@4.13.18)

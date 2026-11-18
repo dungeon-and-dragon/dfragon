@@ -1,7 +1,7 @@
 # DFragon worker
 
 `apps/worker`는 캐릭터 수집 worker입니다. 캐릭터 목록 파일에 있는 캐릭터의 기본 정보를 DB에 쌓고, 배치 job도 돌립니다.
-지금은 API 이미지에 함께 들어가며, API의 진입 파일 `dist/character-collector.js`가 이 workspace의 시작 함수를 불러 실행합니다.
+자기 이미지(`apps/worker/Dockerfile`)로 빌드하며, 진입 파일은 `dist/main.js`입니다.
 
 ## 코드 위치
 
@@ -36,3 +36,19 @@ pnpm --filter @dfragon/worker lint
 ```
 
 `test`는 의존 package와 이 workspace를 build한 뒤 `test/*.test.ts`를 compile해 실행합니다.
+
+## 서버 이미지
+
+worker 이미지는 운영자가 고른 main commit을 인프라의 빌드 노드가 빌드해 배포합니다.
+빌드, 배포 절차는 [인프라 fleet 안내](https://github.com/dungeon-and-dragon/dfragon-infra/blob/main/fleet/README.md#배포)를 따릅니다.
+
+로컬 빌드는 API 이미지처럼 [엔진 라이브러리](../../packages/models/README.md)를 `packages/models/score-engine/libdnfscore.so`에 둔 뒤 실행합니다. 엔진 파일이 없으면 빌드에 실패합니다.
+
+```sh
+podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/worker/Dockerfile -t dfragon-worker:local .
+```
+
+이미지는 UID/GID `1000:1000`으로 실행하며 migration을 적용하지 않습니다.
+`SCORE_LIBRARY_FILE`은 이미지 안의 엔진 라이브러리를 가리킵니다.
+`DB_HOST`를 지정하고 비밀번호 입력을 둘 다 생략하면 `/run/secrets/db_password`를 읽습니다.
+실제 PostgreSQL을 붙인 검사는 [API 컨테이너 검사](../api/README.md#컨테이너-검사)가 API 이미지와 함께 실행합니다.

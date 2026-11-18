@@ -27,7 +27,7 @@ pnpm workspace 모노레포입니다.
 | 경로 | 내용 |
 | --- | --- |
 | [`apps/api`](apps/api/README.md) | Neople 오픈 API를 조회해 캐시하는 공개 캐릭터 API |
-| [`apps/worker`](apps/worker/README.md) | 캐릭터 목록 수집과 배치 job을 돌리는 worker. 지금은 API 이미지에 함께 들어갑니다 |
+| [`apps/worker`](apps/worker/README.md) | 캐릭터 목록 수집과 배치 job을 돌리는 worker |
 | [`apps/ops`](apps/ops/README.md) | 운영 화면이 부르는 job, queue, 수집 대기열, batch Neople key 경로를 내는 운영 app |
 | [`apps/web`](apps/web/README.md) | 웹 앱의 화면, 브라우저 host, OCR과 검색 로직(dfragon.com) |
 | [`apps/storybook`](apps/storybook/README.md) | 토큰, 공용 컴포넌트, 화면을 실제 코드로 미리 보는 Storybook |

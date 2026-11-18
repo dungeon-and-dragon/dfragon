@@ -3,7 +3,7 @@
 const packageEntry = '^\\.\\./\\.\\./packages/(database|neople)/'
 const apiSourcePath = '^src/'
 const allowedApiSourcePath =
-  '^src/(?:(domain|application|infrastructure|presentation|runtime)/|(main|character-collector)\\.ts$)'
+  '^src/(?:(domain|application|infrastructure|presentation|runtime)/|main\\.ts$)'
 
 export default {
   forbidden: [
@@ -13,7 +13,7 @@ export default {
       return {
         name,
         comment:
-          'API source는 domain/, application/, infrastructure/, presentation/, runtime/에 둔다. 계층 폴더 밖에는 진입 파일 main.ts, character-collector.ts만 둔다.',
+          'API source는 domain/, application/, infrastructure/, presentation/, runtime/에 둔다. 계층 폴더 밖에는 진입 파일 main.ts만 둔다.',
         severity: 'error',
         from: { path: apiSourcePath, pathNot: allowedApiSourcePath, orphan },
         to: {}
