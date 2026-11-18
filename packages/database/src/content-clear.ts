@@ -340,12 +340,6 @@ export type ClearJobFameSample = ClearFameSample & {
   cleared: number
 }
 
-export type ClearCoClearCount = {
-  contentId: string
-  otherContentId: string
-  cleared: number
-}
-
 export type ClearTimeCount = {
   weekday: number
   hour: number
@@ -412,29 +406,6 @@ export function readSelectedContentClearJobFames(
   selection: ClearWeekSelection
 ): Promise<ClearJobFameSample[]> {
   return readJobFames(client, selectedClearsSql(selection))
-}
-
-// 한 주로 고르면 컨텐츠마다 캐릭터당 한 행이라 짝지은 행 수가 두 컨텐츠를 함께 깬 캐릭터 수다.
-export function readContentClearCoClears(
-  client: DatabaseClient,
-  weekStart: Date
-): Promise<ClearCoClearCount[]> {
-  return client.$queryRaw<ClearCoClearCount[]>`
-    WITH selected AS (
-      SELECT clear.content_id, clear.server_id, clear.character_id
-      FROM content_clears clear
-      WHERE ${weekClearsSql(weekStart)}
-    )
-    SELECT
-      base.content_id AS "contentId",
-      other.content_id AS "otherContentId",
-      count(*)::int AS cleared
-    FROM selected base
-    JOIN selected other
-      ON other.server_id = base.server_id
-      AND other.character_id = base.character_id
-      AND other.content_id <> base.content_id
-    GROUP BY base.content_id, other.content_id`
 }
 
 function readClearTimes(client: DatabaseClient, where: Prisma.Sql): Promise<ClearTimeCount[]> {
