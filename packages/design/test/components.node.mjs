@@ -69,11 +69,11 @@ test('상태 칩 면은 행 바탕이 비치지 않게 transparent와 섞지 않
   assert.doesNotMatch(status, TRANSPARENT_STATUS_BACKGROUND_PATTERN)
 })
 
-test('동작 줄이기에서 상태 칩 점과 진행 점의 움직임을 끈다', async () => {
+test('동작 줄이기에서 상태 칩 점과 spinner의 움직임을 끈다', async () => {
   const status = await readFile(new URL('status.css', componentsDirectory), 'utf8')
   const reducedRules = status.slice(status.indexOf(REDUCED_MOTION_RULE_START))
 
-  for (const selector of [".status-chip[data-tone='success'] .status-dot", '.step-dots > span']) {
+  for (const selector of [".status-chip[data-tone='success'] .status-dot", '.status-spinner']) {
     const rule = reducedRules.slice(reducedRules.indexOf(`${selector} {`))
     assert.notEqual(reducedRules.indexOf(`${selector} {`), -1, selector)
     assert.match(rule.slice(0, rule.indexOf('}')), /animation:\s*none/, selector)

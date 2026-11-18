@@ -795,7 +795,7 @@ describe('StatusChip의 상태 알림 범위', () => {
 })
 
 describe('StatusChip의 tone과 진행 표시', () => {
-  it('tone을 data 속성으로 드러내고 진행 중이면 점 대신 점 세 개를 둔다', async () => {
+  it('tone을 data 속성으로 드러내고 진행 중이면 점 대신 spinner를 둔다', async () => {
     await render(
       <>
         <StatusChip tone="neutral">준비 중</StatusChip>
@@ -820,10 +820,13 @@ describe('StatusChip의 tone과 진행 표시', () => {
       'signal'
     ])
     expect(done.hasAttribute('data-busy')).toBe(false)
-    expect(done.querySelectorAll('[aria-hidden="true"]')).toHaveLength(1)
+    expect(
+      [...done.querySelectorAll('[aria-hidden="true"]')].map((mark) => mark.className)
+    ).toEqual(['status-dot'])
     expect(busy.hasAttribute('data-busy')).toBe(true)
-    const dots = busy.querySelector('[aria-hidden="true"]')!
-    expect(dots.children).toHaveLength(3)
+    expect(
+      [...busy.querySelectorAll('[aria-hidden="true"]')].map((mark) => mark.className)
+    ).toEqual(['status-spinner'])
     expect(busy.textContent).toBe('인식 중')
   })
 })
