@@ -3,7 +3,7 @@ import type { ReactNode, Ref } from 'react'
 import { MISSING_VALUE } from '#core/capture'
 import type { StoredCharacter } from '#core/ranking'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
-import { RankBadge } from './RankBadge'
+import { RankNumber } from './RankNumber'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -76,7 +76,7 @@ export function CharacterTable({
         <tbody>
           {rows.map((row) => (
             <tr key={`${row.serverId}/${row.characterId}`}>
-              {ranked && <td>{row.rank != null && <RankBadge rank={row.rank} />}</td>}
+              {ranked && <td>{row.rank != null && <RankNumber rank={row.rank} />}</td>}
               <td className={PORTRAIT_CELL}>
                 <CharacterCell
                   character={row}
