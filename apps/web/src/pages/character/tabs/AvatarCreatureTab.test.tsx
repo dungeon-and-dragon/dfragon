@@ -7,10 +7,10 @@ import { characterDetailFixture } from '#core/testing'
 import { artifactDotClasses as dotTones, avatarClasses } from './avatar/avatar-classes'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
 import {
-  itemClasses,
   raritySolidClasses as raritySolid,
   rarityTextClasses as rarityTones
-} from './equipment/item-classes'
+} from '../../../components/game-colors'
+import { itemClasses } from './equipment/item-classes'
 
 let container: HTMLDivElement
 let root: Root

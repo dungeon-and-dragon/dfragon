@@ -16,25 +16,7 @@ import {
 import { LoadingLine } from '../../../../components/LoadingLine'
 import { RelativeTime } from '../../../../components/RelativeTime'
 import { useInfiniteScrollRef } from '../../../../hooks/useInfiniteScrollRef'
-import { raritySolidClasses } from '../equipment/item-classes'
-
-const RARITY_TONES: Readonly<Record<string, string>> = {
-  커먼: raritySolidClasses.common,
-  언커먼: raritySolidClasses.uncommon,
-  레어: raritySolidClasses.rare,
-  유니크: raritySolidClasses.unique,
-  에픽: raritySolidClasses.epic,
-  레전더리: raritySolidClasses.legendary,
-  크로니클: raritySolidClasses.chronicle,
-  태초: raritySolidClasses.primordial,
-  신화: raritySolidClasses.mythic
-}
-
-const ENHANCEMENT_KIND_TONES: Readonly<Record<TimelineEnhancement['kind'], string>> = {
-  reinforce: 'text-game-enhance',
-  amplify: 'text-game-amplify',
-  refine: 'text-game-refine'
-}
+import { enhancementKindClasses, raritySolidOfName } from '../../../../components/game-colors'
 
 const BADGE = 'badge text-fg-muted'
 const TABLE = 'table table-fixed'
@@ -109,7 +91,9 @@ function ItemName({
   }
 
   return (
-    <span className={itemRarity != null ? RARITY_TONES[itemRarity] : undefined}>{itemName}</span>
+    <span className={itemRarity != null ? raritySolidOfName(itemRarity) : undefined}>
+      {itemName}
+    </span>
   )
 }
 
@@ -207,7 +191,7 @@ export function Enhancements({
               <td className="text-fg-subtle tabular-nums">
                 <RelativeTime at={enhancement.occurredAt} />
               </td>
-              <td className={ENHANCEMENT_KIND_TONES[enhancement.kind]}>
+              <td className={enhancementKindClasses[enhancement.kind]}>
                 {ENHANCEMENT_KIND_LABELS[enhancement.kind]}
               </td>
               <td>

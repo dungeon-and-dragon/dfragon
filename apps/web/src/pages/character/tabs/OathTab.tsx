@@ -11,7 +11,8 @@ import {
 import { useOathCatalog } from '../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
-import { itemClasses, itemTableClasses, raritySolidOf } from './equipment/item-classes'
+import { raritySolidOf } from '../../../components/game-colors'
+import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
 
 const { slot, muted, heading, count } = itemTableClasses

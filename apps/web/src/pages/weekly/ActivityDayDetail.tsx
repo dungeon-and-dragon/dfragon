@@ -8,26 +8,12 @@ import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActi
 import type { ActivityKind } from './activity-heatmap'
 import { formatClearCount } from './clear-count'
 import { type DayItemRow, dayItemRows } from './day-item-rows'
+import { enhancementKindClasses, rarityTextOfName } from '../../components/game-colors'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
 const MAX_ENHANCEMENT_ROWS = 8
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
-
-const GRADIENT_TEXT = 'bg-clip-text text-transparent'
-
-const RARITY_TONES: Readonly<Record<string, string>> = {
-  레전더리: 'text-rarity-legendary',
-  에픽: 'text-rarity-epic',
-  태초: `bg-(image:--gradient-rarity-primordial) ${GRADIENT_TEXT}`,
-  신화: `bg-(image:--gradient-rarity-mythic) ${GRADIENT_TEXT}`
-}
-
-const ENHANCEMENT_TONES: Readonly<Record<ActivityDayEnhancement['kind'], string>> = {
-  reinforce: 'text-game-enhance',
-  amplify: 'text-game-amplify',
-  refine: 'text-game-refine'
-}
 
 const ROW = 'flex py-1 text-xs'
 const SPREAD_ROW = `${ROW} justify-between gap-4`
@@ -84,7 +70,7 @@ function ItemRow({ row }: { row: DayItemRow }): React.JSX.Element {
 
   return (
     <div className={SPREAD_ROW}>
-      <span className={`${TEXT} ${RARITY_TONES[row.rarity] ?? ''}`}>{row.rarity}</span>
+      <span className={`${TEXT} ${rarityTextOfName(row.rarity) ?? ''}`}>{row.rarity}</span>
       <span className={COUNT}>{numberFormat.format(row.count)}개</span>
     </div>
   )
@@ -132,13 +118,13 @@ function EnhancementGroup({
 }
 
 function ItemName({ name, rarity }: ActivityDayItem): React.JSX.Element {
-  return <span className={RARITY_TONES[rarity]}>{name}</span>
+  return <span className={rarityTextOfName(rarity)}>{name}</span>
 }
 
 function EnhancementResult({ kind, target, success }: ActivityDayEnhancement): React.JSX.Element {
   return (
     <>
-      <b className={`num font-semibold ${ENHANCEMENT_TONES[kind]}`}>+{target}</b>{' '}
+      <b className={`num font-semibold ${enhancementKindClasses[kind]}`}>+{target}</b>{' '}
       <span className={success ? 'text-fg-success' : 'text-fg-danger'}>
         {success ? '성공' : '실패'}
       </span>
