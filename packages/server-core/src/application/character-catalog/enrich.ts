@@ -3,8 +3,8 @@ import {
   mapCharacterItems,
   isCatalogId,
   unavailableDetail
-} from '../../domain/character-catalog/index.js'
-import type { projectCharacterDetails } from '../../domain/character-detail/index.js'
+} from '#domain/character-catalog/index.js'
+import type { projectCharacterDetails } from '#domain/character-detail/index.js'
 import type { CharacterCatalog } from './ports.js'
 
 type CharacterDetails = ReturnType<typeof projectCharacterDetails>

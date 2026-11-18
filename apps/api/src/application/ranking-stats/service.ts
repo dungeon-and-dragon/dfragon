@@ -5,7 +5,7 @@ import type {
   JobSkillAdoptionSnapshot,
   StoredCharacter
 } from '@dfragon/database'
-import { FAME_RANKING_LIMIT } from '../../domain/ranking-stats/index.js'
+import { FAME_RANKING_LIMIT } from '#domain/ranking-stats/index.js'
 import type { RankingStatsRepository } from './repository.js'
 
 export class RankingStatsService {

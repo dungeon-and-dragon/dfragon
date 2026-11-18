@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { defineJob } from '../jobs/index.js'
+import { defineJob } from '#application/jobs/index.js'
 import type { ContentClearCollectionService } from './collection.js'
 import type { ClearRecordBackfillService } from './record-backfill.js'
 import type { ClearWeekSampleService } from './week-samples.js'

@@ -19,7 +19,7 @@ import {
   toEmptyContentStats,
   toLegionContentStats,
   toLegionSummaries
-} from '../../domain/content-clears/index.js'
+} from '#domain/content-clears/index.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/index.js'
 

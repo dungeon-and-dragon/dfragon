@@ -4,8 +4,8 @@ import {
   CATALOG_LIMITS,
   unavailableDetail,
   type CatalogDetail
-} from '../../domain/character-catalog/index.js'
-import type { CharacterPayload } from '../../domain/character-detail/index.js'
+} from '#domain/character-catalog/index.js'
+import type { CharacterPayload } from '#domain/character-detail/index.js'
 import type { CharacterCatalog, FetchCatalog } from './ports.js'
 
 const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000

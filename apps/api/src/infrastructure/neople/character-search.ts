@@ -6,7 +6,7 @@ import {
   type NeopleClient,
   NeopleRequestFailure
 } from '@dfragon/neople'
-import type { SearchCharacters } from '../../application/character-search/ports.js'
+import type { SearchCharacters } from '#application/character-search/ports.js'
 import { CHARACTER_ID_PATTERN } from '@dfragon/server-core/domain/character-identity.js'
 import { NEOPLE_SERVER_NAMES } from '@dfragon/server-core/domain/neople-servers.js'
 import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/index.js'
@@ -14,7 +14,7 @@ import type {
   CharacterSearchRow,
   NeopleCharacterSearchInput,
   NeopleCharacterSearchResult
-} from '../../domain/character-search/index.js'
+} from '#domain/character-search/index.js'
 
 const invalidResponse = (): NeopleSearchFailure => new NeopleSearchFailure('api')
 

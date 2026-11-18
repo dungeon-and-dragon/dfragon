@@ -1,4 +1,4 @@
-import type { ScoreEngineInput } from '../../domain/score/index.js'
+import type { ScoreEngineInput } from '#domain/score/index.js'
 
 // 엔진은 문서의 캐릭터 식별 칸을 확인한 뒤 thread마다 한 번 계산 초기화(약 1초)를 하므로, 식별 칸만 있는 문서로도
 // 초기화가 끝난다. 직업은 버퍼여야 버프 계산기가 직업 판정에서 멈추지 않고 초기화까지 간다

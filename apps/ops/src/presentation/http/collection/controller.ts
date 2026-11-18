@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
-import type { CollectionService } from '../../../application/collection/index.js'
-import { OpsFailure } from '../../../domain/failure.js'
-import { readJsonBody } from '../json-request.js'
+import type { CollectionService } from '#application/collection/index.js'
+import { OpsFailure } from '#domain/failure.js'
+import { readJsonBody } from '#presentation/http/json-request.js'
 import { type CollectionSummaryResponse, requeueBody, toRequeueResponse } from './dto.js'
 
 // 집계가 대기열 테이블 전체를 읽으므로 자주 다시 읽는 job 목록 경로와 나눠 둔다.

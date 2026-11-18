@@ -1,8 +1,8 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type { NeopleClient } from '@dfragon/neople'
-import type { FetchCatalog } from '../../application/character-catalog/ports.js'
-import type { CharacterPayload } from '../../domain/character-detail/index.js'
-import { CATALOG_LIMITS, isCatalogId } from '../../domain/character-catalog/index.js'
+import type { FetchCatalog } from '#application/character-catalog/ports.js'
+import type { CharacterPayload } from '#domain/character-detail/index.js'
+import { CATALOG_LIMITS, isCatalogId } from '#domain/character-catalog/index.js'
 
 function selectRequestedRows(rows: unknown[], itemIds: string[]): Map<string, CharacterPayload> {
   const payloads = new Map<string, CharacterPayload>()

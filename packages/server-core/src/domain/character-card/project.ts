@@ -1,4 +1,4 @@
-import { characterFromDetails } from '../character-from-details.js'
+import { characterFromDetails } from '#domain/character-from-details.js'
 import type { CharacterCard } from './types.js'
 
 export interface CharacterCardSource {

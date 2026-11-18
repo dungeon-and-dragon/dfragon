@@ -4,7 +4,7 @@ import {
   DatabaseCollectionRepository,
   DatabaseJobRepository,
   DatabaseQueueRepository
-} from '../infrastructure/database/index.js'
+} from '#infrastructure/database/index.js'
 import { createOpsHttpApp } from './ops-app.js'
 
 export function createOpsRuntime(database: DatabaseConfiguration) {

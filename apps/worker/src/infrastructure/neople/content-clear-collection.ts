@@ -1,5 +1,5 @@
 import type { NeopleClient } from '@dfragon/neople'
-import type { CreateClearTimeline } from '../../application/content-clears/ports.js'
+import type { CreateClearTimeline } from '#application/content-clears/ports.js'
 import { CLEAR_CODES } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/index.js'
 import { createNeopleCharacterTimeline } from '@dfragon/server-core/infrastructure/neople/index.js'

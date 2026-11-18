@@ -1,5 +1,5 @@
 import type { BatchNeopleKeyInput, BatchNeopleKeySummary } from '@dfragon/database'
-import { OpsFailure } from '../../domain/failure.js'
+import { OpsFailure } from '#domain/failure.js'
 import type { BatchNeopleKeyRepository } from './repository.js'
 
 function throwWhenMissing(found: boolean): void {

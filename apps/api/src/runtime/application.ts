@@ -17,17 +17,14 @@ import {
   DatabaseSeasonBackfillRepository,
   DatabaseTimelineQueueCountRepository,
   DatabaseTimelineSyncRepository
-} from '../infrastructure/database/index.js'
+} from '#infrastructure/database/index.js'
 import {
   ENHANCEMENT_BACKFILL_CODES,
   EnhancementBackfillService,
   SeasonBackfillService,
   TimelineSyncService
-} from '../application/character-timeline/index.js'
-import {
-  createNeopleCharacterSearch,
-  createNeopleShopGrade
-} from '../infrastructure/neople/index.js'
+} from '#application/character-timeline/index.js'
+import { createNeopleCharacterSearch, createNeopleShopGrade } from '#infrastructure/neople/index.js'
 import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'

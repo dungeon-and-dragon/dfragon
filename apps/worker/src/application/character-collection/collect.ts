@@ -1,5 +1,5 @@
 import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
-import { CharacterCollectionFailure } from '../../domain/character-collection/index.js'
+import { CharacterCollectionFailure } from '#domain/character-collection/index.js'
 import type { FetchCharacterBasic } from './ports.js'
 import type { CollectionRepository } from './repository.js'
 

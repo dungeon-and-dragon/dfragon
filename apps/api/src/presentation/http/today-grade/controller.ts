@@ -1,7 +1,7 @@
 import { type AccessLogEnv, createFailureHandler } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import type { TodayGradeService } from '../../../application/today-grade/index.js'
-import { respondUnlessDisconnected } from '../disconnected-request.js'
+import type { TodayGradeService } from '#application/today-grade/index.js'
+import { respondUnlessDisconnected } from '#presentation/http/disconnected-request.js'
 import type { TodayGradeResponse } from './dto.js'
 import { todayGradeFailureResponse } from './failures.js'
 

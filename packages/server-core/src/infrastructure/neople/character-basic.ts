@@ -2,7 +2,7 @@ import { characterBasicSchema, characterSkillStyleSchema } from '@dfragon/neople
 import type {
   ParseCharacterBasic,
   ParseCharacterSkillStyle
-} from '../../application/character-basic/ports.js'
+} from '#application/character-basic/ports.js'
 
 export const parseCharacterBasic: ParseCharacterBasic = (payload) => {
   const parsed = characterBasicSchema.safeParse(payload)

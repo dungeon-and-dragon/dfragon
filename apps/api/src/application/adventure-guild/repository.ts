@@ -4,8 +4,8 @@ import type {
   AdventureSeasonDays,
   AdventureWeeklyClears,
   StoredActivitySeason
-} from '../../domain/adventure-guild/index.js'
-import type { SeasonBackfillJob } from '../../domain/character-timeline/index.js'
+} from '#domain/adventure-guild/index.js'
+import type { SeasonBackfillJob } from '#domain/character-timeline/index.js'
 
 export type AdventureActivityRead = {
   characters: TimelineCharacter[]
