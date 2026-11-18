@@ -13,9 +13,9 @@ export function CollectionPanel(): React.JSX.Element {
 
   return (
     <section aria-label="수집 대기열" className={panelClasses.box}>
-      <h2 className={panelClasses.heading}>
+      <h2 className="section-title">
         수집 대기열
-        <span className={panelClasses.headingActions}>
+        <span className="section-title-actions">
           <RequeueButton
             label="전체 되돌리기"
             title="실패"

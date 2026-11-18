@@ -9,7 +9,7 @@ const meta = {
   title: 'Patterns/차트',
   decorators: [
     (Story) => (
-      <div className="w-[720px] max-w-full rounded-panel border border-line bg-canvas font-sans text-sm text-fg">
+      <div className="w-[720px] max-w-full border border-line bg-canvas font-sans text-sm text-fg">
         <Story />
       </div>
     )

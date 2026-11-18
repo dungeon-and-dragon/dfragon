@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '../../testing/story-support/story-characters'
 import { createStoryClientHost } from '../../testing/story-support/story-host'
 import { CharacterSearchScreen } from '../character-search/CharacterSearchScreen'
@@ -43,16 +44,12 @@ const searchHost = createStoryClientHost({
     })
 })
 
-function Screen({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return <div className="page mt-6">{children}</div>
-}
-
 export const 메인: Story = {
   render: () => (
     <StoryFrame host={rankingHost}>
-      <Screen>
+      <StoryScreen>
         <HomePage />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -60,9 +57,9 @@ export const 메인: Story = {
 export const 메인받는중: Story = {
   render: () => (
     <StoryFrame>
-      <Screen>
+      <StoryScreen>
         <HomePage />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -70,9 +67,9 @@ export const 메인받는중: Story = {
 export const 캐릭터검색결과: Story = {
   render: () => (
     <StoryFrame host={searchHost}>
-      <Screen>
+      <StoryScreen>
         <CharacterSearchScreen query={{ characterName: '캐릭터', serverId: 'all' }} />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -80,9 +77,9 @@ export const 캐릭터검색결과: Story = {
 export const 약관: Story = {
   render: () => (
     <StoryFrame>
-      <Screen>
+      <StoryScreen>
         <TermsPage />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -90,9 +87,9 @@ export const 약관: Story = {
 export const 없는주소: Story = {
   render: () => (
     <StoryFrame>
-      <Screen>
+      <StoryScreen>
         <NotFoundPage />
-      </Screen>
+      </StoryScreen>
     </StoryFrame>
   )
 }

@@ -21,8 +21,8 @@ export function ClearTitle({
   const [now] = useState(Date.now)
 
   return (
-    <header className="box-border flex min-h-16 flex-wrap items-center gap-4 rounded-panel border border-line bg-canvas p-4">
-      <h1 className="my-0 mr-6 ml-0 text-xl font-semibold tracking-heading">{CLEAR_TITLE}</h1>
+    <header className="section screen-head flex-wrap justify-start">
+      <h1 className="screen-title mr-6">{CLEAR_TITLE}</h1>
       {children}
       {summary !== undefined && (
         <div className="ml-auto flex flex-wrap gap-x-6 gap-y-2 max-sm:gap-x-4">
@@ -64,11 +64,11 @@ export function Panel({
   return (
     <section
       aria-label={name}
-      className="flex min-w-0 grow basis-0 flex-col rounded-panel border border-line bg-canvas"
+      className="section flex min-w-0 grow basis-0 flex-col"
       style={grow !== undefined ? { flexGrow: grow } : undefined}
     >
-      <div className="flex min-h-12 flex-wrap items-center gap-2 border-b border-line px-4 py-2">
-        <h2 className="m-0 grow text-base font-semibold tracking-heading">{name}</h2>
+      <div className="section-title flex-wrap py-2">
+        <h2 className="grow">{name}</h2>
         {controls}
       </div>
       <div className="flex grow flex-col">{children}</div>

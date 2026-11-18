@@ -2,11 +2,7 @@
 export const FIELD_INPUT = 'field-box box-border w-full font-sans outline-none'
 
 export const panelClasses = {
-  box: 'relative min-w-0 overflow-hidden rounded-panel border border-line bg-canvas',
-  heading: 'm-0 flex min-h-12 items-center gap-2 border-b border-line px-4 text-base font-semibold',
-  headingCount: 'font-mono text-xs font-medium tabular-nums text-fg-subtle',
-  headingActions: 'ml-auto flex items-center gap-2',
-  sectionHeading: 'flex min-h-12 items-center border-b border-line px-4 text-sm font-semibold',
+  box: 'section min-w-0',
   empty: 'm-0 px-4 py-12 text-center text-sm font-semibold',
   scroll: 'overflow-x-auto'
 } as const

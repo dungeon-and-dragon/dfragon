@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import type { ClientHost } from '../../host/client-host'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '../../testing/story-support/story-characters'
 import { createStoryClientHost } from '../../testing/story-support/story-host'
 import { RANKING_JOBS } from './ranking-jobs'
@@ -40,9 +41,9 @@ function Screen({
 
   return (
     <StoryFrame host={host}>
-      <div className="page mt-6">
+      <StoryScreen>
         <RankingsScreen filter={filter} onFilterChange={setFilter} />
-      </div>
+      </StoryScreen>
     </StoryFrame>
   )
 }

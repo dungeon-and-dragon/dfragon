@@ -16,7 +16,7 @@ export function FavoritesPage(): React.JSX.Element {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col">
       <TitleBox title="즐겨찾기">
         {empty ? null : (
           <TitleStat label="캐릭터" value={integer.format(favoriteCharacters.length)} />

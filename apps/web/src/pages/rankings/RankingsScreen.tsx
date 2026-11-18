@@ -11,7 +11,7 @@ export function RankingsScreen({
   onFilterChange: (filter: FameRankingFilter) => void
 }): React.JSX.Element {
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col">
       <TitleBox title="명성 랭킹" />
       <RankingFilterBox filter={filter} onChange={onFilterChange} />
       <FameRankingList filter={filter} />

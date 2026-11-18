@@ -8,8 +8,8 @@ export function TitleBox({
   children?: ReactNode
 }): React.JSX.Element {
   return (
-    <header className="flex min-h-16 items-center justify-between gap-4 rounded-panel border border-line bg-canvas px-4 max-sm:flex-wrap max-sm:py-3">
-      <h1 className="m-0 text-xl font-semibold tracking-heading">{title}</h1>
+    <header className="section screen-head">
+      <h1 className="screen-title">{title}</h1>
       {children != null && <div className="flex items-center gap-6">{children}</div>}
     </header>
   )
@@ -25,11 +25,9 @@ export function TitleStat({
   numeric?: boolean
 }): React.JSX.Element {
   return (
-    <div className="flex flex-col items-end gap-1">
-      <span className="text-xs font-medium text-fg-subtle">{label}</span>
-      <span className={`text-xl font-semibold ${numeric ? 'font-mono tabular-nums' : ''}`}>
-        {value}
-      </span>
+    <div className="stat">
+      <span className="stat-label">{label}</span>
+      <span className={`stat-value${numeric ? '' : ' font-sans'}`}>{value}</span>
     </div>
   )
 }
