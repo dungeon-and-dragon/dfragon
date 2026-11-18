@@ -6,7 +6,7 @@ import {
   readDatabaseConfiguration,
   recordContentClearPopulation
 } from '@dfragon/database'
-import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/clear-stats.js'
+import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { ClearWeekSampleService } from './dist/application/content-clears/week-samples.js'
 
 // 앞 단계의 API 검사가 넣은 합성 클리어 기록에 마감하지 않은 주의 모집단만 더한다.
