@@ -47,9 +47,7 @@ export function RarityBadge({
   rarity
 }: Tone & { children: React.ReactNode }): React.JSX.Element {
   return (
-    <span
-      className={`box-border inline-flex h-4.5 shrink-0 items-center rounded-badge border border-current px-1 text-2xs font-medium whitespace-nowrap ${raritySolidOf(rarity)}`}
-    >
+    <span className={`badge badge-sm border border-current ${raritySolidOf(rarity)}`}>
       {children}
     </span>
   )

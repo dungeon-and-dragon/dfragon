@@ -192,13 +192,13 @@ function RecentItem({
       className={`flex items-center pl-3 text-fg no-underline transition-colors duration-(--duration-hover) ease-standard -outline-offset-2 outline-none hover:bg-inset focus-visible:bg-inset focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
     >
       <span
-        className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-8.5 w-7' : 'size-9'}`}
+        className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-[34px] w-[28px]' : 'size-[36px]'}`}
       >
         <CardImage src={characterImageUrl(character)} />
       </span>
       <span className="flex min-w-0 grow flex-col">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-control px-2 text-xs font-medium text-fg-muted">
+          <span className="badge bg-control text-fg-muted">
             {CHARACTER_SERVER_NAMES[character.serverId]}
           </span>
           <span className="truncate text-sm font-semibold">{character.characterName}</span>

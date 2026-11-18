@@ -35,8 +35,8 @@ export function raritySolidOf(rarity: ItemRarity | null): string {
 }
 
 export const itemClasses = {
-  icon: 'box-border block size-7 shrink-0 rounded-badge border border-current bg-inset object-contain',
-  iconSpace: 'size-7 shrink-0',
+  icon: 'box-border block size-game-icon shrink-0 rounded-badge border border-current bg-inset object-contain',
+  iconSpace: 'size-game-icon shrink-0',
   name: 'font-semibold',
   item: 'flex min-w-0 items-center gap-3',
   itemText: 'flex min-w-0 flex-wrap items-center gap-2',

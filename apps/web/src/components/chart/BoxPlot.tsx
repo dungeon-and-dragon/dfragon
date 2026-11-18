@@ -235,7 +235,7 @@ function BoxPlotChartPlot({
         {head != null && (
           <div
             aria-hidden="true"
-            className={`${ROW_CLASS} h-5.5 text-xs text-fg-subtle`}
+            className={`${ROW_CLASS} h-[22px] text-xs text-fg-subtle`}
             style={columns}
           >
             <span>{head.name}</span>

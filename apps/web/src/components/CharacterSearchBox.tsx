@@ -24,24 +24,24 @@ const iconButton =
   'm-0 inline-flex h-full shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-fg-muted outline-none -outline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal'
 const SIZE_CLASSES = {
   medium: {
-    box: 'h-control-sm w-66 max-sm:w-auto max-sm:min-w-0 max-sm:flex-1',
+    box: 'h-control-sm w-[264px] max-sm:w-auto max-sm:min-w-0 max-sm:flex-1',
     server: 'gap-1 px-2 text-sm',
     divider: 'h-4',
     input: 'px-2 text-sm',
     clear: 'w-6',
-    clearIcon: 'size-3.5',
+    clearIcon: 'size-[14px]',
     submit: 'w-8',
     icon: 'size-4'
   },
   large: {
-    box: 'h-control-lg w-160 max-w-full',
+    box: 'h-control-lg w-[640px] max-w-full',
     server: 'gap-2 pr-3 pl-4 text-sm',
-    divider: 'h-5',
+    divider: 'h-6',
     input: 'px-3 text-base',
     clear: 'w-8',
     clearIcon: 'size-4',
     submit: 'w-12',
-    icon: 'size-5'
+    icon: 'size-icon-md'
   }
 } as const
 

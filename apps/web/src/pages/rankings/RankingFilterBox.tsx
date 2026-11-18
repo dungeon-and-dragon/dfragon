@@ -3,7 +3,7 @@ import type { FameRankingFilter } from '#core/ranking/ranking-stats'
 import { growFilter, growLabel, isGrowSelected, RANKING_JOBS } from './ranking-jobs'
 
 const FILTER_ROW = 'flex items-start gap-4'
-const FILTER_LABEL = 'm-0 w-12 shrink-0 text-xs/8 font-medium text-fg-subtle'
+const FILTER_LABEL = 'm-0 w-12 shrink-0 text-xs leading-8 font-medium text-fg-subtle'
 const CHIPS = 'm-0 flex list-none flex-wrap gap-2 p-0'
 
 export function RankingFilterBox({

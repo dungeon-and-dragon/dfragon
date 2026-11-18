@@ -20,10 +20,10 @@ type ShownTooltip = Readonly<{ key: string | null; open: boolean }>
 const NARROW_SCROLL_CLASS = 'max-sm:overflow-x-auto'
 // 축 선은 아래 padding 16px, 라벨 위 간격 4px, 라벨 높이 14px를 더한 34px 위에 긋는다.
 const COLUMNS_CLASS =
-  "relative m-0 flex grow list-none gap-0.5 p-4 after:absolute after:inset-x-4 after:bottom-[34px] after:h-px after:bg-line-strong after:content-['']"
+  "relative m-0 flex grow list-none gap-1 p-4 after:absolute after:inset-x-4 after:bottom-[34px] after:h-px after:bg-line-strong after:content-['']"
 // 세로 구분선은 위 툴팁 자리 44px와 아래 라벨 자리 18px를 비운다.
 const COLUMN_DIVIDER_CLASS =
-  'mt-11 mb-4.5 w-1.5 shrink-0 bg-[linear-gradient(var(--color-line),var(--color-line))] bg-size-[1px_100%] bg-center bg-no-repeat'
+  'mt-[44px] mb-[18px] w-[6px] shrink-0 bg-[linear-gradient(var(--color-line),var(--color-line))] bg-size-[1px_100%] bg-center bg-no-repeat'
 
 function columnTooltipPlaceOf(
   column: HTMLElement,
@@ -167,19 +167,19 @@ function Column({
       ref={columnRef}
       data-chart-item=""
       onMouseEnter={handleMouseEnter}
-      className={`flex grow basis-0 flex-col pt-11 ${scrollable ? 'min-w-1' : 'min-w-0'}`}
+      className={`flex grow basis-0 flex-col pt-[44px] ${scrollable ? 'min-w-1' : 'min-w-0'}`}
     >
       <span className="sr-only">
         {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
       </span>
       <span
-        className="flex min-h-40 grow items-end"
+        className="flex min-h-[160px] grow items-end"
         style={height !== undefined ? { minHeight: height } : undefined}
       >
         {ratio > 0 && (
           <span
             data-chart-mark=""
-            className="relative block h-(--bar-height) min-h-0.5 w-full"
+            className="relative block h-(--bar-height) min-h-[2px] w-full"
             style={{ '--bar-height': `${ratio * 100}%` }}
           >
             <span
@@ -188,9 +188,9 @@ function Column({
           </span>
         )}
       </span>
-      <span aria-hidden="true" className="relative mt-1 h-3.5 shrink-0">
+      <span aria-hidden="true" className="relative mt-1 h-[14px] shrink-0">
         {label != null && (
-          <span className="absolute left-1/2 -translate-x-1/2 text-2xs leading-3.5 whitespace-nowrap text-fg-subtle tabular-nums">
+          <span className="absolute left-1/2 -translate-x-1/2 text-2xs leading-[14px] whitespace-nowrap text-fg-subtle tabular-nums">
             {label}
           </span>
         )}

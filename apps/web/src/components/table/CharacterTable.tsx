@@ -52,9 +52,9 @@ export function CharacterTable({
           <col />
           <col className={tableClasses.fameColumn} />
           {affiliations.map((affiliation) => (
-            <col key={affiliation} className="w-40" />
+            <col key={affiliation} className="w-[160px]" />
           ))}
-          {action != null && <col className="w-14" />}
+          {action != null && <col className="w-[56px]" />}
         </colgroup>
         <thead>
           <tr>

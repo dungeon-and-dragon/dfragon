@@ -52,7 +52,7 @@ export function SnapshotToggle({
         role="alertdialog"
         initialFocus={cancelRef}
       >
-        <div className="box-border flex w-55 flex-col gap-3 px-4 pt-4 pb-3">
+        <div className="box-border flex w-[220px] flex-col gap-3 px-4 pt-4 pb-3">
           <Popover.Title>고정을 취소하시겠습니까?</Popover.Title>
           <div className="flex justify-end gap-2">
             <Popover.Close ref={cancelRef} render={<Button variant="secondary" size="sm" />}>

@@ -43,7 +43,7 @@ export function WeeklyClearTable({
         <col />
         <col className={tableClasses.fameColumn} />
         {clearNames.map(({ kind, name }) => (
-          <col key={`${kind}/${name}`} className="w-24" />
+          <col key={`${kind}/${name}`} className="w-[96px]" />
         ))}
       </colgroup>
       <thead>

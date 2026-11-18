@@ -72,10 +72,10 @@ function OathSetCard({
   return (
     <div className="flex items-center gap-6 border-b border-line p-4">
       <span
-        className={`box-border flex size-14 shrink-0 items-center justify-center rounded-control border border-current bg-inset ${raritySolidOf(set.rarity)}`}
+        className={`box-border flex size-[56px] shrink-0 items-center justify-center rounded-control border border-current bg-inset ${raritySolidOf(set.rarity)}`}
       >
         {board.icon !== null && (
-          <img src={board.icon} alt="" className="size-10 [image-rendering:pixelated]" />
+          <img src={board.icon} alt="" className="size-[40px] [image-rendering:pixelated]" />
         )}
       </span>
       <span className="flex flex-wrap items-center gap-2 text-base">
@@ -103,17 +103,17 @@ function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): R
             <img
               src={option.icon}
               alt=""
-              className={`size-11.5 rounded-full ${option.picked ? '' : 'opacity-40 grayscale-80'}`}
+              className={`size-[46px] rounded-full ${option.picked ? '' : 'opacity-40 grayscale-80'}`}
             />
             {option.picked && (
-              <span className="inline-flex h-5 items-center gap-1 rounded-badge bg-signal px-2 text-2xs font-semibold text-on-signal">
+              <span className="badge gap-1 bg-signal text-2xs font-semibold text-on-signal">
                 <CheckIcon width={12} height={12} strokeWidth={3} />
                 선택
               </span>
             )}
           </div>
           {option.effect !== null && (
-            <GameText lines={option.effect} className="min-w-0 grow text-xs/4.5" />
+            <GameText lines={option.effect} className="min-w-0 grow text-xs leading-[18px]" />
           )}
         </article>
       ))}
@@ -205,13 +205,13 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
       <table className={table}>
         <thead>
           <tr>
-            <th scope="col" className={`${head} w-14`}>
+            <th scope="col" className={`${head} w-[56px]`}>
               칸
             </th>
             <th scope="col" className={head}>
               결정
             </th>
-            <th scope="col" className={`${headEnd} w-27.5`}>
+            <th scope="col" className={`${headEnd} w-[110px]`}>
               세트 포인트
             </th>
           </tr>
@@ -246,7 +246,7 @@ function OathEffects({
   view: OathView
 }): React.JSX.Element {
   return (
-    <div className="w-120 shrink-0 max-sm:w-full">
+    <div className="w-[480px] shrink-0 max-sm:w-full">
       <StatSection title="서약 세트 효과" lines={setStatus} />
       <StatSection title="서약의 가호" lines={blessing} />
       {upgrade !== null && <StatSection title={upgrade.title} lines={upgrade.lines} />}
@@ -272,7 +272,7 @@ function StatSection({
         {lines.map(({ name, value }, index) => (
           <div
             key={`${name}-${index}`}
-            className="flex min-h-10 items-center justify-between gap-3 border-b border-line px-4"
+            className="flex min-h-[40px] items-center justify-between gap-3 border-b border-line px-4"
           >
             <dt className="text-fg-muted">{name}</dt>
             <dd

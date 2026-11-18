@@ -19,7 +19,7 @@ function LegalPage({ title }: { title: string }): React.JSX.Element {
             {title}
           </h1>
         </div>
-        <div className="min-h-120" />
+        <div className="min-h-[480px]" />
       </article>
     </div>
   )

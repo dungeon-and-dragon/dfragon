@@ -6,9 +6,9 @@ const WHEEL_STEP_DELTA = 40
 
 const ROW =
   'm-0 flex items-center justify-center gap-2 bg-transparent p-0 [font-family:inherit] tabular-nums transition-colors duration-(--duration-hover) ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
-const ROW_IDLE = 'h-7 cursor-pointer border-0 text-sm text-fg-subtle hover:text-fg'
+const ROW_IDLE = 'h-[28px] cursor-pointer border-0 text-sm text-fg-subtle hover:text-fg'
 const ROW_SELECTED =
-  'h-8.5 cursor-default border-x-0 border-y border-line-input text-base font-semibold text-fg'
+  'h-[34px] cursor-default border-x-0 border-y border-line-input text-base font-semibold text-fg'
 
 export function ClearWeekWheel({
   weeks,
@@ -59,7 +59,12 @@ export function ClearWeekWheel({
   }, [])
 
   return (
-    <div ref={wheelRef} role="group" aria-label="주 선택" className="flex w-46 shrink-0 flex-col">
+    <div
+      ref={wheelRef}
+      role="group"
+      aria-label="주 선택"
+      className="flex w-[184px] shrink-0 flex-col"
+    >
       <WheelRow week={previous} selected={false} labelOf={labelOf} onSelect={onSelect} />
       <WheelRow week={selected} selected labelOf={labelOf} onSelect={onSelect} />
       <WheelRow week={next} selected={false} labelOf={labelOf} onSelect={onSelect} />
@@ -79,7 +84,7 @@ function WheelRow({
   onSelect: (weekStart: string) => void
 }): React.JSX.Element {
   if (week === undefined) {
-    return <span aria-hidden="true" className="h-7" />
+    return <span aria-hidden="true" className="h-[28px]" />
   }
 
   function select(): void {
@@ -96,11 +101,7 @@ function WheelRow({
       className={`${ROW} ${selected ? ROW_SELECTED : ROW_IDLE}`}
     >
       {labelOf(week.weekStart)}
-      {!week.closed && (
-        <small className="inline-flex h-5 items-center rounded-badge bg-inset px-2 text-xs font-medium text-fg-muted">
-          집계 중
-        </small>
-      )}
+      {!week.closed && <small className="badge bg-inset text-fg-muted">집계 중</small>}
     </button>
   )
 }

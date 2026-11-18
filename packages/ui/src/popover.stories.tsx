@@ -12,7 +12,7 @@ function ConfirmPopover({ side, defaultOpen }: ConfirmPopoverProps) {
     <Popover.Root defaultOpen={defaultOpen}>
       <Popover.Trigger render={<Button size="sm" />}>고정 풀기</Popover.Trigger>
       <Popover.Popup side={side} role="alertdialog">
-        <div className="grid w-56 gap-3 p-3">
+        <div className="grid w-[224px] gap-3 p-3">
           <Popover.Title>고정을 취소하시겠습니까?</Popover.Title>
           <div className="flex justify-end gap-2">
             <Popover.Close render={<Button variant="secondary" size="sm" />}>유지</Popover.Close>
@@ -31,7 +31,7 @@ const meta = {
   argTypes: { side: { control: 'inline-radio', options: ['top', 'right', 'bottom', 'left'] } },
   decorators: [
     (Story) => (
-      <div className="flex min-h-48 justify-center p-8">
+      <div className="flex min-h-[192px] justify-center p-8">
         <Story />
       </div>
     )
@@ -57,7 +57,7 @@ export const Focus: Story = {
 export const Html: Story = {
   render: () => (
     <div className="popover" role="alertdialog" aria-labelledby="html-popover-title">
-      <div className="grid w-56 gap-3 p-3">
+      <div className="grid w-[224px] gap-3 p-3">
         <h2 id="html-popover-title" className="popover-title">
           고정을 취소하시겠습니까?
         </h2>

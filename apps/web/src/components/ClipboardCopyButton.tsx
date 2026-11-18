@@ -24,7 +24,7 @@ export function ClipboardCopyButton({
         >
           <span
             aria-hidden="true"
-            className="flex size-4.5 shrink-0 items-center justify-center rounded-control bg-danger-weak text-sm font-semibold text-fg-danger"
+            className="flex size-[18px] shrink-0 items-center justify-center rounded-control bg-danger-weak text-sm font-semibold text-fg-danger"
           >
             !
           </span>

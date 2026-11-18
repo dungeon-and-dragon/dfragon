@@ -19,7 +19,7 @@ const SECTION_PREFIXES: Readonly<Record<TokenSection, readonly string[]>> = {
   color: ['--gray-', '--color-', '--gradient-'],
   typography: ['--font-', '--text-', '--leading-', '--tracking-'],
   spacing: ['--spacing'],
-  size: ['--height-', '--container-'],
+  size: ['--height-', '--container-', '--size-'],
   radius: ['--radius-'],
   layer: ['--z-'],
   breakpoint: ['--breakpoint-'],

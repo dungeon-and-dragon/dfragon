@@ -44,7 +44,7 @@ function AdventureNameForm({
       onSubmit={handleSubmit}
       className="flex items-center gap-2 border-t border-line px-4 py-3"
     >
-      <div className="w-56 max-sm:min-w-0 max-sm:flex-1">
+      <div className="w-[224px] max-sm:min-w-0 max-sm:flex-1">
         <TextField size="sm">
           <TextFieldInput
             aria-label="모험단"

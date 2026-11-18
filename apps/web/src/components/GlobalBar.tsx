@@ -44,16 +44,16 @@ export function GlobalBar(): React.JSX.Element {
             {PRODUCT_NAME}
           </span>
         </Link>
-        <span aria-hidden="true" className="h-5 w-px shrink-0 bg-line max-sm:hidden" />
+        <span aria-hidden="true" className="h-6 w-px shrink-0 bg-line max-sm:hidden" />
         <nav
           ref={menuRef}
           aria-label="전역 메뉴"
-          className="relative flex min-w-0 grow items-stretch self-stretch overflow-x-auto max-sm:order-last max-sm:h-10 max-sm:basis-full"
+          className="relative flex min-w-0 grow items-stretch self-stretch overflow-x-auto max-sm:order-last max-sm:h-[40px] max-sm:basis-full"
         >
           <span
             ref={underlineRef}
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 h-0.5 bg-signal"
+            className="pointer-events-none absolute bottom-0 h-[2px] bg-signal"
           />
           {GLOBAL_MENU.map((item) => (
             <Link

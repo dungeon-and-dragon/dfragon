@@ -39,7 +39,7 @@ export function LookupProgress({
         {LOOKUP_STEPS.map((name, index) => (
           <span
             key={name}
-            className={`size-1.25 shrink-0 rounded-full ${dotClass(index, current)}`}
+            className={`size-[5px] shrink-0 rounded-full ${dotClass(index, current)}`}
           />
         ))}
       </span>

@@ -9,6 +9,7 @@ import {
   Section,
   ShadowTokens,
   SpacingTokens,
+  SquareTokens,
   TypographyTokens,
   ValueTokens
 } from './sections'
@@ -22,6 +23,7 @@ const roleColorTokens = colorTokens.filter((token) => token.name.startsWith('--c
 const sizeTokens = tokensIn(tokens, 'size')
 const heightTokens = sizeTokens.filter((token) => token.name.startsWith('--height-'))
 const containerTokens = sizeTokens.filter((token) => token.name.startsWith('--container-'))
+const iconTokens = sizeTokens.filter((token) => token.name.startsWith('--size-'))
 
 const meta = {
   title: 'Foundations'
@@ -68,6 +70,9 @@ export const Size: Story = {
     <div className="grid gap-12">
       <Section title="높이">
         <HeightTokens tokens={heightTokens} />
+      </Section>
+      <Section title="아이콘">
+        <SquareTokens tokens={iconTokens} />
       </Section>
       <Section title="컨테이너 폭">
         <ValueTokens tokens={containerTokens} />
