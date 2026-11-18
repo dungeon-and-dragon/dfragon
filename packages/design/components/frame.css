@@ -154,26 +154,8 @@
   letter-spacing: var(--tracking-heading);
 }
 
-.stat {
-  display: flex;
-  flex-direction: column;
+.screen-head .stat {
   align-items: flex-end;
-  gap: 4px;
-}
-
-.stat-label {
-  color: var(--color-fg-subtle);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs--line-height);
-  font-weight: var(--font-weight-medium);
-}
-
-.stat-value {
-  font-family: var(--font-mono);
-  font-size: var(--text-xl);
-  line-height: var(--text-xl--line-height);
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
 }
 
 @media (width < 600px) {
