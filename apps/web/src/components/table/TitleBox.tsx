@@ -27,7 +27,7 @@ export function TitleStat({
   return (
     <div className="stat">
       <span className="stat-label">{label}</span>
-      <span className={`stat-value${numeric ? ' font-mono tabular-nums' : ''}`}>{value}</span>
+      <span className={`stat-value${numeric ? '' : ' font-sans'}`}>{value}</span>
     </div>
   )
 }
