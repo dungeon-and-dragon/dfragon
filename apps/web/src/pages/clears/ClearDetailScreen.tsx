@@ -1,3 +1,4 @@
+import { ChipGroup } from '@dfragon/ui'
 import type {
   ClearContent,
   ClearContentStats,
@@ -44,7 +45,6 @@ import {
   weekOf
 } from './clear-overview'
 import { seoulDateOf } from './clear-weeks'
-import { ChoiceGroup } from './components/ChoiceGroup'
 import { ClearContentCards } from './components/ClearContentCards'
 import { ClearJobTable } from './components/ClearJobTable'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
@@ -231,12 +231,12 @@ function ContentHead({
         <h2 className="m-0 text-xl font-semibold tracking-heading">{place.group.name}</h2>
       </div>
       {place.choice !== null && (
-        <ChoiceGroup
-          label="단계"
-          choices={choices}
+        <ChipGroup
+          aria-label="단계"
+          items={choices}
           value={place.choice.slug}
-          large
-          onChange={onStageSelect}
+          size="md"
+          onValueChange={onStageSelect}
         />
       )}
       {week !== undefined && (
@@ -409,7 +409,7 @@ function GroupScorePanel({
       name="클리어 캐릭터의 장비 점수"
       controls={
         choices.length > 1 && (
-          <ChoiceGroup label="점수 종류" choices={choices} value={kind} onChange={setKind} />
+          <ChipGroup aria-label="점수 종류" items={choices} value={kind} onValueChange={setKind} />
         )
       }
     >
@@ -437,7 +437,7 @@ function ScoreBandPanel({
       name="장비 점수 구간별 클리어율"
       controls={
         choices.length > 1 && (
-          <ChoiceGroup label="점수 종류" choices={choices} value={kind} onChange={setKind} />
+          <ChipGroup aria-label="점수 종류" items={choices} value={kind} onValueChange={setKind} />
         )
       }
     >

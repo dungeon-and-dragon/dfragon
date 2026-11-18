@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { Choice } from '../components/ChoiceGroup'
+import type { ChipGroupItem } from '@dfragon/ui'
 
 export function useChoice<Value extends string>(
-  choices: readonly Choice<Value>[]
+  choices: readonly ChipGroupItem<Value>[]
 ): [Value | undefined, (value: Value) => void] {
   const [chosen, setChosen] = useState<Value>()
   const value = choices.some((choice) => choice.value === chosen) ? chosen : choices[0]?.value
