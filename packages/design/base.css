@@ -88,3 +88,13 @@ body {
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
+
+/* preflight를 쓰지 않아 button의 브라우저 기본 모양을 여기서 지운다. 모양은 컴포넌트 클래스나 utility가 정한다. */
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}

@@ -34,8 +34,8 @@ const FAME = 'text-game-fame'
 const STRIP = `box-border flex min-h-12 items-center px-4 py-2 ${LINE}`
 const DELTA_TONES = { up: 'text-game-increase', down: 'text-game-decrease' } as const
 const POINT =
-  'relative m-0 box-border flex min-h-[56px] w-full cursor-pointer items-center gap-3 rounded-none border-0 px-4 py-2 text-left [font-family:inherit] text-sm text-fg focus-ring-inset'
-const POINT_IDLE = 'bg-transparent hover:bg-surface'
+  'relative box-border flex min-h-[56px] w-full cursor-pointer items-center gap-3 rounded-none px-4 py-2 text-left text-sm text-fg focus-ring-inset'
+const POINT_IDLE = 'hover:bg-surface'
 const POINT_SELECTED =
   'bg-surface before:absolute before:inset-y-0 before:left-0 before:w-[2px] before:bg-signal'
 
