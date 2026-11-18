@@ -47,14 +47,6 @@ export function CheckIcon(props: IconProps): React.JSX.Element {
   )
 }
 
-export function DashIcon(props: IconProps): React.JSX.Element {
-  return (
-    <LineIcon {...props}>
-      <path vectorEffect="non-scaling-stroke" d="M6 12h12" />
-    </LineIcon>
-  )
-}
-
 export function CloseIcon(props: IconProps): React.JSX.Element {
   return (
     <LineIcon {...props}>
