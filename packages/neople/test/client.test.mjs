@@ -49,6 +49,34 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
       url: 'http://neople.test/df/servers/ca%2Fin/characters?characterName=%EA%B0%80+%EB%82%98%2B%26&limit=10&wordType=match'
     },
     {
+      call: (neople) => neople.servers(),
+      body: { rows: [{ serverId: 'cain', serverName: '카인' }] },
+      url: 'http://neople.test/df/servers'
+    },
+    {
+      call: (neople) => neople.jobs(),
+      body: { rows: [{ jobId: 'job-1', jobName: '귀검사(남)', rows: [{ jobGrowId: 'grow-1' }] }] },
+      url: 'http://neople.test/df/jobs'
+    },
+    {
+      call: (neople) =>
+        neople.charactersFame('ca/in', {
+          minFame: 58000,
+          maxFame: 60000,
+          jobId: 'job-1',
+          jobGrowId: 'grow-1',
+          isAllJobGrow: true,
+          limit: 200
+        }),
+      body: { rows: [{ characterId: 'character-1', fame: 59000 }] },
+      url: 'http://neople.test/df/servers/ca%2Fin/characters-fame?minFame=58000&maxFame=60000&jobId=job-1&jobGrowId=grow-1&isAllJobGrow=true&limit=200'
+    },
+    {
+      call: (neople) => neople.charactersFame('all', { limit: 200 }),
+      body: { rows: [] },
+      url: 'http://neople.test/df/servers/all/characters-fame?limit=200'
+    },
+    {
       call: (neople) => neople.character(identity, 'status', signal),
       body: character,
       url: 'http://neople.test/df/servers/cain/characters/a%2Fb%20c/status'
