@@ -50,6 +50,7 @@ function createDatabaseSubscribers(
   | 'recordCharacterSkillStyle'
   | 'recordCharacterScore'
   | 'recordCharacterHistory'
+  | 'recordCharacterSets'
   | 'characterHistory'
   | 'adventureGuild'
   | 'rankingStats'
@@ -97,6 +98,7 @@ function createDatabaseSubscribers(
     recordCharacterSkillStyle: (style) => characterBasic.recordSkillStyle(style),
     recordCharacterScore: (score) => characterBasic.recordScore(score),
     recordCharacterHistory: (history) => characterBasic.recordHistory(history),
+    recordCharacterSets: (sets) => characterBasic.recordSets(sets),
     characterHistory: new DatabaseCharacterHistoryRepository(client),
     readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
