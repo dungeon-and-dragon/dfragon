@@ -100,7 +100,7 @@ TLS 파일의 key 일치와 localhost, port 입력은 listen 전에 확인하며
 pnpm --filter @dfragon/api test
 ```
 
-HTTP, 설정과 build를 검증합니다. `packages/models/score-engine/`에 엔진 라이브러리가 없으면 실제 엔진 계산과 점수 worker를 띄운 종료 확인만 건너뜁니다.
+HTTP, 설정과 build를 검증합니다. `packages/models/score-engine/`에 엔진 라이브러리가 없으면 실제 엔진을 연 상세 응답 확인만 건너뜁니다.
 변경 범위별 명령 조합은 [Native validation](../../scripts/README.md#native-validation)을 따릅니다. 로컬 성공은 실제 DNS, TLS 검증을 대신하지 않습니다.
 
 ## 서버 이미지
