@@ -7,7 +7,7 @@ import neopleOpenApiGrayLogo from './assets/neople-open-api-gray.png'
 import { useFavoriteCharacterStore } from './hooks/useFavoriteCharacterStore'
 import { useMyAdventureStore } from './hooks/useMyAdventureStore'
 import { useSearchModeStore } from './hooks/useSearchModeStore'
-import { RANKING_JOBS } from './pages/rankings/ranking-jobs'
+import { RANKING_JOBS } from './pages/rankings'
 import { installBrowserHost } from './host'
 import type { AutoRoundSignal, BrowserHost } from './host/client-host'
 import { decodeBrowserImage } from './host/browser-png'
@@ -17,7 +17,7 @@ import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { CharacterCandidate } from '#core/character/character'
 import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
-import { WEB_SCREEN_WATCH_TEXTS } from './pages/multisearch/components/web-capture-texts'
+import { WEB_SCREEN_WATCH_TEXTS } from './pages/multisearch'
 
 vi.mock('./host/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
