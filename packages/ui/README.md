@@ -7,18 +7,18 @@
 | Component | 바탕 | 요약 |
 | --- | --- | --- |
 | `Button` | native `button` | `variant` `primary`, `secondary`(기본), `ghost`, `danger`와 `size` `sm`, `md`(기본), `lg`(32, 40, 48px). `primary`는 신호색 면이다. `loading`은 `data-loading`으로 글자를 투명하게 가리고 진행 호를 그리며 클릭을 막지 않는다. |
-| `IconButton` | native `button` | 평소에는 면이 없고 hover 때 `inset` 면에 아이콘이 밝아진다. `aria-label`, `icon` 필수, `size` `sm` 32, `md` 40, `bar` 36(상단 바 도구 버튼, 아이콘 20), `lg` 48(화면 헤더 도구 버튼, 아이콘 24, `inset` 면). `pressed`를 주면 켜고 끄는 토글로 `aria-pressed`를 전하고 켜진 동안 안쪽 2px 선이 신호색이다. |
+| `IconButton` | native `button` | 평소에는 면이 없고 hover 때 `inset` 면에 아이콘이 밝아진다. `aria-label`, `icon` 필수, `size` `sm` 32, `md` 40(아이콘 20), `lg` 48(화면 헤더 도구 버튼, 아이콘 24, `inset` 면). `pressed`를 주면 켜고 끄는 토글로 `aria-pressed`를 전하고 켜진 동안 안쪽 2px 선이 신호색이다. |
 | `TextField`, `TextFieldLabel`, `TextFieldInput`, `TextFieldDescription`, `TextFieldError` | `Field`, `Input` | `TextField`가 `invalid`, `disabled`, `name`, `size` `sm`, `md`, `lg`를 받고, 안에 둔 라벨, 설명, 오류를 입력에 연결한다. 글자는 각 부품의 `children`으로 주며 `TextFieldError`는 `invalid`일 때만 보인다. `value`, `defaultValue`, `onValueChange(value)`, `readOnly`, `required`는 `TextFieldInput`이 받고, 입력 요소 합성은 `render`다. |
-| `Select` | `Select` | `Root`, `Trigger`(`size` `2xs`, `xs`, `sm`, `md`. `2xs`는 표 행의 서버 칩으로 높이 20에 테두리가 없고 흐린 글자이며 올리거나 열면 면이 생긴다), `Value`, `Popup`(Portal, Positioner, Popup, List), `Item`, `ItemText`, `Group`, `GroupLabel`, `Separator`. `Popup`의 `columns`는 항목을 그 수의 열로 읽는 순서대로 늘어놓는 격자 목록이고, 없으면 한 줄 목록이다. |
+| `Select` | `Select` | `Root`, `Trigger`(`size` `2xs`, `xs`, `sm`, `md`. `2xs`는 표 행의 서버 칩으로 높이 24에 테두리가 없고 흐린 글자이며 올리거나 열면 면이 생긴다), `Value`, `Popup`(Portal, Positioner, Popup, List), `Item`, `ItemText`, `Group`, `GroupLabel`, `Separator`. `Popup`의 `columns`는 항목을 그 수의 열로 읽는 순서대로 늘어놓는 격자 목록이고, 없으면 한 줄 목록이다. |
 | `Menu` | `Menu` | `Root`, `Trigger`(외형 없음, `render`로 연결), `Popup`, `Item`, `RadioGroup`, `RadioItem`, `Group`, `GroupLabel`, `Separator`. |
 | `Tabs` | `Tabs` | `Root`, `List`(현재 탭 아래로 움직이는 2px 선 포함), `Tab`, `Panel`. |
 | `Switch`, `Checkbox`, `Chip` | `Switch`, `Checkbox`, `Toggle` | 한 요소로 쓰는 켜고 끄는 컨트롤. 이름은 감싼 label이나 `aria-label`로 준다. |
 | `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 화면과 반대 색 모드로 그려, 안에 둔 글자가 어떤 색 토큰을 써도 읽힌다. |
 | `Popover` | `Popover` | `Root`, `Trigger`, `Popup`(Portal, Positioner, Popup. `anchor`, `side`, `align`, `sideOffset`을 받는다), `Title`, `Close`. 면, 테두리, 그림자만 그리고 안쪽 배치와 폭은 화면이 정한다. |
-| `StatusChip` | `span` | tone `neutral`, `success`, `danger`, `warning`(주의), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 `StepDots`를 둔다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 28이다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
-| `StepDots` | plain | 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜진다. `size` 4(상태 칩 안, 3px 간격)와 5(목록 안내, 4px 간격). 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
+| `StatusChip` | `span` | tone `neutral`, `success`, `danger`, `warning`(주의), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 `StepDots`를 둔다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 32다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
+| `StepDots` | plain | 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜진다. 동작 줄이기에서는 모두 켠 채 멈추고, 보조 기술에는 숨긴다. |
 | `LoadingIndicator`, `ProgressCircle` | 자체 SVG | 값이 없으면 `steps()`로 끊어 도는 호, 있으면 진행 호. |
-| `Kbd`, `NumericText` | plain | 단축키(22px 키캡, 숫자 글꼴. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 숫자 글꼴(`--font-mono`, `tabular-nums`)과 `--duration-count` 동안의 증가. |
+| `Kbd`, `NumericText` | plain | 단축키(24px 키캡, 숫자 글꼴. `surface="signal"`은 주 버튼 안의 키캡으로 버튼 글자색과 그 55% 외곽선을 쓴다), 숫자 글꼴(`--font-mono`, `tabular-nums`)과 `--duration-count` 동안의 증가. |
 
 공개 타입은 `className`, `style`을 받지 않는다. Base UI 부품 그대로인 `Select.Root`, `Menu.Root` 같은 부품은 Base UI 문서의 API를 따른다.
 

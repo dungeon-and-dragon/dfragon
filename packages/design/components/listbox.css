@@ -39,7 +39,7 @@
 .listbox-grid {
   display: grid;
   grid-template-columns: repeat(var(--listbox-columns), minmax(max-content, 1fr));
-  gap: 2px;
+  gap: 4px;
 }
 
 .listbox-item {

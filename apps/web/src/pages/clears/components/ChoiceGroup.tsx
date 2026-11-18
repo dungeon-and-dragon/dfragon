@@ -50,7 +50,7 @@ function ChoiceButton<Value extends string>({
       // chip 클래스는 Base UI Toggle이 붙이는 data-pressed로 켜짐을 그린다.
       data-pressed={pressed ? '' : undefined}
       onClick={select}
-      className={`chip ${large ? 'h-control-md px-4' : ''}`}
+      className={large ? 'chip chip-md' : 'chip'}
     >
       {label}
     </button>

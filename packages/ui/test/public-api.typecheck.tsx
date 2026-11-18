@@ -39,7 +39,6 @@ import {
   type SelectTriggerProps,
   type StatusChipProps,
   type StatusChipTone,
-  type StepDotsProps,
   type SwitchProps,
   type TabsListProps,
   type TabsTabProps,
@@ -83,7 +82,7 @@ expectTypeOf<ButtonProps['variant']>().toEqualTypeOf<
 >()
 expectTypeOf<ButtonProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
 expectTypeOf<IconButtonProps['ref']>().toEqualTypeOf<Ref<HTMLButtonElement> | undefined>()
-expectTypeOf<IconButtonProps['size']>().toEqualTypeOf<'sm' | 'md' | 'bar' | 'lg' | undefined>()
+expectTypeOf<IconButtonProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
 expectTypeOf<ProgressCircleProps['ref']>().toEqualTypeOf<Ref<SVGSVGElement> | undefined>()
 expectTypeOf<TextFieldProps['ref']>().toEqualTypeOf<Ref<HTMLDivElement> | undefined>()
 expectTypeOf<TextFieldProps['size']>().toEqualTypeOf<'sm' | 'md' | 'lg' | undefined>()
@@ -93,7 +92,6 @@ expectTypeOf<StatusChipTone>().toEqualTypeOf<
   'neutral' | 'success' | 'danger' | 'warning' | 'signal'
 >()
 expectTypeOf<StatusChipProps['busy']>().toEqualTypeOf<boolean | undefined>()
-expectTypeOf<StepDotsProps['size']>().toEqualTypeOf<4 | 5 | undefined>()
 expectTypeOf<StatusChipProps['size']>().toEqualTypeOf<'sm' | 'md' | undefined>()
 expectTypeOf<KbdSurface>().toEqualTypeOf<'default' | 'signal'>()
 expectTypeOf<KbdProps['surface']>().toEqualTypeOf<KbdSurface | undefined>()
@@ -160,7 +158,7 @@ export const designExamples = (
     <StatusChip tone="signal" role="status" busy>
       인식 중
     </StatusChip>
-    <StepDots size={5} />
+    <StepDots />
     <StatusChip tone="success" size="md">
       창 감지됨
     </StatusChip>
@@ -239,8 +237,8 @@ export const invalidDesignExamples = (
     <IconButton className="square" aria-label="설정" icon={<svg />} />
     {/* @ts-expect-error StatusChip tone은 디자인 상태 tone 중 하나여야 한다. 대기 톤은 주의 톤으로 바뀌었다. */}
     <StatusChip tone="waiting">상태</StatusChip>
-    {/* @ts-expect-error StepDots는 상태 칩과 목록 안내의 두 크기만 받는다. */}
-    <StepDots size={6} />
+    {/* @ts-expect-error StepDots는 크기를 받지 않는다. */}
+    <StepDots size={5} />
     {/* @ts-expect-error IconButton은 외형 variant를 받지 않는다. */}
     <IconButton variant="ghost" aria-label="설정" icon={<svg />} />
     {/* @ts-expect-error Select trigger 크기는 2xs, xs, sm, md 중 하나다. */}
