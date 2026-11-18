@@ -3,24 +3,7 @@ export const FIELD_INPUT = 'field-box box-border w-full font-sans outline-none'
 
 export const panelClasses = {
   box: 'section min-w-0',
-  empty: 'm-0 px-4 py-12 text-center text-sm font-semibold',
-  scroll: 'overflow-x-auto'
-} as const
-
-const HEAD_CELL =
-  'h-[36px] whitespace-nowrap border-b border-line bg-surface px-3 text-xs font-medium text-fg-subtle first:pl-4 last:pr-4'
-const CELL =
-  'h-row whitespace-nowrap border-b border-line px-3 py-2 align-middle first:pl-4 last:pr-4'
-
-export const tableClasses = {
-  table: 'w-full border-collapse',
-  body: '[&>tr:last-child>td]:border-b-0',
-  headCell: `${HEAD_CELL} text-left`,
-  headCellEnd: `${HEAD_CELL} text-right`,
-  row: 'transition-colors hover:bg-surface',
-  selectedRow: 'bg-surface',
-  cell: CELL,
-  cellEnd: `${CELL} text-right`
+  empty: 'm-0 px-4 py-12 text-center text-sm font-semibold'
 } as const
 
 export const textClasses = {

@@ -4,7 +4,7 @@ import { ItemCell } from './item-parts'
 
 export type SlotItemRow = Readonly<{ key: string; slot: React.ReactNode; item: ItemView }>
 
-const { table, head, body, row, cell, slot: slotCell } = itemTableClasses
+const { slot: slotCell } = itemTableClasses
 
 export function SlotItemTable({
   itemLabel,
@@ -14,22 +14,20 @@ export function SlotItemTable({
   rows: readonly SlotItemRow[]
 }): React.JSX.Element {
   return (
-    <table className={table}>
+    <table className="table">
       <thead>
         <tr>
-          <th scope="col" className={`${head} w-[96px]`}>
+          <th scope="col" className="w-[96px]">
             부위
           </th>
-          <th scope="col" className={head}>
-            {itemLabel}
-          </th>
+          <th scope="col">{itemLabel}</th>
         </tr>
       </thead>
-      <tbody className={body}>
+      <tbody>
         {rows.map(({ key, slot, item }) => (
-          <tr key={key} className={row}>
-            <td className={`${cell} ${slotCell}`}>{slot}</td>
-            <td className={cell}>
+          <tr key={key}>
+            <td className={`${slotCell}`}>{slot}</td>
+            <td>
               <ItemCell item={item} tune={null} exalted={false} />
             </td>
           </tr>

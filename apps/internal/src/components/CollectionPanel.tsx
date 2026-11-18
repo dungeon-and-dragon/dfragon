@@ -1,6 +1,6 @@
 import { EMPTY_VALUE, formatCount, formatDateMinute } from '../format'
 import { useCollection } from '../ops-queries'
-import { panelClasses, tableClasses, textClasses } from './panel-classes'
+import { panelClasses, textClasses } from './panel-classes'
 import { RequeueButton } from './RequeueButton'
 
 const FIGURE_VALUE = 'm-0 font-mono font-semibold tabular-nums'
@@ -41,31 +41,27 @@ export function CollectionPanel(): React.JSX.Element {
         </dl>
       )}
       {failures.length > 0 && (
-        <div className={panelClasses.scroll}>
-          <table className={tableClasses.table}>
+        <div className="table-scroll">
+          <table className="table">
             <thead>
               <tr>
-                <th className={tableClasses.headCell}>실패 종류</th>
-                <th className={tableClasses.headCellEnd}>건수</th>
-                <th className={tableClasses.headCell}>마지막 시도</th>
-                <th className={tableClasses.headCellEnd}>
+                <th>실패 종류</th>
+                <th className="table-num">건수</th>
+                <th>마지막 시도</th>
+                <th className="table-num">
                   <span className="sr-only">되돌리기</span>
                 </th>
               </tr>
             </thead>
-            <tbody className={tableClasses.body}>
+            <tbody>
               {failures.map(({ failure, count, lastAttemptedAt }) => (
-                <tr key={failure} className={tableClasses.row}>
-                  <td className={tableClasses.cell}>{failure}</td>
-                  <td className={`${tableClasses.cellEnd} ${textClasses.numeric}`}>
-                    {formatCount(count)}
-                  </td>
-                  <td
-                    className={`${tableClasses.cell} ${textClasses.muted} ${textClasses.numeric}`}
-                  >
+                <tr key={failure}>
+                  <td>{failure}</td>
+                  <td className={`text-right ${textClasses.numeric}`}>{formatCount(count)}</td>
+                  <td className={`${textClasses.muted} ${textClasses.numeric}`}>
                     {lastAttemptedAt !== null ? formatDateMinute(lastAttemptedAt) : EMPTY_VALUE}
                   </td>
-                  <td className={tableClasses.cellEnd}>
+                  <td className="text-right">
                     <RequeueButton
                       label="되돌리기"
                       title={failure}

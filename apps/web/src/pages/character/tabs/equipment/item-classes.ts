@@ -1,5 +1,4 @@
 import type { ItemRarity } from '#core/character/character-detail-display'
-import { tableClasses } from '../../../../components/table/table-classes'
 
 type RarityKey = ItemRarity | 'unknown'
 
@@ -50,13 +49,6 @@ export const itemClasses = {
 
 export const itemTableClasses = {
   root: 'text-sm',
-  scroll: tableClasses.scroll,
-  table: 'w-full border-collapse',
-  head: `${tableClasses.headCell} box-border text-left whitespace-nowrap`,
-  headEnd: `${tableClasses.headCell} box-border text-right whitespace-nowrap`,
-  body: tableClasses.body,
-  row: tableClasses.row,
-  cell: 'h-row border-b border-line px-3 py-2 align-middle first:pl-4 last:pr-4',
   slot: 'text-xs whitespace-nowrap text-fg-subtle',
   number: 'font-mono tabular-nums',
   muted: 'text-fg-muted',

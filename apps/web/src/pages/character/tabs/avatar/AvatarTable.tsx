@@ -7,32 +7,30 @@ import { avatarClasses } from './avatar-classes'
 
 type Avatar = CharacterDetailView['avatar'][number]
 
-const { scroll, table, head, body, row, cell, slot } = itemTableClasses
+const { slot } = itemTableClasses
 
 export function AvatarTable({ avatars }: { avatars: readonly Avatar[] }): React.JSX.Element {
   const aura = avatars.find((avatar) => avatar.slotId === 'AURORA')
   const auraSkin = avatars.find((avatar) => avatar.slotId === 'AURA_SKIN')
 
   return (
-    <div className={scroll}>
-      <table className={`${table} min-w-[800px]`}>
+    <div className="table-scroll">
+      <table className="table table-wrap min-w-[800px]">
         <thead>
           <tr>
-            <th scope="col" className={`${head} ${avatarClasses.slotColumn}`}>
+            <th scope="col" className={`${avatarClasses.slotColumn}`}>
               부위
             </th>
-            <th scope="col" className={head}>
-              아바타
-            </th>
-            <th scope="col" className={`${head} ${avatarClasses.optionColumn}`}>
+            <th scope="col">아바타</th>
+            <th scope="col" className={`${avatarClasses.optionColumn}`}>
               옵션
             </th>
-            <th scope="col" className={`${head} ${avatarClasses.emblemColumn}`}>
+            <th scope="col" className={`${avatarClasses.emblemColumn}`}>
               엠블렘
             </th>
           </tr>
         </thead>
-        <tbody className={body}>
+        <tbody>
           {avatars.map((avatar, index) => {
             if (avatar.slotId === 'AURA_SKIN' && aura != null) {
               return null
@@ -64,9 +62,9 @@ export function AvatarRow({
   const cloneName = avatar.clone?.itemName ?? null
 
   return (
-    <tr className={row}>
-      <td className={`${cell} ${slot}`}>{avatarSlotLabel(avatar.slotName)}</td>
-      <td className={cell}>
+    <tr>
+      <td className={`${slot}`}>{avatarSlotLabel(avatar.slotName)}</td>
+      <td>
         <div className={itemClasses.item}>
           <span className="flex shrink-0 gap-1">
             <ItemIcon itemId={item.itemId} rarity={item.rarity} />
@@ -87,8 +85,8 @@ export function AvatarRow({
           </span>
         </div>
       </td>
-      <td className={cell}>{avatar.optionAbility}</td>
-      <td className={cell}>
+      <td>{avatar.optionAbility}</td>
+      <td>
         <span className={avatarClasses.stack}>
           {avatar.emblems.map((emblem, index) => {
             if (emblem.itemName == null) {
