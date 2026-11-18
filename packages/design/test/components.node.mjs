@@ -14,6 +14,7 @@ const RUNTIME_VARIABLES = new Set([
   '--listbox-columns'
 ])
 const REDUCED_MOTION_RULE_START = '@media (prefers-reduced-motion: reduce) {'
+const NARROW_VIEWPORT_RULE_START = '@media (width < 600px) {'
 const COLOR_LITERAL_PATTERN = /#[0-9a-f]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch)\(/i
 const TRANSPARENT_STATUS_BACKGROUND_PATTERN = /--status-bg:[^;]*transparent/
 const CENTERED_LOADING_SEGMENT_PATTERN =
@@ -120,4 +121,27 @@ test('로딩 막대의 진행 조각은 움직이지 않을 때 막대 가운데
 
   assert.match(state, CENTERED_LOADING_SEGMENT_PATTERN)
   assert.match(state, CENTERED_SHORT_LOADING_SEGMENT_PATTERN)
+})
+
+test('작은 컨트롤의 누르는 영역 pseudo-element는 600px 미만에만 있다', () => {
+  const expanded = [
+    ['chip.css', '.chip:not(.chip-md)'],
+    ['button.css', '.btn-sm'],
+    ['icon-button.css', '.icon-btn-sm'],
+    ['select.css', '.select-2xs']
+  ]
+
+  for (const [file, selector] of expanded) {
+    const { source } = components.find((component) => component.file === file)
+    const [wide, narrow] = source.split(NARROW_VIEWPORT_RULE_START)
+
+    assert.ok(
+      narrow?.includes(`${selector}::before {`),
+      `${file}의 ${selector}::before가 600px 미만에 있어야 한다`
+    )
+    assert.ok(
+      !wide.includes(`${selector}::before`),
+      `${file}의 ${selector}::before가 600px 이상에 없어야 한다`
+    )
+  }
 })
