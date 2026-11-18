@@ -20,7 +20,7 @@ export function ChartTooltip({
               style={{ backgroundColor: color }}
             />
             <span className="text-fg-muted">{name}</span>
-            <span className="ml-auto pl-3 font-mono font-semibold">{value}</span>
+            <span className="ml-auto pl-3 num font-semibold">{value}</span>
           </span>
         ))}
       </span>

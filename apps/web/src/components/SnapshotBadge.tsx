@@ -4,7 +4,6 @@ import type { SnapshotMark } from '#core/capture/adventure-snapshot'
 import type { SearchMode } from '#core/capture/search-mode'
 
 const badgeClass = 'badge badge-sm gap-1 border font-semibold'
-const orderClass = 'font-mono tabular-nums'
 
 function seatOrderLabel(seat: number, screen: SearchMode): string {
   if (screen === 'party') {
@@ -41,7 +40,7 @@ export function SnapshotBadge({
     <span
       role="img"
       aria-label={label}
-      className={`${badgeClass} ${orderClass} ${mark.kind === 'moved' ? 'border-signal bg-signal text-on-signal' : 'border-current text-signal'}`}
+      className={`${badgeClass} num ${mark.kind === 'moved' ? 'border-signal bg-signal text-on-signal' : 'border-current text-signal'}`}
     >
       <PinIcon filled className="size-icon-sm" />
       <span aria-hidden="true">{order}</span>

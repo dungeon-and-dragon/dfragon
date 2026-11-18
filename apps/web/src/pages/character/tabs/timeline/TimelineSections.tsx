@@ -58,7 +58,7 @@ function TimelineGroup({
       <h2 className="section-title whitespace-nowrap">
         <span>{title}</span>
         <span className="section-title-count">{count}</span>
-        {note !== undefined && <span className="text-xs font-medium text-fg-subtle">{note}</span>}
+        {note !== undefined && <span className="label">{note}</span>}
       </h2>
       {count === 0 ? <p className="m-0 px-4 py-3 text-fg-subtle">{emptyText}</p> : children}
     </section>
@@ -172,7 +172,7 @@ export function SeasonClears({
             <span className={`${BADGE} bg-canvas`}>{CLEAR_KIND_LABELS[count.kind]}</span>
             <span>{count.name}</span>
             {count.hard && <span className={`${BADGE} bg-canvas`}>하드</span>}
-            <span className="font-mono font-semibold tabular-nums">{count.count}</span>
+            <span className="num font-semibold">{count.count}</span>
           </li>
         ))}
       </ul>
@@ -222,7 +222,7 @@ export function Enhancements({
               <td>
                 <ItemName itemName={enhancement.itemName} itemRarity={enhancement.itemRarity} />
               </td>
-              <td className="font-mono tabular-nums">{formatEnhancementValue(enhancement)}</td>
+              <td className="num">{formatEnhancementValue(enhancement)}</td>
               <td>
                 <span className="inline-flex items-center gap-2">
                   <span className={enhancement.result ? 'text-fg-success' : 'text-fg-danger'}>

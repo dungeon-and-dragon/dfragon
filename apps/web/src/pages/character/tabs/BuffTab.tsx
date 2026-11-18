@@ -82,7 +82,7 @@ function BuffSkill({
   return (
     <section aria-label="버프 스킬">
       <div className={itemClasses.strip}>
-        <span className={itemClasses.stripLabel}>버프 스킬</span>
+        <span className="label">버프 스킬</span>
         <BuffSkillName name={name} icon={icon} />
         {option?.level != null && (
           <span className={itemClasses.stripNumber}>{`Lv.${option.level}`}</span>

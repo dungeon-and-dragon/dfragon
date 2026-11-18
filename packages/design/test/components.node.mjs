@@ -81,3 +81,31 @@ test('동작 줄이기에서 상태 칩 점, 진행 점, 진행 원의 움직임
     assert.match(rule.slice(0, rule.indexOf('}')), /animation:\s*none/, selector)
   }
 })
+
+test('display.css는 표시 클래스 selector를 모두 정의한다', () => {
+  const display = components.find(({ file }) => file === 'display.css').source
+
+  for (const name of [
+    'num',
+    'label',
+    'stat',
+    'stat-label',
+    'stat-value',
+    'portrait',
+    'portrait-sm',
+    'portrait-md',
+    'portrait-lg',
+    'link',
+    'skeleton',
+    'skeleton-text',
+    'skeleton-text-xs'
+  ]) {
+    assert.match(display, new RegExp(`\\.${name}\\s*[,{]`), name)
+  }
+})
+
+test('base.css는 dl, dd의 기본 margin을 지운다', async () => {
+  const base = await readFile(new URL('../base.css', import.meta.url), 'utf8')
+
+  assert.match(base, /dl,\s*dd\s*\{\s*margin:\s*0;/)
+})

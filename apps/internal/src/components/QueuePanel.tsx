@@ -1,6 +1,6 @@
 import { formatCount, queueLabel } from '../format'
 import { useQueues } from '../ops-queries'
-import { panelClasses, textClasses } from './panel-classes'
+import { panelClasses } from './panel-classes'
 
 export function QueuePanel(): React.JSX.Element {
   const queues = useQueues()
@@ -20,8 +20,8 @@ export function QueuePanel(): React.JSX.Element {
           {queues.data?.queues.map((queue) => (
             <tr key={queue.name}>
               <td>{queueLabel(queue.name)}</td>
-              <td className={`text-right ${textClasses.numeric}`}>{formatCount(queue.waiting)}</td>
-              <td className={`text-right ${textClasses.numeric}`}>{formatCount(queue.running)}</td>
+              <td className="table-num">{formatCount(queue.waiting)}</td>
+              <td className="table-num">{formatCount(queue.running)}</td>
             </tr>
           ))}
         </tbody>

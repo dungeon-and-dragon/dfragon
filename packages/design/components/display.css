@@ -1,0 +1,83 @@
+/*
+ * 숫자, 라벨, 요약 숫자, 초상화 틀, 텍스트 링크, skeleton이다.
+ * <span class="num">98,412</span> <span class="label">명성</span>
+ * <dl class="flex gap-8"><div class="stat"><dt class="stat-label">클리어</dt><dd class="stat-value">12</dd></div></dl>
+ * <span class="portrait portrait-sm"><img …></span> <a class="link text-fg-guild">길드1</a>
+ * <span class="skeleton portrait-sm"></span> <span class="skeleton-text skeleton-text-xs w-[40px]"></span>
+ * 숫자의 크기와 굵기는 숫자가 놓인 자리의 글자 단계를 따른다.
+ */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.label,
+.stat-label {
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  line-height: var(--text-xl--line-height);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.portrait {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background-color: var(--color-inset);
+}
+
+.portrait-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.portrait-md {
+  width: 64px;
+  height: 64px;
+}
+
+.portrait-lg {
+  width: 96px;
+  height: 96px;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.skeleton,
+.skeleton-text {
+  display: block;
+  flex-shrink: 0;
+  border-radius: var(--radius-control);
+  background-color: var(--color-inset);
+}
+
+.skeleton-text {
+  height: 10px;
+}
+
+.skeleton-text-xs {
+  height: 8px;
+}

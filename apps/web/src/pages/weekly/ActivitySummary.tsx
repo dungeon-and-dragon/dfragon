@@ -9,8 +9,8 @@ import { formatClearCount } from './clear-count'
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
 const STATS = 'flex gap-8'
-const STAT = 'flex flex-col items-start focus-ring'
-const STAT_LABEL = 'text-xs font-medium whitespace-nowrap text-fg-subtle'
+const STAT = 'stat items-start focus-ring'
+const STAT_LABEL = 'stat-label whitespace-nowrap'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 
 type NameCount = Summary['raids'][number]
@@ -31,7 +31,7 @@ function DetailRow({
   return (
     <div className="flex justify-between gap-4 py-1 text-xs">
       <span className={labelTone}>{label}</span>
-      <span className="font-mono tabular-nums text-fg-muted">{value}</span>
+      <span className="num text-fg-muted">{value}</span>
     </div>
   )
 }
@@ -49,7 +49,7 @@ function SummaryStat({
     <Tooltip.Root disabled={value === 0}>
       <Tooltip.Trigger delay={0} closeDelay={0} render={<div tabIndex={0} className={STAT} />}>
         <span className={STAT_LABEL}>{label}</span>
-        <b className="font-mono text-xl font-semibold tabular-nums [text-shadow:0_1px_8px_color-mix(in_srgb,var(--color-canvas)_60%,transparent)]">
+        <b className="stat-value [text-shadow:0_1px_8px_color-mix(in_srgb,var(--color-canvas)_60%,transparent)]">
           {numberFormat.format(value)}
         </b>
       </Tooltip.Trigger>
@@ -89,12 +89,12 @@ function TargetRows({
 
   return (
     <>
-      <div className="pt-2 pb-1 text-xs font-medium text-fg-subtle">{title}</div>
+      <div className="label pt-2 pb-1">{title}</div>
       {targets.toReversed().map((target) => (
         <DetailRow
           key={target.target}
           label={`+${target.target}`}
-          labelTone={`font-mono tabular-nums ${labelTone}`}
+          labelTone={`num ${labelTone}`}
           value={successRate(target)}
         />
       ))}
@@ -179,7 +179,7 @@ export function ActivitySummarySkeleton({ hasLegion }: { hasLegion: boolean }): 
       {labels.map((label) => (
         <div key={label} className={STAT}>
           <span className={STAT_LABEL}>{label}</span>
-          <span className="my-1 block h-[20px] w-[40px] rounded-control bg-inset" />
+          <span className="skeleton-text my-[9px] w-[40px]" />
         </div>
       ))}
     </div>

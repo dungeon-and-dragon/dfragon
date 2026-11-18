@@ -45,7 +45,7 @@ export function WeeklyClearTable({
       </colgroup>
       <thead>
         <tr>
-          <th scope="col" rowSpan={headRows} className="text-center">
+          <th scope="col" rowSpan={headRows}>
             #
           </th>
           <th scope="col" rowSpan={headRows}>
@@ -73,10 +73,10 @@ export function WeeklyClearTable({
       <tbody>
         {rows.map((row, index) => (
           <tr key={`${row.serverId}/${row.characterId}`}>
-            <td className="text-center">
+            <td>
               <RankBadge rank={index + 1} />
             </td>
-            {/* 초상화(36px)가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
+            {/* 초상화 옆 두 줄 글자가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
             <td className="py-0">
               <CharacterCell character={row} />
             </td>

@@ -20,7 +20,7 @@ import { ScheduleText } from './ScheduleText'
 
 const FACT =
   'flex flex-col gap-1 border-r border-line px-4 py-3 last:border-r-0 max-sm:even:border-r-0 max-sm:nth-[-n+2]:border-b'
-const ACTIVE_VALUE = 'font-mono font-medium tabular-nums text-fg'
+const ACTIVE_VALUE = 'num font-medium text-fg'
 
 function Blank(): React.JSX.Element {
   return <span className={textClasses.subtle}>{EMPTY_VALUE}</span>
@@ -35,7 +35,7 @@ function NextRunValue({ job }: { job: Job }): React.JSX.Element {
     return <Blank />
   }
 
-  return <span className={textClasses.numeric}>{formatDateMinute(job.nextRunAt)}</span>
+  return <span className="num">{formatDateMinute(job.nextRunAt)}</span>
 }
 
 function ActiveRun({ run, now }: { run: Run; now: Date }): React.JSX.Element {
@@ -76,16 +76,12 @@ function RunRow({ run, now }: { run: Run; now: Date }): React.JSX.Element {
       <td>
         <RunStatusTag status={run.status} />
       </td>
-      <td className={`${textClasses.numeric}`}>
+      <td className="num">
         {run.startedAt !== null ? formatDateSecond(run.startedAt) : <Blank />}
       </td>
-      <td className={`text-right ${textClasses.numeric}`}>
-        {duration !== undefined ? formatDuration(duration) : <Blank />}
-      </td>
+      <td className="table-num">{duration !== undefined ? formatDuration(duration) : <Blank />}</td>
       <td>{run.progress !== null ? <RunProgress progress={run.progress} /> : <Blank />}</td>
-      <td className={`${textClasses.numeric}`}>
-        {run.summary !== null ? formatSummary(run.summary) : <Blank />}
-      </td>
+      <td className="num">{run.summary !== null ? formatSummary(run.summary) : <Blank />}</td>
       <td>
         {error !== undefined ? (
           <span className={textClasses.twoLine}>
@@ -165,26 +161,26 @@ export function JobDetail({ job, now }: { job: Job; now: Date }): React.JSX.Elem
           <RunJobButton job={job} variant="primary" />
         </div>
       </div>
-      <dl className="m-0 grid grid-cols-4 border-b border-line max-sm:grid-cols-2">
+      <dl className="grid grid-cols-4 border-b border-line max-sm:grid-cols-2">
         <div className={FACT}>
-          <dt className="text-xs font-medium text-fg-subtle">스케줄</dt>
-          <dd className="m-0">
+          <dt className="label">스케줄</dt>
+          <dd>
             <ScheduleText schedule={job.schedule} />
           </dd>
         </div>
         <div className={FACT}>
-          <dt className="text-xs font-medium text-fg-subtle">다음 실행</dt>
-          <dd className="m-0">
+          <dt className="label">다음 실행</dt>
+          <dd>
             <NextRunValue job={job} />
           </dd>
         </div>
         <div className={FACT}>
-          <dt className="text-xs font-medium text-fg-subtle">지연 기준</dt>
-          <dd className={`m-0 ${textClasses.numeric}`}>{`${job.delayMinutes}분`}</dd>
+          <dt className="label">지연 기준</dt>
+          <dd className="num">{`${job.delayMinutes}분`}</dd>
         </div>
         <div className={FACT}>
-          <dt className="text-xs font-medium text-fg-subtle">인자</dt>
-          <dd className="m-0">
+          <dt className="label">인자</dt>
+          <dd>
             {argNames.length > 0 ? (
               argNames.join(', ')
             ) : (

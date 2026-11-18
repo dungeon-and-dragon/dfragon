@@ -193,7 +193,7 @@ export function NameChanges({
         <tbody>
           {changes.toReversed().map(({ kind, at, before, after }, index) => (
             <tr key={`${index}-${kind}-${at}`}>
-              <td className="font-mono text-xs whitespace-nowrap text-fg-subtle tabular-nums">
+              <td className="num text-xs whitespace-nowrap text-fg-subtle">
                 {formatSeoulFullDateTime(at)}
               </td>
               <td>

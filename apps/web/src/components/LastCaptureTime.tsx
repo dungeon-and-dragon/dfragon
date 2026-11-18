@@ -15,7 +15,7 @@ function CaptureTimeValue({ at }: { at: number }): React.JSX.Element {
 
   return (
     <time dateTime={new Date(at).toISOString()} className="text-fg-muted">
-      <span className="font-mono text-sm font-semibold tabular-nums text-fg">{time.value}</span>
+      <span className="num text-sm font-semibold text-fg">{time.value}</span>
       {time.unit} 전
     </time>
   )

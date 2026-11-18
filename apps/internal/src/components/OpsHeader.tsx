@@ -5,7 +5,7 @@ import { EMPTY_VALUE, formatAgo, formatClockMinute, formatClockSecond } from '..
 const WORKER_STALE_MS = 5 * 60_000
 
 const STATUS = 'inline-flex items-center gap-2 whitespace-nowrap text-xs'
-const STATUS_VALUE = 'font-mono font-semibold tabular-nums'
+const STATUS_VALUE = 'num font-semibold'
 const DIVIDER = 'divider-v max-sm:hidden'
 const NAV_LINK =
   'inline-flex h-topbar items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors hover:bg-surface hover:text-fg max-sm:h-12 focus-ring'
@@ -65,7 +65,7 @@ export function OpsHeader({ workerSeenAt, readAt, onRefresh }: OpsHeaderProps): 
         )}
         <span aria-hidden="true" className={DIVIDER} />
         <span className={`${STATUS} text-fg-muted`}>
-          <b className="font-mono font-medium tabular-nums">
+          <b className="num font-medium">
             {readAt !== undefined ? formatClockSecond(readAt) : EMPTY_VALUE}
           </b>
         </span>

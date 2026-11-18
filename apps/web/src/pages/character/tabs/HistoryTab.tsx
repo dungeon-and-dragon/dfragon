@@ -18,13 +18,9 @@ import { type Delta, deltaOf, formatOptional, integer, MISSING } from './history
 import { Heading, HistoryChanges, NameChanges } from './history/HistorySections'
 
 const CHART_HEIGHT = 226
-const CHART_BONE_HEIGHT = 296
-const POINT_BONE_HEIGHT = 48
-const POINT_BONE_COUNT = 4
-const SUMMARY_BONE_HEIGHT = 216
-const TILE_BONE_HEIGHT = 64
+const POINT_SKELETON_COUNT = 4
 const TILE_COUNT = 4
-const CHANGE_BONE_HEIGHTS = [32, 38, 38, 38]
+const CHANGE_SKELETON_HEIGHTS = ['h-[32px]', 'h-[38px]', 'h-[38px]', 'h-[38px]']
 
 type ScoreLabel = ReturnType<typeof toScoreView>['label']
 
@@ -170,12 +166,12 @@ function PointButton({
         className={`${POINT} ${selected ? POINT_SELECTED : POINT_IDLE}`}
       >
         <span
-          className={`w-[96px] shrink-0 font-mono tabular-nums ${selected ? 'font-semibold text-fg' : 'font-medium text-fg-muted'}`}
+          className={`w-[96px] shrink-0 num ${selected ? 'font-semibold text-fg' : 'font-medium text-fg-muted'}`}
         >
           {time}
         </span>
         <span className="min-w-0 truncate text-xs text-fg-muted">{partsText(point)}</span>
-        <span className="ms-auto flex flex-col items-end font-mono text-xs tabular-nums">
+        <span className="ms-auto flex flex-col items-end num text-xs">
           <span className={FAME}>{formatOptional(point.fame)}</span>
           <span className={scoreTone}>{formatOptional(point.score)}</span>
         </span>
@@ -264,7 +260,7 @@ function PointSummary({
   return (
     <div className="min-w-0">
       <div className={STRIP}>
-        <b className="font-mono text-sm font-semibold tabular-nums">{time}</b>
+        <b className="num text-sm font-semibold">{time}</b>
       </div>
       <SummaryBody
         identity={identity}
@@ -314,7 +310,7 @@ function SummaryBody({
 
   return (
     <>
-      <dl className={`m-0 grid grid-cols-4 max-sm:grid-cols-2 ${LINE}`}>
+      <dl className={`grid grid-cols-4 max-sm:grid-cols-2 ${LINE}`}>
         <Tile
           label="명성"
           value={formatOptional(point.fame)}
@@ -357,20 +353,12 @@ function Tile({
   const deltaTone = delta.direction !== null ? DELTA_TONES[delta.direction] : 'text-fg-subtle'
 
   return (
-    <div className="m-0 flex flex-col gap-1 border-s border-line p-4 first:border-s-0">
-      <dt className="text-xs text-fg-subtle">{label}</dt>
-      <dd className={`m-0 font-mono text-xl leading-8 font-semibold tabular-nums ${tone ?? ''}`}>
-        {value}
-      </dd>
-      <dd className={`ms-0 mt-1 text-right font-mono text-2xs tabular-nums ${deltaTone}`}>
-        {delta.text}
-      </dd>
+    <div className="stat border-s border-line p-4 first:border-s-0">
+      <dt className="stat-label">{label}</dt>
+      <dd className={`stat-value ${tone ?? ''}`}>{value}</dd>
+      <dd className={`mt-1 text-right num text-2xs ${deltaTone}`}>{delta.text}</dd>
     </div>
   )
-}
-
-function Bone({ height }: { height: number }): React.JSX.Element {
-  return <span className="block rounded-control bg-surface" style={{ height }} />
 }
 
 function HistorySkeleton(): React.JSX.Element {
@@ -380,16 +368,16 @@ function HistorySkeleton(): React.JSX.Element {
         이력을 받는 중입니다.
       </span>
       <div aria-hidden="true" className={`grid grid-cols-2 gap-4 p-4 ${LINE}`}>
-        <Bone height={CHART_BONE_HEIGHT} />
-        <Bone height={CHART_BONE_HEIGHT} />
+        <span className="skeleton h-[296px]" />
+        <span className="skeleton h-[296px]" />
       </div>
       <div aria-hidden="true" className={`${POINT_COLUMNS} gap-4 p-4`}>
         <div className="flex flex-col gap-2">
-          {Array.from({ length: POINT_BONE_COUNT }, (_, index) => (
-            <Bone key={index} height={POINT_BONE_HEIGHT} />
+          {Array.from({ length: POINT_SKELETON_COUNT }, (_, index) => (
+            <span key={index} className="skeleton h-12" />
           ))}
         </div>
-        <Bone height={SUMMARY_BONE_HEIGHT} />
+        <span className="skeleton h-[216px]" />
       </div>
     </div>
   )
@@ -403,12 +391,12 @@ function SummarySkeleton(): React.JSX.Element {
       </span>
       <div aria-hidden="true" className={`grid grid-cols-4 gap-2 p-4 ${LINE}`}>
         {Array.from({ length: TILE_COUNT }, (_, index) => (
-          <Bone key={index} height={TILE_BONE_HEIGHT} />
+          <span key={index} className="skeleton h-16" />
         ))}
       </div>
       <div aria-hidden="true" className="flex flex-col gap-2 p-4">
-        {CHANGE_BONE_HEIGHTS.map((height, index) => (
-          <Bone key={index} height={height} />
+        {CHANGE_SKELETON_HEIGHTS.map((height, index) => (
+          <span key={index} className={`skeleton ${height}`} />
         ))}
       </div>
     </div>

@@ -98,3 +98,9 @@ button {
   color: inherit;
   font: inherit;
 }
+
+/* preflight를 쓰지 않아 dl, dd의 브라우저 기본 margin을 여기서 지운다. */
+dl,
+dd {
+  margin: 0;
+}

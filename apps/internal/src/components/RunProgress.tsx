@@ -34,7 +34,7 @@ export function RunProgress({
           <i className="block h-full bg-fg-muted" style={{ width: `${percent}%` }} />
         </span>
       )}
-      <b className="font-mono font-medium tabular-nums">{countText}</b>
+      <b className="num font-medium">{countText}</b>
     </span>
   )
 }

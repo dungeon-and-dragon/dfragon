@@ -20,8 +20,7 @@ export type CharacterTableAction = {
 
 export type Affiliation = 'adventure' | 'guild'
 
-const link = 'text-inherit no-underline hover:underline'
-// 초상화(36px)가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다.
+// 초상화 옆 두 줄 글자가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다.
 const PORTRAIT_CELL = 'py-0'
 const FAME_CELL = 'table-num font-semibold text-game-fame'
 
@@ -57,11 +56,7 @@ export function CharacterTable({
         </colgroup>
         <thead>
           <tr>
-            {ranked && (
-              <th scope="col" className="text-center">
-                #
-              </th>
-            )}
+            {ranked && <th scope="col">#</th>}
             <th scope="col">캐릭터</th>
             <th scope="col" className="table-num">
               명성
@@ -81,9 +76,7 @@ export function CharacterTable({
         <tbody>
           {rows.map((row) => (
             <tr key={`${row.serverId}/${row.characterId}`}>
-              {ranked && (
-                <td className="text-center">{row.rank != null && <RankBadge rank={row.rank} />}</td>
-              )}
+              {ranked && <td>{row.rank != null && <RankBadge rank={row.rank} />}</td>}
               <td className={PORTRAIT_CELL}>
                 <CharacterCell
                   character={row}
@@ -124,7 +117,7 @@ function AffiliationLink({
       <Link
         to="/adventures/$adventureName"
         params={{ adventureName: character.adventureName }}
-        className={link}
+        className="link"
       >
         {character.adventureName}
       </Link>
@@ -140,7 +133,7 @@ function AffiliationLink({
   }
 
   return (
-    <Link to="/guilds/$guildId" params={{ guildId: character.guildId }} className={link}>
+    <Link to="/guilds/$guildId" params={{ guildId: character.guildId }} className="link">
       {character.guildName}
     </Link>
   )
@@ -158,29 +151,27 @@ export function SkeletonRow({
   return (
     <tr ref={rowRef} aria-hidden="true">
       {ranked && (
-        <td className="text-center">
-          <Bone width={24} height={20} />
+        <td>
+          <span className="skeleton-text w-[12px]" />
         </td>
       )}
       <td className={PORTRAIT_CELL}>
         <div className="flex items-center gap-3">
-          <Bone width={32} height={36} />
+          <span className="skeleton portrait-sm" />
           <div className="flex flex-col gap-2">
-            <Bone width={140} height={14} />
-            <Bone width={96} height={12} />
+            <span className="skeleton-text w-[88px]" />
+            <span className="skeleton-text skeleton-text-xs w-[40px]" />
           </div>
         </div>
       </td>
       <td>
-        <Bone width={64} height={14} />
+        <span className="skeleton-text ml-auto w-[56px]" />
       </td>
       {affiliations.map((affiliation) => (
-        <td key={affiliation} />
+        <td key={affiliation}>
+          <span className="skeleton-text mx-auto w-[56px]" />
+        </td>
       ))}
     </tr>
   )
-}
-
-function Bone({ width, height }: { width: number; height: number }): React.JSX.Element {
-  return <span className="block rounded-control bg-inset" style={{ width, height }} />
 }
