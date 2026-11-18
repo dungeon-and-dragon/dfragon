@@ -34,32 +34,76 @@ function stats(): { name: string; value: string; icon: boolean }[] {
   }))
 }
 
-it('딜러 스탯은 응답의 79개를 응답 순서대로 이름과 값으로 보인다', async () => {
+function namesIn(label: string): string[] {
+  return [...container.querySelectorAll(`dl[aria-label="${label}"] dt`)].map(
+    (name) => name.textContent ?? ''
+  )
+}
+
+it('딜러 스탯 79개를 힘부터 속성 강화까지의 첫 묶음과, HP, MP, 방어율과 모험가 명성부터의 나머지 묶음으로 나눠 보인다', async () => {
   const detail = characterDetailFixture('dealer')
   await render(detail)
 
-  const shown = stats()
-  expect(shown).toHaveLength(79)
-  expect(shown.map((stat) => stat.name)).toEqual(detail.status.status.map((stat) => stat.name))
-  expect(shown.slice(0, 3)).toEqual([
-    { name: 'HP', value: '176,036', icon: false },
-    { name: 'MP', value: '117,334', icon: false },
-    { name: '물리 방어율', value: '40.1', icon: false }
+  expect(stats()).toHaveLength(79)
+  expect(namesIn('스탯')).toEqual([
+    '힘',
+    '지능',
+    '체력',
+    '정신력',
+    '물리 공격',
+    '마법 공격',
+    '물리 크리티컬',
+    '마법 크리티컬',
+    '독립 공격',
+    '공격 속도',
+    '캐스팅 속도',
+    '이동 속도',
+    '화속성 강화',
+    '수속성 강화',
+    '명속성 강화',
+    '암속성 강화'
   ])
-  expect(shown.find((stat) => stat.name === '최종 데미지 증가')?.value).toBe('122,134,200')
+
+  const responseNames = detail.status.status.map(({ name }) => name ?? '')
+  const fameIndex = responseNames.indexOf('모험가 명성')
+  const afterFame = responseNames.slice(fameIndex).filter((name) => !name.endsWith('속성 강화'))
+  expect(namesIn('그 밖의 스탯')).toEqual(['HP', 'MP', '물리 방어율', '마법 방어율', ...afterFame])
+
+  expect(stats().find((stat) => stat.name === '최종 데미지 증가')?.value).toBe('122,134,200')
 })
 
-it('속성 강화 네 개만 이름 왼쪽에 아이콘 자리를 두고 값은 다른 스탯과 같은 class로 보인다', async () => {
+it('기본 스탯, 공격, 크리티컬, 속성 강화마다 가장 높은 스탯의 이름과 값을 굵게 두고, 같은 값은 모두 굵게 둔다', async () => {
   await render(characterDetailFixture('dealer'))
 
-  expect(stats().filter((stat) => stat.icon)).toEqual([
-    { name: '화속성 강화', value: '306', icon: true },
-    { name: '수속성 강화', value: '281', icon: true },
-    { name: '명속성 강화', value: '306', icon: true },
-    { name: '암속성 강화', value: '246', icon: true }
+  const emphasized = [...container.querySelectorAll('dl > div')]
+    .filter((stat) => stat.querySelector('dd')?.classList.contains('font-semibold'))
+    .map((stat) => [
+      stat.querySelector('dt')?.textContent,
+      stat.querySelector('dt')?.classList.contains('font-semibold')
+    ])
+  expect(emphasized).toEqual([
+    ['힘', true],
+    ['물리 공격', true],
+    ['물리 크리티컬', true],
+    ['화속성 강화', true],
+    ['명속성 강화', true]
+  ])
+})
+
+it('속성 강화도 이름 왼쪽에 빈 자리 없이 보이고 값은 강조하지 않은 다른 스탯과 같은 class로 보인다', async () => {
+  await render(characterDetailFixture('dealer'))
+
+  expect(stats().filter((stat) => stat.icon)).toEqual([])
+  expect(stats().filter((stat) => stat.name.endsWith('속성 강화'))).toEqual([
+    { name: '화속성 강화', value: '306', icon: false },
+    { name: '수속성 강화', value: '281', icon: false },
+    { name: '명속성 강화', value: '306', icon: false },
+    { name: '암속성 강화', value: '246', icon: false }
   ])
   const valueClasses = new Set(
-    [...container.querySelectorAll('dl dd')].map((value) => value.className)
+    [...container.querySelectorAll('dl dd')]
+      .filter((value) => !value.classList.contains('font-semibold'))
+      .map((value) => value.className)
   )
   expect(valueClasses.size).toBe(1)
 })
