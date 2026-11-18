@@ -49,7 +49,7 @@ export {
 export type { ItemView, StatLine } from './character-item'
 export { isMaxLevel } from './character-level'
 export { toOathView } from './character-oath'
-export type { OathView } from './character-oath'
+export type { OathUpgradeChoice, OathView } from './character-oath'
 export {
   CHARACTER_SERVER_NAMES,
   characterIdentitySchema,
