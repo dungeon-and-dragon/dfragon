@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import type { SkillWindowCatalog } from '#core/catalog'
+import type { CharacterHistory } from '#core/character'
 import type { ClientHost } from '#host/client-host'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
@@ -9,6 +10,7 @@ import {
   storyCharacterDetail,
   storyHistory,
   storyOathCatalog,
+  storySingleHistory,
   storySkillWindowCatalog,
   storyTimeline
 } from '#testing/story-support/story-character-detail'
@@ -25,7 +27,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-function hostOf(role: 'dealer' | 'buffer'): ClientHost {
+function hostOf(role: 'dealer' | 'buffer', history: CharacterHistory): ClientHost {
   const detail = storyCharacterDetail(role)
   const catalogs: Readonly<Record<string, SkillWindowCatalog>> = {
     [storySkillWindowCatalog.job.jobName]: storySkillWindowCatalog,
@@ -35,7 +37,7 @@ function hostOf(role: 'dealer' | 'buffer'): ClientHost {
   return createStoryClientHost({
     getCharacterDetail: async () => detail,
     getCharacterTimeline: async () => storyTimeline,
-    getCharacterHistory: async () => storyHistory,
+    getCharacterHistory: async () => history,
     getCharacterHistorySnapshot: async () => detail,
     getSkillWindowCatalog: async (jobName) => catalogs[jobName] ?? null,
     getOathCatalog: async () => storyOathCatalog
@@ -64,10 +66,14 @@ function Screen({
   )
 }
 
-function tabStory(tab: CharacterTab, role: 'dealer' | 'buffer' = 'dealer'): Story {
+function tabStory(
+  tab: CharacterTab,
+  role: 'dealer' | 'buffer' = 'dealer',
+  history: CharacterHistory = storyHistory
+): Story {
   return {
     render: () => (
-      <StoryFrame host={hostOf(role)}>
+      <StoryFrame host={hostOf(role, history)}>
         <Screen initialTab={tab} role={role} />
       </StoryFrame>
     )
@@ -89,6 +95,8 @@ export const 스탯: Story = tabStory('status')
 export const 타임라인: Story = tabStory('timeline')
 
 export const 이력: Story = tabStory('history')
+
+export const 이력하나: Story = tabStory('history', 'dealer', storySingleHistory)
 
 export const 받는중: Story = {
   render: () => (

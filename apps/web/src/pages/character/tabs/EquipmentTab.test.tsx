@@ -59,8 +59,18 @@ it('딜러 장비 13칸과 크리쳐, 오라 행을 부위, 장비, 강화, 마�
   expect(container.querySelector('tbody img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/items/89c42c1d02e6749244ce518e9b34e1c7'
   )
-  expect(container.textContent).toContain('로열 페어리 세트태초2,615pt')
+  expect(container.textContent).toContain('장비로열 페어리 세트태초2,615pt')
   expect(container.textContent).toContain('안개 융화Lv.100')
+})
+
+it('장비 줄 바로 아래에 서약 세트 이름, 등급, 서약 포인트 줄을 둔다', async () => {
+  await render(characterDetailFixture('dealer'))
+
+  const strips = [...container.children[0].children[0].children].map((strip) => strip.textContent)
+  expect(strips).toEqual([
+    '장비로열 페어리 세트태초2,615pt안개 융화Lv.100',
+    '서약야망의 용투 서약태초2,780pt'
+  ])
 })
 
 it('버퍼의 재련과 버프 패시브 스킬 마법부여를 그린다', async () => {
@@ -71,16 +81,17 @@ it('버퍼의 재련과 버프 패시브 스킬 마법부여를 그린다', asyn
   expect(rows[2][3]).toBe('버프 패시브 스킬 +3, 올스탯 +100')
 })
 
-it('장비, 세트, 크리쳐, 오라가 모두 없으면 표와 위 한 줄을 그리지 않는다', async () => {
+it('장비, 세트, 서약, 크리쳐, 오라가 모두 없으면 표와 위 줄을 그리지 않는다', async () => {
   const detail = characterDetailFixture('dealer')
   await render({
     ...detail,
     equipment: { equipment: [], setItemInfo: [] },
     creature: null,
     avatar: [],
-    mistAssimilation: null
+    mistAssimilation: null,
+    oath: null
   })
 
   expect(container.querySelector('table')).toBeNull()
-  expect(container.textContent).toBe('')
+  expect(container.children[0].children).toHaveLength(0)
 })

@@ -241,13 +241,15 @@ it('이력이 없으면 빈 상태 제목과 최신 순 이름 변경 표만 보
   ])
 })
 
-it('한 시점뿐이면 차트 없이 첫 기록 시점과 요약 숫자를 보인다', async () => {
+it('한 시점뿐이어도 명성과 점수 차트, 첫 기록 시점과 요약 숫자를 보인다', async () => {
   const getCharacterHistorySnapshot = snapshots({ [FIRST]: detailOf(2555, 100) })
   await render(
     createTestClientHost({ getCharacterHistory: async () => ONE, getCharacterHistorySnapshot })
   )
 
-  expect(container.querySelector('section[aria-label="명성 추이"]')).toBeNull()
+  expect(
+    [...container.querySelectorAll('section[aria-label$="추이"]')].map(({ ariaLabel }) => ariaLabel)
+  ).toEqual(['명성 추이', '장비 점수 추이'])
   expect(text('h2')).toEqual(['시점1', '변경점1'])
   expect(text('button[aria-pressed="true"]')).toEqual(['11-05 22:00첫 기록134,8611,268,402'])
   expect(tiles()).toEqual([
