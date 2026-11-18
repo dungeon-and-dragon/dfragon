@@ -6,12 +6,12 @@ import type {
   TimelineRange
 } from '@dfragon/database'
 import { addWeeks, subMinutes } from 'date-fns'
-import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/ranges.js'
+import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   type ClearContent,
   toPopulationMinFame
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 
 type ClearCollectionWeek = {
   contentId: string

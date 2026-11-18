@@ -1,7 +1,7 @@
 import type { CharacterBasicInput } from '@dfragon/database'
-import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterFetched } from '../../domain/character-events.js'
-import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import type {
   CharacterRecordFailure,
   ParseCharacterBasic,

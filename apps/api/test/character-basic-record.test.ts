@@ -11,14 +11,16 @@ import {
   recordCharacterBasic
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type {
   CharacterPayload,
   CharacterPayloads
-} from '@dfragon/server-core/domain/character-detail/sections.js'
-import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/result.js'
-import type { ScoreWorker } from '@dfragon/server-core/infrastructure/score/engine.js'
-import type { ScoreWorkerMessage } from '@dfragon/server-core/infrastructure/score/worker-protocol.js'
+} from '@dfragon/server-core/domain/character-detail/index.js'
+import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/index.js'
+import type {
+  ScoreWorker,
+  ScoreWorkerMessage
+} from '@dfragon/server-core/infrastructure/score/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 import { createApiRuntimeOptions } from '../src/runtime/application.js'
 

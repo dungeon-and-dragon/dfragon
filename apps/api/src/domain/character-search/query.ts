@@ -1,6 +1,6 @@
 import { matchesDNFSearchNicknamePolicy } from '@dfragon/lib'
 import { NEOPLE_SERVER_NAMES } from '@dfragon/server-core/domain/neople-servers.js'
-import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
+import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/index.js'
 import type { NeopleCharacterSearchInput } from './types.js'
 
 type DecodedQueryPair = { key: string; value: string }

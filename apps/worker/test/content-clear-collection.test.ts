@@ -40,7 +40,7 @@ import type {
 import { ContentClearCollectionService } from '../src/application/content-clears/collection.js'
 import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
 import { ClearRecordBackfillService } from '../src/application/content-clears/record-backfill.js'
-import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/contents.js'
+import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/index.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 import { JobSchedulerService } from '../src/application/jobs/scheduler.js'
 import { formatResetDate, startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'

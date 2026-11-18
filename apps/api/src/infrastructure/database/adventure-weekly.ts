@@ -9,7 +9,7 @@ import {
   type AdventureWeeklyClears,
   toAdventureWeeklyClears
 } from '../../domain/adventure-guild/index.js'
-import { CLEAR_CODES } from '@dfragon/server-core/domain/character-timeline/project.js'
+import { CLEAR_CODES } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 import { parseTimelineClearRow } from './character-timeline-read.js'
 

@@ -5,7 +5,7 @@ import {
   ACQUISITION_CODES,
   type TimelineClear,
   type TimelineEnhancement
-} from '@dfragon/server-core/domain/character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   type SeasonBackfillProgress,
   isSeasonBackfilled,

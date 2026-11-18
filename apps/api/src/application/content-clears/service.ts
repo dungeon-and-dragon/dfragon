@@ -5,7 +5,7 @@ import {
   CLEAR_CONTENTS,
   type ClearContent,
   findStagePair
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   CLEAR_LEGIONS,
   type ClearContentStats,
@@ -21,7 +21,7 @@ import {
   toLegionSummaries
 } from '../../domain/content-clears/index.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
-import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/sample-loader.js'
+import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/index.js'
 
 type ClearSummary = {
   stats: ClearStats

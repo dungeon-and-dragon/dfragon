@@ -3,7 +3,8 @@
   "compilerOptions": {
     "paths": {
       "@dfragon/database": ["../../packages/database/src/index.ts"],
-      "@dfragon/neople": ["../../packages/neople/src/index.ts"]
+      "@dfragon/neople": ["../../packages/neople/src/index.ts"],
+      "@dfragon/server-core/*": ["../../packages/server-core/src/*"]
     }
   },
   "include": ["src/**/*.ts"]

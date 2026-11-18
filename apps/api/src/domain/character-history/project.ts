@@ -5,7 +5,7 @@ import type {
   TimelineEventRow
 } from '@dfragon/database'
 import { z } from 'zod'
-import type { CharacterCardScore } from '@dfragon/server-core/domain/character-card/types.js'
+import type { CharacterCardScore } from '@dfragon/server-core/domain/character-card/index.js'
 import type { CharacterChangePoint } from './changes.js'
 
 export const CHARACTER_NAME_CHANGE_CODES = { character: 102, adventure: 105 } as const

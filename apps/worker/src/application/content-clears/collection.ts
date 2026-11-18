@@ -3,7 +3,7 @@ import {
   CLEAR_CONTENTS,
   toCollectionMinFame,
   toContentClearInput
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   planClearCollection,
   toContentPopulation,

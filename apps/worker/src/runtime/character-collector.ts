@@ -10,7 +10,7 @@ import {
   createNeopleCharacterBasic,
   paceNeopleRequests
 } from '../infrastructure/neople/index.js'
-import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
+import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { readCollectorConfiguration } from './collector-configuration.js'
 import { CharacterCollectionService } from '../application/character-collection/index.js'
 import {

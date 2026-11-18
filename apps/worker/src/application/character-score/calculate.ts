@@ -1,16 +1,20 @@
-import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/project.js'
-import { cardScoreCalculator } from '@dfragon/server-core/domain/character-card/score.js'
-import { projectCharacterDetails } from '@dfragon/server-core/domain/character-detail/project.js'
-import type {
-  CharacterIdentity,
-  FetchedCharacterPayloads
-} from '@dfragon/server-core/domain/character-detail/sections.js'
-import { toScoreEngineInput } from '@dfragon/server-core/domain/score/input.js'
-import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/result.js'
+import {
+  projectCharacterCard,
+  cardScoreCalculator
+} from '@dfragon/server-core/domain/character-card/index.js'
+import {
+  projectCharacterDetails,
+  type CharacterIdentity,
+  type FetchedCharacterPayloads
+} from '@dfragon/server-core/domain/character-detail/index.js'
+import {
+  toScoreEngineInput,
+  type ScoreEngineResult
+} from '@dfragon/server-core/domain/score/index.js'
 import {
   enrichCharacterDetails,
   hasUnavailableItemDetail
-} from '@dfragon/server-core/application/character-catalog/enrich.js'
+} from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
 

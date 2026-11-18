@@ -1,8 +1,11 @@
 import DataLoader from 'dataloader'
 import { LRUCache } from 'lru-cache'
-import { CATALOG_LIMITS, unavailableDetail } from '../../domain/character-catalog/types.js'
-import type { CatalogDetail } from '../../domain/character-catalog/types.js'
-import type { CharacterPayload } from '../../domain/character-detail/sections.js'
+import {
+  CATALOG_LIMITS,
+  unavailableDetail,
+  type CatalogDetail
+} from '../../domain/character-catalog/index.js'
+import type { CharacterPayload } from '../../domain/character-detail/index.js'
 import type { CharacterCatalog, FetchCatalog } from './ports.js'
 
 const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000

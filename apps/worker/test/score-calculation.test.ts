@@ -21,9 +21,9 @@ import type {
   ScoreEngineHandle
 } from '../src/application/character-score/ports.js'
 import type { ScoreCalculationRepository } from '../src/application/character-score/repository.js'
-import type { CharacterDetailSection } from '@dfragon/server-core/domain/character-detail/sections.js'
-import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/result.js'
-import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
+import type { CharacterDetailSection } from '@dfragon/server-core/domain/character-detail/index.js'
+import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/index.js'
+import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { WorkerNeople } from '../src/infrastructure/neople/character-collection.js'
 import { createScoreSources } from '../src/runtime/score-calculation.js'
 import {

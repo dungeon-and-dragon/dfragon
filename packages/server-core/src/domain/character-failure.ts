@@ -1,5 +1,5 @@
 import { type FailureOptions, SanitizedFailure } from '@dfragon/lib/error-chain'
-import { NeopleSearchFailure } from './character-search/failure.js'
+import { NeopleSearchFailure } from './character-search/index.js'
 
 export type CharacterFailureKind =
   | 'query'

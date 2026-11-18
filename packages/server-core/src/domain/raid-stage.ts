@@ -1,4 +1,4 @@
-import type { TimelineClear } from './character-timeline/project.js'
+import type { TimelineClear } from './character-timeline/index.js'
 
 // Neople 타임라인은 한 레이드의 본 레이드와 개전, 매칭 같은 단계를 같은 raidName으로 주고 data.modeName으로만 나눈다.
 // 표에 없는 modeName은 본 레이드로 보고 하드, 일반으로 나눈다. 값은 운영 DB에서 본 modeName이다(2026-11-09).

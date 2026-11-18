@@ -7,6 +7,9 @@ const allowedApiSourcePath =
 const featureFolderPath =
   '^src/(?:(?:domain|application|infrastructure)/[^/]+|presentation/http/[^/]+)/'
 
+const serverCoreFeatureFolderPath =
+  '^\\.\\./\\.\\./packages/server-core/src/(?:domain|application|infrastructure)/[^/]+/'
+
 export default {
   forbidden: [
     ...[true, false].map((orphan) => {
@@ -68,6 +71,20 @@ export default {
       severity: 'error',
       from: { path: '^src/' },
       to: { circular: true, viaOnly: { dependencyTypesNot: ['type-only'] } }
+    },
+    {
+      name: 'server-core-feature-folder-index',
+      comment:
+        'server-core 기능 폴더 밖에서는 @dfragon/server-core/<계층>/<기능>/index.js로 가져온다. 필요한 이름을 server-core의 index.ts에 named re-export로 더한다. application/<기능>/repository.ts, ports.ts와 계층 폴더 바로 아래 파일은 직접 import한다.',
+      severity: 'error',
+      from: { path: '^src/' },
+      to: {
+        path: serverCoreFeatureFolderPath,
+        pathNot: [
+          `${serverCoreFeatureFolderPath}index\\.ts$`,
+          '^\\.\\./\\.\\./packages/server-core/src/application/[^/]+/(repository|ports)\\.ts$'
+        ]
+      }
     },
     {
       name: 'unresolved-package',

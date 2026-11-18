@@ -1,5 +1,5 @@
 import { CHARACTER_ID_PATTERN } from '../character-identity.js'
-import type { CharacterPayload } from '../character-detail/sections.js'
+import type { CharacterPayload } from '../character-detail/index.js'
 
 export const CATALOG_LIMITS = {
   maximumBatchKeys: 15,

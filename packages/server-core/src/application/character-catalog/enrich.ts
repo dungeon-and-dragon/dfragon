@@ -1,7 +1,10 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
-import { mapCharacterItems } from '../../domain/character-catalog/items.js'
-import { isCatalogId, unavailableDetail } from '../../domain/character-catalog/types.js'
-import type { projectCharacterDetails } from '../../domain/character-detail/project.js'
+import {
+  mapCharacterItems,
+  isCatalogId,
+  unavailableDetail
+} from '../../domain/character-catalog/index.js'
+import type { projectCharacterDetails } from '../../domain/character-detail/index.js'
 import type { CharacterCatalog } from './ports.js'
 
 type CharacterDetails = ReturnType<typeof projectCharacterDetails>
