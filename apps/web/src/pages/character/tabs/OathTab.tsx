@@ -1,6 +1,11 @@
 import { CheckIcon } from '@dfragon/ui'
-import { MISSING_VALUE } from '#core/capture'
-import { formatCount, formatPoint, type OathView, type StatLine, toOathView } from '#core/character'
+import {
+  formatCount,
+  OATH_SET_POINT_BONUS,
+  type OathUpgradeChoice,
+  type OathView,
+  toOathView
+} from '#core/character'
 import {
   type OathCatalog,
   type OathOptionCard,
@@ -13,11 +18,23 @@ import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
 import { raritySolidOf } from '#components/game-colors'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
-import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
+import { ItemIcon, ItemName, RarityBadge, SetPoint, TuneNumeral } from './equipment/item-parts'
 
-const { slot, muted, heading, count } = itemTableClasses
-// 진의 단계처럼 값이 글자인 줄도 있어, 숫자로만 된 값에만 숫자 글꼴을 쓴다.
-const NUMERIC_TEXT = /^[\d.,+\-%\s]+$/
+const { heading, count } = itemTableClasses
+const UPGRADE_CHOICE_LABELS: Readonly<Record<OathUpgradeChoice, string>> = {
+  finalDamage: '최종 데미지',
+  cooldown: '쿨타임 감소',
+  oathPoint: '서약 포인트',
+  speed: '이동속도',
+  range: '범위',
+  defense: '방어력'
+}
+
+const UPGRADE_CHOICE_TONES: Readonly<Partial<Record<OathUpgradeChoice, string>>> = {
+  finalDamage: 'text-game-decrease',
+  cooldown: 'text-game-enhance'
+}
+
 const OPTION = 'm-0 flex items-start gap-4 rounded-control border p-4'
 const OPTION_IDLE = 'border-dashed border-line-strong bg-canvas'
 const OPTION_PICKED = 'border-solid border-signal bg-surface shadow-selected'
@@ -80,9 +97,7 @@ function OathSetCard({
       <span className="flex flex-wrap items-center gap-2 text-base">
         <ItemName name={set.name} rarity={set.rarity} />
         {set.rarityName !== null && <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>}
-        {set.point !== null && (
-          <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
-        )}
+        {set.point !== null && <SetPoint point={set.point} rule={OATH_SET_POINT_BONUS} />}
       </span>
     </div>
   )
@@ -139,10 +154,6 @@ function OathBody({
           <ItemIcon itemId={info.itemId} src={oathItemIconOf(catalog, info)} rarity={info.rarity} />
           <ItemName name={info.itemName} rarity={info.rarity} />
         </div>
-        <span className={itemClasses.spacer} />
-        {info.setPoint !== null && (
-          <span className={itemClasses.stripNumber}>{formatPoint(info.setPoint)}</span>
-        )}
       </div>
     </section>
   )
@@ -166,9 +177,6 @@ function OathStrip({
           <span className="label">서약</span>
           {icon !== null && <ItemIcon itemId={info.itemId} src={icon} rarity={info.rarity} />}
           <ItemName name={info.itemName} rarity={info.rarity} />
-          {info.setPoint !== null && (
-            <span className={itemClasses.stripNumber}>{formatPoint(info.setPoint)}</span>
-          )}
         </span>
       )}
       <span className={itemClasses.spacer} />
@@ -182,9 +190,7 @@ function OathStrip({
           {set.rarityName !== null && (
             <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>
           )}
-          {set.point !== null && (
-            <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
-          )}
+          {set.point !== null && <SetPoint point={set.point} rule={OATH_SET_POINT_BONUS} />}
         </span>
       )}
     </div>
@@ -204,19 +210,12 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
       <table className="table">
         <thead>
           <tr>
-            <th scope="col" className="w-[56px]">
-              칸
-            </th>
             <th scope="col">결정</th>
-            <th scope="col" className="table-num w-[110px]">
-              세트 포인트
-            </th>
           </tr>
         </thead>
         <tbody>
           {crystals.map((crystal, index) => (
             <tr key={`${crystal.slot}-${index}`}>
-              <td className={`${slot} num`}>{crystal.slot ?? MISSING_VALUE}</td>
               <td>
                 <div className={itemClasses.item}>
                   <ItemIcon itemId={crystal.itemId} rarity={crystal.rarity} />
@@ -226,9 +225,6 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
                   </span>
                 </div>
               </td>
-              <td className={`table-num ${muted}`}>
-                {crystal.setPoint !== null ? formatPoint(crystal.setPoint) : MISSING_VALUE}
-              </td>
             </tr>
           ))}
         </tbody>
@@ -237,42 +233,34 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
   )
 }
 
-function OathEffects({
-  view: { setStatus, blessing, upgrade }
-}: {
-  view: OathView
-}): React.JSX.Element {
+function OathEffects({ view: { upgrade } }: { view: OathView }): React.JSX.Element {
   return (
     <div className="w-[480px] shrink-0 max-sm:w-full">
-      <StatSection title="서약 세트 효과" lines={setStatus} />
-      <StatSection title="서약의 가호" lines={blessing} />
-      {upgrade !== null && <StatSection title={upgrade.title} lines={upgrade.lines} />}
+      {upgrade !== null && <UpgradeSection title={upgrade.title} steps={upgrade.steps} />}
     </div>
   )
 }
 
-function StatSection({
+function UpgradeSection({
   title,
-  lines
+  steps
 }: {
   title: string | null
-  lines: StatLine[]
-}): React.JSX.Element | null {
-  if (lines.length === 0) {
-    return null
-  }
-
+  steps: NonNullable<OathView['upgrade']>['steps']
+}): React.JSX.Element {
   return (
     <section aria-label={title ?? undefined}>
       {title !== null && <h2 className={heading}>{title}</h2>}
       <dl>
-        {lines.map(({ name, value }, index) => (
+        {steps.map(({ name, choice }) => (
           <div
-            key={`${name}-${index}`}
+            key={name}
             className="flex min-h-[40px] items-center justify-between gap-3 border-b border-line px-4"
           >
             <dt className="text-fg-muted">{name}</dt>
-            <dd className={`font-semibold ${NUMERIC_TEXT.test(value) ? 'num' : ''}`}>{value}</dd>
+            <dd className={`font-semibold ${UPGRADE_CHOICE_TONES[choice] ?? ''}`}>
+              {UPGRADE_CHOICE_LABELS[choice]}
+            </dd>
           </div>
         ))}
       </dl>
