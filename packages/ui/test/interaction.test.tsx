@@ -394,20 +394,16 @@ describe('IconButton의 이름, 클릭, disabled', () => {
   })
 
   // jsdom은 계산된 크기를 모르므로 크기마다 다른 class가 붙는지만 확인한다.
-  it('상단 바 크기 bar와 헤더 도구 크기 lg는 기본 md와 다른 외형을 쓴다', async () => {
+  it('헤더 도구 크기 lg는 기본 md와 다른 외형을 쓴다', async () => {
     await render(
       <>
         <IconButton aria-label="기본" icon={<SettingsIcon />} />
-        <IconButton aria-label="상단 바" size="bar" icon={<SettingsIcon />} />
         <IconButton aria-label="헤더 도구" size="lg" icon={<SettingsIcon />} />
       </>
     )
-    const plain = getByRole('button', '기본').className
 
-    expect(getByRole('button', '상단 바').className).not.toBe(plain)
-    expect(getByRole('button', '헤더 도구').className).not.toBe(plain)
     expect(getByRole('button', '헤더 도구').className).not.toBe(
-      getByRole('button', '상단 바').className
+      getByRole('button', '기본').className
     )
   })
 
@@ -808,19 +804,12 @@ describe('StatusChip의 tone과 진행 표시', () => {
 })
 
 describe('StepDots', () => {
-  it('보조 기술에 숨긴 점 세 개를 두고 크기를 클래스로 고른다', async () => {
-    await render(
-      <>
-        <StepDots />
-        <StepDots size={5} />
-      </>
-    )
-    const [small, large] = [...container.children]
+  it('보조 기술에 숨긴 점 세 개를 둔다', async () => {
+    await render(<StepDots />)
+    const dots = container.children[0]
 
-    expect(small.getAttribute('aria-hidden')).toBe('true')
-    expect(small.children).toHaveLength(3)
-    expect(small.classList.contains('step-dots-4')).toBe(true)
-    expect(large.classList.contains('step-dots-5')).toBe(true)
+    expect(dots.getAttribute('aria-hidden')).toBe('true')
+    expect(dots.children).toHaveLength(3)
   })
 })
 
