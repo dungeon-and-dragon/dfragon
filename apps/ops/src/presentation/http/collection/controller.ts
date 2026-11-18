@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { CollectionService } from '../../../application/collection/service.js'
+import type { CollectionService } from '../../../application/collection/index.js'
 import { OpsFailure } from '../../../domain/failure.js'
 import { readJsonBody } from '../json-request.js'
 import { type CollectionSummaryResponse, requeueBody, toRequeueResponse } from './dto.js'

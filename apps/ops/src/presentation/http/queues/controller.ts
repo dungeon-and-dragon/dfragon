@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { QueueService } from '../../../application/queues/service.js'
+import type { QueueService } from '../../../application/queues/index.js'
 import { toQueueListResponse } from './dto.js'
 
 export class QueueController {

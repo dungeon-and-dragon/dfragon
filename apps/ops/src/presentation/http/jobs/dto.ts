@@ -1,6 +1,6 @@
 import type { JobOverview, JobRunRecord } from '@dfragon/database'
 import { z } from 'zod'
-import type { JobList, JobRunPage } from '../../../application/jobs/service.js'
+import type { JobList, JobRunPage } from '../../../application/jobs/index.js'
 
 const DEFAULT_RUN_PAGE_SIZE = 20
 const MAX_RUN_PAGE_SIZE = 100
