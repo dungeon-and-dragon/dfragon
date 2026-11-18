@@ -15,6 +15,7 @@ export type {
   UsableBatchNeopleKey
 } from './batch-neople-key.js'
 export {
+  readItemDictionary,
   readUnlistedAcquisitionItemIds,
   readUnlistedItemIds,
   recordItemDictionary

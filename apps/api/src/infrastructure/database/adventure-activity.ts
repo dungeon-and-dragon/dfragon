@@ -1,12 +1,14 @@
 import {
   type CharacterTimelineItemRow,
   type DatabaseClient,
+  type ItemDictionaryEntry,
   type TimelineCharacter,
   type TimelineEventRow,
   type TimelineRange,
   readAdventureCharacters,
   readCharactersTimelineEvents,
   readCharactersTimelineItems,
+  readItemDictionary,
   readSeasonBackfillStates,
   readSeasons
 } from '@dfragon/database'
@@ -46,6 +48,7 @@ import { parseTimelineClearRow, parseTimelineEnhancementRow } from './character-
 export type ActivityRecords = {
   clears: readonly TimelineEventRow[]
   items: readonly CharacterTimelineItemRow[]
+  itemDictionary: readonly ItemDictionaryEntry[]
 }
 
 function parseActivityRecords(records: ActivityRecords): ParsedActivityRecords {
@@ -55,8 +58,9 @@ function parseActivityRecords(records: ActivityRecords): ParsedActivityRecords {
 
     return { ...row, enhancements }
   })
+  const itemDictionary = new Map(records.itemDictionary.map((entry) => [entry.itemId, entry]))
 
-  return { clears, items }
+  return { clears, items, itemDictionary }
 }
 
 export function parseSeasonActivity(
@@ -67,14 +71,15 @@ export function parseSeasonActivity(
 }
 
 export function parseActivityDayDetail(
+  seasonId: number,
   day: ActivityDayRange,
   records: ActivityRecords
 ): ActivityDayDetail {
-  return toActivityDayDetail(day, parseActivityRecords(records))
+  return toActivityDayDetail(seasonId, day, parseActivityRecords(records))
 }
 
-export function parseSeasonDays(records: ActivityRecords): ActivityDayDetail[] {
-  return toSeasonDays(parseActivityRecords(records))
+export function parseSeasonDays(seasonId: number, records: ActivityRecords): ActivityDayDetail[] {
+  return toSeasonDays(seasonId, parseActivityRecords(records))
 }
 
 async function readActivityRecords(
@@ -94,7 +99,10 @@ async function readActivityRecords(
     )
   ])
 
-  return { clears, items }
+  const itemIds = items.flatMap(({ itemId }) => (itemId !== null ? [itemId] : []))
+  const itemDictionary = await readItemDictionary(client, itemIds)
+
+  return { clears, items, itemDictionary }
 }
 
 async function readSeasonActivity(
@@ -195,7 +203,7 @@ export async function readAdventureSeasonDays(
     season.startsAt,
     season.endsAt ?? now
   )
-  const days = parseSeasonDays(records)
+  const days = parseSeasonDays(season.id, records)
 
   return { season: season.id, days }
 }
