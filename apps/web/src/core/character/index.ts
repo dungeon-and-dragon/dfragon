@@ -83,3 +83,5 @@ export {
   OATH_SET_POINT_BONUS
 } from './set-point-bonus'
 export type { SetPointBonusRule } from './set-point-bonus'
+export { toStatusLayout } from './status-layout'
+export type { StatusLine } from './status-layout'
