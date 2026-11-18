@@ -439,7 +439,22 @@ function payloadsWithSets(): CharacterPayloads {
     ...payloads,
     equipment: {
       ...payloads.equipment,
-      equipment: [{ slotName: '상의', setItemId: 'synthetic-set', setItemName: '합성 세트' }],
+      equipment: [
+        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
+        {
+          slotId: 'SUPPORT',
+          itemId: 'synthetic-support',
+          itemName: '합성 보조장비',
+          exaltedInfo: { damage: '1%' }
+        },
+        {
+          slotId: 'JACKET',
+          itemId: 'synthetic-jacket',
+          itemName: '합성 상의',
+          setItemId: 'synthetic-set',
+          setItemName: '합성 세트'
+        }
+      ],
       setItemInfo: [
         {
           setItemId: 'synthetic-set',
@@ -455,7 +470,7 @@ function payloadsWithSets(): CharacterPayloads {
   }
 }
 
-test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 세트를 저장하고, 캐시 적중에도 같은 시각으로 저장한다', {
+test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 세트와 무기, 유일 장비를 저장하고, 캐시 적중에도 같은 시각으로 저장한다', {
   timeout: 10_000
 }, async (t) => {
   let savedBasics = 0
@@ -495,6 +510,10 @@ test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 �
       ...character,
       equipmentSet: { id: 'synthetic-set', name: '합성 세트' },
       oathSet: { id: 16204, name: '합성 서약', option: '합성 선택지' },
+      items: [
+        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
+        { slotId: 'SUPPORT', itemId: 'synthetic-support', itemName: '합성 보조장비' }
+      ],
       fetchedAt: undefined
     }
   )

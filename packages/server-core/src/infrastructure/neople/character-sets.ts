@@ -1,4 +1,4 @@
-import type { CharacterEquipmentSet, CharacterOathSet } from '@dfragon/database'
+import type { CharacterEquipmentSet, CharacterItem, CharacterOathSet } from '@dfragon/database'
 import { z } from 'zod'
 import type { ParseCharacterSets } from '#application/character-basic/ports.js'
 
@@ -8,8 +8,12 @@ const equipmentSchema = z.looseObject({
   equipment: z
     .array(
       z.looseObject({
+        slotId: z.string().nullish(),
+        itemId: z.string().nullish(),
+        itemName: z.string().nullish(),
         setItemId: z.string().nullish(),
-        setItemName: z.string().nullish()
+        setItemName: z.string().nullish(),
+        exaltedInfo: z.unknown().optional()
       })
     )
     .nullish(),
@@ -59,6 +63,21 @@ function toEquipmentSet({
   return { id: active.setItemId, name }
 }
 
+const WEAPON_SLOT_ID = 'WEAPON'
+
+// 유일 장비는 exaltedInfo가 있는 부위라, 유일 장비가 다른 부위에 생겨도 부위 목록을 고치지 않는다.
+function toItems({ equipment }: z.output<typeof equipmentSchema>): CharacterItem[] {
+  return (equipment ?? []).flatMap(({ slotId, itemId, itemName, exaltedInfo }) => {
+    const kept = slotId === WEAPON_SLOT_ID || exaltedInfo != null
+
+    if (!kept || !slotId || !itemId || !itemName) {
+      return []
+    }
+
+    return [{ slotId, itemId, itemName }]
+  })
+}
+
 function toOathSet({ oath }: z.output<typeof oathSchema>): CharacterOathSet | null {
   const setInfo = oath?.setInfo
 
@@ -79,6 +98,7 @@ export const parseCharacterSets: ParseCharacterSets = (payloads) => {
 
   const equipmentSet = toEquipmentSet(equipment.data)
   const oathSet = toOathSet(oath.data)
+  const items = toItems(equipment.data)
 
-  return { equipmentSet, oathSet }
+  return { equipmentSet, oathSet, items }
 }
