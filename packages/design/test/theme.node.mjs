@@ -21,6 +21,7 @@ const FONT_FACE_PATTERN =
 const FONT_FILE_WEIGHT_PATTERN = /-(Regular|Medium|SemiBold|Bold)\.woff2$/
 const WEAK_TOKEN_PATTERN = /(--color-[a-z-]+-weak):\s*light-dark\(([^,]+),\s*([^)]+)\)/g
 const OPAQUE_HEX_PATTERN = /^#[0-9a-f]{6}$/
+const FOCUS_OUTLINE_PATTERN = /outline:\s*2px solid var\(--color-signal\);/
 const FONT_FILE_WEIGHTS = { Regular: '400', Medium: '500', SemiBold: '600', Bold: '700' }
 
 const theme = await readFile(new URL('../theme.css', import.meta.url), 'utf8')
@@ -32,6 +33,15 @@ function block(css, start) {
   const end = css.indexOf('\n}', index)
 
   return css.slice(index + 1, end)
+}
+
+function focusVisibleBlock(css, utility) {
+  const start = css.indexOf(`.${utility} {`)
+  assert.notEqual(start, -1, utility)
+  const focused = css.indexOf(':focus-visible', start)
+  assert.notEqual(focused, -1, utility)
+
+  return css.slice(focused, css.indexOf('}', focused))
 }
 
 function definedNames(source) {
@@ -198,6 +208,19 @@ test('시간을 적지 않은 전환은 hover 시간과 곡선을 쓴다', () =>
   const tokens = block(theme, '@theme static {')
   assert.match(tokens, /--default-transition-duration:\s*var\(--duration-hover\);/)
   assert.match(tokens, /--default-transition-timing-function:\s*var\(--ease-standard\);/)
+})
+
+test('focus-ring은 바깥, focus-ring-inset은 안쪽에 신호색 2px outline을 키보드 focus에만 그린다', async () => {
+  const css = await compiledUtilities(['focus-ring', 'focus-ring-inset'])
+
+  for (const [name, offset] of [
+    ['focus-ring', '2px'],
+    ['focus-ring-inset', '-2px']
+  ]) {
+    const focused = focusVisibleBlock(css, name)
+    assert.match(focused, FOCUS_OUTLINE_PATTERN, name)
+    assert.match(focused, new RegExp(`outline-offset:\\s*${offset};`), name)
+  }
 })
 
 test('utility를 쓰지 않은 토큰도 CSS 변수로 낸다', async () => {

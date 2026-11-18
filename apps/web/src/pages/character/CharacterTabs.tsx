@@ -4,8 +4,7 @@ import { CHARACTER_TABS, type CharacterTab, isCharacterTab } from './character-t
 
 const ROOT = 'flex flex-col rounded-panel border border-line bg-canvas'
 // 내용이 아직 없는 탭과 받는 중, 오류 상태가 같은 높이를 차지해 패널이 접히지 않게 한다.
-const PANEL =
-  'min-h-[360px] rounded-b-panel text-sm outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-signal'
+const PANEL = 'min-h-[360px] rounded-b-panel text-sm focus-ring-inset'
 
 export function CharacterTabs({
   tab,

@@ -184,7 +184,7 @@ function RowPortrait({
       params={{ serverId: character.serverId, characterId: character.characterId }}
       aria-label={`${character.name} 상세`}
       draggable={false}
-      className="absolute inset-0 cursor-pointer rounded-[inherit] -outline-offset-2 outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal"
+      className="absolute inset-0 cursor-pointer rounded-[inherit] focus-ring-inset"
     >
       {portrait}
     </Link>

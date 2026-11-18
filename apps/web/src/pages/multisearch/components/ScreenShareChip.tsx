@@ -75,7 +75,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
               sourceReady ? `화면 공유 중지, ${state.label}` : `화면 공유, ${state.label}`
             }
             onClick={sourceReady ? disconnect : connect}
-            className="m-0 inline-flex cursor-pointer rounded-badge border-0 bg-transparent p-0 text-inherit [font:inherit] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-signal"
+            className="inline-flex cursor-pointer rounded-badge focus-ring"
           >
             <StatusChip tone={state.tone} busy={state.busy} size="md">
               {state.label}
