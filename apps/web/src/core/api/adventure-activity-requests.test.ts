@@ -93,6 +93,18 @@ it('레이드 하드, 노말을 보내기 전의 API 응답도 읽는다', async
   await expect(read('합성 모험단', undefined)).resolves.toEqual(before)
 })
 
+it('시즌 10, 11의 서약 수와 날짜별 서약 필드가 더해진 API 응답도 읽는다', async () => {
+  const withOaths = {
+    ...activity,
+    summary: { ...activity.summary, oaths: { legendary: 1, epic: 0, primeval: 1 } },
+    days: activity.days.map((day) => ({ ...day, oath: 2, oathPrimeval: true }))
+  }
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(withOaths) }).adventures
+    .activity
+
+  await expect(read('합성 모험단', 10)).resolves.toEqual(activity)
+})
+
 it('빈 이름은 요청하지 않고 거부한다', async () => {
   const fetch = respond(activity)
   const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).adventures.activity
@@ -124,6 +136,20 @@ it('모험단 이름과 시즌 번호를 경로에 담아 그 시즌의 하루 �
   expect(requestedUrl(fetch)).toBe(
     `${API_ORIGIN}/adventures/${encodeURIComponent('합성 모험단/1')}/activity/seasons/12/days`
   )
+})
+
+it('하루 활동 상세에 서약 목록이 더해진 API 응답도 읽는다', async () => {
+  const withOaths = {
+    ...seasonDays,
+    days: seasonDays.days.map((day) => ({
+      ...day,
+      oaths: [{ at: '2026-07-18T10:20:00+09:00', name: '합성 서약', rarity: '태초' }]
+    }))
+  }
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(withOaths) }).adventures
+    .activitySeasonDays
+
+  await expect(read('합성 모험단', 11)).resolves.toEqual(seasonDays)
 })
 
 it('옛 시즌 받기는 시즌 번호를 경로에 담아 POST로 요청하고 그 시즌의 받기 상태를 돌려준다', async () => {
