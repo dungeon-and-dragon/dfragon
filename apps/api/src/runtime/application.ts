@@ -1,7 +1,11 @@
 import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
-import { createNeopleCharacterTimeline } from '@dfragon/server-core/infrastructure/neople/character-timeline.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
+import {
+  createNeopleCharacterTimeline,
+  createNeopleCatalog,
+  createNeopleCharacterDetails
+} from '@dfragon/server-core/infrastructure/neople/index.js'
 import {
   DatabaseAdventureGuildRepository,
   DatabaseCharacterBasicRepository,
@@ -20,13 +24,11 @@ import {
   SeasonBackfillService,
   TimelineSyncService
 } from '../application/character-timeline/index.js'
-import { createNeopleCatalog } from '@dfragon/server-core/infrastructure/neople/character-catalog.js'
-import { createNeopleCharacterDetails } from '@dfragon/server-core/infrastructure/neople/character-detail.js'
 import {
   createNeopleCharacterSearch,
   createNeopleShopGrade
 } from '../infrastructure/neople/index.js'
-import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/clear-stats.js'
+import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
