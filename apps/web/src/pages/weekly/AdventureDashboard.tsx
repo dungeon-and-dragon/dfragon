@@ -92,14 +92,16 @@ export function AdventureDashboard({
   const backfill = useBackfillAdventureSeason(adventureName)
   if (result.status === 'error') {
     return (
-      <div className={HERO}>
-        <div className={CONTENT}>
-          <h1 className={TITLE}>{adventureName}</h1>
+      <>
+        <div className={HERO}>
+          <div className={CONTENT}>
+            <h1 className={TITLE}>{adventureName}</h1>
+          </div>
         </div>
         <p role="alert" className="state state-error">
           {result.message}
         </p>
-      </div>
+      </>
     )
   }
 
