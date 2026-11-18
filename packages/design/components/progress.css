@@ -1,9 +1,8 @@
 /*
- * ProgressCircle과 LoadingIndicator.
+ * ProgressCircle.
  * <svg class="progress progress-40" data-tone="neutral" role="progressbar">…</svg>
  * 크기는 progress-24, progress-40, progress-inherit(1em), tone은 data-tone(neutral, brand, staticWhite, inherit)이다.
  * 값이 없는 원은 data-indeterminate로 끊어 돌고, 동작 줄이기에서는 멈춘다.
- * <span class="loading"><span class="loading-label">검색</span><span class="loading-indicator"><svg …/></span></span>
  */
 .progress {
   display: inline-block;
@@ -56,22 +55,4 @@
   .progress[data-indeterminate] {
     animation: none;
   }
-}
-
-.loading {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-}
-
-/* visibility와 달리 접근 가능한 이름은 남는다. */
-.loading-label {
-  grid-area: 1 / 1;
-  opacity: 0;
-}
-
-.loading-indicator {
-  display: inline-flex;
-  grid-area: 1 / 1;
-  font-size: 1.25em;
 }

@@ -258,8 +258,6 @@
   --default-transition-timing-function: var(--ease-standard);
   /* 열림, 선택 같은 상태 전환 */
   --duration-state: 180ms;
-  /* 숫자 증가(NumericText) */
-  --duration-count: 400ms;
   /* 반복 움직임의 한 바퀴. 지금 쓰는 곳은 없다. */
   --cycle: 4s;
   /* 실시간 표시 점의 깜빡임 */
@@ -321,7 +319,6 @@
   :root {
     --duration-hover: 0ms;
     --duration-state: 0ms;
-    --duration-count: 0ms;
   }
 }
 
