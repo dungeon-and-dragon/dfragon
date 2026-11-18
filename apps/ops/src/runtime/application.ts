@@ -1,8 +1,10 @@
 import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/database'
-import { DatabaseBatchNeopleKeyRepository } from '../infrastructure/database/batch-neople-keys.js'
-import { DatabaseCollectionRepository } from '../infrastructure/database/collection.js'
-import { DatabaseJobRepository } from '../infrastructure/database/jobs.js'
-import { DatabaseQueueRepository } from '../infrastructure/database/queues.js'
+import {
+  DatabaseBatchNeopleKeyRepository,
+  DatabaseCollectionRepository,
+  DatabaseJobRepository,
+  DatabaseQueueRepository
+} from '../infrastructure/database/index.js'
 import { createOpsHttpApp } from './ops-app.js'
 
 export function createOpsRuntime(database: DatabaseConfiguration) {
