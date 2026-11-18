@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { SkillWindowCatalog } from '#core/catalog/skill-window'
+import type { SkillWindowCatalog } from '#core/catalog'
 import type { ClientHost } from '../../host/client-host'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
 import { StoryScreen } from '../../testing/story-support/StoryScreen'

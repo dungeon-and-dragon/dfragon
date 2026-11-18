@@ -3,7 +3,7 @@ import type {
   ActivityDayEnhancement,
   ActivityDayItem,
   AdventureActivityDay
-} from '#core/adventure-guild/adventure-activity'
+} from '#core/adventure-guild'
 import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
 import { formatClearCount } from './clear-count'

@@ -1,10 +1,13 @@
 import { CloseIcon, Popover } from '@dfragon/ui'
-import { isMaxLevel } from '#core/character/character-level'
-import { displayJobName } from '#core/character/job-display'
+import {
+  CHARACTER_SERVER_NAMES,
+  characterImageUrl,
+  displayJobName,
+  isMaxLevel
+} from '#core/character'
 import { Link } from '@tanstack/react-router'
 import { type KeyboardEvent, type RefObject, useId } from 'react'
-import { MISSING_VALUE } from '#core/capture/cards'
-import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character/character-summary'
+import { MISSING_VALUE } from '#core/capture'
 import { useFavoriteCharacterStore } from '../hooks/useFavoriteCharacterStore'
 import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
 import type { CharacterDisplay } from '../lib/stored-character'

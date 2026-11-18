@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode, Ref } from 'react'
-import { MISSING_VALUE } from '#core/capture/cards'
-import type { StoredCharacter } from '#core/ranking/ranking-stats'
+import { MISSING_VALUE } from '#core/capture'
+import type { StoredCharacter } from '#core/ranking'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
 import { RankBadge } from './RankBadge'
 

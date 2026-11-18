@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { maleCrusaderRoleSchema } from '#core/character/male-crusader'
-import type { FameRankingFilter } from '#core/ranking/ranking-stats'
+import { maleCrusaderRoleSchema } from '#core/character'
+import type { FameRankingFilter } from '#core/ranking'
 import { growFilter, RANKING_JOBS } from './ranking-jobs'
 
 const searchSchema = z.object({

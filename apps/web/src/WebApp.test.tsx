@@ -14,9 +14,8 @@ import { decodeBrowserImage } from './host/browser-png'
 import { readRaidWindowTemplates } from './host/screen-watch/browser-raid-templates'
 import { readTownIndicatorTemplate } from './host/screen-watch/browser-town-template'
 import { WebApp } from './WebApp'
-import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
-import type { CharacterCandidate } from '#core/character/character'
-import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
+import { CHARACTER_SERVER_NAMES, type CharacterCandidate } from '#core/character'
+import { WEB_CAPTURE_TEXTS } from '#core/capture'
 import { WEB_SCREEN_WATCH_TEXTS } from './pages/multisearch'
 
 vi.mock('./host/browser-png', () => ({

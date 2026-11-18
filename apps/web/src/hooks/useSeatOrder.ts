@@ -4,7 +4,7 @@ import {
   swapSeats as swapSeatOrder,
   type SeatLayout,
   type SeatOrder
-} from '#core/capture/seats'
+} from '#core/capture'
 
 export type SeatArrangement = {
   layout: SeatLayout

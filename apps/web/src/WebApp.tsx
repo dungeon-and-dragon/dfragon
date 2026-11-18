@@ -34,7 +34,7 @@ import {
 } from './pages/clears'
 import { AdventureEntryPage, WeeklyPage, parseWeeklySearch } from './pages/weekly'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
-import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
+import { WEB_CAPTURE_TEXTS } from '#core/capture'
 
 // 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 라우터 위에서 구독한다.
 function ScreenShareEndings({ host }: { host: BrowserHost }): null {

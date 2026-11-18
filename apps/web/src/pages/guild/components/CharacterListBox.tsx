@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useInfiniteScrollRef } from '../../../hooks/useInfiniteScrollRef'
-import type { StoredCharacter } from '#core/ranking/ranking-stats'
+import type { StoredCharacter } from '#core/ranking'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
 import {
   type Affiliation,

@@ -1,12 +1,13 @@
-import { type OathCatalog, oathCatalogSchema } from '#core/catalog/oath-catalog'
 import {
+  type OathCatalog,
+  oathCatalogSchema,
   type SkillMarks,
   type SkillWindowCatalog,
   type SkillWindowIndex,
-  type SkillWindowJob,
   skillWindowIndexSchema,
+  type SkillWindowJob,
   skillWindowJobSchema
-} from '#core/catalog/skill-window'
+} from '#core/catalog'
 
 // 그림 경로는 데이터 파일 기준의 상대 경로라, 화면이 데이터 위치를 몰라도 되게 절대 주소로 바꿔 둔다.
 function absoluteUrl(path: string, catalogUrl: string): string {

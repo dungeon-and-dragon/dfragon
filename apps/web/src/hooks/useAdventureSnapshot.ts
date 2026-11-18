@@ -1,10 +1,10 @@
 import { create } from 'zustand'
 import {
   compareWithSnapshot,
+  type SearchMode,
   type SeatAdventures,
   type SnapshotMark
-} from '#core/capture/adventure-snapshot'
-import type { SearchMode } from '#core/capture/search-mode'
+} from '#core/capture'
 
 type AdventureSnapshot = {
   adventures: SeatAdventures

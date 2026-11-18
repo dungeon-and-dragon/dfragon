@@ -8,7 +8,7 @@ import { SnapshotToggle } from '../../components/SnapshotToggle'
 import { useBoardHeaderPortal } from '../../hooks/useBoardHeaderPortal'
 import { usePartySlotCards } from './hooks/usePartySlotCards'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
-import { filledSlotCount } from '#core/capture/slot-cards'
+import { filledSlotCount } from '#core/capture'
 import { PartyScreen } from './PartyScreen'
 
 export function PartyPage({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {

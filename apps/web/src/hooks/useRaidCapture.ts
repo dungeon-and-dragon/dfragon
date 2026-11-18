@@ -1,14 +1,16 @@
 import { useCallback, useEffect } from 'react'
 import { useMachine } from '@xstate/react'
-import { getRaidCapturePhase, raidCaptureMachine } from '#core/capture/raid/raid-capture-machine'
-import { SEARCH_SLOT_COUNTS } from '#core/search/search'
-import { getRecognizedNicknames } from '#core/ocr/recognized-nicknames'
-import { RAID_SEAT_LAYOUT } from '#core/capture/cards'
+import {
+  type CaptureTexts,
+  getRaidCapturePhase,
+  RAID_SEAT_LAYOUT,
+  raidCaptureMachine
+} from '#core/capture'
+import { SEARCH_SLOT_COUNTS } from '#core/search'
+import { getRecognizedNicknames, type OcrRecognition } from '#core/ocr'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
 import { useClientHost } from '../host/client-host'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
-import type { OcrRecognition } from '#core/ocr/ocr-worker-recognition'
-import type { CaptureTexts } from '#core/capture/capture-texts'
 
 export type RaidCapture = {
   search: CharacterSearch

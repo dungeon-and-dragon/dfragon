@@ -3,15 +3,17 @@ import { act, useLayoutEffect, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useRaidCapture } from './useRaidCapture'
-import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
-import { createSharedOcrWorker } from '#core/ocr/ocr-worker-recognition'
-import { emptySearchSlots } from '#core/capture/slots'
+import {
+  emptySearchSlots,
+  type RaidFrameResult,
+  type RaidSlotRecognition,
+  WEB_CAPTURE_TEXTS
+} from '#core/capture'
+import { createSharedOcrWorker } from '#core/ocr'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext, type RaidCaptureHost } from '../host/client-host'
-import type { RaidSlotRecognition } from '#core/capture/raid/raid-recognition'
-import { searchSnapshot } from '#core/testing/search-test-fixture'
-import type { RaidFrameResult } from '#core/capture/capture-types'
-import type { SearchApi, SearchSnapshot } from '#core/search/search'
+import { searchSnapshot } from '#core/testing'
+import type { SearchApi, SearchSnapshot } from '#core/search'
 
 const raidMocks = vi.hoisted(() => ({ recognize: vi.fn() }))
 vi.mock('#core/capture/raid/raid-recognition', () => ({

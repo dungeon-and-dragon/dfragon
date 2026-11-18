@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
 import {
+  type CharacterDetailView,
   isMaleCrusaderJob,
   type MaleCrusaderRole,
   maleCrusaderRoleOf
-} from '#core/character/male-crusader'
-import type { SkillStats, SkillStatsJob } from '#core/ranking/skill-stats'
+} from '#core/character'
+import type { SkillStats, SkillStatsJob } from '#core/ranking'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
@@ -19,7 +19,7 @@ import {
   skillUpgradeBoardOf,
   skillUpgradesOf,
   skillWindowOf
-} from '#core/catalog/skill-window'
+} from '#core/catalog'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
 import { LoadingLine } from '../../../components/LoadingLine'
 import { useSkillStats } from '../hooks/useSkillStats'

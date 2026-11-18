@@ -1,4 +1,4 @@
-import type { GameTextTone } from '#core/catalog/game-text'
+import type { GameTextTone } from '#core/catalog'
 
 export const gameTextToneClasses: Readonly<Record<GameTextTone, string>> = {
   default: '',

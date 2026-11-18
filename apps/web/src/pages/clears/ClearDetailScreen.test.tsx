@@ -8,7 +8,7 @@ import type {
   ClearJob,
   ClearStats,
   ClearWeek
-} from '#core/ranking/clear-stats'
+} from '#core/ranking'
 import { type ClientHost, ClientHostContext } from '../../host/client-host'
 import { createTestClientHost } from '../../testing/test-support/client-host'
 import { TestQueryClient } from '../../testing/test-support/test-query-client'

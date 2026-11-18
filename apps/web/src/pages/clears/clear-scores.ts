@@ -3,7 +3,7 @@ import type {
   ClearJob,
   ClearScoreDistributions,
   ClearScoreKind
-} from '#core/ranking/clear-stats'
+} from '#core/ranking'
 import type { ChipGroupItem } from '@dfragon/ui'
 
 export type JobMetric = 'fame' | 'score'

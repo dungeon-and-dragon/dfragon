@@ -1,4 +1,4 @@
-import type { CharacterStats } from '#core/ranking/ranking-stats'
+import type { CharacterStats } from '#core/ranking'
 
 const JOBS = [
   ['귀검사(남)', '眞 웨펀마스터', 9120, 98_400],

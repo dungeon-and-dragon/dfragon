@@ -1,4 +1,4 @@
-import type { ClearContent, ClearContentKind } from '#core/ranking/clear-stats'
+import type { ClearContent, ClearContentKind } from '#core/ranking'
 
 export type ClearStage = '하드' | '일반'
 

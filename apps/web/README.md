@@ -43,6 +43,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/components/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 컴포넌트와 스타일을 둡니다.
 - `src/constants/`: 화면 크기와 서버 선택지 상수를 둡니다.
 - `src/core/`: React와 UI 폴더를 import하지 않는 검색, 캡처, OCR 로직을 둡니다.
+- `src/core/<도메인>/index.ts`: core 밖에서 `#core/<도메인>`으로 가져오는 이름을 다시 내보냅니다. core 안의 도메인 사이는 파일을 직접 가져옵니다.
 - `src/hooks/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 React hook과 store를 둡니다.
 - `src/host/`: 브라우저 API를 검색, 캡처, 클립보드 기능과 연결합니다.
 - `src/lib/`: 조회 캐시와 카드 표시, 저장된 캐릭터 처리 함수를 둡니다.
