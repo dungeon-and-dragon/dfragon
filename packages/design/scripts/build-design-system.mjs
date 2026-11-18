@@ -55,7 +55,6 @@ const FAMILY_BY_PREFIX = [
   ['--default-transition-timing-function', 'easing'],
   ['--duration-', 'duration'],
   ['--default-transition-duration', 'duration'],
-  ['--cycle', 'duration'],
   ['--beat', 'duration'],
   ['--animate-', 'duration'],
   ['--z-index-', 'zIndex'],
