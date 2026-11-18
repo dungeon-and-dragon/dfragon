@@ -4,10 +4,13 @@ import {
   type FameRankingFilter,
   type JobSkillAdoptionQuery,
   type JobSkillAdoptionSnapshot,
+  type SetAdoption,
+  type SetAdoptionQuery,
   type StoredCharacter,
   readCharacterStatsSnapshot,
   readFameRanking,
-  readJobSkillAdoptionSnapshot
+  readJobSkillAdoptionSnapshot,
+  readSetAdoption
 } from '@dfragon/database'
 import type { RankingStatsRepository } from '#application/ranking-stats/repository.js'
 
@@ -26,5 +29,9 @@ export class DatabaseRankingStatsRepository implements RankingStatsRepository {
     job: JobSkillAdoptionQuery
   ): Promise<JobSkillAdoptionSnapshot | null> {
     return readJobSkillAdoptionSnapshot(this.client, job)
+  }
+
+  readSetAdoption(query: SetAdoptionQuery): Promise<SetAdoption> {
+    return readSetAdoption(this.client, query)
   }
 }
