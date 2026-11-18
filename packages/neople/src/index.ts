@@ -1,6 +1,7 @@
 export {
   type CharacterSearchQuery,
   type CharacterTimelineQuery,
+  type CharactersFameQuery,
   type NeopleCharacterIdentity,
   type NeopleClient,
   type NeopleTestDependencies,
