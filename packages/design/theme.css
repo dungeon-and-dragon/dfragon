@@ -244,6 +244,9 @@
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   /* hover 전환 */
   --duration-hover: 120ms;
+  /* transition-colors처럼 시간을 적지 않은 전환은 hover 전환이다. */
+  --default-transition-duration: var(--duration-hover);
+  --default-transition-timing-function: var(--ease-standard);
   /* 열림, 선택 같은 상태 전환 */
   --duration-state: 180ms;
   /* 숫자 증가(NumericText) */

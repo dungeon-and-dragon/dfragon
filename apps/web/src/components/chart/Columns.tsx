@@ -183,7 +183,7 @@ function Column({
             style={{ '--bar-height': `${ratio * 100}%` }}
           >
             <span
-              className={`absolute inset-0 rounded-t-[3px] bg-chart-1 transition-opacity duration-(--duration-hover) ease-standard ${dimmed ? 'opacity-30' : ''}`}
+              className={`absolute inset-0 rounded-t-[3px] bg-chart-1 transition-opacity ${dimmed ? 'opacity-30' : ''}`}
             />
           </span>
         )}

@@ -8,13 +8,13 @@ type Edges = Readonly<{ start: boolean; end: boolean }>
 const AT_BOTH_EDGES: Edges = { start: true, end: true }
 
 const CARD =
-  'relative m-0 box-border flex h-[294px] w-[196px] shrink-0 cursor-pointer snap-start flex-col items-stretch overflow-hidden rounded-panel border bg-canvas p-4 text-left [font-family:inherit] text-fg transition-colors duration-(--duration-hover) ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
+  'relative m-0 box-border flex h-[294px] w-[196px] shrink-0 cursor-pointer snap-start flex-col items-stretch overflow-hidden rounded-panel border bg-canvas p-4 text-left [font-family:inherit] text-fg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
 const CARD_IDLE = 'border-line hover:border-line-input'
 const CARD_SELECTED = 'border-signal shadow-[inset_0_0_0_1px_var(--color-signal)]'
 const SHADE =
   'absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--color-canvas)_70%,transparent)_0%,color-mix(in_srgb,var(--color-canvas)_20%,transparent)_30%,color-mix(in_srgb,var(--color-canvas)_92%,transparent)_78%)]'
 const PAGER =
-  'absolute top-1/2 z-1 -mt-[18px] inline-flex size-[36px] p-0 cursor-pointer items-center justify-center rounded-full border border-line-strong bg-surface text-fg transition-colors duration-(--duration-hover) ease-standard hover:bg-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
+  'absolute top-1/2 z-1 -mt-[18px] inline-flex size-[36px] p-0 cursor-pointer items-center justify-center rounded-full border border-line-strong bg-surface text-fg transition-colors hover:bg-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
 const TREND_CLASSES = {
   up: 'text-fg-success',
   down: 'text-fg-danger',

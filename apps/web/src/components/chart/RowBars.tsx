@@ -22,7 +22,7 @@ const TOOLTIP_INSIDE_GAP = 10
 // 값 열은 Monoplex KR 14px 숫자 9자(예: 1,914,430, 약 67px)가 한 줄에 들어가는 폭이다.
 const ROW_COLUMNS_CLASS = 'grid-cols-[120px_minmax(0,1fr)_80px]'
 const WIDE_NAME_ROW_COLUMNS_CLASS = 'grid-cols-[176px_minmax(0,1fr)_80px]'
-const BODY_CLASS = 'absolute inset-0 transition-opacity duration-(--duration-hover) ease-standard'
+const BODY_CLASS = 'absolute inset-0 transition-opacity'
 const RAIL_CLASS =
   "relative block before:absolute before:inset-x-0 before:top-1/2 before:-mt-[0.5px] before:h-px before:bg-inset before:content-['']"
 

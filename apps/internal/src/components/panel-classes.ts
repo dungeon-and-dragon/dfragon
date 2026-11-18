@@ -24,7 +24,7 @@ export const tableClasses = {
   body: '[&>tr:last-child>td]:border-b-0',
   headCell: `${HEAD_CELL} text-left`,
   headCellEnd: `${HEAD_CELL} text-right`,
-  row: 'transition-colors duration-(--duration-hover) ease-standard hover:bg-surface',
+  row: 'transition-colors hover:bg-surface',
   selectedRow: 'bg-surface',
   cell: CELL,
   cellEnd: `${CELL} text-right`
