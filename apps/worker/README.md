@@ -1,7 +1,7 @@
 # DFragon worker
 
 `apps/worker`는 캐릭터 수집 worker입니다. 캐릭터 목록 파일에 있는 캐릭터의 기본 정보를 DB에 쌓고, 배치 job도 돌립니다.
-지금은 API 이미지에 함께 들어가며, API의 진입 파일 `dist/character-collector.js`가 이 workspace의 시작 함수를 불러 실행합니다.
+자기 이미지(`apps/worker/Dockerfile`)로 빌드하며, 진입 파일은 `dist/main.js`입니다.
 
 ## 코드 위치
 
