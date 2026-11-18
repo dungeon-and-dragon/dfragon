@@ -1,5 +1,5 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
-import { IconButton } from '@dfragon/ui'
+import { ExternalLinkIcon, IconButton, RefreshIcon } from '@dfragon/ui'
 import { EMPTY_VALUE, formatAgo, formatClockMinute, formatClockSecond } from '../format'
 
 const WORKER_STALE_MS = 5 * 60_000
@@ -19,42 +19,6 @@ type OpsHeaderProps = {
   workerSeenAt: Date | null | undefined
   readAt: Date | undefined
   onRefresh: () => void
-}
-
-function ExternalIcon(): React.JSX.Element {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="square"
-      strokeLinejoin="miter"
-      aria-hidden="true"
-    >
-      <path d="M14 4h6v6M20 4 10 14M18 14v6H4V6h6" />
-    </svg>
-  )
-}
-
-function RefreshIcon(): React.JSX.Element {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="square"
-      strokeLinejoin="miter"
-      aria-hidden="true"
-    >
-      <path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" />
-    </svg>
-  )
 }
 
 function WorkerSeen({ seenAt, readAt }: { seenAt: Date; readAt: Date }): React.JSX.Element {
@@ -86,7 +50,7 @@ export function OpsHeader({ workerSeenAt, readAt, onRefresh }: OpsHeaderProps): 
             <a key={label} href={href} target="_blank" rel="noreferrer" className={NAV_LINK}>
               {label}
               <span className="inline-flex text-fg-subtle">
-                <ExternalIcon />
+                <ExternalLinkIcon className="size-icon-sm" />
               </span>
             </a>
           ))}

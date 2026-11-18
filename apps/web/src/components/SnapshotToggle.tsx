@@ -1,7 +1,6 @@
-import { Button, Popover, type PopoverChangeEventDetails } from '@dfragon/ui'
+import { Button, PinIcon, Popover, type PopoverChangeEventDetails } from '@dfragon/ui'
 import { useRef } from 'react'
 import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
-import { SnapshotIcon } from './SnapshotIcon'
 
 export function SnapshotToggle({
   label,
@@ -39,7 +38,7 @@ export function SnapshotToggle({
                 aria-pressed={active}
                 className="icon-btn icon-btn-sm"
               >
-                <SnapshotIcon filled={active} width={16} height={16} />
+                <PinIcon filled={active} className="size-icon-sm" />
               </button>
             }
           />
