@@ -25,20 +25,10 @@ export type {
   SelectTriggerProps,
   SelectValueProps
 } from './select'
-export { Menu } from './menu'
-export type {
-  MenuGroupLabelProps,
-  MenuItemProps,
-  MenuPopupProps,
-  MenuRadioItemProps,
-  MenuSeparatorProps
-} from './menu'
 export { Tabs } from './tabs'
 export type { TabsListProps, TabsTabProps } from './tabs'
 export { Switch } from './switch'
 export type { SwitchProps } from './switch'
-export { Checkbox } from './checkbox'
-export type { CheckboxProps } from './checkbox'
 export { Chip } from './chip'
 export type { ChipProps } from './chip'
 export { Popover } from './popover'
@@ -47,15 +37,8 @@ export { Tooltip } from './tooltip'
 export type { TooltipPopupProps } from './tooltip'
 export { StatusChip } from './status-chip'
 export type { StatusChipProps, StatusChipTone } from './status-chip'
-export { StepDots } from './step-dots'
-export { LoadingIndicator } from './loading-indicator'
-export type { LoadingIndicatorProps } from './loading-indicator'
 export { ProgressCircle } from './progress-circle'
 export type { ProgressCircleProps } from './progress-circle'
-export { Kbd } from './kbd'
-export type { KbdProps, KbdSurface } from './kbd'
-export { NumericText } from './numeric-text'
-export type { NumericTextProps } from './numeric-text'
 export {
   CameraIcon,
   CheckIcon,
@@ -63,7 +46,6 @@ export {
   ChevronRightIcon,
   CloseIcon,
   CopyIcon,
-  DashIcon,
   ExternalLinkIcon,
   MonitorIcon,
   MoonIcon,
