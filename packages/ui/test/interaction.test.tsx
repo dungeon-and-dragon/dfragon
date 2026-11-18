@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   Button,
   Chip,
+  ChipGroup,
   IconButton,
   Popover,
   Select,
@@ -73,7 +74,8 @@ const IMPLICIT_ROLES: Record<string, string> = {
   tabpanel: '[role="tabpanel"]',
   dialog: '[role="dialog"]',
   switch: '[role="switch"]',
-  status: '[role="status"]'
+  status: '[role="status"]',
+  group: '[role="group"]'
 }
 
 function queryByRole(role: string, name?: string, scope: ParentNode = document) {
@@ -650,6 +652,66 @@ describe('Switch, Chip의 켜짐 상태', () => {
 
     await click(chip)
     expect(chip.getAttribute('aria-pressed')).toBe('false')
+  })
+})
+
+const PERIODS = [
+  { value: 'half', label: '반년' },
+  { value: 'quarter', label: '분기' },
+  { value: 'month', label: '한 달' }
+] as const
+
+type Period = (typeof PERIODS)[number]['value']
+
+function PeriodChips({
+  initial = 'half',
+  onValueChange
+}: {
+  initial?: Period
+  onValueChange: (value: Period) => void
+}) {
+  const [period, setPeriod] = useState<Period>(initial)
+
+  function change(value: Period) {
+    onValueChange(value)
+    setPeriod(value)
+  }
+
+  return <ChipGroup aria-label="기간" items={PERIODS} value={period} onValueChange={change} />
+}
+
+function pressedLabels(group: HTMLElement) {
+  return [...group.querySelectorAll('button[aria-pressed="true"]')].map((chip) => chip.textContent)
+}
+
+describe('ChipGroup의 하나만 고르기와 키보드 이동', () => {
+  it('다른 칩을 누르면 그 칩만 켜고, 이미 고른 칩을 다시 눌러도 값을 바꾸지 않는다', async () => {
+    const onValueChange = vi.fn<(value: Period) => void>()
+    await render(<PeriodChips onValueChange={onValueChange} />)
+    const group = getByRole('group', '기간')
+    expect(pressedLabels(group)).toEqual(['반년'])
+
+    await click(getByRole('button', '분기', group))
+    expect(onValueChange).toHaveBeenLastCalledWith('quarter')
+    expect(pressedLabels(group)).toEqual(['분기'])
+
+    await click(getByRole('button', '분기', group))
+    expect(onValueChange).toHaveBeenCalledOnce()
+    expect(pressedLabels(group)).toEqual(['분기'])
+  })
+
+  it('Tab 키는 묶음에서 칩 하나에만 멈추고 화살표로 칩 사이를 옮긴다', async () => {
+    await render(<PeriodChips initial="quarter" onValueChange={vi.fn()} />)
+    const group = getByRole('group', '기간')
+    const chips = [...group.querySelectorAll<HTMLElement>('button')]
+    const tabStops = chips.filter((chip) => chip.tabIndex === 0)
+    expect(tabStops).toHaveLength(1)
+    const [stop] = tabStops
+    stop.focus()
+
+    await press(stop, 'ArrowRight')
+
+    await vi.waitFor(() => expect(document.activeElement).toBe(chips[chips.indexOf(stop) + 1]))
   })
 })
 
