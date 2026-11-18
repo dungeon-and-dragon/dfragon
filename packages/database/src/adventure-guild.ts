@@ -41,11 +41,12 @@ export const storedDealerSkillLearnedSql = Prisma.sql`(
     AND style.job_grow_id = c.job_grow_id
 )`
 
-export function readStoredCharacterRows(
+export function readStoredCharacterRows<Row extends StoredCharacter = StoredCharacter>(
   client: DatabaseClient,
-  filterAndOrder: Prisma.Sql
-): Promise<StoredCharacter[]> {
-  return client.$queryRaw<StoredCharacter[]>`
+  filterAndOrder: Prisma.Sql,
+  extraColumns: Prisma.Sql = Prisma.empty
+): Promise<Row[]> {
+  return client.$queryRaw<Row[]>`
     SELECT
       c.server_id AS "serverId",
       c.character_id AS "characterId",
@@ -61,6 +62,7 @@ export function readStoredCharacterRows(
       c.guild_name AS "guildName",
       c.basic_fetched_at AS "fetchedAt",
       ${storedDealerSkillLearnedSql} AS "dealerSkillLearned"
+      ${extraColumns}
     FROM characters c
     JOIN adventures a ON a.id = c.adventure_id
     ${filterAndOrder}`
