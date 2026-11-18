@@ -1,13 +1,8 @@
 import { createRef } from 'react'
 import {
   Button,
-  Checkbox,
   Chip,
   IconButton,
-  Kbd,
-  LoadingIndicator,
-  Menu,
-  NumericText,
   ProgressCircle,
   Select,
   StatusChip,
@@ -35,12 +30,8 @@ import type {
 
 export const components = [
   Button,
-  Checkbox,
   Chip,
   IconButton,
-  Kbd,
-  LoadingIndicator,
-  NumericText,
   ProgressCircle,
   StatusChip,
   Switch,
@@ -50,7 +41,6 @@ export const components = [
   TextFieldInput,
   TextFieldLabel,
   Select.Trigger,
-  Menu.Popup,
   Tabs.List,
   Tooltip.Popup
 ]
@@ -98,7 +88,6 @@ export const statusChip = (
     연결됨
   </StatusChip>
 )
-export const numeric = <NumericText value={414806} />
 
 // @ts-expect-error 공개 Button은 화면별 className override를 허용하지 않는다.
 export const unsupportedAppearance = <Button className="override" />

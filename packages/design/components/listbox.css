@@ -1,10 +1,10 @@
 /*
- * Select와 Menu의 목록.
+ * Select의 목록.
  * <div class="listbox-positioner"><div class="listbox">
  *   <div class="listbox-item" role="option" data-selected><span class="listbox-marker"></span>시로코</div>
  *   <div class="listbox-group-label">, <div class="listbox-separator">
  * </div></div>
- * 강조는 data-highlighted, 선택은 data-selected나 data-checked, 비활성은 data-disabled다.
+ * 강조는 data-highlighted, 선택은 data-selected, 비활성은 data-disabled다.
  * 격자 목록은 목록 요소에 listbox-grid와 --listbox-columns를 둔다.
  */
 .listbox-positioner {
@@ -64,7 +64,7 @@
   color: var(--color-fg);
 }
 
-.listbox-item:is([data-selected], [data-checked]) {
+.listbox-item[data-selected] {
   color: var(--color-fg);
   font-weight: var(--font-weight-semibold);
 }
