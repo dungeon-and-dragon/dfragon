@@ -12,6 +12,8 @@ const CHARACTER_STATS_DELAY_MINUTES = 5
 const SKILL_ADOPTION_DELAY_MINUTES = 10
 // 세트를 받은 캐릭터 100만 명의 합성 데이터(PostgreSQL 18.7)에서 2~3초 걸렸다. 위와 같이 넉넉히 둔다.
 const SET_ADOPTION_DELAY_MINUTES = 5
+// 같은 합성 데이터에 아이템 120만 행을 더해 약 7초 걸렸다. 위와 같이 넉넉히 둔다.
+const ITEM_ADOPTION_DELAY_MINUTES = 10
 
 function rolesOf(job: SkillStyleSampleJob): (MaleCrusaderRole | undefined)[] {
   if (isMaleCrusaderJob(job)) {
@@ -64,6 +66,16 @@ export class StatsJobService {
 
     return { combinations }
   }
+
+  async computeItemAdoption(): Promise<{ items: number }> {
+    const computedAt = this.now()
+    const items = await this.repository.replaceItemAdoption({
+      computedAt,
+      maleCrusader: MALE_CRUSADER_JOB
+    })
+
+    return { items }
+  }
 }
 
 export function createCharacterStatsJob(service: StatsJobService) {
@@ -100,5 +112,18 @@ export function createSetAdoptionJob(service: StatsJobService) {
     argsSchema: z.object({}),
     delayMinutes: SET_ADOPTION_DELAY_MINUTES,
     run: () => service.computeSetAdoption()
+  })
+}
+
+export function createItemAdoptionJob(service: StatsJobService) {
+  return defineJob({
+    name: 'item-adoption',
+    displayName: '무기, 유일 장비 선택 비율',
+    description:
+      '세트 값을 받은 캐릭터가 낀 무기와 유일 장비의 선택 수를 전직별로 계산해 저장합니다.',
+    schedule: DAILY_AT_MIDNIGHT,
+    argsSchema: z.object({}),
+    delayMinutes: ITEM_ADOPTION_DELAY_MINUTES,
+    run: () => service.computeItemAdoption()
   })
 }
