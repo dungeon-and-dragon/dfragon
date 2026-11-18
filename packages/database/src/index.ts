@@ -49,6 +49,7 @@ export type { CharacterScoreInput, CharacterScoreKind } from './character-score.
 export { recordCharacterSets } from './character-sets.js'
 export type {
   CharacterEquipmentSet,
+  CharacterItem,
   CharacterOathSet,
   CharacterSets,
   CharacterSetsInput
