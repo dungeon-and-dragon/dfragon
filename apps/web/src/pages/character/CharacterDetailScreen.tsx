@@ -33,9 +33,9 @@ export function CharacterDetailScreen({
     case 'error':
       return (
         <div className={SCREEN}>
-          {/* 요약 구획(160px)과, 위 여백(24px), 탭 줄(49px), 빈 탭 자리(360px)를 담은 탭 구획(433px)을 합친 높이라 오류가
+          {/* 요약 구획(144px)과, 위 여백(24px), 탭 줄(49px), 빈 탭 자리(360px)를 담은 탭 구획(433px)을 합친 높이라 오류가
               나도 화면 높이가 받는 중과 같다. */}
-          <div className="section box-border flex min-h-[593px] items-center justify-center px-4 text-center">
+          <div className="section box-border flex min-h-[577px] items-center justify-center px-4 text-center">
             <p role="alert" className="m-0 text-sm text-fg-danger">
               {result.message}
             </p>
