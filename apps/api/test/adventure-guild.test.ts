@@ -187,6 +187,7 @@ test('DB 설정이 없는 API는 모험단 캐릭터, 길드, 주간, 시즌 활
       raids: [],
       legions: [],
       items: { legendary: 0, epic: 0, primeval: 0, mythic: 0 },
+      oaths: { legendary: 0, epic: 0, primeval: 0 },
       enhancement: {
         attempts: 0,
         amplify: [],
