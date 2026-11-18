@@ -1,0 +1,45 @@
+import { describe, expect, it } from 'vitest'
+import { fameRankingSchema } from './ranking-stats'
+
+// 합성 응답이다. API가 세트 필드와 nextCursor를 더한 뒤의 명성 랭킹 응답 모양이다.
+const row = {
+  serverId: 'cain',
+  characterId: 'synthetic-character',
+  characterName: '합성캐릭터',
+  adventureName: '합성모험단',
+  level: 115,
+  jobId: 'synthetic-job',
+  jobGrowId: 'synthetic-grow',
+  jobName: '귀검사(남)',
+  jobGrowName: '眞 웨펀마스터',
+  fame: 80000,
+  guildId: null,
+  guildName: null,
+  fetchedAt: '2026-11-18T00:00:00.000Z',
+  role: 'dealer',
+  rank: 1
+}
+
+describe('fameRankingSchema', () => {
+  it('세트 필드와 nextCursor가 더해진 응답도 기존 행으로 읽는다', () => {
+    const response = {
+      characters: [
+        {
+          ...row,
+          equipmentSet: { id: 'set-fairy', name: '소울 페어리 세트' },
+          oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' }
+        },
+        { ...row, characterId: 'synthetic-no-sets', rank: 2, equipmentSet: null, oathSet: null }
+      ],
+      nextCursor: 'WzgwMDAwLCJjYWluIiwic3ludGhldGljLW5vLXNldHMiLDJd'
+    }
+
+    const parsed = fameRankingSchema.safeParse(response)
+
+    expect(parsed.success).toBe(true)
+    expect(parsed.data?.characters.map(({ characterId, rank }) => [characterId, rank])).toEqual([
+      ['synthetic-character', 1],
+      ['synthetic-no-sets', 2]
+    ])
+  })
+})

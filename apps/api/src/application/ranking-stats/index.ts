@@ -1,1 +1,6 @@
-export { RankingStatsService, emptyRankingStatsRepository } from './service.js'
+export {
+  type FameRankingPage,
+  type RankedCharacter,
+  RankingStatsService,
+  emptyRankingStatsRepository
+} from './service.js'
