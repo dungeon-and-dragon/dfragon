@@ -156,6 +156,19 @@ test('글자, radius, breakpoint, 곡선 utility는 theme.css의 단계로만 �
   }
 })
 
+test('크기 토큰은 높이, 폭 utility만 만들고 간격 utility는 만들지 않는다', async () => {
+  const sizeUtilities = ['h-control-md', 'min-h-row', 'h-topbar', 'w-page', 'min-w-page']
+  const leakedUtilities = ['p-control-md', 'gap-row', 'w-control-md', 'h-page']
+  const css = await compiledUtilities([...sizeUtilities, ...leakedUtilities])
+
+  for (const name of sizeUtilities) {
+    assert.match(css, new RegExp(`\\.${name}\\s*\\{`), name)
+  }
+  for (const name of leakedUtilities) {
+    assert.doesNotMatch(css, new RegExp(`\\.${name}\\s*\\{`), name)
+  }
+})
+
 test('utility를 쓰지 않은 토큰도 CSS 변수로 낸다', async () => {
   const css = await compiledUtilities([])
   for (const name of ['--color-game-fame-label', '--gradient-rarity-mythic', '--beat']) {
