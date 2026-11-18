@@ -164,7 +164,7 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
     case 'error':
       return (
         <WeeklyClearBox>
-          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
+          <p role="alert" className="state state-error">
             {result.message}
           </p>
         </WeeklyClearBox>

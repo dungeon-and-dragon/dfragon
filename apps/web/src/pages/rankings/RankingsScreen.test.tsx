@@ -177,10 +177,12 @@ it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직
   ])
 })
 
-it('빈 랭킹은 목록 상자에 이름 한 줄만 둔다', async () => {
+it('빈 랭킹은 목록 상자에 빈 문구만 둔다', async () => {
   await render(async () => ({ characters: [] }))
 
-  expect(container.querySelector('section[aria-label="명성 랭킹"]')?.textContent).toBe('명성 랭킹')
+  expect(container.querySelector('section[aria-label="명성 랭킹"] p')?.textContent).toBe(
+    '랭킹에 오른 캐릭터가 없습니다.'
+  )
   expect(container.querySelector('table')).toBeNull()
 })
 

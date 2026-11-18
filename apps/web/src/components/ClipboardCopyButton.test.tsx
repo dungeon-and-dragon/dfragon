@@ -2,7 +2,6 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { useClipboardCopy } from '../hooks/useClipboardCopy'
 import { ClipboardCopyButton } from './ClipboardCopyButton'
 
 const FAILURE = '클립보드에 복사하지 못했습니다.'
@@ -29,14 +28,8 @@ afterEach(async () => {
   Reflect.deleteProperty(navigator, 'clipboard')
 })
 
-function Harness({ text }: { text: string }): React.JSX.Element {
-  const clipboard = useClipboardCopy(text)
-
-  return <ClipboardCopyButton status={clipboard.status} onCopy={clipboard.copy} />
-}
-
 async function render(text = '[퍼리조아, 시로코, 검은전투늑대], []'): Promise<void> {
-  await act(async () => root.render(<Harness text={text} />))
+  await act(async () => root.render(<ClipboardCopyButton text={text} />))
 }
 
 function button(): HTMLButtonElement {
@@ -121,4 +114,20 @@ it('Clipboard API가 없는 페이지에서는 복사 실패를 보인다', asyn
   await act(async () => button().click())
 
   expect(failure()).toBe(`!${FAILURE}`)
+})
+
+it('라벨 버튼도 쓰기가 실패하면 화면에 실패 문구를 보이고, 성공하면 복사 아이콘을 바꾼다', async () => {
+  writeText.mockRejectedValueOnce(new Error('CLIPBOARD_NOT_ALLOWED'))
+  await act(async () => root.render(<ClipboardCopyButton text="ABCD-1234" label="코드 복사" />))
+  const codeButton = [...container.querySelectorAll('button')].find(
+    (candidate) => candidate.textContent === '코드 복사'
+  )!
+
+  await act(async () => codeButton.click())
+  expect(failure()).toBe(`!${FAILURE}`)
+
+  await act(async () => codeButton.click())
+  expect(writeText).toHaveBeenLastCalledWith('ABCD-1234')
+  expect(failure()).toBeNull()
+  expect(codeButton.querySelector('rect')).toBeNull()
 })

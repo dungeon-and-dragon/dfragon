@@ -43,7 +43,7 @@ function FameRankingTop(): React.JSX.Element {
     case 'error':
       return (
         <ListBox name={NAME}>
-          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
+          <p role="alert" className="state state-error">
             {result.message}
           </p>
         </ListBox>

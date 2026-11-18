@@ -152,7 +152,7 @@ export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): 
           </table>
         </div>
       ) : (
-        <p className={panelClasses.empty}>등록된 job이 없습니다.</p>
+        <p className="state">등록된 job이 없습니다.</p>
       )}
     </section>
   )

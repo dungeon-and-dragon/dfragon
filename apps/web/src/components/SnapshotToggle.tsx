@@ -1,5 +1,4 @@
-import { Button, PinIcon, Popover, type PopoverChangeEventDetails } from '@dfragon/ui'
-import { useRef } from 'react'
+import { ConfirmPopover, PinIcon, Popover, type PopoverChangeEventDetails } from '@dfragon/ui'
 import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 
 export function SnapshotToggle({
@@ -15,7 +14,6 @@ export function SnapshotToggle({
   onTake: () => void
   onClear: () => void
 }): React.JSX.Element {
-  const cancelRef = useRef<HTMLButtonElement>(null)
   const tooltipLabel = active ? '모험단 고정 풀기' : '모험단 고정하기'
 
   function handleOpenChange(open: boolean, details: PopoverChangeEventDetails): void {
@@ -26,7 +24,13 @@ export function SnapshotToggle({
   }
 
   return (
-    <Popover.Root onOpenChange={handleOpenChange}>
+    <ConfirmPopover
+      title="고정을 취소하시겠습니까?"
+      cancelLabel="유지"
+      confirmLabel="고정 취소"
+      onOpenChange={handleOpenChange}
+      onConfirm={onClear}
+    >
       <HeaderTooltip label={tooltipLabel}>
         <span className={tooltipTriggerClass}>
           <Popover.Trigger
@@ -44,25 +48,6 @@ export function SnapshotToggle({
           />
         </span>
       </HeaderTooltip>
-      <Popover.Popup
-        side="bottom"
-        align="end"
-        sideOffset={8}
-        role="alertdialog"
-        initialFocus={cancelRef}
-      >
-        <div className="box-border flex w-[220px] flex-col gap-3 px-4 pt-4 pb-3">
-          <Popover.Title>고정을 취소하시겠습니까?</Popover.Title>
-          <div className="flex justify-end gap-2">
-            <Popover.Close ref={cancelRef} render={<Button variant="secondary" size="sm" />}>
-              유지
-            </Popover.Close>
-            <Popover.Close render={<Button variant="primary" size="sm" />} onClick={onClear}>
-              고정 취소
-            </Popover.Close>
-          </div>
-        </div>
-      </Popover.Popup>
-    </Popover.Root>
+    </ConfirmPopover>
   )
 }

@@ -25,7 +25,7 @@ function JobsSection({
     return (
       <section aria-label="job" className={panelClasses.box}>
         <h2 className="section-title">Job</h2>
-        <p role="alert" className={panelClasses.empty}>
+        <p role="alert" className="state state-error">
           job 목록을 읽지 못했습니다.
         </p>
       </section>

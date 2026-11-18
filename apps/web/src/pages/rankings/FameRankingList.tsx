@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { useInfiniteScrollRef } from '../../hooks/useInfiniteScrollRef'
 import type { FameRanking, FameRankingFilter } from '#core/ranking/ranking-stats'
 import { CharacterTable, SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
@@ -32,14 +33,18 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
     case 'error':
       return (
         <ListBox name={name}>
-          <p role="alert" className="m-0 p-4 text-sm text-fg-danger">
+          <p role="alert" className="state state-error">
             {result.message}
           </p>
         </ListBox>
       )
     case 'success':
       if (result.value.characters.length === 0) {
-        return <ListBox name={name} />
+        return (
+          <ListBox name={name}>
+            <p className="state">랭킹에 오른 캐릭터가 없습니다.</p>
+          </ListBox>
+        )
       }
 
       return (
@@ -57,20 +62,8 @@ export function FameRankingList({ filter }: { filter: FameRankingFilter }): Reac
 function ScrollingTable({ ranking }: { ranking: FameRanking }): React.JSX.Element {
   const [visible, setVisible] = useState(PAGE_SIZE)
   const { characters } = ranking
-  // visible이 바뀌면 새 callback이라 observer를 다시 만들어, 줄을 더한 뒤에도 빈 줄이 화면 안이면 이어서 더한다.
-  const watchSkeleton = useCallback(
-    (row: HTMLTableRowElement) => {
-      const observer = new IntersectionObserver((entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setVisible(visible + PAGE_SIZE)
-        }
-      })
-      observer.observe(row)
-
-      return () => observer.disconnect()
-    },
-    [visible]
-  )
+  const showMore = useCallback(() => setVisible(visible + PAGE_SIZE), [visible])
+  const watchSkeleton = useInfiniteScrollRef<HTMLTableRowElement>(showMore)
 
   return (
     <CharacterTable

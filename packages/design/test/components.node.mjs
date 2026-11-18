@@ -16,6 +16,10 @@ const RUNTIME_VARIABLES = new Set([
 const REDUCED_MOTION_RULE_START = '@media (prefers-reduced-motion: reduce) {'
 const COLOR_LITERAL_PATTERN = /#[0-9a-f]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch)\(/i
 const TRANSPARENT_STATUS_BACKGROUND_PATTERN = /--status-bg:[^;]*transparent/
+const CENTERED_LOADING_SEGMENT_PATTERN =
+  /\.loading-line > span \{[^}]*left: calc\(50% - 16px\);[^}]*width: 32px;/
+const CENTERED_SHORT_LOADING_SEGMENT_PATTERN =
+  /\.loading-line-sm > span \{[^}]*left: calc\(50% - 8px\);[^}]*width: 16px;/
 
 const componentsDirectory = new URL('../components/', import.meta.url)
 const theme = await readFile(new URL('../theme.css', import.meta.url), 'utf8')
@@ -64,18 +68,11 @@ test('상태 칩 면은 행 바탕이 비치지 않게 transparent와 섞지 않
   assert.doesNotMatch(status, TRANSPARENT_STATUS_BACKGROUND_PATTERN)
 })
 
-test('동작 줄이기에서 상태 칩 점, 진행 점, 진행 원의 움직임을 끈다', async () => {
+test('동작 줄이기에서 상태 칩 점과 진행 점의 움직임을 끈다', async () => {
   const status = await readFile(new URL('status.css', componentsDirectory), 'utf8')
-  const progress = await readFile(new URL('progress.css', componentsDirectory), 'utf8')
-  const reducedRules = [status, progress]
-    .map((source) => source.slice(source.indexOf(REDUCED_MOTION_RULE_START)))
-    .join('\n')
+  const reducedRules = status.slice(status.indexOf(REDUCED_MOTION_RULE_START))
 
-  for (const selector of [
-    ".status-chip[data-tone='success'] .status-dot",
-    '.step-dots > span',
-    '.progress[data-indeterminate]'
-  ]) {
+  for (const selector of [".status-chip[data-tone='success'] .status-dot", '.step-dots > span']) {
     const rule = reducedRules.slice(reducedRules.indexOf(`${selector} {`))
     assert.notEqual(reducedRules.indexOf(`${selector} {`), -1, selector)
     assert.match(rule.slice(0, rule.indexOf('}')), /animation:\s*none/, selector)
@@ -108,4 +105,19 @@ test('base.css는 dl, dd의 기본 margin을 지운다', async () => {
   const base = await readFile(new URL('../base.css', import.meta.url), 'utf8')
 
   assert.match(base, /dl,\s*dd\s*\{\s*margin:\s*0;/)
+})
+
+test('state.css는 상태 자리와 로딩 막대 selector를 모두 정의한다', () => {
+  const state = components.find(({ file }) => file === 'state.css').source
+
+  for (const name of ['state', 'state-error', 'state-pending', 'loading-line', 'loading-line-sm']) {
+    assert.match(state, new RegExp(`\\.${name}\\s*[,{]`), name)
+  }
+})
+
+test('로딩 막대의 진행 조각은 움직이지 않을 때 막대 가운데에 있다', () => {
+  const state = components.find(({ file }) => file === 'state.css').source
+
+  assert.match(state, CENTERED_LOADING_SEGMENT_PATTERN)
+  assert.match(state, CENTERED_SHORT_LOADING_SEGMENT_PATTERN)
 })
