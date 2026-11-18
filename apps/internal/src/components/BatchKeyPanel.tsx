@@ -167,7 +167,7 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
     <tr>
       <td className="font-semibold">{label}</td>
       <td>
-        <span className="font-mono tabular-nums text-fg-muted">
+        <span className="num text-fg-muted">
           {KEY_MASK}
           <b className="font-medium text-fg">{keySuffix}</b>
         </span>
@@ -176,15 +176,11 @@ function BatchKeyRow({ batchKey }: { batchKey: BatchKey }): React.JSX.Element {
         <span className={textClasses.inline}>
           <BatchKeyStatusTag status={statusOf(batchKey)} />
           {rejectedAt !== null && (
-            <span className={`${textClasses.muted} ${textClasses.numeric}`}>
-              {formatDateMinute(rejectedAt)}
-            </span>
+            <span className={`${textClasses.muted} num`}>{formatDateMinute(rejectedAt)}</span>
           )}
         </span>
       </td>
-      <td className={`${textClasses.muted} ${textClasses.numeric}`}>
-        {formatDateMinute(createdAt)}
-      </td>
+      <td className={`${textClasses.muted} num`}>{formatDateMinute(createdAt)}</td>
       <td>
         <EnabledSwitch batchKey={batchKey} />
       </td>

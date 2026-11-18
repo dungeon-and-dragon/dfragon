@@ -37,7 +37,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
       <div className="flex items-center gap-2 border-b border-line px-4 py-3">
         <code
           title={hash}
-          className="box-border h-[28px] min-w-0 grow truncate rounded-control border border-line bg-surface px-2 font-mono text-xs leading-[26px] text-fg-muted"
+          className="box-border h-[28px] min-w-0 grow truncate rounded-control border border-line bg-surface px-2 num text-xs leading-[26px] text-fg-muted"
         >
           {hash}
         </code>

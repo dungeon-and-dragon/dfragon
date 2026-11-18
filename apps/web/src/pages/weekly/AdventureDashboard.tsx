@@ -13,7 +13,7 @@ const HERO =
   'relative flex min-h-[220px] flex-col justify-between gap-6 overflow-hidden border-t border-line bg-canvas px-4 pt-6 pb-4'
 const CONTENT = 'relative flex flex-col gap-1'
 const TITLE = 'screen-title break-keep [overflow-wrap:anywhere]'
-const PERIOD = 'font-mono text-xs tabular-nums text-fg-muted'
+const PERIOD = 'num text-xs text-fg-muted'
 
 // 시즌을 고르는 순간 배경이 크로스페이드되도록 고를 수 있는 시즌의 배경을 미리 받는다.
 function preloadSeasonBackgrounds(activity: AdventureActivity): void {
@@ -56,7 +56,7 @@ function DashboardHero({
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         {season !== undefined && period !== undefined && (
           <div className={CONTENT}>
-            <span className="text-xs font-medium text-fg-muted">시즌 {season.id}</span>
+            <span className="label">시즌 {season.id}</span>
             <div className="flex flex-wrap items-baseline gap-x-2">
               <b className="text-base font-semibold">{season.name}</b>
               <span className={PERIOD}>{period.days}일</span>

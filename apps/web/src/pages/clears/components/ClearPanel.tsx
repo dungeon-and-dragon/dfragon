@@ -32,7 +32,7 @@ export function ClearTitle({
               numeric={false}
               value={
                 <span className="text-game-fame">
-                  <span className="font-mono tabular-nums">{integer.format(summary.minFame)}</span>
+                  <span className="num">{integer.format(summary.minFame)}</span>
                   {' 이상'}
                 </span>
               }

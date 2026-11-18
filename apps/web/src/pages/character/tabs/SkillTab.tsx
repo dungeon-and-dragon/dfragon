@@ -119,7 +119,7 @@ function SkillIcon({
         )}
       </span>
       <span
-        className="font-mono font-semibold whitespace-nowrap text-fg-muted tabular-nums select-none"
+        className="num font-semibold whitespace-nowrap text-fg-muted select-none"
         style={LEVEL_SIZE}
       >
         {icon.learned && icon.level !== null ? `Lv ${icon.level}` : ''}
@@ -156,7 +156,7 @@ function SkillWindowGrid({
               />
             )}
             <span
-              className={`absolute left-0 flex items-center justify-center whitespace-nowrap text-fg-subtle select-none ${row === COMMON_ROW ? '' : 'font-mono tabular-nums'}`}
+              className={`absolute left-0 flex items-center justify-center whitespace-nowrap text-fg-subtle select-none ${row === COMMON_ROW ? '' : 'num'}`}
               style={{ ...ROW_LABEL_SIZE, top: scaled(row * SKILL_CELL_HEIGHT) }}
             >
               {row === COMMON_ROW ? '공용' : requiredLevel}
@@ -184,9 +184,7 @@ function LearnedSkillRows({ rows }: { rows: readonly LearnedSkillRow[] }): React
               <li key={skill.skillId ?? index} className={LIST_ROW}>
                 <span>{skill.name}</span>
                 {skill.level !== null && (
-                  <span className={`${SUBTLE} font-mono tabular-nums select-none`}>
-                    {`Lv ${skill.level}`}
-                  </span>
+                  <span className={`${SUBTLE} num select-none`}>{`Lv ${skill.level}`}</span>
                 )}
               </li>
             ))}
@@ -215,7 +213,7 @@ function SkillUpgrades({
         {upgrades.map((upgrade, index) => (
           <li key={upgrade.skillId ?? index} className={LIST_ROW}>
             <span>{upgrade.name ?? upgrade.skillId}</span>
-            <span className={`${SUBTLE} font-mono tabular-nums`}>{upgrade.type}</span>
+            <span className={`${SUBTLE} num`}>{upgrade.type}</span>
           </li>
         ))}
       </ul>

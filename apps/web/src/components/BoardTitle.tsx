@@ -12,7 +12,7 @@ export function BoardTitle({
   return (
     <>
       <h1 className="m-0 shrink-0 text-base font-semibold tracking-heading text-fg">{label}</h1>
-      <span className="shrink-0 font-mono text-base font-semibold tabular-nums text-fg">
+      <span className="shrink-0 num text-base font-semibold text-fg">
         {filled}
         <span className="text-fg-subtle">/{total}</span>
       </span>
@@ -20,7 +20,7 @@ export function BoardTitle({
         <span
           aria-label={`${round}번째 ${label}`}
           role="img"
-          className="shrink-0 font-mono text-base font-semibold tabular-nums text-fg"
+          className="shrink-0 num text-base font-semibold text-fg"
         >
           #{round}
         </span>

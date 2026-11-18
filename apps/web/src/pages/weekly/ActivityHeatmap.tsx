@@ -129,10 +129,7 @@ function Legend({
   }
 
   return (
-    <div
-      aria-hidden="true"
-      className="ms-auto flex items-center gap-1 text-2xs tabular-nums text-fg-subtle"
-    >
+    <div aria-hidden="true" className="ms-auto flex items-center gap-1 num text-2xs text-fg-subtle">
       0
       {LEVEL_FILLS.map((fill, index) => (
         <span key={index} className={`size-3 rounded-control ${KIND_TONES[kind]} ${fill}`} />

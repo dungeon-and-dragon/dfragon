@@ -37,7 +37,7 @@ const CAP_HALF = 4
 const DOT_SHARE = 0.15
 const DEFAULT_PLOT_WIDTH = 360
 const ROW_CLASS = 'grid items-center gap-x-2'
-const VALUE_CLASS = 'text-right font-mono text-sm tabular-nums'
+const VALUE_CLASS = 'text-right num text-sm'
 
 function gridColumnsOf(nameWidth: number, valueWidth: number): React.CSSProperties {
   const gridTemplateColumns =

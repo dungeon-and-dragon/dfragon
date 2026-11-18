@@ -109,9 +109,9 @@ function CandidateTile({
       aria-label={`${server}, 명성 ${fame}${adventure}${state}`}
       aria-pressed={shown}
       onClick={handleClick}
-      className={`relative box-border flex w-16 cursor-pointer flex-col rounded-control border text-left text-fg transition-colors ${shown ? 'border-signal shadow-selected' : 'border-transparent hover:border-line-input'} focus-ring`}
+      className={`relative flex w-16 cursor-pointer flex-col rounded-control border text-left text-fg transition-colors ${shown ? 'border-signal shadow-selected' : 'border-transparent hover:border-line-input'} focus-ring`}
     >
-      <span className="relative block size-[62px] overflow-hidden bg-inset">
+      <span className="portrait portrait-md">
         <CardImage src={characterImageUrl(choice)} />
       </span>
       {shown && (
@@ -124,7 +124,7 @@ function CandidateTile({
       </span>
       <span
         aria-hidden="true"
-        className={`px-1 pb-1 font-mono text-xs font-semibold tabular-nums ${choice.fame !== null ? 'text-game-fame' : 'text-fg-subtle'}`}
+        className={`px-1 pb-1 num text-xs font-semibold ${choice.fame !== null ? 'text-game-fame' : 'text-fg-subtle'}`}
       >
         {fame}
       </span>

@@ -14,8 +14,7 @@ import { RunProgress } from './RunProgress'
 import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
 
-const NAME_BUTTON =
-  'cursor-pointer text-left text-sm font-semibold text-fg hover:underline focus-ring'
+const NAME_BUTTON = 'link cursor-pointer text-left text-sm font-semibold text-fg focus-ring'
 
 type JobTableProps = {
   jobs: readonly Job[]
@@ -33,7 +32,7 @@ function NextRun({ job }: { job: Job }): React.JSX.Element {
     return <span className={textClasses.subtle}>{EMPTY_VALUE}</span>
   }
 
-  return <span className={textClasses.numeric}>{formatDateMinute(job.nextRunAt)}</span>
+  return <span className="num">{formatDateMinute(job.nextRunAt)}</span>
 }
 
 function JobRow({
@@ -94,15 +93,13 @@ function JobRow({
         {lastFinishedRun?.finishedAt != null && (
           <span className={textClasses.inline}>
             <RunStatusTag status={lastFinishedRun.status} />
-            <span className={`${textClasses.muted} ${textClasses.numeric}`}>
+            <span className={`${textClasses.muted} num`}>
               {formatDateSecond(lastFinishedRun.finishedAt)}
             </span>
           </span>
         )}
       </td>
-      <td className={`text-right ${textClasses.numeric}`}>
-        {lastDuration !== undefined && formatDuration(lastDuration)}
-      </td>
+      <td className="table-num">{lastDuration !== undefined && formatDuration(lastDuration)}</td>
       <td>
         {job.schedule !== null ? (
           <PauseSwitch job={job} />

@@ -158,10 +158,7 @@ function Segment({
       }}
     >
       {text != null && (
-        <span
-          aria-hidden="true"
-          className="pl-2 font-mono text-xs font-semibold whitespace-nowrap tabular-nums"
-        >
+        <span aria-hidden="true" className="pl-2 num text-xs font-semibold whitespace-nowrap">
           {text}
         </span>
       )}
