@@ -2,6 +2,7 @@ import { createRef } from 'react'
 import {
   Button,
   Chip,
+  ChipGroup,
   IconButton,
   ProgressCircle,
   Select,
@@ -31,6 +32,7 @@ import type {
 export const components = [
   Button,
   Chip,
+  ChipGroup,
   IconButton,
   ProgressCircle,
   StatusChip,

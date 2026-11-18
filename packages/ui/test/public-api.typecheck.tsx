@@ -3,6 +3,7 @@ import { expectTypeOf } from 'vitest'
 import {
   Button,
   Chip,
+  ChipGroup,
   IconButton,
   Popover,
   ProgressCircle,
@@ -17,6 +18,7 @@ import {
   TextFieldLabel,
   Tooltip,
   type ButtonProps,
+  type ChipGroupProps,
   type ChipProps,
   type IconButtonProps,
   type PopoverPopupProps,
@@ -54,6 +56,7 @@ type PublicPropKeys =
   | keyof TabsTabProps
   | keyof SwitchProps
   | keyof ChipProps
+  | keyof ChipGroupProps<string>
   | keyof TooltipPopupProps
   | keyof PopoverPopupProps
   | keyof PopoverTitleProps
@@ -174,6 +177,15 @@ export const behaviorExamples = (
     </Tabs.Root>
     <Switch aria-label="자동 캡처" defaultChecked />
     <Chip defaultPressed>원본</Chip>
+    <ChipGroup
+      aria-label="기간"
+      items={[{ value: 'half', label: '반년' }]}
+      value="half"
+      size="md"
+      onValueChange={(value) => {
+        expectTypeOf(value).toEqualTypeOf<'half'>()
+      }}
+    />
     <Popover.Root>
       <Popover.Trigger render={<Button size="sm" />}>열기</Popover.Trigger>
       <Popover.Popup side="bottom" align="end" initialFocus={false}>
@@ -200,6 +212,8 @@ export const invalidDesignExamples = (
     <StatusChip tone="waiting">상태</StatusChip>
     {/* @ts-expect-error IconButton은 외형 variant를 받지 않는다. */}
     <IconButton variant="ghost" aria-label="설정" icon={<svg />} />
+    {/* @ts-expect-error ChipGroup 크기는 sm, md 중 하나다. */}
+    <ChipGroup items={[]} value="" size="lg" onValueChange={() => undefined} />
     {/* @ts-expect-error Select trigger 크기는 2xs, xs, sm, md 중 하나다. */}
     <Select.Trigger size="lg" />
   </>
