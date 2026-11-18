@@ -1,4 +1,3 @@
-import { MISSING_VALUE } from '#core/capture'
 import type { Guild } from '#core/adventure-guild'
 import type { StoredCharacter } from '#core/ranking'
 import { CharacterListBox } from './components/CharacterListBox'
@@ -17,7 +16,9 @@ export function GuildScreen({ guildId }: { guildId: string }): React.JSX.Element
   return (
     <div className="flex flex-col">
       <TitleBox title={guildTitle(result)}>
-        {result.status === 'success' && <GuildStats guild={result.value} />}
+        {result.status === 'success' && (
+          <TitleStat label="길드원" value={integer.format(result.value.memberCount)} />
+        )}
       </TitleBox>
       <CharacterListBox name="길드원" result={members} affiliation="adventure" scrolling />
     </div>
@@ -34,16 +35,4 @@ function guildTitle(result: LoadedResult<Guild>): string {
   }
 
   return result.value.guildName
-}
-
-function GuildStats({ guild }: { guild: Guild }): React.JSX.Element {
-  return (
-    <>
-      <TitleStat label="길드원" value={integer.format(guild.memberCount)} />
-      <TitleStat
-        label="평균 명성"
-        value={guild.averageFame != null ? integer.format(guild.averageFame) : MISSING_VALUE}
-      />
-    </>
-  )
 }
