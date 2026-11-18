@@ -8,7 +8,7 @@ import { characterDetailFixture } from '#core/testing'
 import { type ClientHost, ClientHostContext } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
-import { rarityTextClasses } from './equipment/item-classes'
+import { rarityTextClasses } from '../../../components/game-colors'
 import { BuffTab } from './BuffTab'
 
 let container: HTMLDivElement
