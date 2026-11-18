@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
 import { readApiBuildInfo } from '../src/infrastructure/build-info.js'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 

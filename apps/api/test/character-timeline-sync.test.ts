@@ -2,16 +2,18 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineCharacter, TimelineRange, TimelineSyncState } from '@dfragon/database'
-import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
-import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/neople-stages.js'
-import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/index.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
 import { CharacterDetailService } from '../src/application/character-detail/service.js'
-import { TimelineFailure } from '@dfragon/server-core/domain/character-timeline/failure.js'
+import {
+  TimelineFailure,
+  EMPTY_CHARACTER_TIMELINE,
+  type TimelineInputs
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
-import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/project.js'
-import type { TimelineInputs } from '@dfragon/server-core/domain/character-timeline/rows.js'
 import type { TimelineSyncRepository } from '../src/application/character-timeline/repository.js'
 import {
   type TimelineSyncFailure,
