@@ -7,7 +7,6 @@ RUN apt-get update \
 RUN npm install --global pnpm@12.11.2
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json apps/api/package.json
-COPY apps/worker/package.json apps/worker/package.json
 COPY packages/database/package.json packages/database/package.json
 COPY packages/lib/package.json packages/lib/package.json
 COPY packages/neople/package.json packages/neople/package.json
@@ -29,16 +28,12 @@ COPY packages/server-core/tsconfig*.json packages/server-core/
 COPY packages/server-core/src packages/server-core/src
 COPY packages/server-core/test packages/server-core/test
 COPY packages/licenses/notices/lib packages/licenses/notices/lib
-COPY apps/worker/tsconfig*.json apps/worker/
-COPY apps/worker/src apps/worker/src
-COPY apps/worker/test apps/worker/test
 COPY apps/api/tsconfig*.json apps/api/
 COPY apps/api/src apps/api/src
 COPY apps/api/test apps/api/test
 COPY apps/api/test-support apps/api/test-support
 COPY packages/models/score-engine/libdnfscore.so packages/models/score-engine/libdnfscore.so
 RUN pnpm --filter @dfragon/server-core test \
-    && pnpm --filter @dfragon/worker test \
     && pnpm --filter @dfragon/api test \
     && pnpm --filter @dfragon/api deploy --legacy --prod /production \
     && find /production/node_modules -name schema-engine-debian-openssl-3.0.x -exec {} --version \; | grep -q schema-engine
