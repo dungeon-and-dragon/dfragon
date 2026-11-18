@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import themeSource from '@dfragon/design/theme.css?raw'
 import {
   ColorTokens,
+  HeightTokens,
   MotionTokens,
   PrimitiveScale,
   RadiusTokens,
@@ -18,6 +19,9 @@ const colorTokens = tokensIn(tokens, 'color')
 const primitiveTokens = colorTokens.filter((token) => token.name.startsWith('--gray-'))
 const gradientTokens = colorTokens.filter((token) => token.name.startsWith('--gradient-'))
 const roleColorTokens = colorTokens.filter((token) => token.name.startsWith('--color-'))
+const sizeTokens = tokensIn(tokens, 'size')
+const heightTokens = sizeTokens.filter((token) => token.name.startsWith('--height-'))
+const containerTokens = sizeTokens.filter((token) => token.name.startsWith('--container-'))
 
 const meta = {
   title: 'Foundations'
@@ -56,6 +60,19 @@ export const Spacing: Story = {
     <Section title="간격">
       <SpacingTokens tokens={tokensIn(tokens, 'spacing')} />
     </Section>
+  )
+}
+
+export const Size: Story = {
+  render: () => (
+    <div className="grid gap-12">
+      <Section title="높이">
+        <HeightTokens tokens={heightTokens} />
+      </Section>
+      <Section title="컨테이너 폭">
+        <ValueTokens tokens={containerTokens} />
+      </Section>
+    </div>
   )
 }
 

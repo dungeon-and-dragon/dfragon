@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: var(--spacing-control-sm);
+  height: var(--height-control-sm);
   padding-inline: 12px;
   border-radius: var(--radius-control);
   outline: none;

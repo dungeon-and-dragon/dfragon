@@ -48,8 +48,8 @@ function useStorySeats(mode: SearchMode): SeatArrangement {
 
 function Frame({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
-    <div className="mx-auto mt-6 w-270 max-w-full overflow-x-auto">
-      <div className="box-border min-w-270 p-4">
+    <div className="page mt-6 overflow-x-auto">
+      <div className="box-border min-w-page p-4">
         <div className="rounded-panel border border-line bg-canvas">{children}</div>
       </div>
     </div>
@@ -87,7 +87,7 @@ function Board({ mode }: { mode: SearchMode }): React.JSX.Element {
   return (
     <StoryFrame host={host}>
       <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-        <div className="mx-auto mt-6 w-270 max-w-full overflow-x-auto">
+        <div className="page mt-6 overflow-x-auto">
           <MultisearchBoard host={host} />
         </div>
       </ScreenCaptureProvider>

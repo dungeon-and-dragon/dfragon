@@ -8,6 +8,7 @@ export type TokenSection =
   | 'color'
   | 'typography'
   | 'spacing'
+  | 'size'
   | 'radius'
   | 'layer'
   | 'breakpoint'
@@ -18,6 +19,7 @@ const SECTION_PREFIXES: Readonly<Record<TokenSection, readonly string[]>> = {
   color: ['--gray-', '--color-', '--gradient-'],
   typography: ['--font-', '--text-', '--leading-', '--tracking-'],
   spacing: ['--spacing'],
+  size: ['--height-', '--container-'],
   radius: ['--radius-'],
   layer: ['--z-'],
   breakpoint: ['--breakpoint-'],

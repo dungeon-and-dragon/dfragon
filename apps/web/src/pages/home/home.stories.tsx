@@ -44,7 +44,7 @@ const searchHost = createStoryClientHost({
 })
 
 function Screen({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return <div className="mx-auto mt-6 w-270 max-w-full">{children}</div>
+  return <div className="page mt-6">{children}</div>
 }
 
 export const 메인: Story = {

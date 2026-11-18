@@ -164,6 +164,22 @@ export function SpacingTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   )
 }
 
+export function HeightTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
+  return (
+    <TokenRows>
+      {tokens.map((token) => (
+        <TokenRow key={token.name}>
+          <TokenName token={token} />
+          <div className="flex items-center gap-3">
+            <div className="w-16 shrink-0 bg-signal" style={{ height: `var(${token.name})` }} />
+            <TokenValue>{token.value}</TokenValue>
+          </div>
+        </TokenRow>
+      ))}
+    </TokenRows>
+  )
+}
+
 export function ValueTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   return (
     <TokenRows>

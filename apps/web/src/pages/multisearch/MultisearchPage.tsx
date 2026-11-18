@@ -2,7 +2,6 @@ import { getRouteApi } from '@tanstack/react-router'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
 import { GameBar } from './components/GameBar'
 import { ScreenShareChip } from './components/ScreenShareChip'
-import { CONTENT_WIDTH } from '../../constants/layout'
 import { useScreenCaptureContext } from '../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../hooks/useSearchModeStore'
 import type { AutoRoundSignal, BrowserHost } from '../../host/client-host'
@@ -67,11 +66,7 @@ export function MultisearchPage(): React.JSX.Element {
 
 export function MultisearchBoard({ host }: { host: BrowserHost }): React.JSX.Element {
   return (
-    <div
-      onKeyDown={keepSeatMoveKeys}
-      className="box-border flex flex-col p-4"
-      style={{ minWidth: CONTENT_WIDTH }}
-    >
+    <div onKeyDown={keepSeatMoveKeys} className="box-border flex min-w-page flex-col p-4">
       <PastedFrameRounds host={host} />
       <AutoRounds host={host} />
       <div className="flex flex-col rounded-panel border border-line bg-canvas">

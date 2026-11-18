@@ -75,7 +75,7 @@ function WorkerSeen({ seenAt, readAt }: { seenAt: Date; readAt: Date }): React.J
 export function OpsHeader({ workerSeenAt, readAt, onRefresh }: OpsHeaderProps): React.JSX.Element {
   return (
     <header className="self-stretch border-b border-line bg-canvas">
-      <div className="mx-auto box-border flex h-topbar w-300 min-w-0 max-w-full items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-y-0 max-sm:pb-2">
+      <div className="page page-wide flex h-topbar min-w-0 items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-y-0 max-sm:pb-2">
         <a
           href="/"
           className={`flex shrink-0 items-center gap-2 text-fg no-underline ${FOCUS_RING}`}
