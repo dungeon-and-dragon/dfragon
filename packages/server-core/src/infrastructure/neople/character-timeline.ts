@@ -2,13 +2,13 @@ import { forwardCause } from '@dfragon/lib/error-chain'
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { formatSeoulTime, parseSeoulTime } from '../../domain/seoul-time.js'
 import type { FetchCharacterTimeline } from '../../application/character-timeline/ports.js'
-import { TimelineFailure } from '../../domain/character-timeline/failure.js'
 import {
+  TimelineFailure,
   TIMELINE_CODES,
   type TimelineRow,
   isTimelineCode,
   toTimelineInputs
-} from '../../domain/character-timeline/rows.js'
+} from '../../domain/character-timeline/index.js'
 
 const PAGE_LIMIT = 100
 

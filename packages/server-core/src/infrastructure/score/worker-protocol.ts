@@ -1,4 +1,4 @@
-import type { ScoreCalculator, ScoreEngineInput } from '../../domain/score/input.js'
+import type { ScoreCalculator, ScoreEngineInput } from '../../domain/score/index.js'
 
 export type ScoreWorkerData = Readonly<{ path: string }>
 export type ScoreWorkerRequest = Readonly<{

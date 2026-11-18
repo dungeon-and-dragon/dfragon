@@ -1,4 +1,4 @@
-import type { ScoreCalculator } from '../score/input.js'
+import type { ScoreCalculator } from '../score/index.js'
 import type { CharacterRole } from '../character-role.js'
 
 export type { CharacterRole }

@@ -1,5 +1,4 @@
-import type { ScoreCalculator } from '../score/input.js'
-import type { ScoreEngineResult } from '../score/result.js'
+import type { ScoreCalculator, ScoreEngineResult } from '../score/index.js'
 import type { CharacterCard, CharacterCardScore, CharacterRole } from './types.js'
 
 export function cardScoreCalculator(role: CharacterRole | null): ScoreCalculator {
