@@ -4,6 +4,7 @@ import type {
   CharacterStats,
   FameRankingFilter,
   FameRankingPosition,
+  ItemAdoption,
   JobSkillAdoption,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
@@ -96,7 +97,8 @@ const unusedReader: RankingStatsRepository = {
   readFameRanking: async () => assert.fail('랭킹을 읽으면 안 된다'),
   readCharacterStatsSnapshot: async () => assert.fail('통계를 읽으면 안 된다'),
   readJobSkillAdoptionSnapshot: async () => assert.fail('스킬 채택률을 읽으면 안 된다'),
-  readSetAdoption: async () => assert.fail('세트 선택 수를 읽으면 안 된다')
+  readSetAdoption: async () => assert.fail('세트 선택 수를 읽으면 안 된다'),
+  readItemAdoption: async () => assert.fail('아이템 선택 수를 읽으면 안 된다')
 }
 
 async function listen(
@@ -272,7 +274,7 @@ test('명성 랭킹은 oathSetId 없는 oathSetOption, 숫자가 아닌 oathSetI
   }
 })
 
-test('명성 랭킹과 세트 선택 수는 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으로 거절한다', async () => {
+test('명성 랭킹과 세트, 아이템 선택 수는 빈 값, 중복 query와 jobId 없는 jobGrowId를 400으로 거절한다', async () => {
   const { app, origin } = await listen(unusedReader)
   try {
     for (const query of [
@@ -280,7 +282,7 @@ test('명성 랭킹과 세트 선택 수는 빈 값, 중복 query와 jobId 없�
       'jobId=',
       'jobGrowId=synthetic-grow'
     ]) {
-      for (const path of ['/rankings/fame', '/stats/sets']) {
+      for (const path of ['/rankings/fame', '/stats/sets', '/stats/items']) {
         const { status, body } = await getJson(origin, `${path}?${query}`)
         assert.equal(status, 400, `${path}?${query}`)
         assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', `${path}?${query}`)
@@ -345,7 +347,7 @@ test('role은 남성 크루세이더 전직이 아니거나 값이 다르거나 
       `${maleCrusaderQuery}&role=`,
       `${maleCrusaderQuery}&role=dealer&role=buffer`
     ]) {
-      for (const path of ['/rankings/fame', '/stats/skills', '/stats/sets']) {
+      for (const path of ['/rankings/fame', '/stats/skills', '/stats/sets', '/stats/items']) {
         const { status, body } = await getJson(origin, `${path}?${query}`)
         assert.equal(status, 400, `${path}?${query}`)
         assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', `${path}?${query}`)
@@ -483,7 +485,50 @@ test('세트 선택 수는 요청마다 query의 직업, 전직, 남성 크루�
   }
 })
 
-test('DB 설정이 없는 API는 빈 랭킹, 0인 통계와 세트 선택 수, computedAt null을 준다', async () => {
+const itemAdoption: ItemAdoption = {
+  computedAt,
+  sampleSize: 3,
+  slots: [
+    {
+      slotId: 'WEAPON',
+      items: [
+        { itemId: 'weapon-a', name: '합성 무기', count: 2 },
+        { itemId: 'weapon-b', name: '합성 다른 무기', count: 1 }
+      ]
+    },
+    { slotId: 'SUPPORT', items: [{ itemId: 'support-a', name: '합성 보조장비', count: 1 }] }
+  ]
+}
+
+test('무기, 유일 장비 선택 수는 요청마다 query의 직업, 전직, 남성 크루세이더 role로 저장분을 읽어 계산 시각과 함께 준다', async () => {
+  const reads: SetAdoptionQuery[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readItemAdoption: async (query) => {
+      reads.push(query)
+
+      return itemAdoption
+    }
+  })
+  try {
+    const all = await getJson(origin, '/stats/items')
+    const dealer = await getJson(origin, `/stats/items?${maleCrusaderQuery}&role=dealer`)
+
+    assert.deepEqual(all, {
+      status: 200,
+      body: { ...itemAdoption, computedAt: '2026-11-06T15:00:00.000Z' }
+    })
+    assert.equal(dealer.status, 200)
+    assert.deepEqual(reads, [
+      {},
+      { jobId: malePriestJobId, jobGrowId: crusaderGrowId, role: 'dealer' }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('DB 설정이 없는 API는 빈 랭킹, 0인 통계와 세트, 아이템 선택 수, computedAt null을 준다', async () => {
   const { app, origin } = await listen()
   try {
     assert.deepEqual(await getJson(origin, '/rankings/fame'), {
@@ -497,6 +542,10 @@ test('DB 설정이 없는 API는 빈 랭킹, 0인 통계와 세트 선택 수, c
     assert.deepEqual(await getJson(origin, '/stats/sets?jobId=synthetic-job'), {
       status: 200,
       body: { computedAt: null, sampleSize: 0, equipmentSets: [], oathSets: [], combos: [] }
+    })
+    assert.deepEqual(await getJson(origin, '/stats/items?jobId=synthetic-job'), {
+      status: 200,
+      body: { computedAt: null, sampleSize: 0, slots: [] }
     })
   } finally {
     await app.close()

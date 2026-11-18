@@ -1,6 +1,7 @@
 import type {
   CharacterStatsSnapshot,
   FameRankingFilter,
+  ItemAdoption,
   RankedStoredCharacter,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
@@ -9,6 +10,8 @@ import type {
 } from '@dfragon/database'
 import { FAME_RANKING_LIMIT, type FameRankingCursor } from '#domain/ranking-stats/index.js'
 import type { RankingStatsRepository } from './repository.js'
+
+const emptyItemAdoption: ItemAdoption = { computedAt: null, sampleSize: 0, slots: [] }
 
 const emptySetAdoption: SetAdoption = {
   computedAt: null,
@@ -72,11 +75,16 @@ export class RankingStatsService {
   setStats(query: SetAdoptionQuery): Promise<SetAdoption> {
     return this.repository.readSetAdoption(query)
   }
+
+  itemStats(query: SetAdoptionQuery): Promise<ItemAdoption> {
+    return this.repository.readItemAdoption(query)
+  }
 }
 
 export const emptyRankingStatsRepository: RankingStatsRepository = {
   readFameRanking: async () => [],
   readCharacterStatsSnapshot: async () => null,
   readJobSkillAdoptionSnapshot: async () => null,
-  readSetAdoption: async () => emptySetAdoption
+  readSetAdoption: async () => emptySetAdoption,
+  readItemAdoption: async () => emptyItemAdoption
 }
