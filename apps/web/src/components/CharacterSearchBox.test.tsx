@@ -138,7 +138,7 @@ function recentCharacter(
   }
 }
 
-it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 그 아래 줄에 레벨만 둔다', async () => {
+it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을 둔다', async () => {
   useRecentCharacterStore.setState({
     recentCharacters: [
       {
@@ -162,7 +162,7 @@ it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만�
   const lines = [...popup.querySelectorAll('li a')].map((item) =>
     [...(item.children[1]?.children ?? [])].map((line) => line.textContent)
   )
-  expect(lines).toEqual([['프레이만렙넨마스터 격투가(여)'], ['프레이육성합성 직업', 'Lv.110']])
+  expect(lines).toEqual([['프레이만렙넨마스터 격투가(여)'], ['프레이육성합성 직업Lv.110']])
 })
 
 function savedCharacter(characterId: string, characterName: string): FavoriteCharacter {
