@@ -4,7 +4,6 @@ import {
   Chip,
   ChipGroup,
   IconButton,
-  ProgressCircle,
   Select,
   StatusChip,
   Switch,
@@ -19,7 +18,6 @@ import {
 import type {
   ButtonProps,
   IconButtonProps,
-  ProgressCircleProps,
   SelectPopupProps,
   StatusChipProps,
   TextFieldDescriptionProps,
@@ -34,7 +32,6 @@ export const components = [
   Chip,
   ChipGroup,
   IconButton,
-  ProgressCircle,
   StatusChip,
   Switch,
   TextField,
@@ -49,7 +46,6 @@ export const components = [
 
 export type PublicProps = {
   button: ButtonProps
-  progress: ProgressCircleProps
   field: TextFieldProps
   fieldLabel: TextFieldLabelProps
   input: TextFieldInputProps
