@@ -7,9 +7,9 @@ import {
 import {
   planClearCollection,
   toContentPopulation,
-  weekKey
-} from '../../domain/content-clears/collection.js'
-import { toClearRecordInput } from '../../domain/content-clears/records.js'
+  weekKey,
+  toClearRecordInput
+} from '../../domain/content-clears/index.js'
 import type { ClearCollectionPorts } from './ports.js'
 import { collectPopulation, readOrStartProgress } from './population-collection.js'
 import type { ClearCollectionRepository } from './repository.js'

@@ -7,41 +7,39 @@ import type {
 import {
   createClearRecordBackfillJob,
   createClearWeekSampleJob,
-  createContentClearCollectionJob
-} from '../application/content-clears/collection-job.js'
-import { ContentClearCollectionService } from '../application/content-clears/collection.js'
-import { ClearRecordBackfillService } from '../application/content-clears/record-backfill.js'
-import { ClearWeekSampleService } from '../application/content-clears/week-samples.js'
+  createContentClearCollectionJob,
+  ContentClearCollectionService,
+  ClearRecordBackfillService,
+  ClearWeekSampleService
+} from '../application/content-clears/index.js'
 import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/clear-stats.js'
 import {
   DatabaseClearCollectionRepository,
-  DatabaseClearRecordBackfillRepository
-} from '../infrastructure/database/content-clear-collection.js'
+  DatabaseClearRecordBackfillRepository,
+  DatabaseSkillStyleCollectionRepository,
+  DatabaseStatsJobRepository,
+  DatabaseJobRunCleanupRepository,
+  DatabaseScoreCalculationRepository
+} from '../infrastructure/database/index.js'
 import type { SkillStyleCollectionPorts } from '../application/ranking-stats/ports.js'
-import { DatabaseSkillStyleCollectionRepository } from '../infrastructure/database/skill-style-collection.js'
 import {
   SkillStyleCollectionService,
-  createSkillStyleCollectionJob
-} from '../application/ranking-stats/skill-style-collection.js'
-import {
+  createSkillStyleCollectionJob,
   StatsJobService,
   createCharacterStatsJob,
   createSkillAdoptionJob
-} from '../application/ranking-stats/stats-jobs.js'
-import { DatabaseStatsJobRepository } from '../infrastructure/database/stats-jobs.js'
-import type { JobDefinition } from '../application/jobs/definition.js'
-import { DatabaseJobRunCleanupRepository } from '../infrastructure/database/job-run-cleanup.js'
+} from '../application/ranking-stats/index.js'
 import {
+  type JobDefinition,
   JobRunCleanupService,
   createJobRunCleanupJob
-} from '../application/jobs/job-run-cleanup.js'
+} from '../application/jobs/index.js'
 import type { ScoreCalculationPorts } from '../application/character-score/ports.js'
 import {
   SCORE_CALCULATION_JOB_NAME,
   ScoreCalculationService,
   createScoreCalculationJob
-} from '../application/character-score/calculation-job.js'
-import { DatabaseScoreCalculationRepository } from '../infrastructure/database/score-calculation.js'
+} from '../application/character-score/index.js'
 
 type ClockKey = 'now' | 'pause'
 
