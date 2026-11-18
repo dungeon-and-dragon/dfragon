@@ -4,7 +4,7 @@ import type {
   DNFRaidMetadataTemplates,
   DNFRaidValueHeadingTemplates
 } from '@dfragon/lib'
-import { sliceRaidValueGlyphs } from '../../src/core/capture/raid/raid-value-glyphs'
+import { sliceRaidValueGlyphs } from '#core/capture/raid/raid-value-glyphs'
 import { readPng } from './manifest'
 
 const LIBRARY_ASSETS = new URL('../../src/core/capture/raid/', import.meta.url)

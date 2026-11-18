@@ -1,5 +1,5 @@
 import type { FameRankingFilter } from '#core/ranking'
-import { TitleBox } from '../../components/table/TitleBox'
+import { TitleBox } from '#components/table/TitleBox'
 import { FameRankingList } from './FameRankingList'
 import { RankingFilterBox } from './RankingFilterBox'
 

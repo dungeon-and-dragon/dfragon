@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { PNG } from 'pngjs'
 import { describe, expect, it } from 'vitest'
 import type { DNFParticipantFrame } from '@dfragon/lib'
-import type { CropRegion } from '../shared/onnx-ocr'
+import type { CropRegion } from '#scripts/shared/onnx-ocr'
 import { type CaseObservation, formatTable, type SlotObservation, summarize } from './evaluate'
 import {
   loadCaseImage,

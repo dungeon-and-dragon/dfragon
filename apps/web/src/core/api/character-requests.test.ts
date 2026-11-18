@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CHARACTER_SERVER_NAMES } from '../character/character-summary'
-import { characterDetailResponse } from '../testing/character-detail'
-import type { SearchErrorCode } from '../search/search'
+import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
+import { characterDetailResponse } from '#core/testing/character-detail'
+import type { SearchErrorCode } from '#core/search/search'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'

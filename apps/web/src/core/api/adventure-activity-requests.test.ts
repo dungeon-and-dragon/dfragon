@@ -2,7 +2,7 @@ import { expect, it, vi } from 'vitest'
 import type {
   AdventureActivity,
   AdventureActivitySeasonDays
-} from '../adventure-guild/adventure-activity'
+} from '#core/adventure-guild/adventure-activity'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'

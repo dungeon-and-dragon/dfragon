@@ -1,11 +1,10 @@
-import { createActor } from 'xstate'
-import type { Actor, EventFrom, SnapshotFrom } from 'xstate'
+import { createActor, type Actor, type EventFrom, type SnapshotFrom } from 'xstate'
 import type {
   SearchApi,
   SearchCommandResult,
   SearchControl,
   SearchSnapshot
-} from '../search/search'
+} from '#core/search/search'
 import { readSearchSnapshot, searchConnectionMachine } from './search-connection-machine'
 
 type ConnectionActor = Actor<typeof searchConnectionMachine>

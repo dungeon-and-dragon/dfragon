@@ -1,7 +1,7 @@
 import { type ReactNode, useState } from 'react'
-import { ClientHostContext, type ClientHost } from '../../host/client-host'
-import { TestQueryClient } from '../test-support/test-query-client'
-import { TestRouter } from '../test-support/test-router'
+import { ClientHostContext, type ClientHost } from '#host/client-host'
+import { TestQueryClient } from '#testing/test-support/test-query-client'
+import { TestRouter } from '#testing/test-support/test-router'
 import { createStoryClientHost } from './story-host'
 
 export function StoryFrame({

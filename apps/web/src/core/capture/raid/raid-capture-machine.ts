@@ -1,21 +1,24 @@
 import { assign, fromPromise, setup, type SnapshotFrom } from 'xstate'
-import type { CapturePhase } from '../capture-types'
-import type { RaidFrameResult, RaidFrameRow } from '../capture-types'
-import type { RaidValueColumn } from '../../search/search'
+import {
+  type CapturePhase,
+  type RaidFrameResult,
+  type RaidFrameRow
+} from '#core/capture/capture-types'
+import type { RaidValueColumn } from '#core/search/search'
 import {
   beginCaptureSearch,
   getCapturingPhase,
   getObservedNickname,
   getRecognizeErrorStatus
-} from '../capture-round'
-import type { OcrCaptureObservation } from '../capture-search'
-import type { CaptureTexts } from '../capture-texts'
-import type { OcrRecognition } from '../../ocr/ocr-worker-recognition'
+} from '#core/capture/capture-round'
+import type { OcrCaptureObservation } from '#core/capture/capture-search'
+import type { CaptureTexts } from '#core/capture/capture-texts'
+import type { OcrRecognition } from '#core/ocr/ocr-worker-recognition'
 import { recognizeRaidRows, type RaidSlotRecognition } from './raid-recognition'
 import {
   reportRuntimeDiagnostic,
   showRejectedOcrNickname
-} from '../../diagnostics/runtime-diagnostics'
+} from '#core/diagnostics/runtime-diagnostics'
 
 const READY_STATUS = '캡처 버튼을 눌러 공대를 인식해 주세요.'
 

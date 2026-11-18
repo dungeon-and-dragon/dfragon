@@ -1,13 +1,18 @@
 import { afterEach, expect, it, vi, type Mock } from 'vitest'
-import type {
-  OcrSearchObservation,
-  SearchApi,
-  SearchCommandResult,
-  SearchSnapshot
-} from '../search/search'
-import type { CharacterPortrait } from '../character/character'
-import { CAPTURE_ID, searchRow, searchSlot, searchSnapshot } from '../testing/search-test-fixture'
-import type { SearchView } from '../search/search'
+import {
+  type OcrSearchObservation,
+  type SearchApi,
+  type SearchCommandResult,
+  type SearchSnapshot,
+  type SearchView
+} from '#core/search/search'
+import type { CharacterPortrait } from '#core/character/character'
+import {
+  CAPTURE_ID,
+  searchRow,
+  searchSlot,
+  searchSnapshot
+} from '#core/testing/search-test-fixture'
 import {
   createCaptureSearch,
   type CaptureSearch,

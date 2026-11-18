@@ -1,4 +1,4 @@
-import { SEARCH_SLOT_COUNTS } from '../search/search'
+import { SEARCH_SLOT_COUNTS } from '#core/search/search'
 import type { SeatLayout } from './seats'
 import type { CharacterTier } from './cards-types'
 

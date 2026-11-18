@@ -1,28 +1,27 @@
 import { setImmediate } from 'node:timers/promises'
-import { describe, expect, it, vi } from 'vitest'
-import type { MockedFunction } from 'vitest'
+import { describe, expect, it, vi, type MockedFunction } from 'vitest'
 import type {
   CharacterCandidate,
   CharacterDetails,
   CharacterImage,
   CharacterPortrait,
   SelectedCharacterSummary
-} from '../character/character'
-import { deferred } from '../testing/async-test-fixture'
+} from '#core/character/character'
+import { deferred } from '#core/testing/async-test-fixture'
 import { runDetailsRequest, runSearchRequest, type IdentificationAdapters } from './request'
 import type { CharacterIdentificationInput } from './identify'
 import type { SearchOperationContext } from './operation'
-import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '../api/dfragon-client'
-import type { CharacterImageHttp } from '../character/character-image-source'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '#core/api/dfragon-client'
 import {
+  type CharacterImageHttp,
   createCharacterImageCache,
   createCharacterImageSource
-} from '../character/character-image-source'
-import { SearchHttpFailure } from '../api/http'
+} from '#core/character/character-image-source'
+import { SearchHttpFailure } from '#core/api/http'
 import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 import { PortraitComparisonBudgetExceededError } from './portrait-raster'
-import { dealerCard, scoredDealerCard } from '../testing/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '#core/testing/card-test-fixture'
 
 const FACE_SIZE = 8
 const FACE_LEFT_SHADE = 100

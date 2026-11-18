@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import type { ItemView } from '../character/character-item'
+import type { ItemView } from '#core/character/character-item'
 import { type GameTextLines, gameTextSchema } from './game-text'
-import { itemRarityOf } from '../character/character-detail-display'
-import type { CharacterDetailView } from '../character/character-detail-view'
+import { itemRarityOf } from '#core/character/character-detail-display'
+import type { CharacterDetailView } from '#core/character/character-detail-view'
 
 const RARITY_FILES = ['rare', 'unique', 'legendary', 'epic', 'primitive'] as const
 

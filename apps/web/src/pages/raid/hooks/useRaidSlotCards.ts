@@ -6,8 +6,8 @@ import {
   toClipboardText,
   toSlotCards
 } from '#core/capture'
-import { useAdventureSnapshot } from '../../../hooks/useAdventureSnapshot'
-import type { RaidCapture } from '../../../hooks/useRaidCapture'
+import { useAdventureSnapshot } from '#hooks/useAdventureSnapshot'
+import type { RaidCapture } from '#hooks/useRaidCapture'
 
 export function useRaidSlotCards(capture: RaidCapture): {
   cards: SlotCard[]

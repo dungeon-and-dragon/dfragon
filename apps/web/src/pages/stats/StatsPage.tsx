@@ -1,8 +1,8 @@
-import { RelativeTime } from '../../components/RelativeTime'
-import { Columns } from '../../components/chart/Columns'
-import { type Bar, type BarTone, RowBars } from '../../components/chart/RowBars'
-import { ListBox } from '../../components/table/ListBox'
-import { TitleBox, TitleStat } from '../../components/table/TitleBox'
+import { RelativeTime } from '#components/RelativeTime'
+import { Columns } from '#components/chart/Columns'
+import { type Bar, type BarTone, RowBars } from '#components/chart/RowBars'
+import { ListBox } from '#components/table/ListBox'
+import { TitleBox, TitleStat } from '#components/table/TitleBox'
 import { useCharacterStats } from './hooks/useCharacterStats'
 import {
   averageFameBars,
@@ -10,7 +10,7 @@ import {
   fameBars,
   jobBars,
   serverBars
-} from '../../components/chart/stats-bars'
+} from '#components/chart/stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
 const SCREEN = 'flex flex-col'

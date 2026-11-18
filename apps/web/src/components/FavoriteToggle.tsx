@@ -1,6 +1,6 @@
 import { IconButton, StarIcon } from '@dfragon/ui'
-import { useFavoriteCharacterStore } from '../hooks/useFavoriteCharacterStore'
-import { type CharacterDisplay, isSameCharacter } from '../lib/stored-character'
+import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
+import { type CharacterDisplay, isSameCharacter } from '#lib/stored-character'
 
 export function FavoriteToggle({
   character,

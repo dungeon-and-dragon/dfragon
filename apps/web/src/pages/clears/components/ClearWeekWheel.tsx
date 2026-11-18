@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useRef } from 'react'
-import { type OverviewWeek, weekRangeText } from '../clear-overview'
+import { type OverviewWeek, weekRangeText } from '#pages/clears/clear-overview'
 
 // 트랙패드는 작은 delta를 연달아 보내므로 한 칸씩 넘기도록 모아서 센다.
 const WHEEL_STEP_DELTA = 40

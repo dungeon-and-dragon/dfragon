@@ -1,7 +1,6 @@
-import { afterEach, expect, it, vi } from 'vitest'
-import type { Mock } from 'vitest'
-import type { SearchApi, SearchCommandResult, SearchSnapshot } from '../search/search'
-import { CAPTURE_ID, searchSnapshot } from '../testing/search-test-fixture'
+import { afterEach, expect, it, vi, type Mock } from 'vitest'
+import type { SearchApi, SearchCommandResult, SearchSnapshot } from '#core/search/search'
+import { CAPTURE_ID, searchSnapshot } from '#core/testing/search-test-fixture'
 import { createSearchConnection, type SearchConnection } from './search-connection'
 
 const connections: SearchConnection[] = []

@@ -4,14 +4,14 @@ import type {
   CharacterIdentity,
   CharacterImage,
   CharacterPortrait
-} from '../character/character'
+} from '#core/character/character'
 import { orderedCandidates } from './candidate-order'
 import { portraitAnchorOf, type PortraitAnchor } from './portrait-anchor'
 import {
   planRaidComparison,
   selectRaidCandidate,
   type RaidObservedValues
-} from '../capture/raid/raid-candidate'
+} from '#core/capture/raid/raid-candidate'
 
 const MAX_OCR_NAMES = 2
 const MAX_NAME_CODE_POINTS = 12

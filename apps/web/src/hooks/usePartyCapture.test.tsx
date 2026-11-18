@@ -14,8 +14,8 @@ import type {
 } from '#core/search'
 import { WEB_CAPTURE_TEXTS } from '#core/capture'
 import * as diagnostics from '#core/diagnostics'
-import { createTestClientHost } from '../testing/test-support/client-host'
-import { ClientHostContext } from '../host/client-host'
+import { createTestClientHost } from '#testing/test-support/client-host'
+import { ClientHostContext } from '#host/client-host'
 import { usePartyCapture } from './usePartyCapture'
 
 vi.mock('#core/diagnostics/runtime-diagnostics', { spy: true })

@@ -23,11 +23,11 @@ import { Portrait } from './Portrait'
 import { ServerSelect } from './ServerSelect'
 import { SnapshotAdventureField } from './SnapshotAdventureField'
 import { SnapshotBadge } from './SnapshotBadge'
-import { serverOptions } from '../constants/server-options'
-import { type LookupDraft, useLookupDraft } from '../hooks/useLookupDraft'
-import { useServerMenu } from '../hooks/useServerMenu'
-import type { SlotCardKey } from '../hooks/useSlotCardStore'
-import { getLookupStep, type LookupStep } from '../lib/card-presentation'
+import { serverOptions } from '#constants/server-options'
+import { type LookupDraft, useLookupDraft } from '#hooks/useLookupDraft'
+import { useServerMenu } from '#hooks/useServerMenu'
+import type { SlotCardKey } from '#hooks/useSlotCardStore'
+import { getLookupStep, type LookupStep } from '#lib/card-presentation'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

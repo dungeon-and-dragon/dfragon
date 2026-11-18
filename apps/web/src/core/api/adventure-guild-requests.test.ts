@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
-import type { StoredCharacter } from '../ranking/ranking-stats'
-import type { Guild } from '../adventure-guild/adventure-guild'
+import type { StoredCharacter } from '#core/ranking/ranking-stats'
+import type { Guild } from '#core/adventure-guild/adventure-guild'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'

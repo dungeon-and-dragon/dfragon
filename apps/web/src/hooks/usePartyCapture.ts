@@ -17,7 +17,7 @@ import {
 import { SEARCH_SLOT_COUNTS } from '#core/search'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
 import { createSharedOcrWorker, getRecognizedNicknames, type OcrRecognition } from '#core/ocr'
-import { useClientHost } from '../host/client-host'
+import { useClientHost } from '#host/client-host'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 
 export type CaptureSourceSelection = {

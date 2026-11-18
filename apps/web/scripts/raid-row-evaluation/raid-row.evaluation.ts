@@ -8,7 +8,7 @@ import {
   parseDNFRaidValueNotation,
   readDNFRaidParticipantMetadata
 } from '@dfragon/lib'
-import { cropRegion } from '../shared/onnx-ocr'
+import { cropRegion } from '#scripts/shared/onnx-ocr'
 import { type CaseObservation, readJobText, type RowObservation, summarize } from './evaluate'
 import { createJobOcrReader, type JobOcrReader } from './job-ocr'
 import { loadCaseImage, readManifest } from './manifest'

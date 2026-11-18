@@ -1,4 +1,4 @@
-import type { SearchSlot } from '../search/search'
+import type { SearchSlot } from '#core/search/search'
 import type { CardCharacter, SlotState } from './cards-types'
 import type { SnapshotMark } from './adventure-snapshot'
 import type { CandidatePicker } from './candidate-picker'
@@ -8,7 +8,7 @@ import {
   searchSlotNotice,
   toCharacterCard,
   toChoiceCharacterCard
-} from '../character/character-card'
+} from '#core/character/character-card'
 
 export type SlotCard = {
   state: SlotState

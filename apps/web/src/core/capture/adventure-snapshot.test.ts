@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { searchSlot } from '../testing/search-test-fixture'
-import type { SelectedCharacterSummary } from '../character/character'
-import type { SearchSlot } from '../search/search'
+import { searchSlot } from '#core/testing/search-test-fixture'
+import type { SelectedCharacterSummary } from '#core/character/character'
+import type { SearchSlot } from '#core/search/search'
 import { compareWithSnapshot, slotAdventureName } from './adventure-snapshot'
 
 const NONE = undefined

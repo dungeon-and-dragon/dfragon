@@ -1,7 +1,7 @@
-import type { SearchSlot } from '../search/search'
-import { serverNames } from '../servers/servers'
+import type { SearchSlot } from '#core/search/search'
+import { serverNames } from '#core/servers/servers'
 import type { CardCharacter } from './cards-types'
-import { toCharacterCard } from '../character/character-card'
+import { toCharacterCard } from '#core/character/character-card'
 
 export function characterSeatText(
   character: Pick<CardCharacter, 'name' | 'serverId'>,

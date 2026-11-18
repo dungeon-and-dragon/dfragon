@@ -10,18 +10,18 @@ import {
   swapSeats,
   WEB_CAPTURE_TEXTS
 } from '#core/capture'
-import { ScreenCaptureProvider } from '../../components/ScreenCaptureProvider'
-import { useSearchModeStore } from '../../hooks/useSearchModeStore'
-import type { SeatArrangement } from '../../hooks/useSeatOrder'
-import { StoryFrame } from '../../testing/story-support/StoryFrame'
-import { StoryScreen } from '../../testing/story-support/StoryScreen'
+import { ScreenCaptureProvider } from '#components/ScreenCaptureProvider'
+import { useSearchModeStore } from '#hooks/useSearchModeStore'
+import type { SeatArrangement } from '#hooks/useSeatOrder'
+import { StoryFrame } from '#testing/story-support/StoryFrame'
+import { StoryScreen } from '#testing/story-support/StoryScreen'
 import {
   createStoryMultisearchHost,
   storyPartyCards,
   storyRaidCards
-} from '../../testing/story-support/story-multisearch'
-import { PartyScreen } from '../party'
-import { RaidScreen } from '../raid'
+} from '#testing/story-support/story-multisearch'
+import { PartyScreen } from '#pages/party'
+import { RaidScreen } from '#pages/raid'
 import { MultisearchBoard } from './MultisearchPage'
 
 const meta = {

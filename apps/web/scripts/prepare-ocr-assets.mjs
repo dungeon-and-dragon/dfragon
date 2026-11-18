@@ -3,7 +3,7 @@ import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import ocrModel from '../ocr-model.config.mjs'
+import ocrModel from '#ocr-model'
 import { countOcrClasses, validateOcrModel } from './validate-ocr-model.mjs'
 
 const require = createRequire(import.meta.url)

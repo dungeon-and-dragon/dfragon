@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest'
-import type { CharacterStats, FameRanking } from '../ranking/ranking-stats'
+import type { CharacterStats, FameRanking } from '#core/ranking/ranking-stats'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'

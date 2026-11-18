@@ -1,6 +1,5 @@
 import { assign, enqueueActions, fromCallback, fromPromise, setup } from 'xstate'
-import { SEARCH_ACTIONS } from '../search/search'
-import type { SearchApi, SearchSnapshot } from '../search/search'
+import { SEARCH_ACTIONS, type SearchApi, type SearchSnapshot } from '#core/search/search'
 
 type ConnectionEvent =
   | { type: 'SUBSCRIBED' }

@@ -1,5 +1,5 @@
 import { type FocusEvent, type ReactNode, useState } from 'react'
-import type { SeatMove } from '../hooks/useSeatMove'
+import type { SeatMove } from '#hooks/useSeatMove'
 
 const seatClass = '-outline-offset-2 transition-[background-color,opacity]'
 const focusOutlineClass = 'focus-ring-inset'

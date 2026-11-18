@@ -6,9 +6,9 @@ import type { CharacterDetailView, MaleCrusaderRole } from '#core/character'
 import type { GameTextLines, SkillWindowCatalog } from '#core/catalog'
 import type { SkillStats } from '#core/ranking'
 import { characterDetailFixture } from '#core/testing'
-import { type ClientHost, ClientHostContext } from '../../../host/client-host'
-import { createTestClientHost } from '../../../testing/test-support/client-host'
-import { TestQueryClient } from '../../../testing/test-support/test-query-client'
+import { type ClientHost, ClientHostContext } from '#host/client-host'
+import { createTestClientHost } from '#testing/test-support/client-host'
+import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { SkillTab } from './SkillTab'
 
 const MARKS = {

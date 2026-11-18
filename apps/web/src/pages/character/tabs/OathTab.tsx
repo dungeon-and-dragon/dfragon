@@ -8,10 +8,10 @@ import {
   oathItemIconOf,
   oathSetBoardOf
 } from '#core/catalog'
-import { useOathCatalog } from '../hooks/useOathCatalog'
+import { useOathCatalog } from '#pages/character/hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
-import { raritySolidOf } from '../../../components/game-colors'
+import { raritySolidOf } from '#components/game-colors'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
 

@@ -1,4 +1,4 @@
-import { CharacterSearchBox } from '../../components/CharacterSearchBox'
+import { CharacterSearchBox } from '#components/CharacterSearchBox'
 
 export function HomeSearch(): React.JSX.Element {
   return (

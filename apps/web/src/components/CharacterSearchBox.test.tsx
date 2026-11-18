@@ -2,12 +2,9 @@
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import {
-  type FavoriteCharacter,
-  useFavoriteCharacterStore
-} from '../hooks/useFavoriteCharacterStore'
-import { type RecentCharacter, useRecentCharacterStore } from '../hooks/useRecentCharacterStore'
-import { TestRouter } from '../testing/test-support/test-router'
+import { type FavoriteCharacter, useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
+import { type RecentCharacter, useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
+import { TestRouter } from '#testing/test-support/test-router'
 import { CharacterSearchBox } from './CharacterSearchBox'
 
 let root: ReturnType<typeof createRoot>

@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer'
 import { afterEach, expect, it, vi } from 'vitest'
-import type { CharacterImage } from '../../character/character'
+import type { CharacterImage } from '#core/character/character'
 import { capturePartyRecognitionInputs } from './party'
 import { recognizePartyFrame } from './party-recognition'
-import type { PartyOcrWorker } from '../capture-types'
+import type { PartyOcrWorker } from '#core/capture/capture-types'
 
 type NicknameCanvas = {
   width: number

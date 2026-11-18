@@ -1,4 +1,4 @@
-import type { SeatMoveNotice } from '../hooks/useSeatMove'
+import type { SeatMoveNotice } from '#hooks/useSeatMove'
 import { seatDirections, type SeatDirection, type SeatLayout } from '#core/capture'
 
 const directionLabels: Readonly<Record<SeatDirection, string>> = {

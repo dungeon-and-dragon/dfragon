@@ -9,7 +9,7 @@ import { AvatarCreatureTab } from './AvatarCreatureTab'
 import {
   raritySolidClasses as raritySolid,
   rarityTextClasses as rarityTones
-} from '../../../components/game-colors'
+} from '#components/game-colors'
 import { itemClasses } from './equipment/item-classes'
 
 let container: HTMLDivElement
