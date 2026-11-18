@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { IconButton } from './icon-button'
 import { CloseIcon } from './icons'
 
-const SIZES = ['sm', 'md', 'bar', 'lg'] as const
+const SIZES = ['sm', 'md', 'lg'] as const
 
 const meta = {
   title: 'Components/IconButton',

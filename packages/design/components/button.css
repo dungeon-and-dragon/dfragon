@@ -10,7 +10,7 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
@@ -41,7 +41,7 @@
 
 .btn-md {
   height: var(--height-control-md);
-  padding-inline: 14px;
+  padding-inline: 16px;
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
 }

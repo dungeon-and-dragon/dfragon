@@ -3,22 +3,17 @@ import { StepDots } from './step-dots'
 
 const meta = {
   title: 'Components/StepDots',
-  component: StepDots,
-  args: { size: 4 },
-  argTypes: { size: { control: 'inline-radio', options: [4, 5] } }
+  component: StepDots
 } satisfies Meta<typeof StepDots>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Playground: Story = {}
-
-export const Sizes: Story = {
+export const Playground: Story = {
   render: () => (
-    <div className="flex items-center gap-6 text-fg">
-      <StepDots size={4} />
-      <StepDots size={5} />
+    <div className="text-fg">
+      <StepDots />
     </div>
   )
 }
