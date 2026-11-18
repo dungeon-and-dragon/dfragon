@@ -353,12 +353,12 @@ importers:
       '@dfragon/server-core':
         specifier: workspace:*
         version: link:../../packages/server-core
+      '@dfragon/worker':
+        specifier: workspace:*
+        version: link:../worker
       '@hono/node-server':
         specifier: 'catalog:'
         version: 2.1.7(hono@4.13.18)
-      croner:
-        specifier: 'catalog:'
-        version: 11.0.0
       date-fns:
         specifier: 'catalog:'
         version: 4.4.0
@@ -368,9 +368,6 @@ importers:
       lru-cache:
         specifier: 'catalog:'
         version: 11.5.3
-      p-throttle:
-        specifier: 'catalog:'
-        version: 8.1.1
       remeda:
         specifier: 'catalog:'
         version: 2.59.0
@@ -621,6 +618,43 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 5.1.0(@types/node@26.6.6)(jsdom@30.1.3(@noble/hashes@1.8.0))(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+
+  apps/worker:
+    dependencies:
+      '@dfragon/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@dfragon/http-server':
+        specifier: workspace:*
+        version: link:../../packages/http-server
+      '@dfragon/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
+      '@dfragon/neople':
+        specifier: workspace:*
+        version: link:../../packages/neople
+      '@dfragon/server-core':
+        specifier: workspace:*
+        version: link:../../packages/server-core
+      croner:
+        specifier: 'catalog:'
+        version: 11.0.0
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.4.0
+      p-throttle:
+        specifier: 'catalog:'
+        version: 8.1.1
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
 
   packages/database:
     dependencies:
