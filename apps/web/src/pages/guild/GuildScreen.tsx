@@ -20,7 +20,7 @@ export function GuildScreen({ guildId }: { guildId: string }): React.JSX.Element
           <TitleStat label="길드원" value={integer.format(result.value.memberCount)} />
         )}
       </TitleBox>
-      <CharacterListBox name="길드원" result={members} affiliation="adventure" scrolling />
+      <CharacterListBox name="길드원" result={members} affiliation="adventure" paged />
     </div>
   )
 }

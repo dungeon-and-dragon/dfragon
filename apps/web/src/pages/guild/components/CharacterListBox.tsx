@@ -1,23 +1,23 @@
-import { useCallback, useState } from 'react'
-import { useInfiniteScrollRef } from '#hooks/useInfiniteScrollRef'
+import { Button } from '@dfragon/ui'
+import { useState } from 'react'
 import type { StoredCharacter } from '#core/ranking'
 import type { LoadedResult } from '#hooks/useLoadedResult'
 import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
 import { ListBox } from '#components/table/ListBox'
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 50
 const LOADING_ROWS = 5
 
 export function CharacterListBox({
   name,
   result,
   affiliation,
-  scrolling = false
+  paged = false
 }: {
   name: string
   result: LoadedResult<readonly StoredCharacter[]>
   affiliation: Affiliation
-  scrolling?: boolean
+  paged?: boolean
 }): React.JSX.Element {
   const affiliations = [affiliation]
   switch (result.status) {
@@ -57,8 +57,8 @@ export function CharacterListBox({
 
       return (
         <ListBox name={name}>
-          {scrolling ? (
-            <ScrollingTable characters={result.value} affiliations={affiliations} />
+          {paged ? (
+            <PagedTable characters={result.value} affiliations={affiliations} />
           ) : (
             <CharacterTable rows={ranked(result.value)} affiliations={affiliations} />
           )}
@@ -71,7 +71,7 @@ function ranked(characters: readonly StoredCharacter[]) {
   return characters.map((character, index) => ({ ...character, rank: index + 1 }))
 }
 
-function ScrollingTable({
+function PagedTable({
   characters,
   affiliations
 }: {
@@ -79,18 +79,21 @@ function ScrollingTable({
   affiliations: readonly Affiliation[]
 }): React.JSX.Element {
   const [visible, setVisible] = useState(PAGE_SIZE)
-  const showMore = useCallback(() => setVisible(visible + PAGE_SIZE), [visible])
-  const watchSkeleton = useInfiniteScrollRef<HTMLTableRowElement>(showMore)
+
+  function showMore(): void {
+    setVisible(visible + PAGE_SIZE)
+  }
 
   return (
-    <CharacterTable
-      rows={ranked(characters.slice(0, visible))}
-      affiliations={affiliations}
-      trailing={
-        visible < characters.length ? (
-          <SkeletonRow rowRef={watchSkeleton} affiliations={affiliations} />
-        ) : undefined
-      }
-    />
+    <>
+      <CharacterTable rows={ranked(characters.slice(0, visible))} affiliations={affiliations} />
+      {visible < characters.length && (
+        <div className="flex min-h-12 items-center justify-center border-t border-line">
+          <Button variant="secondary" size="sm" onClick={showMore}>
+            불러오기
+          </Button>
+        </div>
+      )}
+    </>
   )
 }
