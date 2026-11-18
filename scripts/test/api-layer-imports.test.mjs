@@ -4,6 +4,29 @@ import { lintSamples } from './fixtures/biome-lint.mjs'
 import { cruiseAppSamples } from './fixtures/dependency-cruiser.mjs'
 
 const src = 'apps/api/src'
+const CLI_WHITESPACE_PATTERN = /\s+/g
+
+for (const workspace of ['api', 'ops', 'worker']) {
+  for (const folder of ['domain', 'application', 'infrastructure', 'presentation', 'runtime', '']) {
+    if (workspace === 'worker' && folder === 'presentation') {
+      continue
+    }
+
+    const file = `apps/${workspace}/src/${folder ? `${folder}/alias-check` : 'main'}.ts`
+
+    for (const source of ['../sibling.js', '../../sibling.js', '../neighbor/file.js']) {
+      test(`Biome: ${file}에서 ${source} import를 거부한다`, async () => {
+        const sample = importing(source)
+        const diagnostics = await lintSamples({ [file]: sample })
+        const reported = diagnostics.get(file)
+
+        assert.equal(reported.length, 1)
+        assert.equal(reported[0].category, 'lint/style/noRestrictedImports')
+        assert.ok(reported[0].message.includes('#<계층>/...'))
+      })
+    }
+  }
+}
 
 function importing(source) {
   return `import { value } from '${source}'\nexport const used = value\n`
@@ -13,13 +36,33 @@ function typeImporting(source) {
   return `import type { Value } from '${source}'\nexport type Used = Value\n`
 }
 
+test('Biome: 상위 폴더의 import type, re-export, 동적 import, side-effect import도 거부한다', async () => {
+  const sources = [
+    typeImporting('../../domain/value.js'),
+    "export { value } from '../../domain/value.js'\n",
+    "export const used = import('../../domain/value.js')\n",
+    "import '../../domain/value.js'\n"
+  ]
+
+  const samples = Object.fromEntries(
+    sources.map((source, index) => [`apps/api/src/runtime/parent-${index}.ts`, source])
+  )
+  const diagnostics = await lintSamples(samples)
+
+  for (const [file, reported] of diagnostics) {
+    assert.equal(reported.length, 1, file)
+    assert.equal(reported[0].category, 'lint/style/noRestrictedImports')
+    assert.ok(reported[0].message.includes('#<계층>/...'))
+  }
+})
+
 // [계층 파일, import 대상, 메시지에 있어야 할 옮길 위치]
 const rejectedImports = [
-  ['domain/today-grade/a.ts', '../../application/today-grade/service.js', 'application/<기능>/'],
-  ['domain/today-grade/e.ts', '../../application/today-grade/index.js', 'application/<기능>/'],
-  ['domain/today-grade/b.ts', '../../infrastructure/neople/today-grade.js', 'infrastructure/'],
-  ['domain/today-grade/c.ts', '../../presentation/http/today-grade/routes.js', 'presentation/'],
-  ['domain/today-grade/d.ts', '../../runtime/routes/api.js', 'application/<기능>/'],
+  ['domain/today-grade/a.ts', '#application/today-grade/service.js', 'application/<기능>/'],
+  ['domain/today-grade/e.ts', '#application/today-grade/index.js', 'application/<기능>/'],
+  ['domain/today-grade/b.ts', '#infrastructure/neople/today-grade.js', 'infrastructure/'],
+  ['domain/today-grade/c.ts', '#presentation/http/today-grade/routes.js', 'presentation/'],
+  ['domain/today-grade/d.ts', '#runtime/routes/api.js', 'application/<기능>/'],
   ['domain/today-grade/k.ts', 'hono', 'presentation/http/'],
   ['domain/today-grade/l.ts', 'hono/route', 'presentation/http/'],
   ['domain/today-grade/m.ts', '@hono/node-server', 'runtime/routes/'],
@@ -30,9 +73,9 @@ const rejectedImports = [
     '@dfragon/server-core/infrastructure/neople/character-detail.js',
     'infrastructure/'
   ],
-  ['application/today-grade/a.ts', '../../infrastructure/neople/today-grade.js', 'ports.ts'],
-  ['application/today-grade/b.ts', '../../presentation/http/today-grade/failures.js', 'ports.ts'],
-  ['application/today-grade/c.ts', '../../runtime/routes/api.js', '연결은 runtime/에'],
+  ['application/today-grade/a.ts', '#infrastructure/neople/today-grade.js', 'ports.ts'],
+  ['application/today-grade/b.ts', '#presentation/http/today-grade/failures.js', 'ports.ts'],
+  ['application/today-grade/c.ts', '#runtime/routes/api.js', '연결은 runtime/에'],
   ['application/today-grade/j.ts', 'hono', 'presentation/http/'],
   ['application/today-grade/k.ts', 'hono/body-limit', 'presentation/http/'],
   ['application/today-grade/l.ts', '@hono/node-server', 'runtime/routes/'],
@@ -51,16 +94,16 @@ const rejectedImports = [
   ],
   [
     'infrastructure/neople/a.ts',
-    '../../presentation/http/today-grade/failures.js',
+    '#presentation/http/today-grade/failures.js',
     'presentation/http/'
   ],
-  ['infrastructure/database/b.ts', '../../runtime/api-services.js', '연결은 runtime/에'],
+  ['infrastructure/database/b.ts', '#runtime/api-services.js', '연결은 runtime/에'],
   [
     'presentation/http/today-grade/a.ts',
-    '../../../infrastructure/neople/today-grade.js',
+    '#infrastructure/neople/today-grade.js',
     'application의 service'
   ],
-  ['presentation/events/b.ts', '../../runtime/api-services.js', '연결은 runtime/에']
+  ['presentation/events/b.ts', '#runtime/api-services.js', '연결은 runtime/에']
 ]
 
 // node: 접두 없는 내장 module은 먼저 node:를 붙이게 해, 붙인 뒤 위 규칙이 계층별로 거부하게 한다.
@@ -80,27 +123,27 @@ const allowedImports = [
   ['domain/today-grade/b.ts', '@dfragon/lib/error-chain'],
   ['domain/today-grade/c.ts', '@dfragon/lib'],
   ['domain/today-grade/d.ts', 'date-fns'],
-  ['application/today-grade/a.ts', '../../domain/today-grade/failure.js'],
+  ['application/today-grade/a.ts', '#domain/today-grade/failure.js'],
   ['application/today-grade/b.ts', './ports.js'],
   ['application/today-grade/c.ts', 'lru-cache'],
   ['application/today-grade/d.ts', '@dfragon/server-core/domain/score/input.js'],
   ['application/today-grade/e.ts', '@dfragon/server-core/application/character-catalog/service.js'],
   ['runtime/score.ts', '@dfragon/server-core/infrastructure/score/engine.js'],
-  ['infrastructure/neople/a.ts', '../../application/today-grade/ports.js'],
-  ['infrastructure/database/f.ts', '../../application/today-grade/repository.js'],
-  ['infrastructure/neople/b.ts', '../../domain/today-grade/failure.js'],
-  ['infrastructure/neople/e.ts', '../../domain/today-grade/index.js'],
+  ['infrastructure/neople/a.ts', '#application/today-grade/ports.js'],
+  ['infrastructure/database/f.ts', '#application/today-grade/repository.js'],
+  ['infrastructure/neople/b.ts', '#domain/today-grade/failure.js'],
+  ['infrastructure/neople/e.ts', '#domain/today-grade/index.js'],
   ['infrastructure/neople/c.ts', '@dfragon/neople'],
   ['infrastructure/database/d.ts', 'node:fs/promises'],
   ['infrastructure/database/e.ts', 'node:fs'],
-  ['presentation/http/today-grade/a.ts', '../../../application/today-grade/service.js'],
-  ['presentation/http/today-grade/j.ts', '../../../application/today-grade/index.js'],
+  ['presentation/http/today-grade/a.ts', '#application/today-grade/service.js'],
+  ['presentation/http/today-grade/j.ts', '#application/today-grade/index.js'],
   ['presentation/http/today-grade/d.ts', 'hono'],
   ['presentation/http/today-grade/e.ts', 'hono/route'],
   ['infrastructure/neople/d.ts', 'hono'],
   ['runtime/hono.ts', '@hono/node-server'],
-  ['runtime/api-services.ts', '../infrastructure/neople/today-grade.js'],
-  ['runtime/routes/a.ts', '../../presentation/http/today-grade/routes.js'],
+  ['runtime/api-services.ts', '#infrastructure/neople/today-grade.js'],
+  ['runtime/routes/a.ts', '#presentation/http/today-grade/routes.js'],
   ['main.ts', './runtime/application.js']
 ]
 
@@ -108,38 +151,46 @@ const allowedImports = [
 const appFiles = {
   'apps/api/src/runtime/api-app.ts': {
     rejected: [
-      '../characters/http.js',
-      '../characters/search-service.js',
-      '../score/engine.js',
-      '../infrastructure/build-info.js',
-      '../domain/character-failure.js',
-      '../application/today-grade/service.js',
-      '../application/today-grade/index.js',
-      '../infrastructure/neople/today-grade.js',
-      '../presentation/http/today-grade/routes.js',
-      '../presentation/http/today-grade/index.js',
-      '../presentation/http/character-search/failures.js',
-      '../presentation/openapi/setup.js',
+      '#presentation/http/character-search/controller.js',
+      '#application/character-search/index.js',
+      '#infrastructure/neople/index.js',
+      '#infrastructure/build-info.js',
+      '#domain/character-failure.js',
+      '#application/today-grade/service.js',
+      '#application/today-grade/index.js',
+      '#infrastructure/neople/today-grade.js',
+      '#presentation/http/today-grade/routes.js',
+      '#presentation/http/today-grade/index.js',
+      '#presentation/http/character-search/failures.js',
+      '#presentation/openapi/setup.js',
       './routes-not-allowed.js',
       './hono-app.js'
     ],
     allowed: [
       './routes/api.js',
+      '#runtime/routes/api.js',
+      '#runtime/api-services.js',
       './api-services.js',
-      '../presentation/http/character-failures.js',
+      '#presentation/http/character-failures.js',
       '@dfragon/http-server',
       'hono'
     ]
   },
   'apps/ops/src/runtime/ops-app.ts': {
     rejected: [
-      '../application/jobs/ports.js',
-      '../domain/failure.js',
-      '../characters/http.js',
-      '../presentation/http/jobs/routes.js',
+      '#application/jobs/ports.js',
+      '#domain/failure.js',
+      '#presentation/http/jobs/controller.js',
+      '#presentation/http/jobs/routes.js',
       './hono-app.js'
     ],
-    allowed: ['./routes/ops.js', '../presentation/http/failures.js', '@dfragon/http-server', 'hono']
+    allowed: [
+      '#runtime/routes/ops.js',
+      './routes/ops.js',
+      '#presentation/http/failures.js',
+      '@dfragon/http-server',
+      'hono'
+    ]
   }
 }
 
@@ -363,17 +414,17 @@ const featureFolderCases = {
   rejected: [
     [
       'src/presentation/http/today-grade/a.ts',
-      importing('../../../application/today-grade/service.js'),
+      importing('#application/today-grade/service.js'),
       'feature-folder-index'
     ],
     [
       'src/infrastructure/database/a.ts',
-      typeImporting('../../domain/today-grade/grade.js'),
+      typeImporting('#domain/today-grade/grade.js'),
       'feature-folder-index'
     ],
     [
       'src/runtime/routes/api.ts',
-      importing('../../presentation/http/today-grade/controller.js'),
+      importing('#presentation/http/today-grade/controller.js'),
       'feature-folder-index'
     ],
     [
@@ -383,16 +434,16 @@ const featureFolderCases = {
     ]
   ],
   allowed: [
+    ['src/presentation/http/today-grade/b.ts', importing('#application/today-grade/index.js')],
     [
-      'src/presentation/http/today-grade/b.ts',
-      importing('../../../application/today-grade/index.js')
+      'src/presentation/http/today-grade/c.ts',
+      importing('#presentation/http/character-failures.js')
     ],
-    ['src/presentation/http/today-grade/c.ts', importing('../character-failures.js')],
     ['src/presentation/http/today-grade/d.ts', importing('./controller.js')],
     ['src/application/today-grade/a.ts', importing('./service.js')],
-    ['src/infrastructure/database/b.ts', importing('../../application/today-grade/repository.js')],
-    ['src/infrastructure/neople/a.ts', typeImporting('../../application/today-grade/ports.js')],
-    ['src/runtime/api-services.ts', importing('../application/today-grade/ports.js')]
+    ['src/infrastructure/database/b.ts', importing('#application/today-grade/repository.js')],
+    ['src/infrastructure/neople/a.ts', typeImporting('#application/today-grade/ports.js')],
+    ['src/runtime/api-services.ts', importing('#application/today-grade/ports.js')]
   ]
 }
 const featureFolderCruised = await cruiseAppSamples({
@@ -424,7 +475,9 @@ test('dependency-cruiser: 기능 폴더의 index.js, 같은 폴더 파일, 계�
 
 test('dependency-cruiser: 기능 폴더 안쪽 파일을 직접 import하면 index.js로 가져오라고 알린다', () => {
   assert.ok(
-    featureFolderCruised.text.includes("'../../application/<기능>/index.js'처럼 가져온다"),
+    featureFolderCruised.text
+      .replace(CLI_WHITESPACE_PATTERN, ' ')
+      .includes("'#application/<기능>/index.js'처럼 가져온다"),
     featureFolderCruised.text
   )
 })
@@ -453,51 +506,44 @@ test('dependency-cruiser: import type만으로 이은 순환은 허용한다', a
 // 운영 app도 같은 계층 폴더라 API와 같은 규칙이 걸리는지 대표 사례로 확인한다.
 const opsSrc = 'apps/ops/src'
 const opsRejectedImports = [
-  ['domain/jobs/a.ts', '../../application/jobs/ports.js', 'application/<기능>/'],
+  ['domain/jobs/infra.ts', '#infrastructure/database/jobs.js', 'infrastructure/'],
+  ['domain/jobs/http.ts', '#presentation/http/jobs/index.js', 'presentation/'],
+  ['domain/jobs/runtime.ts', '#runtime/routes/ops.js', 'application/<기능>/'],
+  ['application/jobs/infra.ts', '#infrastructure/database/jobs.js', 'ports.ts'],
+  ['application/jobs/runtime.ts', '#runtime/routes/ops.js', '연결은 runtime/에'],
+  ['infrastructure/database/http.ts', '#presentation/http/jobs/index.js', 'presentation/http/'],
+  ['domain/jobs/a.ts', '#application/jobs/ports.js', 'application/<기능>/'],
   ['domain/jobs/b.ts', 'hono', 'presentation/http/'],
-  ['application/jobs/a.ts', '../../presentation/http/jobs/routes.js', 'ports.ts'],
+  ['application/jobs/a.ts', '#presentation/http/jobs/routes.js', 'ports.ts'],
   ['application/jobs/b.ts', 'node:fs', 'infrastructure/'],
-  ['infrastructure/database/a.ts', '../../runtime/application.js', '연결은 runtime/에'],
-  [
-    'presentation/http/jobs/a.ts',
-    '../../../infrastructure/database/jobs.js',
-    'application의 service'
-  ],
-  ['presentation/http/jobs/b.ts', '../../../runtime/application.js', 'application의 service']
+  ['infrastructure/database/a.ts', '#runtime/application.js', '연결은 runtime/에'],
+  ['presentation/http/jobs/a.ts', '#infrastructure/database/jobs.js', 'application의 service'],
+  ['presentation/http/jobs/b.ts', '#runtime/application.js', 'application의 service']
 ]
 const opsAllowedImports = [
-  ['presentation/http/jobs/d.ts', '../../../domain/failure.js'],
+  ['presentation/http/jobs/d.ts', '#domain/failure.js'],
   ['presentation/http/jobs/e.ts', 'hono'],
   ['presentation/http/jobs/f.ts', './dto.js'],
-  ['presentation/http/jobs/g.ts', '../../../application/jobs/service.js'],
+  ['presentation/http/jobs/g.ts', '#application/jobs/service.js'],
   ['application/jobs/c.ts', './repository.js'],
-  ['infrastructure/database/b.ts', '../../application/jobs/repository.js'],
-  ['runtime/routes/a.ts', '../../presentation/http/jobs/routes.js']
+  ['infrastructure/database/b.ts', '#application/jobs/repository.js'],
+  ['runtime/routes/a.ts', '#presentation/http/jobs/routes.js']
 ]
 // Controller가 Repository와 port를 직접 부르지 못하게, 두 app의 presentation에서 값 import와 import type을 모두 막는다.
 const presentationContractImports = [
-  [`${opsSrc}/presentation/http/jobs/c.ts`, importing('../../../application/jobs/ports.js')],
-  [`${opsSrc}/presentation/http/jobs/i.ts`, typeImporting('../../../application/jobs/ports.js')],
-  [
-    `${src}/presentation/http/today-grade/h.ts`,
-    importing('../../../application/today-grade/ports.js')
-  ],
-  [
-    `${src}/presentation/http/today-grade/i.ts`,
-    typeImporting('../../../application/today-grade/ports.js')
-  ],
-  [`${opsSrc}/presentation/http/jobs/g.ts`, importing('../../../application/jobs/repository.js')],
-  [
-    `${opsSrc}/presentation/http/jobs/h.ts`,
-    typeImporting('../../../application/jobs/repository.js')
-  ],
+  [`${opsSrc}/presentation/http/jobs/c.ts`, importing('#application/jobs/ports.js')],
+  [`${opsSrc}/presentation/http/jobs/i.ts`, typeImporting('#application/jobs/ports.js')],
+  [`${src}/presentation/http/today-grade/h.ts`, importing('#application/today-grade/ports.js')],
+  [`${src}/presentation/http/today-grade/i.ts`, typeImporting('#application/today-grade/ports.js')],
+  [`${opsSrc}/presentation/http/jobs/g.ts`, importing('#application/jobs/repository.js')],
+  [`${opsSrc}/presentation/http/jobs/h.ts`, typeImporting('#application/jobs/repository.js')],
   [
     `${src}/presentation/http/today-grade/f.ts`,
-    importing('../../../application/today-grade/repository.js')
+    importing('#application/today-grade/repository.js')
   ],
   [
     `${src}/presentation/http/today-grade/g.ts`,
-    typeImporting('../../../application/today-grade/repository.js')
+    typeImporting('#application/today-grade/repository.js')
   ]
 ]
 const opsRejectedSources = Object.fromEntries(
@@ -613,17 +659,17 @@ const opsFeatureFolderCases = {
   rejected: [
     [
       'src/presentation/http/jobs/a.ts',
-      importing('../../../application/jobs/service.js'),
+      importing('#application/jobs/service.js'),
       'feature-folder-index'
     ],
     [
       'src/runtime/database.ts',
-      typeImporting('../infrastructure/database/jobs.js'),
+      typeImporting('#infrastructure/database/jobs.js'),
       'feature-folder-index'
     ],
     [
       'src/runtime/routes/ops.ts',
-      importing('../../presentation/http/jobs/controller.js'),
+      importing('#presentation/http/jobs/controller.js'),
       'feature-folder-index'
     ],
     [
@@ -638,15 +684,15 @@ const opsFeatureFolderCases = {
     ]
   ],
   allowed: [
-    ['src/presentation/http/jobs/b.ts', importing('../../../application/jobs/index.js')],
-    ['src/presentation/http/jobs/c.ts', importing('../failures.js')],
-    ['src/presentation/http/jobs/e.ts', importing('../json-request.js')],
-    ['src/application/jobs/b.ts', importing('../../domain/failure.js')],
+    ['src/presentation/http/jobs/b.ts', importing('#application/jobs/index.js')],
+    ['src/presentation/http/jobs/c.ts', importing('#presentation/http/failures.js')],
+    ['src/presentation/http/jobs/e.ts', importing('#presentation/http/json-request.js')],
+    ['src/application/jobs/b.ts', importing('#domain/failure.js')],
     ['src/presentation/http/jobs/d.ts', importing('./controller.js')],
     ['src/application/jobs/a.ts', importing('./service.js')],
-    ['src/infrastructure/database/b.ts', importing('../../application/jobs/repository.js')],
-    ['src/infrastructure/database/c.ts', typeImporting('../../application/jobs/ports.js')],
-    ['src/runtime/application.ts', importing('../application/jobs/ports.js')]
+    ['src/infrastructure/database/b.ts', importing('#application/jobs/repository.js')],
+    ['src/infrastructure/database/c.ts', typeImporting('#application/jobs/ports.js')],
+    ['src/runtime/application.ts', importing('#application/jobs/ports.js')]
   ]
 }
 const opsFeatureFolderCruised = await cruiseAppSamples(
@@ -680,7 +726,9 @@ test('dependency-cruiser: 운영 app에서 기능 폴더의 index.js, 같은 폴
 
 test('dependency-cruiser: 운영 app의 기능 폴더 안쪽 파일을 직접 import하면 index.js로 가져오라고 알린다', () => {
   assert.ok(
-    opsFeatureFolderCruised.text.includes("'../../application/<기능>/index.js'처럼 가져온다"),
+    opsFeatureFolderCruised.text
+      .replace(CLI_WHITESPACE_PATTERN, ' ')
+      .includes("'#application/<기능>/index.js'처럼 가져온다"),
     opsFeatureFolderCruised.text
   )
 })
@@ -713,6 +761,42 @@ test('dependency-cruiser: 운영 app의 import type만으로 이은 순환은 �
 
   assert.deepEqual(result.violations, [])
 })
+
+for (const app of ['api', 'ops']) {
+  test(`dependency-cruiser: ${app}의 기능 폴더 사이 alias 실행 순환은 거부하고 import type 순환은 허용한다`, async () => {
+    const execution = await cruiseAppSamples(
+      {
+        'src/domain/a/index.ts': "export { a } from './x.js'\n",
+        'src/domain/a/x.ts': "import { b } from '#domain/b/index.js'\nexport const a = () => b\n",
+        'src/domain/b/index.ts': "export { b } from './y.js'\n",
+        'src/domain/b/y.ts': "import { a } from '#domain/a/index.js'\nexport const b = () => a\n"
+      },
+      { app }
+    )
+    const typeOnly = await cruiseAppSamples(
+      {
+        'src/domain/a/index.ts': "export type { A } from './x.js'\n",
+        'src/domain/a/x.ts':
+          "import type { B } from '#domain/b/index.js'\nexport type A = { b?: B }\n",
+        'src/domain/b/index.ts': "export type { B } from './y.js'\n",
+        'src/domain/b/y.ts':
+          "import type { A } from '#domain/a/index.js'\nexport type B = { a?: A }\n"
+      },
+      { app }
+    )
+
+    assert.ok(execution.exitCode > 0)
+    assert.ok(execution.violations.length > 0)
+    assert.ok(
+      execution.violations.every(({ rule }) => rule === 'no-circular'),
+      JSON.stringify(execution.violations)
+    )
+    assert.ok(execution.text.includes('src/domain/a/x.ts'), execution.text)
+    assert.ok(execution.text.includes('src/domain/b/y.ts'), execution.text)
+    assert.equal(typeOnly.exitCode, 0)
+    assert.deepEqual(typeOnly.violations, [])
+  })
+}
 
 const serverCoreTargets = Object.fromEntries(
   [
