@@ -8,3 +8,6 @@ export {
   toPopulationMinFame
 } from './contents.js'
 export type { ClearContent, ClearStagePair } from './contents.js'
+export { CLEAR_LEGIONS } from './legions.js'
+export type { ClearLegion } from './legions.js'
+export { sortClearCountsByRelease } from './release-order.js'
