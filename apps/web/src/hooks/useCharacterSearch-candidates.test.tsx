@@ -3,12 +3,15 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useCharacterSearch } from './useCharacterSearch'
-import type { CaptureSearch, createCaptureSearch } from '#core/capture/capture-search'
-import { emptySearchSlots } from '#core/capture/slots'
+import { type CaptureSearch, type createCaptureSearch, emptySearchSlots } from '#core/capture'
 import { createTestClientHost } from '../testing/test-support/client-host'
-import type { SearchView } from '#core/search/search'
-import { type CharacterChoice, SEARCH_SLOT_COUNTS, type SearchSlot } from '#core/search/search'
-import { CAPTURE_ID, REQUEST_ID, searchRow, searchSlot } from '#core/testing/search-test-fixture'
+import {
+  type CharacterChoice,
+  SEARCH_SLOT_COUNTS,
+  type SearchSlot,
+  type SearchView
+} from '#core/search'
+import { CAPTURE_ID, REQUEST_ID, searchRow, searchSlot } from '#core/testing'
 
 // 파티 검색 수명의 연결(createCaptureSearch)만 바꾸고 useManualCharacterLookup은 그대로 쓴다.
 const mocks = vi.hoisted(() => ({ create: vi.fn<typeof createCaptureSearch>() }))

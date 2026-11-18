@@ -3,25 +3,22 @@
 import { act, StrictMode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import {
-  CAPTURE_ID,
-  searchRow,
-  searchSnapshot,
-  searchSlot
-} from '#core/testing/search-test-fixture'
-import type { CharacterImage } from '#core/character/character'
+import { CAPTURE_ID, searchRow, searchSnapshot, searchSlot } from '#core/testing'
+import type { CharacterImage } from '#core/character'
 import type {
   CharacterChoice,
   SearchCommandResult,
   SearchControl,
   SearchSlot,
   SearchSnapshot
-} from '#core/search/search'
-import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
-import * as diagnostics from '#core/diagnostics/runtime-diagnostics'
+} from '#core/search'
+import { WEB_CAPTURE_TEXTS } from '#core/capture'
+import * as diagnostics from '#core/diagnostics'
 import { createTestClientHost } from '../testing/test-support/client-host'
 import { ClientHostContext } from '../host/client-host'
 import { usePartyCapture } from './usePartyCapture'
+
+vi.mock('#core/diagnostics/runtime-diagnostics', { spy: true })
 
 const moduleMocks = vi.hoisted(() => {
   const capturePartyRecognitionInputs = vi.fn()
@@ -34,14 +31,22 @@ const moduleMocks = vi.hoisted(() => {
 })
 
 vi.mock('#core/ocr/ocr', async (importOriginal) => {
-  const ocr = { ...(await importOriginal<typeof import('#core/ocr/ocr')>()) }
+  const ocr = {
+    ...(await importOriginal<Pick<typeof import('#core/ocr'), 'createPartyOcrWorker'>>())
+  }
+
   ocr.createPartyOcrWorker = moduleMocks.createPartyOcrWorker
 
   return ocr
 })
 
 vi.mock('#core/capture/party/party', async (importOriginal) => {
-  const party = { ...(await importOriginal<typeof import('#core/capture/party/party')>()) }
+  const party = {
+    ...(await importOriginal<
+      Pick<typeof import('#core/capture'), 'capturePartyRecognitionInputs'>
+    >())
+  }
+
   party.capturePartyRecognitionInputs = moduleMocks.capturePartyRecognitionInputs
 
   return party
