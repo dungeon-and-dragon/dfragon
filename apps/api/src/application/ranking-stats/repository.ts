@@ -2,6 +2,7 @@ import type {
   CharacterStatsSnapshot,
   FameRankingFilter,
   FameRankingPosition,
+  ItemAdoption,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
   SetAdoption,
@@ -18,4 +19,5 @@ export interface RankingStatsRepository {
   readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null>
   readJobSkillAdoptionSnapshot(job: JobSkillAdoptionQuery): Promise<JobSkillAdoptionSnapshot | null>
   readSetAdoption(query: SetAdoptionQuery): Promise<SetAdoption>
+  readItemAdoption(query: SetAdoptionQuery): Promise<ItemAdoption>
 }

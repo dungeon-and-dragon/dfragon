@@ -3,6 +3,7 @@ import {
   type DatabaseClient,
   type FameRankingFilter,
   type FameRankingPosition,
+  type ItemAdoption,
   type JobSkillAdoptionQuery,
   type JobSkillAdoptionSnapshot,
   type SetAdoption,
@@ -10,6 +11,7 @@ import {
   type RankedStoredCharacter,
   readCharacterStatsSnapshot,
   readFameRanking,
+  readItemAdoption,
   readJobSkillAdoptionSnapshot,
   readSetAdoption
 } from '@dfragon/database'
@@ -38,5 +40,9 @@ export class DatabaseRankingStatsRepository implements RankingStatsRepository {
 
   readSetAdoption(query: SetAdoptionQuery): Promise<SetAdoption> {
     return readSetAdoption(this.client, query)
+  }
+
+  readItemAdoption(query: SetAdoptionQuery): Promise<ItemAdoption> {
+    return readItemAdoption(this.client, query)
   }
 }
