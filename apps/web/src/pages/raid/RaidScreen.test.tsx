@@ -3,12 +3,16 @@ import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { ServerSelect } from '../../components/ServerSelect'
-import type { SnapshotMark } from '#core/capture/adventure-snapshot'
-import { RAID_SEAT_LAYOUT } from '#core/capture/cards'
-import { createSeatOrder, swapSeats } from '#core/capture/seats'
-import type { SlotNotice } from '#core/character/character-card'
-import { dealerCard } from '#core/testing/character-cards'
-import type { CardCharacter, SlotState } from '#core/capture/cards-types'
+import {
+  type CardCharacter,
+  createSeatOrder,
+  RAID_SEAT_LAYOUT,
+  type SlotState,
+  type SnapshotMark,
+  swapSeats
+} from '#core/capture'
+import type { SlotNotice } from '#core/character'
+import { dealerCard } from '#core/testing'
 import { RaidScreen } from './RaidScreen'
 import { TestRouter } from '../../testing/test-support/test-router'
 

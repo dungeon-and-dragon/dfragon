@@ -6,7 +6,7 @@ import type {
   ClearOverview,
   ClearStats,
   ClearWeek
-} from '#core/ranking/clear-stats'
+} from '#core/ranking'
 
 // 클리어 화면 story의 합성 집계다. 전직 이름과 수는 실제 값이 아니다.
 

@@ -3,10 +3,15 @@ import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { PartyScreen } from './PartyScreen'
-import { PARTY_SEAT_LAYOUT } from '#core/capture/cards'
-import type { SnapshotMark } from '#core/capture/adventure-snapshot'
-import { createSeatOrder, swapSeats, type SeatOrder } from '#core/capture/seats'
-import type { CardCharacter, SlotState } from '#core/capture/cards-types'
+import {
+  type CardCharacter,
+  createSeatOrder,
+  PARTY_SEAT_LAYOUT,
+  type SeatOrder,
+  type SlotState,
+  type SnapshotMark,
+  swapSeats
+} from '#core/capture'
 import { TestRouter } from '../../testing/test-support/test-router'
 
 const CHARACTER_NAME_INPUT_SELECTOR = 'input[aria-label$="번 캐릭터 이름"]'

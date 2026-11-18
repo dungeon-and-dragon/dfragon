@@ -2,13 +2,13 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
 import type {
+  CharacterDetailView,
   CharacterTimeline,
   TimelineAcquisition,
   TimelineEnhancement,
   TimelinePage
-} from '#core/character/character-timeline'
+} from '#core/character'
 import { ClientHostContext, type ClientHost } from '../../../host/client-host'
 import { createTestClientHost } from '../../../testing/test-support/client-host'
 import { TestQueryClient } from '../../../testing/test-support/test-query-client'
