@@ -12,12 +12,13 @@ import type { StatsJobRepository } from '../src/application/ranking-stats/reposi
 import {
   StatsJobService,
   createCharacterStatsJob,
+  createItemAdoptionJob,
   createSetAdoptionJob,
   createSkillAdoptionJob
 } from '../src/application/ranking-stats/stats-jobs.js'
 
 // 합성 값이다. DB 읽기와 저장은 저장 행을 메모리에 두는 fake이며, 실제 DB의 덮어쓰기와 삭제는 container-stats-snapshot-check.mjs가,
-// 세트 선택 수의 집계와 교체는 container-set-adoption-check.mjs가 확인한다.
+// 세트 선택 수의 집계와 교체는 container-set-adoption-check.mjs가, 무기와 유일 장비는 container-item-adoption-check.mjs가 확인한다.
 const stats: CharacterStats = {
   total: 3,
   servers: [{ serverId: 'cain', count: 3 }],
@@ -75,6 +76,7 @@ function memoryStatsStore({
   const savedStats: CharacterStatsSnapshot[] = []
   const adoptionRows = new Map<string, { computedAt: Date; adoption: JobSkillAdoption }>()
   const setReplacements: SetAdoptionReplacement[] = []
+  const itemReplacements: SetAdoptionReplacement[] = []
   const store: StatsJobRepository = {
     readCharacterStats: async () => stats,
     saveCharacterStats: async (snapshot) => {
@@ -106,10 +108,15 @@ function memoryStatsStore({
       setReplacements.push(replacement)
 
       return 42
+    },
+    replaceItemAdoption: async (replacement) => {
+      itemReplacements.push(replacement)
+
+      return 7
     }
   }
 
-  return { store, savedStats, adoptionRows, setReplacements }
+  return { store, savedStats, adoptionRows, setReplacements, itemReplacements }
 }
 
 const ignoreProgress = { reportProgress: () => {} }
@@ -217,4 +224,16 @@ test('세트 선택 비율 job은 매일 0시에 돌며 계산을 시작한 시�
   assert.equal(job.schedule, '0 0 * * *')
   assert.deepEqual(setReplacements, [{ computedAt: minutesAfterMidnight(0), maleCrusader }])
   assert.deepEqual(summary, { combinations: 42 })
+})
+
+test('무기, 유일 장비 선택 비율 job은 매일 0시에 돌며 계산을 시작한 시각과 남성 크루세이더 전직으로 표를 바꾸고 아이템 행 수를 남긴다', async () => {
+  const { store, itemReplacements } = memoryStatsStore()
+  const job = createItemAdoptionJob(new StatsJobService(store, sequentialClock()))
+
+  const summary = await job.run({}, ignoreProgress)
+
+  assert.equal(job.name, 'item-adoption')
+  assert.equal(job.schedule, '0 0 * * *')
+  assert.deepEqual(itemReplacements, [{ computedAt: minutesAfterMidnight(0), maleCrusader }])
+  assert.deepEqual(summary, { items: 7 })
 })
