@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { RankingStatsService } from '../../../application/ranking-stats/service.js'
+import type { RankingStatsService } from '../../../application/ranking-stats/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { readQuery } from '../request-query.js'
 import {

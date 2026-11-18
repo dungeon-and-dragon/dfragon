@@ -6,58 +6,58 @@ import {
   AdventureGuildService,
   emptyAdventureGuildRepository,
   noSeasonBackfill
-} from '../application/adventure-guild/service.js'
+} from '../application/adventure-guild/index.js'
 import type { CharacterBasicRepository } from '../application/character-basic/repository.js'
 import {
   type CharacterHistoryRepository,
   emptyCharacterHistoryRepository
 } from '../application/character-history/repository.js'
-import { CharacterHistoryService } from '../application/character-history/service.js'
-import { CharacterBasicService } from '../application/character-basic/service.js'
+import { CharacterHistoryService } from '../application/character-history/index.js'
+import { CharacterBasicService } from '../application/character-basic/index.js'
 import {
   type CharacterDetailDependencies,
   CharacterDetailService
-} from '../application/character-detail/service.js'
+} from '../application/character-detail/index.js'
 import type { FetchCharacterImage } from '../application/character-image/ports.js'
-import { CharacterImageService } from '../application/character-image/service.js'
+import { CharacterImageService } from '../application/character-image/index.js'
 import type { SearchCharacters } from '../application/character-search/ports.js'
 import type { CharacterSearchRepository } from '../application/character-search/repository.js'
 import {
   CharacterSearchService,
   emptyCharacterSearchRepository
-} from '../application/character-search/service.js'
-import { createTimelineSyncQueue } from '../application/character-timeline/queue.js'
-import { startQueueCountsWriter } from '../application/character-timeline/queue-counts.js'
+} from '../application/character-search/index.js'
+import {
+  CharacterTimelineService,
+  createSeasonBackfillQueue,
+  createTimelineSyncQueue,
+  emptyCharacterTimelineRepository,
+  noTimelineSync,
+  startQueueCountsWriter
+} from '../application/character-timeline/index.js'
 import type {
   CharacterTimelineRepository,
   TimelineQueueCountRepository
 } from '../application/character-timeline/repository.js'
-import { createSeasonBackfillQueue } from '../application/character-timeline/season-backfill.js'
-import {
-  CharacterTimelineService,
-  emptyCharacterTimelineRepository,
-  noTimelineSync
-} from '../application/character-timeline/service.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import {
   ClearStatsService,
   emptyClearStatsRepository
-} from '../application/content-clears/service.js'
+} from '../application/content-clears/index.js'
 import type { RankingStatsRepository } from '../application/ranking-stats/repository.js'
 import {
   RankingStatsService,
   emptyRankingStatsRepository
-} from '../application/ranking-stats/service.js'
+} from '../application/ranking-stats/index.js'
 import type { FetchShopGrade } from '../application/today-grade/ports.js'
-import { TodayGradeService } from '../application/today-grade/service.js'
+import { TodayGradeService } from '../application/today-grade/index.js'
 import { CharacterFetched } from '../domain/character-events.js'
-import type { SeasonBackfillJob } from '../domain/character-timeline/season-backfill.js'
+import type { SeasonBackfillJob } from '../domain/character-timeline/index.js'
 import { readApiBuildInfo } from '../infrastructure/build-info.js'
 import {
   parseCharacterBasic,
   parseCharacterSkillStyle
 } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
-import { createNeopleCharacterImage } from '../infrastructure/neople/character-image.js'
+import { createNeopleCharacterImage } from '../infrastructure/neople/index.js'
 import {
   type ScoreEngineOptions,
   createScoreEngine
