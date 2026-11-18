@@ -89,7 +89,7 @@ function makeClient(transport: Transport) {
       transport.get(`${characterPath(identity)}/timeline`, timelinePageSchema, {
         searchParams: { ...query }
       }),
-    multiItems: (itemIds: readonly string[], signal: AbortSignal) =>
+    multiItems: (itemIds: readonly string[], signal?: AbortSignal) =>
       transport.get('/df/multi/items', multiItemsSchema, {
         signal,
         searchParams: { itemIds: itemIds.join(',') }

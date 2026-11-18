@@ -61,7 +61,10 @@ import {
 } from '@dfragon/server-core/infrastructure/score/index.js'
 
 export interface TimelineSyncOptions {
-  readonly sync: (character: TimelineCharacter) => Promise<void>
+  readonly sync: (
+    character: TimelineCharacter,
+    reportItemDictionaryFailure: () => void
+  ) => Promise<void>
   readonly backfillEnhancements: (character: TimelineCharacter) => Promise<void>
   readonly backfillSeason: (job: SeasonBackfillJob) => Promise<void>
   readonly read: CharacterTimelineRepository['readTimeline']
@@ -100,7 +103,10 @@ type CharacterFetchedSubscriber = (event: CharacterFetched) => void
 function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCode) {
   // 타임라인 조회가 백필을 기다리지 않도록 백필은 따로 queue를 둔다.
   const queues = {
-    sync: createTimelineSyncQueue(timeline.sync, () => reportCode('TIMELINE_SYNC_FAILED')),
+    sync: createTimelineSyncQueue(
+      (character) => timeline.sync(character, () => reportCode('TIMELINE_ITEM_DICTIONARY_FAILED')),
+      () => reportCode('TIMELINE_SYNC_FAILED')
+    ),
     enhancementBackfill: createTimelineSyncQueue(timeline.backfillEnhancements, () =>
       reportCode('TIMELINE_BACKFILL_FAILED')
     ),

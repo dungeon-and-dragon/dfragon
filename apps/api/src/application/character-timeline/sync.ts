@@ -1,9 +1,11 @@
-import type { TimelineCharacter, TimelineSyncState } from '@dfragon/database'
+import type { TimelineCharacter, TimelineItemInput, TimelineSyncState } from '@dfragon/database'
+import type { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
 import {
   TimelineFailure,
   type TimelineFailureKind,
   splitTimelineRanges
 } from '@dfragon/server-core/domain/character-timeline/index.js'
+import { dictionaryItemIds } from '@dfragon/server-core/domain/item-dictionary/index.js'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import type { TimelineSyncRepository } from './repository.js'
 
@@ -47,10 +49,13 @@ export class TimelineSyncService {
   constructor(
     private readonly repository: TimelineSyncRepository,
     private readonly fetchTimeline: FetchCharacterTimeline,
+    private readonly itemDictionary: Pick<ItemDictionaryService, 'fill'>,
     private readonly now: () => Date = () => new Date()
   ) {}
 
-  async sync(character: TimelineCharacter): Promise<void> {
+  async sync(character: TimelineCharacter, reportItemDictionaryFailure: () => void): Promise<void> {
+    const savedItems: TimelineItemInput[] = []
+
     try {
       const state = await this.repository.readSyncState(character)
       const until = this.now()
@@ -63,11 +68,19 @@ export class TimelineSyncService {
       for (const range of splitTimelineRanges(syncStart(state), until)) {
         const inputs = await this.fetchTimeline(character, range)
         await this.repository.replaceRange(character, range, inputs)
+        savedItems.push(...inputs.items)
       }
 
       await this.repository.recordSuccess(character)
     } catch (error) {
       await this.repository.recordFailure(character, syncFailureOf(error))
+    }
+
+    // 사전은 동기화 결과에 들지 않아, 채우지 못해도 동기화 기록을 바꾸지 않고 다음에 그 아이템을 저장할 때 다시 채운다.
+    try {
+      await this.itemDictionary.fill(dictionaryItemIds(savedItems))
+    } catch {
+      reportItemDictionaryFailure()
     }
   }
 }
