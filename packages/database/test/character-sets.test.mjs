@@ -273,7 +273,7 @@ test('유일 장비를 세트 부위로 바꾼 뒤 늦은 시각으로 저장하
   assert.deepEqual(withoutVersion(replaced), bySlot([weapon, ...exalted.slice(1)]))
 })
 
-test('같은 아이템을 다시 저장하면 행이 바뀌지 않고, 바뀐 부위만 새 아이템으로 덮는다', {
+test('같은 세트와 아이템을 다시 저장하면 아이템 행과 캐릭터 행이 바뀌지 않고, 바뀐 부위만 새 아이템으로 덮는다', {
   skip: port === undefined
 }, async () => {
   const key = await createCharacter('items-same')
@@ -285,12 +285,14 @@ test('같은 아이템을 다시 저장하면 행이 바뀌지 않고, 바뀐 �
     fetchedAt: at('18T10:00:00')
   })
   const first = await readItems(key)
+  const firstSets = await readSets(key)
   await recordCharacterSets(client, {
     ...base,
     items: [weapon, ...exalted],
     fetchedAt: at('18T11:00:00')
   })
   const same = await readItems(key)
+  const sameSets = await readSets(key)
   const newWeapon = { slotId: 'WEAPON', itemId: 'weapon-b', itemName: '합성 새 무기' }
   await recordCharacterSets(client, {
     ...base,
@@ -302,6 +304,7 @@ test('같은 아이템을 다시 저장하면 행이 바뀌지 않고, 바뀐 �
   const changedWeapon = changed.find(({ slotId }) => slotId === 'WEAPON')
 
   assert.deepEqual(same, first)
+  assert.deepEqual(sameSets, firstSets)
   assert.deepEqual(changedWeapon, { ...newWeapon, version: changedWeapon.version })
   assert.notEqual(changedWeapon.version, firstWeapon.version)
   assert.deepEqual(
