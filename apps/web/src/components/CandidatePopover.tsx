@@ -1,12 +1,10 @@
-import { Popover } from '@dfragon/ui'
+import { CheckIcon, ChevronDownIcon, Popover } from '@dfragon/ui'
 import { type KeyboardEvent, useRef, useState } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { CandidatePicker } from '#core/capture/candidate-picker'
 import { characterImageUrl } from '#core/character/character-summary'
 import type { CharacterChoice } from '#core/search/search'
 import { CardImage } from './CardImage'
-import { CheckIcon } from './CheckIcon'
-import { ChevronDownIcon } from './ChevronDownIcon'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -53,7 +51,7 @@ export function CandidatePopover({
         className="badge badge-sm cursor-pointer gap-1 border border-current font-semibold text-signal transition-colors hover:bg-inset data-popup-open:bg-inset focus-ring"
       >
         {`후보 ${count}`}
-        <ChevronDownIcon className="size-[10px] stroke-3" />
+        <ChevronDownIcon className="size-icon-sm" />
       </Popover.Trigger>
       <Popover.Popup
         side="bottom"
@@ -118,7 +116,7 @@ function CandidateTile({
       </span>
       {shown && (
         <span className="absolute top-[2px] right-[2px] flex size-4 items-center justify-center rounded-control bg-signal text-on-signal">
-          <CheckIcon className="size-[10px] stroke-4" />
+          <CheckIcon className="size-icon-sm" />
         </span>
       )}
       <span aria-hidden="true" className="truncate px-1 pt-1 text-2xs text-fg-muted">

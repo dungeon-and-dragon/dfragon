@@ -1,7 +1,7 @@
+import { PinIcon } from '@dfragon/ui'
 import { RAID_PARTY_SIZE } from '#core/capture/cards'
 import type { SnapshotMark } from '#core/capture/adventure-snapshot'
 import type { SearchMode } from '#core/capture/search-mode'
-import { SnapshotIcon } from './SnapshotIcon'
 
 const badgeClass = 'badge badge-sm gap-1 border font-semibold'
 const orderClass = 'font-mono tabular-nums'
@@ -29,7 +29,7 @@ export function SnapshotBadge({
         aria-label="스냅샷에 없는 모험단"
         className={`${badgeClass} border-current text-fg-danger`}
       >
-        <SnapshotIcon filled width={10} height={10} />
+        <PinIcon filled className="size-icon-sm" />
         <span aria-hidden="true">없음</span>
       </span>
     )
@@ -43,7 +43,7 @@ export function SnapshotBadge({
       aria-label={label}
       className={`${badgeClass} ${orderClass} ${mark.kind === 'moved' ? 'border-signal bg-signal text-on-signal' : 'border-current text-signal'}`}
     >
-      <SnapshotIcon filled width={10} height={10} />
+      <PinIcon filled className="size-icon-sm" />
       <span aria-hidden="true">{order}</span>
     </span>
   )

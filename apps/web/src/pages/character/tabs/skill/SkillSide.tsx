@@ -1,4 +1,4 @@
-import { Button, Tooltip } from '@dfragon/ui'
+import { Button, CheckIcon, ChevronRightIcon, CopyIcon, Tooltip } from '@dfragon/ui'
 import {
   type EnhancementRow,
   type EvolutionRow,
@@ -7,8 +7,6 @@ import {
   type SkillUpgradeBoard,
   skillMarkOf
 } from '#core/catalog/skill-window'
-import { CheckIcon } from '../../../../components/CheckIcon'
-import { CopyIcon } from '../../../../components/CopyIcon'
 import { useClipboardCopy } from '../../../../hooks/useClipboardCopy'
 import { GameText } from '../GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
@@ -45,7 +43,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
         </code>
         <Button size="sm" onClick={clipboard.copy}>
           <span className="inline-flex items-center gap-2">
-            <Icon width={14} height={14} />
+            <Icon className="size-icon-sm" />
             코드 복사
           </span>
         </Button>
@@ -55,23 +53,6 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
         </span>
       </div>
     </section>
-  )
-}
-
-function ChevronRight(): React.JSX.Element {
-  return (
-    <svg
-      aria-hidden="true"
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      className="mt-2 shrink-0 text-fg-subtle"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
   )
 }
 
@@ -99,7 +80,9 @@ export function SkillChainSection({ chain }: { chain: SkillChain | null }): Reac
               )}
               {name}
             </span>
-            {index < chain.skills.length - 1 && <ChevronRight />}
+            {index < chain.skills.length - 1 && (
+              <ChevronRightIcon className="mt-2 size-icon-sm shrink-0 text-fg-subtle" />
+            )}
           </li>
         ))}
       </ol>

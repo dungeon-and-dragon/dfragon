@@ -1,6 +1,5 @@
-import { Button, StatusChip } from '@dfragon/ui'
+import { Button, MonitorIcon, StatusChip } from '@dfragon/ui'
 import { HeaderTooltip, tooltipTriggerClass } from '../../../components/HeaderTooltip'
-import { MonitorIcon } from './MonitorIcon'
 import { useScreenCaptureContext } from '../../../hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '../../../hooks/useSearchModeStore'
 import { getCaptureControlState } from '#core/capture/capture-presentation'
@@ -64,7 +63,7 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
               aria-label={`화면 공유, ${state.label}`}
               onClick={connect}
             >
-              <MonitorIcon width={16} height={16} />
+              <MonitorIcon className="size-icon-sm" />
               화면 공유
             </Button>
           </span>

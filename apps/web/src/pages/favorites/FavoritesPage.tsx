@@ -1,5 +1,4 @@
-import { IconButton } from '@dfragon/ui'
-import { StarIcon } from '../../components/StarIcon'
+import { IconButton, StarIcon } from '@dfragon/ui'
 import { CharacterTable, type CharacterTableAction } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { TitleBox, TitleStat } from '../../components/table/TitleBox'
@@ -49,7 +48,7 @@ function UnfavoriteButton({ character }: { character: CharacterKey }): React.JSX
     <IconButton
       size="sm"
       aria-label="즐겨찾기 해제"
-      icon={<StarIcon filled />}
+      icon={<StarIcon filled className="text-fg" />}
       onClick={handleClick}
     />
   )
