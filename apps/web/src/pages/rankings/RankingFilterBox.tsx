@@ -10,7 +10,7 @@ import {
 } from './ranking-jobs'
 
 const FILTER_ROW = 'flex items-start gap-4'
-const FILTER_LABEL = 'm-0 w-12 shrink-0 text-xs leading-8 font-medium text-fg-subtle'
+const FILTER_LABEL = 'label m-0 flex h-8 w-12 shrink-0 items-center'
 // 칩 묶음의 값은 문자열이라 직업은 jobId, 전직은 jobGrowId와 역할을 이은 키로 고른다.
 const ALL = 'all'
 

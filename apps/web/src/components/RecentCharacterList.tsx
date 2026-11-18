@@ -15,8 +15,7 @@ import { moveItemFocus } from './move-item-focus'
 const integer = new Intl.NumberFormat('ko-KR')
 const SECTION_ROW_LIMIT = 5
 
-const titleClass =
-  'm-0 flex h-8 items-center border-b border-line px-4 text-xs font-medium text-fg-subtle'
+const titleClass = 'm-0 flex h-8 items-center border-b border-line px-4 label'
 const listClass = 'm-0 list-none p-0'
 
 export function RecentCharacterList({
@@ -191,9 +190,7 @@ function RecentItem({
       onClick={onPick}
       className={`flex items-center pl-4 text-fg no-underline transition-colors focus-ring-inset hover:bg-inset focus-visible:bg-inset ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
     >
-      <span
-        className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-[34px] w-[28px]' : 'size-[36px]'}`}
-      >
+      <span className="portrait portrait-sm">
         <CardImage src={characterImageUrl(character)} />
       </span>
       <span className="flex min-w-0 grow flex-col">
@@ -207,11 +204,11 @@ function RecentItem({
           )}
         </span>
         {showsLevel && (
-          <span className="font-mono text-xs tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>
+          <span className="num text-xs text-fg-subtle">{`Lv.${character.level}`}</span>
         )}
       </span>
       <span
-        className={`min-w-16 shrink-0 text-right font-mono text-sm font-semibold tabular-nums ${character.fame == null ? 'text-fg-subtle' : 'text-game-fame'}`}
+        className={`min-w-16 shrink-0 text-right num text-sm font-semibold ${character.fame == null ? 'text-fg-subtle' : 'text-game-fame'}`}
       >
         {character.fame != null ? integer.format(character.fame) : MISSING_VALUE}
       </span>

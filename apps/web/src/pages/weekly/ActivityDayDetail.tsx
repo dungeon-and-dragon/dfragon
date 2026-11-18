@@ -32,16 +32,12 @@ const ENHANCEMENT_TONES: Readonly<Record<ActivityDayEnhancement['kind'], string>
 const ROW = 'flex py-1 text-xs'
 const SPREAD_ROW = `${ROW} justify-between gap-4`
 const TEXT = 'min-w-0 overflow-hidden text-ellipsis'
-const COUNT = 'font-mono tabular-nums text-fg-muted'
+const COUNT = 'num text-fg-muted'
 
 type NameCount = AdventureActivityDay['raids'][number]
 
 function Group({ title }: { title: string }): React.JSX.Element {
-  return (
-    <div className="flex justify-between gap-4 pt-2 pb-1 text-xs font-medium text-fg-subtle">
-      {title}
-    </div>
-  )
+  return <div className="label flex justify-between gap-4 pt-2 pb-1">{title}</div>
 }
 
 function ClearGroup({
@@ -71,9 +67,7 @@ function ClearGroup({
 function TimelineRow({ at, children }: { at: string; children: ReactNode }): React.JSX.Element {
   return (
     <div className={`${ROW} justify-start gap-2`}>
-      <span className="w-[36px] shrink-0 font-mono tabular-nums text-fg-subtle">
-        {formatSeoulTime(at)}
-      </span>
+      <span className="w-[36px] shrink-0 num text-fg-subtle">{formatSeoulTime(at)}</span>
       <span className={TEXT}>{children}</span>
     </div>
   )
@@ -144,7 +138,7 @@ function ItemName({ name, rarity }: ActivityDayItem): React.JSX.Element {
 function EnhancementResult({ kind, target, success }: ActivityDayEnhancement): React.JSX.Element {
   return (
     <>
-      <b className={`font-mono font-semibold tabular-nums ${ENHANCEMENT_TONES[kind]}`}>+{target}</b>{' '}
+      <b className={`num font-semibold ${ENHANCEMENT_TONES[kind]}`}>+{target}</b>{' '}
       <span className={success ? 'text-fg-success' : 'text-fg-danger'}>
         {success ? '성공' : '실패'}
       </span>
@@ -194,7 +188,7 @@ export function ActivityDayDetail({
           <span role="status" className="sr-only">
             하루 활동을 받는 중입니다.
           </span>
-          <span aria-hidden="true" className="my-1 block h-12 rounded-control bg-control" />
+          <span aria-hidden="true" className="skeleton my-1 h-12" />
         </>
       )}
       {seasonDays.status === 'error' && (

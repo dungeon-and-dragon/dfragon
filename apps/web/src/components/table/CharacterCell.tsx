@@ -22,7 +22,7 @@ export function CharacterCell({
 
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="relative h-[36px] w-8 shrink-0 overflow-hidden rounded-control bg-inset">
+      <span className="portrait portrait-sm">
         <Portrait src={characterImageUrl(character)} />
       </span>
       <span className="flex min-w-0 flex-col gap-1">
@@ -33,7 +33,7 @@ export function CharacterCell({
           <Link
             to="/c/$serverId/$characterId"
             params={{ serverId: character.serverId, characterId: character.characterId }}
-            className="min-w-0 truncate text-sm font-semibold text-fg no-underline hover:underline"
+            className="link min-w-0 truncate text-sm font-semibold text-fg"
           >
             {character.characterName}
           </Link>
@@ -41,7 +41,7 @@ export function CharacterCell({
             <Link
               to="/adventures/$adventureName"
               params={{ adventureName }}
-              className="truncate text-xs text-fg-muted no-underline hover:underline"
+              className="link truncate text-xs text-fg-muted"
             >
               {adventureName}
             </Link>
@@ -51,7 +51,7 @@ export function CharacterCell({
           )}
         </span>
         {showsLevel && (
-          <span className="truncate font-mono text-xs tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>
+          <span className="truncate num text-xs text-fg-subtle">{`Lv.${character.level}`}</span>
         )}
       </span>
     </div>

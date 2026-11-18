@@ -58,7 +58,7 @@ export function TuneNumeral({ numeral }: { numeral: string | null }): React.JSX.
     return null
   }
 
-  return <span className="text-xs font-semibold text-fg-muted">{numeral}</span>
+  return <span className="label">{numeral}</span>
 }
 
 export function ItemCell({

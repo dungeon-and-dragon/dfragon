@@ -46,7 +46,7 @@ export function CharacterTabsSkeleton(): React.JSX.Element {
     <div aria-hidden="true" className={ROOT}>
       <div className="flex h-12 shrink-0 items-center gap-6 overflow-hidden border-b border-line px-4">
         {CHARACTER_TABS.map(({ id }) => (
-          <span key={id} className="block h-[14px] w-[56px] rounded-control bg-inset" />
+          <span key={id} className="skeleton-text w-[56px]" />
         ))}
       </div>
       <div className={PANEL} />

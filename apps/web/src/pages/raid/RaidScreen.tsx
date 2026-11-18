@@ -96,7 +96,7 @@ export function RaidScreen({
                 <span className={`${badgeClass} ${partyClasses[partyName]}`}>
                   {`${partyName} 파티`}
                 </span>
-                <span className="ml-2 font-mono tabular-nums text-fg-subtle">{`${found}/${RAID_PARTY_SIZE}`}</span>
+                <span className="ml-2 num text-fg-subtle">{`${found}/${RAID_PARTY_SIZE}`}</span>
               </td>
             </tr>,
             ...partySeats.map((seat) => renderSeat(seat, partyLabelId))

@@ -1,6 +1,6 @@
 import { GRADE_RARITY_NAMES, type GradeRarity, gradeRarity } from '#core/today-grade/today-grade'
 
-const percent = 'shrink-0 font-mono text-base font-semibold whitespace-nowrap tabular-nums'
+const percent = 'shrink-0 num text-base font-semibold whitespace-nowrap'
 
 const RARITY_CLASSES: Record<GradeRarity, string> = {
   common: 'text-rarity-common',

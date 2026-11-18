@@ -12,7 +12,7 @@ import { ItemCell } from './item-parts'
 const REINFORCE_LABELS = { amplify: '증폭', enhance: '강화' } as const
 const REINFORCE_TONES = { amplify: 'text-game-amplify', enhance: 'text-game-enhance' } as const
 
-const { slot, number, muted, missing } = itemTableClasses
+const { slot, muted, missing } = itemTableClasses
 
 export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Element | null {
   const { items, creature, aura } = view
@@ -126,14 +126,14 @@ function Reinforce({
       {reinforce !== null && (
         <span
           title={REINFORCE_LABELS[reinforce.kind]}
-          className={`${number} font-semibold ${REINFORCE_TONES[reinforce.kind]}`}
+          className={`num font-semibold ${REINFORCE_TONES[reinforce.kind]}`}
         >
           {`+${reinforce.value}`}
         </span>
       )}
       {refine !== null && (
         <span className={`text-xs text-game-refine ${reinforce !== null ? 'ml-2' : ''}`}>
-          재련 <span className={number}>{refine}</span>
+          재련 <span className="num">{refine}</span>
         </span>
       )}
     </>

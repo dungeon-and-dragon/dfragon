@@ -43,7 +43,7 @@ export function PartyScreen({
           cardKey={{ id: `party-${slot}`, resetKey }}
           card={slots[slot]}
           slot={seat + 1}
-          seat={<span className="font-mono tabular-nums text-fg-subtle">{seat + 1}</span>}
+          seat={<span className="num text-fg-subtle">{seat + 1}</span>}
           screen="party"
           onLookup={handleLookup}
           onPickCandidate={handlePickCandidate}

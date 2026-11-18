@@ -1,0 +1,60 @@
+<!-- @dsCard group="Components" height=300 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    .samples {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 24px;
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div class="samples">
+      <dl class="row">
+        <div class="stat">
+          <dt class="stat-label">클리어율</dt>
+          <dd class="stat-value">82%</dd>
+        </div>
+        <div class="stat">
+          <dt class="stat-label">명성</dt>
+          <dd class="stat-value text-game-fame">98,412</dd>
+        </div>
+        <div class="stat">
+          <dt class="label">마지막 갱신</dt>
+          <dd class="num">11-18 14:02</dd>
+        </div>
+      </dl>
+      <div class="row">
+        <span class="portrait portrait-sm"></span>
+        <span class="portrait portrait-md"></span>
+        <span class="portrait portrait-lg"></span>
+        <span class="skeleton portrait-lg"></span>
+      </div>
+      <div class="row">
+        <a class="link font-semibold" href="#">캐릭터1</a>
+        <a class="link text-fg-adventure" href="#">모험단1</a>
+        <a class="link text-fg-guild" href="#">길드1</a>
+        <span class="num text-xs text-fg-subtle">Lv.115</span>
+      </div>
+      <div class="row">
+        <span class="skeleton-text" style="width: 88px"></span>
+        <span class="skeleton-text skeleton-text-xs" style="width: 40px"></span>
+      </div>
+    </div>
+  </body>
+</html>

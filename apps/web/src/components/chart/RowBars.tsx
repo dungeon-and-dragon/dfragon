@@ -193,7 +193,7 @@ function BarRow({
       </span>
       <span
         data-chart-count={countUp ? value : undefined}
-        className={`text-right font-mono tabular-nums ${fame ? 'text-game-fame' : ''}`}
+        className={`text-right num ${fame ? 'text-game-fame' : ''}`}
       >
         {formatValue(value)}
       </span>

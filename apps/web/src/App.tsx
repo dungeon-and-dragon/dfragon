@@ -10,7 +10,7 @@ export default function App(): React.JSX.Element {
       <Suspense fallback={<div className="h-topbar shrink-0 border-b border-line bg-canvas" />}>
         <WebClient />
       </Suspense>
-      <span className="absolute bottom-4 left-4 font-mono text-2xs tabular-nums text-fg-subtle">
+      <span className="absolute bottom-4 left-4 num text-2xs text-fg-subtle">
         <span className="sr-only">빌드 </span>
         {__BUILD_COMMIT__}
       </span>

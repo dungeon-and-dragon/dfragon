@@ -18,14 +18,10 @@ const integer = new Intl.NumberFormat('ko-KR')
 const REFRESH_INTERVAL_MS = 60_000
 
 const SUMMARY = 'section flex flex-wrap items-center gap-6 px-4'
-const WELL = 'relative h-[112px] w-[96px] shrink-0 overflow-hidden rounded-control bg-inset'
 const IDENTITY = 'flex min-w-0 grow basis-[280px] flex-col gap-2'
 const STATS = 'flex shrink-0 gap-12'
-const STAT = 'stat min-w-[104px]'
-const STAT_LABEL = 'stat-label'
-const STAT_VALUE = 'stat-value'
+const STAT = 'stat min-w-[104px] items-end'
 const LINE = 'flex items-center gap-2 whitespace-nowrap'
-const LINK = 'no-underline hover:text-fg hover:underline'
 const SCORE_TONES = { dealer: 'text-score-dealer', buffer: 'text-score-buffer' } as const
 
 export function CharacterSummary({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
@@ -48,7 +44,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <Link
           to="/adventures/$adventureName"
           params={{ adventureName: character.adventureName }}
-          className={`text-fg-adventure ${LINK}`}
+          className="link text-fg-adventure"
         >
           {character.adventureName}
         </Link>
@@ -62,7 +58,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <Link
           to="/guilds/$guildId"
           params={{ guildId: character.guildId }}
-          className={`text-fg-guild ${LINK}`}
+          className="link text-fg-guild"
         >
           {character.guildName}
         </Link>
@@ -72,7 +68,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
 
   return (
     <section aria-label="캐릭터 요약" aria-busy={refreshing || undefined} className={SUMMARY}>
-      <div className={WELL}>
+      <div className="portrait portrait-lg">
         <Portrait src={characterImageUrl(character)} />
       </div>
       <div className={IDENTITY}>
@@ -92,7 +88,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
           </span>
           {job != null && <span className="text-fg-muted">{job}</span>}
           {character.level != null && (
-            <span className="font-mono tabular-nums text-fg-subtle">{`Lv.${character.level}`}</span>
+            <span className="num text-fg-subtle">{`Lv.${character.level}`}</span>
           )}
         </div>
         {affiliations.length > 0 && (
@@ -155,17 +151,17 @@ function RefreshControl({
 export function CharacterSummarySkeleton(): React.JSX.Element {
   return (
     <div aria-hidden="true" className={SUMMARY}>
-      <div className={WELL} />
+      <span className="skeleton portrait-lg" />
       <div className={IDENTITY}>
-        <Bone width={160} height={28} />
-        <Bone width={200} height={20} />
-        <Bone width={140} height={20} />
+        <span className="skeleton-text w-[160px]" />
+        <span className="skeleton-text w-[200px]" />
+        <span className="skeleton-text w-[140px]" />
       </div>
       <div className={STATS}>
         {[0, 1].map((stat) => (
           <div key={stat} className={STAT}>
-            <Bone width={40} height={16} />
-            <Bone width={96} height={28} />
+            <span className="skeleton-text skeleton-text-xs w-[40px]" />
+            <span className="skeleton-text w-[96px]" />
           </div>
         ))}
       </div>
@@ -173,18 +169,14 @@ export function CharacterSummarySkeleton(): React.JSX.Element {
   )
 }
 
-function Bone({ width, height }: { width: number; height: number }): React.JSX.Element {
-  return <span className="block rounded-control bg-inset" style={{ width, height }} />
-}
-
 function FameStat({ fame }: { fame: number | null }): React.JSX.Element {
   return (
     <div className={STAT}>
-      <span className={STAT_LABEL}>명성</span>
+      <span className="stat-label">명성</span>
       {fame != null ? (
-        <span className={`${STAT_VALUE} text-game-fame`}>{integer.format(fame)}</span>
+        <span className="stat-value text-game-fame">{integer.format(fame)}</span>
       ) : (
-        <span className={`${STAT_VALUE} text-fg-subtle`}>{MISSING_VALUE}</span>
+        <span className="stat-value text-fg-subtle">{MISSING_VALUE}</span>
       )}
     </div>
   )
@@ -198,14 +190,14 @@ function ScoreStat({ card }: { card: CharacterDetailView['card'] }): React.JSX.E
 
   return (
     <div className={STAT}>
-      <span className={STAT_LABEL}>{label}</span>
+      <span className="stat-label">{label}</span>
       {value != null ? (
-        <span title={description} className={`${STAT_VALUE} ${toneClass} ${approximateClass}`}>
+        <span title={description} className={`stat-value ${toneClass} ${approximateClass}`}>
           {approximate ? formatApproximateScore(value) : integer.format(value)}
           {note}
         </span>
       ) : (
-        <span className={`${STAT_VALUE} text-fg-subtle`}>
+        <span className="stat-value text-fg-subtle">
           {MISSING_VALUE}
           {note}
         </span>

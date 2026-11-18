@@ -13,22 +13,20 @@ export function StatusTab({ detail }: CharacterTabProps): React.JSX.Element {
   return (
     <div className={layout.tab}>
       {stats.length > 0 && (
-        <dl aria-label="스탯" className="m-0 grid grid-cols-4 gap-x-6 max-sm:grid-cols-2">
+        <dl aria-label="스탯" className="grid grid-cols-4 gap-x-6 max-sm:grid-cols-2">
           {stats.map((stat) => (
             <div
               key={stat.name}
               className="flex min-w-0 items-center justify-between gap-2 border-b border-line py-3"
             >
-              <dt className="m-0 flex min-w-0 items-center gap-1 text-fg-muted">
+              <dt className="flex min-w-0 items-center gap-1 text-fg-muted">
                 {/* 속성 아이콘 그림이 저장소에 들어오기 전까지 자리만 둔다. */}
                 {statusElementOf(stat.name) != null && (
                   <span aria-hidden="true" className="size-4 shrink-0" />
                 )}
                 {stat.name}
               </dt>
-              <dd className="m-0 shrink-0 font-mono text-fg tabular-nums">
-                {formatStatValue(stat.value)}
-              </dd>
+              <dd className="shrink-0 num text-fg">{formatStatValue(stat.value)}</dd>
             </div>
           ))}
         </dl>
@@ -62,9 +60,7 @@ function StatusBuffRow({ buff }: { buff: StatusBuff }): React.JSX.Element {
   return (
     <li className="flex items-baseline gap-2">
       <span className="font-semibold">{buff.name}</span>
-      {buff.level != null && (
-        <span className="font-mono text-fg-subtle tabular-nums">{`Lv.${buff.level}`}</span>
-      )}
+      {buff.level != null && <span className="num text-fg-subtle">{`Lv.${buff.level}`}</span>}
       {values !== '' && <span className="text-fg-muted tabular-nums">{values}</span>}
     </li>
   )
