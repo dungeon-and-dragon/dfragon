@@ -6,8 +6,8 @@ import type { CollectionRepository } from './repository.js'
 
 export const UNAVAILABLE_PAUSE_MS = 60_000
 
-// 서버 8개와 1차 전직 약 70개의 조합마다 명성 2,000 구간을 약 55번 부르면 빈 구간만 약 3만 요청이다(추정, 재지 않았다).
-// key 하나의 기본 속도(초당 5건)로 약 1시간 40분이고, 다른 수집과 Neople 요청을 나눠 보내므로 세 배 넘게 둔다.
+// 서버 8개와 1차 전직 71개의 조합 568개마다 최고 명성 136,927에서 0까지 구간 69개를 부르면 빈 구간만 약 3.9만 요청이다(2026-11-18 실제 응답).
+// key 하나의 기본 속도(초당 5건)로 약 2시간 10분이고, 다른 수집과 Neople 요청을 나눠 보내므로 두 배 넘게 둔다.
 const DELAY_MINUTES = 6 * 60
 
 export type CharacterDiscoverySummary = {
