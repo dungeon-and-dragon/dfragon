@@ -5,6 +5,7 @@ import type {
   JobSkillAdoptionSnapshot,
   CharacterEquipmentSet,
   CharacterOathSet,
+  ItemAdoption,
   SetAdoption
 } from '@dfragon/database'
 import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
@@ -64,6 +65,12 @@ export const fameRankingQuery = z
 export type FameRankingQuery = z.infer<typeof fameRankingQuery>
 
 export const setStatsQuery = jobFilterSchema.refine(hasJobForGrow).refine(hasMaleCrusaderForRole)
+
+export const itemStatsQuery = setStatsQuery
+
+export type ItemStatsResponse = Omit<ItemAdoption, 'computedAt'> & {
+  computedAt: string | null
+}
 
 export type SetStatsResponse = Omit<SetAdoption, 'computedAt'> & {
   computedAt: string | null
@@ -171,6 +178,12 @@ export function toSkillStatsResponse(
 }
 
 export function toSetStatsResponse({ computedAt, ...adoption }: SetAdoption): SetStatsResponse {
+  const storedAt = computedAt?.toISOString() ?? null
+
+  return { computedAt: storedAt, ...adoption }
+}
+
+export function toItemStatsResponse({ computedAt, ...adoption }: ItemAdoption): ItemStatsResponse {
   const storedAt = computedAt?.toISOString() ?? null
 
   return { computedAt: storedAt, ...adoption }
