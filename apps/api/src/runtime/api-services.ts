@@ -56,12 +56,12 @@ import { readApiBuildInfo } from '../infrastructure/build-info.js'
 import {
   parseCharacterBasic,
   parseCharacterSkillStyle
-} from '@dfragon/server-core/infrastructure/neople/character-basic.js'
+} from '@dfragon/server-core/infrastructure/neople/index.js'
 import { createNeopleCharacterImage } from '../infrastructure/neople/index.js'
 import {
   type ScoreEngineOptions,
   createScoreEngine
-} from '@dfragon/server-core/infrastructure/score/engine.js'
+} from '@dfragon/server-core/infrastructure/score/index.js'
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>

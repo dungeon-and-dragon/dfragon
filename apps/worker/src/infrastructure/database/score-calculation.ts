@@ -15,7 +15,7 @@ import type { ScoreCalculationRepository } from '../../application/character-sco
 import {
   CLEAR_CONTENTS,
   toCollectionMinFame
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 
 export class DatabaseScoreCalculationRepository implements ScoreCalculationRepository {
   constructor(

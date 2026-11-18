@@ -1,6 +1,6 @@
-import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
-import type { CalculatedScore } from '@dfragon/server-core/domain/score/calculated.js'
+import type { CalculatedScore } from '@dfragon/server-core/domain/score/index.js'
 
 export class CharacterFetched implements CharacterIdentity {
   constructor(

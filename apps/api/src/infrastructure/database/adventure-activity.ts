@@ -34,7 +34,7 @@ import {
   ACQUISITION_CODES,
   CLEAR_CODES,
   ENHANCEMENT_CODES
-} from '@dfragon/server-core/domain/character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   type SeasonBackfillProgress,
   isSeasonBackfilled,

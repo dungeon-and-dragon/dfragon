@@ -1,11 +1,11 @@
 import type { TimelineCharacter, TimelineSyncState } from '@dfragon/database'
 import {
   TimelineFailure,
-  type TimelineFailureKind
-} from '@dfragon/server-core/domain/character-timeline/failure.js'
+  type TimelineFailureKind,
+  splitTimelineRanges
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import type { TimelineSyncRepository } from './repository.js'
-import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/ranges.js'
 
 // 중천 시즌 시작이다. 그 전 이력은 받지 않는다(#1175).
 export const TIMELINE_COLLECTION_START = new Date('2025-01-09T06:00:00+09:00')

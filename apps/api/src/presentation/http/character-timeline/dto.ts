@@ -10,7 +10,7 @@ import {
   type CharacterTimeline,
   type TimelineItemPage,
   parseTimelineCursor
-} from '@dfragon/server-core/domain/character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/index.js'
 
 export const pageQuery = z.object({ before: z.string() }).strict()
 

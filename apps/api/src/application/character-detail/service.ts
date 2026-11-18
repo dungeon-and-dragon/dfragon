@@ -1,35 +1,33 @@
-import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/project.js'
 import {
+  projectCharacterCard,
   cardScoreCalculator,
   withCardScore
-} from '@dfragon/server-core/domain/character-card/score.js'
+} from '@dfragon/server-core/domain/character-card/index.js'
 import {
   projectCharacterDetails,
-  projectCharacterFreshness
-} from '@dfragon/server-core/domain/character-detail/project.js'
-import type {
-  CharacterIdentity,
-  FetchedCharacterPayloads
-} from '@dfragon/server-core/domain/character-detail/sections.js'
+  projectCharacterFreshness,
+  type CharacterIdentity,
+  type FetchedCharacterPayloads
+} from '@dfragon/server-core/domain/character-detail/index.js'
 import {
   CharacterDetailFailure,
   characterDetailFailure
 } from '@dfragon/server-core/domain/character-failure.js'
 import {
   type CalculatedScore,
-  toCalculatedScore
-} from '@dfragon/server-core/domain/score/calculated.js'
-import { toScoreEngineInput } from '@dfragon/server-core/domain/score/input.js'
+  toCalculatedScore,
+  toScoreEngineInput
+} from '@dfragon/server-core/domain/score/index.js'
 import {
   enrichCharacterDetails,
   hasUnavailableItemDetail
-} from '@dfragon/server-core/application/character-catalog/enrich.js'
+} from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import { type LoadCharacter, createCharacterCache } from './character-cache.js'
 import {
   type NeopleStageTimings,
   elapsedMs
-} from '@dfragon/server-core/application/character-detail/neople-stages.js'
+} from '@dfragon/server-core/application/character-detail/index.js'
 import type {
   CalculateScore,
   PublishCharacterFetched,

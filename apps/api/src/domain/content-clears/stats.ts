@@ -8,7 +8,7 @@ import {
   CLEAR_CONTENTS,
   type ClearContent,
   toLatestContents
-} from '@dfragon/server-core/domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/index.js'
 
 export type ClearRatioCount = {
   ratio: number | null
