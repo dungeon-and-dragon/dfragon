@@ -20,7 +20,9 @@ const rejectedImports = [
   ['domain/score/c.ts', '../../infrastructure/score/engine.js', 'infrastructure/'],
   ['domain/score/d.ts', '../../application/character-catalog/ports.js', 'application/<기능>/'],
   ['domain/score/e.ts', 'node:fs', 'infrastructure/'],
+  ['domain/score/f.ts', '@dfragon/worker', '그 앱에 둔다'],
   ['application/character-catalog/a.ts', '@dfragon/api', '그 앱에 둔다'],
+  ['application/character-catalog/d.ts', '@dfragon/worker/runtime/worker-jobs.js', '그 앱에 둔다'],
   [
     'application/character-catalog/b.ts',
     '../../infrastructure/neople/character-catalog.js',
@@ -33,7 +35,8 @@ const rejectedImports = [
     '그 앱에 둔다'
   ],
   ['infrastructure/score/b.ts', '@dfragon/http-server', '그 앱에 둔다'],
-  ['infrastructure/score/c.ts', '@hono/node-server', '그 앱에 둔다']
+  ['infrastructure/score/c.ts', '@hono/node-server', '그 앱에 둔다'],
+  ['infrastructure/score/d.ts', '@dfragon/worker/infrastructure/jobs/scheduler.js', '그 앱에 둔다']
 ]
 const allowedImports = [
   ['domain/score/a.ts', './result.js'],
