@@ -39,7 +39,7 @@ export function CardImage({
   return (
     <img
       src={src}
-      alt="캐릭터"
+      alt=""
       draggable={false}
       onError={handleError}
       className={

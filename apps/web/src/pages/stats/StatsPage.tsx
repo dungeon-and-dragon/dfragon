@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { RelativeTime } from '#components/RelativeTime'
 import { Columns } from '#components/chart/Columns'
 import { type Bar, type BarTone, RowBars } from '#components/chart/RowBars'
@@ -14,19 +15,24 @@ import {
 
 const integer = new Intl.NumberFormat('ko-KR')
 const SCREEN = 'flex flex-col'
+const STAT_BOX_NAMES = {
+  server: '서버 인구',
+  fame: '명성 분포',
+  job: '직업 분포',
+  averageFame: '직업별 평균 명성'
+} as const
+
+type StatBoxId = keyof typeof STAT_BOX_NAMES
+const STAT_BOX_ROWS: readonly (readonly StatBoxId[])[] = [
+  ['server', 'fame'],
+  ['job', 'averageFame']
+]
 
 export function StatsPage(): React.JSX.Element {
   const result = useCharacterStats()
   switch (result.status) {
     case 'loading':
-      return (
-        <div aria-busy="true" className={SCREEN}>
-          <span role="status" className="sr-only">
-            통계를 받는 중입니다.
-          </span>
-          <TitleBox title="캐릭터 통계" />
-        </div>
-      )
+      return <StatsSkeleton />
     case 'error':
       return (
         <div className={SCREEN}>
@@ -38,6 +44,14 @@ export function StatsPage(): React.JSX.Element {
       )
     case 'success': {
       const stats = result.value
+      const boxes: Record<StatBoxId, React.JSX.Element> = {
+        server: <StatBox name={STAT_BOX_NAMES.server} bars={serverBars(stats)} />,
+        fame: <FameBox bars={fameBars(stats)} />,
+        job: <StatBox name={STAT_BOX_NAMES.job} bars={jobBars(stats)} />,
+        averageFame: (
+          <StatBox name={STAT_BOX_NAMES.averageFame} bars={averageFameBars(stats)} tone="fame" />
+        )
+      }
 
       return (
         <div className={SCREEN}>
@@ -51,18 +65,39 @@ export function StatsPage(): React.JSX.Element {
               />
             )}
           </TitleBox>
-          <div className="section section-cols">
-            <StatBox name="서버 인구" bars={serverBars(stats)} />
-            <FameBox bars={fameBars(stats)} />
-          </div>
-          <div className="section section-cols">
-            <StatBox name="직업 분포" bars={jobBars(stats)} />
-            <StatBox name="직업별 평균 명성" bars={averageFameBars(stats)} tone="fame" />
-          </div>
+          {STAT_BOX_ROWS.map((row) => (
+            <div key={row.join()} className="section section-cols">
+              {row.map((id) => (
+                <Fragment key={id}>{boxes[id]}</Fragment>
+              ))}
+            </div>
+          ))}
         </div>
       )
     }
   }
+}
+
+function StatsSkeleton(): React.JSX.Element {
+  return (
+    <div aria-busy="true" className={SCREEN}>
+      <span role="status" className="sr-only">
+        통계를 받는 중입니다.
+      </span>
+      <TitleBox title="캐릭터 통계" />
+      <div aria-hidden="true">
+        {STAT_BOX_ROWS.map((row) => (
+          <div key={row.join()} className="section section-cols">
+            {row.map((id) => (
+              <ListBox key={id} name={STAT_BOX_NAMES[id]}>
+                <span className="skeleton h-[256px]" />
+              </ListBox>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function StatBox({
@@ -94,11 +129,11 @@ function fameGroupsOf(bars: readonly FameBar[]): FameBar[][] {
 
 function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {
   if (bars.length === 0) {
-    return <ListBox name="명성 분포" />
+    return <ListBox name={STAT_BOX_NAMES.fame} />
   }
 
   return (
-    <ListBox name="명성 분포" fillHeight>
+    <ListBox name={STAT_BOX_NAMES.fame} fillHeight>
       <Columns groups={fameGroupsOf(bars)} />
     </ListBox>
   )

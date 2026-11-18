@@ -192,7 +192,7 @@
   /* 팝오버, 후보 목록, listbox */
   --shadow-popover: 0 8px 24px light-dark(rgb(0 0 0 / 12%), rgb(0 0 0 / 45%));
   /* 툴팁 */
-  --shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
+  --shadow-tooltip: 0 2px 8px light-dark(rgb(0 0 0 / 10%), rgb(0 0 0 / 35%));
   /* 선택 표시. 신호색 1px 선(border-signal) 바깥에 1px을 더해 2px 선으로 보이게 한다. */
   --shadow-selected: 0 0 0 1px var(--color-signal);
 
@@ -235,9 +235,9 @@
   /* 배지, 태그 */
   --radius-badge: 2px;
   /* 버튼, 입력 칸, 칩, 이미지 자리 */
-  --radius-control: 3px;
+  --radius-control: 2px;
   /* 패널 */
-  --radius-panel: 4px;
+  --radius-panel: 2px;
 
   /* 같은 상자 안에서 형제 요소 위에 올리는 tooltip, 넘김 버튼, 선택 막대 */
   --z-index-raised: 1;
@@ -254,18 +254,16 @@
   /* 전환, 움직임 곡선. GSAP으로 움직이는 곳도 같은 곡선을 쓴다. */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   /* hover 전환 */
-  --duration-hover: 120ms;
+  --duration-hover: 150ms;
   /* transition-colors처럼 시간을 적지 않은 전환은 hover 전환이다. */
   --default-transition-duration: var(--duration-hover);
   --default-transition-timing-function: var(--ease-standard);
   /* 열림, 선택 같은 상태 전환 */
-  --duration-state: 180ms;
-  /* 반복 움직임의 한 바퀴. 지금 쓰는 곳은 없다. */
-  --cycle: 4s;
+  --duration-state: 250ms;
   /* 실시간 표시 점의 깜빡임 */
   --beat: 0.9s;
-  /* 새로고침, 불러오는 중의 회전. 버튼과 progress의 spinner처럼 8단으로 돈다. */
-  --animate-spin: spin var(--beat) steps(8, end) infinite;
+  /* 새로고침, 불러오는 중의 회전 */
+  --animate-spin: spin var(--beat) linear infinite;
 
   /* 본문 글꼴 */
   --font-sans:

@@ -1,20 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import themeSource from '@dfragon/design/theme.css?raw'
 import {
-  CameraIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   CloseIcon,
   CopyIcon,
   ExternalLinkIcon,
+  HeartIcon,
   MonitorIcon,
   MoonIcon,
   PinIcon,
   RefreshIcon,
   SearchIcon,
-  StarIcon,
-  SunIcon
+  SunIcon,
+  ViewfinderIcon
 } from '@dfragon/ui'
 import {
   ClassSamples,
@@ -44,22 +44,22 @@ const containerTokens = sizeTokens.filter((token) => token.name.startsWith('--co
 const iconTokens = sizeTokens.filter((token) => token.name.startsWith('--size-'))
 const iconSizeTokens = iconTokens.filter((token) => token.name.startsWith('--size-icon-'))
 const ICONS = [
-  { name: 'CameraIcon', Icon: CameraIcon },
   { name: 'CheckIcon', Icon: CheckIcon },
   { name: 'ChevronDownIcon', Icon: ChevronDownIcon },
   { name: 'ChevronRightIcon', Icon: ChevronRightIcon },
   { name: 'CloseIcon', Icon: CloseIcon },
   { name: 'CopyIcon', Icon: CopyIcon },
   { name: 'ExternalLinkIcon', Icon: ExternalLinkIcon },
+  { name: 'HeartIcon', Icon: HeartIcon },
+  { name: 'HeartIcon filled', Icon: HeartIcon, props: { filled: true } },
   { name: 'MonitorIcon', Icon: MonitorIcon },
   { name: 'MoonIcon', Icon: MoonIcon },
   { name: 'PinIcon', Icon: PinIcon },
   { name: 'PinIcon filled', Icon: PinIcon, props: { filled: true } },
   { name: 'RefreshIcon', Icon: RefreshIcon },
   { name: 'SearchIcon', Icon: SearchIcon },
-  { name: 'StarIcon', Icon: StarIcon },
-  { name: 'StarIcon filled', Icon: StarIcon, props: { filled: true } },
-  { name: 'SunIcon', Icon: SunIcon }
+  { name: 'SunIcon', Icon: SunIcon },
+  { name: 'ViewfinderIcon', Icon: ViewfinderIcon }
 ] as const
 
 const meta = {

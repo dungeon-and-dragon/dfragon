@@ -1,4 +1,4 @@
-import { CameraIcon } from '@dfragon/ui'
+import { ViewfinderIcon } from '@dfragon/ui'
 import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 
 export function CaptureButton({
@@ -21,7 +21,7 @@ export function CaptureButton({
           onClick={onClick}
           className={`btn btn-sm w-8 px-0 ${disabled ? 'btn-ghost' : 'btn-primary'}`}
         >
-          <CameraIcon className="size-icon-sm" />
+          <ViewfinderIcon className="size-icon-sm" />
         </button>
       </span>
     </HeaderTooltip>

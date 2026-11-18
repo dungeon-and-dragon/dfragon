@@ -144,14 +144,14 @@ function characterLines(row: Element): (string | null)[] {
   return [nameLine, levelLine]
 }
 
-it('만렙은 서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 그 아래 줄에 레벨만 둔다', async () => {
+it('서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을 둔다', async () => {
   await render(async () => ({
     characters: [rankedCharacter(1), rankedCharacter(2, { level: 110 })]
   }))
 
   const [maxLevel, belowMax] = bodyRows()
   expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직 합성 직업', null])
-  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직 합성 직업', 'Lv.110'])
+  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직 합성 직업Lv.110', null])
 })
 
 it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직 뒤에 직업명을 붙인다', async () => {

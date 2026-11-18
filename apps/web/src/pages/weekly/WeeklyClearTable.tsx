@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture'
 import type { ClearName, WeeklyCharacter } from '#core/adventure-guild'
 import { CharacterCell } from '#components/table/CharacterCell'
-import { RankBadge } from '#components/table/RankBadge'
+import { RankNumber } from '#components/table/RankNumber'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -74,9 +74,9 @@ export function WeeklyClearTable({
         {rows.map((row, index) => (
           <tr key={`${row.serverId}/${row.characterId}`}>
             <td>
-              <RankBadge rank={index + 1} />
+              <RankNumber rank={index + 1} />
             </td>
-            {/* 초상화 옆 두 줄 글자가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
+            {/* 초상화가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
             <td className="py-0">
               <CharacterCell character={row} />
             </td>

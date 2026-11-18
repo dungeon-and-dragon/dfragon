@@ -26,6 +26,7 @@ const FONT_FAMILY_PATTERN = /font-family:\s*'([^']+)'/
 const FONT_SOURCE_PATTERN = /url\('(\.\/fonts\/[^']+)'\)/
 const FONT_WEIGHT_PATTERN = /font-weight:\s*([^;]+);/
 const FONT_STYLE_PATTERN = /font-style:\s*([^;]+);/
+const FONT_UNICODE_RANGE_PATTERN = /unicode-range:\s*([^;]+);/
 const TEXT_PROPERTY_SEPARATOR = '--'
 const BLANK_LINE_PATTERN = /^[ \t]*\n/
 const WHITESPACE_PATTERN = /\s/
@@ -55,7 +56,6 @@ const FAMILY_BY_PREFIX = [
   ['--default-transition-timing-function', 'easing'],
   ['--duration-', 'duration'],
   ['--default-transition-duration', 'duration'],
-  ['--cycle', 'duration'],
   ['--beat', 'duration'],
   ['--animate-', 'duration'],
   ['--z-index-', 'zIndex'],
@@ -411,13 +411,16 @@ export function readFontFaces(baseCss) {
     const style = body.match(FONT_STYLE_PATTERN)?.[1].trim() ?? 'normal'
     const family = body.match(FONT_FAMILY_PATTERN)[1]
     const file = `fonts/${basename(source)}`
+    const unicodeRange = body.match(FONT_UNICODE_RANGE_PATTERN)?.[1].trim()
+    const unicodeRangeField = unicodeRange !== undefined ? { unicodeRange } : {}
 
     return {
       family,
       source,
       file,
       weight,
-      style
+      style,
+      ...unicodeRangeField
     }
   })
 }
@@ -570,9 +573,14 @@ async function compileStylesheet(componentStylesheets, candidates) {
 
 async function replaceFontSources(css, fonts, sourceFor) {
   let replaced = css
+  const fontsBySource = new Map(
+    fonts.map((font) => {
+      return [font.source, font]
+    })
+  )
 
-  for (const font of fonts) {
-    const target = `url('${font.source}')`
+  for (const [source, font] of fontsBySource) {
+    const target = `url('${source}')`
 
     if (!replaced.includes(target)) {
       throw new Error(`컴파일한 CSS에서 ${target}을 찾지 못함`)
@@ -615,8 +623,8 @@ export async function buildDesignSystem({
     paths: { tokens: ['theme.css'], fonts: ['base.css', 'fonts'], docs: ['design-system'] },
     synced: syncedAt
   }
-  const fonts = fontFaces.map(({ family, file, weight, style }) => {
-    return { family, file, weight, style }
+  const fonts = fontFaces.map(({ source, ...font }) => {
+    return font
   })
   const tokens = tokensFromTheme(themeCss, fonts, meta)
   const tokenCount = countTokens(tokens)
