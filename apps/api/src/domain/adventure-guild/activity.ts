@@ -1,4 +1,4 @@
-import type { StoredSeason, TimelineRange } from '@dfragon/database'
+import type { ItemDictionaryEntry, StoredSeason, TimelineRange } from '@dfragon/database'
 import { addHours } from 'date-fns'
 import { z } from 'zod'
 import {
@@ -6,6 +6,7 @@ import {
   type TimelineClear,
   type TimelineEnhancement
 } from '@dfragon/server-core/domain/character-timeline/index.js'
+import { ITEM_DICTIONARY_CODES } from '@dfragon/server-core/domain/item-dictionary/index.js'
 import {
   type SeasonBackfillProgress,
   isSeasonBackfilled,
@@ -30,6 +31,26 @@ const ITEM_RARITIES = {
   신화: 'mythic'
 } as const
 const ITEM_CODES = new Set(ACQUISITION_CODES)
+// 시즌마다 115레벨 같은 장비 레벨이다(2026-11-18 저장소 소유자 결정, ADR 0074). 이 표에 있는 시즌만 아이템 사전으로
+// 장비와 서약을 나눠 세고, 없는 시즌은 등급만 보고 센다. 장비 레벨이 바뀐 시즌은 한 줄을 더한다.
+const SEASON_EQUIPMENT_LEVELS: ReadonlyMap<number, number> = new Map([
+  [10, 115],
+  [11, 115]
+])
+const EQUIPMENT_CODES = new Set(ITEM_DICTIONARY_CODES)
+const OATH_CODES = new Set([550, 551, 552, 553, 554, 555, 556, 557])
+// 칭호도 itemType이 액세서리지만 레벨이 0이나 1이라 장비 레벨로 빠진다(ADR 0074).
+const EQUIPMENT_ITEM_TYPES: ReadonlySet<string | null> = new Set([
+  '무기',
+  '방어구',
+  '액세서리',
+  '추가장비'
+])
+const SPLIT_RARITIES = {
+  레전더리: 'legendary',
+  에픽: 'epic',
+  태초: 'primeval'
+} as const
 // data.ticket은 강화권, 증폭권을 쓴 기록에만 있다. 운영 DB에서는 객체지만 안의 키를 확인하지 못해 값이 있는지만 본다.
 // 권은 그 단계에 직접 도전한 기록이 아니라 단계별 성공률에서 뺀다.
 const ticketData = z.object({ ticket: z.unknown().refine((ticket) => ticket != null) })
@@ -72,6 +93,11 @@ const ACTIVITY_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssxxx"
 
 type ItemRarityName = keyof typeof ITEM_RARITIES
 type ItemRarity = (typeof ITEM_RARITIES)[ItemRarityName]
+type SplitRarityName = keyof typeof SPLIT_RARITIES
+type SplitRarity = (typeof SPLIT_RARITIES)[SplitRarityName]
+type Acquisition =
+  | { kind: 'item'; rarityName: ItemRarityName }
+  | { kind: 'oath'; rarityName: SplitRarityName }
 
 export type SeasonBackfillStatus = SeasonBackfillProgress & { running: boolean }
 
@@ -114,6 +140,7 @@ export type ActivitySummary = {
   raids: RaidCount[]
   legions: NameCount[]
   items: Record<ItemRarity, number>
+  oaths: Record<SplitRarity, number>
   enhancement: {
     attempts: number
     amplify: EnhancementTarget[]
@@ -133,6 +160,8 @@ export type ActivityDay = {
   primeval: boolean
   mythic: boolean
   highEnhancement: boolean
+  oath: number
+  oathPrimeval: boolean
 }
 
 export type SeasonActivity = {
@@ -150,15 +179,19 @@ export type AdventureActivity = AdventureActivityOf<ActivitySeason>
 export type ActivityItem = {
   code: number
   occurredAt: Date
+  itemId: string | null
   itemName: string | null
   itemRarity: string | null
   data: unknown
   enhancements: TimelineEnhancement[]
 }
 
+export type ActivityItemDictionary = ReadonlyMap<string, ItemDictionaryEntry>
+
 export type ActivityRecords = {
   clears: readonly TimelineClear[]
   items: readonly ActivityItem[]
+  itemDictionary: ActivityItemDictionary
 }
 
 export type ActivityDayRange = {
@@ -173,6 +206,12 @@ export type ActivityDayItem = {
   rarity: ItemRarityName
 }
 
+export type ActivityDayOath = {
+  at: string
+  name: string | null
+  rarity: SplitRarityName
+}
+
 export type ActivityDayEnhancement = {
   at: string
   kind: TimelineEnhancement['kind']
@@ -185,6 +224,7 @@ export type ActivityDayDetail = {
   raids: RaidCount[]
   legions: NameCount[]
   items: ActivityDayItem[]
+  oaths: ActivityDayOath[]
   enhancements: ActivityDayEnhancement[]
 }
 
@@ -267,12 +307,54 @@ function isItemRarityName(name: string): name is ItemRarityName {
   return Object.hasOwn(ITEM_RARITIES, name)
 }
 
-function toItemRarityName({ code, itemRarity }: ActivityItem): ItemRarityName | undefined {
+function isSplitRarityName(name: string | null): name is SplitRarityName {
+  return name !== null && Object.hasOwn(SPLIT_RARITIES, name)
+}
+
+function toLegacyAcquisition({ code, itemRarity }: ActivityItem): Acquisition | undefined {
   if (!ITEM_CODES.has(code) || itemRarity === null || !isItemRarityName(itemRarity)) {
     return undefined
   }
 
-  return itemRarity
+  return { kind: 'item', rarityName: itemRarity }
+}
+
+function isSeasonEquipment(
+  { itemId }: ActivityItem,
+  itemDictionary: ActivityItemDictionary,
+  equipmentLevel: number
+): boolean {
+  const entry = itemId !== null ? itemDictionary.get(itemId) : undefined
+
+  return entry?.availableLevel === equipmentLevel && EQUIPMENT_ITEM_TYPES.has(entry.itemType)
+}
+
+function toAcquisition(
+  seasonId: number,
+  row: ActivityItem,
+  itemDictionary: ActivityItemDictionary
+): Acquisition | undefined {
+  const equipmentLevel = SEASON_EQUIPMENT_LEVELS.get(seasonId)
+
+  if (equipmentLevel === undefined) {
+    return toLegacyAcquisition(row)
+  }
+
+  const { code, itemRarity } = row
+
+  if (!isSplitRarityName(itemRarity)) {
+    return undefined
+  }
+
+  if (OATH_CODES.has(code)) {
+    return { kind: 'oath', rarityName: itemRarity }
+  }
+
+  if (EQUIPMENT_CODES.has(code) && isSeasonEquipment(row, itemDictionary, equipmentLevel)) {
+    return { kind: 'item', rarityName: itemRarity }
+  }
+
+  return undefined
 }
 
 function usedTicket({ data }: ActivityItem): boolean {
@@ -284,6 +366,7 @@ function emptySummary(): ActivitySummary {
     raids: [],
     legions: [],
     items: { legendary: 0, epic: 0, primeval: 0, mythic: 0 },
+    oaths: { legendary: 0, epic: 0, primeval: 0 },
     enhancement: {
       attempts: 0,
       amplify: [],
@@ -376,7 +459,7 @@ export function toSeasonActivity(
 ): SeasonActivity {
   const inSeason = (record: { occurredAt: Date }) => occursIn(season, record)
   const summary = emptySummary()
-  const { items, enhancement } = summary
+  const { items, oaths, enhancement } = summary
   const raids = new Map<string, RaidCount>()
   const legions = new Map<string, NameCount>()
   const amplify = new Map<number, EnhancementTarget>()
@@ -392,7 +475,9 @@ export function toSeasonActivity(
       enhance: 0,
       primeval: false,
       mythic: false,
-      highEnhancement: false
+      highEnhancement: false,
+      oath: 0,
+      oathPrimeval: false
     }
     days.set(date, day)
 
@@ -411,14 +496,20 @@ export function toSeasonActivity(
   }
 
   for (const row of records.items.filter(inSeason)) {
-    const rarityName = toItemRarityName(row)
-    if (rarityName !== undefined) {
-      const rarity = ITEM_RARITIES[rarityName]
+    const acquisition = toAcquisition(season.id, row, records.itemDictionary)
+    if (acquisition?.kind === 'item') {
+      const rarity = ITEM_RARITIES[acquisition.rarityName]
       const day = dayOf(row.occurredAt)
       items[rarity]++
       day.item++
       day.primeval ||= rarity === 'primeval'
       day.mythic ||= rarity === 'mythic'
+    } else if (acquisition?.kind === 'oath') {
+      const rarity = SPLIT_RARITIES[acquisition.rarityName]
+      const day = dayOf(row.occurredAt)
+      oaths[rarity]++
+      day.oath++
+      day.oathPrimeval ||= rarity === 'primeval'
     }
 
     const ticket = usedTicket(row)
@@ -471,6 +562,7 @@ function formatActivityTime(occurredAt: Date): string {
 }
 
 export function toActivityDayDetail(
+  seasonId: number,
   day: ActivityDayRange,
   records: ActivityRecords
 ): ActivityDayDetail {
@@ -487,16 +579,20 @@ export function toActivityDayDetail(
   const rows = records.items
     .filter(onDay)
     .sort((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime())
-  const items = rows.flatMap((row): ActivityDayItem[] => {
-    const rarity = toItemRarityName(row)
-    if (rarity === undefined) {
-      return []
-    }
+  const items: ActivityDayItem[] = []
+  const oaths: ActivityDayOath[] = []
 
+  for (const row of rows) {
+    const acquisition = toAcquisition(seasonId, row, records.itemDictionary)
     const at = formatActivityTime(row.occurredAt)
 
-    return [{ at, name: row.itemName, rarity }]
-  })
+    if (acquisition?.kind === 'item') {
+      items.push({ at, name: row.itemName, rarity: acquisition.rarityName })
+    } else if (acquisition?.kind === 'oath') {
+      oaths.push({ at, name: row.itemName, rarity: acquisition.rarityName })
+    }
+  }
+
   const enhancements = rows
     .flatMap((row) => row.enhancements)
     .map(({ occurredAt, kind, after, result }): ActivityDayEnhancement => {
@@ -507,10 +603,10 @@ export function toActivityDayDetail(
   const raids = toNameCounts(raidCounts, RAID_RELEASE_ORDER)
   const legions = toNameCounts(legionCounts, LEGION_RELEASE_ORDER)
 
-  return { date: day.date, raids, legions, items, enhancements }
+  return { date: day.date, raids, legions, items, oaths, enhancements }
 }
 
-export function toSeasonDays(records: ActivityRecords): ActivityDayDetail[] {
+export function toSeasonDays(seasonId: number, records: ActivityRecords): ActivityDayDetail[] {
   const days = new Map<string, { clears: TimelineClear[]; items: ActivityItem[] }>()
   const recordsFor = (occurredAt: Date) => {
     const date = formatResetDate(occurredAt)
@@ -533,11 +629,15 @@ export function toSeasonDays(records: ActivityRecords): ActivityDayDetail[] {
       if (day === undefined) {
         throw new Error('Invalid activity day')
       }
-      const detail = toActivityDayDetail(day, dayRecords)
+      const detail = toActivityDayDetail(seasonId, day, {
+        ...dayRecords,
+        itemDictionary: records.itemDictionary
+      })
       const isEmpty =
         detail.raids.length +
           detail.legions.length +
           detail.items.length +
+          detail.oaths.length +
           detail.enhancements.length ===
         0
       if (isEmpty) {
