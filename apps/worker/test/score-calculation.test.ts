@@ -64,7 +64,16 @@ function equippedSections(basic: Record<string, unknown>) {
   return {
     equipment: {
       ...basic,
-      equipment: [{ slotId: 'JACKET', setItemId: 'synthetic-set', setItemName: '합성 세트' }],
+      equipment: [
+        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
+        {
+          slotId: 'SUPPORT',
+          itemId: 'synthetic-support',
+          itemName: '합성 보조장비',
+          exaltedInfo: { damage: '1%' }
+        },
+        { slotId: 'JACKET', setItemId: 'synthetic-set', setItemName: '합성 세트' }
+      ],
       setItemInfo: [
         {
           setItemId: 'synthetic-set',
@@ -439,7 +448,7 @@ test('characters 갱신이 실패한 캐릭터는 이력을 저장하지 않고 
   )
 })
 
-test('상세를 받은 캐릭터마다 뽑은 세트를 받은 시각과 함께 저장하고, 세트가 없거나 점수를 건너뛴 캐릭터도 저장한다', async () => {
+test('상세를 받은 캐릭터마다 뽑은 세트와 무기, 유일 장비를 받은 시각과 함께 저장하고, 세트가 없거나 점수를 건너뛴 캐릭터도 저장한다', async () => {
   const { dependencies, sets } = calculation([equippedId, 'n'].map(character), {
     unscored: ['n']
   })
@@ -455,9 +464,20 @@ test('상세를 받은 캐릭터마다 뽑은 세트를 받은 시각과 함께 
       characterId: equippedId,
       equipmentSet: { id: 'synthetic-set', name: '합성 세트' },
       oathSet: { id: 16204, name: '합성 서약', option: '합성 선택지' },
+      items: [
+        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
+        { slotId: 'SUPPORT', itemId: 'synthetic-support', itemName: '합성 보조장비' }
+      ],
       fetchedAt: NOW
     },
-    { serverId: 'cain', characterId: 'n', equipmentSet: null, oathSet: null, fetchedAt: NOW }
+    {
+      serverId: 'cain',
+      characterId: 'n',
+      equipmentSet: null,
+      oathSet: null,
+      items: [],
+      fetchedAt: NOW
+    }
   ])
 })
 
