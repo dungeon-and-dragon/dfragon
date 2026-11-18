@@ -358,6 +358,23 @@ model JobSkillAdoptionSnapshot {
   @@map("job_skill_adoption")
 }
 
+model SetAdoption {
+  id               BigInt   @id @default(autoincrement())
+  jobId            String   @map("job_id")
+  jobGrowId        String   @map("job_grow_id")
+  role             String
+  equipmentSetId   String?  @map("equipment_set_id")
+  equipmentSetName String?  @map("equipment_set_name")
+  oathSetId        Int?     @map("oath_set_id")
+  oathSetName      String?  @map("oath_set_name")
+  oathSetOption    String?  @map("oath_set_option")
+  count            Int
+  computedAt       DateTime @map("computed_at") @db.Timestamptz(3)
+
+  @@index([jobId, jobGrowId, role])
+  @@map("set_adoption")
+}
+
 model BatchNeopleKey {
   id         Int       @id @default(autoincrement())
   label      String
