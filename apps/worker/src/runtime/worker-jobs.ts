@@ -35,6 +35,7 @@ import {
   createSkillStyleCollectionJob,
   StatsJobService,
   createCharacterStatsJob,
+  createSetAdoptionJob,
   createSkillAdoptionJob
 } from '#application/ranking-stats/index.js'
 import {
@@ -126,6 +127,7 @@ export function createWorkerJobs(
     createCharacterDiscoveryJob(discoveryService),
     createCharacterStatsJob(statsService),
     createSkillAdoptionJob(statsService),
+    createSetAdoptionJob(statsService),
     createScoreCalculationJob(scoreService, scoreSchedule),
     createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary)
   ]

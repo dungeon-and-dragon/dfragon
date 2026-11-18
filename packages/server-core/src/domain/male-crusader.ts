@@ -3,13 +3,13 @@ import { isRecord } from '@dfragon/lib/utils/shape-check'
 import { Character, type CharacterRole } from './character-role.js'
 
 // Neople /df/jobs의 프리스트(남) 직업 ID와 그 眞 크루세이더 전직 ID다. 여성 크루세이더는 전직 ID가 같고 직업 ID만 다르다.
-const maleCrusaderJob = {
+export const MALE_CRUSADER_JOB = {
   jobId: 'f6a4ad30555b99b499c07835f87ce522',
   jobGrowId: '37495b941da3b1661bc900e68ef3b2c6'
 }
 
 export function isMaleCrusaderJob(job: { jobId?: string; jobGrowId?: string }): boolean {
-  return job.jobId === maleCrusaderJob.jobId && job.jobGrowId === maleCrusaderJob.jobGrowId
+  return job.jobId === MALE_CRUSADER_JOB.jobId && job.jobGrowId === MALE_CRUSADER_JOB.jobGrowId
 }
 
 function hasLearned(skillStyle: unknown, skillName: string): boolean {

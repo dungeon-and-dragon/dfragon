@@ -5,6 +5,7 @@ import type {
   JobSkillAdoption,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
+  SetAdoptionReplacement,
   SkillStyleSampleCharacter,
   SkillStyleSampleJob
 } from '@dfragon/database'
@@ -16,6 +17,7 @@ export interface StatsJobRepository {
   readJobSkillAdoption(job: JobSkillAdoptionQuery): Promise<JobSkillAdoption>
   saveJobSkillAdoption(snapshot: JobSkillAdoptionSnapshot): Promise<void>
   deleteJobSkillAdoptionComputedBefore(before: Date): Promise<number>
+  replaceSetAdoption(replacement: SetAdoptionReplacement): Promise<number>
 }
 
 export interface SkillStyleCollectionRepository {
