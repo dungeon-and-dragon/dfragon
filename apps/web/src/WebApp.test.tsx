@@ -1056,14 +1056,15 @@ it('캐릭터 이름 한 글자를 제출하면 검색 화면으로 가서 그 �
   expect(searchRequests(fetch).map((url) => url.searchParams.get('characterName'))).toEqual(['가'])
 })
 
-it('검색 결과가 없으면 찾지 못했다는 목록 제목 한 줄만 보인다', async () => {
+it('검색 결과가 없으면 검색한 이름의 목록 상자에 찾지 못했다는 문구를 보인다', async () => {
   stubSearchFetch([])
   window.history.replaceState(null, '', '/search?characterName=없는이름&serverId=all')
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() =>
-    expect(container.querySelector('main section')?.textContent).toBe('캐릭터를 찾지 못했습니다.')
+    expect(container.querySelector('main section p')?.textContent).toBe('캐릭터를 찾지 못했습니다.')
   )
+  expect(container.querySelector('main section h2')?.textContent).toBe('없는이름')
   expect(container.querySelector('main table')).toBeNull()
 })
 
@@ -1076,7 +1077,8 @@ it('주소의 이름이 열세 글자면 검색 화면은 요청하지 않는다
   )
   await act(async () => root.render(<WebApp host={host} />))
 
-  expect(container.querySelector('main section')?.textContent).toBe('검색할 수 없는 이름입니다.')
+  expect(container.querySelector('main section h2')?.textContent).toBe('가나다라마바사아자차카타파')
+  expect(container.querySelector('main section p')?.textContent).toBe('검색할 수 없는 이름입니다.')
   expect(container.querySelector('main header')?.textContent).toBe('캐릭터 검색서버전체')
   expect(searchRequests(fetch)).toEqual([])
 })

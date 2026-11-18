@@ -132,10 +132,11 @@ it('길드원 45명 가운데 처음 20명을 그리고 끝에 닿을 때마다 
   expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
 })
 
-it('길드원이 없으면 목록 상자에 한 줄만 두고 평균 명성은 -다', async () => {
+it('길드원이 없으면 목록 상자에 빈 문구만 두고 평균 명성은 -다', async () => {
   await render(async () => guildOf(0, { guildName: null, averageFame: null }))
 
-  expect(container.querySelector('section')?.textContent).toBe('저장된 캐릭터가 없습니다.')
+  expect(container.querySelector('section p')?.textContent).toBe('저장된 캐릭터가 없습니다.')
+  expect(container.querySelector('section table')).toBeNull()
   expect(container.querySelector('h1')?.textContent).toBe('길드')
   expect([...container.querySelectorAll('header div')].map((stat) => stat.textContent)).toEqual(
     expect.arrayContaining(['길드원0', '평균 명성-'])
