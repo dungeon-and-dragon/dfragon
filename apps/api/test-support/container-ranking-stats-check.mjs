@@ -4,7 +4,8 @@ import {
   readCharacterStats,
   readDatabaseConfiguration,
   readFameRanking,
-  recordCharacterBasic
+  recordCharacterBasic,
+  recordCharacterSets
 } from '@dfragon/database'
 import {
   StatsJobService,
@@ -68,7 +69,9 @@ try {
     {
       ...basic('cain', 'rank-a1', 'grow-a', 80000),
       fetchedAt: undefined,
-      dealerSkillLearned: null
+      dealerSkillLearned: null,
+      equipmentSet: null,
+      oathSet: null
     }
   )
   assert.deepEqual(ids(await readFameRanking(client, { jobId, jobGrowId: 'grow-b' }, 100)), [
@@ -178,6 +181,119 @@ try {
   // 요청은 계산하지 않으므로 저장 뒤 더한 캐릭터는 다음 job 실행 전까지 응답에 들지 않는다.
   await recordCharacterBasic(client, basic('cain', 'rank-after-snapshot', 'grow-a', 90000))
   assert.deepEqual(await get('/stats'), statsAnswer)
+
+  // 두 세트를 낀 캐릭터 105명이다. 99~102위가 같은 명성이고 서버가 번갈아, 100위와 101위 사이 page 경계가 같은 명성의 서버 순서에 걸린다.
+  const fairy = { id: 'set-rank-fairy', name: '소울 페어리 세트' }
+  const golden = { id: 'set-rank-golden', name: '영원히 이어지는 황금향 세트' }
+  const dragon = (option) => ({ id: 16204, name: '야망의 용투 서약', option })
+  const setCharacters = Array.from({ length: 105 }, (_, index) => {
+    const serverId = index % 2 === 0 ? 'cain' : 'siroco'
+    const characterId = `set-rank-${String(index).padStart(3, '0')}`
+    const fame = 160000 - (index >= 98 && index <= 101 ? 98 : index)
+    const jobGrowId = index === 0 ? 'grow-set-other' : 'grow-set'
+    const option = index % 3 === 0 ? '용투 : 세계를 태우는 불꽃' : '용투 : 합성 선택지'
+
+    return { serverId, characterId, fame, jobGrowId, option }
+  })
+  const setFilteredJob = 'synthetic-set-rank-job'
+
+  for (const { serverId, characterId, fame, jobGrowId, option } of setCharacters) {
+    await recordCharacterBasic(
+      client,
+      basic(serverId, characterId, jobGrowId, fame, setFilteredJob)
+    )
+    await recordCharacterSets(client, {
+      serverId,
+      characterId,
+      equipmentSet: fairy,
+      oathSet: dragon(option),
+      fetchedAt: new Date()
+    })
+  }
+
+  for (const [characterId, equipmentSet, oathSet] of [
+    ['set-rank-fairy-only', fairy, null],
+    ['set-rank-golden', golden, dragon('용투 : 세계를 태우는 불꽃')]
+  ]) {
+    await recordCharacterBasic(
+      client,
+      basic('cain', characterId, 'grow-set', 170000, setFilteredJob)
+    )
+    await recordCharacterSets(client, {
+      serverId: 'cain',
+      characterId,
+      equipmentSet,
+      oathSet,
+      fetchedAt: new Date()
+    })
+  }
+
+  const expectedOrder = setCharacters
+    .toSorted(
+      (left, right) =>
+        right.fame - left.fame ||
+        left.serverId.localeCompare(right.serverId) ||
+        left.characterId.localeCompare(right.characterId)
+    )
+    .map(({ characterId }) => characterId)
+  const readAllPages = async (query) => {
+    const pages = []
+    let cursor = null
+
+    do {
+      const page = await get(
+        `/rankings/fame?${query}${cursor !== null ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
+      )
+      pages.push(page)
+      cursor = page.nextCursor
+    } while (cursor !== null)
+
+    return pages
+  }
+  const bothSetsQuery = `jobId=${setFilteredJob}&equipmentSetId=${fairy.id}&oathSetId=16204`
+  const bothSetsPages = await readAllPages(bothSetsQuery)
+  const bothSetsRows = bothSetsPages.flatMap(({ characters }) => characters)
+  assert.deepEqual(
+    bothSetsPages.map(({ characters }) => characters.length),
+    [100, 5]
+  )
+  assert.deepEqual(
+    bothSetsRows.map(({ characterId }) => characterId),
+    expectedOrder
+  )
+  const [lastOfFirstPage, firstOfSecondPage] = bothSetsRows.slice(99, 101)
+  assert.equal(lastOfFirstPage.fame, firstOfSecondPage.fame)
+  assert.notEqual(lastOfFirstPage.serverId, firstOfSecondPage.serverId)
+  assert.deepEqual(
+    bothSetsRows.map(({ rank }) => rank),
+    Array.from({ length: 105 }, (_, index) => index + 1)
+  )
+  assert.deepEqual(bothSetsRows[0].equipmentSet, fairy)
+  assert.deepEqual(bothSetsRows[0].oathSet, dragon('용투 : 세계를 태우는 불꽃'))
+
+  const growPages = await readAllPages(`${bothSetsQuery}&jobGrowId=grow-set-other`)
+  assert.deepEqual(
+    growPages.flatMap(({ characters }) => characters.map(({ characterId }) => characterId)),
+    ['set-rank-000']
+  )
+  const optionRows = (
+    await readAllPages(
+      `${bothSetsQuery}&oathSetOption=${encodeURIComponent('용투 : 세계를 태우는 불꽃')}`
+    )
+  ).flatMap(({ characters }) => characters)
+  assert.equal(optionRows.length, 35)
+  assert.ok(optionRows.every(({ oathSet }) => oathSet.option === '용투 : 세계를 태우는 불꽃'))
+  const equipmentRows = (
+    await readAllPages(`jobId=${setFilteredJob}&equipmentSetId=${fairy.id}`)
+  ).flatMap(({ characters }) => characters)
+  assert.deepEqual(
+    equipmentRows.slice(0, 2).map(({ characterId, oathSet }) => [characterId, oathSet]),
+    [
+      ['set-rank-fairy-only', null],
+      ['set-rank-000', dragon('용투 : 세계를 태우는 불꽃')]
+    ]
+  )
+  assert.equal(equipmentRows.length, 106)
 } finally {
   await client.$disconnect()
 }
