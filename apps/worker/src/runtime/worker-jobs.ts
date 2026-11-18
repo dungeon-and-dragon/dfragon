@@ -12,8 +12,15 @@ import {
   ClearRecordBackfillService,
   ClearWeekSampleService
 } from '#application/content-clears/index.js'
-import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import {
+  DatabaseClearStatsRepository,
+  DatabaseItemDictionaryRepository
+} from '@dfragon/server-core/infrastructure/database/index.js'
+import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
+import type { FetchItemDetails } from '@dfragon/server-core/application/item-dictionary/ports.js'
+import { createItemDictionaryFillJob } from '#application/item-dictionary/index.js'
+import {
+  DatabaseAcquisitionItemRepository,
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository,
   DatabaseCollectionRepository,
@@ -53,6 +60,7 @@ export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
   Omit<SkillStyleCollectionPorts, ClockKey> &
   Omit<CharacterDiscoveryPorts, ClockKey> & {
     createFetchRecordTimeline: CreateClearTimeline
+    fetchItemDetails: FetchItemDetails
     score: Omit<ScoreCalculationPorts, ClockKey> & { schedule?: string }
   }
 
@@ -65,6 +73,7 @@ export function createWorkerJobs(
     createFetchTimeline,
     createFetchRecordTimeline,
     fetchSkillStyle,
+    fetchItemDetails,
     readTargets,
     readTopFame,
     fetchFamePage,
@@ -99,6 +108,10 @@ export function createWorkerJobs(
     pause: clock.pause
   })
   const statsService = new StatsJobService(new DatabaseStatsJobRepository(client))
+  const itemDictionary = new ItemDictionaryService(
+    new DatabaseItemDictionaryRepository(client),
+    fetchItemDetails
+  )
   const scoreService = new ScoreCalculationService(
     new DatabaseScoreCalculationRepository(client, SCORE_CALCULATION_JOB_NAME),
     { ...score, ...clock }
@@ -113,6 +126,7 @@ export function createWorkerJobs(
     createCharacterDiscoveryJob(discoveryService),
     createCharacterStatsJob(statsService),
     createSkillAdoptionJob(statsService),
-    createScoreCalculationJob(scoreService, scoreSchedule)
+    createScoreCalculationJob(scoreService, scoreSchedule),
+    createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary)
   ]
 }

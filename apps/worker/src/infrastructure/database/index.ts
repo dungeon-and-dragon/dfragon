@@ -9,3 +9,4 @@ export { DatabaseSkillStyleCollectionRepository } from './skill-style-collection
 export { DatabaseStatsJobRepository } from './stats-jobs.js'
 export { DatabaseJobRunCleanupRepository } from './job-run-cleanup.js'
 export { DatabaseScoreCalculationRepository } from './score-calculation.js'
+export { DatabaseAcquisitionItemRepository } from './item-dictionary.js'

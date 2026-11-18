@@ -14,6 +14,12 @@ export type {
   BatchNeopleKeySummary,
   UsableBatchNeopleKey
 } from './batch-neople-key.js'
+export {
+  readUnlistedAcquisitionItemIds,
+  readUnlistedItemIds,
+  recordItemDictionary
+} from './item-dictionary.js'
+export type { ItemDictionaryEntry, UnlistedAcquisitionQuery } from './item-dictionary.js'
 export { readTimelineQueueCounts, writeTimelineQueueCounts } from './timeline-queue-count.js'
 export type { TimelineQueueCount } from './timeline-queue-count.js'
 export { recordCharacter } from './character.js'
