@@ -1,4 +1,3 @@
-import { ProgressCircle } from '@dfragon/ui'
 import { useState } from 'react'
 import type { CharacterDetailView } from '#core/character/character-detail-view'
 import {
@@ -22,6 +21,7 @@ import {
   skillWindowOf
 } from '#core/catalog/skill-window'
 import type { LoadedResult } from '../../../hooks/useLoadedResult'
+import { LoadingLine } from '../../../components/LoadingLine'
 import { useSkillStats } from '../hooks/useSkillStats'
 import { useSkillWindowCatalog } from '../hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
@@ -332,10 +332,9 @@ export function SkillTab({ detail }: CharacterTabProps): React.JSX.Element | nul
 
   if (catalog.status === 'loading') {
     return (
-      <div aria-busy="true" className={ROOT}>
-        <div className="flex min-h-12 items-center px-4">
-          <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
-        </div>
+      <div aria-busy="true" className="state state-pending">
+        <LoadingLine />
+        <span role="status">스킬 창을 받는 중입니다.</span>
       </div>
     )
   }

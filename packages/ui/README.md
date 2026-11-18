@@ -15,8 +15,8 @@
 | `ChipGroup` | `ToggleGroup`, `Toggle` | `items`(`value`, `label`) 가운데 하나만 고르는 칩 묶음. 고른 칩을 다시 눌러도 선택이 풀리지 않는다. 화살표로 칩 사이를 옮기고 Tab은 묶음에서 칩 하나에만 멈춘다. `size` `sm`(기본), `md`(32, 40px). 이름은 `aria-label`이나 보이는 라벨의 `aria-labelledby`로 준다. |
 | `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 화면과 반대 색 모드로 그려, 안에 둔 글자가 어떤 색 토큰을 써도 읽힌다. |
 | `Popover` | `Popover` | `Root`, `Trigger`, `Popup`(Portal, Positioner, Popup. `anchor`, `side`, `align`, `sideOffset`을 받는다), `Title`, `Close`. 면, 테두리, 그림자만 그리고 안쪽 배치와 폭은 화면이 정한다. |
+| `ConfirmPopover` | `Popover` | 되돌리기 어려운 동작 앞의 확인 팝오버. `children`에 `Popover.Trigger`를 두고 `title`, `confirmLabel`, `cancelLabel`(기본 `취소`), `onConfirm`을 받는다. 열리면 취소 버튼에 focus가 가고, `onConfirm`이 Promise면 끝날 때까지 확인 버튼을 막은 뒤 성공하면 닫고 실패하면 열린 채 실패 문구를 보인다. `onOpenChange`의 `details.cancel()`로 열기를 막을 수 있다. |
 | `StatusChip` | `span` | tone `neutral`, `success`, `danger`, `warning`(주의), `signal`(진행 중인 일)이고, 모두 글자색 둥근 점과 같은 색의 옅은 면이다. `success` 점은 박자 두 번 주기로 깜박인다. `busy`면 둥근 점 대신 글자색 사각 점 세 개가 `--beat`마다 `steps()`로 차례로 켜지고, 동작 줄이기에서는 모두 켠 채 멈춘다. `size` `sm`은 높이 24, `md`는 상단 바 게임 연결 상태의 높이 32다. 상태 변화를 알릴 곳만 `role="status"`를 넘긴다. |
-| `ProgressCircle` | 자체 SVG | 값이 없으면 `steps()`로 끊어 도는 호, 있으면 진행 호. |
 | `CameraIcon`, `CheckIcon`, `ChevronDownIcon`, `ChevronRightIcon`, `CloseIcon`, `CopyIcon`, `ExternalLinkIcon`, `MonitorIcon`, `MoonIcon`, `PinIcon`, `RefreshIcon`, `SearchIcon`, `StarIcon`, `SunIcon` | `svg` | 글자색 선 아이콘. 크기는 부모 글자 크기(`1em`)이고, 따로 정할 때는 `size-icon-sm`, `size-icon-md`, `size-icon-lg`만 쓴다. `PinIcon`, `StarIcon`은 `filled`로 면을 채운다. |
 
 공개 타입은 `className`, `style`을 받지 않는다. 아이콘은 `svg` 속성을 그대로 받아 `className`으로 크기, 색, 배치를 정한다. Base UI 부품 그대로인 `Select.Root`, `Tabs.Root` 같은 부품은 Base UI 문서의 API를 따른다.

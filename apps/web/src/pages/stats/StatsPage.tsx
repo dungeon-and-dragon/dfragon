@@ -31,7 +31,7 @@ export function StatsPage(): React.JSX.Element {
       return (
         <div className={SCREEN}>
           <TitleBox title="캐릭터 통계" />
-          <p role="alert" className="section m-0 px-4 text-sm text-fg-danger">
+          <p role="alert" className="section state state-error">
             {result.message}
           </p>
         </div>

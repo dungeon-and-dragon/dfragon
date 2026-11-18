@@ -5,6 +5,7 @@ import {
   Button,
   Chip,
   ChipGroup,
+  ConfirmPopover,
   IconButton,
   Popover,
   Select,
@@ -73,6 +74,8 @@ const IMPLICIT_ROLES: Record<string, string> = {
   tablist: '[role="tablist"]',
   tabpanel: '[role="tabpanel"]',
   dialog: '[role="dialog"]',
+  alertdialog: '[role="alertdialog"]',
+  alert: '[role="alert"]',
   switch: '[role="switch"]',
   status: '[role="status"]',
   group: '[role="group"]'
@@ -573,6 +576,62 @@ describe('Popover의 열고 닫기와 focus 복귀', () => {
 
     await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'))
     await vi.waitFor(() => expect(document.activeElement).toBe(trigger))
+  })
+})
+
+describe('ConfirmPopover의 확인 흐름', () => {
+  function DeletePopover({ onConfirm }: { onConfirm: () => Promise<unknown> }) {
+    return (
+      <ConfirmPopover title="batch key 삭제" confirmLabel="삭제" onConfirm={onConfirm}>
+        <Popover.Trigger render={<Button />}>삭제</Popover.Trigger>
+      </ConfirmPopover>
+    )
+  }
+
+  async function open() {
+    await click(getByRole('button', '삭제'))
+
+    return vi.waitFor(() => getByRole('alertdialog', 'batch key 삭제'))
+  }
+
+  it('열리면 취소 버튼에 focus가 간다', async () => {
+    await render(<DeletePopover onConfirm={async () => {}} />)
+
+    const popup = await open()
+
+    await vi.waitFor(() => expect(document.activeElement).toBe(getByRole('button', '취소', popup)))
+  })
+
+  it('확인 요청이 끝날 때까지 확인 버튼을 막고, 성공하면 닫는다', async () => {
+    let finish = () => {}
+    const request = new Promise<void>((resolve) => {
+      finish = resolve
+    })
+    await render(<DeletePopover onConfirm={() => request} />)
+    const popup = await open()
+    const confirm = getByRole('button', '삭제', popup) as HTMLButtonElement
+
+    await click(confirm)
+    expect(confirm.disabled).toBe(true)
+    await act(async () => finish())
+
+    await vi.waitFor(() =>
+      expect(getByRole('button', '삭제').getAttribute('aria-expanded')).toBe('false')
+    )
+  })
+
+  it('확인 요청이 실패하면 열린 채 실패 문구를 보이고 확인 버튼을 다시 누를 수 있다', async () => {
+    await render(<DeletePopover onConfirm={async () => Promise.reject(new Error('요청 실패'))} />)
+    const popup = await open()
+    const confirm = getByRole('button', '삭제', popup) as HTMLButtonElement
+
+    await click(confirm)
+
+    await vi.waitFor(() =>
+      expect(getByRole('alert', undefined, popup).textContent).toBe('요청에 실패했습니다.')
+    )
+    expect(popup.isConnected).toBe(true)
+    expect(confirm.disabled).toBe(false)
   })
 })
 

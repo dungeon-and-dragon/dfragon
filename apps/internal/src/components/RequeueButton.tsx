@@ -1,6 +1,6 @@
+import { Button, ConfirmPopover, Popover } from '@dfragon/ui'
 import { formatCount } from '../format'
 import { useRequeue } from '../ops-queries'
-import { ConfirmButton } from './ConfirmButton'
 
 type RequeueButtonProps = {
   label: string
@@ -17,21 +17,19 @@ export function RequeueButton({
 }: RequeueButtonProps): React.JSX.Element {
   const requeue = useRequeue()
 
-  function handleConfirm(close: () => void): void {
-    requeue.mutate(failure, { onSuccess: close })
+  function requeueFailures(): Promise<unknown> {
+    return requeue.mutateAsync(failure)
   }
 
   return (
-    <ConfirmButton
-      label={label}
+    <ConfirmPopover
       title={`${title} ${formatCount(count)}건 되돌리기`}
       confirmLabel="되돌리기"
-      disabled={count === 0}
-      pending={requeue.isPending}
-      failed={requeue.isError}
-      popupClassName="w-[260px]"
-      onOpen={requeue.reset}
-      onConfirm={handleConfirm}
-    />
+      onConfirm={requeueFailures}
+    >
+      <Popover.Trigger disabled={count === 0} render={<Button size="sm" />}>
+        {label}
+      </Popover.Trigger>
+    </ConfirmPopover>
   )
 }

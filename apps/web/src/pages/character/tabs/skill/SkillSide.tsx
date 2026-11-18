@@ -1,4 +1,4 @@
-import { Button, CheckIcon, ChevronRightIcon, CopyIcon, Tooltip } from '@dfragon/ui'
+import { ChevronRightIcon, Tooltip } from '@dfragon/ui'
 import {
   type EnhancementRow,
   type EvolutionRow,
@@ -7,7 +7,7 @@ import {
   type SkillUpgradeBoard,
   skillMarkOf
 } from '#core/catalog/skill-window'
-import { useClipboardCopy } from '../../../../hooks/useClipboardCopy'
+import { ClipboardCopyButton } from '../../../../components/ClipboardCopyButton'
 import { GameText } from '../GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { SkillSprite } from './SkillSprite'
@@ -28,9 +28,6 @@ const ROW_BODY = 'flex min-w-0 grow flex-col gap-2'
 const BRANCHES = 'flex flex-wrap gap-2'
 
 export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
-  const clipboard = useClipboardCopy(hash)
-  const Icon = clipboard.status === 'copied' ? CheckIcon : CopyIcon
-
   return (
     <section aria-label="스킬 트리 코드">
       <h2 className={HEADING}>스킬 트리 코드</h2>
@@ -41,16 +38,7 @@ export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
         >
           {hash}
         </code>
-        <Button size="sm" onClick={clipboard.copy}>
-          <span className="inline-flex items-center gap-2">
-            <Icon className="size-icon-sm" />
-            코드 복사
-          </span>
-        </Button>
-        <span role="status" className="sr-only">
-          {clipboard.status === 'copied' && '스킬 트리 코드를 복사했습니다.'}
-          {clipboard.status === 'failed' && '클립보드에 복사하지 못했습니다.'}
-        </span>
+        <ClipboardCopyButton text={hash} label="코드 복사" />
       </div>
     </section>
   )
