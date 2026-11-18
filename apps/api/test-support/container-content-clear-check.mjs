@@ -3,7 +3,6 @@ import {
   createDatabaseClient,
   readClearPopulation,
   readContentClearAdventureSizes,
-  readContentClearCoClears,
   readContentClearCollectedAt,
   readContentClearFameBands,
   readContentClearFames,
@@ -266,7 +265,6 @@ try {
     readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
     readFames: (weekStart) => readContentClearFames(client, weekStart),
     readJobFames: (weekStart) => readContentClearJobFames(client, weekStart),
-    readCoClears: (weekStart) => readContentClearCoClears(client, weekStart),
     readRaidTimes: (weekStart) => readContentClearRaidTimes(client, weekStart),
     readContentJobFames: (selection) => readSelectedContentClearJobFames(client, selection),
     readContentTimes: (selection) => readSelectedContentClearTimes(client, selection),
@@ -478,32 +476,6 @@ try {
       ['-', 1, null],
       ['synthetic-clear-grow', 27, 112000],
       ['synthetic-clear-other', 1, null]
-    ]
-  )
-  assert.deepEqual(
-    overview.contents.map(({ id, coClears }) => [id, coClears]),
-    [
-      [
-        'michaela-normal',
-        [
-          { id: 'michaela-hard', cleared: 1 },
-          { id: 'engraved-nightmare-1', cleared: 1 }
-        ]
-      ],
-      [
-        'michaela-hard',
-        [
-          { id: 'michaela-normal', cleared: 1 },
-          { id: 'engraved-nightmare-1', cleared: 6 }
-        ]
-      ],
-      [
-        'engraved-nightmare-1',
-        [
-          { id: 'michaela-normal', cleared: 1 },
-          { id: 'michaela-hard', cleared: 6 }
-        ]
-      ]
     ]
   )
   // 목요일 02:30은 그 주 끝(다음 목요일 06:00 전)이라 같은 주의 목요일로 센다.

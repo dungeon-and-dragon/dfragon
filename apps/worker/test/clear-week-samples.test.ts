@@ -28,7 +28,6 @@ const emptySampleRepository: ClearSampleRepository = {
   readJobScores: async () => [],
   readFames: async () => [],
   readJobFames: async () => [],
-  readCoClears: async () => [],
   readRaidTimes: async () => []
 }
 const population = (contentId: string, date: string, closed: boolean): StoredClearPopulation => ({
