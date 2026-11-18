@@ -1,6 +1,5 @@
-import { type JobLabel, jobLabelOf } from '#core/character/job-display'
-import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
-import type { CharacterStats } from '#core/ranking/ranking-stats'
+import { CHARACTER_SERVER_NAMES, type JobLabel, jobLabelOf } from '#core/character'
+import type { CharacterStats } from '#core/ranking'
 import type { ColumnBar } from './Columns'
 import type { Bar } from './RowBars'
 

@@ -1,12 +1,12 @@
-import { itemRarityOfGrade } from '#core/character/character-item'
 import {
   ARTIFACT_PART,
   type HistoryChangeItem,
   type HistoryFieldChange,
   type HistoryNameChange,
   type HistoryPoint,
+  itemRarityOfGrade,
   SET_PART
-} from '#core/character/character-history'
+} from '#core/character'
 import { formatSeoulFullDateTime } from '#core/time-format'
 import { itemTableClasses } from '../equipment/item-classes'
 import { ItemName } from '../equipment/item-parts'

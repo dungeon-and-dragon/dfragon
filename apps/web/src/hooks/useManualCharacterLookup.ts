@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import {
-  createCaptureSearch,
   type CaptureSearch,
+  createCaptureSearch,
+  emptySearchSlots,
+  fillSlots,
   type OcrCaptureObservation
-} from '#core/capture/capture-search'
-import { emptySearchSlots, fillSlots } from '#core/capture/slots'
-import type { SearchView } from '#core/search/search'
+} from '#core/capture'
 import type {
   OcrSearchObservation,
   SearchApi,
   SearchCommandResult,
-  SearchSlotCount
-} from '#core/search/search'
+  SearchSlotCount,
+  SearchView
+} from '#core/search'
 
 export type ManualCharacterLookup = SearchView & {
   lookupSlot: (slot: number, nickname: string, serverId?: string) => void

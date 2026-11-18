@@ -7,8 +7,8 @@ import type {
   ClearFameDistribution,
   ClearTimes,
   ClearWeek
-} from '#core/ranking/clear-stats'
-import { jobLabelOf } from '#core/character/job-display'
+} from '#core/ranking'
+import { jobLabelOf } from '#core/character'
 import type { BoxPlotRow } from '../../components/chart/BoxPlot'
 import type { ColumnBar } from '../../components/chart/Columns'
 import type { LineSeries } from '../../components/chart/LineChart'

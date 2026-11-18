@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import type { CharacterDetailView } from '#core/character'
 import { characterDisplayOf } from '../../../lib/stored-character'
 import { useFavoriteCharacterStore } from '../../../hooks/useFavoriteCharacterStore'
 import { useRecentCharacterStore } from '../../../hooks/useRecentCharacterStore'

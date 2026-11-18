@@ -1,6 +1,9 @@
-import { signedEnchantValue } from '#core/character/character-equipment'
-import { type ItemView, toItemView } from '#core/character/character-item'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import {
+  type CharacterDetailView,
+  type ItemView,
+  signedEnchantValue,
+  toItemView
+} from '#core/character'
 import { AvatarRow } from '../avatar/AvatarTable'
 import { avatarClasses } from '../avatar/avatar-classes'
 import { itemTableClasses } from '../equipment/item-classes'

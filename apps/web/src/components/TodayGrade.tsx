@@ -1,4 +1,4 @@
-import { GRADE_RARITY_NAMES, type GradeRarity, gradeRarity } from '#core/today-grade/today-grade'
+import { GRADE_RARITY_NAMES, type GradeRarity, gradeRarity } from '#core/today-grade'
 
 const percent = 'shrink-0 num text-base font-semibold whitespace-nowrap'
 

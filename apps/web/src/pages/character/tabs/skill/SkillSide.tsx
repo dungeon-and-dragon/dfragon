@@ -6,7 +6,7 @@ import {
   type SkillMarks,
   type SkillUpgradeBoard,
   skillMarkOf
-} from '#core/catalog/skill-window'
+} from '#core/catalog'
 import { ClipboardCopyButton } from '../../../../components/ClipboardCopyButton'
 import { GameText } from '../GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'

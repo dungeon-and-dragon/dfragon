@@ -1,6 +1,4 @@
-import type { CharacterIdentity } from '#core/character/character'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
-import type { CharacterHistory } from '#core/character/character-history'
+import type { CharacterDetailView, CharacterHistory, CharacterIdentity } from '#core/character'
 import { useClientHost } from '../../../host/client-host'
 import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
 

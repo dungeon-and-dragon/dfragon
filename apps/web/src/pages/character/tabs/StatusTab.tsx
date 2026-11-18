@@ -1,5 +1,4 @@
-import { formatStatValue, statusElementOf } from '#core/character/character-detail-display'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import { type CharacterDetailView, formatStatValue, statusElementOf } from '#core/character'
 import type { CharacterTabProps } from './character-tab-props'
 import { detailTabClasses as layout } from './detail-tab-classes'
 

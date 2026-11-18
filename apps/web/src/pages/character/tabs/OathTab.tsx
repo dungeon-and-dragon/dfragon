@@ -1,14 +1,13 @@
 import { CheckIcon } from '@dfragon/ui'
-import { MISSING_VALUE } from '#core/capture/cards'
-import { formatCount, formatPoint, type StatLine } from '#core/character/character-item'
-import { type OathView, toOathView } from '#core/character/character-oath'
+import { MISSING_VALUE } from '#core/capture'
+import { formatCount, formatPoint, type OathView, type StatLine, toOathView } from '#core/character'
 import {
   type OathCatalog,
   type OathOptionCard,
   type OathSetBoard,
   oathItemIconOf,
   oathSetBoardOf
-} from '#core/catalog/oath-catalog'
+} from '#core/catalog'
 import { useOathCatalog } from '../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
