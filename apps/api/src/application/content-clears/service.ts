@@ -7,22 +7,19 @@ import {
   findStagePair
 } from '@dfragon/server-core/domain/content-clears/contents.js'
 import {
+  CLEAR_LEGIONS,
   type ClearContentStats,
-  toClearContentStats,
-  toEmptyContentStats,
-  toLegionContentStats
-} from '../../domain/content-clears/detail.js'
-import { CLEAR_LEGIONS, toLegionSummaries } from '../../domain/content-clears/legions.js'
-import {
-  type ClearOverview,
-  toClearOverview,
-  toEmptyClearOverview
-} from '../../domain/content-clears/overview.js'
-import {
-  type ClearStats,
   type ClearContentSummary,
-  toClearStats
-} from '../../domain/content-clears/stats.js'
+  type ClearOverview,
+  type ClearStats,
+  toClearContentStats,
+  toClearOverview,
+  toClearStats,
+  toEmptyClearOverview,
+  toEmptyContentStats,
+  toLegionContentStats,
+  toLegionSummaries
+} from '../../domain/content-clears/index.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/sample-loader.js'
 

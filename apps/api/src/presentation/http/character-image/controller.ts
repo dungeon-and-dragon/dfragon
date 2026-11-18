@@ -1,6 +1,6 @@
 import type { AccessLogEnv } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import type { CharacterImageService } from '../../../application/character-image/service.js'
+import type { CharacterImageService } from '../../../application/character-image/index.js'
 import { respondUnlessDisconnected } from '../disconnected-request.js'
 import { readIdentity } from './dto.js'
 

@@ -2,7 +2,7 @@ import type { CharacterIdentity } from '@dfragon/server-core/domain/character-id
 import type {
   NeopleCharacterSearchInput,
   NeopleCharacterSearchResult
-} from '../../domain/character-search/types.js'
+} from '../../domain/character-search/index.js'
 
 export type SearchCharacters = (
   input: NeopleCharacterSearchInput

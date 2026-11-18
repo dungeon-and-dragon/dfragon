@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { CharacterTimelineService } from '../../../application/character-timeline/service.js'
+import type { CharacterTimelineService } from '../../../application/character-timeline/index.js'
 import type { TimelinePageList } from '@dfragon/server-core/domain/character-timeline/project.js'
 import { readQuery } from '../request-query.js'
 import {

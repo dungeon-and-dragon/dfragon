@@ -24,8 +24,10 @@ import type {
   TimelineQueueCountRepository,
   TimelineSyncRepository
 } from '../../application/character-timeline/repository.js'
-import { ENHANCEMENT_BACKFILL_CODES } from '../../application/character-timeline/backfill.js'
-import type { TimelineSyncFailure } from '../../application/character-timeline/sync.js'
+import {
+  ENHANCEMENT_BACKFILL_CODES,
+  type TimelineSyncFailure
+} from '../../application/character-timeline/index.js'
 import type {
   CharacterTimeline,
   TimelineItemPage,

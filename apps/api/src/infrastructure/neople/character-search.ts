@@ -12,9 +12,9 @@ import { NEOPLE_SERVER_NAMES } from '@dfragon/server-core/domain/neople-servers.
 import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import type {
   CharacterSearchRow,
-  NeopleCharacterSearchResult,
-  NeopleCharacterSearchInput
-} from '../../domain/character-search/types.js'
+  NeopleCharacterSearchInput,
+  NeopleCharacterSearchResult
+} from '../../domain/character-search/index.js'
 
 const invalidResponse = (): NeopleSearchFailure => new NeopleSearchFailure('api')
 

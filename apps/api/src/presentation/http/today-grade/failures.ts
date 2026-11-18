@@ -1,8 +1,5 @@
 import type { FailureResponse } from '@dfragon/http-server'
-import {
-  type TodayGradeFailureKind,
-  todayGradeFailure
-} from '../../../domain/today-grade/failure.js'
+import { type TodayGradeFailureKind, todayGradeFailure } from '../../../domain/today-grade/index.js'
 
 const failureResponses: Record<TodayGradeFailureKind, FailureResponse> = {
   internal: {

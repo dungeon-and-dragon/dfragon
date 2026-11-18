@@ -1,3 +1,3 @@
-import type { SeasonBackfillQueue } from '../character-timeline/season-backfill.js'
+import type { SeasonBackfillQueue } from '../character-timeline/index.js'
 
 export type SeasonBackfillRequests = Pick<SeasonBackfillQueue, 'request' | 'has'>

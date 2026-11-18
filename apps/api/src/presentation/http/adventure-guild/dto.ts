@@ -1,12 +1,12 @@
 import type { StoredCharacter, StoredGuild } from '@dfragon/database'
 import { z } from 'zod'
-import type {
-  ActivitySeason,
-  AdventureActivity,
-  AdventureSeasonDays
-} from '../../../domain/adventure-guild/activity.js'
-import { averageFame } from '../../../domain/adventure-guild/fame.js'
-import type { AdventureWeeklyClears } from '../../../domain/adventure-guild/weekly.js'
+import {
+  type ActivitySeason,
+  type AdventureActivity,
+  type AdventureSeasonDays,
+  type AdventureWeeklyClears,
+  averageFame
+} from '../../../domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { type CharacterRow, toCharacterRow } from '../../../domain/character-row.js'
 
