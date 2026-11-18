@@ -3,11 +3,11 @@ import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-fa
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   CLEAR_CONTENTS,
+  CLEAR_LEGIONS,
   type ClearContent,
   findStagePair
 } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
-  CLEAR_LEGIONS,
   type ClearContentStats,
   type ClearContentSummary,
   type ClearOverview,

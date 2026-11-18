@@ -21,6 +21,7 @@ export {
 export type {
   CharacterTimeline,
   TimelineClear,
+  TimelineClearCount,
   TimelineClearRecord,
   TimelineEnhancement,
   TimelineEnhancementRecord,
