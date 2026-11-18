@@ -173,17 +173,17 @@ function BarRow({
     <li
       data-chart-item=""
       onMouseEnter={handleMouseEnter}
-      className={`grid h-7 items-center gap-x-3 text-sm ${wideName ? WIDE_NAME_ROW_COLUMNS_CLASS : ROW_COLUMNS_CLASS}`}
+      className={`grid h-[28px] items-center gap-x-3 text-sm ${wideName ? WIDE_NAME_ROW_COLUMNS_CLASS : ROW_COLUMNS_CLASS}`}
     >
       <span data-chart-name="" className="truncate">
         {name}
         {sub != null && <small className="text-xs text-fg-subtle"> {sub}</small>}
       </span>
-      <span className={`${RAIL_CLASS} ${thick ? 'h-2.5' : 'h-1.5'}`}>
+      <span className={`${RAIL_CLASS} ${thick ? 'h-[10px]' : 'h-[6px]'}`}>
         <span
           ref={markRef}
           data-chart-mark=""
-          className="absolute top-0 left-0 block h-full w-(--bar-width) min-w-0.5"
+          className="absolute top-0 left-0 block h-full w-(--bar-width) min-w-[2px]"
           style={{ '--bar-width': `${percent}%` }}
         >
           <span

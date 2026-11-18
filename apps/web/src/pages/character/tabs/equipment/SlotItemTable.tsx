@@ -17,7 +17,7 @@ export function SlotItemTable({
     <table className={table}>
       <thead>
         <tr>
-          <th scope="col" className={`${head} w-24`}>
+          <th scope="col" className={`${head} w-[96px]`}>
             부위
           </th>
           <th scope="col" className={head}>

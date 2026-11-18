@@ -180,6 +180,25 @@ export function HeightTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   )
 }
 
+export function SquareTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
+  return (
+    <TokenRows>
+      {tokens.map((token) => (
+        <TokenRow key={token.name}>
+          <TokenName token={token} />
+          <div className="flex items-center gap-3">
+            <div
+              className="shrink-0 bg-signal"
+              style={{ width: `var(${token.name})`, height: `var(${token.name})` }}
+            />
+            <TokenValue>{token.value}</TokenValue>
+          </div>
+        </TokenRow>
+      ))}
+    </TokenRows>
+  )
+}
+
 export function ValueTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   return (
     <TokenRows>
@@ -249,7 +268,7 @@ function EasingCurve({ value }: { value: string }) {
   const [x1, y1, x2, y2] = points.map((point) => point * 100)
 
   return (
-    <svg viewBox="-4 -4 108 108" className="size-24 overflow-visible" aria-hidden="true">
+    <svg viewBox="-4 -4 108 108" className="size-[96px] overflow-visible" aria-hidden="true">
       <rect x="0" y="0" width="100" height="100" fill="none" className="stroke-line" />
       <path
         d={`M0 100 C${x1} ${100 - y1}, ${x2} ${100 - y2}, 100 0`}

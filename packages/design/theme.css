@@ -200,6 +200,14 @@
   /* 상단 바 높이 */
   --height-topbar: 48px;
 
+  /* 아이콘 */
+  --size-icon-sm: 16px;
+  --size-icon-md: 20px;
+  --size-icon-lg: 24px;
+
+  /* 아이템, 스킬 아이콘 */
+  --size-game-icon: 28px;
+
   /* 웹 화면 상자의 폭 */
   --container-page: 1080px;
   /* 운영 화면 상자의 폭 */

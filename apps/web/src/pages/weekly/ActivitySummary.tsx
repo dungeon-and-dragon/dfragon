@@ -55,7 +55,7 @@ function SummaryStat({
         </b>
       </Tooltip.Trigger>
       <Tooltip.Popup side="bottom" align="start" sideOffset={8}>
-        <div className="flex min-w-50 flex-col text-fg">{children}</div>
+        <div className="flex min-w-[200px] flex-col text-fg">{children}</div>
       </Tooltip.Popup>
     </Tooltip.Root>
   )
@@ -180,7 +180,7 @@ export function ActivitySummarySkeleton({ hasLegion }: { hasLegion: boolean }): 
       {labels.map((label) => (
         <div key={label} className={STAT}>
           <span className={STAT_LABEL}>{label}</span>
-          <span className="my-1 block h-5 w-10 rounded-control bg-inset" />
+          <span className="my-1 block h-[20px] w-[40px] rounded-control bg-inset" />
         </div>
       ))}
     </div>

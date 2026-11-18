@@ -27,8 +27,7 @@ const cellBaseClass = 'overflow-hidden px-3 align-middle text-ellipsis first:pl-
 const cellClass = `${cellBaseClass} whitespace-nowrap`
 const endCellClass = `${cellClass} text-right`
 const numberClass = 'font-mono font-semibold tabular-nums'
-const tagClass =
-  'box-border inline-flex h-4.5 shrink-0 items-center rounded-badge border border-current px-1 text-2xs font-semibold whitespace-nowrap'
+const tagClass = 'badge badge-sm border border-current font-semibold'
 const linkClass = 'text-inherit no-underline hover:underline'
 
 const tierClasses: Readonly<Record<CharacterTier, string>> = {
@@ -107,7 +106,7 @@ export function CharacterRow({
       <td className={cellClass}>
         <div className="flex min-w-0 items-center gap-3">
           <div
-            className={`relative size-9 shrink-0 overflow-hidden rounded-control ${shown === undefined ? 'bg-surface' : 'bg-inset'}`}
+            className={`relative size-[36px] shrink-0 overflow-hidden rounded-control ${shown === undefined ? 'bg-surface' : 'bg-inset'}`}
           >
             {shown !== undefined && (
               <RowPortrait character={shown} face={screen === 'raid' ? shown.face : undefined} />

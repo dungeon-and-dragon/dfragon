@@ -23,9 +23,8 @@ const BEFORE = 'text-fg-subtle tabular-nums'
 const AFTER = 'font-semibold tabular-nums'
 const CHANGES = 'm-0 list-none p-0'
 const CHANGE = 'flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line px-4 py-3'
-const CHANGE_SLOT = 'w-14 shrink-0 text-fg-subtle'
-const BADGE =
-  'inline-flex h-5 items-center rounded-badge bg-inset px-2 text-xs font-medium whitespace-nowrap text-fg-muted'
+const CHANGE_SLOT = 'w-[56px] shrink-0 text-fg-subtle'
+const BADGE = 'badge bg-inset text-fg-muted'
 const { head: HEAD, cell: CELL, row: ROW, body: BODY } = itemTableClasses
 
 export function Heading({ title, count }: { title: string; count?: number }): React.JSX.Element {
@@ -183,10 +182,10 @@ export function NameChanges({
       <table className="w-full border-collapse">
         <thead>
           <tr>
-            <th scope="col" className={`${HEAD} w-40`}>
+            <th scope="col" className={`${HEAD} w-[160px]`}>
               일시
             </th>
-            <th scope="col" className={`${HEAD} w-24`}>
+            <th scope="col" className={`${HEAD} w-[96px]`}>
               종류
             </th>
             <th scope="col" className={HEAD}>

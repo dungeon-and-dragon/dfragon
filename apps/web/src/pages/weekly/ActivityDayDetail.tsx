@@ -71,7 +71,7 @@ function ClearGroup({
 function TimelineRow({ at, children }: { at: string; children: ReactNode }): React.JSX.Element {
   return (
     <div className={`${ROW} justify-start gap-2`}>
-      <span className="w-9 shrink-0 font-mono tabular-nums text-fg-subtle">
+      <span className="w-[36px] shrink-0 font-mono tabular-nums text-fg-subtle">
         {formatSeoulTime(at)}
       </span>
       <span className={TEXT}>{children}</span>
@@ -185,7 +185,7 @@ export function ActivityDayDetail({
   seasonDays: AdventureActivitySeasonDaysResult
 }): React.JSX.Element {
   return (
-    <div className="flex w-64 flex-col text-fg">
+    <div className="flex w-[256px] flex-col text-fg">
       <div className="mb-1 flex justify-between gap-4 border-b border-line pb-2 text-xs text-fg-muted">
         <span className="text-fg">{formatActivityDate(date)}</span>
       </div>

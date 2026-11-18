@@ -7,7 +7,7 @@ const WORKER_STALE_MS = 5 * 60_000
 
 const STATUS = 'inline-flex items-center gap-2 whitespace-nowrap text-xs'
 const STATUS_VALUE = 'font-mono font-semibold tabular-nums'
-const DIVIDER = 'h-5 w-px shrink-0 bg-line max-sm:hidden'
+const DIVIDER = 'h-6 w-px shrink-0 bg-line max-sm:hidden'
 const NAV_LINK = `inline-flex h-topbar items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors duration-(--duration-hover) ease-standard hover:bg-surface hover:text-fg max-sm:h-12 ${FOCUS_RING}`
 
 const TOOL_LINKS = [

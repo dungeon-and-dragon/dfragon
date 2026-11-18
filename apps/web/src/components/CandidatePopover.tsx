@@ -53,10 +53,10 @@ export function CandidatePopover({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
         aria-label={`${slot}번 후보 고르기, 후보 ${count}`}
-        className={`m-0 box-border inline-flex h-4.5 shrink-0 cursor-pointer items-center gap-1 rounded-badge border border-current bg-transparent px-1 text-2xs font-semibold whitespace-nowrap text-signal [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard hover:bg-inset data-popup-open:bg-inset ${focusRingClass}`}
+        className={`badge badge-sm m-0 cursor-pointer gap-1 border border-current bg-transparent font-semibold text-signal [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard hover:bg-inset data-popup-open:bg-inset ${focusRingClass}`}
       >
         {`후보 ${count}`}
-        <ChevronDownIcon className="size-2.5 stroke-3" />
+        <ChevronDownIcon className="size-[10px] stroke-3" />
       </Popover.Trigger>
       <Popover.Popup
         side="bottom"
@@ -116,12 +116,12 @@ function CandidateTile({
       onClick={handleClick}
       className={`relative m-0 box-border flex w-16 cursor-pointer flex-col rounded-control border bg-transparent p-0 text-left text-fg [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard ${shown ? 'border-signal shadow-[0_0_0_1px_var(--color-signal)]' : 'border-transparent hover:border-line-input'} ${focusRingClass}`}
     >
-      <span className="relative block size-15.5 overflow-hidden bg-inset">
+      <span className="relative block size-[62px] overflow-hidden bg-inset">
         <CardImage src={characterImageUrl(choice)} />
       </span>
       {shown && (
-        <span className="absolute top-0.5 right-0.5 flex size-4 items-center justify-center rounded-control bg-signal text-on-signal">
-          <CheckIcon className="size-2.5 stroke-4" />
+        <span className="absolute top-[2px] right-[2px] flex size-4 items-center justify-center rounded-control bg-signal text-on-signal">
+          <CheckIcon className="size-[10px] stroke-4" />
         </span>
       )}
       <span aria-hidden="true" className="truncate px-1 pt-1 text-2xs text-fg-muted">
