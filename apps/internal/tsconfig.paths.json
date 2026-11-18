@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "#ops-api/*": ["./src/api/*"],
+      "#ops-components/*": ["./src/components/*"],
+      "#ops-testing/*": ["./src/testing/*"],
+      "#app/*": ["./src/*"],
+      "@dfragon/ui": ["../../packages/ui/src/index.tsx"],
+      "@dfragon/lib": ["../../packages/lib/src/index.ts"]
+    }
+  }
+}

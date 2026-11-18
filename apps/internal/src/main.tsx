@@ -2,7 +2,7 @@ import './app.css'
 import { QueryClient } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createOpsClient } from './api/ops-client'
+import { createOpsClient } from '#ops-api/ops-client'
 import { OpsApp } from './OpsApp'
 
 // 운영에서는 host의 reverse proxy가, 개발 서버는 vite.config.ts가 같은 origin의 /api를 운영 app으로 넘긴다.

@@ -1,5 +1,5 @@
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { OpsClient } from './api/ops-client'
+import type { OpsClient } from '#ops-api/ops-client'
 import { OpsClientContext } from './ops-queries'
 import { OpsScreen } from './OpsScreen'
 

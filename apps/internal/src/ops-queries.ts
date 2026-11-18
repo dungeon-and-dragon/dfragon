@@ -6,7 +6,7 @@ import {
   type UseMutationResult
 } from '@tanstack/react-query'
 import { createContext, use } from 'react'
-import type { OpsClient } from './api/ops-client'
+import type { OpsClient } from '#ops-api/ops-client'
 
 export const REFRESH_INTERVAL_MS = 1_000
 

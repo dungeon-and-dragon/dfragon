@@ -1,5 +1,5 @@
 import { Button } from '@dfragon/ui'
-import type { Job, Run } from '../api/ops-schemas'
+import type { Job, Run } from '#ops-api/ops-schemas'
 import {
   EMPTY_VALUE,
   formatDateMinute,
@@ -8,9 +8,9 @@ import {
   formatSummary,
   runDuration,
   TRIGGER_LABELS
-} from '../format'
-import { useJobRuns } from '../ops-queries'
-import { argInputs } from '../run-args'
+} from '#app/format'
+import { useJobRuns } from '#app/ops-queries'
+import { argInputs } from '#app/run-args'
 import { panelClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'
