@@ -52,6 +52,7 @@ import type { SeasonBackfillJob } from '#domain/character-timeline/index.js'
 import { readApiBuildInfo } from '#infrastructure/build-info.js'
 import {
   parseCharacterBasic,
+  parseCharacterSets,
   parseCharacterSkillStyle
 } from '@dfragon/server-core/infrastructure/neople/index.js'
 import { createNeopleCharacterImage } from '#infrastructure/neople/index.js'
@@ -86,6 +87,7 @@ export interface ApiServicesOptions {
   readonly recordCharacterSkillStyle?: CharacterBasicRepository['recordSkillStyle']
   readonly recordCharacterScore?: CharacterBasicRepository['recordScore']
   readonly recordCharacterHistory?: CharacterBasicRepository['recordHistory']
+  readonly recordCharacterSets?: CharacterBasicRepository['recordSets']
   readonly characterHistory?: CharacterHistoryRepository
   readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsRepository
@@ -204,16 +206,18 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   }
 
   if (recordCharacterBasic !== undefined) {
-    // 스킬 스타일, 점수, 이력 기록 함수를 주지 않은 app은 그 기록을 하지 않는다.
+    // 스킬 스타일, 점수, 이력, 세트 기록 함수를 주지 않은 app은 그 기록을 하지 않는다.
     const repository: CharacterBasicRepository = {
       recordBasic: recordCharacterBasic,
       recordSkillStyle: options.recordCharacterSkillStyle ?? (async () => undefined),
       recordScore: options.recordCharacterScore ?? (async () => undefined),
-      recordHistory: options.recordCharacterHistory ?? (async () => undefined)
+      recordHistory: options.recordCharacterHistory ?? (async () => undefined),
+      recordSets: options.recordCharacterSets ?? (async () => undefined)
     }
     const characterBasic = new CharacterBasicService(repository, {
       parseBasic: parseCharacterBasic,
       parseSkillStyle: parseCharacterSkillStyle,
+      parseSets: parseCharacterSets,
       reportFailure: reportCode
     })
     subscribers.push((event) => characterBasic.record(event))
