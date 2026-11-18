@@ -1,0 +1,60 @@
+/*
+ * 빈 상태, 오류, 받는 중 자리와 로딩 막대다.
+ * <p class="state">즐겨찾기한 캐릭터가 없습니다.</p>
+ * <p class="state state-error" role="alert">랭킹을 받지 못했습니다.</p>
+ * <div class="state state-pending" role="status"><span class="loading-line"><span></span></span>받는 중입니다.</div>
+ * 로딩 막대의 진행 조각은 웹이 GSAP로 움직인다. 움직이지 않을 때는 가운데에 멈춰 있다.
+ */
+.state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 48px 16px;
+  color: var(--color-fg);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.state-error {
+  color: var(--color-fg-danger);
+  font-weight: var(--font-weight-normal);
+}
+
+.state-pending {
+  flex-direction: column;
+  gap: 12px;
+  color: var(--color-fg-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.loading-line {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  width: 96px;
+  height: 2px;
+  overflow: hidden;
+  background-color: var(--color-line);
+}
+
+.loading-line > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 16px);
+  width: 32px;
+  background-color: var(--color-fg);
+}
+
+.loading-line-sm {
+  width: 48px;
+}
+
+.loading-line-sm > span {
+  left: calc(50% - 8px);
+  width: 16px;
+}
