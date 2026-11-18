@@ -1,4 +1,7 @@
-import type { ParseCharacterBasic } from '@dfragon/server-core/application/character-basic/ports.js'
+import type {
+  ParseCharacterBasic,
+  ParseCharacterSets
+} from '@dfragon/server-core/application/character-basic/ports.js'
 import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import type {
   CalculateScore,
@@ -29,6 +32,7 @@ export type ScoreCalculationPorts = {
   createSources: (events: ScoreSourceEvents) => ScoreSources
   readConcurrency: () => number
   parseBasic: ParseCharacterBasic
+  parseSets: ParseCharacterSets
   now: () => Date
   pause: (ms: number) => Promise<void>
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
