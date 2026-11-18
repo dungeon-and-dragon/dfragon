@@ -67,6 +67,8 @@ function memoryStore(initial?: TimelineSyncState) {
 }
 
 const emptyInputs: TimelineInputs = { events: [], items: [] }
+const noItemDictionary = { fill: async () => 0 }
+const unexpectedItemDictionaryFailure = () => assert.fail('사전 채우기 실패가 보고되면 안 된다')
 
 test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기화하고 다른 캐릭터는 기다리지 않고 시작한다', async () => {
   const running = gate()
@@ -174,7 +176,10 @@ test('마지막 성공이 1시간 이내면 Neople을 부르지 않는다', asyn
     return emptyInputs
   }
 
-  await new TimelineSyncService(recent.store, fetchTimeline, () => now).sync(character)
+  await new TimelineSyncService(recent.store, fetchTimeline, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
 
   assert.equal(calls, 0)
   assert.equal(recent.successes(), 0)
@@ -185,7 +190,10 @@ test('마지막 성공이 1시간 이내면 Neople을 부르지 않는다', asyn
     lastSucceededAt: new Date(now.getTime() - 61 * MINUTE_MS)
   })
 
-  await new TimelineSyncService(stale.store, fetchTimeline, () => now).sync(character)
+  await new TimelineSyncService(stale.store, fetchTimeline, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
 
   assert.equal(calls, 1)
   assert.equal(stale.successes(), 1)
@@ -201,8 +209,9 @@ test('다시 받을 때는 기록 지연을 감안해 마지막 동기화 위치
   await new TimelineSyncService(
     stale.store,
     async () => emptyInputs,
+    noItemDictionary,
     () => now
-  ).sync(character)
+  ).sync(character, unexpectedItemDictionaryFailure)
 
   assert.deepEqual(stale.replaced, [{ start: new Date('2026-11-04T10:30:00Z'), end: now }])
 })
@@ -217,8 +226,9 @@ test('마지막 동기화 위치가 중천 시작 30분 안이면 중천 시작�
   await new TimelineSyncService(
     early.store,
     async () => emptyInputs,
+    noItemDictionary,
     () => now
-  ).sync(character)
+  ).sync(character, unexpectedItemDictionaryFailure)
 
   assert.deepEqual(early.replaced, [{ start: SEASON_START, end: now }])
 })
@@ -233,7 +243,10 @@ test('처음 동기화는 중천 시작부터 90일 구간을 앞에서부터 �
     return emptyInputs
   }
 
-  await new TimelineSyncService(fresh.store, fetchTimeline, () => now).sync(character)
+  await new TimelineSyncService(fresh.store, fetchTimeline, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
 
   assert.equal(requested[0]!.start.getTime(), SEASON_START.getTime())
   assert.equal(requested.at(-1)!.end.getTime(), now.getTime())
@@ -257,7 +270,10 @@ test('세 번째 구간에서 Neople이 실패하면 앞 두 구간만 저장되
     return emptyInputs
   }
 
-  await new TimelineSyncService(fresh.store, fetchTimeline, () => now).sync(character)
+  await new TimelineSyncService(fresh.store, fetchTimeline, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
 
   assert.equal(fresh.replaced.length, 2)
   assert.equal(fresh.replaced[0]!.start.getTime(), SEASON_START.getTime())
@@ -279,7 +295,10 @@ test('저장이 실패하면 DB 실패를 기록하고 다음 구간을 받지 �
     return emptyInputs
   }
 
-  await new TimelineSyncService(fresh.store, fetchTimeline, () => now).sync(character)
+  await new TimelineSyncService(fresh.store, fetchTimeline, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
 
   assert.equal(calls, 1)
   assert.equal(fresh.successes(), 0)
