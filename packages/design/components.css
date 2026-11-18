@@ -11,8 +11,8 @@
 @import './components/tooltip.css';
 @import './components/popover.css';
 @import './components/status.css';
-@import './components/progress.css';
 @import './components/page.css';
 @import './components/frame.css';
 @import './components/table.css';
 @import './components/display.css';
+@import './components/state.css';

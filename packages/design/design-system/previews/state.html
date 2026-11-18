@@ -1,0 +1,29 @@
+<!-- @dsCard group="Components" height=420 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    .row {
+      border-bottom: 1px solid var(--color-line);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <p class="state row">즐겨찾기한 캐릭터가 없습니다.</p>
+    <p class="state state-error row" role="alert">랭킹을 받지 못했습니다.</p>
+    <div class="state state-pending row" role="status">
+      <span class="loading-line" aria-hidden="true"><span></span></span>
+      타임라인을 받는 중입니다.
+    </div>
+    <div class="state state-pending" style="flex-direction: row; padding-block: 12px">
+      <span class="loading-line loading-line-sm" aria-hidden="true"><span></span></span>
+      기록을 더 받는 중입니다.
+    </div>
+  </body>
+</html>

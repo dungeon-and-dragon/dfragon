@@ -34,3 +34,30 @@
   line-height: var(--text-sm--line-height);
   font-weight: var(--font-weight-semibold);
 }
+
+/*
+ * ConfirmPopover. 제목, 실패 문구, 취소와 확인 버튼을 세로로 둔다.
+ * <div class="popover"><div class="confirm-popover"><h2 class="popover-title">…</h2>
+ *   <p class="confirm-popover-error" role="alert">…</p><div class="confirm-popover-actions">…</div></div></div>
+ */
+.confirm-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 240px;
+  padding: 16px;
+}
+
+.confirm-popover-error {
+  margin: 0;
+  color: var(--color-fg-danger);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+.confirm-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
