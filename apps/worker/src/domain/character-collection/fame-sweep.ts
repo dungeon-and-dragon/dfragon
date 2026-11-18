@@ -1,4 +1,5 @@
 // Neople 명성 검색은 한 번에 명성 2,000 범위와 200행까지만 답하고 다음 페이지 cursor가 없다.
+// 구간의 양 끝 명성을 포함하고 명성이 높은 순으로 답한다(2026-11-18 실제 응답).
 export const FAME_SEARCH_RANGE = 2000
 export const FAME_SEARCH_LIMIT = 200
 
@@ -16,9 +17,8 @@ export function fameWindowBelow(maxFame: number): FameWindow {
 /** 돌려주는 값이 `window.maxFame`보다 작지 않으면 호출한 쪽이 같은 구간을 끝없이 다시 부른다. 끝나면 undefined다. */
 export function nextMaxFame(window: FameWindow, fames: readonly number[]): number | undefined {
   if (fames.length < FAME_SEARCH_LIMIT) {
-    // 구간 경계를 Neople이 포함하는지 확인하지 못해 경계 명성을 다음 구간에서 한 번 더 받는다.
     if (window.minFame > 0) {
-      return window.minFame
+      return window.minFame - 1
     }
 
     return undefined
