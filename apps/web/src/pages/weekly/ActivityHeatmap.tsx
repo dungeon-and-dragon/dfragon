@@ -58,8 +58,7 @@ const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
 const LABEL = 'text-2xs whitespace-nowrap text-fg-subtle'
 const TAG = 'badge badge-sm border border-current tabular-nums'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
-const BOX =
-  'relative grid grid-cols-[minmax(0,1fr)_120px] rounded-panel border border-line bg-canvas xl:grid-cols-[minmax(0,1fr)]'
+const BOX = 'section grid grid-cols-[minmax(0,1fr)_120px] xl:grid-cols-[minmax(0,1fr)]'
 
 // gsap이 heatmap 격자에 --heatmap-ring-angle을 돌리고, 테두리가 상속받아 각도로 쓴다.
 const RING =

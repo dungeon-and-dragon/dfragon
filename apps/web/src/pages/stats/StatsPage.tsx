@@ -13,7 +13,7 @@ import {
 } from '../../components/chart/stats-bars'
 
 const integer = new Intl.NumberFormat('ko-KR')
-const SCREEN = 'flex flex-col gap-4 p-4'
+const SCREEN = 'flex flex-col'
 
 export function StatsPage(): React.JSX.Element {
   const result = useCharacterStats()
@@ -31,7 +31,7 @@ export function StatsPage(): React.JSX.Element {
       return (
         <div className={SCREEN}>
           <TitleBox title="캐릭터 통계" />
-          <p role="alert" className="m-0 text-sm text-fg-danger">
+          <p role="alert" className="section m-0 px-4 text-sm text-fg-danger">
             {result.message}
           </p>
         </div>
@@ -51,9 +51,11 @@ export function StatsPage(): React.JSX.Element {
               />
             )}
           </TitleBox>
-          <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+          <div className="section section-cols">
             <StatBox name="서버 인구" bars={serverBars(stats)} />
             <FameBox bars={fameBars(stats)} />
+          </div>
+          <div className="section section-cols">
             <StatBox name="직업 분포" bars={jobBars(stats)} />
             <StatBox name="직업별 평균 명성" bars={averageFameBars(stats)} tone="fame" />
           </div>

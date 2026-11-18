@@ -57,7 +57,7 @@ export function RankingFilterBox({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-panel border border-line bg-canvas p-4">
+    <div className="section flex flex-col gap-3 px-4">
       <div className={FILTER_ROW}>
         <h2 id={jobLabelId} className={FILTER_LABEL}>
           직업

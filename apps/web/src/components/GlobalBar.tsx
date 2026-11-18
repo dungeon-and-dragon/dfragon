@@ -33,8 +33,8 @@ export function GlobalBar(): React.JSX.Element {
   })
 
   return (
-    <header className="shrink-0 border-b border-line bg-canvas text-fg">
-      <div className="page flex h-topbar min-w-0 items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0 max-sm:pt-2">
+    <header className="topbar">
+      <div className="page max-sm:h-auto max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0 max-sm:pt-2">
         <Link
           to="/"
           aria-label={`${PRODUCT_NAME} 첫 화면`}
@@ -44,7 +44,7 @@ export function GlobalBar(): React.JSX.Element {
             {PRODUCT_NAME}
           </span>
         </Link>
-        <span aria-hidden="true" className="h-6 w-px shrink-0 bg-line max-sm:hidden" />
+        <span aria-hidden="true" className="divider-v max-sm:hidden" />
         <nav
           ref={menuRef}
           aria-label="전역 메뉴"

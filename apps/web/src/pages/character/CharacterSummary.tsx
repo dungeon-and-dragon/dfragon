@@ -17,13 +17,13 @@ const integer = new Intl.NumberFormat('ko-KR')
 // API도 마지막으로 받은 지 1분 안의 강제 갱신에는 Neople을 다시 부르지 않고 받아 둔 응답을 준다.
 const REFRESH_INTERVAL_MS = 60_000
 
-const SUMMARY = 'flex flex-wrap items-center gap-6 rounded-panel border border-line bg-canvas p-6'
+const SUMMARY = 'section flex flex-wrap items-center gap-6 px-4'
 const WELL = 'relative h-[112px] w-[96px] shrink-0 overflow-hidden rounded-control bg-inset'
 const IDENTITY = 'flex min-w-0 grow basis-[280px] flex-col gap-2'
 const STATS = 'flex shrink-0 gap-12'
-const STAT = 'flex min-w-[104px] flex-col items-end gap-1'
-const STAT_LABEL = 'text-xs font-medium text-fg-subtle'
-const STAT_VALUE = 'font-mono text-xl font-semibold tabular-nums'
+const STAT = 'stat min-w-[104px]'
+const STAT_LABEL = 'stat-label'
+const STAT_VALUE = 'stat-value font-mono tabular-nums'
 const LINE = 'flex items-center gap-2 whitespace-nowrap'
 const LINK = 'no-underline hover:text-fg hover:underline'
 const SCORE_TONES = { dealer: 'text-score-dealer', buffer: 'text-score-buffer' } as const
@@ -77,9 +77,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
       </div>
       <div className={IDENTITY}>
         <div className="flex min-w-0 items-center gap-2">
-          <h1 className="m-0 text-xl font-semibold tracking-heading">
-            {character.characterName ?? MISSING_VALUE}
-          </h1>
+          <h1 className="screen-title">{character.characterName ?? MISSING_VALUE}</h1>
           {favorite != null && <FavoriteToggle character={favorite} />}
           <RefreshControl
             key={lastSuccessfulFetchAt}

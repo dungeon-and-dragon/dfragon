@@ -66,12 +66,15 @@ export function MultisearchPage(): React.JSX.Element {
 
 export function MultisearchBoard({ host }: { host: BrowserHost }): React.JSX.Element {
   return (
-    <div onKeyDown={keepSeatMoveKeys} className="box-border flex min-w-page flex-col p-4">
+    <div onKeyDown={keepSeatMoveKeys} className="section">
       <PastedFrameRounds host={host} />
       <AutoRounds host={host} />
-      <div className="flex flex-col rounded-panel border border-line bg-canvas">
-        <GameBar />
-        <SearchScreen captureSource={<ScreenShareChip host={host} />} />
+      {/* 좌석 표는 화면 상자 폭(양옆 세로 선 안쪽)보다 좁아지면 배치가 깨지므로, 좁은 창에서는 구획 안에서 가로로 스크롤한다. */}
+      <div className="overflow-x-auto">
+        <div className="flex min-w-[1078px] flex-col">
+          <GameBar />
+          <SearchScreen captureSource={<ScreenShareChip host={host} />} />
+        </div>
       </div>
     </div>
   )

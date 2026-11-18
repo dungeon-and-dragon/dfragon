@@ -219,16 +219,16 @@ function HistoryCharts({
   ]
 
   return (
-    <div className={`grid grid-cols-2 gap-4 p-4 max-sm:grid-cols-1 ${LINE}`}>
+    <div
+      className={`grid grid-cols-2 divide-x divide-line max-sm:grid-cols-1 max-sm:divide-x-0 max-sm:divide-y ${LINE}`}
+    >
       {charts.map((series) => (
         <section
           key={series.key}
           aria-label={`${series.name} 추이`}
-          className="flex min-w-0 flex-col rounded-panel border border-line bg-canvas"
+          className="flex min-w-0 flex-col"
         >
-          <div className={STRIP}>
-            <h3 className="m-0 text-sm font-semibold">{series.name}</h3>
-          </div>
+          <h3 className="section-title">{series.name}</h3>
           <LineChart
             label={`${series.name} 추이`}
             x={x}

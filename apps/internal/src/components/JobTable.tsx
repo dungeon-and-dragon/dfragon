@@ -123,9 +123,9 @@ function JobRow({
 export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): React.JSX.Element {
   return (
     <section aria-label="job" className={panelClasses.box}>
-      <h2 className={panelClasses.heading}>
+      <h2 className="section-title">
         Job
-        {jobs.length > 0 && <span className={panelClasses.headingCount}>{jobs.length}</span>}
+        {jobs.length > 0 && <span className="section-title-count">{jobs.length}</span>}
       </h2>
       {jobs.length > 0 ? (
         <div className={panelClasses.scroll}>
