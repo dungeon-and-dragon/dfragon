@@ -88,19 +88,19 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         </div>
         <div className={LINE}>
           <ServerBadge serverId={character.serverId} />
-          {job != null && <span className="text-fg-muted">{job}</span>}
-          {character.level != null && (
-            <span className="num text-fg-subtle">{`Lv.${character.level}`}</span>
-          )}
+          {affiliations.map(({ id, name, tone, link }, index) => (
+            <span key={id} className="inline-flex items-center gap-2">
+              {index > 0 && <span aria-hidden="true" className="h-[10px] w-px bg-line-strong" />}
+              {link || <span className={tone}>{name}</span>}
+            </span>
+          ))}
         </div>
-        {affiliations.length > 0 && (
+        {(job != null || character.level != null) && (
           <div className={LINE}>
-            {affiliations.map(({ id, name, tone, link }, index) => (
-              <span key={id} className="inline-flex items-center gap-2">
-                {index > 0 && <span aria-hidden="true" className="h-[10px] w-px bg-line-strong" />}
-                {link || <span className={tone}>{name}</span>}
-              </span>
-            ))}
+            {job != null && <span className="text-fg-muted">{job}</span>}
+            {character.level != null && (
+              <span className="num text-fg-subtle">{`Lv.${character.level}`}</span>
+            )}
           </div>
         )}
       </div>
