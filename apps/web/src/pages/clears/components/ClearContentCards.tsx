@@ -10,8 +10,7 @@ const AT_BOTH_EDGES: Edges = { start: true, end: true }
 const CARD =
   'relative m-0 box-border flex h-[294px] w-[196px] shrink-0 cursor-pointer snap-start flex-col items-stretch overflow-hidden rounded-panel border bg-canvas p-4 text-left [font-family:inherit] text-fg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
 const CARD_IDLE = 'border-line hover:border-line-input'
-// 카드가 가로 스크롤 상자에 붙어 바깥 그림자는 잘리므로 선택선의 둘째 1px을 안쪽에 그린다.
-const CARD_SELECTED = 'border-signal shadow-[inset_0_0_0_1px_var(--color-signal)]'
+const CARD_SELECTED = 'border-signal shadow-selected'
 const SHADE =
   'absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--color-canvas)_70%,transparent)_0%,color-mix(in_srgb,var(--color-canvas)_20%,transparent)_30%,color-mix(in_srgb,var(--color-canvas)_92%,transparent)_78%)]'
 const PAGER =
@@ -81,7 +80,7 @@ export function ClearContentCards({
     <nav aria-label="컨텐츠" className="relative">
       <div
         ref={trackRef}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-m-1 flex snap-x snap-mandatory scroll-px-1 gap-3 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {cards.map((card) => (
           <Card key={card.key} card={card} selected={card.key === selectedKey} onOpen={onOpen} />
