@@ -3,9 +3,9 @@ import { QueryClient } from '@tanstack/react-query'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createOpsClient } from './api/ops-client'
+import { createOpsClient } from '#ops-api/ops-client'
 import { OpsApp } from './OpsApp'
-import { FakeOpsApi, job, run } from './testing/fake-ops-api'
+import { FakeOpsApi, job, run } from '#ops-testing/fake-ops-api'
 
 // 화면이 읽는 시각(14:32:05 KST)을 고정한다. 1초 다시 읽기 timer는 진짜 timer라 테스트 안에서 돌지 않는다.
 const NOW = new Date('2026-11-10T05:32:05.000Z')
