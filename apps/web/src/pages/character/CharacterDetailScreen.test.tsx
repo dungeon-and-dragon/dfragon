@@ -169,14 +169,14 @@ it('받는 동안에는 요약과 탭 줄 대신 뼈대와 받는 중 안내만 
   expect(container.querySelector('[role="tablist"]')).toBeNull()
 })
 
-it('딜러 요약은 이름, 서버 칩과 전직과 레벨, 모험단과 길드, 명성 색의 명성, 역할 색의 장비 점수를 보인다', async () => {
+it('딜러 요약은 이름, 서버와 모험단과 길드, 전직과 레벨, 명성 색의 명성, 역할 색의 장비 점수를 보인다', async () => {
   const card: Card = { role: 'dealer', score: scoreOf({ value: 392332 }) }
   await render(async () => detailOf({ card }))
 
   expect(textLines()).toEqual([
     '커피갱신30분 전',
-    '바칼버서커 귀검사(남)Lv.115',
-    '동네커피필로시스'
+    '바칼동네커피필로시스',
+    '버서커 귀검사(남)Lv.115'
   ])
   expect(summary().querySelector('img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/servers/bakal/characters/dealer-1?zoom=1'
@@ -193,7 +193,7 @@ it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최�
     detailOf({ character: maleCrusader, card: { role: 'buffer', score: null } })
   )
 
-  expect(textLines()[1]).toBe('바칼크루세이더(버퍼) 프리스트(남)Lv.115')
+  expect(textLines()[2]).toBe('크루세이더(버퍼) 프리스트(남)Lv.115')
   expect(useRecentCharacterStore.getState().recentCharacters[0]).toMatchObject({
     characterId: 'dealer-1',
     role: 'buffer'
@@ -205,7 +205,7 @@ it('캐릭터 상세 요약의 전직 뒤에 직업명을 보인다', async () =
     detailOf({ character: { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' } })
   )
 
-  expect(textLines()[1]).toBe('바칼넨마스터 격투가(여)Lv.115')
+  expect(textLines()[2]).toBe('넨마스터 격투가(여)Lv.115')
 })
 
 it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {
@@ -237,15 +237,15 @@ it('버퍼 요약은 점수 라벨이 버프 점수이고 버퍼 색이며, 근�
   expect(summary().textContent).not.toContain('장비 점수')
 })
 
-it('명성과 점수가 없으면 -를 두고, 길드가 없으면 모험단만 구분선 없이 둔다', async () => {
+it('명성과 점수가 없으면 -를 두고, 길드가 없으면 서버 뒤에 모험단만 구분선 없이 둔다', async () => {
   await render(async () =>
     detailOf({ character: { fame: null, guildName: null }, card: { role: 'dealer', score: null } })
   )
 
   expect(statValue('명성').textContent).toBe('-')
   expect(statValue('장비 점수').textContent).toBe('-')
-  expect(textLines()[2]).toBe('동네커피')
-  expect(identityLines()[2].querySelectorAll('[aria-hidden="true"]')).toHaveLength(0)
+  expect(textLines()[1]).toBe('바칼동네커피')
+  expect(identityLines()[1].querySelectorAll('[aria-hidden="true"]')).toHaveLength(0)
 })
 
 it('탭 줄은 여덟 탭을 순서대로 두고 받은 tab을 고르며, 다른 탭을 누르면 다시 조회하지 않고 그 탭을 알린다', async () => {
