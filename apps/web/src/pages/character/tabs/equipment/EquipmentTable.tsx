@@ -4,7 +4,6 @@ import {
   type EquipmentReinforce,
   type EquipmentRow,
   type EquipmentView,
-  formatPoint,
   type ItemView
 } from '#core/character'
 import { enhancementTextClasses } from '#components/game-colors'
@@ -13,7 +12,7 @@ import { ItemCell } from './item-parts'
 
 const REINFORCE_LABELS = { amplify: '증폭', enhance: '강화' } as const
 
-const { slot, muted, missing } = itemTableClasses
+const { slot, missing } = itemTableClasses
 
 export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Element | null {
   const { items, creature, aura } = view
@@ -34,14 +33,8 @@ export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Ele
             <th scope="col" className="w-[128px]">
               강화, 증폭
             </th>
-            <th scope="col" className="w-[320px]">
+            <th scope="col" className="w-[400px]">
               마법부여
-            </th>
-            <th scope="col" className="table-num w-[96px]">
-              세트 포인트
-            </th>
-            <th scope="col" className="table-num w-[80px]">
-              정밀도
             </th>
           </tr>
         </thead>
@@ -62,7 +55,7 @@ function EquipmentItemRow({ item }: { item: EquipmentRow }): React.JSX.Element {
     <tr>
       <td className={`${slot}`}>{item.slotName}</td>
       <td>
-        <ItemCell item={item} tune={item.tune} exalted={item.exalted} />
+        <ItemCell item={item} tune={item.tune} exalted={item.exalted} potency={item.potency} />
       </td>
       <td className="whitespace-nowrap">
         <Reinforce reinforce={item.reinforce} refine={item.refine} />
@@ -70,30 +63,24 @@ function EquipmentItemRow({ item }: { item: EquipmentRow }): React.JSX.Element {
       <td className="text-xs text-game-enchant">
         <Enchants options={item.enchants} />
       </td>
-      <td className={`table-num ${muted}`}>
-        {item.setPoint !== null ? formatPoint(item.setPoint) : MISSING_VALUE}
-      </td>
-      <td className="table-num">
-        {item.potency !== null ? (
-          <span className="text-game-precision">{item.potency}</span>
-        ) : (
-          <span className={missing}>{MISSING_VALUE}</span>
-        )}
-      </td>
     </tr>
   )
 }
 
 function Enchants({ options }: { options: EnchantOption[] }): React.JSX.Element {
+  const important = joinLabels(options.filter(({ emphasized }) => emphasized))
+  const minor = joinLabels(options.filter(({ emphasized }) => !emphasized))
+
   return (
     <>
-      {options.map(({ label, emphasized }, index) => (
-        <span key={label} className={emphasized ? undefined : 'text-fg-muted'}>
-          {index < options.length - 1 ? `${label}, ` : label}
-        </span>
-      ))}
+      {important !== '' && <span className="block">{important}</span>}
+      {minor !== '' && <span className="block text-2xs text-fg-muted">{minor}</span>}
     </>
   )
+}
+
+function joinLabels(options: EnchantOption[]): string {
+  return options.map(({ label }) => label).join(', ')
 }
 
 function ExtraRow({ slotName, item }: { slotName: string; item: ItemView }): React.JSX.Element {
@@ -105,8 +92,6 @@ function ExtraRow({ slotName, item }: { slotName: string; item: ItemView }): Rea
       </td>
       <td className={`${missing}`}>{MISSING_VALUE}</td>
       <td />
-      <td className={`table-num ${missing}`}>{MISSING_VALUE}</td>
-      <td className={`table-num ${missing}`}>{MISSING_VALUE}</td>
     </tr>
   )
 }

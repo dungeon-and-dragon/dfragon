@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { MISSING_VALUE } from '#core/capture'
-import { itemIconUrl, type ItemRarity, type ItemView } from '#core/character'
+import {
+  formatPoint,
+  formatSetPointBonus,
+  itemIconUrl,
+  type ItemRarity,
+  type ItemView,
+  type SetPointBonusRule
+} from '#core/character'
 import { raritySolidOf, rarityTextClasses } from '#components/game-colors'
 import { itemClasses } from './item-classes'
 
@@ -64,11 +71,13 @@ export function TuneNumeral({ numeral }: { numeral: string | null }): React.JSX.
 export function ItemCell({
   item,
   tune,
-  exalted
+  exalted,
+  potency = null
 }: {
   item: ItemView
   tune: string | null
   exalted: boolean
+  potency?: string | null
 }): React.JSX.Element {
   return (
     <div className={itemClasses.item}>
@@ -77,7 +86,25 @@ export function ItemCell({
         <ItemName name={item.itemName} rarity={item.rarity} />
         <TuneNumeral numeral={tune} />
         {exalted && <RarityBadge rarity={item.rarity}>유일</RarityBadge>}
+        {potency !== null && <span className="num text-xs text-game-precision">{potency}</span>}
       </span>
     </div>
+  )
+}
+
+export function SetPoint({
+  point,
+  rule
+}: {
+  point: number
+  rule: SetPointBonusRule
+}): React.JSX.Element {
+  const bonus = formatSetPointBonus(point, rule)
+
+  return (
+    <>
+      <span className={itemClasses.stripNumber}>{formatPoint(point)}</span>
+      {bonus !== null && <span className={itemClasses.stripBonus}>{bonus}</span>}
+    </>
   )
 }

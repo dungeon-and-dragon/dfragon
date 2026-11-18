@@ -77,3 +77,9 @@ export {
   withMaleCrusaderRole
 } from './male-crusader'
 export type { MaleCrusaderRole } from './male-crusader'
+export {
+  EQUIPMENT_SET_POINT_BONUS,
+  formatSetPointBonus,
+  OATH_SET_POINT_BONUS
+} from './set-point-bonus'
+export type { SetPointBonusRule } from './set-point-bonus'

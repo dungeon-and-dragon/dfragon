@@ -1,6 +1,7 @@
 import {
+  EQUIPMENT_SET_POINT_BONUS,
   type EquipmentView,
-  formatPoint,
+  OATH_SET_POINT_BONUS,
   type OathView,
   toEquipmentView,
   toOathView
@@ -8,7 +9,7 @@ import {
 import type { CharacterTabProps } from './character-tab-props'
 import { EquipmentTable } from './equipment/EquipmentTable'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
-import { ItemName, RarityBadge } from './equipment/item-parts'
+import { ItemName, RarityBadge, SetPoint } from './equipment/item-parts'
 
 export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
   const view = toEquipmentView(detail)
@@ -18,7 +19,7 @@ export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
   return (
     <div className={itemTableClasses.root}>
       {(hasEquipmentStrip || oathSet !== null) && (
-        <div className="border-b border-line">
+        <div className={itemClasses.stripGroup}>
           {hasEquipmentStrip && <EquipmentStrip view={view} />}
           {oathSet !== null && <OathSetStrip set={oathSet} />}
         </div>
@@ -38,9 +39,7 @@ function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }):
           {set.rarityName !== null && (
             <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>
           )}
-          {set.point !== null && (
-            <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
-          )}
+          {set.point !== null && <SetPoint point={set.point} rule={EQUIPMENT_SET_POINT_BONUS} />}
         </span>
       ))}
       <span className={itemClasses.spacer} />
@@ -61,9 +60,7 @@ function OathSetStrip({ set }: { set: NonNullable<OathView['set']> }): React.JSX
         <span className="label">서약</span>
         <ItemName name={set.name} rarity={set.rarity} />
         {set.rarityName !== null && <RarityBadge rarity={set.rarity}>{set.rarityName}</RarityBadge>}
-        {set.point !== null && (
-          <span className={itemClasses.stripNumber}>{formatPoint(set.point)}</span>
-        )}
+        {set.point !== null && <SetPoint point={set.point} rule={OATH_SET_POINT_BONUS} />}
       </span>
     </div>
   )
