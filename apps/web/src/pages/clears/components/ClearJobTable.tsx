@@ -128,14 +128,14 @@ function JobTable({
   return (
     // 넓은 화면에서는 스크롤 영역을 두지 않는다. 두면 아래쪽 행의 툴팁이 영역 밖으로 나간 만큼 잘린다.
     <div className="max-sm:overflow-x-auto">
-      <div ref={chartRef} className="relative max-sm:min-w-180">
+      <div ref={chartRef} className="relative max-sm:min-w-[720px]">
         <table className={tableClasses.table}>
           <thead>
             <tr>
-              <th scope="col" className={`${HEAD} w-46 text-left`}>
+              <th scope="col" className={`${HEAD} w-[184px] text-left`}>
                 전직
               </th>
-              <th scope="col" className={`${HEAD} w-28 text-right`}>
+              <th scope="col" className={`${HEAD} w-[112px] text-right`}>
                 클리어 / 캐릭터 수
               </th>
               <th scope="col" className={`${HEAD} text-left`}>

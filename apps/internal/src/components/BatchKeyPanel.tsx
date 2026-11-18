@@ -78,7 +78,7 @@ function AddBatchKeyForm(): React.JSX.Element {
       onSubmit={handleSubmit}
       className="m-0 flex items-end gap-3 border-b border-line px-4 py-3 max-sm:flex-wrap"
     >
-      <div className="field w-50 max-sm:w-full">
+      <div className="field w-[200px] max-sm:w-full">
         <label htmlFor={LABEL_INPUT_ID} className="field-label">
           이름
         </label>
@@ -92,7 +92,7 @@ function AddBatchKeyForm(): React.JSX.Element {
         />
       </div>
       <div
-        className="field w-90 max-sm:w-full"
+        className="field w-[360px] max-sm:w-full"
         data-invalid={message !== undefined ? '' : undefined}
       >
         <label htmlFor={KEY_INPUT_ID} className="field-label">
@@ -153,7 +153,7 @@ function DeleteBatchKeyButton({ batchKey }: { batchKey: BatchKey }): React.JSX.E
       disabled={false}
       pending={deleteKey.isPending}
       failed={deleteKey.isError}
-      popupClassName="w-60"
+      popupClassName="w-[240px]"
       onOpen={deleteKey.reset}
       onConfirm={handleConfirm}
     />

@@ -138,7 +138,7 @@ function ArgsPopover({
           sideOffset={8}
           className={popoverClasses.positioner}
         >
-          <Popover.Popup className={`${popoverClasses.popup} w-80`}>
+          <Popover.Popup className={`${popoverClasses.popup} w-[320px]`}>
             <form onSubmit={handleSubmit}>
               <Popover.Title className={popoverClasses.title}>인자</Popover.Title>
               {inputs.map((input) => (

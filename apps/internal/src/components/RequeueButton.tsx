@@ -29,7 +29,7 @@ export function RequeueButton({
       disabled={count === 0}
       pending={requeue.isPending}
       failed={requeue.isError}
-      popupClassName="w-65"
+      popupClassName="w-[260px]"
       onOpen={requeue.reset}
       onConfirm={handleConfirm}
     />

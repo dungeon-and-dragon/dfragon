@@ -25,25 +25,25 @@ export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Ele
 
   return (
     <div className={scroll}>
-      <table className={`${table} min-w-230 table-fixed`}>
+      <table className={`${table} min-w-[920px] table-fixed`}>
         <thead>
           <tr>
-            <th scope="col" className={`${head} w-22`}>
+            <th scope="col" className={`${head} w-[88px]`}>
               부위
             </th>
             <th scope="col" className={head}>
               장비
             </th>
-            <th scope="col" className={`${head} w-32`}>
+            <th scope="col" className={`${head} w-[128px]`}>
               강화, 증폭
             </th>
-            <th scope="col" className={`${head} w-80`}>
+            <th scope="col" className={`${head} w-[320px]`}>
               마법부여
             </th>
-            <th scope="col" className={`${headEnd} w-24`}>
+            <th scope="col" className={`${headEnd} w-[96px]`}>
               세트 포인트
             </th>
-            <th scope="col" className={`${headEnd} w-20`}>
+            <th scope="col" className={`${headEnd} w-[80px]`}>
               정밀도
             </th>
           </tr>

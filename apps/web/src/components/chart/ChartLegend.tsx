@@ -12,8 +12,8 @@ const MIN_LEGEND_ITEMS = 2
 const LEGEND_CLASS = 'm-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-xs text-fg-muted'
 const LEGEND_ITEM_CLASS = 'flex items-center gap-2'
 const MARK_CLASS = 'shrink-0 h-2 w-2 rounded-[2px]'
-const LINE_MARK_CLASS = 'shrink-0 h-0.5 w-3.5 rounded-none'
-const WIDE_MARK_CLASS = 'shrink-0 h-2 w-3.5 rounded-[2px]'
+const LINE_MARK_CLASS = 'shrink-0 h-[2px] w-[14px] rounded-none'
+const WIDE_MARK_CLASS = 'shrink-0 h-2 w-[14px] rounded-[2px]'
 const DOT_MARK_CLASS = 'shrink-0 h-2 w-2 rounded-full'
 
 export function ChartLegend({

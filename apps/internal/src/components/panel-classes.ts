@@ -15,7 +15,7 @@ export const panelClasses = {
 } as const
 
 const HEAD_CELL =
-  'h-9 whitespace-nowrap border-b border-line bg-surface px-3 text-xs font-medium text-fg-subtle first:pl-4 last:pr-4'
+  'h-[36px] whitespace-nowrap border-b border-line bg-surface px-3 text-xs font-medium text-fg-subtle first:pl-4 last:pr-4'
 const CELL =
   'h-row whitespace-nowrap border-b border-line px-3 py-2 align-middle first:pl-4 last:pr-4'
 

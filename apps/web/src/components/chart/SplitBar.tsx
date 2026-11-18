@@ -15,7 +15,7 @@ export type SplitSegment = Readonly<{
 
 const TOOLTIP_GAP = 6
 const SEGMENT_CLASS =
-  'relative flex min-w-0.5 items-center overflow-hidden rounded-[3px] transition-opacity duration-(--duration-hover) ease-standard'
+  'relative flex min-w-[2px] items-center overflow-hidden rounded-[3px] transition-opacity duration-(--duration-hover) ease-standard'
 const percent = new Intl.NumberFormat('ko-KR', { style: 'percent', maximumFractionDigits: 1 })
 
 function belowTooltipPlaceOf(
@@ -102,7 +102,7 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
       <ul
         data-chart-reveal=""
         onMouseLeave={handleLeave}
-        className="m-0 flex h-7 list-none gap-1 p-0"
+        className="m-0 flex h-[28px] list-none gap-1 p-0"
       >
         {shown.map((segment) => (
           <Segment

@@ -20,7 +20,7 @@ const meta = {
     disabled: { control: 'boolean' }
   },
   render: (args) => (
-    <div className="max-w-sm">
+    <div className="max-w-[384px]">
       <TextField {...args}>
         <TextFieldLabel>캐릭터 이름</TextFieldLabel>
         <TextFieldInput placeholder="이름을 입력합니다" />
@@ -39,7 +39,7 @@ export const Playground: Story = {}
 
 export const Sizes: Story = {
   render: () => (
-    <div className="grid max-w-sm gap-4">
+    <div className="grid max-w-[384px] gap-4">
       {SIZES.map((size) => (
         <TextField key={size} size={size}>
           <TextFieldLabel>{size}</TextFieldLabel>
@@ -52,7 +52,7 @@ export const Sizes: Story = {
 
 export const States: Story = {
   render: () => (
-    <div className="grid max-w-sm gap-6">
+    <div className="grid max-w-[384px] gap-6">
       <TextField>
         <TextFieldLabel>기본</TextFieldLabel>
         <TextFieldInput placeholder="이름을 입력합니다" />
@@ -83,7 +83,7 @@ export const Focus: Story = {
 
 export const Html: Story = {
   render: () => (
-    <div className="grid max-w-sm gap-6">
+    <div className="grid max-w-[384px] gap-6">
       <div className="field">
         <label className="field-label" htmlFor="html-name">
           기본
