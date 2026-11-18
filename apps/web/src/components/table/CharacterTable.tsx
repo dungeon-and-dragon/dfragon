@@ -20,7 +20,7 @@ export type CharacterTableAction = {
 
 export type Affiliation = 'adventure' | 'guild'
 
-// 초상화 옆 두 줄 글자가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다.
+// 초상화가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다.
 const PORTRAIT_CELL = 'py-0'
 const FAME_CELL = 'table-num font-semibold text-game-fame'
 
@@ -158,10 +158,7 @@ export function SkeletonRow({
       <td className={PORTRAIT_CELL}>
         <div className="flex items-center gap-3">
           <span className="skeleton portrait-sm" />
-          <div className="flex flex-col gap-2">
-            <span className="skeleton-text w-[88px]" />
-            <span className="skeleton-text skeleton-text-xs w-[40px]" />
-          </div>
+          <span className="skeleton-text w-[88px]" />
         </div>
       </td>
       <td>
