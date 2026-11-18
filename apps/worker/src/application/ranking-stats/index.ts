@@ -5,6 +5,7 @@ export {
 export {
   StatsJobService,
   createCharacterStatsJob,
+  createItemAdoptionJob,
   createSetAdoptionJob,
   createSkillAdoptionJob
 } from './stats-jobs.js'
