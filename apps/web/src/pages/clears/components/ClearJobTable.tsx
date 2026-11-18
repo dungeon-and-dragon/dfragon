@@ -23,13 +23,12 @@ import {
 } from '../clear-scores'
 import { useChoice } from '../hooks/useChoice'
 import { Panel } from './ClearPanel'
-import { tableClasses } from '../../../components/table/table-classes'
 
 const VISIBLE_JOB_COUNT = 10
 const PLOT_FALLBACK = { width: 320, height: 20 }
 const PLOT_COLOR = 'var(--color-chart-1)'
-const HEAD = `${tableClasses.headCell} py-1 align-top`
-const VALUE = 'text-right font-mono tabular-nums'
+// 축 눈금을 함께 담는 두 줄 헤더라 위로 맞추고 위아래 여백을 줄인다.
+const HEAD = 'py-1 align-top'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -133,16 +132,16 @@ function JobTable({
     // 넓은 화면에서는 스크롤 영역을 두지 않는다. 두면 아래쪽 행의 툴팁이 영역 밖으로 나간 만큼 잘린다.
     <div className="max-sm:overflow-x-auto">
       <div ref={chartRef} className="relative max-sm:min-w-[720px]">
-        <table className={tableClasses.table}>
+        <table className="table table-fixed">
           <thead>
             <tr>
-              <th scope="col" className={`${HEAD} w-[184px] text-left`}>
+              <th scope="col" className={`${HEAD} w-[184px]`}>
                 전직
               </th>
-              <th scope="col" className={`${HEAD} w-[112px] text-right`}>
+              <th scope="col" className={`${HEAD} table-num w-[112px]`}>
                 클리어 / 캐릭터 수
               </th>
-              <th scope="col" className={`${HEAD} text-left`}>
+              <th scope="col" className={HEAD}>
                 {JOB_METRIC_PLOT_LABELS[metric]}
                 <span ref={plotRef} className="mt-1 block">
                   {scale !== undefined && (
@@ -150,15 +149,12 @@ function JobTable({
                   )}
                 </span>
               </th>
-              <th scope="col" className={`${HEAD} w-16 text-right`}>
+              <th scope="col" className={`${HEAD} table-num w-16`}>
                 클리어율
               </th>
             </tr>
           </thead>
-          <tbody
-            onMouseLeave={handleLeave}
-            className={`${tableClasses.body} [&>tr:last-child>th]:border-b-0`}
-          >
+          <tbody onMouseLeave={handleLeave}>
             {rows.map((row) => (
               <JobTableRow
                 key={row.key}
@@ -208,16 +204,13 @@ function JobTableRow({
   }
 
   return (
-    <tr
-      onMouseEnter={stats !== null ? handleMouseEnter : undefined}
-      className={`${tableClasses.row} transition-colors`}
-    >
-      <th scope="row" className={`${tableClasses.cell} truncate text-left font-normal`}>
+    <tr onMouseEnter={stats !== null ? handleMouseEnter : undefined}>
+      <th scope="row" className="text-left font-normal">
         {name}
         {sub !== null && <small className="text-xs text-fg-subtle"> {sub}</small>}
       </th>
-      <td className={`${tableClasses.cell} ${VALUE} text-fg-muted`}>{counts}</td>
-      <td ref={plotRef} className={tableClasses.cell}>
+      <td className="table-num text-fg-muted">{counts}</td>
+      <td ref={plotRef}>
         {stats !== null && scale !== undefined && (
           <>
             <span className="sr-only">{description}</span>
@@ -225,7 +218,7 @@ function JobTableRow({
           </>
         )}
       </td>
-      <td className={`${tableClasses.cell} ${VALUE}`}>{rate}</td>
+      <td className="table-num">{rate}</td>
     </tr>
   )
 }

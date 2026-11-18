@@ -91,7 +91,7 @@ export function RaidScreen({
               <td
                 id={partyLabelId}
                 colSpan={SEAT_TABLE_COLUMN_COUNT}
-                className="px-4 py-0 text-left text-xs font-medium"
+                className="h-8 px-4 py-0 text-left text-xs font-medium"
               >
                 <span className={`${badgeClass} ${partyClasses[partyName]}`}>
                   {`${partyName} 파티`}

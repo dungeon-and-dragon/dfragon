@@ -12,9 +12,7 @@ import { ItemCell } from './item-parts'
 const REINFORCE_LABELS = { amplify: '증폭', enhance: '강화' } as const
 const REINFORCE_TONES = { amplify: 'text-game-amplify', enhance: 'text-game-enhance' } as const
 
-const { scroll, table, head, headEnd, body, row, cell, slot, number, muted, missing } =
-  itemTableClasses
-const NUMBER_CELL = `${cell} text-right whitespace-nowrap ${number}`
+const { slot, number, muted, missing } = itemTableClasses
 
 export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Element | null {
   const { items, creature, aura } = view
@@ -24,31 +22,29 @@ export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Ele
   }
 
   return (
-    <div className={scroll}>
-      <table className={`${table} min-w-[920px] table-fixed`}>
+    <div className="table-scroll">
+      <table className="table table-wrap table-fixed min-w-[920px]">
         <thead>
           <tr>
-            <th scope="col" className={`${head} w-[88px]`}>
+            <th scope="col" className="w-[88px]">
               부위
             </th>
-            <th scope="col" className={head}>
-              장비
-            </th>
-            <th scope="col" className={`${head} w-[128px]`}>
+            <th scope="col">장비</th>
+            <th scope="col" className="w-[128px]">
               강화, 증폭
             </th>
-            <th scope="col" className={`${head} w-[320px]`}>
+            <th scope="col" className="w-[320px]">
               마법부여
             </th>
-            <th scope="col" className={`${headEnd} w-[96px]`}>
+            <th scope="col" className="table-num w-[96px]">
               세트 포인트
             </th>
-            <th scope="col" className={`${headEnd} w-[80px]`}>
+            <th scope="col" className="table-num w-[80px]">
               정밀도
             </th>
           </tr>
         </thead>
-        <tbody className={body}>
+        <tbody>
           {items.map((item, index) => (
             <EquipmentItemRow key={`${item.slotName}-${index}`} item={item} />
           ))}
@@ -62,21 +58,21 @@ export function EquipmentTable({ view }: { view: EquipmentView }): React.JSX.Ele
 
 function EquipmentItemRow({ item }: { item: EquipmentRow }): React.JSX.Element {
   return (
-    <tr className={row}>
-      <td className={`${cell} ${slot}`}>{item.slotName}</td>
-      <td className={cell}>
+    <tr>
+      <td className={`${slot}`}>{item.slotName}</td>
+      <td>
         <ItemCell item={item} tune={item.tune} exalted={item.exalted} />
       </td>
-      <td className={`${cell} whitespace-nowrap`}>
+      <td className="whitespace-nowrap">
         <Reinforce reinforce={item.reinforce} refine={item.refine} />
       </td>
-      <td className={`${cell} text-xs text-game-enchant`}>
+      <td className="text-xs text-game-enchant">
         <Enchants options={item.enchants} />
       </td>
-      <td className={`${NUMBER_CELL} ${muted}`}>
+      <td className={`table-num ${muted}`}>
         {item.setPoint !== null ? formatPoint(item.setPoint) : MISSING_VALUE}
       </td>
-      <td className={NUMBER_CELL}>
+      <td className="table-num">
         {item.potency !== null ? (
           <span className="text-game-precision">{item.potency}</span>
         ) : (
@@ -101,15 +97,15 @@ function Enchants({ options }: { options: EnchantOption[] }): React.JSX.Element 
 
 function ExtraRow({ slotName, item }: { slotName: string; item: ItemView }): React.JSX.Element {
   return (
-    <tr className={row}>
-      <td className={`${cell} ${slot}`}>{slotName}</td>
-      <td className={cell}>
+    <tr>
+      <td className={`${slot}`}>{slotName}</td>
+      <td>
         <ItemCell item={item} tune={null} exalted={false} />
       </td>
-      <td className={`${cell} ${missing}`}>{MISSING_VALUE}</td>
-      <td className={cell} />
-      <td className={`${NUMBER_CELL} ${missing}`}>{MISSING_VALUE}</td>
-      <td className={`${NUMBER_CELL} ${missing}`}>{MISSING_VALUE}</td>
+      <td className={`${missing}`}>{MISSING_VALUE}</td>
+      <td />
+      <td className={`table-num ${missing}`}>{MISSING_VALUE}</td>
+      <td className={`table-num ${missing}`}>{MISSING_VALUE}</td>
     </tr>
   )
 }

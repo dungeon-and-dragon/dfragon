@@ -1,8 +1,7 @@
 import { type FocusEvent, type ReactNode, useState } from 'react'
 import type { SeatMove } from '../hooks/useSeatMove'
 
-const seatClass =
-  'h-row border-b border-line -outline-offset-2 transition-[background-color,opacity] hover:bg-surface'
+const seatClass = '-outline-offset-2 transition-[background-color,opacity]'
 const focusOutlineClass = 'focus-ring-inset'
 const dropOutlineClass = 'outline-2 outline-solid outline-signal'
 

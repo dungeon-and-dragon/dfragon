@@ -25,7 +25,6 @@ const CHANGES = 'm-0 list-none p-0'
 const CHANGE = 'flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line px-4 py-3'
 const CHANGE_SLOT = 'w-[56px] shrink-0 text-fg-subtle'
 const BADGE = 'badge bg-inset text-fg-muted'
-const { head: HEAD, cell: CELL, row: ROW, body: BODY } = itemTableClasses
 
 export function Heading({ title, count }: { title: string; count?: number }): React.JSX.Element {
   return (
@@ -179,32 +178,28 @@ export function NameChanges({
   return (
     <section aria-label="이름 변경">
       <Heading title="이름 변경" count={changes.length} />
-      <table className="w-full border-collapse">
+      <table className="table table-wrap">
         <thead>
           <tr>
-            <th scope="col" className={`${HEAD} w-[160px]`}>
+            <th scope="col" className="w-[160px]">
               일시
             </th>
-            <th scope="col" className={`${HEAD} w-[96px]`}>
+            <th scope="col" className="w-[96px]">
               종류
             </th>
-            <th scope="col" className={HEAD}>
-              이름
-            </th>
+            <th scope="col">이름</th>
           </tr>
         </thead>
-        <tbody className={BODY}>
+        <tbody>
           {changes.toReversed().map(({ kind, at, before, after }, index) => (
-            <tr key={`${index}-${kind}-${at}`} className={ROW}>
-              <td
-                className={`${CELL} font-mono text-xs whitespace-nowrap text-fg-subtle tabular-nums`}
-              >
+            <tr key={`${index}-${kind}-${at}`}>
+              <td className="font-mono text-xs whitespace-nowrap text-fg-subtle tabular-nums">
                 {formatSeoulFullDateTime(at)}
               </td>
-              <td className={CELL}>
+              <td>
                 <span className={BADGE}>{NAME_CHANGE_LABELS[kind]}</span>
               </td>
-              <td className={CELL}>
+              <td>
                 <span className="text-fg-subtle">{before}</span>
                 <span aria-label="에서" className="mx-2 text-fg-subtle">
                   →
