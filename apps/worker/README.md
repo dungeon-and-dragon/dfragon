@@ -10,6 +10,12 @@
 계층 사이의 import 방향과 계층 밖 파일, `apps/api` import는 `pnpm lint`가 막습니다.
 API와 함께 쓰는 코드는 [`@dfragon/server-core`](../../packages/server-core/README.md)에 있습니다.
 
+기능 폴더(`domain/<기능>/`, `application/<기능>/`, `infrastructure/<기술>/`)에는 `index.ts`를 둡니다(ADR 0070).
+`index.ts`는 폴더 밖에서 쓰는 이름만 `export { 이름 } from './파일.js'`로 다시 내보냅니다.
+폴더 밖에서는 `'../../application/<기능>/index.js'`처럼 `index.js`만 import하고, 같은 폴더 안의 파일끼리는 직접 import합니다.
+`application/<기능>/repository.ts`, `ports.ts`는 `index.ts`가 다시 내보내지 않고, infrastructure와 runtime이 파일을 직접 import합니다.
+계층 폴더 바로 아래의 파일과 `src/runtime/`은 파일을 직접 import합니다.
+
 Job 정의와 실행 흐름은 `src/application/jobs/`, 예약은 `src/infrastructure/jobs/`, 실행 이력 DB adapter는 `src/infrastructure/database/`에 있고, worker가 돌릴 job은 `src/runtime/worker-jobs.ts`에 등록합니다.
 worker가 돌리는 기능은 HTTP 경로가 없어 Controller와 DTO 없이 Service와 Repository만 두고, job 정의(`defineJob`)의 `run`이 Service를 부릅니다.
 worker 기능의 Service는 `service.ts`가 아니라 기존 use case 파일(예: `application/content-clears/collection.ts`, `application/character-score/calculation-job.ts`)에 둡니다.
