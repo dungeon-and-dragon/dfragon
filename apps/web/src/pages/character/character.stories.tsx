@@ -3,6 +3,7 @@ import { useState } from 'react'
 import type { SkillWindowCatalog } from '#core/catalog/skill-window'
 import type { ClientHost } from '../../host/client-host'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import {
   storyBuffSkillWindowCatalog,
   storyCharacterDetail,
@@ -52,14 +53,14 @@ function Screen({
   const { serverId, characterId } = storyCharacterDetail(role).character
 
   return (
-    <div className="page mt-6">
+    <StoryScreen>
       <CharacterDetailScreen
         serverId={serverId}
         characterId={characterId}
         tab={tab}
         onTabChange={setTab}
       />
-    </div>
+    </StoryScreen>
   )
 }
 

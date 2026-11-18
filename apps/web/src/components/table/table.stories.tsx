@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '../../testing/story-support/story-characters'
 import { CharacterTable, SkeletonRow } from './CharacterTable'
 import { ListBox } from './ListBox'
@@ -10,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoryFrame>
-        <div className="w-page max-w-full">
+        <StoryScreen>
           <Story />
-        </div>
+        </StoryScreen>
       </StoryFrame>
     )
   ]

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import type { ClientHost } from '../../host/client-host'
 import { StoryFrame } from '../../testing/story-support/StoryFrame'
+import { StoryScreen } from '../../testing/story-support/StoryScreen'
 import {
   STORY_ADVENTURE_NAME,
   storyAdventureActivity,
@@ -42,14 +43,14 @@ function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
 
   return (
     <StoryFrame host={host}>
-      <div className="page mt-6">
+      <StoryScreen>
         <WeeklyScreen
           adventureName={STORY_ADVENTURE_NAME}
           season={season}
           onSeasonChange={setSeason}
           onAdventureOpen={ignoreOpen}
         />
-      </div>
+      </StoryScreen>
     </StoryFrame>
   )
 }
@@ -69,9 +70,9 @@ export const 받지못함: Story = {
 export const 모험단입력: Story = {
   render: () => (
     <StoryFrame>
-      <div className="page mt-6">
+      <StoryScreen>
         <AdventureEntryScreen onAdventureOpen={ignoreOpen} />
-      </div>
+      </StoryScreen>
     </StoryFrame>
   )
 }
