@@ -56,13 +56,6 @@
 !apps/api/test-support/**
 !apps/api/Dockerfile
 !apps/api/docker-entrypoint.sh
-!apps/worker/
-!apps/worker/package.json
-!apps/worker/tsconfig*.json
-!apps/worker/src/
-!apps/worker/src/**
-!apps/worker/test/
-!apps/worker/test/**
 **/*.pem
 **/*.key
 **/.env*
