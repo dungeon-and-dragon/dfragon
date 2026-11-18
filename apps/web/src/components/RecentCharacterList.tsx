@@ -111,7 +111,7 @@ function SavedCharacterSections({
   const recentCharacters = useRecentCharacterStore((state) => state.recentCharacters)
   const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
 
-  // 즐겨찾기 절에서 별을 누르면 그 줄이 사라져 초점을 잃으므로 이름 칸으로 옮긴다.
+  // 즐겨찾기 절에서 하트를 누르면 그 줄이 사라져 초점을 잃으므로 이름 칸으로 옮긴다.
   function focusInput(): void {
     input.current?.focus()
   }

@@ -98,14 +98,11 @@ export function CopyIcon(props: IconProps): React.JSX.Element {
   )
 }
 
-export function CameraIcon(props: IconProps): React.JSX.Element {
+export function ViewfinderIcon(props: IconProps): React.JSX.Element {
   return (
-    <LineIcon {...props}>
-      <path
-        vectorEffect="non-scaling-stroke"
-        d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"
-      />
-      <circle vectorEffect="non-scaling-stroke" cx="12" cy="13" r="3" />
+    <LineIcon strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path vectorEffect="non-scaling-stroke" d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5" />
+      <circle vectorEffect="non-scaling-stroke" cx="12" cy="12" r="3" />
     </LineIcon>
   )
 }
@@ -121,12 +118,11 @@ export function MonitorIcon(props: IconProps): React.JSX.Element {
 
 export function SunIcon(props: IconProps): React.JSX.Element {
   return (
-    <LineIcon {...props}>
-      <polygon vectorEffect="non-scaling-stroke" points="12 7 17 12 12 17 7 12" />
-      <path vectorEffect="non-scaling-stroke" d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+    <LineIcon strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle vectorEffect="non-scaling-stroke" cx="12" cy="12" r="4" />
       <path
         vectorEffect="non-scaling-stroke"
-        d="m5 5 1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"
+        d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
       />
     </LineIcon>
   )
@@ -143,12 +139,17 @@ export function MoonIcon(props: IconProps): React.JSX.Element {
   )
 }
 
-export function StarIcon({ filled = false, ...props }: FillableIconProps): React.JSX.Element {
+export function HeartIcon({ filled = false, ...props }: FillableIconProps): React.JSX.Element {
   return (
-    <LineIcon fill={filled ? 'currentColor' : 'none'} {...props}>
+    <LineIcon
+      fill={filled ? 'currentColor' : 'none'}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path
         vectorEffect="non-scaling-stroke"
-        d="m12 3 2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.9 6.6 19.8l1.1-6.1L3.2 9.4l6.1-.8z"
+        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z"
       />
     </LineIcon>
   )
@@ -157,11 +158,10 @@ export function StarIcon({ filled = false, ...props }: FillableIconProps): React
 export function PinIcon({ filled = false, ...props }: FillableIconProps): React.JSX.Element {
   return (
     <LineIcon fill={filled ? 'currentColor' : 'none'} {...props}>
-      <path vectorEffect="non-scaling-stroke" d="M12 17v5" />
-      <path
-        vectorEffect="non-scaling-stroke"
-        d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"
-      />
+      <g transform="translate(-1.4 1.4) rotate(45 12 12)">
+        <path vectorEffect="non-scaling-stroke" d="M9 3h6v7l3 4H6l3-4z" />
+        <path vectorEffect="non-scaling-stroke" d="M8 3h8M12 14v7" />
+      </g>
     </LineIcon>
   )
 }
