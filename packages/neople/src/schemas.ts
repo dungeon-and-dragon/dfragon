@@ -17,6 +17,23 @@ export const characterSearchSchema = z.object({
 
 export type NeopleCharacterSearchRow = z.output<typeof characterSearchSchema>['rows'][number]
 
+export const serversSchema = z.object({
+  rows: z.array(z.looseObject({ serverId: nonblankString }))
+})
+
+export const jobsSchema = z.object({
+  rows: z.array(
+    z.looseObject({
+      jobId: nonblankString,
+      rows: z.array(z.looseObject({ jobGrowId: nonblankString }))
+    })
+  )
+})
+
+export const charactersFameSchema = z.object({
+  rows: z.array(z.looseObject({ characterId: nonblankString, fame: z.int() }))
+})
+
 export const NEOPLE_CHARACTER_SECTIONS = {
   basic: { path: '', fields: [] },
   status: { path: '/status', fields: ['status', 'buff'] },
