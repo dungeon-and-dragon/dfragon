@@ -5,12 +5,32 @@ import type {
   ClearContentWeekSamples,
   StoredClearPopulation
 } from '@dfragon/database'
-import { emptyClearStatsRepository } from '../src/application/content-clears/service.js'
+import type { ClearSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearWeekSampleService } from '../src/application/content-clears/week-samples.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 
 // 합성 모집단과 집계다. DB 읽기와 저장은 fake이며 저장한 재료를 다시 읽는 왕복은 container-content-clear-check.mjs가 확인한다.
 const week = (date: string) => new Date(`${date}T06:00:00+09:00`)
+const emptySampleRepository: ClearSampleRepository = {
+  readAdventureSizes: async () => [],
+  readContentJobFames: async () => [],
+  readContentTimes: async () => [],
+  readFameBands: async () => [],
+  readWeekGroups: async () => [],
+  readStageMoves: async () => [],
+  readStreaks: async () => [],
+  readRaidModes: async () => [],
+  readRaidStageCounts: async () => [],
+  readContentJobScores: async () => [],
+  readWeekGroupScores: async () => [],
+  readScoreBands: async () => [],
+  readScores: async () => [],
+  readJobScores: async () => [],
+  readFames: async () => [],
+  readJobFames: async () => [],
+  readCoClears: async () => [],
+  readRaidTimes: async () => []
+}
 const population = (contentId: string, date: string, closed: boolean): StoredClearPopulation => ({
   contentId,
   weekStart: week(date),
@@ -28,7 +48,7 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
   const keyOf = ({ contentId, weekStart }: ClearContentWeek) =>
     `${contentId}/${formatResetDate(weekStart)}`
   const service = new ClearWeekSampleService({
-    ...emptyClearStatsRepository,
+    ...emptySampleRepository,
     readPopulations: async () => [
       population('michaela-hard', '2026-10-29', true),
       population('michaela-hard', '2026-11-05', true),
