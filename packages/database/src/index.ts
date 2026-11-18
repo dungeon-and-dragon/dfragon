@@ -45,6 +45,13 @@ export type {
 } from './character-history.js'
 export { recordCharacterScore } from './character-score.js'
 export type { CharacterScoreInput, CharacterScoreKind } from './character-score.js'
+export { recordCharacterSets } from './character-sets.js'
+export type {
+  CharacterEquipmentSet,
+  CharacterOathSet,
+  CharacterSets,
+  CharacterSetsInput
+} from './character-sets.js'
 export {
   enqueueCollectedCharacters,
   readCollectionSummary,

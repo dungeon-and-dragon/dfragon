@@ -5,6 +5,7 @@ import { toSectionBodies } from '@dfragon/server-core/domain/character-history/i
 import type {
   CharacterRecordFailure,
   ParseCharacterBasic,
+  ParseCharacterSets,
   ParseCharacterSkillStyle
 } from '@dfragon/server-core/application/character-basic/ports.js'
 import type { CharacterBasicRepository } from './repository.js'
@@ -12,6 +13,7 @@ import type { CharacterBasicRepository } from './repository.js'
 export interface CharacterBasicDependencies {
   readonly parseBasic: ParseCharacterBasic
   readonly parseSkillStyle: ParseCharacterSkillStyle
+  readonly parseSets: ParseCharacterSets
   readonly reportFailure: (failure: CharacterRecordFailure) => void
 }
 
@@ -30,12 +32,19 @@ export class CharacterBasicService {
     }
 
     const parsedSkillStyle = this.ports.parseSkillStyle(payloads.skill_style)
-    // 스킬 스타일, 점수, 이력 행은 characters를 참조하므로 기본 정보를 저장한 뒤에 저장한다.
+    const parsedSets = this.ports.parseSets(payloads)
+    // 스킬 스타일, 점수, 이력 행은 characters를 참조하고 세트는 characters 행을 고치므로 기본 정보를 저장한 뒤에 저장한다.
     this.repository.recordBasic(parsedBasic).then(
       () => {
         this.recordScoreAndHistory(parsedBasic, payloads, fetchedAt, score).catch(() =>
           this.ports.reportFailure('CHARACTER_HISTORY_RECORD_FAILED')
         )
+
+        if (parsedSets !== undefined) {
+          this.repository
+            .recordSets({ serverId, characterId, ...parsedSets, fetchedAt })
+            .catch(() => this.ports.reportFailure('CHARACTER_SETS_RECORD_FAILED'))
+        }
 
         if (parsedSkillStyle === undefined) {
           return

@@ -2,6 +2,7 @@ import {
   type CharacterBasicInput,
   type CharacterHistoryInput,
   type CharacterScoreInput,
+  type CharacterSetsInput,
   type ClearPopulationCharacter,
   type DatabaseClient,
   type FinishedJobRun,
@@ -9,7 +10,8 @@ import {
   readLastFinishedJobRun,
   recordCharacterBasic,
   recordCharacterHistory,
-  recordCharacterScore
+  recordCharacterScore,
+  recordCharacterSets
 } from '@dfragon/database'
 import type { ScoreCalculationRepository } from '#application/character-score/repository.js'
 import {
@@ -41,5 +43,9 @@ export class DatabaseScoreCalculationRepository implements ScoreCalculationRepos
 
   recordHistory(history: CharacterHistoryInput): Promise<void> {
     return recordCharacterHistory(this.client, history)
+  }
+
+  recordSets(sets: CharacterSetsInput): Promise<void> {
+    return recordCharacterSets(this.client, sets)
   }
 }

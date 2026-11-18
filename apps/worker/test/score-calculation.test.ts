@@ -4,6 +4,7 @@ import type {
   CharacterBasicInput,
   CharacterHistoryInput,
   CharacterScoreInput,
+  CharacterSetsInput,
   ClearPopulationCharacter,
   FinishedJobRun
 } from '@dfragon/database'
@@ -23,7 +24,10 @@ import type {
 import type { ScoreCalculationRepository } from '../src/application/character-score/repository.js'
 import type { CharacterDetailSection } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { ScoreEngineResult } from '@dfragon/server-core/domain/score/index.js'
-import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/index.js'
+import {
+  parseCharacterBasic,
+  parseCharacterSets
+} from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { WorkerNeople } from '../src/infrastructure/neople/character-collection.js'
 import { createScoreSources } from '../src/runtime/score-calculation.js'
 import {
@@ -54,6 +58,27 @@ const character = (characterId: string): ClearPopulationCharacter => ({
 })
 
 const adventurelessId = 'no-adventure'
+const equippedId = 'equipped'
+
+function equippedSections(basic: Record<string, unknown>) {
+  return {
+    equipment: {
+      ...basic,
+      equipment: [{ slotId: 'JACKET', setItemId: 'synthetic-set', setItemName: '합성 세트' }],
+      setItemInfo: [
+        {
+          setItemId: 'synthetic-set',
+          setItemName: '합성 등급 세트',
+          active: { setPoint: { current: 2550 } }
+        }
+      ]
+    },
+    oath: {
+      ...basic,
+      oath: { setInfo: { setId: 16204, setName: '합성 서약', setOptionName: '합성 선택지' } }
+    }
+  }
+}
 
 function sectionOf(
   { serverId, characterId }: NeopleCharacterIdentity,
@@ -79,6 +104,7 @@ function sectionOf(
     avatar: { ...basic, avatar: [] },
     creature: { ...basic, creature: null },
     oath: { ...basic, oath: null },
+    ...(characterId === equippedId ? equippedSections(basic) : {}),
     mist_assimilation: { ...basic, mistAssimilation: null },
     skill_style: { ...basic, skill: { style: { active: [] } } },
     buff_equipment: { ...basic, skill: { buff: null } },
@@ -128,6 +154,7 @@ type CalculationOptions = {
   unscored?: readonly string[]
   historyFailures?: readonly string[]
   basicFailures?: readonly string[]
+  setsFailures?: readonly string[]
 }
 
 function calculation(
@@ -140,11 +167,13 @@ function calculation(
     engine = 'running',
     unscored = [],
     historyFailures = [],
-    basicFailures = []
+    basicFailures = [],
+    setsFailures = []
   } = options
   const saved: CharacterScoreInput[] = []
   const basics: CharacterBasicInput[] = []
   const histories: CharacterHistoryInput[] = []
+  const sets: CharacterSetsInput[] = []
   const writes: string[] = []
   const pauses: number[] = []
   const progress: [number, number][] = []
@@ -209,12 +238,22 @@ function calculation(
         }
 
         histories.push(history)
+      },
+      recordSets: async (input) => {
+        writes.push(`sets/${input.characterId}`)
+
+        if (setsFailures.includes(input.characterId)) {
+          throw new Error('database closed')
+        }
+
+        sets.push(input)
       }
     },
     openEngine: () => (engine === 'missing' ? null : handle),
     createSources: (onRequest) => createScoreSources(neople, onRequest),
     readConcurrency: () => 2,
     parseBasic: parseCharacterBasic,
+    parseSets: parseCharacterSets,
     now: () => NOW,
     pause: async (ms) => {
       pauses.push(ms)
@@ -232,6 +271,7 @@ function calculation(
     saved,
     basics,
     histories,
+    sets,
     writes,
     pauses,
     progress,
@@ -326,7 +366,7 @@ test('상세를 받은 캐릭터마다 characters를 받은 기본 정보로 덮
   ])
   assert.deepEqual(
     writes.filter((write) => write.endsWith('/a')),
-    ['basic/a', 'history/a']
+    ['basic/a', 'sets/a', 'history/a']
   )
   assert.deepEqual(
     { ...scored, score: undefined },
@@ -390,6 +430,7 @@ test('characters 갱신이 실패한 캐릭터는 이력을 저장하지 않고 
     ['a', 'c']
   )
   assert.equal(writes.includes('history/b'), false)
+  assert.equal(writes.includes('sets/b'), false)
   assert.equal(summary.historySaved, 2)
   assert.equal(summary.historyFailed, 1)
   assert.deepEqual(
@@ -398,8 +439,49 @@ test('characters 갱신이 실패한 캐릭터는 이력을 저장하지 않고 
   )
 })
 
-test('모험단 이름이 없는 캐릭터는 점수만 저장하고 characters와 이력은 저장하지 않는다', async () => {
-  const { dependencies, saved, basics, histories } = calculation([character(adventurelessId)])
+test('상세를 받은 캐릭터마다 뽑은 세트를 받은 시각과 함께 저장하고, 세트가 없거나 점수를 건너뛴 캐릭터도 저장한다', async () => {
+  const { dependencies, sets } = calculation([equippedId, 'n'].map(character), {
+    unscored: ['n']
+  })
+
+  await calculateScores(dependencies)
+  const byCharacter = [...sets].sort((left, right) =>
+    left.characterId.localeCompare(right.characterId)
+  )
+
+  assert.deepEqual(byCharacter, [
+    {
+      serverId: 'cain',
+      characterId: equippedId,
+      equipmentSet: { id: 'synthetic-set', name: '합성 세트' },
+      oathSet: { id: 16204, name: '합성 서약', option: '합성 선택지' },
+      fetchedAt: NOW
+    },
+    { serverId: 'cain', characterId: 'n', equipmentSet: null, oathSet: null, fetchedAt: NOW }
+  ])
+})
+
+test('세트 저장이 실패해도 이력은 저장하고 이력 수에 넣지 않으며 실패 code와 위치를 남긴다', async () => {
+  const { dependencies, histories, reports } = calculation(['a', 'b', 'c'].map(character), {
+    setsFailures: ['b']
+  })
+
+  const summary = await calculateScores(dependencies)
+
+  assert.deepEqual(
+    histories.map(({ characterId }) => characterId),
+    ['a', 'b', 'c']
+  )
+  assert.equal(summary.historySaved, 3)
+  assert.equal(summary.historyFailed, 0)
+  assert.deepEqual(
+    reports.filter(([code]) => code === 'SCORE_SETS_RECORD_FAILED'),
+    [['SCORE_SETS_RECORD_FAILED', { position: 1 }]]
+  )
+})
+
+test('모험단 이름이 없는 캐릭터는 점수만 저장하고 characters, 세트, 이력은 저장하지 않는다', async () => {
+  const { dependencies, saved, basics, histories, sets } = calculation([character(adventurelessId)])
 
   const summary = await calculateScores(dependencies)
 
@@ -409,6 +491,7 @@ test('모험단 이름이 없는 캐릭터는 점수만 저장하고 characters�
   )
   assert.deepEqual(basics, [])
   assert.deepEqual(histories, [])
+  assert.deepEqual(sets, [])
   assert.equal(summary.historySaved, 0)
   assert.equal(summary.historyFailed, 0)
 })
@@ -497,7 +580,8 @@ async function calculateFixture(
         saved.push(score)
       },
       recordBasic: async () => undefined,
-      recordHistory: async () => undefined
+      recordHistory: async () => undefined,
+      recordSets: async () => undefined
     },
     openEngine: () => ({
       calculate: async (input) => engineResult(Object.keys(input.items).length),
@@ -507,6 +591,7 @@ async function calculateFixture(
     createSources: (events) => createScoreSources(neople, events),
     readConcurrency: () => 2,
     parseBasic: parseCharacterBasic,
+    parseSets: parseCharacterSets,
     now: () => NOW,
     pause: async (ms) => {
       pauses.push(ms)
