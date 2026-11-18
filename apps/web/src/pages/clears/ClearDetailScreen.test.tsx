@@ -281,7 +281,7 @@ function jobNames(): string[] {
   )
 }
 
-it('받는 중에는 제목 줄만 둔다', async () => {
+it('받는 중에는 제목을 두고 패널은 두지 않는다', async () => {
   await render({ contentKey: 'michaela' }, { getClearStats: () => new Promise<never>(() => {}) })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')
