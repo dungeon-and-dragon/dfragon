@@ -60,23 +60,37 @@ for (const [file, source] of allowedImports) {
 }
 
 const screenRejected = [
-  ['src/pages/a/relative.ts', '../b/hooks/useThing'],
-  ['src/pages/a/via-root.ts', '../../pages/b/hooks/useThing'],
-  ['src/pages/a/explicit.ts', '../b/hooks/useThing.ts'],
-  ['src/pages/a/ts-page.ts', '../b/OtherPage'],
-  ['src/pages/a/top-level-util.tsx', '../b/util'],
-  ['src/pages/a/nested-page.ts', '../b/components/NestedPage.tsx'],
-  ['src/pages/a/index-import.ts', '../b'],
-  ['src/pages/a/one/two/three/four/deep.ts', '../../../../../b/hooks/useThing']
+  ['src/pages/a/relative.ts', '../b/hooks/useThing', 'screen-folder-imports'],
+  ['src/pages/a/via-root.ts', '../../pages/b/hooks/useThing', 'screen-folder-imports'],
+  ['src/pages/a/explicit.ts', '../b/hooks/useThing.ts', 'screen-folder-imports'],
+  ['src/pages/a/ts-page.ts', '../b/OtherPage', 'screen-folder-imports'],
+  ['src/pages/a/top-level-util.tsx', '../b/util', 'screen-folder-imports'],
+  ['src/pages/a/nested-page.ts', '../b/components/NestedPage.tsx', 'screen-folder-imports'],
+  ['src/pages/a/page.ts', '../b/BPage', 'screen-folder-imports'],
+  ['src/pages/a/page-tsx.ts', '../b/BPage.tsx', 'screen-folder-imports'],
+  ['src/pages/a/screen.ts', '../b/BScreen', 'screen-folder-imports'],
+  ['src/pages/a/screen-tsx.ts', '../b/BScreen.tsx', 'screen-folder-imports'],
+  [
+    'src/pages/a/one/two/three/four/deep.ts',
+    '../../../../../b/hooks/useThing',
+    'screen-folder-imports'
+  ],
+  ['src/WebApp.ts', './pages/rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
+  ['src/pages/router.ts', './rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
+  ['src/WebApp.test.ts', './pages/b/hooks/useThing', 'screen-folder-imports-outside-pages'],
+  ['src/testing/story.ts', '../pages/b/BPage.tsx', 'screen-folder-imports-outside-pages'],
+  ['src/lib/shared.ts', '../pages/b/util', 'screen-folder-imports-outside-pages']
 ]
+
 const screenAllowed = [
   ['src/pages/a/same.ts', './hooks/useThing'],
   ['src/pages/a/one/same.ts', '../hooks/useThing'],
+  ['src/pages/b/same-page.ts', './BPage'],
   ['src/pages/a/shared.ts', '../../hooks/useShared'],
-  ['src/pages/a/page.ts', '../b/BPage'],
-  ['src/pages/a/page-tsx.ts', '../b/BPage.tsx'],
-  ['src/pages/a/screen.ts', '../b/BScreen'],
-  ['src/pages/a/screen-tsx.ts', '../b/BScreen.tsx'],
+  ['src/pages/a/index-import.ts', '../b'],
+  ['src/pages/a/rankings.ts', '../rankings'],
+  ['src/router.ts', './pages/rankings'],
+  ['src/router.test.ts', './pages/b'],
   ['src/pages/a/core.ts', '#core/search/search']
 ]
 
@@ -99,61 +113,68 @@ async function cruiseSamples() {
     const files = Object.fromEntries(
       [...screenRejected, ...screenAllowed].map(([file, source]) => [file, importing(source)])
     )
+
     for (const file of [
       'src/pages/a/hooks/useThing.ts',
       'src/pages/b/hooks/useThing.ts',
       'src/pages/b/components/NestedPage.tsx',
       'src/pages/b/OtherPage.ts',
       'src/pages/b/util.tsx',
-      'src/pages/b/index.ts',
       'src/pages/b/BPage.tsx',
       'src/pages/b/BScreen.tsx',
+      'src/pages/rankings/RankingsScreen.tsx',
       'src/hooks/useShared.ts',
       'src/core/search/search.ts'
     ]) {
       files[file] = 'export const value = 1\n'
     }
 
+    files['src/pages/b/index.ts'] = "export { value } from './BPage'\n"
+    files['src/pages/rankings/index.ts'] = "export { value } from './RankingsScreen'\n"
+
     for (const [file, contents] of Object.entries(files)) {
       await mkdir(dirname(join(web, file)), { recursive: true })
       await writeFile(join(web, file), contents)
     }
 
-    async function cruise(outputType) {
+    async function cruise(outputType, entry = 'src') {
       const args = [
         depcruise,
         '--config',
         '.dependency-cruiser.mjs',
         '--output-type',
         outputType,
-        'src'
+        entry
       ]
+
       try {
         const { stdout } = await run(process.execPath, args, { cwd: web })
 
-        return stdout
+        return { stdout, exitCode: 0 }
       } catch (error) {
         if (Number.isInteger(error.code) && error.code > 0 && error.stdout) {
-          return error.stdout
+          return { stdout: error.stdout, exitCode: error.code }
         }
+
         throw error
       }
     }
 
-    const report = JSON.parse(await cruise('json'))
+    const report = JSON.parse((await cruise('json')).stdout)
+    const { stdout: text, exitCode } = await cruise('err-long', 'src/WebApp.ts')
 
-    return { report, text: await cruise('err-long') }
+    return { report, text, exitCode }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
 }
 
-const { report, text } = await cruiseSamples()
-for (const [file, source] of screenRejected) {
+const { report, text, exitCode } = await cruiseSamples()
+for (const [file, source, ruleName] of screenRejected) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 거부한다`, () => {
     assert.deepEqual(
-      report.summary.violations.filter(({ from }) => from === file).map(({ rule }) => rule.name),
-      ['screen-folder-imports']
+      report.summary.violations.filter(({ from }) => from === file).map(({ rule }) => rule),
+      [{ name: ruleName, severity: 'error' }]
     )
   })
 }
@@ -174,6 +195,8 @@ test('dependency-cruiser: #core alias를 실제 소스로 해석한다', () => {
   assert.equal(module.dependencies[0].resolved, 'src/core/search/search.ts')
 })
 
-test('dependency-cruiser: 메시지는 공용 코드의 위치를 알린다', () => {
+test('dependency-cruiser: 화면 파일 직접 import는 실패하고 폴더 경로와 공용 코드 위치를 알린다', () => {
+  assert.ok(exitCode > 0)
+  assert.ok(text.includes('pages/<화면>(예: pages/rankings)처럼 폴더 경로로 import한다.'), text)
   assert.ok(text.includes('components/나 hooks/'), text)
 })
