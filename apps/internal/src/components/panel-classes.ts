@@ -1,6 +1,3 @@
-export const FOCUS_RING =
-  'outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-signal focus-visible:outline-offset-2'
-
 // field-box의 :focus-within 테두리가 focus를 보이므로 브라우저 outline은 끈다.
 export const FIELD_INPUT = 'field-box box-border w-full font-sans outline-none'
 

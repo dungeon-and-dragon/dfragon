@@ -1,14 +1,14 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
 import { IconButton } from '@dfragon/ui'
 import { EMPTY_VALUE, formatAgo, formatClockMinute, formatClockSecond } from '../format'
-import { FOCUS_RING } from './panel-classes'
 
 const WORKER_STALE_MS = 5 * 60_000
 
 const STATUS = 'inline-flex items-center gap-2 whitespace-nowrap text-xs'
 const STATUS_VALUE = 'font-mono font-semibold tabular-nums'
 const DIVIDER = 'h-6 w-px shrink-0 bg-line max-sm:hidden'
-const NAV_LINK = `inline-flex h-topbar items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors hover:bg-surface hover:text-fg max-sm:h-12 ${FOCUS_RING}`
+const NAV_LINK =
+  'inline-flex h-topbar items-center gap-2 whitespace-nowrap px-3 text-sm font-medium text-fg-muted no-underline transition-colors hover:bg-surface hover:text-fg max-sm:h-12 focus-ring'
 
 const TOOL_LINKS = [
   { label: 'Grafana', href: '/grafana/' },
@@ -76,10 +76,7 @@ export function OpsHeader({ workerSeenAt, readAt, onRefresh }: OpsHeaderProps): 
   return (
     <header className="self-stretch border-b border-line bg-canvas">
       <div className="page page-wide flex h-topbar min-w-0 items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-y-0 max-sm:pb-2">
-        <a
-          href="/"
-          className={`flex shrink-0 items-center gap-2 text-fg no-underline ${FOCUS_RING}`}
-        >
+        <a href="/" className="flex shrink-0 items-center gap-2 text-fg no-underline focus-ring">
           <span className="text-base font-bold tracking-heading">{PRODUCT_NAME}</span>
           <span className="text-sm font-medium text-fg-muted">운영</span>
         </a>

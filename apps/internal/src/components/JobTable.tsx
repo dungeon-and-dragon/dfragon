@@ -7,14 +7,14 @@ import {
   formatDuration,
   runDuration
 } from '../format'
-import { FOCUS_RING, panelClasses, tableClasses, textClasses } from './panel-classes'
+import { panelClasses, tableClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'
 import { RunProgress } from './RunProgress'
 import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
 
-const NAME_BUTTON = `m-0 cursor-pointer border-0 bg-transparent p-0 text-left font-sans text-sm font-semibold text-fg hover:underline ${FOCUS_RING}`
+const NAME_BUTTON = `m-0 cursor-pointer border-0 bg-transparent p-0 text-left font-sans text-sm font-semibold text-fg hover:underline focus-ring`
 
 type JobTableProps = {
   jobs: readonly Job[]
