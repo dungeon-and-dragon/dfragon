@@ -12,22 +12,9 @@ import { GuildScreen } from './GuildScreen'
 
 let container: HTMLDivElement
 let root: Root
-let observed: { callback: IntersectionObserverCallback; target: Element }[]
-
-class FakeIntersectionObserver {
-  constructor(private readonly callback: IntersectionObserverCallback) {}
-  observe(target: Element): void {
-    observed.push({ callback: this.callback, target })
-  }
-  disconnect(): void {
-    observed = observed.filter((entry) => entry.callback !== this.callback)
-  }
-}
 
 beforeEach(() => {
-  observed = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
-  vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -85,12 +72,14 @@ function bodyRows(): HTMLTableRowElement[] {
   return [...container.querySelectorAll<HTMLTableRowElement>('tbody tr:not([aria-hidden])')]
 }
 
-function reachEnd(): Promise<void> {
-  return act(async () => {
-    for (const { callback, target } of observed) {
-      callback([{ isIntersecting: true, target } as IntersectionObserverEntry], {} as never)
-    }
-  })
+function moreButton(): HTMLButtonElement | undefined {
+  return [...container.querySelectorAll('button')].find(
+    (button) => button.textContent === '불러오기'
+  )
+}
+
+function clickMore(): Promise<void> {
+  return act(async () => moreButton()?.click())
 }
 
 it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐릭터, 명성, 모험단이다', async () => {
@@ -119,16 +108,22 @@ it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐
   ).not.toBeNull()
 })
 
-it('길드원 45명 가운데 처음 20명을 그리고 끝에 닿을 때마다 20명씩 더 그린다', async () => {
-  await render(async () => guildOf(45))
+it('길드원 120명 가운데 처음 50명을 그리고 불러오기를 누를 때마다 50명씩 더 그린다', async () => {
+  await render(async () => guildOf(120))
 
-  expect(bodyRows()).toHaveLength(20)
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1)
-  await reachEnd()
-  expect(bodyRows()).toHaveLength(40)
-  await reachEnd()
-  expect(bodyRows()).toHaveLength(45)
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  expect(bodyRows()).toHaveLength(50)
+  await clickMore()
+  expect(bodyRows()).toHaveLength(100)
+  await clickMore()
+  expect(bodyRows()).toHaveLength(120)
+  expect(moreButton()).toBeUndefined()
+})
+
+it('길드원이 50명 이하면 모두 그리고 불러오기 버튼을 두지 않는다', async () => {
+  await render(async () => guildOf(50))
+
+  expect(bodyRows()).toHaveLength(50)
+  expect(moreButton()).toBeUndefined()
 })
 
 it('길드원이 없으면 목록 상자에 빈 문구만 두고 길드원 수는 0이다', async () => {
