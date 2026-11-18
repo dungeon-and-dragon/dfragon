@@ -96,10 +96,11 @@ async function replaceItems(
   items: readonly CharacterItem[]
 ): Promise<boolean> {
   const slotIds = items.map(({ slotId }) => slotId)
+  let written = 0
+
   const { count: deleted } = await transaction.characterItem.deleteMany({
     where: { serverId, characterId, slotId: { notIn: slotIds } }
   })
-  let written = 0
 
   for (const { slotId, itemId, itemName } of items) {
     written += await transaction.$executeRaw`
