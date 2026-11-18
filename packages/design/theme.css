@@ -5,7 +5,7 @@
  * 색 토큰은 light-dark(라이트, 다크)로 두 모드 값을 함께 둔다. 모드 고르기는 base.css가 color-scheme으로 한다.
  * 상황별 색의 옅은 면(--color-*-weak)은 canvas 위에 그 색을 다크 14%, 라이트 10%로 섞은 불투명 값이다.
  * 반투명이면 hover, 선택 행 바탕과 섞여 어두워져 글자 명암비가 떨어진다.
- * 글자, radius, breakpoint, 곡선은 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
+ * 글자, radius, breakpoint, 곡선, 간격, 컨테이너 폭은 Tailwind CSS의 기본 단계를 지우고 여기 적은 단계만 utility로 낸다.
  * 원색 단계(--gray-*)는 :root에 두어 utility가 생기지 않게 하고, 역할 이름만 @theme로 내보낸다.
  */
 :root {
@@ -41,6 +41,8 @@
   --radius-*: initial;
   --breakpoint-*: initial;
   --ease-*: initial;
+  --spacing-*: initial;
+  --container-*: initial;
 
   /* 페이지, 패널, 상단 바의 바탕 */
   --color-canvas: light-dark(var(--gray-0), var(--gray-950));
@@ -187,8 +189,16 @@
   /* 툴팁 */
   --shadow-tooltip: 0 12px 32px light-dark(rgb(0 0 0 / 16%), rgb(0 0 0 / 60%));
 
-  /* 간격 단위. 간격은 이 값의 배수로 쓴다(p-3은 12px, gap-0.5는 2px). */
-  --spacing: 4px;
+  /* 간격 단계. 이름은 Tailwind CSS의 숫자다(p-3은 12px). 여기 없는 숫자는 utility가 생기지 않는다. */
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
 
   /* 버튼, 입력 칸, 칩, 선택 칸, 상태 칩의 높이. 정사각 버튼은 폭에도 쓴다. */
   --height-control-xs: 24px;
