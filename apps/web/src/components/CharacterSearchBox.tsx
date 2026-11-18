@@ -119,7 +119,7 @@ export function CharacterSearchBox({
       role="search"
       aria-label={isAdventure ? '모험단 검색' : '캐릭터 검색'}
       onSubmit={handleSubmit}
-      className={`m-0 box-border flex shrink-0 items-center rounded-control border border-line-input bg-canvas text-fg transition-[border-color,box-shadow] duration-(--duration-hover) ease-standard focus-within:border-signal focus-within:shadow-[0_0_0_1px_var(--color-signal)] ${sizeClasses.box}`}
+      className={`m-0 box-border flex shrink-0 items-center rounded-control border border-line-input bg-canvas text-fg transition-[border-color,box-shadow] focus-within:border-signal focus-within:shadow-[0_0_0_1px_var(--color-signal)] ${sizeClasses.box}`}
     >
       <BaseSelect.Root
         value={scope}

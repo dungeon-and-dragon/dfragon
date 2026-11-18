@@ -373,11 +373,17 @@ export function MotionTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
   return (
     <TokenRows>
       {tokens.map((token) => {
-        if (token.name.startsWith('--ease-')) {
+        if (
+          token.name.startsWith('--ease-') ||
+          token.name === '--default-transition-timing-function'
+        ) {
           return <EasingRow key={token.name} token={token} />
         }
 
-        if (token.name.startsWith('--duration-')) {
+        if (
+          token.name.startsWith('--duration-') ||
+          token.name === '--default-transition-duration'
+        ) {
           return <DurationRow key={token.name} token={token} easing={easing} />
         }
 

@@ -15,7 +15,7 @@ export type SplitSegment = Readonly<{
 
 const TOOLTIP_GAP = 6
 const SEGMENT_CLASS =
-  'relative flex min-w-[2px] items-center overflow-hidden rounded-[3px] transition-opacity duration-(--duration-hover) ease-standard'
+  'relative flex min-w-[2px] items-center overflow-hidden rounded-[3px] transition-opacity'
 const percent = new Intl.NumberFormat('ko-KR', { style: 'percent', maximumFractionDigits: 1 })
 
 function belowTooltipPlaceOf(

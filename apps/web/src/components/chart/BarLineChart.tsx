@@ -248,7 +248,7 @@ function BarLinePlot({
             <g
               key={key}
               data-chart-bar=""
-              className={`transition-opacity duration-(--duration-hover) ease-standard ${hoverIndex >= 0 && hoverIndex !== index ? 'opacity-30' : ''}`}
+              className={`transition-opacity ${hoverIndex >= 0 && hoverIndex !== index ? 'opacity-30' : ''}`}
             >
               {barPiecesAt(bars, layout, index).map((piece) => {
                 const barX = centerOf(index) - barWidth / 2

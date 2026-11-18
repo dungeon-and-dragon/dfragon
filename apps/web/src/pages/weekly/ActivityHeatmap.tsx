@@ -452,7 +452,7 @@ export function ActivityHeatmap({
             {label}
           </Tabs.Tab>
         ))}
-        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-[2px] bg-signal transition-[top,height] duration-(--duration-hover) ease-standard" />
+        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-[2px] bg-signal transition-[top,height]" />
       </Tabs.List>
     </Tabs.Root>
   )
