@@ -14,7 +14,6 @@ import {
   formatEnhancementValue
 } from './timeline-format'
 import { RelativeTime } from '../../../../components/RelativeTime'
-import { tableClasses } from '../../../../components/table/table-classes'
 import { raritySolidClasses } from '../equipment/item-classes'
 
 const RARITY_TONES: Readonly<Record<string, string>> = {
@@ -36,8 +35,7 @@ const ENHANCEMENT_KIND_TONES: Readonly<Record<TimelineEnhancement['kind'], strin
 }
 
 const BADGE = 'badge text-fg-muted'
-const TABLE = 'w-full table-fixed border-collapse'
-const CELL = 'h-row truncate border-t border-line px-3 first:pl-4 last:pr-4'
+const TABLE = 'table table-fixed'
 const TIME_COLUMN = 'w-[112px]'
 const MORE =
   'flex min-h-12 items-center justify-center gap-2 border-t border-line px-4 text-fg-muted'
@@ -182,14 +180,6 @@ export function SeasonClears({
   )
 }
 
-function HeaderCell({ children }: { children: ReactNode }): React.JSX.Element {
-  return (
-    <th scope="col" className={`${tableClasses.headCell} text-left whitespace-nowrap`}>
-      {children}
-    </th>
-  )
-}
-
 export function Enhancements({
   enhancements,
   more
@@ -213,29 +203,27 @@ export function Enhancements({
         </colgroup>
         <thead>
           <tr>
-            <HeaderCell>일시</HeaderCell>
-            <HeaderCell>종류</HeaderCell>
-            <HeaderCell>장비</HeaderCell>
-            <HeaderCell>수치</HeaderCell>
-            <HeaderCell>결과</HeaderCell>
+            <th scope="col">일시</th>
+            <th scope="col">종류</th>
+            <th scope="col">장비</th>
+            <th scope="col">수치</th>
+            <th scope="col">결과</th>
           </tr>
         </thead>
         <tbody>
           {enhancements.map((enhancement, index) => (
-            <tr key={`${enhancement.occurredAt}-${index}`} className={tableClasses.row}>
-              <td className={`${CELL} text-fg-subtle tabular-nums`}>
+            <tr key={`${enhancement.occurredAt}-${index}`}>
+              <td className="text-fg-subtle tabular-nums">
                 <RelativeTime at={enhancement.occurredAt} />
               </td>
-              <td className={`${CELL} ${ENHANCEMENT_KIND_TONES[enhancement.kind]}`}>
+              <td className={ENHANCEMENT_KIND_TONES[enhancement.kind]}>
                 {ENHANCEMENT_KIND_LABELS[enhancement.kind]}
               </td>
-              <td className={CELL}>
+              <td>
                 <ItemName itemName={enhancement.itemName} itemRarity={enhancement.itemRarity} />
               </td>
-              <td className={`${CELL} font-mono tabular-nums`}>
-                {formatEnhancementValue(enhancement)}
-              </td>
-              <td className={CELL}>
+              <td className="font-mono tabular-nums">{formatEnhancementValue(enhancement)}</td>
+              <td>
                 <span className="inline-flex items-center gap-2">
                   <span className={enhancement.result ? 'text-fg-success' : 'text-fg-danger'}>
                     {enhancement.result ? '성공' : '실패'}
@@ -274,21 +262,21 @@ export function Acquisitions({
         </colgroup>
         <thead>
           <tr>
-            <HeaderCell>일시</HeaderCell>
-            <HeaderCell>장비</HeaderCell>
-            <HeaderCell>경로</HeaderCell>
+            <th scope="col">일시</th>
+            <th scope="col">장비</th>
+            <th scope="col">경로</th>
           </tr>
         </thead>
         <tbody>
           {acquisitions.map((acquisition, index) => (
-            <tr key={`${acquisition.occurredAt}-${index}`} className={tableClasses.row}>
-              <td className={`${CELL} text-fg-subtle tabular-nums`}>
+            <tr key={`${acquisition.occurredAt}-${index}`}>
+              <td className="text-fg-subtle tabular-nums">
                 <RelativeTime at={acquisition.occurredAt} />
               </td>
-              <td className={CELL}>
+              <td>
                 <ItemName itemName={acquisition.itemName} itemRarity={acquisition.itemRarity} />
               </td>
-              <td className={`${CELL} text-fg-muted`}>{acquisitionRoute(acquisition.name)}</td>
+              <td className="text-fg-muted">{acquisitionRoute(acquisition.name)}</td>
             </tr>
           ))}
         </tbody>

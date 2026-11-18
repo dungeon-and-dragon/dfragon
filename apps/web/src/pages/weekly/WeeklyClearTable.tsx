@@ -3,10 +3,7 @@ import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { ClearName, WeeklyCharacter } from '#core/adventure-guild/adventure-weekly'
 import { CharacterCell } from '../../components/table/CharacterCell'
-import { tableClasses } from '../../components/table/table-classes'
 import { RankBadge } from '../../components/table/RankBadge'
-
-const { headCell, cell } = tableClasses
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -37,28 +34,28 @@ export function WeeklyClearTable({
   const headRows = clearNames.length > 0 ? 2 : 1
 
   return (
-    <table className={`${tableClasses.table} ${tableClasses.wideTable}`}>
+    <table className="table table-fixed table-wide">
       <colgroup>
-        <col className={tableClasses.rankColumn} />
+        <col className="w-16" />
         <col />
-        <col className={tableClasses.fameColumn} />
+        <col className="w-[120px]" />
         {clearNames.map(({ kind, name }) => (
           <col key={`${kind}/${name}`} className="w-[96px]" />
         ))}
       </colgroup>
       <thead>
         <tr>
-          <th scope="col" rowSpan={headRows} className={`${headCell} text-center`}>
+          <th scope="col" rowSpan={headRows} className="text-center">
             #
           </th>
-          <th scope="col" rowSpan={headRows} className={`${headCell} text-left`}>
+          <th scope="col" rowSpan={headRows}>
             캐릭터
           </th>
-          <th scope="col" rowSpan={headRows} className={`${headCell} text-right`}>
+          <th scope="col" rowSpan={headRows} className="table-num">
             명성
           </th>
           {groups.map(({ label, span }) => (
-            <th key={label} scope="colgroup" colSpan={span} className={`${headCell} text-center`}>
+            <th key={label} scope="colgroup" colSpan={span} className="text-center">
               {label}
             </th>
           ))}
@@ -66,27 +63,28 @@ export function WeeklyClearTable({
         {clearNames.length > 0 && (
           <tr>
             {clearNames.map(({ kind, name }) => (
-              <th key={`${kind}/${name}`} scope="col" className={`${headCell} text-center`}>
+              <th key={`${kind}/${name}`} scope="col" className="text-center">
                 {name}
               </th>
             ))}
           </tr>
         )}
       </thead>
-      <tbody className={tableClasses.body}>
+      <tbody>
         {rows.map((row, index) => (
-          <tr key={`${row.serverId}/${row.characterId}`} className={tableClasses.row}>
-            <td className={`${cell} text-center`}>
+          <tr key={`${row.serverId}/${row.characterId}`}>
+            <td className="text-center">
               <RankBadge rank={index + 1} />
             </td>
-            <td className={cell}>
+            {/* 초상화(36px)가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
+            <td className="py-0">
               <CharacterCell character={row} />
             </td>
-            <td className={`${cell} ${tableClasses.fame}`}>
+            <td className="table-num font-semibold text-game-fame">
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
             </td>
             {clearNames.map((clearName) => (
-              <td key={`${clearName.kind}/${clearName.name}`} className={`${cell} text-center`}>
+              <td key={`${clearName.kind}/${clearName.name}`} className="text-center">
                 <ClearMark cleared={isCleared(row, clearName)} />
               </td>
             ))}

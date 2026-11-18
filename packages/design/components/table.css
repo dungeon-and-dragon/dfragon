@@ -1,0 +1,76 @@
+/*
+ * <div class="table-scroll"><table class="table table-wide">…<td class="table-num">98,412</td>…</table></div>.
+ * 셀은 한 줄로 두고 넘치면 말줄임하며, 이름이 두 줄이 되는 표만 table-wrap을 붙인다. 열 폭을 지켜야 하는 표는
+ * Tailwind CSS의 table-fixed를 함께 붙인다. 행 양 끝 칸은 구획의 제목 줄과 같은 16px에서 글자가 시작한다.
+ */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+.table thead th {
+  box-sizing: border-box;
+  height: var(--height-table-head);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table :is(td, tbody th) {
+  box-sizing: border-box;
+  height: var(--height-row);
+  padding: 8px 12px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-line);
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table :is(th, td):first-child {
+  padding-left: 16px;
+}
+
+.table :is(th, td):last-child {
+  padding-right: 16px;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.table tbody tr {
+  transition: background-color var(--duration-hover) var(--ease-standard);
+}
+
+.table tbody tr:is(:hover, [aria-selected='true']) {
+  background-color: var(--color-surface);
+}
+
+.table .table-num {
+  text-align: right;
+}
+
+.table td.table-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap tbody > tr > * {
+  white-space: normal;
+}
+
+.table-wide {
+  min-width: 720px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}

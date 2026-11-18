@@ -214,6 +214,8 @@
   --height-control-lg: 48px;
   /* 표의 행 높이 */
   --height-row: 48px;
+  /* 표 헤더 높이 */
+  --height-table-head: 40px;
   /* 상단 바 높이 */
   --height-topbar: 48px;
 

@@ -15,8 +15,7 @@ import { GameText } from './GameText'
 import { itemClasses, itemTableClasses, raritySolidOf } from './equipment/item-classes'
 import { ItemIcon, ItemName, RarityBadge, TuneNumeral } from './equipment/item-parts'
 
-const { table, head, headEnd, body, row, cell, slot, number, muted, heading, count } =
-  itemTableClasses
+const { slot, number, muted, heading, count } = itemTableClasses
 // 진의 단계처럼 값이 글자인 줄도 있어, 숫자로만 된 값에만 숫자 글꼴을 쓴다.
 const NUMERIC_TEXT = /^[\d.,+\-%\s]+$/
 const OPTION = 'm-0 flex items-start gap-4 rounded-control border p-4'
@@ -202,25 +201,23 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
       <h2 className={heading}>
         서약 결정 <span className={count}>{formatCount(crystals.length)}</span>
       </h2>
-      <table className={table}>
+      <table className="table">
         <thead>
           <tr>
-            <th scope="col" className={`${head} w-[56px]`}>
+            <th scope="col" className="w-[56px]">
               칸
             </th>
-            <th scope="col" className={head}>
-              결정
-            </th>
-            <th scope="col" className={`${headEnd} w-[110px]`}>
+            <th scope="col">결정</th>
+            <th scope="col" className="table-num w-[110px]">
               세트 포인트
             </th>
           </tr>
         </thead>
-        <tbody className={body}>
+        <tbody>
           {crystals.map((crystal, index) => (
-            <tr key={`${crystal.slot}-${index}`} className={row}>
-              <td className={`${cell} ${slot} ${number}`}>{crystal.slot ?? MISSING_VALUE}</td>
-              <td className={cell}>
+            <tr key={`${crystal.slot}-${index}`}>
+              <td className={`${slot} ${number}`}>{crystal.slot ?? MISSING_VALUE}</td>
+              <td>
                 <div className={itemClasses.item}>
                   <ItemIcon itemId={crystal.itemId} rarity={crystal.rarity} />
                   <span className={itemClasses.itemText}>
@@ -229,7 +226,7 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
                   </span>
                 </div>
               </td>
-              <td className={`${cell} text-right ${number} ${muted}`}>
+              <td className={`table-num ${muted}`}>
                 {crystal.setPoint !== null ? formatPoint(crystal.setPoint) : MISSING_VALUE}
               </td>
             </tr>
