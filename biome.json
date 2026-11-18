@@ -311,6 +311,26 @@
       }
     },
     {
+      "includes": ["apps/web/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["../*", "../**"],
+                    "message": "상위 폴더 상대 경로 대신 #<폴더>/... alias로 가져온다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/web/src/core/**"],
       "linter": {
         "rules": {
@@ -325,7 +345,16 @@
                 },
                 "patterns": [
                   {
+                    "group": ["../*", "../**"],
+                    "message": "상위 폴더 상대 경로 대신 #<폴더>/... alias로 가져온다."
+                  },
+                  {
                     "group": [
+                      "#hooks/**",
+                      "#components/**",
+                      "#pages/**",
+                      "#host/**",
+                      "#animations/**",
                       "**/hooks/**",
                       "**/components/**",
                       "**/pages/**",
@@ -355,6 +384,10 @@
               "options": {
                 "patterns": [
                   {
+                    "group": ["../*", "../**"],
+                    "message": "상위 폴더 상대 경로 대신 #<폴더>/... alias로 가져온다."
+                  },
+                  {
                     "group": [
                       "../**/pages",
                       "../**/pages/**",
@@ -383,6 +416,10 @@
               "level": "error",
               "options": {
                 "patterns": [
+                  {
+                    "group": ["../*", "../**"],
+                    "message": "상위 폴더 상대 경로 대신 #<폴더>/... alias로 가져온다."
+                  },
                   {
                     "group": [
                       "../**/pages",
