@@ -132,3 +132,11 @@
     animation: none;
   }
 }
+
+@media (width < 600px) {
+  .btn-sm::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+  }
+}
