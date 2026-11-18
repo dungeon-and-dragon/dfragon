@@ -7,6 +7,7 @@ import {
   readGuild,
   recordCharacter,
   recordCharacterBasic,
+  recordItemDictionary,
   replaceEnhancementBackfillRange,
   replaceTimelineRange
 } from '@dfragon/database'
@@ -133,15 +134,20 @@ try {
     raidName: null,
     data: { regionName }
   })
-  const item = (code, occurredAt, itemRarity, data = {}) => ({
+  const item = (code, occurredAt, itemRarity, data = {}, itemId = null) => ({
     code,
     occurredAt,
     name: '합성',
-    itemId: null,
+    itemId,
     itemName: null,
     itemRarity,
     data
   })
+  // 합성 아이템 사전이다. 천해천은 사전의 115레벨 장비만 아이템으로 세고, 칭호(액세서리, 레벨 1)는 뺀다.
+  await recordItemDictionary(client, [
+    { itemId: 'synthetic-armor-115', availableLevel: 115, itemType: '방어구' },
+    { itemId: 'synthetic-title', availableLevel: 1, itemType: '액세서리' }
+  ])
   const clears = [
     [
       { serverId: 'siroco', characterId: 'adventure-high' },
@@ -151,7 +157,9 @@ try {
         raid(201, '04-02T06:30:00', '합성 목록 밖 레이드')
       ],
       [
-        item(505, at('04-02T10:00:00'), '태초'),
+        item(505, at('04-02T10:00:00'), '태초', {}, 'synthetic-armor-115'),
+        item(504, at('04-02T10:10:00'), '레전더리', {}, 'synthetic-title'),
+        item(557, at('04-02T10:20:00'), '태초', {}, 'synthetic-oath'),
         item(402, at('04-02T11:00:00'), '에픽', {
           before: 0,
           after: 12,
@@ -233,6 +241,7 @@ try {
       ],
       legions: [{ name: '아포칼립스', count: 1 }],
       items: { legendary: 0, epic: 0, primeval: 1, mythic: 0 },
+      oaths: { legendary: 0, epic: 0, primeval: 1 },
       enhancement: {
         ...emptySeasonActivity().summary.enhancement,
         attempts: 1,
@@ -248,7 +257,9 @@ try {
         enhance: 0,
         primeval: false,
         mythic: false,
-        highEnhancement: false
+        highEnhancement: false,
+        oath: 0,
+        oathPrimeval: false
       },
       {
         date: '2026-04-02',
@@ -258,7 +269,9 @@ try {
         enhance: 1,
         primeval: true,
         mythic: false,
-        highEnhancement: true
+        highEnhancement: true,
+        oath: 1,
+        oathPrimeval: true
       }
     ]
   }
@@ -376,6 +389,7 @@ try {
       raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
       legions: [{ name: '합성 귀환 레기온', count: 1 }],
       items: { legendary: 0, epic: 0, primeval: 0, mythic: 1 },
+      oaths: { legendary: 0, epic: 0, primeval: 0 },
       enhancement: {
         ...emptySeasonActivity().summary.enhancement,
         attempts: 1,
@@ -391,7 +405,9 @@ try {
         enhance: 1,
         primeval: false,
         mythic: true,
-        highEnhancement: true
+        highEnhancement: true,
+        oath: 0,
+        oathPrimeval: false
       }
     ]
   }
@@ -425,6 +441,7 @@ try {
       raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
       legions: [{ name: '합성 귀환 레기온', count: 1 }],
       items: [{ at: '2021-05-01T14:00:00+09:00', name: null, rarity: '신화' }],
+      oaths: [],
       enhancements: [
         { at: '2021-05-01T15:00:00+09:00', kind: 'amplify', target: 10, success: true }
       ]
@@ -440,6 +457,7 @@ try {
     ],
     legions: [{ name: '아포칼립스', count: 1 }],
     items: [{ at: '2026-04-02T10:00:00+09:00', name: null, rarity: '태초' }],
+    oaths: [{ at: '2026-04-02T10:20:00+09:00', name: null, rarity: '태초' }],
     enhancements: [{ at: '2026-04-02T11:00:00+09:00', kind: 'amplify', target: 12, success: false }]
   }
   const seasonDays = await readAdventureSeasonDays(client, adventureName, 11, now)
@@ -454,6 +472,7 @@ try {
       raids: [{ name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 }],
       legions: [],
       items: [],
+      oaths: [],
       enhancements: []
     }
   )

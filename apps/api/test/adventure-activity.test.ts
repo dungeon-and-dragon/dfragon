@@ -35,6 +35,8 @@ const season: ActivitySeasonRange = {
   endsAt: at('2026-12-17T06:00:00'),
   timelineStartsAt: at('2026-03-26T06:00:00')
 }
+// 시즌 5~9는 아이템 사전 없이 등급만 보고 센다. 같은 구간에 시즌 번호만 바꿔 그 기준을 확인한다.
+const legacySeason: ActivitySeasonRange = { ...season, id: 9 }
 const raid = (time: string, raidName: string): TimelineEventRow => ({
   code: 201,
   occurredAt: at(time),
@@ -85,8 +87,9 @@ const enhancement = (
 ) => item(code, time, '에픽', { before, after, result, safe: false, ticket })
 // 운영 DB의 data.ticket은 객체지만 안의 키는 확인하지 못해 합성 키를 쓴다.
 const ticketItem = (name: string) => ({ name })
+const noRecords = { clears: [], items: [], itemDictionary: [] }
 const activity = (records: Partial<Parameters<typeof toSeasonActivity>[1]>) =>
-  toSeasonActivity(season, { clears: [], items: [], ...records })
+  toSeasonActivity(legacySeason, { ...noRecords, ...records })
 const day = (date: string) => {
   const range = toActivityDayRange(date)
   assert.ok(range, date)
@@ -131,7 +134,7 @@ test('시즌 시작 전과 다음 시즌 시작부터의 기록은 세지 않는
 test('지금 시즌은 끝이 없어 시작 뒤 기록을 모두 센다', () => {
   const current = toSeasonActivity(
     { ...season, endsAt: null },
-    { clears: [legion('2027-01-01T12:00:00', '아포칼립스')], items: [] }
+    { ...noRecords, clears: [legion('2027-01-01T12:00:00', '아포칼립스')] }
   )
 
   assert.deepEqual(current.summary.legions, [{ name: '아포칼립스', count: 1 }])
@@ -257,7 +260,7 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
   ])
 })
 
-test('아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급별로 세고 태초, 신화를 얻은 날을 표시한다', () => {
+test('시즌 5~9의 아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급별로 세고 태초, 신화를 얻은 날을 표시한다', () => {
   const { summary, days } = activity({
     items: [
       acquisition('2026-07-18T12:00:00', '레전더리'),
@@ -279,6 +282,103 @@ test('아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등�
       { date: '2026-07-20', item: 1, primeval: false, mythic: false }
     ]
   )
+})
+
+// 합성 아이템 사전이다. 칭호는 실제 응답처럼 액세서리, 레벨 1로 둔다(ADR 0074).
+const zhongtian: ActivitySeasonRange = { ...season, id: 10 }
+const splitDictionary = [
+  { itemId: 'armor-115', availableLevel: 115, itemType: '방어구' },
+  { itemId: 'weapon-115', availableLevel: 115, itemType: '무기' },
+  { itemId: 'armor-105', availableLevel: 105, itemType: '방어구' },
+  { itemId: 'fusion-115', availableLevel: 115, itemType: '융합석' },
+  { itemId: 'title', availableLevel: 1, itemType: '액세서리' },
+  { itemId: 'unknown-row', availableLevel: null, itemType: null }
+]
+const acquired = (time: string, itemId: string, itemRarity: string, code = 505) => ({
+  ...item(code, time, itemRarity),
+  itemId,
+  itemName: itemId
+})
+const splitRows = [
+  acquired('2026-07-18T12:00:00', 'armor-115', '에픽'),
+  acquired('2026-07-18T12:01:00', 'weapon-115', '태초', 513),
+  acquired('2026-07-18T12:02:00', 'armor-105', '에픽'),
+  acquired('2026-07-18T12:03:00', 'fusion-115', '레전더리'),
+  acquired('2026-07-18T12:04:00', 'title', '레전더리'),
+  acquired('2026-07-18T12:05:00', 'unknown-row', '에픽'),
+  acquired('2026-07-18T12:06:00', 'not-in-dictionary', '태초'),
+  acquired('2026-07-18T12:07:00', 'armor-115', '레어'),
+  acquired('2026-07-19T12:00:00', 'oath-primeval', '태초', 557),
+  acquired('2026-07-19T12:01:00', 'oath-legendary', '레전더리', 556),
+  acquired('2026-07-19T12:02:00', 'oath-rare', '레어', 554),
+  acquired('2026-07-19T12:03:00', 'oath-uncommon', '언커먼', 555),
+  acquired('2026-07-19T12:04:00', 'oath-epic', '에픽', 553),
+  acquired('2026-07-19T12:05:00', 'armor-115', '에픽', 601),
+  acquired('2026-07-20T12:00:00', 'armor-115', '레전더리')
+]
+const splitRecords = { ...noRecords, items: splitRows, itemDictionary: splitDictionary }
+
+test('시즌 10은 아이템 사전의 115레벨 장비만 아이템으로, 레전더리 이상 서약을 따로 센다', () => {
+  const { summary, days } = toSeasonActivity(zhongtian, splitRecords)
+  const sum = (values: Record<string, number>) => Object.values(values).reduce((a, b) => a + b, 0)
+
+  assert.deepEqual(summary.items, { legendary: 1, epic: 1, primeval: 1, mythic: 0 })
+  assert.deepEqual(summary.oaths, { legendary: 1, epic: 1, primeval: 1 })
+  assert.deepEqual(
+    days.map(({ date, item, primeval, oath, oathPrimeval }) => ({
+      date,
+      item,
+      primeval,
+      oath,
+      oathPrimeval
+    })),
+    [
+      { date: '2026-07-18', item: 2, primeval: true, oath: 0, oathPrimeval: false },
+      { date: '2026-07-19', item: 0, primeval: false, oath: 3, oathPrimeval: true },
+      { date: '2026-07-20', item: 1, primeval: false, oath: 0, oathPrimeval: false }
+    ]
+  )
+  assert.equal(
+    days.reduce((total, { item }) => total + item, 0),
+    sum(summary.items)
+  )
+  assert.equal(
+    days.reduce((total, { oath }) => total + oath, 0),
+    sum(summary.oaths)
+  )
+})
+
+test('시즌 10 하루 상세는 115레벨 장비를 items에, 레전더리 이상 서약을 oaths에 두고 그날의 수와 같다', () => {
+  const { days } = toSeasonActivity(zhongtian, splitRecords)
+
+  for (const { date, item, oath } of days) {
+    const detail = toActivityDayDetail(zhongtian.id, day(date), splitRecords)
+
+    assert.equal(detail.items.length, item, date)
+    assert.equal(detail.oaths.length, oath, date)
+  }
+
+  const itemDay = toActivityDayDetail(zhongtian.id, day('2026-07-18'), splitRecords)
+  assert.deepEqual(itemDay.items, [
+    { at: '2026-07-18T12:00:00+09:00', name: 'armor-115', rarity: '에픽' },
+    { at: '2026-07-18T12:01:00+09:00', name: 'weapon-115', rarity: '태초' }
+  ])
+  const oathDay = toActivityDayDetail(zhongtian.id, day('2026-07-19'), splitRecords)
+  assert.deepEqual(oathDay.oaths, [
+    { at: '2026-07-19T12:00:00+09:00', name: 'oath-primeval', rarity: '태초' },
+    { at: '2026-07-19T12:01:00+09:00', name: 'oath-legendary', rarity: '레전더리' },
+    { at: '2026-07-19T12:04:00+09:00', name: 'oath-epic', rarity: '에픽' }
+  ])
+})
+
+test('시즌 9는 같은 행을 등급만 보고 세고 서약 필드는 0, false, 빈 목록이다', () => {
+  const { summary, days } = toSeasonActivity(legacySeason, splitRecords)
+  const oathDay = toActivityDayDetail(legacySeason.id, day('2026-07-19'), splitRecords)
+
+  assert.deepEqual(summary.items, { legendary: 4, epic: 4, primeval: 3, mythic: 0 })
+  assert.deepEqual(summary.oaths, { legendary: 0, epic: 0, primeval: 0 })
+  assert.ok(days.every(({ oath, oathPrimeval }) => oath === 0 && !oathPrimeval))
+  assert.deepEqual(oathDay.oaths, [])
 })
 
 test('강화 단계는 before + 1이 아니라 after로 세고 성공을 따로 센다', () => {
@@ -311,6 +411,7 @@ test('강화권, 증폭권 기록은 단계별 시도와 성공에서 빼고 전
     enhancement(402, '2026-07-19T12:01:00', 11, 12, false, null)
   ]
   const { summary, days } = activity({ items })
+  const detail = toActivityDayDetail(legacySeason.id, day('2026-07-18'), { ...noRecords, items })
 
   assert.deepEqual(summary.enhancement, {
     attempts: 5,
@@ -327,7 +428,7 @@ test('강화권, 증폭권 기록은 단계별 시도와 성공에서 빼고 전
       { date: '2026-07-19', enhance: 2, highEnhancement: true }
     ]
   )
-  assert.equal(toActivityDayDetail(day('2026-07-18'), { clears: [], items }).enhancements.length, 3)
+  assert.equal(detail.enhancements.length, 3)
 })
 
 test('10증폭, 12강부터 단계별로 넣고 그 아래와 재련은 횟수만 센다', () => {
@@ -395,8 +496,8 @@ test('시즌 목록은 시작한 시즌만 두고 중천부터 available이며, 
   assert.equal(findActivitySeason([], undefined), undefined)
 })
 
-const dayDetail = (records: Partial<Parameters<typeof toActivityDayDetail>[1]>) =>
-  toActivityDayDetail(day('2026-07-18'), { clears: [], items: [], ...records })
+const dayDetail = (records: Partial<Parameters<typeof toActivityDayDetail>[2]>) =>
+  toActivityDayDetail(legacySeason.id, day('2026-07-18'), { ...noRecords, ...records })
 
 test('하루 상세는 그날 06:00부터 다음 날 06:00 전까지의 기록만 준다', () => {
   assert.deepEqual(day('2026-07-18'), {
@@ -480,8 +581,8 @@ test('하루 상세의 아이템과 강화는 캐릭터와 들어온 순서에 �
   )
 })
 
-test('하루 상세의 아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급 이름과 함께 준다', () => {
-  const { items } = dayDetail({
+test('시즌 5~9의 하루 상세 아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급 이름과 함께 주고 서약은 빈 목록이다', () => {
+  const { items, oaths } = dayDetail({
     items: [
       { ...acquisition('2026-07-18T12:00:00', '레전더리'), itemName: '한계 : 선명한 광휘 결정' },
       acquisition('2026-07-18T12:01:00', '에픽'),
@@ -493,6 +594,7 @@ test('하루 상세의 아이템은 획득 코드의 레전더리, 에픽, 태�
     ]
   })
 
+  assert.deepEqual(oaths, [])
   assert.deepEqual(items, [
     { at: '2026-07-18T12:00:00+09:00', name: '한계 : 선명한 광휘 결정', rarity: '레전더리' },
     { at: '2026-07-18T12:01:00+09:00', name: null, rarity: '에픽' },
@@ -533,10 +635,12 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
   const items = [
     acquisition('2026-07-20T10:00:00', '레어'),
     enhancement(402, '2026-07-18T06:01:00', 9, 10, true),
-    { ...acquisition('2026-07-18T05:58:00', '에픽'), itemName: '합성 아이템' }
+    { ...acquisition('2026-07-18T05:58:00', '에픽'), itemId: 'armor', itemName: '합성 아이템' }
   ]
+  const dictionary = [{ itemId: 'armor', availableLevel: 115, itemType: '방어구' }]
   let eventQueries = 0
   let itemQueries = 0
+  let dictionaryQueries = 0
   let backfillComplete = false
   const filter = <T extends { occurredAt: Date }>(
     rows: T[],
@@ -583,6 +687,13 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
 
         return filter(items, args)
       }
+    },
+    item: {
+      findMany: async (args: { where: { itemId: { in: string[] } } }) => {
+        dictionaryQueries++
+
+        return dictionary.filter(({ itemId }) => args.where.itemId.in.includes(itemId))
+      }
     }
   } as unknown as DatabaseClient
 
@@ -598,6 +709,7 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
     raids: [{ name: '디레지에 레이드', count: 1, hard: 0, normal: 1 }],
     legions: [],
     items: [{ at: '2026-07-18T05:58:00+09:00', name: '합성 아이템', rarity: '에픽' }],
+    oaths: [],
     enhancements: []
   })
   assert.deepEqual(result.days[1], {
@@ -605,9 +717,10 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
     raids: [],
     legions: [{ name: '아포칼립스', count: 1 }],
     items: [],
+    oaths: [],
     enhancements: [{ at: '2026-07-18T06:01:00+09:00', kind: 'amplify', target: 10, success: true }]
   })
-  assert.deepEqual([eventQueries, itemQueries], [1, 1])
+  assert.deepEqual([eventQueries, itemQueries, dictionaryQueries], [1, 1, 1])
   assert.deepEqual(await readAdventureSeasonDays(client, '합성', 9, now), { season: 9, days: [] })
   backfillComplete = true
   assert.deepEqual(
