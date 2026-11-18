@@ -37,6 +37,9 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 
 ## 코드 위치
 
+자기 폴더 밖의 source는 `#<폴더>/...` alias로 가져오고, 같은 폴더 안에서는 `./...`를 씁니다.
+화면 폴더 밖에서는 `#pages/<화면>`, core 밖에서는 `#core/<도메인>`으로 가져오며, 같은 화면 안과 core 도메인 사이는 파일까지 적습니다.
+
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
 - `src/animations/`: 화면에서 함께 쓰는 전환 animation과 GSAP 설정을 둡니다.
 - `src/assets/`: 글꼴, 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
@@ -48,7 +51,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/host/`: 브라우저 API를 검색, 캡처, 클립보드 기능과 연결합니다.
 - `src/lib/`: 조회 캐시와 카드 표시, 저장된 캐릭터 처리 함수를 둡니다.
 - `src/pages/<화면>/`: 라우트나 다른 화면이 렌더링하는 진입 컴포넌트인 `*Page.tsx`와 화면 본체인 `*Screen.tsx`를 둡니다. 한 파일 화면은 `*Page.tsx`에 본체도 둡니다.
-- `src/pages/<화면>/index.ts`: 그 화면의 `*Page.tsx`, `*Screen.tsx` 컴포넌트와 화면 폴더 밖에서 가져오는 함수, 상수를 다시 내보냅니다. 외부 import에는 `pages/<화면>`처럼 폴더 이름까지만 적습니다.
+- `src/pages/<화면>/index.ts`: 그 화면의 `*Page.tsx`, `*Screen.tsx` 컴포넌트와 화면 폴더 밖에서 가져오는 함수, 상수를 다시 내보냅니다. 외부 import에는 `#pages/<화면>`처럼 폴더 이름까지만 적습니다.
 - `src/pages/<화면>/components/`: 그 화면만 쓰는 컴포넌트와 스타일, 테스트를 둡니다.
 - `src/pages/<화면>/hooks/`: 그 화면만 쓰는 React hook과 store, 테스트를 둡니다.
 - `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.

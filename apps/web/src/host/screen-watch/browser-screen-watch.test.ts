@@ -15,12 +15,12 @@ import {
   type RaidWindowTemplates
 } from '#core/capture'
 import { installBrowserHost } from '..'
-import type { AutoRoundSignal, BrowserHost } from '../client-host'
-import { decodeBrowserImage } from '../browser-png'
+import type { AutoRoundSignal, BrowserHost } from '#host/client-host'
+import { decodeBrowserImage } from '#host/browser-png'
 import { readRaidWindowTemplates } from './browser-raid-templates'
 import { readTownIndicatorTemplate } from './browser-town-template'
 
-vi.mock('../browser-png', () => ({
+vi.mock('#host/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
   decodeBrowserPng: vi.fn()
 }))

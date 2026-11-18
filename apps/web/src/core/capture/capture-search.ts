@@ -1,16 +1,16 @@
 import { createActor } from 'xstate'
-import type { SearchView } from '../search/search'
+import {
+  type SearchView,
+  SEARCH_ACTIONS,
+  type SearchApi,
+  type OcrSearchInput,
+  type OcrSearchObservation,
+  type SearchCommandResult,
+  type SearchSlot,
+  type SearchSlotCount,
+  type SearchSnapshot
+} from '#core/search/search'
 import { emptySearchSlots, fillSlots } from './slots'
-import { SEARCH_ACTIONS } from '../search/search'
-import type {
-  SearchApi,
-  OcrSearchInput,
-  OcrSearchObservation,
-  SearchCommandResult,
-  SearchSlot,
-  SearchSlotCount,
-  SearchSnapshot
-} from '../search/search'
 import { createSearchConnection } from './search-connection'
 import { captureSearchMachine } from './capture-search-machine'
 

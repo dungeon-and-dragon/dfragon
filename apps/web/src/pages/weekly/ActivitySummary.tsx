@@ -1,7 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import type { ActivitySummary as Summary, EnhancementTarget } from '#core/adventure-guild'
-import { enhancementTextClasses, rarityTextClasses } from '../../components/game-colors'
+import { enhancementTextClasses, rarityTextClasses } from '#components/game-colors'
 import { formatClearCount } from './clear-count'
 
 const numberFormat = new Intl.NumberFormat('ko-KR')

@@ -1,12 +1,12 @@
 import { ChipGroup } from '@dfragon/ui'
 import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking'
-import { BoxPlotChart } from '../../components/chart/BoxPlot'
-import { BoxPlotLegend } from '../../components/chart/ChartLegend'
-import { Columns } from '../../components/chart/Columns'
-import { LineChart } from '../../components/chart/LineChart'
-import { RowBars } from '../../components/chart/RowBars'
-import { TitleBox } from '../../components/table/TitleBox'
+import { BoxPlotChart } from '#components/chart/BoxPlot'
+import { BoxPlotLegend } from '#components/chart/ChartLegend'
+import { Columns } from '#components/chart/Columns'
+import { LineChart } from '#components/chart/LineChart'
+import { RowBars } from '#components/chart/RowBars'
+import { TitleBox } from '#components/table/TitleBox'
 import {
   adventureColumns,
   type BaseContentOption,

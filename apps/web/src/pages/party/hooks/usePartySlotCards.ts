@@ -5,8 +5,8 @@ import {
   toClipboardText,
   toSlotCards
 } from '#core/capture'
-import { useAdventureSnapshot } from '../../../hooks/useAdventureSnapshot'
-import type { PartyCapture } from '../../../hooks/usePartyCapture'
+import { useAdventureSnapshot } from '#hooks/useAdventureSnapshot'
+import type { PartyCapture } from '#hooks/usePartyCapture'
 
 export function usePartySlotCards(capture: PartyCapture): {
   cards: SlotCard[]

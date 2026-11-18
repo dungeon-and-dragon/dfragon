@@ -14,16 +14,16 @@ import { createQueryClient } from './lib/query-client'
 import { ClientHostContext, type BrowserHost } from './host/client-host'
 import { useScreenCaptureContext } from './hooks/useScreenCaptureContext'
 import { useMyAdventureStore } from './hooks/useMyAdventureStore'
-import { CharacterDetailPage, parseCharacterTabSearch } from './pages/character'
-import { CharacterSearchPage, parseCharacterSearch } from './pages/character-search'
-import { FavoritesPage } from './pages/favorites'
-import { GuildPage } from './pages/guild'
-import { HomePage } from './pages/home'
-import { PrivacyPage, TermsPage } from './pages/legal'
-import { NotFoundPage } from './pages/not-found'
-import { RankingsPage, parseRankingSearch } from './pages/rankings'
-import { MultisearchPage } from './pages/multisearch'
-import { StatsPage } from './pages/stats'
+import { CharacterDetailPage, parseCharacterTabSearch } from '#pages/character'
+import { CharacterSearchPage, parseCharacterSearch } from '#pages/character-search'
+import { FavoritesPage } from '#pages/favorites'
+import { GuildPage } from '#pages/guild'
+import { HomePage } from '#pages/home'
+import { PrivacyPage, TermsPage } from '#pages/legal'
+import { NotFoundPage } from '#pages/not-found'
+import { RankingsPage, parseRankingSearch } from '#pages/rankings'
+import { MultisearchPage } from '#pages/multisearch'
+import { StatsPage } from '#pages/stats'
 import {
   ClearsPage,
   ClearDetailPage,
@@ -31,8 +31,8 @@ import {
   isKnownContentId,
   parseClearDetailSearch,
   parseClearSearch
-} from './pages/clears'
-import { AdventureEntryPage, WeeklyPage, parseWeeklySearch } from './pages/weekly'
+} from '#pages/clears'
+import { AdventureEntryPage, WeeklyPage, parseWeeklySearch } from '#pages/weekly'
 import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
 import { WEB_CAPTURE_TEXTS } from '#core/capture'
 

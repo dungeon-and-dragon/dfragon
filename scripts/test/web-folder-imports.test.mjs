@@ -10,23 +10,42 @@ import { lintSamples } from './fixtures/biome-lint.mjs'
 
 const src = 'apps/web/src'
 const rejectedImports = [
-  ['components/a.ts', '../pages/a/APage', 'pages/'],
-  ['components/nested/b.ts', '../../pages/a/util', 'pages/'],
-  ['hooks/a.ts', '../pages/a/APage', 'pages/'],
-  ['hooks/index.ts', '../pages', 'pages/'],
-  ['host/a.ts', '../pages/a/APage', 'pages/'],
-  ['host/nested/b.ts', '../../components/Shared', 'components/'],
-  ['host/nested/c.ts', '../../hooks/useShared', 'hooks/'],
-  ['host/index-import.ts', '../components', 'components/'],
+  ['pages/a/dynamic.ts', '../shared', '#<폴더>/...', "export const used = import('../shared')\n"],
+  [
+    'pages/a/type.ts',
+    '../shared',
+    '#<폴더>/...',
+    "import type { Value } from '../shared'\nexport type Used = Value\n"
+  ],
+  ['pages/a/export.ts', '../shared', '#<폴더>/...', "export { value } from '../shared'\n"],
+  ['pages/a/parent.ts', '../shared', '#<폴더>/...'],
+  ['pages/a/deep.ts', '../../../hooks/useShared', '#<폴더>/...'],
+  ['core/search/parent.ts', '../character/character', '#<폴더>/...'],
+  ['components/parent.ts', '../hooks/useShared', '#<폴더>/...'],
+  ['host/parent.ts', '../core/search', '#<폴더>/...'],
+  ['core/component-alias.ts', '#components/Shared', 'UI 폴더'],
+  ['core/hook-alias.ts', '#hooks/useShared', 'UI 폴더'],
+  ['core/page-alias.ts', '#pages/a', 'UI 폴더'],
+  ['core/host-alias.ts', '#host/client-host', 'UI 폴더'],
+  ['core/animation-alias.ts', '#animations/transition', 'UI 폴더'],
+  ['components/a.ts', '#pages/a/APage', 'pages/'],
+  ['components/nested/b.ts', '#pages/a/util', 'pages/'],
+  ['hooks/a.ts', '#pages/a/APage', 'pages/'],
+  ['hooks/index.ts', '#pages', 'pages/'],
+  ['host/a.ts', '#pages/a/APage', 'pages/'],
+  ['host/nested/b.ts', '#components/Shared', 'components/'],
+  ['host/nested/c.ts', '#hooks/useShared', 'hooks/'],
+  ['host/index-import.ts', '#components', 'components/'],
   ['host/alias.ts', '#ui/components/Thing', 'components/'],
   ['hooks/alias.ts', '#pages/a/APage', 'pages/'],
   ['host/direct-alias.ts', '#components/Thing', 'components/'],
   ['core/a.ts', 'react', 'UI 폴더'],
-  ['core/b.ts', '../components/Shared', 'UI 폴더']
+  ['core/b.ts', '#components/Shared', 'UI 폴더']
 ]
 const allowedImports = [
-  ['components/allowed.ts', '../hooks/useShared'],
-  ['hooks/allowed.ts', '../components/Shared'],
+  ['pages/a/same.ts', './local'],
+  ['components/allowed.ts', '#hooks/useShared'],
+  ['hooks/allowed.ts', '#components/Shared'],
   ['host/allowed.ts', '#core/search'],
   ['host/package.ts', '@dfragon/ui/components/Thing'],
   ['host/package-index.ts', '@dfragon/ui/hooks'],
@@ -38,11 +57,24 @@ function importing(source) {
 }
 
 function samples(cases) {
-  return Object.fromEntries(cases.map(([file, source]) => [`${src}/${file}`, importing(source)]))
+  return Object.fromEntries(
+    cases.map(([file, source, , code]) => [`${src}/${file}`, code ?? importing(source)])
+  )
 }
 
 const rejected = await lintSamples(samples(rejectedImports))
-const allowed = await lintSamples(samples(allowedImports))
+const allowedSamples = samples(allowedImports)
+const parentImport = importing('../shared')
+const allowed = await lintSamples({
+  ...allowedSamples,
+  'apps/web/vite.config.ts': parentImport,
+  'apps/storybook/src/allowed.ts': parentImport
+})
+
+test('Biome: 웹 설정과 다른 앱의 상위 폴더 상대 경로는 허용한다', () => {
+  assert.deepEqual(allowed.get('apps/web/vite.config.ts'), [])
+  assert.deepEqual(allowed.get('apps/storybook/src/allowed.ts'), [])
+})
 
 for (const [file, source, destination] of rejectedImports) {
   test(`Biome: ${file}에서 ${source} import를 거부하고 ${destination} 위치를 알린다`, () => {
@@ -60,51 +92,59 @@ for (const [file, source] of allowedImports) {
 }
 
 const screenRejected = [
-  ['src/pages/a/relative.ts', '../b/hooks/useThing', 'screen-folder-imports'],
-  ['src/pages/a/via-root.ts', '../../pages/b/hooks/useThing', 'screen-folder-imports'],
-  ['src/pages/a/explicit.ts', '../b/hooks/useThing.ts', 'screen-folder-imports'],
-  ['src/pages/a/ts-page.ts', '../b/OtherPage', 'screen-folder-imports'],
-  ['src/pages/a/top-level-util.tsx', '../b/util', 'screen-folder-imports'],
-  ['src/pages/a/nested-page.ts', '../b/components/NestedPage.tsx', 'screen-folder-imports'],
-  ['src/pages/a/page.ts', '../b/BPage', 'screen-folder-imports'],
-  ['src/pages/a/page-tsx.ts', '../b/BPage.tsx', 'screen-folder-imports'],
-  ['src/pages/a/screen.ts', '../b/BScreen', 'screen-folder-imports'],
-  ['src/pages/a/screen-tsx.ts', '../b/BScreen.tsx', 'screen-folder-imports'],
-  [
-    'src/pages/a/one/two/three/four/deep.ts',
-    '../../../../../b/hooks/useThing',
-    'screen-folder-imports'
-  ],
+  ['src/pages/a/relative-screen-boundary.ts', '../b/hooks/useThing', 'screen-folder-imports'],
+  ['src/pages/a/alias-screen-boundary.ts', '#pages/b/hooks/useThing', 'screen-folder-imports'],
+  ['src/pages/a/explicit.ts', '#pages/b/hooks/useThing.ts', 'screen-folder-imports'],
+  ['src/pages/a/ts-page.ts', '#pages/b/OtherPage', 'screen-folder-imports'],
+  ['src/pages/a/top-level-util.tsx', '#pages/b/util', 'screen-folder-imports'],
+  ['src/pages/a/nested-page.ts', '#pages/b/components/NestedPage.tsx', 'screen-folder-imports'],
+  ['src/pages/a/page.ts', '#pages/b/BPage', 'screen-folder-imports'],
+  ['src/pages/a/page-tsx.ts', '#pages/b/BPage.tsx', 'screen-folder-imports'],
+  ['src/pages/a/screen.ts', '#pages/b/BScreen', 'screen-folder-imports'],
+  ['src/pages/a/screen-tsx.ts', '#pages/b/BScreen.tsx', 'screen-folder-imports'],
   ['src/WebApp.ts', './pages/rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
   ['src/pages/router.ts', './rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
   ['src/WebApp.test.ts', './pages/b/hooks/useThing', 'screen-folder-imports-outside-pages'],
-  ['src/testing/story.ts', '../pages/b/BPage.tsx', 'screen-folder-imports-outside-pages'],
-  ['src/lib/shared.ts', '../pages/b/util', 'screen-folder-imports-outside-pages']
+  ['src/testing/story.ts', '#pages/b/BPage.tsx', 'screen-folder-imports-outside-pages'],
+  ['src/lib/shared.ts', '#pages/b/util', 'screen-folder-imports-outside-pages']
 ]
 
 const screenAllowed = [
   ['src/pages/a/same.ts', './hooks/useThing'],
-  ['src/pages/a/one/same.ts', '../hooks/useThing'],
+  ['src/pages/a/one/same.ts', '#pages/a/hooks/useThing'],
   ['src/pages/b/same-page.ts', './BPage'],
-  ['src/pages/a/shared.ts', '../../hooks/useShared'],
-  ['src/pages/a/index-import.ts', '../b'],
-  ['src/pages/a/rankings.ts', '../rankings'],
-  ['src/router.ts', './pages/rankings'],
-  ['src/router.test.ts', './pages/b'],
+  ['src/pages/a/shared.ts', '#hooks/useShared'],
+  ['src/pages/a/index-import.ts', '#pages/b'],
+  ['src/pages/a/rankings.ts', '#pages/rankings'],
+  ['src/router.ts', '#pages/rankings'],
+  ['src/router.test.ts', '#pages/b'],
   ['src/pages/a/core.ts', '#core/search']
 ]
 
 const coreRejected = [
   ['src/pages/a/core-detail.ts', '#core/character/character-detail-view'],
-  ['src/lib/core-relative.ts', '../core/character/character-detail-view'],
-  ['src/testing/core-nested.ts', '../core/character/nested/helper'],
+  ['src/lib/core-relative.ts', '#core/character/character-detail-view'],
+  ['src/testing/core-nested.ts', '#core/character/nested/helper'],
   ['src/core-boundary.test.ts', './core/character/character-detail-view']
+]
+
+const aliasAllowed = [
+  ['src/pages/a/animation.ts', '#animations/transition', 'src/animations/transition.ts'],
+  ['src/pages/a/asset.ts', '#assets/logo.png', 'src/assets/logo.png'],
+  ['src/pages/a/component.ts', '#components/Shared', 'src/components/Shared.tsx'],
+  ['src/pages/a/constant.ts', '#constants/shared', 'src/constants/shared.ts'],
+  ['src/pages/a/hook.ts', '#hooks/useShared', 'src/hooks/useShared.ts'],
+  ['src/pages/a/host.ts', '#host/client-host', 'src/host/client-host.tsx'],
+  ['src/pages/a/lib.ts', '#lib/shared', 'src/lib/shared.ts'],
+  ['src/pages/a/testing.ts', '#testing/fixture', 'src/testing/fixture.tsx'],
+  ['src/pages/a/other-screen.ts', '#pages/b', 'src/pages/b/index.ts'],
+  ['src/pages/a/same-screen.ts', '#pages/a/hooks/useThing', 'src/pages/a/hooks/useThing.ts']
 ]
 
 const coreAllowed = [
   ['src/pages/a/core-character.ts', '#core/character'],
   ['src/core/character/same.ts', './character-detail-view'],
-  ['src/core/search/other-domain.ts', '../character/character-detail-view'],
+  ['src/core/search/other-domain.ts', '#core/character/character-detail-view'],
   ['src/core/search/other-alias.ts', '#core/character/character-detail-view'],
   ['src/pages/a/core-time.ts', '#core/time-format'],
   ['src/pages/a/core-image.ts', '#core/capture/raid/heading.png']
@@ -122,17 +162,28 @@ async function cruiseSamples() {
 
   try {
     await mkdir(web, { recursive: true })
-    for (const file of ['.dependency-cruiser.mjs', 'tsconfig.app.json', 'package.json']) {
+    for (const file of [
+      '.dependency-cruiser.mjs',
+      'tsconfig.app.json',
+      'tsconfig.paths.json',
+      'package.json'
+    ]) {
       await cp(join(root, 'apps/web', file), join(web, file))
     }
 
     const files = Object.fromEntries(
-      [...screenRejected, ...screenAllowed, ...coreRejected, ...coreAllowed].map(
+      [...screenRejected, ...screenAllowed, ...coreRejected, ...coreAllowed, ...aliasAllowed].map(
         ([file, source]) => [file, importing(source)]
       )
     )
 
     for (const file of [
+      'src/animations/transition.ts',
+      'src/assets/logo.png',
+      'src/components/Shared.tsx',
+      'src/constants/shared.ts',
+      'src/host/client-host.tsx',
+      'src/testing/fixture.tsx',
       'src/pages/a/hooks/useThing.ts',
       'src/pages/b/hooks/useThing.ts',
       'src/pages/b/components/NestedPage.tsx',
@@ -225,7 +276,7 @@ for (const [file, source, ruleName] of screenRejected) {
     )
   })
 }
-for (const [file, source] of [...screenAllowed, ...coreAllowed]) {
+for (const [file, source] of [...screenAllowed, ...coreAllowed, ...aliasAllowed]) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 허용한다`, () => {
     assert.deepEqual(
       report.summary.violations.filter(({ from }) => from === file),
@@ -237,6 +288,14 @@ for (const [file, source] of [...screenAllowed, ...coreAllowed]) {
   })
 }
 
+for (const [file, source, expected] of aliasAllowed) {
+  test(`dependency-cruiser: ${source}는 ${expected}로 풀린다`, () => {
+    const module = report.modules.find(({ source: path }) => path === file)
+    assert.equal(module.dependencies[0].resolved, expected)
+    assert.equal(module.dependencies[0].couldNotResolve, false)
+  })
+}
+
 test('dependency-cruiser: #core alias를 실제 소스로 해석한다', () => {
   const module = report.modules.find(({ source }) => source === 'src/pages/a/core.ts')
   assert.equal(module.dependencies[0].resolved, 'src/core/search/index.ts')
@@ -244,7 +303,7 @@ test('dependency-cruiser: #core alias를 실제 소스로 해석한다', () => {
 
 test('dependency-cruiser: 화면 파일 직접 import는 실패하고 폴더 경로와 공용 코드 위치를 알린다', () => {
   assert.ok(exitCode > 0)
-  assert.ok(text.includes('pages/<화면>(예: pages/rankings)처럼 폴더 경로로 import한다.'), text)
+  assert.ok(text.includes('#pages/<화면>(예: #pages/rankings)처럼 폴더 경로로 import한다.'), text)
   assert.ok(text.includes('components/나 hooks/'), text)
 })
 

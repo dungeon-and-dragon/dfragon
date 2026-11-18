@@ -1,6 +1,10 @@
 import { assign, fromCallback, setup } from 'xstate'
-import type { SearchCommandResult, SearchControl, SearchSnapshot } from '../search/search'
-import { SEARCH_ACTIONS } from '../search/search'
+import {
+  type SearchCommandResult,
+  type SearchControl,
+  type SearchSnapshot,
+  SEARCH_ACTIONS
+} from '#core/search/search'
 
 type BeginRequest = {
   signal: AbortSignal

@@ -1,5 +1,5 @@
 import { formatSeoulMonthDay, formatSeoulTime } from '#core/time-format'
-import type { LineAxisTick, LineTimeAxis } from '../../../../components/chart/LineChart'
+import type { LineAxisTick, LineTimeAxis } from '#components/chart/LineChart'
 
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR

@@ -5,7 +5,7 @@ import type {
   AdventureWeekly,
   Guild
 } from '#core/adventure-guild'
-import type { FavoriteCharacter } from '../../hooks/useFavoriteCharacterStore'
+import type { FavoriteCharacter } from '#hooks/useFavoriteCharacterStore'
 import { storyRankedCharacters } from './story-characters'
 
 // 모험단, 길드, 캐릭터 이름과 활동 기록은 실제 값이 아닌 합성 값이다.

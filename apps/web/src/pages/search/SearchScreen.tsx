@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import { useIsPartyMode, useIsRaidMode } from '../../hooks/useSearchModeStore'
-import { PartyPage } from '../party'
-import { RaidPage } from '../raid'
+import { useIsPartyMode, useIsRaidMode } from '#hooks/useSearchModeStore'
+import { PartyPage } from '#pages/party'
+import { RaidPage } from '#pages/raid'
 
 export function SearchScreen({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {
   const isPartyMode = useIsPartyMode()

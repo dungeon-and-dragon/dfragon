@@ -1,7 +1,7 @@
-import { binarizeRaidTextPixels } from '../../src/core/ocr/nickname-pixels'
-import { normalizedBgr, normalizedNicknameBgr } from '../../src/core/ocr/paddle-recognition'
-import type { CharacterImage } from '../../src/core/character/character'
-import { createOcrRecognizer } from '../shared/onnx-ocr'
+import { binarizeRaidTextPixels } from '#core/ocr/nickname-pixels'
+import { normalizedBgr, normalizedNicknameBgr } from '#core/ocr/paddle-recognition'
+import type { CharacterImage } from '#core/character/character'
+import { createOcrRecognizer } from '#scripts/shared/onnx-ocr'
 import type { JobOcrPreprocessing } from './evaluate'
 
 export type JobOcrReader = (

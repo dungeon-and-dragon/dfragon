@@ -7,11 +7,11 @@ import {
   type SkillUpgradeBoard,
   skillMarkOf
 } from '#core/catalog'
-import { ClipboardCopyButton } from '../../../../components/ClipboardCopyButton'
-import { GameText } from '../GameText'
+import { ClipboardCopyButton } from '#components/ClipboardCopyButton'
+import { GameText } from '#pages/character/tabs/GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { SkillSprite } from './SkillSprite'
-import { itemTableClasses } from '../equipment/item-classes'
+import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
 import { EVOLUTION_MARK, PIXELATED } from './skill-classes'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 

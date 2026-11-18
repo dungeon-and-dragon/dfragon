@@ -1,11 +1,11 @@
 import { expect, it, vi } from 'vitest'
 import { createCaptureSearchLifetime } from './capture-lifetime'
-import { deferred } from '../testing/async-test-fixture'
-import { SearchHttpFailure } from '../api/http'
+import { deferred } from '#core/testing/async-test-fixture'
+import { SearchHttpFailure } from '#core/api/http'
 import type { SearchRuntime } from './request'
-import type { CharacterCandidatesHttp } from '../api/dfragon-client'
+import type { CharacterCandidatesHttp } from '#core/api/dfragon-client'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
-import type { CharacterCandidate } from '../character/character'
+import type { CharacterCandidate } from '#core/character/character'
 import type { OcrSearchObservation, SearchSnapshot } from './search'
 
 const rows: readonly CharacterCandidate[] = [

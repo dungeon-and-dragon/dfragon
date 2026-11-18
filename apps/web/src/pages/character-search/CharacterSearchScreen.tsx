@@ -7,10 +7,10 @@ import {
   CharacterTable,
   type CharacterTableRow,
   SkeletonRow
-} from '../../components/table/CharacterTable'
-import { ListBox } from '../../components/table/ListBox'
-import { TitleBox, TitleStat } from '../../components/table/TitleBox'
-import { characterSearchServerOptions } from '../../constants/server-options'
+} from '#components/table/CharacterTable'
+import { ListBox } from '#components/table/ListBox'
+import { TitleBox, TitleStat } from '#components/table/TitleBox'
+import { characterSearchServerOptions } from '#constants/server-options'
 import { useSearchedCharacters } from './hooks/useSearchedCharacters'
 
 const LOADING_ROWS = 5

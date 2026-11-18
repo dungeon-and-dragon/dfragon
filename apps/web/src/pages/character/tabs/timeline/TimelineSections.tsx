@@ -6,17 +6,17 @@ import type {
   TimelineClearCount,
   TimelineEnhancement
 } from '#core/character'
-import type { TimelinePages } from '../../hooks/useTimelinePages'
+import type { TimelinePages } from '#pages/character/hooks/useTimelinePages'
 import {
   acquisitionRoute,
   CLEAR_KIND_LABELS,
   ENHANCEMENT_KIND_LABELS,
   formatEnhancementValue
 } from './timeline-format'
-import { LoadingLine } from '../../../../components/LoadingLine'
-import { RelativeTime } from '../../../../components/RelativeTime'
-import { useInfiniteScrollRef } from '../../../../hooks/useInfiniteScrollRef'
-import { enhancementKindClasses, raritySolidOfName } from '../../../../components/game-colors'
+import { LoadingLine } from '#components/LoadingLine'
+import { RelativeTime } from '#components/RelativeTime'
+import { useInfiniteScrollRef } from '#hooks/useInfiniteScrollRef'
+import { enhancementKindClasses, raritySolidOfName } from '#components/game-colors'
 
 const BADGE = 'badge text-fg-muted'
 const TABLE = 'table table-fixed'

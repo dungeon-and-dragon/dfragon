@@ -1,4 +1,4 @@
-import type { SearchSlot, SearchSlotCount } from '../search/search'
+import type { SearchSlot, SearchSlotCount } from '#core/search/search'
 
 export function fillSlots<T>(slotCount: SearchSlotCount, value: T): T[] {
   return Array.from({ length: slotCount }, () => value)

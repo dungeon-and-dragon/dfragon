@@ -1,27 +1,27 @@
 import { Button, ChipGroup } from '@dfragon/ui'
 import { useRef, useState } from 'react'
 import type { ClearJob } from '#core/ranking'
-import { useChartTooltipSlide } from '../../../animations/useChartTooltipSlide'
-import { BoxPlot, BoxPlotAxis } from '../../../components/chart/BoxPlot'
+import { useChartTooltipSlide } from '#animations/useChartTooltipSlide'
+import { BoxPlot, BoxPlotAxis } from '#components/chart/BoxPlot'
 import {
   boxPlotScaleFor,
   boxPlotTooltipPlaceOf,
   boxStatsTooltipRows
-} from '../../../components/chart/box-plot-layout'
-import { BoxPlotLegend } from '../../../components/chart/ChartLegend'
-import type { Scale } from '../../../components/chart/chart-geometry'
-import { ChartTooltip } from '../../../components/chart/plot-parts'
-import { type Hover, NO_HOVER, type TooltipRow } from '../../../components/chart/plot-layout'
-import { useChartSize } from '../../../components/chart/useChartSize'
-import { JOB_SORTS, type JobRow, type JobSort, jobRows } from '../clear-detail'
+} from '#components/chart/box-plot-layout'
+import { BoxPlotLegend } from '#components/chart/ChartLegend'
+import type { Scale } from '#components/chart/chart-geometry'
+import { ChartTooltip } from '#components/chart/plot-parts'
+import { type Hover, NO_HOVER, type TooltipRow } from '#components/chart/plot-layout'
+import { useChartSize } from '#components/chart/useChartSize'
+import { JOB_SORTS, type JobRow, type JobSort, jobRows } from '#pages/clears/clear-detail'
 import {
   hasJobScores,
   JOB_METRIC_PLOT_LABELS,
   JOB_METRICS,
   type JobMetric,
   jobMetricTickOf
-} from '../clear-scores'
-import { useChoice } from '../hooks/useChoice'
+} from '#pages/clears/clear-scores'
+import { useChoice } from '#pages/clears/hooks/useChoice'
 import { Panel } from './ClearPanel'
 
 const VISIBLE_JOB_COUNT = 10

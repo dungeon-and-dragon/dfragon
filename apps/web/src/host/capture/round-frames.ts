@@ -1,7 +1,7 @@
 import type { CharacterImage } from '#core/character'
-import type { BrowserHost } from '../client-host'
-import { decodeBrowserImage } from '../browser-png'
-import { createListeners } from '../listeners'
+import type { BrowserHost } from '#host/client-host'
+import { decodeBrowserImage } from '#host/browser-png'
+import { createListeners } from '#host/listeners'
 import type { createScreenShare } from './screen-share'
 
 function findPastedImage(data: DataTransfer | null): File | null {

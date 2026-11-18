@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import { StoryFrame } from '../../testing/story-support/StoryFrame'
-import { StoryScreen } from '../../testing/story-support/StoryScreen'
+import { StoryFrame } from '#testing/story-support/StoryFrame'
+import { StoryScreen } from '#testing/story-support/StoryScreen'
 import {
   storyClearContentStats,
   storyClearOverview,
   storyClearStats
-} from '../../testing/story-support/story-clears'
-import { createStoryClientHost } from '../../testing/story-support/story-host'
+} from '#testing/story-support/story-clears'
+import { createStoryClientHost } from '#testing/story-support/story-host'
 import { ClearDetailScreen } from './ClearDetailScreen'
 import { ClearOverviewScreen } from './ClearOverviewScreen'
 

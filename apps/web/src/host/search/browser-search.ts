@@ -16,8 +16,8 @@ import {
 } from '#core/search'
 import type { DfragonClient } from '#core/api'
 import { createCharacterImageSource, decodeCharacterImage } from '#core/character'
-import type { CardSearchHost } from '../client-host'
-import { decodeBrowserPng } from '../browser-png'
+import type { CardSearchHost } from '#host/client-host'
+import { decodeBrowserPng } from '#host/browser-png'
 
 // setTimeout은 중첩되면 4ms 이상 기다려 초상화 비교의 양보가 수 초로 늘어난다.
 function createMessageChannelYield(): YieldToEventLoop {

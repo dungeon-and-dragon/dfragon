@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { LINE_REVEAL, useChartReveal } from '../../animations/useChartReveal'
-import { useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
+import { LINE_REVEAL, useChartReveal } from '#animations/useChartReveal'
+import { useChartTooltipSlide } from '#animations/useChartTooltipSlide'
 import { ChartLegend } from './ChartLegend'
 import {
   definedRuns,

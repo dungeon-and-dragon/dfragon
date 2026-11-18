@@ -12,7 +12,7 @@ import {
   type SnapshotMark,
   swapSeats
 } from '#core/capture'
-import { TestRouter } from '../../testing/test-support/test-router'
+import { TestRouter } from '#testing/test-support/test-router'
 
 const CHARACTER_NAME_INPUT_SELECTOR = 'input[aria-label$="번 캐릭터 이름"]'
 

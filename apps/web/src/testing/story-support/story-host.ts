@@ -1,4 +1,4 @@
-import type { ClientHost } from '../../host/client-host'
+import type { ClientHost } from '#host/client-host'
 
 type StoryHostOverrides = Partial<Omit<ClientHost, 'party' | 'raid'>> & {
   party?: Partial<ClientHost['party']>

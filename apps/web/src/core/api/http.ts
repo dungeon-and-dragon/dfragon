@@ -1,5 +1,4 @@
-import { SEARCH_ERRORS } from '../search/search'
-import type { SearchError, SearchErrorCode } from '../search/search'
+import { SEARCH_ERRORS, type SearchError, type SearchErrorCode } from '#core/search/search'
 
 export class SearchHttpFailure extends Error {
   constructor(

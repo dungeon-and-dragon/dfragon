@@ -2,8 +2,8 @@ import { CheckIcon } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture'
 import type { ClearName, WeeklyCharacter } from '#core/adventure-guild'
-import { CharacterCell } from '../../components/table/CharacterCell'
-import { RankBadge } from '../../components/table/RankBadge'
+import { CharacterCell } from '#components/table/CharacterCell'
+import { RankBadge } from '#components/table/RankBadge'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

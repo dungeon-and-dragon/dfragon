@@ -5,8 +5,8 @@ import {
   detectPartyFrameGeometry,
   PartyFrameGeometryError
 } from '@dfragon/lib'
-import type { CharacterImage } from '../../src/core/character/character'
-import { type CropRegion, cropRegion } from '../shared/onnx-ocr'
+import type { CharacterImage } from '#core/character/character'
+import { type CropRegion, cropRegion } from '#scripts/shared/onnx-ocr'
 import type { DetectionFailure } from './evaluate'
 import { type NicknameSlot, readPng, type Screen } from './manifest'
 

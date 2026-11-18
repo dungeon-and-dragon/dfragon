@@ -4,7 +4,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useCharacterSearch } from './useCharacterSearch'
 import { type CaptureSearch, type createCaptureSearch, emptySearchSlots } from '#core/capture'
-import { createTestClientHost } from '../testing/test-support/client-host'
+import { createTestClientHost } from '#testing/test-support/client-host'
 import {
   type CharacterChoice,
   SEARCH_SLOT_COUNTS,

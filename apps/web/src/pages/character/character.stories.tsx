@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import type { SkillWindowCatalog } from '#core/catalog'
-import type { ClientHost } from '../../host/client-host'
-import { StoryFrame } from '../../testing/story-support/StoryFrame'
-import { StoryScreen } from '../../testing/story-support/StoryScreen'
+import type { ClientHost } from '#host/client-host'
+import { StoryFrame } from '#testing/story-support/StoryFrame'
+import { StoryScreen } from '#testing/story-support/StoryScreen'
 import {
   storyBuffSkillWindowCatalog,
   storyCharacterDetail,
@@ -11,8 +11,8 @@ import {
   storyOathCatalog,
   storySkillWindowCatalog,
   storyTimeline
-} from '../../testing/story-support/story-character-detail'
-import { createStoryClientHost } from '../../testing/story-support/story-host'
+} from '#testing/story-support/story-character-detail'
+import { createStoryClientHost } from '#testing/story-support/story-host'
 import type { CharacterTab } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
 

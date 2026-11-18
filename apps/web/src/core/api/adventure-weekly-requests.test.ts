@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest'
-import type { AdventureWeekly } from '../adventure-guild/adventure-weekly'
+import type { AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'

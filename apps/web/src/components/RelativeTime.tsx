@@ -1,5 +1,5 @@
 import { formatSeoulDateTime, formatTimeAgo } from '#core/time-format'
-import { useRefreshingNow } from '../hooks/useRefreshingNow'
+import { useRefreshingNow } from '#hooks/useRefreshingNow'
 
 type RelativeTimeProps = { at: string; className?: string }
 
