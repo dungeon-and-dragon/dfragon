@@ -4,7 +4,7 @@ import {
   readUsableBatchNeopleKeys,
   recordBatchNeopleKeyRejected
 } from '@dfragon/database'
-import type { BatchNeopleKeyRepository } from '../neople/batch-key-pool.js'
+import type { BatchNeopleKeyRepository } from '../neople/index.js'
 
 export class DatabaseBatchNeopleKeyRepository implements BatchNeopleKeyRepository {
   constructor(private readonly client: DatabaseClient) {}
