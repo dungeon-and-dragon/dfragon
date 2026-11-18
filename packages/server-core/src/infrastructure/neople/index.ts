@@ -1,5 +1,5 @@
 export { parseCharacterBasic, parseCharacterSkillStyle } from './character-basic.js'
-export { createNeopleCatalog } from './character-catalog.js'
+export { createNeopleCatalog, createNeopleItemDetails } from './character-catalog.js'
 export { parseCharacterSets } from './character-sets.js'
 export { createNeopleCharacterDetails } from './character-detail.js'
 export { createNeopleCharacterTimeline } from './character-timeline.js'

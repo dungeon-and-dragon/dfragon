@@ -12,6 +12,7 @@ import {
   paceNeopleRequests
 } from '#infrastructure/neople/index.js'
 import {
+  createNeopleItemDetails,
   parseCharacterBasic,
   parseCharacterSets
 } from '@dfragon/server-core/infrastructure/neople/index.js'
@@ -69,6 +70,7 @@ export async function startCharacterCollector(
     createFetchTimeline: createNeopleClearTimeline(neople),
     createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
     fetchSkillStyle: createNeopleSkillStyle(neople),
+    fetchItemDetails: createNeopleItemDetails(neople),
     ...createNeopleFameSearch(neople),
     readConcurrency,
     report,
