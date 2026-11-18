@@ -1,5 +1,4 @@
 import type {
-  ClearCoClearCount,
   ClearContentScoreSample,
   ClearFameSample,
   ClearJobFameSample,
@@ -26,7 +25,6 @@ export type ClearOverviewContent = {
   fame: ClearFameDistribution | null
   scores: ClearScoreDistributions
   jobs: ClearJobStats[]
-  coClears: { id: string; cleared: number }[]
 }
 
 export type ClearOverview = ClearTimes & {
@@ -39,7 +37,6 @@ export type ClearOverviewSamples = {
   jobFames: readonly ClearJobFameSample[]
   scores: readonly ClearContentScoreSample[]
   jobScores: readonly ClearJobScoreSample[]
-  coClears: readonly ClearCoClearCount[]
   raidTimes: readonly ClearTimeCount[]
 }
 
@@ -50,7 +47,7 @@ export function toEmptyClearOverview(): ClearOverview {
 export function toClearOverview(
   weekStart: Date,
   populations: readonly StoredClearPopulation[],
-  { fames, jobFames, scores, jobScores, coClears, raidTimes }: ClearOverviewSamples
+  { fames, jobFames, scores, jobScores, raidTimes }: ClearOverviewSamples
 ): ClearOverview {
   const weekPopulations = new Map(
     populations
@@ -68,8 +65,6 @@ export function toClearOverview(
     return [{ id, population }]
   })
 
-  const contentIds = weekContents.map(({ id }) => id)
-
   const contents = weekContents.map(({ id, population }) => {
     const jobs = toClearJobs(
       population,
@@ -81,17 +76,8 @@ export function toClearOverview(
     const fameSample = fames.find(({ contentId }) => contentId === id)
     const fame = fameSample !== undefined ? toFameDistribution(fameSample) : null
     const contentScores = toScoreDistributions(scores.filter(({ contentId }) => contentId === id))
-    const contentCoClears = contentIds
-      .filter((otherId) => otherId !== id)
-      .map((otherId) => {
-        const otherCleared = coClears
-          .filter((row) => row.contentId === id && row.otherContentId === otherId)
-          .reduce((total, row) => total + row.cleared, 0)
 
-        return { id: otherId, cleared: otherCleared }
-      })
-
-    return { id, cleared, fame, scores: contentScores, jobs, coClears: contentCoClears }
+    return { id, cleared, fame, scores: contentScores, jobs }
   })
 
   const times = toClearTimes(raidTimes)
