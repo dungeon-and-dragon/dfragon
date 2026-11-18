@@ -11,6 +11,7 @@ import {
   readCharacterStats,
   readFamedJobGrows,
   readJobSkillAdoption,
+  replaceItemAdoption,
   replaceSetAdoption,
   saveCharacterStats,
   saveJobSkillAdoption
@@ -46,5 +47,9 @@ export class DatabaseStatsJobRepository implements StatsJobRepository {
 
   replaceSetAdoption(replacement: SetAdoptionReplacement): Promise<number> {
     return replaceSetAdoption(this.client, replacement)
+  }
+
+  replaceItemAdoption(replacement: SetAdoptionReplacement): Promise<number> {
+    return replaceItemAdoption(this.client, replacement)
   }
 }
