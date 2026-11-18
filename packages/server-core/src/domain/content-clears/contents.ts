@@ -1,8 +1,12 @@
 import type { ContentClearInput, ContentClearKind, TimelineCharacter } from '@dfragon/database'
 import { z } from 'zod'
 import { toRaidStageLabel } from '../raid-stage.js'
-import { RAID_CLEAR_CODES, toClear, toTimelineClearData } from '../character-timeline/project.js'
-import type { TimelineRow } from '../character-timeline/rows.js'
+import {
+  RAID_CLEAR_CODES,
+  toClear,
+  toTimelineClearData,
+  type TimelineRow
+} from '../character-timeline/index.js'
 import { startOfResetWeek } from '../seoul-time.js'
 
 const BOX_ACQUISITION_CODE = 504

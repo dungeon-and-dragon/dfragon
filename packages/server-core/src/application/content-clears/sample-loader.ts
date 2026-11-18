@@ -10,7 +10,7 @@ import {
   findStagePair,
   toCollectionMinFame,
   toPopulationMinFame
-} from '../../domain/content-clears/contents.js'
+} from '../../domain/content-clears/index.js'
 import type { ClearSampleRepository } from './repository.js'
 
 export class ClearSampleLoader {

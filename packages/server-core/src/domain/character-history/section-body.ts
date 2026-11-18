@@ -5,7 +5,7 @@ import {
   type CharacterPayload,
   type CharacterPayloads,
   characterDetailSections
-} from '../character-detail/sections.js'
+} from '../character-detail/index.js'
 
 export type CharacterHistorySection = Exclude<CharacterDetailSection, 'basic'>
 
