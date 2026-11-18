@@ -24,7 +24,7 @@ export function CharacterSearchScreen({
   const server = characterSearchServerOptions.find(({ id }) => id === query.serverId)
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col">
       <TitleBox title="캐릭터 검색">
         {server != null && <TitleStat label="서버" value={server.label} numeric={false} />}
       </TitleBox>

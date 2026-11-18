@@ -24,7 +24,7 @@ function JobsSection({
 
     return (
       <section aria-label="job" className={panelClasses.box}>
-        <h2 className={panelClasses.heading}>Job</h2>
+        <h2 className="section-title">Job</h2>
         <p role="alert" className={panelClasses.empty}>
           job 목록을 읽지 못했습니다.
         </p>
@@ -54,11 +54,11 @@ export function OpsScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-canvas pb-12 font-sans text-sm text-fg">
+    <div className="flex min-h-screen flex-col items-center overflow-x-clip bg-canvas font-sans text-sm text-fg">
       <OpsHeader workerSeenAt={jobs.data?.workerSeenAt} readAt={readAt} onRefresh={handleRefresh} />
-      <main className="page page-wide mt-6 flex flex-col gap-4 px-4">
+      <main className="page page-wide screen">
         <JobsSection selectedName={selectedName} onSelect={setSelectedName} />
-        <div className="grid grid-cols-2 items-start gap-4 max-[800px]:grid-cols-1">
+        <div className="section section-cols">
           <QueuePanel />
           <CollectionPanel />
         </div>

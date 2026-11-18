@@ -225,10 +225,10 @@ export function BatchKeyPanel(): React.JSX.Element {
 
   return (
     <section aria-label="batch key" className={panelClasses.box}>
-      <h2 className={panelClasses.heading}>
+      <h2 className="section-title">
         batch key
         {keys !== undefined && (
-          <span className={panelClasses.headingCount}>{formatCount(keys.length)}</span>
+          <span className="section-title-count">{formatCount(keys.length)}</span>
         )}
       </h2>
       <AddBatchKeyForm />

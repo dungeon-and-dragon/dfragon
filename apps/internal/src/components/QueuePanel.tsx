@@ -7,7 +7,7 @@ export function QueuePanel(): React.JSX.Element {
 
   return (
     <section aria-label="타임라인 queue" className={panelClasses.box}>
-      <h2 className={panelClasses.heading}>타임라인 queue</h2>
+      <h2 className="section-title">타임라인 queue</h2>
       <table className={tableClasses.table}>
         <thead>
           <tr>

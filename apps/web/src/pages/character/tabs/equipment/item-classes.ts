@@ -61,7 +61,6 @@ export const itemTableClasses = {
   number: 'font-mono tabular-nums',
   muted: 'text-fg-muted',
   missing: 'text-fg-subtle',
-  heading:
-    'm-0 box-border flex min-h-12 items-center gap-2 border-b border-line px-4 text-sm font-semibold',
-  count: 'font-mono font-medium tabular-nums text-fg-muted'
+  heading: 'section-title',
+  count: 'section-title-count'
 } as const

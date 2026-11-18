@@ -16,7 +16,7 @@ const integer = new Intl.NumberFormat('ko-KR')
 const SECTION_ROW_LIMIT = 5
 
 const titleClass =
-  'm-0 flex h-8 items-center border-b border-line px-3 text-xs font-medium text-fg-subtle'
+  'm-0 flex h-8 items-center border-b border-line px-4 text-xs font-medium text-fg-subtle'
 const listClass = 'm-0 list-none p-0'
 
 export function RecentCharacterList({
@@ -154,13 +154,13 @@ function SavedCharacterSection({
         {title}
       </h3>
       {characters.length === 0 ? (
-        <p className="m-0 flex h-12 items-center px-3 text-sm">{emptyMessage}</p>
+        <p className="m-0 flex h-12 items-center px-4 text-sm">{emptyMessage}</p>
       ) : (
         <ul className={listClass}>
           {characters.map((character) => (
             <li
               key={`${character.serverId}/${character.characterId}`}
-              className="flex items-center gap-2 border-b border-line pr-2 transition-colors last:border-b-0 hover:bg-inset"
+              className="flex items-center gap-2 border-b border-line pr-4 transition-colors last:border-b-0 hover:bg-inset"
             >
               <RecentItem character={character} large onPick={onPick} />
               <FavoriteToggle character={character} onToggle={onFavoriteToggle} />
@@ -189,7 +189,7 @@ function RecentItem({
       to="/c/$serverId/$characterId"
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
-      className={`flex items-center pl-3 text-fg no-underline transition-colors focus-ring-inset hover:bg-inset focus-visible:bg-inset ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
+      className={`flex items-center pl-4 text-fg no-underline transition-colors focus-ring-inset hover:bg-inset focus-visible:bg-inset ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
     >
       <span
         className={`relative shrink-0 overflow-hidden rounded-control bg-inset ${large ? 'h-[34px] w-[28px]' : 'size-[36px]'}`}

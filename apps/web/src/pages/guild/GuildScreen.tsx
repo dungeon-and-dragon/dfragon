@@ -15,7 +15,7 @@ export function GuildScreen({ guildId }: { guildId: string }): React.JSX.Element
     result.status === 'success' ? { status: 'success', value: result.value.members } : result
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col">
       <TitleBox title={guildTitle(result)}>
         {result.status === 'success' && <GuildStats guild={result.value} />}
       </TitleBox>

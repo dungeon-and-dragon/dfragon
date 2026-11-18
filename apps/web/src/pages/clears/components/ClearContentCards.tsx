@@ -77,36 +77,38 @@ export function ClearContentCards({
   }
 
   return (
-    <nav aria-label="컨텐츠" className="relative">
-      <div
-        ref={trackRef}
-        className="-m-1 flex snap-x snap-mandatory scroll-px-1 gap-3 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {cards.map((card) => (
-          <Card key={card.key} card={card} selected={card.key === selectedKey} onOpen={onOpen} />
-        ))}
-      </div>
-      {!edges.start && (
-        <button
-          type="button"
-          aria-label="이전 컨텐츠"
-          onClick={previous}
-          className={`${PAGER} left-0 sm:-left-[18px]`}
+    <div className="section px-4">
+      <nav aria-label="컨텐츠" className="relative">
+        <div
+          ref={trackRef}
+          className="-m-1 flex snap-x snap-mandatory scroll-px-1 gap-3 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          <ChevronRightIcon className="size-icon-sm rotate-180" />
-        </button>
-      )}
-      {!edges.end && (
-        <button
-          type="button"
-          aria-label="다음 컨텐츠"
-          onClick={next}
-          className={`${PAGER} right-0 sm:-right-[18px]`}
-        >
-          <ChevronRightIcon className="size-icon-sm" />
-        </button>
-      )}
-    </nav>
+          {cards.map((card) => (
+            <Card key={card.key} card={card} selected={card.key === selectedKey} onOpen={onOpen} />
+          ))}
+        </div>
+        {!edges.start && (
+          <button
+            type="button"
+            aria-label="이전 컨텐츠"
+            onClick={previous}
+            className={`${PAGER} left-0 sm:-left-[18px]`}
+          >
+            <ChevronRightIcon className="size-icon-sm rotate-180" />
+          </button>
+        )}
+        {!edges.end && (
+          <button
+            type="button"
+            aria-label="다음 컨텐츠"
+            onClick={next}
+            className={`${PAGER} right-0 sm:-right-[18px]`}
+          >
+            <ChevronRightIcon className="size-icon-sm" />
+          </button>
+        )}
+      </nav>
+    </div>
   )
 }
 

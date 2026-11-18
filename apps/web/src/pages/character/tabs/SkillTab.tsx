@@ -68,7 +68,7 @@ const LIST = 'm-0 flex list-none flex-col gap-1 p-0'
 const LIST_ROW = 'flex items-baseline justify-between gap-2'
 const SUBTLE = 'whitespace-nowrap text-fg-subtle'
 const ROOT =
-  'grid grid-cols-[minmax(max-content,1fr)_minmax(0,340px)] items-start justify-between gap-6 p-4 text-sm max-sm:grid-cols-1 max-sm:overflow-x-auto'
+  'grid grid-cols-[minmax(max-content,1fr)_minmax(0,340px)] divide-x divide-line text-sm max-sm:grid-cols-1 max-sm:divide-x-0 max-sm:divide-y max-sm:overflow-x-auto'
 
 function SkillIcon({
   icon,
@@ -261,7 +261,7 @@ function SkillSideColumn({
   const board = catalog !== null ? skillUpgradeBoardOf(catalog, detail.character, style) : null
 
   return (
-    <div className="min-w-0 overflow-hidden rounded-panel border border-line">
+    <div className="min-w-0">
       {hash !== null && <SkillTreeCode hash={hash} />}
       <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
       {board !== null && source !== null ? (
@@ -298,11 +298,13 @@ function SkillColumns({
 
   return (
     <div className={ROOT}>
-      {skillWindow !== null && source !== null ? (
-        <SkillWindowGrid skillWindow={skillWindow} source={source} />
-      ) : (
-        <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
-      )}
+      <div className="p-4">
+        {skillWindow !== null && source !== null ? (
+          <SkillWindowGrid skillWindow={skillWindow} source={source} />
+        ) : (
+          <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
+        )}
+      </div>
       <SkillSideColumn detail={detail} style={style} catalog={catalog} source={source} />
     </div>
   )
@@ -333,7 +335,7 @@ export function SkillTab({ detail }: CharacterTabProps): React.JSX.Element | nul
   if (catalog.status === 'loading') {
     return (
       <div aria-busy="true" className={ROOT}>
-        <div className="flex min-h-12 items-center">
+        <div className="flex min-h-12 items-center px-4">
           <ProgressCircle size="24" tone="neutral" aria-hidden="true" />
         </div>
       </div>

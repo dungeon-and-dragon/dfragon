@@ -112,7 +112,7 @@ function RunHistory({ job, now }: { job: Job; now: Date }): React.JSX.Element {
 
   return (
     <>
-      <div className={panelClasses.sectionHeading}>실행 이력</div>
+      <div className="section-title">실행 이력</div>
       <div className={panelClasses.scroll}>
         <table className={tableClasses.table}>
           <thead>
@@ -155,7 +155,7 @@ export function JobDetail({ job, now }: { job: Job; now: Date }): React.JSX.Elem
   return (
     <section aria-label={job.displayName} className={panelClasses.box}>
       <div className="flex flex-wrap items-center gap-3 border-b border-line p-4">
-        <h2 className="m-0 text-xl font-semibold tracking-heading">{job.displayName}</h2>
+        <h2 className="screen-title">{job.displayName}</h2>
         <span className="text-xs text-fg-subtle">{job.name}</span>
         <div className="ml-auto flex items-center gap-3">
           {job.schedule !== null && (
