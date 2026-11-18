@@ -1,6 +1,5 @@
 import {
   type ClearAdventureSize,
-  type ClearCoClearCount,
   type ClearContentScoreSample,
   type ClearContentWeek,
   type ClearContentWeekSamples,
@@ -31,7 +30,6 @@ import {
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
   readContentClearAdventureSizes,
-  readContentClearCoClears,
   readContentClearCollectedAt,
   readContentClearFameBands,
   readContentClearFames,
@@ -152,10 +150,6 @@ export class DatabaseClearStatsRepository
 
   readJobFames(weekStart: Date): Promise<ClearJobFameSample[]> {
     return readContentClearJobFames(this.client, weekStart)
-  }
-
-  readCoClears(weekStart: Date): Promise<ClearCoClearCount[]> {
-    return readContentClearCoClears(this.client, weekStart)
   }
 
   readRaidTimes(weekStart: Date): Promise<ClearTimeCount[]> {

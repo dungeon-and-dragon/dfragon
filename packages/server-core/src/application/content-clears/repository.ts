@@ -1,6 +1,5 @@
 import type {
   ClearAdventureSize,
-  ClearCoClearCount,
   ClearContentScoreSample,
   ClearContentWeek,
   ClearContentWeekSamples,
@@ -48,7 +47,6 @@ export interface ClearSampleRepository {
   readJobScores(weekStart: Date): Promise<ClearJobScoreSample[]>
   readFames(weekStart: Date): Promise<ClearFameSample[]>
   readJobFames(weekStart: Date): Promise<ClearJobFameSample[]>
-  readCoClears(weekStart: Date): Promise<ClearCoClearCount[]>
   readRaidTimes(weekStart: Date): Promise<ClearTimeCount[]>
 }
 
