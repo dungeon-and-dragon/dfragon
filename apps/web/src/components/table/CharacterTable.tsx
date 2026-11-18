@@ -168,9 +168,9 @@ export function SkeletonRow({
         </td>
       )}
       <td className={cell}>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <Bone width={32} height={36} />
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <Bone width={140} height={14} />
             <Bone width={96} height={12} />
           </div>

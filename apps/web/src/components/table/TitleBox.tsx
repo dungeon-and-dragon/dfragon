@@ -25,7 +25,7 @@ export function TitleStat({
   numeric?: boolean
 }): React.JSX.Element {
   return (
-    <div className="flex flex-col items-end gap-0.5">
+    <div className="flex flex-col items-end gap-1">
       <span className="text-xs font-medium text-fg-subtle">{label}</span>
       <span className={`text-xl font-semibold ${numeric ? 'font-mono tabular-nums' : ''}`}>
         {value}

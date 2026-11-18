@@ -5,7 +5,7 @@ import { type OverviewWeek, weekRangeText } from '../clear-overview'
 const WHEEL_STEP_DELTA = 40
 
 const ROW =
-  'm-0 flex items-center justify-center gap-1.5 bg-transparent p-0 [font-family:inherit] tabular-nums transition-colors duration-(--duration-hover) ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
+  'm-0 flex items-center justify-center gap-2 bg-transparent p-0 [font-family:inherit] tabular-nums transition-colors duration-(--duration-hover) ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal'
 const ROW_IDLE = 'h-7 cursor-pointer border-0 text-sm text-fg-subtle hover:text-fg'
 const ROW_SELECTED =
   'h-8.5 cursor-default border-x-0 border-y border-line-input text-base font-semibold text-fg'
@@ -97,7 +97,7 @@ function WheelRow({
     >
       {labelOf(week.weekStart)}
       {!week.closed && (
-        <small className="inline-flex h-5 items-center rounded-badge bg-inset px-1.5 text-xs font-medium text-fg-muted">
+        <small className="inline-flex h-5 items-center rounded-badge bg-inset px-2 text-xs font-medium text-fg-muted">
           집계 중
         </small>
       )}

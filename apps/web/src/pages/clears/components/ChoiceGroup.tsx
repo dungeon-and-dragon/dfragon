@@ -14,7 +14,7 @@ export function ChoiceGroup<Value extends string>({
   onChange: (value: Value) => void
 }): React.JSX.Element {
   return (
-    <div role="group" aria-label={label} className="flex shrink-0 flex-wrap gap-1.5">
+    <div role="group" aria-label={label} className="flex shrink-0 flex-wrap gap-2">
       {choices.map((choice) => (
         <ChoiceButton
           key={choice.value}

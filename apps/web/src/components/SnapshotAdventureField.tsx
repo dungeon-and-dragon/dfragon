@@ -23,7 +23,7 @@ export function SnapshotAdventureField({
       title={notice || undefined}
       value={value}
       onChange={handleChange}
-      className="m-0 box-border h-6 w-full max-w-[130px] rounded-control border border-dashed border-line-input bg-canvas px-1.5 py-0 text-sm text-fg-adventure [font-family:inherit] outline-none placeholder:text-fg-subtle focus:border-solid focus:border-signal"
+      className="m-0 box-border h-6 w-full max-w-[130px] rounded-control border border-dashed border-line-input bg-canvas px-2 py-0 text-sm text-fg-adventure [font-family:inherit] outline-none placeholder:text-fg-subtle focus:border-solid focus:border-signal"
     />
   )
 }

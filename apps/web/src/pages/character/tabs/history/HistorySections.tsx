@@ -22,10 +22,10 @@ const AFTER_TONES: Partial<Record<HistoryFieldChange['field'], string>> = {
 const BEFORE = 'text-fg-subtle tabular-nums'
 const AFTER = 'font-semibold tabular-nums'
 const CHANGES = 'm-0 list-none p-0'
-const CHANGE = 'flex flex-wrap items-center gap-x-1.5 gap-y-0.5 border-b border-line px-4 py-2.5'
+const CHANGE = 'flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-line px-4 py-3'
 const CHANGE_SLOT = 'w-14 shrink-0 text-fg-subtle'
 const BADGE =
-  'inline-flex h-5 items-center rounded-badge bg-inset px-1.5 text-xs font-medium whitespace-nowrap text-fg-muted'
+  'inline-flex h-5 items-center rounded-badge bg-inset px-2 text-xs font-medium whitespace-nowrap text-fg-muted'
 const { head: HEAD, cell: CELL, row: ROW, body: BODY } = itemTableClasses
 
 export function Heading({ title, count }: { title: string; count?: number }): React.JSX.Element {
@@ -39,7 +39,7 @@ export function Heading({ title, count }: { title: string; count?: number }): Re
 
 function Arrow(): React.JSX.Element {
   return (
-    <span aria-label="에서" className="mx-0.5 text-fg-subtle">
+    <span aria-label="에서" className="mx-1 text-fg-subtle">
       →
     </span>
   )
@@ -50,7 +50,7 @@ function FieldChange({ change }: { change: HistoryFieldChange }): React.JSX.Elem
 
   return (
     <>
-      <span className="ms-1.5 text-fg-subtle">{FIELD_LABELS[field]}</span>
+      <span className="ms-2 text-fg-subtle">{FIELD_LABELS[field]}</span>
       {name !== null && <span className="text-fg-muted">{name}</span>}
       <span className={BEFORE}>{formatFieldValue(field, before)}</span>
       <Arrow />
@@ -207,7 +207,7 @@ export function NameChanges({
               </td>
               <td className={CELL}>
                 <span className="text-fg-subtle">{before}</span>
-                <span aria-label="에서" className="mx-1.5 text-fg-subtle">
+                <span aria-label="에서" className="mx-2 text-fg-subtle">
                   →
                 </span>
                 <span className={`font-semibold ${kind === 'adventure' ? 'text-fg-muted' : ''}`}>

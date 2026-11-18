@@ -53,7 +53,7 @@ export function CandidatePopover({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
         aria-label={`${slot}번 후보 고르기, 후보 ${count}`}
-        className={`m-0 box-border inline-flex h-4.5 shrink-0 cursor-pointer items-center gap-0.75 rounded-badge border border-current bg-transparent px-1 text-2xs font-semibold whitespace-nowrap text-signal [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard hover:bg-inset data-popup-open:bg-inset ${focusRingClass}`}
+        className={`m-0 box-border inline-flex h-4.5 shrink-0 cursor-pointer items-center gap-1 rounded-badge border border-current bg-transparent px-1 text-2xs font-semibold whitespace-nowrap text-signal [font-family:inherit] transition-colors duration-(--duration-hover) ease-standard hover:bg-inset data-popup-open:bg-inset ${focusRingClass}`}
       >
         {`후보 ${count}`}
         <ChevronDownIcon className="size-2.5 stroke-3" />
@@ -69,7 +69,7 @@ export function CandidatePopover({
           role="group"
           aria-label={`${slot}번 같은 이름 후보`}
           onKeyDown={moveTileFocus}
-          className="flex gap-1.5 p-2"
+          className="flex gap-2 p-2"
         >
           {picker.choices.map((choice) => {
             const shown = choice.serverId === picker.shownServerId
@@ -124,7 +124,7 @@ function CandidateTile({
           <CheckIcon className="size-2.5 stroke-4" />
         </span>
       )}
-      <span aria-hidden="true" className="truncate px-1 pt-0.75 text-2xs text-fg-muted">
+      <span aria-hidden="true" className="truncate px-1 pt-1 text-2xs text-fg-muted">
         {server}
       </span>
       <span

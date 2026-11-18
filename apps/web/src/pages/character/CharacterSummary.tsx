@@ -18,11 +18,11 @@ const integer = new Intl.NumberFormat('ko-KR')
 // API도 마지막으로 받은 지 1분 안의 강제 갱신에는 Neople을 다시 부르지 않고 받아 둔 응답을 준다.
 const REFRESH_INTERVAL_MS = 60_000
 
-const SUMMARY = 'flex flex-wrap items-center gap-5 rounded-panel border border-line bg-canvas p-5'
+const SUMMARY = 'flex flex-wrap items-center gap-6 rounded-panel border border-line bg-canvas p-6'
 const WELL = 'relative h-28 w-24 shrink-0 overflow-hidden rounded-control bg-inset'
-const IDENTITY = 'flex min-w-0 grow basis-70 flex-col gap-1.5'
-const STATS = 'flex shrink-0 gap-10'
-const STAT = 'flex min-w-26 flex-col items-end gap-0.5'
+const IDENTITY = 'flex min-w-0 grow basis-70 flex-col gap-2'
+const STATS = 'flex shrink-0 gap-12'
+const STAT = 'flex min-w-26 flex-col items-end gap-1'
 const STAT_LABEL = 'text-xs font-medium text-fg-subtle'
 const STAT_VALUE = 'font-mono text-xl font-semibold tabular-nums'
 const LINE = 'flex items-center gap-2 whitespace-nowrap'
@@ -90,7 +90,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
           />
         </div>
         <div className={LINE}>
-          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-1.5 text-xs font-medium text-fg-muted">
+          <span className="inline-flex h-5 shrink-0 items-center rounded-badge bg-inset px-2 text-xs font-medium text-fg-muted">
             {CHARACTER_SERVER_NAMES[character.serverId]}
           </span>
           {job != null && <span className="text-fg-muted">{job}</span>}

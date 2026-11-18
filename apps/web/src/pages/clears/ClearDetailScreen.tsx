@@ -226,7 +226,7 @@ function ContentHead({
       aria-label="컨텐츠"
       className="flex flex-wrap items-center gap-6 rounded-panel border border-line bg-canvas px-4 py-2"
     >
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-fg-muted tabular-nums">{kind}</span>
         <h2 className="m-0 text-xl font-semibold tracking-heading">{place.group.name}</h2>
       </div>
@@ -268,7 +268,7 @@ function Figure({
   tone
 }: Readonly<{ label: string; value: string; tone?: 'up' | 'down' }>): React.JSX.Element {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-1">
       <dt className="text-xs font-medium text-fg-subtle">{label}</dt>
       <dd
         className={`m-0 font-mono text-xl font-semibold tabular-nums ${tone !== undefined ? TONE_CLASSES[tone] : ''}`}

@@ -44,7 +44,7 @@ export function CharacterTabs({
 export function CharacterTabsSkeleton(): React.JSX.Element {
   return (
     <div aria-hidden="true" className={ROOT}>
-      <div className="flex h-11 shrink-0 items-center gap-6 overflow-hidden border-b border-line px-4">
+      <div className="flex h-12 shrink-0 items-center gap-6 overflow-hidden border-b border-line px-4">
         {CHARACTER_TABS.map(({ id }) => (
           <span key={id} className="block h-3.5 w-14 rounded-control bg-inset" />
         ))}
