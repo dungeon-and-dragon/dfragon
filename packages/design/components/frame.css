@@ -142,7 +142,8 @@
   justify-content: space-between;
   gap: 16px;
   box-sizing: border-box;
-  min-height: 64px;
+  /* 가장 높은 헤더 내용인 클리어 주 선택 바퀴(90px)와 위아래 여백 24px에 맞춰 화면마다 높이를 같게 한다. */
+  min-height: 138px;
   padding-inline: 16px;
 }
 
