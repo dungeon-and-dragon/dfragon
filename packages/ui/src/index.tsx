@@ -35,12 +35,12 @@ export { ChipGroup } from './chip-group'
 export type { ChipGroupItem, ChipGroupProps } from './chip-group'
 export { Popover } from './popover'
 export type { PopoverChangeEventDetails, PopoverPopupProps, PopoverTitleProps } from './popover'
+export { ConfirmPopover } from './confirm-popover'
+export type { ConfirmPopoverProps } from './confirm-popover'
 export { Tooltip } from './tooltip'
 export type { TooltipPopupProps } from './tooltip'
 export { StatusChip } from './status-chip'
 export type { StatusChipProps, StatusChipTone } from './status-chip'
-export { ProgressCircle } from './progress-circle'
-export type { ProgressCircleProps } from './progress-circle'
 export {
   CameraIcon,
   CheckIcon,
