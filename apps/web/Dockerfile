@@ -15,7 +15,7 @@ COPY packages/licenses packages/licenses
 COPY packages/ui packages/ui
 COPY packages/models/ocr-finetuned packages/models/ocr-finetuned
 COPY apps/web apps/web
-COPY apps/api/test/fixtures/character-card-buffer.json apps/api/test/fixtures/character-card-dealer.json apps/api/test/fixtures/
+COPY packages/server-core/test/fixtures/character-card-buffer.json packages/server-core/test/fixtures/character-card-dealer.json packages/server-core/test/fixtures/
 ARG SOURCE_COMMIT=""
 RUN pnpm --filter @dfragon/web build
 COPY scripts/server-build-info.mjs scripts/server-build-info.mjs

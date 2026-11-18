@@ -1,6 +1,6 @@
 import type { StoredCharacter } from '@dfragon/database'
-import type { CharacterRole } from './character-role.js'
-import { characterFromStored } from './character-from-details.js'
+import type { CharacterRole } from '@dfragon/server-core/domain/character-role.js'
+import { characterFromStored } from '@dfragon/server-core/domain/character-from-details.js'
 
 export type CharacterRow = {
   serverId: string

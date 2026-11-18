@@ -18,7 +18,7 @@ pnpm verify
 
 - 의존성은 `pnpm install --frozen-lockfile`로 먼저 설치합니다.
 - Web 빌드가 OCR 자산을 만들므로 OCR 모델 submodule(`packages/models/ocr-finetuned`)이 없으면 web job이 실패합니다. `git submodule update --init --recursive`로 받습니다.
-- API 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인은 이 플랫폼의 엔진 파일이 `packages/models/score-engine/`에 있을 때만 실행합니다.
+- `@dfragon/server-core` 테스트 가운데 실제 점수 엔진 계산과 점수 worker를 띄운 종료 확인, API 테스트 가운데 실제 엔진을 연 상세 응답 확인은 이 플랫폼의 엔진 파일이 `packages/models/score-engine/`에 있을 때만 실행합니다.
 - 한 job에서 명령이 실패하면 그 job의 남은 명령을 건너뛰고, 끝에 실패를 모아 출력한 뒤 non-zero로 종료합니다.
 
 `pnpm install`이 설치하는 husky `pre-push` hook이 push 전에 `pnpm verify --reuse-pass`를 실행하고, 실패하면 push가 중단됩니다.
@@ -38,6 +38,7 @@ pnpm verify
 | 저장소 전체 | `pnpm verify` |
 | API | `pnpm --filter @dfragon/api run --sequential '/^(lint\|test)$/'` |
 | 공용 HTTP package | `pnpm --filter @dfragon/http-server run --sequential '/^(lint\|test)$/'`와 API 행 |
+| API, worker 공용 package | `pnpm --filter @dfragon/server-core run --sequential '/^(lint\|test)$/'`와 API 행 |
 | Web | `pnpm --filter @dfragon/web run --sequential '/^(test\|lint\|build)$/'` |
 | 운영 app | `pnpm --filter @dfragon/ops run --sequential '/^(lint\|test)$/'` |
 | 운영 화면 | `pnpm --filter @dfragon/internal run --sequential '/^(test\|lint\|build)$/'` |

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 test('제거된 경로는 404를 반환하고 provider를 호출하지 않는다', async (t) => {

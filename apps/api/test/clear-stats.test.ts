@@ -11,10 +11,10 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { CatalogService } from '../src/application/character-catalog/service.js'
-import { formatResetDate } from '../src/domain/seoul-time.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
+import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import type { ClearStats } from '../src/domain/content-clears/stats.js'
-import type { ClearStatsRepository } from '../src/application/content-clears/repository.js'
+import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 합성 집계다. DB 읽기는 fake이며 SQL의 주 고르기, 직업과 모험단 묶기는 container-content-clear-check.mjs가 실제 DB로 확인한다.

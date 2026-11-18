@@ -1,10 +1,14 @@
 import { LRUCache } from 'lru-cache'
-import { CHARACTER_CACHE_TTL_MS } from '../../domain/character-detail/project.js'
+import { CHARACTER_CACHE_TTL_MS } from '@dfragon/server-core/domain/character-detail/project.js'
 import type {
   CharacterIdentity,
   FetchedCharacterPayloads
-} from '../../domain/character-detail/sections.js'
-import type { NeopleStage, NeopleStageTimings, RecordNeopleStage } from './neople-stages.js'
+} from '@dfragon/server-core/domain/character-detail/sections.js'
+import type {
+  NeopleStage,
+  NeopleStageTimings,
+  RecordNeopleStage
+} from '@dfragon/server-core/application/character-detail/neople-stages.js'
 
 export const CHARACTER_REFRESH_MIN_INTERVAL_MS = 60 * 1000
 // One character keeps about 35KB of raw sections plus the detail service's stored response (about 150KB), so

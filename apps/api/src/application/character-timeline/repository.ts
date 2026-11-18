@@ -10,8 +10,8 @@ import type {
   CharacterTimeline,
   TimelineItemPage,
   TimelinePageList
-} from '../../domain/character-timeline/project.js'
-import type { TimelineInputs } from '../../domain/character-timeline/rows.js'
+} from '@dfragon/server-core/domain/character-timeline/project.js'
+import type { TimelineInputs } from '@dfragon/server-core/domain/character-timeline/rows.js'
 import type { TimelineSyncFailure } from './sync.js'
 
 export interface CharacterTimelineRepository {

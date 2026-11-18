@@ -28,8 +28,8 @@ import {
   toTimelineClearData,
   toEnhancement,
   toEnhancementPage
-} from '../../domain/character-timeline/project.js'
-import { startOfResetWeek } from '../../domain/seoul-time.js'
+} from '@dfragon/server-core/domain/character-timeline/project.js'
+import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 const ACQUISITION_RARITIES = ['에픽', '태초']
 const PAGE_QUERIES = {

@@ -1,6 +1,9 @@
-import type { ParseCharacterBasic } from '../character-basic/ports.js'
-import type { CharacterCatalog } from '../character-catalog/ports.js'
-import type { CalculateScore, FetchCharacterDetails } from '../character-detail/ports.js'
+import type { ParseCharacterBasic } from '@dfragon/server-core/application/character-basic/ports.js'
+import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
+import type {
+  CalculateScore,
+  FetchCharacterDetails
+} from '@dfragon/server-core/application/character-detail/ports.js'
 
 export type ScoreEngineHandle = {
   calculate: CalculateScore

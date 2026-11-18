@@ -7,7 +7,7 @@ import type {
 } from '@dfragon/database'
 import { emptyClearStatsRepository } from '../src/application/content-clears/service.js'
 import { ClearWeekSampleService } from '../src/application/content-clears/week-samples.js'
-import { formatResetDate } from '../src/domain/seoul-time.js'
+import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 
 // 합성 모집단과 집계다. DB 읽기와 저장은 fake이며 저장한 재료를 다시 읽는 왕복은 container-content-clear-check.mjs가 확인한다.
 const week = (date: string) => new Date(`${date}T06:00:00+09:00`)

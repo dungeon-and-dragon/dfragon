@@ -23,6 +23,13 @@
 !packages/neople/tsconfig.json
 !packages/neople/src/
 !packages/neople/src/**
+!packages/server-core/
+!packages/server-core/package.json
+!packages/server-core/tsconfig*.json
+!packages/server-core/src/
+!packages/server-core/src/**
+!packages/server-core/test/
+!packages/server-core/test/**
 !packages/licenses/
 !packages/licenses/package.json
 !packages/licenses/src/

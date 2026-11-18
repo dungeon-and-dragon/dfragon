@@ -5,15 +5,19 @@ import {
   ACQUISITION_CODES,
   type TimelineClear,
   type TimelineEnhancement
-} from '../character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/project.js'
 import {
   type SeasonBackfillProgress,
   isSeasonBackfilled,
   toSeasonBackfillRange,
   toSeasonTimelineStart
 } from '../character-timeline/season-backfill.js'
-import { formatResetDate, formatSeoulTime, parseResetDate } from '../seoul-time.js'
-import { toRaidStageLabel } from '../raid-stage.js'
+import {
+  formatResetDate,
+  formatSeoulTime,
+  parseResetDate
+} from '@dfragon/server-core/domain/seoul-time.js'
+import { toRaidStageLabel } from '@dfragon/server-core/domain/raid-stage.js'
 
 // 타임라인 정기 동기화는 중천(시즌 10)부터 받는다. 그 전 시즌은 모험단 캐릭터가 모두 옛 시즌 받기를 끝내야 집계한다.
 const FIRST_COLLECTED_SEASON_ID = 10

@@ -38,7 +38,7 @@ import {
   emptyCharacterTimelineRepository,
   noTimelineSync
 } from '../application/character-timeline/service.js'
-import type { ClearStatsRepository } from '../application/content-clears/repository.js'
+import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import {
   ClearStatsService,
   emptyClearStatsRepository
@@ -56,9 +56,12 @@ import { readApiBuildInfo } from '../infrastructure/build-info.js'
 import {
   parseCharacterBasic,
   parseCharacterSkillStyle
-} from '../infrastructure/neople/character-basic.js'
+} from '@dfragon/server-core/infrastructure/neople/character-basic.js'
 import { createNeopleCharacterImage } from '../infrastructure/neople/character-image.js'
-import { type ScoreEngineOptions, createScoreEngine } from '../infrastructure/score/engine.js'
+import {
+  type ScoreEngineOptions,
+  createScoreEngine
+} from '@dfragon/server-core/infrastructure/score/engine.js'
 
 export interface TimelineSyncOptions {
   readonly sync: (character: TimelineCharacter) => Promise<void>

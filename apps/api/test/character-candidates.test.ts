@@ -7,13 +7,13 @@ import {
   neopleCharacterImageUrl,
   type NeopleTestDependencies
 } from '@dfragon/neople'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
 import {
   CharacterSearchService,
   emptyCharacterSearchRepository
 } from '../src/application/character-search/service.js'
-import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
+import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import { parseCharacterCandidatesQuery } from '../src/domain/character-search/query.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type {

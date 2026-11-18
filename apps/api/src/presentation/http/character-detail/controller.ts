@@ -6,7 +6,7 @@ import {
   recordAccessLogSharedNeopleFetch
 } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import type { NeopleStageTimings } from '../../../application/character-detail/neople-stages.js'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/neople-stages.js'
 import type {
   CharacterDetailResponse,
   CharacterDetailService

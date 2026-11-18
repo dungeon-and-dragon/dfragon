@@ -7,17 +7,20 @@ import type {
   TimelineEventRow
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import type { CharacterHistoryRepository } from '../src/application/character-history/repository.js'
-import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
-import { toSectionBodies } from '../src/domain/character-history/section-body.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
 const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
 
 // 실응답 fixture는 익명화로 모험단 이름과 명성이 비어 있어 합성 값을 모든 섹션 헤더에 넣는다. 길드는 비어 있는 그대로 둔다.
 function readSections(): CharacterPayloads {
-  const url = new URL('../../test/fixtures/character-card-dealer.json', import.meta.url)
+  const url = new URL(
+    '../../../../packages/server-core/test/fixtures/character-card-dealer.json',
+    import.meta.url
+  )
   const { sections } = JSON.parse(readFileSync(url, 'utf8')) as { sections: CharacterPayloads }
   const syntheticHeader = { adventureName: '합성모험단', fame: 60_000 }
   const filled: CharacterPayloads = { ...sections }

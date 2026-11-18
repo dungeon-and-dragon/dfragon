@@ -11,7 +11,7 @@ import {
 } from '@dfragon/database'
 import type { CharacterHistoryRepository } from '../../application/character-history/repository.js'
 import { CHARACTER_NAME_CHANGE_CODES } from '../../domain/character-history/project.js'
-import type { CharacterIdentity } from '../../domain/character-identity.js'
+import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 
 const nameChangeCodes = Object.values(CHARACTER_NAME_CHANGE_CODES)
 const everySync = new Date(0)

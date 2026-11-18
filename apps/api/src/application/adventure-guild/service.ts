@@ -7,7 +7,7 @@ import {
   emptySeasonActivity
 } from '../../domain/adventure-guild/activity.js'
 import type { AdventureWeeklyClears } from '../../domain/adventure-guild/weekly.js'
-import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import type { RequestTimelineSync } from '../character-timeline/queue.js'
 import type { SeasonBackfillRequests } from './ports.js'
 import type { AdventureGuildRepository } from './repository.js'
