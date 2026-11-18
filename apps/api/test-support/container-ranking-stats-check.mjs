@@ -207,6 +207,7 @@ try {
       characterId,
       equipmentSet: fairy,
       oathSet: dragon(option),
+      items: [],
       fetchedAt: new Date()
     })
   }
@@ -224,6 +225,7 @@ try {
       characterId,
       equipmentSet,
       oathSet,
+      items: [],
       fetchedAt: new Date()
     })
   }

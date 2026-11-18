@@ -47,6 +47,7 @@ model Character {
   oathSetOption    String?   @map("oath_set_option")
   setsFetchedAt    DateTime? @map("sets_fetched_at") @db.Timestamptz(3)
   skillStyle     CharacterSkillStyle?
+  items          CharacterItem[]
   score          CharacterScore?
   basicHistory   CharacterBasicHistory[]
   sectionHistory CharacterSectionHistory[]
@@ -61,6 +62,19 @@ model Character {
   @@index([jobId, fame(sort: Desc)])
   @@index([jobId, jobGrowId, fame(sort: Desc)])
   @@map("characters")
+}
+
+model CharacterItem {
+  serverId    String    @map("server_id")
+  characterId String    @map("character_id")
+  character   Character @relation(fields: [serverId, characterId], references: [serverId, characterId], onDelete: Cascade)
+  slotId      String    @map("slot_id")
+  itemId      String    @map("item_id")
+  itemName    String    @map("item_name")
+
+  @@id([serverId, characterId, slotId])
+  @@index([itemId])
+  @@map("character_items")
 }
 
 model CharacterSkillStyle {

@@ -60,6 +60,7 @@ try {
       characterId,
       equipmentSet,
       oathSet,
+      items: [],
       fetchedAt
     })
   }
@@ -172,6 +173,7 @@ try {
     characterId: 'set-blade-c',
     equipmentSet: fairy,
     oathSet: null,
+    items: [],
     fetchedAt: new Date('2026-11-18T01:00:00Z')
   })
   await job.run({}, ignoreProgress)
