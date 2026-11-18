@@ -292,6 +292,7 @@ const splitDictionary = [
   { itemId: 'armor-105', availableLevel: 105, itemType: '방어구' },
   { itemId: 'fusion-115', availableLevel: 115, itemType: '융합석' },
   { itemId: 'title', availableLevel: 1, itemType: '액세서리' },
+  { itemId: 'title-level-0', availableLevel: 0, itemType: '액세서리' },
   { itemId: 'unknown-row', availableLevel: null, itemType: null }
 ]
 const acquired = (time: string, itemId: string, itemRarity: string, code = 505) => ({
@@ -305,6 +306,7 @@ const splitRows = [
   acquired('2026-07-18T12:02:00', 'armor-105', '에픽'),
   acquired('2026-07-18T12:03:00', 'fusion-115', '레전더리'),
   acquired('2026-07-18T12:04:00', 'title', '레전더리'),
+  acquired('2026-07-18T12:04:30', 'title-level-0', '에픽'),
   acquired('2026-07-18T12:05:00', 'unknown-row', '에픽'),
   acquired('2026-07-18T12:06:00', 'not-in-dictionary', '태초'),
   acquired('2026-07-18T12:07:00', 'armor-115', '레어'),
@@ -375,7 +377,7 @@ test('시즌 9는 같은 행을 등급만 보고 세고 서약 필드는 0, fals
   const { summary, days } = toSeasonActivity(legacySeason, splitRecords)
   const oathDay = toActivityDayDetail(legacySeason.id, day('2026-07-19'), splitRecords)
 
-  assert.deepEqual(summary.items, { legendary: 4, epic: 4, primeval: 3, mythic: 0 })
+  assert.deepEqual(summary.items, { legendary: 4, epic: 5, primeval: 3, mythic: 0 })
   assert.deepEqual(summary.oaths, { legendary: 0, epic: 0, primeval: 0 })
   assert.ok(days.every(({ oath, oathPrimeval }) => oath === 0 && !oathPrimeval))
   assert.deepEqual(oathDay.oaths, [])
