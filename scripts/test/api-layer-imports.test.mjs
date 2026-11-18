@@ -16,6 +16,7 @@ function typeImporting(source) {
 // [계층 파일, import 대상, 메시지에 있어야 할 옮길 위치]
 const rejectedImports = [
   ['domain/today-grade/a.ts', '../../application/today-grade/service.js', 'application/<기능>/'],
+  ['domain/today-grade/e.ts', '../../application/today-grade/index.js', 'application/<기능>/'],
   ['domain/today-grade/b.ts', '../../infrastructure/neople/today-grade.js', 'infrastructure/'],
   ['domain/today-grade/c.ts', '../../presentation/http/today-grade/routes.js', 'presentation/'],
   ['domain/today-grade/d.ts', '../../runtime/routes/api.js', 'application/<기능>/'],
@@ -86,11 +87,14 @@ const allowedImports = [
   ['application/today-grade/e.ts', '@dfragon/server-core/application/character-catalog/service.js'],
   ['runtime/score.ts', '@dfragon/server-core/infrastructure/score/engine.js'],
   ['infrastructure/neople/a.ts', '../../application/today-grade/ports.js'],
+  ['infrastructure/database/f.ts', '../../application/today-grade/repository.js'],
   ['infrastructure/neople/b.ts', '../../domain/today-grade/failure.js'],
+  ['infrastructure/neople/e.ts', '../../domain/today-grade/index.js'],
   ['infrastructure/neople/c.ts', '@dfragon/neople'],
   ['infrastructure/database/d.ts', 'node:fs/promises'],
   ['infrastructure/database/e.ts', 'node:fs'],
   ['presentation/http/today-grade/a.ts', '../../../application/today-grade/service.js'],
+  ['presentation/http/today-grade/j.ts', '../../../application/today-grade/index.js'],
   ['presentation/http/today-grade/d.ts', 'hono'],
   ['presentation/http/today-grade/e.ts', 'hono/route'],
   ['infrastructure/neople/d.ts', 'hono'],
@@ -110,8 +114,10 @@ const appFiles = {
       '../infrastructure/build-info.js',
       '../domain/character-failure.js',
       '../application/today-grade/service.js',
+      '../application/today-grade/index.js',
       '../infrastructure/neople/today-grade.js',
       '../presentation/http/today-grade/routes.js',
+      '../presentation/http/today-grade/index.js',
       '../presentation/http/character-search/failures.js',
       '../presentation/openapi/setup.js',
       './routes-not-allowed.js',
@@ -337,6 +343,110 @@ test('dependency-cruiser: 진입 파일과 다섯 계층 안의 import 없는 �
     )
   )
   assert.equal(result.exitCode, 0)
+  assert.deepEqual(result.violations, [])
+})
+
+const exporting = 'export const value = 1\nexport type Value = number\n'
+// 기능 폴더 밖에서 import하는 대상 파일이 있어야 dependency-cruiser가 경로를 풀어 규칙을 적용한다.
+const featureFolderTargets = Object.fromEntries(
+  [
+    'src/application/today-grade/service.ts',
+    'src/application/today-grade/repository.ts',
+    'src/application/today-grade/ports.ts',
+    'src/domain/today-grade/grade.ts',
+    'src/presentation/http/today-grade/controller.ts',
+    'src/presentation/http/today-grade/index.ts',
+    'src/presentation/http/character-failures.ts'
+  ].map((file) => [file, exporting])
+)
+const featureFolderCases = {
+  rejected: [
+    [
+      'src/presentation/http/today-grade/a.ts',
+      importing('../../../application/today-grade/service.js'),
+      'feature-folder-index'
+    ],
+    [
+      'src/infrastructure/database/a.ts',
+      typeImporting('../../domain/today-grade/grade.js'),
+      'feature-folder-index'
+    ],
+    [
+      'src/runtime/routes/api.ts',
+      importing('../../presentation/http/today-grade/controller.js'),
+      'feature-folder-index'
+    ],
+    [
+      'src/application/today-grade/index.ts',
+      `export { value } from './repository.js'\n`,
+      'application-index-contract'
+    ]
+  ],
+  allowed: [
+    [
+      'src/presentation/http/today-grade/b.ts',
+      importing('../../../application/today-grade/index.js')
+    ],
+    ['src/presentation/http/today-grade/c.ts', importing('../character-failures.js')],
+    ['src/presentation/http/today-grade/d.ts', importing('./controller.js')],
+    ['src/application/today-grade/a.ts', importing('./service.js')],
+    ['src/infrastructure/database/b.ts', importing('../../application/today-grade/repository.js')],
+    ['src/infrastructure/neople/a.ts', typeImporting('../../application/today-grade/ports.js')],
+    ['src/runtime/api-services.ts', importing('../application/today-grade/ports.js')]
+  ]
+}
+const featureFolderCruised = await cruiseAppSamples({
+  ...featureFolderTargets,
+  ...Object.fromEntries(
+    [...featureFolderCases.rejected, ...featureFolderCases.allowed].map(([file, source]) => [
+      file,
+      source
+    ])
+  )
+})
+
+for (const [file, , rule] of featureFolderCases.rejected) {
+  test(`dependency-cruiser: ${file}의 import를 ${rule}로 거부한다`, () => {
+    assert.deepEqual(
+      featureFolderCruised.violations.filter(({ from }) => from === file),
+      [{ from: file, rule }]
+    )
+  })
+}
+
+test('dependency-cruiser: 기능 폴더의 index.js, 같은 폴더 파일, 계층 폴더 바로 아래 파일, repository.ts와 ports.ts import는 허용한다', () => {
+  const allowedFiles = new Set(featureFolderCases.allowed.map(([file]) => file))
+  assert.deepEqual(
+    featureFolderCruised.violations.filter(({ from }) => allowedFiles.has(from)),
+    []
+  )
+})
+
+test('dependency-cruiser: 기능 폴더 안쪽 파일을 직접 import하면 index.js로 가져오라고 알린다', () => {
+  assert.ok(
+    featureFolderCruised.text.includes("'../../application/<기능>/index.js'처럼 가져온다"),
+    featureFolderCruised.text
+  )
+})
+
+test('dependency-cruiser: 실행할 때 생기는 순환 import를 no-circular로 거부한다', async () => {
+  const result = await cruiseAppSamples({
+    'src/domain/today-grade/a.ts': `import { b } from './b.js'\nexport const a = () => b\n`,
+    'src/domain/today-grade/b.ts': `import { a } from './a.js'\nexport const b = () => a\n`
+  })
+  assert.ok(result.exitCode > 0)
+  assert.ok(result.violations.length > 0)
+  assert.ok(
+    result.violations.every(({ rule }) => rule === 'no-circular'),
+    JSON.stringify(result.violations)
+  )
+})
+
+test('dependency-cruiser: import type만으로 이은 순환은 허용한다', async () => {
+  const result = await cruiseAppSamples({
+    'src/domain/today-grade/c.ts': `import type { D } from './d.js'\nexport type C = { d?: D }\n`,
+    'src/domain/today-grade/d.ts': `import type { C } from './c.js'\nexport type D = { c?: C }\n`
+  })
   assert.deepEqual(result.violations, [])
 })
 
