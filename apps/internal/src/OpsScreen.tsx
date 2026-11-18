@@ -56,7 +56,7 @@ export function OpsScreen(): React.JSX.Element {
   return (
     <div className="flex min-h-screen flex-col items-center bg-canvas pb-12 font-sans text-sm text-fg">
       <OpsHeader workerSeenAt={jobs.data?.workerSeenAt} readAt={readAt} onRefresh={handleRefresh} />
-      <main className="mt-6 box-border flex w-300 max-w-full flex-col gap-4 px-4">
+      <main className="page page-wide mt-6 flex flex-col gap-4 px-4">
         <JobsSection selectedName={selectedName} onSelect={setSelectedName} />
         <div className="grid grid-cols-2 items-start gap-4 max-[800px]:grid-cols-1">
           <QueuePanel />

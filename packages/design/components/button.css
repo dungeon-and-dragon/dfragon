@@ -33,21 +33,21 @@
 }
 
 .btn-sm {
-  height: var(--spacing-control-sm);
+  height: var(--height-control-sm);
   padding-inline: 12px;
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
 }
 
 .btn-md {
-  height: var(--spacing-control-md);
+  height: var(--height-control-md);
   padding-inline: 14px;
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
 }
 
 .btn-lg {
-  height: var(--spacing-control-lg);
+  height: var(--height-control-lg);
   padding-inline: 24px;
   font-size: var(--text-base);
   line-height: var(--text-base--line-height);

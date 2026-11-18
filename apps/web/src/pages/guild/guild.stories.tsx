@@ -29,7 +29,7 @@ const failedHost = createStoryClientHost({
 function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
   return (
     <StoryFrame host={host}>
-      <div className="mx-auto mt-6 w-270 max-w-full">
+      <div className="page mt-6">
         <GuildScreen guildId="guild-1" />
       </div>
     </StoryFrame>

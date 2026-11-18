@@ -11,7 +11,6 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState } from 'react'
 import { GlobalBar } from './components/GlobalBar'
 import { SiteFooter } from './components/SiteFooter'
-import { CONTENT_WIDTH } from './constants/layout'
 import { createQueryClient } from './lib/query-client'
 import { ClientHostContext, type BrowserHost } from './host/client-host'
 import { useScreenCaptureContext } from './hooks/useScreenCaptureContext'
@@ -58,8 +57,7 @@ function SiteLayout(): React.JSX.Element {
           기준으로 놓이면 overflow에 잘리지 않고 페이지를 넓히므로 상자를 기준으로 삼는다. 모험단 세로 탭은 상자 양옆에
           자리가 있는 넓은 창에서 상자 밖 여백에 놓이므로, 그 화면만 잘리지 않게 스크롤을 두지 않는다. */}
       <main
-        className={`relative mt-6 box-border flex max-w-full flex-col self-center overflow-x-auto bg-canvas${adventure !== undefined ? ' xl:overflow-x-visible' : ''}`}
-        style={{ width: CONTENT_WIDTH }}
+        className={`page relative mt-6 flex flex-col overflow-x-auto bg-canvas${adventure !== undefined ? ' xl:overflow-x-visible' : ''}`}
       >
         <Outlet />
       </main>

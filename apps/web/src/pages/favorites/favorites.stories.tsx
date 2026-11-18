@@ -9,7 +9,7 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   render: () => (
     <StoryFrame>
-      <div className="mx-auto mt-6 w-270 max-w-full">
+      <div className="page mt-6">
         <FavoritesPage />
       </div>
     </StoryFrame>

@@ -6,7 +6,7 @@
   flex-shrink: 0;
   align-items: center;
   gap: 4px;
-  height: var(--spacing-control-sm);
+  height: var(--height-control-sm);
   margin: 0;
   padding-inline: 12px;
   border: 1px solid var(--color-line);

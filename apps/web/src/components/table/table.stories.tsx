@@ -10,7 +10,7 @@ const meta = {
   decorators: [
     (Story) => (
       <StoryFrame>
-        <div className="w-270 max-w-full">
+        <div className="w-page max-w-full">
           <Story />
         </div>
       </StoryFrame>

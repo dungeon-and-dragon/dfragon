@@ -34,7 +34,7 @@ export function GlobalBar(): React.JSX.Element {
 
   return (
     <header className="shrink-0 border-b border-line bg-canvas text-fg">
-      <div className="mx-auto box-border flex h-topbar w-270 max-w-full min-w-0 items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0 max-sm:pt-2">
+      <div className="page flex h-topbar min-w-0 items-center gap-4 px-4 max-sm:h-auto max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0 max-sm:pt-2">
         <Link
           to="/"
           aria-label={`${PRODUCT_NAME} 첫 화면`}
