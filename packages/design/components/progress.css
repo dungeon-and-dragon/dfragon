@@ -49,18 +49,12 @@
 
 .progress[data-indeterminate] {
   transform-origin: center;
-  animation: progress-turn var(--beat) steps(8, end) infinite;
+  animation: var(--animate-spin);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .progress[data-indeterminate] {
     animation: none;
-  }
-}
-
-@keyframes progress-turn {
-  to {
-    transform: rotate(360deg);
   }
 }
 

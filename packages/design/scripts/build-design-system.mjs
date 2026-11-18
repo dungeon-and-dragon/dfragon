@@ -57,16 +57,18 @@ const FAMILY_BY_PREFIX = [
   ['--default-transition-duration', 'duration'],
   ['--cycle', 'duration'],
   ['--beat', 'duration'],
-  ['--z-', 'zIndex'],
+  ['--animate-', 'duration'],
+  ['--z-index-', 'zIndex'],
   ['--breakpoint-', 'breakpoint'],
   ['--tracking-', 'tracking'],
+  ['--leading-', 'lineHeight'],
   ['--text-', 'text'],
   ['--font-weight-', 'fontWeight'],
   ['--font-', 'font']
 ]
 
 // artifact가 section 이름만 key에서 따오는 family다. 값은 단일 CSS 값이어야 한다.
-const PLAIN_FAMILIES = ['size', 'zIndex', 'breakpoint', 'fontWeight', 'tracking']
+const PLAIN_FAMILIES = ['size', 'zIndex', 'breakpoint', 'fontWeight', 'tracking', 'lineHeight']
 const LISTED_FAMILIES = [
   'color',
   'spacing',
@@ -364,7 +366,7 @@ export function tokensFromTheme(themeCss, fonts, meta) {
     },
     easing: { tokens: families.easing },
     duration: {
-      note: 'prefers-reduced-motion: reduce에서는 duration-* 값이 0ms다.',
+      note: 'prefers-reduced-motion: reduce에서는 duration-* 값이 0ms이고, animate-*는 쓰는 컴포넌트가 끈다.',
       tokens: families.duration
     },
     ...plainSections

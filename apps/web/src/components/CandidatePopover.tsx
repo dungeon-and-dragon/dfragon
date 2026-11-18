@@ -114,7 +114,7 @@ function CandidateTile({
       aria-label={`${server}, 명성 ${fame}${adventure}${state}`}
       aria-pressed={shown}
       onClick={handleClick}
-      className={`relative m-0 box-border flex w-16 cursor-pointer flex-col rounded-control border bg-transparent p-0 text-left text-fg [font-family:inherit] transition-colors ${shown ? 'border-signal shadow-[0_0_0_1px_var(--color-signal)]' : 'border-transparent hover:border-line-input'} ${focusRingClass}`}
+      className={`relative m-0 box-border flex w-16 cursor-pointer flex-col rounded-control border bg-transparent p-0 text-left text-fg [font-family:inherit] transition-colors ${shown ? 'border-signal shadow-selected' : 'border-transparent hover:border-line-input'} ${focusRingClass}`}
     >
       <span className="relative block size-[62px] overflow-hidden bg-inset">
         <CardImage src={characterImageUrl(choice)} />

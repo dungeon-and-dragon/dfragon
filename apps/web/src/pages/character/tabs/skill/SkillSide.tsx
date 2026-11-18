@@ -19,12 +19,11 @@ import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
 
 const { heading: HEADING } = itemTableClasses
 const SKILL_ICON = 'relative size-game-icon shrink-0 select-none'
-const PICKED_RING = 'shadow-[0_0_0_2px_var(--color-signal)]'
+const PICKED_RING = 'outline-1 -outline-offset-1 outline-solid outline-signal shadow-selected'
 const BRANCH =
   'm-0 box-border inline-flex h-[28px] cursor-default items-center gap-2 rounded-control border px-2 [font-family:inherit] text-xs'
 const BRANCH_IDLE = 'border-dashed border-line-strong bg-surface text-fg-subtle hover:bg-control'
-const BRANCH_PICKED =
-  'border-solid border-signal bg-inset font-semibold text-fg shadow-[0_0_0_1px_var(--color-signal)]'
+const BRANCH_PICKED = 'border-solid border-signal bg-inset font-semibold text-fg shadow-selected'
 const ROWS = 'm-0 list-none p-0'
 const ROW = 'box-border flex min-h-[56px] items-center gap-3 border-b border-line px-4 py-2'
 const ROW_BODY = 'flex min-w-0 grow flex-col gap-2'
@@ -151,7 +150,7 @@ function Branch({
         {content}
       </Tooltip.Trigger>
       <Tooltip.Popup side="bottom" align="end">
-        <span className="flex w-[340px] flex-col gap-2 py-1 text-xs leading-[18px] break-keep whitespace-normal">
+        <span className="flex w-[340px] flex-col gap-2 py-1 text-xs leading-relaxed break-keep whitespace-normal">
           {tooltip}
         </span>
       </Tooltip.Popup>

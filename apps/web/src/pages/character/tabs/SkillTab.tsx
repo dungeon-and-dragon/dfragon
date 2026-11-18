@@ -97,7 +97,7 @@ function SkillIcon({
     >
       {/* zoom은 아이콘과 함께 개화, 강화 표식과 선택 테두리도 같은 배율로 키운다. */}
       <span
-        className={`relative block select-none ${picked ? 'shadow-[0_0_0_2px_var(--color-signal)]' : ''}`}
+        className={`relative block select-none ${picked ? 'outline-1 -outline-offset-1 outline-solid outline-signal shadow-selected' : ''}`}
         style={{ zoom: SKILL_WINDOW_SCALE }}
       >
         <SkillSprite icon={icon.icon} label={icon.name} dim={!icon.learned} />

@@ -55,7 +55,7 @@ const LEVEL_FILLS = [
 // GitHub contribution 그래프처럼 칸 크기를 고정하고, 범례 견본과 같은 12px로 둔다.
 const CELL = 'relative box-border block size-3 rounded-control'
 const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
-const LABEL = 'text-2xs leading-[14px] whitespace-nowrap text-fg-subtle'
+const LABEL = 'text-2xs whitespace-nowrap text-fg-subtle'
 const TAG = 'badge badge-sm border border-current tabular-nums'
 const GRADIENT_TEXT = 'bg-clip-text text-transparent'
 const BOX =
