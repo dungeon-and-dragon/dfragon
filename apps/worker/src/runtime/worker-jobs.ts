@@ -16,6 +16,7 @@ import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructur
 import {
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository,
+  DatabaseCollectionRepository,
   DatabaseSkillStyleCollectionRepository,
   DatabaseStatsJobRepository,
   DatabaseJobRunCleanupRepository,
@@ -35,6 +36,11 @@ import {
   createJobRunCleanupJob
 } from '#application/jobs/index.js'
 import type { ScoreCalculationPorts } from '#application/character-score/ports.js'
+import type { CharacterDiscoveryPorts } from '#application/character-collection/ports.js'
+import {
+  CharacterDiscoveryService,
+  createCharacterDiscoveryJob
+} from '#application/character-collection/index.js'
 import {
   SCORE_CALCULATION_JOB_NAME,
   ScoreCalculationService,
@@ -44,7 +50,8 @@ import {
 type ClockKey = 'now' | 'pause'
 
 export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
-  Omit<SkillStyleCollectionPorts, ClockKey> & {
+  Omit<SkillStyleCollectionPorts, ClockKey> &
+  Omit<CharacterDiscoveryPorts, ClockKey> & {
     createFetchRecordTimeline: CreateClearTimeline
     score: Omit<ScoreCalculationPorts, ClockKey> & { schedule?: string }
   }
@@ -58,6 +65,9 @@ export function createWorkerJobs(
     createFetchTimeline,
     createFetchRecordTimeline,
     fetchSkillStyle,
+    readTargets,
+    readTopFame,
+    fetchFamePage,
     readConcurrency,
     report
   } = collection
@@ -80,6 +90,14 @@ export function createWorkerJobs(
     new DatabaseSkillStyleCollectionRepository(client),
     { fetchSkillStyle, readConcurrency, report, ...clock }
   )
+  const discoveryService = new CharacterDiscoveryService(new DatabaseCollectionRepository(client), {
+    readTargets,
+    readTopFame,
+    fetchFamePage,
+    readConcurrency,
+    report,
+    pause: clock.pause
+  })
   const statsService = new StatsJobService(new DatabaseStatsJobRepository(client))
   const scoreService = new ScoreCalculationService(
     new DatabaseScoreCalculationRepository(client, SCORE_CALCULATION_JOB_NAME),
@@ -92,6 +110,7 @@ export function createWorkerJobs(
     createClearRecordBackfillJob(recordBackfillService),
     createClearWeekSampleJob(weekSampleService),
     createSkillStyleCollectionJob(skillStyleService),
+    createCharacterDiscoveryJob(discoveryService),
     createCharacterStatsJob(statsService),
     createSkillAdoptionJob(statsService),
     createScoreCalculationJob(scoreService, scoreSchedule)

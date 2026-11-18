@@ -5,8 +5,11 @@ import {
   characterSearchSchema,
   characterSectionSchemas,
   characterSkillStyleSchema,
+  charactersFameSchema,
   itemShopSchema,
+  jobsSchema,
   multiItemsSchema,
+  serversSchema,
   skillSchema,
   timelinePageSchema
 } from './schemas.js'
@@ -25,6 +28,16 @@ export interface CharacterSearchQuery {
   wordType: 'full' | 'match'
 }
 
+// minFame을 비우면 Neople이 maxFame - 2000으로, maxFame을 비우면 게임 안 최고 명성으로 채운다.
+export interface CharactersFameQuery {
+  minFame?: number
+  maxFame?: number
+  jobId?: string
+  jobGrowId?: string
+  isAllJobGrow?: boolean
+  limit: number
+}
+
 // Neople이 다음 페이지에도 첫 요청의 limit, code와 기간을 적용하므로 `next`만 보낸다.
 export type CharacterTimelineQuery =
   | { limit: number; code: string; startDate: string; endDate: string }
@@ -41,10 +54,18 @@ function characterPath({ serverId, characterId }: NeopleCharacterIdentity): stri
 
 function makeClient(transport: Transport) {
   return {
+    servers: () => transport.get('/df/servers', serversSchema),
+    jobs: () => transport.get('/df/jobs', jobsSchema),
     searchCharacters: (serverId: string, query: CharacterSearchQuery) =>
       transport.get(
         `/df/servers/${encodeURIComponent(serverId)}/characters`,
         characterSearchSchema,
+        { searchParams: { ...query } }
+      ),
+    charactersFame: (serverId: string, query: CharactersFameQuery) =>
+      transport.get(
+        `/df/servers/${encodeURIComponent(serverId)}/characters-fame`,
+        charactersFameSchema,
         { searchParams: { ...query } }
       ),
     character: (
