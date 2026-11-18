@@ -372,6 +372,21 @@ model JobSkillAdoptionSnapshot {
   @@map("job_skill_adoption")
 }
 
+model ItemAdoption {
+  id         BigInt   @id @default(autoincrement())
+  jobId      String   @map("job_id")
+  jobGrowId  String   @map("job_grow_id")
+  role       String
+  slotId     String?  @map("slot_id")
+  itemId     String?  @map("item_id")
+  itemName   String?  @map("item_name")
+  count      Int
+  computedAt DateTime @map("computed_at") @db.Timestamptz(3)
+
+  @@index([jobId, jobGrowId, role])
+  @@map("item_adoption")
+}
+
 model SetAdoption {
   id               BigInt   @id @default(autoincrement())
   jobId            String   @map("job_id")

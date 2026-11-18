@@ -55,17 +55,21 @@ export type SetAdoption = {
 // 운영 장비와 설정 차이를 감안해 Prisma 기본값 5초보다 넉넉히 둔다.
 const REPLACE_TIMEOUT_MS = 60_000
 
+// 남성 크루세이더만 랭킹과 같은 스킬 스타일 판정으로 역할을 나누고, 판정할 행이 없으면 unknown이다.
+export function adoptionRoleSql(maleCrusader: SetAdoptionJob): Prisma.Sql {
+  return Prisma.sql`CASE
+    WHEN c.job_id = ${maleCrusader.jobId} AND c.job_grow_id = ${maleCrusader.jobGrowId} THEN
+      CASE ${storedDealerSkillLearnedSql} WHEN true THEN 'dealer' WHEN false THEN 'buffer' ELSE 'unknown' END
+    ELSE 'all'
+  END`
+}
+
 // 한 transaction에서 지우고 넣어, 집계가 실패하면 이전 저장분이 남는다.
 export async function replaceSetAdoption(
   client: DatabaseClient,
   { computedAt, maleCrusader }: SetAdoptionReplacement
 ): Promise<number> {
-  // 남성 크루세이더만 랭킹과 같은 스킬 스타일 판정으로 역할을 나누고, 판정할 행이 없으면 unknown이다.
-  const role = Prisma.sql`CASE
-    WHEN c.job_id = ${maleCrusader.jobId} AND c.job_grow_id = ${maleCrusader.jobGrowId} THEN
-      CASE ${storedDealerSkillLearnedSql} WHEN true THEN 'dealer' WHEN false THEN 'buffer' ELSE 'unknown' END
-    ELSE 'all'
-  END`
+  const role = adoptionRoleSql(maleCrusader)
 
   // TRUNCATE는 commit까지 읽기도 막으므로, 계산하는 동안 API가 이전 저장분을 읽도록 DELETE로 지운다.
 
@@ -87,7 +91,7 @@ export async function replaceSetAdoption(
   )
 }
 
-function setAdoptionConditions({ jobId, jobGrowId, role }: SetAdoptionQuery): Prisma.Sql {
+export function adoptionConditions({ jobId, jobGrowId, role }: SetAdoptionQuery): Prisma.Sql {
   const conditions = [
     ...(jobId !== undefined ? [Prisma.sql`job_id = ${jobId}`] : []),
     ...(jobGrowId !== undefined ? [Prisma.sql`job_grow_id = ${jobGrowId}`] : []),
@@ -109,7 +113,7 @@ export async function readSetAdoption(
 ): Promise<SetAdoption> {
   const [adoption] = await client.$queryRaw<SetAdoption[]>`
     WITH picked AS (
-      SELECT * FROM set_adoption ${setAdoptionConditions(query)}
+      SELECT * FROM set_adoption ${adoptionConditions(query)}
     ),
     equipment_names AS (
       SELECT equipment_set_id AS id, equipment_set_name AS name, sum(count)::int AS count

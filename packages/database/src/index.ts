@@ -215,6 +215,8 @@ export type {
   SkillLevelCount,
   SkillSelectionCount
 } from './skill-adoption.js'
+export { readItemAdoption, replaceItemAdoption } from './item-adoption.js'
+export type { ItemAdoption, ItemCount, SlotItemCounts } from './item-adoption.js'
 export { readSetAdoption, replaceSetAdoption } from './set-adoption.js'
 export type {
   EquipmentSetCount,
