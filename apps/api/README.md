@@ -2,20 +2,20 @@
 
 `apps/api`는 로그인 없는 공개 캐릭터 API(Hono)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
 DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정보를 PostgreSQL에 저장하고, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
-같은 이미지의 캐릭터 수집 worker(`dist/character-collector.js`)는 [`apps/worker`](../worker/README.md)에 있습니다.
+캐릭터 수집 worker는 [`apps/worker`](../worker/README.md)에 있습니다.
 
 ## 코드 위치
 
 `src/`는 계층 폴더로 나눕니다(ADR 0047, ADR 0057).
-`src/` 바로 아래에는 진입 파일 `main.ts`, `character-collector.ts`와 다섯 계층 폴더만 둡니다.
-진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`, `dist/character-collector.js`로 실행합니다.
+`src/` 바로 아래에는 진입 파일 `main.ts`와 다섯 계층 폴더만 둡니다.
+진입 파일은 설정과 runtime을 연결하며, build 뒤 `dist/main.js`로 실행합니다.
 계층 폴더 사이의 import 방향과 계층 밖 파일은 `pnpm lint`가 `src/` 전체에서 검사합니다.
 앱을 만드는 `src/runtime/api-app.ts`가 route를 모으는 파일(`src/runtime/routes/`), 공개 app의 조립 함수(`src/runtime/api-services.ts`)가 아닌 기능 파일을 import하는 것도 `pnpm lint`가 막습니다.
 운영 경로는 [운영 app](../ops/README.md)에 있습니다.
 
 | 폴더 | 담는 것 |
 | --- | --- |
-| `src/main.ts`, `src/character-collector.ts` | API와 캐릭터 수집 worker의 진입 파일. `character-collector.ts`는 `@dfragon/worker`의 시작 함수만 부릅니다 |
+| `src/main.ts` | API의 진입 파일 |
 | `src/domain/<기능>/` | 순수 계산, 표, 타입, 실패 종류 |
 | `src/application/<기능>/` | Service, Service가 받는 Repository interface와 DB가 아닌 의존성의 함수 타입(port) |
 | `src/infrastructure/neople/`, `src/infrastructure/database/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기로 구현한 adapter |
@@ -115,7 +115,7 @@ podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 - `PORT`(운영은 3000)는 반드시 지정합니다. `EXPOSE 3000`은 기본값이 아닙니다.
 - Neople key는 직접 입력이나 `_FILE`로 받고, 둘 다 생략하면 `/run/secrets/neople_api_key`를 읽습니다.
 - DB 설정은 선택입니다. `DB_HOST`를 지정하고 비밀번호 입력을 둘 다 생략하면 `/run/secrets/db_password`를 읽습니다.
-- 기본 CMD는 API(`node dist/main.js`)이고, 캐릭터 수집 worker는 CMD를 `node dist/character-collector.js`로 바꿔 실행합니다.
+- 기본 CMD는 API(`node dist/main.js`)입니다.
 
 ### 실행 중인 서버의 버전 조회
 
@@ -124,11 +124,11 @@ podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse H
 
 ### 컨테이너 검사
 
-로컬 Podman 이미지로 이미지 실행 계약과 DB를 붙인 실행을 검사합니다. DB 검사는 [운영 app 이미지](../ops/README.md#서버-이미지)도 함께 띄웁니다.
+로컬 Podman 이미지로 이미지 실행 계약과 DB를 붙인 실행을 검사합니다. DB 검사는 [운영 app 이미지](../ops/README.md#서버-이미지)와 [worker 이미지](../worker/README.md#서버-이미지)도 함께 띄웁니다.
 
 ```sh
 node apps/api/test-support/container-deployment.mjs dfragon-api:local
-node apps/api/test-support/container-database.mjs dfragon-api:local dfragon-ops:local
+node apps/api/test-support/container-database.mjs dfragon-api:local dfragon-ops:local dfragon-worker:local
 ```
 
 ## 비공개 스킬 패키지 검증

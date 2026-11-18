@@ -430,12 +430,7 @@
       }
     },
     {
-      "includes": [
-        "apps/api/**",
-        "!apps/api/src/character-collector.ts",
-        "!apps/api/test-support/container-*.mjs",
-        "apps/worker/**"
-      ],
+      "includes": ["apps/api/**", "apps/worker/**"],
       "linter": {
         "rules": {
           "style": {
@@ -454,7 +449,7 @@
                       "../**/api/**",
                       "../**/worker/**"
                     ],
-                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 두고, API에서 worker를 시작하는 파일은 apps/api/src/character-collector.ts 하나만 두고, worker가 든 API 이미지를 검사하는 apps/api/test-support/container-*.mjs만 worker 코드를 import한다."
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   }
                 ]
               }
@@ -484,7 +479,7 @@
                       "../**/api/**",
                       "../**/worker/**"
                     ],
-                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 두고, API에서 worker를 시작하는 파일은 apps/api/src/character-collector.ts 하나만 두고, worker가 든 API 이미지를 검사하는 apps/api/test-support/container-*.mjs만 worker 코드를 import한다."
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
                     "group": [
@@ -535,7 +530,7 @@
                       "../**/api/**",
                       "../**/worker/**"
                     ],
-                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 두고, API에서 worker를 시작하는 파일은 apps/api/src/character-collector.ts 하나만 두고, worker가 든 API 이미지를 검사하는 apps/api/test-support/container-*.mjs만 worker 코드를 import한다."
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
                     "group": ["**/infrastructure/**", "**/presentation/**", "**/runtime/**"],
@@ -596,7 +591,7 @@
                       "../**/api/**",
                       "../**/worker/**"
                     ],
-                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 두고, API에서 worker를 시작하는 파일은 apps/api/src/character-collector.ts 하나만 두고, worker가 든 API 이미지를 검사하는 apps/api/test-support/container-*.mjs만 worker 코드를 import한다."
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
                     "group": ["**/presentation/**", "**/runtime/**"],
@@ -630,7 +625,7 @@
                       "../**/api/**",
                       "../**/worker/**"
                     ],
-                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 두고, API에서 worker를 시작하는 파일은 apps/api/src/character-collector.ts 하나만 두고, worker가 든 API 이미지를 검사하는 apps/api/test-support/container-*.mjs만 worker 코드를 import한다."
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
                     "group": ["**/infrastructure/**", "**/runtime/**"],
@@ -831,7 +826,7 @@
                       "../**/api/**",
                       "../**/worker/**"
                     ],
-                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 두고, API에서 worker를 시작하는 파일은 apps/api/src/character-collector.ts 하나만 두고, worker가 든 API 이미지를 검사하는 apps/api/test-support/container-*.mjs만 worker 코드를 import한다."
+                    "message": "API와 worker는 서로의 코드를 import하지 않는다. 함께 쓰는 코드는 @dfragon/server-core에 둔다."
                   },
                   {
                     "group": [

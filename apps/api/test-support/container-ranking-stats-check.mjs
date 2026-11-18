@@ -9,8 +9,8 @@ import {
 import {
   StatsJobService,
   createCharacterStatsJob
-} from '@dfragon/worker/application/ranking-stats/stats-jobs.js'
-import { DatabaseStatsJobRepository } from '@dfragon/worker/infrastructure/database/stats-jobs.js'
+} from './dist/application/ranking-stats/stats-jobs.js'
+import { DatabaseStatsJobRepository } from './dist/infrastructure/database/stats-jobs.js'
 
 // 합성 캐릭터다. 앞 단계가 넣은 행이 있어 통계는 넣기 전후의 차이로 확인한다.
 const jobId = 'synthetic-rank-job'
@@ -134,7 +134,7 @@ try {
     ]
   )
 
-  // 같은 컨테이너에서 DB 설정으로 뜬 API를 불러 runtime 연결과 저장분 읽기까지 확인한다.
+  // network namespace를 함께 쓰는 API 컨테이너를 불러 runtime 연결과 저장분 읽기까지 확인한다.
   const get = async (path) => {
     const response = await fetch(new URL(path, 'http://127.0.0.1:3000'))
     assert.equal(response.status, 200, path)
