@@ -29,12 +29,11 @@ const guild: Guild = {
   guildId: 'guild-1',
   guildName: '합성 길드',
   memberCount: 1,
-  averageFame: 80123,
   members: [character]
 }
 
 it('길드 응답을 읽고, 길드원이 없는 길드도 읽는다', async () => {
-  const empty: Guild = { ...guild, guildName: null, memberCount: 0, averageFame: null, members: [] }
+  const empty: Guild = { ...guild, guildName: null, memberCount: 0, members: [] }
   const fetch = respond(guild)
 
   await expect(
