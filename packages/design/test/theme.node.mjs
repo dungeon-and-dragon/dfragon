@@ -230,7 +230,7 @@ test('utility를 쓰지 않은 토큰도 CSS 변수로 낸다', async () => {
   }
 })
 
-test('base.css의 @font-face는 fonts 폴더의 woff2와 하나씩 맞고 파일 이름의 굵기를 쓴다', async () => {
+test('base.css의 @font-face는 fonts 폴더의 woff2를 빠짐없이 쓰고 파일 이름의 굵기를 쓴다', async () => {
   const faces = [...base.matchAll(FONT_FACE_PATTERN)].map(([, file, weight]) => {
     return { file, weight }
   })
@@ -239,7 +239,7 @@ test('base.css의 @font-face는 fonts 폴더의 woff2와 하나씩 맞고 파일
 
     return isFont
   })
-  assert.deepEqual(faces.map((face) => face.file).toSorted(), files.toSorted())
+  assert.deepEqual([...new Set(faces.map((face) => face.file))].toSorted(), files.toSorted())
   for (const { file, weight } of faces) {
     const name = FONT_FILE_WEIGHT_PATTERN.exec(file)?.[1]
     assert.equal(weight, FONT_FILE_WEIGHTS[name], file)

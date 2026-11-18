@@ -288,7 +288,7 @@ function click(element: Element): Promise<void> {
   })
 }
 
-it('받는 중에는 제목 줄만 둔다', async () => {
+it('받는 중에는 제목과 받는 중 안내를 두고 주 선택과 패널은 두지 않는다', async () => {
   await render(undefined, { getClearStats: () => new Promise<never>(() => {}) })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')

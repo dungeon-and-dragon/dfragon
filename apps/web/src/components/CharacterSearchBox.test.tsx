@@ -138,7 +138,7 @@ function recentCharacter(
   }
 }
 
-it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 그 아래 줄에 레벨만 둔다', async () => {
+it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을 둔다', async () => {
   useRecentCharacterStore.setState({
     recentCharacters: [
       {
@@ -162,7 +162,7 @@ it('최근 본 캐릭터는 서버, 이름, 직업명을 한 줄로 두고 만�
   const lines = [...popup.querySelectorAll('li a')].map((item) =>
     [...(item.children[1]?.children ?? [])].map((line) => line.textContent)
   )
-  expect(lines).toEqual([['프레이만렙넨마스터 격투가(여)'], ['프레이육성합성 직업', 'Lv.110']])
+  expect(lines).toEqual([['프레이만렙넨마스터 격투가(여)'], ['프레이육성합성 직업Lv.110']])
 })
 
 function savedCharacter(characterId: string, characterName: string): FavoriteCharacter {
@@ -198,7 +198,7 @@ function rowsNamed(...names: string[]): unknown[] {
   return names.map((name) => expect.stringContaining(name))
 }
 
-function star(element: HTMLElement, characterName: string): HTMLButtonElement {
+function heart(element: HTMLElement, characterName: string): HTMLButtonElement {
   const row = [...element.querySelectorAll('li')].find((item) =>
     item.textContent?.includes(characterName)
   )!
@@ -250,33 +250,33 @@ it('큰 검색창 드롭다운은 두 절을 저장된 순서대로 최대 5줄�
   expect(fetchSpy).not.toHaveBeenCalled()
 })
 
-it('최근 절의 선 별을 누르면 즐겨찾기 절에 생기고, 즐겨찾기 절의 별을 누르면 빠지며 드롭다운은 열려 있다', async () => {
+it('최근 절의 빈 하트를 누르면 즐겨찾기 절에 생기고, 즐겨찾기 절의 하트를 누르면 빠지며 드롭다운은 열려 있다', async () => {
   useRecentCharacterStore.setState({ recentCharacters: [recentCharacter('recent-1', '하늘', 115)] })
   await renderSearchBox('large')
   const dropdown = await openSavedDropdown()
-  const recentStar = star(section(dropdown, '최근 본 캐릭터'), '하늘')
-  expect(recentStar.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
+  const recentHeart = heart(section(dropdown, '최근 본 캐릭터'), '하늘')
+  expect(recentHeart.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
 
-  await act(async () => recentStar.focus())
-  await act(async () => recentStar.click())
+  await act(async () => recentHeart.focus())
+  await act(async () => recentHeart.click())
 
   expect(rowTexts(section(dropdown, '즐겨찾기'))).toEqual(rowsNamed('하늘'))
-  expect(star(section(dropdown, '즐겨찾기'), '하늘').getAttribute('aria-label')).toBe(
+  expect(heart(section(dropdown, '즐겨찾기'), '하늘').getAttribute('aria-label')).toBe(
     '즐겨찾기 해제'
   )
-  expect(star(section(dropdown, '최근 본 캐릭터'), '하늘').getAttribute('aria-label')).toBe(
+  expect(heart(section(dropdown, '최근 본 캐릭터'), '하늘').getAttribute('aria-label')).toBe(
     '즐겨찾기 해제'
   )
 
-  const favoriteStar = star(section(dropdown, '즐겨찾기'), '하늘')
-  await act(async () => favoriteStar.focus())
-  await act(async () => favoriteStar.click())
+  const favoriteHeart = heart(section(dropdown, '즐겨찾기'), '하늘')
+  await act(async () => favoriteHeart.focus())
+  await act(async () => favoriteHeart.click())
 
   expect(savedDropdown()).toBe(dropdown)
   expect(section(dropdown, '즐겨찾기').querySelector('p')?.textContent).toBe(
     '즐겨찾기한 캐릭터가 없습니다.'
   )
-  expect(star(section(dropdown, '최근 본 캐릭터'), '하늘').getAttribute('aria-label')).toBe(
+  expect(heart(section(dropdown, '최근 본 캐릭터'), '하늘').getAttribute('aria-label')).toBe(
     '즐겨찾기에 더하기'
   )
   expect(document.activeElement).toBe(nameInput())

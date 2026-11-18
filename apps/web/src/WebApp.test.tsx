@@ -1158,7 +1158,7 @@ it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기
   expect(captureStatus()).toBe(status)
 })
 
-function summaryStar(): HTMLButtonElement | null {
+function summaryHeart(): HTMLButtonElement | null {
   return container.querySelector(
     'section[aria-label="캐릭터 요약"] button:is([aria-label="즐겨찾기에 더하기"], [aria-label="즐겨찾기 해제"])'
   )
@@ -1176,17 +1176,17 @@ function globalMenuLink(label: string): HTMLAnchorElement {
   )!
 }
 
-it('상세의 별로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨찾기 화면에서 해제하면 목록에서 빠지고 상세의 별도 꺼진다', async () => {
+it('상세의 하트로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨찾기 화면에서 해제하면 목록에서 빠지고 상세의 하트도 꺼진다', async () => {
   stubDetailFetch()
   window.history.replaceState(null, '', DETAIL_PATH)
   await act(async () => root.render(<WebApp host={host} />))
   await vi.waitFor(() =>
-    expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
+    expect(summaryHeart()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
   )
 
-  await act(async () => summaryStar()!.click())
+  await act(async () => summaryHeart()!.click())
 
-  expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기 해제')
+  expect(summaryHeart()?.getAttribute('aria-label')).toBe('즐겨찾기 해제')
   await act(async () => root.unmount())
   const savedText = localStorage.getItem('dfragon:favorite-characters') ?? ''
   useFavoriteCharacterStore.setState({ favoriteCharacters: [] })
@@ -1194,7 +1194,7 @@ it('상세의 별로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨�
   await act(async () => useFavoriteCharacterStore.persist.rehydrate())
   root = createRoot(container)
   await act(async () => root.render(<WebApp host={host} />))
-  await vi.waitFor(() => expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기 해제'))
+  await vi.waitFor(() => expect(summaryHeart()?.getAttribute('aria-label')).toBe('즐겨찾기 해제'))
 
   await act(async () => globalMenuLink('즐겨찾기').click())
 
@@ -1213,7 +1213,7 @@ it('상세의 별로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨�
   await act(async () => window.history.back())
   await waitForPath(DETAIL_PATH)
   await vi.waitFor(() =>
-    expect(summaryStar()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
+    expect(summaryHeart()?.getAttribute('aria-label')).toBe('즐겨찾기에 더하기')
   )
 })
 
@@ -1225,7 +1225,7 @@ it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최�
   stubDetailFetch()
   window.history.replaceState(null, '', DETAIL_PATH)
   await act(async () => root.render(<WebApp host={host} />))
-  await vi.waitFor(() => expect(summaryStar()).not.toBeNull())
+  await vi.waitFor(() => expect(summaryHeart()).not.toBeNull())
   const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
   expect(recentPopup()).toBeNull()
 

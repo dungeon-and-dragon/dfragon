@@ -7,8 +7,8 @@ type Edges = Readonly<{ start: boolean; end: boolean }>
 
 const AT_BOTH_EDGES: Edges = { start: true, end: true }
 
-const CARD =
-  'relative box-border flex h-[294px] w-[196px] shrink-0 cursor-pointer snap-start flex-col items-stretch overflow-hidden rounded-panel border bg-canvas p-4 text-left text-fg transition-colors focus-ring'
+export const CARD_SIZE = 'h-[294px] w-[196px]'
+const CARD = `relative box-border flex ${CARD_SIZE} shrink-0 cursor-pointer snap-start flex-col items-stretch overflow-hidden rounded-panel border bg-canvas p-4 text-left text-fg transition-colors focus-ring`
 const CARD_IDLE = 'border-line hover:border-line-input'
 const CARD_SELECTED = 'border-signal shadow-selected'
 const SHADE =

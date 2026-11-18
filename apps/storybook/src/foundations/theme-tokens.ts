@@ -24,7 +24,7 @@ const SECTION_PREFIXES: Readonly<Record<TokenSection, readonly string[]>> = {
   layer: ['--z-index-'],
   breakpoint: ['--breakpoint-'],
   shadow: ['--shadow-', '--inset-shadow-', '--drop-shadow-'],
-  motion: ['--ease-', '--duration-', '--default-transition-', '--animate-', '--cycle', '--beat']
+  motion: ['--ease-', '--duration-', '--default-transition-', '--animate-', '--beat']
 }
 
 const TOKEN_BLOCK_PATTERN = /^(?::root|@theme\b.*)$/u

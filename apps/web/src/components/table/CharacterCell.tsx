@@ -1,12 +1,8 @@
-import {
-  CHARACTER_SERVER_NAMES,
-  characterImageUrl,
-  displayJobName,
-  isMaxLevel
-} from '#core/character'
+import { characterImageUrl, displayJobName, isMaxLevel } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import type { StoredCharacter } from '#core/ranking'
 import { Portrait } from '#components/Portrait'
+import { ServerBadge } from '#components/ServerBadge'
 
 export type CharacterCellCharacter = Pick<
   StoredCharacter,
@@ -28,33 +24,27 @@ export function CharacterCell({
       <span className="portrait portrait-sm">
         <Portrait src={characterImageUrl(character)} />
       </span>
-      <span className="flex min-w-0 flex-col gap-1">
-        <span className="flex min-w-0 items-center gap-2">
-          <span className="badge bg-inset text-fg-muted">
-            {CHARACTER_SERVER_NAMES[character.serverId]}
-          </span>
+      <span className="flex min-w-0 items-center gap-2">
+        <ServerBadge serverId={character.serverId} />
+        <Link
+          to="/c/$serverId/$characterId"
+          params={{ serverId: character.serverId, characterId: character.characterId }}
+          className="link min-w-0 truncate text-sm font-semibold text-fg"
+        >
+          {character.characterName}
+        </Link>
+        {adventureName != null && (
           <Link
-            to="/c/$serverId/$characterId"
-            params={{ serverId: character.serverId, characterId: character.characterId }}
-            className="link min-w-0 truncate text-sm font-semibold text-fg"
+            to="/adventures/$adventureName"
+            params={{ adventureName }}
+            className="link truncate text-xs text-fg-muted"
           >
-            {character.characterName}
+            {adventureName}
           </Link>
-          {adventureName != null && (
-            <Link
-              to="/adventures/$adventureName"
-              params={{ adventureName }}
-              className="link truncate text-xs text-fg-muted"
-            >
-              {adventureName}
-            </Link>
-          )}
-          {job != null && (
-            <span className="min-w-0 flex-1 truncate text-xs text-fg-subtle">{job}</span>
-          )}
-        </span>
+        )}
+        {job != null && <span className="min-w-0 truncate text-xs text-fg-subtle">{job}</span>}
         {showsLevel && (
-          <span className="truncate num text-xs text-fg-subtle">{`Lv.${character.level}`}</span>
+          <span className="shrink-0 num text-xs text-fg-subtle">{`Lv.${character.level}`}</span>
         )}
       </span>
     </div>

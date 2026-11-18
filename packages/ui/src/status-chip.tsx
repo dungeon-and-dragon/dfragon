@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { StepDots } from './step-dots'
 
 export type StatusChipTone = 'neutral' | 'success' | 'danger' | 'warning' | 'signal'
 
@@ -19,7 +18,7 @@ export function StatusChip({ tone, role, size = 'sm', busy = false, children }: 
       data-busy={busy ? '' : undefined}
       className={`status-chip status-chip-${size}`}
     >
-      {busy ? <StepDots /> : <span aria-hidden="true" className="status-dot" />}
+      <span aria-hidden="true" className={busy ? 'status-spinner' : 'status-dot'} />
       {children}
     </span>
   )
