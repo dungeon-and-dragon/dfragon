@@ -18,12 +18,12 @@
 !packages/models/package.json
 !packages/models/ocr-finetuned/
 !packages/models/ocr-finetuned/**
+!packages/server-core/
+!packages/server-core/test/
+!packages/server-core/test/fixtures/
+!packages/server-core/test/fixtures/character-card-buffer.json
+!packages/server-core/test/fixtures/character-card-dealer.json
 !apps/
-!apps/api/
-!apps/api/test/
-!apps/api/test/fixtures/
-!apps/api/test/fixtures/character-card-buffer.json
-!apps/api/test/fixtures/character-card-dealer.json
 !apps/web/
 !apps/web/**
 **/node_modules/

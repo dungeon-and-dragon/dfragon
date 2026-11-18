@@ -1,12 +1,12 @@
 import type { CharacterBasicInput } from '@dfragon/database'
-import type { CharacterPayloads } from '../../domain/character-detail/sections.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
 import type { CharacterFetched } from '../../domain/character-events.js'
-import { toSectionBodies } from '../../domain/character-history/section-body.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
 import type {
   CharacterRecordFailure,
   ParseCharacterBasic,
   ParseCharacterSkillStyle
-} from './ports.js'
+} from '@dfragon/server-core/application/character-basic/ports.js'
 import type { CharacterBasicRepository } from './repository.js'
 
 export interface CharacterBasicDependencies {

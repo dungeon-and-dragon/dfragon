@@ -3,7 +3,7 @@ import { createDatabaseClient } from '@dfragon/database'
 import { writeAccessLogToStdout } from '@dfragon/http-server'
 import { createNeopleClient } from '@dfragon/neople'
 import { createBatchNeopleKeyPool } from '../infrastructure/neople/batch-key-pool.js'
-import { parseCharacterBasic } from '../infrastructure/neople/character-basic.js'
+import { parseCharacterBasic } from '@dfragon/server-core/infrastructure/neople/character-basic.js'
 import {
   createNeopleClearRecordTimeline,
   createNeopleClearTimeline

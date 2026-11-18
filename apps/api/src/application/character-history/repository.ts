@@ -4,7 +4,7 @@ import type {
   StoredCharacterHistorySnapshot,
   TimelineEventRow
 } from '@dfragon/database'
-import type { CharacterIdentity } from '../../domain/character-identity.js'
+import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 
 export interface CharacterHistoryRepository {
   readHistory(character: CharacterIdentity): Promise<StoredCharacterHistory>

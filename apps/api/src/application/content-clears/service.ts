@@ -1,11 +1,11 @@
 import type { ClearFirstWeekCount, StoredClearPopulation } from '@dfragon/database'
-import { CharacterDetailFailure } from '../../domain/character-failure.js'
-import { formatResetDate } from '../../domain/seoul-time.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
+import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   CLEAR_CONTENTS,
   type ClearContent,
   findStagePair
-} from '../../domain/content-clears/contents.js'
+} from '@dfragon/server-core/domain/content-clears/contents.js'
 import {
   type ClearContentStats,
   toClearContentStats,
@@ -23,8 +23,8 @@ import {
   type ClearContentSummary,
   toClearStats
 } from '../../domain/content-clears/stats.js'
-import type { ClearStatsRepository } from './repository.js'
-import { ClearSampleLoader } from './sample-loader.js'
+import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
+import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/sample-loader.js'
 
 type ClearSummary = {
   stats: ClearStats

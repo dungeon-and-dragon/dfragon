@@ -1,5 +1,5 @@
 import type { ClearRecordLegionWeek, StoredClearPopulation } from '@dfragon/database'
-import { formatResetDate, startOfResetWeek } from '../seoul-time.js'
+import { formatResetDate, startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 import type { ClearContentHeader, ClearContentSummary, ClearWeek } from './stats.js'
 
 export type ClearLegion = {

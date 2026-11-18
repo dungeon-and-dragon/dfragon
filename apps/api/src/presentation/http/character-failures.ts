@@ -2,7 +2,7 @@ import type { FailureResponse } from '@dfragon/http-server'
 import {
   type CharacterFailureKind,
   characterDetailFailure
-} from '../../domain/character-failure.js'
+} from '@dfragon/server-core/domain/character-failure.js'
 
 const failureResponses: Record<CharacterFailureKind, FailureResponse> = {
   query: {

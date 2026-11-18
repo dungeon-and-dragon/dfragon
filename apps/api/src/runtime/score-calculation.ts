@@ -1,14 +1,14 @@
 import { NeopleRequestFailure } from '@dfragon/neople'
-import { CatalogService } from '../application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import type {
   ScoreCalculationPorts,
   ScoreSourceEvents,
   ScoreSources
 } from '../application/character-score/ports.js'
-import { createNeopleCatalog } from '../infrastructure/neople/character-catalog.js'
+import { createNeopleCatalog } from '@dfragon/server-core/infrastructure/neople/character-catalog.js'
 import type { WorkerNeople } from '../infrastructure/neople/character-collection.js'
-import { createNeopleCharacterDetails } from '../infrastructure/neople/character-detail.js'
-import { createScoreEngine } from '../infrastructure/score/engine.js'
+import { createNeopleCharacterDetails } from '@dfragon/server-core/infrastructure/neople/character-detail.js'
+import { createScoreEngine } from '@dfragon/server-core/infrastructure/score/engine.js'
 
 type ScoreNeople = Pick<WorkerNeople, 'character' | 'multiItems'>
 

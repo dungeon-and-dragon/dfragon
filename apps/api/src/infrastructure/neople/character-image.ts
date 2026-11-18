@@ -5,7 +5,7 @@ import {
   createNeopleImageClient
 } from '@dfragon/neople'
 import type { FetchCharacterImage } from '../../application/character-image/ports.js'
-import { CharacterDetailFailure } from '../../domain/character-failure.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 
 export function createNeopleCharacterImage(
   images: NeopleImageClient = createNeopleImageClient()
