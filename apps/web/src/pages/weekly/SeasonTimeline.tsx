@@ -148,7 +148,7 @@ export function SeasonTimeline({
         <span
           ref={indicatorRef}
           aria-hidden="true"
-          className="pointer-events-none absolute top-3 z-1 h-1 rounded-[1px] bg-signal"
+          className="pointer-events-none absolute top-3 z-raised h-1 rounded-[1px] bg-signal"
         />
       )}
       {seasons.map((season, index) => (

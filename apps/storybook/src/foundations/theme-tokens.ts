@@ -21,7 +21,7 @@ const SECTION_PREFIXES: Readonly<Record<TokenSection, readonly string[]>> = {
   spacing: ['--spacing'],
   size: ['--height-', '--container-', '--size-'],
   radius: ['--radius-'],
-  layer: ['--z-'],
+  layer: ['--z-index-'],
   breakpoint: ['--breakpoint-'],
   shadow: ['--shadow-', '--inset-shadow-', '--drop-shadow-'],
   motion: ['--ease-', '--duration-', '--default-transition-', '--animate-', '--cycle', '--beat']

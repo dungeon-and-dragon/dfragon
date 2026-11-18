@@ -8,7 +8,7 @@
  * 격자 목록은 목록 요소에 listbox-grid와 --listbox-columns를 둔다.
  */
 .listbox-positioner {
-  z-index: var(--z-popover);
+  z-index: var(--z-index-popover);
   outline: none;
 }
 

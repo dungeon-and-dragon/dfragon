@@ -21,7 +21,7 @@ const { table, head, headEnd, body, row, cell, slot, number, muted, heading, cou
 const NUMERIC_TEXT = /^[\d.,+\-%\s]+$/
 const OPTION = 'm-0 flex items-start gap-4 rounded-control border p-4'
 const OPTION_IDLE = 'border-dashed border-line-strong bg-canvas'
-const OPTION_PICKED = 'border-solid border-signal bg-surface shadow-[0_0_0_1px_var(--color-signal)]'
+const OPTION_PICKED = 'border-solid border-signal bg-surface shadow-selected'
 
 export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null {
   const catalog = useOathCatalog()
@@ -113,7 +113,7 @@ function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): R
             )}
           </div>
           {option.effect !== null && (
-            <GameText lines={option.effect} className="min-w-0 grow text-xs leading-[18px]" />
+            <GameText lines={option.effect} className="min-w-0 grow text-xs leading-relaxed" />
           )}
         </article>
       ))}
