@@ -3,10 +3,10 @@ import type {
   SeasonBackfillTarget,
   SeasonBackfillJob
 } from '../../domain/character-timeline/season-backfill.js'
-import type { FetchCharacterTimeline } from './ports.js'
+import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import { type JobQueue, createJobQueue } from './queue.js'
 import type { SeasonBackfillRepository } from './repository.js'
-import { splitTimelineRanges } from '../../domain/character-timeline/ranges.js'
+import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/ranges.js'
 
 const MINUTE_MS = 60_000
 // 운영 배포 뒤 실제 요청 수와 시간을 재 다시 정할 시작값이다(#1324).

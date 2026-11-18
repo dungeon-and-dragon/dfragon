@@ -1,4 +1,4 @@
-import type { FetchCharacterTimeline } from '../character-timeline/ports.js'
+import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 
 export type CreateClearTimeline = (onRequest: () => void) => FetchCharacterTimeline
 

@@ -12,7 +12,10 @@ import {
   recordCharacterScore
 } from '@dfragon/database'
 import type { ScoreCalculationRepository } from '../../application/character-score/repository.js'
-import { CLEAR_CONTENTS, toCollectionMinFame } from '../../domain/content-clears/contents.js'
+import {
+  CLEAR_CONTENTS,
+  toCollectionMinFame
+} from '@dfragon/server-core/domain/content-clears/contents.js'
 
 export class DatabaseScoreCalculationRepository implements ScoreCalculationRepository {
   constructor(

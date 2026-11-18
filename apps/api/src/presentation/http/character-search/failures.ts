@@ -2,7 +2,7 @@ import type { FailureResponse } from '@dfragon/http-server'
 import {
   type CharacterSearchFailureKind,
   NeopleSearchFailure
-} from '../../../domain/character-search/failure.js'
+} from '@dfragon/server-core/domain/character-search/failure.js'
 
 const failureResponses: Record<CharacterSearchFailureKind, FailureResponse> = {
   query: {

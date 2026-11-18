@@ -11,6 +11,7 @@ COPY packages/database/package.json packages/database/package.json
 COPY packages/lib/package.json packages/lib/package.json
 COPY packages/neople/package.json packages/neople/package.json
 COPY packages/http-server/package.json packages/http-server/package.json
+COPY packages/server-core/package.json packages/server-core/package.json
 COPY packages/licenses/package.json packages/licenses/package.json
 COPY packages/licenses/src/copy-notices.mjs packages/licenses/src/copy-notices.mjs
 RUN pnpm install --frozen-lockfile --filter @dfragon/api...
@@ -23,13 +24,17 @@ COPY packages/neople/tsconfig.json packages/neople/tsconfig.json
 COPY packages/neople/src packages/neople/src
 COPY packages/http-server/tsconfig.json packages/http-server/tsconfig.json
 COPY packages/http-server/src packages/http-server/src
+COPY packages/server-core/tsconfig*.json packages/server-core/
+COPY packages/server-core/src packages/server-core/src
+COPY packages/server-core/test packages/server-core/test
 COPY packages/licenses/notices/lib packages/licenses/notices/lib
 COPY apps/api/tsconfig*.json apps/api/
 COPY apps/api/src apps/api/src
 COPY apps/api/test apps/api/test
 COPY apps/api/test-support apps/api/test-support
 COPY packages/models/score-engine/libdnfscore.so packages/models/score-engine/libdnfscore.so
-RUN pnpm --filter @dfragon/api test \
+RUN pnpm --filter @dfragon/server-core test \
+    && pnpm --filter @dfragon/api test \
     && pnpm --filter @dfragon/api deploy --legacy --prod /production \
     && find /production/node_modules -name schema-engine-debian-openssl-3.0.x -exec {} --version \; | grep -q schema-engine
 COPY packages/licenses/notices/upstream/remeda-2.53.0-LICENSE.txt apps/api/dist/notices/remeda-2.53.0-LICENSE.txt

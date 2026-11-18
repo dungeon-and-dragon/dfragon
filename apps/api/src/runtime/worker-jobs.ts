@@ -12,7 +12,7 @@ import {
 import { ContentClearCollectionService } from '../application/content-clears/collection.js'
 import { ClearRecordBackfillService } from '../application/content-clears/record-backfill.js'
 import { ClearWeekSampleService } from '../application/content-clears/week-samples.js'
-import { DatabaseClearStatsRepository } from '../infrastructure/database/clear-stats.js'
+import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/clear-stats.js'
 import {
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository

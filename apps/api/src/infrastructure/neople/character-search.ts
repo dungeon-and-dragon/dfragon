@@ -7,9 +7,9 @@ import {
   NeopleRequestFailure
 } from '@dfragon/neople'
 import type { SearchCharacters } from '../../application/character-search/ports.js'
-import { CHARACTER_ID_PATTERN } from '../../domain/character-identity.js'
-import { NEOPLE_SERVER_NAMES } from '../../domain/neople-servers.js'
-import { NeopleSearchFailure } from '../../domain/character-search/failure.js'
+import { CHARACTER_ID_PATTERN } from '@dfragon/server-core/domain/character-identity.js'
+import { NEOPLE_SERVER_NAMES } from '@dfragon/server-core/domain/neople-servers.js'
+import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import type {
   CharacterSearchRow,
   NeopleCharacterSearchResult,

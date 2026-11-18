@@ -5,7 +5,7 @@ import {
   EMPTY_TIMELINE_PAGE,
   type TimelineItemPage,
   type TimelinePageList
-} from '../../domain/character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/project.js'
 import type { TimelineSyncWaiter } from './ports.js'
 import type { CharacterTimelineRepository } from './repository.js'
 

@@ -1,16 +1,16 @@
 import type { TimelineItemCursor } from '@dfragon/database'
 import type { Context } from 'hono'
 import { z } from 'zod'
-import { CharacterDetailFailure } from '../../../domain/character-failure.js'
+import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import {
   type CharacterIdentity,
   parseCharacterIdentity
-} from '../../../domain/character-identity.js'
+} from '@dfragon/server-core/domain/character-identity.js'
 import {
   type CharacterTimeline,
   type TimelineItemPage,
   parseTimelineCursor
-} from '../../../domain/character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/project.js'
 
 export const pageQuery = z.object({ before: z.string() }).strict()
 

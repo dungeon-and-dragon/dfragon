@@ -1,5 +1,8 @@
 import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfragon/database'
-import { NEOPLE_TIMELINE_START, splitTimelineRanges } from './ranges.js'
+import {
+  NEOPLE_TIMELINE_START,
+  splitTimelineRanges
+} from '@dfragon/server-core/domain/character-timeline/ranges.js'
 
 const MINUTE_MS = 60_000
 

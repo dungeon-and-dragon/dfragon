@@ -338,9 +338,6 @@ importers:
 
   apps/api:
     dependencies:
-      '@date-fns/tz':
-        specifier: 'catalog:'
-        version: 1.5.0
       '@dfragon/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -353,24 +350,21 @@ importers:
       '@dfragon/neople':
         specifier: workspace:*
         version: link:../../packages/neople
+      '@dfragon/server-core':
+        specifier: workspace:*
+        version: link:../../packages/server-core
       '@hono/node-server':
         specifier: 'catalog:'
         version: 2.1.7(hono@4.13.18)
       croner:
         specifier: 'catalog:'
         version: 11.0.0
-      dataloader:
-        specifier: 'catalog:'
-        version: 2.2.3
       date-fns:
         specifier: 'catalog:'
         version: 4.4.0
       hono:
         specifier: 'catalog:'
         version: 4.13.18
-      koffi:
-        specifier: 'catalog:'
-        version: 3.3.7
       lru-cache:
         specifier: 'catalog:'
         version: 11.5.3
@@ -712,6 +706,46 @@ importers:
       ky:
         specifier: 'catalog:'
         version: 2.2.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
+  packages/server-core:
+    dependencies:
+      '@date-fns/tz':
+        specifier: 'catalog:'
+        version: 1.5.0
+      '@dfragon/database':
+        specifier: workspace:*
+        version: link:../database
+      '@dfragon/lib':
+        specifier: workspace:*
+        version: link:../lib
+      '@dfragon/neople':
+        specifier: workspace:*
+        version: link:../neople
+      dataloader:
+        specifier: 'catalog:'
+        version: 2.2.3
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.4.0
+      koffi:
+        specifier: 'catalog:'
+        version: 3.3.7
+      lru-cache:
+        specifier: 'catalog:'
+        version: 11.5.3
+      remeda:
+        specifier: 'catalog:'
+        version: 2.59.0
       zod:
         specifier: 'catalog:'
         version: 4.6.7
