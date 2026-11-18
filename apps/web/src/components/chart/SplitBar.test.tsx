@@ -37,7 +37,7 @@ describe('SplitBar', () => {
         segments={[
           {
             key: 'both',
-            name: '두 주 모두 클리어',
+            name: '잔존',
             value: 76,
             color: '#000001',
             textColor: '#ffffff'
