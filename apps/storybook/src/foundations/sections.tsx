@@ -444,3 +444,20 @@ export function IconSet({
     </TokenRows>
   )
 }
+
+export function ClassSamples({
+  samples
+}: {
+  samples: readonly { name: string; sample: ReactNode }[]
+}) {
+  return (
+    <TokenRows>
+      {samples.map(({ name, sample }) => (
+        <TokenRow key={name}>
+          <code className="font-mono text-xs text-fg">{name}</code>
+          <div className="flex min-w-0 flex-wrap items-center gap-6 text-sm">{sample}</div>
+        </TokenRow>
+      ))}
+    </TokenRows>
+  )
+}

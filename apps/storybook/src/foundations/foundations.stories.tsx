@@ -17,6 +17,7 @@ import {
   SunIcon
 } from '@dfragon/ui'
 import {
+  ClassSamples,
   ColorTokens,
   HeightTokens,
   IconSet,
@@ -161,6 +162,112 @@ export const Motion: Story = {
   render: () => (
     <Section title="모션">
       <MotionTokens tokens={tokensIn(tokens, 'motion')} />
+    </Section>
+  )
+}
+
+export const NumberText: Story = {
+  name: 'Number',
+  render: () => (
+    <Section title="숫자">
+      <ClassSamples
+        samples={[
+          { name: 'num', sample: <span className="num">98,412</span> },
+          {
+            name: 'num text-xs',
+            sample: <span className="num text-xs text-fg-subtle">Lv.115</span>
+          },
+          {
+            name: 'num font-semibold',
+            sample: <span className="num font-semibold text-game-fame">98,412</span>
+          }
+        ]}
+      />
+    </Section>
+  )
+}
+
+export const Stat: Story = {
+  render: () => (
+    <Section title="요약 숫자와 라벨">
+      <ClassSamples
+        samples={[
+          {
+            name: 'stat',
+            sample: (
+              <dl className="flex gap-8">
+                <div className="stat">
+                  <dt className="stat-label">클리어율</dt>
+                  <dd className="stat-value">82%</dd>
+                </div>
+                <div className="stat">
+                  <dt className="stat-label">명성</dt>
+                  <dd className="stat-value text-game-fame">98,412</dd>
+                </div>
+              </dl>
+            )
+          },
+          { name: 'label', sample: <span className="label">마지막 갱신</span> }
+        ]}
+      />
+    </Section>
+  )
+}
+
+export const Portrait: Story = {
+  render: () => (
+    <Section title="초상화 틀">
+      <ClassSamples
+        samples={[
+          { name: 'portrait portrait-sm', sample: <span className="portrait portrait-sm" /> },
+          { name: 'portrait portrait-md', sample: <span className="portrait portrait-md" /> },
+          { name: 'portrait portrait-lg', sample: <span className="portrait portrait-lg" /> }
+        ]}
+      />
+    </Section>
+  )
+}
+
+export const Link: Story = {
+  render: () => (
+    <Section title="텍스트 링크">
+      <ClassSamples
+        samples={[
+          {
+            name: 'link',
+            sample: (
+              <>
+                <a className="link font-semibold" href="#link">
+                  캐릭터1
+                </a>
+                <a className="link text-fg-adventure" href="#link">
+                  모험단1
+                </a>
+                <a className="link text-fg-guild" href="#link">
+                  길드1
+                </a>
+              </>
+            )
+          }
+        ]}
+      />
+    </Section>
+  )
+}
+
+export const Skeleton: Story = {
+  render: () => (
+    <Section title="Skeleton">
+      <ClassSamples
+        samples={[
+          { name: 'skeleton portrait-sm', sample: <span className="skeleton portrait-sm" /> },
+          { name: 'skeleton-text', sample: <span className="skeleton-text w-[88px]" /> },
+          {
+            name: 'skeleton-text skeleton-text-xs',
+            sample: <span className="skeleton-text skeleton-text-xs w-[40px]" />
+          }
+        ]}
+      />
     </Section>
   )
 }
