@@ -1,4 +1,5 @@
-import { type CSSProperties, type ReactNode, useState } from 'react'
+import { type ComponentType, type CSSProperties, type ReactNode, useState } from 'react'
+import type { FillableIconProps } from '@dfragon/ui'
 import { modeValues, type ThemeToken } from './theme-tokens'
 
 type ColorScheme = 'light' | 'dark'
@@ -408,6 +409,38 @@ export function MotionTokens({ tokens }: { tokens: readonly ThemeToken[] }) {
 
         return <LoopRow key={token.name} token={token} />
       })}
+    </TokenRows>
+  )
+}
+
+export function IconSet({
+  icons,
+  sizes
+}: {
+  icons: readonly {
+    name: string
+    Icon: ComponentType<FillableIconProps>
+    props?: { filled: boolean }
+  }[]
+  sizes: readonly ThemeToken[]
+}) {
+  return (
+    <TokenRows>
+      {icons.map(({ name, Icon, props }) => (
+        <TokenRow key={name}>
+          <code className="font-mono text-xs text-fg">{name}</code>
+          <div className="flex items-center gap-6 text-fg">
+            {sizes.map((size) => (
+              <Icon
+                key={size.name}
+                className="shrink-0"
+                style={{ width: `var(${size.name})`, height: `var(${size.name})` }}
+                {...props}
+              />
+            ))}
+          </div>
+        </TokenRow>
+      ))}
     </TokenRows>
   )
 }
