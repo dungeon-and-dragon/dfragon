@@ -357,3 +357,11 @@ export const storyHistory: CharacterHistory = {
     }
   ]
 }
+
+export const storySingleHistory: CharacterHistory = {
+  basics: [{ observedAt: HISTORY_LATEST, fame: 136647 }],
+  scores: [{ observedAt: HISTORY_LATEST, calculator: 'equipment', value: 1369647 }],
+  sectionChanges: { equipment: [HISTORY_LATEST] },
+  nameChanges: [],
+  changes: [{ observedAt: HISTORY_LATEST, first: true, items: [] }]
+}
