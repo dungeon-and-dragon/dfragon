@@ -189,14 +189,20 @@
 
   /* 간격 단위. 간격은 이 값의 배수로 쓴다(p-3은 12px, gap-0.5는 2px). */
   --spacing: 4px;
-  /* 상단 바 높이 */
-  --spacing-topbar: 48px;
-  /* 버튼, 입력 칸 높이 */
-  --spacing-control-sm: 32px;
-  --spacing-control-md: 40px;
-  --spacing-control-lg: 48px;
+
+  /* 버튼, 입력 칸, 칩의 높이. 정사각 버튼은 폭에도 쓴다. */
+  --height-control-sm: 32px;
+  --height-control-md: 40px;
+  --height-control-lg: 48px;
   /* 표의 행 높이 */
-  --spacing-row: 48px;
+  --height-row: 48px;
+  /* 상단 바 높이 */
+  --height-topbar: 48px;
+
+  /* 웹 화면 상자의 폭 */
+  --container-page: 1080px;
+  /* 운영 화면 상자의 폭 */
+  --container-page-wide: 1200px;
 
   /* 배지, 태그 */
   --radius-badge: 2px;

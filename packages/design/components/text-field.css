@@ -34,17 +34,17 @@
 }
 
 .field-box-sm {
-  height: var(--spacing-control-sm);
+  height: var(--height-control-sm);
   font-size: var(--text-sm);
 }
 
 .field-box-md {
-  height: var(--spacing-control-md);
+  height: var(--height-control-md);
   font-size: var(--text-sm);
 }
 
 .field-box-lg {
-  height: var(--spacing-control-lg);
+  height: var(--height-control-lg);
   font-size: var(--text-base);
 }
 

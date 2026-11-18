@@ -1,0 +1,14 @@
+/*
+ * <main class="page">…</main>. 운영 화면처럼 넓은 상자는 page-wide를 함께 붙인다.
+ * 가운데 열의 폭만 정한다. 안쪽 여백, 위 여백, 넘칠 때의 스크롤은 화면이 정한다.
+ */
+.page {
+  box-sizing: border-box;
+  width: var(--container-page);
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.page-wide {
+  width: var(--container-page-wide);
+}
