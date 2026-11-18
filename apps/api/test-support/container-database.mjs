@@ -431,7 +431,7 @@ try {
     (
       await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
     ).stdout.trim(),
-    '23'
+    '25'
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -696,10 +696,12 @@ try {
       )
     ).stdout.trim(),
     [
+      'CREATE INDEX characters_equipment_set_id_fame_idx ON public.characters USING btree (equipment_set_id, fame DESC) WHERE (equipment_set_id IS NOT NULL)',
       'CREATE INDEX characters_fame_idx ON public.characters USING btree (fame DESC)',
       'CREATE INDEX characters_job_id_fame_idx ON public.characters USING btree (job_id, fame DESC)',
       'CREATE INDEX characters_job_id_job_grow_id_fame_idx ON public.characters USING btree (job_id, job_grow_id, fame DESC)',
-      'CREATE INDEX characters_max_fame_idx ON public.characters USING btree (max_fame DESC)'
+      'CREATE INDEX characters_max_fame_idx ON public.characters USING btree (max_fame DESC)',
+      'CREATE INDEX characters_oath_set_id_fame_idx ON public.characters USING btree (oath_set_id, fame DESC) WHERE (oath_set_id IS NOT NULL)'
     ].join('\n')
   )
   await runWorkerCheck(rankingStatsCheckPath)
