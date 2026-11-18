@@ -10,8 +10,8 @@ import type { NeopleStageTimings } from '@dfragon/server-core/application/charac
 import type {
   CharacterDetailResponse,
   CharacterDetailService
-} from '../../../application/character-detail/index.js'
-import { respondUnlessDisconnected } from '../disconnected-request.js'
+} from '#application/character-detail/index.js'
+import { respondUnlessDisconnected } from '#presentation/http/disconnected-request.js'
 import { type DetailContext, readIdentity } from './dto.js'
 
 function accessLogTimings(c: DetailContext): NeopleStageTimings {

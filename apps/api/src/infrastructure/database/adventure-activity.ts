@@ -13,7 +13,7 @@ import {
 import type {
   AdventureActivityRead,
   AdventureSeasonBackfillRead
-} from '../../application/adventure-guild/repository.js'
+} from '#application/adventure-guild/repository.js'
 import {
   type ActivityDayDetail,
   type ActivityDayRange,
@@ -29,7 +29,7 @@ import {
   toSeasonBackfillRanges,
   toSeasonDays,
   withSeasonBackfills
-} from '../../domain/adventure-guild/index.js'
+} from '#domain/adventure-guild/index.js'
 import {
   ACQUISITION_CODES,
   CLEAR_CODES,
@@ -40,7 +40,7 @@ import {
   isSeasonBackfilled,
   toSeasonBackfillJobs,
   toSeasonBackfillProgress
-} from '../../domain/character-timeline/index.js'
+} from '#domain/character-timeline/index.js'
 import { parseTimelineClearRow, parseTimelineEnhancementRow } from './character-timeline-read.js'
 
 export type ActivityRecords = {

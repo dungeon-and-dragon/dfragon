@@ -4,7 +4,7 @@ import {
   type NeopleClient,
   NeopleRequestFailure
 } from '@dfragon/neople'
-import type { FetchedSkillStyle, FetchSkillStyle } from '../../application/ranking-stats/ports.js'
+import type { FetchedSkillStyle, FetchSkillStyle } from '#application/ranking-stats/ports.js'
 
 async function fetchSkillStyle(
   character: SkillStyleSampleCharacter,

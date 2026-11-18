@@ -1,6 +1,6 @@
 import { Cron } from 'croner'
-import type { JobSchedule, ReportJobEvent } from '../../application/jobs/ports.js'
-import { type JobSchedulerService, readErrorChain } from '../../application/jobs/index.js'
+import type { JobSchedule, ReportJobEvent } from '#application/jobs/ports.js'
+import { type JobSchedulerService, readErrorChain } from '#application/jobs/index.js'
 
 const TIMEZONE = 'Asia/Seoul'
 const REQUEST_POLL_INTERVAL_MS = 1_000

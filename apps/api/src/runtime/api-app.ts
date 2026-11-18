@@ -5,7 +5,7 @@ import {
   createHonoAppHandle,
   writeAccessLogToStdout
 } from '@dfragon/http-server'
-import { characterFailureResponse } from '../presentation/http/character-failures.js'
+import { characterFailureResponse } from '#presentation/http/character-failures.js'
 import { type ApiServicesOptions, createApiServices } from './api-services.js'
 import { createApiRoutes } from './routes/api.js'
 

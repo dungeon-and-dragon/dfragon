@@ -3,7 +3,7 @@ import type { DatabaseClient } from '@dfragon/database'
 import type {
   ClearCollectionPorts,
   CreateClearTimeline
-} from '../application/content-clears/ports.js'
+} from '#application/content-clears/ports.js'
 import {
   createClearRecordBackfillJob,
   createClearWeekSampleJob,
@@ -11,7 +11,7 @@ import {
   ContentClearCollectionService,
   ClearRecordBackfillService,
   ClearWeekSampleService
-} from '../application/content-clears/index.js'
+} from '#application/content-clears/index.js'
 import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import {
   DatabaseClearCollectionRepository,
@@ -20,26 +20,26 @@ import {
   DatabaseStatsJobRepository,
   DatabaseJobRunCleanupRepository,
   DatabaseScoreCalculationRepository
-} from '../infrastructure/database/index.js'
-import type { SkillStyleCollectionPorts } from '../application/ranking-stats/ports.js'
+} from '#infrastructure/database/index.js'
+import type { SkillStyleCollectionPorts } from '#application/ranking-stats/ports.js'
 import {
   SkillStyleCollectionService,
   createSkillStyleCollectionJob,
   StatsJobService,
   createCharacterStatsJob,
   createSkillAdoptionJob
-} from '../application/ranking-stats/index.js'
+} from '#application/ranking-stats/index.js'
 import {
   type JobDefinition,
   JobRunCleanupService,
   createJobRunCleanupJob
-} from '../application/jobs/index.js'
-import type { ScoreCalculationPorts } from '../application/character-score/ports.js'
+} from '#application/jobs/index.js'
+import type { ScoreCalculationPorts } from '#application/character-score/ports.js'
 import {
   SCORE_CALCULATION_JOB_NAME,
   ScoreCalculationService,
   createScoreCalculationJob
-} from '../application/character-score/index.js'
+} from '#application/character-score/index.js'
 
 type ClockKey = 'now' | 'pause'
 

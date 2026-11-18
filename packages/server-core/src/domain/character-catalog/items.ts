@@ -1,5 +1,5 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
-import type { projectCharacterDetails, CharacterPayload } from '../character-detail/index.js'
+import type { projectCharacterDetails, CharacterPayload } from '#domain/character-detail/index.js'
 
 type CharacterDetails = ReturnType<typeof projectCharacterDetails>
 

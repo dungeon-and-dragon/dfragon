@@ -1,12 +1,12 @@
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import { fromKeys } from 'remeda'
-import { NEOPLE_SERVER_NAMES } from '../neople-servers.js'
-import { characterDetailSections } from './sections.js'
-import type {
-  CharacterDetailSection,
-  CharacterIdentity,
-  CharacterPayload,
-  CharacterPayloads
+import { NEOPLE_SERVER_NAMES } from '#domain/neople-servers.js'
+import {
+  characterDetailSections,
+  type CharacterDetailSection,
+  type CharacterIdentity,
+  type CharacterPayload,
+  type CharacterPayloads
 } from './sections.js'
 
 export const CHARACTER_CACHE_TTL_MS = 60 * 60 * 1000

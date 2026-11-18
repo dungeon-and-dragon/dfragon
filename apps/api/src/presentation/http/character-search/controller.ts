@@ -5,12 +5,12 @@ import {
   recordAccessLogSharedNeopleFetch
 } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import type { CharacterSearchService } from '../../../application/character-search/index.js'
+import type { CharacterSearchService } from '#application/character-search/index.js'
 import {
   parseCharacterCandidatesQuery,
   parseCharacterSearchQuery
-} from '../../../domain/character-search/index.js'
-import { respondUnlessDisconnected } from '../disconnected-request.js'
+} from '#domain/character-search/index.js'
+import { respondUnlessDisconnected } from '#presentation/http/disconnected-request.js'
 import type { CharacterCandidatesWithAdventureResponse, CharacterSearchResponse } from './dto.js'
 import { characterSearchFailureResponse } from './failures.js'
 

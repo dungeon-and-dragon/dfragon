@@ -1,5 +1,5 @@
-import type { ScoreCalculator } from '../score/index.js'
-import type { CharacterRole } from '../character-role.js'
+import type { ScoreCalculator } from '#domain/score/index.js'
+import type { CharacterRole } from '#domain/character-role.js'
 
 export type { CharacterRole }
 

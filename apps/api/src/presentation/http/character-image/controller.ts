@@ -1,7 +1,7 @@
 import type { AccessLogEnv } from '@dfragon/http-server'
 import { Hono } from 'hono'
-import type { CharacterImageService } from '../../../application/character-image/index.js'
-import { respondUnlessDisconnected } from '../disconnected-request.js'
+import type { CharacterImageService } from '#application/character-image/index.js'
+import { respondUnlessDisconnected } from '#presentation/http/disconnected-request.js'
 import { readIdentity } from './dto.js'
 
 // API는 초상화를 저장하지 않고 브라우저 캐시만 쓴다. 캐릭터 상세 캐시와 같은 1시간이다.

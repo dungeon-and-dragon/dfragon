@@ -23,11 +23,11 @@ import type {
   SeasonBackfillRepository,
   TimelineQueueCountRepository,
   TimelineSyncRepository
-} from '../../application/character-timeline/repository.js'
+} from '#application/character-timeline/repository.js'
 import {
   ENHANCEMENT_BACKFILL_CODES,
   type TimelineSyncFailure
-} from '../../application/character-timeline/index.js'
+} from '#application/character-timeline/index.js'
 import type {
   CharacterTimeline,
   TimelineItemPage,

@@ -8,7 +8,7 @@ import {
   readBatchNeopleKeys,
   setBatchNeopleKeyEnabled
 } from '@dfragon/database'
-import type { BatchNeopleKeyRepository } from '../../application/batch-neople-keys/repository.js'
+import type { BatchNeopleKeyRepository } from '#application/batch-neople-keys/repository.js'
 
 export class DatabaseBatchNeopleKeyRepository implements BatchNeopleKeyRepository {
   constructor(private readonly client: DatabaseClient) {}

@@ -3,7 +3,7 @@ import {
   TodayGradeFailure,
   averageGradePercent,
   todayGradeFailure
-} from '../../domain/today-grade/index.js'
+} from '#domain/today-grade/index.js'
 import { startOfNextSeoulDay } from '@dfragon/server-core/domain/seoul-time.js'
 import type { FetchShopGrade } from './ports.js'
 
