@@ -235,7 +235,7 @@ function RemoveButton({
       type="button"
       aria-label={`${character.characterName} 최근 목록에서 지우기`}
       onClick={handleClick}
-      className="absolute end-3 top-1/2 m-0 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-control border-0 bg-transparent p-0 text-fg-muted transition-colors focus-ring-inset hover:bg-control-hover hover:text-fg"
+      className="absolute end-3 top-1/2 inline-flex size-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-control text-fg-muted transition-colors focus-ring-inset hover:bg-control-hover hover:text-fg"
     >
       <svg
         aria-hidden="true"

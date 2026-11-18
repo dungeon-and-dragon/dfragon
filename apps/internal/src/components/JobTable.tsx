@@ -14,7 +14,8 @@ import { RunProgress } from './RunProgress'
 import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
 
-const NAME_BUTTON = `m-0 cursor-pointer border-0 bg-transparent p-0 text-left font-sans text-sm font-semibold text-fg hover:underline focus-ring`
+const NAME_BUTTON =
+  'cursor-pointer text-left text-sm font-semibold text-fg hover:underline focus-ring'
 
 type JobTableProps = {
   jobs: readonly Job[]

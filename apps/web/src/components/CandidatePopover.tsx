@@ -50,7 +50,7 @@ export function CandidatePopover({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
         aria-label={`${slot}번 후보 고르기, 후보 ${count}`}
-        className="badge badge-sm m-0 cursor-pointer gap-1 border border-current bg-transparent font-semibold text-signal [font-family:inherit] transition-colors hover:bg-inset data-popup-open:bg-inset focus-ring"
+        className="badge badge-sm cursor-pointer gap-1 border border-current font-semibold text-signal transition-colors hover:bg-inset data-popup-open:bg-inset focus-ring"
       >
         {`후보 ${count}`}
         <ChevronDownIcon className="size-[10px] stroke-3" />
@@ -111,7 +111,7 @@ function CandidateTile({
       aria-label={`${server}, 명성 ${fame}${adventure}${state}`}
       aria-pressed={shown}
       onClick={handleClick}
-      className={`relative m-0 box-border flex w-16 cursor-pointer flex-col rounded-control border bg-transparent p-0 text-left text-fg [font-family:inherit] transition-colors ${shown ? 'border-signal shadow-selected' : 'border-transparent hover:border-line-input'} focus-ring`}
+      className={`relative box-border flex w-16 cursor-pointer flex-col rounded-control border text-left text-fg transition-colors ${shown ? 'border-signal shadow-selected' : 'border-transparent hover:border-line-input'} focus-ring`}
     >
       <span className="relative block size-[62px] overflow-hidden bg-inset">
         <CardImage src={characterImageUrl(choice)} />
