@@ -130,37 +130,54 @@ function lines(name: string): string[][] {
   )
 }
 
-it('딜러의 서약, 세트, 결정, 세트 효과, 가호와 진의 단계를 그린다', async () => {
+it('딜러의 서약, 세트, 결정과 진의 단계마다 고른 효과를 그리고, 쿨타임 감소는 파랑, 최종 데미지는 빨강으로 칠한다', async () => {
   await render(characterDetailFixture('dealer'))
 
-  expect(container.textContent).toContain('서약세계를 태우는 용투 서약655pt')
+  expect(container.textContent).toContain('서약세계를 태우는 용투 서약서약 세트')
+  expect(container.textContent).not.toContain('655pt')
   expect(container.textContent).toContain(
-    '서약 세트야망의 용투 서약용투 : 세계를 태우는 불꽃태초2,780pt'
+    '서약 세트야망의 용투 서약용투 : 세계를 태우는 불꽃태초2,780pt최종 데미지 +9%'
   )
   const crystals = [...section('서약 결정').querySelectorAll('tbody tr')].map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')
   )
   expect(crystals).toHaveLength(11)
-  expect(crystals[0]).toEqual(['9', '용투 : 태초의 광휘 결정', '205pt'])
-  expect(crystals.at(-1)).toEqual(['8', '용투 : 완전한 광휘 결정', '165pt'])
+  expect(crystals[0]).toEqual(['용투 : 태초의 광휘 결정'])
+  expect(crystals.at(-1)).toEqual(['용투 : 완전한 광휘 결정'])
   expect(section('서약 결정').querySelector('h2')?.textContent).toBe('서약 결정 11')
-  expect(lines('서약 세트 효과')).toEqual([
-    ['최종 데미지 증가', '500%'],
-    ['버프력', '35,500'],
-    ['모험가 명성', '18,000']
-  ])
-  expect(lines('서약의 가호')[0]).toEqual(['최종 데미지 증가', '71%'])
+  expect(container.querySelector('section[aria-label="서약 세트 효과"]')).toBeNull()
+  expect(container.querySelector('section[aria-label="서약의 가호"]')).toBeNull()
   expect(section('묵언의 진의').querySelector('h2')?.textContent).toBe('묵언의 진의')
-  expect(lines('묵언의 진의')[0]).toEqual(['<묵언의 진의> - 첫 번째 진의', '고요한 호흡'])
+  expect(lines('묵언의 진의')).toEqual([
+    ['첫 번째 진의', '쿨타임 감소'],
+    ['두 번째 진의', '쿨타임 감소'],
+    ['세 번째 진의', '쿨타임 감소'],
+    ['네 번째 진의', '최종 데미지'],
+    ['다섯 번째 진의', '이동속도'],
+    ['여섯 번째 진의', '이동속도'],
+    ['일곱 번째 진의', '이동속도'],
+    ['여덟 번째 진의', '이동속도'],
+    ['아홉 번째 진의', '이동속도']
+  ])
+  const tones = [...section('묵언의 진의').querySelectorAll('dd')]
+    .slice(2, 5)
+    .map((value) => [
+      value.textContent,
+      value.classList.contains('text-game-enhance'),
+      value.classList.contains('text-game-decrease')
+    ])
+  expect(tones).toEqual([
+    ['쿨타임 감소', true, false],
+    ['최종 데미지', false, true],
+    ['이동속도', false, false]
+  ])
 })
 
-it('세트 효과와 진의가 없는 버퍼 서약은 그 영역을 생략한다', async () => {
+it('진의가 없는 버퍼 서약은 진의 영역을 그리지 않는다', async () => {
   await render(characterDetailFixture('buffer'))
 
   expect(container.textContent).toContain('레어 Ⅱ')
-  expect(container.querySelector('section[aria-label="서약 세트 효과"]')).toBeNull()
   expect(container.querySelector('section[aria-label="묵언의 진의"]')).toBeNull()
-  expect(lines('서약의 가호')).toHaveLength(3)
 })
 
 it('서약이 없는 캐릭터는 아무것도 그리지 않는다', async () => {
@@ -178,7 +195,7 @@ it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장�
   expect(
     container.querySelector('img[src="https://skilltab.test/oath-set/16204.png"]')
   ).not.toBeNull()
-  expect(container.textContent).toContain('야망의 용투 서약태초2,780pt')
+  expect(container.textContent).toContain('야망의 용투 서약태초2,780pt최종 데미지 +9%')
   expect(container.textContent).not.toContain('용투 : 세계를 태우는 불꽃')
   const cards = [...container.querySelectorAll('article')]
   expect(cards.map((card) => card.getAttribute('aria-current'))).toEqual(['true', null, null])
@@ -186,7 +203,7 @@ it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장�
     [...(cards[0]?.querySelectorAll('p > span') ?? [])].map((line) => line.textContent)
   ).toEqual(['[투룡의 불꽃] [장비 발동 옵션]', '모든 속도 +20%', '[용투장의 난 세트] 장착 시'])
   expect(cards.map((card) => card.textContent?.includes('선택'))).toEqual([true, false, false])
-  expect(section('서약 본체').textContent).toContain('세계를 태우는 용투 서약655pt')
+  expect(section('서약 본체').textContent).toBe('서약 본체세계를 태우는 용투 서약')
   expect(section('서약 본체').querySelector('img')?.getAttribute('src')).toBe(
     'https://skilltab.test/oath-item/primordial.webp'
   )
@@ -211,7 +228,7 @@ it('서약 데이터에 없는 세트는 지금 화면대로 그린다', async (
   )
 
   expect(container.textContent).toContain(
-    '서약 세트야망의 용투 서약용투 : 세계를 태우는 불꽃태초2,780pt'
+    '서약 세트야망의 용투 서약용투 : 세계를 태우는 불꽃태초2,780pt최종 데미지 +9%'
   )
   expect(container.querySelector('article')).toBeNull()
   expect(container.querySelector('section[aria-label="서약 본체"]')).toBeNull()
@@ -237,7 +254,7 @@ it('세트가 없는 서약도 한 줄 화면에 서약 데이터의 아이콘�
 
   await render(withoutSet, createTestClientHost({ getOathCatalog: async () => catalog }))
 
-  expect(container.textContent).toContain('서약영겁의 안개 서약455pt')
+  expect(container.textContent).toContain('서약영겁의 안개 서약서약 결정')
   expect(strip().querySelector('img')?.getAttribute('src')).toBe(
     'https://skilltab.test/oath-item/mist-epic.webp'
   )
@@ -252,6 +269,6 @@ it('서약 데이터가 없으면 한 줄 화면에 아이콘을 두지 않는�
 
   await render({ ...buffer, oath: { ...oath, setInfo: null } })
 
-  expect(container.textContent).toContain('서약영겁의 안개 서약455pt')
+  expect(container.textContent).toContain('서약영겁의 안개 서약서약 결정')
   expect(strip().querySelector('img')).toBeNull()
 })
