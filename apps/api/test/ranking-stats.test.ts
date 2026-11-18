@@ -9,7 +9,7 @@ import type {
   StoredCharacter
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { RankingStatsRepository } from '../src/application/ranking-stats/repository.js'
 

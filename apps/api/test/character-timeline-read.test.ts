@@ -2,17 +2,17 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineEventRow, TimelineItemRow } from '@dfragon/database'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
 import {
   type CharacterTimeline,
   EMPTY_CHARACTER_TIMELINE,
   formatTimelineCursor,
   parseTimelineCursor
-} from '../src/domain/character-timeline/project.js'
+} from '@dfragon/server-core/domain/character-timeline/project.js'
 import { parseCharacterTimelineRows } from '../src/infrastructure/database/character-timeline-read.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
-import { startOfResetWeek } from '../src/domain/seoul-time.js'
+import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 const character = { serverId: 'siroco', characterId: 'timeline-read-fixture' }
 const unused = async (): Promise<never> => assert.fail('부르면 안 된다')

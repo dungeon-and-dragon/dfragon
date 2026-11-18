@@ -5,7 +5,7 @@ import test from 'node:test'
 import type { FailureResponse } from '@dfragon/http-server'
 import { createNeopleClientForTest } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../src/infrastructure/neople/character-search.js'
-import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
+import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import { characterSearchFailureResponse } from '../src/presentation/http/character-search/failures.js'
 
 interface Loopback {

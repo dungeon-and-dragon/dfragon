@@ -35,20 +35,20 @@ import { CharacterCollectionService } from '../src/application/character-collect
 import { createContentClearCollectionJob } from '../src/application/content-clears/collection-job.js'
 import type {
   ClearCollectionRepository,
-  ClearRecordBackfillRepository,
-  ClearStatsRepository
+  ClearRecordBackfillRepository
 } from '../src/application/content-clears/repository.js'
+import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ContentClearCollectionService } from '../src/application/content-clears/collection.js'
 import { UNAVAILABLE_PAUSE_MS } from '../src/application/content-clears/population-collection.js'
 import { ClearRecordBackfillService } from '../src/application/content-clears/record-backfill.js'
-import { CLEAR_CONTENTS } from '../src/domain/content-clears/contents.js'
+import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/contents.js'
 import {
   ClearStatsService,
   emptyClearStatsRepository
 } from '../src/application/content-clears/service.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 import { JobSchedulerService } from '../src/application/jobs/scheduler.js'
-import { formatResetDate, startOfResetWeek } from '../src/domain/seoul-time.js'
+import { formatResetDate, startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 const at = (time: string) => new Date(`${time}:00+09:00`)
 const NOW = at('2026-11-10T12:00')

@@ -1,8 +1,8 @@
 import { readSecretInput } from '@dfragon/database'
 import { createNeopleClient } from '@dfragon/neople'
 import { createNeopleCharacterSearch } from '../dist/infrastructure/neople/character-search.js'
-import { createNeopleCharacterDetails } from '../dist/infrastructure/neople/character-detail.js'
-import { isCatalogId } from '../dist/domain/character-catalog/types.js'
+import { createNeopleCharacterDetails } from '@dfragon/server-core/infrastructure/neople/character-detail.js'
+import { isCatalogId } from '@dfragon/server-core/domain/character-catalog/types.js'
 import {
   SkillVerificationFailure,
   loadSkillPackage,

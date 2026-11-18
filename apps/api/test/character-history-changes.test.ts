@@ -2,15 +2,18 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import type { StoredCharacterSection } from '@dfragon/database'
-import type { CharacterPayloads } from '../src/domain/character-detail/sections.js'
+import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/sections.js'
 import { projectCharacterChanges } from '../src/domain/character-history/changes.js'
-import { toSectionBodies } from '../src/domain/character-history/section-body.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/section-body.js'
 
 type Body = Record<string, unknown>
 type Item = Record<string, unknown>
 
 function readBodies() {
-  const url = new URL('../../test/fixtures/character-card-dealer.json', import.meta.url)
+  const url = new URL(
+    '../../../../packages/server-core/test/fixtures/character-card-dealer.json',
+    import.meta.url
+  )
   const { sections } = JSON.parse(readFileSync(url, 'utf8')) as { sections: CharacterPayloads }
 
   return toSectionBodies(sections)

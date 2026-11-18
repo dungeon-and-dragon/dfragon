@@ -7,7 +7,7 @@ import test from 'node:test'
 import { setTimeout as delay } from 'node:timers/promises'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type { SearchCharacters } from '../src/application/character-search/ports.js'
 

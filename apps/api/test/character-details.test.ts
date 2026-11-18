@@ -2,15 +2,18 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
 import { createNeopleClientForTest } from '@dfragon/neople'
-import { CatalogService } from '../src/application/character-catalog/service.js'
+import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import type {
   CharacterDetailSection,
   CharacterPayloads
-} from '../src/domain/character-detail/sections.js'
-import { CharacterDetailFailure, characterDetailFailure } from '../src/domain/character-failure.js'
-import { createNeopleCharacterDetails } from '../src/infrastructure/neople/character-detail.js'
-import { parseCharacterIdentity } from '../src/domain/character-identity.js'
-import { NeopleSearchFailure } from '../src/domain/character-search/failure.js'
+} from '@dfragon/server-core/domain/character-detail/sections.js'
+import {
+  CharacterDetailFailure,
+  characterDetailFailure
+} from '@dfragon/server-core/domain/character-failure.js'
+import { createNeopleCharacterDetails } from '@dfragon/server-core/infrastructure/neople/character-detail.js'
+import { parseCharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
+import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import { characterFailureResponse } from '../src/presentation/http/character-failures.js'
 
