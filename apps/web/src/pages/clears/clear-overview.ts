@@ -13,7 +13,6 @@ import type { BoxPlotRow } from '#components/chart/BoxPlot'
 import type { ColumnBar } from '#components/chart/Columns'
 import type { LineSeries } from '#components/chart/LineChart'
 import type { ChartX } from '#components/chart/plot-layout'
-import type { Bar } from '#components/chart/RowBars'
 import { shareText } from '#components/chart/stats-bars'
 import { addDays } from './clear-weeks'
 import { type JobMetric, jobStatsOf } from './clear-scores'
@@ -418,36 +417,6 @@ export function hourColumns({ hours }: ClearTimes): ColumnBar[] {
 
 export function hasClearTimes({ weekdays }: ClearTimes): boolean {
   return weekdays.some(({ cleared }) => cleared > 0)
-}
-
-export function coClearBars(
-  overview: ClearOverview,
-  contents: readonly ClearContent[],
-  baseId: string
-): Bar[] {
-  const base = overview.contents.find(({ id }) => id === baseId)
-  if (base === undefined || base.cleared === 0) {
-    return []
-  }
-
-  return base.coClears
-    .flatMap(({ id, cleared }) => {
-      const content = contents.find((candidate) => candidate.id === id)
-      if (content === undefined) {
-        return []
-      }
-
-      const name = contentLabelOf(content)
-      const value = cleared / base.cleared
-      const share = integer.format(cleared)
-
-      return [{ key: id, name, value, share }]
-    })
-    .toSorted((left, right) => right.value - left.value)
-}
-
-export function formatPercent(value: number): string {
-  return percent.format(value)
 }
 
 // 마지막 칸은 그 인원 이상을 모두 센다.

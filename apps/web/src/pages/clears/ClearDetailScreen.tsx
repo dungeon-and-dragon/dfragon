@@ -1,4 +1,4 @@
-import { ChipGroup } from '@dfragon/ui'
+import { ArrowRightIcon, ChipGroup } from '@dfragon/ui'
 import type { ClearContent, ClearContentStats, ClearWeek, ClearWeekOverWeek } from '#core/ranking'
 import { BarLineChart } from '#components/chart/BarLineChart'
 import { BoxPlotChart } from '#components/chart/BoxPlot'
@@ -250,12 +250,26 @@ function ContentHead({
 
 function Figure({
   label,
+  to,
   value,
   tone
-}: Readonly<{ label: string; value: string; tone?: 'up' | 'down' }>): React.JSX.Element {
+}: Readonly<{
+  label: string
+  to?: string
+  value: string
+  tone?: 'up' | 'down'
+}>): React.JSX.Element {
   return (
     <div className="stat">
-      <dt className="stat-label">{label}</dt>
+      <dt className="stat-label inline-flex items-center gap-1">
+        {label}
+        {to !== undefined && (
+          <>
+            <ArrowRightIcon className="size-icon-sm" />
+            {to}
+          </>
+        )}
+      </dt>
       <dd className={`stat-value ${tone !== undefined ? TONE_CLASSES[tone] : ''}`}>{value}</dd>
     </div>
   )
@@ -321,7 +335,7 @@ function DetailStats({
         )}
         {stats.stageMoves !== null && (
           <SplitPanel
-            name="일반과 하드 사이 이동"
+            name="난이도 이동"
             card={stageMoveCard(stats.stageMoves, week.weekStart, releasedAt)}
           />
         )}
@@ -364,7 +378,7 @@ function DetailStats({
       </div>
       <div className={clearClasses.row}>
         {hasAdventures && (
-          <Panel name="모험단당 클리어 캐릭터">
+          <Panel name="모험단 기준 클리어 횟수">
             <Columns groups={[adventures]} />
           </Panel>
         )}
@@ -436,8 +450,8 @@ function SplitPanel({
     <Panel name={name}>
       <div className="flex flex-col gap-3 p-4">
         <dl className="flex gap-6">
-          {card.figures.map(({ label, value }) => (
-            <Figure key={label} label={label} value={value} />
+          {card.figures.map(({ label, to, value }) => (
+            <Figure key={label} label={label} to={to} value={value} />
           ))}
         </dl>
         <div className="mt-auto flex flex-col gap-2">
