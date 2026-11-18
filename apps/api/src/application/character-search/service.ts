@@ -1,12 +1,12 @@
 import { sortBy } from 'remeda'
 import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/failure.js'
 import type {
-  CharacterCandidatesWithAdventureResult,
   CharacterCandidatesResult,
+  CharacterCandidatesWithAdventureResult,
   CharacterImageCandidate,
   NeopleCharacterSearchInput,
   NeopleCharacterSearchResult
-} from '../../domain/character-search/types.js'
+} from '../../domain/character-search/index.js'
 import { type CandidateSource, createCandidateCache } from './candidate-cache.js'
 import type { CharacterImageUrl, SearchCharacters } from './ports.js'
 import type { CharacterSearchRepository } from './repository.js'

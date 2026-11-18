@@ -1,5 +1,5 @@
 import { LRUCache } from 'lru-cache'
-import type { CharacterCandidatesResult } from '../../domain/character-search/types.js'
+import type { CharacterCandidatesResult } from '../../domain/character-search/index.js'
 
 export type CandidateSource = 'cache' | 'shared' | 'neople'
 

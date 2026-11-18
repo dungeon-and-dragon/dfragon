@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { AdventureGuildService } from '../../../application/adventure-guild/service.js'
+import type { AdventureGuildService } from '../../../application/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { readQuery } from '../request-query.js'
 import {

@@ -44,6 +44,12 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 
 Repository와 port를 쓰지 않는 경로(`health`, `version`)는 Controller만 둡니다.
 
+기능 폴더(`domain/<기능>/`, `application/<기능>/`, `infrastructure/<기술>/`, `presentation/http/<기능>/`)에는 `index.ts`를 둡니다(ADR 0070).
+`index.ts`는 폴더 밖에서 쓰는 이름만 `export { 이름 } from './파일.js'`로 다시 내보냅니다.
+폴더 밖에서는 `'../../application/<기능>/index.js'`처럼 `index.js`만 import하고, 같은 폴더 안의 파일끼리는 직접 import합니다.
+`application/<기능>/repository.ts`, `ports.ts`는 `index.ts`가 다시 내보내지 않고, infrastructure와 runtime이 파일을 직접 import합니다.
+계층 폴더 바로 아래의 파일과 `src/runtime/`은 파일을 직접 import합니다.
+
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `packages/server-core/src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
 두 앱이 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.

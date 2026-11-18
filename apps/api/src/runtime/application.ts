@@ -2,29 +2,31 @@ import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/datab
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/service.js'
 import { createNeopleCharacterTimeline } from '@dfragon/server-core/infrastructure/neople/character-timeline.js'
-import { DatabaseCharacterHistoryRepository } from '../infrastructure/database/character-history.js'
-import { DatabaseCharacterBasicRepository } from '../infrastructure/database/character-basic.js'
 import {
-  ENHANCEMENT_BACKFILL_CODES,
-  EnhancementBackfillService
-} from '../application/character-timeline/backfill.js'
-import {
+  DatabaseAdventureGuildRepository,
+  DatabaseCharacterBasicRepository,
+  DatabaseCharacterHistoryRepository,
+  DatabaseCharacterSearchRepository,
   DatabaseCharacterTimelineRepository,
   DatabaseEnhancementBackfillRepository,
+  DatabaseRankingStatsRepository,
   DatabaseSeasonBackfillRepository,
   DatabaseTimelineQueueCountRepository,
   DatabaseTimelineSyncRepository
-} from '../infrastructure/database/character-timeline.js'
-import { SeasonBackfillService } from '../application/character-timeline/season-backfill.js'
-import { TimelineSyncService } from '../application/character-timeline/sync.js'
+} from '../infrastructure/database/index.js'
+import {
+  ENHANCEMENT_BACKFILL_CODES,
+  EnhancementBackfillService,
+  SeasonBackfillService,
+  TimelineSyncService
+} from '../application/character-timeline/index.js'
 import { createNeopleCatalog } from '@dfragon/server-core/infrastructure/neople/character-catalog.js'
 import { createNeopleCharacterDetails } from '@dfragon/server-core/infrastructure/neople/character-detail.js'
-import { createNeopleCharacterSearch } from '../infrastructure/neople/character-search.js'
-import { createNeopleShopGrade } from '../infrastructure/neople/today-grade.js'
-import { DatabaseAdventureGuildRepository } from '../infrastructure/database/adventure-guild.js'
-import { DatabaseCharacterSearchRepository } from '../infrastructure/database/character-search.js'
+import {
+  createNeopleCharacterSearch,
+  createNeopleShopGrade
+} from '../infrastructure/neople/index.js'
 import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/clear-stats.js'
-import { DatabaseRankingStatsRepository } from '../infrastructure/database/ranking-stats.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
