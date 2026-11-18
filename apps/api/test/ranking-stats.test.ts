@@ -199,6 +199,55 @@ test('명성 랭킹은 세트 필터를 직업 필터와 함께 넘긴다', asyn
   }
 })
 
+test('명성 랭킹은 쉼표로 이은 itemIds를 목록으로 바꿔 세트, 직업 필터와 함께 넘긴다', async () => {
+  const reads: FameRankingFilter[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (filter) => {
+      reads.push(filter)
+
+      return []
+    }
+  })
+  try {
+    const one = await getJson(origin, '/rankings/fame?itemIds=weapon-a')
+    const five = await getJson(
+      origin,
+      '/rankings/fame?jobId=synthetic-job&equipmentSetId=set-fairy&itemIds=a,b,c,d,e'
+    )
+
+    assert.equal(one.status, 200)
+    assert.deepEqual(one.body, { characters: [], nextCursor: null })
+    assert.equal(five.status, 200)
+    assert.deepEqual(reads, [
+      { itemIds: ['weapon-a'] },
+      { jobId: 'synthetic-job', equipmentSetId: 'set-fairy', itemIds: ['a', 'b', 'c', 'd', 'e'] }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹은 빈 itemIds와 빈 항목, 같은 itemId의 중복, 여섯 개 이상, 같은 key의 중복을 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+  try {
+    for (const query of [
+      'itemIds=',
+      'itemIds=a,',
+      'itemIds=a,,b',
+      'itemIds=a,a',
+      'itemIds=a,b,c,d,e,f',
+      'itemIds=a&itemIds=b'
+    ]) {
+      const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
+      assert.equal(status, 400, query)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+    }
+  } finally {
+    await app.close()
+  }
+})
+
 // fake DB가 받은 위치 뒤의 행만 주도록 해, API가 마지막 행으로 cursor를 만들고 rank를 잇는지 본다.
 test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor로 다음 page를 이어 rank를 매기며 마지막 page는 null이다', async () => {
   const sorted = Array.from({ length: 150 }, (_, index) =>

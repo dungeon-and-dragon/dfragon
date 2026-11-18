@@ -193,11 +193,19 @@ try {
     const jobGrowId = index === 0 ? 'grow-set-other' : 'grow-set'
     const option = index % 3 === 0 ? '용투 : 세계를 태우는 불꽃' : '용투 : 합성 선택지'
 
-    return { serverId, characterId, fame, jobGrowId, option }
+    // 모두 같은 무기를 끼고, 짝수 번째만 같은 유일 장비 반지를 낀다.
+    const items = [
+      { slotId: 'WEAPON', itemId: 'item-rank-weapon', itemName: '합성 랭킹 무기' },
+      ...(index % 2 === 0
+        ? [{ slotId: 'RING', itemId: 'item-rank-ring', itemName: '합성 랭킹 반지' }]
+        : [])
+    ]
+
+    return { serverId, characterId, fame, jobGrowId, option, items }
   })
   const setFilteredJob = 'synthetic-set-rank-job'
 
-  for (const { serverId, characterId, fame, jobGrowId, option } of setCharacters) {
+  for (const { serverId, characterId, fame, jobGrowId, option, items } of setCharacters) {
     await recordCharacterBasic(
       client,
       basic(serverId, characterId, jobGrowId, fame, setFilteredJob)
@@ -207,7 +215,7 @@ try {
       characterId,
       equipmentSet: fairy,
       oathSet: dragon(option),
-      items: [],
+      items,
       fetchedAt: new Date()
     })
   }
@@ -296,6 +304,77 @@ try {
     ]
   )
   assert.equal(equipmentRows.length, 106)
+
+  const weaponPages = await readAllPages(`jobId=${setFilteredJob}&itemIds=item-rank-weapon`)
+  const weaponRows = weaponPages.flatMap(({ characters }) => characters)
+  assert.deepEqual(
+    weaponPages.map(({ characters }) => characters.length),
+    [100, 5]
+  )
+  assert.deepEqual(
+    weaponRows.map(({ characterId }) => characterId),
+    expectedOrder
+  )
+  assert.deepEqual(
+    weaponRows.map(({ rank }) => rank),
+    Array.from({ length: 105 }, (_, index) => index + 1)
+  )
+
+  const ringHolders = setCharacters
+    .filter((_, index) => index % 2 === 0)
+    .map(({ characterId }) => characterId)
+  const bothItemRows = (
+    await readAllPages(`jobId=${setFilteredJob}&itemIds=item-rank-weapon,item-rank-ring`)
+  ).flatMap(({ characters }) => characters)
+  assert.deepEqual(
+    bothItemRows.map(({ characterId }) => characterId),
+    expectedOrder.filter((characterId) => ringHolders.includes(characterId))
+  )
+
+  const filteredItemRows = (
+    await readAllPages(`${bothSetsQuery}&jobGrowId=grow-set-other&itemIds=item-rank-ring`)
+  ).flatMap(({ characters }) => characters)
+  assert.deepEqual(
+    filteredItemRows.map(({ characterId }) => characterId),
+    ['set-rank-000']
+  )
+  assert.deepEqual(await get(`/rankings/fame?itemIds=item-rank-nobody`), {
+    characters: [],
+    nextCursor: null
+  })
+
+  // 1만 명이 낀 아이템은 먼저 모으지 않고 명성 index를 따라 읽는 분기를 탄다. 행을 SQL로 한 번에 넣는다.
+  const commonJob = 'synthetic-common-item-job'
+  await client.$executeRaw`
+    INSERT INTO characters
+      (server_id, character_id, character_name, adventure_id, level, job_id, job_grow_id, job_name, job_grow_name, fame, sets_fetched_at)
+    SELECT 'cain', 'common-' || g, '합성common' || g, (SELECT id FROM adventures ORDER BY id LIMIT 1), 115,
+      ${commonJob}, 'grow-common', '합성직업', '합성전직', 10000 + g / 2, now()
+    FROM generate_series(1, 10000) g`
+  await client.$executeRaw`
+    INSERT INTO character_items (server_id, character_id, slot_id, item_id, item_name)
+    SELECT 'cain', 'common-' || g, 'WEAPON', 'item-rank-common', '합성 흔한 무기'
+    FROM generate_series(1, 10000) g`
+  const commonExpected = (
+    await client.$queryRaw`
+      SELECT character_id AS "characterId" FROM characters
+      WHERE job_id = ${commonJob}
+      ORDER BY fame DESC, server_id, character_id
+      LIMIT 200`
+  ).map(({ characterId }) => characterId)
+  const commonFirst = await get(`/rankings/fame?jobId=${commonJob}&itemIds=item-rank-common`)
+  const commonSecond = await get(
+    `/rankings/fame?jobId=${commonJob}&itemIds=item-rank-common&cursor=${encodeURIComponent(commonFirst.nextCursor)}`
+  )
+  assert.deepEqual(
+    [...commonFirst.characters, ...commonSecond.characters].map(({ characterId }) => characterId),
+    commonExpected
+  )
+  assert.deepEqual(
+    [...commonFirst.characters, ...commonSecond.characters].map(({ rank }) => rank),
+    Array.from({ length: 200 }, (_, index) => index + 1)
+  )
+  assert.equal(typeof commonSecond.nextCursor, 'string')
 } finally {
   await client.$disconnect()
 }

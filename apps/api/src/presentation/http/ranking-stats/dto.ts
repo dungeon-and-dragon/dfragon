@@ -38,6 +38,24 @@ const hasJobForGrow = ({ jobId, jobGrowId }: JobFilter) =>
 const hasMaleCrusaderForRole = (query: JobFilter) =>
   query.role === undefined || isMaleCrusaderJob(query)
 
+const ITEM_IDS_LIMIT = 5
+
+const itemIds = z.string().transform((value, context): string[] => {
+  const ids = value.split(',')
+  const valid =
+    ids.length <= ITEM_IDS_LIMIT &&
+    ids.every((id) => id.length > 0) &&
+    new Set(ids).size === ids.length
+
+  if (!valid) {
+    context.addIssue({ code: 'custom', message: 'itemIds를 해석할 수 없음' })
+
+    return z.NEVER
+  }
+
+  return ids
+})
+
 const cursor = z.string().transform((value, context): FameRankingCursor => {
   const decoded = decodeFameRankingCursor(value)
 
@@ -56,6 +74,7 @@ export const fameRankingQuery = z
     equipmentSetId: z.string().min(1).optional(),
     oathSetId: z.string().regex(OATH_SET_ID_PATTERN).transform(Number).optional(),
     oathSetOption: z.string().min(1).optional(),
+    itemIds: itemIds.optional(),
     cursor: cursor.optional()
   })
   .refine(hasJobForGrow)
