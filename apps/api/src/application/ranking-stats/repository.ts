@@ -1,15 +1,20 @@
 import type {
   CharacterStatsSnapshot,
   FameRankingFilter,
+  FameRankingPosition,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
   SetAdoption,
   SetAdoptionQuery,
-  StoredCharacter
+  RankedStoredCharacter
 } from '@dfragon/database'
 
 export interface RankingStatsRepository {
-  readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]>
+  readFameRanking(
+    filter: FameRankingFilter,
+    limit: number,
+    after?: FameRankingPosition
+  ): Promise<RankedStoredCharacter[]>
   readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null>
   readJobSkillAdoptionSnapshot(job: JobSkillAdoptionQuery): Promise<JobSkillAdoptionSnapshot | null>
   readSetAdoption(query: SetAdoptionQuery): Promise<SetAdoption>

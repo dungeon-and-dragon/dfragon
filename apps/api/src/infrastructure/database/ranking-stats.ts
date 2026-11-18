@@ -2,11 +2,12 @@ import {
   type CharacterStatsSnapshot,
   type DatabaseClient,
   type FameRankingFilter,
+  type FameRankingPosition,
   type JobSkillAdoptionQuery,
   type JobSkillAdoptionSnapshot,
   type SetAdoption,
   type SetAdoptionQuery,
-  type StoredCharacter,
+  type RankedStoredCharacter,
   readCharacterStatsSnapshot,
   readFameRanking,
   readJobSkillAdoptionSnapshot,
@@ -17,8 +18,12 @@ import type { RankingStatsRepository } from '#application/ranking-stats/reposito
 export class DatabaseRankingStatsRepository implements RankingStatsRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  readFameRanking(filter: FameRankingFilter, limit: number): Promise<StoredCharacter[]> {
-    return readFameRanking(this.client, filter, limit)
+  readFameRanking(
+    filter: FameRankingFilter,
+    limit: number,
+    after?: FameRankingPosition
+  ): Promise<RankedStoredCharacter[]> {
+    return readFameRanking(this.client, filter, limit, after)
   }
 
   readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null> {

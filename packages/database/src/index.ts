@@ -276,6 +276,8 @@ export type {
   CharacterStatsSnapshot,
   FameBucket,
   FameRankingFilter,
+  FameRankingPosition,
   JobCount,
+  RankedStoredCharacter,
   ServerCount
 } from './ranking-stats.js'
