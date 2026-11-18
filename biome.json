@@ -586,6 +586,131 @@
       }
     },
     {
+      "includes": ["packages/server-core/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNodejsImportProtocol": "error",
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@dfragon/api",
+                      "@dfragon/api/**",
+                      "@dfragon/ops",
+                      "@dfragon/ops/**",
+                      "@dfragon/http-server",
+                      "@dfragon/http-server/**",
+                      "hono",
+                      "hono/**",
+                      "@hono/**",
+                      "**/apps/**"
+                    ],
+                    "message": "server-core는 API와 worker가 함께 쓰는 코드라 앱, 공용 HTTP 코드, Hono를 import하지 않는다. route, HTTP 응답과 앱 하나만 쓰는 코드는 그 앱에 둔다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/server-core/src/domain/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@dfragon/api",
+                      "@dfragon/api/**",
+                      "@dfragon/ops",
+                      "@dfragon/ops/**",
+                      "@dfragon/http-server",
+                      "@dfragon/http-server/**",
+                      "hono",
+                      "hono/**",
+                      "@hono/**",
+                      "**/apps/**"
+                    ],
+                    "message": "server-core는 API와 worker가 함께 쓰는 코드라 앱, 공용 HTTP 코드, Hono를 import하지 않는다. route, HTTP 응답과 앱 하나만 쓰는 코드는 그 앱에 둔다."
+                  },
+                  {
+                    "group": ["**/application/**", "**/infrastructure/**"],
+                    "message": "server-core의 domain은 다른 계층을 import하지 않는다. port는 application/<기능>/, Neople, DB, 점수 엔진 연결은 infrastructure/에 두고, 그쪽에서 domain을 가져다 쓴다."
+                  },
+                  {
+                    "group": ["node:*", "node:*/**"],
+                    "message": "server-core의 domain은 Node.js 내장 module을 쓰지 않는다. 파일, 네트워크, 프로세스를 쓰는 코드는 infrastructure/에 두고, application/<기능>/ports.ts의 함수 타입으로 받는다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/server-core/src/application/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@dfragon/api",
+                      "@dfragon/api/**",
+                      "@dfragon/ops",
+                      "@dfragon/ops/**",
+                      "@dfragon/http-server",
+                      "@dfragon/http-server/**",
+                      "hono",
+                      "hono/**",
+                      "@hono/**",
+                      "**/apps/**"
+                    ],
+                    "message": "server-core는 API와 worker가 함께 쓰는 코드라 앱, 공용 HTTP 코드, Hono를 import하지 않는다. route, HTTP 응답과 앱 하나만 쓰는 코드는 그 앱에 둔다."
+                  },
+                  {
+                    "group": ["**/infrastructure/**"],
+                    "message": "server-core의 application은 infrastructure를 import하지 않는다. 외부 호출은 application/<기능>/ports.ts에 함수 타입으로 적고 구현은 infrastructure/에 둔다."
+                  },
+                  {
+                    "group": [
+                      "node:fs",
+                      "node:fs/**",
+                      "node:net",
+                      "node:http",
+                      "node:https",
+                      "node:http2",
+                      "node:tls",
+                      "node:dgram",
+                      "node:dns",
+                      "node:dns/**",
+                      "node:child_process",
+                      "node:worker_threads",
+                      "ky",
+                      "koffi"
+                    ],
+                    "message": "server-core의 application은 파일, 네트워크, native library를 직접 쓰지 않는다. application/<기능>/ports.ts에 함수 타입을 두고 구현은 infrastructure/에 둔다."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/api/src/runtime/api-app.ts", "apps/ops/src/runtime/ops-app.ts"],
       "linter": {
         "rules": {
