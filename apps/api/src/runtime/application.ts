@@ -1,10 +1,12 @@
 import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/database'
 import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
+import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
 import {
   createNeopleCharacterTimeline,
   createNeopleCatalog,
-  createNeopleCharacterDetails
+  createNeopleCharacterDetails,
+  createNeopleItemDetails
 } from '@dfragon/server-core/infrastructure/neople/index.js'
 import {
   DatabaseAdventureGuildRepository,
@@ -25,7 +27,10 @@ import {
   TimelineSyncService
 } from '#application/character-timeline/index.js'
 import { createNeopleCharacterSearch, createNeopleShopGrade } from '#infrastructure/neople/index.js'
-import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
+import {
+  DatabaseClearStatsRepository,
+  DatabaseItemDictionaryRepository
+} from '@dfragon/server-core/infrastructure/database/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
@@ -66,9 +71,14 @@ function createDatabaseSubscribers(
   const fetchTimeline = createNeopleCharacterTimeline(neople)
   const timelineRead = new DatabaseCharacterTimelineRepository(client)
   const timelineQueueCounts = new DatabaseTimelineQueueCountRepository(client)
+  const itemDictionary = new ItemDictionaryService(
+    new DatabaseItemDictionaryRepository(client),
+    createNeopleItemDetails(neople)
+  )
   const timelineSync = new TimelineSyncService(
     new DatabaseTimelineSyncRepository(client),
-    fetchTimeline
+    fetchTimeline,
+    itemDictionary
   )
   const enhancementBackfill = new EnhancementBackfillService(
     new DatabaseEnhancementBackfillRepository(client),
@@ -83,7 +93,8 @@ function createDatabaseSubscribers(
 
   return {
     timeline: {
-      sync: (character) => timelineSync.sync(character),
+      sync: (character, reportItemDictionaryFailure) =>
+        timelineSync.sync(character, reportItemDictionaryFailure),
       backfillEnhancements: (character) => enhancementBackfill.backfill(character),
       backfillSeason: (job) => seasonBackfill.backfill(job),
       read: (character) => timelineRead.readTimeline(character),
