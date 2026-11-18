@@ -1,6 +1,6 @@
 import type { CharacterSearchQuery, SearchedCharacter } from '#core/api'
-import { useClientHost } from '../../../host/client-host'
-import { type LoadedResult, useLoadedResult } from '../../../hooks/useLoadedResult'
+import { useClientHost } from '#host/client-host'
+import { type LoadedResult, useLoadedResult } from '#hooks/useLoadedResult'
 
 export function useSearchedCharacters(
   query: CharacterSearchQuery

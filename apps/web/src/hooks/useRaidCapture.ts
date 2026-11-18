@@ -9,7 +9,7 @@ import {
 import { SEARCH_SLOT_COUNTS } from '#core/search'
 import { getRecognizedNicknames, type OcrRecognition } from '#core/ocr'
 import { type CharacterSearch, useCharacterSearch } from './useCharacterSearch'
-import { useClientHost } from '../host/client-host'
+import { useClientHost } from '#host/client-host'
 import { useSeatOrder, type SeatArrangement } from './useSeatOrder'
 
 export type RaidCapture = {

@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { characterIdentitySchema, characterRole } from '../character/character-summary'
-import type { MaleCrusaderRole } from '../character/male-crusader'
+import { characterIdentitySchema, characterRole } from '#core/character/character-summary'
+import type { MaleCrusaderRole } from '#core/character/male-crusader'
 
 const nullableText = z.string().nullable()
 const count = z.number().int().nonnegative()

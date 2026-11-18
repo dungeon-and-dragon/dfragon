@@ -1,5 +1,5 @@
 import type { FameRanking, FameRankingFilter } from '#core/ranking'
-import { useClientHost } from '../host/client-host'
+import { useClientHost } from '#host/client-host'
 import { type LoadedResult, useLoadedResult } from './useLoadedResult'
 
 export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRanking> {

@@ -6,7 +6,7 @@ const CORE_PATH = '^src/core/'
 const CORE_DOMAIN_SOURCE_PATH = '^src/core/[^/]+/.*\\.[cm]?[jt]sx?$'
 const CORE_INDEX_PATH = '^src/core/[^/]+/index\\.ts$'
 const SCREEN_FOLDER_IMPORT_COMMENT =
-  '화면 폴더 밖에서는 pages/<화면>(예: pages/rankings)처럼 폴더 경로로 import한다. 두 화면이 쓰는 코드는 공용 components/나 hooks/에 옮긴다.'
+  '화면 폴더 밖에서는 #pages/<화면>(예: #pages/rankings)처럼 폴더 경로로 import한다. 두 화면이 쓰는 코드는 공용 components/나 hooks/에 옮긴다.'
 
 export default {
   forbidden: [

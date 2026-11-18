@@ -54,19 +54,6 @@
     "vitest": "catalog:"
   },
   "imports": {
-    "#core/adventure-guild": "./src/core/adventure-guild/index.ts",
-    "#core/api": "./src/core/api/index.ts",
-    "#core/capture": "./src/core/capture/index.ts",
-    "#core/catalog": "./src/core/catalog/index.ts",
-    "#core/character": "./src/core/character/index.ts",
-    "#core/diagnostics": "./src/core/diagnostics/index.ts",
-    "#core/ocr": "./src/core/ocr/index.ts",
-    "#core/ranking": "./src/core/ranking/index.ts",
-    "#core/search": "./src/core/search/index.ts",
-    "#core/servers": "./src/core/servers/index.ts",
-    "#core/testing": "./src/core/testing/index.ts",
-    "#core/today-grade": "./src/core/today-grade/index.ts",
-    "#core/*.png": "./src/core/*.png",
-    "#core/*": "./src/core/*.ts"
+    "#ocr-model": "./ocr-model.config.mjs"
   }
 }

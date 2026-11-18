@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { ClientHost } from '../../host/client-host'
-import { StoryFrame } from '../../testing/story-support/StoryFrame'
-import { StoryScreen } from '../../testing/story-support/StoryScreen'
+import type { ClientHost } from '#host/client-host'
+import { StoryFrame } from '#testing/story-support/StoryFrame'
+import { StoryScreen } from '#testing/story-support/StoryScreen'
 import {
   STORY_ADVENTURE_NAME,
   storyAdventureActivity,
   storyAdventureSeasonDays,
   storyAdventureWeekly
-} from '../../testing/story-support/story-adventure'
-import { createStoryClientHost } from '../../testing/story-support/story-host'
+} from '#testing/story-support/story-adventure'
+import { createStoryClientHost } from '#testing/story-support/story-host'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 const meta = {

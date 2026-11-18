@@ -6,7 +6,7 @@ import {
 } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import type { StoredCharacter } from '#core/ranking'
-import { Portrait } from '../Portrait'
+import { Portrait } from '#components/Portrait'
 
 export type CharacterCellCharacter = Pick<
   StoredCharacter,

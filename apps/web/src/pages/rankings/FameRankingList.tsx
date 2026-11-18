@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react'
-import { useInfiniteScrollRef } from '../../hooks/useInfiniteScrollRef'
+import { useInfiniteScrollRef } from '#hooks/useInfiniteScrollRef'
 import type { FameRanking, FameRankingFilter } from '#core/ranking'
-import { CharacterTable, SkeletonRow } from '../../components/table/CharacterTable'
-import { ListBox } from '../../components/table/ListBox'
-import { useFameRanking } from '../../hooks/useFameRanking'
+import { CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
+import { ListBox } from '#components/table/ListBox'
+import { useFameRanking } from '#hooks/useFameRanking'
 import { rankingName } from './ranking-jobs'
 
 const PAGE_SIZE = 20

@@ -1,6 +1,6 @@
 import { avatarSlotLabel, type CharacterDetailView, toItemView } from '#core/character'
-import { itemClasses, itemTableClasses } from '../equipment/item-classes'
-import { ItemIcon, ItemName } from '../equipment/item-parts'
+import { itemClasses, itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
+import { ItemIcon, ItemName } from '#pages/character/tabs/equipment/item-parts'
 import { avatarClasses } from './avatar-classes'
 
 type Avatar = CharacterDetailView['avatar'][number]

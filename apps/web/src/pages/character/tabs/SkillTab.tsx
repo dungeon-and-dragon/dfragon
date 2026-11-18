@@ -20,10 +20,10 @@ import {
   skillUpgradesOf,
   skillWindowOf
 } from '#core/catalog'
-import type { LoadedResult } from '../../../hooks/useLoadedResult'
-import { LoadingLine } from '../../../components/LoadingLine'
-import { useSkillStats } from '../hooks/useSkillStats'
-import { useSkillWindowCatalog } from '../hooks/useSkillWindowCatalog'
+import type { LoadedResult } from '#hooks/useLoadedResult'
+import { LoadingLine } from '#components/LoadingLine'
+import { useSkillStats } from '#pages/character/hooks/useSkillStats'
+import { useSkillWindowCatalog } from '#pages/character/hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { detailTabClasses as layout } from './detail-tab-classes'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './skill/SkillAdoptionTooltip'

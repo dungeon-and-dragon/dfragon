@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { CharacterDetailView, CharacterIdentity } from '#core/character'
-import { useClientHost } from '../../../host/client-host'
-import { useLoadedResult } from '../../../hooks/useLoadedResult'
+import { useClientHost } from '#host/client-host'
+import { useLoadedResult } from '#hooks/useLoadedResult'
 
 export type CharacterDetailResult =
   | Readonly<{ status: 'loading' }>

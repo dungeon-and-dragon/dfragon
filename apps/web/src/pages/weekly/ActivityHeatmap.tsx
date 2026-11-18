@@ -6,7 +6,7 @@ import {
   enhancementTextClasses,
   rarityTextClasses,
   raritySolidClasses
-} from '../../components/game-colors'
+} from '#components/game-colors'
 import {
   type AdventureActivitySeasonDaysResult,
   useAdventureActivity,

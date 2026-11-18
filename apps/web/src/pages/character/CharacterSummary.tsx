@@ -9,11 +9,11 @@ import {
 } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture'
-import { Portrait } from '../../components/Portrait'
-import { characterDisplayOf } from '../../lib/stored-character'
-import { FavoriteToggle } from '../../components/FavoriteToggle'
+import { Portrait } from '#components/Portrait'
+import { characterDisplayOf } from '#lib/stored-character'
+import { FavoriteToggle } from '#components/FavoriteToggle'
 import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
-import { useRefreshingNow } from '../../hooks/useRefreshingNow'
+import { useRefreshingNow } from '#hooks/useRefreshingNow'
 import { formatSeoulDateTime, formatTimeAgo } from '#core/time-format'
 
 const integer = new Intl.NumberFormat('ko-KR')

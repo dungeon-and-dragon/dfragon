@@ -9,12 +9,12 @@ import type {
   ClearWeek
 } from '#core/ranking'
 import { jobLabelOf } from '#core/character'
-import type { BoxPlotRow } from '../../components/chart/BoxPlot'
-import type { ColumnBar } from '../../components/chart/Columns'
-import type { LineSeries } from '../../components/chart/LineChart'
-import type { ChartX } from '../../components/chart/plot-layout'
-import type { Bar } from '../../components/chart/RowBars'
-import { shareText } from '../../components/chart/stats-bars'
+import type { BoxPlotRow } from '#components/chart/BoxPlot'
+import type { ColumnBar } from '#components/chart/Columns'
+import type { LineSeries } from '#components/chart/LineChart'
+import type { ChartX } from '#components/chart/plot-layout'
+import type { Bar } from '#components/chart/RowBars'
+import { shareText } from '#components/chart/stats-bars'
 import { addDays } from './clear-weeks'
 import { type JobMetric, jobStatsOf } from './clear-scores'
 import {

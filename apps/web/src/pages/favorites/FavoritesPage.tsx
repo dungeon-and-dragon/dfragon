@@ -1,9 +1,9 @@
 import { IconButton, StarIcon } from '@dfragon/ui'
-import { CharacterTable, type CharacterTableAction } from '../../components/table/CharacterTable'
-import { ListBox } from '../../components/table/ListBox'
-import { TitleBox, TitleStat } from '../../components/table/TitleBox'
-import { useFavoriteCharacterStore } from '../../hooks/useFavoriteCharacterStore'
-import type { CharacterKey } from '../../lib/stored-character'
+import { CharacterTable, type CharacterTableAction } from '#components/table/CharacterTable'
+import { ListBox } from '#components/table/ListBox'
+import { TitleBox, TitleStat } from '#components/table/TitleBox'
+import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
+import type { CharacterKey } from '#lib/stored-character'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

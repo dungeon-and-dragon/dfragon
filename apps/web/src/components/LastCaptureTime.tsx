@@ -1,5 +1,5 @@
 import { toElapsedTime } from '#core/time-format'
-import { useRefreshingNow } from '../hooks/useRefreshingNow'
+import { useRefreshingNow } from '#hooks/useRefreshingNow'
 
 export function LastCaptureTime({ at }: { at: number | null }): React.JSX.Element {
   return (

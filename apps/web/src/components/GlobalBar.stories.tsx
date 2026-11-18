@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { StoryFrame } from '../testing/story-support/StoryFrame'
-import { createStoryClientHost } from '../testing/story-support/story-host'
+import { StoryFrame } from '#testing/story-support/StoryFrame'
+import { createStoryClientHost } from '#testing/story-support/story-host'
 import { CharacterSearchBox } from './CharacterSearchBox'
 import { GlobalBar } from './GlobalBar'
 import { SiteFooter } from './SiteFooter'

@@ -1,4 +1,4 @@
-import { RAID_PARTY_SIZE } from '../cards'
+import { RAID_PARTY_SIZE } from '#core/capture/cards'
 
 const raidParties = ['R', 'Y', 'G'] as const
 

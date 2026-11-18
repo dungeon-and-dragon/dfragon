@@ -4,10 +4,10 @@ import {
   signedEnchantValue,
   toItemView
 } from '#core/character'
-import { AvatarRow } from '../avatar/AvatarTable'
-import { avatarClasses } from '../avatar/avatar-classes'
-import { itemTableClasses } from '../equipment/item-classes'
-import { ItemCell } from '../equipment/item-parts'
+import { AvatarRow } from '#pages/character/tabs/avatar/AvatarTable'
+import { avatarClasses } from '#pages/character/tabs/avatar/avatar-classes'
+import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
+import { ItemCell } from '#pages/character/tabs/equipment/item-parts'
 
 type Buff = CharacterDetailView['buff']
 type BuffEquipment = NonNullable<Buff['equipment']>['equipment'][number]

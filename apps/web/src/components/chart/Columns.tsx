@@ -1,6 +1,6 @@
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
-import { COLUMN_BAR_GROW, useChartBarGrow } from '../../animations/useChartBarGrow'
-import { type TooltipPlace, useChartTooltipSlide } from '../../animations/useChartTooltipSlide'
+import { COLUMN_BAR_GROW, useChartBarGrow } from '#animations/useChartBarGrow'
+import { type TooltipPlace, useChartTooltipSlide } from '#animations/useChartTooltipSlide'
 import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS, TOOLTIP_TITLE_CLASS } from './plot-layout'
 
 const integer = new Intl.NumberFormat('ko-KR')

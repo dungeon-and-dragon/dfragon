@@ -4,11 +4,12 @@ import {
   RAID_VALUE_TEXT_PATTERN,
   SEARCH_ACTIONS,
   SEARCH_SLOT_COUNTS,
-  type SearchSlotCount
+  type SearchSlotCount,
+  type OcrSearchObservation,
+  type SearchControl
 } from './search'
 import { z } from 'zod'
-import { CHARACTER_SERVER_NAMES } from '../character/character-summary'
-import type { OcrSearchObservation, SearchControl } from './search'
+import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 
 const MAX_NICKNAME_INPUT_LENGTH = 24
 const text = z.string()

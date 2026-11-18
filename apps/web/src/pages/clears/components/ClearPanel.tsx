@@ -1,9 +1,9 @@
 import { type ReactNode, useState } from 'react'
 import { formatSeoulDateTime } from '#core/time-format'
 import type { ClearTimes } from '#core/ranking'
-import { Columns } from '../../../components/chart/Columns'
-import { TitleStat } from '../../../components/table/TitleBox'
-import { hourColumns, type WeekSummary, weekdayColumns } from '../clear-overview'
+import { Columns } from '#components/chart/Columns'
+import { TitleStat } from '#components/table/TitleBox'
+import { hourColumns, type WeekSummary, weekdayColumns } from '#pages/clears/clear-overview'
 import { clearClasses } from './clear-classes'
 
 export const CLEAR_TITLE = '클리어 집계'
