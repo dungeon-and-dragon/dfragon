@@ -4,11 +4,11 @@ import type {
   ClearScoreDistributions,
   ClearScoreKind
 } from '#core/ranking/clear-stats'
-import type { Choice } from './components/ChoiceGroup'
+import type { ChipGroupItem } from '@dfragon/ui'
 
 export type JobMetric = 'fame' | 'score'
 
-export const JOB_METRICS: readonly Choice<JobMetric>[] = [
+export const JOB_METRICS: readonly ChipGroupItem<JobMetric>[] = [
   { value: 'fame', label: '명성' },
   { value: 'score', label: '장비 점수' }
 ]
@@ -63,7 +63,7 @@ export function hasJobScores(jobs: readonly Pick<ClearJob, 'scores'>[]): boolean
 
 export function scoreKindChoices(
   distributions: readonly ClearScoreDistributions[]
-): Choice<ClearScoreKind>[] {
+): ChipGroupItem<ClearScoreKind>[] {
   return SCORE_KIND_ORDER.filter((kind) =>
     distributions.some((scores) => scores[kind] !== null)
   ).map((kind) => ({ value: kind, label: SCORE_KIND_LABELS[kind] }))
@@ -71,7 +71,7 @@ export function scoreKindChoices(
 
 export function bandScoreKindChoices(
   bands: Readonly<Record<ClearScoreKind, readonly unknown[]>>
-): Choice<ClearScoreKind>[] {
+): ChipGroupItem<ClearScoreKind>[] {
   return SCORE_KIND_ORDER.filter((kind) => bands[kind].length > 0).map((kind) => ({
     value: kind,
     label: SCORE_KIND_LABELS[kind]
