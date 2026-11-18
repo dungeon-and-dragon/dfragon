@@ -61,7 +61,6 @@ export type EquipmentRow = ItemView &
     reinforce: EquipmentReinforce | null
     refine: number | null
     enchants: EnchantOption[]
-    setPoint: number | null
     potency: string | null
   }>
 
@@ -222,7 +221,6 @@ function highestTune(item: EquipmentItem): string | null {
 function toEquipmentRow(item: EquipmentItem, role: EnchantRole): EquipmentRow {
   const refined = item.refine != null && item.refine > 0
   const refine = refined ? item.refine : null
-  const setPoint = item.tune.find((tune) => tune.setPoint != null)?.setPoint ?? null
   const potency = formatPotency(item.potency?.value ?? null)
 
   return {
@@ -233,7 +231,6 @@ function toEquipmentRow(item: EquipmentItem, role: EnchantRole): EquipmentRow {
     reinforce: toReinforce(item),
     refine,
     enchants: groupEnchant(item.enchant, role),
-    setPoint,
     potency
   }
 }

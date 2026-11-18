@@ -10,6 +10,7 @@ import {
   toLatestContents,
   toPopulationMinFame
 } from '../src/domain/content-clears/contents.js'
+import { sortClearCountsByRelease } from '../src/domain/content-clears/release-order.js'
 
 // 합성 타임라인 기록이다. data는 운영 DB에서 본 Neople 응답의 필드 모양을 따른다.
 const at = (time: string) => new Date(`${time}+09:00`)
@@ -189,6 +190,29 @@ test('분모 기준은 입장 명성이 수집 하한보다 높은 각인된 악
       ['michaela-normal', 104_292],
       ['michaela-hard', 104_292],
       ['engraved-nightmare-1', 119_414]
+    ]
+  )
+})
+
+test('시즌 클리어 횟수는 레이드와 레기온을 섞어 최근에 나온 컨텐츠부터 두고, 출시일을 모르는 컨텐츠는 뒤에 둔다', () => {
+  const counts = [
+    { kind: 'legion' as const, name: '베누스', hard: false, count: 12 },
+    { kind: 'raid' as const, name: '디레지에 레이드', hard: true, count: 3 },
+    { kind: 'raid' as const, name: '목록에 없는 레이드', hard: false, count: 1 },
+    { kind: 'raid' as const, name: '무너진 성자 미카엘라', hard: false, count: 2 },
+    { kind: 'legion' as const, name: '아포칼립스', hard: false, count: 4 },
+    { kind: 'raid' as const, name: '디레지에 레이드', hard: false, count: 1 }
+  ]
+
+  assert.deepEqual(
+    sortClearCountsByRelease(counts).map(({ name, hard }) => [name, hard]),
+    [
+      ['무너진 성자 미카엘라', false],
+      ['아포칼립스', false],
+      ['디레지에 레이드', true],
+      ['디레지에 레이드', false],
+      ['베누스', false],
+      ['목록에 없는 레이드', false]
     ]
   )
 })

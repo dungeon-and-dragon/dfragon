@@ -115,8 +115,7 @@ export const clearOverviewSchema = z.object({
       cleared: count,
       fame: fameDistributionSchema.nullable(),
       scores: scoreDistributionsSchema,
-      jobs: z.array(clearJobSchema),
-      coClears: z.array(z.object({ id: z.string(), cleared: count }))
+      jobs: z.array(clearJobSchema)
     })
   ),
   ...clearTimesSchema

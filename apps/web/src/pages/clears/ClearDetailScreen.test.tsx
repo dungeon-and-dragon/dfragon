@@ -348,12 +348,12 @@ it('일반과 하드가 있는 레이드는 상세 카드를 모두 두고, 배�
     '주차별 클리어',
     '명성 구간',
     '지난주 대비 이탈과 복귀',
-    '일반과 하드 사이 이동',
+    '난이도 이동',
     '클리어 캐릭터의 명성',
     '연속 클리어 주 수',
     '클리어 요일과 시간대',
     '배율별 클리어',
-    '모험단당 클리어 캐릭터',
+    '모험단 기준 클리어 횟수',
     '전직별 클리어'
   ])
 
@@ -368,7 +368,7 @@ it('이동 집계가 없는 레이드는 일반과 하드 이동 카드를 두�
   await render({ contentKey: 'inae' })
 
   expect(panelNames()).toContain('지난주 대비 이탈과 복귀')
-  expect(panelNames()).not.toContain('일반과 하드 사이 이동')
+  expect(panelNames()).not.toContain('난이도 이동')
 })
 
 it('챌린지는 미션 선택을 두고, 응답에 없는 지난주 대비, 이동, 연속 클리어 주 수, 그룹별 명성 카드를 두지 않는다', async () => {
@@ -380,20 +380,21 @@ it('챌린지는 미션 선택을 두고, 응답에 없는 지난주 대비, 이
     '주차별 클리어',
     '명성 구간',
     '클리어 요일과 시간대',
-    '모험단당 클리어 캐릭터',
+    '모험단 기준 클리어 횟수',
     '전직별 클리어'
   ])
 })
 
-it('지난주 대비는 이탈, 복귀, 첫 클리어 수와 두 주의 분할 막대를 두고, 이동은 두 방향의 수를 둔다', async () => {
+it('지난주 대비는 이탈, 복귀, 신규 수와 두 주의 분할 막대를 두고, 이동은 일반 → 하드, 하드 → 일반 수를 둔다', async () => {
   await render({ contentKey: 'michaela', week: LAST_CLOSED_WEEK })
 
   const weekOverWeek = panel('지난주 대비 이탈과 복귀')
-  expect(weekOverWeek?.querySelector('dl')?.textContent).toBe('이탈21복귀7첫 클리어10')
+  expect(weekOverWeek?.querySelector('dl')?.textContent).toBe('이탈21복귀7신규10')
   expect(weekOverWeek?.textContent).toContain('13주차61')
   expect(weekOverWeek?.textContent).toContain('14주차57')
-  const moves = panel('일반과 하드 사이 이동')
-  expect(moves?.querySelector('dl')?.textContent).toBe('일반에서 하드로9하드에서 일반으로6')
+  const moves = panel('난이도 이동')
+  expect(moves?.querySelector('dl')?.textContent).toBe('일반하드9하드일반6')
+  expect(moves?.querySelectorAll('dt svg')).toHaveLength(2)
   expect(moves?.textContent).toContain('14주차 하드57')
   expect(moves?.textContent).toContain('14주차 일반106')
 })
@@ -404,13 +405,13 @@ it('클리어 캐릭터의 명성은 분포가 있는 그룹만 둔다', async (
   const names = [
     ...(panel('클리어 캐릭터의 명성')?.querySelectorAll('li > span:first-child') ?? [])
   ].map((name) => name.firstChild?.textContent)
-  expect(names).toEqual(['두 주 모두 클리어', '이탈', '첫 클리어'])
+  expect(names).toEqual(['잔존', '이탈', '신규'])
 })
 
-it('모험단당 클리어 캐릭터는 1명부터 16명과 17명 이상으로 센다', async () => {
+it('모험단 기준 클리어 횟수는 1명부터 16명과 17명 이상으로 센다', async () => {
   await render({ contentKey: 'michaela' })
 
-  const columns = [...(panel('모험단당 클리어 캐릭터')?.querySelectorAll('li') ?? [])].map(
+  const columns = [...(panel('모험단 기준 클리어 횟수')?.querySelectorAll('li') ?? [])].map(
     (column) => column.querySelector('span')?.textContent
   )
   expect(columns).toHaveLength(17)
@@ -418,13 +419,12 @@ it('모험단당 클리어 캐릭터는 1명부터 16명과 17명 이상으로 �
   expect(columns.at(16)).toMatch(/^17명 이상 3 /)
 })
 
-it('전직별 클리어는 클리어율 순 10줄에 클리어 / 캐릭터 수와 클리어율을 두고, 정렬을 바꾸거나 모두 볼 수 있다', async () => {
+it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 두고, 정렬을 바꾸거나 모두 볼 수 있다', async () => {
   await render({ contentKey: 'michaela' })
 
   const first = panel('전직별 클리어')?.querySelector('tbody tr')
   expect([...(first?.children ?? [])].map((cell) => cell.textContent)).toEqual([
-    '전직6 직업6',
-    '25 / 50',
+    '전직6 직업6, 클리어 / 캐릭터 수 25 / 50',
     '최고 140,000, 95% 132,000, 75% 126,000, 중앙값 120,006, 25% 118,000, 5% 110,000',
     '50.0%'
   ])
@@ -440,7 +440,7 @@ it('전직별 클리어는 클리어율 순 10줄에 클리어 / 캐릭터 수�
   expect(jobNames()).toHaveLength(12)
 })
 
-it('전직별 클리어 줄에 마우스를 올리면 전직과 직업명 아래 분포 값 여섯 개를 띄운다', async () => {
+it('전직별 클리어 줄에 마우스를 올리면 전직과 직업명 아래 클리어 / 캐릭터 수와 분포 값 여섯 개를 띄운다', async () => {
   await render({ contentKey: 'michaela' })
 
   const row = panel('전직별 클리어')?.querySelector('tbody tr')
@@ -452,6 +452,7 @@ it('전직별 클리어 줄에 마우스를 올리면 전직과 직업명 아래
   const lines = [...(tooltip?.lastElementChild?.children ?? [])].map((line) => line.textContent)
   expect(tooltip?.firstElementChild?.textContent).toBe('전직6 직업6')
   expect(lines).toEqual([
+    '클리어 / 캐릭터 수25 / 50',
     '최고140,000',
     '95%132,000',
     '75%126,000',
@@ -527,7 +528,7 @@ it('점수와 단계별 기록이 있으면 그룹별 장비 점수, 장비 점�
     '주차별 클리어',
     '명성 구간',
     '지난주 대비 이탈과 복귀',
-    '일반과 하드 사이 이동',
+    '난이도 이동',
     '클리어 캐릭터의 명성',
     '클리어 캐릭터의 장비 점수',
     '연속 클리어 주 수',
@@ -535,7 +536,7 @@ it('점수와 단계별 기록이 있으면 그룹별 장비 점수, 장비 점�
     '배율별 클리어',
     '장비 점수 구간별 클리어율',
     '단계별 클리어 캐릭터',
-    '모험단당 클리어 캐릭터',
+    '모험단 기준 클리어 횟수',
     '전직별 클리어'
   ])
   const stageRows = [...(panel('단계별 클리어 캐릭터')?.querySelectorAll('li') ?? [])].map((row) =>

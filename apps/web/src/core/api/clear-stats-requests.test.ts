@@ -231,8 +231,7 @@ const overview: ClearOverview = {
           fame: null,
           scores: noScores
         }
-      ],
-      coClears: [{ id: 'michaela-normal', cleared: 4 }]
+      ]
     }
   ],
   weekdays: [{ weekday: 6, cleared: 30 }],

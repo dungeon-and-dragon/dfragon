@@ -29,6 +29,7 @@ const PLOT_FALLBACK = { width: 320, height: 20 }
 const PLOT_COLOR = 'var(--color-chart-1)'
 // 축 눈금을 함께 담는 두 줄 헤더라 위로 맞추고 위아래 여백을 줄인다.
 const HEAD = 'py-1 align-top'
+const COUNTS_LABEL = '클리어 / 캐릭터 수'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -91,6 +92,13 @@ function statsRowsOf({ stats }: JobRow): TooltipRow[] {
   return boxStatsTooltipRows(stats, PLOT_COLOR, formatInteger)
 }
 
+// 클리어와 캐릭터 수는 계열이 아니라 색 표식 없이 둔다.
+function tooltipRowsOf(row: JobRow): TooltipRow[] {
+  const counts = { key: 'counts', name: COUNTS_LABEL, color: 'transparent', value: row.counts }
+
+  return [counts, ...statsRowsOf(row)]
+}
+
 function JobTable({
   rows,
   metric
@@ -126,7 +134,7 @@ function JobTable({
 
   const shownTitle =
     shownRow != null ? [shownRow.name, shownRow.sub].filter(Boolean).join(' ') : undefined
-  const shownRows = shownRow != null ? statsRowsOf(shownRow) : []
+  const shownRows = shownRow != null ? tooltipRowsOf(shownRow) : []
 
   return (
     // 넓은 화면에서는 스크롤 영역을 두지 않는다. 두면 아래쪽 행의 툴팁이 영역 밖으로 나간 만큼 잘린다.
@@ -137,9 +145,6 @@ function JobTable({
             <tr>
               <th scope="col" className={`${HEAD} w-[184px]`}>
                 전직
-              </th>
-              <th scope="col" className={`${HEAD} table-num w-[112px]`}>
-                클리어 / 캐릭터 수
               </th>
               <th scope="col" className={HEAD}>
                 {JOB_METRIC_PLOT_LABELS[metric]}
@@ -204,12 +209,12 @@ function JobTableRow({
   }
 
   return (
-    <tr onMouseEnter={stats !== null ? handleMouseEnter : undefined}>
+    <tr onMouseEnter={handleMouseEnter}>
       <th scope="row" className="text-left font-normal">
         {name}
         {sub !== null && <small className="text-xs text-fg-subtle"> {sub}</small>}
+        <span className="sr-only">{`, ${COUNTS_LABEL} ${counts}`}</span>
       </th>
-      <td className="table-num text-fg-muted">{counts}</td>
       <td ref={plotRef}>
         {stats !== null && scale !== undefined && (
           <>

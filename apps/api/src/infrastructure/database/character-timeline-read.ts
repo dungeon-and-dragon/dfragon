@@ -29,6 +29,7 @@ import {
   toEnhancement,
   toEnhancementPage
 } from '@dfragon/server-core/domain/character-timeline/index.js'
+import { sortClearCountsByRelease } from '@dfragon/server-core/domain/content-clears/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 const ACQUISITION_RARITIES = ['에픽', '태초']
@@ -74,7 +75,7 @@ export function parseCharacterTimelineRows(
   weekStart: Date,
   seasonStart: Date
 ): CharacterTimeline {
-  return toCharacterTimeline(
+  const timeline = toCharacterTimeline(
     {
       clears: records.clears.map(parseClear),
       enhancements: records.enhancements.map(parseEnhancement),
@@ -83,6 +84,9 @@ export function parseCharacterTimelineRows(
     weekStart,
     seasonStart
   )
+  const seasonClears = sortClearCountsByRelease(timeline.seasonClears)
+
+  return { ...timeline, seasonClears }
 }
 
 function readPageRows(

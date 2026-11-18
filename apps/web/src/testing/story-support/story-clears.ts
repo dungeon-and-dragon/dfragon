@@ -144,7 +144,7 @@ const hours = Array.from({ length: 24 }, (_, hour) => ({
 function overviewContent(id: string, cleared: number, median: number) {
   const fame = spread(median, 4000)
 
-  return { id, cleared, fame, scores, jobs: [], coClears: [] }
+  return { id, cleared, fame, scores, jobs: [] }
 }
 
 export function storyClearOverview(weekStart: string): ClearOverview {
@@ -155,13 +155,7 @@ export function storyClearOverview(weekStart: string): ClearOverview {
     contents: [
       {
         ...michaelaHard,
-        jobs,
-        coClears: [
-          { id: 'michaela-normal', cleared: 1310 },
-          { id: 'inae-twilight', cleared: 980 },
-          { id: 'nabel-hard', cleared: 520 },
-          { id: 'engraved-nightmare-1', cleared: 210 }
-        ]
+        jobs
       },
       overviewContent('michaela-normal', 4400, 119000),
       overviewContent('inae-twilight', 2700, 115000),
