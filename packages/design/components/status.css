@@ -1,10 +1,10 @@
 /*
- * StatusChip과 StepDots.
+ * StatusChip.
  * <span class="status-chip status-chip-sm" data-tone="success"><span class="status-dot"></span>연결됨</span>
  * tone은 data-tone(neutral, success, danger, warning, signal), 크기는 status-chip-sm, status-chip-md다.
- * success 점은 박자 두 번 주기로 깜박인다. 진행 중이면 점 대신 step-dots를 둔다.
- * <span class="step-dots" aria-hidden="true"><span></span><span></span><span></span></span>
- * 동작 줄이기에서는 점이 모두 켜진 채 멈춘다.
+ * success 점은 박자 두 번 주기로 깜박인다. 진행 중이면 점 대신 status-spinner를 둔다.
+ * <span class="status-spinner" aria-hidden="true"></span>
+ * 동작 줄이기에서는 점과 spinner가 멈춘다.
  */
 .status-chip {
   --status-fg: var(--color-fg-subtle);
@@ -65,26 +65,15 @@
   animation: status-live calc(var(--beat) * 2) steps(1, end) infinite;
 }
 
-.step-dots {
-  display: inline-flex;
+.status-spinner {
   flex-shrink: 0;
-  gap: 4px;
-}
-
-.step-dots > span {
-  width: 4px;
-  height: 4px;
-  background-color: currentColor;
-  opacity: 0.25;
-  animation: step-dots-blip var(--beat) steps(1, end) infinite;
-}
-
-.step-dots > span:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.step-dots > span:nth-child(3) {
-  animation-delay: 0.3s;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: var(--animate-spin);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -92,8 +81,7 @@
     animation: none;
   }
 
-  .step-dots > span {
-    opacity: 1;
+  .status-spinner {
     animation: none;
   }
 }
@@ -105,15 +93,5 @@
 
   50% {
     opacity: 0.35;
-  }
-}
-
-@keyframes step-dots-blip {
-  0% {
-    opacity: 1;
-  }
-
-  33% {
-    opacity: 0.25;
   }
 }
