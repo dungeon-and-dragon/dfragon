@@ -1,11 +1,11 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import type { SearchSnapshot } from '#core/search'
 import { createDfragonClient } from '#core/api'
-import { decodeBrowserPng } from '../browser-png'
+import { decodeBrowserPng } from '#host/browser-png'
 import { browserFetch, createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
 
 // jsdom에는 createImageBitmap과 WebGL이 없어 브라우저 PNG 디코더만 대신한다.
-vi.mock('../browser-png', () => ({ decodeBrowserPng: vi.fn() }))
+vi.mock('#host/browser-png', () => ({ decodeBrowserPng: vi.fn() }))
 
 // 같은 origin 빌드의 API 주소처럼 경로가 붙은 base도 요청 주소에 그대로 남는지 본다.
 const API_BASE_URL = 'https://site.example.test/api'

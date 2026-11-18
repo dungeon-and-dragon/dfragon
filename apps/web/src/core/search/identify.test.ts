@@ -1,6 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
-import type { MockedFunction } from 'vitest'
-import type { CharacterCandidate, CharacterImage, CharacterPortrait } from '../character/character'
+import { describe, expect, it, vi, type MockedFunction } from 'vitest'
+import type {
+  CharacterCandidate,
+  CharacterImage,
+  CharacterPortrait
+} from '#core/character/character'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,

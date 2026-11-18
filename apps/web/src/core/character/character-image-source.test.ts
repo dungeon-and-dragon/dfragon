@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { CharacterImage } from './character'
 import { createCharacterImageSource, type CharacterImageHttp } from './character-image-source'
-import { CompletedCache } from '../search/completed-cache'
+import { CompletedCache } from '#core/search/completed-cache'
 
 function createImage(value: number): CharacterImage {
   return { width: 1, height: 1, rgba: new Uint8Array([value, 0, 0, 255]) }

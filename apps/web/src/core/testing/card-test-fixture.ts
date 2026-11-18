@@ -1,4 +1,4 @@
-import type { CharacterCard } from '../character/character'
+import type { CharacterCard } from '#core/character/character'
 
 export const dealerCard: CharacterCard = { role: 'dealer', score: null }
 

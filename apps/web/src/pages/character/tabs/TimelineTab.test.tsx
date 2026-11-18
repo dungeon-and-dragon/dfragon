@@ -9,9 +9,9 @@ import type {
   TimelineEnhancement,
   TimelinePage
 } from '#core/character'
-import { ClientHostContext, type ClientHost } from '../../../host/client-host'
-import { createTestClientHost } from '../../../testing/test-support/client-host'
-import { TestQueryClient } from '../../../testing/test-support/test-query-client'
+import { ClientHostContext, type ClientHost } from '#host/client-host'
+import { createTestClientHost } from '#testing/test-support/client-host'
+import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TimelineTab } from './TimelineTab'
 
 // jsdom은 색을 계산하지 않으므로 색 utility class가 붙었는지로 색을 확인한다.

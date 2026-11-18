@@ -4,7 +4,7 @@ import type {
   ClearOverview,
   ClearStats,
   ClearWeek
-} from '../ranking/clear-stats'
+} from '#core/ranking/clear-stats'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'

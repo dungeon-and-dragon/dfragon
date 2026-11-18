@@ -1,13 +1,13 @@
 import { createActor, waitFor } from 'xstate'
 import { afterEach, expect, it, vi } from 'vitest'
 import { partyCaptureMachine } from './party-capture-machine'
-import { WEB_CAPTURE_TEXTS } from '../capture-texts'
-import { createSharedOcrWorker } from '../../ocr/ocr-worker-recognition'
-import type { CharacterImage } from '../../character/character'
+import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
+import { createSharedOcrWorker } from '#core/ocr/ocr-worker-recognition'
+import type { CharacterImage } from '#core/character/character'
 
 const modules = vi.hoisted(() => ({ diagnostic: vi.fn() }))
-vi.mock('../../ocr/ocr', () => ({ createPartyOcrWorker: vi.fn() }))
-vi.mock('../../diagnostics/runtime-diagnostics', () => ({
+vi.mock('#core/ocr/ocr', () => ({ createPartyOcrWorker: vi.fn() }))
+vi.mock('#core/diagnostics/runtime-diagnostics', () => ({
   reportRuntimeDiagnostic: modules.diagnostic,
   showRejectedOcrNickname: vi.fn()
 }))
