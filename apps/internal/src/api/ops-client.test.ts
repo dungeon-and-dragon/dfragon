@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FakeOpsApi, job, run } from '../testing/fake-ops-api'
+import { FakeOpsApi, job, run } from '#ops-testing/fake-ops-api'
 import { createOpsClient, JOB_ALREADY_RUNNING, OpsRequestFailure } from './ops-client'
 
 const BASE_URL = 'http://ops.test/api/'
