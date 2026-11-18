@@ -1,6 +1,5 @@
-import { Button, TextField, TextFieldInput } from '@dfragon/ui'
+import { Button, RefreshIcon, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
-import { RefreshIcon } from '../../components/RefreshIcon'
 import { SkeletonRow } from '../../components/table/CharacterTable'
 import { ListBox } from '../../components/table/ListBox'
 import { useRefreshAdventureActivity } from './hooks/useAdventureActivity'
@@ -66,7 +65,9 @@ function AdventureNameForm({
           disabled={refreshing}
           onClick={onRefresh}
         >
-          <RefreshIcon spinning={refreshing} />
+          <RefreshIcon
+            className={`size-icon-sm ${refreshing ? 'animate-spin motion-reduce:animate-none' : ''}`}
+          />
           {refreshing ? '받는 중' : '갱신'}
         </Button>
       )}

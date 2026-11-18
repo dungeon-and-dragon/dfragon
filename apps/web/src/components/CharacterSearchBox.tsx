@@ -1,5 +1,5 @@
 import { Select as BaseSelect } from '@base-ui/react/select'
-import { Select } from '@dfragon/ui'
+import { ChevronDownIcon, CloseIcon, SearchIcon, Select } from '@dfragon/ui'
 import { useNavigate } from '@tanstack/react-router'
 import {
   type ChangeEvent,
@@ -11,10 +11,7 @@ import {
 } from 'react'
 import { ALL_CHARACTER_SERVERS, isSearchableCharacterName } from '#core/api/character-schemas'
 import { characterSearchServerOptions } from '../constants/server-options'
-import { ChevronDownIcon } from './ChevronDownIcon'
-import { CloseIcon } from './CloseIcon'
 import { RecentCharacterList } from './RecentCharacterList'
-import { SearchIcon } from './SearchIcon'
 
 const ADVENTURE = 'adventure'
 const scopeOptions = [...characterSearchServerOptions, { id: ADVENTURE, label: '모험단' }]
@@ -29,7 +26,7 @@ const SIZE_CLASSES = {
     divider: 'h-4',
     input: 'px-2 text-sm',
     clear: 'w-6',
-    clearIcon: 'size-[14px]',
+    clearIcon: 'size-icon-sm',
     submit: 'w-8',
     icon: 'size-icon-sm'
   },
@@ -131,7 +128,7 @@ export function CharacterSearchBox({
           className={`inline-flex h-full shrink-0 cursor-pointer items-center font-medium whitespace-nowrap text-fg-muted focus-ring-inset hover:text-fg ${sizeClasses.server}`}
         >
           <BaseSelect.Value />
-          <ChevronDownIcon className="size-3" />
+          <ChevronDownIcon className="size-icon-sm" />
         </BaseSelect.Trigger>
         <Select.Popup aria-label="검색 대상" columns={3}>
           {scopeOptions.map((option) => (

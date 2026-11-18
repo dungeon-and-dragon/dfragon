@@ -1,5 +1,4 @@
-import { IconButton } from '@dfragon/ui'
-import { StarIcon } from './StarIcon'
+import { IconButton, StarIcon } from '@dfragon/ui'
 import { useFavoriteCharacterStore } from '../hooks/useFavoriteCharacterStore'
 import { type CharacterDisplay, isSameCharacter } from '../lib/stored-character'
 
@@ -31,7 +30,7 @@ export function FavoriteToggle({
     <IconButton
       size="sm"
       aria-label={favorite ? '즐겨찾기 해제' : '즐겨찾기에 더하기'}
-      icon={<StarIcon filled={favorite} />}
+      icon={<StarIcon filled={favorite} className={favorite ? 'text-fg' : undefined} />}
       onClick={toggle}
     />
   )
