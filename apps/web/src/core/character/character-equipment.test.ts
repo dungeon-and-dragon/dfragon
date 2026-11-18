@@ -170,7 +170,6 @@ describe('장비 탭 값', () => {
       refine: null,
       tune: null,
       enchants: [{ label: '모든 속성 강화 +15', emphasized: true }],
-      setPoint: null,
       exalted: false,
       potency: null
     })
@@ -181,7 +180,6 @@ describe('장비 탭 값', () => {
       { label: '올스탯 +40', emphasized: false },
       { label: '크리티컬 +5%', emphasized: false }
     ])
-    expect(view.items[3].setPoint).toBe(235)
     expect(view.items[12].reinforce).toEqual({ kind: 'amplify', value: 8 })
     expect(view.sets).toEqual([
       { name: '로열 페어리 세트', rarityName: '태초', rarity: 'primordial', point: 2615 }

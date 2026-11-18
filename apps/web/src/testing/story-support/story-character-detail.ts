@@ -9,11 +9,23 @@ const STORY_IDENTITY = {
   buffer: { characterId: 'story-buffer', characterName: '캐릭터2', fame: 125_689 }
 } as const
 
+const STORY_EXALTED_POTENCY: Readonly<Record<string, number>> = { 반지: 100, 보조장비: 90 }
+
 export function storyCharacterDetail(role: 'dealer' | 'buffer'): CharacterDetailView {
   const detail = characterDetailFixture(role)
+  const equipment = detail.equipment.equipment.map((item) => {
+    const potency = STORY_EXALTED_POTENCY[item.slotName ?? '']
+
+    if (potency === undefined) {
+      return item
+    }
+
+    return { ...item, exaltedInfo: { explain: null }, potency: { value: potency } }
+  })
 
   return {
     ...detail,
+    equipment: { ...detail.equipment, equipment },
     character: {
       ...detail.character,
       ...STORY_IDENTITY[role],
