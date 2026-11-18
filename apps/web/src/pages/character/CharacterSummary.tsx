@@ -1,4 +1,4 @@
-import { Button } from '@dfragon/ui'
+import { Button, RefreshIcon } from '@dfragon/ui'
 import { displayJobName } from '#core/character/job-display'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture/cards'
@@ -8,7 +8,6 @@ import type { CharacterDetailView } from '#core/character/character-detail-view'
 import { Portrait } from '../../components/Portrait'
 import { characterDisplayOf } from '../../lib/stored-character'
 import { FavoriteToggle } from '../../components/FavoriteToggle'
-import { RefreshIcon } from '../../components/RefreshIcon'
 import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
 import { useRefreshingNow } from '../../hooks/useRefreshingNow'
 import { formatSeoulDateTime, formatTimeAgo } from '#core/time-format'
@@ -138,7 +137,9 @@ function RefreshControl({
         disabled={refreshing || justFetched}
         onClick={onRefresh}
       >
-        <RefreshIcon spinning={refreshing} />
+        <RefreshIcon
+          className={`size-icon-sm ${refreshing ? 'animate-spin motion-reduce:animate-none' : ''}`}
+        />
         {refreshing ? '받는 중' : '갱신'}
       </Button>
       <time

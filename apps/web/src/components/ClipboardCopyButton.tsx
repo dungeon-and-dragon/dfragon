@@ -1,6 +1,5 @@
+import { CheckIcon, CopyIcon } from '@dfragon/ui'
 import type { ClipboardCopyStatus } from '../hooks/useClipboardCopy'
-import { CheckIcon } from './CheckIcon'
-import { CopyIcon } from './CopyIcon'
 import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'
@@ -39,7 +38,7 @@ export function ClipboardCopyButton({
             onClick={onCopy}
             className="icon-btn icon-btn-sm"
           >
-            <Icon width={16} height={16} />
+            <Icon className="size-icon-sm" />
           </button>
         </span>
       </HeaderTooltip>

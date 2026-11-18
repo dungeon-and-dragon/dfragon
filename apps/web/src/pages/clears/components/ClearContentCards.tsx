@@ -1,5 +1,5 @@
+import { ChevronRightIcon } from '@dfragon/ui'
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDownIcon } from '../../../components/ChevronDownIcon'
 import { findClearContentBackground } from '../../../lib/clear-content-background'
 import type { CardStage, ContentCard } from '../clear-overview'
 
@@ -93,7 +93,7 @@ export function ClearContentCards({
           onClick={previous}
           className={`${PAGER} left-0 sm:-left-[18px]`}
         >
-          <ChevronDownIcon className="size-icon-sm rotate-90" />
+          <ChevronRightIcon className="size-icon-sm rotate-180" />
         </button>
       )}
       {!edges.end && (
@@ -103,7 +103,7 @@ export function ClearContentCards({
           onClick={next}
           className={`${PAGER} right-0 sm:-right-[18px]`}
         >
-          <ChevronDownIcon className="size-icon-sm -rotate-90" />
+          <ChevronRightIcon className="size-icon-sm" />
         </button>
       )}
     </nav>

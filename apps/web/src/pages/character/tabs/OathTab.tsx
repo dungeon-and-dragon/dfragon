@@ -1,3 +1,4 @@
+import { CheckIcon } from '@dfragon/ui'
 import { MISSING_VALUE } from '#core/capture/cards'
 import { formatCount, formatPoint, type StatLine } from '#core/character/character-item'
 import { type OathView, toOathView } from '#core/character/character-oath'
@@ -8,7 +9,6 @@ import {
   oathItemIconOf,
   oathSetBoardOf
 } from '#core/catalog/oath-catalog'
-import { CheckIcon } from '../../../components/CheckIcon'
 import { useOathCatalog } from '../hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
@@ -107,7 +107,7 @@ function OathOptionCards({ options }: { options: readonly OathOptionCard[] }): R
             />
             {option.picked && (
               <span className="badge gap-1 bg-signal text-2xs font-semibold text-on-signal">
-                <CheckIcon width={12} height={12} strokeWidth={3} />
+                <CheckIcon className="size-icon-sm" />
                 선택
               </span>
             )}

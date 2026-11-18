@@ -56,3 +56,21 @@ export { Kbd } from './kbd'
 export type { KbdProps, KbdSurface } from './kbd'
 export { NumericText } from './numeric-text'
 export type { NumericTextProps } from './numeric-text'
+export {
+  CameraIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  CopyIcon,
+  DashIcon,
+  ExternalLinkIcon,
+  MonitorIcon,
+  MoonIcon,
+  PinIcon,
+  RefreshIcon,
+  SearchIcon,
+  StarIcon,
+  SunIcon
+} from './icons'
+export type { FillableIconProps, IconProps } from './icons'
