@@ -1,4 +1,4 @@
-import { Button } from '@dfragon/ui'
+import { Button, ChipGroup } from '@dfragon/ui'
 import { useRef, useState } from 'react'
 import type { ClearJob } from '#core/ranking/clear-stats'
 import { useChartTooltipSlide } from '../../../animations/useChartTooltipSlide'
@@ -22,7 +22,6 @@ import {
   jobMetricTickOf
 } from '../clear-scores'
 import { useChoice } from '../hooks/useChoice'
-import { ChoiceGroup } from './ChoiceGroup'
 import { Panel } from './ClearPanel'
 import { tableClasses } from '../../../components/table/table-classes'
 
@@ -61,9 +60,14 @@ export function ClearJobTable({ jobs }: { jobs: readonly ClearJob[] }): React.JS
       controls={
         <>
           {metricChoices.length > 0 && (
-            <ChoiceGroup label="분포" choices={metricChoices} value={metric} onChange={setMetric} />
+            <ChipGroup
+              aria-label="분포"
+              items={metricChoices}
+              value={metric}
+              onValueChange={setMetric}
+            />
           )}
-          <ChoiceGroup label="정렬" choices={JOB_SORTS} value={sort} onChange={setSort} />
+          <ChipGroup aria-label="정렬" items={JOB_SORTS} value={sort} onValueChange={setSort} />
         </>
       }
     >

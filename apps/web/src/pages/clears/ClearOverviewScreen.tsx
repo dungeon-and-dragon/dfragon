@@ -1,3 +1,4 @@
+import { ChipGroup } from '@dfragon/ui'
 import { useState } from 'react'
 import type { ClearContent, ClearOverview } from '#core/ranking/clear-stats'
 import { BoxPlotChart } from '../../components/chart/BoxPlot'
@@ -28,7 +29,6 @@ import {
   weekSummaryOf
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
-import { ChoiceGroup } from './components/ChoiceGroup'
 import { ClearContentCards } from './components/ClearContentCards'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
@@ -176,7 +176,12 @@ function ClearRatePanel({
     <Panel
       name="주간 클리어율"
       controls={
-        <ChoiceGroup label="기간" choices={PERIOD_CHOICES} value={period} onChange={setPeriod} />
+        <ChipGroup
+          aria-label="기간"
+          items={PERIOD_CHOICES}
+          value={period}
+          onValueChange={setPeriod}
+        />
       }
     >
       <LineChart
@@ -259,7 +264,7 @@ function ScorePanel({
       name="클리어 캐릭터의 장비 점수"
       controls={
         choices.length > 1 && (
-          <ChoiceGroup label="점수 종류" choices={choices} value={kind} onChange={setKind} />
+          <ChipGroup aria-label="점수 종류" items={choices} value={kind} onValueChange={setKind} />
         )
       }
     >
@@ -310,7 +315,12 @@ function JobPanel({
       controls={
         <>
           {metricChoices.length > 0 && (
-            <ChoiceGroup label="분포" choices={metricChoices} value={metric} onChange={setMetric} />
+            <ChipGroup
+              aria-label="분포"
+              items={metricChoices}
+              value={metric}
+              onValueChange={setMetric}
+            />
           )}
           <BaseContentSelect
             label="전직별 클리어 기준 컨텐츠"
