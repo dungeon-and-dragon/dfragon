@@ -19,7 +19,7 @@ DFragon 웹과 운영 화면이 쓰는 토큰, 글꼴, 컴포넌트 CSS입니다
 - 주 버튼, 선택 표시, focus 테두리는 `color-signal`이고 그 위 글자는 `color-on-signal`입니다. 신호색은 한 화면에 적게 씁니다.
 - 상태 칩의 면은 `color-*-weak`, 글자는 `color-fg-success`, `color-fg-warning`, `color-fg-danger`입니다.
 - 차트는 `color-chart-1`부터 순서대로 쓰고, 기준 항목은 `color-chart-base`입니다. 차트에 게임 색이나 그라데이션을 쓰지 않습니다.
-- 간격은 `spacing` 단위의 배수로 씁니다. 버튼과 입력 칸 높이는 `height-control-*`, 상단 바 높이는 `height-topbar`, 표 행 높이는 `height-row`, 화면 상자 폭은 `container-page`입니다.
+- 간격은 `spacing-0`부터 `spacing-16`까지 아홉 단계(0, 4, 8, 12, 16, 24, 32, 48, 64px)만 씁니다. 버튼과 입력 칸 높이는 `height-control-*`, 상단 바 높이는 `height-topbar`, 표 행 높이는 `height-row`, 화면 상자 폭은 `container-page`입니다.
 - 모서리는 `radius-badge`(배지), `radius-control`(버튼, 입력 칸, 칩), `radius-panel`(패널)만 씁니다.
 - 글자는 `text-*` 단계로 쓰고 줄 높이는 단계에 들어 있습니다. 굵기는 `font-weight-*` 넷만 씁니다.
 - 전환은 `ease-standard` 곡선에 `duration-hover`, `duration-state`를 씁니다. 움직임을 줄인 설정에서는 duration이 0이 됩니다.
