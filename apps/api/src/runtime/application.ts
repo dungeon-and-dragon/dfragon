@@ -61,7 +61,7 @@ function createDatabaseSubscribers(
   | 'rankingStats'
   | 'clearStats'
 > &
-  Pick<ApiHttpAppOptions['search'], 'readAdventureNames'> {
+  Pick<ApiHttpAppOptions['search'], 'readAdventureNames' | 'readCharacterScores'> {
   if (database === undefined) {
     return {}
   }
@@ -112,6 +112,7 @@ function createDatabaseSubscribers(
     recordCharacterSets: (sets) => characterBasic.recordSets(sets),
     characterHistory: new DatabaseCharacterHistoryRepository(client),
     readAdventureNames: (characters) => characterSearch.readAdventureNames(characters),
+    readCharacterScores: (characters) => characterSearch.readCharacterScores(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: new DatabaseRankingStatsRepository(client),
     clearStats: new DatabaseClearStatsRepository(clearStatsClient)
@@ -120,13 +121,17 @@ function createDatabaseSubscribers(
 
 export function createApiRuntimeOptions(configuration: RuntimeConfiguration): ApiHttpAppOptions {
   const neople = createNeopleClient(configuration.apiKey)
-  const { readAdventureNames: readCandidateAdventureNames, ...database } =
-    createDatabaseSubscribers(neople, configuration.database)
+  const {
+    readAdventureNames: readCandidateAdventureNames,
+    readCharacterScores,
+    ...database
+  } = createDatabaseSubscribers(neople, configuration.database)
 
   return {
     search: {
       searchCharacters: createNeopleCharacterSearch(neople),
-      readAdventureNames: readCandidateAdventureNames
+      readAdventureNames: readCandidateAdventureNames,
+      readCharacterScores
     },
     details: {
       fetchDetails: createNeopleCharacterDetails(neople),

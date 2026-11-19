@@ -1,7 +1,9 @@
 import {
   type DatabaseClient,
   type StoredAdventureName,
-  readAdventureNames
+  type StoredCharacterScoreRow,
+  readAdventureNames,
+  readCharacterScores
 } from '@dfragon/database'
 import type { CharacterSearchRepository } from '#application/character-search/repository.js'
 
@@ -12,5 +14,11 @@ export class DatabaseCharacterSearchRepository implements CharacterSearchReposit
     characters: readonly { serverId: string; characterId: string }[]
   ): Promise<StoredAdventureName[]> {
     return readAdventureNames(this.client, characters)
+  }
+
+  readCharacterScores(
+    characters: readonly { serverId: string; characterId: string }[]
+  ): Promise<StoredCharacterScoreRow[]> {
+    return readCharacterScores(this.client, characters)
   }
 }

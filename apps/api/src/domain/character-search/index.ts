@@ -3,7 +3,9 @@ export type {
   CharacterCandidatesResult,
   CharacterCandidatesWithAdventureResult,
   CharacterImageCandidate,
+  CharacterSearchResult,
   CharacterSearchRow,
   NeopleCharacterSearchInput,
-  NeopleCharacterSearchResult
+  NeopleCharacterSearchResult,
+  ScoredCharacterCandidate
 } from './types.js'
