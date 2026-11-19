@@ -15,7 +15,7 @@ export function createItemDictionaryFillJob(
     name: 'item-dictionary-fill',
     displayName: '아이템 사전 채우기',
     description:
-      '중천 시작부터 저장한 레전더리 이상 장비 획득 기록 가운데 아이템 사전에 없는 아이템의 레벨과 종류를 Neople에서 받아 저장합니다. 다시 실행하면 남은 아이템만 받습니다.',
+      '중천 시작부터 저장한 레전더리 이상 장비 획득 기록과 서약 획득 기록 가운데 아이템 사전에 없거나 세트, 부위, 등급을 아직 받지 않은 아이템의 레벨, 종류, 부위, 등급, 세트를 Neople에서 받아 저장합니다. 다시 실행하면 남은 아이템만 받습니다.',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
     neopleApi: NEOPLE_APIS.items,
