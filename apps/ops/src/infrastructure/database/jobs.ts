@@ -2,7 +2,7 @@ import {
   type DatabaseClient,
   type JobOverview,
   type JobPauseChange,
-  type JobRunRecord,
+  type JobRunHistoryRecord,
   type JobRunRequest,
   readJobOverviews,
   readJobRuns,
@@ -18,11 +18,8 @@ export class DatabaseJobRepository implements JobRepository {
     return readJobOverviews(this.client)
   }
 
-  readRuns(
-    name: string,
-    page: { before: number | undefined; limit: number }
-  ): Promise<JobRunRecord[] | undefined> {
-    return readJobRuns(this.client, name, page)
+  readRuns(page: { before: number | undefined; limit: number }): Promise<JobRunHistoryRecord[]> {
+    return readJobRuns(this.client, page)
   }
 
   requestRun(name: string, args: unknown): Promise<JobRunRequest> {
