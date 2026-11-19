@@ -21,9 +21,9 @@ import { GuildPage } from '#pages/guild'
 import { HomePage } from '#pages/home'
 import { PrivacyPage, TermsPage } from '#pages/legal'
 import { NotFoundPage } from '#pages/not-found'
-import { RankingsPage, parseRankingSearch } from '#pages/rankings'
+import { RankingsPage, parseJobSearch, parseRankingSearch } from '#pages/rankings'
 import { MultisearchPage } from '#pages/multisearch'
-import { StatsPage } from '#pages/stats'
+import { SetStatsPage, StatsPage } from '#pages/stats'
 import {
   ClearsPage,
   ClearDetailPage,
@@ -105,6 +105,13 @@ const statsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/stats',
   component: StatsPage
+})
+
+const setStatsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/stats/sets',
+  validateSearch: parseJobSearch,
+  component: SetStatsPage
 })
 
 const clearsRoute = createRoute({
@@ -211,6 +218,7 @@ const routeTree = rootRoute.addChildren([
   characterSearchRoute,
   rankingsRoute,
   statsRoute,
+  setStatsRoute,
   clearsRoute,
   clearContentRoute,
   adventureEntryRoute,

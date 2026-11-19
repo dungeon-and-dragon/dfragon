@@ -4,6 +4,7 @@ import { Columns } from '#components/chart/Columns'
 import { type Bar, type BarTone, RowBars } from '#components/chart/RowBars'
 import { ListBox } from '#components/table/ListBox'
 import { TitleBox, TitleStat } from '#components/table/TitleBox'
+import { StatsTabs } from './StatsTabs'
 import { useCharacterStats } from './hooks/useCharacterStats'
 import {
   averageFameBars,
@@ -29,6 +30,15 @@ const STAT_BOX_ROWS: readonly (readonly StatBoxId[])[] = [
 ]
 
 export function StatsPage(): React.JSX.Element {
+  return (
+    <div className={SCREEN}>
+      <StatsTabs />
+      <CharacterStatsBody />
+    </div>
+  )
+}
+
+function CharacterStatsBody(): React.JSX.Element {
   const result = useCharacterStats()
   switch (result.status) {
     case 'loading':

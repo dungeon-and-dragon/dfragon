@@ -6,7 +6,15 @@ export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRank
   const { getFameRanking } = useClientHost()
 
   return useLoadedResult(
-    ['fame-ranking', filter.jobId ?? null, filter.jobGrowId ?? null, filter.role ?? null],
+    [
+      'fame-ranking',
+      filter.jobId ?? null,
+      filter.jobGrowId ?? null,
+      filter.role ?? null,
+      filter.equipmentSetId ?? null,
+      filter.oathSetId ?? null,
+      filter.oathSetOption ?? null
+    ],
     () => getFameRanking(filter)
   )
 }
