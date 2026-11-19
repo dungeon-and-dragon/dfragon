@@ -60,6 +60,15 @@ export type {
   CharacterSetsInput
 } from './character-sets.js'
 export {
+  countFameRefreshTargets,
+  countInactiveCharacters,
+  readFameRefreshTargets,
+  readInactiveCharacters,
+  recordCharacterActive,
+  recordCharacterInactive
+} from './character-activity.js'
+export type { FameRefreshTarget } from './character-activity.js'
+export {
   enqueueCollectedCharacters,
   readCollectionSummary,
   recordCharacterBasic,
