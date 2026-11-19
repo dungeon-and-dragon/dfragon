@@ -7,7 +7,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView, MaleCrusaderRole } from '#entities/character'
 import type { GameTextLines, SkillWindowCatalog } from '#entities/catalog'
 import type { SkillStats } from '#entities/ranking'
-import { characterDetailFixture } from '#core/testing'
+import { characterDetailFixture } from '#testing/fixtures/character'
 import {
   loadingResponse,
   SKILL_STATS_URL,

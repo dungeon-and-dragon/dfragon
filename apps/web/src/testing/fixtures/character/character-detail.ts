@@ -1,6 +1,6 @@
 import buffer from '#server-fixtures/character-card-buffer.json'
 import dealer from '#server-fixtures/character-card-dealer.json'
-import { type CharacterDetailView, characterDetailViewSchema } from '#entities/character'
+import { type CharacterDetailView, characterDetailViewSchema } from '#entities/character/index'
 
 type Entry = { slotId?: string; [key: string]: unknown }
 type Basic = { serverId: string; characterId: string; [key: string]: unknown }

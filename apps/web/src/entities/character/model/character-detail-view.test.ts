@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { characterDetailResponse } from '#core/testing'
+import { characterDetailResponse } from '#testing/fixtures/character'
 import { characterDetailViewSchema } from './character-detail-view'
 
 describe('캐릭터 상세 화면 응답', () => {
