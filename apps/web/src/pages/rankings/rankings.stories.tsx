@@ -6,6 +6,7 @@ import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
 import { createStoryClientHost } from '#testing/story-support/story-host'
+import { storyItemStats } from '#testing/story-support/story-item-stats'
 import { storySetOathCatalog, storySetStats } from '#testing/story-support/story-set-stats'
 import { RANKING_JOBS } from './ranking-jobs'
 import { RankingsScreen } from './RankingsScreen'
@@ -24,6 +25,7 @@ const characters = storyRankedCharacters(PAGE_SIZE + 30)
 const SECOND_PAGE = 'story-page-2'
 const setHosts = {
   getSetStats: async () => storySetStats(new Date().toISOString()),
+  getItemStats: async () => storyItemStats(new Date().toISOString()),
   getOathCatalog: async () => storySetOathCatalog
 }
 
@@ -83,6 +85,18 @@ export const 세트선택: Story = {
         jobId: RANKING_JOBS[0]!.jobId,
         oathSetId: 16204,
         oathSetOption: '용투 : 용제 강림'
+      }}
+    />
+  )
+}
+
+export const 아이템선택: Story = {
+  render: () => (
+    <Screen
+      host={rankingHost}
+      initialFilter={{
+        jobId: RANKING_JOBS[0]!.jobId,
+        itemIds: ['story-unique-1', 'story-weapon-1']
       }}
     />
   )

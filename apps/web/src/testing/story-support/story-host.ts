@@ -47,6 +47,7 @@ export function createStoryClientHost({
     getCharacterStats: pending,
     getSkillStats: pending,
     getSetStats: pending,
+    getItemStats: pending,
     getClearStats: pending,
     getClearContentStats: pending,
     getClearOverview: pending,
