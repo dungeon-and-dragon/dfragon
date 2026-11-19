@@ -80,6 +80,7 @@ export interface ApiServicesOptions {
   readonly search: {
     readonly searchCharacters: SearchCharacters
     readonly readAdventureNames?: CharacterSearchRepository['readAdventureNames']
+    readonly readCharacterScores?: CharacterSearchRepository['readCharacterScores']
   }
   readonly details: Omit<CharacterDetailDependencies, 'calculateScore' | 'publishCharacterFetched'>
   readonly timeline?: TimelineSyncOptions
@@ -223,9 +224,11 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     subscribers.push((event) => characterBasic.record(event))
   }
 
-  const { searchCharacters, readAdventureNames } = options.search
-  const searchRepository: CharacterSearchRepository =
-    readAdventureNames !== undefined ? { readAdventureNames } : emptyCharacterSearchRepository
+  const { searchCharacters, readAdventureNames, readCharacterScores } = options.search
+  const searchRepository: CharacterSearchRepository = {
+    readAdventureNames: readAdventureNames ?? emptyCharacterSearchRepository.readAdventureNames,
+    readCharacterScores: readCharacterScores ?? emptyCharacterSearchRepository.readCharacterScores
+  }
   const search = new CharacterSearchService(
     searchRepository,
     searchCharacters,
