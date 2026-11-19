@@ -1,5 +1,5 @@
 import { Button, MonitorIcon, StatusChip } from '@dfragon/ui'
-import { HeaderTooltip, tooltipTriggerClass } from '#components/HeaderTooltip'
+import { HeaderTooltip, tooltipTriggerClass } from '#shared/ui/HeaderTooltip'
 import { useScreenCaptureContext } from '#hooks/useScreenCaptureContext'
 import { useSearchModeStore } from '#hooks/useSearchModeStore'
 import { type CapturePhase, getCaptureControlState, type SearchMode } from '#core/capture'

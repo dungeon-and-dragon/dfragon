@@ -1,5 +1,5 @@
 import { Button, CheckIcon, CopyIcon } from '@dfragon/ui'
-import { type ClipboardCopyStatus, useClipboardCopy } from '#hooks/useClipboardCopy'
+import { type ClipboardCopyStatus, useClipboardCopy } from '#shared/lib/useClipboardCopy'
 import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'

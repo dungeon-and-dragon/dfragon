@@ -1,18 +1,18 @@
 import { Button, ChipGroup } from '@dfragon/ui'
 import { useRef, useState } from 'react'
 import type { ClearJob } from '#core/ranking'
-import { useChartTooltipSlide } from '#animations/useChartTooltipSlide'
-import { BoxPlot, BoxPlotAxis } from '#components/chart/BoxPlot'
+import { useChartTooltipSlide } from '#shared/ui/chart/useChartTooltipSlide'
+import { BoxPlot, BoxPlotAxis } from '#shared/ui/chart/BoxPlot'
 import {
   boxPlotScaleFor,
   boxPlotTooltipPlaceOf,
   boxStatsTooltipRows
-} from '#components/chart/box-plot-layout'
-import { BoxPlotLegend } from '#components/chart/ChartLegend'
-import type { Scale } from '#components/chart/chart-geometry'
-import { ChartTooltip } from '#components/chart/plot-parts'
-import { type Hover, NO_HOVER, type TooltipRow } from '#components/chart/plot-layout'
-import { useChartSize } from '#components/chart/useChartSize'
+} from '#shared/ui/chart/box-plot-layout'
+import { BoxPlotLegend } from '#shared/ui/chart/ChartLegend'
+import type { Scale } from '#shared/ui/chart/chart-geometry'
+import { ChartTooltip } from '#shared/ui/chart/plot-parts'
+import { type Hover, NO_HOVER, type TooltipRow } from '#shared/ui/chart/plot-layout'
+import { useChartSize } from '#shared/ui/chart/useChartSize'
 import { JOB_SORTS, type JobRow, type JobSort, jobRows } from '#pages/clears/clear-detail'
 import {
   hasJobScores,

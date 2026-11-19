@@ -1,5 +1,5 @@
-import { EMPTY_VALUE, formatCount, formatDateMinute } from '#app/format'
-import { useCollection } from '#app/ops-queries'
+import { EMPTY_VALUE, formatCount, formatDateMinute } from '#ops-app/format'
+import { useCollection } from '#ops-app/ops-queries'
 import { panelClasses, textClasses } from './panel-classes'
 import { RequeueButton } from './RequeueButton'
 

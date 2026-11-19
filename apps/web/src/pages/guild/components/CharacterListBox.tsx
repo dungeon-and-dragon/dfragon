@@ -1,9 +1,9 @@
 import { Button } from '@dfragon/ui'
 import { useState } from 'react'
 import type { StoredCharacter } from '#core/ranking'
-import type { LoadedResult } from '#hooks/useLoadedResult'
+import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
-import { ListBox } from '#components/table/ListBox'
+import { ListBox } from '#shared/ui/ListBox'
 
 const PAGE_SIZE = 50
 const LOADING_ROWS = 5

@@ -1,4 +1,4 @@
-import type { TooltipPlace } from '#animations/useChartTooltipSlide'
+import type { TooltipPlace } from './useChartTooltipSlide'
 import { type BoxStats, boxPlotScale, type Scale } from './chart-geometry'
 import type { TooltipRow } from './plot-layout'
 

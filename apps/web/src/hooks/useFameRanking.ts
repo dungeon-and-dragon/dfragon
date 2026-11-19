@@ -2,7 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import type { FameRanking, FameRankingFilter, RankedCharacter } from '#core/ranking'
 import { useClientHost } from '#host/client-host'
-import type { LoadedResult } from './useLoadedResult'
+import type { LoadedResult } from '#shared/lib/useLoadedResult'
 
 export type FameRankingPages = Readonly<{
   characters: readonly RankedCharacter[]

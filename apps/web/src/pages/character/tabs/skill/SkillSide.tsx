@@ -7,7 +7,7 @@ import {
   type SkillUpgradeBoard,
   skillMarkOf
 } from '#core/catalog'
-import { ClipboardCopyButton } from '#components/ClipboardCopyButton'
+import { ClipboardCopyButton } from '#shared/ui/ClipboardCopyButton'
 import { GameText } from '#pages/character/tabs/GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { SkillSprite } from './SkillSprite'

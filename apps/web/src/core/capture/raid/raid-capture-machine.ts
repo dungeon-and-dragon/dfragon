@@ -18,7 +18,7 @@ import { recognizeRaidRows, type RaidSlotRecognition } from './raid-recognition'
 import {
   reportRuntimeDiagnostic,
   showRejectedOcrNickname
-} from '#core/diagnostics/runtime-diagnostics'
+} from '#shared/lib/diagnostics/runtime-diagnostics'
 
 const READY_STATUS = '캡처 버튼을 눌러 공대를 인식해 주세요.'
 

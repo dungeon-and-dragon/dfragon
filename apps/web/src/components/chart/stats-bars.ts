@@ -1,7 +1,7 @@
 import { CHARACTER_SERVER_NAMES, type JobLabel, jobLabelOf } from '#core/character'
 import type { CharacterStats } from '#core/ranking'
-import type { ColumnBar } from './Columns'
-import type { Bar } from './RowBars'
+import type { ColumnBar } from '#shared/ui/chart/Columns'
+import type { Bar } from '#shared/ui/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
 

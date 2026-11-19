@@ -33,7 +33,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 
 ## 코드 위치
 
-다른 폴더는 `#ops-api/*`, `#ops-components/*`, `#ops-testing/*`, `src/` 바로 아래 파일은 `#app/*` alias로 가져옵니다.
+다른 폴더는 `#ops-api/*`, `#ops-components/*`, `#ops-testing/*`, `src/` 바로 아래 파일은 `#ops-app/*` alias로 가져옵니다.
 Alias 원본은 `tsconfig.paths.json`이며, 같은 폴더의 파일만 `./` 상대 경로로 가져옵니다.
 
 - `src/OpsScreen.tsx`: 헤더, job 목록과 상세, queue, 수집 대기열을 한 화면에 둡니다.

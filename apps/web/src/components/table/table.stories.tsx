@@ -3,8 +3,8 @@ import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
 import { CharacterTable, SkeletonRow } from './CharacterTable'
-import { ListBox } from './ListBox'
-import { TitleBox, TitleStat } from './TitleBox'
+import { ListBox } from '#shared/ui/ListBox'
+import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 
 const meta = {
   title: 'Patterns/표',

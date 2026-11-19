@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import { type RefObject, useLayoutEffect } from 'react'
 import { COLUMN_BAR_GROW } from './useChartBarGrow'
-import { cubicBezier, useMotionAllowed } from './gsap-motion'
+import { cubicBezier, useMotionAllowed } from '#shared/lib/animations/gsap-motion'
 
 const GROW_EASE = cubicBezier('chart-svg-grow', '0.2,0,0,1')
 

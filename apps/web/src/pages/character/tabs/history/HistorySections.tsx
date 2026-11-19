@@ -7,7 +7,7 @@ import {
   itemRarityOfGrade,
   SET_PART
 } from '#core/character'
-import { formatSeoulFullDateTime } from '#core/time-format'
+import { formatSeoulFullDateTime } from '#shared/lib/time-format'
 import { enhancementKindClasses } from '#components/game-colors'
 import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
 import { ItemName } from '#pages/character/tabs/equipment/item-parts'

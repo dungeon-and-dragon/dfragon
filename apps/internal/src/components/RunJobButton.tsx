@@ -3,8 +3,8 @@ import { Button } from '@dfragon/ui'
 import { type FormEvent, useState } from 'react'
 import { JOB_ALREADY_RUNNING, OpsRequestFailure } from '#ops-api/ops-client'
 import type { Job } from '#ops-api/ops-schemas'
-import { EMPTY_VALUE } from '#app/format'
-import { useRequestRun } from '#app/ops-queries'
+import { EMPTY_VALUE } from '#ops-app/format'
+import { useRequestRun } from '#ops-app/ops-queries'
 import {
   type ArgDraft,
   type ArgInput,
@@ -12,7 +12,7 @@ import {
   argsFromDraft,
   choicesOf,
   isNumberField
-} from '#app/run-args'
+} from '#ops-app/run-args'
 import { FIELD_INPUT, popoverClasses, textClasses } from './panel-classes'
 
 type RunJobButtonProps = {

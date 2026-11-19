@@ -1,6 +1,6 @@
 import type { ItemStats, SetStatsFilter } from '#core/ranking'
 import { useClientHost } from '#host/client-host'
-import { type LoadedResult, useLoadedResult } from './useLoadedResult'
+import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 
 export function useItemStats(filter: SetStatsFilter): LoadedResult<ItemStats> {
   const { getItemStats } = useClientHost()
