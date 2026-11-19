@@ -42,4 +42,31 @@ describe('fameRankingSchema', () => {
       'synthetic-no-sets'
     ])
   })
+
+  it('행의 score를 종류와 값으로 읽고, score가 없는 행은 null로 읽으며, 모르는 종류는 거절한다', () => {
+    const response = {
+      characters: [
+        {
+          ...row,
+          equipmentSet: null,
+          oathSet: null,
+          score: { calculator: 'buff', value: 4120000 }
+        },
+        { ...row, characterId: 'synthetic-null', equipmentSet: null, oathSet: null, score: null },
+        { ...row, characterId: 'synthetic-missing', equipmentSet: null, oathSet: null }
+      ],
+      nextCursor: null
+    }
+
+    expect(fameRankingSchema.parse(response).characters.map(({ score }) => score)).toEqual([
+      { calculator: 'buff', value: 4120000 },
+      null,
+      null
+    ])
+    const unknown = {
+      ...response,
+      characters: [{ ...response.characters[0], score: { calculator: 'synergy', value: 1 } }]
+    }
+    expect(fameRankingSchema.safeParse(unknown).success).toBe(false)
+  })
 })
