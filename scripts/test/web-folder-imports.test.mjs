@@ -27,7 +27,7 @@ const rejectedImports = [
   ['core/hook-alias.ts', '#hooks/useShared', 'UI 폴더'],
   ['core/page-alias.ts', '#pages/a', 'UI 폴더'],
   ['core/host-alias.ts', '#host/client-host', 'UI 폴더'],
-  ['core/animation-alias.ts', '#animations/transition', 'UI 폴더'],
+  ['core/animation-alias.ts', '#shared/lib/animations/gsap-motion', 'UI 폴더'],
   ['components/a.ts', '#pages/a/APage', 'pages/'],
   ['components/nested/b.ts', '#pages/a/util', 'pages/'],
   ['hooks/a.ts', '#pages/a/APage', 'pages/'],
@@ -129,10 +129,9 @@ const coreRejected = [
 ]
 
 const aliasAllowed = [
-  ['src/pages/a/animation.ts', '#animations/transition', 'src/animations/transition.ts'],
-  ['src/pages/a/asset.ts', '#assets/logo.png', 'src/assets/logo.png'],
+  ['src/pages/a/asset.ts', '#shared/assets/logo.png', 'src/shared/assets/logo.png'],
   ['src/pages/a/component.ts', '#components/Shared', 'src/components/Shared.tsx'],
-  ['src/pages/a/constant.ts', '#constants/shared', 'src/constants/shared.ts'],
+  ['src/pages/a/shared-ui.ts', '#shared/ui/ListBox', 'src/shared/ui/ListBox.tsx'],
   ['src/pages/a/hook.ts', '#hooks/useShared', 'src/hooks/useShared.ts'],
   ['src/pages/a/host.ts', '#host/client-host', 'src/host/client-host.tsx'],
   ['src/pages/a/lib.ts', '#lib/shared', 'src/lib/shared.ts'],
@@ -143,10 +142,10 @@ const aliasAllowed = [
 
 const coreAllowed = [
   ['src/pages/a/core-character.ts', '#core/character'],
+  ['src/pages/a/core-root.ts', '#core/root-file'],
   ['src/core/character/same.ts', './character-detail-view'],
   ['src/core/search/other-domain.ts', '#core/character/character-detail-view'],
   ['src/core/search/other-alias.ts', '#core/character/character-detail-view'],
-  ['src/pages/a/core-time.ts', '#core/time-format'],
   ['src/pages/a/core-image.ts', '#core/capture/raid/heading.png']
 ]
 
@@ -178,10 +177,9 @@ async function cruiseSamples() {
     )
 
     for (const file of [
-      'src/animations/transition.ts',
-      'src/assets/logo.png',
+      'src/shared/assets/logo.png',
+      'src/shared/ui/ListBox.tsx',
       'src/components/Shared.tsx',
-      'src/constants/shared.ts',
       'src/host/client-host.tsx',
       'src/testing/fixture.tsx',
       'src/pages/a/hooks/useThing.ts',
@@ -196,8 +194,8 @@ async function cruiseSamples() {
       'src/core/search/search.ts',
       'src/core/character/character-detail-view.ts',
       'src/core/character/nested/helper.ts',
-      'src/core/time-format.ts',
-      'src/core/capture/raid/heading.png'
+      'src/core/capture/raid/heading.png',
+      'src/core/root-file.ts'
     ]) {
       files[file] = 'export const value = 1\n'
     }
