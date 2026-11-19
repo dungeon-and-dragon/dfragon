@@ -161,6 +161,15 @@ function rowLink(name: string, rowName: string): Element | null | undefined {
   return row?.querySelector(':scope > div a')
 }
 
+it('직업을 고른 통계 화면의 필터 상자에는 초기화 버튼이 없다', async () => {
+  await render({ setStats: setStatsOf(stats) })
+
+  expect(container.querySelector('[role="group"]')).not.toBeNull()
+  expect(
+    [...container.querySelectorAll('button')].some((button) => button.textContent === '초기화')
+  ).toBe(false)
+})
+
 it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두고, 표본 전체 대비 비율의 합이 100%다', async () => {
   await render({ setStats: setStatsOf(stats) })
 

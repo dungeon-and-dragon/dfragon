@@ -415,6 +415,29 @@ it('명성 범위를 query로 보내고, 최고 명성이 있든 없든 순위 �
   expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
 })
 
+it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초기화로 모든 필터를 지운다', async () => {
+  const onFilterChange = vi.fn()
+  await render(async () => rankingOf(1), {}, onFilterChange)
+
+  expect(chip('초기화').disabled).toBe(true)
+  await render(
+    async () => rankingOf(1),
+    {
+      jobId: MALE_PRIEST,
+      jobGrowId: CRUSADER,
+      role: 'buffer',
+      equipmentSetId: GOLDEN,
+      itemIds: ['synthetic-weapon'],
+      fameFrom: 136000,
+      fameTo: 138000
+    },
+    onFilterChange
+  )
+  expect(chip('초기화').disabled).toBe(false)
+  await act(async () => chip('초기화').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({})
+})
+
 it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두고, 다시 시도하면 이어 받는다', async () => {
   let failNext = true
   await render(async (cursor) => {

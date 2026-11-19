@@ -380,6 +380,42 @@ it('푸터의 약관 링크를 누르면 그 화면으로 가고 지금 화면�
   ])
 })
 
+it('여러 필터가 붙은 검색 주소에서 초기화를 누르면 query 없는 검색 주소로 가서 필터를 처음 상태로 돌린다', async () => {
+  server.use(
+    http.get(`${SITE_API_URL}/stats/sets`, failure),
+    http.get(`${SITE_API_URL}/stats/items`, failure)
+  )
+  const [job] = RANKING_JOBS
+  window.history.replaceState(
+    null,
+    '',
+    `/rankings?jobId=${job!.jobId}&jobGrowId=${job!.grows[0]!.jobGrowId}&oathSetId=16204&itemIds=synthetic-weapon&fameFrom=136000&fameTo=138000`
+  )
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const reset = await vi.waitFor(() => {
+    const button = [...container.querySelectorAll<HTMLButtonElement>('main button')].find(
+      (candidate) => candidate.textContent === '초기화'
+    )
+    expect(button?.disabled).toBe(false)
+
+    return button!
+  })
+  await act(async () => reset.click())
+
+  await vi.waitFor(() => expect(window.location.search).toBe(''))
+  expect(window.location.pathname).toBe('/rankings')
+  expect(reset.disabled).toBe(true)
+  expect(
+    [...container.querySelectorAll('main button[data-pressed]')].map((chip) => chip.textContent)
+  ).toEqual(['직업 전체', '전직 전체'])
+  expect(
+    [...container.querySelectorAll<HTMLInputElement>('main input[inputmode="numeric"]')].map(
+      (input) => input.value
+    )
+  ).toEqual(['', ''])
+})
+
 it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 지금 화면으로 표시한다', async () => {
   server.use(
     http.get(`${SITE_API_URL}/stats/sets`, failure),
