@@ -23,6 +23,7 @@ worker가 돌리는 기능은 HTTP 경로가 없어 Controller와 DTO 없이 Ser
 worker 기능의 Service는 `service.ts`가 아니라 기존 use case 파일(예: `application/content-clears/collection.ts`, `application/character-score/calculation-job.ts`)에 둡니다.
 캐릭터 목록 수집 Service, Repository interface와 port는 `src/application/character-collection/`, Neople과 DB adapter는 `src/infrastructure/neople/character-collection.ts`, `src/infrastructure/database/character-collection.ts`, 파일 읽기는 `src/infrastructure/files/character-collection.ts`에 있습니다.
 Neople 명성 검색으로 새 캐릭터를 찾아 같은 대기열에 넣는 job은 `src/application/character-collection/discovery.ts`, 명성 구간을 내려가는 규칙은 `src/domain/character-collection/fame-sweep.ts`, Neople adapter는 `src/infrastructure/neople/character-discovery.ts`에 있습니다.
+명성 갱신 job과 월말 비활성 캐릭터 재확인 job은 `src/application/character-activity/activity-jobs.ts`, 비활성 판정 기준은 `src/domain/character-activity/activity.ts`, 최근 활동을 읽는 Neople adapter는 `src/infrastructure/neople/character-activity.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있고, 시작 함수 `runCharacterCollector`는 `src/runtime/run-character-collector.ts`에 있습니다.
 Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`에 있습니다.
 
