@@ -11,7 +11,7 @@ import {
   type SlotState,
   type SnapshotMark,
   swapSeats
-} from '#core/capture'
+} from '#features/capture-search'
 import { TestRouter } from '#testing/test-support/test-router'
 
 const CHARACTER_NAME_INPUT_SELECTOR = 'input[aria-label$="번 캐릭터 이름"]'

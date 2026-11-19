@@ -1,8 +1,10 @@
 import { vi } from 'vitest'
-import { searchSnapshot } from '#core/testing'
-import { SEARCH_SLOT_COUNTS } from '#core/search'
-import type { ClientHost } from '#host/client-host'
-import { emptySearchSlots } from '#core/capture'
+import {
+  searchSnapshot,
+  SEARCH_SLOT_COUNTS,
+  type ClientHost,
+  emptySearchSlots
+} from '#features/capture-search'
 
 type ClientHostOverrides = {
   party?: Partial<ClientHost['party']>

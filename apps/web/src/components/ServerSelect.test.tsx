@@ -2,7 +2,7 @@
 import { act, type ComponentProps } from 'react'
 import { createRoot } from 'react-dom/client'
 import { beforeEach, afterEach, expect, it, vi } from 'vitest'
-import type { SearchMode } from '#core/capture'
+import type { SearchMode } from '#features/capture-search'
 import { CharacterRow } from './CharacterRow'
 import { previewCharacter } from '#testing/fixtures/mvp/fixture'
 import { serverNames } from '#shared/config/servers'

@@ -1,4 +1,4 @@
-import type { ClientHost } from '#host/client-host'
+import type { ClientHost } from '#features/capture-search'
 
 type StoryHostOverrides = {
   party?: Partial<ClientHost['party']>
