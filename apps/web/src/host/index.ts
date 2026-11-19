@@ -65,6 +65,7 @@ export function installBrowserHost(
     getFameRanking: dfragon.rankings.fame,
     getCharacterStats: dfragon.stats,
     getSkillStats: dfragon.skillStats,
+    getSetStats: dfragon.setStats,
     getClearStats: dfragon.clearStats,
     getClearContentStats: dfragon.clearContentStats,
     getClearOverview: dfragon.clearOverview,

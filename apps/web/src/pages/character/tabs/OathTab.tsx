@@ -13,7 +13,7 @@ import {
   oathItemIconOf,
   oathSetBoardOf
 } from '#core/catalog'
-import { useOathCatalog } from '#pages/character/hooks/useOathCatalog'
+import { useOathCatalog } from '#hooks/useOathCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
 import { raritySolidOf } from '#components/game-colors'
