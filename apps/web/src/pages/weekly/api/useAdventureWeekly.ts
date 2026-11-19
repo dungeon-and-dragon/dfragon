@@ -1,16 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query'
-import type { AdventureWeekly } from '#core/adventure-guild'
-import { useClientHost } from '#host/client-host'
+import { type AdventureWeekly, adventureWeeklySchema } from '#core/adventure-guild'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
+import { requestAdventureJson } from './adventure-request'
 
 function weeklyKey(adventureName: string) {
   return ['adventure', adventureName, 'weekly'] as const
 }
 
 export function useAdventureWeekly(adventureName: string): LoadedResult<AdventureWeekly> {
-  const { getAdventureWeekly } = useClientHost()
-
-  return useLoadedResult(weeklyKey(adventureName), () => getAdventureWeekly(adventureName))
+  return useLoadedResult(weeklyKey(adventureName), async () =>
+    requestAdventureJson(adventureName, '/weekly', adventureWeeklySchema)
+  )
 }
 
 export function useRefreshAdventureWeekly(): (adventureName: string) => Promise<void> {

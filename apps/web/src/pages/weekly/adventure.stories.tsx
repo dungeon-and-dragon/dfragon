@@ -1,15 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { ClientHost } from '#host/client-host'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import {
-  STORY_ADVENTURE_NAME,
-  storyAdventureActivity,
-  storyAdventureSeasonDays,
-  storyAdventureWeekly
-} from '#testing/story-support/story-adventure'
-import { createStoryClientHost } from '#testing/story-support/story-host'
+import { STORY_ADVENTURE_NAME } from './api/adventure.fixture'
+import { adventureHandlers } from './api/adventure.handlers'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 const meta = {
@@ -21,34 +15,13 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const adventureHost = createStoryClientHost({
-  getAdventureActivity: async (_name, season) => storyAdventureActivity(season),
-  getAdventureActivitySeasonDays: async (_name, season) => storyAdventureSeasonDays(season),
-  getAdventureWeekly: async () => storyAdventureWeekly
-})
-
-const failedHost = createStoryClientHost({
-  getAdventureActivity: async () => {
-    throw new Error('모험단 활동을 받지 못했습니다.')
-  },
-  getAdventureWeekly: async () => {
-    throw new Error('주간 던파를 받지 못했습니다.')
-  }
-})
-
 function ignoreOpen(): void {}
 
-function Screen({
-  host,
-  initialSeason
-}: {
-  host?: ClientHost
-  initialSeason?: number
-}): React.JSX.Element {
+function Screen({ initialSeason }: { initialSeason?: number }): React.JSX.Element {
   const [season, setSeason] = useState(initialSeason)
 
   return (
-    <StoryFrame host={host}>
+    <StoryFrame>
       <StoryScreen>
         <WeeklyScreen
           adventureName={STORY_ADVENTURE_NAME}
@@ -62,23 +35,28 @@ function Screen({
 }
 
 export const 모험단: Story = {
-  render: () => <Screen host={adventureHost} />
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <Screen />
 }
 
 export const 시즌10: Story = {
-  render: () => <Screen host={adventureHost} initialSeason={10} />
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <Screen initialSeason={10} />
 }
 
 export const 시즌9: Story = {
-  render: () => <Screen host={adventureHost} initialSeason={9} />
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <Screen initialSeason={9} />
 }
 
 export const 받는중: Story = {
+  parameters: { msw: adventureHandlers.loading },
   render: () => <Screen />
 }
 
 export const 받지못함: Story = {
-  render: () => <Screen host={failedHost} />
+  parameters: { msw: adventureHandlers.failure },
+  render: () => <Screen />
 }
 
 export const 모험단입력: Story = {
