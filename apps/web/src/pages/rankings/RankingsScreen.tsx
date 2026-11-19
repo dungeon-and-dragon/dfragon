@@ -36,7 +36,7 @@ export function RankingsScreen({
   const catalog: OathCatalog | null = loadedValue(useOathCatalog())
   const itemStats: ItemStats | null = loadedValue(useItemStats({ jobId, jobGrowId, role }))
   const choices = setChoicesOf(stats, catalog, filter)
-  const itemChoices = itemChoicesOf(itemStats)
+  const itemChoices = itemChoicesOf(itemStats, jobId === undefined)
   const setLabel = setFilterLabel(stats, catalog, filter)
   const keptItemIds = itemStats !== null ? itemIdsInStats(itemStats, itemIds) : itemIds
   const dropsItems = keptItemIds.length !== itemIds.length

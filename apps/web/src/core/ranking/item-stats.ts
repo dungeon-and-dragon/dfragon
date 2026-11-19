@@ -13,7 +13,15 @@ export const itemStatsSchema = z
     slots: z.array(
       z.object({
         slotId: z.string().min(1),
-        items: z.array(z.object({ itemId: z.string().min(1), name: z.string(), count }))
+        items: z.array(
+          z.object({
+            itemId: z.string().min(1),
+            name: z.string(),
+            // Neople itemTypeDetail(무기는 도, 낫 같은 종류)이고, 모르면 null이다.
+            typeDetail: z.string().nullable(),
+            count
+          })
+        )
       })
     )
   })
