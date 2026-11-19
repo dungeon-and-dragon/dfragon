@@ -36,10 +36,12 @@ export const adventureEquipmentSchema = z.object({
   sets: z.array(z.object({ setItemId: z.string(), setItemName: z.string() })),
   servers: z.array(
     z.object({ serverId: z.string(), characters: z.array(equipmentCharacterSchema) })
-  )
+  ),
+  selected: z.object({ serverId: z.string(), setItemId: z.string().nullable() }).nullable()
 })
 
 export type AdventureEquipment = z.infer<typeof adventureEquipmentSchema>
+export type EquipmentSelection = NonNullable<AdventureEquipment['selected']>
 export type EquipmentCharacter = z.infer<typeof equipmentCharacterSchema>
 export type EquipmentSlot = (typeof EQUIPMENT_SLOTS)[number]
 
