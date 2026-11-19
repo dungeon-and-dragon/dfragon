@@ -22,6 +22,7 @@ import {
   parseResetDate
 } from '@dfragon/server-core/domain/seoul-time.js'
 import { toRaidStageLabel } from '@dfragon/server-core/domain/raid-stage.js'
+import { isSeasonEquipment, seasonEquipmentLevel } from './season-equipment.js'
 
 // 타임라인 정기 동기화는 중천(시즌 10)부터 받는다. 그 전 시즌은 모험단 캐릭터가 모두 옛 시즌 받기를 끝내야 집계한다.
 const FIRST_COLLECTED_SEASON_ID = 10
@@ -34,21 +35,8 @@ const ITEM_RARITIES = {
   신화: 'mythic'
 } as const
 const ITEM_CODES = new Set(ACQUISITION_CODES)
-// 시즌마다 115레벨 같은 장비 레벨이다(2026-11-18 저장소 소유자 결정, ADR 0074). 이 표에 있는 시즌만 아이템 사전으로
-// 장비와 서약을 나눠 세고, 없는 시즌은 등급만 보고 센다. 장비 레벨이 바뀐 시즌은 한 줄을 더한다.
-const SEASON_EQUIPMENT_LEVELS: ReadonlyMap<number, number> = new Map([
-  [10, 115],
-  [11, 115]
-])
 const EQUIPMENT_CODES = new Set(EQUIPMENT_ACQUISITION_CODES)
 const OATH_CODES = new Set(OATH_ACQUISITION_CODES)
-// 칭호도 itemType이 액세서리지만 레벨이 0이나 1이라 장비 레벨로 빠진다(ADR 0074).
-const EQUIPMENT_ITEM_TYPES: ReadonlySet<string | null> = new Set([
-  '무기',
-  '방어구',
-  '액세서리',
-  '추가장비'
-])
 const SPLIT_RARITIES = {
   레전더리: 'legendary',
   에픽: 'epic',
@@ -322,14 +310,14 @@ function toLegacyAcquisition({ code, itemRarity }: ActivityItem): Acquisition | 
   return { kind: 'item', rarityName: itemRarity }
 }
 
-function isSeasonEquipment(
+function isSeasonEquipmentItem(
   { itemId }: ActivityItem,
   itemDictionary: ActivityItemDictionary,
   equipmentLevel: number
 ): boolean {
   const entry = itemId !== null ? itemDictionary.get(itemId) : undefined
 
-  return entry?.availableLevel === equipmentLevel && EQUIPMENT_ITEM_TYPES.has(entry.itemType)
+  return isSeasonEquipment(entry, equipmentLevel)
 }
 
 function toAcquisition(
@@ -337,7 +325,7 @@ function toAcquisition(
   row: ActivityItem,
   itemDictionary: ActivityItemDictionary
 ): Acquisition | undefined {
-  const equipmentLevel = SEASON_EQUIPMENT_LEVELS.get(seasonId)
+  const equipmentLevel = seasonEquipmentLevel(seasonId)
 
   if (equipmentLevel === undefined) {
     return toLegacyAcquisition(row)
@@ -353,7 +341,7 @@ function toAcquisition(
     return { kind: 'oath', rarityName: itemRarity }
   }
 
-  if (EQUIPMENT_CODES.has(code) && isSeasonEquipment(row, itemDictionary, equipmentLevel)) {
+  if (EQUIPMENT_CODES.has(code) && isSeasonEquipmentItem(row, itemDictionary, equipmentLevel)) {
     return { kind: 'item', rarityName: itemRarity }
   }
 
