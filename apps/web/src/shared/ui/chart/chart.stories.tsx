@@ -42,7 +42,7 @@ export const 가로막대: Story = {
         const value = 4200 - index * 430
         const share = (14 - index * 1.4).toFixed(1)
 
-        return { key: name, name, sub: '귀검사(남)', value, share: `${share}%` }
+        return { key: name, name, value, share: `${share}%` }
       })}
       formatValue={formatCount}
     />
@@ -170,7 +170,6 @@ export const 상자그림: Story = {
           return {
             key: name,
             name,
-            sub: '귀검사(남)',
             color: `var(--color-chart-${index + 1})`,
             value,
             stats: {
