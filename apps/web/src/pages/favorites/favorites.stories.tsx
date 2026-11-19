@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { storyFavoriteCharacters } from '#testing/story-support/story-adventure'
+import { storyFavoriteCharacters } from '#testing/story-support/story-favorites'
 import { FavoritesPage } from './FavoritesPage'
 
 const meta = {

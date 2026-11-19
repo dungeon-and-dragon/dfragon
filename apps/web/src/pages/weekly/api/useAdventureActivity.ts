@@ -1,6 +1,14 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { ActivitySeason, AdventureActivity, AdventureActivityDay } from '#core/adventure-guild'
-import { useClientHost } from '#host/client-host'
+import {
+  type ActivitySeason,
+  type AdventureActivity,
+  type AdventureActivityDay,
+  type AdventureActivitySeasonDays,
+  activitySeasonSchema,
+  adventureActivitySchema,
+  adventureActivitySeasonDaysSchema
+} from '#core/adventure-guild'
+import { requestAdventureJson } from './adventure-request'
 
 export type AdventureActivityResult =
   | Readonly<{ status: 'loading' }>
@@ -9,6 +17,38 @@ export type AdventureActivityResult =
 
 const LOADING = { status: 'loading' } as const
 const BACKFILL_POLL_MS = 3000
+
+async function requestAdventureActivity(
+  adventureName: string,
+  season: number | undefined
+): Promise<AdventureActivity> {
+  return requestAdventureJson(adventureName, '/activity', adventureActivitySchema, {
+    searchParams: { ...(season !== undefined && { season: String(season) }) }
+  })
+}
+
+async function requestSeasonDays(
+  adventureName: string,
+  season: number
+): Promise<AdventureActivitySeasonDays> {
+  return requestAdventureJson(
+    adventureName,
+    `/activity/seasons/${season}/days`,
+    adventureActivitySeasonDaysSchema
+  )
+}
+
+async function requestSeasonBackfill(
+  adventureName: string,
+  season: number
+): Promise<ActivitySeason> {
+  return requestAdventureJson(
+    adventureName,
+    `/activity/seasons/${season}/backfill`,
+    activitySeasonSchema,
+    { method: 'post' }
+  )
+}
 
 function activityKey(adventureName: string) {
   return ['adventure', adventureName, 'activity'] as const
@@ -50,12 +90,11 @@ export function useAdventureActivity(
   adventureName: string,
   season: number | undefined
 ): AdventureActivityResult {
-  const { getAdventureActivity } = useClientHost()
   const queryClient = useQueryClient()
   const { data, error, isPlaceholderData } = useQuery({
     queryKey: seasonActivityKey(adventureName, season),
     queryFn: async () => {
-      const activity = await getAdventureActivity(adventureName, season)
+      const activity = await requestAdventureActivity(adventureName, season)
       const currentQuery = queryClient.getQueryCache().find({
         queryKey: seasonActivityKey(adventureName, season),
         exact: true
@@ -112,10 +151,9 @@ export function useAdventureActivity(
 // 받기 요청이 돌려준 시즌 상태를 받아 둔 모든 시즌 응답에 바로 넣어, 받는 중이면 다음 조회를 기다리지 않고 진행 조회를 시작한다.
 // 받는 중에 받아 둔 다른 시즌으로 바꿔도 그 응답이 받는 중을 알아야 진행 조회가 이어진다.
 export function useBackfillAdventureSeason(adventureName: string): (seasonId: number) => void {
-  const { backfillAdventureSeason } = useClientHost()
   const queryClient = useQueryClient()
   const { mutate } = useMutation({
-    mutationFn: (seasonId: number) => backfillAdventureSeason(adventureName, seasonId),
+    mutationFn: (seasonId: number) => requestSeasonBackfill(adventureName, seasonId),
     onSuccess(updated: ActivitySeason) {
       queryClient.setQueriesData<AdventureActivity>(
         { queryKey: seasonsActivityKey(adventureName) },
@@ -146,10 +184,9 @@ export function useAdventureActivitySeasonDays(
   adventureName: string,
   season: number
 ): AdventureActivitySeasonDaysResult {
-  const { getAdventureActivitySeasonDays } = useClientHost()
   const { data, error } = useQuery({
     queryKey: seasonDaysKey(adventureName, season),
-    queryFn: () => getAdventureActivitySeasonDays(adventureName, season)
+    queryFn: () => requestSeasonDays(adventureName, season)
   })
   if (data !== undefined) {
     return { status: 'success', value: data.days }

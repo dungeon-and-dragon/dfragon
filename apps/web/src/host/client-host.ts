@@ -2,15 +2,6 @@ import { createContext, useContext } from 'react'
 import type { CaptureSource, RaidFrameResult } from '#core/capture'
 import type { CharacterImage } from '#core/character'
 import type { OcrSearchObservation, SearchApi, SearchCommandResult } from '#core/search'
-import type { TodayGrade } from '#core/today-grade'
-import type {
-  ActivitySeason,
-  AdventureActivity,
-  AdventureActivitySeasonDays,
-  AdventureWeekly,
-  Guild
-} from '#core/adventure-guild'
-import type { CharacterSearchQuery, SearchedCharacter } from '#core/api'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'
 
@@ -30,19 +21,6 @@ export type RaidCaptureHost = CardSearchHost & {
 export type ClientHost = Readonly<{
   party: PartyCaptureHost
   raid: RaidCaptureHost
-  getTodayGrade: () => Promise<TodayGrade>
-  getGuild: (guildId: string) => Promise<Guild>
-  getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
-  getAdventureActivity: (
-    adventureName: string,
-    season: number | undefined
-  ) => Promise<AdventureActivity>
-  getAdventureActivitySeasonDays: (
-    adventureName: string,
-    season: number
-  ) => Promise<AdventureActivitySeasonDays>
-  backfillAdventureSeason: (adventureName: string, season: number) => Promise<ActivitySeason>
-  searchCharacters: (query: CharacterSearchQuery) => Promise<readonly SearchedCharacter[]>
 }>
 
 export type WatchedScreen = Readonly<{ kind: ScreenWatchKind; roundRunning: boolean }>

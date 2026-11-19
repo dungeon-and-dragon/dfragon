@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
-import { createStoryClientHost } from '#testing/story-support/story-host'
+import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
 import { GlobalBar } from './GlobalBar'
 import { CharacterTable } from './table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
@@ -16,14 +16,12 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const host = createStoryClientHost({
-  getTodayGrade: async () => ({ percent: 13, expiresAt: '2999-01-01T00:00:00.000Z' })
-})
 const rows = storyRankedCharacters(4)
 
 export const 화면틀: Story = {
+  parameters: { msw: [todayGradeHandlers.grade(13)] },
   render: () => (
-    <StoryFrame host={host}>
+    <StoryFrame>
       <div className="flex min-h-screen flex-col overflow-x-clip">
         <GlobalBar />
         <main className="page screen bg-canvas">

@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { ClientHost } from '#host/client-host'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { storyGuild } from '#testing/story-support/story-adventure'
-import { createStoryClientHost } from '#testing/story-support/story-host'
+import { guildHandlers } from './api/guild.handlers'
 import { GuildScreen } from './GuildScreen'
 
 const meta = {
@@ -15,21 +13,9 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-function hostOf(memberCount: number): ClientHost {
-  const guild = storyGuild(memberCount)
-
-  return createStoryClientHost({ getGuild: async () => guild })
-}
-
-const failedHost = createStoryClientHost({
-  getGuild: async () => {
-    throw new Error('길드를 받지 못했습니다.')
-  }
-})
-
-function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
+function Screen(): React.JSX.Element {
   return (
-    <StoryFrame host={host}>
+    <StoryFrame>
       <StoryScreen>
         <GuildScreen guildId="guild-1" />
       </StoryScreen>
@@ -38,17 +24,21 @@ function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
 }
 
 export const 길드: Story = {
-  render: () => <Screen host={hostOf(48)} />
+  parameters: { msw: [guildHandlers.members(48)] },
+  render: () => <Screen />
 }
 
 export const 길드원없음: Story = {
-  render: () => <Screen host={hostOf(0)} />
+  parameters: { msw: [guildHandlers.members(0)] },
+  render: () => <Screen />
 }
 
 export const 받는중: Story = {
+  parameters: { msw: [guildHandlers.loading] },
   render: () => <Screen />
 }
 
 export const 받지못함: Story = {
-  render: () => <Screen host={failedHost} />
+  parameters: { msw: [guildHandlers.failure] },
+  render: () => <Screen />
 }
