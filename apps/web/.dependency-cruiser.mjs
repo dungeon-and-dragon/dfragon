@@ -9,6 +9,8 @@ const SCREEN_FOLDER_IMPORT_COMMENT =
   '화면 폴더 밖에서는 #pages/<화면>(예: #pages/rankings)처럼 폴더 경로로 import한다. 두 화면이 쓰는 코드는 공용 components/나 hooks/에 옮긴다.'
 const LAYERS = ['app', 'pages', 'widgets', 'features', 'entities', 'shared']
 const LEGACY_FOLDERS_PATH = '^src/(components|hooks|core|host|lib)/'
+const TEST_OR_STORY_PATH = '\\.(test|stories)\\.tsx?$'
+const MOCK_API_PATH = '/api/[^/]+\\.(fixture|handlers)\\.ts$'
 const LAYER_IMPORT_COMMENT =
   '계층은 자기보다 아래 계층만 import한다. 위에서부터 app, pages, widgets, features, entities, shared다.'
 const SLICE_IMPORT_COMMENT =
@@ -63,14 +65,32 @@ function pageSliceRules() {
   ]
 }
 
+// 테스트와 story는 다른 슬라이스의 fixture와 MSW handler를 index.ts를 거치지 않고 가져온다.
+// index.ts로 내보내면 제품 코드가 그 슬라이스를 import할 때 MSW가 함께 묶일 수 있다.
 function slicePublicApiRules() {
-  return ['widgets', 'features', 'entities'].map((layer) => ({
-    name: 'slice-index',
-    comment: `슬라이스 밖에서는 #${layer}/<슬라이스>처럼 그 슬라이스의 index.ts로 import한다.`,
-    severity: 'error',
-    from: { path: WEB_SOURCE_PATH, pathNot: `^src/${layer}/` },
-    to: { path: `^src/${layer}/[^/]+/`, pathNot: `^src/${layer}/[^/]+/index\\.ts$` }
-  }))
+  return ['widgets', 'features', 'entities'].flatMap((layer) => {
+    const rule = {
+      name: 'slice-index',
+      comment: `슬라이스 밖에서는 #${layer}/<슬라이스>처럼 그 슬라이스의 index.ts로 import한다.`,
+      severity: 'error'
+    }
+
+    const sliceInnerPath = `^src/${layer}/[^/]+/`
+    const sliceIndexPath = `^src/${layer}/[^/]+/index\\.ts$`
+
+    return [
+      {
+        ...rule,
+        from: { path: WEB_SOURCE_PATH, pathNot: [`^src/${layer}/`, TEST_OR_STORY_PATH] },
+        to: { path: sliceInnerPath, pathNot: sliceIndexPath }
+      },
+      {
+        ...rule,
+        from: { path: TEST_OR_STORY_PATH, pathNot: `^src/${layer}/` },
+        to: { path: sliceInnerPath, pathNot: [sliceIndexPath, MOCK_API_PATH] }
+      }
+    ]
+  })
 }
 
 export default {
@@ -81,6 +101,14 @@ export default {
     sliceRule('features', { path: '^src/features/([^/]+)/' }),
     sliceRule('entities', { path: '^src/entities/([^/]+)/' }, ['^src/entities/[^/]+/@x/$1\\.ts$']),
     ...slicePublicApiRules(),
+    {
+      name: 'fixture-imports',
+      comment:
+        'fixture와 MSW handler(api/*.fixture.ts, api/*.handlers.ts)는 테스트와 story에서만 import한다.',
+      severity: 'error',
+      from: { path: WEB_SOURCE_PATH, pathNot: [TEST_OR_STORY_PATH, MOCK_API_PATH] },
+      to: { path: MOCK_API_PATH }
+    },
     {
       name: 'shared-legacy-imports',
       comment:

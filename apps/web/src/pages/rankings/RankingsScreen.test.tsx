@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -10,8 +11,14 @@ import type {
   RankedCharacter,
   SetStats
 } from '#core/ranking'
+import {
+  FAME_RANKING_NEXT_CURSOR,
+  fameRankingFixture
+} from '#entities/ranking/api/fame-ranking.fixture'
+import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
 import { ClientHostContext, type ClientHost } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { RankingsScreen } from './RankingsScreen'
@@ -19,8 +26,10 @@ import { RANKING_JOBS } from './ranking-jobs'
 
 let container: HTMLDivElement
 let root: Root
+let requests: URLSearchParams[]
 
 beforeEach(() => {
+  requests = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   container = document.createElement('div')
   document.body.append(container)
@@ -62,15 +71,41 @@ function rankingOf(count: number): FameRanking {
   }
 }
 
-function render(
-  getFameRanking: ClientHost['getFameRanking'],
+// cursor는 요청에 붙은 다음 page cursor이고, 첫 page 요청이면 null이다.
+type RankingResponse = (
+  cursor: string | null
+) => FameRanking | Response | Promise<FameRanking | Response>
+
+function respondRanking(response: RankingResponse): void {
+  server.use(
+    http.get(FAME_RANKING_URL, async ({ request }) => {
+      const params = new URL(request.url).searchParams
+      requests.push(params)
+      const body = await response(params.get('cursor'))
+
+      if (body instanceof Response) {
+        return body
+      }
+
+      return HttpResponse.json(body)
+    })
+  )
+}
+
+function queries(): Record<string, string>[] {
+  return requests.map((params) => Object.fromEntries(params))
+}
+
+async function render(
+  ranking: RankingResponse,
   filter: FameRankingFilter = {},
   onFilterChange: (filter: FameRankingFilter) => void = () => {},
   sets: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog' | 'getItemStats'>> = {}
 ): Promise<void> {
-  return act(async () =>
+  respondRanking(ranking)
+  await act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getFameRanking, ...sets })}>
+      <ClientHostContext value={createTestClientHost(sets)}>
         <TestQueryClient>
           <TestRouter>
             <RankingsScreen filter={filter} onFilterChange={onFilterChange} />
@@ -79,6 +114,7 @@ function render(
       </ClientHostContext>
     )
   )
+  await vi.waitFor(() => expect(container.textContent).not.toContain('랭킹을 받는 중입니다.'))
 }
 
 function bodyRows(): HTMLTableRowElement[] {
@@ -237,16 +273,15 @@ it('제국기사 칩을 고르면 목록 이름이 바뀌고, 브레이커 전�
 
 it('필터에 맞춰 직업, 전직을 넘겨 조회하고 실패하면 오류를 알린다', async () => {
   const [job] = RANKING_JOBS
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => {
-    throw new Error('랭킹을 받지 못했습니다.')
+  await render(() => fameRankingFailure(fameRankingFixture.failureMessage), {
+    jobId: job.jobId,
+    jobGrowId: job.grows[0].jobGrowId
   })
-  await render(getFameRanking, { jobId: job.jobId, jobGrowId: job.grows[0].jobGrowId })
 
-  expect(getFameRanking).toHaveBeenCalledWith(
-    { jobId: job.jobId, jobGrowId: job.grows[0].jobGrowId },
-    undefined
+  expect(queries()).toEqual([{ jobId: job.jobId, jobGrowId: job.grows[0].jobGrowId }])
+  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+    fameRankingFixture.failureMessage
   )
-  expect(container.querySelector('[role="alert"]')?.textContent).toBe('랭킹을 받지 못했습니다.')
 })
 
 const MALE_PRIEST = 'f6a4ad30555b99b499c07835f87ce522'
@@ -288,13 +323,13 @@ it('프리스트(남)는 크루세이더 칩 대신 딜러, 버퍼 칩을 두고
 })
 
 it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌린 채 목록 이름에 전직과 역할을 쓴다', async () => {
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
-  await render(getFameRanking, { jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' })
+  await render(async () => rankingOf(1), {
+    jobId: MALE_PRIEST,
+    jobGrowId: CRUSADER,
+    role: 'dealer'
+  })
 
-  expect(getFameRanking).toHaveBeenCalledWith(
-    { jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' },
-    undefined
-  )
+  expect(queries()).toEqual([{ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' }])
   expect(
     container.querySelector('section[aria-label="프리스트(남) 크루세이더(딜러) 명성 랭킹"]')
   ).not.toBeNull()
@@ -314,37 +349,33 @@ function rankTexts(): string[] {
 }
 
 it('받은 행을 다 그리면 nextCursor로 다음 page를 받아 순위를 잇고, 마지막 page 뒤에는 더 받지 않는다', async () => {
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async (_filter, cursor) => {
-    if (cursor === undefined) {
-      return rankingPage(1, 100, 'page-2')
+  await render(async (cursor) => {
+    if (cursor === null) {
+      return fameRankingFixture.firstPage
     }
 
-    return rankingPage(101, 30, null)
+    return fameRankingFixture.lastPage
   })
-  await render(getFameRanking)
 
   for (let step = 0; step < 4; step += 1) {
     await showMore()
   }
-  expect(getFameRanking).toHaveBeenCalledTimes(1)
+  expect(requests).toHaveLength(1)
   await showMore()
   await vi.waitFor(() => expect(rankTexts()).toHaveLength(120))
-  expect(getFameRanking.mock.calls).toEqual([
-    [{}, undefined],
-    [{}, 'page-2']
-  ])
+  expect(queries()).toEqual([{}, { cursor: FAME_RANKING_NEXT_CURSOR }])
   await showMore()
 
   expect(rankTexts()).toHaveLength(130)
   expect(rankTexts().slice(99, 102)).toEqual(['100', '101', '102'])
   expect(findButton('불러오기')).toBeUndefined()
-  expect(getFameRanking).toHaveBeenCalledTimes(2)
+  expect(requests).toHaveLength(2)
 })
 
 it('다음 page를 받는 동안 불러오기 대신 빈 줄을 두고, 받으면 빈 줄을 지운다', async () => {
   let finish: (page: FameRanking) => void = () => {}
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async (_filter, cursor) => {
-    if (cursor === undefined) {
+  await render(async (cursor) => {
+    if (cursor === null) {
       return rankingPage(1, 20, 'page-2')
     }
 
@@ -352,13 +383,13 @@ it('다음 page를 받는 동안 불러오기 대신 빈 줄을 두고, 받으�
       finish = resolve
     })
   })
-  await render(getFameRanking)
   await showMore()
 
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1)
+  await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1))
   expect(findButton('불러오기')).toBeUndefined()
+  await vi.waitFor(() => expect(requests).toHaveLength(2))
   await act(async () => finish(rankingPage(21, 5, null)))
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0))
   expect(rankTexts()).toHaveLength(25)
 })
 
@@ -367,30 +398,30 @@ function headings(): string[] {
 }
 
 it('최고 명성을 정하면 순위가 전체 순위와 달라 순위 열을 빼고, 최저 명성만 정하면 순위 열을 둔다', async () => {
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(3))
-  await render(getFameRanking, { fameFrom: 136000, fameTo: 138000 })
+  await render(async () => rankingOf(3), { fameFrom: 136000, fameTo: 138000 })
 
-  expect(getFameRanking).toHaveBeenCalledWith({ fameFrom: 136000, fameTo: 138000 }, undefined)
+  expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }])
   expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
-  await render(getFameRanking, { fameFrom: 136000 })
+  await render(async () => rankingOf(3), { fameFrom: 136000 })
+  expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }, { fameFrom: '136000' }])
   expect(headings()).toEqual(['#', '캐릭터', '세트', '명성', '모험단'])
 })
 
 it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두고, 다시 시도하면 이어 받는다', async () => {
   let failNext = true
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async (_filter, cursor) => {
-    if (cursor === undefined) {
+  await render(async (cursor) => {
+    if (cursor === null) {
       return rankingPage(1, 20, 'page-2')
     }
 
     if (failNext) {
       failNext = false
-      throw new Error('랭킹을 더 받지 못했습니다.')
+
+      return fameRankingFailure('랭킹을 더 받지 못했습니다.')
     }
 
     return rankingPage(21, 5, null)
   })
-  await render(getFameRanking)
   await showMore()
 
   await vi.waitFor(() =>
@@ -524,11 +555,15 @@ it('세트를 고르면 직업 필터와 함께 넘기고, 서약 세트를 바�
 })
 
 it('세트로 거르면 세트를 query로 보내고 목록 띠 제목에 고른 세트를 쓴다', async () => {
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
   const filter = { equipmentSetId: GOLDEN, oathSetId: DRAGON, oathSetOption: '용투 : 용제 강림' }
-  await render(getFameRanking, filter, () => {}, setHost)
+  await render(
+    async () => rankingOf(1),
+    filter,
+    () => {},
+    setHost
+  )
 
-  expect(getFameRanking).toHaveBeenCalledWith(filter, undefined)
+  expect(queries()).toEqual([{ ...filter, oathSetId: String(DRAGON) }])
   await vi.waitFor(() =>
     expect(
       container.querySelector('section[aria-label="황금향 용투 : 두 번째 명성 랭킹"]')
@@ -648,10 +683,9 @@ it('고른 전직의 아이템 통계에 없는 무기 필터는 지우고 유�
 it('아이템 통계가 비어 있으면 주소의 아이템 필터를 지우지 않는다', async () => {
   const onFilterChange = vi.fn()
   const empty: ItemStats = { computedAt: null, sampleSize: 0, slots: [] }
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
-  await render(getFameRanking, { itemIds: ['weapon-x'] }, onFilterChange, itemHost(empty))
+  await render(async () => rankingOf(1), { itemIds: ['weapon-x'] }, onFilterChange, itemHost(empty))
 
-  expect(getFameRanking).toHaveBeenCalledWith({ itemIds: ['weapon-x'] }, undefined)
+  expect(queries()).toEqual([{ itemIds: 'weapon-x' }])
   expect(onFilterChange).not.toHaveBeenCalled()
 })
 

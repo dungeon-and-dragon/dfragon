@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import type { FameRankingFilter } from '#core/ranking'
+import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import type { ClientHost } from '#host/client-host'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { storyRankedCharacters } from '#testing/story-support/story-characters'
 import { createStoryClientHost } from '#testing/story-support/story-host'
 import { storyItemStats } from '#testing/story-support/story-item-stats'
 import { storySetOathCatalog, storySetStats } from '#testing/story-support/story-set-stats'
@@ -20,36 +20,12 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const PAGE_SIZE = 100
-const characters = storyRankedCharacters(PAGE_SIZE + 30)
-const SECOND_PAGE = 'story-page-2'
-const setHosts = {
+const setHost = createStoryClientHost({
   getSetStats: async () => storySetStats(new Date().toISOString()),
   getItemStats: async () => storyItemStats(new Date().toISOString()),
   getOathCatalog: async () => storySetOathCatalog
-}
-
-const rankingHost = createStoryClientHost({
-  getFameRanking: async (_filter, cursor) => {
-    if (cursor === SECOND_PAGE) {
-      return { characters: characters.slice(PAGE_SIZE), nextCursor: null }
-    }
-
-    return { characters: characters.slice(0, PAGE_SIZE), nextCursor: SECOND_PAGE }
-  },
-  ...setHosts
 })
-
-const emptyHost = createStoryClientHost({
-  getFameRanking: async () => ({ characters: [], nextCursor: null }),
-  ...setHosts
-})
-
-const failedHost = createStoryClientHost({
-  getFameRanking: async () => {
-    throw new Error('랭킹을 받지 못했습니다.')
-  }
-})
+const rankingPagesParameters = { msw: [fameRankingHandlers.pages] }
 
 function Screen({
   host,
@@ -70,17 +46,20 @@ function Screen({
 }
 
 export const 전체: Story = {
-  render: () => <Screen host={rankingHost} />
+  parameters: rankingPagesParameters,
+  render: () => <Screen host={setHost} />
 }
 
 export const 직업선택: Story = {
-  render: () => <Screen host={rankingHost} initialFilter={{ jobId: RANKING_JOBS[0]!.jobId }} />
+  parameters: rankingPagesParameters,
+  render: () => <Screen host={setHost} initialFilter={{ jobId: RANKING_JOBS[0]!.jobId }} />
 }
 
 export const 세트선택: Story = {
+  parameters: rankingPagesParameters,
   render: () => (
     <Screen
-      host={rankingHost}
+      host={setHost}
       initialFilter={{
         jobId: RANKING_JOBS[0]!.jobId,
         oathSetId: 16204,
@@ -91,9 +70,10 @@ export const 세트선택: Story = {
 }
 
 export const 아이템선택: Story = {
+  parameters: rankingPagesParameters,
   render: () => (
     <Screen
-      host={rankingHost}
+      host={setHost}
       initialFilter={{
         jobId: RANKING_JOBS[0]!.jobId,
         itemIds: ['story-unique-1', 'story-weapon-1']
@@ -103,13 +83,16 @@ export const 아이템선택: Story = {
 }
 
 export const 거른랭킹없음: Story = {
-  render: () => <Screen host={emptyHost} initialFilter={{ oathSetId: 16204 }} />
+  parameters: { msw: [fameRankingHandlers.empty] },
+  render: () => <Screen host={setHost} initialFilter={{ oathSetId: 16204 }} />
 }
 
 export const 받는중: Story = {
+  parameters: { msw: [fameRankingHandlers.loading] },
   render: () => <Screen />
 }
 
 export const 받지못함: Story = {
-  render: () => <Screen host={failedHost} />
+  parameters: { msw: [fameRankingHandlers.failure] },
+  render: () => <Screen />
 }

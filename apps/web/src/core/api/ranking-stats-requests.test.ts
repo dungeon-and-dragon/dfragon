@@ -1,35 +1,11 @@
 import { expect, it, vi } from 'vitest'
-import type { CharacterStats, FameRanking } from '#core/ranking/ranking-stats'
+import type { CharacterStats } from '#core/ranking/ranking-stats'
 import { createDfragonClient } from './dfragon-client'
 
 const API_ORIGIN = 'https://api.example.test'
 
 function respond(body: unknown, status = 200) {
   return vi.fn<typeof globalThis.fetch>(async () => new Response(JSON.stringify(body), { status }))
-}
-
-const ranking: FameRanking = {
-  characters: [
-    {
-      rank: 1,
-      serverId: 'cain',
-      characterId: 'character-1',
-      characterName: '합성 캐릭터',
-      adventureName: '합성 모험단',
-      level: 115,
-      jobId: 'job-1',
-      jobGrowId: 'grow-1',
-      jobName: '합성 직업',
-      jobGrowName: '眞 합성 전직',
-      fame: 80123,
-      guildId: null,
-      guildName: null,
-      role: null,
-      equipmentSet: { id: 'set-1', name: '소울 페어리 세트' },
-      oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' }
-    }
-  ],
-  nextCursor: 'cursor-1'
 }
 
 const stats: CharacterStats = {
@@ -48,63 +24,6 @@ const stats: CharacterStats = {
   ],
   fameDistribution: [{ from: 70000, to: 80000, count: 1 }]
 }
-
-it('랭킹 응답을 그대로 읽고 정한 직업, 전직, 역할만 query로 보낸다', async () => {
-  const fetch = respond(ranking)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
-
-  await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1' })).resolves.toEqual(ranking)
-  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
-    `${API_ORIGIN}/rankings/fame?jobId=job-1&jobGrowId=grow-1`
-  )
-  await read({})
-  expect(new Request(fetch.mock.calls[1][0]).url).toBe(`${API_ORIGIN}/rankings/fame`)
-  await read({ jobId: 'job-1', jobGrowId: 'grow-1', role: 'dealer' })
-  expect(new Request(fetch.mock.calls[2][0]).url).toBe(
-    `${API_ORIGIN}/rankings/fame?jobId=job-1&jobGrowId=grow-1&role=dealer`
-  )
-})
-
-it('명성 범위를 query로 보내고, 거꾸로 된 범위는 요청하지 않고 거부한다', async () => {
-  const fetch = respond(ranking)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
-
-  await read({ jobId: 'job-1', fameFrom: 136000, fameTo: 138000 })
-  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
-    `${API_ORIGIN}/rankings/fame?jobId=job-1&fameFrom=136000&fameTo=138000`
-  )
-  await read({ fameFrom: 0 })
-  expect(new Request(fetch.mock.calls[1][0]).url).toBe(`${API_ORIGIN}/rankings/fame?fameFrom=0`)
-  await expect(read({ fameFrom: 138000, fameTo: 136000 })).rejects.toThrow()
-  expect(fetch).toHaveBeenCalledTimes(2)
-})
-
-it('빈 랭킹도 읽는다', async () => {
-  const read = createDfragonClient({
-    apiOrigin: API_ORIGIN,
-    fetch: respond({ characters: [], nextCursor: null })
-  }).rankings.fame
-
-  await expect(read({})).resolves.toEqual({ characters: [], nextCursor: null })
-})
-
-it('직업 없이 전직만 보내면 요청하지 않고 거부한다', async () => {
-  const fetch = respond(ranking)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
-
-  await expect(read({ jobGrowId: 'grow-1' })).rejects.toThrow()
-  expect(fetch).not.toHaveBeenCalled()
-})
-
-it('순위가 없거나 모르는 서버가 있는 랭킹 응답은 거부한다', async () => {
-  const { rank: _rank, ...withoutRank } = ranking.characters[0]
-  for (const characters of [[withoutRank], [{ ...ranking.characters[0], serverId: 'unknown' }]]) {
-    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond({ characters }) })
-      .rankings.fame
-
-    await expect(read({})).rejects.toThrow()
-  }
-})
 
 it('통계 응답과 빈 통계를 읽는다', async () => {
   const empty: CharacterStats = { ...stats, total: 0, servers: [], jobs: [], fameDistribution: [] }
@@ -187,27 +106,6 @@ it('집계 시각이 null인 빈 스킬 채택률 응답을 읽는다', async ()
   ).resolves.toEqual(empty)
 })
 
-it('랭킹에 장비 세트, 서약 세트, 선택지를 query로 보내고 서약 세트 없는 선택지는 요청하지 않는다', async () => {
-  const fetch = respond(ranking)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
-
-  await read({
-    jobId: 'job-1',
-    equipmentSetId: 'set-1',
-    oathSetId: 16204,
-    oathSetOption: '용투 : 용제 강림'
-  })
-  const url = new URL(new Request(fetch.mock.calls[0][0]).url)
-  expect(Object.fromEntries(url.searchParams)).toEqual({
-    jobId: 'job-1',
-    equipmentSetId: 'set-1',
-    oathSetId: '16204',
-    oathSetOption: '용투 : 용제 강림'
-  })
-  await expect(read({ oathSetOption: '용투 : 용제 강림' })).rejects.toThrow()
-  expect(fetch).toHaveBeenCalledTimes(1)
-})
-
 // #1798의 실제 응답 모양이다. 세 목록 각각의 count 합이 sampleSize이고, 서약 세트 하나의 선택지 count 합이 그 세트 count다.
 const setStats = {
   computedAt: '2026-11-18T11:00:27.845Z',
@@ -269,47 +167,6 @@ it('목록의 count 합이 표본 수와 다르거나 선택지 합이 세트 �
     const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).setStats
     await expect(read({})).rejects.toThrow()
   }
-})
-
-it('랭킹 다음 page는 같은 필터에 cursor를 붙여 받고 행의 세트와 nextCursor를 읽는다', async () => {
-  const fetch = respond(ranking)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
-
-  await expect(read({ oathSetId: 16204 }, 'cursor-1')).resolves.toEqual(ranking)
-  const url = new URL(new Request(fetch.mock.calls[0][0]).url)
-  expect(Object.fromEntries(url.searchParams)).toEqual({ oathSetId: '16204', cursor: 'cursor-1' })
-})
-
-it('nextCursor가 없거나 세트 모양이 다른 랭킹 응답은 거부한다', async () => {
-  const [character] = ranking.characters
-  const broken = [
-    { characters: ranking.characters },
-    {
-      ...ranking,
-      characters: [{ ...character, oathSet: { id: '16204', name: '서약', option: null } }]
-    }
-  ]
-
-  for (const body of broken) {
-    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).rankings.fame
-    await expect(read({})).rejects.toThrow()
-  }
-})
-
-it('랭킹에 itemIds를 쉼표로 이어 보내고, 빈 항목, 중복, 여섯 개 이상은 요청하지 않는다', async () => {
-  const fetch = respond(ranking)
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
-
-  await read({ jobId: 'job-1', itemIds: ['weapon-1', 'ring-1'] })
-  const url = new URL(new Request(fetch.mock.calls[0][0]).url)
-  expect(Object.fromEntries(url.searchParams)).toEqual({
-    jobId: 'job-1',
-    itemIds: 'weapon-1,ring-1'
-  })
-  for (const itemIds of [[''], ['a', 'a'], ['a', 'b', 'c', 'd', 'e', 'f'], ['a,b']]) {
-    await expect(read({ itemIds })).rejects.toThrow()
-  }
-  expect(fetch).toHaveBeenCalledTimes(1)
 })
 
 // #1802의 실제 응답 모양이다. 유일 장비가 없는 캐릭터는 부위의 items에 없어 그 부위 count 합이 sampleSize보다 작다.

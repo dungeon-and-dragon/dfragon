@@ -11,6 +11,9 @@ const config: StorybookConfig = {
     '../../web/src/**/*.stories.tsx',
     '../../internal/src/**/*.stories.tsx'
   ],
+  addons: ['msw-storybook-addon'],
+  // msw init이 만든 MSW service worker 파일을 story iframe과 같은 root 경로로 내준다.
+  staticDirs: ['../public'],
   core: { disableTelemetry: true, disableWhatsNewNotifications: true },
   viteFinal(viteConfig) {
     const plugins = [tailwindcss(), ...(viteConfig.plugins ?? [])]
