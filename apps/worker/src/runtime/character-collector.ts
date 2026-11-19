@@ -9,6 +9,7 @@ import {
   createNeopleSkillStyle,
   createNeopleFameSearch,
   createNeopleCharacterBasic,
+  createNeopleLatestActivity,
   paceNeopleRequests
 } from '#infrastructure/neople/index.js'
 import {
@@ -72,6 +73,8 @@ export async function startCharacterCollector(
     fetchSkillStyle: createNeopleSkillStyle(neople),
     fetchItemDetails: createNeopleItemDetails(neople),
     ...createNeopleFameSearch(neople),
+    fetchLatestActivity: createNeopleLatestActivity(neople),
+    fetchBasic,
     readConcurrency,
     report,
     score: {
