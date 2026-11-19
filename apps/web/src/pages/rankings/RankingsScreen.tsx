@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { ItemStats } from '#core/ranking'
+import type { ItemStats } from '#entities/ranking'
 import { TitleBox } from '#shared/ui/TitleBox'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import {

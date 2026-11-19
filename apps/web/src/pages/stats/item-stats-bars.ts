@@ -1,5 +1,5 @@
 import type { Bar } from '#shared/ui/chart/RowBars'
-import { type ItemStats, itemSlotName, WEAPON_SLOT } from '#core/ranking'
+import { type ItemStats, itemSlotName, WEAPON_SLOT } from '#entities/ranking'
 import type { SetStatsFilter } from '#entities/ranking'
 import { rankingLink, shareOf } from './set-stats-bars'
 
