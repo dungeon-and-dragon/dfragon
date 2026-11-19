@@ -6,12 +6,14 @@ import type {
   CharacterEquipmentSet,
   CharacterOathSet,
   ItemAdoption,
+  RankingSort,
   SetAdoption
 } from '@dfragon/database'
 import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 import { z } from 'zod'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 import {
+  RANKING_SORTS,
   type FameRankingCursor,
   decodeFameRankingCursor,
   encodeFameRankingCursor
@@ -23,9 +25,9 @@ const role = z.enum(['dealer', 'buffer']).optional()
 
 // INTEGER 열과 비교하므로 int 범위를 넘지 않는 9자리까지의 양의 정수만 받는다.
 const OATH_SET_ID_PATTERN = /^[1-9]\d{0,8}$/
-const FAME_PATTERN = /^(0|[1-9]\d{0,8})$/
+const RANGE_VALUE_PATTERN = /^(0|[1-9]\d{0,8})$/
 
-const fame = z.string().regex(FAME_PATTERN).transform(Number).optional()
+const rangeValue = z.string().regex(RANGE_VALUE_PATTERN).transform(Number).optional()
 
 const jobFilter = {
   jobId: z.string().min(1).optional(),
@@ -109,25 +111,48 @@ const cursor = z.string().transform((value, context): FameRankingCursor => {
   return decoded
 })
 
+type RankingRange = {
+  sort?: RankingSort
+  fameFrom?: number
+  fameTo?: number
+  scoreFrom?: number
+  scoreTo?: number
+}
+
+const isWithin = (from: number | undefined, to: number | undefined) =>
+  from === undefined || to === undefined || from <= to
+
+function rangeMatchesSort({ sort = 'fame', fameFrom, fameTo, scoreFrom, scoreTo }: RankingRange) {
+  if (sort === 'fame') {
+    return scoreFrom === undefined && scoreTo === undefined
+  }
+
+  return fameFrom === undefined && fameTo === undefined
+}
+
 export const fameRankingQuery = z
   .object({
+    sort: z.enum(RANKING_SORTS).optional(),
     ...jobFilter,
     equipmentSetId: z.string().min(1).optional(),
     oathSetId: z.string().regex(OATH_SET_ID_PATTERN).transform(Number).optional(),
     oathSetOption: z.string().min(1).optional(),
     itemIds: itemIds.optional(),
     evolutions: evolutions.optional(),
-    fameFrom: fame,
-    fameTo: fame,
+    fameFrom: rangeValue,
+    fameTo: rangeValue,
+    scoreFrom: rangeValue,
+    scoreTo: rangeValue,
     cursor: cursor.optional()
   })
   .refine(hasJobForGrow)
   .refine(hasMaleCrusaderForRole)
   .refine(({ evolutions, jobGrowId }) => evolutions === undefined || jobGrowId !== undefined)
   .refine(({ oathSetId, oathSetOption }) => oathSetOption === undefined || oathSetId !== undefined)
-  .refine(
-    ({ fameFrom, fameTo }) => fameFrom === undefined || fameTo === undefined || fameFrom <= fameTo
-  )
+  .refine(({ fameFrom, fameTo }) => isWithin(fameFrom, fameTo))
+  .refine(({ scoreFrom, scoreTo }) => isWithin(scoreFrom, scoreTo))
+  .refine(rangeMatchesSort)
+  .refine(({ sort = 'fame', cursor }) => cursor === undefined || cursor.sort === sort)
 
 export type FameRankingQuery = z.infer<typeof fameRankingQuery>
 
@@ -155,7 +180,6 @@ export type SkillStatsQuery = z.infer<typeof skillStatsQuery>
 
 export type FameRankingResponse = {
   characters: (CharacterRow & {
-    rank: number
     equipmentSet: CharacterEquipmentSet | null
     oathSet: CharacterOathSet | null
   })[]
@@ -206,11 +230,10 @@ export function toFameRankingResponse({
   characters,
   nextCursor
 }: FameRankingPage): FameRankingResponse {
-  const rows = characters.map(({ rank, character }) => {
-    const { equipmentSet, oathSet, ...stored } = character
+  const rows = characters.map(({ equipmentSet, oathSet, ...stored }) => {
     const row = toCharacterRow(stored)
 
-    return { rank, ...row, equipmentSet, oathSet }
+    return { ...row, equipmentSet, oathSet }
   })
   const encodedCursor = nextCursor !== null ? encodeFameRankingCursor(nextCursor) : null
 
