@@ -17,7 +17,7 @@ import {
   readTownIndicatorTemplate,
   WEB_CAPTURE_TEXTS
 } from '#features/capture-search'
-import { RANKING_JOBS } from '#pages/rankings'
+import { RANKING_JOBS } from '#widgets/ranking-filter'
 import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES, type CharacterCandidate } from '#entities/character'
 import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'

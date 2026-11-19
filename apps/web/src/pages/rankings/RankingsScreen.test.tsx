@@ -18,7 +18,7 @@ import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { RankingsScreen } from './RankingsScreen'
-import { RANKING_JOBS } from './ranking-jobs'
+import { RANKING_JOBS } from '#widgets/ranking-filter'
 
 let container: HTMLDivElement
 let root: Root

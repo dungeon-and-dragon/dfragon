@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { RANKING_JOBS } from './ranking-jobs'
+import { RANKING_JOBS } from '#widgets/ranking-filter/lib/ranking-jobs'
 import {
   parseJobSearch,
   parseRankingSearch,
