@@ -105,8 +105,11 @@ model CharacterScore {
   enginePackage  String    @map("engine_package")
   engineRulesRev String    @map("engine_rules_rev")
   engineBundleId String    @map("engine_bundle_id")
+  jobId          String?   @map("job_id")
+  jobGrowId      String?   @map("job_grow_id")
 
   @@id([serverId, characterId])
+  @@index([kind, jobId, jobGrowId, score(sort: Desc), serverId, characterId], map: "character_scores_kind_job_score_idx")
   @@map("character_scores")
 }
 
