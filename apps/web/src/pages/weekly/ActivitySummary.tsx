@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { ActivitySummary as Summary, EnhancementTarget } from '#core/adventure-guild'
 import { enhancementTextClasses, rarityTextClasses } from '#components/game-colors'
 import { formatClearCount } from './clear-count'
+import { type RarityCounts, rarityTotal } from './rarity-counts'
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
@@ -67,6 +68,75 @@ function ClearRows({ counts }: { counts: readonly NameCount[] }): React.JSX.Elem
   )
 }
 
+const RARITY_ROWS = [
+  { key: 'legendary', label: '레전더리', tone: rarityTextClasses.legendary },
+  { key: 'epic', label: '에픽', tone: rarityTextClasses.epic },
+  { key: 'primeval', label: '태초', tone: rarityTextClasses.primordial },
+  { key: 'mythic', label: '신화', tone: rarityTextClasses.mythic }
+] as const
+
+function RarityRows({ counts }: { counts: RarityCounts }): React.JSX.Element {
+  return (
+    <>
+      {RARITY_ROWS.map(({ key, label, tone }) => {
+        const count = counts[key] ?? 0
+
+        if (count === 0) {
+          return null
+        }
+
+        return (
+          <DetailRow
+            key={key}
+            label={label}
+            labelTone={tone}
+            value={`${numberFormat.format(count)}개`}
+          />
+        )
+      })}
+    </>
+  )
+}
+
+function RarityGroup({
+  title,
+  counts
+}: {
+  title: string
+  counts: RarityCounts
+}): React.JSX.Element {
+  return (
+    <>
+      <div className="label flex justify-between gap-4 pt-2 pb-1">
+        {title}
+        <span className="num text-fg-muted normal-case">
+          {numberFormat.format(rarityTotal(counts))}
+        </span>
+      </div>
+      <RarityRows counts={counts} />
+    </>
+  )
+}
+
+function SplitItemRows({
+  items,
+  oaths
+}: {
+  items: RarityCounts
+  oaths: RarityCounts
+}): React.JSX.Element {
+  const hasItems = rarityTotal(items) > 0
+  const hasOaths = rarityTotal(oaths) > 0
+
+  return (
+    <>
+      {hasItems && <RarityGroup title="장비" counts={items} />}
+      {hasItems && hasOaths && <div className="mt-1 border-t border-line" />}
+      {hasOaths && <RarityGroup title="서약" counts={oaths} />}
+    </>
+  )
+}
+
 function successRate({ attempts, successes }: EnhancementTarget): string {
   return `(${successes}/${attempts} ${Math.round((successes / attempts) * 100)}%)`
 }
@@ -101,13 +171,14 @@ function TargetRows({
 
 export function ActivitySummary({
   summary,
-  hasLegion
+  hasLegion,
+  hasOaths
 }: {
   summary: Summary
   hasLegion: boolean
+  hasOaths: boolean
 }): React.JSX.Element {
-  const { items, enhancement } = summary
-  const itemCount = items.legendary + items.epic + items.primeval + items.mythic
+  const { items, oaths, enhancement } = summary
   const hasTargets = enhancement.amplify.length > 0 || enhancement.reinforce.length > 0
 
   return (
@@ -120,35 +191,8 @@ export function ActivitySummary({
           <ClearRows counts={summary.legions} />
         </SummaryStat>
       )}
-      <SummaryStat label="아이템" value={itemCount}>
-        {items.legendary > 0 && (
-          <DetailRow
-            label="레전더리"
-            labelTone={rarityTextClasses.legendary}
-            value={`${numberFormat.format(items.legendary)}개`}
-          />
-        )}
-        {items.epic > 0 && (
-          <DetailRow
-            label="에픽"
-            labelTone={rarityTextClasses.epic}
-            value={`${numberFormat.format(items.epic)}개`}
-          />
-        )}
-        {items.primeval > 0 && (
-          <DetailRow
-            label="태초"
-            labelTone={rarityTextClasses.primordial}
-            value={`${numberFormat.format(items.primeval)}개`}
-          />
-        )}
-        {items.mythic > 0 && (
-          <DetailRow
-            label="신화"
-            labelTone={rarityTextClasses.mythic}
-            value={`${numberFormat.format(items.mythic)}개`}
-          />
-        )}
+      <SummaryStat label="아이템" value={rarityTotal(items) + rarityTotal(oaths)}>
+        {hasOaths ? <SplitItemRows items={items} oaths={oaths} /> : <RarityRows counts={items} />}
       </SummaryStat>
       <SummaryStat label="강화" value={enhancement.attempts}>
         <TargetRows
