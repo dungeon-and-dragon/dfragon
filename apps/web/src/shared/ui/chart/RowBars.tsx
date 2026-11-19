@@ -10,7 +10,6 @@ const integer = new Intl.NumberFormat('ko-KR')
 export type Bar = Readonly<{
   key: string
   name: string
-  sub?: string
   value: number
   share?: string
   link?: LinkOptions
@@ -37,7 +36,6 @@ const TOOLTIP_GAP = 8
 const TOOLTIP_INSIDE_GAP = 10
 // 값 열은 Monoplex KR 14px 숫자 9자(예: 1,914,430, 약 67px)가 한 줄에 들어가는 폭이다.
 const ROW_COLUMNS_CLASS = 'grid-cols-[120px_minmax(0,1fr)_80px]'
-const WIDE_NAME_ROW_COLUMNS_CLASS = 'grid-cols-[176px_minmax(0,1fr)_80px]'
 // 좁은 폭에서도 막대가 보이도록 이름 칸은 줄 폭의 40%를 넘지 않는다.
 const SIZED_NAME_ROW_COLUMNS_CLASS = 'grid-cols-[min(var(--bar-name-width),40%)_minmax(0,1fr)_80px]'
 const LINK_COLUMN_CLASS = 'grid-cols-[minmax(0,1fr)_16px]'
@@ -99,7 +97,6 @@ export function RowBars({
   const marksRef = useRef(new Map<string, HTMLSpanElement>())
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set())
   const hasShare = bars.some(({ share }) => share != null)
-  const hasSub = bars.some(({ sub }) => sub != null)
   const linked = bars.some(({ link }) => link != null)
   const toggleSlot = bars.some(({ details }) => details != null)
   const shownBar = bars.find(({ key }) => key === hover.key)
@@ -135,9 +132,7 @@ export function RowBars({
 
   function columnsOf(shrink: number): Pick<RowLayout, 'columns' | 'style'> {
     if (nameWidth === undefined) {
-      const columns = hasSub ? WIDE_NAME_ROW_COLUMNS_CLASS : ROW_COLUMNS_CLASS
-
-      return { columns }
+      return { columns: ROW_COLUMNS_CLASS }
     }
 
     const width = `${nameWidth - shrink}px`
@@ -255,7 +250,7 @@ function railHeightOf(thick: boolean, small: boolean): string {
 type DetailsToggle = Readonly<{ open: boolean; onToggle: (key: string) => void }>
 
 function BarRow({
-  bar: { key, name, sub, value, share, link, base = false },
+  bar: { key, name, value, share, link, base = false },
   layout: { columns, style, tone, formatValue, countUp, thick, linked, toggleSlot, small = false },
   percent,
   dimmed,
@@ -294,7 +289,6 @@ function BarRow({
     <>
       <span data-chart-name="" className={`truncate ${small || base ? 'text-fg-muted' : ''}`}>
         {name}
-        {sub != null && <small className="text-xs text-fg-subtle"> {sub}</small>}
       </span>
       <span className={`${RAIL_CLASS} ${railHeightOf(thick, small)}`}>
         <span

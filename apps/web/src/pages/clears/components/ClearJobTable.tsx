@@ -132,8 +132,7 @@ function JobTable({
     setHover(({ key }) => ({ key, open: false }))
   }
 
-  const shownTitle =
-    shownRow != null ? [shownRow.name, shownRow.sub].filter(Boolean).join(' ') : undefined
+  const shownTitle = shownRow?.name
   const shownRows = shownRow != null ? tooltipRowsOf(shownRow) : []
 
   return (
@@ -191,7 +190,7 @@ function JobTableRow({
   onHover: (hover: Hover) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
 }): React.JSX.Element {
-  const { key, name, sub, counts, rate, stats } = row
+  const { key, name, counts, rate, stats } = row
   const description = statsRowsOf(row)
     .map(({ name: statName, value }) => `${statName} ${value}`)
     .join(', ')
@@ -212,7 +211,6 @@ function JobTableRow({
     <tr onMouseEnter={handleMouseEnter}>
       <th scope="row" className="text-left font-normal">
         {name}
-        {sub !== null && <small className="text-xs text-fg-subtle"> {sub}</small>}
         <span className="sr-only">{`, ${COUNTS_LABEL} ${counts}`}</span>
       </th>
       <td ref={plotRef}>
