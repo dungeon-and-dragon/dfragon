@@ -188,6 +188,7 @@ export type {
   ClaimedJobRun,
   FinishedJobRun,
   InterruptedJobRun,
+  JobNeopleApi,
   JobOverview,
   JobPauseChange,
   JobRegistration,
