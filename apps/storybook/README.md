@@ -19,4 +19,5 @@ pnpm --filter @dfragon/storybook build
 
 - `.storybook/`: Storybook 설정과 웹 화면과 같은 순서로 불러오는 전역 CSS를 둡니다.
 - `src/foundations/`: `packages/design/theme.css`를 읽어 토큰을 그리는 `Foundations` 페이지를 둡니다.
+- `public/mockServiceWorker.js`: story의 API 요청을 MSW handler로 받는 service worker입니다. `msw` 버전을 올리면 `pnpm --filter @dfragon/storybook exec msw init public --no-save`로 다시 만듭니다.
 - 컴포넌트 story는 컴포넌트 옆(`packages/ui/src/*.stories.tsx`)에 둡니다.
