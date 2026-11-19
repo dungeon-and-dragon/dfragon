@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { OathCatalog } from '#core/catalog'
-import type { SetStats, SetStatsFilter } from '#core/ranking'
+import type { ItemStats, SetStats, SetStatsFilter } from '#core/ranking'
 import { ClientHostContext, type ClientHost } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -81,7 +81,7 @@ const catalog: OathCatalog = {
 const JOB_FILTER: SetStatsFilter = { jobId: 'job-1', jobGrowId: 'grow-1' }
 
 function render(
-  overrides: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog'>>,
+  overrides: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog' | 'getItemStats'>>,
   filter: SetStatsFilter = JOB_FILTER
 ): Promise<void> {
   const host = createTestClientHost({ getOathCatalog: async () => catalog, ...overrides })
@@ -244,7 +244,9 @@ it('받는 중에는 상자 제목과 skeleton을 보인다', async () => {
   expect([...container.querySelectorAll('section h2')].map((h2) => h2.textContent)).toEqual([
     '장비 세트',
     '서약 세트',
-    '장비와 서약 조합'
+    '장비와 서약 조합',
+    '무기',
+    '유일 장비'
   ])
 })
 
@@ -259,4 +261,79 @@ it('받지 못하면 세트 통계를 받지 못했다고 알린다', async () =
       '세트 통계를 받지 못했습니다.'
     )
   )
+})
+
+// 합성 아이템 통계다. 유일 장비 이름은 게임 데이터 그대로다.
+function itemStatsWith(weaponCount: number): ItemStats {
+  const weapons = Array.from({ length: weaponCount }, (_, index) => ({
+    itemId: `weapon-${index + 1}`,
+    name: `무기${index + 1}`,
+    count: weaponCount - index
+  }))
+
+  return {
+    computedAt: '2026-11-18T15:38:47.900Z',
+    sampleSize: 100,
+    slots: [
+      { slotId: 'WEAPON', items: weapons },
+      { slotId: 'RING', items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', count: 72 }] },
+      {
+        slotId: 'EARRING',
+        items: [
+          { itemId: 'earring-1', name: '영롱한 날씨의 큐브', count: 40 },
+          { itemId: 'earring-2', name: '합성 귀걸이', count: 10 }
+        ]
+      }
+    ]
+  }
+}
+
+it('전체 직업 무기는 많은 순 10개와 나머지를 묶은 그 밖 막대이고, 무기 막대는 그 itemId로 거른 랭킹으로 잇는다', async () => {
+  await render({ getSetStats: async () => stats, getItemStats: async () => itemStatsWith(12) }, {})
+
+  const weapons = await vi.waitFor(() => {
+    const rows = rowsOf('무기')
+    expect(rows).toHaveLength(11)
+
+    return rows
+  })
+  expect(weapons[0]).toEqual(['무기1', '12.0%'])
+  expect(weapons.at(-1)).toEqual(['그 밖', '3.0%'])
+  expect(rankingSearchOf(rowLink('무기', '무기1'))).toEqual({ itemIds: 'weapon-1' })
+  expect(rowLink('무기', '그 밖')).toBeNull()
+})
+
+it('전직을 고르면 그 전직의 무기를 그 밖으로 묶지 않고 많은 순으로 모두 보인다', async () => {
+  await render({ getSetStats: async () => stats, getItemStats: async () => itemStatsWith(12) })
+
+  await vi.waitFor(() => expect(rowsOf('무기')).toHaveLength(12))
+  expect(rankingSearchOf(rowLink('무기', '무기2'))).toEqual({ ...JOB_FILTER, itemIds: 'weapon-2' })
+})
+
+it('유일 장비는 부위마다 착용 비율 한 줄이고, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
+  await render({ getSetStats: async () => stats, getItemStats: async () => itemStatsWith(2) })
+
+  await vi.waitFor(() =>
+    expect(rowsOf('유일 장비')).toEqual([
+      ['반지 유일 장비 착용', '72.0%'],
+      ['귀걸이 유일 장비 착용', '50.0%']
+    ])
+  )
+  expect(rankingSearchOf(rowLink('유일 장비', '반지 유일 장비 착용'))).toEqual({
+    ...JOB_FILTER,
+    itemIds: 'ring-1'
+  })
+  expect(rowLink('유일 장비', '귀걸이 유일 장비 착용')).toBeNull()
+})
+
+it('아이템 통계 저장분이 없으면 무기, 유일 장비 상자에 아이템 통계가 없다고 알린다', async () => {
+  await render({
+    getSetStats: async () => stats,
+    getItemStats: async () => ({ computedAt: null, sampleSize: 0, slots: [] })
+  })
+
+  await vi.waitFor(() =>
+    expect(boxOf('무기').querySelector('p.state')?.textContent).toBe('아이템 통계가 없습니다.')
+  )
+  expect(boxOf('유일 장비').querySelector('p.state')?.textContent).toBe('아이템 통계가 없습니다.')
 })

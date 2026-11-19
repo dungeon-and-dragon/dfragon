@@ -3,7 +3,13 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { OathCatalog } from '#core/catalog'
-import type { FameRanking, FameRankingFilter, RankedCharacter, SetStats } from '#core/ranking'
+import type {
+  FameRanking,
+  FameRankingFilter,
+  ItemStats,
+  RankedCharacter,
+  SetStats
+} from '#core/ranking'
 import { ClientHostContext, type ClientHost } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -73,7 +79,7 @@ function render(
   getFameRanking: ClientHost['getFameRanking'],
   filter: FameRankingFilter = {},
   onFilterChange: (filter: FameRankingFilter) => void = () => {},
-  sets: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog'>> = {}
+  sets: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog' | 'getItemStats'>> = {}
 ): Promise<void> {
   return act(async () =>
     root.render(
@@ -521,4 +527,102 @@ it('거른 랭킹이 비면 랭킹에 오른 캐릭터가 없다고 알린다', 
   )
 
   expect(container.querySelector('p.state')?.textContent).toBe('랭킹에 오른 캐릭터가 없습니다.')
+})
+
+// 합성 아이템 통계다. 유일 장비 이름은 게임 데이터 그대로다.
+function itemStatsOf(weapons: readonly [string, number][]): ItemStats {
+  return {
+    computedAt: '2026-11-18T15:38:47.900Z',
+    sampleSize: 10,
+    slots: [
+      {
+        slotId: 'WEAPON',
+        items: weapons.map(([itemId, count]) => ({ itemId, name: `무기 ${itemId}`, count }))
+      },
+      { slotId: 'RING', items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', count: 7 }] },
+      {
+        slotId: 'SUPPORT',
+        items: [
+          { itemId: 'support-2', name: '합성 보조장비', count: 2 },
+          { itemId: 'support-1', name: '만병을 잉태한 역병의 심장', count: 6 }
+        ]
+      }
+    ]
+  }
+}
+
+function itemHost(stats: ItemStats) {
+  return { getItemStats: async () => stats }
+}
+
+it('무기 셀렉트는 고른 직업, 전직의 아이템 통계에서 많이 낀 순이고, 유일 장비는 부위마다 착용 칩 하나다', async () => {
+  const getItemStats = vi.fn(async () =>
+    itemStatsOf([
+      ['weapon-b', 1],
+      ['weapon-a', 3]
+    ])
+  )
+  const jobId = RANKING_JOBS[0].jobId
+  await render(
+    async () => rankingOf(1),
+    { jobId },
+    () => {},
+    { getItemStats }
+  )
+
+  expect(getItemStats).toHaveBeenCalledWith({ jobId, jobGrowId: undefined, role: undefined })
+  await act(async () => setSelect('무기').click())
+  expect(optionTexts('무기')).toEqual(['무기 전체', '무기 weapon-a', '무기 weapon-b'])
+  const uniqueRow = [...container.querySelectorAll('h2')].find(
+    (heading) => heading.textContent === '유일 장비'
+  )?.parentElement
+  expect(
+    [...(uniqueRow?.querySelectorAll('button') ?? [])].map((button) => button.textContent)
+  ).toEqual(['반지 착용', '보조장비 착용'])
+})
+
+it('무기는 하나만 골라 바꾸고, 착용 칩은 그 부위 유일 장비 itemId를 넣고 뺀다', async () => {
+  const onFilterChange = vi.fn()
+  const host = itemHost(
+    itemStatsOf([
+      ['weapon-a', 3],
+      ['weapon-b', 1]
+    ])
+  )
+  await render(async () => rankingOf(1), { itemIds: ['ring-1', 'weapon-a'] }, onFilterChange, host)
+
+  await pickOption('무기', '무기 weapon-b')
+  expect(onFilterChange).toHaveBeenLastCalledWith({ itemIds: ['ring-1', 'weapon-b'] })
+  await act(async () => chip('보조장비 착용').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    itemIds: ['ring-1', 'weapon-a', 'support-1']
+  })
+  await act(async () => chip('반지 착용').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({ itemIds: ['weapon-a'] })
+})
+
+it('고른 전직의 아이템 통계에 없는 무기 필터는 지우고 유일 장비 필터는 남긴다', async () => {
+  const onFilterChange = vi.fn()
+  const host = itemHost(itemStatsOf([['weapon-a', 3]]))
+  const jobId = RANKING_JOBS[0].jobId
+  await render(
+    async () => rankingOf(1),
+    { jobId, itemIds: ['ring-1', 'other-job-weapon'] },
+    onFilterChange,
+    host
+  )
+
+  await vi.waitFor(() =>
+    expect(onFilterChange).toHaveBeenLastCalledWith({ jobId, itemIds: ['ring-1'] })
+  )
+})
+
+it('아이템 통계가 비어 있으면 주소의 아이템 필터를 지우지 않는다', async () => {
+  const onFilterChange = vi.fn()
+  const empty: ItemStats = { computedAt: null, sampleSize: 0, slots: [] }
+  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
+  await render(getFameRanking, { itemIds: ['weapon-x'] }, onFilterChange, itemHost(empty))
+
+  expect(getFameRanking).toHaveBeenCalledWith({ itemIds: ['weapon-x'] }, undefined)
+  expect(onFilterChange).not.toHaveBeenCalled()
 })
