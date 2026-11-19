@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { createJsonRequest } from '#shared/api/json-request'
-import type { TodayGrade } from '#core/today-grade'
+import type { TodayGrade } from '#widgets/global-bar/model/today-grade-types'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 
 // PC 시계가 API 서버보다 빠르면 만료가 이미 지난 값을 다시 받으므로, 다시 받는 간격을 1분 아래로 줄이지 않는다.

@@ -3,7 +3,6 @@ import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
 import { CharacterSearchBox } from './CharacterSearchBox'
 import { GlobalBar } from './GlobalBar'
-import { SiteFooter } from './SiteFooter'
 import { TodayGrade } from './TodayGrade'
 
 const meta = {
@@ -44,13 +43,5 @@ export const 오늘등급: Story = {
       <TodayGrade grade={92} />
       <TodayGrade grade={98} />
     </div>
-  )
-}
-
-export const 푸터: Story = {
-  render: () => (
-    <StoryFrame>
-      <SiteFooter />
-    </StoryFrame>
   )
 }

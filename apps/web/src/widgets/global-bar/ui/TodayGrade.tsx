@@ -1,5 +1,5 @@
 import { rarityTextClasses } from '#entities/character'
-import { GRADE_RARITY_NAMES, gradeRarity } from '#core/today-grade'
+import { GRADE_RARITY_NAMES, gradeRarity } from '#widgets/global-bar/lib/today-grade'
 
 const percent = 'shrink-0 num text-base font-semibold whitespace-nowrap'
 

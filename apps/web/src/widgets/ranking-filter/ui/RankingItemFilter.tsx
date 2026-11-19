@@ -5,7 +5,7 @@ import {
   type WeaponGroup,
   withUniqueToggled,
   withWeapon
-} from './ranking-items'
+} from '#widgets/ranking-filter/lib/ranking-items'
 
 const ALL = 'all'
 const LABEL = '무기'
