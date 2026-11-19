@@ -184,14 +184,14 @@ export class FakeOpsApi {
       return this.changeBatchKey(method, path)
     }
 
+    if (method === 'GET' && path === 'jobs/runs') {
+      return this.runPage(url)
+    }
+
     const [, name, action] = JOB_ACTION_PATH_PATTERN.exec(path) ?? []
     const target = this.jobs.find((candidate) => candidate.name === decodeURIComponent(name ?? ''))
     if (target === undefined) {
       return failure(404, 'JOB_NOT_FOUND')
-    }
-
-    if (method === 'GET' && action === 'runs') {
-      return this.runPage(target, url)
     }
 
     if (method === 'POST' && action === 'runs') {
@@ -208,9 +208,12 @@ export class FakeOpsApi {
     return failure(404, 'NOT_FOUND')
   }
 
-  private runPage(target: JobBody, url: URL): Response {
+  private runPage(url: URL): Response {
     const before = Number(url.searchParams.get('before') ?? Number.POSITIVE_INFINITY)
-    const runs = (this.runs[target.name] ?? []).filter(({ id }) => id < before)
+    const runs = Object.entries(this.runs)
+      .flatMap(([jobName, jobRuns]) => jobRuns.map((entry) => ({ ...entry, jobName })))
+      .filter(({ id }) => id < before)
+      .sort((left, right) => right.id - left.id)
     const page = runs.slice(0, this.runPageSize)
     const nextBefore = runs.length > this.runPageSize ? (page.at(-1)?.id ?? null) : null
 
