@@ -1,13 +1,17 @@
 import { expect, it } from 'vitest'
 import type { ActivityDayItem } from '#core/adventure-guild'
-import { type DayItemRow, dayItemRows } from './day-item-rows'
+import { type DayItemRow, dayItemGroups } from './day-item-rows'
 
-function items(rarities: readonly string[]): ActivityDayItem[] {
+function items(rarities: readonly string[], prefix = ''): ActivityDayItem[] {
   return rarities.map((rarity, index) => ({
     at: `2026-04-02T12:${String(index).padStart(2, '0')}:00+09:00`,
-    name: `${rarity} ${index}`,
+    name: `${prefix}${rarity} ${index}`,
     rarity
   }))
+}
+
+function dayItemRows(dayItems: readonly ActivityDayItem[]): readonly DayItemRow[] {
+  return dayItemGroups(dayItems, []).items
 }
 
 function repeat(rarity: string, count: number): string[] {
@@ -66,4 +70,34 @@ it('모두 개수로 둘 때도 0인 등급은 뺀다', () => {
     '태초 9개',
     '레전더리 1개'
   ])
+})
+
+it('장비와 서약을 합쳐 8개 이하면 두 묶음 모두 시간순으로 둔다', () => {
+  const equipment = items(['태초', ...repeat('레전더리', 3)])
+  const oaths = items(repeat('레전더리', 4), '서약 ')
+
+  expect(dayItemGroups(equipment, oaths)).toEqual({
+    items: equipment.map((item) => ({ kind: 'item', item })),
+    oaths: oaths.map((item) => ({ kind: 'item', item }))
+  })
+})
+
+it('장비와 서약을 합쳐 8개를 넘으면 두 묶음 모두 태초 이름과 에픽, 레전더리 개수로 둔다', () => {
+  const groups = dayItemGroups(
+    items(['태초', '태초', ...repeat('에픽', 4), ...repeat('레전더리', 8)]),
+    items(['태초', '에픽', '에픽', '레전더리', '레전더리'], '서약 ')
+  )
+
+  expect(labels(groups.items)).toEqual(['태초 0', '태초 1', '에픽 4개', '레전더리 8개'])
+  expect(labels(groups.oaths)).toEqual(['서약 태초 0', '에픽 2개', '레전더리 2개'])
+})
+
+it('두 묶음의 줄을 합쳐 9줄이면 두 묶음 모두 등급별 개수로 둔다', () => {
+  const groups = dayItemGroups(
+    items([...repeat('태초', 3), '에픽', '레전더리']),
+    items([...repeat('태초', 2), '에픽', '레전더리', '레전더리'], '서약 ')
+  )
+
+  expect(labels(groups.items)).toEqual(['태초 3개', '에픽 1개', '레전더리 1개'])
+  expect(labels(groups.oaths)).toEqual(['태초 2개', '에픽 1개', '레전더리 2개'])
 })
