@@ -1,15 +1,18 @@
-import type { CharacterDetailView, CharacterHistory, CharacterIdentity } from '#core/character'
-import { useClientHost } from '#host/client-host'
+import {
+  type CharacterDetailView,
+  type CharacterHistory,
+  type CharacterIdentity,
+  characterHistorySchema
+} from '#core/character'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
+import { detailViewSchemaOf, requestCharacterJson } from './character-api'
 
 export function useCharacterHistory({
   serverId,
   characterId
 }: CharacterIdentity): LoadedResult<CharacterHistory> {
-  const { getCharacterHistory } = useClientHost()
-
   return useLoadedResult(['character', serverId, characterId, 'history'], () =>
-    getCharacterHistory({ serverId, characterId })
+    requestCharacterJson({ serverId, characterId }, '/history', characterHistorySchema)
   )
 }
 
@@ -17,8 +20,6 @@ export function useHistorySnapshot(
   { serverId, characterId }: CharacterIdentity,
   at: string | null
 ): LoadedResult<CharacterDetailView | null> {
-  const { getCharacterHistorySnapshot } = useClientHost()
-
   return useLoadedResult(
     ['character', serverId, characterId, 'history', 'snapshot', at],
     async () => {
@@ -26,7 +27,11 @@ export function useHistorySnapshot(
         return null
       }
 
-      return getCharacterHistorySnapshot({ serverId, characterId }, at)
+      const identity = { serverId, characterId }
+
+      return requestCharacterJson(identity, '/history/snapshot', detailViewSchemaOf(identity), {
+        searchParams: { at }
+      })
     }
   )
 }

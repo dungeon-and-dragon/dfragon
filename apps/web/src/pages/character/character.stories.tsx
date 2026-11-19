@@ -1,20 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { SkillWindowCatalog } from '#core/catalog'
 import type { CharacterHistory } from '#core/character'
-import type { ClientHost } from '#host/client-host'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
+import { createStoryClientHost } from '#testing/story-support/story-host'
 import {
-  storyBuffSkillWindowCatalog,
   storyCharacterDetail,
   storyHistory,
   storyOathCatalog,
-  storySingleHistory,
-  storySkillWindowCatalog,
-  storyTimeline
-} from '#testing/story-support/story-character-detail'
-import { createStoryClientHost } from '#testing/story-support/story-host'
+  storySingleHistory
+} from './api/character.fixture'
+import { characterDetailHandlers, characterDetailLoadingHandlers } from './api/character.handlers'
 import type { CharacterTab } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
 
@@ -27,22 +23,7 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-function hostOf(role: 'dealer' | 'buffer', history: CharacterHistory): ClientHost {
-  const detail = storyCharacterDetail(role)
-  const catalogs: Readonly<Record<string, SkillWindowCatalog>> = {
-    [storySkillWindowCatalog.job.jobName]: storySkillWindowCatalog,
-    [storyBuffSkillWindowCatalog.job.jobName]: storyBuffSkillWindowCatalog
-  }
-
-  return createStoryClientHost({
-    getCharacterDetail: async () => detail,
-    getCharacterTimeline: async () => storyTimeline,
-    getCharacterHistory: async () => history,
-    getCharacterHistorySnapshot: async () => detail,
-    getSkillWindowCatalog: async (jobName) => catalogs[jobName] ?? null,
-    getOathCatalog: async () => storyOathCatalog
-  })
-}
+const host = createStoryClientHost({ getOathCatalog: async () => storyOathCatalog })
 
 function Screen({
   initialTab,
@@ -72,8 +53,9 @@ function tabStory(
   history: CharacterHistory = storyHistory
 ): Story {
   return {
+    parameters: { msw: characterDetailHandlers(storyCharacterDetail(role), history) },
     render: () => (
-      <StoryFrame host={hostOf(role, history)}>
+      <StoryFrame host={host}>
         <Screen initialTab={tab} role={role} />
       </StoryFrame>
     )
@@ -99,6 +81,7 @@ export const 이력: Story = tabStory('history')
 export const 이력하나: Story = tabStory('history', 'dealer', storySingleHistory)
 
 export const 받는중: Story = {
+  parameters: { msw: characterDetailLoadingHandlers('dealer') },
   render: () => (
     <StoryFrame>
       <Screen initialTab="equipment" />
