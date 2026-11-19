@@ -580,19 +580,26 @@ function serveEquipment(): void {
   const sirocoCharacter = equipmentCharacter('siroco', '시로코캐릭터')
 
   server.use(
-    http.get(`${SITE_API_URL}/adventures/:adventureName/equipment`, ({ params }) =>
-      HttpResponse.json({
+    http.get(`${SITE_API_URL}/adventures/:adventureName/equipment`, ({ params, request }) => {
+      const query = new URL(request.url).searchParams
+      const serverId = query.get('server') === 'siroco' ? 'siroco' : 'cain'
+      const setItemId = query.get('set') === FAIRY_SET ? FAIRY_SET : ONYX_SET
+      const cainCharacters = serverId === 'cain' ? [cainCharacter] : []
+      const sirocoCharacters = serverId === 'siroco' ? [sirocoCharacter] : []
+
+      return HttpResponse.json({
         adventureName: params.adventureName,
         sets: [
-          { setItemId: FAIRY_SET, setItemName: '소울 페어리 세트' },
-          { setItemId: ONYX_SET, setItemName: '칠흑의 정화 세트' }
+          { setItemId: ONYX_SET, setItemName: '칠흑의 정화 세트' },
+          { setItemId: FAIRY_SET, setItemName: '소울 페어리 세트' }
         ],
         servers: [
-          { serverId: 'cain', characters: [cainCharacter] },
-          { serverId: 'siroco', characters: [sirocoCharacter] }
-        ]
+          { serverId: 'cain', characters: cainCharacters },
+          { serverId: 'siroco', characters: sirocoCharacters }
+        ],
+        selected: { serverId, setItemId }
       })
-    )
+    })
   )
 }
 
@@ -651,7 +658,7 @@ it('모험단 화면의 장비 탭을 누르면 장비 주소로 가고, 세트�
       new URLSearchParams({ server: 'siroco', set: FAIRY_SET })
     )
   )
-  expect(equipmentNames()).toEqual(['시로코캐릭터'])
+  await vi.waitFor(() => expect(equipmentNames()).toEqual(['시로코캐릭터']))
 
   const address = `${window.location.pathname}${window.location.search}`
   await act(async () => root.unmount())

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { HttpResponse, http, type JsonBodyType } from 'msw'
+import { delay, HttpResponse, http, type JsonBodyType } from 'msw'
 import { act, useEffect } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -8,6 +8,7 @@ import { API_BASE_URL } from '#shared/api/dfragon-api'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
+import type { EquipmentSearch } from '#pages/weekly/equipment-search'
 import { ADVENTURE_EQUIPMENT_URL } from './adventure.handlers'
 import { useAdventureEquipment } from './useAdventureEquipment'
 
@@ -31,8 +32,14 @@ afterEach(async () => {
   container.remove()
 })
 
-function Harness({ adventureName }: { adventureName: string }): null {
-  const value = useAdventureEquipment(adventureName)
+function Harness({
+  adventureName,
+  search
+}: {
+  adventureName: string
+  search: EquipmentSearch
+}): null {
+  const value = useAdventureEquipment(adventureName, search)
   useEffect(() => {
     result = value
   })
@@ -50,11 +57,14 @@ function respond(body: JsonBodyType): void {
   )
 }
 
-async function settle(adventureName: string): Promise<LoadedResult<AdventureEquipment>> {
+async function settle(
+  adventureName: string,
+  search: EquipmentSearch = {}
+): Promise<LoadedResult<AdventureEquipment>> {
   await act(async () =>
     root.render(
       <TestQueryClient>
-        <Harness adventureName={adventureName} />
+        <Harness adventureName={adventureName} search={search} />
       </TestQueryClient>
     )
   )
@@ -97,7 +107,8 @@ const equipment: AdventureEquipment = {
         }
       ]
     }
-  ]
+  ],
+  selected: { serverId: 'cain', setItemId: 'set-a' }
 }
 
 it('모험단 이름을 encode해 한 경로 조각으로 담아 장비 보유 응답을 읽는다', async () => {
@@ -109,8 +120,41 @@ it('모험단 이름을 encode해 한 경로 조각으로 담아 장비 보유 �
   ])
 })
 
+it('서버와 세트를 query로 담아 요청한다', async () => {
+  respond(equipment)
+
+  await settle('합성 모험단', { server: 'cain', set: 'set-a' })
+  expect(requested).toEqual([
+    `${API_BASE_URL}/adventures/${encodeURIComponent('합성 모험단')}/equipment?server=cain&set=set-a`
+  ])
+})
+
+it('같은 모험단의 서버, 세트를 바꾸면 받는 동안 앞선 응답을 보이고, 다른 모험단으로 바꾸면 보이지 않는다', async () => {
+  respond(equipment)
+  await settle('합성 모험단')
+  server.use(http.get(ADVENTURE_EQUIPMENT_URL, () => delay('infinite')))
+
+  await act(async () =>
+    root.render(
+      <TestQueryClient>
+        <Harness adventureName="합성 모험단" search={{ server: 'cain', set: 'set-b' }} />
+      </TestQueryClient>
+    )
+  )
+  expect(result).toEqual({ status: 'success', value: equipment })
+
+  await act(async () =>
+    root.render(
+      <TestQueryClient>
+        <Harness adventureName="다른 모험단" search={{ server: 'cain', set: 'set-b' }} />
+      </TestQueryClient>
+    )
+  )
+  expect(result).toEqual({ status: 'loading' })
+})
+
 it('캐릭터가 없는 응답도 읽는다', async () => {
-  const empty = { adventureName: '없는 모험단', sets: [], servers: [] }
+  const empty = { adventureName: '없는 모험단', sets: [], servers: [], selected: null }
   respond(empty)
 
   await expect(settle('없는 모험단')).resolves.toEqual({ status: 'success', value: empty })

@@ -2,11 +2,13 @@ import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/d
 import {
   type ActivitySeason,
   type AdventureActivity,
-  type AdventureEquipment,
   type AdventureSeasonDays,
   type AdventureWeeklyClears,
+  type EquipmentQuery,
+  type SelectedAdventureEquipment,
   type StoredActivitySeason,
-  emptySeasonActivity
+  emptySeasonActivity,
+  selectAdventureEquipment
 } from '#domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import type { RequestTimelineSync } from '#application/character-timeline/index.js'
@@ -39,7 +41,10 @@ export class AdventureGuildService {
     return weekly
   }
 
-  async adventureEquipment(adventureName: string): Promise<AdventureEquipment> {
+  async adventureEquipment(
+    adventureName: string,
+    query: EquipmentQuery
+  ): Promise<SelectedAdventureEquipment> {
     const equipment = await this.repository.readAdventureEquipment(adventureName)
 
     for (const { characters } of equipment.servers) {
@@ -48,7 +53,7 @@ export class AdventureGuildService {
       }
     }
 
-    return equipment
+    return selectAdventureEquipment(equipment, query)
   }
 
   async adventureActivity(
