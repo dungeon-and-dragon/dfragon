@@ -50,6 +50,7 @@ export class JobSchedulerService {
         schedule: definition.schedule ?? null,
         argsSchema: z.toJSONSchema(definition.argsSchema),
         delayMinutes: definition.delayMinutes,
+        neopleApi: definition.neopleApi,
         nextRunAt: nextRuns.get(definition.name) ?? null
       }))
     )

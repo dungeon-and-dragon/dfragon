@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { defineJob, createUnavailableStreaks } from '#application/jobs/index.js'
+import { defineJob, createUnavailableStreaks, NEOPLE_APIS } from '#application/jobs/index.js'
 import type { SkillStyleCollectionPorts } from './ports.js'
 import type { SkillStyleCollectionRepository } from './repository.js'
 
@@ -74,6 +74,7 @@ export function createSkillStyleCollectionJob(service: SkillStyleCollectionServi
       '스킬 채택률 표본 가운데 스킬 스타일이 없는 캐릭터의 스킬 스타일을 Neople에서 받아 저장합니다. 다시 실행하면 남은 캐릭터부터 받습니다.',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
+    neopleApi: NEOPLE_APIS.skillStyle,
     run: (_args, { reportProgress }) => service.collect(reportProgress)
   })
 }

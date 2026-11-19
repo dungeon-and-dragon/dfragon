@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { defineJob } from '#application/jobs/index.js'
+import { defineJob, NEOPLE_APIS } from '#application/jobs/index.js'
 import type { ContentClearCollectionService } from './collection.js'
 import type { ClearRecordBackfillService } from './record-backfill.js'
 import type { ClearWeekSampleService } from './week-samples.js'
@@ -18,6 +18,7 @@ export function createContentClearCollectionJob(service: ContentClearCollectionS
     schedule: '0 6 * * 4',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
+    neopleApi: NEOPLE_APIS.timeline,
     run: (_args, { reportProgress }) => service.collect(reportProgress)
   })
 }
@@ -34,6 +35,7 @@ export function createClearRecordBackfillJob(service: ClearRecordBackfillService
       '클리어 기록 수집과 같은 대상 캐릭터의 2025-02-06부터의 레이드, 레기온 클리어 기록을 Neople에서 받아 저장합니다. 전에 받은 캐릭터는 지난 실행 시각 30분 전부터만 받습니다. 클리어 집계 값은 바꾸지 않고, 끊긴 실행은 다음 실행이 남은 캐릭터부터 잇습니다.',
     argsSchema: z.object({}),
     delayMinutes: BACKFILL_DELAY_MINUTES,
+    neopleApi: NEOPLE_APIS.timeline,
     run: (_args, { reportProgress }) => service.backfill(reportProgress)
   })
 }
@@ -53,6 +55,7 @@ export function createClearWeekSampleJob(service: ClearWeekSampleService) {
     catchup: false,
     argsSchema: z.object({}),
     delayMinutes: WEEK_SAMPLE_DELAY_MINUTES,
+    neopleApi: null,
     run: (_args, { reportProgress }) => service.recordMissing(reportProgress)
   })
 }

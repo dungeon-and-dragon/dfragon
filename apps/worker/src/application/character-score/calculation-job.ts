@@ -8,7 +8,7 @@ import type {
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import { type CalculatedScore, toCalculatedScore } from '@dfragon/server-core/domain/score/index.js'
-import { defineJob, createUnavailableStreaks } from '#application/jobs/index.js'
+import { defineJob, createUnavailableStreaks, NEOPLE_APIS } from '#application/jobs/index.js'
 import { calculateCharacterScore } from './calculate.js'
 import type { ScoreCalculationPorts, ScoreEngineHandle, ScoreSources } from './ports.js'
 import type { ScoreCalculationRepository } from './repository.js'
@@ -344,6 +344,7 @@ export function createScoreCalculationJob(
     catchup: false,
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
+    neopleApi: NEOPLE_APIS.characterDetail,
     run: (_args, { reportProgress }) => service.calculate(reportProgress)
   })
 }

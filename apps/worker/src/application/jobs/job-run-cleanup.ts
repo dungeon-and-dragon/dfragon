@@ -24,6 +24,7 @@ export function createJobRunCleanupJob(service: JobRunCleanupService) {
     schedule: '0 4 * * *',
     argsSchema: z.object({}),
     delayMinutes: 5,
+    neopleApi: null,
     run: () => service.cleanup()
   })
 }
