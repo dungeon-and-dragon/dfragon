@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { searchSlot } from '#features/capture-search/lib/search/search-test-fixture'
+import { searchSlot } from '#features/capture-search/api/search.fixture'
 import type { SelectedCharacterSummary } from '#entities/character'
 import type { SearchSlot } from '#features/capture-search/lib/search/search'
 import { toClipboardText } from './slot-clipboard'

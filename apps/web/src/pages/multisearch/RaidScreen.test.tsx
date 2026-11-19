@@ -12,7 +12,7 @@ import {
   type SnapshotMark,
   swapSeats
 } from '#features/capture-search'
-import { dealerCard } from '#testing/fixtures/character'
+import { dealerCard } from '#entities/character/api/character-cards.fixture'
 import { RaidScreen } from './RaidScreen'
 import { TestRouter } from '#testing/test-support/test-router'
 

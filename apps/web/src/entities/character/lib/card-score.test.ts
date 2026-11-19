@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import { bufferCard, dealerCard } from '#testing/fixtures/character'
+import { bufferCard, dealerCard } from '#entities/character/api/character-cards.fixture'
 import type { CharacterCard } from '#entities/character/model/character'
 import { formatApproximateScore, toScoreView } from './card-score'
 

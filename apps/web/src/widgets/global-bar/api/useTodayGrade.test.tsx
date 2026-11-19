@@ -4,7 +4,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { server } from '#testing/test-support/msw-server'
-import { TODAY_GRADE_URL } from '#testing/test-support/today-grade-handlers'
+import { TODAY_GRADE_URL } from './today-grade.handlers'
 import { useTodayGrade } from './useTodayGrade'
 
 function Harness(): React.JSX.Element {
