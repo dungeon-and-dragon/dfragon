@@ -74,8 +74,8 @@ function section(label: string): HTMLElement {
 }
 
 function rowOf(name: string): HTMLTableRowElement {
-  const row = [...section('job').querySelectorAll('tbody tr')].find((candidate) =>
-    candidate.textContent?.includes(name)
+  const row = [...section('job').querySelectorAll('tbody tr')].find(
+    (candidate) => candidate.querySelector('td') !== null && candidate.textContent?.includes(name)
   )
   if (!(row instanceof HTMLTableRowElement)) {
     throw new Error(`${name} 행이 없습니다.`)
@@ -189,6 +189,43 @@ describe('운영 화면', () => {
     expect(section('수집 대기열').textContent).toContain('18,402')
     expect(section('수집 대기열').textContent).toContain('11-10 09:14')
     expect(section('수집 대기열').textContent).toContain('neople-internal41')
+  })
+
+  it('job을 Neople API 종류별로 묶어 머리줄에 endpoint를 보이고, Neople을 부르지 않는 job은 맨 뒤에 묶는다', async () => {
+    const api = new FakeOpsApi()
+    api.jobs = [
+      job({ name: 'cleanup', displayName: '실행 기록 정리', neopleApi: null }),
+      job({
+        name: 'clears',
+        displayName: '클리어 기록 수집',
+        neopleApi: { group: '캐릭터 타임라인', endpoints: ['/timeline'] }
+      }),
+      job({
+        name: 'items',
+        displayName: '아이템 사전 채우기',
+        neopleApi: { group: '캐릭터 상세, 아이템', endpoints: ['/multi/items'] }
+      }),
+      job({
+        name: 'score',
+        displayName: '점수 계산',
+        neopleApi: { group: '캐릭터 상세, 아이템', endpoints: ['/equip/*', '/multi/items'] }
+      })
+    ]
+
+    await renderScreen(api)
+
+    const groups = [...section('job').querySelectorAll('tbody')].map((body) => ({
+      header: body.querySelector('th[scope="colgroup"]')?.textContent,
+      jobs: [...body.querySelectorAll('button[aria-pressed]')].map((button) => button.textContent)
+    }))
+    expect(groups).toEqual([
+      {
+        header: '캐릭터 상세, 아이템/multi/items/equip/*',
+        jobs: ['아이템 사전 채우기', '점수 계산']
+      },
+      { header: '캐릭터 타임라인/timeline', jobs: ['클리어 기록 수집'] },
+      { header: 'Neople 안 부름', jobs: ['실행 기록 정리'] }
+    ])
   })
 
   it('job이 없으면 빈 목록 한 줄과 worker 시각 자리 표시만 보인다', async () => {

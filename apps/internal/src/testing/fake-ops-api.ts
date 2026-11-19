@@ -20,6 +20,7 @@ export type JobBody = {
   nextRunAt: string | null
   argsSchema: object
   delayMinutes: number
+  neopleApi: { group: string; endpoints: string[] } | null
   activeRun: RunBody | null
   lastFinishedRun: RunBody | null
 }
@@ -77,6 +78,7 @@ export function job(overrides: Partial<JobBody> & Pick<JobBody, 'name'>): JobBod
     nextRunAt: '2026-11-10T15:00:00.000Z',
     argsSchema: NO_ARGS_SCHEMA,
     delayMinutes: 10,
+    neopleApi: null,
     activeRun: null,
     lastFinishedRun: null,
     ...overrides
