@@ -58,23 +58,32 @@ function slotCell(row: ReturnType<typeof toEquipmentBoard>[number], slot: string
   return row.slots.find((entry) => entry.slot === slot)?.cell
 }
 
-it('같은 부위에 에픽과 태초가 있으면 태초를 보이고 나머지 개수를 더한다', () => {
-  const source = character('가', 1, [equipment('상의', '에픽', 2), equipment('상의', '태초')])
+it('같은 부위에 에픽과 태초가 있으면 태초를 보이고, 남은 개수는 태초만 세며 등급별 개수를 따로 둔다', () => {
+  const source = character('가', 1, [
+    equipment('상의', '에픽', 2),
+    equipment('상의', '태초', 3),
+    equipment('상의', '레전더리')
+  ])
   const [row] = toEquipmentBoard([source], SET)
 
   expect(slotCell(row!, '상의')).toEqual({
     itemId: '상의-태초',
     itemName: '태초 상의',
     rarity: '태초',
-    extraCount: 2
+    extraCount: 2,
+    rarityCounts: [3, 2, 1]
   })
 })
 
-it('에픽과 레전더리만 있으면 에픽을 보인다', () => {
+it('에픽과 레전더리가 하나씩이면 에픽을 보이고 남은 개수는 없다', () => {
   const source = character('가', 1, [equipment('반지', '레전더리'), equipment('반지', '에픽')])
   const [row] = toEquipmentBoard([source], SET)
 
-  expect(slotCell(row!, '반지')).toMatchObject({ rarity: '에픽', extraCount: 1 })
+  expect(slotCell(row!, '반지')).toMatchObject({
+    rarity: '에픽',
+    extraCount: 0,
+    rarityCounts: [0, 1, 1]
+  })
 })
 
 it('고른 세트가 아닌 보유는 칸에 넣지 않고, 가진 것이 없는 부위는 비운다', () => {

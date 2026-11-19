@@ -28,6 +28,10 @@ const TRANSCENDENCE_CODES: ReadonlySet<number> = new Set([516, 556])
 // 업그레이드(511), 제작서(514), 서약 업그레이드(553), 무기고(555)는 이미 가진 것을 바꾸거나 꺼낸 기록일 수 있어
 // 개수를 더하지 않고 없던 칸만 1로 만든다(2026-11-19 저장소 소유자 결정, #1852).
 const KEEP_CODES: ReadonlySet<number> = new Set([511, 514, 553, 555])
+// 고유 장비는 Neople 사전에 세트가 없어 이름 앞의 "고유 - "로 가르고, 세트 하나처럼 묶는다(2026-11-19 저장소 소유자 결정).
+// 이름에 "고유"가 없는 세트 없는 태초 장비는 묶지 않는다.
+const UNIQUE_NAME_PREFIX = '고유 - '
+const UNIQUE_SET: EquipmentSet = { setItemId: 'unique', setItemName: '고유' }
 
 type HoldingRarity = (typeof HOLDING_RARITIES)[number]
 type OathKind = 'oath' | 'crystal'
@@ -106,14 +110,29 @@ export function toEquipmentWindow(
   return { since: first.startsAt, equipmentLevel }
 }
 
+function holdingSet(entry: ItemDictionaryEntry, itemName: string | null): EquipmentSet | undefined {
+  const { setItemId, setItemName } = entry
+
+  if (setItemId !== null && setItemName !== null) {
+    return { setItemId, setItemName }
+  }
+
+  if (setItemId === null && itemName?.startsWith(UNIQUE_NAME_PREFIX)) {
+    return UNIQUE_SET
+  }
+
+  return undefined
+}
+
 function toHoldingCell(
   code: number,
   entry: ItemDictionaryEntry,
+  setItemId: string,
   equipmentLevel: number | undefined
 ): HoldingCell | undefined {
-  const { setItemId, itemRarity, itemTypeDetail, itemType } = entry
+  const { itemRarity, itemTypeDetail, itemType } = entry
 
-  if (setItemId === null || !isHoldingRarity(itemRarity)) {
+  if (!isHoldingRarity(itemRarity)) {
     return undefined
   }
 
@@ -160,9 +179,10 @@ function countHoldings(
 
   for (const { code, itemId, itemName, data } of records) {
     const entry = itemId !== null ? dictionary.get(itemId) : undefined
-    const cell = entry && toHoldingCell(code, entry, equipmentLevel)
+    const set = entry && holdingSet(entry, itemName)
+    const cell = set && toHoldingCell(code, entry, set.setItemId, equipmentLevel)
 
-    if (itemId === null || entry?.setItemName == null || cell === undefined) {
+    if (itemId === null || set === undefined || cell === undefined) {
       continue
     }
 
@@ -176,7 +196,7 @@ function countHoldings(
       counted.count = KEEP_CODES.has(code) ? Math.max(counted.count, 1) : counted.count + 1
       counted.itemId = itemId
       counted.itemName = itemName ?? ''
-      counted.setItemName = entry.setItemName
+      counted.setItemName = set.setItemName
     }
     cells.set(key, counted)
   }
