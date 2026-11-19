@@ -6,7 +6,10 @@ import {
   type TimelineClear,
   type TimelineEnhancement
 } from '@dfragon/server-core/domain/character-timeline/index.js'
-import { ITEM_DICTIONARY_CODES } from '@dfragon/server-core/domain/item-dictionary/index.js'
+import {
+  EQUIPMENT_ACQUISITION_CODES,
+  OATH_ACQUISITION_CODES
+} from '@dfragon/server-core/domain/item-dictionary/index.js'
 import {
   type SeasonBackfillProgress,
   isSeasonBackfilled,
@@ -37,8 +40,8 @@ const SEASON_EQUIPMENT_LEVELS: ReadonlyMap<number, number> = new Map([
   [10, 115],
   [11, 115]
 ])
-const EQUIPMENT_CODES = new Set(ITEM_DICTIONARY_CODES)
-const OATH_CODES = new Set([550, 551, 552, 553, 554, 555, 556, 557])
+const EQUIPMENT_CODES = new Set(EQUIPMENT_ACQUISITION_CODES)
+const OATH_CODES = new Set(OATH_ACQUISITION_CODES)
 // 칭호도 itemType이 액세서리지만 레벨이 0이나 1이라 장비 레벨로 빠진다(ADR 0074).
 const EQUIPMENT_ITEM_TYPES: ReadonlySet<string | null> = new Set([
   '무기',
