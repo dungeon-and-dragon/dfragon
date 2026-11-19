@@ -11,7 +11,8 @@ export type {
   CharacterTableAction,
   CharacterTableDetail,
   CharacterTableRow,
-  ScorePlacement
+  ScorePlacement,
+  SortedColumn
 } from './ui/CharacterTable'
 export { RankNumber } from './ui/RankNumber'
 export { ScoreValue } from './ui/ScoreValue'
