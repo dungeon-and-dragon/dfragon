@@ -1,4 +1,4 @@
-import type { AdventureActivity } from '#core/adventure-guild'
+import type { AdventureActivity } from '#entities/adventure-guild'
 
 export type ActivityKind = 'all' | 'raid' | 'legion' | 'item' | 'enhance'
 export type ActivityDay = AdventureActivity['days'][number]

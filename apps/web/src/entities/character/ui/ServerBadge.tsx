@@ -1,4 +1,4 @@
-import { CHARACTER_SERVER_NAMES } from '#core/character'
+import { CHARACTER_SERVER_NAMES } from '#entities/character/model/character-summary'
 
 const SURFACE_CLASSES = {
   inset: 'bg-inset',

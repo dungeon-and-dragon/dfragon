@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { type CharacterDetailView, characterIdentitySchema, characterRole } from '#core/character'
+import { type CharacterDetailView } from './character-detail-view'
+import { characterIdentitySchema, characterRole } from './character-summary'
 
 const text = z.string().nullable()
 const count = z.number().nullable()

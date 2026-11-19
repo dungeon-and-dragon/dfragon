@@ -1,4 +1,4 @@
-import type { Guild } from '#core/adventure-guild'
+import type { Guild } from '#entities/adventure-guild'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
 
 // 길드와 캐릭터 이름은 실제 값이 아닌 합성 값이다.

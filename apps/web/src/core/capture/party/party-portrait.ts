@@ -1,5 +1,5 @@
 import { isValidPartyFrameSize, type PartyFrameGeometry } from '@dfragon/lib'
-import type { CharacterImage, CharacterPortrait } from '#core/character/character'
+import type { CharacterImage, CharacterPortrait } from '#entities/character'
 
 type PartyPortraitCropInput = Readonly<{
   frame: CharacterImage

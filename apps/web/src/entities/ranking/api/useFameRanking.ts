@@ -6,9 +6,9 @@ import {
   type FameRanking,
   type FameRankingFilter,
   fameRankingSchema,
-  ITEM_FILTER_LIMIT,
   type RankedCharacter
-} from '#core/ranking'
+} from '#entities/ranking/model/ranking-stats'
+import { ITEM_FILTER_LIMIT } from '#core/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 

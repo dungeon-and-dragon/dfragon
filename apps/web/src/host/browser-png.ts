@@ -1,4 +1,4 @@
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 
 const IMAGE_READ_ERROR = 'Could not read the character image.'
 

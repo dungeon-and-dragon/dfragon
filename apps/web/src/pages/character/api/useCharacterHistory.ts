@@ -3,7 +3,7 @@ import {
   type CharacterHistory,
   type CharacterIdentity,
   characterHistorySchema
-} from '#core/character'
+} from '#entities/character'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { detailViewSchemaOf, requestCharacterJson } from './character-api'
 

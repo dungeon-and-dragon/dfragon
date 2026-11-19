@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { type OathCatalog, oathCatalogSchema } from '#core/catalog'
+import { type OathCatalog, oathCatalogSchema } from '#entities/catalog/model/oath-catalog'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { absoluteUrl, fetchUploadedStaticJson } from '#shared/lib/static-json'
 

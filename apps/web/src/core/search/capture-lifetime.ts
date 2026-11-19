@@ -24,7 +24,7 @@ import {
   type RequestIdentity
 } from './slot-lifetime-machine'
 import { sameOcrSearchInput } from '#core/ocr/ocr-input'
-import type { SelectedCharacterSummary } from '#core/character/character'
+import type { SelectedCharacterSummary } from '#entities/character'
 
 export type CaptureBinding = Readonly<{
   captureId: string

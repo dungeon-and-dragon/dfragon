@@ -1,4 +1,4 @@
-import type { CharacterCard } from './character'
+import type { CharacterCard } from '#entities/character/model/character'
 
 export type ScoreView = {
   label: '장비 점수' | '버프 점수'

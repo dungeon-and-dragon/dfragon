@@ -1,4 +1,5 @@
-import type { GameTextLines, OathCatalog } from '#core/catalog'
+import type { GameTextLines } from '#entities/catalog/model/game-text'
+import type { OathCatalog } from '#entities/catalog/model/oath-catalog'
 
 // 서약 세트 id와 이름, 선택지 이름은 게임 데이터 그대로이고, 그림 주소와 효과 문구는 합성 값이다.
 

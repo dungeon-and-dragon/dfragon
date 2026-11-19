@@ -1,5 +1,5 @@
 import { detectPartyFrameGeometry, type DNFParticipantFrame, type DNFRectangle } from '@dfragon/lib'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import { SEARCH_SLOT_COUNTS } from '#core/search'
 import { cropRaidWindowNicknames, type RaidWindowTemplates } from '#core/capture'
 import type { NameCrops } from './screen-watch'

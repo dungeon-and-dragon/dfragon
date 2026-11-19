@@ -1,4 +1,4 @@
-import type { CharacterPortrait } from '#core/character/character'
+import type { CharacterPortrait } from '#entities/character'
 import type { OcrSearchInput, RaidRowObservation } from '#core/search/search'
 
 const RGBA_CHANNELS = 4

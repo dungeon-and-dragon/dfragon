@@ -1,4 +1,4 @@
-import type { GameTextLines } from '#core/catalog'
+import type { GameTextLines } from '#entities/catalog'
 import { gameTextToneClasses } from './game-text-tones'
 
 export function GameText({

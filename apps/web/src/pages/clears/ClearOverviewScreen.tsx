@@ -1,6 +1,6 @@
 import { ChipGroup } from '@dfragon/ui'
 import { useState } from 'react'
-import type { ClearContent, ClearOverview } from '#core/ranking'
+import type { ClearContent, ClearOverview } from '#entities/ranking'
 import { BoxPlotChart } from '#shared/ui/chart/BoxPlot'
 import { BoxPlotLegend } from '#shared/ui/chart/ChartLegend'
 import { Columns } from '#shared/ui/chart/Columns'

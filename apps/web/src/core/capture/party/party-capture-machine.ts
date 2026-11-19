@@ -1,6 +1,6 @@
 import { assign, fromCallback, fromPromise, setup, type SnapshotFrom } from 'xstate'
 import type { CapturePhase } from '#core/capture/capture-types'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 import {
   beginCaptureSearch,
   getCapturingPhase,

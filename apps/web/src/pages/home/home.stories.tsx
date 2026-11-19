@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { HttpResponse, http } from 'msw'
-import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character'
+import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#entities/character'
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'

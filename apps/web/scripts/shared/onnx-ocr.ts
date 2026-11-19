@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { env, InferenceSession, Tensor } from 'onnxruntime-web/wasm'
 import { decodeCtcCandidates } from '#core/ocr/ctc-candidates'
 import { MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH } from '#core/ocr/paddle-recognition'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 
 const RGBA_CHANNELS = 4
 const DICTIONARY_CARRIAGE_RETURN_PATTERN = /\r/g

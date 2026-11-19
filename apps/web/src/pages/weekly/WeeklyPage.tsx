@@ -1,5 +1,5 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
-import { useMyAdventureStore } from '#hooks/useMyAdventureStore'
+import { useMyAdventureStore } from '#entities/adventure-guild'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 const route = getRouteApi('/adventures/$adventureName')

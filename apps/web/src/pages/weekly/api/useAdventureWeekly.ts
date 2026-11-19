@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { type AdventureWeekly, adventureWeeklySchema } from '#core/adventure-guild'
+import { type AdventureWeekly, adventureWeeklySchema } from '#entities/adventure-guild'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { requestAdventureJson } from './adventure-request'
 

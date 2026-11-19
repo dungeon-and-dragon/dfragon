@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, isAbsolute, relative, resolve } from 'node:path'
 import { PNG } from 'pngjs'
 import type { DNFRaidParticipantPosition, PartyFrameSlot } from '@dfragon/lib'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 
 export const CAPTURE_KINDS = ['prtsc', 'share', 'snip', 'ingame-jpg'] as const
 export type CaptureKind = (typeof CAPTURE_KINDS)[number]

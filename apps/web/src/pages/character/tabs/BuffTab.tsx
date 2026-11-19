@@ -1,6 +1,6 @@
 import { Tooltip } from '@dfragon/ui'
-import { buffSkillInfoOf } from '#core/character'
-import { buffSkillIconOf, type SkillIconImage } from '#core/catalog'
+import { buffSkillInfoOf } from '#entities/character'
+import { buffSkillIconOf, type SkillIconImage } from '#entities/catalog'
 import { useSkillWindowCatalog } from '#pages/character/api/useSkillWindowCatalog'
 import { BuffGearTable } from './buff/BuffGearTable'
 import type { CharacterTabProps } from './character-tab-props'

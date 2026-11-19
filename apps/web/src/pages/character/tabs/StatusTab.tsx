@@ -3,7 +3,7 @@ import {
   formatStatValue,
   type StatusLine,
   toStatusLayout
-} from '#core/character'
+} from '#entities/character'
 import type { CharacterTabProps } from './character-tab-props'
 import { detailTabClasses as layout } from './detail-tab-classes'
 

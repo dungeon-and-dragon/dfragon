@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { MaleCrusaderRole } from '#core/character/male-crusader'
+import type { MaleCrusaderRole } from '#entities/character/@x/ranking'
 
 const count = z.number().int().nonnegative()
 const upgradeCounts = z.object({ name: z.string(), type1: count, type2: count })

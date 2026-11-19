@@ -3,7 +3,7 @@ import {
   type ItemView,
   signedEnchantValue,
   toItemView
-} from '#core/character'
+} from '#entities/character'
 import { AvatarRow } from '#pages/character/tabs/avatar/AvatarTable'
 import { avatarClasses } from '#pages/character/tabs/avatar/avatar-classes'
 import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'

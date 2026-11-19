@@ -1,5 +1,5 @@
-import { CHARACTER_SERVER_NAMES, type JobLabel, jobLabelOf } from '#core/character'
-import type { CharacterStats } from '#core/ranking'
+import { CHARACTER_SERVER_NAMES, type JobLabel, jobLabelOf } from '#entities/character/@x/ranking'
+import type { CharacterStats } from '#entities/ranking/model/ranking-stats'
 import type { ColumnBar } from '#shared/ui/chart/Columns'
 import type { Bar } from '#shared/ui/chart/RowBars'
 

@@ -4,9 +4,9 @@ import {
   type EquipmentReinforce,
   type EquipmentRow,
   type EquipmentView,
-  type ItemView
-} from '#core/character'
-import { enhancementTextClasses } from '#components/game-colors'
+  type ItemView,
+  enhancementTextClasses
+} from '#entities/character'
 import { itemTableClasses } from './item-classes'
 import { ItemCell } from './item-parts'
 

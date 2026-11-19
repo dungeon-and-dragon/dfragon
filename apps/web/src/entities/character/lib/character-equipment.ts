@@ -1,5 +1,5 @@
 import { formatStatValue, type ItemRarity } from './character-detail-display'
-import type { CharacterDetailView } from './character-detail-view'
+import type { CharacterDetailView } from '#entities/character/model/character-detail-view'
 import { type ItemView, itemRarityOfGrade, toItemView, tuneNumeral } from './character-item'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { FameRankingFilter } from '#core/ranking'
+import type { FameRankingFilter } from '#entities/ranking'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'

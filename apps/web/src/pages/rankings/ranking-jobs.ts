@@ -1,5 +1,5 @@
-import { MALE_CRUSADER_JOB, type MaleCrusaderRole, withMaleCrusaderRole } from '#core/character'
-import type { FameRankingFilter } from '#core/ranking'
+import { MALE_CRUSADER_JOB, type MaleCrusaderRole, withMaleCrusaderRole } from '#entities/character'
+import type { FameRankingFilter } from '#entities/ranking'
 
 export type RankingGrow = Readonly<{ jobGrowId: string; name: string; role?: MaleCrusaderRole }>
 

@@ -7,7 +7,7 @@ import {
   activitySeasonSchema,
   adventureActivitySchema,
   adventureActivitySeasonDaysSchema
-} from '#core/adventure-guild'
+} from '#entities/adventure-guild'
 import { requestAdventureJson } from './adventure-request'
 
 export type AdventureActivityResult =

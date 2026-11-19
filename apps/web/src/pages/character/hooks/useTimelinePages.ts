@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { TimelinePage } from '#core/character'
+import type { TimelinePage } from '#entities/character'
 
 export type TimelinePagesState =
   | Readonly<{ status: 'idle' }>

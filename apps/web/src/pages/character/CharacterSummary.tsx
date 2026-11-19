@@ -4,13 +4,13 @@ import {
   characterImageUrl,
   displayJobName,
   formatApproximateScore,
-  toScoreView
-} from '#core/character'
+  toScoreView,
+  ServerBadge,
+  characterDisplayOf
+} from '#entities/character'
 import { Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#core/capture'
 import { Portrait } from '#components/Portrait'
-import { ServerBadge } from '#components/ServerBadge'
-import { characterDisplayOf } from '#lib/stored-character'
 import { FavoriteToggle } from '#components/FavoriteToggle'
 import { useRefreshCharacterDetail } from './api/useCharacterDetail'
 import { useRefreshingNow } from '#shared/lib/useRefreshingNow'

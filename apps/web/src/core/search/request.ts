@@ -5,7 +5,7 @@ import type {
   CharacterSearchRow,
   SelectedCharacterSummary,
   CharacterJsonValue
-} from '#core/character/character'
+} from '#entities/character'
 import type { DiagnosticCode } from '#shared/lib/diagnostics/diagnostics'
 import {
   createCharacterIdentifier,

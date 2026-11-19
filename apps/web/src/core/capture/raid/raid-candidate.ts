@@ -1,6 +1,6 @@
 import { parseDNFRaidValueNotation, type DNFRaidValueNotation } from '@dfragon/lib'
 import type { CharacterSelectionMethod, RaidRowObservation } from '#core/search/search'
-import type { CharacterCandidate } from '#core/character/character'
+import type { CharacterCandidate } from '#entities/character'
 import { orderedCandidates } from '#core/search/candidate-order'
 import { matchJobName } from './raid-job-name'
 

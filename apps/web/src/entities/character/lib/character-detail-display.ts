@@ -1,4 +1,4 @@
-import type { CharacterDetailView } from './character-detail-view'
+import type { CharacterDetailView } from '#entities/character/model/character-detail-view'
 
 type BuffSkillInfo = NonNullable<NonNullable<CharacterDetailView['buff']['equipment']>['skillInfo']>
 

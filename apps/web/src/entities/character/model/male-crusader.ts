@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { CharacterCardRole } from './character'
-import { formatJobName } from './job-format'
+import { formatJobName } from '#entities/character/lib/job-format'
 
 export const maleCrusaderRoleSchema = z.enum(['dealer', 'buffer'])
 

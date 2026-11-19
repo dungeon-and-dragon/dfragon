@@ -1,7 +1,7 @@
 import type { z } from 'zod'
 import { SearchHttpFailure } from '#shared/api/api-error'
 import { createJsonRequest } from '#shared/api/json-request'
-import type { SetStatsFilter } from '#core/ranking'
+import type { SetStatsFilter } from '#entities/ranking/model/ranking-stats'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 
 const requestJson = createJsonRequest(dfragonHttp, API_BASE_URL)

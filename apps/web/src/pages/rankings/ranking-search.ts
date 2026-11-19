@@ -1,12 +1,12 @@
 import { z } from 'zod'
-import { maleCrusaderRoleSchema } from '#core/character'
-import {
-  type FameRankingFameRange,
-  type FameRankingFilter,
-  type FameRankingSetFilter,
-  ITEM_FILTER_LIMIT,
-  type SetStatsFilter
-} from '#core/ranking'
+import { ITEM_FILTER_LIMIT } from '#core/ranking'
+import { maleCrusaderRoleSchema } from '#entities/character'
+import type {
+  FameRankingFameRange,
+  FameRankingFilter,
+  FameRankingSetFilter,
+  SetStatsFilter
+} from '#entities/ranking'
 import { growFilter, RANKING_JOBS } from './ranking-jobs'
 
 const text = z.string().min(1).optional().catch(undefined)

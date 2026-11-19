@@ -1,5 +1,5 @@
 import { createJsonRequest } from '#shared/api/json-request'
-import { type Guild, guildSchema } from '#core/adventure-guild'
+import { type Guild, guildSchema } from '#entities/adventure-guild'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 

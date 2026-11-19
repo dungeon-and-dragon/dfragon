@@ -4,7 +4,7 @@ import type {
   CharacterIdentity,
   CharacterImage,
   CharacterPortrait
-} from '#core/character/character'
+} from '#entities/character'
 import { orderedCandidates } from './candidate-order'
 import { portraitAnchorOf, type PortraitAnchor } from './portrait-anchor'
 import {
