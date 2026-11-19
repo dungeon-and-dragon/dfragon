@@ -1,6 +1,7 @@
 import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
 import type {
   AdventureActivityOf,
+  AdventureEquipment,
   AdventureSeasonDays,
   AdventureWeeklyClears,
   StoredActivitySeason
@@ -22,6 +23,7 @@ export interface AdventureGuildRepository {
   readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]>
   readGuild(guildId: string): Promise<StoredGuild>
   readAdventureWeeklyClears(adventureName: string): Promise<AdventureWeeklyClears>
+  readAdventureEquipment(adventureName: string): Promise<AdventureEquipment>
   readAdventureActivity(
     adventureName: string,
     seasonId: number | undefined

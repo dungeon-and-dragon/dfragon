@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type {
   ActivitySeason,
   AdventureActivity,
+  AdventureEquipment,
   AdventureSeasonDays,
   AdventureWeeklyClears
 } from '#domain/adventure-guild/index.js'
@@ -31,6 +32,8 @@ export type GuildMembersResponse = {
 }
 
 export type AdventureWeeklyResponse = AdventureWeeklyClears & { adventureName: string }
+
+export type AdventureEquipmentResponse = AdventureEquipment & { adventureName: string }
 
 export type AdventureActivityResponse = AdventureActivity
 
@@ -65,6 +68,13 @@ export function toGuildMembersResponse(
   const rows = members.map(toCharacterRow)
 
   return { guildId, guildName, memberCount, members: rows }
+}
+
+export function toAdventureEquipmentResponse(
+  adventureName: string,
+  equipment: AdventureEquipment
+): AdventureEquipmentResponse {
+  return { adventureName, ...equipment }
 }
 
 export function toAdventureWeeklyResponse(
