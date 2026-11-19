@@ -5,7 +5,8 @@ import type { CharacterIdentity } from './character'
 import {
   CHARACTER_SERVER_NAMES as SERVER_NAMES,
   characterIdentitySchema as identitySchema,
-  characterImageUrl
+  characterImageUrl,
+  listScoreSchema
 } from './character-summary'
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
@@ -21,7 +22,8 @@ const candidateSchema = identitySchema
     // 모험단명, 직업명을 보내기 전의 API와도 호환하도록 없으면 null로 받는다.
     adventureName: z.string().nullable().default(null),
     jobName: z.string().nullable().default(null),
-    jobGrowName: z.string().nullable().default(null)
+    jobGrowName: z.string().nullable().default(null),
+    score: listScoreSchema
   })
   .refine(
     (candidate) =>

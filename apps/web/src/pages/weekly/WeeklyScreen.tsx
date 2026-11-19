@@ -163,7 +163,7 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
               clearNames={[]}
               rows={[]}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} affiliations={[]} />
+                <SkeletonRow key={index} scorePlacement="column" affiliations={[]} />
               ))}
             />
           </div>
