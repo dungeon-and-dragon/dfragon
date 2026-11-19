@@ -1,5 +1,5 @@
 import type { FameRanking } from '#entities/ranking/model/ranking-stats'
-import { storyRankedCharacters } from '#testing/story-support/story-characters'
+import { storyRankedCharacters } from './ranked-characters.fixture'
 
 const PAGE_SIZE = 100
 const characters = storyRankedCharacters(PAGE_SIZE + 30)

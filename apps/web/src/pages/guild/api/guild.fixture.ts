@@ -1,5 +1,5 @@
 import type { Guild } from '#entities/adventure-guild'
-import { storyRankedCharacters } from '#testing/story-support/story-characters'
+import { storyRankedCharacters } from '#entities/ranking/api/ranked-characters.fixture'
 
 // 길드와 캐릭터 이름은 실제 값이 아닌 합성 값이다.
 

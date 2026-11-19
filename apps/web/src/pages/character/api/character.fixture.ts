@@ -1,6 +1,6 @@
 import type { GameTextLines, SkillWindowCatalog } from '#entities/catalog'
 import type { CharacterDetailView, CharacterHistory, CharacterTimeline } from '#entities/character'
-import { characterDetailFixture } from '#testing/fixtures/character'
+import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 
 // 캐릭터 상세 화면 테스트의 fixture에서 만든 story와 MSW handler의 값이다. 이름, 소속과 그림 주소는 실제 캐릭터가 아닌 합성 값이다.
 

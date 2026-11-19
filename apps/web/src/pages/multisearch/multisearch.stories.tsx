@@ -19,7 +19,7 @@ import {
   createStoryMultisearchHost,
   storyPartyCards,
   storyRaidCards
-} from '#testing/story-support/story-multisearch'
+} from '#pages/multisearch/api/multisearch.fixture'
 import { PartyScreen } from './PartyScreen'
 import { RaidScreen } from './RaidScreen'
 import { MultisearchBoard } from './MultisearchPage'

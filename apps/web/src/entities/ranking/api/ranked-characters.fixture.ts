@@ -1,4 +1,4 @@
-import type { RankedCharacter } from '#entities/ranking'
+import type { RankedCharacter } from '#entities/ranking/model/ranking-stats'
 
 const SERVERS = ['cain', 'bakal', 'diregie', 'casillas', 'hilder'] as const
 const JOBS = [

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { storyRankedCharacters } from '#testing/story-support/story-characters'
+import { storyRankedCharacters } from '#entities/ranking/api/ranked-characters.fixture'
 import { CharacterTable, SkeletonRow } from './CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
