@@ -1352,8 +1352,14 @@ const ITEM_STATS = {
   computedAt: '2026-11-18T15:38:47.900Z',
   sampleSize: 4,
   slots: [
-    { slotId: 'WEAPON', items: [{ itemId: 'weapon-1', name: '합성 무기', count: 4 }] },
-    { slotId: 'RING', items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', count: 3 }] }
+    {
+      slotId: 'WEAPON',
+      items: [{ itemId: 'weapon-1', name: '합성 무기', typeDetail: null, count: 4 }]
+    },
+    {
+      slotId: 'RING',
+      items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', typeDetail: null, count: 3 }]
+    }
   ]
 }
 

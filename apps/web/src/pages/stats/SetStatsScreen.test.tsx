@@ -268,6 +268,7 @@ function itemStatsWith(weaponCount: number): ItemStats {
   const weapons = Array.from({ length: weaponCount }, (_, index) => ({
     itemId: `weapon-${index + 1}`,
     name: `무기${index + 1}`,
+    typeDetail: null,
     count: weaponCount - index
   }))
 
@@ -276,12 +277,15 @@ function itemStatsWith(weaponCount: number): ItemStats {
     sampleSize: 100,
     slots: [
       { slotId: 'WEAPON', items: weapons },
-      { slotId: 'RING', items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', count: 72 }] },
+      {
+        slotId: 'RING',
+        items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', typeDetail: null, count: 72 }]
+      },
       {
         slotId: 'EARRING',
         items: [
-          { itemId: 'earring-1', name: '영롱한 날씨의 큐브', count: 40 },
-          { itemId: 'earring-2', name: '합성 귀걸이', count: 10 }
+          { itemId: 'earring-1', name: '영롱한 날씨의 큐브', typeDetail: null, count: 40 },
+          { itemId: 'earring-2', name: '합성 귀걸이', typeDetail: null, count: 10 }
         ]
       }
     ]
