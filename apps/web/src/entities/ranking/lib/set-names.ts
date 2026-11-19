@@ -1,4 +1,4 @@
-import type { OathCatalog } from '#core/catalog/oath-catalog'
+import type { OathCatalog } from '#entities/catalog/@x/ranking'
 
 export const NO_SET_NAME = '세트 없음'
 

@@ -1,6 +1,6 @@
 import { Button } from '@dfragon/ui'
 import { useState } from 'react'
-import type { StoredCharacter } from '#core/ranking'
+import type { StoredCharacter } from '#entities/ranking'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'

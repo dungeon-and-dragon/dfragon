@@ -1,5 +1,5 @@
-import type { GameTextTone } from '#core/catalog'
-import { enhancementTextClasses, rarityTextClasses } from '#components/game-colors'
+import type { GameTextTone } from '#entities/catalog'
+import { enhancementTextClasses, rarityTextClasses } from '#entities/character'
 
 export const gameTextToneClasses: Readonly<Record<GameTextTone, string>> = {
   default: '',

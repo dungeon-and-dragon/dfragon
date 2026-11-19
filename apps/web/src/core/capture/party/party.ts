@@ -6,7 +6,7 @@ import {
 } from '@dfragon/lib'
 import { toBinarizedTextCanvas } from '#core/ocr/nickname-pixels'
 import { SEARCH_SLOT_COUNTS } from '#core/search/search'
-import type { CharacterImage, CharacterPortrait } from '#core/character/character'
+import type { CharacterImage, CharacterPortrait } from '#entities/character'
 import { cropPartyPortrait } from './party-portrait'
 
 const RGBA_CHANNELS = 4

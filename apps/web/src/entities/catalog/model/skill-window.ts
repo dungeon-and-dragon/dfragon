@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CharacterDetailView } from '#core/character/character-detail-view'
+import type { CharacterDetailView } from '#entities/character/@x/catalog'
 import { type GameTextLines, gameTextSchema } from './game-text'
 
 const evolutionBranchSchema = z.object({

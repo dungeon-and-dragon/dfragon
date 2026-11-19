@@ -6,7 +6,7 @@ import {
   clearContentStatsSchema,
   clearOverviewSchema,
   clearStatsSchema
-} from '#core/ranking'
+} from '#entities/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 

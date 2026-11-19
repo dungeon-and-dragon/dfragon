@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { storedCharacterSchema } from '#core/ranking/ranking-stats'
-import { clearKind } from '#core/character/character-timeline'
+import { storedCharacterSchema } from '#entities/ranking/@x/adventure-guild'
+import { clearKind } from '#entities/character/@x/adventure-guild'
 
 const clearNameSchema = z.object({ kind: clearKind, name: z.string() })
 

@@ -4,8 +4,8 @@ import {
   isMaleCrusaderJob,
   type MaleCrusaderRole,
   maleCrusaderRoleOf
-} from '#core/character'
-import type { SkillStats, SkillStatsJob } from '#core/ranking'
+} from '#entities/character'
+import type { SkillStats, SkillStatsJob } from '#entities/ranking'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
@@ -19,7 +19,7 @@ import {
   skillUpgradeBoardOf,
   skillUpgradesOf,
   skillWindowOf
-} from '#core/catalog'
+} from '#entities/catalog'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useSkillStats } from '#pages/character/api/useSkillStats'

@@ -1,5 +1,5 @@
-import type { Guild } from '#core/adventure-guild'
-import type { StoredCharacter } from '#core/ranking'
+import type { Guild } from '#entities/adventure-guild'
+import type { StoredCharacter } from '#entities/ranking'
 import { CharacterListBox } from './components/CharacterListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { useGuild } from './api/useGuild'

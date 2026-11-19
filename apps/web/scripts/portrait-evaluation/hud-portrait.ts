@@ -1,5 +1,5 @@
 import { cropPartyPortrait } from '#core/capture/party/party-portrait'
-import type { CharacterImage, CharacterPortrait } from '#core/character/character'
+import type { CharacterImage, CharacterPortrait } from '#entities/character'
 
 const RGBA_CHANNELS = 4
 const OPAQUE_ALPHA = 255

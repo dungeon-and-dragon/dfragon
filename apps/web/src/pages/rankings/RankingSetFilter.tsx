@@ -1,5 +1,5 @@
 import { Select } from '@dfragon/ui'
-import type { FameRankingSetFilter } from '#core/ranking'
+import type { FameRankingSetFilter } from '#entities/ranking'
 import type { SetChoice, SetChoices } from './ranking-sets'
 
 const ALL = 'all'

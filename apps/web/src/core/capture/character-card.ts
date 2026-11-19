@@ -1,7 +1,9 @@
 import { portraitFaceWindowOf } from '#core/search/portrait-anchor'
-import type { SelectedCharacterSummary } from '#core/character/character'
-import { characterImageUrl } from '#core/character/character-summary'
-import { displayJobName } from '#core/character/job-display'
+import {
+  type SelectedCharacterSummary,
+  characterImageUrl,
+  displayJobName
+} from '#entities/character'
 import type { CharacterChoice, SearchSlot } from '#core/search/search'
 import { SEARCH_ERRORS, type SearchError } from '#shared/api/api-error'
 import { serverNames } from '#shared/config/servers/servers'

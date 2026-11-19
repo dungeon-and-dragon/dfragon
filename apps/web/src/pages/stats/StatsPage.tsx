@@ -6,13 +6,7 @@ import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { StatsTabs } from './StatsTabs'
 import { useCharacterStats } from './api/useCharacterStats'
-import {
-  averageFameBars,
-  type FameBar,
-  fameBars,
-  jobBars,
-  serverBars
-} from '#components/chart/stats-bars'
+import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from '#entities/ranking'
 
 const integer = new Intl.NumberFormat('ko-KR')
 const SCREEN = 'flex flex-col'

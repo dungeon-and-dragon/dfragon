@@ -1,6 +1,6 @@
 import { Button, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
-import type { FameRankingFameRange } from '#core/ranking'
+import type { FameRankingFameRange } from '#entities/ranking'
 import { fameRangeOf } from './ranking-fame'
 
 const FAME_INPUT = 'w-[112px]'

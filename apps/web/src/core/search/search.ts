@@ -2,7 +2,7 @@ import type {
   CharacterPortrait,
   CharacterSearchRow,
   SelectedCharacterSummary
-} from '#core/character/character'
+} from '#entities/character'
 import type { SearchError } from '#shared/api/api-error'
 
 export const SEARCH_SLOT_COUNTS = { party: 4, raid: 12 } as const

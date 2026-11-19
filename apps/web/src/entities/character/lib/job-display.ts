@@ -1,6 +1,6 @@
-import type { CharacterCardRole } from './character'
+import type { CharacterCardRole } from '#entities/character/model/character'
 import { formatJobName } from './job-format'
-import { maleCrusaderRoleOf, withMaleCrusaderRole } from './male-crusader'
+import { maleCrusaderRoleOf, withMaleCrusaderRole } from '#entities/character/model/male-crusader'
 
 type JobNames = Readonly<{ jobName: string | null; jobGrowName: string | null }>
 

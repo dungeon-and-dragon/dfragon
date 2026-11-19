@@ -4,19 +4,19 @@ import {
   OATH_SET_POINT_BONUS,
   type OathUpgradeChoice,
   type OathView,
-  toOathView
-} from '#core/character'
+  toOathView,
+  raritySolidOf
+} from '#entities/character'
 import {
   type OathCatalog,
   type OathOptionCard,
   type OathSetBoard,
   oathItemIconOf,
-  oathSetBoardOf
-} from '#core/catalog'
-import { useOathCatalog } from '#entities/catalog'
+  oathSetBoardOf,
+  useOathCatalog
+} from '#entities/catalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
-import { raritySolidOf } from '#components/game-colors'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { ItemIcon, ItemName, RarityBadge, SetPoint, TuneNumeral } from './equipment/item-parts'
 

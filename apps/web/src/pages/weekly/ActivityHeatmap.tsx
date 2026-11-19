@@ -1,12 +1,8 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
-import type { ActivitySummary, AdventureActivity } from '#core/adventure-guild'
-import {
-  enhancementTextClasses,
-  rarityTextClasses,
-  raritySolidClasses
-} from '#components/game-colors'
+import type { ActivitySummary, AdventureActivity } from '#entities/adventure-guild'
+import { enhancementTextClasses, rarityTextClasses, raritySolidClasses } from '#entities/character'
 import {
   type AdventureActivitySeasonDaysResult,
   useAdventureActivity,

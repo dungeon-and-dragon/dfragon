@@ -1,4 +1,4 @@
-import type { ActivitySeason } from '#core/adventure-guild'
+import type { ActivitySeason } from '#entities/adventure-guild'
 
 export type SeasonBar =
   | Readonly<{ state: 'ready' }>

@@ -8,7 +8,7 @@ import {
   type TimelineEnhancement,
   timelineAcquisitionPageSchema,
   timelineEnhancementPageSchema
-} from '#core/character'
+} from '#entities/character'
 import { useLoadedResult } from '#shared/lib/useLoadedResult'
 import { type TimelinePages, useTimelinePages } from '#pages/character/hooks/useTimelinePages'
 import { requestCharacterJson } from './character-api'

@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from 'react'
 import { formatSeoulDateTime } from '#shared/lib/time-format'
-import type { ClearTimes } from '#core/ranking'
+import type { ClearTimes } from '#entities/ranking'
 import { Columns } from '#shared/ui/chart/Columns'
 import { TitleStat } from '#shared/ui/TitleBox'
 import { hourColumns, type WeekSummary, weekdayColumns } from '#pages/clears/clear-overview'

@@ -1,4 +1,4 @@
-import type { OathCatalog } from '#core/catalog'
+import type { OathCatalog } from '#entities/catalog'
 import {
   catalogOptionNamesOf,
   equipmentSetShortName,
@@ -7,7 +7,7 @@ import {
   oathSetShortName,
   type RankedCharacter,
   type SetStats
-} from '#core/ranking'
+} from '#entities/ranking'
 
 export type SetChoice = Readonly<{ value: string; label: string }>
 

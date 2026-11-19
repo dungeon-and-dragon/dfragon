@@ -1,15 +1,13 @@
 import type { KyInstance } from 'ky'
-import type {
-  CharacterCandidate,
-  CharacterDetails,
-  CharacterIdentity
-} from '#core/character/character'
 import {
+  type CharacterCandidate,
+  type CharacterDetails,
+  type CharacterIdentity,
   candidatesSchema,
   detailsSchema,
   validateIdentity,
   validateNickname
-} from '#core/character/character-schemas'
+} from '#entities/character'
 import { SearchHttpFailure } from '#shared/api/api-error'
 import { throwCharacterTransportFailure } from '#shared/api/api-response'
 import { createJsonRequest } from '#shared/api/json-request'

@@ -1,6 +1,6 @@
 import type { CtcCandidate } from '#core/ocr/ctc-candidates'
 import type { RaidValueColumn } from '#core/search/search'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 
 export type CaptureSource = {
   id: string

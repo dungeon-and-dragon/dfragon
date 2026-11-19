@@ -1,16 +1,16 @@
-import type { OathCatalog } from '#core/catalog'
 import { useEffect } from 'react'
-import type {
-  FameRankingFameRange,
-  FameRankingFilter,
-  FameRankingSetFilter,
-  ItemStats,
-  SetStats
-} from '#core/ranking'
+import type { ItemStats } from '#core/ranking'
 import { TitleBox } from '#shared/ui/TitleBox'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
-import { useItemStats, useSetStats } from '#entities/ranking'
-import { useOathCatalog } from '#entities/catalog'
+import {
+  type FameRankingFameRange,
+  type FameRankingFilter,
+  type FameRankingSetFilter,
+  type SetStats,
+  useItemStats,
+  useSetStats
+} from '#entities/ranking'
+import { type OathCatalog, useOathCatalog } from '#entities/catalog'
 import { FameRankingList } from './FameRankingList'
 import { type FilterRow, RankingFilterBox } from './RankingFilterBox'
 import { UniqueItemChips, WeaponSelect } from './RankingItemFilter'

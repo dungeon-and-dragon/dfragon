@@ -3,7 +3,7 @@ import {
   candidatesSchema,
   type SearchedCharacter,
   validateSearchQuery
-} from '#core/character'
+} from '#entities/character'
 import { createJsonRequest } from '#shared/api/json-request'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'

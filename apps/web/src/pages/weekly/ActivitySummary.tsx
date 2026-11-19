@@ -1,7 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import type { ReactNode } from 'react'
-import type { ActivitySummary as Summary, EnhancementTarget } from '#core/adventure-guild'
-import { enhancementTextClasses, rarityTextClasses } from '#components/game-colors'
+import type { ActivitySummary as Summary, EnhancementTarget } from '#entities/adventure-guild'
+import { enhancementTextClasses, rarityTextClasses } from '#entities/character'
 import { formatClearCount } from './clear-count'
 import { type RarityCounts, rarityTotal } from './rarity-counts'
 
