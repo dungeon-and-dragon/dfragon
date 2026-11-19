@@ -1,6 +1,6 @@
 import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
-import { useFameRanking } from '#hooks/useFameRanking'
+import { useFameRanking } from '#entities/ranking'
 
 const NAME = '명성 랭킹'
 const SHOWN_COUNT = 3
