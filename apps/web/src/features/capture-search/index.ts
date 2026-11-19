@@ -13,7 +13,6 @@ export type {
   SlotState
 } from './lib/capture/cards-types'
 export {
-  MISSING_VALUE,
   PARTY_SEAT_LAYOUT,
   RAID_PARTY_COUNT,
   RAID_PARTY_SIZE,

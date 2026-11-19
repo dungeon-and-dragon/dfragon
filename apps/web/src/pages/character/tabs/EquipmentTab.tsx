@@ -1,15 +1,18 @@
 import {
   EQUIPMENT_SET_POINT_BONUS,
   type EquipmentView,
+  ItemName,
+  itemPartClasses,
   OATH_SET_POINT_BONUS,
   type OathView,
+  RarityBadge,
   toEquipmentView,
   toOathView
 } from '#entities/character'
 import type { CharacterTabProps } from './character-tab-props'
 import { EquipmentTable } from './equipment/EquipmentTable'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
-import { ItemName, RarityBadge, SetPoint } from './equipment/item-parts'
+import { SetPoint } from './equipment/item-parts'
 
 export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
   const view = toEquipmentView(detail)
@@ -46,7 +49,7 @@ function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }):
       {mistLevel !== null && (
         <span className={itemClasses.itemText}>
           <span className="label">안개 융화</span>
-          <b className={`${itemClasses.name} num`}>{`Lv.${mistLevel}`}</b>
+          <b className={`${itemPartClasses.name} num`}>{`Lv.${mistLevel}`}</b>
         </span>
       )}
     </div>

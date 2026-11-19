@@ -7,7 +7,7 @@ import {
 import type { CharacterChoice, SearchSlot } from '#features/capture-search/lib/search/search'
 import { SEARCH_ERRORS, type SearchError } from '#shared/api/api-error'
 import { serverNames } from '#shared/config/servers/servers'
-import { MISSING_VALUE } from './cards'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { CardCharacter } from './cards-types'
 import type { SearchMode } from './search-mode'
 import type { ServerId } from '#shared/config/servers/servers-types'

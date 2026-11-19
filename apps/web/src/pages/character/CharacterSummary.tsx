@@ -10,7 +10,7 @@ import {
   Portrait
 } from '#entities/character'
 import { Link } from '@tanstack/react-router'
-import { MISSING_VALUE } from '#features/capture-search'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { FavoriteToggle } from '#features/favorite-character'
 import { useRefreshCharacterDetail } from './api/useCharacterDetail'
 import { useRefreshingNow } from '#shared/lib/useRefreshingNow'
