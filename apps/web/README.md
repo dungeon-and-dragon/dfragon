@@ -58,7 +58,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/pages/<화면>/components/`: 그 화면만 쓰는 컴포넌트와 스타일, 테스트를 둡니다.
 - `src/pages/<화면>/hooks/`: 그 화면만 쓰는 React hook과 store, 테스트를 둡니다.
 - `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.
-- `src/testing/`: UI 테스트 setup, fixture와 host, router 테스트 도구를 둡니다.
+- `src/testing/`: UI 테스트 setup, fixture와 host, router, MSW 서버 테스트 도구를 둡니다. handler가 없는 API 요청을 보낸 테스트는 실패합니다.
 - `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
 - `src/core/api/`: DFragon API 요청 함수와 응답 schema, API 오류 코드를 둡니다.
 - `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 표시 함수, 검색 상태를 둡니다.
@@ -72,6 +72,8 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/core/testing/`: core와 UI 테스트가 함께 쓰는 fixture를 둡니다.
 - `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
 - `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`: FSD 계층 폴더입니다. 옛 폴더의 코드를 옮기면서 채웁니다.
+- `src/entities/ranking/api/`: 명성 랭킹 요청과 query hook, 테스트와 story가 쓰는 fixture(`*.fixture.ts`)와 MSW handler(`*.handlers.ts`)를 둡니다. fixture와 handler는 테스트와 story에서만 import합니다.
+- `src/shared/api/`: API 주소(같은 origin의 `/api`)와 공용 ky instance를 둡니다.
 - `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
 - `src/shared/lib/`: 조회 결과, 무한 스크롤, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
 - `src/shared/lib/animations/`: GSAP 설정과 공용 전환 animation hook을 둡니다.
