@@ -7,6 +7,7 @@ import {
   type AdventureActivityResponse,
   type AdventureSeasonDaysResponse,
   activityQuery,
+  equipmentQuery,
   parseSeason,
   toAdventureCharactersResponse,
   toAdventureEquipmentResponse,
@@ -42,8 +43,18 @@ export class AdventureGuildController {
     })
 
     routes.get('/adventures/:adventureName/equipment', async (c) => {
+      const parsed = equipmentQuery.safeParse(readQuery(c))
+
+      if (!parsed.success) {
+        throw new CharacterDetailFailure('query')
+      }
+
       const adventureName = c.req.param('adventureName')
-      const equipment = await this.service.adventureEquipment(adventureName)
+      const { server, set } = parsed.data
+      const equipment = await this.service.adventureEquipment(adventureName, {
+        serverId: server,
+        setItemId: set
+      })
 
       return c.json(toAdventureEquipmentResponse(adventureName, equipment))
     })
