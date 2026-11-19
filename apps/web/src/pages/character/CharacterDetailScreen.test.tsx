@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '#core/character'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
+import { ClientHostContext } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { toneClassesOf } from '#testing/test-support/score-tone-class'
 import type { CharacterTab } from './character-tabs'
+import { apiFailure, characterUrl, loadingResponse } from './api/character.handlers'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
 import { TestRouter } from '#testing/test-support/test-router'
 import { useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
@@ -69,12 +72,19 @@ function detailOf({
   }
 }
 
+const IDENTITY = { serverId: 'bakal', characterId: 'dealer-1' }
+const DETAIL_URL = characterUrl(IDENTITY)
+const REFRESH_URL = characterUrl(IDENTITY, '/refresh')
+
+type Respond = () => HttpResponse<object> | Promise<void>
+
 let container: HTMLDivElement
 let root: Root
+let requests: string[]
 
 beforeEach(() => {
   vi.useFakeTimers({ now: NOW, toFake: ['Date'] })
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  requests = []
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -83,30 +93,38 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
-  vi.unstubAllGlobals()
   vi.useRealTimers()
 })
 
+function recorded(respond: Respond) {
+  return ({ request }: { request: Request }) => {
+    requests.push(`${request.method} ${request.url}`)
+
+    return respond()
+  }
+}
+
+function respondDetail(respond: Respond, refresh: Respond = loadingResponse): void {
+  server.use(http.get(DETAIL_URL, recorded(respond)), http.post(REFRESH_URL, recorded(refresh)))
+}
+
 async function render(
-  getCharacterDetail: ClientHost['getCharacterDetail'],
+  respond: Respond,
   {
     tab = 'equipment',
     onTabChange = vi.fn(),
-    refreshCharacterDetail
+    refresh
   }: {
     tab?: CharacterTab
     onTabChange?: (tab: CharacterTab) => void
-    refreshCharacterDetail?: ClientHost['refreshCharacterDetail']
+    refresh?: Respond
   } = {}
-): Promise<ClientHost> {
-  const host = createTestClientHost({
-    getCharacterDetail: vi.fn(getCharacterDetail),
-    refreshCharacterDetail
-  })
+): Promise<void> {
+  respondDetail(respond, refresh)
   await act(async () =>
     root.render(
       <TestRouter>
-        <ClientHostContext value={host}>
+        <ClientHostContext value={createTestClientHost()}>
           <TestQueryClient>
             <CharacterDetailScreen
               serverId="bakal"
@@ -119,9 +137,18 @@ async function render(
       </TestRouter>
     )
   )
-
-  return host
 }
+
+async function renderLoaded(
+  detail: CharacterDetailView,
+  options?: Parameters<typeof render>[1]
+): Promise<void> {
+  await render(() => HttpResponse.json(detail), options)
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+}
+
+const DETAIL_REQUEST = `GET ${DETAIL_URL}`
+const REFRESH_REQUEST = `POST ${REFRESH_URL}`
 
 function summary(): HTMLElement {
   return container.querySelector<HTMLElement>('section[aria-label="캐릭터 요약"]')!
@@ -158,7 +185,7 @@ function tabs(): HTMLElement[] {
 }
 
 it('받는 동안에는 요약과 탭 줄 대신 뼈대와 받는 중 안내만 둔다', async () => {
-  await render(() => new Promise<never>(() => {}))
+  await render(loadingResponse)
 
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
   expect(container.querySelector('[role="status"]')?.textContent).toBe(
@@ -171,7 +198,7 @@ it('받는 동안에는 요약과 탭 줄 대신 뼈대와 받는 중 안내만 
 
 it('딜러 요약은 이름, 서버와 모험단과 길드, 전직과 레벨, 명성 색의 명성, 역할 색의 장비 점수를 보인다', async () => {
   const card: Card = { role: 'dealer', score: scoreOf({ value: 392332 }) }
-  await render(async () => detailOf({ card }))
+  await renderLoaded(detailOf({ card }))
 
   expect(textLines()).toEqual([
     '커피갱신30분 전',
@@ -189,9 +216,7 @@ it('딜러 요약은 이름, 서버와 모험단과 길드, 전직과 레벨, �
 
 it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최근 본 캐릭터에도 역할을 남긴다', async () => {
   const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
-  await render(async () =>
-    detailOf({ character: maleCrusader, card: { role: 'buffer', score: null } })
-  )
+  await renderLoaded(detailOf({ character: maleCrusader, card: { role: 'buffer', score: null } }))
 
   expect(textLines()[2]).toBe('크루세이더(버퍼) 프리스트(남)Lv.115')
   expect(useRecentCharacterStore.getState().recentCharacters[0]).toMatchObject({
@@ -201,15 +226,13 @@ it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최�
 })
 
 it('캐릭터 상세 요약의 전직 뒤에 직업명을 보인다', async () => {
-  await render(async () =>
-    detailOf({ character: { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' } })
-  )
+  await renderLoaded(detailOf({ character: { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' } }))
 
   expect(textLines()[2]).toBe('넨마스터 격투가(여)Lv.115')
 })
 
 it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {
-  await render(async () => detailOf())
+  await renderLoaded(detailOf())
 
   const links = [...summary().querySelectorAll('a')].map((link) => [
     link.textContent,
@@ -230,7 +253,7 @@ it('버퍼 요약은 점수 라벨이 버프 점수이고 버퍼 색이며, 근�
       approximate: { value: 151199, source: 'input_gate_diagnostic', warning: '근사값' }
     })
   }
-  await render(async () => detailOf({ card }))
+  await renderLoaded(detailOf({ card }))
 
   expect(statValue('버프 점수').firstChild?.textContent).toBe('≈151,199')
   expect(toneClassesOf(statValue('버프 점수'))).toEqual(['buffer'])
@@ -238,7 +261,7 @@ it('버퍼 요약은 점수 라벨이 버프 점수이고 버퍼 색이며, 근�
 })
 
 it('명성과 점수가 없으면 -를 두고, 길드가 없으면 서버 뒤에 모험단만 구분선 없이 둔다', async () => {
-  await render(async () =>
+  await renderLoaded(
     detailOf({ character: { fame: null, guildName: null }, card: { role: 'dealer', score: null } })
   )
 
@@ -250,7 +273,7 @@ it('명성과 점수가 없으면 -를 두고, 길드가 없으면 서버 뒤에
 
 it('탭 줄은 여덟 탭을 순서대로 두고 받은 tab을 고르며, 다른 탭을 누르면 다시 조회하지 않고 그 탭을 알린다', async () => {
   const onTabChange = vi.fn()
-  const host = await render(async () => detailOf(), { tab: 'oath', onTabChange })
+  await renderLoaded(detailOf(), { tab: 'oath', onTabChange })
 
   expect(tabs().map((tab) => tab.textContent)).toEqual([
     '장비',
@@ -277,23 +300,25 @@ it('탭 줄은 여덟 탭을 순서대로 두고 받은 tab을 고르며, 다른
   await act(async () => tabs()[5].click())
 
   expect(onTabChange).toHaveBeenCalledExactlyOnceWith('status')
-  expect(host.getCharacterDetail).toHaveBeenCalledOnce()
+  expect(requests).toEqual([DETAIL_REQUEST])
 })
 
 it('조회에 실패하면 요약과 탭 없이 받은 오류 문구를 그대로 보인다', async () => {
-  await render(async () => {
-    throw new Error('캐릭터 정보 조회 중 오류가 발생했습니다.')
-  })
+  await render(() =>
+    apiFailure(502, 'NEOPLE_API_ERROR', '캐릭터 정보 조회 중 오류가 발생했습니다.')
+  )
 
-  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
-    '캐릭터 정보 조회 중 오류가 발생했습니다.'
+  await vi.waitFor(() =>
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+      '캐릭터 정보 조회 중 오류가 발생했습니다.'
+    )
   )
   expect(container.querySelector('section[aria-label="캐릭터 요약"]')).toBeNull()
   expect(container.querySelector('[role="tablist"]')).toBeNull()
 })
 
 it('받은 지 1분이 지났으면 갱신 버튼이 켜져 있고 옆에 받은 시각을 상대 시각으로, title에 절대 시각으로 보인다', async () => {
-  await render(async () => detailOf())
+  await renderLoaded(detailOf())
 
   expect(refreshButton().disabled).toBe(false)
   expect(refreshButton().textContent).toBe('갱신')
@@ -307,17 +332,12 @@ it('갱신을 누르면 강제 갱신을 한 번 요청하고, 성공하면 상�
     character: { characterName: '라떼', fame: 130000 },
     fetchedAt: new Date(NOW).toISOString()
   })
-  const refreshCharacterDetail = vi.fn<ClientHost['refreshCharacterDetail']>(async () => refreshed)
-  const host = await render(async () => detailOf(), { refreshCharacterDetail })
+  await renderLoaded(detailOf(), { refresh: () => HttpResponse.json(refreshed) })
 
   await act(async () => refreshButton().click())
 
-  expect(refreshCharacterDetail).toHaveBeenCalledExactlyOnceWith({
-    serverId: 'bakal',
-    characterId: 'dealer-1'
-  })
-  expect(host.getCharacterDetail).toHaveBeenCalledOnce()
-  expect(summary().querySelector('h1')?.textContent).toBe('라떼')
+  await vi.waitFor(() => expect(summary().querySelector('h1')?.textContent).toBe('라떼'))
+  expect(requests).toEqual([DETAIL_REQUEST, REFRESH_REQUEST])
   expect(statValue('명성').textContent).toBe('130,000')
   expect(fetchedAt().textContent).toBe('방금 전')
   expect(refreshButton().disabled).toBe(true)
@@ -328,10 +348,7 @@ it('갱신을 누르면 강제 갱신을 한 번 요청하고, 성공하면 상�
 })
 
 it('받는 중에는 버튼이 꺼지고 받는 중으로 바뀌며, 뼈대 없이 기존 요약과 탭을 그대로 보인다', async () => {
-  const refreshCharacterDetail = vi.fn<ClientHost['refreshCharacterDetail']>(
-    () => new Promise<never>(() => {})
-  )
-  await render(async () => detailOf(), { refreshCharacterDetail })
+  await renderLoaded(detailOf(), { refresh: loadingResponse })
 
   await act(async () => refreshButton().click())
 
@@ -346,15 +363,14 @@ it('받는 중에는 버튼이 꺼지고 받는 중으로 바뀌며, 뼈대 없�
 })
 
 it('강제 갱신이 실패하면 오류 문구 없이 기존 값을 그대로 두고 버튼을 다시 켠다', async () => {
-  const refreshCharacterDetail = vi.fn<ClientHost['refreshCharacterDetail']>(async () => {
-    throw new Error('캐릭터 정보 조회 중 오류가 발생했습니다.')
+  await renderLoaded(detailOf(), {
+    refresh: () => apiFailure(502, 'NEOPLE_API_ERROR', '캐릭터 정보 조회 중 오류가 발생했습니다.')
   })
-  await render(async () => detailOf(), { refreshCharacterDetail })
 
   await act(async () => refreshButton().click())
 
-  expect(refreshCharacterDetail).toHaveBeenCalledOnce()
-  expect(refreshButton().disabled).toBe(false)
+  await vi.waitFor(() => expect(refreshButton().disabled).toBe(false))
+  expect(requests).toEqual([DETAIL_REQUEST, REFRESH_REQUEST])
   expect(refreshButton().textContent).toBe('갱신')
   expect(summary().getAttribute('aria-busy')).toBeNull()
   expect(container.querySelector('[role="alert"]')).toBeNull()
@@ -364,7 +380,7 @@ it('강제 갱신이 실패하면 오류 문구 없이 기존 값을 그대로 �
 
 it('받은 지 1분 안이면 버튼이 꺼져 있고 방금 전으로 보이며, 1분이 지나면 다시 그리지 않아도 켜진다', async () => {
   vi.useFakeTimers({ now: NOW, toFake: ['Date', 'setTimeout', 'clearTimeout'] })
-  await render(async () => detailOf({ fetchedAt: new Date(NOW - 30_000).toISOString() }))
+  await renderLoaded(detailOf({ fetchedAt: new Date(NOW - 30_000).toISOString() }))
   await act(async () => vi.advanceTimersByTimeAsync(0))
 
   expect(refreshButton().disabled).toBe(true)

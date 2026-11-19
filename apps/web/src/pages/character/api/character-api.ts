@@ -1,0 +1,29 @@
+import type { z } from 'zod'
+import { createJsonRequest, validateIdentity } from '#core/api'
+import { type CharacterIdentity, characterDetailViewSchema } from '#core/character'
+import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
+
+const requestJson = createJsonRequest(dfragonHttp, API_BASE_URL)
+
+type JsonRequestOptions = Parameters<typeof requestJson>[2]
+
+export function characterPath({ serverId, characterId }: CharacterIdentity): string {
+  return `/characters/${serverId}/${characterId}`
+}
+
+export async function requestCharacterJson<Schema extends z.ZodType>(
+  identity: CharacterIdentity,
+  path: string,
+  schema: Schema,
+  options?: JsonRequestOptions
+): Promise<z.infer<Schema>> {
+  validateIdentity(identity)
+
+  return requestJson(`${characterPath(identity)}${path}`, schema, options)
+}
+
+export function detailViewSchemaOf({ serverId, characterId }: CharacterIdentity) {
+  return characterDetailViewSchema.refine(
+    ({ character }) => character.serverId === serverId && character.characterId === characterId
+  )
+}

@@ -11,7 +11,7 @@ import {
 } from '#core/character'
 import { formatSeoulDateTime } from '#shared/lib/time-format'
 import { LineChart } from '#shared/ui/chart/LineChart'
-import { useCharacterHistory, useHistorySnapshot } from '#pages/character/hooks/useCharacterHistory'
+import { useCharacterHistory, useHistorySnapshot } from '#pages/character/api/useCharacterHistory'
 import type { CharacterTabProps } from './character-tab-props'
 import { historyTimeAxis } from './history/history-chart'
 import { type Delta, deltaOf, formatOptional, integer, MISSING } from './history/history-format'

@@ -9,17 +9,8 @@ type ClientHostOverrides = Partial<
   Pick<
     ClientHost,
     | 'getTodayGrade'
-    | 'getCharacterDetail'
-    | 'refreshCharacterDetail'
-    | 'getCharacterTimeline'
-    | 'getTimelineEnhancements'
-    | 'getTimelineAcquisitions'
-    | 'getCharacterHistory'
-    | 'getCharacterHistorySnapshot'
-    | 'getSkillWindowCatalog'
     | 'getOathCatalog'
     | 'getCharacterStats'
-    | 'getSkillStats'
     | 'getSetStats'
     | 'getItemStats'
     | 'getClearStats'
@@ -72,17 +63,8 @@ export function createTestClientHost({
       ...raid
     },
     getTodayGrade: vi.fn(() => new Promise<TodayGrade>(() => {})),
-    getCharacterDetail: vi.fn(() => new Promise<never>(() => {})),
-    refreshCharacterDetail: vi.fn(() => new Promise<never>(() => {})),
-    getCharacterTimeline: vi.fn(() => new Promise<never>(() => {})),
-    getTimelineEnhancements: vi.fn(() => new Promise<never>(() => {})),
-    getTimelineAcquisitions: vi.fn(() => new Promise<never>(() => {})),
-    getCharacterHistory: vi.fn(() => new Promise<never>(() => {})),
-    getCharacterHistorySnapshot: vi.fn(() => new Promise<never>(() => {})),
-    getSkillWindowCatalog: vi.fn(async () => null),
     getOathCatalog: vi.fn(async () => null),
     getCharacterStats: vi.fn(() => new Promise<never>(() => {})),
-    getSkillStats: vi.fn(() => new Promise<never>(() => {})),
     getSetStats: vi.fn(() => new Promise<never>(() => {})),
     getItemStats: vi.fn(() => new Promise<never>(() => {})),
     getClearStats: vi.fn(() => new Promise<never>(() => {})),

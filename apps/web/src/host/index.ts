@@ -2,10 +2,7 @@ import type { CharacterImage } from '#core/character'
 import { createDfragonClient } from '#core/api'
 import { toRaidFrameResult } from '#core/capture'
 import { startRuntimeDiagnostics } from '#shared/lib/diagnostics'
-import {
-  createOathCatalogSource,
-  createSkillWindowCatalogSource
-} from './catalog/browser-skill-window'
+import { createOathCatalogSource } from './catalog/browser-skill-window'
 import { createRoundFrames } from './capture/round-frames'
 import { createScreenShare } from './capture/screen-share'
 import type { BrowserHost } from './client-host'
@@ -18,11 +15,7 @@ import {
   createBrowserSearchRuntime
 } from './search/browser-search'
 
-export function installBrowserHost(
-  apiOrigin: string,
-  skillWindowIndexUrl: string,
-  oathCatalogUrl: string
-): BrowserHost {
+export function installBrowserHost(apiOrigin: string, oathCatalogUrl: string): BrowserHost {
   const reportDiagnostic = startRuntimeDiagnostics()
   const dfragon = createDfragonClient({ apiOrigin, fetch: browserFetch })
   const runtime = createBrowserSearchRuntime(dfragon, reportDiagnostic)
@@ -53,17 +46,8 @@ export function installBrowserHost(
         toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
     getTodayGrade: dfragon.items.todayGrade,
-    getCharacterDetail: dfragon.characters.detailView,
-    refreshCharacterDetail: dfragon.characters.refresh,
-    getCharacterTimeline: dfragon.characters.timeline,
-    getTimelineEnhancements: dfragon.characters.timelineEnhancements,
-    getTimelineAcquisitions: dfragon.characters.timelineAcquisitions,
-    getCharacterHistory: dfragon.characters.history,
-    getCharacterHistorySnapshot: dfragon.characters.historySnapshot,
-    getSkillWindowCatalog: createSkillWindowCatalogSource(skillWindowIndexUrl),
     getOathCatalog: createOathCatalogSource(oathCatalogUrl),
     getCharacterStats: dfragon.stats,
-    getSkillStats: dfragon.skillStats,
     getSetStats: dfragon.setStats,
     getItemStats: dfragon.itemStats,
     getClearStats: dfragon.clearStats,

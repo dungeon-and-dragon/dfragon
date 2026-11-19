@@ -2,7 +2,7 @@ import type { GameTextLines, OathCatalog, SkillWindowCatalog } from '#core/catal
 import type { CharacterDetailView, CharacterHistory, CharacterTimeline } from '#core/character'
 import { characterDetailFixture } from '#core/testing'
 
-// 캐릭터 상세 화면 테스트의 fixture를 story에 옮긴 값이다. 이름, 소속과 그림 주소는 실제 캐릭터가 아닌 합성 값이다.
+// 캐릭터 상세 화면 테스트의 fixture에서 만든 story와 MSW handler의 값이다. 이름, 소속과 그림 주소는 실제 캐릭터가 아닌 합성 값이다.
 
 const STORY_IDENTITY = {
   dealer: { characterId: 'story-dealer', characterName: '캐릭터1', fame: 136_647 },
