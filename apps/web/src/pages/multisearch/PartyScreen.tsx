@@ -5,11 +5,11 @@ import {
   type SlotCardActions,
   useSeatMove
 } from '#features/capture-search'
-import { Seat } from '#components/Seat'
-import { SeatMoveStatus } from '#components/SeatMoveStatus'
-import { SeatTable } from '#components/SeatTable'
-import { CharacterRow } from '#components/CharacterRow'
-import { isBusySlot } from '#lib/card-presentation'
+import { Seat } from './components/Seat'
+import { SeatMoveStatus } from './components/SeatMoveStatus'
+import { SeatTable } from './components/SeatTable'
+import { CharacterRow } from './components/CharacterRow'
+import { isBusySlot } from './card-presentation'
 
 export function PartyScreen({
   slots,
