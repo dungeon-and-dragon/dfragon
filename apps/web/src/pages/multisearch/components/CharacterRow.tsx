@@ -2,7 +2,8 @@ import {
   formatApproximateScore,
   formatJobName,
   type ScoreView,
-  toScoreView
+  toScoreView,
+  Portrait
 } from '#entities/character'
 import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
@@ -16,8 +17,7 @@ import {
   tierLabels,
   type LookupDraft,
   useLookupDraft,
-  type SlotCardKey,
-  Portrait
+  type SlotCardKey
 } from '#features/capture-search'
 import { CandidatePopover } from './CandidatePopover'
 import { CardAnnouncer } from './CardAnnouncer'

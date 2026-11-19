@@ -1,6 +1,6 @@
 import type { ServerId } from '#shared/config/servers/servers-types'
-import type { CharacterFaceWindow, SearchSlot } from '#features/capture-search/lib/search/search'
-import type { CharacterCard } from '#entities/character'
+import type { CharacterCard, CharacterFaceWindow } from '#entities/character'
+import type { SearchSlot } from '#features/capture-search/lib/search/search'
 
 export type SlotState = SearchSlot['state']
 

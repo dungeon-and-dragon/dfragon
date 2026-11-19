@@ -1,12 +1,7 @@
 import { CheckIcon, ChevronDownIcon, Popover } from '@dfragon/ui'
 import { type KeyboardEvent, useRef, useState } from 'react'
-import {
-  type CandidatePicker,
-  MISSING_VALUE,
-  type CharacterChoice,
-  CardImage
-} from '#features/capture-search'
-import { characterImageUrl } from '#entities/character'
+import { type CandidatePicker, MISSING_VALUE, type CharacterChoice } from '#features/capture-search'
+import { CardImage, characterImageUrl } from '#entities/character'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
