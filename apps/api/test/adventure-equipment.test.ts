@@ -22,6 +22,8 @@ const OATH_CODES =
   '서약도 556 out은 1을 빼고 553 기록은 이미 있는 칸을 늘리지 않으며, 초월이 아닌 기록의 out 값은 빼지 않는다'
 const LATEST_ITEM =
   '칸의 아이템 id와 이름은 out이 아닌 가장 최근 기록의 값이고, sets는 응답에 나온 세트만 담는다'
+const GROUPS_UNIQUE =
+  '세트가 없고 이름이 "고유 - "로 시작하는 장비는 고유 세트 하나로 묶고, 이름에 고유가 없는 세트 없는 장비는 없다'
 const WINDOW_START =
   '기록은 지금 시즌과 장비 레벨이 같은 시즌 가운데 가장 이른 시즌의 시작부터 읽는다'
 
@@ -40,7 +42,10 @@ const ids = {
   fusionStone: '3'.repeat(32),
   weapon: '4'.repeat(32),
   oldTop: '5'.repeat(32),
-  unknown: '6'.repeat(32)
+  unknown: '6'.repeat(32),
+  uniqueRing: '7'.repeat(32),
+  noSetEarring: '8'.repeat(32),
+  uniqueTop: '9'.repeat(32)
 }
 
 function entry(
@@ -77,7 +82,21 @@ const dictionary = new Map(
     }),
     entry(ids.fusionStone, { itemType: '융합석', itemTypeDetail: '융합석' }),
     entry(ids.weapon, { itemType: '무기', itemTypeDetail: '대검' }),
-    entry(ids.oldTop, { availableLevel: 105 })
+    entry(ids.oldTop, { availableLevel: 105 }),
+    entry(ids.uniqueRing, {
+      itemType: '액세서리',
+      itemTypeDetail: '반지',
+      setItemId: null,
+      setItemName: null
+    }),
+    entry(ids.uniqueTop, { setItemId: null, setItemName: null }),
+    entry(ids.noSetEarring, {
+      itemType: '추가장비',
+      itemTypeDetail: '귀걸이',
+      itemRarity: '태초',
+      setItemId: null,
+      setItemName: null
+    })
   ].map((dictionaryEntry) => [dictionaryEntry.itemId, dictionaryEntry])
 )
 
@@ -240,6 +259,27 @@ test(LATEST_ITEM, () => {
     }
   ])
   assert.deepEqual(equipment.sets, [{ setItemId: valkyrie, setItemName: '발키리 세트' }])
+})
+
+test(GROUPS_UNIQUE, () => {
+  const equipment = holdingsOf([
+    record(505, ids.uniqueRing, { itemName: '고유 - 합성 반지' }),
+    record(505, ids.uniqueTop, { itemName: '고유 - 합성 상의' }),
+    record(505, ids.noSetEarring, { itemName: '합성 귀걸이' })
+  ])
+
+  assert.deepEqual(
+    equipment.servers[0]?.characters[0]?.equipment.map(({ setItemId, slot, count }) => [
+      setItemId,
+      slot,
+      count
+    ]),
+    [
+      ['unique', '반지', 1],
+      ['unique', '상의', 1]
+    ]
+  )
+  assert.deepEqual(equipment.sets, [{ setItemId: 'unique', setItemName: '고유' }])
 })
 
 test(WINDOW_START, () => {
