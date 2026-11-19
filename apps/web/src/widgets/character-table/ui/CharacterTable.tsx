@@ -249,6 +249,7 @@ export function SkeletonRow({
       )}
       <td>
         <span className="skeleton-text ml-auto w-[56px]" />
+        {scorePlacement === 'belowFame' && <span className="skeleton-text mt-1 ml-auto w-[48px]" />}
       </td>
       {scorePlacement === 'column' && (
         <td>
