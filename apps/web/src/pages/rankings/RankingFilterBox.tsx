@@ -35,12 +35,14 @@ function narrowingOf({
   equipmentSetId,
   oathSetId,
   oathSetOption,
-  itemIds
+  itemIds,
+  fameFrom,
+  fameTo
 }: FameRankingFilter): FameRankingFilter {
-  return { equipmentSetId, oathSetId, oathSetOption, itemIds }
+  return { equipmentSetId, oathSetId, oathSetOption, itemIds, fameFrom, fameTo }
 }
 
-// 직업, 전직을 바꿔도 세트, 아이템 필터는 그대로 둔다.
+// 직업, 전직을 바꿔도 세트, 아이템, 명성 필터는 그대로 둔다.
 export function RankingFilterBox({
   filter,
   onChange,

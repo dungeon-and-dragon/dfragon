@@ -39,7 +39,9 @@ export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRank
       filter.equipmentSetId ?? null,
       filter.oathSetId ?? null,
       filter.oathSetOption ?? null,
-      filter.itemIds?.join(',') ?? null
+      filter.itemIds?.join(',') ?? null,
+      filter.fameFrom ?? null,
+      filter.fameTo ?? null
     ],
     queryFn: ({ pageParam }) => getFameRanking(filter, pageParam),
     initialPageParam: undefined as string | undefined,

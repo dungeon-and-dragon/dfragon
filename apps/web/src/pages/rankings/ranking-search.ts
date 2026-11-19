@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { maleCrusaderRoleSchema } from '#core/character'
 import {
+  type FameRankingFameRange,
   type FameRankingFilter,
   type FameRankingSetFilter,
   ITEM_FILTER_LIMIT,
@@ -27,6 +28,10 @@ const itemIdsSchema = z
   .optional()
   .catch(undefined)
 
+// 빈 값이 0이 되지 않게 coerce하지 않는다. router가 주소의 숫자를 number로 읽어 준다.
+// API가 INTEGER 열과 비교하는 9자리까지만 받는다.
+const fame = z.number().int().min(0).max(999_999_999).optional().catch(undefined)
+
 const searchSchema = z.object({
   jobId: z.string().optional().catch(undefined),
   jobGrowId: z.string().optional().catch(undefined),
@@ -34,7 +39,9 @@ const searchSchema = z.object({
   equipmentSetId: text,
   oathSetId: z.coerce.number().int().positive().optional().catch(undefined),
   oathSetOption: text,
-  itemIds: itemIdsSchema
+  itemIds: itemIdsSchema,
+  fameFrom: fame,
+  fameTo: fame
 })
 
 function jobFilterOf({ jobId, jobGrowId, role }: z.infer<typeof searchSchema>): SetStatsFilter {
@@ -68,6 +75,18 @@ function setFilterOf({
   }
 }
 
+// 거꾸로 된 범위는 API가 거절하므로 범위를 모두 버린다.
+function fameFilterOf({ fameFrom, fameTo }: z.infer<typeof searchSchema>): FameRankingFameRange {
+  if (fameFrom !== undefined && fameTo !== undefined && fameFrom > fameTo) {
+    return {}
+  }
+
+  return {
+    ...(fameFrom !== undefined && { fameFrom }),
+    ...(fameTo !== undefined && { fameTo })
+  }
+}
+
 function itemFilterOf({ itemIds }: z.infer<typeof searchSchema>): RankingSearch {
   if (itemIds === undefined) {
     return {}
@@ -81,8 +100,9 @@ export function parseRankingSearch(search: Record<string, unknown>): RankingSear
   const items = itemFilterOf(parsed)
   const jobFilter = jobFilterOf(parsed)
   const setFilter = setFilterOf(parsed)
+  const fameFilter = fameFilterOf(parsed)
 
-  return { ...jobFilter, ...setFilter, ...items }
+  return { ...jobFilter, ...setFilter, ...items, ...fameFilter }
 }
 
 export function rankingFilterOf({ itemIds, ...rest }: RankingSearch): FameRankingFilter {
