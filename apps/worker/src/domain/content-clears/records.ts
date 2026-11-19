@@ -1,14 +1,32 @@
-import type { ClearRecordInput, TimelineCharacter } from '@dfragon/database'
+import type { ClearRecordInput, TimelineCharacter, TimelineRange } from '@dfragon/database'
 import { z } from 'zod'
 import {
   LEGION_CLEAR_CODE,
   RAID_CLEAR_CODES,
-  type TimelineRow
+  TIMELINE_RECORD_DELAY_MS,
+  type TimelineRow,
+  splitTimelineRanges
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 // 베누스 첫 클리어 주다. 지난 레이드, 레기온 기록은 이 주부터 받는다.
 export const CLEAR_RECORD_BACKFILL_START = new Date('2025-02-06T06:00:00+09:00')
+
+export function toClearRecordRanges(
+  fetchedUntil: Date | undefined,
+  startedAt: Date
+): TimelineRange[] {
+  if (fetchedUntil === undefined) {
+    return splitTimelineRanges(CLEAR_RECORD_BACKFILL_START, startedAt)
+  }
+
+  const start = Math.max(
+    fetchedUntil.getTime() - TIMELINE_RECORD_DELAY_MS,
+    CLEAR_RECORD_BACKFILL_START.getTime()
+  )
+
+  return splitTimelineRanges(new Date(start), startedAt)
+}
 
 // Neople은 하드로 깬 레이드에만 hard: true를 넣고, 단계나 공격대 이름이 없는 레이드는 칸을 두지 않는다.
 const raidRecordData = z.object({

@@ -31,7 +31,7 @@ export function createClearRecordBackfillJob(service: ClearRecordBackfillService
     name: 'clear-record-backfill',
     displayName: '지난 클리어 기록 받기',
     description:
-      '클리어 기록 수집과 같은 대상 캐릭터의 2025-02-06부터의 레이드, 레기온 클리어 기록을 Neople에서 받아 저장합니다. 클리어 집계 값은 바꾸지 않고, 끊긴 실행은 다음 실행이 남은 캐릭터부터 잇습니다.',
+      '클리어 기록 수집과 같은 대상 캐릭터의 2025-02-06부터의 레이드, 레기온 클리어 기록을 Neople에서 받아 저장합니다. 전에 받은 캐릭터는 지난 실행 시각 30분 전부터만 받습니다. 클리어 집계 값은 바꾸지 않고, 끊긴 실행은 다음 실행이 남은 캐릭터부터 잇습니다.',
     argsSchema: z.object({}),
     delayMinutes: BACKFILL_DELAY_MINUTES,
     run: (_args, { reportProgress }) => service.backfill(reportProgress)

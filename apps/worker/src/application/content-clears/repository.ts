@@ -1,6 +1,7 @@
 import type {
   ClearPopulationCharacter,
   ClearRecordBackfillProgress,
+  ClearRecordCursor,
   ClearRecordInput,
   ContentClearCollectionProgress,
   ContentClearInput,
@@ -26,5 +27,7 @@ export interface ClearRecordBackfillRepository {
   startProgress(startedAt: Date): Promise<void>
   recordProgress(progress: ClearRecordBackfillProgress): Promise<void>
   recordRecords(records: readonly ClearRecordInput[]): Promise<void>
+  readCursors(): Promise<ClearRecordCursor[]>
+  recordCursors(characters: readonly ClearPopulationCharacter[], fetchedUntil: Date): Promise<void>
   finishProgress(startedAt: Date): Promise<void>
 }
