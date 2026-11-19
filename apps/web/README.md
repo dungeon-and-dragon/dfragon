@@ -73,7 +73,8 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/core/testing/`: core와 UI 테스트가 함께 쓰는 fixture를 둡니다.
 - `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
 - `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`: FSD 계층 폴더입니다. 옛 폴더의 코드를 옮기면서 채웁니다.
-- `src/entities/ranking/api/`: 명성 랭킹 요청과 query hook, 테스트와 story가 쓰는 fixture(`*.fixture.ts`)와 MSW handler(`*.handlers.ts`)를 둡니다. fixture와 handler는 테스트와 story에서만 import합니다.
+- `src/entities/ranking/api/`: 명성 랭킹, 세트 통계, 아이템 통계 요청과 query hook, 테스트와 story가 쓰는 fixture(`*.fixture.ts`)와 MSW handler(`*.handlers.ts`)를 둡니다. fixture와 handler는 테스트와 story에서만 import합니다.
+- `src/entities/catalog/api/`: 서약 데이터 파일 요청과 query hook, fixture와 MSW handler를 둡니다.
 - `src/shared/api/`: API 주소(같은 origin의 `/api`)와 공용 ky instance를 둡니다.
 - `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
 - `src/shared/lib/`: 조회 결과, 클립보드 복사 hook과 시간 표시 함수, 같은 origin의 게임 데이터 파일 요청, 브라우저 console 진단 코드를 둡니다.
