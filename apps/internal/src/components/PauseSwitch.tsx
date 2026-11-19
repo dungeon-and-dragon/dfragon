@@ -1,6 +1,6 @@
 import { Switch } from '@dfragon/ui'
 import type { Job } from '#ops-api/ops-schemas'
-import { useSetPaused } from '#app/ops-queries'
+import { useSetPaused } from '#ops-app/ops-queries'
 
 export function PauseSwitch({ job }: { job: Job }): React.JSX.Element {
   const setPaused = useSetPaused()
