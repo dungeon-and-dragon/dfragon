@@ -12,9 +12,9 @@ const aliases = [
   ['#ops-api/ops-client', 'api/ops-client.ts'],
   ['#ops-components/JobTable', 'components/JobTable.tsx'],
   ['#ops-testing/fake-ops-api', 'testing/fake-ops-api.ts'],
-  ['#app/format', 'format.ts'],
-  ['#app/ops-queries', 'ops-queries.ts'],
-  ['#app/run-args', 'run-args.ts']
+  ['#ops-app/format', 'format.ts'],
+  ['#ops-app/ops-queries', 'ops-queries.ts'],
+  ['#ops-app/run-args', 'run-args.ts']
 ]
 
 test('Biome: 운영 화면의 상위 상대 경로를 거부하고 같은 폴더와 alias를 허용한다', async () => {
