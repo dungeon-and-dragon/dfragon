@@ -60,12 +60,12 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router 테스트 도구를 둡니다.
 - `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
-- `src/core/api/`: DFragon API 요청 함수와 응답 schema를 둡니다.
-- `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 검색 상태를 둡니다.
+- `src/core/api/`: DFragon API 요청 함수와 응답 schema, API 오류 코드를 둡니다.
+- `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 표시 함수, 검색 상태를 둡니다.
 - `src/core/capture/party/`: 파티 화면 인식과 파티 캡처 machine을 둡니다.
 - `src/core/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
 - `src/core/catalog/`: 스킬 창, 서약, 게임 문구 데이터 묶음과 이벤트 보상 데이터 파일의 schema를 둡니다.
-- `src/core/character/`: 캐릭터 상세, 장비, 서약, 카드 표시 함수와 캐릭터 타입을 둡니다.
+- `src/core/character/`: 캐릭터 상세, 장비, 서약, 점수 표시 함수와 캐릭터 타입을 둡니다. 검색, 캡처, OCR 코드는 import하지 않습니다.
 - `src/core/ocr/`: OCR worker, 닉네임 이미지 처리와 인식 결과 선택을 둡니다.
 - `src/core/ranking/`: 명성 랭킹, 캐릭터 통계, 스킬 통계 응답 schema를 둡니다.
 - `src/core/search/`: 캐릭터 검색 요청, 식별, 초상화 비교와 검색 상태를 둡니다.
