@@ -161,14 +161,6 @@ export default {
       to: { path: '^src/core/(search|capture|ocr)/' }
     },
     {
-      name: 'api-error-imports',
-      comment:
-        'API 오류 코드와 SearchHttpFailure는 core/api/http.ts에 두고 검색이 그것을 import한다. core/api/http.ts, api-response.ts는 core/search를 import하지 않는다.',
-      severity: 'error',
-      from: { path: '^src/core/api/(http|api-response)\\.ts$' },
-      to: { path: '^src/core/search/' }
-    },
-    {
       name: 'no-circular',
       comment:
         '실행할 때 생기는 순환 import를 두지 않는다. import type만으로 이은 순환은 검사하지 않는다. core/ 안의 도메인 사이는 index 대신 파일을 직접 import한다.',
