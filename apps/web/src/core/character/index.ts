@@ -6,7 +6,6 @@ export type {
   CharacterImage,
   SelectedCharacterSummary
 } from './character'
-export type { SlotNotice } from './character-card'
 export {
   avatarSlotLabel,
   buffSkillInfoOf,
@@ -37,7 +36,6 @@ export type {
   ScoreCalculator
 } from './character-history'
 export { decodeCharacterImage } from './character-image'
-export { createCharacterImageSource } from './character-image-source'
 export {
   formatCount,
   formatPoint,

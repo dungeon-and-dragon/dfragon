@@ -1,4 +1,8 @@
-import type { CharacterPortrait, SelectedCharacterSummary } from '#core/character/character'
+import type {
+  CharacterPortrait,
+  CharacterSearchRow,
+  SelectedCharacterSummary
+} from '#core/character/character'
 import type { SearchError } from '#core/api/http'
 
 export const SEARCH_SLOT_COUNTS = { party: 4, raid: 12 } as const
@@ -58,14 +62,6 @@ export type OcrSearchInput = Readonly<{
   raidRow?: RaidRowObservation
 }>
 export type OcrSearchObservation = SearchObservation & OcrSearchInput
-
-export type CharacterSearchRow = Readonly<{
-  characterId: string
-  characterName: string
-  serverId: string
-  serverName: string | null
-  fame: number | null
-}>
 
 export type CharacterFaceWindow = Readonly<{ x: number; y: number; width: number; height: number }>
 

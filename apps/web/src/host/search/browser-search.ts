@@ -3,6 +3,7 @@ import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails,
   createCaptureSearchLifetime,
+  createCharacterImageSource,
   createPortraitColorScorer,
   INITIAL_PORTRAIT_COLOR_POLICY,
   parseOcrSearchObservation,
@@ -15,7 +16,7 @@ import {
   type YieldToEventLoop
 } from '#core/search'
 import type { DfragonClient } from '#core/api'
-import { createCharacterImageSource, decodeCharacterImage } from '#core/character'
+import { decodeCharacterImage } from '#core/character'
 import type { CardSearchHost } from '#host/client-host'
 import { decodeBrowserPng } from '#host/browser-png'
 

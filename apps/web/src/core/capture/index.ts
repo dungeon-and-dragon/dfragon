@@ -17,6 +17,7 @@ export {
   tierLabels
 } from './cards'
 export type { CardCharacter, CharacterCard, CharacterTier, SlotState } from './cards-types'
+export type { SlotNotice } from './character-card'
 export { capturePartyRecognitionInputs } from './party/party'
 export { getCapturePhase, partyCaptureMachine } from './party/party-capture-machine'
 export { getRaidCapturePhase, raidCaptureMachine } from './raid/raid-capture-machine'
