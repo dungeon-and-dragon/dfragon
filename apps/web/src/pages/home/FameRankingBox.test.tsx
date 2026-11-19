@@ -93,10 +93,9 @@ function bodyRows(): string[][] {
 }
 
 it('직업 필터 없이 조회해 앞 3명을 받은 순서의 순위, 캐릭터, 명성 열로 그린다', async () => {
-  respondRanking({
-    characters: [7, 3, 9, 1].map((order) => rankedCharacter(order)),
-    nextCursor: null
-  })
+  const characters = [7, 3, 9, 1].map((order) => rankedCharacter(order))
+
+  respondRanking({ characters, nextCursor: null })
   await render()
   await settled()
 
