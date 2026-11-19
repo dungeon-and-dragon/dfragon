@@ -23,19 +23,20 @@ export class ClearSampleLoader {
     const { weekStart } = population
     const previousWeekStart = subWeeks(weekStart, 1)
     const selection = { contentId: content.id, kind: content.kind, weekStart }
-    const raid = content.kind === 'raid'
+    const weekly = content.kind !== 'challenge'
     const pair = findStagePair(content)
     const minFame = population.minFame ?? toPopulationMinFame(content, toCollectionMinFame())
     const comparison = { contentId: content.id, weekStart, previousWeekStart }
-    const raidName = content.rule.type === 'clear' ? content.rule.name : undefined
+    const raidName =
+      content.kind === 'raid' && content.rule.type === 'clear' ? content.rule.name : undefined
     const jobFames = await this.repository.readContentJobFames(selection)
     const jobScores = await this.repository.readContentJobScores(selection)
     const adventures = await this.repository.readAdventureSizes(selection)
     const fameBands = await this.repository.readFameBands(selection, minFame)
     const scoreBands = await this.repository.readScoreBands(selection, minFame)
     const times = await this.repository.readContentTimes(selection)
-    const weekGroups = raid ? await this.repository.readWeekGroups(comparison) : null
-    const weekGroupScores = raid ? await this.repository.readWeekGroupScores(comparison) : null
+    const weekGroups = weekly ? await this.repository.readWeekGroups(comparison) : null
+    const weekGroupScores = weekly ? await this.repository.readWeekGroupScores(comparison) : null
     const stageMoves =
       pair !== undefined
         ? await this.repository.readStageMoves({
@@ -46,7 +47,7 @@ export class ClearSampleLoader {
           })
         : null
 
-    const streaks = raid ? await this.repository.readStreaks(selection) : null
+    const streaks = weekly ? await this.repository.readStreaks(selection) : null
     const stages = raidName !== undefined ? await this.loadStages(raidName, weekStart) : null
 
     return {

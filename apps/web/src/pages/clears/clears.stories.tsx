@@ -23,8 +23,8 @@ function Overview(): React.JSX.Element {
   return <ClearOverviewScreen week={week} onWeekSelect={setWeek} onContentOpen={openContent} />
 }
 
-function Detail(): React.JSX.Element {
-  const [contentKey, setContentKey] = useState('michaela')
+function Detail({ initialContentKey }: Readonly<{ initialContentKey: string }>): React.JSX.Element {
+  const [contentKey, setContentKey] = useState(initialContentKey)
   const [stage, setStage] = useState<string>()
   const [week, setWeek] = useState<string>()
 
@@ -61,7 +61,18 @@ export const 컨텐츠상세: Story = {
   render: () => (
     <StoryFrame>
       <StoryScreen>
-        <Detail />
+        <Detail initialContentKey="michaela" />
+      </StoryScreen>
+    </StoryFrame>
+  )
+}
+
+export const 레기온상세: Story = {
+  parameters: { msw: clearStatsHandlers.stats },
+  render: () => (
+    <StoryFrame>
+      <StoryScreen>
+        <Detail initialContentKey="apocalypse" />
       </StoryScreen>
     </StoryFrame>
   )

@@ -5,7 +5,6 @@ import type {
 } from '@dfragon/database'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
-  CLEAR_CONTENTS,
   type ClearContent,
   toLatestContents
 } from '@dfragon/server-core/domain/content-clears/index.js'
@@ -29,7 +28,7 @@ export type ClearWeek = {
 // 레기온은 입장 명성을 정하지 않아 entryFame이 null이다.
 export type ClearContentHeader = {
   id: string
-  kind: ContentClearKind | 'legion'
+  kind: ContentClearKind
   name: string
   releasedAt: string
   entryFame: number | null
@@ -98,13 +97,14 @@ function toHeader(content: ClearContent, latestIds: ReadonlySet<string>): ClearC
   return { id, kind, name, releasedAt, entryFame, latest }
 }
 
-export function toClearStats(
+export function toClearSummaries(
+  contents: readonly ClearContent[],
   populations: readonly StoredClearPopulation[],
   counts: readonly ClearWeekRatioCount[]
-): Pick<ClearStats, 'contents'> {
-  const latestIds = new Set(toLatestContents(CLEAR_CONTENTS).map(({ id }) => id))
+): ClearContentSummary[] {
+  const latestIds = new Set(toLatestContents(contents).map(({ id }) => id))
 
-  const contents = CLEAR_CONTENTS.map((content) => {
+  return contents.map((content) => {
     const contentCounts = counts.filter(({ contentId }) => contentId === content.id)
     const weeks = populations
       .filter(({ contentId }) => contentId === content.id)
@@ -114,6 +114,4 @@ export function toClearStats(
 
     return { ...header, weeks }
   })
-
-  return { contents }
 }

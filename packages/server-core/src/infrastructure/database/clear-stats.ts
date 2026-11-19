@@ -9,7 +9,6 @@ import {
   type ClearJobFameSample,
   type ClearJobScoreSample,
   type ClearOverviewWeekSamples,
-  type ClearRecordLegionWeek,
   type ClearRecordRaidMode,
   type ClearRecordRaidSelection,
   type ClearRecordRaidStage,
@@ -24,9 +23,10 @@ import {
   type ClearWeekGroupScoreSample,
   type ClearWeekRatioCount,
   type ClearWeekSelection,
+  type ContentClearPopulationInput,
   type DatabaseClient,
+  type LegionClearWeek,
   type StoredClearPopulation,
-  readClearRecordLegionWeeks,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
   readContentClearAdventureSizes,
@@ -53,7 +53,9 @@ import {
   readSelectedContentClearJobScores,
   readSelectedContentClearTimes,
   recordContentClearOverviewSamples,
-  recordContentClearWeekSamples
+  recordContentClearPopulation,
+  recordContentClearWeekSamples,
+  recordLegionContentClears
 } from '@dfragon/database'
 import type {
   ClearStatsRepository,
@@ -107,10 +109,6 @@ export class DatabaseClearStatsRepository
 
   readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]> {
     return readContentClearStreaks(this.client, selection)
-  }
-
-  readLegionWeeks(names: readonly string[]): Promise<ClearRecordLegionWeek[]> {
-    return readClearRecordLegionWeeks(this.client, names)
   }
 
   readRaidModes(selection: ClearRecordRaidSelection): Promise<ClearRecordRaidMode[]> {
@@ -170,6 +168,14 @@ export class DatabaseClearStatsRepository
 
   readOverviewSampleWeeks(): Promise<Date[]> {
     return readContentClearOverviewSampleWeeks(this.client)
+  }
+
+  recordLegionClears(week: LegionClearWeek): Promise<void> {
+    return recordLegionContentClears(this.client, week)
+  }
+
+  recordPopulation(population: ContentClearPopulationInput): Promise<void> {
+    return recordContentClearPopulation(this.client, population)
   }
 
   recordContentWeekSamples(
