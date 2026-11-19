@@ -183,13 +183,7 @@ it('열은 순위, 캐릭터, 세트, 명성, 모험단이고 세트 값을 받�
   const [first, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual([
-    '1',
-    '카인합성1합성 전직 합성 직업',
-    '황금향용투 : 용제 강림',
-    '99,999',
-    '모험단1'
-  ])
+  expect(first).toEqual(['1', '카인합성1합성 전직', '황금향용투 : 용제 강림', '99,999', '모험단1'])
   expect(fourth).toEqual(['4', '카인합성4합성 직업', '-', '99,996', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
@@ -209,11 +203,11 @@ it('서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 직업�
   }))
 
   const [maxLevel, belowMax] = bodyRows()
-  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직 합성 직업', null])
-  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직 합성 직업Lv.110', null])
+  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직', null])
+  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직Lv.110', null])
 })
 
-it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직 뒤에 직업명을 붙인다', async () => {
+it('동명 전직에는 성별을 붙이고 남성 크루세이더는 역할을 알면 함께 표시한다', async () => {
   const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
   await render(async () => ({
     characters: [
@@ -228,12 +222,12 @@ it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직
   }))
 
   expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
-    '카인합성1크루세이더(딜러) 프리스트(남)',
-    '카인합성2크루세이더(버퍼) 프리스트(남)',
-    '카인합성3크루세이더 프리스트(남)',
-    '카인합성4크루세이더 프리스트(여)',
-    '카인합성5인파이터 프리스트(남)',
-    '카인합성6넨마스터 격투가(여)'
+    '카인합성1크루세이더(남, 딜러)',
+    '카인합성2크루세이더(남, 버퍼)',
+    '카인합성3크루세이더(남)',
+    '카인합성4크루세이더(여)',
+    '카인합성5인파이터(남)',
+    '카인합성6넨마스터(여)'
   ])
 })
 
