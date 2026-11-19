@@ -9,8 +9,8 @@ import {
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { server } from '#testing/test-support/msw-server'
+import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
 import { GlobalBar } from './GlobalBar'
 
 const MENU_LEFT = 100
@@ -40,6 +40,7 @@ beforeEach(() => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   vi.stubGlobal('scrollTo', vi.fn())
   stubMenuLayout()
+  server.use(todayGradeHandlers.grade(85))
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -57,13 +58,7 @@ async function render(path: string): Promise<void> {
     routeTree: createRootRoute({ component: GlobalBar, notFoundComponent: () => null }),
     history: createMemoryHistory({ initialEntries: [path] })
   })
-  await act(async () =>
-    root.render(
-      <ClientHostContext value={createTestClientHost()}>
-        <RouterProvider router={router} />
-      </ClientHostContext>
-    )
-  )
+  await act(async () => root.render(<RouterProvider router={router} />))
 }
 
 function menu(): HTMLElement {
