@@ -215,16 +215,16 @@ it('첫 서버와 줄임말 표에서 앞선 세트를 고르고 표에 없는 �
     ['가나다 세트', 'false']
   ])
   expect(tableRows('장비')).toEqual([
-    ['합성2합성 전직 합성 직업', '태초 태초 상의', ...DASHES],
-    ['합성1합성 전직 합성 직업', '에픽 에픽 상의', ...DASHES]
+    ['합성2합성 전직', '태초 태초 상의', ...DASHES],
+    ['합성1합성 전직', '에픽 에픽 상의', ...DASHES]
   ])
 
   const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
   expect(topRow.querySelectorAll('td')[1]?.textContent).toBe('+1')
 
   expect(tableRows('서약')).toEqual([
-    ['합성2합성 전직 합성 직업', '합성 서약', '0', '3', '0'],
-    ['합성1합성 전직 합성 직업', '-', '0', '0', '0']
+    ['합성2합성 전직', '합성 서약', '0', '3', '0'],
+    ['합성1합성 전직', '-', '0', '0', '0']
   ])
 })
 
@@ -266,7 +266,7 @@ it('주소의 서버와 세트를 고르고, 그 서버 캐릭터만 행으로 �
     ['페어리', 'true'],
     ['가나다 세트', 'false']
   ])
-  expect(tableRows('장비')).toEqual([['합성3합성 전직 합성 직업', '-', ...DASHES]])
+  expect(tableRows('장비')).toEqual([['합성3합성 전직', '-', ...DASHES]])
 
   await act(async () => chip('서버', '카인').click())
 
