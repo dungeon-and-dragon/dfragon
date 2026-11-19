@@ -1,62 +1,25 @@
 // @vitest-environment jsdom
+import type { RequestHandler } from 'msw'
 import { act } from 'react'
+import { createPortal } from 'react-dom'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '#core/character'
-import type { GameTextLines, GameTextTone, OathCatalog } from '#core/catalog'
+import type { GameTextTone, OathCatalog } from '#core/catalog'
 import { characterDetailFixture } from '#core/testing'
-import { type ClientHost, ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { useOathCatalog } from '#entities/catalog'
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { gameTextToneClasses } from './game-text-tones'
 import { OathTab } from './OathTab'
 
-type Effects = OathCatalog['sets'][number]['options'][number]['effects']
-
-function effects(primitive: GameTextLines): Effects {
-  return { rare: null, unique: null, legendary: null, epic: null, primitive }
-}
-
-// 데이터 묶음(oath.v2.json)과 같은 모양의 합성 데이터다. 세트 번호와 고른 선택지 이름은 딜러 fixture의 용투 서약이다.
+// 세트 번호와 고른 선택지 이름은 딜러 fixture의 용투 서약이고, 서약 본체 아이콘은 딜러 서약의 태초 등급으로 고른다.
 const OATH_CATALOG: OathCatalog = {
-  version: 'synthetic',
-  sets: [
-    {
-      setId: 16204,
-      name: '야망의 용투 서약',
-      icon: 'https://skilltab.test/oath-set/16204.png',
-      options: [
-        {
-          name: '용투 : 세계를 태우는 불꽃',
-          icon: 'https://skilltab.test/oath/9.png',
-          effects: effects([
-            [
-              { text: '[투룡의 불꽃]', tone: 'increase' },
-              { text: ' [장비 발동 옵션]', tone: 'default' }
-            ],
-            [{ text: '모든 속도 +20%', tone: 'rarity-primordial' }],
-            [{ text: '[용투장의 난 세트] 장착 시', tone: 'disabled' }]
-          ])
-        },
-        {
-          name: '용투 : 용의 분노',
-          icon: 'https://skilltab.test/oath/10.png',
-          effects: effects([[{ text: '분노', tone: 'rarity-primordial' }]])
-        },
-        {
-          name: '용투 : 승리의 함성',
-          icon: 'https://skilltab.test/oath/11.png',
-          effects: effects([[{ text: '[함성]', tone: 'increase' }]])
-        }
-      ]
-    }
-  ],
+  ...oathCatalogFixture.characterDetail,
   items: [
-    {
-      name: '세계를 태우는 용투 서약',
-      rarity: '에픽',
-      icon: 'https://skilltab.test/oath-item/epic.webp'
-    },
+    ...oathCatalogFixture.characterDetail.items,
     {
       name: '세계를 태우는 용투 서약',
       rarity: '태초',
@@ -67,33 +30,40 @@ const OATH_CATALOG: OathCatalog = {
 
 let container: HTMLDivElement
 let root: Root
+let probe: HTMLOutputElement
 
 beforeEach(() => {
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   container = document.createElement('div')
-  document.body.append(container)
+  probe = document.createElement('output')
+  document.body.append(container, probe)
   root = createRoot(container)
 })
 
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
-  vi.unstubAllGlobals()
+  probe.remove()
 })
+
+// 서약 데이터가 없을 때와 받는 중일 때 화면이 같아, 같은 캐시를 읽는 이 컴포넌트로 응답을 받았는지 본다.
+function CatalogStatusProbe(): React.JSX.Element {
+  return createPortal(useOathCatalog().status, probe)
+}
 
 async function render(
   detail: CharacterDetailView,
-  host: ClientHost = createTestClientHost()
+  catalog: RequestHandler = oathCatalogHandlers.notUploaded
 ): Promise<void> {
+  server.use(catalog)
   await act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <TestQueryClient>
-          <OathTab detail={detail} />
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <CatalogStatusProbe />
+        <OathTab detail={detail} />
+      </TestQueryClient>
     )
   )
+  await vi.waitFor(() => expect(probe.textContent).toBe('success'))
 }
 
 function section(name: string): HTMLElement {
@@ -187,10 +157,7 @@ it('서약이 없는 캐릭터는 아무것도 그리지 않는다', async () =>
 })
 
 it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장을 두고 고른 선택지만 표시한다', async () => {
-  await render(
-    characterDetailFixture('dealer'),
-    createTestClientHost({ getOathCatalog: async () => OATH_CATALOG })
-  )
+  await render(characterDetailFixture('dealer'), oathCatalogHandlers.catalog(OATH_CATALOG))
 
   expect(
     container.querySelector('img[src="https://skilltab.test/oath-set/16204.png"]')
@@ -211,10 +178,7 @@ it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장�
 })
 
 it('고르지 않은 선택지 카드도 문구를 조각의 tone 색으로 그린다', async () => {
-  await render(
-    characterDetailFixture('dealer'),
-    createTestClientHost({ getOathCatalog: async () => OATH_CATALOG })
-  )
+  await render(characterDetailFixture('dealer'), oathCatalogHandlers.catalog(OATH_CATALOG))
 
   const [, rage, shout] = [...container.querySelectorAll('article')]
   expect(hasTone(rage?.querySelector('p span span'), 'rarity-primordial')).toBe(true)
@@ -224,7 +188,7 @@ it('고르지 않은 선택지 카드도 문구를 조각의 tone 색으로 그�
 it('서약 데이터에 없는 세트는 지금 화면대로 그린다', async () => {
   await render(
     characterDetailFixture('dealer'),
-    createTestClientHost({ getOathCatalog: async () => ({ ...OATH_CATALOG, sets: [] }) })
+    oathCatalogHandlers.catalog({ ...OATH_CATALOG, sets: [] })
   )
 
   expect(container.textContent).toContain(
@@ -252,7 +216,7 @@ it('세트가 없는 서약도 한 줄 화면에 서약 데이터의 아이콘�
     ]
   }
 
-  await render(withoutSet, createTestClientHost({ getOathCatalog: async () => catalog }))
+  await render(withoutSet, oathCatalogHandlers.catalog(catalog))
 
   expect(container.textContent).toContain('서약영겁의 안개 서약서약 결정')
   expect(strip().querySelector('img')?.getAttribute('src')).toBe(
