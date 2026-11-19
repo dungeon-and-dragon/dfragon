@@ -2,11 +2,14 @@ import { delay, HttpResponse, http } from 'msw'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import {
   storyAdventureActivity,
+  storyAdventureEquipment,
   storyAdventureSeasonDays,
-  storyAdventureWeekly
+  storyAdventureWeekly,
+  storyEmptyAdventureEquipment
 } from './adventure.fixture'
 
 export const ADVENTURE_WEEKLY_URL = `${API_BASE_URL}/adventures/:adventureName/weekly`
+export const ADVENTURE_EQUIPMENT_URL = `${API_BASE_URL}/adventures/:adventureName/equipment`
 export const ADVENTURE_ACTIVITY_URL = `${API_BASE_URL}/adventures/:adventureName/activity`
 export const ADVENTURE_BACKFILL_URL = `${API_BASE_URL}/adventures/:adventureName/activity/seasons/:season/backfill`
 export const ADVENTURE_SEASON_DAYS_URL = `${API_BASE_URL}/adventures/:adventureName/activity/seasons/:season/days`
@@ -22,6 +25,7 @@ async function never(): Promise<void> {
 export const adventureHandlers = {
   adventure: [
     http.get(ADVENTURE_WEEKLY_URL, () => HttpResponse.json(storyAdventureWeekly)),
+    http.get(ADVENTURE_EQUIPMENT_URL, () => HttpResponse.json(storyAdventureEquipment)),
     http.get(ADVENTURE_ACTIVITY_URL, ({ request }) => {
       const season = new URL(request.url).searchParams.get('season')
       const seasonId = season !== null ? Number(season) : undefined
@@ -35,10 +39,16 @@ export const adventureHandlers = {
       return HttpResponse.json(days)
     })
   ],
-  loading: [ADVENTURE_WEEKLY_URL, ADVENTURE_ACTIVITY_URL].map((url) => http.get(url, never)),
+  emptyEquipment: [
+    http.get(ADVENTURE_EQUIPMENT_URL, () => HttpResponse.json(storyEmptyAdventureEquipment))
+  ],
+  loading: [ADVENTURE_WEEKLY_URL, ADVENTURE_ACTIVITY_URL, ADVENTURE_EQUIPMENT_URL].map((url) =>
+    http.get(url, never)
+  ),
   failure: [
     http.get(ADVENTURE_WEEKLY_URL, () => failure('주간 던파를 받지 못했습니다.')),
     http.get(ADVENTURE_ACTIVITY_URL, () => failure('모험단 활동을 받지 못했습니다.')),
+    http.get(ADVENTURE_EQUIPMENT_URL, () => failure('장비를 받지 못했습니다.')),
     http.get(ADVENTURE_SEASON_DAYS_URL, never)
   ]
 }
