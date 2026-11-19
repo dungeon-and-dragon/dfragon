@@ -541,11 +541,14 @@ const itemAdoption: ItemAdoption = {
     {
       slotId: 'WEAPON',
       items: [
-        { itemId: 'weapon-a', name: '합성 무기', count: 2 },
-        { itemId: 'weapon-b', name: '합성 다른 무기', count: 1 }
+        { itemId: 'weapon-a', name: '합성 무기', typeDetail: '도', count: 2 },
+        { itemId: 'weapon-b', name: '합성 다른 무기', typeDetail: '낫', count: 1 }
       ]
     },
-    { slotId: 'SUPPORT', items: [{ itemId: 'support-a', name: '합성 보조장비', count: 1 }] }
+    {
+      slotId: 'SUPPORT',
+      items: [{ itemId: 'support-a', name: '합성 보조장비', typeDetail: '보조장비', count: 1 }]
+    }
   ]
 }
 
