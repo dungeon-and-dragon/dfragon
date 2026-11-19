@@ -1,19 +1,24 @@
 // @vitest-environment jsdom
+import { type HttpHandler, HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { OathCatalog } from '#core/catalog'
 import type { ItemStats, SetStats, SetStatsFilter } from '#core/ranking'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
+import { SET_STATS_URL, setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { SetStatsScreen } from './SetStatsScreen'
 
 let container: HTMLDivElement
 let root: Root
+let setStatsQueries: Record<string, string>[]
 
 beforeEach(() => {
+  setStatsQueries = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   container = document.createElement('div')
   document.body.append(container)
@@ -80,23 +85,48 @@ const catalog: OathCatalog = {
 
 const JOB_FILTER: SetStatsFilter = { jobId: 'job-1', jobGrowId: 'grow-1' }
 
-function render(
-  overrides: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog' | 'getItemStats'>>,
+function setStatsOf(body: SetStats): HttpHandler {
+  return http.get(SET_STATS_URL, ({ request }) => {
+    setStatsQueries.push(Object.fromEntries(new URL(request.url).searchParams))
+
+    return HttpResponse.json(body)
+  })
+}
+
+function itemStatsOf(body: ItemStats): HttpHandler {
+  return http.get(ITEM_STATS_URL, () => HttpResponse.json(body))
+}
+
+type Responses = Readonly<{
+  setStats?: HttpHandler
+  oathCatalog?: HttpHandler
+  itemStats?: HttpHandler
+}>
+
+function mount(
+  {
+    setStats = setStatsHandlers.loading,
+    oathCatalog = oathCatalogHandlers.catalog(catalog),
+    itemStats = itemStatsHandlers.loading
+  }: Responses,
   filter: SetStatsFilter = JOB_FILTER
 ): Promise<void> {
-  const host = createTestClientHost({ getOathCatalog: async () => catalog, ...overrides })
+  server.use(setStats, oathCatalog, itemStats)
 
   return act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <TestQueryClient>
-          <TestRouter>
-            <SetStatsScreen filter={filter} onFilterChange={vi.fn()} />
-          </TestRouter>
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <TestRouter>
+          <SetStatsScreen filter={filter} onFilterChange={vi.fn()} />
+        </TestRouter>
+      </TestQueryClient>
     )
   )
+}
+
+async function render(responses: Responses, filter?: SetStatsFilter): Promise<void> {
+  await mount(responses, filter)
+  await vi.waitFor(() => expect(container.textContent).not.toContain('세트 통계를 받는 중입니다.'))
 }
 
 function boxOf(name: string): HTMLElement {
@@ -131,10 +161,9 @@ function rowLink(name: string, rowName: string): Element | null | undefined {
 }
 
 it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두고, 표본 전체 대비 비율의 합이 100%다', async () => {
-  const getSetStats = vi.fn(async () => stats)
-  await render({ getSetStats })
+  await render({ setStats: setStatsOf(stats) })
 
-  expect(getSetStats).toHaveBeenCalledWith(JOB_FILTER)
+  expect(setStatsQueries).toEqual([JOB_FILTER])
   expect(rowsOf('장비 세트')).toEqual([
     ['황금향', '37.5%'],
     ['페어리', '25.0%'],
@@ -147,7 +176,7 @@ it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두�
 })
 
 it('서약 세트 아래 카탈로그 순서로 선택지를 펼치고, 아무도 고르지 않은 선택지는 0%이며 세트 안 비율의 합이 100%다', async () => {
-  await render({ getSetStats: async () => stats })
+  await render({ setStats: setStatsOf(stats) })
 
   expect(rowsOf('서약 세트')).toEqual([
     ['용투', '50.0%'],
@@ -159,7 +188,7 @@ it('서약 세트 아래 카탈로그 순서로 선택지를 펼치고, 아무�
 })
 
 it('서약 세트의 선택지는 세트마다 접고 다시 펼친다', async () => {
-  await render({ getSetStats: async () => stats })
+  await render({ setStats: setStatsOf(stats) })
   const toggle = boxOf('서약 세트').querySelector<HTMLButtonElement>('button[aria-expanded]')!
 
   expect(toggle.getAttribute('aria-expanded')).toBe('true')
@@ -171,7 +200,7 @@ it('서약 세트의 선택지는 세트마다 접고 다시 펼친다', async (
 })
 
 it('카탈로그를 받지 못하면 받은 선택지를 원래 이름으로 보인다', async () => {
-  await render({ getSetStats: async () => stats, getOathCatalog: async () => null })
+  await render({ setStats: setStatsOf(stats), oathCatalog: oathCatalogHandlers.notUploaded })
 
   expect(rowsOf('서약 세트').map(([name]) => name)).toEqual([
     '용투',
@@ -182,7 +211,7 @@ it('카탈로그를 받지 못하면 받은 선택지를 원래 이름으로 보
 })
 
 it('세트와 선택지 막대는 고른 직업, 전직과 그 세트로 거른 랭킹으로 잇고 세트 없음은 잇지 않는다', async () => {
-  await render({ getSetStats: async () => stats })
+  await render({ setStats: setStatsOf(stats) })
 
   expect(rankingSearchOf(rowLink('장비 세트', '페어리'))).toEqual({
     ...JOB_FILTER,
@@ -202,7 +231,7 @@ it('세트와 선택지 막대는 고른 직업, 전직과 그 세트로 거른 
 })
 
 it('조합은 두 세트를 함께 랭킹에 붙이고, 한쪽이라도 세트가 없으면 잇지 않는다', async () => {
-  await render({ getSetStats: async () => stats })
+  await render({ setStats: setStatsOf(stats) })
 
   expect(rowsOf('장비와 서약 조합')).toEqual([
     ['황금향 + 용투', '25.0%'],
@@ -219,15 +248,7 @@ it('조합은 두 세트를 함께 랭킹에 붙이고, 한쪽이라도 세트�
 })
 
 it('저장분이 없으면 집계 시각 없이 상자마다 세트 통계가 없다고 알린다', async () => {
-  await render({
-    getSetStats: async () => ({
-      computedAt: null,
-      sampleSize: 0,
-      equipmentSets: [],
-      oathSets: [],
-      combos: []
-    })
-  })
+  await render({ setStats: setStatsHandlers.empty })
 
   expect(container.querySelector('header')?.textContent).toBe('세트 통계')
   expect([...container.querySelectorAll('section p')].map((p) => p.textContent)).toEqual([
@@ -238,7 +259,7 @@ it('저장분이 없으면 집계 시각 없이 상자마다 세트 통계가 �
 })
 
 it('받는 중에는 상자 제목과 skeleton을 보인다', async () => {
-  await render({})
+  await mount({})
 
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
   expect([...container.querySelectorAll('section h2')].map((h2) => h2.textContent)).toEqual([
@@ -251,11 +272,7 @@ it('받는 중에는 상자 제목과 skeleton을 보인다', async () => {
 })
 
 it('받지 못하면 세트 통계를 받지 못했다고 알린다', async () => {
-  await render({
-    getSetStats: async () => {
-      throw new Error('network')
-    }
-  })
+  await render({ setStats: http.get(SET_STATS_URL, () => HttpResponse.error()) })
   await vi.waitFor(() =>
     expect(container.querySelector('[role="alert"]')?.textContent).toBe(
       '세트 통계를 받지 못했습니다.'
@@ -293,7 +310,7 @@ function itemStatsWith(weaponCount: number): ItemStats {
 }
 
 it('전체 직업 무기는 많은 순 10개와 나머지를 묶은 그 밖 막대이고, 무기 막대는 그 itemId로 거른 랭킹으로 잇는다', async () => {
-  await render({ getSetStats: async () => stats, getItemStats: async () => itemStatsWith(12) }, {})
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(12)) }, {})
 
   const weapons = await vi.waitFor(() => {
     const rows = rowsOf('무기')
@@ -308,14 +325,14 @@ it('전체 직업 무기는 많은 순 10개와 나머지를 묶은 그 밖 막�
 })
 
 it('전직을 고르면 그 전직의 무기를 그 밖으로 묶지 않고 많은 순으로 모두 보인다', async () => {
-  await render({ getSetStats: async () => stats, getItemStats: async () => itemStatsWith(12) })
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(12)) })
 
   await vi.waitFor(() => expect(rowsOf('무기')).toHaveLength(12))
   expect(rankingSearchOf(rowLink('무기', '무기2'))).toEqual({ ...JOB_FILTER, itemIds: 'weapon-2' })
 })
 
 it('유일 장비는 부위마다 착용 비율 한 줄이고, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
-  await render({ getSetStats: async () => stats, getItemStats: async () => itemStatsWith(2) })
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(2)) })
 
   await vi.waitFor(() =>
     expect(rowsOf('유일 장비')).toEqual([
@@ -331,10 +348,7 @@ it('유일 장비는 부위마다 착용 비율 한 줄이고, 한 종뿐인 부
 })
 
 it('아이템 통계 저장분이 없으면 무기, 유일 장비 상자에 아이템 통계가 없다고 알린다', async () => {
-  await render({
-    getSetStats: async () => stats,
-    getItemStats: async () => ({ computedAt: null, sampleSize: 0, slots: [] })
-  })
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsHandlers.empty })
 
   await vi.waitFor(() =>
     expect(boxOf('무기').querySelector('p.state')?.textContent).toBe('아이템 통계가 없습니다.')

@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterStats } from '#core/ranking'
-import { ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
+import { CHARACTER_STATS_URL, characterStatsHandlers } from './api/stats.handlers'
 import { StatsPage } from './StatsPage'
 
 let container: HTMLDivElement
@@ -67,18 +68,23 @@ const stats: CharacterStats = {
   ]
 }
 
-function render(getCharacterStats: () => Promise<CharacterStats>): Promise<void> {
-  return act(async () =>
+async function mount(): Promise<void> {
+  await act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getCharacterStats })}>
-        <TestQueryClient>
-          <TestRouter>
-            <StatsPage />
-          </TestRouter>
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <TestRouter>
+          <StatsPage />
+        </TestRouter>
+      </TestQueryClient>
     )
   )
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+}
+
+function render(body: CharacterStats): Promise<void> {
+  server.use(http.get(CHARACTER_STATS_URL, () => HttpResponse.json(body)))
+
+  return mount()
 }
 
 function boxOf(name: string): HTMLElement {
@@ -92,7 +98,7 @@ function rowsOf(name: string): string[][] {
 }
 
 it('제목 상자에 캐릭터 수와 마지막 업데이트로부터 지난 시간을 보이고 한국 시간은 title로 둔다', async () => {
-  await render(async () => stats)
+  await render(stats)
 
   expect(container.querySelector('header')?.textContent).toBe(
     '캐릭터 통계캐릭터1,234,567마지막 업데이트 시간11시간 전'
@@ -101,7 +107,7 @@ it('제목 상자에 캐릭터 수와 마지막 업데이트로부터 지난 시
 })
 
 it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 분포, 직업별 평균 명성 순으로 그린다', async () => {
-  await render(async () => stats)
+  await render(stats)
 
   expect([...container.querySelectorAll('h2')].map((name) => name.textContent)).toEqual([
     '서버 인구',
@@ -148,7 +154,7 @@ function moveMouse(from: Element, to: Element): Promise<void> {
 }
 
 it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
-  await render(async () => stats)
+  await render(stats)
 
   const items = [...boxOf('명성 분포').querySelectorAll('li')]
   expect(items.map((item) => item.getAttribute('aria-hidden'))).toEqual([
@@ -170,7 +176,7 @@ it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 �
 })
 
 it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫지 않고 다음 막대의 구간과 인원으로 바꾼다', async () => {
-  await render(async () => stats)
+  await render(stats)
 
   const chart = boxOf('명성 분포').querySelector('ul')!
   const [, coarseBar, , divider, firstFineBar] = [...chart.querySelectorAll('li')]
@@ -189,7 +195,7 @@ it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫�
 })
 
 it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 목록을 벗어나면 지운다', async () => {
-  await render(async () => ({ ...stats, total: 1000 }))
+  await render({ ...stats, total: 1000 })
 
   const serverRow = boxOf('서버 인구').querySelector('li')!
   const jobRow = boxOf('직업 분포').querySelector('li')!
@@ -205,7 +211,7 @@ it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭�
 })
 
 it('행 사이 간격을 지나도 비율 툴팁을 닫지 않고 다음 행의 비율로 바꾼다', async () => {
-  await render(async () => ({ ...stats, total: 1000 }))
+  await render({ ...stats, total: 1000 })
 
   const list = boxOf('서버 인구').querySelector('ul')!
   const [firstRow, secondRow] = [...list.querySelectorAll('li')]
@@ -221,7 +227,7 @@ it('행 사이 간격을 지나도 비율 툴팁을 닫지 않고 다음 행의 
 })
 
 it('직업별 평균 명성 행에는 마우스를 올려도 비율 툴팁이 없다', async () => {
-  await render(async () => ({ ...stats, total: 1000 }))
+  await render({ ...stats, total: 1000 })
 
   const row = boxOf('직업별 평균 명성').querySelector('li')!
   await moveMouse(document.body, row)
@@ -231,7 +237,7 @@ it('직업별 평균 명성 행에는 마우스를 올려도 비율 툴팁이 �
 })
 
 it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직업은 뺀다', async () => {
-  await render(async () => stats)
+  await render(stats)
 
   expect(rowsOf('직업별 평균 명성').map(([name, , value]) => [name, value])).toEqual([
     ['전직2 직업1', '90,000'],
@@ -240,7 +246,7 @@ it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직�
 })
 
 it('직업 분포와 직업별 평균 명성에서 眞이 붙지 않은 전직은 뺀다', async () => {
-  await render(async () => ({
+  await render({
     ...stats,
     jobs: [
       ...stats.jobs,
@@ -253,7 +259,7 @@ it('직업 분포와 직업별 평균 명성에서 眞이 붙지 않은 전직�
         averageFame: 100000
       }
     ]
-  }))
+  })
 
   expect(rowsOf('직업 분포').map(([name]) => name)).toEqual([
     '전직1 직업1',
@@ -264,14 +270,14 @@ it('직업 분포와 직업별 평균 명성에서 眞이 붙지 않은 전직�
 })
 
 it('두 통계 막대의 전직 뒤에 직업명을 붙인다', async () => {
-  await render(async () => ({
+  await render({
     ...stats,
     jobs: [
       { ...stats.jobs[0], jobName: '격투가(남)', jobGrowName: '眞 넨마스터' },
       { ...stats.jobs[1], jobName: '격투가(여)', jobGrowName: '眞 넨마스터' },
       { ...stats.jobs[2], jobName: '귀검사(남)', jobGrowName: '眞 웨펀마스터', averageFame: 70000 }
     ]
-  }))
+  })
 
   expect(rowsOf('직업 분포').map(([name]) => name)).toEqual([
     '넨마스터 격투가(남)',
@@ -286,26 +292,26 @@ it('두 통계 막대의 전직 뒤에 직업명을 붙인다', async () => {
 })
 
 it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
-  await render(async () => ({
+  await render({
     ...stats,
     total: 0,
     servers: [],
     jobs: [],
     fameDistribution: []
-  }))
+  })
 
   expect(container.querySelectorAll('li')).toHaveLength(0)
   expect(boxOf('서버 인구').textContent).toBe('서버 인구')
 })
 
 it('집계 시각이 null인 빈 통계는 마지막 업데이트 없이 표시한다', async () => {
-  await render(async () => ({
+  await render({
     computedAt: null,
     total: 0,
     servers: [],
     jobs: [],
     fameDistribution: []
-  }))
+  })
 
   expect(container.querySelector('header')?.textContent).toBe('캐릭터 통계캐릭터0')
   expect(container.querySelector('header time')).toBeNull()
@@ -313,9 +319,8 @@ it('집계 시각이 null인 빈 통계는 마지막 업데이트 없이 표시�
 })
 
 it('조회가 실패하면 오류를 알린다', async () => {
-  await render(async () => {
-    throw new Error('통계를 받지 못했습니다.')
-  })
+  server.use(characterStatsHandlers.failure)
+  await mount()
 
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('통계를 받지 못했습니다.')
 })

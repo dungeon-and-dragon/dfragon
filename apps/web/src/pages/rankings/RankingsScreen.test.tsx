@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { HttpResponse, http } from 'msw'
+import { type HttpHandler, HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -11,13 +11,14 @@ import type {
   RankedCharacter,
   SetStats
 } from '#core/ranking'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import {
   FAME_RANKING_NEXT_CURSOR,
   fameRankingFixture
 } from '#entities/ranking/api/fame-ranking.fixture'
 import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
+import { SET_STATS_URL, setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -27,9 +28,13 @@ import { RANKING_JOBS } from './ranking-jobs'
 let container: HTMLDivElement
 let root: Root
 let requests: URLSearchParams[]
+let setStatsQueries: Record<string, string>[]
+let itemStatsQueries: Record<string, string>[]
 
 beforeEach(() => {
   requests = []
+  setStatsQueries = []
+  itemStatsQueries = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   container = document.createElement('div')
   document.body.append(container)
@@ -96,22 +101,31 @@ function queries(): Record<string, string>[] {
   return requests.map((params) => Object.fromEntries(params))
 }
 
+type StatsResponses = Readonly<{
+  setStats?: HttpHandler
+  oathCatalog?: HttpHandler
+  itemStats?: HttpHandler
+}>
+
 async function render(
   ranking: RankingResponse,
   filter: FameRankingFilter = {},
   onFilterChange: (filter: FameRankingFilter) => void = () => {},
-  sets: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog' | 'getItemStats'>> = {}
+  {
+    setStats = setStatsHandlers.loading,
+    oathCatalog = oathCatalogHandlers.notUploaded,
+    itemStats = itemStatsHandlers.loading
+  }: StatsResponses = {}
 ): Promise<void> {
   respondRanking(ranking)
+  server.use(setStats, oathCatalog, itemStats)
   await act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost(sets)}>
-        <TestQueryClient>
-          <TestRouter>
-            <RankingsScreen filter={filter} onFilterChange={onFilterChange} />
-          </TestRouter>
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <TestRouter>
+          <RankingsScreen filter={filter} onFilterChange={onFilterChange} />
+        </TestRouter>
+      </TestQueryClient>
     )
   )
   await vi.waitFor(() => expect(container.textContent).not.toContain('랭킹을 받는 중입니다.'))
@@ -478,9 +492,16 @@ const oathCatalog: OathCatalog = {
   items: []
 }
 
-const setHost = {
-  getSetStats: async () => setStats,
-  getOathCatalog: async () => oathCatalog
+function setStatsOf(body: SetStats): HttpHandler {
+  return http.get(SET_STATS_URL, ({ request }) => {
+    setStatsQueries.push(Object.fromEntries(new URL(request.url).searchParams))
+
+    return HttpResponse.json(body)
+  })
+}
+
+function setResponses(): StatsResponses {
+  return { setStats: setStatsOf(setStats), oathCatalog: oathCatalogHandlers.catalog(oathCatalog) }
 }
 
 function setSelect(label: string): HTMLButtonElement {
@@ -489,10 +510,15 @@ function setSelect(label: string): HTMLButtonElement {
 
 async function pickOption(label: string, optionText: string): Promise<void> {
   await act(async () => setSelect(label).click())
-  const listbox = document.querySelector(`[role="listbox"][aria-label="${label}"]`)!
-  const option = [...listbox.querySelectorAll<HTMLElement>('[role="option"]')].find(
-    (item) => item.textContent === optionText
-  )!
+  const option = await vi.waitFor(() => {
+    const listbox = document.querySelector(`[role="listbox"][aria-label="${label}"]`)!
+    const found = [...listbox.querySelectorAll<HTMLElement>('[role="option"]')].find(
+      (item) => item.textContent === optionText
+    )
+    expect(found).toBeDefined()
+
+    return found!
+  })
   await act(async () => option.click())
 }
 
@@ -505,27 +531,27 @@ function optionTexts(label: string): string[] {
 }
 
 it('세트 셀렉트는 전체 직업 세트 통계에서 많이 낀 순으로 세트를 두고, 선택지는 카탈로그 순서로 줄여 쓴다', async () => {
-  const getSetStats = vi.fn(setHost.getSetStats)
   await render(
     async () => rankingOf(1),
     { jobId: RANKING_JOBS[0].jobId, oathSetId: DRAGON },
     () => {},
-    {
-      ...setHost,
-      getSetStats
-    }
+    setResponses()
   )
 
-  expect(getSetStats).toHaveBeenCalledWith({})
   await act(async () => setSelect('장비 세트').click())
-  expect(optionTexts('장비 세트')).toEqual(['장비 세트 전체', '황금향', '페어리'])
+  await vi.waitFor(() =>
+    expect(optionTexts('장비 세트')).toEqual(['장비 세트 전체', '황금향', '페어리'])
+  )
+  expect(setStatsQueries).toEqual([{}])
   await act(async () => setSelect('서약 선택지').click())
-  expect(optionTexts('서약 선택지')).toEqual([
-    '선택지 전체',
-    '용투 : 첫 번째',
-    '용투 : 두 번째',
-    '용투 : 세 번째'
-  ])
+  await vi.waitFor(() =>
+    expect(optionTexts('서약 선택지')).toEqual([
+      '선택지 전체',
+      '용투 : 첫 번째',
+      '용투 : 두 번째',
+      '용투 : 세 번째'
+    ])
+  )
 })
 
 it('세트를 고르면 직업 필터와 함께 넘기고, 서약 세트를 바꾸면 고른 선택지를 지운다', async () => {
@@ -535,7 +561,7 @@ it('세트를 고르면 직업 필터와 함께 넘기고, 서약 세트를 바�
     async () => rankingOf(1),
     { jobId, oathSetId: DRAGON, oathSetOption: '용투 : 용제 강림' },
     onFilterChange,
-    setHost
+    setResponses()
   )
 
   await pickOption('장비 세트', '황금향')
@@ -560,7 +586,7 @@ it('세트로 거르면 세트를 query로 보내고 목록 띠 제목에 고른
     async () => rankingOf(1),
     filter,
     () => {},
-    setHost
+    setResponses()
   )
 
   expect(queries()).toEqual([{ ...filter, oathSetId: String(DRAGON) }])
@@ -578,7 +604,7 @@ it('거른 랭킹이 비면 랭킹에 오른 캐릭터가 없다고 알린다', 
     async () => ({ characters: [], nextCursor: null }),
     { oathSetId: DRAGON },
     () => {},
-    setHost
+    setResponses()
   )
 
   expect(container.querySelector('p.state')?.textContent).toBe('랭킹에 오른 캐릭터가 없습니다.')
@@ -614,28 +640,35 @@ function itemStatsOf(weapons: readonly [string, number][]): ItemStats {
   }
 }
 
-function itemHost(stats: ItemStats) {
-  return { getItemStats: async () => stats }
+function itemResponses(stats: ItemStats): StatsResponses {
+  return {
+    itemStats: http.get(ITEM_STATS_URL, ({ request }) => {
+      itemStatsQueries.push(Object.fromEntries(new URL(request.url).searchParams))
+
+      return HttpResponse.json(stats)
+    })
+  }
 }
 
 it('무기 셀렉트는 고른 직업, 전직의 아이템 통계에서 많이 낀 순이고, 유일 장비는 부위마다 착용 칩 하나다', async () => {
-  const getItemStats = vi.fn(async () =>
-    itemStatsOf([
-      ['weapon-b', 1],
-      ['weapon-a', 3]
-    ])
-  )
   const jobId = RANKING_JOBS[0].jobId
   await render(
     async () => rankingOf(1),
     { jobId },
     () => {},
-    { getItemStats }
+    itemResponses(
+      itemStatsOf([
+        ['weapon-b', 1],
+        ['weapon-a', 3]
+      ])
+    )
   )
 
-  expect(getItemStats).toHaveBeenCalledWith({ jobId, jobGrowId: undefined, role: undefined })
   await act(async () => setSelect('무기').click())
-  expect(optionTexts('무기')).toEqual(['무기 전체', '무기 weapon-a', '무기 weapon-b'])
+  await vi.waitFor(() =>
+    expect(optionTexts('무기')).toEqual(['무기 전체', '무기 weapon-a', '무기 weapon-b'])
+  )
+  expect(itemStatsQueries).toEqual([{ jobId }])
   const uniqueRow = [...container.querySelectorAll('h2')].find(
     (heading) => heading.textContent === '유일 장비'
   )?.parentElement
@@ -646,13 +679,18 @@ it('무기 셀렉트는 고른 직업, 전직의 아이템 통계에서 많이 �
 
 it('무기는 하나만 골라 바꾸고, 착용 칩은 그 부위 유일 장비 itemId를 넣고 뺀다', async () => {
   const onFilterChange = vi.fn()
-  const host = itemHost(
+  const responses = itemResponses(
     itemStatsOf([
       ['weapon-a', 3],
       ['weapon-b', 1]
     ])
   )
-  await render(async () => rankingOf(1), { itemIds: ['ring-1', 'weapon-a'] }, onFilterChange, host)
+  await render(
+    async () => rankingOf(1),
+    { itemIds: ['ring-1', 'weapon-a'] },
+    onFilterChange,
+    responses
+  )
 
   await pickOption('무기', '무기 weapon-b')
   expect(onFilterChange).toHaveBeenLastCalledWith({ itemIds: ['ring-1', 'weapon-b'] })
@@ -666,13 +704,13 @@ it('무기는 하나만 골라 바꾸고, 착용 칩은 그 부위 유일 장비
 
 it('고른 전직의 아이템 통계에 없는 무기 필터는 지우고 유일 장비 필터는 남긴다', async () => {
   const onFilterChange = vi.fn()
-  const host = itemHost(itemStatsOf([['weapon-a', 3]]))
+  const responses = itemResponses(itemStatsOf([['weapon-a', 3]]))
   const jobId = RANKING_JOBS[0].jobId
   await render(
     async () => rankingOf(1),
     { jobId, itemIds: ['ring-1', 'other-job-weapon'] },
     onFilterChange,
-    host
+    responses
   )
 
   await vi.waitFor(() =>
@@ -683,7 +721,26 @@ it('고른 전직의 아이템 통계에 없는 무기 필터는 지우고 유�
 it('아이템 통계가 비어 있으면 주소의 아이템 필터를 지우지 않는다', async () => {
   const onFilterChange = vi.fn()
   const empty: ItemStats = { computedAt: null, sampleSize: 0, slots: [] }
-  await render(async () => rankingOf(1), { itemIds: ['weapon-x'] }, onFilterChange, itemHost(empty))
+  let answered: () => void = () => {}
+  const itemStatsAnswered = new Promise<void>((resolve) => {
+    answered = resolve
+  })
+  const itemStats = http.get(ITEM_STATS_URL, () => {
+    answered()
+
+    return HttpResponse.json(empty)
+  })
+  // 빈 아이템 통계를 받은 뒤 화면이 필터를 지우지 않았는지 보려고, 랭킹은 아이템 통계에 응답한 뒤에 돌려준다.
+  await render(
+    async () => {
+      await itemStatsAnswered
+
+      return rankingOf(1)
+    },
+    { itemIds: ['weapon-x'] },
+    onFilterChange,
+    { itemStats }
+  )
 
   expect(queries()).toEqual([{ itemIds: 'weapon-x' }])
   expect(onFilterChange).not.toHaveBeenCalled()
@@ -716,7 +773,7 @@ function weaponOptionGroups(): (string | null)[][] {
 it('직업을 고르지 않으면 무기를 종류별로 묶고, 종류는 그 안 최다 무기 순이며 종류를 모르는 무기는 묶음 없이 맨 끝이다', async () => {
   const stats: ItemStats = {
     computedAt: '2026-11-19T05:26:46.665Z',
-    sampleSize: 20,
+    sampleSize: 25,
     slots: [
       {
         slotId: 'WEAPON',
@@ -734,17 +791,19 @@ it('직업을 고르지 않으면 무기를 종류별로 묶고, 종류는 그 �
     async () => rankingOf(1),
     {},
     () => {},
-    itemHost(stats)
+    itemResponses(stats)
   )
 
   await act(async () => setSelect('무기').click())
-  expect(weaponOptionGroups()).toEqual([
-    [null, '무기 전체'],
-    ['도', '도1', '도2'],
-    ['낫', '낫1', '낫2'],
-    [SEPARATOR],
-    [null, '모름1']
-  ])
+  await vi.waitFor(() =>
+    expect(weaponOptionGroups()).toEqual([
+      [null, '무기 전체'],
+      ['도', '도1', '도2'],
+      ['낫', '낫1', '낫2'],
+      [SEPARATOR],
+      [null, '모름1']
+    ])
+  )
 })
 
 it('직업을 고르면 무기를 묶지 않고 많이 낀 순으로 둔다', async () => {
@@ -765,15 +824,17 @@ it('직업을 고르면 무기를 묶지 않고 많이 낀 순으로 둔다', as
     async () => rankingOf(1),
     { jobId: RANKING_JOBS[0].jobId },
     () => {},
-    itemHost(stats)
+    itemResponses(stats)
   )
 
   await act(async () => setSelect('무기').click())
-  expect(weaponOptionGroups()).toEqual([
-    [null, '무기 전체'],
-    [null, '도1'],
-    [null, '낫1']
-  ])
+  await vi.waitFor(() =>
+    expect(weaponOptionGroups()).toEqual([
+      [null, '무기 전체'],
+      [null, '도1'],
+      [null, '낫1']
+    ])
+  )
 })
 
 it('직업을 고르지 않았을 때 주소에만 있는 무기는 묶음 앞에 따로 두어 고른 값으로 보인다', async () => {
@@ -791,14 +852,16 @@ it('직업을 고르지 않았을 때 주소에만 있는 무기는 묶음 앞�
     async () => rankingOf(1),
     { itemIds: ['gone-weapon'] },
     () => {},
-    itemHost(stats)
+    itemResponses(stats)
   )
 
   expect(setSelect('무기').textContent).toContain('gone-weapon')
   await act(async () => setSelect('무기').click())
-  expect(weaponOptionGroups()).toEqual([
-    [null, '무기 전체'],
-    [null, 'gone-weapon'],
-    ['도', '도1']
-  ])
+  await vi.waitFor(() =>
+    expect(weaponOptionGroups()).toEqual([
+      [null, '무기 전체'],
+      [null, 'gone-weapon'],
+      ['도', '도1']
+    ])
+  )
 })
