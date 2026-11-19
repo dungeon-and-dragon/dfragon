@@ -1,4 +1,4 @@
-import type { TimelineClear, TimelineEnhancement } from '#core/character'
+import type { TimelineClear, TimelineEnhancement } from '#entities/character'
 
 export const CLEAR_KIND_LABELS = {
   raid: '레이드',

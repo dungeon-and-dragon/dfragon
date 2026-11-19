@@ -8,7 +8,7 @@ import {
   toHistoryPoints,
   toHistorySnapshotSummary,
   toScoreView
-} from '#core/character'
+} from '#entities/character'
 import { formatSeoulDateTime } from '#shared/lib/time-format'
 import { LineChart } from '#shared/ui/chart/LineChart'
 import { useCharacterHistory, useHistorySnapshot } from '#pages/character/api/useCharacterHistory'

@@ -1,4 +1,9 @@
-import { formatApproximateScore, formatJobName, type ScoreView, toScoreView } from '#core/character'
+import {
+  formatApproximateScore,
+  formatJobName,
+  type ScoreView,
+  toScoreView
+} from '#entities/character'
 import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import {
@@ -15,12 +20,12 @@ import { CardAnnouncer } from './CardAnnouncer'
 import { LookupProgress } from './LookupProgress'
 import { NameField } from './NameField'
 import { Portrait } from './Portrait'
-import { ServerSelect } from './ServerSelect'
+import { ServerSelect } from '#shared/ui/ServerSelect'
 import { SnapshotAdventureField } from './SnapshotAdventureField'
 import { SnapshotBadge } from './SnapshotBadge'
 import { serverOptions } from '#shared/config/server-options'
 import { type LookupDraft, useLookupDraft } from '#hooks/useLookupDraft'
-import { useServerMenu } from '#hooks/useServerMenu'
+import { useServerMenu } from '#shared/ui/useServerMenu'
 import type { SlotCardKey } from '#hooks/useSlotCardStore'
 import { getLookupStep, type LookupStep } from '#lib/card-presentation'
 

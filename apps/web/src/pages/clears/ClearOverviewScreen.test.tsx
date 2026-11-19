@@ -10,7 +10,7 @@ import type {
   ClearOverviewJob,
   ClearStats,
   ClearWeek
-} from '#core/ranking'
+} from '#entities/ranking'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'

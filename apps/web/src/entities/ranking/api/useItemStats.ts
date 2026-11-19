@@ -1,4 +1,5 @@
-import { type ItemStats, itemStatsSchema, type SetStatsFilter } from '#core/ranking'
+import { type ItemStats, itemStatsSchema } from '#core/ranking'
+import { type SetStatsFilter } from '#entities/ranking/model/ranking-stats'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { requestJobStats } from './job-stats-request'
 

@@ -3,7 +3,7 @@ import { CharacterTable, type CharacterTableAction } from '#components/table/Cha
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
-import type { CharacterKey } from '#lib/stored-character'
+import type { CharacterKey } from '#entities/character'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

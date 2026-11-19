@@ -9,7 +9,7 @@ import {
   type SearchControl
 } from './search'
 import { z } from 'zod'
-import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
+import { CHARACTER_SERVER_NAMES } from '#entities/character'
 
 const MAX_NICKNAME_INPUT_LENGTH = 24
 const text = z.string()

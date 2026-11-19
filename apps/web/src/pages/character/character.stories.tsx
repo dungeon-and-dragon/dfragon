@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { CharacterHistory } from '#core/character'
+import type { CharacterHistory } from '#entities/character'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'

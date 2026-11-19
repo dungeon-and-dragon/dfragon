@@ -4,7 +4,7 @@ import {
   type HistoryNameChange,
   signedEnchantValue,
   tuneNumeral
-} from '#core/character'
+} from '#entities/character'
 
 export const MISSING = '-'
 

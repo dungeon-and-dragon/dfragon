@@ -1,5 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import type { SetStatsFilter } from '#core/ranking'
+import type { SetStatsFilter } from '#entities/ranking'
 import { SetStatsScreen } from './SetStatsScreen'
 
 const route = getRouteApi('/stats/sets')

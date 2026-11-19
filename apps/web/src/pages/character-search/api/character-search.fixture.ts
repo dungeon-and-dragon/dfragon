@@ -1,4 +1,4 @@
-import { CHARACTER_SERVER_NAMES } from '#core/character'
+import { CHARACTER_SERVER_NAMES } from '#entities/character'
 
 // 캐릭터와 모험단 이름은 실제 값이 아닌 합성 값이다.
 

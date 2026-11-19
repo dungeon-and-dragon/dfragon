@@ -1,7 +1,7 @@
 import { CheckIcon, ChevronDownIcon, Popover } from '@dfragon/ui'
 import { type KeyboardEvent, useRef, useState } from 'react'
 import { type CandidatePicker, MISSING_VALUE } from '#core/capture'
-import { characterImageUrl } from '#core/character'
+import { characterImageUrl } from '#entities/character'
 import type { CharacterChoice } from '#core/search'
 import { CardImage } from './CardImage'
 

@@ -1,4 +1,4 @@
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import { toRaidFrameResult } from '#core/capture'
 import { createDfragonHttp } from '#shared/api/dfragon-http'
 import { startRuntimeDiagnostics } from '#shared/lib/diagnostics'

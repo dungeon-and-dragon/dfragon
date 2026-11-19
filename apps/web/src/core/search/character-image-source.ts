@@ -1,4 +1,4 @@
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 import type { IdentityRequest } from './character-requests'
 import { CompletedCache } from './completed-cache'
 

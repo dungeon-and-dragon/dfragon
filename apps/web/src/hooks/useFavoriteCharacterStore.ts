@@ -9,7 +9,7 @@ import {
   storedCharacterList,
   type CharacterDisplay,
   type CharacterKey
-} from '#lib/stored-character'
+} from '#entities/character'
 
 const favoriteCharacterSchema = characterDisplaySchema.extend({ savedAt: z.number() })
 

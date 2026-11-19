@@ -1,5 +1,5 @@
 import { Tabs } from '@dfragon/ui'
-import type { CharacterDetailView } from '#core/character'
+import type { CharacterDetailView } from '#entities/character'
 import { CHARACTER_TABS, type CharacterTab, isCharacterTab } from './character-tabs'
 
 // 탭 안의 나란한 칸 사이 세로 선이 구획 아래 가로 선까지 닿도록 아래 여백을 두지 않는다.

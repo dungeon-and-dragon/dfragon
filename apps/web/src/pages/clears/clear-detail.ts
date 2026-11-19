@@ -1,14 +1,4 @@
-import type {
-  ClearContent,
-  ClearContentStats,
-  ClearFameDistribution,
-  ClearJob,
-  ClearScoreBand,
-  ClearStageMoves,
-  ClearWeek,
-  ClearWeekOverWeek
-} from '#core/ranking'
-import { jobLabelOf } from '#core/character'
+import { jobLabelOf } from '#entities/character'
 import type { BarSeries } from '#shared/ui/chart/BarLineChart'
 import type { BoxPlotRow } from '#shared/ui/chart/BoxPlot'
 import type { LegendItem } from '#shared/ui/chart/ChartLegend'
@@ -17,7 +7,17 @@ import type { LineSeries } from '#shared/ui/chart/LineChart'
 import type { ChartX } from '#shared/ui/chart/plot-layout'
 import type { Bar } from '#shared/ui/chart/RowBars'
 import type { SplitSegment } from '#shared/ui/chart/SplitBar'
-import { shareText } from '#components/chart/stats-bars'
+import {
+  type ClearContent,
+  type ClearContentStats,
+  type ClearFameDistribution,
+  type ClearJob,
+  type ClearScoreBand,
+  type ClearStageMoves,
+  type ClearWeek,
+  type ClearWeekOverWeek,
+  shareText
+} from '#entities/ranking'
 import { type ContentChoice, type GroupedContent, groupsOf } from './clear-groups'
 import { columnsOf, type OverviewWeek, weekRangeText } from './clear-overview'
 import { addDays, weekNumberOf } from './clear-weeks'

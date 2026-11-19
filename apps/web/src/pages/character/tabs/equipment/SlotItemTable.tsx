@@ -1,4 +1,4 @@
-import type { ItemView } from '#core/character'
+import type { ItemView } from '#entities/character'
 import { itemTableClasses } from './item-classes'
 import { ItemCell } from './item-parts'
 

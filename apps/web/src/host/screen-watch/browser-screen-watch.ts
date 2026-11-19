@@ -1,5 +1,5 @@
 import { detectDNFTownIndicator, type DNFParticipantFrame } from '@dfragon/lib'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import type { AutoRoundSignal, BrowserHost, WatchedScreen } from '#host/client-host'
 import { decodeBrowserImage } from '#host/browser-png'
 import { createBackgroundLoad } from './background-load'

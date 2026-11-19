@@ -1,4 +1,4 @@
-import { avatarSlotLabel, type CharacterDetailView, toItemView } from '#core/character'
+import { avatarSlotLabel, type CharacterDetailView, toItemView } from '#entities/character'
 import { itemClasses, itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
 import { ItemIcon, ItemName } from '#pages/character/tabs/equipment/item-parts'
 import { avatarClasses } from './avatar-classes'

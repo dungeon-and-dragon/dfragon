@@ -1,5 +1,5 @@
 import { type PartyOcrWorker, type RaidFrameRow } from '#core/capture/capture-types'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 import { MAX_RAID_JOB_TEXT_LENGTH } from '#core/search/search'
 import { toRaidJobCanvas, toRaidNicknameCanvas } from '#core/ocr/nickname-pixels'
 import {

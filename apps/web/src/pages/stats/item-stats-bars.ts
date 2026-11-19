@@ -1,5 +1,6 @@
 import type { Bar } from '#shared/ui/chart/RowBars'
-import { type ItemStats, itemSlotName, type SetStatsFilter, WEAPON_SLOT } from '#core/ranking'
+import { type ItemStats, itemSlotName, WEAPON_SLOT } from '#core/ranking'
+import type { SetStatsFilter } from '#entities/ranking'
 import { rankingLink, shareOf } from './set-stats-bars'
 
 // 전체 직업은 무기 종류가 많아 많은 순 10개만 막대로 두고 나머지는 "그 밖" 하나로 묶는다.

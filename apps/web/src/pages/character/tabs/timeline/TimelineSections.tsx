@@ -1,11 +1,5 @@
 import { Button } from '@dfragon/ui'
 import type { ReactNode } from 'react'
-import type {
-  TimelineAcquisition,
-  TimelineClear,
-  TimelineClearCount,
-  TimelineEnhancement
-} from '#core/character'
 import type { TimelinePagesState } from '#pages/character/hooks/useTimelinePages'
 import {
   acquisitionRoute,
@@ -15,7 +9,14 @@ import {
 } from './timeline-format'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { RelativeTime } from '#shared/ui/RelativeTime'
-import { enhancementKindClasses, raritySolidOfName } from '#components/game-colors'
+import {
+  type TimelineAcquisition,
+  type TimelineClear,
+  type TimelineClearCount,
+  type TimelineEnhancement,
+  enhancementKindClasses,
+  raritySolidOfName
+} from '#entities/character'
 
 const BADGE = 'badge text-fg-muted'
 const HARD_BADGE = 'badge bg-danger-weak text-fg-danger'

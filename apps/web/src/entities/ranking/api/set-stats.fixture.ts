@@ -1,4 +1,4 @@
-import type { SetStats } from '#core/ranking'
+import type { SetStats } from '#entities/ranking/model/set-stats'
 
 // 비율은 #1781 시안의 합성 값이다. 세트 id와 이름, 선택지 이름은 게임 데이터 그대로다.
 const SAMPLE_SIZE = 412_380

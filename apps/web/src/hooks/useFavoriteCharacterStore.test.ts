@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { CharacterDisplay } from '#lib/stored-character'
+import type { CharacterDisplay } from '#entities/character'
 import { useFavoriteCharacterStore } from './useFavoriteCharacterStore'
 
 const STORAGE_KEY = 'dfragon:favorite-characters'

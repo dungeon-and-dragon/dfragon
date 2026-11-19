@@ -1,4 +1,4 @@
-import type { ActivitySummary } from '#core/adventure-guild'
+import type { ActivitySummary } from '#entities/adventure-guild'
 
 export type RarityCounts = ActivitySummary['oaths'] &
   Partial<Pick<ActivitySummary['items'], 'mythic'>>

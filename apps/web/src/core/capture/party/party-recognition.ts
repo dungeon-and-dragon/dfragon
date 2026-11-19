@@ -1,5 +1,5 @@
 import type { PartyOcrResult, PartyOcrWorker } from '#core/capture/capture-types'
-import type { CharacterImage, CharacterPortrait } from '#core/character/character'
+import type { CharacterImage, CharacterPortrait } from '#entities/character'
 import { capturePartyRecognitionInputs } from './party'
 import type { OcrNicknameRejection } from '#shared/lib/diagnostics/runtime-diagnostics'
 

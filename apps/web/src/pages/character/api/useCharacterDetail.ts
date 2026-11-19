@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { CharacterDetailView, CharacterIdentity } from '#core/character'
+import type { CharacterDetailView, CharacterIdentity } from '#entities/character'
 import { useLoadedResult } from '#shared/lib/useLoadedResult'
 import { detailViewSchemaOf, requestCharacterJson } from './character-api'
 

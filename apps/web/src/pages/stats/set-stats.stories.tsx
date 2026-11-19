@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import type { SetStatsFilter } from '#core/ranking'
+import type { SetStatsFilter } from '#entities/ranking'
 import { RANKING_JOBS } from '#pages/rankings'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'

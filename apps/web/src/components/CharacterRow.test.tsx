@@ -5,12 +5,12 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { bufferCard, dealerCard } from '#core/testing'
 import type { CandidatePicker, CardCharacter, SlotCard } from '#core/capture'
 import type { CharacterChoice } from '#core/search'
-import type { ServerSelect } from './ServerSelect'
+import type { ServerSelect } from '#shared/ui/ServerSelect'
 import { toneClassesOf } from '#testing/test-support/score-tone-class'
 import { TestRouter } from '#testing/test-support/test-router'
 import { CharacterRow } from './CharacterRow'
 
-vi.mock('./ServerSelect', () => ({
+vi.mock('#shared/ui/ServerSelect', () => ({
   ServerSelect: ({ value, onValueChange, label, options }: ComponentProps<typeof ServerSelect>) => (
     <select
       aria-label={label}

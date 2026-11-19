@@ -2,13 +2,12 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView } from '#core/character'
-import type { SkillWindowCatalog } from '#core/catalog'
+import type { SkillWindowCatalog } from '#entities/catalog'
 import { characterDetailFixture } from '#core/testing'
 import { skillWindowHandlers } from '#pages/character/api/character.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { rarityTextClasses } from '#components/game-colors'
+import { type CharacterDetailView, rarityTextClasses } from '#entities/character'
 import { BuffTab } from './BuffTab'
 
 let container: HTMLDivElement

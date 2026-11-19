@@ -6,7 +6,7 @@ import {
   type SkillWindowJob,
   skillWindowIndexSchema,
   skillWindowJobSchema
-} from '#core/catalog'
+} from '#entities/catalog'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { absoluteUrl, fetchStaticJson, fetchUploadedStaticJson } from '#shared/lib/static-json'
 
