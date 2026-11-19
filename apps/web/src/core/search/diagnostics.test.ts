@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { reportSearchOutcome } from './diagnostics'
-import type { SearchErrorCode } from '#core/api/http'
+import type { SearchErrorCode } from '#shared/api/api-error'
 import type { DiagnosticCode } from '#shared/lib/diagnostics/diagnostics'
 
 const report = vi.fn()
