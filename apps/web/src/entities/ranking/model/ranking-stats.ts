@@ -25,7 +25,6 @@ export const storedCharacterSchema = characterIdentitySchema.extend({
 export const fameRankingSchema = z.object({
   characters: z.array(
     storedCharacterSchema.extend({
-      rank: z.number().int().positive(),
       equipmentSet: z.object({ id: z.string(), name: z.string() }).nullable(),
       oathSet: z
         .object({ id: z.number().int(), name: z.string(), option: z.string().nullable() })
@@ -70,7 +69,7 @@ export type FameRankingFilter = Readonly<{
   oathSetOption?: string
   // 무기와 유일 장비 itemId다. 모두 낀 캐릭터만 거른다.
   itemIds?: readonly string[]
-  // 둘 다 포함하는 명성 범위다. fameTo가 있으면 위쪽 캐릭터를 건너뛰어 순위가 전체 순위와 달라진다.
+  // 둘 다 포함하는 명성 범위다.
   fameFrom?: number
   fameTo?: number
 }>

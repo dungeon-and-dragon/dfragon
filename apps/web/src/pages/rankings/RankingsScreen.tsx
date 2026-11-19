@@ -99,7 +99,7 @@ export function RankingsScreen({
 
   return (
     <div className="flex flex-col">
-      <TitleBox title="명성 랭킹" />
+      <TitleBox title="검색" />
       <RankingFilterBox filter={filter} onChange={onFilterChange} rows={rows} />
       <FameRankingList filter={filter} setLabel={setLabel} catalog={catalog} />
     </div>
