@@ -7,6 +7,7 @@ import {
   readGuild,
   recordCharacter,
   recordCharacterBasic,
+  recordCharacterScore,
   recordItemDictionary,
   replaceEnhancementBackfillRange,
   replaceTimelineRange
@@ -23,7 +24,10 @@ import { DatabaseSeasonBackfillRepository } from './dist/infrastructure/database
 import { readAdventureWeeklyClears } from './dist/infrastructure/database/adventure-weekly.js'
 import { CharacterSearchService } from './dist/application/character-search/service.js'
 import { DatabaseCharacterSearchRepository } from './dist/infrastructure/database/character-search.js'
-import { parseCharacterCandidatesQuery } from './dist/domain/character-search/query.js'
+import {
+  parseCharacterCandidatesQuery,
+  parseCharacterSearchQuery
+} from './dist/domain/character-search/query.js'
 
 // 합성 캐릭터다. 여러 서버에 걸친 모험단과 길드, 명성이 없는 캐릭터와 기본 정보가 없는 캐릭터를 둔다.
 const job = {
@@ -85,7 +89,8 @@ try {
     {
       ...basic('siroco', 'adventure-high', adventureName, 70000, guildId, '합성길드'),
       fetchedAt: undefined,
-      dealerSkillLearned: null
+      dealerSkillLearned: null,
+      score: null
     }
   )
   assert.deepEqual(adventure.at(-1), {
@@ -102,7 +107,8 @@ try {
     guildId: null,
     guildName: null,
     fetchedAt: null,
-    dealerSkillLearned: null
+    dealerSkillLearned: null,
+    score: null
   })
 
   const guild = await readGuild(client, guildId)
@@ -613,6 +619,39 @@ try {
     source: 'cache',
     names: [adventureName, '합성새길드원모험단', null]
   })
+
+  // 일반 검색은 점수가 저장된 캐릭터에만 점수를 붙인다.
+  await recordCharacterScore(client, {
+    serverId: 'siroco',
+    characterId: 'adventure-high',
+    kind: 'equipment',
+    score: 1234567,
+    calculatedAt: new Date(),
+    engine: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+  })
+  assert.deepEqual(
+    (await readAdventureCharacters(client, adventureName)).map(({ characterId, score }) => [
+      characterId,
+      score
+    ]),
+    [
+      ['adventure-high', { kind: 'equipment', value: 1234567 }],
+      ['adventure-low', null],
+      ['adventure-no-fame', null],
+      ['adventure-no-basic', null]
+    ]
+  )
+  const searched = await candidates.search(
+    parseCharacterSearchQuery(`/characters?characterName=${encodeURIComponent('합성후보')}`)
+  )
+  assert.deepEqual(
+    searched.rows.map(({ serverId, characterId, score }) => [serverId, characterId, score]),
+    [
+      ['siroco', 'adventure-high', { calculator: 'equipment', value: 1234567 }],
+      ['hilder', 'guild-no-fame', null],
+      ['cain', 'candidate-not-stored', null]
+    ]
+  )
   await candidates.close()
 } finally {
   await client.$disconnect()

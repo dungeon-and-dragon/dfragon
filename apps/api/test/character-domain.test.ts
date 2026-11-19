@@ -40,7 +40,8 @@ function stored(
     guildId: null,
     guildName: null,
     fetchedAt: null,
-    dealerSkillLearned
+    dealerSkillLearned,
+    score: null
   }
 }
 

@@ -14,7 +14,10 @@ import {
   emptyCharacterSearchRepository
 } from '../src/application/character-search/service.js'
 import { NeopleSearchFailure } from '@dfragon/server-core/domain/character-search/index.js'
-import { parseCharacterCandidatesQuery } from '../src/domain/character-search/query.js'
+import {
+  parseCharacterCandidatesQuery,
+  parseCharacterSearchQuery
+} from '../src/domain/character-search/query.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 import type {
   CharacterSearchRow,
@@ -444,7 +447,8 @@ test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보�
         fame: null,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/exact?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/anton/characters/exact?zoom=1',
+        score: null
       },
       {
         characterId: 'low',
@@ -454,7 +458,8 @@ test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보�
         fame: 100,
         jobName: null,
         jobGrowName: null,
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/low?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/low?zoom=1',
+        score: null
       },
       {
         characterId: 'high',
@@ -464,7 +469,8 @@ test('일반 검색은 이름이 검색어로 시작하는 캐릭터만 후보�
         fame: 500,
         jobName: '귀검사(남)',
         jobGrowName: '眞 웨펀마스터',
-        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/high?zoom=1'
+        imageUrl: 'https://img-api.neople.co.kr/df/servers/bakal/characters/high?zoom=1',
+        score: null
       }
     ]
   })
@@ -690,6 +696,7 @@ test('후보마다 DB에 저장된 모험단명을 한 번에 읽어 붙이고 �
   const reads: string[][] = []
   const service = new CharacterSearchService(
     {
+      ...emptyCharacterSearchRepository,
       readAdventureNames: async (characters) => {
         reads.push(characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`))
 
@@ -732,6 +739,7 @@ test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로
   let searches = 0
   const service = new CharacterSearchService(
     {
+      ...emptyCharacterSearchRepository,
       readAdventureNames: async () => [{ serverId: 'cain', characterId: 'renamed', adventureName }]
     },
     async (input) => {
@@ -757,6 +765,7 @@ test('캐시한 후보에도 모험단명은 응답할 때마다 DB에서 새로
 test('후보가 없으면 모험단명을 읽지 않는다', async () => {
   const service = new CharacterSearchService(
     {
+      ...emptyCharacterSearchRepository,
       readAdventureNames: async () => {
         throw new Error('빈 후보는 DB를 읽지 않아야 한다')
       }
@@ -766,4 +775,63 @@ test('후보가 없으면 모험단명을 읽지 않는다', async () => {
   )
 
   assert.deepEqual((await service.candidates(candidateInput(characterName))).result, { rows: [] })
+})
+
+test('일반 검색은 결과 캐릭터의 저장된 점수를 한 번에 읽어 종류와 함께 붙이고 저장되지 않은 캐릭터는 null이다', async () => {
+  const reads: string[][] = []
+  const service = new CharacterSearchService(
+    {
+      ...emptyCharacterSearchRepository,
+      readCharacterScores: async (characters) => {
+        reads.push(characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`))
+
+        return [
+          { serverId: 'cain', characterId: 'dealer', kind: 'equipment', value: 1234567 },
+          { serverId: 'cain', characterId: 'buffer', kind: 'buff', value: 4321000 }
+        ]
+      }
+    },
+    async () => ({
+      rows: [
+        candidateRow('가딜러', 'dealer'),
+        candidateRow('나버퍼', 'buffer'),
+        { ...candidateRow('다딜러', 'dealer'), serverId: 'siroco', serverName: '시로코' }
+      ]
+    }),
+    neopleCharacterImageUrl
+  )
+
+  const { rows } = await service.search(parseCharacterSearchQuery('/characters?characterName=ab'))
+
+  assert.deepEqual(
+    rows.map(({ serverId, characterId, score }) => ({ serverId, characterId, score })),
+    [
+      {
+        serverId: 'cain',
+        characterId: 'dealer',
+        score: { calculator: 'equipment', value: 1234567 }
+      },
+      { serverId: 'cain', characterId: 'buffer', score: { calculator: 'buff', value: 4321000 } },
+      { serverId: 'siroco', characterId: 'dealer', score: null }
+    ]
+  )
+  assert.deepEqual(reads, [['cain/dealer', 'cain/buffer', 'siroco/dealer']])
+})
+
+test('일반 검색 결과가 없으면 점수를 읽지 않는다', async () => {
+  const service = new CharacterSearchService(
+    {
+      ...emptyCharacterSearchRepository,
+      readCharacterScores: async () => {
+        throw new Error('빈 결과는 DB를 읽지 않아야 한다')
+      }
+    },
+    async () => ({ rows: [] }),
+    neopleCharacterImageUrl
+  )
+
+  assert.deepEqual(
+    await service.search(parseCharacterSearchQuery('/characters?characterName=ab')),
+    { rows: [] }
+  )
 })

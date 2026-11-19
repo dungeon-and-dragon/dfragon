@@ -5,6 +5,7 @@ import {
   readDatabaseConfiguration,
   readFameRanking,
   recordCharacterBasic,
+  recordCharacterScore,
   recordCharacterSets
 } from '@dfragon/database'
 import {
@@ -53,6 +54,24 @@ try {
   ]) {
     await recordCharacterBasic(client, character)
   }
+  const scoreEngine = {
+    package: 'dnfscore-native 0.4.2',
+    rulesRev: 'rev14',
+    bundleId: 'phase32-rev14d'
+  }
+  for (const [characterId, kind, score] of [
+    ['rank-a1', 'equipment', 1234567],
+    ['rank-b2', 'buff', 4321000]
+  ]) {
+    await recordCharacterScore(client, {
+      serverId: 'cain',
+      characterId,
+      kind,
+      score,
+      calculatedAt: new Date(),
+      engine: scoreEngine
+    })
+  }
   for (let index = 1; index <= 101; index++) {
     await recordCharacterBasic(
       client,
@@ -70,9 +89,19 @@ try {
       ...basic('cain', 'rank-a1', 'grow-a', 80000),
       fetchedAt: undefined,
       dealerSkillLearned: null,
+      score: { kind: 'equipment', value: 1234567 },
       equipmentSet: null,
       oathSet: null
     }
+  )
+  assert.deepEqual(
+    ranking.map(({ characterId, score }) => [characterId, score]),
+    [
+      ['rank-a1', { kind: 'equipment', value: 1234567 }],
+      ['rank-a2', null],
+      ['rank-b1', null],
+      ['rank-b2', { kind: 'buff', value: 4321000 }]
+    ]
   )
   assert.deepEqual(ids(await readFameRanking(client, { jobId, jobGrowId: 'grow-b' }, 100)), [
     'cain/rank-b1',
@@ -150,10 +179,10 @@ try {
   }
   const rankingAnswer = await get(`/rankings/fame?jobId=${jobId}&jobGrowId=grow-b`)
   assert.deepEqual(
-    rankingAnswer.characters.map(({ rank, characterId }) => [rank, characterId]),
+    rankingAnswer.characters.map(({ rank, characterId, score }) => [rank, characterId, score]),
     [
-      [1, 'rank-b1'],
-      [2, 'rank-b2']
+      [1, 'rank-b1', null],
+      [2, 'rank-b2', { calculator: 'buff', value: 4321000 }]
     ]
   )
   assert.deepEqual(await get('/stats'), {

@@ -28,7 +28,8 @@ test('공개 검색은 loopback 공급자의 후보를 정제한다', async () =
           fame: 0,
           jobName: null,
           jobGrowName: null,
-          imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/candidate?zoom=1'
+          imageUrl: 'https://img-api.neople.co.kr/df/servers/cain/characters/candidate?zoom=1',
+          score: null
         }
       ]
     })
