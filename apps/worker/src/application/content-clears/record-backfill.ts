@@ -1,10 +1,9 @@
 import type { ClearRecordInput } from '@dfragon/database'
-import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   CLEAR_CONTENTS,
   toCollectionMinFame
 } from '@dfragon/server-core/domain/content-clears/index.js'
-import { CLEAR_RECORD_BACKFILL_START, toClearRecordInput } from '#domain/content-clears/index.js'
+import { toClearRecordInput, toClearRecordRanges } from '#domain/content-clears/index.js'
 import type { ClearCollectionPorts } from './ports.js'
 import { collectPopulation, readOrStartProgress } from './population-collection.js'
 import type { ClearRecordBackfillRepository } from './repository.js'
@@ -16,6 +15,9 @@ export type ClearRecordBackfillSummary = {
   records: number
   skipped: number
 }
+
+const characterKey = ({ serverId, characterId }: { serverId: string; characterId: string }) =>
+  JSON.stringify([serverId, characterId])
 
 export class ClearRecordBackfillService {
   constructor(
@@ -33,9 +35,14 @@ export class ClearRecordBackfillService {
     const { createFetchTimeline, readConcurrency, now, pause, report } = this.ports
     const { startedAt, done: resumedAt } = await readOrStartProgress(this.repository, now)
     const startedAtIso = startedAt.toISOString()
-    const ranges = splitTimelineRanges(CLEAR_RECORD_BACKFILL_START, startedAt)
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
     const population = await this.repository.readPopulation(collectionMinFame)
+    const fetchedUntil = new Map(
+      (await this.repository.readCursors()).map((cursor) => [
+        characterKey(cursor),
+        cursor.fetchedUntil
+      ])
+    )
     const counts = { requests: 0, records: 0 }
     const fetchTimeline = createFetchTimeline(() => {
       counts.requests++
@@ -46,13 +53,17 @@ export class ClearRecordBackfillService {
       done: resumedAt,
       minFame: collectionMinFame,
       characters: population.length,
-      ranges: ranges.length
+      cursors: fetchedUntil.size
     })
 
     const skipped = await collectPopulation({
       population,
       resumedAt,
-      ranges,
+      rangesOf: (character) => {
+        const characterFetchedUntil = fetchedUntil.get(characterKey(character))
+
+        return toClearRecordRanges(characterFetchedUntil, startedAt)
+      },
       fetchTimeline,
       readConcurrency,
       pause,
@@ -78,6 +89,11 @@ export class ClearRecordBackfillService {
           await this.repository.recordRecords(records)
         }
 
+        // 기록을 저장한 뒤에 받은 시각을 옮겨, 저장 도중 멈추면 다음 실행이 같은 구간을 다시 받는다.
+        await this.repository.recordCursors(
+          collected.map(({ character }) => character),
+          startedAt
+        )
         counts.records += records.length
       },
       recordProgress: (done) => this.repository.recordProgress({ startedAt, done })

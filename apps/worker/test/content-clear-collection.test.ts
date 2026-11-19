@@ -4,6 +4,7 @@ import { setImmediate } from 'node:timers/promises'
 import type {
   ClearPopulationCharacter,
   ClearRecordBackfillProgress,
+  ClearRecordCursor,
   ClearRecordInput,
   CollectedCharacter,
   ContentClearCollectionProgress,
@@ -406,6 +407,7 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
     requests
       .filter((request) => request.characterId === characterId)
       .map(({ startDate, endDate }) => `${startDate}/${endDate}`)
+
   assert.deepEqual(rangesOf('a'), ranges)
   assert.deepEqual(rangesOf('b'), ranges)
   assert.deepEqual(rangesOf('c'), [...ranges, ...ranges])
@@ -1293,8 +1295,14 @@ test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온
 })
 
 // 지난 기록 받기의 진행 위치만 따로 두고, 모집단과 기록은 클리어 수집 fake의 상태를 함께 쓴다.
-function memoryBackfillStore(memory: ReturnType<typeof memoryClearStore>) {
+function memoryBackfillStore(
+  memory: ReturnType<typeof memoryClearStore>,
+  initialCursors: readonly ClearRecordCursor[] = []
+) {
   const progress = { current: undefined as ClearRecordBackfillProgress | undefined }
+  const cursorKey = ({ serverId, characterId }: Omit<ClearRecordCursor, 'fetchedUntil'>) =>
+    `${serverId}/${characterId}`
+  const cursors = new Map(initialCursors.map((cursor) => [cursorKey(cursor), cursor]))
   const store: ClearRecordBackfillRepository = {
     readPopulation: memory.store.readPopulation,
     readProgress: async () => {
@@ -1311,12 +1319,18 @@ function memoryBackfillStore(memory: ReturnType<typeof memoryClearStore>) {
       progress.current = { ...next }
     },
     recordRecords: memory.store.recordRecords,
+    readCursors: async () => [...cursors.values()],
+    recordCursors: async (characters, fetchedUntil) => {
+      for (const { serverId, characterId } of characters) {
+        cursors.set(cursorKey({ serverId, characterId }), { serverId, characterId, fetchedUntil })
+      }
+    },
     finishProgress: async () => {
       progress.current = undefined
     }
   }
 
-  return { progress, store }
+  return { progress, cursors, store }
 }
 
 function backfill(
@@ -1475,5 +1489,48 @@ test('지난 기록 받기도 Neople 한도 초과면 쉬었다가 같은 캐릭
     ['legion/a', 'raid/b']
   )
   assert.equal(summary.records, 2)
+  assert.equal(summary.skipped, 1)
+})
+
+test('지난 기록 받기는 전에 받은 캐릭터를 받은 시각 30분 전부터만 받고, 받지 못한 캐릭터의 받은 시각은 옮기지 않는다', async () => {
+  const memory = memoryClearStore([character('a'), character('b'), character('missing')])
+  const { cursors, store } = memoryBackfillStore(memory, [
+    { serverId: 'cain', characterId: 'a', fetchedUntil: at('2026-11-03T12:00') },
+    { serverId: 'cain', characterId: 'missing', fetchedUntil: at('2026-11-03T12:00') }
+  ])
+  const { neople, requests } = fakeNeople(
+    {
+      a: [nabelHard('2026-11-03 11:40'), michaelaHard('2026-11-07 21:15')],
+      b: [legionRow('2025-03-01 20:00')]
+    },
+    (request) =>
+      request.characterId === 'missing'
+        ? new NeopleRequestFailure('api', { characterNotFound: true })
+        : undefined
+  )
+
+  const summary = await backfill(store, neople, NOW)
+
+  const rangesOf = (characterId: string) =>
+    requests
+      .filter((request) => request.characterId === characterId)
+      .map(({ startDate, endDate }) => `${startDate}/${endDate}`)
+  assert.deepEqual(rangesOf('a'), ['20261103T1130/20261110T1200'])
+  assert.deepEqual(rangesOf('b'), [...RECORD_BACKFILL_RANGES, '20261022T0600/20261110T1200'])
+  assert.deepEqual(
+    storedRecords(memory.state).map((record) => record.split('/').slice(0, 3).join('/')),
+    ['legion/b/베누스', 'raid/a/만들어진 신 나벨', 'raid/a/무너진 성자 미카엘라']
+  )
+  assert.deepEqual(
+    [...cursors.values()]
+      .map(({ characterId, fetchedUntil }) => [characterId, fetchedUntil])
+      .toSorted(([left], [right]) => String(left).localeCompare(String(right))),
+    [
+      ['a', NOW],
+      ['b', NOW],
+      ['missing', at('2026-11-03T12:00')]
+    ]
+  )
+  assert.equal(summary.requests, 10)
   assert.equal(summary.skipped, 1)
 })

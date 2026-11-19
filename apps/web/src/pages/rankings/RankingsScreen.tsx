@@ -1,6 +1,12 @@
 import type { OathCatalog } from '#core/catalog'
 import { useEffect } from 'react'
-import type { FameRankingFilter, FameRankingSetFilter, ItemStats, SetStats } from '#core/ranking'
+import type {
+  FameRankingFameRange,
+  FameRankingFilter,
+  FameRankingSetFilter,
+  ItemStats,
+  SetStats
+} from '#core/ranking'
 import { TitleBox } from '#shared/ui/TitleBox'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { useItemStats } from '#hooks/useItemStats'
@@ -9,6 +15,7 @@ import { useSetStats } from '#hooks/useSetStats'
 import { FameRankingList } from './FameRankingList'
 import { type FilterRow, RankingFilterBox } from './RankingFilterBox'
 import { UniqueItemChips, WeaponSelect } from './RankingItemFilter'
+import { RankingFameFilter } from './RankingFameFilter'
 import { RankingSetFilter } from './RankingSetFilter'
 import { itemChoicesOf, itemIdsInStats } from './ranking-items'
 import { setChoicesOf, setFilterLabel } from './ranking-sets'
@@ -31,7 +38,7 @@ export function RankingsScreen({
   filter: FameRankingFilter
   onFilterChange: (filter: FameRankingFilter) => void
 }): React.JSX.Element {
-  const { jobId, jobGrowId, role, itemIds = [] } = filter
+  const { jobId, jobGrowId, role, itemIds = [], fameFrom, fameTo } = filter
   const stats: SetStats | null = loadedValue(useSetStats(ALL_JOBS))
   const catalog: OathCatalog | null = loadedValue(useOathCatalog())
   const itemStats: ItemStats | null = loadedValue(useItemStats({ jobId, jobGrowId, role }))
@@ -49,7 +56,11 @@ export function RankingsScreen({
   }, [dropsItems, filter, keptItemIds, onFilterChange])
 
   function changeSets(sets: FameRankingSetFilter): void {
-    onFilterChange({ jobId, jobGrowId, role, ...sets, itemIds: filter.itemIds })
+    onFilterChange({ jobId, jobGrowId, role, ...sets, itemIds: filter.itemIds, fameFrom, fameTo })
+  }
+
+  function changeFame(range: FameRankingFameRange): void {
+    onFilterChange({ ...filter, fameFrom: range.fameFrom, fameTo: range.fameTo })
   }
 
   function changeItems(next: readonly string[]): void {
@@ -68,6 +79,16 @@ export function RankingsScreen({
     {
       label: '유일 장비',
       content: <UniqueItemChips choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
+    },
+    {
+      label: '명성',
+      content: (
+        <RankingFameFilter
+          key={`${fameFrom}/${fameTo}`}
+          range={{ fameFrom, fameTo }}
+          onChange={changeFame}
+        />
+      )
     }
   ]
 

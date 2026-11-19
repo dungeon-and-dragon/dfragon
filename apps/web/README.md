@@ -75,7 +75,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/entities/ranking/api/`: 명성 랭킹 요청과 query hook, 테스트와 story가 쓰는 fixture(`*.fixture.ts`)와 MSW handler(`*.handlers.ts`)를 둡니다. fixture와 handler는 테스트와 story에서만 import합니다.
 - `src/shared/api/`: API 주소(같은 origin의 `/api`)와 공용 ky instance를 둡니다.
 - `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
-- `src/shared/lib/`: 조회 결과, 무한 스크롤, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
+- `src/shared/lib/`: 조회 결과, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
 - `src/shared/lib/animations/`: GSAP 설정과 공용 전환 animation hook을 둡니다.
 - `src/shared/config/`: 서버 이름, 서버 ID 타입과 서버 선택지 상수를 둡니다.
 - `src/shared/assets/`: 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.

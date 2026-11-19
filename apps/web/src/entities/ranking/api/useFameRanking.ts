@@ -47,13 +47,18 @@ async function requestFameRanking(
 ): Promise<FameRanking> {
   if (
     (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
-    (filter.oathSetOption !== undefined && filter.oathSetId === undefined)
+    (filter.oathSetOption !== undefined && filter.oathSetId === undefined) ||
+    (filter.fameFrom !== undefined &&
+      filter.fameTo !== undefined &&
+      filter.fameFrom > filter.fameTo)
   ) {
     throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
   }
 
   const oathSetId = filter.oathSetId !== undefined ? String(filter.oathSetId) : undefined
   const itemIds = itemIdsParam(filter.itemIds)
+  const fameFrom = filter.fameFrom !== undefined ? String(filter.fameFrom) : undefined
+  const fameTo = filter.fameTo !== undefined ? String(filter.fameTo) : undefined
 
   return requestJson(FAME_RANKING_PATH, fameRankingSchema, {
     searchParams: {
@@ -64,6 +69,8 @@ async function requestFameRanking(
       ...(oathSetId !== undefined && { oathSetId }),
       ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption }),
       ...(itemIds !== undefined && { itemIds }),
+      ...(fameFrom !== undefined && { fameFrom }),
+      ...(fameTo !== undefined && { fameTo }),
       ...(cursor !== undefined && { cursor })
     }
   })
@@ -95,7 +102,9 @@ export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRank
       filter.equipmentSetId ?? null,
       filter.oathSetId ?? null,
       filter.oathSetOption ?? null,
-      filter.itemIds?.join(',') ?? null
+      filter.itemIds?.join(',') ?? null,
+      filter.fameFrom ?? null,
+      filter.fameTo ?? null
     ],
     queryFn: ({ pageParam }) => requestFameRanking(filter, pageParam),
     initialPageParam: undefined as string | undefined,

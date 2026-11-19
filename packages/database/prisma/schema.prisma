@@ -315,6 +315,15 @@ model ClearRecordBackfill {
   @@map("clear_record_backfills")
 }
 
+model ClearRecordCursor {
+  serverId     String   @map("server_id")
+  characterId  String   @map("character_id")
+  fetchedUntil DateTime @map("fetched_until") @db.Timestamptz(3)
+
+  @@id([serverId, characterId])
+  @@map("clear_record_cursors")
+}
+
 model Job {
   name          String    @id
   displayName   String    @map("display_name")

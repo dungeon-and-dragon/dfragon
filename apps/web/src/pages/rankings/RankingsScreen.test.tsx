@@ -26,24 +26,11 @@ import { RANKING_JOBS } from './ranking-jobs'
 
 let container: HTMLDivElement
 let root: Root
-let observed: { callback: IntersectionObserverCallback; target: Element }[]
 let requests: URLSearchParams[]
 
-class FakeIntersectionObserver {
-  constructor(private readonly callback: IntersectionObserverCallback) {}
-  observe(target: Element): void {
-    observed.push({ callback: this.callback, target })
-  }
-  disconnect(): void {
-    observed = observed.filter((entry) => entry.callback !== this.callback)
-  }
-}
-
 beforeEach(() => {
-  observed = []
   requests = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
-  vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -134,32 +121,31 @@ function bodyRows(): HTMLTableRowElement[] {
   return [...container.querySelectorAll<HTMLTableRowElement>('tbody tr:not([aria-hidden])')]
 }
 
-function reachEnd(): Promise<void> {
-  return act(async () => {
-    for (const { callback, target } of observed) {
-      callback([{ isIntersecting: true, target } as IntersectionObserverEntry], {} as never)
-    }
-  })
+function findButton(label: string): HTMLButtonElement | undefined {
+  return [...container.querySelectorAll<HTMLButtonElement>('button')].find(
+    (button) => button.textContent === label
+  )
 }
 
 function chip(label: string): HTMLButtonElement {
-  return [...container.querySelectorAll<HTMLButtonElement>('button')].find(
-    (button) => button.textContent === label
-  )!
+  return findButton(label)!
 }
 
-it('받은 100명 가운데 처음 20명을 그리고 끝에 닿을 때마다 20명씩 더 그린다', async () => {
+function showMore(): Promise<void> {
+  return act(async () => chip('불러오기').click())
+}
+
+it('받은 100명 가운데 처음 20명을 그리고 불러오기를 누를 때마다 20명씩 더 그린다', async () => {
   await render(async () => rankingOf(100))
 
   expect(bodyRows()).toHaveLength(20)
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1)
-  await reachEnd()
+  await showMore()
   expect(bodyRows()).toHaveLength(40)
-  await reachEnd()
-  await reachEnd()
-  await reachEnd()
+  await showMore()
+  await showMore()
+  await showMore()
   expect(bodyRows()).toHaveLength(100)
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  expect(findButton('불러오기')).toBeUndefined()
 })
 
 it('열은 순위, 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 없는 행은 세트를 -로 그린다', async () => {
@@ -371,20 +357,52 @@ it('받은 행을 다 그리면 nextCursor로 다음 page를 받아 순위를 �
     return fameRankingFixture.lastPage
   })
 
-  for (let step = 0; step < 5; step += 1) {
-    await reachEnd()
+  for (let step = 0; step < 4; step += 1) {
+    await showMore()
   }
-  await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1))
+  expect(requests).toHaveLength(1)
+  await showMore()
+  await vi.waitFor(() => expect(rankTexts()).toHaveLength(120))
   expect(queries()).toEqual([{}, { cursor: FAME_RANKING_NEXT_CURSOR }])
-  await reachEnd()
-  await reachEnd()
+  await showMore()
 
   expect(rankTexts()).toHaveLength(130)
   expect(rankTexts().slice(99, 102)).toEqual(['100', '101', '102'])
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
-  await reachEnd()
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  expect(findButton('불러오기')).toBeUndefined()
   expect(requests).toHaveLength(2)
+})
+
+it('다음 page를 받는 동안 불러오기 대신 빈 줄을 두고, 받으면 빈 줄을 지운다', async () => {
+  let finish: (page: FameRanking) => void = () => {}
+  await render(async (cursor) => {
+    if (cursor === null) {
+      return rankingPage(1, 20, 'page-2')
+    }
+
+    return new Promise<FameRanking>((resolve) => {
+      finish = resolve
+    })
+  })
+  await showMore()
+
+  await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1))
+  expect(findButton('불러오기')).toBeUndefined()
+  await act(async () => finish(rankingPage(21, 5, null)))
+  await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0))
+  expect(rankTexts()).toHaveLength(25)
+})
+
+function headings(): string[] {
+  return [...container.querySelectorAll('thead th')].map((th) => th.textContent ?? '')
+}
+
+it('최고 명성을 정하면 순위가 전체 순위와 달라 순위 열을 빼고, 최저 명성만 정하면 순위 열을 둔다', async () => {
+  await render(async () => rankingOf(3), { fameFrom: 136000, fameTo: 138000 })
+
+  expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }])
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
+  await render(async () => rankingOf(3), { fameFrom: 136000 })
+  expect(headings()).toEqual(['#', '캐릭터', '세트', '명성', '모험단'])
 })
 
 it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두고, 다시 시도하면 이어 받는다', async () => {
@@ -402,19 +420,18 @@ it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두
 
     return rankingPage(21, 5, null)
   })
-  await reachEnd()
+  await showMore()
 
   await vi.waitFor(() =>
     expect(container.querySelector('[role="alert"]')?.textContent).toBe(
       '랭킹을 더 받지 못했습니다.'
     )
   )
-  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  expect(findButton('불러오기')).toBeUndefined()
   await act(async () => chip('다시 시도').click())
 
-  await vi.waitFor(() => expect(container.querySelector('[role="alert"]')).toBeNull())
-  await reachEnd()
-  expect(rankTexts()).toHaveLength(25)
+  await vi.waitFor(() => expect(rankTexts()).toHaveLength(25))
+  expect(container.querySelector('[role="alert"]')).toBeNull()
 })
 
 const GOLDEN = '7f788a703a87d783079b41d0fe6448c9'

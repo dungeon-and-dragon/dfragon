@@ -123,13 +123,28 @@ it('itemIds를 쉼표로 이어 보낸다', async () => {
   expect(queries()).toEqual([{ jobId: 'job-1', itemIds: 'weapon-1,ring-1' }])
 })
 
+it('명성 범위를 query로 보내고, 범위 아래쪽만 있어도 보낸다', async () => {
+  respond(fameRankingFixture.lastPage)
+
+  await settle({ jobId: 'job-1', fameFrom: 136000, fameTo: 138000 })
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  await settle({ fameFrom: 0 })
+
+  expect(queries()).toEqual([
+    { jobId: 'job-1', fameFrom: '136000', fameTo: '138000' },
+    { fameFrom: '0' }
+  ])
+})
+
 it.each<[string, FameRankingFilter]>([
   ['직업 없는 전직', { jobGrowId: 'grow-1' }],
   ['서약 세트 없는 선택지', { oathSetOption: '용투 : 용제 강림' }],
   ['빈 itemId', { itemIds: [''] }],
   ['중복 itemId', { itemIds: ['a', 'a'] }],
   ['여섯 개 itemId', { itemIds: ['a', 'b', 'c', 'd', 'e', 'f'] }],
-  ['쉼표가 든 itemId', { itemIds: ['a,b'] }]
+  ['쉼표가 든 itemId', { itemIds: ['a,b'] }],
+  ['거꾸로 된 명성 범위', { fameFrom: 138000, fameTo: 136000 }]
 ])('%s: 요청하지 않고 오류로 끝낸다', async (_name, filter) => {
   respond(fameRankingFixture.lastPage)
 

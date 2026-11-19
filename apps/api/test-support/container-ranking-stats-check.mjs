@@ -78,6 +78,10 @@ try {
     'cain/rank-b1',
     'cain/rank-b2'
   ])
+  assert.deepEqual(
+    ids(await readFameRanking(client, { jobId, fameFrom: 69999, fameTo: 79999 }, 100)),
+    ['siroco/rank-a2', 'cain/rank-b1', 'cain/rank-b2']
+  )
   const limited = await readFameRanking(client, { jobId: limitJobId }, 100)
   assert.equal(limited.length, 100)
   assert.deepEqual([limited[0].fame, limited.at(-1).fame], [200101, 200002])

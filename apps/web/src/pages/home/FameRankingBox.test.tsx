@@ -18,15 +18,9 @@ let container: HTMLDivElement
 let root: Root
 let requests: URLSearchParams[]
 
-class FakeIntersectionObserver {
-  observe(): void {}
-  disconnect(): void {}
-}
-
 beforeEach(() => {
   requests = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
-  vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)

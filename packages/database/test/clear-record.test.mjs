@@ -6,7 +6,9 @@ import {
   createDatabaseClient,
   finishClearRecordBackfill,
   readClearRecordBackfill,
+  readClearRecordCursors,
   recordClearRecordBackfillProgress,
+  recordClearRecordCursors,
   recordClearRecords,
   startClearRecordBackfill
 } from '../dist/index.js'
@@ -254,4 +256,39 @@ test('지난 기록 받기의 진행 위치를 시작하고 옮긴 값대로 읽
   assert.deepEqual(await readClearRecordBackfill(client), { startedAt, done: 3200 })
   await finishClearRecordBackfill(client, startedAt)
   assert.equal(await readClearRecordBackfill(client), undefined)
+})
+
+test('캐릭터별 받은 시각은 처음이면 넣고, 이미 있으면 더 늦은 시각일 때만 바꾼다', {
+  skip: port === undefined
+}, async (t) => {
+  const database = 'clear_record_cursor'
+  const earlier = at('2026-11-12T07:00:00')
+  const later = at('2026-11-19T07:00:00')
+  const a = { serverId: 'cain', characterId: 'cursor-a' }
+  const b = { serverId: 'cain', characterId: 'cursor-b' }
+
+  await recreateDatabase(database)
+
+  const client = connect(database)
+  t.after(() => client.$disconnect())
+  await runMigration(client, '20261119100000_add_clear_record_cursors')
+
+  const storedCursors = async () =>
+    (await readClearRecordCursors(client))
+      .map(({ characterId, fetchedUntil }) => [characterId, fetchedUntil])
+      .toSorted(([left], [right]) => left.localeCompare(right))
+
+  assert.deepEqual(await storedCursors(), [])
+  await recordClearRecordCursors(client, [a], later)
+  await recordClearRecordCursors(client, [a, b], earlier)
+  assert.deepEqual(await storedCursors(), [
+    ['cursor-a', later],
+    ['cursor-b', earlier]
+  ])
+  await recordClearRecordCursors(client, [b], later)
+  await recordClearRecordCursors(client, [], earlier)
+  assert.deepEqual(await storedCursors(), [
+    ['cursor-a', later],
+    ['cursor-b', later]
+  ])
 })
