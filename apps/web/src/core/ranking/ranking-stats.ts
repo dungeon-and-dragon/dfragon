@@ -20,7 +20,16 @@ export const storedCharacterSchema = characterIdentitySchema.extend({
 })
 
 export const fameRankingSchema = z.object({
-  characters: z.array(storedCharacterSchema.extend({ rank: z.number().int().positive() }))
+  characters: z.array(
+    storedCharacterSchema.extend({
+      rank: z.number().int().positive(),
+      equipmentSet: z.object({ id: z.string(), name: z.string() }).nullable(),
+      oathSet: z
+        .object({ id: z.number().int(), name: z.string(), option: z.string().nullable() })
+        .nullable()
+    })
+  ),
+  nextCursor: z.string().min(1).nullable()
 })
 
 export const characterStatsSchema = z.object({
@@ -59,3 +68,8 @@ export type FameRankingFilter = Readonly<{
 }>
 
 export type SetStatsFilter = Pick<FameRankingFilter, 'jobId' | 'jobGrowId' | 'role'>
+
+export type FameRankingSetFilter = Pick<
+  FameRankingFilter,
+  'equipmentSetId' | 'oathSetId' | 'oathSetOption'
+>

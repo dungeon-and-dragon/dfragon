@@ -20,6 +20,11 @@ export type CharacterTableAction = {
 
 export type Affiliation = 'adventure' | 'guild'
 
+export type CharacterTableDetail<Row> = {
+  name: string
+  render: (row: Row) => ReactNode
+}
+
 // 초상화가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다.
 const PORTRAIT_CELL = 'py-0'
 const FAME_CELL = 'table-num font-semibold text-game-fame'
@@ -28,20 +33,25 @@ export const RANK_COLUMN = 'w-[76px]'
 export const FAME_COLUMN = 'w-[96px]'
 // 모험단, 길드 이름도 캐릭터 이름처럼 12바이트 제한이라고 보고 한글 6자가 다 들어가게 잡는다.
 const AFFILIATION_COLUMN = 'w-[128px]'
+const DETAIL_COLUMN = 'w-[160px] max-sm:hidden'
+// 두 줄 값도 행을 48px보다 높이지 않게 초상화 칸처럼 위아래 여백을 두지 않는다.
+const DETAIL_CELL = 'py-0 max-sm:hidden'
 
 const ALL_AFFILIATIONS: readonly Affiliation[] = ['adventure', 'guild']
 const AFFILIATION_HEADINGS: Record<Affiliation, string> = { adventure: '모험단', guild: '길드' }
 
-export function CharacterTable({
+export function CharacterTable<Row extends CharacterTableRow>({
   rows,
   ranked = true,
+  detail,
   action,
   trailing,
   affiliations = ALL_AFFILIATIONS,
   adventureBesideName = false
 }: {
-  rows: readonly CharacterTableRow[]
+  rows: readonly Row[]
   ranked?: boolean
+  detail?: CharacterTableDetail<Row>
   action?: CharacterTableAction
   trailing?: ReactNode
   affiliations?: readonly Affiliation[]
@@ -53,6 +63,7 @@ export function CharacterTable({
         <colgroup>
           {ranked && <col className={RANK_COLUMN} />}
           <col />
+          {detail != null && <col className={DETAIL_COLUMN} />}
           <col className={FAME_COLUMN} />
           {affiliations.map((affiliation) => (
             <col key={affiliation} className={AFFILIATION_COLUMN} />
@@ -67,6 +78,11 @@ export function CharacterTable({
               </th>
             )}
             <th scope="col">캐릭터</th>
+            {detail != null && (
+              <th scope="col" className={DETAIL_CELL}>
+                {detail.name}
+              </th>
+            )}
             <th scope="col" className="table-num">
               명성
             </th>
@@ -94,6 +110,7 @@ export function CharacterTable({
                   adventureName={adventureBesideName ? row.adventureName : null}
                 />
               </td>
+              {detail != null && <td className={DETAIL_CELL}>{detail.render(row)}</td>}
               <td className={FAME_CELL}>
                 {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
               </td>
@@ -153,10 +170,12 @@ function AffiliationLink({
 export function SkeletonRow({
   rowRef,
   ranked = true,
+  detail = false,
   affiliations = ALL_AFFILIATIONS
 }: {
   rowRef?: Ref<HTMLTableRowElement>
   ranked?: boolean
+  detail?: boolean
   affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
@@ -172,6 +191,11 @@ export function SkeletonRow({
           <span className="skeleton-text w-[88px]" />
         </div>
       </td>
+      {detail && (
+        <td className={DETAIL_CELL}>
+          <span className="skeleton-text w-[56px]" />
+        </td>
+      )}
       <td>
         <span className="skeleton-text ml-auto w-[56px]" />
       </td>

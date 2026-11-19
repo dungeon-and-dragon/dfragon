@@ -1,5 +1,5 @@
 import { ChipGroup, type ChipGroupItem } from '@dfragon/ui'
-import { useId } from 'react'
+import { type ReactNode, useId } from 'react'
 import type { FameRankingFilter } from '#core/ranking'
 import {
   growFilter,
@@ -29,15 +29,28 @@ function growItems(job: RankingJob | undefined): ChipGroupItem<string>[] {
   return [{ value: ALL, label: '전직 전체' }, ...grows]
 }
 
+function setFilterOf({
+  equipmentSetId,
+  oathSetId,
+  oathSetOption
+}: FameRankingFilter): FameRankingFilter {
+  return { equipmentSetId, oathSetId, oathSetOption }
+}
+
+// 직업, 전직을 바꿔도 세트 필터는 그대로 둔다.
 export function RankingFilterBox({
   filter,
-  onChange
+  onChange,
+  setSelects
 }: {
   filter: FameRankingFilter
   onChange: (filter: FameRankingFilter) => void
+  setSelects?: ReactNode
 }): React.JSX.Element {
+  const sets = setFilterOf(filter)
   const jobLabelId = useId()
   const growLabelId = useId()
+  const setLabelId = useId()
   const job = RANKING_JOBS.find(({ jobId }) => jobId === filter.jobId)
   const growValue =
     filter.jobGrowId !== undefined
@@ -45,7 +58,9 @@ export function RankingFilterBox({
       : ALL
 
   function selectJob(jobId: string): void {
-    onChange(jobId === ALL ? {} : { jobId })
+    const jobFilter = jobId === ALL ? {} : { jobId }
+
+    onChange({ ...sets, ...jobFilter })
   }
 
   function selectGrow(key: string): void {
@@ -53,7 +68,7 @@ export function RankingFilterBox({
     const next =
       job !== undefined && chosen !== undefined ? growFilter(job, chosen) : { jobId: filter.jobId }
 
-    onChange(next)
+    onChange({ ...sets, ...next })
   }
 
   return (
@@ -80,6 +95,14 @@ export function RankingFilterBox({
           onValueChange={selectGrow}
         />
       </div>
+      {setSelects != null && (
+        <div role="group" aria-labelledby={setLabelId} className={FILTER_ROW}>
+          <h2 id={setLabelId} className={FILTER_LABEL}>
+            세트
+          </h2>
+          {setSelects}
+        </div>
+      )}
     </div>
   )
 }

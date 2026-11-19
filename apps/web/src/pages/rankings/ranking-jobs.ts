@@ -201,17 +201,23 @@ function isGrowSelected(grow: RankingGrow, filter: FameRankingFilter): boolean {
 }
 
 // 딜러, 버퍼 칩은 같은 전직 ID라 목록 이름에 전직과 역할까지 써서 구분한다. 다른 전직 칩은 직업 이름만 쓴다.
-export function rankingName(filter: FameRankingFilter): string {
+function jobNameOf(filter: FameRankingFilter): string | null {
   const job = RANKING_JOBS.find((candidate) => candidate.jobId === filter.jobId)
   if (job === undefined) {
-    return '명성 랭킹'
+    return null
   }
 
   const roleGrow =
     filter.role !== undefined ? job.grows.find((grow) => isGrowSelected(grow, filter)) : undefined
   if (roleGrow === undefined) {
-    return `${job.name} 명성 랭킹`
+    return job.name
   }
 
-  return `${job.name} ${growLabel(roleGrow)} 명성 랭킹`
+  return `${job.name} ${growLabel(roleGrow)}`
+}
+
+export function rankingName(filter: FameRankingFilter, setLabel: string | null = null): string {
+  const parts = [jobNameOf(filter), setLabel, '명성 랭킹'].filter((part) => part !== null)
+
+  return parts.join(' ')
 }

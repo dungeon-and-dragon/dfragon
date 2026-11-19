@@ -24,9 +24,12 @@ const ranking: FameRanking = {
       fame: 80123,
       guildId: null,
       guildName: null,
-      role: null
+      role: null,
+      equipmentSet: { id: 'set-1', name: '소울 페어리 세트' },
+      oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' }
     }
-  ]
+  ],
+  nextCursor: 'cursor-1'
 }
 
 const stats: CharacterStats = {
@@ -63,10 +66,12 @@ it('랭킹 응답을 그대로 읽고 정한 직업, 전직, 역할만 query로 
 })
 
 it('빈 랭킹도 읽는다', async () => {
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond({ characters: [] }) })
-    .rankings.fame
+  const read = createDfragonClient({
+    apiOrigin: API_ORIGIN,
+    fetch: respond({ characters: [], nextCursor: null })
+  }).rankings.fame
 
-  await expect(read({})).resolves.toEqual({ characters: [] })
+  await expect(read({})).resolves.toEqual({ characters: [], nextCursor: null })
 })
 
 it('직업 없이 전직만 보내면 요청하지 않고 거부한다', async () => {
@@ -248,6 +253,31 @@ it('목록의 count 합이 표본 수와 다르거나 선택지 합이 세트 �
 
   for (const body of broken) {
     const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).setStats
+    await expect(read({})).rejects.toThrow()
+  }
+})
+
+it('랭킹 다음 page는 같은 필터에 cursor를 붙여 받고 행의 세트와 nextCursor를 읽는다', async () => {
+  const fetch = respond(ranking)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
+
+  await expect(read({ oathSetId: 16204 }, 'cursor-1')).resolves.toEqual(ranking)
+  const url = new URL(new Request(fetch.mock.calls[0][0]).url)
+  expect(Object.fromEntries(url.searchParams)).toEqual({ oathSetId: '16204', cursor: 'cursor-1' })
+})
+
+it('nextCursor가 없거나 세트 모양이 다른 랭킹 응답은 거부한다', async () => {
+  const [character] = ranking.characters
+  const broken = [
+    { characters: ranking.characters },
+    {
+      ...ranking,
+      characters: [{ ...character, oathSet: { id: '16204', name: '서약', option: null } }]
+    }
+  ]
+
+  for (const body of broken) {
+    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).rankings.fame
     await expect(read({})).rejects.toThrow()
   }
 })

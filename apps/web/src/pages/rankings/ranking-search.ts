@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { maleCrusaderRoleSchema } from '#core/character'
-import type { FameRankingFilter, SetStatsFilter } from '#core/ranking'
+import type { FameRankingFilter, FameRankingSetFilter, SetStatsFilter } from '#core/ranking'
 import { growFilter, RANKING_JOBS } from './ranking-jobs'
 
 const text = z.string().min(1).optional().catch(undefined)
@@ -13,8 +13,6 @@ const searchSchema = z.object({
   oathSetId: z.coerce.number().int().positive().optional().catch(undefined),
   oathSetOption: text
 })
-
-type SetFilter = Pick<FameRankingFilter, 'equipmentSetId' | 'oathSetId' | 'oathSetOption'>
 
 function jobFilterOf({ jobId, jobGrowId, role }: z.infer<typeof searchSchema>): SetStatsFilter {
   const job = RANKING_JOBS.find((candidate) => candidate.jobId === jobId)
@@ -39,7 +37,7 @@ function setFilterOf({
   equipmentSetId,
   oathSetId,
   oathSetOption
-}: z.infer<typeof searchSchema>): SetFilter {
+}: z.infer<typeof searchSchema>): FameRankingSetFilter {
   return {
     ...(equipmentSetId !== undefined && { equipmentSetId }),
     ...(oathSetId !== undefined && { oathSetId }),
