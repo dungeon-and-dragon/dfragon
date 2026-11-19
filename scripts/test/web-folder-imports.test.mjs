@@ -180,7 +180,13 @@ const layerRejected = [
   ],
   ['src/core/character/ocr.ts', '../ocr/ocr', 'character-feature-imports'],
   ['src/core/api/http.ts', '#core/search/search', 'api-error-imports'],
-  ['src/core/api/api-response.ts', '#core/search', 'api-error-imports']
+  ['src/core/api/api-response.ts', '#core/search', 'api-error-imports'],
+  ['src/pages/a/inner.test.ts', '#entities/character/model/character', 'slice-index'],
+  [
+    'src/entities/character/model/uses-fixture.ts',
+    '#entities/character/api/character.fixture',
+    'fixture-imports'
+  ]
 ]
 
 const layerAllowed = [
@@ -199,7 +205,10 @@ const layerAllowed = [
   ['src/pages/stats/rankings.ts', '#pages/rankings'],
   ['src/core/character/api-error.ts', '#core/api/http'],
   ['src/core/capture/character.ts', '#core/character/character-detail-view'],
-  ['src/core/search/api-error.ts', '#core/api/http']
+  ['src/core/search/api-error.ts', '#core/api/http'],
+  ['src/pages/a/fixture.test.ts', '#entities/character/api/character.fixture'],
+  ['src/pages/a/handler.stories.tsx', '#entities/character/api/character.handlers'],
+  ['src/entities/character/api/character.handlers.ts', './character.fixture']
 ]
 
 const run = promisify(execFile)
@@ -266,6 +275,7 @@ async function cruiseSamples() {
       'src/entities/character/index.ts',
       'src/entities/character/@x/guild.ts',
       'src/entities/character/model/character.ts',
+      'src/entities/character/api/character.fixture.ts',
       'src/entities/ranking/index.ts',
       'src/entities/ranking/@x/guild.ts',
       'src/core/capture/raid/heading.png',
