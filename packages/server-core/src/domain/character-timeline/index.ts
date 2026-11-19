@@ -28,6 +28,6 @@ export type {
   TimelineItemPage,
   TimelinePageList
 } from './project.js'
-export { NEOPLE_TIMELINE_START, splitTimelineRanges } from './ranges.js'
+export { NEOPLE_TIMELINE_START, TIMELINE_RECORD_DELAY_MS, splitTimelineRanges } from './ranges.js'
 export { TIMELINE_CODES, isTimelineCode, toTimelineInputs } from './rows.js'
 export type { TimelineInputs, TimelineRow } from './rows.js'
