@@ -64,7 +64,7 @@ export class ContentClearCollectionService {
     const skipped = await collectPopulation({
       population,
       resumedAt,
-      ranges: plan.ranges,
+      rangesOf: () => plan.ranges,
       fetchTimeline,
       readConcurrency,
       pause,

@@ -1,6 +1,7 @@
 import type { TimelineCharacter, TimelineItemInput, TimelineSyncState } from '@dfragon/database'
 import type { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
 import {
+  TIMELINE_RECORD_DELAY_MS,
   TimelineFailure,
   type TimelineFailureKind,
   splitTimelineRanges
@@ -12,8 +13,6 @@ import type { TimelineSyncRepository } from './repository.js'
 // 중천 시즌 시작이다. 그 전 이력은 받지 않는다(#1175).
 export const TIMELINE_COLLECTION_START = new Date('2025-01-09T06:00:00+09:00')
 const RESYNC_INTERVAL_MS = 60 * 60 * 1000
-// Neople 타임라인은 행동 뒤 보통 10분 안에 나타나지만 더 늦을 때가 있어 넉넉히 30분을 다시 받는다(#1187).
-const RECORD_DELAY_MS = 30 * 60 * 1000
 
 export type TimelineSyncFailure = `neople-${TimelineFailureKind}` | 'database'
 
@@ -32,7 +31,7 @@ function syncStart(state: TimelineSyncState | undefined): Date {
   }
 
   return new Date(
-    Math.max(syncedUntil.getTime() - RECORD_DELAY_MS, TIMELINE_COLLECTION_START.getTime())
+    Math.max(syncedUntil.getTime() - TIMELINE_RECORD_DELAY_MS, TIMELINE_COLLECTION_START.getTime())
   )
 }
 
