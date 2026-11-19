@@ -1,6 +1,6 @@
 import { CheckIcon } from '@dfragon/ui'
 import type { ReactNode } from 'react'
-import { MISSING_VALUE } from '#features/capture-search'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { ClearName, WeeklyCharacter } from '#entities/adventure-guild'
 import { CharacterCell, FAME_COLUMN, RANK_COLUMN, RankNumber } from '#widgets/character-table'
 

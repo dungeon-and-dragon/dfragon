@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { MISSING_VALUE } from '#features/capture-search'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { StoredCharacter } from '#entities/ranking'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
 import { RankNumber } from './RankNumber'
