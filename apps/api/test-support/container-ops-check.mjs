@@ -54,9 +54,12 @@ assert.equal(repeated.status, 409)
 assert.deepEqual(await repeated.json(), { error: { code: 'JOB_ALREADY_RUNNING' } })
 const active = (await readJob('job-run-cleanup')).activeRun
 assert.deepEqual([active.id, active.status, active.trigger], [id, 'requested', 'manual'])
-const page = await (await get('/api/jobs/job-run-cleanup/runs?limit=1')).json()
-assert.deepEqual([page.runs.map((run) => run.id), page.nextBefore], [[id], id])
-const older = await (await get(`/api/jobs/job-run-cleanup/runs?before=${id}`)).json()
+const page = await (await get('/api/jobs/runs?limit=1')).json()
+assert.deepEqual(
+  [page.runs.map((run) => [run.id, run.jobName]), page.nextBefore],
+  [[[id, 'job-run-cleanup']], id]
+)
+const older = await (await get(`/api/jobs/runs?before=${id}`)).json()
 assert.ok(older.runs.length > 0 && older.runs.every((run) => run.id < id))
 assert.equal((await post('/api/jobs/missing/runs', {})).status, 404)
 
