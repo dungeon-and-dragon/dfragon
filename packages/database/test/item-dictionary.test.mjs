@@ -3,6 +3,7 @@ import { after, before, test } from 'node:test'
 import {
   applyMigrations,
   createDatabaseClient,
+  readItemDictionary,
   readUnlistedAcquisitionItemIds,
   readUnlistedItemIds,
   recordItemDictionary,
@@ -64,7 +65,9 @@ const ids = {
   missing: 'c'.repeat(32),
   rare: 'd'.repeat(32),
   oath: 'e'.repeat(32),
-  beforeSeason: 'f'.repeat(32)
+  beforeSeason: 'f'.repeat(32),
+  armor: '1'.repeat(32),
+  oldVersion: '2'.repeat(32)
 }
 const at = (time) => new Date(`${time}+09:00`)
 const acquisition = (code, occurredAt, itemId, itemRarity) => ({
@@ -135,5 +138,63 @@ test('사전에 없는 획득 itemId는 고른 code와 등급, 시작 시각 뒤
       since: at('2025-01-09T06:00:00')
     }),
     [ids.rare]
+  )
+})
+
+test('세트, 부위, 등급 열을 더한 뒤에도 기존 사전 함수의 쓰기와 읽기는 실패하지 않고 새 열은 null로 남는다', {
+  skip: port === undefined
+}, async () => {
+  const setItemId = '9'.repeat(32)
+  const filledArmor = {
+    itemId: ids.armor,
+    availableLevel: 115,
+    itemType: '방어구',
+    itemTypeDetail: '상의',
+    itemRarity: '에픽',
+    setItemId,
+    setItemName: '합성 세트'
+  }
+  await client.item.create({ data: filledArmor })
+  await recordItemDictionary(client, [
+    { itemId: ids.armor, availableLevel: null, itemType: null },
+    { itemId: ids.oldVersion, availableLevel: 115, itemType: '방어구' }
+  ])
+
+  const dictionary = await readItemDictionary(client, [ids.armor, ids.oldVersion])
+  assert.deepEqual(
+    dictionary.toSorted((a, b) => a.itemId.localeCompare(b.itemId)),
+    [
+      { itemId: ids.armor, availableLevel: 115, itemType: '방어구' },
+      { itemId: ids.oldVersion, availableLevel: 115, itemType: '방어구' }
+    ]
+  )
+  assert.deepEqual(
+    await client.item.findMany({
+      where: { itemId: { in: [ids.armor, ids.oldVersion] } },
+      select: {
+        itemId: true,
+        itemTypeDetail: true,
+        itemRarity: true,
+        setItemId: true,
+        setItemName: true
+      },
+      orderBy: { itemId: 'asc' }
+    }),
+    [
+      {
+        itemId: ids.armor,
+        itemTypeDetail: '상의',
+        itemRarity: '에픽',
+        setItemId,
+        setItemName: '합성 세트'
+      },
+      {
+        itemId: ids.oldVersion,
+        itemTypeDetail: null,
+        itemRarity: null,
+        setItemId: null,
+        setItemName: null
+      }
+    ]
   )
 })
