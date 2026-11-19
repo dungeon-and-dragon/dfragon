@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView } from '#core/character'
+import type { CharacterDetailView } from '#entities/character'
 import { characterDetailFixture } from '#core/testing'
 import { EquipmentTab } from './EquipmentTab'
 

@@ -8,7 +8,7 @@ import type {
   CharacterTimeline,
   TimelineAcquisition,
   TimelineEnhancement
-} from '#core/character'
+} from '#entities/character'
 import { apiFailure, characterUrl } from '#pages/character/api/character.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'

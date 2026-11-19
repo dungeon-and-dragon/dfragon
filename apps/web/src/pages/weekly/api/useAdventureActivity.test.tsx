@@ -7,7 +7,7 @@ import type {
   ActivitySeason,
   AdventureActivity,
   AdventureActivitySeasonDays
-} from '#core/adventure-guild'
+} from '#entities/adventure-guild'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'

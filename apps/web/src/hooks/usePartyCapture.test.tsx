@@ -4,7 +4,7 @@ import { act, StrictMode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { CAPTURE_ID, searchRow, searchSnapshot, searchSlot } from '#core/testing'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import type {
   CharacterChoice,
   SearchCommandResult,

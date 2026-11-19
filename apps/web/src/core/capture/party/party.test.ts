@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
 import { afterEach, expect, it, vi } from 'vitest'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 import { capturePartyRecognitionInputs } from './party'
 import { recognizePartyFrame } from './party-recognition'
 import type { PartyOcrWorker } from '#core/capture/capture-types'

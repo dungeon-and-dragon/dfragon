@@ -1,5 +1,5 @@
 export { bufferCard, dealerCard } from './character-cards'
-export { characterDetailFixture } from './character-detail'
+export { characterDetailFixture, characterDetailResponse } from './character-detail'
 export {
   CAPTURE_ID,
   REQUEST_ID,

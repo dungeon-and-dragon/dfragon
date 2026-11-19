@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest'
-import type { ActivityDayItem } from '#core/adventure-guild'
+import type { ActivityDayItem } from '#entities/adventure-guild'
 import { type DayItemRow, dayItemGroups } from './day-item-rows'
 
 function items(rarities: readonly string[], prefix = ''): ActivityDayItem[] {

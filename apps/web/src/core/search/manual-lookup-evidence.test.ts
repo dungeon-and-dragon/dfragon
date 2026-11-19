@@ -1,5 +1,5 @@
 import { describe, expect, it, onTestFinished, vi } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '#core/character/character'
+import type { CharacterCandidate, CharacterDetails } from '#entities/character'
 import type { ManualCharacterLookup, OcrSearchObservation, RaidRowObservation } from './search'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-requests'
 import type { CharacterImageHttp } from './character-image-source'

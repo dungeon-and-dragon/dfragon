@@ -3,14 +3,9 @@ import { type HttpHandler, HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { OathCatalog } from '#core/catalog'
-import type {
-  FameRanking,
-  FameRankingFilter,
-  ItemStats,
-  RankedCharacter,
-  SetStats
-} from '#core/ranking'
+import type { ItemStats } from '#core/ranking'
+import type { OathCatalog } from '#entities/catalog'
+import type { FameRanking, FameRankingFilter, RankedCharacter, SetStats } from '#entities/ranking'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import {
   FAME_RANKING_NEXT_CURSOR,

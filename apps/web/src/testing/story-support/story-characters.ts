@@ -1,4 +1,4 @@
-import type { RankedCharacter } from '#core/ranking'
+import type { RankedCharacter } from '#entities/ranking'
 
 const SERVERS = ['cain', 'bakal', 'diregie', 'casillas', 'hilder'] as const
 const JOBS = [

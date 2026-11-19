@@ -8,7 +8,7 @@ import type {
   CharacterIdentity,
   CharacterTimeline,
   TimelineAcquisition
-} from '#core/character'
+} from '#entities/character'
 import type { TimelinePages } from '#pages/character/hooks/useTimelinePages'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'

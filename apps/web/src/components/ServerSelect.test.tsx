@@ -6,8 +6,8 @@ import type { SearchMode } from '#core/capture'
 import { CharacterRow } from './CharacterRow'
 import { previewCharacter } from '#testing/fixtures/mvp/fixture'
 import { serverNames } from '#shared/config/servers'
-import { useServerMenu } from '#hooks/useServerMenu'
-import { ServerSelect } from './ServerSelect'
+import { useServerMenu } from '#shared/ui/useServerMenu'
+import { ServerSelect } from '#shared/ui/ServerSelect'
 import { TestRouter } from '#testing/test-support/test-router'
 
 let root: ReturnType<typeof createRoot>

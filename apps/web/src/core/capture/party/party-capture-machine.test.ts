@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { partyCaptureMachine } from './party-capture-machine'
 import { WEB_CAPTURE_TEXTS } from '#core/capture/capture-texts'
 import { createSharedOcrWorker } from '#core/ocr/ocr-worker-recognition'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 
 const modules = vi.hoisted(() => ({ diagnostic: vi.fn() }))
 vi.mock('#core/ocr/ocr', () => ({ createPartyOcrWorker: vi.fn() }))

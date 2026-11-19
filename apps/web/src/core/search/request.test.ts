@@ -6,8 +6,8 @@ import type {
   CharacterImage,
   CharacterPortrait,
   SelectedCharacterSummary
-} from '#core/character/character'
-import { deferred } from '#core/testing/async-test-fixture'
+} from '#entities/character'
+import { deferred } from '#testing/test-support/async-test-fixture'
 import { runDetailsRequest, runSearchRequest, type IdentificationAdapters } from './request'
 import type { CharacterIdentificationInput } from './identify'
 import type { SearchOperationContext } from './operation'
@@ -21,7 +21,7 @@ import { SearchHttpFailure } from '#shared/api/api-error'
 import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 import { PortraitComparisonBudgetExceededError } from './portrait-raster'
-import { dealerCard, scoredDealerCard } from '#core/testing/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '#entities/character/api/card-test.fixture'
 
 const FACE_SIZE = 8
 const FACE_LEFT_SHADE = 100

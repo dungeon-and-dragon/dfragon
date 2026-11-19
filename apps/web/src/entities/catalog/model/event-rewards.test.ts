@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { eventRewardsSchema } from './event-rewards'
 
-const DATA_FILE = new URL('../../../public/data/event-rewards.v1.json', import.meta.url)
+const DATA_FILE = new URL('../../../../public/data/event-rewards.v1.json', import.meta.url)
 
 // 이벤트와 아이템 이름은 합성 값이다.
 const shopRecord = {

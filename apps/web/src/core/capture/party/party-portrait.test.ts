@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { sameOcrSearchInput } from '#core/ocr/ocr-input'
-import type { CharacterPortrait } from '#core/character/character'
+import type { CharacterPortrait } from '#entities/character'
 import { cropPartyPortrait } from './party-portrait'
 
 type PartyPortraitCropInput = Parameters<typeof cropPartyPortrait>[0]
