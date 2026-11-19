@@ -4,18 +4,23 @@ import { setImmediate as nextTurn } from 'node:timers/promises'
 import type {
   CharacterTimelineEventRow,
   StoredCharacter,
+  StoredCharacterScore,
   TimelineCharacter
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
 import type { AdventureGuildRepository } from '../src/application/adventure-guild/repository.js'
-import type { CharacterRow } from '../src/domain/character-row.js'
+import type { CharacterRow, CharacterRowScore } from '../src/domain/character-row.js'
 import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 정렬, 저장과 주간 경계는 container-adventure-guild-check.mjs가 실제 DB로 확인한다.
 const fetchedAt = new Date('2026-11-06T00:00:00.000Z')
-function member(characterId: string, fame: number | null): StoredCharacter {
+function member(
+  characterId: string,
+  fame: number | null,
+  score: StoredCharacterScore | null = null
+): StoredCharacter {
   return {
     serverId: 'cain',
     characterId,
@@ -30,14 +35,19 @@ function member(characterId: string, fame: number | null): StoredCharacter {
     guildId: 'synthetic-guild',
     guildName: '합성길드',
     fetchedAt,
-    dealerSkillLearned: null
+    dealerSkillLearned: null,
+    score
   }
 }
 
-function memberRow(characterId: string, fame: number | null): CharacterRow {
-  const { dealerSkillLearned, ...row } = member(characterId, fame)
+function memberRow(
+  characterId: string,
+  fame: number | null,
+  score: CharacterRowScore | null
+): CharacterRow {
+  const { dealerSkillLearned, score: _stored, ...row } = member(characterId, fame)
 
-  return { ...row, role: 'dealer' }
+  return { ...row, role: 'dealer', score }
 }
 
 async function listen(
@@ -72,9 +82,9 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐릭터 행을 준다', async () => {
+test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 저장된 점수가 붙은 캐릭터 행을 준다', async () => {
   const names: string[] = []
-  const characters = [member('a', 70000), member('b', null)]
+  const characters = [member('a', 70000, { kind: 'equipment', value: 1234567 }), member('b', null)]
   const { app, origin } = await listen({
     readAdventureCharacters: async (adventureName) => {
       names.push(adventureName)
@@ -98,7 +108,10 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
     assert.deepEqual(names, ['합성 모험단/1'])
     assert.deepEqual(answer.body, {
       adventureName: '합성 모험단/1',
-      characters: [memberRow('a', 70000), memberRow('b', null)].map((character) => ({
+      characters: [
+        memberRow('a', 70000, { calculator: 'equipment', value: 1234567 }),
+        memberRow('b', null, null)
+      ].map((character) => ({
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z'
       }))
@@ -108,8 +121,12 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
   }
 })
 
-test('길드 조회는 평균 명성 없이 길드 이름, 길드원 수, 길드원 목록을 준다', async () => {
-  const members = [member('a', 70001), member('b', 70000), member('c', null)]
+test('길드 조회는 평균 명성 없이 길드 이름, 길드원 수, 저장된 점수가 붙은 길드원 목록을 준다', async () => {
+  const members = [
+    member('a', 70001),
+    member('b', 70000, { kind: 'buff', value: 4321000 }),
+    member('c', null)
+  ]
   const { app, origin } = await listen({
     readAdventureCharacters: async () => assert.fail('모험단을 읽으면 안 된다'),
     readGuild: async (guildId) => {
@@ -132,8 +149,12 @@ test('길드 조회는 평균 명성 없이 길드 이름, 길드원 수, 길드
     assert.equal(body.guildName, '합성길드')
     assert.equal(body.memberCount, 3)
     assert.deepEqual(
-      body.members.map(({ characterId }: StoredCharacter) => characterId),
-      ['a', 'b', 'c']
+      body.members.map(({ characterId, score }: CharacterRow) => [characterId, score]),
+      [
+        ['a', null],
+        ['b', { calculator: 'buff', value: 4321000 }],
+        ['c', null]
+      ]
     )
   } finally {
     await app.close()
@@ -284,7 +305,7 @@ test('주간 클리어는 고정한 레이드, 레기온 열에 목요일 06:00�
       ['none', []]
     ]
   )
-  assert.deepEqual(weekly.characters.at(-1), { ...memberRow('none', null), weeklyClears: [] })
+  assert.deepEqual(weekly.characters.at(-1), { ...memberRow('none', null, null), weeklyClears: [] })
 })
 
 test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝나기를 기다리지 않는다', async () => {
@@ -293,7 +314,7 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
   const syncing = new Promise<void>((resolve) => {
     release = resolve
   })
-  const characters = [memberRow('a', 70000), memberRow('b', null)].map((character) => ({
+  const characters = [memberRow('a', 70000, null), memberRow('b', null, null)].map((character) => ({
     ...character,
     weeklyClears: []
   }))
@@ -358,13 +379,13 @@ test('모험단 장비 조회는 서버별 캐릭터마다 동기화를 요청�
     itemName: '합성 상의',
     count: 1
   }
-  const siroco = { ...memberRow('b', 60000), serverId: 'siroco' }
+  const siroco = { ...memberRow('b', 60000, null), serverId: 'siroco' }
   const equipment = {
     sets: [{ setItemId: 'v'.repeat(32), setItemName: '합성 세트' }],
     servers: [
       {
         serverId: 'cain',
-        characters: [{ ...memberRow('a', 70000), equipment: [holding], oaths: [] }]
+        characters: [{ ...memberRow('a', 70000, null), equipment: [holding], oaths: [] }]
       },
       { serverId: 'siroco', characters: [{ ...siroco, equipment: [], oaths: [] }] }
     ]

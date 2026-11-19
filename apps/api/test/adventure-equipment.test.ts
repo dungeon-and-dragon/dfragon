@@ -96,7 +96,8 @@ function character(serverId: string, characterId: string): StoredCharacter {
     guildId: null,
     guildName: null,
     fetchedAt: null,
-    dealerSkillLearned: null
+    dealerSkillLearned: null,
+    score: null
   }
 }
 
