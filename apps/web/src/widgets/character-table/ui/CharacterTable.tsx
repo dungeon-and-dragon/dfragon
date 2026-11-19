@@ -1,9 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
+import type { ListScore } from '#entities/character'
 import type { StoredCharacter } from '#entities/ranking'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
 import { RankNumber } from './RankNumber'
+import { ScoreLine, ScoreValue } from './ScoreValue'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -11,6 +13,7 @@ export type CharacterTableRow = CharacterCellCharacter &
   Pick<StoredCharacter, 'fame' | 'guildId' | 'guildName'> & {
     adventureName: string | null
     rank?: number
+    score?: ListScore
   }
 
 export type CharacterTableAction = {
@@ -19,6 +22,8 @@ export type CharacterTableAction = {
 }
 
 export type Affiliation = 'adventure' | 'guild'
+
+export type ScorePlacement = 'column' | 'belowFame'
 
 export type CharacterTableDetail<Row> = {
   name: string
@@ -31,6 +36,8 @@ const FAME_CELL = 'table-num font-semibold text-game-fame'
 // 순위는 여섯 자리(123456), 명성은 일곱 자리(1,999,999)까지 셀 여백 안에 들어가는 폭이다.
 export const RANK_COLUMN = 'w-[76px]'
 export const FAME_COLUMN = 'w-[96px]'
+// 종류 글자와 일곱 자리 점수(1,999,999)가 셀 여백 안에 들어가는 폭이다.
+export const SCORE_COLUMN = 'w-[136px]'
 // 모험단, 길드 이름도 캐릭터 이름처럼 12바이트 제한이라고 보고 한글 6자가 다 들어가게 잡는다.
 const AFFILIATION_COLUMN = 'w-[128px]'
 const DETAIL_COLUMN = 'w-[160px] max-sm:hidden'
@@ -47,10 +54,12 @@ export function CharacterTable<Row extends CharacterTableRow>({
   action,
   trailing,
   affiliations = ALL_AFFILIATIONS,
-  adventureBesideName = false
+  adventureBesideName = false,
+  scorePlacement
 }: {
   rows: readonly Row[]
   ranked?: boolean
+  scorePlacement?: ScorePlacement
   detail?: CharacterTableDetail<Row>
   action?: CharacterTableAction
   trailing?: ReactNode
@@ -65,6 +74,7 @@ export function CharacterTable<Row extends CharacterTableRow>({
           <col />
           {detail != null && <col className={DETAIL_COLUMN} />}
           <col className={FAME_COLUMN} />
+          {scorePlacement === 'column' && <col className={SCORE_COLUMN} />}
           {affiliations.map((affiliation) => (
             <col key={affiliation} className={AFFILIATION_COLUMN} />
           ))}
@@ -86,6 +96,11 @@ export function CharacterTable<Row extends CharacterTableRow>({
             <th scope="col" className="table-num">
               명성
             </th>
+            {scorePlacement === 'column' && (
+              <th scope="col" className="table-num">
+                점수
+              </th>
+            )}
             {affiliations.map((affiliation) => (
               <th key={affiliation} scope="col" className="text-center">
                 {AFFILIATION_HEADINGS[affiliation]}
@@ -111,9 +126,25 @@ export function CharacterTable<Row extends CharacterTableRow>({
                 />
               </td>
               {detail != null && <td className={DETAIL_CELL}>{detail.render(row)}</td>}
-              <td className={FAME_CELL}>
-                {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
-              </td>
+              {scorePlacement === 'belowFame' ? (
+                <td className="table-num py-0">
+                  <span className="flex flex-col items-end">
+                    <span className="num font-semibold leading-4 text-game-fame">
+                      {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
+                    </span>
+                    <ScoreLine score={row.score} />
+                  </span>
+                </td>
+              ) : (
+                <td className={FAME_CELL}>
+                  {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
+                </td>
+              )}
+              {scorePlacement === 'column' && (
+                <td className="table-num">
+                  <ScoreValue score={row.score} />
+                </td>
+              )}
               {affiliations.map((affiliation) => (
                 <td key={affiliation} className="text-center text-fg-adventure">
                   <AffiliationLink affiliation={affiliation} character={row} />
@@ -170,10 +201,12 @@ function AffiliationLink({
 export function SkeletonRow({
   ranked = true,
   detail = false,
+  scorePlacement,
   affiliations = ALL_AFFILIATIONS
 }: {
   ranked?: boolean
   detail?: boolean
+  scorePlacement?: ScorePlacement
   affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
@@ -197,6 +230,11 @@ export function SkeletonRow({
       <td>
         <span className="skeleton-text ml-auto w-[56px]" />
       </td>
+      {scorePlacement === 'column' && (
+        <td>
+          <span className="skeleton-text ml-auto w-[88px]" />
+        </td>
+      )}
       {affiliations.map((affiliation) => (
         <td key={affiliation}>
           <span className="skeleton-text mx-auto w-[56px]" />

@@ -57,6 +57,14 @@ export const characterRole = z.enum(['dealer', 'buffer', 'synergy']).nullable()
 
 const scoreCalculator = z.enum(['equipment', 'buff'])
 
+// 점수를 보내기 전의 API와도 호환하도록 없으면 null로 받는다.
+export const listScoreSchema = z
+  .object({ calculator: scoreCalculator, value: z.number() })
+  .nullable()
+  .default(null)
+
+export type ListScore = z.output<typeof listScoreSchema>
+
 function hasApproximateOnlyWhenSkipped(score: CharacterCardScore) {
   return score.approximate === null || (score.value === null && score.skipped !== null)
 }

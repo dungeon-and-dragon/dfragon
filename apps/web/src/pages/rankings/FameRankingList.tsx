@@ -76,8 +76,15 @@ export function FameRankingList({
               detail={setColumnOf(catalog)}
               affiliations={AFFILIATIONS}
               ranked={false}
+              scorePlacement="column"
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} ranked={false} detail affiliations={AFFILIATIONS} />
+                <SkeletonRow
+                  key={index}
+                  ranked={false}
+                  detail
+                  scorePlacement="column"
+                  affiliations={AFFILIATIONS}
+                />
               ))}
             />
           </div>
@@ -139,7 +146,13 @@ function PagedTable({
   const isLastPage = end >= characters.length && !hasMore
   const skeletonRows = waiting
     ? Array.from({ length: LOADING_ROWS }, (_, index) => (
-        <SkeletonRow key={index} ranked={false} detail affiliations={AFFILIATIONS} />
+        <SkeletonRow
+          key={index}
+          ranked={false}
+          detail
+          scorePlacement="column"
+          affiliations={AFFILIATIONS}
+        />
       ))
     : undefined
 
@@ -175,6 +188,7 @@ function PagedTable({
             detail={setColumnOf(catalog)}
             affiliations={AFFILIATIONS}
             ranked={false}
+            scorePlacement="column"
             trailing={skeletonRows}
           />
         </div>
