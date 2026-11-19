@@ -1,4 +1,4 @@
-import type { JobOverview, JobRunRecord } from '@dfragon/database'
+import type { JobNeopleApi, JobOverview, JobRunRecord } from '@dfragon/database'
 import { z } from 'zod'
 import type { JobList, JobRunPage } from '#application/jobs/index.js'
 
@@ -32,6 +32,7 @@ export type JobResponse = {
   nextRunAt: Date | null
   argsSchema: unknown
   delayMinutes: number
+  neopleApi: JobNeopleApi | null
   activeRun: JobRunResponse | null
   lastFinishedRun: JobRunResponse | null
 }
@@ -73,6 +74,7 @@ function toJobResponse(job: JobOverview): JobResponse {
     nextRunAt,
     argsSchema: job.argsSchema,
     delayMinutes: job.delayMinutes,
+    neopleApi: job.neopleApi,
     activeRun,
     lastFinishedRun
   }
