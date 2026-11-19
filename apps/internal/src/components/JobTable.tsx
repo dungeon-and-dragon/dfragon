@@ -6,7 +6,7 @@ import {
   formatDateSecond,
   formatDuration,
   runDuration
-} from '#app/format'
+} from '#ops-app/format'
 import { panelClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'

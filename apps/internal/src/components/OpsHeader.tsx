@@ -1,6 +1,6 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
 import { ExternalLinkIcon, IconButton, RefreshIcon } from '@dfragon/ui'
-import { EMPTY_VALUE, formatAgo, formatClockMinute, formatClockSecond } from '#app/format'
+import { EMPTY_VALUE, formatAgo, formatClockMinute, formatClockSecond } from '#ops-app/format'
 
 const WORKER_STALE_MS = 5 * 60_000
 
