@@ -6,7 +6,8 @@ import {
   readFameRanking,
   recordCharacterBasic,
   recordCharacterScore,
-  recordCharacterSets
+  recordCharacterSets,
+  recordCharacterSkillStyle
 } from '@dfragon/database'
 import {
   StatsJobService,
@@ -387,6 +388,72 @@ try {
     characters: [],
     nextCursor: null
   })
+
+  const evolutionSkill = '합성 랭킹 스킬 (각성)'
+  const styledCharacters = setCharacters.slice(0, -1)
+
+  for (const [index, { serverId, characterId, jobGrowId }] of styledCharacters.entries()) {
+    await recordCharacterSkillStyle(client, {
+      serverId,
+      characterId,
+      jobId: setFilteredJob,
+      jobGrowId,
+      skills: [],
+      evolutions: [
+        { name: evolutionSkill, type: index % 3 === 0 ? 1 : 2 },
+        { name: '합성 랭킹 보조 스킬', type: 1 }
+      ],
+      enhancements: [],
+      fetchedAt: new Date()
+    })
+  }
+
+  const evolutionQuery = (type) =>
+    `jobId=${setFilteredJob}&jobGrowId=grow-set&evolutions=${encodeURIComponent(`${evolutionSkill}~${type}`)}`
+  const typeOneQuery = evolutionQuery(1)
+  const typeTwoQuery = evolutionQuery(2)
+  const withAuxiliaryAndRingQuery = `${typeOneQuery}${encodeURIComponent(',합성 랭킹 보조 스킬~1')}&itemIds=item-rank-ring&equipmentSetId=${fairy.id}`
+  const unselectedAuxiliaryQuery = `${typeOneQuery}${encodeURIComponent(',합성 랭킹 보조 스킬~2')}`
+  const styledInGrow = styledCharacters
+    .map(({ characterId, jobGrowId }, index) => ({ characterId, jobGrowId, index }))
+    .filter(({ jobGrowId }) => jobGrowId === 'grow-set')
+  const styledInGrowIds = styledInGrow.map(({ characterId }) => characterId)
+  const typeOne = styledInGrow
+    .filter(({ index }) => index % 3 === 0)
+    .map(({ characterId }) => characterId)
+  const typeTwo = styledInGrow
+    .filter(({ index }) => index % 3 !== 0)
+    .map(({ characterId }) => characterId)
+  const inOrder = (characterIds) =>
+    expectedOrder.filter((characterId) => characterIds.includes(characterId))
+  const evolutionIds = async (query) =>
+    (await readAllPages(query)).flatMap(({ characters }) =>
+      characters.map(({ characterId }) => characterId)
+    )
+  // 보조 스킬은 스킬 스타일이 있는 103명이 모두 골라 100명 page 경계를 넘는다.
+  const auxiliaryQuery = `jobId=${setFilteredJob}&jobGrowId=grow-set&evolutions=${encodeURIComponent('합성 랭킹 보조 스킬~1')}`
+  const auxiliaryPages = await readAllPages(auxiliaryQuery)
+  assert.deepEqual(
+    auxiliaryPages.map(({ characters }) => characters.length),
+    [100, 3]
+  )
+  assert.deepEqual(
+    auxiliaryPages.flatMap(({ characters }) => characters.map(({ characterId }) => characterId)),
+    inOrder(styledInGrowIds)
+  )
+  assert.deepEqual(await evolutionIds(typeOneQuery), inOrder(typeOne))
+  assert.deepEqual(await evolutionIds(typeTwoQuery), inOrder(typeTwo))
+  assert.deepEqual(
+    await evolutionIds(withAuxiliaryAndRingQuery),
+    inOrder(typeOne).filter((characterId) => ringHolders.includes(characterId))
+  )
+  assert.deepEqual(await evolutionIds(unselectedAuxiliaryQuery), [])
+  const missingGrowResponse = await fetch(
+    new URL(`/rankings/fame?jobId=${setFilteredJob}&evolutions=a~1`, 'http://127.0.0.1:3000')
+  )
+  assert.equal(missingGrowResponse.status, 400)
+  // 다음 단계의 스킬 스타일 점검이 테이블 전체를 비교하므로 여기서 넣은 행을 지운다.
+  await client.$executeRaw`DELETE FROM character_skill_styles WHERE job_id = ${setFilteredJob}`
 
   // 1만 명이 낀 아이템은 먼저 모으지 않고 명성 index를 따라 읽는 분기를 탄다. 행을 SQL로 한 번에 넣는다.
   const commonJob = 'synthetic-common-item-job'
