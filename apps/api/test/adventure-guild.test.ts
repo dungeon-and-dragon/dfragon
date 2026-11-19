@@ -107,7 +107,7 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 캐
   }
 })
 
-test('길드 조회는 명성이 있는 길드원만으로 평균 명성을 반올림한다', async () => {
+test('길드 조회는 평균 명성 없이 길드 이름, 길드원 수, 길드원 목록을 준다', async () => {
   const members = [member('a', 70001), member('b', 70000), member('c', null)]
   const { app, origin } = await listen({
     readAdventureCharacters: async () => assert.fail('모험단을 읽으면 안 된다'),
@@ -125,33 +125,14 @@ test('길드 조회는 명성이 있는 길드원만으로 평균 명성을 반�
     const { status, body } = await getJson(origin, '/guilds/synthetic-guild')
 
     assert.equal(status, 200)
+    assert.equal(Object.hasOwn(body, 'averageFame'), false)
     assert.equal(body.guildId, 'synthetic-guild')
     assert.equal(body.guildName, '합성길드')
     assert.equal(body.memberCount, 3)
-    assert.equal(body.averageFame, 70001)
     assert.deepEqual(
       body.members.map(({ characterId }: StoredCharacter) => characterId),
       ['a', 'b', 'c']
     )
-  } finally {
-    await app.close()
-  }
-})
-
-test('명성이 있는 길드원이 없으면 평균 명성은 null이다', async () => {
-  const { app, origin } = await listen({
-    readAdventureCharacters: async () => [],
-    readGuild: async () => ({ guildName: '합성길드', members: [member('a', null)] }),
-    readAdventureWeeklyClears: async () => assert.fail('주간 클리어를 읽으면 안 된다'),
-    readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다'),
-    readAdventureSeasonDays: async () => assert.fail('시즌 하루 활동을 읽으면 안 된다'),
-    readAdventureSeasonBackfill: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
-  })
-  try {
-    const { body } = await getJson(origin, '/guilds/synthetic-guild')
-
-    assert.equal(body.memberCount, 1)
-    assert.equal(body.averageFame, null)
   } finally {
     await app.close()
   }
@@ -170,7 +151,6 @@ test('DB 설정이 없는 API는 모험단 캐릭터, 길드, 주간, 시즌 활
         guildId: 'synthetic-guild',
         guildName: null,
         memberCount: 0,
-        averageFame: null,
         members: []
       }
     })
