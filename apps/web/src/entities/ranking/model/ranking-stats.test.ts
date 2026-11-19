@@ -16,20 +16,20 @@ const row = {
   guildId: null,
   guildName: null,
   fetchedAt: '2026-11-18T00:00:00.000Z',
-  role: 'dealer',
-  rank: 1
+  role: 'dealer'
 }
 
 describe('fameRankingSchema', () => {
-  it('세트 필드와 nextCursor가 더해진 응답도 기존 행으로 읽는다', () => {
+  it('세트 필드와 nextCursor가 더해진 응답을 rank가 있든 없든 읽는다', () => {
     const response = {
       characters: [
         {
           ...row,
+          rank: 1,
           equipmentSet: { id: 'set-fairy', name: '소울 페어리 세트' },
           oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' }
         },
-        { ...row, characterId: 'synthetic-no-sets', rank: 2, equipmentSet: null, oathSet: null }
+        { ...row, characterId: 'synthetic-no-sets', equipmentSet: null, oathSet: null }
       ],
       nextCursor: 'WzgwMDAwLCJjYWluIiwic3ludGhldGljLW5vLXNldHMiLDJd'
     }
@@ -37,9 +37,9 @@ describe('fameRankingSchema', () => {
     const parsed = fameRankingSchema.safeParse(response)
 
     expect(parsed.success).toBe(true)
-    expect(parsed.data?.characters.map(({ characterId, rank }) => [characterId, rank])).toEqual([
-      ['synthetic-character', 1],
-      ['synthetic-no-sets', 2]
+    expect(parsed.data?.characters.map(({ characterId }) => characterId)).toEqual([
+      'synthetic-character',
+      'synthetic-no-sets'
     ])
   })
 })

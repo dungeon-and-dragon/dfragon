@@ -42,19 +42,18 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-function rankedCharacter(rank: number, overrides: Partial<RankedCharacter> = {}): RankedCharacter {
+function rankedCharacter(order: number, overrides: Partial<RankedCharacter> = {}): RankedCharacter {
   return {
-    rank,
     serverId: 'cain',
-    characterId: `character-${rank}`,
-    characterName: `합성${rank}`,
-    adventureName: `모험단${rank}`,
+    characterId: `character-${order}`,
+    characterName: `합성${order}`,
+    adventureName: `모험단${order}`,
     level: 115,
     jobId: 'job-1',
     jobGrowId: 'grow-1',
     jobName: '합성 직업',
     jobGrowName: '眞 합성 전직',
-    fame: 100000 - rank,
+    fame: 100000 - order,
     guildId: null,
     guildName: null,
     role: null,
@@ -123,7 +122,7 @@ async function render(
       </TestQueryClient>
     )
   )
-  await vi.waitFor(() => expect(container.textContent).not.toContain('랭킹을 받는 중입니다.'))
+  await vi.waitFor(() => expect(container.textContent).not.toContain('검색 결과를 받는 중입니다.'))
 }
 
 function bodyRows(): HTMLTableRowElement[] {
@@ -157,7 +156,7 @@ it('받은 100명 가운데 처음 20명을 그리고 불러오기를 누를 때
   expect(findButton('불러오기')).toBeUndefined()
 })
 
-it('열은 순위, 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 없는 행은 세트를 -로 그린다', async () => {
+it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 없는 행은 세트를 -로 그린다', async () => {
   await render(async () => ({
     characters: [
       rankedCharacter(1, {
@@ -174,7 +173,6 @@ it('열은 순위, 캐릭터, 세트, 명성, 모험단이고 세트 값을 받�
   }))
 
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
-    '#',
     '캐릭터',
     '세트',
     '명성',
@@ -183,8 +181,8 @@ it('열은 순위, 캐릭터, 세트, 명성, 모험단이고 세트 값을 받�
   const [first, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['1', '카인합성1합성 전직', '황금향용투 : 용제 강림', '99,999', '모험단1'])
-  expect(fourth).toEqual(['4', '카인합성4합성 직업', '-', '99,996', '모험단4'])
+  expect(first).toEqual(['카인합성1합성 전직', '황금향용투 : 용제 강림', '99,999', '모험단1'])
+  expect(fourth).toEqual(['카인합성4합성 직업', '-', '99,996', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
@@ -231,11 +229,11 @@ it('동명 전직에는 성별을 붙이고 남성 크루세이더는 역할을 
   ])
 })
 
-it('빈 랭킹은 목록 상자에 빈 문구만 둔다', async () => {
+it('빈 결과는 목록 상자에 빈 문구만 둔다', async () => {
   await render(async () => ({ characters: [], nextCursor: null }))
 
-  expect(container.querySelector('section[aria-label="명성 랭킹"] p')?.textContent).toBe(
-    '랭킹에 오른 캐릭터가 없습니다.'
+  expect(container.querySelector('section[aria-label="검색 결과"] p')?.textContent).toBe(
+    '조건에 맞는 캐릭터가 없습니다.'
   )
   expect(container.querySelector('table')).toBeNull()
 })
@@ -245,7 +243,7 @@ it('고른 직업으로 목록 이름을 바꾸고, 앞의 眞을 뺀 전직 이
   const onFilterChange = vi.fn()
   await render(async () => rankingOf(1), { jobId: job.jobId }, onFilterChange)
 
-  expect(container.querySelector(`section[aria-label="${job.name} 명성 랭킹"]`)).not.toBeNull()
+  expect(container.querySelector(`section[aria-label="${job.name} 검색 결과"]`)).not.toBeNull()
   expect(chip(job.name).hasAttribute('data-pressed')).toBe(true)
   expect(chip('직업 전체').hasAttribute('data-pressed')).toBe(false)
   await act(async () => chip('웨펀마스터').click())
@@ -266,7 +264,7 @@ it('제국기사 칩을 고르면 목록 이름이 바뀌고, 브레이커 전�
   expect(onFilterChange).toHaveBeenLastCalledWith({ jobId })
 
   await render(async () => rankingOf(1), { jobId }, onFilterChange)
-  expect(container.querySelector('section[aria-label="제국기사 명성 랭킹"]')).not.toBeNull()
+  expect(container.querySelector('section[aria-label="제국기사 검색 결과"]')).not.toBeNull()
   await act(async () => chip('브레이커').click())
   expect(onFilterChange).toHaveBeenLastCalledWith({
     jobId,
@@ -334,7 +332,7 @@ it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌�
 
   expect(queries()).toEqual([{ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' }])
   expect(
-    container.querySelector('section[aria-label="프리스트(남) 크루세이더(딜러) 명성 랭킹"]')
+    container.querySelector('section[aria-label="프리스트(남) 크루세이더(딜러) 검색 결과"]')
   ).not.toBeNull()
   expect(chip('크루세이더(딜러)').hasAttribute('data-pressed')).toBe(true)
   expect(chip('크루세이더(버퍼)').hasAttribute('data-pressed')).toBe(false)
@@ -347,11 +345,15 @@ function rankingPage(from: number, count: number, nextCursor: string | null): Fa
   return { characters, nextCursor }
 }
 
-function rankTexts(): string[] {
-  return bodyRows().map((row) => row.querySelector('td')?.textContent ?? '')
+function characterLinks(): string[] {
+  return bodyRows().map((row) => row.querySelector('a[href^="/c/"]')?.getAttribute('href') ?? '')
 }
 
-it('받은 행을 다 그리면 nextCursor로 다음 page를 받아 순위를 잇고, 마지막 page 뒤에는 더 받지 않는다', async () => {
+function characterLinkOf({ serverId, characterId }: RankedCharacter): string {
+  return `/c/${serverId}/${characterId}`
+}
+
+it('받은 행을 다 그리면 nextCursor로 다음 page를 받아 이어 그리고, 마지막 page 뒤에는 더 받지 않는다', async () => {
   await render(async (cursor) => {
     if (cursor === null) {
       return fameRankingFixture.firstPage
@@ -365,12 +367,15 @@ it('받은 행을 다 그리면 nextCursor로 다음 page를 받아 순위를 �
   }
   expect(requests).toHaveLength(1)
   await showMore()
-  await vi.waitFor(() => expect(rankTexts()).toHaveLength(120))
+  await vi.waitFor(() => expect(characterLinks()).toHaveLength(120))
   expect(queries()).toEqual([{}, { cursor: FAME_RANKING_NEXT_CURSOR }])
   await showMore()
 
-  expect(rankTexts()).toHaveLength(130)
-  expect(rankTexts().slice(99, 102)).toEqual(['100', '101', '102'])
+  expect(characterLinks()).toHaveLength(130)
+  expect(characterLinks().slice(99, 101)).toEqual([
+    characterLinkOf(fameRankingFixture.firstPage.characters.at(-1)!),
+    characterLinkOf(fameRankingFixture.lastPage.characters[0]!)
+  ])
   expect(findButton('불러오기')).toBeUndefined()
   expect(requests).toHaveLength(2)
 })
@@ -393,21 +398,21 @@ it('다음 page를 받는 동안 불러오기 대신 빈 줄을 두고, 받으�
   await vi.waitFor(() => expect(requests).toHaveLength(2))
   await act(async () => finish(rankingPage(21, 5, null)))
   await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0))
-  expect(rankTexts()).toHaveLength(25)
+  expect(characterLinks()).toHaveLength(25)
 })
 
 function headings(): string[] {
   return [...container.querySelectorAll('thead th')].map((th) => th.textContent ?? '')
 }
 
-it('최고 명성을 정하면 순위가 전체 순위와 달라 순위 열을 빼고, 최저 명성만 정하면 순위 열을 둔다', async () => {
+it('명성 범위를 query로 보내고, 최고 명성이 있든 없든 순위 열 없이 그린다', async () => {
   await render(async () => rankingOf(3), { fameFrom: 136000, fameTo: 138000 })
 
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }])
   expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
   await render(async () => rankingOf(3), { fameFrom: 136000 })
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }, { fameFrom: '136000' }])
-  expect(headings()).toEqual(['#', '캐릭터', '세트', '명성', '모험단'])
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
 })
 
 it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두고, 다시 시도하면 이어 받는다', async () => {
@@ -435,7 +440,7 @@ it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두
   expect(findButton('불러오기')).toBeUndefined()
   await act(async () => chip('다시 시도').click())
 
-  await vi.waitFor(() => expect(rankTexts()).toHaveLength(25))
+  await vi.waitFor(() => expect(characterLinks()).toHaveLength(25))
   expect(container.querySelector('[role="alert"]')).toBeNull()
 })
 
@@ -581,14 +586,14 @@ it('세트로 거르면 세트를 query로 보내고 목록 띠 제목에 고른
   expect(queries()).toEqual([{ ...filter, oathSetId: String(DRAGON) }])
   await vi.waitFor(() =>
     expect(
-      container.querySelector('section[aria-label="황금향 용투 : 두 번째 명성 랭킹"]')
+      container.querySelector('section[aria-label="황금향 용투 : 두 번째 검색 결과"]')
     ).not.toBeNull()
   )
   expect(setSelect('장비 세트').textContent).toContain('황금향')
   expect(setSelect('서약 선택지').textContent).toContain('용투 : 두 번째')
 })
 
-it('거른 랭킹이 비면 랭킹에 오른 캐릭터가 없다고 알린다', async () => {
+it('거른 결과가 비면 조건에 맞는 캐릭터가 없다고 알린다', async () => {
   await render(
     async () => ({ characters: [], nextCursor: null }),
     { oathSetId: DRAGON },
@@ -596,7 +601,7 @@ it('거른 랭킹이 비면 랭킹에 오른 캐릭터가 없다고 알린다', 
     setResponses()
   )
 
-  expect(container.querySelector('p.state')?.textContent).toBe('랭킹에 오른 캐릭터가 없습니다.')
+  expect(container.querySelector('p.state')?.textContent).toBe('조건에 맞는 캐릭터가 없습니다.')
 })
 
 // 합성 아이템 통계다. 유일 장비 이름은 게임 데이터 그대로다.
