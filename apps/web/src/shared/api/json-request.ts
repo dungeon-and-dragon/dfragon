@@ -1,0 +1,55 @@
+import type { KyInstance } from 'ky'
+import type { z } from 'zod'
+import { SearchHttpFailure } from './api-error'
+import {
+  assertApiSuccess,
+  parseCharacterJson,
+  throwCharacterTransportFailure
+} from './api-response'
+
+type JsonRequestOptions = {
+  method?: 'get' | 'post'
+  searchParams?: Record<string, string>
+  signal?: AbortSignal
+  details?: boolean
+  timeout?: number
+}
+
+export function createJsonRequest(
+  http: KyInstance,
+  apiOrigin: string
+): <Schema extends z.ZodType>(
+  path: string,
+  schema: Schema,
+  options?: JsonRequestOptions
+) => Promise<z.infer<Schema>> {
+  return async (
+    path,
+    schema,
+    { method = 'get', searchParams, signal, details = true, timeout } = {}
+  ) => {
+    try {
+      signal?.throwIfAborted()
+      const request = http(`${apiOrigin}${path}`, {
+        method,
+        searchParams,
+        headers: { Accept: 'application/json' },
+        signal,
+        timeout
+      })
+      const response = await request
+      // ky의 body 메서드만 본문 읽기에도 timeout을 건다. await한 Response의 본문을 직접 읽으면 대기 상한이 없다.
+      const body = parseCharacterJson(await request.arrayBuffer())
+      assertApiSuccess(response, body, details)
+      const parsed = schema.safeParse(body)
+      if (!parsed.success) {
+        throw new SearchHttpFailure('SEARCH_RESPONSE_INVALID')
+      }
+      signal?.throwIfAborted()
+
+      return parsed.data
+    } catch (error) {
+      throwCharacterTransportFailure(error, signal)
+    }
+  }
+}

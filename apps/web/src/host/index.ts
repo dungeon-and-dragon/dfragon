@@ -1,6 +1,6 @@
 import type { CharacterImage } from '#core/character'
-import { createDfragonClient } from '#core/api'
 import { toRaidFrameResult } from '#core/capture'
+import { createDfragonHttp } from '#shared/api/dfragon-http'
 import { startRuntimeDiagnostics } from '#shared/lib/diagnostics'
 import { createRoundFrames } from './capture/round-frames'
 import { createScreenShare } from './capture/screen-share'
@@ -16,8 +16,9 @@ import {
 
 export function installBrowserHost(apiOrigin: string): BrowserHost {
   const reportDiagnostic = startRuntimeDiagnostics()
-  const dfragon = createDfragonClient({ apiOrigin, fetch: browserFetch })
-  const runtime = createBrowserSearchRuntime(dfragon, reportDiagnostic)
+  const http = createDfragonHttp(browserFetch)
+  const api = { http, apiOrigin }
+  const runtime = createBrowserSearchRuntime(api, reportDiagnostic)
   const party = createBrowserCardSearch('party', runtime)
   const raid = createBrowserCardSearch('raid', runtime)
   const screenShare = createScreenShare()

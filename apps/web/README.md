@@ -61,12 +61,11 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router, MSW 서버 테스트 도구를 둡니다. handler가 없는 API 요청을 보낸 테스트는 실패합니다.
 - `src/core/adventure-guild/`: 모험단 정보, 주간 기록, 활동 응답 schema를 둡니다.
-- `src/core/api/`: DFragon API 요청 함수와 응답 schema, API 오류 코드를 둡니다.
 - `src/core/capture/`: 캡처 회차, 슬롯, 자리와 캡처한 카드의 표시 함수, 검색 상태를 둡니다.
 - `src/core/capture/party/`: 파티 화면 인식과 파티 캡처 machine을 둡니다.
 - `src/core/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
 - `src/core/catalog/`: 스킬 창, 서약, 게임 문구 데이터 묶음과 이벤트 보상 데이터 파일의 schema를 둡니다.
-- `src/core/character/`: 캐릭터 상세, 장비, 서약, 점수 표시 함수와 캐릭터 타입을 둡니다. 검색, 캡처, OCR 코드는 import하지 않습니다.
+- `src/core/character/`: 캐릭터 상세, 장비, 서약, 점수 표시 함수와 캐릭터 타입, 캐릭터 검색 응답 schema를 둡니다. 검색, 캡처, OCR 코드는 import하지 않습니다.
 - `src/core/ocr/`: OCR worker, 닉네임 이미지 처리와 인식 결과 선택을 둡니다.
 - `src/core/ranking/`: 명성 랭킹, 캐릭터 통계, 스킬 통계 응답 schema를 둡니다.
 - `src/core/search/`: 캐릭터 검색 요청, 식별, 초상화 비교와 검색 상태를 둡니다.
@@ -75,7 +74,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`: FSD 계층 폴더입니다. 옛 폴더의 코드를 옮기면서 채웁니다.
 - `src/entities/ranking/api/`: 명성 랭킹, 세트 통계, 아이템 통계 요청과 query hook, 테스트와 story가 쓰는 fixture(`*.fixture.ts`)와 MSW handler(`*.handlers.ts`)를 둡니다. fixture와 handler는 테스트와 story에서만 import합니다.
 - `src/entities/catalog/api/`: 서약 데이터 파일 요청과 query hook, fixture와 MSW handler를 둡니다.
-- `src/shared/api/`: API 주소(같은 origin의 `/api`)와 공용 ky instance를 둡니다.
+- `src/shared/api/`: API 주소(같은 origin의 `/api`), 공용 ky instance, JSON 요청 함수와 API 오류 코드를 둡니다.
 - `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
 - `src/shared/lib/`: 조회 결과, 클립보드 복사 hook과 시간 표시 함수, 같은 origin의 게임 데이터 파일 요청, 브라우저 console 진단 코드를 둡니다.
 - `src/shared/lib/animations/`: GSAP 설정과 공용 전환 animation hook을 둡니다.

@@ -1,4 +1,4 @@
-import { createJsonRequest } from '#core/api'
+import { createJsonRequest } from '#shared/api/json-request'
 import {
   type ClearContentStats,
   type ClearOverview,

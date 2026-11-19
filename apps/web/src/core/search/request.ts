@@ -17,8 +17,8 @@ import {
   type RaidIdentificationServices
 } from './identify'
 import { toRaidObservedValues } from '#core/capture/raid/raid-candidate'
-import { SearchHttpFailure } from '#core/api/http'
-import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '#core/api/dfragon-client'
+import { SearchHttpFailure } from '#shared/api/api-error'
+import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-requests'
 import type { CharacterImageHttp } from './character-image-source'
 import type { PortraitColorScorer } from './portrait-color'
 import { runSearchOperation, type SearchOperation, type SearchOperationFailure } from './operation'
