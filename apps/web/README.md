@@ -49,9 +49,7 @@ core 밖에서는 `#core/<도메인>`으로 가져오며, core 도메인 사이�
 
 - `public/data/event-rewards.v1.json`: 공식 이벤트의 보상과 획득 조건을 옮긴 데이터 파일을 두는 위치입니다. 형식은 [이벤트 보상 schema](src/entities/catalog/model/event-rewards.ts)에 있습니다.
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
-- `src/components/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 컴포넌트와 스타일을 둡니다.
-- `src/hooks/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 React hook과 store를 둡니다.
-- `src/lib/`: 조회 캐시와 카드 표시 함수를 둡니다.
+- `src/app/query-client.ts`: 조회 캐시 설정을 둡니다.
 - `src/pages/<화면>/`: 라우트나 다른 화면이 렌더링하는 진입 컴포넌트인 `*Page.tsx`와 화면 본체인 `*Screen.tsx`를 둡니다. 한 파일 화면은 `*Page.tsx`에 본체도 둡니다.
 - `src/pages/<화면>/index.ts`: 그 화면의 `*Page.tsx`, `*Screen.tsx` 컴포넌트와 화면 폴더 밖에서 가져오는 함수, 상수를 다시 내보냅니다. 외부 import에는 `#pages/<화면>`처럼 폴더 이름까지만 적습니다.
 - `src/pages/<화면>/components/`: 그 화면만 쓰는 컴포넌트와 스타일, 테스트를 둡니다.
@@ -60,12 +58,15 @@ core 밖에서는 `#core/<도메인>`으로 가져오며, core 도메인 사이�
 - `src/pages/<화면>/animations/`: 그 화면의 GSAP animation hook을 둡니다.
 - `src/testing/`: UI 테스트 setup, fixture와 host, router, MSW 서버 테스트 도구를 둡니다. handler가 없는 API 요청을 보낸 테스트는 실패합니다.
 - `src/testing/fixtures/`: 여러 슬라이스의 테스트와 story에서 쓰는 캐릭터 fixture를 둡니다.
-- `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
+- `src/widgets/global-bar/`: 상단 바, 캐릭터 검색창, 최근 본 캐릭터 목록과 오늘 등급 조회, 희귀도 구분을 둡니다.
+- `src/widgets/site-footer/`: 사이트 푸터를 둡니다.
+- `src/widgets/character-table/`: 여러 화면이 쓰는 캐릭터 표와 캐릭터 칸, 순위 숫자를 둡니다.
+- `src/widgets/ranking-filter/`: 랭킹 화면과 세트 통계 화면이 쓰는 직업, 세트, 아이템 필터와 주소 query 해석을 둡니다.
 - `src/features/capture-search/lib/`: React를 import하지 않는 화면 캡처, OCR worker, 검색과 브라우저 API 연결 코드를 둡니다.
 - `src/features/capture-search/lib/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
 - `src/features/capture-search/api/`: 캐릭터 카드 검색 요청을 둡니다.
 - `src/features/capture-search/model/`: 브라우저 host 설치, 캡처와 카드 검색 hook, 슬롯 순서와 관련 store를 둡니다.
-- `src/features/capture-search/ui/`: 화면 캡처 provider를 둡니다.
+- `src/features/capture-search/ui/`: 화면 캡처 provider와 얼굴 칸을 맞춘 캐릭터 이미지를 둡니다.
 - `src/features/favorite-character/`, `src/features/recent-characters/`, `src/features/color-mode/`: 즐겨찾기, 최근 본 캐릭터, 색상 모드의 store와 UI를 둡니다.
 - `src/entities/character/`: 캐릭터 타입과 schema, 저장 데이터 처리, 장비와 점수 표시 함수, 서버 배지와 장비 색상을 둡니다.
 - `src/entities/adventure-guild/model/`: 모험단, 길드, 주간 기록, 활동 응답 schema와 내 모험단 store를 둡니다.
