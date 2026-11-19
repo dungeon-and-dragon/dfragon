@@ -10,7 +10,7 @@ import {
   SkeletonRow
 } from '#components/table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
-import { type FameRankingPages, useFameRanking } from '#hooks/useFameRanking'
+import { type FameRankingPages, useFameRanking } from '#entities/ranking'
 import { rankingName } from './ranking-jobs'
 import { rankingSetLines } from './ranking-sets'
 

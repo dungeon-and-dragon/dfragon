@@ -17,15 +17,12 @@ import {
 import { adventureWeeklySchema, type AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
 import {
   characterStatsSchema,
-  fameRankingSchema,
   type CharacterStats,
-  type FameRanking,
-  type FameRankingFilter,
   type SetStatsFilter
 } from '#core/ranking/ranking-stats'
 import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '#core/ranking/skill-stats'
 import { setStatsSchema, type SetStats } from '#core/ranking/set-stats'
-import { ITEM_FILTER_LIMIT, itemStatsSchema, type ItemStats } from '#core/ranking/item-stats'
+import { itemStatsSchema, type ItemStats } from '#core/ranking/item-stats'
 import {
   clearContentStatsSchema,
   clearOverviewSchema,
@@ -87,7 +84,6 @@ export type TimelinePageHttp<Item> = (
   identity: CharacterIdentity,
   before: string
 ) => Promise<TimelinePage<Item>>
-export type FameRankingHttp = (filter: FameRankingFilter, cursor?: string) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
 export type SetStatsHttp = (filter: SetStatsFilter) => Promise<SetStats>
@@ -128,7 +124,6 @@ export type DfragonClient = Readonly<{
     history: CharacterHistoryHttp
     historySnapshot: CharacterHistorySnapshotHttp
   }>
-  rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
   skillStats: SkillStatsHttp
   setStats: SetStatsHttp
@@ -177,24 +172,6 @@ function jobSearchParams(filter: SetStatsFilter): Record<string, string> {
   }
 }
 
-// API는 빈 항목, 중복, 여섯 개 이상을 400으로 거부하므로 보내기 전에 거른다.
-function itemIdsParam(itemIds: readonly string[] | undefined): string | undefined {
-  if (itemIds === undefined || itemIds.length === 0) {
-    return undefined
-  }
-
-  const valid =
-    itemIds.length <= ITEM_FILTER_LIMIT &&
-    itemIds.every((itemId) => itemId.length > 0 && !itemId.includes(',')) &&
-    new Set(itemIds).size === itemIds.length
-
-  if (!valid) {
-    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-  }
-
-  return itemIds.join(',')
-}
-
 function characterPath({ serverId, characterId }: CharacterIdentity): string {
   return `/characters/${serverId}/${characterId}`
 }
@@ -206,7 +183,7 @@ function sameIdentity(
   return character.serverId === serverId && character.characterId === characterId
 }
 
-function createJsonRequest(
+export function createJsonRequest(
   http: ReturnType<typeof createCharacterHttpClient>,
   apiOrigin: string
 ): <Schema extends z.ZodType>(
@@ -385,39 +362,6 @@ export function createDfragonClient({
           characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity)),
           { searchParams: { at } }
         )
-      }
-    },
-    rankings: {
-      async fame(filter, cursor) {
-        if (
-          (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
-          (filter.oathSetOption !== undefined && filter.oathSetId === undefined) ||
-          (filter.fameFrom !== undefined &&
-            filter.fameTo !== undefined &&
-            filter.fameFrom > filter.fameTo)
-        ) {
-          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-        }
-
-        const oathSetId = filter.oathSetId !== undefined ? String(filter.oathSetId) : undefined
-        const itemIds = itemIdsParam(filter.itemIds)
-        const fameFrom = filter.fameFrom !== undefined ? String(filter.fameFrom) : undefined
-        const fameTo = filter.fameTo !== undefined ? String(filter.fameTo) : undefined
-
-        return requestJson('/rankings/fame', fameRankingSchema, {
-          searchParams: {
-            ...(filter.jobId !== undefined && { jobId: filter.jobId }),
-            ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
-            ...(filter.role !== undefined && { role: filter.role }),
-            ...(filter.equipmentSetId !== undefined && { equipmentSetId: filter.equipmentSetId }),
-            ...(oathSetId !== undefined && { oathSetId }),
-            ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption }),
-            ...(itemIds !== undefined && { itemIds }),
-            ...(fameFrom !== undefined && { fameFrom }),
-            ...(fameTo !== undefined && { fameTo }),
-            ...(cursor !== undefined && { cursor })
-          }
-        })
       }
     },
     stats: () => requestJson('/stats', characterStatsSchema),
