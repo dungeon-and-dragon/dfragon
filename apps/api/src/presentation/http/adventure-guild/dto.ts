@@ -1,11 +1,10 @@
 import type { StoredCharacter, StoredGuild } from '@dfragon/database'
 import { z } from 'zod'
-import {
-  type ActivitySeason,
-  type AdventureActivity,
-  type AdventureSeasonDays,
-  type AdventureWeeklyClears,
-  averageFame
+import type {
+  ActivitySeason,
+  AdventureActivity,
+  AdventureSeasonDays,
+  AdventureWeeklyClears
 } from '#domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
@@ -28,7 +27,6 @@ export type GuildMembersResponse = {
   guildId: string
   guildName: string | null
   memberCount: number
-  averageFame: number | null
   members: CharacterRow[]
 }
 
@@ -64,10 +62,9 @@ export function toGuildMembersResponse(
   { guildName, members }: StoredGuild
 ): GuildMembersResponse {
   const memberCount = members.length
-  const meanFame = averageFame(members)
   const rows = members.map(toCharacterRow)
 
-  return { guildId, guildName, memberCount, averageFame: meanFame, members: rows }
+  return { guildId, guildName, memberCount, members: rows }
 }
 
 export function toAdventureWeeklyResponse(
