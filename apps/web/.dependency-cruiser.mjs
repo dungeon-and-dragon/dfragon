@@ -15,12 +15,9 @@ const LAYER_IMPORT_COMMENT =
   '계층은 자기보다 아래 계층만 import한다. 위에서부터 app, pages, widgets, features, entities, shared다.'
 const SLICE_IMPORT_COMMENT =
   '같은 계층의 다른 슬라이스는 import하지 않는다. 두 슬라이스가 쓰는 코드는 아래 계층으로 내린다. entity 사이는 entities/<A>/@x/<B>.ts로만 가져온다.'
-// 화면끼리 import하는 지금 코드는 #1822, #1823이 옮기거나 지울 때까지 예외로 둔다.
+// home의 test와 story가 다른 화면을 띄우는 import는 #1823이 정할 때까지 예외로 둔다.
 const PAGE_SLICE_EXCEPTIONS = {
-  home: ['rankings', 'character-search', 'not-found', 'legal'],
-  search: ['party', 'raid'],
-  multisearch: ['party', 'raid', 'search'],
-  stats: ['rankings']
+  home: ['rankings', 'character-search', 'not-found', 'legal']
 }
 
 function upperLayerRules() {
