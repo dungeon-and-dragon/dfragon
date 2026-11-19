@@ -57,6 +57,8 @@ export function FameRankingList({
 }): React.JSX.Element {
   const result = useFameRanking(filter)
   const name = rankingName(filter, setLabel)
+  const ranked = filter.fameTo === undefined
+
   switch (result.status) {
     case 'loading':
       return (
@@ -70,8 +72,9 @@ export function FameRankingList({
               rows={[]}
               detail={setColumnOf(catalog)}
               affiliations={AFFILIATIONS}
+              ranked={ranked}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} detail affiliations={AFFILIATIONS} />
+                <SkeletonRow key={index} ranked={ranked} detail affiliations={AFFILIATIONS} />
               ))}
             />
           </div>
@@ -103,10 +106,13 @@ export function FameRankingList({
               filter.role,
               filter.equipmentSetId,
               filter.oathSetId,
-              filter.oathSetOption
+              filter.oathSetOption,
+              filter.fameFrom,
+              filter.fameTo
             ].join('/')}
             ranking={result.value}
             catalog={catalog}
+            ranked={ranked}
           />
         </ListBox>
       )
@@ -115,10 +121,12 @@ export function FameRankingList({
 
 function PagedTable({
   ranking,
-  catalog
+  catalog,
+  ranked
 }: {
   ranking: FameRankingPages
   catalog: OathCatalog | null
+  ranked: boolean
 }): React.JSX.Element {
   const [visible, setVisible] = useState(PAGE_SIZE)
   const { characters, hasMore, loadingMore, moreError, loadMore } = ranking
@@ -140,7 +148,12 @@ function PagedTable({
         rows={characters.slice(0, visible)}
         detail={setColumnOf(catalog)}
         affiliations={AFFILIATIONS}
-        trailing={loadingMore ? <SkeletonRow detail affiliations={AFFILIATIONS} /> : undefined}
+        ranked={ranked}
+        trailing={
+          loadingMore ? (
+            <SkeletonRow ranked={ranked} detail affiliations={AFFILIATIONS} />
+          ) : undefined
+        }
       />
       {!loadingMore && canShowMore && (
         <div className="flex min-h-12 items-center justify-center border-t border-line">
