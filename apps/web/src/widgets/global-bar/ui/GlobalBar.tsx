@@ -11,7 +11,7 @@ type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '멀티서치', to: '/multisearch' },
-  { label: '랭킹', to: '/rankings' },
+  { label: '검색', to: '/rankings' },
   { label: '통계', to: '/stats' },
   { label: '클리어', to: '/clears' },
   { label: '모험단', to: '/adventures' },

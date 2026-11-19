@@ -60,7 +60,6 @@ export function FameRankingList({
 }): React.JSX.Element {
   const result = useFameRanking(filter)
   const name = rankingName(filter, setLabel)
-  const ranked = filter.fameTo === undefined
 
   switch (result.status) {
     case 'loading':
@@ -69,15 +68,15 @@ export function FameRankingList({
           {/* 필터를 바꿔 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다. */}
           <div aria-busy="true" className="min-h-screen">
             <span role="status" className="sr-only">
-              랭킹을 받는 중입니다.
+              검색 결과를 받는 중입니다.
             </span>
             <CharacterTable
               rows={[]}
               detail={setColumnOf(catalog)}
               affiliations={AFFILIATIONS}
-              ranked={ranked}
+              ranked={false}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} ranked={ranked} detail affiliations={AFFILIATIONS} />
+                <SkeletonRow key={index} ranked={false} detail affiliations={AFFILIATIONS} />
               ))}
             />
           </div>
@@ -95,7 +94,7 @@ export function FameRankingList({
       if (result.value.characters.length === 0) {
         return (
           <ListBox name={name}>
-            <p className="state">랭킹에 오른 캐릭터가 없습니다.</p>
+            <p className="state">조건에 맞는 캐릭터가 없습니다.</p>
           </ListBox>
         )
       }
@@ -115,7 +114,6 @@ export function FameRankingList({
             ].join('/')}
             ranking={result.value}
             catalog={catalog}
-            ranked={ranked}
           />
         </ListBox>
       )
@@ -124,12 +122,10 @@ export function FameRankingList({
 
 function PagedTable({
   ranking,
-  catalog,
-  ranked
+  catalog
 }: {
   ranking: FameRankingPages
   catalog: OathCatalog | null
-  ranked: boolean
 }): React.JSX.Element {
   const [visible, setVisible] = useState(PAGE_SIZE)
   const { characters, hasMore, loadingMore, moreError, loadMore } = ranking
@@ -151,10 +147,10 @@ function PagedTable({
         rows={characters.slice(0, visible)}
         detail={setColumnOf(catalog)}
         affiliations={AFFILIATIONS}
-        ranked={ranked}
+        ranked={false}
         trailing={
           loadingMore ? (
-            <SkeletonRow ranked={ranked} detail affiliations={AFFILIATIONS} />
+            <SkeletonRow ranked={false} detail affiliations={AFFILIATIONS} />
           ) : undefined
         }
       />

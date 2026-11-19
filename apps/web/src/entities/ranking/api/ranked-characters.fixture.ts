@@ -54,7 +54,6 @@ export function storyRankedCharacters(count: number): RankedCharacter[] {
     const role = jobGrowName === '眞 크루세이더' ? 'buffer' : 'dealer'
 
     return {
-      rank: number,
       serverId,
       characterId: `story-character-${number}`,
       characterName: `캐릭터${number}`,

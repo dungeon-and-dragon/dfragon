@@ -52,7 +52,9 @@ function FameRankingTop(): React.JSX.Element {
       return (
         <ListBox name={NAME}>
           <CharacterTable
-            rows={result.value.characters.slice(0, SHOWN_COUNT)}
+            rows={result.value.characters
+              .slice(0, SHOWN_COUNT)
+              .map((character, index) => ({ ...character, rank: index + 1 }))}
             affiliations={NO_AFFILIATIONS}
           />
         </ListBox>
