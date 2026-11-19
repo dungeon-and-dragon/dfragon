@@ -1,15 +1,20 @@
 import type { StoredClearPopulation } from '@dfragon/database'
 import {
   CLEAR_CONTENTS,
+  CLEAR_LEGIONS,
   type ClearContent
 } from '@dfragon/server-core/domain/content-clears/index.js'
 import type { ClearWeekSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/index.js'
+import { planLegionClearMoves } from '#domain/content-clears/index.js'
 
 export type ClearWeekSampleSummary = {
+  legions: number
   contents: number
   overviews: number
 }
+
+const SAMPLED_CONTENTS: readonly ClearContent[] = [...CLEAR_CONTENTS, ...CLEAR_LEGIONS]
 
 type ContentWeek = {
   content: ClearContent
@@ -47,6 +52,7 @@ export class ClearWeekSampleService {
   async recordMissing(
     reportProgress: (done: number, total: number) => void
   ): Promise<ClearWeekSampleSummary> {
+    const legions = await this.moveLegionClears()
     const populations = await this.repository.readPopulations()
     const storedContentWeeks = new Set(
       (await this.repository.readContentWeekSampleWeeks()).map(({ contentId, weekStart }) =>
@@ -63,7 +69,7 @@ export class ClearWeekSampleService {
         ({ contentId, weekStart }) => !storedContentWeeks.has(contentWeekKey(contentId, weekStart))
       )
       .flatMap((population): ContentWeek[] => {
-        const content = CLEAR_CONTENTS.find(({ id }) => id === population.contentId)
+        const content = SAMPLED_CONTENTS.find(({ id }) => id === population.contentId)
 
         if (content === undefined) {
           return []
@@ -98,6 +104,36 @@ export class ClearWeekSampleService {
       reportProgress(done, total)
     }
 
-    return { contents: contentWeeks.length, overviews: overviewWeeks.length }
+    return { legions, contents: contentWeeks.length, overviews: overviewWeeks.length }
+  }
+
+  // 레기온 클리어를 먼저 옮기고 모집단을 마감해야 아래 상세 집계가 그 주를 계산한다.
+  private async moveLegionClears(): Promise<number> {
+    const populations = await this.repository.readPopulations()
+    const moves = planLegionClearMoves(CLEAR_LEGIONS, populations, this.now())
+
+    for (const { legion, collection, copySnapshot } of moves) {
+      const { weekStart, population, minFame, jobs } = collection
+
+      await this.repository.recordLegionClears({
+        contentId: legion.id,
+        name: legion.name,
+        weekStart,
+        copySnapshot
+      })
+
+      const collectedAt = this.now()
+      await this.repository.recordPopulation({
+        contentId: legion.id,
+        weekStart,
+        population,
+        minFame,
+        jobs,
+        collectedAt,
+        closed: true
+      })
+    }
+
+    return moves.length
   }
 }

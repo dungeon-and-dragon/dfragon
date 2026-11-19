@@ -85,7 +85,6 @@ export {
   finishClearRecordBackfill,
   readClearRecordBackfill,
   readClearRecordCursors,
-  readClearRecordLegionWeeks,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
   recordClearRecordBackfillProgress,
@@ -97,7 +96,6 @@ export type {
   ClearRecordBackfillProgress,
   ClearRecordCursor,
   ClearRecordInput,
-  ClearRecordLegionWeek,
   ClearRecordRaidMode,
   ClearRecordRaidSelection,
   ClearRecordRaidStage,
@@ -132,6 +130,7 @@ export {
   recordContentClearCollectionProgress,
   recordContentClearPopulation,
   recordContentClears,
+  recordLegionContentClears,
   startContentClearCollection
 } from './content-clear.js'
 export type {
@@ -162,6 +161,7 @@ export type {
   ContentClearInput,
   ContentClearKind,
   ContentClearPopulationInput,
+  LegionClearWeek,
   StoredClearPopulation
 } from './content-clear.js'
 export {
