@@ -612,9 +612,16 @@ it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전�
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => {
         const jobs = item.jobs.map((candidate, index) => {
-          const scores = index === 0 ? noScores : { equipment, buff: null }
+          if (index === 0) {
+            return {
+              ...candidate,
+              jobName: '거너(남)',
+              jobGrowName: '眞 레인저',
+              scores: noScores
+            }
+          }
 
-          return { ...candidate, scores }
+          return { ...candidate, scores: { equipment, buff: null } }
         })
 
         return { ...item, jobs }
@@ -638,5 +645,5 @@ it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전�
   expect(jobPanel?.textContent).toContain('클리어 캐릭터의 장비 점수')
   expect(axisTicks('전직별 클리어')).toContain('30만')
   expect(jobNames()).toEqual(fameNames)
-  expect(jobNames()[0]).toBe('전직0')
+  expect(jobNames()[0]).toBe('레인저(남)')
 })
