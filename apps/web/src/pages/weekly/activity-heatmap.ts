@@ -86,13 +86,13 @@ export function buildHeatmapWeeks(season: SeasonRange, now: number): readonly He
 export function dayCount(day: ActivityDay, kind: ActivityKind): number {
   switch (kind) {
     case 'all':
-      return day.raid + day.legion + day.item + day.enhance
+      return day.raid + day.legion + day.item + day.oath + day.enhance
     case 'raid':
       return day.raid
     case 'legion':
       return day.legion
     case 'item':
-      return day.item
+      return day.item + day.oath
     case 'enhance':
       return day.enhance
   }
@@ -125,7 +125,7 @@ export function ringHighlight(day: ActivityDay, kind: ActivityKind): RingHighlig
       return 'mythic'
     }
 
-    if (day.primeval) {
+    if (day.primeval || day.oathPrimeval) {
       return 'primeval'
     }
 

@@ -7,7 +7,7 @@ import type {
 import type { AdventureActivitySeasonDaysResult } from './hooks/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
 import { formatClearCount } from './clear-count'
-import { type DayItemRow, dayItemRows } from './day-item-rows'
+import { type DayItemRow, dayItemGroups } from './day-item-rows'
 import { enhancementKindClasses, rarityTextOfName } from '#components/game-colors'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
@@ -76,17 +76,40 @@ function ItemRow({ row }: { row: DayItemRow }): React.JSX.Element {
   )
 }
 
-function ItemGroup({ items }: { items: readonly ActivityDayItem[] }): React.JSX.Element | null {
-  if (items.length === 0) {
+function ItemGroup({
+  title,
+  rows
+}: {
+  title: string
+  rows: readonly DayItemRow[]
+}): React.JSX.Element | null {
+  if (rows.length === 0) {
     return null
   }
 
   return (
     <>
-      <Group title="아이템" />
-      {dayItemRows(items).map((row, index) => (
+      <Group title={title} />
+      {rows.map((row, index) => (
         <ItemRow key={index} row={row} />
       ))}
+    </>
+  )
+}
+
+function ItemGroups({
+  day,
+  hasOaths
+}: {
+  day: AdventureActivityDay
+  hasOaths: boolean
+}): React.JSX.Element {
+  const groups = dayItemGroups(day.items, day.oaths)
+
+  return (
+    <>
+      <ItemGroup title={hasOaths ? '장비' : '아이템'} rows={groups.items} />
+      <ItemGroup title="서약" rows={groups.oaths} />
     </>
   )
 }
@@ -134,10 +157,12 @@ function EnhancementResult({ kind, target, success }: ActivityDayEnhancement): R
 
 function DayRecords({
   day,
-  kind
+  kind,
+  hasOaths
 }: {
   day: AdventureActivityDay | undefined
   kind: ActivityKind
+  hasOaths: boolean
 }): React.JSX.Element | null {
   if (day === undefined) {
     return null
@@ -147,7 +172,7 @@ function DayRecords({
     <>
       {(kind === 'all' || kind === 'raid') && <ClearGroup title="레이드" counts={day.raids} />}
       {(kind === 'all' || kind === 'legion') && <ClearGroup title="레기온" counts={day.legions} />}
-      {(kind === 'all' || kind === 'item') && <ItemGroup items={day.items} />}
+      {(kind === 'all' || kind === 'item') && <ItemGroups day={day} hasOaths={hasOaths} />}
       {(kind === 'all' || kind === 'enhance') && (
         <EnhancementGroup enhancements={day.enhancements} />
       )}
@@ -158,11 +183,13 @@ function DayRecords({
 export function ActivityDayDetail({
   date,
   kind,
-  seasonDays
+  seasonDays,
+  hasOaths
 }: {
   date: string
   kind: ActivityKind
   seasonDays: AdventureActivitySeasonDaysResult
+  hasOaths: boolean
 }): React.JSX.Element {
   return (
     <div className="flex w-[256px] flex-col text-fg">
@@ -183,7 +210,11 @@ export function ActivityDayDetail({
         </p>
       )}
       {seasonDays.status === 'success' && (
-        <DayRecords day={seasonDays.value.find((day) => day.date === date)} kind={kind} />
+        <DayRecords
+          day={seasonDays.value.find((day) => day.date === date)}
+          kind={kind}
+          hasOaths={hasOaths}
+        />
       )}
     </div>
   )
