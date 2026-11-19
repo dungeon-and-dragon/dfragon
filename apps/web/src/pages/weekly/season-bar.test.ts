@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ActivitySeason } from '#core/adventure-guild'
+import type { ActivitySeason } from '#entities/adventure-guild'
 import { backfillProgress, seasonBar } from './season-bar'
 
 const SEASON: ActivitySeason = {

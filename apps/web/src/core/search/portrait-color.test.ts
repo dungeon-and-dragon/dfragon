@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { CharacterImage, CharacterPortrait } from '#core/character/character'
+import type { CharacterImage, CharacterPortrait } from '#entities/character'
 import type { PortraitAnchor } from './portrait-anchor'
 import {
   createPortraitColorScorer,

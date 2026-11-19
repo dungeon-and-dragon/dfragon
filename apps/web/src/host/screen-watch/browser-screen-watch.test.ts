@@ -8,7 +8,7 @@ import {
   type PartyFrameSlot
 } from '@dfragon/lib'
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import {
   cropRaidWindowNicknames,
   readRaidWindowValues,

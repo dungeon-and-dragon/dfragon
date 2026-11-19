@@ -2,7 +2,7 @@
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { ServerSelect } from '#components/ServerSelect'
+import type { ServerSelect } from '#shared/ui/ServerSelect'
 import {
   type CardCharacter,
   createSeatOrder,
@@ -16,7 +16,7 @@ import { dealerCard } from '#core/testing'
 import { RaidScreen } from './RaidScreen'
 import { TestRouter } from '#testing/test-support/test-router'
 
-vi.mock('#components/ServerSelect', () => ({
+vi.mock('#shared/ui/ServerSelect', () => ({
   ServerSelect: ({ value, onValueChange, label, options }: ComponentProps<typeof ServerSelect>) => (
     <select
       aria-label={label}

@@ -1,4 +1,4 @@
-import type { SelectedCharacterSummary } from '#core/character'
+import type { SelectedCharacterSummary } from '#entities/character'
 import type { CharacterChoice, SearchSlot } from '#core/search'
 import { bufferCard, dealerCard } from '#core/testing'
 import type { CardCharacter, CharacterCard } from '#core/capture'

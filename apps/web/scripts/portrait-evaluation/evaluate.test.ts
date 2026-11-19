@@ -5,7 +5,7 @@ import { setImmediate } from 'node:timers/promises'
 import { PNG } from 'pngjs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createPortraitColorScorer, type PortraitColorScorer } from '#core/search/portrait-color'
-import type { CharacterImage } from '#core/character/character'
+import type { CharacterImage } from '#entities/character'
 import { type CaseResult, evaluateCase, summarize } from './evaluate'
 import { buildHudPortrait, hudFaceSize } from './hud-portrait'
 import {

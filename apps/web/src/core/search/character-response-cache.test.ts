@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '#core/character/character'
+import type { CharacterCandidate, CharacterDetails } from '#entities/character'
 import { createDfragonHttp } from '#shared/api/dfragon-http'
 import {
   type CharacterCandidatesHttp,

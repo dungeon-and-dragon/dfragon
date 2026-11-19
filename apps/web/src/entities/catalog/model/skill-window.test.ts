@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { characterDetailFixture } from '#core/testing/character-detail'
+import { characterDetailFixture } from '#core/testing'
 import type { GameTextLines } from './game-text'
 import {
   buffSkillIconOf,
