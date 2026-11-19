@@ -44,6 +44,8 @@ export type {
   CharacterSearchRow,
   SelectedCharacterSummary
 } from './model/character'
+export { PORTRAIT_CANVAS_WIDTH } from './model/character-face'
+export type { CharacterFaceWindow } from './model/character-face'
 export { characterDetailViewSchema } from './model/character-detail-view'
 export type { CharacterDetailView } from './model/character-detail-view'
 export {
@@ -118,3 +120,5 @@ export {
   rarityTextOfName
 } from './ui/game-colors'
 export { ServerBadge } from './ui/ServerBadge'
+export { CardImage } from './ui/CardImage'
+export { Portrait } from './ui/Portrait'
