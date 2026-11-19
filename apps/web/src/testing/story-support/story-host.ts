@@ -1,6 +1,6 @@
 import type { ClientHost } from '#host/client-host'
 
-type StoryHostOverrides = Partial<Omit<ClientHost, 'party' | 'raid'>> & {
+type StoryHostOverrides = {
   party?: Partial<ClientHost['party']>
   raid?: Partial<ClientHost['raid']>
 }
@@ -12,11 +12,7 @@ function pending<T>(): Promise<T> {
 
 function unsubscribe(): void {}
 
-export function createStoryClientHost({
-  party,
-  raid,
-  ...operations
-}: StoryHostOverrides = {}): ClientHost {
+export function createStoryClientHost({ party, raid }: StoryHostOverrides = {}): ClientHost {
   return {
     party: {
       controlCharacterSearch: pending,
@@ -32,14 +28,6 @@ export function createStoryClientHost({
       notifyOcrCandidatesDetected: pending,
       readCaptureFrame: pending,
       ...raid
-    },
-    getTodayGrade: pending,
-    getGuild: pending,
-    getAdventureWeekly: pending,
-    getAdventureActivity: pending,
-    getAdventureActivitySeasonDays: pending,
-    backfillAdventureSeason: pending,
-    searchCharacters: pending,
-    ...operations
+    }
   }
 }
