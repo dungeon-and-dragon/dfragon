@@ -88,6 +88,7 @@ async function createCharacter(characterId, fame) {
 async function recordScore(key, kind, score) {
   await recordCharacterScore(client, {
     ...key,
+    job: null,
     kind,
     score,
     calculatedAt: new Date('2026-11-19T00:00:00Z'),

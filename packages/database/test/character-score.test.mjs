@@ -7,10 +7,12 @@ const port = process.env.DFRAGON_TEST_CHARACTER_SCORE_PORT
 
 const character = { serverId: 'cain', characterId: 'score-fixture' }
 const engine = { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+const job = { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }
 
 function scoreOf(score, overrides = {}) {
   return {
     ...character,
+    job,
     kind: 'equipment',
     score,
     calculatedAt: new Date('2026-11-14T00:00:00Z'),
@@ -21,14 +23,15 @@ function scoreOf(score, overrides = {}) {
 
 async function readStored(client) {
   const [row] = await client.$queryRaw`
-    SELECT "kind", "score", "calculated_at", "engine_package", "engine_rules_rev", "engine_bundle_id"
+    SELECT "kind", "score", "calculated_at", "engine_package", "engine_rules_rev", "engine_bundle_id",
+      "job_id", "job_grow_id"
     FROM "character_scores"
     WHERE "server_id" = ${character.serverId} AND "character_id" = ${character.characterId}`
 
   return row
 }
 
-test('같은 엔진 버전과 종류에서는 높은 점수만 남기고, 버전이나 종류가 바뀌면 낮아도 새 값으로 덮으며, 동시에 저장해도 최고값이 남는다', {
+test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 버전, 종류나 전직이 바뀌면 낮아도 새 값으로 덮으며, 동시에 저장해도 최고값이 남는다', {
   skip: port === undefined
 }, async (t) => {
   const client = createDatabaseClient({
@@ -39,20 +42,19 @@ test('같은 엔진 버전과 종류에서는 높은 점수만 남기고, 버전
     password: 'synthetic'
   })
   t.after(() => client.$disconnect())
-  const migration = await readFile(
-    new URL(
-      '../prisma/migrations/20261114130000_add_character_scores/migration.sql',
-      import.meta.url
-    ),
-    'utf8'
+  const migrations = await Promise.all(
+    ['20261114130000_add_character_scores', '20261119180000_add_character_score_jobs'].map((name) =>
+      readFile(new URL(`../prisma/migrations/${name}/migration.sql`, import.meta.url), 'utf8')
+    )
   )
   await client.$executeRawUnsafe('DROP TABLE IF EXISTS "character_scores", "characters"')
-  // 점수 행이 참조하는 기본 key만 둔 characters다.
+  // 점수 행이 참조하는 기본 key와 전직 migration이 읽는 전직만 둔 characters다.
   await client.$executeRawUnsafe(
-    'CREATE TABLE "characters" ("server_id" TEXT NOT NULL, "character_id" TEXT NOT NULL, PRIMARY KEY ("server_id", "character_id"))'
+    'CREATE TABLE "characters" ("server_id" TEXT NOT NULL, "character_id" TEXT NOT NULL, "job_id" TEXT, "job_grow_id" TEXT, PRIMARY KEY ("server_id", "character_id"))'
   )
-  await client.$executeRaw`INSERT INTO "characters" VALUES (${character.serverId}, ${character.characterId})`
-  for (const statement of migration
+  await client.$executeRaw`INSERT INTO "characters" VALUES (${character.serverId}, ${character.characterId}, NULL, NULL)`
+  for (const statement of migrations
+    .join(';')
     .split(';')
     .map((part) => part.trim())
     .filter(Boolean)) {
@@ -70,7 +72,9 @@ test('같은 엔진 버전과 종류에서는 높은 점수만 남기고, 버전
     calculated_at: new Date('2026-11-14T00:00:00Z'),
     engine_package: engine.package,
     engine_rules_rev: engine.rulesRev,
-    engine_bundle_id: engine.bundleId
+    engine_bundle_id: engine.bundleId,
+    job_id: job.jobId,
+    job_grow_id: job.jobGrowId
   })
 
   await recordCharacterScore(
@@ -90,7 +94,9 @@ test('같은 엔진 버전과 종류에서는 높은 점수만 남기고, 버전
     calculated_at: new Date('2026-11-17T00:00:00Z'),
     engine_package: engine.package,
     engine_rules_rev: engine.rulesRev,
-    engine_bundle_id: 'phase33-rev15a'
+    engine_bundle_id: 'phase33-rev15a',
+    job_id: job.jobId,
+    job_grow_id: job.jobGrowId
   })
 
   await recordCharacterScore(client, scoreOf(900, { kind: 'buff', engine: nextEngine }))
@@ -104,6 +110,17 @@ test('같은 엔진 버전과 종류에서는 높은 점수만 남기고, 버전
     )
   )
   assert.equal((await readStored(client)).score, Math.max(...concurrent))
+
+  const nextJob = { jobId: 'synthetic-job', jobGrowId: 'synthetic-next-grow' }
+  await recordCharacterScore(
+    client,
+    scoreOf(800, { kind: 'buff', engine: nextEngine, job: nextJob })
+  )
+  const regrown = await readStored(client)
+  assert.deepEqual([regrown.score, regrown.job_grow_id], [800, 'synthetic-next-grow'])
+  await recordCharacterScore(client, scoreOf(700, { kind: 'buff', engine: nextEngine, job: null }))
+  const unknownJob = await readStored(client)
+  assert.deepEqual([unknownJob.score, unknownJob.job_id], [700, null])
 
   await client.$executeRaw`DELETE FROM "characters" WHERE "server_id" = ${character.serverId}`
   assert.equal(await readStored(client), undefined)

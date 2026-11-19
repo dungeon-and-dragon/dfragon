@@ -649,6 +649,7 @@ try {
     await recordCharacterScore(client, {
       serverId: 'cain',
       characterId,
+      job: null,
       kind: 'equipment',
       score: 905000,
       calculatedAt: at('2026-11-10T06:00:00'),

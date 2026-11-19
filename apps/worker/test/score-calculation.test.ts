@@ -161,14 +161,25 @@ function engineResult(score: number | null): ScoreEngineResult {
   }
 }
 
-const scoreOf = (characterId: string): CharacterScoreInput => ({
-  serverId: 'cain',
-  characterId,
-  kind: 'equipment',
-  score: 1000 + characterId.charCodeAt(0),
-  calculatedAt: NOW,
-  engine: { package: versions.package, rulesRev: versions.rules_rev, bundleId: versions.bundle_id }
-})
+// 모험단 이름이 없는 캐릭터는 기본 정보를 읽지 못해 전직을 모르는 점수로 저장한다.
+const scoreOf = (characterId: string): CharacterScoreInput => {
+  const job =
+    characterId === adventurelessId ? null : { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }
+
+  return {
+    serverId: 'cain',
+    characterId,
+    job,
+    kind: 'equipment',
+    score: 1000 + characterId.charCodeAt(0),
+    calculatedAt: NOW,
+    engine: {
+      package: versions.package,
+      rulesRev: versions.rules_rev,
+      bundleId: versions.bundle_id
+    }
+  }
+}
 
 type Respond = (characterId: string, section: CharacterDetailSection, attempt: number) => void
 
@@ -521,14 +532,14 @@ test('세트 저장이 실패해도 이력은 저장하고 이력 수에 넣지 
   )
 })
 
-test('모험단 이름이 없는 캐릭터는 점수만 저장하고 characters, 세트, 이력은 저장하지 않는다', async () => {
+test('모험단 이름이 없는 캐릭터는 점수만 전직 없이 저장하고 characters, 세트, 이력은 저장하지 않는다', async () => {
   const { dependencies, saved, basics, histories, sets } = calculation([character(adventurelessId)])
 
   const summary = await calculateScores(dependencies)
 
   assert.deepEqual(
-    saved.map(({ characterId }) => characterId),
-    [adventurelessId]
+    saved.map(({ characterId, job }) => [characterId, job]),
+    [[adventurelessId, null]]
   )
   assert.deepEqual(basics, [])
   assert.deepEqual(histories, [])
