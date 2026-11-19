@@ -16,6 +16,8 @@ export type FameRankingFilter = {
   oathSetId?: number
   oathSetOption?: string
   itemIds?: readonly string[]
+  fameFrom?: number
+  fameTo?: number
 }
 
 export type FameRankingPosition = {
@@ -159,10 +161,22 @@ export async function readFameRanking(
   limit: number,
   after?: FameRankingPosition
 ): Promise<RankedStoredCharacter[]> {
-  const { jobId, jobGrowId, role, equipmentSetId, oathSetId, oathSetOption, itemIds = [] } = filter
+  const {
+    jobId,
+    jobGrowId,
+    role,
+    equipmentSetId,
+    oathSetId,
+    oathSetOption,
+    itemIds = [],
+    fameFrom,
+    fameTo
+  } = filter
   const gatheredItem = await pickGatheredItem(client, itemIds)
   const conditions = [
     Prisma.sql`c.fame IS NOT NULL`,
+    ...(fameFrom !== undefined ? [Prisma.sql`c.fame >= ${fameFrom}::int`] : []),
+    ...(fameTo !== undefined ? [Prisma.sql`c.fame <= ${fameTo}::int`] : []),
     ...(jobId !== undefined ? [Prisma.sql`c.job_id = ${jobId}`] : []),
     ...(jobGrowId !== undefined ? [Prisma.sql`c.job_grow_id = ${jobGrowId}`] : []),
     ...(role !== undefined ? [maleCrusaderRoleSql(storedDealerSkillLearnedSql, role)] : []),
