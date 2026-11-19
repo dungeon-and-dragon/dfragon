@@ -5,12 +5,15 @@ import {
   type SlotCard,
   type SnapshotMark,
   toCandidatePicker,
-  toSlotCards
-} from '#core/capture'
+  toSlotCards,
+  type CharacterChoice,
+  type SearchSlot,
+  type SearchSnapshot,
+  CAPTURE_ID,
+  type BrowserHost
+} from '#features/capture-search'
 import type { SelectedCharacterSummary } from '#entities/character'
-import type { CharacterChoice, SearchSlot, SearchSnapshot } from '#core/search'
-import { bufferCard, CAPTURE_ID, dealerCard } from '#core/testing'
-import type { BrowserHost } from '#host/client-host'
+import { bufferCard, dealerCard } from '#testing/fixtures/character'
 import characterImage from '#testing/fixtures/mvp/assets/character.png'
 import { createStoryClientHost } from './story-host'
 

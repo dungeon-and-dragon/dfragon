@@ -2,9 +2,13 @@
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { bufferCard, dealerCard } from '#core/testing'
-import type { CandidatePicker, CardCharacter, SlotCard } from '#core/capture'
-import type { CharacterChoice } from '#core/search'
+import { bufferCard, dealerCard } from '#testing/fixtures/character'
+import type {
+  CandidatePicker,
+  CardCharacter,
+  SlotCard,
+  CharacterChoice
+} from '#features/capture-search'
 import type { ServerSelect } from '#shared/ui/ServerSelect'
 import { toneClassesOf } from '#testing/test-support/score-tone-class'
 import { TestRouter } from '#testing/test-support/test-router'

@@ -2,8 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CandidatePicker } from '#core/capture'
-import type { CharacterChoice } from '#core/search'
+import type { CandidatePicker, CharacterChoice } from '#features/capture-search'
 import { toneClassesOf } from '#testing/test-support/score-tone-class'
 import { CandidatePopover } from './CandidatePopover'
 
