@@ -13,12 +13,12 @@ import type {
   SearchSnapshot
 } from '#core/search'
 import { WEB_CAPTURE_TEXTS } from '#core/capture'
-import * as diagnostics from '#core/diagnostics'
+import * as diagnostics from '#shared/lib/diagnostics'
 import { createTestClientHost } from '#testing/test-support/client-host'
 import { ClientHostContext } from '#host/client-host'
 import { usePartyCapture } from './usePartyCapture'
 
-vi.mock('#core/diagnostics/runtime-diagnostics', { spy: true })
+vi.mock('#shared/lib/diagnostics/runtime-diagnostics', { spy: true })
 
 const moduleMocks = vi.hoisted(() => {
   const capturePartyRecognitionInputs = vi.fn()

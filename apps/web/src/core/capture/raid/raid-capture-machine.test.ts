@@ -14,7 +14,7 @@ const modules = vi.hoisted(() => ({
 }))
 vi.mock('#core/ocr/ocr', () => ({ createPartyOcrWorker: modules.worker }))
 vi.mock('./raid-recognition', () => ({ recognizeRaidRows: modules.recognize }))
-vi.mock('#core/diagnostics/runtime-diagnostics', () => ({
+vi.mock('#shared/lib/diagnostics/runtime-diagnostics', () => ({
   reportRuntimeDiagnostic: modules.diagnostic,
   showRejectedOcrNickname: modules.rejected
 }))

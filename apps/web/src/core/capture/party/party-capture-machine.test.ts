@@ -7,7 +7,7 @@ import type { CharacterImage } from '#core/character/character'
 
 const modules = vi.hoisted(() => ({ diagnostic: vi.fn() }))
 vi.mock('#core/ocr/ocr', () => ({ createPartyOcrWorker: vi.fn() }))
-vi.mock('#core/diagnostics/runtime-diagnostics', () => ({
+vi.mock('#shared/lib/diagnostics/runtime-diagnostics', () => ({
   reportRuntimeDiagnostic: modules.diagnostic,
   showRejectedOcrNickname: vi.fn()
 }))
