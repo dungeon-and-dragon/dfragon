@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { CHARACTER_SERVER_NAMES, characterImageUrl } from '#core/character'
+import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
@@ -19,10 +20,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const characters = storyRankedCharacters(10)
-
-const rankingHost = createStoryClientHost({
-  getFameRanking: async () => ({ characters, nextCursor: null })
-})
 
 const searchHost = createStoryClientHost({
   searchCharacters: async () =>
@@ -45,8 +42,9 @@ const searchHost = createStoryClientHost({
 })
 
 export const 메인: Story = {
+  parameters: { msw: [fameRankingHandlers.pages] },
   render: () => (
-    <StoryFrame host={rankingHost}>
+    <StoryFrame>
       <StoryScreen>
         <HomePage />
       </StoryScreen>
@@ -55,6 +53,7 @@ export const 메인: Story = {
 }
 
 export const 메인받는중: Story = {
+  parameters: { msw: [fameRankingHandlers.loading] },
   render: () => (
     <StoryFrame>
       <StoryScreen>
