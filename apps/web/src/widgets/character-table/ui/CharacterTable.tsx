@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@dfragon/ui'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
@@ -24,6 +25,8 @@ export type CharacterTableAction = {
 export type Affiliation = 'adventure' | 'guild'
 
 export type ScorePlacement = 'column' | 'belowFame'
+
+export type SortedColumn = 'fame' | 'score'
 
 export type CharacterTableDetail<Row> = {
   name: string
@@ -55,11 +58,13 @@ export function CharacterTable<Row extends CharacterTableRow>({
   trailing,
   affiliations = ALL_AFFILIATIONS,
   adventureBesideName = false,
-  scorePlacement
+  scorePlacement,
+  sortedBy
 }: {
   rows: readonly Row[]
   ranked?: boolean
   scorePlacement?: ScorePlacement
+  sortedBy?: SortedColumn
   detail?: CharacterTableDetail<Row>
   action?: CharacterTableAction
   trailing?: ReactNode
@@ -93,13 +98,9 @@ export function CharacterTable<Row extends CharacterTableRow>({
                 {detail.name}
               </th>
             )}
-            <th scope="col" className="table-num">
-              명성
-            </th>
+            <NumberHeading label="명성" sorted={sortedBy === 'fame'} />
             {scorePlacement === 'column' && (
-              <th scope="col" className="table-num">
-                점수
-              </th>
+              <NumberHeading label="점수" sorted={sortedBy === 'score'} />
             )}
             {affiliations.map((affiliation) => (
               <th key={affiliation} scope="col" className="text-center">
@@ -157,6 +158,25 @@ export function CharacterTable<Row extends CharacterTableRow>({
         </tbody>
       </table>
     </div>
+  )
+}
+
+function NumberHeading({ label, sorted }: { label: string; sorted: boolean }): React.JSX.Element {
+  if (!sorted) {
+    return (
+      <th scope="col" className="table-num">
+        {label}
+      </th>
+    )
+  }
+
+  return (
+    <th scope="col" aria-sort="descending" className="table-num">
+      <span className="inline-flex items-center gap-1 text-fg">
+        {label}
+        <ChevronDownIcon className="size-icon-sm" />
+      </span>
+    </th>
   )
 }
 

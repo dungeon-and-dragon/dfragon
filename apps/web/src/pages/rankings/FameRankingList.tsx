@@ -77,6 +77,7 @@ export function FameRankingList({
               affiliations={AFFILIATIONS}
               ranked={false}
               scorePlacement="column"
+              sortedBy="fame"
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
                 <SkeletonRow
                   key={index}
@@ -189,6 +190,7 @@ function PagedTable({
             affiliations={AFFILIATIONS}
             ranked={false}
             scorePlacement="column"
+            sortedBy="fame"
             trailing={skeletonRows}
           />
         </div>
