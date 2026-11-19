@@ -13,6 +13,19 @@ export type {
   AdventureActivitySeasonDays,
   EnhancementTarget
 } from './model/adventure-activity'
+export {
+  adventureEquipmentSchema,
+  EQUIPMENT_SLOTS,
+  HOLDING_RARITIES,
+  toEquipmentBoard
+} from './model/adventure-equipment'
+export type {
+  AdventureEquipment,
+  EquipmentBoardRow,
+  EquipmentCharacter,
+  EquipmentSlot,
+  HoldingCell
+} from './model/adventure-equipment'
 export { guildSchema } from './model/adventure-guild'
 export type { Guild } from './model/adventure-guild'
 export { adventureWeeklySchema } from './model/adventure-weekly'
