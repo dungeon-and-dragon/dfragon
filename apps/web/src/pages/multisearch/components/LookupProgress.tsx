@@ -1,4 +1,4 @@
-import { LOOKUP_STEPS, type LookupStep } from '#lib/card-presentation'
+import { LOOKUP_STEPS, type LookupStep } from '#pages/multisearch/card-presentation'
 
 // design의 status-live keyframes가 이 점의 깜박임(불투명에서 0.35로)과 같아 그것을 쓴다.
 const activeDotClass =
