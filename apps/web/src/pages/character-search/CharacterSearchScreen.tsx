@@ -11,7 +11,7 @@ import {
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { characterSearchServerOptions } from '#shared/config/server-options'
-import { useSearchedCharacters } from './hooks/useSearchedCharacters'
+import { useSearchedCharacters } from './api/useSearchedCharacters'
 
 const LOADING_ROWS = 5
 const NO_AFFILIATIONS = [] as const

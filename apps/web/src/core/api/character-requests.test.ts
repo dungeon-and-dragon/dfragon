@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
 import type { SearchErrorCode } from './http'
 import { createDfragonClient } from './dfragon-client'
 
@@ -46,7 +45,7 @@ describe('없는 캐릭터의 404 응답', () => {
   })
 })
 
-type Route = 'candidates' | 'search' | 'details'
+type Route = 'candidates' | 'details'
 
 function request(route: Route, response: Response): Promise<unknown> {
   const options = {
@@ -58,11 +57,6 @@ function request(route: Route, response: Response): Promise<unknown> {
   switch (route) {
     case 'candidates':
       return createDfragonClient(options).characters.candidates({ nickname: '가나', signal })
-    case 'search':
-      return createDfragonClient(options).characters.search({
-        characterName: '가나',
-        serverId: 'all'
-      })
     case 'details':
       return createDfragonClient(options).characters.details({ ...identity, signal })
   }
@@ -122,7 +116,6 @@ const detailErrors: ApiErrorCase[] = [
 ]
 const cases: [Route, ...ApiErrorCase][] = [
   ...candidateErrors.map((error): [Route, ...ApiErrorCase] => ['candidates', ...error]),
-  ...candidateErrors.map((error): [Route, ...ApiErrorCase] => ['search', ...error]),
   ...detailErrors.map((error): [Route, ...ApiErrorCase] => ['details', ...error])
 ]
 
@@ -140,7 +133,6 @@ describe('경로별 API 오류 응답', () => {
 
   it.each([
     ['candidates', 400, 'INVALID_CHARACTER_QUERY'],
-    ['search', 404, 'CHARACTER_NOT_FOUND'],
     ['details', 400, 'INVALID_SEARCH_QUERY']
   ] as const)(
     '%s가 Swagger에 없는 %i %s를 받으면 SEARCH_RESPONSE_INVALID로 실패한다',
@@ -152,7 +144,7 @@ describe('경로별 API 오류 응답', () => {
     }
   )
 
-  it.each(['candidates', 'search', 'details'] as const)(
+  it.each(['candidates', 'details'] as const)(
     '%s가 JSON이 아닌 502를 받으면 클라이언트 문구로 실패한다',
     async (route) => {
       await expect(
@@ -163,62 +155,6 @@ describe('경로별 API 오류 응답', () => {
       })
     }
   )
-})
-
-function searchRow(serverId: 'cain' | 'prey', characterId: string) {
-  return {
-    serverId,
-    characterId,
-    characterName: '가나다',
-    serverName: CHARACTER_SERVER_NAMES[serverId],
-    fame: null,
-    jobName: null,
-    jobGrowName: null,
-    imageUrl: `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=1`
-  }
-}
-
-describe('이름으로 시작하는 캐릭터 검색', () => {
-  it('이름, 서버와 200명 상한을 query로 보내고 받은 순서대로 행을 준다', async () => {
-    const options = respondWith({ rows: [searchRow('cain', 'c-1'), searchRow('cain', 'c-2')] }, 200)
-
-    const rows = await createDfragonClient(options).characters.search({
-      characterName: '가나',
-      serverId: 'cain'
-    })
-
-    expect(rows.map((row) => row.characterId)).toEqual(['c-1', 'c-2'])
-    const url = new URL(new Request(...options.fetch.mock.calls[0]).url)
-    expect(`${url.origin}${url.pathname}`).toBe(`${API_ORIGIN}/characters`)
-    expect(Object.fromEntries(url.searchParams)).toEqual({
-      characterName: '가나',
-      serverId: 'cain',
-      limit: '200'
-    })
-  })
-
-  it('서버를 고른 검색에 다른 서버의 행이 오면 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
-    const search = createDfragonClient(
-      respondWith({ rows: [searchRow('cain', 'c-1'), searchRow('prey', 'p-1')] }, 200)
-    ).characters.search
-
-    await expect(search({ characterName: '가나', serverId: 'cain' })).rejects.toMatchObject({
-      code: 'SEARCH_RESPONSE_INVALID'
-    })
-  })
-
-  it.each([
-    ['열세 글자 이름', '가나다라마바사아자차카타파', 'all'],
-    ['앞뒤 공백', ' 가나', 'all'],
-    ['모르는 서버', '가나', 'unknown']
-  ])('%s는 요청하지 않고 INVALID_SEARCH_QUERY로 실패한다', async (_, characterName, serverId) => {
-    const options = respondWith({ rows: [] }, 200)
-
-    await expect(
-      createDfragonClient(options).characters.search({ characterName, serverId })
-    ).rejects.toMatchObject({ code: 'INVALID_SEARCH_QUERY' })
-    expect(options.fetch).not.toHaveBeenCalled()
-  })
 })
 
 describe('캐릭터 이미지 요청', () => {

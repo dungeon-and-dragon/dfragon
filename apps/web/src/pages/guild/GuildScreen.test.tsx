@@ -1,19 +1,22 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { Guild } from '#core/adventure-guild'
 import type { StoredCharacter } from '#core/ranking'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
+import { GUILD_URL } from './api/guild.handlers'
 import { GuildScreen } from './GuildScreen'
 
 let container: HTMLDivElement
 let root: Root
+let requestedGuildIds: string[]
 
 beforeEach(() => {
+  requestedGuildIds = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   container = document.createElement('div')
   document.body.append(container)
@@ -54,18 +57,25 @@ function guildOf(count: number, overrides: Partial<Guild> = {}): Guild {
   }
 }
 
-function render(getGuild: ClientHost['getGuild']): Promise<void> {
-  return act(async () =>
+async function render(guild: Guild): Promise<void> {
+  server.use(
+    http.get(GUILD_URL, ({ params }) => {
+      requestedGuildIds.push(String(params.guildId))
+
+      return HttpResponse.json(guild)
+    })
+  )
+
+  await act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getGuild })}>
-        <TestQueryClient>
-          <TestRouter>
-            <GuildScreen guildId="guild-1" />
-          </TestRouter>
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <TestRouter>
+          <GuildScreen guildId="guild-1" />
+        </TestRouter>
+      </TestQueryClient>
     )
   )
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
 }
 
 function bodyRows(): HTMLTableRowElement[] {
@@ -83,10 +93,9 @@ function clickMore(): Promise<void> {
 }
 
 it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐릭터, 명성, 모험단이다', async () => {
-  const getGuild = vi.fn<ClientHost['getGuild']>(async () => guildOf(2))
-  await render(getGuild)
+  await render(guildOf(2))
 
-  expect(getGuild).toHaveBeenCalledWith('guild-1')
+  expect(requestedGuildIds).toEqual(['guild-1'])
   expect(container.querySelector('h1')?.textContent).toBe('합성 길드')
   const stats = [...container.querySelectorAll('header .stat')].map((stat) => stat.textContent)
   expect(stats).toEqual(['길드원2'])
@@ -109,7 +118,7 @@ it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐
 })
 
 it('길드원 120명 가운데 처음 50명을 그리고 불러오기를 누를 때마다 50명씩 더 그린다', async () => {
-  await render(async () => guildOf(120))
+  await render(guildOf(120))
 
   expect(bodyRows()).toHaveLength(50)
   await clickMore()
@@ -120,14 +129,14 @@ it('길드원 120명 가운데 처음 50명을 그리고 불러오기를 누를 
 })
 
 it('길드원이 50명 이하면 모두 그리고 불러오기 버튼을 두지 않는다', async () => {
-  await render(async () => guildOf(50))
+  await render(guildOf(50))
 
   expect(bodyRows()).toHaveLength(50)
   expect(moreButton()).toBeUndefined()
 })
 
 it('길드원이 없으면 목록 상자에 빈 문구만 두고 길드원 수는 0이다', async () => {
-  await render(async () => guildOf(0, { guildName: null }))
+  await render(guildOf(0, { guildName: null }))
 
   expect(container.querySelector('section p')?.textContent).toBe('저장된 캐릭터가 없습니다.')
   expect(container.querySelector('section table')).toBeNull()

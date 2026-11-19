@@ -2,13 +2,11 @@ import type {
   AdventureActivity,
   AdventureActivityDay,
   AdventureActivitySeasonDays,
-  AdventureWeekly,
-  Guild
+  AdventureWeekly
 } from '#core/adventure-guild'
-import type { FavoriteCharacter } from '#hooks/useFavoriteCharacterStore'
-import { storyRankedCharacters } from './story-characters'
+import { storyRankedCharacters } from '#testing/story-support/story-characters'
 
-// 모험단, 길드, 캐릭터 이름과 활동 기록은 실제 값이 아닌 합성 값이다.
+// 모험단, 캐릭터 이름과 활동 기록은 실제 값이 아닌 합성 값이다.
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -139,11 +137,13 @@ function dayDetail(day: AdventureActivity['days'][number]): AdventureActivityDay
   })
 
   if (day.primeval) {
-    items.unshift({ at: at(19, 12), name: '합성 태초', rarity: '태초' })
+    const primevalAt = at(19, 12)
+    items.unshift({ at: primevalAt, name: '합성 태초', rarity: '태초' })
   }
 
   if (day.mythic) {
-    items.unshift({ at: at(19, 40), name: '합성 신화', rarity: '신화' })
+    const mythicAt = at(19, 40)
+    items.unshift({ at: mythicAt, name: '합성 신화', rarity: '신화' })
   }
 
   const oaths: AdventureActivityDay['oaths'] = Array.from({ length: day.oath }, (_, index) => {
@@ -153,7 +153,8 @@ function dayDetail(day: AdventureActivity['days'][number]): AdventureActivityDay
   })
 
   if (day.oathPrimeval) {
-    oaths.unshift({ at: at(21, 30), name: '합성 태초 서약', rarity: '태초' })
+    const oathPrimevalAt = at(21, 30)
+    oaths.unshift({ at: oathPrimevalAt, name: '합성 태초 서약', rarity: '태초' })
   }
 
   const raids = [{ name: RAIDS[day.raid % 2]!, count: day.raid }].filter(({ count }) => count > 0)
@@ -203,45 +204,3 @@ export const storyAdventureWeekly: AdventureWeekly = {
   ],
   characters: weeklyCharacters
 }
-
-export function storyGuild(memberCount: number): Guild {
-  const guildMembers = storyRankedCharacters(memberCount).map((character) => ({
-    ...character,
-    guildId: 'guild-1',
-    guildName: '길드1'
-  }))
-
-  return { guildId: 'guild-1', guildName: '길드1', memberCount, members: guildMembers }
-}
-
-export const storyFavoriteCharacters: FavoriteCharacter[] = storyRankedCharacters(6).map(
-  (
-    {
-      serverId,
-      characterId,
-      characterName,
-      adventureName,
-      guildId,
-      guildName,
-      level,
-      jobName,
-      jobGrowName,
-      fame,
-      role
-    },
-    index
-  ) => ({
-    serverId,
-    characterId,
-    characterName,
-    adventureName,
-    guildId,
-    guildName,
-    level,
-    jobName,
-    jobGrowName,
-    fame,
-    role,
-    savedAt: index
-  })
-)

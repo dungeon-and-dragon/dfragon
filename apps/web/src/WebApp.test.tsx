@@ -164,7 +164,7 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
   expect(container.querySelectorAll('tr[aria-label*="번 자리"]')).toHaveLength(4)
   expect(vi.mocked(fetch).mock.calls.map((args) => new Request(...args).url)).toContain(
-    `${API_BASE_URL}/items/today-grade`
+    `${SITE_API_URL}/items/today-grade`
   )
 })
 
@@ -434,7 +434,7 @@ function stubAdventureFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
 function adventureRequests(fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>): string[] {
   return fetch.mock.calls
     .map((args) => new Request(...args).url)
-    .filter((url) => url.startsWith(`${API_BASE_URL}/adventures/`))
+    .filter((url) => url.startsWith(`${SITE_API_URL}/adventures/`))
     .toSorted()
 }
 
@@ -461,8 +461,8 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['즐겨찾기', null]
   ])
   expect(adventureRequests(fetch)).toEqual([
-    `${API_BASE_URL}/adventures/${encodedName}/activity`,
-    `${API_BASE_URL}/adventures/${encodedName}/weekly`
+    `${SITE_API_URL}/adventures/${encodedName}/activity`,
+    `${SITE_API_URL}/adventures/${encodedName}/weekly`
   ])
   expect(useMyAdventureStore.getState().adventureName).toBe('저장 모험단')
 })
@@ -1274,7 +1274,7 @@ it('예전 내 모험단 주소는 season과 함께 저장한 모험단 주소�
   await waitForPath(`/adventures/${encodedName}`)
   expect(window.location.search).toBe('?season=10')
   await vi.waitFor(() =>
-    expect(activityUrls()).toEqual([`${API_BASE_URL}/adventures/${encodedName}/activity?season=10`])
+    expect(activityUrls()).toEqual([`${SITE_API_URL}/adventures/${encodedName}/activity?season=10`])
   )
   await act(async () => root.unmount())
 
@@ -1283,8 +1283,8 @@ it('예전 내 모험단 주소는 season과 함께 저장한 모험단 주소�
   await act(async () => root.render(<WebApp host={host} />))
   await vi.waitFor(() =>
     expect(activityUrls()).toEqual([
-      `${API_BASE_URL}/adventures/${encodedName}/activity?season=10`,
-      `${API_BASE_URL}/adventures/${encodedName}/activity`
+      `${SITE_API_URL}/adventures/${encodedName}/activity?season=10`,
+      `${SITE_API_URL}/adventures/${encodedName}/activity`
     ])
   )
 })
@@ -1321,8 +1321,8 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
     expect(container.querySelector('main section h2')?.textContent).toBe('합성 모험단')
   )
   expect(adventureRequests(fetch)).toEqual([
-    `${API_BASE_URL}/adventures/${encodedName}/activity`,
-    `${API_BASE_URL}/adventures/${encodedName}/weekly`
+    `${SITE_API_URL}/adventures/${encodedName}/activity`,
+    `${SITE_API_URL}/adventures/${encodedName}/weekly`
   ])
   expect(localStorage.getItem('dfragon:my-adventure')).toContain('합성 모험단')
 })
