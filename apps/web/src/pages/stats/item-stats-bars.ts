@@ -1,4 +1,4 @@
-import type { Bar } from '#components/chart/RowBars'
+import type { Bar } from '#shared/ui/chart/RowBars'
 import { type ItemStats, itemSlotName, type SetStatsFilter, WEAPON_SLOT } from '#core/ranking'
 import { rankingLink, shareOf } from './set-stats-bars'
 

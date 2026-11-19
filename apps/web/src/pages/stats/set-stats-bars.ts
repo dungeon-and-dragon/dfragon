@@ -1,5 +1,5 @@
 import { linkOptions } from '@tanstack/react-router'
-import type { Bar } from '#components/chart/RowBars'
+import type { Bar } from '#shared/ui/chart/RowBars'
 import type { OathCatalog } from '#core/catalog'
 import type { RankingSearch } from '#pages/rankings'
 import {

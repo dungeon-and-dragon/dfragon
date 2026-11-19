@@ -2,13 +2,13 @@ import { Button, ConfirmPopover, Popover, Switch } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import { BATCH_NEOPLE_KEY_DUPLICATE, OpsRequestFailure } from '#ops-api/ops-client'
 import type { BatchKey } from '#ops-api/ops-schemas'
-import { formatCount, formatDateMinute } from '#app/format'
+import { formatCount, formatDateMinute } from '#ops-app/format'
 import {
   useAddBatchKey,
   useBatchKeys,
   useDeleteBatchKey,
   useSetBatchKeyEnabled
-} from '#app/ops-queries'
+} from '#ops-app/ops-queries'
 import { FIELD_INPUT, panelClasses, textClasses } from './panel-classes'
 import { type BatchKeyStatus, BatchKeyStatusTag } from './RunStatusTag'
 

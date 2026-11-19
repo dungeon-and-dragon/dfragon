@@ -8,9 +8,9 @@ import {
   type CharacterTableRow,
   SkeletonRow
 } from '#components/table/CharacterTable'
-import { ListBox } from '#components/table/ListBox'
-import { TitleBox, TitleStat } from '#components/table/TitleBox'
-import { characterSearchServerOptions } from '#constants/server-options'
+import { ListBox } from '#shared/ui/ListBox'
+import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
+import { characterSearchServerOptions } from '#shared/config/server-options'
 import { useSearchedCharacters } from './hooks/useSearchedCharacters'
 
 const LOADING_ROWS = 5

@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { type RefObject, useCallback, useLayoutEffect, useRef } from 'react'
-import { TOOLTIP_SLIDE, useMotionAllowed } from '#animations/gsap-motion'
+import { TOOLTIP_SLIDE, useMotionAllowed } from '#shared/lib/animations/gsap-motion'
 
 type Placement = Readonly<{ date: string; side: string | undefined; x: number; y: number }>
 

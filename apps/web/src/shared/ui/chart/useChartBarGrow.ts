@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { type RefObject, useLayoutEffect } from 'react'
-import { cubicBezier, useMotionAllowed } from './gsap-motion'
+import { cubicBezier, useMotionAllowed } from '#shared/lib/animations/gsap-motion'
 
 export type BarGrow = Readonly<{ property: 'width' | 'height'; seconds: number; stagger: number }>
 

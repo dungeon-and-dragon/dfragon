@@ -1,5 +1,5 @@
-import { type Bar, type BarTone, RowBars } from '#components/chart/RowBars'
-import { ListBox } from '#components/table/ListBox'
+import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
+import { ListBox } from '#shared/ui/ListBox'
 import type { SetStatsFilter } from '#core/ranking'
 import { useItemStats } from '#hooks/useItemStats'
 import { uniqueItemBars, weaponBars } from './item-stats-bars'

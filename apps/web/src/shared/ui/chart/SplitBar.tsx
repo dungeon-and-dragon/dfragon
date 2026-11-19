@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { SPLIT_BAR_REVEAL, useChartReveal } from '#animations/useChartReveal'
-import { type TooltipPlace, useChartTooltipSlide } from '#animations/useChartTooltipSlide'
+import { SPLIT_BAR_REVEAL, useChartReveal } from './useChartReveal'
+import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { splitLabelShown } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
 import { type Hover, NO_HOVER, type TooltipRow } from './plot-layout'

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { LINE_REVEAL, useChartReveal } from '#animations/useChartReveal'
-import { useChartSvgBarGrow } from '#animations/useChartSvgBarGrow'
-import { useChartTooltipSlide } from '#animations/useChartTooltipSlide'
+import { LINE_REVEAL, useChartReveal } from './useChartReveal'
+import { useChartSvgBarGrow } from './useChartSvgBarGrow'
+import { useChartTooltipSlide } from './useChartTooltipSlide'
 import { ChartLegend, type LegendItem } from './ChartLegend'
 import {
   alignedScale,

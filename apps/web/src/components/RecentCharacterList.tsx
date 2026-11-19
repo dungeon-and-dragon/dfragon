@@ -9,7 +9,7 @@ import { type RecentCharacter, useRecentCharacterStore } from '#hooks/useRecentC
 import type { CharacterDisplay } from '#lib/stored-character'
 import { CardImage } from './CardImage'
 import { FavoriteToggle } from './FavoriteToggle'
-import { moveItemFocus } from './move-item-focus'
+import { moveItemFocus } from '#shared/ui/move-item-focus'
 
 const integer = new Intl.NumberFormat('ko-KR')
 const SECTION_ROW_LIMIT = 5

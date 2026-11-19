@@ -1,8 +1,8 @@
 import { ChevronDownIcon, ChevronRightIcon } from '@dfragon/ui'
 import { Link, type LinkOptions } from '@tanstack/react-router'
 import { type ReactNode, useId, useRef, useState } from 'react'
-import { ROW_BAR_GROW, useChartBarGrow } from '#animations/useChartBarGrow'
-import { type TooltipPlace, useChartTooltipSlide } from '#animations/useChartTooltipSlide'
+import { ROW_BAR_GROW, useChartBarGrow } from './useChartBarGrow'
+import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS } from './plot-layout'
 
 const integer = new Intl.NumberFormat('ko-KR')

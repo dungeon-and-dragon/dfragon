@@ -8,11 +8,11 @@ import {
   type SearchError,
   type SearchSlot
 } from '#core/search/search'
-import { serverNames } from '#core/servers/servers'
+import { serverNames } from '#shared/config/servers/servers'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { CardCharacter } from '#core/capture/cards-types'
 import type { SearchMode } from '#core/capture/search-mode'
-import type { ServerId } from '#core/servers/servers-types'
+import type { ServerId } from '#shared/config/servers/servers-types'
 
 function isServerId(value: string): value is ServerId {
   return Object.hasOwn(serverNames, value)

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { CharacterIdentity, CharacterTimeline } from '#core/character'
 import { useCharacterTimeline } from '#pages/character/hooks/useCharacterTimeline'
-import { LoadingLine } from '#components/LoadingLine'
+import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useClientHost } from '#host/client-host'
 import { type TimelinePages, useTimelinePages } from '#pages/character/hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'

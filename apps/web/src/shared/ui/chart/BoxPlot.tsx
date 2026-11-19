@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { BOX_PLOT_REVEAL, useChartReveal } from '#animations/useChartReveal'
-import { useChartTooltipSlide } from '#animations/useChartTooltipSlide'
+import { BOX_PLOT_REVEAL, useChartReveal } from './useChartReveal'
+import { useChartTooltipSlide } from './useChartTooltipSlide'
 import { BoxPlotLegend } from './ChartLegend'
 import {
   BOX_PLOT_EDGE,

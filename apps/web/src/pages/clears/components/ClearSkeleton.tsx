@@ -1,4 +1,4 @@
-import { TitleBox } from '#components/table/TitleBox'
+import { TitleBox } from '#shared/ui/TitleBox'
 import { CARD_SIZE } from './ClearContentCards'
 import { CLEAR_TITLE } from './ClearPanel'
 import { clearClasses } from './clear-classes'

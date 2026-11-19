@@ -8,9 +8,9 @@ import {
   formatSummary,
   runDuration,
   TRIGGER_LABELS
-} from '#app/format'
-import { useJobRuns } from '#app/ops-queries'
-import { argInputs } from '#app/run-args'
+} from '#ops-app/format'
+import { useJobRuns } from '#ops-app/ops-queries'
+import { argInputs } from '#ops-app/run-args'
 import { panelClasses, textClasses } from './panel-classes'
 import { PauseSwitch } from './PauseSwitch'
 import { RunJobButton } from './RunJobButton'

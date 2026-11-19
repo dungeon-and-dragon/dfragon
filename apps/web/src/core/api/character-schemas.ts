@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'
 import type { CharacterIdentity } from '#core/character/character'
 import { SearchHttpFailure } from './http'
 import {
@@ -9,8 +10,6 @@ import {
 
 const MAX_CHARACTER_NAME_CODE_POINTS = 12
 const MIN_SEARCH_NAME_CODE_POINTS = 1
-
-export const ALL_CHARACTER_SERVERS = 'all'
 
 const nonblank = z.string().refine((value) => value.trim().length > 0)
 const candidateSchema = identitySchema

@@ -1,7 +1,7 @@
 import type { CharacterImage } from '#core/character'
 import { createDfragonClient } from '#core/api'
 import { toRaidFrameResult } from '#core/capture'
-import { startRuntimeDiagnostics } from '#core/diagnostics'
+import { startRuntimeDiagnostics } from '#shared/lib/diagnostics'
 import {
   createOathCatalogSource,
   createSkillWindowCatalogSource

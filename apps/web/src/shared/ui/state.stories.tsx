@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { ClipboardCopyButton } from './ClipboardCopyButton'
 import { LoadingLine } from './LoadingLine'
-import { ListBox } from './table/ListBox'
+import { ListBox } from './ListBox'
 
 const meta = {
   title: 'Patterns/상태',

@@ -1,7 +1,7 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
 import { Link, type LinkProps, useLocation } from '@tanstack/react-router'
 import { useRef } from 'react'
-import { useIndicatorSlide } from '#animations/useIndicatorSlide'
+import { useIndicatorSlide } from '#shared/lib/animations/useIndicatorSlide'
 import { useTodayGrade } from '#hooks/useTodayGrade'
 import { CharacterSearchBox } from './CharacterSearchBox'
 import { ColorModeToggle } from './ColorModeToggle'

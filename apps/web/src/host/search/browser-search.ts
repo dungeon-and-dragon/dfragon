@@ -1,4 +1,4 @@
-import type { DiagnosticCode } from '#core/diagnostics'
+import type { DiagnosticCode } from '#shared/lib/diagnostics'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails,

@@ -1,5 +1,5 @@
 import { ViewfinderIcon } from '@dfragon/ui'
-import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
+import { HeaderTooltip, tooltipTriggerClass } from '#shared/ui/HeaderTooltip'
 
 export function CaptureButton({
   target,

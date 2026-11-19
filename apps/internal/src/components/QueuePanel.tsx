@@ -1,5 +1,5 @@
-import { formatCount, queueLabel } from '#app/format'
-import { useQueues } from '#app/ops-queries'
+import { formatCount, queueLabel } from '#ops-app/format'
+import { useQueues } from '#ops-app/ops-queries'
 import { panelClasses } from './panel-classes'
 
 export function QueuePanel(): React.JSX.Element {

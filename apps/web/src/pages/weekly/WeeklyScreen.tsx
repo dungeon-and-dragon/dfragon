@@ -1,7 +1,7 @@
 import { Button, RefreshIcon, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
 import { SkeletonRow } from '#components/table/CharacterTable'
-import { ListBox } from '#components/table/ListBox'
+import { ListBox } from '#shared/ui/ListBox'
 import { useRefreshAdventureActivity } from './hooks/useAdventureActivity'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from './hooks/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'

@@ -1,5 +1,5 @@
 import type { SearchSlot } from '#core/search/search'
-import { serverNames } from '#core/servers/servers'
+import { serverNames } from '#shared/config/servers/servers'
 import type { CardCharacter } from './cards-types'
 import { toCharacterCard } from '#core/character/character-card'
 

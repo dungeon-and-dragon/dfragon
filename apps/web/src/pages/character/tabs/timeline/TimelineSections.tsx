@@ -13,8 +13,8 @@ import {
   ENHANCEMENT_KIND_LABELS,
   formatEnhancementValue
 } from './timeline-format'
-import { LoadingLine } from '#components/LoadingLine'
-import { RelativeTime } from '#components/RelativeTime'
+import { LoadingLine } from '#shared/ui/LoadingLine'
+import { RelativeTime } from '#shared/ui/RelativeTime'
 import { enhancementKindClasses, raritySolidOfName } from '#components/game-colors'
 
 const BADGE = 'badge text-fg-muted'

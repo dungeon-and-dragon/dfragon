@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { type RefObject, useLayoutEffect, useRef } from 'react'
-import { cubicBezier, type Motion } from '#animations/gsap-motion'
+import { cubicBezier, type Motion } from '#shared/lib/animations/gsap-motion'
 
 export const FILL_GROW: Motion = {
   seconds: 0.8,

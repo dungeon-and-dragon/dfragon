@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useLoadingLinePass } from '#animations/useLoadingLinePass'
+import { useLoadingLinePass } from '#shared/lib/animations/useLoadingLinePass'
 
 export function LoadingLine({ short = false }: { short?: boolean }): React.JSX.Element {
   const segmentRef = useRef<HTMLSpanElement>(null)
