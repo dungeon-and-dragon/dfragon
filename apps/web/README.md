@@ -73,7 +73,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
 - `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`: FSD 계층 폴더입니다. 옛 폴더의 코드를 옮기면서 채웁니다.
 - `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
-- `src/shared/lib/`: 조회 결과, 무한 스크롤, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
+- `src/shared/lib/`: 조회 결과, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
 - `src/shared/lib/animations/`: GSAP 설정과 공용 전환 animation hook을 둡니다.
 - `src/shared/config/`: 서버 이름, 서버 ID 타입과 서버 선택지 상수를 둡니다.
 - `src/shared/assets/`: 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
