@@ -7,7 +7,6 @@
       "#entities/*": ["./src/entities/*"],
       "#features/*": ["./src/features/*"],
       "#hooks/*": ["./src/hooks/*"],
-      "#host/*": ["./src/host/*"],
       "#lib/*": ["./src/lib/*"],
       "#pages/*": ["./src/pages/*"],
       "#shared/*": ["./src/shared/*"],

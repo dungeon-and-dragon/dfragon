@@ -8,7 +8,7 @@ const CORE_INDEX_PATH = '^src/core/[^/]+/index\\.ts$'
 const SCREEN_FOLDER_IMPORT_COMMENT =
   '화면 폴더 밖에서는 #pages/<화면>(예: #pages/rankings)처럼 폴더 경로로 import한다. 두 화면이 쓰는 코드는 공용 components/나 hooks/에 옮긴다.'
 const LAYERS = ['app', 'pages', 'widgets', 'features', 'entities', 'shared']
-const LEGACY_FOLDERS_PATH = '^src/(components|hooks|core|host|lib)/'
+const LEGACY_FOLDERS_PATH = '^src/(components|hooks|core|lib)/'
 const TEST_OR_STORY_PATH = '\\.(test|stories)\\.tsx?$'
 const MOCK_API_PATH = '/api/[^/]+\\.(fixture|handlers)\\.ts$'
 const LAYER_IMPORT_COMMENT =
@@ -112,14 +112,14 @@ export default {
     {
       name: 'shared-legacy-imports',
       comment:
-        'shared는 옛 폴더(components, hooks, core, host, lib)를 import하지 않는다. 옛 폴더의 코드가 필요하면 그 코드를 shared로 내리거나 위 계층에 둔다.',
+        'shared는 옛 폴더(components, hooks, core, lib)를 import하지 않는다. 옛 폴더의 코드가 필요하면 그 코드를 shared로 내리거나 위 계층에 둔다.',
       severity: 'error',
       from: { path: '^src/shared/' },
       to: { path: LEGACY_FOLDERS_PATH }
     },
     {
       name: 'legacy-layer-imports',
-      comment: '옛 폴더(components, hooks, core, host, lib)는 app과 pages를 import하지 않는다.',
+      comment: '옛 폴더(components, hooks, core, lib)는 app과 pages를 import하지 않는다.',
       severity: 'error',
       from: { path: LEGACY_FOLDERS_PATH },
       to: { path: '^src/(app|pages)/' }
