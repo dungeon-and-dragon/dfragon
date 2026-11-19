@@ -17,9 +17,8 @@ import {
   readTownIndicatorTemplate,
   WEB_CAPTURE_TEXTS
 } from '#features/capture-search'
-import { RANKING_JOBS } from '#widgets/ranking-filter'
 import { WebApp } from './WebApp'
-import { CHARACTER_SERVER_NAMES, type CharacterCandidate } from '#entities/character'
+import { CHARACTER_SERVER_NAMES, type CharacterCandidate, RANKING_JOBS } from '#entities/character'
 import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'
 import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
