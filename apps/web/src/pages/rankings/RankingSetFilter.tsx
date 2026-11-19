@@ -4,7 +4,7 @@ import type { SetChoice, SetChoices } from './ranking-sets'
 
 const ALL = 'all'
 
-function SetSelect({
+export function SetSelect({
   label,
   allLabel,
   choices,

@@ -5,6 +5,7 @@ import { RANKING_JOBS } from '#pages/rankings'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { createStoryClientHost } from '#testing/story-support/story-host'
+import { storyItemStats } from '#testing/story-support/story-item-stats'
 import { storySetOathCatalog, storySetStats } from '#testing/story-support/story-set-stats'
 import { SetStatsScreen } from './SetStatsScreen'
 
@@ -22,6 +23,7 @@ const [slayer] = RANKING_JOBS
 
 const statsHost = createStoryClientHost({
   getSetStats: async () => storySetStats(new Date(Date.now() - TWO_HOURS).toISOString()),
+  getItemStats: async () => storyItemStats(new Date(Date.now() - TWO_HOURS).toISOString()),
   getOathCatalog: async () => storySetOathCatalog
 })
 
@@ -33,6 +35,7 @@ const emptyHost = createStoryClientHost({
     oathSets: [],
     combos: []
   }),
+  getItemStats: async () => ({ computedAt: null, sampleSize: 0, slots: [] }),
   getOathCatalog: async () => storySetOathCatalog
 })
 

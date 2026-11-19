@@ -10,7 +10,7 @@ import {
 } from './ranking-jobs'
 
 const FILTER_ROW = 'flex items-start gap-4'
-const FILTER_LABEL = 'label m-0 flex h-8 w-12 shrink-0 items-center'
+const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center'
 // 칩 묶음의 값은 문자열이라 직업은 jobId, 전직은 jobGrowId와 역할을 이은 키로 고른다.
 const ALL = 'all'
 
@@ -29,28 +29,30 @@ function growItems(job: RankingJob | undefined): ChipGroupItem<string>[] {
   return [{ value: ALL, label: '전직 전체' }, ...grows]
 }
 
-function setFilterOf({
+export type FilterRow = Readonly<{ label: string; content: ReactNode }>
+
+function narrowingOf({
   equipmentSetId,
   oathSetId,
-  oathSetOption
+  oathSetOption,
+  itemIds
 }: FameRankingFilter): FameRankingFilter {
-  return { equipmentSetId, oathSetId, oathSetOption }
+  return { equipmentSetId, oathSetId, oathSetOption, itemIds }
 }
 
-// 직업, 전직을 바꿔도 세트 필터는 그대로 둔다.
+// 직업, 전직을 바꿔도 세트, 아이템 필터는 그대로 둔다.
 export function RankingFilterBox({
   filter,
   onChange,
-  setSelects
+  rows = []
 }: {
   filter: FameRankingFilter
   onChange: (filter: FameRankingFilter) => void
-  setSelects?: ReactNode
+  rows?: readonly FilterRow[]
 }): React.JSX.Element {
-  const sets = setFilterOf(filter)
+  const sets = narrowingOf(filter)
   const jobLabelId = useId()
   const growLabelId = useId()
-  const setLabelId = useId()
   const job = RANKING_JOBS.find(({ jobId }) => jobId === filter.jobId)
   const growValue =
     filter.jobGrowId !== undefined
@@ -95,14 +97,22 @@ export function RankingFilterBox({
           onValueChange={selectGrow}
         />
       </div>
-      {setSelects != null && (
-        <div role="group" aria-labelledby={setLabelId} className={FILTER_ROW}>
-          <h2 id={setLabelId} className={FILTER_LABEL}>
-            세트
-          </h2>
-          {setSelects}
-        </div>
-      )}
+      {rows.map((row) => (
+        <LabeledRow key={row.label} row={row} />
+      ))}
+    </div>
+  )
+}
+
+function LabeledRow({ row: { label, content } }: { row: FilterRow }): React.JSX.Element {
+  const labelId = useId()
+
+  return (
+    <div role="group" aria-labelledby={labelId} className={FILTER_ROW}>
+      <h2 id={labelId} className={FILTER_LABEL}>
+        {label}
+      </h2>
+      {content}
     </div>
   )
 }

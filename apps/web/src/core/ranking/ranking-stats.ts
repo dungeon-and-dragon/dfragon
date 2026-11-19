@@ -65,6 +65,8 @@ export type FameRankingFilter = Readonly<{
   equipmentSetId?: string
   oathSetId?: number
   oathSetOption?: string
+  // 무기와 유일 장비 itemId다. 모두 낀 캐릭터만 거른다.
+  itemIds?: readonly string[]
 }>
 
 export type SetStatsFilter = Pick<FameRankingFilter, 'jobId' | 'jobGrowId' | 'role'>
