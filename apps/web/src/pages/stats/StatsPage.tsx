@@ -5,7 +5,7 @@ import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { StatsTabs } from './StatsTabs'
-import { useCharacterStats } from './hooks/useCharacterStats'
+import { useCharacterStats } from './api/useCharacterStats'
 import {
   averageFameBars,
   type FameBar,
