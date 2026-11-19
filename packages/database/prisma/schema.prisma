@@ -71,6 +71,7 @@ model CharacterItem {
   slotId      String    @map("slot_id")
   itemId      String    @map("item_id")
   itemName    String    @map("item_name")
+  typeDetail  String?   @map("item_type_detail")
 
   @@id([serverId, characterId, slotId])
   @@index([itemId])
@@ -380,6 +381,7 @@ model ItemAdoption {
   slotId     String?  @map("slot_id")
   itemId     String?  @map("item_id")
   itemName   String?  @map("item_name")
+  typeDetail String?  @map("item_type_detail")
   count      Int
   computedAt DateTime @map("computed_at") @db.Timestamptz(3)
 

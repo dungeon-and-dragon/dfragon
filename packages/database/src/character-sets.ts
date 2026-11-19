@@ -16,6 +16,7 @@ export type CharacterItem = {
   slotId: string
   itemId: string
   itemName: string
+  typeDetail: string | null
 }
 
 export type CharacterSets = {
@@ -102,15 +103,17 @@ async function replaceItems(
     where: { serverId, characterId, slotId: { notIn: slotIds } }
   })
 
-  for (const { slotId, itemId, itemName } of items) {
+  // 종류 열을 비교에 넣어, 종류 열을 더하기 전에 저장한 행도 다음 저장 때 채워진다.
+  for (const { slotId, itemId, itemName, typeDetail } of items) {
     written += await transaction.$executeRaw`
-      INSERT INTO "character_items" ("server_id", "character_id", "slot_id", "item_id", "item_name")
-      VALUES (${serverId}, ${characterId}, ${slotId}, ${itemId}, ${itemName})
+      INSERT INTO "character_items" ("server_id", "character_id", "slot_id", "item_id", "item_name", "item_type_detail")
+      VALUES (${serverId}, ${characterId}, ${slotId}, ${itemId}, ${itemName}, ${typeDetail})
       ON CONFLICT ("server_id", "character_id", "slot_id") DO UPDATE SET
         "item_id" = EXCLUDED."item_id",
-        "item_name" = EXCLUDED."item_name"
-      WHERE ("character_items"."item_id", "character_items"."item_name")
-        IS DISTINCT FROM (EXCLUDED."item_id", EXCLUDED."item_name")`
+        "item_name" = EXCLUDED."item_name",
+        "item_type_detail" = EXCLUDED."item_type_detail"
+      WHERE ("character_items"."item_id", "character_items"."item_name", "character_items"."item_type_detail")
+        IS DISTINCT FROM (EXCLUDED."item_id", EXCLUDED."item_name", EXCLUDED."item_type_detail")`
   }
 
   return deleted + written > 0
