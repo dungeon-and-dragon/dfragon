@@ -27,6 +27,10 @@ const rejectedImports = [
   ['core/hook-alias.ts', '#hooks/useShared', 'UI 폴더'],
   ['core/page-alias.ts', '#pages/a', 'UI 폴더'],
   ['core/host-alias.ts', '#host/client-host', 'UI 폴더'],
+  ['core/app-alias.ts', '#app/router', 'UI 폴더'],
+  ['core/widget-alias.ts', '#widgets/global-bar', 'UI 폴더'],
+  ['core/shared-ui-alias.ts', '#shared/ui/ListBox', 'UI 폴더'],
+  ['core/feature-alias.ts', '#features/favorite', 'UI 폴더'],
   ['core/animation-alias.ts', '#shared/lib/animations/gsap-motion', 'UI 폴더'],
   ['components/a.ts', '#pages/a/APage', 'pages/'],
   ['components/nested/b.ts', '#pages/a/util', 'pages/'],
@@ -106,7 +110,7 @@ const screenRejected = [
   ['src/pages/router.ts', './rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
   ['src/WebApp.test.ts', './pages/b/hooks/useThing', 'screen-folder-imports-outside-pages'],
   ['src/testing/story.ts', '#pages/b/BPage.tsx', 'screen-folder-imports-outside-pages'],
-  ['src/lib/shared.ts', '#pages/b/util', 'screen-folder-imports-outside-pages']
+  ['src/shared.ts', '#pages/b/util', 'screen-folder-imports-outside-pages']
 ]
 
 const screenAllowed = [
@@ -114,8 +118,6 @@ const screenAllowed = [
   ['src/pages/a/one/same.ts', '#pages/a/hooks/useThing'],
   ['src/pages/b/same-page.ts', './BPage'],
   ['src/pages/a/shared.ts', '#hooks/useShared'],
-  ['src/pages/a/index-import.ts', '#pages/b'],
-  ['src/pages/a/rankings.ts', '#pages/rankings'],
   ['src/router.ts', '#pages/rankings'],
   ['src/router.test.ts', '#pages/b'],
   ['src/pages/a/core.ts', '#core/search']
@@ -136,7 +138,7 @@ const aliasAllowed = [
   ['src/pages/a/host.ts', '#host/client-host', 'src/host/client-host.tsx'],
   ['src/pages/a/lib.ts', '#lib/shared', 'src/lib/shared.ts'],
   ['src/pages/a/testing.ts', '#testing/fixture', 'src/testing/fixture.tsx'],
-  ['src/pages/a/other-screen.ts', '#pages/b', 'src/pages/b/index.ts'],
+  ['src/app/other-screen.ts', '#pages/b', 'src/pages/b/index.ts'],
   ['src/pages/a/same-screen.ts', '#pages/a/hooks/useThing', 'src/pages/a/hooks/useThing.ts']
 ]
 
@@ -147,6 +149,43 @@ const coreAllowed = [
   ['src/core/search/other-domain.ts', '#core/character/character-detail-view'],
   ['src/core/search/other-alias.ts', '#core/character/character-detail-view'],
   ['src/pages/a/core-image.ts', '#core/capture/raid/heading.png']
+]
+
+const layerRejected = [
+  ['src/shared/ui/upper.ts', '#entities/character', 'layer-imports'],
+  ['src/entities/character/upper.ts', '#features/favorite', 'layer-imports'],
+  ['src/features/favorite/upper.ts', '#widgets/global-bar', 'layer-imports'],
+  ['src/widgets/global-bar/upper.ts', '#pages/b', 'layer-imports'],
+  ['src/pages/a/app.ts', '#app/router', 'layer-imports'],
+  ['src/pages/a/index-import.ts', '#pages/b', 'slice-imports'],
+  ['src/pages/stats/unlisted.ts', '#pages/b', 'slice-imports'],
+  ['src/widgets/global-bar/other-slice.ts', '#widgets/site-footer', 'slice-imports'],
+  ['src/features/favorite/other-slice.ts', '#features/color-mode', 'slice-imports'],
+  ['src/entities/character/other-slice.ts', '#entities/ranking', 'slice-imports'],
+  ['src/entities/character/other-x.ts', '#entities/ranking/@x/guild', 'slice-imports'],
+  ['src/pages/a/feature-inner.ts', '#features/favorite/ui/FavoriteToggle', 'slice-index'],
+  ['src/components/entity-inner.ts', '#entities/character/model/character', 'slice-index'],
+  ['src/shared/lib/legacy-component.ts', '#components/Shared', 'shared-legacy-imports'],
+  ['src/shared/ui/legacy-core.ts', '#core/search', 'shared-legacy-imports'],
+  ['src/shared/config/legacy-hook.ts', '#hooks/useShared', 'shared-legacy-imports'],
+  ['src/components/page.ts', '#pages/b', 'legacy-layer-imports'],
+  ['src/core/app.ts', '#app/router', 'legacy-layer-imports']
+]
+
+const layerAllowed = [
+  ['src/app/router.ts', '#pages/b'],
+  ['src/pages/a/widget.ts', '#widgets/global-bar'],
+  ['src/widgets/global-bar/feature.ts', '#features/favorite'],
+  ['src/features/favorite/entity.ts', '#entities/character'],
+  ['src/entities/character/shared.ts', '#shared/ui/ListBox'],
+  ['src/entities/guild/cross.ts', '#entities/character/@x/guild'],
+  ['src/features/favorite/same-slice.ts', './ui/FavoriteToggle'],
+  ['src/features/favorite/ui/same-slice-alias.ts', '#features/favorite/model/store'],
+  ['src/shared/ui/segment.ts', '#shared/lib/time-format'],
+  ['src/entities/character/legacy.ts', '#core/search'],
+  ['src/components/shared-ui.ts', '#shared/ui/ListBox'],
+  ['src/pages/home/rankings.ts', '#pages/rankings'],
+  ['src/pages/stats/rankings.ts', '#pages/rankings']
 ]
 
 const run = promisify(execFile)
@@ -171,15 +210,23 @@ async function cruiseSamples() {
     }
 
     const files = Object.fromEntries(
-      [...screenRejected, ...screenAllowed, ...coreRejected, ...coreAllowed, ...aliasAllowed].map(
-        ([file, source]) => [file, importing(source)]
-      )
+      [
+        ...screenRejected,
+        ...screenAllowed,
+        ...coreRejected,
+        ...coreAllowed,
+        ...aliasAllowed,
+        ...layerRejected,
+        ...layerAllowed
+      ].map(([file, source]) => [file, importing(source)])
     )
 
     for (const file of [
       'src/shared/assets/logo.png',
       'src/shared/ui/ListBox.tsx',
+      'src/shared/lib/time-format.ts',
       'src/components/Shared.tsx',
+      'src/lib/shared.ts',
       'src/host/client-host.tsx',
       'src/testing/fixture.tsx',
       'src/pages/a/hooks/useThing.ts',
@@ -194,6 +241,17 @@ async function cruiseSamples() {
       'src/core/search/search.ts',
       'src/core/character/character-detail-view.ts',
       'src/core/character/nested/helper.ts',
+      'src/widgets/global-bar/index.ts',
+      'src/widgets/site-footer/index.ts',
+      'src/features/favorite/index.ts',
+      'src/features/favorite/ui/FavoriteToggle.tsx',
+      'src/features/favorite/model/store.ts',
+      'src/features/color-mode/index.ts',
+      'src/entities/character/index.ts',
+      'src/entities/character/@x/guild.ts',
+      'src/entities/character/model/character.ts',
+      'src/entities/ranking/index.ts',
+      'src/entities/ranking/@x/guild.ts',
       'src/core/capture/raid/heading.png',
       'src/core/root-file.ts'
     ]) {
@@ -252,21 +310,45 @@ async function cruiseSamples() {
       'src/pages/a/core-detail.ts'
     )
 
+    const { stdout: layerText, exitCode: layerExitCode } = await cruise(
+      'err-long',
+      'src/shared/ui/upper.ts'
+    )
+
     const { stdout: cycleText, exitCode: cycleExitCode } = await cruise(
       'err-long',
       'src/cycles/value-a.ts'
     )
 
-    return { report, text, exitCode, coreText, coreExitCode, cycleText, cycleExitCode }
+    return {
+      report,
+      text,
+      exitCode,
+      coreText,
+      coreExitCode,
+      layerText,
+      layerExitCode,
+      cycleText,
+      cycleExitCode
+    }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
 }
 
-const { report, text, exitCode, coreText, coreExitCode, cycleText, cycleExitCode } =
-  await cruiseSamples()
+const {
+  report,
+  text,
+  exitCode,
+  coreText,
+  coreExitCode,
+  layerText,
+  layerExitCode,
+  cycleText,
+  cycleExitCode
+} = await cruiseSamples()
 
-for (const [file, source, ruleName] of screenRejected) {
+for (const [file, source, ruleName] of [...screenRejected, ...layerRejected]) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 거부한다`, () => {
     assert.deepEqual(
       report.summary.violations.filter(({ from }) => from === file).map(({ rule }) => rule),
@@ -274,7 +356,7 @@ for (const [file, source, ruleName] of screenRejected) {
     )
   })
 }
-for (const [file, source] of [...screenAllowed, ...coreAllowed, ...aliasAllowed]) {
+for (const [file, source] of [...screenAllowed, ...coreAllowed, ...aliasAllowed, ...layerAllowed]) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 허용한다`, () => {
     assert.deepEqual(
       report.summary.violations.filter(({ from }) => from === file),
@@ -303,6 +385,11 @@ test('dependency-cruiser: 화면 파일 직접 import는 실패하고 폴더 경
   assert.ok(exitCode > 0)
   assert.ok(text.includes('#pages/<화면>(예: #pages/rankings)처럼 폴더 경로로 import한다.'), text)
   assert.ok(text.includes('components/나 hooks/'), text)
+})
+
+test('dependency-cruiser: 위 계층 import는 실패하고 아래 계층만 import하라고 알린다', () => {
+  assert.ok(layerExitCode > 0)
+  assert.ok(layerText.includes('계층은 자기보다 아래 계층만 import한다.'), layerText)
 })
 
 for (const [file, source] of coreRejected) {
