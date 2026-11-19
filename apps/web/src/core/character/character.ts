@@ -1,5 +1,3 @@
-import type { CharacterSearchRow } from '#core/search/search'
-
 export type CharacterIdentity = Readonly<{ serverId: string; characterId: string }>
 
 export type CharacterSummary = CharacterIdentity &
@@ -13,6 +11,14 @@ export type CharacterSummary = CharacterIdentity &
     fame: number | null
     imageUrl: string
   }>
+
+export type CharacterSearchRow = Readonly<{
+  characterId: string
+  characterName: string
+  serverId: string
+  serverName: string | null
+  fame: number | null
+}>
 
 export type CharacterCardRole = 'dealer' | 'buffer' | 'synergy'
 export type CharacterScoreCalculator = 'equipment' | 'buff'

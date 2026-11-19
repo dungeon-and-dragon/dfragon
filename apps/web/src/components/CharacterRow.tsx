@@ -1,10 +1,4 @@
-import {
-  formatApproximateScore,
-  formatJobName,
-  type ScoreView,
-  type SlotNotice,
-  toScoreView
-} from '#core/character'
+import { formatApproximateScore, formatJobName, type ScoreView, toScoreView } from '#core/character'
 import { Link } from '@tanstack/react-router'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import {
@@ -13,6 +7,7 @@ import {
   MISSING_VALUE,
   type SearchMode,
   type SlotCard,
+  type SlotNotice,
   tierLabels
 } from '#core/capture'
 import { CandidatePopover } from './CandidatePopover'

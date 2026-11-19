@@ -8,7 +8,7 @@ import {
   searchSlotNotice,
   toCharacterCard,
   toChoiceCharacterCard
-} from '#core/character/character-card'
+} from './character-card'
 
 export type SlotCard = {
   state: SlotState

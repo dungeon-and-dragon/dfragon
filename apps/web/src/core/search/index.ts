@@ -1,4 +1,5 @@
 export { createCaptureSearchLifetime } from './capture-lifetime'
+export { createCharacterImageSource } from './character-image-source'
 export {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
