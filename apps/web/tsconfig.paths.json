@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
     "paths": {
+      "#app/*": ["./src/app/*"],
       "#components/*": ["./src/components/*"],
       "#core/*": ["./src/core/*"],
+      "#entities/*": ["./src/entities/*"],
+      "#features/*": ["./src/features/*"],
       "#hooks/*": ["./src/hooks/*"],
       "#host/*": ["./src/host/*"],
       "#lib/*": ["./src/lib/*"],
       "#pages/*": ["./src/pages/*"],
       "#shared/*": ["./src/shared/*"],
       "#testing/*": ["./src/testing/*"],
+      "#widgets/*": ["./src/widgets/*"],
       "#scripts/*": ["./scripts/*"],
       "@dfragon/ui": ["../../packages/ui/src/index.tsx"],
       "@dfragon/lib": ["../../packages/lib/src/index.ts"],
