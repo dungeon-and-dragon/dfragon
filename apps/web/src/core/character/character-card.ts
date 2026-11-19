@@ -2,12 +2,8 @@ import { portraitFaceWindowOf } from '#core/search/portrait-anchor'
 import type { SelectedCharacterSummary } from './character'
 import { characterImageUrl } from './character-summary'
 import { displayJobName } from './job-display'
-import {
-  type CharacterChoice,
-  SEARCH_ERRORS,
-  type SearchError,
-  type SearchSlot
-} from '#core/search/search'
+import type { CharacterChoice, SearchSlot } from '#core/search/search'
+import { SEARCH_ERRORS, type SearchError } from '#core/api/http'
 import { serverNames } from '#shared/config/servers/servers'
 import { MISSING_VALUE } from '#core/capture/cards'
 import type { CardCharacter } from '#core/capture/cards-types'
