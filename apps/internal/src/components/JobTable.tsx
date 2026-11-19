@@ -15,6 +15,59 @@ import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
 
 const NAME_BUTTON = 'link cursor-pointer text-left text-sm font-semibold text-fg focus-ring'
+const COLUMN_COUNT = 8
+const NO_NEOPLE_GROUP = 'Neople 안 부름'
+
+type JobGroup = {
+  label: string
+  endpoints: string[]
+  jobs: Job[]
+}
+
+function groupByNeopleApi(jobs: readonly Job[]): JobGroup[] {
+  const groups = new Map<string, JobGroup>()
+  const idle: Job[] = []
+
+  for (const job of jobs) {
+    if (job.neopleApi === null) {
+      idle.push(job)
+      continue
+    }
+
+    const { group, endpoints } = job.neopleApi
+    const current = groups.get(group) ?? { label: group, endpoints: [], jobs: [] }
+    current.endpoints = [...new Set([...current.endpoints, ...endpoints])]
+    current.jobs.push(job)
+    groups.set(group, current)
+  }
+
+  const sorted = [...groups.values()].sort((left, right) =>
+    left.label.localeCompare(right.label, 'ko')
+  )
+
+  if (idle.length > 0) {
+    sorted.push({ label: NO_NEOPLE_GROUP, endpoints: [], jobs: idle })
+  }
+
+  return sorted
+}
+
+function GroupHeader({ group }: { group: JobGroup }): React.JSX.Element {
+  return (
+    <tr className="bg-surface">
+      <th scope="colgroup" colSpan={COLUMN_COUNT} className="whitespace-normal">
+        <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="text-xs font-semibold text-fg-muted">{group.label}</span>
+          {group.endpoints.map((endpoint) => (
+            <code key={endpoint} className="text-xs text-fg-subtle">
+              {endpoint}
+            </code>
+          ))}
+        </span>
+      </th>
+    </tr>
+  )
+}
 
 type JobTableProps = {
   jobs: readonly Job[]
@@ -138,17 +191,20 @@ export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): 
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {jobs.map((job) => (
-                <JobRow
-                  key={job.name}
-                  job={job}
-                  selected={job.name === selectedName}
-                  now={now}
-                  onSelect={onSelect}
-                />
-              ))}
-            </tbody>
+            {groupByNeopleApi(jobs).map((group) => (
+              <tbody key={group.label}>
+                <GroupHeader group={group} />
+                {group.jobs.map((job) => (
+                  <JobRow
+                    key={job.name}
+                    job={job}
+                    selected={job.name === selectedName}
+                    now={now}
+                    onSelect={onSelect}
+                  />
+                ))}
+              </tbody>
+            ))}
           </table>
         </div>
       ) : (

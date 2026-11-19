@@ -35,6 +35,9 @@ function finishedRun(id: number, status: 'succeeded' | 'failed' | 'interrupted',
   return run({ id, status, requestedAt, startedAt, finishedAt, summary, error })
 }
 
+const CHARACTER = '/df/servers/{serverId}/characters/{characterId}'
+const TIMELINE_API = { group: '캐릭터 타임라인', endpoints: [`${CHARACTER}/timeline`] }
+
 function statsJob() {
   const nextRunAt = minutesLater(540)
   const lastFinishedRun = finishedRun(10, 'succeeded', 120)
@@ -66,6 +69,7 @@ function timelineBackfillJob() {
     name: 'timeline-backfill',
     displayName: '타임라인 백필',
     schedule: '*/30 * * * *',
+    neopleApi: TIMELINE_API,
     nextRunAt,
     activeRun,
     lastFinishedRun
@@ -87,6 +91,7 @@ function seasonBackfillJob() {
   return job({
     name: 'season-backfill',
     displayName: '옛 시즌 백필',
+    neopleApi: TIMELINE_API,
     paused: true,
     nextRunAt: null,
     activeRun,
@@ -101,6 +106,7 @@ function filledApi(): FakeOpsApi {
   const manualJob = job({
     name: 'skill-style-sample',
     displayName: '스킬 스타일 표본 채우기',
+    neopleApi: { group: '스킬 스타일', endpoints: [`${CHARACTER}/skill/style`] },
     schedule: null,
     nextRunAt: null,
     argsSchema: {

@@ -46,6 +46,7 @@ const jobSchema = z.object({
   nextRunAt: timestamp.nullable(),
   argsSchema: argsSchemaSchema,
   delayMinutes: count,
+  neopleApi: z.object({ group: z.string(), endpoints: z.array(z.string()) }).nullable(),
   activeRun: runSchema.nullable(),
   lastFinishedRun: runSchema.nullable()
 })
