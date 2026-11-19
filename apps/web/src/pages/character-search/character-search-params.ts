@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CharacterSearchQuery } from '#core/api'
+import type { CharacterSearchQuery } from '#core/character'
 import { ALL_CHARACTER_SERVERS, characterSearchServerOptions } from '#shared/config/server-options'
 
 const searchSchema = z.object({

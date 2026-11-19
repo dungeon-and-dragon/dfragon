@@ -1,5 +1,6 @@
 import type { z } from 'zod'
-import { createJsonRequest, SearchHttpFailure } from '#core/api'
+import { SearchHttpFailure } from '#shared/api/api-error'
+import { createJsonRequest } from '#shared/api/json-request'
 import type { SetStatsFilter } from '#core/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 

@@ -11,11 +11,14 @@ import {
   SEARCH_ACTIONS,
   SEARCH_COMMAND_ERRORS,
   SEARCH_SLOT_COUNTS,
+  requestCharacterCandidates,
+  requestCharacterDetails,
+  requestCharacterImage,
+  type CharacterApi,
   type SearchRuntime,
   type SearchSnapshot,
   type YieldToEventLoop
 } from '#core/search'
-import type { DfragonClient } from '#core/api'
 import { decodeCharacterImage } from '#core/character'
 import type { CardSearchHost } from '#host/client-host'
 import { decodeBrowserPng } from '#host/browser-png'
@@ -37,15 +40,17 @@ function createMessageChannelYield(): YieldToEventLoop {
 export const browserFetch: typeof fetch = (input, init) => fetch(input, init)
 
 export function createBrowserSearchRuntime(
-  dfragon: DfragonClient,
+  api: CharacterApi,
   reportDiagnostic: (code: DiagnosticCode) => void
 ): SearchRuntime {
   const policy = INITIAL_PORTRAIT_COLOR_POLICY
-  const candidates = createCachedCharacterCandidates(dfragon.characters.candidates)
+  const candidates = createCachedCharacterCandidates((input) =>
+    requestCharacterCandidates(api, input)
+  )
   // 네오플 이미지 서버는 CORS 헤더를 주지 않아 픽셀을 읽을 수 없으므로 API가 전달하는 같은 PNG를 받는다.
   const image = createCharacterImageSource({
     image: async (input) => {
-      const bytes = await dfragon.characters.image(input)
+      const bytes = await requestCharacterImage(api, input)
       try {
         return await decodeCharacterImage(bytes, decodeBrowserPng)
       } finally {
@@ -54,7 +59,7 @@ export function createBrowserSearchRuntime(
       }
     }
   })
-  const details = createCachedCharacterDetails(dfragon.characters.details)
+  const details = createCachedCharacterDetails((input) => requestCharacterDetails(api, input))
   const scorePortrait = createPortraitColorScorer(policy, createMessageChannelYield())
 
   return {

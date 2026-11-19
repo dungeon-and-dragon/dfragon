@@ -9,7 +9,7 @@ import {
   useRef,
   useState
 } from 'react'
-import { isSearchableCharacterName } from '#core/api'
+import { isSearchableCharacterName } from '#core/character'
 import { ALL_CHARACTER_SERVERS, characterSearchServerOptions } from '#shared/config/server-options'
 import { RecentCharacterList } from './RecentCharacterList'
 

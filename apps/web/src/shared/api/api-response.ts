@@ -1,6 +1,6 @@
-import ky, { isTimeoutError } from 'ky'
+import { isTimeoutError } from 'ky'
 import { z } from 'zod'
-import { type SearchErrorCode, SearchHttpFailure } from './http'
+import { type SearchErrorCode, SearchHttpFailure } from './api-error'
 
 const failureSchema = z.object({
   error: z.object({ code: z.string(), message: z.string().min(1).optional().catch(undefined) })
@@ -16,18 +16,6 @@ const statusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
 const detailStatusErrors: Readonly<Partial<Record<number, SearchErrorCode>>> = {
   ...statusErrors,
   404: 'CHARACTER_NOT_FOUND'
-}
-
-/** 공개 캐릭터와 캐릭터 이미지 요청은 인증, 리다이렉트, 자체 재시도를 사용하지 않고 ky 기본 timeout까지만 기다린다. */
-export function createCharacterHttpClient(transport: typeof fetch): ReturnType<typeof ky.create> {
-  return ky.create({
-    fetch: transport,
-    retry: 0,
-    throwHttpErrors: false,
-    redirect: 'error',
-    credentials: 'omit',
-    cache: 'no-store'
-  })
 }
 
 // Response.text(), .json()과 ky의 parseJson은 잘못된 UTF-8을 U+FFFD로 바꿔 읽으므로 bytes를 fatal 모드로 decode해 거절한다.
