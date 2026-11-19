@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
 import { CHARACTER_SERVER_NAMES } from '#core/character/character-summary'
-import { characterDetailResponse } from '#core/testing/character-detail'
 import type { SearchErrorCode } from './http'
 import { createDfragonClient } from './dfragon-client'
 
@@ -47,7 +46,7 @@ describe('없는 캐릭터의 404 응답', () => {
   })
 })
 
-type Route = 'candidates' | 'search' | 'details' | 'detail-view'
+type Route = 'candidates' | 'search' | 'details'
 
 function request(route: Route, response: Response): Promise<unknown> {
   const options = {
@@ -66,8 +65,6 @@ function request(route: Route, response: Response): Promise<unknown> {
       })
     case 'details':
       return createDfragonClient(options).characters.details({ ...identity, signal })
-    case 'detail-view':
-      return createDfragonClient(options).characters.detailView(identity)
   }
 }
 
@@ -126,8 +123,7 @@ const detailErrors: ApiErrorCase[] = [
 const cases: [Route, ...ApiErrorCase][] = [
   ...candidateErrors.map((error): [Route, ...ApiErrorCase] => ['candidates', ...error]),
   ...candidateErrors.map((error): [Route, ...ApiErrorCase] => ['search', ...error]),
-  ...detailErrors.map((error): [Route, ...ApiErrorCase] => ['details', ...error]),
-  ...detailErrors.map((error): [Route, ...ApiErrorCase] => ['detail-view', ...error])
+  ...detailErrors.map((error): [Route, ...ApiErrorCase] => ['details', ...error])
 ]
 
 describe('경로별 API 오류 응답', () => {
@@ -145,9 +141,7 @@ describe('경로별 API 오류 응답', () => {
   it.each([
     ['candidates', 400, 'INVALID_CHARACTER_QUERY'],
     ['search', 404, 'CHARACTER_NOT_FOUND'],
-    ['details', 400, 'INVALID_SEARCH_QUERY'],
-    ['detail-view', 404, 'NEOPLE_API_ERROR'],
-    ['detail-view', 409, 'CHARACTER_NOT_FOUND']
+    ['details', 400, 'INVALID_SEARCH_QUERY']
   ] as const)(
     '%s가 Swagger에 없는 %i %s를 받으면 SEARCH_RESPONSE_INVALID로 실패한다',
     async (route, status, apiCode) => {
@@ -158,7 +152,7 @@ describe('경로별 API 오류 응답', () => {
     }
   )
 
-  it.each(['candidates', 'search', 'details', 'detail-view'] as const)(
+  it.each(['candidates', 'search', 'details'] as const)(
     '%s가 JSON이 아닌 502를 받으면 클라이언트 문구로 실패한다',
     async (route) => {
       await expect(
@@ -183,24 +177,6 @@ function searchRow(serverId: 'cain' | 'prey', characterId: string) {
     imageUrl: `https://img-api.neople.co.kr/df/servers/${serverId}/characters/${characterId}?zoom=1`
   }
 }
-
-describe('캐릭터 강제 갱신', () => {
-  it('그 캐릭터의 refresh 경로로 POST하고 상세 응답과 받은 시각을 준다', async () => {
-    const body = characterDetailResponse('dealer')
-    const identity = { serverId: body.character.serverId, characterId: body.character.characterId }
-    const options = respondWith(body, 200)
-
-    const detail = await createDfragonClient(options).characters.refresh(identity)
-
-    expect(detail.character).toMatchObject(identity)
-    expect(detail.freshness.lastSuccessfulFetchAt).toBe('2026-11-09T05:08:00.000Z')
-    const request = new Request(...options.fetch.mock.calls[0])
-    expect(request.method).toBe('POST')
-    expect(request.url).toBe(
-      `${API_ORIGIN}/characters/${identity.serverId}/${identity.characterId}/refresh`
-    )
-  })
-})
 
 describe('이름으로 시작하는 캐릭터 검색', () => {
   it('이름, 서버와 200명 상한을 query로 보내고 받은 순서대로 행을 준다', async () => {
@@ -283,41 +259,5 @@ describe('캐릭터 이미지 요청', () => {
     [502, 'NEOPLE_API_ERROR']
   ])('%i 응답은 %s로 실패한다', async (status, code) => {
     await expect(readImage(new Response(null, { status })).read).rejects.toMatchObject({ code })
-  })
-})
-
-describe('캐릭터 이력 요청', () => {
-  const history = { basics: [], scores: [], sectionChanges: {}, nameChanges: [], changes: [] }
-
-  it('이력은 history 경로로, 과거 시점 상세는 snapshot 경로에 at query를 붙여 받는다', async () => {
-    const snapshot = characterDetailResponse('dealer')
-    const identity = {
-      serverId: snapshot.character.serverId,
-      characterId: snapshot.character.characterId
-    }
-    const fetch = vi
-      .fn<typeof globalThis.fetch>()
-      .mockResolvedValueOnce(new Response(JSON.stringify(history), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify(snapshot), { status: 200 }))
-    const client = createDfragonClient({ apiOrigin: API_ORIGIN, fetch })
-
-    await expect(client.characters.history(identity)).resolves.toEqual(history)
-    await client.characters.historySnapshot(identity, '2026-11-17T13:09:00.000Z')
-
-    const urls = fetch.mock.calls.map(([input]) => new URL((input as Request).url))
-    expect(urls.map(({ pathname }) => pathname)).toEqual([
-      `/characters/${identity.serverId}/${identity.characterId}/history`,
-      `/characters/${identity.serverId}/${identity.characterId}/history/snapshot`
-    ])
-    expect(urls[1]?.searchParams.get('at')).toBe('2026-11-17T13:09:00.000Z')
-  })
-
-  it('변경점 changes가 없는 이력 응답은 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
-    const { changes: _changes, ...withoutChanges } = history
-    const client = createDfragonClient(respondWith(withoutChanges, 200))
-
-    await expect(
-      client.characters.history({ serverId: 'cain', characterId: 'character-1' })
-    ).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
   })
 })

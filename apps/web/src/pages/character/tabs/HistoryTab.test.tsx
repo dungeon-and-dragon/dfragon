@@ -1,16 +1,20 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView, CharacterHistory } from '#core/character'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { apiFailure, characterUrl } from '#pages/character/api/character.handlers'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { HistoryTab } from './HistoryTab'
 
 const FIRST = '2026-11-05T13:00:00.000Z'
 const MIDDLE = '2026-11-13T11:40:00.000Z'
 const LATEST = '2026-11-17T13:09:00.000Z'
+const IDENTITY = { serverId: 'cain', characterId: 'character-1' }
+const HISTORY_URL = characterUrl(IDENTITY, '/history')
+const SNAPSHOT_URL = characterUrl(IDENTITY, '/history/snapshot')
 
 let container: HTMLDivElement
 let root: Root
@@ -175,28 +179,39 @@ const THREE: CharacterHistory = {
   ]
 }
 
-function render(host: ClientHost): Promise<void> {
+function render(): Promise<void> {
   return act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <TestQueryClient>
-          <HistoryTab detail={detailOf()} />
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <HistoryTab detail={detailOf()} />
+      </TestQueryClient>
     )
   )
 }
 
-function snapshots(values: Readonly<Record<string, CharacterDetailView>>) {
-  return vi.fn<ClientHost['getCharacterHistorySnapshot']>(async (_identity, at) => {
-    const snapshot = values[at]
+async function renderLoaded(
+  history: CharacterHistory,
+  snapshots: Readonly<Record<string, CharacterDetailView>> = {}
+): Promise<string[]> {
+  const requestedAt: string[] = []
+  server.use(
+    http.get(HISTORY_URL, () => HttpResponse.json(history)),
+    http.get(SNAPSHOT_URL, ({ request }) => {
+      const at = new URL(request.url).searchParams.get('at') ?? ''
+      requestedAt.push(at)
+      const snapshot = snapshots[at]
 
-    if (snapshot === undefined) {
-      throw new Error('없는 시점')
-    }
+      if (snapshot === undefined) {
+        return apiFailure(404, 'CHARACTER_NOT_FOUND', '캐릭터를 찾을 수 없습니다.')
+      }
 
-    return snapshot
-  })
+      return HttpResponse.json(snapshot)
+    })
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+
+  return requestedAt
 }
 
 function text(selector: string): string[] {
@@ -214,23 +229,28 @@ function pointButtons(): HTMLButtonElement[] {
 }
 
 it('받는 동안 받는 중을 알리고, 받지 못하면 이력을 받지 못했다고 알린다', async () => {
-  const { promise, reject } = Promise.withResolvers<CharacterHistory>()
-  const host = createTestClientHost({ getCharacterHistory: vi.fn(() => promise) })
-  await render(host)
+  const { promise, resolve } = Promise.withResolvers<void>()
+  const requested: string[] = []
+  server.use(
+    http.get(HISTORY_URL, async ({ request }) => {
+      requested.push(request.url)
+      await promise
+
+      return apiFailure(500, 'INTERNAL_SERVER_ERROR', '서버 오류로 이력을 처리하지 못했습니다.')
+    })
+  )
+  await render()
 
   expect(text('[role="status"]')).toEqual(['이력을 받는 중입니다.'])
 
-  await act(async () => reject(new Error('실패')))
+  resolve()
 
-  expect(text('[role="alert"]')).toEqual(['이력을 받지 못했습니다.'])
-  expect(host.getCharacterHistory).toHaveBeenCalledExactlyOnceWith({
-    serverId: 'cain',
-    characterId: 'character-1'
-  })
+  await vi.waitFor(() => expect(text('[role="alert"]')).toEqual(['이력을 받지 못했습니다.']))
+  expect(requested).toEqual([HISTORY_URL])
 })
 
 it('이력이 없으면 빈 상태 제목과 최신 순 이름 변경 표만 보인다', async () => {
-  await render(createTestClientHost({ getCharacterHistory: async () => EMPTY }))
+  await renderLoaded(EMPTY)
 
   expect(text('p')).toEqual(['저장된 이력이 없습니다.'])
   expect(container.querySelector('svg')).toBeNull()
@@ -242,10 +262,7 @@ it('이력이 없으면 빈 상태 제목과 최신 순 이름 변경 표만 보
 })
 
 it('한 시점뿐이어도 명성과 점수 차트, 첫 기록 시점과 요약 숫자를 보인다', async () => {
-  const getCharacterHistorySnapshot = snapshots({ [FIRST]: detailOf(2555, 100) })
-  await render(
-    createTestClientHost({ getCharacterHistory: async () => ONE, getCharacterHistorySnapshot })
-  )
+  await renderLoaded(ONE, { [FIRST]: detailOf(2555, 100) })
 
   expect(
     [...container.querySelectorAll('section[aria-label$="추이"]')].map(({ ariaLabel }) => ariaLabel)
@@ -262,13 +279,7 @@ it('한 시점뿐이어도 명성과 점수 차트, 첫 기록 시점과 요약 
 })
 
 it('여러 시점이면 최신 시점을 골라 두 차트와 직전 시점 대비 증감, 변경점, 그대로를 보인다', async () => {
-  const getCharacterHistorySnapshot = snapshots({
-    [FIRST]: detailOf(2500, 99),
-    [LATEST]: detailOf(2555, 100)
-  })
-  await render(
-    createTestClientHost({ getCharacterHistory: async () => TWO, getCharacterHistorySnapshot })
-  )
+  await renderLoaded(TWO, { [FIRST]: detailOf(2500, 99), [LATEST]: detailOf(2555, 100) })
 
   expect(
     [...container.querySelectorAll('section[aria-label$="추이"]')].map(({ ariaLabel }) => ariaLabel)
@@ -297,18 +308,16 @@ it('여러 시점이면 최신 시점을 골라 두 차트와 직전 시점 대�
 })
 
 it('다른 시점을 고르면 그 시점과 직전 시점의 상세를 받아 요약 숫자와 증감, 변경점을 그 시점 값으로 바꾼다', async () => {
-  const getCharacterHistorySnapshot = snapshots({
+  await renderLoaded(THREE, {
     [FIRST]: detailOf(2500, 99),
     [MIDDLE]: detailOf(2520, 100),
     [LATEST]: detailOf(2555, 100)
   })
-  await render(
-    createTestClientHost({ getCharacterHistory: async () => THREE, getCharacterHistorySnapshot })
-  )
 
   await act(async () => pointButtons()[1]?.click())
 
   expect(text('button[aria-pressed="true"]')).toEqual(['11-13 20:40신발135,9801,338,770'])
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
   expect(tiles()).toEqual([
     ['명성', '135,980', '+1,119'],
     ['장비 점수', '1,338,770', '+70,368'],
@@ -320,18 +329,12 @@ it('다른 시점을 고르면 그 시점과 직전 시점의 상세를 받아 �
 })
 
 it('고른 시점의 상세를 받지 못하면 그 자리에만 실패를 알린다', async () => {
-  const getCharacterHistorySnapshot = snapshots({ [LATEST]: detailOf(2555, 100) })
-  await render(
-    createTestClientHost({ getCharacterHistory: async () => TWO, getCharacterHistorySnapshot })
-  )
+  const requestedAt = await renderLoaded(TWO, { [LATEST]: detailOf(2555, 100) })
 
   await act(async () => pointButtons()[1]?.click())
 
   expect(text('button[aria-pressed="true"]')).toEqual(['11-05 22:00첫 기록134,8611,268,402'])
-  expect(getCharacterHistorySnapshot).toHaveBeenCalledWith(
-    { serverId: 'cain', characterId: 'character-1' },
-    FIRST
-  )
-  expect(text('[role="alert"]')).toEqual(['시점 요약을 받지 못했습니다.'])
+  await vi.waitFor(() => expect(text('[role="alert"]')).toEqual(['시점 요약을 받지 못했습니다.']))
+  expect(requestedAt).toContain(FIRST)
   expect(text('h2')).toEqual(['시점2'])
 })
