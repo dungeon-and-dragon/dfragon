@@ -64,15 +64,9 @@ function readEntry(line: string) {
 // 이름이 stats인 job 하나만 있는 것처럼 답하며 DB를 쓰지 않는다.
 const statsOnlyJobs: JobRepository = {
   readOverviews: async () => [],
-  readRuns: async (name) => {
-    if (name === 'stats') {
-      return []
-    }
-
-    return undefined
-  },
+  readRuns: async () => [],
   requestRun: async () => ({ status: 'requested', id: 1 }),
-  setPaused: async () => 'updated'
+  setPaused: async (name) => (name === 'stats' ? 'updated' : 'not-found')
 }
 
 const unusedCollection = async () => assert.fail('이 테스트는 수집 대기열을 읽으면 안 된다')
@@ -115,11 +109,11 @@ test('운영 app 접근 로그는 요청마다 route template과 allowlist field
   const jobPath = `/api/jobs/${secrets.pathValue}`
   const cases: { path: string; init: RequestInit; expected: Record<string, unknown> }[] = [
     {
-      path: `${jobPath}/runs?limit=${secrets.query}`,
+      path: `/api/jobs/runs?limit=${secrets.query}`,
       init: {},
       expected: {
         method: 'GET',
-        route: '/api/jobs/:name/runs',
+        route: '/api/jobs/runs',
         status: 400,
         code: 'INVALID_OPS_REQUEST'
       }
@@ -136,7 +130,12 @@ test('운영 app 접근 로그는 요청마다 route template과 allowlist field
     {
       path: `${jobPath}/pause`,
       init: { method: 'POST', headers: json },
-      expected: { method: 'POST', route: '/api/jobs/:name/pause', status: 204 }
+      expected: {
+        method: 'POST',
+        route: '/api/jobs/:name/pause',
+        status: 404,
+        code: 'JOB_NOT_FOUND'
+      }
     },
     {
       path: '/api/jobs/',
@@ -216,7 +215,7 @@ test('운영 app은 5xx 응답에만 오류 이름과 code를 담은 오류 chai
   const responses = [
     await request('/api/jobs'),
     await request('/api/jobs/stats/runs', { method: 'POST', headers: json, body: '{}' }),
-    await request('/api/jobs/missing/runs')
+    await request('/api/jobs/missing/pause', { method: 'POST', headers: json })
   ]
   const bodies = await Promise.all(responses.map((response) => response.json()))
   await logs.waitFor(3)
@@ -348,15 +347,15 @@ test('잘못된 percent-encoding은 400으로 거절하지 않고, 디코딩하�
   const request = await startOpsApp(t, {
     jobs: {
       ...statsOnlyJobs,
-      readRuns: async (name) => {
+      setPaused: async (name) => {
         readNames.push(name)
 
-        return undefined
+        return 'not-found'
       }
     }
   })
 
-  const job = await request('/api/jobs/%E0%A4%A/runs')
+  const job = await request('/api/jobs/%E0%A4%A/pause', { method: 'POST', headers: json })
   const unmatched = await request('/api/%E0%A4%A')
 
   assert.deepEqual([job.status, await job.json()], [404, { error: { code: 'JOB_NOT_FOUND' } }])
