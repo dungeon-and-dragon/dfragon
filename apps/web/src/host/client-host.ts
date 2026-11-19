@@ -10,17 +10,7 @@ import type {
   AdventureWeekly,
   Guild
 } from '#core/adventure-guild'
-import type { OathCatalog } from '#core/catalog'
 import type { CharacterSearchQuery, SearchedCharacter } from '#core/api'
-import type {
-  CharacterStats,
-  ClearContentStats,
-  ClearOverview,
-  ClearStats,
-  ItemStats,
-  SetStats,
-  SetStatsFilter
-} from '#core/ranking'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'
 
@@ -41,17 +31,6 @@ export type ClientHost = Readonly<{
   party: PartyCaptureHost
   raid: RaidCaptureHost
   getTodayGrade: () => Promise<TodayGrade>
-  // 서약 데이터를 아직 올리지 않았으면 null을 돌려준다.
-  getOathCatalog: () => Promise<OathCatalog | null>
-  getCharacterStats: () => Promise<CharacterStats>
-  getSetStats: (filter: SetStatsFilter) => Promise<SetStats>
-  getItemStats: (filter: SetStatsFilter) => Promise<ItemStats>
-  getClearStats: () => Promise<ClearStats>
-  getClearContentStats: (
-    contentId: string,
-    weekStart: string | undefined
-  ) => Promise<ClearContentStats>
-  getClearOverview: (weekStart: string) => Promise<ClearOverview>
   getGuild: (guildId: string) => Promise<Guild>
   getAdventureWeekly: (adventureName: string) => Promise<AdventureWeekly>
   getAdventureActivity: (

@@ -32,7 +32,7 @@ import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
 import { clearClasses } from './components/clear-classes'
 import { useChoice } from './hooks/useChoice'
-import { useClearContentStats, useClearOverview, useClearStats } from './hooks/useClearStats'
+import { useClearContentStats, useClearOverview, useClearStats } from './api/useClearStats'
 import {
   formatScoreTick,
   hasJobScores,

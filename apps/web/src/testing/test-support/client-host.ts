@@ -9,13 +9,6 @@ type ClientHostOverrides = Partial<
   Pick<
     ClientHost,
     | 'getTodayGrade'
-    | 'getOathCatalog'
-    | 'getCharacterStats'
-    | 'getSetStats'
-    | 'getItemStats'
-    | 'getClearStats'
-    | 'getClearContentStats'
-    | 'getClearOverview'
     | 'getGuild'
     | 'getAdventureWeekly'
     | 'getAdventureActivity'
@@ -63,13 +56,6 @@ export function createTestClientHost({
       ...raid
     },
     getTodayGrade: vi.fn(() => new Promise<TodayGrade>(() => {})),
-    getOathCatalog: vi.fn(async () => null),
-    getCharacterStats: vi.fn(() => new Promise<never>(() => {})),
-    getSetStats: vi.fn(() => new Promise<never>(() => {})),
-    getItemStats: vi.fn(() => new Promise<never>(() => {})),
-    getClearStats: vi.fn(() => new Promise<never>(() => {})),
-    getClearContentStats: vi.fn(() => new Promise<never>(() => {})),
-    getClearOverview: vi.fn(() => new Promise<never>(() => {})),
     getGuild: vi.fn(() => new Promise<never>(() => {})),
     getAdventureWeekly: vi.fn(() => new Promise<never>(() => {})),
     getAdventureActivity: vi.fn(() => new Promise<never>(() => {})),

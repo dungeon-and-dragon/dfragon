@@ -5,9 +5,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { FameRanking, RankedCharacter } from '#core/ranking'
 import { fameRankingFixture } from '#entities/ranking/api/fame-ranking.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
-import { ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
+import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -154,15 +155,13 @@ it('빈 랭킹은 박스에 이름 한 줄만 둔다', async () => {
 
 it('랭킹 화면의 직업 전체 조회를 받아 두었으면 다시 조회하지 않는다', async () => {
   respondRanking(rankingOf(100))
-  const host = createTestClientHost()
+  server.use(setStatsHandlers.loading, itemStatsHandlers.loading, oathCatalogHandlers.notUploaded)
   function show(screen: React.JSX.Element): Promise<void> {
     return act(async () =>
       root.render(
-        <ClientHostContext value={host}>
-          <TestQueryClient>
-            <TestRouter>{screen}</TestRouter>
-          </TestQueryClient>
-        </ClientHostContext>
+        <TestQueryClient>
+          <TestRouter>{screen}</TestRouter>
+        </TestQueryClient>
       )
     )
   }

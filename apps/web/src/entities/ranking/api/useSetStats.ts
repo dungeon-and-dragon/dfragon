@@ -1,12 +1,10 @@
-import type { SetStats, SetStatsFilter } from '#core/ranking'
-import { useClientHost } from '#host/client-host'
+import { type SetStats, type SetStatsFilter, setStatsSchema } from '#core/ranking'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
+import { requestJobStats } from './job-stats-request'
 
 export function useSetStats(filter: SetStatsFilter): LoadedResult<SetStats> {
-  const { getSetStats } = useClientHost()
-
   return useLoadedResult(
     ['set-stats', filter.jobId ?? null, filter.jobGrowId ?? null, filter.role ?? null],
-    () => getSetStats(filter)
+    () => requestJobStats('/stats/sets', setStatsSchema, filter)
   )
 }

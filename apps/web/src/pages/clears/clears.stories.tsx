@@ -2,12 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import {
-  storyClearContentStats,
-  storyClearOverview,
-  storyClearStats
-} from '#testing/story-support/story-clears'
-import { createStoryClientHost } from '#testing/story-support/story-host'
+import { clearStatsHandlers } from './api/clears.handlers'
 import { ClearDetailScreen } from './ClearDetailScreen'
 import { ClearOverviewScreen } from './ClearOverviewScreen'
 
@@ -19,15 +14,6 @@ const meta = {
 export default meta
 
 type Story = StoryObj<typeof meta>
-
-const LATEST_WEEK = '2026-11-12'
-
-const host = createStoryClientHost({
-  getClearStats: async () => storyClearStats,
-  getClearOverview: async (weekStart) => storyClearOverview(weekStart),
-  getClearContentStats: async (contentId, weekStart) =>
-    storyClearContentStats(contentId, weekStart ?? LATEST_WEEK)
-})
 
 function Overview(): React.JSX.Element {
   const [week, setWeek] = useState<string>()
@@ -60,8 +46,9 @@ function Detail(): React.JSX.Element {
 }
 
 export const 개요: Story = {
+  parameters: { msw: clearStatsHandlers.stats },
   render: () => (
-    <StoryFrame host={host}>
+    <StoryFrame>
       <StoryScreen>
         <Overview />
       </StoryScreen>
@@ -70,8 +57,9 @@ export const 개요: Story = {
 }
 
 export const 컨텐츠상세: Story = {
+  parameters: { msw: clearStatsHandlers.stats },
   render: () => (
-    <StoryFrame host={host}>
+    <StoryFrame>
       <StoryScreen>
         <Detail />
       </StoryScreen>
@@ -80,6 +68,7 @@ export const 컨텐츠상세: Story = {
 }
 
 export const 받는중: Story = {
+  parameters: { msw: clearStatsHandlers.loading },
   render: () => (
     <StoryFrame>
       <StoryScreen>

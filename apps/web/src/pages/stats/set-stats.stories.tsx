@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { SetStatsFilter } from '#core/ranking'
-import type { ClientHost } from '#host/client-host'
 import { RANKING_JOBS } from '#pages/rankings'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { createStoryClientHost } from '#testing/story-support/story-host'
-import { storyItemStats } from '#testing/story-support/story-item-stats'
-import { storySetOathCatalog, storySetStats } from '#testing/story-support/story-set-stats'
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
+import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { SetStatsScreen } from './SetStatsScreen'
 
 const meta = {
@@ -18,45 +18,20 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const TWO_HOURS = 2 * 60 * 60 * 1000
 const [slayer] = RANKING_JOBS
-
-const statsHost = createStoryClientHost({
-  getSetStats: async () => storySetStats(new Date(Date.now() - TWO_HOURS).toISOString()),
-  getItemStats: async () => storyItemStats(new Date(Date.now() - TWO_HOURS).toISOString()),
-  getOathCatalog: async () => storySetOathCatalog
-})
-
-const emptyHost = createStoryClientHost({
-  getSetStats: async () => ({
-    computedAt: null,
-    sampleSize: 0,
-    equipmentSets: [],
-    oathSets: [],
-    combos: []
-  }),
-  getItemStats: async () => ({ computedAt: null, sampleSize: 0, slots: [] }),
-  getOathCatalog: async () => storySetOathCatalog
-})
-
-const failedHost = createStoryClientHost({
-  getSetStats: async () => {
-    throw new Error('세트 통계를 받지 못했습니다.')
-  },
-  getOathCatalog: async () => storySetOathCatalog
-})
+const oathCatalog = oathCatalogHandlers.catalog(oathCatalogFixture.setStats)
+const TWO_HOURS = 2 * 60 * 60 * 1000
+const statsHandlers = [
+  setStatsHandlers.statsComputedAgo(TWO_HOURS),
+  itemStatsHandlers.statsComputedAgo(TWO_HOURS),
+  oathCatalog
+]
 
 function ignoreFilterChange(): void {}
 
-function Screen({
-  host,
-  filter = {}
-}: {
-  host?: ClientHost
-  filter?: SetStatsFilter
-}): React.JSX.Element {
+function Screen({ filter = {} }: { filter?: SetStatsFilter }): React.JSX.Element {
   return (
-    <StoryFrame host={host}>
+    <StoryFrame>
       <StoryScreen>
         <SetStatsScreen filter={filter} onFilterChange={ignoreFilterChange} />
       </StoryScreen>
@@ -65,21 +40,28 @@ function Screen({
 }
 
 export const 세트통계: Story = {
-  render: () => <Screen host={statsHost} />
+  parameters: { msw: statsHandlers },
+  render: () => <Screen />
 }
 
 export const 직업고름: Story = {
-  render: () => <Screen host={statsHost} filter={{ jobId: slayer.jobId }} />
+  parameters: { msw: statsHandlers },
+  render: () => <Screen filter={{ jobId: slayer.jobId }} />
 }
 
 export const 비었을때: Story = {
-  render: () => <Screen host={emptyHost} />
+  parameters: { msw: [setStatsHandlers.empty, itemStatsHandlers.empty, oathCatalog] },
+  render: () => <Screen />
 }
 
 export const 받는중: Story = {
+  parameters: {
+    msw: [setStatsHandlers.loading, itemStatsHandlers.loading, oathCatalogHandlers.loading]
+  },
   render: () => <Screen />
 }
 
 export const 받지못함: Story = {
-  render: () => <Screen host={failedHost} />
+  parameters: { msw: [setStatsHandlers.failure, itemStatsHandlers.loading, oathCatalog] },
+  render: () => <Screen />
 }

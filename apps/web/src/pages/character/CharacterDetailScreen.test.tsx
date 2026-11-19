@@ -4,8 +4,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '#core/character'
-import { ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { toneClassesOf } from '#testing/test-support/score-tone-class'
@@ -105,7 +104,11 @@ function recorded(respond: Respond) {
 }
 
 function respondDetail(respond: Respond, refresh: Respond = loadingResponse): void {
-  server.use(http.get(DETAIL_URL, recorded(respond)), http.post(REFRESH_URL, recorded(refresh)))
+  server.use(
+    http.get(DETAIL_URL, recorded(respond)),
+    http.post(REFRESH_URL, recorded(refresh)),
+    oathCatalogHandlers.notUploaded
+  )
 }
 
 async function render(
@@ -124,16 +127,14 @@ async function render(
   await act(async () =>
     root.render(
       <TestRouter>
-        <ClientHostContext value={createTestClientHost()}>
-          <TestQueryClient>
-            <CharacterDetailScreen
-              serverId="bakal"
-              characterId="dealer-1"
-              tab={tab}
-              onTabChange={onTabChange}
-            />
-          </TestQueryClient>
-        </ClientHostContext>
+        <TestQueryClient>
+          <CharacterDetailScreen
+            serverId="bakal"
+            characterId="dealer-1"
+            tab={tab}
+            onTabChange={onTabChange}
+          />
+        </TestQueryClient>
       </TestRouter>
     )
   )
