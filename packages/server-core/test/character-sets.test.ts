@@ -12,8 +12,9 @@ function readSections(role: 'dealer' | 'buffer'): CharacterPayloads {
 }
 
 const header = { serverId: 'cain', characterId: 'synthetic', characterName: '합성캐릭터' }
+const effect = [{ name: '최종 데미지 증가', value: '100%' }]
 
-test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위의 고정 이름으로, 서약은 세트와 고른 선택지로 뽑는다', () => {
+test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위의 고정 이름으로, 효과가 켜진 서약은 세트와 고른 선택지로 뽑는다', () => {
   assert.deepEqual(parseCharacterSets(readSections('dealer')), {
     equipmentSet: { id: '4ee7bd5912cda6e2a24c1f36d5202b46', name: '소울 페어리 세트' },
     oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' },
@@ -21,9 +22,10 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
       { slotId: 'WEAPON', itemId: '89c42c1d02e6749244ce518e9b34e1c7', itemName: '재앙의 송곳니' }
     ]
   })
+  // 버퍼 fixture의 서약은 레어 Ⅱ(905점) 구간 안이지만 효과가 붙는 등급에 못 미쳐, active에 setPoint만 오고 status가 없다.
   assert.deepEqual(parseCharacterSets(readSections('buffer')), {
     equipmentSet: { id: '93e7825053bdec4e0f4c12837cf4f57e', name: '에테리얼 오브 아츠 세트' },
-    oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' },
+    oathSet: null,
     items: [
       { slotId: 'WEAPON', itemId: '4c2c36b92f60155c579d36eea9786324', itemName: '시크릿 듀엣' }
     ]
@@ -39,8 +41,16 @@ test('setItemInfo에 세트가 여럿이면 현재 세트 포인트가 가장 �
         { setItemId: 'set-b', setItemName: '합성 B 세트' }
       ],
       setItemInfo: [
-        { setItemId: 'set-a', setItemName: '등급 A 세트', active: { setPoint: { current: 900 } } },
-        { setItemId: 'set-b', setItemName: '등급 B 세트', active: { setPoint: { current: 1650 } } }
+        {
+          setItemId: 'set-a',
+          setItemName: '등급 A 세트',
+          active: { setPoint: { current: 900 }, status: effect }
+        },
+        {
+          setItemId: 'set-b',
+          setItemName: '등급 B 세트',
+          active: { setPoint: { current: 1650 }, status: effect }
+        }
       ]
     },
     oath: { ...header, oath: null }
@@ -113,4 +123,67 @@ test('유일 장비가 어느 부위에 있든 뽑고, 세트 부위와 칭호, 
     sets?.items.map(({ slotId }) => slotId),
     ['WEAPON', 'RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
   )
+})
+
+test('효과가 켜지지 않은 장비 세트는 고르지 않고, 켜진 세트 가운데 포인트가 가장 큰 세트를 고른다', () => {
+  const equipmentWith = (setItemInfo: unknown[]) => ({
+    ...header,
+    equipment: [
+      { setItemId: 'set-a', setItemName: '합성 A 세트' },
+      { setItemId: 'set-b', setItemName: '합성 B 세트' }
+    ],
+    setItemInfo
+  })
+
+  const oath = { ...header, oath: null }
+
+  const effective = {
+    setItemId: 'set-a',
+    setItemName: '등급 A 세트',
+    active: { setPoint: { current: 900 }, status: effect }
+  }
+
+  const pointsOnly = {
+    setItemId: 'set-b',
+    setItemName: '등급 B 세트',
+    active: { setPoint: { current: 1650, min: 1540, max: 1650 } }
+  }
+
+  const mixed = parseCharacterSets({ equipment: equipmentWith([pointsOnly, effective]), oath })
+  const onlyOff = parseCharacterSets({ equipment: equipmentWith([pointsOnly]), oath })
+  const noActive = parseCharacterSets({
+    equipment: equipmentWith([{ setItemId: 'set-b', setItemName: '등급 B 세트', active: null }]),
+    oath
+  })
+
+  assert.deepEqual(mixed?.equipmentSet, { id: 'set-a', name: '합성 A 세트' })
+  assert.equal(onlyOff?.equipmentSet, null)
+  assert.equal(noActive?.equipmentSet, null)
+})
+
+test('효과가 켜지지 않은 서약 세트는 세트와 선택지를 모두 null로 두고, 무기 저장은 그대로다', () => {
+  const sections = readSections('dealer')
+  const oath = sections.oath as { oath: { setInfo: { active: Record<string, unknown> } } }
+  const {
+    status: _status,
+    explain: _explain,
+    explainDetail: _detail,
+    ...pointsOnly
+  } = oath.oath.setInfo.active
+
+  const inactive = {
+    ...sections,
+    oath: { ...oath, oath: { ...oath.oath, setInfo: { ...oath.oath.setInfo, active: pointsOnly } } }
+  }
+
+  const sets = parseCharacterSets(inactive)
+
+  assert.equal(sets?.oathSet, null)
+  assert.deepEqual(sets?.equipmentSet, {
+    id: '4ee7bd5912cda6e2a24c1f36d5202b46',
+    name: '소울 페어리 세트'
+  })
+  assert.deepEqual(sets?.items, [
+    { slotId: 'WEAPON', itemId: '89c42c1d02e6749244ce518e9b34e1c7', itemName: '재앙의 송곳니' }
+  ])
 })

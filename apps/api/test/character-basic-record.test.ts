@@ -459,13 +459,23 @@ function payloadsWithSets(): CharacterPayloads {
         {
           setItemId: 'synthetic-set',
           setItemName: '합성 등급 세트',
-          active: { setPoint: { current: 2550 } }
+          active: {
+            setPoint: { current: 2550 },
+            status: [{ name: '최종 데미지 증가', value: '100%' }]
+          }
         }
       ]
     },
     oath: {
       ...payloads.oath,
-      oath: { setInfo: { setId: 16204, setName: '합성 서약', setOptionName: '합성 선택지' } }
+      oath: {
+        setInfo: {
+          setId: 16204,
+          setName: '합성 서약',
+          setOptionName: '합성 선택지',
+          active: { status: [{ key: '최종 데미지 증가', value: '100%' }] }
+        }
+      }
     }
   }
 }
