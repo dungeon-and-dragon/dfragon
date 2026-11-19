@@ -2,7 +2,9 @@ import { Button, RefreshIcon, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
 import { SkeletonRow } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
+import { AdventureTabs } from './AdventureTabs'
 import { useRefreshAdventureActivity } from './api/useAdventureActivity'
+import { useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from './api/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
@@ -104,16 +106,22 @@ export function WeeklyScreen({
 }): React.JSX.Element {
   const refreshActivity = useRefreshAdventureActivity()
   const refreshWeekly = useRefreshAdventureWeekly()
+  const refreshEquipment = useRefreshAdventureEquipment()
   const [refreshing, setRefreshing] = useState(false)
 
   async function handleRefresh(): Promise<void> {
     setRefreshing(true)
-    await Promise.all([refreshActivity(adventureName), refreshWeekly(adventureName)])
+    await Promise.all([
+      refreshActivity(adventureName),
+      refreshWeekly(adventureName),
+      refreshEquipment(adventureName)
+    ])
     setRefreshing(false)
   }
 
   return (
     <div className={SCREEN}>
+      <AdventureTabs adventureName={adventureName} />
       <div className="section">
         <AdventureDashboard
           adventureName={adventureName}

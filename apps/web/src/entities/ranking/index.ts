@@ -4,6 +4,7 @@ export { useItemStats } from './api/useItemStats'
 export { useSetStats } from './api/useSetStats'
 export {
   catalogOptionNamesOf,
+  compareEquipmentSets,
   equipmentSetShortName,
   NO_SET_NAME,
   oathOptionShortName,
