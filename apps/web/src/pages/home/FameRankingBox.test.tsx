@@ -139,12 +139,16 @@ it('3명보다 적으면 받은 만큼만 그린다', async () => {
   expect(bodyRows()).toHaveLength(2)
 })
 
-it('받는 중에는 빈 줄 3개를 그린다', async () => {
+it('받는 중에는 명성과 점수 줄 자리까지 둔 빈 줄 3개를 그린다', async () => {
   respond(() => new Promise<Response>(() => {}))
   await render()
 
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
-  expect(container.querySelectorAll('tbody tr[aria-hidden]')).toHaveLength(3)
+  const skeletonRows = [...container.querySelectorAll('tbody tr[aria-hidden]')]
+  expect(skeletonRows).toHaveLength(3)
+  expect(
+    skeletonRows.map((row) => row.querySelectorAll('td:last-child .skeleton-text').length)
+  ).toEqual([2, 2, 2])
   expect(bodyRows()).toHaveLength(0)
 })
 
