@@ -1,17 +1,13 @@
 import { portraitFaceWindowOf } from '#core/search/portrait-anchor'
-import type { SelectedCharacterSummary } from './character'
-import { characterImageUrl } from './character-summary'
-import { displayJobName } from './job-display'
-import {
-  type CharacterChoice,
-  SEARCH_ERRORS,
-  type SearchError,
-  type SearchSlot
-} from '#core/search/search'
+import type { SelectedCharacterSummary } from '#core/character/character'
+import { characterImageUrl } from '#core/character/character-summary'
+import { displayJobName } from '#core/character/job-display'
+import type { CharacterChoice, SearchSlot } from '#core/search/search'
+import { SEARCH_ERRORS, type SearchError } from '#core/api/http'
 import { serverNames } from '#shared/config/servers/servers'
-import { MISSING_VALUE } from '#core/capture/cards'
-import type { CardCharacter } from '#core/capture/cards-types'
-import type { SearchMode } from '#core/capture/search-mode'
+import { MISSING_VALUE } from './cards'
+import type { CardCharacter } from './cards-types'
+import type { SearchMode } from './search-mode'
 import type { ServerId } from '#shared/config/servers/servers-types'
 
 function isServerId(value: string): value is ServerId {
