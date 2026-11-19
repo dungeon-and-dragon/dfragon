@@ -2,14 +2,14 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { itemIconUrl } from '#core/character'
+import {
+  itemIconUrl,
+  raritySolidClasses as raritySolid,
+  rarityTextClasses as rarityTones
+} from '#entities/character'
 import { characterDetailFixture } from '#core/testing'
 import { artifactDotClasses as dotTones, avatarClasses } from './avatar/avatar-classes'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
-import {
-  raritySolidClasses as raritySolid,
-  rarityTextClasses as rarityTones
-} from '#components/game-colors'
 import { itemClasses } from './equipment/item-classes'
 
 let container: HTMLDivElement

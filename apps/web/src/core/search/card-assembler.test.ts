@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { dealerCard, scoredDealerCard } from '#core/testing/card-test-fixture'
-import type { CharacterCardScore, CharacterDetails } from '#core/character/character'
+import { dealerCard, scoredDealerCard } from '#entities/character/api/card-test.fixture'
+import type { CharacterCardScore, CharacterDetails } from '#entities/character'
 import { buildCharacterCard } from './card-assembler'
 
 const versions = {

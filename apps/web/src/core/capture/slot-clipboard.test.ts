@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { searchSlot } from '#core/testing/search-test-fixture'
-import type { SelectedCharacterSummary } from '#core/character/character'
+import type { SelectedCharacterSummary } from '#entities/character'
 import type { SearchSlot } from '#core/search/search'
 import { toClipboardText } from './slot-clipboard'
 

@@ -1,4 +1,4 @@
-import type { FameRanking } from '#core/ranking'
+import type { FameRanking } from '#entities/ranking/model/ranking-stats'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
 
 const PAGE_SIZE = 100

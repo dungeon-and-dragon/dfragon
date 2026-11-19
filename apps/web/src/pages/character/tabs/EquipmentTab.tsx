@@ -5,7 +5,7 @@ import {
   type OathView,
   toEquipmentView,
   toOathView
-} from '#core/character'
+} from '#entities/character'
 import type { CharacterTabProps } from './character-tab-props'
 import { EquipmentTable } from './equipment/EquipmentTable'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'

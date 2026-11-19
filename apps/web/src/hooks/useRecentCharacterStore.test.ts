@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { CharacterDisplay } from '#lib/stored-character'
+import type { CharacterDisplay } from '#entities/character'
 import { RECENT_CHARACTER_LIMIT, useRecentCharacterStore } from './useRecentCharacterStore'
 
 const STORAGE_KEY = 'dfragon:recent-characters'

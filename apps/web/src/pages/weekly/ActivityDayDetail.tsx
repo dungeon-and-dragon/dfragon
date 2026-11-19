@@ -3,12 +3,12 @@ import type {
   ActivityDayEnhancement,
   ActivityDayItem,
   AdventureActivityDay
-} from '#core/adventure-guild'
+} from '#entities/adventure-guild'
 import type { AdventureActivitySeasonDaysResult } from './api/useAdventureActivity'
 import type { ActivityKind } from './activity-heatmap'
 import { formatClearCount } from './clear-count'
 import { type DayItemRow, dayItemGroups } from './day-item-rows'
-import { enhancementKindClasses, rarityTextOfName } from '#components/game-colors'
+import { enhancementKindClasses, rarityTextOfName } from '#entities/character'
 import { formatActivityDate, formatSeoulTime } from './season-format'
 
 const MAX_ENHANCEMENT_ROWS = 8

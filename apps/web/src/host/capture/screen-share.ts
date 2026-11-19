@@ -1,5 +1,5 @@
 import type { CaptureSource } from '#core/capture'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import type { BrowserHost } from '#host/client-host'
 import { decodeBrowserImage } from '#host/browser-png'
 import { createListeners } from '#host/listeners'

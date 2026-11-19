@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { CaptureSource, RaidFrameResult } from '#core/capture'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import type { OcrSearchObservation, SearchApi, SearchCommandResult } from '#core/search'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'

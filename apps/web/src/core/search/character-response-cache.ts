@@ -1,4 +1,4 @@
-import type { CharacterCandidate, CharacterDetails } from '#core/character/character'
+import type { CharacterCandidate, CharacterDetails } from '#entities/character'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-requests'
 import { CompletedCache } from './completed-cache'
 

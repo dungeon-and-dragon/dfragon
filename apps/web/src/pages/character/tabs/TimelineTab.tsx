@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { CharacterIdentity, CharacterTimeline } from '#core/character'
+import type { CharacterIdentity, CharacterTimeline } from '#entities/character'
 import {
   useCharacterTimeline,
   useTimelineAcquisitions,

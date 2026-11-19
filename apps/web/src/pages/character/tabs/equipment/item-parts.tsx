@@ -6,9 +6,10 @@ import {
   itemIconUrl,
   type ItemRarity,
   type ItemView,
-  type SetPointBonusRule
-} from '#core/character'
-import { raritySolidOf, rarityTextClasses } from '#components/game-colors'
+  type SetPointBonusRule,
+  raritySolidOf,
+  rarityTextClasses
+} from '#entities/character'
 import { itemClasses } from './item-classes'
 
 type Tone = Readonly<{ rarity: ItemRarity | null }>

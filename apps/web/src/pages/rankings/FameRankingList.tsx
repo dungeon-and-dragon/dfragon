@@ -1,8 +1,7 @@
 import { Button } from '@dfragon/ui'
 import { useState } from 'react'
 import { MISSING_VALUE } from '#core/capture'
-import type { OathCatalog } from '#core/catalog'
-import type { FameRankingFilter, RankedCharacter } from '#core/ranking'
+import type { OathCatalog } from '#entities/catalog'
 import {
   type Affiliation,
   CharacterTable,
@@ -10,7 +9,12 @@ import {
   SkeletonRow
 } from '#components/table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
-import { type FameRankingPages, useFameRanking } from '#entities/ranking'
+import {
+  type FameRankingFilter,
+  type RankedCharacter,
+  type FameRankingPages,
+  useFameRanking
+} from '#entities/ranking'
 import { rankingName } from './ranking-jobs'
 import { rankingSetLines } from './ranking-sets'
 

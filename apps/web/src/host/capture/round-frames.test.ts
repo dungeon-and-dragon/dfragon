@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeAll, beforeEach, expect, it, vi, type Mock } from 'vitest'
-import type { CharacterImage } from '#core/character'
+import type { CharacterImage } from '#entities/character'
 import { decodeBrowserImage } from '#host/browser-png'
 import type { BrowserHost } from '#host/client-host'
 import { createRoundFrames } from './round-frames'

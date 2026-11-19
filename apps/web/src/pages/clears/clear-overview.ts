@@ -1,19 +1,19 @@
-import type {
-  ClearAdventureSize,
-  ClearContent,
-  ClearOverview,
-  ClearOverviewContent,
-  ClearOverviewJob,
-  ClearFameDistribution,
-  ClearTimes,
-  ClearWeek
-} from '#core/ranking'
-import { jobLabelOf } from '#core/character'
+import { jobLabelOf } from '#entities/character'
 import type { BoxPlotRow } from '#shared/ui/chart/BoxPlot'
 import type { ColumnBar } from '#shared/ui/chart/Columns'
 import type { LineSeries } from '#shared/ui/chart/LineChart'
 import type { ChartX } from '#shared/ui/chart/plot-layout'
-import { shareText } from '#components/chart/stats-bars'
+import {
+  type ClearAdventureSize,
+  type ClearContent,
+  type ClearOverview,
+  type ClearOverviewContent,
+  type ClearOverviewJob,
+  type ClearFameDistribution,
+  type ClearTimes,
+  type ClearWeek,
+  shareText
+} from '#entities/ranking'
 import { addDays } from './clear-weeks'
 import { type JobMetric, jobStatsOf } from './clear-scores'
 import {

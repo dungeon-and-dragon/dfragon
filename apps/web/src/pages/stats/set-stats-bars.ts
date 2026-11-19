@@ -1,6 +1,6 @@
 import { linkOptions } from '@tanstack/react-router'
 import type { Bar } from '#shared/ui/chart/RowBars'
-import type { OathCatalog } from '#core/catalog'
+import type { OathCatalog } from '#entities/catalog'
 import type { RankingSearch } from '#pages/rankings'
 import {
   catalogOptionNamesOf,
@@ -11,7 +11,7 @@ import {
   type OathSetCount,
   type SetStats,
   type SetStatsFilter
-} from '#core/ranking'
+} from '#entities/ranking'
 
 const NO_OPTION_NAME = '선택지 없음'
 const COMBO_LIMIT = 10

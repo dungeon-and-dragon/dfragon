@@ -1,5 +1,8 @@
-import { apiCharacterCardSchema } from '#core/character/character-summary'
-import type { CharacterCard, CharacterDetails } from '#core/character/character'
+import {
+  apiCharacterCardSchema,
+  type CharacterCard,
+  type CharacterDetails
+} from '#entities/character'
 
 export function buildCharacterCard(details: CharacterDetails): CharacterCard | null {
   const parsed = apiCharacterCardSchema.safeParse(details.card)

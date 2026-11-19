@@ -6,7 +6,7 @@ import {
   type SearchSnapshot,
   type SearchView
 } from '#core/search/search'
-import type { CharacterPortrait } from '#core/character/character'
+import type { CharacterPortrait } from '#entities/character'
 import {
   CAPTURE_ID,
   searchRow,

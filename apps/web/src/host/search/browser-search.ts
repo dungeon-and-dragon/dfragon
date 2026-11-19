@@ -19,7 +19,7 @@ import {
   type SearchSnapshot,
   type YieldToEventLoop
 } from '#core/search'
-import { decodeCharacterImage } from '#core/character'
+import { decodeCharacterImage } from '#entities/character'
 import type { CardSearchHost } from '#host/client-host'
 import { decodeBrowserPng } from '#host/browser-png'
 

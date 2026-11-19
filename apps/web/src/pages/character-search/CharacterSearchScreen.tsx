@@ -2,7 +2,7 @@ import {
   type CharacterSearchQuery,
   isSearchableCharacterName,
   type SearchedCharacter
-} from '#core/character'
+} from '#entities/character'
 import {
   CharacterTable,
   type CharacterTableRow,

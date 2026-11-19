@@ -9,7 +9,7 @@ import {
   storedCharacterList,
   type CharacterDisplay,
   type CharacterKey
-} from '#lib/stored-character'
+} from '#entities/character'
 
 export const RECENT_CHARACTER_LIMIT = 10
 

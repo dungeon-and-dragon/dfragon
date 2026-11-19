@@ -1,12 +1,16 @@
 import { CloseIcon, Popover } from '@dfragon/ui'
-import { characterImageUrl, displayJobName, isMaxLevel } from '#core/character'
+import {
+  characterImageUrl,
+  displayJobName,
+  isMaxLevel,
+  ServerBadge,
+  type CharacterDisplay
+} from '#entities/character'
 import { Link } from '@tanstack/react-router'
 import { type KeyboardEvent, type RefObject, useId } from 'react'
 import { MISSING_VALUE } from '#core/capture'
-import { ServerBadge } from '#components/ServerBadge'
 import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
 import { type RecentCharacter, useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
-import type { CharacterDisplay } from '#lib/stored-character'
 import { CardImage } from './CardImage'
 import { FavoriteToggle } from './FavoriteToggle'
 import { moveItemFocus } from '#shared/ui/move-item-focus'

@@ -7,7 +7,7 @@ import {
   toCandidatePicker,
   toSlotCards
 } from '#core/capture'
-import type { SelectedCharacterSummary } from '#core/character'
+import type { SelectedCharacterSummary } from '#entities/character'
 import type { CharacterChoice, SearchSlot, SearchSnapshot } from '#core/search'
 import { bufferCard, CAPTURE_ID, dealerCard } from '#core/testing'
 import type { BrowserHost } from '#host/client-host'

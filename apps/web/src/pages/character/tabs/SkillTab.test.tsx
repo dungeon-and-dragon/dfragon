@@ -4,9 +4,9 @@ import { HttpResponse, http } from 'msw'
 import { act, useEffect } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView, MaleCrusaderRole } from '#core/character'
-import type { GameTextLines, SkillWindowCatalog } from '#core/catalog'
-import type { SkillStats } from '#core/ranking'
+import type { CharacterDetailView, MaleCrusaderRole } from '#entities/character'
+import type { GameTextLines, SkillWindowCatalog } from '#entities/catalog'
+import type { SkillStats } from '#entities/ranking'
 import { characterDetailFixture } from '#core/testing'
 import {
   loadingResponse,

@@ -1,10 +1,10 @@
 import { describe, expect, it, vi, type MockedFunction } from 'vitest'
-import type { CharacterCandidate, CharacterDetails } from '#core/character/character'
+import type { CharacterCandidate, CharacterDetails } from '#entities/character'
 import type { RaidRowObservation } from './search'
-import { deferred } from '#core/testing/async-test-fixture'
+import { deferred } from '#testing/test-support/async-test-fixture'
 import { runDetailsRequest, runSearchRequest } from './request'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from './character-requests'
-import { dealerCard, scoredDealerCard } from '#core/testing/card-test-fixture'
+import { dealerCard, scoredDealerCard } from '#entities/character/api/card-test.fixture'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'
 
 // 합성 후보, 직업명, 점수만 쓰며 표본이나 플레이어 식별자는 넣지 않는다.

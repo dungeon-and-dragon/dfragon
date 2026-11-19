@@ -1,12 +1,17 @@
 import { ArrowRightIcon, ChipGroup } from '@dfragon/ui'
-import type { ClearContent, ClearContentStats, ClearWeek, ClearWeekOverWeek } from '#core/ranking'
 import { BarLineChart } from '#shared/ui/chart/BarLineChart'
 import { BoxPlotChart } from '#shared/ui/chart/BoxPlot'
 import { ChartLegend } from '#shared/ui/chart/ChartLegend'
 import { Columns } from '#shared/ui/chart/Columns'
 import { RowBars } from '#shared/ui/chart/RowBars'
 import { SplitBar } from '#shared/ui/chart/SplitBar'
-import { shareText } from '#components/chart/stats-bars'
+import {
+  type ClearContent,
+  type ClearContentStats,
+  type ClearWeek,
+  type ClearWeekOverWeek,
+  shareText
+} from '#entities/ranking'
 import { TitleBox } from '#shared/ui/TitleBox'
 import {
   contentWeeks,

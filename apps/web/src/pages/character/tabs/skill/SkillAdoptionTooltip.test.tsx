@@ -2,9 +2,9 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { type SkillAdoptionTarget, type SkillStats, skillAdoptionOf } from '#core/ranking'
-import type { SkillMarks } from '#core/catalog'
-import type { MaleCrusaderRole } from '#core/character'
+import { type SkillAdoptionTarget, type SkillStats, skillAdoptionOf } from '#entities/ranking'
+import type { SkillMarks } from '#entities/catalog'
+import type { MaleCrusaderRole } from '#entities/character'
 import { SkillAdoptionTooltip } from './SkillAdoptionTooltip'
 
 const MARKS: SkillMarks = {

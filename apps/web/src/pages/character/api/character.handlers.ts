@@ -1,6 +1,6 @@
 import { delay, HttpResponse, http } from 'msw'
-import type { SkillWindowCatalog } from '#core/catalog'
-import type { CharacterDetailView, CharacterHistory, CharacterIdentity } from '#core/character'
+import type { SkillWindowCatalog } from '#entities/catalog'
+import type { CharacterDetailView, CharacterHistory, CharacterIdentity } from '#entities/character'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { characterPath } from './character-api'
 import {

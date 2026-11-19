@@ -5,10 +5,10 @@ import {
   type HistoryNameChange,
   type HistoryPoint,
   itemRarityOfGrade,
-  SET_PART
-} from '#core/character'
+  SET_PART,
+  enhancementKindClasses
+} from '#entities/character'
 import { formatSeoulFullDateTime } from '#shared/lib/time-format'
-import { enhancementKindClasses } from '#components/game-colors'
 import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
 import { ItemName } from '#pages/character/tabs/equipment/item-parts'
 import { FIELD_LABELS, formatFieldValue, NAME_CHANGE_LABELS } from './history-format'
