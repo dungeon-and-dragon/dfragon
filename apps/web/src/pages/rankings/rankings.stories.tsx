@@ -12,7 +12,7 @@ import { RANKING_JOBS } from '#entities/character'
 import { RankingsScreen } from './RankingsScreen'
 
 const meta = {
-  title: 'Screens/랭킹',
+  title: 'Screens/검색',
   parameters: { layout: 'fullscreen' }
 } satisfies Meta
 
@@ -79,7 +79,7 @@ export const 아이템선택: Story = {
   )
 }
 
-export const 거른랭킹없음: Story = {
+export const 거른결과없음: Story = {
   parameters: { msw: [fameRankingHandlers.empty, ...setHandlers] },
   render: () => <Screen initialFilter={{ oathSetId: 16204 }} />
 }

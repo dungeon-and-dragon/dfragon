@@ -17,8 +17,8 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const searchedCharacters = storyRankedCharacters(4).map((character) => {
-  const adventureName = character.rank % 2 === 0 ? character.adventureName : null
+const searchedCharacters = storyRankedCharacters(4).map((character, index) => {
+  const adventureName = index % 2 === 1 ? character.adventureName : null
   const imageUrl = characterImageUrl(character)
 
   return {

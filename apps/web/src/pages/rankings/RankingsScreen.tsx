@@ -72,6 +72,10 @@ export function RankingsScreen({
     onFilterChange({ ...filter, itemIds: next })
   }
 
+  function resetFilter(): void {
+    onFilterChange({})
+  }
+
   const rows: readonly FilterRow[] = [
     {
       label: '세트',
@@ -99,8 +103,13 @@ export function RankingsScreen({
 
   return (
     <div className="flex flex-col">
-      <TitleBox title="명성 랭킹" />
-      <RankingFilterBox filter={filter} onChange={onFilterChange} rows={rows} />
+      <TitleBox title="검색" />
+      <RankingFilterBox
+        filter={filter}
+        onChange={onFilterChange}
+        onReset={resetFilter}
+        rows={rows}
+      />
       <FameRankingList filter={filter} setLabel={setLabel} catalog={catalog} />
     </div>
   )
