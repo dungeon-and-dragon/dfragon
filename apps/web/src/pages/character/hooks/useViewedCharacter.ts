@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { type CharacterDetailView, characterDisplayOf } from '#entities/character'
-import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
-import { useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
+import { useFavoriteCharacterStore } from '#features/favorite-character'
+import { useRecentCharacterStore } from '#features/recent-characters'
 
 export function useViewedCharacter(detail: CharacterDetailView | null): void {
   const addRecentCharacter = useRecentCharacterStore((state) => state.addRecentCharacter)

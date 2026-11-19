@@ -1,5 +1,5 @@
 import { HeartIcon, IconButton } from '@dfragon/ui'
-import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
+import { useFavoriteCharacterStore } from '#features/favorite-character/model/useFavoriteCharacterStore'
 import { type CharacterDisplay, isSameCharacter } from '#entities/character'
 
 export function FavoriteToggle({
