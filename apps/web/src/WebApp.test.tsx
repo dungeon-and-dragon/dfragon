@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
@@ -18,6 +19,10 @@ import { CHARACTER_SERVER_NAMES, type CharacterCandidate } from '#core/character
 import { WEB_CAPTURE_TEXTS } from '#core/capture'
 import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'
 import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
+import { server } from '#testing/test-support/msw-server'
+import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
 
 vi.mock('./host/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
@@ -117,6 +122,23 @@ async function waitForPath(pathname: string): Promise<void> {
 let root: Root
 let container: HTMLDivElement
 let host: BrowserHost
+let requested: URL[]
+
+function recordRequest({ request }: { request: Request }): void {
+  requested.push(new URL(request.url))
+}
+
+// 화면이 확인하지 않는 조회는 실패로 돌려준다.
+function failure(): HttpResponse<object> {
+  return HttpResponse.json(
+    { error: { code: 'INTERNAL_SERVER_ERROR', message: '받지 못했습니다.' } },
+    { status: 500 }
+  )
+}
+
+function requestedPaths(pathname: string): URL[] {
+  return requested.filter((url) => url.pathname === new URL(`${SITE_API_URL}${pathname}`).pathname)
+}
 
 // host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
 beforeAll(() => {
@@ -131,11 +153,12 @@ beforeEach(() => {
   vi.mocked(decodeBrowserImage).mockResolvedValue(pastedImage)
   vi.mocked(readTownIndicatorTemplate).mockResolvedValue(pastedImage)
   vi.mocked(readRaidWindowTemplates).mockRejectedValue(new Error('no templates'))
-  vi.stubGlobal(
-    'fetch',
-    vi.fn<typeof fetch>(async () =>
-      Response.json({ percent: 85, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() })
-    )
+  requested = []
+  server.events.on('request:start', recordRequest)
+  server.use(
+    todayGradeHandlers.grade(85),
+    fameRankingHandlers.empty,
+    oathCatalogHandlers.notUploaded
   )
   localStorage.clear()
   container = document.createElement('div')
@@ -146,6 +169,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
+  server.events.removeListener('request:start', recordRequest)
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
   vi.clearAllMocks()
@@ -163,9 +187,7 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
     )
   )
   expect(container.querySelectorAll('tr[aria-label*="번 자리"]')).toHaveLength(4)
-  expect(vi.mocked(fetch).mock.calls.map((args) => new Request(...args).url)).toContain(
-    `${SITE_API_URL}/items/today-grade`
-  )
+  expect(requested.map(String)).toContain(`${SITE_API_URL}/items/today-grade`)
 })
 
 it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 멀티서치 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
@@ -204,10 +226,6 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
 })
 
 it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화면 상자에 큰 검색창과 명성 랭킹 제목만 둔다', async () => {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn<typeof fetch>(async () => Response.json({ characters: [], nextCursor: null }))
-  )
   window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -340,6 +358,10 @@ it('푸터의 약관 링크를 누르면 그 화면으로 가고 지금 화면�
 })
 
 it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 지금 화면으로 표시한다', async () => {
+  server.use(
+    http.get(`${SITE_API_URL}/stats/sets`, failure),
+    http.get(`${SITE_API_URL}/stats/items`, failure)
+  )
   window.history.replaceState(null, '', `/rankings?jobId=${RANKING_JOBS[0]!.jobId}`)
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -358,29 +380,27 @@ const DETAIL_PATH = '/c/prey/buffer-1'
 // 캐릭터 상세는 host가 아니라 화면의 hook이 사이트 origin의 /api로 요청한다.
 const DETAIL_URL = `${SITE_API_URL}/characters/prey/buffer-1`
 
-function stubDetailFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
-  const detail = vi.fn<typeof fetch>(async (...args) => {
-    if (new Request(...args).url !== DETAIL_URL) {
-      return Response.json({
-        percent: 85,
-        expiresAt: new Date(Date.now() + 3_600_000).toISOString()
+function serveDetail(): void {
+  server.use(
+    http.get(DETAIL_URL, () => {
+      const lastSuccessfulFetchAt = new Date().toISOString()
+
+      return HttpResponse.json({
+        character: {
+          serverId: 'prey',
+          characterId: 'buffer-1',
+          characterName: '하늘',
+          fame: 126965
+        },
+        freshness: { lastSuccessfulFetchAt },
+        card: { role: 'buffer', score: null }
       })
-    }
-
-    return Response.json({
-      character: { serverId: 'prey', characterId: 'buffer-1', characterName: '하늘', fame: 126965 },
-      freshness: { lastSuccessfulFetchAt: new Date().toISOString() },
-      card: { role: 'buffer', score: null }
     })
-  })
-  vi.stubGlobal('fetch', detail)
-
-  return detail
+  )
 }
 
-function detailRequests(detail: ReturnType<typeof vi.fn<typeof fetch>>): number {
-  return detail.mock.calls.filter((args) => new Request(...args).url.includes('/characters/prey/'))
-    .length
+function detailRequests(): number {
+  return requested.filter((url) => url.pathname.includes('/characters/prey/')).length
 }
 
 function selectedTab(): string | null | undefined {
@@ -388,7 +408,7 @@ function selectedTab(): string | null | undefined {
 }
 
 it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그리고, 탭을 바꾸면 다시 조회하지 않고 지금 기록의 tab만 바꾼다', async () => {
-  const detail = stubDetailFetch()
+  serveDetail()
   window.history.replaceState(null, '', `${DETAIL_PATH}?tab=skill`)
   const historyLength = window.history.length
   await act(async () => root.render(<WebApp host={host} />))
@@ -412,35 +432,28 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   await vi.waitFor(() => expect(window.location.search).toBe('?tab=status'))
   expect(selectedTab()).toBe('스탯')
   expect(window.history.length).toBe(historyLength)
-  expect(detailRequests(detail)).toBe(1)
+  expect(detailRequests()).toBe(1)
 })
 
-function stubAdventureFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
-  const requested = vi.fn<typeof fetch>(async (...args) => {
-    const url = new URL(new Request(...args).url)
-    if (url.pathname.endsWith('/weekly')) {
-      const adventureName = decodeURIComponent(url.pathname.split('/').at(-2)!)
-
-      return Response.json({ adventureName, clearNames: [], characters: [] })
-    }
-
-    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
-  })
-  vi.stubGlobal('fetch', requested)
-
-  return requested
+function serveAdventure(): void {
+  server.use(
+    http.get(`${SITE_API_URL}/adventures/:adventureName/weekly`, ({ params }) =>
+      HttpResponse.json({ adventureName: params.adventureName, clearNames: [], characters: [] })
+    ),
+    http.get(`${SITE_API_URL}/adventures/:adventureName/activity`, failure)
+  )
 }
 
-function adventureRequests(fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>): string[] {
-  return fetch.mock.calls
-    .map((args) => new Request(...args).url)
+function adventureRequests(): string[] {
+  return requested
+    .map(String)
     .filter((url) => url.startsWith(`${SITE_API_URL}/adventures/`))
     .toSorted()
 }
 
 it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 달라도 그 모험단의 대시보드를 그리고 저장한 이름은 그대로 둔다', async () => {
   useMyAdventureStore.setState({ adventureName: '저장 모험단' })
-  const fetch = stubAdventureFetch()
+  serveAdventure()
   const encodedName = encodeURIComponent('동네커피')
   window.history.replaceState(null, '', `/adventures/${encodedName}`)
   await act(async () => root.render(<WebApp host={host} />))
@@ -460,7 +473,7 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['모험단', 'page'],
     ['즐겨찾기', null]
   ])
-  expect(adventureRequests(fetch)).toEqual([
+  expect(adventureRequests()).toEqual([
     `${SITE_API_URL}/adventures/${encodedName}/activity`,
     `${SITE_API_URL}/adventures/${encodedName}/weekly`
   ])
@@ -469,7 +482,7 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
 
 it('모험단 주소는 저장한 모험단이 있으면 기록을 늘리지 않고 그 모험단 주소로 season과 함께 바꾼다', async () => {
   useMyAdventureStore.setState({ adventureName: '합성 모험단' })
-  stubAdventureFetch()
+  serveAdventure()
   window.history.replaceState(null, '', '/adventures?season=10')
   const historyLength = window.history.length
   await act(async () => root.render(<WebApp host={host} />))
@@ -480,6 +493,7 @@ it('모험단 주소는 저장한 모험단이 있으면 기록을 늘리지 않
 })
 
 it('컨텐츠를 고른 예전 클리어 주소는 기록을 늘리지 않고 같은 컨텐츠 묶음과 단계, 주의 상세 주소로 바꾼다', async () => {
+  server.use(http.get(`${SITE_API_URL}/stats/clears`, failure))
   window.history.replaceState(null, '', '/clears?content=nabel-hard&week=2026-11-05')
   const historyLength = window.history.length
   await act(async () => root.render(<WebApp host={host} />))
@@ -490,6 +504,7 @@ it('컨텐츠를 고른 예전 클리어 주소는 기록을 늘리지 않고 �
 })
 
 it('컨텐츠 id로 연 클리어 상세 주소는 컨텐츠 묶음 주소와 단계 query로 바꾼다', async () => {
+  server.use(http.get(`${SITE_API_URL}/stats/clears`, failure))
   window.history.replaceState(null, '', '/clears/michaela-normal?week=2026-11-05')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -497,7 +512,7 @@ it('컨텐츠 id로 연 클리어 상세 주소는 컨텐츠 묶음 주소와 �
   expect(window.location.search).toBe('?stage=normal&week=2026-11-05')
 })
 
-function stubClearFetch(): void {
+function serveClears(): void {
   const week = {
     weekStart: '2026-11-05',
     closed: true,
@@ -532,32 +547,17 @@ function stubClearFetch(): void {
     hours: []
   }
   const overview = { weekStart: '2026-11-05', contents: [], weekdays: [], hours: [] }
-  vi.stubGlobal(
-    'fetch',
-    vi.fn<typeof fetch>(async (...args) => {
-      const { pathname } = new URL(new Request(...args).url)
-      if (pathname.endsWith('/stats/clears')) {
-        return Response.json({ contents: [{ ...header, weeks: [week] }], legions: [] })
-      }
-
-      if (pathname.endsWith('/stats/clears/overview')) {
-        return Response.json(overview)
-      }
-
-      if (pathname.endsWith('/stats/clears/michaela-hard')) {
-        return Response.json(detail)
-      }
-
-      return Response.json({
-        percent: 85,
-        expiresAt: new Date(Date.now() + 3_600_000).toISOString()
-      })
-    })
+  server.use(
+    http.get(`${SITE_API_URL}/stats/clears`, () =>
+      HttpResponse.json({ contents: [{ ...header, weeks: [week] }], legions: [] })
+    ),
+    http.get(`${SITE_API_URL}/stats/clears/overview`, () => HttpResponse.json(overview)),
+    http.get(`${SITE_API_URL}/stats/clears/michaela-hard`, () => HttpResponse.json(detail))
   )
 }
 
 it('클리어 상세에서 고른 컨텐츠 카드를 다시 누르면 같은 주의 전체 개요로 돌아간다', async () => {
-  stubClearFetch()
+  serveClears()
   window.history.replaceState(null, '', '/clears/michaela?week=2026-11-05')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -576,7 +576,7 @@ it('클리어 상세에서 고른 컨텐츠 카드를 다시 누르면 같은 �
 })
 
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
-  stubDetailFetch()
+  serveDetail()
   window.history.replaceState(null, '', `${DETAIL_PATH}?tab=unknown`)
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -902,29 +902,15 @@ function candidateRow(
   }
 }
 
-function stubSearchFetch(
-  rows: readonly CharacterCandidate[]
-): ReturnType<typeof vi.fn<typeof globalThis.fetch>> {
-  const fetch = vi.fn<typeof globalThis.fetch>(async (...args) => {
-    const url = new URL(new Request(...args).url)
-    if (url.pathname === '/api/characters') {
-      return Response.json({ rows })
-    }
-
-    return Response.json({
-      percent: 85,
-      expiresAt: new Date(Date.now() + 3_600_000).toISOString()
-    })
-  })
-  vi.stubGlobal('fetch', fetch)
-
-  return fetch
+function serveCharacterSearch(rows: readonly CharacterCandidate[]): void {
+  server.use(
+    http.get(`${SITE_API_URL}/characters`, () => HttpResponse.json({ rows })),
+    http.get(`${SITE_API_URL}/characters/:serverId/:characterId`, failure)
+  )
 }
 
-function searchRequests(fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>): URL[] {
-  return fetch.mock.calls
-    .map((args) => new URL(new Request(...args).url))
-    .filter((url) => url.pathname === '/api/characters')
+function searchRequests(): URL[] {
+  return requestedPaths('/characters')
 }
 
 function searchBox(): HTMLFormElement {
@@ -994,7 +980,7 @@ it('검색 대상 목록은 전체, 서버, 모험단 순이고 모험단을 고
 })
 
 it('캐릭터 검색을 제출하면 결과가 한 명이어도 검색 화면으로 가서 목록을 보이고, 고른 캐릭터의 상세로 가며 뒤로 가면 목록으로 돌아온다', async () => {
-  const fetch = stubSearchFetch([candidateRow('한명', 'cain', 'only-1', 50000)])
+  serveCharacterSearch([candidateRow('한명', 'cain', 'only-1', 50000)])
   await act(async () => root.render(<WebApp host={host} />))
 
   await searchName(' 한명 ')
@@ -1009,7 +995,7 @@ it('캐릭터 검색을 제출하면 결과가 한 명이어도 검색 화면으
       ['/c/cain/only-1', '카인한명크루세이더 프리스트(남)50,000']
     ])
   )
-  expect(searchRequests(fetch).map((url) => Object.fromEntries(url.searchParams))).toEqual([
+  expect(searchRequests().map((url) => Object.fromEntries(url.searchParams))).toEqual([
     { characterName: '한명', serverId: 'all', limit: '200' }
   ])
 
@@ -1022,7 +1008,7 @@ it('캐릭터 검색을 제출하면 결과가 한 명이어도 검색 화면으
 })
 
 it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답을 그 순서대로 보인다', async () => {
-  const fetch = stubSearchFetch([
+  serveCharacterSearch([
     candidateRow('카인검색1', 'cain', 'server-1', 90000),
     candidateRow('카인검색', 'cain', 'server-2', null)
   ])
@@ -1039,11 +1025,11 @@ it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답�
     ])
   )
   expect(container.querySelector('main h1')?.textContent).toBe('캐릭터 검색')
-  expect(searchRequests(fetch).map((url) => url.searchParams.get('serverId'))).toEqual(['cain'])
+  expect(searchRequests().map((url) => url.searchParams.get('serverId'))).toEqual(['cain'])
 })
 
 it('캐릭터 이름 한 글자를 제출하면 검색 화면으로 가서 그 이름으로 찾는다', async () => {
-  const fetch = stubSearchFetch([candidateRow('가', 'cain', 'single-1', 1000)])
+  serveCharacterSearch([candidateRow('가', 'cain', 'single-1', 1000)])
   await act(async () => root.render(<WebApp host={host} />))
 
   await searchName('가')
@@ -1052,11 +1038,11 @@ it('캐릭터 이름 한 글자를 제출하면 검색 화면으로 가서 그 �
   await vi.waitFor(() =>
     expect(searchResultRows()).toEqual([['/c/cain/single-1', '카인가크루세이더 프리스트(남)1,000']])
   )
-  expect(searchRequests(fetch).map((url) => url.searchParams.get('characterName'))).toEqual(['가'])
+  expect(searchRequests().map((url) => url.searchParams.get('characterName'))).toEqual(['가'])
 })
 
 it('검색 결과가 없으면 검색한 이름의 목록 상자에 찾지 못했다는 문구를 보인다', async () => {
-  stubSearchFetch([])
+  serveCharacterSearch([])
   window.history.replaceState(null, '', '/search?characterName=없는이름&serverId=all')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -1068,7 +1054,7 @@ it('검색 결과가 없으면 검색한 이름의 목록 상자에 찾지 못�
 })
 
 it('주소의 이름이 열세 글자면 검색 화면은 요청하지 않는다', async () => {
-  const fetch = stubSearchFetch([])
+  serveCharacterSearch([])
   window.history.replaceState(
     null,
     '',
@@ -1079,11 +1065,11 @@ it('주소의 이름이 열세 글자면 검색 화면은 요청하지 않는다
   expect(container.querySelector('main section h2')?.textContent).toBe('가나다라마바사아자차카타파')
   expect(container.querySelector('main section p')?.textContent).toBe('검색할 수 없는 이름입니다.')
   expect(container.querySelector('main header')?.textContent).toBe('캐릭터 검색서버전체')
-  expect(searchRequests(fetch)).toEqual([])
+  expect(searchRequests()).toEqual([])
 })
 
 it('모험단 검색을 제출하면 다듬은 이름의 모험단 대시보드로 가고 저장한 이름은 바꾸지 않는다', async () => {
-  const fetch = stubAdventureFetch()
+  serveAdventure()
   await act(async () => root.render(<WebApp host={host} />))
   await chooseScope('모험단')
 
@@ -1094,12 +1080,12 @@ it('모험단 검색을 제출하면 다듬은 이름의 모험단 대시보드�
     expect(container.querySelector('main section h2')?.textContent).toBe('없는 모험단')
   )
   expect(container.querySelector('main h1')?.textContent).toBe('없는 모험단')
-  expect(searchRequests(fetch)).toEqual([])
+  expect(searchRequests()).toEqual([])
   expect(useMyAdventureStore.getState().adventureName).toBeNull()
 })
 
 it('메인 화면의 큰 검색창에 캐릭터 이름을 제출하면 전역 검색창처럼 검색 화면으로 가고, 그 화면의 전역 바에는 검색창이 다시 보인다', async () => {
-  const fetch = stubSearchFetch([candidateRow('큰검색', 'cain', 'home-1', 1000)])
+  serveCharacterSearch([candidateRow('큰검색', 'cain', 'home-1', 1000)])
   window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -1115,12 +1101,12 @@ it('메인 화면의 큰 검색창에 캐릭터 이름을 제출하면 전역 �
       ['/c/cain/home-1', '카인큰검색크루세이더 프리스트(남)1,000']
     ])
   )
-  expect(searchRequests(fetch)).toHaveLength(1)
+  expect(searchRequests()).toHaveLength(1)
   expect(container.querySelector('header form[role="search"]')).not.toBeNull()
 })
 
 it('메인 화면의 큰 검색창에서 모험단을 고르고 제출하면 그 모험단 대시보드로 간다', async () => {
-  stubAdventureFetch()
+  serveAdventure()
   window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
   await chooseScope('모험단', homeSearchBox())
@@ -1177,7 +1163,7 @@ function globalMenuLink(label: string): HTMLAnchorElement {
 }
 
 it('상세의 하트로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨찾기 화면에서 해제하면 목록에서 빠지고 상세의 하트도 꺼진다', async () => {
-  stubDetailFetch()
+  serveDetail()
   window.history.replaceState(null, '', DETAIL_PATH)
   await act(async () => root.render(<WebApp host={host} />))
   await vi.waitFor(() =>
@@ -1222,7 +1208,7 @@ function recentPopup(): HTMLElement | null {
 }
 
 it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최근 본 캐릭터로 보이고, 이름을 쓰면 닫히며, 지우면 목록에서 빠진다', async () => {
-  stubDetailFetch()
+  serveDetail()
   window.history.replaceState(null, '', DETAIL_PATH)
   await act(async () => root.render(<WebApp host={host} />))
   await vi.waitFor(() => expect(summaryHeart()).not.toBeNull())
@@ -1261,13 +1247,14 @@ it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최�
 
 it('예전 내 모험단 주소는 season과 함께 저장한 모험단 주소로 넘어가 그 시즌을 조회하고, 숫자가 아닌 season은 지금 시즌을 조회한다', async () => {
   useMyAdventureStore.setState({ adventureName: '합성 모험단' })
-  const fetch = vi.fn<typeof globalThis.fetch>(async () => new Response('{}', { status: 500 }))
-  vi.stubGlobal('fetch', fetch)
+  server.use(
+    http.get(`${SITE_API_URL}/adventures/:adventureName/*`, () =>
+      HttpResponse.json({}, { status: 500 })
+    )
+  )
   const encodedName = encodeURIComponent('합성 모험단')
   const activityUrls = () =>
-    fetch.mock.calls
-      .map((args) => new Request(...args).url)
-      .filter((url) => url.includes(`${encodedName}/activity`))
+    requested.map(String).filter((url) => url.includes(`${encodedName}/activity`))
 
   window.history.replaceState(null, '', '/my?season=10')
   await act(async () => root.render(<WebApp host={host} />))
@@ -1290,7 +1277,7 @@ it('예전 내 모험단 주소는 season과 함께 저장한 모험단 주소�
 })
 
 it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 이름 입력 화면으로 넘어가고, 이름을 넣고 보기를 누르면 그 모험단 주소로 가서 지금 시즌 활동과 주간 던파만 조회하고 이름은 브라우저에 남긴다', async () => {
-  const fetch = stubAdventureFetch()
+  serveAdventure()
   window.history.replaceState(null, '', '/my')
   await act(async () => root.render(<WebApp host={host} />))
 
@@ -1320,7 +1307,7 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
   await vi.waitFor(() =>
     expect(container.querySelector('main section h2')?.textContent).toBe('합성 모험단')
   )
-  expect(adventureRequests(fetch)).toEqual([
+  expect(adventureRequests()).toEqual([
     `${SITE_API_URL}/adventures/${encodedName}/activity`,
     `${SITE_API_URL}/adventures/${encodedName}/weekly`
   ])
@@ -1363,37 +1350,24 @@ const ITEM_STATS = {
   ]
 }
 
-function stubSetStatsFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
-  const stats = vi.fn<typeof fetch>(async (...args) => {
-    const { pathname } = new URL(new Request(...args).url)
-    if (pathname.endsWith('/stats/sets')) {
-      return Response.json(SET_STATS)
-    }
-
-    if (pathname.endsWith('/stats/items')) {
-      return Response.json(ITEM_STATS)
-    }
-
-    if (pathname.endsWith('/rankings/fame')) {
-      return Response.json({ characters: [] })
-    }
-
-    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
-  })
-  vi.stubGlobal('fetch', stats)
-
-  return stats
+function serveSetStats(): void {
+  server.use(
+    http.get(`${SITE_API_URL}/stats/sets`, () => HttpResponse.json(SET_STATS)),
+    http.get(`${SITE_API_URL}/stats/items`, () => HttpResponse.json(ITEM_STATS)),
+    http.get(`${SITE_API_URL}/rankings/fame`, () => HttpResponse.json({ characters: [] }))
+  )
 }
 
-function setStatsRequests(stats: ReturnType<typeof vi.fn<typeof fetch>>): string[] {
-  return stats.mock.calls
-    .map((args) => new URL(new Request(...args).url))
-    .filter(({ pathname }) => pathname.endsWith('/stats/sets'))
-    .map(({ search }) => search)
+function setStatsRequests(): string[] {
+  return requestedPaths('/stats/sets').map(({ search }) => search)
+}
+
+function rankingRequests(): URL[] {
+  return requestedPaths('/rankings/fame')
 }
 
 it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계를 받고, 전직을 고르면 주소를 바꿔 다시 받는다', async () => {
-  const stats = stubSetStatsFetch()
+  serveSetStats()
   const [job] = RANKING_JOBS
   const [firstGrow, secondGrow] = job!.grows
   window.history.replaceState(
@@ -1404,9 +1378,7 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() =>
-    expect(setStatsRequests(stats)).toEqual([
-      `?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}`
-    ])
+    expect(setStatsRequests()).toEqual([`?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}`])
   )
   expect(globalMenu()).toContainEqual(['통계', 'page'])
   const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
@@ -1424,14 +1396,14 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
     expect(new URLSearchParams(window.location.search).get('jobGrowId')).toBe(secondGrow!.jobGrowId)
   )
   await vi.waitFor(() =>
-    expect(setStatsRequests(stats).at(-1)).toBe(
+    expect(setStatsRequests().at(-1)).toBe(
       `?jobId=${job!.jobId}&jobGrowId=${secondGrow!.jobGrowId}`
     )
   )
 })
 
 it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세트로 거른 랭킹 주소로 가서 랭킹을 그 조건으로 받는다', async () => {
-  const stats = stubSetStatsFetch()
+  serveSetStats()
   const [job] = RANKING_JOBS
   window.history.replaceState(null, '', `/stats/sets?jobId=${job!.jobId}`)
   await act(async () => root.render(<WebApp host={host} />))
@@ -1453,10 +1425,9 @@ it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세�
     equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
   })
   await vi.waitFor(() => {
-    const rankingUrls = stats.mock.calls
-      .map((args) => new URL(new Request(...args).url))
-      .filter(({ pathname }) => pathname.endsWith('/rankings/fame'))
-    expect(rankingUrls.map(({ searchParams }) => Object.fromEntries(searchParams))).toContainEqual({
+    expect(
+      rankingRequests().map(({ searchParams }) => Object.fromEntries(searchParams))
+    ).toContainEqual({
       jobId: job!.jobId,
       equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
     })
@@ -1464,7 +1435,7 @@ it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세�
 })
 
 it('세트 통계의 무기 막대를 누르면 그 itemId로 거른 랭킹 주소로 가고, 새로 열어도 같은 아이템으로 랭킹을 받는다', async () => {
-  const stats = stubSetStatsFetch()
+  serveSetStats()
   const [job] = RANKING_JOBS
   window.history.replaceState(null, '', `/stats/sets?jobId=${job!.jobId}`)
   await act(async () => root.render(<WebApp host={host} />))
@@ -1491,10 +1462,7 @@ it('세트 통계의 무기 막대를 누르면 그 itemId로 거른 랭킹 주�
   )
   await act(async () => root.render(<WebApp host={host} />))
   await vi.waitFor(() => {
-    const rankingUrls = stats.mock.calls
-      .map((args) => new URL(new Request(...args).url))
-      .filter(({ pathname }) => pathname.endsWith('/rankings/fame'))
-    expect(rankingUrls.map(({ searchParams }) => searchParams.get('itemIds'))).toContain(
+    expect(rankingRequests().map(({ searchParams }) => searchParams.get('itemIds'))).toContain(
       'weapon-1,ring-1'
     )
   })
