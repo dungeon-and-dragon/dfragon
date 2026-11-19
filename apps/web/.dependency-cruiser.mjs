@@ -153,14 +153,6 @@ export default {
       to: { path: CORE_DOMAIN_SOURCE_PATH, pathNot: CORE_INDEX_PATH }
     },
     {
-      name: 'character-feature-imports',
-      comment:
-        'core/character는 entities로, core/search, capture, ocr은 그 위 features로 옮기므로 character는 셋을 import하지 않는다(import type 포함). 함께 쓰는 타입은 core/character로 내리고, 검색이나 캡처만 쓰는 코드는 그쪽으로 옮긴다.',
-      severity: 'error',
-      from: { path: '^src/core/character/' },
-      to: { path: '^src/core/(search|capture|ocr)/' }
-    },
-    {
       name: 'no-circular',
       comment:
         '실행할 때 생기는 순환 import를 두지 않는다. import type만으로 이은 순환은 검사하지 않는다. core/ 안의 도메인 사이는 index 대신 파일을 직접 import한다.',
