@@ -111,7 +111,8 @@ describe('완료한 캐릭터 응답 캐시', () => {
         return details({ ...identity, signal: signal() })
       }
       try {
-        const original = kind === 'candidates' ? [candidate] : detail()
+        // 응답 schema가 점수를 보내지 않은 행의 score를 null로 채운다.
+        const original = kind === 'candidates' ? [{ ...candidate, score: null }] : detail()
         const rename = (value: Awaited<ReturnType<typeof read>>) => {
           if (Array.isArray(value)) {
             Reflect.set(value[0], 'characterName', '변경')

@@ -54,6 +54,7 @@ function character(
     guildId: null,
     guildName: null,
     role: null,
+    score: null,
     equipment,
     oaths
   }
