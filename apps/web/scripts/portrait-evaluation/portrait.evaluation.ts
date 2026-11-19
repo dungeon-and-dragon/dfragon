@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { setImmediate } from 'node:timers/promises'
 import { describe, expect, it } from 'vitest'
-import { createPortraitColorScorer } from '#core/search/portrait-color'
+import { createPortraitColorScorer } from '#features/capture-search'
 import { type CaseResult, evaluateCase, type PolicyBase, summarize } from './evaluate'
 import {
   formatCandidateTable,

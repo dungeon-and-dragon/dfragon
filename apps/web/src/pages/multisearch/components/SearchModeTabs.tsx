@@ -1,6 +1,5 @@
 import { Tabs } from '@base-ui/react/tabs'
-import { useSearchModeStore } from '#hooks/useSearchModeStore'
-import type { SearchMode } from '#core/capture'
+import { useSearchModeStore, type SearchMode } from '#features/capture-search'
 
 const SEARCH_MODES: readonly SearchMode[] = ['party', 'raid']
 

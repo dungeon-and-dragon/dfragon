@@ -1,12 +1,12 @@
 import {
+  type PartyCapture,
   seatValuesToSlotOrder,
   slotAdventureName,
   type SlotCard,
   toClipboardText,
-  toSlotCards
-} from '#core/capture'
-import { useAdventureSnapshot } from '#hooks/useAdventureSnapshot'
-import type { PartyCapture } from '#hooks/usePartyCapture'
+  toSlotCards,
+  useAdventureSnapshot
+} from '#features/capture-search'
 
 export function usePartySlotCards(capture: PartyCapture): {
   cards: SlotCard[]

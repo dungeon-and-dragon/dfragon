@@ -4,15 +4,15 @@ import {
   createSeatOrder,
   PARTY_SEAT_LAYOUT,
   RAID_SEAT_LAYOUT,
+  ScreenCaptureProvider,
   type SearchMode,
+  type SeatArrangement,
   type SlotCard,
   type SlotCardActions,
   swapSeats,
-  WEB_CAPTURE_TEXTS
-} from '#core/capture'
-import { ScreenCaptureProvider } from '#components/ScreenCaptureProvider'
-import { useSearchModeStore } from '#hooks/useSearchModeStore'
-import type { SeatArrangement } from '#hooks/useSeatOrder'
+  WEB_CAPTURE_TEXTS,
+  useSearchModeStore
+} from '#features/capture-search'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import {

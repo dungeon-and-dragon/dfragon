@@ -1,13 +1,13 @@
 import {
   RAID_PARTY_SIZE,
+  type RaidCapture,
   seatValuesToSlotOrder,
   slotAdventureName,
   type SlotCard,
   toClipboardText,
-  toSlotCards
-} from '#core/capture'
-import { useAdventureSnapshot } from '#hooks/useAdventureSnapshot'
-import type { RaidCapture } from '#hooks/useRaidCapture'
+  toSlotCards,
+  useAdventureSnapshot
+} from '#features/capture-search'
 
 export function useRaidSlotCards(capture: RaidCapture): {
   cards: SlotCard[]

@@ -1,9 +1,13 @@
 import { Button, MonitorIcon, StatusChip } from '@dfragon/ui'
 import { HeaderTooltip, tooltipTriggerClass } from '#shared/ui/HeaderTooltip'
-import { useScreenCaptureContext } from '#hooks/useScreenCaptureContext'
-import { useSearchModeStore } from '#hooks/useSearchModeStore'
-import { type CapturePhase, getCaptureControlState, type SearchMode } from '#core/capture'
-import type { BrowserHost } from '#host/client-host'
+import {
+  useScreenCaptureContext,
+  useSearchModeStore,
+  type CapturePhase,
+  getCaptureControlState,
+  type SearchMode,
+  type BrowserHost
+} from '#features/capture-search'
 import { WEB_SCREEN_WATCH_TEXTS } from './web-capture-texts'
 
 function getScreenShareStatus(
