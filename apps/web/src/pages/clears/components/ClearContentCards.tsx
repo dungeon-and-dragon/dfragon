@@ -1,6 +1,6 @@
 import { ChevronRightIcon } from '@dfragon/ui'
 import { useEffect, useRef, useState } from 'react'
-import { findClearContentBackground } from '#lib/clear-content-background'
+import { findClearContentBackground } from '#pages/clears/clear-content-background'
 import type { CardStage, ContentCard } from '#pages/clears/clear-overview'
 
 type Edges = Readonly<{ start: boolean; end: boolean }>

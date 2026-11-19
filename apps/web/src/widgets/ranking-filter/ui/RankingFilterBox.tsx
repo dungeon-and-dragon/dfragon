@@ -7,7 +7,7 @@ import {
   RANKING_JOBS,
   type RankingGrow,
   type RankingJob
-} from './ranking-jobs'
+} from '#widgets/ranking-filter/lib/ranking-jobs'
 
 const FILTER_ROW = 'flex items-start gap-4'
 const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center'

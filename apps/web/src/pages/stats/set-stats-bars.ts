@@ -1,7 +1,7 @@
 import { linkOptions } from '@tanstack/react-router'
 import type { Bar } from '#shared/ui/chart/RowBars'
 import type { OathCatalog } from '#entities/catalog'
-import type { RankingSearch } from '#pages/rankings'
+import type { RankingSearch } from '#widgets/ranking-filter'
 import {
   catalogOptionNamesOf,
   equipmentSetShortName,

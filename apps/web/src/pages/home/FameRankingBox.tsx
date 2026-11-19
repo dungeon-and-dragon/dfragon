@@ -1,4 +1,4 @@
-import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
+import { type Affiliation, CharacterTable, SkeletonRow } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 import { useFameRanking } from '#entities/ranking'
 

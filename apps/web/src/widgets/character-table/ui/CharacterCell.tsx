@@ -1,7 +1,7 @@
 import { characterImageUrl, displayJobName, isMaxLevel, ServerBadge } from '#entities/character'
 import { Link } from '@tanstack/react-router'
 import type { StoredCharacter } from '#entities/ranking'
-import { Portrait } from '#components/Portrait'
+import { Portrait } from '#features/capture-search'
 import { PortraitPreview } from '#shared/ui/PortraitPreview'
 
 export type CharacterCellCharacter = Pick<

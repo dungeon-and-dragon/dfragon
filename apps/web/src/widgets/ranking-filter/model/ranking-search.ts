@@ -7,7 +7,7 @@ import type {
   FameRankingSetFilter,
   SetStatsFilter
 } from '#entities/ranking'
-import { growFilter, RANKING_JOBS } from './ranking-jobs'
+import { growFilter, RANKING_JOBS } from '#widgets/ranking-filter/lib/ranking-jobs'
 
 const text = z.string().min(1).optional().catch(undefined)
 

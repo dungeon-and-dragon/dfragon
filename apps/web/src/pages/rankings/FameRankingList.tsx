@@ -7,7 +7,7 @@ import {
   CharacterTable,
   type CharacterTableDetail,
   SkeletonRow
-} from '#components/table/CharacterTable'
+} from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 import {
   type FameRankingFilter,
@@ -15,8 +15,7 @@ import {
   type FameRankingPages,
   useFameRanking
 } from '#entities/ranking'
-import { rankingName } from './ranking-jobs'
-import { rankingSetLines } from './ranking-sets'
+import { rankingName, rankingSetLines } from '#widgets/ranking-filter'
 
 const PAGE_SIZE = 20
 const LOADING_ROWS = 5
