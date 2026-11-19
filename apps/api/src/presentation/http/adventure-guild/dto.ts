@@ -3,9 +3,9 @@ import { z } from 'zod'
 import type {
   ActivitySeason,
   AdventureActivity,
-  AdventureEquipment,
   AdventureSeasonDays,
-  AdventureWeeklyClears
+  AdventureWeeklyClears,
+  SelectedAdventureEquipment
 } from '#domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
@@ -14,6 +14,11 @@ const SEASON_NUMBER_PATTERN = /^[1-9]\d{0,3}$/
 const seasonNumber = z.string().regex(SEASON_NUMBER_PATTERN).transform(Number)
 
 export const activityQuery = z.object({ season: seasonNumber.optional() })
+
+export const equipmentQuery = z.object({
+  server: z.string().optional(),
+  set: z.string().optional()
+})
 
 export type ActivityQuery = z.infer<typeof activityQuery>
 
@@ -33,7 +38,7 @@ export type GuildMembersResponse = {
 
 export type AdventureWeeklyResponse = AdventureWeeklyClears & { adventureName: string }
 
-export type AdventureEquipmentResponse = AdventureEquipment & { adventureName: string }
+export type AdventureEquipmentResponse = SelectedAdventureEquipment & { adventureName: string }
 
 export type AdventureActivityResponse = AdventureActivity
 
@@ -72,7 +77,7 @@ export function toGuildMembersResponse(
 
 export function toAdventureEquipmentResponse(
   adventureName: string,
-  equipment: AdventureEquipment
+  equipment: SelectedAdventureEquipment
 ): AdventureEquipmentResponse {
   return { adventureName, ...equipment }
 }
