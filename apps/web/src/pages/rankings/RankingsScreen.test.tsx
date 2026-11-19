@@ -362,6 +362,20 @@ it('다음 page를 받는 동안 불러오기 대신 빈 줄을 두고, 받으�
   expect(rankTexts()).toHaveLength(25)
 })
 
+function headings(): string[] {
+  return [...container.querySelectorAll('thead th')].map((th) => th.textContent ?? '')
+}
+
+it('최고 명성을 정하면 순위가 전체 순위와 달라 순위 열을 빼고, 최저 명성만 정하면 순위 열을 둔다', async () => {
+  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(3))
+  await render(getFameRanking, { fameFrom: 136000, fameTo: 138000 })
+
+  expect(getFameRanking).toHaveBeenCalledWith({ fameFrom: 136000, fameTo: 138000 }, undefined)
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
+  await render(getFameRanking, { fameFrom: 136000 })
+  expect(headings()).toEqual(['#', '캐릭터', '세트', '명성', '모험단'])
+})
+
 it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두고, 다시 시도하면 이어 받는다', async () => {
   let failNext = true
   const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async (_filter, cursor) => {
