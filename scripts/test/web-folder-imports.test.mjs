@@ -179,8 +179,6 @@ const layerRejected = [
     "import type { Value } from '#core/capture/cards-types'\nexport type Used = Value\n"
   ],
   ['src/core/character/ocr.ts', '../ocr/ocr', 'character-feature-imports'],
-  ['src/core/api/http.ts', '#core/search/search', 'api-error-imports'],
-  ['src/core/api/api-response.ts', '#core/search', 'api-error-imports'],
   ['src/pages/a/inner.test.ts', '#entities/character/model/character', 'slice-index'],
   [
     'src/entities/character/model/uses-fixture.ts',
@@ -203,9 +201,7 @@ const layerAllowed = [
   ['src/components/shared-ui.ts', '#shared/ui/ListBox'],
   ['src/pages/home/rankings.ts', '#pages/rankings'],
   ['src/pages/stats/rankings.ts', '#pages/rankings'],
-  ['src/core/character/api-error.ts', '#core/api/http'],
   ['src/core/capture/character.ts', '#core/character/character-detail-view'],
-  ['src/core/search/api-error.ts', '#core/api/http'],
   ['src/pages/a/fixture.test.ts', '#entities/character/api/character.fixture'],
   ['src/pages/a/handler.stories.tsx', '#entities/character/api/character.handlers'],
   ['src/entities/character/api/character.handlers.ts', './character.fixture']
