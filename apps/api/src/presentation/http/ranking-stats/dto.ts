@@ -23,6 +23,9 @@ const role = z.enum(['dealer', 'buffer']).optional()
 
 // INTEGER 열과 비교하므로 int 범위를 넘지 않는 9자리까지의 양의 정수만 받는다.
 const OATH_SET_ID_PATTERN = /^[1-9]\d{0,8}$/
+const FAME_PATTERN = /^(0|[1-9]\d{0,8})$/
+
+const fame = z.string().regex(FAME_PATTERN).transform(Number).optional()
 
 const jobFilter = {
   jobId: z.string().min(1).optional(),
@@ -75,11 +78,16 @@ export const fameRankingQuery = z
     oathSetId: z.string().regex(OATH_SET_ID_PATTERN).transform(Number).optional(),
     oathSetOption: z.string().min(1).optional(),
     itemIds: itemIds.optional(),
+    fameFrom: fame,
+    fameTo: fame,
     cursor: cursor.optional()
   })
   .refine(hasJobForGrow)
   .refine(hasMaleCrusaderForRole)
   .refine(({ oathSetId, oathSetOption }) => oathSetOption === undefined || oathSetId !== undefined)
+  .refine(
+    ({ fameFrom, fameTo }) => fameFrom === undefined || fameTo === undefined || fameFrom <= fameTo
+  )
 
 export type FameRankingQuery = z.infer<typeof fameRankingQuery>
 
