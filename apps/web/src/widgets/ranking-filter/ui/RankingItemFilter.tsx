@@ -1,9 +1,13 @@
-import { Chip, Select } from '@dfragon/ui'
+import { Select } from '@dfragon/ui'
+import { ItemIcon } from '#entities/character'
 import {
+  chosenUniquesOf,
   chosenWeaponOf,
   type ItemChoices,
+  isUniqueBlocked,
+  type UniqueItemGroup,
   type WeaponGroup,
-  withUniqueToggled,
+  withUniques,
   withWeapon
 } from '#widgets/ranking-filter/lib/ranking-items'
 
@@ -40,6 +44,7 @@ export function WeaponSelect({
   return (
     <Select.Root value={weapon ?? ALL} onValueChange={handleValueChange} items={items}>
       <Select.Trigger size="sm" aria-label={LABEL}>
+        {weapon !== undefined && <ItemIcon itemId={weapon} rarity={null} size="sm" />}
         <Select.Value />
       </Select.Trigger>
       <Select.Popup aria-label={LABEL}>
@@ -68,6 +73,7 @@ function WeaponOptions({
 }): React.JSX.Element {
   const options = choices.map(({ value, label: name }) => (
     <Select.Item key={value} value={value}>
+      <ItemIcon itemId={value} rarity={null} size="sm" />
       <Select.ItemText>{name}</Select.ItemText>
     </Select.Item>
   ))
@@ -89,7 +95,10 @@ function WeaponOptions({
   )
 }
 
-export function UniqueItemChips({
+const UNIQUE_LABEL = '유일 장비'
+const UNIQUE_ALL_LABEL = '유일 장비 전체'
+
+export function UniqueItemSelect({
   choices,
   itemIds,
   onChange
@@ -98,43 +107,74 @@ export function UniqueItemChips({
   itemIds: readonly string[]
   onChange: (itemIds: readonly string[]) => void
 }): React.JSX.Element {
-  function toggle(itemId: string): void {
-    onChange(withUniqueToggled(itemIds, itemId))
+  const chosen = chosenUniquesOf(choices, itemIds)
+  const items = choices.uniqueGroups.flatMap((group) => group.choices)
+
+  function handleValueChange(next: string[]): void {
+    onChange(withUniques(choices, itemIds, next))
+  }
+
+  function valueText(values: string[]): string {
+    const [only] = values
+
+    if (only === undefined) {
+      return UNIQUE_ALL_LABEL
+    }
+
+    if (values.length > 1) {
+      return `${values.length}개`
+    }
+
+    const chosenItem = items.find(({ value }) => value === only)
+
+    if (chosenItem === undefined) {
+      return only
+    }
+
+    return chosenItem.label
+  }
+
+  function isBlocked(itemId: string): boolean {
+    return isUniqueBlocked(choices, itemIds, itemId)
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {choices.uniques.map(({ slotId, label, itemId }) => (
-        <UniqueChip
-          key={slotId}
-          label={label}
-          itemId={itemId}
-          pressed={itemIds.includes(itemId)}
-          onToggle={toggle}
-        />
-      ))}
-    </div>
+    <Select.Root multiple value={chosen} onValueChange={handleValueChange} items={items}>
+      <Select.Trigger size="sm" aria-label={UNIQUE_LABEL}>
+        {chosen.length > 0 && (
+          <span className="flex items-center gap-1">
+            {chosen.map((itemId) => (
+              <ItemIcon key={itemId} itemId={itemId} rarity={null} size="sm" />
+            ))}
+          </span>
+        )}
+        <Select.Value>{valueText}</Select.Value>
+      </Select.Trigger>
+      <Select.Popup aria-label={UNIQUE_LABEL}>
+        {choices.uniqueGroups.map((group) => (
+          <UniqueOptions key={group.slotId} group={group} isBlocked={isBlocked} />
+        ))}
+      </Select.Popup>
+    </Select.Root>
   )
 }
 
-function UniqueChip({
-  label,
-  itemId,
-  pressed,
-  onToggle
+function UniqueOptions({
+  group: { label, choices },
+  isBlocked
 }: {
-  label: string
-  itemId: string
-  pressed: boolean
-  onToggle: (itemId: string) => void
+  group: UniqueItemGroup
+  isBlocked: (itemId: string) => boolean
 }): React.JSX.Element {
-  function handlePressedChange(): void {
-    onToggle(itemId)
-  }
-
   return (
-    <Chip pressed={pressed} onPressedChange={handlePressedChange}>
-      {label}
-    </Chip>
+    <Select.Group>
+      <Select.GroupLabel>{label}</Select.GroupLabel>
+      {choices.map(({ value, label: name }) => (
+        <Select.Item key={value} value={value} disabled={isBlocked(value)}>
+          <ItemIcon itemId={value} rarity={null} size="sm" />
+          <Select.ItemText>{name}</Select.ItemText>
+        </Select.Item>
+      ))}
+    </Select.Group>
   )
 }
