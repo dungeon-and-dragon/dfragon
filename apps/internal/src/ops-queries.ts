@@ -36,12 +36,12 @@ export function useJobs() {
   })
 }
 
-export function useJobRuns(name: string) {
+export function useRunHistory() {
   const client = useOpsClient()
 
   return useInfiniteQuery({
-    queryKey: [...JOBS_KEY, name, 'runs'],
-    queryFn: ({ pageParam }) => client.readRuns(name, pageParam),
+    queryKey: [...JOBS_KEY, 'runs'],
+    queryFn: ({ pageParam }) => client.readRuns(pageParam),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (page) => page.nextBefore,
     refetchInterval: REFRESH_INTERVAL_MS

@@ -1,21 +1,19 @@
+import { Tabs } from '@dfragon/ui'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import { BatchKeyPanel } from '#ops-components/BatchKeyPanel'
 import { CollectionPanel } from '#ops-components/CollectionPanel'
-import { JobDetail } from '#ops-components/JobDetail'
 import { JobTable } from '#ops-components/JobTable'
 import { OpsHeader } from '#ops-components/OpsHeader'
 import { panelClasses } from '#ops-components/panel-classes'
 import { QueuePanel } from '#ops-components/QueuePanel'
+import { RunHistory } from '#ops-components/RunHistory'
 import { useJobs } from './ops-queries'
 
-function JobsSection({
-  selectedName,
-  onSelect
-}: {
-  selectedName: string | undefined
-  onSelect: (name: string) => void
-}): React.JSX.Element | null {
+// 탭 줄은 구획 하나로 두고, 패널 안의 구획이 각자 가로 선을 긋도록 Root와 Panel은 구획 class를 두지 않는다.
+const TAB_LIST = 'section shrink-0 px-1 py-0'
+const TAB_PANEL = 'flex flex-col focus-ring-inset'
+
+function JobsSection(): React.JSX.Element | null {
   const jobs = useJobs()
   if (jobs.data === undefined) {
     if (!jobs.isError) {
@@ -33,12 +31,11 @@ function JobsSection({
   }
   const { jobs: list } = jobs.data
   const now = new Date(jobs.dataUpdatedAt)
-  const selected = list.find(({ name }) => name === selectedName) ?? list[0]
 
   return (
     <>
-      <JobTable jobs={list} selectedName={selected?.name} now={now} onSelect={onSelect} />
-      {selected !== undefined && <JobDetail job={selected} now={now} />}
+      <JobTable jobs={list} now={now} />
+      <RunHistory jobs={list} now={now} />
     </>
   )
 }
@@ -46,7 +43,6 @@ function JobsSection({
 export function OpsScreen(): React.JSX.Element {
   const queryClient = useQueryClient()
   const jobs = useJobs()
-  const [selectedName, setSelectedName] = useState<string>()
   const readAt = jobs.data !== undefined ? new Date(jobs.dataUpdatedAt) : undefined
 
   function handleRefresh(): void {
@@ -57,12 +53,23 @@ export function OpsScreen(): React.JSX.Element {
     <div className="flex min-h-screen flex-col items-center overflow-x-clip bg-canvas font-sans text-sm text-fg">
       <OpsHeader workerSeenAt={jobs.data?.workerSeenAt} readAt={readAt} onRefresh={handleRefresh} />
       <main className="page page-wide screen">
-        <JobsSection selectedName={selectedName} onSelect={setSelectedName} />
-        <div className="section section-cols">
-          <QueuePanel />
-          <CollectionPanel />
-        </div>
-        <BatchKeyPanel />
+        <CollectionPanel />
+        <Tabs.Root defaultValue="jobs" className="flex flex-col">
+          <Tabs.List aria-label="운영" render={<div className={TAB_LIST} />}>
+            <Tabs.Tab value="jobs">Job</Tabs.Tab>
+            <Tabs.Tab value="queues">타임라인 queue</Tabs.Tab>
+            <Tabs.Tab value="batch-keys">batch key</Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel value="jobs" className={TAB_PANEL}>
+            <JobsSection />
+          </Tabs.Panel>
+          <Tabs.Panel value="queues" className={TAB_PANEL}>
+            <QueuePanel />
+          </Tabs.Panel>
+          <Tabs.Panel value="batch-keys" className={TAB_PANEL}>
+            <BatchKeyPanel />
+          </Tabs.Panel>
+        </Tabs.Root>
       </main>
     </div>
   )

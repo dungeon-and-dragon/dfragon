@@ -86,6 +86,7 @@ export function createCharacterStatsJob(service: StatsJobService) {
     schedule: DAILY_AT_MIDNIGHT,
     argsSchema: z.object({}),
     delayMinutes: CHARACTER_STATS_DELAY_MINUTES,
+    neopleApi: null,
     run: () => service.computeCharacterStats()
   })
 }
@@ -98,6 +99,7 @@ export function createSkillAdoptionJob(service: StatsJobService) {
     schedule: DAILY_AT_MIDNIGHT,
     argsSchema: z.object({}),
     delayMinutes: SKILL_ADOPTION_DELAY_MINUTES,
+    neopleApi: null,
     run: (_args, { reportProgress }) => service.computeSkillAdoption(reportProgress)
   })
 }
@@ -111,6 +113,7 @@ export function createSetAdoptionJob(service: StatsJobService) {
     schedule: DAILY_AT_MIDNIGHT,
     argsSchema: z.object({}),
     delayMinutes: SET_ADOPTION_DELAY_MINUTES,
+    neopleApi: null,
     run: () => service.computeSetAdoption()
   })
 }
@@ -124,6 +127,7 @@ export function createItemAdoptionJob(service: StatsJobService) {
     schedule: DAILY_AT_MIDNIGHT,
     argsSchema: z.object({}),
     delayMinutes: ITEM_ADOPTION_DELAY_MINUTES,
+    neopleApi: null,
     run: () => service.computeItemAdoption()
   })
 }

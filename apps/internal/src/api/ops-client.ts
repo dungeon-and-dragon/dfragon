@@ -32,7 +32,7 @@ export class OpsRequestFailure extends Error {
 
 export type OpsClient = {
   readJobs: () => Promise<JobList>
-  readRuns: (name: string, before: number | undefined) => Promise<RunPage>
+  readRuns: (before: number | undefined) => Promise<RunPage>
   requestRun: (name: string, args: Record<string, unknown>) => Promise<void>
   setPaused: (name: string, paused: boolean) => Promise<void>
   readQueues: () => Promise<QueueList>
@@ -93,10 +93,10 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
 
   return {
     readJobs: async () => readBody(await http.get('jobs'), jobListSchema),
-    readRuns: async (name, before) => {
+    readRuns: async (before) => {
       const searchParams = before !== undefined ? { before } : {}
 
-      return readBody(await http.get(jobPath(name, 'runs'), { searchParams }), runPageSchema)
+      return readBody(await http.get('jobs/runs', { searchParams }), runPageSchema)
     },
     requestRun: async (name, args) => {
       await readBody(await http.post(jobPath(name, 'runs'), { json: { args } }), runRequestSchema)

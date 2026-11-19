@@ -1,11 +1,13 @@
-import type { JobOverview, JobPauseChange, JobRunRecord, JobRunRequest } from '@dfragon/database'
+import type {
+  JobOverview,
+  JobPauseChange,
+  JobRunHistoryRecord,
+  JobRunRequest
+} from '@dfragon/database'
 
 export interface JobRepository {
   readOverviews(): Promise<JobOverview[]>
-  readRuns(
-    name: string,
-    page: { before: number | undefined; limit: number }
-  ): Promise<JobRunRecord[] | undefined>
+  readRuns(page: { before: number | undefined; limit: number }): Promise<JobRunHistoryRecord[]>
   requestRun(name: string, args: unknown): Promise<JobRunRequest>
   setPaused(name: string, paused: boolean): Promise<JobPauseChange>
 }

@@ -143,6 +143,7 @@ const dailyJob = defineJob({
   schedule: '0 4 * * *',
   argsSchema: z.object({ limit: z.number().int().positive().default(10) }),
   delayMinutes: 5,
+  neopleApi: { group: '합성 그룹', endpoints: ['/df/synthetic'] },
   run: async ({ limit }, { reportProgress }) => {
     reportProgress(limit, limit)
 
@@ -156,6 +157,7 @@ const failingJob = defineJob({
   description: '실패합니다.',
   argsSchema: z.object({}),
   delayMinutes: 5,
+  neopleApi: null,
   run: async () => {
     throw new SyntheticFailure()
   }
@@ -257,10 +259,20 @@ test('시작할 때 job 목록을 올리고 running으로 남은 행을 interrup
   )
   assert.deepEqual(events, [{ code: 'JOB_RUN_INTERRUPTED', job: 'daily', reason: undefined }])
   assert.deepEqual(
-    registered.map(({ name, schedule, nextRunAt }) => ({ name, schedule, nextRunAt })),
+    registered.map(({ name, schedule, neopleApi, nextRunAt }) => ({
+      name,
+      schedule,
+      neopleApi,
+      nextRunAt
+    })),
     [
-      { name: 'daily', schedule: '0 4 * * *', nextRunAt: new Date('2026-11-10T19:00:00Z') },
-      { name: 'failing', schedule: null, nextRunAt: null }
+      {
+        name: 'daily',
+        schedule: '0 4 * * *',
+        neopleApi: { group: '합성 그룹', endpoints: ['/df/synthetic'] },
+        nextRunAt: new Date('2026-11-10T19:00:00Z')
+      },
+      { name: 'failing', schedule: null, neopleApi: null, nextRunAt: null }
     ]
   )
   assert.equal(registered[0]?.delayMinutes, 5)
@@ -358,6 +370,7 @@ test('요청 행은 running을 거쳐 succeeded가 되고, schema에 맞지 않�
     description: '실행을 관찰합니다.',
     argsSchema: z.object({ target: z.string() }),
     delayMinutes: 5,
+    neopleApi: null,
     run: async () => {
       statusesDuringRun.push(
         ...runs.filter(({ jobName }) => jobName === 'observed').map(({ status }) => status)

@@ -2,6 +2,11 @@ import type { DatabaseClient } from './client.js'
 
 export type JobTrigger = 'schedule' | 'catchup' | 'manual'
 
+export type JobNeopleApi = {
+  group: string
+  endpoints: readonly string[]
+}
+
 export type JobRegistration = {
   name: string
   displayName: string
@@ -9,6 +14,7 @@ export type JobRegistration = {
   schedule: string | null
   argsSchema: object
   delayMinutes: number
+  neopleApi: JobNeopleApi | null
   nextRunAt: Date | null
 }
 
@@ -54,14 +60,18 @@ export async function registerJobs(
       schedule,
       argsSchema,
       delayMinutes,
+      neopleApi,
       nextRunAt
     } of jobs) {
+      const neopleApiGroup = neopleApi?.group ?? null
+      const neopleEndpoints = [...(neopleApi?.endpoints ?? [])]
       await transaction.$executeRaw`
         INSERT INTO "jobs"
-          ("name", "display_name", "description", "schedule", "args_schema", "delay_minutes", "next_run_at", "worker_seen_at")
+          ("name", "display_name", "description", "schedule", "args_schema", "delay_minutes",
+           "neople_api_group", "neople_endpoints", "next_run_at", "worker_seen_at")
         VALUES (
           ${name}, ${displayName}, ${description}, ${schedule}, ${JSON.stringify(argsSchema)}::jsonb, ${delayMinutes},
-          ${nextRunAt}, now()
+          ${neopleApiGroup}, ${neopleEndpoints}::text[], ${nextRunAt}, now()
         )
         ON CONFLICT ("name") DO UPDATE SET
           "display_name" = EXCLUDED."display_name",
@@ -69,6 +79,8 @@ export async function registerJobs(
           "schedule" = EXCLUDED."schedule",
           "args_schema" = EXCLUDED."args_schema",
           "delay_minutes" = EXCLUDED."delay_minutes",
+          "neople_api_group" = EXCLUDED."neople_api_group",
+          "neople_endpoints" = EXCLUDED."neople_endpoints",
           "next_run_at" = EXCLUDED."next_run_at",
           "worker_seen_at" = EXCLUDED."worker_seen_at"`
     }
@@ -249,6 +261,7 @@ export type JobOverview = {
   schedule: string | null
   argsSchema: unknown
   delayMinutes: number
+  neopleApi: JobNeopleApi | null
   pausedAt: Date | null
   nextRunAt: Date | null
   workerSeenAt: Date
@@ -266,7 +279,10 @@ export type JobPauseChange = 'updated' | 'not-found' | 'not-scheduled'
 export async function readJobOverviews(client: DatabaseClient): Promise<JobOverview[]> {
   const jobs = await client.job.findMany({ orderBy: { name: 'asc' } })
   const overviews: JobOverview[] = []
-  for (const job of jobs) {
+  for (const { neopleApiGroup, neopleEndpoints, ...job } of jobs) {
+    const neopleApi =
+      neopleApiGroup !== null ? { group: neopleApiGroup, endpoints: neopleEndpoints } : null
+
     const activeRun = await client.jobRun.findFirst({
       where: { jobName: job.name, status: { in: ['requested', 'running'] } },
       select: jobRunSelect
@@ -276,27 +292,23 @@ export async function readJobOverviews(client: DatabaseClient): Promise<JobOverv
       orderBy: [{ finishedAt: 'desc' }, { id: 'desc' }],
       select: jobRunSelect
     })
-    overviews.push({ ...job, activeRun, lastFinishedRun })
+    overviews.push({ ...job, neopleApi, activeRun, lastFinishedRun })
   }
 
   return overviews
 }
 
-export async function readJobRuns(
-  client: DatabaseClient,
-  jobName: string,
-  { before, limit }: { before: number | undefined; limit: number }
-): Promise<JobRunRecord[] | undefined> {
-  const job = await client.job.findUnique({ where: { name: jobName }, select: { name: true } })
-  if (job === null) {
-    return undefined
-  }
+export type JobRunHistoryRecord = JobRunRecord & { jobName: string }
 
+export function readJobRuns(
+  client: DatabaseClient,
+  { before, limit }: { before: number | undefined; limit: number }
+): Promise<JobRunHistoryRecord[]> {
   return client.jobRun.findMany({
-    where: { jobName, id: before !== undefined ? { lt: before } : undefined },
+    where: { id: before !== undefined ? { lt: before } : undefined },
     orderBy: { id: 'desc' },
     take: limit,
-    select: jobRunSelect
+    select: { ...jobRunSelect, jobName: true }
   })
 }
 

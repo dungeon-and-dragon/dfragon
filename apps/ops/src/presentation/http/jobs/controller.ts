@@ -22,7 +22,7 @@ export class JobController {
       return c.json(toJobListResponse(list))
     })
 
-    routes.get('/:name/runs', async (c) => {
+    routes.get('/runs', async (c) => {
       const page = runPageQuery.safeParse(c.req.query())
 
       if (!page.success) {
@@ -30,7 +30,7 @@ export class JobController {
       }
 
       const { before, limit } = page.data
-      const runPage = await this.service.readRuns(c.req.param('name'), { before, limit })
+      const runPage = await this.service.readRuns({ before, limit })
 
       return c.json(toJobRunPageResponse(runPage))
     })

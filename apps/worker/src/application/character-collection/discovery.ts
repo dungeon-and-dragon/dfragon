@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { fameWindowBelow, nextMaxFame } from '#domain/character-collection/index.js'
-import { defineJob } from '#application/jobs/index.js'
+import { defineJob, NEOPLE_APIS } from '#application/jobs/index.js'
 import type { CharacterDiscoveryPorts, FameSearchTarget } from './ports.js'
 import type { CollectionRepository } from './repository.js'
 
@@ -107,6 +107,7 @@ export function createCharacterDiscoveryJob(service: CharacterDiscoveryService) 
       'Neople 명성 검색으로 최근 90일 안에 접속한 110레벨 이상 캐릭터를 서버와 전직마다 훑어, 기본 정보를 저장하지 않은 캐릭터를 새 캐릭터 대기열에 넣습니다. 다른 수집과 Neople 요청 속도 상한을 나눠 씁니다.',
     argsSchema: z.object({}),
     delayMinutes: DELAY_MINUTES,
+    neopleApi: NEOPLE_APIS.fameSearch,
     run: (_args, { reportProgress }) => service.discover(reportProgress)
   })
 }

@@ -11,13 +11,7 @@ function progressPercent({ done, total }: Progress): number | undefined {
   return Math.min(100, (done / total) * 100)
 }
 
-export function RunProgress({
-  progress,
-  wide = false
-}: {
-  progress: Progress
-  wide?: boolean
-}): React.JSX.Element {
+export function RunProgress({ progress }: { progress: Progress }): React.JSX.Element {
   const percent = progressPercent(progress)
   const countText =
     progress.total !== null
@@ -29,7 +23,7 @@ export function RunProgress({
       {percent !== undefined && (
         <span
           aria-hidden="true"
-          className={`shrink-0 overflow-hidden rounded-badge bg-control ${wide ? 'h-2 w-[320px] max-sm:w-[160px]' : 'h-[6px] w-[88px]'}`}
+          className="h-[6px] w-[88px] shrink-0 overflow-hidden rounded-badge bg-control"
         >
           <i className="block h-full bg-fg-muted" style={{ width: `${percent}%` }} />
         </span>
