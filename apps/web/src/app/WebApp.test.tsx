@@ -206,7 +206,7 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
   expect(header.querySelector('nav a')?.getAttribute('href')).toBe('/multisearch')
   expect(globalMenu()).toEqual([
     ['멀티서치', 'page'],
-    ['랭킹', null],
+    ['검색', null],
     ['통계', null],
     ['클리어', null],
     ['모험단', null],
@@ -240,7 +240,7 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
   ).toEqual(['다크 모드로 바꾸기'])
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
-    ['랭킹', null],
+    ['검색', null],
     ['통계', null],
     ['클리어', null],
     ['모험단', null],
@@ -289,7 +289,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(homeLink().getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
-    ['랭킹', null],
+    ['검색', null],
     ['통계', null],
     ['클리어', null],
     ['모험단', null],
@@ -324,7 +324,7 @@ it.each([
     expect(article.textContent).toBe(title)
     expect(globalMenu()).toEqual([
       ['멀티서치', null],
-      ['랭킹', null],
+      ['검색', null],
       ['통계', null],
       ['클리어', null],
       ['모험단', null],
@@ -380,7 +380,7 @@ it('푸터의 약관 링크를 누르면 그 화면으로 가고 지금 화면�
   ])
 })
 
-it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 지금 화면으로 표시한다', async () => {
+it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 지금 화면으로 표시한다', async () => {
   server.use(
     http.get(`${SITE_API_URL}/stats/sets`, failure),
     http.get(`${SITE_API_URL}/stats/items`, failure)
@@ -390,7 +390,7 @@ it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 �
 
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
-    ['랭킹', 'page'],
+    ['검색', 'page'],
     ['통계', null],
     ['클리어', null],
     ['모험단', null],
@@ -440,7 +440,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(selectedTab()).toBe('스킬')
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
-    ['랭킹', null],
+    ['검색', null],
     ['통계', null],
     ['클리어', null],
     ['모험단', null],
@@ -490,7 +490,7 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
   )
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
-    ['랭킹', null],
+    ['검색', null],
     ['통계', null],
     ['클리어', null],
     ['모험단', 'page'],
@@ -1444,7 +1444,7 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
   expect(container.querySelector('main h1')?.textContent).toBe('모험단')
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
-    ['랭킹', null],
+    ['검색', null],
     ['통계', null],
     ['클리어', null],
     ['모험단', 'page'],

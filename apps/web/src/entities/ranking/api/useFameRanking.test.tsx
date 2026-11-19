@@ -188,10 +188,8 @@ it('다음 page는 같은 필터에 nextCursor를 붙여 받고 앞 page에 잇�
 })
 
 const [character] = fameRankingFixture.lastPage.characters
-const { rank: _rank, ...withoutRank } = character
 
 it.each<[string, JsonBodyType]>([
-  ['순위가 없는 행', { characters: [withoutRank], nextCursor: null }],
   ['모르는 서버', { characters: [{ ...character, serverId: 'unknown' }], nextCursor: null }],
   ['nextCursor가 없는 응답', { characters: [character] }],
   [

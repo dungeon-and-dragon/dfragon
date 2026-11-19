@@ -29,19 +29,18 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-function rankedCharacter(rank: number): RankedCharacter {
+function rankedCharacter(order: number): RankedCharacter {
   return {
-    rank,
     serverId: 'cain',
-    characterId: `character-${rank}`,
-    characterName: `합성${rank}`,
-    adventureName: `모험단${rank}`,
+    characterId: `character-${order}`,
+    characterName: `합성${order}`,
+    adventureName: `모험단${order}`,
     level: 115,
     jobId: 'job-1',
     jobGrowId: 'grow-1',
     jobName: '합성 직업',
     jobGrowName: '眞 합성 전직',
-    fame: 100000 - rank,
+    fame: 100000 - order,
     guildId: null,
     guildName: '합성 길드',
     role: null,
@@ -93,8 +92,11 @@ function bodyRows(): string[][] {
   )
 }
 
-it('직업 필터 없이 조회해 앞 3명을 순위, 캐릭터, 명성 열로 그린다', async () => {
-  respondRanking(rankingOf(100))
+it('직업 필터 없이 조회해 앞 3명을 받은 순서의 순위, 캐릭터, 명성 열로 그린다', async () => {
+  respondRanking({
+    characters: [7, 3, 9, 1].map((order) => rankedCharacter(order)),
+    nextCursor: null
+  })
   await render()
   await settled()
 
@@ -105,11 +107,11 @@ it('직업 필터 없이 조회해 앞 3명을 순위, 캐릭터, 명성 열로 
     '명성'
   ])
   expect(bodyRows()).toEqual([
-    ['1', '카인합성1합성 전직', '99,999'],
-    ['2', '카인합성2합성 전직', '99,998'],
-    ['3', '카인합성3합성 전직', '99,997']
+    ['1', '카인합성7합성 전직', '99,993'],
+    ['2', '카인합성3합성 전직', '99,997'],
+    ['3', '카인합성9합성 전직', '99,991']
   ])
-  expect(container.querySelector('tbody a')?.getAttribute('href')).toBe('/c/cain/character-1')
+  expect(container.querySelector('tbody a')?.getAttribute('href')).toBe('/c/cain/character-7')
 })
 
 it('3명보다 적으면 받은 만큼만 그린다', async () => {
