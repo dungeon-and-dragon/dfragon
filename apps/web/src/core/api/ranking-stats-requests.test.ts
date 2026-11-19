@@ -167,3 +167,87 @@ it('집계 시각이 null인 빈 스킬 채택률 응답을 읽는다', async ()
     })
   ).resolves.toEqual(empty)
 })
+
+it('랭킹에 장비 세트, 서약 세트, 선택지를 query로 보내고 서약 세트 없는 선택지는 요청하지 않는다', async () => {
+  const fetch = respond(ranking)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
+
+  await read({
+    jobId: 'job-1',
+    equipmentSetId: 'set-1',
+    oathSetId: 16204,
+    oathSetOption: '용투 : 용제 강림'
+  })
+  const url = new URL(new Request(fetch.mock.calls[0][0]).url)
+  expect(Object.fromEntries(url.searchParams)).toEqual({
+    jobId: 'job-1',
+    equipmentSetId: 'set-1',
+    oathSetId: '16204',
+    oathSetOption: '용투 : 용제 강림'
+  })
+  await expect(read({ oathSetOption: '용투 : 용제 강림' })).rejects.toThrow()
+  expect(fetch).toHaveBeenCalledTimes(1)
+})
+
+// #1798의 실제 응답 모양이다. 세 목록 각각의 count 합이 sampleSize이고, 서약 세트 하나의 선택지 count 합이 그 세트 count다.
+const setStats = {
+  computedAt: '2026-11-18T11:00:27.845Z',
+  sampleSize: 4,
+  equipmentSets: [
+    { setId: 'set-fairy', name: '소울 페어리 세트', count: 3 },
+    { setId: null, name: null, count: 1 }
+  ],
+  oathSets: [
+    {
+      setId: 16204,
+      name: '야망의 용투 서약',
+      count: 2,
+      options: [
+        { name: '용투 : 세계를 태우는 불꽃', count: 1 },
+        { name: '용투 : 합성 선택지', count: 1 }
+      ]
+    },
+    { setId: null, name: null, count: 2, options: [{ name: null, count: 2 }] }
+  ],
+  combos: [
+    { equipmentSetId: 'set-fairy', oathSetId: 16204, count: 2 },
+    { equipmentSetId: 'set-fairy', oathSetId: null, count: 1 },
+    { equipmentSetId: null, oathSetId: null, count: 1 }
+  ]
+}
+
+it('세트 통계는 고른 직업, 전직, 역할만 query로 보내고 응답을 schema로 읽는다', async () => {
+  const fetch = respond(setStats)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).setStats
+
+  await expect(read({})).resolves.toEqual(setStats)
+  expect(new Request(fetch.mock.calls[0][0]).url).toBe(`${API_ORIGIN}/stats/sets`)
+  await read({ jobId: 'job-1', jobGrowId: 'grow-1', role: 'buffer' })
+  expect(new Request(fetch.mock.calls[1][0]).url).toBe(
+    `${API_ORIGIN}/stats/sets?jobId=job-1&jobGrowId=grow-1&role=buffer`
+  )
+  await expect(read({ jobGrowId: 'grow-1' })).rejects.toThrow()
+  expect(fetch).toHaveBeenCalledTimes(2)
+})
+
+it('저장분이 없는 빈 세트 통계를 읽는다', async () => {
+  const empty = { computedAt: null, sampleSize: 0, equipmentSets: [], oathSets: [], combos: [] }
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).setStats
+
+  await expect(read({})).resolves.toEqual(empty)
+})
+
+it('목록의 count 합이 표본 수와 다르거나 선택지 합이 세트 수와 다른 세트 통계는 거부한다', async () => {
+  const [fairy, noSet] = setStats.equipmentSets
+  const [dragon, noOath] = setStats.oathSets
+  const broken = [
+    { ...setStats, equipmentSets: [fairy, { ...noSet, count: 2 }] },
+    { ...setStats, oathSets: [{ ...dragon, options: dragon.options.slice(1) }, noOath] },
+    { ...setStats, combos: setStats.combos.slice(1) }
+  ]
+
+  for (const body of broken) {
+    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(body) }).setStats
+    await expect(read({})).rejects.toThrow()
+  }
+})

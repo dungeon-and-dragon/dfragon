@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { RANKING_JOBS } from './ranking-jobs'
-import { parseRankingSearch } from './ranking-search'
+import { parseJobSearch, parseRankingSearch } from './ranking-search'
 
 const [job, otherJob] = RANKING_JOBS
 const grow = job.grows[0]
@@ -85,4 +85,33 @@ it('남성 크루세이더의 역할이 없거나 모르는 값이면 칩이 없
   expect(parseRankingSearch({ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: ['dealer'] })).toEqual(
     { jobId: MALE_PRIEST }
   )
+})
+
+it('세트 통계 막대에서 넘어온 장비 세트, 서약 세트, 선택지를 직업과 함께 읽는다', () => {
+  expect(
+    parseRankingSearch({
+      jobId: job.jobId,
+      equipmentSetId: '7f788a703a87d783079b41d0fe6448c9',
+      oathSetId: '16204',
+      oathSetOption: '용투 : 용제 강림'
+    })
+  ).toEqual({
+    jobId: job.jobId,
+    equipmentSetId: '7f788a703a87d783079b41d0fe6448c9',
+    oathSetId: 16204,
+    oathSetOption: '용투 : 용제 강림'
+  })
+  expect(parseRankingSearch({ equipmentSetId: 'set-1' })).toEqual({ equipmentSetId: 'set-1' })
+})
+
+it('서약 세트 없는 선택지와 읽을 수 없는 서약 세트 번호는 버린다', () => {
+  expect(parseRankingSearch({ oathSetOption: '용투 : 용제 강림' })).toEqual({})
+  expect(parseRankingSearch({ oathSetId: 'abc', oathSetOption: '용투 : 용제 강림' })).toEqual({})
+  expect(parseRankingSearch({ equipmentSetId: '' })).toEqual({})
+})
+
+it('세트 통계 주소는 직업, 전직, 역할만 읽고 세트 값은 버린다', () => {
+  expect(
+    parseJobSearch({ jobId: job.jobId, jobGrowId: grow.jobGrowId, equipmentSetId: 'set-1' })
+  ).toEqual({ jobId: job.jobId, jobGrowId: grow.jobGrowId })
 })
