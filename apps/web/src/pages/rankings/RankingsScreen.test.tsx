@@ -207,7 +207,7 @@ it('3페이지에서 이미 받아 둔 필터로 바꿔도 1페이지를 보인�
   expect(queries()).toEqual([{}, { itemIds: 'synthetic-weapon' }])
 })
 
-it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 세트 값이나 점수가 없는 행은 그 칸을 -로 그린다', async () => {
+it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 헤더에 내림차순을 표시하며, 세트 값이나 점수가 없는 행은 그 칸을 -로 그린다', async () => {
   await render(async () => ({
     characters: [
       rankedCharacter(1, {
@@ -232,6 +232,11 @@ it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 세트 값이나 �
     '점수',
     '모험단'
   ])
+  expect(
+    [...container.querySelectorAll('thead th[aria-sort="descending"]')].map(
+      (cell) => cell.textContent
+    )
+  ).toEqual(['명성'])
   const [first, second, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )

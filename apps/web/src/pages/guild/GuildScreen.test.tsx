@@ -111,6 +111,7 @@ it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐
     '점수',
     '모험단'
   ])
+  expect(container.querySelector('thead th[aria-sort]')).toBeNull()
   expect([...bodyRows()[0].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual([
     '1',
     '카인합성1합성 전직',
