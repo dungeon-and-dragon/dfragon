@@ -1,4 +1,4 @@
-import type { GameTextLines, OathCatalog, SkillWindowCatalog } from '#core/catalog'
+import type { GameTextLines, SkillWindowCatalog } from '#core/catalog'
 import type { CharacterDetailView, CharacterHistory, CharacterTimeline } from '#core/character'
 import { characterDetailFixture } from '#core/testing'
 
@@ -166,54 +166,6 @@ export const storyBuffSkillWindowCatalog: SkillWindowCatalog = {
       }
     }
   }
-}
-
-type OathEffects = OathCatalog['sets'][number]['options'][number]['effects']
-
-function oathEffects(primitive: GameTextLines): OathEffects {
-  return { rare: null, unique: null, legendary: null, epic: null, primitive }
-}
-
-export const storyOathCatalog: OathCatalog = {
-  version: 'synthetic',
-  sets: [
-    {
-      setId: 16204,
-      name: '야망의 용투 서약',
-      icon: 'https://skilltab.test/oath-set/16204.png',
-      options: [
-        {
-          name: '용투 : 세계를 태우는 불꽃',
-          icon: 'https://skilltab.test/oath/9.png',
-          effects: oathEffects([
-            [
-              { text: '[투룡의 불꽃]', tone: 'increase' },
-              { text: ' [장비 발동 옵션]', tone: 'default' }
-            ],
-            [{ text: '모든 속도 +20%', tone: 'rarity-primordial' }],
-            [{ text: '[용투장의 난 세트] 장착 시', tone: 'disabled' }]
-          ])
-        },
-        {
-          name: '용투 : 용의 분노',
-          icon: 'https://skilltab.test/oath/10.png',
-          effects: oathEffects([[{ text: '분노', tone: 'rarity-primordial' }]])
-        },
-        {
-          name: '용투 : 승리의 함성',
-          icon: 'https://skilltab.test/oath/11.png',
-          effects: oathEffects([[{ text: '[함성]', tone: 'increase' }]])
-        }
-      ]
-    }
-  ],
-  items: [
-    {
-      name: '세계를 태우는 용투 서약',
-      rarity: '에픽',
-      icon: 'https://skilltab.test/oath-item/epic.webp'
-    }
-  ]
 }
 
 export const storyTimeline: CharacterTimeline = {

@@ -46,7 +46,7 @@ import { ClearJobTable } from './components/ClearJobTable'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
 import { clearClasses } from './components/clear-classes'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
-import { useClearContentStats, useClearStats } from './hooks/useClearStats'
+import { useClearContentStats, useClearStats } from './api/useClearStats'
 
 const DETAIL_LAST_ADVENTURE_SIZE = 17
 const WIDE_PANEL = 2
