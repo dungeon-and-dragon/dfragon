@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
@@ -433,11 +433,22 @@ try {
     ).stdout.trim(),
     'dfragon_api'
   )
+  const migrationNames = (
+    await readdir(new URL('../../../packages/database/prisma/migrations/', import.meta.url), {
+      withFileTypes: true
+    })
+  )
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+
   assert.equal(
     (
-      await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
+      await psql(
+        'SELECT string_agg(migration_name, \',\' ORDER BY migration_name COLLATE "C") FROM _prisma_migrations WHERE finished_at IS NOT NULL'
+      )
     ).stdout.trim(),
-    '29'
+    migrationNames.join(',')
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
@@ -836,9 +847,9 @@ try {
     ].join('; ')
   )
 
-  // 클리어 수집 job은 정지해 두어 보충 실행으로 Neople을 부르지 않는다. 다시 등록해도 정지 시각은 남는다.
+  // 클리어 수집, 명성 갱신, 비활성 재확인 job은 정지해 두어 보충 실행으로 Neople을 부르지 않는다. 다시 등록해도 정지 시각은 남는다.
   await psql(
-    "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now())"
+    "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now()), ('character-fame-refresh', 'probe', '{}', 0, now(), now()), ('inactive-character-recheck', 'probe', '{}', 0, now(), now())"
   )
 
   stage = 'character collector waits on the empty queue and stops'
@@ -887,7 +898,7 @@ try {
         "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,item-adoption:0 0 * * *:true:object:false,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false'
+    'character-fame-refresh:0 3 * * *:true:object:true,character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,inactive-character-recheck:0 4 L * *:true:object:true,item-adoption:0 0 * * *:true:object:false,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false'
   )
   assert.equal(
     (
