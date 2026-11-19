@@ -1,4 +1,4 @@
-import { ChipGroup, type ChipGroupItem } from '@dfragon/ui'
+import { Button, ChipGroup, type ChipGroupItem } from '@dfragon/ui'
 import { type ReactNode, useId } from 'react'
 import { RANKING_JOBS, type RankingGrow, type RankingJob } from '#entities/character'
 import type { FameRankingFilter } from '#entities/ranking'
@@ -37,14 +37,22 @@ function narrowingOf({
   return { equipmentSetId, oathSetId, oathSetOption, itemIds, fameFrom, fameTo }
 }
 
+function hasFilter(filter: FameRankingFilter): boolean {
+  return Object.values(filter).some(
+    (value) => value !== undefined && !(Array.isArray(value) && value.length === 0)
+  )
+}
+
 // 직업, 전직을 바꿔도 세트, 아이템, 명성 필터는 그대로 둔다.
 export function RankingFilterBox({
   filter,
   onChange,
+  onReset,
   rows = []
 }: {
   filter: FameRankingFilter
   onChange: (filter: FameRankingFilter) => void
+  onReset?: () => void
   rows?: readonly FilterRow[]
 }): React.JSX.Element {
   const sets = narrowingOf(filter)
@@ -97,6 +105,13 @@ export function RankingFilterBox({
       {rows.map((row) => (
         <LabeledRow key={row.label} row={row} />
       ))}
+      {onReset !== undefined && (
+        <div className="flex justify-end">
+          <Button variant="secondary" size="sm" disabled={!hasFilter(filter)} onClick={onReset}>
+            초기화
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

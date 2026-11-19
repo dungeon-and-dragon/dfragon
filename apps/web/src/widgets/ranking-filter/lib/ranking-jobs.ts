@@ -35,7 +35,7 @@ function jobNameOf(filter: FameRankingFilter): string | null {
 }
 
 export function rankingName(filter: FameRankingFilter, setLabel: string | null = null): string {
-  const parts = [jobNameOf(filter), setLabel, '명성 랭킹'].filter((part) => part !== null)
+  const parts = [jobNameOf(filter), setLabel, '검색 결과'].filter((part) => part !== null)
 
   return parts.join(' ')
 }
