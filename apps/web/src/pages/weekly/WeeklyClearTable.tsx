@@ -2,9 +2,7 @@ import { CheckIcon } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#features/capture-search'
 import type { ClearName, WeeklyCharacter } from '#entities/adventure-guild'
-import { CharacterCell } from '#components/table/CharacterCell'
-import { FAME_COLUMN, RANK_COLUMN } from '#components/table/CharacterTable'
-import { RankNumber } from '#components/table/RankNumber'
+import { CharacterCell, FAME_COLUMN, RANK_COLUMN, RankNumber } from '#widgets/character-table'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

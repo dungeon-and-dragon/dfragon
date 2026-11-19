@@ -3,11 +3,7 @@ import {
   isSearchableCharacterName,
   type SearchedCharacter
 } from '#entities/character'
-import {
-  CharacterTable,
-  type CharacterTableRow,
-  SkeletonRow
-} from '#components/table/CharacterTable'
+import { CharacterTable, type CharacterTableRow, SkeletonRow } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { characterSearchServerOptions } from '#shared/config/server-options'

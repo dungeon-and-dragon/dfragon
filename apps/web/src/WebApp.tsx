@@ -8,9 +8,9 @@ import {
 } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState } from 'react'
-import { GlobalBar } from './components/GlobalBar'
-import { SiteFooter } from './components/SiteFooter'
-import { createQueryClient } from './lib/query-client'
+import { GlobalBar } from '#widgets/global-bar'
+import { SiteFooter } from '#widgets/site-footer'
+import { createQueryClient } from '#app/query-client'
 import {
   type BrowserHost,
   ClientHostContext,
@@ -26,7 +26,8 @@ import { GuildPage } from '#pages/guild'
 import { HomePage } from '#pages/home'
 import { PrivacyPage, TermsPage } from '#pages/legal'
 import { NotFoundPage } from '#pages/not-found'
-import { RankingsPage, parseJobSearch, parseRankingSearch } from '#pages/rankings'
+import { RankingsPage } from '#pages/rankings'
+import { parseJobSearch, parseRankingSearch } from '#widgets/ranking-filter'
 import { MultisearchPage } from '#pages/multisearch'
 import { SetStatsPage, StatsPage } from '#pages/stats'
 import {

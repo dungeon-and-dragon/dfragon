@@ -8,7 +8,7 @@ import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { RANKING_JOBS } from './ranking-jobs'
+import { RANKING_JOBS } from '#widgets/ranking-filter'
 import { RankingsScreen } from './RankingsScreen'
 
 const meta = {

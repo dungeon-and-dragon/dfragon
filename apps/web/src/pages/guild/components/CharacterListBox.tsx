@@ -2,7 +2,7 @@ import { Button } from '@dfragon/ui'
 import { useState } from 'react'
 import type { StoredCharacter } from '#entities/ranking'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
-import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
+import { type Affiliation, CharacterTable, SkeletonRow } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 
 const PAGE_SIZE = 50
