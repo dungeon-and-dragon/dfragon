@@ -74,6 +74,43 @@ export const 말줄임: Story = {
   )
 }
 
+// 이름은 게임의 12바이트 제한에서 가장 넓은 한글 6자와 영문 12자, 순위는 cursor로 끝까지 넘긴 여섯 자리까지 둔다.
+const widestRows = [
+  { ...rows[0]!, rank: 1 },
+  {
+    ...rows[1]!,
+    rank: 100,
+    characterName: '뛟뛟뛟뛟뛟뛟',
+    adventureName: '뛟뛟뛟뛟뛟뛟',
+    guildName: '뛟뛟뛟뛟뛟뛟'
+  },
+  {
+    ...rows[2]!,
+    rank: 123_456,
+    characterName: 'WWWWWWWWWWWW',
+    adventureName: 'WWWWWWWWWWWW',
+    guildName: 'WWWWWWWWWWWW'
+  }
+]
+
+export const 열폭: Story = {
+  render: () => (
+    <ListBox name="명성 랭킹">
+      <CharacterTable rows={widestRows} />
+    </ListBox>
+  )
+}
+
+export const 좁은폭열폭: Story = {
+  render: () => (
+    <div className="w-[390px]">
+      <ListBox name="명성 랭킹">
+        <CharacterTable rows={widestRows} affiliations={[]} />
+      </ListBox>
+    </div>
+  )
+}
+
 const ITEMS = [
   [
     '머리 아바타',

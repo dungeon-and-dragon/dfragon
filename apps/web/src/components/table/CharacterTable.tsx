@@ -23,6 +23,11 @@ export type Affiliation = 'adventure' | 'guild'
 // 초상화가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다.
 const PORTRAIT_CELL = 'py-0'
 const FAME_CELL = 'table-num font-semibold text-game-fame'
+// 순위는 여섯 자리(123456), 명성은 일곱 자리(1,999,999)까지 셀 여백 안에 들어가는 폭이다.
+export const RANK_COLUMN = 'w-[76px]'
+export const FAME_COLUMN = 'w-[96px]'
+// 모험단, 길드 이름도 캐릭터 이름처럼 12바이트 제한이라고 보고 한글 6자가 다 들어가게 잡는다.
+const AFFILIATION_COLUMN = 'w-[128px]'
 
 const ALL_AFFILIATIONS: readonly Affiliation[] = ['adventure', 'guild']
 const AFFILIATION_HEADINGS: Record<Affiliation, string> = { adventure: '모험단', guild: '길드' }
@@ -46,17 +51,21 @@ export function CharacterTable({
     <div className="table-scroll">
       <table className={`table table-fixed${affiliations.length > 0 ? ' table-wide' : ''}`}>
         <colgroup>
-          {ranked && <col className="w-16" />}
+          {ranked && <col className={RANK_COLUMN} />}
           <col />
-          <col className="w-[120px]" />
+          <col className={FAME_COLUMN} />
           {affiliations.map((affiliation) => (
-            <col key={affiliation} className="w-[160px]" />
+            <col key={affiliation} className={AFFILIATION_COLUMN} />
           ))}
           {action != null && <col className="w-[56px]" />}
         </colgroup>
         <thead>
           <tr>
-            {ranked && <th scope="col">#</th>}
+            {ranked && (
+              <th scope="col" className="table-num">
+                #
+              </th>
+            )}
             <th scope="col">캐릭터</th>
             <th scope="col" className="table-num">
               명성
@@ -76,7 +85,9 @@ export function CharacterTable({
         <tbody>
           {rows.map((row) => (
             <tr key={`${row.serverId}/${row.characterId}`}>
-              {ranked && <td>{row.rank != null && <RankNumber rank={row.rank} />}</td>}
+              {ranked && (
+                <td className="table-num">{row.rank != null && <RankNumber rank={row.rank} />}</td>
+              )}
               <td className={PORTRAIT_CELL}>
                 <CharacterCell
                   character={row}
@@ -152,7 +163,7 @@ export function SkeletonRow({
     <tr ref={rowRef} aria-hidden="true">
       {ranked && (
         <td>
-          <span className="skeleton-text w-[12px]" />
+          <span className="skeleton-text ml-auto w-[12px]" />
         </td>
       )}
       <td className={PORTRAIT_CELL}>
