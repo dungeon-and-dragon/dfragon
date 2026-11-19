@@ -250,6 +250,34 @@ try {
     '0/2/0'
   )
 
+  stage = 'character score job migration backfill'
+  const scoreJobMigration = await readFile(
+    new URL(
+      '../../../packages/database/prisma/migrations/20261119180000_add_character_score_jobs/migration.sql',
+      import.meta.url
+    ),
+    'utf8'
+  )
+  assert.equal(
+    (
+      await psql(
+        [
+          'CREATE TEMP TABLE characters (server_id text, character_id text, job_id text, job_grow_id text)',
+          "INSERT INTO characters VALUES ('cain', 'scored', 'job-a', 'grow-a'), ('siroco', 'scored', 'job-b', 'grow-b'), ('cain', 'no-job', NULL, NULL)",
+          'CREATE TEMP TABLE character_scores (server_id text, character_id text, kind text, score integer)',
+          "INSERT INTO character_scores VALUES ('cain', 'scored', 'equipment', 1), ('siroco', 'scored', 'buff', 2), ('cain', 'no-job', 'equipment', 3)",
+          scoreJobMigration,
+          "SELECT string_agg(server_id || '/' || character_id || ':' || coalesce(job_id, '-') || ':' || coalesce(job_grow_id, '-'), ',' ORDER BY server_id, character_id) FROM character_scores"
+        ].join(';\n')
+      )
+    ).stdout
+      .trim()
+      .split('\n')
+      .at(-1)
+      .trim(),
+    'cain/no-job:-:-,cain/scored:job-a:grow-a,siroco/scored:job-b:grow-b'
+  )
+
   stage = 'API role with public schema ownership only'
   await psql(
     [
