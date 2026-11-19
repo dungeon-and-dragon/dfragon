@@ -1,13 +1,8 @@
 import { ChipGroup, type ChipGroupItem } from '@dfragon/ui'
 import { type ReactNode, useId } from 'react'
+import { RANKING_JOBS, type RankingGrow, type RankingJob } from '#entities/character'
 import type { FameRankingFilter } from '#entities/ranking'
-import {
-  growFilter,
-  growLabel,
-  RANKING_JOBS,
-  type RankingGrow,
-  type RankingJob
-} from '#widgets/ranking-filter/lib/ranking-jobs'
+import { growFilter, growLabel } from '#widgets/ranking-filter/lib/ranking-jobs'
 
 const FILTER_ROW = 'flex items-start gap-4'
 const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center'

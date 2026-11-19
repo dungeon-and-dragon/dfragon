@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { SetStatsFilter } from '#entities/ranking'
-import { RANKING_JOBS } from '#widgets/ranking-filter'
+import { RANKING_JOBS } from '#entities/character'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
