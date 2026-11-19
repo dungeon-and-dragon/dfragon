@@ -568,6 +568,74 @@ describe('Select의 키보드 선택과 포커스 복귀', () => {
   })
 })
 
+function ItemSelect({ onValueChange }: { onValueChange: (value: string[]) => void }) {
+  const [value, setValue] = useState<string[]>([])
+  const items = [
+    { value: 'ring', label: '반지 아이템' },
+    { value: 'support', label: '보조장비 아이템' }
+  ]
+
+  function valueText(values: string[]): string {
+    if (values.length === 0) {
+      return '전체'
+    }
+
+    return `${values.length}개`
+  }
+
+  return (
+    <Select.Root
+      multiple
+      value={value}
+      onValueChange={(next) => {
+        setValue(next)
+        onValueChange(next)
+      }}
+      items={items}
+    >
+      <Select.Trigger size="sm" aria-label="아이템">
+        {value.map((itemId) => (
+          <img key={itemId} alt="" data-icon={itemId} />
+        ))}
+        <Select.Value>{valueText}</Select.Value>
+      </Select.Trigger>
+      <Select.Popup aria-label="아이템 목록">
+        {items.map((item) => (
+          <Select.Item key={item.value} value={item.value}>
+            <img alt="" data-icon={item.value} />
+            <Select.ItemText>{item.label}</Select.ItemText>
+          </Select.Item>
+        ))}
+      </Select.Popup>
+    </Select.Root>
+  )
+}
+
+describe('Select의 아이콘과 여러 개 고르기', () => {
+  it('항목 글자 왼쪽의 아이콘은 이름에 섞이지 않고, multiple이면 고를 때마다 고른 값 배열을 전달하고 목록을 열어 둔다', async () => {
+    const onValueChange = vi.fn<(value: string[]) => void>()
+    await render(<ItemSelect onValueChange={onValueChange} />)
+    const trigger = getByRole('combobox', '아이템')
+    expect(trigger.textContent).toBe('전체')
+
+    await click(trigger)
+    const listbox = await vi.waitFor(() => getByRole('listbox', '아이템 목록'))
+    const ring = getByRole('option', '반지 아이템', listbox)
+    expect(ring.querySelector('img[data-icon="ring"]')).not.toBeNull()
+    await click(ring)
+    await click(getByRole('option', '보조장비 아이템', listbox))
+
+    expect(onValueChange).toHaveBeenLastCalledWith(['ring', 'support'])
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    expect(trigger.textContent).toBe('2개')
+    expect(
+      [...trigger.querySelectorAll('img')].map((icon) => icon.getAttribute('data-icon'))
+    ).toEqual(['ring', 'support'])
+    await click(ring)
+    expect(onValueChange).toHaveBeenLastCalledWith(['support'])
+  })
+})
+
 describe('Popover의 열고 닫기와 focus 복귀', () => {
   function SnapshotPopover() {
     return (
