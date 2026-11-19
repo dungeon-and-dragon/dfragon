@@ -10,7 +10,7 @@ React와 JavaScript runtime이 없는 디자인 CSS package입니다.
 
 토큰 값의 원본은 `theme.css`입니다. 코드 뒤에는 `apps/storybook`의 `Foundations` 페이지에서 봅니다.
 
-앱은 전역 CSS 하나에서 불러옵니다. 순서는 `apps/web/src/site.css`를 따릅니다.
+앱은 전역 CSS 하나에서 불러옵니다. 순서는 `apps/web/src/app/site.css`를 따릅니다.
 
 ## Command
 
