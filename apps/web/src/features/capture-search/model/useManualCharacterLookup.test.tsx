@@ -3,7 +3,7 @@ import { act, useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useManualCharacterLookup } from './useManualCharacterLookup'
-import { CAPTURE_ID, searchSnapshot } from '#features/capture-search/lib/search/search-test-fixture'
+import { CAPTURE_ID, searchSnapshot } from '#features/capture-search/api/search.fixture'
 import {
   SEARCH_SLOT_COUNTS,
   type OcrSearchObservation,

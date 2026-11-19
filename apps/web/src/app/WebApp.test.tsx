@@ -3,8 +3,8 @@ import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
-import neopleOpenApiColorLogo from './shared/assets/neople-open-api-color.png'
-import neopleOpenApiGrayLogo from './shared/assets/neople-open-api-gray.png'
+import neopleOpenApiColorLogo from '#shared/assets/neople-open-api-color.png'
+import neopleOpenApiGrayLogo from '#shared/assets/neople-open-api-gray.png'
 import { useFavoriteCharacterStore } from '#features/favorite-character'
 import { useMyAdventureStore } from '#entities/adventure-guild'
 import {
@@ -24,8 +24,10 @@ import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'
 import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
+import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
+import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
-import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
+import { todayGradeHandlers } from '#widgets/global-bar/api/today-grade.handlers'
 
 vi.mock('#features/capture-search/lib/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
@@ -257,6 +259,25 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
   ])
   expect(main.querySelector('p')).toBeNull()
   expect(seats()).toHaveLength(0)
+})
+
+it('랭킹 화면의 직업 전체 조회를 받아 두었으면 메인 화면의 명성 랭킹은 다시 조회하지 않는다', async () => {
+  server.use(fameRankingHandlers.pages, setStatsHandlers.loading, itemStatsHandlers.loading)
+  window.history.replaceState(null, '', '/rankings')
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() =>
+    expect(container.querySelector('main tbody tr:not([aria-hidden])')).not.toBeNull()
+  )
+
+  const brand = container.querySelector<HTMLAnchorElement>('header a[href="/"]')!
+  await act(async () => brand.click())
+  await waitForPath('/')
+
+  const homeRows = container.querySelectorAll(
+    'section[aria-label="명성 랭킹"] tbody tr:not([aria-hidden])'
+  )
+  expect(homeRows).toHaveLength(3)
+  expect(requestedPaths('/rankings/fame')).toHaveLength(1)
 })
 
 it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 링크만 두고 링크를 누르면 메인 화면으로 간다', async () => {

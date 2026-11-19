@@ -8,9 +8,9 @@ import type { RaidFrameResult } from '#features/capture-search/lib/capture/captu
 import type { RaidSlotRecognition } from '#features/capture-search/lib/capture/raid/raid-recognition'
 import { emptySearchSlots } from '#features/capture-search/lib/capture/slots'
 import { createSharedOcrWorker } from '#features/capture-search/lib/ocr/ocr-worker-recognition'
-import { searchSnapshot } from '#features/capture-search/lib/search/search-test-fixture'
+import { searchSnapshot } from '#features/capture-search/api/search.fixture'
 import type { SearchApi, SearchSnapshot } from '#features/capture-search/lib/search/search'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { createTestClientHost } from '#features/capture-search/api/client-host.fixture'
 import { ClientHostContext, type RaidCaptureHost } from './client-host'
 
 const raidMocks = vi.hoisted(() => ({ recognize: vi.fn() }))

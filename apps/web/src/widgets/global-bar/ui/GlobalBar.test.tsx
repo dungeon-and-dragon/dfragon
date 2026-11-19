@@ -10,7 +10,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { server } from '#testing/test-support/msw-server'
-import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
+import { todayGradeHandlers } from '#widgets/global-bar/api/today-grade.handlers'
 import { GlobalBar } from './GlobalBar'
 
 const MENU_LEFT = 100

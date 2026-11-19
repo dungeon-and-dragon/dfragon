@@ -4,7 +4,7 @@ import type {
   AdventureActivitySeasonDays,
   AdventureWeekly
 } from '#entities/adventure-guild'
-import { storyRankedCharacters } from '#testing/story-support/story-characters'
+import { storyRankedCharacters } from '#entities/ranking/api/ranked-characters.fixture'
 
 // 모험단, 캐릭터 이름과 활동 기록은 실제 값이 아닌 합성 값이다.
 

@@ -52,18 +52,16 @@ export {
 } from './lib/ocr/paddle-recognition'
 export { readRaidWindowTemplates } from './lib/screen-watch/browser-raid-templates'
 export { readTownIndicatorTemplate } from './lib/screen-watch/browser-town-template'
-export { PORTRAIT_CANVAS_WIDTH, portraitAnchorOf } from './lib/search/portrait-anchor'
+export { portraitAnchorOf } from './lib/search/portrait-anchor'
 export { createPortraitColorScorer } from './lib/search/portrait-color'
 export type {
   PortraitColorPolicy,
   PortraitColorScore,
   PortraitColorScorer
 } from './lib/search/portrait-color'
-export { CAPTURE_ID, searchSnapshot } from './lib/search/search-test-fixture'
 export { SEARCH_SLOT_COUNTS } from './lib/search/search'
 export type {
   CharacterChoice,
-  CharacterFaceWindow,
   SearchSlot,
   SearchSnapshot
 } from './lib/search/search'
@@ -81,6 +79,4 @@ export { useSeatMove } from './model/useSeatMove'
 export type { SeatMove, SeatMoveNotice } from './model/useSeatMove'
 export type { SeatArrangement } from './model/useSeatOrder'
 export type { SlotCardKey } from './model/useSlotCardStore'
-export { CardImage } from './ui/CardImage'
-export { Portrait } from './ui/Portrait'
 export { ScreenCaptureProvider } from './ui/ScreenCaptureProvider'

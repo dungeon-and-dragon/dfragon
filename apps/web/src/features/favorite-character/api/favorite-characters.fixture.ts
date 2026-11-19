@@ -1,5 +1,5 @@
-import type { FavoriteCharacter } from '#features/favorite-character'
-import { storyRankedCharacters } from './story-characters'
+import { storyRankedCharacters } from '#entities/ranking/api/ranked-characters.fixture'
+import type { FavoriteCharacter } from '#features/favorite-character/model/useFavoriteCharacterStore'
 
 // 캐릭터, 모험단, 길드 이름은 실제 값이 아닌 합성 값이다.
 

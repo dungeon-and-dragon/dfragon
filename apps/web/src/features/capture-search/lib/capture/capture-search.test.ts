@@ -12,7 +12,7 @@ import {
   searchRow,
   searchSlot,
   searchSnapshot
-} from '#features/capture-search/lib/search/search-test-fixture'
+} from '#features/capture-search/api/search.fixture'
 import {
   createCaptureSearch,
   type CaptureSearch,

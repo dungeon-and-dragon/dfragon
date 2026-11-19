@@ -6,10 +6,11 @@ import {
   formatApproximateScore,
   toScoreView,
   ServerBadge,
-  characterDisplayOf
+  characterDisplayOf,
+  Portrait
 } from '#entities/character'
 import { Link } from '@tanstack/react-router'
-import { MISSING_VALUE, Portrait } from '#features/capture-search'
+import { MISSING_VALUE } from '#features/capture-search'
 import { FavoriteToggle } from '#features/favorite-character'
 import { useRefreshCharacterDetail } from './api/useCharacterDetail'
 import { useRefreshingNow } from '#shared/lib/useRefreshingNow'
