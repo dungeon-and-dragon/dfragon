@@ -201,17 +201,18 @@ test('서약 선택지만 바뀌어도 새 값으로 덮는다', { skip: port ==
   assert.deepEqual(stored.sets_fetched_at, at('18T11:00:00'))
 })
 
-const weapon = { slotId: 'WEAPON', itemId: 'weapon-a', itemName: '합성 무기' }
+const weapon = { slotId: 'WEAPON', itemId: 'weapon-a', itemName: '합성 무기', typeDetail: '도' }
 const exalted = [
-  { slotId: 'RING', itemId: 'ring-a', itemName: '합성 반지' },
-  { slotId: 'SUPPORT', itemId: 'support-a', itemName: '합성 보조' },
-  { slotId: 'MAGIC_STON', itemId: 'stone-a', itemName: '합성 마법석' },
-  { slotId: 'EARRING', itemId: 'earring-a', itemName: '합성 귀걸이' }
+  { slotId: 'RING', itemId: 'ring-a', itemName: '합성 반지', typeDetail: '반지' },
+  { slotId: 'SUPPORT', itemId: 'support-a', itemName: '합성 보조', typeDetail: '보조장비' },
+  { slotId: 'MAGIC_STON', itemId: 'stone-a', itemName: '합성 마법석', typeDetail: '마법석' },
+  { slotId: 'EARRING', itemId: 'earring-a', itemName: '합성 귀걸이', typeDetail: '귀걸이' }
 ]
 
 async function readItems({ serverId, characterId }) {
   return client.$queryRaw`
-    SELECT "slot_id" AS "slotId", "item_id" AS "itemId", "item_name" AS "itemName", xmin::text AS "version"
+    SELECT "slot_id" AS "slotId", "item_id" AS "itemId", "item_name" AS "itemName",
+      "item_type_detail" AS "typeDetail", xmin::text AS "version"
     FROM "character_items"
     WHERE "server_id" = ${serverId} AND "character_id" = ${characterId}
     ORDER BY "slot_id"`
@@ -293,7 +294,12 @@ test('같은 세트와 아이템을 다시 저장하면 아이템 행과 캐릭�
   })
   const same = await readItems(key)
   const sameSets = await readSets(key)
-  const newWeapon = { slotId: 'WEAPON', itemId: 'weapon-b', itemName: '합성 새 무기' }
+  const newWeapon = {
+    slotId: 'WEAPON',
+    itemId: 'weapon-b',
+    itemName: '합성 새 무기',
+    typeDetail: '도'
+  }
   await recordCharacterSets(client, {
     ...base,
     items: [newWeapon, ...exalted],
@@ -318,7 +324,12 @@ test('세트는 같고 아이템만 바뀐 저장도 받은 시각을 옮겨, �
 }, async () => {
   const key = await createCharacter('items-stale')
   const base = { ...key, equipmentSet: fairy, oathSet: dragon }
-  const newWeapon = { slotId: 'WEAPON', itemId: 'weapon-b', itemName: '합성 새 무기' }
+  const newWeapon = {
+    slotId: 'WEAPON',
+    itemId: 'weapon-b',
+    itemName: '합성 새 무기',
+    typeDetail: '도'
+  }
 
   await recordCharacterSets(client, { ...base, items: [weapon], fetchedAt: at('18T10:00:00') })
   await recordCharacterSets(client, { ...base, items: [newWeapon], fetchedAt: at('18T12:00:00') })
@@ -328,4 +339,22 @@ test('세트는 같고 아이템만 바뀐 저장도 받은 시각을 옮겨, �
 
   assert.deepEqual(withoutVersion(items), [newWeapon])
   assert.deepEqual(stored.sets_fetched_at, at('18T12:00:00'))
+})
+
+test('종류 열을 더하기 전에 저장한 아이템 행은 같은 아이템을 다시 저장할 때 종류가 채워지고 받은 시각도 옮긴다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('items-type-detail')
+  const base = { ...key, equipmentSet: null, oathSet: null }
+
+  await recordCharacterSets(client, { ...base, items: [weapon], fetchedAt: at('18T10:00:00') })
+  await client.$executeRaw`
+    UPDATE "character_items" SET "item_type_detail" = NULL
+    WHERE "server_id" = ${key.serverId} AND "character_id" = ${key.characterId}`
+  await recordCharacterSets(client, { ...base, items: [weapon], fetchedAt: at('18T11:00:00') })
+  const items = await readItems(key)
+  const stored = await readSets(key)
+
+  assert.deepEqual(withoutVersion(items), [weapon])
+  assert.deepEqual(stored.sets_fetched_at, at('18T11:00:00'))
 })

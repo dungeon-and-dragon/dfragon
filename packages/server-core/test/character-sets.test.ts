@@ -19,7 +19,12 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
     equipmentSet: { id: '4ee7bd5912cda6e2a24c1f36d5202b46', name: '소울 페어리 세트' },
     oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' },
     items: [
-      { slotId: 'WEAPON', itemId: '89c42c1d02e6749244ce518e9b34e1c7', itemName: '재앙의 송곳니' }
+      {
+        slotId: 'WEAPON',
+        itemId: '89c42c1d02e6749244ce518e9b34e1c7',
+        itemName: '재앙의 송곳니',
+        typeDetail: '낫'
+      }
     ]
   })
   // 버퍼 fixture의 서약은 레어 Ⅱ(905점) 구간 안이지만 효과가 붙는 등급에 못 미쳐, active에 setPoint만 오고 status가 없다.
@@ -27,7 +32,12 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
     equipmentSet: { id: '93e7825053bdec4e0f4c12837cf4f57e', name: '에테리얼 오브 아츠 세트' },
     oathSet: null,
     items: [
-      { slotId: 'WEAPON', itemId: '4c2c36b92f60155c579d36eea9786324', itemName: '시크릿 듀엣' }
+      {
+        slotId: 'WEAPON',
+        itemId: '4c2c36b92f60155c579d36eea9786324',
+        itemName: '시크릿 듀엣',
+        typeDetail: '선현궁'
+      }
     ]
   })
 })
@@ -89,12 +99,14 @@ test('가명 처리한 실응답에서 무기와 exaltedInfo가 있는 유일 �
     {
       slotId: 'WEAPON',
       itemId: '8a79cefa4aec25884139327f093ef696',
-      itemName: '검은 질병의 시크릿 콘서트'
+      itemName: '검은 질병의 시크릿 콘서트',
+      typeDetail: '선현궁'
     },
     {
       slotId: 'SUPPORT',
       itemId: '6e1fcf6e59ed8d5a95dc152b84fe93ce',
-      itemName: '만병을 잉태한 역병의 심장'
+      itemName: '만병을 잉태한 역병의 심장',
+      typeDetail: '보조장비'
     }
   ])
 })
@@ -184,6 +196,28 @@ test('효과가 켜지지 않은 서약 세트는 세트와 선택지를 모두 
     name: '소울 페어리 세트'
   })
   assert.deepEqual(sets?.items, [
-    { slotId: 'WEAPON', itemId: '89c42c1d02e6749244ce518e9b34e1c7', itemName: '재앙의 송곳니' }
+    {
+      slotId: 'WEAPON',
+      itemId: '89c42c1d02e6749244ce518e9b34e1c7',
+      itemName: '재앙의 송곳니',
+      typeDetail: '낫'
+    }
+  ])
+})
+
+test('빈 itemTypeDetail은 종류를 모르는 것으로 null로 뽑는다', () => {
+  const sets = parseCharacterSets({
+    equipment: {
+      ...header,
+      equipment: [
+        { slotId: 'WEAPON', itemId: 'weapon', itemName: '합성 무기', itemTypeDetail: '' }
+      ],
+      setItemInfo: []
+    },
+    oath: { ...header, oath: null }
+  })
+
+  assert.deepEqual(sets?.items, [
+    { slotId: 'WEAPON', itemId: 'weapon', itemName: '합성 무기', typeDetail: null }
   ])
 })
