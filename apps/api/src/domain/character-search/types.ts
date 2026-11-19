@@ -1,3 +1,5 @@
+import type { CharacterRowScore } from '#domain/character-row.js'
+
 export interface NeopleCharacterSearchInput {
   characterName: string
   serverId: string
@@ -21,6 +23,14 @@ export interface NeopleCharacterSearchResult {
 
 export interface CharacterImageCandidate extends CharacterSearchRow {
   imageUrl: string
+}
+
+export interface ScoredCharacterCandidate extends CharacterImageCandidate {
+  score: CharacterRowScore | null
+}
+
+export interface CharacterSearchResult {
+  rows: ScoredCharacterCandidate[]
 }
 
 export interface CharacterCandidatesResult {

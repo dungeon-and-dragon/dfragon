@@ -1,6 +1,9 @@
-import type { StoredCharacter } from '@dfragon/database'
+import type { StoredCharacter, StoredCharacterScore } from '@dfragon/database'
+import type { CharacterCardScore } from '@dfragon/server-core/domain/character-card/index.js'
 import type { CharacterRole } from '@dfragon/server-core/domain/character-role.js'
 import { characterFromStored } from '@dfragon/server-core/domain/character-from-details.js'
+
+export type CharacterRowScore = Pick<CharacterCardScore, 'calculator'> & { value: number }
 
 export type CharacterRow = {
   serverId: string
@@ -17,11 +20,23 @@ export type CharacterRow = {
   guildName: string | null
   fetchedAt: Date | null
   role: CharacterRole | null
+  score: CharacterRowScore | null
+}
+
+export function toCharacterRowScore(stored: StoredCharacterScore | null): CharacterRowScore | null {
+  if (stored === null) {
+    return null
+  }
+
+  const { kind: calculator, value } = stored
+
+  return { calculator, value }
 }
 
 export function toCharacterRow(stored: StoredCharacter): CharacterRow {
-  const { dealerSkillLearned, ...row } = stored
+  const { dealerSkillLearned, score: storedScore, ...row } = stored
   const role = characterFromStored(stored)?.role() ?? null
+  const score = toCharacterRowScore(storedScore)
 
-  return { ...row, role }
+  return { ...row, role, score }
 }
