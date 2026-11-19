@@ -2,6 +2,7 @@ import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/d
 import {
   type ActivitySeason,
   type AdventureActivity,
+  type AdventureEquipment,
   type AdventureSeasonDays,
   type AdventureWeeklyClears,
   type StoredActivitySeason,
@@ -36,6 +37,18 @@ export class AdventureGuildService {
     }
 
     return weekly
+  }
+
+  async adventureEquipment(adventureName: string): Promise<AdventureEquipment> {
+    const equipment = await this.repository.readAdventureEquipment(adventureName)
+
+    for (const { characters } of equipment.servers) {
+      for (const { serverId, characterId } of characters) {
+        this.requestTimelineSync({ serverId, characterId })
+      }
+    }
+
+    return equipment
   }
 
   async adventureActivity(
@@ -108,6 +121,7 @@ export const emptyAdventureGuildRepository: AdventureGuildRepository = {
   readAdventureCharacters: async () => [],
   readGuild: async () => ({ guildName: null, members: [] }),
   readAdventureWeeklyClears: async () => ({ clearNames: [], characters: [] }),
+  readAdventureEquipment: async () => ({ sets: [], servers: [] }),
   readAdventureActivity: async (_adventureName, seasonId) => {
     if (seasonId !== undefined) {
       return undefined
