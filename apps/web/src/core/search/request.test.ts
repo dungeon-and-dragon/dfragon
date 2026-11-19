@@ -16,7 +16,7 @@ import {
   type CharacterImageHttp,
   createCharacterImageCache,
   createCharacterImageSource
-} from '#core/character/character-image-source'
+} from './character-image-source'
 import { SearchHttpFailure } from '#core/api/http'
 import { createPortraitColorScorer, type PortraitColorScorer } from './portrait-color'
 import { INITIAL_PORTRAIT_COLOR_POLICY } from './portrait-policy'

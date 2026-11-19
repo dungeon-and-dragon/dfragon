@@ -169,7 +169,18 @@ const layerRejected = [
   ['src/shared/ui/legacy-core.ts', '#core/search', 'shared-legacy-imports'],
   ['src/shared/config/legacy-hook.ts', '#hooks/useShared', 'shared-legacy-imports'],
   ['src/components/page.ts', '#pages/b', 'legacy-layer-imports'],
-  ['src/core/app.ts', '#app/router', 'legacy-layer-imports']
+  ['src/core/app.ts', '#app/router', 'legacy-layer-imports'],
+  ['src/core/character/search.ts', '#core/search/search', 'character-feature-imports'],
+  ['src/core/character/search-index.ts', '#core/search', 'character-feature-imports'],
+  [
+    'src/core/character/capture-type.ts',
+    '#core/capture/cards-types',
+    'character-feature-imports',
+    "import type { Value } from '#core/capture/cards-types'\nexport type Used = Value\n"
+  ],
+  ['src/core/character/ocr.ts', '../ocr/ocr', 'character-feature-imports'],
+  ['src/core/api/http.ts', '#core/search/search', 'api-error-imports'],
+  ['src/core/api/api-response.ts', '#core/search', 'api-error-imports']
 ]
 
 const layerAllowed = [
@@ -185,7 +196,10 @@ const layerAllowed = [
   ['src/entities/character/legacy.ts', '#core/search'],
   ['src/components/shared-ui.ts', '#shared/ui/ListBox'],
   ['src/pages/home/rankings.ts', '#pages/rankings'],
-  ['src/pages/stats/rankings.ts', '#pages/rankings']
+  ['src/pages/stats/rankings.ts', '#pages/rankings'],
+  ['src/core/character/api-error.ts', '#core/api/http'],
+  ['src/core/capture/character.ts', '#core/character/character-detail-view'],
+  ['src/core/search/api-error.ts', '#core/api/http']
 ]
 
 const run = promisify(execFile)
@@ -218,7 +232,7 @@ async function cruiseSamples() {
         ...aliasAllowed,
         ...layerRejected,
         ...layerAllowed
-      ].map(([file, source]) => [file, importing(source)])
+      ].map(([file, source, , code]) => [file, code ?? importing(source)])
     )
 
     for (const file of [
@@ -239,6 +253,8 @@ async function cruiseSamples() {
       'src/pages/rankings/RankingsScreen.tsx',
       'src/hooks/useShared.ts',
       'src/core/search/search.ts',
+      'src/core/capture/cards-types.ts',
+      'src/core/ocr/ocr.ts',
       'src/core/character/character-detail-view.ts',
       'src/core/character/nested/helper.ts',
       'src/widgets/global-bar/index.ts',

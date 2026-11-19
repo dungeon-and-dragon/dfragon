@@ -1,4 +1,4 @@
-import type { CharacterCard } from '#core/capture/cards-types'
+import type { CharacterCard } from './character'
 
 export type ScoreView = {
   label: '장비 점수' | '버프 점수'

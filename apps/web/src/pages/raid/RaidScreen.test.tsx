@@ -7,11 +7,11 @@ import {
   type CardCharacter,
   createSeatOrder,
   RAID_SEAT_LAYOUT,
+  type SlotNotice,
   type SlotState,
   type SnapshotMark,
   swapSeats
 } from '#core/capture'
-import type { SlotNotice } from '#core/character'
 import { dealerCard } from '#core/testing'
 import { RaidScreen } from './RaidScreen'
 import { TestRouter } from '#testing/test-support/test-router'

@@ -1,12 +1,8 @@
 import { isFiniteNumber } from '@dfragon/lib/utils/shape-check'
-import type {
-  CharacterChoice,
-  CharacterSearchRow,
-  CharacterSelectionMethod,
-  OcrSearchInput
-} from './search'
+import type { CharacterChoice, CharacterSelectionMethod, OcrSearchInput } from './search'
 import type {
   CharacterCandidate,
+  CharacterSearchRow,
   SelectedCharacterSummary,
   CharacterJsonValue
 } from '#core/character/character'
@@ -23,7 +19,7 @@ import {
 import { toRaidObservedValues } from '#core/capture/raid/raid-candidate'
 import { SearchHttpFailure } from '#core/api/http'
 import type { CharacterCandidatesHttp, CharacterDetailsHttp } from '#core/api/dfragon-client'
-import type { CharacterImageHttp } from '#core/character/character-image-source'
+import type { CharacterImageHttp } from './character-image-source'
 import type { PortraitColorScorer } from './portrait-color'
 import { runSearchOperation, type SearchOperation, type SearchOperationFailure } from './operation'
 import { buildCharacterCard } from './card-assembler'
