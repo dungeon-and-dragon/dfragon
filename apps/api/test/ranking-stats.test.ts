@@ -304,6 +304,86 @@ test('명성 랭킹은 빈 itemIds와 빈 항목, 같은 itemId의 중복, 여�
   }
 })
 
+test('명성 랭킹은 쉼표로 이은 스킬 이름~개화 종류 쌍을 개화 목록으로 바꿔 직업, 전직, 세트, 아이템 필터와 함께 넘긴다', async () => {
+  const reads: FameRankingFilter[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (filter) => {
+      reads.push(filter)
+
+      return []
+    }
+  })
+
+  try {
+    const job = 'jobId=synthetic-job&jobGrowId=synthetic-grow'
+    // 운영 데이터의 스킬 이름에 쓰이는 공백, 괄호, 쌍점, 대괄호, 느낌표를 넣은 합성 이름이다.
+    const names = ['발도', '귀참 : 나락 (각성) [EX]!', '삼', '사', '오']
+    const fivePairs = names.map((name, index) => `${name}~${(index % 2) + 1}`).join(',')
+    const one = await getJson(
+      origin,
+      `/rankings/fame?${job}&evolutions=${encodeURIComponent(`${names[0]}~2`)}`
+    )
+    const five = await getJson(
+      origin,
+      `/rankings/fame?${job}&equipmentSetId=set-fairy&itemIds=weapon-a&evolutions=${encodeURIComponent(fivePairs)}`
+    )
+
+    assert.deepEqual([one.status, five.status], [200, 200])
+    assert.deepEqual(reads, [
+      {
+        jobId: 'synthetic-job',
+        jobGrowId: 'synthetic-grow',
+        evolutions: [{ name: '발도', type: 2 }]
+      },
+      {
+        jobId: 'synthetic-job',
+        jobGrowId: 'synthetic-grow',
+        equipmentSetId: 'set-fairy',
+        itemIds: ['weapon-a'],
+        evolutions: [
+          { name: '발도', type: 1 },
+          { name: '귀참 : 나락 (각성) [EX]!', type: 2 },
+          { name: '삼', type: 1 },
+          { name: '사', type: 2 },
+          { name: '오', type: 1 }
+        ]
+      }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹은 전직 없는 개화, 빈 값과 빈 쌍, 종류가 1, 2가 아니거나 빠진 쌍, 같은 스킬의 중복, 여섯 쌍 이상, 같은 key의 중복을 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+
+  try {
+    const job = 'jobId=synthetic-job&jobGrowId=synthetic-grow'
+
+    for (const query of [
+      'evolutions=발도~1',
+      'jobId=synthetic-job&evolutions=발도~1',
+      `${job}&evolutions=`,
+      `${job}&evolutions=발도~1,`,
+      `${job}&evolutions=~1`,
+      `${job}&evolutions=발도~3`,
+      `${job}&evolutions=발도~0`,
+      `${job}&evolutions=발도`,
+      `${job}&evolutions=발도~1~2`,
+      `${job}&evolutions=발도~1,발도~2`,
+      `${job}&evolutions=가~1,나~1,다~1,라~1,마~1,바~1`,
+      `${job}&evolutions=발도~1&evolutions=삼~1`
+    ]) {
+      const { status, body } = await getJson(origin, `/rankings/fame?${encodeURI(query)}`)
+      assert.equal(status, 400, query)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+    }
+  } finally {
+    await app.close()
+  }
+})
+
 // fake DB가 받은 위치 뒤의 행만 주도록 해, API가 마지막 행으로 cursor를 만들고 rank를 잇는지 본다.
 test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor로 다음 page를 이어 rank를 매기며 마지막 page는 null이다', async () => {
   const sorted = Array.from({ length: 150 }, (_, index) =>
