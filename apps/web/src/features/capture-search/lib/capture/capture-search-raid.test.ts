@@ -5,7 +5,7 @@ import {
   searchSnapshot,
   searchSlot,
   searchRow
-} from '#features/capture-search/lib/search/search-test-fixture'
+} from '#features/capture-search/api/search.fixture'
 import type {
   SearchApi,
   SearchSnapshot,

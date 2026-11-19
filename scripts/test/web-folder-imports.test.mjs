@@ -22,28 +22,19 @@ const rejectedImports = [
   ['pages/a/parent.ts', '../shared', '#<폴더>/...'],
   ['pages/a/deep.ts', '../../../hooks/useShared', '#<폴더>/...'],
   [`${captureLib}/search/parent.ts`, '../capture/cards', '#<폴더>/...'],
-  ['components/parent.ts', '../hooks/useShared', '#<폴더>/...'],
-  [`${captureLib}/component-alias.ts`, '#components/Shared', captureLib],
-  [`${captureLib}/hook-alias.ts`, '#hooks/useShared', captureLib],
+  ['widgets/a/ui/parent.ts', '../model/store', '#<폴더>/...'],
   [`${captureLib}/page-alias.ts`, '#pages/a', captureLib],
   [`${captureLib}/app-alias.ts`, '#app/router', captureLib],
   [`${captureLib}/widget-alias.ts`, '#widgets/global-bar', captureLib],
   [`${captureLib}/shared-ui-alias.ts`, '#shared/ui/ListBox', captureLib],
   [`${captureLib}/feature-alias.ts`, '#features/favorite', captureLib],
   [`${captureLib}/animation-alias.ts`, '#shared/lib/animations/gsap-motion', captureLib],
-  ['components/a.ts', '#pages/a/APage', 'pages/'],
-  ['components/nested/b.ts', '#pages/a/util', 'pages/'],
-  ['hooks/a.ts', '#pages/a/APage', 'pages/'],
-  ['hooks/index.ts', '#pages', 'pages/'],
-  ['hooks/alias.ts', '#pages/a/APage', 'pages/'],
   [`${captureLib}/ocr/react.ts`, 'react', captureLib],
   [`${captureLib}/ocr/react-dom.ts`, 'react-dom', captureLib],
   [`${captureLib}/capture/ui.ts`, '@dfragon/ui', captureLib]
 ]
 const allowedImports = [
   ['pages/a/same.ts', './local'],
-  ['components/allowed.ts', '#hooks/useShared'],
-  ['hooks/allowed.ts', '#components/Shared'],
   [`${captureLib}/same-folder.ts`, './browser-png']
 ]
 
@@ -86,61 +77,6 @@ for (const [file, source] of allowedImports) {
   })
 }
 
-const screenRejected = [
-  ['src/pages/a/relative-screen-boundary.ts', '../b/hooks/useThing', 'screen-folder-imports'],
-  ['src/pages/a/alias-screen-boundary.ts', '#pages/b/hooks/useThing', 'screen-folder-imports'],
-  ['src/pages/a/explicit.ts', '#pages/b/hooks/useThing.ts', 'screen-folder-imports'],
-  ['src/pages/a/ts-page.ts', '#pages/b/OtherPage', 'screen-folder-imports'],
-  ['src/pages/a/top-level-util.tsx', '#pages/b/util', 'screen-folder-imports'],
-  ['src/pages/a/nested-page.ts', '#pages/b/components/NestedPage.tsx', 'screen-folder-imports'],
-  ['src/pages/a/page.ts', '#pages/b/BPage', 'screen-folder-imports'],
-  ['src/pages/a/page-tsx.ts', '#pages/b/BPage.tsx', 'screen-folder-imports'],
-  ['src/pages/a/screen.ts', '#pages/b/BScreen', 'screen-folder-imports'],
-  ['src/pages/a/screen-tsx.ts', '#pages/b/BScreen.tsx', 'screen-folder-imports'],
-  ['src/WebApp.ts', './pages/rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
-  ['src/pages/router.ts', './rankings/RankingsScreen', 'screen-folder-imports-outside-pages'],
-  ['src/WebApp.test.ts', './pages/b/hooks/useThing', 'screen-folder-imports-outside-pages'],
-  ['src/testing/story.ts', '#pages/b/BPage.tsx', 'screen-folder-imports-outside-pages'],
-  ['src/shared.ts', '#pages/b/util', 'screen-folder-imports-outside-pages']
-]
-
-const screenAllowed = [
-  ['src/pages/a/same.ts', './hooks/useThing'],
-  ['src/pages/a/one/same.ts', '#pages/a/hooks/useThing'],
-  ['src/pages/b/same-page.ts', './BPage'],
-  ['src/pages/a/shared.ts', '#hooks/useShared'],
-  ['src/router.ts', '#pages/rankings'],
-  ['src/router.test.ts', '#pages/b'],
-  ['src/pages/a/core.ts', '#core/search']
-]
-
-const coreRejected = [
-  ['src/pages/a/core-detail.ts', '#core/character/character-detail-view'],
-  ['src/lib/core-relative.ts', '#core/character/character-detail-view'],
-  ['src/testing/core-nested.ts', '#core/character/nested/helper'],
-  ['src/core-boundary.test.ts', './core/character/character-detail-view']
-]
-
-const aliasAllowed = [
-  ['src/pages/a/asset.ts', '#shared/assets/logo.png', 'src/shared/assets/logo.png'],
-  ['src/pages/a/component.ts', '#components/Shared', 'src/components/Shared.tsx'],
-  ['src/pages/a/shared-ui.ts', '#shared/ui/ListBox', 'src/shared/ui/ListBox.tsx'],
-  ['src/pages/a/hook.ts', '#hooks/useShared', 'src/hooks/useShared.ts'],
-  ['src/pages/a/lib.ts', '#lib/shared', 'src/lib/shared.ts'],
-  ['src/pages/a/testing.ts', '#testing/fixture', 'src/testing/fixture.tsx'],
-  ['src/app/other-screen.ts', '#pages/b', 'src/pages/b/index.ts'],
-  ['src/pages/a/same-screen.ts', '#pages/a/hooks/useThing', 'src/pages/a/hooks/useThing.ts']
-]
-
-const coreAllowed = [
-  ['src/pages/a/core-character.ts', '#core/character'],
-  ['src/pages/a/core-root.ts', '#core/root-file'],
-  ['src/core/character/same.ts', './character-detail-view'],
-  ['src/core/search/other-domain.ts', '#core/character/character-detail-view'],
-  ['src/core/search/other-alias.ts', '#core/character/character-detail-view'],
-  ['src/pages/a/core-image.ts', '#core/capture/raid/heading.png']
-]
-
 const layerRejected = [
   ['src/shared/ui/upper.ts', '#entities/character', 'layer-imports'],
   ['src/entities/character/upper.ts', '#features/favorite', 'layer-imports'],
@@ -148,25 +84,28 @@ const layerRejected = [
   ['src/widgets/global-bar/upper.ts', '#pages/b', 'layer-imports'],
   ['src/pages/a/app.ts', '#app/router', 'layer-imports'],
   ['src/pages/a/index-import.ts', '#pages/b', 'slice-imports'],
-  ['src/pages/home/unlisted.ts', '#pages/b', 'slice-imports'],
-  ['src/pages/stats/rankings.ts', '#pages/rankings', 'slice-imports'],
+  ['src/pages/a/relative-inner.ts', '../b/hooks/useThing', 'slice-imports'],
+  ['src/pages/a/alias-inner.ts', '#pages/b/hooks/useThing', 'slice-imports'],
+  ['src/pages/home/rankings.ts', '#pages/rankings', 'slice-imports'],
+  ['src/pages/home/rankings.test.ts', '#pages/rankings', 'slice-imports'],
+  ['src/pages/home/rankings.stories.tsx', '#pages/rankings', 'slice-imports'],
   ['src/widgets/global-bar/other-slice.ts', '#widgets/site-footer', 'slice-imports'],
   ['src/features/favorite/other-slice.ts', '#features/color-mode', 'slice-imports'],
   ['src/entities/character/other-slice.ts', '#entities/ranking', 'slice-imports'],
   ['src/entities/character/other-x.ts', '#entities/ranking/@x/guild', 'slice-imports'],
+  ['src/app/page-inner.ts', '#pages/b/BPage', 'slice-index'],
+  ['src/app/page-inner-tsx.ts', '#pages/b/BPage.tsx', 'slice-index'],
+  ['src/testing/story.ts', '#pages/b/BPage.tsx', 'slice-index'],
   ['src/pages/a/feature-inner.ts', '#features/favorite/ui/FavoriteToggle', 'slice-index'],
-  ['src/components/entity-inner.ts', '#entities/character/model/character', 'slice-index'],
-  ['src/shared/lib/legacy-component.ts', '#components/Shared', 'shared-legacy-imports'],
-  ['src/shared/ui/legacy-core.ts', '#core/search', 'shared-legacy-imports'],
-  ['src/shared/config/legacy-hook.ts', '#hooks/useShared', 'shared-legacy-imports'],
-  ['src/components/page.ts', '#pages/b', 'legacy-layer-imports'],
-  ['src/core/app.ts', '#app/router', 'legacy-layer-imports'],
   ['src/pages/a/inner.test.ts', '#entities/character/model/character', 'slice-index'],
   [
     'src/entities/character/model/uses-fixture.ts',
     '#entities/character/api/character.fixture',
     'fixture-imports'
-  ]
+  ],
+  ['src/pages/a/uses-fixture.ts', '#entities/character/api/character.fixture', 'fixture-imports'],
+  ['src/pages/a/uses-testing.ts', '#testing/fixture', 'testing-imports'],
+  ['src/shared/lib/uses-testing.ts', '#testing/fixture', 'testing-imports']
 ]
 
 const layerAllowed = [
@@ -178,14 +117,25 @@ const layerAllowed = [
   ['src/entities/guild/cross.ts', '#entities/character/@x/guild'],
   ['src/features/favorite/same-slice.ts', './ui/FavoriteToggle'],
   ['src/features/favorite/ui/same-slice-alias.ts', '#features/favorite/model/store'],
+  ['src/pages/a/same.ts', './hooks/useThing'],
+  ['src/pages/a/one/same.ts', '#pages/a/hooks/useThing'],
   ['src/shared/ui/segment.ts', '#shared/lib/time-format'],
-  ['src/entities/character/legacy.ts', '#core/search'],
-  ['src/components/shared-ui.ts', '#shared/ui/ListBox'],
-  ['src/pages/home/rankings.ts', '#pages/rankings'],
-  ['src/core/capture/character.ts', '#core/character/character-detail-view'],
   ['src/pages/a/fixture.test.ts', '#entities/character/api/character.fixture'],
   ['src/pages/a/handler.stories.tsx', '#entities/character/api/character.handlers'],
-  ['src/entities/character/api/character.handlers.ts', './character.fixture']
+  ['src/entities/character/api/character.handlers.ts', './character.fixture'],
+  ['src/entities/ranking/model/other-entity.test.ts', '#entities/character/api/character.fixture'],
+  ['src/pages/a/api/a.fixture.ts', '#entities/character/api/character.fixture'],
+  ['src/pages/a/api/b.fixture.ts', '#testing/fixture'],
+  ['src/pages/a/uses-testing.test.ts', '#testing/fixture'],
+  ['src/testing/story-support/frame.ts', '#entities/character/api/character.fixture']
+]
+
+const aliasAllowed = [
+  ['src/pages/a/asset.ts', '#shared/assets/logo.png', 'src/shared/assets/logo.png'],
+  ['src/pages/a/shared-ui.ts', '#shared/ui/ListBox', 'src/shared/ui/ListBox.tsx'],
+  ['src/pages/a/testing.test.ts', '#testing/fixture', 'src/testing/fixture.tsx'],
+  ['src/app/other-screen.ts', '#pages/b', 'src/pages/b/index.ts'],
+  ['src/pages/a/same-screen.ts', '#pages/a/hooks/useThing', 'src/pages/a/hooks/useThing.ts']
 ]
 
 const run = promisify(execFile)
@@ -210,36 +160,21 @@ async function cruiseSamples() {
     }
 
     const files = Object.fromEntries(
-      [
-        ...screenRejected,
-        ...screenAllowed,
-        ...coreRejected,
-        ...coreAllowed,
-        ...aliasAllowed,
-        ...layerRejected,
-        ...layerAllowed
-      ].map(([file, source, , code]) => [file, code ?? importing(source)])
+      [...aliasAllowed, ...layerRejected, ...layerAllowed].map(([file, source, , code]) => [
+        file,
+        code ?? importing(source)
+      ])
     )
 
     for (const file of [
       'src/shared/assets/logo.png',
       'src/shared/ui/ListBox.tsx',
       'src/shared/lib/time-format.ts',
-      'src/components/Shared.tsx',
-      'src/lib/shared.ts',
       'src/testing/fixture.tsx',
       'src/pages/a/hooks/useThing.ts',
       'src/pages/b/hooks/useThing.ts',
-      'src/pages/b/components/NestedPage.tsx',
-      'src/pages/b/OtherPage.ts',
-      'src/pages/b/util.tsx',
       'src/pages/b/BPage.tsx',
-      'src/pages/b/BScreen.tsx',
       'src/pages/rankings/RankingsScreen.tsx',
-      'src/hooks/useShared.ts',
-      'src/core/search/search.ts',
-      'src/core/character/character-detail-view.ts',
-      'src/core/character/nested/helper.ts',
       'src/widgets/global-bar/index.ts',
       'src/widgets/site-footer/index.ts',
       'src/features/favorite/index.ts',
@@ -251,17 +186,13 @@ async function cruiseSamples() {
       'src/entities/character/model/character.ts',
       'src/entities/character/api/character.fixture.ts',
       'src/entities/ranking/index.ts',
-      'src/entities/ranking/@x/guild.ts',
-      'src/core/capture/raid/heading.png',
-      'src/core/root-file.ts'
+      'src/entities/ranking/@x/guild.ts'
     ]) {
       files[file] = 'export const value = 1\n'
     }
 
     files['src/pages/b/index.ts'] = "export { value } from './BPage'\n"
     files['src/pages/rankings/index.ts'] = "export { value } from './RankingsScreen'\n"
-    files['src/core/search/index.ts'] = "export { value } from './search'\n"
-    files['src/core/character/index.ts'] = "export { value } from './character-detail-view'\n"
     files['src/cycles/value-a.ts'] =
       "import { b } from './value-b'\nexport function a() { return b }\n"
     files['src/cycles/value-b.ts'] =
@@ -304,11 +235,7 @@ async function cruiseSamples() {
     }
 
     const report = JSON.parse((await cruise('json')).stdout)
-    const { stdout: text, exitCode } = await cruise('err-long', 'src/WebApp.ts')
-    const { stdout: coreText, exitCode: coreExitCode } = await cruise(
-      'err-long',
-      'src/pages/a/core-detail.ts'
-    )
+    const { stdout: text, exitCode } = await cruise('err-long', 'src/app/page-inner.ts')
 
     const { stdout: layerText, exitCode: layerExitCode } = await cruise(
       'err-long',
@@ -324,8 +251,6 @@ async function cruiseSamples() {
       report,
       text,
       exitCode,
-      coreText,
-      coreExitCode,
       layerText,
       layerExitCode,
       cycleText,
@@ -336,19 +261,10 @@ async function cruiseSamples() {
   }
 }
 
-const {
-  report,
-  text,
-  exitCode,
-  coreText,
-  coreExitCode,
-  layerText,
-  layerExitCode,
-  cycleText,
-  cycleExitCode
-} = await cruiseSamples()
+const { report, text, exitCode, layerText, layerExitCode, cycleText, cycleExitCode } =
+  await cruiseSamples()
 
-for (const [file, source, ruleName] of [...screenRejected, ...layerRejected]) {
+for (const [file, source, ruleName] of layerRejected) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 거부한다`, () => {
     assert.deepEqual(
       report.summary.violations.filter(({ from }) => from === file).map(({ rule }) => rule),
@@ -356,7 +272,7 @@ for (const [file, source, ruleName] of [...screenRejected, ...layerRejected]) {
     )
   })
 }
-for (const [file, source] of [...screenAllowed, ...coreAllowed, ...aliasAllowed, ...layerAllowed]) {
+for (const [file, source] of [...aliasAllowed, ...layerAllowed]) {
   test(`dependency-cruiser: ${file}에서 ${source} import를 허용한다`, () => {
     assert.deepEqual(
       report.summary.violations.filter(({ from }) => from === file),
@@ -376,39 +292,17 @@ for (const [file, source, expected] of aliasAllowed) {
   })
 }
 
-test('dependency-cruiser: #core alias를 실제 소스로 해석한다', () => {
-  const module = report.modules.find(({ source }) => source === 'src/pages/a/core.ts')
-  assert.equal(module.dependencies[0].resolved, 'src/core/search/index.ts')
-})
-
-test('dependency-cruiser: 화면 파일 직접 import는 실패하고 폴더 경로와 공용 코드 위치를 알린다', () => {
+test('dependency-cruiser: 화면 안쪽 파일 import는 실패하고 화면 index.ts로 가져오라고 알린다', () => {
   assert.ok(exitCode > 0)
-  assert.ok(text.includes('#pages/<화면>(예: #pages/rankings)처럼 폴더 경로로 import한다.'), text)
-  assert.ok(text.includes('components/나 hooks/'), text)
+  assert.ok(
+    text.includes('슬라이스 밖에서는 #pages/<슬라이스>처럼 그 슬라이스의 index.ts로 import한다.'),
+    text
+  )
 })
 
 test('dependency-cruiser: 위 계층 import는 실패하고 아래 계층만 import하라고 알린다', () => {
   assert.ok(layerExitCode > 0)
   assert.ok(layerText.includes('계층은 자기보다 아래 계층만 import한다.'), layerText)
-})
-
-for (const [file, source] of coreRejected) {
-  test(`dependency-cruiser: core 밖 ${file}에서 ${source} 직접 import를 거부한다`, () => {
-    assert.deepEqual(
-      report.summary.violations.filter(({ from }) => from === file).map(({ rule }) => rule),
-      [{ name: 'core-folder-index', severity: 'error' }]
-    )
-  })
-}
-
-test('dependency-cruiser: core 직접 import는 실패하고 #core/character 경로를 안내한다', () => {
-  assert.ok(coreExitCode > 0)
-  assert.ok(coreText.includes('#core/<도메인>(예: #core/character)으로 가져온다.'), coreText)
-})
-
-test('dependency-cruiser: #core/character는 도메인 index.ts로 풀린다', () => {
-  const module = report.modules.find(({ source }) => source === 'src/pages/a/core-character.ts')
-  assert.equal(module.dependencies[0].resolved, 'src/core/character/index.ts')
 })
 
 test('dependency-cruiser: value import 순환은 실패하고 type-only 경로가 낀 순환은 허용한다', () => {

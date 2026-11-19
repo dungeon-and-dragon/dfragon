@@ -27,7 +27,7 @@ Entry는 `@dfragon/ui` 하나다. 앱에서 눈에는 숨기고 보조 기술이
 
 ## 소비 앱의 CSS
 
-모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/design/components.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
+모든 browser entry는 전역 CSS 하나에서 `tailwindcss/theme.css`, `@dfragon/design/theme.css`, `@dfragon/design/base.css`, `@dfragon/design/components.css`, `tailwindcss/utilities.css` 순서로 한 번 import한다(`apps/web/src/app/site.css`). 앱은 모드 값을 따로 넣지 않으며, 사용자가 고른 모드만 첫 그리기 전에 `html`의 `data-color-mode`로 붙인다.
 
 `apps/web`은 Vite/Vitest의 exact `@dfragon/ui` alias와 TypeScript paths로 public source entry를 직접 해석하므로 library build 없이 source 변경이 반영된다.
 

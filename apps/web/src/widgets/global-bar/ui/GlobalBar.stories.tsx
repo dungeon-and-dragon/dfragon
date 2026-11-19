@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
-import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
+import { todayGradeHandlers } from '#widgets/global-bar/api/today-grade.handlers'
 import { CharacterSearchBox } from './CharacterSearchBox'
 import { GlobalBar } from './GlobalBar'
 import { TodayGrade } from './TodayGrade'

@@ -63,8 +63,6 @@ export type OcrSearchInput = Readonly<{
 }>
 export type OcrSearchObservation = SearchObservation & OcrSearchInput
 
-export type CharacterFaceWindow = Readonly<{ x: number; y: number; width: number; height: number }>
-
 export type CharacterChoice = CharacterSearchRow & Readonly<{ adventureName: string | null }>
 
 export const SEARCH_SLOT_STATES = ['idle', 'pending', 'success', 'empty', 'failure'] as const

@@ -2,12 +2,8 @@
   "compilerOptions": {
     "paths": {
       "#app/*": ["./src/app/*"],
-      "#components/*": ["./src/components/*"],
-      "#core/*": ["./src/core/*"],
       "#entities/*": ["./src/entities/*"],
       "#features/*": ["./src/features/*"],
-      "#hooks/*": ["./src/hooks/*"],
-      "#lib/*": ["./src/lib/*"],
       "#pages/*": ["./src/pages/*"],
       "#shared/*": ["./src/shared/*"],
       "#testing/*": ["./src/testing/*"],

@@ -4,11 +4,12 @@ import {
   displayJobName,
   isMaxLevel,
   ServerBadge,
-  type CharacterDisplay
+  type CharacterDisplay,
+  CardImage
 } from '#entities/character'
 import { Link } from '@tanstack/react-router'
 import { type KeyboardEvent, type RefObject, useId } from 'react'
-import { CardImage, MISSING_VALUE } from '#features/capture-search'
+import { MISSING_VALUE } from '#features/capture-search'
 import { useFavoriteCharacterStore, FavoriteToggle } from '#features/favorite-character'
 import { type RecentCharacter, useRecentCharacterStore } from '#features/recent-characters'
 import { moveItemFocus } from '#shared/ui/move-item-focus'

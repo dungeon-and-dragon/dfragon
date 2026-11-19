@@ -5,7 +5,7 @@ import type {
   CardCharacter,
   CharacterCard
 } from '#features/capture-search'
-import { bufferCard, dealerCard } from '#testing/fixtures/character'
+import { bufferCard, dealerCard } from '#entities/character/api/character-cards.fixture'
 import characterImage from './assets/character.png'
 
 export const previewCharacter: CardCharacter = {

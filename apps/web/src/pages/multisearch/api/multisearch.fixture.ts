@@ -9,13 +9,13 @@ import {
   type CharacterChoice,
   type SearchSlot,
   type SearchSnapshot,
-  CAPTURE_ID,
   type BrowserHost
 } from '#features/capture-search'
+import { CAPTURE_ID } from '#features/capture-search/api/search.fixture'
 import type { SelectedCharacterSummary } from '#entities/character'
-import { bufferCard, dealerCard } from '#testing/fixtures/character'
-import characterImage from '#testing/fixtures/mvp/assets/character.png'
-import { createStoryClientHost } from './story-host'
+import { bufferCard, dealerCard } from '#entities/character/api/character-cards.fixture'
+import { createStoryClientHost } from '#testing/story-support/story-host'
+import characterImage from './assets/character.png'
 
 // 멀티서치 표에 넣을 검색 결과와 행 값이다. 이름, 소속은 실제 캐릭터가 아닌 합성 값이다.
 
