@@ -84,6 +84,15 @@ function rowOf(name: string): HTMLTableRowElement {
   return row
 }
 
+function jobNameIn(row: HTMLTableRowElement): HTMLElement {
+  const name = row.querySelector<HTMLElement>('td > span > span')
+  if (name === null) {
+    throw new Error('job 이름이 없습니다.')
+  }
+
+  return name
+}
+
 function buttonIn(scope: ParentNode, label: string): HTMLButtonElement {
   const button = [...scope.querySelectorAll('button')].find(
     (candidate) => candidate.textContent === label
@@ -98,6 +107,18 @@ function buttonIn(scope: ParentNode, label: string): HTMLButtonElement {
 async function click(element: HTMLElement): Promise<void> {
   act(() => element.click())
   await flush()
+}
+
+async function openTab(label: string): Promise<void> {
+  const tab = [...container.querySelectorAll<HTMLElement>('[role="tab"]')].find(
+    (candidate) => candidate.textContent === label
+  )
+
+  if (tab === undefined) {
+    throw new Error(`${label} 탭이 없습니다.`)
+  }
+
+  await click(tab)
 }
 
 function typeInto(input: HTMLInputElement, value: string): void {
@@ -135,12 +156,12 @@ describe('운영 화면', () => {
     api.jobs = [{ ...statsJob(), description: '직업별 통계를 다시 계산한다' }]
 
     await renderScreen(api)
-    focusOn(buttonIn(rowOf('통계'), '통계'))
+    focusOn(jobNameIn(rowOf('통계')))
 
     await waitFor(() => expect(tooltip()).not.toBeNull())
     expect(tooltip()?.textContent).toBe('직업별 통계를 다시 계산한다')
 
-    blurFrom(buttonIn(rowOf('통계'), '통계'))
+    blurFrom(jobNameIn(rowOf('통계')))
     await waitFor(() => expect(tooltip()).toBeNull())
   })
 
@@ -149,7 +170,7 @@ describe('운영 화면', () => {
     api.jobs = [statsJob()]
 
     await renderScreen(api)
-    focusOn(buttonIn(rowOf('통계'), '통계'))
+    focusOn(jobNameIn(rowOf('통계')))
     for (let attempt = 0; attempt < 10; attempt += 1) {
       await flush()
     }
@@ -157,7 +178,7 @@ describe('운영 화면', () => {
     expect(tooltip()).toBeNull()
   })
 
-  it('job 목록에 스케줄, 다음 실행, 마지막 실행과 걸린 시간, queue와 수집 대기열을 보인다', async () => {
+  it('수집 대기열은 탭 위에 늘 보이고, Job 탭에 스케줄, 다음 실행, 마지막 실행과 걸린 시간을, queue 탭에 queue를 보인다', async () => {
     const api = new FakeOpsApi()
     api.jobs = [
       statsJob(),
@@ -185,10 +206,16 @@ describe('운영 화면', () => {
     expect(manual.querySelector('[role="switch"]')).toBeNull()
     expect(container.querySelector('header')?.textContent).toContain('worker14:311분 전')
     expect(container.querySelector('header')?.textContent).toContain('14:32:05')
-    expect(section('타임라인 queue').textContent).toContain('옛 시즌 백필9,8701')
     expect(section('수집 대기열').textContent).toContain('18,402')
     expect(section('수집 대기열').textContent).toContain('11-10 09:14')
     expect(section('수집 대기열').textContent).toContain('neople-internal41')
+    expect(container.querySelector('section[aria-label="타임라인 queue"]')).toBeNull()
+
+    await openTab('타임라인 queue')
+
+    expect(section('타임라인 queue').textContent).toContain('옛 시즌 백필9,8701')
+    expect(section('수집 대기열').textContent).toContain('18,402')
+    expect(container.querySelector('section[aria-label="job"]')).toBeNull()
   })
 
   it('job을 Neople API 종류별로 묶어 머리줄에 endpoint를 보이고, Neople을 부르지 않는 job은 맨 뒤에 묶는다', async () => {
@@ -216,7 +243,9 @@ describe('운영 화면', () => {
 
     const groups = [...section('job').querySelectorAll('tbody')].map((body) => ({
       header: body.querySelector('th[scope="colgroup"]')?.textContent,
-      jobs: [...body.querySelectorAll('button[aria-pressed]')].map((button) => button.textContent)
+      jobs: [...body.querySelectorAll('tr')]
+        .filter((row) => row.querySelector('td') !== null)
+        .map((row) => jobNameIn(row).textContent)
     }))
     expect(groups).toEqual([
       {
@@ -250,7 +279,7 @@ describe('운영 화면', () => {
       { method: 'POST', path: '/api/jobs/stats/runs', body: { args: {} } }
     ])
     expect(buttonIn(rowOf('통계'), '실행').disabled).toBe(true)
-    expect(section('통계').textContent).toContain('요청 11-10 14:32:00')
+    await waitFor(() => expect(section('실행 이력').textContent).toContain('통계stats수동요청됨'))
   })
 
   it('이미 실행 중이라 거절되면 거절 문구를 보이고 실행 중인 상태로 다시 읽는다', async () => {
@@ -269,12 +298,12 @@ describe('운영 화면', () => {
       finishedAt: null
     })
 
-    await click(buttonIn(section('통계'), '실행'))
+    await click(buttonIn(rowOf('통계'), '실행'))
 
-    await waitFor(() => expect(section('통계').textContent).toContain('이미 실행 중입니다.'))
-    expect(section('통계').querySelector('[role="alert"]')?.textContent).toBe('이미 실행 중입니다.')
-    expect(section('통계').textContent).toContain('경과 4초')
-    expect(buttonIn(section('통계'), '실행').disabled).toBe(true)
+    await waitFor(() => expect(rowOf('통계').textContent).toContain('이미 실행 중입니다.'))
+    expect(rowOf('통계').querySelector('[role="alert"]')?.textContent).toBe('이미 실행 중입니다.')
+    expect(rowOf('통계').querySelectorAll('td')[3]?.textContent).toBe('실행 중')
+    expect(buttonIn(rowOf('통계'), '실행').disabled).toBe(true)
   })
 
   it('정기 실행 스위치를 끄면 다음 실행 자리에 정지가 보이고 다시 켜면 시각이 돌아온다', async () => {
@@ -296,10 +325,11 @@ describe('운영 화면', () => {
     ])
   })
 
-  it('실행 이력에 계기, 실패 오류의 name과 code, 중단과 진행률을 보이고 더 보기로 다음 쪽을 읽는다', async () => {
+  it('실행 이력은 job을 고르지 않아도 모든 job의 실행을 최신순으로 job 이름과 함께 보이고 더 보기로 다음 쪽을 읽는다', async () => {
     const api = new FakeOpsApi()
-    api.jobs = [statsJob()]
+    api.jobs = [statsJob(), job({ name: 'cleanup', displayName: '실행 기록 정리' })]
     api.runPageSize = 2
+    api.runs.cleanup = [run({ id: 13, summary: { deleted: 4 } })]
     api.runs.stats = [
       run({
         id: 12,
@@ -313,16 +343,20 @@ describe('운영 화면', () => {
     ]
     await renderScreen(api)
 
-    const history = section('통계')
-    expect(history.textContent).toContain('보충')
-    expect(history.textContent).toContain('PrismaClientKnownRequestErrorP2024')
-    expect(history.textContent).toContain('중단')
-    expect(history.textContent).toContain('21 / 132')
-    expect(history.textContent).not.toContain('total 132')
+    const historyJobs = () =>
+      [...section('실행 이력').querySelectorAll('tbody tr')].map(
+        (row) => row.querySelector('td')?.textContent
+      )
+    expect(historyJobs()).toEqual(['실행 기록 정리cleanup', '통계stats'])
+    expect(section('실행 이력').textContent).toContain('보충')
+    expect(section('실행 이력').textContent).toContain('PrismaClientKnownRequestErrorP2024')
+    expect(section('실행 이력').textContent).toContain('21 / 132')
 
-    await click(buttonIn(history, '더 보기'))
+    await click(buttonIn(section('실행 이력'), '더 보기'))
 
-    await waitFor(() => expect(section('통계').textContent).toContain('total 132'))
+    await waitFor(() => expect(historyJobs()).toHaveLength(4))
+    expect(section('실행 이력').textContent).toContain('중단')
+    expect(section('실행 이력').textContent).toContain('64 / 132')
   })
 
   it('실행 중인 job은 진행률과 처리 수를 보이고 실행 버튼이 잠긴다', async () => {
@@ -346,7 +380,6 @@ describe('운영 화면', () => {
 
     expect(rowOf('스킬 채택률').textContent).toContain('실행 중87 / 132')
     expect(buttonIn(rowOf('스킬 채택률'), '실행').disabled).toBe(true)
-    expect(section('스킬 채택률').textContent).toContain('경과 12분 03초')
   })
 
   it('worker를 마지막으로 본 시각과 경과 시간을 분 단위로 보인다', async () => {
@@ -406,9 +439,8 @@ describe('운영 화면', () => {
       })
     ]
     await renderScreen(api)
-    expect(section('스킬 스타일 표본 채우기').textContent).toContain('limit, serverId')
 
-    await click(buttonIn(section('스킬 스타일 표본 채우기'), '실행'))
+    await click(buttonIn(rowOf('스킬 스타일 표본 채우기'), '실행'))
     const limit = document.body.querySelector<HTMLInputElement>('input[type="number"]')
     expect(text()).toContain('limitinteger')
     expect(text()).toContain('serverId선택')
@@ -461,6 +493,7 @@ describe('batch key 패널', () => {
   it('key를 추가하면 끝 4자로 목록에 나타나고 입력란을 비우며 원문은 화면 어디에도 없다', async () => {
     const api = new FakeOpsApi()
     await renderScreen(api)
+    await openTab('batch key')
     expect(batchKeyInput('batch-key-value').type).toBe('password')
 
     await submitBatchKey('batch5', NEW_KEY)
@@ -485,6 +518,7 @@ describe('batch key 패널', () => {
     const api = new FakeOpsApi()
     const added = api.addBatchKey('batch1', 'synthetic-batch-key-0001-3f9a')
     await renderScreen(api)
+    await openTab('batch key')
     const toggle = () => batchKeyRowOf('batch1').querySelector<HTMLElement>('[role="switch"]')
 
     await click(toggle() as HTMLElement)
@@ -506,6 +540,7 @@ describe('batch key 패널', () => {
       rejectedAt: '2026-11-10T06:04:00.000Z'
     })
     await renderScreen(api)
+    await openTab('batch key')
 
     expect(batchKeyRowOf('batch4').textContent).toContain('거절됨11-10 15:04')
 
@@ -520,6 +555,7 @@ describe('batch key 패널', () => {
     const api = new FakeOpsApi()
     api.addBatchKey('batch1', NEW_KEY)
     await renderScreen(api)
+    await openTab('batch key')
 
     await submitBatchKey('batch5', NEW_KEY)
 
@@ -536,6 +572,7 @@ describe('batch key 패널', () => {
   it('이름이 비면 오류를 보이고 key를 추가하지 않는다', async () => {
     const api = new FakeOpsApi()
     await renderScreen(api)
+    await openTab('batch key')
 
     await submitBatchKey('  ', NEW_KEY)
 
@@ -551,6 +588,7 @@ describe('batch key 패널', () => {
     const api = new FakeOpsApi()
 
     await renderScreen(api)
+    await openTab('batch key')
 
     expect(section('batch key').querySelector('table')).toBeNull()
     expect(section('batch key').querySelector('p')?.textContent).toBe('batch key가 없습니다.')
@@ -561,6 +599,7 @@ describe('batch key 패널', () => {
     const api = new FakeOpsApi()
     const added = api.addBatchKey('batch3', 'synthetic-batch-key-0003-8e5d')
     await renderScreen(api)
+    await openTab('batch key')
 
     await click(buttonIn(batchKeyRowOf('batch3'), '삭제'))
     const dialog = document.body.querySelector<HTMLElement>('[role="alertdialog"]')
