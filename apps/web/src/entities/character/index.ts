@@ -22,8 +22,10 @@ export type { ItemView } from './lib/character-item'
 export { isMaxLevel } from './lib/character-level'
 export { toOathView } from './lib/character-oath'
 export type { OathUpgradeChoice, OathView } from './lib/character-oath'
-export { displayJobName, jobLabelOf } from './lib/job-display'
+export { displayJobName } from './lib/job-display'
 export { formatJobName } from './lib/job-format'
+export { RANKING_JOBS } from './lib/ranking-jobs'
+export type { RankingGrow, RankingJob } from './lib/ranking-jobs'
 export {
   EQUIPMENT_SET_POINT_BONUS,
   formatSetPointBonus,
