@@ -25,6 +25,7 @@ import {
 } from '#core/ranking/ranking-stats'
 import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '#core/ranking/skill-stats'
 import { setStatsSchema, type SetStats } from '#core/ranking/set-stats'
+import { ITEM_FILTER_LIMIT, itemStatsSchema, type ItemStats } from '#core/ranking/item-stats'
 import {
   clearContentStatsSchema,
   clearOverviewSchema,
@@ -90,6 +91,7 @@ export type FameRankingHttp = (filter: FameRankingFilter, cursor?: string) => Pr
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
 export type SetStatsHttp = (filter: SetStatsFilter) => Promise<SetStats>
+export type ItemStatsHttp = (filter: SetStatsFilter) => Promise<ItemStats>
 export type ClearStatsHttp = () => Promise<ClearStats>
 export type ClearContentStatsHttp = (
   contentId: string,
@@ -130,6 +132,7 @@ export type DfragonClient = Readonly<{
   stats: CharacterStatsHttp
   skillStats: SkillStatsHttp
   setStats: SetStatsHttp
+  itemStats: ItemStatsHttp
   clearStats: ClearStatsHttp
   clearContentStats: ClearContentStatsHttp
   clearOverview: ClearOverviewHttp
@@ -161,6 +164,36 @@ const todayGradeSchema = z.object({
   // 화면은 Date.parse로 만료 시각을 읽으므로 ISO 형식으로 좁히지 않고 Date.parse가 읽는지만 본다.
   expiresAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)))
 })
+
+function jobSearchParams(filter: SetStatsFilter): Record<string, string> {
+  if (filter.jobGrowId !== undefined && filter.jobId === undefined) {
+    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+  }
+
+  return {
+    ...(filter.jobId !== undefined && { jobId: filter.jobId }),
+    ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
+    ...(filter.role !== undefined && { role: filter.role })
+  }
+}
+
+// API는 빈 항목, 중복, 여섯 개 이상을 400으로 거부하므로 보내기 전에 거른다.
+function itemIdsParam(itemIds: readonly string[] | undefined): string | undefined {
+  if (itemIds === undefined || itemIds.length === 0) {
+    return undefined
+  }
+
+  const valid =
+    itemIds.length <= ITEM_FILTER_LIMIT &&
+    itemIds.every((itemId) => itemId.length > 0 && !itemId.includes(',')) &&
+    new Set(itemIds).size === itemIds.length
+
+  if (!valid) {
+    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+  }
+
+  return itemIds.join(',')
+}
 
 function characterPath({ serverId, characterId }: CharacterIdentity): string {
   return `/characters/${serverId}/${characterId}`
@@ -364,6 +397,7 @@ export function createDfragonClient({
         }
 
         const oathSetId = filter.oathSetId !== undefined ? String(filter.oathSetId) : undefined
+        const itemIds = itemIdsParam(filter.itemIds)
 
         return requestJson('/rankings/fame', fameRankingSchema, {
           searchParams: {
@@ -373,6 +407,7 @@ export function createDfragonClient({
             ...(filter.equipmentSetId !== undefined && { equipmentSetId: filter.equipmentSetId }),
             ...(oathSetId !== undefined && { oathSetId }),
             ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption }),
+            ...(itemIds !== undefined && { itemIds }),
             ...(cursor !== undefined && { cursor })
           }
         })
@@ -384,17 +419,14 @@ export function createDfragonClient({
         searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
       }),
     async setStats(filter) {
-      if (filter.jobGrowId !== undefined && filter.jobId === undefined) {
-        throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-      }
+      const searchParams = jobSearchParams(filter)
 
-      return requestJson('/stats/sets', setStatsSchema, {
-        searchParams: {
-          ...(filter.jobId !== undefined && { jobId: filter.jobId }),
-          ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
-          ...(filter.role !== undefined && { role: filter.role })
-        }
-      })
+      return requestJson('/stats/sets', setStatsSchema, { searchParams })
+    },
+    async itemStats(filter) {
+      const searchParams = jobSearchParams(filter)
+
+      return requestJson('/stats/items', itemStatsSchema, { searchParams })
     },
     clearStats: () =>
       requestJson('/stats/clears', clearStatsSchema, { timeout: CLEAR_STATS_TIMEOUT_MS }),

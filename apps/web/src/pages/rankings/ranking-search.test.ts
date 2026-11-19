@@ -1,6 +1,11 @@
 import { expect, it } from 'vitest'
 import { RANKING_JOBS } from './ranking-jobs'
-import { parseJobSearch, parseRankingSearch } from './ranking-search'
+import {
+  parseJobSearch,
+  parseRankingSearch,
+  rankingFilterOf,
+  rankingSearchOf
+} from './ranking-search'
 
 const [job, otherJob] = RANKING_JOBS
 const grow = job.grows[0]
@@ -114,4 +119,24 @@ it('세트 통계 주소는 직업, 전직, 역할만 읽고 세트 값은 버�
   expect(
     parseJobSearch({ jobId: job.jobId, jobGrowId: grow.jobGrowId, equipmentSetId: 'set-1' })
   ).toEqual({ jobId: job.jobId, jobGrowId: grow.jobGrowId })
+})
+
+it('itemIds는 쉼표로 이은 값을 읽어 빈 항목과 중복을 버리고, 여섯 개 이상이면 아이템 필터를 버린다', () => {
+  expect(parseRankingSearch({ itemIds: 'weapon-1,ring-1' })).toEqual({ itemIds: 'weapon-1,ring-1' })
+  expect(parseRankingSearch({ itemIds: 'weapon-1,,weapon-1' })).toEqual({ itemIds: 'weapon-1' })
+  expect(parseRankingSearch({ itemIds: '' })).toEqual({})
+  expect(parseRankingSearch({ itemIds: 'a,b,c,d,e,f' })).toEqual({})
+  expect(parseRankingSearch({ itemIds: 12345 })).toEqual({ itemIds: '12345' })
+})
+
+it('주소의 itemIds와 랭킹 필터의 itemId 목록을 서로 바꾼다', () => {
+  expect(rankingFilterOf({ jobId: job.jobId, itemIds: 'weapon-1,ring-1' })).toEqual({
+    jobId: job.jobId,
+    itemIds: ['weapon-1', 'ring-1']
+  })
+  expect(rankingSearchOf({ jobId: job.jobId, itemIds: ['weapon-1', 'ring-1'] })).toEqual({
+    jobId: job.jobId,
+    itemIds: 'weapon-1,ring-1'
+  })
+  expect(rankingSearchOf({ itemIds: [] })).toEqual({})
 })

@@ -1348,11 +1348,30 @@ const SET_STATS = {
   ]
 }
 
+const ITEM_STATS = {
+  computedAt: '2026-11-18T15:38:47.900Z',
+  sampleSize: 4,
+  slots: [
+    {
+      slotId: 'WEAPON',
+      items: [{ itemId: 'weapon-1', name: '합성 무기', typeDetail: null, count: 4 }]
+    },
+    {
+      slotId: 'RING',
+      items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', typeDetail: null, count: 3 }]
+    }
+  ]
+}
+
 function stubSetStatsFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
   const stats = vi.fn<typeof fetch>(async (...args) => {
     const { pathname } = new URL(new Request(...args).url)
     if (pathname.endsWith('/stats/sets')) {
       return Response.json(SET_STATS)
+    }
+
+    if (pathname.endsWith('/stats/items')) {
+      return Response.json(ITEM_STATS)
     }
 
     if (pathname.endsWith('/rankings/fame')) {
@@ -1441,5 +1460,42 @@ it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세�
       jobId: job!.jobId,
       equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
     })
+  })
+})
+
+it('세트 통계의 무기 막대를 누르면 그 itemId로 거른 랭킹 주소로 가고, 새로 열어도 같은 아이템으로 랭킹을 받는다', async () => {
+  const stats = stubSetStatsFetch()
+  const [job] = RANKING_JOBS
+  window.history.replaceState(null, '', `/stats/sets?jobId=${job!.jobId}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const weaponLink = await vi.waitFor(() => {
+    const link = container.querySelector<HTMLAnchorElement>('section[aria-label="무기"] a')
+    expect(link).not.toBeNull()
+
+    return link!
+  })
+  await act(async () => weaponLink.click())
+  await waitForPath('/rankings')
+  expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+    jobId: job!.jobId,
+    itemIds: 'weapon-1'
+  })
+
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  window.history.replaceState(
+    null,
+    '',
+    `/rankings?itemIds=${encodeURIComponent('weapon-1,ring-1')}`
+  )
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() => {
+    const rankingUrls = stats.mock.calls
+      .map((args) => new URL(new Request(...args).url))
+      .filter(({ pathname }) => pathname.endsWith('/rankings/fame'))
+    expect(rankingUrls.map(({ searchParams }) => searchParams.get('itemIds'))).toContain(
+      'weapon-1,ring-1'
+    )
   })
 })

@@ -1,13 +1,13 @@
 import { linkOptions } from '@tanstack/react-router'
 import type { Bar } from '#components/chart/RowBars'
 import type { OathCatalog } from '#core/catalog'
+import type { RankingSearch } from '#pages/rankings'
 import {
   catalogOptionNamesOf,
   equipmentSetShortName,
   NO_SET_NAME,
   oathOptionShortName,
   oathSetShortName,
-  type FameRankingFilter,
   type OathSetCount,
   type SetStats,
   type SetStatsFilter
@@ -26,7 +26,7 @@ export function formatShare(share: number): string {
   return `${percent.format(share)}%`
 }
 
-function shareOf(count: number, total: number): number {
+export function shareOf(count: number, total: number): number {
   if (total <= 0) {
     return 0
   }
@@ -34,8 +34,8 @@ function shareOf(count: number, total: number): number {
   return (count / total) * FULL_SHARE
 }
 
-function rankingLink(filter: SetStatsFilter, sets: FameRankingFilter): Bar['link'] {
-  return linkOptions({ to: '/rankings', search: { ...filter, ...sets } })
+export function rankingLink(filter: SetStatsFilter, narrowing: RankingSearch): Bar['link'] {
+  return linkOptions({ to: '/rankings', search: { ...filter, ...narrowing } })
 }
 
 // 세트 없음은 비교 기준이라 비율과 관계없이 맨 아래에 둔다.

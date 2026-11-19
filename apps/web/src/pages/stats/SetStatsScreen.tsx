@@ -7,6 +7,7 @@ import type { SetStats, SetStatsFilter } from '#core/ranking'
 import { useOathCatalog } from '#hooks/useOathCatalog'
 import { useSetStats } from '#hooks/useSetStats'
 import { RankingFilterBox } from '#pages/rankings'
+import { ItemStatsBoxes } from './ItemStatsBoxes'
 import { StatsTabs } from './StatsTabs'
 import { comboBars, equipmentSetBars, formatShare, oathSetBars } from './set-stats-bars'
 
@@ -136,6 +137,7 @@ function SetStatsBody({
             </div>
           ))}
         </div>
+        <ItemStatsBoxes filter={filter} />
       </div>
     )
   }
@@ -177,6 +179,7 @@ function SetStatsBody({
           ))}
         </div>
       ))}
+      <ItemStatsBoxes filter={filter} />
     </>
   )
 }
