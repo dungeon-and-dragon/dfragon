@@ -3,13 +3,9 @@ import { useState } from 'react'
 import type { CharacterHistory } from '#core/character'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { createStoryClientHost } from '#testing/story-support/story-host'
-import {
-  storyCharacterDetail,
-  storyHistory,
-  storyOathCatalog,
-  storySingleHistory
-} from './api/character.fixture'
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import { storyCharacterDetail, storyHistory, storySingleHistory } from './api/character.fixture'
 import { characterDetailHandlers, characterDetailLoadingHandlers } from './api/character.handlers'
 import type { CharacterTab } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
@@ -22,8 +18,6 @@ const meta = {
 export default meta
 
 type Story = StoryObj<typeof meta>
-
-const host = createStoryClientHost({ getOathCatalog: async () => storyOathCatalog })
 
 function Screen({
   initialTab,
@@ -53,9 +47,14 @@ function tabStory(
   history: CharacterHistory = storyHistory
 ): Story {
   return {
-    parameters: { msw: characterDetailHandlers(storyCharacterDetail(role), history) },
+    parameters: {
+      msw: [
+        ...characterDetailHandlers(storyCharacterDetail(role), history),
+        oathCatalogHandlers.catalog(oathCatalogFixture.characterDetail)
+      ]
+    },
     render: () => (
-      <StoryFrame host={host}>
+      <StoryFrame>
         <Screen initialTab={tab} role={role} />
       </StoryFrame>
     )

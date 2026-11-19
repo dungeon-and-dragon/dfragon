@@ -2,7 +2,6 @@ import type { CharacterImage } from '#core/character'
 import { createDfragonClient } from '#core/api'
 import { toRaidFrameResult } from '#core/capture'
 import { startRuntimeDiagnostics } from '#shared/lib/diagnostics'
-import { createOathCatalogSource } from './catalog/browser-skill-window'
 import { createRoundFrames } from './capture/round-frames'
 import { createScreenShare } from './capture/screen-share'
 import type { BrowserHost } from './client-host'
@@ -15,7 +14,7 @@ import {
   createBrowserSearchRuntime
 } from './search/browser-search'
 
-export function installBrowserHost(apiOrigin: string, oathCatalogUrl: string): BrowserHost {
+export function installBrowserHost(apiOrigin: string): BrowserHost {
   const reportDiagnostic = startRuntimeDiagnostics()
   const dfragon = createDfragonClient({ apiOrigin, fetch: browserFetch })
   const runtime = createBrowserSearchRuntime(dfragon, reportDiagnostic)
@@ -46,13 +45,6 @@ export function installBrowserHost(apiOrigin: string, oathCatalogUrl: string): B
         toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
     getTodayGrade: dfragon.items.todayGrade,
-    getOathCatalog: createOathCatalogSource(oathCatalogUrl),
-    getCharacterStats: dfragon.stats,
-    getSetStats: dfragon.setStats,
-    getItemStats: dfragon.itemStats,
-    getClearStats: dfragon.clearStats,
-    getClearContentStats: dfragon.clearContentStats,
-    getClearOverview: dfragon.clearOverview,
     getGuild: dfragon.guilds.get,
     getAdventureWeekly: dfragon.adventures.weekly,
     getAdventureActivity: dfragon.adventures.activity,

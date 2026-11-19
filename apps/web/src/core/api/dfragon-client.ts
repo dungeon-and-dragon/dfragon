@@ -15,21 +15,6 @@ import {
   type AdventureActivitySeasonDays
 } from '#core/adventure-guild/adventure-activity'
 import { adventureWeeklySchema, type AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
-import {
-  characterStatsSchema,
-  type CharacterStats,
-  type SetStatsFilter
-} from '#core/ranking/ranking-stats'
-import { setStatsSchema, type SetStats } from '#core/ranking/set-stats'
-import { itemStatsSchema, type ItemStats } from '#core/ranking/item-stats'
-import {
-  clearContentStatsSchema,
-  clearOverviewSchema,
-  clearStatsSchema,
-  type ClearContentStats,
-  type ClearOverview,
-  type ClearStats
-} from '#core/ranking/clear-stats'
 import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'
 import { SearchHttpFailure } from './http'
 import {
@@ -58,15 +43,6 @@ export type CharacterSearchHttp = (
 ) => Promise<readonly SearchedCharacter[]>
 export type CharacterPngHttp = (input: IdentityRequest) => Promise<Uint8Array>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
-export type CharacterStatsHttp = () => Promise<CharacterStats>
-export type SetStatsHttp = (filter: SetStatsFilter) => Promise<SetStats>
-export type ItemStatsHttp = (filter: SetStatsFilter) => Promise<ItemStats>
-export type ClearStatsHttp = () => Promise<ClearStats>
-export type ClearContentStatsHttp = (
-  contentId: string,
-  weekStart: string | undefined
-) => Promise<ClearContentStats>
-export type ClearOverviewHttp = (weekStart: string) => Promise<ClearOverview>
 export type GuildHttp = (guildId: string) => Promise<Guild>
 export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
 export type AdventureActivityHttp = (
@@ -90,12 +66,6 @@ export type DfragonClient = Readonly<{
     image: CharacterPngHttp
     details: CharacterDetailsHttp
   }>
-  stats: CharacterStatsHttp
-  setStats: SetStatsHttp
-  itemStats: ItemStatsHttp
-  clearStats: ClearStatsHttp
-  clearContentStats: ClearContentStatsHttp
-  clearOverview: ClearOverviewHttp
   adventures: Readonly<{
     weekly: AdventureWeeklyHttp
     activity: AdventureActivityHttp
@@ -114,9 +84,6 @@ type JsonRequestOptions = {
   timeout?: number
 }
 
-// API는 클리어 통계를 한 번에 하나씩 계산해, 미리 계산하지 않은 주는 앞 계산을 기다린 뒤 1분 가까이 더 걸린다.
-const CLEAR_STATS_TIMEOUT_MS = 120_000
-
 const CHARACTER_SEARCH_LIMIT = '200'
 
 const todayGradeSchema = z.object({
@@ -124,18 +91,6 @@ const todayGradeSchema = z.object({
   // 화면은 Date.parse로 만료 시각을 읽으므로 ISO 형식으로 좁히지 않고 Date.parse가 읽는지만 본다.
   expiresAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)))
 })
-
-function jobSearchParams(filter: SetStatsFilter): Record<string, string> {
-  if (filter.jobGrowId !== undefined && filter.jobId === undefined) {
-    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-  }
-
-  return {
-    ...(filter.jobId !== undefined && { jobId: filter.jobId }),
-    ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
-    ...(filter.role !== undefined && { role: filter.role })
-  }
-}
 
 function characterPath({ serverId, characterId }: CharacterIdentity): string {
   return `/characters/${serverId}/${characterId}`
@@ -275,29 +230,6 @@ export function createDfragonClient({
         )
       }
     },
-    stats: () => requestJson('/stats', characterStatsSchema),
-    async setStats(filter) {
-      const searchParams = jobSearchParams(filter)
-
-      return requestJson('/stats/sets', setStatsSchema, { searchParams })
-    },
-    async itemStats(filter) {
-      const searchParams = jobSearchParams(filter)
-
-      return requestJson('/stats/items', itemStatsSchema, { searchParams })
-    },
-    clearStats: () =>
-      requestJson('/stats/clears', clearStatsSchema, { timeout: CLEAR_STATS_TIMEOUT_MS }),
-    clearContentStats: (contentId, weekStart) =>
-      requestJson(`/stats/clears/${encodeURIComponent(contentId)}`, clearContentStatsSchema, {
-        searchParams: { ...(weekStart !== undefined && { week: weekStart }) },
-        timeout: CLEAR_STATS_TIMEOUT_MS
-      }),
-    clearOverview: (weekStart) =>
-      requestJson('/stats/clears/overview', clearOverviewSchema, {
-        searchParams: { week: weekStart },
-        timeout: CLEAR_STATS_TIMEOUT_MS
-      }),
     adventures: {
       async weekly(adventureName) {
         if (adventureName.trim() === '') {

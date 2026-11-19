@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -10,16 +11,18 @@ import type {
   ClearStats,
   ClearWeek
 } from '#core/ranking'
-import { type ClientHost, ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { API_BASE_URL } from '#shared/api/dfragon-api'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
+import { CLEAR_CONTENT_STATS_URL, CLEAR_OVERVIEW_URL, CLEAR_STATS_URL } from './api/clears.handlers'
 import { ClearOverviewScreen } from './ClearOverviewScreen'
 
 let container: HTMLDivElement
 let root: Root
+let requested: string[]
 
 beforeEach(() => {
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  requested = []
   // 2026-11-14 14:00 KST. 타이머는 그대로 두고 지금 시각만 고정한다.
   vi.useFakeTimers({ now: new Date('2026-11-14T05:00:00.000Z'), toFake: ['Date'] })
   container = document.createElement('div')
@@ -31,7 +34,6 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.useRealTimers()
-  vi.unstubAllGlobals()
 })
 
 const DAY = 24 * 60 * 60 * 1000
@@ -196,39 +198,99 @@ function contentStatsOf(contentId: string): ClearContentStats {
   }
 }
 
-type Loaders = Partial<
-  Pick<ClientHost, 'getClearStats' | 'getClearOverview' | 'getClearContentStats'>
->
+type Reply = () => Response | Promise<Response>
+
+type Replies = Readonly<{
+  stats?: Reply
+  overview?: (weekStart: string) => Response | Promise<Response>
+  contentStats?: (contentId: string) => Response | Promise<Response>
+}>
 
 type Handlers = Readonly<{
   onWeekSelect?: (weekStart: string) => void
   onContentOpen?: (contentKey: string, weekStart: string) => void
 }>
 
+function serverError(message: string): Response {
+  return HttpResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message } }, { status: 500 })
+}
+
+function pending(): Promise<never> {
+  return new Promise<never>(() => {})
+}
+
+function record(request: Request): URL {
+  requested.push(request.url.slice(API_BASE_URL.length))
+
+  return new URL(request.url)
+}
+
+// 컨텐츠 집계 경로가 개요 경로도 받으므로 개요 handler를 앞에 둔다.
+function respond({
+  stats: statsReply = () => HttpResponse.json(stats),
+  overview = (selected) => HttpResponse.json(overviewOf(selected)),
+  contentStats = (contentId) => HttpResponse.json(contentStatsOf(contentId))
+}: Replies): void {
+  server.use(
+    http.get(CLEAR_STATS_URL, ({ request }) => {
+      record(request)
+
+      return statsReply()
+    }),
+    http.get(CLEAR_OVERVIEW_URL, ({ request }) => {
+      const url = record(request)
+
+      return overview(url.searchParams.get('week') ?? '')
+    }),
+    http.get(CLEAR_CONTENT_STATS_URL, ({ params, request }) => {
+      record(request)
+
+      return contentStats(String(params.contentId))
+    })
+  )
+}
+
 function render(
   weekStart: string | undefined,
-  {
-    getClearStats = async () => stats,
-    getClearOverview = vi.fn(async (selected: string) => overviewOf(selected)),
-    getClearContentStats = vi.fn(async (contentId: string) => contentStatsOf(contentId))
-  }: Loaders = {},
+  replies: Replies = {},
   { onWeekSelect = () => {}, onContentOpen = () => {} }: Handlers = {}
 ): Promise<void> {
+  respond(replies)
+
   return act(async () =>
     root.render(
-      <ClientHostContext
-        value={createTestClientHost({ getClearStats, getClearOverview, getClearContentStats })}
-      >
-        <TestQueryClient>
-          <ClearOverviewScreen
-            week={weekStart}
-            onWeekSelect={onWeekSelect}
-            onContentOpen={onContentOpen}
-          />
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <ClearOverviewScreen
+          week={weekStart}
+          onWeekSelect={onWeekSelect}
+          onContentOpen={onContentOpen}
+        />
+      </TestQueryClient>
     )
   )
+}
+
+function loading(): boolean {
+  if (container.querySelector('[aria-busy="true"], [aria-hidden="true"] .skeleton-text') != null) {
+    return true
+  }
+
+  const adventures = panel('모험단 기준 클리어 횟수')
+
+  return adventures != null && adventures.lastElementChild?.childElementCount === 0
+}
+
+async function open(
+  weekStart: string | undefined,
+  replies: Replies = {},
+  handlers: Handlers = {}
+): Promise<void> {
+  await render(weekStart, replies, handlers)
+  await vi.waitFor(() => expect(loading()).toBe(false))
+}
+
+function requestsTo(path: string): string[] {
+  return requested.filter((request) => request.startsWith(path))
 }
 
 function panel(name: string): HTMLElement | null {
@@ -282,7 +344,7 @@ function click(element: Element): Promise<void> {
 }
 
 it('받는 중에는 제목과 받는 중 안내를 두고 주 선택과 패널은 두지 않는다', async () => {
-  await render(undefined, { getClearStats: () => new Promise<never>(() => {}) })
+  await render(undefined, { stats: pending })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')
   expect(container.querySelector('[role="status"]')?.textContent).toBe(
@@ -293,44 +355,40 @@ it('받는 중에는 제목과 받는 중 안내를 두고 주 선택과 패널�
 })
 
 it('조회가 실패하면 제목 줄과 오류 한 줄을 둔다', async () => {
-  await render(undefined, {
-    getClearStats: async () => {
-      throw new Error('통계를 불러오지 못했습니다.')
-    }
-  })
+  await open(undefined, { stats: () => serverError('통계를 불러오지 못했습니다.') })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('통계를 불러오지 못했습니다.')
 })
 
 it('수집한 주가 하나도 없으면 제목 줄 아래 한 줄만 두고 개요를 부르지 않는다', async () => {
-  const getClearOverview = vi.fn(async (selected: string) => overviewOf(selected))
-  await render(undefined, {
-    getClearStats: async () => ({
-      contents: stats.contents.map((item) => ({ ...item, weeks: [] })),
-      legions: []
-    }),
-    getClearOverview
+  await open(undefined, {
+    stats: () =>
+      HttpResponse.json({
+        contents: stats.contents.map((item) => ({ ...item, weeks: [] })),
+        legions: []
+      })
   })
 
   expect(container.textContent).toBe('클리어 집계수집 기록이 없습니다.')
-  expect(getClearOverview).not.toHaveBeenCalled()
+  expect(requested).toEqual(['/stats/clears'])
 })
 
 it('주를 고르지 않으면 가장 최근 주를 가운데에 두고 가장 넓은 분모의 기준 명성, 캐릭터 수와 수집 시각을 보인다', async () => {
-  const getClearOverview = vi.fn(async (selected: string) => overviewOf(selected))
-  await render(undefined, { getClearOverview })
+  await open(undefined)
 
   expect(wheelRows()).toEqual(['11-05 ~ 11-11', '11-12 ~ 11-18집계 중', ''])
   expect(container.querySelector('header')?.textContent).toBe(
     '클리어 집계11-05 ~ 11-1111-12 ~ 11-18집계 중기준 명성104,292 이상캐릭터 수2,000수집 시각11-14 07:39'
   )
-  expect(getClearOverview).toHaveBeenCalledWith(LATEST_WEEK)
+  expect(requestsTo('/stats/clears/overview')).toEqual([
+    `/stats/clears/overview?week=${LATEST_WEEK}`
+  ])
   expect(container.textContent).not.toContain('모집단')
 })
 
 it('컨텐츠 카드는 출시가 최근인 것부터 일반과 하드를 한 장에 두고 클리어율, 지난주 대비 증감, 클리어 수를 적는다', async () => {
-  await render(undefined)
+  await open(undefined)
 
   expect(cards()).toEqual([
     '챌린지각인된 악몽0.3%0.0%p6',
@@ -345,16 +403,18 @@ it('컨텐츠 카드는 출시가 최근인 것부터 일반과 하드를 한 �
 
 it('휠의 이전 주와 다음 주를 누르면 그 주를 고르고, 고른 주가 바뀌면 카드와 개요를 그 주 값으로 다시 그린다', async () => {
   const onWeekSelect = vi.fn()
-  const getClearOverview = vi.fn(async (selected: string) => overviewOf(selected))
-  await render(undefined, { getClearOverview }, { onWeekSelect })
+  await open(undefined, {}, { onWeekSelect })
 
   await click(buttonNamed('11-05 ~ 11-11'))
   expect(onWeekSelect).toHaveBeenCalledWith(LAST_CLOSED_WEEK)
 
-  await render(LAST_CLOSED_WEEK, { getClearOverview }, { onWeekSelect })
+  await open(LAST_CLOSED_WEEK, {}, { onWeekSelect })
 
   expect(wheelRows()).toEqual(['10-29 ~ 11-04', '11-05 ~ 11-11', '11-12 ~ 11-18집계 중'])
-  expect(getClearOverview).toHaveBeenLastCalledWith(LAST_CLOSED_WEEK)
+  expect(requestsTo('/stats/clears/overview')).toEqual([
+    `/stats/clears/overview?week=${LATEST_WEEK}`,
+    `/stats/clears/overview?week=${LAST_CLOSED_WEEK}`
+  ])
   await click(buttonNamed('11-12 ~ 11-18집계 중'))
   expect(onWeekSelect).toHaveBeenLastCalledWith(LATEST_WEEK)
   expect(cards()).toEqual([
@@ -366,7 +426,7 @@ it('휠의 이전 주와 다음 주를 누르면 그 주를 고르고, 고른 �
 
 it('컨텐츠 카드를 누르면 그 컨텐츠 묶음과 고른 주로 상세를 연다', async () => {
   const onContentOpen = vi.fn()
-  await render(LAST_CLOSED_WEEK, {}, { onContentOpen })
+  await open(LAST_CLOSED_WEEK, {}, { onContentOpen })
 
   const card = [...container.querySelectorAll('nav[aria-label="컨텐츠"] > div > button')][1]!
   await click(card)
@@ -375,7 +435,7 @@ it('컨텐츠 카드를 누르면 그 컨텐츠 묶음과 고른 주로 상세�
 })
 
 it('주간 클리어율은 레이드의 하드와 일반 선을 함께 그리고 기간을 줄여 선이 빠져도 남은 컨텐츠의 색을 바꾸지 않는다', async () => {
-  await render(undefined)
+  await open(undefined)
 
   expect(panel('주간 클리어율')?.querySelector('[aria-label="단계"]')).toBeNull()
   const halfYear = legendMarks()
@@ -398,7 +458,7 @@ it('주간 클리어율은 레이드의 하드와 일반 선을 함께 그리고
 })
 
 it('명성 box plot은 분포가 있는 컨텐츠만 중앙값이 높은 순으로 둔다', async () => {
-  await render(undefined)
+  await open(undefined)
 
   const names = [
     ...(panel('클리어 캐릭터의 명성')?.querySelectorAll('li > span:first-child') ?? [])
@@ -411,7 +471,7 @@ it('명성 box plot은 분포가 있는 컨텐츠만 중앙값이 높은 순으�
 })
 
 it('전직별 클리어는 첫 레이드를 기준으로 클리어율이 높은 전직 8개와 낮은 전직 8개를 클리어율과 함께 둔다', async () => {
-  await render(undefined)
+  await open(undefined)
 
   const lists = [...(panel('전직별 클리어')?.querySelectorAll('[role="group"]') ?? [])].map(
     (list) => [
@@ -429,16 +489,17 @@ it('전직별 클리어는 첫 레이드를 기준으로 클리어율이 높은 
 })
 
 it('함께 깬 컨텐츠 패널은 두지 않는다', async () => {
-  await render(undefined)
+  await open(undefined)
 
   expect(panel('함께 깬 컨텐츠')).toBeNull()
 })
 
 it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주로 받아 1명부터 12명과 13명 이상으로 센다', async () => {
-  const getClearContentStats = vi.fn(async (contentId: string) => contentStatsOf(contentId))
-  await render(undefined, { getClearContentStats })
+  await open(undefined)
 
-  expect(getClearContentStats).toHaveBeenCalledWith('michaela-hard', LATEST_WEEK)
+  expect(requestsTo('/stats/clears/michaela-hard')).toEqual([
+    `/stats/clears/michaela-hard?week=${LATEST_WEEK}`
+  ])
   const columns = [...(panel('모험단 기준 클리어 횟수')?.querySelectorAll('li') ?? [])].map(
     (column) => column.querySelector('span')?.textContent
   )
@@ -449,29 +510,26 @@ it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주�
 })
 
 it('값이 없는 통계는 패널과 점수 전환을 두지 않는다', async () => {
-  await render(undefined, {
-    getClearOverview: async (selected) => ({
-      ...overviewOf(selected),
-      contents: overviewOf(selected).contents.map((item) => ({
-        ...item,
-        fame: null,
-        jobs: []
-      })),
-      weekdays: [4, 5, 6, 7, 1, 2, 3].map((weekday) => ({ weekday, cleared: 0 })),
-      hours: []
-    }),
-    getClearContentStats: async (contentId) => ({ ...contentStatsOf(contentId), adventures: [] })
+  await open(undefined, {
+    overview: (selected) =>
+      HttpResponse.json({
+        ...overviewOf(selected),
+        contents: overviewOf(selected).contents.map((item) => ({
+          ...item,
+          fame: null,
+          jobs: []
+        })),
+        weekdays: [4, 5, 6, 7, 1, 2, 3].map((weekday) => ({ weekday, cleared: 0 })),
+        hours: []
+      }),
+    contentStats: (contentId) => HttpResponse.json({ ...contentStatsOf(contentId), adventures: [] })
   })
 
   expect(panelNames()).toEqual(['주간 클리어율'])
 })
 
 it('개요 조회가 실패하면 카드와 주간 클리어율은 두고 오류 한 줄을 둔다', async () => {
-  await render(undefined, {
-    getClearOverview: async () => {
-      throw new Error('개요를 불러오지 못했습니다.')
-    }
-  })
+  await open(undefined, { overview: () => serverError('개요를 불러오지 못했습니다.') })
 
   expect(cards()).toHaveLength(3)
   expect(panelNames()).toEqual(['주간 클리어율'])
@@ -492,8 +550,8 @@ it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 �
     '2026-04-22T21:00:00.000Z',
     recentWeeks([420, 400], 1000)
   )
-  await render(undefined, {
-    getClearStats: async () => ({ ...stats, legions: [{ ...apocalypse, entryFame: null }] })
+  await open(undefined, {
+    stats: () => HttpResponse.json({ ...stats, legions: [{ ...apocalypse, entryFame: null }] })
   })
 
   expect(cards().map((card) => card.slice(0, 8))).toEqual([
@@ -512,12 +570,12 @@ it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 �
 })
 
 it('점수가 있는 주에는 장비 점수 카드를 두고, 장비와 버프를 바꾸면 축이 그 점수 기준으로 바뀐다', async () => {
-  await render(undefined, {
-    getClearOverview: async (selected) => {
+  await open(undefined, {
+    overview: (selected) => {
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => ({ ...item, scores: { equipment, buff } }))
 
-      return { ...overview, contents }
+      return HttpResponse.json({ ...overview, contents })
     }
   })
 
@@ -533,15 +591,15 @@ it('점수가 있는 주에는 장비 점수 카드를 두고, 장비와 버프�
 })
 
 it('한 가지 점수만 있으면 장비 점수 카드에 전환을 두지 않는다', async () => {
-  await render(undefined, {
-    getClearOverview: async (selected) => {
+  await open(undefined, {
+    overview: (selected) => {
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => ({
         ...item,
         scores: { equipment, buff: null }
       }))
 
-      return { ...overview, contents }
+      return HttpResponse.json({ ...overview, contents })
     }
   })
 
@@ -549,8 +607,8 @@ it('한 가지 점수만 있으면 장비 점수 카드에 전환을 두지 않�
 })
 
 it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전환을 두고, 장비 점수로 바꿔도 같은 전직 목록에 점수 분포를 그린다', async () => {
-  await render(undefined, {
-    getClearOverview: async (selected) => {
+  await open(undefined, {
+    overview: (selected) => {
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => {
         const jobs = item.jobs.map((candidate, index) => {
@@ -562,7 +620,7 @@ it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전�
         return { ...item, jobs }
       })
 
-      return { ...overview, contents }
+      return HttpResponse.json({ ...overview, contents })
     }
   })
 

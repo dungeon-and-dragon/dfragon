@@ -34,13 +34,6 @@ export function createStoryClientHost({
       ...raid
     },
     getTodayGrade: pending,
-    getOathCatalog: pending,
-    getCharacterStats: pending,
-    getSetStats: pending,
-    getItemStats: pending,
-    getClearStats: pending,
-    getClearContentStats: pending,
-    getClearOverview: pending,
     getGuild: pending,
     getAdventureWeekly: pending,
     getAdventureActivity: pending,
