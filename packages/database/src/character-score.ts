@@ -2,6 +2,16 @@ import type { DatabaseClient } from './client.js'
 
 export type CharacterScoreKind = 'equipment' | 'buff'
 
+export type StoredCharacterScore = {
+  kind: CharacterScoreKind
+  value: number
+}
+
+export type StoredCharacterScoreRow = StoredCharacterScore & {
+  serverId: string
+  characterId: string
+}
+
 export type CharacterScoreInput = {
   serverId: string
   characterId: string
@@ -43,4 +53,18 @@ export async function recordCharacterScore(
           IS DISTINCT FROM
           (EXCLUDED."kind", EXCLUDED."engine_package", EXCLUDED."engine_rules_rev", EXCLUDED."engine_bundle_id")
        OR "character_scores"."score" <= EXCLUDED."score"`
+}
+
+export function readCharacterScores(
+  client: DatabaseClient,
+  characters: readonly { serverId: string; characterId: string }[]
+): Promise<StoredCharacterScoreRow[]> {
+  const serverIds = characters.map((character) => character.serverId)
+  const characterIds = characters.map((character) => character.characterId)
+
+  return client.$queryRaw<StoredCharacterScoreRow[]>`
+    SELECT score.server_id AS "serverId", score.character_id AS "characterId", score.kind, score.score AS value
+    FROM unnest(${serverIds}::text[], ${characterIds}::text[]) AS listed(server_id, character_id)
+    JOIN character_scores score
+      ON score.server_id = listed.server_id AND score.character_id = listed.character_id`
 }
