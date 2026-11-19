@@ -4,6 +4,7 @@ import { setImmediate as nextTurn } from 'node:timers/promises'
 import type {
   CharacterTimelineItemRow,
   DatabaseClient,
+  ItemDictionaryEntry,
   TimelineCharacter,
   TimelineEventRow
 } from '@dfragon/database'
@@ -286,14 +287,27 @@ test('시즌 5~9의 아이템은 획득 코드의 레전더리, 에픽, 태초, 
 
 // 합성 아이템 사전이다. 칭호는 실제 응답처럼 액세서리, 레벨 1로 둔다(ADR 0074).
 const zhongtian: ActivitySeasonRange = { ...season, id: 10 }
+const dictionaryEntry = (
+  itemId: string,
+  availableLevel: number | null,
+  itemType: string | null
+): ItemDictionaryEntry => ({
+  itemId,
+  availableLevel,
+  itemType,
+  itemTypeDetail: null,
+  itemRarity: null,
+  setItemId: null,
+  setItemName: null
+})
 const splitDictionary = [
-  { itemId: 'armor-115', availableLevel: 115, itemType: '방어구' },
-  { itemId: 'weapon-115', availableLevel: 115, itemType: '무기' },
-  { itemId: 'armor-105', availableLevel: 105, itemType: '방어구' },
-  { itemId: 'fusion-115', availableLevel: 115, itemType: '융합석' },
-  { itemId: 'title', availableLevel: 1, itemType: '액세서리' },
-  { itemId: 'title-level-0', availableLevel: 0, itemType: '액세서리' },
-  { itemId: 'unknown-row', availableLevel: null, itemType: null }
+  dictionaryEntry('armor-115', 115, '방어구'),
+  dictionaryEntry('weapon-115', 115, '무기'),
+  dictionaryEntry('armor-105', 105, '방어구'),
+  dictionaryEntry('fusion-115', 115, '융합석'),
+  dictionaryEntry('title', 1, '액세서리'),
+  dictionaryEntry('title-level-0', 0, '액세서리'),
+  dictionaryEntry('unknown-row', null, null)
 ]
 const acquired = (time: string, itemId: string, itemRarity: string, code = 505) => ({
   ...item(code, time, itemRarity),
@@ -639,7 +653,7 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
     enhancement(402, '2026-07-18T06:01:00', 9, 10, true),
     { ...acquisition('2026-07-18T05:58:00', '에픽'), itemId: 'armor', itemName: '합성 아이템' }
   ]
-  const dictionary = [{ itemId: 'armor', availableLevel: 115, itemType: '방어구' }]
+  const dictionary = [dictionaryEntry('armor', 115, '방어구')]
   let eventQueries = 0
   let itemQueries = 0
   let dictionaryQueries = 0

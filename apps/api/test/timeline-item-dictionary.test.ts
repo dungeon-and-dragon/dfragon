@@ -14,33 +14,52 @@ import type { TimelineSyncRepository } from '../src/application/character-timeli
 import { TimelineSyncService } from '../src/application/character-timeline/sync.js'
 
 const SAVES_UNLISTED_ITEMS =
-  '사전에 없는 장비 획득 itemId만 아이템 상세로 조회해 레벨과 종류를 저장한다'
+  '사전에 없는 레전더리 이상 장비와 모든 등급의 서약 획득 itemId를 아이템 상세로 조회해 세트, 부위, 등급과 함께 저장한다'
 const SKIPS_LISTED_ITEMS = '사전에 있는 itemId만 받으면 아이템 상세를 조회하지 않는다'
 const KEEPS_MISSING_ROWS =
-  'Neople이 행을 주지 않은 itemId는 레벨과 종류가 null인 행으로 남아 다시 조회하지 않는다'
+  'Neople이 행을 주지 않은 itemId는 모든 열이 null인 행으로 남아 다시 조회하지 않는다'
 const SYNC_SURVIVES_FAILURE =
   '아이템 상세 조회가 실패해도 타임라인 구간과 동기화 성공을 기록하고 실패만 보고한다'
 
-// 합성 itemId와 아이템 상세다. 실제 Neople 응답의 itemType 값(장비 4종, 칭호는 액세서리)을 흉내 냈다.
+// 합성 itemId와 아이템 상세다. 실제 Neople 응답의 itemType 값(장비 4종, 칭호는 액세서리)과 무기에 세트가 없는 모양을 흉내 냈다.
 const ids = {
   weapon: 'a'.repeat(32),
   title: 'b'.repeat(32),
   fusionStone: 'c'.repeat(32),
   missing: 'd'.repeat(32),
   rare: 'e'.repeat(32),
-  oath: 'f'.repeat(32)
+  oath: 'f'.repeat(32),
+  armor: '1'.repeat(32),
+  craftedOath: '2'.repeat(32)
 }
+const setItemId = '9'.repeat(32)
 const details: Record<string, Record<string, unknown>> = {
   [ids.weapon]: {
     itemId: ids.weapon,
     itemName: '합성 무기',
     itemType: '무기',
-    itemAvailableLevel: 115
+    itemTypeDetail: '대검',
+    itemRarity: '태초',
+    itemAvailableLevel: 115,
+    setItemId: null,
+    setItemName: null
+  },
+  [ids.armor]: {
+    itemId: ids.armor,
+    itemName: '합성 상의',
+    itemType: '방어구',
+    itemTypeDetail: '상의',
+    itemRarity: '에픽',
+    itemAvailableLevel: 115,
+    setItemId,
+    setItemName: '합성 세트'
   },
   [ids.title]: {
     itemId: ids.title,
     itemName: '합성 칭호',
     itemType: '액세서리',
+    itemTypeDetail: '칭호',
+    itemRarity: '레어',
     itemAvailableLevel: 1
   },
   [ids.fusionStone]: {
@@ -48,8 +67,37 @@ const details: Record<string, Record<string, unknown>> = {
     itemName: '합성 융합석',
     itemType: '융합석',
     itemAvailableLevel: 115
+  },
+  [ids.oath]: {
+    itemId: ids.oath,
+    itemName: '합성 서약',
+    itemType: '서약',
+    itemTypeDetail: '서약',
+    itemRarity: '태초',
+    itemAvailableLevel: 115,
+    setItemId,
+    setItemName: '합성 세트'
+  },
+  [ids.craftedOath]: {
+    itemId: ids.craftedOath,
+    itemName: '합성 서약 결정',
+    itemType: '서약 결정',
+    itemTypeDetail: '서약 결정',
+    itemRarity: '에픽',
+    itemAvailableLevel: 115,
+    setItemId,
+    setItemName: '합성 세트'
   }
 }
+const emptyEntry = (itemId: string): ItemDictionaryEntry => ({
+  itemId,
+  availableLevel: null,
+  itemType: null,
+  itemTypeDetail: null,
+  itemRarity: null,
+  setItemId: null,
+  setItemName: null
+})
 
 const character = { serverId: 'siroco', characterId: 'item-dictionary-fixture' }
 const now = new Date('2026-11-18T12:00:00+09:00')
@@ -133,7 +181,7 @@ const unexpectedFailure = () => assert.fail('사전 채우기 실패가 보고�
 test(SAVES_UNLISTED_ITEMS, async () => {
   const timeline = memoryTimeline()
   const dictionary = memoryDictionary([
-    { itemId: ids.fusionStone, availableLevel: 115, itemType: '융합석' }
+    { ...emptyEntry(ids.fusionStone), availableLevel: 115, itemType: '융합석' }
   ])
   const neople = neopleItems()
   const inputs: TimelineInputs = {
@@ -141,10 +189,12 @@ test(SAVES_UNLISTED_ITEMS, async () => {
     items: [
       acquisition(505, ids.weapon, '태초'),
       acquisition(513, ids.weapon, '태초'),
+      acquisition(502, ids.armor, '에픽'),
       acquisition(504, ids.title, '레전더리'),
       acquisition(505, ids.fusionStone, '에픽'),
       acquisition(505, ids.rare, '레어'),
-      acquisition(550, ids.oath, '태초')
+      acquisition(550, ids.oath, '태초'),
+      acquisition(554, ids.craftedOath, '레어')
     ]
   }
 
@@ -154,25 +204,44 @@ test(SAVES_UNLISTED_ITEMS, async () => {
     new ItemDictionaryService(dictionary.repository, neople.fetchItemDetails)
   ).sync(character, unexpectedFailure)
 
-  assert.deepEqual(neople.requested.flat().toSorted(), [ids.weapon, ids.title].toSorted())
+  assert.deepEqual(
+    neople.requested.flat().toSorted(),
+    [ids.weapon, ids.armor, ids.title, ids.oath, ids.craftedOath].toSorted()
+  )
   assert.deepEqual(dictionary.entries.get(ids.weapon), {
     itemId: ids.weapon,
     availableLevel: 115,
-    itemType: '무기'
+    itemType: '무기',
+    itemTypeDetail: '대검',
+    itemRarity: '태초',
+    setItemId: null,
+    setItemName: null
   })
-  assert.deepEqual(dictionary.entries.get(ids.title), {
-    itemId: ids.title,
-    availableLevel: 1,
-    itemType: '액세서리'
+  assert.deepEqual(dictionary.entries.get(ids.armor), {
+    itemId: ids.armor,
+    availableLevel: 115,
+    itemType: '방어구',
+    itemTypeDetail: '상의',
+    itemRarity: '에픽',
+    setItemId,
+    setItemName: '합성 세트'
+  })
+  assert.deepEqual(dictionary.entries.get(ids.craftedOath), {
+    itemId: ids.craftedOath,
+    availableLevel: 115,
+    itemType: '서약 결정',
+    itemTypeDetail: '서약 결정',
+    itemRarity: '에픽',
+    setItemId,
+    setItemName: '합성 세트'
   })
   assert.equal(dictionary.entries.has(ids.rare), false)
-  assert.equal(dictionary.entries.has(ids.oath), false)
 })
 
 test(SKIPS_LISTED_ITEMS, async () => {
   const timeline = memoryTimeline()
   const dictionary = memoryDictionary([
-    { itemId: ids.weapon, availableLevel: 115, itemType: '무기' }
+    { ...emptyEntry(ids.weapon), availableLevel: 115, itemType: '무기', itemRarity: '태초' }
   ])
   const neople = neopleItems()
 
@@ -197,11 +266,7 @@ test(KEEPS_MISSING_ROWS, async () => {
   }
 
   assert.deepEqual(neople.requested, [[ids.missing]])
-  assert.deepEqual(dictionary.entries.get(ids.missing), {
-    itemId: ids.missing,
-    availableLevel: null,
-    itemType: null
-  })
+  assert.deepEqual(dictionary.entries.get(ids.missing), emptyEntry(ids.missing))
 })
 
 test(SYNC_SURVIVES_FAILURE, async () => {

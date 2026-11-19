@@ -143,10 +143,16 @@ try {
     itemRarity,
     data
   })
+  const unfilledSetEntry = {
+    itemTypeDetail: null,
+    itemRarity: null,
+    setItemId: null,
+    setItemName: null
+  }
   // 합성 아이템 사전이다. 천해천은 사전의 115레벨 장비만 아이템으로 세고, 칭호(액세서리, 레벨 1)는 뺀다.
   await recordItemDictionary(client, [
-    { itemId: 'synthetic-armor-115', availableLevel: 115, itemType: '방어구' },
-    { itemId: 'synthetic-title', availableLevel: 1, itemType: '액세서리' }
+    { ...unfilledSetEntry, itemId: 'synthetic-armor-115', availableLevel: 115, itemType: '방어구' },
+    { ...unfilledSetEntry, itemId: 'synthetic-title', availableLevel: 1, itemType: '액세서리' }
   ])
   const clears = [
     [
