@@ -1,4 +1,4 @@
-import type { JobOverview, JobPauseChange, JobRunRecord } from '@dfragon/database'
+import type { JobOverview, JobPauseChange, JobRunHistoryRecord } from '@dfragon/database'
 import { OpsFailure } from '#domain/failure.js'
 import type { JobRepository } from './repository.js'
 
@@ -8,7 +8,7 @@ export type JobList = {
 }
 
 export type JobRunPage = {
-  readonly runs: readonly JobRunRecord[]
+  readonly runs: readonly JobRunHistoryRecord[]
   readonly nextBefore: number | null
 }
 
@@ -44,17 +44,15 @@ export class JobService {
     return { workerSeenAt, jobs }
   }
 
-  async readRuns(
-    name: string,
-    { before, limit }: { before: number | undefined; limit: number }
-  ): Promise<JobRunPage> {
+  async readRuns({
+    before,
+    limit
+  }: {
+    before: number | undefined
+    limit: number
+  }): Promise<JobRunPage> {
     // 다음 쪽이 있는지 알려고 한 행을 더 읽는다.
-    const runs = await this.repository.readRuns(name, { before, limit: limit + 1 })
-
-    if (runs === undefined) {
-      throw new OpsFailure('jobNotFound')
-    }
-
+    const runs = await this.repository.readRuns({ before, limit: limit + 1 })
     const pageRuns = runs.slice(0, limit)
     const nextBefore = runs.length > limit ? (pageRuns.at(-1)?.id ?? null) : null
 

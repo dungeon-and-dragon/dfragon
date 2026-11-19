@@ -1,4 +1,9 @@
-import type { JobOverview, JobRunRecord } from '@dfragon/database'
+import type {
+  JobNeopleApi,
+  JobOverview,
+  JobRunHistoryRecord,
+  JobRunRecord
+} from '@dfragon/database'
 import { z } from 'zod'
 import type { JobList, JobRunPage } from '#application/jobs/index.js'
 
@@ -32,6 +37,7 @@ export type JobResponse = {
   nextRunAt: Date | null
   argsSchema: unknown
   delayMinutes: number
+  neopleApi: JobNeopleApi | null
   activeRun: JobRunResponse | null
   lastFinishedRun: JobRunResponse | null
 }
@@ -42,7 +48,7 @@ export type JobListResponse = {
 }
 
 export type JobRunPageResponse = {
-  runs: JobRunResponse[]
+  runs: (JobRunResponse & { jobName: string })[]
   nextBefore: number | null
 }
 
@@ -55,6 +61,12 @@ function toJobRunResponse(run: JobRunRecord): JobRunResponse {
   const progress = progressDone !== null ? { done: progressDone, total: progressTotal } : null
 
   return { ...rest, progress }
+}
+
+function toJobRunHistoryResponse(run: JobRunHistoryRecord): JobRunPageResponse['runs'][number] {
+  const response = toJobRunResponse(run)
+
+  return { ...response, jobName: run.jobName }
 }
 
 function toJobResponse(job: JobOverview): JobResponse {
@@ -73,6 +85,7 @@ function toJobResponse(job: JobOverview): JobResponse {
     nextRunAt,
     argsSchema: job.argsSchema,
     delayMinutes: job.delayMinutes,
+    neopleApi: job.neopleApi,
     activeRun,
     lastFinishedRun
   }
@@ -85,7 +98,7 @@ export function toJobListResponse({ workerSeenAt, jobs }: JobList): JobListRespo
 }
 
 export function toJobRunPageResponse({ runs, nextBefore }: JobRunPage): JobRunPageResponse {
-  const runResponses = runs.map(toJobRunResponse)
+  const runResponses = runs.map(toJobRunHistoryResponse)
 
   return { runs: runResponses, nextBefore }
 }

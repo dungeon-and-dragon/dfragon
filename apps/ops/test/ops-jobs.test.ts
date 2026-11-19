@@ -28,17 +28,12 @@ function memoryOpsJobStore(jobs: StoredJob[], runs: StoredRun[] = []): JobReposi
 
         return { ...job, activeRun, lastFinishedRun }
       }),
-    readRuns: async (name, { before, limit }) => {
-      if (find(name) === undefined) {
-        return undefined
-      }
-
-      return runs
-        .filter((run) => run.jobName === name && (before === undefined || run.id < before))
+    readRuns: async ({ before, limit }) =>
+      runs
+        .filter((run) => before === undefined || run.id < before)
         .sort((a, b) => b.id - a.id)
         .slice(0, limit)
-        .map(record)
-    },
+        .map((run) => ({ ...record(run), jobName: run.jobName })),
     requestRun: async (name, args) => {
       if (find(name) === undefined) {
         return { status: 'not-found' }
@@ -75,6 +70,7 @@ function storedJob(overrides: Partial<StoredJob> & Pick<StoredJob, 'name'>): Sto
     schedule: '0 0 * * *',
     argsSchema: { type: 'object' },
     delayMinutes: 10,
+    neopleApi: null,
     pausedAt: null,
     nextRunAt: new Date('2026-11-10T15:00:00Z'),
     workerSeenAt: new Date('2026-11-10T02:00:00Z'),
@@ -130,7 +126,7 @@ const json = (body: unknown): RequestInit => ({
   body: JSON.stringify(body)
 })
 
-test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마지막 실행과 가장 최근 worker 시각을 준다', async (t) => {
+test('job 목록은 정지 여부, 정지 중 다음 실행 null, Neople API, 진행률, 마지막 실행과 가장 최근 worker 시각을 준다', async (t) => {
   const request = await startOpsApp(
     t,
     memoryOpsJobStore(
@@ -138,6 +134,7 @@ test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마
         storedJob({
           name: 'stats',
           description: '통계를 저장합니다.',
+          neopleApi: { group: '합성 그룹', endpoints: ['/df/synthetic'] },
           workerSeenAt: new Date('2026-11-10T02:00:00Z')
         }),
         storedJob({
@@ -185,6 +182,7 @@ test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마
     nextRunAt: '2026-11-10T15:00:00.000Z',
     argsSchema: { type: 'object' },
     delayMinutes: 10,
+    neopleApi: { group: '합성 그룹', endpoints: ['/df/synthetic'] },
     activeRun: {
       id: 2,
       trigger: 'manual',
@@ -216,6 +214,7 @@ test('job 목록은 정지 여부, 정지 중 다음 실행 null, 진행률, 마
   assert.equal(skillAdoption.activeRun, null)
   assert.equal(skillAdoption.lastFinishedRun, null)
   assert.equal(backfill.schedule, null)
+  assert.equal(backfill.neopleApi, null)
   assert.deepEqual(backfill.lastFinishedRun.error, [{ name: 'TypeError', code: 'ERR_X' }])
 })
 
@@ -225,33 +224,34 @@ test('job이 없으면 빈 목록과 worker 시각 null을 준다', async (t) =>
   assert.deepEqual(await (await request('/api/jobs')).json(), { workerSeenAt: null, jobs: [] })
 })
 
-test('실행 이력은 id 역순으로 before와 limit로 이어 받고 다음 쪽 기준을 준다', async (t) => {
-  const runs = [1, 2, 3, 4, 5].map((id) => storedRun({ id, jobName: 'stats' }))
+test('실행 이력은 모든 job의 실행을 id 역순으로 job 이름과 함께 주고, before와 limit로 이어 받는다', async (t) => {
+  const runs = [1, 2, 3, 4, 5].map((id) =>
+    storedRun({ id, jobName: id % 2 === 0 ? 'cleanup' : 'stats' })
+  )
   const request = await startOpsApp(
     t,
-    memoryOpsJobStore([storedJob({ name: 'stats' })], [...runs, storedRun({ id: 6, jobName: 'x' })])
+    memoryOpsJobStore([storedJob({ name: 'stats' }), storedJob({ name: 'cleanup' })], runs)
   )
-  const ids = (body: { runs: Array<{ id: number }> }) => body.runs.map(({ id }) => id)
+  const ids = (body: { runs: Array<{ id: number; jobName: string }> }) =>
+    body.runs.map(({ id, jobName }) => `${id}:${jobName}`)
 
-  const first = await (await request('/api/jobs/stats/runs?limit=2')).json()
-  const second = await (
-    await request(`/api/jobs/stats/runs?limit=2&before=${first.nextBefore}`)
-  ).json()
-  const last = await (await request('/api/jobs/stats/runs?limit=2&before=2')).json()
-  const all = await (await request('/api/jobs/stats/runs')).json()
+  const first = await (await request('/api/jobs/runs?limit=2')).json()
+  const second = await (await request(`/api/jobs/runs?limit=2&before=${first.nextBefore}`)).json()
+  const last = await (await request('/api/jobs/runs?limit=2&before=2')).json()
+  const all = await (await request('/api/jobs/runs')).json()
 
-  assert.deepEqual([ids(first), first.nextBefore], [[5, 4], 4])
-  assert.deepEqual([ids(second), second.nextBefore], [[3, 2], 2])
-  assert.deepEqual([ids(last), last.nextBefore], [[1], null])
-  assert.deepEqual([ids(all), all.nextBefore], [[5, 4, 3, 2, 1], null])
+  assert.deepEqual([ids(first), first.nextBefore], [['5:stats', '4:cleanup'], 4])
+  assert.deepEqual([ids(second), second.nextBefore], [['3:stats', '2:cleanup'], 2])
+  assert.deepEqual([ids(last), last.nextBefore], [['1:stats'], null])
+  assert.deepEqual(
+    [ids(all), all.nextBefore],
+    [['5:stats', '4:cleanup', '3:stats', '2:cleanup', '1:stats'], null]
+  )
 })
 
-test('실행 이력 조회는 없는 job을 404, 잘못된 before와 limit를 400으로 거절한다', async (t) => {
+test('실행 이력 조회는 잘못된 before와 limit를 400으로 거절한다', async (t) => {
   const request = await startOpsApp(t, memoryOpsJobStore([storedJob({ name: 'stats' })]))
 
-  const missing = await request('/api/jobs/missing/runs')
-  assert.equal(missing.status, 404)
-  assert.deepEqual(await missing.json(), { error: { code: 'JOB_NOT_FOUND' } })
   for (const query of [
     'limit=0',
     'limit=101',
@@ -260,7 +260,7 @@ test('실행 이력 조회는 없는 job을 404, 잘못된 before와 limit를 40
     'before=-1',
     'before=1e3'
   ]) {
-    const response = await request(`/api/jobs/stats/runs?${query}`)
+    const response = await request(`/api/jobs/runs?${query}`)
     assert.equal(response.status, 400, query)
     assert.deepEqual(await response.json(), { error: { code: 'INVALID_OPS_REQUEST' } })
   }

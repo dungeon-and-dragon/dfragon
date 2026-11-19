@@ -1,4 +1,4 @@
-import type { JobRunSummary } from '@dfragon/database'
+import type { JobNeopleApi, JobRunSummary } from '@dfragon/database'
 import type { z } from 'zod'
 
 export type JobContext = {
@@ -15,6 +15,7 @@ export type JobDefinition<Schema extends z.ZodType = z.ZodType> = {
   catchup?: boolean
   argsSchema: Schema
   delayMinutes: number
+  neopleApi: JobNeopleApi | null
   run(args: z.output<Schema>, context: JobContext): Promise<JobRunSummary | undefined>
 }
 
