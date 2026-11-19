@@ -1,9 +1,12 @@
 import { CheckIcon } from '@dfragon/ui'
 import {
   formatCount,
+  ItemIcon,
+  ItemName,
   OATH_SET_POINT_BONUS,
   type OathUpgradeChoice,
   type OathView,
+  RarityBadge,
   toOathView,
   raritySolidOf
 } from '#entities/character'
@@ -18,7 +21,7 @@ import {
 import type { CharacterTabProps } from './character-tab-props'
 import { GameText } from './GameText'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
-import { ItemIcon, ItemName, RarityBadge, SetPoint, TuneNumeral } from './equipment/item-parts'
+import { SetPoint, TuneNumeral } from './equipment/item-parts'
 
 const { heading, count } = itemTableClasses
 const UPGRADE_CHOICE_LABELS: Readonly<Record<OathUpgradeChoice, string>> = {

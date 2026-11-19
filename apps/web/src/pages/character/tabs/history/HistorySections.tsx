@@ -4,13 +4,13 @@ import {
   type HistoryFieldChange,
   type HistoryNameChange,
   type HistoryPoint,
+  ItemName,
   itemRarityOfGrade,
   SET_PART,
   enhancementKindClasses
 } from '#entities/character'
 import { formatSeoulFullDateTime } from '#shared/lib/time-format'
 import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
-import { ItemName } from '#pages/character/tabs/equipment/item-parts'
 import { FIELD_LABELS, formatFieldValue, NAME_CHANGE_LABELS } from './history-format'
 
 const AFTER_TONES: Partial<Record<HistoryFieldChange['field'], string>> = {
