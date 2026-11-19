@@ -10,5 +10,5 @@ export {
 export type { RankingSearch } from './model/ranking-search'
 export { RankingFilterBox } from './ui/RankingFilterBox'
 export type { FilterRow } from './ui/RankingFilterBox'
-export { UniqueItemChips, WeaponSelect } from './ui/RankingItemFilter'
+export { UniqueItemSelect, WeaponSelect } from './ui/RankingItemFilter'
 export { RankingSetFilter } from './ui/RankingSetFilter'
