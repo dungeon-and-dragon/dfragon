@@ -281,3 +281,56 @@ it('nextCursor가 없거나 세트 모양이 다른 랭킹 응답은 거부한�
     await expect(read({})).rejects.toThrow()
   }
 })
+
+it('랭킹에 itemIds를 쉼표로 이어 보내고, 빈 항목, 중복, 여섯 개 이상은 요청하지 않는다', async () => {
+  const fetch = respond(ranking)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
+
+  await read({ jobId: 'job-1', itemIds: ['weapon-1', 'ring-1'] })
+  const url = new URL(new Request(fetch.mock.calls[0][0]).url)
+  expect(Object.fromEntries(url.searchParams)).toEqual({
+    jobId: 'job-1',
+    itemIds: 'weapon-1,ring-1'
+  })
+  for (const itemIds of [[''], ['a', 'a'], ['a', 'b', 'c', 'd', 'e', 'f'], ['a,b']]) {
+    await expect(read({ itemIds })).rejects.toThrow()
+  }
+  expect(fetch).toHaveBeenCalledTimes(1)
+})
+
+// #1802의 실제 응답 모양이다. 유일 장비가 없는 캐릭터는 부위의 items에 없어 그 부위 count 합이 sampleSize보다 작다.
+const itemStats = {
+  computedAt: '2026-11-18T15:38:47.900Z',
+  sampleSize: 5,
+  slots: [
+    {
+      slotId: 'WEAPON',
+      items: [
+        { itemId: 'item-weapon-a', name: '합성 무기', count: 2 },
+        { itemId: 'item-weapon-b', name: '합성 다른 무기', count: 2 }
+      ]
+    },
+    { slotId: 'RING', items: [{ itemId: 'item-ring-a', name: '합성 반지', count: 1 }] }
+  ]
+}
+
+it('아이템 통계는 고른 직업, 전직, 역할만 query로 보내고 응답을 schema로 읽는다', async () => {
+  const fetch = respond(itemStats)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).itemStats
+
+  await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1' })).resolves.toEqual(itemStats)
+  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
+    `${API_ORIGIN}/stats/items?jobId=job-1&jobGrowId=grow-1`
+  )
+  const empty = { computedAt: null, sampleSize: 0, slots: [] }
+  await expect(
+    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).itemStats({})
+  ).resolves.toEqual(empty)
+})
+
+it('한 부위의 count 합이 표본 수보다 큰 아이템 통계는 거부한다', async () => {
+  const broken = { ...itemStats, sampleSize: 3 }
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(broken) }).itemStats
+
+  await expect(read({})).rejects.toThrow()
+})
