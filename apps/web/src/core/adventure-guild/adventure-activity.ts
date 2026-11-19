@@ -28,6 +28,7 @@ export const adventureActivitySchema = z.object({
     raids: z.array(raidCount),
     legions: z.array(nameCount),
     items: z.object({ legendary: count, epic: count, primeval: count, mythic: count }),
+    oaths: z.object({ legendary: count, epic: count, primeval: count }),
     enhancement: z.object({
       attempts: count,
       amplify: z.array(enhancementTarget),
@@ -46,7 +47,9 @@ export const adventureActivitySchema = z.object({
       enhance: count,
       primeval: z.boolean(),
       mythic: z.boolean(),
-      highEnhancement: z.boolean()
+      highEnhancement: z.boolean(),
+      oath: count,
+      oathPrimeval: z.boolean()
     })
   )
 })
@@ -58,13 +61,18 @@ export type SeasonBackfill = NonNullable<ActivitySeason['backfill']>
 export type ActivitySummary = AdventureActivity['summary']
 export type EnhancementTarget = ActivitySummary['enhancement']['amplify'][number]
 
+const dayItem = z.object({
+  at: z.iso.datetime({ offset: true }),
+  name: z.string(),
+  rarity: z.string()
+})
+
 const adventureActivityDaySchema = z.object({
   date: z.iso.date(),
   raids: z.array(raidCount),
   legions: z.array(nameCount),
-  items: z.array(
-    z.object({ at: z.iso.datetime({ offset: true }), name: z.string(), rarity: z.string() })
-  ),
+  items: z.array(dayItem),
+  oaths: z.array(dayItem),
   enhancements: z.array(
     z.object({
       at: z.iso.datetime({ offset: true }),

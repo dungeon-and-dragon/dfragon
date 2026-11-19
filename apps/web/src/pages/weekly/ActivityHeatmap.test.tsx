@@ -48,6 +48,7 @@ const activity: AdventureActivity = {
     raids: [{ name: '가 레이드', count: 2 }],
     legions: [],
     items: { legendary: 8, epic: 1, primeval: 1, mythic: 0 },
+    oaths: { legendary: 0, epic: 0, primeval: 0 },
     enhancement: {
       attempts: 3,
       amplify: [{ target: 12, attempts: 1, successes: 0 }],
@@ -66,7 +67,9 @@ const activity: AdventureActivity = {
       enhance: 0,
       primeval: true,
       mythic: false,
-      highEnhancement: false
+      highEnhancement: false,
+      oath: 0,
+      oathPrimeval: false
     },
     {
       date: '2026-04-03',
@@ -76,7 +79,9 @@ const activity: AdventureActivity = {
       enhance: 3,
       primeval: false,
       mythic: false,
-      highEnhancement: true
+      highEnhancement: true,
+      oath: 0,
+      oathPrimeval: false
     }
   ]
 }
@@ -95,6 +100,7 @@ const april2: AdventureActivityDay = {
       rarity: '레전더리'
     }))
   ],
+  oaths: [],
   enhancements: [{ at: '2026-04-03T00:29:00+09:00', kind: 'reinforce', target: 15, success: false }]
 }
 
@@ -331,6 +337,78 @@ it('네 등급이 모두 0이면 아이템 탭에 등급 뱃지를 그리지 않
   }
 })
 
+it('시즌 11의 아이템 탭은 장비 뱃지 뒤에 서약 뱃지를 두고, 칸은 장비와 서약을 더해 세며 태초 서약만 얻은 날도 태초 테두리다', async () => {
+  const withOaths: AdventureActivity = {
+    ...activity,
+    summary: { ...activity.summary, oaths: { legendary: 2, epic: 0, primeval: 1 } },
+    days: [
+      { ...activity.days[0]!, oath: 2 },
+      { ...activity.days[1]!, oath: 1, oathPrimeval: true }
+    ]
+  }
+  await render({ getAdventureActivity: async () => withOaths })
+  expect(cellLabels()).toEqual(['4월 2일 활동 14', '4월 3일 활동 4'])
+
+  await act(async () => tab('아이템').click())
+
+  expect(panelText()).toContain('레전더리 8에픽 1태초 1서약 레전더리 2서약 태초 1')
+  expect(panelText()).not.toContain('서약 에픽')
+  expect(cellLabels()).toEqual(['4월 2일 아이템 12, 태초', '4월 3일 아이템 1, 태초'])
+})
+
+it('장비 없이 서약만 있으면 아이템 탭에 서약 뱃지만 둔다', async () => {
+  await render({
+    getAdventureActivity: async () => ({
+      ...activity,
+      summary: {
+        ...activity.summary,
+        items: { legendary: 0, epic: 0, primeval: 0, mythic: 0 },
+        oaths: { legendary: 0, epic: 3, primeval: 0 }
+      }
+    })
+  })
+  await act(async () => tab('아이템').click())
+
+  expect(panelText()).toContain('서약 에픽 3')
+  expect(panelText()).not.toContain('레전더리')
+})
+
+it('시즌 11의 칸 Tooltip은 장비 묶음 바로 아래 서약 묶음을 두고, 둘을 합쳐 8개가 넘으면 두 묶음을 함께 줄인다', async () => {
+  const oath = { at: '2026-04-02T21:40:00+09:00', name: '합성 서약', rarity: '태초' }
+  await render({
+    getAdventureActivitySeasonDays: async () => seasonDays({ ...april2, oaths: [oath] })
+  })
+
+  await act(async () => hover(cell('4월 2일')))
+
+  expect(popupText()).toEqual([
+    '4월 2일 (목)',
+    '레이드',
+    '가 레이드2회',
+    '장비',
+    '09:58합성 태초',
+    '레전더리9개',
+    '서약',
+    '21:40합성 서약',
+    '강화',
+    '00:29+15 실패'
+  ])
+})
+
+it('시즌 9의 칸 Tooltip은 장비와 서약을 나누지 않고 아이템 묶음 하나로 보인다', async () => {
+  await render(
+    {
+      getAdventureActivity: async () => ({ ...activity, season: { ...activity.season!, id: 9 } }),
+      getAdventureActivitySeasonDays: async () => ({ season: 9, days: [april2] })
+    },
+    9
+  )
+
+  await act(async () => hover(cell('4월 2일')))
+
+  expect(popupText().slice(3, 6)).toEqual(['아이템', '09:58합성 태초', '레전더리9개'])
+})
+
 it('히트맵을 그리면 시즌 하루 상세를 한 번 받고, 받기 전에 칸에 올리면 받는 중을 보이다가 날짜와 묶음 제목은 합계 없이 두고, 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보인다', async () => {
   const loaded = Promise.withResolvers<AdventureActivitySeasonDays>()
   const getAdventureActivitySeasonDays = vi
@@ -347,7 +425,7 @@ it('히트맵을 그리면 시즌 하루 상세를 한 번 받고, 받기 전에
     '4월 2일 (목)',
     '레이드',
     '가 레이드2회',
-    '아이템',
+    '장비',
     '09:58합성 태초',
     '레전더리9개',
     '강화',
@@ -361,6 +439,7 @@ it('시즌 하루 상세를 받은 뒤에는 처음 올리는 칸도 받는 중 
     raids: [],
     legions: [],
     items: [],
+    oaths: [],
     enhancements: [{ at: '2026-04-03T10:00:00+09:00', kind: 'amplify', target: 12, success: true }]
   }
   const getAdventureActivitySeasonDays = vi
@@ -472,7 +551,7 @@ it('탭에 해당하는 묶음만 보이고 탭을 바꿔도 받아 둔 시즌 �
   const date = '4월 2일 (목)'
   const raid = ['레이드', '가 레이드2회']
   const legion = ['레기온', '가 레기온1회']
-  const item = ['아이템', '09:58합성 태초', '레전더리9개']
+  const item = ['장비', '09:58합성 태초', '레전더리9개']
   const enhance = ['강화', '00:29+15 실패']
 
   await act(async () => hover(cell('4월 2일')))

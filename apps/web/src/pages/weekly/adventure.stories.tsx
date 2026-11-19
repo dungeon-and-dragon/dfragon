@@ -22,8 +22,8 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const adventureHost = createStoryClientHost({
-  getAdventureActivity: async () => storyAdventureActivity,
-  getAdventureActivitySeasonDays: async () => storyAdventureSeasonDays,
+  getAdventureActivity: async (_name, season) => storyAdventureActivity(season),
+  getAdventureActivitySeasonDays: async (_name, season) => storyAdventureSeasonDays(season),
   getAdventureWeekly: async () => storyAdventureWeekly
 })
 
@@ -38,8 +38,14 @@ const failedHost = createStoryClientHost({
 
 function ignoreOpen(): void {}
 
-function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
-  const [season, setSeason] = useState<number | undefined>()
+function Screen({
+  host,
+  initialSeason
+}: {
+  host?: ClientHost
+  initialSeason?: number
+}): React.JSX.Element {
+  const [season, setSeason] = useState(initialSeason)
 
   return (
     <StoryFrame host={host}>
@@ -57,6 +63,14 @@ function Screen({ host }: { host?: ClientHost }): React.JSX.Element {
 
 export const 모험단: Story = {
   render: () => <Screen host={adventureHost} />
+}
+
+export const 시즌10: Story = {
+  render: () => <Screen host={adventureHost} initialSeason={10} />
+}
+
+export const 시즌9: Story = {
+  render: () => <Screen host={adventureHost} initialSeason={9} />
 }
 
 export const 받는중: Story = {

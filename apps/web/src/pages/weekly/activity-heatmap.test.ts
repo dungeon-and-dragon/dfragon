@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   type ActivityDay,
   buildHeatmapWeeks,
+  dayCount,
   type HeatmapDay,
   heatLevel,
   levelThresholds,
@@ -25,6 +26,8 @@ function day(overrides: Partial<ActivityDay>): ActivityDay {
     primeval: false,
     mythic: false,
     highEnhancement: false,
+    oath: 0,
+    oathPrimeval: false,
     ...overrides
   }
 }
@@ -195,11 +198,25 @@ describe('levelThresholds, heatLevel', () => {
   })
 })
 
+describe('dayCount', () => {
+  it('아이템과 전체는 그날 얻은 장비와 서약을 더해 센다', () => {
+    const counted = day({ raid: 1, legion: 2, item: 3, oath: 4, enhance: 5 })
+
+    expect(dayCount(counted, 'item')).toBe(7)
+    expect(dayCount(counted, 'all')).toBe(15)
+  })
+})
+
 describe('ringHighlight', () => {
   it('아이템은 신화를 얻은 날 신화, 태초만 얻은 날 태초 테두리다', () => {
     expect(ringHighlight(day({ item: 3, primeval: true, mythic: true }), 'item')).toBe('mythic')
     expect(ringHighlight(day({ item: 3, primeval: true }), 'item')).toBe('primeval')
     expect(ringHighlight(day({ item: 3 }), 'item')).toBeUndefined()
+  })
+
+  it('아이템은 태초 서약만 얻은 날도 태초 테두리다', () => {
+    expect(ringHighlight(day({ oath: 1, oathPrimeval: true }), 'item')).toBe('primeval')
+    expect(ringHighlight(day({ item: 1, oath: 2 }), 'item')).toBeUndefined()
   })
 
   it('강화는 10증폭 이상이나 12강 이상을 도전한 날 태초 테두리다', () => {
