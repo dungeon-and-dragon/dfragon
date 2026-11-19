@@ -10,6 +10,7 @@ import {
 export type ItemCount = {
   itemId: string
   name: string
+  typeDetail: string | null
   count: number
 }
 
@@ -62,26 +63,27 @@ export async function replaceItemAdoption(
     async (transaction) => {
       await transaction.$executeRaw`DELETE FROM item_adoption`
       await transaction.$executeRaw`
-        INSERT INTO item_adoption (job_id, job_grow_id, role, slot_id, item_id, item_name, count, computed_at)
-        SELECT c.job_id, c.job_grow_id, ${role}, NULL, NULL, NULL, count(*)::int, ${computedAt}
+        INSERT INTO item_adoption (job_id, job_grow_id, role, slot_id, item_id, item_name, item_type_detail, count, computed_at)
+        SELECT c.job_id, c.job_grow_id, ${role}, NULL, NULL, NULL, NULL, count(*)::int, ${computedAt}
         FROM characters c
         WHERE ${population}
         GROUP BY 1, 2, 3`
 
       return transaction.$executeRaw`
-        INSERT INTO item_adoption (job_id, job_grow_id, role, slot_id, item_id, item_name, count, computed_at)
-        SELECT c.job_id, c.job_grow_id, ${role}, item.slot_id, item.item_id, item.item_name, count(*)::int, ${computedAt}
+        INSERT INTO item_adoption (job_id, job_grow_id, role, slot_id, item_id, item_name, item_type_detail, count, computed_at)
+        SELECT c.job_id, c.job_grow_id, ${role}, item.slot_id, item.item_id, item.item_name, item.item_type_detail,
+          count(*)::int, ${computedAt}
         FROM characters c
         JOIN character_items item
           ON item.server_id = c.server_id AND item.character_id = c.character_id
         WHERE ${population}
-        GROUP BY 1, 2, 3, 4, 5, 6`
+        GROUP BY 1, 2, 3, 4, 5, 6, 7`
     },
     { timeout: REPLACE_TIMEOUT_MS }
   )
 }
 
-// 같은 아이템 id에 이름이 여럿이면 캐릭터가 가장 많은 이름을 준다. 한 문장으로 읽어 job이 표를 바꾸는 중에도 같은 저장분에서 나온다.
+// 같은 아이템 id에 이름이나 종류가 여럿이면 캐릭터가 가장 많은 값을 준다. 종류를 모르는 행만 있으면 종류는 null이다. 한 문장으로 읽어 job이 표를 바꾸는 중에도 같은 저장분에서 나온다.
 export async function readItemAdoption(
   client: DatabaseClient,
   query: SetAdoptionQuery
@@ -94,15 +96,27 @@ export async function readItemAdoption(
       SELECT slot_id, item_id, item_name, sum(count)::int AS count
       FROM picked WHERE slot_id IS NOT NULL GROUP BY 1, 2, 3
     ),
+    item_types AS (
+      SELECT slot_id, item_id, (array_agg(item_type_detail ORDER BY count DESC, item_type_detail))[1] AS type_detail
+      FROM (
+        SELECT slot_id, item_id, item_type_detail, sum(count)::int AS count
+        FROM picked WHERE slot_id IS NOT NULL AND item_type_detail IS NOT NULL GROUP BY 1, 2, 3
+      ) counted
+      GROUP BY 1, 2
+    ),
     items AS (
       SELECT slot_id, item_id, (array_agg(item_name ORDER BY count DESC, item_name))[1] AS name,
         sum(count)::int AS count
       FROM item_names GROUP BY 1, 2
     ),
     slots AS (
-      SELECT slot_id, jsonb_agg(jsonb_build_object('itemId', item_id, 'name', name, 'count', count)
-        ORDER BY count DESC, item_id) AS items
-      FROM items GROUP BY 1
+      SELECT items.slot_id,
+        jsonb_agg(jsonb_build_object('itemId', items.item_id, 'name', items.name,
+          'typeDetail', item_types.type_detail, 'count', items.count)
+          ORDER BY items.count DESC, items.item_id) AS items
+      FROM items
+      LEFT JOIN item_types ON item_types.slot_id = items.slot_id AND item_types.item_id = items.item_id
+      GROUP BY 1
     )
     SELECT
       (SELECT max(computed_at) FROM item_adoption) AS "computedAt",
