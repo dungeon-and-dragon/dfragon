@@ -387,6 +387,7 @@ it('다음 page를 받는 동안 불러오기 대신 빈 줄을 두고, 받으�
 
   await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1))
   expect(findButton('불러오기')).toBeUndefined()
+  await vi.waitFor(() => expect(requests).toHaveLength(2))
   await act(async () => finish(rankingPage(21, 5, null)))
   await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0))
   expect(rankTexts()).toHaveLength(25)
@@ -402,6 +403,7 @@ it('최고 명성을 정하면 순위가 전체 순위와 달라 순위 열을 �
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }])
   expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
   await render(async () => rankingOf(3), { fameFrom: 136000 })
+  expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }, { fameFrom: '136000' }])
   expect(headings()).toEqual(['#', '캐릭터', '세트', '명성', '모험단'])
 })
 
