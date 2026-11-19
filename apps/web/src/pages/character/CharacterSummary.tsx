@@ -12,7 +12,7 @@ import { Portrait } from '#components/Portrait'
 import { ServerBadge } from '#components/ServerBadge'
 import { characterDisplayOf } from '#lib/stored-character'
 import { FavoriteToggle } from '#components/FavoriteToggle'
-import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
+import { useRefreshCharacterDetail } from './api/useCharacterDetail'
 import { useRefreshingNow } from '#shared/lib/useRefreshingNow'
 import { formatSeoulDateTime, formatTimeAgo } from '#shared/lib/time-format'
 

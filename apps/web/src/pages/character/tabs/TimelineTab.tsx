@@ -1,9 +1,12 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import type { CharacterIdentity, CharacterTimeline } from '#core/character'
-import { useCharacterTimeline } from '#pages/character/hooks/useCharacterTimeline'
+import {
+  useCharacterTimeline,
+  useTimelineAcquisitions,
+  useTimelineEnhancements
+} from '#pages/character/api/useCharacterTimeline'
 import { LoadingLine } from '#shared/ui/LoadingLine'
-import { useClientHost } from '#host/client-host'
-import { type TimelinePages, useTimelinePages } from '#pages/character/hooks/useTimelinePages'
+import type { TimelinePages } from '#pages/character/hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
 import {
   Acquisitions,
@@ -77,24 +80,8 @@ function TimelineContent({
   identity: CharacterIdentity
   timeline: CharacterTimeline
 }): React.JSX.Element {
-  const { getTimelineEnhancements, getTimelineAcquisitions } = useClientHost()
-  const { serverId, characterId } = identity
-  const enhancements = useTimelinePages(
-    timeline.enhancements,
-    timeline.enhancementsCursor,
-    useCallback(
-      (before: string) => getTimelineEnhancements({ serverId, characterId }, before),
-      [getTimelineEnhancements, serverId, characterId]
-    )
-  )
-  const acquisitions = useTimelinePages(
-    timeline.acquisitions,
-    timeline.acquisitionsCursor,
-    useCallback(
-      (before: string) => getTimelineAcquisitions({ serverId, characterId }, before),
-      [getTimelineAcquisitions, serverId, characterId]
-    )
-  )
+  const enhancements = useTimelineEnhancements(identity, timeline)
+  const acquisitions = useTimelineAcquisitions(identity, timeline)
 
   const shownEnhancements = useShownRows(enhancements)
   const shownAcquisitions = useShownRows(acquisitions)
