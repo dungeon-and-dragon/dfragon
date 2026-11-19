@@ -2,8 +2,8 @@
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { type FavoriteCharacter, useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
-import { type RecentCharacter, useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
+import { type FavoriteCharacter, useFavoriteCharacterStore } from '#features/favorite-character'
+import { type RecentCharacter, useRecentCharacterStore } from '#features/recent-characters'
 import { TestRouter } from '#testing/test-support/test-router'
 import { CharacterSearchBox } from './CharacterSearchBox'
 

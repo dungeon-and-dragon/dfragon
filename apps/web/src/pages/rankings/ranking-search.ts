@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ITEM_FILTER_LIMIT } from '#core/ranking'
+import { ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import { maleCrusaderRoleSchema } from '#entities/character'
 import type {
   FameRankingFameRange,

@@ -13,8 +13,11 @@ import {
   type SearchMode,
   type SlotCard,
   type SlotNotice,
-  tierLabels
-} from '#core/capture'
+  tierLabels,
+  type LookupDraft,
+  useLookupDraft,
+  type SlotCardKey
+} from '#features/capture-search'
 import { CandidatePopover } from './CandidatePopover'
 import { CardAnnouncer } from './CardAnnouncer'
 import { LookupProgress } from './LookupProgress'
@@ -24,9 +27,7 @@ import { ServerSelect } from '#shared/ui/ServerSelect'
 import { SnapshotAdventureField } from './SnapshotAdventureField'
 import { SnapshotBadge } from './SnapshotBadge'
 import { serverOptions } from '#shared/config/server-options'
-import { type LookupDraft, useLookupDraft } from '#hooks/useLookupDraft'
 import { useServerMenu } from '#shared/ui/useServerMenu'
-import type { SlotCardKey } from '#hooks/useSlotCardStore'
 import { getLookupStep, type LookupStep } from '#lib/card-presentation'
 
 const integer = new Intl.NumberFormat('ko-KR')

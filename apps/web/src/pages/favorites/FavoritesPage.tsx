@@ -2,7 +2,7 @@ import { HeartIcon, IconButton } from '@dfragon/ui'
 import { CharacterTable, type CharacterTableAction } from '#components/table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
-import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
+import { useFavoriteCharacterStore } from '#features/favorite-character'
 import type { CharacterKey } from '#entities/character'
 
 const integer = new Intl.NumberFormat('ko-KR')

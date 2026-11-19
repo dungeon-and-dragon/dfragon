@@ -2,8 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { useSearchModeStore } from '#hooks/useSearchModeStore'
-import type { SearchMode } from '#core/capture'
+import { useSearchModeStore, type SearchMode } from '#features/capture-search'
 import { SearchModeTabs } from './SearchModeTabs'
 
 let root: Root

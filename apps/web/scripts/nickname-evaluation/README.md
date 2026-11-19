@@ -7,7 +7,7 @@
 | 화면 | 검출과 crop | `nickname` 전처리 |
 | --- | --- | --- |
 | `party` | `@dfragon/lib`의 `detectPartyFrameGeometry`가 준 자리별 이름 영역을 그대로 자릅니다. | 웹 앱 파티 OCR과 같은 `binarizeNicknamePixels`(BT.601 회색의 Otsu 반전 이진화) |
-| `raid` | `@dfragon/lib`의 `cropDNFRaidParticipantNicknames`가 공대 창 제목 기준 이미지(`src/shared/raid/raid-heading.png`)로 창을 찾고 12행 이름 칸을 자릅니다. 빈 행은 자르지 않습니다. | 웹 앱 공대 OCR과 같은 `binarizeRaidNicknamePixels`(가장 어두운 채널의 Otsu 이진화, 선택 행 테두리와 떨어진 픽셀 제거) |
+| `raid` | `@dfragon/lib`의 `cropDNFRaidParticipantNicknames`가 공대 창 제목 기준 이미지(`src/features/capture-search/lib/capture/raid/raid-heading.png`)로 창을 찾고 12행 이름 칸을 자릅니다. 빈 행은 자르지 않습니다. | 웹 앱 공대 OCR과 같은 `binarizeRaidNicknamePixels`(가장 어두운 채널의 Otsu 이진화, 선택 행 테두리와 떨어진 픽셀 제거) |
 
 - `nickname` 전처리는 두 화면 모두 이진화 뒤 `normalizedNicknameBgr`(`nicknameCenterOffset`으로 가운데 정렬)로 모델 입력을 만듭니다.
 - `raw` 전처리는 이진화하지 않은 원본 색을 `normalizedBgr`로 왼쪽에 붙여 넣습니다. 공대 행 평가의 `raw`와 같습니다.

@@ -352,7 +352,7 @@
       }
     },
     {
-      "includes": ["apps/web/src/core/**"],
+      "includes": ["apps/web/src/features/capture-search/lib/**"],
       "linter": {
         "rules": {
           "style": {
@@ -360,9 +360,9 @@
               "level": "error",
               "options": {
                 "paths": {
-                  "react": "src/core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다.",
-                  "react-dom": "src/core는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다.",
-                  "@dfragon/ui": "src/core는 화면과 무관한 로직이라 @dfragon/ui를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
+                  "react": "src/features/capture-search/lib는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다.",
+                  "react-dom": "src/features/capture-search/lib는 화면과 무관한 로직이라 React를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다.",
+                  "@dfragon/ui": "src/features/capture-search/lib는 화면과 무관한 로직이라 @dfragon/ui를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
                 },
                 "patterns": [
                   {
@@ -374,22 +374,24 @@
                       "#hooks/**",
                       "#components/**",
                       "#pages/**",
-                      "#host/**",
                       "#app/**",
                       "#widgets/**",
                       "#features/**",
+                      "!#features/capture-search/lib/**",
+                      "!#features/capture-search/api/**",
+                      "!#features/capture-search/model/client-host",
+                      "!#features/capture-search/model/install-browser-host",
                       "#shared/ui/**",
                       "**/hooks/**",
                       "**/components/**",
                       "**/pages/**",
-                      "**/host/**",
                       "**/site/**",
                       "**/sections/**",
                       "**/animations/**",
                       "**/styles/**",
                       "**/fixture/**"
                     ],
-                    "message": "src/core는 UI 폴더를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
+                    "message": "src/features/capture-search/lib는 UI 폴더를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
                   }
                 ]
               }
@@ -423,55 +425,6 @@
                       "#*/**/pages/**"
                     ],
                     "message": "공용 components와 hooks는 pages/를 import하지 않는다. 화면 전용 코드는 pages/<화면>/에 두고, 여러 화면이 쓰는 코드는 공용 components/나 hooks/에 둔다."
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "includes": ["apps/web/src/host/**"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noRestrictedImports": {
-              "level": "error",
-              "options": {
-                "patterns": [
-                  {
-                    "group": ["../*", "../**"],
-                    "message": "상위 폴더 상대 경로 대신 #<폴더>/... alias로 가져온다."
-                  },
-                  {
-                    "group": [
-                      "../**/pages",
-                      "../**/pages/**",
-                      "./**/pages",
-                      "./**/pages/**",
-                      "#pages",
-                      "#pages/**",
-                      "#*/**/pages",
-                      "#*/**/pages/**",
-                      "../**/components",
-                      "../**/components/**",
-                      "./**/components",
-                      "./**/components/**",
-                      "#components",
-                      "#components/**",
-                      "#*/**/components",
-                      "#*/**/components/**",
-                      "../**/hooks",
-                      "../**/hooks/**",
-                      "./**/hooks",
-                      "./**/hooks/**",
-                      "#hooks",
-                      "#hooks/**",
-                      "#*/**/hooks",
-                      "#*/**/hooks/**"
-                    ],
-                    "message": "host는 pages/, components/, hooks/를 import하지 않는다. 화면 코드는 pages/에, 공용 UI는 components/나 hooks/에 두고 host를 가져다 쓴다."
                   }
                 ]
               }

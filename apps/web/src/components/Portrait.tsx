@@ -1,4 +1,4 @@
-import type { CharacterFaceWindow } from '#core/search'
+import type { CharacterFaceWindow } from '#features/capture-search'
 import { CardImage } from './CardImage'
 
 export function Portrait({

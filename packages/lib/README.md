@@ -72,7 +72,7 @@ const result = detectDNFTownIndicator(frame, townIndicatorTemplate)
 if (result.status === 'found') console.log(result.scale, result.matchScore, result.region)
 ```
 
-`detectDNFTownIndicator(frame, template)`는 화면 오른쪽 위의 노란 지구본 아이콘을 `16 × 16` 템플릿으로 찾아 `found` 또는 `not-found`를 돌려줍니다. 템플릿은 웹 앱의 [`town-indicator.png`](../../apps/web/src/host/screen-watch/town-indicator.png)입니다.
+`detectDNFTownIndicator(frame, template)`는 화면 오른쪽 위의 노란 지구본 아이콘을 `16 × 16` 템플릿으로 찾아 `found` 또는 `not-found`를 돌려줍니다. 템플릿은 웹 앱의 [`town-indicator.png`](../../apps/web/src/features/capture-search/lib/screen-watch/town-indicator.png)입니다.
 
 ## 개발 및 검증
 

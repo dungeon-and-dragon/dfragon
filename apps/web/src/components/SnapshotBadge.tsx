@@ -1,5 +1,5 @@
 import { PinIcon } from '@dfragon/ui'
-import { RAID_PARTY_SIZE, type SearchMode, type SnapshotMark } from '#core/capture'
+import { RAID_PARTY_SIZE, type SearchMode, type SnapshotMark } from '#features/capture-search'
 
 const badgeClass = 'badge badge-sm gap-1 border font-semibold'
 

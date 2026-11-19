@@ -11,8 +11,13 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import { GlobalBar } from './components/GlobalBar'
 import { SiteFooter } from './components/SiteFooter'
 import { createQueryClient } from './lib/query-client'
-import { ClientHostContext, type BrowserHost } from './host/client-host'
-import { useScreenCaptureContext } from './hooks/useScreenCaptureContext'
+import {
+  type BrowserHost,
+  ClientHostContext,
+  ScreenCaptureProvider,
+  useScreenCaptureContext,
+  WEB_CAPTURE_TEXTS
+} from '#features/capture-search'
 import { useMyAdventureStore } from '#entities/adventure-guild'
 import { CharacterDetailPage, parseCharacterTabSearch } from '#pages/character'
 import { CharacterSearchPage, parseCharacterSearch } from '#pages/character-search'
@@ -33,8 +38,6 @@ import {
   parseClearSearch
 } from '#pages/clears'
 import { AdventureEntryPage, WeeklyPage, parseWeeklySearch } from '#pages/weekly'
-import { ScreenCaptureProvider } from './components/ScreenCaptureProvider'
-import { WEB_CAPTURE_TEXTS } from '#core/capture'
 
 // 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 라우터 위에서 구독한다.
 function ScreenShareEndings({ host }: { host: BrowserHost }): null {

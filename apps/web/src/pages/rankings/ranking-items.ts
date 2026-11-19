@@ -1,4 +1,4 @@
-import { type ItemStats, itemSlotName, WEAPON_SLOT } from '#core/ranking'
+import { type ItemStats, itemSlotName, WEAPON_SLOT } from '#entities/ranking'
 import type { SetChoice } from './ranking-sets'
 
 export type UniqueItemChoice = Readonly<{ slotId: string; label: string; itemId: string }>

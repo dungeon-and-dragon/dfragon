@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { useIndicatorSlide } from '#shared/lib/animations/useIndicatorSlide'
 import { useTodayGrade } from '#hooks/useTodayGrade'
 import { CharacterSearchBox } from './CharacterSearchBox'
-import { ColorModeToggle } from './ColorModeToggle'
+import { ColorModeToggle } from '#features/color-mode'
 import { TodayGrade } from './TodayGrade'
 
 type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }

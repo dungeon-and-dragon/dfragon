@@ -89,7 +89,7 @@ test('export const 초기값의 정규식 리터럴을 허용한다', async () =
 })
 
 const excludedFiles = [
-  'apps/web/src/core/regex.test.ts',
+  'apps/web/src/features/capture-search/lib/regex.test.ts',
   'apps/web/src/regex.spec.tsx',
   'apps/api/test/regex.ts',
   'apps/api/tests/regex.ts',
