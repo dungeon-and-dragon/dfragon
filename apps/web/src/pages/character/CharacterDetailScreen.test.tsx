@@ -12,7 +12,7 @@ import type { CharacterTab } from './character-tabs'
 import { apiFailure, characterUrl, loadingResponse } from './api/character.handlers'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
 import { TestRouter } from '#testing/test-support/test-router'
-import { useRecentCharacterStore } from '#hooks/useRecentCharacterStore'
+import { useRecentCharacterStore } from '#features/recent-characters'
 
 type Card = NonNullable<CharacterDetailView['card']>
 type Score = NonNullable<Card['score']>

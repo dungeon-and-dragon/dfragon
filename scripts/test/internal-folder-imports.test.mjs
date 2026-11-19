@@ -104,10 +104,10 @@ test('Vite, Vitest, Storybook: 운영 화면 alias와 웹 alias를 충돌 없이
 
       if (config.configFile === false) {
         const result = await server.pluginContainer.resolveId(
-          '#components/FavoriteToggle',
+          '#features/favorite-character',
           join(root, 'apps/web/src/WebApp.tsx')
         )
-        assert.equal(result?.id, join(root, 'apps/web/src/components/FavoriteToggle.tsx'))
+        assert.equal(result?.id, join(root, 'apps/web/src/features/favorite-character/index.ts'))
       }
     } finally {
       await server.close()

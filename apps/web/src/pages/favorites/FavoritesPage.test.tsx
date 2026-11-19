@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { type FavoriteCharacter, useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
+import { type FavoriteCharacter, useFavoriteCharacterStore } from '#features/favorite-character'
 import { TestRouter } from '#testing/test-support/test-router'
 import { FavoritesPage } from './FavoritesPage'
 

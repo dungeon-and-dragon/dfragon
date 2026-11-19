@@ -5,18 +5,21 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import neopleOpenApiColorLogo from './shared/assets/neople-open-api-color.png'
 import neopleOpenApiGrayLogo from './shared/assets/neople-open-api-gray.png'
-import { useFavoriteCharacterStore } from './hooks/useFavoriteCharacterStore'
+import { useFavoriteCharacterStore } from '#features/favorite-character'
 import { useMyAdventureStore } from '#entities/adventure-guild'
-import { useSearchModeStore } from './hooks/useSearchModeStore'
+import {
+  useSearchModeStore,
+  installBrowserHost,
+  type AutoRoundSignal,
+  type BrowserHost,
+  decodeBrowserImage,
+  readRaidWindowTemplates,
+  readTownIndicatorTemplate,
+  WEB_CAPTURE_TEXTS
+} from '#features/capture-search'
 import { RANKING_JOBS } from '#pages/rankings'
-import { installBrowserHost } from './host'
-import type { AutoRoundSignal, BrowserHost } from './host/client-host'
-import { decodeBrowserImage } from './host/browser-png'
-import { readRaidWindowTemplates } from './host/screen-watch/browser-raid-templates'
-import { readTownIndicatorTemplate } from './host/screen-watch/browser-town-template'
 import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES, type CharacterCandidate } from '#entities/character'
-import { WEB_CAPTURE_TEXTS } from '#core/capture'
 import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'
 import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
@@ -24,14 +27,14 @@ import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers
 import { server } from '#testing/test-support/msw-server'
 import { todayGradeHandlers } from '#testing/test-support/today-grade-handlers'
 
-vi.mock('./host/browser-png', () => ({
+vi.mock('#features/capture-search/lib/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
   decodeBrowserPng: vi.fn()
 }))
-vi.mock('./host/screen-watch/browser-raid-templates', () => ({
+vi.mock('#features/capture-search/lib/screen-watch/browser-raid-templates', () => ({
   readRaidWindowTemplates: vi.fn()
 }))
-vi.mock('./host/screen-watch/browser-town-template', () => ({
+vi.mock('#features/capture-search/lib/screen-watch/browser-town-template', () => ({
   readTownIndicatorTemplate: vi.fn()
 }))
 

@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useColorModeStore } from '#hooks/useColorModeStore'
+import { useColorModeStore } from '#features/color-mode/model/useColorModeStore'
 import { ColorModeToggle } from './ColorModeToggle'
 
 const STORAGE_KEY = 'dfragon:color-mode'
