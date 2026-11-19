@@ -2,7 +2,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { FameRanking, FameRankingFilter, RankedCharacter } from '#core/ranking'
+import type { OathCatalog } from '#core/catalog'
+import type { FameRanking, FameRankingFilter, RankedCharacter, SetStats } from '#core/ranking'
 import { ClientHostContext, type ClientHost } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -55,22 +56,28 @@ function rankedCharacter(rank: number, overrides: Partial<RankedCharacter> = {})
     guildId: null,
     guildName: null,
     role: null,
+    equipmentSet: null,
+    oathSet: null,
     ...overrides
   }
 }
 
 function rankingOf(count: number): FameRanking {
-  return { characters: Array.from({ length: count }, (_, index) => rankedCharacter(index + 1)) }
+  return {
+    characters: Array.from({ length: count }, (_, index) => rankedCharacter(index + 1)),
+    nextCursor: null
+  }
 }
 
 function render(
   getFameRanking: ClientHost['getFameRanking'],
   filter: FameRankingFilter = {},
-  onFilterChange: (filter: FameRankingFilter) => void = () => {}
+  onFilterChange: (filter: FameRankingFilter) => void = () => {},
+  sets: Partial<Pick<ClientHost, 'getSetStats' | 'getOathCatalog'>> = {}
 ): Promise<void> {
   return act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getFameRanking })}>
+      <ClientHostContext value={createTestClientHost({ getFameRanking, ...sets })}>
         <TestQueryClient>
           <TestRouter>
             <RankingsScreen filter={filter} onFilterChange={onFilterChange} />
@@ -113,26 +120,40 @@ it('받은 100명 가운데 처음 20명을 그리고 끝에 닿을 때마다 20
   expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
 })
 
-it('열은 순위, 캐릭터, 명성, 모험단, 길드이고 값이 없는 길드는 -로 그린다', async () => {
+it('열은 순위, 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 없는 행은 세트를 -로 그린다', async () => {
   await render(async () => ({
     characters: [
-      rankedCharacter(1, { guildName: '합성 길드' }),
+      rankedCharacter(1, {
+        guildName: '합성 길드',
+        equipmentSet: {
+          id: '7f788a703a87d783079b41d0fe6448c9',
+          name: '영원히 이어지는 황금향 세트'
+        },
+        oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' }
+      }),
       rankedCharacter(4, { level: null, jobGrowName: null, jobName: '합성 직업' })
-    ]
+    ],
+    nextCursor: null
   }))
 
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
     '#',
     '캐릭터',
+    '세트',
     '명성',
-    '모험단',
-    '길드'
+    '모험단'
   ])
   const [first, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['1', '카인합성1합성 전직 합성 직업', '99,999', '모험단1', '합성 길드'])
-  expect(fourth).toEqual(['4', '카인합성4합성 직업', '99,996', '모험단4', '-'])
+  expect(first).toEqual([
+    '1',
+    '카인합성1합성 전직 합성 직업',
+    '황금향용투 : 용제 강림',
+    '99,999',
+    '모험단1'
+  ])
+  expect(fourth).toEqual(['4', '카인합성4합성 직업', '-', '99,996', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
@@ -146,7 +167,8 @@ function characterLines(row: Element): (string | null)[] {
 
 it('서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을 둔다', async () => {
   await render(async () => ({
-    characters: [rankedCharacter(1), rankedCharacter(2, { level: 110 })]
+    characters: [rankedCharacter(1), rankedCharacter(2, { level: 110 })],
+    nextCursor: null
   }))
 
   const [maxLevel, belowMax] = bodyRows()
@@ -164,7 +186,8 @@ it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직
       rankedCharacter(4, { jobName: '프리스트(여)', jobGrowName: '眞 크루세이더', role: 'buffer' }),
       rankedCharacter(5, { jobName: '프리스트(남)', jobGrowName: '眞 인파이터', role: 'dealer' }),
       rankedCharacter(6, { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' })
-    ]
+    ],
+    nextCursor: null
   }))
 
   expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
@@ -178,7 +201,7 @@ it('남성 크루세이더는 역할을 알면 역할을 붙이고 모든 전직
 })
 
 it('빈 랭킹은 목록 상자에 빈 문구만 둔다', async () => {
-  await render(async () => ({ characters: [] }))
+  await render(async () => ({ characters: [], nextCursor: null }))
 
   expect(container.querySelector('section[aria-label="명성 랭킹"] p')?.textContent).toBe(
     '랭킹에 오른 캐릭터가 없습니다.'
@@ -227,10 +250,10 @@ it('필터에 맞춰 직업, 전직을 넘겨 조회하고 실패하면 오류�
   })
   await render(getFameRanking, { jobId: job.jobId, jobGrowId: job.grows[0].jobGrowId })
 
-  expect(getFameRanking).toHaveBeenCalledWith({
-    jobId: job.jobId,
-    jobGrowId: job.grows[0].jobGrowId
-  })
+  expect(getFameRanking).toHaveBeenCalledWith(
+    { jobId: job.jobId, jobGrowId: job.grows[0].jobGrowId },
+    undefined
+  )
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('랭킹을 받지 못했습니다.')
 })
 
@@ -276,15 +299,226 @@ it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌�
   const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
   await render(getFameRanking, { jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' })
 
-  expect(getFameRanking).toHaveBeenCalledWith({
-    jobId: MALE_PRIEST,
-    jobGrowId: CRUSADER,
-    role: 'dealer'
-  })
+  expect(getFameRanking).toHaveBeenCalledWith(
+    { jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' },
+    undefined
+  )
   expect(
     container.querySelector('section[aria-label="프리스트(남) 크루세이더(딜러) 명성 랭킹"]')
   ).not.toBeNull()
   expect(chip('크루세이더(딜러)').hasAttribute('data-pressed')).toBe(true)
   expect(chip('크루세이더(버퍼)').hasAttribute('data-pressed')).toBe(false)
   expect(chip('전직 전체').hasAttribute('data-pressed')).toBe(false)
+})
+
+function rankingPage(from: number, count: number, nextCursor: string | null): FameRanking {
+  const characters = Array.from({ length: count }, (_, index) => rankedCharacter(from + index))
+
+  return { characters, nextCursor }
+}
+
+function rankTexts(): string[] {
+  return bodyRows().map((row) => row.querySelector('td')?.textContent ?? '')
+}
+
+it('받은 행을 다 그리면 nextCursor로 다음 page를 받아 순위를 잇고, 마지막 page 뒤에는 더 받지 않는다', async () => {
+  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async (_filter, cursor) => {
+    if (cursor === undefined) {
+      return rankingPage(1, 100, 'page-2')
+    }
+
+    return rankingPage(101, 30, null)
+  })
+  await render(getFameRanking)
+
+  for (let step = 0; step < 5; step += 1) {
+    await reachEnd()
+  }
+  await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(1))
+  expect(getFameRanking.mock.calls).toEqual([
+    [{}, undefined],
+    [{}, 'page-2']
+  ])
+  await reachEnd()
+  await reachEnd()
+
+  expect(rankTexts()).toHaveLength(130)
+  expect(rankTexts().slice(99, 102)).toEqual(['100', '101', '102'])
+  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  await reachEnd()
+  expect(getFameRanking).toHaveBeenCalledTimes(2)
+})
+
+it('다음 page를 받지 못하면 목록 끝에 오류와 다시 시도를 두고, 다시 시도하면 이어 받는다', async () => {
+  let failNext = true
+  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async (_filter, cursor) => {
+    if (cursor === undefined) {
+      return rankingPage(1, 20, 'page-2')
+    }
+
+    if (failNext) {
+      failNext = false
+      throw new Error('랭킹을 더 받지 못했습니다.')
+    }
+
+    return rankingPage(21, 5, null)
+  })
+  await render(getFameRanking)
+  await reachEnd()
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+      '랭킹을 더 받지 못했습니다.'
+    )
+  )
+  expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0)
+  await act(async () => chip('다시 시도').click())
+
+  await vi.waitFor(() => expect(container.querySelector('[role="alert"]')).toBeNull())
+  await reachEnd()
+  expect(rankTexts()).toHaveLength(25)
+})
+
+const GOLDEN = '7f788a703a87d783079b41d0fe6448c9'
+const FAIRY = '4ee7bd5912cda6e2a24c1f36d5202b46'
+const DRAGON = 16204
+
+// 합성 세트 통계와 서약 카탈로그다. 세트 id, 이름, 선택지 이름은 게임 데이터 그대로다.
+const setStats: SetStats = {
+  computedAt: '2026-11-18T11:00:27.845Z',
+  sampleSize: 6,
+  equipmentSets: [
+    { setId: FAIRY, name: '소울 페어리 세트', count: 1 },
+    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 3 },
+    { setId: null, name: null, count: 2 }
+  ],
+  oathSets: [
+    {
+      setId: DRAGON,
+      name: '야망의 용투 서약',
+      count: 4,
+      options: [{ name: '용투 : 용제 강림', count: 4 }]
+    },
+    { setId: null, name: null, count: 2, options: [{ name: null, count: 2 }] }
+  ],
+  combos: [{ equipmentSetId: null, oathSetId: null, count: 6 }]
+}
+
+const oathCatalog: OathCatalog = {
+  version: 'synthetic',
+  sets: [
+    {
+      setId: DRAGON,
+      name: '야망의 용투 서약',
+      icon: null,
+      options: ['세계를 태우는 불꽃', '용제 강림', '싸워야만 하는 운명'].map((name) => ({
+        name: `용투 : ${name}`,
+        icon: '',
+        effects: { rare: null, unique: null, legendary: null, epic: null, primitive: null }
+      }))
+    }
+  ],
+  items: []
+}
+
+const setHost = {
+  getSetStats: async () => setStats,
+  getOathCatalog: async () => oathCatalog
+}
+
+function setSelect(label: string): HTMLButtonElement {
+  return container.querySelector<HTMLButtonElement>(`[role="combobox"][aria-label="${label}"]`)!
+}
+
+async function pickOption(label: string, optionText: string): Promise<void> {
+  await act(async () => setSelect(label).click())
+  const listbox = document.querySelector(`[role="listbox"][aria-label="${label}"]`)!
+  const option = [...listbox.querySelectorAll<HTMLElement>('[role="option"]')].find(
+    (item) => item.textContent === optionText
+  )!
+  await act(async () => option.click())
+}
+
+function optionTexts(label: string): string[] {
+  const listbox = document.querySelector(`[role="listbox"][aria-label="${label}"]`)
+
+  return [...(listbox?.querySelectorAll('[role="option"]') ?? [])].map(
+    (item) => item.textContent ?? ''
+  )
+}
+
+it('세트 셀렉트는 전체 직업 세트 통계에서 많이 낀 순으로 세트를 두고, 선택지는 카탈로그 순서로 줄여 쓴다', async () => {
+  const getSetStats = vi.fn(setHost.getSetStats)
+  await render(
+    async () => rankingOf(1),
+    { jobId: RANKING_JOBS[0].jobId, oathSetId: DRAGON },
+    () => {},
+    {
+      ...setHost,
+      getSetStats
+    }
+  )
+
+  expect(getSetStats).toHaveBeenCalledWith({})
+  await act(async () => setSelect('장비 세트').click())
+  expect(optionTexts('장비 세트')).toEqual(['장비 세트 전체', '황금향', '페어리'])
+  await act(async () => setSelect('서약 선택지').click())
+  expect(optionTexts('서약 선택지')).toEqual([
+    '선택지 전체',
+    '용투 : 첫 번째',
+    '용투 : 두 번째',
+    '용투 : 세 번째'
+  ])
+})
+
+it('세트를 고르면 직업 필터와 함께 넘기고, 서약 세트를 바꾸면 고른 선택지를 지운다', async () => {
+  const onFilterChange = vi.fn()
+  const jobId = RANKING_JOBS[0].jobId
+  await render(
+    async () => rankingOf(1),
+    { jobId, oathSetId: DRAGON, oathSetOption: '용투 : 용제 강림' },
+    onFilterChange,
+    setHost
+  )
+
+  await pickOption('장비 세트', '황금향')
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId,
+    equipmentSetId: GOLDEN,
+    oathSetId: DRAGON,
+    oathSetOption: '용투 : 용제 강림'
+  })
+  await pickOption('서약 세트', '서약 세트 전체')
+  expect(onFilterChange).toHaveBeenLastCalledWith({ jobId })
+  await act(async () => chip('직업 전체').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    oathSetId: DRAGON,
+    oathSetOption: '용투 : 용제 강림'
+  })
+})
+
+it('세트로 거르면 세트를 query로 보내고 목록 띠 제목에 고른 세트를 쓴다', async () => {
+  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(1))
+  const filter = { equipmentSetId: GOLDEN, oathSetId: DRAGON, oathSetOption: '용투 : 용제 강림' }
+  await render(getFameRanking, filter, () => {}, setHost)
+
+  expect(getFameRanking).toHaveBeenCalledWith(filter, undefined)
+  await vi.waitFor(() =>
+    expect(
+      container.querySelector('section[aria-label="황금향 용투 : 두 번째 명성 랭킹"]')
+    ).not.toBeNull()
+  )
+  expect(setSelect('장비 세트').textContent).toContain('황금향')
+  expect(setSelect('서약 선택지').textContent).toContain('용투 : 두 번째')
+})
+
+it('거른 랭킹이 비면 랭킹에 오른 캐릭터가 없다고 알린다', async () => {
+  await render(
+    async () => ({ characters: [], nextCursor: null }),
+    { oathSetId: DRAGON },
+    () => {},
+    setHost
+  )
+
+  expect(container.querySelector('p.state')?.textContent).toBe('랭킹에 오른 캐릭터가 없습니다.')
 })

@@ -21,6 +21,7 @@ export type {
   CharacterStats,
   FameRanking,
   FameRankingFilter,
+  FameRankingSetFilter,
   RankedCharacter,
   SetStatsFilter,
   StoredCharacter

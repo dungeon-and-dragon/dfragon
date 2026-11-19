@@ -47,12 +47,17 @@ function rankedCharacter(rank: number): RankedCharacter {
     fame: 100000 - rank,
     guildId: null,
     guildName: '합성 길드',
-    role: null
+    role: null,
+    equipmentSet: null,
+    oathSet: null
   }
 }
 
 function rankingOf(count: number): FameRanking {
-  return { characters: Array.from({ length: count }, (_, index) => rankedCharacter(index + 1)) }
+  return {
+    characters: Array.from({ length: count }, (_, index) => rankedCharacter(index + 1)),
+    nextCursor: null
+  }
 }
 
 function render(getFameRanking: ClientHost['getFameRanking']): Promise<void> {
@@ -79,7 +84,7 @@ it('직업 필터 없이 조회해 앞 3명을 순위, 캐릭터, 명성 열로 
   const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(100))
   await render(getFameRanking)
 
-  expect(getFameRanking).toHaveBeenCalledWith({})
+  expect(getFameRanking).toHaveBeenCalledWith({}, undefined)
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
     '#',
     '캐릭터',
@@ -117,7 +122,7 @@ it('조회에 실패하면 오류 문구 한 줄을 둔다', async () => {
 })
 
 it('빈 랭킹은 박스에 이름 한 줄만 둔다', async () => {
-  await render(async () => ({ characters: [] }))
+  await render(async () => ({ characters: [], nextCursor: null }))
 
   expect(container.querySelector('section[aria-label="명성 랭킹"]')?.textContent).toBe('명성 랭킹')
   expect(container.querySelector('table')).toBeNull()

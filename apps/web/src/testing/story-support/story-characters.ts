@@ -9,6 +9,33 @@ const JOBS = [
   ['마법사(여)', '眞 인챈트리스']
 ] as const
 
+// 세트 id와 이름, 선택지 이름은 게임 데이터 그대로다. 다섯 번째마다 세트가 없고 일곱 번째마다 세트 값을 받은 적이 없다.
+const EQUIPMENT_SETS = [
+  { id: '7f788a703a87d783079b41d0fe6448c9', name: '영원히 이어지는 황금향 세트' },
+  { id: '11f7d203a05ea6f13300c0facb39f11e', name: '칠흑의 정화 세트' },
+  { id: '4ee7bd5912cda6e2a24c1f36d5202b46', name: '소울 페어리 세트' },
+  { id: 'b92ca7784123b5fea9cea40144925194', name: '용투장의 난 세트' }
+] as const
+const OATH_SETS = [
+  { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' },
+  { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' },
+  { id: 16205, name: '완전무결한 정화 서약', option: '정화 : 찬란한 정화' }
+] as const
+const NO_SET_EVERY = 5
+const NOT_FETCHED_EVERY = 7
+
+function setsOf(index: number): Pick<RankedCharacter, 'equipmentSet' | 'oathSet'> {
+  if ((index + 1) % NOT_FETCHED_EVERY === 0) {
+    return { equipmentSet: null, oathSet: null }
+  }
+
+  const equipmentSet =
+    (index + 1) % NO_SET_EVERY === 0 ? null : EQUIPMENT_SETS[index % EQUIPMENT_SETS.length]!
+  const oathSet = OATH_SETS[index % OATH_SETS.length]!
+
+  return { equipmentSet, oathSet }
+}
+
 // 이름과 소속은 실제 캐릭터가 아닌 합성 값이다.
 export function storyRankedCharacters(count: number): RankedCharacter[] {
   return Array.from({ length: count }, (_, index) => {
@@ -40,7 +67,8 @@ export function storyRankedCharacters(count: number): RankedCharacter[] {
       fame,
       guildId,
       guildName,
-      role
+      role,
+      ...setsOf(index)
     }
   })
 }
