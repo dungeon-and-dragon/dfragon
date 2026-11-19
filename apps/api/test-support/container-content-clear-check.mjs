@@ -148,7 +148,7 @@ try {
   await assert.rejects(
     client.$executeRaw`
       INSERT INTO content_clears (content_id, kind, server_id, character_id, week_start, cleared_at)
-      VALUES ('michaela-hard', 'legion', 'cain', 'clear-a', now(), now())`
+      VALUES ('michaela-hard', 'dungeon', 'cain', 'clear-a', now(), now())`
   )
 
   await recordContentClearPopulation(client, population(1000, false))
