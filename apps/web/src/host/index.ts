@@ -66,6 +66,7 @@ export function installBrowserHost(
     getCharacterStats: dfragon.stats,
     getSkillStats: dfragon.skillStats,
     getSetStats: dfragon.setStats,
+    getItemStats: dfragon.itemStats,
     getClearStats: dfragon.clearStats,
     getClearContentStats: dfragon.clearContentStats,
     getClearOverview: dfragon.clearOverview,

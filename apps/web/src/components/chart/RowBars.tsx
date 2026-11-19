@@ -20,12 +20,14 @@ export type Bar = Readonly<{
 
 export type BarDetails = Readonly<{ bars: readonly Bar[]; max: number }>
 
-export type BarTone = 'count' | 'fame' | 'chart-3' | 'chart-7'
+export type BarTone = 'count' | 'fame' | 'chart-2' | 'chart-3' | 'chart-5' | 'chart-7'
 
 const TONE_FILL: Readonly<Record<BarTone, string>> = {
   count: 'bg-chart-1',
   fame: 'bg-game-fame',
+  'chart-2': 'bg-chart-2',
   'chart-3': 'bg-chart-3',
+  'chart-5': 'bg-chart-5',
   'chart-7': 'bg-chart-7'
 }
 
