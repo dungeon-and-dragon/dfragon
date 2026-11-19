@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { z } from 'zod'
-import { createJsonRequest } from '#core/api'
+import { createJsonRequest } from '#shared/api/json-request'
 import type { TodayGrade } from '#core/today-grade'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 

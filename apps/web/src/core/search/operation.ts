@@ -1,4 +1,4 @@
-import { type SearchError, type SearchErrorCode, SearchHttpFailure } from '#core/api/http'
+import { type SearchError, type SearchErrorCode, SearchHttpFailure } from '#shared/api/api-error'
 
 export type SearchOperationFailure = {
   kind: 'failure'

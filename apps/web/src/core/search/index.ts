@@ -1,6 +1,12 @@
 export { createCaptureSearchLifetime } from './capture-lifetime'
 export { createCharacterImageSource } from './character-image-source'
 export {
+  requestCharacterCandidates,
+  requestCharacterDetails,
+  requestCharacterImage
+} from './character-requests'
+export type { CharacterApi } from './character-requests'
+export {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
 } from './character-response-cache'

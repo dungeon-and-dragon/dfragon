@@ -1,6 +1,10 @@
 import type { z } from 'zod'
-import { createJsonRequest, validateIdentity } from '#core/api'
-import { type CharacterIdentity, characterDetailViewSchema } from '#core/character'
+import {
+  type CharacterIdentity,
+  characterDetailViewSchema,
+  validateIdentity
+} from '#core/character'
+import { createJsonRequest } from '#shared/api/json-request'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 
 const requestJson = createJsonRequest(dfragonHttp, API_BASE_URL)
