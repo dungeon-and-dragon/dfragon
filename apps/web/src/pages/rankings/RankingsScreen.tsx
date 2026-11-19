@@ -15,7 +15,7 @@ import { FameRankingList } from './FameRankingList'
 import {
   type FilterRow,
   RankingFilterBox,
-  UniqueItemChips,
+  UniqueItemSelect,
   WeaponSelect,
   RankingSetFilter,
   itemChoicesOf,
@@ -87,7 +87,7 @@ export function RankingsScreen({
     },
     {
       label: '유일 장비',
-      content: <UniqueItemChips choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
+      content: <UniqueItemSelect choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
     },
     {
       label: '명성',
