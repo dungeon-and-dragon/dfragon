@@ -47,6 +47,7 @@ export type {
 export { readCharacterScores, recordCharacterScore } from './character-score.js'
 export type {
   CharacterScoreInput,
+  CharacterScoreJob,
   CharacterScoreKind,
   StoredCharacterScore,
   StoredCharacterScoreRow
