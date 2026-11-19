@@ -516,6 +516,146 @@ it('모험단 주소는 저장한 모험단이 있으면 기록을 늘리지 않
   expect(window.history.length).toBe(historyLength)
 })
 
+// 세트 id는 웹의 줄임말 표에 있는 게임 값이다.
+const FAIRY_SET = '4ee7bd5912cda6e2a24c1f36d5202b46'
+const ONYX_SET = '11f7d203a05ea6f13300c0facb39f11e'
+
+function equipmentCharacter(serverId: 'cain' | 'siroco', name: string) {
+  return {
+    serverId,
+    characterId: `${serverId}-character`,
+    characterName: name,
+    adventureName: '합성 모험단',
+    level: 115,
+    jobId: null,
+    jobGrowId: null,
+    jobName: null,
+    jobGrowName: null,
+    fame: 1000,
+    guildId: null,
+    guildName: null,
+    role: null,
+    equipment: [],
+    oaths: []
+  }
+}
+
+function serveEquipment(): void {
+  const cainCharacter = equipmentCharacter('cain', '카인캐릭터')
+  const sirocoCharacter = equipmentCharacter('siroco', '시로코캐릭터')
+
+  server.use(
+    http.get(`${SITE_API_URL}/adventures/:adventureName/equipment`, ({ params }) =>
+      HttpResponse.json({
+        adventureName: params.adventureName,
+        sets: [
+          { setItemId: FAIRY_SET, setItemName: '소울 페어리 세트' },
+          { setItemId: ONYX_SET, setItemName: '칠흑의 정화 세트' }
+        ],
+        servers: [
+          { serverId: 'cain', characters: [cainCharacter] },
+          { serverId: 'siroco', characters: [sirocoCharacter] }
+        ]
+      })
+    )
+  )
+}
+
+function adventureTabs(): [string | null, string | null][] {
+  return [...container.querySelectorAll('nav[aria-label="모험단"] a')].map((link) => [
+    link.textContent,
+    link.getAttribute('aria-current')
+  ])
+}
+
+function equipmentNames(): (string | null)[] {
+  return [...container.querySelectorAll('section[aria-label="장비"] table tbody tr a')].map(
+    (link) => link.textContent
+  )
+}
+
+function pressedChip(group: string): string | null | undefined {
+  return container.querySelector(
+    `[role="group"][aria-label="${group}"] button[aria-pressed="true"]`
+  )?.textContent
+}
+
+async function clickText(selector: string, text: string): Promise<void> {
+  const target = [...container.querySelectorAll<HTMLElement>(selector)].find(
+    (element) => element.textContent === text
+  )!
+  await act(async () => target.click())
+}
+
+it('모험단 화면의 장비 탭을 누르면 장비 주소로 가고, 세트와 서버를 바꾸면 주소에 남아 다시 열어도 같은 표를 보인다', async () => {
+  serveAdventure()
+  serveEquipment()
+  const encodedName = encodeURIComponent('합성 모험단')
+  window.history.replaceState(null, '', `/adventures/${encodedName}`)
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() =>
+    expect(adventureTabs()).toEqual([
+      ['활동', 'page'],
+      ['장비', null]
+    ])
+  )
+
+  await clickText('nav[aria-label="모험단"] a', '장비')
+  await waitForPath(`/adventures/${encodedName}/equipment`)
+  await vi.waitFor(() => expect(equipmentNames()).toEqual(['카인캐릭터']))
+  expect(adventureTabs()).toEqual([
+    ['활동', null],
+    ['장비', 'page']
+  ])
+  expect(pressedChip('세트')).toBe('칠흑')
+
+  await clickText('[role="group"][aria-label="세트"] button', '페어리')
+  await clickText('[role="group"][aria-label="서버"] button', '시로코')
+  await vi.waitFor(() =>
+    expect(new URLSearchParams(window.location.search)).toEqual(
+      new URLSearchParams({ server: 'siroco', set: FAIRY_SET })
+    )
+  )
+  expect(equipmentNames()).toEqual(['시로코캐릭터'])
+
+  const address = `${window.location.pathname}${window.location.search}`
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  window.history.replaceState(null, '', address)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(equipmentNames()).toEqual(['시로코캐릭터']))
+  expect(pressedChip('서버')).toBe('시로코')
+  expect(pressedChip('세트')).toBe('페어리')
+})
+
+it('활동 탭의 갱신을 누르면 받아 둔 장비 조회도 다시 받는다', async () => {
+  serveAdventure()
+  serveEquipment()
+  const encodedName = encodeURIComponent('합성 모험단')
+  const equipmentPath = `/adventures/${encodedName}/equipment`
+  window.history.replaceState(null, '', equipmentPath)
+  await act(async () => root.render(<WebApp host={host} />))
+  await vi.waitFor(() => expect(equipmentNames()).toEqual(['카인캐릭터']))
+
+  await clickText('nav[aria-label="모험단"] a', '활동')
+  await waitForPath(`/adventures/${encodedName}`)
+  await vi.waitFor(() =>
+    expect(container.querySelector('main h1')?.textContent).toBe('합성 모험단')
+  )
+  await clickText('main button', '갱신')
+  await vi.waitFor(() =>
+    expect(
+      container.querySelector<HTMLButtonElement>('main form button[type="button"]')?.disabled
+    ).toBe(false)
+  )
+  await clickText('nav[aria-label="모험단"] a', '장비')
+
+  await vi.waitFor(() =>
+    expect(requestedPaths(`/adventures/${encodedName}/equipment`)).toHaveLength(2)
+  )
+})
+
 it('컨텐츠를 고른 예전 클리어 주소는 기록을 늘리지 않고 같은 컨텐츠 묶음과 단계, 주의 상세 주소로 바꾼다', async () => {
   server.use(http.get(`${SITE_API_URL}/stats/clears`, failure))
   window.history.replaceState(null, '', '/clears?content=nabel-hard&week=2026-11-05')

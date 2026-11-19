@@ -4,6 +4,8 @@ import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { STORY_ADVENTURE_NAME } from './api/adventure.fixture'
 import { adventureHandlers } from './api/adventure.handlers'
+import { AdventureEquipmentScreen } from './AdventureEquipmentScreen'
+import type { EquipmentSearch } from './equipment-search'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 const meta = {
@@ -67,4 +69,45 @@ export const 모험단입력: Story = {
       </StoryScreen>
     </StoryFrame>
   )
+}
+
+function EquipmentScreen({ initialSearch = {} }: { initialSearch?: EquipmentSearch }) {
+  const [search, setSearch] = useState(initialSearch)
+
+  return (
+    <StoryFrame>
+      <StoryScreen>
+        <AdventureEquipmentScreen
+          adventureName={STORY_ADVENTURE_NAME}
+          search={search}
+          onSearchChange={setSearch}
+        />
+      </StoryScreen>
+    </StoryFrame>
+  )
+}
+
+export const 장비: Story = {
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <EquipmentScreen />
+}
+
+export const 장비_다른서버: Story = {
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <EquipmentScreen initialSearch={{ server: 'siroco' }} />
+}
+
+export const 장비_받는중: Story = {
+  parameters: { msw: adventureHandlers.loading },
+  render: () => <EquipmentScreen />
+}
+
+export const 장비_받지못함: Story = {
+  parameters: { msw: adventureHandlers.failure },
+  render: () => <EquipmentScreen />
+}
+
+export const 장비_캐릭터없음: Story = {
+  parameters: { msw: adventureHandlers.emptyEquipment },
+  render: () => <EquipmentScreen />
 }

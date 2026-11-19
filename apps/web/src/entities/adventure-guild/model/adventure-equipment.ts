@@ -1,0 +1,116 @@
+import { z } from 'zod'
+import { storedCharacterSchema } from '#entities/ranking/@x/adventure-guild'
+
+export const EQUIPMENT_SLOTS = [
+  '상의',
+  '머리어깨',
+  '하의',
+  '신발',
+  '벨트',
+  '목걸이',
+  '팔찌',
+  '반지',
+  '보조장비',
+  '마법석',
+  '귀걸이'
+] as const
+
+// 높은 등급부터 둔다. 서약 결정 열도 이 순서다.
+export const HOLDING_RARITIES = ['태초', '에픽', '레전더리'] as const
+
+const holdingSchema = z.object({
+  setItemId: z.string(),
+  rarity: z.string(),
+  itemId: z.string(),
+  itemName: z.string(),
+  count: z.number().int().positive()
+})
+
+const equipmentCharacterSchema = storedCharacterSchema.extend({
+  equipment: z.array(holdingSchema.extend({ slot: z.string() })),
+  oaths: z.array(holdingSchema.extend({ kind: z.enum(['oath', 'crystal']) }))
+})
+
+export const adventureEquipmentSchema = z.object({
+  adventureName: z.string(),
+  sets: z.array(z.object({ setItemId: z.string(), setItemName: z.string() })),
+  servers: z.array(
+    z.object({ serverId: z.string(), characters: z.array(equipmentCharacterSchema) })
+  )
+})
+
+export type AdventureEquipment = z.infer<typeof adventureEquipmentSchema>
+export type EquipmentCharacter = z.infer<typeof equipmentCharacterSchema>
+export type EquipmentSlot = (typeof EQUIPMENT_SLOTS)[number]
+
+type Holding = z.infer<typeof holdingSchema>
+
+export type HoldingCell = Readonly<{
+  itemId: string
+  itemName: string
+  rarity: string
+  extraCount: number
+}>
+
+export type EquipmentBoardRow = Readonly<{
+  character: EquipmentCharacter
+  slots: readonly Readonly<{ slot: EquipmentSlot; cell: HoldingCell | null }>[]
+  oath: HoldingCell | null
+  crystalCounts: readonly number[]
+}>
+
+function rarityRank(rarity: string): number {
+  const rank = HOLDING_RARITIES.findIndex((name) => name === rarity)
+
+  if (rank === -1) {
+    return HOLDING_RARITIES.length
+  }
+
+  return rank
+}
+
+function toCell(holdings: readonly Holding[]): HoldingCell | null {
+  const top = holdings.toSorted((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity))[0]
+
+  if (top === undefined) {
+    return null
+  }
+
+  const total = holdings.reduce((sum, { count }) => sum + count, 0)
+  const extraCount = total - 1
+
+  return { itemId: top.itemId, itemName: top.itemName, rarity: top.rarity, extraCount }
+}
+
+function toSlots(equipment: EquipmentCharacter['equipment']): EquipmentBoardRow['slots'] {
+  return EQUIPMENT_SLOTS.map((slot) => {
+    const holdings = equipment.filter((holding) => holding.slot === slot)
+    const cell = toCell(holdings)
+
+    return { slot, cell }
+  })
+}
+
+function compareFame(a: EquipmentCharacter, b: EquipmentCharacter): number {
+  return (b.fame ?? -1) - (a.fame ?? -1)
+}
+
+export function toEquipmentBoard(
+  characters: readonly EquipmentCharacter[],
+  setItemId: string | undefined
+): EquipmentBoardRow[] {
+  return characters.toSorted(compareFame).map((character) => {
+    const equipment = character.equipment.filter((holding) => holding.setItemId === setItemId)
+    const oaths = character.oaths.filter((holding) => holding.setItemId === setItemId)
+    const crystals = oaths.filter(({ kind }) => kind === 'crystal')
+    const crystalCounts = HOLDING_RARITIES.map((rarity) =>
+      crystals
+        .filter((crystal) => crystal.rarity === rarity)
+        .reduce((sum, { count }) => sum + count, 0)
+    )
+    const slots = toSlots(equipment)
+    const oath = toCell(oaths.filter(({ kind }) => kind === 'oath'))
+
+    return { character, slots, oath, crystalCounts }
+  })
+}
