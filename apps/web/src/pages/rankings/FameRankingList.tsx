@@ -1,4 +1,4 @@
-import { Button } from '@dfragon/ui'
+import { Button, Pagination } from '@dfragon/ui'
 import { useState } from 'react'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { OathCatalog } from '#entities/catalog'
@@ -19,6 +19,7 @@ import { rankingName, rankingSetLines } from '#widgets/ranking-filter'
 
 const PAGE_SIZE = 20
 const LOADING_ROWS = 5
+const FAILURE_MESSAGE = '검색 결과를 받지 못했습니다.'
 // 세트 열이 길드 열 자리를 쓴다.
 const AFFILIATIONS: readonly Affiliation[] = ['adventure']
 
@@ -86,7 +87,7 @@ export function FameRankingList({
       return (
         <ListBox name={name}>
           <p role="alert" className="state state-error">
-            {result.message}
+            {FAILURE_MESSAGE}
           </p>
         </ListBox>
       )
@@ -109,6 +110,7 @@ export function FameRankingList({
               filter.equipmentSetId,
               filter.oathSetId,
               filter.oathSetOption,
+              filter.itemIds?.join(','),
               filter.fameFrom,
               filter.fameTo
             ].join('/')}
@@ -127,50 +129,63 @@ function PagedTable({
   ranking: FameRankingPages
   catalog: OathCatalog | null
 }): React.JSX.Element {
-  const [visible, setVisible] = useState(PAGE_SIZE)
+  const [page, setPage] = useState(0)
   const { characters, hasMore, loadingMore, moreError, loadMore } = ranking
-  const canShowMore = visible < characters.length || (hasMore && moreError === null)
+  const start = page * PAGE_SIZE
+  const end = start + PAGE_SIZE
+  const rows = characters.slice(start, end)
+  const failed = rows.length === 0 && moreError !== null && !loadingMore
+  const waiting = rows.length === 0 && !failed
+  const isLastPage = end >= characters.length && !hasMore
+  const skeletonRows = waiting
+    ? Array.from({ length: LOADING_ROWS }, (_, index) => (
+        <SkeletonRow key={index} ranked={false} detail affiliations={AFFILIATIONS} />
+      ))
+    : undefined
 
-  function showMore(): void {
-    const next = visible + PAGE_SIZE
+  function showNext(): void {
+    const nextEnd = end + PAGE_SIZE
 
-    setVisible(next)
+    setPage(page + 1)
 
-    if (characters.length < next) {
+    if (characters.length < nextEnd && hasMore) {
       loadMore()
     }
   }
 
+  function showPrevious(): void {
+    setPage(page - 1)
+  }
+
   return (
     <>
-      <CharacterTable
-        rows={characters.slice(0, visible)}
-        detail={setColumnOf(catalog)}
-        affiliations={AFFILIATIONS}
-        ranked={false}
-        trailing={
-          loadingMore ? (
-            <SkeletonRow ranked={false} detail affiliations={AFFILIATIONS} />
-          ) : undefined
-        }
-      />
-      {!loadingMore && canShowMore && (
-        <div className="flex min-h-12 items-center justify-center border-t border-line">
-          <Button variant="secondary" size="sm" onClick={showMore}>
-            불러오기
-          </Button>
-        </div>
-      )}
-      {moreError !== null && visible >= characters.length && (
-        <div className="state state-error flex-row border-t border-line">
+      {failed ? (
+        <div className="state state-error flex-col border-t border-line">
           <p role="alert" className="m-0">
-            {moreError}
+            {FAILURE_MESSAGE}
           </p>
           <Button variant="secondary" size="sm" onClick={loadMore}>
             다시 시도
           </Button>
         </div>
+      ) : (
+        <div aria-busy={waiting ? 'true' : undefined}>
+          <CharacterTable
+            rows={rows}
+            detail={setColumnOf(catalog)}
+            affiliations={AFFILIATIONS}
+            ranked={false}
+            trailing={skeletonRows}
+          />
+        </div>
       )}
+      <Pagination
+        page={page + 1}
+        onPrevious={showPrevious}
+        onNext={showNext}
+        previousDisabled={page === 0 || waiting}
+        nextDisabled={isLastPage || waiting || failed}
+      />
     </>
   )
 }

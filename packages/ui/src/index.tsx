@@ -39,12 +39,15 @@ export { ConfirmPopover } from './confirm-popover'
 export type { ConfirmPopoverProps } from './confirm-popover'
 export { Tooltip } from './tooltip'
 export type { TooltipPopupProps } from './tooltip'
+export { Pagination } from './pagination'
+export type { PaginationProps } from './pagination'
 export { StatusChip } from './status-chip'
 export type { StatusChipProps, StatusChipTone } from './status-chip'
 export {
   ArrowRightIcon,
   CheckIcon,
   ChevronDownIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
   CloseIcon,
   CopyIcon,
