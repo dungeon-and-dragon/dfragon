@@ -39,6 +39,13 @@ export type {
 } from './character-history'
 export { decodeCharacterImage } from './character-image'
 export {
+  candidatesSchema,
+  isSearchableCharacterName,
+  validateIdentity,
+  validateSearchQuery
+} from './character-schemas'
+export type { CharacterSearchQuery, SearchedCharacter } from './character-schemas'
+export {
   formatCount,
   formatPoint,
   itemIconUrl,

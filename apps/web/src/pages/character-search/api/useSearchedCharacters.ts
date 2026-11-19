@@ -1,10 +1,10 @@
 import {
   type CharacterSearchQuery,
   candidatesSchema,
-  createJsonRequest,
   type SearchedCharacter,
   validateSearchQuery
-} from '#core/api'
+} from '#core/character'
+import { createJsonRequest } from '#shared/api/json-request'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'

@@ -1,4 +1,4 @@
-import { createJsonRequest } from '#core/api'
+import { createJsonRequest } from '#shared/api/json-request'
 import { type SkillStats, type SkillStatsJob, skillStatsSchema } from '#core/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'

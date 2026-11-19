@@ -3,7 +3,7 @@ import type {
   CharacterSearchRow,
   SelectedCharacterSummary
 } from '#core/character/character'
-import type { SearchError } from '#core/api/http'
+import type { SearchError } from '#shared/api/api-error'
 
 export const SEARCH_SLOT_COUNTS = { party: 4, raid: 12 } as const
 export type SearchSlotCount = (typeof SEARCH_SLOT_COUNTS)[keyof typeof SEARCH_SLOT_COUNTS]

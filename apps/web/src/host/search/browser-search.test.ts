@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import type { SearchSnapshot } from '#core/search'
-import { createDfragonClient } from '#core/api'
+import { createDfragonHttp } from '#shared/api/dfragon-http'
 import { decodeBrowserPng } from '#host/browser-png'
 import { browserFetch, createBrowserCardSearch, createBrowserSearchRuntime } from './browser-search'
 
@@ -66,10 +66,9 @@ function requestUrls(fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>): 
 }
 
 function createRuntime() {
-  return createBrowserSearchRuntime(
-    createDfragonClient({ apiOrigin: API_BASE_URL, fetch: browserFetch }),
-    vi.fn()
-  )
+  const http = createDfragonHttp(browserFetch)
+
+  return createBrowserSearchRuntime({ http, apiOrigin: API_BASE_URL }, vi.fn())
 }
 
 // decodeCharacterImage는 PNG signature와 IHDR의 너비, 높이만 읽으므로 1x1 PNG의 앞 33 bytes만 만든다.

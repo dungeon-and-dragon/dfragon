@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import { createJsonRequest, SearchHttpFailure } from '#core/api'
+import { SearchHttpFailure } from '#shared/api/api-error'
+import { createJsonRequest } from '#shared/api/json-request'
 import {
   type FameRanking,
   type FameRankingFilter,

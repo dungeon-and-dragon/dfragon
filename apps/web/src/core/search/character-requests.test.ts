@@ -1,20 +1,28 @@
-import { describe, expect, it, vi } from 'vitest'
-import type { SearchErrorCode } from './http'
-import { createDfragonClient } from './dfragon-client'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { SearchErrorCode } from '#shared/api/api-error'
+import { createDfragonHttp } from '#shared/api/dfragon-http'
+import {
+  type CharacterApi,
+  requestCharacterCandidates,
+  requestCharacterDetails,
+  requestCharacterImage
+} from './character-requests'
 
 const API_ORIGIN = 'https://api.example.test'
 const NOT_FOUND_MESSAGE = 'API가 보낸 없는 캐릭터 문구'
 
-function respondWith(body: unknown, status: number) {
-  const fetch = vi.fn<typeof globalThis.fetch>(
-    async () => new Response(JSON.stringify(body), { status })
-  )
+function characterApi(fetch: typeof globalThis.fetch): CharacterApi {
+  const http = createDfragonHttp(fetch)
 
-  return { apiOrigin: API_ORIGIN, fetch }
+  return { http, apiOrigin: API_ORIGIN }
+}
+
+function respondWith(body: unknown, status: number): CharacterApi {
+  return characterApi(async () => new Response(JSON.stringify(body), { status }))
 }
 
 function readDetails(body: unknown, status: number) {
-  return createDfragonClient(respondWith(body, status)).characters.details({
+  return requestCharacterDetails(respondWith(body, status), {
     serverId: 'cain',
     characterId: 'missing-character',
     signal: new AbortController().signal
@@ -35,12 +43,13 @@ describe('없는 캐릭터의 404 응답', () => {
   })
 
   it('후보 검색은 404 CHARACTER_NOT_FOUND를 받아도 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
-    const candidates = createDfragonClient(
-      respondWith({ error: { code: 'CHARACTER_NOT_FOUND', message: NOT_FOUND_MESSAGE } }, 404)
-    ).characters.candidates
+    const api = respondWith(
+      { error: { code: 'CHARACTER_NOT_FOUND', message: NOT_FOUND_MESSAGE } },
+      404
+    )
 
     await expect(
-      candidates({ nickname: '가나', signal: new AbortController().signal })
+      requestCharacterCandidates(api, { nickname: '가나', signal: new AbortController().signal })
     ).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
   })
 })
@@ -48,17 +57,14 @@ describe('없는 캐릭터의 404 응답', () => {
 type Route = 'candidates' | 'details'
 
 function request(route: Route, response: Response): Promise<unknown> {
-  const options = {
-    apiOrigin: API_ORIGIN,
-    fetch: vi.fn<typeof globalThis.fetch>(async () => response)
-  }
+  const api = characterApi(async () => response)
   const signal = new AbortController().signal
   const identity = { serverId: 'cain', characterId: 'character-1' }
   switch (route) {
     case 'candidates':
-      return createDfragonClient(options).characters.candidates({ nickname: '가나', signal })
+      return requestCharacterCandidates(api, { nickname: '가나', signal })
     case 'details':
-      return createDfragonClient(options).characters.details({ ...identity, signal })
+      return requestCharacterDetails(api, { ...identity, signal })
   }
 }
 
@@ -162,7 +168,7 @@ describe('캐릭터 이미지 요청', () => {
 
   function readImage(response: Response) {
     const fetch = vi.fn<typeof globalThis.fetch>(async () => response)
-    const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).characters.image({
+    const read = requestCharacterImage(characterApi(fetch), {
       serverId: 'cain',
       characterId: 'character-1',
       signal: new AbortController().signal
@@ -196,4 +202,53 @@ describe('캐릭터 이미지 요청', () => {
   ])('%i 응답은 %s로 실패한다', async (status, code) => {
     await expect(readImage(new Response(null, { status })).read).rejects.toMatchObject({ code })
   })
+})
+
+describe('카드 검색 요청의 timeout과 재시도', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  function requestRoute(route: Route | 'image', fetch: typeof globalThis.fetch): Promise<unknown> {
+    const api = characterApi(fetch)
+    const signal = new AbortController().signal
+    const identity = { serverId: 'cain', characterId: 'character-1', signal }
+    switch (route) {
+      case 'candidates':
+        return requestCharacterCandidates(api, { nickname: '가나', signal })
+      case 'details':
+        return requestCharacterDetails(api, identity)
+      case 'image':
+        return requestCharacterImage(api, identity)
+    }
+  }
+
+  it.each(['candidates', 'details', 'image'] as const)(
+    '%s는 응답이 없으면 10초 안에 SEARCH_TIMEOUT으로 실패한다',
+    async (route) => {
+      vi.useFakeTimers()
+      const fetch = vi.fn<typeof globalThis.fetch>(() => new Promise<never>(() => {}))
+      const failed = expect(requestRoute(route, fetch)).rejects.toMatchObject({
+        code: 'SEARCH_TIMEOUT'
+      })
+
+      await vi.advanceTimersByTimeAsync(10_000)
+
+      await failed
+    }
+  )
+
+  it.each(['candidates', 'details', 'image'] as const)(
+    '%s는 연결에 실패하면 다시 보내지 않고 SEARCH_NETWORK_ERROR로 실패한다',
+    async (route) => {
+      const fetch = vi.fn<typeof globalThis.fetch>(async () => {
+        throw new TypeError('Failed to fetch')
+      })
+
+      await expect(requestRoute(route, fetch)).rejects.toMatchObject({
+        code: 'SEARCH_NETWORK_ERROR'
+      })
+      expect(fetch).toHaveBeenCalledOnce()
+    }
+  )
 })
