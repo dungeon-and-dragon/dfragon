@@ -20,6 +20,5 @@ export type {
   SeasonActivity,
   StoredActivitySeason
 } from './activity.js'
-export { averageFame } from './fame.js'
 export { toAdventureWeeklyClears } from './weekly.js'
 export type { AdventureWeeklyClears } from './weekly.js'
