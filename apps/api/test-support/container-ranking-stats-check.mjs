@@ -195,9 +195,21 @@ try {
 
     // 모두 같은 무기를 끼고, 짝수 번째만 같은 유일 장비 반지를 낀다.
     const items = [
-      { slotId: 'WEAPON', itemId: 'item-rank-weapon', itemName: '합성 랭킹 무기' },
+      {
+        slotId: 'WEAPON',
+        itemId: 'item-rank-weapon',
+        itemName: '합성 랭킹 무기',
+        typeDetail: '도'
+      },
       ...(index % 2 === 0
-        ? [{ slotId: 'RING', itemId: 'item-rank-ring', itemName: '합성 랭킹 반지' }]
+        ? [
+            {
+              slotId: 'RING',
+              itemId: 'item-rank-ring',
+              itemName: '합성 랭킹 반지',
+              typeDetail: '반지'
+            }
+          ]
         : [])
     ]
 

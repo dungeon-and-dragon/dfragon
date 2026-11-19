@@ -27,6 +27,10 @@ const equipmentSchema = z.looseObject({
         slotId: z.string().nullish(),
         itemId: z.string().nullish(),
         itemName: z.string().nullish(),
+        itemTypeDetail: z
+          .string()
+          .nullish()
+          .transform((value) => value || null),
         setItemId: z.string().nullish(),
         setItemName: z.string().nullish(),
         exaltedInfo: z.unknown().optional()
@@ -84,14 +88,14 @@ const WEAPON_SLOT_ID = 'WEAPON'
 
 // 유일 장비는 exaltedInfo가 있는 부위라, 유일 장비가 다른 부위에 생겨도 부위 목록을 고치지 않는다.
 function toItems({ equipment }: z.output<typeof equipmentSchema>): CharacterItem[] {
-  return (equipment ?? []).flatMap(({ slotId, itemId, itemName, exaltedInfo }) => {
+  return (equipment ?? []).flatMap(({ slotId, itemId, itemName, itemTypeDetail, exaltedInfo }) => {
     const kept = slotId === WEAPON_SLOT_ID || exaltedInfo != null
 
     if (!kept || !slotId || !itemId || !itemName) {
       return []
     }
 
-    return [{ slotId, itemId, itemName }]
+    return [{ slotId, itemId, itemName, typeDetail: itemTypeDetail }]
   })
 }
 

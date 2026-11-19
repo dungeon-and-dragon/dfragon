@@ -65,11 +65,17 @@ function equippedSections(basic: Record<string, unknown>) {
     equipment: {
       ...basic,
       equipment: [
-        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
+        {
+          slotId: 'WEAPON',
+          itemId: 'synthetic-weapon',
+          itemName: '합성 무기',
+          itemTypeDetail: '도'
+        },
         {
           slotId: 'SUPPORT',
           itemId: 'synthetic-support',
           itemName: '합성 보조장비',
+          itemTypeDetail: '보조장비',
           exaltedInfo: { damage: '1%' }
         },
         { slotId: 'JACKET', setItemId: 'synthetic-set', setItemName: '합성 세트' }
@@ -475,8 +481,13 @@ test('상세를 받은 캐릭터마다 뽑은 세트와 무기, 유일 장비를
       equipmentSet: { id: 'synthetic-set', name: '합성 세트' },
       oathSet: { id: 16204, name: '합성 서약', option: '합성 선택지' },
       items: [
-        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
-        { slotId: 'SUPPORT', itemId: 'synthetic-support', itemName: '합성 보조장비' }
+        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기', typeDetail: '도' },
+        {
+          slotId: 'SUPPORT',
+          itemId: 'synthetic-support',
+          itemName: '합성 보조장비',
+          typeDetail: '보조장비'
+        }
       ],
       fetchedAt: NOW
     },
