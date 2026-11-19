@@ -65,6 +65,20 @@ it('랭킹 응답을 그대로 읽고 정한 직업, 전직, 역할만 query로 
   )
 })
 
+it('명성 범위를 query로 보내고, 거꾸로 된 범위는 요청하지 않고 거부한다', async () => {
+  const fetch = respond(ranking)
+  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).rankings.fame
+
+  await read({ jobId: 'job-1', fameFrom: 136000, fameTo: 138000 })
+  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
+    `${API_ORIGIN}/rankings/fame?jobId=job-1&fameFrom=136000&fameTo=138000`
+  )
+  await read({ fameFrom: 0 })
+  expect(new Request(fetch.mock.calls[1][0]).url).toBe(`${API_ORIGIN}/rankings/fame?fameFrom=0`)
+  await expect(read({ fameFrom: 138000, fameTo: 136000 })).rejects.toThrow()
+  expect(fetch).toHaveBeenCalledTimes(2)
+})
+
 it('빈 랭킹도 읽는다', async () => {
   const read = createDfragonClient({
     apiOrigin: API_ORIGIN,

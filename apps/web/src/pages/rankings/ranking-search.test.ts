@@ -140,3 +140,15 @@ it('주소의 itemIds와 랭킹 필터의 itemId 목록을 서로 바꾼다', ()
   })
   expect(rankingSearchOf({ itemIds: [] })).toEqual({})
 })
+
+it('명성 범위는 router가 읽은 0 이상의 정수만 받고, 거꾸로 된 범위와 빈 값, 10자리 이상은 버린다', () => {
+  expect(parseRankingSearch({ fameFrom: 136000, fameTo: 138000 })).toEqual({
+    fameFrom: 136000,
+    fameTo: 138000
+  })
+  expect(parseRankingSearch({ fameFrom: 0 })).toEqual({ fameFrom: 0 })
+  expect(parseRankingSearch({ fameTo: 138000 })).toEqual({ fameTo: 138000 })
+  expect(parseRankingSearch({ fameFrom: 138000, fameTo: 136000 })).toEqual({})
+  expect(parseRankingSearch({ fameFrom: '', fameTo: 1.5 })).toEqual({})
+  expect(parseRankingSearch({ fameTo: 1_000_000_000 })).toEqual({})
+})

@@ -228,6 +228,58 @@ test('명성 랭킹은 쉼표로 이은 itemIds를 목록으로 바꿔 세트, �
   }
 })
 
+test('명성 랭킹은 fameFrom, fameTo를 숫자로 바꿔 직업 필터와 함께 넘긴다', async () => {
+  const reads: FameRankingFilter[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (filter) => {
+      reads.push(filter)
+
+      return []
+    }
+  })
+
+  try {
+    const range = await getJson(
+      origin,
+      '/rankings/fame?jobId=synthetic-job&fameFrom=136000&fameTo=138000'
+    )
+    const same = await getJson(origin, '/rankings/fame?fameFrom=0&fameTo=0')
+    const from = await getJson(origin, '/rankings/fame?fameFrom=136000')
+
+    assert.deepEqual([range.status, same.status, from.status], [200, 200, 200])
+    assert.deepEqual(reads, [
+      { jobId: 'synthetic-job', fameFrom: 136000, fameTo: 138000 },
+      { fameFrom: 0, fameTo: 0 },
+      { fameFrom: 136000 }
+    ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹은 음수, 소수, 0으로 시작하는 수, 10자리 이상, 빈 값, 중복, fameTo보다 큰 fameFrom을 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+
+  try {
+    for (const query of [
+      'fameFrom=-1',
+      'fameFrom=1.5',
+      'fameFrom=0136000',
+      'fameTo=1000000000',
+      'fameFrom=',
+      'fameTo=1&fameTo=2',
+      'fameFrom=138000&fameTo=136000'
+    ]) {
+      const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
+      assert.equal(status, 400, query)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+    }
+  } finally {
+    await app.close()
+  }
+})
+
 test('명성 랭킹은 빈 itemIds와 빈 항목, 같은 itemId의 중복, 여섯 개 이상, 같은 key의 중복을 400으로 거절한다', async () => {
   const { app, origin } = await listen(unusedReader)
   try {

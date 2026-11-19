@@ -391,13 +391,18 @@ export function createDfragonClient({
       async fame(filter, cursor) {
         if (
           (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
-          (filter.oathSetOption !== undefined && filter.oathSetId === undefined)
+          (filter.oathSetOption !== undefined && filter.oathSetId === undefined) ||
+          (filter.fameFrom !== undefined &&
+            filter.fameTo !== undefined &&
+            filter.fameFrom > filter.fameTo)
         ) {
           throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
         }
 
         const oathSetId = filter.oathSetId !== undefined ? String(filter.oathSetId) : undefined
         const itemIds = itemIdsParam(filter.itemIds)
+        const fameFrom = filter.fameFrom !== undefined ? String(filter.fameFrom) : undefined
+        const fameTo = filter.fameTo !== undefined ? String(filter.fameTo) : undefined
 
         return requestJson('/rankings/fame', fameRankingSchema, {
           searchParams: {
@@ -408,6 +413,8 @@ export function createDfragonClient({
             ...(oathSetId !== undefined && { oathSetId }),
             ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption }),
             ...(itemIds !== undefined && { itemIds }),
+            ...(fameFrom !== undefined && { fameFrom }),
+            ...(fameTo !== undefined && { fameTo }),
             ...(cursor !== undefined && { cursor })
           }
         })
