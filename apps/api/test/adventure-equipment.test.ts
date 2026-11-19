@@ -3,6 +3,7 @@ import test from 'node:test'
 import type { ItemDictionaryEntry, StoredCharacter, StoredSeason } from '@dfragon/database'
 import {
   type HoldingRecord,
+  selectAdventureEquipment,
   toAdventureEquipment,
   toEquipmentWindow
 } from '../src/domain/adventure-guild/equipment.js'
@@ -24,12 +25,21 @@ const LATEST_ITEM =
   '칸의 아이템 id와 이름은 out이 아닌 가장 최근 기록의 값이고, sets는 응답에 나온 세트만 담는다'
 const GROUPS_UNIQUE =
   '세트가 없고 이름이 "고유 - "로 시작하는 장비는 고유 세트 하나로 묶고, 이름에 고유가 없는 세트 없는 장비는 없다'
+const SORTS_SETS =
+  'sets는 세트 순서 표의 세트가 먼저 표 순서로 오고, 표에 없는 세트는 그 뒤에 이름순으로 온다'
+const SELECTS_QUERY =
+  '고른 서버, 세트를 주면 그 서버의 캐릭터만 그 세트의 보유로 남고, 칩 목록은 모험단 전체 기준이다'
+const DEFAULT_SELECTION =
+  '서버, 세트가 없거나 모험단에 없는 값이면 첫 서버와 sets의 첫 세트를 고른다'
+const NO_CHARACTER = '캐릭터가 없는 모험단은 고른 값이 null이다'
 const WINDOW_START =
   '기록은 지금 시즌과 장비 레벨이 같은 시즌 가운데 가장 이른 시즌의 시작부터 읽는다'
 
 // 합성 캐릭터, itemId, 세트다. 사전 값의 itemType, itemTypeDetail은 실제 Neople 응답의 모양을 흉내 냈다.
 const valkyrie = 'v'.repeat(32)
 const purify = 'p'.repeat(32)
+// 세트 순서 표의 첫 세트(황금향)인 실제 Neople setItemId다.
+const golden = '7f788a703a87d783079b41d0fe6448c9'
 const ids = {
   top: 'a'.repeat(32),
   fusedTop: 'b'.repeat(32),
@@ -45,7 +55,8 @@ const ids = {
   unknown: '6'.repeat(32),
   uniqueRing: '7'.repeat(32),
   noSetEarring: '8'.repeat(32),
-  uniqueTop: '9'.repeat(32)
+  uniqueTop: '9'.repeat(32),
+  goldenTop: '0'.repeat(32)
 }
 
 function entry(
@@ -71,6 +82,7 @@ const dictionary = new Map(
     entry(ids.topPrimeval, { itemRarity: '태초' }),
     entry(ids.ring, { itemType: '액세서리', itemTypeDetail: '반지' }),
     entry(ids.purifyTop, { setItemId: purify, setItemName: '정화 세트' }),
+    entry(ids.goldenTop, { setItemId: golden, setItemName: '황금향 세트' }),
     entry(ids.oath, { itemType: '서약', itemTypeDetail: '서약', itemRarity: '태초' }),
     entry(ids.crystal, { itemType: '서약결정', itemTypeDetail: '서약결정', itemRarity: '에픽' }),
     entry(ids.title, {
@@ -281,6 +293,83 @@ test(GROUPS_UNIQUE, () => {
     ]
   )
   assert.deepEqual(equipment.sets, [{ setItemId: 'unique', setItemName: '고유' }])
+})
+
+test(SORTS_SETS, () => {
+  const equipment = holdingsOf([
+    record(505, ids.purifyTop),
+    record(505, ids.uniqueTop, { itemName: '고유 - 합성 상의' }),
+    record(505, ids.ring),
+    record(505, ids.goldenTop)
+  ])
+
+  assert.deepEqual(
+    equipment.sets.map(({ setItemName }) => setItemName),
+    ['황금향 세트', '고유', '발키리 세트', '정화 세트']
+  )
+})
+
+const siroco = character('siroco', 'b')
+
+function twoServerEquipment() {
+  return holdingsOf(
+    [
+      record(505, ids.top),
+      record(505, ids.purifyTop),
+      record(505, ids.ring, { owner: siroco }),
+      record(505, ids.purifyTop, { owner: siroco })
+    ],
+    [cain, siroco]
+  )
+}
+
+function shownHoldings(equipment: ReturnType<typeof selectAdventureEquipment>) {
+  return equipment.servers.map(({ serverId, characters }) => [
+    serverId,
+    characters.map(({ characterId, equipment: holdings }) => [
+      characterId,
+      holdings.map(({ setItemId, slot }) => `${setItemId.slice(0, 1)}/${slot}`)
+    ])
+  ])
+}
+
+test(SELECTS_QUERY, () => {
+  const all = twoServerEquipment()
+  const selected = selectAdventureEquipment(all, { serverId: 'siroco', setItemId: valkyrie })
+
+  assert.deepEqual(selected.selected, { serverId: 'siroco', setItemId: valkyrie })
+  assert.deepEqual(selected.sets, all.sets)
+  assert.deepEqual(shownHoldings(selected), [
+    ['cain', []],
+    ['siroco', [['b', ['v/반지']]]]
+  ])
+})
+
+test(DEFAULT_SELECTION, () => {
+  const all = twoServerEquipment()
+  const expected = [
+    ['cain', [['a', ['v/상의']]]],
+    ['siroco', []]
+  ]
+
+  for (const query of [
+    { serverId: undefined, setItemId: undefined },
+    { serverId: 'unknown', setItemId: 'unknown' }
+  ]) {
+    const selected = selectAdventureEquipment(all, query)
+
+    assert.deepEqual(selected.selected, { serverId: 'cain', setItemId: valkyrie })
+    assert.deepEqual(shownHoldings(selected), expected)
+  }
+})
+
+test(NO_CHARACTER, () => {
+  const selected = selectAdventureEquipment(holdingsOf([], []), {
+    serverId: 'cain',
+    setItemId: valkyrie
+  })
+
+  assert.deepEqual(selected, { sets: [], servers: [], selected: null })
 })
 
 test(WINDOW_START, () => {

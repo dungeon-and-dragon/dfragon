@@ -183,7 +183,7 @@ test('DB 설정이 없는 API는 모험단 캐릭터, 길드, 주간, 장비, �
     })
     assert.deepEqual(await getJson(origin, '/adventures/%ED%95%A9%EC%84%B1/equipment'), {
       status: 200,
-      body: { adventureName: '합성', sets: [], servers: [] }
+      body: { adventureName: '합성', sets: [], servers: [], selected: null }
     })
     const activity = await getJson(origin, '/adventures/%ED%95%A9%EC%84%B1/activity')
     assert.equal(activity.status, 200)
@@ -365,7 +365,7 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
   }
 })
 
-test('모험단 장비 조회는 서버별 캐릭터마다 동기화를 요청하고 끝나기를 기다리지 않는다', async () => {
+test('모험단 장비 조회는 고른 서버, 세트의 보유만 주고, 모든 서버의 캐릭터마다 동기화를 요청하고 끝나기를 기다리지 않는다', async () => {
   const requested: TimelineCharacter[] = []
   let release!: () => void
   const syncing = new Promise<void>((resolve) => {
@@ -379,14 +379,17 @@ test('모험단 장비 조회는 서버별 캐릭터마다 동기화를 요청�
     itemName: '합성 상의',
     count: 1
   }
+  const otherSet = { ...holding, setItemId: 'w'.repeat(32), slot: '하의' }
+  const cain = { ...memberRow('a', 70000, null), equipment: [holding, otherSet], oaths: [] }
   const siroco = { ...memberRow('b', 60000, null), serverId: 'siroco' }
+  const sets = [
+    { setItemId: 'v'.repeat(32), setItemName: '합성 세트' },
+    { setItemId: 'w'.repeat(32), setItemName: '합성 다른 세트' }
+  ]
   const equipment = {
-    sets: [{ setItemId: 'v'.repeat(32), setItemName: '합성 세트' }],
+    sets,
     servers: [
-      {
-        serverId: 'cain',
-        characters: [{ ...memberRow('a', 70000, null), equipment: [holding], oaths: [] }]
-      },
+      { serverId: 'cain', characters: [cain] },
       { serverId: 'siroco', characters: [{ ...siroco, equipment: [], oaths: [] }] }
     ]
   }
@@ -412,15 +415,23 @@ test('모험단 장비 조회는 서버별 캐릭터마다 동기화를 요청�
   )
 
   try {
-    const { status, body } = await getJson(
-      origin,
-      `/adventures/${encodeURIComponent('합성 모험단')}/equipment`
+    const path = `/adventures/${encodeURIComponent('합성 모험단')}/equipment`
+    const { status, body } = await getJson(origin, `${path}?server=cain&set=${'w'.repeat(32)}`)
+    const expected = JSON.parse(
+      JSON.stringify({
+        adventureName: '합성 모험단',
+        sets,
+        servers: [
+          { serverId: 'cain', characters: [{ ...cain, equipment: [otherSet] }] },
+          { serverId: 'siroco', characters: [] }
+        ],
+        selected: { serverId: 'cain', setItemId: 'w'.repeat(32) }
+      })
     )
-
-    const expected = JSON.parse(JSON.stringify({ adventureName: '합성 모험단', ...equipment }))
 
     assert.equal(status, 200)
     assert.deepEqual(body, expected)
+    assert.equal((await getJson(origin, `${path}?set=a&set=b`)).status, 400)
     release()
 
     while (requested.length < 2) {
