@@ -1,6 +1,6 @@
 import { Button } from '@dfragon/ui'
 import { useState } from 'react'
-import { MISSING_VALUE } from '#core/capture'
+import { MISSING_VALUE } from '#features/capture-search'
 import type { OathCatalog } from '#entities/catalog'
 import {
   type Affiliation,

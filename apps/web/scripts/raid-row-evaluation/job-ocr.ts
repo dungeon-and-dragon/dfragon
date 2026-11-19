@@ -1,5 +1,8 @@
-import { binarizeRaidTextPixels } from '#core/ocr/nickname-pixels'
-import { normalizedBgr, normalizedNicknameBgr } from '#core/ocr/paddle-recognition'
+import {
+  binarizeRaidTextPixels,
+  normalizedBgr,
+  normalizedNicknameBgr
+} from '#features/capture-search'
 import type { CharacterImage } from '#entities/character'
 import { createOcrRecognizer } from '#scripts/shared/onnx-ocr'
 import type { JobOcrPreprocessing } from './evaluate'

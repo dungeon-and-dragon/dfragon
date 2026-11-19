@@ -1,4 +1,4 @@
-import type { FavoriteCharacter } from '#hooks/useFavoriteCharacterStore'
+import type { FavoriteCharacter } from '#features/favorite-character'
 import { storyRankedCharacters } from './story-characters'
 
 // 캐릭터, 모험단, 길드 이름은 실제 값이 아닌 합성 값이다.

@@ -1,5 +1,9 @@
-import type { SeatMoveNotice } from '#hooks/useSeatMove'
-import { seatDirections, type SeatDirection, type SeatLayout } from '#core/capture'
+import {
+  seatDirections,
+  type SeatDirection,
+  type SeatLayout,
+  type SeatMoveNotice
+} from '#features/capture-search'
 
 const directionLabels: Readonly<Record<SeatDirection, string>> = {
   up: '위',

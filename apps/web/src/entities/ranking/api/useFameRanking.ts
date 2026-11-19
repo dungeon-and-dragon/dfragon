@@ -8,7 +8,7 @@ import {
   fameRankingSchema,
   type RankedCharacter
 } from '#entities/ranking/model/ranking-stats'
-import { ITEM_FILTER_LIMIT } from '#core/ranking'
+import { ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 

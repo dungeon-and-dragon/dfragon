@@ -11,8 +11,8 @@ import {
   type SlotState,
   type SnapshotMark,
   swapSeats
-} from '#core/capture'
-import { dealerCard } from '#core/testing'
+} from '#features/capture-search'
+import { dealerCard } from '#testing/fixtures/character'
 import { RaidScreen } from './RaidScreen'
 import { TestRouter } from '#testing/test-support/test-router'
 

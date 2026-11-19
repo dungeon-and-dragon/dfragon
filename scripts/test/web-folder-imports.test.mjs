@@ -9,6 +9,7 @@ import { promisify } from 'node:util'
 import { lintSamples } from './fixtures/biome-lint.mjs'
 
 const src = 'apps/web/src'
+const captureLib = 'features/capture-search/lib'
 const rejectedImports = [
   ['pages/a/dynamic.ts', '../shared', '#<폴더>/...', "export const used = import('../shared')\n"],
   [
@@ -20,40 +21,30 @@ const rejectedImports = [
   ['pages/a/export.ts', '../shared', '#<폴더>/...', "export { value } from '../shared'\n"],
   ['pages/a/parent.ts', '../shared', '#<폴더>/...'],
   ['pages/a/deep.ts', '../../../hooks/useShared', '#<폴더>/...'],
-  ['core/search/parent.ts', '../character/character', '#<폴더>/...'],
+  [`${captureLib}/search/parent.ts`, '../capture/cards', '#<폴더>/...'],
   ['components/parent.ts', '../hooks/useShared', '#<폴더>/...'],
-  ['host/parent.ts', '../core/search', '#<폴더>/...'],
-  ['core/component-alias.ts', '#components/Shared', 'UI 폴더'],
-  ['core/hook-alias.ts', '#hooks/useShared', 'UI 폴더'],
-  ['core/page-alias.ts', '#pages/a', 'UI 폴더'],
-  ['core/host-alias.ts', '#host/client-host', 'UI 폴더'],
-  ['core/app-alias.ts', '#app/router', 'UI 폴더'],
-  ['core/widget-alias.ts', '#widgets/global-bar', 'UI 폴더'],
-  ['core/shared-ui-alias.ts', '#shared/ui/ListBox', 'UI 폴더'],
-  ['core/feature-alias.ts', '#features/favorite', 'UI 폴더'],
-  ['core/animation-alias.ts', '#shared/lib/animations/gsap-motion', 'UI 폴더'],
+  [`${captureLib}/component-alias.ts`, '#components/Shared', captureLib],
+  [`${captureLib}/hook-alias.ts`, '#hooks/useShared', captureLib],
+  [`${captureLib}/page-alias.ts`, '#pages/a', captureLib],
+  [`${captureLib}/app-alias.ts`, '#app/router', captureLib],
+  [`${captureLib}/widget-alias.ts`, '#widgets/global-bar', captureLib],
+  [`${captureLib}/shared-ui-alias.ts`, '#shared/ui/ListBox', captureLib],
+  [`${captureLib}/feature-alias.ts`, '#features/favorite', captureLib],
+  [`${captureLib}/animation-alias.ts`, '#shared/lib/animations/gsap-motion', captureLib],
   ['components/a.ts', '#pages/a/APage', 'pages/'],
   ['components/nested/b.ts', '#pages/a/util', 'pages/'],
   ['hooks/a.ts', '#pages/a/APage', 'pages/'],
   ['hooks/index.ts', '#pages', 'pages/'],
-  ['host/a.ts', '#pages/a/APage', 'pages/'],
-  ['host/nested/b.ts', '#components/Shared', 'components/'],
-  ['host/nested/c.ts', '#hooks/useShared', 'hooks/'],
-  ['host/index-import.ts', '#components', 'components/'],
-  ['host/alias.ts', '#ui/components/Thing', 'components/'],
   ['hooks/alias.ts', '#pages/a/APage', 'pages/'],
-  ['host/direct-alias.ts', '#components/Thing', 'components/'],
-  ['core/a.ts', 'react', 'UI 폴더'],
-  ['core/b.ts', '#components/Shared', 'UI 폴더']
+  [`${captureLib}/ocr/react.ts`, 'react', captureLib],
+  [`${captureLib}/ocr/react-dom.ts`, 'react-dom', captureLib],
+  [`${captureLib}/capture/ui.ts`, '@dfragon/ui', captureLib]
 ]
 const allowedImports = [
   ['pages/a/same.ts', './local'],
   ['components/allowed.ts', '#hooks/useShared'],
   ['hooks/allowed.ts', '#components/Shared'],
-  ['host/allowed.ts', '#core/search'],
-  ['host/package.ts', '@dfragon/ui/components/Thing'],
-  ['host/package-index.ts', '@dfragon/ui/hooks'],
-  ['core/allowed.ts', './search/search']
+  [`${captureLib}/same-folder.ts`, './browser-png']
 ]
 
 function importing(source) {
@@ -135,7 +126,6 @@ const aliasAllowed = [
   ['src/pages/a/component.ts', '#components/Shared', 'src/components/Shared.tsx'],
   ['src/pages/a/shared-ui.ts', '#shared/ui/ListBox', 'src/shared/ui/ListBox.tsx'],
   ['src/pages/a/hook.ts', '#hooks/useShared', 'src/hooks/useShared.ts'],
-  ['src/pages/a/host.ts', '#host/client-host', 'src/host/client-host.tsx'],
   ['src/pages/a/lib.ts', '#lib/shared', 'src/lib/shared.ts'],
   ['src/pages/a/testing.ts', '#testing/fixture', 'src/testing/fixture.tsx'],
   ['src/app/other-screen.ts', '#pages/b', 'src/pages/b/index.ts'],
@@ -170,15 +160,6 @@ const layerRejected = [
   ['src/shared/config/legacy-hook.ts', '#hooks/useShared', 'shared-legacy-imports'],
   ['src/components/page.ts', '#pages/b', 'legacy-layer-imports'],
   ['src/core/app.ts', '#app/router', 'legacy-layer-imports'],
-  ['src/core/character/search.ts', '#core/search/search', 'character-feature-imports'],
-  ['src/core/character/search-index.ts', '#core/search', 'character-feature-imports'],
-  [
-    'src/core/character/capture-type.ts',
-    '#core/capture/cards-types',
-    'character-feature-imports',
-    "import type { Value } from '#core/capture/cards-types'\nexport type Used = Value\n"
-  ],
-  ['src/core/character/ocr.ts', '../ocr/ocr', 'character-feature-imports'],
   ['src/pages/a/inner.test.ts', '#entities/character/model/character', 'slice-index'],
   [
     'src/entities/character/model/uses-fixture.ts',
@@ -246,7 +227,6 @@ async function cruiseSamples() {
       'src/shared/lib/time-format.ts',
       'src/components/Shared.tsx',
       'src/lib/shared.ts',
-      'src/host/client-host.tsx',
       'src/testing/fixture.tsx',
       'src/pages/a/hooks/useThing.ts',
       'src/pages/b/hooks/useThing.ts',
@@ -258,8 +238,6 @@ async function cruiseSamples() {
       'src/pages/rankings/RankingsScreen.tsx',
       'src/hooks/useShared.ts',
       'src/core/search/search.ts',
-      'src/core/capture/cards-types.ts',
-      'src/core/ocr/ocr.ts',
       'src/core/character/character-detail-view.ts',
       'src/core/character/nested/helper.ts',
       'src/widgets/global-bar/index.ts',

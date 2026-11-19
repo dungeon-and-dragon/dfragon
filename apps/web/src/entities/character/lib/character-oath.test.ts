@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { characterDetailFixture } from '#core/testing'
+import { characterDetailFixture } from '#testing/fixtures/character'
 import { toOathView } from './character-oath'
 
 function oathOf(role: 'dealer' | 'buffer') {

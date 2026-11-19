@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MISSING_VALUE } from '#core/capture'
+import { MISSING_VALUE } from '#features/capture-search'
 import {
   formatPoint,
   formatSetPointBonus,

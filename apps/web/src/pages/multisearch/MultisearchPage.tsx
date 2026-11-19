@@ -2,9 +2,12 @@ import { getRouteApi } from '@tanstack/react-router'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
 import { GameBar } from './components/GameBar'
 import { ScreenShareChip } from './components/ScreenShareChip'
-import { useScreenCaptureContext } from '#hooks/useScreenCaptureContext'
-import { useSearchModeStore } from '#hooks/useSearchModeStore'
-import type { AutoRoundSignal, BrowserHost } from '#host/client-host'
+import {
+  useScreenCaptureContext,
+  useSearchModeStore,
+  type AutoRoundSignal,
+  type BrowserHost
+} from '#features/capture-search'
 import { SearchScreen } from '#pages/search'
 
 const route = getRouteApi('/multisearch')

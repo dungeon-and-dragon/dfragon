@@ -9,9 +9,9 @@ import {
   characterDisplayOf
 } from '#entities/character'
 import { Link } from '@tanstack/react-router'
-import { MISSING_VALUE } from '#core/capture'
+import { MISSING_VALUE } from '#features/capture-search'
 import { Portrait } from '#components/Portrait'
-import { FavoriteToggle } from '#components/FavoriteToggle'
+import { FavoriteToggle } from '#features/favorite-character'
 import { useRefreshCharacterDetail } from './api/useCharacterDetail'
 import { useRefreshingNow } from '#shared/lib/useRefreshingNow'
 import { formatSeoulDateTime, formatTimeAgo } from '#shared/lib/time-format'

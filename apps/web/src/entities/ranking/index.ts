@@ -31,6 +31,8 @@ export type {
   ClearWeek,
   ClearWeekOverWeek
 } from './model/clear-stats'
+export { itemSlotName, WEAPON_SLOT } from './model/item-stats'
+export type { ItemStats } from './model/item-stats'
 export { characterStatsSchema } from './model/ranking-stats'
 export type {
   CharacterStats,

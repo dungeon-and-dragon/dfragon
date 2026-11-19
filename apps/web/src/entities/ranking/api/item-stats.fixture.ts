@@ -1,4 +1,4 @@
-import type { ItemStats } from '#core/ranking'
+import type { ItemStats } from '#entities/ranking/model/item-stats'
 
 // 비율은 #1781 시안의 합성 값이다. 무기와 유일 장비 이름은 게임 데이터 그대로이고 itemId는 합성 값이다.
 const SAMPLE_SIZE = 412_380

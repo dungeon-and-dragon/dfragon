@@ -8,8 +8,7 @@ import { LastCaptureTime } from '#components/LastCaptureTime'
 import { SnapshotToggle } from '#components/SnapshotToggle'
 import { useBoardHeaderPortal } from '#hooks/useBoardHeaderPortal'
 import { useRaidSlotCards } from './hooks/useRaidSlotCards'
-import { useScreenCaptureContext } from '#hooks/useScreenCaptureContext'
-import { filledSlotCount } from '#core/capture'
+import { filledSlotCount, useScreenCaptureContext } from '#features/capture-search'
 import { RaidScreen } from './RaidScreen'
 
 export function RaidPage({ captureSource }: { captureSource: ReactNode }): React.JSX.Element {
