@@ -6,6 +6,7 @@ import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { storyRankedCharacters } from '#testing/story-support/story-characters'
 import { createStoryClientHost } from '#testing/story-support/story-host'
+import { storySetOathCatalog, storySetStats } from '#testing/story-support/story-set-stats'
 import { RANKING_JOBS } from './ranking-jobs'
 import { RankingsScreen } from './RankingsScreen'
 
@@ -18,10 +19,28 @@ export default meta
 
 type Story = StoryObj<typeof meta>
 
-const characters = storyRankedCharacters(100)
+const PAGE_SIZE = 100
+const characters = storyRankedCharacters(PAGE_SIZE + 30)
+const SECOND_PAGE = 'story-page-2'
+const setHosts = {
+  getSetStats: async () => storySetStats(new Date().toISOString()),
+  getOathCatalog: async () => storySetOathCatalog
+}
 
 const rankingHost = createStoryClientHost({
-  getFameRanking: async () => ({ characters })
+  getFameRanking: async (_filter, cursor) => {
+    if (cursor === SECOND_PAGE) {
+      return { characters: characters.slice(PAGE_SIZE), nextCursor: null }
+    }
+
+    return { characters: characters.slice(0, PAGE_SIZE), nextCursor: SECOND_PAGE }
+  },
+  ...setHosts
+})
+
+const emptyHost = createStoryClientHost({
+  getFameRanking: async () => ({ characters: [], nextCursor: null }),
+  ...setHosts
 })
 
 const failedHost = createStoryClientHost({
@@ -54,6 +73,23 @@ export const 전체: Story = {
 
 export const 직업선택: Story = {
   render: () => <Screen host={rankingHost} initialFilter={{ jobId: RANKING_JOBS[0]!.jobId }} />
+}
+
+export const 세트선택: Story = {
+  render: () => (
+    <Screen
+      host={rankingHost}
+      initialFilter={{
+        jobId: RANKING_JOBS[0]!.jobId,
+        oathSetId: 16204,
+        oathSetOption: '용투 : 용제 강림'
+      }}
+    />
+  )
+}
+
+export const 거른랭킹없음: Story = {
+  render: () => <Screen host={emptyHost} initialFilter={{ oathSetId: 16204 }} />
 }
 
 export const 받는중: Story = {

@@ -86,7 +86,7 @@ export type TimelinePageHttp<Item> = (
   identity: CharacterIdentity,
   before: string
 ) => Promise<TimelinePage<Item>>
-export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
+export type FameRankingHttp = (filter: FameRankingFilter, cursor?: string) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
 export type SetStatsHttp = (filter: SetStatsFilter) => Promise<SetStats>
@@ -355,7 +355,7 @@ export function createDfragonClient({
       }
     },
     rankings: {
-      async fame(filter) {
+      async fame(filter, cursor) {
         if (
           (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
           (filter.oathSetOption !== undefined && filter.oathSetId === undefined)
@@ -372,7 +372,8 @@ export function createDfragonClient({
             ...(filter.role !== undefined && { role: filter.role }),
             ...(filter.equipmentSetId !== undefined && { equipmentSetId: filter.equipmentSetId }),
             ...(oathSetId !== undefined && { oathSetId }),
-            ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption })
+            ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption }),
+            ...(cursor !== undefined && { cursor })
           }
         })
       }

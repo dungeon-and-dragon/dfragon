@@ -73,7 +73,8 @@ export type ClientHost = Readonly<{
   getSkillWindowCatalog: (jobName: string) => Promise<SkillWindowCatalog | null>
   // 서약 데이터를 아직 올리지 않았으면 null을 돌려준다.
   getOathCatalog: () => Promise<OathCatalog | null>
-  getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
+  // cursor는 앞 page 응답의 nextCursor다. 없으면 첫 page를 받는다.
+  getFameRanking: (filter: FameRankingFilter, cursor?: string) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
   getSkillStats: (job: SkillStatsJob) => Promise<SkillStats>
   getSetStats: (filter: SetStatsFilter) => Promise<SetStats>

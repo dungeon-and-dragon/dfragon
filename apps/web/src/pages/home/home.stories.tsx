@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>
 const characters = storyRankedCharacters(10)
 
 const rankingHost = createStoryClientHost({
-  getFameRanking: async () => ({ characters })
+  getFameRanking: async () => ({ characters, nextCursor: null })
 })
 
 const searchHost = createStoryClientHost({
