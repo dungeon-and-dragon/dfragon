@@ -12,12 +12,18 @@ import {
 } from '#entities/ranking'
 import { type OathCatalog, useOathCatalog } from '#entities/catalog'
 import { FameRankingList } from './FameRankingList'
-import { type FilterRow, RankingFilterBox } from './RankingFilterBox'
-import { UniqueItemChips, WeaponSelect } from './RankingItemFilter'
+import {
+  type FilterRow,
+  RankingFilterBox,
+  UniqueItemChips,
+  WeaponSelect,
+  RankingSetFilter,
+  itemChoicesOf,
+  itemIdsInStats,
+  setChoicesOf,
+  setFilterLabel
+} from '#widgets/ranking-filter'
 import { RankingFameFilter } from './RankingFameFilter'
-import { RankingSetFilter } from './RankingSetFilter'
-import { itemChoicesOf, itemIdsInStats } from './ranking-items'
-import { setChoicesOf, setFilterLabel } from './ranking-sets'
 
 // 세트 셀렉트 목록은 전체 직업 세트 통계에서 읽어, 직업을 바꿔도 같은 목록을 쓴다.
 const ALL_JOBS = {}

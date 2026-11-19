@@ -8,7 +8,7 @@ import {
   type AutoRoundSignal,
   type BrowserHost
 } from '#features/capture-search'
-import { SearchScreen } from '#pages/search'
+import { SearchScreen } from './SearchScreen'
 
 const route = getRouteApi('/multisearch')
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
