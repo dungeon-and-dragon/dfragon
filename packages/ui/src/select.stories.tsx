@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { useState } from 'react'
 import { ChevronDownIcon } from './icons'
 import { Select } from './select'
 
@@ -173,6 +174,95 @@ export const Html: Story = {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+const ITEMS = [
+  { value: 'ring', label: '광휘를 머금은 눈동자', slot: '반지' },
+  { value: 'support', label: '만병을 잉태한 역병의 심장', slot: '보조장비' },
+  { value: 'stone', label: '우아한 기품의 향수', slot: '마법석' }
+]
+
+function ItemMark() {
+  return (
+    <span
+      aria-hidden="true"
+      className="block size-[24px] shrink-0 rounded-badge border border-line-strong bg-inset"
+    />
+  )
+}
+
+function IconSelect() {
+  return (
+    <Select.Root defaultValue="ring" items={ITEMS}>
+      <Select.Trigger size="sm" aria-label="아이템">
+        <ItemMark />
+        <Select.Value />
+      </Select.Trigger>
+      <Select.Popup aria-label="아이템">
+        {ITEMS.map((item) => (
+          <Select.Item key={item.value} value={item.value}>
+            <ItemMark />
+            <Select.ItemText>{item.label}</Select.ItemText>
+          </Select.Item>
+        ))}
+      </Select.Popup>
+    </Select.Root>
+  )
+}
+
+function countText(values: string[]): string {
+  if (values.length === 0) {
+    return '아이템 전체'
+  }
+
+  const chosen = ITEMS.find((item) => item.value === values[0])
+
+  if (values.length > 1 || chosen === undefined) {
+    return `${values.length}개`
+  }
+
+  return chosen.label
+}
+
+function MultipleSelect({ defaultValue }: { defaultValue: string[] }) {
+  const [value, setValue] = useState(defaultValue)
+
+  return (
+    <Select.Root multiple value={value} onValueChange={setValue} items={ITEMS}>
+      <Select.Trigger size="sm" aria-label="아이템 여러 개">
+        {value.length > 0 && (
+          <span className="flex items-center gap-1">
+            {value.map((itemId) => (
+              <ItemMark key={itemId} />
+            ))}
+          </span>
+        )}
+        <Select.Value>{countText}</Select.Value>
+      </Select.Trigger>
+      <Select.Popup aria-label="아이템 여러 개">
+        {ITEMS.map((item) => (
+          <Select.Group key={item.value}>
+            <Select.GroupLabel>{item.slot}</Select.GroupLabel>
+            <Select.Item value={item.value}>
+              <ItemMark />
+              <Select.ItemText>{item.label}</Select.ItemText>
+            </Select.Item>
+          </Select.Group>
+        ))}
+      </Select.Popup>
+    </Select.Root>
+  )
+}
+
+export const Icons: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-3">
+      <IconSelect />
+      <MultipleSelect defaultValue={[]} />
+      <MultipleSelect defaultValue={['ring']} />
+      <MultipleSelect defaultValue={['ring', 'support']} />
     </div>
   )
 }
