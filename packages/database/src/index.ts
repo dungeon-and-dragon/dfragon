@@ -70,15 +70,18 @@ export type {
 export {
   finishClearRecordBackfill,
   readClearRecordBackfill,
+  readClearRecordCursors,
   readClearRecordLegionWeeks,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
   recordClearRecordBackfillProgress,
+  recordClearRecordCursors,
   recordClearRecords,
   startClearRecordBackfill
 } from './clear-record.js'
 export type {
   ClearRecordBackfillProgress,
+  ClearRecordCursor,
   ClearRecordInput,
   ClearRecordLegionWeek,
   ClearRecordRaidMode,

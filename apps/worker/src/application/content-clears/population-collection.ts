@@ -31,7 +31,7 @@ type CharacterRows =
 export type PopulationCollection = {
   population: readonly ClearPopulationCharacter[]
   resumedAt: number
-  ranges: readonly TimelineRange[]
+  rangesOf: (character: ClearPopulationCharacter) => readonly TimelineRange[]
   fetchTimeline: FetchCharacterTimeline
   readConcurrency: () => number
   pause: (ms: number) => Promise<void>
@@ -117,7 +117,7 @@ async function fetchCharacterRows(
 export async function collectPopulation({
   population,
   resumedAt,
-  ranges,
+  rangesOf,
   fetchTimeline,
   readConcurrency,
   pause,
@@ -134,7 +134,7 @@ export async function collectPopulation({
   while (done < population.length) {
     const group = population.slice(done, done + readConcurrency())
     const results = await Promise.all(
-      group.map((character) => fetchCharacterRows(character, ranges, fetchTimeline))
+      group.map((character) => fetchCharacterRows(character, rangesOf(character), fetchTimeline))
     )
 
     const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
