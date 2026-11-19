@@ -44,13 +44,6 @@ export function installBrowserHost(apiOrigin: string): BrowserHost {
       readCaptureFrame: async () =>
         toRaidFrameResult(await readRoundFrame('raid'), await readRaidWindowTemplates())
     },
-    getTodayGrade: dfragon.items.todayGrade,
-    getGuild: dfragon.guilds.get,
-    getAdventureWeekly: dfragon.adventures.weekly,
-    getAdventureActivity: dfragon.adventures.activity,
-    getAdventureActivitySeasonDays: dfragon.adventures.activitySeasonDays,
-    backfillAdventureSeason: dfragon.adventures.backfillSeason,
-    searchCharacters: dfragon.characters.search,
     onPastedFrame: roundFrames.install(),
     requestScreenShare: screenShare.request,
     onScreenShareEnded: screenShare.onEnded,

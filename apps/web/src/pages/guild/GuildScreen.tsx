@@ -2,7 +2,7 @@ import type { Guild } from '#core/adventure-guild'
 import type { StoredCharacter } from '#core/ranking'
 import { CharacterListBox } from './components/CharacterListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
-import { useGuild } from './hooks/useGuild'
+import { useGuild } from './api/useGuild'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 
 const DEFAULT_TITLE = '길드'

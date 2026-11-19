@@ -4,18 +4,6 @@ import type {
   CharacterDetails,
   CharacterIdentity
 } from '#core/character/character'
-import type { TodayGrade } from '#core/today-grade/today-grade-types'
-import { guildSchema, type Guild } from '#core/adventure-guild/adventure-guild'
-import {
-  adventureActivitySeasonDaysSchema,
-  adventureActivitySchema,
-  activitySeasonSchema,
-  type ActivitySeason,
-  type AdventureActivity,
-  type AdventureActivitySeasonDays
-} from '#core/adventure-guild/adventure-activity'
-import { adventureWeeklySchema, type AdventureWeekly } from '#core/adventure-guild/adventure-weekly'
-import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'
 import { SearchHttpFailure } from './http'
 import {
   assertApiSuccess,
@@ -25,12 +13,9 @@ import {
 } from './api-response'
 import {
   candidatesSchema,
-  type CharacterSearchQuery,
   detailsSchema,
-  type SearchedCharacter,
   validateIdentity,
-  validateNickname,
-  validateSearchQuery
+  validateNickname
 } from './character-schemas'
 
 export type IdentityRequest = CharacterIdentity & { signal: AbortSignal }
@@ -38,42 +23,14 @@ export type CharacterCandidatesHttp = (input: {
   nickname: string
   signal: AbortSignal
 }) => Promise<readonly CharacterCandidate[]>
-export type CharacterSearchHttp = (
-  query: CharacterSearchQuery
-) => Promise<readonly SearchedCharacter[]>
 export type CharacterPngHttp = (input: IdentityRequest) => Promise<Uint8Array>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
-export type GuildHttp = (guildId: string) => Promise<Guild>
-export type AdventureWeeklyHttp = (adventureName: string) => Promise<AdventureWeekly>
-export type AdventureActivityHttp = (
-  adventureName: string,
-  season: number | undefined
-) => Promise<AdventureActivity>
-export type AdventureActivitySeasonDaysHttp = (
-  adventureName: string,
-  season: number
-) => Promise<AdventureActivitySeasonDays>
-export type AdventureSeasonBackfillHttp = (
-  adventureName: string,
-  season: number
-) => Promise<ActivitySeason>
-export type TodayGradeHttp = () => Promise<TodayGrade>
-
 export type DfragonClient = Readonly<{
   characters: Readonly<{
-    search: CharacterSearchHttp
     candidates: CharacterCandidatesHttp
     image: CharacterPngHttp
     details: CharacterDetailsHttp
   }>
-  adventures: Readonly<{
-    weekly: AdventureWeeklyHttp
-    activity: AdventureActivityHttp
-    activitySeasonDays: AdventureActivitySeasonDaysHttp
-    backfillSeason: AdventureSeasonBackfillHttp
-  }>
-  guilds: Readonly<{ get: GuildHttp }>
-  items: Readonly<{ todayGrade: TodayGradeHttp }>
 }>
 
 type JsonRequestOptions = {
@@ -83,14 +40,6 @@ type JsonRequestOptions = {
   details?: boolean
   timeout?: number
 }
-
-const CHARACTER_SEARCH_LIMIT = '200'
-
-const todayGradeSchema = z.object({
-  percent: z.number().int().min(0).max(100),
-  // 화면은 Date.parse로 만료 시각을 읽으므로 ISO 형식으로 좁히지 않고 Date.parse가 읽는지만 본다.
-  expiresAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)))
-})
 
 function characterPath({ serverId, characterId }: CharacterIdentity): string {
   return `/characters/${serverId}/${characterId}`
@@ -185,27 +134,6 @@ export function createDfragonClient({
 
   return {
     characters: {
-      async search(query) {
-        validateSearchQuery(query)
-        const { rows } = await requestJson(
-          '/characters',
-          candidatesSchema.refine(
-            ({ rows }) =>
-              query.serverId === ALL_CHARACTER_SERVERS ||
-              rows.every((row) => row.serverId === query.serverId)
-          ),
-          {
-            searchParams: {
-              characterName: query.characterName,
-              serverId: query.serverId,
-              limit: CHARACTER_SEARCH_LIMIT
-            },
-            details: false
-          }
-        )
-
-        return rows
-      },
       async candidates({ nickname, signal }) {
         validateNickname(nickname)
         const { rows } = await requestJson(
@@ -229,56 +157,6 @@ export function createDfragonClient({
           { signal }
         )
       }
-    },
-    adventures: {
-      async weekly(adventureName) {
-        if (adventureName.trim() === '') {
-          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-        }
-
-        return requestJson(
-          `/adventures/${encodeURIComponent(adventureName)}/weekly`,
-          adventureWeeklySchema
-        )
-      },
-      async activity(adventureName, season) {
-        if (adventureName.trim() === '') {
-          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-        }
-
-        return requestJson(
-          `/adventures/${encodeURIComponent(adventureName)}/activity`,
-          adventureActivitySchema,
-          { searchParams: { ...(season !== undefined && { season: String(season) }) } }
-        )
-      },
-      async activitySeasonDays(adventureName, season) {
-        if (adventureName.trim() === '') {
-          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-        }
-
-        return requestJson(
-          `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/${season}/days`,
-          adventureActivitySeasonDaysSchema
-        )
-      },
-      async backfillSeason(adventureName, season) {
-        if (adventureName.trim() === '') {
-          throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
-        }
-
-        return requestJson(
-          `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/${season}/backfill`,
-          activitySeasonSchema,
-          { method: 'post' }
-        )
-      }
-    },
-    guilds: {
-      get: (guildId) => requestJson(`/guilds/${encodeURIComponent(guildId)}`, guildSchema)
-    },
-    items: {
-      todayGrade: () => requestJson('/items/today-grade', todayGradeSchema)
     }
   }
 }

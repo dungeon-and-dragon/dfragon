@@ -11,7 +11,7 @@ import {
   type AdventureActivitySeasonDaysResult,
   useAdventureActivity,
   useAdventureActivitySeasonDays
-} from './hooks/useAdventureActivity'
+} from './api/useAdventureActivity'
 import {
   type ActivityDay,
   type ActivityKind,
