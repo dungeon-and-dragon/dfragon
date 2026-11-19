@@ -14,7 +14,18 @@ const listedItemId = acquiredItemIds[0]!
 
 function memoryStores() {
   const entries = new Map<string, ItemDictionaryEntry>([
-    [listedItemId, { itemId: listedItemId, availableLevel: 115, itemType: '무기' }]
+    [
+      listedItemId,
+      {
+        itemId: listedItemId,
+        availableLevel: 115,
+        itemType: '무기',
+        itemTypeDetail: '대검',
+        itemRarity: '태초',
+        setItemId: null,
+        setItemName: null
+      }
+    ]
   ])
   const acquisitions: AcquisitionItemRepository = {
     readUnlistedItemIds: async () => acquiredItemIds.filter((itemId) => !entries.has(itemId))
