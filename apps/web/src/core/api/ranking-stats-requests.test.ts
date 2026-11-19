@@ -306,11 +306,14 @@ const itemStats = {
     {
       slotId: 'WEAPON',
       items: [
-        { itemId: 'item-weapon-a', name: '합성 무기', count: 2 },
-        { itemId: 'item-weapon-b', name: '합성 다른 무기', count: 2 }
+        { itemId: 'item-weapon-a', name: '합성 무기', typeDetail: '도', count: 2 },
+        { itemId: 'item-weapon-b', name: '합성 다른 무기', typeDetail: '낫', count: 2 }
       ]
     },
-    { slotId: 'RING', items: [{ itemId: 'item-ring-a', name: '합성 반지', count: 1 }] }
+    {
+      slotId: 'RING',
+      items: [{ itemId: 'item-ring-a', name: '합성 반지', typeDetail: null, count: 1 }]
+    }
   ]
 }
 
