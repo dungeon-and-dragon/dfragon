@@ -1,8 +1,8 @@
 import type {
-  CharacterCandidatesResult,
-  CharacterCandidatesWithAdventureResult
+  CharacterCandidatesWithAdventureResult,
+  CharacterSearchResult
 } from '#domain/character-search/index.js'
 
-export type CharacterSearchResponse = CharacterCandidatesResult
+export type CharacterSearchResponse = CharacterSearchResult
 
 export type CharacterCandidatesWithAdventureResponse = CharacterCandidatesWithAdventureResult

@@ -44,8 +44,13 @@ export type {
   StoredCharacterSection,
   StoredCharacterSectionChange
 } from './character-history.js'
-export { recordCharacterScore } from './character-score.js'
-export type { CharacterScoreInput, CharacterScoreKind } from './character-score.js'
+export { readCharacterScores, recordCharacterScore } from './character-score.js'
+export type {
+  CharacterScoreInput,
+  CharacterScoreKind,
+  StoredCharacterScore,
+  StoredCharacterScoreRow
+} from './character-score.js'
 export { recordCharacterSets } from './character-sets.js'
 export type {
   CharacterEquipmentSet,

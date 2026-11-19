@@ -1,3 +1,4 @@
+import type { StoredCharacterScore } from './character-score.js'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 import { learnedDealerSkillSql } from './male-crusader.js'
@@ -17,6 +18,7 @@ export type StoredCharacter = {
   guildName: string | null
   fetchedAt: Date | null
   dealerSkillLearned: boolean | null
+  score: StoredCharacterScore | null
 }
 
 export type StoredAdventureName = {
@@ -41,6 +43,14 @@ export const storedDealerSkillLearnedSql = Prisma.sql`(
     AND style.job_grow_id = c.job_grow_id
 )`
 
+// 스킬 스타일과 같은 이유로 JOIN 대신 행마다 PK로 읽는 subquery로 둔다.
+const storedScoreSql = Prisma.sql`(
+  SELECT jsonb_build_object('kind', score.kind, 'value', score.score)
+  FROM character_scores score
+  WHERE score.server_id = c.server_id
+    AND score.character_id = c.character_id
+)`
+
 export function readStoredCharacterRows<Row extends StoredCharacter = StoredCharacter>(
   client: DatabaseClient,
   filterAndOrder: Prisma.Sql,
@@ -62,7 +72,8 @@ export function readStoredCharacterRows<Row extends StoredCharacter = StoredChar
       c.guild_id AS "guildId",
       c.guild_name AS "guildName",
       c.basic_fetched_at AS "fetchedAt",
-      ${storedDealerSkillLearnedSql} AS "dealerSkillLearned"
+      ${storedDealerSkillLearnedSql} AS "dealerSkillLearned",
+      ${storedScoreSql} AS "score"
       ${extraColumns}
     FROM characters c
     JOIN adventures a ON a.id = c.adventure_id

@@ -35,6 +35,7 @@ function character(characterId: string, fame: number): RankedStoredCharacter {
     guildName: null,
     fetchedAt,
     dealerSkillLearned: null,
+    score: null,
     equipmentSet: null,
     oathSet: null
   }
@@ -129,11 +130,13 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
   const characters = [
     {
       ...character('a', 80000),
+      score: { kind: 'equipment', value: 1234567 },
       equipmentSet: { id: 'set-fairy', name: '소울 페어리 세트' },
       oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' }
     },
     character('b', 70000)
-  ]
+  ] satisfies RankedStoredCharacter[]
+  const scores = [{ calculator: 'equipment', value: 1234567 }, null]
   const { app, origin } = await listen({
     ...unusedReader,
     readFameRanking: async (filter, limit, after) => {
@@ -155,7 +158,8 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
         rank: index + 1,
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z',
-        role: 'dealer'
+        role: 'dealer',
+        score: scores[index]
       })),
       nextCursor: null
     })

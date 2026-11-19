@@ -4,9 +4,11 @@ import type {
   CharacterCandidatesResult,
   CharacterCandidatesWithAdventureResult,
   CharacterImageCandidate,
+  CharacterSearchResult,
   NeopleCharacterSearchInput,
   NeopleCharacterSearchResult
 } from '#domain/character-search/index.js'
+import { toCharacterRowScore } from '#domain/character-row.js'
 import { type CandidateSource, createCandidateCache } from './candidate-cache.js'
 import type { CharacterImageUrl, SearchCharacters } from './ports.js'
 import type { CharacterSearchRepository } from './repository.js'
@@ -28,12 +30,12 @@ export class CharacterSearchService {
     private readonly characterImageUrl: CharacterImageUrl
   ) {}
 
-  async search(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResult> {
+  async search(input: NeopleCharacterSearchInput): Promise<CharacterSearchResult> {
     const rows = (await this.loadRows(input)).toSorted((left, right) =>
       nameCollator.compare(left.characterName, right.characterName)
     )
 
-    return { rows }
+    return this.withScores(rows)
   }
 
   async candidates(input: NeopleCharacterSearchInput): Promise<CharacterCandidatesResponse> {
@@ -118,8 +120,24 @@ export class CharacterSearchService {
 
     return { rows: candidates }
   }
+
+  private async withScores(rows: CharacterImageCandidate[]): Promise<CharacterSearchResult> {
+    const stored = rows.length > 0 ? await this.repository.readCharacterScores(rows) : []
+    const scores = new Map(
+      stored.map(({ serverId, characterId, ...score }) => [`${serverId}/${characterId}`, score])
+    )
+
+    const scored = rows.map((row) => {
+      const score = toCharacterRowScore(scores.get(`${row.serverId}/${row.characterId}`) ?? null)
+
+      return { ...row, score }
+    })
+
+    return { rows: scored }
+  }
 }
 
 export const emptyCharacterSearchRepository: CharacterSearchRepository = {
-  readAdventureNames: async () => []
+  readAdventureNames: async () => [],
+  readCharacterScores: async () => []
 }
