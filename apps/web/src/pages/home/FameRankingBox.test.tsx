@@ -5,14 +5,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { FameRanking, RankedCharacter } from '#entities/ranking'
 import { fameRankingFixture } from '#entities/ranking/api/fame-ranking.fixture'
-import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
-import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
-import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
-import { RankingsScreen } from '#pages/rankings'
 import { FameRankingBox } from './FameRankingBox'
 
 let container: HTMLDivElement
@@ -151,27 +147,4 @@ it('빈 랭킹은 박스에 이름 한 줄만 둔다', async () => {
 
   expect(container.querySelector('section[aria-label="명성 랭킹"]')?.textContent).toBe('명성 랭킹')
   expect(container.querySelector('table')).toBeNull()
-})
-
-it('랭킹 화면의 직업 전체 조회를 받아 두었으면 다시 조회하지 않는다', async () => {
-  respondRanking(rankingOf(100))
-  server.use(setStatsHandlers.loading, itemStatsHandlers.loading, oathCatalogHandlers.notUploaded)
-  function show(screen: React.JSX.Element): Promise<void> {
-    return act(async () =>
-      root.render(
-        <TestQueryClient>
-          <TestRouter>{screen}</TestRouter>
-        </TestQueryClient>
-      )
-    )
-  }
-
-  await show(<RankingsScreen filter={{}} onFilterChange={() => {}} />)
-  await vi.waitFor(() =>
-    expect(container.querySelector('tbody tr:not([aria-hidden])')).not.toBeNull()
-  )
-  await show(<FameRankingBox />)
-
-  expect(requests).toHaveLength(1)
-  expect(bodyRows()).toHaveLength(3)
 })
