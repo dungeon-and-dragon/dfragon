@@ -104,6 +104,39 @@ export async function finishClearRecordBackfill(
   await client.clearRecordBackfill.deleteMany({ where: { startedAt } })
 }
 
+export type ClearRecordCursor = {
+  serverId: string
+  characterId: string
+  fetchedUntil: Date
+}
+
+export function readClearRecordCursors(client: DatabaseClient): Promise<ClearRecordCursor[]> {
+  return client.clearRecordCursor.findMany({
+    select: { serverId: true, characterId: true, fetchedUntil: true }
+  })
+}
+
+// 늦게 끝난 실행이 먼저 끝난 실행보다 앞선 시각으로 되돌리지 않게 더 늦은 시각만 남긴다.
+export async function recordClearRecordCursors(
+  client: DatabaseClient,
+  characters: readonly { serverId: string; characterId: string }[],
+  fetchedUntil: Date
+): Promise<void> {
+  if (characters.length === 0) {
+    return
+  }
+
+  await client.$executeRaw`
+    INSERT INTO "clear_record_cursors" ("server_id", "character_id", "fetched_until")
+    SELECT server_id, character_id, ${fetchedUntil}::timestamptz
+    FROM unnest(
+      ${characters.map(({ serverId }) => serverId)}::text[],
+      ${characters.map(({ characterId }) => characterId)}::text[]
+    ) AS character(server_id, character_id)
+    ON CONFLICT ("server_id", "character_id") DO UPDATE
+      SET "fetched_until" = GREATEST("clear_record_cursors"."fetched_until", EXCLUDED."fetched_until")`
+}
+
 export type ClearRecordLegionWeek = {
   name: string
   weekStart: Date

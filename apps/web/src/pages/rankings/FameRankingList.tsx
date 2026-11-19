@@ -1,5 +1,5 @@
 import { Button } from '@dfragon/ui'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { MISSING_VALUE } from '#core/capture'
 import type { OathCatalog } from '#core/catalog'
 import type { FameRankingFilter, RankedCharacter } from '#core/ranking'
@@ -11,7 +11,6 @@ import {
 } from '#components/table/CharacterTable'
 import { ListBox } from '#shared/ui/ListBox'
 import { type FameRankingPages, useFameRanking } from '#entities/ranking'
-import { useInfiniteScrollRef } from '#shared/lib/useInfiniteScrollRef'
 import { rankingName } from './ranking-jobs'
 import { rankingSetLines } from './ranking-sets'
 
@@ -58,6 +57,8 @@ export function FameRankingList({
 }): React.JSX.Element {
   const result = useFameRanking(filter)
   const name = rankingName(filter, setLabel)
+  const ranked = filter.fameTo === undefined
+
   switch (result.status) {
     case 'loading':
       return (
@@ -71,8 +72,9 @@ export function FameRankingList({
               rows={[]}
               detail={setColumnOf(catalog)}
               affiliations={AFFILIATIONS}
+              ranked={ranked}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} detail affiliations={AFFILIATIONS} />
+                <SkeletonRow key={index} ranked={ranked} detail affiliations={AFFILIATIONS} />
               ))}
             />
           </div>
@@ -97,44 +99,48 @@ export function FameRankingList({
 
       return (
         <ListBox name={name}>
-          <ScrollingTable
+          <PagedTable
             key={[
               filter.jobId,
               filter.jobGrowId,
               filter.role,
               filter.equipmentSetId,
               filter.oathSetId,
-              filter.oathSetOption
+              filter.oathSetOption,
+              filter.fameFrom,
+              filter.fameTo
             ].join('/')}
             ranking={result.value}
             catalog={catalog}
+            ranked={ranked}
           />
         </ListBox>
       )
   }
 }
 
-// 받은 행을 20명씩 그리고, 다음 줄 자리의 빈 줄이 화면에 들어오면 20명을 더 그린다.
-// 받은 행을 다 그리면 다음 page를 받아 잇는다.
-function ScrollingTable({
+function PagedTable({
   ranking,
-  catalog
+  catalog,
+  ranked
 }: {
   ranking: FameRankingPages
   catalog: OathCatalog | null
+  ranked: boolean
 }): React.JSX.Element {
   const [visible, setVisible] = useState(PAGE_SIZE)
-  const { characters, hasMore, moreError, loadMore } = ranking
-  // 받은 행을 다 그린 뒤에만 다음 page를 받는다. 받는 동안 빈 줄이 화면에 남아도 그릴 행 수를 늘리지 않는다.
-  const showMore = useCallback(() => {
-    if (visible < characters.length) {
-      setVisible(visible + PAGE_SIZE)
-    } else {
+  const { characters, hasMore, loadingMore, moreError, loadMore } = ranking
+  const canShowMore = visible < characters.length || (hasMore && moreError === null)
+
+  function showMore(): void {
+    const next = visible + PAGE_SIZE
+
+    setVisible(next)
+
+    if (characters.length < next) {
       loadMore()
     }
-  }, [visible, characters.length, loadMore])
-  const watchSkeleton = useInfiniteScrollRef<HTMLTableRowElement>(showMore)
-  const waiting = visible < characters.length || (hasMore && moreError === null)
+  }
 
   return (
     <>
@@ -142,12 +148,20 @@ function ScrollingTable({
         rows={characters.slice(0, visible)}
         detail={setColumnOf(catalog)}
         affiliations={AFFILIATIONS}
+        ranked={ranked}
         trailing={
-          waiting ? (
-            <SkeletonRow rowRef={watchSkeleton} detail affiliations={AFFILIATIONS} />
+          loadingMore ? (
+            <SkeletonRow ranked={ranked} detail affiliations={AFFILIATIONS} />
           ) : undefined
         }
       />
+      {!loadingMore && canShowMore && (
+        <div className="flex min-h-12 items-center justify-center border-t border-line">
+          <Button variant="secondary" size="sm" onClick={showMore}>
+            불러오기
+          </Button>
+        </div>
+      )}
       {moreError !== null && visible >= characters.length && (
         <div className="state state-error flex-row border-t border-line">
           <p role="alert" className="m-0">

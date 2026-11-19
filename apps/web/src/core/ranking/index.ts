@@ -20,6 +20,7 @@ export type {
 export type {
   CharacterStats,
   FameRanking,
+  FameRankingFameRange,
   FameRankingFilter,
   FameRankingSetFilter,
   RankedCharacter,
