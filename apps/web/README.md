@@ -42,10 +42,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 
 - `public/data/event-rewards.v1.json`: 공식 이벤트의 보상과 획득 조건을 옮긴 데이터 파일을 두는 위치입니다. 형식은 [이벤트 보상 schema](src/core/catalog/event-rewards.ts)에 있습니다.
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
-- `src/animations/`: 화면에서 함께 쓰는 전환 animation과 GSAP 설정을 둡니다.
-- `src/assets/`: 글꼴, 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
 - `src/components/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 컴포넌트와 스타일을 둡니다.
-- `src/constants/`: 화면 크기와 서버 선택지 상수를 둡니다.
 - `src/core/`: React와 UI 폴더를 import하지 않는 검색, 캡처, OCR 로직을 둡니다.
 - `src/core/<도메인>/index.ts`: core 밖에서 `#core/<도메인>`으로 가져오는 이름을 다시 내보냅니다. core 안의 도메인 사이는 파일을 직접 가져옵니다.
 - `src/hooks/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 React hook과 store를 둡니다.
@@ -64,14 +61,16 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/core/capture/raid/`: 공대 상세 창 검출, 행 인식, 공대 캡처 machine과 기준 이미지를 둡니다.
 - `src/core/catalog/`: 스킬 창, 서약, 게임 문구 데이터 묶음과 이벤트 보상 데이터 파일의 schema를 둡니다.
 - `src/core/character/`: 캐릭터 상세, 장비, 서약, 카드 표시 함수와 캐릭터 타입을 둡니다.
-- `src/core/diagnostics/`: 브라우저 console에 남기는 진단 코드와 문구를 둡니다.
 - `src/core/ocr/`: OCR worker, 닉네임 이미지 처리와 인식 결과 선택을 둡니다.
 - `src/core/ranking/`: 명성 랭킹, 캐릭터 통계, 스킬 통계 응답 schema를 둡니다.
 - `src/core/search/`: 캐릭터 검색 요청, 식별, 초상화 비교와 검색 상태를 둡니다.
-- `src/core/servers/`: 서버 이름과 서버 ID 타입을 둡니다.
 - `src/core/testing/`: core와 UI 테스트가 함께 쓰는 fixture를 둡니다.
 - `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
-- `src/core/time-format.ts`: 경과 시간, 서울 시각, 시즌 이름 표시 함수를 둡니다.
+- `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
+- `src/shared/lib/`: 조회 결과, 무한 스크롤, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
+- `src/shared/lib/animations/`: GSAP 설정과 공용 전환 animation hook을 둡니다.
+- `src/shared/config/`: 서버 이름, 서버 ID 타입과 서버 선택지 상수를 둡니다.
+- `src/shared/assets/`: 로고, 시즌 배경과 클리어 집계 배경 이미지를 둡니다.
 
 ## 글꼴과 고지
 
