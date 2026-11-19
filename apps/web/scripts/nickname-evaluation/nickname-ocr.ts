@@ -1,5 +1,9 @@
-import { binarizeNicknamePixels, binarizeRaidNicknamePixels } from '#core/ocr/nickname-pixels'
-import { normalizedBgr, normalizedNicknameBgr } from '#core/ocr/paddle-recognition'
+import {
+  binarizeNicknamePixels,
+  binarizeRaidNicknamePixels,
+  normalizedBgr,
+  normalizedNicknameBgr
+} from '#features/capture-search'
 import type { DNFParticipantFrame } from '@dfragon/lib'
 import { createOcrRecognizer } from '#scripts/shared/onnx-ocr'
 import type { NicknameReads } from './evaluate'

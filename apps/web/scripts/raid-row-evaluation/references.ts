@@ -4,10 +4,13 @@ import type {
   DNFRaidMetadataTemplates,
   DNFRaidValueHeadingTemplates
 } from '@dfragon/lib'
-import { sliceRaidValueGlyphs } from '#core/capture/raid/raid-value-glyphs'
+import { sliceRaidValueGlyphs } from '#features/capture-search'
 import { readPng } from './manifest'
 
-const LIBRARY_ASSETS = new URL('../../src/core/capture/raid/', import.meta.url)
+const LIBRARY_ASSETS = new URL(
+  '../../src/features/capture-search/lib/capture/raid/',
+  import.meta.url
+)
 const PARTY_SIZE = { width: 42, height: 17 } as const
 const RGBA_CHANNELS = 4
 const PLACEHOLDER_STRIPE = 7

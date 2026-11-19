@@ -4,16 +4,16 @@ import {
   RAID_PARTY_COUNT,
   RAID_PARTY_SIZE,
   type RaidParty,
+  type SeatArrangement,
   type SlotCard,
   type SlotCardActions,
-  toRaidSeat
-} from '#core/capture'
+  toRaidSeat,
+  useSeatMove
+} from '#features/capture-search'
 import { Seat } from '#components/Seat'
 import { SeatMoveStatus } from '#components/SeatMoveStatus'
 import { SeatTable } from '#components/SeatTable'
 import { SEAT_TABLE_COLUMN_COUNT } from '#components/SeatTable.columns'
-import { useSeatMove } from '#hooks/useSeatMove'
-import type { SeatArrangement } from '#hooks/useSeatOrder'
 import { isBusySlot } from '#lib/card-presentation'
 import { CharacterRow } from '#components/CharacterRow'
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useIsPartyMode, useIsRaidMode } from '#hooks/useSearchModeStore'
+import { useIsPartyMode, useIsRaidMode } from '#features/capture-search'
 import { PartyPage } from '#pages/party'
 import { RaidPage } from '#pages/raid'
 

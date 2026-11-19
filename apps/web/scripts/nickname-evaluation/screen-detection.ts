@@ -11,7 +11,7 @@ import type { DetectionFailure } from './evaluate'
 import { type NicknameSlot, readPng, type Screen } from './manifest'
 
 const RAID_HEADING = fileURLToPath(
-  new URL('../../src/core/capture/raid/raid-heading.png', import.meta.url)
+  new URL('../../src/features/capture-search/lib/capture/raid/raid-heading.png', import.meta.url)
 )
 
 export type NicknameCrop = Readonly<{

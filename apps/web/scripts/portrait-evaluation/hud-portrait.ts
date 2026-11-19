@@ -1,4 +1,4 @@
-import { cropPartyPortrait } from '#core/capture/party/party-portrait'
+import { cropPartyPortrait } from '#features/capture-search'
 import type { CharacterImage, CharacterPortrait } from '#entities/character'
 
 const RGBA_CHANNELS = 4

@@ -1,5 +1,5 @@
 import { type CSSProperties, useState } from 'react'
-import { type CharacterFaceWindow, PORTRAIT_CANVAS_WIDTH } from '#core/search'
+import { type CharacterFaceWindow, PORTRAIT_CANVAS_WIDTH } from '#features/capture-search'
 
 function percentOfFace(value: number, faceWidth: number): string {
   return `${(value / faceWidth) * 100}%`

@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { env, InferenceSession, Tensor } from 'onnxruntime-web/wasm'
-import { decodeCtcCandidates } from '#core/ocr/ctc-candidates'
-import { MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH } from '#core/ocr/paddle-recognition'
+import {
+  decodeCtcCandidates,
+  MODEL_INPUT_HEIGHT,
+  MODEL_INPUT_WIDTH
+} from '#features/capture-search'
 import type { CharacterImage } from '#entities/character'
 
 const RGBA_CHANNELS = 4

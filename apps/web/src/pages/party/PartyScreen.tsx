@@ -1,10 +1,13 @@
 import { useId } from 'react'
-import type { SlotCard, SlotCardActions } from '#core/capture'
+import {
+  type SeatArrangement,
+  type SlotCard,
+  type SlotCardActions,
+  useSeatMove
+} from '#features/capture-search'
 import { Seat } from '#components/Seat'
 import { SeatMoveStatus } from '#components/SeatMoveStatus'
 import { SeatTable } from '#components/SeatTable'
-import { useSeatMove } from '#hooks/useSeatMove'
-import type { SeatArrangement } from '#hooks/useSeatOrder'
 import { CharacterRow } from '#components/CharacterRow'
 import { isBusySlot } from '#lib/card-presentation'
 
