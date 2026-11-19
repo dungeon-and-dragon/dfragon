@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { ReactNode, Ref } from 'react'
+import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#core/capture'
 import type { StoredCharacter } from '#core/ranking'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
@@ -168,18 +168,16 @@ function AffiliationLink({
 }
 
 export function SkeletonRow({
-  rowRef,
   ranked = true,
   detail = false,
   affiliations = ALL_AFFILIATIONS
 }: {
-  rowRef?: Ref<HTMLTableRowElement>
   ranked?: boolean
   detail?: boolean
   affiliations?: readonly Affiliation[]
 }): React.JSX.Element {
   return (
-    <tr ref={rowRef} aria-hidden="true">
+    <tr aria-hidden="true">
       {ranked && (
         <td>
           <span className="skeleton-text ml-auto w-[12px]" />
