@@ -325,15 +325,17 @@ model ClearRecordCursor {
 }
 
 model Job {
-  name          String    @id
-  displayName   String    @map("display_name")
-  description   String    @default("")
-  schedule      String?
-  argsSchema    Json      @map("args_schema")
-  delayMinutes  Int       @map("delay_minutes")
-  pausedAt      DateTime? @map("paused_at") @db.Timestamptz(3)
-  nextRunAt     DateTime? @map("next_run_at") @db.Timestamptz(3)
-  workerSeenAt  DateTime  @map("worker_seen_at") @db.Timestamptz(3)
+  name            String    @id
+  displayName     String    @map("display_name")
+  description     String    @default("")
+  schedule        String?
+  argsSchema      Json      @map("args_schema")
+  delayMinutes    Int       @map("delay_minutes")
+  neopleApiGroup  String?   @map("neople_api_group")
+  neopleEndpoints String[]  @default([]) @map("neople_endpoints")
+  pausedAt        DateTime? @map("paused_at") @db.Timestamptz(3)
+  nextRunAt       DateTime? @map("next_run_at") @db.Timestamptz(3)
+  workerSeenAt    DateTime  @map("worker_seen_at") @db.Timestamptz(3)
 
   @@map("jobs")
 }
