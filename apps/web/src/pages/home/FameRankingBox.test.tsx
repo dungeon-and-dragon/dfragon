@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { FameRanking, RankedCharacter } from '#core/ranking'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
+import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
+import { ClientHostContext } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { RankingsScreen } from '#pages/rankings'
@@ -12,6 +15,7 @@ import { FameRankingBox } from './FameRankingBox'
 
 let container: HTMLDivElement
 let root: Root
+let requests: URLSearchParams[]
 
 class FakeIntersectionObserver {
   observe(): void {}
@@ -19,6 +23,7 @@ class FakeIntersectionObserver {
 }
 
 beforeEach(() => {
+  requests = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
   container = document.createElement('div')
@@ -60,18 +65,34 @@ function rankingOf(count: number): FameRanking {
   }
 }
 
-function render(getFameRanking: ClientHost['getFameRanking']): Promise<void> {
+function respond(response: () => Response | Promise<Response>): void {
+  server.use(
+    http.get(FAME_RANKING_URL, ({ request }) => {
+      requests.push(new URL(request.url).searchParams)
+
+      return response()
+    })
+  )
+}
+
+function respondRanking(ranking: FameRanking): void {
+  respond(() => HttpResponse.json(ranking))
+}
+
+function render(): Promise<void> {
   return act(async () =>
     root.render(
-      <ClientHostContext value={createTestClientHost({ getFameRanking })}>
-        <TestQueryClient>
-          <TestRouter>
-            <FameRankingBox />
-          </TestRouter>
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <TestRouter>
+          <FameRankingBox />
+        </TestRouter>
+      </TestQueryClient>
     )
   )
+}
+
+function settled(): Promise<void> {
+  return vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
 }
 
 function bodyRows(): string[][] {
@@ -81,10 +102,11 @@ function bodyRows(): string[][] {
 }
 
 it('직업 필터 없이 조회해 앞 3명을 순위, 캐릭터, 명성 열로 그린다', async () => {
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(100))
-  await render(getFameRanking)
+  respondRanking(rankingOf(100))
+  await render()
+  await settled()
 
-  expect(getFameRanking).toHaveBeenCalledWith({}, undefined)
+  expect(requests.map((params) => Object.fromEntries(params))).toEqual([{}])
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
     '#',
     '캐릭터',
@@ -99,13 +121,16 @@ it('직업 필터 없이 조회해 앞 3명을 순위, 캐릭터, 명성 열로 
 })
 
 it('3명보다 적으면 받은 만큼만 그린다', async () => {
-  await render(async () => rankingOf(2))
+  respondRanking(rankingOf(2))
+  await render()
+  await settled()
 
   expect(bodyRows()).toHaveLength(2)
 })
 
 it('받는 중에는 빈 줄 3개를 그린다', async () => {
-  await render(() => new Promise<FameRanking>(() => {}))
+  respond(() => new Promise<Response>(() => {}))
+  await render()
 
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
   expect(container.querySelectorAll('tbody tr[aria-hidden]')).toHaveLength(3)
@@ -113,24 +138,26 @@ it('받는 중에는 빈 줄 3개를 그린다', async () => {
 })
 
 it('조회에 실패하면 오류 문구 한 줄을 둔다', async () => {
-  await render(async () => {
-    throw new Error('랭킹을 받지 못했습니다.')
-  })
+  respond(() => fameRankingFailure('랭킹을 받지 못했습니다.'))
+  await render()
+  await settled()
 
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('랭킹을 받지 못했습니다.')
   expect(container.querySelector('table')).toBeNull()
 })
 
 it('빈 랭킹은 박스에 이름 한 줄만 둔다', async () => {
-  await render(async () => ({ characters: [], nextCursor: null }))
+  respondRanking({ characters: [], nextCursor: null })
+  await render()
+  await settled()
 
   expect(container.querySelector('section[aria-label="명성 랭킹"]')?.textContent).toBe('명성 랭킹')
   expect(container.querySelector('table')).toBeNull()
 })
 
 it('랭킹 화면의 직업 전체 조회를 받아 두었으면 다시 조회하지 않는다', async () => {
-  const getFameRanking = vi.fn<ClientHost['getFameRanking']>(async () => rankingOf(100))
-  const host = createTestClientHost({ getFameRanking })
+  respondRanking(rankingOf(100))
+  const host = createTestClientHost()
   function show(screen: React.JSX.Element): Promise<void> {
     return act(async () =>
       root.render(
@@ -144,8 +171,11 @@ it('랭킹 화면의 직업 전체 조회를 받아 두었으면 다시 조회�
   }
 
   await show(<RankingsScreen filter={{}} onFilterChange={() => {}} />)
+  await vi.waitFor(() =>
+    expect(container.querySelector('tbody tr:not([aria-hidden])')).not.toBeNull()
+  )
   await show(<FameRankingBox />)
 
-  expect(getFameRanking).toHaveBeenCalledTimes(1)
+  expect(requests).toHaveLength(1)
   expect(bodyRows()).toHaveLength(3)
 })
