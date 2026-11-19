@@ -135,7 +135,7 @@ function filledApi(): FakeOpsApi {
 
   api.workerSeenAt = workerSeenAt
   api.jobs = [statsJob(), timelineBackfillJob(), seasonBackfillJob(), manualJob]
-  api.runs = { stats: statsRuns }
+  api.runs = { stats: statsRuns, 'timeline-backfill': [finishedRun(20, 'failed', 40)] }
   api.collection = {
     waiting: 18_402,
     oldestQueuedAt,

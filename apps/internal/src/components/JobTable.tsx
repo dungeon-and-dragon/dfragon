@@ -14,7 +14,7 @@ import { RunProgress } from './RunProgress'
 import { PausedTag, RunStatusTag } from './RunStatusTag'
 import { ScheduleText } from './ScheduleText'
 
-const NAME_BUTTON = 'link cursor-pointer text-left text-sm font-semibold text-fg focus-ring'
+const NAME = 'text-left text-sm font-semibold text-fg focus-ring'
 const COLUMN_COUNT = 8
 const NO_NEOPLE_GROUP = 'Neople 안 부름'
 
@@ -71,9 +71,7 @@ function GroupHeader({ group }: { group: JobGroup }): React.JSX.Element {
 
 type JobTableProps = {
   jobs: readonly Job[]
-  selectedName: string | undefined
   now: Date
-  onSelect: (name: string) => void
 }
 
 function NextRun({ job }: { job: Job }): React.JSX.Element {
@@ -88,39 +86,21 @@ function NextRun({ job }: { job: Job }): React.JSX.Element {
   return <span className="num">{formatDateMinute(job.nextRunAt)}</span>
 }
 
-function JobRow({
-  job,
-  selected,
-  now,
-  onSelect
-}: {
-  job: Job
-  selected: boolean
-  now: Date
-  onSelect: (name: string) => void
-}): React.JSX.Element {
+function JobRow({ job, now }: { job: Job; now: Date }): React.JSX.Element {
   const { activeRun, lastFinishedRun } = job
   const lastDuration = lastFinishedRun !== null ? runDuration(lastFinishedRun, now) : undefined
-
-  function handleSelect(): void {
-    onSelect(job.name)
-  }
+  const hasDescription = job.description !== ''
 
   return (
-    <tr aria-selected={selected}>
+    <tr>
       <td>
-        <Tooltip.Root disabled={job.description === ''}>
+        <Tooltip.Root disabled={!hasDescription}>
           <Tooltip.Trigger
             render={
               <span className={textClasses.twoLine}>
-                <button
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={handleSelect}
-                  className={NAME_BUTTON}
-                >
+                <span tabIndex={hasDescription ? 0 : undefined} className={NAME}>
                   {job.displayName}
-                </button>
+                </span>
                 <small className={textClasses.small}>{job.name}</small>
               </span>
             }
@@ -167,7 +147,7 @@ function JobRow({
   )
 }
 
-export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): React.JSX.Element {
+export function JobTable({ jobs, now }: JobTableProps): React.JSX.Element {
   return (
     <section aria-label="job" className={panelClasses.box}>
       <h2 className="section-title">
@@ -195,13 +175,7 @@ export function JobTable({ jobs, selectedName, now, onSelect }: JobTableProps): 
               <tbody key={group.label}>
                 <GroupHeader group={group} />
                 {group.jobs.map((job) => (
-                  <JobRow
-                    key={job.name}
-                    job={job}
-                    selected={job.name === selectedName}
-                    now={now}
-                    onSelect={onSelect}
-                  />
+                  <JobRow key={job.name} job={job} now={now} />
                 ))}
               </tbody>
             ))}

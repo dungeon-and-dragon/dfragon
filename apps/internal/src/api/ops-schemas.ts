@@ -57,7 +57,7 @@ export const jobListSchema = z.object({
 })
 
 export const runPageSchema = z.object({
-  runs: z.array(runSchema),
+  runs: z.array(runSchema.extend({ jobName: z.string() })),
   nextBefore: z.int().positive().nullable()
 })
 
