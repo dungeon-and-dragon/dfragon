@@ -21,6 +21,7 @@ import type { FetchItemDetails } from '@dfragon/server-core/application/item-dic
 import { createItemDictionaryFillJob } from '#application/item-dictionary/index.js'
 import {
   DatabaseAcquisitionItemRepository,
+  DatabaseCharacterActivityRepository,
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository,
   DatabaseCollectionRepository,
@@ -45,6 +46,12 @@ import {
   createJobRunCleanupJob
 } from '#application/jobs/index.js'
 import type { ScoreCalculationPorts } from '#application/character-score/ports.js'
+import type { CharacterActivityPorts } from '#application/character-activity/ports.js'
+import {
+  CharacterActivityService,
+  createFameRefreshJob,
+  createInactiveRecheckJob
+} from '#application/character-activity/index.js'
 import type { CharacterDiscoveryPorts } from '#application/character-collection/ports.js'
 import {
   CharacterDiscoveryService,
@@ -60,7 +67,8 @@ type ClockKey = 'now' | 'pause'
 
 export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
   Omit<SkillStyleCollectionPorts, ClockKey> &
-  Omit<CharacterDiscoveryPorts, ClockKey> & {
+  Omit<CharacterDiscoveryPorts, ClockKey> &
+  Omit<CharacterActivityPorts, ClockKey> & {
     createFetchRecordTimeline: CreateClearTimeline
     fetchItemDetails: FetchItemDetails
     score: Omit<ScoreCalculationPorts, ClockKey> & { schedule?: string }
@@ -79,6 +87,8 @@ export function createWorkerJobs(
     readTargets,
     readTopFame,
     fetchFamePage,
+    fetchLatestActivity,
+    fetchBasic,
     readConcurrency,
     report
   } = collection
@@ -109,6 +119,10 @@ export function createWorkerJobs(
     report,
     pause: clock.pause
   })
+  const activityService = new CharacterActivityService(
+    new DatabaseCharacterActivityRepository(client),
+    { fetchLatestActivity, fetchBasic, readConcurrency, report, ...clock }
+  )
   const statsService = new StatsJobService(new DatabaseStatsJobRepository(client))
   const itemDictionary = new ItemDictionaryService(
     new DatabaseItemDictionaryRepository(client),
@@ -126,6 +140,8 @@ export function createWorkerJobs(
     createClearWeekSampleJob(weekSampleService),
     createSkillStyleCollectionJob(skillStyleService),
     createCharacterDiscoveryJob(discoveryService),
+    createFameRefreshJob(activityService),
+    createInactiveRecheckJob(activityService),
     createCharacterStatsJob(statsService),
     createSkillAdoptionJob(statsService),
     createSetAdoptionJob(statsService),

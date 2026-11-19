@@ -5,6 +5,10 @@ const DETAIL_GROUP = '캐릭터 상세, 아이템'
 
 export const NEOPLE_APIS = {
   timeline: { group: '캐릭터 타임라인', endpoints: [`${CHARACTER}/timeline`] },
+  fameRefresh: {
+    group: '캐릭터 기본 정보, 타임라인',
+    endpoints: [CHARACTER, `${CHARACTER}/timeline`]
+  },
   fameSearch: {
     group: '명성 검색',
     endpoints: ['/df/servers/{serverId}/characters-fame', '/df/servers', '/df/jobs']
