@@ -371,8 +371,6 @@
                   },
                   {
                     "group": [
-                      "#hooks/**",
-                      "#components/**",
                       "#pages/**",
                       "#app/**",
                       "#widgets/**",
@@ -392,39 +390,6 @@
                       "**/fixture/**"
                     ],
                     "message": "src/features/capture-search/lib는 UI 폴더를 import하지 않는다. 화면 코드는 apps/web/src의 UI 폴더에 둔다."
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "includes": ["apps/web/src/components/**", "apps/web/src/hooks/**"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noRestrictedImports": {
-              "level": "error",
-              "options": {
-                "patterns": [
-                  {
-                    "group": ["../*", "../**"],
-                    "message": "상위 폴더 상대 경로 대신 #<폴더>/... alias로 가져온다."
-                  },
-                  {
-                    "group": [
-                      "../**/pages",
-                      "../**/pages/**",
-                      "./**/pages",
-                      "./**/pages/**",
-                      "#pages",
-                      "#pages/**",
-                      "#*/**/pages",
-                      "#*/**/pages/**"
-                    ],
-                    "message": "공용 components와 hooks는 pages/를 import하지 않는다. 화면 전용 코드는 pages/<화면>/에 두고, 여러 화면이 쓰는 코드는 공용 components/나 hooks/에 둔다."
                   }
                 ]
               }
