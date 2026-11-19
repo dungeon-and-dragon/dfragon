@@ -20,9 +20,11 @@ import {
   fameRankingSchema,
   type CharacterStats,
   type FameRanking,
-  type FameRankingFilter
+  type FameRankingFilter,
+  type SetStatsFilter
 } from '#core/ranking/ranking-stats'
 import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '#core/ranking/skill-stats'
+import { setStatsSchema, type SetStats } from '#core/ranking/set-stats'
 import {
   clearContentStatsSchema,
   clearOverviewSchema,
@@ -87,6 +89,7 @@ export type TimelinePageHttp<Item> = (
 export type FameRankingHttp = (filter: FameRankingFilter) => Promise<FameRanking>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
 export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
+export type SetStatsHttp = (filter: SetStatsFilter) => Promise<SetStats>
 export type ClearStatsHttp = () => Promise<ClearStats>
 export type ClearContentStatsHttp = (
   contentId: string,
@@ -126,6 +129,7 @@ export type DfragonClient = Readonly<{
   rankings: Readonly<{ fame: FameRankingHttp }>
   stats: CharacterStatsHttp
   skillStats: SkillStatsHttp
+  setStats: SetStatsHttp
   clearStats: ClearStatsHttp
   clearContentStats: ClearContentStatsHttp
   clearOverview: ClearOverviewHttp
@@ -352,15 +356,23 @@ export function createDfragonClient({
     },
     rankings: {
       async fame(filter) {
-        if (filter.jobGrowId !== undefined && filter.jobId === undefined) {
+        if (
+          (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
+          (filter.oathSetOption !== undefined && filter.oathSetId === undefined)
+        ) {
           throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
         }
+
+        const oathSetId = filter.oathSetId !== undefined ? String(filter.oathSetId) : undefined
 
         return requestJson('/rankings/fame', fameRankingSchema, {
           searchParams: {
             ...(filter.jobId !== undefined && { jobId: filter.jobId }),
             ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
-            ...(filter.role !== undefined && { role: filter.role })
+            ...(filter.role !== undefined && { role: filter.role }),
+            ...(filter.equipmentSetId !== undefined && { equipmentSetId: filter.equipmentSetId }),
+            ...(oathSetId !== undefined && { oathSetId }),
+            ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption })
           }
         })
       }
@@ -370,6 +382,19 @@ export function createDfragonClient({
       requestJson('/stats/skills', skillStatsSchema, {
         searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
       }),
+    async setStats(filter) {
+      if (filter.jobGrowId !== undefined && filter.jobId === undefined) {
+        throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+      }
+
+      return requestJson('/stats/sets', setStatsSchema, {
+        searchParams: {
+          ...(filter.jobId !== undefined && { jobId: filter.jobId }),
+          ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
+          ...(filter.role !== undefined && { role: filter.role })
+        }
+      })
+    },
     clearStats: () =>
       requestJson('/stats/clears', clearStatsSchema, { timeout: CLEAR_STATS_TIMEOUT_MS }),
     clearContentStats: (contentId, weekStart) =>

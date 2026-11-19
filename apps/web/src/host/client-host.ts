@@ -28,6 +28,8 @@ import type {
   ClearStats,
   FameRanking,
   FameRankingFilter,
+  SetStats,
+  SetStatsFilter,
   SkillStats,
   SkillStatsJob
 } from '#core/ranking'
@@ -74,6 +76,7 @@ export type ClientHost = Readonly<{
   getFameRanking: (filter: FameRankingFilter) => Promise<FameRanking>
   getCharacterStats: () => Promise<CharacterStats>
   getSkillStats: (job: SkillStatsJob) => Promise<SkillStats>
+  getSetStats: (filter: SetStatsFilter) => Promise<SetStats>
   getClearStats: () => Promise<ClearStats>
   getClearContentStats: (
     contentId: string,
