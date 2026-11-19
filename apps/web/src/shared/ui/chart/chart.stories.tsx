@@ -170,6 +170,7 @@ export const 상자그림: Story = {
           return {
             key: name,
             name,
+            sub: '하드',
             color: `var(--color-chart-${index + 1})`,
             value,
             stats: {
