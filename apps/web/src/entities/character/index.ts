@@ -119,6 +119,10 @@ export {
   rarityTextClasses,
   rarityTextOfName
 } from './ui/game-colors'
+export { ItemIcon } from './ui/ItemIcon'
+export { ItemName } from './ui/ItemName'
+export { itemPartClasses } from './ui/item-part-classes'
+export { RarityBadge } from './ui/RarityBadge'
 export { ServerBadge } from './ui/ServerBadge'
 export { CardImage } from './ui/CardImage'
 export { Portrait } from './ui/Portrait'
