@@ -4,6 +4,7 @@ export {
   createNeopleClearTimeline
 } from './content-clear-collection.js'
 export { createNeopleSkillStyle } from './skill-style-collection.js'
+export { createNeopleLatestActivity } from './character-activity.js'
 export { createNeopleFameSearch } from './character-discovery.js'
 export { createNeopleCharacterBasic, paceNeopleRequests } from './character-collection.js'
 export type { WorkerNeople } from './character-collection.js'
