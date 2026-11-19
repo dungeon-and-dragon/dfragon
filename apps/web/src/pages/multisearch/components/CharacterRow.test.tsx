@@ -2,7 +2,7 @@
 import { act, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { bufferCard, dealerCard } from '#testing/fixtures/character'
+import { bufferCard, dealerCard } from '#entities/character/api/character-cards.fixture'
 import type {
   CandidatePicker,
   CardCharacter,

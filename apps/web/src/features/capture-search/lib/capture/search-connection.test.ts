@@ -4,7 +4,7 @@ import type {
   SearchCommandResult,
   SearchSnapshot
 } from '#features/capture-search/lib/search/search'
-import { CAPTURE_ID, searchSnapshot } from '#features/capture-search/lib/search/search-test-fixture'
+import { CAPTURE_ID, searchSnapshot } from '#features/capture-search/api/search.fixture'
 import { createSearchConnection, type SearchConnection } from './search-connection'
 
 const connections: SearchConnection[] = []

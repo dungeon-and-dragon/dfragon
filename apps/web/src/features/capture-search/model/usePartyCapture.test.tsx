@@ -10,7 +10,7 @@ import {
   searchRow,
   searchSnapshot,
   searchSlot
-} from '#features/capture-search/lib/search/search-test-fixture'
+} from '#features/capture-search/api/search.fixture'
 import type {
   CharacterChoice,
   SearchCommandResult,
@@ -19,7 +19,7 @@ import type {
   SearchSnapshot
 } from '#features/capture-search/lib/search/search'
 import * as diagnostics from '#shared/lib/diagnostics'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { createTestClientHost } from '#features/capture-search/api/client-host.fixture'
 import { ClientHostContext } from './client-host'
 import { usePartyCapture } from './usePartyCapture'
 

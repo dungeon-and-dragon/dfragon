@@ -7,7 +7,7 @@ import {
   raritySolidClasses as raritySolid,
   rarityTextClasses as rarityTones
 } from '#entities/character'
-import { characterDetailFixture } from '#testing/fixtures/character'
+import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 import { artifactDotClasses as dotTones, avatarClasses } from './avatar/avatar-classes'
 import { AvatarCreatureTab } from './AvatarCreatureTab'
 import { itemClasses } from './equipment/item-classes'

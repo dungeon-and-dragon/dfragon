@@ -8,7 +8,7 @@ import type {
   createCaptureSearch
 } from '#features/capture-search/lib/capture/capture-search'
 import { emptySearchSlots } from '#features/capture-search/lib/capture/slots'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { createTestClientHost } from '#features/capture-search/api/client-host.fixture'
 import {
   type CharacterChoice,
   SEARCH_SLOT_COUNTS,
@@ -20,7 +20,7 @@ import {
   REQUEST_ID,
   searchRow,
   searchSlot
-} from '#features/capture-search/lib/search/search-test-fixture'
+} from '#features/capture-search/api/search.fixture'
 
 // 파티 검색 수명의 연결(createCaptureSearch)만 바꾸고 useManualCharacterLookup은 그대로 쓴다.
 const mocks = vi.hoisted(() => ({ create: vi.fn<typeof createCaptureSearch>() }))

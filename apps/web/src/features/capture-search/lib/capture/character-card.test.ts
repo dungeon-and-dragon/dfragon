@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { SelectedCharacterSummary } from '#entities/character'
 import type { SearchSlot } from '#features/capture-search/lib/search/search'
-import { dealerCard } from '#testing/fixtures/character/character-cards'
+import { dealerCard } from '#entities/character/api/character-cards.fixture'
 import { searchSlotNotice, toCharacterCard } from './character-card'
 
 const summary: SelectedCharacterSummary = {
