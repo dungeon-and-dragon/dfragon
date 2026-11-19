@@ -73,7 +73,7 @@ function holding(setItemId: string, slot: string, rarity: string, count = 1) {
 const lowFameHoldings = [holding(ONYX, '상의', '에픽')]
 const highFameHoldings = [
   holding(ONYX, '상의', '에픽', 2),
-  holding(ONYX, '상의', '태초'),
+  holding(ONYX, '상의', '태초', 2),
   holding(FAIRY, '하의', '레전더리')
 ]
 const highFameOaths: EquipmentCharacter['oaths'] = [
@@ -180,13 +180,27 @@ function tableRows(section: string): string[][] {
   )
 }
 
+function openPopup(): Element | null {
+  return document.querySelector('[data-base-ui-portal] [data-open][data-base-ui-focusable]')
+}
+
+function tooltipRows(): string[] {
+  const rows = openPopup()?.firstElementChild?.children ?? []
+
+  return [...rows].map((row) => row.textContent ?? '')
+}
+
+function hover(element: Element): void {
+  element.dispatchEvent(new MouseEvent('mouseenter'))
+}
+
 async function waitForTable(): Promise<void> {
   await vi.waitFor(() => expect(tableRows('장비').length).toBeGreaterThan(0))
 }
 
 const DASHES = Array.from({ length: 10 }, () => '-')
 
-it('첫 서버와 줄임말 표에서 앞선 세트를 고르고 표에 없는 세트는 원래 이름으로 뒤에 두며, 그 서버 캐릭터를 명성 순으로 보이고, 칸에는 가장 높은 등급과 남은 개수를 보인다', async () => {
+it('첫 서버와 줄임말 표에서 앞선 세트를 고르고 표에 없는 세트는 원래 이름으로 뒤에 두며, 그 서버 캐릭터를 명성 순으로 보이고, 칸에는 가장 높은 등급과 그 등급의 남은 개수를 보인다', async () => {
   serve(json(equipment))
   await render()
   await waitForTable()
@@ -206,12 +220,26 @@ it('첫 서버와 줄임말 표에서 앞선 세트를 고르고 표에 없는 �
   ])
 
   const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
-  expect(topRow.querySelectorAll('td')[1]?.textContent).toBe('+2')
+  expect(topRow.querySelectorAll('td')[1]?.textContent).toBe('+1')
 
   expect(tableRows('서약')).toEqual([
     ['합성2합성 전직 합성 직업', '합성 서약', '0', '3', '0'],
     ['합성1합성 전직 합성 직업', '-', '0', '0', '0']
   ])
+})
+
+it('장비 칸과 서약에 마우스를 올리면 태초, 에픽, 레전더리 개수를 따로 보인다', async () => {
+  serve(json(equipment))
+  await render()
+  await waitForTable()
+
+  const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
+  await act(async () => hover(topRow.querySelector('[role="img"]')!))
+  expect(tooltipRows()).toEqual(['태초2개', '에픽2개', '레전더리0개'])
+
+  const oathRow = container.querySelector('section[aria-label="서약"] table tbody tr')!
+  await act(async () => hover(oathRow.querySelectorAll('td')[1]!.firstElementChild!))
+  expect(tooltipRows()).toEqual(['태초1개', '에픽0개', '레전더리0개'])
 })
 
 it('세트 칩을 누르면 지금 서버와 고른 세트를 주소 값으로 넘긴다', async () => {

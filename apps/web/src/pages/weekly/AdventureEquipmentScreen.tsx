@@ -82,7 +82,7 @@ function EquipmentPickers({
   }
 
   return (
-    <div className="section flex flex-col gap-3 px-4">
+    <div className="section flex flex-col gap-3 bg-canvas px-4 sm:sticky sm:top-0 sm:z-sticky">
       {servers.length > 1 && (
         <PickerRow label="서버">
           <ChipGroup

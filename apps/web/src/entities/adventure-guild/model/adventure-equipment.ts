@@ -50,6 +50,7 @@ export type HoldingCell = Readonly<{
   itemName: string
   rarity: string
   extraCount: number
+  rarityCounts: readonly number[]
 }>
 
 export type EquipmentBoardRow = Readonly<{
@@ -69,6 +70,14 @@ function rarityRank(rarity: string): number {
   return rank
 }
 
+function countByRarity(holdings: readonly Holding[]): number[] {
+  return HOLDING_RARITIES.map((rarity) =>
+    holdings
+      .filter((holding) => holding.rarity === rarity)
+      .reduce((sum, { count }) => sum + count, 0)
+  )
+}
+
 function toCell(holdings: readonly Holding[]): HoldingCell | null {
   const top = holdings.toSorted((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity))[0]
 
@@ -76,10 +85,19 @@ function toCell(holdings: readonly Holding[]): HoldingCell | null {
     return null
   }
 
-  const total = holdings.reduce((sum, { count }) => sum + count, 0)
-  const extraCount = total - 1
+  const rarityCounts = countByRarity(holdings)
+  const topCount = holdings
+    .filter(({ rarity }) => rarity === top.rarity)
+    .reduce((sum, { count }) => sum + count, 0)
+  const extraCount = topCount - 1
 
-  return { itemId: top.itemId, itemName: top.itemName, rarity: top.rarity, extraCount }
+  return {
+    itemId: top.itemId,
+    itemName: top.itemName,
+    rarity: top.rarity,
+    extraCount,
+    rarityCounts
+  }
 }
 
 function toSlots(equipment: EquipmentCharacter['equipment']): EquipmentBoardRow['slots'] {
@@ -103,11 +121,7 @@ export function toEquipmentBoard(
     const equipment = character.equipment.filter((holding) => holding.setItemId === setItemId)
     const oaths = character.oaths.filter((holding) => holding.setItemId === setItemId)
     const crystals = oaths.filter(({ kind }) => kind === 'crystal')
-    const crystalCounts = HOLDING_RARITIES.map((rarity) =>
-      crystals
-        .filter((crystal) => crystal.rarity === rarity)
-        .reduce((sum, { count }) => sum + count, 0)
-    )
+    const crystalCounts = countByRarity(crystals)
     const slots = toSlots(equipment)
     const oath = toCell(oaths.filter(({ kind }) => kind === 'oath'))
 
