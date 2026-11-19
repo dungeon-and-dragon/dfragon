@@ -1,15 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { CaptureSource, RaidFrameResult } from '#core/capture'
-import type {
-  CharacterDetailView,
-  CharacterHistory,
-  CharacterIdentity,
-  CharacterImage,
-  CharacterTimeline,
-  TimelineAcquisition,
-  TimelineEnhancement,
-  TimelinePage
-} from '#core/character'
+import type { CharacterImage } from '#core/character'
 import type { OcrSearchObservation, SearchApi, SearchCommandResult } from '#core/search'
 import type { TodayGrade } from '#core/today-grade'
 import type {
@@ -19,7 +10,7 @@ import type {
   AdventureWeekly,
   Guild
 } from '#core/adventure-guild'
-import type { OathCatalog, SkillWindowCatalog } from '#core/catalog'
+import type { OathCatalog } from '#core/catalog'
 import type { CharacterSearchQuery, SearchedCharacter } from '#core/api'
 import type {
   CharacterStats,
@@ -28,9 +19,7 @@ import type {
   ClearStats,
   ItemStats,
   SetStats,
-  SetStatsFilter,
-  SkillStats,
-  SkillStatsJob
+  SetStatsFilter
 } from '#core/ranking'
 
 import type { ScreenWatchKind } from './screen-watch/screen-watch'
@@ -52,28 +41,9 @@ export type ClientHost = Readonly<{
   party: PartyCaptureHost
   raid: RaidCaptureHost
   getTodayGrade: () => Promise<TodayGrade>
-  getCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
-  refreshCharacterDetail: (identity: CharacterIdentity) => Promise<CharacterDetailView>
-  getCharacterTimeline: (identity: CharacterIdentity) => Promise<CharacterTimeline>
-  getTimelineEnhancements: (
-    identity: CharacterIdentity,
-    before: string
-  ) => Promise<TimelinePage<TimelineEnhancement>>
-  getTimelineAcquisitions: (
-    identity: CharacterIdentity,
-    before: string
-  ) => Promise<TimelinePage<TimelineAcquisition>>
-  getCharacterHistory: (identity: CharacterIdentity) => Promise<CharacterHistory>
-  getCharacterHistorySnapshot: (
-    identity: CharacterIdentity,
-    at: string
-  ) => Promise<CharacterDetailView>
-  // 스킬 창 데이터를 아직 올리지 않았거나 그 직업이 데이터에 없으면 null을 돌려준다.
-  getSkillWindowCatalog: (jobName: string) => Promise<SkillWindowCatalog | null>
   // 서약 데이터를 아직 올리지 않았으면 null을 돌려준다.
   getOathCatalog: () => Promise<OathCatalog | null>
   getCharacterStats: () => Promise<CharacterStats>
-  getSkillStats: (job: SkillStatsJob) => Promise<SkillStats>
   getSetStats: (filter: SetStatsFilter) => Promise<SetStats>
   getItemStats: (filter: SetStatsFilter) => Promise<ItemStats>
   getClearStats: () => Promise<ClearStats>

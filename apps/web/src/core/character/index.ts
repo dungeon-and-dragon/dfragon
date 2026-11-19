@@ -13,6 +13,7 @@ export {
   statusElementOf
 } from './character-detail-display'
 export type { ItemRarity } from './character-detail-display'
+export { characterDetailViewSchema } from './character-detail-view'
 export type { CharacterDetailView } from './character-detail-view'
 export { signedEnchantValue, toEquipmentView } from './character-equipment'
 export type {
@@ -23,6 +24,7 @@ export type {
 } from './character-equipment'
 export {
   ARTIFACT_PART,
+  characterHistorySchema,
   SET_PART,
   toHistoryPoints,
   toHistorySnapshotSummary
@@ -54,6 +56,11 @@ export {
   characterImageUrl,
   characterRole
 } from './character-summary'
+export {
+  characterTimelineSchema,
+  timelineAcquisitionPageSchema,
+  timelineEnhancementPageSchema
+} from './character-timeline'
 export type {
   CharacterTimeline,
   TimelineAcquisition,

@@ -1,13 +1,20 @@
 // @vitest-environment jsdom
-import { act } from 'react'
+import { useIsFetching } from '@tanstack/react-query'
+import { HttpResponse, http } from 'msw'
+import { act, useEffect } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView, MaleCrusaderRole } from '#core/character'
 import type { GameTextLines, SkillWindowCatalog } from '#core/catalog'
 import type { SkillStats } from '#core/ranking'
 import { characterDetailFixture } from '#core/testing'
-import { type ClientHost, ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import {
+  loadingResponse,
+  SKILL_STATS_URL,
+  skillWindowHandlers
+} from '#pages/character/api/character.handlers'
+import { SKILL_WINDOW_INDEX_URL } from '#pages/character/api/useSkillWindowCatalog'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { SkillTab } from './SkillTab'
 
@@ -152,9 +159,18 @@ const CATALOG_WITH_UPGRADES: SkillWindowCatalog = {
 
 let container: HTMLDivElement
 let root: Root
+let requested: URL[]
+let fetching: number
+
+function recordRequest({ request }: { request: Request }): void {
+  requested.push(new URL(request.url))
+}
 
 beforeEach(() => {
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  requested = []
+  fetching = 0
+  server.events.on('request:start', recordRequest)
+  server.use(...skillWindowHandlers([]), http.get(SKILL_STATS_URL, loadingResponse))
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -163,19 +179,50 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
-  vi.unstubAllGlobals()
+  server.events.removeListener('request:start', recordRequest)
 })
 
-async function render(host: ClientHost, detail: CharacterDetailView): Promise<void> {
+function respondSkillWindow(...catalogs: SkillWindowCatalog[]): void {
+  server.use(...skillWindowHandlers(catalogs))
+}
+
+function respondSkillStats(stats: SkillStats): void {
+  server.use(http.get(SKILL_STATS_URL, () => HttpResponse.json(stats)))
+}
+
+function skillStatsQueries(): Record<string, string>[] {
+  return requested
+    .filter((url) => url.href.startsWith(SKILL_STATS_URL))
+    .map((url) => Object.fromEntries(url.searchParams))
+}
+
+function CountFetching(): null {
+  const count = useIsFetching()
+  useEffect(() => {
+    fetching = count
+  })
+
+  return null
+}
+
+async function render(detail: CharacterDetailView): Promise<void> {
   await act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <TestQueryClient>
-          <SkillTab detail={detail} />
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <SkillTab detail={detail} />
+        <CountFetching />
+      </TestQueryClient>
     )
   )
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+}
+
+// 스킬 채택률은 스킬 창을 받은 뒤에야 요청하므로, 그 요청을 보낸 뒤 진행 중인 조회가 없을 때 응답이 화면에 반영됐다고 본다.
+async function waitSkillStats(count: number): Promise<void> {
+  await vi.waitFor(() => {
+    expect(skillStatsQueries()).toHaveLength(count)
+    expect(fetching).toBe(0)
+  })
 }
 
 function spriteAt(position: string): unknown {
@@ -195,10 +242,12 @@ function iconTexts(): string[][] {
 }
 
 it('스킬 창 데이터가 있는 전직은 배치에 아이콘을 두고 배운 스킬에만 레벨을 보인다', async () => {
-  const getSkillWindowCatalog = vi.fn(async () => CATALOG)
-  await render(createTestClientHost({ getSkillWindowCatalog }), characterDetailFixture('dealer'))
+  respondSkillWindow(MALE_CRUSADER_CATALOG, CATALOG)
+  await render(characterDetailFixture('dealer'))
 
-  expect(getSkillWindowCatalog).toHaveBeenCalledWith('프리스트(여)')
+  expect(
+    requested.filter(({ pathname }) => pathname.startsWith('/skilltab/')).map(({ href }) => href)
+  ).toEqual([SKILL_WINDOW_INDEX_URL, new URL('jobs/at_priest.json', SKILL_WINDOW_INDEX_URL).href])
   expect(iconTexts()).toEqual([
     ['기본기 숙련', spriteAt('0px 0px'), 'Lv 115'],
     ['배우지 않은 스킬', spriteAt('-28px 0px'), '']
@@ -207,7 +256,7 @@ it('스킬 창 데이터가 있는 전직은 배치에 아이콘을 두고 배�
 })
 
 it('스킬 창 데이터가 없으면 배운 스킬을 습득 레벨 줄로 나눈 목록으로 보인다', async () => {
-  await render(createTestClientHost(), characterDetailFixture('dealer'))
+  await render(characterDetailFixture('dealer'))
 
   const rows = container.querySelectorAll('[aria-label="배운 스킬"] section')
   expect(container.querySelector('[aria-label="스킬 창"]')).toBeNull()
@@ -218,20 +267,14 @@ it('스킬 창 데이터가 없으면 배운 스킬을 습득 레벨 줄로 나�
 })
 
 it('스킬 창 데이터를 받지 못해도 배운 스킬 목록으로 보인다', async () => {
-  await render(
-    createTestClientHost({
-      getSkillWindowCatalog: async () => {
-        throw new Error('스킬 창 데이터를 받지 못했습니다(HTTP 503).')
-      }
-    }),
-    characterDetailFixture('dealer')
-  )
+  server.use(http.get(SKILL_WINDOW_INDEX_URL, () => new HttpResponse(null, { status: 503 })))
+  await render(characterDetailFixture('dealer'))
 
   expect(container.querySelector('[aria-label="배운 스킬"]')).not.toBeNull()
 })
 
 it('스킬 개화와 강화는 스킬 이름과 type 숫자로 나열한다', async () => {
-  await render(createTestClientHost(), characterDetailFixture('dealer'))
+  await render(characterDetailFixture('dealer'))
 
   const rowsOf = (label: string) =>
     [...container.querySelectorAll(`section[aria-label="${label}"] li`)].map((row) =>
@@ -252,10 +295,8 @@ it('스킬 개화와 강화는 스킬 이름과 type 숫자로 나열한다', as
 })
 
 it('개화는 배울 수 있는 스킬을 모두, 강화는 강화한 스킬만 두고 고른 갈래만 표시한다', async () => {
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  await render(characterDetailFixture('dealer'))
 
   expect(container.querySelector('section[aria-label="스킬 개화"] h2')?.textContent).toBe(
     '스킬 개화'
@@ -289,7 +330,8 @@ it('강화한 스킬이 없으면 스킬 강화 없음 한 줄을 보인다', as
   if (skillStyle?.style == null) {
     throw new Error('딜러 fixture에 스킬 스타일이 없다')
   }
-  await render(createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }), {
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  await render({
     ...detail,
     skillStyle: { ...skillStyle, style: { ...skillStyle.style, enhancement: [] } }
   })
@@ -299,20 +341,16 @@ it('강화한 스킬이 없으면 스킬 강화 없음 한 줄을 보인다', as
 })
 
 it('개화 갈래만 설명 창을 여는 버튼이고 강화 칸은 설명 창이 없다', async () => {
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  await render(characterDetailFixture('dealer'))
 
   expect(container.querySelectorAll('section[aria-label="스킬 개화"] button')).toHaveLength(4)
   expect(container.querySelectorAll('section[aria-label="스킬 강화"] button')).toHaveLength(0)
 })
 
 it('스킬 창 아이콘에 고른 개화 마름모와 강화 표식을 붙인다', async () => {
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  await render(characterDetailFixture('dealer'))
 
   const marksOf = (name: string) =>
     [
@@ -329,10 +367,8 @@ it('스킬 창 아이콘에 고른 개화 마름모와 강화 표식을 붙인�
 })
 
 it('스킬 창과 개화, 강화 표의 마크는 드래그되지 않는다', async () => {
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  await render(characterDetailFixture('dealer'))
 
   for (const label of ['스킬 창', '스킬 개화', '스킬 강화']) {
     const marks = container.querySelectorAll<HTMLImageElement>(`[aria-label="${label}"] img`)
@@ -342,10 +378,8 @@ it('스킬 창과 개화, 강화 표의 마크는 드래그되지 않는다', as
 })
 
 it('스킬 트리 코드와 체인 스킬 이름을 보인다', async () => {
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  await render(characterDetailFixture('dealer'))
 
   expect(container.querySelector('section[aria-label="스킬 트리 코드"] code')?.textContent).toMatch(
     /^eJyNjDFOAlEARN9b/
@@ -361,32 +395,33 @@ it('스킬 트리 코드와 체인 스킬 이름을 보인다', async () => {
 })
 
 it('스킬 체인을 쓰지 않는 캐릭터는 체인 없음 한 줄을 보인다', async () => {
-  await render(createTestClientHost(), characterDetailFixture('buffer'))
+  await render(characterDetailFixture('buffer'))
 
   expect(container.textContent).toContain('스킬 체인 없음')
   expect(container.querySelector('section[aria-label="스킬 체인"]')).toBeNull()
 })
 
 it('스킬 창이 있으면 그 전직의 스킬 채택률을 받고, 배운 스킬 목록이면 받지 않는다', async () => {
-  const getSkillStats = vi.fn(() => new Promise<never>(() => {}))
-  await render(
-    createTestClientHost({ getSkillWindowCatalog: async () => CATALOG, getSkillStats }),
-    characterDetailFixture('dealer')
+  respondSkillWindow(CATALOG)
+  await render(characterDetailFixture('dealer'))
+
+  await vi.waitFor(() =>
+    expect(skillStatsQueries()).toEqual([
+      {
+        jobId: '0c1b401bb09241570d364420b3ba3fd7',
+        jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7'
+      }
+    ])
   )
 
-  expect(getSkillStats).toHaveBeenCalledWith({
-    jobId: '0c1b401bb09241570d364420b3ba3fd7',
-    jobGrowId: '618326026de1a1f1cfba5dbd0b8396e7',
-    role: null
-  })
-
-  getSkillStats.mockClear()
+  requested = []
   await act(async () => root.unmount())
   root = createRoot(container)
-  await render(createTestClientHost({ getSkillStats }), characterDetailFixture('dealer'))
+  respondSkillWindow()
+  await render(characterDetailFixture('dealer'))
 
   expect(container.querySelector('[aria-label="배운 스킬"]')).not.toBeNull()
-  expect(getSkillStats).not.toHaveBeenCalled()
+  expect(skillStatsQueries()).toEqual([])
 })
 
 // 프리스트(남) 眞 크루세이더의 합성 배치다. 저장소 fixture의 스킬 구성은 그대로 두고 직업과 카드 역할만 바꾼다.
@@ -517,28 +552,23 @@ function upgradeRowTriggers(label: string, skillName: string): { icon: Element; 
 }
 
 it('남성 크루세이더는 카드 역할을 role로 보내 역할마다 따로 받는다', async () => {
-  const getSkillStats = vi.fn(() => new Promise<never>(() => {}))
-  const host = createTestClientHost({
-    getSkillWindowCatalog: async () => MALE_CRUSADER_CATALOG,
-    getSkillStats
-  })
-  await render(host, maleCrusaderDetail('dealer'))
-  await render(host, maleCrusaderDetail('buffer'))
+  respondSkillWindow(MALE_CRUSADER_CATALOG)
+  await render(maleCrusaderDetail('dealer'))
+  await render(maleCrusaderDetail('buffer'))
 
-  expect(getSkillStats.mock.calls).toEqual([
-    [{ ...MALE_CRUSADER_JOB, role: 'dealer' }],
-    [{ ...MALE_CRUSADER_JOB, role: 'buffer' }]
-  ])
+  await vi.waitFor(() =>
+    expect(skillStatsQueries()).toEqual([
+      { ...MALE_CRUSADER_JOB, role: 'dealer' },
+      { ...MALE_CRUSADER_JOB, role: 'buffer' }
+    ])
+  )
 })
 
 it('남성 크루세이더 Tooltip은 역할 표본 수를 쓰고 용기의 은총은 이름 한 줄이다', async () => {
-  await render(
-    createTestClientHost({
-      getSkillWindowCatalog: async () => MALE_CRUSADER_CATALOG,
-      getSkillStats: async () => DEALER_STATS
-    }),
-    maleCrusaderDetail('dealer')
-  )
+  respondSkillWindow(MALE_CRUSADER_CATALOG)
+  respondSkillStats(DEALER_STATS)
+  await render(maleCrusaderDetail('dealer'))
+  await waitSkillStats(1)
 
   expect(await tooltipOf('성령의 메이스')).toContain('딜러 표본 408명')
   expect(await tooltipOf('용기의 은총')).toBe('용기의 은총')
@@ -561,14 +591,10 @@ const UPGRADE_STATS: SkillStats = {
 }
 
 it('개화, 강화 행의 스킬 아이콘과 이름은 스킬 창 아이콘과 같은 채택률 Tooltip을 보이고 채택률은 한 번만 받는다', async () => {
-  const getSkillStats = vi.fn(async () => UPGRADE_STATS)
-  await render(
-    createTestClientHost({
-      getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES,
-      getSkillStats
-    }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  respondSkillStats(UPGRADE_STATS)
+  await render(characterDetailFixture('dealer'))
+  await waitSkillStats(1)
 
   const windowTooltip = await tooltipOf('참수')
   expect(windowTooltip).toContain('50.0%')
@@ -582,17 +608,14 @@ it('개화, 강화 행의 스킬 아이콘과 이름은 스킬 창 아이콘과 
 
   const evolution = upgradeRowTriggers('스킬 개화', '세례의 불길')
   expect(await tooltipAt(evolution.title)).toBe(await tooltipOf('세례의 불길'))
-  expect(getSkillStats).toHaveBeenCalledTimes(1)
+  expect(skillStatsQueries()).toHaveLength(1)
 })
 
 it('표본이 20명 미만이면 개화, 강화 행의 Tooltip은 스킬 이름 한 줄이다', async () => {
-  await render(
-    createTestClientHost({
-      getSkillWindowCatalog: async () => CATALOG_WITH_UPGRADES,
-      getSkillStats: async () => ({ ...UPGRADE_STATS, sampleSize: 19 })
-    }),
-    characterDetailFixture('dealer')
-  )
+  respondSkillWindow(CATALOG_WITH_UPGRADES)
+  respondSkillStats({ ...UPGRADE_STATS, sampleSize: 19 })
+  await render(characterDetailFixture('dealer'))
+  await waitSkillStats(1)
 
   for (const label of ['스킬 개화', '스킬 강화']) {
     const { icon, title } = upgradeRowTriggers(label, '참수')

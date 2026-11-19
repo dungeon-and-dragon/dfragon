@@ -5,8 +5,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '#core/character'
 import type { SkillWindowCatalog } from '#core/catalog'
 import { characterDetailFixture } from '#core/testing'
-import { type ClientHost, ClientHostContext } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { skillWindowHandlers } from '#pages/character/api/character.handlers'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { rarityTextClasses } from '#components/game-colors'
 import { BuffTab } from './BuffTab'
@@ -15,7 +15,7 @@ let container: HTMLDivElement
 let root: Root
 
 beforeEach(() => {
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  server.use(...skillWindowHandlers([]))
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -24,7 +24,6 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
-  vi.unstubAllGlobals()
 })
 
 // 저장소 fixture(아처 眞 뮤즈)의 버프 스킬 이름으로 만든 합성 배치다.
@@ -64,17 +63,12 @@ const MUSE_CATALOG: SkillWindowCatalog = {
   }
 }
 
-async function render(
-  detail: CharacterDetailView,
-  host: ClientHost = createTestClientHost()
-): Promise<void> {
+async function render(detail: CharacterDetailView): Promise<void> {
   await act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <TestQueryClient>
-          <BuffTab detail={detail} />
-        </TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>
+        <BuffTab detail={detail} />
+      </TestQueryClient>
     )
   )
 }
@@ -94,14 +88,18 @@ it('버퍼 버프 스킬은 이름과 레벨만 보이고 스킬 설명 줄은 �
 })
 
 it('스킬 창 데이터에 그 전직의 버프 스킬이 있으면 이름 대신 그 스킬의 sprite 아이콘을 보인다', async () => {
-  await render(
-    characterDetailFixture('buffer'),
-    createTestClientHost({ getSkillWindowCatalog: async () => MUSE_CATALOG })
-  )
+  server.use(...skillWindowHandlers([MUSE_CATALOG]))
+  await render(characterDetailFixture('buffer'))
 
-  const name = section('버프 스킬')!.querySelector('h2')!
-  expect(name.textContent).toBe('')
-  const icon = name.querySelector('[role="img"]')
+  const icon = await vi.waitFor(() => {
+    const image = section('버프 스킬')?.querySelector('h2 [role="img"]')
+    if (image == null) {
+      throw new Error('버프 스킬 아이콘이 없다')
+    }
+
+    return image
+  })
+  expect(icon.closest('h2')?.textContent).toBe('')
   expect(icon?.getAttribute('aria-label')).toBe('러블리 템포')
   // jsdom은 배경 그림을 계산하지 않으므로, style 속성에 sprite 주소와 위치가 들어갔는지 본다.
   expect(icon?.getAttribute('style')).toMatch(

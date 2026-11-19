@@ -20,7 +20,6 @@ import {
   type CharacterStats,
   type SetStatsFilter
 } from '#core/ranking/ranking-stats'
-import { skillStatsSchema, type SkillStats, type SkillStatsJob } from '#core/ranking/skill-stats'
 import { setStatsSchema, type SetStats } from '#core/ranking/set-stats'
 import { itemStatsSchema, type ItemStats } from '#core/ranking/item-stats'
 import {
@@ -31,20 +30,6 @@ import {
   type ClearOverview,
   type ClearStats
 } from '#core/ranking/clear-stats'
-import {
-  characterDetailViewSchema,
-  type CharacterDetailView
-} from '#core/character/character-detail-view'
-import {
-  characterTimelineSchema,
-  timelineAcquisitionPageSchema,
-  timelineEnhancementPageSchema,
-  type CharacterTimeline,
-  type TimelineAcquisition,
-  type TimelineEnhancement,
-  type TimelinePage
-} from '#core/character/character-timeline'
-import { characterHistorySchema, type CharacterHistory } from '#core/character/character-history'
 import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'
 import { SearchHttpFailure } from './http'
 import {
@@ -73,19 +58,7 @@ export type CharacterSearchHttp = (
 ) => Promise<readonly SearchedCharacter[]>
 export type CharacterPngHttp = (input: IdentityRequest) => Promise<Uint8Array>
 export type CharacterDetailsHttp = (input: IdentityRequest) => Promise<CharacterDetails>
-export type CharacterDetailViewHttp = (identity: CharacterIdentity) => Promise<CharacterDetailView>
-export type CharacterTimelineHttp = (identity: CharacterIdentity) => Promise<CharacterTimeline>
-export type CharacterHistoryHttp = (identity: CharacterIdentity) => Promise<CharacterHistory>
-export type CharacterHistorySnapshotHttp = (
-  identity: CharacterIdentity,
-  at: string
-) => Promise<CharacterDetailView>
-export type TimelinePageHttp<Item> = (
-  identity: CharacterIdentity,
-  before: string
-) => Promise<TimelinePage<Item>>
 export type CharacterStatsHttp = () => Promise<CharacterStats>
-export type SkillStatsHttp = (job: SkillStatsJob) => Promise<SkillStats>
 export type SetStatsHttp = (filter: SetStatsFilter) => Promise<SetStats>
 export type ItemStatsHttp = (filter: SetStatsFilter) => Promise<ItemStats>
 export type ClearStatsHttp = () => Promise<ClearStats>
@@ -116,16 +89,8 @@ export type DfragonClient = Readonly<{
     candidates: CharacterCandidatesHttp
     image: CharacterPngHttp
     details: CharacterDetailsHttp
-    detailView: CharacterDetailViewHttp
-    refresh: CharacterDetailViewHttp
-    timeline: CharacterTimelineHttp
-    timelineEnhancements: TimelinePageHttp<TimelineEnhancement>
-    timelineAcquisitions: TimelinePageHttp<TimelineAcquisition>
-    history: CharacterHistoryHttp
-    historySnapshot: CharacterHistorySnapshotHttp
   }>
   stats: CharacterStatsHttp
-  skillStats: SkillStatsHttp
   setStats: SetStatsHttp
   itemStats: ItemStatsHttp
   clearStats: ClearStatsHttp
@@ -308,67 +273,9 @@ export function createDfragonClient({
           detailsSchema.refine(({ character }) => sameIdentity(character, identity)),
           { signal }
         )
-      },
-      async detailView(identity) {
-        validateIdentity(identity)
-
-        return requestJson(
-          characterPath(identity),
-          characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity))
-        )
-      },
-      async refresh(identity) {
-        validateIdentity(identity)
-
-        return requestJson(
-          `${characterPath(identity)}/refresh`,
-          characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity)),
-          { method: 'post' }
-        )
-      },
-      async timeline(identity) {
-        validateIdentity(identity)
-
-        return requestJson(`${characterPath(identity)}/timeline`, characterTimelineSchema)
-      },
-      async timelineEnhancements(identity, before) {
-        validateIdentity(identity)
-
-        return requestJson(
-          `${characterPath(identity)}/timeline/enhancements`,
-          timelineEnhancementPageSchema,
-          { searchParams: { before } }
-        )
-      },
-      async timelineAcquisitions(identity, before) {
-        validateIdentity(identity)
-
-        return requestJson(
-          `${characterPath(identity)}/timeline/acquisitions`,
-          timelineAcquisitionPageSchema,
-          { searchParams: { before } }
-        )
-      },
-      async history(identity) {
-        validateIdentity(identity)
-
-        return requestJson(`${characterPath(identity)}/history`, characterHistorySchema)
-      },
-      async historySnapshot(identity, at) {
-        validateIdentity(identity)
-
-        return requestJson(
-          `${characterPath(identity)}/history/snapshot`,
-          characterDetailViewSchema.refine(({ character }) => sameIdentity(character, identity)),
-          { searchParams: { at } }
-        )
       }
     },
     stats: () => requestJson('/stats', characterStatsSchema),
-    skillStats: ({ jobId, jobGrowId, role }) =>
-      requestJson('/stats/skills', skillStatsSchema, {
-        searchParams: { jobId, jobGrowId, ...(role !== null && { role }) }
-      }),
     async setStats(filter) {
       const searchParams = jobSearchParams(filter)
 

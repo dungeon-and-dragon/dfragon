@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { delay, HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -6,11 +7,10 @@ import type {
   CharacterDetailView,
   CharacterTimeline,
   TimelineAcquisition,
-  TimelineEnhancement,
-  TimelinePage
+  TimelineEnhancement
 } from '#core/character'
-import { ClientHostContext, type ClientHost } from '#host/client-host'
-import { createTestClientHost } from '#testing/test-support/client-host'
+import { apiFailure, characterUrl } from '#pages/character/api/character.handlers'
+import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TimelineTab } from './TimelineTab'
 
@@ -155,11 +155,16 @@ const FILLED: CharacterTimeline = {
   acquisitionsCursor: null
 }
 
+const TIMEOUT_MESSAGE = '캐릭터 정보 조회 시간이 초과됐습니다. 다시 시도해 주세요.'
+
+type Reply = () => HttpResponse<object> | Promise<HttpResponse<object>>
+
 let container: HTMLDivElement
 let root: Root
+let requested: string[]
 
 beforeEach(() => {
-  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  requested = []
   // 2026-11-06 12:00 KST. 타이머는 그대로 두고 지금 시각만 고정한다.
   vi.useFakeTimers({ now: new Date('2026-11-06T03:00:00.000Z'), toFake: ['Date'] })
   container = document.createElement('div')
@@ -171,22 +176,73 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   vi.useRealTimers()
-  vi.unstubAllGlobals()
 })
 
-function render(host: ClientHost, detail: CharacterDetailView | null): Promise<void> {
+function characterPathUrl(path: string, characterId = 'character-1'): string {
+  return characterUrl({ serverId: 'cain', characterId }, path)
+}
+
+function timelineUrl(): string {
+  return characterPathUrl('/timeline')
+}
+
+function pageUrl(list: 'enhancements' | 'acquisitions', before: string): string {
+  return `${characterPathUrl(`/timeline/${list}`)}?before=${before}`
+}
+
+// 응답마다 한 번만 쓰는 handler를 넣어, 응답을 정하지 않은 요청은 handler 없는 요청으로 테스트를 실패시킨다.
+function respond(path: string, replies: readonly Reply[], characterId = 'character-1'): void {
+  server.use(
+    ...replies.map((reply) =>
+      http.get(
+        characterPathUrl(path, characterId),
+        ({ request }) => {
+          requested.push(request.url)
+
+          return reply()
+        },
+        { once: true }
+      )
+    )
+  )
+}
+
+function json(body: object): Reply {
+  return () => HttpResponse.json(body)
+}
+
+function timeoutFailure(): Reply {
+  return () => apiFailure(504, 'NEOPLE_TIMEOUT', TIMEOUT_MESSAGE)
+}
+
+function after(gate: Promise<void>, reply: Reply): Reply {
+  return async () => {
+    await gate
+
+    return reply()
+  }
+}
+
+function render(detail: CharacterDetailView | null): Promise<void> {
   return act(async () =>
     root.render(
-      <ClientHostContext value={host}>
-        <TestQueryClient>{detail !== null && <TimelineTab detail={detail} />}</TestQueryClient>
-      </ClientHostContext>
+      <TestQueryClient>{detail !== null && <TimelineTab detail={detail} />}</TestQueryClient>
     )
   )
 }
 
 // 탭 패널을 숨기면 탭 내용만 unmount되고 화면 위의 캐시는 남는다.
-function hide(host: ClientHost): Promise<void> {
-  return render(host, null)
+function hide(): Promise<void> {
+  return render(null)
+}
+
+async function settled(): Promise<void> {
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+}
+
+async function open(detail: CharacterDetailView): Promise<void> {
+  await render(detail)
+  await settled()
 }
 
 function group(title: string): HTMLElement {
@@ -213,18 +269,24 @@ function clickMore(title: string): Promise<void> {
   return act(async () => moreButton(title)!.click())
 }
 
+async function loadMore(title: string): Promise<void> {
+  await clickMore(title)
+  await settled()
+}
+
 function cellsOf(title: string, row: number): HTMLElement[] {
   return [...group(title).querySelectorAll<HTMLElement>('tbody tr')[row].querySelectorAll('td')]
 }
 
 it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시즌, 강화, 획득 순으로 그린다', async () => {
-  const { promise, resolve } = Promise.withResolvers<CharacterTimeline>()
-  const host = createTestClientHost({ getCharacterTimeline: vi.fn(() => promise) })
-  await render(host, detailOf())
+  const { promise, resolve } = Promise.withResolvers<void>()
+  respond('/timeline', [after(promise, json(FILLED))])
+  await render(detailOf())
 
   expect(container.querySelector('[role="status"]')?.textContent).toContain('타임라인을 받는 중')
 
-  await act(async () => resolve(FILLED))
+  resolve()
+  await settled()
 
   expect(container.querySelector('[role="status"]')).toBeNull()
   expect([...container.querySelectorAll('section')].map((section) => section.ariaLabel)).toEqual([
@@ -233,14 +295,12 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시�
     '강화, 증폭, 재련',
     '획득'
   ])
-  expect(host.getCharacterTimeline).toHaveBeenCalledExactlyOnceWith({
-    serverId: 'cain',
-    characterId: 'character-1'
-  })
+  expect(requested).toEqual([timelineUrl()])
 })
 
 it('이번 주 클리어는 최근 순으로 종류, 하드 배지, 이름, 난이도(없으면 생략), 지난 시간을 보이고 한국 시간 MM-DD HH:mm은 title로 두며, 시즌은 종류 뒤 하드 배지로 나눈 횟수 칩을 보이며, 하드 배지는 붉은색이다', async () => {
-  await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
+  respond('/timeline', [json(FILLED)])
+  await open(detailOf())
 
   expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '3'])
   expect(rowsOf('이번 주 클리어')).toEqual([
@@ -271,7 +331,8 @@ it('이번 주 클리어는 최근 순으로 종류, 하드 배지, 이름, 난�
 })
 
 it('강화 표는 종류별 색, 등급 색 장비, 전과 후 수치(재련은 후 수치만), 결과 색과 안전 배지를 보인다', async () => {
-  await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
+  respond('/timeline', [json(FILLED)])
+  await open(detailOf())
 
   expect(rowsOf('강화, 증폭, 재련')).toEqual([
     ['2일 전', '강화', '합성 무기', '13 → 14', '성공안전'],
@@ -294,7 +355,8 @@ it('강화 표는 종류별 색, 등급 색 장비, 전과 후 수치(재련은 
 })
 
 it('획득 표는 제목 옆에 개수와 에픽, 태초를 적고 경로는 이름의 괄호 안 글자만, 괄호가 없으면 이름을 보인다', async () => {
-  await render(createTestClientHost({ getCharacterTimeline: async () => FILLED }), detailOf())
+  respond('/timeline', [json(FILLED)])
+  await open(detailOf())
 
   expect(headerOf('획득')).toEqual(['획득', '2', '에픽, 태초'])
   expect(rowsOf('획득')).toEqual([
@@ -304,7 +366,8 @@ it('획득 표는 제목 옆에 개수와 에픽, 태초를 적고 경로는 이
 })
 
 it('값이 없는 캐릭터는 네 묶음의 제목을 남기고 묶음마다 빈 상태 한 줄을 보인다', async () => {
-  await render(createTestClientHost({ getCharacterTimeline: async () => EMPTY }), detailOf())
+  respond('/timeline', [json(EMPTY)])
+  await open(detailOf())
 
   const groups = [...container.querySelectorAll('section')]
   expect(groups.map((section) => headerOf(section.ariaLabel!)[1])).toEqual(['0', '0', '0', '0'])
@@ -318,51 +381,50 @@ it('값이 없는 캐릭터는 네 묶음의 제목을 남기고 묶음마다 �
 })
 
 it('탭을 숨겼다가 다시 열거나 같은 캐릭터의 상세를 새로 받아도 캐시가 남은 동안 다시 조회하지 않는다', async () => {
-  const getCharacterTimeline = vi.fn<ClientHost['getCharacterTimeline']>(async () => FILLED)
-  const host = createTestClientHost({ getCharacterTimeline })
+  respond('/timeline', [json(FILLED)])
 
-  await render(host, detailOf())
-  await hide(host)
-  await render(host, detailOf())
+  await open(detailOf())
+  await hide()
+  await render(detailOf())
 
   expect(rowsOf('이번 주 클리어')).toHaveLength(3)
-  expect(getCharacterTimeline).toHaveBeenCalledOnce()
+  expect(requested).toEqual([timelineUrl()])
 })
 
 it('조회가 실패하면 오류 문구를 보이고, 탭을 다시 열면 다시 조회한다', async () => {
-  const getCharacterTimeline = vi
-    .fn<ClientHost['getCharacterTimeline']>()
-    .mockRejectedValueOnce(new Error('검색 시간이 초과됐습니다. 다시 시도해 주세요.'))
-    .mockResolvedValueOnce(EMPTY)
-  const host = createTestClientHost({ getCharacterTimeline })
+  respond('/timeline', [timeoutFailure(), json(EMPTY)])
   const detail = detailOf()
 
-  await render(host, detail)
-  expect(container.querySelector('[role="alert"]')?.textContent).toBe(
-    '검색 시간이 초과됐습니다. 다시 시도해 주세요.'
-  )
+  await open(detail)
+  expect(container.querySelector('[role="alert"]')?.textContent).toBe(TIMEOUT_MESSAGE)
 
-  await hide(host)
-  await render(host, detail)
+  await hide()
+  await render(detail)
+  await vi.waitFor(() => expect(container.querySelectorAll('section')).toHaveLength(4))
   expect(container.querySelector('[role="alert"]')).toBeNull()
-  expect(container.querySelectorAll('section')).toHaveLength(4)
-  expect(getCharacterTimeline).toHaveBeenCalledTimes(2)
+  expect(requested).toEqual([timelineUrl(), timelineUrl()])
 })
 
 it('다른 캐릭터로 바뀐 뒤 늦게 온 이전 캐릭터의 응답은 무시한다', async () => {
-  const pending = new Map<string, PromiseWithResolvers<CharacterTimeline>>()
-  const getCharacterTimeline = vi.fn<ClientHost['getCharacterTimeline']>(({ characterId }) => {
-    const request = Promise.withResolvers<CharacterTimeline>()
-    pending.set(characterId, request)
+  const first = Promise.withResolvers<void>()
+  const second = Promise.withResolvers<void>()
+  respond('/timeline', [after(first.promise, json(FILLED))], 'character-1')
+  respond('/timeline', [after(second.promise, json(EMPTY))], 'character-2')
 
-    return request.promise
-  })
-  const host = createTestClientHost({ getCharacterTimeline })
-
-  await render(host, detailOf('character-1'))
-  await render(host, detailOf('character-2'))
-  await act(async () => pending.get('character-2')!.resolve(EMPTY))
-  await act(async () => pending.get('character-1')!.resolve(FILLED))
+  await render(detailOf('character-1'))
+  await render(detailOf('character-2'))
+  // 두 요청이 handler에 닿는 순서는 정해지지 않으므로 순서 없이 본다.
+  await vi.waitFor(() =>
+    expect([...requested].sort()).toEqual([
+      characterPathUrl('/timeline', 'character-1'),
+      characterPathUrl('/timeline', 'character-2')
+    ])
+  )
+  second.resolve()
+  await settled()
+  // 늦은 응답이 도착해 화면에 반영될 틈을 준 뒤에도 지금 캐릭터를 보이는지 본다.
+  first.resolve()
+  await act(async () => delay(50))
 
   expect(container.querySelectorAll('section')).toHaveLength(4)
   expect(container.querySelector('section p')?.textContent).toBe('이번 주 클리어 기록이 없습니다.')
@@ -392,76 +454,61 @@ const PAGED: CharacterTimeline = {
 }
 
 it('강화, 획득 목록은 받아 둔 줄이 모자라면 불러오기를 눌렀을 때 그 목록의 cursor로 다음 묶음을 받아 뒤에 붙이고, cursor가 없으면 불러오기를 두지 않는다', async () => {
-  const getTimelineEnhancements = vi
-    .fn<ClientHost['getTimelineEnhancements']>()
-    .mockResolvedValueOnce({
-      items: [enhancement('둘째 강화')],
-      nextCursor: 'enhancement-cursor-2'
-    })
-    .mockResolvedValueOnce({ items: [enhancement('셋째 강화')], nextCursor: null })
-  const getTimelineAcquisitions = vi
-    .fn<ClientHost['getTimelineAcquisitions']>()
-    .mockResolvedValueOnce({ items: [acquisition('둘째 획득')], nextCursor: null })
-  const host = createTestClientHost({
-    getCharacterTimeline: async () => PAGED,
-    getTimelineEnhancements,
-    getTimelineAcquisitions
-  })
-  await render(host, detailOf())
+  respond('/timeline', [json(PAGED)])
+  respond('/timeline/enhancements', [
+    json({ items: [enhancement('둘째 강화')], nextCursor: 'enhancement-cursor-2' }),
+    json({ items: [enhancement('셋째 강화')], nextCursor: null })
+  ])
+  respond('/timeline/acquisitions', [json({ items: [acquisition('둘째 획득')], nextCursor: null })])
+  await open(detailOf())
 
-  await clickMore('강화, 증폭, 재련')
-  await clickMore('강화, 증폭, 재련')
+  await loadMore('강화, 증폭, 재련')
+  await loadMore('강화, 증폭, 재련')
 
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화', '둘째 강화', '셋째 강화'])
   expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
   expect(headerOf('강화, 증폭, 재련')).toEqual(['강화, 증폭, 재련', '3'])
-  expect(getTimelineEnhancements.mock.calls).toEqual([
-    [{ serverId: 'cain', characterId: 'character-1' }, 'enhancement-cursor-1'],
-    [{ serverId: 'cain', characterId: 'character-1' }, 'enhancement-cursor-2']
-  ])
   expect(itemNames('획득')).toEqual(['첫 획득'])
-  expect(getTimelineAcquisitions).not.toHaveBeenCalled()
+  expect(requested).toEqual([
+    timelineUrl(),
+    pageUrl('enhancements', 'enhancement-cursor-1'),
+    pageUrl('enhancements', 'enhancement-cursor-2')
+  ])
 
-  await clickMore('획득')
+  await loadMore('획득')
 
   expect(itemNames('획득')).toEqual(['첫 획득', '둘째 획득'])
   expect(moreButton('획득')).toBeUndefined()
-  expect(getTimelineAcquisitions).toHaveBeenCalledExactlyOnceWith(
-    { serverId: 'cain', characterId: 'character-1' },
-    'acquisition-cursor-1'
-  )
-  expect(getTimelineEnhancements).toHaveBeenCalledTimes(2)
+  expect(requested).toEqual([
+    timelineUrl(),
+    pageUrl('enhancements', 'enhancement-cursor-1'),
+    pageUrl('enhancements', 'enhancement-cursor-2'),
+    pageUrl('acquisitions', 'acquisition-cursor-1')
+  ])
 })
 
 it('강화, 증폭, 재련은 처음 10줄만 보이고 다음 묶음이 없으면 불러오기로 받아 둔 나머지 줄만 보인다', async () => {
-  const getTimelineEnhancements = vi.fn<ClientHost['getTimelineEnhancements']>()
   const twelve = Array.from({ length: 12 }, (_, index) => enhancement(`강화 ${index + 1}`))
-  const host = createTestClientHost({
-    getCharacterTimeline: async () => ({ ...EMPTY, enhancements: twelve }),
-    getTimelineEnhancements
-  })
-  await render(host, detailOf())
+  respond('/timeline', [json({ ...EMPTY, enhancements: twelve })])
+  await open(detailOf())
 
   expect(itemNames('강화, 증폭, 재련')).toHaveLength(10)
 
-  await clickMore('강화, 증폭, 재련')
+  await loadMore('강화, 증폭, 재련')
 
   expect(itemNames('강화, 증폭, 재련')).toHaveLength(12)
   expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
-  expect(getTimelineEnhancements).not.toHaveBeenCalled()
+  expect(requested).toEqual([timelineUrl()])
 })
 
 it('다음 묶음을 받는 동안 불러오기 대신 받는 중을 알리고, 실패하면 오류와 다시 시도를 보이고 다시 시도하면 같은 cursor로 받는다', async () => {
-  const pending = Promise.withResolvers<TimelinePage<TimelineEnhancement>>()
-  const getTimelineEnhancements = vi
-    .fn<ClientHost['getTimelineEnhancements']>()
-    .mockReturnValueOnce(pending.promise)
-    .mockResolvedValueOnce({ items: [enhancement('둘째 강화')], nextCursor: null })
-  const host = createTestClientHost({
-    getCharacterTimeline: async () => PAGED,
-    getTimelineEnhancements
-  })
-  await render(host, detailOf())
+  const pending = Promise.withResolvers<void>()
+  respond('/timeline', [json(PAGED)])
+  respond('/timeline/enhancements', [
+    after(pending.promise, timeoutFailure()),
+    json({ items: [enhancement('둘째 강화')], nextCursor: null })
+  ])
+  await open(detailOf())
 
   await clickMore('강화, 증폭, 재련')
 
@@ -469,55 +516,62 @@ it('다음 묶음을 받는 동안 불러오기 대신 받는 중을 알리고, 
   expect(group('강화, 증폭, 재련').querySelector('[role="status"]')?.textContent).toBe(
     '기록을 더 받는 중입니다.'
   )
-  expect(getTimelineEnhancements).toHaveBeenCalledOnce()
 
-  await act(async () => pending.reject(new Error('검색 시간이 초과됐습니다. 다시 시도해 주세요.')))
+  pending.resolve()
+  await settled()
 
   expect(group('강화, 증폭, 재련').querySelector('[role="status"]')).toBeNull()
   expect(group('강화, 증폭, 재련').querySelector('[role="alert"]')?.textContent).toBe(
-    '검색 시간이 초과됐습니다. 다시 시도해 주세요.'
+    TIMEOUT_MESSAGE
   )
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화'])
   expect(moreButton('강화, 증폭, 재련')).toBeUndefined()
 
   await act(async () => group('강화, 증폭, 재련').querySelector('button')!.click())
+  await settled()
 
   expect(group('강화, 증폭, 재련').querySelector('[role="alert"]')).toBeNull()
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화', '둘째 강화'])
-  expect(getTimelineEnhancements.mock.calls.map(([, before]) => before)).toEqual([
-    'enhancement-cursor-1',
-    'enhancement-cursor-1'
+  expect(requested).toEqual([
+    timelineUrl(),
+    pageUrl('enhancements', 'enhancement-cursor-1'),
+    pageUrl('enhancements', 'enhancement-cursor-1')
   ])
 })
 
 it('5분이 지나 다시 연 탭은 받아 둔 타임라인을 먼저 그리고, 새로 받은 첫 페이지로 바꾸며 그 전에 이어 받던 묶음은 붙이지 않는다', async () => {
   const startedAt = Date.now()
-  const refetched = Promise.withResolvers<CharacterTimeline>()
-  const nextPage = Promise.withResolvers<TimelinePage<TimelineEnhancement>>()
-  const getCharacterTimeline = vi
-    .fn<ClientHost['getCharacterTimeline']>()
-    .mockResolvedValueOnce(PAGED)
-    .mockReturnValueOnce(refetched.promise)
-  const getTimelineEnhancements = vi.fn<ClientHost['getTimelineEnhancements']>(
-    () => nextPage.promise
-  )
-  const host = createTestClientHost({ getCharacterTimeline, getTimelineEnhancements })
+  const refetched = Promise.withResolvers<void>()
+  const nextPage = Promise.withResolvers<void>()
+  respond('/timeline', [
+    json(PAGED),
+    after(refetched.promise, json({ ...PAGED, enhancements: [enhancement('새 첫 강화')] }))
+  ])
+  respond('/timeline/enhancements', [
+    after(nextPage.promise, json({ items: [enhancement('둘째 강화')], nextCursor: null }))
+  ])
 
-  await render(host, detailOf())
-  await hide(host)
+  await open(detailOf())
+  await hide()
   vi.setSystemTime(startedAt + 6 * 60_000)
-  await render(host, detailOf())
+  await render(detailOf())
   expect(itemNames('강화, 증폭, 재련')).toEqual(['첫 강화'])
 
   await clickMore('강화, 증폭, 재련')
-  expect(getTimelineEnhancements).toHaveBeenCalledExactlyOnceWith(
-    { serverId: 'cain', characterId: 'character-1' },
-    'enhancement-cursor-1'
+  // 다시 받는 첫 페이지와 다음 묶음 요청이 handler에 닿는 순서는 정해지지 않으므로 순서 없이 본다.
+  await vi.waitFor(() =>
+    expect([...requested].sort()).toEqual([
+      timelineUrl(),
+      timelineUrl(),
+      pageUrl('enhancements', 'enhancement-cursor-1')
+    ])
   )
-  await act(async () => refetched.resolve({ ...PAGED, enhancements: [enhancement('새 첫 강화')] }))
-  expect(itemNames('강화, 증폭, 재련')).toEqual(['새 첫 강화'])
+  refetched.resolve()
+  await vi.waitFor(() => expect(itemNames('강화, 증폭, 재련')).toEqual(['새 첫 강화']))
 
-  await act(async () => nextPage.resolve({ items: [enhancement('둘째 강화')], nextCursor: null }))
+  // 늦은 다음 묶음이 도착해 화면에 반영될 틈을 준 뒤에도 새 첫 페이지만 보이는지 본다.
+  nextPage.resolve()
+  await act(async () => delay(50))
   expect(itemNames('강화, 증폭, 재련')).toEqual(['새 첫 강화'])
-  expect(getCharacterTimeline).toHaveBeenCalledTimes(2)
+  expect(requested).toHaveLength(3)
 })

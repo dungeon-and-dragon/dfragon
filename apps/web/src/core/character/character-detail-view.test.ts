@@ -1,26 +1,11 @@
-import { describe, expect, it, vi } from 'vitest'
-import { type CharacterDetailBody, characterDetailResponse } from '#core/testing/character-detail'
-import { createDfragonClient } from '#core/api/dfragon-client'
-import { SearchHttpFailure } from '#core/api/http'
-
-const API_ORIGIN = 'https://api.example.test'
-
-function identityOf(body: Pick<CharacterDetailBody, 'character'>) {
-  return { serverId: body.character.serverId, characterId: body.character.characterId }
-}
-
-function load(body: unknown, status = 200) {
-  const fetch = vi.fn<typeof globalThis.fetch>(
-    async () => new Response(JSON.stringify(body), { status })
-  )
-
-  return createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).characters.detailView
-}
+import { describe, expect, it } from 'vitest'
+import { characterDetailResponse } from '#core/testing/character-detail'
+import { characterDetailViewSchema } from './character-detail-view'
 
 describe('캐릭터 상세 화면 응답', () => {
-  it('딜러 fixture의 장비, 세트, 서약, 크리쳐, 아바타, 스킬, 버프 강화, 스탯을 읽는다', async () => {
+  it('딜러 fixture의 장비, 세트, 서약, 크리쳐, 아바타, 스킬, 버프 강화, 스탯을 읽는다', () => {
     const body = characterDetailResponse('dealer')
-    const detail = await load(body)(identityOf(body))
+    const detail = characterDetailViewSchema.parse(body)
 
     expect(detail.character).toMatchObject({ serverName: '카인', level: 115, fame: null })
     expect(detail.card?.role).toBe('dealer')
@@ -104,9 +89,9 @@ describe('캐릭터 상세 화면 응답', () => {
     })
   })
 
-  it('버퍼 fixture의 증폭 장비, 재련 무기, 강화 옵션이 없는 서약, 버프 강화 장비를 읽는다', async () => {
+  it('버퍼 fixture의 증폭 장비, 재련 무기, 강화 옵션이 없는 서약, 버프 강화 장비를 읽는다', () => {
     const body = characterDetailResponse('buffer')
-    const detail = await load(body)(identityOf(body))
+    const detail = characterDetailViewSchema.parse(body)
 
     expect(detail.card?.role).toBe('buffer')
     expect(detail.equipment.equipment[0]).toMatchObject({ slotId: 'WEAPON', refine: 8 })
@@ -124,12 +109,12 @@ describe('캐릭터 상세 화면 응답', () => {
     expect(detail.skillStyle?.style?.chain).toBeNull()
   })
 
-  it('빈 슬롯과 칸이 빠진 장비는 실패하지 않고 빈 값으로 읽는다', async () => {
+  it('빈 슬롯과 칸이 빠진 장비는 실패하지 않고 빈 값으로 읽는다', () => {
     const body = characterDetailResponse('dealer')
     body.equipment.equipment = body.equipment.equipment.filter((item) => item.slotId !== 'TITLE')
     body.equipment.equipment[0] = { slotId: 'WEAPON', tune: null, enchant: [] }
     body.avatar = body.avatar.filter((avatar) => avatar.slotId !== 'AURORA')
-    const detail = await load(body)(identityOf(body))
+    const detail = characterDetailViewSchema.parse(body)
 
     expect(detail.equipment.equipment.map((item) => item.slotId)).not.toContain('TITLE')
     expect(detail.equipment.equipment[0]).toEqual({
@@ -149,13 +134,13 @@ describe('캐릭터 상세 화면 응답', () => {
     expect(detail.avatar.map((avatar) => avatar.slotId)).not.toContain('AURORA')
   })
 
-  it('유일 장비의 옵션과 정밀도를 읽는다', async () => {
+  it('유일 장비의 옵션과 정밀도를 읽는다', () => {
     const body = characterDetailResponse('dealer')
     Object.assign(body.equipment.equipment[9], {
       exaltedInfo: { damage: 1, buff: 1, explain: '장착 중인 가장 높은 세트 포인트' },
       potency: { value: 100, damage: 1, buff: 1 }
     })
-    const detail = await load(body)(identityOf(body))
+    const detail = characterDetailViewSchema.parse(body)
 
     expect(detail.equipment.equipment[9]).toMatchObject({
       slotId: 'RING',
@@ -167,19 +152,19 @@ describe('캐릭터 상세 화면 응답', () => {
   it.each([
     ['null', null],
     ['빈 객체', {}]
-  ])('서약이 %s인 캐릭터를 실패 없이 읽는다', async (_, oath) => {
+  ])('서약이 %s인 캐릭터를 실패 없이 읽는다', (_, oath) => {
     const body = characterDetailResponse('buffer')
     body.oath = oath
-    const detail = await load(body)(identityOf(body))
+    const detail = characterDetailViewSchema.parse(body)
 
     expect(detail.oath).toEqual(
       oath === null ? null : { info: null, crystal: [], blessing: null, setInfo: null }
     )
   })
 
-  it('character와 freshness만 있고 나머지 섹션이 통째로 없는 응답은 빈 섹션으로 읽는다', async () => {
+  it('character와 freshness만 있고 나머지 섹션이 통째로 없는 응답은 빈 섹션으로 읽는다', () => {
     const { character, freshness } = characterDetailResponse('dealer')
-    const detail = await load({ character, freshness })(identityOf({ character }))
+    const detail = characterDetailViewSchema.parse({ character, freshness })
 
     expect(detail).toEqual({
       character: expect.objectContaining({ characterId: character.characterId }),
@@ -196,31 +181,11 @@ describe('캐릭터 상세 화면 응답', () => {
     })
   })
 
-  it('character가 없거나 요청한 캐릭터가 아니면 SEARCH_RESPONSE_INVALID로 실패한다', async () => {
+  it('character가 없는 응답은 읽지 않는다', () => {
     const body = characterDetailResponse('dealer')
-    const identity = identityOf(body)
 
-    await expect(load({ ...body, character: undefined })(identity)).rejects.toMatchObject({
-      code: 'SEARCH_RESPONSE_INVALID'
-    })
-    await expect(
-      load(body)({ serverId: identity.serverId, characterId: 'other-character' })
-    ).rejects.toMatchObject({ code: 'SEARCH_RESPONSE_INVALID' })
-  })
-
-  it.each([
-    [404, 'CHARACTER_NOT_FOUND', 'API가 보낸 없는 캐릭터 문구'],
-    [502, 'NEOPLE_API_ERROR', '캐릭터 정보 조회 중 오류가 발생했습니다.']
-  ])('API %i 오류 응답(%s)의 error.message를 오류 문구로 준다', async (status, code, message) => {
-    const error = load(
-      { error: { code, message } },
-      status
-    )({
-      serverId: 'cain',
-      characterId: 'missing-character'
-    })
-
-    await expect(error).rejects.toBeInstanceOf(SearchHttpFailure)
-    await expect(error).rejects.toMatchObject({ code, message })
+    expect(characterDetailViewSchema.safeParse({ ...body, character: undefined }).success).toBe(
+      false
+    )
   })
 })

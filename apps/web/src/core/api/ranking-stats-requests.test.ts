@@ -58,54 +58,6 @@ it('집계 시각이 없는 통계 응답과 오류 응답은 거부한다', asy
   ).rejects.toThrow()
 })
 
-it('스킬 채택률은 전직을 query로 보내고 응답을 schema로 읽는다', async () => {
-  const skillStats = {
-    computedAt: '2026-11-06T15:00:00.000Z',
-    minFame: null,
-    sampleSize: 0,
-    skills: [],
-    evolutions: [],
-    enhancements: []
-  }
-  const fetch = respond({ ...skillStats, topCount: 5000 })
-  const read = createDfragonClient({ apiOrigin: API_ORIGIN, fetch }).skillStats
-
-  await expect(read({ jobId: 'job-1', jobGrowId: 'grow-1', role: null })).resolves.toEqual(
-    skillStats
-  )
-  expect(new Request(fetch.mock.calls[0][0]).url).toBe(
-    `${API_ORIGIN}/stats/skills?jobId=job-1&jobGrowId=grow-1`
-  )
-  await read({ jobId: 'job-1', jobGrowId: 'grow-1', role: 'buffer' })
-  expect(new Request(fetch.mock.calls[1][0]).url).toBe(
-    `${API_ORIGIN}/stats/skills?jobId=job-1&jobGrowId=grow-1&role=buffer`
-  )
-  await expect(
-    createDfragonClient({
-      apiOrigin: API_ORIGIN,
-      fetch: respond({ ...skillStats, sampleSize: undefined })
-    }).skillStats({ jobId: 'job-1', jobGrowId: 'grow-1', role: null })
-  ).rejects.toThrow()
-})
-
-it('집계 시각이 null인 빈 스킬 채택률 응답을 읽는다', async () => {
-  const empty = {
-    computedAt: null,
-    minFame: null,
-    sampleSize: 0,
-    skills: [],
-    evolutions: [],
-    enhancements: []
-  }
-  await expect(
-    createDfragonClient({ apiOrigin: API_ORIGIN, fetch: respond(empty) }).skillStats({
-      jobId: 'job-1',
-      jobGrowId: 'grow-1',
-      role: null
-    })
-  ).resolves.toEqual(empty)
-})
-
 // #1798의 실제 응답 모양이다. 세 목록 각각의 count 합이 sampleSize이고, 서약 세트 하나의 선택지 count 합이 그 세트 count다.
 const setStats = {
   computedAt: '2026-11-18T11:00:27.845Z',

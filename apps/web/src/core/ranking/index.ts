@@ -38,7 +38,7 @@ export {
   oathOptionShortName,
   oathSetShortName
 } from './set-names'
-export { skillAdoptionOf } from './skill-stats'
+export { skillAdoptionOf, skillStatsSchema } from './skill-stats'
 export type {
   SkillAdoption,
   SkillAdoptionTarget,
