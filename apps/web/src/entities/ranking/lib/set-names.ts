@@ -54,22 +54,6 @@ export function equipmentSetShortName(setId: string | null, name: string | null)
   return setId
 }
 
-const EQUIPMENT_SET_ORDER = Object.keys(EQUIPMENT_SET_SHORT_NAMES)
-
-function equipmentSetRank(setId: string): number {
-  const rank = EQUIPMENT_SET_ORDER.indexOf(setId)
-
-  if (rank === -1) {
-    return EQUIPMENT_SET_ORDER.length
-  }
-
-  return rank
-}
-
-export function compareEquipmentSets(a: string, b: string): number {
-  return equipmentSetRank(a) - equipmentSetRank(b)
-}
-
 export function oathSetShortName(name: string | null): string {
   if (name === null) {
     return NO_SET_NAME

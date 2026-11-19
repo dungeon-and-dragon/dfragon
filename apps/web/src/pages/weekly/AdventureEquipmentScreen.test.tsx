@@ -11,17 +11,17 @@ import { ADVENTURE_EQUIPMENT_URL } from './api/adventure.handlers'
 import { AdventureEquipmentScreen } from './AdventureEquipmentScreen'
 import type { EquipmentSearch } from './equipment-search'
 
-// 세트 id는 웹의 줄임말 표에 있는 게임 값이다. 칠흑이 페어리보다 표에서 앞선다.
+// 세트 id는 웹의 줄임말 표에 있는 게임 값이다.
 const FAIRY = '4ee7bd5912cda6e2a24c1f36d5202b46'
 const ONYX = '11f7d203a05ea6f13300c0facb39f11e'
 
 let container: HTMLDivElement
 let root: Root
-let requests: number
+let requests: string[]
 let changes: EquipmentSearch[]
 
 beforeEach(() => {
-  requests = 0
+  requests = []
   changes = []
   container = document.createElement('div')
   document.body.append(container)
@@ -103,22 +103,31 @@ const sirocoCharacter = character(3, 'siroco', 200)
 const equipment: AdventureEquipment = {
   adventureName: '합성 모험단',
   sets: [
-    { setItemId: 'unlisted-set', setItemName: '가나다 세트' },
+    { setItemId: ONYX, setItemName: '칠흑의 정화 세트' },
     { setItemId: FAIRY, setItemName: '소울 페어리 세트' },
-    { setItemId: ONYX, setItemName: '칠흑의 정화 세트' }
+    { setItemId: 'unlisted-set', setItemName: '가나다 세트' }
   ],
   servers: [
     { serverId: 'cain', characters: cainCharacters },
+    { serverId: 'siroco', characters: [] }
+  ],
+  selected: { serverId: 'cain', setItemId: ONYX }
+}
+const sirocoFairy: AdventureEquipment = {
+  ...equipment,
+  servers: [
+    { serverId: 'cain', characters: [] },
     { serverId: 'siroco', characters: [sirocoCharacter] }
-  ]
+  ],
+  selected: { serverId: 'siroco', setItemId: FAIRY }
 }
 
 type Reply = () => Response | Promise<Response>
 
 function serve(reply: Reply): void {
   server.use(
-    http.get(ADVENTURE_EQUIPMENT_URL, () => {
-      requests++
+    http.get(ADVENTURE_EQUIPMENT_URL, ({ request }) => {
+      requests.push(new URL(request.url).search)
 
       return reply()
     })
@@ -136,7 +145,7 @@ function failure(): Response {
   )
 }
 
-async function render(search: EquipmentSearch = {}): Promise<void> {
+async function render(search: EquipmentSearch): Promise<void> {
   function change(next: EquipmentSearch): void {
     changes.push(next)
   }
@@ -200,11 +209,12 @@ async function waitForTable(): Promise<void> {
 
 const DASHES = Array.from({ length: 10 }, () => '-')
 
-it('첫 서버와 줄임말 표에서 앞선 세트를 고르고 표에 없는 세트는 원래 이름으로 뒤에 두며, 그 서버 캐릭터를 명성 순으로 보이고, 칸에는 가장 높은 등급과 그 등급의 남은 개수를 보인다', async () => {
+it('응답이 고른 서버와 세트의 칩을 켜고 세트 칩은 응답 순서대로 두며, 표에 없는 세트는 원래 이름으로 보이고, 그 서버 캐릭터를 명성 순으로 보이고, 칸에는 가장 높은 등급과 그 등급의 남은 개수를 보인다', async () => {
   serve(json(equipment))
-  await render()
+  await render({})
   await waitForTable()
 
+  expect(requests).toEqual([''])
   expect(chips('서버')).toEqual([
     ['카인', 'true'],
     ['시로코', 'false']
@@ -230,7 +240,7 @@ it('첫 서버와 줄임말 표에서 앞선 세트를 고르고 표에 없는 �
 
 it('장비 칸과 서약에 마우스를 올리면 태초, 에픽, 레전더리 개수를 따로 보인다', async () => {
   serve(json(equipment))
-  await render()
+  await render({})
   await waitForTable()
 
   const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
@@ -244,7 +254,7 @@ it('장비 칸과 서약에 마우스를 올리면 태초, 에픽, 레전더리 
 
 it('세트 칩을 누르면 지금 서버와 고른 세트를 주소 값으로 넘긴다', async () => {
   serve(json(equipment))
-  await render()
+  await render({})
   await waitForTable()
 
   await act(async () => chip('세트', '페어리').click())
@@ -252,11 +262,12 @@ it('세트 칩을 누르면 지금 서버와 고른 세트를 주소 값으로 �
   expect(changes).toEqual([{ server: 'cain', set: FAIRY }])
 })
 
-it('주소의 서버와 세트를 고르고, 그 서버 캐릭터만 행으로 보인다', async () => {
-  serve(json(equipment))
+it('주소의 서버와 세트로 요청하고, 그 서버 캐릭터만 행으로 보인다', async () => {
+  serve(json(sirocoFairy))
   await render({ server: 'siroco', set: FAIRY })
   await waitForTable()
 
+  expect(requests).toEqual([`?server=siroco&set=${FAIRY}`])
   expect(chips('서버')).toEqual([
     ['카인', 'false'],
     ['시로코', 'true']
@@ -273,18 +284,64 @@ it('주소의 서버와 세트를 고르고, 그 서버 캐릭터만 행으로 �
   expect(changes).toEqual([{ server: 'cain', set: FAIRY }])
 })
 
-it('주소의 서버나 세트가 응답에 없으면 첫 서버와 첫 세트를 고른다', async () => {
-  serve(json(equipment))
+it('주소의 서버나 세트가 응답에 없으면 응답이 고른 서버와 세트의 칩을 켠다', async () => {
+  serve(json(sirocoFairy))
   await render({ server: 'bakal', set: 'unknown-set' })
   await waitForTable()
 
-  expect(chips('서버')[0]).toEqual(['카인', 'true'])
-  expect(chips('세트')[0]).toEqual(['칠흑', 'true'])
+  expect(chips('서버')).toEqual([
+    ['카인', 'false'],
+    ['시로코', 'true']
+  ])
+  expect(chips('세트')[1]).toEqual(['페어리', 'true'])
+})
+
+it('세트를 바꾸면 그 세트로 한 번 요청하고, 받는 동안 누른 칩을 켜고 앞선 표를 보인다', async () => {
+  serve(json(equipment))
+  await render({})
+  await waitForTable()
+  const onyxRows = tableRows('장비')
+
+  let release!: () => void
+  const released = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const fairy: AdventureEquipment = {
+    ...equipment,
+    servers: [
+      {
+        serverId: 'cain',
+        characters: [character(2, 'cain', 300, [holding(FAIRY, '하의', '에픽')])]
+      },
+      { serverId: 'siroco', characters: [] }
+    ],
+    selected: { serverId: 'cain', setItemId: FAIRY }
+  }
+
+  serve(async () => {
+    await released
+
+    return HttpResponse.json(fairy)
+  })
+  await render({ server: 'cain', set: FAIRY })
+
+  await vi.waitFor(() => expect(requests).toHaveLength(2))
+  expect(requests[1]).toBe(`?server=cain&set=${FAIRY}`)
+  expect(chip('세트', '페어리').getAttribute('aria-pressed')).toBe('true')
+  expect(tableRows('장비')).toEqual(onyxRows)
+
+  await act(async () => release())
+  await vi.waitFor(() =>
+    expect(tableRows('장비')).toEqual([
+      ['합성2합성 전직', '-', '-', '에픽 에픽 하의', ...DASHES.slice(2)]
+    ])
+  )
+  expect(requests).toHaveLength(2)
 })
 
 it('서버가 하나인 모험단은 서버 줄을 두지 않는다', async () => {
   serve(json({ ...equipment, servers: [equipment.servers[0]!] }))
-  await render()
+  await render({})
   await waitForTable()
 
   expect(container.querySelector('[role="group"][aria-label="서버"]')).toBeNull()
@@ -297,9 +354,9 @@ it('받는 중에는 장비 표에 빈 행 4개를 보인다', async () => {
 
     return failure()
   })
-  await render()
+  await render({})
 
-  await vi.waitFor(() => expect(requests).toBe(1))
+  await vi.waitFor(() => expect(requests).toHaveLength(1))
   expect(container.querySelector('[role="status"]')?.textContent).toBe('장비를 받는 중입니다.')
   expect(
     container.querySelectorAll('section[aria-label="장비"] tbody tr[aria-hidden="true"]')
@@ -309,7 +366,7 @@ it('받는 중에는 장비 표에 빈 행 4개를 보인다', async () => {
 
 it('받지 못하면 오류 문구와 다시 시도 버튼을 보이고, 누르면 다시 받아 표를 보인다', async () => {
   serve(failure)
-  await render()
+  await render({})
 
   await vi.waitFor(() =>
     expect(container.querySelector('[role="alert"]')?.textContent).toBe('장비를 받지 못했습니다.')
@@ -326,8 +383,8 @@ it('받지 못하면 오류 문구와 다시 시도 버튼을 보이고, 누르�
 })
 
 it('캐릭터가 없는 모험단은 서버, 세트 줄 없이 빈 상태 한 줄만 보인다', async () => {
-  serve(json({ adventureName: '합성 모험단', sets: [], servers: [] }))
-  await render()
+  serve(json({ adventureName: '합성 모험단', sets: [], servers: [], selected: null }))
+  await render({})
 
   await vi.waitFor(() =>
     expect(container.querySelector('section[aria-label="장비"] .state')?.textContent).toBe(

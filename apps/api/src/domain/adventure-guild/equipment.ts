@@ -32,6 +32,21 @@ const KEEP_CODES: ReadonlySet<number> = new Set([511, 514, 553, 555])
 // 이름에 "고유"가 없는 세트 없는 태초 장비는 묶지 않는다.
 const UNIQUE_NAME_PREFIX = '고유 - '
 const UNIQUE_SET: EquipmentSet = { setItemId: 'unique', setItemName: '고유' }
+// 저장소 소유자가 #1781에서 정한 세트 줄임말 표의 순서다. 응답 sets의 순서와 기본 세트를 정한다(#1868).
+const EQUIPMENT_SET_ORDER: readonly string[] = [
+  '7f788a703a87d783079b41d0fe6448c9',
+  '11f7d203a05ea6f13300c0facb39f11e',
+  '4ee7bd5912cda6e2a24c1f36d5202b46',
+  '93e7825053bdec4e0f4c12837cf4f57e',
+  'b92ca7784123b5fea9cea40144925194',
+  'e23286107ba4328af86c83aabc347e9e',
+  '7c9c8335b72c2907df20786f8f5b27f0',
+  '3af7c961e7d8cd8b5b42c5f82af2a0ad',
+  '854dc8c01b1bc231e132dae5df3c52bc',
+  '2877466bc2fc8bedf7799d88167c9fe3',
+  '4e65968c4d30898e6879434dc641b6e4',
+  '8e9cb65cb6285d7e2f084f440aa18870'
+]
 
 type HoldingRarity = (typeof HOLDING_RARITIES)[number]
 type OathKind = 'oath' | 'crystal'
@@ -69,6 +84,14 @@ export type EquipmentCharacter = CharacterRow & {
 export type AdventureEquipment = {
   sets: EquipmentSet[]
   servers: { serverId: string; characters: EquipmentCharacter[] }[]
+}
+
+export type EquipmentQuery = { serverId: string | undefined; setItemId: string | undefined }
+
+export type EquipmentSelection = { serverId: string; setItemId: string | null }
+
+export type SelectedAdventureEquipment = AdventureEquipment & {
+  selected: EquipmentSelection | null
 }
 
 export type EquipmentWindow = { since: Date; equipmentLevel: number | undefined }
@@ -241,6 +264,26 @@ function toCharacterHoldings(counted: readonly CountedCell[]) {
   return { equipment, oaths }
 }
 
+function setRank(setItemId: string): number {
+  const rank = EQUIPMENT_SET_ORDER.indexOf(setItemId)
+
+  if (rank === -1) {
+    return EQUIPMENT_SET_ORDER.length
+  }
+
+  return rank
+}
+
+function compareSets(a: EquipmentSet, b: EquipmentSet): number {
+  const byRank = setRank(a.setItemId) - setRank(b.setItemId)
+
+  if (byRank !== 0) {
+    return byRank
+  }
+
+  return a.setItemName.localeCompare(b.setItemName, 'ko')
+}
+
 function characterKey({ serverId, characterId }: TimelineCharacter): string {
   return `${serverId}/${characterId}`
 }
@@ -279,11 +322,54 @@ export function toAdventureEquipment(
 
   const setList = [...sets]
     .map(([setItemId, setItemName]) => ({ setItemId, setItemName }))
-    .sort((a, b) => a.setItemName.localeCompare(b.setItemName, 'ko'))
+    .sort(compareSets)
   const serverList = [...servers].map(([serverId, serverCharacters]) => ({
     serverId,
     characters: serverCharacters
   }))
 
   return { sets: setList, servers: serverList }
+}
+
+function toSelection(
+  { sets, servers }: AdventureEquipment,
+  { serverId, setItemId }: EquipmentQuery
+): EquipmentSelection | null {
+  const server = servers.find((candidate) => candidate.serverId === serverId) ?? servers[0]
+
+  if (server === undefined) {
+    return null
+  }
+
+  const set = sets.find((candidate) => candidate.setItemId === setItemId) ?? sets[0]
+  const selectedSetItemId = set?.setItemId ?? null
+
+  return { serverId: server.serverId, setItemId: selectedSetItemId }
+}
+
+function onlySet(character: EquipmentCharacter, setItemId: string | null): EquipmentCharacter {
+  const equipment = character.equipment.filter((holding) => holding.setItemId === setItemId)
+  const oaths = character.oaths.filter((holding) => holding.setItemId === setItemId)
+
+  return { ...character, equipment, oaths }
+}
+
+// 칩 목록은 모험단 전체 기준으로 두고, 캐릭터와 보유는 고른 서버, 세트만 남긴다.
+// 없거나 모험단에 없는 값이면 첫 서버와 sets의 첫 세트를 고른다(2026-11-19 저장소 소유자 결정, #1868).
+export function selectAdventureEquipment(
+  equipment: AdventureEquipment,
+  query: EquipmentQuery
+): SelectedAdventureEquipment {
+  const selected = toSelection(equipment, query)
+  const servers = equipment.servers.map(({ serverId, characters }) => {
+    if (serverId !== selected?.serverId) {
+      return { serverId, characters: [] }
+    }
+
+    const selectedCharacters = characters.map((character) => onlySet(character, selected.setItemId))
+
+    return { serverId, characters: selectedCharacters }
+  })
+
+  return { sets: equipment.sets, servers, selected }
 }
