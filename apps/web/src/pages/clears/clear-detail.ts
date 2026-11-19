@@ -1,4 +1,4 @@
-import { jobLabelOf } from '#entities/character'
+import { displayJobName } from '#entities/character'
 import type { BarSeries } from '#shared/ui/chart/BarLineChart'
 import type { BoxPlotRow } from '#shared/ui/chart/BoxPlot'
 import type { LegendItem } from '#shared/ui/chart/ChartLegend'
@@ -339,7 +339,6 @@ export const JOB_SORTS: readonly { value: JobSort; label: string }[] = [
 export type JobRow = Readonly<{
   key: string
   name: string
-  sub: string | null
   counts: string
   rate: string
   stats: ClearFameDistribution | null
@@ -352,16 +351,13 @@ const NO_RATE = '-'
 
 function rankedJob(job: ClearJob, metric: JobMetric): RankedJob {
   const rate = job.population > 0 ? job.cleared / job.population : -1
-  const label = jobLabelOf(job)
-  const name = label?.grow ?? UNKNOWN_JOB_NAME
-  const sub = label?.job ?? null
+  const name = displayJobName(job) ?? UNKNOWN_JOB_NAME
   const counts = `${integer.format(job.cleared)} / ${integer.format(job.population)}`
   const rateText = rate >= 0 ? percent.format(rate) : NO_RATE
   const stats = jobStatsOf(job, metric)
   const row = {
     key: `${job.jobId}/${job.jobGrowId}`,
     name,
-    sub,
     counts,
     rate: rateText,
     stats

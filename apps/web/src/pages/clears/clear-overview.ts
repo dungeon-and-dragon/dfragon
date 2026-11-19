@@ -1,4 +1,4 @@
-import { jobLabelOf } from '#entities/character'
+import { displayJobName } from '#entities/character'
 import type { BoxPlotRow } from '#shared/ui/chart/BoxPlot'
 import type { ColumnBar } from '#shared/ui/chart/Columns'
 import type { LineSeries } from '#shared/ui/chart/LineChart'
@@ -331,15 +331,12 @@ export type JobRanks = Readonly<{ high: BoxPlotRow[]; low: BoxPlotRow[] }>
 
 function jobRowOf(job: ClearOverviewJob, rate: number, metric: JobMetric): BoxPlotRow {
   const stats = jobStatsOf(job, metric)
-  const label = jobLabelOf(job)
-  const name = label?.grow ?? UNKNOWN_JOB_NAME
-  const sub = label?.job ?? undefined
+  const name = displayJobName(job) ?? UNKNOWN_JOB_NAME
   const value = percent.format(rate)
 
   return {
     key: `${job.jobId}/${job.jobGrowId}`,
     name,
-    sub,
     color: 'var(--color-chart-1)',
     stats,
     value
