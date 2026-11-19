@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { createDatabaseClient, readJobOverviews, registerJobs } from '../dist/index.js'
+import { createDatabaseClient, readJobOverviews, readJobRuns, registerJobs } from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_JOBS_PORT
 
-test('migration 기본값과 재등록 시 설명, Neople API 갱신, 정지 유지, 삭제된 job 정리', {
+test('migration 기본값과 재등록 시 설명, Neople API 갱신, 정지 유지, 삭제된 job 정리, 모든 job 실행 이력 최신순 조회', {
   skip: port === undefined
 }, async (t) => {
   const client = createDatabaseClient({
@@ -87,4 +87,16 @@ test('migration 기본값과 재등록 시 설명, Neople API 갱신, 정지 유
     })),
     [{ name: 'legacy', description: '바뀐 설명', neopleApi: null, pausedAt }]
   )
+
+  await registerJobs(client, [registration, { ...registration, name: 'other' }])
+
+  for (const jobName of ['legacy', 'legacy', 'other']) {
+    await client.$executeRaw`INSERT INTO "job_runs" ("job_name", "trigger", "status", "args") VALUES (${jobName}, 'manual', 'succeeded', '{}'::jsonb)`
+  }
+
+  const runsOf = (runs) => runs.map(({ jobName }) => jobName)
+  const all = await readJobRuns(client, { before: undefined, limit: 10 })
+  assert.deepEqual(runsOf(all), ['other', 'legacy', 'legacy'])
+  const older = await readJobRuns(client, { before: all[0].id, limit: 1 })
+  assert.deepEqual(runsOf(older), ['legacy'])
 })
