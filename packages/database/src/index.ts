@@ -193,6 +193,7 @@ export type {
   JobPauseChange,
   JobRegistration,
   JobRunErrorEntry,
+  JobRunHistoryRecord,
   JobRunOutcome,
   JobRunProgress,
   JobRunRecord,

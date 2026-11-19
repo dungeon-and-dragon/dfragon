@@ -298,21 +298,17 @@ export async function readJobOverviews(client: DatabaseClient): Promise<JobOverv
   return overviews
 }
 
-export async function readJobRuns(
-  client: DatabaseClient,
-  jobName: string,
-  { before, limit }: { before: number | undefined; limit: number }
-): Promise<JobRunRecord[] | undefined> {
-  const job = await client.job.findUnique({ where: { name: jobName }, select: { name: true } })
-  if (job === null) {
-    return undefined
-  }
+export type JobRunHistoryRecord = JobRunRecord & { jobName: string }
 
+export function readJobRuns(
+  client: DatabaseClient,
+  { before, limit }: { before: number | undefined; limit: number }
+): Promise<JobRunHistoryRecord[]> {
   return client.jobRun.findMany({
-    where: { jobName, id: before !== undefined ? { lt: before } : undefined },
+    where: { id: before !== undefined ? { lt: before } : undefined },
     orderBy: { id: 'desc' },
     take: limit,
-    select: jobRunSelect
+    select: { ...jobRunSelect, jobName: true }
   })
 }
 
