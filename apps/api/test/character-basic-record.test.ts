@@ -440,11 +440,17 @@ function payloadsWithSets(): CharacterPayloads {
     equipment: {
       ...payloads.equipment,
       equipment: [
-        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
+        {
+          slotId: 'WEAPON',
+          itemId: 'synthetic-weapon',
+          itemName: '합성 무기',
+          itemTypeDetail: '도'
+        },
         {
           slotId: 'SUPPORT',
           itemId: 'synthetic-support',
           itemName: '합성 보조장비',
+          itemTypeDetail: '보조장비',
           exaltedInfo: { damage: '1%' }
         },
         {
@@ -521,8 +527,13 @@ test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 �
       equipmentSet: { id: 'synthetic-set', name: '합성 세트' },
       oathSet: { id: 16204, name: '합성 서약', option: '합성 선택지' },
       items: [
-        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기' },
-        { slotId: 'SUPPORT', itemId: 'synthetic-support', itemName: '합성 보조장비' }
+        { slotId: 'WEAPON', itemId: 'synthetic-weapon', itemName: '합성 무기', typeDetail: '도' },
+        {
+          slotId: 'SUPPORT',
+          itemId: 'synthetic-support',
+          itemName: '합성 보조장비',
+          typeDetail: '보조장비'
+        }
       ],
       fetchedAt: undefined
     }
