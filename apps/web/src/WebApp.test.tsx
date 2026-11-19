@@ -17,6 +17,7 @@ import { WebApp } from './WebApp'
 import { CHARACTER_SERVER_NAMES, type CharacterCandidate } from '#core/character'
 import { WEB_CAPTURE_TEXTS } from '#core/capture'
 import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'
+import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
 
 vi.mock('./host/browser-png', () => ({
   decodeBrowserImage: vi.fn(),
@@ -119,11 +120,7 @@ let host: BrowserHost
 
 // host는 페이지당 한 번 설치하고 문서 listener를 해제하지 않으므로 테스트도 한 번만 설치한다.
 beforeAll(() => {
-  host = installBrowserHost(
-    API_BASE_URL,
-    'https://site.example.test/skilltab/skilltab.v3.json',
-    'https://site.example.test/skilltab/oath.v2.json'
-  )
+  host = installBrowserHost(API_BASE_URL, 'https://site.example.test/skilltab/oath.v2.json')
 })
 
 beforeEach(() => {
@@ -358,9 +355,12 @@ it('직업 필터가 붙은 랭킹 주소에서도 전역 메뉴의 랭킹을 �
 
 const DETAIL_PATH = '/c/prey/buffer-1'
 
+// 캐릭터 상세는 host가 아니라 화면의 hook이 사이트 origin의 /api로 요청한다.
+const DETAIL_URL = `${SITE_API_URL}/characters/prey/buffer-1`
+
 function stubDetailFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
   const detail = vi.fn<typeof fetch>(async (...args) => {
-    if (new Request(...args).url !== `${API_BASE_URL}/characters/prey/buffer-1`) {
+    if (new Request(...args).url !== DETAIL_URL) {
       return Response.json({
         percent: 85,
         expiresAt: new Date(Date.now() + 3_600_000).toISOString()
