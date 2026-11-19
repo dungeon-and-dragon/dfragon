@@ -40,6 +40,11 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 자기 폴더 밖의 source는 `#<폴더>/...` alias로 가져오고, 같은 폴더 안에서는 `./...`를 씁니다.
 화면 폴더 밖에서는 `#pages/<화면>`, core 밖에서는 `#core/<도메인>`으로 가져오며, 같은 화면 안과 core 도메인 사이는 파일까지 적습니다.
 
+웹은 Feature-Sliced Design 계층으로 옮기는 중입니다.
+계층은 위에서부터 `app`, `pages`, `widgets`, `features`, `entities`, `shared`이고, 파일은 자기보다 아래 계층만 import합니다.
+같은 계층의 다른 슬라이스는 import하지 않고, 슬라이스 밖에서는 `#<계층>/<슬라이스>`로 그 슬라이스의 `index.ts`를 가져옵니다.
+`shared`는 `#shared/<세그먼트>/...`로 파일을 직접 가져오고, 옛 폴더(`components`, `hooks`, `core`, `host`, `lib`)를 import하지 않습니다.
+
 - `public/data/event-rewards.v1.json`: 공식 이벤트의 보상과 획득 조건을 옮긴 데이터 파일을 두는 위치입니다. 형식은 [이벤트 보상 schema](src/core/catalog/event-rewards.ts)에 있습니다.
 - `src/WebApp.tsx`: 웹 라우터를 둡니다.
 - `src/components/`: 두 화면 이상이나 웹 앱 전역에서 쓰는 컴포넌트와 스타일을 둡니다.
@@ -66,6 +71,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 - `src/core/search/`: 캐릭터 검색 요청, 식별, 초상화 비교와 검색 상태를 둡니다.
 - `src/core/testing/`: core와 UI 테스트가 함께 쓰는 fixture를 둡니다.
 - `src/core/today-grade/`: 오늘 등급 타입과 희귀도 구분을 둡니다.
+- `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`: FSD 계층 폴더입니다. 옛 폴더의 코드를 옮기면서 채웁니다.
 - `src/shared/ui/`: 차트, 목록 상자, 제목 상자, 로딩 줄, tooltip, 복사 버튼처럼 도메인을 모르는 컴포넌트와 그 animation hook을 둡니다.
 - `src/shared/lib/`: 조회 결과, 무한 스크롤, 클립보드 복사 hook과 시간 표시 함수, 브라우저 console 진단 코드를 둡니다.
 - `src/shared/lib/animations/`: GSAP 설정과 공용 전환 animation hook을 둡니다.
