@@ -302,5 +302,6 @@ export type {
   FameRankingPosition,
   JobCount,
   RankedStoredCharacter,
+  RankingSort,
   ServerCount
 } from './ranking-stats.js'

@@ -4,12 +4,16 @@ import {
   storedDealerSkillLearnedSql
 } from './adventure-guild.js'
 import type { CharacterEquipmentSet, CharacterOathSet } from './character-sets.js'
+import type { CharacterScoreKind } from './character-score.js'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 import { type MaleCrusaderRole, maleCrusaderRoleSql } from './male-crusader.js'
 import type { SkillStyleSelection } from './skill-style.js'
 
+export type RankingSort = 'fame' | 'equipmentScore' | 'buffScore'
+
 export type FameRankingFilter = {
+  sort?: RankingSort
   jobId?: string
   jobGrowId?: string
   role?: MaleCrusaderRole
@@ -20,10 +24,12 @@ export type FameRankingFilter = {
   evolutions?: readonly SkillStyleSelection[]
   fameFrom?: number
   fameTo?: number
+  scoreFrom?: number
+  scoreTo?: number
 }
 
 export type FameRankingPosition = {
-  fame: number
+  value: number
   serverId: string
   characterId: string
 }
@@ -137,9 +143,60 @@ function selectsEvolutionsSql(evolutions: readonly SkillStyleSelection[]): Prism
   )`
 }
 
-function afterPositionSql({ fame, serverId, characterId }: FameRankingPosition): Prisma.Sql {
-  return Prisma.sql`c.fame <= ${fame}
-    AND (c.fame < ${fame} OR (c.server_id, c.character_id) > (${serverId}, ${characterId}))`
+function afterPositionSql(
+  sortValue: Prisma.Sql,
+  { value, serverId, characterId }: FameRankingPosition
+): Prisma.Sql {
+  return Prisma.sql`${sortValue} <= ${value}
+    AND (${sortValue} < ${value} OR (c.server_id, c.character_id) > (${serverId}, ${characterId}))`
+}
+
+const SCORE_KINDS: Record<Exclude<RankingSort, 'fame'>, CharacterScoreKind> = {
+  equipmentScore: 'equipment',
+  buffScore: 'buff'
+}
+
+type SortSource = {
+  value: Prisma.Sql
+  join: Prisma.Sql
+  conditions: Prisma.Sql[]
+}
+
+function sortSource({
+  sort = 'fame',
+  jobId,
+  jobGrowId,
+  fameFrom,
+  fameTo,
+  scoreFrom,
+  scoreTo
+}: FameRankingFilter): SortSource {
+  if (sort === 'fame') {
+    const value = Prisma.sql`c.fame`
+    const conditions = [
+      Prisma.sql`c.fame IS NOT NULL`,
+      ...(fameFrom !== undefined ? [Prisma.sql`c.fame >= ${fameFrom}::int`] : []),
+      ...(fameTo !== undefined ? [Prisma.sql`c.fame <= ${fameTo}::int`] : [])
+    ]
+
+    return { value, join: Prisma.empty, conditions }
+  }
+
+  const value = Prisma.sql`ranked_score.score`
+  const join = Prisma.sql`JOIN character_scores ranked_score
+    ON ranked_score.server_id = c.server_id
+    AND ranked_score.character_id = c.character_id
+    AND ranked_score.kind = ${SCORE_KINDS[sort]}`
+
+  // 점수 행의 전직은 점수를 계산할 때의 전직이다. 전직을 바꾼 뒤 다시 계산하지 않은 캐릭터는 characters 전직과 달라 직업 필터에 걸리지 않는다.
+  const conditions = [
+    ...(jobId !== undefined ? [Prisma.sql`ranked_score.job_id = ${jobId}`] : []),
+    ...(jobGrowId !== undefined ? [Prisma.sql`ranked_score.job_grow_id = ${jobGrowId}`] : []),
+    ...(scoreFrom !== undefined ? [Prisma.sql`ranked_score.score >= ${scoreFrom}::int`] : []),
+    ...(scoreTo !== undefined ? [Prisma.sql`ranked_score.score <= ${scoreTo}::int`] : [])
+  ]
+
+  return { value, join, conditions }
 }
 
 export type ServerCount = {
@@ -185,15 +242,12 @@ export async function readFameRanking(
     oathSetId,
     oathSetOption,
     itemIds = [],
-    evolutions = [],
-    fameFrom,
-    fameTo
+    evolutions = []
   } = filter
   const gatheredItem = await pickGatheredItem(client, itemIds)
+  const sortBy = sortSource(filter)
   const conditions = [
-    Prisma.sql`c.fame IS NOT NULL`,
-    ...(fameFrom !== undefined ? [Prisma.sql`c.fame >= ${fameFrom}::int`] : []),
-    ...(fameTo !== undefined ? [Prisma.sql`c.fame <= ${fameTo}::int`] : []),
+    ...sortBy.conditions,
     ...(jobId !== undefined ? [Prisma.sql`c.job_id = ${jobId}`] : []),
     ...(jobGrowId !== undefined ? [Prisma.sql`c.job_grow_id = ${jobGrowId}`] : []),
     ...(role !== undefined ? [maleCrusaderRoleSql(storedDealerSkillLearnedSql, role)] : []),
@@ -202,19 +256,22 @@ export async function readFameRanking(
     ...(oathSetOption !== undefined ? [Prisma.sql`c.oath_set_option = ${oathSetOption}`] : []),
     ...itemIds.filter((itemId) => itemId !== gatheredItem).map(wearsItemSql),
     ...(evolutions.length > 0 ? [selectsEvolutionsSql(evolutions)] : []),
-    ...(after !== undefined ? [afterPositionSql(after)] : [])
+    ...(after !== undefined ? [afterPositionSql(sortBy.value, after)] : [])
   ]
-  const gatheredJoin = gatheredItem !== undefined ? gatheredWearersSql(gatheredItem) : Prisma.empty
 
-  // ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
+  const gatheredJoin = gatheredItem !== undefined ? gatheredWearersSql(gatheredItem) : Prisma.empty
+  const where =
+    conditions.length > 0 ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}` : Prisma.empty
+
+  // 명성 기준일 때 ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
   const rows = await readStoredCharacterRows<RankedRow>(
     client,
     Prisma.sql`
-      WHERE ${Prisma.join(conditions, ' AND ')}
-      ORDER BY c.fame DESC, c.server_id, c.character_id
+      ${where}
+      ORDER BY ${sortBy.value} DESC, c.server_id, c.character_id
       LIMIT ${limit}`,
     setColumns,
-    gatheredJoin
+    Prisma.sql`${sortBy.join} ${gatheredJoin}`
   )
 
   return rows.map(toRankedCharacter)
