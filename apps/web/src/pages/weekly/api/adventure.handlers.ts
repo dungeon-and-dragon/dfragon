@@ -25,7 +25,12 @@ async function never(): Promise<void> {
 export const adventureHandlers = {
   adventure: [
     http.get(ADVENTURE_WEEKLY_URL, () => HttpResponse.json(storyAdventureWeekly)),
-    http.get(ADVENTURE_EQUIPMENT_URL, () => HttpResponse.json(storyAdventureEquipment)),
+    http.get(ADVENTURE_EQUIPMENT_URL, ({ request }) => {
+      const { searchParams } = new URL(request.url)
+      const equipment = storyAdventureEquipment(searchParams.get('server'), searchParams.get('set'))
+
+      return HttpResponse.json(equipment)
+    }),
     http.get(ADVENTURE_ACTIVITY_URL, ({ request }) => {
       const season = new URL(request.url).searchParams.get('season')
       const seasonId = season !== null ? Number(season) : undefined

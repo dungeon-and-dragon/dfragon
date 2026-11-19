@@ -374,9 +374,18 @@ const STORY_MAIN_SETS: readonly StorySetId[] = [
   '11f7d203a05ea6f13300c0facb39f11e'
 ]
 
-const storyEquipmentSets = Object.entries(STORY_SET_ITEMS).map(([setItemId, { name }]) => ({
+// API가 세트 순서 표대로 정렬해 주는 순서다.
+const STORY_SET_ORDER: readonly StorySetId[] = [
+  '7f788a703a87d783079b41d0fe6448c9',
+  '11f7d203a05ea6f13300c0facb39f11e',
+  '4ee7bd5912cda6e2a24c1f36d5202b46',
+  '93e7825053bdec4e0f4c12837cf4f57e',
+  'story-unlisted-set'
+]
+
+const storyEquipmentSets = STORY_SET_ORDER.map((setItemId) => ({
   setItemId,
-  setItemName: name
+  setItemName: STORY_SET_ITEMS[setItemId].name
 }))
 const storyCainCharacters = [0, 1, 2, 3, 4, 5].map((index) =>
   storyEquipmentCharacter(index, 'cain', STORY_MAIN_SETS)
@@ -388,17 +397,49 @@ const storySirocoCharacters = [6, 7].map((index) =>
   ])
 )
 
-export const storyAdventureEquipment: AdventureEquipment = {
-  adventureName: STORY_ADVENTURE_NAME,
-  sets: storyEquipmentSets,
-  servers: [
-    { serverId: 'cain', characters: storyCainCharacters },
-    { serverId: 'siroco', characters: storySirocoCharacters }
-  ]
+const storyEquipmentServers = [
+  { serverId: 'cain', characters: storyCainCharacters },
+  { serverId: 'siroco', characters: storySirocoCharacters }
+]
+
+function onlySet(character: EquipmentCharacter, setItemId: string): EquipmentCharacter {
+  const equipment = character.equipment.filter((holding) => holding.setItemId === setItemId)
+  const oaths = character.oaths.filter((holding) => holding.setItemId === setItemId)
+
+  return { ...character, equipment, oaths }
+}
+
+// API처럼 없거나 모르는 서버, 세트는 첫 서버와 첫 세트로 고르고, 고른 서버, 세트의 보유만 담는다.
+export function storyAdventureEquipment(
+  server: string | null,
+  set: string | null
+): AdventureEquipment {
+  const serverId =
+    storyEquipmentServers.find((candidate) => candidate.serverId === server)?.serverId ?? 'cain'
+  const setItemId =
+    storyEquipmentSets.find((candidate) => candidate.setItemId === set)?.setItemId ??
+    STORY_SET_ORDER[0]!
+  const servers = storyEquipmentServers.map((candidate) => {
+    if (candidate.serverId !== serverId) {
+      return { serverId: candidate.serverId, characters: [] }
+    }
+
+    const characters = candidate.characters.map((character) => onlySet(character, setItemId))
+
+    return { serverId: candidate.serverId, characters }
+  })
+
+  return {
+    adventureName: STORY_ADVENTURE_NAME,
+    sets: storyEquipmentSets,
+    servers,
+    selected: { serverId, setItemId }
+  }
 }
 
 export const storyEmptyAdventureEquipment: AdventureEquipment = {
   adventureName: STORY_ADVENTURE_NAME,
   sets: [],
-  servers: []
+  servers: [],
+  selected: null
 }

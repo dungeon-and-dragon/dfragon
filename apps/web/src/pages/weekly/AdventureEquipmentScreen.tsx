@@ -1,6 +1,10 @@
 import { Button, ChipGroup } from '@dfragon/ui'
-import { type AdventureEquipment, toEquipmentBoard } from '#entities/adventure-guild'
-import { compareEquipmentSets, equipmentSetShortName } from '#entities/ranking'
+import {
+  type AdventureEquipment,
+  type EquipmentSelection,
+  toEquipmentBoard
+} from '#entities/adventure-guild'
+import { equipmentSetShortName } from '#entities/ranking'
 import { serverNames } from '#shared/config/servers/servers'
 import { AdventureTabs } from './AdventureTabs'
 import { useAdventureEquipment, useRefreshAdventureEquipment } from './api/useAdventureEquipment'
@@ -20,25 +24,18 @@ function serverLabel(serverId: string): string {
   return name
 }
 
-function sortedSets(equipment: AdventureEquipment): AdventureEquipment['sets'] {
-  return equipment.sets.toSorted((a, b) => compareEquipmentSets(a.setItemId, b.setItemId))
-}
-
-function resolveSelection(
+// 칩은 누른 값을 바로 켜고, 표는 새 응답이 올 때까지 앞선 응답이 고른 서버, 세트를 보인다.
+function chipSelection(
   equipment: AdventureEquipment,
-  search: EquipmentSearch
-): Selection | undefined {
-  const server =
-    equipment.servers.find(({ serverId }) => serverId === search.server) ?? equipment.servers[0]
+  search: EquipmentSearch,
+  selected: EquipmentSelection
+): Selection {
+  const server = equipment.servers.find(({ serverId }) => serverId === search.server)
+  const set = equipment.sets.find(({ setItemId }) => setItemId === search.set)
+  const serverId = server?.serverId ?? selected.serverId
+  const setItemId = set?.setItemId ?? selected.setItemId ?? undefined
 
-  if (server === undefined) {
-    return undefined
-  }
-
-  const sets = sortedSets(equipment)
-  const set = sets.find(({ setItemId }) => setItemId === search.set) ?? sets[0]
-
-  return { serverId: server.serverId, setItemId: set?.setItemId }
+  return { serverId, setItemId }
 }
 
 function PickerRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -63,7 +60,7 @@ function EquipmentPickers({
     value: serverId,
     label: serverLabel(serverId)
   }))
-  const sets = sortedSets(equipment).map(({ setItemId, setItemName }) => ({
+  const sets = equipment.sets.map(({ setItemId, setItemName }) => ({
     value: setItemId,
     label: equipmentSetShortName(setItemId, setItemName)
   }))
@@ -111,7 +108,7 @@ function EquipmentBody({
   search: EquipmentSearch
   onSearchChange: (search: EquipmentSearch) => void
 }): React.JSX.Element {
-  const result = useAdventureEquipment(adventureName)
+  const result = useAdventureEquipment(adventureName, search)
   const refresh = useRefreshAdventureEquipment()
 
   async function retry(): Promise<void> {
@@ -142,9 +139,9 @@ function EquipmentBody({
       )
     case 'success': {
       const equipment = result.value
-      const selection = resolveSelection(equipment, search)
+      const { selected } = equipment
 
-      if (selection === undefined) {
+      if (selected === null) {
         return (
           <section aria-label="장비" className="section min-w-0">
             <h2 className="section-title">장비</h2>
@@ -154,8 +151,9 @@ function EquipmentBody({
       }
 
       const characters =
-        equipment.servers.find(({ serverId }) => serverId === selection.serverId)?.characters ?? []
-      const rows = toEquipmentBoard(characters, selection.setItemId)
+        equipment.servers.find(({ serverId }) => serverId === selected.serverId)?.characters ?? []
+      const rows = toEquipmentBoard(characters, selected.setItemId ?? undefined)
+      const selection = chipSelection(equipment, search, selected)
 
       return (
         <>
