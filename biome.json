@@ -374,7 +374,6 @@
                       "#components/**",
                       "#pages/**",
                       "#host/**",
-                      "#animations/**",
                       "**/hooks/**",
                       "**/components/**",
                       "**/pages/**",

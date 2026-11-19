@@ -20,8 +20,8 @@ import {
   skillUpgradesOf,
   skillWindowOf
 } from '#core/catalog'
-import type { LoadedResult } from '#hooks/useLoadedResult'
-import { LoadingLine } from '#components/LoadingLine'
+import type { LoadedResult } from '#shared/lib/useLoadedResult'
+import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useSkillStats } from '#pages/character/hooks/useSkillStats'
 import { useSkillWindowCatalog } from '#pages/character/hooks/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'

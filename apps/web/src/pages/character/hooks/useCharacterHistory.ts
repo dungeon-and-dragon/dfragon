@@ -1,6 +1,6 @@
 import type { CharacterDetailView, CharacterHistory, CharacterIdentity } from '#core/character'
 import { useClientHost } from '#host/client-host'
-import { type LoadedResult, useLoadedResult } from '#hooks/useLoadedResult'
+import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 
 export function useCharacterHistory({
   serverId,

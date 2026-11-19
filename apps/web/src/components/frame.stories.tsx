@@ -4,8 +4,8 @@ import { storyRankedCharacters } from '#testing/story-support/story-characters'
 import { createStoryClientHost } from '#testing/story-support/story-host'
 import { GlobalBar } from './GlobalBar'
 import { CharacterTable } from './table/CharacterTable'
-import { ListBox } from './table/ListBox'
-import { TitleBox, TitleStat } from './table/TitleBox'
+import { ListBox } from '#shared/ui/ListBox'
+import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 
 const meta = {
   title: 'Patterns/화면 틀',

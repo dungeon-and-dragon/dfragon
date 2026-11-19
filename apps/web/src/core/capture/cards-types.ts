@@ -1,4 +1,4 @@
-import type { ServerId } from '#core/servers/servers-types'
+import type { ServerId } from '#shared/config/servers/servers-types'
 import type { CharacterFaceWindow, SearchSlot } from '#core/search/search'
 import type { CharacterCard } from '#core/character/character'
 
