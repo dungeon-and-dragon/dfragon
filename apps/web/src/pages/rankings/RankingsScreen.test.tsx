@@ -57,6 +57,7 @@ function rankedCharacter(order: number, overrides: Partial<RankedCharacter> = {}
     guildId: null,
     guildName: null,
     role: null,
+    score: null,
     equipmentSet: null,
     oathSet: null,
     ...overrides
@@ -206,7 +207,7 @@ it('3페이지에서 이미 받아 둔 필터로 바꿔도 1페이지를 보인�
   expect(queries()).toEqual([{}, { itemIds: 'synthetic-weapon' }])
 })
 
-it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 없는 행은 세트를 -로 그린다', async () => {
+it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 헤더에 내림차순을 표시하며, 세트 값이나 점수가 없는 행은 그 칸을 -로 그린다', async () => {
   await render(async () => ({
     characters: [
       rankedCharacter(1, {
@@ -215,8 +216,10 @@ it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 �
           id: '7f788a703a87d783079b41d0fe6448c9',
           name: '영원히 이어지는 황금향 세트'
         },
-        oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' }
+        oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' },
+        score: { calculator: 'equipment', value: 1_388_832 }
       }),
+      rankedCharacter(2, { role: 'buffer', score: { calculator: 'buff', value: 4_120_000 } }),
       rankedCharacter(4, { level: null, jobGrowName: null, jobName: '합성 직업' })
     ],
     nextCursor: null
@@ -226,13 +229,26 @@ it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 �
     '캐릭터',
     '세트',
     '명성',
+    '점수',
     '모험단'
   ])
-  const [first, fourth] = bodyRows().map((row) =>
+  expect(
+    [...container.querySelectorAll('thead th[aria-sort="descending"]')].map(
+      (cell) => cell.textContent
+    )
+  ).toEqual(['명성'])
+  const [first, second, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['카인합성1합성 전직', '황금향용투 : 용제 강림', '99,999', '모험단1'])
-  expect(fourth).toEqual(['카인합성4합성 직업', '-', '99,996', '모험단4'])
+  expect(first).toEqual([
+    '카인합성1합성 전직',
+    '황금향용투 : 용제 강림',
+    '99,999',
+    '장비1,388,832',
+    '모험단1'
+  ])
+  expect(second?.[3]).toBe('버프4,120,000')
+  expect(fourth).toEqual(['카인합성4합성 직업', '-', '99,996', '-', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
@@ -463,10 +479,10 @@ it('명성 범위를 query로 보내고, 최고 명성이 있든 없든 순위 �
   await render(async () => rankingOf(3), { fameFrom: 136000, fameTo: 138000 })
 
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }])
-  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '점수', '모험단'])
   await render(async () => rankingOf(3), { fameFrom: 136000 })
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }, { fameFrom: '136000' }])
-  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '점수', '모험단'])
 })
 
 it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초기화로 모든 필터를 지운다', async () => {

@@ -28,8 +28,18 @@ const rows = storyRankedCharacters(10)
 export const 캐릭터표: Story = {
   render: () => (
     <ListBox name="명성 랭킹">
-      <CharacterTable rows={rows} />
+      <CharacterTable rows={rows} scorePlacement="column" />
     </ListBox>
+  )
+}
+
+export const 명성아래점수: Story = {
+  render: () => (
+    <div className="w-[400px]">
+      <ListBox name="명성 랭킹">
+        <CharacterTable rows={rows.slice(3, 6)} scorePlacement="belowFame" affiliations={[]} />
+      </ListBox>
+    </div>
   )
 }
 
@@ -46,7 +56,10 @@ export const 받는중: Story = {
     <ListBox name="명성 랭킹">
       <CharacterTable
         rows={[]}
-        trailing={Array.from({ length: 5 }, (_, index) => <SkeletonRow key={index} />)}
+        scorePlacement="column"
+        trailing={Array.from({ length: 5 }, (_, index) => (
+          <SkeletonRow key={index} scorePlacement="column" />
+        ))}
       />
     </ListBox>
   )

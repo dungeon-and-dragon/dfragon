@@ -31,8 +31,9 @@ export function CharacterListBox({
             <CharacterTable
               rows={[]}
               affiliations={affiliations}
+              scorePlacement="column"
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} affiliations={affiliations} />
+                <SkeletonRow key={index} scorePlacement="column" affiliations={affiliations} />
               ))}
             />
           </div>
@@ -60,7 +61,11 @@ export function CharacterListBox({
           {paged ? (
             <PagedTable characters={result.value} affiliations={affiliations} />
           ) : (
-            <CharacterTable rows={ranked(result.value)} affiliations={affiliations} />
+            <CharacterTable
+              rows={ranked(result.value)}
+              affiliations={affiliations}
+              scorePlacement="column"
+            />
           )}
         </ListBox>
       )
@@ -86,7 +91,11 @@ function PagedTable({
 
   return (
     <>
-      <CharacterTable rows={ranked(characters.slice(0, visible))} affiliations={affiliations} />
+      <CharacterTable
+        rows={ranked(characters.slice(0, visible))}
+        affiliations={affiliations}
+        scorePlacement="column"
+      />
       {visible < characters.length && (
         <div className="flex min-h-12 items-center justify-center border-t border-line">
           <Button variant="secondary" size="sm" onClick={showMore}>

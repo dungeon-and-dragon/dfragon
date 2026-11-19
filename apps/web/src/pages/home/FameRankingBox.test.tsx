@@ -44,6 +44,7 @@ function rankedCharacter(order: number): RankedCharacter {
     guildId: null,
     guildName: '합성 길드',
     role: null,
+    score: null,
     equipmentSet: null,
     oathSet: null
   }
@@ -86,14 +87,25 @@ function settled(): Promise<void> {
   return vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
 }
 
+function scoreToneOf(element: Element): string | undefined {
+  return [...element.classList].find(
+    (name) => name.startsWith('text-score-') || name === 'text-fg-subtle'
+  )
+}
+
 function bodyRows(): string[][] {
   return [...container.querySelectorAll('tbody tr:not([aria-hidden])')].map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')
   )
 }
 
-it('직업 필터 없이 조회해 앞 3명을 받은 순서의 순위, 캐릭터, 명성 열로 그린다', async () => {
-  const characters = [7, 3, 9, 1].map((order) => rankedCharacter(order))
+it('직업 필터 없이 조회해 앞 3명을 받은 순서의 순위, 캐릭터, 명성 열로 그리고 점수는 열을 늘리지 않고 명성 아래 줄에 둔다', async () => {
+  const characters = [
+    { ...rankedCharacter(7), score: { calculator: 'equipment' as const, value: 1_388_832 } },
+    { ...rankedCharacter(3), score: { calculator: 'buff' as const, value: 4_120_000 } },
+    rankedCharacter(9),
+    rankedCharacter(1)
+  ]
 
   respondRanking({ characters, nextCursor: null })
   await render()
@@ -106,9 +118,15 @@ it('직업 필터 없이 조회해 앞 3명을 받은 순서의 순위, 캐릭�
     '명성'
   ])
   expect(bodyRows()).toEqual([
-    ['1', '카인합성7합성 전직', '99,993'],
-    ['2', '카인합성3합성 전직', '99,997'],
-    ['3', '카인합성9합성 전직', '99,991']
+    ['1', '카인합성7합성 전직', '99,9931,388,832'],
+    ['2', '카인합성3합성 전직', '99,9974,120,000'],
+    ['3', '카인합성9합성 전직', '99,991-']
+  ])
+  const scoreLines = [...container.querySelectorAll('tbody tr td:last-child span span:last-child')]
+  expect(scoreLines.map((line) => [line.textContent, scoreToneOf(line)])).toEqual([
+    ['1,388,832', 'text-score-dealer'],
+    ['4,120,000', 'text-score-buffer'],
+    ['-', 'text-fg-subtle']
   ])
   expect(container.querySelector('tbody a')?.getAttribute('href')).toBe('/c/cain/character-7')
 })
@@ -121,12 +139,16 @@ it('3명보다 적으면 받은 만큼만 그린다', async () => {
   expect(bodyRows()).toHaveLength(2)
 })
 
-it('받는 중에는 빈 줄 3개를 그린다', async () => {
+it('받는 중에는 명성과 점수 줄 자리까지 둔 빈 줄 3개를 그린다', async () => {
   respond(() => new Promise<Response>(() => {}))
   await render()
 
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
-  expect(container.querySelectorAll('tbody tr[aria-hidden]')).toHaveLength(3)
+  const skeletonRows = [...container.querySelectorAll('tbody tr[aria-hidden]')]
+  expect(skeletonRows).toHaveLength(3)
+  expect(
+    skeletonRows.map((row) => row.querySelectorAll('td:last-child .skeleton-text').length)
+  ).toEqual([2, 2, 2])
   expect(bodyRows()).toHaveLength(0)
 })
 

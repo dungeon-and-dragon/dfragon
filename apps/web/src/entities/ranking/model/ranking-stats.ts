@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
   characterIdentitySchema,
   characterRole,
+  listScoreSchema,
   type MaleCrusaderRole
 } from '#entities/character/@x/ranking'
 
@@ -19,7 +20,8 @@ export const storedCharacterSchema = characterIdentitySchema.extend({
   fame: z.number().int().nullable(),
   guildId: nullableText,
   guildName: nullableText,
-  role: characterRole
+  role: characterRole,
+  score: listScoreSchema
 })
 
 export const fameRankingSchema = z.object({

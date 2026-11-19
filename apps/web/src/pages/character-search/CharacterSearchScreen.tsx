@@ -49,9 +49,15 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
             <CharacterTable
               rows={[]}
               ranked={false}
+              scorePlacement="column"
               affiliations={NO_AFFILIATIONS}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} ranked={false} affiliations={NO_AFFILIATIONS} />
+                <SkeletonRow
+                  key={index}
+                  ranked={false}
+                  scorePlacement="column"
+                  affiliations={NO_AFFILIATIONS}
+                />
               ))}
             />
           </div>
@@ -79,6 +85,7 @@ function SearchedCharacterList({ query }: { query: CharacterSearchQuery }): Reac
           <CharacterTable
             rows={result.value.map(tableRow)}
             ranked={false}
+            scorePlacement="column"
             affiliations={NO_AFFILIATIONS}
             adventureBesideName
           />
