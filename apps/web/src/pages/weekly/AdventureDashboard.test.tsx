@@ -29,6 +29,7 @@ const emptySummary: AdventureActivity['summary'] = {
   raids: [],
   legions: [],
   items: { legendary: 0, epic: 0, primeval: 0, mythic: 0 },
+  oaths: { legendary: 0, epic: 0, primeval: 0 },
   enhancement: {
     attempts: 0,
     amplify: [],
@@ -59,7 +60,8 @@ const currentSeason: AdventureActivity = {
       { name: '나 레이드', count: 3 }
     ],
     legions: [{ name: '다 레기온', count: 5 }],
-    items: { legendary: 7, epic: 4, primeval: 2, mythic: 1 },
+    items: { legendary: 7, epic: 4, primeval: 2, mythic: 0 },
+    oaths: { legendary: 1, epic: 0, primeval: 0 },
     enhancement: {
       attempts: 40,
       amplify: [
@@ -546,7 +548,15 @@ it('요약 숫자에 키보드 focus를 주면 내역이 열리고, 강화는 �
   expect(tooltipRows()).toEqual(['가 레이드1,200회', '나 레이드3회'])
 
   await act(async () => stat('아이템').focus())
-  expect(tooltipRows()).toEqual(['레전더리7개', '에픽4개', '태초2개', '신화1개'])
+  expect(tooltipRows()).toEqual([
+    '장비13',
+    '레전더리7개',
+    '에픽4개',
+    '태초2개',
+    '',
+    '서약1',
+    '레전더리1개'
+  ])
 
   await act(async () => stat('강화').focus())
   expect(tooltipRows()).toEqual([
@@ -562,16 +572,52 @@ it('요약 숫자에 키보드 focus를 주면 내역이 열리고, 강화는 �
   ])
 })
 
-it('아이템 내역은 개수가 0인 등급 줄을 뺀다', async () => {
-  const items = { legendary: 7, epic: 0, primeval: 2, mythic: 0 }
+it('시즌 9의 아이템 내역은 신화까지 등급별 수 한 묶음으로 두고 개수가 0인 등급 줄을 뺀다', async () => {
+  const items = { legendary: 7, epic: 0, primeval: 2, mythic: 1 }
   await render(
-    async () => ({ ...currentSeason, summary: { ...currentSeason.summary, items } }),
+    async () => ({
+      ...currentSeason,
+      season: { ...currentSeason.season!, id: 9 },
+      summary: { ...emptySummary, items }
+    }),
     undefined
   )
 
+  expect(stat('아이템').lastElementChild?.textContent).toBe('10')
   await act(async () => stat('아이템').focus())
 
-  expect(tooltipRows()).toEqual(['레전더리7개', '태초2개'])
+  expect(tooltipRows()).toEqual(['레전더리7개', '태초2개', '신화1개'])
+})
+
+it('시즌 10의 아이템 숫자는 장비와 서약을 더하고, 내역은 수가 0인 묶음과 등급 줄을 뺀다', async () => {
+  const withSummary = (summary: Partial<AdventureActivity['summary']>) => async () => ({
+    ...previousSeason,
+    summary: { ...emptySummary, ...summary }
+  })
+  await render(
+    withSummary({
+      items: { legendary: 3, epic: 0, primeval: 1, mythic: 0 },
+      oaths: { legendary: 0, epic: 2, primeval: 1 }
+    }),
+    10
+  )
+  expect(stat('아이템').lastElementChild?.textContent).toBe('7')
+  await act(async () => stat('아이템').focus())
+  expect(tooltipRows()).toEqual([
+    '장비4',
+    '레전더리3개',
+    '태초1개',
+    '',
+    '서약3',
+    '에픽2개',
+    '태초1개'
+  ])
+
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  await render(withSummary({ oaths: { legendary: 2, epic: 0, primeval: 0 } }), 10)
+  await act(async () => stat('아이템').focus())
+  expect(tooltipRows()).toEqual(['서약2', '레전더리2개'])
 })
 
 it('요약 숫자에 마우스를 올리면 내역이 열리고, 0인 숫자는 내역을 열지 않는다', async () => {

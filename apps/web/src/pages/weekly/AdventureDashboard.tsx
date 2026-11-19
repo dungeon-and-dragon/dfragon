@@ -7,6 +7,7 @@ import { findSeasonRaidBackground } from '#lib/season-raid-background'
 import { ActivitySummary, ActivitySummarySkeleton } from './ActivitySummary'
 import { seasonPeriod } from './season-format'
 import { seasonHasLegion } from './season-legion'
+import { seasonHasOaths } from './season-oath'
 import { SeasonTimeline } from './SeasonTimeline'
 
 const HERO =
@@ -65,7 +66,11 @@ function DashboardHero({
           </div>
         )}
         {settled && activity !== undefined ? (
-          <ActivitySummary summary={activity.summary} hasLegion={hasLegion} />
+          <ActivitySummary
+            summary={activity.summary}
+            hasLegion={hasLegion}
+            hasOaths={seasonHasOaths(seasonId)}
+          />
         ) : (
           <>
             <span role="status" className="sr-only">

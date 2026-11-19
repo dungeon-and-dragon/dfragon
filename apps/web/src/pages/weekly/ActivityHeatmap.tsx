@@ -1,7 +1,7 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { Tooltip } from '@dfragon/ui'
 import { type RefObject, useLayoutEffect, useRef, useState } from 'react'
-import type { AdventureActivity } from '#core/adventure-guild'
+import type { ActivitySummary, AdventureActivity } from '#core/adventure-guild'
 import {
   enhancementTextClasses,
   rarityTextClasses,
@@ -31,6 +31,8 @@ import { useHeatmapTooltipSlide } from './animations/useHeatmapTooltipSlide'
 import { useHeatmapWheelScroll } from './animations/useHeatmapWheelScroll'
 import { formatMonthDay } from './season-format'
 import { seasonHasLegion } from './season-legion'
+import { seasonHasOaths } from './season-oath'
+import { type RarityCounts, rarityTotal } from './rarity-counts'
 
 const KINDS: readonly Readonly<{ kind: ActivityKind; label: string; cellLabel: string }>[] = [
   { kind: 'all', label: '전체', cellLabel: '활동' },
@@ -144,39 +146,70 @@ function Legend({
   )
 }
 
-function ItemTags({
-  items
+// 서약 뱃지까지 붙는 시즌만 좁은 폭에서 뱃지를 줄바꿈하고, 옛 시즌 뱃지 줄은 그대로 둔다.
+function RarityTags({
+  counts,
+  prefix,
+  wrap
 }: {
-  items: AdventureActivity['summary']['items']
+  counts: RarityCounts
+  prefix: string
+  wrap: boolean
 }): React.JSX.Element | null {
-  if (items.legendary + items.epic + items.primeval + items.mythic === 0) {
+  const { legendary, epic, primeval, mythic = 0 } = counts
+
+  if (rarityTotal(counts) === 0) {
     return null
   }
 
   return (
-    <span className="flex gap-2">
-      {items.legendary > 0 && (
+    <span className={wrap ? 'flex flex-wrap gap-2' : 'flex gap-2'}>
+      {legendary > 0 && (
         <span className={`${TAG} ${raritySolidClasses.legendary}`}>
-          레전더리 {numberFormat.format(items.legendary)}
+          {prefix}레전더리 {numberFormat.format(legendary)}
         </span>
       )}
-      {items.epic > 0 && (
+      {epic > 0 && (
         <span className={`${TAG} ${raritySolidClasses.epic}`}>
-          에픽 {numberFormat.format(items.epic)}
+          {prefix}에픽 {numberFormat.format(epic)}
         </span>
       )}
-      {items.primeval > 0 && (
+      {primeval > 0 && (
         <span className={`${TAG} ${raritySolidClasses.primordial}`}>
           <span className={rarityTextClasses.primordial}>
-            태초 {numberFormat.format(items.primeval)}
+            {prefix}태초 {numberFormat.format(primeval)}
           </span>
         </span>
       )}
-      {items.mythic > 0 && (
+      {mythic > 0 && (
         <span className={`${TAG} ${raritySolidClasses.mythic}`}>
-          <span className={rarityTextClasses.mythic}>신화 {numberFormat.format(items.mythic)}</span>
+          <span className={rarityTextClasses.mythic}>
+            {prefix}신화 {numberFormat.format(mythic)}
+          </span>
         </span>
       )}
+    </span>
+  )
+}
+
+function ItemTags({
+  summary,
+  hasOaths
+}: {
+  summary: ActivitySummary
+  hasOaths: boolean
+}): React.JSX.Element | null {
+  if (!hasOaths) {
+    return <RarityTags counts={summary.items} prefix="" wrap={false} />
+  }
+
+  const hasDivider = rarityTotal(summary.items) > 0 && rarityTotal(summary.oaths) > 0
+
+  return (
+    <span className="flex flex-wrap gap-2">
+      <RarityTags counts={summary.items} prefix="" wrap />
+      {hasDivider && <span aria-hidden="true" className="w-px self-stretch bg-line" />}
+      <RarityTags counts={summary.oaths} prefix="서약 " wrap />
     </span>
   )
 }
@@ -287,17 +320,19 @@ function HeatmapGrid({
 function CellTooltipPopup({
   date,
   kind,
-  seasonDays
+  seasonDays,
+  hasOaths
 }: {
   date: string
   kind: ActivityKind
   seasonDays: AdventureActivitySeasonDaysResult
+  hasOaths: boolean
 }): React.JSX.Element {
   const popupRef = useHeatmapTooltipSlide(date)
 
   return (
     <Tooltip.Popup ref={popupRef} side="top" sideOffset={8}>
-      <ActivityDayDetail date={date} kind={kind} seasonDays={seasonDays} />
+      <ActivityDayDetail date={date} kind={kind} seasonDays={seasonDays} hasOaths={hasOaths} />
     </Tooltip.Popup>
   )
 }
@@ -345,6 +380,7 @@ function HeatmapPanel({
 }): React.JSX.Element {
   const [tooltip] = useState(() => Tooltip.createHandle<CellPayload>())
   const seasonDays = useAdventureActivitySeasonDays(adventureName, season.id)
+  const hasOaths = seasonHasOaths(season.id)
   const weeks = buildHeatmapWeeks(season, now)
   const days = new Map(activity.days.map((day) => [day.date, day]))
   const thresholds = levelThresholds(activity.days.map((day) => dayCount(day, kind)))
@@ -355,7 +391,7 @@ function HeatmapPanel({
   return (
     <>
       <div className="flex min-h-[18px] items-center justify-between gap-4 px-4 pt-6 max-sm:pt-4">
-        {kind === 'item' && <ItemTags items={activity.summary.items} />}
+        {kind === 'item' && <ItemTags summary={activity.summary} hasOaths={hasOaths} />}
         <Legend kind={kind} thresholds={thresholds} />
       </div>
       <div className="flex px-4 pt-3 pb-6 max-sm:pb-4">
@@ -374,7 +410,12 @@ function HeatmapPanel({
       <Tooltip.Root handle={tooltip} disableHoverablePopup>
         {({ payload }) =>
           payload !== undefined && (
-            <CellTooltipPopup date={payload.date} kind={kind} seasonDays={seasonDays} />
+            <CellTooltipPopup
+              date={payload.date}
+              kind={kind}
+              seasonDays={seasonDays}
+              hasOaths={hasOaths}
+            />
           )
         }
       </Tooltip.Root>
