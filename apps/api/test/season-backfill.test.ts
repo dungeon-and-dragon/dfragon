@@ -265,6 +265,7 @@ async function listen(
       readAdventureCharacters: unused,
       readGuild: unused,
       readAdventureWeeklyClears: unused,
+      readAdventureEquipment: unused,
       readAdventureSeasonDays: unused,
       ...reader
     },
