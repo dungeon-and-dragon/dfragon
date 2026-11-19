@@ -1,4 +1,6 @@
+import { Tooltip } from '@dfragon/ui'
 import { Link } from '@tanstack/react-router'
+import type { ReactElement } from 'react'
 import {
   EQUIPMENT_SLOTS,
   type EquipmentBoardRow,
@@ -47,24 +49,51 @@ function CharacterIdentity({ character }: { character: EquipmentCharacter }): Re
   )
 }
 
+function RarityCountTooltip({
+  cell,
+  children
+}: {
+  cell: HoldingCell
+  children: ReactElement
+}): React.JSX.Element {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger delay={0} closeDelay={0} render={children} />
+      <Tooltip.Popup side="bottom" sideOffset={8}>
+        <dl className="m-0 flex min-w-[120px] flex-col text-fg">
+          {HOLDING_RARITIES.map((rarity, index) => (
+            <div key={rarity} className="flex justify-between gap-4 py-1 text-xs">
+              <dt className={raritySolidOfName(rarity)}>{rarity}</dt>
+              <dd className="m-0 num text-fg-muted">{`${cell.rarityCounts[index] ?? 0}개`}</dd>
+            </div>
+          ))}
+        </dl>
+      </Tooltip.Popup>
+    </Tooltip.Root>
+  )
+}
+
 function HoldingIcon({ cell }: { cell: HoldingCell | null }): React.JSX.Element {
   if (cell === null) {
     return MISSING
   }
 
   return (
-    <span
-      role="img"
-      aria-label={`${cell.rarity} ${cell.itemName}`}
-      className="relative inline-block align-middle"
-    >
-      <ItemIcon itemId={cell.itemId} rarity={itemRarityOfGrade(cell.rarity)} />
-      {cell.extraCount > 0 && (
-        <span className="absolute -right-2 -bottom-1 flex h-4 min-w-4 items-center justify-center rounded-badge border border-line bg-canvas px-1 num text-2xs text-fg-muted">
-          {`+${cell.extraCount}`}
-        </span>
-      )}
-    </span>
+    <RarityCountTooltip cell={cell}>
+      <span
+        role="img"
+        tabIndex={0}
+        aria-label={`${cell.rarity} ${cell.itemName}`}
+        className="relative inline-block align-middle focus-ring"
+      >
+        <ItemIcon itemId={cell.itemId} rarity={itemRarityOfGrade(cell.rarity)} />
+        {cell.extraCount > 0 && (
+          <span className="absolute -right-2 -bottom-1 flex h-4 min-w-4 items-center justify-center rounded-badge border border-line bg-canvas px-1 num text-2xs text-fg-muted">
+            {`+${cell.extraCount}`}
+          </span>
+        )}
+      </span>
+    </RarityCountTooltip>
   )
 }
 
@@ -229,7 +258,11 @@ export function OathSection({ rows }: { rows: readonly EquipmentBoardRow[] }): R
                 </td>
                 <td>
                   {oath !== null ? (
-                    <ItemName name={oath.itemName} rarity={itemRarityOfGrade(oath.rarity)} />
+                    <RarityCountTooltip cell={oath}>
+                      <span tabIndex={0} className="inline-flex max-w-full focus-ring">
+                        <ItemName name={oath.itemName} rarity={itemRarityOfGrade(oath.rarity)} />
+                      </span>
+                    </RarityCountTooltip>
                   ) : (
                     MISSING
                   )}
