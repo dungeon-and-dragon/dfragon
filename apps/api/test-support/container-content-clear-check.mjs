@@ -16,7 +16,6 @@ import {
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
   readContentClearWeekSamples,
-  readClearRecordLegionWeeks,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
   readContentClearJobScores,
@@ -31,7 +30,8 @@ import {
   recordCharacterScore,
   recordClearRecords,
   recordContentClearPopulation,
-  recordContentClears
+  recordContentClears,
+  recordLegionContentClears
 } from '@dfragon/database'
 import { ClearStatsService } from './dist/application/content-clears/service.js'
 
@@ -273,7 +273,6 @@ try {
     readWeekGroups: (comparison) => readContentClearWeekGroups(client, comparison),
     readStageMoves: (selection) => readContentClearStageMoves(client, selection),
     readStreaks: (selection) => readContentClearStreaks(client, selection),
-    readLegionWeeks: (names) => readClearRecordLegionWeeks(client, names),
     readRaidModes: (selection) => readClearRecordRaidModes(client, selection),
     readRaidStageCounts: (selection, stages) =>
       readClearRecordRaidStageCounts(client, selection, stages),
@@ -624,6 +623,44 @@ try {
     })
   ])
 
+  // 레기온은 worker가 그 주 기록을 옮긴 뒤 수집 대상 전체를 분모로 저장한다. 두 번 옮겨도 캐릭터마다 가장 이른 클리어 한 행이다.
+  // 명성과 점수 복사는 막 마감한 주를 옮길 때만 하므로, 이번 주로 둔 thisWeek만 clear-l2의 명성과 점수를 복사한다.
+  await recordCharacterBasic(client, basic('cain', 'clear-l2', 60000, '합성레기온모험단'))
+  await recordCharacterScore(client, {
+    serverId: 'cain',
+    characterId: 'clear-l2',
+    kind: 'equipment',
+    score: 905000,
+    calculatedAt: at('2026-11-10T06:00:00'),
+    engine: { package: 'synthetic-engine', rulesRev: 'rules-legion', bundleId: 'bundle-legion' }
+  })
+  for (const [weekStart, copySnapshot] of [
+    [lastWeek, false],
+    [thisWeek, true],
+    [thisWeek, true],
+    ['2026-11-12T06:00:00', false]
+  ]) {
+    await recordLegionContentClears(client, {
+      contentId: 'legion-venus',
+      name: '베누스',
+      weekStart: at(weekStart),
+      copySnapshot
+    })
+    await recordContentClearPopulation(client, population(1200, true, 'legion-venus', weekStart))
+  }
+  assert.deepEqual(
+    await client.$queryRaw`
+      SELECT to_char(week_start AT TIME ZONE 'Asia/Seoul', 'MM-DD') AS week, max_fame AS "maxFame",
+        score, score_engine_bundle_id AS "bundleId"
+      FROM content_clears
+      WHERE content_id = 'legion-venus' AND character_id = 'clear-l2'
+      ORDER BY week_start`,
+    [
+      { week: '10-29', maxFame: null, score: null, bundleId: null },
+      { week: '11-05', maxFame: 60000, score: 905000, bundleId: 'bundle-legion' }
+    ]
+  )
+
   // 점수는 클리어 행에 복사한 값을 쓴다. 이번 주 미카엘라 하드에서 clear-fame-1~22는 엔진 A의 장비 점수,
   // clear-fame-23~25는 엔진 B의 장비 점수, clear-e는 엔진 A의 버프 점수다.
   const engineA = ['synthetic-engine', 'rules-a', 'bundle-a']
@@ -705,8 +742,23 @@ try {
   })
   const legionDetail = await scoredService.contentStats('legion-venus', '2026-11-05')
   assert.deepEqual(
-    [legionDetail.kind, legionDetail.week.cleared, legionDetail.stages],
-    ['legion', 2, null]
+    [legionDetail.kind, legionDetail.week.cleared, legionDetail.stages, legionDetail.stageMoves],
+    ['legion', 2, null, null]
+  )
+  assert.equal(
+    legionDetail.jobs.reduce((total, { cleared }) => total + cleared, 0),
+    2
+  )
+  assert.deepEqual(
+    [legionDetail.weekOverWeek.both.cleared, legionDetail.weekOverWeek.first.cleared],
+    [1, 1]
+  )
+  assert.deepEqual(
+    legionDetail.weekdays.filter(({ cleared }) => cleared > 0),
+    [
+      { weekday: 5, cleared: 1 },
+      { weekday: 6, cleared: 1 }
+    ]
   )
   const challengeScored = await scoredService.contentStats('engraved-nightmare-1', '2026-11-05')
   assert.deepEqual(challengeScored.scoreBands, { equipment: [], buff: [] })

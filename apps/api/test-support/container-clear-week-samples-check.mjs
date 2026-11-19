@@ -9,7 +9,8 @@ import {
 import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { ClearWeekSampleService } from './dist/application/content-clears/week-samples.js'
 
-// 앞 단계의 API 검사가 넣은 합성 클리어 기록에 마감하지 않은 주의 모집단만 더한다.
+// 앞 단계의 API 검사가 넣은 합성 클리어 기록에 마감하지 않은 주의 모집단만 더한다. 레기온은 앞 단계가 옮기지 않은
+// 마감한 주를 이 job이 옮긴다.
 const at = (time) => new Date(`${time}+09:00`)
 const closedWeek = at('2026-11-05T06:00:00').getTime()
 const openWeek = at('2026-11-19T06:00:00')
@@ -41,8 +42,12 @@ try {
   )
 
   const recorded = await service.recordMissing(() => undefined)
-  assert.ok(recorded.contents > 0 && recorded.overviews > 0)
-  assert.deepEqual(await service.recordMissing(() => undefined), { contents: 0, overviews: 0 })
+  assert.ok(recorded.legions > 0 && recorded.contents > 0 && recorded.overviews > 0)
+  assert.deepEqual(await service.recordMissing(() => undefined), {
+    legions: 0,
+    contents: 0,
+    overviews: 0
+  })
   const overviewSampleWeeks = (await readContentClearOverviewSampleWeeks(client)).map((weekStart) =>
     weekStart.getTime()
   )

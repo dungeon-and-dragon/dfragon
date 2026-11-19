@@ -42,6 +42,10 @@ try {
     await stored.contentStats('michaela-hard', '2026-11-05'),
     await computed.contentStats('michaela-hard', '2026-11-05')
   )
+  assert.deepEqual(
+    await stored.contentStats('legion-venus', '2026-11-05'),
+    await computed.contentStats('legion-venus', '2026-11-05')
+  )
   assert.deepEqual(await stored.overview('2026-11-05'), await computed.overview('2026-11-05'))
 
   // 수집 진행 위치는 끝나기 전까지만 남는다.

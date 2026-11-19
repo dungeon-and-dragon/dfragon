@@ -80,7 +80,6 @@ function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRe
     readWeekGroups: async () => [],
     readStageMoves: async () => [],
     readStreaks: async () => [],
-    readLegionWeeks: async () => [],
     readRaidModes: async () => [],
     readRaidStageCounts: async () => [],
     readContentJobScores: async () => [],
@@ -815,7 +814,6 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
     readWeekGroups: counted(base.readWeekGroups),
     readStageMoves: counted(base.readStageMoves),
     readStreaks: counted(base.readStreaks),
-    readLegionWeeks: counted(base.readLegionWeeks),
     readRaidModes: counted(base.readRaidModes),
     readRaidStageCounts: counted(base.readRaidStageCounts),
     readContentJobScores: counted(base.readContentJobScores),
@@ -1208,13 +1206,7 @@ test('분모 기준 명성이 저장되지 않은 주의 명성 구간은 지금
   }
 })
 
-const legionWeek = (name: string, date: string, cleared: number) => ({
-  name,
-  weekStart: week(date),
-  cleared
-})
-
-test('목록은 레기온을 contents와 따로 주고, 레기온 기록이 없으면 그 레기온의 weeks가 빈 배열이다', async () => {
+test('목록은 레기온을 contents와 따로 주고, 레기온 모집단이 없으면 그 레기온의 weeks가 빈 배열이다', async () => {
   const { app, origin } = await listen(fakeReader())
   try {
     const { body } = await getJson(origin, '/stats/clears')
@@ -1238,23 +1230,25 @@ test('목록은 레기온을 contents와 따로 주고, 레기온 기록이 없�
   }
 })
 
-test('레기온 주는 첫 기록 주부터 수집한 주마다 두고, 분모는 그 주 가장 큰 모집단이다', async () => {
-  const names: (readonly string[])[] = []
+test('레기온 주는 저장한 레기온 모집단마다 두고 클리어 수는 그 주에 깬 캐릭터 수다', async () => {
   const { app, origin } = await listen(
     fakeReader({
-      readPopulations: async () => [...populations, population('nabel-normal', '2026-11-05', 1500)],
-      readLegionWeeks: async (legionNames) => {
-        names.push(legionNames)
-
-        return [legionWeek('베누스', '2026-10-29', 3), legionWeek('베누스', '2026-11-05', 7)]
-      }
+      readPopulations: async () => [
+        ...populations,
+        population('legion-venus', '2026-10-29', 900),
+        population('legion-venus', '2026-11-05', 1500)
+      ],
+      readWeekRatioCounts: async () => [
+        ...counts,
+        count('legion-venus', '2026-10-29', null, 3),
+        count('legion-venus', '2026-11-05', null, 7)
+      ]
     })
   )
   try {
     const { body } = await getJson(origin, '/stats/clears')
     const venus = contentOf({ contents: body.legions, legions: [] }, 'legion-venus')
 
-    assert.deepEqual(names, [['아포칼립스', '베누스']])
     assert.deepEqual(
       venus.weeks.map(({ weekStart, population, cleared, newlyCleared, ratios }) => ({
         weekStart,
@@ -1285,28 +1279,55 @@ test('레기온 주는 첫 기록 주부터 수집한 주마다 두고, 분모�
   }
 })
 
-test('레기온 상세는 고른 주의 요약만 주고 저장되지 않은 주는 400으로 거절한다', async () => {
-  const unread = async (): Promise<never> =>
-    assert.fail('레기온 상세에서 클리어 집계를 읽으면 안 된다')
+test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업, 지난주 대비, 연속 주를 읽고 단계 기록은 읽지 않는다', async () => {
+  const selections: ClearWeekSelection[] = []
+  const comparisons: ClearWeekComparison[] = []
   const { app, origin } = await listen(
     fakeReader({
-      readLegionWeeks: async () => [legionWeek('베누스', '2026-11-05', 7)],
-      readContentJobFames: unread,
-      readFirstWeeks: unread
+      readPopulations: async () => [
+        ...populations,
+        population('legion-venus', '2026-10-29', 900),
+        population('legion-venus', '2026-11-05', 1500)
+      ],
+      readWeekRatioCounts: async () => [...counts, count('legion-venus', '2026-11-05', null, 7)],
+      readContentJobFames: async (selection) => {
+        selections.push(selection)
+
+        return []
+      },
+      readWeekGroups: async (comparison) => {
+        comparisons.push(comparison)
+
+        return [{ group: 'both', cleared: 7, characters: 7, quantiles: null, max: null }]
+      },
+      readStreaks: async () => [{ weeks: 2, characters: 7 }],
+      readRaidModes: async () => assert.fail('레기온 기록에는 단계가 없어 단계 기록을 읽지 않는다')
     })
   )
   try {
     const detail = await getJson(origin, '/stats/clears/legion-venus')
-    const rejected = await getJson(origin, '/stats/clears/legion-venus?week=2026-10-29')
+    const rejected = await getJson(origin, '/stats/clears/legion-venus?week=2026-10-22')
 
     assert.equal(detail.status, 200)
+    assert.deepEqual(selections, [
+      { contentId: 'legion-venus', kind: 'legion', weekStart: week('2026-11-05') }
+    ])
+    assert.deepEqual(comparisons, [
+      {
+        contentId: 'legion-venus',
+        weekStart: week('2026-11-05'),
+        previousWeekStart: week('2026-10-29')
+      }
+    ])
     assert.deepEqual(
       {
         kind: detail.body.kind,
         entryFame: detail.body.entryFame,
         weekStart: detail.body.week.weekStart,
         cleared: detail.body.week.cleared,
-        jobs: detail.body.jobs,
+        bothCleared: detail.body.weekOverWeek?.both.cleared,
+        streaks: detail.body.streaks,
+        stageMoves: detail.body.stageMoves,
         stages: detail.body.stages
       },
       {
@@ -1314,7 +1335,9 @@ test('레기온 상세는 고른 주의 요약만 주고 저장되지 않은 주
         entryFame: null,
         weekStart: '2026-11-05',
         cleared: 7,
-        jobs: [],
+        bothCleared: 7,
+        streaks: [{ weeks: 2, characters: 7 }],
+        stageMoves: null,
         stages: null
       }
     )
