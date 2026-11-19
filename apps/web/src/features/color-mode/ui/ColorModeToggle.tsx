@@ -1,6 +1,6 @@
 import { IconButton, MoonIcon, SunIcon } from '@dfragon/ui'
 import { useSyncExternalStore } from 'react'
-import { type ColorMode, useColorModeStore } from '#hooks/useColorModeStore'
+import { type ColorMode, useColorModeStore } from '#features/color-mode/model/useColorModeStore'
 
 const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)'
 const THEME_COLOR_META_SELECTOR = 'meta[name="theme-color"][data-color-mode]'
