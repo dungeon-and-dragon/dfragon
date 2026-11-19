@@ -1,4 +1,4 @@
-import { MISSING_VALUE } from '#features/capture-search'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   type EnchantOption,
   type EquipmentReinforce,

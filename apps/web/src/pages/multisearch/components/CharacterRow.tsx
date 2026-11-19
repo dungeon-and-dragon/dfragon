@@ -10,7 +10,6 @@ import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import {
   type CardCharacter,
   type CharacterTier,
-  MISSING_VALUE,
   type SearchMode,
   type SlotCard,
   type SlotNotice,
@@ -19,6 +18,7 @@ import {
   useLookupDraft,
   type SlotCardKey
 } from '#features/capture-search'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { CandidatePopover } from './CandidatePopover'
 import { CardAnnouncer } from './CardAnnouncer'
 import { LookupProgress } from './LookupProgress'
