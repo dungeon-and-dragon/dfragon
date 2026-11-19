@@ -40,6 +40,8 @@ model Character {
   guildId        String?   @map("guild_id")
   guildName      String?   @map("guild_name")
   basicFetchedAt DateTime? @map("basic_fetched_at") @db.Timestamptz(3)
+  lastActiveAt   DateTime? @map("last_active_at") @db.Timestamptz(3)
+  inactiveSince  DateTime? @map("inactive_since") @db.Timestamptz(3)
   equipmentSetId   String?   @map("equipment_set_id")
   equipmentSetName String?   @map("equipment_set_name")
   oathSetId        Int?      @map("oath_set_id")

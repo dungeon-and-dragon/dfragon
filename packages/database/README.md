@@ -74,7 +74,7 @@ pnpm --filter @dfragon/database db:migrate:reset
 ## 테이블
 
 - `adventures`: 자체 id를 붙인 모험단과 지금 이름
-- `characters`: 캐릭터와 Neople 기본 정보, 장비 세트와 서약 세트
+- `characters`: 캐릭터와 Neople 기본 정보, 장비 세트와 서약 세트, 마지막 활동 시각과 비활성 판정 시각
 - `character_skill_styles`: 캐릭터마다 최신 스킬 스타일 한 행
 - `character_items`: 캐릭터가 낀 무기와 유일 장비, 부위마다 한 행
 - `item_adoption`: 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 전직, 역할마다 모집단 수 한 행
