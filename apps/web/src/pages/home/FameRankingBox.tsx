@@ -1,5 +1,5 @@
 import { type Affiliation, CharacterTable, SkeletonRow } from '#components/table/CharacterTable'
-import { ListBox } from '#components/table/ListBox'
+import { ListBox } from '#shared/ui/ListBox'
 import { useFameRanking } from '#hooks/useFameRanking'
 
 const NAME = '명성 랭킹'

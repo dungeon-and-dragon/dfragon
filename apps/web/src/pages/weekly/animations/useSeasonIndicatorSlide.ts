@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { useIndicatorSlide } from '#animations/useIndicatorSlide'
+import { useIndicatorSlide } from '#shared/lib/animations/useIndicatorSlide'
 
 export function useSeasonIndicatorSlide({
   timelineRef,

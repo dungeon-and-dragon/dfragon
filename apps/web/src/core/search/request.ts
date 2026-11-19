@@ -10,7 +10,7 @@ import type {
   SelectedCharacterSummary,
   CharacterJsonValue
 } from '#core/character/character'
-import type { DiagnosticCode } from '#core/diagnostics/diagnostics'
+import type { DiagnosticCode } from '#shared/lib/diagnostics/diagnostics'
 import {
   createCharacterIdentifier,
   createManualCharacterLookup,

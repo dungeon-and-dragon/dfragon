@@ -13,8 +13,8 @@ import { ServerBadge } from '#components/ServerBadge'
 import { characterDisplayOf } from '#lib/stored-character'
 import { FavoriteToggle } from '#components/FavoriteToggle'
 import { useRefreshCharacterDetail } from './hooks/useCharacterDetail'
-import { useRefreshingNow } from '#hooks/useRefreshingNow'
-import { formatSeoulDateTime, formatTimeAgo } from '#core/time-format'
+import { useRefreshingNow } from '#shared/lib/useRefreshingNow'
+import { formatSeoulDateTime, formatTimeAgo } from '#shared/lib/time-format'
 
 const integer = new Intl.NumberFormat('ko-KR')
 

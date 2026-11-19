@@ -48,6 +48,7 @@ import {
   type TimelinePage
 } from '#core/character/character-timeline'
 import { characterHistorySchema, type CharacterHistory } from '#core/character/character-history'
+import { ALL_CHARACTER_SERVERS } from '#shared/config/server-options'
 import { SearchHttpFailure } from './http'
 import {
   assertApiSuccess,
@@ -56,7 +57,6 @@ import {
   throwCharacterTransportFailure
 } from './api-response'
 import {
-  ALL_CHARACTER_SERVERS,
   candidatesSchema,
   type CharacterSearchQuery,
   detailsSchema,

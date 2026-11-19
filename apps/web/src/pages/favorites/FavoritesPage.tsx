@@ -1,7 +1,7 @@
 import { HeartIcon, IconButton } from '@dfragon/ui'
 import { CharacterTable, type CharacterTableAction } from '#components/table/CharacterTable'
-import { ListBox } from '#components/table/ListBox'
-import { TitleBox, TitleStat } from '#components/table/TitleBox'
+import { ListBox } from '#shared/ui/ListBox'
+import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { useFavoriteCharacterStore } from '#hooks/useFavoriteCharacterStore'
 import type { CharacterKey } from '#lib/stored-character'
 

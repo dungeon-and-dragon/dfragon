@@ -9,8 +9,8 @@ import {
   toHistorySnapshotSummary,
   toScoreView
 } from '#core/character'
-import { formatSeoulDateTime } from '#core/time-format'
-import { LineChart } from '#components/chart/LineChart'
+import { formatSeoulDateTime } from '#shared/lib/time-format'
+import { LineChart } from '#shared/ui/chart/LineChart'
 import { useCharacterHistory, useHistorySnapshot } from '#pages/character/hooks/useCharacterHistory'
 import type { CharacterTabProps } from './character-tab-props'
 import { historyTimeAxis } from './history/history-chart'

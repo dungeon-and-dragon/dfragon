@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import neopleOpenApiColorLogo from '#assets/neople-open-api-color.png'
-import neopleOpenApiGrayLogo from '#assets/neople-open-api-gray.png'
+import neopleOpenApiColorLogo from '#shared/assets/neople-open-api-color.png'
+import neopleOpenApiGrayLogo from '#shared/assets/neople-open-api-gray.png'
 
 const link =
   'link p-1 text-fg-subtle focus-ring aria-[current=page]:font-semibold aria-[current=page]:text-fg'

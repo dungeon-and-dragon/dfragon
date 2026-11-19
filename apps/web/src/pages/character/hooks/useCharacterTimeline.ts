@@ -1,6 +1,6 @@
 import type { CharacterDetailView, CharacterTimeline } from '#core/character'
 import { useClientHost } from '#host/client-host'
-import { useLoadedResult } from '#hooks/useLoadedResult'
+import { useLoadedResult } from '#shared/lib/useLoadedResult'
 
 export type CharacterTimelineResult =
   | Readonly<{ status: 'loading' }>

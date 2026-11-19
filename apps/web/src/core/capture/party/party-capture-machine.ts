@@ -14,7 +14,7 @@ import { recognizePartyFrame, type PartySlotRecognition } from './party-recognit
 import {
   reportRuntimeDiagnostic,
   showRejectedOcrNickname
-} from '#core/diagnostics/runtime-diagnostics'
+} from '#shared/lib/diagnostics/runtime-diagnostics'
 
 type CaptureInput = {
   texts: CaptureTexts

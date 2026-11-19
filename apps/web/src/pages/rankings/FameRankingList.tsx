@@ -9,9 +9,9 @@ import {
   type CharacterTableDetail,
   SkeletonRow
 } from '#components/table/CharacterTable'
-import { ListBox } from '#components/table/ListBox'
+import { ListBox } from '#shared/ui/ListBox'
 import { type FameRankingPages, useFameRanking } from '#hooks/useFameRanking'
-import { useInfiniteScrollRef } from '#hooks/useInfiniteScrollRef'
+import { useInfiniteScrollRef } from '#shared/lib/useInfiniteScrollRef'
 import { rankingName } from './ranking-jobs'
 import { rankingSetLines } from './ranking-sets'
 

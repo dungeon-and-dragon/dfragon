@@ -1,6 +1,6 @@
 import { Tooltip, type TooltipPopupProps } from '@dfragon/ui'
 import { Fragment } from 'react'
-import { formatSeoulDateTime } from '#core/time-format'
+import { formatSeoulDateTime } from '#shared/lib/time-format'
 import {
   MALE_CRUSADER_DEALER_SKILL,
   MALE_CRUSADER_ROLE_LABELS,

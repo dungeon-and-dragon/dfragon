@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { type RefObject, useLayoutEffect } from 'react'
-import { TOOLTIP_FADE, TOOLTIP_SLIDE, useMotionAllowed } from './gsap-motion'
+import { TOOLTIP_FADE, TOOLTIP_SLIDE, useMotionAllowed } from '#shared/lib/animations/gsap-motion'
 
 export type TooltipPlace = Readonly<{ x: number; y: number }>
 

@@ -9,8 +9,8 @@ import {
   useRef,
   useState
 } from 'react'
-import { ALL_CHARACTER_SERVERS, isSearchableCharacterName } from '#core/api'
-import { characterSearchServerOptions } from '#constants/server-options'
+import { isSearchableCharacterName } from '#core/api'
+import { ALL_CHARACTER_SERVERS, characterSearchServerOptions } from '#shared/config/server-options'
 import { RecentCharacterList } from './RecentCharacterList'
 
 const ADVENTURE = 'adventure'
