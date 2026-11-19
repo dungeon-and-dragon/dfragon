@@ -20,5 +20,7 @@ export type {
   SeasonActivity,
   StoredActivitySeason
 } from './activity.js'
+export { toAdventureEquipment, toEquipmentWindow } from './equipment.js'
+export type { AdventureEquipment } from './equipment.js'
 export { toAdventureWeeklyClears } from './weekly.js'
 export type { AdventureWeeklyClears } from './weekly.js'

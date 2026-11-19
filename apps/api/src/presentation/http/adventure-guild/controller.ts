@@ -9,6 +9,7 @@ import {
   activityQuery,
   parseSeason,
   toAdventureCharactersResponse,
+  toAdventureEquipmentResponse,
   toAdventureWeeklyResponse,
   toGuildMembersResponse
 } from './dto.js'
@@ -38,6 +39,13 @@ export class AdventureGuildController {
       const weekly = await this.service.adventureWeekly(adventureName)
 
       return c.json(toAdventureWeeklyResponse(adventureName, weekly))
+    })
+
+    routes.get('/adventures/:adventureName/equipment', async (c) => {
+      const adventureName = c.req.param('adventureName')
+      const equipment = await this.service.adventureEquipment(adventureName)
+
+      return c.json(toAdventureEquipmentResponse(adventureName, equipment))
     })
 
     routes.get('/adventures/:adventureName/activity', async (c) => {
