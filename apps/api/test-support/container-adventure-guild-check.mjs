@@ -491,7 +491,6 @@ try {
   const guildAnswer = await get(`/guilds/${guildId}`)
   assert.equal(guildAnswer.guildName, '새합성길드')
   assert.equal(guildAnswer.memberCount, 3)
-  assert.equal(guildAnswer.averageFame, 65001)
   assert.deepEqual(
     guildAnswer.members.map(({ characterId }) => characterId),
     ['adventure-high', 'guild-renamed', 'guild-no-fame']
@@ -562,7 +561,6 @@ try {
     guildId: 'missing-guild',
     guildName: null,
     memberCount: 0,
-    averageFame: null,
     members: []
   })
 
