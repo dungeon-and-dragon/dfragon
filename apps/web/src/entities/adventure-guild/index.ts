@@ -23,6 +23,7 @@ export type {
   AdventureEquipment,
   EquipmentBoardRow,
   EquipmentCharacter,
+  EquipmentSelection,
   EquipmentSlot,
   HoldingCell
 } from './model/adventure-equipment'

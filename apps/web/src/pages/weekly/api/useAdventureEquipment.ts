@@ -1,15 +1,39 @@
-import { useQueryClient } from '@tanstack/react-query'
+import { type QueryKey, useQueryClient } from '@tanstack/react-query'
 import { type AdventureEquipment, adventureEquipmentSchema } from '#entities/adventure-guild'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
+import type { EquipmentSearch } from '#pages/weekly/equipment-search'
 import { requestAdventureJson } from './adventure-request'
 
-function equipmentKey(adventureName: string) {
+function adventureEquipmentKey(adventureName: string) {
   return ['adventure', adventureName, 'equipment'] as const
 }
 
-export function useAdventureEquipment(adventureName: string): LoadedResult<AdventureEquipment> {
-  return useLoadedResult(equipmentKey(adventureName), async () =>
-    requestAdventureJson(adventureName, '/equipment', adventureEquipmentSchema)
+function equipmentKey(adventureName: string, { server, set }: EquipmentSearch) {
+  return [...adventureEquipmentKey(adventureName), server ?? null, set ?? null] as const
+}
+
+function requestEquipment(
+  adventureName: string,
+  { server, set }: EquipmentSearch
+): Promise<AdventureEquipment> {
+  return requestAdventureJson(adventureName, '/equipment', adventureEquipmentSchema, {
+    searchParams: { ...(server !== undefined && { server }), ...(set !== undefined && { set }) }
+  })
+}
+
+// 서버, 세트 칩을 바꾸는 동안에는 같은 모험단의 앞선 응답을 그대로 보인다.
+export function useAdventureEquipment(
+  adventureName: string,
+  search: EquipmentSearch
+): LoadedResult<AdventureEquipment> {
+  function sameAdventure(previousKey: QueryKey): boolean {
+    return previousKey[1] === adventureName
+  }
+
+  return useLoadedResult(
+    equipmentKey(adventureName, search),
+    () => requestEquipment(adventureName, search),
+    { keepPreviousWhile: sameAdventure }
   )
 }
 
@@ -17,5 +41,5 @@ export function useRefreshAdventureEquipment(): (adventureName: string) => Promi
   const queryClient = useQueryClient()
 
   return (adventureName) =>
-    queryClient.invalidateQueries({ queryKey: equipmentKey(adventureName), exact: true })
+    queryClient.invalidateQueries({ queryKey: adventureEquipmentKey(adventureName) })
 }
