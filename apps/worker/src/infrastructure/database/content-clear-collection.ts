@@ -1,6 +1,7 @@
 import {
   type ClearPopulationCharacter,
   type ClearRecordBackfillProgress,
+  type ClearRecordCursor,
   type ClearRecordInput,
   type ContentClearCollectionProgress,
   type ContentClearInput,
@@ -11,9 +12,11 @@ import {
   finishContentClearCollection,
   readClearPopulation,
   readClearRecordBackfill,
+  readClearRecordCursors,
   readContentClearCollection,
   readContentClearPopulations,
   recordClearRecordBackfillProgress,
+  recordClearRecordCursors,
   recordClearRecords,
   recordContentClearCollectionProgress,
   recordContentClearPopulation,
@@ -87,6 +90,17 @@ export class DatabaseClearRecordBackfillRepository implements ClearRecordBackfil
 
   recordRecords(records: readonly ClearRecordInput[]): Promise<void> {
     return recordClearRecords(this.client, records)
+  }
+
+  readCursors(): Promise<ClearRecordCursor[]> {
+    return readClearRecordCursors(this.client)
+  }
+
+  recordCursors(
+    characters: readonly ClearPopulationCharacter[],
+    fetchedUntil: Date
+  ): Promise<void> {
+    return recordClearRecordCursors(this.client, characters, fetchedUntil)
   }
 
   finishProgress(startedAt: Date): Promise<void> {
