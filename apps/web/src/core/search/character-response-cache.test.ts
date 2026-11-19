@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { CharacterCandidate, CharacterDetails } from '#core/character/character'
-import { createDfragonClient, type CharacterCandidatesHttp } from '#core/api/dfragon-client'
+import { createDfragonHttp } from '#shared/api/dfragon-http'
+import {
+  type CharacterCandidatesHttp,
+  requestCharacterCandidates,
+  requestCharacterDetails
+} from './character-requests'
 import {
   createCachedCharacterCandidates,
   createCachedCharacterDetails
@@ -92,11 +97,12 @@ describe('완료한 캐릭터 응답 캐시', () => {
         .mockImplementation(async () =>
           json(kind === 'candidates' ? { rows: [candidate] } : detail())
         )
-      const options = { apiOrigin: API_ORIGIN, fetch }
-      const candidates = createCachedCharacterCandidates(
-        createDfragonClient(options).characters.candidates
+      const http = createDfragonHttp(fetch)
+      const api = { http, apiOrigin: API_ORIGIN }
+      const candidates = createCachedCharacterCandidates((input) =>
+        requestCharacterCandidates(api, input)
       )
-      const details = createCachedCharacterDetails(createDfragonClient(options).characters.details)
+      const details = createCachedCharacterDetails((input) => requestCharacterDetails(api, input))
       const read = () => {
         if (kind === 'candidates') {
           return candidates({ nickname: '가나', signal: signal() })
@@ -136,11 +142,12 @@ describe('완료한 캐릭터 응답 캐시', () => {
       .mockResolvedValueOnce(json({ error: { code: 'NEOPLE_API_ERROR' } }, 502))
       .mockResolvedValueOnce(json({ error: { code } }, 429))
       .mockResolvedValueOnce(json(kind === 'candidates' ? { rows: [candidate] } : detail()))
-    const options = { apiOrigin: API_ORIGIN, fetch }
-    const candidates = createCachedCharacterCandidates(
-      createDfragonClient(options).characters.candidates
+    const http = createDfragonHttp(fetch)
+    const api = { http, apiOrigin: API_ORIGIN }
+    const candidates = createCachedCharacterCandidates((input) =>
+      requestCharacterCandidates(api, input)
     )
-    const details = createCachedCharacterDetails(createDfragonClient(options).characters.details)
+    const details = createCachedCharacterDetails((input) => requestCharacterDetails(api, input))
     const read = () => {
       if (kind === 'candidates') {
         return candidates({ nickname: '가나', signal: signal() })
