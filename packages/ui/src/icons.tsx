@@ -31,6 +31,14 @@ export function ChevronDownIcon(props: IconProps): React.JSX.Element {
   )
 }
 
+export function ChevronLeftIcon(props: IconProps): React.JSX.Element {
+  return (
+    <LineIcon {...props}>
+      <path vectorEffect="non-scaling-stroke" d="m15 18-6-6 6-6" />
+    </LineIcon>
+  )
+}
+
 export function ChevronRightIcon(props: IconProps): React.JSX.Element {
   return (
     <LineIcon {...props}>

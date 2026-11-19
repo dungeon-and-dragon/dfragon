@@ -7,6 +7,7 @@ import {
   ChipGroup,
   ConfirmPopover,
   IconButton,
+  Pagination,
   Popover,
   Select,
   StatusChip,
@@ -181,6 +182,36 @@ describe('Button의 클릭과 disabled, loading 상태', () => {
 
     expect(ref.current).toBe(getByRole('button', '저장'))
     expect(ref.current?.type).toBe('submit')
+  })
+})
+
+describe('Pagination의 이전, 다음과 현재 페이지', () => {
+  it('현재 페이지 번호만 보이고 이전, 다음 클릭을 각각 전달한다', async () => {
+    const onPrevious = vi.fn()
+    const onNext = vi.fn()
+    await render(<Pagination page={3} onPrevious={onPrevious} onNext={onNext} />)
+    const nav = container.querySelector('nav[aria-label="페이지"]')!
+
+    expect(nav.textContent).toBe('이전3다음')
+    expect(nav.querySelector('[aria-current="page"]')?.textContent).toBe('3')
+    await click(getByRole('button', '다음'))
+    expect(onNext).toHaveBeenCalledOnce()
+    expect(onPrevious).not.toHaveBeenCalled()
+    await click(getByRole('button', '이전'))
+    expect(onPrevious).toHaveBeenCalledOnce()
+  })
+
+  it('막은 쪽 버튼은 클릭을 전달하지 않는다', async () => {
+    const onPrevious = vi.fn()
+    const onNext = vi.fn()
+    await render(
+      <Pagination page={1} onPrevious={onPrevious} onNext={onNext} previousDisabled nextDisabled />
+    )
+
+    await click(getByRole('button', '이전'))
+    await click(getByRole('button', '다음'))
+    expect(onPrevious).not.toHaveBeenCalled()
+    expect(onNext).not.toHaveBeenCalled()
   })
 })
 

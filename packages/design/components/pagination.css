@@ -1,0 +1,25 @@
+/*
+ * 목록 아래의 이전, 현재 페이지 번호, 다음 줄이다. 전체 페이지 수는 보이지 않는다.
+ * <nav class="pagination" aria-label="페이지"><button class="btn btn-ghost btn-sm" disabled>이전</button>
+ *   <span class="pagination-page num" aria-current="page">1</span><button class="btn btn-ghost btn-sm">다음</button></nav>
+ */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border-top: 1px solid var(--color-line);
+}
+
+.pagination-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--height-control-sm);
+  height: var(--height-control-sm);
+  color: var(--color-fg);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: var(--font-weight-semibold);
+}
