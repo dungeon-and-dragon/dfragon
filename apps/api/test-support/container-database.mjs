@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { setTimeout } from 'node:timers/promises'
@@ -433,11 +433,22 @@ try {
     ).stdout.trim(),
     'dfragon_api'
   )
+  const migrationNames = (
+    await readdir(new URL('../../../packages/database/prisma/migrations/', import.meta.url), {
+      withFileTypes: true
+    })
+  )
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()
+
   assert.equal(
     (
-      await psql('SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL')
+      await psql(
+        'SELECT string_agg(migration_name, \',\' ORDER BY migration_name COLLATE "C") FROM _prisma_migrations WHERE finished_at IS NOT NULL'
+      )
     ).stdout.trim(),
-    '29'
+    migrationNames.join(',')
   )
   assert.equal(
     (await psql("SELECT count(*) FROM pg_locks WHERE locktype = 'advisory'")).stdout.trim(),
