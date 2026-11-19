@@ -723,7 +723,23 @@ function itemResponses(stats: ItemStats): StatsResponses {
   }
 }
 
-it('무기 셀렉트는 고른 직업, 전직의 아이템 통계에서 많이 낀 순이고, 유일 장비는 부위마다 착용 칩 하나다', async () => {
+function optionGroups(label: string): string[][] {
+  const listbox = document.querySelector(`[role="listbox"][aria-label="${label}"]`)
+
+  return [...(listbox?.querySelectorAll('[role="group"]') ?? [])].map((group) =>
+    [...group.children].map((child) => child.textContent ?? '')
+  )
+}
+
+function optionIcons(label: string): number[] {
+  const listbox = document.querySelector(`[role="listbox"][aria-label="${label}"]`)
+
+  return [...(listbox?.querySelectorAll('[role="option"]') ?? [])].map(
+    (option) => option.querySelectorAll('img').length
+  )
+}
+
+it('무기 셀렉트는 많이 낀 순에 무기마다 아이콘을 두고, 유일 장비 셀렉트는 부위별로 묶어 많이 낀 순으로 둔다', async () => {
   const jobId = RANKING_JOBS[0].jobId
   await render(
     async () => rankingOf(1),
@@ -741,16 +757,19 @@ it('무기 셀렉트는 고른 직업, 전직의 아이템 통계에서 많이 �
   await vi.waitFor(() =>
     expect(optionTexts('무기')).toEqual(['무기 전체', '무기 weapon-a', '무기 weapon-b'])
   )
+  expect(optionIcons('무기')).toEqual([0, 1, 1])
   expect(itemStatsQueries).toEqual([{ jobId }])
-  const uniqueRow = [...container.querySelectorAll('h2')].find(
-    (heading) => heading.textContent === '유일 장비'
-  )?.parentElement
-  expect(
-    [...(uniqueRow?.querySelectorAll('button') ?? [])].map((button) => button.textContent)
-  ).toEqual(['반지 착용', '보조장비 착용'])
+  await act(async () => setSelect('유일 장비').click())
+  await vi.waitFor(() =>
+    expect(optionGroups('유일 장비')).toEqual([
+      ['반지', '광휘를 머금은 눈동자'],
+      ['보조장비', '만병을 잉태한 역병의 심장', '합성 보조장비']
+    ])
+  )
+  expect(optionIcons('유일 장비')).toEqual([1, 1, 1])
 })
 
-it('무기는 하나만 골라 바꾸고, 착용 칩은 그 부위 유일 장비 itemId를 넣고 뺀다', async () => {
+it('무기는 하나만 골라 바꾸고, 유일 장비는 다른 부위를 더하고 고른 것을 다시 누르면 뺀다', async () => {
   const onFilterChange = vi.fn()
   const responses = itemResponses(
     itemStatsOf([
@@ -767,12 +786,103 @@ it('무기는 하나만 골라 바꾸고, 착용 칩은 그 부위 유일 장비
 
   await pickOption('무기', '무기 weapon-b')
   expect(onFilterChange).toHaveBeenLastCalledWith({ itemIds: ['ring-1', 'weapon-b'] })
-  await act(async () => chip('보조장비 착용').click())
+  await pickOption('유일 장비', '만병을 잉태한 역병의 심장')
   expect(onFilterChange).toHaveBeenLastCalledWith({
-    itemIds: ['ring-1', 'weapon-a', 'support-1']
+    itemIds: ['ring-1', 'support-1', 'weapon-a']
   })
-  await act(async () => chip('반지 착용').click())
+  await pickOption('유일 장비', '광휘를 머금은 눈동자')
   expect(onFilterChange).toHaveBeenLastCalledWith({ itemIds: ['weapon-a'] })
+})
+
+it('같은 부위의 다른 유일 장비를 고르면 그 부위의 선택을 바꾸고 개수는 늘리지 않는다', async () => {
+  const onFilterChange = vi.fn()
+  await render(
+    async () => rankingOf(1),
+    { itemIds: ['support-2', 'ring-1'] },
+    onFilterChange,
+    itemResponses(itemStatsOf([['weapon-a', 3]]))
+  )
+
+  await pickOption('유일 장비', '만병을 잉태한 역병의 심장')
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({ itemIds: ['ring-1', 'support-1'] })
+})
+
+it('itemIds가 든 주소로 들어오면 닫힌 셀렉트에 고른 무기의 아이콘과 이름, 유일 장비의 아이콘과 이름이나 개수를 보인다', async () => {
+  const responses = itemResponses(itemStatsOf([['weapon-a', 3]]))
+  await render(
+    async () => rankingOf(1),
+    { itemIds: ['ring-1', 'weapon-a'] },
+    () => {},
+    responses
+  )
+
+  await vi.waitFor(() => expect(setSelect('유일 장비').textContent).toBe('광휘를 머금은 눈동자'))
+  expect(setSelect('유일 장비').querySelectorAll('img')).toHaveLength(1)
+  expect(setSelect('무기').textContent).toBe('무기 weapon-a')
+  expect(setSelect('무기').querySelectorAll('img')).toHaveLength(1)
+  await render(
+    async () => rankingOf(1),
+    { itemIds: ['ring-1', 'support-1'] },
+    () => {},
+    responses
+  )
+
+  await vi.waitFor(() => expect(setSelect('유일 장비').textContent).toBe('2개'))
+  expect(setSelect('유일 장비').querySelectorAll('img')).toHaveLength(2)
+  expect(setSelect('무기').querySelectorAll('img')).toHaveLength(0)
+})
+
+it('무기를 포함해 5개를 고르면 고르지 않은 부위의 유일 장비는 막고, 고른 부위의 다른 아이템은 둔다', async () => {
+  const base = itemStatsOf([['weapon-a', 3]])
+  // 무기와 유일 장비 넷으로 한도에 닿은 뒤에도 고르지 않은 부위가 남도록 합성 부위 셋을 더해 다섯 부위로 만든다.
+  const stats: ItemStats = {
+    ...base,
+    slots: [
+      ...base.slots,
+      ...['EARRING', 'MAGIC_STONE', 'SYNTHETIC'].map((slotId) => ({
+        slotId,
+        items: [{ itemId: `${slotId}-1`, name: `합성 ${slotId}`, typeDetail: null, count: 1 }]
+      }))
+    ]
+  }
+  await render(
+    async () => rankingOf(1),
+    { itemIds: ['weapon-a', 'ring-1', 'support-2', 'EARRING-1', 'MAGIC_STONE-1'] },
+    () => {},
+    itemResponses(stats)
+  )
+
+  await act(async () => setSelect('유일 장비').click())
+  const option = (name: string) =>
+    [...document.querySelectorAll('[role="listbox"][aria-label="유일 장비"] [role="option"]')].find(
+      (item) => item.textContent === name
+    )
+  await vi.waitFor(() => expect(option('합성 SYNTHETIC')).toBeDefined())
+
+  expect(option('합성 SYNTHETIC')?.hasAttribute('data-disabled')).toBe(true)
+  expect(option('만병을 잉태한 역병의 심장')?.hasAttribute('data-disabled')).toBe(false)
+})
+
+it('아이템 아이콘을 받지 못해도 옵션 이름은 보인다', async () => {
+  await render(
+    async () => rankingOf(1),
+    {},
+    () => {},
+    itemResponses(itemStatsOf([['weapon-a', 3]]))
+  )
+
+  await act(async () => setSelect('유일 장비').click())
+  await vi.waitFor(() => expect(optionIcons('유일 장비')).toEqual([1, 1, 1]))
+  const icon = document.querySelector('[role="listbox"][aria-label="유일 장비"] img')!
+  await act(async () => icon.dispatchEvent(new Event('error')))
+
+  expect(optionIcons('유일 장비')).toEqual([0, 1, 1])
+  expect(optionTexts('유일 장비')).toEqual([
+    '광휘를 머금은 눈동자',
+    '만병을 잉태한 역병의 심장',
+    '합성 보조장비'
+  ])
 })
 
 it('고른 전직의 아이템 통계에 없는 무기 필터는 지우고 유일 장비 필터는 남긴다', async () => {
