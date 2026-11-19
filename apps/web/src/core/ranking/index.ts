@@ -22,8 +22,17 @@ export type {
   FameRanking,
   FameRankingFilter,
   RankedCharacter,
+  SetStatsFilter,
   StoredCharacter
 } from './ranking-stats'
+export type { OathSetCount, SetStats } from './set-stats'
+export {
+  catalogOptionNamesOf,
+  equipmentSetShortName,
+  NO_SET_NAME,
+  oathOptionShortName,
+  oathSetShortName
+} from './set-names'
 export { skillAdoptionOf } from './skill-stats'
 export type {
   SkillAdoption,

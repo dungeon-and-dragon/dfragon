@@ -6,6 +6,7 @@ import type { CharacterStats } from '#core/ranking'
 import { ClientHostContext } from '#host/client-host'
 import { createTestClientHost } from '#testing/test-support/client-host'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
+import { TestRouter } from '#testing/test-support/test-router'
 import { StatsPage } from './StatsPage'
 
 let container: HTMLDivElement
@@ -71,7 +72,9 @@ function render(getCharacterStats: () => Promise<CharacterStats>): Promise<void>
     root.render(
       <ClientHostContext value={createTestClientHost({ getCharacterStats })}>
         <TestQueryClient>
-          <StatsPage />
+          <TestRouter>
+            <StatsPage />
+          </TestRouter>
         </TestQueryClient>
       </ClientHostContext>
     )

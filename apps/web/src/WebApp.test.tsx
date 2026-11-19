@@ -1326,3 +1326,120 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
   ])
   expect(localStorage.getItem('dfragon:my-adventure')).toContain('합성 모험단')
 })
+
+const SET_STATS = {
+  computedAt: '2026-11-18T11:00:27.845Z',
+  sampleSize: 4,
+  equipmentSets: [
+    { setId: '4ee7bd5912cda6e2a24c1f36d5202b46', name: '소울 페어리 세트', count: 3 },
+    { setId: null, name: null, count: 1 }
+  ],
+  oathSets: [
+    {
+      setId: 16204,
+      name: '야망의 용투 서약',
+      count: 4,
+      options: [{ name: '용투 : 세계를 태우는 불꽃', count: 4 }]
+    }
+  ],
+  combos: [
+    { equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46', oathSetId: 16204, count: 3 },
+    { equipmentSetId: null, oathSetId: 16204, count: 1 }
+  ]
+}
+
+function stubSetStatsFetch(): ReturnType<typeof vi.fn<typeof fetch>> {
+  const stats = vi.fn<typeof fetch>(async (...args) => {
+    const { pathname } = new URL(new Request(...args).url)
+    if (pathname.endsWith('/stats/sets')) {
+      return Response.json(SET_STATS)
+    }
+
+    if (pathname.endsWith('/rankings/fame')) {
+      return Response.json({ characters: [] })
+    }
+
+    return Response.json({ percent: 85, expiresAt: new Date(Date.now() + 3_600_000).toISOString() })
+  })
+  vi.stubGlobal('fetch', stats)
+
+  return stats
+}
+
+function setStatsRequests(stats: ReturnType<typeof vi.fn<typeof fetch>>): string[] {
+  return stats.mock.calls
+    .map((args) => new URL(new Request(...args).url))
+    .filter(({ pathname }) => pathname.endsWith('/stats/sets'))
+    .map(({ search }) => search)
+}
+
+it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계를 받고, 전직을 고르면 주소를 바꿔 다시 받는다', async () => {
+  const stats = stubSetStatsFetch()
+  const [job] = RANKING_JOBS
+  const [firstGrow, secondGrow] = job!.grows
+  window.history.replaceState(
+    null,
+    '',
+    `/stats/sets?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}`
+  )
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(setStatsRequests(stats)).toEqual([
+      `?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}`
+    ])
+  )
+  expect(globalMenu()).toContainEqual(['통계', 'page'])
+  const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
+  expect(statsTabs.map((tab) => [tab.textContent, tab.getAttribute('aria-current')])).toEqual([
+    ['캐릭터', null],
+    ['세트', 'page']
+  ])
+
+  const secondChip = [...container.querySelectorAll<HTMLButtonElement>('button')].find(
+    (button) => button.textContent === secondGrow!.name
+  )!
+  await act(async () => secondChip.click())
+
+  await vi.waitFor(() =>
+    expect(new URLSearchParams(window.location.search).get('jobGrowId')).toBe(secondGrow!.jobGrowId)
+  )
+  await vi.waitFor(() =>
+    expect(setStatsRequests(stats).at(-1)).toBe(
+      `?jobId=${job!.jobId}&jobGrowId=${secondGrow!.jobGrowId}`
+    )
+  )
+})
+
+it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세트로 거른 랭킹 주소로 가서 랭킹을 그 조건으로 받는다', async () => {
+  const stats = stubSetStatsFetch()
+  const [job] = RANKING_JOBS
+  window.history.replaceState(null, '', `/stats/sets?jobId=${job!.jobId}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const equipmentBox = await vi.waitFor(() => {
+    const box = container.querySelector('section[aria-label="장비 세트"]')
+    expect(box?.querySelector('a')).not.toBeNull()
+
+    return box!
+  })
+  const fairyLink = equipmentBox.querySelector<HTMLAnchorElement>('a')!
+  expect(fairyLink.textContent).toContain('페어리')
+  await act(async () => fairyLink.click())
+
+  await waitForPath('/rankings')
+  const search = new URLSearchParams(window.location.search)
+  expect(Object.fromEntries(search)).toEqual({
+    jobId: job!.jobId,
+    equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
+  })
+  await vi.waitFor(() => {
+    const rankingUrls = stats.mock.calls
+      .map((args) => new URL(new Request(...args).url))
+      .filter(({ pathname }) => pathname.endsWith('/rankings/fame'))
+    expect(rankingUrls.map(({ searchParams }) => Object.fromEntries(searchParams))).toContainEqual({
+      jobId: job!.jobId,
+      equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
+    })
+  })
+})
