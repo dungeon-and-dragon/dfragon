@@ -36,6 +36,21 @@ function setsOf(index: number): Pick<RankedCharacter, 'equipmentSet' | 'oathSet'
   return { equipmentSet, oathSet }
 }
 
+// 여섯 번째마다 점수가 저장되지 않은 캐릭터다. 점수 값은 운영 데이터의 자릿수를 따른 합성 값이다.
+const NO_SCORE_EVERY = 6
+
+function scoreOf(index: number, role: 'buffer' | 'dealer'): RankedCharacter['score'] {
+  if ((index + 1) % NO_SCORE_EVERY === 0) {
+    return null
+  }
+
+  if (role === 'buffer') {
+    return { calculator: 'buff', value: 4_120_000 - index * 1_700 }
+  }
+
+  return { calculator: 'equipment', value: 1_388_832 - index * 613 }
+}
+
 // 이름과 소속은 실제 캐릭터가 아닌 합성 값이다.
 export function storyRankedCharacters(count: number): RankedCharacter[] {
   return Array.from({ length: count }, (_, index) => {
@@ -52,6 +67,7 @@ export function storyRankedCharacters(count: number): RankedCharacter[] {
     const guildId = guildless ? null : `guild-${guildNumber}`
     const guildName = guildless ? null : `길드${guildNumber}`
     const role = jobGrowName === '眞 크루세이더' ? 'buffer' : 'dealer'
+    const score = scoreOf(index, role)
 
     return {
       serverId,
@@ -67,6 +83,7 @@ export function storyRankedCharacters(count: number): RankedCharacter[] {
       guildId,
       guildName,
       role,
+      score,
       ...setsOf(index)
     }
   })

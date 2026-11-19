@@ -3,12 +3,15 @@ export {
   CharacterTable,
   FAME_COLUMN,
   RANK_COLUMN,
+  SCORE_COLUMN,
   SkeletonRow
 } from './ui/CharacterTable'
 export type {
   Affiliation,
   CharacterTableAction,
   CharacterTableDetail,
-  CharacterTableRow
+  CharacterTableRow,
+  ScorePlacement
 } from './ui/CharacterTable'
 export { RankNumber } from './ui/RankNumber'
+export { ScoreValue } from './ui/ScoreValue'

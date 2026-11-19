@@ -79,6 +79,7 @@ export {
   CHARACTER_SERVER_NAMES,
   characterImageUrl
 } from './model/character-summary'
+export type { ListScore } from './model/character-summary'
 export {
   characterTimelineSchema,
   timelineAcquisitionPageSchema,
