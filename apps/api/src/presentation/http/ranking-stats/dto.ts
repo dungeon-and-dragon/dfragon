@@ -59,6 +59,44 @@ const itemIds = z.string().transform((value, context): string[] => {
   return ids
 })
 
+// 스킬 이름에는 쉼표와 물결표가 쓰이지 않아(2026-11-19 운영 DB 기준) 쌍은 쉼표, 이름과 종류는 물결표로 나눈다.
+// 한 캐릭터가 고르는 개화가 많아야 5개라 쌍도 5개까지 받는다.
+const EVOLUTIONS_LIMIT = 5
+const EVOLUTION_PATTERN = /^([^~]+)~([12])$/
+
+type EvolutionSelection = { name: string; type: number }
+
+function parseEvolution(pair: string): EvolutionSelection | undefined {
+  const matched = EVOLUTION_PATTERN.exec(pair)
+
+  if (matched === null) {
+    return undefined
+  }
+
+  const [, name, typeDigit] = matched
+  const type = Number(typeDigit)
+
+  return { name, type }
+}
+
+const evolutions = z.string().transform((value, context): EvolutionSelection[] => {
+  const pairs = value.split(',')
+  const selections = pairs.map(parseEvolution)
+  const parsed = selections.filter((selection) => selection !== undefined)
+  const valid =
+    pairs.length <= EVOLUTIONS_LIMIT &&
+    parsed.length === pairs.length &&
+    new Set(parsed.map(({ name }) => name)).size === parsed.length
+
+  if (!valid) {
+    context.addIssue({ code: 'custom', message: 'evolutions를 해석할 수 없음' })
+
+    return z.NEVER
+  }
+
+  return parsed
+})
+
 const cursor = z.string().transform((value, context): FameRankingCursor => {
   const decoded = decodeFameRankingCursor(value)
 
@@ -78,12 +116,14 @@ export const fameRankingQuery = z
     oathSetId: z.string().regex(OATH_SET_ID_PATTERN).transform(Number).optional(),
     oathSetOption: z.string().min(1).optional(),
     itemIds: itemIds.optional(),
+    evolutions: evolutions.optional(),
     fameFrom: fame,
     fameTo: fame,
     cursor: cursor.optional()
   })
   .refine(hasJobForGrow)
   .refine(hasMaleCrusaderForRole)
+  .refine(({ evolutions, jobGrowId }) => evolutions === undefined || jobGrowId !== undefined)
   .refine(({ oathSetId, oathSetOption }) => oathSetOption === undefined || oathSetId !== undefined)
   .refine(
     ({ fameFrom, fameTo }) => fameFrom === undefined || fameTo === undefined || fameFrom <= fameTo

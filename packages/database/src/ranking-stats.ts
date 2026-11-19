@@ -7,6 +7,7 @@ import type { CharacterEquipmentSet, CharacterOathSet } from './character-sets.j
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 import { type MaleCrusaderRole, maleCrusaderRoleSql } from './male-crusader.js'
+import type { SkillStyleSelection } from './skill-style.js'
 
 export type FameRankingFilter = {
   jobId?: string
@@ -16,6 +17,7 @@ export type FameRankingFilter = {
   oathSetId?: number
   oathSetOption?: string
   itemIds?: readonly string[]
+  evolutions?: readonly SkillStyleSelection[]
   fameFrom?: number
   fameTo?: number
 }
@@ -121,6 +123,20 @@ function wearsItemSql(itemId: string): Prisma.Sql {
   )`
 }
 
+// 스킬 스타일은 전직을 바꾸기 전 것이 남을 수 있어 지금 전직의 행만 본다.
+function selectsEvolutionsSql(evolutions: readonly SkillStyleSelection[]): Prisma.Sql {
+  const selected = JSON.stringify(evolutions.map(({ name, type }) => ({ name, type })))
+
+  return Prisma.sql`EXISTS (
+    SELECT 1 FROM character_skill_styles style
+    WHERE style.server_id = c.server_id
+      AND style.character_id = c.character_id
+      AND style.job_id = c.job_id
+      AND style.job_grow_id = c.job_grow_id
+      AND style.evolutions @> ${selected}::jsonb
+  )`
+}
+
 function afterPositionSql({ fame, serverId, characterId }: FameRankingPosition): Prisma.Sql {
   return Prisma.sql`c.fame <= ${fame}
     AND (c.fame < ${fame} OR (c.server_id, c.character_id) > (${serverId}, ${characterId}))`
@@ -169,6 +185,7 @@ export async function readFameRanking(
     oathSetId,
     oathSetOption,
     itemIds = [],
+    evolutions = [],
     fameFrom,
     fameTo
   } = filter
@@ -184,6 +201,7 @@ export async function readFameRanking(
     ...(oathSetId !== undefined ? [Prisma.sql`c.oath_set_id = ${oathSetId}::int`] : []),
     ...(oathSetOption !== undefined ? [Prisma.sql`c.oath_set_option = ${oathSetOption}`] : []),
     ...itemIds.filter((itemId) => itemId !== gatheredItem).map(wearsItemSql),
+    ...(evolutions.length > 0 ? [selectsEvolutionsSql(evolutions)] : []),
     ...(after !== undefined ? [afterPositionSql(after)] : [])
   ]
   const gatheredJoin = gatheredItem !== undefined ? gatheredWearersSql(gatheredItem) : Prisma.empty
