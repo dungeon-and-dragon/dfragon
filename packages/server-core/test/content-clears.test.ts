@@ -5,6 +5,7 @@ import {
   CLEAR_CONTENTS,
   type ClearContent,
   findContentClear,
+  hasScoreStats,
   toCollectionMinFame,
   toContentClearInput,
   toLatestContents,
@@ -197,6 +198,11 @@ test('분모 기준 명성은 컨텐츠마다 그 입장 명성이다', () => {
       ['engraved-nightmare-1', 119_414]
     ]
   )
+})
+
+test('점수 통계는 각인된 악몽 1주차부터 내고 그 전 주는 내지 않는다', () => {
+  assert.equal(hasScoreStats(at('2026-10-29T06:00:00')), false)
+  assert.equal(hasScoreStats(at('2026-11-05T06:00:00')), true)
 })
 
 test('시즌 클리어 횟수는 레이드와 레기온을 섞어 최근에 나온 컨텐츠부터 두고, 출시일을 모르는 컨텐츠는 뒤에 둔다', () => {
