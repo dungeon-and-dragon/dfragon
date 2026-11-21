@@ -3,10 +3,10 @@ import type { ItemStats } from '#entities/ranking'
 import { TitleBox } from '#shared/ui/TitleBox'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import {
-  type FameRankingFameRange,
   type FameRankingFilter,
   type FameRankingSetFilter,
   type SetStats,
+  type ScoreSort,
   type SkillEvolutionChoice,
   useItemStats,
   useSetStats
@@ -25,7 +25,8 @@ import {
   setChoicesOf,
   setFilterLabel
 } from '#widgets/ranking-filter'
-import { RankingFameFilter } from './RankingFameFilter'
+import { SearchCriterionFilter } from './SearchCriterionFilter'
+import { criterionFilterOf, rangeOfFilter, type SearchRange } from './search-range'
 
 // 세트 셀렉트 목록은 전체 직업 세트 통계에서 읽어, 직업을 바꿔도 같은 목록을 쓴다.
 const ALL_JOBS = {}
@@ -45,7 +46,8 @@ export function RankingsScreen({
   filter: FameRankingFilter
   onFilterChange: (filter: FameRankingFilter) => void
 }): React.JSX.Element {
-  const { jobId, jobGrowId, role, itemIds = [], fameFrom, fameTo } = filter
+  const { jobId, jobGrowId, role, itemIds = [], sort } = filter
+  const range = rangeOfFilter(filter)
   const stats: SetStats | null = loadedValue(useSetStats(ALL_JOBS))
   const catalog: OathCatalog | null = loadedValue(useOathCatalog())
   const itemStats: ItemStats | null = loadedValue(useItemStats({ jobId, jobGrowId, role }))
@@ -63,20 +65,22 @@ export function RankingsScreen({
   }, [dropsItems, filter, keptItemIds, onFilterChange])
 
   function changeSets(sets: FameRankingSetFilter): void {
-    onFilterChange({
-      jobId,
-      jobGrowId,
-      role,
-      ...sets,
-      itemIds: filter.itemIds,
-      evolutions: filter.evolutions,
-      fameFrom,
-      fameTo
-    })
+    const { equipmentSetId: _equipment, oathSetId: _oath, oathSetOption: _option, ...rest } = filter
+
+    onFilterChange({ ...rest, ...sets })
   }
 
-  function changeFame(range: FameRankingFameRange): void {
-    onFilterChange({ ...filter, fameFrom: range.fameFrom, fameTo: range.fameTo })
+  function changeRange(nextRange: SearchRange): void {
+    const criterionFilter = criterionFilterOf(sort, nextRange)
+
+    onFilterChange({ ...filter, ...criterionFilter })
+  }
+
+  // 기준을 바꾸면 넣어 둔 범위는 다른 기준의 값이라 비운다.
+  function changeSort(next: ScoreSort | undefined): void {
+    const criterionFilter = criterionFilterOf(next, {})
+
+    onFilterChange({ ...filter, ...criterionFilter })
   }
 
   function changeItems(next: readonly string[]): void {
@@ -108,12 +112,14 @@ export function RankingsScreen({
     },
     ...(evolutionRow !== null ? [evolutionRow] : []),
     {
-      label: '명성',
+      label: '검색 기준',
       content: (
-        <RankingFameFilter
-          key={`${fameFrom}/${fameTo}`}
-          range={{ fameFrom, fameTo }}
-          onChange={changeFame}
+        <SearchCriterionFilter
+          key={`${sort}/${range.from}/${range.to}`}
+          sort={sort}
+          range={range}
+          onSortChange={changeSort}
+          onRangeChange={changeRange}
         />
       )
     }

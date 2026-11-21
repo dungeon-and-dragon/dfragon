@@ -31,10 +31,23 @@ function narrowingOf({
   oathSetId,
   oathSetOption,
   itemIds,
+  sort,
   fameFrom,
-  fameTo
+  fameTo,
+  scoreFrom,
+  scoreTo
 }: FameRankingFilter): FameRankingFilter {
-  return { equipmentSetId, oathSetId, oathSetOption, itemIds, fameFrom, fameTo }
+  return {
+    equipmentSetId,
+    oathSetId,
+    oathSetOption,
+    itemIds,
+    sort,
+    fameFrom,
+    fameTo,
+    scoreFrom,
+    scoreTo
+  }
 }
 
 function hasFilter(filter: FameRankingFilter): boolean {
@@ -43,7 +56,7 @@ function hasFilter(filter: FameRankingFilter): boolean {
   )
 }
 
-// 직업, 전직을 바꿔도 세트, 아이템, 명성 필터는 그대로 둔다.
+// 직업, 전직을 바꿔도 세트, 아이템, 검색 기준과 범위는 그대로 두고 그 전직의 개화 선택만 버린다.
 export function RankingFilterBox({
   filter,
   onChange,

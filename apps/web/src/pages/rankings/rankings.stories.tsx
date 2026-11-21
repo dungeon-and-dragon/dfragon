@@ -141,3 +141,17 @@ export const 개화받지못함: Story = {
   },
   render: () => <Screen initialFilter={WEAPON_MASTER_FILTER} />
 }
+
+export const 점수기준: Story = {
+  parameters: rankingPagesParameters,
+  render: () => (
+    <Screen
+      initialFilter={{
+        jobId: RANKING_JOBS[0]!.jobId,
+        sort: 'equipmentScore',
+        scoreFrom: 1300000,
+        scoreTo: 1400000
+      }}
+    />
+  )
+}

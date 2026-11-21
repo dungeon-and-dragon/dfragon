@@ -3,7 +3,7 @@ import { EVOLUTION_FILTER_LIMIT, ITEM_FILTER_LIMIT } from '#shared/config/rankin
 import { maleCrusaderRoleSchema, RANKING_JOBS } from '#entities/character'
 import {
   evolutionsQueryText,
-  type FameRankingFameRange,
+  SCORE_SORTS,
   type FameRankingFilter,
   type FameRankingSetFilter,
   type SetStatsFilter,
@@ -76,7 +76,7 @@ const itemIdsSchema = z
 
 // 빈 값이 0이 되지 않게 coerce하지 않는다. router가 주소의 숫자를 number로 읽어 준다.
 // API가 INTEGER 열과 비교하는 9자리까지만 받는다.
-const fame = z.number().int().min(0).max(999_999_999).optional().catch(undefined)
+const rangeBound = z.number().int().min(0).max(999_999_999).optional().catch(undefined)
 
 const searchSchema = z.object({
   jobId: z.string().optional().catch(undefined),
@@ -87,8 +87,11 @@ const searchSchema = z.object({
   oathSetOption: text,
   itemIds: itemIdsSchema,
   evolutions: evolutionsSchema,
-  fameFrom: fame,
-  fameTo: fame
+  sort: z.enum(SCORE_SORTS).optional().catch(undefined),
+  fameFrom: rangeBound,
+  fameTo: rangeBound,
+  scoreFrom: rangeBound,
+  scoreTo: rangeBound
 })
 
 function jobFilterOf({ jobId, jobGrowId, role }: z.infer<typeof searchSchema>): SetStatsFilter {
@@ -122,15 +125,39 @@ function setFilterOf({
   }
 }
 
-// 거꾸로 된 범위는 API가 거절하므로 범위를 모두 버린다.
-function fameFilterOf({ fameFrom, fameTo }: z.infer<typeof searchSchema>): FameRankingFameRange {
-  if (fameFrom !== undefined && fameTo !== undefined && fameFrom > fameTo) {
-    return {}
+type RangeFilter = Pick<FameRankingFilter, 'sort' | 'fameFrom' | 'fameTo' | 'scoreFrom' | 'scoreTo'>
+
+function isReversed(from: number | undefined, to: number | undefined): boolean {
+  return from !== undefined && to !== undefined && from > to
+}
+
+// API는 기준과 맞지 않는 범위와 거꾸로 된 범위를 거절하므로, 기준이 아닌 쪽 범위와 거꾸로 된 범위는 버린다.
+function rangeFilterOf({
+  sort,
+  fameFrom,
+  fameTo,
+  scoreFrom,
+  scoreTo
+}: z.infer<typeof searchSchema>): RangeFilter {
+  if (sort === undefined) {
+    if (isReversed(fameFrom, fameTo)) {
+      return {}
+    }
+
+    return {
+      ...(fameFrom !== undefined && { fameFrom }),
+      ...(fameTo !== undefined && { fameTo })
+    }
+  }
+
+  if (isReversed(scoreFrom, scoreTo)) {
+    return { sort }
   }
 
   return {
-    ...(fameFrom !== undefined && { fameFrom }),
-    ...(fameTo !== undefined && { fameTo })
+    sort,
+    ...(scoreFrom !== undefined && { scoreFrom }),
+    ...(scoreTo !== undefined && { scoreTo })
   }
 }
 
@@ -161,10 +188,10 @@ export function parseRankingSearch(search: Record<string, unknown>): RankingSear
   const items = itemFilterOf(parsed)
   const jobFilter = jobFilterOf(parsed)
   const setFilter = setFilterOf(parsed)
-  const fameFilter = fameFilterOf(parsed)
+  const rangeFilter = rangeFilterOf(parsed)
   const evolutionFilter = evolutionFilterOf(parsed, jobFilter)
 
-  return { ...jobFilter, ...setFilter, ...items, ...evolutionFilter, ...fameFilter }
+  return { ...jobFilter, ...setFilter, ...items, ...evolutionFilter, ...rangeFilter }
 }
 
 export function rankingFilterOf({
