@@ -81,13 +81,15 @@ export function readStoredCharacterRows<Row extends StoredCharacter = StoredChar
     ${filterAndOrder}`
 }
 
-function readStoredCharacters(
+export function readStoredCharacters<Row extends StoredCharacter = StoredCharacter>(
   client: DatabaseClient,
-  condition: Prisma.Sql
-): Promise<StoredCharacter[]> {
-  return readStoredCharacterRows(
+  condition: Prisma.Sql,
+  extraColumns: Prisma.Sql = Prisma.empty
+): Promise<Row[]> {
+  return readStoredCharacterRows<Row>(
     client,
-    Prisma.sql`WHERE ${condition} ORDER BY c.fame DESC NULLS LAST, c.server_id, c.character_id`
+    Prisma.sql`WHERE ${condition} ORDER BY c.fame DESC NULLS LAST, c.server_id, c.character_id`,
+    extraColumns
   )
 }
 

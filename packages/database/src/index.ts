@@ -291,6 +291,7 @@ export type {
   TimelineSyncState
 } from './timeline.js'
 export {
+  readAdventureSetCharacters,
   readCharacterStats,
   readCharacterStatsSnapshot,
   readFameRanking,

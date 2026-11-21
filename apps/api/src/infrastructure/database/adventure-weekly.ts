@@ -1,8 +1,8 @@
 import {
   type CharacterTimelineEventRow,
   type DatabaseClient,
-  type StoredCharacter,
-  readAdventureCharacters,
+  type RankedStoredCharacter,
+  readAdventureSetCharacters,
   readCharactersTimelineEvents
 } from '@dfragon/database'
 import {
@@ -14,7 +14,7 @@ import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 import { parseTimelineClearRow } from './character-timeline-read.js'
 
 export function parseAdventureWeeklyClears(
-  characters: readonly StoredCharacter[],
+  characters: readonly RankedStoredCharacter[],
   events: readonly CharacterTimelineEventRow[],
   weekStart: Date
 ): AdventureWeeklyClears {
@@ -33,7 +33,7 @@ export async function readAdventureWeeklyClears(
   now: Date
 ): Promise<AdventureWeeklyClears> {
   const weekStart = startOfResetWeek(now)
-  const characters = await readAdventureCharacters(client, adventureName)
+  const characters = await readAdventureSetCharacters(client, adventureName)
   const events = await readCharactersTimelineEvents(client, characters, CLEAR_CODES, weekStart)
 
   return parseAdventureWeeklyClears(characters, events, weekStart)
