@@ -17,7 +17,7 @@ export function SlotItemTable({
     <table className="table">
       <thead>
         <tr>
-          <th scope="col" className="w-[96px]">
+          <th scope="col" className="w-[96px] max-sm:hidden">
             부위
           </th>
           <th scope="col">{itemLabel}</th>
@@ -26,9 +26,9 @@ export function SlotItemTable({
       <tbody>
         {rows.map(({ key, slot, item }) => (
           <tr key={key}>
-            <td className={`${slotCell}`}>{slot}</td>
+            <td className={`${slotCell} max-sm:hidden`}>{slot}</td>
             <td>
-              <ItemCell item={item} tune={null} exalted={false} />
+              <ItemCell item={item} tune={null} />
             </td>
           </tr>
         ))}

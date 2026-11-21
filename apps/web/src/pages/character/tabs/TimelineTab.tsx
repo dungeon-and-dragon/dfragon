@@ -8,13 +8,7 @@ import {
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import type { TimelinePages } from '#pages/character/hooks/useTimelinePages'
 import type { CharacterTabProps } from './character-tab-props'
-import {
-  Acquisitions,
-  Enhancements,
-  SeasonClears,
-  TimelineMore,
-  WeeklyClears
-} from './timeline/TimelineSections'
+import { Acquisitions, Enhancements, SeasonClears, TimelineMore } from './timeline/TimelineSections'
 
 export function TimelineTab({ detail }: CharacterTabProps): React.JSX.Element {
   const result = useCharacterTimeline(detail)
@@ -88,7 +82,6 @@ function TimelineContent({
 
   return (
     <div className="flex flex-col divide-y divide-line text-sm">
-      <WeeklyClears clears={timeline.weeklyClears} />
       <SeasonClears counts={timeline.seasonClears} />
       <div className="grid grid-cols-[minmax(0,1fr)_500px] divide-x divide-line max-md:grid-cols-1 max-md:divide-x-0 max-md:divide-y">
         <Enhancements enhancements={shownEnhancements.items} more={shownEnhancements.more} />

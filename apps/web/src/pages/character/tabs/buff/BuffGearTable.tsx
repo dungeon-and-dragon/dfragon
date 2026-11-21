@@ -27,10 +27,10 @@ export function BuffGearTable({
 }): React.JSX.Element {
   return (
     <div className="table-scroll">
-      <table className="table table-wrap min-w-[800px]">
+      <table className="table table-wrap min-w-[800px] max-sm:min-w-0">
         <thead>
           <tr>
-            <th scope="col" className={`${avatarClasses.slotColumn}`}>
+            <th scope="col" className={`${avatarClasses.slotColumn} max-sm:hidden`}>
               부위
             </th>
             <th scope="col">아이템</th>
@@ -92,9 +92,9 @@ function ItemRow({
 
   return (
     <tr>
-      <td className={`${slotCell}`}>{slot}</td>
+      <td className={`${slotCell} max-sm:hidden`}>{slot}</td>
       <td>
-        <ItemCell item={item} tune={null} exalted={false} />
+        <ItemCell item={item} tune={null} />
       </td>
       <td>
         {lines.length > 0 && (

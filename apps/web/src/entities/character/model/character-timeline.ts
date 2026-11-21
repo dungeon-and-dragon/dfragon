@@ -28,15 +28,6 @@ const timelineAcquisitionSchema = z.object({
 })
 
 export const characterTimelineSchema = z.object({
-  weeklyClears: z.array(
-    z.object({
-      kind: clearKind,
-      name: z.string(),
-      modeName: nullableText,
-      hard: z.boolean().default(false),
-      occurredAt
-    })
-  ),
   seasonClears: z.array(
     z.object({
       kind: clearKind,
@@ -62,7 +53,6 @@ export const timelineAcquisitionPageSchema = z.object({
 })
 
 export type CharacterTimeline = z.infer<typeof characterTimelineSchema>
-export type TimelineClear = CharacterTimeline['weeklyClears'][number]
 export type TimelineClearCount = CharacterTimeline['seasonClears'][number]
 export type TimelineEnhancement = CharacterTimeline['enhancements'][number]
 export type TimelineAcquisition = CharacterTimeline['acquisitions'][number]

@@ -1,9 +1,9 @@
-import type { TimelineClear, TimelineEnhancement } from '#entities/character'
+import type { TimelineClearCount, TimelineEnhancement } from '#entities/character'
 
 export const CLEAR_KIND_LABELS = {
   raid: '레이드',
   legion: '레기온'
-} as const satisfies Record<TimelineClear['kind'], string>
+} as const satisfies Record<TimelineClearCount['kind'], string>
 
 export const ENHANCEMENT_KIND_LABELS = {
   reinforce: '강화',

@@ -135,37 +135,40 @@ function SkillWindowGrid({
   skillWindow: SkillWindow
   source: SkillAdoptionSource
 }): React.JSX.Element {
+  // 스킬 창은 최소 폭보다 좁은 칸에서 화면 전체가 아니라 스킬 창만 가로로 스크롤한다.
   return (
-    <div className="@container" style={{ minWidth: SKILL_WINDOW_OUTER_WIDTH }}>
-      <div
-        role="group"
-        aria-label="스킬 창"
-        className="relative shrink-0 rounded-control border-solid border-line bg-inset"
-        style={{
-          borderWidth: scaled(SKILL_WINDOW_BORDER_WIDTH),
-          width: scaled(SKILL_WINDOW_WIDTH),
-          height: scaled(skillWindow.rows.length * SKILL_CELL_HEIGHT)
-        }}
-      >
-        {skillWindow.rows.map(({ row, requiredLevel }) => (
-          <div key={row}>
-            {row > COMMON_ROW && (
-              <div
-                className="absolute inset-x-0 h-0"
-                style={{ ...ROW_LINE_BORDER, top: scaled(row * SKILL_CELL_HEIGHT) }}
-              />
-            )}
-            <span
-              className={`absolute left-0 flex items-center justify-center whitespace-nowrap text-fg-subtle select-none ${row === COMMON_ROW ? '' : 'num'}`}
-              style={{ ...ROW_LABEL_SIZE, top: scaled(row * SKILL_CELL_HEIGHT) }}
-            >
-              {row === COMMON_ROW ? '공용' : requiredLevel}
-            </span>
-          </div>
-        ))}
-        {skillWindow.icons.map((icon) => (
-          <SkillIcon key={`${icon.col},${icon.row}`} icon={icon} source={source} />
-        ))}
+    <div className="max-w-full overflow-x-auto">
+      <div className="@container" style={{ minWidth: SKILL_WINDOW_OUTER_WIDTH }}>
+        <div
+          role="group"
+          aria-label="스킬 창"
+          className="relative shrink-0 rounded-control border-solid border-line bg-inset"
+          style={{
+            borderWidth: scaled(SKILL_WINDOW_BORDER_WIDTH),
+            width: scaled(SKILL_WINDOW_WIDTH),
+            height: scaled(skillWindow.rows.length * SKILL_CELL_HEIGHT)
+          }}
+        >
+          {skillWindow.rows.map(({ row, requiredLevel }) => (
+            <div key={row}>
+              {row > COMMON_ROW && (
+                <div
+                  className="absolute inset-x-0 h-0"
+                  style={{ ...ROW_LINE_BORDER, top: scaled(row * SKILL_CELL_HEIGHT) }}
+                />
+              )}
+              <span
+                className={`absolute left-0 flex items-center justify-center whitespace-nowrap text-fg-subtle select-none ${row === COMMON_ROW ? '' : 'num'}`}
+                style={{ ...ROW_LABEL_SIZE, top: scaled(row * SKILL_CELL_HEIGHT) }}
+              >
+                {row === COMMON_ROW ? '공용' : requiredLevel}
+              </span>
+            </div>
+          ))}
+          {skillWindow.icons.map((icon) => (
+            <SkillIcon key={`${icon.col},${icon.row}`} icon={icon} source={source} />
+          ))}
+        </div>
       </div>
     </div>
   )

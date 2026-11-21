@@ -22,9 +22,13 @@ const integer = new Intl.NumberFormat('ko-KR')
 const REFRESH_INTERVAL_MS = 60_000
 
 const SUMMARY = 'section flex flex-wrap items-center gap-6 px-4'
-const IDENTITY = 'flex min-w-0 grow basis-[280px] flex-col gap-2'
-const STATS = 'flex shrink-0 gap-12'
-const STAT = 'stat min-w-[104px] items-end'
+// 600px 미만에서는 초상화 옆 같은 줄에 두도록 기준 폭을 두지 않는다.
+const IDENTITY = 'flex min-w-0 grow basis-[280px] flex-col gap-2 max-sm:basis-0'
+// 600px 미만에서는 초상화와 이름 줄을 좁히지 않도록 늘 다음 줄에 둔다.
+const STATS = 'flex shrink-0 gap-12 max-sm:basis-full max-sm:gap-6'
+// 600px 미만에서는 라벨과 값을 한 줄에 두고 값을 14px로 줄인다.
+const STAT =
+  'stat min-w-[104px] items-end max-sm:min-w-0 max-sm:flex-row max-sm:items-baseline max-sm:gap-2 max-sm:[&_.stat-value]:text-sm'
 const LINE = 'flex items-center gap-2 whitespace-nowrap'
 const SCORE_TONES = { dealer: 'text-score-dealer', buffer: 'text-score-buffer' } as const
 
@@ -99,7 +103,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
           <div className={LINE}>
             {job != null && <span className="text-fg-muted">{job}</span>}
             {character.level != null && (
-              <span className="num text-fg-subtle">{`Lv.${character.level}`}</span>
+              <span className="num text-fg-subtle">{`Lv ${character.level}`}</span>
             )}
           </div>
         )}
@@ -141,7 +145,7 @@ function RefreshControl({
       <time
         dateTime={fetchedAt}
         title={formatSeoulDateTime(fetchedAt, now)}
-        className="text-xs whitespace-nowrap text-fg-subtle"
+        className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden"
       >
         {justFetched ? '방금 전' : formatTimeAgo(fetchedAt, now)}
       </time>
