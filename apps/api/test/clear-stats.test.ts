@@ -1460,6 +1460,11 @@ test('점수 분포는 장비 점수와 버프 점수를 따로 두고 20명 미
 test('상세의 그룹별 점수 분포와 점수 구간은 점수 종류마다 나누어 준다', async () => {
   const { app, origin } = await listen(
     fakeReader({
+      // 지난주 대비 그룹 점수는 지난주도 각인된 악몽 1주차 뒤여야 나오므로 11-12 주를 연다.
+      readPopulations: async () => [
+        ...populations,
+        population('michaela-hard', '2026-11-12', 1100)
+      ],
       readWeekGroups: async () => [groupSample('both', 30, 30)],
       readWeekGroupScores: async () => [
         { group: 'both', ...scoreSample('equipment', 22, 800_000) },
