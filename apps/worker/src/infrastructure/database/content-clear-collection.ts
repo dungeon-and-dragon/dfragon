@@ -7,6 +7,7 @@ import {
   type ContentClearInput,
   type ContentClearPopulationInput,
   type DatabaseClient,
+  type PopulationActivity,
   type StoredClearPopulation,
   finishClearRecordBackfill,
   finishContentClearCollection,
@@ -32,8 +33,11 @@ import type {
 export class DatabaseClearCollectionRepository implements ClearCollectionRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, minMaxFame)
+  readPopulation(
+    minMaxFame: number,
+    activity: PopulationActivity
+  ): Promise<ClearPopulationCharacter[]> {
+    return readClearPopulation(this.client, minMaxFame, activity)
   }
 
   readPopulations(): Promise<StoredClearPopulation[]> {
@@ -72,8 +76,11 @@ export class DatabaseClearCollectionRepository implements ClearCollectionReposit
 export class DatabaseClearRecordBackfillRepository implements ClearRecordBackfillRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, minMaxFame)
+  readPopulation(
+    minMaxFame: number,
+    activity: PopulationActivity
+  ): Promise<ClearPopulationCharacter[]> {
+    return readClearPopulation(this.client, minMaxFame, activity)
   }
 
   readProgress(): Promise<ClearRecordBackfillProgress | undefined> {

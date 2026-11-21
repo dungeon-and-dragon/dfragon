@@ -240,11 +240,17 @@ export async function finishContentClearCollection(
   await client.contentClearCollection.deleteMany({ where: { startedAt } })
 }
 
+export type PopulationActivity = 'active-only' | 'include-inactive'
+
 // 최고 명성 index로 하한 이상만 읽는다. 같은 최고 명성은 서버, 캐릭터 순이라 다시 읽어도 순서가 같다.
 export function readClearPopulation(
   client: DatabaseClient,
-  minMaxFame: number
+  minMaxFame: number,
+  activity: PopulationActivity
 ): Promise<ClearPopulationCharacter[]> {
+  const activeOnly =
+    activity === 'active-only' ? Prisma.sql`AND inactive_since IS NULL` : Prisma.empty
+
   return client.$queryRaw<ClearPopulationCharacter[]>`
     SELECT
       server_id AS "serverId",
@@ -255,7 +261,7 @@ export function readClearPopulation(
       job_name AS "jobName",
       job_grow_name AS "jobGrowName"
     FROM characters
-    WHERE max_fame >= ${minMaxFame}
+    WHERE max_fame >= ${minMaxFame} ${activeOnly}
     ORDER BY max_fame DESC, server_id, character_id`
 }
 

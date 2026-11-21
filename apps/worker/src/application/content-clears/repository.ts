@@ -6,11 +6,15 @@ import type {
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
+  PopulationActivity,
   StoredClearPopulation
 } from '@dfragon/database'
 
 export interface ClearCollectionRepository {
-  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]>
+  readPopulation(
+    minMaxFame: number,
+    activity: PopulationActivity
+  ): Promise<ClearPopulationCharacter[]>
   readPopulations(): Promise<StoredClearPopulation[]>
   readProgress(): Promise<ContentClearCollectionProgress | undefined>
   startProgress(startedAt: Date): Promise<void>
@@ -22,7 +26,10 @@ export interface ClearCollectionRepository {
 }
 
 export interface ClearRecordBackfillRepository {
-  readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]>
+  readPopulation(
+    minMaxFame: number,
+    activity: PopulationActivity
+  ): Promise<ClearPopulationCharacter[]>
   readProgress(): Promise<ClearRecordBackfillProgress | undefined>
   startProgress(startedAt: Date): Promise<void>
   recordProgress(progress: ClearRecordBackfillProgress): Promise<void>

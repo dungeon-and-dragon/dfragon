@@ -352,7 +352,7 @@ export function createScoreCalculationJob(
     name: SCORE_CALCULATION_JOB_NAME,
     displayName: '점수 계산',
     description:
-      '클리어 기록 수집 대상 캐릭터의 상세 정보를 Neople에서 받아 장비 점수, 버프 점수를 계산해 저장합니다. 도중에 끝난 실행은 하루 안에 다시 실행하면 남은 캐릭터부터 계산합니다.',
+      '클리어 기록 수집 대상 가운데 활성 캐릭터의 상세 정보를 Neople에서 받아 장비 점수, 버프 점수를 계산해 저장합니다. 도중에 끝난 실행은 하루 안에 다시 실행하면 남은 캐릭터부터 계산합니다.',
     schedule,
     // 놓친 실행을 worker 시작 때 보충하면 낮에 시작해 클리어 기록 수집과 겹치므로, 정해진 일정과 수동 실행으로만 돈다.
     catchup: false,
