@@ -38,7 +38,6 @@ const equipmentItem = z.object({
     status: list(namedStat),
     reinforceSkill: list(z.object({ skills: list(z.object({ name: text, value: count })) }))
   }),
-  exaltedInfo: section({ explain: text }),
   potency: section({ value: statValue })
 })
 

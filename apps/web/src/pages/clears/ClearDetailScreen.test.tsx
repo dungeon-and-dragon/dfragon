@@ -47,7 +47,6 @@ function week(
   return {
     weekStart,
     closed: weekStart !== LATEST_WEEK,
-    collectedAt: '2026-11-13T22:39:00.000Z',
     population: 1000,
     minFame: 104292,
     cleared,

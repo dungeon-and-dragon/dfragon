@@ -50,7 +50,6 @@ function week(weekStart: string, cleared: number, population = 1000): ClearWeek 
   return {
     weekStart,
     closed: weekStart !== LATEST_WEEK,
-    collectedAt: '2026-11-13T22:39:00.000Z',
     population,
     minFame: 104292,
     cleared,
@@ -374,12 +373,12 @@ it('수집한 주가 하나도 없으면 제목 줄 아래 한 줄만 두고 개
   expect(requested).toEqual(['/stats/clears'])
 })
 
-it('주를 고르지 않으면 가장 최근 주를 가운데에 두고 가장 넓은 분모의 기준 명성, 캐릭터 수와 수집 시각을 보인다', async () => {
+it('주를 고르지 않으면 가장 최근 주를 가운데에 두고 가장 넓은 분모의 기준 명성과 캐릭터 수를 보인다', async () => {
   await open(undefined)
 
   expect(wheelRows()).toEqual(['11-05 ~ 11-11', '11-12 ~ 11-18집계 중', ''])
   expect(container.querySelector('header')?.textContent).toBe(
-    '클리어 집계11-05 ~ 11-1111-12 ~ 11-18집계 중기준 명성104,292 이상캐릭터 수2,000수집 시각11-14 07:39'
+    '클리어 집계11-05 ~ 11-1111-12 ~ 11-18집계 중기준 명성104,292 이상캐릭터 수2,000'
   )
   expect(requestsTo('/stats/clears/overview')).toEqual([
     `/stats/clears/overview?week=${LATEST_WEEK}`

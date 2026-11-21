@@ -177,7 +177,7 @@ export const NumberText: Story = {
           { name: 'num', sample: <span className="num">98,412</span> },
           {
             name: 'num text-xs',
-            sample: <span className="num text-xs text-fg-subtle">Lv.115</span>
+            sample: <span className="num text-xs text-fg-subtle">Lv 115</span>
           },
           {
             name: 'num font-semibold',

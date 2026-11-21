@@ -298,7 +298,7 @@ function SummaryBody({
   const summary = toHistorySnapshotSummary(current.value)
   const previousSummary = before.value !== null ? toHistorySnapshotSummary(before.value) : null
   const setPoint = summary.setPoint !== null ? formatPoint(summary.setPoint) : MISSING
-  const mistLevel = summary.mistLevel !== null ? `Lv.${summary.mistLevel}` : MISSING
+  const mistLevel = summary.mistLevel !== null ? `Lv ${summary.mistLevel}` : MISSING
 
   return (
     <>

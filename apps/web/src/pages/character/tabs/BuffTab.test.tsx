@@ -81,7 +81,7 @@ it('버퍼 버프 스킬은 이름과 레벨만 보이고 스킬 설명 줄은 �
 
   const skill = section('버프 스킬')!
   expect(skill.querySelector('h2')?.textContent).toBe('러블리 템포')
-  expect(skill.querySelector('h2 + span')?.textContent).toBe('Lv.30')
+  expect(skill.querySelector('h2 + span')?.textContent).toBe('Lv 30')
   expect(skill.textContent).not.toContain('지속 시간')
   expect(skill.querySelector('li')).toBeNull()
 })

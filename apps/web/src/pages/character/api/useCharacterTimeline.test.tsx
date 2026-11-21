@@ -50,15 +50,6 @@ const detail: CharacterDetailView = {
 }
 
 const filled: CharacterTimeline = {
-  weeklyClears: [
-    {
-      kind: 'raid',
-      name: '디레지에 레이드',
-      modeName: '디레지에 : 악연',
-      hard: true,
-      occurredAt: '2026-11-05T12:30:00.000Z'
-    }
-  ],
   seasonClears: [{ kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 }],
   enhancements: [
     {
@@ -88,7 +79,6 @@ const filled: CharacterTimeline = {
 }
 
 const empty: CharacterTimeline = {
-  weeklyClears: [],
   seasonClears: [],
   enhancements: [],
   enhancementsCursor: null,

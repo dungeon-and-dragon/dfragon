@@ -120,7 +120,8 @@ function SlotHead({ sticky = false }: { sticky?: boolean }): React.JSX.Element {
         </th>
         {EQUIPMENT_SLOTS.map((slot) => (
           <th key={slot} scope="col" className={`${SLOT_CELL} ${cell}`}>
-            {slot}
+            {/* 900px 미만에서는 칸이 좁아 부위 이름이 겹치므로 화면에서는 숨기고 보조 기술에만 남긴다. */}
+            <span className="max-md:sr-only">{slot}</span>
           </th>
         ))}
       </tr>

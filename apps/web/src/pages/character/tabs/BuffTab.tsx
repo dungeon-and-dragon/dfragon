@@ -88,7 +88,7 @@ function BuffSkill({
         <span className="label">버프 스킬</span>
         <BuffSkillName name={name} icon={icon} />
         {option?.level != null && (
-          <span className={itemClasses.stripNumber}>{`Lv.${option.level}`}</span>
+          <span className={itemClasses.stripNumber}>{`Lv ${option.level}`}</span>
         )}
       </div>
     </section>

@@ -201,7 +201,7 @@ it('딜러 요약은 이름, 서버와 모험단과 길드, 전직과 레벨, �
   const card: Card = { role: 'dealer', score: scoreOf({ value: 392332 }) }
   await renderLoaded(detailOf({ card }))
 
-  expect(textLines()).toEqual(['커피갱신30분 전', '바칼동네커피필로시스', '버서커Lv.115'])
+  expect(textLines()).toEqual(['커피갱신30분 전', '바칼동네커피필로시스', '버서커Lv 115'])
   expect(summary().querySelector('img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/servers/bakal/characters/dealer-1?zoom=1'
   )
@@ -215,7 +215,7 @@ it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최�
   const maleCrusader = { jobName: '프리스트(남)', jobGrowName: '眞 크루세이더' }
   await renderLoaded(detailOf({ character: maleCrusader, card: { role: 'buffer', score: null } }))
 
-  expect(textLines()[2]).toBe('크루세이더(남, 버퍼)Lv.115')
+  expect(textLines()[2]).toBe('크루세이더(남, 버퍼)Lv 115')
   expect(useRecentCharacterStore.getState().recentCharacters[0]).toMatchObject({
     characterId: 'dealer-1',
     role: 'buffer'
@@ -225,7 +225,7 @@ it('남성 크루세이더는 카드 역할을 전직에 붙여 보이고, 최�
 it('캐릭터 상세 요약의 동명 전직 뒤에 성별을 붙인다', async () => {
   await renderLoaded(detailOf({ character: { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' } }))
 
-  expect(textLines()[2]).toBe('넨마스터(여)Lv.115')
+  expect(textLines()[2]).toBe('넨마스터(여)Lv 115')
 })
 
 it('모험단과 길드 이름은 그 페이지로 가는 링크다', async () => {

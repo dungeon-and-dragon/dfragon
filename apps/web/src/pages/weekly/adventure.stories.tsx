@@ -81,6 +81,7 @@ function EquipmentScreen({ initialSearch = {} }: { initialSearch?: EquipmentSear
           adventureName={STORY_ADVENTURE_NAME}
           search={search}
           onSearchChange={setSearch}
+          onAdventureOpen={ignoreOpen}
         />
       </StoryScreen>
     </StoryFrame>

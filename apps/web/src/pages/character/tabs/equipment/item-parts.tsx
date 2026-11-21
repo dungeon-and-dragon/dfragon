@@ -4,7 +4,6 @@ import {
   ItemIcon,
   ItemName,
   type ItemView,
-  RarityBadge,
   type SetPointBonusRule
 } from '#entities/character'
 import { itemClasses } from './item-classes'
@@ -20,12 +19,10 @@ export function TuneNumeral({ numeral }: { numeral: string | null }): React.JSX.
 export function ItemCell({
   item,
   tune,
-  exalted,
   potency = null
 }: {
   item: ItemView
   tune: string | null
-  exalted: boolean
   potency?: string | null
 }): React.JSX.Element {
   return (
@@ -34,7 +31,6 @@ export function ItemCell({
       <span className={itemClasses.itemText}>
         <ItemName name={item.itemName} rarity={item.rarity} />
         <TuneNumeral numeral={tune} />
-        {exalted && <RarityBadge rarity={item.rarity}>유일</RarityBadge>}
         {potency !== null && <span className="num text-xs text-game-precision">{potency}</span>}
       </span>
     </div>

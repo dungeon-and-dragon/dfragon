@@ -4,6 +4,8 @@ import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS, TOOLTIP_TITLE_CLASS } from './plot-layout'
 import { useChartHover } from './useChartHover'
 
+const AXIS_LABEL_GAP = 4
+
 const integer = new Intl.NumberFormat('ko-KR')
 
 export type ColumnBar = Readonly<{
@@ -78,6 +80,36 @@ export function Columns({
       scroller.scrollLeft = scroller.scrollWidth
     }
   }, [scrollable])
+
+  // 좁은 폭에서 축 글자가 앞 글자와 겹치면 숨기고, 폭이 바뀔 때마다 다시 잰다.
+  useLayoutEffect(() => {
+    const chart = chartRef.current
+    if (chart == null) {
+      return
+    }
+
+    function hideOverlappingLabels(): void {
+      let lastRight = Number.NEGATIVE_INFINITY
+      for (const label of chart?.querySelectorAll<HTMLElement>('[data-axis-label]') ?? []) {
+        label.style.visibility = ''
+        const box = label.getBoundingClientRect()
+        if (box.left < lastRight + AXIS_LABEL_GAP) {
+          label.style.visibility = 'hidden'
+          continue
+        }
+
+        lastRight = box.right
+      }
+    }
+
+    hideOverlappingLabels()
+    const observer = new ResizeObserver(hideOverlappingLabels)
+    observer.observe(chart)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [groups])
 
   function registerColumn(key: string, element: HTMLLIElement): () => void {
     columnsRef.current.set(key, element)
@@ -181,7 +213,10 @@ function Column({
       </span>
       <span aria-hidden="true" className="relative mt-1 h-[14px] shrink-0">
         {label != null && (
-          <span className="absolute left-1/2 -translate-x-1/2 text-2xs whitespace-nowrap text-fg-subtle tabular-nums">
+          <span
+            data-axis-label=""
+            className="absolute left-1/2 -translate-x-1/2 text-2xs whitespace-nowrap text-fg-subtle tabular-nums"
+          >
             {label}
           </span>
         )}

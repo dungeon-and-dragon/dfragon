@@ -89,12 +89,14 @@ function SoulPriceTable({ children }: { children: React.ReactNode }): React.JSX.
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">소울 결정</th>
+            <th scope="col">
+              <span className="sr-only">소울 결정</span>
+            </th>
             <th scope="col" className="table-num">
               가격
             </th>
             <th scope="col" className="table-num">
-              1개당 골드
+              계시 환산
             </th>
           </tr>
         </thead>

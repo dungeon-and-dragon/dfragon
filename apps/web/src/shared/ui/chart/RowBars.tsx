@@ -38,6 +38,7 @@ const TOOLTIP_INSIDE_GAP = 10
 const ROW_COLUMNS_CLASS = 'grid-cols-[120px_minmax(0,1fr)_80px]'
 // 좁은 폭에서도 막대가 보이도록 이름 칸은 줄 폭의 40%를 넘지 않는다.
 const SIZED_NAME_ROW_COLUMNS_CLASS = 'grid-cols-[min(var(--bar-name-width),40%)_minmax(0,1fr)_80px]'
+const NO_BAR_NARROW_COLUMNS_CLASS = 'max-md:grid-cols-[minmax(0,1fr)_80px]'
 const LINK_COLUMN_CLASS = 'grid-cols-[minmax(0,1fr)_16px]'
 // 하위 막대는 펼침 단추 아래 세로 선 오른쪽으로 들여 쓰고, 이름 칸을 이만큼만 줄여 막대가 부모 막대보다 조금 안쪽에서 시작한다.
 const DETAIL_NAME_SHRINK = 8
@@ -82,7 +83,8 @@ export function RowBars({
   max = Math.max(0, ...bars.map(({ value }) => value)),
   formatValue,
   fill = false,
-  nameWidth
+  nameWidth,
+  barFromMd = false
 }: {
   bars: readonly Bar[]
   tone?: BarTone
@@ -90,6 +92,8 @@ export function RowBars({
   formatValue?: (value: number) => string
   fill?: boolean
   nameWidth?: number
+  // true면 900px 미만에서 가운데 막대를 숨기고 이름과 값만 둔다.
+  barFromMd?: boolean
 }): React.JSX.Element {
   const { hover, show, areaProps } = useChartHover()
   const listRef = useRef<HTMLUListElement>(null)
@@ -122,16 +126,22 @@ export function RowBars({
     })
   }
 
-  function columnsOf(shrink: number): Pick<RowLayout, 'columns' | 'style'> {
+  function columnsOf(shrink: number): Pick<RowLayout, 'columns' | 'style' | 'barFromMd'> {
+    const narrow = barFromMd ? ` ${NO_BAR_NARROW_COLUMNS_CLASS}` : ''
+
     if (nameWidth === undefined) {
-      return { columns: ROW_COLUMNS_CLASS }
+      const columns = `${ROW_COLUMNS_CLASS}${narrow}`
+
+      return { columns, barFromMd }
     }
 
     const width = `${nameWidth - shrink}px`
+    const columns = `${SIZED_NAME_ROW_COLUMNS_CLASS}${narrow}`
 
     return {
-      columns: SIZED_NAME_ROW_COLUMNS_CLASS,
-      style: { '--bar-name-width': width }
+      columns,
+      style: { '--bar-name-width': width },
+      barFromMd
     }
   }
 
@@ -225,6 +235,7 @@ type RowLayout = Readonly<{
   linked: boolean
   toggleSlot: boolean
   small?: boolean
+  barFromMd?: boolean
 }>
 
 function railHeightOf(thick: boolean, small: boolean): string {
@@ -243,7 +254,18 @@ type DetailsToggle = Readonly<{ open: boolean; onToggle: (key: string) => void }
 
 function BarRow({
   bar: { key, name, label, value, share, link, base = false },
-  layout: { columns, style, tone, formatValue, countUp, thick, linked, toggleSlot, small = false },
+  layout: {
+    columns,
+    style,
+    tone,
+    formatValue,
+    countUp,
+    thick,
+    linked,
+    toggleSlot,
+    small = false,
+    barFromMd = false
+  },
   percent,
   dimmed,
   onHover,
@@ -282,7 +304,9 @@ function BarRow({
       <span data-chart-name="" className={`truncate ${small || base ? 'text-fg-muted' : ''}`}>
         {label ?? name}
       </span>
-      <span className={`${RAIL_CLASS} ${railHeightOf(thick, small)}`}>
+      <span
+        className={`${RAIL_CLASS} ${railHeightOf(thick, small)}${barFromMd ? ' max-md:hidden' : ''}`}
+      >
         <span
           ref={markRef}
           data-chart-mark=""

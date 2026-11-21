@@ -80,7 +80,7 @@ function StatusBuffRow({ buff }: { buff: StatusBuff }): React.JSX.Element {
   return (
     <li className="flex items-baseline gap-2">
       <span className="font-semibold">{buff.name}</span>
-      {buff.level != null && <span className="num text-fg-subtle">{`Lv.${buff.level}`}</span>}
+      {buff.level != null && <span className="num text-fg-subtle">{`Lv ${buff.level}`}</span>}
       {values !== '' && <span className="text-fg-muted tabular-nums">{values}</span>}
     </li>
   )

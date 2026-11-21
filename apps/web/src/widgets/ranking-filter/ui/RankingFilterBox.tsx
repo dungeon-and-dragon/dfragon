@@ -1,11 +1,16 @@
-import { Button, ChipGroup, type ChipGroupItem } from '@dfragon/ui'
+import { Button, type ChipGroupItem } from '@dfragon/ui'
 import { type ReactNode, useId } from 'react'
+import { ChoiceField } from '#shared/ui/ChoiceField'
 import { RANKING_JOBS, type RankingGrow, type RankingJob } from '#entities/character'
 import type { FameRankingFilter } from '#entities/ranking'
 import { growFilter, growLabel } from '#widgets/ranking-filter/lib/ranking-jobs'
 
-const FILTER_ROW = 'flex items-start gap-4'
-const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center'
+// 600px 미만에서는 칩, 선택 상자, 버튼, 입력칸을 24px 높이와 12px 글자로 줄인다.
+const FILTER_BOX =
+  'section flex flex-col gap-3 px-4 max-sm:[&_:is(.chip,.select,.btn,.field-box)]:h-6 max-sm:[&_:is(.chip,.select,.btn)]:px-2 max-sm:[&_:is(.chip,.select,.btn,.field-input)]:text-xs'
+// 600px 미만에서는 라벨을 고르는 줄 위에 작은 글자로 둔다.
+const FILTER_ROW = 'flex items-start gap-4 max-sm:flex-col max-sm:gap-1'
+const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center max-sm:h-auto max-sm:w-auto'
 // 칩 묶음의 값은 문자열이라 직업은 jobId, 전직은 jobGrowId와 역할을 이은 키로 고른다.
 const ALL = 'all'
 
@@ -130,13 +135,14 @@ export function RankingFilterBox({
   }
 
   return (
-    <div className="section flex flex-col gap-3 px-4">
+    <div className={FILTER_BOX}>
       <div className={FILTER_ROW}>
         <h2 id={jobLabelId} className={FILTER_LABEL}>
           직업
         </h2>
-        <ChipGroup
-          aria-labelledby={jobLabelId}
+        <ChoiceField
+          label="직업"
+          labelId={jobLabelId}
           items={JOB_ITEMS}
           value={job?.jobId ?? ALL}
           onValueChange={selectJob}
@@ -146,8 +152,9 @@ export function RankingFilterBox({
         <h2 id={growLabelId} className={FILTER_LABEL}>
           전직
         </h2>
-        <ChipGroup
-          aria-labelledby={growLabelId}
+        <ChoiceField
+          label="전직"
+          labelId={growLabelId}
           items={growItems(job)}
           value={growValue}
           onValueChange={selectGrow}
