@@ -246,6 +246,20 @@ test('묶음 전체가 Neople 점검, 한도 초과로 실패하면 쉬었다가
   assert.deepEqual(summary, { characters: 2, refreshed: 2, inactive: 0, skipped: 0 })
 })
 
+test('묶음 일부만 Neople 점검, 한도 초과로 실패하면 쉬지 않고 실패한 캐릭터만 다시 부름', async () => {
+  const run = activity([synthetic('a'), synthetic('b')], (call, key, attempt) =>
+    call === 'timeline' && key === 'cain/a' && attempt === 1
+      ? new CharacterCollectionFailure('unavailable')
+      : undefined
+  )
+
+  const summary = await run.service.refreshFame(ignoreProgress)
+
+  assert.deepEqual(run.pauses, [])
+  assert.deepEqual(summary, { characters: 2, refreshed: 2, inactive: 0, skipped: 0 })
+  assert.equal(run.timelineCalls.filter((key) => key === 'cain/b').length, 1)
+})
+
 test('기본 정보가 캐릭터 문제로 실패하면 그 캐릭터만 건너뜀', async () => {
   const run = activity([synthetic('a'), synthetic('b')], (call, key) =>
     call === 'basic' && key === 'cain/b' ? new CharacterCollectionFailure('api') : undefined
