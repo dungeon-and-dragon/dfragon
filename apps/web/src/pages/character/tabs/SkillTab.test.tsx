@@ -8,12 +8,12 @@ import type { CharacterDetailView, MaleCrusaderRole } from '#entities/character'
 import type { GameTextLines, SkillWindowCatalog } from '#entities/catalog'
 import type { SkillStats } from '#entities/ranking'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
+import { loadingResponse } from '#pages/character/api/character.handlers'
 import {
-  loadingResponse,
-  SKILL_STATS_URL,
+  SKILL_WINDOW_INDEX_URL,
   skillWindowHandlers
-} from '#pages/character/api/character.handlers'
-import { SKILL_WINDOW_INDEX_URL } from '#pages/character/api/useSkillWindowCatalog'
+} from '#entities/catalog/api/skill-window.handlers'
+import { SKILL_STATS_URL } from '#entities/ranking/api/skill-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { SkillTab } from './SkillTab'

@@ -1,18 +1,64 @@
 import { z } from 'zod'
-import { ITEM_FILTER_LIMIT } from '#shared/config/ranking'
+import { EVOLUTION_FILTER_LIMIT, ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import { maleCrusaderRoleSchema, RANKING_JOBS } from '#entities/character'
-import type {
-  FameRankingFameRange,
-  FameRankingFilter,
-  FameRankingSetFilter,
-  SetStatsFilter
+import {
+  evolutionsQueryText,
+  type FameRankingFameRange,
+  type FameRankingFilter,
+  type FameRankingSetFilter,
+  type SetStatsFilter,
+  type SkillEvolutionChoice,
+  type SkillEvolutionType
 } from '#entities/ranking'
 import { growFilter } from '#widgets/ranking-filter/lib/ranking-jobs'
 
 const text = z.string().min(1).optional().catch(undefined)
 
-// 주소에는 itemIds를 API query와 같이 쉼표로 이어 둔다.
-export type RankingSearch = Omit<FameRankingFilter, 'itemIds'> & { itemIds?: string }
+// 주소에는 itemIds와 evolutions를 API query와 같은 문자열로 둔다.
+export type RankingSearch = Omit<FameRankingFilter, 'itemIds' | 'evolutions'> & {
+  itemIds?: string
+  evolutions?: string
+}
+
+const EVOLUTION_PATTERN = /^([^,~]+)~([12])$/
+
+function evolutionOf(pair: string): SkillEvolutionChoice | null {
+  const match = EVOLUTION_PATTERN.exec(pair)
+
+  if (match === null) {
+    return null
+  }
+
+  const [, name = '', typeText] = match
+  const type: SkillEvolutionType = typeText === '1' ? 1 : 2
+
+  return { name, type }
+}
+
+// 형식이 틀린 쌍, 같은 스킬 중복, 여섯 쌍 이상이 하나라도 있으면 개화 필터를 모두 버린다.
+const evolutionsSchema = z
+  .string()
+  .transform((value, context) => {
+    const pairs = value.split(',')
+    const choices = pairs
+      .map(evolutionOf)
+      .filter((choice): choice is SkillEvolutionChoice => choice !== null)
+    const names = new Set(choices.map(({ name }) => name))
+    const valid =
+      pairs.length <= EVOLUTION_FILTER_LIMIT &&
+      choices.length === pairs.length &&
+      names.size === choices.length
+
+    if (!valid) {
+      context.addIssue({ code: 'custom', message: 'invalid evolutions' })
+
+      return z.NEVER
+    }
+
+    return choices
+  })
+  .optional()
+  .catch(undefined)
 
 // 빈 항목과 중복은 버리고, 여섯 개 이상이면 아이템 필터를 모두 버린다.
 const itemIdsSchema = z
@@ -40,6 +86,7 @@ const searchSchema = z.object({
   oathSetId: z.coerce.number().int().positive().optional().catch(undefined),
   oathSetOption: text,
   itemIds: itemIdsSchema,
+  evolutions: evolutionsSchema,
   fameFrom: fame,
   fameTo: fame
 })
@@ -95,30 +142,56 @@ function itemFilterOf({ itemIds }: z.infer<typeof searchSchema>): RankingSearch 
   return { itemIds: itemIds.join(',') }
 }
 
+// API는 전직 없는 개화 필터를 거부하므로 전직을 고르지 않은 주소의 개화는 버린다.
+function evolutionFilterOf(
+  { evolutions }: z.infer<typeof searchSchema>,
+  jobFilter: SetStatsFilter
+): RankingSearch {
+  if (evolutions === undefined || jobFilter.jobGrowId === undefined) {
+    return {}
+  }
+
+  const text = evolutionsQueryText(evolutions)
+
+  return { evolutions: text }
+}
+
 export function parseRankingSearch(search: Record<string, unknown>): RankingSearch {
   const parsed = searchSchema.parse(search)
   const items = itemFilterOf(parsed)
   const jobFilter = jobFilterOf(parsed)
   const setFilter = setFilterOf(parsed)
   const fameFilter = fameFilterOf(parsed)
+  const evolutionFilter = evolutionFilterOf(parsed, jobFilter)
 
-  return { ...jobFilter, ...setFilter, ...items, ...fameFilter }
+  return { ...jobFilter, ...setFilter, ...items, ...evolutionFilter, ...fameFilter }
 }
 
-export function rankingFilterOf({ itemIds, ...rest }: RankingSearch): FameRankingFilter {
-  if (itemIds === undefined) {
-    return rest
-  }
+export function rankingFilterOf({
+  itemIds,
+  evolutions,
+  ...rest
+}: RankingSearch): FameRankingFilter {
+  const itemIdList = itemIds?.split(',')
+  const items = itemIdList !== undefined ? { itemIds: itemIdList } : {}
+  const parsedEvolutions = evolutionsSchema.parse(evolutions)
+  const evolutionFilter = parsedEvolutions !== undefined ? { evolutions: parsedEvolutions } : {}
 
-  return { ...rest, itemIds: itemIds.split(',') }
+  return { ...rest, ...items, ...evolutionFilter }
 }
 
-export function rankingSearchOf({ itemIds, ...rest }: FameRankingFilter): RankingSearch {
-  if (itemIds === undefined || itemIds.length === 0) {
-    return rest
-  }
+export function rankingSearchOf({
+  itemIds,
+  evolutions,
+  ...rest
+}: FameRankingFilter): RankingSearch {
+  const itemIdsText = itemIds !== undefined && itemIds.length > 0 ? itemIds.join(',') : undefined
+  const items = itemIdsText !== undefined ? { itemIds: itemIdsText } : {}
+  const evolutionText =
+    evolutions !== undefined && evolutions.length > 0 ? evolutionsQueryText(evolutions) : undefined
+  const evolutionSearch = evolutionText !== undefined ? { evolutions: evolutionText } : {}
 
-  return { ...rest, itemIds: itemIds.join(',') }
+  return { ...rest, ...items, ...evolutionSearch }
 }
 
 export function parseJobSearch(search: Record<string, unknown>): SetStatsFilter {

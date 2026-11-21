@@ -1,3 +1,5 @@
+export { useSkillWindowCatalog } from './api/useSkillWindowCatalog'
+export { SkillSprite } from './ui/SkillSprite'
 export { useOathCatalog } from './api/useOathCatalog'
 export type { GameTextLines, GameTextTone } from './model/game-text'
 export { oathItemIconOf, oathSetBoardOf } from './model/oath-catalog'

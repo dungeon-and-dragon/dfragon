@@ -2,6 +2,7 @@ export { useFameRanking } from './api/useFameRanking'
 export type { FameRankingPages } from './api/useFameRanking'
 export { useItemStats } from './api/useItemStats'
 export { useSetStats } from './api/useSetStats'
+export { skillStatsQueryKey, useSkillStats } from './api/useSkillStats'
 export {
   catalogOptionNamesOf,
   equipmentSetShortName,
@@ -33,7 +34,7 @@ export type {
 } from './model/clear-stats'
 export { itemSlotName, WEAPON_SLOT } from './model/item-stats'
 export type { ItemStats } from './model/item-stats'
-export { characterStatsSchema } from './model/ranking-stats'
+export { characterStatsSchema, evolutionsQueryText } from './model/ranking-stats'
 export type {
   CharacterStats,
   FameRanking,
@@ -42,6 +43,8 @@ export type {
   FameRankingSetFilter,
   RankedCharacter,
   SetStatsFilter,
+  SkillEvolutionChoice,
+  SkillEvolutionType,
   StoredCharacter
 } from './model/ranking-stats'
 export type { OathSetCount, SetStats } from './model/set-stats'
