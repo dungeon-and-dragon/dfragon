@@ -1,4 +1,4 @@
-import type { SkillIconImage } from '#entities/catalog'
+import type { SkillIconImage } from '#entities/catalog/model/skill-window'
 
 export function SkillSprite({
   icon,
