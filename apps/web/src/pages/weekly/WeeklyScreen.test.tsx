@@ -269,7 +269,7 @@ it('캐릭터가 없는 응답은 모험단 이름 한 줄만 둔다', async () 
   expect(container.querySelector('section p')).toBeNull()
 })
 
-it('갱신을 누르면 다시 받는 동안 받아 둔 표와 받는 중 버튼을 두고, 두 요청이 모두 끝나면 새 주간 던파 표를 그리고 버튼을 켠다', async () => {
+it('갱신을 누르면 다시 받는 동안 받아 둔 표와 받는 중 버튼을 두고, 두 요청이 모두 끝나면 새 주간 던파 표를 그리고 갱신 버튼은 꺼 둔다', async () => {
   const refreshedWeekly = Promise.withResolvers<Response>()
   const refreshedActivity = Promise.withResolvers<Response>()
   await renderWeekly(
@@ -295,7 +295,7 @@ it('갱신을 누르면 다시 받는 동안 받아 둔 표와 받는 중 버튼
   expect(button('받는 중')?.disabled).toBe(true)
 
   refreshedActivity.resolve(failure())
-  await vi.waitFor(() => expect(button('갱신')?.disabled).toBe(false))
+  await vi.waitFor(() => expect(button('갱신')?.disabled).toBe(true))
   expect(requested.toSorted()).toEqual([
     'GET /adventures/합성 모험단/activity',
     'GET /adventures/합성 모험단/activity',
@@ -304,7 +304,7 @@ it('갱신을 누르면 다시 받는 동안 받아 둔 표와 받는 중 버튼
   ])
 })
 
-it('갱신이 실패하면 오류 문구 없이 받아 둔 표를 두고 버튼을 다시 켠다', async () => {
+it('갱신이 실패하면 오류 문구 없이 받아 둔 표를 둔다', async () => {
   await renderWeekly('합성 모험단', [respondWeekly(weekly), failure], {
     activityReplies: [failure]
   })
@@ -314,9 +314,46 @@ it('갱신이 실패하면 오류 문구 없이 받아 둔 표를 두고 버튼�
   })
 
   await act(async () => button('갱신')!.click())
-  await vi.waitFor(() => expect(button('갱신')?.disabled).toBe(false))
+  await vi.waitFor(() => {
+    expect(button('받는 중')).toBeUndefined()
+    expect(button('갱신')?.disabled).toBe(true)
+  })
 
   expect(requested.filter((request) => request.endsWith('/weekly'))).toHaveLength(2)
   expect(bodyRows()).toHaveLength(2)
   expect(container.querySelector('section [role="alert"]')).toBeNull()
+})
+
+it('갱신 버튼은 누른 뒤 5분 동안 꺼 두고, 화면을 다시 그려도 그대로 두며 5분이 지나면 켠다', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+
+  try {
+    const screen = (key: string) => (
+      <WeeklyScreen
+        key={key}
+        adventureName="합성 모험단"
+        season={undefined}
+        onSeasonChange={vi.fn()}
+        onAdventureOpen={vi.fn()}
+      />
+    )
+
+    server.use(oathCatalogHandlers.notUploaded)
+    serve(ADVENTURE_WEEKLY_URL, [respondWeekly(weekly)])
+    serve(ADVENTURE_ACTIVITY_URL, [failure])
+    await render(screen('first'))
+    await vi.waitFor(() => expect(characterLinks()).toBe(2))
+
+    await act(async () => button('갱신')!.click())
+    await vi.waitFor(() => expect(button('갱신')?.disabled).toBe(true))
+
+    await render(screen('second'))
+    await act(async () => vi.advanceTimersByTime(5 * 60_000 - 1_000))
+    expect(button('갱신')?.disabled).toBe(true)
+
+    await act(async () => vi.advanceTimersByTime(1_000))
+    expect(button('갱신')?.disabled).toBe(false)
+  } finally {
+    vi.useRealTimers()
+  }
 })

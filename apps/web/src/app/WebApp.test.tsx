@@ -671,11 +671,11 @@ it('활동 탭의 갱신을 누르면 받아 둔 장비 조회도 다시 받는�
     expect(container.querySelector('main h1')?.textContent).toBe('합성 모험단')
   )
   await clickText('main button', '갱신')
-  await vi.waitFor(() =>
-    expect(
-      container.querySelector<HTMLButtonElement>('main form button[type="button"]')?.disabled
-    ).toBe(false)
-  )
+  await vi.waitFor(() => {
+    const refresh = container.querySelector<HTMLButtonElement>('main form button[type="button"]')
+    expect(refresh?.textContent).toBe('갱신')
+    expect(refresh?.disabled).toBe(true)
+  })
   await clickText('nav[aria-label="모험단"] a', '장비')
 
   await vi.waitFor(() =>

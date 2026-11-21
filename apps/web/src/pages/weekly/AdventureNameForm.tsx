@@ -1,5 +1,6 @@
 import { Button, IconButton, RefreshIcon, SearchIcon, TextField, TextFieldInput } from '@dfragon/ui'
-import { type ChangeEvent, type FormEvent, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { type ChangeEvent, type FormEvent, useEffect, useState } from 'react'
 import { useRefreshAdventureActivity } from './api/useAdventureActivity'
 import { useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { useRefreshAdventureWeekly } from './api/useAdventureWeekly'
@@ -8,6 +9,7 @@ export function AdventureNameForm({
   initialName,
   onAdventureOpen,
   refreshing = false,
+  refreshDisabled = false,
   onRefresh,
   className = 'border-t border-line px-4 py-3 first:border-t-0'
 }: {
@@ -15,6 +17,7 @@ export function AdventureNameForm({
   className?: string
   onAdventureOpen: (adventureName: string) => void
   refreshing?: boolean
+  refreshDisabled?: boolean
   onRefresh?: () => void
 }): React.JSX.Element {
   const [draft, setDraft] = useState(initialName)
@@ -57,7 +60,7 @@ export function AdventureNameForm({
           type="button"
           variant="secondary"
           size="sm"
-          disabled={refreshing}
+          disabled={refreshing || refreshDisabled}
           onClick={onRefresh}
         >
           <RefreshIcon
@@ -81,8 +84,11 @@ export function AdventureTabsForm({
   const refreshWeekly = useRefreshAdventureWeekly()
   const refreshEquipment = useRefreshAdventureEquipment()
   const [refreshing, setRefreshing] = useState(false)
+  const { refreshedAt, markRefreshed } = useRefreshedAt(adventureName)
+  const coolingDown = useCoolingDown(refreshedAt)
 
   async function handleRefresh(): Promise<void> {
+    markRefreshed(Date.now())
     setRefreshing(true)
     await Promise.all([
       refreshActivity(adventureName),
@@ -97,8 +103,55 @@ export function AdventureTabsForm({
       initialName={adventureName}
       onAdventureOpen={onAdventureOpen}
       refreshing={refreshing}
+      refreshDisabled={coolingDown}
       onRefresh={handleRefresh}
       className="px-4 py-2 max-sm:w-full max-sm:border-t max-sm:border-line"
     />
   )
+}
+
+const REFRESH_COOLDOWN_MS = 5 * 60_000
+
+function refreshedAtKey(adventureName: string) {
+  return ['adventure', adventureName, 'refreshed-at'] as const
+}
+
+// 탭을 옮기면 버튼이 다시 그려지므로, 마지막으로 누른 시각을 모험단별로 query 캐시에 둔다.
+function useRefreshedAt(adventureName: string): {
+  refreshedAt: number | null | undefined
+  markRefreshed: (at: number) => void
+} {
+  const queryClient = useQueryClient()
+  const key = refreshedAtKey(adventureName)
+  const { data } = useQuery<number | null>({
+    queryKey: key,
+    queryFn: () => null,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY
+  })
+
+  function markRefreshed(at: number): void {
+    queryClient.setQueryData(key, at)
+  }
+
+  return { refreshedAt: data, markRefreshed }
+}
+
+function useCoolingDown(refreshedAt: number | null | undefined): boolean {
+  const [cooledAt, setCooledAt] = useState<number>()
+
+  useEffect(() => {
+    if (refreshedAt == null) {
+      return
+    }
+
+    const timer = window.setTimeout(
+      () => setCooledAt(refreshedAt),
+      refreshedAt + REFRESH_COOLDOWN_MS - Date.now()
+    )
+
+    return () => window.clearTimeout(timer)
+  }, [refreshedAt])
+
+  return refreshedAt != null && cooledAt !== refreshedAt
 }
