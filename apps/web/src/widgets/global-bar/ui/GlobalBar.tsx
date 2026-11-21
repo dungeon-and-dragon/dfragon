@@ -34,7 +34,7 @@ export function GlobalBar(): React.JSX.Element {
 
   return (
     <header className="topbar">
-      <div className="page max-sm:h-auto max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-0 max-sm:pt-2">
+      <div className="page max-md:h-auto max-md:flex-wrap max-md:gap-x-3 max-md:gap-y-0 max-md:pt-2">
         <Link
           to="/"
           aria-label={`${PRODUCT_NAME} 첫 화면`}
@@ -44,11 +44,11 @@ export function GlobalBar(): React.JSX.Element {
             {PRODUCT_NAME}
           </span>
         </Link>
-        <span aria-hidden="true" className="divider-v max-sm:hidden" />
+        <span aria-hidden="true" className="divider-v max-md:hidden" />
         <nav
           ref={menuRef}
           aria-label="전역 메뉴"
-          className="relative flex min-w-0 grow items-stretch self-stretch overflow-x-auto max-sm:order-last max-sm:h-[40px] max-sm:basis-full"
+          className="relative flex min-w-0 grow items-stretch self-stretch overflow-x-auto max-md:order-last max-md:h-[40px] max-md:basis-full"
         >
           <span
             ref={underlineRef}
