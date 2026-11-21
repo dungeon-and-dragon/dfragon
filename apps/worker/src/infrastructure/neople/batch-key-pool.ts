@@ -24,6 +24,7 @@ export type BatchNeopleKeyPool = {
   neople: WorkerNeople
   refresh(): Promise<void>
   readConcurrency(): number
+  drainFailures(): string
 }
 
 type KeySlot = {
@@ -44,6 +45,12 @@ export function createBatchNeopleKeyPool({
 }: BatchNeopleKeyPoolDependencies): BatchNeopleKeyPool {
   let slots = new Map<number, KeySlot>()
   let waiters: (() => void)[] = []
+  let failures = new Map<string, number>()
+
+  function countFailure({ kind, upstream }: NeopleRequestFailure): void {
+    const reason = upstream !== undefined ? `${upstream.status}/${upstream.code ?? 'none'}` : kind
+    failures.set(reason, (failures.get(reason) ?? 0) + 1)
+  }
 
   function createSlot({ id, key }: UsableBatchNeopleKey): KeySlot {
     const neople = createNeople(key)
@@ -145,6 +152,8 @@ export function createBatchNeopleKeyPool({
           throw error
         }
 
+        countFailure(error)
+
         const code = error.upstream?.code
         if (code === RATE_LIMITED_CODE) {
           rest(slot)
@@ -189,6 +198,16 @@ export function createBatchNeopleKeyPool({
       }
 
       return slots.size * concurrencyPerKey
+    },
+    drainFailures() {
+      const drained = [...failures]
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([reason, count]) => `${reason}=${count}`)
+        .join(',')
+
+      failures = new Map()
+
+      return drained
     }
   }
 }

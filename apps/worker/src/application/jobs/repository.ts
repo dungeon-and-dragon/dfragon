@@ -22,4 +22,5 @@ export interface JobRepository {
 
 export interface JobRunCleanupRepository {
   deleteJobRunsFinishedBefore(before: Date): Promise<number>
+  deleteWorkerEventsBefore(before: Date): Promise<number>
 }

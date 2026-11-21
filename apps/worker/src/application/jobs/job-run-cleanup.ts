@@ -4,15 +4,19 @@ import { defineJob } from './definition.js'
 import type { JobRunCleanupRepository } from './repository.js'
 
 const RETENTION_DAYS = 90
+const EVENT_RETENTION_DAYS = 30
 
 export class JobRunCleanupService {
   constructor(private readonly repository: JobRunCleanupRepository) {}
 
-  async cleanup(): Promise<{ deleted: number }> {
-    const before = subDays(new Date(), RETENTION_DAYS)
-    const deleted = await this.repository.deleteJobRunsFinishedBefore(before)
+  async cleanup(): Promise<{ deleted: number; deletedEvents: number }> {
+    const now = new Date()
+    const deleted = await this.repository.deleteJobRunsFinishedBefore(subDays(now, RETENTION_DAYS))
+    const deletedEvents = await this.repository.deleteWorkerEventsBefore(
+      subDays(now, EVENT_RETENTION_DAYS)
+    )
 
-    return { deleted }
+    return { deleted, deletedEvents }
   }
 }
 
@@ -20,7 +24,7 @@ export function createJobRunCleanupJob(service: JobRunCleanupService) {
   return defineJob({
     name: 'job-run-cleanup',
     displayName: '실행 이력 정리',
-    description: '끝난 지 90일이 지난 실행 이력을 지웁니다.',
+    description: '끝난 지 90일이 지난 실행 이력과 30일이 지난 worker 이벤트를 지웁니다.',
     schedule: '0 4 * * *',
     argsSchema: z.object({}),
     delayMinutes: 5,
