@@ -8,6 +8,7 @@ import {
   readClearPopulation,
   readFameRefreshTargets,
   readInactiveCharacters,
+  readSampleCharactersWithoutSkillStyle,
   recordCharacter,
   recordCharacterActive,
   recordCharacterBasic,
@@ -166,4 +167,19 @@ test('클리어 모집단은 활성만 읽으면 비활성 캐릭터를 빼고, 
 
   const includingInactive = await readClearPopulation(client, 50000, 'include-inactive')
   assert.deepEqual(bakalOf(includingInactive), ['bakal/active', 'bakal/inactive'])
+})
+
+test('스킬 스타일 수집 대상에서 비활성 캐릭터를 뺌', {
+  skip: port === undefined
+}, async () => {
+  await createFetched('hilder', 'active')
+  const inactive = await createFetched('hilder', 'inactive')
+  await recordCharacterInactive(client, inactive, at('19T03:00:00'))
+
+  const targets = await readSampleCharactersWithoutSkillStyle(client)
+
+  assert.deepEqual(
+    keysOf(targets).filter((key) => key.startsWith('hilder/')),
+    ['hilder/active']
+  )
 })
