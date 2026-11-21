@@ -7,7 +7,8 @@ import type { SkillWindowCatalog } from '#entities/catalog/model/skill-window'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { SKILL_WINDOW_INDEX_URL, useSkillWindowCatalog } from './useSkillWindowCatalog'
+import { SKILL_WINDOW_INDEX_URL } from './skill-window.handlers'
+import { useSkillWindowCatalog } from './useSkillWindowCatalog'
 
 const SKILLTAB_URL = `${window.location.origin}/skilltab`
 const PRIEST_FILE_URL = `${SKILLTAB_URL}/1d9658f7/jobs/priest.521c797c.json`

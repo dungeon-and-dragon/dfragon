@@ -1,8 +1,8 @@
 import { HttpResponse, http } from 'msw'
 import type { SkillWindowCatalog } from '#entities/catalog/model/skill-window'
-import { SKILL_WINDOW_INDEX_URL } from './useSkillWindowCatalog'
+import { skillWindowIndexUrl } from './useSkillWindowCatalog'
 
-export { SKILL_WINDOW_INDEX_URL }
+export const SKILL_WINDOW_INDEX_URL = skillWindowIndexUrl()
 
 function skillWindowJobUrl(jobId: string): string {
   return new URL(`jobs/${jobId}.json`, SKILL_WINDOW_INDEX_URL).href
