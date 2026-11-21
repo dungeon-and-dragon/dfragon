@@ -9,6 +9,8 @@
  *   <div class="section section-cols"><section>…</section><section>…</section></div>
  * </main>
  * 구획 아래 가로 선은 창 전체 폭으로 그려 화면 상자 밖으로 나가므로, 화면을 담은 상자가 overflow-x: clip으로 자른다.
+ * 900px 미만에서는 화면 상자가 창 폭을 채우고 안쪽이 가로로 스크롤하므로, 선을 구획 안쪽에 맞추고 상자 밖으로 4px 나가는 표식을 빼
+ * 스크롤 범위를 넓히지 않게 한다. 선이 구획 아래로 1px 나가면 마지막 구획의 선이 잘리고 1px 세로 스크롤이 생긴다.
  */
 .topbar {
   flex-shrink: 0;
@@ -159,6 +161,18 @@
   align-items: flex-end;
 }
 
+@media (width < 900px) {
+  .section::after {
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .section::before {
+    content: none;
+  }
+}
+
 @media (width < 600px) {
   .screen {
     border-inline: 0;
@@ -167,10 +181,6 @@
   .section,
   .section-cols > * {
     padding-block: 16px;
-  }
-
-  .section::before {
-    content: none;
   }
 
   .section-cols {
