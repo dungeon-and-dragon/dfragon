@@ -116,5 +116,7 @@ export {
   matchesDNFSearchNicknamePolicy
 } from './dnf-character-search.js'
 export { MALE_CRUSADER_DEALER_SKILL } from './dnf-male-crusader.js'
+export { SET_SAMPLES, SET_SAMPLE_MIN_FAME, SET_SAMPLE_TOP_COUNT } from './dnf-set-sample.js'
+export type { SetSample } from './dnf-set-sample.js'
 export { SKILL_STYLE_SAMPLE_TOP_COUNT } from './dnf-skill-style.js'
 export { PRODUCT_NAME } from './product.js'
