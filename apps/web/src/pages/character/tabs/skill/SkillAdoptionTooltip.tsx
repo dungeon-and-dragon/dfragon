@@ -8,6 +8,8 @@ import {
 } from '#entities/character'
 import {
   type SkillAdoption,
+  type SkillLevelDistribution,
+  type SkillLevelRate,
   type SkillStats,
   type SkillUpgradeRates,
   skillAdoptionOf
@@ -21,6 +23,7 @@ const UPGRADE_TYPES = [1, 2] as const satisfies readonly UpgradeType[]
 const integer = new Intl.NumberFormat('ko-KR')
 
 const ROWS = 'grid grid-cols-[auto_auto] items-center gap-x-6 gap-y-1'
+const TOP_LEVEL_ROWS = 'grid grid-cols-[auto_auto] items-center gap-x-6'
 const LABEL = 'text-fg-muted'
 const VALUE = 'text-right num'
 const HEADING = 'mt-1 text-2xs text-fg-subtle'
@@ -67,6 +70,77 @@ function UpgradeRows({
   )
 }
 
+const LEVEL_CHART_HEIGHT = 40
+
+type LevelPoint = Readonly<{ x: number; height: number }>
+
+function levelPointOf(
+  { level, rate }: SkillLevelRate,
+  lastLevel: number,
+  highestRate: number
+): LevelPoint {
+  const x = ((level - 1) / Math.max(1, lastLevel - 1)) * 100
+  const height = rate / highestRate
+
+  return { x, height }
+}
+
+function LevelDistribution({ levels }: { levels: SkillLevelDistribution }): React.JSX.Element {
+  const { rates, current } = levels
+  const highestRate = Math.max(...rates.map(({ rate }) => rate))
+  const lastLevel = rates.length
+  const points = rates
+    .map((rate) => levelPointOf(rate, lastLevel, highestRate))
+    .map(({ x, height }) => `${x},${(1 - height) * LEVEL_CHART_HEIGHT}`)
+    .join(' ')
+  const currentPoint = current !== null ? levelPointOf(current, lastLevel, highestRate) : null
+
+  return (
+    <>
+      <span className={HEADING}>레벨</span>
+      <span aria-hidden="true" className="relative block h-[40px]">
+        {/* 가로만 Tooltip 폭에 맞춰 늘리므로, 선 굵기는 non-scaling-stroke로 늘어나지 않게 한다. */}
+        <svg
+          viewBox={`0 0 100 ${LEVEL_CHART_HEIGHT}`}
+          preserveAspectRatio="none"
+          className="block size-full overflow-visible"
+        >
+          <polyline
+            points={points}
+            fill="none"
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            className="stroke-chart-1"
+          />
+        </svg>
+        {currentPoint !== null && (
+          <span
+            data-current-level=""
+            className="absolute size-[6px] -translate-x-1/2 translate-y-1/2 rounded-full bg-chart-1"
+            style={{ left: `${currentPoint.x}%`, bottom: `${currentPoint.height * 100}%` }}
+          />
+        )}
+      </span>
+      <span className="flex justify-between text-2xs text-fg-subtle num">
+        <span>1</span>
+        {lastLevel > 1 && <span>{lastLevel}</span>}
+      </span>
+      <span className={TOP_LEVEL_ROWS}>
+        {levels.top.map(({ level, rate }) => (
+          <Fragment key={level}>
+            <span className={LABEL}>
+              <span className="text-2xs text-fg-subtle">Lv</span>
+              <span className="ml-1 inline-block min-w-[2ch] text-right num">{level}</span>
+            </span>
+            <span className={VALUE}>{formatRate(rate)}</span>
+          </Fragment>
+        ))}
+      </span>
+    </>
+  )
+}
+
 function sampleText(sampleSize: number, role: MaleCrusaderRole | null): string {
   const sample = `표본 ${integer.format(sampleSize)}명`
   if (role === null) {
@@ -99,17 +173,7 @@ export function SkillAdoptionTooltip({
         <span className={LABEL}>채택률</span>
         <span className={VALUE}>{formatRate(adoption.adoption)}</span>
       </span>
-      {levels !== null && (
-        <>
-          <span className={HEADING}>레벨</span>
-          <span className={ROWS}>
-            <span className={LABEL}>상위 50%</span>
-            <span className={VALUE}>{levels.p50}</span>
-            <span className={LABEL}>상위 5%</span>
-            <span className={VALUE}>{levels.p95}</span>
-          </span>
-        </>
-      )}
+      {levels !== null && <LevelDistribution levels={levels} />}
       {evolution !== null && (
         <UpgradeRows
           kind="evolution"
@@ -145,6 +209,8 @@ export type SkillAdoptionSource = Readonly<{
 
 export type SkillAdoptionSkill = Readonly<{
   name: string
+  level: number | null
+  maxLevel: number
   evolutionNames: readonly [string, string] | null
   enhanceable: boolean
 }>
@@ -159,6 +225,8 @@ function adoptionOf(
 
   return skillAdoptionOf(stats, {
     name: skill.name,
+    level: skill.level,
+    maxLevel: skill.maxLevel,
     evolutionNames: skill.evolutionNames,
     hasEnhancement: skill.enhanceable
   })
