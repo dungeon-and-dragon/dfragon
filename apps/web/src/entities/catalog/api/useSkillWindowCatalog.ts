@@ -10,7 +10,7 @@ import {
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { absoluteUrl, fetchStaticJson, fetchUploadedStaticJson } from '#shared/lib/static-json'
 
-// 스킬 창 데이터는 사이트 빌드에 넣지 않고 따로 올리며, host Caddy와 개발 서버가 같은 origin의 /skilltab/ 아래에 내준다.
+// 스킬 창 데이터는 사이트 빌드에 넣지 않고 따로 올리며, edge nginx와 개발 서버가 같은 origin의 /skilltab/ 아래에 내준다.
 export function skillWindowIndexUrl(): string {
   return `${window.location.origin}/skilltab/skilltab.v3.json`
 }

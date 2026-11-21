@@ -28,6 +28,7 @@
 !apps/web/**
 **/node_modules/
 **/dist/
+**/.output/
 **/.git
 apps/web/public/ocr/
 packages/lib/LICENSES/

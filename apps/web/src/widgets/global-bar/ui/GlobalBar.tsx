@@ -1,5 +1,6 @@
 import { PRODUCT_NAME } from '@dfragon/lib'
-import { Link, type LinkProps, useLocation } from '@tanstack/react-router'
+import { IconButton } from '@dfragon/ui'
+import { ClientOnly, Link, type LinkProps, useLocation } from '@tanstack/react-router'
 import { useRef } from 'react'
 import { useIndicatorSlide } from '#shared/lib/animations/useIndicatorSlide'
 import { useTodayGrade } from '#widgets/global-bar/api/useTodayGrade'
@@ -80,7 +81,10 @@ export function GlobalBar(): React.JSX.Element {
         </nav>
         {!isHome && <CharacterSearchBox />}
         <TodayGrade grade={grade} />
-        <ColorModeToggle />
+        {/* 고른 색 모드와 시스템 설정은 브라우저만 알아, 서버가 만드는 HTML에는 누를 수 없는 빈 버튼으로 자리만 둔다. */}
+        <ClientOnly fallback={<IconButton aria-label="색 모드 바꾸기" icon={null} disabled />}>
+          <ColorModeToggle />
+        </ClientOnly>
       </div>
     </header>
   )
