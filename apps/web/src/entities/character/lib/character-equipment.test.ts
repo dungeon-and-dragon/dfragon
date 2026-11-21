@@ -170,7 +170,6 @@ describe('장비 탭 값', () => {
       refine: null,
       tune: null,
       enchants: [{ label: '모든 속성 강화 +15', emphasized: true }],
-      exalted: false,
       potency: null
     })
     expect(view.items[1].reinforce).toBeNull()
@@ -228,20 +227,20 @@ describe('장비 탭 값', () => {
     })
   })
 
-  it('조율 단계를 로마 숫자로, 유일 장비 여부와 정밀도를 읽는다', () => {
+  it('조율 단계를 로마 숫자로, 정밀도는 100% 미만일 때만 읽는다', () => {
     const detail = characterDetailFixture('dealer')
-    const [, , jacket, shoulder, pants] = detail.equipment.equipment
+    const [, , jacket, shoulder, pants, shoes] = detail.equipment.equipment
     jacket.tune = [{ level: 1, setPoint: 245 }]
     shoulder.tune = [{ level: 3, setPoint: 265 }]
-    Object.assign(pants, { exaltedInfo: { explain: null }, potency: { value: 100 } })
+    Object.assign(pants, { potency: { value: 90 } })
+    Object.assign(shoes, { potency: { value: 100 } })
     const view = toEquipmentView(detail)
 
-    expect(
-      view.items.slice(2, 5).map(({ tune, exalted, potency }) => [tune, exalted, potency])
-    ).toEqual([
-      ['I', false, null],
-      ['III', false, null],
-      [null, true, '100%']
+    expect(view.items.slice(2, 6).map(({ tune, potency }) => [tune, potency])).toEqual([
+      ['I', null],
+      ['III', null],
+      [null, '90%'],
+      [null, null]
     ])
   })
 

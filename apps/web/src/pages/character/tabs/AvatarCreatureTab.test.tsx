@@ -70,7 +70,7 @@ function auraWithSkin(detail: Detail) {
   return { aura, auraSkin }
 }
 
-it('딜러 아바타 표는 응답 순서대로 부위, 등급 색 이름과 클론 이름, 옵션, 엠블렘 이름을 보인다', async () => {
+it('딜러 아바타 표는 응답 순서대로 부위, 등급 색 이름과 클론 이름, 옵션, 엠블렘 능력치를 보인다', async () => {
   await render(characterDetailFixture('dealer'))
 
   const rows = [...container.querySelectorAll('section[aria-label="아바타"] tbody tr')]
@@ -91,8 +91,11 @@ it('딜러 아바타 표는 응답 순서대로 부위, 등급 색 이름과 클
     '모자',
     '레어 모자 클론 아바타|인페르노의 장식핀[B타입]',
     '정신력 55 증가',
-    '찬란한 붉은빛 엠블렘[힘]|찬란한 붉은빛 엠블렘[힘]'
+    '힘|힘'
   ])
+  expect(rows[0]!.querySelector('td:last-child b')?.getAttribute('title')).toBe(
+    '찬란한 붉은빛 엠블렘[힘]'
+  )
   const [, avatarCell, , emblemCell] = rows[0]!.querySelectorAll('td')
   expect(hasTone(avatarCell?.querySelector('b'), rarityTones.rare)).toBe(true)
   expect(avatarCell?.querySelector('span[title]')?.getAttribute('title')).toBe(

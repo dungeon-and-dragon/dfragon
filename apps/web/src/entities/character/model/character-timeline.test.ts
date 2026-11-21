@@ -10,22 +10,6 @@ function readTimeline(body: unknown): CharacterTimeline {
 }
 
 const filled: CharacterTimeline = {
-  weeklyClears: [
-    {
-      kind: 'raid',
-      name: '디레지에 레이드',
-      modeName: '디레지에 : 악연',
-      hard: true,
-      occurredAt: '2026-11-05T12:30:00.000Z'
-    },
-    {
-      kind: 'legion',
-      name: '베누스',
-      modeName: null,
-      hard: false,
-      occurredAt: '2026-11-05T13:00:00.000Z'
-    }
-  ],
   seasonClears: [{ kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 }],
   enhancements: [
     {
@@ -55,7 +39,6 @@ const filled: CharacterTimeline = {
 }
 
 const empty: CharacterTimeline = {
-  weeklyClears: [],
   seasonClears: [],
   enhancements: [],
   enhancementsCursor: null,
@@ -69,12 +52,10 @@ it('값이 있는 응답과 빈 응답을 그대로 읽는다', () => {
 })
 
 it('hard를 주지 않는 API의 클리어는 하드가 아닌 것으로 읽는다', () => {
-  const { hard: _weeklyHard, ...weekly } = filled.weeklyClears[0]
   const { hard: _seasonHard, ...season } = filled.seasonClears[0]
 
-  expect(readTimeline({ ...empty, weeklyClears: [weekly], seasonClears: [season] })).toEqual({
+  expect(readTimeline({ ...empty, seasonClears: [season] })).toEqual({
     ...empty,
-    weeklyClears: [{ ...weekly, hard: false }],
     seasonClears: [{ ...season, hard: false }]
   })
 })
@@ -107,7 +88,7 @@ it.each([
   ],
   [
     '시각이 아닌 occurredAt',
-    { ...empty, weeklyClears: [{ ...filled.weeklyClears[0], occurredAt: '어제' }] }
+    { ...empty, enhancements: [{ ...filled.enhancements[0], occurredAt: '어제' }] }
   ]
 ])('%s는 읽지 않는다', (_name, body) => {
   expect(characterTimelineSchema.safeParse(body).success).toBe(false)
