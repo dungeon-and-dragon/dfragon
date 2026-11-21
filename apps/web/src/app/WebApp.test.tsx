@@ -1594,7 +1594,9 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
   expect(statsTabs.map((tab) => [tab.textContent, tab.getAttribute('aria-current')])).toEqual([
     ['캐릭터', null],
-    ['세트', 'page']
+    ['세트', 'page'],
+    ['조합', null],
+    ['무기', null]
   ])
 
   const secondChip = [...container.querySelectorAll<HTMLButtonElement>('button')].find(
@@ -1611,6 +1613,27 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
     )
   )
 })
+
+it.each([
+  ['조합', '/stats/combos', '/stats/sets'],
+  ['무기', '/stats/weapons', '/stats/items']
+])(
+  '%s 통계 주소를 직접 열면 그 탭을 고르고 주소의 직업으로 통계를 받는다',
+  async (tab, path, api) => {
+    serveSetStats()
+    const [job] = RANKING_JOBS
+    window.history.replaceState(null, '', `${path}?jobId=${job!.jobId}`)
+    await act(async () => root.render(<WebApp host={host} />))
+
+    await vi.waitFor(() =>
+      expect(requestedPaths(api).map(({ search }) => search)).toEqual([
+        `?jobId=${job!.jobId}&sample=all`
+      ])
+    )
+    const current = container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')
+    expect(current?.textContent).toBe(tab)
+  }
+)
 
 it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세트로 거른 랭킹 주소로 가서 랭킹을 그 조건으로 받는다', async () => {
   serveSetStats()
