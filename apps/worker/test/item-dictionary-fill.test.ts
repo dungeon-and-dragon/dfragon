@@ -59,7 +59,6 @@ test('아이템 사전 채우기는 사전에 없는 itemId만 조회하고, 바
   const progress: [number, number | undefined][] = []
   const context = { reportProgress: (done: number, total?: number) => progress.push([done, total]) }
 
-  assert.equal(job.schedule, undefined)
   assert.deepEqual(await job.run({}, context), { fetched: 16 })
   assert.deepEqual(requested.flat().toSorted(), acquiredItemIds.slice(1).toSorted())
   assert.deepEqual(
@@ -72,4 +71,14 @@ test('아이템 사전 채우기는 사전에 없는 itemId만 조회하고, 바
   requested.length = 0
   assert.deepEqual(await job.run({}, context), { fetched: 0 })
   assert.deepEqual(requested, [])
+})
+
+test('아이템 사전 채우기 job은 매시간 정각에 돈다', () => {
+  const stores = memoryStores()
+  const job = createItemDictionaryFillJob(
+    stores.acquisitions,
+    new ItemDictionaryService(stores.dictionary, async () => new Map())
+  )
+
+  assert.equal(job.schedule, '0 * * * *')
 })
