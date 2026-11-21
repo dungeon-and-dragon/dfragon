@@ -6,6 +6,8 @@ import { rankingLink, shareOf } from './set-stats-bars'
 // 전체 직업은 무기 종류가 많아 많은 순 10개만 막대로 두고 나머지는 "그 밖" 하나로 묶는다.
 const ALL_JOBS_WEAPON_LIMIT = 10
 const OTHER_WEAPONS = '그 밖'
+// 비율은 소수 한 자리로 보이므로, 0.0%로 반올림되는 무기는 막대를 두지 않는다.
+const MIN_SHOWN_WEAPON_SHARE = 0.05
 // 접두사가 붙은 무기는 성능이 같은 다른 아이템 ID라, 접두사를 뗀 이름의 무기와 한 막대로 센다.
 const MERGED_WEAPON_PREFIX = '검은 질병의 '
 
@@ -45,15 +47,19 @@ export function weaponBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
 
     return { key: itemId, name, value, link }
   })
+  const visibleBars = bars.filter(({ value }) => value >= MIN_SHOWN_WEAPON_SHARE)
 
   if (!limited) {
-    return bars
+    return visibleBars
   }
 
   const otherCount = sorted.slice(ALL_JOBS_WEAPON_LIMIT).reduce((sum, { count }) => sum + count, 0)
   const otherValue = shareOf(otherCount, stats.sampleSize)
 
-  return [...bars, { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }]
+  return [
+    ...visibleBars,
+    { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }
+  ]
 }
 
 // 응답은 아무도 끼지 않은 부위를 빼므로, 그 부위도 0명으로 보이도록 부위를 따로 둔다.
