@@ -30,6 +30,9 @@ afterEach(async () => {
 })
 
 function member(index: number): StoredCharacter {
+  const score: StoredCharacter['score'] =
+    index === 1 ? { calculator: 'equipment', value: 1_234_567 } : null
+
   return {
     serverId: 'cain',
     characterId: `character-${index}`,
@@ -43,7 +46,8 @@ function member(index: number): StoredCharacter {
     fame: 90000 - index,
     guildId: 'guild-1',
     guildName: '합성 길드',
-    role: null
+    role: null,
+    score
   }
 }
 
@@ -92,7 +96,7 @@ function clickMore(): Promise<void> {
   return act(async () => moreButton()?.click())
 }
 
-it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐릭터, 명성, 모험단이다', async () => {
+it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐릭터, 명성, 점수, 모험단이다', async () => {
   await render(guildOf(2))
 
   expect(requestedGuildIds).toEqual(['guild-1'])
@@ -104,12 +108,15 @@ it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐
     '#',
     '캐릭터',
     '명성',
+    '점수',
     '모험단'
   ])
+  expect(container.querySelector('thead th[aria-sort]')).toBeNull()
   expect([...bodyRows()[0].querySelectorAll('td')].map((cell) => cell.textContent)).toEqual([
     '1',
     '카인합성1합성 전직',
     '89,999',
+    '장비1,234,567',
     '모험단1'
   ])
   expect(

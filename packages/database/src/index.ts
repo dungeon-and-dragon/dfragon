@@ -47,6 +47,7 @@ export type {
 export { readCharacterScores, recordCharacterScore } from './character-score.js'
 export type {
   CharacterScoreInput,
+  CharacterScoreJob,
   CharacterScoreKind,
   StoredCharacterScore,
   StoredCharacterScoreRow
@@ -301,5 +302,6 @@ export type {
   FameRankingPosition,
   JobCount,
   RankedStoredCharacter,
+  RankingSort,
   ServerCount
 } from './ranking-stats.js'

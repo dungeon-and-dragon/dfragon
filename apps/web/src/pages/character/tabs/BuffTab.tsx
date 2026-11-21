@@ -1,11 +1,14 @@
 import { Tooltip } from '@dfragon/ui'
 import { buffSkillInfoOf } from '#entities/character'
-import { buffSkillIconOf, type SkillIconImage } from '#entities/catalog'
-import { useSkillWindowCatalog } from '#pages/character/api/useSkillWindowCatalog'
+import {
+  buffSkillIconOf,
+  type SkillIconImage,
+  SkillSprite,
+  useSkillWindowCatalog
+} from '#entities/catalog'
 import { BuffGearTable } from './buff/BuffGearTable'
 import type { CharacterTabProps } from './character-tab-props'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
-import { SkillSprite } from './skill/SkillSprite'
 import { SKILL_TOOLTIP } from './skill/skill-classes'
 
 const SKILL_NAME = 'm-0 text-sm font-semibold'

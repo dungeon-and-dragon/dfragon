@@ -2,7 +2,14 @@ import { CheckIcon } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { ClearName, WeeklyCharacter } from '#entities/adventure-guild'
-import { CharacterCell, FAME_COLUMN, RANK_COLUMN, RankNumber } from '#widgets/character-table'
+import {
+  CharacterCell,
+  FAME_COLUMN,
+  RANK_COLUMN,
+  RankNumber,
+  SCORE_COLUMN,
+  ScoreValue
+} from '#widgets/character-table'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -38,6 +45,7 @@ export function WeeklyClearTable({
         <col className={RANK_COLUMN} />
         <col />
         <col className={FAME_COLUMN} />
+        <col className={SCORE_COLUMN} />
         {clearNames.map(({ kind, name }) => (
           <col key={`${kind}/${name}`} className="w-[96px]" />
         ))}
@@ -52,6 +60,9 @@ export function WeeklyClearTable({
           </th>
           <th scope="col" rowSpan={headRows} className="table-num">
             명성
+          </th>
+          <th scope="col" rowSpan={headRows} className="table-num">
+            점수
           </th>
           {groups.map(({ label, span }) => (
             <th key={label} scope="colgroup" colSpan={span} className="text-center">
@@ -81,6 +92,9 @@ export function WeeklyClearTable({
             </td>
             <td className="table-num font-semibold text-game-fame">
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
+            </td>
+            <td className="table-num">
+              <ScoreValue score={row.score} />
             </td>
             {clearNames.map((clearName) => (
               <td key={`${clearName.kind}/${clearName.name}`} className="text-center">

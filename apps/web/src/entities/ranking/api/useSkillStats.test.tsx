@@ -3,11 +3,11 @@ import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { SkillStats } from '#entities/ranking'
+import type { SkillStats } from '#entities/ranking/model/skill-stats'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { SKILL_STATS_URL } from './character.handlers'
+import { SKILL_STATS_URL } from './skill-stats.handlers'
 import { useSkillStats } from './useSkillStats'
 
 let container: HTMLDivElement

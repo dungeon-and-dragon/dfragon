@@ -174,7 +174,7 @@ test('개화 필터로 page를 나눠 읽어도 빠지거나 겹치는 캐릭터
     const last = page.at(-1)
     position =
       page.length === 3
-        ? { fame: last.fame, serverId: last.serverId, characterId: last.characterId }
+        ? { value: last.fame, serverId: last.serverId, characterId: last.characterId }
         : undefined
   } while (position !== undefined)
 

@@ -1,19 +1,25 @@
-import type { FameRankingPosition } from '@dfragon/database'
+import type { FameRankingPosition, RankingSort } from '@dfragon/database'
 import { z } from 'zod'
 
+export const RANKING_SORTS = [
+  'fame',
+  'equipmentScore',
+  'buffScore'
+] as const satisfies readonly RankingSort[]
+
 export type FameRankingCursor = FameRankingPosition & {
-  rank: number
+  sort: RankingSort
 }
 
-const cursorSchema = z.tuple([z.int(), z.string().min(1), z.string().min(1), z.int().positive()])
+const cursorSchema = z.tuple([z.enum(RANKING_SORTS), z.int(), z.string().min(1), z.string().min(1)])
 
 export function encodeFameRankingCursor({
-  fame,
+  sort,
+  value,
   serverId,
-  characterId,
-  rank
+  characterId
 }: FameRankingCursor): string {
-  const json = JSON.stringify([fame, serverId, characterId, rank])
+  const json = JSON.stringify([sort, value, serverId, characterId])
 
   return Buffer.from(json).toString('base64url')
 }
@@ -33,7 +39,7 @@ export function decodeFameRankingCursor(value: string): FameRankingCursor | unde
     return undefined
   }
 
-  const [fame, serverId, characterId, rank] = parsed.data
+  const [sort, position, serverId, characterId] = parsed.data
 
-  return { fame, serverId, characterId, rank }
+  return { sort, value: position, serverId, characterId }
 }

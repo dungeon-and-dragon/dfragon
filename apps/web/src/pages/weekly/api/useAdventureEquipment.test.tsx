@@ -102,6 +102,7 @@ const equipment: AdventureEquipment = {
           guildId: null,
           guildName: null,
           role: null,
+          score: null,
           equipment: [{ ...holding, slot: '상의' }],
           oaths: [{ ...holding, kind: 'crystal', itemName: '합성 결정', count: 3 }]
         }

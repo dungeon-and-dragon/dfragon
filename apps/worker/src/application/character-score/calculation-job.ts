@@ -1,4 +1,4 @@
-import type { ClearPopulationCharacter, FinishedJobRun } from '@dfragon/database'
+import type { CharacterScoreJob, ClearPopulationCharacter, FinishedJobRun } from '@dfragon/database'
 import { z } from 'zod'
 import type {
   CharacterIdentity,
@@ -260,7 +260,8 @@ export class ScoreCalculationService {
     const { serverId, characterId } = character
 
     if (result.status === 'scored') {
-      await this.repository.recordScore({ serverId, characterId, ...result.score })
+      const job = this.scoredJob(result.fetched)
+      await this.repository.recordScore({ serverId, characterId, job, ...result.score })
     }
 
     if (result.fetched === null) {
@@ -270,6 +271,19 @@ export class ScoreCalculationService {
     const score = result.status === 'scored' ? result.score : null
 
     return this.saveHistory(result.fetched, score, position)
+  }
+
+  // 점수를 계산한 상세의 기본 정보를 읽지 못하면 전직을 모르는 점수로 저장한다.
+  private scoredJob({ payloads }: FetchedCharacterPayloads): CharacterScoreJob | null {
+    const basic = this.ports.parseBasic(payloads.basic)
+
+    if (basic === undefined) {
+      return null
+    }
+
+    const { jobId, jobGrowId } = basic
+
+    return { jobId, jobGrowId }
   }
 
   // 이력의 최신 값과 characters가 어긋나지 않게 받은 기본 정보로 characters를 덮어쓴 뒤 이력을 저장한다.

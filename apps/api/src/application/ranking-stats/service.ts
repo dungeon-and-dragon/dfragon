@@ -5,6 +5,7 @@ import type {
   RankedStoredCharacter,
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
+  RankingSort,
   SetAdoption,
   SetAdoptionQuery
 } from '@dfragon/database'
@@ -21,14 +22,21 @@ const emptySetAdoption: SetAdoption = {
   combos: []
 }
 
-export type RankedCharacter = {
-  rank: number
-  character: RankedStoredCharacter
+export type FameRankingPage = {
+  characters: RankedStoredCharacter[]
+  nextCursor: FameRankingCursor | null
 }
 
-export type FameRankingPage = {
-  characters: RankedCharacter[]
-  nextCursor: FameRankingCursor | null
+function sortValue(character: RankedStoredCharacter, sort: RankingSort): number | null {
+  if (sort === 'fame') {
+    return character.fame
+  }
+
+  if (character.score === null) {
+    return null
+  }
+
+  return character.score.value
 }
 
 export class RankingStatsService {
@@ -39,27 +47,23 @@ export class RankingStatsService {
     filter: FameRankingFilter,
     cursor?: FameRankingCursor
   ): Promise<FameRankingPage> {
+    const sort = filter.sort ?? 'fame'
     const after =
       cursor !== undefined
-        ? { fame: cursor.fame, serverId: cursor.serverId, characterId: cursor.characterId }
+        ? { value: cursor.value, serverId: cursor.serverId, characterId: cursor.characterId }
         : undefined
     const rows = await this.repository.readFameRanking(filter, FAME_RANKING_LIMIT + 1, after)
-    const page = rows.slice(0, FAME_RANKING_LIMIT)
-    const firstRank = (cursor?.rank ?? 0) + 1
-    const characters = page.map((character, index) => {
-      const rank = firstRank + index
-
-      return { rank, character }
-    })
+    const characters = rows.slice(0, FAME_RANKING_LIMIT)
     const last = characters.at(-1)
     const hasMore = rows.length > FAME_RANKING_LIMIT
+    const value = last !== undefined ? sortValue(last, sort) : null
 
-    if (!hasMore || last === undefined || last.character.fame === null) {
+    if (!hasMore || last === undefined || value === null) {
       return { characters, nextCursor: null }
     }
 
-    const { fame, serverId, characterId } = last.character
-    const nextCursor = { fame, serverId, characterId, rank: last.rank }
+    const { serverId, characterId } = last
+    const nextCursor = { sort, value, serverId, characterId }
 
     return { characters, nextCursor }
   }

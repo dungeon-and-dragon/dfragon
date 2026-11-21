@@ -28,9 +28,14 @@ function FameRankingTop(): React.JSX.Element {
             </span>
             <CharacterTable
               rows={[]}
+              scorePlacement="belowFame"
               affiliations={NO_AFFILIATIONS}
               trailing={Array.from({ length: SHOWN_COUNT }, (_, index) => (
-                <SkeletonRow key={index} affiliations={NO_AFFILIATIONS} />
+                <SkeletonRow
+                  key={index}
+                  scorePlacement="belowFame"
+                  affiliations={NO_AFFILIATIONS}
+                />
               ))}
             />
           </div>
@@ -55,6 +60,7 @@ function FameRankingTop(): React.JSX.Element {
             rows={result.value.characters
               .slice(0, SHOWN_COUNT)
               .map((character, index) => ({ ...character, rank: index + 1 }))}
+            scorePlacement="belowFame"
             affiliations={NO_AFFILIATIONS}
           />
         </ListBox>

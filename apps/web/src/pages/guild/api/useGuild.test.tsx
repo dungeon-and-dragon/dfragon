@@ -61,7 +61,8 @@ const character: StoredCharacter = {
   fame: 80123,
   guildId: 'guild-1',
   guildName: '합성 길드',
-  role: null
+  role: null,
+  score: null
 }
 
 const guild: Guild = {

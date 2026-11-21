@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
   characterIdentitySchema,
   characterRole,
+  listScoreSchema,
   type MaleCrusaderRole
 } from '#entities/character/@x/ranking'
 
@@ -19,7 +20,8 @@ export const storedCharacterSchema = characterIdentitySchema.extend({
   fame: z.number().int().nullable(),
   guildId: nullableText,
   guildName: nullableText,
-  role: characterRole
+  role: characterRole,
+  score: listScoreSchema
 })
 
 export const fameRankingSchema = z.object({
@@ -56,6 +58,10 @@ export type FameRanking = z.infer<typeof fameRankingSchema>
 export type RankedCharacter = FameRanking['characters'][number]
 export type CharacterStats = z.infer<typeof characterStatsSchema>
 
+export type SkillEvolutionType = 1 | 2
+
+export type SkillEvolutionChoice = Readonly<{ name: string; type: SkillEvolutionType }>
+
 /**
  * `jobGrowId`는 `jobId`와 함께, `role`은 남성 크루세이더 전직과 함께만 쓴다.
  * `oathSetOption`은 서약 선택지의 원래 이름이며 `oathSetId`와 함께만 쓴다.
@@ -69,10 +75,17 @@ export type FameRankingFilter = Readonly<{
   oathSetOption?: string
   // 무기와 유일 장비 itemId다. 모두 낀 캐릭터만 거른다.
   itemIds?: readonly string[]
+  // 스킬마다 고른 개화다. jobGrowId와 함께만 쓴다.
+  evolutions?: readonly SkillEvolutionChoice[]
   // 둘 다 포함하는 명성 범위다.
   fameFrom?: number
   fameTo?: number
 }>
+
+// 개화 필터를 API query와 주소에 같은 \`스킬 이름~종류\` 쌍을 쉼표로 이은 문자열로 둔다.
+export function evolutionsQueryText(evolutions: readonly SkillEvolutionChoice[]): string {
+  return evolutions.map(({ name, type }) => `${name}~${type}`).join(',')
+}
 
 export type FameRankingFameRange = Pick<FameRankingFilter, 'fameFrom' | 'fameTo'>
 

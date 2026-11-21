@@ -6,9 +6,11 @@ import {
   type FameRanking,
   type FameRankingFilter,
   fameRankingSchema,
-  type RankedCharacter
+  type RankedCharacter,
+  type SkillEvolutionChoice,
+  evolutionsQueryText
 } from '#entities/ranking/model/ranking-stats'
-import { ITEM_FILTER_LIMIT } from '#shared/config/ranking'
+import { EVOLUTION_FILTER_LIMIT, ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 
@@ -42,6 +44,37 @@ function itemIdsParam(itemIds: readonly string[] | undefined): string | undefine
   return itemIds.join(',')
 }
 
+// API는 전직 없이, 5쌍을 넘게, 같은 스킬을 두 번, 구분자가 든 이름을 400으로 거부하므로 보내기 전에 거른다.
+function evolutionsParam(
+  evolutions: readonly SkillEvolutionChoice[] | undefined,
+  jobGrowId: string | undefined
+): string | undefined {
+  if (evolutions === undefined || evolutions.length === 0) {
+    return undefined
+  }
+
+  const names = evolutions.map(({ name }) => name)
+  const valid =
+    jobGrowId !== undefined &&
+    evolutions.length <= EVOLUTION_FILTER_LIMIT &&
+    names.every((name) => name.length > 0 && !name.includes(',') && !name.includes('~')) &&
+    new Set(names).size === names.length
+
+  if (!valid) {
+    throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
+  }
+
+  return evolutionsQueryText(evolutions)
+}
+
+function evolutionsKey(evolutions: readonly SkillEvolutionChoice[] | undefined): string | null {
+  if (evolutions === undefined) {
+    return null
+  }
+
+  return evolutionsQueryText(evolutions)
+}
+
 async function requestFameRanking(
   filter: FameRankingFilter,
   cursor: string | undefined
@@ -58,6 +91,7 @@ async function requestFameRanking(
 
   const oathSetId = filter.oathSetId !== undefined ? String(filter.oathSetId) : undefined
   const itemIds = itemIdsParam(filter.itemIds)
+  const evolutions = evolutionsParam(filter.evolutions, filter.jobGrowId)
   const fameFrom = filter.fameFrom !== undefined ? String(filter.fameFrom) : undefined
   const fameTo = filter.fameTo !== undefined ? String(filter.fameTo) : undefined
 
@@ -70,6 +104,7 @@ async function requestFameRanking(
       ...(oathSetId !== undefined && { oathSetId }),
       ...(filter.oathSetOption !== undefined && { oathSetOption: filter.oathSetOption }),
       ...(itemIds !== undefined && { itemIds }),
+      ...(evolutions !== undefined && { evolutions }),
       ...(fameFrom !== undefined && { fameFrom }),
       ...(fameTo !== undefined && { fameTo }),
       ...(cursor !== undefined && { cursor })
@@ -104,6 +139,7 @@ export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRank
       filter.oathSetId ?? null,
       filter.oathSetOption ?? null,
       filter.itemIds?.join(',') ?? null,
+      evolutionsKey(filter.evolutions),
       filter.fameFrom ?? null,
       filter.fameTo ?? null
     ],
