@@ -71,7 +71,7 @@
   background-color: var(--color-control);
 }
 
-@media (width < 600px) {
+@media (pointer: coarse) {
   .chip:not(.chip-md) {
     position: relative;
   }
