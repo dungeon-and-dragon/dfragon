@@ -740,7 +740,7 @@ it('요약 숫자에 마우스를 올리면 내역이 열리고, 0인 숫자는 
   expect(tooltipRows()).toEqual(['가 레이드1,200회', '나 레이드3회'])
 })
 
-it('갱신을 누르면 다시 받는 동안 받아 둔 시즌 활동을 그대로 두고, 같은 시즌을 다시 받으면 새 응답으로 그리고 버튼을 켠다', async () => {
+it('갱신을 누르면 다시 받는 동안 받아 둔 시즌 활동을 그대로 두고, 같은 시즌을 다시 받으면 새 응답으로 그리고 갱신 버튼은 꺼 둔다', async () => {
   const refreshed = Promise.withResolvers<AdventureActivity>()
   serveActivity(respond(previousSeason), respond(refreshed.promise))
   serveWeekly(emptyWeekly)
@@ -756,20 +756,22 @@ it('갱신을 누르면 다시 받는 동안 받아 둔 시즌 활동을 그대�
     ...previousSeason,
     summary: { ...previousSeason.summary, raids: [{ name: '라 레이드', count: 12 }] }
   })
-  await vi.waitFor(() => expect(refreshButton('갱신').disabled).toBe(false))
+  await vi.waitFor(() => expect(refreshButton('갱신').disabled).toBe(true))
   expect(activityRequests()).toEqual([activityRequest(10), activityRequest(10)])
   expect(statValues()[0]).toBe('12')
 })
 
-it('갱신이 실패하면 오류 문구 없이 받아 둔 시즌 활동을 두고 버튼을 다시 켠다', async () => {
+it('갱신이 실패하면 오류 문구 없이 받아 둔 시즌 활동을 둔다', async () => {
   serveActivity(respond(previousSeason), respond(failure()))
   serveWeekly(emptyWeekly)
   await renderSettled(10)
 
   await act(async () => refreshButton('갱신').click())
-  await vi.waitFor(() => expect(refreshButton('갱신').disabled).toBe(false))
+  await vi.waitFor(() => {
+    expect(activityRequests()).toHaveLength(2)
+    expect(refreshButton('갱신')?.disabled).toBe(true)
+  })
 
-  expect(activityRequests()).toHaveLength(2)
   expect(container.querySelector('[role="alert"]')).toBeNull()
   expect(statValues()[0]).toBe('9')
 })
