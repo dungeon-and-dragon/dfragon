@@ -1,11 +1,7 @@
 import { HeartIcon, IconButton } from '@dfragon/ui'
 import { CharacterTable, type CharacterTableAction } from '#widgets/character-table'
-import { ListBox } from '#shared/ui/ListBox'
-import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { useFavoriteCharacterStore } from '#features/favorite-character'
 import type { CharacterKey } from '#entities/character'
-
-const integer = new Intl.NumberFormat('ko-KR')
 
 export function FavoritesPage(): React.JSX.Element {
   const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
@@ -17,18 +13,14 @@ export function FavoritesPage(): React.JSX.Element {
 
   return (
     <div className="flex flex-col">
-      <TitleBox title="즐겨찾기">
-        {empty ? null : (
-          <TitleStat label="캐릭터" value={integer.format(favoriteCharacters.length)} />
-        )}
-      </TitleBox>
-      <ListBox name="즐겨찾기한 캐릭터">
+      <section aria-label="즐겨찾기한 캐릭터" className="section min-w-0 pb-0">
+        <h2 className="section-title">즐겨찾기한 캐릭터</h2>
         {empty ? (
           <p className="state">즐겨찾기한 캐릭터가 없습니다.</p>
         ) : (
           <CharacterTable rows={favoriteCharacters} ranked={false} action={unfavorite} />
         )}
-      </ListBox>
+      </section>
     </div>
   )
 }

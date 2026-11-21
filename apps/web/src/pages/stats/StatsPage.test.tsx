@@ -97,13 +97,10 @@ function rowsOf(name: string): string[][] {
   )
 }
 
-it('제목 상자에 캐릭터 수와 마지막 업데이트로부터 지난 시간을 보이고 한국 시간은 title로 둔다', async () => {
+it('제목 상자 없이 통계 상자만 그린다', async () => {
   await render(stats)
 
-  expect(container.querySelector('header')?.textContent).toBe(
-    '캐릭터 통계캐릭터1,234,567마지막 업데이트 시간11시간 전'
-  )
-  expect(container.querySelector('header time')?.getAttribute('title')).toBe('11-06 00:30')
+  expect(container.querySelector('header')).toBeNull()
 })
 
 it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 분포, 직업별 평균 명성 순으로 그린다', async () => {
@@ -300,7 +297,7 @@ it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
   expect(boxOf('서버 인구').textContent).toBe('서버 인구')
 })
 
-it('집계 시각이 null인 빈 통계는 마지막 업데이트 없이 표시한다', async () => {
+it('집계 시각이 null인 빈 통계도 오류 없이 표시한다', async () => {
   await render({
     computedAt: null,
     total: 0,
@@ -309,8 +306,7 @@ it('집계 시각이 null인 빈 통계는 마지막 업데이트 없이 표시�
     fameDistribution: []
   })
 
-  expect(container.querySelector('header')?.textContent).toBe('캐릭터 통계캐릭터0')
-  expect(container.querySelector('header time')).toBeNull()
+  expect(container.querySelector('header')).toBeNull()
   expect(container.querySelector('[role="alert"]')).toBeNull()
 })
 

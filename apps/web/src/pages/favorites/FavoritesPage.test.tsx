@@ -95,13 +95,13 @@ it('열은 캐릭터, 명성, 모험단, 길드, 해제이고 모험단과 길�
     ],
     ['합성2 /c/cain/character-2', '-', '-', '-', '']
   ])
-  expect(container.querySelector('header')?.textContent).toBe('즐겨찾기캐릭터2')
+  expect(container.querySelector('header')).toBeNull()
 })
 
-it('비었으면 캐릭터 수 없이 목록 상자에 빈 상태 한 줄만 둔다', async () => {
+it('제목 상자 없이, 비었으면 목록 상자에 빈 상태 한 줄만 둔다', async () => {
   await render([])
 
-  expect(container.querySelector('header')?.textContent).toBe('즐겨찾기')
+  expect(container.querySelector('header')).toBeNull()
   expect(container.querySelector('table')).toBeNull()
   expect(container.querySelector('section')?.textContent).toBe(
     '즐겨찾기한 캐릭터즐겨찾기한 캐릭터가 없습니다.'

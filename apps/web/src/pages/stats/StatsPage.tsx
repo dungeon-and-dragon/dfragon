@@ -1,14 +1,12 @@
 import { Fragment } from 'react'
-import { RelativeTime } from '#shared/ui/RelativeTime'
 import { Columns } from '#shared/ui/chart/Columns'
 import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
-import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
-import { StatsTabs } from './StatsTabs'
+import { StatsTabs } from '#widgets/stats-tabs'
 import { useCharacterStats } from './api/useCharacterStats'
 import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from '#entities/ranking'
+import { StatsNote } from './StatsNote'
 
-const integer = new Intl.NumberFormat('ko-KR')
 const SCREEN = 'flex flex-col'
 const STAT_BOX_NAMES = {
   server: '서버 인구',
@@ -40,7 +38,6 @@ function CharacterStatsBody(): React.JSX.Element {
     case 'error':
       return (
         <div className={SCREEN}>
-          <TitleBox title="캐릭터 통계" />
           <p role="alert" className="section state state-error">
             {result.message}
           </p>
@@ -59,16 +56,7 @@ function CharacterStatsBody(): React.JSX.Element {
 
       return (
         <div className={SCREEN}>
-          <TitleBox title="캐릭터 통계">
-            <TitleStat label="캐릭터" value={integer.format(stats.total)} />
-            {stats.computedAt !== null && (
-              <TitleStat
-                label="마지막 업데이트 시간"
-                value={<RelativeTime at={stats.computedAt} />}
-                numeric={false}
-              />
-            )}
-          </TitleBox>
+          <StatsNote count={stats.total} computedAt={stats.computedAt} />
           {STAT_BOX_ROWS.map((row) => (
             <div key={row.join()} className="section section-cols">
               {row.map((id) => (
@@ -88,7 +76,6 @@ function StatsSkeleton(): React.JSX.Element {
       <span role="status" className="sr-only">
         통계를 받는 중입니다.
       </span>
-      <TitleBox title="캐릭터 통계" />
       <div aria-hidden="true">
         {STAT_BOX_ROWS.map((row) => (
           <div key={row.join()} className="section section-cols">
