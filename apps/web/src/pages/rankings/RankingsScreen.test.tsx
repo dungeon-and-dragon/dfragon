@@ -252,34 +252,34 @@ it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 �
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
   expect(first).toEqual([
-    '카인합성1합성 전직',
+    '카인합성1합성 전직99,9991,388,832모험단1',
     '황금향용투 : 용제 강림',
     '99,999',
     '장비1,388,832',
     '모험단1'
   ])
   expect(second?.[3]).toBe('버프4,120,000')
-  expect(fourth).toEqual(['카인합성4합성 직업', '-', '99,996', '-', '모험단4'])
+  expect(fourth).toEqual(['카인합성4합성 직업99,996-모험단4', '-', '99,996', '-', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
 function characterLines(row: Element): (string | null)[] {
-  const line = row.querySelector('a[href^="/c/"]')?.parentElement
-  const nameLine = line?.textContent ?? null
-  const levelLine = line?.nextElementSibling?.textContent ?? null
+  const lines = row.querySelector('a[href^="/c/"]')?.closest('span.flex-col')?.children
+  const nameLine = lines?.[0]?.textContent ?? null
+  const levelLine = lines?.[1]?.textContent ?? null
 
   return [nameLine, levelLine]
 }
 
-it('서버, 이름, 직업명을 한 줄로 두고, 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을 둔다', async () => {
+it('서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을, 다음 줄에 명성, 점수, 모험단을 둔다', async () => {
   await render(async () => ({
     characters: [rankedCharacter(1), rankedCharacter(2, { level: 110 })],
     nextCursor: null
   }))
 
   const [maxLevel, belowMax] = bodyRows()
-  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직', null])
-  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직Lv.110', null])
+  expect(characterLines(maxLevel!)).toEqual(['카인합성1합성 전직', '99,999-모험단1'])
+  expect(characterLines(belowMax!)).toEqual(['카인합성2합성 전직Lv 110', '99,998-모험단2'])
 })
 
 it('동명 전직에는 성별을 붙이고 남성 크루세이더는 역할을 알면 함께 표시한다', async () => {
@@ -375,7 +375,7 @@ function chipLabels(): string[] {
     (heading) => heading.textContent === '전직'
   )
 
-  return [...(growRow?.parentElement?.querySelectorAll('button') ?? [])].map(
+  return [...(growRow?.parentElement?.querySelectorAll('button[aria-pressed]') ?? [])].map(
     (button) => button.textContent ?? ''
   )
 }

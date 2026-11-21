@@ -108,6 +108,8 @@ it('후보의 서버, 이름 오른쪽에 모험단명이 있으면 그 모험�
     ['합성', '/c/prey/with-adventure'],
     ['합성 모험단', `/adventures/${encodeURIComponent('합성 모험단')}`]
   ])
-  expect(withoutAdventure.textContent).toBe('프레이합성')
+  expect(withoutAdventure.querySelector('span.flex-col')?.children[0]?.textContent).toBe(
+    '프레이합성'
+  )
   expect(withoutAdventure.querySelectorAll('a')).toHaveLength(1)
 })
