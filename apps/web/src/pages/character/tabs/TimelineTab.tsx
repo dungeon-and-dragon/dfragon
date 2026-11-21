@@ -90,7 +90,7 @@ function TimelineContent({
     <div className="flex flex-col divide-y divide-line text-sm">
       <WeeklyClears clears={timeline.weeklyClears} />
       <SeasonClears counts={timeline.seasonClears} />
-      <div className="grid grid-cols-[minmax(0,1fr)_500px] divide-x divide-line max-sm:grid-cols-1 max-sm:divide-x-0 max-sm:divide-y">
+      <div className="grid grid-cols-[minmax(0,1fr)_500px] divide-x divide-line max-md:grid-cols-1 max-md:divide-x-0 max-md:divide-y">
         <Enhancements enhancements={shownEnhancements.items} more={shownEnhancements.more} />
         <Acquisitions acquisitions={shownAcquisitions.items} more={shownAcquisitions.more} />
       </div>

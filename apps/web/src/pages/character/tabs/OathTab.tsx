@@ -66,8 +66,8 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
           icon={loaded !== null && view.info !== null ? oathItemIconOf(loaded, view.info) : null}
         />
       )}
-      <div className="flex items-start max-sm:flex-col">
-        <div className="min-w-0 grow border-e border-line max-sm:w-full max-sm:border-e-0">
+      <div className="flex items-start max-md:flex-col">
+        <div className="min-w-0 grow border-e border-line max-md:w-full max-md:border-e-0">
           {loaded !== null && board !== null && <OathBody view={view} catalog={loaded} />}
           <OathCrystals view={view} />
         </div>
@@ -238,7 +238,7 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
 
 function OathEffects({ view: { upgrade } }: { view: OathView }): React.JSX.Element {
   return (
-    <div className="w-[480px] shrink-0 max-sm:w-full">
+    <div className="w-[480px] shrink-0 max-md:w-full">
       {upgrade !== null && <UpgradeSection title={upgrade.title} steps={upgrade.steps} />}
     </div>
   )
