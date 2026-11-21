@@ -388,7 +388,7 @@ it('무기 막대에 아이콘을 보이고, 이름에 마우스를 올리면 �
   expect(requestedItemIds).toEqual(['weapon-1'])
 })
 
-it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 한 막대로 세고, 접두사 없는 무기의 itemId로 잇는다', async () => {
+it('검은 질병의, 억압 - 접두사가 붙은 무기는 접두사 없는 무기와 한 막대로 세고, 접두사 없는 무기의 itemId로 잇는다', async () => {
   const base = itemStatsWith(2)
   const itemStats = {
     ...base,
@@ -398,7 +398,9 @@ it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 �
         items: [
           { itemId: 'plague', name: '검은 질병의 멸룡검 발뭉', typeDetail: null, count: 30 },
           { itemId: 'balmung', name: '멸룡검 발뭉', typeDetail: null, count: 20 },
-          { itemId: 'other', name: '무기', typeDetail: null, count: 40 }
+          { itemId: 'suppressed', name: '억압 - 요도 : 날뛰는 흑혈', typeDetail: null, count: 25 },
+          { itemId: 'blood', name: '요도 : 날뛰는 흑혈', typeDetail: null, count: 10 },
+          { itemId: 'other', name: '무기', typeDetail: null, count: 5 }
         ]
       },
       ...base.slots.slice(1)
@@ -409,12 +411,17 @@ it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 �
   await vi.waitFor(() =>
     expect(rowsOf('무기')).toEqual([
       ['멸룡검 발뭉', '50.0%'],
-      ['무기', '40.0%']
+      ['요도 : 날뛰는 흑혈', '35.0%'],
+      ['무기', '5.0%']
     ])
   )
   expect(rankingSearchOf(rowLink('무기', '멸룡검 발뭉'))).toEqual({
     ...JOB_FILTER,
     itemIds: 'balmung'
+  })
+  expect(rankingSearchOf(rowLink('무기', '요도 : 날뛰는 흑혈'))).toEqual({
+    ...JOB_FILTER,
+    itemIds: 'blood'
   })
 })
 
