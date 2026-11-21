@@ -11,7 +11,8 @@ import {
   recordCharacter,
   recordCharacterActive,
   recordCharacterBasic,
-  recordCharacterInactive
+  recordCharacterInactive,
+  recordCharactersActive
 } from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_CHARACTER_ACTIVITY_PORT
@@ -119,6 +120,36 @@ test('명성 갱신 대상은 기본 정보를 받은 활성 캐릭터를 서버
     targets.find(({ characterId }) => characterId === 'c').lastActiveAt,
     at('18T21:05:00')
   )
+})
+
+test('마지막 활동은 더 최근 시각일 때만 바꾸고, 활동을 기록한 비활성 캐릭터는 활성으로 돌림', {
+  skip: port === undefined
+}, async () => {
+  const lastActiveOf = async (characterId) =>
+    (await readFameRefreshTargets(client, null, 100)).find(
+      (target) => target.serverId === 'anton' && target.characterId === characterId
+    )?.lastActiveAt
+
+  const active = await createFetched('anton', 'active')
+  const inactive = await createFetched('anton', 'inactive')
+  const unseen = await createFetched('anton', 'unseen')
+
+  await recordCharacterActive(client, active, at('18T21:00:00'))
+  await recordCharacterInactive(client, inactive, at('19T03:00:00'))
+
+  await recordCharactersActive(client, [
+    { ...active, lastActiveAt: at('10T21:00:00') },
+    { ...inactive, lastActiveAt: at('19T22:00:00') },
+    { ...unseen, lastActiveAt: at('12T21:00:00') }
+  ])
+
+  assert.deepEqual(await lastActiveOf('active'), at('18T21:00:00'))
+  assert.deepEqual(await lastActiveOf('inactive'), at('19T22:00:00'))
+  assert.deepEqual(await lastActiveOf('unseen'), at('12T21:00:00'))
+
+  await recordCharactersActive(client, [{ ...active, lastActiveAt: at('20T21:00:00') }])
+
+  assert.deepEqual(await lastActiveOf('active'), at('20T21:00:00'))
 })
 
 test('클리어 모집단은 활성만 읽으면 비활성 캐릭터를 빼고, 비활성까지 읽으면 함께 읽음', {
