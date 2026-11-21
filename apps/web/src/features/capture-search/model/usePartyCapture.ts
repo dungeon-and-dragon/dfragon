@@ -58,7 +58,8 @@ export function usePartyCapture({ texts }: { texts: CaptureTexts }): PartyCaptur
   const stopRef = useRef<() => void>(() => {})
   const search = useCharacterSearch(party, SEARCH_SLOT_COUNTS.party, () => stopRef.current())
   const [ocrWorker] = useState(() => createSharedOcrWorker(texts.ocrPrepareFailed))
-  const ocrReady = useSyncExternalStore(ocrWorker.subscribe, ocrWorker.isReady)
+  // 이 hook은 브라우저에서만 돌지만 서버가 만든 HTML을 hydrate하는 동안에도 그려지며, 그때 React는 세 번째 인자를 요구한다.
+  const ocrReady = useSyncExternalStore(ocrWorker.subscribe, ocrWorker.isReady, ocrWorker.isReady)
   const { seatOrder, swapSeats, resetSeats } = useSeatOrder(PARTY_SEAT_LAYOUT)
   const { begin: beginSearch } = search
   const beginRound = useCallback(

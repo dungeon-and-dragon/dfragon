@@ -1,9 +1,10 @@
-import { ClientOnly, Outlet } from '@tanstack/react-router'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { Outlet } from '@tanstack/react-router'
+import { use, useEffect, useEffectEvent, useState } from 'react'
 import {
+  type BrowserHost,
+  BrowserHostContext,
   ClientHostContext,
   ScreenCaptureProvider,
-  useBrowserHost,
   useScreenCaptureContext,
   WEB_CAPTURE_TEXTS
 } from '#features/capture-search'
@@ -12,14 +13,32 @@ import { GlobalBar } from '#widgets/global-bar'
 import { SiteFooter } from '#widgets/site-footer'
 
 // 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 화면들 위에서 구독한다.
-function ScreenShareEndings(): null {
-  const host = useBrowserHost()
+function ScreenShareEndings({ host }: { host: BrowserHost }): null {
   const { selectSource } = useScreenCaptureContext().partyCapture.source
   const onShareEnded = useEffectEvent(() => selectSource(''))
 
   useEffect(() => host.onScreenShareEnded(onShareEnded), [host])
 
   return null
+}
+
+// 화면을 옮겨도 화면 공유 연결과 표 상태가 남도록 캡처 provider를 화면들 위에 둔다. host는 브라우저에만 있고
+// 캡처를 쓰는 멀티서치는 서버에서 그리지 않으므로, 서버에서는 provider 없이 화면만 그린다.
+function CaptureScope({ children }: { children: React.ReactNode }): React.ReactNode {
+  const host = use(BrowserHostContext)
+
+  if (host === null) {
+    return children
+  }
+
+  return (
+    <ClientHostContext value={host}>
+      <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
+        <ScreenShareEndings host={host} />
+        {children}
+      </ScreenCaptureProvider>
+    </ClientHostContext>
+  )
 }
 
 function SiteLayout(): React.JSX.Element {
@@ -31,25 +50,13 @@ function SiteLayout(): React.JSX.Element {
           상자 밖 창 끝까지 그어져야 하므로 상자에 스크롤을 두지 않는다. */}
       <div className="page screen bg-canvas">
         <main className="relative flex flex-col max-md:overflow-x-auto">
-          <Outlet />
+          <CaptureScope>
+            <Outlet />
+          </CaptureScope>
         </main>
         <SiteFooter />
       </div>
     </div>
-  )
-}
-
-// 화면을 옮겨도 화면 공유 연결과 표 상태가 남도록 캡처 provider를 화면들 위에 둔다.
-function CaptureSite(): React.JSX.Element {
-  const host = useBrowserHost()
-
-  return (
-    <ClientHostContext value={host}>
-      <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-        <ScreenShareEndings />
-        <SiteLayout />
-      </ScreenCaptureProvider>
-    </ClientHostContext>
   )
 }
 
@@ -61,10 +68,7 @@ export function RootLayout(): React.JSX.Element {
   return (
     <div className="relative box-border flex min-h-dvh flex-col pb-4">
       <PageNoteTarget value={noteTarget}>
-        {/* 화면은 브라우저 host가 있어야 그릴 수 있어, 서버가 만드는 HTML에는 빈 전역 바만 둔다. */}
-        <ClientOnly fallback={<div className="h-topbar shrink-0 border-b border-line bg-canvas" />}>
-          <CaptureSite />
-        </ClientOnly>
+        <SiteLayout />
       </PageNoteTarget>
       <div ref={setNoteTarget} className="absolute bottom-8 left-4 text-2xs text-fg-subtle" />
       <span className="absolute bottom-4 left-4 num text-2xs text-fg-subtle">
