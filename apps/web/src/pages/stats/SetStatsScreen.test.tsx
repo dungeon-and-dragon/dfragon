@@ -189,10 +189,10 @@ it('서약 세트 아래 카탈로그 순서로 선택지를 펼쳐 왼쪽, 가�
   await render({ setStats: setStatsOf(stats) })
 
   expect(rowsOf('서약 세트')).toEqual([
-    ['용투', '50.0%'],
-    ['용투 : 왼쪽', '0.0%'],
-    ['용투 : 가운데', '75.0%'],
-    ['용투 : 오른쪽', '25.0%'],
+    ['용투장', '50.0%'],
+    ['용투장 : 왼쪽', '0.0%'],
+    ['용투장 : 가운데', '75.0%'],
+    ['용투장 : 오른쪽', '25.0%'],
     ['세트 없음', '50.0%']
   ])
 })
@@ -204,7 +204,7 @@ it('서약 세트의 선택지는 세트마다 접고 다시 펼친다', async (
   expect(toggle.getAttribute('aria-expanded')).toBe('true')
   await act(async () => toggle.click())
   expect(toggle.getAttribute('aria-expanded')).toBe('false')
-  expect(rowsOf('서약 세트').map(([name]) => name)).toEqual(['용투', '세트 없음'])
+  expect(rowsOf('서약 세트').map(([name]) => name)).toEqual(['용투장', '세트 없음'])
   await act(async () => toggle.click())
   expect(rowsOf('서약 세트')).toHaveLength(5)
 })
@@ -213,7 +213,7 @@ it('카탈로그를 받지 못하면 받은 선택지를 원래 이름으로 보
   await render({ setStats: setStatsOf(stats), oathCatalog: oathCatalogHandlers.notUploaded })
 
   expect(rowsOf('서약 세트').map(([name]) => name)).toEqual([
-    '용투',
+    '용투장',
     '용투 : 싸워야만 하는 운명',
     '용투 : 세계를 태우는 불꽃',
     '세트 없음'
@@ -228,11 +228,11 @@ it('세트와 선택지 막대는 고른 직업, 전직과 그 세트로 거른 
     equipmentSetId: FAIRY
   })
   expect(rowLink('장비 세트', '세트 없음')).toBeNull()
-  expect(rankingSearchOf(rowLink('서약 세트', '용투'))).toEqual({
+  expect(rankingSearchOf(rowLink('서약 세트', '용투장'))).toEqual({
     ...JOB_FILTER,
     oathSetId: String(DRAGON)
   })
-  expect(rankingSearchOf(rowLink('서약 세트', '용투 : 왼쪽'))).toEqual({
+  expect(rankingSearchOf(rowLink('서약 세트', '용투장 : 왼쪽'))).toEqual({
     ...JOB_FILTER,
     oathSetId: String(DRAGON),
     oathSetOption: '용투 : 용제 강림'
@@ -244,12 +244,12 @@ it('조합은 두 세트를 함께 랭킹에 붙이고, 한쪽이라도 세트�
   await render({ setStats: setStatsOf(stats) })
 
   expect(rowsOf('장비와 서약 조합')).toEqual([
-    ['황금향 + 용투', '25.0%'],
+    ['황금향 + 용투장', '25.0%'],
     ['페어리 + 세트 없음', '25.0%'],
-    ['나아가려는 자의 마음 세트 + 용투', '12.5%'],
+    ['나아가려는 자의 마음 세트 + 용투장', '12.5%'],
     ['세트 없음', '37.5%']
   ])
-  expect(rankingSearchOf(rowLink('장비와 서약 조합', '황금향 + 용투'))).toEqual({
+  expect(rankingSearchOf(rowLink('장비와 서약 조합', '황금향 + 용투장'))).toEqual({
     ...JOB_FILTER,
     equipmentSetId: GOLDEN,
     oathSetId: String(DRAGON)
