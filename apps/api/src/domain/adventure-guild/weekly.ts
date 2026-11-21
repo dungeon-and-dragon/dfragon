@@ -1,4 +1,9 @@
-import type { StoredCharacter, TimelineCharacter } from '@dfragon/database'
+import type {
+  CharacterEquipmentSet,
+  CharacterOathSet,
+  RankedStoredCharacter,
+  TimelineCharacter
+} from '@dfragon/database'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 import type { TimelineClear } from '@dfragon/server-core/domain/character-timeline/index.js'
 
@@ -13,7 +18,11 @@ const WEEKLY_CLEAR_NAMES: readonly ClearName[] = [
 
 export type ClearName = Pick<TimelineClear, 'kind' | 'name'>
 
-export type WeeklyCharacter = CharacterRow & { weeklyClears: ClearName[] }
+export type WeeklyCharacter = CharacterRow & {
+  equipmentSet: CharacterEquipmentSet | null
+  oathSet: CharacterOathSet | null
+  weeklyClears: ClearName[]
+}
 
 export type AdventureWeeklyClears = {
   clearNames: ClearName[]
@@ -25,7 +34,7 @@ function characterKey({ serverId, characterId }: TimelineCharacter): string {
 }
 
 export function toAdventureWeeklyClears(
-  characters: readonly StoredCharacter[],
+  characters: readonly RankedStoredCharacter[],
   events: readonly WeeklyClearRecord[],
   weekStart: Date
 ): AdventureWeeklyClears {
@@ -39,7 +48,7 @@ export function toAdventureWeeklyClears(
     }
   }
 
-  const weeklyCharacters = characters.map((character) => {
+  const weeklyCharacters = characters.map(({ equipmentSet, oathSet, ...character }) => {
     const clears = weeklyClears.get(characterKey(character)) ?? []
     const characterClears = WEEKLY_CLEAR_NAMES.filter((clearName) =>
       clears.some(({ kind, name }) => kind === clearName.kind && name === clearName.name)
@@ -47,7 +56,7 @@ export function toAdventureWeeklyClears(
 
     const row = toCharacterRow(character)
 
-    return { ...row, weeklyClears: characterClears }
+    return { ...row, equipmentSet, oathSet, weeklyClears: characterClears }
   })
 
   const clearNames = [...WEEKLY_CLEAR_NAMES]

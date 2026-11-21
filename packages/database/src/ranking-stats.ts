@@ -1,6 +1,7 @@
 import {
   type StoredCharacter,
   readStoredCharacterRows,
+  readStoredCharacters,
   storedDealerSkillLearnedSql
 } from './adventure-guild.js'
 import type { CharacterEquipmentSet, CharacterOathSet } from './character-sets.js'
@@ -73,6 +74,19 @@ function toRankedCharacter({
       : null
 
   return { ...character, equipmentSet, oathSet }
+}
+
+export async function readAdventureSetCharacters(
+  client: DatabaseClient,
+  adventureName: string
+): Promise<RankedStoredCharacter[]> {
+  const rows = await readStoredCharacters<RankedRow>(
+    client,
+    Prisma.sql`a.name = ${adventureName}`,
+    setColumns
+  )
+
+  return rows.map(toRankedCharacter)
 }
 
 // 명성은 내림차순, 서버와 캐릭터 ID는 오름차순이라 row 비교 하나로 쓸 수 없다.
