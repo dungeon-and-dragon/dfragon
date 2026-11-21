@@ -18,10 +18,51 @@ function growKey({ jobGrowId, role }: Pick<RankingGrow, 'jobGrowId' | 'role'>): 
   return `${jobGrowId}/${role ?? ''}`
 }
 
+// 전직이 하나뿐인 직업은 전직 전체가 그 전직과 같으므로, 전직 전체 칩 없이 그 전직을 고른 채로 둔다.
+function onlyGrowOf(job: RankingJob | undefined): RankingGrow | undefined {
+  if (job === undefined || job.grows.length !== 1) {
+    return undefined
+  }
+
+  return job.grows[0]
+}
+
 function growItems(job: RankingJob | undefined): ChipGroupItem<string>[] {
   const grows = job?.grows.map((grow) => ({ value: growKey(grow), label: growLabel(grow) })) ?? []
 
+  if (onlyGrowOf(job) !== undefined) {
+    return grows
+  }
+
   return [{ value: ALL, label: '전직 전체' }, ...grows]
+}
+
+function growValueOf(filter: FameRankingFilter, job: RankingJob | undefined): string {
+  if (filter.jobGrowId !== undefined) {
+    return growKey({ jobGrowId: filter.jobGrowId, role: filter.role })
+  }
+
+  const onlyGrow = onlyGrowOf(job)
+  if (onlyGrow !== undefined) {
+    return growKey(onlyGrow)
+  }
+
+  return ALL
+}
+
+function jobFilterOf(jobId: string): FameRankingFilter {
+  const job = RANKING_JOBS.find((candidate) => candidate.jobId === jobId)
+
+  if (job === undefined) {
+    return {}
+  }
+
+  const onlyGrow = onlyGrowOf(job)
+  if (onlyGrow !== undefined) {
+    return growFilter(job, onlyGrow)
+  }
+
+  return { jobId }
 }
 
 export type FilterRow = Readonly<{ label: string; content: ReactNode }>
@@ -72,13 +113,10 @@ export function RankingFilterBox({
   const jobLabelId = useId()
   const growLabelId = useId()
   const job = RANKING_JOBS.find(({ jobId }) => jobId === filter.jobId)
-  const growValue =
-    filter.jobGrowId !== undefined
-      ? growKey({ jobGrowId: filter.jobGrowId, role: filter.role })
-      : ALL
+  const growValue = growValueOf(filter, job)
 
   function selectJob(jobId: string): void {
-    const jobFilter = jobId === ALL ? {} : { jobId }
+    const jobFilter = jobFilterOf(jobId)
 
     onChange({ ...sets, ...jobFilter })
   }
