@@ -127,7 +127,7 @@ function linePoints(): [number, number][] {
   })
 }
 
-it('1레벨부터 마스터 레벨까지 레벨마다 점을 이어 가장 많은 레벨을 맨 위에 두고, 이 캐릭터 레벨에 점을 찍는다', async () => {
+it('1레벨부터 최대 레벨까지 레벨마다 점을 이어 가장 많은 레벨을 맨 위에 두고, 이 캐릭터 레벨에 점을 찍는다', async () => {
   await renderTooltip({ ...BEHEAD, evolutionNames: null, hasEnhancement: false })
 
   const points = linePoints()
