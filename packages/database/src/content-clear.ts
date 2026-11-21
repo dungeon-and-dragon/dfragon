@@ -53,10 +53,28 @@ function toColumns(clears: readonly ContentClearInput[]) {
   }
 }
 
+// 점수는 지금 점수와 같은 종류, 엔진 버전의 이력 가운데 최고치를 쓴다. 클리어 뒤 장비를 갈아 낀 상태로 계산한 점수가
+// 클리어 점수와 점수 구간 분모에 남지 않게 하고, 엔진 버전이 다른 점수는 기준이 달라 섞지 않는다.
+function bestScoreJoinSql(character: string, score: string): Prisma.Sql {
+  const characterAlias = Prisma.raw(character)
+  const scoreAlias = Prisma.raw(score)
+
+  return Prisma.sql`
+    LEFT JOIN LATERAL (
+      SELECT max(history.score) AS score
+      FROM "character_score_history" AS history
+      JOIN "score_engines" AS history_engine ON history_engine.id = history.engine_id
+      WHERE history.server_id = ${characterAlias}.server_id
+        AND history.character_id = ${characterAlias}.character_id
+        AND history.kind = ${scoreAlias}.kind
+        AND history_engine.package = ${scoreAlias}.engine_package
+        AND history_engine.rules_rev = ${scoreAlias}.engine_rules_rev
+        AND history_engine.bundle_id = ${scoreAlias}.engine_bundle_id
+    ) AS best_score ON TRUE`
+}
+
 // 클리어를 처음 저장할 때만 그 시점 캐릭터의 최고 명성과 점수를 복사한다. 아래 ON CONFLICT 갱신은 이 칸을 바꾸지 않아,
 // 그 뒤 명성이나 점수가 바뀌거나 같은 기록을 다시 저장해도 복사한 값은 그대로이고, 비어 있던 지난 행도 채우지 않는다.
-// 점수는 지금 점수와 같은 종류, 엔진 버전의 이력 가운데 최고치다. 클리어 뒤 장비를 갈아 낀 상태로 계산한 점수가
-// 클리어 점수로 남지 않게 하고, 엔진 버전이 다른 점수는 기준이 달라 섞지 않는다.
 const snapshotColumns = Prisma.sql`
   "max_fame", "score", "score_kind", "score_engine_package", "score_engine_rules_rev", "score_engine_bundle_id"`
 const snapshotValues = Prisma.sql`
@@ -67,17 +85,7 @@ const snapshotJoins = Prisma.sql`
     ON copied_character.server_id = clear.server_id AND copied_character.character_id = clear.character_id
   LEFT JOIN "character_scores" AS copied_score
     ON copied_score.server_id = clear.server_id AND copied_score.character_id = clear.character_id
-  LEFT JOIN LATERAL (
-    SELECT max(history.score) AS score
-    FROM "character_score_history" AS history
-    JOIN "score_engines" AS history_engine ON history_engine.id = history.engine_id
-    WHERE history.server_id = clear.server_id
-      AND history.character_id = clear.character_id
-      AND history.kind = copied_score.kind
-      AND history_engine.package = copied_score.engine_package
-      AND history_engine.rules_rev = copied_score.engine_rules_rev
-      AND history_engine.bundle_id = copied_score.engine_bundle_id
-  ) AS best_score ON TRUE`
+  ${bestScoreJoinSql('clear', 'copied_score')}`
 
 // 한 INSERT 안에서 같은 행을 두 번 고치면 PostgreSQL이 거절하므로 DISTINCT ON으로 가장 이른 클리어만 남긴다.
 // 이미 있는 행도 더 이른 클리어가 들어올 때만 바꿔, 같은 기록을 어떤 순서로 다시 저장해도 결과가 같다.
@@ -832,7 +840,8 @@ const SCORE_BAND_WIDTHS: Readonly<Record<CharacterScoreKind, number>> = {
   buff: 10_000
 }
 
-// 구간별 캐릭터 수는 분모 기준 명성 이상인 캐릭터의 지금 점수 가운데 클리어 점수와 같은 엔진 버전만 센다.
+// 구간별 캐릭터 수는 분모 기준 명성 이상인 캐릭터의 지금 점수 가운데 클리어 점수와 같은 엔진 버전만 골라,
+// 클리어 점수와 같은 기준인 이력 최고치로 센다.
 export function readContentClearScoreBands(
   client: DatabaseClient,
   selection: ClearWeekSelection,
@@ -852,7 +861,10 @@ export function readContentClearScoreBands(
       ) AS width(kind, size)
     ),
     population AS (
-      SELECT stored.kind, (stored.score / width.size) * width.size AS score, count(*)::int AS population
+      SELECT
+        stored.kind,
+        (GREATEST(stored.score, best_score.score) / width.size) * width.size AS score,
+        count(*)::int AS population
       FROM character_scores stored
       JOIN characters c ON c.server_id = stored.server_id AND c.character_id = stored.character_id
       JOIN engine
@@ -860,6 +872,7 @@ export function readContentClearScoreBands(
         AND engine.engine_rules_rev = stored.engine_rules_rev
         AND engine.engine_bundle_id = stored.engine_bundle_id
       JOIN width ON width.kind = stored.kind
+      ${bestScoreJoinSql('stored', 'stored')}
       WHERE c.max_fame >= ${minFame}
       GROUP BY 1, 2
     ),
