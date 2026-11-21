@@ -6,6 +6,8 @@ import { rankingLink, shareOf } from './set-stats-bars'
 // 전체 직업은 무기 종류가 많아 많은 순 10개만 막대로 두고 나머지는 "그 밖" 하나로 묶는다.
 const ALL_JOBS_WEAPON_LIMIT = 10
 const OTHER_WEAPONS = '그 밖'
+// 비율은 소수 한 자리로 보이므로, 0.0%로 반올림되는 무기는 막대를 두지 않는다.
+const MIN_SHOWN_WEAPON_SHARE = 0.05
 // 접두사가 붙은 무기는 성능이 같은 다른 아이템 ID라, 접두사를 뗀 이름의 무기와 한 막대로 센다.
 const MERGED_WEAPON_PREFIX = '검은 질병의 '
 
@@ -45,33 +47,39 @@ export function weaponBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
 
     return { key: itemId, name, value, link }
   })
+  const visibleBars = bars.filter(({ value }) => value >= MIN_SHOWN_WEAPON_SHARE)
 
   if (!limited) {
-    return bars
+    return visibleBars
   }
 
   const otherCount = sorted.slice(ALL_JOBS_WEAPON_LIMIT).reduce((sum, { count }) => sum + count, 0)
   const otherValue = shareOf(otherCount, stats.sampleSize)
 
-  return [...bars, { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }]
+  return [
+    ...visibleBars,
+    { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }
+  ]
 }
+
+// 응답은 아무도 끼지 않은 부위를 빼므로, 그 부위도 0명으로 보이도록 부위를 따로 둔다.
+const UNIQUE_ITEM_SLOTS = ['RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
 
 // 유일 장비는 지금 부위마다 한 종뿐이라 부위마다 착용 인원 한 줄로 보인다.
 // 한 부위에 여러 종이 생기면 itemIds가 모두 낀 캐릭터만 거르므로 랭킹으로 잇지 않는다.
 export function uniqueItemBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
-  return stats.slots
-    .filter(({ slotId }) => slotId !== WEAPON_SLOT)
-    .map(({ slotId, items }) => {
-      const value = items.reduce((sum, { count }) => sum + count, 0)
-      const name = `${itemSlotName(slotId)} 유일 장비 착용`
-      const [only] = items
+  return UNIQUE_ITEM_SLOTS.map((slotId) => {
+    const items = stats.slots.find((slot) => slot.slotId === slotId)?.items ?? []
+    const value = items.reduce((sum, { count }) => sum + count, 0)
+    const name = itemSlotName(slotId)
+    const [only] = items
 
-      if (items.length !== 1 || only === undefined) {
-        return { key: slotId, name, value }
-      }
+    if (items.length !== 1 || only === undefined) {
+      return { key: slotId, name, value }
+    }
 
-      const link = rankingLink(filter, { itemIds: only.itemId })
+    const link = rankingLink(filter, { itemIds: only.itemId })
 
-      return { key: slotId, name, value, link }
-    })
+    return { key: slotId, name, value, link }
+  })
 }

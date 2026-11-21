@@ -341,6 +341,20 @@ it('전직을 고르면 그 전직의 무기를 그 밖으로 묶지 않고 많�
   expect(rankingSearchOf(rowLink('무기', '무기2'))).toEqual({ ...JOB_FILTER, itemIds: 'weapon-2' })
 })
 
+it('0.0%로 보일 만큼 적게 낀 무기는 막대를 두지 않는다', async () => {
+  const itemStats = { ...itemStatsWith(5), sampleSize: 3000 }
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
+
+  await vi.waitFor(() =>
+    expect(rowsOf('무기')).toEqual([
+      ['무기1', '0.2%'],
+      ['무기2', '0.1%'],
+      ['무기3', '0.1%'],
+      ['무기4', '0.1%']
+    ])
+  )
+})
+
 it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 한 막대로 세고, 접두사 없는 무기의 itemId로 잇는다', async () => {
   const base = itemStatsWith(2)
   const itemStats = {
@@ -371,21 +385,23 @@ it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 �
   })
 })
 
-it('유일 장비는 부위마다 착용 인원 한 줄이고, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
+it('유일 장비는 반지, 보조장비, 마법석, 귀걸이마다 착용 인원 한 줄이고, 아무도 끼지 않은 부위는 0명이며, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
   const itemStats = { ...itemStatsWith(2), sampleSize: 200 }
   await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
 
   await vi.waitFor(() =>
     expect(rowsOf('유일 장비')).toEqual([
-      ['반지 유일 장비 착용', '72명'],
-      ['귀걸이 유일 장비 착용', '50명']
+      ['반지', '72명'],
+      ['보조장비', '0명'],
+      ['마법석', '0명'],
+      ['귀걸이', '50명']
     ])
   )
-  expect(rankingSearchOf(rowLink('유일 장비', '반지 유일 장비 착용'))).toEqual({
+  expect(rankingSearchOf(rowLink('유일 장비', '반지'))).toEqual({
     ...JOB_FILTER,
     itemIds: 'ring-1'
   })
-  expect(rowLink('유일 장비', '귀걸이 유일 장비 착용')).toBeNull()
+  expect(rowLink('유일 장비', '귀걸이')).toBeNull()
 })
 
 it('아이템 통계 저장분이 없으면 무기, 유일 장비 상자에 아이템 통계가 없다고 알린다', async () => {
