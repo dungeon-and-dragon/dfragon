@@ -162,8 +162,8 @@ try {
     [{ population: 1200, minFame: 126000, jobCount: '1200', closed: true }]
   )
 
-  // 수집 하한(최신 컨텐츠의 가장 낮은 입장 명성)이다. 장비를 벗어 지금 명성이 내려간 캐릭터도 최고 명성으로 든다.
-  const collectionMinFame = 104292
+  // 수집 하한(모든 컨텐츠의 가장 낮은 입장 명성)이다. 장비를 벗어 지금 명성이 내려간 캐릭터도 최고 명성으로 든다.
+  const collectionMinFame = 47684
   for (const character of [
     basic('siroco', 'clear-tie', 900000),
     basic('cain', 'clear-tie-2', 900000),

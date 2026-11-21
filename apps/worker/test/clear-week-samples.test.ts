@@ -214,3 +214,75 @@ test('레기온은 출시 뒤 레이드 모집단이 마감한 주 가운데 아
   )
   assert.equal(summary.legions, 4)
 })
+
+test('각인된 악몽 1주차 전 주는 상세의 점수 구간과 전체 개요의 점수 분포를 담지 않고, 1주차부터는 담는다', async () => {
+  const scoreBand = { kind: 'equipment' as const, score: 50_000, population: 100, cleared: 10 }
+  const contentSamples = new Map<string, ClearContentWeekSamples>()
+  const overviewScores = new Map<string, number>()
+  const service = new ClearWeekSampleService({
+    ...emptySampleRepository,
+    readPopulations: async () => [
+      population('michaela-hard', '2026-10-29', true),
+      population('michaela-hard', '2026-11-05', true)
+    ],
+    readContentWeekSampleWeeks: async () => [],
+    readOverviewSampleWeeks: async () => [],
+    recordLegionClears: async () => undefined,
+    recordPopulation: async () => undefined,
+    readScoreBands: async () => [scoreBand],
+    readScores: async () => [
+      {
+        contentId: 'michaela-hard',
+        kind: 'equipment',
+        characters: 30,
+        quantiles: [1, 2, 3, 4, 5],
+        max: 6
+      }
+    ],
+    recordContentWeekSamples: async ({ weekStart }, samples) => {
+      contentSamples.set(formatResetDate(weekStart), samples)
+    },
+    recordOverviewSamples: async (weekStart, samples) => {
+      overviewScores.set(formatResetDate(weekStart), samples.scores.length)
+    }
+  })
+
+  await service.recordMissing(() => undefined)
+
+  assert.deepEqual(contentSamples.get('2026-10-29')?.scoreBands, [])
+  assert.deepEqual(contentSamples.get('2026-11-05')?.scoreBands, [scoreBand])
+  assert.equal(overviewScores.get('2026-10-29'), 0)
+  assert.equal(overviewScores.get('2026-11-05'), 1)
+})
+
+test('지난주 행의 점수를 쓰는 지난주 대비 그룹 점수는 지난주가 각인된 악몽 1주차 전이면 담지 않는다', async () => {
+  const groupScore = {
+    group: 'left' as const,
+    kind: 'equipment' as const,
+    characters: 30,
+    quantiles: [1, 2, 3, 4, 5],
+    max: 6
+  }
+  const contentSamples = new Map<string, ClearContentWeekSamples>()
+  const service = new ClearWeekSampleService({
+    ...emptySampleRepository,
+    readPopulations: async () => [
+      population('michaela-hard', '2026-11-05', true),
+      population('michaela-hard', '2026-11-12', true)
+    ],
+    readContentWeekSampleWeeks: async () => [],
+    readOverviewSampleWeeks: async () => [],
+    recordLegionClears: async () => undefined,
+    recordPopulation: async () => undefined,
+    readWeekGroupScores: async () => [groupScore],
+    recordContentWeekSamples: async ({ weekStart }, samples) => {
+      contentSamples.set(formatResetDate(weekStart), samples)
+    },
+    recordOverviewSamples: async () => undefined
+  })
+
+  await service.recordMissing(() => undefined)
+
+  assert.deepEqual(contentSamples.get('2026-11-05')?.weekGroupScores, [])
+  assert.deepEqual(contentSamples.get('2026-11-12')?.weekGroupScores, [groupScore])
+})
