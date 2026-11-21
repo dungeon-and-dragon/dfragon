@@ -163,11 +163,11 @@ try {
   ])
   assert.deepEqual(
     (await get(`/rankings/fame?${maleQuery}&role=dealer`)).characters.map(
-      ({ rank, characterId, role }) => [rank, characterId, role]
+      ({ characterId, role }) => [characterId, role]
     ),
     [
-      [1, 'mc-dealer-1', 'dealer'],
-      [2, 'mc-dealer-2', 'dealer']
+      ['mc-dealer-1', 'dealer'],
+      ['mc-dealer-2', 'dealer']
     ]
   )
   assert.deepEqual(roles((await get(`/rankings/fame?${maleQuery}&role=buffer`)).characters), [

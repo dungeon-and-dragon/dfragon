@@ -39,6 +39,7 @@ const engine = { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 
 const score = (characterId, value, overrides = {}) => ({
   serverId: 'cain',
   characterId,
+  job: null,
   kind: 'equipment',
   score: value,
   calculatedAt: new Date('2026-11-12T13:00:00Z'),

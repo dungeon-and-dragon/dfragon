@@ -125,7 +125,7 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1명을 더해 101명을 읽고 serverId는 무시하며 1부터 rank를 붙인다', async () => {
+test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1명을 더해 101명을 읽고 serverId는 무시하며 행에 rank를 붙이지 않는다', async () => {
   const reads: [FameRankingFilter, number, FameRankingPosition | undefined][] = []
   const characters = [
     {
@@ -155,7 +155,6 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
     assert.equal(answer.status, 200)
     assert.deepEqual(answer.body, {
       characters: characters.map(({ dealerSkillLearned, ...character }, index) => ({
-        rank: index + 1,
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z',
         role: 'dealer',
@@ -384,8 +383,8 @@ test('명성 랭킹은 전직 없는 개화, 빈 값과 빈 쌍, 종류가 1, 2�
   }
 })
 
-// fake DB가 받은 위치 뒤의 행만 주도록 해, API가 마지막 행으로 cursor를 만들고 rank를 잇는지 본다.
-test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor로 다음 page를 이어 rank를 매기며 마지막 page는 null이다', async () => {
+// fake DB가 받은 위치 뒤의 행만 주도록 해, API가 마지막 행으로 cursor를 만드는지 본다.
+test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor로 다음 page를 이어 받으며 마지막 page는 null이다', async () => {
   const sorted = Array.from({ length: 150 }, (_, index) =>
     character(`p${String(index).padStart(3, '0')}`, 90000 - Math.floor(index / 2))
   )
@@ -408,9 +407,6 @@ test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor�
       origin,
       `/rankings/fame?cursor=${encodeURIComponent(first.body.nextCursor)}`
     )
-    const ranks = [...first.body.characters, ...second.body.characters].map(
-      ({ rank }: { rank: number }) => rank
-    )
     const ids = [...first.body.characters, ...second.body.characters].map(
       ({ characterId }: { characterId: string }) => characterId
     )
@@ -420,17 +416,126 @@ test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor�
     assert.equal(second.body.characters.length, 50)
     assert.equal(second.body.nextCursor, null)
     assert.deepEqual(
-      ranks,
-      Array.from({ length: 150 }, (_, index) => index + 1)
-    )
-    assert.deepEqual(
       ids,
       sorted.map(({ characterId }) => characterId)
     )
     assert.deepEqual(afters, [
       undefined,
-      { fame: 90000 - 49, serverId: 'cain', characterId: 'p099' }
+      { value: 90000 - 49, serverId: 'cain', characterId: 'p099' }
     ])
+  } finally {
+    await app.close()
+  }
+})
+
+test('점수 기준 랭킹은 마지막 행의 점수로 cursor를 만들고, 그 cursor는 같은 기준에서만 받는다', async () => {
+  const sorted = Array.from({ length: 101 }, (_, index) => ({
+    ...character(`s${String(index).padStart(3, '0')}`, 1000),
+    score: { kind: 'buff' as const, value: 500000 - Math.floor(index / 2) }
+  }))
+  const afters: (FameRankingPosition | undefined)[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (_filter, limit, after) => {
+      afters.push(after)
+      const start =
+        after === undefined
+          ? 0
+          : sorted.findIndex((row) => row.characterId === after.characterId) + 1
+
+      return sorted.slice(start, start + limit)
+    }
+  })
+
+  try {
+    const first = await getJson(origin, '/rankings/fame?sort=buffScore')
+    const cursor = encodeURIComponent(first.body.nextCursor)
+    const second = await getJson(origin, `/rankings/fame?sort=buffScore&cursor=${cursor}`)
+    const otherSorts = await Promise.all(
+      ['', 'sort=fame&', 'sort=equipmentScore&'].map((sort) =>
+        getJson(origin, `/rankings/fame?${sort}cursor=${cursor}`)
+      )
+    )
+
+    assert.deepEqual(
+      second.body.characters.map(({ characterId }: { characterId: string }) => characterId),
+      ['s100']
+    )
+    assert.deepEqual(afters, [
+      undefined,
+      { value: 500000 - 49, serverId: 'cain', characterId: 's099' }
+    ])
+    assert.deepEqual(
+      otherSorts.map(({ status }) => status),
+      [400, 400, 400]
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('랭킹은 sort와 scoreFrom, scoreTo를 숫자로 바꿔 직업 필터와 함께 넘긴다', async () => {
+  const reads: FameRankingFilter[] = []
+  const { app, origin } = await listen({
+    ...unusedReader,
+    readFameRanking: async (filter) => {
+      reads.push(filter)
+
+      return []
+    }
+  })
+
+  try {
+    const job = 'jobId=synthetic-job&jobGrowId=synthetic-grow'
+    const statuses = await Promise.all(
+      [
+        `sort=equipmentScore&${job}&scoreFrom=1000000&scoreTo=1200000`,
+        'sort=buffScore&scoreFrom=0',
+        `sort=fame&${job}&fameFrom=136000`
+      ].map(async (query) => (await getJson(origin, `/rankings/fame?${query}`)).status)
+    )
+
+    assert.deepEqual(statuses, [200, 200, 200])
+    assert.deepEqual(
+      reads.toSorted((left, right) => String(left.sort).localeCompare(String(right.sort))),
+      [
+        { sort: 'buffScore', scoreFrom: 0 },
+        {
+          sort: 'equipmentScore',
+          jobId: 'synthetic-job',
+          jobGrowId: 'synthetic-grow',
+          scoreFrom: 1000000,
+          scoreTo: 1200000
+        },
+        { sort: 'fame', jobId: 'synthetic-job', jobGrowId: 'synthetic-grow', fameFrom: 136000 }
+      ]
+    )
+  } finally {
+    await app.close()
+  }
+})
+
+test('랭킹은 모르는 sort, 기준과 맞지 않는 범위, scoreTo보다 큰 scoreFrom, 잘못된 점수를 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+
+  try {
+    for (const query of [
+      'sort=score',
+      'sort=',
+      'scoreFrom=1',
+      'sort=fame&scoreTo=1',
+      'sort=equipmentScore&fameFrom=1',
+      'sort=buffScore&fameTo=1',
+      'sort=equipmentScore&scoreFrom=2&scoreTo=1',
+      'sort=equipmentScore&scoreFrom=-1',
+      'sort=equipmentScore&scoreFrom=1.5',
+      'sort=equipmentScore&scoreTo=1000000000',
+      'sort=equipmentScore&sort=buffScore'
+    ]) {
+      const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
+      assert.equal(status, 400, query)
+      assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', query)
+    }
   } finally {
     await app.close()
   }
@@ -448,7 +553,9 @@ test('명성 랭킹은 oathSetId 없는 oathSetOption, 숫자가 아닌 oathSetI
       'equipmentSetId=set-a&equipmentSetId=set-b',
       'cursor=',
       'cursor=not-a-cursor',
-      `cursor=${Buffer.from('[1,"cain"]').toString('base64url')}`
+      `cursor=${Buffer.from('[1,"cain"]').toString('base64url')}`,
+      // rank를 넣던 예전 cursor 모양이다.
+      `cursor=${Buffer.from('[90000,"cain","p099",100]').toString('base64url')}`
     ]) {
       const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
       assert.equal(status, 400, query)

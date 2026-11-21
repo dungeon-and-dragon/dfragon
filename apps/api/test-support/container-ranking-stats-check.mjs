@@ -67,6 +67,7 @@ try {
     await recordCharacterScore(client, {
       serverId: 'cain',
       characterId,
+      job: null,
       kind,
       score,
       calculatedAt: new Date(),
@@ -180,11 +181,15 @@ try {
   }
   const rankingAnswer = await get(`/rankings/fame?jobId=${jobId}&jobGrowId=grow-b`)
   assert.deepEqual(
-    rankingAnswer.characters.map(({ rank, characterId, score }) => [rank, characterId, score]),
+    rankingAnswer.characters.map(({ characterId, score }) => [characterId, score]),
     [
-      [1, 'rank-b1', null],
-      [2, 'rank-b2', { calculator: 'buff', value: 4321000 }]
+      ['rank-b1', null],
+      ['rank-b2', { calculator: 'buff', value: 4321000 }]
     ]
+  )
+  assert.equal(
+    rankingAnswer.characters.some((row) => Object.hasOwn(row, 'rank')),
+    false
   )
   assert.deepEqual(await get('/stats'), {
     total: 0,
@@ -320,10 +325,6 @@ try {
   const [lastOfFirstPage, firstOfSecondPage] = bothSetsRows.slice(99, 101)
   assert.equal(lastOfFirstPage.fame, firstOfSecondPage.fame)
   assert.notEqual(lastOfFirstPage.serverId, firstOfSecondPage.serverId)
-  assert.deepEqual(
-    bothSetsRows.map(({ rank }) => rank),
-    Array.from({ length: 105 }, (_, index) => index + 1)
-  )
   assert.deepEqual(bothSetsRows[0].equipmentSet, fairy)
   assert.deepEqual(bothSetsRows[0].oathSet, dragon('용투 : 세계를 태우는 불꽃'))
 
@@ -360,10 +361,6 @@ try {
   assert.deepEqual(
     weaponRows.map(({ characterId }) => characterId),
     expectedOrder
-  )
-  assert.deepEqual(
-    weaponRows.map(({ rank }) => rank),
-    Array.from({ length: 105 }, (_, index) => index + 1)
   )
 
   const ringHolders = setCharacters
@@ -482,11 +479,72 @@ try {
     [...commonFirst.characters, ...commonSecond.characters].map(({ characterId }) => characterId),
     commonExpected
   )
-  assert.deepEqual(
-    [...commonFirst.characters, ...commonSecond.characters].map(({ rank }) => rank),
-    Array.from({ length: 200 }, (_, index) => index + 1)
-  )
   assert.equal(typeof commonSecond.nextCursor, 'string')
+
+  // 흔한 무기 캐릭터 1만 명 가운데 10의 배수 번째는 버프점수, 7의 배수 번째는 점수 없음, 나머지는 장비점수다.
+  // 장비점수는 서른 명씩 같아, 위 조건으로 빠지는 캐릭터를 빼도 page 경계가 같은 점수 사이에 걸린다. 13의 배수 번째는 점수를 계산한 전직이 지금과 다르다.
+  await client.$executeRaw`
+    INSERT INTO character_scores
+      (server_id, character_id, kind, score, calculated_at, engine_package, engine_rules_rev, engine_bundle_id, job_id, job_grow_id)
+    SELECT 'cain', 'common-' || g,
+      CASE WHEN g % 10 = 0 THEN 'buff' ELSE 'equipment' END,
+      3000000 - g / 30, now(), 'p', 'r', 'b',
+      ${commonJob}, CASE WHEN g % 13 = 0 THEN 'grow-before' ELSE 'grow-common' END
+    FROM generate_series(1, 10000) g
+    WHERE g % 7 <> 0`
+  const scoreExpected = (kind, from = 0, to = 2147483647) =>
+    client.$queryRaw`
+      SELECT c.character_id AS "characterId", s.score
+      FROM characters c
+      JOIN character_scores s ON s.server_id = c.server_id AND s.character_id = c.character_id
+      WHERE c.job_id = ${commonJob} AND s.kind = ${kind} AND s.job_grow_id = c.job_grow_id
+        AND s.score BETWEEN ${from}::int AND ${to}::int
+      ORDER BY s.score DESC, c.server_id, c.character_id
+      LIMIT 200`
+  const scoreQuery = `sort=equipmentScore&jobId=${commonJob}&jobGrowId=grow-common`
+  const scorePages = [await get(`/rankings/fame?${scoreQuery}`)]
+  scorePages.push(
+    await get(`/rankings/fame?${scoreQuery}&cursor=${encodeURIComponent(scorePages[0].nextCursor)}`)
+  )
+  const scoreRows = scorePages.flatMap(({ characters }) => characters)
+  const equipmentExpected = await scoreExpected('equipment')
+  assert.deepEqual(
+    scoreRows.map(({ characterId, score }) => [characterId, score]),
+    equipmentExpected.map(({ characterId, score }) => [
+      characterId,
+      { calculator: 'equipment', value: score }
+    ])
+  )
+  assert.equal(scoreRows[99].score.value, scoreRows[100].score.value)
+  assert.equal(
+    scoreRows.some(({ characterId }) => Number(characterId.slice('common-'.length)) % 13 === 0),
+    false
+  )
+  const buffRows = (
+    await get(`/rankings/fame?sort=buffScore&jobId=${commonJob}&jobGrowId=grow-common`)
+  ).characters
+  assert.deepEqual(
+    buffRows.map(({ characterId }) => characterId),
+    (await scoreExpected('buff')).slice(0, 100).map(({ characterId }) => characterId)
+  )
+  const rangeRows = (
+    await get(
+      `/rankings/fame?${scoreQuery}&scoreFrom=2999905&scoreTo=2999906&itemIds=item-rank-common`
+    )
+  ).characters
+  assert.deepEqual(
+    rangeRows.map(({ characterId }) => characterId),
+    (await scoreExpected('equipment', 2999905, 2999906)).map(({ characterId }) => characterId)
+  )
+  assert.ok(rangeRows.length > 0)
+  for (const path of [
+    `/rankings/fame?jobId=${commonJob}&cursor=${encodeURIComponent(scorePages[0].nextCursor)}`,
+    `/rankings/fame?${scoreQuery}&fameFrom=1`,
+    `/rankings/fame?jobId=${commonJob}&scoreFrom=1`
+  ]) {
+    const response = await fetch(new URL(path, 'http://127.0.0.1:3000'))
+    assert.equal(response.status, 400, path)
+  }
 } finally {
   await client.$disconnect()
 }
