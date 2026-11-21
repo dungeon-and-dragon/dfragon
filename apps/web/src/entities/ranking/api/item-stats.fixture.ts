@@ -19,11 +19,12 @@ const WEAPONS: readonly (readonly [string, string | null, number])[] = [
   ['그림자를 가르는 일섬', null, 2.1]
 ]
 
-const UNIQUES: readonly (readonly [string, string, number])[] = [
-  ['RING', '광휘를 머금은 눈동자', 72.4],
-  ['SUPPORT', '만병을 잉태한 역병의 심장', 68.9],
-  ['MAGIC_STON', '우아한 기품의 향수', 70.3],
-  ['EARRING', '영롱한 날씨의 큐브', 66.1]
+// 유일 장비는 화면이 itemId로 고정해 두므로 게임 데이터의 itemId를 쓴다.
+const UNIQUES: readonly (readonly [string, string, string, number])[] = [
+  ['RING', 'aa5273499f19ddba846919dbb6857d82', '광휘를 머금은 눈동자', 72.4],
+  ['SUPPORT', '6e1fcf6e59ed8d5a95dc152b84fe93ce', '만병을 잉태한 역병의 심장', 68.9],
+  ['MAGIC_STON', 'df77236c51ea1274a3deb79c3e470695', '우아한 기품의 향수', 70.3],
+  ['EARRING', '14449881bc371352c250502e7b201506', '영롱한 날씨의 큐브', 66.1]
 ]
 
 function countOf(percent: number): number {
@@ -37,11 +38,9 @@ export function storyItemStats(computedAt: string): ItemStats {
     typeDetail,
     count: countOf(percent)
   }))
-  const uniques = UNIQUES.map(([slotId, name, percent], index) => ({
+  const uniques = UNIQUES.map(([slotId, itemId, name, percent]) => ({
     slotId,
-    items: [
-      { itemId: `story-unique-${index + 1}`, name, typeDetail: null, count: countOf(percent) }
-    ]
+    items: [{ itemId, name, typeDetail: null, count: countOf(percent) }]
   }))
 
   return {
