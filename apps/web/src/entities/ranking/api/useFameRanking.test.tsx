@@ -140,6 +140,16 @@ it('개화 선택을 스킬 이름~종류 쌍을 쉼표로 이어 직업, 전직
   ])
 })
 
+it('검색 기준이 점수면 sort와 점수 범위를 보낸다', async () => {
+  respond(fameRankingFixture.lastPage)
+
+  await settle({ jobId: 'job-1', sort: 'buffScore', scoreFrom: 200000, scoreTo: 240000 })
+
+  expect(queries()).toEqual([
+    { jobId: 'job-1', sort: 'buffScore', scoreFrom: '200000', scoreTo: '240000' }
+  ])
+})
+
 it('명성 범위를 query로 보내고, 범위 아래쪽만 있어도 보낸다', async () => {
   respond(fameRankingFixture.lastPage)
 
@@ -162,6 +172,9 @@ it.each<[string, FameRankingFilter]>([
   ['여섯 개 itemId', { itemIds: ['a', 'b', 'c', 'd', 'e', 'f'] }],
   ['쉼표가 든 itemId', { itemIds: ['a,b'] }],
   ['거꾸로 된 명성 범위', { fameFrom: 138000, fameTo: 136000 }],
+  ['점수 기준의 명성 범위', { sort: 'equipmentScore', fameFrom: 136000 }],
+  ['명성 기준의 점수 범위', { scoreFrom: 1300000 }],
+  ['거꾸로 된 점수 범위', { sort: 'equipmentScore', scoreFrom: 1400000, scoreTo: 1300000 }],
   ['전직 없는 개화', { jobId: 'job-1', evolutions: [{ name: '발도', type: 1 }] }],
   [
     '같은 스킬의 개화 둘',

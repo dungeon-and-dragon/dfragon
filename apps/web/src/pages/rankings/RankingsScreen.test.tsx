@@ -1250,3 +1250,113 @@ it('개화 스킬을 받지 못하면 문구와 다시 시도를 두고, 다시 
   await act(async () => chip('다시 시도').click())
   await vi.waitFor(() => expect(evolutionButton('발도 명가의 손놀림')).not.toBeNull())
 })
+
+function rangeInputs(): HTMLInputElement[] {
+  return [...container.querySelectorAll<HTMLInputElement>('input[inputmode="numeric"]')]
+}
+
+it('검색 기준을 바꾸면 넣어 둔 범위를 비우고 그 기준으로 넘긴다', async () => {
+  const onFilterChange = vi.fn()
+  await render(
+    async () => rankingOf(1),
+    { jobId: WEAPON_MASTER.jobId, fameFrom: 136000 },
+    onFilterChange
+  )
+
+  expect(setSelect('검색 기준').textContent).toContain('명성')
+  await pickOption('검색 기준', '장비 점수')
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId: WEAPON_MASTER.jobId,
+    sort: 'equipmentScore',
+    scoreFrom: undefined,
+    scoreTo: undefined
+  })
+
+  await render(
+    async () => rankingOf(1),
+    { sort: 'equipmentScore', scoreFrom: 1300000 },
+    onFilterChange
+  )
+  await pickOption('검색 기준', '명성')
+  expect(onFilterChange).toHaveBeenLastCalledWith({ fameFrom: undefined, fameTo: undefined })
+})
+
+it('점수 기준이 든 필터로 들어오면 셀렉트와 입력에 그 값을 보이고, 적용하면 점수 범위로 넘기며 점수 헤더에 내림차순을 표시한다', async () => {
+  const onFilterChange = vi.fn()
+  await render(
+    async () => rankingOf(1),
+    { sort: 'equipmentScore', scoreFrom: 1300000, scoreTo: 1400000 },
+    onFilterChange
+  )
+
+  expect(queries()).toEqual([{ sort: 'equipmentScore', scoreFrom: '1300000', scoreTo: '1400000' }])
+  expect(setSelect('검색 기준').textContent).toContain('장비 점수')
+  expect(rangeInputs().map((input) => [input.getAttribute('aria-label'), input.value])).toEqual([
+    ['최저 장비 점수', '1300000'],
+    ['최대 장비 점수', '1400000']
+  ])
+  expect(
+    [...container.querySelectorAll('thead th[aria-sort="descending"]')].map(
+      (cell) => cell.textContent
+    )
+  ).toEqual(['점수'])
+
+  const [from] = rangeInputs()
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(from, '1350000')
+    from!.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await act(async () => chip('적용').click())
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    sort: 'equipmentScore',
+    scoreFrom: 1350000,
+    scoreTo: 1400000
+  })
+})
+
+it('최저가 최대보다 크면 두 입력을 invalid로 두고 적용을 막는다', async () => {
+  await render(async () => rankingOf(1), { sort: 'buffScore' })
+
+  const [from, to] = rangeInputs()
+  await act(async () => {
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+    setValue?.call(from, '240000')
+    from!.dispatchEvent(new Event('input', { bubbles: true }))
+    setValue?.call(to, '200000')
+    to!.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+
+  expect(chip('적용').disabled).toBe(true)
+  expect(rangeInputs().map((input) => input.closest('[data-invalid]') !== null)).toEqual([
+    true,
+    true
+  ])
+})
+
+it('점수 기준에서 세트를 고르면 기준과 점수 범위를 그대로 두고 세트만 바꿔 넘긴다', async () => {
+  const onFilterChange = vi.fn()
+  await render(
+    async () => rankingOf(1),
+    { sort: 'equipmentScore', scoreFrom: 1300000, equipmentSetId: FAIRY },
+    onFilterChange,
+    setResponses()
+  )
+
+  await pickOption('장비 세트', '황금향')
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    sort: 'equipmentScore',
+    scoreFrom: 1300000,
+    equipmentSetId: GOLDEN
+  })
+})
+
+it('검색 기준만 점수로 바꾼 필터도 초기화로 지운다', async () => {
+  const onFilterChange = vi.fn()
+  await render(async () => rankingOf(1), { sort: 'buffScore' }, onFilterChange)
+
+  expect(chip('초기화').disabled).toBe(false)
+  await act(async () => chip('초기화').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({})
+})
