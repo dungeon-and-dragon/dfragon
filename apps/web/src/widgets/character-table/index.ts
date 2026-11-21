@@ -2,6 +2,7 @@ export { CharacterCell } from './ui/CharacterCell'
 export {
   CharacterTable,
   FAME_COLUMN,
+  NarrowStats,
   RANK_COLUMN,
   SCORE_COLUMN,
   SkeletonRow

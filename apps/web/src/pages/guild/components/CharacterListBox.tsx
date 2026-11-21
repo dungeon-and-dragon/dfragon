@@ -29,11 +29,17 @@ export function CharacterListBox({
               목록을 받는 중입니다.
             </span>
             <CharacterTable
+              rankOnNarrow={false}
               rows={[]}
               affiliations={affiliations}
               scorePlacement="column"
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} scorePlacement="column" affiliations={affiliations} />
+                <SkeletonRow
+                  key={index}
+                  rankOnNarrow={false}
+                  scorePlacement="column"
+                  affiliations={affiliations}
+                />
               ))}
             />
           </div>
@@ -62,6 +68,7 @@ export function CharacterListBox({
             <PagedTable characters={result.value} affiliations={affiliations} />
           ) : (
             <CharacterTable
+              rankOnNarrow={false}
               rows={ranked(result.value)}
               affiliations={affiliations}
               scorePlacement="column"
@@ -92,6 +99,7 @@ function PagedTable({
   return (
     <>
       <CharacterTable
+        rankOnNarrow={false}
         rows={ranked(characters.slice(0, visible))}
         affiliations={affiliations}
         scorePlacement="column"

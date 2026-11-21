@@ -197,20 +197,22 @@ function RecentItem({
       </span>
       <span className="flex min-w-0 grow flex-col">
         <span className="flex min-w-0 items-center gap-2">
-          <ServerBadge serverId={character.serverId} surface="control" />
           <span className="truncate text-sm font-semibold">{character.characterName}</span>
           {job != null && (
             <span className="shrink-0 text-xs whitespace-nowrap text-fg-muted">{job}</span>
           )}
           {showsLevel && (
-            <span className="shrink-0 num text-xs text-fg-subtle">{`Lv.${character.level}`}</span>
+            <span className="shrink-0 num text-xs text-fg-subtle">{`Lv ${character.level}`}</span>
           )}
         </span>
-      </span>
-      <span
-        className={`min-w-16 shrink-0 text-right num text-sm font-semibold ${character.fame == null ? 'text-fg-subtle' : 'text-game-fame'}`}
-      >
-        {character.fame != null ? integer.format(character.fame) : MISSING_VALUE}
+        <span className="flex min-w-0 items-center gap-2">
+          <ServerBadge serverId={character.serverId} surface="control" />
+          <span
+            className={`num text-xs font-semibold ${character.fame == null ? 'text-fg-subtle' : 'text-game-fame'}`}
+          >
+            {character.fame != null ? integer.format(character.fame) : MISSING_VALUE}
+          </span>
+        </span>
       </span>
     </Link>
   )

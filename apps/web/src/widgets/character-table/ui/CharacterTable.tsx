@@ -47,12 +47,16 @@ const DETAIL_COLUMN = 'w-[160px] max-sm:hidden'
 // 두 줄 값도 행을 48px보다 높이지 않게 초상화 칸처럼 위아래 여백을 두지 않는다.
 const DETAIL_CELL = 'py-0 max-sm:hidden'
 
+// 600px 미만에서는 명성, 점수, 모험단, 길드 열을 숨기고 명성과 점수를 캐릭터 칸 둘째 줄에 둔다.
+const WIDE_ONLY = 'max-sm:hidden'
+
 const ALL_AFFILIATIONS: readonly Affiliation[] = ['adventure', 'guild']
 const AFFILIATION_HEADINGS: Record<Affiliation, string> = { adventure: '모험단', guild: '길드' }
 
 export function CharacterTable<Row extends CharacterTableRow>({
   rows,
   ranked = true,
+  rankOnNarrow = true,
   detail,
   action,
   trailing,
@@ -63,6 +67,7 @@ export function CharacterTable<Row extends CharacterTableRow>({
 }: {
   rows: readonly Row[]
   ranked?: boolean
+  rankOnNarrow?: boolean
   scorePlacement?: ScorePlacement
   sortedBy?: SortedColumn
   detail?: CharacterTableDetail<Row>
@@ -71,24 +76,28 @@ export function CharacterTable<Row extends CharacterTableRow>({
   affiliations?: readonly Affiliation[]
   adventureBesideName?: boolean
 }): React.JSX.Element {
+  const rankClass = rankOnNarrow ? '' : WIDE_ONLY
+
   return (
     <div className="table-scroll">
-      <table className={`table table-fixed${affiliations.length > 0 ? ' table-wide' : ''}`}>
+      <table
+        className={`table table-fixed${affiliations.length > 0 ? ' table-wide max-sm:min-w-0' : ''}`}
+      >
         <colgroup>
-          {ranked && <col className={RANK_COLUMN} />}
+          {ranked && <col className={`${RANK_COLUMN} ${rankClass}`} />}
           <col />
           {detail != null && <col className={DETAIL_COLUMN} />}
-          <col className={FAME_COLUMN} />
-          {scorePlacement === 'column' && <col className={SCORE_COLUMN} />}
+          <col className={`${FAME_COLUMN} ${WIDE_ONLY}`} />
+          {scorePlacement === 'column' && <col className={`${SCORE_COLUMN} ${WIDE_ONLY}`} />}
           {affiliations.map((affiliation) => (
-            <col key={affiliation} className={AFFILIATION_COLUMN} />
+            <col key={affiliation} className={`${AFFILIATION_COLUMN} ${WIDE_ONLY}`} />
           ))}
           {action != null && <col className="w-[56px]" />}
         </colgroup>
         <thead>
           <tr>
             {ranked && (
-              <th scope="col" className="table-num">
+              <th scope="col" className={`table-num ${rankClass}`}>
                 #
               </th>
             )}
@@ -98,12 +107,12 @@ export function CharacterTable<Row extends CharacterTableRow>({
                 {detail.name}
               </th>
             )}
-            <NumberHeading label="명성" sorted={sortedBy === 'fame'} />
+            <NumberHeading label="명성" sorted={sortedBy === 'fame'} className={WIDE_ONLY} />
             {scorePlacement === 'column' && (
-              <NumberHeading label="점수" sorted={sortedBy === 'score'} />
+              <NumberHeading label="점수" sorted={sortedBy === 'score'} className={WIDE_ONLY} />
             )}
             {affiliations.map((affiliation) => (
-              <th key={affiliation} scope="col" className="text-center">
+              <th key={affiliation} scope="col" className={`text-center ${WIDE_ONLY}`}>
                 {AFFILIATION_HEADINGS[affiliation]}
               </th>
             ))}
@@ -118,17 +127,29 @@ export function CharacterTable<Row extends CharacterTableRow>({
           {rows.map((row) => (
             <tr key={`${row.serverId}/${row.characterId}`}>
               {ranked && (
-                <td className="table-num">{row.rank != null && <RankNumber rank={row.rank} />}</td>
+                <td className={`table-num ${rankClass}`}>
+                  {row.rank != null && <RankNumber rank={row.rank} />}
+                </td>
               )}
               <td className={PORTRAIT_CELL}>
                 <CharacterCell
                   character={row}
                   adventureName={adventureBesideName ? row.adventureName : null}
+                  narrowStats={
+                    <NarrowStats
+                      fame={row.fame}
+                      score={row.score}
+                      showsScore={scorePlacement != null}
+                      adventure={
+                        affiliations.includes('adventure') && !adventureBesideName ? row : undefined
+                      }
+                    />
+                  }
                 />
               </td>
               {detail != null && <td className={DETAIL_CELL}>{detail.render(row)}</td>}
               {scorePlacement === 'belowFame' ? (
-                <td className="table-num py-0">
+                <td className={`table-num py-0 ${WIDE_ONLY}`}>
                   <span className="flex flex-col items-end">
                     <span className="num font-semibold leading-4 text-game-fame">
                       {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
@@ -137,17 +158,17 @@ export function CharacterTable<Row extends CharacterTableRow>({
                   </span>
                 </td>
               ) : (
-                <td className={FAME_CELL}>
+                <td className={`${FAME_CELL} ${WIDE_ONLY}`}>
                   {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
                 </td>
               )}
               {scorePlacement === 'column' && (
-                <td className="table-num">
+                <td className={`table-num ${WIDE_ONLY}`}>
                   <ScoreValue score={row.score} />
                 </td>
               )}
               {affiliations.map((affiliation) => (
-                <td key={affiliation} className="text-center text-fg-adventure">
+                <td key={affiliation} className={`text-center text-fg-adventure ${WIDE_ONLY}`}>
                   <AffiliationLink affiliation={affiliation} character={row} />
                 </td>
               ))}
@@ -161,17 +182,25 @@ export function CharacterTable<Row extends CharacterTableRow>({
   )
 }
 
-function NumberHeading({ label, sorted }: { label: string; sorted: boolean }): React.JSX.Element {
+function NumberHeading({
+  label,
+  sorted,
+  className = ''
+}: {
+  label: string
+  sorted: boolean
+  className?: string
+}): React.JSX.Element {
   if (!sorted) {
     return (
-      <th scope="col" className="table-num">
+      <th scope="col" className={`table-num ${className}`}>
         {label}
       </th>
     )
   }
 
   return (
-    <th scope="col" aria-sort="descending" className="table-num">
+    <th scope="col" aria-sort="descending" className={`table-num ${className}`}>
       <span className="inline-flex items-center gap-1 text-fg">
         {label}
         <ChevronDownIcon className="size-icon-sm" />
@@ -220,11 +249,13 @@ function AffiliationLink({
 
 export function SkeletonRow({
   ranked = true,
+  rankOnNarrow = true,
   detail = false,
   scorePlacement,
   affiliations = ALL_AFFILIATIONS
 }: {
   ranked?: boolean
+  rankOnNarrow?: boolean
   detail?: boolean
   scorePlacement?: ScorePlacement
   affiliations?: readonly Affiliation[]
@@ -232,7 +263,7 @@ export function SkeletonRow({
   return (
     <tr aria-hidden="true">
       {ranked && (
-        <td>
+        <td className={rankOnNarrow ? undefined : WIDE_ONLY}>
           <span className="skeleton-text ml-auto w-[12px]" />
         </td>
       )}
@@ -247,20 +278,55 @@ export function SkeletonRow({
           <span className="skeleton-text w-[56px]" />
         </td>
       )}
-      <td>
+      <td className={WIDE_ONLY}>
         <span className="skeleton-text ml-auto w-[56px]" />
         {scorePlacement === 'belowFame' && <span className="skeleton-text mt-1 ml-auto w-[48px]" />}
       </td>
       {scorePlacement === 'column' && (
-        <td>
+        <td className={WIDE_ONLY}>
           <span className="skeleton-text ml-auto w-[88px]" />
         </td>
       )}
       {affiliations.map((affiliation) => (
-        <td key={affiliation}>
+        <td key={affiliation} className={WIDE_ONLY}>
           <span className="skeleton-text mx-auto w-[56px]" />
         </td>
       ))}
     </tr>
+  )
+}
+
+// 600px 미만에서 캐릭터 칸 둘째 줄에 두는 명성, 점수, 모험단이다. 점수는 색으로 장비, 버프를 구분한다.
+export function NarrowStats({
+  fame,
+  score,
+  showsScore = true,
+  adventure
+}: {
+  fame: number | null
+  score?: ListScore
+  showsScore?: boolean
+  adventure?: CharacterTableRow
+}): React.JSX.Element {
+  return (
+    <>
+      <span className="num font-semibold text-game-fame">
+        {fame != null ? integer.format(fame) : MISSING_VALUE}
+      </span>
+      {showsScore && (
+        <>
+          <span aria-hidden="true" className="h-[10px] w-px bg-line-strong" />
+          <ScoreLine score={score} />
+        </>
+      )}
+      {adventure !== undefined && (
+        <>
+          <span aria-hidden="true" className="h-[10px] w-px bg-line-strong" />
+          <span className="min-w-0 truncate text-fg-adventure">
+            <AffiliationLink affiliation="adventure" character={adventure} />
+          </span>
+        </>
+      )}
+    </>
   )
 }
