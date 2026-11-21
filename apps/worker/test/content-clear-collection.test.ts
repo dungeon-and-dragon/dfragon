@@ -551,6 +551,23 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
   }
 })
 
+test('30일보다 오래된 주를 다시 받을 때는 비활성 캐릭터에게도 요청해 지난 클리어를 센다', async () => {
+  const reopened = closedPastWeeks().map((stored) => ({ ...stored, closed: false }))
+  const { state, store } = memoryClearStore(
+    [character('a', 130_000), character('b', 110_000)],
+    reopened,
+    new Set(['b'])
+  )
+  const { neople, requests } = fakeNeople({ b: [nabelHard('2025-06-05 21:00')] })
+
+  await collect(store, neople, COLLECTED_AT)
+
+  assert.deepEqual(new Set(requests.map(({ characterId }) => characterId)), new Set(['a', 'b']))
+  assert.deepEqual(storedClears(state), [
+    `nabel-hard/b/${at('2025-06-05T06:00').toISOString()}/null`
+  ])
+})
+
 test('목요일 06:00 뒤에 성공한 수집은 다음 목요일 06:00이 지나야 보충 대상이 된다', async () => {
   const { store } = memoryClearStore([])
   const job = createContentClearCollectionJob(
