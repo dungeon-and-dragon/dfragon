@@ -459,7 +459,7 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
   assert.equal(state.progress, undefined)
 })
 
-test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모는 119,414 이상, 레이드 7개 항목의 분모는 수집 대상 전체이며 직업별 수도 같은 기준이다', async () => {
+test('최고 명성 47,684 이상을 모두 받고, 분모와 직업별 수는 컨텐츠마다 그 입장 명성 이상인 캐릭터로 센다', async () => {
   const other = (characterId: string, maxFame: number): ClearPopulationCharacter => ({
     ...character(characterId, maxFame),
     jobGrowId: 'other-grow',
@@ -471,7 +471,10 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
       other('b', 119_414),
       other('c', 119_413),
       character('d', 104_292),
-      character('e', 104_291)
+      character('e', 72_688),
+      character('f', 63_257),
+      character('g', 47_684),
+      character('h', 47_683)
     ],
     closedPastWeeks()
   )
@@ -479,10 +482,10 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
 
   await collect(store, neople, COLLECTED_AT)
 
-  assert.deepEqual(new Set(state.populationMinFames), new Set([104_292]))
+  assert.deepEqual(new Set(state.populationMinFames), new Set([47_684]))
   assert.deepEqual(
     requests.map(({ characterId }) => characterId),
-    ['a', 'b', 'c', 'd']
+    ['a', 'b', 'c', 'd', 'e', 'f', 'g']
   )
   const weekPopulation = (contentId: string) => {
     const stored = state.populations.get(populationKey({ contentId, weekStart: LAST_WEEK }))
@@ -490,17 +493,18 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
 
     return { population: stored?.population, minFame: stored?.minFame, jobs }
   }
-  assert.deepEqual(weekPopulation('engraved-nightmare-1'), {
-    population: 2,
-    minFame: 119_414,
-    jobs: ['grow/1', 'other-grow/1']
-  })
-  for (const { id } of CLEAR_CONTENTS.filter(({ kind }) => kind === 'raid')) {
-    assert.deepEqual(
-      weekPopulation(id),
-      { population: 4, minFame: 104_292, jobs: ['grow/2', 'other-grow/2'] },
-      id
-    )
+  const expected = {
+    'engraved-nightmare-1': { population: 2, minFame: 119_414, jobs: ['grow/1', 'other-grow/1'] },
+    'michaela-normal': { population: 4, minFame: 104_292, jobs: ['grow/2', 'other-grow/2'] },
+    'michaela-hard': { population: 4, minFame: 104_292, jobs: ['grow/2', 'other-grow/2'] },
+    'inae-twilight': { population: 5, minFame: 72_688, jobs: ['grow/3', 'other-grow/2'] },
+    'diregie-normal': { population: 6, minFame: 63_257, jobs: ['grow/4', 'other-grow/2'] },
+    'diregie-hard': { population: 6, minFame: 63_257, jobs: ['grow/4', 'other-grow/2'] },
+    'nabel-normal': { population: 7, minFame: 47_684, jobs: ['grow/5', 'other-grow/2'] },
+    'nabel-hard': { population: 7, minFame: 47_684, jobs: ['grow/5', 'other-grow/2'] }
+  }
+  for (const [contentId, population] of Object.entries(expected)) {
+    assert.deepEqual(weekPopulation(contentId), population, contentId)
   }
 })
 
@@ -536,14 +540,32 @@ test('migration이 마감을 푼 상위 10만 주는 다음 수집이 새 분모
   assert.deepEqual(storedClears(state), [
     `nabel-hard/b/${at('2025-06-05T06:00').toISOString()}/null`
   ])
+  const entryFames = new Map(CLEAR_CONTENTS.map(({ id, entryFame }) => [id, entryFame]))
   for (const { contentId, weekStart } of reopened) {
     const stored = state.populations.get(populationKey({ contentId, weekStart }))
     assert.deepEqual(
       [stored?.population, stored?.minFame, stored?.closed],
-      [2, 104_292, true],
+      [2, entryFames.get(contentId), true],
       `${contentId}/${formatResetDate(weekStart)}`
     )
   }
+})
+
+test('30일보다 오래된 주를 다시 받을 때는 비활성 캐릭터에게도 요청해 지난 클리어를 센다', async () => {
+  const reopened = closedPastWeeks().map((stored) => ({ ...stored, closed: false }))
+  const { state, store } = memoryClearStore(
+    [character('a', 130_000), character('b', 110_000)],
+    reopened,
+    new Set(['b'])
+  )
+  const { neople, requests } = fakeNeople({ b: [nabelHard('2025-06-05 21:00')] })
+
+  await collect(store, neople, COLLECTED_AT)
+
+  assert.deepEqual(new Set(requests.map(({ characterId }) => characterId)), new Set(['a', 'b']))
+  assert.deepEqual(storedClears(state), [
+    `nabel-hard/b/${at('2025-06-05T06:00').toISOString()}/null`
+  ])
 })
 
 test('목요일 06:00 뒤에 성공한 수집은 다음 목요일 06:00이 지나야 보충 대상이 된다', async () => {

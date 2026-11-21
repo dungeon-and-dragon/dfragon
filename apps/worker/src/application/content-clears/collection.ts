@@ -7,6 +7,7 @@ import {
 import {
   planClearCollection,
   toContentPopulation,
+  toRequestActivity,
   weekKey,
   toClearRecordInput
 } from '#domain/content-clears/index.js'
@@ -47,10 +48,13 @@ export class ContentClearCollectionService {
       plan.weeks.map(({ contentId, weekStart }) => weekKey(contentId, weekStart))
     )
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
-    // 분모는 비활성을 포함한 모집단 전체로 두고, 요청은 활성 캐릭터에만 보낸다.
+    // 분모는 비활성을 포함한 모집단 전체로 두고, 최근 구간만 받을 때는 요청을 활성 캐릭터에만 보낸다.
     // 다시 접속한 비활성 캐릭터의 클리어는 활동이 다시 기록될 때까지 빠지는 대신 매주 요청이 줄어든다.
     const population = await this.repository.readPopulation(collectionMinFame, 'include-inactive')
-    const requested = await this.repository.readPopulation(collectionMinFame, 'active-only')
+    const requested = await this.repository.readPopulation(
+      collectionMinFame,
+      toRequestActivity(plan, startedAt)
+    )
     const counts = { requests: 0, clears: 0, records: 0 }
     const fetchTimeline = createFetchTimeline(() => {
       counts.requests++
