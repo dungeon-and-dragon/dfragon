@@ -5,6 +5,7 @@ import type { AuctionListing, FetchLowestListing } from './ports.js'
 const CACHE_TTL_MS = 5 * 60 * 1000
 
 export interface SoulPrice {
+  itemId: string | null
   itemName: string
   itemRarity: string | null
   unitPrice: number | null
@@ -25,10 +26,16 @@ function soulPriceOf(
   listing: AuctionListing | null
 ): SoulPrice {
   if (listing === null) {
-    return { itemName, itemRarity: null, unitPrice: null, revelationCount }
+    return { itemId: null, itemName, itemRarity: null, unitPrice: null, revelationCount }
   }
 
-  return { itemName, itemRarity: listing.itemRarity, unitPrice: listing.unitPrice, revelationCount }
+  return {
+    itemId: listing.itemId,
+    itemName,
+    itemRarity: listing.itemRarity,
+    unitPrice: listing.unitPrice,
+    revelationCount
+  }
 }
 
 export class SoulPriceService {
