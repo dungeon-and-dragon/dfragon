@@ -54,7 +54,7 @@ export const storyWeaponMasterCatalog: SkillWindowCatalog = {
       2: evolutionSkill('맹룡단공참', 252, ['맹룡선풍참', '파죽지세']),
       3: evolutionSkill('환영검무', 280, ['그림자 유희', '무형검무']),
       4: evolutionSkill('극초발도', 308, ['쾌속발도', '흐르는 칼날']),
-      5: evolutionSkill('차지 버스트', 336, ['파동 폭발', '연쇄 폭발'])
+      5: evolutionSkill('차지 버스트', 336, ['심기일전', '무수행보'])
     }
   }
 }
