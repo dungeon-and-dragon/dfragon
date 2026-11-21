@@ -25,15 +25,15 @@ export const storedCharacterSchema = characterIdentitySchema.extend({
   score: listScoreSchema
 })
 
+export const characterSetsShape = {
+  equipmentSet: z.object({ id: z.string(), name: z.string() }).nullable(),
+  oathSet: z
+    .object({ id: z.number().int(), name: z.string(), option: z.string().nullable() })
+    .nullable()
+}
+
 export const fameRankingSchema = z.object({
-  characters: z.array(
-    storedCharacterSchema.extend({
-      equipmentSet: z.object({ id: z.string(), name: z.string() }).nullable(),
-      oathSet: z
-        .object({ id: z.number().int(), name: z.string(), option: z.string().nullable() })
-        .nullable()
-    })
-  ),
+  characters: z.array(storedCharacterSchema.extend(characterSetsShape)),
   nextCursor: z.string().min(1).nullable()
 })
 

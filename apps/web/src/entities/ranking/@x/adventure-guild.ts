@@ -1,1 +1,1 @@
-export { storedCharacterSchema } from '#entities/ranking/model/ranking-stats'
+export { characterSetsShape, storedCharacterSchema } from '#entities/ranking/model/ranking-stats'

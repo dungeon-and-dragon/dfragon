@@ -1,5 +1,6 @@
 import { Button, RefreshIcon, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
+import { useOathCatalog } from '#entities/catalog'
 import { SkeletonRow } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 import { AdventureTabs } from './AdventureTabs'
@@ -152,6 +153,9 @@ function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Elemen
 
 function WeeklyClearList({ adventureName }: { adventureName: string }): React.JSX.Element {
   const result = useAdventureWeekly(adventureName)
+  const catalogResult = useOathCatalog()
+  const catalog = catalogResult.status === 'success' ? catalogResult.value : null
+
   switch (result.status) {
     case 'loading':
       return (
@@ -163,8 +167,9 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
             <WeeklyClearTable
               clearNames={[]}
               rows={[]}
+              catalog={catalog}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} scorePlacement="column" affiliations={[]} />
+                <SkeletonRow key={index} detail scorePlacement="column" affiliations={[]} />
               ))}
             />
           </div>
@@ -185,7 +190,11 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
 
       return (
         <WeeklyClearBox>
-          <WeeklyClearTable clearNames={result.value.clearNames} rows={result.value.characters} />
+          <WeeklyClearTable
+            clearNames={result.value.clearNames}
+            rows={result.value.characters}
+            catalog={catalog}
+          />
         </WeeklyClearBox>
       )
   }
