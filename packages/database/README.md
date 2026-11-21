@@ -78,8 +78,8 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `characters`: 캐릭터와 Neople 기본 정보, 장비 세트와 서약 세트, 마지막 활동 시각과 비활성 판정 시각
 - `character_skill_styles`: 캐릭터마다 최신 스킬 스타일 한 행
 - `character_items`: 캐릭터가 낀 무기와 유일 장비, 부위마다 한 행
-- `item_adoption`: 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 전직, 역할마다 모집단 수 한 행
-- `set_adoption`: 전직, 역할, 장비 세트, 서약 세트와 선택지 조합마다 캐릭터 수 한 행
+- `item_adoption`: 표본, 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 표본, 전직, 역할마다 모집단 수 한 행
+- `set_adoption`: 표본, 전직, 역할, 장비 세트, 서약 세트와 선택지 조합마다 캐릭터 수 한 행
 - `character_scores`: 캐릭터마다 장비 점수나 버프 점수 한 행과 계산 시각, 엔진 버전, 점수를 계산할 때의 전직
 - `character_basic_history`, `character_section_history`, `character_score_history`: 캐릭터의 기본 정보, 상세 섹션 본문, 점수가 바뀔 때마다 한 행
 - `score_engines`: 점수 이력이 참조하는 엔진 버전
