@@ -1,6 +1,7 @@
 import type { CharacterScoreKind } from './character-score.js'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
+import type { TimelineCharacter } from './timeline.js'
 
 export type ContentClearKind = 'raid' | 'challenge' | 'legion'
 
@@ -284,6 +285,74 @@ export function readClearPopulation(
     FROM characters
     WHERE max_fame >= ${minMaxFame} ${activeOnly}
     ORDER BY max_fame DESC, server_id, character_id`
+}
+
+export type ClearPopulationSelection = {
+  minMaxFame: number
+  activity: PopulationActivity
+}
+
+export type ClearPopulationPage = {
+  after: TimelineCharacter | undefined
+  skip: number
+  limit: number
+}
+
+function populationWhereSql({ minMaxFame, activity }: ClearPopulationSelection): Prisma.Sql {
+  const activeOnly =
+    activity === 'active-only' ? Prisma.sql`AND inactive_since IS NULL` : Prisma.empty
+
+  return Prisma.sql`max_fame >= ${minMaxFame} ${activeOnly}`
+}
+
+// 수집이 도는 동안 최고 명성이 올라도 읽는 위치가 바뀌지 않게 서버, 캐릭터 순으로 읽는다.
+export function readClearPopulationPage(
+  client: DatabaseClient,
+  selection: ClearPopulationSelection,
+  { after, skip, limit }: ClearPopulationPage
+): Promise<TimelineCharacter[]> {
+  const afterSql =
+    after !== undefined
+      ? Prisma.sql`AND (server_id, character_id) > (${after.serverId}, ${after.characterId})`
+      : Prisma.empty
+
+  return client.$queryRaw<TimelineCharacter[]>`
+    SELECT server_id AS "serverId", character_id AS "characterId"
+    FROM characters
+    WHERE ${populationWhereSql(selection)} ${afterSql}
+    ORDER BY server_id, character_id
+    OFFSET ${skip}
+    LIMIT ${limit}`
+}
+
+export async function countClearPopulation(
+  client: DatabaseClient,
+  selection: ClearPopulationSelection
+): Promise<number> {
+  const [row] = await client.$queryRaw<{ count: number }[]>`
+    SELECT count(*)::int AS count FROM characters WHERE ${populationWhereSql(selection)}`
+
+  if (row === undefined) {
+    return 0
+  }
+
+  return row.count
+}
+
+export function readClearPopulationJobs(
+  client: DatabaseClient,
+  minMaxFame: number
+): Promise<ClearPopulationJob[]> {
+  return client.$queryRaw<ClearPopulationJob[]>`
+    SELECT
+      job_id AS "jobId",
+      job_grow_id AS "jobGrowId",
+      min(job_name) AS "jobName",
+      min(job_grow_name) AS "jobGrowName",
+      count(*)::int AS count
+    FROM characters
+    WHERE max_fame >= ${minMaxFame}
+    GROUP BY job_id, job_grow_id`
 }
 
 export type StoredClearPopulation = {

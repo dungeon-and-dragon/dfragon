@@ -1,21 +1,25 @@
 import type {
   CharacterActivityInput,
-  ClearPopulationCharacter,
+  ClearPopulationJob,
+  ClearPopulationPage,
+  ClearPopulationSelection,
   ClearRecordBackfillProgress,
   ClearRecordCursor,
   ClearRecordInput,
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
-  PopulationActivity,
-  StoredClearPopulation
+  StoredClearPopulation,
+  TimelineCharacter
 } from '@dfragon/database'
 
 export interface ClearCollectionRepository {
-  readPopulation(
-    minMaxFame: number,
-    activity: PopulationActivity
-  ): Promise<ClearPopulationCharacter[]>
+  countPopulation(selection: ClearPopulationSelection): Promise<number>
+  readPopulationPage(
+    selection: ClearPopulationSelection,
+    page: ClearPopulationPage
+  ): Promise<TimelineCharacter[]>
+  readPopulationJobs(minMaxFame: number): Promise<ClearPopulationJob[]>
   readPopulations(): Promise<StoredClearPopulation[]>
   readProgress(): Promise<ContentClearCollectionProgress | undefined>
   startProgress(startedAt: Date): Promise<void>
@@ -28,15 +32,16 @@ export interface ClearCollectionRepository {
 }
 
 export interface ClearRecordBackfillRepository {
-  readPopulation(
-    minMaxFame: number,
-    activity: PopulationActivity
-  ): Promise<ClearPopulationCharacter[]>
+  countPopulation(selection: ClearPopulationSelection): Promise<number>
+  readPopulationPage(
+    selection: ClearPopulationSelection,
+    page: ClearPopulationPage
+  ): Promise<TimelineCharacter[]>
   readProgress(): Promise<ClearRecordBackfillProgress | undefined>
   startProgress(startedAt: Date): Promise<void>
   recordProgress(progress: ClearRecordBackfillProgress): Promise<void>
   recordRecords(records: readonly ClearRecordInput[]): Promise<void>
   readCursors(): Promise<ClearRecordCursor[]>
-  recordCursors(characters: readonly ClearPopulationCharacter[], fetchedUntil: Date): Promise<void>
+  recordCursors(characters: readonly TimelineCharacter[], fetchedUntil: Date): Promise<void>
   finishProgress(startedAt: Date): Promise<void>
 }

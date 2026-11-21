@@ -1,19 +1,9 @@
-import type {
-  ClearPopulationCharacter,
-  ClearPopulationJob,
-  ContentClearPopulationInput,
-  PopulationActivity,
-  StoredClearPopulation,
-  TimelineRange
-} from '@dfragon/database'
+import type { PopulationActivity, StoredClearPopulation, TimelineRange } from '@dfragon/database'
 import { addWeeks, subMinutes } from 'date-fns'
 import { INACTIVE_AFTER_MS } from '@dfragon/server-core/domain/character-activity.js'
 import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
-import {
-  type ClearContent,
-  toPopulationMinFame
-} from '@dfragon/server-core/domain/content-clears/index.js'
+import type { ClearContent } from '@dfragon/server-core/domain/content-clears/index.js'
 
 type ClearCollectionWeek = {
   contentId: string
@@ -100,26 +90,3 @@ export function toRequestActivity(plan: ClearCollectionPlan, startedAt: Date): P
 
 export const weekKey = (contentId: string, weekStart: Date) =>
   JSON.stringify([contentId, weekStart.getTime()])
-
-function toPopulationJobs(population: readonly ClearPopulationCharacter[]): ClearPopulationJob[] {
-  const jobs = new Map<string, ClearPopulationJob>()
-  for (const { jobId, jobGrowId, jobName, jobGrowName } of population) {
-    const key = JSON.stringify([jobId, jobGrowId])
-    const job = jobs.get(key) ?? { jobId, jobGrowId, jobName, jobGrowName, count: 0 }
-    jobs.set(key, { ...job, count: job.count + 1 })
-  }
-
-  return [...jobs.values()]
-}
-
-export function toContentPopulation(
-  content: ClearContent,
-  population: readonly ClearPopulationCharacter[],
-  collectionMinFame: number
-): Pick<ContentClearPopulationInput, 'population' | 'minFame' | 'jobs'> {
-  const minFame = toPopulationMinFame(content, collectionMinFame)
-  const members = population.filter(({ maxFame }) => maxFame >= minFame)
-  const jobs = toPopulationJobs(members)
-
-  return { population: members.length, minFame, jobs }
-}
