@@ -398,10 +398,11 @@ model ItemAdoption {
   itemId     String?  @map("item_id")
   itemName   String?  @map("item_name")
   typeDetail String?  @map("item_type_detail")
+  sample     String   @default("all")
   count      Int
   computedAt DateTime @map("computed_at") @db.Timestamptz(3)
 
-  @@index([jobId, jobGrowId, role])
+  @@index([sample, jobId, jobGrowId, role])
   @@map("item_adoption")
 }
 
@@ -415,10 +416,11 @@ model SetAdoption {
   oathSetId        Int?     @map("oath_set_id")
   oathSetName      String?  @map("oath_set_name")
   oathSetOption    String?  @map("oath_set_option")
+  sample           String   @default("all")
   count            Int
   computedAt       DateTime @map("computed_at") @db.Timestamptz(3)
 
-  @@index([jobId, jobGrowId, role])
+  @@index([sample, jobId, jobGrowId, role])
   @@map("set_adoption")
 }
 

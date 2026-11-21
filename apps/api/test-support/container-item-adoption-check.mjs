@@ -210,6 +210,15 @@ try {
     SELECT count(*)::int AS stale FROM item_adoption WHERE computed_at <= ${firstComputedAt}`
   assert.equal(stale, 0)
 
+  // 표본을 넣지 않는 job의 행은 기본값인 전체 표본이고, 목록에 없는 표본은 거절한다.
+  assert.deepEqual(await client.$queryRaw`SELECT DISTINCT sample FROM item_adoption`, [{ sample: 'all' }])
+  await assert.rejects(
+    client.$executeRaw`
+      INSERT INTO item_adoption (job_id, job_grow_id, role, sample, count, computed_at)
+      VALUES (${blade.jobId}, ${blade.jobGrowId}, 'all', 'top', 1, now())`,
+    /item_adoption_sample_check/
+  )
+
   // 넣는 문장이 실패하게 해 교체 transaction이 이전 저장분을 남기는지 본다.
   await client.$executeRaw`ALTER TABLE item_adoption ADD CONSTRAINT synthetic_failure CHECK (count < 0) NOT VALID`
 
