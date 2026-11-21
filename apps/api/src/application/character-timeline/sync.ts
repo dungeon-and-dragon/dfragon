@@ -1,9 +1,11 @@
 import type { TimelineCharacter, TimelineItemInput, TimelineSyncState } from '@dfragon/database'
 import type { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
+import { isRecentlyActive } from '@dfragon/server-core/domain/character-activity.js'
 import {
   TIMELINE_RECORD_DELAY_MS,
   TimelineFailure,
   type TimelineFailureKind,
+  type TimelineInputs,
   splitTimelineRanges
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { dictionaryItemIds } from '@dfragon/server-core/domain/item-dictionary/index.js'
@@ -35,6 +37,16 @@ function syncStart(state: TimelineSyncState | undefined): Date {
   )
 }
 
+function latestOccurredAt({ events, items }: TimelineInputs): Date | undefined {
+  const times = [...events, ...items].map((row) => row.occurredAt.getTime())
+
+  if (times.length === 0) {
+    return undefined
+  }
+
+  return new Date(Math.max(...times))
+}
+
 function syncedRecently(state: TimelineSyncState | undefined, now: Date): boolean {
   const lastSucceededAt = state?.lastSucceededAt
   if (lastSucceededAt == null) {
@@ -63,11 +75,18 @@ export class TimelineSyncService {
         return
       }
 
+      let lastActiveAt: Date | undefined
+
       // 구간 교체가 synced_until을 그 구간 끝으로 덮어쓰므로 앞 구간부터 차례로 저장한다.
       for (const range of splitTimelineRanges(syncStart(state), until)) {
         const inputs = await this.fetchTimeline(character, range)
         await this.repository.replaceRange(character, range, inputs)
         savedItems.push(...inputs.items)
+        lastActiveAt = latestOccurredAt(inputs) ?? lastActiveAt
+      }
+
+      if (lastActiveAt !== undefined && isRecentlyActive(lastActiveAt, until)) {
+        await this.repository.recordActive(character, lastActiveAt)
       }
 
       await this.repository.recordSuccess(character)

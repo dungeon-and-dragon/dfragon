@@ -9,6 +9,7 @@ import {
   readEnhancementBackfilledUntil,
   readSeasonBackfillStates,
   readTimelineSyncState,
+  recordCharacterActive,
   recordSeasonBackfillCompleted,
   recordTimelineSyncFailure,
   recordTimelineSyncSuccess,
@@ -65,6 +66,10 @@ export class DatabaseTimelineSyncRepository implements TimelineSyncRepository {
     { events, items }: TimelineInputs
   ): Promise<void> {
     return replaceTimelineRange(this.client, character, range, events, items)
+  }
+
+  recordActive(character: TimelineCharacter, lastActiveAt: Date): Promise<void> {
+    return recordCharacterActive(this.client, character, lastActiveAt)
   }
 
   recordSuccess(character: TimelineCharacter): Promise<void> {
