@@ -549,8 +549,8 @@ test('모험단 이름이 없는 캐릭터는 점수만 전직 없이 저장하�
 })
 
 for (const kind of ['unavailable', 'timeout'] as const) {
-  test(`Neople ${kind} 실패는 건너뛰지 않고 쉬었다가 같은 묶음을 다시 받는다`, async () => {
-    const { dependencies, saved, pauses } = calculation(
+  test(`Neople ${kind} 실패는 건너뛰지 않고 쉬지 않은 채 그 캐릭터만 다시 받는다`, async () => {
+    const { dependencies, saved, pauses, requested } = calculation(
       [character('a'), character('b'), character('c')],
       {
         respond: (characterId, section, attempt) => {
@@ -569,11 +569,15 @@ for (const kind of ['unavailable', 'timeout'] as const) {
     )
     assert.equal(summary.saved, 3)
     assert.equal(summary.skipped, 0)
-    assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS])
+    assert.deepEqual(pauses, [])
+
+    const requestsOf = (characterId: string) => requested.filter((id) => id === characterId).length
+    assert.equal(requestsOf('a'), requestsOf('c'))
+    assert.ok(requestsOf('b') > requestsOf('a'))
   })
 }
 
-test('묶음의 다른 캐릭터는 계산했는데 한 캐릭터만 세 번 연속 unavailable이면 그 캐릭터만 건너뛰고 다음 묶음으로 넘어간다', async () => {
+test('묶음의 다른 캐릭터는 계산했는데 한 캐릭터만 세 번 연속 unavailable이면 쉬지 않고 그 캐릭터만 건너뛰고 다음 묶음으로 넘어간다', async () => {
   const { dependencies, saved, pauses, reports } = calculation(
     [character('a'), character('stuck'), character('c')],
     {
@@ -593,7 +597,7 @@ test('묶음의 다른 캐릭터는 계산했는데 한 캐릭터만 세 번 연
   )
   assert.equal(summary.saved, 2)
   assert.equal(summary.skipped, 1)
-  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(pauses, [])
   assert.deepEqual(
     reports.filter(([code]) => code === 'SCORE_CHARACTER_SKIPPED'),
     [['SCORE_CHARACTER_SKIPPED', { position: 1 }]]
