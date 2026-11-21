@@ -306,3 +306,5 @@ export type {
   RankingSort,
   ServerCount
 } from './ranking-stats.js'
+export { deleteWorkerEventsBefore, recordWorkerEvents } from './worker-events.js'
+export type { WorkerEventInput } from './worker-events.js'
