@@ -64,7 +64,7 @@ export type {
   SearchSlot,
   SearchSnapshot
 } from './lib/search/search'
-export { ClientHostContext } from './model/client-host'
+export { BrowserHostContext, ClientHostContext, useBrowserHost } from './model/client-host'
 export type { AutoRoundSignal, BrowserHost, ClientHost } from './model/client-host'
 export { installBrowserHost } from './model/install-browser-host'
 export { useAdventureSnapshot } from './model/useAdventureSnapshot'

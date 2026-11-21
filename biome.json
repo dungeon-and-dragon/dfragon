@@ -17,6 +17,7 @@
       "!packages/licenses/notices",
       "!packages/models/score-engine",
       "!apps/storybook/public/mockServiceWorker.js",
+      "!apps/web/src/app/routeTree.gen.ts",
       "!**/package-lock.json",
       "!**/*.svg"
     ]

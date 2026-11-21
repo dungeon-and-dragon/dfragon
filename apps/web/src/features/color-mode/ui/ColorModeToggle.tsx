@@ -25,7 +25,7 @@ function readSystemColorMode(): ColorMode {
   return 'light'
 }
 
-// apps/web/index.html의 첫 그리기 전 script도 저장된 모드를 같은 방식으로 붙인다. 고른 모드가 없으면 @dfragon/design/base.css와
+// apps/web/src/app/RootDocument.tsx의 첫 그리기 전 script도 저장된 모드를 같은 방식으로 붙인다. 고른 모드가 없으면 @dfragon/design/base.css와
 // theme-color meta의 media가 시스템 설정을 따른다.
 function applyColorMode(colorMode: ColorMode): void {
   document.documentElement.dataset.colorMode = colorMode
