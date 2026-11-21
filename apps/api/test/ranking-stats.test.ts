@@ -585,6 +585,21 @@ test('명성 랭킹과 세트, 아이템 선택 수는 빈 값, 중복 query와 
   }
 })
 
+test('세트, 아이템 선택 수는 목록에 없거나 비었거나 중복인 sample을 400으로 거절한다', async () => {
+  const { app, origin } = await listen(unusedReader)
+  try {
+    for (const query of ['sample=top500', 'sample=', 'sample=top&sample=all']) {
+      for (const path of ['/stats/sets', '/stats/items']) {
+        const { status, body } = await getJson(origin, `${path}?${query}`)
+        assert.equal(status, 400, `${path}?${query}`)
+        assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY', `${path}?${query}`)
+      }
+    }
+  } finally {
+    await app.close()
+  }
+})
+
 test('명성 랭킹과 스킬 채택률은 남성 크루세이더의 role을 그대로 넘긴다', async () => {
   const rankingReads: FameRankingFilter[] = []
   const adoptionReads: JobSkillAdoptionQuery[] = []
@@ -746,7 +761,7 @@ const setAdoption: SetAdoption = {
   ]
 }
 
-test('세트 선택 수는 요청마다 query의 직업, 전직, 남성 크루세이더 role로 저장분을 읽어 계산 시각과 함께 준다', async () => {
+test('세트 선택 수는 요청마다 query의 표본, 직업, 전직, 남성 크루세이더 role로 저장분을 읽어 계산 시각과 함께 준다', async () => {
   const reads: SetAdoptionQuery[] = []
   const { app, origin } = await listen({
     ...unusedReader,
@@ -758,8 +773,8 @@ test('세트 선택 수는 요청마다 query의 직업, 전직, 남성 크루�
   })
   try {
     const all = await getJson(origin, '/stats/sets')
-    const job = await getJson(origin, '/stats/sets?jobId=synthetic-job')
-    const dealer = await getJson(origin, `/stats/sets?${maleCrusaderQuery}&role=dealer`)
+    const job = await getJson(origin, '/stats/sets?jobId=synthetic-job&sample=fame')
+    const dealer = await getJson(origin, `/stats/sets?${maleCrusaderQuery}&role=dealer&sample=top`)
 
     assert.deepEqual(all, {
       status: 200,
@@ -768,9 +783,9 @@ test('세트 선택 수는 요청마다 query의 직업, 전직, 남성 크루�
     assert.equal(job.status, 200)
     assert.equal(dealer.status, 200)
     assert.deepEqual(reads, [
-      {},
-      { jobId: 'synthetic-job' },
-      { jobId: malePriestJobId, jobGrowId: crusaderGrowId, role: 'dealer' }
+      { sample: 'all' },
+      { jobId: 'synthetic-job', sample: 'fame' },
+      { jobId: malePriestJobId, jobGrowId: crusaderGrowId, role: 'dealer', sample: 'top' }
     ])
   } finally {
     await app.close()
@@ -795,7 +810,7 @@ const itemAdoption: ItemAdoption = {
   ]
 }
 
-test('무기, 유일 장비 선택 수는 요청마다 query의 직업, 전직, 남성 크루세이더 role로 저장분을 읽어 계산 시각과 함께 준다', async () => {
+test('무기, 유일 장비 선택 수는 요청마다 query의 표본, 직업, 전직, 남성 크루세이더 role로 저장분을 읽어 계산 시각과 함께 준다', async () => {
   const reads: SetAdoptionQuery[] = []
   const { app, origin } = await listen({
     ...unusedReader,
@@ -807,7 +822,7 @@ test('무기, 유일 장비 선택 수는 요청마다 query의 직업, 전직, 
   })
   try {
     const all = await getJson(origin, '/stats/items')
-    const dealer = await getJson(origin, `/stats/items?${maleCrusaderQuery}&role=dealer`)
+    const dealer = await getJson(origin, `/stats/items?${maleCrusaderQuery}&role=dealer&sample=top`)
 
     assert.deepEqual(all, {
       status: 200,
@@ -815,8 +830,8 @@ test('무기, 유일 장비 선택 수는 요청마다 query의 직업, 전직, 
     })
     assert.equal(dealer.status, 200)
     assert.deepEqual(reads, [
-      {},
-      { jobId: malePriestJobId, jobGrowId: crusaderGrowId, role: 'dealer' }
+      { sample: 'all' },
+      { jobId: malePriestJobId, jobGrowId: crusaderGrowId, role: 'dealer', sample: 'top' }
     ])
   } finally {
     await app.close()
