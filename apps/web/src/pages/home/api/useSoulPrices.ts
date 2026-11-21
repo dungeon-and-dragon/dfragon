@@ -8,6 +8,7 @@ export const SOUL_PRICES_PATH = '/items/soul-prices'
 const soulPricesSchema = z.object({
   crystals: z.array(
     z.object({
+      itemId: z.string().nullable(),
       itemName: z.string(),
       itemRarity: z.string().nullable(),
       unitPrice: z.number().int().positive().nullable(),
