@@ -15,7 +15,7 @@ export type WorkerNeople = Pick<
   | 'servers'
 >
 
-// 새 캐릭터 찾기와 저장, 클리어, 스킬 스타일 수집이 key 하나의 Neople 요청 속도 상한을 나눠 쓴다. 기다리는 호출은 부른 순서대로 나가 한쪽이 계속 밀리지 않는다.
+// 새 캐릭터 찾기와 저장, 클리어, 스킬 스타일 수집이 같은 Neople 요청 속도 상한을 나눠 쓴다. 기다리는 호출은 부른 순서대로 나가 한쪽이 계속 밀리지 않는다.
 export function paceNeopleRequests(neople: WorkerNeople, requestsPerSecond: number): WorkerNeople {
   const throttle = pThrottle({ limit: 1, interval: 1000 / requestsPerSecond })
   const character = throttle(neople.character)
