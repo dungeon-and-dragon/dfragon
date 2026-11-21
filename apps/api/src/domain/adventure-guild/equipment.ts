@@ -28,6 +28,8 @@ const TRANSCENDENCE_CODES: ReadonlySet<number> = new Set([516, 556])
 // 업그레이드(511), 제작서(514), 서약 업그레이드(553), 무기고(555)는 이미 가진 것을 바꾸거나 꺼낸 기록일 수 있어
 // 개수를 더하지 않고 없던 칸만 1로 만든다(2026-11-19 저장소 소유자 결정, #1852).
 const KEEP_CODES: ReadonlySet<number> = new Set([511, 514, 553, 555])
+// 서약 업그레이드(553)로 얻은 결정은 다른 결정을 재료로 새로 만든 것이라 하나씩 더한다(2026-11-21 저장소 소유자 결정).
+const OATH_UPGRADE_CODE = 553
 // 고유 장비는 Neople 사전에 세트가 없어 이름 앞의 "고유 - "로 가르고, 세트 하나처럼 묶는다(2026-11-19 저장소 소유자 결정).
 // 이름에 "고유"가 없는 세트 없는 태초 장비는 묶지 않는다.
 // 고유 서약과 안개 결정은 이름에 "고유"가 없어 세트 없는 서약, 서약결정을 모두 고유로 묶는다(2026-11-21 저장소 소유자 결정).
@@ -186,6 +188,14 @@ function toHoldingCell(
   return { kind, setItemId, rarity: itemRarity }
 }
 
+function keepsCount(code: number, cell: HoldingCell): boolean {
+  if (cell.kind === 'crystal' && code === OATH_UPGRADE_CODE) {
+    return false
+  }
+
+  return KEEP_CODES.has(code)
+}
+
 function cellPart(cell: HoldingCell): string {
   if (cell.kind === 'equipment') {
     return cell.slot
@@ -221,7 +231,7 @@ function countHoldings(
     if (out) {
       counted.count--
     } else {
-      counted.count = KEEP_CODES.has(code) ? Math.max(counted.count, 1) : counted.count + 1
+      counted.count = keepsCount(code, cell) ? Math.max(counted.count, 1) : counted.count + 1
       counted.itemId = itemId
       counted.itemName = itemName ?? ''
       counted.setItemName = set.setItemName
