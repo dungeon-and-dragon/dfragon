@@ -123,6 +123,23 @@ it('itemIds를 쉼표로 이어 보낸다', async () => {
   expect(queries()).toEqual([{ jobId: 'job-1', itemIds: 'weapon-1,ring-1' }])
 })
 
+it('개화 선택을 스킬 이름~종류 쌍을 쉼표로 이어 직업, 전직과 함께 보낸다', async () => {
+  respond(fameRankingFixture.lastPage)
+
+  await settle({
+    jobId: 'job-1',
+    jobGrowId: 'grow-1',
+    evolutions: [
+      { name: '발도', type: 1 },
+      { name: '차지 버스트', type: 2 }
+    ]
+  })
+
+  expect(queries()).toEqual([
+    { jobId: 'job-1', jobGrowId: 'grow-1', evolutions: '발도~1,차지 버스트~2' }
+  ])
+})
+
 it('명성 범위를 query로 보내고, 범위 아래쪽만 있어도 보낸다', async () => {
   respond(fameRankingFixture.lastPage)
 
@@ -144,7 +161,31 @@ it.each<[string, FameRankingFilter]>([
   ['중복 itemId', { itemIds: ['a', 'a'] }],
   ['여섯 개 itemId', { itemIds: ['a', 'b', 'c', 'd', 'e', 'f'] }],
   ['쉼표가 든 itemId', { itemIds: ['a,b'] }],
-  ['거꾸로 된 명성 범위', { fameFrom: 138000, fameTo: 136000 }]
+  ['거꾸로 된 명성 범위', { fameFrom: 138000, fameTo: 136000 }],
+  ['전직 없는 개화', { jobId: 'job-1', evolutions: [{ name: '발도', type: 1 }] }],
+  [
+    '같은 스킬의 개화 둘',
+    {
+      jobId: 'job-1',
+      jobGrowId: 'grow-1',
+      evolutions: [
+        { name: '발도', type: 1 },
+        { name: '발도', type: 2 }
+      ]
+    }
+  ],
+  [
+    '여섯 스킬의 개화',
+    {
+      jobId: 'job-1',
+      jobGrowId: 'grow-1',
+      evolutions: ['가', '나', '다', '라', '마', '바'].map((name) => ({ name, type: 1 as const }))
+    }
+  ],
+  [
+    '구분자가 든 스킬 이름',
+    { jobId: 'job-1', jobGrowId: 'grow-1', evolutions: [{ name: '가~나', type: 1 }] }
+  ]
 ])('%s: 요청하지 않고 오류로 끝낸다', async (_name, filter) => {
   respond(fameRankingFixture.lastPage)
 
