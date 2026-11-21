@@ -1,0 +1,45 @@
+import { RowBars } from '#shared/ui/chart/RowBars'
+import { ListBox } from '#shared/ui/ListBox'
+import { type SetStatsFilter, useSetStats } from '#entities/ranking'
+import { StatsScreenFrame } from './StatsScreenFrame'
+import { equipmentComboBars } from './combo-stats-bars'
+import { formatShare } from './set-stats-bars'
+
+const TITLE = '조합 통계'
+const BOX_NAME = '장비와 서약 조합'
+const EMPTY = '세트 통계가 없습니다.'
+const FAILED = '세트 통계를 받지 못했습니다.'
+const LOADING = '세트 통계를 받는 중입니다.'
+const SET_NAME_WIDTH = 200
+
+export function ComboStatsScreen({
+  filter,
+  onFilterChange
+}: {
+  filter: SetStatsFilter
+  onFilterChange: (filter: SetStatsFilter) => void
+}): React.JSX.Element {
+  const result = useSetStats(filter)
+
+  return (
+    <StatsScreenFrame
+      title={TITLE}
+      result={result}
+      filter={filter}
+      onFilterChange={onFilterChange}
+      skeletonName={BOX_NAME}
+      messages={{ empty: EMPTY, failed: FAILED, loading: LOADING }}
+    >
+      {(stats) => (
+        <ListBox name={BOX_NAME}>
+          <RowBars
+            bars={equipmentComboBars(stats, filter)}
+            tone="chart-3"
+            formatValue={formatShare}
+            nameWidth={SET_NAME_WIDTH}
+          />
+        </ListBox>
+      )}
+    </StatsScreenFrame>
+  )
+}
