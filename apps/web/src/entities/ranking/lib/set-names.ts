@@ -35,7 +35,8 @@ const OATH_SET_SHORT_NAMES: Readonly<Record<string, string>> = {
   '안개 서약': '안개'
 }
 
-const OPTION_ORDINALS = ['첫 번째', '두 번째', '세 번째'] as const
+// 서약 카탈로그는 선택지를 게임 서약 선택 화면의 왼쪽부터 오른쪽 순서로 둔다.
+const OPTION_POSITIONS = ['왼쪽', '가운데', '오른쪽'] as const
 
 export function equipmentSetShortName(setId: string | null, name: string | null): string {
   if (setId === null) {
@@ -73,12 +74,12 @@ export function oathOptionShortName(
   optionName: string,
   catalogOptionNames: readonly string[]
 ): string {
-  const ordinal = OPTION_ORDINALS[catalogOptionNames.indexOf(optionName)]
-  if (setName === null || ordinal === undefined) {
+  const position = OPTION_POSITIONS[catalogOptionNames.indexOf(optionName)]
+  if (setName === null || position === undefined) {
     return optionName
   }
 
-  return `${oathSetShortName(setName)} : ${ordinal}`
+  return `${oathSetShortName(setName)} : ${position}`
 }
 
 export function catalogOptionNamesOf(catalog: OathCatalog | null, setId: number): string[] {
