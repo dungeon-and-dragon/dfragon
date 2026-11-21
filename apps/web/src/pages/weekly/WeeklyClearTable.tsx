@@ -6,6 +6,7 @@ import type { OathCatalog } from '#entities/catalog'
 import {
   CharacterCell,
   FAME_COLUMN,
+  NarrowStats,
   RANK_COLUMN,
   RankNumber,
   SCORE_COLUMN,
@@ -55,18 +56,18 @@ export function WeeklyClearTable({
   return (
     <table className="table table-fixed table-wide">
       <colgroup>
-        <col className={RANK_COLUMN} />
+        <col className={`${RANK_COLUMN} max-sm:hidden`} />
         <col />
         <col className={SET_COLUMN} />
-        <col className={FAME_COLUMN} />
-        <col className={SCORE_COLUMN} />
+        <col className={`${FAME_COLUMN} max-sm:hidden`} />
+        <col className={`${SCORE_COLUMN} max-sm:hidden`} />
         {clearNames.map(({ kind, name }) => (
           <col key={`${kind}/${name}`} className="w-[96px]" />
         ))}
       </colgroup>
       <thead className={WIDE_STICKY_HEAD}>
         <tr>
-          <th scope="col" className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
+          <th scope="col" className={`table-num max-sm:hidden ${WIDE_STICKY_HEAD_CELL}`}>
             #
           </th>
           <th scope="col" className={WIDE_STICKY_HEAD_CELL}>
@@ -75,10 +76,10 @@ export function WeeklyClearTable({
           <th scope="col" className={`max-sm:hidden ${WIDE_STICKY_HEAD_CELL}`}>
             세트
           </th>
-          <th scope="col" className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
+          <th scope="col" className={`table-num max-sm:hidden ${WIDE_STICKY_HEAD_CELL}`}>
             명성
           </th>
-          <th scope="col" className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
+          <th scope="col" className={`table-num max-sm:hidden ${WIDE_STICKY_HEAD_CELL}`}>
             점수
           </th>
           {clearNames.map(({ kind, name }) => (
@@ -95,20 +96,23 @@ export function WeeklyClearTable({
       <tbody>
         {rows.map((row, index) => (
           <tr key={`${row.serverId}/${row.characterId}`}>
-            <td className="table-num">
+            <td className="table-num max-sm:hidden">
               <RankNumber rank={index + 1} />
             </td>
             {/* 초상화가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
             <td className="py-0">
-              <CharacterCell character={row} />
+              <CharacterCell
+                character={row}
+                narrowStats={<NarrowStats fame={row.fame} score={row.score} />}
+              />
             </td>
             <td className={SET_CELL}>
               <RankingSetLines character={row} catalog={catalog} />
             </td>
-            <td className="table-num font-semibold text-game-fame">
+            <td className="table-num font-semibold text-game-fame max-sm:hidden">
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}
             </td>
-            <td className="table-num">
+            <td className="table-num max-sm:hidden">
               <ScoreValue score={row.score} />
             </td>
             {clearNames.map((clearName) => (
