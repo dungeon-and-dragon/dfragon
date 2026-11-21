@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   applyMigrations,
   createDatabaseClient,
+  readContentClearScoreBands,
   recordCharacterBasic,
   recordCharacterHistory,
   recordCharacterScore,
@@ -10,7 +11,6 @@ import {
 } from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_CONTENT_CLEAR_PORT
-const database = 'content_clear_snapshot'
 
 const connect = (name) =>
   createDatabaseClient({
@@ -115,9 +115,7 @@ async function readSnapshots(client) {
   )
 }
 
-test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 점수와 같은 종류, 엔진 버전의 최고 점수를 복사하고, 그 뒤 값이 바뀌거나 다시 저장해도 그대로 두며 지난 행은 채우지 않는다', {
-  skip: port === undefined
-}, async (t) => {
+async function prepareDatabase(t, database) {
   const admin = connect('content_clear_test')
 
   await admin.$executeRawUnsafe(`DROP DATABASE IF EXISTS "${database}"`)
@@ -141,6 +139,14 @@ test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 �
   const client = connect(database)
 
   t.after(() => client.$disconnect())
+
+  return client
+}
+
+test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 점수와 같은 종류, 엔진 버전의 최고 점수를 복사하고, 그 뒤 값이 바뀌거나 다시 저장해도 그대로 두며 지난 행은 채우지 않는다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await prepareDatabase(t, 'content_clear_snapshot')
 
   await recordCharacterBasic(client, basic('scored', 70_000))
   await recordCharacterBasic(client, basic('unscored', 65_000))
@@ -210,4 +216,38 @@ test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 �
     clearedAt: '2026-11-13T14:00:00.000Z',
     ...copied(72_000, 1200, 'equipment', 'phase33-rev15a')
   })
+})
+
+test('점수 구간의 분모와 클리어 수를 같은 엔진 버전의 이력 최고 점수로 센다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await prepareDatabase(t, 'content_clear_score_bands')
+
+  await recordCharacterBasic(client, basic('swapped', 66_000))
+  await recordCharacterBasic(client, basic('steady', 66_000))
+  await recordCharacterBasic(client, basic('low-fame', 50_000))
+  await recordCharacterHistory(client, scoreHistory('swapped', '2026-11-10T13:00:00Z', 1_260_000))
+  await recordCharacterHistory(
+    client,
+    scoreHistory('swapped', '2026-11-11T13:00:00Z', 1_360_000, {
+      ...engine,
+      bundleId: 'phase31-rev13a'
+    })
+  )
+  await recordCharacterHistory(client, scoreHistory('swapped', '2026-11-12T13:00:00Z', 1_160_000))
+  await recordCharacterScore(client, score('swapped', 1_160_000))
+  await recordCharacterScore(client, score('steady', 1_160_000))
+  await recordCharacterScore(client, score('low-fame', 1_160_000))
+  await recordContentClears(client, [clear('raid-a', 'raid', 'swapped', '2026-11-13T12:00:00Z')])
+
+  const bands = await readContentClearScoreBands(
+    client,
+    { contentId: 'raid-a', kind: 'raid', weekStart },
+    60_000
+  )
+
+  assert.deepEqual(bands, [
+    { kind: 'equipment', score: 1_150_000, population: 1, cleared: 0 },
+    { kind: 'equipment', score: 1_250_000, population: 1, cleared: 1 }
+  ])
 })
