@@ -496,7 +496,7 @@ it('명성 범위를 query로 보내고, 최고 명성이 있든 없든 순위 �
   expect(headings()).toEqual(['캐릭터', '세트', '명성', '점수', '모험단'])
 })
 
-it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초기화로 모든 필터를 지운다', async () => {
+it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초기화로 개화 선택까지 모든 필터를 지운다', async () => {
   const onFilterChange = vi.fn()
   await render(async () => rankingOf(1), {}, onFilterChange)
 
@@ -509,6 +509,7 @@ it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초�
       role: 'buffer',
       equipmentSetId: GOLDEN,
       itemIds: ['synthetic-weapon'],
+      evolutions: [{ name: '발도', type: 1 }],
       fameFrom: 136000,
       fameTo: 138000
     },
