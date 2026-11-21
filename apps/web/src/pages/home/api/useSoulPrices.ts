@@ -27,6 +27,9 @@ async function requestSoulPrices(): Promise<readonly SoulPrice[]> {
   return crystals
 }
 
+// 서버가 화면을 그리기 전에 받아 둘 때와 화면의 hook이 같은 key와 요청을 쓴다.
+export const soulPricesQuery = { queryKey: ['soul-prices'], queryFn: requestSoulPrices } as const
+
 export function useSoulPrices(): LoadedResult<readonly SoulPrice[]> {
-  return useLoadedResult(['soul-prices'], requestSoulPrices)
+  return useLoadedResult(soulPricesQuery.queryKey, soulPricesQuery.queryFn)
 }
