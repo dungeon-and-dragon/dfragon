@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { RelativeTime } from '#shared/ui/RelativeTime'
-import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import type { SetStatsFilter } from '#entities/ranking'
 import { SetStatsFilterBox } from './SetStatsFilterBox'
@@ -18,7 +17,7 @@ export function StatsScreenFrame<Stats extends SampledStats>({
   result,
   filter,
   onFilterChange,
-  skeletonName,
+  skeleton,
   messages,
   children
 }: {
@@ -26,7 +25,7 @@ export function StatsScreenFrame<Stats extends SampledStats>({
   result: LoadedResult<Stats>
   filter: SetStatsFilter
   onFilterChange: (filter: SetStatsFilter) => void
-  skeletonName: string
+  skeleton: React.JSX.Element
   messages: StatsMessages
   children: (stats: Stats) => ReactNode
 }): React.JSX.Element {
@@ -39,7 +38,7 @@ export function StatsScreenFrame<Stats extends SampledStats>({
         title={title}
         result={result}
         filterBox={filterBox}
-        skeletonName={skeletonName}
+        skeleton={skeleton}
         messages={messages}
       >
         {children}
@@ -52,14 +51,14 @@ function StatsBody<Stats extends SampledStats>({
   title,
   result,
   filterBox,
-  skeletonName,
+  skeleton,
   messages,
   children
 }: {
   title: string
   result: LoadedResult<Stats>
   filterBox: React.JSX.Element
-  skeletonName: string
+  skeleton: React.JSX.Element
   messages: StatsMessages
   children: (stats: Stats) => ReactNode
 }): React.JSX.Element {
@@ -72,11 +71,7 @@ function StatsBody<Stats extends SampledStats>({
           </span>
           <TitleBox title={title} />
           {filterBox}
-          <div aria-hidden="true">
-            <ListBox name={skeletonName}>
-              <span className="skeleton h-[480px]" />
-            </ListBox>
-          </div>
+          <div aria-hidden="true">{skeleton}</div>
         </div>
       )
     case 'error':
