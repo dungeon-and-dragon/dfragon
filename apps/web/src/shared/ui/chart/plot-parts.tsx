@@ -1,4 +1,5 @@
 import { type ChartX, TOOLTIP_CLASS, TOOLTIP_TITLE_CLASS, type TooltipRow } from './plot-layout'
+import type { ChartHoverAreaProps } from './useChartHover'
 
 export function ChartTooltip({
   tooltipRef,
@@ -33,18 +34,18 @@ export function HitList({
   places,
   describe,
   onHover,
-  onLeave,
+  areaProps,
   register
 }: {
   x: readonly ChartX[]
   places: readonly Readonly<{ left: number; width: number }>[]
   describe: (index: number) => string
   onHover: (key: string) => void
-  onLeave: () => void
+  areaProps: ChartHoverAreaProps
   register: (key: string, element: HTMLLIElement) => () => void
 }): React.JSX.Element {
   return (
-    <ul onMouseLeave={onLeave} className="absolute inset-0 m-0 list-none p-0">
+    <ul {...areaProps} className="absolute inset-0 m-0 list-none p-0">
       {x.map(({ key }, index) => (
         <HitArea
           key={key}

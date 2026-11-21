@@ -11,7 +11,8 @@ import {
 import { BoxPlotLegend } from '#shared/ui/chart/ChartLegend'
 import type { Scale } from '#shared/ui/chart/chart-geometry'
 import { ChartTooltip } from '#shared/ui/chart/plot-parts'
-import { type Hover, NO_HOVER, type TooltipRow } from '#shared/ui/chart/plot-layout'
+import type { TooltipRow } from '#shared/ui/chart/plot-layout'
+import { useChartHover } from '#shared/ui/chart/useChartHover'
 import { useChartSize } from '#shared/ui/chart/useChartSize'
 import { JOB_SORTS, type JobRow, type JobSort, jobRows } from '#pages/clears/clear-detail'
 import {
@@ -106,7 +107,7 @@ function JobTable({
   rows: readonly JobRow[]
   metric: JobMetric
 }): React.JSX.Element {
-  const [hover, setHover] = useState<Hover>(NO_HOVER)
+  const { hover, show, areaProps } = useChartHover()
   const formatTick = jobMetricTickOf(metric)
   const chartRef = useRef<HTMLDivElement>(null)
   const plotRef = useRef<HTMLSpanElement>(null)
@@ -127,10 +128,6 @@ function JobTable({
     bars: rows,
     placeOf: boxPlotTooltipPlaceOf
   })
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
-  }
 
   const shownTitle = shownRow?.name
   const shownRows = shownRow != null ? tooltipRowsOf(shownRow) : []
@@ -158,14 +155,14 @@ function JobTable({
               </th>
             </tr>
           </thead>
-          <tbody onMouseLeave={handleLeave}>
+          <tbody {...areaProps}>
             {rows.map((row) => (
               <JobTableRow
                 key={row.key}
                 row={row}
                 scale={scale}
                 width={width}
-                onHover={setHover}
+                onHover={show}
                 anchorsRef={anchorsRef}
               />
             ))}
@@ -187,7 +184,7 @@ function JobTableRow({
   row: JobRow
   scale: Scale | undefined
   width: number
-  onHover: (hover: Hover) => void
+  onHover: (key: string) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
 }): React.JSX.Element {
   const { key, name, counts, rate, stats } = row
@@ -196,7 +193,7 @@ function JobTableRow({
     .join(', ')
 
   function handleMouseEnter(): void {
-    onHover({ key, open: true })
+    onHover(key)
   }
 
   function plotRef(element: HTMLTableCellElement): () => void {

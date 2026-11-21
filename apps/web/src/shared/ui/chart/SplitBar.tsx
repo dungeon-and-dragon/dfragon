@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { SPLIT_BAR_REVEAL, useChartReveal } from './useChartReveal'
 import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { splitLabelShown } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
-import { type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
+import type { TooltipRow } from './plot-layout'
+import { useChartHover } from './useChartHover'
 
 export type SplitSegment = Readonly<{
   key: string
@@ -50,7 +51,7 @@ export function SplitBar(props: SplitBarProps): React.JSX.Element | null {
 }
 
 function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JSX.Element {
-  const [hover, setHover] = useState<Hover>(NO_HOVER)
+  const { hover, show, areaProps } = useChartHover()
   const chartRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const anchorsRef = useRef(new Map<string, HTMLElement>())
@@ -67,14 +68,6 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
     bars: segments,
     placeOf: belowTooltipPlaceOf
   })
-
-  function handleHover(key: string): void {
-    setHover({ key, open: true })
-  }
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
-  }
 
   function registerSegment(key: string, element: HTMLLIElement): () => void {
     anchorsRef.current.set(key, element)
@@ -99,11 +92,7 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
 
   return (
     <div ref={chartRef} role="group" aria-label={label} className="relative">
-      <ul
-        data-chart-reveal=""
-        onMouseLeave={handleLeave}
-        className="m-0 flex h-[28px] list-none gap-1 p-0"
-      >
+      <ul data-chart-reveal="" {...areaProps} className="m-0 flex h-[28px] list-none gap-1 p-0">
         {shown.map((segment) => (
           <Segment
             key={segment.key}
@@ -111,7 +100,7 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
             text={splitLabelShown(segment.value, total) ? formatValue(segment.value) : null}
             description={describe(segment)}
             dimmed={hover.open && segment.key !== hover.key}
-            onHover={handleHover}
+            onHover={show}
             register={registerSegment}
           />
         ))}
