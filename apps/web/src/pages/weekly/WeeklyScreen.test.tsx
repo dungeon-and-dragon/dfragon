@@ -172,7 +172,9 @@ function characterLinks(): number {
 }
 
 function button(name: string): HTMLButtonElement | undefined {
-  return [...container.querySelectorAll('button')].find((item) => item.textContent === name)
+  return [...container.querySelectorAll('button')].find(
+    (item) => item.textContent === name || item.getAttribute('aria-label') === name
+  )
 }
 
 async function submitName(name: string): Promise<void> {
