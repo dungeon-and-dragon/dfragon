@@ -2,10 +2,12 @@ import type {
   ClearPopulationCharacter,
   ClearPopulationJob,
   ContentClearPopulationInput,
+  PopulationActivity,
   StoredClearPopulation,
   TimelineRange
 } from '@dfragon/database'
 import { addWeeks, subMinutes } from 'date-fns'
+import { INACTIVE_AFTER_MS } from '@dfragon/server-core/domain/character-activity.js'
 import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 import {
@@ -84,6 +86,16 @@ export function planClearCollection(
   const ranges = toRanges(weeks)
 
   return { ranges, weeks }
+}
+
+// 비활성 캐릭터는 최근 30일 타임라인이 비어 있어, 그보다 오래된 구간을 받을 때만 요청한다.
+export function toRequestActivity(plan: ClearCollectionPlan, startedAt: Date): PopulationActivity {
+  const inactiveSince = startedAt.getTime() - INACTIVE_AFTER_MS
+  if (plan.ranges.some(({ start }) => start.getTime() < inactiveSince)) {
+    return 'include-inactive'
+  }
+
+  return 'active-only'
 }
 
 export const weekKey = (contentId: string, weekStart: Date) =>
