@@ -5,7 +5,13 @@ import { requestJobStats } from './job-stats-request'
 
 export function useSetStats(filter: SetStatsFilter): LoadedResult<SetStats> {
   return useLoadedResult(
-    ['set-stats', filter.jobId ?? null, filter.jobGrowId ?? null, filter.role ?? null],
+    [
+      'set-stats',
+      filter.jobId ?? null,
+      filter.jobGrowId ?? null,
+      filter.role ?? null,
+      filter.sample ?? null
+    ],
     () => requestJobStats('/stats/sets', setStatsSchema, filter)
   )
 }

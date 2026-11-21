@@ -1,3 +1,4 @@
+import type { SetSample } from '@dfragon/lib'
 import { z } from 'zod'
 import {
   characterIdentitySchema,
@@ -95,7 +96,10 @@ export function evolutionsQueryText(evolutions: readonly SkillEvolutionChoice[])
   return evolutions.map(({ name, type }) => `${name}~${type}`).join(',')
 }
 
-export type SetStatsFilter = Pick<FameRankingFilter, 'jobId' | 'jobGrowId' | 'role'>
+// 표본이 없으면 전체다.
+export type SetStatsFilter = Pick<FameRankingFilter, 'jobId' | 'jobGrowId' | 'role'> & {
+  sample?: SetSample
+}
 
 export type FameRankingSetFilter = Pick<
   FameRankingFilter,

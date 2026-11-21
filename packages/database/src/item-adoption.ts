@@ -1,10 +1,9 @@
 import type { DatabaseClient } from './client.js'
-import { Prisma } from './generated/prisma/client.js'
 import {
   type SetAdoptionQuery,
   type SetAdoptionReplacement,
   adoptionConditions,
-  adoptionRoleSql
+  sampledCharactersSql
 } from './set-adoption.js'
 
 export type ItemCount = {
@@ -42,20 +41,19 @@ const SLOT_ORDER = [
   'EARRING'
 ]
 
-// 세트를 받은 합성 캐릭터 100만 명과 아이템 120만 행(PostgreSQL 18.7)에서 교체 transaction이 약 7초 걸렸다.
-// 운영 장비와 설정 차이를 감안해 열 배 넘게 둔다.
-const REPLACE_TIMEOUT_MS = 120_000
+// 세트를 받은 합성 캐릭터 70만 명(명성 117014 이상 40만 명)과 아이템 149만 행(PostgreSQL 18.7)에서 표본별 교체
+// transaction이 약 15초 걸렸다. 운영 장비와 설정 차이를 감안해 열 배 넘게 둔다.
+const REPLACE_TIMEOUT_MS = 180_000
 
 /**
- * 부위 ID가 null인 행은 그 전직, 역할에서 세트 값을 받은 캐릭터 수다.
+ * 부위 ID가 null인 행은 그 표본, 전직, 역할에서 세트 값을 받은 캐릭터 수다.
  * 유일 장비를 끼지 않은 캐릭터도 표본 수에 들어야 해서, 아이템 행과 같은 transaction에서 함께 센다.
  */
 export async function replaceItemAdoption(
   client: DatabaseClient,
   { computedAt, maleCrusader }: SetAdoptionReplacement
 ): Promise<number> {
-  const role = adoptionRoleSql(maleCrusader)
-  const population = Prisma.sql`c.sets_fetched_at IS NOT NULL AND c.job_id IS NOT NULL AND c.job_grow_id IS NOT NULL`
+  const sampled = sampledCharactersSql(maleCrusader)
 
   // TRUNCATE는 commit까지 읽기도 막으므로, 계산하는 동안 API가 이전 저장분을 읽도록 DELETE로 지운다.
 
@@ -63,21 +61,21 @@ export async function replaceItemAdoption(
     async (transaction) => {
       await transaction.$executeRaw`DELETE FROM item_adoption`
       await transaction.$executeRaw`
-        INSERT INTO item_adoption (job_id, job_grow_id, role, slot_id, item_id, item_name, item_type_detail, count, computed_at)
-        SELECT c.job_id, c.job_grow_id, ${role}, NULL, NULL, NULL, NULL, count(*)::int, ${computedAt}
-        FROM characters c
-        WHERE ${population}
-        GROUP BY 1, 2, 3`
+        INSERT INTO item_adoption
+          (sample, job_id, job_grow_id, role, slot_id, item_id, item_name, item_type_detail, count, computed_at)
+        SELECT c.sample, c.job_id, c.job_grow_id, c.role, NULL, NULL, NULL, NULL, count(*)::int, ${computedAt}
+        FROM ${sampled} c
+        GROUP BY 1, 2, 3, 4`
 
       return transaction.$executeRaw`
-        INSERT INTO item_adoption (job_id, job_grow_id, role, slot_id, item_id, item_name, item_type_detail, count, computed_at)
-        SELECT c.job_id, c.job_grow_id, ${role}, item.slot_id, item.item_id, item.item_name, item.item_type_detail,
-          count(*)::int, ${computedAt}
-        FROM characters c
+        INSERT INTO item_adoption
+          (sample, job_id, job_grow_id, role, slot_id, item_id, item_name, item_type_detail, count, computed_at)
+        SELECT c.sample, c.job_id, c.job_grow_id, c.role, item.slot_id, item.item_id, item.item_name,
+          item.item_type_detail, count(*)::int, ${computedAt}
+        FROM ${sampled} c
         JOIN character_items item
           ON item.server_id = c.server_id AND item.character_id = c.character_id
-        WHERE ${population}
-        GROUP BY 1, 2, 3, 4, 5, 6, 7`
+        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8`
     },
     { timeout: REPLACE_TIMEOUT_MS }
   )

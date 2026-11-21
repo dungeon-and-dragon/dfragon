@@ -1586,7 +1586,9 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   await act(async () => root.render(<WebApp host={host} />))
 
   await vi.waitFor(() =>
-    expect(setStatsRequests()).toEqual([`?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}`])
+    expect(setStatsRequests()).toEqual([
+      `?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}&sample=all`
+    ])
   )
   expect(globalMenu()).toContainEqual(['통계', 'page'])
   const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
@@ -1605,7 +1607,7 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   )
   await vi.waitFor(() =>
     expect(setStatsRequests().at(-1)).toBe(
-      `?jobId=${job!.jobId}&jobGrowId=${secondGrow!.jobGrowId}`
+      `?jobId=${job!.jobId}&jobGrowId=${secondGrow!.jobGrowId}&sample=all`
     )
   )
 })

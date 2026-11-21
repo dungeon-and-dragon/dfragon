@@ -648,7 +648,7 @@ it('세트 셀렉트는 전체 직업 세트 통계에서 많이 낀 순으로 �
   await vi.waitFor(() =>
     expect(optionTexts('장비 세트')).toEqual(['장비 세트 전체', '황금향', '페어리'])
   )
-  expect(setStatsQueries).toEqual([{}])
+  expect(setStatsQueries).toEqual([{ sample: 'all' }])
   await act(async () => setSelect('서약 선택지').click())
   await vi.waitFor(() =>
     expect(optionTexts('서약 선택지')).toEqual([
@@ -791,7 +791,7 @@ it('무기 셀렉트는 많이 낀 순에 무기마다 아이콘을 두고, 유�
     expect(optionTexts('무기')).toEqual(['무기 전체', '무기 weapon-a', '무기 weapon-b'])
   )
   expect(optionIcons('무기')).toEqual([0, 1, 1])
-  expect(itemStatsQueries).toEqual([{ jobId }])
+  expect(itemStatsQueries).toEqual([{ jobId, sample: 'all' }])
   await act(async () => setSelect('유일 장비').click())
   await vi.waitFor(() =>
     expect(optionGroups('유일 장비')).toEqual([

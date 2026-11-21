@@ -27,7 +27,7 @@ import { HomePage } from '#pages/home'
 import { PrivacyPage, TermsPage } from '#pages/legal'
 import { NotFoundPage } from '#pages/not-found'
 import { RankingsPage } from '#pages/rankings'
-import { parseJobSearch, parseRankingSearch } from '#widgets/ranking-filter'
+import { parseRankingSearch, parseSetStatsSearch } from '#widgets/ranking-filter'
 import { MultisearchPage } from '#pages/multisearch'
 import { SetStatsPage, StatsPage } from '#pages/stats'
 import {
@@ -120,7 +120,7 @@ const statsRoute = createRoute({
 const setStatsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/stats/sets',
-  validateSearch: parseJobSearch,
+  validateSearch: parseSetStatsSearch,
   component: SetStatsPage
 })
 

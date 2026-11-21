@@ -2,8 +2,8 @@
 import { expect, it } from 'vitest'
 import { RANKING_JOBS } from '#entities/character'
 import {
-  parseJobSearch,
   parseRankingSearch,
+  parseSetStatsSearch,
   rankingFilterOf,
   rankingSearchOf
 } from './ranking-search'
@@ -116,10 +116,21 @@ it('서약 세트 없는 선택지와 읽을 수 없는 서약 세트 번호는 
   expect(parseRankingSearch({ equipmentSetId: '' })).toEqual({})
 })
 
-it('세트 통계 주소는 직업, 전직, 역할만 읽고 세트 값은 버린다', () => {
+it('세트 통계 주소는 직업, 전직, 역할, 표본만 읽고 세트 값은 버린다', () => {
   expect(
-    parseJobSearch({ jobId: job.jobId, jobGrowId: grow.jobGrowId, equipmentSetId: 'set-1' })
-  ).toEqual({ jobId: job.jobId, jobGrowId: grow.jobGrowId })
+    parseSetStatsSearch({
+      jobId: job.jobId,
+      jobGrowId: grow.jobGrowId,
+      equipmentSetId: 'set-1',
+      sample: 'fame'
+    })
+  ).toEqual({ jobId: job.jobId, jobGrowId: grow.jobGrowId, sample: 'fame' })
+})
+
+it('세트 통계 주소의 기본 표본인 전체와 모르는 표본은 표본 없이 읽는다', () => {
+  expect(parseSetStatsSearch({ sample: 'all' })).toEqual({})
+  expect(parseSetStatsSearch({ sample: 'top500' })).toEqual({})
+  expect(parseSetStatsSearch({ sample: 'top' })).toEqual({ sample: 'top' })
 })
 
 it('itemIds는 쉼표로 이은 값을 읽어 빈 항목과 중복을 버리고, 여섯 개 이상이면 아이템 필터를 버린다', () => {
