@@ -66,9 +66,10 @@ export {
   readFameRefreshTargets,
   readInactiveCharacters,
   recordCharacterActive,
-  recordCharacterInactive
+  recordCharacterInactive,
+  recordCharactersActive
 } from './character-activity.js'
-export type { FameRefreshTarget } from './character-activity.js'
+export type { CharacterActivityInput, FameRefreshTarget } from './character-activity.js'
 export {
   enqueueCollectedCharacters,
   readCollectionSummary,
