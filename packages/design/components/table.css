@@ -72,5 +72,7 @@
 }
 
 .table-scroll {
+  /* 표 안의 보조 기술용 absolute 요소가 바깥 상자를 기준으로 놓이면 이 틀에 잘리지 않고 화면 상자의 가로 스크롤 범위를 넓힌다. */
+  position: relative;
   overflow-x: auto;
 }
