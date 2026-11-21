@@ -74,7 +74,7 @@ const catalog: OathCatalog = {
       setId: DRAGON,
       name: '야망의 용투 서약',
       icon: null,
-      options: ['세계를 태우는 불꽃', '용제 강림', '싸워야만 하는 운명'].map((name) => ({
+      options: ['용제 강림', '세계를 태우는 불꽃', '싸워야만 하는 운명'].map((name) => ({
         name: `용투 : ${name}`,
         icon: '',
         effects: { rare: null, unique: null, legendary: null, epic: null, primitive: null }
@@ -185,14 +185,14 @@ it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두�
   expect(container.querySelector('header .stat-value')?.textContent).toBe('8')
 })
 
-it('서약 세트 아래 카탈로그 순서로 선택지를 펼치고, 아무도 고르지 않은 선택지는 0%이며 세트 안 비율의 합이 100%다', async () => {
+it('서약 세트 아래 카탈로그 순서로 선택지를 펼쳐 왼쪽, 가운데, 오른쪽으로 부르고, 아무도 고르지 않은 선택지는 0%이며 세트 안 비율의 합이 100%다', async () => {
   await render({ setStats: setStatsOf(stats) })
 
   expect(rowsOf('서약 세트')).toEqual([
     ['용투', '50.0%'],
-    ['용투 : 첫 번째', '75.0%'],
-    ['용투 : 두 번째', '0.0%'],
-    ['용투 : 세 번째', '25.0%'],
+    ['용투 : 왼쪽', '0.0%'],
+    ['용투 : 가운데', '75.0%'],
+    ['용투 : 오른쪽', '25.0%'],
     ['세트 없음', '50.0%']
   ])
 })
@@ -232,7 +232,7 @@ it('세트와 선택지 막대는 고른 직업, 전직과 그 세트로 거른 
     ...JOB_FILTER,
     oathSetId: String(DRAGON)
   })
-  expect(rankingSearchOf(rowLink('서약 세트', '용투 : 두 번째'))).toEqual({
+  expect(rankingSearchOf(rowLink('서약 세트', '용투 : 왼쪽'))).toEqual({
     ...JOB_FILTER,
     oathSetId: String(DRAGON),
     oathSetOption: '용투 : 용제 강림'

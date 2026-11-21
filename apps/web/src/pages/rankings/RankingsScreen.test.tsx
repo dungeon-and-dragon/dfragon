@@ -583,7 +583,7 @@ const oathCatalog: OathCatalog = {
       setId: DRAGON,
       name: '야망의 용투 서약',
       icon: null,
-      options: ['세계를 태우는 불꽃', '용제 강림', '싸워야만 하는 운명'].map((name) => ({
+      options: ['용제 강림', '세계를 태우는 불꽃', '싸워야만 하는 운명'].map((name) => ({
         name: `용투 : ${name}`,
         icon: '',
         effects: { rare: null, unique: null, legendary: null, epic: null, primitive: null }
@@ -648,9 +648,9 @@ it('세트 셀렉트는 전체 직업 세트 통계에서 많이 낀 순으로 �
   await vi.waitFor(() =>
     expect(optionTexts('서약 선택지')).toEqual([
       '선택지 전체',
-      '용투 : 첫 번째',
-      '용투 : 두 번째',
-      '용투 : 세 번째'
+      '용투 : 왼쪽',
+      '용투 : 가운데',
+      '용투 : 오른쪽'
     ])
   )
 })
@@ -693,11 +693,11 @@ it('세트로 거르면 세트를 query로 보내고 목록 띠 제목에 고른
   expect(queries()).toEqual([{ ...filter, oathSetId: String(DRAGON) }])
   await vi.waitFor(() =>
     expect(
-      container.querySelector('section[aria-label="황금향 용투 : 두 번째 검색 결과"]')
+      container.querySelector('section[aria-label="황금향 용투 : 왼쪽 검색 결과"]')
     ).not.toBeNull()
   )
   expect(setSelect('장비 세트').textContent).toContain('황금향')
-  expect(setSelect('서약 선택지').textContent).toContain('용투 : 두 번째')
+  expect(setSelect('서약 선택지').textContent).toContain('용투 : 왼쪽')
 })
 
 it('거른 결과가 비면 조건에 맞는 캐릭터가 없다고 알린다', async () => {
