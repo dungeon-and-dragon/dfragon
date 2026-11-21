@@ -172,7 +172,8 @@ const recordKey = (record: ClearRecordInput) =>
 // 저장 함수의 규칙(레이드는 주마다, 챌린지는 캐릭터당 가장 이른 클리어 한 행, 마감한 주의 모집단은 바꾸지 않음)을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
 function memoryClearStore(
   population: ClearPopulationCharacter[],
-  seeded: StoredClearPopulation[] = []
+  seeded: StoredClearPopulation[] = [],
+  inactiveIds: ReadonlySet<string> = new Set()
 ) {
   const state = {
     population,
@@ -183,10 +184,14 @@ function memoryClearStore(
     progress: undefined as ContentClearCollectionProgress | undefined
   }
   const store: ClearCollectionRepository = {
-    readPopulation: async (minMaxFame) => {
+    readPopulation: async (minMaxFame, activity) => {
       state.populationMinFames.push(minMaxFame)
 
-      return state.population.filter(({ maxFame }) => maxFame >= minMaxFame)
+      return state.population.filter(
+        ({ characterId, maxFame }) =>
+          maxFame >= minMaxFame &&
+          (activity === 'include-inactive' || !inactiveIds.has(characterId))
+      )
     },
     readPopulations: async () => [...state.populations.values()],
     readProgress: async () => (state.progress === undefined ? undefined : { ...state.progress }),
@@ -365,6 +370,29 @@ test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 끝난
   assert.equal(state.progress, undefined)
 })
 
+test('비활성 캐릭터는 Neople에 요청하지 않고 클리어가 없는 캐릭터로 분모에만 넣는다', async () => {
+  const { state, store } = memoryClearStore(
+    [character('a', 130_000), character('b', 125_000), character('c', 121_000)],
+    closedPastWeeks(),
+    new Set(['b'])
+  )
+  const { neople, requests } = fakeNeople({
+    a: [michaelaHard('2026-11-07 21:15')],
+    b: [michaelaHard('2026-11-07 22:00')]
+  })
+
+  const summary = await collect(store, neople, COLLECTED_AT)
+
+  assert.deepEqual(
+    requests.map(({ characterId }) => characterId),
+    ['a', 'c']
+  )
+  const week = LAST_WEEK.toISOString()
+  assert.deepEqual(storedClears(state), [`michaela-hard/a/${week}/null`])
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(3, true))
+  assert.equal(summary.characters, 2)
+})
+
 const BACKFILL_RANGES = [
   '20250424T0600/20250722T0559',
   '20250722T0600/20251019T0559',
@@ -451,7 +479,7 @@ test('최고 명성 104,292 이상을 모두 받고, 각인된 악몽의 분모�
 
   await collect(store, neople, COLLECTED_AT)
 
-  assert.deepEqual(state.populationMinFames, [104_292])
+  assert.deepEqual(new Set(state.populationMinFames), new Set([104_292]))
   assert.deepEqual(
     requests.map(({ characterId }) => characterId),
     ['a', 'b', 'c', 'd']
@@ -1364,8 +1392,8 @@ const RECORD_BACKFILL_RANGES = [
   '20260725T0600/20261022T0559'
 ]
 
-test('지난 기록 받기는 2025-02-06부터 시작 시각까지 code 201, 209, 210만 받아 레이드, 레기온 기록을 저장한다', async () => {
-  const memory = memoryClearStore([character('a', 130_000), character('b')])
+test('지난 기록 받기는 비활성 캐릭터까지 2025-02-06부터 시작 시각까지 code 201, 209, 210만 받아 레이드, 레기온 기록을 저장한다', async () => {
+  const memory = memoryClearStore([character('a', 130_000), character('b')], [], new Set(['b']))
   const { progress, store } = memoryBackfillStore(memory)
   const { neople, requests } = fakeNeople({
     a: [
