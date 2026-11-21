@@ -210,7 +210,6 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
     ['멀티서치', 'page'],
     ['검색', null],
     ['통계', null],
-    ['클리어', null],
     ['모험단', null],
     ['즐겨찾기', null]
   ])
@@ -244,7 +243,6 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
     ['멀티서치', null],
     ['검색', null],
     ['통계', null],
-    ['클리어', null],
     ['모험단', null],
     ['즐겨찾기', null]
   ])
@@ -274,7 +272,6 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['멀티서치', null],
     ['검색', null],
     ['통계', null],
-    ['클리어', null],
     ['모험단', null],
     ['즐겨찾기', null]
   ])
@@ -309,7 +306,6 @@ it.each([
       ['멀티서치', null],
       ['검색', null],
       ['통계', null],
-      ['클리어', null],
       ['모험단', null],
       ['즐겨찾기', null]
     ])
@@ -413,7 +409,6 @@ it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 �
     ['멀티서치', null],
     ['검색', 'page'],
     ['통계', null],
-    ['클리어', null],
     ['모험단', null],
     ['즐겨찾기', null]
   ])
@@ -463,7 +458,6 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
     ['멀티서치', null],
     ['검색', null],
     ['통계', null],
-    ['클리어', null],
     ['모험단', null],
     ['즐겨찾기', null]
   ])
@@ -513,7 +507,6 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['멀티서치', null],
     ['검색', null],
     ['통계', null],
-    ['클리어', null],
     ['모험단', 'page'],
     ['즐겨찾기', null]
   ])
@@ -1476,7 +1469,6 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
     ['멀티서치', null],
     ['검색', null],
     ['통계', null],
-    ['클리어', null],
     ['모험단', 'page'],
     ['즐겨찾기', null]
   ])
@@ -1555,6 +1547,29 @@ function rankingRequests(): URL[] {
   return requestedPaths('/rankings/fame')
 }
 
+it('세트, 조합, 무기 탭 사이를 오가면 고른 직업, 전직 필터를 주소에 그대로 둔다', async () => {
+  serveSetStats()
+  const [job] = RANKING_JOBS
+  const [grow] = job!.grows
+  const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
+  window.history.replaceState(null, '', `/stats/sets${search}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const tab = (label: string) =>
+    [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="통계 종류"] a')].find(
+      (link) => link.textContent === label
+    )!
+  await vi.waitFor(() => expect(tab('조합')).toBeDefined())
+  await act(async () => tab('조합').click())
+  await waitForPath('/stats/combos')
+  expect(window.location.search).toBe(search)
+
+  await act(async () => tab('무기').click())
+  await waitForPath('/stats/weapons')
+  expect(window.location.search).toBe(search)
+  expect(tab('캐릭터').getAttribute('href')).toBe('/stats')
+})
+
 it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계를 받고, 전직을 고르면 주소를 바꿔 다시 받는다', async () => {
   serveSetStats()
   const [job] = RANKING_JOBS
@@ -1577,7 +1592,8 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
     ['캐릭터', null],
     ['세트', 'page'],
     ['조합', null],
-    ['무기', null]
+    ['무기', null],
+    ['클리어', null]
   ])
 
   const secondChip = [...container.querySelectorAll<HTMLButtonElement>('button')].find(

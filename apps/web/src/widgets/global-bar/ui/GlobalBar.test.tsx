@@ -94,7 +94,7 @@ it('지금 항목이 바뀌면 메뉴의 밑줄 하나가 새 항목 아래로 �
 
   expect(adventures.getAttribute('aria-current')).toBe('page')
   expect(underlines()).toHaveLength(1)
-  expect(underline()).toEqual({ left: '360px', width: '90px', visibility: 'visible' })
+  expect(underline()).toEqual({ left: '270px', width: '85px', visibility: 'visible' })
 })
 
 it('메뉴에 없는 화면에서는 밑줄을 숨기고, 메뉴 항목 화면으로 오면 그 항목 아래에 다시 보인다', async () => {
@@ -105,6 +105,14 @@ it('메뉴에 없는 화면에서는 밑줄을 숨기고, 메뉴 항목 화면�
   await act(async () => router.navigate({ to: '/stats' }))
 
   expect(underline()).toEqual({ left: '180px', width: '80px', visibility: 'visible' })
+})
+
+it('클리어 집계 주소에서는 통계 메뉴를 현재 화면으로 표시한다', async () => {
+  await render('/clears')
+
+  const stats = menuLinks().find((link) => link.textContent === '통계')!
+  expect(stats.getAttribute('aria-current')).toBe('page')
+  expect(menuLinks().map((link) => link.textContent)).not.toContain('클리어')
 })
 
 it('멀티서치 주소에서 메뉴 항목을 현재 화면으로 표시한다', async () => {
@@ -120,7 +128,6 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
 
   expect(container.querySelector('form[role="search"]')).toBeNull()
   expect(menuLinks().map((link) => link.getAttribute('aria-current'))).toEqual([
-    null,
     null,
     null,
     null,
