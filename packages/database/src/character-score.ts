@@ -12,9 +12,15 @@ export type StoredCharacterScoreRow = StoredCharacterScore & {
   characterId: string
 }
 
+export type CharacterScoreJob = {
+  jobId: string
+  jobGrowId: string
+}
+
 export type CharacterScoreInput = {
   serverId: string
   characterId: string
+  job: CharacterScoreJob | null
   kind: CharacterScoreKind
   score: number
   calculatedAt: Date
@@ -29,17 +35,19 @@ export async function recordCharacterScore(
   client: DatabaseClient,
   input: CharacterScoreInput
 ): Promise<void> {
-  const { serverId, characterId, kind, score, calculatedAt, engine } = input
+  const { serverId, characterId, job, kind, score, calculatedAt, engine } = input
+  const jobId = job?.jobId ?? null
+  const jobGrowId = job?.jobGrowId ?? null
 
   // 비교와 갱신을 한 문장으로 해, 같은 캐릭터를 동시에 저장해도 낮은 점수가 높은 점수를 덮지 않는다.
-  // 엔진 버전이나 점수 종류가 다르면 값끼리 비교할 수 없으므로 새 값으로 덮는다.
+  // 엔진 버전, 점수 종류나 계산한 전직이 다르면 값끼리 비교할 수 없으므로 새 값으로 덮는다.
   await client.$executeRaw`
     INSERT INTO "character_scores"
       ("server_id", "character_id", "kind", "score", "calculated_at",
-       "engine_package", "engine_rules_rev", "engine_bundle_id")
+       "engine_package", "engine_rules_rev", "engine_bundle_id", "job_id", "job_grow_id")
     VALUES (
       ${serverId}, ${characterId}, ${kind}, ${score}::integer, ${calculatedAt},
-      ${engine.package}, ${engine.rulesRev}, ${engine.bundleId}
+      ${engine.package}, ${engine.rulesRev}, ${engine.bundleId}, ${jobId}, ${jobGrowId}
     )
     ON CONFLICT ("server_id", "character_id") DO UPDATE SET
       "kind" = EXCLUDED."kind",
@@ -47,11 +55,15 @@ export async function recordCharacterScore(
       "calculated_at" = EXCLUDED."calculated_at",
       "engine_package" = EXCLUDED."engine_package",
       "engine_rules_rev" = EXCLUDED."engine_rules_rev",
-      "engine_bundle_id" = EXCLUDED."engine_bundle_id"
+      "engine_bundle_id" = EXCLUDED."engine_bundle_id",
+      "job_id" = EXCLUDED."job_id",
+      "job_grow_id" = EXCLUDED."job_grow_id"
     WHERE ("character_scores"."kind", "character_scores"."engine_package",
-           "character_scores"."engine_rules_rev", "character_scores"."engine_bundle_id")
+           "character_scores"."engine_rules_rev", "character_scores"."engine_bundle_id",
+           "character_scores"."job_id", "character_scores"."job_grow_id")
           IS DISTINCT FROM
-          (EXCLUDED."kind", EXCLUDED."engine_package", EXCLUDED."engine_rules_rev", EXCLUDED."engine_bundle_id")
+          (EXCLUDED."kind", EXCLUDED."engine_package", EXCLUDED."engine_rules_rev", EXCLUDED."engine_bundle_id",
+           EXCLUDED."job_id", EXCLUDED."job_grow_id")
        OR "character_scores"."score" <= EXCLUDED."score"`
 }
 

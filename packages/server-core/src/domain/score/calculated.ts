@@ -1,7 +1,7 @@
 import type { CharacterScoreInput } from '@dfragon/database'
 import type { ScoreEngineResult } from './result.js'
 
-export type CalculatedScore = Omit<CharacterScoreInput, 'serverId' | 'characterId'>
+export type CalculatedScore = Omit<CharacterScoreInput, 'serverId' | 'characterId' | 'job'>
 
 /** 근사값만 낸 결과처럼 점수가 없는 결과는 저장할 점수가 아니다. */
 export function toCalculatedScore(

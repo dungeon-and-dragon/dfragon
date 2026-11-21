@@ -1,4 +1,5 @@
 export {
+  RANKING_SORTS,
   type FameRankingCursor,
   decodeFameRankingCursor,
   encodeFameRankingCursor
