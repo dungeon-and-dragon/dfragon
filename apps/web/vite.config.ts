@@ -90,10 +90,16 @@ export default defineConfig({
   worker: { format: 'es' },
   resolve: {
     alias: workspaceAliases,
-    dedupe: ['react', 'react-dom'],
-    // onnxruntime-web의 기본 번들은 WASM을 import.meta.url 기준으로도 참조해 Vite가 같은 WASM을 assets에 한 벌 더
-    // 내보낸다. OCR worker는 wasmPaths로 public/ocr의 사본만 읽으므로, 그 참조가 없는 extern WASM 빌드를 고른다.
-    conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions]
+    dedupe: ['react', 'react-dom']
+  },
+  environments: {
+    client: {
+      resolve: {
+        // onnxruntime-web의 기본 번들은 WASM을 import.meta.url 기준으로도 참조해 Vite가 같은 WASM을 assets에 한 벌 더
+        // 내보낸다. OCR worker는 wasmPaths로 public/ocr의 사본만 읽으므로, 그 참조가 없는 extern WASM 빌드를 고른다.
+        conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions]
+      }
+    }
   },
   server: { proxy: { [`${API_PATH_PREFIX}/`]: DEV_API_PROXY } }
 })

@@ -11,12 +11,14 @@ import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { absoluteUrl, fetchStaticJson, fetchUploadedStaticJson } from '#shared/lib/static-json'
 
 // 스킬 창 데이터는 사이트 빌드에 넣지 않고 따로 올리며, host Caddy와 개발 서버가 같은 origin의 /skilltab/ 아래에 내준다.
-export const SKILL_WINDOW_INDEX_URL = `${window.location.origin}/skilltab/skilltab.v3.json`
+export function skillWindowIndexUrl(): string {
+  return `${window.location.origin}/skilltab/skilltab.v3.json`
+}
 
-function markUrlsOf(marks: SkillMarks): SkillMarks {
+function markUrlsOf(marks: SkillMarks, indexUrl: string): SkillMarks {
   const pair = ([first, second]: readonly [string, string]): [string, string] => [
-    absoluteUrl(first, SKILL_WINDOW_INDEX_URL),
-    absoluteUrl(second, SKILL_WINDOW_INDEX_URL)
+    absoluteUrl(first, indexUrl),
+    absoluteUrl(second, indexUrl)
   ]
 
   const evolution = pair(marks.evolution)
@@ -27,25 +29,26 @@ function markUrlsOf(marks: SkillMarks): SkillMarks {
 
 // 직업 파일과 그 안의 sprite 경로도 index처럼 /skilltab/ 기준이라, 모두 index 주소로 푼다.
 async function requestSkillWindowIndex(): Promise<SkillWindowIndex | null> {
-  const json = await fetchUploadedStaticJson(SKILL_WINDOW_INDEX_URL)
+  const indexUrl = skillWindowIndexUrl()
+  const json = await fetchUploadedStaticJson(indexUrl)
   if (json === null) {
     return null
   }
 
   const { marks, ...index } = skillWindowIndexSchema.parse(json)
   const jobs = index.jobs.map((job) => {
-    const file = absoluteUrl(job.file, SKILL_WINDOW_INDEX_URL)
+    const file = absoluteUrl(job.file, indexUrl)
 
     return { ...job, file }
   })
-  const markUrls = markUrlsOf(marks)
+  const markUrls = markUrlsOf(marks, indexUrl)
 
   return { ...index, marks: markUrls, jobs }
 }
 
 async function requestSkillWindowJob(jobUrl: string): Promise<SkillWindowJob> {
   const job = skillWindowJobSchema.parse(await fetchStaticJson(jobUrl))
-  const sprite = absoluteUrl(job.sprite, SKILL_WINDOW_INDEX_URL)
+  const sprite = absoluteUrl(job.sprite, skillWindowIndexUrl())
 
   return { ...job, sprite }
 }
