@@ -113,7 +113,7 @@ it('딜러의 서약, 세트, 결정과 진의 단계마다 고른 효과를 그
   expect(crystals).toHaveLength(11)
   expect(crystals[0]).toEqual(['용투 : 태초의 광휘 결정'])
   expect(crystals.at(-1)).toEqual(['용투 : 완전한 광휘 결정'])
-  expect(section('서약 결정').querySelector('h2')?.textContent).toBe('서약 결정 11')
+  expect(section('서약 결정').querySelector('h2')).toBeNull()
   expect(container.querySelector('section[aria-label="서약 세트 효과"]')).toBeNull()
   expect(container.querySelector('section[aria-label="서약의 가호"]')).toBeNull()
   expect(section('묵언의 진의').querySelector('h2')?.textContent).toBe('묵언의 진의')
@@ -169,7 +169,7 @@ it('서약 데이터가 있으면 세트 카드와 선택지 효과 카드 3장�
     [...(cards[0]?.querySelectorAll('p > span') ?? [])].map((line) => line.textContent)
   ).toEqual(['[투룡의 불꽃] [장비 발동 옵션]', '모든 속도 +20%', '[용투장의 난 세트] 장착 시'])
   expect(cards.map((card) => card.textContent?.includes('선택'))).toEqual([true, false, false])
-  expect(section('서약 본체').textContent).toBe('서약 본체세계를 태우는 용투 서약')
+  expect(section('서약 본체').textContent).toBe('세계를 태우는 용투 서약')
   expect(section('서약 본체').querySelector('img')?.getAttribute('src')).toBe(
     'https://skilltab.test/oath-item/primordial.webp'
   )
@@ -217,7 +217,7 @@ it('세트가 없는 서약도 한 줄 화면에 서약 데이터의 아이콘�
 
   await render(withoutSet, oathCatalogHandlers.catalog(catalog))
 
-  expect(container.textContent).toContain('서약영겁의 안개 서약서약 결정')
+  expect(container.textContent).toContain('서약영겁의 안개 서약결정')
   expect(strip().querySelector('img')?.getAttribute('src')).toBe(
     'https://skilltab.test/oath-item/mist-epic.webp'
   )
@@ -232,6 +232,6 @@ it('서약 데이터가 없으면 한 줄 화면에 아이콘을 두지 않는�
 
   await render({ ...buffer, oath: { ...oath, setInfo: null } })
 
-  expect(container.textContent).toContain('서약영겁의 안개 서약서약 결정')
+  expect(container.textContent).toContain('서약영겁의 안개 서약결정')
   expect(strip().querySelector('img')).toBeNull()
 })

@@ -60,7 +60,6 @@ function detailOf(characterId = 'character-1'): CharacterDetailView {
 }
 
 const EMPTY: CharacterTimeline = {
-  weeklyClears: [],
   seasonClears: [],
   enhancements: [],
   enhancementsCursor: null,
@@ -69,29 +68,6 @@ const EMPTY: CharacterTimeline = {
 }
 
 const FILLED: CharacterTimeline = {
-  weeklyClears: [
-    {
-      kind: 'raid',
-      name: '디레지에 레이드',
-      modeName: '디레지에 : 악연',
-      hard: true,
-      occurredAt: '2026-11-05T12:30:00.000Z'
-    },
-    {
-      kind: 'raid',
-      name: '나벨 레이드',
-      modeName: '나벨 : 무지의 악',
-      hard: false,
-      occurredAt: '2026-11-05T13:00:00.000Z'
-    },
-    {
-      kind: 'legion',
-      name: '베누스',
-      modeName: null,
-      hard: false,
-      occurredAt: '2026-11-05T15:05:00.000Z'
-    }
-  ],
   seasonClears: [
     { kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 },
     { kind: 'raid', name: '나벨 레이드', hard: true, count: 2 },
@@ -278,7 +254,7 @@ function cellsOf(title: string, row: number): HTMLElement[] {
   return [...group(title).querySelectorAll<HTMLElement>('tbody tr')[row].querySelectorAll('td')]
 }
 
-it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시즌, 강화, 획득 순으로 그린다', async () => {
+it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 시즌, 강화, 획득 순으로 그리고 이번 주 클리어는 두지 않는다', async () => {
   const { promise, resolve } = Promise.withResolvers<void>()
   respond('/timeline', [after(promise, json(FILLED))])
   await render(detailOf())
@@ -290,7 +266,6 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시�
 
   expect(container.querySelector('[role="status"]')).toBeNull()
   expect([...container.querySelectorAll('section')].map((section) => section.ariaLabel)).toEqual([
-    '이번 주 클리어',
     '시즌 클리어 횟수',
     '강화, 증폭, 재련',
     '획득'
@@ -298,23 +273,10 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 이번 주, 시�
   expect(requested).toEqual([timelineUrl()])
 })
 
-it('이번 주 클리어는 최근 순으로 종류, 하드 배지, 이름, 난이도(없으면 생략), 지난 시간을 보이고 한국 시간 MM-DD HH:mm은 title로 두며, 시즌은 종류 뒤 하드 배지로 나눈 횟수 칩을 보이며, 하드 배지는 붉은색이다', async () => {
+it('시즌 클리어는 종류 뒤 하드 배지로 나눈 횟수 칩을 보이며, 하드 배지는 붉은색이다', async () => {
   respond('/timeline', [json(FILLED)])
   await open(detailOf())
 
-  expect(headerOf('이번 주 클리어')).toEqual(['이번 주 클리어', '3'])
-  expect(rowsOf('이번 주 클리어')).toEqual([
-    ['레기온', '베누스', '11시간 전'],
-    ['레이드', '나벨 레이드', '나벨 : 무지의 악', '14시간 전'],
-    ['레이드', '하드', '디레지에 레이드', '디레지에 : 악연', '14시간 전']
-  ])
-  expect(
-    [...group('이번 주 클리어').querySelectorAll('time')].map((time) => [time.dateTime, time.title])
-  ).toEqual([
-    ['2026-11-05T15:05:00.000Z', '11-06 00:05'],
-    ['2026-11-05T13:00:00.000Z', '11-05 22:00'],
-    ['2026-11-05T12:30:00.000Z', '11-05 21:30']
-  ])
   expect(rowsOf('시즌 클리어 횟수')).toEqual([
     ['레이드', '하드', '디레지에 레이드', '3'],
     ['레이드', '하드', '나벨 레이드', '2'],
@@ -326,7 +288,7 @@ it('이번 주 클리어는 최근 순으로 종류, 하드 배지, 이름, 난�
     (badge) => badge.textContent === '하드'
   )
 
-  expect(hardBadges).toHaveLength(3)
+  expect(hardBadges).toHaveLength(2)
   expect(hardBadges.every((badge) => badge.classList.contains('text-fg-danger'))).toBe(true)
 })
 
@@ -365,14 +327,13 @@ it('획득 표는 제목 옆에 개수와 에픽, 태초를 적고 경로는 이
   ])
 })
 
-it('값이 없는 캐릭터는 네 묶음의 제목을 남기고 묶음마다 빈 상태 한 줄을 보인다', async () => {
+it('값이 없는 캐릭터는 세 묶음의 제목을 남기고 묶음마다 빈 상태 한 줄을 보인다', async () => {
   respond('/timeline', [json(EMPTY)])
   await open(detailOf())
 
   const groups = [...container.querySelectorAll('section')]
-  expect(groups.map((section) => headerOf(section.ariaLabel!)[1])).toEqual(['0', '0', '0', '0'])
+  expect(groups.map((section) => headerOf(section.ariaLabel!)[1])).toEqual(['0', '0', '0'])
   expect(groups.map((section) => section.querySelector('p')?.textContent)).toEqual([
-    '이번 주 클리어 기록이 없습니다.',
     '이번 시즌 클리어 기록이 없습니다.',
     '강화, 증폭, 재련 기록이 없습니다.',
     '에픽, 태초 획득 기록이 없습니다.'
@@ -387,7 +348,7 @@ it('탭을 숨겼다가 다시 열거나 같은 캐릭터의 상세를 새로 �
   await hide()
   await render(detailOf())
 
-  expect(rowsOf('이번 주 클리어')).toHaveLength(3)
+  expect(rowsOf('시즌 클리어 횟수')).toHaveLength(4)
   expect(requested).toEqual([timelineUrl()])
 })
 
@@ -400,7 +361,7 @@ it('조회가 실패하면 오류 문구를 보이고, 탭을 다시 열면 다�
 
   await hide()
   await render(detail)
-  await vi.waitFor(() => expect(container.querySelectorAll('section')).toHaveLength(4))
+  await vi.waitFor(() => expect(container.querySelectorAll('section')).toHaveLength(3))
   expect(container.querySelector('[role="alert"]')).toBeNull()
   expect(requested).toEqual([timelineUrl(), timelineUrl()])
 })
@@ -426,8 +387,10 @@ it('다른 캐릭터로 바뀐 뒤 늦게 온 이전 캐릭터의 응답은 무�
   first.resolve()
   await act(async () => delay(50))
 
-  expect(container.querySelectorAll('section')).toHaveLength(4)
-  expect(container.querySelector('section p')?.textContent).toBe('이번 주 클리어 기록이 없습니다.')
+  expect(container.querySelectorAll('section')).toHaveLength(3)
+  expect(container.querySelector('section p')?.textContent).toBe(
+    '이번 시즌 클리어 기록이 없습니다.'
+  )
   expect(container.querySelectorAll('li, table')).toHaveLength(0)
 })
 
