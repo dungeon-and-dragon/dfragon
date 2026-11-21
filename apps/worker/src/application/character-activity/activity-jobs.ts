@@ -2,11 +2,11 @@ import type { CharacterBasicInput, CollectedCharacter, FameRefreshTarget } from 
 import { z } from 'zod'
 import { CharacterCollectionFailure } from '#domain/character-collection/index.js'
 import { activityRange, needsActivityCheck } from '#domain/character-activity/index.js'
-import { createUnavailableStreaks, defineJob, NEOPLE_APIS } from '#application/jobs/index.js'
+import { defineJob, fetchGroupWithRetry, NEOPLE_APIS } from '#application/jobs/index.js'
 import type { CharacterActivityPorts } from './ports.js'
 import type { CharacterActivityRepository } from './repository.js'
 
-export const UNAVAILABLE_PAUSE_MS = 60_000
+export { UNAVAILABLE_PAUSE_MS } from '#application/jobs/index.js'
 
 const PAGE_SIZE = 1024
 
@@ -80,7 +80,6 @@ export class CharacterActivityService {
   ): Promise<{ counts: Counts; done: number }> {
     const { readConcurrency, pause, report } = this.ports
     const counts: Counts = { refreshed: 0, inactive: 0, reactivated: 0, skipped: 0 }
-    const unavailableStreaks = createUnavailableStreaks<Target>()
     let after: Target | null = null
     let done = 0
 
@@ -97,21 +96,22 @@ export class CharacterActivityService {
 
       while (position < page.length) {
         const group = page.slice(position, position + readConcurrency())
-        const outcomes = await Promise.all(group.map(handle))
-        const unavailable = group.filter((_, index) => outcomes[index] === 'unavailable')
-
-        if (
-          unavailable.length > 0 &&
-          unavailableStreaks.decide(group.length, unavailable) === 'retry'
-        ) {
-          report('CHARACTER_ACTIVITY_NEOPLE_UNAVAILABLE', {
-            done,
-            characters: group.length,
-            unavailable: unavailable.length
-          })
-          await pause(UNAVAILABLE_PAUSE_MS)
-          continue
-        }
+        const outcomes = await fetchGroupWithRetry(
+          group,
+          (targets) => Promise.all(targets.map(handle)),
+          {
+            isUnavailable: (outcome) => outcome === 'unavailable',
+            pause,
+            onUnavailable: ({ attempted, unavailable, paused }) => {
+              report('CHARACTER_ACTIVITY_NEOPLE_UNAVAILABLE', {
+                done,
+                characters: attempted,
+                unavailable: unavailable.length,
+                paused: paused ? 1 : 0
+              })
+            }
+          }
+        )
 
         for (const outcome of outcomes) {
           const counted = outcome === 'unavailable' ? 'skipped' : outcome

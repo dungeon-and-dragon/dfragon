@@ -4,9 +4,9 @@ import {
   TimelineFailure,
   type TimelineRow
 } from '@dfragon/server-core/domain/character-timeline/index.js'
-import { createUnavailableStreaks } from '#application/jobs/index.js'
+import { fetchGroupWithRetry } from '#application/jobs/index.js'
 
-export const UNAVAILABLE_PAUSE_MS = 60_000
+export { UNAVAILABLE_PAUSE_MS } from '#application/jobs/index.js'
 
 export type CollectionProgress = {
   startedAt: Date
@@ -127,33 +127,38 @@ export async function collectPopulation({
   recordGroup,
   recordProgress
 }: PopulationCollection): Promise<number> {
-  const unavailableStreaks = createUnavailableStreaks<ClearPopulationCharacter>()
   let skipped = 0
   let done = resumedAt
 
   while (done < population.length) {
     const group = population.slice(done, done + readConcurrency())
-    const results = await Promise.all(
-      group.map((character) => fetchCharacterRows(character, rangesOf(character), fetchTimeline))
+    const results = await fetchGroupWithRetry(
+      group,
+      (characters) =>
+        Promise.all(
+          characters.map((character) =>
+            fetchCharacterRows(character, rangesOf(character), fetchTimeline)
+          )
+        ),
+      {
+        isUnavailable: (result) => result.status === 'unavailable',
+        pause,
+        onUnavailable: ({ attempted, unavailable, paused }) => {
+          const reasons = countReasons(unavailable)
+          report(events.unavailable, {
+            done,
+            characters: attempted,
+            unavailable: unavailable.length,
+            paused: paused ? 1 : 0,
+            reasons
+          })
+        }
+      }
     )
 
-    const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
-    if (unavailable.length > 0) {
-      if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-        const reasons = countReasons(results)
-        report(events.unavailable, {
-          done,
-          characters: group.length,
-          unavailable: unavailable.length,
-          reasons
-        })
-        await pause(UNAVAILABLE_PAUSE_MS)
-        continue
-      }
-
-      for (const character of unavailable) {
-        const position = done + group.indexOf(character)
-        report(events.skipped, { position })
+    for (const [index, result] of results.entries()) {
+      if (result.status === 'unavailable') {
+        report(events.skipped, { position: done + index })
       }
     }
 
