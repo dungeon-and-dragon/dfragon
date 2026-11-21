@@ -79,7 +79,7 @@ export const 아이템선택: Story = {
     <Screen
       initialFilter={{
         jobId: RANKING_JOBS[0]!.jobId,
-        itemIds: ['story-unique-1', 'story-weapon-1']
+        itemIds: ['aa5273499f19ddba846919dbb6857d82', 'story-weapon-1']
       }}
     />
   )
