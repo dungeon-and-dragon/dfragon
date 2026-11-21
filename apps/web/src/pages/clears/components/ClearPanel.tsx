@@ -1,5 +1,4 @@
-import { type ReactNode, useState } from 'react'
-import { formatSeoulDateTime } from '#shared/lib/time-format'
+import type { ReactNode } from 'react'
 import type { ClearTimes } from '#entities/ranking'
 import { Columns } from '#shared/ui/chart/Columns'
 import { TitleStat } from '#shared/ui/TitleBox'
@@ -18,8 +17,6 @@ export function ClearTitle({
   summary: WeekSummary | undefined
   children?: ReactNode
 }): React.JSX.Element {
-  const [now] = useState(Date.now)
-
   return (
     <header className="section screen-head flex-wrap justify-start">
       <h1 className="screen-title mr-6">{CLEAR_TITLE}</h1>
@@ -39,11 +36,6 @@ export function ClearTitle({
             />
           )}
           <TitleStat label="캐릭터 수" value={integer.format(summary.population)} />
-          <TitleStat
-            label="수집 시각"
-            numeric={false}
-            value={formatSeoulDateTime(summary.collectedAt, now)}
-          />
         </div>
       )}
     </header>

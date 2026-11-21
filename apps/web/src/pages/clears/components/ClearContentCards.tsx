@@ -52,14 +52,31 @@ export function ClearContentCards({
       }
     }
 
+    // 마우스 휠의 세로 굴림을 카드 줄의 가로 넘김으로 바꾼다. 끝에 닿은 방향은 페이지 스크롤로 둔다.
+    function scrollByWheel(event: WheelEvent): void {
+      if (track == null || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+        return
+      }
+
+      const { start, end } = edgesOf(track)
+      if ((event.deltaY < 0 && start) || (event.deltaY > 0 && end)) {
+        return
+      }
+
+      event.preventDefault()
+      track.scrollBy({ left: event.deltaY })
+    }
+
     update()
     const observer = new ResizeObserver(update)
     observer.observe(track)
     track.addEventListener('scroll', update, { passive: true })
+    track.addEventListener('wheel', scrollByWheel, { passive: false })
 
     return () => {
       observer.disconnect()
       track.removeEventListener('scroll', update)
+      track.removeEventListener('wheel', scrollByWheel)
     }
   }, [])
 

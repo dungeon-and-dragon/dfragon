@@ -37,6 +37,7 @@ export function ComboStatsScreen({
       {(stats) => (
         <ListBox name={BOX_NAME}>
           <RowBars
+            barFromMd
             bars={equipmentComboBars(stats, filter)}
             tone="chart-3"
             formatValue={formatShare}

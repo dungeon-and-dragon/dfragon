@@ -12,7 +12,6 @@ import type {
 
 const DAY = 24 * 60 * 60 * 1000
 const LATEST_WEEK = '2026-11-12'
-const COLLECTED_AT = '2026-11-13T22:39:00.000Z'
 const WEEK_COUNT = 16
 const RAID_RELEASE = '2026-08-05T21:00:00.000Z'
 
@@ -29,7 +28,6 @@ function week(weekStart: string, cleared: number, population: number): ClearWeek
   return {
     weekStart,
     closed: weekStart !== LATEST_WEEK,
-    collectedAt: COLLECTED_AT,
     population,
     minFame: 104292,
     cleared,
