@@ -50,6 +50,7 @@
     "@vitejs/plugin-react": "catalog:",
     "jsdom": "catalog:",
     "msw": "catalog:",
+    "nitro": "catalog:",
     "pngjs": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
