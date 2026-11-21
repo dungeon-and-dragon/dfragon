@@ -1,6 +1,7 @@
 import {
   NEOPLE_CHARACTER_SECTIONS,
   type NeopleCharacterSection,
+  auctionSchema,
   characterBasicSchema,
   characterSearchSchema,
   characterSectionSchemas,
@@ -35,6 +36,13 @@ export interface CharactersFameQuery {
   jobId?: string
   jobGrowId?: string
   isAllJobGrow?: boolean
+  limit: number
+}
+
+export interface AuctionQuery {
+  itemName: string
+  wordType: 'match'
+  sort: 'unitPrice:asc'
   limit: number
 }
 
@@ -96,6 +104,8 @@ function makeClient(transport: Transport) {
       }),
     itemShop: (itemId: string, signal: AbortSignal) =>
       transport.get(`/df/items/${encodeURIComponent(itemId)}/shop`, itemShopSchema, { signal }),
+    auction: (query: AuctionQuery) =>
+      transport.get('/df/auction', auctionSchema, { searchParams: { ...query } }),
     skill: (jobId: string, skillId: string, signal: AbortSignal) =>
       transport.get(
         `/df/skills/${encodeURIComponent(jobId)}/${encodeURIComponent(skillId)}`,

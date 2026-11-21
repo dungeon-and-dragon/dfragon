@@ -168,6 +168,18 @@ export const multiItemsSchema = z.object({ rows: z.array(z.unknown()) })
 
 export const itemShopSchema = z.looseObject({ itemGradeValue: z.number() })
 
+export const auctionSchema = z.object({
+  rows: z.array(
+    z.looseObject({
+      itemName: nonblankString,
+      itemRarity: nonblankString.optional(),
+      unitPrice: z.int().positive()
+    })
+  )
+})
+
+export type NeopleAuctionRow = z.output<typeof auctionSchema>['rows'][number]
+
 export const skillSchema = z.looseObject({
   jobId: z.string(),
   name: nonblankString,

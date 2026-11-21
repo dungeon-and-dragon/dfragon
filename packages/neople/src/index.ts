@@ -1,4 +1,5 @@
 export {
+  type AuctionQuery,
   type CharacterSearchQuery,
   type CharacterTimelineQuery,
   type CharactersFameQuery,
@@ -23,6 +24,7 @@ export {
 } from './image.js'
 export {
   NEOPLE_CHARACTER_SECTIONS,
+  type NeopleAuctionRow,
   type NeopleCharacter,
   type NeopleCharacterBasic,
   type NeopleCharacterSearchRow,

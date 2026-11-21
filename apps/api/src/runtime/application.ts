@@ -26,7 +26,11 @@ import {
   SeasonBackfillService,
   TimelineSyncService
 } from '#application/character-timeline/index.js'
-import { createNeopleCharacterSearch, createNeopleShopGrade } from '#infrastructure/neople/index.js'
+import {
+  createNeopleCharacterSearch,
+  createNeopleLowestListing,
+  createNeopleShopGrade
+} from '#infrastructure/neople/index.js'
 import {
   DatabaseClearStatsRepository,
   DatabaseItemDictionaryRepository
@@ -139,6 +143,7 @@ export function createApiRuntimeOptions(configuration: RuntimeConfiguration): Ap
     },
     ...database,
     todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
+    soulPrices: { fetchLowestListing: createNeopleLowestListing(neople) },
     httpsOptions: configuration.localHttps,
     scoreLibraryPath: configuration.scoreLibraryPath
   }
