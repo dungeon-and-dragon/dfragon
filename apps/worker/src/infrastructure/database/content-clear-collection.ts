@@ -1,6 +1,8 @@
 import {
   type CharacterActivityInput,
-  type ClearPopulationCharacter,
+  type ClearPopulationJob,
+  type ClearPopulationPage,
+  type ClearPopulationSelection,
   type ClearRecordBackfillProgress,
   type ClearRecordCursor,
   type ClearRecordInput,
@@ -8,11 +10,13 @@ import {
   type ContentClearInput,
   type ContentClearPopulationInput,
   type DatabaseClient,
-  type PopulationActivity,
   type StoredClearPopulation,
+  type TimelineCharacter,
+  countClearPopulation,
   finishClearRecordBackfill,
   finishContentClearCollection,
-  readClearPopulation,
+  readClearPopulationJobs,
+  readClearPopulationPage,
   readClearRecordBackfill,
   readClearRecordCursors,
   readContentClearCollection,
@@ -35,11 +39,19 @@ import type {
 export class DatabaseClearCollectionRepository implements ClearCollectionRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  readPopulation(
-    minMaxFame: number,
-    activity: PopulationActivity
-  ): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, minMaxFame, activity)
+  countPopulation(selection: ClearPopulationSelection): Promise<number> {
+    return countClearPopulation(this.client, selection)
+  }
+
+  readPopulationPage(
+    selection: ClearPopulationSelection,
+    page: ClearPopulationPage
+  ): Promise<TimelineCharacter[]> {
+    return readClearPopulationPage(this.client, selection, page)
+  }
+
+  readPopulationJobs(minMaxFame: number): Promise<ClearPopulationJob[]> {
+    return readClearPopulationJobs(this.client, minMaxFame)
   }
 
   readPopulations(): Promise<StoredClearPopulation[]> {
@@ -82,11 +94,15 @@ export class DatabaseClearCollectionRepository implements ClearCollectionReposit
 export class DatabaseClearRecordBackfillRepository implements ClearRecordBackfillRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  readPopulation(
-    minMaxFame: number,
-    activity: PopulationActivity
-  ): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, minMaxFame, activity)
+  countPopulation(selection: ClearPopulationSelection): Promise<number> {
+    return countClearPopulation(this.client, selection)
+  }
+
+  readPopulationPage(
+    selection: ClearPopulationSelection,
+    page: ClearPopulationPage
+  ): Promise<TimelineCharacter[]> {
+    return readClearPopulationPage(this.client, selection, page)
   }
 
   readProgress(): Promise<ClearRecordBackfillProgress | undefined> {
@@ -109,10 +125,7 @@ export class DatabaseClearRecordBackfillRepository implements ClearRecordBackfil
     return readClearRecordCursors(this.client)
   }
 
-  recordCursors(
-    characters: readonly ClearPopulationCharacter[],
-    fetchedUntil: Date
-  ): Promise<void> {
+  recordCursors(characters: readonly TimelineCharacter[], fetchedUntil: Date): Promise<void> {
     return recordClearRecordCursors(this.client, characters, fetchedUntil)
   }
 

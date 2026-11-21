@@ -4,8 +4,8 @@ import type { ContentClearCollectionService } from './collection.js'
 import type { ClearRecordBackfillService } from './record-backfill.js'
 import type { ClearWeekSampleService } from './week-samples.js'
 
-// 최고 명성 104,292 이상 약 92만 명(2026-11-10 운영 DB)을 초당 40건으로 받으면 다른 요청 없이도 6.4시간이 걸린다.
-// 새 캐릭터 저장과 Neople 요청을 나눠 보내므로 두 배 넘게 둔다.
+// 주마다 도는 수집은 약 101만 요청에 42분이 걸렸다(2026-11-19 운영 실행 이력, 초당 약 400건).
+// 마감을 풀어 2025-04-17 주부터 거슬러 받는 수집은 최고 명성 47,684 이상 약 342만 명에게 구간 7개씩 약 2,390만 요청이라 17시간쯤 걸린다.
 const DELAY_MINUTES = 16 * 60
 
 export function createContentClearCollectionJob(service: ContentClearCollectionService) {
@@ -13,7 +13,7 @@ export function createContentClearCollectionJob(service: ContentClearCollectionS
     name: 'content-clear-collection',
     displayName: '클리어 기록 수집',
     description:
-      '최고 명성이 종류별 최신 컨텐츠의 입장 명성 이상인 캐릭터의 클리어 기록을 Neople에서 받아 저장합니다. 다른 수집과 Neople 요청 속도 상한을 나눠 씁니다.',
+      '최고 명성이 가장 낮은 컨텐츠 입장 명성 이상인 캐릭터의 클리어 기록을 Neople에서 받아 저장합니다. 다른 수집과 Neople 요청 속도 상한을 나눠 씁니다.',
     // 던파의 한 주는 목요일 06:00(KST)에 끝나므로, 끝난 주를 그때 한 번 받는다.
     schedule: '0 6 * * 4',
     argsSchema: z.object({}),
@@ -23,8 +23,8 @@ export function createContentClearCollectionJob(service: ContentClearCollectionS
   })
 }
 
-// 2025-02-06부터 89일 구간 8개를 약 92만 명에게 받으면 약 740만 요청(#1593 추정)이라 초당 40건으로 51시간이 걸린다.
-// 클리어 기록 수집과 Neople 요청 속도 상한을 나눠 쓰므로 두 배 넘게 둔다.
+// 2025-02-06부터 89일 구간 8개를 약 92만 명에게 받는 데 약 737만 요청, 5시간 13분이 걸렸다(2026-11-14 운영 실행 이력).
+// 약 342만 명이면 약 2,730만 요청이라 19시간쯤 걸리고, 클리어 기록 수집과 Neople 요청 속도 상한을 나눠 쓴다.
 const BACKFILL_DELAY_MINUTES = 5 * 24 * 60
 
 export function createClearRecordBackfillJob(service: ClearRecordBackfillService) {

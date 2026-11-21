@@ -2,11 +2,11 @@ import type { CharacterActivityInput, ClearRecordInput, ContentClearInput } from
 import {
   CLEAR_CONTENTS,
   toCollectionMinFame,
-  toContentClearInput
+  toContentClearInput,
+  toPopulationMinFame
 } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   planClearCollection,
-  toContentPopulation,
   toRequestActivity,
   weekKey,
   toClearRecordInput
@@ -51,11 +51,15 @@ export class ContentClearCollectionService {
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
     // 분모는 비활성을 포함한 모집단 전체로 두고, 최근 구간만 받을 때는 요청을 활성 캐릭터에만 보낸다.
     // 다시 접속한 비활성 캐릭터의 클리어는 활동이 다시 기록될 때까지 빠지는 대신 매주 요청이 줄어든다.
-    const population = await this.repository.readPopulation(collectionMinFame, 'include-inactive')
-    const requested = await this.repository.readPopulation(
-      collectionMinFame,
-      toRequestActivity(plan, startedAt)
-    )
+    const population = await this.repository.countPopulation({
+      minMaxFame: collectionMinFame,
+      activity: 'include-inactive'
+    })
+    const requested = {
+      minMaxFame: collectionMinFame,
+      activity: toRequestActivity(plan, startedAt)
+    }
+    const characters = await this.repository.countPopulation(requested)
     const counts = { requests: 0, clears: 0, records: 0 }
     const fetchTimeline = createFetchTimeline(() => {
       counts.requests++
@@ -65,13 +69,14 @@ export class ContentClearCollectionService {
       startedAt: startedAt.toISOString(),
       done: resumedAt,
       minFame: collectionMinFame,
-      characters: requested.length,
-      population: population.length,
+      characters,
+      population,
       ranges: plan.ranges.length
     })
 
     const skipped = await collectPopulation({
-      population: requested,
+      total: characters,
+      readPage: (page) => this.repository.readPopulationPage(requested, page),
       resumedAt,
       rangesOf: () => plan.ranges,
       fetchTimeline,
@@ -133,11 +138,15 @@ export class ContentClearCollectionService {
 
     const collectedAt = now()
     for (const content of CLEAR_CONTENTS) {
-      const contentPopulation = toContentPopulation(content, population, collectionMinFame)
+      const minFame = toPopulationMinFame(content, collectionMinFame)
+      const jobs = await this.repository.readPopulationJobs(minFame)
+      const members = jobs.reduce((sum, { count }) => sum + count, 0)
       for (const week of plan.weeks.filter(({ contentId }) => contentId === content.id)) {
         await this.repository.recordPopulation({
           ...week,
-          ...contentPopulation,
+          population: members,
+          minFame,
+          jobs,
           collectedAt,
           closed: true
         })
@@ -147,7 +156,7 @@ export class ContentClearCollectionService {
     const startedAtIso = startedAt.toISOString()
     const summary = {
       startedAt: startedAtIso,
-      characters: requested.length,
+      characters,
       ...counts,
       skipped
     }

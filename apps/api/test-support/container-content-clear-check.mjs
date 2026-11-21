@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import {
+  countClearPopulation,
   createDatabaseClient,
   readClearPopulation,
+  readClearPopulationJobs,
+  readClearPopulationPage,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
   readContentClearFameBands,
@@ -204,6 +207,47 @@ try {
       ['clear-below-floor', 'clear-no-fame'].includes(characterId)
     )
   )
+
+  // 나눠 읽을 때는 최고 명성과 상관없이 서버, 캐릭터 순이고, 읽은 캐릭터 다음부터나 건너뛴 수 다음부터 잇는다.
+  const selection = { minMaxFame: 900000, activity: 'include-inactive' }
+  const everyPage = await readClearPopulationPage(client, selection, {
+    after: undefined,
+    skip: 0,
+    limit: 1000
+  })
+  assert.deepEqual(
+    everyPage.filter(({ characterId }) => characterId.startsWith('clear-')),
+    [
+      { serverId: 'cain', characterId: 'clear-dropped' },
+      { serverId: 'cain', characterId: 'clear-tie' },
+      { serverId: 'cain', characterId: 'clear-tie-2' },
+      { serverId: 'cain', characterId: 'clear-top' },
+      { serverId: 'siroco', characterId: 'clear-tie' }
+    ]
+  )
+  assert.equal(await countClearPopulation(client, selection), everyPage.length)
+  assert.deepEqual(
+    await readClearPopulationPage(client, selection, { after: everyPage[1], skip: 0, limit: 2 }),
+    everyPage.slice(2, 4)
+  )
+  assert.deepEqual(
+    await readClearPopulationPage(client, selection, { after: undefined, skip: 3, limit: 2 }),
+    everyPage.slice(3, 5)
+  )
+  const syntheticJobs = async (minMaxFame) =>
+    (await readClearPopulationJobs(client, minMaxFame)).filter(
+      ({ jobId }) => jobId === 'synthetic-clear-job'
+    )
+  const syntheticJob = (count) => ({
+    jobId: 'synthetic-clear-job',
+    jobGrowId: 'synthetic-clear-grow',
+    jobName: '합성직업',
+    jobGrowName: '합성전직',
+    count
+  })
+
+  assert.deepEqual(await syntheticJobs(collectionMinFame), [syntheticJob(6)])
+  assert.deepEqual(await syntheticJobs(900001), [syntheticJob(2)])
 
   // 예전 상한 10만 명을 넘는 수집 대상도 모두 읽는다.
   const bulkCharacters = 100001
