@@ -46,7 +46,7 @@ function bodyRows(): string[][] {
   )
 }
 
-it('소울 결정 6종의 가격과 그 가격을 종말의 계시 교환 개수로 나눈 1개당 골드를 그리고 결정은 이름 대신 아이템 아이콘으로 보인다', async () => {
+it('소울 결정 6종의 가격과 그 가격을 종말의 계시 교환 개수로 나눈 계시 환산 값을 그리고 결정은 이름 대신 아이템 아이콘으로 보인다', async () => {
   server.use(soulPricesHandlers.prices)
   await render()
   await settled()
@@ -54,8 +54,9 @@ it('소울 결정 6종의 가격과 그 가격을 종말의 계시 교환 개수
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
     '소울 결정',
     '가격',
-    '1개당 골드'
+    '계시 환산'
   ])
+  expect(container.querySelector('thead th:first-child .sr-only')?.textContent).toBe('소울 결정')
   // 1,250 / 2 = 625, 3,000 / 4 = 750, 41,000 / 30 = 1,366.7, 140,000 / 90 = 1,555.6, 2,000,000 / 1,000 = 2,000, 52,000 / 40 = 1,300
   expect(bodyRows()).toEqual([
     ['레어 소울 결정', '1,250', '625'],
@@ -75,7 +76,7 @@ it('소울 결정 6종의 가격과 그 가격을 종말의 계시 교환 개수
   expect(iconCells[0]?.querySelector('img')?.classList).toContain(raritySolidClasses.rare)
 })
 
-it('매물이 없는 결정은 가격과 1개당 골드를 -로, 아이콘을 빈 칸으로 둔다', async () => {
+it('매물이 없는 결정은 가격과 계시 환산 값을 -로, 아이콘을 빈 칸으로 둔다', async () => {
   server.use(
     http.get(SOUL_PRICES_URL, () =>
       HttpResponse.json({
