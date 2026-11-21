@@ -934,7 +934,7 @@ try {
         "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption', 'set-adoption', 'item-adoption')"
       )
     ).stdout.trim(),
-    'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1}'
+    'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1, "deletedEvents": 0}'
   )
   // 통계 저장분은 이번 실행이 시작한 뒤에 계산했고, 스킬 채택률 진행률은 전직 수만큼 끝까지 남는다.
   assert.equal(
@@ -990,7 +990,7 @@ try {
         "SELECT string_agg(status || ':' || coalesce(error->0->>'code', '-') || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE trigger = 'manual' AND job_name = 'job-run-cleanup'"
       )
     ).stdout.trim(),
-    'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0}'
+    'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0, "deletedEvents": 0}'
   )
   assert.equal(
     (await podman(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
