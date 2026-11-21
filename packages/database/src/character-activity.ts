@@ -51,15 +51,38 @@ export function readInactiveCharacters(
     LIMIT ${limit}`
 }
 
-export async function recordCharacterActive(
+export type CharacterActivityInput = CollectedCharacter & {
+  lastActiveAt: Date
+}
+
+export function recordCharacterActive(
   client: DatabaseClient,
-  { serverId, characterId }: CollectedCharacter,
+  character: CollectedCharacter,
   lastActiveAt: Date
 ): Promise<void> {
-  await client.character.updateMany({
-    where: { serverId, characterId },
-    data: { lastActiveAt, inactiveSince: null }
-  })
+  return recordCharactersActive(client, [{ ...character, lastActiveAt }])
+}
+
+// 여러 job이 같은 캐릭터의 타임라인을 따로 받으므로, 늦게 끝난 쪽이 더 오래된 활동 시각으로 덮어쓰지 않게 한다.
+export async function recordCharactersActive(
+  client: DatabaseClient,
+  activities: readonly CharacterActivityInput[]
+): Promise<void> {
+  if (activities.length === 0) {
+    return
+  }
+
+  await client.$executeRaw`
+    UPDATE characters AS c
+    SET last_active_at = GREATEST(c.last_active_at, a.last_active_at),
+      inactive_since = NULL
+    FROM unnest(
+      ${activities.map(({ serverId }) => serverId)}::text[],
+      ${activities.map(({ characterId }) => characterId)}::text[],
+      ${activities.map(({ lastActiveAt }) => lastActiveAt)}::timestamptz[]
+    ) AS a(server_id, character_id, last_active_at)
+    WHERE c.server_id = a.server_id
+      AND c.character_id = a.character_id`
 }
 
 export async function recordCharacterInactive(
