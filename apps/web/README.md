@@ -14,7 +14,7 @@ pnpm --filter @dfragon/web build
 pnpm --filter @dfragon/web preview
 ```
 
-`build`는 `tsc -b`와 Vite production build를 포함하므로 `typecheck`를 따로 실행할 필요가 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 산출물은 `dist`에 생깁니다.
+`build`는 `tsc -b`와 Vite production build를 포함하므로 `typecheck`를 따로 실행할 필요가 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 브라우저에 내줄 산출물은 `dist/client`에 생깁니다.
 
 `dev`와 `build`는 먼저 [`prepare-ocr-assets.mjs`](scripts/prepare-ocr-assets.mjs)로 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다(Git에서 제외). 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
 
@@ -28,7 +28,7 @@ pnpm --filter @dfragon/web preview
 
 ### 웹 이미지
 
-[`Dockerfile`](Dockerfile)이 `dist`를 [`Caddyfile`](Caddyfile)의 Caddy가 내주는 이미지로 만듭니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
+[`Dockerfile`](Dockerfile)이 `dist/client`를 [`Caddyfile`](Caddyfile)의 Caddy가 내주는 이미지로 만듭니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
 
 ```sh
 podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
