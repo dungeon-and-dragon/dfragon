@@ -55,16 +55,29 @@ function toColumns(clears: readonly ContentClearInput[]) {
 
 // 클리어를 처음 저장할 때만 그 시점 캐릭터의 최고 명성과 점수를 복사한다. 아래 ON CONFLICT 갱신은 이 칸을 바꾸지 않아,
 // 그 뒤 명성이나 점수가 바뀌거나 같은 기록을 다시 저장해도 복사한 값은 그대로이고, 비어 있던 지난 행도 채우지 않는다.
+// 점수는 지금 점수와 같은 종류, 엔진 버전의 이력 가운데 최고치다. 클리어 뒤 장비를 갈아 낀 상태로 계산한 점수가
+// 클리어 점수로 남지 않게 하고, 엔진 버전이 다른 점수는 기준이 달라 섞지 않는다.
 const snapshotColumns = Prisma.sql`
   "max_fame", "score", "score_kind", "score_engine_package", "score_engine_rules_rev", "score_engine_bundle_id"`
 const snapshotValues = Prisma.sql`
-  copied_character.max_fame, copied_score.score, copied_score.kind, copied_score.engine_package,
-  copied_score.engine_rules_rev, copied_score.engine_bundle_id`
+  copied_character.max_fame, GREATEST(copied_score.score, best_score.score), copied_score.kind,
+  copied_score.engine_package, copied_score.engine_rules_rev, copied_score.engine_bundle_id`
 const snapshotJoins = Prisma.sql`
   LEFT JOIN "characters" AS copied_character
     ON copied_character.server_id = clear.server_id AND copied_character.character_id = clear.character_id
   LEFT JOIN "character_scores" AS copied_score
-    ON copied_score.server_id = clear.server_id AND copied_score.character_id = clear.character_id`
+    ON copied_score.server_id = clear.server_id AND copied_score.character_id = clear.character_id
+  LEFT JOIN LATERAL (
+    SELECT max(history.score) AS score
+    FROM "character_score_history" AS history
+    JOIN "score_engines" AS history_engine ON history_engine.id = history.engine_id
+    WHERE history.server_id = clear.server_id
+      AND history.character_id = clear.character_id
+      AND history.kind = copied_score.kind
+      AND history_engine.package = copied_score.engine_package
+      AND history_engine.rules_rev = copied_score.engine_rules_rev
+      AND history_engine.bundle_id = copied_score.engine_bundle_id
+  ) AS best_score ON TRUE`
 
 // 한 INSERT 안에서 같은 행을 두 번 고치면 PostgreSQL이 거절하므로 DISTINCT ON으로 가장 이른 클리어만 남긴다.
 // 이미 있는 행도 더 이른 클리어가 들어올 때만 바꿔, 같은 기록을 어떤 순서로 다시 저장해도 결과가 같다.
