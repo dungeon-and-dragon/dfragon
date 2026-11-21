@@ -4,6 +4,7 @@ import {
   applyMigrations,
   createDatabaseClient,
   recordCharacterBasic,
+  recordCharacterHistory,
   recordCharacterScore,
   recordContentClears
 } from '../dist/index.js'
@@ -57,6 +58,25 @@ const clear = (contentId, kind, characterId, clearedAt) => ({
   ratio: null
 })
 
+const scoreHistory = (
+  characterId,
+  observedAt,
+  value,
+  historyEngine = engine,
+  kind = 'equipment'
+) => {
+  const historyBasic = basic(characterId, 66_000)
+
+  return {
+    serverId: 'cain',
+    characterId,
+    observedAt: new Date(observedAt),
+    basic: historyBasic,
+    sections: {},
+    score: { kind, score: value, engine: historyEngine }
+  }
+}
+
 function copied(maxFame, value, scoreKind = 'equipment', bundleId = engine.bundleId) {
   if (value === null) {
     return {
@@ -95,7 +115,7 @@ async function readSnapshots(client) {
   )
 }
 
-test('클리어를 처음 저장할 때 그 시점의 최고 명성과 점수를 복사하고, 그 뒤 값이 바뀌거나 다시 저장해도 그대로 두며 지난 행은 채우지 않는다', {
+test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 점수와 같은 종류, 엔진 버전의 최고 점수를 복사하고, 그 뒤 값이 바뀌거나 다시 저장해도 그대로 두며 지난 행은 채우지 않는다', {
   skip: port === undefined
 }, async (t) => {
   const admin = connect('content_clear_test')
@@ -127,6 +147,18 @@ test('클리어를 처음 저장할 때 그 시점의 최고 명성과 점수를
   await recordCharacterBasic(client, basic('legacy', 60_000))
   await recordCharacterScore(client, score('scored', 1741))
   await recordCharacterScore(client, score('legacy', 1500))
+  await recordCharacterBasic(client, basic('swapped', 66_000))
+  await recordCharacterHistory(client, scoreHistory('swapped', '2026-11-10T13:00:00Z', 1900))
+  await recordCharacterHistory(
+    client,
+    scoreHistory('swapped', '2026-11-11T13:00:00Z', 2100, { ...engine, bundleId: 'phase31-rev13a' })
+  )
+  await recordCharacterHistory(
+    client,
+    scoreHistory('swapped', '2026-11-11T19:00:00Z', 2300, engine, 'buff')
+  )
+  await recordCharacterHistory(client, scoreHistory('swapped', '2026-11-12T13:00:00Z', 1600))
+  await recordCharacterScore(client, score('swapped', 1600))
   // 이 변경 전에 저장된 행처럼 복사 칸이 빈 클리어다.
   await client.$executeRaw`
     INSERT INTO "content_clears"
@@ -136,6 +168,7 @@ test('클리어를 처음 저장할 때 그 시점의 최고 명성과 점수를
   const clears = [
     clear('raid-a', 'raid', 'scored', '2026-11-13T12:00:00Z'),
     clear('raid-a', 'raid', 'unscored', '2026-11-13T12:00:00Z'),
+    clear('raid-a', 'raid', 'swapped', '2026-11-13T12:00:00Z'),
     clear('challenge-a', 'challenge', 'scored', '2026-11-13T13:00:00Z')
   ]
 
@@ -145,6 +178,7 @@ test('클리어를 처음 저장할 때 그 시점의 최고 명성과 점수를
     'challenge-a/scored': { clearedAt: '2026-11-13T13:00:00.000Z', ...copied(70_000, 1741) },
     'raid-a/legacy': { clearedAt: '2026-11-13T12:00:00.000Z', ...copied(null, null) },
     'raid-a/scored': { clearedAt: '2026-11-13T12:00:00.000Z', ...copied(70_000, 1741) },
+    'raid-a/swapped': { clearedAt: '2026-11-13T12:00:00.000Z', ...copied(66_000, 1900) },
     'raid-a/unscored': { clearedAt: '2026-11-13T12:00:00.000Z', ...copied(65_000, null) }
   }
 
