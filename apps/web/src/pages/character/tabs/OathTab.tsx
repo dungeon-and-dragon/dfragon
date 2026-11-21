@@ -1,6 +1,5 @@
 import { CheckIcon } from '@dfragon/ui'
 import {
-  formatCount,
   ItemIcon,
   ItemName,
   OATH_SET_POINT_BONUS,
@@ -23,7 +22,7 @@ import { GameText } from './GameText'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { SetPoint, TuneNumeral } from './equipment/item-parts'
 
-const { heading, count } = itemTableClasses
+const { heading } = itemTableClasses
 const UPGRADE_CHOICE_LABELS: Readonly<Record<OathUpgradeChoice, string>> = {
   finalDamage: '최종 데미지',
   cooldown: '쿨타임 감소',
@@ -53,8 +52,10 @@ export function OathTab({ detail }: CharacterTabProps): React.JSX.Element | null
   const loaded = catalog.status === 'success' ? catalog.value : null
   const board = loaded !== null && setInfo !== null ? oathSetBoardOf(loaded, setInfo) : null
 
+  // 600px 미만에서는 서약 탭의 모든 글자를 보통 굵기로 둔다.
+
   return (
-    <div className={itemTableClasses.root}>
+    <div className={`${itemTableClasses.root} max-sm:[&_*]:font-normal`}>
       {board !== null ? (
         <>
           <OathSetCard view={view} board={board} />
@@ -151,7 +152,6 @@ function OathBody({
 
   return (
     <section aria-label="서약 본체">
-      <h2 className={heading}>서약 본체</h2>
       <div className="flex h-row items-center gap-3 border-b border-line px-4">
         <div className={itemClasses.item}>
           <ItemIcon itemId={info.itemId} src={oathItemIconOf(catalog, info)} rarity={info.rarity} />
@@ -207,9 +207,6 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
 
   return (
     <section aria-label="서약 결정">
-      <h2 className={heading}>
-        서약 결정 <span className={count}>{formatCount(crystals.length)}</span>
-      </h2>
       <table className="table">
         <thead>
           <tr>

@@ -70,6 +70,7 @@ export function WeaponStatsScreen({
                   tone="chart-2"
                   max={FULL_SHARE}
                   formatValue={formatShare}
+                  barFromMd
                 />
               </ListBox>
             ))}

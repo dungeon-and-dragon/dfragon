@@ -113,7 +113,7 @@ it('적용 중인 버프는 이름, 있으면 레벨, 수치를 보인다', asyn
 
   const buffs = [...container.querySelectorAll('section[aria-label="적용 중인 버프"] li')]
   expect(buffs.map((buff) => [...buff.children].map((part) => part.textContent))).toEqual([
-    ['모험단 버프', 'Lv.41', '힘 290, 지능 290, 체력 290, 정신력 290'],
+    ['모험단 버프', 'Lv 41', '힘 290, 지능 290, 체력 290, 정신력 290'],
     ['무제한 길드능력치', '힘 60, 지능 60, 체력 60, 정신력 60'],
     ['기간제 길드능력치', '힘 40, 지능 40, 체력 40, 정신력 40']
   ])

@@ -20,7 +20,7 @@ export function storyCharacterDetail(role: 'dealer' | 'buffer'): CharacterDetail
       return item
     }
 
-    return { ...item, exaltedInfo: { explain: null }, potency: { value: potency } }
+    return { ...item, potency: { value: potency } }
   })
 
   return {
@@ -37,14 +37,18 @@ export function storyCharacterDetail(role: 'dealer' | 'buffer'): CharacterDetail
   }
 }
 
+// Storybook에서 스킬 아이콘이 보이도록 운영 사이트의 스킬 창 데이터 묶음 2ca27db1판 그림을 쓴다. 아이콘 좌표도 그 판의
+// 직업 파일 값이다.
+const SKILLTAB_ART = 'https://dfragon.com/skilltab/2ca27db1'
+
 const MARKS = {
   evolution: [
-    'https://skilltab.test/marks/evolution-1.png',
-    'https://skilltab.test/marks/evolution-2.png'
+    `${SKILLTAB_ART}/marks/evolution-1.ffe62b73.png`,
+    `${SKILLTAB_ART}/marks/evolution-2.8cb1d43d.png`
   ],
   enhancement: [
-    'https://skilltab.test/marks/enhancement-1.png',
-    'https://skilltab.test/marks/enhancement-2.png'
+    `${SKILLTAB_ART}/marks/enhancement-1.b6bca15d.png`,
+    `${SKILLTAB_ART}/marks/enhancement-2.4e92cb62.png`
   ]
 } satisfies SkillWindowCatalog['marks']
 
@@ -57,7 +61,7 @@ export const storySkillWindowCatalog: SkillWindowCatalog = {
   job: {
     jobId: 'at_priest',
     jobName: '프리스트(여)',
-    sprite: 'https://skilltab.test/sprites/at_priest.png',
+    sprite: `${SKILLTAB_ART}/sprites/at_priest.98433654.png`,
     advancements: [
       {
         growtype: 2,
@@ -78,7 +82,7 @@ export const storySkillWindowCatalog: SkillWindowCatalog = {
         kind: 'passive',
         requiredLevel: 1,
         maxLevel: 115,
-        icon: { x: 0, y: 0 },
+        icon: { x: 140, y: 196 },
         stage: false
       },
       2: {
@@ -94,7 +98,7 @@ export const storySkillWindowCatalog: SkillWindowCatalog = {
         kind: 'active',
         requiredLevel: 35,
         maxLevel: 60,
-        icon: { x: 56, y: 0 },
+        icon: { x: 280, y: 56 },
         stage: false,
         evolution: [
           {
@@ -114,7 +118,7 @@ export const storySkillWindowCatalog: SkillWindowCatalog = {
         kind: 'active',
         requiredLevel: 45,
         maxLevel: 60,
-        icon: { x: 84, y: 0 },
+        icon: { x: 364, y: 56 },
         stage: false,
         evolution: [
           { name: '단죄', basicExplain: gameText('공격력 증가'), explain: gameText('공격력 증가') },
@@ -130,7 +134,7 @@ export const storySkillWindowCatalog: SkillWindowCatalog = {
         kind: 'active',
         requiredLevel: 25,
         maxLevel: 60,
-        icon: { x: 112, y: 0 },
+        icon: { x: 196, y: 56 },
         stage: false,
         enhancement: {
           1: { explain: gameText('데미지 증가') },
@@ -146,7 +150,7 @@ export const storyBuffSkillWindowCatalog: SkillWindowCatalog = {
   job: {
     jobId: 'archer',
     jobName: '아처',
-    sprite: 'https://skilltab.test/sprites/archer.png',
+    sprite: `${SKILLTAB_ART}/sprites/archer.16ceb474.png`,
     advancements: [
       {
         growtype: 1,
@@ -161,7 +165,7 @@ export const storyBuffSkillWindowCatalog: SkillWindowCatalog = {
         kind: 'active',
         requiredLevel: 30,
         maxLevel: 40,
-        icon: { x: 56, y: 28 },
+        icon: { x: 364, y: 56 },
         stage: false
       }
     }
@@ -169,29 +173,6 @@ export const storyBuffSkillWindowCatalog: SkillWindowCatalog = {
 }
 
 export const storyTimeline: CharacterTimeline = {
-  weeklyClears: [
-    {
-      kind: 'raid',
-      name: '디레지에 레이드',
-      modeName: '디레지에 : 악연',
-      hard: true,
-      occurredAt: '2026-11-05T12:30:00.000Z'
-    },
-    {
-      kind: 'raid',
-      name: '나벨 레이드',
-      modeName: '나벨 : 무지의 악',
-      hard: false,
-      occurredAt: '2026-11-05T13:00:00.000Z'
-    },
-    {
-      kind: 'legion',
-      name: '베누스',
-      modeName: null,
-      hard: false,
-      occurredAt: '2026-11-05T15:05:00.000Z'
-    }
-  ],
   seasonClears: [
     { kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 },
     { kind: 'raid', name: '나벨 레이드', hard: true, count: 2 },

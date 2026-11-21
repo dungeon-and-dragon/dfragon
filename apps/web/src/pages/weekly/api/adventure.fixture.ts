@@ -17,18 +17,25 @@ const DAY_MS = 24 * 60 * 60 * 1000
 export const STORY_ADVENTURE_NAME = '모험단1'
 const STORY_SEASON_ID = 11
 
-const BACKFILLING_SEASON: AdventureActivity['seasons'][number] = {
-  id: 8,
-  name: '합성 시즌 8',
-  startsAt: '2022-01-12T21:00:00.000Z',
-  available: false,
-  backfill: { done: 18, total: 40, running: false }
-}
+// 시즌 번호, 이름, 시작 시각은 운영 DB seasons 표의 실제 값이다(시작은 목요일 06:00 KST). 중천(시즌 10) 이전 시즌은
+// 모험단마다 받아야 보이므로, 마계~귀환은 아직 받지 않은 시즌, THE NEXT JOURNEY는 받는 중인 시즌으로 둔다.
+const UNCOLLECTED_SEASONS: AdventureActivity['seasons'] = [
+  { id: 5, name: '마계', startsAt: '2016-08-31T21:00:00.000Z', available: false },
+  { id: 6, name: '할렘', startsAt: '2018-08-08T21:00:00.000Z', available: false },
+  { id: 7, name: '귀환', startsAt: '2020-01-08T21:00:00.000Z', available: false },
+  {
+    id: 8,
+    name: 'THE NEXT JOURNEY',
+    startsAt: '2022-03-16T21:00:00.000Z',
+    available: false,
+    backfill: { done: 18, total: 40, running: false }
+  }
+]
 
 const STORY_SEASONS = [
-  { id: 9, name: '합성 시즌 9', startsAt: '2023-09-13T21:00:00.000Z' },
-  { id: 10, name: '합성 시즌 10', startsAt: '2025-01-08T21:00:00.000Z' },
-  { id: STORY_SEASON_ID, name: '합성 시즌 11', startsAt: '2026-03-25T21:00:00.000Z' }
+  { id: 9, name: '선계', startsAt: '2023-09-13T21:00:00.000Z' },
+  { id: 10, name: '중천', startsAt: '2025-01-08T21:00:00.000Z' },
+  { id: STORY_SEASON_ID, name: '천해천', startsAt: '2026-03-25T21:00:00.000Z' }
 ] as const
 
 const RAIDS = ['가 레이드', '나 레이드'] as const
@@ -87,14 +94,14 @@ export function storyAdventureActivity(
   const index = STORY_SEASONS.findIndex(({ id }) => id === seasonId)
 
   if (index < 0) {
-    throw new Error(`합성 시즌 ${seasonId}이 없습니다.`)
+    throw new Error(`시즌 ${seasonId}이 없습니다.`)
   }
 
   const { startsAt } = STORY_SEASONS[index]!
   const endsAt = STORY_SEASONS[index + 1]?.startsAt ?? null
   const hasOaths = seasonId !== 9
   const seasons = [
-    BACKFILLING_SEASON,
+    ...UNCOLLECTED_SEASONS,
     ...STORY_SEASONS.map((season) => ({ ...season, available: true }))
   ]
   const mythic = hasOaths ? 0 : 2

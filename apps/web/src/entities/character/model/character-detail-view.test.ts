@@ -17,7 +17,6 @@ describe('캐릭터 상세 화면 응답', () => {
       reinforce: 10,
       amplificationName: null,
       refine: 0,
-      exaltedInfo: null,
       potency: null
     })
     expect(detail.equipment.equipment[0].enchant?.status).toEqual([
@@ -128,13 +127,12 @@ describe('캐릭터 상세 화면 응답', () => {
       refine: null,
       tune: [],
       enchant: null,
-      exaltedInfo: null,
       potency: null
     })
     expect(detail.avatar.map((avatar) => avatar.slotId)).not.toContain('AURORA')
   })
 
-  it('유일 장비의 옵션과 정밀도를 읽는다', () => {
+  it('유일 장비의 정밀도를 읽는다', () => {
     const body = characterDetailResponse('dealer')
     Object.assign(body.equipment.equipment[9], {
       exaltedInfo: { damage: 1, buff: 1, explain: '장착 중인 가장 높은 세트 포인트' },
@@ -144,7 +142,6 @@ describe('캐릭터 상세 화면 응답', () => {
 
     expect(detail.equipment.equipment[9]).toMatchObject({
       slotId: 'RING',
-      exaltedInfo: { explain: '장착 중인 가장 높은 세트 포인트' },
       potency: { value: 100 }
     })
   })

@@ -34,7 +34,7 @@ export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
 
 function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }): React.JSX.Element {
   return (
-    <div className={itemClasses.stripRow}>
+    <div className={`${itemClasses.stripRow} max-sm:contents`}>
       {sets.map((set, index) => (
         <span key={`${set.name}-${index}`} className={itemClasses.itemText}>
           <span className="label">장비</span>
@@ -45,11 +45,11 @@ function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }):
           {set.point !== null && <SetPoint point={set.point} rule={EQUIPMENT_SET_POINT_BONUS} />}
         </span>
       ))}
-      <span className={itemClasses.spacer} />
+      <span className={`${itemClasses.spacer} max-sm:hidden`} />
       {mistLevel !== null && (
-        <span className={itemClasses.itemText}>
+        <span className={`${itemClasses.itemText} max-sm:order-last max-sm:self-end`}>
           <span className="label">안개 융화</span>
-          <b className={`${itemPartClasses.name} num`}>{`Lv.${mistLevel}`}</b>
+          <b className={`${itemPartClasses.name} num`}>{`Lv ${mistLevel}`}</b>
         </span>
       )}
     </div>
@@ -58,7 +58,7 @@ function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }):
 
 function OathSetStrip({ set }: { set: NonNullable<OathView['set']> }): React.JSX.Element {
   return (
-    <div className={itemClasses.stripRow}>
+    <div className={`${itemClasses.stripRow} max-sm:px-0`}>
       <span className={itemClasses.itemText}>
         <span className="label">서약</span>
         <ItemName name={set.name} rarity={set.rarity} />

@@ -98,6 +98,14 @@
   padding-block: 0;
 }
 
+/* 제목 줄로 시작하는 구획과 칸(제목 줄로 시작하는 구획 하나를 감싼 구획 포함)은 제목 줄이 위 선에 바로 붙도록 위 여백을
+   두지 않는다. */
+.section:has(> .section-title:first-child),
+.section:has(> .section:first-child > .section-title:first-child),
+.section-cols > :has(> .section-title:first-child) {
+  padding-top: 0;
+}
+
 .section-title {
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ActivitySeason } from '#entities/adventure-guild'
 import { rarityGradientFills } from '#entities/character'
 import { useBackfillFillGrow } from './animations/useBackfillFillGrow'
@@ -7,6 +7,9 @@ import { useSeasonIndicatorSlide } from './animations/useSeasonIndicatorSlide'
 import { type SeasonBar, seasonBar } from './season-bar'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+// 시즌 줄의 좌우 여백(px-4)이다. 고른 시즌으로 스크롤할 때 그 칸이 여백 안쪽에 보이게 한다.
+const TIMELINE_INSET = 16
 
 const BAR = 'absolute inset-x-0 top-0 h-1 rounded-[1px]'
 
@@ -115,7 +118,8 @@ function SeasonButton({
         className={`pointer-events-none absolute top-0 left-0 h-1 rounded-[1px] ${rarityGradientFills.primordial}`}
       />
       <span
-        className={`text-xs whitespace-nowrap ${selected ? 'font-semibold' : 'font-medium'} ${nameTone(season, selected)}`}
+        title={season.name}
+        className={`max-w-full truncate text-xs ${selected ? 'font-semibold' : 'font-medium'} ${nameTone(season, selected)}`}
       >
         {season.name}
       </span>
@@ -143,8 +147,30 @@ export function SeasonTimeline({
   const hasSelection = seasons.some(({ id }) => id === selectedId)
   useSeasonIndicatorSlide({ timelineRef, indicatorRef })
 
+  // 칸은 누르기 쉬운 84px보다 줄이지 않아 시즌이 많으면 시즌 줄만 가로로 스크롤하므로, 고른 시즌이 보이게 옮긴다.
+  useEffect(() => {
+    const timeline = timelineRef.current
+    const selected = timeline?.querySelector<HTMLElement>('[aria-current="true"]')
+    if (timeline == null || selected == null) {
+      return
+    }
+
+    const left = selected.offsetLeft
+    const right = left + selected.offsetWidth
+
+    if (left < timeline.scrollLeft) {
+      timeline.scrollLeft = left - TIMELINE_INSET
+    } else if (right > timeline.scrollLeft + timeline.clientWidth) {
+      timeline.scrollLeft = right - timeline.clientWidth + TIMELINE_INSET
+    }
+  }, [selectedId])
+
   return (
-    <nav ref={timelineRef} aria-label="시즌" className="relative flex gap-1 px-4 pt-3 pb-4">
+    <nav
+      ref={timelineRef}
+      aria-label="시즌"
+      className="relative flex gap-1 overflow-x-auto px-4 pt-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       {hasSelection && (
         <span
           ref={indicatorRef}

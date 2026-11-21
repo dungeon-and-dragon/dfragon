@@ -17,7 +17,6 @@ const clearContentHeader = {
 export const clearWeekSchema = z.object({
   weekStart: z.iso.date(),
   closed: z.boolean(),
-  collectedAt: z.iso.datetime(),
   population: count,
   minFame: z.number().int().nullable(),
   cleared: count,

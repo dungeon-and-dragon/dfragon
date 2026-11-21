@@ -1,4 +1,4 @@
-import { Button, ChipGroup } from '@dfragon/ui'
+import { Button } from '@dfragon/ui'
 import type { CSSProperties, Ref } from 'react'
 import {
   type AdventureEquipment,
@@ -7,6 +7,8 @@ import {
 } from '#entities/adventure-guild'
 import { equipmentSetShortName } from '#entities/ranking'
 import { serverNames } from '#shared/config/servers/servers'
+import { ChoiceField } from '#shared/ui/ChoiceField'
+import { AdventureTabsForm } from './AdventureNameForm'
 import { AdventureTabs } from './AdventureTabs'
 import { useAdventureEquipment, useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { EquipmentSection, EquipmentSkeleton, OathSection } from './EquipmentBoard'
@@ -43,8 +45,10 @@ function chipSelection(
 
 function PickerRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4">
-      <h3 className="label m-0 flex h-8 w-16 shrink-0 items-center">{label}</h3>
+    <div className="flex items-start gap-4 max-sm:flex-col max-sm:gap-1">
+      <h3 className="label m-0 flex h-8 w-16 shrink-0 items-center max-sm:h-auto max-sm:w-auto">
+        {label}
+      </h3>
       {children}
     </div>
   )
@@ -90,17 +94,12 @@ function EquipmentPickers({
     >
       {servers.length > 1 && (
         <PickerRow label="서버">
-          <ChipGroup
-            aria-label="서버"
-            items={servers}
-            value={serverId}
-            onValueChange={changeServer}
-          />
+          <ChoiceField label="서버" items={servers} value={serverId} onValueChange={changeServer} />
         </PickerRow>
       )}
       {setItemId !== undefined && (
         <PickerRow label="세트">
-          <ChipGroup aria-label="세트" items={sets} value={setItemId} onValueChange={changeSet} />
+          <ChoiceField label="세트" items={sets} value={setItemId} onValueChange={changeSet} />
         </PickerRow>
       )}
     </div>
@@ -186,20 +185,25 @@ function EquipmentBody({
 export function AdventureEquipmentScreen({
   adventureName,
   search,
-  onSearchChange
+  onSearchChange,
+  onAdventureOpen
 }: {
   adventureName: string
   search: EquipmentSearch
   onSearchChange: (search: EquipmentSearch) => void
+  onAdventureOpen: (adventureName: string) => void
 }): React.JSX.Element {
   const [observeTabs, tabsHeight] = useObservedHeight()
 
   return (
     <div className="flex flex-col" style={adventureTabsHeight(tabsHeight)}>
-      <AdventureTabs ref={observeTabs} adventureName={adventureName} />
-      <header className="section screen-head">
-        <h1 className="screen-title">{adventureName}</h1>
-      </header>
+      <AdventureTabs
+        ref={observeTabs}
+        adventureName={adventureName}
+        actions={
+          <AdventureTabsForm adventureName={adventureName} onAdventureOpen={onAdventureOpen} />
+        }
+      />
       <EquipmentBody
         adventureName={adventureName}
         search={search}
