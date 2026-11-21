@@ -5,12 +5,12 @@ import {
   type SkillChain,
   type SkillMarks,
   type SkillUpgradeBoard,
-  skillMarkOf
+  skillMarkOf,
+  SkillSprite
 } from '#entities/catalog'
 import { ClipboardCopyButton } from '#shared/ui/ClipboardCopyButton'
 import { GameText } from '#pages/character/tabs/GameText'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
-import { SkillSprite } from './SkillSprite'
 import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
 import { EVOLUTION_MARK, PIXELATED } from './skill-classes'
 import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'

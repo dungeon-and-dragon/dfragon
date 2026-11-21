@@ -66,12 +66,13 @@ export class CharacterBasicService {
     score: CharacterFetched['score']
   ): Promise<void> {
     const { serverId, characterId, ...basicColumns } = basic
+    const { jobId, jobGrowId } = basic
     const calculated = await score
     const sections = toSectionBodies(payloads)
 
     if (calculated !== null) {
       this.repository
-        .recordScore({ serverId, characterId, ...calculated })
+        .recordScore({ serverId, characterId, job: { jobId, jobGrowId }, ...calculated })
         .catch(() => this.ports.reportFailure('CHARACTER_SCORE_RECORD_FAILED'))
     }
 

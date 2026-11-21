@@ -626,7 +626,7 @@ test('기본 정보를 저장하지 못하면 스킬 스타일, 점수, 이력, 
   assert.deepEqual(sets, [])
 })
 
-test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류, 계산 시각, 엔진 버전과 함께 저장하고, 저장해 둔 응답을 다시 쓰면 저장하지 않는다', {
+test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류, 계산 시각, 엔진 버전, 받은 기본 정보의 전직과 함께 저장하고, 저장해 둔 응답을 다시 쓰면 저장하지 않는다', {
   timeout: 10_000
 }, async (t) => {
   let savedBasics = 0
@@ -661,6 +661,7 @@ test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류
     { ...score, calculatedAt: undefined },
     {
       ...character,
+      job: { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' },
       kind: 'equipment',
       score: 1741,
       calculatedAt: undefined,

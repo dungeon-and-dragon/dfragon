@@ -624,6 +624,7 @@ try {
   await recordCharacterScore(client, {
     serverId: 'siroco',
     characterId: 'adventure-high',
+    job: null,
     kind: 'equipment',
     score: 1234567,
     calculatedAt: new Date(),

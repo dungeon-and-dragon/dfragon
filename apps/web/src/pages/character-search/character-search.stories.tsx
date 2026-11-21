@@ -20,6 +20,7 @@ type Story = StoryObj<typeof meta>
 const searchedCharacters = storyRankedCharacters(4).map((character, index) => {
   const adventureName = index % 2 === 1 ? character.adventureName : null
   const imageUrl = characterImageUrl(character)
+  const score = index === 2 ? null : character.score
 
   return {
     serverId: character.serverId,
@@ -30,7 +31,8 @@ const searchedCharacters = storyRankedCharacters(4).map((character, index) => {
     imageUrl,
     adventureName,
     jobName: character.jobName,
-    jobGrowName: character.jobGrowName
+    jobGrowName: character.jobGrowName,
+    score
   }
 })
 const searchHandler = http.get(`${API_BASE_URL}/characters`, () =>

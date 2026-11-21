@@ -6,6 +6,12 @@ import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
+import { evolutionSkillStats, skillStatsHandlers } from '#entities/ranking/api/skill-stats.handlers'
+import {
+  STORY_EVOLUTION_SKILLS,
+  storyWeaponMasterCatalog
+} from '#entities/catalog/api/skill-window.fixture'
+import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { RANKING_JOBS } from '#entities/character'
@@ -92,4 +98,46 @@ export const 받는중: Story = {
 export const 받지못함: Story = {
   parameters: { msw: [fameRankingHandlers.failure, ...pendingSetHandlers] },
   render: () => <Screen />
+}
+
+const WEAPON_MASTER_FILTER: FameRankingFilter = {
+  jobId: RANKING_JOBS[0]!.jobId,
+  jobGrowId: RANKING_JOBS[0]!.grows[0]!.jobGrowId
+}
+const catalogHandlers = skillWindowHandlers([storyWeaponMasterCatalog])
+
+export const 개화선택: Story = {
+  parameters: {
+    msw: [
+      fameRankingHandlers.pages,
+      ...setHandlers,
+      skillStatsHandlers.of(evolutionSkillStats(STORY_EVOLUTION_SKILLS)),
+      ...catalogHandlers
+    ]
+  },
+  render: () => (
+    <Screen
+      initialFilter={{
+        ...WEAPON_MASTER_FILTER,
+        evolutions: [
+          { name: '발도', type: 1 },
+          { name: '환영검무', type: 2 }
+        ]
+      }}
+    />
+  )
+}
+
+export const 개화받는중: Story = {
+  parameters: {
+    msw: [fameRankingHandlers.pages, ...setHandlers, skillStatsHandlers.loading, ...catalogHandlers]
+  },
+  render: () => <Screen initialFilter={WEAPON_MASTER_FILTER} />
+}
+
+export const 개화받지못함: Story = {
+  parameters: {
+    msw: [fameRankingHandlers.pages, ...setHandlers, skillStatsHandlers.failure, ...catalogHandlers]
+  },
+  render: () => <Screen initialFilter={WEAPON_MASTER_FILTER} />
 }

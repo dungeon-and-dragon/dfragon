@@ -14,6 +14,13 @@ import {
 import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
 import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { SET_STATS_URL, setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
+import {
+  evolutionSkillStats,
+  SKILL_STATS_URL,
+  skillStatsHandlers
+} from '#entities/ranking/api/skill-stats.handlers'
+import { storyWeaponMasterCatalog } from '#entities/catalog/api/skill-window.fixture'
+import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -57,6 +64,7 @@ function rankedCharacter(order: number, overrides: Partial<RankedCharacter> = {}
     guildId: null,
     guildName: null,
     role: null,
+    score: null,
     equipmentSet: null,
     oathSet: null,
     ...overrides
@@ -99,6 +107,8 @@ type StatsResponses = Readonly<{
   setStats?: HttpHandler
   oathCatalog?: HttpHandler
   itemStats?: HttpHandler
+  skillStats?: HttpHandler
+  skillWindow?: readonly HttpHandler[]
 }>
 
 async function render(
@@ -108,11 +118,13 @@ async function render(
   {
     setStats = setStatsHandlers.loading,
     oathCatalog = oathCatalogHandlers.notUploaded,
-    itemStats = itemStatsHandlers.loading
+    itemStats = itemStatsHandlers.loading,
+    skillStats = skillStatsHandlers.loading,
+    skillWindow = skillWindowHandlers([])
   }: StatsResponses = {}
 ): Promise<void> {
   respondRanking(ranking)
-  server.use(setStats, oathCatalog, itemStats)
+  server.use(setStats, oathCatalog, itemStats, skillStats, ...skillWindow)
   await act(async () =>
     root.render(
       <TestQueryClient>
@@ -206,7 +218,7 @@ it('3페이지에서 이미 받아 둔 필터로 바꿔도 1페이지를 보인�
   expect(queries()).toEqual([{}, { itemIds: 'synthetic-weapon' }])
 })
 
-it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 없는 행은 세트를 -로 그린다', async () => {
+it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 헤더에 내림차순을 표시하며, 세트 값이나 점수가 없는 행은 그 칸을 -로 그린다', async () => {
   await render(async () => ({
     characters: [
       rankedCharacter(1, {
@@ -215,8 +227,10 @@ it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 �
           id: '7f788a703a87d783079b41d0fe6448c9',
           name: '영원히 이어지는 황금향 세트'
         },
-        oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' }
+        oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' },
+        score: { calculator: 'equipment', value: 1_388_832 }
       }),
+      rankedCharacter(2, { role: 'buffer', score: { calculator: 'buff', value: 4_120_000 } }),
       rankedCharacter(4, { level: null, jobGrowName: null, jobName: '합성 직업' })
     ],
     nextCursor: null
@@ -226,13 +240,26 @@ it('열은 캐릭터, 세트, 명성, 모험단이고 세트 값을 받은 적 �
     '캐릭터',
     '세트',
     '명성',
+    '점수',
     '모험단'
   ])
-  const [first, fourth] = bodyRows().map((row) =>
+  expect(
+    [...container.querySelectorAll('thead th[aria-sort="descending"]')].map(
+      (cell) => cell.textContent
+    )
+  ).toEqual(['명성'])
+  const [first, second, fourth] = bodyRows().map((row) =>
     [...row.querySelectorAll('td')].map((cell) => cell.textContent)
   )
-  expect(first).toEqual(['카인합성1합성 전직', '황금향용투 : 용제 강림', '99,999', '모험단1'])
-  expect(fourth).toEqual(['카인합성4합성 직업', '-', '99,996', '모험단4'])
+  expect(first).toEqual([
+    '카인합성1합성 전직',
+    '황금향용투 : 용제 강림',
+    '99,999',
+    '장비1,388,832',
+    '모험단1'
+  ])
+  expect(second?.[3]).toBe('버프4,120,000')
+  expect(fourth).toEqual(['카인합성4합성 직업', '-', '99,996', '-', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
@@ -463,13 +490,13 @@ it('명성 범위를 query로 보내고, 최고 명성이 있든 없든 순위 �
   await render(async () => rankingOf(3), { fameFrom: 136000, fameTo: 138000 })
 
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }])
-  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '점수', '모험단'])
   await render(async () => rankingOf(3), { fameFrom: 136000 })
   expect(queries()).toEqual([{ fameFrom: '136000', fameTo: '138000' }, { fameFrom: '136000' }])
-  expect(headings()).toEqual(['캐릭터', '세트', '명성', '모험단'])
+  expect(headings()).toEqual(['캐릭터', '세트', '명성', '점수', '모험단'])
 })
 
-it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초기화로 모든 필터를 지운다', async () => {
+it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초기화로 개화 선택까지 모든 필터를 지운다', async () => {
   const onFilterChange = vi.fn()
   await render(async () => rankingOf(1), {}, onFilterChange)
 
@@ -482,6 +509,7 @@ it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초�
       role: 'buffer',
       equipmentSetId: GOLDEN,
       itemIds: ['synthetic-weapon'],
+      evolutions: [{ name: '발도', type: 1 }],
       fameFrom: 136000,
       fameTo: 138000
     },
@@ -1047,4 +1075,178 @@ it('직업을 고르지 않았을 때 주소에만 있는 무기는 묶음 앞�
       ['도', '도1']
     ])
   )
+})
+
+const WEAPON_MASTER = RANKING_JOBS[0]
+const GROW_FILTER: FameRankingFilter = {
+  jobId: WEAPON_MASTER.jobId,
+  jobGrowId: WEAPON_MASTER.grows[0].jobGrowId
+}
+
+function evolutionResponses(names: readonly string[] = ['발도', '환영검무']): StatsResponses {
+  return {
+    skillStats: skillStatsHandlers.of(evolutionSkillStats(names)),
+    skillWindow: skillWindowHandlers([storyWeaponMasterCatalog])
+  }
+}
+
+function rowLabels(): string[] {
+  return [...container.querySelectorAll('h2')].map((heading) => heading.textContent ?? '')
+}
+
+function evolutionButton(label: string): HTMLButtonElement {
+  return container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)!
+}
+
+it('직업이나 전직을 고르지 않으면 스킬 개화 줄을 두지 않고 개화 스킬도 받지 않는다', async () => {
+  let skillStatsRequests = 0
+  const responses: StatsResponses = {
+    ...evolutionResponses(),
+    skillStats: http.get(SKILL_STATS_URL, () => {
+      skillStatsRequests += 1
+
+      return HttpResponse.json(evolutionSkillStats(['발도']))
+    })
+  }
+  await render(
+    async () => rankingOf(1),
+    {},
+    () => {},
+    responses
+  )
+  await render(
+    async () => rankingOf(1),
+    { jobId: WEAPON_MASTER.jobId },
+    () => {},
+    responses
+  )
+
+  expect(rowLabels()).not.toContain('스킬 개화')
+  expect(skillStatsRequests).toBe(0)
+})
+
+it('전직을 고르면 스킬 개화 줄에 스킬마다 개화 이름 두 개를 두고, 개화를 고르면 그 선택을 필터로 넘긴다', async () => {
+  const onFilterChange = vi.fn()
+  await render(async () => rankingOf(1), GROW_FILTER, onFilterChange, evolutionResponses())
+
+  await vi.waitFor(() => expect(evolutionButton('발도 명가의 손놀림')).not.toBeNull())
+  expect(rowLabels()).toContain('스킬 개화')
+  expect(
+    [...container.querySelectorAll('button[aria-pressed]')]
+      .map((button) => button.getAttribute('aria-label'))
+      .filter((label) => label?.startsWith('발도') || label?.startsWith('환영검무'))
+  ).toEqual(['발도 명가의 손놀림', '발도 속전속결', '환영검무 그림자 유희', '환영검무 무형검무'])
+  await act(async () => evolutionButton('발도 명가의 손놀림').click())
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    ...GROW_FILTER,
+    evolutions: [{ name: '발도', type: 1 }]
+  })
+})
+
+it('고른 개화가 든 필터로 들어오면 그 개화를 눌린 채 두고 목록 요청에 개화를 붙이며, 다른 개화를 누르면 그 스킬의 선택만 바꾼다', async () => {
+  const onFilterChange = vi.fn()
+  const filter: FameRankingFilter = {
+    ...GROW_FILTER,
+    evolutions: [
+      { name: '발도', type: 1 },
+      { name: '환영검무', type: 2 }
+    ]
+  }
+  await render(async () => rankingOf(1), filter, onFilterChange, evolutionResponses())
+
+  await vi.waitFor(() =>
+    expect(evolutionButton('발도 명가의 손놀림').getAttribute('aria-pressed')).toBe('true')
+  )
+  expect(evolutionButton('발도 속전속결').getAttribute('aria-pressed')).toBe('false')
+  expect(evolutionButton('환영검무 무형검무').getAttribute('aria-pressed')).toBe('true')
+  expect(queries()).toEqual([{ ...GROW_FILTER, evolutions: '발도~1,환영검무~2' }])
+  await act(async () => evolutionButton('발도 속전속결').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    ...filter,
+    evolutions: [
+      { name: '환영검무', type: 2 },
+      { name: '발도', type: 2 }
+    ]
+  })
+  await act(async () => evolutionButton('환영검무 무형검무').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    ...filter,
+    evolutions: [{ name: '발도', type: 1 }]
+  })
+})
+
+it('전직을 바꾸면 개화 선택을 지운 필터를 넘긴다', async () => {
+  const onFilterChange = vi.fn()
+  await render(
+    async () => rankingOf(1),
+    { ...GROW_FILTER, evolutions: [{ name: '발도', type: 1 }] },
+    onFilterChange,
+    evolutionResponses()
+  )
+
+  await act(async () => chip(WEAPON_MASTER.grows[1].name).click())
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId: WEAPON_MASTER.jobId,
+    jobGrowId: WEAPON_MASTER.grows[1].jobGrowId
+  })
+})
+
+it('개화를 다섯 스킬에서 고르면 고르지 않은 스킬의 개화는 막는다', async () => {
+  const names = ['가', '나', '다', '라', '마', '바']
+  const evolutions = names.slice(0, 5).map((name) => ({ name, type: 1 as const }))
+  await render(
+    async () => rankingOf(1),
+    { ...GROW_FILTER, evolutions },
+    () => {},
+    evolutionResponses(names)
+  )
+
+  await vi.waitFor(() => expect(evolutionButton('바 개화 Ⅰ')).not.toBeNull())
+  expect(evolutionButton('바 개화 Ⅰ').disabled).toBe(true)
+  expect(evolutionButton('가 개화 Ⅱ').disabled).toBe(false)
+})
+
+it('그 전직에 개화 스킬이 없으면 스킬 개화 줄을 두지 않는다', async () => {
+  await render(
+    async () => rankingOf(1),
+    GROW_FILTER,
+    () => {},
+    evolutionResponses([])
+  )
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+  expect(rowLabels()).not.toContain('스킬 개화')
+})
+
+it('개화 스킬을 받지 못하면 문구와 다시 시도를 두고, 다시 시도하면 다시 받아 개화를 보인다', async () => {
+  let skillStatsRequests = 0
+  await render(
+    async () => rankingOf(1),
+    GROW_FILTER,
+    () => {},
+    {
+      skillStats: http.get(SKILL_STATS_URL, () => {
+        skillStatsRequests += 1
+
+        if (skillStatsRequests > 1) {
+          return HttpResponse.json(evolutionSkillStats(['발도']))
+        }
+
+        return HttpResponse.json(
+          { error: { code: 'INTERNAL_SERVER_ERROR', message: '실패' } },
+          { status: 500 }
+        )
+      }),
+      skillWindow: skillWindowHandlers([storyWeaponMasterCatalog])
+    }
+  )
+
+  await vi.waitFor(() =>
+    expect(
+      [...container.querySelectorAll('[role="alert"]')].map((alert) => alert.textContent)
+    ).toContain('개화 스킬을 받지 못했습니다.')
+  )
+  await act(async () => chip('다시 시도').click())
+  await vi.waitFor(() => expect(evolutionButton('발도 명가의 손놀림')).not.toBeNull())
 })
