@@ -2,7 +2,9 @@ import { Link } from '@tanstack/react-router'
 
 const STATS_TABS = [
   { to: '/stats', label: '캐릭터' },
-  { to: '/stats/sets', label: '세트' }
+  { to: '/stats/sets', label: '세트' },
+  { to: '/stats/combos', label: '조합' },
+  { to: '/stats/weapons', label: '무기' }
 ] as const
 
 export function StatsTabs(): React.JSX.Element {
