@@ -9,8 +9,9 @@ import { useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from './api/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
-import { WIDE_STICKY_TABLE_FRAME } from './sticky-head'
+import { adventureTabsHeight, WIDE_STICKY_TABLE_FRAME } from './sticky-head'
 import { WeeklyClearTable } from './WeeklyClearTable'
+import { useObservedHeight } from './use-observed-height'
 
 const LOADING_ROWS = 5
 
@@ -110,6 +111,7 @@ export function WeeklyScreen({
   const refreshWeekly = useRefreshAdventureWeekly()
   const refreshEquipment = useRefreshAdventureEquipment()
   const [refreshing, setRefreshing] = useState(false)
+  const [observeTabs, tabsHeight] = useObservedHeight()
 
   async function handleRefresh(): Promise<void> {
     setRefreshing(true)
@@ -122,8 +124,8 @@ export function WeeklyScreen({
   }
 
   return (
-    <div className={SCREEN}>
-      <AdventureTabs adventureName={adventureName} />
+    <div className={SCREEN} style={adventureTabsHeight(tabsHeight)}>
+      <AdventureTabs ref={observeTabs} adventureName={adventureName} />
       <div className="section">
         <AdventureDashboard
           adventureName={adventureName}
