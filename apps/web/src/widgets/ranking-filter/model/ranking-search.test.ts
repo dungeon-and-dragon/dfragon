@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { expect, it } from 'vitest'
 import { RANKING_JOBS } from '#entities/character'
 import {
@@ -151,4 +152,39 @@ it('명성 범위는 router가 읽은 0 이상의 정수만 받고, 거꾸로 �
   expect(parseRankingSearch({ fameFrom: 138000, fameTo: 136000 })).toEqual({})
   expect(parseRankingSearch({ fameFrom: '', fameTo: 1.5 })).toEqual({})
   expect(parseRankingSearch({ fameTo: 1_000_000_000 })).toEqual({})
+})
+
+it('evolutions는 전직을 고른 주소에서만 읽고, 형식이 틀린 쌍, 같은 스킬 중복, 여섯 쌍 이상이 있으면 개화 필터를 버린다', () => {
+  const growSearch = { jobId: job.jobId, jobGrowId: grow.jobGrowId }
+
+  expect(parseRankingSearch({ ...growSearch, evolutions: '발도~1,환영검무~2' })).toEqual({
+    ...growSearch,
+    evolutions: '발도~1,환영검무~2'
+  })
+  expect(parseRankingSearch({ jobId: job.jobId, evolutions: '발도~1' })).toEqual({
+    jobId: job.jobId
+  })
+  expect(
+    ['발도~3', '발도', '~1', '발도~1,발도~2', '가~1,나~1,다~1,라~1,마~1,바~1', ''].map(
+      (evolutions) => parseRankingSearch({ ...growSearch, evolutions })
+    )
+  ).toEqual(Array.from({ length: 6 }, () => growSearch))
+})
+
+it('주소의 evolutions와 랭킹 필터의 개화 목록을 서로 바꾸고, 빈 목록은 주소에 남기지 않는다', () => {
+  const growFilter = { jobId: job.jobId, jobGrowId: grow.jobGrowId }
+  const evolutions = [
+    { name: '발도', type: 1 },
+    { name: '차지 버스트', type: 2 }
+  ] as const
+
+  expect(rankingFilterOf({ ...growFilter, evolutions: '발도~1,차지 버스트~2' })).toEqual({
+    ...growFilter,
+    evolutions
+  })
+  expect(rankingSearchOf({ ...growFilter, evolutions })).toEqual({
+    ...growFilter,
+    evolutions: '발도~1,차지 버스트~2'
+  })
+  expect(rankingSearchOf({ ...growFilter, evolutions: [] })).toEqual(growFilter)
 })

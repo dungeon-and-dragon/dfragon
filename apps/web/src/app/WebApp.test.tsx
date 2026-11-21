@@ -25,6 +25,8 @@ import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
+import { skillStatsHandlers } from '#entities/ranking/api/skill-stats.handlers'
+import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { todayGradeHandlers } from '#widgets/global-bar/api/today-grade.handlers'
 
@@ -383,7 +385,9 @@ it('푸터의 약관 링크를 누르면 그 화면으로 가고 지금 화면�
 it('여러 필터가 붙은 검색 주소에서 초기화를 누르면 query 없는 검색 주소로 가서 필터를 처음 상태로 돌린다', async () => {
   server.use(
     http.get(`${SITE_API_URL}/stats/sets`, failure),
-    http.get(`${SITE_API_URL}/stats/items`, failure)
+    http.get(`${SITE_API_URL}/stats/items`, failure),
+    skillStatsHandlers.failure,
+    ...skillWindowHandlers([])
   )
   const [job] = RANKING_JOBS
   window.history.replaceState(

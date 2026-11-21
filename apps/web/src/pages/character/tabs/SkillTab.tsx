@@ -5,7 +5,7 @@ import {
   type MaleCrusaderRole,
   maleCrusaderRoleOf
 } from '#entities/character'
-import type { SkillStats, SkillStatsJob } from '#entities/ranking'
+import { type SkillStats, type SkillStatsJob, useSkillStats } from '#entities/ranking'
 import {
   type LearnedSkillRow,
   learnedSkillRowsOf,
@@ -18,18 +18,17 @@ import {
   skillMarkOf,
   skillUpgradeBoardOf,
   skillUpgradesOf,
-  skillWindowOf
+  skillWindowOf,
+  SkillSprite,
+  useSkillWindowCatalog
 } from '#entities/catalog'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { LoadingLine } from '#shared/ui/LoadingLine'
-import { useSkillStats } from '#pages/character/api/useSkillStats'
-import { useSkillWindowCatalog } from '#pages/character/api/useSkillWindowCatalog'
 import type { CharacterTabProps } from './character-tab-props'
 import { detailTabClasses as layout } from './detail-tab-classes'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './skill/SkillAdoptionTooltip'
 import { SkillChainSection, SkillTreeCode, SkillUpgradeSections } from './skill/SkillSide'
 import { ENHANCEMENT_MARK, EVOLUTION_MARK } from './skill/skill-classes'
-import { SkillSprite } from './skill/SkillSprite'
 
 const COMMON_ROW = 0
 
