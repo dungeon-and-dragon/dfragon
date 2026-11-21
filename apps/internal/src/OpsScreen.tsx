@@ -10,7 +10,7 @@ import { RunHistory } from '#ops-components/RunHistory'
 import { useJobs } from './ops-queries'
 
 // 탭 줄은 구획 하나로 두고, 패널 안의 구획이 각자 가로 선을 긋도록 Root와 Panel은 구획 class를 두지 않는다.
-const TAB_LIST = 'section shrink-0 px-1 py-0'
+const TAB_LIST = 'px-1 shadow-none'
 const TAB_PANEL = 'flex flex-col focus-ring-inset'
 
 function JobsSection(): React.JSX.Element | null {
@@ -50,16 +50,20 @@ export function OpsScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center overflow-x-clip bg-canvas font-sans text-sm text-fg">
+    <div className="flex min-h-dvh flex-col items-center overflow-x-clip bg-canvas font-sans text-sm text-fg">
       <OpsHeader workerSeenAt={jobs.data?.workerSeenAt} readAt={readAt} onRefresh={handleRefresh} />
       <main className="page page-wide screen">
         <CollectionPanel />
         <Tabs.Root defaultValue="jobs" className="flex flex-col">
-          <Tabs.List aria-label="운영" render={<div className={TAB_LIST} />}>
-            <Tabs.Tab value="jobs">Job</Tabs.Tab>
-            <Tabs.Tab value="queues">타임라인 queue</Tabs.Tab>
-            <Tabs.Tab value="batch-keys">batch key</Tabs.Tab>
-          </Tabs.List>
+          {/* 탭 줄은 넘치면 스스로 스크롤해 그 안에 그린 구획 선이 잘리므로, 구획은 탭 줄을 감싼 상자가 맡는다.
+              구획 선과 겹쳐 2px가 되지 않게 탭 줄 자신의 아래 선은 지운다. */}
+          <div className="section shrink-0 py-0">
+            <Tabs.List aria-label="운영" render={<div className={TAB_LIST} />}>
+              <Tabs.Tab value="jobs">Job</Tabs.Tab>
+              <Tabs.Tab value="queues">타임라인 queue</Tabs.Tab>
+              <Tabs.Tab value="batch-keys">batch key</Tabs.Tab>
+            </Tabs.List>
+          </div>
           <Tabs.Panel value="jobs" className={TAB_PANEL}>
             <JobsSection />
           </Tabs.Panel>
