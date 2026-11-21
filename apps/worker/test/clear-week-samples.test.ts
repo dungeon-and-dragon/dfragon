@@ -3,6 +3,9 @@ import test from 'node:test'
 import type {
   ClearContentWeek,
   ClearContentWeekSamples,
+  ClearWeekSelection,
+  ContentClearPopulationInput,
+  LegionClearWeek,
   StoredClearPopulation
 } from '@dfragon/database'
 import type { ClearSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
@@ -60,6 +63,8 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
       { contentId: 'michaela-hard', weekStart: week('2026-10-29') }
     ],
     readOverviewSampleWeeks: async () => [week('2026-10-29')],
+    recordLegionClears: async () => undefined,
+    recordPopulation: async () => undefined,
     readContentJobFames: async ({ contentId, weekStart }) => [
       {
         contentId,
@@ -84,7 +89,8 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
 
   const summary = await service.recordMissing(() => undefined)
 
-  assert.deepEqual(summary, { contents: 3, overviews: 1 })
+  // 마감한 주 10-29, 11-05, 11-12는 아포칼립스와 베누스 모두 출시 뒤라 레기온 2개씩 옮긴다.
+  assert.deepEqual(summary, { legions: 6, contents: 3, overviews: 1 })
   assert.equal(recordedContents[0], 'michaela-hard/2026-11-12')
   assert.deepEqual(recordedContents.slice(1).toSorted(), [
     'engraved-nightmare-1/2026-11-05',
@@ -96,4 +102,115 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
     week('2026-11-05').getDate()
   )
   assert.equal(recordedSamples.get('engraved-nightmare-1/2026-11-05')?.streaks, null)
+})
+
+test('레기온은 출시 뒤 레이드 모집단이 마감한 주 가운데 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 그 주 가장 큰 모집단을 복사한 뒤 상세 집계를 계산한다', async () => {
+  const largest: StoredClearPopulation = {
+    ...population('nabel-normal', '2026-11-05', true),
+    population: 1500,
+    minFame: 104292,
+    jobs: [
+      {
+        jobId: 'synthetic-job',
+        jobGrowId: 'synthetic-grow',
+        jobName: '합성직업',
+        jobGrowName: '합성전직',
+        count: 1500
+      }
+    ]
+  }
+  const populations: StoredClearPopulation[] = [
+    population('michaela-hard', '2026-04-16', true),
+    population('michaela-hard', '2026-10-29', true),
+    population('michaela-hard', '2026-11-05', true),
+    largest,
+    population('michaela-hard', '2026-11-12', false),
+    population('legion-venus', '2026-04-16', true)
+  ]
+  const moved: string[] = []
+  const recorded: ContentClearPopulationInput[] = []
+  const sampled: ClearWeekSelection[] = []
+  const service = new ClearWeekSampleService(
+    {
+      ...emptySampleRepository,
+      readPopulations: async () => populations,
+      readContentWeekSampleWeeks: async () => [
+        { contentId: 'michaela-hard', weekStart: week('2026-04-16') },
+        { contentId: 'michaela-hard', weekStart: week('2026-10-29') },
+        { contentId: 'michaela-hard', weekStart: week('2026-11-05') },
+        { contentId: 'nabel-normal', weekStart: week('2026-11-05') },
+        { contentId: 'legion-venus', weekStart: week('2026-04-16') }
+      ],
+      readOverviewSampleWeeks: async () => [
+        week('2026-04-16'),
+        week('2026-10-29'),
+        week('2026-11-05')
+      ],
+      recordLegionClears: async ({ contentId, name, weekStart, copySnapshot }: LegionClearWeek) => {
+        moved.push(`${contentId}/${name}/${formatResetDate(weekStart)}/${copySnapshot}`)
+      },
+      recordPopulation: async (input) => {
+        recorded.push(input)
+        populations.push({ ...input, jobs: [...input.jobs] })
+      },
+      readContentJobFames: async (selection) => {
+        sampled.push(selection)
+
+        return []
+      },
+      recordContentWeekSamples: async () => undefined,
+      recordOverviewSamples: async () => undefined
+    },
+    () => week('2026-11-13')
+  )
+
+  const summary = await service.recordMissing(() => undefined)
+
+  assert.deepEqual(moved.toSorted(), [
+    'legion-apocalypse/아포칼립스/2026-10-29/false',
+    'legion-apocalypse/아포칼립스/2026-11-05/true',
+    'legion-venus/베누스/2026-10-29/false',
+    'legion-venus/베누스/2026-11-05/true'
+  ])
+  assert.deepEqual(
+    recorded
+      .map(({ contentId, weekStart, population: size, minFame, jobs, closed }) => ({
+        week: `${contentId}/${formatResetDate(weekStart)}`,
+        size,
+        minFame,
+        jobs,
+        closed
+      }))
+      .toSorted((left, right) => left.week.localeCompare(right.week)),
+    [
+      { week: 'legion-apocalypse/2026-10-29', size: 1000, minFame: 126000, jobs: [], closed: true },
+      {
+        week: 'legion-apocalypse/2026-11-05',
+        size: 1500,
+        minFame: 104292,
+        jobs: largest.jobs,
+        closed: true
+      },
+      { week: 'legion-venus/2026-10-29', size: 1000, minFame: 126000, jobs: [], closed: true },
+      {
+        week: 'legion-venus/2026-11-05',
+        size: 1500,
+        minFame: 104292,
+        jobs: largest.jobs,
+        closed: true
+      }
+    ]
+  )
+  assert.deepEqual(
+    sampled
+      .map(({ contentId, kind, weekStart }) => `${contentId}/${kind}/${formatResetDate(weekStart)}`)
+      .toSorted(),
+    [
+      'legion-apocalypse/legion/2026-10-29',
+      'legion-apocalypse/legion/2026-11-05',
+      'legion-venus/legion/2026-10-29',
+      'legion-venus/legion/2026-11-05'
+    ]
+  )
+  assert.equal(summary.legions, 4)
 })

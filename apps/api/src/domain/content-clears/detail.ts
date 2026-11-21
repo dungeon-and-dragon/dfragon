@@ -204,17 +204,6 @@ export function toEmptyContentStats({
   }
 }
 
-// 레기온 기록에는 전직, 배율, 단계, 점수가 없어 상세는 고른 주의 요약만 준다.
-export function toLegionContentStats(
-  summary: ClearContentSummary,
-  weekStart: string | null
-): ClearContentStats {
-  const week = summary.weeks.find((summaryWeek) => summaryWeek.weekStart === weekStart) ?? null
-  const empty = toEmptyContentStats(summary)
-
-  return { ...empty, week }
-}
-
 export function toClearContentStats(
   { weeks, ...header }: ClearContentSummary,
   population: StoredClearPopulation,

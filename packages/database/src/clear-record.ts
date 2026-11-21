@@ -137,12 +137,6 @@ export async function recordClearRecordCursors(
       SET "fetched_until" = GREATEST("clear_record_cursors"."fetched_until", EXCLUDED."fetched_until")`
 }
 
-export type ClearRecordLegionWeek = {
-  name: string
-  weekStart: Date
-  cleared: number
-}
-
 export type ClearRecordRaidSelection = {
   raidName: string
   weekStart: Date
@@ -158,19 +152,6 @@ export type ClearRecordRaidStage = ClearRecordRaidMode & { stage: string }
 export type ClearRecordStageCount = {
   stage: string
   characters: number
-}
-
-// 레기온은 한 캐릭터가 한 주에 여러 번 깨도 한 명으로 센다.
-export function readClearRecordLegionWeeks(
-  client: DatabaseClient,
-  names: readonly string[]
-): Promise<ClearRecordLegionWeek[]> {
-  return client.$queryRaw<ClearRecordLegionWeek[]>`
-    SELECT name, week_start AS "weekStart", count(DISTINCT (server_id, character_id))::int AS cleared
-    FROM clear_records
-    WHERE kind = 'legion' AND name = ANY(${names}::text[])
-    GROUP BY name, week_start
-    ORDER BY name, week_start`
 }
 
 export function readClearRecordRaidModes(

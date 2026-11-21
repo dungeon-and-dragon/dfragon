@@ -2,7 +2,7 @@ import type { CharacterScoreKind } from './character-score.js'
 import type { DatabaseClient } from './client.js'
 import { Prisma } from './generated/prisma/client.js'
 
-export type ContentClearKind = 'raid' | 'challenge'
+export type ContentClearKind = 'raid' | 'challenge' | 'legion'
 
 export type ContentClearInput = {
   contentId: string
@@ -68,24 +68,25 @@ const snapshotJoins = Prisma.sql`
 
 // 한 INSERT 안에서 같은 행을 두 번 고치면 PostgreSQL이 거절하므로 DISTINCT ON으로 가장 이른 클리어만 남긴다.
 // 이미 있는 행도 더 이른 클리어가 들어올 때만 바꿔, 같은 기록을 어떤 순서로 다시 저장해도 결과가 같다.
-async function recordRaidClears(
+async function recordWeeklyClears(
   client: DatabaseClient,
   clears: readonly ContentClearInput[]
 ): Promise<void> {
   const { contentIds, serverIds, characterIds, weekStarts, clearedAts, ratios } = toColumns(clears)
+  const kinds = clears.map(({ kind }) => kind)
 
   await client.$executeRaw`
     INSERT INTO "content_clears"
       ("content_id", "kind", "server_id", "character_id", "week_start", "cleared_at", "ratio", ${snapshotColumns})
     SELECT
-      clear.content_id, 'raid', clear.server_id, clear.character_id, clear.week_start, clear.cleared_at,
+      clear.content_id, clear.kind, clear.server_id, clear.character_id, clear.week_start, clear.cleared_at,
       clear.ratio, ${snapshotValues}
     FROM (
       SELECT DISTINCT ON (content_id, server_id, character_id, week_start) *
       FROM unnest(
-        ${contentIds}::text[], ${serverIds}::text[], ${characterIds}::text[],
+        ${contentIds}::text[], ${kinds}::text[], ${serverIds}::text[], ${characterIds}::text[],
         ${weekStarts}::timestamptz[], ${clearedAts}::timestamptz[], ${ratios}::int[]
-      ) AS clear(content_id, server_id, character_id, week_start, cleared_at, ratio)
+      ) AS clear(content_id, kind, server_id, character_id, week_start, cleared_at, ratio)
       ORDER BY content_id, server_id, character_id, week_start, cleared_at
     ) AS clear
     ${snapshotJoins}
@@ -127,15 +128,50 @@ export async function recordContentClears(
   client: DatabaseClient,
   clears: readonly ContentClearInput[]
 ): Promise<void> {
-  const raids = clears.filter(({ kind }) => kind === 'raid')
+  const weekly = clears.filter(({ kind }) => kind !== 'challenge')
   const challenges = clears.filter(({ kind }) => kind === 'challenge')
-  if (raids.length > 0) {
-    await recordRaidClears(client, raids)
+  if (weekly.length > 0) {
+    await recordWeeklyClears(client, weekly)
   }
 
   if (challenges.length > 0) {
     await recordChallengeClears(client, challenges)
   }
+}
+
+export type LegionClearWeek = {
+  contentId: string
+  name: string
+  weekStart: Date
+  copySnapshot: boolean
+}
+
+const emptySnapshotValues = Prisma.sql`NULL, NULL, NULL, NULL, NULL, NULL`
+
+// 레기온 클리어는 clear_records에 이미 있어 Neople을 다시 부르지 않고 그 주 기록에서 캐릭터마다 가장 이른 클리어를 옮긴다.
+export async function recordLegionContentClears(
+  client: DatabaseClient,
+  { contentId, name, weekStart, copySnapshot }: LegionClearWeek
+): Promise<void> {
+  const values = copySnapshot ? snapshotValues : emptySnapshotValues
+  const joins = copySnapshot ? snapshotJoins : Prisma.empty
+
+  await client.$executeRaw`
+    INSERT INTO "content_clears"
+      ("content_id", "kind", "server_id", "character_id", "week_start", "cleared_at", "ratio", ${snapshotColumns})
+    SELECT
+      ${contentId}, 'legion', clear.server_id, clear.character_id, clear.week_start, clear.cleared_at,
+      NULL, ${values}
+    FROM (
+      SELECT DISTINCT ON (server_id, character_id) server_id, character_id, week_start, cleared_at
+      FROM "clear_records"
+      WHERE kind = 'legion' AND name = ${name} AND week_start = ${weekStart}
+      ORDER BY server_id, character_id, cleared_at
+    ) AS clear
+    ${joins}
+    ON CONFLICT ("content_id", "server_id", "character_id", "week_start") DO UPDATE SET
+      "cleared_at" = EXCLUDED."cleared_at"
+    WHERE "content_clears"."cleared_at" > EXCLUDED."cleared_at"`
 }
 
 // 마감한 주의 분모는 나중에 다시 저장해도 바뀌지 않는다.

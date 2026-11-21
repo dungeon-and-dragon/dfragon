@@ -95,7 +95,20 @@ export const storyClearStats: ClearStats = {
       weeksOf((index) => 240 + index * 60, 2)
     )
   ],
-  legions: []
+  legions: [
+    {
+      id: 'legion-apocalypse',
+      kind: 'legion',
+      name: '아포칼립스',
+      releasedAt: '2026-04-22T21:00:00.000Z',
+      entryFame: null,
+      latest: true,
+      weeks: weeksOf((index) => 6400 + index * 30).map((item) => ({
+        ...item,
+        ratios: [{ ratio: null, cleared: item.cleared }]
+      }))
+    }
+  ]
 }
 
 function spread(median: number, width: number): ClearFameDistribution {
@@ -189,15 +202,17 @@ const leftGroup = weekGroup(210, 118000)
 const firstGroup = weekGroup(160, 116000)
 
 export function storyClearContentStats(contentId: string, weekStart: string): ClearContentStats {
-  const found = storyClearStats.contents.find(({ id }) => id === contentId)
+  const found = [...storyClearStats.contents, ...storyClearStats.legions].find(
+    ({ id }) => id === contentId
+  )
   if (found === undefined) {
     throw new Error(`story에 없는 컨텐츠입니다: ${contentId}`)
   }
 
   const { weeks, ...header } = found
-  const raid = header.kind === 'raid'
+  const weekly = header.kind !== 'challenge'
   const selected = weeks.find((item) => item.weekStart === weekStart) ?? null
-  const weekOverWeek = raid
+  const weekOverWeek = weekly
     ? {
         both: bothGroup,
         returned: returnedGroup,
@@ -213,7 +228,7 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
       }
     : null
 
-  const streaks = raid
+  const streaks = weekly
     ? [
         { weeks: 1, characters: 320 },
         { weeks: 2, characters: 280 },
@@ -222,6 +237,15 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
         { weeks: 12, characters: 180 }
       ]
     : null
+
+  const stages =
+    header.kind === 'raid'
+      ? [
+          { stage: '싱글/매칭', characters: 1800 },
+          { stage: '일반', characters: 900 },
+          { stage: '하드', characters: 500 }
+        ]
+      : null
 
   const weeklyClears = weeks.map((item, index) => {
     const firstCleared = Math.round(item.cleared * (index === 0 ? 1 : 0.12))
@@ -265,11 +289,7 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
     weekOverWeek,
     stageMoves,
     streaks,
-    stages: [
-      { stage: '싱글/매칭', characters: 1800 },
-      { stage: '일반', characters: 900 },
-      { stage: '하드', characters: 500 }
-    ],
+    stages,
     scoreBands: { equipment: equipmentBands, buff: buffBands },
     weekdays,
     hours

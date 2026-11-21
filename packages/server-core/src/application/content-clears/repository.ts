@@ -9,7 +9,6 @@ import type {
   ClearJobFameSample,
   ClearJobScoreSample,
   ClearOverviewWeekSamples,
-  ClearRecordLegionWeek,
   ClearRecordRaidMode,
   ClearRecordRaidSelection,
   ClearRecordRaidStage,
@@ -24,6 +23,8 @@ import type {
   ClearWeekGroupScoreSample,
   ClearWeekRatioCount,
   ClearWeekSelection,
+  ContentClearPopulationInput,
+  LegionClearWeek,
   StoredClearPopulation
 } from '@dfragon/database'
 
@@ -55,7 +56,6 @@ export interface ClearStatsRepository extends ClearSampleRepository {
   readPopulations(): Promise<StoredClearPopulation[]>
   readWeekRatioCounts(): Promise<ClearWeekRatioCount[]>
   readFirstWeeks(contentId: string): Promise<ClearFirstWeekCount[]>
-  readLegionWeeks(names: readonly string[]): Promise<ClearRecordLegionWeek[]>
   readContentWeekSamples(week: ClearContentWeek): Promise<ClearContentWeekSamples | null>
   readOverviewSamples(weekStart: Date): Promise<ClearOverviewWeekSamples | null>
 }
@@ -64,6 +64,8 @@ export interface ClearWeekSampleRepository extends ClearSampleRepository {
   readPopulations(): Promise<StoredClearPopulation[]>
   readContentWeekSampleWeeks(): Promise<ClearContentWeek[]>
   readOverviewSampleWeeks(): Promise<Date[]>
+  recordLegionClears(week: LegionClearWeek): Promise<void>
+  recordPopulation(population: ContentClearPopulationInput): Promise<void>
   recordContentWeekSamples(
     week: ClearContentWeek,
     samples: ClearContentWeekSamples,
