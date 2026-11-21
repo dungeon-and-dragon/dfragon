@@ -33,14 +33,13 @@ export function weaponBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
   return [...bars, { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }]
 }
 
-// 유일 장비는 지금 부위마다 한 종뿐이라 부위마다 착용 비율 한 줄로 보인다.
+// 유일 장비는 지금 부위마다 한 종뿐이라 부위마다 착용 인원 한 줄로 보인다.
 // 한 부위에 여러 종이 생기면 itemIds가 모두 낀 캐릭터만 거르므로 랭킹으로 잇지 않는다.
 export function uniqueItemBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
   return stats.slots
     .filter(({ slotId }) => slotId !== WEAPON_SLOT)
     .map(({ slotId, items }) => {
-      const worn = items.reduce((sum, { count }) => sum + count, 0)
-      const value = shareOf(worn, stats.sampleSize)
+      const value = items.reduce((sum, { count }) => sum + count, 0)
       const name = `${itemSlotName(slotId)} 유일 장비 착용`
       const [only] = items
 
