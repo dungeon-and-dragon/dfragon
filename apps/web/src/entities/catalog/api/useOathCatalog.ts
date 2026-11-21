@@ -4,34 +4,37 @@ import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 import { absoluteUrl, fetchUploadedStaticJson } from '#shared/lib/static-json'
 
 // 서약 데이터는 사이트 빌드에 넣지 않고 따로 올리며, host Caddy와 개발 서버가 같은 origin의 /skilltab/ 아래에 내준다.
-export const OATH_CATALOG_URL = `${window.location.origin}/skilltab/oath.v2.json`
+export function oathCatalogUrl(): string {
+  return `${window.location.origin}/skilltab/oath.v2.json`
+}
 
-function readOathCatalog(json: unknown): OathCatalog {
+function readOathCatalog(json: unknown, catalogUrl: string): OathCatalog {
   const catalog = oathCatalogSchema.parse(json)
   const sets = catalog.sets.map((set) => {
-    const icon = set.icon !== null ? absoluteUrl(set.icon, OATH_CATALOG_URL) : null
+    const icon = set.icon !== null ? absoluteUrl(set.icon, catalogUrl) : null
     const options = set.options.map((option) => ({
       ...option,
-      icon: absoluteUrl(option.icon, OATH_CATALOG_URL)
+      icon: absoluteUrl(option.icon, catalogUrl)
     }))
 
     return { ...set, icon, options }
   })
   const items = catalog.items.map((item) => ({
     ...item,
-    icon: absoluteUrl(item.icon, OATH_CATALOG_URL)
+    icon: absoluteUrl(item.icon, catalogUrl)
   }))
 
   return { ...catalog, sets, items }
 }
 
 async function requestOathCatalog(): Promise<OathCatalog | null> {
-  const json = await fetchUploadedStaticJson(OATH_CATALOG_URL)
+  const catalogUrl = oathCatalogUrl()
+  const json = await fetchUploadedStaticJson(catalogUrl)
   if (json === null) {
     return null
   }
 
-  return readOathCatalog(json)
+  return readOathCatalog(json, catalogUrl)
 }
 
 export function useOathCatalog(): LoadedResult<OathCatalog | null> {
