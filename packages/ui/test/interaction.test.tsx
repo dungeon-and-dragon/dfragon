@@ -18,6 +18,7 @@ import {
   TextFieldError,
   TextFieldInput,
   TextFieldLabel,
+  Tooltip,
   type ButtonProps,
   type IconButtonProps,
   type TextFieldInputProps
@@ -927,5 +928,117 @@ describe('StatusChip의 tone과 진행 표시', () => {
       [...busy.querySelectorAll('[aria-hidden="true"]')].map((mark) => mark.className)
     ).toEqual(['status-spinner'])
     expect(busy.textContent).toBe('인식 중')
+  })
+})
+
+describe('Tooltip의 터치 탭', () => {
+  async function tap(target: Element) {
+    await act(async () => {
+      target.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'touch' })
+      )
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    })
+  }
+
+  function tooltip() {
+    return document.querySelector('.tooltip')
+  }
+
+  function Described({ onCopy }: { onCopy?: () => void }) {
+    return (
+      <Tooltip.Provider>
+        <Tooltip.Root>
+          <Tooltip.Trigger render={<span tabIndex={0} />}>스킬</Tooltip.Trigger>
+          <Tooltip.Popup>스킬 설명</Tooltip.Popup>
+        </Tooltip.Root>
+        <Tooltip.Root>
+          <Tooltip.Trigger render={<span />}>
+            <IconButton aria-label="복사" icon={<SettingsIcon />} onClick={onCopy} />
+          </Tooltip.Trigger>
+          <Tooltip.Popup>복사하기</Tooltip.Popup>
+        </Tooltip.Root>
+      </Tooltip.Provider>
+    )
+  }
+
+  it('trigger를 탭하면 열리고, 같은 trigger를 다시 탭하면 닫힌다', async () => {
+    await render(<Described />)
+    const trigger = container.querySelector('[data-base-ui-tooltip-trigger]') as Element
+
+    await tap(trigger)
+    await vi.waitFor(() => expect(tooltip()?.textContent).toBe('스킬 설명'))
+
+    await tap(trigger)
+    await vi.waitFor(() => expect(tooltip()).toBeNull())
+  })
+
+  it('trigger 안의 버튼을 탭하면 버튼 동작만 하고 이름 Tooltip은 열지 않는다', async () => {
+    const onCopy = vi.fn()
+    await render(<Described onCopy={onCopy} />)
+
+    await tap(getByRole('button', '복사'))
+
+    expect(onCopy).toHaveBeenCalledOnce()
+    expect(tooltip()).toBeNull()
+  })
+
+  it('링크 행 안의 trigger를 탭하면 링크로 이동하지 않고 Tooltip을 연다', async () => {
+    await render(
+      <a href="#item">
+        <Tooltip.Root>
+          <Tooltip.Trigger render={<span />}>아이템</Tooltip.Trigger>
+          <Tooltip.Popup>아이템 상세</Tooltip.Popup>
+        </Tooltip.Root>
+      </a>
+    )
+    const trigger = container.querySelector('[data-base-ui-tooltip-trigger]') as Element
+    const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true })
+
+    await act(async () => {
+      trigger.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'touch' })
+      )
+      trigger.dispatchEvent(clickEvent)
+    })
+
+    await vi.waitFor(() => expect(tooltip()?.textContent).toBe('아이템 상세'))
+    expect(clickEvent.defaultPrevented).toBe(true)
+  })
+
+  it('링크 행 안 Tooltip의 내용을 눌러도 링크의 click handler로 올라가지 않는다', async () => {
+    const onLinkClick = vi.fn()
+    await render(
+      <a href="#item" onClick={onLinkClick}>
+        <Tooltip.Root defaultOpen>
+          <Tooltip.Trigger render={<span />}>아이템</Tooltip.Trigger>
+          <Tooltip.Popup>아이템 상세</Tooltip.Popup>
+        </Tooltip.Root>
+      </a>
+    )
+    const popup = await vi.waitFor(() => {
+      const shown = tooltip()
+      expect(shown).not.toBeNull()
+
+      return shown as HTMLElement
+    })
+
+    await click(popup)
+
+    expect(onLinkClick).not.toHaveBeenCalled()
+  })
+
+  it('마우스 클릭은 Tooltip을 열지 않는다', async () => {
+    await render(<Described />)
+    const trigger = container.querySelector('[data-base-ui-tooltip-trigger]') as HTMLElement
+
+    await act(async () => {
+      trigger.dispatchEvent(
+        new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' })
+      )
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+    })
+
+    expect(tooltip()).toBeNull()
   })
 })
