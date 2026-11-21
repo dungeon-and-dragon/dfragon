@@ -9,7 +9,11 @@ const OTHER_WEAPONS = '그 밖'
 // 비율은 소수 한 자리로 보이므로, 0.0%로 반올림되는 무기는 막대를 두지 않는다.
 const MIN_SHOWN_WEAPON_SHARE = 0.05
 // 접두사가 붙은 무기는 성능이 같은 다른 아이템 ID라, 접두사를 뗀 이름의 무기와 한 막대로 센다.
-const MERGED_WEAPON_PREFIX = '검은 질병의 '
+const MERGED_WEAPON_PREFIXES = ['검은 질병의 ', '억압 - ']
+
+function prefixOf(name: string): string | undefined {
+  return MERGED_WEAPON_PREFIXES.find((prefix) => name.startsWith(prefix))
+}
 
 function byCountDesc(a: { count: number }, b: { count: number }): number {
   return b.count - a.count
@@ -20,8 +24,9 @@ function mergePrefixedWeapons(weapons: readonly ItemCount[]): ItemCount[] {
   const merged = new Map<string, ItemCount>()
 
   for (const weapon of weapons) {
-    const prefixed = weapon.name.startsWith(MERGED_WEAPON_PREFIX)
-    const name = prefixed ? weapon.name.slice(MERGED_WEAPON_PREFIX.length) : weapon.name
+    const prefix = prefixOf(weapon.name)
+    const prefixed = prefix !== undefined
+    const name = prefixed ? weapon.name.slice(prefix.length) : weapon.name
     const current = merged.get(name)
 
     if (current === undefined) {
