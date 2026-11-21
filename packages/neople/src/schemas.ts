@@ -171,6 +171,7 @@ export const itemShopSchema = z.looseObject({ itemGradeValue: z.number() })
 export const auctionSchema = z.object({
   rows: z.array(
     z.looseObject({
+      itemId: nonblankString,
       itemName: nonblankString,
       itemRarity: nonblankString.optional(),
       unitPrice: z.int().positive()

@@ -1,4 +1,5 @@
 export interface AuctionListing {
+  itemId: string
   itemRarity: string | null
   unitPrice: number
 }

@@ -31,7 +31,7 @@ export function createNeopleLowestListing(neople: NeopleClient): FetchLowestList
 
       const itemRarity = lowest.itemRarity ?? null
 
-      return { itemRarity, unitPrice: lowest.unitPrice }
+      return { itemId: lowest.itemId, itemRarity, unitPrice: lowest.unitPrice }
     } catch (error) {
       if (error instanceof NeopleRequestFailure) {
         throw new SoulPriceFailure(error.kind, forwardCause(error))

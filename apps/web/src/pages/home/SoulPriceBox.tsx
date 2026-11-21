@@ -1,4 +1,4 @@
-import { rarityTextOfName } from '#entities/character'
+import { ItemIcon, itemRarityOfGrade } from '#entities/character'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { ListBox } from '#shared/ui/ListBox'
 import { type SoulPrice, useSoulPrices } from './api/useSoulPrices'
@@ -21,16 +21,6 @@ function goldPerRevelation({ unitPrice, revelationCount }: SoulPrice): number | 
   }
 
   return Math.round(unitPrice / revelationCount)
-}
-
-function nameToneOf(itemRarity: string | null): string {
-  const tone = itemRarity !== null ? rarityTextOfName(itemRarity) : undefined
-
-  if (tone === undefined) {
-    return 'text-fg'
-  }
-
-  return tone
 }
 
 export function SoulPriceBox(): React.JSX.Element {
@@ -75,10 +65,15 @@ function SoulPrices(): React.JSX.Element {
             {result.value.map((crystal) => (
               <tr key={crystal.itemName}>
                 <td>
-                  <b className={nameToneOf(crystal.itemRarity)}>{crystal.itemName}</b>
+                  <span title={crystal.itemName} className="inline-block align-middle">
+                    <ItemIcon
+                      itemId={crystal.itemId}
+                      rarity={itemRarityOfGrade(crystal.itemRarity)}
+                    />
+                    <span className="sr-only">{crystal.itemName}</span>
+                  </span>
                 </td>
                 <td className="table-num">{goldOf(crystal.unitPrice)}</td>
-                <td className="table-num">{integer.format(crystal.revelationCount)}</td>
                 <td className="table-num font-semibold">{goldOf(goldPerRevelation(crystal))}</td>
               </tr>
             ))}
@@ -99,9 +94,6 @@ function SoulPriceTable({ children }: { children: React.ReactNode }): React.JSX.
               가격
             </th>
             <th scope="col" className="table-num">
-              교환 개수
-            </th>
-            <th scope="col" className="table-num">
               1개당 골드
             </th>
           </tr>
@@ -116,13 +108,10 @@ function SkeletonRow(): React.JSX.Element {
   return (
     <tr aria-hidden>
       <td>
-        <span className="skeleton-text w-[120px]" />
+        <span className="skeleton inline-block size-game-icon align-middle" />
       </td>
       <td className="table-num">
         <span className="skeleton-text ml-auto w-[64px]" />
-      </td>
-      <td className="table-num">
-        <span className="skeleton-text ml-auto w-[32px]" />
       </td>
       <td className="table-num">
         <span className="skeleton-text ml-auto w-[56px]" />
