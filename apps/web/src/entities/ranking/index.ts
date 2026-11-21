@@ -52,6 +52,8 @@ export { skillAdoptionOf, skillStatsSchema } from './model/skill-stats'
 export type {
   SkillAdoption,
   SkillAdoptionTarget,
+  SkillLevelDistribution,
+  SkillLevelRate,
   SkillStats,
   SkillStatsJob,
   SkillUpgradeRates

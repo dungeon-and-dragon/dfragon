@@ -77,6 +77,7 @@ export type SkillWindowIcon = Readonly<{
   requiredLevel: number | null
   learned: boolean
   level: number | null
+  maxLevel: number
   evolution: UpgradeType | null
   enhancement: UpgradeType | null
   evolutionNames: readonly [string, string] | null
@@ -213,6 +214,10 @@ function pickedTypesByName(
   return picked
 }
 
+function learnedLevelsByName(style: SkillStyle): Map<string | null, number | null> {
+  return new Map([...style.active, ...style.passive].map((skill) => [skill.name, skill.level]))
+}
+
 function evolutionNamesOf({ evolution }: CatalogSkill): readonly [string, string] | null {
   if (evolution === undefined) {
     return null
@@ -232,9 +237,7 @@ export function skillWindowOf(
     return null
   }
   const { job, advancement } = tree
-  const levelByName = new Map(
-    [...style.active, ...style.passive].map((skill) => [skill.name, skill.level])
-  )
+  const levelByName = learnedLevelsByName(style)
   const evolutionByName = pickedTypesByName(style, 'evolution')
   const enhancementByName = pickedTypesByName(style, 'enhancement')
   const cells = new Map<string, [CellCandidate, ...CellCandidate[]]>()
@@ -253,6 +256,7 @@ export function skillWindowOf(
       requiredLevel: skill.requiredLevel,
       learned: levelByName.has(skill.name),
       level: levelByName.get(skill.name) ?? null,
+      maxLevel: skill.maxLevel,
       evolution: evolutionByName.get(skill.name) ?? null,
       enhancement: enhancementByName.get(skill.name) ?? null,
       evolutionNames: evolutionNamesOf(skill),
@@ -273,6 +277,8 @@ type UpgradeSkill = Readonly<{
   skillId: number
   name: string
   requiredLevel: number | null
+  level: number | null
+  maxLevel: number
   icon: SkillIconImage
   picked: UpgradeType | null
   evolutionNames: readonly [string, string] | null
@@ -325,14 +331,18 @@ function learnableSkillsOf({ job, advancement }: SkillTree): LearnableSkill[] {
 function upgradeSkillOf(
   job: SkillWindowJob,
   { skillId, skill }: LearnableSkill,
-  picked: Map<string | null, UpgradeType>
+  picked: Map<string | null, UpgradeType>,
+  levelByName: Map<string | null, number | null>
 ): UpgradeSkill {
   const pickedType = picked.get(skill.name) ?? null
+  const level = levelByName.get(skill.name) ?? null
 
   return {
     skillId,
     name: skill.name,
     requiredLevel: skill.requiredLevel,
+    level,
+    maxLevel: skill.maxLevel,
     icon: { sprite: job.sprite, ...skill.icon },
     picked: pickedType,
     evolutionNames: evolutionNamesOf(skill),
@@ -359,6 +369,7 @@ export function skillUpgradeBoardOf(
     return null
   }
   const learnable = learnableSkillsOf(tree)
+  const levelByName = learnedLevelsByName(style)
   const evolutionByName = pickedTypesByName(style, 'evolution')
   const enhancementByName = pickedTypesByName(style, 'enhancement')
   const evolutions = learnable.flatMap((learnableSkill): EvolutionRow[] => {
@@ -370,7 +381,7 @@ export function skillUpgradeBoardOf(
 
     return [
       {
-        ...upgradeSkillOf(tree.job, learnableSkill, evolutionByName),
+        ...upgradeSkillOf(tree.job, learnableSkill, evolutionByName, levelByName),
         branches: [
           { type: 1, ...first },
           { type: 2, ...second }
@@ -382,7 +393,7 @@ export function skillUpgradeBoardOf(
     if (learnableSkill.skill.enhancement === undefined) {
       return []
     }
-    const enhancement = upgradeSkillOf(tree.job, learnableSkill, enhancementByName)
+    const enhancement = upgradeSkillOf(tree.job, learnableSkill, enhancementByName, levelByName)
     if (enhancement.picked === null) {
       return []
     }
