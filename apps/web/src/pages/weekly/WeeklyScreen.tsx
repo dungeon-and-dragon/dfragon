@@ -8,6 +8,7 @@ import { useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from './api/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
+import { WIDE_STICKY_TABLE_FRAME } from './sticky-head'
 import { WeeklyClearTable } from './WeeklyClearTable'
 
 const LOADING_ROWS = 5
@@ -144,7 +145,7 @@ export function WeeklyScreen({
 function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Element {
   return (
     <section aria-label="이번 주 클리어" className="section min-w-0">
-      <div className="table-scroll">{children}</div>
+      <div className={WIDE_STICKY_TABLE_FRAME}>{children}</div>
     </section>
   )
 }
