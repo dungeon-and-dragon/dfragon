@@ -779,9 +779,14 @@ try {
     undefined
   )
   assert.equal(scoredDetail.fameBands.find(({ fame }) => fame === 124000).cleared, 2)
-  assert.equal(scoredDetail.weekOverWeek.first.scores.equipment.max, 922000)
-  assert.equal(scoredDetail.weekOverWeek.first.scores.buff, null)
-  assert.deepEqual(scoredDetail.weekOverWeek.both.scores, { equipment: null, buff: null })
+  // 지난주(10-29)가 각인된 악몽 1주차 전이라 지난주 대비 그룹 점수는 계산하지 않는다.
+  assert.deepEqual(
+    [scoredDetail.weekOverWeek.first.scores, scoredDetail.weekOverWeek.both.scores],
+    [
+      { equipment: null, buff: null },
+      { equipment: null, buff: null }
+    ]
+  )
   assert.deepEqual(scoredDetail.scoreBands, {
     equipment: [{ score: 900000, population: 2, cleared: 22 }],
     buff: [{ score: 150000, population: 0, cleared: 1 }]
@@ -809,6 +814,19 @@ try {
   const challengeScored = await scoredService.contentStats('engraved-nightmare-1', '2026-11-05')
   assert.deepEqual(challengeScored.scoreBands, { equipment: [], buff: [] })
   assert.equal(challengeScored.stages, null)
+
+  // 지난주와 이번 주가 모두 1주차 뒤면 지난주 대비 그룹 점수를 계산한다. 11-12 주에 미카엘라 하드를 깬 캐릭터가 없어
+  // 11-05 주 클리어 캐릭터는 모두 이탈 그룹이고 지난주 행의 점수를 쓴다.
+  await recordContentClearPopulation(
+    client,
+    population(1000, true, 'michaela-hard', '2026-11-12T06:00:00', '2026-11-14T06:00:00')
+  )
+  const nextWeekService = new ClearStatsService(reader, reportRefreshFailure)
+  const nextWeekDetail = await nextWeekService.contentStats('michaela-hard', '2026-11-12')
+  assert.deepEqual(nextWeekDetail.weekOverWeek.left.scores, {
+    equipment: { p5: 902000, p25: 906000, median: 911000, p75: 917000, p95: 921000, max: 922000 },
+    buff: null
+  })
 } finally {
   await client.$disconnect()
 }
