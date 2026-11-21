@@ -27,6 +27,11 @@ FROM docker.io/library/node:26-bookworm-slim@sha256:86f07bc9c5dce4578cf37e5a418b
 ENV NODE_ENV=production
 ENV PORT=8080
 WORKDIR /app
+# The fleet probes this service with wget, as it did the earlier Caddy image. Keeping that probe working lets a
+# deploy move between the two images in either direction without changing the service definition first.
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=build /workspace/build-info.json /app/build-info.json
 COPY --from=build /workspace/apps/web/.output /app/.output
 USER 1000:1000
