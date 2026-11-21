@@ -2,10 +2,12 @@ import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import {
   applyMigrations,
+  countClearPopulation,
   countFameRefreshTargets,
   countInactiveCharacters,
   createDatabaseClient,
   readClearPopulation,
+  readClearPopulationPage,
   readFameRefreshTargets,
   readInactiveCharacters,
   readSampleCharactersWithoutSkillStyle,
@@ -167,6 +169,31 @@ test('클리어 모집단은 활성만 읽으면 비활성 캐릭터를 빼고, 
 
   const includingInactive = await readClearPopulation(client, 50000, 'include-inactive')
   assert.deepEqual(bakalOf(includingInactive), ['bakal/active', 'bakal/inactive'])
+
+  const everyone = { after: undefined, skip: 0, limit: 1000 }
+  const activePage = await readClearPopulationPage(
+    client,
+    { minMaxFame: 50000, activity: 'active-only' },
+    everyone
+  )
+
+  assert.deepEqual(bakalOf(activePage), ['bakal/active'])
+  assert.equal(
+    await countClearPopulation(client, { minMaxFame: 50000, activity: 'active-only' }),
+    activePage.length
+  )
+
+  const includingInactivePage = await readClearPopulationPage(
+    client,
+    { minMaxFame: 50000, activity: 'include-inactive' },
+    everyone
+  )
+
+  assert.deepEqual(bakalOf(includingInactivePage), ['bakal/active', 'bakal/inactive'])
+  assert.equal(
+    await countClearPopulation(client, { minMaxFame: 50000, activity: 'include-inactive' }),
+    includingInactivePage.length
+  )
 })
 
 test('스킬 스타일 수집 대상에서 비활성 캐릭터를 뺌', {

@@ -3,13 +3,16 @@ import test from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import type {
   ClearPopulationCharacter,
+  ClearPopulationJob,
+  ClearPopulationSelection,
   ClearRecordBackfillProgress,
   ClearRecordCursor,
   ClearRecordInput,
   CollectedCharacter,
   ContentClearCollectionProgress,
   ContentClearInput,
-  StoredClearPopulation
+  StoredClearPopulation,
+  TimelineCharacter
 } from '@dfragon/database'
 import { type NeopleClient, NeopleRequestFailure, type NeopleTimelineRow } from '@dfragon/neople'
 import { addWeeks } from 'date-fns'
@@ -169,7 +172,10 @@ const recordKey = (record: ClearRecordInput) =>
     record.name
   ])
 
-// 저장 함수의 규칙(레이드는 주마다, 챌린지는 캐릭터당 가장 이른 클리어 한 행, 마감한 주의 모집단은 바꾸지 않음)을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
+const compareCharacters = (left: TimelineCharacter, right: TimelineCharacter) =>
+  left.serverId.localeCompare(right.serverId) || left.characterId.localeCompare(right.characterId)
+
+// 저장 함수의 규칙(수집 대상은 서버, 캐릭터 순, 레이드는 주마다, 챌린지는 캐릭터당 가장 이른 클리어 한 행, 마감한 주의 모집단은 바꾸지 않음)을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
 function memoryClearStore(
   population: ClearPopulationCharacter[],
   seeded: StoredClearPopulation[] = [],
@@ -184,15 +190,42 @@ function memoryClearStore(
     lastActiveAt: new Map<string, Date>(),
     progress: undefined as ContentClearCollectionProgress | undefined
   }
-  const store: ClearCollectionRepository = {
-    readPopulation: async (minMaxFame, activity) => {
-      state.populationMinFames.push(minMaxFame)
-
-      return state.population.filter(
+  const selected = ({ minMaxFame, activity }: ClearPopulationSelection) =>
+    state.population
+      .filter(
         ({ characterId, maxFame }) =>
           maxFame >= minMaxFame &&
           (activity === 'include-inactive' || !inactiveIds.has(characterId))
       )
+      .sort(compareCharacters)
+
+  const store: ClearCollectionRepository = {
+    countPopulation: async (selection) => {
+      state.populationMinFames.push(selection.minMaxFame)
+
+      return selected(selection).length
+    },
+    readPopulationPage: async (selection, { after, skip, limit }) => {
+      state.populationMinFames.push(selection.minMaxFame)
+
+      return selected(selection)
+        .filter((member) => after === undefined || compareCharacters(member, after) > 0)
+        .slice(skip, skip + limit)
+        .map(({ serverId, characterId }) => ({ serverId, characterId }))
+    },
+    readPopulationJobs: async (minMaxFame) => {
+      const jobs = new Map<string, ClearPopulationJob>()
+      for (const { maxFame, jobId, jobGrowId, jobName, jobGrowName } of state.population) {
+        if (maxFame < minMaxFame) {
+          continue
+        }
+
+        const key = JSON.stringify([jobId, jobGrowId])
+        const job = jobs.get(key) ?? { jobId, jobGrowId, jobName, jobGrowName, count: 0 }
+        jobs.set(key, { ...job, count: job.count + 1 })
+      }
+
+      return [...jobs.values()]
     },
     readPopulations: async () => [...state.populations.values()],
     readProgress: async () => (state.progress === undefined ? undefined : { ...state.progress }),
@@ -488,6 +521,28 @@ test('거슬러 받는 수집이 도중에 끝나면 주가 바뀐 뒤 다시 �
   assert.equal(state.progress, undefined)
 })
 
+test('수집 대상이 한 번에 읽는 10,000명을 넘으면 읽은 캐릭터 다음부터 이어 읽어 모두 한 번씩 요청한다', async () => {
+  const ids = Array.from({ length: 10_001 }, (_, index) => `c${String(index).padStart(5, '0')}`)
+  const { state, store } = memoryClearStore(
+    ids.map((id) => character(id)),
+    closedPastWeeks()
+  )
+  const { neople, requests } = fakeNeople({ c10000: [michaelaHard('2026-11-07 21:15')] })
+
+  const summary = await collect(store, neople, COLLECTED_AT)
+
+  assert.deepEqual(
+    requests.map(({ characterId }) => characterId),
+    ids
+  )
+  assert.equal(summary.characters, 10_001)
+  assert.deepEqual(
+    storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
+    ['michaela-hard/c10000']
+  )
+  assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(10_001, true))
+})
+
 test('최고 명성 47,684 이상을 모두 받고, 분모와 직업별 수는 컨텐츠마다 그 입장 명성 이상인 캐릭터로 센다', async () => {
   const other = (characterId: string, maxFame: number): ClearPopulationCharacter => ({
     ...character(characterId, maxFame),
@@ -754,7 +809,7 @@ test('새 컨텐츠에 밀려난 레이드도 주가 끝날 때마다 그 주 �
 
 test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Neople에 없는 캐릭터는 건너뛴다', async () => {
   const { state, store } = memoryClearStore(
-    [character('a'), character('missing'), character('b')],
+    [character('a'), character('b'), character('missing')],
     closedPastWeeks()
   )
   const { neople, requests } = fakeNeople(
@@ -778,7 +833,7 @@ test('Neople 한도 초과면 쉬었다가 같은 캐릭터를 다시 받고, Ne
   assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS])
   assert.deepEqual(
     requests.map(({ characterId }) => characterId),
-    ['a', 'a', 'missing', 'b']
+    ['a', 'a', 'b', 'missing']
   )
   assert.deepEqual(
     storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
@@ -819,7 +874,7 @@ function collectGroup(
 
 test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 unavailable이면 쉬지 않고 그 캐릭터만 다시 받고, 세 번 연속이면 건너뛰고 나머지를 저장한다', async () => {
   const { state, store } = memoryClearStore(
-    [character('a'), character('stuck'), character('b'), character('c')],
+    [character('a'), character('a-stuck'), character('b'), character('c')],
     closedPastWeeks()
   )
   const { neople, requests } = fakeNeople(
@@ -829,7 +884,7 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 unavailable이
       c: [michaelaHard('2026-11-09 21:15')]
     },
     ({ characterId }) =>
-      characterId === 'stuck' ? new NeopleRequestFailure('unavailable') : undefined
+      characterId === 'a-stuck' ? new NeopleRequestFailure('unavailable') : undefined
   )
 
   const { summary, pauses, reports } = collectGroup(store, neople, 3)
@@ -843,7 +898,7 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 unavailable이
     skipped: 1
   })
   assert.deepEqual(pauses, [])
-  assert.equal(requests.filter(({ characterId }) => characterId === 'stuck').length, 3)
+  assert.equal(requests.filter(({ characterId }) => characterId === 'a-stuck').length, 3)
   assert.equal(requests.filter(({ characterId }) => characterId === 'a').length, 1)
   assert.deepEqual(
     storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
@@ -1385,7 +1440,8 @@ function memoryBackfillStore(
     `${serverId}/${characterId}`
   const cursors = new Map(initialCursors.map((cursor) => [cursorKey(cursor), cursor]))
   const store: ClearRecordBackfillRepository = {
-    readPopulation: memory.store.readPopulation,
+    countPopulation: memory.store.countPopulation,
+    readPopulationPage: memory.store.readPopulationPage,
     readProgress: async () => {
       if (progress.current === undefined) {
         return undefined
