@@ -23,8 +23,8 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readAdventureCharacters`, `readAdventureNames`, `readGuild`: 모험단, 길드의 캐릭터와 캐릭터의 모험단 이름을 읽습니다.
 - `readFameRanking`, `readCharacterStats`, `readJobSkillAdoption`: 명성 랭킹, 캐릭터 통계, 전직별 스킬 채택 수를 읽습니다.
 - `saveCharacterStats`, `readFamedJobGrows`, `saveJobSkillAdoption`, `deleteJobSkillAdoptionComputedBefore`: 통계 저장분을 덮어쓰고, 명성 있는 캐릭터의 전직 목록을 읽고, 스킬 채택 수 저장분을 덮어쓰거나 지난 행을 지웁니다.
-- `replaceItemAdoption`, `readItemAdoption`: 세트 값을 받은 캐릭터가 낀 무기, 유일 장비 선택 수 저장분을 한 transaction에서 다시 쓰고, 직업, 전직, 역할로 거른 부위별 선택 수를 읽습니다.
-- `replaceSetAdoption`, `readSetAdoption`: 세트 값을 받은 캐릭터의 세트 선택 수 저장분을 한 transaction에서 다시 쓰고, 직업, 전직, 역할로 거른 세트 선택 수를 읽습니다.
+- `replaceItemAdoption`, `readItemAdoption`: 세트 값을 받은 캐릭터가 낀 무기, 유일 장비 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 부위별 선택 수를 읽습니다.
+- `replaceSetAdoption`, `readSetAdoption`: 세트 값을 받은 캐릭터의 세트 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 세트 선택 수를 읽습니다.
 - `readCharacterStatsSnapshot`, `readJobSkillAdoptionSnapshot`: 통계와 전직별 스킬 채택 수 저장분을 읽고, 없으면 `null`을 돌려줍니다.
 - `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`: 클리어 집계의 클리어 기록과 주별 모집단을 저장하고, 최고 명성이 하한 이상인 모집단을 읽습니다.
 - `recordLegionContentClears`: 레기온 하나와 주 하나의 클리어를 레이드, 레기온 기록 테이블에서 클리어 집계로 옮깁니다.
