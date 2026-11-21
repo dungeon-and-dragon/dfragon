@@ -1,4 +1,5 @@
 import type {
+  CharacterActivityInput,
   ClearPopulationCharacter,
   ClearRecordBackfillProgress,
   ClearRecordCursor,
@@ -21,6 +22,7 @@ export interface ClearCollectionRepository {
   recordProgress(progress: ContentClearCollectionProgress): Promise<void>
   recordClears(clears: readonly ContentClearInput[]): Promise<void>
   recordRecords(records: readonly ClearRecordInput[]): Promise<void>
+  recordActivities(activities: readonly CharacterActivityInput[]): Promise<void>
   recordPopulation(population: ContentClearPopulationInput): Promise<void>
   finishProgress(startedAt: Date): Promise<void>
 }
