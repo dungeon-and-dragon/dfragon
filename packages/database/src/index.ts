@@ -163,6 +163,7 @@ export type {
   ContentClearKind,
   ContentClearPopulationInput,
   LegionClearWeek,
+  PopulationActivity,
   StoredClearPopulation
 } from './content-clear.js'
 export {

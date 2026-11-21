@@ -5,6 +5,7 @@ import {
   countFameRefreshTargets,
   countInactiveCharacters,
   createDatabaseClient,
+  readClearPopulation,
   readFameRefreshTargets,
   readInactiveCharacters,
   recordCharacter,
@@ -118,4 +119,20 @@ test('명성 갱신 대상은 기본 정보를 받은 활성 캐릭터를 서버
     targets.find(({ characterId }) => characterId === 'c').lastActiveAt,
     at('18T21:05:00')
   )
+})
+
+test('클리어 모집단은 활성만 읽으면 비활성 캐릭터를 빼고, 비활성까지 읽으면 함께 읽음', {
+  skip: port === undefined
+}, async () => {
+  const bakalOf = (rows) => keysOf(rows).filter((key) => key.startsWith('bakal/'))
+
+  await createFetched('bakal', 'active')
+  const inactive = await createFetched('bakal', 'inactive')
+  await recordCharacterInactive(client, inactive, at('19T03:00:00'))
+
+  const activeOnly = await readClearPopulation(client, 50000, 'active-only')
+  assert.deepEqual(bakalOf(activeOnly), ['bakal/active'])
+
+  const includingInactive = await readClearPopulation(client, 50000, 'include-inactive')
+  assert.deepEqual(bakalOf(includingInactive), ['bakal/active', 'bakal/inactive'])
 })

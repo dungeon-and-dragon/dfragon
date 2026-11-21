@@ -25,8 +25,9 @@ export class DatabaseScoreCalculationRepository implements ScoreCalculationRepos
     private readonly jobName: string
   ) {}
 
+  // 비활성 캐릭터는 30일 동안 접속하지 않아 장비가 지난 계산과 같으므로 상세를 다시 받지 않는다.
   readTargets(): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, toCollectionMinFame(CLEAR_CONTENTS))
+    return readClearPopulation(this.client, toCollectionMinFame(CLEAR_CONTENTS), 'active-only')
   }
 
   readLastFinishedRun(): Promise<FinishedJobRun | undefined> {
