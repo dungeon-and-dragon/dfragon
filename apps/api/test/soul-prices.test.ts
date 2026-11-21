@@ -34,13 +34,13 @@ function recordingListing(unitPrice: (itemName: string) => number | null) {
       return null
     }
 
-    return { itemRarity: '레어', unitPrice: price }
+    return { itemId: 'synthetic-crystal', itemRarity: '레어', unitPrice: price }
   }
 
   return { calls, fetchLowestListing }
 }
 
-test('소울 결정 6종의 최저가와 종말의 계시 교환 개수를 정한 순서로 주고, 매물이 없으면 가격을 null로 둔다', async () => {
+test('소울 결정 6종의 최저가와 종말의 계시 교환 개수를 정한 순서로 주고, 매물이 없으면 가격과 itemId를 null로 둔다', async () => {
   const { fetchLowestListing } = recordingListing((itemName) =>
     itemName === '태초 소울 결정' ? null : 1000
   )
@@ -60,6 +60,17 @@ test('소울 결정 6종의 최저가와 종말의 계시 교환 개수를 정�
   assert.deepEqual(
     crystals.map(({ unitPrice }) => unitPrice),
     [1000, 1000, 1000, 1000, null, 1000]
+  )
+  assert.deepEqual(
+    crystals.map(({ itemId }) => itemId),
+    [
+      'synthetic-crystal',
+      'synthetic-crystal',
+      'synthetic-crystal',
+      'synthetic-crystal',
+      null,
+      'synthetic-crystal'
+    ]
   )
 })
 
@@ -116,11 +127,18 @@ test('경매장 조회는 이름이 같은 매물 가운데 개당 가격이 가
   )
 
   rows = [
-    { itemName: '에픽 소울 결정', itemRarity: '에픽', count: 3, unitPrice: 31_000 },
-    { itemName: '에픽 소울 결정 상자', itemRarity: '에픽', count: 1, unitPrice: 100 },
-    { itemName: '에픽 소울 결정', itemRarity: '에픽', count: 1, unitPrice: 30_500 }
+    { itemId: 'epic', itemName: '에픽 소울 결정', itemRarity: '에픽', count: 3, unitPrice: 31_000 },
+    {
+      itemId: 'box',
+      itemName: '에픽 소울 결정 상자',
+      itemRarity: '에픽',
+      count: 1,
+      unitPrice: 100
+    },
+    { itemId: 'epic', itemName: '에픽 소울 결정', itemRarity: '에픽', count: 1, unitPrice: 30_500 }
   ]
   assert.deepEqual(await fetchLowestListing('에픽 소울 결정'), {
+    itemId: 'epic',
     itemRarity: '에픽',
     unitPrice: 30_500
   })
@@ -136,10 +154,10 @@ test('경매장 조회는 이름이 같은 매물 가운데 개당 가격이 가
 test('Neople 오류와 잘못된 가격 값을 소울 결정 가격 오류로 바꾼다', async () => {
   const cases: [string, Response, SoulPriceFailureKind][] = [
     ['점검 오류 코드', jsonResponse({ error: { code: 'API002' } }, 503), 'unavailable'],
-    ['가격 없음', jsonResponse({ rows: [{ itemName: '레어 소울 결정' }] }), 'api'],
+    ['가격 없음', jsonResponse({ rows: [{ itemId: 'rare', itemName: '레어 소울 결정' }] }), 'api'],
     [
       '문자열 가격',
-      jsonResponse({ rows: [{ itemName: '레어 소울 결정', unitPrice: '1000' }] }),
+      jsonResponse({ rows: [{ itemId: 'rare', itemName: '레어 소울 결정', unitPrice: '1000' }] }),
       'api'
     ],
     ['JSON이 아닌 응답', new Response('<html>', { status: 200 }), 'api']
@@ -172,7 +190,7 @@ test('GET /items/soul-prices는 결정별 가격을, 실패하면 실패 종류�
           throw failure
         }
 
-        return { itemRarity: '유니크', unitPrice: 2400 }
+        return { itemId: 'synthetic-crystal', itemRarity: '유니크', unitPrice: 2400 }
       }
     },
     writeAccessLog: () => undefined
@@ -202,6 +220,7 @@ test('GET /items/soul-prices는 결정별 가격을, 실패하면 실패 종류�
     CRYSTAL_NAMES
   )
   assert.deepEqual(body.crystals[0], {
+    itemId: 'synthetic-crystal',
     itemName: '레어 소울 결정',
     itemRarity: '유니크',
     unitPrice: 2400,
