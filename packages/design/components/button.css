@@ -133,7 +133,7 @@
   }
 }
 
-@media (width < 600px) {
+@media (pointer: coarse) {
   .btn-sm::before {
     content: '';
     position: absolute;
