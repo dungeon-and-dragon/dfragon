@@ -181,6 +181,7 @@ function memoryClearStore(
     populations: new Map(seeded.map((stored) => [populationKey(stored), stored])),
     clears: new Map<string, ContentClearInput>(),
     records: new Map<string, ClearRecordInput>(),
+    lastActiveAt: new Map<string, Date>(),
     progress: undefined as ContentClearCollectionProgress | undefined
   }
   const store: ClearCollectionRepository = {
@@ -213,6 +214,15 @@ function memoryClearStore(
       for (const record of records) {
         if (!state.records.has(recordKey(record))) {
           state.records.set(recordKey(record), record)
+        }
+      }
+    },
+    recordActivities: async (activities) => {
+      for (const { characterId, lastActiveAt } of activities) {
+        const stored = state.lastActiveAt.get(characterId)
+
+        if (stored === undefined || stored < lastActiveAt) {
+          state.lastActiveAt.set(characterId, lastActiveAt)
         }
       }
     },
@@ -391,6 +401,25 @@ test('비활성 캐릭터는 Neople에 요청하지 않고 클리어가 없는 �
   assert.deepEqual(storedClears(state), [`michaela-hard/a/${week}/null`])
   assert.deepEqual(populationsOf(state, LAST_WEEK), everyContent(3, true))
   assert.equal(summary.characters, 2)
+})
+
+test('받은 타임라인의 가장 최근 기록이 30일 안이면 그 시각을 캐릭터의 마지막 활동으로 기록하고, 더 오래된 기록만 있거나 기록이 없으면 기록하지 않는다', async () => {
+  const { state, store } = memoryClearStore(
+    [character('recent'), character('old'), character('empty')],
+    raidFirstWeeks()
+  )
+  const { neople } = fakeNeople({
+    recent: [
+      michaelaHard('2026-11-07 21:15'),
+      legionRow('2026-11-08 21:00'),
+      nabelHard('2025-06-05 21:00')
+    ],
+    old: [nabelHard('2025-06-05 21:00')]
+  })
+
+  await collect(store, neople, COLLECTED_AT)
+
+  assert.deepEqual([...state.lastActiveAt], [['recent', at('2026-11-08T21:00')]])
 })
 
 const BACKFILL_RANGES = [
