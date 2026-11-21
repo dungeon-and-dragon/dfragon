@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
-import type { TimelineCharacter, TimelineRange, TimelineSyncState } from '@dfragon/database'
+import type {
+  TimelineCharacter,
+  TimelineEventInput,
+  TimelineItemInput,
+  TimelineRange,
+  TimelineSyncState
+} from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/index.js'
@@ -42,12 +48,16 @@ function memoryStore(initial?: TimelineSyncState) {
   let state = initial
   const replaced: TimelineRange[] = []
   const failures: TimelineSyncFailure[] = []
+  const activeAt: Date[] = []
   let successes = 0
   const store: TimelineSyncRepository = {
     readSyncState: async () => state,
     replaceRange: async (_character, range) => {
       replaced.push(range)
       state = { syncedUntil: range.end, lastSucceededAt: state?.lastSucceededAt ?? null }
+    },
+    recordActive: async (_character, lastActiveAt) => {
+      activeAt.push(lastActiveAt)
     },
     recordSuccess: async () => {
       successes++
@@ -61,6 +71,7 @@ function memoryStore(initial?: TimelineSyncState) {
     store,
     replaced,
     failures,
+    activeAt,
     successes: () => successes,
     syncedUntil: () => state?.syncedUntil
   }
@@ -303,6 +314,75 @@ test('저장이 실패하면 DB 실패를 기록하고 다음 구간을 받지 �
   assert.equal(calls, 1)
   assert.equal(fresh.successes(), 0)
   assert.deepEqual(fresh.failures, ['database'])
+})
+
+function eventAt(occurredAt: Date): TimelineEventInput {
+  return { code: 102, occurredAt, name: '캐릭터명 변경', raidName: null, data: {} }
+}
+
+function itemAt(occurredAt: Date): TimelineItemInput {
+  return {
+    code: 402,
+    occurredAt,
+    name: '아이템 증폭',
+    itemId: 'synthetic-item',
+    itemName: '합성 아이템',
+    itemRarity: '에픽',
+    data: {}
+  }
+}
+
+test('받은 타임라인의 마지막 기록이 30일 안이면 그 시각을 마지막 활동으로 기록한다', async () => {
+  const now = new Date(SEASON_START.getTime() + 200 * DAY_MS)
+  const fresh = memoryStore()
+  const older = new Date(SEASON_START.getTime() + 10 * DAY_MS)
+  const sameRangeOlder = new Date(now.getTime() - 40 * DAY_MS)
+  const latest = new Date(now.getTime() - 29 * DAY_MS)
+  const inRange = (range: TimelineRange) => (at: Date) => at > range.start && at <= range.end
+  const fetchTimeline: FetchCharacterTimeline = async (_identity, range) => {
+    const events = [sameRangeOlder, older].filter(inRange(range)).map(eventAt)
+    const items = [latest].filter(inRange(range)).map(itemAt)
+
+    return { events, items }
+  }
+
+  await new TimelineSyncService(fresh.store, fetchTimeline, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
+
+  assert.deepEqual(fresh.activeAt, [latest])
+  assert.equal(fresh.successes(), 1)
+})
+
+test('받은 타임라인의 마지막 기록이 30일 지났거나 기록이 없으면 활동을 기록하지 않는다', async () => {
+  const now = new Date(SEASON_START.getTime() + 200 * DAY_MS)
+  const idle = memoryStore()
+  const stale = new Date(now.getTime() - 30 * DAY_MS)
+  const fetchStale: FetchCharacterTimeline = async (_identity, range) => {
+    const events = stale > range.start && stale <= range.end ? [eventAt(stale)] : []
+
+    return { events, items: [] }
+  }
+
+  await new TimelineSyncService(idle.store, fetchStale, noItemDictionary, () => now).sync(
+    character,
+    unexpectedItemDictionaryFailure
+  )
+
+  assert.deepEqual(idle.activeAt, [])
+  assert.equal(idle.successes(), 1)
+
+  const empty = memoryStore()
+
+  await new TimelineSyncService(
+    empty.store,
+    async () => emptyInputs,
+    noItemDictionary,
+    () => now
+  ).sync(character, unexpectedItemDictionaryFailure)
+
+  assert.deepEqual(empty.activeAt, [])
 })
 
 const ignoredTimings: NeopleStageTimings = { record: () => undefined, markShared: () => undefined }

@@ -127,6 +127,7 @@ function memoryTimeline() {
     replaceRange: async (_character, range) => {
       replaced.push(range)
     },
+    recordActive: async () => undefined,
     recordSuccess: async () => {
       successes++
     },
