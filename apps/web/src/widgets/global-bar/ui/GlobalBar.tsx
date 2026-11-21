@@ -21,6 +21,14 @@ const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '즐겨찾기', to: '/favorites' }
 ]
 
+function isInSection(pathname: string, section: string | undefined): boolean {
+  if (section === undefined) {
+    return false
+  }
+
+  return pathname === section || pathname.startsWith(`${section}/`)
+}
+
 export function GlobalBar(): React.JSX.Element {
   const grade = useTodayGrade()
   const menuRef = useRef<HTMLElement>(null)
@@ -63,12 +71,7 @@ export function GlobalBar(): React.JSX.Element {
               key={item.to}
               to={item.to}
               activeOptions={{ includeSearch: false }}
-              aria-current={
-                item.sectionOf !== undefined &&
-                (pathname === item.sectionOf || pathname.startsWith(`${item.sectionOf}/`))
-                  ? 'page'
-                  : undefined
-              }
+              aria-current={isInSection(pathname, item.sectionOf) ? 'page' : undefined}
               className="inline-flex shrink-0 items-center px-3 text-sm font-medium whitespace-nowrap text-fg-muted no-underline transition-colors focus-ring-inset hover:text-fg aria-[current=page]:font-semibold aria-[current=page]:text-fg"
             >
               {item.label}
