@@ -88,7 +88,6 @@ export {
 export type {
   CharacterTimeline,
   TimelineAcquisition,
-  TimelineClear,
   TimelineClearCount,
   TimelineEnhancement,
   TimelinePage

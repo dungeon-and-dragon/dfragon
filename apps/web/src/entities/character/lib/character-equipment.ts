@@ -57,7 +57,6 @@ export type EquipmentRow = ItemView &
   Readonly<{
     slotName: string | null
     tune: string | null
-    exalted: boolean
     reinforce: EquipmentReinforce | null
     refine: number | null
     enchants: EnchantOption[]
@@ -194,15 +193,19 @@ function toReinforce(item: EquipmentItem): EquipmentReinforce | null {
   return { kind, value: item.reinforce }
 }
 
+// 응답의 정밀도 값 끝에 붙어 올 수 있는 퍼센트 기호다.
+const POTENCY_PERCENT_SUFFIX = /%$/
+
 function formatPotency(value: StatValue | null): string | null {
   if (value == null) {
     return null
   }
 
-  const text = String(value)
+  const text = String(value).replace(POTENCY_PERCENT_SUFFIX, '')
 
-  if (text.endsWith('%')) {
-    return text
+  // 정밀도가 다 찬 100%는 보이지 않는다(2026-11-21 저장소 소유자 결정).
+  if (Number(text) === 100) {
+    return null
   }
 
   return `${text}%`
@@ -227,7 +230,6 @@ function toEquipmentRow(item: EquipmentItem, role: EnchantRole): EquipmentRow {
     ...toItemView(item),
     slotName: item.slotName,
     tune: highestTune(item),
-    exalted: item.exaltedInfo != null,
     reinforce: toReinforce(item),
     refine,
     enchants: groupEnchant(item.enchant, role),

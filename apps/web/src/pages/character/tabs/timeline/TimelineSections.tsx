@@ -11,7 +11,6 @@ import { LoadingLine } from '#shared/ui/LoadingLine'
 import { RelativeTime } from '#shared/ui/RelativeTime'
 import {
   type TimelineAcquisition,
-  type TimelineClear,
   type TimelineClearCount,
   type TimelineEnhancement,
   enhancementKindClasses,
@@ -108,38 +107,6 @@ function ItemName({
     <span className={itemRarity != null ? raritySolidOfName(itemRarity) : undefined}>
       {itemName}
     </span>
-  )
-}
-
-export function WeeklyClears({ clears }: { clears: readonly TimelineClear[] }): React.JSX.Element {
-  const recentFirst = clears.toSorted((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt))
-
-  return (
-    <TimelineGroup
-      title="이번 주 클리어"
-      count={clears.length}
-      emptyText="이번 주 클리어 기록이 없습니다."
-    >
-      <ul className="m-0 list-none p-0">
-        {recentFirst.map((clear, index) => (
-          <li
-            key={`${clear.occurredAt}-${index}`}
-            className="flex min-h-12 items-center gap-2 border-t border-line px-4 first:border-t-0"
-          >
-            <span className={`${BADGE} bg-inset`}>{CLEAR_KIND_LABELS[clear.kind]}</span>
-            {clear.hard && <span className={HARD_BADGE}>하드</span>}
-            <span className="truncate font-semibold">{clear.name}</span>
-            {clear.modeName != null && (
-              <span className="whitespace-nowrap text-fg-muted">{clear.modeName}</span>
-            )}
-            <RelativeTime
-              at={clear.occurredAt}
-              className="ms-auto shrink-0 text-fg-subtle tabular-nums"
-            />
-          </li>
-        ))}
-      </ul>
-    </TimelineGroup>
   )
 }
 
