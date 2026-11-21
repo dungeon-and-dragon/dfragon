@@ -216,3 +216,28 @@ test('API002를 받은 key는 60초 동안 새 요청을 받지 않고, 모든 k
   assert.deepEqual(requests, ['synthetic-key-1', 'synthetic-key-1'])
   assert.deepEqual(reports, [['BATCH_NEOPLE_KEY_RESTING', { keyId: 1 }]])
 })
+
+test('key로 보낸 요청의 Neople 실패를 이유별로 세고, 꺼낸 뒤에는 비운다', async () => {
+  const answers = [
+    upstreamFailure(429, 'API002'),
+    new NeopleRequestFailure('timeout'),
+    new NeopleRequestFailure('timeout'),
+    upstreamFailure(503, 'API999')
+  ]
+  const { pool } = fakeKeys([1, 2], async () => {
+    const answer = answers.shift()
+    if (answer !== undefined) {
+      throw answer
+    }
+
+    return basic
+  })
+  await pool.refresh()
+
+  await assert.rejects(pool.neople.characterBasic(identity))
+  await assert.rejects(pool.neople.characterBasic(identity))
+  await assert.rejects(pool.neople.characterBasic(identity))
+
+  assert.equal(pool.drainFailures(), '429/API002=1,503/API999=1,timeout=2')
+  assert.equal(pool.drainFailures(), '')
+})

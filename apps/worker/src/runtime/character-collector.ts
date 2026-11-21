@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers/promises'
-import { createDatabaseClient } from '@dfragon/database'
+import { createDatabaseClient, recordWorkerEvents } from '@dfragon/database'
 import { writeAccessLogToStdout } from '@dfragon/http-server'
 import { createNeopleClient } from '@dfragon/neople'
 import {
@@ -29,10 +29,11 @@ import { JobSchedulerService } from '#application/jobs/index.js'
 import { startJobScheduler } from '#infrastructure/jobs/index.js'
 import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
 import { createWorkerJobs } from './worker-jobs.js'
+import { startWorkerEventRecorder } from './worker-events.js'
 
 const BATCH_KEY_REFRESH_MS = 5000
 
-function report(code: string, details?: Readonly<Record<string, unknown>>): void {
+function writeReport(code: string, details?: Readonly<Record<string, unknown>>): void {
   writeAccessLogToStdout(
     JSON.stringify({
       time: new Date().toISOString(),
@@ -48,6 +49,18 @@ export async function startCharacterCollector(
   configuration: ReturnType<typeof readCollectorConfiguration>
 ): Promise<never> {
   const client = createDatabaseClient(configuration.database)
+  const events = startWorkerEventRecorder({
+    recordEvents: (batch) => recordWorkerEvents(client, batch),
+    onFailure: () => {
+      writeReport('WORKER_EVENT_RECORD_FAILED')
+    }
+  })
+
+  const report = (code: string, details?: Readonly<Record<string, unknown>>) => {
+    writeReport(code, details)
+    events.record(code, details)
+  }
+
   const keyRepository = new DatabaseBatchNeopleKeyRepository(client)
   const keyPool = createBatchNeopleKeyPool({
     store: keyRepository,
@@ -62,6 +75,11 @@ export async function startCharacterCollector(
     keyPool.refresh().catch(() => {
       report('BATCH_NEOPLE_KEY_READ_FAILED')
     })
+
+    const failures = keyPool.drainFailures()
+    if (failures !== '') {
+      report('BATCH_NEOPLE_REQUEST_FAILURES', { reasons: failures })
+    }
   }, BATCH_KEY_REFRESH_MS)
 
   const { neople, readConcurrency } = keyPool
