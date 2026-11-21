@@ -3,6 +3,7 @@ import type { SetStatsFilter } from '#entities/ranking'
 import { RANKING_JOBS } from '#entities/character'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
+import { itemDetailHandlers } from './api/item-detail.handlers'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
@@ -24,6 +25,7 @@ const TWO_HOURS = 2 * 60 * 60 * 1000
 const statsHandlers = [
   setStatsHandlers.statsComputedAgo(TWO_HOURS),
   itemStatsHandlers.statsComputedAgo(TWO_HOURS),
+  itemDetailHandlers.detail,
   oathCatalog
 ]
 
