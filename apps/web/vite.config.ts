@@ -4,6 +4,7 @@ import { extname, join, normalize, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { clientNotices, uiNotices } from '@dfragon/licenses/vite'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defaultClientConditions, defineConfig, type Plugin } from 'vite'
 import { buildCommit } from './build-commit.ts'
@@ -27,6 +28,10 @@ const DEV_API_PROXY = {
   changeOrigin: true,
   rewrite: (path: string) => path.slice(API_PATH_PREFIX.length)
 }
+
+// 개발 서버의 서버 렌더링과 빌드의 shell prerender는 Node에서 route 모듈을 읽으므로, proxy와 같은 API를 주소로 준다.
+// 배포한 서버는 이 설정을 읽지 않아 DFRAGON_API_ORIGIN을 직접 받아야 한다.
+process.env.DFRAGON_API_ORIGIN ??= DEV_API_PROXY.target
 
 // 개발 서버는 DFRAGON_SKILLTAB_DIR에 데이터 묶음 폴더를 주면 그 폴더를 배포된 사이트와 같은 /skilltab/ 주소로 내준다.
 const SKILLTAB_PATH = '/skilltab/'
@@ -80,6 +85,17 @@ function localSkillTab(directory: string | undefined): Plugin {
 export default defineConfig({
   plugins: [
     tailwindcss(),
+    tanstackStart({
+      srcDirectory: 'src',
+      router: {
+        entry: 'app/router.tsx',
+        routesDirectory: 'app/routes',
+        generatedRouteTree: 'app/routeTree.gen.ts'
+      },
+      client: { entry: 'app/client.tsx' },
+      // 서버 없이 정적 파일로 서빙하므로 모든 주소가 받는 shell을 index.html로 만든다.
+      spa: { enabled: true, prerender: { outputPath: '/index.html' } }
+    }),
     react(),
     uiNotices(),
     clientNotices(),

@@ -26,6 +26,8 @@
     "@dfragon/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "catalog:",
+    "@tanstack/react-router-ssr-query": "catalog:",
+    "@tanstack/react-start": "catalog:",
     "@xstate/react": "catalog:",
     "gsap": "catalog:",
     "ky": "catalog:",
