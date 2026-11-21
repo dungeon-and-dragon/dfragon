@@ -32,7 +32,7 @@ Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infra
 | 입력 | 필수 | 내용 |
 | --- | --- | --- |
 | `CHARACTER_IMPORT_FILES` | 필수 | 캐릭터 목록 파일의 절대 경로. 여러 개면 쉼표로 잇습니다 |
-| `CHARACTER_COLLECTOR_REQUESTS_PER_SECOND` | 선택 | batch Neople key 하나의 초당 요청 수. 없으면 5입니다 |
+| `CHARACTER_COLLECTOR_REQUESTS_PER_SECOND` | 선택 | worker 전체의 초당 Neople 요청 수. key 하나는 이 값과 500 가운데 작은 값을 넘지 않습니다. 없으면 5입니다 |
 | `CHARACTER_COLLECTOR_CONCURRENCY` | 선택 | batch Neople key 하나의 동시 요청 수(1~1024). 없으면 1입니다 |
 | `SCORE_LIBRARY_FILE` | 선택 | 점수 엔진 라이브러리(macOS `libdnfscore.dylib`, Linux `libdnfscore.so`)의 절대 경로. 없으면 점수 계산 job만 실패로 끝냅니다 |
 | `SCORE_CALCULATION_SCHEDULE` | 선택 | 점수 계산 job 일정(Asia/Seoul cron 식). 없으면 수요일 22:00입니다 |
