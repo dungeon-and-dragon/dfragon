@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { SET_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 import {
   createDatabaseClient,
   readDatabaseConfiguration,
@@ -20,6 +21,11 @@ const maleCrusader = {
   jobGrowId: '37495b941da3b1661bc900e68ef3b2c6'
 }
 const blade = { jobId: 'synthetic-set-job', jobGrowId: 'synthetic-set-blade' }
+// 명성 상위 표본의 경계를 보는 직업이다. crowded 전직의 가장 낮은 캐릭터와 lone 전직의 캐릭터는 직업 안의 상위 500명에서 빠진다.
+const topJob = 'synthetic-set-top-job'
+const crowded = { jobId: topJob, jobGrowId: 'synthetic-set-crowded' }
+const lone = { jobId: topJob, jobGrowId: 'synthetic-set-lone' }
+const everyone = (query) => ({ ...query, sample: 'all' })
 const fetchedAt = new Date('2026-11-18T00:00:00Z')
 const fairy = { id: 'set-fairy', name: '소울 페어리 세트' }
 const golden = { id: 'set-golden', name: '영원히 이어지는 황금향 세트' }
@@ -67,6 +73,20 @@ try {
 
   await recordCharacterBasic(client, basic('set-blade-unfetched', blade, 80000))
 
+  // 상위 500명 경계에는 501명이 필요해 한 문장으로 넣는다. crowded의 명성은 117001부터 117501까지라 117014 이상이 488명이다.
+  await client.$executeRaw`
+    WITH adventure AS (INSERT INTO adventures (name) VALUES ('합성표본모험단') RETURNING id)
+    INSERT INTO characters (server_id, character_id, character_name, adventure_id, job_id, job_grow_id, fame,
+      equipment_set_id, equipment_set_name, sets_fetched_at)
+    SELECT 'cain', 'set-crowded-' || rank, '합성표본' || rank, adventure.id, ${crowded.jobId}, ${crowded.jobGrowId},
+      117000 + rank, CASE WHEN rank = 1 THEN 'set-low' ELSE 'set-top' END,
+      CASE WHEN rank = 1 THEN '합성 낮은 세트' ELSE '합성 상위 세트' END, ${fetchedAt}::timestamptz
+    FROM adventure, generate_series(1, ${SET_SAMPLE_TOP_COUNT + 1}) rank
+    UNION ALL
+    SELECT 'cain', 'set-lone', '합성외톨이', adventure.id, ${lone.jobId}, ${lone.jobGrowId}, 117000,
+      'set-lone', '합성 외톨이 세트', ${fetchedAt}::timestamptz
+    FROM adventure`
+
   for (const [characterId, skills] of [
     ['set-crusader-dealer', [{ name: '용기의 은총', level: 1 }]],
     ['set-crusader-buffer', [{ name: '합성버프', level: 20 }]]
@@ -87,7 +107,7 @@ try {
   const startedAt = new Date()
   await job.run({}, ignoreProgress)
 
-  const bladeAdoption = await readSetAdoption(client, blade)
+  const bladeAdoption = await readSetAdoption(client, everyone(blade))
   assert.ok(bladeAdoption.computedAt >= startedAt)
   assert.deepEqual(
     { ...bladeAdoption, computedAt: undefined },
@@ -124,9 +144,9 @@ try {
     }
   )
 
-  const crusader = await readSetAdoption(client, maleCrusader)
-  const dealer = await readSetAdoption(client, { ...maleCrusader, role: 'dealer' })
-  const buffer = await readSetAdoption(client, { ...maleCrusader, role: 'buffer' })
+  const crusader = await readSetAdoption(client, everyone(maleCrusader))
+  const dealer = await readSetAdoption(client, everyone({ ...maleCrusader, role: 'dealer' }))
+  const buffer = await readSetAdoption(client, everyone({ ...maleCrusader, role: 'buffer' }))
   assert.deepEqual(dealer.equipmentSets, [
     { setId: 'set-fairy', name: '소울 페어리 세트', count: 1 }
   ])
@@ -138,8 +158,8 @@ try {
   const roles = await client.$queryRaw`
     SELECT job_grow_id AS "jobGrowId", role, sum(count)::int AS count
     FROM set_adoption
-    WHERE (job_grow_id = ${blade.jobGrowId})
-      OR (job_grow_id = ${maleCrusader.jobGrowId} AND equipment_set_id IN ('set-fairy', 'set-golden'))
+    WHERE sample = 'all' AND ((job_grow_id = ${blade.jobGrowId})
+      OR (job_grow_id = ${maleCrusader.jobGrowId} AND equipment_set_id IN ('set-fairy', 'set-golden')))
     GROUP BY 1, 2
     ORDER BY 1, 2`
   assert.deepEqual(roles, [
@@ -162,10 +182,12 @@ try {
 
   const jobGrows = await client.$queryRaw`
     SELECT DISTINCT job_id AS "jobId", job_grow_id AS "jobGrowId" FROM set_adoption`
-  const everyone = await readSetAdoption(client, {})
-  const perJobGrow = await Promise.all(jobGrows.map((jobGrow) => readSetAdoption(client, jobGrow)))
+  const total = await readSetAdoption(client, everyone({}))
+  const perJobGrow = await Promise.all(
+    jobGrows.map((jobGrow) => readSetAdoption(client, everyone(jobGrow)))
+  )
   const perJobGrowTotal = sum(perJobGrow.map(({ sampleSize }) => ({ count: sampleSize })))
-  assert.equal(everyone.sampleSize, perJobGrowTotal)
+  assert.equal(total.sampleSize, perJobGrowTotal)
 
   const firstComputedAt = bladeAdoption.computedAt
   await recordCharacterSets(client, {
@@ -177,7 +199,7 @@ try {
     fetchedAt: new Date('2026-11-18T01:00:00Z')
   })
   await job.run({}, ignoreProgress)
-  const replaced = await readSetAdoption(client, blade)
+  const replaced = await readSetAdoption(client, everyone(blade))
   assert.deepEqual(replaced.equipmentSets, [
     { setId: 'set-fairy', name: '소울 페어리 세트', count: 3 },
     { setId: null, name: null, count: 1 }
@@ -187,8 +209,31 @@ try {
 
   assert.equal(stale, 0)
 
-  // 표본을 넣지 않는 job의 행은 기본값인 전체 표본이고, 목록에 없는 표본은 거절한다.
-  assert.deepEqual(await client.$queryRaw`SELECT DISTINCT sample FROM set_adoption`, [{ sample: 'all' }])
+  const equipmentOf = async (query) => (await readSetAdoption(client, query)).equipmentSets
+  const topSet = (count) => ({ setId: 'set-top', name: '합성 상위 세트', count })
+  const lowSet = { setId: 'set-low', name: '합성 낮은 세트', count: 1 }
+  const loneSet = { setId: 'set-lone', name: '합성 외톨이 세트', count: 1 }
+  assert.deepEqual(await equipmentOf(everyone(crowded)), [topSet(500), lowSet])
+  assert.deepEqual(await equipmentOf({ ...crowded, sample: 'top' }), [topSet(500)])
+  assert.deepEqual(await equipmentOf({ ...lone, sample: 'top' }), [loneSet])
+  assert.deepEqual(await equipmentOf({ jobId: topJob, sample: 'top' }), [topSet(500)])
+  assert.deepEqual(await equipmentOf({ jobId: topJob, sample: 'fame' }), [topSet(488)])
+  assert.equal((await readSetAdoption(client, { sample: 'top' })).sampleSize, SET_SAMPLE_TOP_COUNT)
+  // blade의 명성은 crowded보다 낮아 전체 상위 500명에는 없지만, 직업 안의 상위로는 모두 든다.
+  assert.equal(
+    (await readSetAdoption(client, { jobId: blade.jobId, sample: 'top' })).sampleSize,
+    bladeAdoption.sampleSize
+  )
+
+  // 남성 크루세이더는 500명보다 적어, 전직과 역할의 상위 표본이 전체 표본과 같다.
+  assert.equal(
+    (await readSetAdoption(client, { ...maleCrusader, sample: 'top' })).sampleSize,
+    crusader.sampleSize
+  )
+  assert.deepEqual(
+    await equipmentOf({ ...maleCrusader, role: 'dealer', sample: 'top' }),
+    dealer.equipmentSets
+  )
   await assert.rejects(
     client.$executeRaw`
       INSERT INTO set_adoption (job_id, job_grow_id, role, sample, count, computed_at)
@@ -205,7 +250,7 @@ try {
     await client.$executeRaw`ALTER TABLE set_adoption DROP CONSTRAINT synthetic_failure`
   }
 
-  assert.deepEqual(await readSetAdoption(client, blade), replaced)
+  assert.deepEqual(await readSetAdoption(client, everyone(blade)), replaced)
 } finally {
   await client.$disconnect()
 }

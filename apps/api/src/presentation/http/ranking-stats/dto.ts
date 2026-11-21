@@ -9,7 +9,7 @@ import type {
   RankingSort,
   SetAdoption
 } from '@dfragon/database'
-import { SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
+import { SET_SAMPLES, SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 import { z } from 'zod'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 import {
@@ -156,7 +156,11 @@ export const fameRankingQuery = z
 
 export type FameRankingQuery = z.infer<typeof fameRankingQuery>
 
-export const setStatsQuery = jobFilterSchema.refine(hasJobForGrow).refine(hasMaleCrusaderForRole)
+// 표본을 보내지 않는 예전 화면이 바뀌지 않게 기본값은 전체다.
+export const setStatsQuery = z
+  .object({ ...jobFilter, sample: z.enum(SET_SAMPLES).default('all') })
+  .refine(hasJobForGrow)
+  .refine(hasMaleCrusaderForRole)
 
 export const itemStatsQuery = setStatsQuery
 

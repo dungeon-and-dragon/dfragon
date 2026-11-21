@@ -11,10 +11,13 @@ function jobSearchParams(filter: SetStatsFilter): Record<string, string> {
     throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
   }
 
+  const sample = filter.sample ?? 'all'
+
   return {
     ...(filter.jobId !== undefined && { jobId: filter.jobId }),
     ...(filter.jobGrowId !== undefined && { jobGrowId: filter.jobGrowId }),
-    ...(filter.role !== undefined && { role: filter.role })
+    ...(filter.role !== undefined && { role: filter.role }),
+    sample
   }
 }
 

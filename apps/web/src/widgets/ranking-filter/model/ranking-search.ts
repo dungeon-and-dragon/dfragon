@@ -1,3 +1,4 @@
+import { SET_SAMPLES } from '@dfragon/lib'
 import { z } from 'zod'
 import { EVOLUTION_FILTER_LIMIT, ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import { maleCrusaderRoleSchema, RANKING_JOBS } from '#entities/character'
@@ -221,6 +222,15 @@ export function rankingSearchOf({
   return { ...rest, ...items, ...evolutionSearch }
 }
 
-export function parseJobSearch(search: Record<string, unknown>): SetStatsFilter {
-  return jobFilterOf(searchSchema.parse(search))
+const setSampleSchema = z.enum(SET_SAMPLES).optional().catch(undefined)
+
+// 전체가 기본 표본이라 주소에는 그 밖의 표본만 둔다.
+export function parseSetStatsSearch(search: Record<string, unknown>): SetStatsFilter {
+  const sample = setSampleSchema.parse(search.sample)
+  const jobFilter = jobFilterOf(searchSchema.parse(search))
+
+  return {
+    ...jobFilter,
+    ...(sample !== undefined && sample !== 'all' && { sample })
+  }
 }
