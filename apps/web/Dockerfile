@@ -21,14 +21,14 @@ RUN pnpm --filter @dfragon/web build
 COPY scripts/server-build-info.mjs scripts/server-build-info.mjs
 RUN node scripts/server-build-info.mjs web "$SOURCE_COMMIT" /workspace/build-info.json
 
-# The deploy helper runs this container as 1000:1000 with a read-only root, no capabilities and a tmpfs /tmp,
-# so Caddy keeps its config and data under /tmp and listens on an unprivileged port.
-FROM docker.io/library/caddy:2.11.9-alpine@sha256:0bbb055bda6793c999bde78b1b5ce3e89f829fb031af2cf50056ea1246559fee AS runtime
-ENV XDG_CONFIG_HOME=/tmp
-ENV XDG_DATA_HOME=/tmp
-COPY apps/web/Caddyfile /etc/caddy/Caddyfile
+# The deploy helper runs this container as 1000:1000 with a read-only root, no capabilities and a tmpfs /tmp.
+# The Nitro server needs no writable path and listens on an unprivileged port.
+FROM docker.io/library/node:26-bookworm-slim@sha256:86f07bc9c5dce4578cf37e5a418b7bfc7f817cda25cde66e2b66e95ed86c4567 AS runtime
+ENV NODE_ENV=production
+ENV PORT=8080
+WORKDIR /app
 COPY --from=build /workspace/build-info.json /app/build-info.json
-COPY --from=build /workspace/apps/web/dist/client /srv
+COPY --from=build /workspace/apps/web/.output /app/.output
 USER 1000:1000
 EXPOSE 8080
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+CMD ["node", ".output/server/index.mjs"]
