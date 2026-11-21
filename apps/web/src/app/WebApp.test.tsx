@@ -1374,7 +1374,7 @@ it('상세의 하트로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐�
   await act(async () => globalMenuLink('즐겨찾기').click())
 
   await waitForPath('/favorites')
-  expect(container.querySelector('main h1')?.textContent).toBe('즐겨찾기')
+  expect(container.querySelector('main h1')).toBeNull()
   expect(favoriteRows()).toEqual([DETAIL_PATH])
   const unfavorite = container.querySelector<HTMLButtonElement>(
     'section[aria-label="즐겨찾기한 캐릭터"] button[aria-label="즐겨찾기 해제"]'
