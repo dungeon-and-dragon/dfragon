@@ -188,3 +188,21 @@ it('주소의 evolutions와 랭킹 필터의 개화 목록을 서로 바꾸고, 
   })
   expect(rankingSearchOf({ ...growFilter, evolutions: [] })).toEqual(growFilter)
 })
+
+it('검색 기준이 점수면 점수 범위만, 명성이면 명성 범위만 읽고, 모르는 기준과 거꾸로 된 점수 범위는 버린다', () => {
+  expect(
+    parseRankingSearch({
+      sort: 'equipmentScore',
+      scoreFrom: 1300000,
+      scoreTo: 1400000,
+      fameFrom: 136000
+    })
+  ).toEqual({ sort: 'equipmentScore', scoreFrom: 1300000, scoreTo: 1400000 })
+  expect(parseRankingSearch({ fameFrom: 136000, scoreFrom: 1300000 })).toEqual({
+    fameFrom: 136000
+  })
+  expect(parseRankingSearch({ sort: 'fame', fameTo: 138000 })).toEqual({ fameTo: 138000 })
+  expect(parseRankingSearch({ sort: 'buffScore', scoreFrom: 240000, scoreTo: 200000 })).toEqual({
+    sort: 'buffScore'
+  })
+})
