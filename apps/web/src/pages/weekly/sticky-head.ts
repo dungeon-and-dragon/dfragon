@@ -5,3 +5,12 @@ export const STICKY_HEAD = 'bg-canvas sm:sticky sm:top-(--sticky-head-top,0px) s
 
 // border-collapse 표에서는 sticky 헤더의 border가 따라 움직이지 않아 아래 선을 shadow로 그린다.
 export const STICKY_HEAD_CELL = 'sm:border-b-0 sm:shadow-[inset_0_-1px_0_var(--color-line)]'
+
+// table-wide 표는 최소 720px이라, 그보다 좁은 창에서는 가로 스크롤을 남기고 표가 다 들어가는 768px부터 헤더를 붙인다.
+export const WIDE_STICKY_TABLE_FRAME = 'max-[768px]:overflow-x-auto'
+
+export const WIDE_STICKY_HEAD =
+  'bg-canvas min-[768px]:sticky min-[768px]:top-0 min-[768px]:z-raised'
+
+export const WIDE_STICKY_HEAD_CELL =
+  'min-[768px]:border-b-0 min-[768px]:shadow-[inset_0_-1px_0_var(--color-line)]'
