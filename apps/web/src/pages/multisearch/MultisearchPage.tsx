@@ -1,8 +1,8 @@
-import { getRouteApi } from '@tanstack/react-router'
 import { useEffect, useEffectEvent, type KeyboardEvent } from 'react'
 import { GameBar } from './components/GameBar'
 import { ScreenShareChip } from './components/ScreenShareChip'
 import {
+  useBrowserHost,
   useScreenCaptureContext,
   useSearchModeStore,
   type AutoRoundSignal,
@@ -10,7 +10,6 @@ import {
 } from '#features/capture-search'
 import { SearchScreen } from './SearchScreen'
 
-const route = getRouteApi('/multisearch')
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 
 function isTextField(target: EventTarget | null): boolean {
@@ -62,7 +61,7 @@ function AutoRounds({ host }: { host: BrowserHost }): null {
 // 표 상태는 라우터 위의 ScreenCaptureProvider와 store가 가지므로 멀티서치를 떠나며 unmount해도 남는다. 붙여넣기와
 // 자동 인식 회차는 이 화면이 그려진 동안에만 구독한다.
 export function MultisearchPage(): React.JSX.Element {
-  const { host } = route.useRouteContext()
+  const host = useBrowserHost()
 
   return <MultisearchBoard host={host} />
 }

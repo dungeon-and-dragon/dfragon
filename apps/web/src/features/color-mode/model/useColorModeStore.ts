@@ -29,7 +29,7 @@ export const useColorModeStore = create<
       changeColorMode: (colorMode) => set({ colorMode })
     }),
     {
-      // apps/web/index.html의 첫 그리기 전 script가 이 key와 zustand persist 형식({ state, version })을 직접 읽는다.
+      // apps/web/src/app/RootDocument.tsx의 첫 그리기 전 script가 이 key와 zustand persist 형식({ state, version })을 직접 읽는다.
       name: 'dfragon:color-mode',
       version: COLOR_MODE_VERSION,
       partialize: ({ colorMode }) => ({ colorMode }),

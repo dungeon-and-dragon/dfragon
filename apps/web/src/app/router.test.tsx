@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { HttpResponse, http } from 'msw'
-import { act } from 'react'
+import { RouterProvider } from '@tanstack/react-router'
+import { act, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import neopleOpenApiColorLogo from '#shared/assets/neople-open-api-color.png'
@@ -8,6 +9,7 @@ import neopleOpenApiGrayLogo from '#shared/assets/neople-open-api-gray.png'
 import { useFavoriteCharacterStore } from '#features/favorite-character'
 import { useMyAdventureStore } from '#entities/adventure-guild'
 import {
+  BrowserHostContext,
   useSearchModeStore,
   installBrowserHost,
   type AutoRoundSignal,
@@ -17,13 +19,14 @@ import {
   readTownIndicatorTemplate,
   WEB_CAPTURE_TEXTS
 } from '#features/capture-search'
-import { WebApp } from './WebApp'
+import { getRouter } from './router'
 import { CHARACTER_SERVER_NAMES, type CharacterCandidate, RANKING_JOBS } from '#entities/character'
 import { WEB_SCREEN_WATCH_TEXTS } from '#pages/multisearch'
 import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import { soulPricesHandlers } from '#pages/home/api/soul-prices.handlers'
+import { characterStatsHandlers } from '#pages/stats/api/stats.handlers'
 import { skillStatsHandlers } from '#entities/ranking/api/skill-stats.handlers'
 import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { server } from '#testing/test-support/msw-server'
@@ -40,7 +43,24 @@ vi.mock('#features/capture-search/lib/screen-watch/browser-town-template', () =>
   readTownIndicatorTemplate: vi.fn()
 }))
 
+// html, head, body를 그리는 문서 틀은 테스트 container 안에 둘 수 없어 내용만 그린다.
+vi.mock('#app/RootDocument', () => ({
+  RootDocument: ({ children }: { children: React.ReactNode }) => children
+}))
+
 const API_BASE_URL = 'https://site.example.test/api'
+
+// 브라우저 진입점(client.tsx)처럼 host를 router 위에 둔다.
+function WebApp({ host }: { host: BrowserHost }): React.JSX.Element {
+  const [router] = useState(getRouter)
+
+  return (
+    <BrowserHostContext value={host}>
+      <RouterProvider router={router} />
+    </BrowserHostContext>
+  )
+}
+
 const pastedImage = { width: 1, height: 1, rgba: new Uint8Array([0, 0, 0, 255]) }
 
 function pasteImage(): void {
@@ -194,6 +214,36 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   )
   expect(container.querySelectorAll('tr[aria-label*="번 자리"]')).toHaveLength(4)
   expect(requested.map(String)).toContain(`${SITE_API_URL}/items/today-grade`)
+})
+
+it('화면 밖에 빌드 commit을 두고 숨긴 라벨과 함께 빌드 commit으로 읽히게 한다', async () => {
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const label = [...container.querySelectorAll('span')].find(
+    (span) => span.textContent === '빌드 '
+  )!
+
+  const buildCommit = label.parentElement!
+
+  expect(buildCommit.textContent).toBe(`빌드 ${__BUILD_COMMIT__}`)
+  expect(buildCommit.closest('footer, a, header, main')).toBeNull()
+})
+
+it('통계 화면의 표본 정보를 화면 밖 빌드 commit 위에 둔다', async () => {
+  window.history.replaceState(null, '', '/stats')
+  server.use(characterStatsHandlers.stats)
+
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(
+      [...container.querySelectorAll('div')].some(
+        (element) =>
+          element.closest('main, header, footer') === null &&
+          /^캐릭터 [\d,]+, 마지막 업데이트 /.test(element.textContent)
+      )
+    ).toBe(true)
+  )
 })
 
 it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 멀티서치 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
