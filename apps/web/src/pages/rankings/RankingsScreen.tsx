@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import type { ItemStats } from '#entities/ranking'
-import { TitleBox } from '#shared/ui/TitleBox'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import {
   type FameRankingFilter,
@@ -127,7 +126,6 @@ export function RankingsScreen({
 
   return (
     <div className="flex flex-col">
-      <TitleBox title="검색" />
       <RankingFilterBox
         filter={filter}
         onChange={onFilterChange}

@@ -234,7 +234,6 @@ it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두�
   ])
   const total = rowsOf('장비 세트').reduce((sum, [, share]) => sum + Number.parseFloat(share), 0)
   expect(total).toBe(100)
-  expect(container.querySelector('header .stat-value')?.textContent).toBe('8')
 })
 
 it('서약 세트 아래 카탈로그 순서로 선택지를 펼쳐 왼쪽, 가운데, 오른쪽으로 부르고, 아무도 고르지 않은 선택지는 0%이며 세트 안 비율의 합이 100%다', async () => {
@@ -312,7 +311,7 @@ it('조합은 두 세트를 함께 랭킹에 붙이고, 한쪽이라도 세트�
 it('저장분이 없으면 집계 시각 없이 상자마다 세트 통계가 없다고 알린다', async () => {
   await render({ setStats: setStatsHandlers.empty })
 
-  expect(container.querySelector('header')?.textContent).toBe('세트 통계')
+  expect(container.querySelector('header')).toBeNull()
   expect([...container.querySelectorAll('section p')].map((p) => p.textContent)).toEqual([
     '세트 통계가 없습니다.',
     '세트 통계가 없습니다.',

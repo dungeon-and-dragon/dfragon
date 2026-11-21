@@ -1,4 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { StatsTabs } from '#widgets/stats-tabs'
 import { ClearOverviewScreen } from './ClearOverviewScreen'
 
 const route = getRouteApi('/clears')
@@ -20,5 +21,10 @@ export function ClearsPage(): React.JSX.Element {
     })
   }
 
-  return <ClearOverviewScreen week={week} onWeekSelect={selectWeek} onContentOpen={openContent} />
+  return (
+    <div className="flex flex-col">
+      <StatsTabs />
+      <ClearOverviewScreen week={week} onWeekSelect={selectWeek} onContentOpen={openContent} />
+    </div>
+  )
 }

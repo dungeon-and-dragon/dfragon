@@ -1,16 +1,13 @@
-import { RelativeTime } from '#shared/ui/RelativeTime'
 import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
-import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { type OathCatalog, useOathCatalog } from '#entities/catalog'
 import { type SetStats, type SetStatsFilter, useSetStats } from '#entities/ranking'
 import { ItemStatsBoxes } from './ItemStatsBoxes'
+import { StatsNote } from './StatsNote'
 import { SetStatsFilterBox } from './SetStatsFilterBox'
-import { StatsTabs } from './StatsTabs'
+import { StatsTabs } from '#widgets/stats-tabs'
 import { comboBars, equipmentSetBars, formatShare, oathSetBars } from './set-stats-bars'
 
-const integer = new Intl.NumberFormat('ko-KR')
-const TITLE = '세트 통계'
 const EMPTY = '세트 통계가 없습니다.'
 const FAILED = '세트 통계를 받지 못했습니다.'
 const BOX_NAMES = {
@@ -107,7 +104,6 @@ function SetStatsBody({
   if (result.status === 'error') {
     return (
       <>
-        <TitleBox title={TITLE} />
         {filterBox}
         <p role="alert" className="section state state-error">
           {FAILED}
@@ -123,7 +119,6 @@ function SetStatsBody({
         <span role="status" className="sr-only">
           세트 통계를 받는 중입니다.
         </span>
-        <TitleBox title={TITLE} />
         {filterBox}
         <div aria-hidden="true">
           {SKELETON_ROWS.map((row) => (
@@ -147,19 +142,10 @@ function SetStatsBody({
 
   return (
     <>
-      <TitleBox title={TITLE}>
-        {stats.computedAt !== null && (
-          <>
-            <TitleStat label="캐릭터" value={integer.format(stats.sampleSize)} />
-            <TitleStat
-              label="마지막 업데이트 시간"
-              value={<RelativeTime at={stats.computedAt} />}
-              numeric={false}
-            />
-          </>
-        )}
-      </TitleBox>
       {filterBox}
+      {stats.computedAt !== null && (
+        <StatsNote count={stats.sampleSize} computedAt={stats.computedAt} />
+      )}
       {setBoxRowsOf(stats, oathCatalog, filter).map((row) => (
         <div key={row.map(({ name }) => name).join()} className={rowClass(row.length)}>
           {row.map((box) => (
