@@ -56,22 +56,24 @@ export function weaponBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
   return [...bars, { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }]
 }
 
+// 응답은 아무도 끼지 않은 부위를 빼므로, 그 부위도 0명으로 보이도록 부위를 따로 둔다.
+const UNIQUE_ITEM_SLOTS = ['RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
+
 // 유일 장비는 지금 부위마다 한 종뿐이라 부위마다 착용 인원 한 줄로 보인다.
 // 한 부위에 여러 종이 생기면 itemIds가 모두 낀 캐릭터만 거르므로 랭킹으로 잇지 않는다.
 export function uniqueItemBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
-  return stats.slots
-    .filter(({ slotId }) => slotId !== WEAPON_SLOT)
-    .map(({ slotId, items }) => {
-      const value = items.reduce((sum, { count }) => sum + count, 0)
-      const name = `${itemSlotName(slotId)} 유일 장비 착용`
-      const [only] = items
+  return UNIQUE_ITEM_SLOTS.map((slotId) => {
+    const items = stats.slots.find((slot) => slot.slotId === slotId)?.items ?? []
+    const value = items.reduce((sum, { count }) => sum + count, 0)
+    const name = itemSlotName(slotId)
+    const [only] = items
 
-      if (items.length !== 1 || only === undefined) {
-        return { key: slotId, name, value }
-      }
+    if (items.length !== 1 || only === undefined) {
+      return { key: slotId, name, value }
+    }
 
-      const link = rankingLink(filter, { itemIds: only.itemId })
+    const link = rankingLink(filter, { itemIds: only.itemId })
 
-      return { key: slotId, name, value, link }
-    })
+    return { key: slotId, name, value, link }
+  })
 }
