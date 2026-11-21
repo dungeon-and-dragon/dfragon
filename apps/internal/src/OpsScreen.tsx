@@ -50,7 +50,7 @@ export function OpsScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center overflow-x-clip bg-canvas font-sans text-sm text-fg">
+    <div className="flex min-h-dvh flex-col items-center overflow-x-clip bg-canvas font-sans text-sm text-fg">
       <OpsHeader workerSeenAt={jobs.data?.workerSeenAt} readAt={readAt} onRefresh={handleRefresh} />
       <main className="page page-wide screen">
         <CollectionPanel />
