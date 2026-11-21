@@ -7,6 +7,7 @@ import {
   type FameRankingFilter,
   type FameRankingSetFilter,
   type SetStats,
+  type SkillEvolutionChoice,
   useItemStats,
   useSetStats
 } from '#entities/ranking'
@@ -16,6 +17,7 @@ import {
   type FilterRow,
   RankingFilterBox,
   UniqueItemSelect,
+  useSkillEvolutionRow,
   WeaponSelect,
   RankingSetFilter,
   itemChoicesOf,
@@ -61,7 +63,16 @@ export function RankingsScreen({
   }, [dropsItems, filter, keptItemIds, onFilterChange])
 
   function changeSets(sets: FameRankingSetFilter): void {
-    onFilterChange({ jobId, jobGrowId, role, ...sets, itemIds: filter.itemIds, fameFrom, fameTo })
+    onFilterChange({
+      jobId,
+      jobGrowId,
+      role,
+      ...sets,
+      itemIds: filter.itemIds,
+      evolutions: filter.evolutions,
+      fameFrom,
+      fameTo
+    })
   }
 
   function changeFame(range: FameRankingFameRange): void {
@@ -71,6 +82,12 @@ export function RankingsScreen({
   function changeItems(next: readonly string[]): void {
     onFilterChange({ ...filter, itemIds: next })
   }
+
+  function changeEvolutions(next: readonly SkillEvolutionChoice[]): void {
+    onFilterChange({ ...filter, evolutions: next })
+  }
+
+  const evolutionRow = useSkillEvolutionRow(filter, changeEvolutions)
 
   function resetFilter(): void {
     onFilterChange({})
@@ -89,6 +106,7 @@ export function RankingsScreen({
       label: '유일 장비',
       content: <UniqueItemSelect choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
     },
+    ...(evolutionRow !== null ? [evolutionRow] : []),
     {
       label: '명성',
       content: (

@@ -7,6 +7,8 @@ export type LoadedResult<Value> =
 
 type LoadedResultOptions = Readonly<{
   keepPreviousWhile?: (previousKey: QueryKey) => boolean
+  // false인 동안은 받지 않고 받는 중으로 둔다.
+  enabled?: boolean
 }>
 
 const LOADING = { status: 'loading' } as const
@@ -18,11 +20,12 @@ const LOADING = { status: 'loading' } as const
 export function useLoadedResult<Value>(
   queryKey: QueryKey,
   load: () => Promise<Value>,
-  { keepPreviousWhile }: LoadedResultOptions = {}
+  { keepPreviousWhile, enabled = true }: LoadedResultOptions = {}
 ): LoadedResult<Value> {
   const { data, error } = useQuery({
     queryKey,
     queryFn: load,
+    enabled,
     placeholderData: (previous, previousQuery) => {
       if (previousQuery === undefined || keepPreviousWhile?.(previousQuery.queryKey) !== true) {
         return undefined
