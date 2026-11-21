@@ -117,3 +117,19 @@ it('저장분이 없으면 세트 통계가 없다고 알린다', async () => {
   )
   expect(container.querySelector(`section[aria-label="${BOX}"]`)).toBeNull()
 })
+
+it('받는 중에는 조합 상자 제목과 skeleton을 보인다', async () => {
+  server.use(setStatsHandlers.loading)
+  await act(async () =>
+    root.render(
+      <TestQueryClient>
+        <TestRouter>
+          <ComboStatsScreen filter={JOB_FILTER} onFilterChange={vi.fn()} />
+        </TestRouter>
+      </TestQueryClient>
+    )
+  )
+
+  const box = container.querySelector(`[aria-hidden="true"] section[aria-label="${BOX}"]`)
+  expect(box?.querySelector('.skeleton')).not.toBeNull()
+})
