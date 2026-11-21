@@ -5,7 +5,6 @@ import { ItemRowBars } from './ItemRowBars'
 import { FULL_SHARE, formatShare } from './set-stats-bars'
 import { type WeaponType, weaponTypesOf } from './weapon-stats-bars'
 
-const TITLE = '무기 통계'
 const SKELETON_NAME = '무기'
 const SKELETON_ROWS = 2
 const EMPTY = '아이템 통계가 없습니다.'
@@ -53,7 +52,6 @@ export function WeaponStatsScreen({
 
   return (
     <StatsScreenFrame
-      title={TITLE}
       result={result}
       filter={filter}
       onFilterChange={onFilterChange}
