@@ -270,9 +270,17 @@ const raid = (characterId: string, occurredAt: string, raidName: string) =>
 const legion = (characterId: string, occurredAt: string, regionName: string) =>
   clearEvent(characterId, occurredAt, { code: 209, raidName: null, data: { regionName } })
 
+const syntheticEquipmentSet = { id: 'synthetic-set', name: '합성 세트' }
+const syntheticOathSet = { id: 16204, name: '합성 서약', option: '합성 선택지' }
+
 test('주간 클리어는 고정한 레이드, 레기온 열에 목요일 06:00부터의 클리어만 표시한다', () => {
+  const noSets = { equipmentSet: null, oathSet: null }
   const weekly = toAdventureWeeklyClears(
-    [member('a', 70000), member('b', 60000), member('none', null)],
+    [
+      { ...member('a', 70000), equipmentSet: syntheticEquipmentSet, oathSet: syntheticOathSet },
+      { ...member('b', 60000), ...noSets },
+      { ...member('none', null), ...noSets }
+    ],
     [
       raid('a', '2026-11-05T05:59:00+09:00', '무너진 성자 미카엘라'),
       legion('a', '2026-11-05T06:00:00+09:00', '아포칼립스'),
@@ -305,7 +313,21 @@ test('주간 클리어는 고정한 레이드, 레기온 열에 목요일 06:00�
       ['none', []]
     ]
   )
-  assert.deepEqual(weekly.characters.at(-1), { ...memberRow('none', null, null), weeklyClears: [] })
+  assert.deepEqual(weekly.characters.at(0), {
+    ...memberRow('a', 70000, null),
+    equipmentSet: syntheticEquipmentSet,
+    oathSet: syntheticOathSet,
+    weeklyClears: [
+      { kind: 'raid', name: '디레지에 레이드' },
+      { kind: 'legion', name: '아포칼립스' }
+    ]
+  })
+  assert.deepEqual(weekly.characters.at(-1), {
+    ...memberRow('none', null, null),
+    equipmentSet: null,
+    oathSet: null,
+    weeklyClears: []
+  })
 })
 
 test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝나기를 기다리지 않는다', async () => {
@@ -316,6 +338,8 @@ test('주간 클리어 조회는 캐릭터마다 동기화를 요청하고 끝�
   })
   const characters = [memberRow('a', 70000, null), memberRow('b', null, null)].map((character) => ({
     ...character,
+    equipmentSet: null,
+    oathSet: null,
     weeklyClears: []
   }))
   const { app, origin } = await listen(

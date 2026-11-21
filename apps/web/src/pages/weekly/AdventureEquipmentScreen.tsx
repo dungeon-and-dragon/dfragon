@@ -1,5 +1,5 @@
 import { Button, ChipGroup } from '@dfragon/ui'
-import { type CSSProperties, type Ref, type RefCallback, useCallback, useState } from 'react'
+import type { CSSProperties, Ref } from 'react'
 import {
   type AdventureEquipment,
   type EquipmentSelection,
@@ -11,35 +11,10 @@ import { AdventureTabs } from './AdventureTabs'
 import { useAdventureEquipment, useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { EquipmentSection, EquipmentSkeleton, OathSection } from './EquipmentBoard'
 import type { EquipmentSearch } from './equipment-search'
+import { adventureTabsHeight } from './sticky-head'
+import { useObservedHeight } from './use-observed-height'
 
 type Selection = Readonly<{ serverId: string; setItemId: string | undefined }>
-
-function useObservedHeight(): [RefCallback<HTMLElement>, number] {
-  const [height, setHeight] = useState(0)
-  const observe = useCallback((element: HTMLElement | null) => {
-    if (element === null) {
-      return
-    }
-
-    const target = element
-
-    function measure(): void {
-      setHeight(target.offsetHeight)
-    }
-
-    measure()
-
-    const observer = new ResizeObserver(measure)
-    observer.observe(target)
-
-    return () => {
-      observer.disconnect()
-      setHeight(0)
-    }
-  }, [])
-
-  return [observe, height]
-}
 
 function serverLabel(serverId: string): string {
   const names: Readonly<Record<string, string | undefined>> = serverNames
@@ -111,7 +86,7 @@ function EquipmentPickers({
   return (
     <div
       ref={ref}
-      className="section flex flex-col gap-3 bg-canvas px-4 sm:sticky sm:top-0 sm:z-sticky"
+      className="section flex flex-col gap-3 bg-canvas px-4 sm:sticky sm:top-(--adventure-tabs-height,0px) sm:z-sticky"
     >
       {servers.length > 1 && (
         <PickerRow label="서버">
@@ -188,7 +163,9 @@ function EquipmentBody({
         equipment.servers.find(({ serverId }) => serverId === selected.serverId)?.characters ?? []
       const rows = toEquipmentBoard(characters, selected.setItemId ?? undefined)
       const selection = chipSelection(equipment, search, selected)
-      const stickyTop = { '--sticky-head-top': `${pickersHeight}px` } as CSSProperties
+      const stickyTop = {
+        '--sticky-head-top': `calc(var(--adventure-tabs-height, 0px) + ${pickersHeight}px)`
+      } as CSSProperties
 
       return (
         <div style={stickyTop}>
@@ -215,9 +192,11 @@ export function AdventureEquipmentScreen({
   search: EquipmentSearch
   onSearchChange: (search: EquipmentSearch) => void
 }): React.JSX.Element {
+  const [observeTabs, tabsHeight] = useObservedHeight()
+
   return (
-    <div className="flex flex-col">
-      <AdventureTabs adventureName={adventureName} />
+    <div className="flex flex-col" style={adventureTabsHeight(tabsHeight)}>
+      <AdventureTabs ref={observeTabs} adventureName={adventureName} />
       <header className="section screen-head">
         <h1 className="screen-title">{adventureName}</h1>
       </header>

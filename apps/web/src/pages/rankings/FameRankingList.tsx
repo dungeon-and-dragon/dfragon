@@ -1,6 +1,5 @@
 import { Button, Pagination } from '@dfragon/ui'
 import { useState } from 'react'
-import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { OathCatalog } from '#entities/catalog'
 import {
   type Affiliation,
@@ -17,7 +16,7 @@ import {
   type FameRankingPages,
   useFameRanking
 } from '#entities/ranking'
-import { rankingName, rankingSetLines } from '#widgets/ranking-filter'
+import { RankingSetLines, rankingName } from '#widgets/ranking-filter'
 
 const PAGE_SIZE = 20
 const LOADING_ROWS = 5
@@ -28,28 +27,8 @@ const AFFILIATIONS: readonly Affiliation[] = ['adventure']
 function setColumnOf(catalog: OathCatalog | null): CharacterTableDetail<RankedCharacter> {
   return {
     name: '세트',
-    render: (row) => <SetLines row={row} catalog={catalog} />
+    render: (row) => <RankingSetLines character={row} catalog={catalog} />
   }
-}
-
-function SetLines({
-  row,
-  catalog
-}: {
-  row: RankedCharacter
-  catalog: OathCatalog | null
-}): React.JSX.Element {
-  const { equipment, oath } = rankingSetLines(row, catalog)
-  if (equipment === null && oath === null) {
-    return <span className="text-fg-subtle">{MISSING_VALUE}</span>
-  }
-
-  return (
-    <span className="flex min-w-0 flex-col">
-      <span className="truncate leading-4">{equipment ?? MISSING_VALUE}</span>
-      <span className="truncate text-xs leading-4 text-fg-muted">{oath ?? MISSING_VALUE}</span>
-    </span>
-  )
 }
 
 export function FameRankingList({
