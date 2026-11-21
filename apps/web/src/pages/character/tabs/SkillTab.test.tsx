@@ -249,7 +249,7 @@ it('스킬 창 데이터가 있는 전직은 배치에 아이콘을 두고 배�
     requested.filter(({ pathname }) => pathname.startsWith('/skilltab/')).map(({ href }) => href)
   ).toEqual([SKILL_WINDOW_INDEX_URL, new URL('jobs/at_priest.json', SKILL_WINDOW_INDEX_URL).href])
   expect(iconTexts()).toEqual([
-    ['기본기 숙련', spriteAt('0px 0px'), 'Lv 115'],
+    ['기본기 숙련', spriteAt('0px 0px'), '115'],
     ['배우지 않은 스킬', spriteAt('-28px 0px'), '']
   ])
   expect(container.querySelector('[aria-label="배운 스킬"]')).toBeNull()

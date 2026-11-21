@@ -122,7 +122,7 @@ function SkillIcon({
         className="num font-semibold whitespace-nowrap text-fg-muted select-none"
         style={LEVEL_SIZE}
       >
-        {icon.learned && icon.level !== null ? `Lv ${icon.level}` : ''}
+        {icon.learned && icon.level !== null ? `${icon.level}` : ''}
       </span>
     </SkillAdoptionHover>
   )
