@@ -25,7 +25,7 @@ const CHANGE_SKELETON_HEIGHTS = ['h-[32px]', 'h-[38px]', 'h-[38px]', 'h-[38px]']
 type ScoreLabel = ReturnType<typeof toScoreView>['label']
 
 const LINE = 'border-b border-line'
-const POINT_COLUMNS = 'grid grid-cols-[400px_minmax(0,1fr)] max-sm:grid-cols-1'
+const POINT_COLUMNS = 'grid grid-cols-[400px_minmax(0,1fr)] max-md:grid-cols-1'
 const FAME = 'text-game-fame'
 const STRIP = `box-border flex min-h-12 items-center px-4 py-2 ${LINE}`
 const DELTA_TONES = { up: 'text-game-increase', down: 'text-game-decrease' } as const
@@ -108,7 +108,7 @@ function HistoryContent({
       />
       <Heading title="시점" count={points.length} />
       <div className={`${POINT_COLUMNS} ${LINE}`}>
-        <ul className="m-0 flex list-none flex-col border-e border-line p-0 max-sm:border-e-0">
+        <ul className="m-0 flex list-none flex-col border-e border-line p-0 max-md:border-e-0">
           {points.map((point) => (
             <PointButton
               key={point.observedAt}

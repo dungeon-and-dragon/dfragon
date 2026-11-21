@@ -21,7 +21,7 @@ const iconButton =
   'inline-flex h-full shrink-0 cursor-pointer items-center justify-center text-fg-muted focus-ring-inset hover:text-fg'
 const SIZE_CLASSES = {
   medium: {
-    box: 'h-control-sm w-[264px] max-sm:w-auto max-sm:min-w-0 max-sm:flex-1',
+    box: 'h-control-sm w-[264px] max-md:w-auto max-md:min-w-0 max-md:flex-1',
     server: 'gap-1 px-2 text-sm',
     divider: 'h-4',
     input: 'px-2 text-sm',

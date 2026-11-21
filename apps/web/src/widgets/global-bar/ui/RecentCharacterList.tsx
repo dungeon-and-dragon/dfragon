@@ -83,7 +83,7 @@ export function RecentCharacterList({
             <SavedCharacterSections input={input} onPick={onClose} />
           </div>
         ) : (
-          <div className="box-border max-h-[calc(min(480px,var(--available-height))-2px)] w-[418px] overflow-y-auto py-1">
+          <div className="box-border max-h-[calc(min(480px,var(--available-height))-2px)] w-[min(418px,calc(var(--available-width)-2px))] overflow-y-auto py-1">
             <h3 className={titleClass}>최근 본 캐릭터</h3>
             <ul className={listClass}>
               {recentCharacters.map((character) => (
