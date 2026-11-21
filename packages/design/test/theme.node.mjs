@@ -16,6 +16,8 @@ const SEMIBOLD_UTILITY_PATTERN = /\.font-semibold\s*\{/
 const MONO_FONT_UTILITY_PATTERN = /\.font-mono\s*\{/
 const CONTROL_RADIUS_UTILITY_PATTERN = /\.rounded-control\s*\{/
 const NARROW_SCREEN_VARIANT_PATTERN = /@media \(width < 600px\)\s*\{\s*\.max-sm\\:hidden/
+const MIDDLE_SCREEN_VARIANT_PATTERN = /@media \(width < 900px\)\s*\{\s*\.max-md\\:hidden/
+const WIDE_SCREEN_VARIANT_PATTERN = /@media \(width >= 900px\)\s*\{\s*\.md\\:hidden/
 const FONT_FACE_PATTERN =
   /@font-face\s*\{[^}]*url\('\.\/fonts\/([^']+)'\)[^}]*font-weight:\s*(\d+);[^}]*\}/g
 const FONT_FILE_WEIGHT_PATTERN = /-(Regular|Medium|SemiBold|Bold)\.woff2$/
@@ -117,11 +119,13 @@ test('글자, radius, breakpoint, 곡선 utility는 theme.css의 단계로만 �
     'font-mono',
     'rounded-control',
     'max-sm:hidden',
+    'max-md:hidden',
+    'md:hidden',
     'text-lg',
     'font-thin',
     'font-serif',
     'rounded-lg',
-    'md:hidden',
+    'lg:hidden',
     'leading-tight',
     'tracking-wide',
     'ease-in'
@@ -131,12 +135,14 @@ test('글자, radius, breakpoint, 곡선 utility는 theme.css의 단계로만 �
   assert.match(css, MONO_FONT_UTILITY_PATTERN)
   assert.match(css, CONTROL_RADIUS_UTILITY_PATTERN)
   assert.match(css, NARROW_SCREEN_VARIANT_PATTERN)
+  assert.match(css, MIDDLE_SCREEN_VARIANT_PATTERN)
+  assert.match(css, WIDE_SCREEN_VARIANT_PATTERN)
   const defaultSteps = [
     'text-lg',
     'font-thin',
     'font-serif',
     'rounded-lg',
-    'md\\\\:hidden',
+    'lg\\\\:hidden',
     'leading-tight',
     'tracking-wide',
     'ease-in'
