@@ -1,5 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { ClearDetailScreen } from './ClearDetailScreen'
+import { StatsTabs } from '#widgets/stats-tabs'
 
 const route = getRouteApi('/clears/$content')
 
@@ -27,13 +28,16 @@ export function ClearDetailPage(): React.JSX.Element {
   }
 
   return (
-    <ClearDetailScreen
-      contentKey={content}
-      stage={stage}
-      week={week}
-      onStageSelect={selectStage}
-      onWeekSelect={selectWeek}
-      onContentOpen={openContent}
-    />
+    <div className="flex flex-col">
+      <StatsTabs />
+      <ClearDetailScreen
+        contentKey={content}
+        stage={stage}
+        week={week}
+        onStageSelect={selectStage}
+        onWeekSelect={selectWeek}
+        onContentOpen={openContent}
+      />
+    </div>
   )
 }
