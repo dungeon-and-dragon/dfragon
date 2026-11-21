@@ -341,6 +341,20 @@ it('전직을 고르면 그 전직의 무기를 그 밖으로 묶지 않고 많�
   expect(rankingSearchOf(rowLink('무기', '무기2'))).toEqual({ ...JOB_FILTER, itemIds: 'weapon-2' })
 })
 
+it('0.0%로 보일 만큼 적게 낀 무기는 막대를 두지 않는다', async () => {
+  const itemStats = { ...itemStatsWith(5), sampleSize: 3000 }
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
+
+  await vi.waitFor(() =>
+    expect(rowsOf('무기')).toEqual([
+      ['무기1', '0.2%'],
+      ['무기2', '0.1%'],
+      ['무기3', '0.1%'],
+      ['무기4', '0.1%']
+    ])
+  )
+})
+
 it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 한 막대로 세고, 접두사 없는 무기의 itemId로 잇는다', async () => {
   const base = itemStatsWith(2)
   const itemStats = {
