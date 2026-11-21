@@ -232,6 +232,13 @@ export function toPopulationMinFame(content: ClearContent, collectionMinFame: nu
   return content.entryFame
 }
 
+// 지난 주의 점수는 클리어 뒤에 계산한 값이라 그 주 장비를 보여 주지 못해, 각인된 악몽 1주차부터만 점수 통계를 낸다.
+const SCORE_STATS_FROM = new Date('2026-11-05T06:00:00+09:00')
+
+export function hasScoreStats(weekStart: Date): boolean {
+  return weekStart >= SCORE_STATS_FROM
+}
+
 export type ClearStagePair = {
   hard: ClearContent
   normal: ClearContent
