@@ -1,23 +1,11 @@
-import {
-  SET_SAMPLE_MIN_FAME,
-  SET_SAMPLE_TOP_COUNT,
-  SET_SAMPLES,
-  type SetSample
-} from '@dfragon/lib'
-import { ChipGroup, type ChipGroupItem } from '@dfragon/ui'
 import { RelativeTime } from '#shared/ui/RelativeTime'
 import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
 import { TitleBox, TitleStat } from '#shared/ui/TitleBox'
 import { type OathCatalog, useOathCatalog } from '#entities/catalog'
-import {
-  type FameRankingFilter,
-  type SetStats,
-  type SetStatsFilter,
-  useSetStats
-} from '#entities/ranking'
-import { type FilterRow, RankingFilterBox } from '#widgets/ranking-filter'
+import { type SetStats, type SetStatsFilter, useSetStats } from '#entities/ranking'
 import { ItemStatsBoxes } from './ItemStatsBoxes'
+import { SetStatsFilterBox } from './SetStatsFilterBox'
 import { StatsTabs } from './StatsTabs'
 import { comboBars, equipmentSetBars, formatShare, oathSetBars } from './set-stats-bars'
 
@@ -30,16 +18,6 @@ const BOX_NAMES = {
   oath: '서약 세트',
   combo: '장비와 서약 조합'
 } as const
-const SAMPLE_LABEL = '표본'
-const SAMPLE_NAMES: Record<SetSample, string> = {
-  top: `상위 ${SET_SAMPLE_TOP_COUNT}명`,
-  fame: `명성 ${integer.format(SET_SAMPLE_MIN_FAME)} 이상`,
-  all: '전체'
-}
-const SAMPLE_ITEMS: readonly ChipGroupItem<SetSample>[] = SET_SAMPLES.map((sample) => ({
-  value: sample,
-  label: SAMPLE_NAMES[sample]
-}))
 // 장비와 서약 상자는 반 폭이라 줄임말이 없는 긴 세트 이름도 들어가게, 조합은 한 줄 폭이라 넓게 둔다.
 const SET_NAME_WIDTH = 200
 const COMBO_NAME_WIDTH = 440
@@ -124,32 +102,7 @@ function SetStatsBody({
   const result = useSetStats(filter)
   const catalog = useOathCatalog()
 
-  // 직업, 전직을 바꿔도 고른 표본은 그대로 둔다.
-  function changeJob({ jobId, jobGrowId, role }: FameRankingFilter): void {
-    onFilterChange({ jobId, jobGrowId, role, sample: filter.sample })
-  }
-
-  function changeSample(sample: SetSample): void {
-    const selected = sample === 'all' ? undefined : sample
-
-    onFilterChange({ ...filter, sample: selected })
-  }
-
-  const rows: readonly FilterRow[] = [
-    {
-      label: SAMPLE_LABEL,
-      content: (
-        <ChipGroup
-          aria-label={SAMPLE_LABEL}
-          items={SAMPLE_ITEMS}
-          value={filter.sample ?? 'all'}
-          onValueChange={changeSample}
-        />
-      )
-    }
-  ]
-
-  const filterBox = <RankingFilterBox filter={filter} onChange={changeJob} rows={rows} />
+  const filterBox = <SetStatsFilterBox filter={filter} onFilterChange={onFilterChange} />
 
   if (result.status === 'error') {
     return (

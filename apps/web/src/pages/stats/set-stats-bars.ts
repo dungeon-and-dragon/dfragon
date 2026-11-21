@@ -15,7 +15,7 @@ import {
 
 const NO_OPTION_NAME = '선택지 없음'
 const COMBO_LIMIT = 10
-const FULL_SHARE = 100
+export const FULL_SHARE = 100
 
 const percent = new Intl.NumberFormat('ko-KR', {
   minimumFractionDigits: 1,
@@ -39,7 +39,7 @@ export function rankingLink(filter: SetStatsFilter, narrowing: RankingSearch): B
 }
 
 // 세트 없음은 비교 기준이라 비율과 관계없이 맨 아래에 둔다.
-function byCountWithBaseLast(a: Bar, b: Bar): number {
+export function byCountWithBaseLast(a: Bar, b: Bar): number {
   if (a.base === b.base) {
     return b.value - a.value
   }

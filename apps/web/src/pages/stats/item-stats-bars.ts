@@ -15,12 +15,12 @@ function prefixOf(name: string): string | undefined {
   return MERGED_WEAPON_PREFIXES.find((prefix) => name.startsWith(prefix))
 }
 
-function byCountDesc(a: { count: number }, b: { count: number }): number {
+export function byCountDesc(a: { count: number }, b: { count: number }): number {
   return b.count - a.count
 }
 
 // 랭킹 필터의 itemIds는 모두 낀 캐릭터만 거르므로, 합친 막대는 접두사 없는 무기의 itemId로 잇는다.
-function mergePrefixedWeapons(weapons: readonly ItemCount[]): ItemCount[] {
+export function mergePrefixedWeapons(weapons: readonly ItemCount[]): ItemCount[] {
   const merged = new Map<string, ItemCount>()
 
   for (const weapon of weapons) {
