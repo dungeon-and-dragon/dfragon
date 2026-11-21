@@ -95,7 +95,7 @@ it('고른 직업, 전직, 역할을 query로 보낸다', async () => {
     status: 'success',
     value: setStats
   })
-  expect(queries).toEqual([{ jobId: 'job-1', jobGrowId: 'grow-1', role: 'buffer' }])
+  expect(queries).toEqual([{ jobId: 'job-1', jobGrowId: 'grow-1', role: 'buffer', sample: 'all' }])
 })
 
 it('직업 없는 전직은 요청하지 않고 검색 조건 오류로 끝낸다', async () => {

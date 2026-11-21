@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { ItemStats } from '#entities/ranking'
 import type { OathCatalog } from '#entities/catalog'
+import { RANKING_JOBS } from '#entities/character'
 import type { SetStats, SetStatsFilter } from '#entities/ranking'
 import { storyItemDetail } from './api/item-detail.fixture'
 import { ITEM_DETAIL_URL } from './api/item-detail.handlers'
@@ -19,9 +20,11 @@ import { SetStatsScreen } from './SetStatsScreen'
 let container: HTMLDivElement
 let root: Root
 let setStatsQueries: Record<string, string>[]
+let itemStatsQueries: Record<string, string>[]
 
 beforeEach(() => {
   setStatsQueries = []
+  itemStatsQueries = []
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   container = document.createElement('div')
   document.body.append(container)
@@ -87,6 +90,7 @@ const catalog: OathCatalog = {
 }
 
 const JOB_FILTER: SetStatsFilter = { jobId: 'job-1', jobGrowId: 'grow-1' }
+const [otherJob] = RANKING_JOBS
 
 function setStatsOf(body: SetStats): HttpHandler {
   return http.get(SET_STATS_URL, ({ request }) => {
@@ -97,7 +101,11 @@ function setStatsOf(body: SetStats): HttpHandler {
 }
 
 function itemStatsOf(body: ItemStats): HttpHandler {
-  return http.get(ITEM_STATS_URL, () => HttpResponse.json(body))
+  return http.get(ITEM_STATS_URL, ({ request }) => {
+    itemStatsQueries.push(Object.fromEntries(new URL(request.url).searchParams))
+
+    return HttpResponse.json(body)
+  })
 }
 
 type Responses = Readonly<{
@@ -112,7 +120,8 @@ function mount(
     oathCatalog = oathCatalogHandlers.catalog(catalog),
     itemStats = itemStatsHandlers.loading
   }: Responses,
-  filter: SetStatsFilter = JOB_FILTER
+  filter: SetStatsFilter = JOB_FILTER,
+  onFilterChange: (filter: SetStatsFilter) => void = vi.fn()
 ): Promise<void> {
   server.use(setStats, oathCatalog, itemStats)
 
@@ -120,15 +129,19 @@ function mount(
     root.render(
       <TestQueryClient>
         <TestRouter>
-          <SetStatsScreen filter={filter} onFilterChange={vi.fn()} />
+          <SetStatsScreen filter={filter} onFilterChange={onFilterChange} />
         </TestRouter>
       </TestQueryClient>
     )
   )
 }
 
-async function render(responses: Responses, filter?: SetStatsFilter): Promise<void> {
-  await mount(responses, filter)
+async function render(
+  responses: Responses,
+  filter?: SetStatsFilter,
+  onFilterChange?: (filter: SetStatsFilter) => void
+): Promise<void> {
+  await mount(responses, filter, onFilterChange)
   await vi.waitFor(() => expect(container.textContent).not.toContain('세트 통계를 받는 중입니다.'))
 }
 
@@ -172,10 +185,47 @@ it('직업을 고른 통계 화면의 필터 상자에는 초기화 버튼이 �
   ).toBe(false)
 })
 
+function chipOf(label: string): HTMLButtonElement {
+  return [...container.querySelectorAll('button')].find((button) => button.textContent === label)!
+}
+
+it('표본을 고르지 않으면 전체를 골라 보이고, 고른 표본은 세트와 아이템 통계에 함께 보낸다', async () => {
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(1)) })
+  await vi.waitFor(() => expect(itemStatsQueries).toHaveLength(1))
+
+  expect(chipOf('전체').getAttribute('aria-pressed')).toBe('true')
+  expect(itemStatsQueries).toEqual([{ ...JOB_FILTER, sample: 'all' }])
+
+  await render(
+    { setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(1)) },
+    { ...JOB_FILTER, sample: 'fame' }
+  )
+  await vi.waitFor(() => expect(itemStatsQueries).toHaveLength(2))
+
+  expect(chipOf('명성 117,014 이상').getAttribute('aria-pressed')).toBe('true')
+  expect(setStatsQueries.at(-1)).toEqual({ ...JOB_FILTER, sample: 'fame' })
+  expect(itemStatsQueries.at(-1)).toEqual({ ...JOB_FILTER, sample: 'fame' })
+})
+
+it('표본 칩은 직업, 전직을 두고 표본만 바꾸며, 직업을 바꿔도 고른 표본을 그대로 둔다', async () => {
+  const onFilterChange = vi.fn()
+  await render({ setStats: setStatsOf(stats) }, { ...JOB_FILTER, sample: 'fame' }, onFilterChange)
+
+  await act(async () => chipOf('상위 500명').click())
+  await act(async () => chipOf('전체').click())
+  await act(async () => chipOf(otherJob.name).click())
+
+  expect(onFilterChange.mock.calls).toEqual([
+    [{ ...JOB_FILTER, sample: 'top' }],
+    [{ ...JOB_FILTER, sample: undefined }],
+    [expect.objectContaining({ jobId: otherJob.jobId, sample: 'fame' })]
+  ])
+})
+
 it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두고, 표본 전체 대비 비율의 합이 100%다', async () => {
   await render({ setStats: setStatsOf(stats) })
 
-  expect(setStatsQueries).toEqual([JOB_FILTER])
+  expect(setStatsQueries).toEqual([{ ...JOB_FILTER, sample: 'all' }])
   expect(rowsOf('장비 세트')).toEqual([
     ['황금향', '37.5%'],
     ['페어리', '25.0%'],
