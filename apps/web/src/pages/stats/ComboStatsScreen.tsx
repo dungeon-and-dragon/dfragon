@@ -5,7 +5,6 @@ import { StatsScreenFrame } from './StatsScreenFrame'
 import { equipmentComboBars } from './combo-stats-bars'
 import { formatShare } from './set-stats-bars'
 
-const TITLE = '조합 통계'
 const BOX_NAME = '장비와 서약 조합'
 const EMPTY = '세트 통계가 없습니다.'
 const FAILED = '세트 통계를 받지 못했습니다.'
@@ -23,7 +22,6 @@ export function ComboStatsScreen({
 
   return (
     <StatsScreenFrame
-      title={TITLE}
       result={result}
       filter={filter}
       onFilterChange={onFilterChange}
