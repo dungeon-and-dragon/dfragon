@@ -46,10 +46,13 @@ import {
   RankingStatsService,
   emptyRankingStatsRepository
 } from '#application/ranking-stats/index.js'
+import type { FetchLowestListing } from '#application/soul-prices/ports.js'
+import { SoulPriceService } from '#application/soul-prices/index.js'
 import type { FetchShopGrade } from '#application/today-grade/ports.js'
 import { TodayGradeService } from '#application/today-grade/index.js'
 import { CharacterFetched } from '#domain/character-events.js'
 import type { SeasonBackfillJob } from '#domain/character-timeline/index.js'
+import { SoulPriceFailure } from '#domain/soul-prices/index.js'
 import { readApiBuildInfo } from '#infrastructure/build-info.js'
 import {
   parseCharacterBasic,
@@ -95,6 +98,7 @@ export interface ApiServicesOptions {
   readonly rankingStats?: RankingStatsRepository
   readonly clearStats?: ClearStatsRepository
   readonly todayGrade: { readonly fetchShopGrade: FetchShopGrade }
+  readonly soulPrices?: { readonly fetchLowestListing: FetchLowestListing }
   readonly fetchCharacterImage?: FetchCharacterImage
   readonly buildInfoPath?: string
   readonly scoreLibraryPath?: string | null
@@ -103,6 +107,11 @@ export interface ApiServicesOptions {
 }
 
 type CharacterFetchedSubscriber = (event: CharacterFetched) => void
+
+// 경매장 조회를 넘기지 않은 실행에서는 Neople을 부를 수 없으므로 조회할 수 없음으로 답한다.
+const noLowestListing: FetchLowestListing = async () => {
+  throw new SoulPriceFailure('unavailable')
+}
 
 function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCode) {
   // 타임라인 조회가 백필을 기다리지 않도록 백필은 따로 queue를 둔다.
@@ -255,6 +264,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   )
   const itemDetail = new ItemDetailService(options.details.catalog)
   const todayGrade = new TodayGradeService(options.todayGrade.fetchShopGrade)
+  const soulPrices = new SoulPriceService(options.soulPrices?.fetchLowestListing ?? noLowestListing)
   const characterImage = new CharacterImageService(
     options.fetchCharacterImage ?? createNeopleCharacterImage()
   )
@@ -279,7 +289,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       rankingStats,
       clearStats,
       itemDetail,
-      todayGrade
+      todayGrade,
+      soulPrices
     },
     refreshClearStats: () => clearStats.refresh(),
     readQueueCounts,
