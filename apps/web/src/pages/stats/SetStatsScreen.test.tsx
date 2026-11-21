@@ -341,6 +341,36 @@ it('전직을 고르면 그 전직의 무기를 그 밖으로 묶지 않고 많�
   expect(rankingSearchOf(rowLink('무기', '무기2'))).toEqual({ ...JOB_FILTER, itemIds: 'weapon-2' })
 })
 
+it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 한 막대로 세고, 접두사 없는 무기의 itemId로 잇는다', async () => {
+  const base = itemStatsWith(2)
+  const itemStats = {
+    ...base,
+    slots: [
+      {
+        slotId: 'WEAPON',
+        items: [
+          { itemId: 'plague', name: '검은 질병의 멸룡검 발뭉', typeDetail: null, count: 30 },
+          { itemId: 'balmung', name: '멸룡검 발뭉', typeDetail: null, count: 20 },
+          { itemId: 'other', name: '무기', typeDetail: null, count: 40 }
+        ]
+      },
+      ...base.slots.slice(1)
+    ]
+  }
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
+
+  await vi.waitFor(() =>
+    expect(rowsOf('무기')).toEqual([
+      ['멸룡검 발뭉', '50.0%'],
+      ['무기', '40.0%']
+    ])
+  )
+  expect(rankingSearchOf(rowLink('무기', '멸룡검 발뭉'))).toEqual({
+    ...JOB_FILTER,
+    itemIds: 'balmung'
+  })
+})
+
 it('유일 장비는 부위마다 착용 인원 한 줄이고, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
   const itemStats = { ...itemStatsWith(2), sampleSize: 200 }
   await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
