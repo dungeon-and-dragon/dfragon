@@ -4,7 +4,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { ItemCount, ItemStats, SetStatsFilter } from '#entities/ranking'
-import { ITEM_STATS_URL } from '#entities/ranking/api/item-stats.handlers'
+import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -126,4 +126,20 @@ it('검은 질병의, 억압 - 접두사가 붙은 무기는 접두사 없는 �
     ...JOB_FILTER,
     itemIds: 'staff'
   })
+})
+
+it('받는 중에는 실제 상자처럼 두 칸씩 놓인 skeleton을 보인다', async () => {
+  server.use(itemStatsHandlers.loading)
+  await act(async () =>
+    root.render(
+      <TestQueryClient>
+        <TestRouter>
+          <WeaponStatsScreen filter={JOB_FILTER} onFilterChange={vi.fn()} />
+        </TestRouter>
+      </TestQueryClient>
+    )
+  )
+
+  const rows = [...container.querySelectorAll('[aria-hidden="true"] .section-cols')]
+  expect(rows.map((row) => row.querySelectorAll('section .skeleton').length)).toEqual([2, 2])
 })
