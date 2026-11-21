@@ -8,6 +8,7 @@ import {
   toCollectionMinFame,
   toContentClearInput,
   toLatestContents,
+  toLatestContentsMinFame,
   toPopulationMinFame
 } from '../src/domain/content-clears/contents.js'
 import { sortClearCountsByRelease } from '../src/domain/content-clears/release-order.js'
@@ -171,22 +172,26 @@ test('더 늦게 출시한 항목을 더하면 그 종류의 최신이 바뀌고
     toLatestContents([...CLEAR_CONTENTS, newRaid, lateDiregieMode]).map(({ id }) => id),
     ['engraved-nightmare-1', 'synthetic-raid-normal']
   )
-  assert.equal(toCollectionMinFame([...CLEAR_CONTENTS, newRaid, lateDiregieMode]), 119_414)
+  assert.equal(toLatestContentsMinFame([...CLEAR_CONTENTS, newRaid, lateDiregieMode]), 119_414)
 })
 
-test('수집 하한은 종류별 최신 컨텐츠의 입장 명성 가운데 가장 낮은 미카엘라의 104,292다', () => {
-  assert.equal(toCollectionMinFame(), 104_292)
+test('클리어 수집 하한은 모든 컨텐츠의 입장 명성 가운데 가장 낮은 나벨의 47,684다', () => {
+  assert.equal(toCollectionMinFame(), 47_684)
 })
 
-test('분모 기준은 입장 명성이 수집 하한보다 높은 각인된 악몽만 입장 명성이고 레이드 7개 항목은 수집 하한이다', () => {
+test('점수 계산 하한은 종류별 최신 컨텐츠의 입장 명성 가운데 가장 낮은 미카엘라의 104,292다', () => {
+  assert.equal(toLatestContentsMinFame(), 104_292)
+})
+
+test('분모 기준 명성은 컨텐츠마다 그 입장 명성이다', () => {
   assert.deepEqual(
-    CLEAR_CONTENTS.map((content) => [content.id, toPopulationMinFame(content, 104_292)]),
+    CLEAR_CONTENTS.map((content) => [content.id, toPopulationMinFame(content, 47_684)]),
     [
-      ['nabel-normal', 104_292],
-      ['nabel-hard', 104_292],
-      ['inae-twilight', 104_292],
-      ['diregie-normal', 104_292],
-      ['diregie-hard', 104_292],
+      ['nabel-normal', 47_684],
+      ['nabel-hard', 47_684],
+      ['inae-twilight', 72_688],
+      ['diregie-normal', 63_257],
+      ['diregie-hard', 63_257],
       ['michaela-normal', 104_292],
       ['michaela-hard', 104_292],
       ['engraved-nightmare-1', 119_414]
