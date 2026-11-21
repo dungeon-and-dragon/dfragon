@@ -194,12 +194,12 @@ test('Neople 실패가 아닌 오류는 수집을 실패로 끝낸다', async ()
   assert.deepEqual(saved, [])
 })
 
-test('스킬 스타일 수집 job은 일정 없이 수동으로만 돈다', () => {
+test('스킬 스타일 수집 job은 매주 금요일 00:00에 돈다', () => {
   const { dependencies } = collection([], styleOf)
   const { store, reportProgress, ...ports } = dependencies
 
   const job = createSkillStyleCollectionJob(new SkillStyleCollectionService(store, ports))
 
   assert.equal(job.name, 'skill-style-collection')
-  assert.equal(job.schedule, undefined)
+  assert.equal(job.schedule, '0 0 * * 5')
 })
