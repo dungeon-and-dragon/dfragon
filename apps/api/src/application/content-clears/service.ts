@@ -14,14 +14,14 @@ import {
   type ClearStats,
   toClearContentStats,
   toClearOverview,
-  toClearStats,
+  toClearSummaries,
   toEmptyClearOverview,
-  toEmptyContentStats,
-  toLegionContentStats,
-  toLegionSummaries
+  toEmptyContentStats
 } from '#domain/content-clears/index.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/index.js'
+
+const DETAIL_CONTENTS: readonly ClearContent[] = [...CLEAR_CONTENTS, ...CLEAR_LEGIONS]
 
 type ClearSummary = {
   stats: ClearStats
@@ -140,11 +140,8 @@ export class ClearStatsService {
     // 마감하지 않은 주는 다 받지 않은 값이라 보여 주지 않는다.
     const populations = (await this.repository.readPopulations()).filter(({ closed }) => closed)
     const counts = await this.repository.readWeekRatioCounts()
-    const legionCounts = await this.repository.readLegionWeeks(
-      CLEAR_LEGIONS.map(({ name }) => name)
-    )
-    const { contents } = toClearStats(populations, counts)
-    const legions = toLegionSummaries(populations, legionCounts)
+    const contents = toClearSummaries(CLEAR_CONTENTS, populations, counts)
+    const legions = toClearSummaries(CLEAR_LEGIONS, populations, counts)
     const stats = { contents, legions }
 
     return { stats, populations }
@@ -219,9 +216,8 @@ export class ClearStatsService {
     contentId: string,
     weekStart: string | undefined
   ): Promise<ClearContentStats> {
-    const content = CLEAR_CONTENTS.find(({ id }) => id === contentId)
-    const legion = CLEAR_LEGIONS.find(({ id }) => id === contentId)
-    if (content === undefined && legion === undefined) {
+    const content = DETAIL_CONTENTS.find(({ id }) => id === contentId)
+    if (content === undefined) {
       throw new CharacterDetailFailure('notFound')
     }
 
@@ -237,10 +233,6 @@ export class ClearStatsService {
     }
 
     const selectedWeek = weekStart ?? summary.weeks.at(-1)?.weekStart ?? null
-
-    if (content === undefined) {
-      return toLegionContentStats(summary, selectedWeek)
-    }
 
     const key = JSON.stringify([contentId, selectedWeek])
     const cached = current.contentStats.get(key)
@@ -311,7 +303,7 @@ export class ClearStatsService {
 
     const loads = [
       () => this.overviewOf(current, undefined),
-      ...CLEAR_CONTENTS.map(
+      ...DETAIL_CONTENTS.map(
         ({ id }) =>
           () =>
             this.contentStatsOf(current, id, undefined)
@@ -407,7 +399,6 @@ export const emptyClearStatsRepository: ClearStatsRepository = {
   readWeekGroups: async () => [],
   readStageMoves: async () => [],
   readStreaks: async () => [],
-  readLegionWeeks: async () => [],
   readRaidModes: async () => [],
   readRaidStageCounts: async () => [],
   readContentJobScores: async () => [],

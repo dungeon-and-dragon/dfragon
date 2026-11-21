@@ -1,6 +1,6 @@
 import type { TimelineClearCount } from '#domain/character-timeline/index.js'
 import { CLEAR_CONTENTS, type ClearContent } from './contents.js'
-import { CLEAR_LEGIONS, type ClearLegion } from './legions.js'
+import { CLEAR_LEGIONS } from './legions.js'
 
 type ClearName = Pick<TimelineClearCount, 'kind' | 'name'>
 
@@ -8,7 +8,7 @@ type ClearName = Pick<TimelineClearCount, 'kind' | 'name'>
 function releasedAtOf(
   { kind, name }: ClearName,
   contents: readonly ClearContent[],
-  legions: readonly ClearLegion[]
+  legions: readonly ClearContent[]
 ): number | undefined {
   if (kind === 'legion') {
     return legions.find((legion) => legion.name === name)?.releasedAt.getTime()
@@ -28,7 +28,7 @@ function releasedAtOf(
 export function sortClearCountsByRelease(
   counts: readonly TimelineClearCount[],
   contents: readonly ClearContent[] = CLEAR_CONTENTS,
-  legions: readonly ClearLegion[] = CLEAR_LEGIONS
+  legions: readonly ClearContent[] = CLEAR_LEGIONS
 ): TimelineClearCount[] {
   const known = counts.flatMap((count) => {
     const releasedAt = releasedAtOf(count, contents, legions)

@@ -33,7 +33,7 @@ export type ClearContent = {
   kind: ContentClearKind
   name: string
   releasedAt: Date
-  entryFame: number
+  entryFame: number | null
   rule: ClearContentRule
 }
 
@@ -214,12 +214,18 @@ export function toLatestContents(
 
 // 종류별 최신 컨텐츠에 입장할 수 있는 캐릭터를 모두 받는 가장 낮은 최고 명성이다.
 export function toCollectionMinFame(contents: readonly ClearContent[] = CLEAR_CONTENTS): number {
-  return Math.min(...toLatestContents(contents).map(({ entryFame }) => entryFame))
+  return Math.min(
+    ...toLatestContents(contents).flatMap(({ entryFame }) =>
+      entryFame !== null ? [entryFame] : []
+    )
+  )
 }
 
-// 수집 하한 아래 캐릭터는 받지 않으므로, 입장 명성이 수집 하한보다 낮은 컨텐츠의 분모는 수집 대상 전체다.
+// 수집 하한 아래 캐릭터는 받지 않으므로, 입장 명성이 수집 하한보다 낮거나 없는 컨텐츠의 분모는 수집 대상 전체다.
 export function toPopulationMinFame(content: ClearContent, collectionMinFame: number): number {
-  return Math.max(content.entryFame, collectionMinFame)
+  const entryFame = content.entryFame ?? collectionMinFame
+
+  return Math.max(entryFame, collectionMinFame)
 }
 
 export type ClearStagePair = {
