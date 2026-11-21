@@ -159,6 +159,7 @@ async function render(search: EquipmentSearch): Promise<void> {
             adventureName="합성 모험단"
             search={search}
             onSearchChange={change}
+            onAdventureOpen={vi.fn()}
           />
         </TestRouter>
       </TestQueryClient>
