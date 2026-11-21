@@ -80,14 +80,14 @@ const itemStats: ItemStats = {
   ]
 }
 
-it('고른 직업, 전직, 역할을 query로 보내고 부위 count 합이 표본 수보다 작은 응답을 읽는다', async () => {
+it('고른 직업, 전직, 역할과 기본 표본을 query로 보내고 부위 count 합이 표본 수보다 작은 응답을 읽는다', async () => {
   respond(itemStats)
 
   await expect(settle({ jobId: 'job-1', jobGrowId: 'grow-1', role: 'dealer' })).resolves.toEqual({
     status: 'success',
     value: itemStats
   })
-  expect(queries).toEqual([{ jobId: 'job-1', jobGrowId: 'grow-1', role: 'dealer' }])
+  expect(queries).toEqual([{ jobId: 'job-1', jobGrowId: 'grow-1', role: 'dealer', sample: 'all' }])
 })
 
 it('직업 없는 전직은 요청하지 않고 검색 조건 오류로 끝낸다', async () => {
