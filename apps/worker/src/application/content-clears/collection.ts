@@ -47,7 +47,10 @@ export class ContentClearCollectionService {
       plan.weeks.map(({ contentId, weekStart }) => weekKey(contentId, weekStart))
     )
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
-    const population = await this.repository.readPopulation(collectionMinFame)
+    // 분모는 비활성을 포함한 모집단 전체로 두고, 요청은 활성 캐릭터에만 보낸다.
+    // 다시 접속한 비활성 캐릭터의 클리어는 활동이 다시 기록될 때까지 빠지는 대신 매주 요청이 줄어든다.
+    const population = await this.repository.readPopulation(collectionMinFame, 'include-inactive')
+    const requested = await this.repository.readPopulation(collectionMinFame, 'active-only')
     const counts = { requests: 0, clears: 0, records: 0 }
     const fetchTimeline = createFetchTimeline(() => {
       counts.requests++
@@ -57,12 +60,13 @@ export class ContentClearCollectionService {
       startedAt: startedAt.toISOString(),
       done: resumedAt,
       minFame: collectionMinFame,
-      characters: population.length,
+      characters: requested.length,
+      population: population.length,
       ranges: plan.ranges.length
     })
 
     const skipped = await collectPopulation({
-      population,
+      population: requested,
       resumedAt,
       rangesOf: () => plan.ranges,
       fetchTimeline,
@@ -125,7 +129,7 @@ export class ContentClearCollectionService {
     const startedAtIso = startedAt.toISOString()
     const summary = {
       startedAt: startedAtIso,
-      characters: population.length,
+      characters: requested.length,
       ...counts,
       skipped
     }

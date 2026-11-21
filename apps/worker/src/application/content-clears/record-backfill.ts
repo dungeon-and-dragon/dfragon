@@ -36,7 +36,8 @@ export class ClearRecordBackfillService {
     const { startedAt, done: resumedAt } = await readOrStartProgress(this.repository, now)
     const startedAtIso = startedAt.toISOString()
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
-    const population = await this.repository.readPopulation(collectionMinFame)
+    // 지금은 비활성인 캐릭터도 지난 시즌의 클리어 기록이 있으므로 비활성도 부른다.
+    const population = await this.repository.readPopulation(collectionMinFame, 'include-inactive')
     const fetchedUntil = new Map(
       (await this.repository.readCursors()).map((cursor) => [
         characterKey(cursor),
