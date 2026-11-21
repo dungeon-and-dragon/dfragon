@@ -1,7 +1,8 @@
-import { Fragment, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 import { COLUMN_BAR_GROW, useChartBarGrow } from './useChartBarGrow'
 import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS, TOOLTIP_TITLE_CLASS } from './plot-layout'
+import { useChartHover } from './useChartHover'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -13,8 +14,6 @@ export type ColumnBar = Readonly<{
   share?: string
   ratio: number
 }>
-
-type ShownTooltip = Readonly<{ key: string | null; open: boolean }>
 
 // 넓은 화면에서는 막대가 칸에 들어가므로 스크롤 영역을 두지 않는다. 두면 첫 축 라벨이 영역 밖으로 나간 만큼 잘린다.
 const NARROW_SCROLL_CLASS = 'max-sm:overflow-x-auto'
@@ -53,7 +52,7 @@ export function Columns({
   scrollable?: boolean
   height?: number
 }): React.JSX.Element {
-  const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
+  const { hover, show, areaProps } = useChartHover()
   const scrollerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
@@ -80,14 +79,6 @@ export function Columns({
     }
   }, [scrollable])
 
-  function handleHover(key: string): void {
-    setHover({ key, open: true })
-  }
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
-  }
-
   function registerColumn(key: string, element: HTMLLIElement): () => void {
     columnsRef.current.set(key, element)
 
@@ -103,7 +94,7 @@ export function Columns({
     >
       <ul
         ref={chartRef}
-        onMouseLeave={handleLeave}
+        {...areaProps}
         className={`${COLUMNS_CLASS} ${scrollable ? 'min-w-min max-sm:gap-px' : ''}`}
       >
         {groups.map((group, index) => (
@@ -116,7 +107,7 @@ export function Columns({
                 dimmed={open && bar.key !== shownKey}
                 scrollable={scrollable}
                 height={height}
-                onHover={handleHover}
+                onHover={show}
                 register={registerColumn}
               />
             ))}

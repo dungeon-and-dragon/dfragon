@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { LINE_REVEAL, useChartReveal } from './useChartReveal'
 import { useChartTooltipSlide } from './useChartTooltipSlide'
 import { ChartLegend } from './ChartLegend'
@@ -16,10 +16,9 @@ import {
   LINE_CLASS,
   axisWidth,
   besideTooltipPlaceOf,
-  type ChartX,
-  type Hover,
-  NO_HOVER
+  type ChartX
 } from './plot-layout'
+import { useChartHover } from './useChartHover'
 import { useChartSize } from './useChartSize'
 
 export type LineSeries = Readonly<{
@@ -83,7 +82,7 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
     fitValues = false
   } = props
   const times = timesOf(props)
-  const [hover, setHover] = useState<Hover>(NO_HOVER)
+  const { hover, show, areaProps } = useChartHover()
   const areaRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const hitsRef = useRef(new Map<string, HTMLElement>())
@@ -143,14 +142,6 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
     const pointY = yOf(value)
 
     return { x: pointX, y: pointY }
-  }
-
-  function handleHover(key: string): void {
-    setHover({ key, open: true })
-  }
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
   }
 
   function registerHit(key: string, element: HTMLLIElement): () => void {
@@ -324,8 +315,8 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
           x={x}
           places={places}
           describe={describe}
-          onHover={handleHover}
-          onLeave={handleLeave}
+          onHover={show}
+          areaProps={areaProps}
           register={registerHit}
         />
         <ChartTooltip

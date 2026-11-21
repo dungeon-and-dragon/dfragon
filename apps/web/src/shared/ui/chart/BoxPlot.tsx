@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { BOX_PLOT_REVEAL, useChartReveal } from './useChartReveal'
 import { useChartTooltipSlide } from './useChartTooltipSlide'
 import { BoxPlotLegend } from './ChartLegend'
@@ -10,7 +10,8 @@ import {
 } from './box-plot-layout'
 import { type BoxStats, positionOf, type Scale } from './chart-geometry'
 import { ChartTooltip } from './plot-parts'
-import { AXIS_TEXT_CLASS, type Hover, NO_HOVER, type TooltipRow } from './plot-layout'
+import { AXIS_TEXT_CLASS, type TooltipRow } from './plot-layout'
+import { useChartHover } from './useChartHover'
 import { useChartSize } from './useChartSize'
 
 export type BoxPlotRow = Readonly<{
@@ -187,7 +188,7 @@ function BoxPlotChartPlot({
   nameWidth = DEFAULT_NAME_WIDTH,
   legend = true
 }: BoxPlotChartProps & { domain: readonly BoxStats[] }): React.JSX.Element | null {
-  const [hover, setHover] = useState<Hover>(NO_HOVER)
+  const { hover, show, areaProps } = useChartHover()
   const chartRef = useRef<HTMLDivElement>(null)
   const plotRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
@@ -208,10 +209,6 @@ function BoxPlotChartPlot({
     bars: rows,
     placeOf: boxPlotTooltipPlaceOf
   })
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
-  }
 
   function tooltipRows({ stats, color }: BoxPlotRow): TooltipRow[] {
     if (stats === null) {
@@ -243,7 +240,7 @@ function BoxPlotChartPlot({
             <span className="text-right text-sm">{head.value}</span>
           </div>
         )}
-        <ul onMouseLeave={handleLeave} className="m-0 list-none p-0">
+        <ul {...areaProps} className="m-0 list-none p-0">
           {rows.map((row) => (
             <BoxPlotChartRow
               key={row.key}
@@ -254,7 +251,7 @@ function BoxPlotChartPlot({
               description={tooltipRows(row)
                 .map(({ name, value }) => `${name} ${value}`)
                 .join(', ')}
-              onHover={setHover}
+              onHover={show}
               anchorsRef={anchorsRef}
             />
           ))}
@@ -286,11 +283,11 @@ function BoxPlotChartRow({
   width: number
   columns: React.CSSProperties
   description: string
-  onHover: (hover: Hover) => void
+  onHover: (key: string) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
 }): React.JSX.Element {
   function handleMouseEnter(): void {
-    onHover({ key, open: true })
+    onHover(key)
   }
 
   function plotRef(element: HTMLDivElement): () => void {

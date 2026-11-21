@@ -8,7 +8,26 @@
   z-index: var(--z-index-tooltip);
 }
 
+/*
+ * 마우스가 올라가면 닫으려고 Base UI가 inline style로 pointer-events: none을 거는 Tooltip이 있다.
+ * 터치에는 hover가 없으므로, Tooltip 안을 탭하면 아래 요소가 눌려 닫히지 않게 되돌린다.
+ */
+@media (pointer: coarse) {
+  .tooltip-positioner {
+    pointer-events: auto !important;
+  }
+}
+
+/*
+ * 좌우 16px(Positioner의 collisionPadding)을 남기고 창 안에 들어오게 폭을 줄인다.
+ * 위아래 어느 쪽에도 다 들어가지 않으면 Base UI가 넣는 --available-height까지만 그리고 안에서 스크롤한다.
+ * 340px, 280px처럼 폭을 정한 내용은 Tooltip 폭에 맞춰 줄어든다.
+ */
 .tooltip {
+  box-sizing: border-box;
+  max-width: calc(100vw - 32px);
+  max-height: var(--available-height);
+  overflow-y: auto;
   padding: 4px 8px;
   border-radius: var(--radius-control);
   color-scheme: dark;
@@ -30,6 +49,10 @@
   :root:not([data-color-mode='light']) .tooltip {
     color-scheme: light;
   }
+}
+
+.tooltip > * {
+  max-width: 100%;
 }
 
 .tooltip:is([data-starting-style], [data-ending-style]) {
