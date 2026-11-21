@@ -4,6 +4,7 @@ import { type ReactNode, useId, useRef, useState } from 'react'
 import { ROW_BAR_GROW, useChartBarGrow } from './useChartBarGrow'
 import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS } from './plot-layout'
+import { useChartHover } from './useChartHover'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -30,8 +31,6 @@ const TONE_FILL: Readonly<Record<BarTone, string>> = {
   'chart-5': 'bg-chart-5',
   'chart-7': 'bg-chart-7'
 }
-
-type ShownTooltip = Readonly<{ key: string | null; open: boolean }>
 
 const TOOLTIP_GAP = 8
 const TOOLTIP_INSIDE_GAP = 10
@@ -92,7 +91,7 @@ export function RowBars({
   fill?: boolean
   nameWidth?: number
 }): React.JSX.Element {
-  const [hover, setHover] = useState<ShownTooltip>({ key: null, open: false })
+  const { hover, show, areaProps } = useChartHover()
   const listRef = useRef<HTMLUListElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const marksRef = useRef(new Map<string, HTMLSpanElement>())
@@ -111,14 +110,6 @@ export function RowBars({
     bars,
     placeOf: rowTooltipPlaceOf
   })
-
-  function handleHover(key: string): void {
-    setHover({ key, open: true })
-  }
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
-  }
 
   function toggleDetails(key: string): void {
     setCollapsed((current) => {
@@ -156,7 +147,7 @@ export function RowBars({
     <div className={`relative ${fill ? 'flex grow flex-col' : ''}`}>
       <ul
         ref={listRef}
-        onMouseLeave={handleLeave}
+        {...areaProps}
         className={`m-0 list-none p-4 ${fill ? 'flex grow flex-col justify-around' : ''}`}
       >
         {bars.map((bar) => {
@@ -179,7 +170,7 @@ export function RowBars({
               layout={layout}
               percent={percentOf(bar.value, max)}
               dimmed={hover.open && bar.key !== hover.key}
-              onHover={handleHover}
+              onHover={show}
               register={registerMark}
               toggle={bar.details !== undefined ? { open, onToggle: toggleDetails } : undefined}
             >
@@ -204,7 +195,7 @@ export function RowBars({
                         layout={detailLayout}
                         percent={percentOf(detail.value, bar.details?.max ?? 0)}
                         dimmed={hover.open && detail.key !== hover.key}
-                        onHover={handleHover}
+                        onHover={show}
                         register={registerMark}
                       />
                     )

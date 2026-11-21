@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { LINE_REVEAL, useChartReveal } from './useChartReveal'
 import { useChartSvgBarGrow } from './useChartSvgBarGrow'
 import { useChartTooltipSlide } from './useChartTooltipSlide'
@@ -22,10 +22,9 @@ import {
   AXIS_TEXT_CLASS,
   LINE_CLASS,
   type ChartX,
-  type Hover,
-  NO_HOVER,
   type TooltipRow
 } from './plot-layout'
+import { useChartHover } from './useChartHover'
 import { useChartSize } from './useChartSize'
 
 export type BarSeries = Readonly<{
@@ -86,7 +85,7 @@ function BarLinePlot({
   formats,
   height = DEFAULT_HEIGHT
 }: BarLineChartProps): React.JSX.Element {
-  const [hover, setHover] = useState<Hover>(NO_HOVER)
+  const { hover, show, areaProps } = useChartHover()
   const areaRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
   const hitsRef = useRef(new Map<string, HTMLElement>())
@@ -132,14 +131,6 @@ function BarLinePlot({
     const pointY = lineY(value)
 
     return { x: pointX, y: pointY }
-  }
-
-  function handleHover(key: string): void {
-    setHover({ key, open: true })
-  }
-
-  function handleLeave(): void {
-    setHover(({ key }) => ({ key, open: false }))
   }
 
   function registerHit(key: string, element: HTMLLIElement): () => void {
@@ -315,8 +306,8 @@ function BarLinePlot({
           x={x}
           places={places}
           describe={describe}
-          onHover={handleHover}
-          onLeave={handleLeave}
+          onHover={show}
+          areaProps={areaProps}
           register={registerHit}
         />
         <ChartTooltip
