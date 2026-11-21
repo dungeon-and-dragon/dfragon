@@ -29,7 +29,7 @@ import { NotFoundPage } from '#pages/not-found'
 import { RankingsPage } from '#pages/rankings'
 import { parseRankingSearch, parseSetStatsSearch } from '#widgets/ranking-filter'
 import { MultisearchPage } from '#pages/multisearch'
-import { SetStatsPage, StatsPage } from '#pages/stats'
+import { ComboStatsPage, SetStatsPage, StatsPage, WeaponStatsPage } from '#pages/stats'
 import {
   ClearsPage,
   ClearDetailPage,
@@ -122,6 +122,20 @@ const setStatsRoute = createRoute({
   path: '/stats/sets',
   validateSearch: parseSetStatsSearch,
   component: SetStatsPage
+})
+
+const comboStatsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/stats/combos',
+  validateSearch: parseSetStatsSearch,
+  component: ComboStatsPage
+})
+
+const weaponStatsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/stats/weapons',
+  validateSearch: parseSetStatsSearch,
+  component: WeaponStatsPage
 })
 
 const clearsRoute = createRoute({
@@ -236,6 +250,8 @@ const routeTree = rootRoute.addChildren([
   rankingsRoute,
   statsRoute,
   setStatsRoute,
+  comboStatsRoute,
+  weaponStatsRoute,
   clearsRoute,
   clearContentRoute,
   adventureEntryRoute,
