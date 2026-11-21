@@ -1,4 +1,9 @@
-export { planClearCollection, toContentPopulation, weekKey } from './collection.js'
+export {
+  planClearCollection,
+  toContentPopulation,
+  toRequestActivity,
+  weekKey
+} from './collection.js'
 export { planLegionClearMoves } from './legions.js'
 export type { LegionClearMove } from './legions.js'
 export { toClearRecordInput, toClearRecordRanges } from './records.js'
