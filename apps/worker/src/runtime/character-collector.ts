@@ -32,6 +32,8 @@ import { createWorkerJobs } from './worker-jobs.js'
 import { startWorkerEventRecorder } from './worker-events.js'
 
 const BATCH_KEY_REFRESH_MS = 5000
+// Neople 공지(2026-03-05)의 애플리케이션 기준 허용량이다. IP 기준 분당 5만 건은 worker 전체 상한(설정)으로 지킨다.
+const KEY_REQUESTS_PER_SECOND = 500
 
 function writeReport(code: string, details?: Readonly<Record<string, unknown>>): void {
   writeAccessLogToStdout(
@@ -62,10 +64,10 @@ export async function startCharacterCollector(
   }
 
   const keyRepository = new DatabaseBatchNeopleKeyRepository(client)
+  const keyRequestsPerSecond = Math.min(KEY_REQUESTS_PER_SECOND, configuration.requestsPerSecond)
   const keyPool = createBatchNeopleKeyPool({
     store: keyRepository,
-    createNeople: (key) =>
-      paceNeopleRequests(createNeopleClient(key), configuration.requestsPerSecond),
+    createNeople: (key) => paceNeopleRequests(createNeopleClient(key), keyRequestsPerSecond),
     concurrencyPerKey: configuration.concurrency,
     report
   })
@@ -82,7 +84,8 @@ export async function startCharacterCollector(
     }
   }, BATCH_KEY_REFRESH_MS)
 
-  const { neople, readConcurrency } = keyPool
+  const { readConcurrency } = keyPool
+  const neople = paceNeopleRequests(keyPool.neople, configuration.requestsPerSecond)
   const fetchBasic = createNeopleCharacterBasic(neople)
   const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
   const jobs = createWorkerJobs(client, {
