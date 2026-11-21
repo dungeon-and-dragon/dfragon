@@ -7,7 +7,8 @@ import type { OathCatalog } from '#entities/catalog/model/oath-catalog'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { OATH_CATALOG_URL, useOathCatalog } from './useOathCatalog'
+import { OATH_CATALOG_URL } from './oath-catalog.handlers'
+import { useOathCatalog } from './useOathCatalog'
 
 const SKILLTAB_URL = `${window.location.origin}/skilltab`
 
