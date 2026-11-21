@@ -5,7 +5,7 @@ import { EVOLUTION_FILTER_LIMIT } from '#shared/config/ranking'
 
 const LOADING_CELLS = 4
 const EVOLUTION_TYPES: readonly SkillEvolutionType[] = [1, 2]
-const GRID = 'grid min-w-0 grow grid-cols-2 gap-x-8 gap-y-3'
+const GRID = 'grid min-w-0 grow grid-cols-2 gap-x-8 gap-y-3 max-sm:grid-cols-1'
 const BRANCH =
   'box-border inline-flex h-[28px] items-center gap-2 rounded-control border px-2 text-xs'
 const BRANCH_IDLE = 'border-dashed border-line-strong bg-surface text-fg-subtle hover:bg-control'
@@ -67,7 +67,7 @@ function EvolutionCell({
   onPick: (name: string, type: SkillEvolutionType) => void
 }): React.JSX.Element {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3 max-sm:flex-wrap">
       <span className="block size-game-icon shrink-0">
         {icon !== null ? (
           <SkillSprite icon={icon} />
@@ -150,7 +150,7 @@ export function SkillEvolutionSkeleton(): React.JSX.Element {
         <div key={index} aria-hidden="true" className="flex h-8 items-center gap-3">
           <span className="skeleton block size-game-icon shrink-0" />
           <span className="skeleton-text w-[96px]" />
-          <span className="skeleton-text w-[120px]" />
+          <span className="skeleton-text w-[120px] max-sm:w-[88px]" />
         </div>
       ))}
     </div>
