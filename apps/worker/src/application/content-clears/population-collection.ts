@@ -1,4 +1,4 @@
-import type { ClearPopulationCharacter, TimelineRange } from '@dfragon/database'
+import type { ClearPopulationPage, TimelineCharacter, TimelineRange } from '@dfragon/database'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
 import {
   TimelineFailure,
@@ -19,7 +19,7 @@ export type CollectionProgressRepository = {
 }
 
 export type CollectedCharacter = {
-  character: ClearPopulationCharacter
+  character: TimelineCharacter
   rows: TimelineRow[]
 }
 
@@ -29,9 +29,10 @@ type CharacterRows =
   | { status: 'unavailable'; reason: string }
 
 export type PopulationCollection = {
-  population: readonly ClearPopulationCharacter[]
+  total: number
+  readPage: (page: ClearPopulationPage) => Promise<TimelineCharacter[]>
   resumedAt: number
-  rangesOf: (character: ClearPopulationCharacter) => readonly TimelineRange[]
+  rangesOf: (character: TimelineCharacter) => readonly TimelineRange[]
   fetchTimeline: FetchCharacterTimeline
   readConcurrency: () => number
   pause: (ms: number) => Promise<void>
@@ -87,7 +88,7 @@ function countReasons(results: readonly CharacterRows[]): string {
 }
 
 async function fetchCharacterRows(
-  character: ClearPopulationCharacter,
+  character: TimelineCharacter,
   ranges: readonly TimelineRange[],
   fetchTimeline: FetchCharacterTimeline
 ): Promise<CharacterRows> {
@@ -114,8 +115,12 @@ async function fetchCharacterRows(
   return { status: 'collected', rows }
 }
 
+// 수백만 명인 수집 대상을 한 번에 읽으면 worker 메모리 한도를 넘어 나눠 읽는다.
+const POPULATION_PAGE_SIZE = 10_000
+
 export async function collectPopulation({
-  population,
+  total,
+  readPage,
   resumedAt,
   rangesOf,
   fetchTimeline,
@@ -129,54 +134,61 @@ export async function collectPopulation({
 }: PopulationCollection): Promise<number> {
   let skipped = 0
   let done = resumedAt
+  let page = await readPage({ after: undefined, skip: resumedAt, limit: POPULATION_PAGE_SIZE })
 
-  while (done < population.length) {
-    const group = population.slice(done, done + readConcurrency())
-    const results = await fetchGroupWithRetry(
-      group,
-      (characters) =>
-        Promise.all(
-          characters.map((character) =>
-            fetchCharacterRows(character, rangesOf(character), fetchTimeline)
-          )
-        ),
-      {
-        isUnavailable: (result) => result.status === 'unavailable',
-        pause,
-        onUnavailable: ({ attempted, unavailable, paused }) => {
-          const reasons = countReasons(unavailable)
-          report(events.unavailable, {
-            done,
-            characters: attempted,
-            unavailable: unavailable.length,
-            paused: paused ? 1 : 0,
-            reasons
-          })
+  while (page.length > 0) {
+    for (let read = 0; read < page.length; ) {
+      const group = page.slice(read, read + readConcurrency())
+      const results = await fetchGroupWithRetry(
+        group,
+        (characters) =>
+          Promise.all(
+            characters.map((character) =>
+              fetchCharacterRows(character, rangesOf(character), fetchTimeline)
+            )
+          ),
+        {
+          isUnavailable: (result) => result.status === 'unavailable',
+          pause,
+          onUnavailable: ({ attempted, unavailable, paused }) => {
+            const reasons = countReasons(unavailable)
+            report(events.unavailable, {
+              done,
+              characters: attempted,
+              unavailable: unavailable.length,
+              paused: paused ? 1 : 0,
+              reasons
+            })
+          }
+        }
+      )
+
+      for (const [index, result] of results.entries()) {
+        if (result.status === 'unavailable') {
+          report(events.skipped, { position: done + index })
         }
       }
-    )
 
-    for (const [index, result] of results.entries()) {
-      if (result.status === 'unavailable') {
-        report(events.skipped, { position: done + index })
-      }
+      const collected = group.flatMap((character, index) => {
+        const result = results[index]
+
+        if (result?.status !== 'collected') {
+          return []
+        }
+
+        return [{ character, rows: result.rows }]
+      })
+
+      await recordGroup(collected)
+      skipped += group.length - collected.length
+      read += group.length
+      done += group.length
+      await recordProgress(done)
+      // 수집이 도는 동안 대상이 늘면 처음 센 수를 넘는다.
+      reportProgress(done, Math.max(total, done))
     }
 
-    const collected = group.flatMap((character, index) => {
-      const result = results[index]
-
-      if (result?.status !== 'collected') {
-        return []
-      }
-
-      return [{ character, rows: result.rows }]
-    })
-
-    await recordGroup(collected)
-    skipped += group.length - collected.length
-    done += group.length
-    await recordProgress(done)
-    reportProgress(done, population.length)
+    page = await readPage({ after: page.at(-1), skip: 0, limit: POPULATION_PAGE_SIZE })
   }
 
   return skipped

@@ -107,8 +107,11 @@ export type {
 } from './clear-record.js'
 export { createDatabaseClient } from './client.js'
 export {
+  countClearPopulation,
   finishContentClearCollection,
   readClearPopulation,
+  readClearPopulationJobs,
+  readClearPopulationPage,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
   readContentClearCollection,
@@ -145,6 +148,8 @@ export type {
   ClearJobFameSample,
   ClearJobScoreSample,
   ClearPopulationCharacter,
+  ClearPopulationPage,
+  ClearPopulationSelection,
   ClearPopulationJob,
   ClearScoreBandCount,
   ClearScoreSample,
