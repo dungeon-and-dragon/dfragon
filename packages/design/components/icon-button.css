@@ -71,7 +71,7 @@
   color: var(--color-fg-disabled);
 }
 
-@media (width < 600px) {
+@media (pointer: coarse) {
   .icon-btn-sm {
     position: relative;
   }

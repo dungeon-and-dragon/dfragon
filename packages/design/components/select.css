@@ -93,7 +93,7 @@
   transform: scaleY(-1);
 }
 
-@media (width < 600px) {
+@media (pointer: coarse) {
   .select-2xs {
     position: relative;
   }
