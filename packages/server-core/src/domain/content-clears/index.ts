@@ -5,6 +5,7 @@ export {
   toCollectionMinFame,
   toContentClearInput,
   toLatestContents,
+  toLatestContentsMinFame,
   toPopulationMinFame
 } from './contents.js'
 export type { ClearContent, ClearStagePair } from './contents.js'

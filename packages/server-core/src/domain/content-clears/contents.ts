@@ -212,20 +212,24 @@ export function toLatestContents(
   )
 }
 
-// 종류별 최신 컨텐츠에 입장할 수 있는 캐릭터를 모두 받는 가장 낮은 최고 명성이다.
+// 지난 컨텐츠도 그 입장 명성부터 세야 하므로 모든 컨텐츠에 입장할 수 있는 캐릭터를 받는다.
 export function toCollectionMinFame(contents: readonly ClearContent[] = CLEAR_CONTENTS): number {
-  return Math.min(
-    ...toLatestContents(contents).flatMap(({ entryFame }) =>
-      entryFame !== null ? [entryFame] : []
-    )
-  )
+  return Math.min(...contents.flatMap(({ entryFame }) => (entryFame !== null ? [entryFame] : [])))
 }
 
-// 수집 하한 아래 캐릭터는 받지 않으므로, 입장 명성이 수집 하한보다 낮거나 없는 컨텐츠의 분모는 수집 대상 전체다.
-export function toPopulationMinFame(content: ClearContent, collectionMinFame: number): number {
-  const entryFame = content.entryFame ?? collectionMinFame
+// 점수 계산 대상은 클리어 수집 하한과 달리 종류별 최신 컨텐츠에 입장할 수 있는 캐릭터까지다.
+export function toLatestContentsMinFame(
+  contents: readonly ClearContent[] = CLEAR_CONTENTS
+): number {
+  return toCollectionMinFame(toLatestContents(contents))
+}
 
-  return Math.max(entryFame, collectionMinFame)
+export function toPopulationMinFame(content: ClearContent, collectionMinFame: number): number {
+  if (content.entryFame === null) {
+    return collectionMinFame
+  }
+
+  return content.entryFame
 }
 
 export type ClearStagePair = {
