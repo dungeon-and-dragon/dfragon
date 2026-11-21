@@ -35,7 +35,7 @@ export const 캐릭터표: Story = {
 
 export const 명성아래점수: Story = {
   render: () => (
-    <div className="w-[400px]">
+    <div className="w-[400px] max-w-full">
       <ListBox name="명성 랭킹">
         <CharacterTable rows={rows.slice(3, 6)} scorePlacement="belowFame" affiliations={[]} />
       </ListBox>
@@ -116,7 +116,7 @@ export const 열폭: Story = {
 
 export const 좁은폭열폭: Story = {
   render: () => (
-    <div className="w-[390px]">
+    <div className="w-[390px] max-w-full">
       <ListBox name="명성 랭킹">
         <CharacterTable rows={widestRows} affiliations={[]} />
       </ListBox>
@@ -196,7 +196,7 @@ export const 줄바꿈: Story = {
 
 export const 좁은폭가로스크롤: Story = {
   render: () => (
-    <div className="w-[390px]">
+    <div className="w-[390px] max-w-full">
       <ListBox name="명성 랭킹">
         <CharacterTable rows={rows.slice(0, 4)} />
       </ListBox>

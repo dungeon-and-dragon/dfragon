@@ -3,7 +3,7 @@ import { type ChangeEvent, type FormEvent, useState } from 'react'
 import type { ScoreSort } from '#entities/ranking'
 import { type SearchRange, searchRangeOf } from './search-range'
 
-const RANGE_INPUT = 'w-[112px]'
+const RANGE_INPUT = 'w-[112px] max-sm:w-[88px]'
 const FAME = 'fame'
 const LABEL = '검색 기준'
 const CRITERIA = [
@@ -71,7 +71,7 @@ export function SearchCriterionFilter({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-center gap-2">
       <Select.Root value={criterion.value} onValueChange={handleCriterionChange} items={CRITERIA}>
         <Select.Trigger size="sm" aria-label={LABEL}>
           <Select.Value />
@@ -84,28 +84,30 @@ export function SearchCriterionFilter({
           ))}
         </Select.Popup>
       </Select.Root>
-      <div className={RANGE_INPUT}>
-        <TextField size="sm" invalid={next === null}>
-          <TextFieldInput
-            aria-label={`최저 ${criterion.label}`}
-            inputMode="numeric"
-            autoComplete="off"
-            value={from}
-            onChange={handleFromChange}
-          />
-        </TextField>
-      </div>
-      <span className="text-fg-muted">~</span>
-      <div className={RANGE_INPUT}>
-        <TextField size="sm" invalid={next === null}>
-          <TextFieldInput
-            aria-label={`최대 ${criterion.label}`}
-            inputMode="numeric"
-            autoComplete="off"
-            value={to}
-            onChange={handleToChange}
-          />
-        </TextField>
+      <div className="flex items-center gap-2">
+        <div className={RANGE_INPUT}>
+          <TextField size="sm" invalid={next === null}>
+            <TextFieldInput
+              aria-label={`최저 ${criterion.label}`}
+              inputMode="numeric"
+              autoComplete="off"
+              value={from}
+              onChange={handleFromChange}
+            />
+          </TextField>
+        </div>
+        <span className="text-fg-muted">~</span>
+        <div className={RANGE_INPUT}>
+          <TextField size="sm" invalid={next === null}>
+            <TextFieldInput
+              aria-label={`최대 ${criterion.label}`}
+              inputMode="numeric"
+              autoComplete="off"
+              value={to}
+              onChange={handleToChange}
+            />
+          </TextField>
+        </div>
       </div>
       <Button type="submit" variant="secondary" size="sm" disabled={next === null}>
         적용
