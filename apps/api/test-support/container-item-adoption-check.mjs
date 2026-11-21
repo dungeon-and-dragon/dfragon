@@ -52,6 +52,7 @@ const basic = (characterId, job, fame) => ({
 })
 const ignoreProgress = { reportProgress: () => {} }
 const sum = (items) => items.reduce((total, { count }) => total + count, 0)
+const everyone = (query) => ({ ...query, sample: 'all' })
 const slotOf = (adoption, slotId) => adoption.slots.find((slot) => slot.slotId === slotId)
 
 const client = createDatabaseClient(readDatabaseConfiguration(process.env))
@@ -136,7 +137,7 @@ try {
   await job.run({}, ignoreProgress)
   await createSetAdoptionJob(service).run({}, ignoreProgress)
 
-  const bladeAdoption = await readItemAdoption(client, blade)
+  const bladeAdoption = await readItemAdoption(client, everyone(blade))
   assert.ok(bladeAdoption.computedAt >= startedAt)
   assert.deepEqual(
     { ...bladeAdoption, computedAt: undefined },
@@ -169,25 +170,35 @@ try {
   assert.equal(sum(slotOf(bladeAdoption, 'WEAPON').items), 4)
   assert.equal(sum(slotOf(bladeAdoption, 'SUPPORT').items), 1)
 
-  const dealer = await readItemAdoption(client, { ...maleCrusader, role: 'dealer' })
+  const dealer = await readItemAdoption(client, everyone({ ...maleCrusader, role: 'dealer' }))
   assert.deepEqual(slotOf(dealer, 'WEAPON').items, [
     { itemId: 'item-weapon-c', name: '합성 딜러 무기', typeDetail: '도', count: 1 }
   ])
   // 앞 단계가 세트 값을 남긴 남성 크루세이더도 표본 수에 들 수 있어, 역할은 이 검사의 무기로만 본다.
-  const buffer = await readItemAdoption(client, { ...maleCrusader, role: 'buffer' })
+  const buffer = await readItemAdoption(client, everyone({ ...maleCrusader, role: 'buffer' }))
   assert.deepEqual(slotOf(buffer, 'WEAPON').items, [
     { itemId: 'item-weapon-d', name: '합성 버퍼 무기', typeDetail: '도', count: 1 }
   ])
 
-  const typedAdoption = await readItemAdoption(client, typed)
+  const typedAdoption = await readItemAdoption(client, everyone(typed))
   assert.deepEqual(slotOf(typedAdoption, 'WEAPON').items, [
     { itemId: 'item-type-x', name: '합성 종류 무기', typeDetail: '창', count: 3 },
     { itemId: 'item-type-y', name: '합성 종류 무기', typeDetail: '낫', count: 3 }
   ])
 
-  const everyItems = await readItemAdoption(client, {})
-  const everySets = await readSetAdoption(client, {})
-  assert.equal(everyItems.sampleSize, everySets.sampleSize)
+  // 아이템 상자는 세트 상자와 같은 표본을 센다.
+  for (const query of [
+    { sample: 'all' },
+    { sample: 'fame' },
+    { sample: 'top' },
+    { ...blade, sample: 'top' },
+    { jobId: blade.jobId, sample: 'top' },
+    { ...maleCrusader, role: 'dealer', sample: 'top' }
+  ]) {
+    const items = await readItemAdoption(client, query)
+    const sets = await readSetAdoption(client, query)
+    assert.equal(items.sampleSize, sets.sampleSize, JSON.stringify(query))
+  }
 
   const firstComputedAt = bladeAdoption.computedAt
   await recordCharacterSets(client, {
@@ -199,7 +210,7 @@ try {
     fetchedAt: new Date('2026-11-18T01:00:00Z')
   })
   await job.run({}, ignoreProgress)
-  const replaced = await readItemAdoption(client, blade)
+  const replaced = await readItemAdoption(client, everyone(blade))
   assert.deepEqual(slotOf(replaced, 'WEAPON').items, [
     { itemId: 'item-weapon-a', name: '합성 무기', typeDetail: '도', count: 2 },
     { itemId: 'item-weapon-b', name: '합성 다른 무기', typeDetail: '낫', count: 2 }
@@ -210,8 +221,6 @@ try {
     SELECT count(*)::int AS stale FROM item_adoption WHERE computed_at <= ${firstComputedAt}`
   assert.equal(stale, 0)
 
-  // 표본을 넣지 않는 job의 행은 기본값인 전체 표본이고, 목록에 없는 표본은 거절한다.
-  assert.deepEqual(await client.$queryRaw`SELECT DISTINCT sample FROM item_adoption`, [{ sample: 'all' }])
   await assert.rejects(
     client.$executeRaw`
       INSERT INTO item_adoption (job_id, job_grow_id, role, sample, count, computed_at)
@@ -228,7 +237,7 @@ try {
     await client.$executeRaw`ALTER TABLE item_adoption DROP CONSTRAINT synthetic_failure`
   }
 
-  assert.deepEqual(await readItemAdoption(client, blade), replaced)
+  assert.deepEqual(await readItemAdoption(client, everyone(blade)), replaced)
 } finally {
   await client.$disconnect()
 }
