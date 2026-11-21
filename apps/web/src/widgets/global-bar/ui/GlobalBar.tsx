@@ -7,13 +7,16 @@ import { CharacterSearchBox } from './CharacterSearchBox'
 import { ColorModeToggle } from '#features/color-mode'
 import { TodayGrade } from './TodayGrade'
 
-type GlobalMenuItem = { label: string; to: NonNullable<LinkProps['to']> }
+type GlobalMenuItem = {
+  label: string
+  to: NonNullable<LinkProps['to']>
+  sectionOf?: string
+}
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '멀티서치', to: '/multisearch' },
   { label: '검색', to: '/rankings' },
-  { label: '통계', to: '/stats' },
-  { label: '클리어', to: '/clears' },
+  { label: '통계', to: '/stats', sectionOf: '/clears' },
   { label: '모험단', to: '/adventures' },
   { label: '즐겨찾기', to: '/favorites' }
 ]
@@ -60,6 +63,12 @@ export function GlobalBar(): React.JSX.Element {
               key={item.to}
               to={item.to}
               activeOptions={{ includeSearch: false }}
+              aria-current={
+                item.sectionOf !== undefined &&
+                (pathname === item.sectionOf || pathname.startsWith(`${item.sectionOf}/`))
+                  ? 'page'
+                  : undefined
+              }
               className="inline-flex shrink-0 items-center px-3 text-sm font-medium whitespace-nowrap text-fg-muted no-underline transition-colors focus-ring-inset hover:text-fg aria-[current=page]:font-semibold aria-[current=page]:text-fg"
             >
               {item.label}
