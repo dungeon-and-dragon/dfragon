@@ -30,6 +30,7 @@ const TRANSCENDENCE_CODES: ReadonlySet<number> = new Set([516, 556])
 const KEEP_CODES: ReadonlySet<number> = new Set([511, 514, 553, 555])
 // 고유 장비는 Neople 사전에 세트가 없어 이름 앞의 "고유 - "로 가르고, 세트 하나처럼 묶는다(2026-11-19 저장소 소유자 결정).
 // 이름에 "고유"가 없는 세트 없는 태초 장비는 묶지 않는다.
+// 고유 서약과 안개 결정은 이름에 "고유"가 없어 세트 없는 서약, 서약결정을 모두 고유로 묶는다(2026-11-21 저장소 소유자 결정).
 const UNIQUE_NAME_PREFIX = '고유 - '
 const UNIQUE_SET: EquipmentSet = { setItemId: 'unique', setItemName: '고유' }
 // 저장소 소유자가 #1781에서 정한 세트 줄임말 표의 순서다. 응답 sets의 순서와 기본 세트를 정한다(#1868).
@@ -134,13 +135,17 @@ export function toEquipmentWindow(
 }
 
 function holdingSet(entry: ItemDictionaryEntry, itemName: string | null): EquipmentSet | undefined {
-  const { setItemId, setItemName } = entry
+  const { setItemId, setItemName, itemType } = entry
 
   if (setItemId !== null && setItemName !== null) {
     return { setItemId, setItemName }
   }
 
-  if (setItemId === null && itemName?.startsWith(UNIQUE_NAME_PREFIX)) {
+  if (setItemId !== null) {
+    return undefined
+  }
+
+  if (itemName?.startsWith(UNIQUE_NAME_PREFIX) || OATH_KINDS.has(itemType)) {
     return UNIQUE_SET
   }
 
