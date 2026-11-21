@@ -1,5 +1,5 @@
 import type { Bar } from '#shared/ui/chart/RowBars'
-import { type ItemCount, type ItemStats, itemSlotName, WEAPON_SLOT } from '#entities/ranking'
+import { type ItemCount, type ItemStats, WEAPON_SLOT } from '#entities/ranking'
 import type { SetStatsFilter } from '#entities/ranking'
 import { rankingLink, shareOf } from './set-stats-bars'
 
@@ -36,16 +36,18 @@ function mergePrefixedWeapons(weapons: readonly ItemCount[]): ItemCount[] {
   return [...merged.values()]
 }
 
-export function weaponBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
+export type ItemBar = Bar & Readonly<{ itemId: string | null }>
+
+export function weaponBars(stats: ItemStats, filter: SetStatsFilter): ItemBar[] {
   const weapons = stats.slots.find(({ slotId }) => slotId === WEAPON_SLOT)?.items ?? []
   const sorted = mergePrefixedWeapons(weapons).toSorted(byCountDesc)
   const limited = filter.jobId === undefined && sorted.length > ALL_JOBS_WEAPON_LIMIT
   const shown = limited ? sorted.slice(0, ALL_JOBS_WEAPON_LIMIT) : sorted
-  const bars: Bar[] = shown.map(({ itemId, name, count }) => {
+  const bars: ItemBar[] = shown.map(({ itemId, name, count }) => {
     const value = shareOf(count, stats.sampleSize)
     const link = rankingLink(filter, { itemIds: itemId })
 
-    return { key: itemId, name, value, link }
+    return { key: itemId, itemId, name, value, link }
   })
   const visibleBars = bars.filter(({ value }) => value >= MIN_SHOWN_WEAPON_SHARE)
 
@@ -58,28 +60,33 @@ export function weaponBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
 
   return [
     ...visibleBars,
-    { key: OTHER_WEAPONS, name: OTHER_WEAPONS, value: otherValue, base: true }
+    {
+      key: OTHER_WEAPONS,
+      itemId: null,
+      name: OTHER_WEAPONS,
+      value: otherValue,
+      base: true
+    }
   ]
 }
 
-// 응답은 아무도 끼지 않은 부위를 빼므로, 그 부위도 0명으로 보이도록 부위를 따로 둔다.
-const UNIQUE_ITEM_SLOTS = ['RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
+// 유일 장비는 부위마다 한 종뿐이라 아이템을 고정해 두고, 아무도 끼지 않아 응답에 없어도 0명으로 보인다.
+const UNIQUE_ITEMS: readonly Readonly<{ itemId: string; name: string }>[] = [
+  { itemId: 'aa5273499f19ddba846919dbb6857d82', name: '광휘를 머금은 눈동자' },
+  { itemId: '6e1fcf6e59ed8d5a95dc152b84fe93ce', name: '만병을 잉태한 역병의 심장' },
+  { itemId: 'df77236c51ea1274a3deb79c3e470695', name: '우아한 기품의 향수' },
+  { itemId: '14449881bc371352c250502e7b201506', name: '영롱한 날씨의 큐브' }
+]
 
-// 유일 장비는 지금 부위마다 한 종뿐이라 부위마다 착용 인원 한 줄로 보인다.
-// 한 부위에 여러 종이 생기면 itemIds가 모두 낀 캐릭터만 거르므로 랭킹으로 잇지 않는다.
-export function uniqueItemBars(stats: ItemStats, filter: SetStatsFilter): Bar[] {
-  return UNIQUE_ITEM_SLOTS.map((slotId) => {
-    const items = stats.slots.find((slot) => slot.slotId === slotId)?.items ?? []
-    const value = items.reduce((sum, { count }) => sum + count, 0)
-    const name = itemSlotName(slotId)
-    const [only] = items
+export function uniqueItemBars(stats: ItemStats, filter: SetStatsFilter): ItemBar[] {
+  const counts = new Map(
+    stats.slots.flatMap(({ items }) => items.map(({ itemId, count }) => [itemId, count] as const))
+  )
 
-    if (items.length !== 1 || only === undefined) {
-      return { key: slotId, name, value }
-    }
+  return UNIQUE_ITEMS.map(({ itemId, name }) => {
+    const value = counts.get(itemId) ?? 0
+    const link = rankingLink(filter, { itemIds: itemId })
 
-    const link = rankingLink(filter, { itemIds: only.itemId })
-
-    return { key: slotId, name, value, link }
+    return { key: itemId, itemId, name, value, link }
   })
 }
