@@ -2,6 +2,7 @@ import { CheckIcon } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { ClearName, WeeklyCharacter } from '#entities/adventure-guild'
+import type { OathCatalog } from '#entities/catalog'
 import {
   CharacterCell,
   FAME_COLUMN,
@@ -10,14 +11,29 @@ import {
   SCORE_COLUMN,
   ScoreValue
 } from '#widgets/character-table'
+import { RankingSetLines } from '#widgets/ranking-filter'
 import { WIDE_STICKY_HEAD, WIDE_STICKY_HEAD_CELL } from './sticky-head'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-const CLEAR_KINDS = [
-  { kind: 'raid', label: '레이드' },
-  { kind: 'legion', label: '레기온' }
-] as const
+// 열이 좁아 레이드 이름을 줄여 쓴다. 클리어 판정은 API가 보낸 원래 이름으로 한다.
+const SHORT_CLEAR_NAMES: Readonly<Record<string, string | undefined>> = {
+  '디레지에 레이드': '디레지에',
+  '무너진 성자 미카엘라': '미카엘라'
+}
+
+// 검색 화면의 세트 열과 같은 폭이다.
+const SET_COLUMN = 'w-[160px] max-sm:hidden'
+const SET_CELL = 'py-0 max-sm:hidden'
+
+function clearLabel(name: string): string {
+  const shortName = SHORT_CLEAR_NAMES[name]
+  if (shortName !== undefined) {
+    return shortName
+  }
+
+  return name
+}
 
 function isCleared(character: WeeklyCharacter, clearName: ClearName): boolean {
   return character.weeklyClears.some(
@@ -28,23 +44,20 @@ function isCleared(character: WeeklyCharacter, clearName: ClearName): boolean {
 export function WeeklyClearTable({
   clearNames,
   rows,
+  catalog,
   trailing
 }: {
   clearNames: readonly ClearName[]
   rows: readonly WeeklyCharacter[]
+  catalog: OathCatalog | null
   trailing?: ReactNode
 }): React.JSX.Element {
-  const groups = CLEAR_KINDS.map(({ kind, label }) => ({
-    label,
-    span: clearNames.filter((clearName) => clearName.kind === kind).length
-  })).filter(({ span }) => span > 0)
-  const headRows = clearNames.length > 0 ? 2 : 1
-
   return (
     <table className="table table-fixed table-wide">
       <colgroup>
         <col className={RANK_COLUMN} />
         <col />
+        <col className={SET_COLUMN} />
         <col className={FAME_COLUMN} />
         <col className={SCORE_COLUMN} />
         {clearNames.map(({ kind, name }) => (
@@ -53,42 +66,31 @@ export function WeeklyClearTable({
       </colgroup>
       <thead className={WIDE_STICKY_HEAD}>
         <tr>
-          <th scope="col" rowSpan={headRows} className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
+          <th scope="col" className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
             #
           </th>
-          <th scope="col" rowSpan={headRows} className={WIDE_STICKY_HEAD_CELL}>
+          <th scope="col" className={WIDE_STICKY_HEAD_CELL}>
             캐릭터
           </th>
-          <th scope="col" rowSpan={headRows} className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
+          <th scope="col" className={`max-sm:hidden ${WIDE_STICKY_HEAD_CELL}`}>
+            세트
+          </th>
+          <th scope="col" className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
             명성
           </th>
-          <th scope="col" rowSpan={headRows} className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
+          <th scope="col" className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
             점수
           </th>
-          {groups.map(({ label, span }) => (
+          {clearNames.map(({ kind, name }) => (
             <th
-              key={label}
-              scope="colgroup"
-              colSpan={span}
+              key={`${kind}/${name}`}
+              scope="col"
               className={`text-center ${WIDE_STICKY_HEAD_CELL}`}
             >
-              {label}
+              {clearLabel(name)}
             </th>
           ))}
         </tr>
-        {clearNames.length > 0 && (
-          <tr>
-            {clearNames.map(({ kind, name }) => (
-              <th
-                key={`${kind}/${name}`}
-                scope="col"
-                className={`text-center ${WIDE_STICKY_HEAD_CELL}`}
-              >
-                {name}
-              </th>
-            ))}
-          </tr>
-        )}
       </thead>
       <tbody>
         {rows.map((row, index) => (
@@ -99,6 +101,9 @@ export function WeeklyClearTable({
             {/* 초상화가 셀 위아래 여백과 합쳐 행을 48px보다 높이지 않게 이 칸만 위아래 여백을 두지 않는다. */}
             <td className="py-0">
               <CharacterCell character={row} />
+            </td>
+            <td className={SET_CELL}>
+              <RankingSetLines character={row} catalog={catalog} />
             </td>
             <td className="table-num font-semibold text-game-fame">
               {row.fame != null ? integer.format(row.fame) : MISSING_VALUE}

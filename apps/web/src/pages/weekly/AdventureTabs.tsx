@@ -1,10 +1,17 @@
 import { Link } from '@tanstack/react-router'
+import type { Ref } from 'react'
 
 const TAB = 'tab no-underline focus-ring-inset'
 
-export function AdventureTabs({ adventureName }: { adventureName: string }): React.JSX.Element {
+export function AdventureTabs({
+  adventureName,
+  ref
+}: {
+  adventureName: string
+  ref: Ref<HTMLDivElement>
+}): React.JSX.Element {
   return (
-    <div className="section pb-0">
+    <div ref={ref} className="section sticky top-0 z-sticky bg-canvas pt-2 pb-0">
       <nav aria-label="모험단" className="tabs px-1">
         <Link
           to="/adventures/$adventureName"

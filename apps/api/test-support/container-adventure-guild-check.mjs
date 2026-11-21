@@ -228,7 +228,13 @@ try {
     ]
   )
   const { dealerSkillLearned, ...noBasic } = adventure.at(-1)
-  assert.deepEqual(weekly.characters.at(-1), { ...noBasic, role: null, weeklyClears: [] })
+  assert.deepEqual(weekly.characters.at(-1), {
+    ...noBasic,
+    role: null,
+    equipmentSet: null,
+    oathSet: null,
+    weeklyClears: []
+  })
   assert.deepEqual(await readAdventureWeeklyClears(client, '없는모험단', now), {
     clearNames: fixedClearNames,
     characters: []

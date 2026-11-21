@@ -1,5 +1,6 @@
 import { Button, RefreshIcon, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, type ReactNode, useState } from 'react'
+import { useOathCatalog } from '#entities/catalog'
 import { SkeletonRow } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 import { AdventureTabs } from './AdventureTabs'
@@ -8,8 +9,9 @@ import { useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { useAdventureWeekly, useRefreshAdventureWeekly } from './api/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
-import { WIDE_STICKY_TABLE_FRAME } from './sticky-head'
+import { adventureTabsHeight, WIDE_STICKY_TABLE_FRAME } from './sticky-head'
 import { WeeklyClearTable } from './WeeklyClearTable'
+import { useObservedHeight } from './use-observed-height'
 
 const LOADING_ROWS = 5
 
@@ -109,6 +111,7 @@ export function WeeklyScreen({
   const refreshWeekly = useRefreshAdventureWeekly()
   const refreshEquipment = useRefreshAdventureEquipment()
   const [refreshing, setRefreshing] = useState(false)
+  const [observeTabs, tabsHeight] = useObservedHeight()
 
   async function handleRefresh(): Promise<void> {
     setRefreshing(true)
@@ -121,8 +124,8 @@ export function WeeklyScreen({
   }
 
   return (
-    <div className={SCREEN}>
-      <AdventureTabs adventureName={adventureName} />
+    <div className={SCREEN} style={adventureTabsHeight(tabsHeight)}>
+      <AdventureTabs ref={observeTabs} adventureName={adventureName} />
       <div className="section">
         <AdventureDashboard
           adventureName={adventureName}
@@ -152,6 +155,9 @@ function WeeklyClearBox({ children }: { children: ReactNode }): React.JSX.Elemen
 
 function WeeklyClearList({ adventureName }: { adventureName: string }): React.JSX.Element {
   const result = useAdventureWeekly(adventureName)
+  const catalogResult = useOathCatalog()
+  const catalog = catalogResult.status === 'success' ? catalogResult.value : null
+
   switch (result.status) {
     case 'loading':
       return (
@@ -163,8 +169,9 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
             <WeeklyClearTable
               clearNames={[]}
               rows={[]}
+              catalog={catalog}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow key={index} scorePlacement="column" affiliations={[]} />
+                <SkeletonRow key={index} detail scorePlacement="column" affiliations={[]} />
               ))}
             />
           </div>
@@ -185,7 +192,11 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
 
       return (
         <WeeklyClearBox>
-          <WeeklyClearTable clearNames={result.value.clearNames} rows={result.value.characters} />
+          <WeeklyClearTable
+            clearNames={result.value.clearNames}
+            rows={result.value.characters}
+            catalog={catalog}
+          />
         </WeeklyClearBox>
       )
   }

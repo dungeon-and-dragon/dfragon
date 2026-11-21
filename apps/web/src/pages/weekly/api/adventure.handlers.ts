@@ -1,4 +1,6 @@
 import { delay, HttpResponse, http } from 'msw'
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import {
   storyAdventureActivity,
@@ -24,6 +26,7 @@ async function never(): Promise<void> {
 
 export const adventureHandlers = {
   adventure: [
+    oathCatalogHandlers.catalog(oathCatalogFixture.setStats),
     http.get(ADVENTURE_WEEKLY_URL, () => HttpResponse.json(storyAdventureWeekly)),
     http.get(ADVENTURE_EQUIPMENT_URL, ({ request }) => {
       const { searchParams } = new URL(request.url)

@@ -22,6 +22,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `enqueueCollectedCharacters`, `takeCollectionBatch`, `recordCollectionFailure`: 기본 정보 대기열에 넣고, 꺼내고, 실패를 남깁니다.
 - `readAdventureCharacters`, `readAdventureNames`, `readGuild`: 모험단, 길드의 캐릭터와 캐릭터의 모험단 이름을 읽습니다.
 - `readFameRanking`, `readCharacterStats`, `readJobSkillAdoption`: 명성 랭킹, 캐릭터 통계, 전직별 스킬 채택 수를 읽습니다.
+- `readAdventureSetCharacters`: 모험단 캐릭터를 장비, 서약 세트와 함께 읽습니다.
 - `saveCharacterStats`, `readFamedJobGrows`, `saveJobSkillAdoption`, `deleteJobSkillAdoptionComputedBefore`: 통계 저장분을 덮어쓰고, 명성 있는 캐릭터의 전직 목록을 읽고, 스킬 채택 수 저장분을 덮어쓰거나 지난 행을 지웁니다.
 - `replaceItemAdoption`, `readItemAdoption`: 세트 값을 받은 캐릭터가 낀 무기, 유일 장비 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 부위별 선택 수를 읽습니다.
 - `replaceSetAdoption`, `readSetAdoption`: 세트 값을 받은 캐릭터의 세트 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 세트 선택 수를 읽습니다.

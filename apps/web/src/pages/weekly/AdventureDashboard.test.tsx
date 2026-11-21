@@ -4,6 +4,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { ActivitySeason, AdventureActivity, AdventureWeekly } from '#entities/adventure-guild'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -26,6 +27,7 @@ beforeEach(() => {
   requested = []
   // 주간 던파는 기본으로 끝나지 않고, 시즌 하루 상세는 빈 기록을 돌려준다.
   server.use(
+    oathCatalogHandlers.notUploaded,
     http.get(ADVENTURE_WEEKLY_URL, () => delay('infinite')),
     http.get(ADVENTURE_SEASON_DAYS_URL, ({ params }) => {
       const season = Number(params.season)
