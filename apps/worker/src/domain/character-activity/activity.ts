@@ -15,3 +15,23 @@ export function activityRange(now: Date): ActivityRange {
 export function needsActivityCheck(lastActiveAt: Date | null, now: Date): boolean {
   return lastActiveAt === null || !isRecentlyActive(lastActiveAt, now)
 }
+
+// 30일보다 오래된 활동만 있으면 활성인지 알 수 없어, 비활성 여부는 명성 갱신의 타임라인 확인에 맡긴다.
+export function latestRecentActivity(
+  rows: readonly { occurredAt: Date }[],
+  now: Date
+): Date | undefined {
+  const latest = rows.reduce<Date | undefined>((found, { occurredAt }) => {
+    if (found === undefined || occurredAt > found) {
+      return occurredAt
+    }
+
+    return found
+  }, undefined)
+
+  if (latest === undefined || !isRecentlyActive(latest, now)) {
+    return undefined
+  }
+
+  return latest
+}

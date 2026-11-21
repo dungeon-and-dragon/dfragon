@@ -1,4 +1,4 @@
-import type { ClearRecordInput, ContentClearInput } from '@dfragon/database'
+import type { CharacterActivityInput, ClearRecordInput, ContentClearInput } from '@dfragon/database'
 import {
   CLEAR_CONTENTS,
   toCollectionMinFame,
@@ -11,6 +11,7 @@ import {
   weekKey,
   toClearRecordInput
 } from '#domain/content-clears/index.js'
+import { latestRecentActivity } from '#domain/character-activity/index.js'
 import type { ClearCollectionPorts } from './ports.js'
 import { collectPopulation, readOrStartProgress } from './population-collection.js'
 import type { ClearCollectionRepository } from './repository.js'
@@ -85,8 +86,17 @@ export class ContentClearCollectionService {
       recordGroup: async (collected) => {
         const clears: ContentClearInput[] = []
         const records: ClearRecordInput[] = []
+        const activities: CharacterActivityInput[] = []
+        const checkedAt = now()
 
         for (const { character, rows } of collected) {
+          const lastActiveAt = latestRecentActivity(rows, checkedAt)
+
+          if (lastActiveAt !== undefined) {
+            const { serverId, characterId } = character
+            activities.push({ serverId, characterId, lastActiveAt })
+          }
+
           for (const row of rows) {
             const clear = toContentClearInput(character, row)
             if (
@@ -109,6 +119,10 @@ export class ContentClearCollectionService {
 
         if (records.length > 0) {
           await this.repository.recordRecords(records)
+        }
+
+        if (activities.length > 0) {
+          await this.repository.recordActivities(activities)
         }
 
         counts.clears += clears.length

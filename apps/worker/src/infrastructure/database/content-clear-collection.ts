@@ -1,4 +1,5 @@
 import {
+  type CharacterActivityInput,
   type ClearPopulationCharacter,
   type ClearRecordBackfillProgress,
   type ClearRecordCursor,
@@ -18,6 +19,7 @@ import {
   readContentClearPopulations,
   recordClearRecordBackfillProgress,
   recordClearRecordCursors,
+  recordCharactersActive,
   recordClearRecords,
   recordContentClearCollectionProgress,
   recordContentClearPopulation,
@@ -62,6 +64,10 @@ export class DatabaseClearCollectionRepository implements ClearCollectionReposit
 
   recordRecords(records: readonly ClearRecordInput[]): Promise<void> {
     return recordClearRecords(this.client, records)
+  }
+
+  recordActivities(activities: readonly CharacterActivityInput[]): Promise<void> {
+    return recordCharactersActive(this.client, activities)
   }
 
   recordPopulation(population: ContentClearPopulationInput): Promise<void> {
