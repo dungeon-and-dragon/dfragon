@@ -341,13 +341,14 @@ it('전직을 고르면 그 전직의 무기를 그 밖으로 묶지 않고 많�
   expect(rankingSearchOf(rowLink('무기', '무기2'))).toEqual({ ...JOB_FILTER, itemIds: 'weapon-2' })
 })
 
-it('유일 장비는 부위마다 착용 비율 한 줄이고, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
-  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(2)) })
+it('유일 장비는 부위마다 착용 인원 한 줄이고, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
+  const itemStats = { ...itemStatsWith(2), sampleSize: 200 }
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
 
   await vi.waitFor(() =>
     expect(rowsOf('유일 장비')).toEqual([
-      ['반지 유일 장비 착용', '72.0%'],
-      ['귀걸이 유일 장비 착용', '50.0%']
+      ['반지 유일 장비 착용', '72명'],
+      ['귀걸이 유일 장비 착용', '50명']
     ])
   )
   expect(rankingSearchOf(rowLink('유일 장비', '반지 유일 장비 착용'))).toEqual({
