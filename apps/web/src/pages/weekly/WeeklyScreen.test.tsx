@@ -4,6 +4,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { AdventureWeekly, WeeklyCharacter } from '#entities/adventure-guild'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -30,7 +31,8 @@ afterEach(async () => {
 function weeklyCharacter(
   index: number,
   weeklyClears: WeeklyCharacter['weeklyClears'],
-  score: WeeklyCharacter['score'] = null
+  score: WeeklyCharacter['score'] = null,
+  sets: Pick<WeeklyCharacter, 'equipmentSet' | 'oathSet'> = { equipmentSet: null, oathSet: null }
 ): WeeklyCharacter {
   return {
     serverId: 'cain',
@@ -47,6 +49,7 @@ function weeklyCharacter(
     guildName: null,
     role: null,
     score,
+    ...sets,
     weeklyClears
   }
 }
@@ -54,18 +57,22 @@ function weeklyCharacter(
 const weekly: AdventureWeekly = {
   adventureName: '합성 모험단',
   clearNames: [
-    { kind: 'raid', name: '가 레이드' },
-    { kind: 'raid', name: '나 레이드' },
+    { kind: 'raid', name: '디레지에 레이드' },
+    { kind: 'raid', name: '무너진 성자 미카엘라' },
     { kind: 'legion', name: '다 레기온' }
   ],
   characters: [
     weeklyCharacter(
       1,
       [
-        { kind: 'raid', name: '나 레이드' },
+        { kind: 'raid', name: '무너진 성자 미카엘라' },
         { kind: 'legion', name: '다 레기온' }
       ],
-      { calculator: 'buff', value: 4_120_000 }
+      { calculator: 'buff', value: 4_120_000 },
+      {
+        equipmentSet: { id: 'synthetic-set', name: '합성 장비 세트' },
+        oathSet: { id: 1, name: '합성 서약', option: null }
+      }
     ),
     weeklyCharacter(2, [])
   ]
@@ -126,6 +133,7 @@ function renderWeekly(
     onAdventureOpen = vi.fn()
   }: { activityReplies?: readonly Reply[]; onAdventureOpen?: (adventureName: string) => void } = {}
 ): Promise<void> {
+  server.use(oathCatalogHandlers.notUploaded)
   serve(ADVENTURE_WEEKLY_URL, weeklyReplies)
   serve(ADVENTURE_ACTIVITY_URL, activityReplies)
 
@@ -204,30 +212,38 @@ it('모험단 화면의 입력은 지금 모험단 이름으로 시작하고, �
   expect(onAdventureOpen.mock.calls).toEqual([['다른 모험단']])
 })
 
-it('표 위에 제목 없이 클리어 이름 열을 응답 순서로 레이드, 레기온 묶음 아래 두고, 응답 순서의 캐릭터마다 점수와 클리어한 칸의 체크를 두며 점수가 없으면 -다', async () => {
+it('표 위에 제목 없이 한 줄 헤더에 세트 열과 줄인 레이드 이름의 클리어 열을 응답 순서로 두고, 응답 순서의 캐릭터마다 세트, 점수와 클리어한 칸의 체크를 두며 값이 없으면 -다', async () => {
   await renderWeekly('합성 모험단', [respondWeekly(weekly)])
   await vi.waitFor(() => expect(characterLinks()).toBe(2))
 
   expect(listName()).toBeUndefined()
   expect(headerRows()).toEqual([
-    ['#', '캐릭터', '명성', '점수', '레이드', '레기온'],
-    ['가 레이드', '나 레이드', '다 레기온']
+    ['#', '캐릭터', '세트', '명성', '점수', '디레지에', '미카엘라', '다 레기온']
   ])
-  expect(
-    [...container.querySelectorAll('thead th[scope="colgroup"]')].map((cell) =>
-      cell.getAttribute('colspan')
-    )
-  ).toEqual(['2', '1'])
   const [first, second] = bodyRows()
-  expect(first.slice(2)).toEqual(['89,999', '버프4,120,000', '클리어 안 함', '클리어', '클리어'])
-  expect(second.slice(2)).toEqual(['89,998', '-', '클리어 안 함', '클리어 안 함', '클리어 안 함'])
+  expect(first.slice(2)).toEqual([
+    '합성 장비 세트합성 서약',
+    '89,999',
+    '버프4,120,000',
+    '클리어 안 함',
+    '클리어',
+    '클리어'
+  ])
+  expect(second.slice(2)).toEqual([
+    '-',
+    '89,998',
+    '-',
+    '클리어 안 함',
+    '클리어 안 함',
+    '클리어 안 함'
+  ])
   expect(container.querySelectorAll('tbody tr:first-child td svg')).toHaveLength(2)
   const link = container.querySelector<HTMLAnchorElement>('tbody a')!
   expect(link.textContent).toBe('합성1')
   expect(link.getAttribute('href')).toBe('/c/cain/character-1')
 })
 
-it('클리어 이름이 없는 응답은 묶음 헤더 없이 #, 캐릭터, 명성, 점수 열만 그린다', async () => {
+it('클리어 이름이 없는 응답은 #, 캐릭터, 세트, 명성, 점수 열만 그린다', async () => {
   await renderWeekly('합성 모험단', [
     respondWeekly({
       ...weekly,
@@ -237,7 +253,7 @@ it('클리어 이름이 없는 응답은 묶음 헤더 없이 #, 캐릭터, 명�
   ])
   await vi.waitFor(() => expect(characterLinks()).toBe(2))
 
-  expect(headerRows()).toEqual([['#', '캐릭터', '명성', '점수']])
+  expect(headerRows()).toEqual([['#', '캐릭터', '세트', '명성', '점수']])
   expect(bodyRows()).toHaveLength(2)
 })
 
