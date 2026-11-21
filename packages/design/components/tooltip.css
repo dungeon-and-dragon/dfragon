@@ -50,6 +50,20 @@
   height: 230px;
 }
 
+/*
+ * <div class="tooltip"><div class="tooltip-item">아이템 상세</div></div>. 게임 아이템 툴팁처럼 여러 줄을 촘촘히 그린다.
+ * 기본 tooltip의 4px 8px는 한 줄 설명에 맞춘 값이라, 여러 줄 카드에서는 사방을 같게 둔다.
+ */
+.tooltip:has(> .tooltip-item) {
+  padding: 8px;
+  white-space: normal;
+}
+
+.tooltip-item {
+  line-height: 14px;
+  font-weight: var(--font-weight-normal);
+}
+
 @media (width < 1024px) {
   .tooltip-positioner:has(.tooltip-portrait) {
     display: none;
