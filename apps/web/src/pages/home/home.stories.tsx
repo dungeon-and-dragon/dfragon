@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
-import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
+import { soulPricesHandlers } from './api/soul-prices.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { HomePage } from './HomePage'
@@ -14,7 +14,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const 메인: Story = {
-  parameters: { msw: [fameRankingHandlers.pages] },
+  parameters: { msw: [soulPricesHandlers.prices] },
   render: () => (
     <StoryFrame>
       <StoryScreen>
@@ -25,7 +25,7 @@ export const 메인: Story = {
 }
 
 export const 메인받는중: Story = {
-  parameters: { msw: [fameRankingHandlers.loading] },
+  parameters: { msw: [soulPricesHandlers.loading] },
   render: () => (
     <StoryFrame>
       <StoryScreen>
