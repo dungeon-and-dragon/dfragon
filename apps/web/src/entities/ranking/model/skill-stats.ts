@@ -40,9 +40,19 @@ export type SkillEvolutionRates = Readonly<{
   rates: SkillUpgradeRates
 }>
 
+export type SkillLevelRate = Readonly<{ level: number; rate: number }>
+
+export type SkillLevelDistribution = Readonly<{
+  rates: readonly SkillLevelRate[]
+  current: SkillLevelRate | null
+  top: readonly SkillLevelRate[]
+}>
+
+const TOP_LEVEL_COUNT = 3
+
 export type SkillAdoption = Readonly<{
   adoption: number
-  levels: Readonly<{ p50: number; p95: number }> | null
+  levels: SkillLevelDistribution | null
   evolution: SkillEvolutionRates | null
   enhancement: SkillUpgradeRates | null
   sampleSize: number
@@ -51,24 +61,35 @@ export type SkillAdoption = Readonly<{
 
 export type SkillAdoptionTarget = Readonly<{
   name: string
+  level: number | null
+  maxLevel: number
   evolutionNames: readonly [string, string] | null
   hasEnhancement: boolean
 }>
 
 type SkillLevels = SkillStats['skills'][number]['levels']
 
-// 레벨 낮은 순 분포에서 배운 캐릭터의 percent%가 그 레벨 이하인 가장 낮은 레벨이다(nearest-rank).
-function levelPercentile(levels: SkillLevels, learned: number, percent: number): number {
-  const rank = Math.ceil((learned * percent) / 100)
-  let seen = 0
-  for (const [level, levelCount] of levels) {
-    seen += levelCount
-    if (seen >= rank) {
-      return level
-    }
-  }
+// 장비 옵션으로 마스터 레벨을 넘긴 캐릭터도 잘리지 않게 표본과 이 캐릭터의 가장 높은 레벨까지 칸을 둔다.
+function levelDistributionOf(
+  levels: SkillLevels,
+  learned: number,
+  { level, maxLevel }: Pick<SkillAdoptionTarget, 'level' | 'maxLevel'>
+): SkillLevelDistribution {
+  const countByLevel = new Map(levels)
+  const lastLevel = Math.max(maxLevel, level ?? 0, ...countByLevel.keys())
+  const rates = Array.from({ length: lastLevel }, (_, index) => {
+    const barLevel = index + 1
+    const rate = (countByLevel.get(barLevel) ?? 0) / learned
 
-  throw new RangeError('레벨 분포의 인원 합이 배운 캐릭터 수보다 적다')
+    return { level: barLevel, rate }
+  })
+  const current = rates.find((rate) => rate.level === level) ?? null
+  const top = rates
+    .filter(({ rate }) => rate > 0)
+    .toSorted((left, right) => right.rate - left.rate || right.level - left.level)
+    .slice(0, TOP_LEVEL_COUNT)
+
+  return { rates, current, top }
 }
 
 function upgradeRates(
@@ -86,7 +107,7 @@ function upgradeRates(
 
 export function skillAdoptionOf(
   stats: SkillStats,
-  { name, evolutionNames, hasEnhancement }: SkillAdoptionTarget
+  { name, level, maxLevel, evolutionNames, hasEnhancement }: SkillAdoptionTarget
 ): SkillAdoption | null {
   const { sampleSize, computedAt } = stats
   if (sampleSize < SKILL_STATS_MIN_SAMPLE) {
@@ -103,14 +124,11 @@ export function skillAdoptionOf(
       : null
   const enhancement = hasEnhancement ? upgradeRates(stats.enhancements, name, learned) : null
   const adoption = learned / sampleSize
-  const levelPercentiles = {
-    p50: levelPercentile(levels, learned, 50),
-    p95: levelPercentile(levels, learned, 95)
-  }
+  const levelDistribution = levelDistributionOf(levels, learned, { level, maxLevel })
 
   return {
     adoption,
-    levels: levelPercentiles,
+    levels: levelDistribution,
     evolution,
     enhancement,
     sampleSize,

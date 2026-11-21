@@ -26,6 +26,8 @@ function statsOf(overrides: Partial<SkillStats> = {}): SkillStats {
 
 const BALDO = {
   name: '발도',
+  level: 13,
+  maxLevel: 20,
   evolutionNames: ['명가의 손놀림', '속전속결'],
   hasEnhancement: true
 } as const
@@ -34,7 +36,20 @@ describe('skillAdoptionOf', () => {
   it('채택률은 표본, 개화와 강화 비율은 그 스킬을 배운 캐릭터로 나눈다', () => {
     expect(skillAdoptionOf(statsOf(), BALDO)).toEqual({
       adoption: 0.5,
-      levels: { p50: 1, p95: 13 },
+      levels: {
+        rates: Array.from({ length: 20 }, (_, index) => {
+          const level = index + 1
+          const rate = { 1: 0.5, 13: 0.45, 20: 0.05 }[level] ?? 0
+
+          return { level, rate }
+        }),
+        current: { level: 13, rate: 0.45 },
+        top: [
+          { level: 1, rate: 0.5 },
+          { level: 13, rate: 0.45 },
+          { level: 20, rate: 0.05 }
+        ]
+      },
       evolution: { names: ['명가의 손놀림', '속전속결'], rates: [0.6, 0.3] },
       enhancement: [0.15, 0.75],
       sampleSize: 40,
@@ -42,51 +57,59 @@ describe('skillAdoptionOf', () => {
     })
   })
 
-  it.each([
-    {
-      name: 'p50 순위 10번째가 1레벨 끝이면 1',
-      levels: [
-        [1, 10],
-        [13, 10]
-      ],
-      p50: 1,
-      p95: 13
-    },
-    {
-      name: 'p50 순위 10번째가 13레벨로 넘어가면 13',
-      levels: [
-        [1, 9],
-        [13, 11]
-      ],
-      p50: 13,
-      p95: 13
-    },
-    {
-      name: 'p95 순위 19번째가 1레벨 끝이면 1',
-      levels: [
-        [1, 19],
-        [20, 1]
-      ],
-      p50: 1,
-      p95: 1
-    },
-    {
-      name: 'p95 순위 19번째가 20레벨로 넘어가면 20',
-      levels: [
-        [1, 18],
-        [20, 2]
-      ],
-      p50: 1,
-      p95: 20
-    }
-  ] satisfies { name: string; levels: [number, number][]; p50: number; p95: number }[])(
-    '배운 20명에서 $name',
-    ({ levels, p50, p95 }) => {
-      const stats = statsOf({ skills: [{ name: '발도', learned: 20, levels }] })
+  it('마스터 레벨보다 높은 표본 레벨과 이 캐릭터 레벨까지 칸을 늘린다', () => {
+    const stats = statsOf({
+      skills: [
+        {
+          name: '발도',
+          learned: 20,
+          levels: [
+            [1, 19],
+            [22, 1]
+          ]
+        }
+      ]
+    })
 
-      expect(skillAdoptionOf(stats, BALDO)?.levels).toEqual({ p50, p95 })
-    }
-  )
+    expect(skillAdoptionOf(stats, BALDO)?.levels?.rates).toHaveLength(22)
+    expect(skillAdoptionOf(stats, { ...BALDO, level: 24 })?.levels).toMatchObject({
+      rates: { length: 24, 23: { level: 24, rate: 0 } },
+      current: { level: 24, rate: 0 }
+    })
+  })
+
+  it('이 캐릭터가 배우지 않은 스킬은 강조할 레벨을 두지 않는다', () => {
+    expect(skillAdoptionOf(statsOf(), { ...BALDO, level: null })?.levels?.current).toBeNull()
+  })
+
+  it('많이 찍은 레벨은 비율 높은 순으로 3개까지 두고, 비율이 같으면 높은 레벨을 앞에 둔다', () => {
+    const stats = statsOf({
+      skills: [
+        {
+          name: '발도',
+          learned: 20,
+          levels: [
+            [1, 5],
+            [10, 5],
+            [13, 6],
+            [20, 4]
+          ]
+        }
+      ]
+    })
+
+    expect(skillAdoptionOf(stats, BALDO)?.levels?.top).toEqual([
+      { level: 13, rate: 0.3 },
+      { level: 10, rate: 0.25 },
+      { level: 1, rate: 0.25 }
+    ])
+  })
+
+  it('찍은 레벨이 3개보다 적으면 있는 레벨만 둔다', () => {
+    const stats = statsOf({ skills: [{ name: '발도', learned: 20, levels: [[13, 20]] }] })
+
+    expect(skillAdoptionOf(stats, BALDO)?.levels?.top).toEqual([{ level: 13, rate: 1 }])
+  })
 
   it('표본이 20명 미만이면 수치를 두지 않는다', () => {
     expect(skillAdoptionOf(statsOf({ sampleSize: 19 }), BALDO)).toBeNull()
@@ -108,7 +131,7 @@ describe('skillAdoptionOf', () => {
     const stats = statsOf({ evolutions: [], enhancements: [] })
 
     expect(
-      skillAdoptionOf(stats, { name: '발도', evolutionNames: null, hasEnhancement: true })
+      skillAdoptionOf(stats, { ...BALDO, evolutionNames: null, hasEnhancement: true })
     ).toMatchObject({ evolution: null, enhancement: [0, 0] })
   })
 })
