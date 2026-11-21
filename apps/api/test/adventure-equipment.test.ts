@@ -20,7 +20,8 @@ const USES_DICTIONARY_RARITY =
 const SPLITS_SERVERS =
   '서버가 둘인 모험단은 servers가 둘이고 캐릭터가 자기 서버에만 있으며, 가진 것이 없는 캐릭터도 남는다'
 const OATH_CODES =
-  '서약도 556 out은 1을 빼고 553 기록은 이미 있는 칸을 늘리지 않으며, 초월이 아닌 기록의 out 값은 빼지 않는다'
+  '서약도 556 out은 1을 빼고 본체의 553 기록은 이미 있는 칸을 늘리지 않으며, 초월이 아닌 기록의 out 값은 빼지 않는다'
+const ADDS_CRYSTAL_UPGRADE = '결정의 553 기록은 이미 있는 칸에도 하나씩 더한다'
 const LATEST_ITEM =
   '칸의 아이템 id와 이름은 out이 아닌 가장 최근 기록의 값이고, sets는 응답에 나온 세트만 담는다'
 const GROUPS_UNIQUE =
@@ -238,6 +239,19 @@ test(OATH_CODES, () => {
       ['crystal', 1],
       ['oath', 1]
     ]
+  )
+})
+
+test(ADDS_CRYSTAL_UPGRADE, () => {
+  const { oaths } = firstCharacter([
+    record(553, ids.crystal),
+    record(553, ids.crystal),
+    record(552, ids.crystal)
+  ])
+
+  assert.deepEqual(
+    oaths.map(({ kind, count }) => [kind, count]),
+    [['crystal', 3]]
   )
 })
 
