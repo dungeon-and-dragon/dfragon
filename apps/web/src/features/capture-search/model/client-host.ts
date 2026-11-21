@@ -45,6 +45,17 @@ export type BrowserHost = ClientHost & {
 
 export const ClientHostContext = createContext<ClientHost | null>(null)
 
+export const BrowserHostContext = createContext<BrowserHost | null>(null)
+
+export function useBrowserHost(): BrowserHost {
+  const host = useContext(BrowserHostContext)
+  if (host == null) {
+    throw new Error('useBrowserHost는 BrowserHostContext 안에서만 쓸 수 있습니다.')
+  }
+
+  return host
+}
+
 export function useClientHost(): ClientHost {
   const host = useContext(ClientHostContext)
   if (host == null) {

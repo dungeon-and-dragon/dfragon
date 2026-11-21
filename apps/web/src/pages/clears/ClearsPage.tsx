@@ -2,7 +2,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { StatsTabs } from '#widgets/stats-tabs'
 import { ClearOverviewScreen } from './ClearOverviewScreen'
 
-const route = getRouteApi('/clears')
+const route = getRouteApi('/clears/')
 
 export function ClearsPage(): React.JSX.Element {
   const { week } = route.useSearch()

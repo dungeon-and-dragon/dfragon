@@ -28,7 +28,7 @@ ENV XDG_CONFIG_HOME=/tmp
 ENV XDG_DATA_HOME=/tmp
 COPY apps/web/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /workspace/build-info.json /app/build-info.json
-COPY --from=build /workspace/apps/web/dist /srv
+COPY --from=build /workspace/apps/web/dist/client /srv
 USER 1000:1000
 EXPOSE 8080
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

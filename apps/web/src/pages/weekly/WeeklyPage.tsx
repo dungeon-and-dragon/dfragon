@@ -4,7 +4,7 @@ import { AdventureEquipmentScreen } from './AdventureEquipmentScreen'
 import type { EquipmentSearch } from './equipment-search'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
-const route = getRouteApi('/adventures/$adventureName')
+const route = getRouteApi('/adventures/$adventureName/')
 const equipmentRoute = getRouteApi('/adventures/$adventureName/equipment')
 
 function useOpenAdventure(): (adventureName: string) => Promise<void> {
