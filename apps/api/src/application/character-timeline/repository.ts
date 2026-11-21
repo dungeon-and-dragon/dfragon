@@ -30,6 +30,7 @@ export interface TimelineSyncRepository {
     range: TimelineRange,
     inputs: TimelineInputs
   ): Promise<void>
+  recordActive(character: TimelineCharacter, lastActiveAt: Date): Promise<void>
   recordSuccess(character: TimelineCharacter): Promise<void>
   recordFailure(character: TimelineCharacter, failure: TimelineSyncFailure): Promise<void>
 }
