@@ -3,7 +3,7 @@ import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { rarityTextClasses } from '#entities/character'
+import { raritySolidClasses } from '#entities/character'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { soulPricesFixture } from './api/soul-prices.fixture'
@@ -46,7 +46,7 @@ function bodyRows(): string[][] {
   )
 }
 
-it('소울 결정 6종의 가격, 교환 개수와 가격을 교환 개수로 나눈 1개당 골드를 그리고 매물이 없으면 -로 둔다', async () => {
+it('소울 결정 6종의 가격과 그 가격을 종말의 계시 교환 개수로 나눈 1개당 골드를 그리고 결정은 이름 대신 아이템 아이콘으로 보이며 매물이 없으면 가격을 -로, 아이콘을 빈 칸으로 둔다', async () => {
   server.use(soulPricesHandlers.prices)
   await render()
   await settled()
@@ -54,21 +54,26 @@ it('소울 결정 6종의 가격, 교환 개수와 가격을 교환 개수로 �
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
     '소울 결정',
     '가격',
-    '교환 개수',
     '1개당 골드'
   ])
   // 1,250 / 2 = 625, 3,000 / 4 = 750, 41,000 / 30 = 1,366.7, 140,000 / 90 = 1,555.6, 52,000 / 40 = 1,300
   expect(bodyRows()).toEqual([
-    ['레어 소울 결정', '1,250', '2', '625'],
-    ['유니크 소울 결정', '3,000', '4', '750'],
-    ['레전더리 소울 결정', '41,000', '30', '1,367'],
-    ['에픽 소울 결정', '140,000', '90', '1,556'],
-    ['태초 소울 결정', '-', '1,000', '-'],
-    ['광휘의 소울 결정', '52,000', '40', '1,300']
+    ['레어 소울 결정', '1,250', '625'],
+    ['유니크 소울 결정', '3,000', '750'],
+    ['레전더리 소울 결정', '41,000', '1,367'],
+    ['에픽 소울 결정', '140,000', '1,556'],
+    ['태초 소울 결정', '-', '-'],
+    ['광휘의 소울 결정', '52,000', '1,300']
   ])
-  const names = [...container.querySelectorAll('tbody b')]
-  expect(names[0]?.className).toBe(rarityTextClasses.rare)
-  expect(names[4]?.className).toBe('text-fg')
+  const iconCells = [...container.querySelectorAll('tbody tr td:first-child')]
+  expect(iconCells.map((cell) => cell.querySelector('[title]')?.getAttribute('title'))).toEqual(
+    soulPricesFixture.crystals.map(({ itemName }) => itemName)
+  )
+  expect(iconCells[0]?.querySelector('img')?.getAttribute('src')).toBe(
+    'https://img-api.neople.co.kr/df/items/synthetic-rare-crystal'
+  )
+  expect(iconCells[0]?.querySelector('img')?.classList).toContain(raritySolidClasses.rare)
+  expect(iconCells[4]?.querySelector('img')).toBeNull()
 })
 
 it('받는 중에는 빈 줄 6개를 그린다', async () => {
