@@ -34,14 +34,14 @@ export type {
 } from './model/clear-stats'
 export { itemSlotName, WEAPON_SLOT } from './model/item-stats'
 export type { ItemStats } from './model/item-stats'
-export { characterStatsSchema, evolutionsQueryText } from './model/ranking-stats'
+export { characterStatsSchema, evolutionsQueryText, SCORE_SORTS } from './model/ranking-stats'
 export type {
   CharacterStats,
   FameRanking,
-  FameRankingFameRange,
   FameRankingFilter,
   FameRankingSetFilter,
   RankedCharacter,
+  ScoreSort,
   SetStatsFilter,
   SkillEvolutionChoice,
   SkillEvolutionType,

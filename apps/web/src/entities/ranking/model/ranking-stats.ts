@@ -58,6 +58,10 @@ export type FameRanking = z.infer<typeof fameRankingSchema>
 export type RankedCharacter = FameRanking['characters'][number]
 export type CharacterStats = z.infer<typeof characterStatsSchema>
 
+// 없으면 명성 순이다. 점수 순이면 그 점수가 저장된 캐릭터만 나온다.
+export const SCORE_SORTS = ['equipmentScore', 'buffScore'] as const
+export type ScoreSort = (typeof SCORE_SORTS)[number]
+
 export type SkillEvolutionType = 1 | 2
 
 export type SkillEvolutionChoice = Readonly<{ name: string; type: SkillEvolutionType }>
@@ -77,17 +81,19 @@ export type FameRankingFilter = Readonly<{
   itemIds?: readonly string[]
   // 스킬마다 고른 개화다. jobGrowId와 함께만 쓴다.
   evolutions?: readonly SkillEvolutionChoice[]
-  // 둘 다 포함하는 명성 범위다.
+  sort?: ScoreSort
+  // 둘 다 포함하는 명성 범위다. 명성 순일 때만 쓴다.
   fameFrom?: number
   fameTo?: number
+  // 둘 다 포함하는 점수 범위다. 점수 순일 때만 쓴다.
+  scoreFrom?: number
+  scoreTo?: number
 }>
 
 // 개화 필터를 API query와 주소에 같은 \`스킬 이름~종류\` 쌍을 쉼표로 이은 문자열로 둔다.
 export function evolutionsQueryText(evolutions: readonly SkillEvolutionChoice[]): string {
   return evolutions.map(({ name, type }) => `${name}~${type}`).join(',')
 }
-
-export type FameRankingFameRange = Pick<FameRankingFilter, 'fameFrom' | 'fameTo'>
 
 export type SetStatsFilter = Pick<FameRankingFilter, 'jobId' | 'jobGrowId' | 'role'>
 
