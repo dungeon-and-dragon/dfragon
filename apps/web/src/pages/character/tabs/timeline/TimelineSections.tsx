@@ -184,48 +184,50 @@ export function Enhancements({
       count={enhancements.length}
       emptyText="강화, 증폭, 재련 기록이 없습니다."
     >
-      <table className={TABLE}>
-        <colgroup>
-          <col className={TIME_COLUMN} />
-          <col className="w-[56px]" />
-          <col />
-          <col className="w-[80px]" />
-          <col className="w-[96px]" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th scope="col">일시</th>
-            <th scope="col">종류</th>
-            <th scope="col">장비</th>
-            <th scope="col">수치</th>
-            <th scope="col">결과</th>
-          </tr>
-        </thead>
-        <tbody>
-          {enhancements.map((enhancement, index) => (
-            <tr key={`${enhancement.occurredAt}-${index}`}>
-              <td className="text-fg-subtle tabular-nums">
-                <RelativeTime at={enhancement.occurredAt} />
-              </td>
-              <td className={enhancementKindClasses[enhancement.kind]}>
-                {ENHANCEMENT_KIND_LABELS[enhancement.kind]}
-              </td>
-              <td>
-                <ItemName itemName={enhancement.itemName} itemRarity={enhancement.itemRarity} />
-              </td>
-              <td className="num">{formatEnhancementValue(enhancement)}</td>
-              <td>
-                <span className="inline-flex items-center gap-2">
-                  <span className={enhancement.result ? 'text-fg-success' : 'text-fg-danger'}>
-                    {enhancement.result ? '성공' : '실패'}
-                  </span>
-                  {enhancement.safe === true && <span className={`${BADGE} bg-inset`}>안전</span>}
-                </span>
-              </td>
+      <div className="table-scroll">
+        <table className={`${TABLE} max-md:min-w-[480px]`}>
+          <colgroup>
+            <col className={TIME_COLUMN} />
+            <col className="w-[56px]" />
+            <col />
+            <col className="w-[80px]" />
+            <col className="w-[96px]" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">일시</th>
+              <th scope="col">종류</th>
+              <th scope="col">장비</th>
+              <th scope="col">수치</th>
+              <th scope="col">결과</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {enhancements.map((enhancement, index) => (
+              <tr key={`${enhancement.occurredAt}-${index}`}>
+                <td className="text-fg-subtle tabular-nums">
+                  <RelativeTime at={enhancement.occurredAt} />
+                </td>
+                <td className={enhancementKindClasses[enhancement.kind]}>
+                  {ENHANCEMENT_KIND_LABELS[enhancement.kind]}
+                </td>
+                <td>
+                  <ItemName itemName={enhancement.itemName} itemRarity={enhancement.itemRarity} />
+                </td>
+                <td className="num">{formatEnhancementValue(enhancement)}</td>
+                <td>
+                  <span className="inline-flex items-center gap-2">
+                    <span className={enhancement.result ? 'text-fg-success' : 'text-fg-danger'}>
+                      {enhancement.result ? '성공' : '실패'}
+                    </span>
+                    {enhancement.safe === true && <span className={`${BADGE} bg-inset`}>안전</span>}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {more}
     </TimelineGroup>
   )
@@ -245,33 +247,35 @@ export function Acquisitions({
       note="에픽, 태초"
       emptyText="에픽, 태초 획득 기록이 없습니다."
     >
-      <table className={TABLE}>
-        <colgroup>
-          <col className={TIME_COLUMN} />
-          <col />
-          <col className="w-[140px]" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th scope="col">일시</th>
-            <th scope="col">장비</th>
-            <th scope="col">경로</th>
-          </tr>
-        </thead>
-        <tbody>
-          {acquisitions.map((acquisition, index) => (
-            <tr key={`${acquisition.occurredAt}-${index}`}>
-              <td className="text-fg-subtle tabular-nums">
-                <RelativeTime at={acquisition.occurredAt} />
-              </td>
-              <td>
-                <ItemName itemName={acquisition.itemName} itemRarity={acquisition.itemRarity} />
-              </td>
-              <td className="text-fg-muted">{acquisitionRoute(acquisition.name)}</td>
+      <div className="table-scroll">
+        <table className={TABLE}>
+          <colgroup>
+            <col className={TIME_COLUMN} />
+            <col />
+            <col className="w-[140px]" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">일시</th>
+              <th scope="col">장비</th>
+              <th scope="col">경로</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {acquisitions.map((acquisition, index) => (
+              <tr key={`${acquisition.occurredAt}-${index}`}>
+                <td className="text-fg-subtle tabular-nums">
+                  <RelativeTime at={acquisition.occurredAt} />
+                </td>
+                <td>
+                  <ItemName itemName={acquisition.itemName} itemRarity={acquisition.itemRarity} />
+                </td>
+                <td className="text-fg-muted">{acquisitionRoute(acquisition.name)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {more}
     </TimelineGroup>
   )
