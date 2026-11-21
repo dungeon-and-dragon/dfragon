@@ -29,12 +29,14 @@ export function ItemRowBars({
   bars,
   tone,
   max,
-  formatValue
+  formatValue,
+  barFromMd = false
 }: {
   bars: readonly ItemBar[]
   tone: BarTone
   max?: number
   formatValue: (value: number) => string
+  barFromMd?: boolean
 }): React.JSX.Element {
   return (
     <RowBars
@@ -43,6 +45,7 @@ export function ItemRowBars({
       max={max}
       formatValue={formatValue}
       nameWidth={ITEM_NAME_WIDTH}
+      barFromMd={barFromMd}
     />
   )
 }

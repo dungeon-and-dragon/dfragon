@@ -4,6 +4,9 @@ import { cubicBezier, useMotionAllowed } from '#shared/lib/animations/gsap-motio
 
 export type BarGrow = Readonly<{ property: 'width' | 'height'; seconds: number; stagger: number }>
 
+// 첫 항목과 마지막 항목이 자라기 시작하는 시각의 차이 한도다.
+const MAX_STAGGER_SECONDS = 0.4
+
 export const ROW_BAR_GROW: BarGrow = { property: 'width', seconds: 0.7, stagger: 0.04 }
 export const COLUMN_BAR_GROW: BarGrow = { property: 'height', seconds: 0.6, stagger: 0.022 }
 
@@ -50,8 +53,11 @@ export function useChartBarGrow(chartRef: RefObject<HTMLElement | null>, grow: B
     }
 
     const timeline = gsap.timeline()
-    for (const [index, item] of chart.querySelectorAll('[data-chart-item]').entries()) {
-      const at = index * grow.stagger
+    const items = [...chart.querySelectorAll('[data-chart-item]')]
+    // 항목이 많아도 마지막 막대가 늦게 시작하지 않도록 항목 사이 간격을 줄여 전체 시작 차이를 한도 안에 둔다.
+    const stagger = Math.min(grow.stagger, MAX_STAGGER_SECONDS / Math.max(items.length - 1, 1))
+    for (const [index, item] of items.entries()) {
+      const at = index * stagger
       const mark = item.querySelector<HTMLElement>('[data-chart-mark]')
       if (mark != null) {
         timeline.fromTo(

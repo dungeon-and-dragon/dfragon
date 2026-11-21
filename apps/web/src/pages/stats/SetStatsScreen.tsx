@@ -168,6 +168,7 @@ function SetStatsBody({
                 <p className="state">{EMPTY}</p>
               ) : (
                 <RowBars
+                  barFromMd
                   bars={box.bars}
                   tone={box.tone}
                   formatValue={formatShare}

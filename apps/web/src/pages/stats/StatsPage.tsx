@@ -119,7 +119,7 @@ function StatBox({
 
   return (
     <ListBox name={name}>
-      <RowBars bars={bars} tone={tone} />
+      <RowBars bars={bars} tone={tone} barFromMd />
     </ListBox>
   )
 }

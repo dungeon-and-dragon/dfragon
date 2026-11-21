@@ -76,7 +76,12 @@ export function ItemStatsBoxes({ filter }: { filter: SetStatsFilter }): React.JS
         <div className="section section-cols">
           {boxes.map((box) => (
             <ListBox key={box.name} name={box.name}>
-              <ItemRowBars bars={box.bars} tone={box.tone} formatValue={box.formatValue} />
+              <ItemRowBars
+                bars={box.bars}
+                tone={box.tone}
+                formatValue={box.formatValue}
+                barFromMd
+              />
             </ListBox>
           ))}
         </div>

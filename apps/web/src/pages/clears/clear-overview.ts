@@ -80,7 +80,6 @@ export function weekRangeText(weekStart: string): string {
 export type WeekSummary = Readonly<{
   minFame: number | null
   population: number
-  collectedAt: string
 }>
 
 // 컨텐츠마다 입장 명성으로 분모를 거르므로, 그 주에 가장 넓은 분모를 화면 전체의 기준으로 보인다.
@@ -97,11 +96,7 @@ export function weekSummaryOf(
     return undefined
   }
 
-  const collectedAt = weeks
-    .map((week) => week.collectedAt)
-    .reduce((latest, at) => (at > latest ? at : latest))
-
-  return { minFame: widest.minFame, population: widest.population, collectedAt }
+  return { minFame: widest.minFame, population: widest.population }
 }
 
 export type Trend = 'up' | 'down' | 'flat'
