@@ -6,9 +6,11 @@ import { createStoryClientHost } from './story-host'
 
 export function StoryFrame({
   host,
+  path,
   children
 }: {
   host?: ClientHost
+  path?: string
   children: ReactNode
 }): React.JSX.Element {
   const [storyHost] = useState(() => host ?? createStoryClientHost())
@@ -16,7 +18,7 @@ export function StoryFrame({
   return (
     <ClientHostContext value={storyHost}>
       <TestQueryClient>
-        <TestRouter>
+        <TestRouter path={path}>
           <div className="font-sans text-sm text-fg">{children}</div>
         </TestRouter>
       </TestQueryClient>
