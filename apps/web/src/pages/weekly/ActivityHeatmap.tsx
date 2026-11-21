@@ -60,7 +60,9 @@ const CELL = 'relative box-border block size-3 rounded-control'
 const ROWS = 'grid-rows-[14px_repeat(7,12px)]'
 const LABEL = 'text-2xs whitespace-nowrap text-fg-subtle'
 const TAG = 'badge badge-sm border border-current tabular-nums'
-const BOX = 'section grid grid-cols-[minmax(0,1fr)_120px] xl:grid-cols-[minmax(0,1fr)] py-0'
+// 600px 미만에서는 활동 종류 탭을 히트맵 위 가로 줄로 둔다.
+const BOX =
+  'section grid grid-cols-[minmax(0,1fr)_120px] xl:grid-cols-[minmax(0,1fr)] py-0 max-sm:grid-cols-[minmax(0,1fr)]'
 
 // gsap이 heatmap 격자에 --heatmap-ring-angle을 돌리고, 테두리가 상속받아 각도로 쓴다.
 const RING =
@@ -478,18 +480,18 @@ export function ActivityHeatmap({
       ))}
       <Tabs.List
         aria-label="활동 종류"
-        className="relative flex flex-col border-l border-line py-6 max-sm:py-4 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-[120px] xl:py-0"
+        className="relative flex flex-col border-l border-line py-6 xl:absolute xl:top-0 xl:left-full xl:ml-4 xl:w-[120px] xl:py-0 max-sm:order-first max-sm:flex-row max-sm:border-b max-sm:border-l-0 max-sm:px-1 max-sm:py-0"
       >
         {kinds.map(({ kind: tabKind, label }) => (
           <Tabs.Tab
             key={tabKind}
             value={tabKind}
-            className="block w-full cursor-pointer py-2 px-4 text-left text-sm font-medium text-fg-muted focus-ring-inset hover:text-fg data-active:font-semibold data-active:text-fg"
+            className="block w-full cursor-pointer py-2 px-4 text-left max-sm:w-auto max-sm:px-3 max-sm:py-3 text-sm font-medium text-fg-muted focus-ring-inset hover:text-fg data-active:font-semibold data-active:text-fg"
           >
             {label}
           </Tabs.Tab>
         ))}
-        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-[2px] bg-signal transition-[top,height]" />
+        <Tabs.Indicator className="absolute -left-px top-[calc(var(--active-tab-top)+4px)] h-[calc(var(--active-tab-height)-8px)] w-[2px] bg-signal transition-[top,height] max-sm:top-auto max-sm:-bottom-px max-sm:left-(--active-tab-left) max-sm:h-[2px] max-sm:w-(--active-tab-width) max-sm:transition-[left,width]" />
       </Tabs.List>
     </Tabs.Root>
   )

@@ -48,6 +48,7 @@ export function AdventureEquipmentPage(): React.JSX.Element {
   const { adventureName } = equipmentRoute.useParams()
   const search = equipmentRoute.useSearch()
   const navigate = equipmentRoute.useNavigate()
+  const openAdventure = useOpenAdventure()
 
   async function changeSearch(next: EquipmentSearch): Promise<void> {
     await navigate({ search: next, resetScroll: false })
@@ -59,6 +60,7 @@ export function AdventureEquipmentPage(): React.JSX.Element {
       adventureName={adventureName}
       search={search}
       onSearchChange={changeSearch}
+      onAdventureOpen={openAdventure}
     />
   )
 }
