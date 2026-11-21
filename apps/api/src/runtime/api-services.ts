@@ -20,6 +20,7 @@ import {
 } from '#application/character-detail/index.js'
 import type { FetchCharacterImage } from '#application/character-image/ports.js'
 import { CharacterImageService } from '#application/character-image/index.js'
+import { ItemDetailService } from '#application/item-detail/index.js'
 import type { SearchCharacters } from '#application/character-search/ports.js'
 import type { CharacterSearchRepository } from '#application/character-search/repository.js'
 import {
@@ -252,6 +253,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     options.characterHistory ?? emptyCharacterHistoryRepository,
     options.details.catalog
   )
+  const itemDetail = new ItemDetailService(options.details.catalog)
   const todayGrade = new TodayGradeService(options.todayGrade.fetchShopGrade)
   const characterImage = new CharacterImageService(
     options.fetchCharacterImage ?? createNeopleCharacterImage()
@@ -276,6 +278,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       adventureGuild,
       rankingStats,
       clearStats,
+      itemDetail,
       todayGrade
     },
     refreshClearStats: () => clearStats.refresh(),

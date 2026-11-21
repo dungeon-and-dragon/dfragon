@@ -10,6 +10,7 @@ const integer = new Intl.NumberFormat('ko-KR')
 export type Bar = Readonly<{
   key: string
   name: string
+  label?: ReactNode
   value: number
   share?: string
   link?: LinkOptions
@@ -250,7 +251,7 @@ function railHeightOf(thick: boolean, small: boolean): string {
 type DetailsToggle = Readonly<{ open: boolean; onToggle: (key: string) => void }>
 
 function BarRow({
-  bar: { key, name, value, share, link, base = false },
+  bar: { key, name, label, value, share, link, base = false },
   layout: { columns, style, tone, formatValue, countUp, thick, linked, toggleSlot, small = false },
   percent,
   dimmed,
@@ -288,7 +289,7 @@ function BarRow({
   const cells = (
     <>
       <span data-chart-name="" className={`truncate ${small || base ? 'text-fg-muted' : ''}`}>
-        {name}
+        {label ?? name}
       </span>
       <span className={`${RAIL_CLASS} ${railHeightOf(thick, small)}`}>
         <span

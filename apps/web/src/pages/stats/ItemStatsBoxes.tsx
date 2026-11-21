@@ -1,7 +1,9 @@
 import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
+import { ItemIcon } from '#entities/character'
+import { ItemTooltip } from './ItemTooltip'
 import { type SetStatsFilter, useItemStats } from '#entities/ranking'
-import { uniqueItemBars, weaponBars } from './item-stats-bars'
+import { uniqueItemBars, type ItemBar, weaponBars } from './item-stats-bars'
 import { formatShare } from './set-stats-bars'
 
 const WEAPON = '무기'
@@ -21,6 +23,25 @@ type ItemBox = Readonly<{
 
 function formatHeadcount(count: number): string {
   return `${headcount.format(count)}명`
+}
+
+function ItemLabel({ itemId, name }: { itemId: string; name: string }): React.JSX.Element {
+  return (
+    <ItemTooltip itemId={itemId}>
+      <span className="inline-flex max-w-full items-center gap-2 align-middle">
+        <ItemIcon itemId={itemId} rarity={null} size="sm" />
+        <span className="truncate">{name}</span>
+      </span>
+    </ItemTooltip>
+  )
+}
+
+function withItemLabel({ itemId, ...bar }: ItemBar): Bar {
+  if (itemId === null) {
+    return bar
+  }
+
+  return { ...bar, label: <ItemLabel itemId={itemId} name={bar.name} /> }
 }
 
 function SameContentRow({ content }: { content: React.JSX.Element }): React.JSX.Element {
@@ -66,8 +87,8 @@ export function ItemStatsBoxes({ filter }: { filter: SetStatsFilter }): React.JS
         return <SameContentRow content={<p className="state">{EMPTY}</p>} />
       }
 
-      const weapons = weaponBars(stats, filter)
-      const uniques = uniqueItemBars(stats, filter)
+      const weapons = weaponBars(stats, filter).map(withItemLabel)
+      const uniques = uniqueItemBars(stats, filter).map(withItemLabel)
       const boxes: readonly ItemBox[] = [
         { name: WEAPON, bars: weapons, tone: 'chart-2', formatValue: formatShare },
         { name: UNIQUE, bars: uniques, tone: 'chart-5', formatValue: formatHeadcount }

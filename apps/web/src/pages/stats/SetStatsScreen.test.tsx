@@ -6,6 +6,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { ItemStats } from '#entities/ranking'
 import type { OathCatalog } from '#entities/catalog'
 import type { SetStats, SetStatsFilter } from '#entities/ranking'
+import { storyItemDetail } from './api/item-detail.fixture'
+import { ITEM_DETAIL_URL } from './api/item-detail.handlers'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { SET_STATS_URL, setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
@@ -290,7 +292,10 @@ it('받지 못하면 세트 통계를 받지 못했다고 알린다', async () =
   )
 })
 
-// 합성 아이템 통계다. 유일 장비 이름은 게임 데이터 그대로다.
+// 합성 아이템 통계다. 유일 장비의 itemId와 이름은 게임 데이터 그대로다.
+const RING = 'aa5273499f19ddba846919dbb6857d82'
+const EARRING = '14449881bc371352c250502e7b201506'
+
 function itemStatsWith(weaponCount: number): ItemStats {
   const weapons = Array.from({ length: weaponCount }, (_, index) => ({
     itemId: `weapon-${index + 1}`,
@@ -306,14 +311,11 @@ function itemStatsWith(weaponCount: number): ItemStats {
       { slotId: 'WEAPON', items: weapons },
       {
         slotId: 'RING',
-        items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', typeDetail: null, count: 72 }]
+        items: [{ itemId: RING, name: '광휘를 머금은 눈동자', typeDetail: null, count: 72 }]
       },
       {
         slotId: 'EARRING',
-        items: [
-          { itemId: 'earring-1', name: '영롱한 날씨의 큐브', typeDetail: null, count: 40 },
-          { itemId: 'earring-2', name: '합성 귀걸이', typeDetail: null, count: 10 }
-        ]
+        items: [{ itemId: EARRING, name: '영롱한 날씨의 큐브', typeDetail: null, count: 50 }]
       }
     ]
   }
@@ -355,6 +357,37 @@ it('0.0%로 보일 만큼 적게 낀 무기는 막대를 두지 않는다', asyn
   )
 })
 
+it('무기 막대에 아이콘을 보이고, 이름에 마우스를 올리면 그 무기의 상세를 툴팁으로 보인다', async () => {
+  const requestedItemIds: string[] = []
+  server.use(
+    http.get(ITEM_DETAIL_URL, ({ params }) => {
+      requestedItemIds.push(String(params.itemId))
+
+      return HttpResponse.json(storyItemDetail(String(params.itemId)))
+    })
+  )
+  await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStatsWith(2)) })
+  const name = await vi.waitFor(() => {
+    const row = [...boxOf('무기').querySelectorAll('[data-chart-name]')].find(
+      (cell) => cell.textContent === '무기1'
+    )
+    expect(row?.querySelector('img')).not.toBeNull()
+
+    return row!.firstElementChild as HTMLElement
+  })
+
+  // Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
+  await act(async () => {
+    name.dispatchEvent(new MouseEvent('mouseenter'))
+  })
+
+  await vi.waitFor(() => {
+    expect(document.body.textContent).toContain('레벨제한 115')
+    expect(document.body.textContent).toContain('방어는 최선의 공격이지')
+  })
+  expect(requestedItemIds).toEqual(['weapon-1'])
+})
+
 it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 한 막대로 세고, 접두사 없는 무기의 itemId로 잇는다', async () => {
   const base = itemStatsWith(2)
   const itemStats = {
@@ -385,23 +418,30 @@ it('검은 질병의 접두사가 붙은 무기는 접두사 없는 무기와 �
   })
 })
 
-it('유일 장비는 반지, 보조장비, 마법석, 귀걸이마다 착용 인원 한 줄이고, 아무도 끼지 않은 부위는 0명이며, 한 종뿐인 부위만 그 itemId로 거른 랭킹으로 잇는다', async () => {
+it('유일 장비는 네 아이템마다 아이콘, 이름과 착용 인원 한 줄이고, 아무도 끼지 않은 아이템은 0명이며, 그 itemId로 거른 랭킹으로 잇는다', async () => {
   const itemStats = { ...itemStatsWith(2), sampleSize: 200 }
   await render({ setStats: setStatsOf(stats), itemStats: itemStatsOf(itemStats) })
 
   await vi.waitFor(() =>
     expect(rowsOf('유일 장비')).toEqual([
-      ['반지', '72명'],
-      ['보조장비', '0명'],
-      ['마법석', '0명'],
-      ['귀걸이', '50명']
+      ['광휘를 머금은 눈동자', '72명'],
+      ['만병을 잉태한 역병의 심장', '0명'],
+      ['우아한 기품의 향수', '0명'],
+      ['영롱한 날씨의 큐브', '50명']
     ])
   )
-  expect(rankingSearchOf(rowLink('유일 장비', '반지'))).toEqual({
+  expect(rankingSearchOf(rowLink('유일 장비', '광휘를 머금은 눈동자'))).toEqual({
     ...JOB_FILTER,
-    itemIds: 'ring-1'
+    itemIds: RING
   })
-  expect(rowLink('유일 장비', '귀걸이')).toBeNull()
+  expect(rankingSearchOf(rowLink('유일 장비', '영롱한 날씨의 큐브'))).toEqual({
+    ...JOB_FILTER,
+    itemIds: EARRING
+  })
+
+  const iconCount = boxOf('유일 장비').querySelectorAll('[data-chart-name] img').length
+
+  expect(iconCount).toBe(4)
 })
 
 it('아이템 통계 저장분이 없으면 무기, 유일 장비 상자에 아이템 통계가 없다고 알린다', async () => {
