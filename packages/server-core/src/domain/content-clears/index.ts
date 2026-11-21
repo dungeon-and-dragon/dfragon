@@ -2,6 +2,7 @@ export {
   CLEAR_CONTENTS,
   findContentClear,
   findStagePair,
+  hasScoreStats,
   toCollectionMinFame,
   toContentClearInput,
   toLatestContents,
