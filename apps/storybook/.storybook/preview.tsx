@@ -36,6 +36,13 @@ const preview: Preview = {
   ],
   parameters: {
     layout: 'padded',
+    viewport: {
+      options: {
+        phone: { name: '휴대폰 375', styles: { width: '375px', height: '812px' }, type: 'mobile' },
+        sm: { name: 'sm 600', styles: { width: '600px', height: '900px' }, type: 'tablet' },
+        md: { name: 'md 900', styles: { width: '900px', height: '900px' }, type: 'tablet' }
+      }
+    },
     options: { storySort: { order: ['Foundations', 'Components', 'Patterns', 'Screens'] } }
   }
 }
