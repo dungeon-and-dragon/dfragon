@@ -33,7 +33,7 @@ export type {
   ClearWeekOverWeek
 } from './model/clear-stats'
 export { itemSlotName, WEAPON_SLOT } from './model/item-stats'
-export type { ItemStats } from './model/item-stats'
+export type { ItemCount, ItemStats } from './model/item-stats'
 export { characterStatsSchema, evolutionsQueryText, SCORE_SORTS } from './model/ranking-stats'
 export type {
   CharacterStats,
