@@ -22,7 +22,7 @@ export const 화면틀: Story = {
   parameters: { msw: [todayGradeHandlers.grade(13)] },
   render: () => (
     <StoryFrame>
-      <div className="flex min-h-screen flex-col overflow-x-clip">
+      <div className="flex min-h-dvh flex-col overflow-x-clip">
         <GlobalBar />
         <main className="page screen bg-canvas">
           <TitleBox title="모험단1">

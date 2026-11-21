@@ -1,13 +1,16 @@
 /*
  * <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">개요</button>...</div>.
  * 지금 탭은 data-active나 aria-selected="true"이고, 화면을 바꾸는 링크 탭은 aria-current="page"다. React의 Tabs는 tabs-indicator가 지금 탭 아래로 미끄러지고,
- * indicator가 없는 HTML은 지금 탭이 직접 밑줄을 그린다.
+ * indicator가 없는 HTML은 지금 탭이 직접 밑줄을 그린다. 탭이 줄을 넘으면 탭 줄만 가로로 스크롤한다.
  */
 .tabs {
   position: relative;
   display: flex;
   align-items: stretch;
-  border-bottom: 1px solid var(--color-line);
+  overflow-x: auto;
+  /* 스크롤 상자는 border 위를 그리지 못해 border 자리에 걸친 indicator가 잘리므로, 아래 선을 padding 위의 inset 그림자로 긋는다. */
+  padding-bottom: 1px;
+  box-shadow: inset 0 -1px 0 var(--color-line);
 }
 
 .tab {
@@ -54,7 +57,7 @@
 
 .tabs-indicator {
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   left: var(--active-tab-left);
   width: var(--active-tab-width);
   height: 2px;
