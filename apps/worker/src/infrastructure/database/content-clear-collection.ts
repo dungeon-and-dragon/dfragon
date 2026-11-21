@@ -32,8 +32,9 @@ import type {
 export class DatabaseClearCollectionRepository implements ClearCollectionRepository {
   constructor(private readonly client: DatabaseClient) {}
 
+  // 모집단이 클리어 비율의 분모이고, 월말 재확인 전에 다시 접속한 비활성 캐릭터의 클리어도 세야 하므로 비활성도 부른다.
   readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, minMaxFame)
+    return readClearPopulation(this.client, minMaxFame, 'include-inactive')
   }
 
   readPopulations(): Promise<StoredClearPopulation[]> {
@@ -72,8 +73,9 @@ export class DatabaseClearCollectionRepository implements ClearCollectionReposit
 export class DatabaseClearRecordBackfillRepository implements ClearRecordBackfillRepository {
   constructor(private readonly client: DatabaseClient) {}
 
+  // 지금은 비활성인 캐릭터도 지난 시즌의 클리어 기록이 있으므로 비활성도 부른다.
   readPopulation(minMaxFame: number): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, minMaxFame)
+    return readClearPopulation(this.client, minMaxFame, 'include-inactive')
   }
 
   readProgress(): Promise<ClearRecordBackfillProgress | undefined> {
