@@ -1,4 +1,5 @@
 import { Button, ChipGroup } from '@dfragon/ui'
+import { type CSSProperties, type Ref, type RefCallback, useCallback, useState } from 'react'
 import {
   type AdventureEquipment,
   type EquipmentSelection,
@@ -12,6 +13,33 @@ import { EquipmentSection, EquipmentSkeleton, OathSection } from './EquipmentBoa
 import type { EquipmentSearch } from './equipment-search'
 
 type Selection = Readonly<{ serverId: string; setItemId: string | undefined }>
+
+function useObservedHeight(): [RefCallback<HTMLElement>, number] {
+  const [height, setHeight] = useState(0)
+  const observe = useCallback((element: HTMLElement | null) => {
+    if (element === null) {
+      return
+    }
+
+    const target = element
+
+    function measure(): void {
+      setHeight(target.offsetHeight)
+    }
+
+    measure()
+
+    const observer = new ResizeObserver(measure)
+    observer.observe(target)
+
+    return () => {
+      observer.disconnect()
+      setHeight(0)
+    }
+  }, [])
+
+  return [observe, height]
+}
 
 function serverLabel(serverId: string): string {
   const names: Readonly<Record<string, string | undefined>> = serverNames
@@ -50,11 +78,13 @@ function PickerRow({ label, children }: { label: string; children: React.ReactNo
 function EquipmentPickers({
   equipment,
   selection,
-  onChange
+  onChange,
+  ref
 }: {
   equipment: AdventureEquipment
   selection: Selection
   onChange: (search: EquipmentSearch) => void
+  ref: Ref<HTMLDivElement>
 }): React.JSX.Element | null {
   const servers = equipment.servers.map(({ serverId }) => ({
     value: serverId,
@@ -79,7 +109,10 @@ function EquipmentPickers({
   }
 
   return (
-    <div className="section flex flex-col gap-3 bg-canvas px-4 sm:sticky sm:top-0 sm:z-sticky">
+    <div
+      ref={ref}
+      className="section flex flex-col gap-3 bg-canvas px-4 sm:sticky sm:top-0 sm:z-sticky"
+    >
       {servers.length > 1 && (
         <PickerRow label="서버">
           <ChipGroup
@@ -110,6 +143,7 @@ function EquipmentBody({
 }): React.JSX.Element {
   const result = useAdventureEquipment(adventureName, search)
   const refresh = useRefreshAdventureEquipment()
+  const [observePickers, pickersHeight] = useObservedHeight()
 
   async function retry(): Promise<void> {
     await refresh(adventureName)
@@ -154,13 +188,19 @@ function EquipmentBody({
         equipment.servers.find(({ serverId }) => serverId === selected.serverId)?.characters ?? []
       const rows = toEquipmentBoard(characters, selected.setItemId ?? undefined)
       const selection = chipSelection(equipment, search, selected)
+      const stickyTop = { '--sticky-head-top': `${pickersHeight}px` } as CSSProperties
 
       return (
-        <>
-          <EquipmentPickers equipment={equipment} selection={selection} onChange={onSearchChange} />
+        <div style={stickyTop}>
+          <EquipmentPickers
+            ref={observePickers}
+            equipment={equipment}
+            selection={selection}
+            onChange={onSearchChange}
+          />
           <EquipmentSection rows={rows} />
           <OathSection rows={rows} />
-        </>
+        </div>
       )
     }
   }

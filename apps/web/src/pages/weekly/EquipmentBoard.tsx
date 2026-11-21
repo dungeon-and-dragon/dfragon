@@ -18,6 +18,7 @@ import {
   raritySolidOfName
 } from '#entities/character'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
+import { STICKY_HEAD, STICKY_HEAD_CELL, STICKY_TABLE_FRAME } from './sticky-head'
 
 export const LOADING_ROWS = 4
 
@@ -108,13 +109,17 @@ function SlotColumns(): React.JSX.Element {
   )
 }
 
-function SlotHead(): React.JSX.Element {
+function SlotHead({ sticky = false }: { sticky?: boolean }): React.JSX.Element {
+  const cell = sticky ? STICKY_HEAD_CELL : ''
+
   return (
-    <thead>
+    <thead className={sticky ? STICKY_HEAD : undefined}>
       <tr>
-        <th scope="col">캐릭터</th>
+        <th scope="col" className={cell}>
+          캐릭터
+        </th>
         {EQUIPMENT_SLOTS.map((slot) => (
-          <th key={slot} scope="col" className={SLOT_CELL}>
+          <th key={slot} scope="col" className={`${SLOT_CELL} ${cell}`}>
             {slot}
           </th>
         ))}
@@ -125,10 +130,10 @@ function SlotHead(): React.JSX.Element {
 
 function EquipmentTable({ rows }: { rows: readonly EquipmentBoardRow[] }): React.JSX.Element {
   return (
-    <div className="table-scroll max-sm:hidden">
+    <div className="max-sm:hidden">
       <table className="table table-fixed">
         <SlotColumns />
-        <SlotHead />
+        <SlotHead sticky />
         <tbody>
           {rows.map(({ character, slots }) => (
             <tr key={character.characterId}>
@@ -230,7 +235,7 @@ export function OathSection({ rows }: { rows: readonly EquipmentBoardRow[] }): R
   return (
     <section aria-label="서약" className="section min-w-0">
       <h2 className="section-title">서약</h2>
-      <div className="table-scroll">
+      <div className={STICKY_TABLE_FRAME}>
         <table className="table table-fixed">
           <colgroup>
             <col className={CHARACTER_COLUMN} />
@@ -239,12 +244,16 @@ export function OathSection({ rows }: { rows: readonly EquipmentBoardRow[] }): R
               <col key={rarity} className={CRYSTAL_COLUMN} />
             ))}
           </colgroup>
-          <thead>
+          <thead className={STICKY_HEAD}>
             <tr>
-              <th scope="col">캐릭터</th>
-              <th scope="col">서약</th>
+              <th scope="col" className={STICKY_HEAD_CELL}>
+                캐릭터
+              </th>
+              <th scope="col" className={STICKY_HEAD_CELL}>
+                서약
+              </th>
               {HOLDING_RARITIES.map((rarity) => (
-                <th key={rarity} scope="col" className="table-num">
+                <th key={rarity} scope="col" className={`table-num ${STICKY_HEAD_CELL}`}>
                   {`${rarity} 결정`}
                 </th>
               ))}

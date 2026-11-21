@@ -10,6 +10,7 @@ import {
   SCORE_COLUMN,
   ScoreValue
 } from '#widgets/character-table'
+import { WIDE_STICKY_HEAD, WIDE_STICKY_HEAD_CELL } from './sticky-head'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -50,22 +51,27 @@ export function WeeklyClearTable({
           <col key={`${kind}/${name}`} className="w-[96px]" />
         ))}
       </colgroup>
-      <thead>
+      <thead className={WIDE_STICKY_HEAD}>
         <tr>
-          <th scope="col" rowSpan={headRows} className="table-num">
+          <th scope="col" rowSpan={headRows} className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
             #
           </th>
-          <th scope="col" rowSpan={headRows}>
+          <th scope="col" rowSpan={headRows} className={WIDE_STICKY_HEAD_CELL}>
             캐릭터
           </th>
-          <th scope="col" rowSpan={headRows} className="table-num">
+          <th scope="col" rowSpan={headRows} className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
             명성
           </th>
-          <th scope="col" rowSpan={headRows} className="table-num">
+          <th scope="col" rowSpan={headRows} className={`table-num ${WIDE_STICKY_HEAD_CELL}`}>
             점수
           </th>
           {groups.map(({ label, span }) => (
-            <th key={label} scope="colgroup" colSpan={span} className="text-center">
+            <th
+              key={label}
+              scope="colgroup"
+              colSpan={span}
+              className={`text-center ${WIDE_STICKY_HEAD_CELL}`}
+            >
               {label}
             </th>
           ))}
@@ -73,7 +79,11 @@ export function WeeklyClearTable({
         {clearNames.length > 0 && (
           <tr>
             {clearNames.map(({ kind, name }) => (
-              <th key={`${kind}/${name}`} scope="col" className="text-center">
+              <th
+                key={`${kind}/${name}`}
+                scope="col"
+                className={`text-center ${WIDE_STICKY_HEAD_CELL}`}
+              >
                 {name}
               </th>
             ))}
