@@ -6,10 +6,12 @@ import {
   type Affiliation,
   CharacterTable,
   type CharacterTableDetail,
-  SkeletonRow
+  SkeletonRow,
+  type SortedColumn
 } from '#widgets/character-table'
 import { ListBox } from '#shared/ui/ListBox'
 import {
+  evolutionsQueryText,
   type FameRankingFilter,
   type RankedCharacter,
   type FameRankingPages,
@@ -61,6 +63,7 @@ export function FameRankingList({
 }): React.JSX.Element {
   const result = useFameRanking(filter)
   const name = rankingName(filter, setLabel)
+  const sortedBy: SortedColumn = filter.sort !== undefined ? 'score' : 'fame'
 
   switch (result.status) {
     case 'loading':
@@ -77,7 +80,7 @@ export function FameRankingList({
               affiliations={AFFILIATIONS}
               ranked={false}
               scorePlacement="column"
-              sortedBy="fame"
+              sortedBy={sortedBy}
               trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
                 <SkeletonRow
                   key={index}
@@ -119,11 +122,16 @@ export function FameRankingList({
               filter.oathSetId,
               filter.oathSetOption,
               filter.itemIds?.join(','),
+              evolutionsQueryText(filter.evolutions ?? []),
+              filter.sort,
               filter.fameFrom,
-              filter.fameTo
+              filter.fameTo,
+              filter.scoreFrom,
+              filter.scoreTo
             ].join('/')}
             ranking={result.value}
             catalog={catalog}
+            sortedBy={sortedBy}
           />
         </ListBox>
       )
@@ -132,10 +140,12 @@ export function FameRankingList({
 
 function PagedTable({
   ranking,
-  catalog
+  catalog,
+  sortedBy
 }: {
   ranking: FameRankingPages
   catalog: OathCatalog | null
+  sortedBy: SortedColumn
 }): React.JSX.Element {
   const [page, setPage] = useState(0)
   const { characters, hasMore, loadingMore, moreError, loadMore } = ranking
@@ -190,7 +200,7 @@ function PagedTable({
             affiliations={AFFILIATIONS}
             ranked={false}
             scorePlacement="column"
-            sortedBy="fame"
+            sortedBy={sortedBy}
             trailing={skeletonRows}
           />
         </div>

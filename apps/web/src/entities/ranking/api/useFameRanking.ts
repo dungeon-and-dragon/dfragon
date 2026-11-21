@@ -75,16 +75,23 @@ function evolutionsKey(evolutions: readonly SkillEvolutionChoice[] | undefined):
   return evolutionsQueryText(evolutions)
 }
 
+function isReversed(from: number | undefined, to: number | undefined): boolean {
+  return from !== undefined && to !== undefined && from > to
+}
+
+// API는 기준과 맞지 않는 범위와 거꾸로 된 범위를 400으로 거부하므로 보내기 전에 거른다.
 async function requestFameRanking(
   filter: FameRankingFilter,
   cursor: string | undefined
 ): Promise<FameRanking> {
+  const scored = filter.sort !== undefined
   if (
     (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
     (filter.oathSetOption !== undefined && filter.oathSetId === undefined) ||
-    (filter.fameFrom !== undefined &&
-      filter.fameTo !== undefined &&
-      filter.fameFrom > filter.fameTo)
+    isReversed(filter.fameFrom, filter.fameTo) ||
+    isReversed(filter.scoreFrom, filter.scoreTo) ||
+    (scored && (filter.fameFrom !== undefined || filter.fameTo !== undefined)) ||
+    (!scored && (filter.scoreFrom !== undefined || filter.scoreTo !== undefined))
   ) {
     throw new SearchHttpFailure('INVALID_SEARCH_QUERY')
   }
@@ -94,6 +101,8 @@ async function requestFameRanking(
   const evolutions = evolutionsParam(filter.evolutions, filter.jobGrowId)
   const fameFrom = filter.fameFrom !== undefined ? String(filter.fameFrom) : undefined
   const fameTo = filter.fameTo !== undefined ? String(filter.fameTo) : undefined
+  const scoreFrom = filter.scoreFrom !== undefined ? String(filter.scoreFrom) : undefined
+  const scoreTo = filter.scoreTo !== undefined ? String(filter.scoreTo) : undefined
 
   return requestJson(FAME_RANKING_PATH, fameRankingSchema, {
     searchParams: {
@@ -107,6 +116,9 @@ async function requestFameRanking(
       ...(evolutions !== undefined && { evolutions }),
       ...(fameFrom !== undefined && { fameFrom }),
       ...(fameTo !== undefined && { fameTo }),
+      ...(filter.sort !== undefined && { sort: filter.sort }),
+      ...(scoreFrom !== undefined && { scoreFrom }),
+      ...(scoreTo !== undefined && { scoreTo }),
       ...(cursor !== undefined && { cursor })
     }
   })
@@ -141,7 +153,10 @@ export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRank
       filter.itemIds?.join(',') ?? null,
       evolutionsKey(filter.evolutions),
       filter.fameFrom ?? null,
-      filter.fameTo ?? null
+      filter.fameTo ?? null,
+      filter.sort ?? null,
+      filter.scoreFrom ?? null,
+      filter.scoreTo ?? null
     ],
     queryFn: ({ pageParam }) => requestFameRanking(filter, pageParam),
     initialPageParam: undefined as string | undefined,
