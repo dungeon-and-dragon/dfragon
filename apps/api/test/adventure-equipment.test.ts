@@ -25,6 +25,7 @@ const LATEST_ITEM =
   '칸의 아이템 id와 이름은 out이 아닌 가장 최근 기록의 값이고, sets는 응답에 나온 세트만 담는다'
 const GROUPS_UNIQUE =
   '세트가 없고 이름이 "고유 - "로 시작하는 장비는 고유 세트 하나로 묶고, 이름에 고유가 없는 세트 없는 장비는 없다'
+const GROUPS_UNIQUE_OATHS = '세트가 없는 서약과 서약결정은 이름에 고유가 없어도 고유 세트로 묶는다'
 const SORTS_SETS =
   'sets는 세트 순서 표의 세트가 먼저 표 순서로 오고, 표에 없는 세트는 그 뒤에 이름순으로 온다'
 const SELECTS_QUERY =
@@ -56,7 +57,9 @@ const ids = {
   uniqueRing: '7'.repeat(32),
   noSetEarring: '8'.repeat(32),
   uniqueTop: '9'.repeat(32),
-  goldenTop: '0'.repeat(32)
+  goldenTop: '0'.repeat(32),
+  uniqueOath: 'g'.repeat(32),
+  uniqueCrystal: 'h'.repeat(32)
 }
 
 function entry(
@@ -106,6 +109,19 @@ const dictionary = new Map(
       itemType: '추가장비',
       itemTypeDetail: '귀걸이',
       itemRarity: '태초',
+      setItemId: null,
+      setItemName: null
+    }),
+    entry(ids.uniqueOath, {
+      itemType: '서약',
+      itemTypeDetail: '서약',
+      setItemId: null,
+      setItemName: null
+    }),
+    entry(ids.uniqueCrystal, {
+      itemType: '서약결정',
+      itemTypeDetail: '서약결정',
+      itemRarity: '레전더리',
       setItemId: null,
       setItemName: null
     })
@@ -290,6 +306,28 @@ test(GROUPS_UNIQUE, () => {
     [
       ['unique', '반지', 1],
       ['unique', '상의', 1]
+    ]
+  )
+  assert.deepEqual(equipment.sets, [{ setItemId: 'unique', setItemName: '고유' }])
+})
+
+test(GROUPS_UNIQUE_OATHS, () => {
+  const equipment = holdingsOf([
+    record(552, ids.uniqueCrystal, { itemName: '기억의 안개 결정' }),
+    record(557, ids.uniqueCrystal, { itemName: '기억의 안개 결정' }),
+    record(550, ids.uniqueOath, { itemName: '합성 서약' })
+  ])
+
+  assert.deepEqual(
+    equipment.servers[0]?.characters[0]?.oaths.map(({ setItemId, kind, rarity, count }) => [
+      setItemId,
+      kind,
+      rarity,
+      count
+    ]),
+    [
+      ['unique', 'crystal', '레전더리', 2],
+      ['unique', 'oath', '에픽', 1]
     ]
   )
   assert.deepEqual(equipment.sets, [{ setItemId: 'unique', setItemName: '고유' }])
