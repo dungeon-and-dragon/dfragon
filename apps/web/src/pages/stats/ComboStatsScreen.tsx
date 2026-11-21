@@ -27,7 +27,11 @@ export function ComboStatsScreen({
       result={result}
       filter={filter}
       onFilterChange={onFilterChange}
-      skeletonName={BOX_NAME}
+      skeleton={
+        <ListBox name={BOX_NAME}>
+          <span className="skeleton h-[480px]" />
+        </ListBox>
+      }
       messages={{ empty: EMPTY, failed: FAILED, loading: LOADING }}
     >
       {(stats) => (

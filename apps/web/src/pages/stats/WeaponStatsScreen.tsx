@@ -7,6 +7,7 @@ import { type WeaponType, weaponTypesOf } from './weapon-stats-bars'
 
 const TITLE = '무기 통계'
 const SKELETON_NAME = '무기'
+const SKELETON_ROWS = 2
 const EMPTY = '아이템 통계가 없습니다.'
 const FAILED = '아이템 통계를 받지 못했습니다.'
 const LOADING = '아이템 통계를 받는 중입니다.'
@@ -20,6 +21,25 @@ function rowsOf(types: readonly WeaponType[]): WeaponType[][] {
   }
 
   return rows
+}
+
+function WeaponSkeleton(): React.JSX.Element {
+  const rows = Array.from({ length: SKELETON_ROWS }, (_, row) => row)
+  const columns = Array.from({ length: BOXES_PER_ROW }, (_, column) => column)
+
+  return (
+    <>
+      {rows.map((row) => (
+        <div key={row} className="section section-cols">
+          {columns.map((column) => (
+            <ListBox key={column} name={SKELETON_NAME}>
+              <span className="skeleton h-[160px]" />
+            </ListBox>
+          ))}
+        </div>
+      ))}
+    </>
+  )
 }
 
 export function WeaponStatsScreen({
@@ -37,7 +57,7 @@ export function WeaponStatsScreen({
       result={result}
       filter={filter}
       onFilterChange={onFilterChange}
-      skeletonName={SKELETON_NAME}
+      skeleton={<WeaponSkeleton />}
       messages={{ empty: EMPTY, failed: FAILED, loading: LOADING }}
     >
       {(stats) =>
