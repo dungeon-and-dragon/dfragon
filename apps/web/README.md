@@ -1,6 +1,6 @@
 # Web
 
-DFragon 웹 앱 정적 사이트입니다. `dfragon.com`에 올리며, 설치 없이 캐릭터와 모험단을 찾고 멀티서치에서 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 파티, 공대를 확인합니다. 데스크톱 브라우저용입니다.
+DFragon 웹 앱입니다. Node 서버가 전역 틀을 서버에서 그려 내주고 화면은 브라우저에서 그립니다. `dfragon.com`에 올리며, 설치 없이 캐릭터와 모험단을 찾고 멀티서치에서 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 파티, 공대를 확인합니다. 데스크톱 브라우저용입니다.
 
 ## 실행과 검증
 
@@ -14,11 +14,11 @@ pnpm --filter @dfragon/web build
 pnpm --filter @dfragon/web preview
 ```
 
-`build`는 `tsc -b`와 Vite production build를 포함하므로 `typecheck`를 따로 실행할 필요가 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 브라우저에 내줄 산출물은 `dist/client`에 생깁니다.
+`build`는 `tsc -b`와 Vite production build를 포함하므로 `typecheck`를 따로 실행할 필요가 없습니다. `pnpm verify`는 Web의 `test`, `build`를 실행합니다. 산출물은 `.output`에 생기며, `.output/server/index.mjs`가 서버이고 `.output/public`이 정적 파일입니다.
 
 `dev`와 `build`는 먼저 [`prepare-ocr-assets.mjs`](scripts/prepare-ocr-assets.mjs)로 OCR 모델과 ONNX Runtime WASM을 `public/ocr`에 만듭니다(Git에서 제외). 처음 checkout할 때 [`@dfragon/models` 받기](../../packages/models/README.md#받기)의 `ocr-finetuned` submodule을 받아야 하며, 받지 않으면 두 명령이 실패합니다.
 
-`dev` 서버(`http://localhost:5173/`)는 `/api/*` 요청을 `/api`를 뗀 경로로 운영 API(`https://api.dfragon.com`)에 넘기므로 로컬 API, Neople key 없이 검색해 볼 수 있습니다. `preview`에는 이 proxy가 없어 검색이 되지 않습니다. `dev` 서버는 첫 붙여넣기에서 `onnxruntime-web/webgpu`를 최적화하며 페이지를 한 번 다시 읽으므로 그때는 다시 붙여 넣습니다.
+`dev` 서버(`http://localhost:5173/`)는 `/api/*` 요청을 `/api`를 뗀 경로로 운영 API(`https://api.dfragon.com`)에 넘기므로 로컬 API, Neople key 없이 검색해 볼 수 있습니다. `preview`는 빌드한 서버를 띄우며 이 proxy가 없어 검색이 되지 않습니다. `dev` 서버는 첫 붙여넣기에서 `onnxruntime-web/webgpu`를 최적화하며 페이지를 한 번 다시 읽으므로 그때는 다시 붙여 넣습니다.
 
 스킬 탭과 서약 탭은 `/skilltab/` 데이터 묶음이 있어야 그림으로 그립니다. 개발 서버에서는 `DFRAGON_SKILLTAB_DIR`에 묶음 폴더를 주면 `/skilltab/` 아래에 내줍니다. 묶음 형식은 [스킬 창 schema](src/entities/catalog/model/skill-window.ts)와 [서약 schema](src/entities/catalog/model/oath-catalog.ts)에 있습니다.
 
@@ -28,11 +28,11 @@ pnpm --filter @dfragon/web preview
 
 ### 웹 이미지
 
-[`Dockerfile`](Dockerfile)이 `dist/client`를 [`Caddyfile`](Caddyfile)의 Caddy가 내주는 이미지로 만듭니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
+[`Dockerfile`](Dockerfile)이 `.output`을 Node로 띄우는 이미지를 만듭니다. 서버는 `PORT`(기본 8080)에서 듣고, 서버 렌더링이 부를 API 주소를 `DFRAGON_API_ORIGIN`으로 받습니다. 응답 헤더(cross-origin isolation, 캐시)는 [`vite.config.ts`](vite.config.ts)의 route rule이 정합니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
 
 ```sh
 podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
-podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080:8080 dfragon-web:local
+podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -e DFRAGON_API_ORIGIN=https://api.dfragon.com -p 8080:8080 dfragon-web:local
 ```
 
 ## 코드 위치

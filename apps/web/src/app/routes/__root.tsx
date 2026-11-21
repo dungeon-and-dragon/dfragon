@@ -30,6 +30,7 @@ export const Route = createRootRoute({
       { rel: 'canonical', href: SITE_URL }
     ]
   }),
+  ssr: true,
   shellComponent: RootDocument,
   component: RootLayout,
   notFoundComponent: NotFoundPage
