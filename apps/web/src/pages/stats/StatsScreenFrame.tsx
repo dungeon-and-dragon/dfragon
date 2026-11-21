@@ -2,7 +2,8 @@ import type { ReactNode } from 'react'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import type { SetStatsFilter } from '#entities/ranking'
 import { SetStatsFilterBox } from './SetStatsFilterBox'
-import { StatsTabs } from './StatsTabs'
+import { StatsNote } from './StatsNote'
+import { StatsTabs } from '#widgets/stats-tabs'
 
 type SampledStats = Readonly<{ computedAt: string | null; sampleSize: number }>
 
@@ -77,6 +78,7 @@ function StatsBody<Stats extends SampledStats>({
         <>
           {filterBox}
           {empty ? <p className="section state">{messages.empty}</p> : children(stats)}
+          {computedAt !== null && <StatsNote count={stats.sampleSize} computedAt={computedAt} />}
         </>
       )
     }

@@ -2,9 +2,10 @@ import { Fragment } from 'react'
 import { Columns } from '#shared/ui/chart/Columns'
 import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
-import { StatsTabs } from './StatsTabs'
+import { StatsTabs } from '#widgets/stats-tabs'
 import { useCharacterStats } from './api/useCharacterStats'
 import { averageFameBars, type FameBar, fameBars, jobBars, serverBars } from '#entities/ranking'
+import { StatsNote } from './StatsNote'
 
 const SCREEN = 'flex flex-col'
 const STAT_BOX_NAMES = {
@@ -55,6 +56,7 @@ function CharacterStatsBody(): React.JSX.Element {
 
       return (
         <div className={SCREEN}>
+          <StatsNote count={stats.total} computedAt={stats.computedAt} />
           {STAT_BOX_ROWS.map((row) => (
             <div key={row.join()} className="section section-cols">
               {row.map((id) => (
