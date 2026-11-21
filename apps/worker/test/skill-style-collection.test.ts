@@ -95,7 +95,7 @@ test('대상 캐릭터의 스킬 스타일을 받아 받은 시각과 함께 저
 })
 
 for (const kind of ['unavailable', 'timeout'] as const) {
-  test(`Neople ${kind} 실패는 건너뛰지 않고 쉬었다가 같은 캐릭터를 다시 받는다`, async () => {
+  test(`Neople ${kind} 실패는 건너뛰지 않고 쉬지 않은 채 그 캐릭터만 다시 받는다`, async () => {
     const { dependencies, saved, pauses } = collection(
       [character('a'), character('b'), character('c')],
       (characterId, attempt) => {
@@ -114,11 +114,11 @@ for (const kind of ['unavailable', 'timeout'] as const) {
       ['a', 'b', 'c']
     )
     assert.deepEqual(summary, { characters: 3, saved: 3, skipped: 0 })
-    assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS])
+    assert.deepEqual(pauses, [])
   })
 }
 
-test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속 unavailable이면 그 캐릭터만 건너뛰고 다음 묶음으로 넘어간다', async () => {
+test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속 unavailable이면 쉬지 않고 그 캐릭터만 건너뛰고 다음 묶음으로 넘어간다', async () => {
   const { dependencies, saved, pauses, progress } = collection(
     [character('a'), character('stuck'), character('c')],
     (characterId) => {
@@ -143,10 +143,13 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
     saved.map(({ characterId }) => characterId),
     ['a', 'c']
   )
-  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(pauses, [])
   assert.deepEqual(
     reports.filter(([code]) => code === 'SKILL_STYLE_NEOPLE_UNAVAILABLE'),
-    Array(2).fill(['SKILL_STYLE_NEOPLE_UNAVAILABLE', { done: 0, characters: 2, unavailable: 1 }])
+    [2, 1, 1].map((characters) => [
+      'SKILL_STYLE_NEOPLE_UNAVAILABLE',
+      { done: 0, characters, unavailable: 1, paused: 0 }
+    ])
   )
   assert.deepEqual(
     reports.filter(([code]) => code === 'SKILL_STYLE_CHARACTER_SKIPPED'),

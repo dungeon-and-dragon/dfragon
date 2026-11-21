@@ -788,7 +788,7 @@ function collectGroup(
   return { summary, pauses, reports }
 }
 
-test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속 unavailable이면 그 캐릭터만 건너뛰고 나머지를 저장한 뒤 다음 묶음으로 넘어간다', async () => {
+test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 unavailable이면 쉬지 않고 그 캐릭터만 다시 받고, 세 번 연속이면 건너뛰고 나머지를 저장한다', async () => {
   const { state, store } = memoryClearStore(
     [character('a'), character('stuck'), character('b'), character('c')],
     closedPastWeeks()
@@ -808,22 +808,23 @@ test('묶음의 다른 캐릭터는 받았는데 한 캐릭터만 세 번 연속
   assert.deepEqual(await summary, {
     startedAt: COLLECTED_AT.toISOString(),
     characters: 4,
-    requests: 10,
+    requests: 6,
     clears: 3,
     records: 3,
     skipped: 1
   })
-  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(pauses, [])
   assert.equal(requests.filter(({ characterId }) => characterId === 'stuck').length, 3)
+  assert.equal(requests.filter(({ characterId }) => characterId === 'a').length, 1)
   assert.deepEqual(
     storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
     ['michaela-hard/a', 'michaela-hard/b', 'michaela-hard/c']
   )
   assert.deepEqual(
     reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
-    Array(2).fill([
+    [3, 1, 1].map((characters) => [
       'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
-      { done: 0, characters: 3, unavailable: 1, reasons: 'unavailable=1' }
+      { done: 0, characters, unavailable: 1, paused: 0, reasons: 'unavailable=1' }
     ])
   )
   assert.deepEqual(
@@ -882,14 +883,14 @@ test('두 번 연속 unavailable이던 캐릭터가 세 번째에 받아지면 �
   const { summary, pauses } = collectGroup(store, neople, 2)
 
   assert.equal((await summary).skipped, 0)
-  assert.deepEqual(pauses, [UNAVAILABLE_PAUSE_MS, UNAVAILABLE_PAUSE_MS])
+  assert.deepEqual(pauses, [])
   assert.deepEqual(
     storedClears(state).map((clear) => clear.split('/').slice(0, 2).join('/')),
     ['michaela-hard/a', 'michaela-hard/b']
   )
 })
 
-test('쉬었다 다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, Neople이 거절한 status와 code별 수를 남긴다', async () => {
+test('다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, 쉬었는지, Neople이 거절한 status와 code별 수를 남긴다', async () => {
   const { store } = memoryClearStore(
     ['a', 'b', 'c', 'd', 'e'].map((id) => character(id)),
     closedPastWeeks()
@@ -920,6 +921,7 @@ test('쉬었다 다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, Ne
           done: 0,
           characters: 5,
           unavailable: 4,
+          paused: 0,
           reasons: '429/API002=2,503/none=1,timeout=1'
         }
       ]
@@ -1208,7 +1210,7 @@ test('모든 key가 API002를 받으면 1분 쉬고 같은 묶음을 다시 보�
     [
       [
         'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
-        { done: 0, characters: 1, unavailable: 1, reasons: 'all-resting=1' }
+        { done: 0, characters: 1, unavailable: 1, paused: 1, reasons: 'all-resting=1' }
       ]
     ]
   )
@@ -1282,10 +1284,10 @@ test('켜진 key가 없으면 Neople을 부르지 않고 no-key로 남긴 뒤 1�
     reports.filter(([code]) => code === 'CONTENT_CLEAR_NEOPLE_UNAVAILABLE'),
     Array(2).fill([
       'CONTENT_CLEAR_NEOPLE_UNAVAILABLE',
-      { done: 0, characters: 1, unavailable: 1, reasons: 'no-key=1' }
+      { done: 0, characters: 1, unavailable: 1, paused: 1, reasons: 'no-key=1' }
     ])
   )
-  assert.deepEqual(progress, [2, 3])
+  assert.deepEqual(progress, [1, 3])
   assert.equal(requests.length, 3)
 })
 
@@ -1530,7 +1532,7 @@ test('지난 기록 받기도 Neople 한도 초과면 쉬었다가 같은 캐릭
     [
       [
         'CLEAR_RECORD_BACKFILL_NEOPLE_UNAVAILABLE',
-        { done: 0, characters: 1, unavailable: 1, reasons: 'unavailable=1' }
+        { done: 0, characters: 1, unavailable: 1, paused: 1, reasons: 'unavailable=1' }
       ]
     ]
   )

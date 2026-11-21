@@ -8,12 +8,12 @@ import type {
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import { type CalculatedScore, toCalculatedScore } from '@dfragon/server-core/domain/score/index.js'
-import { defineJob, createUnavailableStreaks, NEOPLE_APIS } from '#application/jobs/index.js'
+import { defineJob, fetchGroupWithRetry, NEOPLE_APIS } from '#application/jobs/index.js'
 import { calculateCharacterScore } from './calculate.js'
 import type { ScoreCalculationPorts, ScoreEngineHandle, ScoreSources } from './ports.js'
 import type { ScoreCalculationRepository } from './repository.js'
 
-export const UNAVAILABLE_PAUSE_MS = 60_000
+export { UNAVAILABLE_PAUSE_MS } from '#application/jobs/index.js'
 
 // 이어 계산할 위치를 이 이름의 실행 이력에서 읽는다.
 export const SCORE_CALCULATION_JOB_NAME = 'score-calculation'
@@ -178,7 +178,6 @@ export class ScoreCalculationService {
     try {
       const targets = await this.repository.readTargets()
       const resumedAt = resumePosition(await this.repository.readLastFinishedRun(), now())
-      const unavailableStreaks = createUnavailableStreaks<ClearPopulationCharacter>()
       let done = resumedAt
 
       reportProgress(Math.min(resumedAt, targets.length), targets.length)
@@ -186,34 +185,38 @@ export class ScoreCalculationService {
       while (done < targets.length) {
         const group = targets.slice(done, done + readConcurrency())
 
-        itemLookupUnavailable = false
-        const calculations = await Promise.all(
-          group.map((character) => calculateCharacter(character, sources, engine, now))
-        )
-        const results = calculations.map((calculation) =>
-          settle(calculation, itemLookupUnavailable)
-        )
+        const results = await fetchGroupWithRetry(
+          group,
+          async (characters) => {
+            itemLookupUnavailable = false
+            const calculations = await Promise.all(
+              characters.map((character) => calculateCharacter(character, sources, engine, now))
+            )
 
-        // 라이브러리를 열지 못했거나 worker가 멈추면 계산이 모두 null이 되므로, 남은 캐릭터를 받지 않고 끝낸다.
-        if (!engine.isRunning()) {
-          throw new ScoreEngineUnavailable('SCORE_ENGINE_STOPPED')
-        }
+            // 라이브러리를 열지 못했거나 worker가 멈추면 계산이 모두 null이 되므로, 남은 캐릭터를 받지 않고 끝낸다.
+            if (!engine.isRunning()) {
+              throw new ScoreEngineUnavailable('SCORE_ENGINE_STOPPED')
+            }
 
-        const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
-
-        if (unavailable.length > 0) {
-          if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-            report('SCORE_NEOPLE_UNAVAILABLE', {
-              done,
-              characters: group.length,
-              unavailable: unavailable.length
-            })
-            await pause(UNAVAILABLE_PAUSE_MS)
-            continue
+            return calculations.map((calculation) => settle(calculation, itemLookupUnavailable))
+          },
+          {
+            isUnavailable: (result) => result.status === 'unavailable',
+            pause,
+            onUnavailable: ({ attempted, unavailable, paused }) => {
+              report('SCORE_NEOPLE_UNAVAILABLE', {
+                done,
+                characters: attempted,
+                unavailable: unavailable.length,
+                paused: paused ? 1 : 0
+              })
+            }
           }
+        )
 
-          for (const character of unavailable) {
-            report('SCORE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+        for (const [index, result] of results.entries()) {
+          if (result.status === 'unavailable') {
+            report('SCORE_CHARACTER_SKIPPED', { position: done + index })
           }
         }
 

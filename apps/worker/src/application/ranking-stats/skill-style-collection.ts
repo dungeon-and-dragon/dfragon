@@ -1,9 +1,9 @@
 import { z } from 'zod'
-import { defineJob, createUnavailableStreaks, NEOPLE_APIS } from '#application/jobs/index.js'
+import { defineJob, fetchGroupWithRetry, NEOPLE_APIS } from '#application/jobs/index.js'
 import type { SkillStyleCollectionPorts } from './ports.js'
 import type { SkillStyleCollectionRepository } from './repository.js'
 
-export const UNAVAILABLE_PAUSE_MS = 60_000
+export { UNAVAILABLE_PAUSE_MS } from '#application/jobs/index.js'
 
 // 운영 표본 35.5만 명(2026-11-10)을 초당 40건으로 처음부터 채우면 2시간 반이 걸린다.
 // 다른 수집과 Neople 요청을 나눠 보내므로 두 배 넘게 둔다.
@@ -30,26 +30,32 @@ export class SkillStyleCollectionService {
     const counts = { saved: 0, skipped: 0 }
     reportProgress(0, targets.length)
 
-    const unavailableStreaks = createUnavailableStreaks<(typeof targets)[number]>()
     let done = 0
     while (done < targets.length) {
       const group = targets.slice(done, done + readConcurrency())
-      const results = await Promise.all(group.map((character) => fetchSkillStyle(character, now)))
-      const unavailable = group.filter((_, index) => results[index]?.status === 'unavailable')
-      if (unavailable.length > 0) {
-        if (unavailableStreaks.decide(group.length, unavailable) === 'retry') {
-          report('SKILL_STYLE_NEOPLE_UNAVAILABLE', {
-            done,
-            characters: group.length,
-            unavailable: unavailable.length
-          })
-          await pause(UNAVAILABLE_PAUSE_MS)
-          continue
+      const results = await fetchGroupWithRetry(
+        group,
+        (characters) => Promise.all(characters.map((character) => fetchSkillStyle(character, now))),
+        {
+          isUnavailable: (result) => result.status === 'unavailable',
+          pause,
+          onUnavailable: ({ attempted, unavailable, paused }) => {
+            report('SKILL_STYLE_NEOPLE_UNAVAILABLE', {
+              done,
+              characters: attempted,
+              unavailable: unavailable.length,
+              paused: paused ? 1 : 0
+            })
+          }
         }
-        for (const character of unavailable) {
-          report('SKILL_STYLE_CHARACTER_SKIPPED', { position: done + group.indexOf(character) })
+      )
+
+      for (const [index, result] of results.entries()) {
+        if (result.status === 'unavailable') {
+          report('SKILL_STYLE_CHARACTER_SKIPPED', { position: done + index })
         }
       }
+
       for (const result of results) {
         if (result.status === 'fetched') {
           await this.repository.recordSkillStyle(result.style)
@@ -58,6 +64,7 @@ export class SkillStyleCollectionService {
           counts.skipped++
         }
       }
+
       done += group.length
       reportProgress(done, targets.length)
     }
