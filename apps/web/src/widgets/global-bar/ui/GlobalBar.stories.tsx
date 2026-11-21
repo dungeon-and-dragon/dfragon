@@ -23,6 +23,16 @@ export const 상단바: Story = {
   )
 }
 
+// 첫 화면이 아닌 화면은 전역 바에 검색창을 함께 둔다.
+export const 검색창있는상단바: Story = {
+  parameters: { msw: [todayGradeHandlers.grade(13)] },
+  render: () => (
+    <StoryFrame path="/rankings">
+      <GlobalBar />
+    </StoryFrame>
+  )
+}
+
 export const 검색창: Story = {
   render: () => (
     <StoryFrame>
