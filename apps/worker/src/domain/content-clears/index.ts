@@ -1,6 +1,5 @@
 export {
   planClearCollection,
-  toContentPopulation,
   toRequestActivity,
   weekKey
 } from './collection.js'

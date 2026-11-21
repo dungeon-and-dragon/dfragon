@@ -37,7 +37,8 @@ export class ClearRecordBackfillService {
     const startedAtIso = startedAt.toISOString()
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
     // 지금은 비활성인 캐릭터도 지난 시즌의 클리어 기록이 있으므로 비활성도 부른다.
-    const population = await this.repository.readPopulation(collectionMinFame, 'include-inactive')
+    const selection = { minMaxFame: collectionMinFame, activity: 'include-inactive' } as const
+    const characters = await this.repository.countPopulation(selection)
     const fetchedUntil = new Map(
       (await this.repository.readCursors()).map((cursor) => [
         characterKey(cursor),
@@ -53,12 +54,13 @@ export class ClearRecordBackfillService {
       startedAt: startedAtIso,
       done: resumedAt,
       minFame: collectionMinFame,
-      characters: population.length,
+      characters,
       cursors: fetchedUntil.size
     })
 
     const skipped = await collectPopulation({
-      population,
+      total: characters,
+      readPage: (page) => this.repository.readPopulationPage(selection, page),
       resumedAt,
       rangesOf: (character) => {
         const characterFetchedUntil = fetchedUntil.get(characterKey(character))
@@ -103,7 +105,7 @@ export class ClearRecordBackfillService {
     await this.repository.finishProgress(startedAt)
     const summary = {
       startedAt: startedAtIso,
-      characters: population.length,
+      characters,
       ...counts,
       skipped
     }
