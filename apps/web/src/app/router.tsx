@@ -6,7 +6,7 @@ import { routeTree } from '#app/routeTree.gen'
 // 서버에서는 요청마다 router를 만들므로, 조회 캐시가 요청 사이에 섞이지 않게 QueryClient도 여기서 만든다.
 export function getRouter() {
   const queryClient = createQueryClient()
-  const router = createRouter({ routeTree })
+  const router = createRouter({ routeTree, context: { queryClient } })
   setupRouterSsrQueryIntegration({ router, queryClient })
 
   return router
