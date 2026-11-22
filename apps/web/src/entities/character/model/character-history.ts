@@ -42,7 +42,15 @@ const changeItemSchema = z.discriminatedUnion('kind', [
 export const characterHistorySchema = z.object({
   basics: z.array(z.object({ observedAt, fame: z.number().nullable() })),
   scores: z.array(
-    z.object({ observedAt, calculator: z.enum(['equipment', 'buff']), value: z.number() })
+    z.object({
+      observedAt,
+      calculator: z.enum(['equipment', 'buff']),
+      value: z.number(),
+      approximate: z
+        .object({ source: z.string().trim().min(1) })
+        .nullable()
+        .default(null)
+    })
   ),
   sectionChanges: z.record(z.string(), z.array(observedAt)),
   nameChanges: z.array(
@@ -74,6 +82,7 @@ export type HistoryPoint = Readonly<{
   unchanged: readonly string[]
   fame: number | null
   score: number | null
+  approximate: boolean
 }>
 
 export type HistorySnapshotSummary = Readonly<{
@@ -139,9 +148,11 @@ export function toHistoryPoints(
       const parts = [...new Set(items.map(partOf))]
       const unchanged = first ? [] : unchangedAt(history.sectionChanges, time)
       const fame = latestAt(history.basics, time)?.fame ?? null
-      const score = latestAt(scores, time)?.value ?? null
+      const latestScore = latestAt(scores, time)
+      const score = latestScore?.value ?? null
+      const approximate = latestScore?.approximate != null
 
-      return { observedAt, first, parts, items, unchanged, fame, score }
+      return { observedAt, first, parts, items, unchanged, fame, score, approximate }
     })
     .toReversed()
 }

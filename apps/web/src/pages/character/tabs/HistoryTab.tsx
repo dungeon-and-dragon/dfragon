@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   type CharacterHistory,
   type CharacterIdentity,
+  formatApproximateScore,
   formatPoint,
   type HistoryPoint,
   type ScoreCalculator,
@@ -167,11 +168,19 @@ function PointButton({
         <span className="min-w-0 truncate text-xs text-fg-muted">{partsText(point)}</span>
         <span className="ms-auto flex flex-col items-end num text-xs">
           <span className={FAME}>{formatOptional(point.fame)}</span>
-          <span className={scoreTone}>{formatOptional(point.score)}</span>
+          <span className={scoreTone}>{formatPointScore(point)}</span>
         </span>
       </button>
     </li>
   )
+}
+
+function formatPointScore({ score, approximate }: HistoryPoint): string {
+  if (score !== null && approximate) {
+    return formatApproximateScore(score)
+  }
+
+  return formatOptional(score)
 }
 
 function partsText(point: HistoryPoint): string {
@@ -311,7 +320,7 @@ function SummaryBody({
         />
         <Tile
           label={scoreLabel}
-          value={formatOptional(point.score)}
+          value={formatPointScore(point)}
           tone={scoreTone}
           delta={deltaOf(point.score, previous?.score)}
         />

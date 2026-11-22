@@ -247,9 +247,9 @@ export const storyHistory: CharacterHistory = {
     { observedAt: HISTORY_LATEST, fame: 136647 }
   ],
   scores: [
-    { observedAt: HISTORY_FIRST, calculator: 'equipment', value: 1268402 },
-    { observedAt: HISTORY_MIDDLE, calculator: 'equipment', value: 1338770 },
-    { observedAt: HISTORY_LATEST, calculator: 'equipment', value: 1369647 }
+    { observedAt: HISTORY_FIRST, calculator: 'equipment', value: 1268402, approximate: null },
+    { observedAt: HISTORY_MIDDLE, calculator: 'equipment', value: 1338770, approximate: null },
+    { observedAt: HISTORY_LATEST, calculator: 'equipment', value: 1369647, approximate: null }
   ],
   sectionChanges: {
     equipment: [HISTORY_FIRST, HISTORY_MIDDLE, HISTORY_LATEST],
@@ -305,7 +305,9 @@ export const storyHistory: CharacterHistory = {
 
 export const storySingleHistory: CharacterHistory = {
   basics: [{ observedAt: HISTORY_LATEST, fame: 136647 }],
-  scores: [{ observedAt: HISTORY_LATEST, calculator: 'equipment', value: 1369647 }],
+  scores: [
+    { observedAt: HISTORY_LATEST, calculator: 'equipment', value: 1369647, approximate: null }
+  ],
   sectionChanges: { equipment: [HISTORY_LATEST] },
   nameChanges: [],
   changes: [{ observedAt: HISTORY_LATEST, first: true, items: [] }]
