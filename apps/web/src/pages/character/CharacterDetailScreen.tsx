@@ -1,4 +1,4 @@
-import { useCharacterDetail } from './api/useCharacterDetail'
+import { useCharacterDetail } from '#entities/character-detail'
 import { useViewedCharacter } from './hooks/useViewedCharacter'
 import type { CharacterTab } from './character-tabs'
 import { CharacterSummary, CharacterSummarySkeleton } from './CharacterSummary'

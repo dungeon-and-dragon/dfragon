@@ -3,7 +3,7 @@ import {
   type CharacterIdentity,
   characterDetailViewSchema,
   validateIdentity
-} from '#entities/character'
+} from '#entities/character/@x/character-detail'
 import { createJsonRequest } from '#shared/api/json-request'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
 

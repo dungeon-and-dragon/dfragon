@@ -1,7 +1,9 @@
-import { delay, HttpResponse, http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import type { CharacterDetailView, CharacterHistory, CharacterIdentity } from '#entities/character'
-import { API_BASE_URL } from '#shared/api/dfragon-api'
-import { characterPath } from './character-api'
+import {
+  characterUrl,
+  loadingResponse
+} from '#entities/character-detail/api/character-detail.handlers'
 import {
   storyBuffSkillWindowCatalog,
   storyCharacterDetail,
@@ -12,20 +14,8 @@ import {
 import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { SKILL_STATS_URL } from '#entities/ranking/api/skill-stats.handlers'
 
-export function characterUrl(identity: CharacterIdentity, path = ''): string {
-  return `${API_BASE_URL}${characterPath(identity)}${path}`
-}
-
 function identityOf({ character }: CharacterDetailView): CharacterIdentity {
   return { serverId: character.serverId, characterId: character.characterId }
-}
-
-export function apiFailure(status: number, code: string, message: string): HttpResponse<object> {
-  return HttpResponse.json({ error: { code, message } }, { status })
-}
-
-export async function loadingResponse(): Promise<void> {
-  await delay('infinite')
 }
 
 export function characterDetailHandlers(

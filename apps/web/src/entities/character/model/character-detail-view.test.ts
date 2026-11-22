@@ -14,6 +14,7 @@ describe('캐릭터 상세 화면 응답', () => {
     expect(slots[0]).toBe('WEAPON')
     expect(detail.equipment.equipment[0]).toMatchObject({
       itemRarity: '태초',
+      itemAvailableLevel: 115,
       reinforce: 10,
       amplificationName: null,
       refine: 0,
@@ -122,6 +123,7 @@ describe('캐릭터 상세 화면 응답', () => {
       itemId: null,
       itemName: null,
       itemRarity: null,
+      itemAvailableLevel: null,
       reinforce: null,
       amplificationName: null,
       refine: null,

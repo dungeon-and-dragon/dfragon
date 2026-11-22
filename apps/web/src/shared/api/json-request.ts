@@ -10,6 +10,7 @@ import {
 type JsonRequestOptions = {
   method?: 'get' | 'post'
   searchParams?: Record<string, string>
+  json?: unknown
   signal?: AbortSignal
   details?: boolean
   timeout?: number
@@ -26,13 +27,14 @@ export function createJsonRequest(
   return async (
     path,
     schema,
-    { method = 'get', searchParams, signal, details = true, timeout } = {}
+    { method = 'get', searchParams, json, signal, details = true, timeout } = {}
   ) => {
     try {
       signal?.throwIfAborted()
       const request = http(`${apiOrigin}${path}`, {
         method,
         searchParams,
+        json,
         headers: { Accept: 'application/json' },
         signal,
         timeout

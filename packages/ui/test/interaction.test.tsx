@@ -7,6 +7,7 @@ import {
   ChipGroup,
   ConfirmPopover,
   IconButton,
+  NumberField,
   Pagination,
   Popover,
   Select,
@@ -213,6 +214,93 @@ describe('Pagination의 이전, 다음과 현재 페이지', () => {
     await click(getByRole('button', '다음'))
     expect(onPrevious).not.toHaveBeenCalled()
     expect(onNext).not.toHaveBeenCalled()
+  })
+})
+
+function StepField({
+  initial,
+  disabled = false,
+  onValueChange
+}: {
+  initial: number
+  disabled?: boolean
+  onValueChange: (value: number) => void
+}) {
+  const [value, setValue] = useState(initial)
+
+  function change(next: number) {
+    onValueChange(next)
+    setValue(next)
+  }
+
+  return (
+    <NumberField
+      aria-label="무기 수치"
+      value={value}
+      onValueChange={change}
+      min={0}
+      max={3}
+      disabled={disabled}
+      format={{ signDisplay: 'always' }}
+    />
+  )
+}
+
+function stepInput() {
+  return container.querySelector<HTMLInputElement>('input[aria-label="무기 수치"]')!
+}
+
+describe('NumberField의 한 칸씩 바꾸기와 범위 끝', () => {
+  it('양옆 버튼은 입력칸 이름을 붙여 읽히고, 누를 때마다 한 칸씩 바꾼 값을 전달한다', async () => {
+    const onValueChange = vi.fn<(value: number) => void>()
+    await render(<StepField initial={1} onValueChange={onValueChange} />)
+
+    expect(stepInput().value).toBe('+1')
+    expect(stepInput().getAttribute('aria-roledescription')).toBe('숫자 입력')
+    await click(getByRole('button', '무기 수치 올리기'))
+    expect(onValueChange).toHaveBeenLastCalledWith(2)
+    expect(stepInput().value).toBe('+2')
+    await click(getByRole('button', '무기 수치 내리기'))
+    await click(getByRole('button', '무기 수치 내리기'))
+    expect(onValueChange).toHaveBeenLastCalledWith(0)
+    expect(stepInput().value).toBe('+0')
+  })
+
+  it('범위 끝에 닿은 쪽 버튼만 막고 그 버튼은 값을 바꾸지 않는다', async () => {
+    const onValueChange = vi.fn<(value: number) => void>()
+    await render(<StepField initial={0} onValueChange={onValueChange} />)
+    const decrement = getByRole('button', '무기 수치 내리기') as HTMLButtonElement
+    const increment = getByRole('button', '무기 수치 올리기') as HTMLButtonElement
+
+    expect([decrement.disabled, increment.disabled]).toEqual([true, false])
+    await click(decrement)
+    expect(onValueChange).not.toHaveBeenCalled()
+    await click(increment)
+    await click(increment)
+    await click(increment)
+    expect(stepInput().value).toBe('+3')
+    expect([decrement.disabled, increment.disabled]).toEqual([false, true])
+  })
+
+  it('입력칸에서 위, 아래 화살표로 한 칸씩 바꾼다', async () => {
+    const onValueChange = vi.fn<(value: number) => void>()
+    await render(<StepField initial={1} onValueChange={onValueChange} />)
+
+    await press(stepInput(), 'ArrowUp')
+    expect(onValueChange).toHaveBeenLastCalledWith(2)
+    await press(stepInput(), 'ArrowDown')
+    expect(onValueChange).toHaveBeenLastCalledWith(1)
+  })
+
+  it('disabled면 입력칸과 두 버튼을 모두 막는다', async () => {
+    await render(<StepField initial={1} disabled onValueChange={vi.fn()} />)
+    const buttons = [
+      getByRole('button', '무기 수치 내리기'),
+      getByRole('button', '무기 수치 올리기')
+    ] as HTMLButtonElement[]
+
+    expect(stepInput().disabled).toBe(true)
+    expect(buttons.map((button) => button.disabled)).toEqual([true, true])
   })
 })
 

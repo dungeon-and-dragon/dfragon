@@ -30,6 +30,7 @@ const equipmentItem = z.object({
   slotId: text,
   slotName: text,
   ...itemShape,
+  itemAvailableLevel: count,
   reinforce: count,
   amplificationName: text,
   refine: count,

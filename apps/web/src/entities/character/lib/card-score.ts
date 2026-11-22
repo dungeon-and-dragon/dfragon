@@ -14,7 +14,8 @@ const skippedReasons: Readonly<Record<string, string>> = {
   input_gate: '입력값이 게임 스탯과 다름',
   resolution: '아이템을 판별하지 못함',
   unresolved: '장비 정보 부족',
-  exception: '계산 오류'
+  exception: '계산 오류',
+  simulation: '바꾼 장비를 계산하지 못함'
 }
 
 const approximateMethods: Readonly<Record<string, string>> = {

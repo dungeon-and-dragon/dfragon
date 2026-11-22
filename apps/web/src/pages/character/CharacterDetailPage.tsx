@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { useRouteReload } from '#shared/lib/useRouteReload'
-import { useCharacterDetail } from './api/useCharacterDetail'
+import { useCharacterDetail } from '#entities/character-detail'
 import { type CharacterTab, DEFAULT_CHARACTER_TAB } from './character-tabs'
 import { CharacterDetailScreen } from './CharacterDetailScreen'
 

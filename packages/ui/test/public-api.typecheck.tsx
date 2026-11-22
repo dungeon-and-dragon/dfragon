@@ -5,6 +5,7 @@ import {
   Chip,
   ChipGroup,
   IconButton,
+  NumberField,
   Popover,
   Select,
   StatusChip,
@@ -20,6 +21,7 @@ import {
   type ChipGroupProps,
   type ChipProps,
   type IconButtonProps,
+  type NumberFieldProps,
   type PopoverPopupProps,
   type PopoverTitleProps,
   type SelectItemProps,
@@ -41,6 +43,7 @@ import {
 type PublicPropKeys =
   | keyof ButtonProps
   | keyof IconButtonProps
+  | keyof NumberFieldProps
   | keyof TextFieldProps
   | keyof TextFieldLabelProps
   | keyof TextFieldInputProps
@@ -74,6 +77,8 @@ expectTypeOf<TextFieldInputProps['ref']>().toEqualTypeOf<Ref<HTMLInputElement> |
 expectTypeOf<StatusChipTone>().toEqualTypeOf<
   'neutral' | 'success' | 'danger' | 'warning' | 'signal'
 >()
+expectTypeOf<NumberFieldProps['onValueChange']>().toEqualTypeOf<(value: number) => void>()
+expectTypeOf<NumberFieldProps['aria-label']>().toEqualTypeOf<string>()
 expectTypeOf<StatusChipProps['busy']>().toEqualTypeOf<boolean | undefined>()
 expectTypeOf<StatusChipProps['size']>().toEqualTypeOf<'sm' | 'md' | undefined>()
 
@@ -117,6 +122,19 @@ export const componentExamples = (
       <TextFieldDescription>예시 이름입니다.</TextFieldDescription>
       <TextFieldError>이름을 입력하세요.</TextFieldError>
     </TextField>
+    <NumberField
+      aria-label="무기 수치"
+      value={12}
+      min={0}
+      max={20}
+      disabled
+      format={{ signDisplay: 'always' }}
+      decrementLabel="무기 수치 내리기"
+      incrementLabel="무기 수치 올리기"
+      onValueChange={(value) => {
+        expectTypeOf(value).toEqualTypeOf<number>()
+      }}
+    />
   </>
 )
 
