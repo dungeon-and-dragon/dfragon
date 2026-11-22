@@ -3,6 +3,11 @@ import type { CharacterPayload, CharacterPayloads } from '#domain/character-deta
 
 export type ScoreCalculator = 'equipment' | 'buff'
 
+/** 엔진이 `slotId`가 같은 원본 장비 항목을 이 항목으로 통째로 바꿔 계산한다. */
+export type ScoreSimulationInput = Readonly<{
+  equipment: readonly CharacterPayload[]
+}>
+
 export type ScoreEngineInput = Readonly<{
   status: CharacterPayload
   equipment: CharacterPayload
@@ -15,6 +20,7 @@ export type ScoreEngineInput = Readonly<{
   buff_equip_avatar: CharacterPayload
   buff_equip_creature: CharacterPayload
   items: Readonly<Record<string, CharacterPayload>>
+  simulation?: ScoreSimulationInput
 }>
 
 /** 엔진은 Neople 섹션 응답 원문을 받으므로 상세 응답용으로 고친 값이 아니라 받은 그대로를 넘긴다. */

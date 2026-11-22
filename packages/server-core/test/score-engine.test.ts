@@ -33,6 +33,18 @@ const approximateResult = {
   approximate_source: 'legacy_fusion_policy_a',
   warning: '근사값, 1% 밖일 가능성 높음: 판정 불가'
 }
+const simulatedResult = {
+  ...engineResult,
+  display: { ...engineResult.display, mainStat: '힘' },
+  simulation: {
+    score: 1802,
+    skipped: null,
+    approximate_score: null,
+    approximate_source: null,
+    warning: null,
+    display: { buff30: null, buff50: null }
+  }
+}
 const input = readEngineInput('dealer-blade')
 
 /** Node worker의 메시지, 오류, 종료 이벤트만 흉내 낸다. 응답은 테스트가 정한다. */
@@ -177,6 +189,24 @@ for (const [name, text] of [
   [
     '알 수 없는 표시 역할',
     JSON.stringify({ ...engineResult, display: { ...engineResult.display, role: 'x' } })
+  ],
+  [
+    '알 수 없는 주 스탯',
+    JSON.stringify({ ...engineResult, display: { ...engineResult.display, mainStat: '민첩' } })
+  ],
+  [
+    '시뮬레이션 점수와 건너뛰기 사유가 함께 있음',
+    JSON.stringify({
+      ...simulatedResult,
+      simulation: { ...simulatedResult.simulation, skipped: { kind: 'simulation', message: 'x' } }
+    })
+  ],
+  [
+    '시뮬레이션 결과에 근사값 칸이 없음',
+    JSON.stringify({
+      ...simulatedResult,
+      simulation: { score: 1802, skipped: null, display: { buff30: null, buff50: null } }
+    })
   ]
 ] as const) {
   test(`${name}이면 점수 없이 계산 실패 진단을 남기고 worker는 계속 쓴다`, async () => {
@@ -199,6 +229,18 @@ for (const [name, expected] of [
   [
     '정확한 점수에 붙은 경고',
     { ...engineResult, warning: '버프 효과에 닿지 않는 부위의 아바타가 번들에 없음' }
+  ],
+  ['주 스탯과 시뮬레이션 점수', simulatedResult],
+  [
+    '지원하지 않는 변경으로 건너뛴 시뮬레이션',
+    {
+      ...simulatedResult,
+      simulation: {
+        ...simulatedResult.simulation,
+        score: null,
+        skipped: { kind: 'simulation', message: '지원하지 않는 변경' }
+      }
+    }
   ]
 ] as const) {
   test(`${name}는 그대로 돌려준다`, async () => {
