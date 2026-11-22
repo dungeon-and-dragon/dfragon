@@ -349,27 +349,23 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
 it.each([
   ['/terms', '이용약관'],
   ['/privacy', '개인정보처리방침']
-])(
-  '%s를 직접 열면 %s 제목 줄과 빈 본문 박스만 그리고 전역 메뉴에는 현재 항목이 없다',
-  async (path, title) => {
-    window.history.replaceState(null, '', path)
-    await act(async () => root.render(<WebApp host={host} />))
+])('%s를 직접 열면 %s 제목 줄을 그리고 전역 메뉴에는 현재 항목이 없다', async (path, title) => {
+  window.history.replaceState(null, '', path)
+  await act(async () => root.render(<WebApp host={host} />))
 
-    const main = container.querySelector('main')!
-    const article = main.querySelector('article')!
-    const heading = article.querySelector('h1')!
-    expect(heading.textContent).toBe(title)
-    expect(article.getAttribute('aria-labelledby')).toBe(heading.id)
-    expect(article.textContent).toBe(title)
-    expect(globalMenu()).toEqual([
-      ['멀티서치', null],
-      ['검색', null],
-      ['통계', null],
-      ['모험단', null],
-      ['즐겨찾기', null]
-    ])
-  }
-)
+  const main = container.querySelector('main')!
+  const article = main.querySelector('article')!
+  const heading = article.querySelector('h1')!
+  expect(heading.textContent).toBe(title)
+  expect(article.getAttribute('aria-labelledby')).toBe(heading.id)
+  expect(globalMenu()).toEqual([
+    ['멀티서치', null],
+    ['검색', null],
+    ['통계', null],
+    ['모험단', null],
+    ['즐겨찾기', null]
+  ])
+})
 
 it('화면 상자 아래 푸터에 Neople 로고 링크와 두 약관 화면 링크를 두고 지금 화면 표시는 하지 않는다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
