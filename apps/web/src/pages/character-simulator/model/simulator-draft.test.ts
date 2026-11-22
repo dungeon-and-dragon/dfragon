@@ -1,4 +1,4 @@
-import { type EnchantGradeSlot, enchantGradesOf } from '@dfragon/lib/enchant-grades'
+import { type EnchantGradeSlot, enchantOptionsOf } from '@dfragon/lib/enchant-grades'
 import { expect, it } from 'vitest'
 import type { CharacterDetailView } from '#entities/character'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
@@ -50,12 +50,12 @@ function apply(changes: SimulatorChanges, ...actions: SimulatorAction[]): Simula
   return actions.reduce(simulatorReducer, changes)
 }
 
-function firstGradeId(slotId: EnchantGradeSlot, role: 'dealer' | 'buffer'): string {
-  const { 종결, 준종결 } = enchantGradesOf(slotId, role)
-  const grade = [...종결, ...준종결][0]
-  expect(grade, `${slotId} ${role}`).toBeDefined()
+function firstOptionId(slotId: EnchantGradeSlot, role: 'dealer' | 'buffer'): string {
+  const { 종결, 준종결 } = enchantOptionsOf(slotId, role)
+  const option = [...종결, ...준종결][0]
+  expect(option, `${slotId} ${role}`).toBeDefined()
 
-  return grade!.id
+  return option!.id
 }
 
 const dealerSlots = toSimulatorSlots(characterDetailFixture('dealer'))
@@ -76,7 +76,7 @@ it('장비 12부위만 응답 순서대로 두고 칭호는 빼며, 착용한 �
 it('버퍼의 0 증폭 장비는 증폭으로 두고, 마법부여 목록은 버퍼 등급표에서만 고른다', () => {
   const bufferSlots = toSimulatorSlots(characterDetailFixture('buffer'))
   const jacket = slotOf(bufferSlots, 'JACKET')
-  const bufferIds = Object.values(enchantGradesOf('JACKET', 'buffer'))
+  const bufferIds = Object.values(enchantOptionsOf('JACKET', 'buffer'))
     .flat()
     .map(({ id }) => id)
 
@@ -86,7 +86,7 @@ it('버퍼의 0 증폭 장비는 증폭으로 두고, 마법부여 목록은 버
 })
 
 it('바꾼 부위만 그 부위의 원하는 상태 전체로 요청 body에 넣고, 원래 값으로 되돌리면 뺀다', () => {
-  const enchantId = firstGradeId('AMULET', 'dealer')
+  const enchantId = firstOptionId('AMULET', 'dealer')
   const changed = apply(
     {},
     { type: 'change', slot: amulet, draft: { enchantId } },
@@ -138,8 +138,23 @@ it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까
   ).toEqual({ reinforce: 22, amplified: false, enchantId: null })
 })
 
+it('표시가 같아 합친 묶음은 묶음 id로만 고르고 묶음의 다른 항목 id는 받지 않는다', () => {
+  const merged = enchantOptionsOf('WEAPON', 'dealer').준종결.find(
+    (option) => option.members.length > 1
+  )
+  expect(merged).toBeDefined()
+  const [, other] = merged!.members
+
+  expect(weapon.enchantChoices.map(({ id }) => id)).toContain(merged!.id)
+  expect(
+    draftOf(weapon, apply({}, { type: 'change', slot: weapon, draft: { enchantId: merged!.id } }))
+      .enchantId
+  ).toBe(merged!.id)
+  expect(apply({}, { type: 'change', slot: weapon, draft: { enchantId: other!.id } })).toEqual({})
+})
+
 it('등급표에 없는 마법부여는 받지 않는다', () => {
-  const otherSlotId = firstGradeId('WEAPON', 'dealer')
+  const otherSlotId = firstOptionId('WEAPON', 'dealer')
 
   expect(apply({}, { type: 'change', slot: amulet, draft: { enchantId: otherSlotId } })).toEqual({})
 })
@@ -147,7 +162,7 @@ it('등급표에 없는 마법부여는 받지 않는다', () => {
 it('115레벨이 아닌 장비는 수치와 강화, 증폭을 바꾸지 않고 마법부여만 바꾼다', () => {
   const detail = withItem(characterDetailFixture('dealer'), 'AMULET', { itemAvailableLevel: 110 })
   const oldAmulet = slotOf(toSimulatorSlots(detail), 'AMULET')
-  const enchantId = firstGradeId('AMULET', 'dealer')
+  const enchantId = firstOptionId('AMULET', 'dealer')
   const changed = apply(
     {},
     { type: 'change', slot: oldAmulet, draft: { reinforce: 12 } },

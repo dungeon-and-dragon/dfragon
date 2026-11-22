@@ -1,5 +1,6 @@
+import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
 import { expect, it } from 'vitest'
-import { enchantLabels } from './enchant-label'
+import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
 
 type Status = readonly (readonly [string, number | string])[]
 
@@ -15,44 +16,26 @@ function labels(
   role: 'dealer' | 'buffer' = 'dealer',
   skills?: (number | string)[]
 ) {
-  return enchantLabels(enchantOf(status, skills), role).map(({ label }) => label)
+  return equippedEnchantLabels(enchantOf(status, skills), role).map(({ label }) => label)
 }
 
-it('힘, 지능, 체력, 정신력이 모두 같은 값이면 올스탯으로 줄이고, 하나라도 빠지거나 값이 다르면 실제 이름으로 둔다', () => {
-  const allStats: Status = [
-    ['힘', 100],
-    ['지능', 100],
-    ['체력', 100],
-    ['정신력', 100]
-  ]
-
-  expect(labels(allStats)).toEqual(['올스탯 +100'])
-  expect(labels([['힘', 100]])).toEqual(['힘 +100'])
-  expect(labels([['지능', 100]])).toEqual(['지능 +100'])
+it('주스탯은 하나만 있어도 가장 큰 값의 올스탯으로 보인다', () => {
+  expect(labels([['힘', 100]])).toEqual(['올스탯 +100'])
   expect(
     labels([
       ['힘', 100],
-      ['지능', 100],
-      ['체력', 90],
-      ['정신력', 100]
+      ['지능', 90]
     ])
-  ).toEqual(['힘 +100', '지능 +100', '체력 +90', '정신력 +100'])
+  ).toEqual(['올스탯 +100'])
 })
 
-it('공격력은 물리, 마법, 독립이 모두 같은 값일 때만 줄이고 일부만 있으면 실제 이름을 응답 순서로 잇는다', () => {
+it('공격력은 물리, 마법, 독립이 모두 같은 값일 때만 줄이고 아니면 실제 이름으로 둔다', () => {
   expect(
     labels([
       ['물리 공격력', 90],
       ['힘', 60]
     ])
-  ).toEqual(['물리 공격력 +90', '힘 +60'])
-  expect(
-    labels([
-      ['독립 공격력', 90],
-      ['힘', 60],
-      ['지능', 60]
-    ])
-  ).toEqual(['독립 공격력 +90', '힘 +60', '지능 +60'])
+  ).toEqual(['물리 공격력 +90', '올스탯 +60'])
   expect(
     labels([
       ['물리 공격력', 30],
@@ -62,27 +45,25 @@ it('공격력은 물리, 마법, 독립이 모두 같은 값일 때만 줄이고
   ).toEqual(['공격력 +30'])
 })
 
-it('물리, 마법 크리티컬 히트가 같은 값이면 크리티컬로 줄이고 퍼센트 표기의 소수점 0은 뗀다', () => {
+it('크리티컬은 값이 달라도 가장 큰 값으로 줄이고 퍼센트 표기의 소수점 0은 뗀다', () => {
   expect(
     labels([
       ['물리 크리티컬 히트', '3.0%'],
-      ['마법 크리티컬 히트', '3%']
+      ['마법 크리티컬 히트', '5%']
     ])
-  ).toEqual(['크리티컬 +3%'])
-  expect(labels([['물리 크리티컬 히트', '5%']])).toEqual(['물리 크리티컬 히트 +5%'])
+  ).toEqual(['크리티컬 +5%'])
 })
 
 it('딜러는 최종 데미지, 공격력 증폭, 속성 강화를 강조해 앞에 두고 단일 속성 강화는 띄어 쓴 이름으로 각각 둔다', () => {
-  const options = enchantLabels(
+  const options = equippedEnchantLabels(
     enchantOf([
       ['힘', 50],
       ['지능', 50],
-      ['체력', 50],
-      ['정신력', 50],
       ['물리 공격력', 15],
       ['마법 공격력', 15],
       ['독립 공격력', 15],
       ['화속성강화', 15],
+      ['명속성강화', 15],
       ['최종 데미지 증가', '3%']
     ]),
     'dealer'
@@ -91,13 +72,14 @@ it('딜러는 최종 데미지, 공격력 증폭, 속성 강화를 강조해 앞
   expect(options).toEqual([
     { label: '최종 데미지 증가 +3%', emphasized: true },
     { label: '화속성 강화 +15', emphasized: true },
+    { label: '명속성 강화 +15', emphasized: true },
     { label: '공격력 +15', emphasized: false },
     { label: '올스탯 +50', emphasized: false }
   ])
 })
 
 it('버퍼는 직업별 스킬 강화를 버프 패시브 스킬 한 줄로 두고 올스탯과 함께 강조해 앞에 둔다', () => {
-  const options = enchantLabels(
+  const options = equippedEnchantLabels(
     enchantOf(
       [
         ['물리 크리티컬 히트', '7%'],
@@ -119,15 +101,19 @@ it('버퍼는 직업별 스킬 강화를 버프 패시브 스킬 한 줄로 두�
   ])
 })
 
-it('같은 값의 두 속성 강화도 합치지 않고 각각 띄어 써 나열한다', () => {
-  expect(
-    labels([
-      ['수속성강화', 35],
-      ['암속성 강화', 35]
-    ])
-  ).toEqual(['수속성 강화 +35', '암속성 강화 +35'])
+it('등급표 목록은 표시가 같아진 항목을 한 줄로 보이고 착용한 마법부여와 같은 표기를 쓴다', () => {
+  const semiFinals = enchantOptionsOf('WEAPON', 'dealer').준종결
+  const listed = semiFinals.map((option) =>
+    optionEnchantLabels(option, 'dealer')
+      .map(({ label }) => label)
+      .join(', ')
+  )
+
+  expect(listed.filter((label) => label === '올스탯 +100')).toHaveLength(1)
+  expect(listed).toContain('물리 공격력 +90, 올스탯 +60')
+  expect(labels([['지능', 100]])).toEqual(['올스탯 +100'])
 })
 
 it('마법부여가 없으면 빈 목록이다', () => {
-  expect(enchantLabels(null, 'dealer')).toEqual([])
+  expect(equippedEnchantLabels(null, 'dealer')).toEqual([])
 })
