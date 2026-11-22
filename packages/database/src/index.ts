@@ -269,6 +269,7 @@ export {
   readCharactersTimelineItems,
   readCurrentSeasonStart,
   readEnhancementBackfilledUntil,
+  readRecentTimelineEvents,
   readRecentTimelineItems,
   readSeasonBackfillStates,
   readSeasons,
@@ -284,6 +285,8 @@ export {
 export type {
   CharacterTimelineEventRow,
   CharacterTimelineItemRow,
+  RecentTimelineEventQuery,
+  RecentTimelineEventRow,
   RecentTimelineItemQuery,
   SeasonBackfillState,
   StoredSeason,

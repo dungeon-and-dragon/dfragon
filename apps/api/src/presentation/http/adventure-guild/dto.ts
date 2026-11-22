@@ -2,6 +2,7 @@ import type { StoredCharacter, StoredGuild } from '@dfragon/database'
 import { z } from 'zod'
 import {
   ADVENTURE_TIMELINE_KINDS,
+  parseAdventureTimelineCursor,
   type ActivitySeason,
   type AdventureActivity,
   type AdventureSeasonDays,
@@ -11,7 +12,6 @@ import {
   type SelectedAdventureEquipment
 } from '#domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
-import { parseTimelineCursor } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 
 const SEASON_NUMBER_PATTERN = /^[1-9]\d{0,3}$/
@@ -69,7 +69,7 @@ export function parseTimelineQuery(query: unknown): AdventureTimelineQuery {
     return { kind }
   }
 
-  const cursor = parseTimelineCursor(before)
+  const cursor = parseAdventureTimelineCursor(before)
 
   if (cursor === undefined) {
     throw new CharacterDetailFailure('query')
