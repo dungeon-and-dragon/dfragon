@@ -3,7 +3,7 @@
   "source": {
     "dataset": "phase32-rev16b sha256:1d9658f799d58202e96c6d210420c02c6cc1fc367e2c82035c9866d5aa124487",
     "generated_at": "2026-11-18T18:00:00+09:00",
-    "rule": "부위마다 그 부위 카드의 명성 가운데 가장 높은 값이 종결, 다음 값이 준종결. 준종결 항목의 status와 reinforceSkill이 종결 항목과 같으면 종결 항목에 합침. 역할은 reinforceSkill이 있으면 buffer, status에 속성 강화, 공격력, 최종 데미지 증가, 공격력 증폭이 있으면 dealer, 그 밖에는 4스탯이면 buffer, 힘이나 지능만 있으면 dealer, 체력이나 정신력만 있으면 buffer"
+    "rule": "부위마다 그 부위 카드의 명성 가운데 가장 높은 값이 종결, 다음 값이 준종결. 준종결 항목의 status와 reinforceSkill이 종결 항목과 같으면 종결 항목에 합침. 같은 등급, 역할, 명성에서 다른 옵션이 같고 단일 속성이나 2속성 강화 N인 항목은 모든 속성 강화 N 항목에 합침. 역할은 reinforceSkill이 있으면 buffer, status에 속성 강화, 공격력, 최종 데미지 증가, 공격력 증폭이 있으면 dealer, 그 밖에는 4스탯이면 buffer, 힘이나 지능만 있으면 dealer, 체력이나 정신력만 있으면 buffer"
   },
   "slots": {
     "WEAPON": {
@@ -67,98 +67,6 @@
       ],
       "준종결": [
         {
-          "id": "WEAPON:10312973:dealer",
-          "status": [
-            {
-              "name": "명속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "백화 만다린 카드",
-          "cardId": 10312973,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10312975:dealer",
-          "status": [
-            {
-              "name": "화속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "어리석은 시드르 카드",
-          "cardId": 10312975,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10312979:dealer",
-          "status": [
-            {
-              "name": "암속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "카잔이 빙의된 로젠버그 카드",
-          "cardId": 10312979,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10312981:dealer",
-          "status": [
-            {
-              "name": "수속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "영매 아이락 카드",
-          "cardId": 10312981,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10315712:dealer",
-          "status": [
-            {
-              "name": "화속성강화",
-              "value": 15
-            },
-            {
-              "name": "명속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "붉은 짐승, 슈브라스 카드",
-          "cardId": 10315712,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10315713:dealer",
-          "status": [
-            {
-              "name": "수속성강화",
-              "value": 15
-            },
-            {
-              "name": "암속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "적응하는 자고스 카드",
-          "cardId": 10315713,
-          "roles": ["dealer"]
-        },
-        {
           "id": "WEAPON:10316077:dealer",
           "status": [
             {
@@ -213,42 +121,6 @@
           "cardName": "대천사 미카엘 카드",
           "cardId": 10326802,
           "roles": ["buffer"]
-        },
-        {
-          "id": "WEAPON:10326805:dealer",
-          "status": [
-            {
-              "name": "화속성강화",
-              "value": 15
-            },
-            {
-              "name": "수속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "볼트 MX_3 카드",
-          "cardId": 10326805,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10326809:dealer",
-          "status": [
-            {
-              "name": "명속성강화",
-              "value": 15
-            },
-            {
-              "name": "암속성강화",
-              "value": 15
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "빛의 괴수 피톤 카드",
-          "cardId": 10326809,
-          "roles": ["dealer"]
         },
         {
           "id": "WEAPON:10326833:buffer",
