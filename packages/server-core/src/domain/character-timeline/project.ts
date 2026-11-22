@@ -38,9 +38,9 @@ export const RAID_CLEAR_CODES = [201, 210]
 export const LEGION_CLEAR_CODE = 209
 export const CLEAR_CODES = [...RAID_CLEAR_CODES, LEGION_CLEAR_CODE]
 type ClearKind = 'raid' | 'legion'
-type EnhancementKind = 'reinforce' | 'amplify' | 'refine'
+export type EnhancementKind = 'reinforce' | 'amplify' | 'refine'
 
-const ENHANCEMENT_KINDS = new Map<number, EnhancementKind>([
+export const ENHANCEMENT_KINDS: ReadonlyMap<number, EnhancementKind> = new Map([
   [401, 'reinforce'],
   [402, 'amplify'],
   [403, 'refine']
@@ -190,7 +190,7 @@ export function toEnhancement(row: TimelineEnhancementRecord): TimelineEnhanceme
   ]
 }
 
-function toAcquisition({
+export function toAcquisition({
   code,
   name,
   itemId,
