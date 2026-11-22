@@ -30,6 +30,9 @@ parsePort('3000') // 3000
 `optionNeedsMainStat(option)`이 true인 선택 항목은 `chooseEnchantGrade(option, mainStat)`으로 캐릭터의 주스탯에 맞는 항목을 고릅니다.
 등급표는 점수 엔진 저장소가 만든 `enchant-grades.dfragon.json`(version 2)을 복사한 파일이며 손으로 고치지 않습니다. 새 파일로 바꾸면 root에서 `pnpm exec biome format --write packages/lib/src/enchant-grades.json`, `node scripts/check-writing.mjs packages/lib/src/enchant-grades.json`을 실행하고, `test/enchant-grades.test.mjs`의 부위별 id 기대값을 새 표에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
+`@dfragon/lib/slot-items`의 `slotItemsOf(category)`, `findSlotItem(category, id)`는 장비 시뮬레이터에서 고를 수 있는 칭호, 크리쳐, 오라 목록(`src/slot-items.json`)을 찾습니다. 엔진 점수 효과가 같은 아이템은 한 항목으로 묶여 있고, 항목의 `item`은 엔진에 넘길 대표 아이템입니다.
+목록은 점수 엔진 저장소의 `slot-items.dfragon.json`(그 저장소의 packages/dnfscore-native/tools/slot_items 아래)에 운영에서 관측한 대표 itemId를 붙인 파일이며 손으로 고치지 않습니다. 새 파일로 바꾸면 등급표와 같이 Biome format과 check-writing을 실행하고, `test/slot-items.test.mjs`의 이름 기대값을 새 목록에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
+
 `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 API의 스킬 채택률 응답과 `@dfragon/database`의 표본 SQL이 함께 쓰는 표본 순위입니다.
 
 ## 던파 캐릭터명 검사
