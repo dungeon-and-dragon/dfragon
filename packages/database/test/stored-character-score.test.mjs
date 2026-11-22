@@ -85,32 +85,39 @@ async function createCharacter(characterId, fame) {
   return key
 }
 
-async function recordScore(key, kind, score) {
+const approximate = {
+  source: 'legacy_fusion_policy_a',
+  warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+  skipped: { kind: 'resolution', message: '판정 불가' }
+}
+
+async function recordScore(key, kind, score, approximation = null) {
   await recordCharacterScore(client, {
     ...key,
     job: null,
     kind,
     score,
     calculatedAt: new Date('2026-11-19T00:00:00Z'),
-    engine
+    engine,
+    approximate: approximation
   })
 }
 
 const scoresOf = (rows) => rows.map(({ characterId, score }) => [characterId, score])
 
-test('캐릭터 목록 행에 저장된 점수를 종류와 함께 붙이고 저장되지 않은 캐릭터는 null이며 명성 순서는 그대로다', {
+test('캐릭터 목록 행에 저장된 점수를 종류, 근사 방식과 함께 붙이고 저장되지 않은 캐릭터는 null이며 명성 순서는 그대로다', {
   skip: port === undefined
 }, async () => {
   const dealer = await createCharacter('dealer', 120000)
   const buffer = await createCharacter('buffer', 110000)
   await createCharacter('unscored', 115000)
   await recordScore(dealer, 'equipment', 1234567)
-  await recordScore(buffer, 'buff', 4321000)
+  await recordScore(buffer, 'buff', 4321000, approximate)
 
   const expected = [
-    ['dealer', { kind: 'equipment', value: 1234567 }],
+    ['dealer', { kind: 'equipment', value: 1234567, approximateSource: null }],
     ['unscored', null],
-    ['buffer', { kind: 'buff', value: 4321000 }]
+    ['buffer', { kind: 'buff', value: 4321000, approximateSource: approximate.source }]
   ]
 
   assert.deepEqual(scoresOf(await readFameRanking(client, { jobId }, 100)), expected)
@@ -124,7 +131,7 @@ test('이름 검색 결과의 점수는 저장된 캐릭터만 읽고 목록에 
   const stored = await createCharacter('search-stored', 100000)
   const other = await createCharacter('search-other', 100000)
   await createCharacter('search-unscored', 100000)
-  await recordScore(stored, 'equipment', 1111111)
+  await recordScore(stored, 'equipment', 1111111, approximate)
   await recordScore(other, 'buff', 2222222)
 
   const rows = await readCharacterScores(client, [
@@ -135,7 +142,13 @@ test('이름 검색 결과의 점수는 저장된 캐릭터만 읽고 목록에 
   ])
 
   assert.deepEqual(rows, [
-    { serverId: 'cain', characterId: 'search-stored', kind: 'equipment', value: 1111111 }
+    {
+      serverId: 'cain',
+      characterId: 'search-stored',
+      kind: 'equipment',
+      value: 1111111,
+      approximateSource: approximate.source
+    }
   ])
   assert.deepEqual(await readCharacterScores(client, []), [])
 })

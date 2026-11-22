@@ -45,6 +45,7 @@ const score = (characterId, value, overrides = {}) => ({
   score: value,
   calculatedAt: new Date('2026-11-12T13:00:00Z'),
   engine,
+  approximate: null,
   ...overrides
 })
 const weekStart = new Date('2026-11-11T21:00:00Z')
@@ -63,7 +64,8 @@ const scoreHistory = (
   observedAt,
   value,
   historyEngine = engine,
-  kind = 'equipment'
+  kind = 'equipment',
+  approximate = null
 ) => {
   const historyBasic = basic(characterId, 66_000)
 
@@ -73,7 +75,7 @@ const scoreHistory = (
     observedAt: new Date(observedAt),
     basic: historyBasic,
     sections: {},
-    score: { kind, score: value, engine: historyEngine }
+    score: { kind, score: value, engine: historyEngine, approximate }
   }
 }
 
@@ -143,7 +145,7 @@ async function prepareDatabase(t, database) {
   return client
 }
 
-test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 점수와 같은 종류, 엔진 버전의 최고 점수를 복사하고, 그 뒤 값이 바뀌거나 다시 저장해도 그대로 두며 지난 행은 채우지 않는다', {
+test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 점수와 같은 종류, 엔진 버전, 근사 방식의 최고 점수를 복사하고, 그 뒤 값이 바뀌거나 다시 저장해도 그대로 두며 지난 행은 채우지 않는다', {
   skip: port === undefined
 }, async (t) => {
   const client = await prepareDatabase(t, 'content_clear_snapshot')
@@ -162,6 +164,14 @@ test('클리어를 처음 저장할 때 그 시점의 최고 명성과 지금 �
   await recordCharacterHistory(
     client,
     scoreHistory('swapped', '2026-11-11T19:00:00Z', 2300, engine, 'buff')
+  )
+  await recordCharacterHistory(
+    client,
+    scoreHistory('swapped', '2026-11-11T20:00:00Z', 2500, engine, 'equipment', {
+      source: 'legacy_fusion_policy_a',
+      warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+      skipped: { kind: 'resolution', message: '판정 불가' }
+    })
   )
   await recordCharacterHistory(client, scoreHistory('swapped', '2026-11-12T13:00:00Z', 1600))
   await recordCharacterScore(client, score('swapped', 1600))
