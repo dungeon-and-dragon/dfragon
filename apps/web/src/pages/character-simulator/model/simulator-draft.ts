@@ -2,7 +2,7 @@ import {
   ENCHANT_GRADE_SLOTS,
   type EnchantGradeSlot,
   type EnchantGradeTier,
-  enchantGradesOf
+  enchantOptionsOf
 } from '@dfragon/lib/enchant-grades'
 import {
   type CharacterDetailView,
@@ -11,7 +11,7 @@ import {
   type ItemView,
   toItemView
 } from '#entities/character'
-import { enchantLabels } from './enchant-label'
+import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
 
@@ -69,14 +69,14 @@ export function simulatorRole(card: CharacterDetailView['card']): EnchantRole {
 }
 
 function enchantChoices(slotId: EnchantGradeSlot, role: EnchantRole): EnchantChoice[] {
-  const tiers = enchantGradesOf(slotId, role)
+  const tiers = enchantOptionsOf(slotId, role)
   const tierNames: EnchantGradeTier[] = ['종결', '준종결']
 
   return tierNames.flatMap((tier) =>
-    tiers[tier].map((grade) => {
-      const options = enchantLabels(grade, role)
+    tiers[tier].map((option) => {
+      const options = optionEnchantLabels(option, role)
 
-      return { id: grade.id, tier, options }
+      return { id: option.id, tier, options }
     })
   )
 }
@@ -90,7 +90,7 @@ function toSimulatorSlot(
   const amplified = item.amplificationName != null
   const reinforceLimit = Math.max(REINFORCE_LIMIT, reinforce)
   const reinforceEditable = item.itemAvailableLevel === SIMULATED_ITEM_LEVEL
-  const enchants = enchantLabels(item.enchant, role)
+  const enchants = equippedEnchantLabels(item.enchant, role)
   const choices = enchantChoices(item.slotId, role)
 
   return {
