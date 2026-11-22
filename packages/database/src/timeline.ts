@@ -58,6 +58,10 @@ export type TimelineItemRow = {
   data: unknown
 }
 
+export type RecentTimelineEventRow = TimelineEventRow & { id: bigint }
+
+export type RecentTimelineEventQuery = Omit<RecentTimelineItemQuery, 'itemRarities'>
+
 export type CharacterTimelineEventRow = TimelineCharacter & TimelineEventRow
 
 export type CharacterTimelineItemRow = TimelineCharacter & TimelineItemRow
@@ -427,6 +431,29 @@ export function readCharactersTimelineItems(
       itemRarity: true,
       data: true
     }
+  })
+}
+
+export function readRecentTimelineEvents(
+  client: DatabaseClient,
+  character: TimelineCharacter,
+  { codes, limit, before }: RecentTimelineEventQuery
+): Promise<RecentTimelineEventRow[]> {
+  const { serverId, characterId } = character
+
+  return client.timelineEvent.findMany({
+    where: {
+      serverId,
+      characterId,
+      code: { in: [...codes] },
+      OR: before && [
+        { occurredAt: { lt: before.occurredAt } },
+        { occurredAt: before.occurredAt, id: { gt: before.id } }
+      ]
+    },
+    orderBy: [{ occurredAt: 'desc' }, { id: 'asc' }],
+    take: limit,
+    select: { id: true, code: true, occurredAt: true, name: true, raidName: true, data: true }
   })
 }
 

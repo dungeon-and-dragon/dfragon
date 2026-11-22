@@ -25,12 +25,12 @@ import { useObservedHeight } from './use-observed-height'
 const ALL_KINDS = 'all'
 const KIND_ITEMS = [
   { value: ALL_KINDS, label: '전체' },
-  { value: 'reinforce', label: '강화' },
-  { value: 'amplify', label: '증폭' },
-  { value: 'refine', label: '재련' },
-  { value: 'acquisition', label: '획득' }
+  { value: 'enhancement', label: '강화' },
+  { value: 'acquisition', label: '드랍' },
+  { value: 'clear', label: '클리어' }
 ] as const satisfies readonly { value: AdventureTimelineKind | typeof ALL_KINDS; label: string }[]
 
+const HARD_BADGE = 'badge bg-danger-weak text-fg-danger'
 const MORE = 'min-h-12 border-t border-line'
 const MORE_STATE = `${MORE} flex-row py-0`
 
@@ -64,24 +64,29 @@ function KindPicker({
   )
 }
 
-function ItemName({
-  itemName,
-  itemRarity
-}: Pick<AdventureTimelineItem, 'itemName' | 'itemRarity'>): React.JSX.Element {
-  if (itemName == null) {
-    return <span className="text-fg-subtle">-</span>
+function TargetCell({ item }: { item: AdventureTimelineItem }): React.JSX.Element {
+  if (item.type === 'clear') {
+    return <td className="truncate">{item.name}</td>
   }
 
-  return (
-    <span className={itemRarity != null ? raritySolidOfName(itemRarity) : undefined}>
-      {itemName}
-    </span>
-  )
+  const { itemName, itemRarity } = item
+
+  if (itemName == null) {
+    return <td className="text-fg-subtle">-</td>
+  }
+
+  const rarityClass = itemRarity != null ? raritySolidOfName(itemRarity) : ''
+
+  return <td className={`truncate ${rarityClass}`}>{itemName}</td>
 }
 
 function KindCell({ item }: { item: AdventureTimelineItem }): React.JSX.Element {
   if (item.type === 'acquisition') {
-    return <td className="text-fg-muted">획득</td>
+    return <td className="text-fg-muted">드랍</td>
+  }
+
+  if (item.type === 'clear') {
+    return <td className="text-fg-muted">클리어</td>
   }
 
   return <td className={enhancementKindClasses[item.kind]}>{ENHANCEMENT_KIND_LABELS[item.kind]}</td>
@@ -90,6 +95,19 @@ function KindCell({ item }: { item: AdventureTimelineItem }): React.JSX.Element 
 function DetailCell({ item }: { item: AdventureTimelineItem }): React.JSX.Element {
   if (item.type === 'acquisition') {
     return <td className="text-fg-muted">{acquisitionRoute(item.name)}</td>
+  }
+
+  if (item.type === 'clear') {
+    return (
+      <td>
+        <span className="inline-flex min-w-0 items-center gap-2">
+          {item.hard && <span className={HARD_BADGE}>하드</span>}
+          {item.modeName !== null && (
+            <span className="truncate text-fg-muted">{item.modeName}</span>
+          )}
+        </span>
+      </td>
+    )
   }
 
   return (
@@ -153,7 +171,7 @@ function TimelineTable({ pages }: { pages: AdventureTimelinePages }): React.JSX.
           <colgroup>
             <col className="w-[112px]" />
             <col className="w-[160px]" />
-            <col className="w-[56px]" />
+            <col className="w-[64px]" />
             <col />
             <col className="w-[180px]" />
           </colgroup>
@@ -162,7 +180,7 @@ function TimelineTable({ pages }: { pages: AdventureTimelinePages }): React.JSX.
               <th scope="col">일시</th>
               <th scope="col">캐릭터</th>
               <th scope="col">종류</th>
-              <th scope="col">장비</th>
+              <th scope="col">대상</th>
               <th scope="col">내용</th>
             </tr>
           </thead>
@@ -182,9 +200,7 @@ function TimelineTable({ pages }: { pages: AdventureTimelinePages }): React.JSX.
                   </Link>
                 </td>
                 <KindCell item={item} />
-                <td className="truncate">
-                  <ItemName itemName={item.itemName} itemRarity={item.itemRarity} />
-                </td>
+                <TargetCell item={item} />
                 <DetailCell item={item} />
               </tr>
             ))}

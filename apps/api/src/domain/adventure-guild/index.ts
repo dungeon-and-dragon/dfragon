@@ -28,12 +28,19 @@ export type {
 } from './equipment.js'
 export { toAdventureWeeklyClears } from './weekly.js'
 export type { AdventureWeeklyClears } from './weekly.js'
-export { ADVENTURE_TIMELINE_KINDS, toAdventureTimelinePage } from './timeline.js'
+export {
+  ADVENTURE_TIMELINE_KINDS,
+  parseAdventureTimelineCursor,
+  toAdventureTimelinePage,
+  toSourceCursor
+} from './timeline.js'
 export type {
   AdventureTimelineCharacter,
+  AdventureTimelineCursor,
   AdventureTimelineEntry,
   AdventureTimelineItem,
   AdventureTimelineKind,
   AdventureTimelinePage,
-  AdventureTimelineQuery
+  AdventureTimelineQuery,
+  AdventureTimelineSource
 } from './timeline.js'
