@@ -1,0 +1,1169 @@
+{
+  "version": 1,
+  "source": {
+    "engine": {
+      "slot_tables_pvf_sha256": "52c416b7d0e905e7a9c0387a49f51e700d36de4f42d95bb0afb4f7b3d573c620",
+      "generated_at": "2026-10-21",
+      "rule": "카테고리마다 하한 아이템의 명성 이상인 (명성, 템플릿) 묶음. 템플릿은 엔진 점수 효과(packet, 공격력, 버프, H 조건)가 같은 레코드라 플래티넘과 일반 아이템도 효과가 같으면 한 묶음. 대표 이름은 일반 멤버(이름에 플래티넘이 없는 멤버)의 기본 이름(꾸밈 [NNLv], [EVENT], WON'S, [기간제]를 뗀 이름) 가운데 같은 명성의 다른 묶음과 겹치지 않는 이름, 그런 이름이 없으면 플래티넘을 남긴 이름, 그것도 없으면 걸친 이름(nameSharedWith에 함께 있는 묶음을 적음). 후보 가운데 기본 이름의 착용 순위(꾸민 판의 착용 수까지 합친 순위)가 가장 높은 이름(순위가 없으면 이름 순)"
+    },
+    "itemsObservedAt": "2026-11-23"
+  },
+  "floors": {
+    "title": {
+      "fame": 790,
+      "name": "세리아의 풍성한 선물 Ver.2"
+    },
+    "creature": {
+      "fame": 810,
+      "name": "다정한 SD 세리아 Ver.2"
+    },
+    "aura": {
+      "fame": 463,
+      "name": "세리아의 파스텔 버블 Ver.2"
+    }
+  },
+  "categories": {
+    "title": [
+      {
+        "id": "title:1123:character/common/title/100333448",
+        "fame": 1123,
+        "name": "운명이 담긴 책",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "20%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "9.6%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 10
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 2,
+          "buffPower": 0,
+          "skills": ["50레벨 액티브 스킬 Lv +2"],
+          "otherSkills": ["1~95레벨 모든 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "741f95b1012f33a3949d4fe38f094d41",
+          "itemName": "프로스트의 전설 플래티넘[80Lv]",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "title:1123:character/common/title/100333206",
+        "fame": 1123,
+        "name": "프로스트의 전설",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "20%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "8%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 10
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 2,
+          "buffPower": 0,
+          "skills": ["50레벨 액티브 스킬 Lv +2"],
+          "otherSkills": ["1~95레벨 모든 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "42fd3d4144f788b37ed19c70281dcda6",
+          "itemName": "프로스트의 전설",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "title:849:character/common/title/100332937",
+        "fame": 849,
+        "name": "진정한 각성을 이룬 자",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "18%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 10
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 2,
+          "buffPower": 0,
+          "skills": ["50레벨 액티브 스킬 Lv +2"],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "c89a01593a155a3cbaaf272084d8fb57",
+          "itemName": "진정한 각성을 이룬 자",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "title:849:character/common/title/100332897",
+        "fame": 849,
+        "name": "마스터 다이버",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "18%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "1.5%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 10
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 2,
+          "buffPower": 0,
+          "skills": ["50레벨 액티브 스킬 Lv +2"],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "25bb5843f1f7f581ef55460fc0b708b8",
+          "itemName": "진정한 각성을 이룬 자 플래티넘[75Lv]",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "title:790:character/common/title/100332708",
+        "fame": 790,
+        "name": "세리아의 풍성한 선물 Ver.2",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "18%"
+          },
+          {
+            "name": "힘",
+            "value": 70
+          },
+          {
+            "name": "지능",
+            "value": 70
+          },
+          {
+            "name": "체력",
+            "value": 70
+          },
+          {
+            "name": "정신력",
+            "value": 70
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": ["50레벨 액티브 스킬 Lv +2"],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "74711128d2d0739c4f5d38b488d2be2c",
+          "itemName": "[EVENT]세리아의 풍성한 선물 Ver.2",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "title:790:character/common/title/100333192",
+        "fame": 790,
+        "name": "달을 삼킨 자 플래티넘",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "18%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "1.5%"
+          },
+          {
+            "name": "힘",
+            "value": 70
+          },
+          {
+            "name": "지능",
+            "value": 70
+          },
+          {
+            "name": "체력",
+            "value": 70
+          },
+          {
+            "name": "정신력",
+            "value": 70
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": ["50레벨 액티브 스킬 Lv +2"],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "6952ef732a8abbf64c87aa1585ede172",
+          "itemName": "난초의 고결함 플래티넘[75Lv]",
+          "itemRarity": "레어"
+        }
+      }
+    ],
+    "creature": [
+      {
+        "id": "creature:1261:creature/22_lounge6/autocreature_100",
+        "fame": 1261,
+        "name": "운명을 담는 여신",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "40%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "1.5%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 40
+          },
+          {
+            "name": "힘",
+            "value": 150
+          },
+          {
+            "name": "지능",
+            "value": 150
+          },
+          {
+            "name": "체력",
+            "value": 150
+          },
+          {
+            "name": "정신력",
+            "value": 150
+          }
+        ],
+        "buff": {
+          "buffAmp": 10,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "b0c0512c23d593574269e0cb2ef22ccd",
+          "itemName": "운명을 담는 재단사 플래티넘[30Lv]",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "creature:1261:creature/100991296",
+        "fame": 1261,
+        "name": "운명을 담는 재단사",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "40%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 40
+          },
+          {
+            "name": "힘",
+            "value": 150
+          },
+          {
+            "name": "지능",
+            "value": 150
+          },
+          {
+            "name": "체력",
+            "value": 150
+          },
+          {
+            "name": "정신력",
+            "value": 150
+          }
+        ],
+        "buff": {
+          "buffAmp": 10,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "bf04e5b415fea3989e8607efb4987d14",
+          "itemName": "운명을 담는 재단사",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "creature:991:creature/100990927",
+        "fame": 991,
+        "name": "SD 흰 구름 전령 에를리히",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "25%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 30
+          },
+          {
+            "name": "힘",
+            "value": 110
+          },
+          {
+            "name": "지능",
+            "value": 110
+          },
+          {
+            "name": "체력",
+            "value": 110
+          },
+          {
+            "name": "정신력",
+            "value": 110
+          }
+        ],
+        "buff": {
+          "buffAmp": 7,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "d1a086d0205f4928ec5f04b53b308521",
+          "itemName": "톱니꼬마 던니니",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "creature:889:creature/100991066",
+        "fame": 889,
+        "name": "순백의 나비 공주",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "20%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 25
+          },
+          {
+            "name": "힘",
+            "value": 110
+          },
+          {
+            "name": "지능",
+            "value": 110
+          },
+          {
+            "name": "체력",
+            "value": 110
+          },
+          {
+            "name": "정신력",
+            "value": 110
+          }
+        ],
+        "buff": {
+          "buffAmp": 5,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "f5c87c63bbdaa5413a105640cafbc30a",
+          "itemName": "순백의 나비 공주",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "creature:889:creature/100991472",
+        "fame": 889,
+        "name": "페이퍼 폭스 플래티넘",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "20%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "1.5%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 25
+          },
+          {
+            "name": "힘",
+            "value": 110
+          },
+          {
+            "name": "지능",
+            "value": 110
+          },
+          {
+            "name": "체력",
+            "value": 110
+          },
+          {
+            "name": "정신력",
+            "value": 110
+          }
+        ],
+        "buff": {
+          "buffAmp": 5,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "bfec0713af7dee1524fe3fd96fb2baaa",
+          "itemName": "페이퍼 래빗 플래티넘[80Lv]",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "creature:810:creature/100990854",
+        "fame": 810,
+        "name": "다정한 SD 세리아 Ver.2",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "19%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 10
+          },
+          {
+            "name": "힘",
+            "value": 110
+          },
+          {
+            "name": "지능",
+            "value": 110
+          },
+          {
+            "name": "체력",
+            "value": 110
+          },
+          {
+            "name": "정신력",
+            "value": 110
+          }
+        ],
+        "buff": {
+          "buffAmp": 3,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "c5d3d0419fbb1fcf0157018601b6fc20",
+          "itemName": "[EVENT]다정한 SD 세리아 Ver.2",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "creature:810:creature/2026_arcana/platinum/destinylion/autocreature_100",
+        "fame": 810,
+        "name": "데스티니 라이언 플래티넘",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "19%"
+          },
+          {
+            "name": "최종 데미지 증가",
+            "value": "1.5%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 10
+          },
+          {
+            "name": "힘",
+            "value": 110
+          },
+          {
+            "name": "지능",
+            "value": 110
+          },
+          {
+            "name": "체력",
+            "value": 110
+          },
+          {
+            "name": "정신력",
+            "value": 110
+          }
+        ],
+        "buff": {
+          "buffAmp": 3,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "1788cf8f8ee652e5a2802203c2b279a1",
+          "itemName": "데스티니 라이언 플래티넘[30Lv]",
+          "itemRarity": "레어"
+        }
+      }
+    ],
+    "aura": [
+      {
+        "id": "aura:845:character/swordman/avatar/aura/101590700",
+        "fame": 845,
+        "name": "열대야의 추억",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "9%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 70
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 6,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": ["직업별 스킬 Lv +1"]
+        },
+        "item": {
+          "itemId": "c6ca900e513cccb177890939de234227",
+          "itemName": "열대야의 추억",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:645:character/swordman/avatar/aura/101590961",
+        "fame": 645,
+        "name": "스노우메이지 캐슬",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "6%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 40
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 4,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "6997321d175648e99eb75adf5c8e2625",
+          "itemName": "초월한 폭풍의 기세",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:545:character/swordman/avatar/aura/101591031",
+        "fame": 545,
+        "name": "어워즈 패셔니스타",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "3%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 30
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 2,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "0c85043f055780b4454d9c7c4567f16e",
+          "itemName": "어워즈 패셔니스타",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:523:character/swordman/avatar/aura/101590917",
+        "fame": 523,
+        "name": "로얄 패스 오라",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 134
+          },
+          {
+            "name": "지능",
+            "value": 134
+          },
+          {
+            "name": "체력",
+            "value": 134
+          },
+          {
+            "name": "정신력",
+            "value": 134
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "6fc98a5c6932b7fb4626f78a92552861",
+          "itemName": "로얄 패스 오라[기간제]",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590917",
+        "fame": 463,
+        "name": "세리아의 파스텔 버블 Ver.2",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "e3a8f465174ad184ee15dafb221634d2",
+          "itemName": "[EVENT]세리아의 파스텔 버블 Ver.2",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590906",
+        "fame": 463,
+        "name": "함께 내딛는 걸음",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "de4baa247b579a2c6c7213d5b75e3b17",
+          "itemName": "함께 내딛는 걸음",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590905",
+        "fame": 463,
+        "name": "함께 내미는 손길",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "모든 속성 강화",
+            "value": 25
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "97d4388cd75d6459288ab28c10b83b68",
+          "itemName": "함께 내미는 손길",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590704",
+        "fame": 463,
+        "name": "페스타의 검은빛 아다지오",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "암속성강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "4bdf9b355eb561fe9a52c263cea2e711",
+          "itemName": "페스타의 검은빛 아다지오",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590703",
+        "fame": 463,
+        "name": "페스타의 노란빛 아다지오",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "명속성강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "ef99196082741cb7480cb401bdfb5f6f",
+          "itemName": "페스타의 노란빛 아다지오",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590701",
+        "fame": 463,
+        "name": "페스타의 붉은빛 아다지오",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "화속성강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "2826f7ebeda39f4cf28deb625fa100f8",
+          "itemName": "페스타의 붉은빛 아다지오",
+          "itemRarity": "레어"
+        }
+      },
+      {
+        "id": "aura:463:character/swordman/avatar/aura/101590702",
+        "fame": 463,
+        "name": "페스타의 푸른빛 아다지오",
+        "status": [
+          {
+            "name": "공격력 증폭",
+            "value": "2%"
+          },
+          {
+            "name": "수속성강화",
+            "value": 25
+          },
+          {
+            "name": "물리 공격력",
+            "value": 50
+          },
+          {
+            "name": "마법 공격력",
+            "value": 50
+          },
+          {
+            "name": "독립 공격력",
+            "value": 50
+          },
+          {
+            "name": "힘",
+            "value": 100
+          },
+          {
+            "name": "지능",
+            "value": 100
+          },
+          {
+            "name": "체력",
+            "value": 100
+          },
+          {
+            "name": "정신력",
+            "value": 100
+          }
+        ],
+        "buff": {
+          "buffAmp": 1,
+          "buffPower": 0,
+          "skills": [],
+          "otherSkills": []
+        },
+        "item": {
+          "itemId": "31dc027043afbefe14c59a88422c99c0",
+          "itemName": "페스타의 푸른빛 아다지오",
+          "itemRarity": "레어"
+        }
+      }
+    ]
+  }
+}
