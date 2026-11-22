@@ -120,7 +120,7 @@ function requestedSearches(): string[] {
   return requested.map((url) => `${url.pathname}${url.search}`)
 }
 
-it('랭킹 loader는 주소의 필터로 첫 쪽을 서버에서 받아 캐시에 둔다', async () => {
+it('랭킹 loader는 주소의 필터로 첫 쪽을 서버에서 받아 캐시에 두고 구조화 데이터에 쓸 캐릭터를 돌려준다', async () => {
   const { fameRankingHandlers } = await import('#entities/ranking/api/fame-ranking.handlers')
   const { fameRankingFixture } = await import('#entities/ranking/api/fame-ranking.fixture')
   const { fameRankingQuery } = await import('#entities/ranking')
@@ -128,9 +128,16 @@ it('랭킹 loader는 주소의 필터로 첫 쪽을 서버에서 받아 캐시�
   const loader = Route.options.loader as Loader
   const { queryKey } = fameRankingQuery({ jobId: 'job-1', role: 'buffer' })
 
-  server.use(fameRankingHandlers.pages)
-  await loader({ context: { queryClient }, params: {}, deps: { jobId: 'job-1', role: 'buffer' } })
+  const expectedCharacters = fameRankingFixture.firstPage.characters
+    .slice(0, 20)
+    .map(({ serverId, characterId, characterName }) => ({ serverId, characterId, characterName }))
 
+  server.use(fameRankingHandlers.pages)
+
+  await expect(
+    loader({ context: { queryClient }, params: {}, deps: { jobId: 'job-1', role: 'buffer' } })
+  ).resolves.toEqual({ characters: expectedCharacters })
+  expect(fameRankingFixture.firstPage.characters.length).toBeGreaterThan(20)
   expect(requestedSearches()).toEqual(['/rankings/fame?jobId=job-1&role=buffer'])
   expect(queryClient.getQueryData(queryKey)?.pages).toEqual([fameRankingFixture.firstPage])
 })

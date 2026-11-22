@@ -6,7 +6,7 @@ import {
   isCharacterNotFound,
   parseCharacterTabSearch
 } from '#pages/character'
-import { pageHead } from '#shared/lib/page-head'
+import { pageHead, siteUrl } from '#shared/lib/page-head'
 
 export const Route = createFileRoute('/c/$serverId/$characterId')({
   ssr: true,
@@ -26,12 +26,16 @@ export const Route = createFileRoute('/c/$serverId/$characterId')({
     return { characterName }
   },
   head: ({ params: { serverId, characterId }, loaderData }) => {
-    const title = loaderData?.characterName ?? '캐릭터'
+    const characterName = loaderData?.characterName ?? null
+    const path = `/c/${encodeURIComponent(serverId)}/${encodeURIComponent(characterId)}`
+    const url = siteUrl(path)
+    const structuredData =
+      characterName !== null
+        ? { '@type': 'ProfilePage', mainEntity: { '@type': 'Person', name: characterName, url } }
+        : null
+    const title = characterName ?? '캐릭터'
 
-    return pageHead({
-      title,
-      path: `/c/${encodeURIComponent(serverId)}/${encodeURIComponent(characterId)}`
-    })
+    return pageHead({ title, path, structuredData })
   },
   component: CharacterDetailPage
 })
