@@ -21,10 +21,11 @@ export type CharacterNameChange = {
 
 export type CharacterHistoryBasicChange = CharacterHistoryBasic & { observedAt: string }
 
-export type CharacterHistoryScoreChange = Pick<
-  CharacterCardScore,
-  'calculator' | 'value' | 'versions'
-> & { observedAt: string }
+export type CharacterHistoryScoreChange = Pick<CharacterCardScore, 'calculator' | 'versions'> & {
+  observedAt: string
+  value: number
+  approximate: { source: string } | null
+}
 
 export type CharacterHistory = {
   lastSeenAt: string | null
@@ -62,7 +63,6 @@ export function projectNameChanges(rows: readonly TimelineEventRow[]): Character
   })
 }
 
-// 점수 이력은 엔진이 낸 점수만 저장하므로 건너뛴 이유와 근사값이 없다.
 export function projectHistoryScore(score: StoredCharacterScoreHistory): CharacterCardScore | null {
   const calculator = calculatorSchema.safeParse(score.kind)
 
@@ -70,26 +70,37 @@ export function projectHistoryScore(score: StoredCharacterScoreHistory): Charact
     return null
   }
 
-  return {
-    calculator: calculator.data,
-    value: score.score,
-    skipped: null,
-    approximate: null,
-    versions: score.engine
+  const { approximate } = score
+  const base = { calculator: calculator.data, versions: score.engine }
+
+  if (approximate === null) {
+    return { ...base, value: score.score, skipped: null, approximate: null }
   }
+
+  const { source, warning, skipped } = approximate
+
+  return { ...base, value: null, skipped, approximate: { value: score.score, source, warning } }
 }
 
 function projectScoreChange(score: StoredCharacterScoreHistory): CharacterHistoryScoreChange[] {
-  const projected = projectHistoryScore(score)
+  const calculator = calculatorSchema.safeParse(score.kind)
 
-  if (projected === null) {
+  if (!calculator.success) {
     return []
   }
 
-  const { calculator, value, versions } = projected
   const observedAt = score.observedAt.toISOString()
+  const approximate = score.approximate !== null ? { source: score.approximate.source } : null
 
-  return [{ observedAt, calculator, value, versions }]
+  return [
+    {
+      observedAt,
+      calculator: calculator.data,
+      value: score.score,
+      approximate,
+      versions: score.engine
+    }
+  ]
 }
 
 export function projectCharacterHistory(
