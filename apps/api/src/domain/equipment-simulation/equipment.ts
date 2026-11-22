@@ -1,4 +1,5 @@
 import {
+  ENCHANT_GRADE_SLOTS,
   type EnchantGrade,
   type EnchantGradeRole,
   type EnchantGradeSlot,
@@ -96,12 +97,44 @@ export function editEquipment(
   })
 }
 
-/** 강화한 장비를 증폭으로 바꾸면 증폭 이름에 넣을 캐릭터의 주 스탯이 있어야 한다. */
-export function needsMainStat(edits: readonly EquipmentEdit[]): boolean {
+/** 강화한 장비를 증폭으로 바꾸면 그 장비에 붙일 증폭 이름이 있어야 한다. */
+export function amplifiesReinforcedItem(edits: readonly EquipmentEdit[]): boolean {
   return edits.some((edit) => edit.amplified && !isAmplified(edit.original))
 }
 
-function amplificationName(edit: EquipmentEdit, mainStat: ScoreMainStat | null): unknown {
+/**
+ * 캐릭터가 고른 증폭 스탯을 따르도록, 시뮬레이터 부위에 착용한 원본 장비에서 가장 많이 쓴 증폭 이름을 고른다.
+ * 요청의 다른 변경에 따라 이름이 바뀌지 않게 원본만 세고, 동률이면 장비 응답에서 먼저 나온 이름이다.
+ */
+export function wornAmplificationName(equipment: CharacterPayload): string | null {
+  const slots: readonly unknown[] = ENCHANT_GRADE_SLOTS
+  const counts = new Map<string, number>()
+
+  for (const item of equippedItems(equipment)) {
+    if (slots.includes(item.slotId) && typeof item.amplificationName === 'string') {
+      counts.set(item.amplificationName, (counts.get(item.amplificationName) ?? 0) + 1)
+    }
+  }
+
+  let chosen: string | null = null
+  let chosenCount = 0
+
+  for (const [name, count] of counts) {
+    if (count > chosenCount) {
+      chosen = name
+      chosenCount = count
+    }
+  }
+
+  return chosen
+}
+
+/** 증폭한 장비가 하나도 없는 캐릭터는 엔진이 정한 주 스탯으로 증폭 이름을 만든다. */
+export function mainStatAmplificationName(mainStat: ScoreMainStat): string {
+  return `차원의 ${mainStat}`
+}
+
+function amplificationName(edit: EquipmentEdit, convertedName: string | null): unknown {
   if (!edit.amplified) {
     return null
   }
@@ -110,11 +143,11 @@ function amplificationName(edit: EquipmentEdit, mainStat: ScoreMainStat | null):
     return edit.original.amplificationName
   }
 
-  if (mainStat === null) {
-    throw new Error('Amplifying a reinforced item needs the main stat')
+  if (convertedName === null) {
+    throw new Error('Amplifying a reinforced item needs an amplification name')
   }
 
-  return `차원의 ${mainStat}`
+  return convertedName
 }
 
 // Neople 응답은 직업별 스킬 강화가 없는 마법부여에 reinforceSkill 키를 두지 않는다.
@@ -128,14 +161,15 @@ function toNeopleEnchant(grade: EnchantGrade): CharacterPayload {
   return { reinforceSkill: structuredClone(grade.reinforceSkill), status }
 }
 
+/** `convertedName`은 강화한 장비를 증폭으로 바꿀 때 붙일 이름이다. */
 export function simulatedEquipment(
   edits: readonly EquipmentEdit[],
-  mainStat: ScoreMainStat | null
+  convertedName: string | null
 ): CharacterPayload[] {
   return edits.map((edit) => {
     const item = structuredClone(edit.original)
     item.reinforce = edit.reinforce
-    item.amplificationName = amplificationName(edit, mainStat)
+    item.amplificationName = amplificationName(edit, convertedName)
 
     if (edit.enchant !== null) {
       item.enchant = toNeopleEnchant(edit.enchant)

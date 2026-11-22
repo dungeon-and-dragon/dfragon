@@ -16,9 +16,11 @@ import {
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
 import {
   type EquipmentChange,
+  amplifiesReinforcedItem,
   editEquipment,
-  needsMainStat,
-  simulatedEquipment
+  mainStatAmplificationName,
+  simulatedEquipment,
+  wornAmplificationName
 } from '#domain/equipment-simulation/index.js'
 import type { LoadCharacterScoreSource } from './ports.js'
 
@@ -75,17 +77,17 @@ export class EquipmentSimulationService {
       return { baseline: score, simulated: score }
     }
 
-    let mainStat: ScoreMainStat | null = null
+    let convertedName: string | null = null
 
-    if (needsMainStat(edits)) {
-      mainStat = await this.mainStatOf(payloads, input, calculator, signal)
+    if (amplifiesReinforcedItem(edits)) {
+      convertedName = await this.convertedAmplificationName(payloads, input, calculator, signal)
 
-      if (mainStat === null) {
+      if (convertedName === null) {
         return noScores
       }
     }
 
-    const equipment = simulatedEquipment(edits, mainStat)
+    const equipment = simulatedEquipment(edits, convertedName)
     const simulation = { equipment }
     const result = await this.calculate(payloads, { ...input, simulation }, calculator, signal)
 
@@ -118,6 +120,27 @@ export class EquipmentSimulationService {
     }
 
     return result
+  }
+
+  private async convertedAmplificationName(
+    payloads: CharacterPayloads,
+    input: ScoreEngineInput,
+    calculator: ScoreCalculator,
+    signal: AbortSignal
+  ): Promise<string | null> {
+    const worn = wornAmplificationName(payloads.equipment)
+
+    if (worn !== null) {
+      return worn
+    }
+
+    const mainStat = await this.mainStatOf(payloads, input, calculator, signal)
+
+    if (mainStat === null) {
+      return null
+    }
+
+    return mainStatAmplificationName(mainStat)
   }
 
   private async mainStatOf(
