@@ -1,5 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { CharacterDetailView, CharacterIdentity } from '#entities/character'
+import { SearchHttpFailure } from '#shared/api/api-error'
 import { useLoadedResult } from '#shared/lib/useLoadedResult'
 import { detailViewSchemaOf, requestCharacterJson } from './character-api'
 
@@ -22,10 +23,21 @@ function requestCharacterRefresh(identity: CharacterIdentity): Promise<Character
   })
 }
 
+// 서버가 화면을 그리기 전에 받아 둘 때와 화면의 hook이 같은 key와 요청을 쓴다.
+export function characterDetailQuery(identity: CharacterIdentity) {
+  return queryOptions({
+    queryKey: detailKey(identity),
+    queryFn: () => requestCharacterDetail(identity)
+  })
+}
+
+export function isCharacterNotFound(error: unknown): boolean {
+  return error instanceof SearchHttpFailure && error.code === 'CHARACTER_NOT_FOUND'
+}
+
 export function useCharacterDetail(serverId: string, characterId: string): CharacterDetailResult {
-  const result = useLoadedResult(detailKey({ serverId, characterId }), () =>
-    requestCharacterDetail({ serverId, characterId })
-  )
+  const identity = { serverId, characterId }
+  const result = useLoadedResult(detailKey(identity), () => requestCharacterDetail(identity))
   if (result.status !== 'success') {
     return result
   }

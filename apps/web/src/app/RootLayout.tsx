@@ -13,13 +13,20 @@ import { GlobalBar } from '#widgets/global-bar'
 import { SiteFooter } from '#widgets/site-footer'
 
 // 다른 화면을 보는 동안 공유가 끝나도 연결 상태가 남지 않도록 화면 공유 칩 대신 화면들 위에서 구독한다.
-function ScreenShareEndings({ host }: { host: BrowserHost }): null {
+// 화면 옆에 형제로 두면 서버가 그린 트리와 모양이 달라져 화면 안의 useId 값이 어긋나므로 화면을 감싼다.
+function ScreenShareEndings({
+  host,
+  children
+}: {
+  host: BrowserHost
+  children: React.ReactNode
+}): React.ReactNode {
   const { selectSource } = useScreenCaptureContext().partyCapture.source
   const onShareEnded = useEffectEvent(() => selectSource(''))
 
   useEffect(() => host.onScreenShareEnded(onShareEnded), [host])
 
-  return null
+  return children
 }
 
 // 화면을 옮겨도 화면 공유 연결과 표 상태가 남도록 캡처 provider를 화면들 위에 둔다. host는 브라우저에만 있고
@@ -34,8 +41,7 @@ function CaptureScope({ children }: { children: React.ReactNode }): React.ReactN
   return (
     <ClientHostContext value={host}>
       <ScreenCaptureProvider texts={WEB_CAPTURE_TEXTS}>
-        <ScreenShareEndings host={host} />
-        {children}
+        <ScreenShareEndings host={host}>{children}</ScreenShareEndings>
       </ScreenCaptureProvider>
     </ClientHostContext>
   )

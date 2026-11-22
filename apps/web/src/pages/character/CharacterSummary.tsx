@@ -9,7 +9,7 @@ import {
   characterDisplayOf,
   Portrait
 } from '#entities/character'
-import { Link } from '@tanstack/react-router'
+import { ClientOnly, Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { FavoriteToggle } from '#features/favorite-character'
 import { useRefreshCharacterDetail } from './api/useCharacterDetail'
@@ -83,12 +83,15 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <div className="flex min-w-0 items-center gap-2">
           <h1 className="screen-title">{character.characterName ?? MISSING_VALUE}</h1>
           {favorite != null && <FavoriteToggle character={favorite} />}
-          <RefreshControl
-            key={lastSuccessfulFetchAt}
-            fetchedAt={lastSuccessfulFetchAt}
-            refreshing={refreshing}
-            onRefresh={refreshCharacter}
-          />
+          {/* 받은 지 얼마나 됐는지는 그리는 시각에 따라 달라, 서버가 그린 값이 브라우저와 어긋나지 않게 브라우저에서만 그린다. */}
+          <ClientOnly>
+            <RefreshControl
+              key={lastSuccessfulFetchAt}
+              fetchedAt={lastSuccessfulFetchAt}
+              refreshing={refreshing}
+              onRefresh={refreshCharacter}
+            />
+          </ClientOnly>
         </div>
         <div className={LINE}>
           <ServerBadge serverId={character.serverId} />
