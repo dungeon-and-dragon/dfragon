@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: PRODUCT_NAME },
       { property: 'og:locale', content: 'ko_KR' },
-      { property: 'og:description', content: '캐릭터 정보, 통계, 클리어 집계를 한곳에서' },
+      { property: 'og:description', content: '캐릭터 정보, 통계, 클리어 집계' },
       { name: 'twitter:card', content: 'summary' }
     ],
     links: [
