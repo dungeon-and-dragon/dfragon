@@ -14,7 +14,7 @@ type StatValue = number | string
 
 type LabeledStat = Readonly<{ name: string; value: StatValue; order: number }>
 
-// 묶음의 이름이 모두 같은 값으로 있을 때만 한 이름으로 줄인다(2026-11-23 저장소 소유자 결정).
+// 묶음의 이름이 모두 같은 값으로 있을 때만 한 이름으로 줄인다. 일부만 있는 카드는 실제 옵션 이름으로 구분한다.
 const SHORTHANDS: readonly Readonly<{ name: string; members: readonly string[] }>[] = [
   { name: '올스탯', members: ['힘', '지능', '체력', '정신력'] },
   { name: '공격력', members: ['물리 공격력', '마법 공격력', '독립 공격력'] },
