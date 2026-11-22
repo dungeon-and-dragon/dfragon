@@ -46,6 +46,7 @@ export type {
 } from './character-history.js'
 export { readCharacterScores, recordCharacterScore } from './character-score.js'
 export type {
+  CharacterScoreApproximation,
   CharacterScoreInput,
   CharacterScoreJob,
   CharacterScoreKind,

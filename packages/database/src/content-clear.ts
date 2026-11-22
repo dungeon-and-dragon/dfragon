@@ -71,6 +71,7 @@ function bestScoreJoinSql(character: string, score: string): Prisma.Sql {
         AND history_engine.package = ${scoreAlias}.engine_package
         AND history_engine.rules_rev = ${scoreAlias}.engine_rules_rev
         AND history_engine.bundle_id = ${scoreAlias}.engine_bundle_id
+        AND history.approximate_source IS NOT DISTINCT FROM ${scoreAlias}.approximate_source
     ) AS best_score ON TRUE`
 }
 
