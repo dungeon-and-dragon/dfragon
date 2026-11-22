@@ -45,7 +45,7 @@ export const storedDealerSkillLearnedSql = Prisma.sql`(
 
 // 스킬 스타일과 같은 이유로 JOIN 대신 행마다 PK로 읽는 subquery로 둔다.
 const storedScoreSql = Prisma.sql`(
-  SELECT jsonb_build_object('kind', score.kind, 'value', score.score)
+  SELECT jsonb_build_object('kind', score.kind, 'value', score.score, 'approximateSource', score.approximate_source)
   FROM character_scores score
   WHERE score.server_id = c.server_id
     AND score.character_id = c.character_id

@@ -665,12 +665,46 @@ test('상세 조회는 기본 정보를 저장한 뒤 계산한 점수를 종류
       kind: 'equipment',
       score: 1741,
       calculatedAt: undefined,
-      engine: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' }
+      engine: { package: 'dnfscore-native 0.4.2', rulesRev: 'rev14', bundleId: 'phase32-rev14d' },
+      approximate: null
     }
   )
 })
 
-test('점수를 내지 못한 결과는 저장하지 않는다', { timeout: 10_000 }, async (t) => {
+test('근사값만 낸 결과는 근사값을 점수로 두고 근사 방식, 경고, 건너뛴 이유와 함께 저장한다', {
+  timeout: 10_000
+}, async (t) => {
+  const scores: CharacterScoreInput[] = []
+  const { app, origin } = await listen({
+    details: detailsReturning(payloadsWith(basicFields)),
+    ...scoring(() => ({
+      ...engineResult,
+      score: null,
+      skipped: { kind: 'resolution', message: '판정 불가' },
+      approximate_score: 1650,
+      approximate_source: 'legacy_fusion_policy_a',
+      warning: '근사값, 1% 밖일 가능성 높음: 판정 불가'
+    })),
+    recordCharacterBasic: async () => undefined,
+    recordCharacterScore: async (score) => {
+      scores.push(score)
+    }
+  })
+  t.after(() => app.close())
+
+  await getDetails(origin)
+  await waitUntil(() => scores.length === 1)
+
+  const [{ score, approximate }] = scores
+  assert.equal(score, 1650)
+  assert.deepEqual(approximate, {
+    source: 'legacy_fusion_policy_a',
+    warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+    skipped: { kind: 'resolution', message: '판정 불가' }
+  })
+})
+
+test('점수도 근사값도 내지 못한 결과는 저장하지 않는다', { timeout: 10_000 }, async (t) => {
   const scores: CharacterScoreInput[] = []
   let savedBasic!: () => void
   const basicSaved = new Promise<void>((resolve) => {
@@ -681,10 +715,7 @@ test('점수를 내지 못한 결과는 저장하지 않는다', { timeout: 10_0
     ...scoring(() => ({
       ...engineResult,
       score: null,
-      skipped: { kind: 'resolution', message: '판정 불가' },
-      approximate_score: 1650,
-      approximate_source: 'legacy_fusion_policy_a',
-      warning: '근사값, 1% 밖일 가능성 높음: 판정 불가'
+      skipped: { kind: 'resolution', message: '판정 불가' }
     })),
     recordCharacterBasic: async () => {
       savedBasic()
@@ -700,7 +731,7 @@ test('점수를 내지 못한 결과는 저장하지 않는다', { timeout: 10_0
   // 점수 저장은 기본 정보 저장 다음 차례에 시작하므로, 그 차례가 지나도록 한 번 넘긴다.
   await new Promise((resolve) => setTimeout(resolve, 10))
 
-  assert.equal(body.card.score.approximate.value, 1650)
+  assert.equal(body.card.score.skipped.kind, 'resolution')
   assert.deepEqual(scores, [])
 })
 

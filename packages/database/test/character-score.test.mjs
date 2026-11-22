@@ -17,21 +17,28 @@ function scoreOf(score, overrides = {}) {
     score,
     calculatedAt: new Date('2026-11-14T00:00:00Z'),
     engine,
+    approximate: null,
     ...overrides
   }
+}
+
+const approximate = {
+  source: 'legacy_fusion_policy_a',
+  warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+  skipped: { kind: 'resolution', message: '판정 불가' }
 }
 
 async function readStored(client) {
   const [row] = await client.$queryRaw`
     SELECT "kind", "score", "calculated_at", "engine_package", "engine_rules_rev", "engine_bundle_id",
-      "job_id", "job_grow_id"
+      "job_id", "job_grow_id", "approximate_source"
     FROM "character_scores"
     WHERE "server_id" = ${character.serverId} AND "character_id" = ${character.characterId}`
 
   return row
 }
 
-test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 버전, 종류나 전직이 바뀌면 낮아도 새 값으로 덮으며, 동시에 저장해도 최고값이 남는다', {
+test('같은 엔진 버전, 종류, 전직, 근사 방식에서는 높은 점수만 남기고, 버전, 종류, 전직, 근사 여부나 근사 방식이 바뀌면 낮아도 새 값으로 덮으며, 동시에 저장해도 최고값이 남는다', {
   skip: port === undefined
 }, async (t) => {
   const client = createDatabaseClient({
@@ -43,7 +50,11 @@ test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 
   })
   t.after(() => client.$disconnect())
   const migrations = await Promise.all(
-    ['20261114130000_add_character_scores', '20261119180000_add_character_score_jobs'].map((name) =>
+    [
+      '20261114130000_add_character_scores',
+      '20261119180000_add_character_score_jobs',
+      '20261122100000_add_character_score_approximate'
+    ].map((name) =>
       readFile(new URL(`../prisma/migrations/${name}/migration.sql`, import.meta.url), 'utf8')
     )
   )
@@ -57,7 +68,8 @@ test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 
     .join(';')
     .split(';')
     .map((part) => part.trim())
-    .filter(Boolean)) {
+    // 이 테스트는 점수 이력 테이블을 만들지 않으므로 그 테이블을 바꾸는 문장은 건너뛴다.
+    .filter((part) => part !== '' && !part.includes('"character_score_history"'))) {
     await client.$executeRawUnsafe(statement)
   }
 
@@ -74,7 +86,8 @@ test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 
     engine_rules_rev: engine.rulesRev,
     engine_bundle_id: engine.bundleId,
     job_id: job.jobId,
-    job_grow_id: job.jobGrowId
+    job_grow_id: job.jobGrowId,
+    approximate_source: null
   })
 
   await recordCharacterScore(
@@ -96,7 +109,8 @@ test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 
     engine_rules_rev: engine.rulesRev,
     engine_bundle_id: 'phase33-rev15a',
     job_id: job.jobId,
-    job_grow_id: job.jobGrowId
+    job_grow_id: job.jobGrowId,
+    approximate_source: null
   })
 
   await recordCharacterScore(client, scoreOf(900, { kind: 'buff', engine: nextEngine }))
@@ -121,6 +135,25 @@ test('같은 엔진 버전, 종류, 전직에서는 높은 점수만 남기고, 
   await recordCharacterScore(client, scoreOf(700, { kind: 'buff', engine: nextEngine, job: null }))
   const unknownJob = await readStored(client)
   assert.deepEqual([unknownJob.score, unknownJob.job_id], [700, null])
+
+  const unknownJobBuff = (score, overrides = {}) =>
+    scoreOf(score, { kind: 'buff', engine: nextEngine, job: null, ...overrides })
+  const otherApproximate = { ...approximate, source: 'input_gate_diagnostic' }
+  await recordCharacterScore(client, unknownJobBuff(600, { approximate }))
+  const approximated = await readStored(client)
+  assert.deepEqual([approximated.score, approximated.approximate_source], [600, approximate.source])
+  await recordCharacterScore(client, unknownJobBuff(500))
+  const exact = await readStored(client)
+  assert.deepEqual([exact.score, exact.approximate_source], [500, null])
+  await recordCharacterScore(client, unknownJobBuff(450, { approximate }))
+  await recordCharacterScore(client, unknownJobBuff(440, { approximate: otherApproximate }))
+  const otherSource = await readStored(client)
+  assert.deepEqual(
+    [otherSource.score, otherSource.approximate_source],
+    [440, otherApproximate.source]
+  )
+  await recordCharacterScore(client, unknownJobBuff(430, { approximate: otherApproximate }))
+  assert.equal((await readStored(client)).score, 440)
 
   await client.$executeRaw`DELETE FROM "characters" WHERE "server_id" = ${character.serverId}`
   assert.equal(await readStored(client), undefined)

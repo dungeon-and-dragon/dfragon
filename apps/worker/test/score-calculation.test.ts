@@ -177,7 +177,23 @@ const scoreOf = (characterId: string): CharacterScoreInput => {
       package: versions.package,
       rulesRev: versions.rules_rev,
       bundleId: versions.bundle_id
-    }
+    },
+    approximate: null
+  }
+}
+
+const approximation = {
+  source: 'legacy_fusion_policy_a',
+  warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+  skipped: { kind: 'resolution', message: '판정 불가' }
+}
+
+function approximateResult(value: number): ScoreEngineResult {
+  return {
+    ...engineResult(null),
+    approximate_score: value,
+    approximate_source: approximation.source,
+    warning: approximation.warning
   }
 }
 
@@ -188,6 +204,7 @@ type CalculationOptions = {
   lastRun?: FinishedJobRun
   engine?: 'running' | 'missing' | 'stops-after-first-group'
   unscored?: readonly string[]
+  approximated?: readonly string[]
   historyFailures?: readonly string[]
   basicFailures?: readonly string[]
   setsFailures?: readonly string[]
@@ -202,6 +219,7 @@ function calculation(
     lastRun,
     engine = 'running',
     unscored = [],
+    approximated = [],
     historyFailures = [],
     basicFailures = [],
     setsFailures = []
@@ -240,6 +258,10 @@ function calculation(
 
       if (unscored.includes(characterId)) {
         return engineResult(null)
+      }
+
+      if (approximated.includes(characterId)) {
+        return approximateResult(scoreOf(characterId).score)
       }
 
       return engineResult(scoreOf(characterId).score)
@@ -419,11 +441,32 @@ test('상세를 받은 캐릭터마다 characters를 받은 기본 정보로 덮
     kind: 'equipment',
     score: expectedScore.score,
     calculatedAt: NOW,
-    engine: expectedScore.engine
+    engine: expectedScore.engine,
+    approximate: null
   })
   assert.equal(unscored?.characterId, 'n')
   assert.equal(unscored?.score, null)
   assert.deepEqual(unscored?.sections, expectedSectionBodies)
+})
+
+test('점수 없이 근사값만 낸 캐릭터는 건너뛰지 않고 근사값을 점수로 근사 정보와 함께 저장하고 이력에도 남긴다', async () => {
+  const { dependencies, saved, histories } = calculation([character('a'), character('p')], {
+    approximated: ['p']
+  })
+
+  const summary = await calculateScores(dependencies)
+  const expected = { ...scoreOf('p'), approximate: approximation }
+
+  assert.deepEqual(saved, [scoreOf('a'), expected])
+  assert.equal(summary.saved, 2)
+  assert.equal(summary.skipped, 0)
+  assert.deepEqual(histories.find(({ characterId }) => characterId === 'p')?.score, {
+    kind: 'equipment',
+    score: expected.score,
+    calculatedAt: NOW,
+    engine: expected.engine,
+    approximate: approximation
+  })
 })
 
 test('이력 저장이 실패한 캐릭터가 있어도 다음 캐릭터로 넘어가고 실패 수와 위치를 남긴다', async () => {

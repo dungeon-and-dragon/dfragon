@@ -45,10 +45,10 @@ function scoreOf(index: number, role: 'buffer' | 'dealer'): RankedCharacter['sco
   }
 
   if (role === 'buffer') {
-    return { calculator: 'buff', value: 4_120_000 - index * 1_700 }
+    return { calculator: 'buff', value: 4_120_000 - index * 1_700, approximate: null }
   }
 
-  return { calculator: 'equipment', value: 1_388_832 - index * 613 }
+  return { calculator: 'equipment', value: 1_388_832 - index * 613, approximate: null }
 }
 
 // 이름과 소속은 실제 캐릭터가 아닌 합성 값이다.

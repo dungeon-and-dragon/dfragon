@@ -228,9 +228,12 @@ it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 �
           name: '영원히 이어지는 황금향 세트'
         },
         oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 용제 강림' },
-        score: { calculator: 'equipment', value: 1_388_832 }
+        score: { calculator: 'equipment', value: 1_388_832, approximate: null }
       }),
-      rankedCharacter(2, { role: 'buffer', score: { calculator: 'buff', value: 4_120_000 } }),
+      rankedCharacter(2, {
+        role: 'buffer',
+        score: { calculator: 'buff', value: 4_120_000, approximate: null }
+      }),
       rankedCharacter(4, { level: null, jobGrowName: null, jobName: '합성 직업' })
     ],
     nextCursor: null
