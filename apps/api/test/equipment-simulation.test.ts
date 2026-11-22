@@ -16,6 +16,7 @@ import type {
   ScoreWorkerRequest
 } from '@dfragon/server-core/infrastructure/score/index.js'
 import {
+  REAL_SCORE_LIBRARY_PATH,
   payloadsFromEngineInput,
   readEngineInput
 } from '@dfragon/server-core/test/score-fixtures.js'
@@ -171,7 +172,8 @@ function itemOf(items: readonly unknown[], slotId: string): Item {
 }
 
 // 실제 등급표의 값이다. 표를 다시 생성해 값이 바뀌면 함께 고친다.
-const DEALER_JACKET_ID = 'JACKET:10417944:dealer'
+// 묶이는 항목이 없는 준종결 항목이라 고른 항목이 그대로 엔진에 들어간다.
+const DEALER_JACKET_ID = 'JACKET:10361759:dealer'
 const DEALER_JACKET_ENCHANT = {
   status: [
     { name: '물리 공격력', value: 110 },
@@ -179,7 +181,7 @@ const DEALER_JACKET_ENCHANT = {
     { name: '독립 공격력', value: 110 },
     { name: '힘', value: 90 },
     { name: '지능', value: 90 },
-    { name: '최종 데미지 증가', value: '3%' }
+    { name: '최종 데미지 증가', value: '2%' }
   ]
 }
 const BUFFER_WAIST_ID = 'WAIST:10362002:buffer'
@@ -337,6 +339,68 @@ for (const [name, fixtureName, amplified, changes, expected] of [
     })
   })
 }
+
+test('힘 캐릭터가 지능 100 마법부여를 고르면 같은 묶음의 힘 100 항목을 엔진에 넣는다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade')
+  const engine = scoring()
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [
+      { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: 'WEAPON:10316079:dealer' }
+    ]
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(
+    engine.requests.map(({ input }) => input.simulation !== undefined),
+    [false, true]
+  )
+  assert.deepEqual(engine.requests[1]!.input.simulation, {
+    equipment: [
+      {
+        ...itemOf(payloads.equipment.equipment as unknown[], 'WEAPON'),
+        reinforce: 0,
+        amplificationName: null,
+        enchant: { status: [{ name: '힘', value: 100 }] }
+      }
+    ]
+  })
+})
+
+test('4스탯 항목이 있는 묶음은 주스탯을 계산하지 않고 그 항목을 엔진에 넣는다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse', (items) =>
+    items.map((item) => ({ ...item, amplificationName: null }))
+  )
+  const engine = scoring()
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [
+      { slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: 'WEAPON:10326833:buffer' }
+    ]
+  })
+
+  assert.equal(response.status, 200)
+  assert.equal(engine.requests.length, 1)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [
+      {
+        ...itemOf(payloads.equipment.equipment as unknown[], 'WEAPON'),
+        reinforce: 11,
+        amplificationName: null,
+        enchant: {
+          status: [
+            { name: '힘', value: 100 },
+            { name: '지능', value: 100 },
+            { name: '체력', value: 100 },
+            { name: '정신력', value: 100 }
+          ]
+        }
+      }
+    ]
+  })
+})
 
 test('버퍼는 버프 점수로 계산하고, 증폭을 유지한 장비는 원본 증폭 이름을 두며 증폭을 끈 장비는 이름을 지운다', async (t) => {
   const { original, details, path } = fixture('buffer-muse')
@@ -639,4 +703,74 @@ test('점수 계산을 기다리는 시뮬레이션이 있을 때 app을 닫으�
     status: 200,
     body: { baseline: cardScore('equipment', 1741), simulated: cardScore('equipment', 1741) }
   })
+})
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 점수를 낸다', {
+  skip: REAL_SCORE_LIBRARY_PATH === null && '점수 엔진 라이브러리가 없음',
+  timeout: 60_000
+}, async (t) => {
+  const dealer = fixture('dealer-blade')
+  const buffer = fixture('buffer-muse')
+  const realOrigin = (details: ApiHttpAppOptions['details']) =>
+    listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+
+  const dealerOrigin = await realOrigin(dealer.details)
+  const bufferOrigin = await realOrigin(buffer.details)
+  const scoresOf = async (origin: string, path: string, equipment: unknown[]) => {
+    const response = await simulate(origin, path, { equipment })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null)
+    assert.equal(response.body.simulated.skipped, null)
+
+    return response.body as {
+      baseline: { calculator: string; value: number }
+      simulated: { calculator: string; value: number }
+    }
+  }
+
+  const allDealerSlots = (reinforce: number) =>
+    (dealer.payloads.equipment.equipment as Item[])
+      .filter(({ slotId }) => slotId !== 'TITLE')
+      .map(({ slotId }) => ({ slotId, reinforce, amplified: false, enchantId: null }))
+
+  const unchanged = await scoresOf(dealerOrigin, dealer.path, [])
+  assert.equal(unchanged.simulated.value, unchanged.baseline.value)
+
+  const raised = await scoresOf(dealerOrigin, dealer.path, allDealerSlots(12))
+  assert.ok(raised.simulated.value > raised.baseline.value)
+
+  const enchanted = await scoresOf(dealerOrigin, dealer.path, [
+    { slotId: 'JACKET', reinforce: 0, amplified: false, enchantId: 'JACKET:10417944:dealer' }
+  ])
+  // 원본 상의 마법부여(공격력 50, 힘과 지능 20)보다 공격력 110, 4스탯 90, 최종 데미지 3% 항목이 높다.
+  assert.ok(enchanted.simulated.value > enchanted.baseline.value)
+
+  const amplified = await scoresOf(dealerOrigin, dealer.path, [
+    { slotId: 'JACKET', reinforce: 12, amplified: true, enchantId: null }
+  ])
+  assert.ok(amplified.simulated.value > amplified.baseline.value)
+
+  // 같은 묶음의 지능 100과 힘 100은 힘 캐릭터에게 같은 항목이 되어 점수도 같다.
+  const intelligence = await scoresOf(dealerOrigin, dealer.path, [
+    { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: 'WEAPON:10316079:dealer' }
+  ])
+  const strength = await scoresOf(dealerOrigin, dealer.path, [
+    { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: 'WEAPON:10316077:dealer' }
+  ])
+  assert.equal(intelligence.simulated.value, strength.simulated.value)
+  assert.notEqual(strength.simulated.value, strength.baseline.value)
+
+  const buffRaised = await scoresOf(bufferOrigin, buffer.path, [
+    { slotId: 'WEAPON', reinforce: 13, amplified: true, enchantId: null }
+  ])
+  assert.equal(buffRaised.baseline.calculator, 'buff')
+  assert.ok(buffRaised.simulated.value > buffRaised.baseline.value)
+
+  // 스킬 레벨 3은 원본 어깨와 같고 4스탯이 원본 120보다 낮은 110이라 점수가 내려간다.
+  const skillEnchanted = await scoresOf(bufferOrigin, buffer.path, [
+    { slotId: 'SHOULDER', reinforce: 11, amplified: true, enchantId: 'SHOULDER:10362000:buffer' }
+  ])
+  assert.ok(skillEnchanted.simulated.value < skillEnchanted.baseline.value)
 })
