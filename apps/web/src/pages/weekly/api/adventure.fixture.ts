@@ -3,6 +3,9 @@ import {
   type AdventureActivityDay,
   type AdventureActivitySeasonDays,
   type AdventureEquipment,
+  type AdventureTimelineItem,
+  type AdventureTimelineKind,
+  type AdventureTimelinePage,
   type AdventureWeekly,
   EQUIPMENT_SLOTS,
   type EquipmentCharacter,
@@ -449,4 +452,92 @@ export const storyEmptyAdventureEquipment: AdventureEquipment = {
   sets: [],
   servers: [],
   selected: null
+}
+
+const STORY_TIMELINE_NOW = Date.parse('2026-11-20T21:00:00+09:00')
+const storyTimelineCharacters = [
+  { serverId: 'cain', characterId: 'story-timeline-1', characterName: '타임라인검사' },
+  { serverId: 'siroco', characterId: 'story-timeline-2', characterName: '타임라인마법사' }
+] as const
+
+function storyTimelineAt(minutesAgo: number): string {
+  return new Date(STORY_TIMELINE_NOW - minutesAgo * 60 * 1000).toISOString()
+}
+
+const storyTimelineItems: AdventureTimelineItem[] = [
+  {
+    ...storyTimelineCharacters[0],
+    type: 'enhancement',
+    kind: 'reinforce',
+    itemId: null,
+    itemName: '합성 대검',
+    itemRarity: '태초',
+    before: 11,
+    after: 12,
+    result: true,
+    safe: false,
+    occurredAt: storyTimelineAt(3)
+  },
+  {
+    ...storyTimelineCharacters[1],
+    type: 'acquisition',
+    code: 505,
+    name: '아이템 획득(레이드 카드 보상)',
+    itemId: null,
+    itemName: '합성 상의',
+    itemRarity: '태초',
+    occurredAt: storyTimelineAt(70)
+  },
+  {
+    ...storyTimelineCharacters[1],
+    type: 'enhancement',
+    kind: 'amplify',
+    itemId: null,
+    itemName: '합성 반지',
+    itemRarity: '에픽',
+    before: 10,
+    after: 11,
+    result: false,
+    safe: true,
+    occurredAt: storyTimelineAt(95)
+  },
+  {
+    ...storyTimelineCharacters[0],
+    type: 'enhancement',
+    kind: 'refine',
+    itemId: null,
+    itemName: '합성 대검',
+    itemRarity: '태초',
+    before: null,
+    after: 8,
+    result: true,
+    safe: null,
+    occurredAt: storyTimelineAt(600)
+  },
+  {
+    ...storyTimelineCharacters[0],
+    type: 'acquisition',
+    code: 550,
+    name: '서약 획득(던전 드랍)',
+    itemId: null,
+    itemName: '합성 서약',
+    itemRarity: '에픽',
+    occurredAt: storyTimelineAt(1500)
+  }
+]
+
+function storyTimelineKind(item: AdventureTimelineItem): AdventureTimelineKind {
+  if (item.type === 'acquisition') {
+    return 'acquisition'
+  }
+
+  return item.kind
+}
+
+export function storyAdventureTimeline(kind: string | null): AdventureTimelinePage {
+  const items = storyTimelineItems.filter(
+    (item) => kind === null || storyTimelineKind(item) === kind
+  )
+
+  return { items, nextCursor: null }
 }

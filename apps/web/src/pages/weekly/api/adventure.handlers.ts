@@ -6,12 +6,14 @@ import {
   storyAdventureActivity,
   storyAdventureEquipment,
   storyAdventureSeasonDays,
+  storyAdventureTimeline,
   storyAdventureWeekly,
   storyEmptyAdventureEquipment
 } from './adventure.fixture'
 
 export const ADVENTURE_WEEKLY_URL = `${API_BASE_URL}/adventures/:adventureName/weekly`
 export const ADVENTURE_EQUIPMENT_URL = `${API_BASE_URL}/adventures/:adventureName/equipment`
+export const ADVENTURE_TIMELINE_URL = `${API_BASE_URL}/adventures/:adventureName/timeline`
 export const ADVENTURE_ACTIVITY_URL = `${API_BASE_URL}/adventures/:adventureName/activity`
 export const ADVENTURE_BACKFILL_URL = `${API_BASE_URL}/adventures/:adventureName/activity/seasons/:season/backfill`
 export const ADVENTURE_SEASON_DAYS_URL = `${API_BASE_URL}/adventures/:adventureName/activity/seasons/:season/days`
@@ -34,6 +36,11 @@ export const adventureHandlers = {
 
       return HttpResponse.json(equipment)
     }),
+    http.get(ADVENTURE_TIMELINE_URL, ({ request }) => {
+      const kind = new URL(request.url).searchParams.get('kind')
+
+      return HttpResponse.json(storyAdventureTimeline(kind))
+    }),
     http.get(ADVENTURE_ACTIVITY_URL, ({ request }) => {
       const season = new URL(request.url).searchParams.get('season')
       const seasonId = season !== null ? Number(season) : undefined
@@ -50,13 +57,17 @@ export const adventureHandlers = {
   emptyEquipment: [
     http.get(ADVENTURE_EQUIPMENT_URL, () => HttpResponse.json(storyEmptyAdventureEquipment))
   ],
-  loading: [ADVENTURE_WEEKLY_URL, ADVENTURE_ACTIVITY_URL, ADVENTURE_EQUIPMENT_URL].map((url) =>
-    http.get(url, never)
-  ),
+  loading: [
+    ADVENTURE_WEEKLY_URL,
+    ADVENTURE_ACTIVITY_URL,
+    ADVENTURE_EQUIPMENT_URL,
+    ADVENTURE_TIMELINE_URL
+  ].map((url) => http.get(url, never)),
   failure: [
     http.get(ADVENTURE_WEEKLY_URL, () => failure('주간 던파를 받지 못했습니다.')),
     http.get(ADVENTURE_ACTIVITY_URL, () => failure('모험단 활동을 받지 못했습니다.')),
     http.get(ADVENTURE_EQUIPMENT_URL, () => failure('장비를 받지 못했습니다.')),
+    http.get(ADVENTURE_TIMELINE_URL, () => failure('타임라인을 받지 못했습니다.')),
     http.get(ADVENTURE_SEASON_DAYS_URL, never)
   ]
 }
