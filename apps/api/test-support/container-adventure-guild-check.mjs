@@ -212,33 +212,39 @@ try {
     ]
   )
 
-  // 다른 모험단(guild-no-fame)의 기록과 레전더리 획득은 빠지고, 중천 전 강화 백필 행은 들어온다.
+  // 다른 모험단(guild-no-fame)의 기록, 레전더리 획득, 레기온은 빠지고, 중천 전 강화 백필 행과 레이드 클리어는 들어온다.
   const timelineRows = async (query) => {
     const { page } = await readAdventureTimeline(client, adventureName, query)
 
     return page.items.map((row) => [row.characterId, row.type, row.occurredAt.toISOString()])
   }
   const timelineCharacter = 'adventure-high'
+  const timelineRow = (type, occurredAt) => [timelineCharacter, type, occurredAt.toISOString()]
+  const amplified = timelineRow('enhancement', at('04-02T11:00:00'))
+  const oathDrop = timelineRow('acquisition', at('04-02T10:20:00'))
+  const armorDrop = timelineRow('acquisition', at('04-02T10:00:00'))
+  const raidClears = [
+    timelineRow('clear', at('04-02T06:30:00')),
+    timelineRow('clear', at('04-02T06:00:00')),
+    timelineRow('clear', at('04-02T05:59:00'))
+  ]
+  const backfilled = timelineRow('enhancement', new Date('2024-01-10T12:00:00+09:00'))
 
   assert.deepEqual(await timelineRows({}), [
-    [timelineCharacter, 'enhancement', at('04-02T11:00:00').toISOString()],
-    [timelineCharacter, 'acquisition', at('04-02T10:20:00').toISOString()],
-    [timelineCharacter, 'acquisition', at('04-02T10:00:00').toISOString()],
-    [timelineCharacter, 'enhancement', new Date('2024-01-10T12:00:00+09:00').toISOString()]
+    amplified,
+    oathDrop,
+    armorDrop,
+    ...raidClears,
+    backfilled
   ])
-  assert.deepEqual(await timelineRows({ kind: 'amplify' }), [
-    [timelineCharacter, 'enhancement', at('04-02T11:00:00').toISOString()]
-  ])
-  assert.deepEqual(await timelineRows({ kind: 'acquisition' }), [
-    [timelineCharacter, 'acquisition', at('04-02T10:20:00').toISOString()],
-    [timelineCharacter, 'acquisition', at('04-02T10:00:00').toISOString()]
-  ])
+  assert.deepEqual(await timelineRows({ kind: 'enhancement' }), [amplified, backfilled])
+  assert.deepEqual(await timelineRows({ kind: 'acquisition' }), [oathDrop, armorDrop])
+  assert.deepEqual(await timelineRows({ kind: 'clear' }), raidClears)
   assert.deepEqual(
-    await timelineRows({ before: { occurredAt: at('04-02T10:20:00'), id: 10n ** 17n } }),
-    [
-      [timelineCharacter, 'acquisition', at('04-02T10:00:00').toISOString()],
-      [timelineCharacter, 'enhancement', new Date('2024-01-10T12:00:00+09:00').toISOString()]
-    ]
+    await timelineRows({
+      before: { occurredAt: at('04-02T10:20:00'), source: 'item', id: 10n ** 17n }
+    }),
+    [armorDrop, ...raidClears, backfilled]
   )
 
   const weekly = await readAdventureWeeklyClears(client, adventureName, now)
