@@ -268,6 +268,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   })
   const equipmentSimulation = new EquipmentSimulationService(
     (identity, signal) => details.scoreSource(identity, signal, unrecordedTimings),
+    (itemIds, signal) => options.details.catalog.load(itemIds, signal),
     engine.calculate
   )
   const characterHistory = new CharacterHistoryService(

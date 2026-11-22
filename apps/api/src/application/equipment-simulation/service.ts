@@ -4,7 +4,10 @@ import {
   toCardScore,
   toSimulatedCardScore
 } from '@dfragon/server-core/domain/character-card/index.js'
-import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
+import type {
+  CharacterPayload,
+  CharacterPayloads
+} from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 import {
   type ScoreCalculator,
@@ -16,12 +19,24 @@ import {
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
 import {
   type EquipmentChange,
+  type SlotItemChanges,
   editEquipment,
+  editSlotItems,
+  hasSlotItemEdits,
   needsMainStat,
   simulatedEquipment,
+  simulatedSlotItems,
+  simulationInputOf,
+  slotItemIds,
+  supportsSlotItems,
   wornMainStat
 } from '#domain/equipment-simulation/index.js'
-import type { LoadCharacterScoreSource } from './ports.js'
+import type { LoadCharacterScoreSource, LoadItemDetails } from './ports.js'
+
+export interface EquipmentSimulationRequest {
+  readonly equipment: readonly EquipmentChange[]
+  readonly slotItems: SlotItemChanges
+}
 
 export interface EquipmentSimulationScores {
   baseline: CharacterCardScore | null
@@ -37,16 +52,17 @@ export class EquipmentSimulationService {
 
   constructor(
     private readonly loadScoreSource: LoadCharacterScoreSource,
+    private readonly loadItemDetails: LoadItemDetails,
     private readonly calculateScore: CalculateScore
   ) {}
 
   /** 가상 점수는 상세 응답 캐시, 조회 알림, DB에 남기지 않는다. */
   simulate(
     identity: CharacterIdentity,
-    changes: readonly EquipmentChange[],
+    request: EquipmentSimulationRequest,
     signal: AbortSignal
   ): Promise<EquipmentSimulationScores> {
-    return this.track(this.run(identity, changes, signal))
+    return this.track(this.run(identity, request, signal))
   }
 
   /** 진행 중인 계산을 끊지 않고 끝나기를 기다린다. */
@@ -56,15 +72,16 @@ export class EquipmentSimulationService {
 
   private async run(
     identity: CharacterIdentity,
-    changes: readonly EquipmentChange[],
+    request: EquipmentSimulationRequest,
     signal: AbortSignal
   ): Promise<EquipmentSimulationScores> {
     const { payloads, role, items } = await this.loadScoreSource(identity, signal)
-    const edits = editEquipment(payloads.equipment, changes, role)
+    const edits = editEquipment(payloads.equipment, request.equipment, role)
+    const slotEdits = editSlotItems(payloads, request.slotItems)
     const calculator = cardScoreCalculator(role)
     const input = toScoreEngineInput(payloads, items)
 
-    if (edits.length === 0) {
+    if (edits.length === 0 && !hasSlotItemEdits(slotEdits)) {
       const result = await this.calculate(payloads, input, calculator, signal)
 
       if (result === null) {
@@ -74,6 +91,12 @@ export class EquipmentSimulationService {
       const score = toCardScore(result)
 
       return { baseline: score, simulated: score }
+    }
+
+    const slotDetails = await this.itemDetails(slotItemIds(slotEdits), signal)
+
+    if (slotDetails === null) {
+      return noScores
     }
 
     let mainStat: ScoreMainStat | null = null
@@ -89,10 +112,18 @@ export class EquipmentSimulationService {
     }
 
     const equipment = simulatedEquipment(edits, mainStat)
-    const simulation = { equipment }
-    const result = await this.calculate(payloads, { ...input, simulation }, calculator, signal)
+    const simulation = simulationInputOf(equipment, simulatedSlotItems(slotEdits, slotDetails))
+    const slotItems = Object.fromEntries(slotDetails)
+    const engineItems = { ...input.items, ...slotItems }
+    const simulationInput = { ...input, items: engineItems, simulation }
+    const result = await this.calculate(payloads, simulationInput, calculator, signal)
 
     if (result === null) {
+      return noScores
+    }
+
+    // 0.6.0 전 엔진은 칭호, 크리쳐, 오라 교체를 반영하지 않은 점수를 바꾼 점수로 낸다.
+    if (hasSlotItemEdits(slotEdits) && !supportsSlotItems(result.versions.package)) {
       return noScores
     }
 
@@ -105,6 +136,32 @@ export class EquipmentSimulationService {
     const baseline = toCardScore(result)
 
     return { baseline, simulated }
+  }
+
+  /** 새 아이템의 상세를 하나라도 받지 못하면 null이다. */
+  private async itemDetails(
+    itemIds: string[],
+    signal: AbortSignal
+  ): Promise<ReadonlyMap<string, CharacterPayload> | null> {
+    const details = new Map<string, CharacterPayload>()
+
+    if (itemIds.length === 0) {
+      return details
+    }
+
+    const loaded = await this.loadItemDetails(itemIds, signal)
+
+    for (const itemId of itemIds) {
+      const data = loaded.get(itemId)?.data
+
+      if (data == null) {
+        return null
+      }
+
+      details.set(itemId, data)
+    }
+
+    return details
   }
 
   private async calculate(
