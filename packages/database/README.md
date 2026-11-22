@@ -82,8 +82,8 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `character_items`: 캐릭터가 낀 무기와 유일 장비, 부위마다 한 행
 - `item_adoption`: 표본, 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 표본, 전직, 역할마다 모집단 수 한 행
 - `set_adoption`: 표본, 전직, 역할, 장비 세트, 서약 세트와 선택지 조합마다 캐릭터 수 한 행
-- `character_scores`: 캐릭터마다 장비 점수나 버프 점수 한 행과 계산 시각, 엔진 버전, 점수를 계산할 때의 전직
-- `character_basic_history`, `character_section_history`, `character_score_history`: 캐릭터의 기본 정보, 상세 섹션 본문, 점수가 바뀔 때마다 한 행
+- `character_scores`: 캐릭터마다 장비 점수나 버프 점수 한 행과 계산 시각, 엔진 버전, 점수를 계산할 때의 전직, 근사값이면 근사 방식
+- `character_basic_history`, `character_section_history`, `character_score_history`: 캐릭터의 기본 정보, 상세 섹션 본문, 점수가 바뀔 때마다 한 행. 점수 이력은 근사값이면 근사 방식, 경고, 건너뛴 사유도 담습니다
 - `score_engines`: 점수 이력이 참조하는 엔진 버전
 - `character_collection`: 기본 정보를 받을 캐릭터 대기열
 - `seasons`: 게임 시즌 번호, 이름, 시작 시각
