@@ -2,7 +2,7 @@
 
 > 던전앤파이터 파티, 공대의 캐릭터 정보를 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 설치 없이 바로 확인하는 웹 앱입니다.
 
-캐릭터, 길드, 순위, 통계 화면은 서버가 본문을 HTML로 내므로 script를 실행하지 않아도 읽을 수 있습니다. 게임 데이터는 Neople Open API에서 받습니다.
+캐릭터, 길드, 검색, 통계, 클리어 집계 화면은 서버가 본문을 HTML로 내므로 script를 실행하지 않아도 읽을 수 있습니다. 게임 데이터는 Neople Open API에서 받습니다.
 
 ## 화면
 
@@ -10,7 +10,7 @@
 - [멀티서치](https://dfragon.com/multisearch): 파티, 공대 화면의 스크린샷이나 화면 공유에서 캐릭터 이름을 읽어 한 번에 조회
 - [검색](https://dfragon.com/rankings): 직업, 세트, 무기, 명성과 점수 범위로 거른 캐릭터 목록
 - [통계](https://dfragon.com/stats): 서버 인구, 명성 분포, 직업 분포, 직업별 평균 명성
-- [세트 통계](https://dfragon.com/stats/sets): 장비 세트, 서약 세트, 무기, 유일 장비의 착용 비율
+- [세트 통계](https://dfragon.com/stats/sets): 장비 세트, 서약 세트, 장비와 서약 조합, 무기, 유일 장비의 착용 비율
 - [조합 통계](https://dfragon.com/stats/combos): 장비 세트와 서약 세트 조합의 착용 비율
 - [무기 통계](https://dfragon.com/stats/weapons): 무기 종류별 착용 비율
 - [클리어 집계](https://dfragon.com/clears): 레이드, 레기온 등 컨텐츠의 주간 클리어율과 클리어 캐릭터의 명성, 점수 분포
