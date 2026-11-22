@@ -11,6 +11,7 @@
       "#scripts/*": ["./scripts/*"],
       "@dfragon/ui": ["../../packages/ui/src/index.tsx"],
       "@dfragon/lib": ["../../packages/lib/src/index.ts"],
+      "@dfragon/lib/enchant-grades": ["../../packages/lib/src/enchant-grades.ts"],
       "@dfragon/lib/utils/shape-check": ["../../packages/lib/src/utils/shape-check.ts"],
       "#server-fixtures/*": ["../../packages/server-core/test/fixtures/*"]
     }

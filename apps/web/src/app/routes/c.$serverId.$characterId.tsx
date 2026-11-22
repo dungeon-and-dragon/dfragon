@@ -1,11 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { prefetchOnServer } from '#app/prefetch-on-server'
-import {
-  CharacterDetailPage,
-  characterDetailQuery,
-  isCharacterNotFound,
-  parseCharacterTabSearch
-} from '#pages/character'
+import { characterDetailQuery, isCharacterNotFound } from '#entities/character-detail'
+import { CharacterDetailPage, parseCharacterTabSearch } from '#pages/character'
 import { pageHead, siteUrl } from '#shared/lib/page-head'
 
 export const Route = createFileRoute('/c/$serverId/$characterId')({

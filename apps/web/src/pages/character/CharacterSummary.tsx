@@ -9,10 +9,10 @@ import {
   characterDisplayOf,
   Portrait
 } from '#entities/character'
+import { useRefreshCharacterDetail } from '#entities/character-detail'
 import { ClientOnly, Link } from '@tanstack/react-router'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { FavoriteToggle } from '#features/favorite-character'
-import { useRefreshCharacterDetail } from './api/useCharacterDetail'
 import { useRefreshingNow } from '#shared/lib/useRefreshingNow'
 import { formatSeoulDateTime, formatTimeAgo } from '#shared/lib/time-format'
 
@@ -80,7 +80,8 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <Portrait src={characterImageUrl(character)} />
       </div>
       <div className={IDENTITY}>
-        <div className="flex min-w-0 items-center gap-2">
+        {/* 좁은 화면에서 이름이 줄어들지 않도록 갱신, 시뮬레이터 버튼을 다음 줄로 넘긴다. */}
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h1 className="screen-title">{character.characterName ?? MISSING_VALUE}</h1>
           {favorite != null && <FavoriteToggle character={favorite} />}
           {/* 받은 지 얼마나 됐는지는 그리는 시각에 따라 달라, 서버가 그린 값이 브라우저와 어긋나지 않게 브라우저에서만 그린다. */}
@@ -92,6 +93,13 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
               onRefresh={refreshCharacter}
             />
           </ClientOnly>
+          <Link
+            to="/c/$serverId/$characterId/simulator"
+            params={{ serverId: character.serverId, characterId: character.characterId }}
+            className="btn btn-secondary btn-sm shrink-0 no-underline"
+          >
+            장비 시뮬레이터
+          </Link>
         </div>
         <div className={LINE}>
           <ServerBadge serverId={character.serverId} />

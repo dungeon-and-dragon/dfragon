@@ -2,9 +2,19 @@ export { approximateScoreNote, formatApproximateScore, toScoreView } from './lib
 export type { ScoreView } from './lib/card-score'
 export { avatarSlotLabel, buffSkillInfoOf, formatStatValue } from './lib/character-detail-display'
 export type { ItemRarity } from './lib/character-detail-display'
-export { signedEnchantValue, toEquipmentView } from './lib/character-equipment'
+export {
+  BUFF_PASSIVE_SKILL,
+  buffSkillLevel,
+  enchantGroup,
+  enchantOrderRank,
+  isEmphasizedEnchant,
+  signedEnchantValue,
+  toEquipmentView
+} from './lib/character-equipment'
 export type {
   EnchantOption,
+  EnchantRole,
+  EnchantStats,
   EquipmentReinforce,
   EquipmentRow,
   EquipmentView
@@ -81,6 +91,7 @@ export {
 } from './model/character-schemas'
 export type { CharacterSearchQuery, SearchedCharacter } from './model/character-schemas'
 export {
+  apiCardScoreSchema,
   apiCharacterCardSchema,
   CHARACTER_SERVER_NAMES,
   characterImageUrl
