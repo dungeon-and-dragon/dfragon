@@ -99,7 +99,7 @@ const EMPTY: CharacterHistory = {
 
 const ONE: CharacterHistory = {
   basics: [{ observedAt: FIRST, fame: 134861 }],
-  scores: [{ observedAt: FIRST, calculator: 'equipment', value: 1268402 }],
+  scores: [{ observedAt: FIRST, calculator: 'equipment', value: 1268402, approximate: null }],
   sectionChanges: { equipment: [FIRST] },
   nameChanges: [],
   changes: [{ observedAt: FIRST, first: true, items: [] }]
@@ -111,8 +111,8 @@ const TWO: CharacterHistory = {
     { observedAt: LATEST, fame: 136647 }
   ],
   scores: [
-    { observedAt: FIRST, calculator: 'equipment', value: 1268402 },
-    { observedAt: LATEST, calculator: 'equipment', value: 1369647 }
+    { observedAt: FIRST, calculator: 'equipment', value: 1268402, approximate: null },
+    { observedAt: LATEST, calculator: 'equipment', value: 1369647, approximate: null }
   ],
   sectionChanges: { equipment: [FIRST, LATEST], avatar: [FIRST] },
   nameChanges: [],
@@ -154,9 +154,9 @@ const THREE: CharacterHistory = {
     { observedAt: LATEST, fame: 136647 }
   ],
   scores: [
-    { observedAt: FIRST, calculator: 'equipment', value: 1268402 },
-    { observedAt: MIDDLE, calculator: 'equipment', value: 1338770 },
-    { observedAt: LATEST, calculator: 'equipment', value: 1369647 }
+    { observedAt: FIRST, calculator: 'equipment', value: 1268402, approximate: null },
+    { observedAt: MIDDLE, calculator: 'equipment', value: 1338770, approximate: null },
+    { observedAt: LATEST, calculator: 'equipment', value: 1369647, approximate: null }
   ],
   changes: [
     ...TWO.changes.slice(0, 1),
@@ -276,6 +276,24 @@ it('한 시점뿐이어도 명성과 점수 차트, 첫 기록 시점과 요약 
     ['안개 융화', 'Lv 100', '-']
   ])
   expect(text('ul li')).toContain('첫 기록')
+})
+
+it('근사값으로 저장한 점수는 시점 목록과 요약 숫자에서 ≈를 붙여 보인다', async () => {
+  const approximate: CharacterHistory = {
+    ...ONE,
+    scores: [
+      {
+        observedAt: FIRST,
+        calculator: 'equipment',
+        value: 1268402,
+        approximate: { source: 'legacy_fusion_policy_a' }
+      }
+    ]
+  }
+  await renderLoaded(approximate, { [FIRST]: detailOf(2555, 100) })
+
+  expect(text('button[aria-pressed="true"]')).toEqual(['11-05 22:00첫 기록134,861≈1,268,402'])
+  expect(tiles()).toContainEqual(['장비 점수', '≈1,268,402', '-'])
 })
 
 it('여러 시점이면 최신 시점을 골라 두 차트와 직전 시점 대비 증감, 변경점, 그대로를 보인다', async () => {

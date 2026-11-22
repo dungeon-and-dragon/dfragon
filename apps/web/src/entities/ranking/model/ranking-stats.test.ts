@@ -43,7 +43,7 @@ describe('fameRankingSchema', () => {
     ])
   })
 
-  it('행의 score를 종류와 값으로 읽고, score가 없는 행은 null로 읽으며, 모르는 종류는 거절한다', () => {
+  it('행의 score를 종류, 값, 근사 방식으로 읽고, 근사 방식이 없으면 정확한 점수로, score가 없는 행은 null로 읽으며, 모르는 종류는 거절한다', () => {
     const response = {
       characters: [
         {
@@ -52,6 +52,17 @@ describe('fameRankingSchema', () => {
           oathSet: null,
           score: { calculator: 'buff', value: 4120000 }
         },
+        {
+          ...row,
+          characterId: 'synthetic-approximate',
+          equipmentSet: null,
+          oathSet: null,
+          score: {
+            calculator: 'equipment',
+            value: 1300000,
+            approximate: { source: 'legacy_fusion_policy_a' }
+          }
+        },
         { ...row, characterId: 'synthetic-null', equipmentSet: null, oathSet: null, score: null },
         { ...row, characterId: 'synthetic-missing', equipmentSet: null, oathSet: null }
       ],
@@ -59,7 +70,12 @@ describe('fameRankingSchema', () => {
     }
 
     expect(fameRankingSchema.parse(response).characters.map(({ score }) => score)).toEqual([
-      { calculator: 'buff', value: 4120000 },
+      { calculator: 'buff', value: 4120000, approximate: null },
+      {
+        calculator: 'equipment',
+        value: 1300000,
+        approximate: { source: 'legacy_fusion_policy_a' }
+      },
       null,
       null
     ])
