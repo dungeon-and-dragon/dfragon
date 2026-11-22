@@ -38,17 +38,13 @@ const acquisition: AdventureTimelineItem = {
   itemRarity: '에픽',
   occurredAt: '2026-11-20T11:00:00.000Z'
 }
-const refine: AdventureTimelineItem = {
+const clear: AdventureTimelineItem = {
   ...cain,
-  type: 'enhancement',
-  kind: 'refine',
-  itemId: null,
-  itemName: '합성 대검',
-  itemRarity: '태초',
-  before: null,
-  after: 8,
-  result: true,
-  safe: null,
+  type: 'clear',
+  kind: 'raid',
+  name: '합성 레이드',
+  modeName: '합성 단계',
+  hard: true,
   occurredAt: '2026-11-19T11:00:00.000Z'
 }
 
@@ -114,15 +110,15 @@ function button(label: string): HTMLButtonElement {
   )!
 }
 
-it('모험단 캐릭터들의 강화와 획득을 한 표에 캐릭터, 종류, 장비, 내용으로 보이고 캐릭터 이름이 상세로 이어진다', async () => {
-  serve(() => ({ items: [amplify, acquisition, refine], nextCursor: null }))
+it('모험단 캐릭터들의 강화, 드랍, 레이드 클리어를 한 표에 캐릭터, 종류, 대상, 내용으로 보이고 캐릭터 이름이 상세로 이어진다', async () => {
+  serve(() => ({ items: [amplify, acquisition, clear], nextCursor: null }))
   await render({})
   await vi.waitFor(() => expect(rows()).toHaveLength(3))
 
   expect(rows()).toEqual([
     ['합성검사', '증폭', '합성 대검', '10 → 11실패안전'],
-    ['합성법사', '획득', '합성 상의', '레이드 카드 보상'],
-    ['합성검사', '재련', '합성 대검', '8성공']
+    ['합성법사', '드랍', '합성 상의', '레이드 카드 보상'],
+    ['합성검사', '클리어', '합성 레이드', '하드합성 단계']
   ])
   expect(container.querySelector('tbody a')?.getAttribute('href')).toBe('/c/cain/character-1')
   expect(requests).toEqual([''])
@@ -135,25 +131,30 @@ it('고른 종류를 kind로 보내고, 종류 칩을 누르면 그 종류로, �
   await vi.waitFor(() => expect(rows()).toHaveLength(1))
 
   expect(requests).toEqual(['?kind=acquisition'])
-  await act(async () => button('증폭').click())
+  expect(
+    [...container.querySelectorAll('[role="group"][aria-label="종류"] button')].map(
+      (chip) => chip.textContent
+    )
+  ).toEqual(['전체', '강화', '드랍', '클리어'])
+  await act(async () => button('클리어').click())
   await act(async () => button('전체').click())
-  expect(changes).toEqual([{ kind: 'amplify' }, { kind: undefined }])
+  expect(changes).toEqual([{ kind: 'clear' }, { kind: undefined }])
 })
 
 it('불러오기를 누르면 cursor 뒤의 기록을 이어 붙이고, 더 없으면 버튼을 숨긴다', async () => {
   serve((search) => {
     if (search.get('before') === 'cursor-1') {
-      return { items: [refine], nextCursor: null }
+      return { items: [clear], nextCursor: null }
     }
 
     return { items: [amplify, acquisition], nextCursor: 'cursor-1' }
   })
-  await render({ kind: 'amplify' })
+  await render({ kind: 'enhancement' })
   await vi.waitFor(() => expect(rows()).toHaveLength(2))
   await act(async () => button('불러오기').click())
   await vi.waitFor(() => expect(rows()).toHaveLength(3))
 
-  expect(requests).toEqual(['?kind=amplify', '?kind=amplify&before=cursor-1'])
+  expect(requests).toEqual(['?kind=enhancement', '?kind=enhancement&before=cursor-1'])
   expect(button('불러오기')).toBeUndefined()
 })
 

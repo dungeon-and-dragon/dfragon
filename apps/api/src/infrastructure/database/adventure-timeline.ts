@@ -1,43 +1,61 @@
 import {
   type DatabaseClient,
+  type RecentTimelineEventRow,
   type RecentTimelineItemQuery,
   type StoredCharacter,
   type TimelineItemRow,
   readAdventureCharacters,
+  readRecentTimelineEvents,
   readRecentTimelineItems
 } from '@dfragon/database'
 import {
   ENHANCEMENT_KINDS,
+  RAID_CLEAR_CODES,
   TIMELINE_PAGE_SIZE,
   toAcquisition
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 import type { AdventureTimelineRead } from '#application/adventure-guild/repository.js'
 import {
   type AdventureTimelineCharacter,
+  type AdventureTimelineCursor,
   type AdventureTimelineEntry,
   type AdventureTimelineKind,
   type AdventureTimelineQuery,
-  toAdventureTimelinePage
+  toAdventureTimelinePage,
+  toSourceCursor
 } from '#domain/adventure-guild/index.js'
-import { PAGE_QUERIES, parseTimelineEnhancementRow } from './character-timeline-read.js'
+import {
+  PAGE_QUERIES,
+  parseTimelineClearRow,
+  parseTimelineEnhancementRow
+} from './character-timeline-read.js'
 
 type ItemFilter = Pick<RecentTimelineItemQuery, 'codes' | 'itemRarities'>
 
-function toItemFilters(kind: AdventureTimelineKind | undefined): ItemFilter[] {
+export type TimelineRead =
+  | { source: 'item'; filter: ItemFilter }
+  | { source: 'event'; codes: readonly number[] }
+
+// 재련은 모험단 타임라인에 넣지 않는다(2026-11-22 저장소 소유자 결정).
+const ENHANCEMENT_CODES = [...ENHANCEMENT_KINDS]
+  .filter(([, kind]) => kind !== 'refine')
+  .map(([code]) => code)
+
+const READS = {
+  enhancement: { source: 'item', filter: { codes: ENHANCEMENT_CODES } },
+  acquisition: { source: 'item', filter: PAGE_QUERIES.acquisitions },
+  clear: { source: 'event', codes: RAID_CLEAR_CODES }
+} as const satisfies Record<AdventureTimelineKind, TimelineRead>
+
+export function toTimelineReads(kind: AdventureTimelineKind | undefined): TimelineRead[] {
   if (kind === undefined) {
-    return [PAGE_QUERIES.enhancements, PAGE_QUERIES.acquisitions]
+    return Object.values(READS)
   }
 
-  if (kind === 'acquisition') {
-    return [PAGE_QUERIES.acquisitions]
-  }
-
-  const codes = [...ENHANCEMENT_KINDS].filter(([, each]) => each === kind).map(([code]) => code)
-
-  return [{ codes }]
+  return [READS[kind]]
 }
 
-export function toAdventureTimelineEntry(
+export function toAdventureTimelineItemEntry(
   character: AdventureTimelineCharacter,
   row: TimelineItemRow
 ): AdventureTimelineEntry {
@@ -50,29 +68,52 @@ export function toAdventureTimelineEntry(
       ...enhancement
     }))
 
-    return { id, occurredAt, items }
+    return { source: 'item', id, occurredAt, items }
   }
 
   const acquisition = toAcquisition(row)
   const item = { ...character, type: 'acquisition' as const, ...acquisition }
 
-  return { id, occurredAt, items: [item] }
+  return { source: 'item', id, occurredAt, items: [item] }
+}
+
+export function toAdventureTimelineEventEntry(
+  character: AdventureTimelineCharacter,
+  row: RecentTimelineEventRow
+): AdventureTimelineEntry {
+  const { id, occurredAt } = row
+  const items = parseTimelineClearRow(row).map((clear) => ({
+    ...character,
+    type: 'clear' as const,
+    ...clear
+  }))
+
+  return { source: 'event', id, occurredAt, items }
 }
 
 async function readCharacterEntries(
   client: DatabaseClient,
   { serverId, characterId, characterName }: StoredCharacter,
-  filter: ItemFilter,
-  before: AdventureTimelineQuery['before']
+  read: TimelineRead,
+  cursor: AdventureTimelineCursor | undefined
 ): Promise<AdventureTimelineEntry[]> {
   const character = { serverId, characterId, characterName }
-  const rows = await readRecentTimelineItems(client, character, {
-    ...filter,
-    limit: TIMELINE_PAGE_SIZE + 1,
-    before
-  })
+  const before = cursor && toSourceCursor(cursor, read.source)
+  const limit = TIMELINE_PAGE_SIZE + 1
 
-  return rows.map((row) => toAdventureTimelineEntry(character, row))
+  if (read.source === 'event') {
+    const rows = await readRecentTimelineEvents(client, character, {
+      codes: read.codes,
+      limit,
+      before
+    })
+
+    return rows.map((row) => toAdventureTimelineEventEntry(character, row))
+  }
+
+  const rows = await readRecentTimelineItems(client, character, { ...read.filter, limit, before })
+
+  return rows.map((row) => toAdventureTimelineItemEntry(character, row))
 }
 
 export async function readAdventureTimeline(
@@ -81,10 +122,10 @@ export async function readAdventureTimeline(
   { kind, before }: AdventureTimelineQuery
 ): Promise<AdventureTimelineRead> {
   const characters = await readAdventureCharacters(client, adventureName)
-  const filters = toItemFilters(kind)
+  const reads = toTimelineReads(kind)
   const entries = await Promise.all(
     characters.flatMap((character) =>
-      filters.map((filter) => readCharacterEntries(client, character, filter, before))
+      reads.map((read) => readCharacterEntries(client, character, read, before))
     )
   )
   const page = toAdventureTimelinePage(entries.flat())
