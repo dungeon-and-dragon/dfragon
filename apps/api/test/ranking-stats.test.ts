@@ -130,13 +130,13 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
   const characters = [
     {
       ...character('a', 80000),
-      score: { kind: 'equipment', value: 1234567 },
+      score: { kind: 'equipment', value: 1234567, approximateSource: null },
       equipmentSet: { id: 'set-fairy', name: '소울 페어리 세트' },
       oathSet: { id: 16204, name: '야망의 용투 서약', option: '용투 : 세계를 태우는 불꽃' }
     },
     character('b', 70000)
   ] satisfies RankedStoredCharacter[]
-  const scores = [{ calculator: 'equipment', value: 1234567 }, null]
+  const scores = [{ calculator: 'equipment', value: 1234567, approximate: null }, null]
   const { app, origin } = await listen({
     ...unusedReader,
     readFameRanking: async (filter, limit, after) => {
@@ -431,7 +431,7 @@ test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor�
 test('점수 기준 랭킹은 마지막 행의 점수로 cursor를 만들고, 그 cursor는 같은 기준에서만 받는다', async () => {
   const sorted = Array.from({ length: 101 }, (_, index) => ({
     ...character(`s${String(index).padStart(3, '0')}`, 1000),
-    score: { kind: 'buff' as const, value: 500000 - Math.floor(index / 2) }
+    score: { kind: 'buff' as const, value: 500000 - Math.floor(index / 2), approximateSource: null }
   }))
   const afters: (FameRankingPosition | undefined)[] = []
   const { app, origin } = await listen({

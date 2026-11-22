@@ -60,7 +60,7 @@ const storedHistory: StoredCharacterHistory = {
     { ...basic, observedAt: firstAt, lastSeenAt: firstAt },
     { ...basic, fame: 61_000, observedAt: secondAt, lastSeenAt: new Date('2026-11-20T01:00:00Z') }
   ],
-  scores: [{ observedAt: firstAt, kind: 'equipment', score: 1741, engine }],
+  scores: [{ observedAt: firstAt, kind: 'equipment', score: 1741, engine, approximate: null }],
   sectionChanges: [
     { section: 'avatar', observedAt: firstAt },
     { section: 'equipment', observedAt: firstAt },
@@ -165,7 +165,13 @@ test('history는 기본 정보, 점수, 섹션별 변경 시각을 주고 타임
       { ...basic, fame: 61_000, observedAt: secondAt.toISOString() }
     ],
     scores: [
-      { observedAt: firstAt.toISOString(), calculator: 'equipment', value: 1741, versions: engine }
+      {
+        observedAt: firstAt.toISOString(),
+        calculator: 'equipment',
+        value: 1741,
+        approximate: null,
+        versions: engine
+      }
     ],
     sectionChanges: {
       avatar: [firstAt.toISOString()],
@@ -260,7 +266,13 @@ test('snapshot은 받은 시각까지 저장한 본문으로 지금 상세 조�
       readSnapshot: async (_character, at) => {
         requested.push(at)
 
-        return snapshotOf({ observedAt: firstAt, kind: 'equipment', score: 1741, engine })
+        return snapshotOf({
+          observedAt: firstAt,
+          kind: 'equipment',
+          score: 1741,
+          engine,
+          approximate: null
+        })
       }
     })
   })
@@ -309,6 +321,65 @@ test('snapshot은 받은 시각까지 저장한 본문으로 지금 상세 조�
   })
 })
 
+test('근사값으로 저장한 점수 이력은 snapshot card.score에서 점수 없이 건너뛴 이유와 근사값으로, history 점수 목록에서는 근사값과 근사 방식으로 준다', async (t) => {
+  const approximate = {
+    source: 'legacy_fusion_policy_a',
+    warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+    skipped: { kind: 'resolution', message: '판정 불가' }
+  }
+  const approximateScore = {
+    observedAt: secondAt,
+    kind: 'equipment',
+    score: 1650,
+    engine,
+    approximate
+  }
+  const { app, origin } = await listen({
+    details: { fetchDetails: unused, catalog: new CatalogService(async () => new Map()) },
+    characterHistory: repository({
+      readHistory: async () => ({
+        ...storedHistory,
+        scores: [...storedHistory.scores, approximateScore]
+      }),
+      readSnapshot: async () => snapshotOf(approximateScore)
+    })
+  })
+  t.after(() => app.close())
+
+  const snapshot = await getJson(origin, `${historyPath}/snapshot?at=2026-11-20T00:00:00Z`)
+  const history = await getJson(origin, historyPath)
+
+  assert.equal(snapshot.status, 200)
+  assert.deepEqual(snapshot.body.card.score, {
+    calculator: 'equipment',
+    value: null,
+    skipped: { kind: 'resolution', message: '판정 불가' },
+    approximate: {
+      value: 1650,
+      source: 'legacy_fusion_policy_a',
+      warning: '근사값, 1% 밖일 가능성 높음: 판정 불가'
+    },
+    versions: engine
+  })
+  assert.equal(history.status, 200)
+  assert.deepEqual(history.body.scores, [
+    {
+      observedAt: firstAt.toISOString(),
+      calculator: 'equipment',
+      value: 1741,
+      approximate: null,
+      versions: engine
+    },
+    {
+      observedAt: secondAt.toISOString(),
+      calculator: 'equipment',
+      value: 1650,
+      approximate: { source: 'legacy_fusion_policy_a' },
+      versions: engine
+    }
+  ])
+})
+
 test('점수 이력이 없는 시각의 snapshot은 card.score가 null이다', async (t) => {
   const { app, origin } = await listen({
     details: { fetchDetails: unused, catalog: new CatalogService(async () => new Map()) },
@@ -337,12 +408,13 @@ test('history의 변경점은 저장한 장비 섹션끼리 비교한 시점만 
       readHistory: async () => ({
         ...storedHistory,
         scores: [
-          { observedAt: firstAt, kind: 'equipment', score: 1741, engine },
+          { observedAt: firstAt, kind: 'equipment', score: 1741, engine, approximate: null },
           {
             observedAt: engineChangedAt,
             kind: 'equipment',
             score: 1741,
-            engine: { ...engine, bundleId: 'phase33-rev15a' }
+            engine: { ...engine, bundleId: 'phase33-rev15a' },
+            approximate: null
           }
         ]
       }),
