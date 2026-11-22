@@ -6,6 +6,7 @@ const link =
   'link p-1 text-fg-subtle focus-ring aria-[current=page]:font-semibold aria-[current=page]:text-fg'
 
 const NEOPLE_API_URL = 'https://developers.neople.co.kr'
+const DISCORD_URL = 'https://discord.gg/MMRhM22RXN'
 
 export function SiteFooter(): React.JSX.Element {
   return (
@@ -41,6 +42,9 @@ export function SiteFooter(): React.JSX.Element {
       <Link to="/privacy" className={link}>
         개인정보처리방침
       </Link>
+      <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className={link}>
+        디스코드
+      </a>
     </footer>
   )
 }
