@@ -192,3 +192,53 @@ it('조합 통계 loader는 세트 통계를, 무기 통계 loader는 아이템 
     '/stats/items?jobId=job-2&sample=top'
   ])
 })
+
+async function loadClearDetail(content: string, deps: Record<string, unknown>): Promise<unknown> {
+  const { clearStatsHandlers } = await import('#pages/clears/api/clears.handlers')
+  const { Route } = await import('./routes/clears.$content')
+  const loader = Route.options.loader as Loader
+
+  server.use(...clearStatsHandlers.stats)
+
+  return loader({ context: { queryClient }, params: { content }, deps })
+}
+
+it('클리어 개요 loader는 클리어 통계를 받은 뒤 가장 최근 주의 개요를 이어서 받는다', async () => {
+  const { clearStatsHandlers } = await import('#pages/clears/api/clears.handlers')
+  const { Route } = await import('./routes/clears.index')
+  const loader = Route.options.loader as Loader
+
+  server.use(...clearStatsHandlers.stats)
+  await loader({ context: { queryClient }, params: {}, deps: {} })
+
+  expect(requestedSearches()).toEqual(['/stats/clears', '/stats/clears/overview?week=2026-11-12'])
+})
+
+it('클리어 상세 loader는 주소의 컨텐츠 묶음과 단계로 컨텐츠 통계를 이어서 받고 묶음 이름을 돌려준다', async () => {
+  await expect(loadClearDetail('michaela', { stage: 'normal' })).resolves.toEqual({
+    groupName: '무너진 성자 미카엘라'
+  })
+  expect(requestedSearches()).toEqual([
+    '/stats/clears',
+    '/stats/clears/michaela-normal?week=2026-11-12'
+  ])
+})
+
+it('클리어 상세 loader는 클리어 통계에 없는 컨텐츠 묶음을 없는 주소로 처리한다', async () => {
+  const failure = await loadClearDetail('no-such-content', {}).catch((error: unknown) => error)
+
+  expect(isNotFound(failure)).toBe(true)
+  expect(requestedSearches()).toEqual(['/stats/clears'])
+})
+
+it('클리어 상세 loader는 클리어 통계를 받지 못하면 이름 없이 끝나 화면을 그리게 둔다', async () => {
+  const { CLEAR_STATS_URL } = await import('#pages/clears/api/clears.handlers')
+  const { Route } = await import('./routes/clears.$content')
+  const loader = Route.options.loader as Loader
+
+  server.use(http.get(CLEAR_STATS_URL, () => HttpResponse.error()))
+
+  await expect(
+    loader({ context: { queryClient }, params: { content: 'michaela' }, deps: {} })
+  ).resolves.toEqual({ groupName: null })
+})
