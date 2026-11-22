@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
+import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -48,9 +49,12 @@ function score(value: number, calculator: CharacterCardScore['calculator'] = 'eq
   return simulationScore(calculator, { value })
 }
 
-// 바꾼 부위의 강화 수치 합만큼 점수를 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
-function scoresFor({ equipment }: SimulationBody): Response {
-  const added = equipment.reduce((sum, { reinforce }) => sum + reinforce, 0)
+const SLOT_ITEM_POINTS = 1_000
+
+// 바꾼 부위의 강화 수치 합과 고른 칭호, 크리쳐, 오라마다 1,000점을 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
+function scoresFor({ equipment, ...slotItems }: SimulationBody): Response {
+  const reinforced = equipment.reduce((sum, { reinforce }) => sum + reinforce, 0)
+  const added = reinforced + Object.keys(slotItems).length * SLOT_ITEM_POINTS
 
   return HttpResponse.json({ baseline: score(BASELINE), simulated: score(BASELINE + added) })
 }
@@ -323,6 +327,115 @@ it('버퍼는 버프 점수 라벨과 버퍼 색으로 보인다', async () => {
     '버프 점수'
   )
   expect(toneClassesOf(scoreValue('현재', '버프 점수'))).toEqual(['buffer'])
+})
+
+function slotNames(): string[] {
+  return [...container.querySelectorAll('tbody tr')].map(
+    (row) => row.querySelector('td')?.textContent ?? ''
+  )
+}
+
+it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두고 착용한 아이템과 현재 아이템 선택을 보인다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+
+  const names = slotNames()
+  expect(names.slice(0, 3)).toEqual(['무기', '칭호', '상의'])
+  expect(names.slice(-2)).toEqual(['크리쳐', '오라'])
+  expect(container.querySelectorAll('tbody tr')[1]!.textContent).toContain(
+    '프로스트의 전설 플래티넘[35Lv]'
+  )
+  expect(control('칭호 교체').textContent).toBe('현재 칭호')
+  expect(control('크리쳐 교체').textContent).toBe('현재 크리쳐')
+  expect(control('오라 교체').textContent).toBe('현재 오라')
+
+  await act(async () => control('칭호 교체').click())
+  const options = [...document.querySelectorAll('[role="option"]')].map((item) => item.textContent)
+  expect(options).toEqual(['현재 칭호', ...slotItemsOf('title').map(({ name }) => name)])
+})
+
+it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수를 새 결과로 바꾼다', async () => {
+  const [titleItem] = slotItemsOf('title')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+
+  await pick('칭호 교체', titleItem!.name)
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,001,000'],
+    ['차이', '+1,000']
+  ])
+  expect(bodies.at(-1)).toEqual({ equipment: [], title: titleItem!.id })
+  expect(control('칭호 교체').textContent).toBe(titleItem!.name)
+  expect(resetButton().disabled).toBe(false)
+})
+
+it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 넣고, 초기화하면 모두 되돌린다', async () => {
+  const [creatureItem] = slotItemsOf('creature')
+  const [auraItem] = slotItemsOf('aura')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+
+  await step('무기 수치 올리기', 1)
+  await pick('크리쳐 교체', creatureItem!.name)
+  await pick('오라 교체', auraItem!.name)
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,002,011'],
+    ['차이', '+2,011']
+  ])
+  expect(bodies.at(-1)).toEqual({
+    equipment: [{ slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: null }],
+    creature: creatureItem!.id,
+    aura: auraItem!.id
+  })
+
+  await act(async () => resetButton().click())
+
+  expect(control('크리쳐 교체').textContent).toBe('현재 크리쳐')
+  expect(control('오라 교체').textContent).toBe('현재 오라')
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+})
+
+it('칭호, 크리쳐, 오라를 착용하지 않았으면 그 행을 두지 않는다', async () => {
+  const detail = characterDetailFixture('dealer')
+  await render({
+    ...detail,
+    equipment: {
+      ...detail.equipment,
+      equipment: detail.equipment.equipment.filter(({ slotId }) => slotId !== 'TITLE')
+    },
+    creature: null,
+    avatar: detail.avatar.filter(({ slotId }) => slotId !== 'AURORA')
+  })
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+
+  expect(slotNames()).not.toContain('칭호')
+  expect(container.querySelector('[aria-label="칭호 교체"]')).toBeNull()
+  expect(container.querySelector('[aria-label="크리쳐 교체"]')).toBeNull()
+  expect(container.querySelector('[aria-label="오라 교체"]')).toBeNull()
 })
 
 it('115레벨이 아닌 장비는 수치와 증폭을 막고 마법부여만 고르게 둔다', async () => {
