@@ -107,6 +107,7 @@ model CharacterScore {
   engineBundleId String    @map("engine_bundle_id")
   jobId          String?   @map("job_id")
   jobGrowId      String?   @map("job_grow_id")
+  approximateSource String? @map("approximate_source")
 
   @@id([serverId, characterId])
   @@index([kind, jobId, jobGrowId, score(sort: Desc), serverId, characterId], map: "character_scores_kind_job_score_idx")
@@ -156,6 +157,10 @@ model CharacterScoreHistory {
   score       Int
   engineId    Int         @map("engine_id")
   engine      ScoreEngine @relation(fields: [engineId], references: [id])
+  approximateSource  String? @map("approximate_source")
+  approximateWarning String? @map("approximate_warning")
+  skippedKind        String? @map("skipped_kind")
+  skippedMessage     String? @map("skipped_message")
 
   @@id([serverId, characterId, observedAt])
   @@map("character_score_history")
