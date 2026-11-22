@@ -3,12 +3,15 @@ import {
   cardScoreCalculator,
   withCardScore
 } from '@dfragon/server-core/domain/character-card/index.js'
+import type { CatalogDetail } from '@dfragon/server-core/domain/character-catalog/index.js'
 import {
   projectCharacterDetails,
   projectCharacterFreshness,
   type CharacterIdentity,
+  type CharacterPayloads,
   type FetchedCharacterPayloads
 } from '@dfragon/server-core/domain/character-detail/index.js'
+import type { CharacterRole } from '@dfragon/server-core/domain/character-role.js'
 import {
   CharacterDetailFailure,
   characterDetailFailure
@@ -37,6 +40,13 @@ import type {
 export interface CharacterDetailResponse {
   body: Buffer<ArrayBuffer>
   reused: boolean
+}
+
+export interface CharacterScoreSource {
+  /** 캐시 항목이 가진 원문 객체 그대로라 같은 항목이면 같은 객체다. 항목에 묶은 값의 key로 쓰고 바꾸지 않는다. */
+  payloads: CharacterPayloads
+  role: CharacterRole | null
+  items: ReadonlyMap<string, CatalogDetail>
 }
 
 export interface CharacterDetailDependencies {
@@ -80,6 +90,15 @@ export class CharacterDetailService {
     timings: NeopleStageTimings
   ): Promise<CharacterDetailResponse> {
     return this.track(this.respond(identity, signal, timings, this.characters.refresh))
+  }
+
+  /** 상세 조회와 같은 캐시의 원문으로 점수 입력 재료만 돌려주며, 상세 본문을 저장하거나 조회를 알리지 않는다. */
+  scoreSource(
+    identity: CharacterIdentity,
+    signal: AbortSignal,
+    timings: NeopleStageTimings
+  ): Promise<CharacterScoreSource> {
+    return this.track(this.loadScoreSource(identity, signal, timings))
   }
 
   async close(): Promise<void> {
@@ -152,6 +171,30 @@ export class CharacterDetailService {
       this.ports.publishCharacterFetched?.(identity, character.payloads, character.fetchedAt, score)
 
       return (await built).response
+    } catch (error) {
+      throw characterDetailFailure(error)
+    }
+  }
+
+  private async loadScoreSource(
+    identity: CharacterIdentity,
+    requestSignal: AbortSignal,
+    timings: NeopleStageTimings
+  ): Promise<CharacterScoreSource> {
+    const signal = AbortSignal.any([requestSignal, this.shutdown.signal])
+
+    try {
+      if (signal.aborted) {
+        throw new CharacterDetailFailure('internal')
+      }
+
+      const { payloads, fetchedAt } = await this.characters.get(identity, signal, timings)
+      const projected = projectCharacterDetails(identity, payloads, fetchedAt)
+      const { items } = await enrichCharacterDetails(projected, this.ports.catalog, signal)
+      signal.throwIfAborted()
+      const { role } = projectCharacterCard(projected)
+
+      return { payloads, role, items }
     } catch (error) {
       throw characterDetailFailure(error)
     }
