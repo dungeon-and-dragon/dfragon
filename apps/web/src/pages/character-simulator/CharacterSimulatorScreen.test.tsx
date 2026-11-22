@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { enchantGradesOf } from '@dfragon/lib/enchant-grades'
+import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
 import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -163,7 +163,7 @@ it('열면 착용한 장비의 수치, 증폭, 마법부여를 기본값으로 �
 })
 
 it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 점수와 차이를 새 결과로 바꾼다', async () => {
-  const [amuletGrade] = enchantGradesOf('AMULET', 'dealer').종결
+  const [amuletOption] = enchantOptionsOf('AMULET', 'dealer').종결
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -183,7 +183,7 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
   expect(bodies.at(-1)).toEqual({
     equipment: [
       { slotId: 'WEAPON', reinforce: 12, amplified: true, enchantId: null },
-      { slotId: 'AMULET', reinforce: 0, amplified: false, enchantId: amuletGrade!.id }
+      { slotId: 'AMULET', reinforce: 0, amplified: false, enchantId: amuletOption!.id }
     ]
   })
   expect(reinforceOf('무기')).toBe('+12')
