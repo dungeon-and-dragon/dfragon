@@ -233,7 +233,7 @@ test('딜러가 바꾼 부위는 강화 수치와 마법부여만 바꾸고 나�
   assert.deepEqual(payloads, before)
 })
 
-test('강화한 장비를 증폭으로 바꾸면 원본 계산의 주 스탯으로 증폭 이름을 정하고, 같은 캐릭터는 주 스탯을 다시 계산하지 않는다', async (t) => {
+test('증폭한 부위가 없는 캐릭터의 장비를 증폭으로 바꾸면 원본 계산의 주 스탯으로 증폭 이름을 정하고, 같은 캐릭터는 주 스탯을 다시 계산하지 않는다', async (t) => {
   const { original, details, path } = fixture('dealer-blade')
   const engine = scoring()
   const origin = await listen(t, { details, ...engine.options })
@@ -263,6 +263,80 @@ test('강화한 장비를 증폭으로 바꾸면 원본 계산의 주 스탯으�
     ]
   })
 })
+
+function amplifiedAs(names: Readonly<Record<string, string | null>>) {
+  return (items: Item[]) =>
+    items.map((item) => {
+      const name = names[item.slotId as string]
+
+      if (name === undefined) {
+        return item
+      }
+
+      return { ...item, amplificationName: name }
+    })
+}
+
+// 원본 장비 응답 순서는 WEAPON, TITLE, JACKET, SHOULDER, PANTS 순이다.
+for (const [name, fixtureName, amplified, changes, expected] of [
+  [
+    '모든 부위를 같은 이름으로 증폭한 캐릭터는 그 이름을 쓴다',
+    'buffer-muse',
+    {
+      WEAPON: '차원의 체력',
+      JACKET: '차원의 체력',
+      SHOULDER: '차원의 체력',
+      PANTS: null,
+      WAIST: '차원의 체력',
+      SHOES: '차원의 체력',
+      AMULET: '차원의 체력',
+      WRIST: '차원의 체력',
+      RING: '차원의 체력',
+      SUPPORT: '차원의 체력',
+      MAGIC_STON: '차원의 체력',
+      EARRING: '차원의 체력'
+    },
+    [{ slotId: 'PANTS', reinforce: 10, amplified: true, enchantId: null }],
+    '차원의 체력'
+  ],
+  [
+    '증폭 이름이 섞이면 원본에서 가장 많이 쓴 이름을 쓰고, 칭호와 요청에서 증폭을 푼 부위는 이름 선택을 바꾸지 않는다',
+    'dealer-blade',
+    { WEAPON: '차원의 지능', TITLE: '차원의 지능', JACKET: '차원의 힘', SHOULDER: '차원의 힘' },
+    [
+      { slotId: 'JACKET', reinforce: 0, amplified: false, enchantId: null },
+      { slotId: 'PANTS', reinforce: 10, amplified: true, enchantId: null }
+    ],
+    '차원의 힘'
+  ],
+  [
+    '가장 많이 쓴 이름이 동률이면 장비 응답에서 먼저 나온 이름을 쓴다',
+    'dealer-blade',
+    { JACKET: '차원의 지능', SHOULDER: '차원의 힘' },
+    [{ slotId: 'PANTS', reinforce: 10, amplified: true, enchantId: null }],
+    '차원의 지능'
+  ]
+] as const) {
+  test(`강화한 장비를 증폭으로 바꿀 때 ${name}, 주 스탯 계산은 하지 않는다`, async (t) => {
+    const { payloads, details, path } = fixture(fixtureName, amplifiedAs(amplified))
+    const engine = scoring()
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: changes })
+
+    assert.equal(response.status, 200)
+    assert.equal(engine.requests.length, 1)
+    const items = payloads.equipment.equipment as unknown[]
+    const pants = engine.requests[0]!.input.simulation!.equipment.find(
+      (item) => item.slotId === 'PANTS'
+    )
+    assert.deepEqual(pants, {
+      ...itemOf(items, 'PANTS'),
+      reinforce: 10,
+      amplificationName: expected
+    })
+  })
+}
 
 test('버퍼는 버프 점수로 계산하고, 증폭을 유지한 장비는 원본 증폭 이름을 두며 증폭을 끈 장비는 이름을 지운다', async (t) => {
   const { original, details, path } = fixture('buffer-muse')
