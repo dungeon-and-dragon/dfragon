@@ -1,4 +1,4 @@
-export { formatApproximateScore, toScoreView } from './lib/card-score'
+export { approximateScoreNote, formatApproximateScore, toScoreView } from './lib/card-score'
 export type { ScoreView } from './lib/card-score'
 export { avatarSlotLabel, buffSkillInfoOf, formatStatValue } from './lib/character-detail-display'
 export type { ItemRarity } from './lib/character-detail-display'
