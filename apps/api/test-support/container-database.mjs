@@ -875,9 +875,9 @@ try {
     ].join('; ')
   )
 
-  // 클리어 수집, 명성 갱신, 비활성 재확인 job은 정지해 두어 보충 실행으로 Neople을 부르지 않는다. 다시 등록해도 정지 시각은 남는다.
+  // 클리어 수집, 명성 갱신, 비활성 재확인, 아이템 사전 채우기, 스킬 스타일 수집 job은 정지해 두어 보충 실행으로 Neople을 부르지 않는다. 다시 등록해도 정지 시각은 남는다.
   await psql(
-    "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now()), ('character-fame-refresh', 'probe', '{}', 0, now(), now()), ('inactive-character-recheck', 'probe', '{}', 0, now(), now())"
+    "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now()), ('character-fame-refresh', 'probe', '{}', 0, now(), now()), ('inactive-character-recheck', 'probe', '{}', 0, now(), now()), ('item-dictionary-fill', 'probe', '{}', 0, now(), now()), ('skill-style-collection', 'probe', '{}', 0, now(), now())"
   )
 
   stage = 'character collector waits on the empty queue and stops'
@@ -926,7 +926,7 @@ try {
         "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'character-fame-refresh:0 3 * * *:true:object:true,character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,inactive-character-recheck:0 4 L * *:true:object:true,item-adoption:0 0 * * *:true:object:false,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false'
+    'character-fame-refresh:0 3 * * *:true:object:true,character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,inactive-character-recheck:0 4 L * *:true:object:true,item-adoption:0 0 * * *:true:object:false,item-dictionary-fill:0 * * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false,skill-style-collection:0 0 * * 5:true:object:true'
   )
   assert.equal(
     (
@@ -934,7 +934,7 @@ try {
         "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption', 'set-adoption', 'item-adoption')"
       )
     ).stdout.trim(),
-    'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1}'
+    'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1, "deletedEvents": 0}'
   )
   // 통계 저장분은 이번 실행이 시작한 뒤에 계산했고, 스킬 채택률 진행률은 전직 수만큼 끝까지 남는다.
   assert.equal(
@@ -990,7 +990,7 @@ try {
         "SELECT string_agg(status || ':' || coalesce(error->0->>'code', '-') || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE trigger = 'manual' AND job_name = 'job-run-cleanup'"
       )
     ).stdout.trim(),
-    'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0}'
+    'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0, "deletedEvents": 0}'
   )
   assert.equal(
     (await podman(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
