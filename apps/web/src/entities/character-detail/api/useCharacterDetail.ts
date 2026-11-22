@@ -1,5 +1,8 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { CharacterDetailView, CharacterIdentity } from '#entities/character'
+import type {
+  CharacterDetailView,
+  CharacterIdentity
+} from '#entities/character/@x/character-detail'
 import { SearchHttpFailure } from '#shared/api/api-error'
 import { useLoadedResult } from '#shared/lib/useLoadedResult'
 import { detailViewSchemaOf, requestCharacterJson } from './character-api'

@@ -4,8 +4,8 @@ import {
   type CharacterIdentity,
   characterHistorySchema
 } from '#entities/character'
+import { detailViewSchemaOf, requestCharacterJson } from '#entities/character-detail'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
-import { detailViewSchemaOf, requestCharacterJson } from './character-api'
 
 export function useCharacterHistory({
   serverId,

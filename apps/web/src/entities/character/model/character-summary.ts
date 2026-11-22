@@ -73,20 +73,20 @@ function hasApproximateOnlyWhenSkipped(score: CharacterCardScore) {
   return score.approximate === null || (score.value === null && score.skipped !== null)
 }
 
+export const apiCardScoreSchema = z
+  .object({
+    calculator: scoreCalculator,
+    value: z.number().nullable(),
+    skipped: z.object({ kind: nonblank, message: nonblank }).nullable(),
+    approximate: z.object({ value: z.number(), source: nonblank, warning: nonblank }).nullable(),
+    versions: z.object({ package: nonblank, rulesRev: nonblank, bundleId: nonblank })
+  })
+  .refine(hasApproximateOnlyWhenSkipped)
+
 // API 응답은 card에 칸이 더해져도 읽도록 모르는 칸을 버리고, 점수를 읽지 못해도 역할은 남긴다.
 export const apiCharacterCardSchema = z.object({
   role: characterRole,
-  score: z
-    .object({
-      calculator: scoreCalculator,
-      value: z.number().nullable(),
-      skipped: z.object({ kind: nonblank, message: nonblank }).nullable(),
-      approximate: z.object({ value: z.number(), source: nonblank, warning: nonblank }).nullable(),
-      versions: z.object({ package: nonblank, rulesRev: nonblank, bundleId: nonblank })
-    })
-    .refine(hasApproximateOnlyWhenSkipped)
-    .nullable()
-    .catch(null)
+  score: apiCardScoreSchema.nullable().catch(null)
 })
 
 const characterCardSchema = z.strictObject({

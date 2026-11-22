@@ -2,6 +2,7 @@
 @import './components/button.css';
 @import './components/icon-button.css';
 @import './components/text-field.css';
+@import './components/number-field.css';
 @import './components/switch.css';
 @import './components/chip.css';
 @import './components/badge.css';
