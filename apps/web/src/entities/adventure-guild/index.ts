@@ -27,6 +27,12 @@ export type {
   EquipmentSlot,
   HoldingCell
 } from './model/adventure-equipment'
+export { ADVENTURE_TIMELINE_KINDS, adventureTimelinePageSchema } from './model/adventure-timeline'
+export type {
+  AdventureTimelineItem,
+  AdventureTimelineKind,
+  AdventureTimelinePage
+} from './model/adventure-timeline'
 export { guildSchema } from './model/adventure-guild'
 export type { Guild } from './model/adventure-guild'
 export { adventureWeeklySchema } from './model/adventure-weekly'

@@ -5,7 +5,9 @@ import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { STORY_ADVENTURE_NAME } from './api/adventure.fixture'
 import { adventureHandlers } from './api/adventure.handlers'
 import { AdventureEquipmentScreen } from './AdventureEquipmentScreen'
+import { AdventureTimelineScreen } from './AdventureTimelineScreen'
 import type { EquipmentSearch } from './equipment-search'
+import type { TimelineSearch } from './timeline-search'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 const meta = {
@@ -111,4 +113,41 @@ export const 장비_받지못함: Story = {
 export const 장비_캐릭터없음: Story = {
   parameters: { msw: adventureHandlers.emptyEquipment },
   render: () => <EquipmentScreen />
+}
+
+function TimelineScreen({ initialSearch = {} }: { initialSearch?: TimelineSearch }) {
+  const [search, setSearch] = useState(initialSearch)
+
+  return (
+    <StoryFrame>
+      <StoryScreen>
+        <AdventureTimelineScreen
+          adventureName={STORY_ADVENTURE_NAME}
+          search={search}
+          onSearchChange={setSearch}
+          onAdventureOpen={ignoreOpen}
+        />
+      </StoryScreen>
+    </StoryFrame>
+  )
+}
+
+export const 타임라인: Story = {
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <TimelineScreen />
+}
+
+export const 타임라인_획득: Story = {
+  parameters: { msw: adventureHandlers.adventure },
+  render: () => <TimelineScreen initialSearch={{ kind: 'acquisition' }} />
+}
+
+export const 타임라인_받는중: Story = {
+  parameters: { msw: adventureHandlers.loading },
+  render: () => <TimelineScreen />
+}
+
+export const 타임라인_받지못함: Story = {
+  parameters: { msw: adventureHandlers.failure },
+  render: () => <TimelineScreen />
 }
