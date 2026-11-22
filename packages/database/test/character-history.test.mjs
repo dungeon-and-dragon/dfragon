@@ -119,7 +119,7 @@ function historyOf(key, observedAt, overrides = {}) {
     observedAt,
     basic,
     sections,
-    score: { kind: 'equipment', score: 1741, engine },
+    score: { kind: 'equipment', score: 1741, engine, approximate: null },
     ...overrides
   }
 }
@@ -244,7 +244,7 @@ test('last_seen_at보다 이르거나 같은 시각의 결과는 값이 달라�
   const different = {
     basic: { ...basic, fame: 99000 },
     sections: { ...sections, avatar: { avatar: [{ slotId: 'HEADGEAR' }] } },
-    score: { kind: 'equipment', score: 1900, engine }
+    score: { kind: 'equipment', score: 1900, engine, approximate: null }
   }
 
   await recordCharacterHistory(client, historyOf(key, nov17At0900, different))
@@ -269,15 +269,59 @@ test('점수가 null이면 점수 행이 생기지 않고, 엔진 버전만 달�
   await recordCharacterHistory(
     client,
     historyOf(key, nov17At1200, {
-      score: { kind: 'equipment', score: 1741, engine: nextEngine }
+      score: { kind: 'equipment', score: 1741, engine: nextEngine, approximate: null }
     })
   )
 
   const { scores } = await readCharacterHistory(client, key)
   assert.deepEqual(scores, [
-    { observedAt: nov17At0900, kind: 'equipment', score: 1741, engine },
-    { observedAt: nov17At1200, kind: 'equipment', score: 1741, engine: nextEngine }
+    { observedAt: nov17At0900, kind: 'equipment', score: 1741, engine, approximate: null },
+    {
+      observedAt: nov17At1200,
+      kind: 'equipment',
+      score: 1741,
+      engine: nextEngine,
+      approximate: null
+    }
   ])
+})
+
+test('근사 점수는 근사 방식, 경고, 건너뛴 이유와 함께 저장해 읽고, 값이 같아도 근사 여부나 근사 방식이 바뀌면 점수 행이 생긴다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('history-approximate')
+  const approximate = {
+    source: 'legacy_fusion_policy_a',
+    warning: '근사값, 1% 밖일 가능성 높음: 판정 불가',
+    skipped: { kind: 'resolution', message: '판정 불가' }
+  }
+  const otherApproximate = { ...approximate, source: 'input_gate_diagnostic' }
+  const scoreWith = (approximation) => ({
+    score: { kind: 'equipment', score: 1650, engine, approximate: approximation }
+  })
+
+  await recordCharacterHistory(client, historyOf(key, nov17At0800, scoreWith(approximate)))
+  await recordCharacterHistory(client, historyOf(key, nov17At0900, scoreWith(approximate)))
+  await recordCharacterHistory(client, historyOf(key, nov17At1000, scoreWith(null)))
+  await recordCharacterHistory(client, historyOf(key, nov17At1100, scoreWith(otherApproximate)))
+
+  const { scores } = await readCharacterHistory(client, key)
+  assert.deepEqual(
+    scores.map(({ observedAt, score, approximate }) => ({ observedAt, score, approximate })),
+    [
+      { observedAt: nov17At0800, score: 1650, approximate },
+      { observedAt: nov17At1000, score: 1650, approximate: null },
+      { observedAt: nov17At1100, score: 1650, approximate: otherApproximate }
+    ]
+  )
+  const snapshot = await readCharacterHistorySnapshot(client, key, nov17At0900)
+  assert.deepEqual(snapshot.score, {
+    observedAt: nov17At0800,
+    kind: 'equipment',
+    score: 1650,
+    engine,
+    approximate
+  })
 })
 
 test('같은 엔진 버전은 여러 캐릭터가 동시에 처음 저장해도 score_engines에 한 행만 있다', {
@@ -293,7 +337,7 @@ test('같은 엔진 버전은 여러 캐릭터가 동시에 처음 저장해도 
       recordCharacterHistory(
         client,
         historyOf(key, nov16At2200, {
-          score: { kind: 'buff', score: 900, engine: newEngine }
+          score: { kind: 'buff', score: 900, engine: newEngine, approximate: null }
         })
       )
     )
@@ -343,7 +387,7 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
     historyOf(key, nov12At2200, {
       basic: { ...basic, fame: 99000 },
       sections: { ...sections, equipment: secondEquipment },
-      score: { kind: 'equipment', score: 1800, engine }
+      score: { kind: 'equipment', score: 1800, engine, approximate: null }
     })
   )
   await recordCharacterHistory(
@@ -351,7 +395,7 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
     historyOf(key, nov14At2200, {
       basic: { ...basic, fame: 99000 },
       sections: { ...sections, equipment: secondEquipment, avatar: secondAvatar },
-      score: { kind: 'equipment', score: 1800, engine }
+      score: { kind: 'equipment', score: 1800, engine, approximate: null }
     })
   )
 
@@ -363,7 +407,8 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
     observedAt: nov12At2200,
     kind: 'equipment',
     score: 1800,
-    engine
+    engine,
+    approximate: null
   })
 
   const first = await readCharacterHistorySnapshot(client, key, nov12At215959)
