@@ -12,7 +12,7 @@ import type {
 import type { TimelinePages } from '#pages/character/hooks/useTimelinePages'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { apiFailure, characterUrl } from './character.handlers'
+import { apiFailure, characterUrl } from '#entities/character-detail/api/character-detail.handlers'
 import {
   type CharacterTimelineResult,
   useCharacterTimeline,

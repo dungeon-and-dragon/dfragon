@@ -3,10 +3,13 @@ import { delay, HttpResponse, http } from 'msw'
 import { act, useEffect } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterDetailView, CharacterIdentity } from '#entities/character'
+import type {
+  CharacterDetailView,
+  CharacterIdentity
+} from '#entities/character/@x/character-detail'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { apiFailure, characterUrl } from './character.handlers'
+import { apiFailure, characterUrl } from './character-detail.handlers'
 import {
   type CharacterDetailResult,
   useCharacterDetail,

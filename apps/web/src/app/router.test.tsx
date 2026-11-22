@@ -532,6 +532,32 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(detailRequests()).toBe(1)
 })
 
+it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시뮬레이터 화면만 그리고 전역 메뉴는 그대로 둔다', async () => {
+  serveDetail()
+  server.use(
+    http.post(`${DETAIL_URL}/simulation`, () =>
+      HttpResponse.json({ baseline: null, simulated: null })
+    )
+  )
+  window.history.replaceState(null, '', `${DETAIL_PATH}/simulator`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('main h1')?.textContent).toBe('장비 시뮬레이터')
+  )
+  expect(document.title).toBe('장비 시뮬레이터 - DFragon')
+  expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex')
+  expect(container.querySelector('section[aria-label="캐릭터 요약"]')).toBeNull()
+  expect(container.querySelector('[role="tablist"]')).toBeNull()
+  expect(globalMenu()).toEqual([
+    ['멀티서치', null],
+    ['검색', null],
+    ['통계', null],
+    ['모험단', null],
+    ['즐겨찾기', null]
+  ])
+})
+
 it('길드 주소를 열면 길드를 받은 뒤 제목이 길드 이름으로 바뀐다', async () => {
   server.use(
     http.get(`${SITE_API_URL}/guilds/guild-1`, () =>
