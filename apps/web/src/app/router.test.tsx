@@ -43,10 +43,19 @@ vi.mock('#features/capture-search/lib/screen-watch/browser-town-template', () =>
   readTownIndicatorTemplate: vi.fn()
 }))
 
-// html, head, body를 그리는 문서 틀은 테스트 container 안에 둘 수 없어 내용만 그린다.
-vi.mock('#app/RootDocument', () => ({
-  RootDocument: ({ children }: { children: React.ReactNode }) => children
-}))
+// html, head, body를 그리는 문서 틀은 테스트 container 안에 둘 수 없어 내용과 route의 head만 그린다.
+vi.mock('#app/RootDocument', async () => {
+  const { HeadContent } = await import('@tanstack/react-router')
+
+  return {
+    RootDocument: ({ children }: { children: React.ReactNode }) => (
+      <>
+        <HeadContent />
+        {children}
+      </>
+    )
+  }
+})
 
 const API_BASE_URL = 'https://site.example.test/api'
 
@@ -504,6 +513,8 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
 
   await vi.waitFor(() => expect(container.querySelector('main h1')?.textContent).toBe('하늘'))
   expect(selectedTab()).toBe('스킬')
+  // 브라우저에서는 loader가 상세를 기다리지 않으므로, 받은 뒤에 제목이 캐릭터 이름으로 바뀐다.
+  await vi.waitFor(() => expect(document.title).toBe('하늘 - DFragon'))
   expect(globalMenu()).toEqual([
     ['멀티서치', null],
     ['검색', null],
@@ -521,6 +532,19 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(selectedTab()).toBe('스탯')
   expect(window.history.length).toBe(historyLength)
   expect(detailRequests()).toBe(1)
+})
+
+it('길드 주소를 열면 길드를 받은 뒤 제목이 길드 이름으로 바뀐다', async () => {
+  server.use(
+    http.get(`${SITE_API_URL}/guilds/guild-1`, () =>
+      HttpResponse.json({ guildId: 'guild-1', guildName: '길드1', memberCount: 0, members: [] })
+    )
+  )
+  window.history.replaceState(null, '', '/guilds/guild-1')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(document.title).toBe('길드1 길드 - DFragon'))
+  expect(requested.filter((url) => url.pathname.includes('/guilds/'))).toHaveLength(1)
 })
 
 function serveAdventure(): void {
