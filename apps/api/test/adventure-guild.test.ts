@@ -82,9 +82,13 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 저장된 점수가 붙은 캐릭터 행을 준다', async () => {
+test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 근사 여부를 포함한 저장된 점수가 붙은 캐릭터 행을 준다', async () => {
   const names: string[] = []
-  const characters = [member('a', 70000, { kind: 'equipment', value: 1234567 }), member('b', null)]
+  const characters = [
+    member('a', 70000, { kind: 'equipment', value: 1234567, approximateSource: null }),
+    member('b', null),
+    member('c', 69000, { kind: 'buff', value: 4000000, approximateSource: 'synthetic-source' })
+  ]
   const { app, origin } = await listen({
     readAdventureCharacters: async (adventureName) => {
       names.push(adventureName)
@@ -109,8 +113,13 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 저
     assert.deepEqual(answer.body, {
       adventureName: '합성 모험단/1',
       characters: [
-        memberRow('a', 70000, { calculator: 'equipment', value: 1234567 }),
-        memberRow('b', null, null)
+        memberRow('a', 70000, { calculator: 'equipment', value: 1234567, approximate: null }),
+        memberRow('b', null, null),
+        memberRow('c', 69000, {
+          calculator: 'buff',
+          value: 4000000,
+          approximate: { source: 'synthetic-source' }
+        })
       ].map((character) => ({
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z'
@@ -124,7 +133,7 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 저
 test('길드 조회는 평균 명성 없이 길드 이름, 길드원 수, 저장된 점수가 붙은 길드원 목록을 준다', async () => {
   const members = [
     member('a', 70001),
-    member('b', 70000, { kind: 'buff', value: 4321000 }),
+    member('b', 70000, { kind: 'buff', value: 4321000, approximateSource: null }),
     member('c', null)
   ]
   const { app, origin } = await listen({
@@ -152,7 +161,7 @@ test('길드 조회는 평균 명성 없이 길드 이름, 길드원 수, 저장
       body.members.map(({ characterId, score }: CharacterRow) => [characterId, score]),
       [
         ['a', null],
-        ['b', { calculator: 'buff', value: 4321000 }],
+        ['b', { calculator: 'buff', value: 4321000, approximate: null }],
         ['c', null]
       ]
     )
