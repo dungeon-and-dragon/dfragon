@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import { bufferCard, dealerCard } from '#entities/character/api/character-cards.fixture'
 import type { CharacterCard } from '#entities/character/model/character'
-import { formatApproximateScore, toScoreView } from './card-score'
+import { approximateScoreNote, formatApproximateScore, toScoreView } from './card-score'
 
 it('카드 값이 없으면 점수 값 대신 null을 두고 라벨은 장비 점수로 둔다', () => {
   expect(toScoreView(null)).toEqual({
@@ -156,6 +156,18 @@ it('엔진이 건너뛴 버프 점수에 낸 근사값도 버퍼 톤의 근사�
     description:
       '근사값, 아이템을 판별하지 못함. 정확히 계산하지 못한 추정값이라 게임 버프 점수와 1% 넘게 다를 수 있습니다.'
   })
+})
+
+it('목록과 이력에 쓰는 근사 설명은 근사 방법과 점수 라벨로 만들고 모르는 방법은 추정값이라고 적는다', () => {
+  expect(approximateScoreNote('legacy_fusion_policy_a', '장비 점수')).toBe(
+    '이전 시즌 융합석을 빼고 계산한 값이라 게임 장비 점수와 1% 넘게 다를 수 있습니다.'
+  )
+  expect(approximateScoreNote('new_source', '버프 점수')).toBe(
+    '정확히 계산하지 못한 추정값이라 게임 버프 점수와 1% 넘게 다를 수 있습니다.'
+  )
+  expect(approximateScoreNote('toString', '장비 점수')).toBe(
+    '정확히 계산하지 못한 추정값이라 게임 장비 점수와 1% 넘게 다를 수 있습니다.'
+  )
 })
 
 it('근사값 점수의 화면 글자는 천 단위 구분 앞에 ≈를 붙인다', () => {

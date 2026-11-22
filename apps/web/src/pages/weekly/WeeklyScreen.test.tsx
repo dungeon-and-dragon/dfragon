@@ -68,7 +68,7 @@ const weekly: AdventureWeekly = {
         { kind: 'raid', name: '무너진 성자 미카엘라' },
         { kind: 'legion', name: '다 레기온' }
       ],
-      { calculator: 'buff', value: 4_120_000 },
+      { calculator: 'buff', value: 4_120_000, approximate: null },
       {
         equipmentSet: { id: 'synthetic-set', name: '합성 장비 세트' },
         oathSet: { id: 1, name: '합성 서약', option: null }
