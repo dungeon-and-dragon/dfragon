@@ -34,6 +34,14 @@ export function AdventureTabs({
         >
           장비
         </Link>
+        <Link
+          to="/adventures/$adventureName/timeline"
+          params={{ adventureName }}
+          activeOptions={{ exact: true, includeSearch: false }}
+          className={TAB}
+        >
+          타임라인
+        </Link>
       </nav>
       {actions}
     </div>

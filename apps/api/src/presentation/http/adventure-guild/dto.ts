@@ -1,13 +1,17 @@
 import type { StoredCharacter, StoredGuild } from '@dfragon/database'
 import { z } from 'zod'
-import type {
-  ActivitySeason,
-  AdventureActivity,
-  AdventureSeasonDays,
-  AdventureWeeklyClears,
-  SelectedAdventureEquipment
+import {
+  ADVENTURE_TIMELINE_KINDS,
+  type ActivitySeason,
+  type AdventureActivity,
+  type AdventureSeasonDays,
+  type AdventureTimelinePage,
+  type AdventureTimelineQuery,
+  type AdventureWeeklyClears,
+  type SelectedAdventureEquipment
 } from '#domain/adventure-guild/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
+import { parseTimelineCursor } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
 
 const SEASON_NUMBER_PATTERN = /^[1-9]\d{0,3}$/
@@ -19,6 +23,10 @@ export const equipmentQuery = z.object({
   server: z.string().optional(),
   set: z.string().optional()
 })
+
+const timelineQuery = z
+  .object({ kind: z.enum(ADVENTURE_TIMELINE_KINDS).optional(), before: z.string().optional() })
+  .strict()
 
 export type ActivityQuery = z.infer<typeof activityQuery>
 
@@ -45,6 +53,30 @@ export type AdventureActivityResponse = AdventureActivity
 export type AdventureSeasonDaysResponse = AdventureSeasonDays
 
 export type ActivitySeasonResponse = ActivitySeason
+
+export type AdventureTimelineResponse = AdventureTimelinePage
+
+export function parseTimelineQuery(query: unknown): AdventureTimelineQuery {
+  const parsed = timelineQuery.safeParse(query)
+
+  if (!parsed.success) {
+    throw new CharacterDetailFailure('query')
+  }
+
+  const { kind, before } = parsed.data
+
+  if (before === undefined) {
+    return { kind }
+  }
+
+  const cursor = parseTimelineCursor(before)
+
+  if (cursor === undefined) {
+    throw new CharacterDetailFailure('query')
+  }
+
+  return { kind, before: cursor }
+}
 
 export function parseSeason(season: string): SeasonNumber {
   const parsed = seasonNumber.safeParse(season)

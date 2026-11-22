@@ -6,7 +6,7 @@ export const clearKind = z.enum(['raid', 'legion'])
 // cursor를 보내기 전의 API 응답은 이어 받을 기록이 없는 것으로 읽는다.
 const timelineCursor = z.string().nullable().default(null)
 
-const timelineEnhancementSchema = z.object({
+export const timelineEnhancementSchema = z.object({
   kind: z.enum(['reinforce', 'amplify', 'refine']),
   itemId: nullableText,
   itemName: nullableText,
@@ -18,7 +18,7 @@ const timelineEnhancementSchema = z.object({
   occurredAt
 })
 
-const timelineAcquisitionSchema = z.object({
+export const timelineAcquisitionSchema = z.object({
   code: z.number().int(),
   name: z.string(),
   itemId: nullableText,

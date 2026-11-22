@@ -1,15 +1,13 @@
 import { Button } from '@dfragon/ui'
 import type { ReactNode } from 'react'
 import type { TimelinePagesState } from '#pages/character/hooks/useTimelinePages'
+import { LoadingLine } from '#shared/ui/LoadingLine'
+import { RelativeTime } from '#shared/ui/RelativeTime'
 import {
   acquisitionRoute,
   CLEAR_KIND_LABELS,
   ENHANCEMENT_KIND_LABELS,
-  formatEnhancementValue
-} from './timeline-format'
-import { LoadingLine } from '#shared/ui/LoadingLine'
-import { RelativeTime } from '#shared/ui/RelativeTime'
-import {
+  formatEnhancementValue,
   type TimelineAcquisition,
   type TimelineClearCount,
   type TimelineEnhancement,

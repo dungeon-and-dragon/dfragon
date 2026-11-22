@@ -1,11 +1,14 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useMyAdventureStore } from '#entities/adventure-guild'
 import { AdventureEquipmentScreen } from './AdventureEquipmentScreen'
+import { AdventureTimelineScreen } from './AdventureTimelineScreen'
 import type { EquipmentSearch } from './equipment-search'
+import type { TimelineSearch } from './timeline-search'
 import { AdventureEntryScreen, WeeklyScreen } from './WeeklyScreen'
 
 const route = getRouteApi('/adventures/$adventureName/')
 const equipmentRoute = getRouteApi('/adventures/$adventureName/equipment')
+const timelineRoute = getRouteApi('/adventures/$adventureName/timeline')
 
 function useOpenAdventure(): (adventureName: string) => Promise<void> {
   const navigate = useNavigate()
@@ -56,6 +59,27 @@ export function AdventureEquipmentPage(): React.JSX.Element {
 
   return (
     <AdventureEquipmentScreen
+      key={adventureName}
+      adventureName={adventureName}
+      search={search}
+      onSearchChange={changeSearch}
+      onAdventureOpen={openAdventure}
+    />
+  )
+}
+
+export function AdventureTimelinePage(): React.JSX.Element {
+  const { adventureName } = timelineRoute.useParams()
+  const search = timelineRoute.useSearch()
+  const navigate = timelineRoute.useNavigate()
+  const openAdventure = useOpenAdventure()
+
+  async function changeSearch(next: TimelineSearch): Promise<void> {
+    await navigate({ search: next, resetScroll: false })
+  }
+
+  return (
+    <AdventureTimelineScreen
       key={adventureName}
       adventureName={adventureName}
       search={search}

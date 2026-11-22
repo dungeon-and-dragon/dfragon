@@ -3,6 +3,8 @@ import {
   type ActivitySeason,
   type AdventureActivity,
   type AdventureSeasonDays,
+  type AdventureTimelinePage,
+  type AdventureTimelineQuery,
   type AdventureWeeklyClears,
   type EquipmentQuery,
   type SelectedAdventureEquipment,
@@ -54,6 +56,22 @@ export class AdventureGuildService {
     }
 
     return selectAdventureEquipment(equipment, query)
+  }
+
+  async adventureTimeline(
+    adventureName: string,
+    query: AdventureTimelineQuery
+  ): Promise<AdventureTimelinePage> {
+    const { characters, page } = await this.repository.readAdventureTimeline(adventureName, query)
+
+    // 이어 받기는 첫 묶음 뒤에만 오므로 첫 묶음을 줄 때만 동기화를 요청한다.
+    if (query.before === undefined) {
+      for (const { serverId, characterId } of characters) {
+        this.requestTimelineSync({ serverId, characterId })
+      }
+    }
+
+    return page
   }
 
   async adventureActivity(
@@ -127,6 +145,7 @@ export const emptyAdventureGuildRepository: AdventureGuildRepository = {
   readGuild: async () => ({ guildName: null, members: [] }),
   readAdventureWeeklyClears: async () => ({ clearNames: [], characters: [] }),
   readAdventureEquipment: async () => ({ sets: [], servers: [] }),
+  readAdventureTimeline: async () => ({ characters: [], page: { items: [], nextCursor: null } }),
   readAdventureActivity: async (_adventureName, seasonId) => {
     if (seasonId !== undefined) {
       return undefined

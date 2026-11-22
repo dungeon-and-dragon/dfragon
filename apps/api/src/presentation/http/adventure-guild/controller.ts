@@ -6,9 +6,11 @@ import {
   type ActivitySeasonResponse,
   type AdventureActivityResponse,
   type AdventureSeasonDaysResponse,
+  type AdventureTimelineResponse,
   activityQuery,
   equipmentQuery,
   parseSeason,
+  parseTimelineQuery,
   toAdventureCharactersResponse,
   toAdventureEquipmentResponse,
   toAdventureWeeklyResponse,
@@ -57,6 +59,16 @@ export class AdventureGuildController {
       })
 
       return c.json(toAdventureEquipmentResponse(adventureName, equipment))
+    })
+
+    routes.get('/adventures/:adventureName/timeline', async (c) => {
+      const query = parseTimelineQuery(readQuery(c))
+      const timeline: AdventureTimelineResponse = await this.service.adventureTimeline(
+        c.req.param('adventureName'),
+        query
+      )
+
+      return c.json(timeline)
     })
 
     routes.get('/adventures/:adventureName/activity', async (c) => {
