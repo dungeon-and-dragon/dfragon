@@ -1,5 +1,5 @@
 import type { CharacterBasicInput } from './character.js'
-import type { CharacterScoreInput } from './character-score.js'
+import type { CharacterScoreApproximation, CharacterScoreInput } from './character-score.js'
 import type { DatabaseClient } from './client.js'
 import type { Prisma } from './generated/prisma/client.js'
 
@@ -10,7 +10,10 @@ export type CharacterHistoryKey = {
 
 export type CharacterHistoryBasic = Omit<CharacterBasicInput, 'serverId' | 'characterId'>
 
-export type CharacterHistoryScore = Pick<CharacterScoreInput, 'kind' | 'score' | 'engine'>
+export type CharacterHistoryScore = Pick<
+  CharacterScoreInput,
+  'kind' | 'score' | 'engine' | 'approximate'
+>
 
 export type CharacterSectionBody = Readonly<Record<string, unknown>>
 
@@ -31,6 +34,7 @@ export type StoredCharacterScoreHistory = {
   kind: string
   score: number
   engine: CharacterHistoryScore['engine']
+  approximate: CharacterScoreApproximation | null
 }
 
 export type StoredCharacterSectionChange = {
@@ -80,8 +84,34 @@ const scoreColumns = {
   observedAt: true,
   kind: true,
   score: true,
-  engine: { select: { package: true, rulesRev: true, bundleId: true } }
+  engine: { select: { package: true, rulesRev: true, bundleId: true } },
+  approximateSource: true,
+  approximateWarning: true,
+  skippedKind: true,
+  skippedMessage: true
 } as const
+
+type ScoreHistoryRow = Prisma.CharacterScoreHistoryGetPayload<{ select: typeof scoreColumns }>
+
+function toStoredScoreHistory(row: ScoreHistoryRow): StoredCharacterScoreHistory {
+  const { approximateSource, approximateWarning, skippedKind, skippedMessage, ...score } = row
+
+  if (
+    approximateSource === null ||
+    approximateWarning === null ||
+    skippedKind === null ||
+    skippedMessage === null
+  ) {
+    return { ...score, approximate: null }
+  }
+
+  const skipped = { kind: skippedKind, message: skippedMessage }
+
+  return {
+    ...score,
+    approximate: { source: approximateSource, warning: approximateWarning, skipped }
+  }
+}
 
 export async function recordCharacterHistory(
   client: DatabaseClient,
@@ -175,18 +205,24 @@ async function writeSections(
 async function writeScore(
   transaction: Prisma.TransactionClient,
   { serverId, characterId, observedAt }: CharacterHistoryInput,
-  { kind, score, engine }: CharacterHistoryScore
+  { kind, score, engine, approximate }: CharacterHistoryScore
 ): Promise<void> {
   const engineId = await findOrCreateEngineId(transaction, engine)
+  const approximateSource = approximate?.source ?? null
+  const approximateWarning = approximate?.warning ?? null
+  const skippedKind = approximate?.skipped.kind ?? null
+  const skippedMessage = approximate?.skipped.message ?? null
 
   await transaction.$executeRaw`
     INSERT INTO "character_score_history"
-      ("server_id", "character_id", "observed_at", "kind", "score", "engine_id")
-    SELECT ${serverId}, ${characterId}, ${observedAt}, ${kind}, ${score}::integer, ${engineId}::integer
+      ("server_id", "character_id", "observed_at", "kind", "score", "engine_id",
+       "approximate_source", "approximate_warning", "skipped_kind", "skipped_message")
+    SELECT ${serverId}, ${characterId}, ${observedAt}, ${kind}, ${score}::integer, ${engineId}::integer,
+      ${approximateSource}, ${approximateWarning}, ${skippedKind}, ${skippedMessage}
     WHERE NOT EXISTS (
       SELECT 1
       FROM (
-        SELECT stored."kind", stored."score", stored."engine_id"
+        SELECT stored."kind", stored."score", stored."engine_id", stored."approximate_source"
         FROM "character_score_history" stored
         WHERE stored."server_id" = ${serverId} AND stored."character_id" = ${characterId}
         ORDER BY stored."observed_at" DESC
@@ -195,6 +231,7 @@ async function writeScore(
       WHERE latest."kind" = ${kind}
         AND latest."score" = ${score}::integer
         AND latest."engine_id" = ${engineId}::integer
+        AND latest."approximate_source" IS NOT DISTINCT FROM ${approximateSource}
     )`
 }
 
@@ -243,7 +280,9 @@ export async function readCharacterHistory(
     })
   ])
 
-  return { basics, scores, sectionChanges }
+  const storedScores = scores.map(toStoredScoreHistory)
+
+  return { basics, scores: storedScores, sectionChanges }
 }
 
 export function readCharacterSectionHistory(
@@ -290,6 +329,7 @@ export async function readCharacterHistorySnapshot(
   const sections = Object.fromEntries(sectionRows.map(({ section, data }) => [section, data]))
   const observedTimes = [basic, score, ...sectionRows].flatMap((row) => row?.observedAt ?? [])
   const observedAt = new Date(Math.max(...observedTimes.map((time) => time.getTime())))
+  const storedScore = score !== null ? toStoredScoreHistory(score) : null
 
-  return { observedAt, basic, score, sections }
+  return { observedAt, basic, score: storedScore, sections }
 }
