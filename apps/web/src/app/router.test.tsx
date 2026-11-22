@@ -688,7 +688,8 @@ it('모험단 화면의 장비 탭을 누르면 장비 주소로 가고, 세트�
   await vi.waitFor(() =>
     expect(adventureTabs()).toEqual([
       ['활동', 'page'],
-      ['장비', null]
+      ['장비', null],
+      ['타임라인', null]
     ])
   )
 
@@ -697,7 +698,8 @@ it('모험단 화면의 장비 탭을 누르면 장비 주소로 가고, 세트�
   await vi.waitFor(() => expect(equipmentNames()).toEqual(['카인캐릭터']))
   expect(adventureTabs()).toEqual([
     ['활동', null],
-    ['장비', 'page']
+    ['장비', 'page'],
+    ['타임라인', null]
   ])
   expect(pressedChip('세트')).toBe('칠흑')
 

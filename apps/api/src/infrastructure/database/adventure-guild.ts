@@ -8,11 +8,13 @@ import {
 import type {
   AdventureActivityRead,
   AdventureGuildRepository,
-  AdventureSeasonBackfillRead
+  AdventureSeasonBackfillRead,
+  AdventureTimelineRead
 } from '#application/adventure-guild/repository.js'
 import type {
   AdventureEquipment,
   AdventureSeasonDays,
+  AdventureTimelineQuery,
   AdventureWeeklyClears
 } from '#domain/adventure-guild/index.js'
 import {
@@ -21,6 +23,7 @@ import {
   readAdventureSeasonDays
 } from './adventure-activity.js'
 import { readAdventureEquipment } from './adventure-equipment.js'
+import { readAdventureTimeline } from './adventure-timeline.js'
 import { readAdventureWeeklyClears } from './adventure-weekly.js'
 
 export class DatabaseAdventureGuildRepository implements AdventureGuildRepository {
@@ -40,6 +43,13 @@ export class DatabaseAdventureGuildRepository implements AdventureGuildRepositor
 
   readAdventureEquipment(adventureName: string): Promise<AdventureEquipment> {
     return readAdventureEquipment(this.client, adventureName, new Date())
+  }
+
+  readAdventureTimeline(
+    adventureName: string,
+    query: AdventureTimelineQuery
+  ): Promise<AdventureTimelineRead> {
+    return readAdventureTimeline(this.client, adventureName, query)
   }
 
   readAdventureActivity(

@@ -21,6 +21,7 @@ import {
 } from './dist/infrastructure/database/adventure-activity.js'
 import { SeasonBackfillService } from './dist/application/character-timeline/season-backfill.js'
 import { DatabaseSeasonBackfillRepository } from './dist/infrastructure/database/character-timeline.js'
+import { readAdventureTimeline } from './dist/infrastructure/database/adventure-timeline.js'
 import { readAdventureWeeklyClears } from './dist/infrastructure/database/adventure-weekly.js'
 import { CharacterSearchService } from './dist/application/character-search/service.js'
 import { DatabaseCharacterSearchRepository } from './dist/infrastructure/database/character-search.js'
@@ -208,6 +209,35 @@ try {
         result: true,
         safe: false
       })
+    ]
+  )
+
+  // 다른 모험단(guild-no-fame)의 기록과 레전더리 획득은 빠지고, 중천 전 강화 백필 행은 들어온다.
+  const timelineRows = async (query) => {
+    const { page } = await readAdventureTimeline(client, adventureName, query)
+
+    return page.items.map((row) => [row.characterId, row.type, row.occurredAt.toISOString()])
+  }
+  const timelineCharacter = 'adventure-high'
+
+  assert.deepEqual(await timelineRows({}), [
+    [timelineCharacter, 'enhancement', at('04-02T11:00:00').toISOString()],
+    [timelineCharacter, 'acquisition', at('04-02T10:20:00').toISOString()],
+    [timelineCharacter, 'acquisition', at('04-02T10:00:00').toISOString()],
+    [timelineCharacter, 'enhancement', new Date('2024-01-10T12:00:00+09:00').toISOString()]
+  ])
+  assert.deepEqual(await timelineRows({ kind: 'amplify' }), [
+    [timelineCharacter, 'enhancement', at('04-02T11:00:00').toISOString()]
+  ])
+  assert.deepEqual(await timelineRows({ kind: 'acquisition' }), [
+    [timelineCharacter, 'acquisition', at('04-02T10:20:00').toISOString()],
+    [timelineCharacter, 'acquisition', at('04-02T10:00:00').toISOString()]
+  ])
+  assert.deepEqual(
+    await timelineRows({ before: { occurredAt: at('04-02T10:20:00'), id: 10n ** 17n } }),
+    [
+      [timelineCharacter, 'acquisition', at('04-02T10:00:00').toISOString()],
+      [timelineCharacter, 'enhancement', new Date('2024-01-10T12:00:00+09:00').toISOString()]
     ]
   )
 

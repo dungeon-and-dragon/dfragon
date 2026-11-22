@@ -33,6 +33,12 @@ export {
 } from './lib/set-point-bonus'
 export type { SetPointBonusRule } from './lib/set-point-bonus'
 export { toStatusLayout } from './lib/status-layout'
+export {
+  acquisitionRoute,
+  CLEAR_KIND_LABELS,
+  ENHANCEMENT_KIND_LABELS,
+  formatEnhancementValue
+} from './lib/timeline-format'
 export type { StatusLine } from './lib/status-layout'
 export type {
   CharacterCandidate,
