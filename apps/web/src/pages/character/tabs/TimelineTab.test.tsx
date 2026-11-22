@@ -9,7 +9,7 @@ import type {
   TimelineAcquisition,
   TimelineEnhancement
 } from '#entities/character'
-import { apiFailure, characterUrl } from '#pages/character/api/character.handlers'
+import { apiFailure, characterUrl } from '#entities/character-detail/api/character-detail.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TimelineTab } from './TimelineTab'

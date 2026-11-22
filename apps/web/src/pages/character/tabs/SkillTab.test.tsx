@@ -8,7 +8,7 @@ import type { CharacterDetailView, MaleCrusaderRole } from '#entities/character'
 import type { GameTextLines, SkillWindowCatalog } from '#entities/catalog'
 import type { SkillStats } from '#entities/ranking'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
-import { loadingResponse } from '#pages/character/api/character.handlers'
+import { loadingResponse } from '#entities/character-detail/api/character-detail.handlers'
 import {
   SKILL_WINDOW_INDEX_URL,
   skillWindowHandlers

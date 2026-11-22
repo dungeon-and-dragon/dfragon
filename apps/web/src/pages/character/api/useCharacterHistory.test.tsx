@@ -8,7 +8,7 @@ import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { storyCharacterDetail } from './character.fixture'
-import { characterUrl } from './character.handlers'
+import { characterUrl } from '#entities/character-detail/api/character-detail.handlers'
 import { useCharacterHistory, useHistorySnapshot } from './useCharacterHistory'
 
 const INVALID_RESPONSE = '검색 응답을 확인하지 못했습니다. 다시 시도해 주세요.'
