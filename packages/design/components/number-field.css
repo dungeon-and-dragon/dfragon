@@ -1,0 +1,93 @@
+/*
+ * 숫자 양옆의 내리기, 올리기 버튼으로 한 칸씩 바꾸는 숫자 칸이다.
+ * <div class="number-field" role="group"><button class="number-field-button" aria-label="수치 내리기"><svg /></button>
+ *   <input class="number-field-input" value="+12"><button class="number-field-button" aria-label="수치 올리기"><svg /></button></div>
+ * 높이는 표 행 안의 작은 컨트롤 높이다. 비활성은 root에 data-disabled, 범위 끝에 닿은 버튼은 disabled다.
+ * 숫자 글자색은 놓인 자리의 글자색을 따라, 강화, 증폭처럼 값마다 색이 다른 자리는 감싼 요소가 색을 정한다.
+ */
+.number-field {
+  display: inline-flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  height: var(--height-control-xs);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--color-canvas);
+  transition-property: border-color, box-shadow;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.number-field:focus-within {
+  border-color: var(--color-signal);
+  box-shadow: 0 0 0 1px var(--color-signal);
+}
+
+.number-field[data-disabled] {
+  border-color: var(--color-line);
+  background-color: var(--color-inset);
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.number-field-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--height-control-xs);
+  color: var(--color-fg-muted);
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition-property: color, background-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.number-field-button:hover:not(:disabled) {
+  background-color: var(--color-surface);
+  color: var(--color-fg);
+}
+
+.number-field-button:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: -2px;
+}
+
+.number-field-button:disabled {
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.number-field-input {
+  box-sizing: border-box;
+  width: 40px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background-color: transparent;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.number-field-input:disabled {
+  cursor: not-allowed;
+}
+
+@media (pointer: coarse) {
+  .number-field-button {
+    position: relative;
+  }
+
+  .number-field-button::before {
+    content: '';
+    position: absolute;
+    inset: -9px -4px;
+  }
+}

@@ -1,0 +1,100 @@
+<!-- @dsCard group="Components" height=100 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+      <div class="number-field" role="group">
+        <button type="button" class="number-field-button" aria-label="수치 내리기" disabled>
+          <svg
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path vector-effect="non-scaling-stroke" d="M5 12h14" />
+          </svg>
+        </button>
+        <input class="number-field-input" aria-label="수치" value="+0" />
+        <button type="button" class="number-field-button" aria-label="수치 올리기">
+          <svg
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path vector-effect="non-scaling-stroke" d="M5 12h14M12 5v14" />
+          </svg>
+        </button>
+      </div>
+      <div class="number-field" role="group">
+        <button type="button" class="number-field-button" aria-label="수치 내리기">
+          <svg
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path vector-effect="non-scaling-stroke" d="M5 12h14" />
+          </svg>
+        </button>
+        <input class="number-field-input" aria-label="수치" value="+12" />
+        <button type="button" class="number-field-button" aria-label="수치 올리기">
+          <svg
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path vector-effect="non-scaling-stroke" d="M5 12h14M12 5v14" />
+          </svg>
+        </button>
+      </div>
+      <div class="number-field" role="group" data-disabled>
+        <button type="button" class="number-field-button" aria-label="수치 내리기" disabled>
+          <svg
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path vector-effect="non-scaling-stroke" d="M5 12h14" />
+          </svg>
+        </button>
+        <input class="number-field-input" aria-label="수치" value="+8" disabled />
+        <button type="button" class="number-field-button" aria-label="수치 올리기" disabled>
+          <svg
+            viewBox="0 0 24 24"
+            width="1em"
+            height="1em"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path vector-effect="non-scaling-stroke" d="M5 12h14M12 5v14" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

@@ -71,6 +71,22 @@ export function CloseIcon(props: IconProps): React.JSX.Element {
   )
 }
 
+export function MinusIcon(props: IconProps): React.JSX.Element {
+  return (
+    <LineIcon {...props}>
+      <path vectorEffect="non-scaling-stroke" d="M5 12h14" />
+    </LineIcon>
+  )
+}
+
+export function PlusIcon(props: IconProps): React.JSX.Element {
+  return (
+    <LineIcon {...props}>
+      <path vectorEffect="non-scaling-stroke" d="M5 12h14M12 5v14" />
+    </LineIcon>
+  )
+}
+
 export function SearchIcon(props: IconProps): React.JSX.Element {
   return (
     <LineIcon {...props}>

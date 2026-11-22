@@ -27,6 +27,8 @@ export type {
 } from './select'
 export { Tabs } from './tabs'
 export type { TabsListProps, TabsTabProps } from './tabs'
+export { NumberField } from './number-field'
+export type { NumberFieldProps } from './number-field'
 export { Switch } from './switch'
 export type { SwitchProps } from './switch'
 export { Chip } from './chip'
@@ -53,9 +55,11 @@ export {
   CopyIcon,
   ExternalLinkIcon,
   HeartIcon,
+  MinusIcon,
   MonitorIcon,
   MoonIcon,
   PinIcon,
+  PlusIcon,
   RefreshIcon,
   SearchIcon,
   SunIcon,
