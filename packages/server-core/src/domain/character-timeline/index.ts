@@ -6,11 +6,13 @@ export {
   EMPTY_CHARACTER_TIMELINE,
   EMPTY_TIMELINE_PAGE,
   ENHANCEMENT_CODES,
+  ENHANCEMENT_KINDS,
   LEGION_CLEAR_CODE,
   RAID_CLEAR_CODES,
   TIMELINE_PAGE_SIZE,
   formatTimelineCursor,
   parseTimelineCursor,
+  toAcquisition,
   toAcquisitionPage,
   toCharacterTimeline,
   toClear,
@@ -20,6 +22,8 @@ export {
 } from './project.js'
 export type {
   CharacterTimeline,
+  EnhancementKind,
+  TimelineAcquisition,
   TimelineClear,
   TimelineClearCount,
   TimelineClearRecord,

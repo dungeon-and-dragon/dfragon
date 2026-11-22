@@ -3,6 +3,8 @@ import type {
   AdventureActivityOf,
   AdventureEquipment,
   AdventureSeasonDays,
+  AdventureTimelinePage,
+  AdventureTimelineQuery,
   AdventureWeeklyClears,
   StoredActivitySeason
 } from '#domain/adventure-guild/index.js'
@@ -19,11 +21,20 @@ export type AdventureSeasonBackfillRead = {
   jobs: SeasonBackfillJob[]
 }
 
+export type AdventureTimelineRead = {
+  characters: TimelineCharacter[]
+  page: AdventureTimelinePage
+}
+
 export interface AdventureGuildRepository {
   readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]>
   readGuild(guildId: string): Promise<StoredGuild>
   readAdventureWeeklyClears(adventureName: string): Promise<AdventureWeeklyClears>
   readAdventureEquipment(adventureName: string): Promise<AdventureEquipment>
+  readAdventureTimeline(
+    adventureName: string,
+    query: AdventureTimelineQuery
+  ): Promise<AdventureTimelineRead>
   readAdventureActivity(
     adventureName: string,
     seasonId: number | undefined

@@ -33,7 +33,7 @@ import { sortClearCountsByRelease } from '@dfragon/server-core/domain/content-cl
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 const ACQUISITION_RARITIES = ['에픽', '태초']
-const PAGE_QUERIES = {
+export const PAGE_QUERIES = {
   enhancements: { codes: ENHANCEMENT_CODES },
   acquisitions: { codes: ACQUISITION_CODES, itemRarities: ACQUISITION_RARITIES }
 } satisfies Record<TimelinePageList, Pick<RecentTimelineItemQuery, 'codes' | 'itemRarities'>>
