@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   type CharacterHistory,
+  characterHistorySchema,
   toHistoryPoints,
   toHistorySnapshotSummary
 } from './character-history'
@@ -16,9 +17,9 @@ function history(overrides: Partial<CharacterHistory> = {}): CharacterHistory {
       { observedAt: THIRD, fame: 135980 }
     ],
     scores: [
-      { observedAt: FIRST, calculator: 'equipment', value: 1268402 },
-      { observedAt: FIRST, calculator: 'buff', value: 4000000 },
-      { observedAt: SECOND, calculator: 'equipment', value: 1281950 }
+      { observedAt: FIRST, calculator: 'equipment', value: 1268402, approximate: null },
+      { observedAt: FIRST, calculator: 'buff', value: 4000000, approximate: null },
+      { observedAt: SECOND, calculator: 'equipment', value: 1281950, approximate: null }
     ],
     sectionChanges: {
       equipment: [FIRST, SECOND],
@@ -87,6 +88,36 @@ describe('toHistoryPoints', () => {
     ])
     expect(toHistoryPoints(history(), 'buff').map(({ score }) => score)).toEqual([
       4000000, 4000000, 4000000
+    ])
+  })
+
+  it('시점의 점수가 근사값으로 저장한 이력이면 그 시점을 근사값으로 표시한다', () => {
+    const scores: CharacterHistory['scores'] = [
+      { observedAt: FIRST, calculator: 'equipment', value: 1268402, approximate: null },
+      {
+        observedAt: SECOND,
+        calculator: 'equipment',
+        value: 1250000,
+        approximate: { source: 'legacy_fusion_policy_a' }
+      }
+    ]
+    const points = toHistoryPoints(history({ scores }), 'equipment')
+
+    expect(points.map(({ score, approximate }) => [score, approximate])).toEqual([
+      [1250000, true],
+      [1250000, true],
+      [1268402, false]
+    ])
+  })
+
+  it('근사 여부를 보내지 않는 API의 점수 이력은 정확한 점수로 읽는다', () => {
+    const { scores } = characterHistorySchema.parse({
+      ...history(),
+      scores: [{ observedAt: FIRST, calculator: 'equipment', value: 1268402 }]
+    })
+
+    expect(scores).toEqual([
+      { observedAt: FIRST, calculator: 'equipment', value: 1268402, approximate: null }
     ])
   })
 

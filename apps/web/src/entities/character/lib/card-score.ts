@@ -31,6 +31,14 @@ const scoreNote = (label: ScoreView['label']): string =>
 
 export const formatApproximateScore = (value: number): string => `≈${integer.format(value)}`
 
+export function approximateScoreNote(source: string, label: ScoreView['label']): string {
+  const method = Object.hasOwn(approximateMethods, source)
+    ? approximateMethods[source]
+    : '정확히 계산하지 못한 추정값'
+
+  return `${method}이라 게임 ${label}와 1% 넘게 다를 수 있습니다.`
+}
+
 function scoreTone(role: CharacterCard['role'] | undefined): ScoreView['tone'] {
   if (role == null) {
     return null
@@ -70,10 +78,7 @@ export function toScoreView(card: CharacterCard | null | undefined, pending = fa
     return { ...labelTone, value: null, approximate: false, description }
   }
   const { value, source } = score.approximate
-  const method = Object.hasOwn(approximateMethods, source)
-    ? approximateMethods[source]
-    : '정확히 계산하지 못한 추정값'
-  const description = `근사값, ${reason}. ${method}이라 게임 ${label}와 1% 넘게 다를 수 있습니다.`
+  const description = `근사값, ${reason}. ${approximateScoreNote(source, label)}`
 
   return { ...labelTone, value, approximate: true, description }
 }

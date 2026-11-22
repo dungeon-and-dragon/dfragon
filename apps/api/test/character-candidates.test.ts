@@ -777,7 +777,7 @@ test('후보가 없으면 모험단명을 읽지 않는다', async () => {
   assert.deepEqual((await service.candidates(candidateInput(characterName))).result, { rows: [] })
 })
 
-test('일반 검색은 결과 캐릭터의 저장된 점수를 한 번에 읽어 종류와 함께 붙이고 저장되지 않은 캐릭터는 null이다', async () => {
+test('일반 검색은 결과 캐릭터의 저장된 점수를 한 번에 읽어 종류, 근사 여부와 함께 붙이고 저장되지 않은 캐릭터는 null이다', async () => {
   const reads: string[][] = []
   const service = new CharacterSearchService(
     {
@@ -786,8 +786,20 @@ test('일반 검색은 결과 캐릭터의 저장된 점수를 한 번에 읽어
         reads.push(characters.map(({ serverId, characterId }) => `${serverId}/${characterId}`))
 
         return [
-          { serverId: 'cain', characterId: 'dealer', kind: 'equipment', value: 1234567 },
-          { serverId: 'cain', characterId: 'buffer', kind: 'buff', value: 4321000 }
+          {
+            serverId: 'cain',
+            characterId: 'dealer',
+            kind: 'equipment',
+            value: 1234567,
+            approximateSource: null
+          },
+          {
+            serverId: 'cain',
+            characterId: 'buffer',
+            kind: 'buff',
+            value: 4321000,
+            approximateSource: 'synthetic-source'
+          }
         ]
       }
     },
@@ -809,9 +821,13 @@ test('일반 검색은 결과 캐릭터의 저장된 점수를 한 번에 읽어
       {
         serverId: 'cain',
         characterId: 'dealer',
-        score: { calculator: 'equipment', value: 1234567 }
+        score: { calculator: 'equipment', value: 1234567, approximate: null }
       },
-      { serverId: 'cain', characterId: 'buffer', score: { calculator: 'buff', value: 4321000 } },
+      {
+        serverId: 'cain',
+        characterId: 'buffer',
+        score: { calculator: 'buff', value: 4321000, approximate: { source: 'synthetic-source' } }
+      },
       { serverId: 'siroco', characterId: 'dealer', score: null }
     ]
   )

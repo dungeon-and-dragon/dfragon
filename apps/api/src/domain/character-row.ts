@@ -3,7 +3,10 @@ import type { CharacterCardScore } from '@dfragon/server-core/domain/character-c
 import type { CharacterRole } from '@dfragon/server-core/domain/character-role.js'
 import { characterFromStored } from '@dfragon/server-core/domain/character-from-details.js'
 
-export type CharacterRowScore = Pick<CharacterCardScore, 'calculator'> & { value: number }
+export type CharacterRowScore = Pick<CharacterCardScore, 'calculator'> & {
+  value: number
+  approximate: { source: string } | null
+}
 
 export type CharacterRow = {
   serverId: string
@@ -28,9 +31,10 @@ export function toCharacterRowScore(stored: StoredCharacterScore | null): Charac
     return null
   }
 
-  const { kind: calculator, value } = stored
+  const { kind: calculator, value, approximateSource } = stored
+  const approximate = approximateSource !== null ? { source: approximateSource } : null
 
-  return { calculator, value }
+  return { calculator, value, approximate }
 }
 
 export function toCharacterRow(stored: StoredCharacter): CharacterRow {
