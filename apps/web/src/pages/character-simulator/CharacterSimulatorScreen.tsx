@@ -10,11 +10,13 @@ import { ScorePanel } from './components/ScorePanel'
 import { SimulatorTable } from './components/SimulatorTable'
 import {
   hasChanges,
+  NO_CHANGES,
   type SimulatorSlot,
+  type SimulatorSlotItem,
   type SlotDraft,
   simulationBody,
   simulatorReducer,
-  toSimulatorSlots
+  toSimulatorRows
 } from './model/simulator-draft'
 
 const TITLE = '장비 시뮬레이터'
@@ -62,14 +64,18 @@ export function CharacterSimulatorScreen({
 function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
   const identity = { serverId: character.serverId, characterId: character.characterId }
-  const slots = useMemo(() => toSimulatorSlots(detail), [detail])
-  const [changes, dispatch] = useReducer(simulatorReducer, {})
-  const body = useMemo(() => simulationBody(slots, changes), [slots, changes])
+  const rows = useMemo(() => toSimulatorRows(detail), [detail])
+  const [changes, dispatch] = useReducer(simulatorReducer, NO_CHANGES)
+  const body = useMemo(() => simulationBody(rows, changes), [rows, changes])
   const simulation = useEquipmentSimulation(identity, body)
   const equipmentHeadingId = useId()
 
   function change(slot: SimulatorSlot, draft: Partial<SlotDraft>): void {
     dispatch({ type: 'change', slot, draft })
+  }
+
+  function changeSlotItem(slotItem: SimulatorSlotItem, id: string | null): void {
+    dispatch({ type: 'slotItem', slotItem, id })
   }
 
   function reset(): void {
@@ -106,7 +112,12 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
               </Button>
             </span>
           </div>
-          <SimulatorTable slots={slots} changes={changes} onChange={change} />
+          <SimulatorTable
+            rows={rows}
+            changes={changes}
+            onChange={change}
+            onSlotItemChange={changeSlotItem}
+          />
         </section>
         <div className="md:sticky md:top-0 max-md:order-first">
           <ScorePanel role={detail.card?.role ?? null} result={simulation} />

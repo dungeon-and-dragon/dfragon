@@ -5,23 +5,28 @@ import {
   draftOf,
   type EnchantChoice,
   type SimulatorChanges,
+  type SimulatorRow,
   type SimulatorSlot,
-  type SlotDraft
+  type SimulatorSlotItem,
+  type SlotDraft,
+  slotItemChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
 
-// 등급표 id는 `부위:카드:역할` 모양이라 이 값과 겹치지 않는다.
-const CURRENT_ENCHANT = 'current'
+// 등급표 id는 `부위:카드:역할`, 칭호, 크리쳐, 오라 묶음 id는 `분류:명성:아이템` 모양이라 이 값과 겹치지 않는다.
+const CURRENT = 'current'
 const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결']
 const SIGNED: Intl.NumberFormatOptions = { signDisplay: 'always' }
 
 export function SimulatorTable({
-  slots,
+  rows,
   changes,
-  onChange
+  onChange,
+  onSlotItemChange
 }: {
-  slots: readonly SimulatorSlot[]
+  rows: readonly SimulatorRow[]
   changes: SimulatorChanges
   onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) => void
+  onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
 }): React.JSX.Element {
   return (
     <div className="table-scroll">
@@ -41,21 +46,38 @@ export function SimulatorTable({
           </tr>
         </thead>
         <tbody>
-          {slots.map((slot) => (
-            <SimulatorRow
-              key={slot.slotId}
-              slot={slot}
-              draft={draftOf(slot, changes)}
-              onChange={onChange}
-            />
-          ))}
+          {rows.map((row) => {
+            if (row.kind === 'slotItem') {
+              const { slotItem } = row
+
+              return (
+                <SlotItemRow
+                  key={slotItem.category}
+                  slotItem={slotItem}
+                  chosen={slotItemChoiceOf(slotItem, changes)}
+                  onChange={onSlotItemChange}
+                />
+              )
+            }
+
+            const { slot } = row
+
+            return (
+              <EquipmentRow
+                key={slot.slotId}
+                slot={slot}
+                draft={draftOf(slot, changes)}
+                onChange={onChange}
+              />
+            )
+          })}
         </tbody>
       </table>
     </div>
   )
 }
 
-function SimulatorRow({
+function EquipmentRow({
   slot,
   draft,
   onChange
@@ -84,6 +106,69 @@ function SimulatorRow({
       </td>
       <td>
         <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+      </td>
+    </tr>
+  )
+}
+
+function SlotItemRow({
+  slotItem,
+  chosen,
+  onChange
+}: {
+  slotItem: SimulatorSlotItem
+  chosen: string | null
+  onChange: (slotItem: SimulatorSlotItem, id: string | null) => void
+}): React.JSX.Element {
+  const { slotName } = slotItem
+  const label = `${slotName} 교체`
+  const currentLabel = `현재 ${slotName}`
+
+  function nameOf(value: string): string {
+    const choice = slotItem.choices.find(({ id }) => id === value)
+
+    if (choice === undefined) {
+      return currentLabel
+    }
+
+    return choice.name
+  }
+
+  function changeItem(value: string | null): void {
+    if (value != null) {
+      const id = value === CURRENT ? null : value
+      onChange(slotItem, id)
+    }
+  }
+
+  return (
+    <tr>
+      <td className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden">{slotName}</td>
+      <td>
+        <div className="flex min-w-0 items-center gap-3">
+          <ItemIcon itemId={slotItem.itemId} rarity={slotItem.rarity} />
+          <ItemName name={slotItem.itemName} rarity={slotItem.rarity} />
+        </div>
+      </td>
+      <td />
+      <td>
+        <div className="grid min-w-0">
+          <Select.Root value={chosen ?? CURRENT} onValueChange={changeItem}>
+            <Select.Trigger size="xs" aria-label={label}>
+              <Select.Value>{(value: string) => nameOf(value)}</Select.Value>
+            </Select.Trigger>
+            <Select.Popup aria-label={label}>
+              <Select.Item value={CURRENT}>
+                <Select.ItemText>{currentLabel}</Select.ItemText>
+              </Select.Item>
+              {slotItem.choices.map((choice) => (
+                <Select.Item key={choice.id} value={choice.id}>
+                  <Select.ItemText>{choice.name}</Select.ItemText>
+                </Select.Item>
+              ))}
+            </Select.Popup>
+          </Select.Root>
+        </div>
       </td>
     </tr>
   )
@@ -185,21 +270,21 @@ function EnchantControl({
 
   function changeEnchant(value: string | null): void {
     if (value != null) {
-      const enchantId = value === CURRENT_ENCHANT ? null : value
+      const enchantId = value === CURRENT ? null : value
       onChange({ enchantId })
     }
   }
 
   return (
     <div className="grid min-w-0">
-      <Select.Root value={draft.enchantId ?? CURRENT_ENCHANT} onValueChange={changeEnchant}>
+      <Select.Root value={draft.enchantId ?? CURRENT} onValueChange={changeEnchant}>
         <Select.Trigger size="xs" aria-label={label}>
           <Select.Value>
             {(value: string) => <EnchantText options={optionsOf(value)} />}
           </Select.Value>
         </Select.Trigger>
         <Select.Popup aria-label={label}>
-          <Select.Item value={CURRENT_ENCHANT}>
+          <Select.Item value={CURRENT}>
             <Select.ItemText>현재 마법부여</Select.ItemText>
             {slot.enchants.length > 0 && (
               <span className="text-xs text-fg-subtle">{joinLabels(slot.enchants)}</span>
