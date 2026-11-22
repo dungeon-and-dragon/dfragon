@@ -5,7 +5,12 @@ export type ScoreCalculator = 'equipment' | 'buff'
 
 /** 엔진이 `slotId`가 같은 원본 장비 항목을 이 항목으로 통째로 바꿔 계산한다. */
 export type ScoreSimulationInput = Readonly<{
+  /** 칭호(TITLE) 항목도 담을 수 있다. */
   equipment: readonly CharacterPayload[]
+  /** 원본 `creature.creature`를 이 객체로 바꾼다. */
+  creature?: CharacterPayload
+  /** 엔진은 `slotId`가 AURORA인 항목만 바꾼다. */
+  avatar?: readonly CharacterPayload[]
 }>
 
 export type ScoreEngineInput = Readonly<{
