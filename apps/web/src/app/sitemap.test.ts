@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
 const SITE_ORIGIN = 'https://dfragon.com'
 const SITEMAP_LOC_PATTERN = /<loc>(.*?)<\/loc>/g
+const LLMS_LINK_PATTERN = /\]\(([^)]+)\)/g
 
 beforeEach(() => {
   vi.stubEnv('DFRAGON_API_ORIGIN', 'http://api.internal.test:3000')
@@ -49,4 +50,11 @@ it('robots.txt는 운영 사이트의 sitemap 주소를 알린다', () => {
   const robots = readFileSync(new URL('../../public/robots.txt', import.meta.url), 'utf8')
 
   expect(robots.split('\n')).toContain(`Sitemap: ${SITE_ORIGIN}/sitemap.xml`)
+})
+
+it('llms.txt가 링크로 알리는 주소는 sitemap의 주소와 같다', () => {
+  const llms = readFileSync(new URL('../../public/llms.txt', import.meta.url), 'utf8')
+  const linked = [...llms.matchAll(LLMS_LINK_PATTERN)].map(([, url]) => url ?? '')
+
+  expect(linked.toSorted()).toEqual(sitemapUrls().toSorted())
 })
