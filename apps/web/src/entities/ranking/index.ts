@@ -1,7 +1,7 @@
-export { useFameRanking } from './api/useFameRanking'
+export { fameRankingQuery, useFameRanking } from './api/useFameRanking'
 export type { FameRankingPages } from './api/useFameRanking'
-export { useItemStats } from './api/useItemStats'
-export { useSetStats } from './api/useSetStats'
+export { itemStatsQuery, useItemStats } from './api/useItemStats'
+export { setStatsQuery, useSetStats } from './api/useSetStats'
 export { skillStatsQueryKey, useSkillStats } from './api/useSkillStats'
 export {
   catalogOptionNamesOf,

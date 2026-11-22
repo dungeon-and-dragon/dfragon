@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { infiniteQueryOptions, useInfiniteQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { SearchHttpFailure } from '#shared/api/api-error'
 import { createJsonRequest } from '#shared/api/json-request'
@@ -140,8 +140,9 @@ function nextCursorOf(page: FameRanking): string | undefined {
   return page.nextCursor
 }
 
-export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRankingPages> {
-  const query = useInfiniteQuery({
+// 서버가 화면을 그리기 전에 받아 둘 때와 화면의 hook이 같은 key와 요청을 쓴다.
+export function fameRankingQuery(filter: FameRankingFilter) {
+  return infiniteQueryOptions({
     queryKey: [
       'fame-ranking',
       filter.jobId ?? null,
@@ -162,6 +163,10 @@ export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRank
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursorOf
   })
+}
+
+export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRankingPages> {
+  const query = useInfiniteQuery(fameRankingQuery(filter))
   const { data, error, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
     query
   const loadMore = useCallback(() => {
