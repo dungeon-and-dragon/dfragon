@@ -7,7 +7,7 @@ import siteCss from '#app/site.css?url'
 import { NotFoundPage } from '#pages/not-found'
 
 const SITE_DESCRIPTION =
-  '던전앤파이터 파티, 공대의 캐릭터 정보를 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 설치 없이 바로 확인하는 웹 앱입니다.'
+  '던전앤파이터 캐릭터의 장비, 스킬, 점수와 변화 이력을 한곳에서 봅니다. 직업별 장비 통계와 주간 클리어 집계로 요즘 흐름을 읽고, 파티와 공대는 스크린샷 한 장으로 한 번에 조회합니다.'
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: PRODUCT_NAME },
       { property: 'og:locale', content: 'ko_KR' },
-      { property: 'og:description', content: '파티, 공대를 쉽게 확인' },
+      { property: 'og:description', content: '캐릭터 정보, 통계, 클리어 집계를 한곳에서' },
       { name: 'twitter:card', content: 'summary' }
     ],
     links: [
