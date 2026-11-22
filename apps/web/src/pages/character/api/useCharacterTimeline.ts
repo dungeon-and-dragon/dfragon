@@ -9,9 +9,9 @@ import {
   timelineAcquisitionPageSchema,
   timelineEnhancementPageSchema
 } from '#entities/character'
+import { requestCharacterJson } from '#entities/character-detail'
 import { useLoadedResult } from '#shared/lib/useLoadedResult'
 import { type TimelinePages, useTimelinePages } from '#pages/character/hooks/useTimelinePages'
-import { requestCharacterJson } from './character-api'
 
 export type CharacterTimelineResult =
   | Readonly<{ status: 'loading' }>

@@ -29,6 +29,7 @@ import { Route as AdventuresAdventureNameIndexRouteImport } from './routes/adven
 import { Route as AdventuresAdventureNameEquipmentRouteImport } from './routes/adventures.$adventureName.equipment'
 import { Route as AdventuresAdventureNameTimelineRouteImport } from './routes/adventures.$adventureName.timeline'
 import { Route as CServerIdCharacterIdRouteImport } from './routes/c.$serverId.$characterId'
+import { Route as CServerIdCharacterIdSimulatorRouteImport } from './routes/c.$serverId.$characterId_.simulator'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -133,6 +134,12 @@ const CServerIdCharacterIdRoute = CServerIdCharacterIdRouteImport.update({
   path: '/c/$serverId/$characterId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CServerIdCharacterIdSimulatorRoute =
+  CServerIdCharacterIdSimulatorRouteImport.update({
+    id: '/c/$serverId/$characterId_/simulator',
+    path: '/c/$serverId/$characterId/simulator',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/adventures/$adventureName/timeline': typeof AdventuresAdventureNameTimelineRoute
   '/c/$serverId/$characterId': typeof CServerIdCharacterIdRoute
   '/adventures/$adventureName/': typeof AdventuresAdventureNameIndexRoute
+  '/c/$serverId/$characterId/simulator': typeof CServerIdCharacterIdSimulatorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,6 +185,7 @@ export interface FileRoutesByTo {
   '/adventures/$adventureName/timeline': typeof AdventuresAdventureNameTimelineRoute
   '/c/$serverId/$characterId': typeof CServerIdCharacterIdRoute
   '/adventures/$adventureName': typeof AdventuresAdventureNameIndexRoute
+  '/c/$serverId/$characterId/simulator': typeof CServerIdCharacterIdSimulatorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -200,6 +209,7 @@ export interface FileRoutesById {
   '/adventures/$adventureName/timeline': typeof AdventuresAdventureNameTimelineRoute
   '/c/$serverId/$characterId': typeof CServerIdCharacterIdRoute
   '/adventures/$adventureName/': typeof AdventuresAdventureNameIndexRoute
+  '/c/$serverId/$characterId_/simulator': typeof CServerIdCharacterIdSimulatorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/adventures/$adventureName/timeline'
     | '/c/$serverId/$characterId'
     | '/adventures/$adventureName/'
+    | '/c/$serverId/$characterId/simulator'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/adventures/$adventureName/timeline'
     | '/c/$serverId/$characterId'
     | '/adventures/$adventureName'
+    | '/c/$serverId/$characterId/simulator'
   id:
     | '__root__'
     | '/'
@@ -268,6 +280,7 @@ export interface FileRouteTypes {
     | '/adventures/$adventureName/timeline'
     | '/c/$serverId/$characterId'
     | '/adventures/$adventureName/'
+    | '/c/$serverId/$characterId_/simulator'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -291,6 +304,7 @@ export interface RootRouteChildren {
   AdventuresAdventureNameTimelineRoute: typeof AdventuresAdventureNameTimelineRoute
   CServerIdCharacterIdRoute: typeof CServerIdCharacterIdRoute
   AdventuresAdventureNameIndexRoute: typeof AdventuresAdventureNameIndexRoute
+  CServerIdCharacterIdSimulatorRoute: typeof CServerIdCharacterIdSimulatorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -435,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CServerIdCharacterIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/c/$serverId/$characterId_/simulator': {
+      id: '/c/$serverId/$characterId_/simulator'
+      path: '/c/$serverId/$characterId/simulator'
+      fullPath: '/c/$serverId/$characterId/simulator'
+      preLoaderRoute: typeof CServerIdCharacterIdSimulatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -459,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdventuresAdventureNameTimelineRoute: AdventuresAdventureNameTimelineRoute,
   CServerIdCharacterIdRoute: CServerIdCharacterIdRoute,
   AdventuresAdventureNameIndexRoute: AdventuresAdventureNameIndexRoute,
+  CServerIdCharacterIdSimulatorRoute: CServerIdCharacterIdSimulatorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

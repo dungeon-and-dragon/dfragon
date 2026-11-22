@@ -3,13 +3,17 @@ import type { CharacterDetailView } from '#entities/character/model/character-de
 import { type ItemView, itemRarityOfGrade, toItemView, tuneNumeral } from './character-item'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
-type Enchant = NonNullable<EquipmentItem['enchant']>
 type StatValue = number | string
+
+export type EnchantStats = Readonly<{
+  status: readonly Readonly<{ name: string | null; value: StatValue | null }>[]
+  reinforceSkill: readonly Readonly<{ skills: readonly Readonly<{ value: StatValue | null }>[] }>[]
+}>
 
 const AURA_SLOT_ID = 'AURORA'
 const WEAPON_SLOT_ID = 'WEAPON'
 const SUB_WEAPON_SLOT_ID = 'SUPPORT_WEAPON'
-const BUFF_PASSIVE_SKILL = '버프 패시브 스킬'
+export const BUFF_PASSIVE_SKILL = '버프 패시브 스킬'
 const ALL_ELEMENT = '모든 속성 강화'
 const ALL_STAT = '올스탯'
 const ATTACK = '공격력'
@@ -78,7 +82,7 @@ export type EquipmentView = Readonly<{
   aura: ItemView | null
 }>
 
-function enchantGroup(name: string): string {
+export function enchantGroup(name: string): string {
   if (SINGLE_ELEMENT_PATTERN.test(name)) {
     return ALL_ELEMENT
   }
@@ -122,7 +126,7 @@ export function signedEnchantValue(value: StatValue): string {
   return `+${text}`
 }
 
-function orderRank(name: string): number {
+export function enchantOrderRank(name: string): number {
   const index = ENCHANT_ORDER.indexOf(name)
 
   if (index === -1) {
@@ -132,7 +136,23 @@ function orderRank(name: string): number {
   return index
 }
 
-export function groupEnchant(enchant: Enchant | null, role: EnchantRole): EnchantOption[] {
+export function isEmphasizedEnchant(group: string, role: EnchantRole): boolean {
+  return EMPHASIZED_ENCHANTS[role].has(group)
+}
+
+export function buffSkillLevel(enchant: EnchantStats | null): number | null {
+  const skillLevels = (enchant?.reinforceSkill ?? []).flatMap(({ skills }) =>
+    skills.flatMap(({ value }) => (value != null ? [magnitude(value)] : []))
+  )
+
+  if (skillLevels.length === 0) {
+    return null
+  }
+
+  return Math.max(...skillLevels)
+}
+
+export function groupEnchant(enchant: EnchantStats | null, role: EnchantRole): EnchantOption[] {
   const groups = new Map<string, StatValue>()
 
   for (const { name, value } of enchant?.status ?? []) {
@@ -148,19 +168,16 @@ export function groupEnchant(enchant: Enchant | null, role: EnchantRole): Enchan
     }
   }
 
-  const skillLevels = (enchant?.reinforceSkill ?? []).flatMap(({ skills }) =>
-    skills.flatMap(({ value }) => (value != null ? [value] : []))
-  )
+  const skillLevel = buffSkillLevel(enchant)
 
-  if (skillLevels.length > 0) {
-    groups.set(BUFF_PASSIVE_SKILL, Math.max(...skillLevels))
+  if (skillLevel !== null) {
+    groups.set(BUFF_PASSIVE_SKILL, skillLevel)
   }
 
-  const emphasized = EMPHASIZED_ENCHANTS[role]
   const options = [...groups].map(([name, value]) => ({
     name,
     label: `${name} ${signedEnchantValue(value)}`,
-    emphasized: emphasized.has(name)
+    emphasized: isEmphasizedEnchant(name, role)
   }))
   const sorted = options.toSorted((a, b) => {
     const emphasisOrder = Number(b.emphasized) - Number(a.emphasized)
@@ -169,7 +186,7 @@ export function groupEnchant(enchant: Enchant | null, role: EnchantRole): Enchan
       return emphasisOrder
     }
 
-    return orderRank(a.name) - orderRank(b.name)
+    return enchantOrderRank(a.name) - enchantOrderRank(b.name)
   })
 
   return sorted.map(({ label, emphasized }) => ({ label, emphasized }))
