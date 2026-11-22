@@ -28,6 +28,13 @@ import {
   type ServerBuildInfo,
   type ServerService
 } from '@dfragon/lib'
+import {
+  enchantGradesOf,
+  findEnchantGrade,
+  type EnchantGrade,
+  type EnchantGradeRole,
+  type EnchantGradeSlot
+} from '@dfragon/lib/enchant-grades'
 import manifest from '@dfragon/lib/package.json' with { type: 'json' }
 
 export const packageName: string = manifest.name
@@ -131,4 +138,13 @@ export function readRaidValueColumn(
 
 export function versionResponse(value: unknown, service: ServerService): ServerBuildInfo | null {
   return parseServerBuildInfo(value, service)
+}
+
+export function enchantCards(slotId: EnchantGradeSlot, role: EnchantGradeRole, id: string) {
+  const finals: readonly EnchantGrade[] = enchantGradesOf(slotId, role).종결
+  const found: EnchantGrade | null = findEnchantGrade(slotId, id)
+  const names = finals.map((grade) => grade.cardName)
+  const status = found?.status ?? null
+
+  return { names, status }
 }

@@ -12,6 +12,10 @@
       "types": "./dist/error-chain.d.ts",
       "import": "./dist/error-chain.js"
     },
+    "./enchant-grades": {
+      "types": "./dist/enchant-grades.d.ts",
+      "import": "./dist/enchant-grades.js"
+    },
     "./port": {
       "types": "./dist/port.d.ts",
       "import": "./dist/port.js"

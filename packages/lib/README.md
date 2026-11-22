@@ -25,6 +25,9 @@ parsePort('3000') // 3000
 
 `MALE_CRUSADER_DEALER_SKILL`(`용기의 은총`)은 남성 크루세이더를 딜러로 판정하는 스킬 이름입니다. API의 역할 판정과 `@dfragon/database`의 역할 SQL이 씁니다.
 
+`@dfragon/lib/enchant-grades`의 `enchantGradesOf(slotId, role)`, `findEnchantGrade(slotId, id)`는 장비 시뮬레이터의 마법부여 등급표(`src/enchant-grades.json`)를 부위별로 찾습니다. 웹과 API가 함께 씁니다.
+등급표는 점수 엔진 저장소가 만든 `enchant-grades.dfragon.json`(version 2)을 복사한 파일이며 손으로 고치지 않습니다. 새 파일로 바꾸면 root에서 `pnpm exec biome format --write packages/lib/src/enchant-grades.json`, `node scripts/check-writing.mjs packages/lib/src/enchant-grades.json`을 실행하고, `test/enchant-grades.test.mjs`의 부위별 id 기대값을 새 표에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
+
 `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 API의 스킬 채택률 응답과 `@dfragon/database`의 표본 SQL이 함께 쓰는 표본 순위입니다.
 
 ## 던파 캐릭터명 검사

@@ -1,4 +1,5 @@
 import type { TimelineCharacter } from '@dfragon/database'
+import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/index.js'
 import type { ReportCode } from '@dfragon/http-server'
 import { neopleCharacterImageUrl } from '@dfragon/neople'
 import type { AdventureGuildRepository } from '#application/adventure-guild/repository.js'
@@ -18,6 +19,7 @@ import {
   type CharacterDetailDependencies,
   CharacterDetailService
 } from '#application/character-detail/index.js'
+import { EquipmentSimulationService } from '#application/equipment-simulation/index.js'
 import type { FetchCharacterImage } from '#application/character-image/ports.js'
 import { CharacterImageService } from '#application/character-image/index.js'
 import { ItemDetailService } from '#application/item-detail/index.js'
@@ -107,6 +109,12 @@ export interface ApiServicesOptions {
 }
 
 type CharacterFetchedSubscriber = (event: CharacterFetched) => void
+
+// 시뮬레이션은 상세 조회의 Neople 단계 시간을 접근 로그에 남기지 않는다.
+const unrecordedTimings: NeopleStageTimings = {
+  record: () => undefined,
+  markShared: () => undefined
+}
 
 // 경매장 조회를 넘기지 않은 실행에서는 Neople을 부를 수 없으므로 조회할 수 없음으로 답한다.
 const noLowestListing: FetchLowestListing = async () => {
@@ -258,6 +266,10 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       }
     }
   })
+  const equipmentSimulation = new EquipmentSimulationService(
+    (identity, signal) => details.scoreSource(identity, signal, unrecordedTimings),
+    engine.calculate
+  )
   const characterHistory = new CharacterHistoryService(
     options.characterHistory ?? emptyCharacterHistoryRepository,
     options.details.catalog
@@ -282,6 +294,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       buildInfo,
       search,
       details,
+      equipmentSimulation,
       characterHistory,
       characterImage,
       timeline: timelineService,
@@ -299,6 +312,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       return runCloseSteps([
         // server는 열린 요청이 끝나야 닫히므로, 진행 중인 요청을 먼저 취소한다.
         () => search.close(),
+        // 시뮬레이션은 진행 중인 계산을 끊지 않고 기다리므로, 그 계산이 쓰는 점수 worker보다 먼저 닫는다.
+        () => equipmentSimulation.close(),
         () => details.close(),
         () => todayGrade.close(),
         () => clearStats.close(),
