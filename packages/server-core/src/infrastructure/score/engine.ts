@@ -1,17 +1,53 @@
 import { Worker } from 'node:worker_threads'
 import { z } from 'zod'
-import type { ScoreCalculator, ScoreEngineInput, ScoreEngineResult } from '#domain/score/index.js'
+import type {
+  ScoreCalculator,
+  ScoreEngineInput,
+  ScoreEngineResult,
+  ScoreOutcome
+} from '#domain/score/index.js'
 import type { ScoreWorkerData, ScoreWorkerMessage, ScoreWorkerRequest } from './worker-protocol.js'
 
 export type ScoreEngineDiagnostic = 'SCORE_ENGINE_UNAVAILABLE' | 'SCORE_ENGINE_FAILED'
 
 const nonblank = z.string().refine((value) => value.trim().length > 0)
 const nullableNumber = z.number().nullable()
+const skippedSchema = z.object({ kind: nonblank, message: nonblank }).nullable()
+
+function hasOneOutcome(outcome: ScoreOutcome): boolean {
+  return (outcome.score === null) !== (outcome.skipped === null)
+}
+
+function hasConsistentApproximation(outcome: ScoreOutcome): boolean {
+  if (outcome.approximate_score === null && outcome.approximate_source === null) {
+    return outcome.warning === null || outcome.score !== null
+  }
+
+  return (
+    outcome.approximate_score !== null &&
+    outcome.approximate_source !== null &&
+    outcome.warning !== null &&
+    outcome.score === null
+  )
+}
+
+const simulationSchema = z
+  .object({
+    score: z.int().nullable(),
+    skipped: skippedSchema,
+    approximate_score: z.int().nullable(),
+    approximate_source: nonblank.nullable(),
+    warning: nonblank.nullable(),
+    display: z.object({ buff30: nullableNumber, buff50: nullableNumber })
+  })
+  .refine(hasOneOutcome)
+  .refine(hasConsistentApproximation)
+
 const resultSchema = z
   .object({
     calculator: z.enum(['equipment', 'buff']),
     score: z.int().nullable(),
-    skipped: z.object({ kind: nonblank, message: nonblank }).nullable(),
+    skipped: skippedSchema,
     // rev14 이전 엔진은 근사값 칸을 보내지 않으므로 빠진 칸은 null로 받는다.
     approximate_score: z.int().nullable().default(null),
     approximate_source: nonblank.nullable().default(null),
@@ -21,22 +57,13 @@ const resultSchema = z
       role: z.enum(['dealer', 'buffer']),
       switchingLevel: nullableNumber,
       buff30: nullableNumber,
-      buff50: nullableNumber
-    })
+      buff50: nullableNumber,
+      mainStat: z.enum(['힘', '지능', '체력', '정신력']).optional()
+    }),
+    simulation: simulationSchema.optional()
   })
-  .refine((result) => (result.score === null) !== (result.skipped === null))
-  .refine((result) => {
-    if (result.approximate_score === null && result.approximate_source === null) {
-      return result.warning === null || result.score !== null
-    }
-
-    return (
-      result.approximate_score !== null &&
-      result.approximate_source !== null &&
-      result.warning !== null &&
-      result.score === null
-    )
-  }) satisfies z.ZodType<ScoreEngineResult>
+  .refine(hasOneOutcome)
+  .refine(hasConsistentApproximation) satisfies z.ZodType<ScoreEngineResult>
 
 export type ScoreWorker = {
   postMessage: (request: ScoreWorkerRequest) => void

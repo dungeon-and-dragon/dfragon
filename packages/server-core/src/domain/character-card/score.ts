@@ -1,4 +1,4 @@
-import type { ScoreCalculator, ScoreEngineResult } from '#domain/score/index.js'
+import type { ScoreCalculator, ScoreEngineResult, ScoreOutcome } from '#domain/score/index.js'
 import type { CharacterCard, CharacterCardScore, CharacterRole } from './types.js'
 
 export function cardScoreCalculator(role: CharacterRole | null): ScoreCalculator {
@@ -9,8 +9,8 @@ export function cardScoreCalculator(role: CharacterRole | null): ScoreCalculator
   return 'equipment'
 }
 
-function toApproximateScore(result: ScoreEngineResult): CharacterCardScore['approximate'] {
-  const { approximate_score: value, approximate_source: source, warning } = result
+function toApproximateScore(outcome: ScoreOutcome): CharacterCardScore['approximate'] {
+  const { approximate_score: value, approximate_source: source, warning } = outcome
   if (value === null || source === null || warning === null) {
     return null
   }
@@ -18,20 +18,32 @@ function toApproximateScore(result: ScoreEngineResult): CharacterCardScore['appr
   return { value, source, warning }
 }
 
-function toCardScore(result: ScoreEngineResult): CharacterCardScore {
+function cardScoreOf(result: ScoreEngineResult, outcome: ScoreOutcome): CharacterCardScore {
   const { versions } = result
 
   return {
     calculator: result.calculator,
-    value: result.score,
-    skipped: result.skipped,
-    approximate: toApproximateScore(result),
+    value: outcome.score,
+    skipped: outcome.skipped,
+    approximate: toApproximateScore(outcome),
     versions: {
       package: versions.package,
       rulesRev: versions.rules_rev,
       bundleId: versions.bundle_id
     }
   }
+}
+
+export function toCardScore(result: ScoreEngineResult): CharacterCardScore {
+  return cardScoreOf(result, result)
+}
+
+export function toSimulatedCardScore(result: ScoreEngineResult): CharacterCardScore | null {
+  if (result.simulation === undefined) {
+    return null
+  }
+
+  return cardScoreOf(result, result.simulation)
 }
 
 export function withCardScore(
