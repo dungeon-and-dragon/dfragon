@@ -5,6 +5,10 @@ import { SLOT_ITEM_CATEGORIES, findSlotItem, slotItemsOf } from '@dfragon/lib/sl
 
 // build가 선택 목록을 dist에 함께 실어야 package export로 읽힌다.
 const table = JSON.parse(readFileSync(new URL('../dist/slot-items.json', import.meta.url), 'utf8'))
+const observed = JSON.parse(
+  readFileSync(new URL('../dist/slot-item-ids.json', import.meta.url), 'utf8')
+)
+const engineIds = Object.values(table.categories).flatMap((items) => items.map(({ id }) => id))
 
 test('선택 목록은 version 1이고 칭호, 크리쳐, 오라 목록만 둔다', () => {
   assert.equal(table.version, 1)
@@ -73,4 +77,42 @@ test('findSlotItem은 그 카테고리의 id만 찾고 다른 카테고리나 �
   })
   assert.equal(findSlotItem('title', 'aura:845:character/swordman/avatar/aura/101590700'), null)
   assert.equal(findSlotItem('title', 'missing-slot-item'), null)
+})
+
+test('운영에서 대표 아이템을 관측하지 못한 칭호 묶음 둘만 목록에서 빠진다', () => {
+  const missing = engineIds.filter((id) => observed.items[id] === undefined)
+
+  assert.deepEqual(missing, [
+    'title:1123:character/common/title/100333421',
+    'title:849:character/common/title/100332647'
+  ])
+
+  for (const id of missing) {
+    assert.equal(findSlotItem('title', id), null, id)
+  }
+})
+
+test('대응 파일의 묶음 id는 모두 엔진 목록에 있다', () => {
+  const unknown = Object.keys(observed.items).filter((id) => !engineIds.includes(id))
+
+  assert.deepEqual(unknown, [])
+})
+
+test('겹치던 묶음이 빠진 칭호 둘은 덮어쓴 이름으로 보인다', () => {
+  assert.equal(
+    findSlotItem('title', 'title:1123:character/common/title/100333206')?.name,
+    '프로스트의 전설'
+  )
+  assert.equal(
+    findSlotItem('title', 'title:849:character/common/title/100332937')?.name,
+    '진정한 각성을 이룬 자'
+  )
+})
+
+test('카테고리 안에서 표시 이름이 겹치지 않는다', () => {
+  for (const category of SLOT_ITEM_CATEGORIES) {
+    const names = slotItemsOf(category).map(({ name }) => name)
+
+    assert.equal(new Set(names).size, names.length, category)
+  }
 })
