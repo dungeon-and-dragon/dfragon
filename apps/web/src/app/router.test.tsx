@@ -1663,10 +1663,10 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   expect(globalMenu()).toContainEqual(['통계', 'page'])
   const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
   expect(statsTabs.map((tab) => [tab.textContent, tab.getAttribute('aria-current')])).toEqual([
-    ['캐릭터', null],
     ['세트', 'page'],
-    ['조합', null],
     ['무기', null],
+    ['조합', null],
+    ['캐릭터', null],
     ['클리어', null]
   ])
 
