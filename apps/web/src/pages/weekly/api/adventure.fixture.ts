@@ -4,7 +4,6 @@ import {
   type AdventureActivitySeasonDays,
   type AdventureEquipment,
   type AdventureTimelineItem,
-  type AdventureTimelineKind,
   type AdventureTimelinePage,
   type AdventureWeekly,
   EQUIPMENT_SLOTS,
@@ -503,15 +502,11 @@ const storyTimelineItems: AdventureTimelineItem[] = [
   },
   {
     ...storyTimelineCharacters[0],
-    type: 'enhancement',
-    kind: 'refine',
-    itemId: null,
-    itemName: '합성 대검',
-    itemRarity: '태초',
-    before: null,
-    after: 8,
-    result: true,
-    safe: null,
+    type: 'clear',
+    kind: 'raid',
+    name: '합성 레이드',
+    modeName: '합성 단계',
+    hard: true,
     occurredAt: storyTimelineAt(600)
   },
   {
@@ -526,18 +521,8 @@ const storyTimelineItems: AdventureTimelineItem[] = [
   }
 ]
 
-function storyTimelineKind(item: AdventureTimelineItem): AdventureTimelineKind {
-  if (item.type === 'acquisition') {
-    return 'acquisition'
-  }
-
-  return item.kind
-}
-
 export function storyAdventureTimeline(kind: string | null): AdventureTimelinePage {
-  const items = storyTimelineItems.filter(
-    (item) => kind === null || storyTimelineKind(item) === kind
-  )
+  const items = storyTimelineItems.filter((item) => kind === null || item.type === kind)
 
   return { items, nextCursor: null }
 }
