@@ -93,11 +93,22 @@ async function changeDealerEquipment({ canvasElement }: { canvasElement: HTMLEle
   await pick(canvasElement, '목걸이 마법부여', '최종 데미지 증가 +2%')
 }
 
+async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }) {
+  await pick(canvasElement, '칭호 교체', '운명이 담긴 책')
+  await pick(canvasElement, '크리쳐 교체', '운명을 담는 여신')
+  await pick(canvasElement, '오라 교체', '열대야의 추억')
+}
+
 export const 딜러: Story = screenStory('dealer', simulatorStoryHandlers.calculated)
 
 export const 값바꿈: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeDealerEquipment
+}
+
+export const 슬롯교체: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeSlotItems
 }
 
 export const 버퍼: Story = screenStory('buffer', simulatorStoryHandlers.calculated)

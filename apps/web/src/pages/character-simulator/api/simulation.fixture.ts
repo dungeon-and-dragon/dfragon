@@ -8,6 +8,7 @@ const BASELINE = { equipment: 1_741_052, buff: 4_120_385 } as const
 const POINTS_PER_REINFORCE = 3_100
 const AMPLIFY_POINTS = 12_400
 const ENCHANT_POINTS = 8_200
+const SLOT_ITEM_POINTS = 15_300
 
 type Calculator = CharacterCardScore['calculator']
 
@@ -33,17 +34,21 @@ export function calculatorOf(detail: CharacterDetailView): Calculator {
   return 'equipment'
 }
 
-function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
+function pointsOf(
+  detail: CharacterDetailView,
+  { equipment, ...slotItems }: SimulationBody
+): number {
   const items = detail.equipment.equipment
+  const slotItemPoints = Object.keys(slotItems).length * SLOT_ITEM_POINTS
 
-  return body.equipment.reduce((sum, change) => {
+  return equipment.reduce((sum, change) => {
     const item = items.find(({ slotId }) => slotId === change.slotId)
     const reinforce = (change.reinforce - (item?.reinforce ?? 0)) * POINTS_PER_REINFORCE
     const amplified = change.amplified !== (item?.amplificationName != null) ? AMPLIFY_POINTS : 0
     const enchant = change.enchantId !== null ? ENCHANT_POINTS : 0
 
     return sum + reinforce + amplified + enchant
-  }, 0)
+  }, slotItemPoints)
 }
 
 export function syntheticSimulation(

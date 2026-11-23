@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
+import { readFileSync } from 'node:fs'
 import test, { type TestContext } from 'node:test'
 import type { CharacterBasicInput, CharacterScoreInput } from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
@@ -15,11 +16,13 @@ import type {
   ScoreWorkerMessage,
   ScoreWorkerRequest
 } from '@dfragon/server-core/infrastructure/score/index.js'
+import { openNativeScore } from '@dfragon/server-core/infrastructure/score/index.js'
 import {
   REAL_SCORE_LIBRARY_PATH,
   payloadsFromEngineInput,
   readEngineInput
 } from '@dfragon/server-core/test/score-fixtures.js'
+import { supportsSlotItems } from '../src/domain/equipment-simulation/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
 type FixtureName = 'dealer-blade' | 'buffer-muse'
@@ -99,7 +102,11 @@ function scoring(reply: Reply = ({ calculator, input }) => engineResult(calculat
   return { requests, options: { scoreLibraryPath: SYNTHETIC_LIBRARY_PATH, spawnScoreWorker } }
 }
 
-function fixture(name: FixtureName, edit: (items: Item[]) => Item[] = (items) => items) {
+function fixture(
+  name: FixtureName,
+  edit: (items: Item[]) => Item[] = (items) => items,
+  catalogItems: Readonly<Record<string, Item>> = {}
+) {
   const original = readEngineInput(name)
   const payloads: CharacterPayloads = payloadsFromEngineInput(original)
   const equipment = payloads.equipment.equipment as Item[]
@@ -114,7 +121,7 @@ function fixture(name: FixtureName, edit: (items: Item[]) => Item[] = (items) =>
     },
     catalog: new CatalogService(async (itemIds) => {
       const found = itemIds.flatMap((itemId) => {
-        const data = original.items[itemId]
+        const data = original.items[itemId] ?? catalogItems[itemId]
         if (data === undefined) {
           return []
         }
@@ -773,4 +780,267 @@ test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 
     { slotId: 'SHOULDER', reinforce: 11, amplified: true, enchantId: 'SHOULDER:10362000:buffer' }
   ])
   assert.ok(skillEnchanted.simulated.value < skillEnchanted.baseline.value)
+})
+
+// 칭호, 크리쳐, 오라 묶음의 대표 아이템 Neople 상세 가운데 엔진이 읽는 명성, 스탯, 버프 칸만 옮긴 값이다.
+const slotItemDetails = JSON.parse(
+  readFileSync(new URL('../../test/fixtures/slot-item-details.json', import.meta.url), 'utf8')
+) as Record<string, Item>
+
+const TITLE_ID = 'title:1123:character/common/title/100333448'
+const TITLE_ITEM = {
+  itemId: '741f95b1012f33a3949d4fe38f094d41',
+  itemName: '프로스트의 전설 플래티넘[80Lv]',
+  itemRarity: '레어'
+}
+const CREATURE_ID = 'creature:1261:creature/22_lounge6/autocreature_100'
+const CREATURE_ITEM = {
+  itemId: 'b0c0512c23d593574269e0cb2ef22ccd',
+  itemName: '운명을 담는 재단사 플래티넘[30Lv]',
+  itemRarity: '레어'
+}
+const AURA_ID = 'aura:645:character/swordman/avatar/aura/101590961'
+const AURA_ITEM = {
+  itemId: '6997321d175648e99eb75adf5c8e2625',
+  itemName: '초월한 폭풍의 기세',
+  itemRarity: '레어'
+}
+const TOP_AURA_ID = 'aura:845:character/swordman/avatar/aura/101590700'
+
+/** 칭호, 크리쳐, 오라 교체를 반영하는 엔진이 낸 결과처럼 버전만 바꾼다. */
+function slotItemEngine(package_ = 'dnfscore-native 0.6.0'): Reply {
+  return ({ calculator, input }) => {
+    const result = engineResult(calculator, input)
+
+    return { ...result, versions: { ...result.versions, package: package_ } }
+  }
+}
+
+test('칭호, 크리쳐, 오라를 바꾸면 원본 항목의 아이템 칸만 바꿔 넣고 새 아이템 상세를 items에 더한다', async (t) => {
+  const { original, payloads, details, path } = fixture('buffer-muse', undefined, slotItemDetails)
+  const before = structuredClone(payloads)
+  const engine = scoring(slotItemEngine())
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    title: TITLE_ID,
+    creature: CREATURE_ID,
+    aura: AURA_ID
+  })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.body.baseline.value, 1741)
+  assert.equal(response.body.simulated.value, 1802)
+  assert.equal(engine.requests.length, 1)
+  const { input } = engine.requests[0]!
+  const avatar = original.avatar.avatar as unknown[]
+  assert.deepEqual(input.simulation, {
+    equipment: [
+      {
+        ...itemOf(original.equipment.equipment as unknown[], 'TITLE'),
+        ...TITLE_ITEM,
+        itemAvailableLevel: 1,
+        enchant: {
+          status: [
+            { name: '모든 속성 강화', value: 4 },
+            { name: '힘', value: 25 },
+            { name: '지능', value: 25 },
+            { name: '체력', value: 25 },
+            { name: '정신력', value: 25 }
+          ]
+        }
+      }
+    ],
+    creature: { ...(original.creature.creature as Item), ...CREATURE_ITEM },
+    avatar: [
+      {
+        ...itemOf(avatar, 'AURORA'),
+        ...AURA_ITEM,
+        clone: { itemId: null, itemName: null },
+        emblems: itemOf(avatar, 'AURORA').emblems
+      }
+    ]
+  })
+  for (const { itemId } of [TITLE_ITEM, CREATURE_ITEM, AURA_ITEM]) {
+    assert.deepEqual(input.items[itemId], slotItemDetails[itemId], itemId)
+  }
+  const wornAuraId = itemOf(avatar, 'AURORA').itemId as string
+  assert.deepEqual(input.items[wornAuraId], original.items[wornAuraId])
+  assert.deepEqual(
+    (input.simulation!.creature as Item).artifact,
+    (original.creature.creature as Item).artifact
+  )
+  assert.deepEqual(payloads, before)
+})
+
+test('칭호 교체는 12부위 변경과 함께 보낼 수 있고 칭호는 장비 목록 뒤에 들어간다', async (t) => {
+  const { original, details, path } = fixture('dealer-blade', undefined, slotItemDetails)
+  const engine = scoring(slotItemEngine())
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [{ slotId: 'WEAPON', reinforce: 12, amplified: false, enchantId: null }],
+    title: TITLE_ID,
+    creature: null
+  })
+
+  assert.equal(response.status, 200)
+  const items = original.equipment.equipment as unknown[]
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [
+      { ...itemOf(items, 'WEAPON'), reinforce: 12, amplificationName: null },
+      { ...itemOf(items, 'TITLE'), ...TITLE_ITEM, itemAvailableLevel: 1 }
+    ]
+  })
+})
+
+test('새 아이템 상세를 받지 못하면 엔진을 부르지 않고 두 점수 모두 null이다', async (t) => {
+  const { details, path } = fixture('buffer-muse')
+  const engine = scoring(slotItemEngine())
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, { equipment: [], creature: CREATURE_ID })
+
+  assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
+  assert.equal(engine.requests.length, 0)
+})
+
+for (const [name, package_, body, expected] of [
+  [
+    '0.6.0 전 엔진에 칭호 교체를 보내면 두 점수 모두 null이다',
+    'dnfscore-native 0.5.1',
+    { equipment: [], title: TITLE_ID },
+    { baseline: null, simulated: null }
+  ],
+  [
+    '0.6.0 전 엔진도 12부위만 바꾼 요청은 점수를 낸다',
+    'dnfscore-native 0.5.1',
+    { equipment: [{ slotId: 'WEAPON', reinforce: 12, amplified: false, enchantId: null }] },
+    { baseline: 1741, simulated: 1802 }
+  ],
+  [
+    '0.10.0 엔진은 0.6.0 이후로 본다',
+    'dnfscore-native 0.10.0',
+    { equipment: [], title: TITLE_ID },
+    { baseline: 1741, simulated: 1802 }
+  ]
+] as const) {
+  test(`엔진 버전: ${name}`, async (t) => {
+    const { details, path } = fixture('dealer-blade', undefined, slotItemDetails)
+    const engine = scoring(slotItemEngine(package_))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, body)
+
+    assert.equal(response.status, 200)
+    assert.deepEqual(
+      {
+        baseline: response.body.baseline?.value ?? null,
+        simulated: response.body.simulated?.value ?? null
+      },
+      expected
+    )
+  })
+}
+
+for (const [name, body, edit] of [
+  [
+    '모르는 칭호 id',
+    { equipment: [], title: 'title:1:missing' },
+    (payloads: CharacterPayloads) => payloads
+  ],
+  [
+    '오라 목록의 id를 칭호로 보냄',
+    { equipment: [], title: TOP_AURA_ID },
+    (payloads: CharacterPayloads) => payloads
+  ],
+  [
+    '문자열이 아닌 크리쳐 id',
+    { equipment: [], creature: 1261 },
+    (payloads: CharacterPayloads) => payloads
+  ],
+  [
+    '칭호를 착용하지 않은 캐릭터의 칭호 교체',
+    { equipment: [], title: TITLE_ID },
+    (payloads: CharacterPayloads) => {
+      payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+        ({ slotId }) => slotId !== 'TITLE'
+      )
+
+      return payloads
+    }
+  ],
+  [
+    '크리쳐가 없는 캐릭터의 크리쳐 교체',
+    { equipment: [], creature: CREATURE_ID },
+    (payloads: CharacterPayloads) => {
+      payloads.creature.creature = null
+
+      return payloads
+    }
+  ],
+  [
+    '오라를 착용하지 않은 캐릭터의 오라 교체',
+    { equipment: [], aura: AURA_ID },
+    (payloads: CharacterPayloads) => {
+      payloads.avatar.avatar = (payloads.avatar.avatar as Item[]).filter(
+        ({ slotId }) => slotId !== 'AURORA'
+      )
+
+      return payloads
+    }
+  ]
+] as const) {
+  test(`요청 본문 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { payloads, details, path } = fixture('dealer-blade', undefined, slotItemDetails)
+    edit(payloads)
+    const engine = scoring(slotItemEngine())
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, body)
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
+
+function realEnginePackage(): string | null {
+  if (REAL_SCORE_LIBRARY_PATH === null) {
+    return null
+  }
+
+  const score = openNativeScore({ path: REAL_SCORE_LIBRARY_PATH })
+  const text = score?.(readEngineInput('dealer-blade'), 'equipment') ?? null
+
+  if (text === null) {
+    return null
+  }
+
+  return (JSON.parse(text) as ScoreEngineResult).versions.package
+}
+
+const REAL_ENGINE_PACKAGE = realEnginePackage()
+const REAL_SLOT_ITEM_ENGINE = REAL_ENGINE_PACKAGE !== null && supportsSlotItems(REAL_ENGINE_PACKAGE)
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 딜러의 칭호, 크리쳐, 오라를 더 높은 명성 묶음으로 바꾸면 점수를 올린다', {
+  skip: !REAL_SLOT_ITEM_ENGINE && '칭호, 크리쳐, 오라 교체를 반영하는 0.6.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  // 원본은 칭호 숙명을 지닌 자[루크](명성 601), 크리쳐 에지(731), 오라 풍요의 파도(325)다.
+  const { details, path } = fixture('dealer-blade', undefined, slotItemDetails)
+  const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+
+  for (const body of [
+    { equipment: [], title: TITLE_ID },
+    { equipment: [], creature: CREATURE_ID },
+    { equipment: [], aura: TOP_AURA_ID }
+  ]) {
+    const response = await simulate(origin, path, body)
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated.skipped, null, JSON.stringify(body))
+    assert.ok(response.body.simulated.value > response.body.baseline.value, JSON.stringify(body))
+  }
 })

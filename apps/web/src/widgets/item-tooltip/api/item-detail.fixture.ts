@@ -1,4 +1,4 @@
-import type { ItemDetail } from '#pages/stats/model/item-detail'
+import type { ItemDetail } from '#widgets/item-tooltip/model/item-detail'
 
 // Neople 아이템 상세를 API 응답 형태로 옮긴 합성 데이터다.
 export function storyItemDetail(itemId: string): ItemDetail {
