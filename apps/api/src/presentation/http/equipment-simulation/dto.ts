@@ -6,11 +6,22 @@ import type {
 } from '#application/equipment-simulation/index.js'
 import { EquipmentSimulationFailure } from '#domain/equipment-simulation/index.js'
 
+const POTENCY_LIMIT = 100
+
 const equipmentChange = z.strictObject({
   slotId: z.enum(ENCHANT_GRADE_SLOTS),
   reinforce: z.int().min(0),
   amplified: z.boolean(),
-  enchantId: z.string().nullable()
+  enchantId: z.string().nullable(),
+  // 생략과 null은 착용한 아이템의 값을 그대로 둔다.
+  variantId: z.string().nullable().default(null),
+  tune: z.int().min(0).nullable().default(null),
+  potency: z.int().min(0).max(POTENCY_LIMIT).nullable().default(null)
+})
+
+const oathTuneChange = z.strictObject({
+  slotNo: z.int().min(0),
+  tune: z.int().min(0)
 })
 
 // 생략과 null은 착용한 아이템을 그대로 둔다.
@@ -22,7 +33,11 @@ const simulationRequest = z.strictObject({
     .refine((changes) => new Set(changes.map(({ slotId }) => slotId)).size === changes.length),
   title: slotItemId,
   creature: slotItemId,
-  aura: slotItemId
+  aura: slotItemId,
+  oath: z
+    .array(oathTuneChange)
+    .refine((changes) => new Set(changes.map(({ slotNo }) => slotNo)).size === changes.length)
+    .default([])
 })
 
 export type EquipmentSimulationResponse = EquipmentSimulationScores
@@ -42,8 +57,8 @@ export function parseSimulationRequest(text: string): EquipmentSimulationRequest
     throw new EquipmentSimulationFailure('request')
   }
 
-  const { equipment, title, creature, aura } = parsed.data
+  const { equipment, title, creature, aura, oath } = parsed.data
   const slotItems = { title, creature, aura }
 
-  return { equipment, slotItems }
+  return { equipment, slotItems, oath }
 }
