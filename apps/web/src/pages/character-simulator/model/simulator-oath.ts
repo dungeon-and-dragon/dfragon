@@ -425,6 +425,12 @@ function movedCrystalOf(
   setId: number
 ): CrystalDraft {
   const moved = draft.variantId !== null ? moveOathCrystalToSet(draft.variantId, setId) : null
+
+  // 광휘 결정이 아닌 착용 결정은 옮길 짝이 없어 세트를 바꿔도 조율까지 그대로 둔다.
+  if (moved === null && draft.variantId === null && next.wornVariantId === null) {
+    return draft
+  }
+
   const variantId = moved !== null ? moved.id : next.wornVariantId
   const tune = Math.min(draft.tune, crystalTuneLimitOf(next, variantId))
 

@@ -761,7 +761,13 @@ function movedDraftOf(
   }
 
   const chosen = variantChoiceOf(current, draft.variantId)
-  const switched = switchEquipmentSet({ [slotId]: chosen?.variant ?? null }, setItemId)[slotId]
+
+  // 선택지 밖 착용 아이템은 옮길 짝이 없어 세트를 바꿔도 조율까지 그대로 둔다.
+  if (chosen === undefined) {
+    return draft
+  }
+
+  const switched = switchEquipmentSet({ [slotId]: chosen.variant }, setItemId)[slotId]
   const keeps = next.variants.some(({ id }) => id === draft.variantId)
   const variantId = switched?.id ?? (keeps ? draft.variantId : next.wornVariantId)
   const choice = variantChoiceOf(next, variantId)
