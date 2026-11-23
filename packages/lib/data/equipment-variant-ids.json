@@ -1,0 +1,8314 @@
+{
+  "observedAt": "2026-11-23",
+  "setItemIds": {
+    "고대 전장의 발키리 세트": "854dc8c01b1bc231e132dae5df3c52bc",
+    "그림자에 숨은 죽음 세트": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "마력의 영역 세트": "8e9cb65cb6285d7e2f084f440aa18870",
+    "무리 사냥의 길잡이 세트": "e23286107ba4328af86c83aabc347e9e",
+    "세렌디피티 세트": "7c9c8335b72c2907df20786f8f5b27f0",
+    "소울 페어리 세트": "4ee7bd5912cda6e2a24c1f36d5202b46",
+    "압도적인 자연 세트": "4e65968c4d30898e6879434dc641b6e4",
+    "에테리얼 오브 아츠 세트": "93e7825053bdec4e0f4c12837cf4f57e",
+    "영원히 이어지는 황금향 세트": "7f788a703a87d783079b41d0fe6448c9",
+    "용투장의 난 세트": "b92ca7784123b5fea9cea40144925194",
+    "차원 속의 이야기 세트": "b9403caf99c157682d1d468d899e9aaa",
+    "칠흑의 정화 세트": "11f7d203a05ea6f13300c0facb39f11e",
+    "한계를 넘어선 에너지 세트": "2877466bc2fc8bedf7799d88167c9fe3"
+  },
+  "items": [
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "JACKET",
+      "itemName": "옅은 그림자를 입은 죽음 상의",
+      "itemIds": [
+        {
+          "itemId": "379a50ab0c8342c1737314eb1b9be60f",
+          "count": 37
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "JACKET",
+      "itemName": "어두운 그림자를 입은 죽음 상의",
+      "itemIds": [
+        {
+          "itemId": "c28adff4d999079e03626b5b04f0a7cc",
+          "count": 98
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "JACKET",
+      "itemName": "짙은 그림자를 입은 죽음 상의",
+      "itemIds": [
+        {
+          "itemId": "712eef49bfaeef17d21b4d984b6c28b0",
+          "count": 4326
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 짙은 그림자를 입은 죽음 상의",
+      "itemIds": [
+        {
+          "itemId": "82167cd052bfb6f3b8f3017a941da668",
+          "count": 10690
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 짙은 그림자를 입은 죽음 상의",
+      "itemIds": [
+        {
+          "itemId": "af510dfd9dfecd8d965bd2c6508c2bbd",
+          "count": 5284
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "ce653434e129a67945878c1c2e66ce73",
+          "count": 17859
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOULDER",
+      "itemName": "옅은 그림자가 드리운 얼굴",
+      "itemIds": [
+        {
+          "itemId": "b3caf20fcc0d3adad83278d8046a39b6",
+          "count": 45
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOULDER",
+      "itemName": "어두운 그림자가 드리운 얼굴",
+      "itemIds": [
+        {
+          "itemId": "cec8dadc0b87a2faa188ba4dacfbb32b",
+          "count": 104
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOULDER",
+      "itemName": "짙은 그림자가 드리운 얼굴",
+      "itemIds": [
+        {
+          "itemId": "810b6286f4f6cf8c4489641a5ed77d9e",
+          "count": 5589
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 짙은 그림자가 드리운 얼굴",
+      "itemIds": [
+        {
+          "itemId": "0222a63fabf29ca6d3b8210445b60711",
+          "count": 12067
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 짙은 그림자가 드리운 얼굴",
+      "itemIds": [
+        {
+          "itemId": "65a0f67f484532d5858c2627c75195d5",
+          "count": 2726
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "cd5697ca4f68d2f06b5965ee2fc5662b",
+          "count": 17858
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "PANTS",
+      "itemName": "옅은 그림자를 녹여내는 하의",
+      "itemIds": [
+        {
+          "itemId": "d00179fb729ccc9a3206c9e50e0c0650",
+          "count": 44
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "PANTS",
+      "itemName": "어두운 그림자를 녹여내는 하의",
+      "itemIds": [
+        {
+          "itemId": "88c015be8ad68d67fb35cfa693dbe639",
+          "count": 97
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "PANTS",
+      "itemName": "짙은 그림자를 녹여내는 하의",
+      "itemIds": [
+        {
+          "itemId": "f2111bcc7ad8b1a005fb78e515ad785b",
+          "count": 4796
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 짙은 그림자를 녹여내는 하의",
+      "itemIds": [
+        {
+          "itemId": "d5fbe4c41da36056a76e459cecf93f9b",
+          "count": 12032
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 짙은 그림자를 녹여내는 하의",
+      "itemIds": [
+        {
+          "itemId": "995181aec033e67576b12db2847a47d8",
+          "count": 3464
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "2fe1185d9c958b52272cf57f36ffbc80",
+          "count": 17856
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOES",
+      "itemName": "옅은 그림자의 걸음",
+      "itemIds": [
+        {
+          "itemId": "2dee8e5022e85c907d129922477b81e6",
+          "count": 48
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOES",
+      "itemName": "어두운 그림자의 걸음",
+      "itemIds": [
+        {
+          "itemId": "78e8f42c625ec7ef7292351850107b03",
+          "count": 91
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOES",
+      "itemName": "짙은 그림자의 걸음",
+      "itemIds": [
+        {
+          "itemId": "6c36d06d09dc447ba97c495554741da4",
+          "count": 4102
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 짙은 그림자의 걸음",
+      "itemIds": [
+        {
+          "itemId": "267c5969bca1ae7f1649d50e7d2452e2",
+          "count": 12740
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 짙은 그림자의 걸음",
+      "itemIds": [
+        {
+          "itemId": "107178f1e897c46911a8b0038bc88671",
+          "count": 2209
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "2912e0efaa521dbceef5b00e7b29fd43",
+          "count": 17730
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WAIST",
+      "itemName": "옅은 그림자를 자아내는 벨트",
+      "itemIds": [
+        {
+          "itemId": "4506d53edea83951fcffc46c76ce096f",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WAIST",
+      "itemName": "어두운 그림자를 자아내는 벨트",
+      "itemIds": [
+        {
+          "itemId": "32b763107adb97a3f1f2717ad92f1995",
+          "count": 104
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WAIST",
+      "itemName": "짙은 그림자를 자아내는 벨트",
+      "itemIds": [
+        {
+          "itemId": "ef642579883c03010e0d38aa1794997b",
+          "count": 5264
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 짙은 그림자를 자아내는 벨트",
+      "itemIds": [
+        {
+          "itemId": "45f82f399d378e7b04a4b56762983990",
+          "count": 12232
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 짙은 그림자를 자아내는 벨트",
+      "itemIds": [
+        {
+          "itemId": "b77b6a297c9d47496fca9f5d5cc21420",
+          "count": 2834
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "6195206e63ffc979e7cd8c0ae01ebfd3",
+          "count": 17855
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "AMULET",
+      "itemName": "옅은 그림자 속 목걸이 - 혈",
+      "itemIds": [
+        {
+          "itemId": "9a78fcae3c6102427dbe40b20fbdd009",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "AMULET",
+      "itemName": "어두운 그림자 속 목걸이 - 혈",
+      "itemIds": [
+        {
+          "itemId": "dd26ecd06ed6b1b7b6f28086beb51f46",
+          "count": 90
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "AMULET",
+      "itemName": "짙은 그림자 속 목걸이 - 혈",
+      "itemIds": [
+        {
+          "itemId": "b56f1b34f0cd04e060ed954df3d638d8",
+          "count": 2323
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "AMULET",
+      "itemName": "칠흑같은 그림자 속 목걸이 - 혈",
+      "itemIds": [
+        {
+          "itemId": "ce90fd8107a2dec651b9f7c41a84888c",
+          "count": 17253
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "10cae409f5fbd9f31f1b7e565cdb7be4",
+          "count": 13914
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 칠흑같은 그림자 속 목걸이 - 혈",
+      "itemIds": [
+        {
+          "itemId": "31259fd7ac677855394e80a8e37fd5e9",
+          "count": 4949
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WRIST",
+      "itemName": "옅은 그림자 속 팔찌 - 화",
+      "itemIds": [
+        {
+          "itemId": "98a11259720824b5bfa77c6e928c3e64",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WRIST",
+      "itemName": "어두운 그림자 속 팔찌 - 화",
+      "itemIds": [
+        {
+          "itemId": "2b7b57418c2c75fc74d1cdebe44147bb",
+          "count": 92
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WRIST",
+      "itemName": "짙은 그림자 속 팔찌 - 화",
+      "itemIds": [
+        {
+          "itemId": "f81cc4cda73187a4003be7745ac16c2a",
+          "count": 2464
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WRIST",
+      "itemName": "칠흑같은 그림자 속 팔찌 - 화",
+      "itemIds": [
+        {
+          "itemId": "0f1556d74a133bf1f32cc414e8c44001",
+          "count": 17108
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "14aa35b710ff05c7502afbdd83fddfbd",
+          "count": 13972
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 칠흑같은 그림자 속 팔찌 - 화",
+      "itemIds": [
+        {
+          "itemId": "5e88d49f703473fd5227d4fd32a3981e",
+          "count": 4867
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "RING",
+      "itemName": "옅은 그림자 속 반지 - 독",
+      "itemIds": [
+        {
+          "itemId": "ea1840a62bf270e34ab12c90bf20d85d",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "RING",
+      "itemName": "어두운 그림자 속 반지 - 독",
+      "itemIds": [
+        {
+          "itemId": "580c1e989f67e38f2d48499eb88ecb94",
+          "count": 90
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "RING",
+      "itemName": "짙은 그림자 속 반지 - 독",
+      "itemIds": [
+        {
+          "itemId": "21753478bab6cd9d3f5265ae36abc34d",
+          "count": 2590
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "RING",
+      "itemName": "칠흑같은 그림자 속 반지 - 독",
+      "itemIds": [
+        {
+          "itemId": "cb015bdb6ca83dae7ccd7604ca558064",
+          "count": 17035
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "1805e9cce8dccd082607a00e2ad8f70f",
+          "count": 14105
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 칠흑같은 그림자 속 반지 - 독",
+      "itemIds": [
+        {
+          "itemId": "e6ffc6ca5528bb4250770f6bce91e47a",
+          "count": 4470
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SUPPORT",
+      "itemName": "옅은 그림자 속 보조장비 - 예",
+      "itemIds": [
+        {
+          "itemId": "ba31c9f8bf33c9427f005600ed4672f0",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SUPPORT",
+      "itemName": "어두운 그림자 속 보조장비 - 예",
+      "itemIds": [
+        {
+          "itemId": "d02a39cfb1501bcc8453229b7f85a43e",
+          "count": 152
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SUPPORT",
+      "itemName": "짙은 그림자 속 보조장비 - 예",
+      "itemIds": [
+        {
+          "itemId": "b1307410051171619ec11fac715d16cb",
+          "count": 20242
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "de2811a96fe646281ade2ea28317f2c3",
+          "count": 17446
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "옅은 그림자 속 마법석 - 폭",
+      "itemIds": [
+        {
+          "itemId": "971d30035a9821303613474ca91768db",
+          "count": 48
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "어두운 그림자 속 마법석 - 폭",
+      "itemIds": [
+        {
+          "itemId": "607c2ea23e6c1e7d82e3cb0ec17b45c3",
+          "count": 130
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "짙은 그림자 속 마법석 - 폭",
+      "itemIds": [
+        {
+          "itemId": "1585efdc5a6a16de5fa29d55e956665b",
+          "count": 19992
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "97a123ba55e5a3808dacb1f295871216",
+          "count": 17708
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "EARRING",
+      "itemName": "옅은 그림자 속 귀걸이 - 전",
+      "itemIds": [
+        {
+          "itemId": "6f89828858bb37275f88e02e54b4e94f",
+          "count": 41
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "EARRING",
+      "itemName": "어두운 그림자 속 귀걸이 - 전",
+      "itemIds": [
+        {
+          "itemId": "e9d532aaa850ae9022c33b1a687049c5",
+          "count": 224
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "EARRING",
+      "itemName": "짙은 그림자 속 귀걸이 - 전",
+      "itemIds": [
+        {
+          "itemId": "3f81664a47d9f1a03a4fd9b2137b8eb7",
+          "count": 20103
+        }
+      ]
+    },
+    {
+      "setItemName": "그림자에 숨은 죽음 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "ff2594fc8475d76fcb2fbb080a8467d1",
+          "count": 17705
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "JACKET",
+      "itemName": "리틀 페어리 상의",
+      "itemIds": [
+        {
+          "itemId": "4f0dcc6940b2bc614e735cc7e327ea7c",
+          "count": 351
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "JACKET",
+      "itemName": "엘더 페어리 상의",
+      "itemIds": [
+        {
+          "itemId": "bc0b48fc1aee8c0e52aaf26c74a333b4",
+          "count": 1017
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "JACKET",
+      "itemName": "노블 페어리 상의",
+      "itemIds": [
+        {
+          "itemId": "6bddee1482930a1654617768003cd00d",
+          "count": 9315
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 노블 페어리 상의",
+      "itemIds": [
+        {
+          "itemId": "2b9753caf05686862b3f3d46e03c1c0e",
+          "count": 16027
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 노블 페어리 상의",
+      "itemIds": [
+        {
+          "itemId": "6c8e9b2f11cecd539f956eac3e7c09a6",
+          "count": 8712
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "11f55a9437e514d46ee55c8a8ae82b7e",
+          "count": 64100
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "리틀 페어리 어깨",
+      "itemIds": [
+        {
+          "itemId": "36a16911dc4202abdd0d2ea0d23ef58f",
+          "count": 389
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "엘더 페어리 어깨",
+      "itemIds": [
+        {
+          "itemId": "22939054b71dfd19a8a5231f1c2056ac",
+          "count": 1021
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "노블 페어리 어깨",
+      "itemIds": [
+        {
+          "itemId": "29f5d0e0643c18eb213ec39a0f54863b",
+          "count": 11890
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 노블 페어리 어깨",
+      "itemIds": [
+        {
+          "itemId": "97f979a0a5e0fd5b47d9ac34a67571b6",
+          "count": 17573
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 노블 페어리 어깨",
+      "itemIds": [
+        {
+          "itemId": "e33e3fae99ec0ce9f11439c10fd1ae5d",
+          "count": 4719
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "2d81feba3c9977d5ffa32fd378785bf0",
+          "count": 64157
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "PANTS",
+      "itemName": "리틀 페어리 하의",
+      "itemIds": [
+        {
+          "itemId": "5380a0c6d45e300da8e30941301009b8",
+          "count": 407
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "PANTS",
+      "itemName": "엘더 페어리 하의",
+      "itemIds": [
+        {
+          "itemId": "063aa2c3726ea7bb560c1a845a58caa9",
+          "count": 1005
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "PANTS",
+      "itemName": "노블 페어리 하의",
+      "itemIds": [
+        {
+          "itemId": "1cdff16c1ee7de1697c4f4ced568360a",
+          "count": 10462
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 노블 페어리 하의",
+      "itemIds": [
+        {
+          "itemId": "61dfbf6b981e3daa257fed9773fa49c1",
+          "count": 17807
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 노블 페어리 하의",
+      "itemIds": [
+        {
+          "itemId": "fd915c69a72450a268c36cf71afc23b0",
+          "count": 5846
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "607ee0da46bf24a4b211bff52f3c05f1",
+          "count": 64150
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOES",
+      "itemName": "리틀 페어리 신발",
+      "itemIds": [
+        {
+          "itemId": "3f63897edfaf30b29490187d7d768b21",
+          "count": 363
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOES",
+      "itemName": "엘더 페어리 신발",
+      "itemIds": [
+        {
+          "itemId": "b9a53ed5a3cefd55052e245e80c8a8c4",
+          "count": 900
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOES",
+      "itemName": "노블 페어리 신발",
+      "itemIds": [
+        {
+          "itemId": "92716e38cfda9c78009d410f825cd1fe",
+          "count": 8960
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 노블 페어리 신발",
+      "itemIds": [
+        {
+          "itemId": "3c8ba6cf3f8103dfea6c0477817e815f",
+          "count": 18314
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 노블 페어리 신발",
+      "itemIds": [
+        {
+          "itemId": "2899df699505e632d151ec5a5de0c287",
+          "count": 3892
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "e6360b073291b20bd81c830fe5b52962",
+          "count": 62706
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WAIST",
+      "itemName": "리틀 페어리 벨트",
+      "itemIds": [
+        {
+          "itemId": "7fbaefcfbc4e57f85ac8193020289db1",
+          "count": 408
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WAIST",
+      "itemName": "엘더 페어리 벨트",
+      "itemIds": [
+        {
+          "itemId": "9d8753d398024eb58c0e4bd845cf5b10",
+          "count": 1035
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WAIST",
+      "itemName": "노블 페어리 벨트",
+      "itemIds": [
+        {
+          "itemId": "660527937b8a1089c9192e6aeb07d9ac",
+          "count": 11095
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 노블 페어리 벨트",
+      "itemIds": [
+        {
+          "itemId": "11ef6d8f18c5d3d0c56df86dd86046ed",
+          "count": 18177
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 노블 페어리 벨트",
+      "itemIds": [
+        {
+          "itemId": "0beda3bb0116b2ceb573cf2304e563f4",
+          "count": 4845
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "20c367fa5eaccbaa7b9fe372d4b94170",
+          "count": 64142
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "AMULET",
+      "itemName": "리틀 페어리 목걸이",
+      "itemIds": [
+        {
+          "itemId": "f4815e8c43771a0d4455018367a67a6d",
+          "count": 362
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "AMULET",
+      "itemName": "엘더 페어리 목걸이",
+      "itemIds": [
+        {
+          "itemId": "0346b10d179e5c4ce056fa4c42670f99",
+          "count": 975
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "AMULET",
+      "itemName": "노블 페어리 목걸이",
+      "itemIds": [
+        {
+          "itemId": "184d9dfed90f970fe7ca3cb967e2a722",
+          "count": 6964
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "AMULET",
+      "itemName": "로열 페어리 목걸이",
+      "itemIds": [
+        {
+          "itemId": "8683263b76f6822e92e46d4e080cd3f6",
+          "count": 27083
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "f774b185f71d9f5e7a712aa842e8ebba",
+          "count": 58631
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 로열 페어리 목걸이",
+      "itemIds": [
+        {
+          "itemId": "8d00f886eb2915766c01e56afc113540",
+          "count": 3372
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WRIST",
+      "itemName": "리틀 페어리 팔찌",
+      "itemIds": [
+        {
+          "itemId": "e4c70810aba0d7592c8407b2273ce209",
+          "count": 358
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WRIST",
+      "itemName": "엘더 페어리 팔찌",
+      "itemIds": [
+        {
+          "itemId": "311f3720a38dc22182863a1e975feb18",
+          "count": 1011
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WRIST",
+      "itemName": "노블 페어리 팔찌",
+      "itemIds": [
+        {
+          "itemId": "c65e76ae9dee4ac94ca34110daa5e63a",
+          "count": 7369
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WRIST",
+      "itemName": "로열 페어리 팔찌",
+      "itemIds": [
+        {
+          "itemId": "38649c2d1efd86613624653fe835c190",
+          "count": 26681
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "1d102027205b181ec94bd03581f30fe6",
+          "count": 58770
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 로열 페어리 팔찌",
+      "itemIds": [
+        {
+          "itemId": "02d0e4da9d66db015298fbe5e6643b3c",
+          "count": 3329
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "RING",
+      "itemName": "리틀 페어리 반지",
+      "itemIds": [
+        {
+          "itemId": "6f4e8fc235394ffa7b774199b01e1e83",
+          "count": 362
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "RING",
+      "itemName": "엘더 페어리 반지",
+      "itemIds": [
+        {
+          "itemId": "f83450f4b2907a2a8bd5f1deb3b54289",
+          "count": 1006
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "RING",
+      "itemName": "노블 페어리 반지",
+      "itemIds": [
+        {
+          "itemId": "454e2f2f91562a128ba433307bc59015",
+          "count": 7513
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "RING",
+      "itemName": "로열 페어리 반지",
+      "itemIds": [
+        {
+          "itemId": "dc1167f78aae7c8f6ed6b29c14dd29e5",
+          "count": 26546
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "f8f5673ee549e8de296b3c2ba1593ca4",
+          "count": 59044
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 로열 페어리 반지",
+      "itemIds": [
+        {
+          "itemId": "30309e6c9512c23cf967113800f05f2f",
+          "count": 2918
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "리틀 페어리 보조장비",
+      "itemIds": [
+        {
+          "itemId": "b4ab1780edca3c0994ed3e8c29a4a454",
+          "count": 411
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "엘더 페어리 보조장비",
+      "itemIds": [
+        {
+          "itemId": "fa53754fc0f378503e801e066d331e6e",
+          "count": 1350
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "노블 페어리 보조장비",
+      "itemIds": [
+        {
+          "itemId": "51be90f0f68a048084cd6163e722bbd0",
+          "count": 33796
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "819d0bd846c913248d30c8b1e4e53755",
+          "count": 63310
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "리틀 페어리 마법석",
+      "itemIds": [
+        {
+          "itemId": "a12433545e35378e40afb9e0e3aa684a",
+          "count": 458
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "엘더 페어리 마법석",
+      "itemIds": [
+        {
+          "itemId": "57ad748a9e4802e0e90f6390995cd420",
+          "count": 1238
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "노블 페어리 마법석",
+      "itemIds": [
+        {
+          "itemId": "d814c3a2e2afd76b31939f138989249c",
+          "count": 33279
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "b797e5b10819d9edb772d6cc69f7561d",
+          "count": 63443
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "EARRING",
+      "itemName": "리틀 페어리 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "3552b745ce36ce09b362a76e2c81ee04",
+          "count": 432
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "EARRING",
+      "itemName": "엘더 페어리 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "841ea92775de710061d9ea2045217e21",
+          "count": 1279
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "EARRING",
+      "itemName": "노블 페어리 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "72baf130d32d7c03872f338e86a1c13f",
+          "count": 33676
+        }
+      ]
+    },
+    {
+      "setItemName": "소울 페어리 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "523be2dc115d046a3ce5ab76f5e1e42b",
+          "count": 63820
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "JACKET",
+      "itemName": "빛나는 황금향의 플레이트 아머",
+      "itemIds": [
+        {
+          "itemId": "b84809e685b56fddb4977b8252f8a0c8",
+          "count": 59
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "JACKET",
+      "itemName": "화려한 황금향의 플레이트 아머",
+      "itemIds": [
+        {
+          "itemId": "ec0998fd61d11d03b8afeb804f2e750a",
+          "count": 165
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "JACKET",
+      "itemName": "찬란한 황금향의 플레이트 아머",
+      "itemIds": [
+        {
+          "itemId": "a1b024bc3c80c0028e8408a5e008f915",
+          "count": 8374
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 찬란한 황금향의 플레이트 아머",
+      "itemIds": [
+        {
+          "itemId": "447e2906aee1c31574dea25387c876b0",
+          "count": 33173
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 찬란한 황금향의 플레이트 아머",
+      "itemIds": [
+        {
+          "itemId": "d6cc73e1e4f4b83d6cecb5c310014977",
+          "count": 16266
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "847ec8e923e46351dc2c747cd121b7f0",
+          "count": 82103
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOULDER",
+      "itemName": "빛나는 황금향의 플레이트 숄더",
+      "itemIds": [
+        {
+          "itemId": "ef9a465b5635da5583d958d42bfada88",
+          "count": 73
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOULDER",
+      "itemName": "화려한 황금향의 플레이트 숄더",
+      "itemIds": [
+        {
+          "itemId": "975d2fb3c5dd7e6c2f2fbdae37bdaed5",
+          "count": 155
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOULDER",
+      "itemName": "찬란한 황금향의 플레이트 숄더",
+      "itemIds": [
+        {
+          "itemId": "6c1950a1769f2dc1f38d94166aa6db4a",
+          "count": 11067
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 찬란한 황금향의 플레이트 숄더",
+      "itemIds": [
+        {
+          "itemId": "57b894751ac458069a7df9338f1de23b",
+          "count": 38415
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 찬란한 황금향의 플레이트 숄더",
+      "itemIds": [
+        {
+          "itemId": "90e09e1ad869e07977b94fbf9cd6acce",
+          "count": 8983
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "c4de6c27c8c1cce1474341a170f06351",
+          "count": 82274
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "PANTS",
+      "itemName": "빛나는 황금향의 플레이트 레깅스",
+      "itemIds": [
+        {
+          "itemId": "ac4e19629298d2c9a354076ab78d5532",
+          "count": 66
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "PANTS",
+      "itemName": "화려한 황금향의 플레이트 레깅스",
+      "itemIds": [
+        {
+          "itemId": "425fa6a763366225ad9bc774e9e0f577",
+          "count": 173
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "PANTS",
+      "itemName": "찬란한 황금향의 플레이트 레깅스",
+      "itemIds": [
+        {
+          "itemId": "fa186dfbbdef647418f4581cedec7ea8",
+          "count": 9705
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 찬란한 황금향의 플레이트 레깅스",
+      "itemIds": [
+        {
+          "itemId": "c0c61c2e5a0510bc68a2a6a26b3b7990",
+          "count": 37740
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 찬란한 황금향의 플레이트 레깅스",
+      "itemIds": [
+        {
+          "itemId": "700fb5abf341de4f8f210213ccc5e7df",
+          "count": 10793
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "2eee49706bce42e0bd022b9a86e7e3c9",
+          "count": 82253
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOES",
+      "itemName": "빛나는 황금향의 플레이트 부츠",
+      "itemIds": [
+        {
+          "itemId": "ced44d50ce333fff4ce4bc9a195a968d",
+          "count": 61
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOES",
+      "itemName": "화려한 황금향의 플레이트 부츠",
+      "itemIds": [
+        {
+          "itemId": "3501089b77395bbeeb11c4d96d51df70",
+          "count": 150
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOES",
+      "itemName": "찬란한 황금향의 플레이트 부츠",
+      "itemIds": [
+        {
+          "itemId": "6cb8c6f4e78084084e459c42b92a2940",
+          "count": 8602
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 찬란한 황금향의 플레이트 부츠",
+      "itemIds": [
+        {
+          "itemId": "e6606418d01e3bd4944aaa3af786c346",
+          "count": 36729
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 찬란한 황금향의 플레이트 부츠",
+      "itemIds": [
+        {
+          "itemId": "92d13dc1c38895202ee62b05e2b5d11e",
+          "count": 6511
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "3dc40d93e54a55bb1e13a4a2633c6efb",
+          "count": 79616
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WAIST",
+      "itemName": "빛나는 황금향의 플레이트 코일",
+      "itemIds": [
+        {
+          "itemId": "69e169c1b9699d3d16f9ed45b3c2df09",
+          "count": 77
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WAIST",
+      "itemName": "화려한 황금향의 플레이트 코일",
+      "itemIds": [
+        {
+          "itemId": "880f071286012608377d70fab1e45668",
+          "count": 168
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WAIST",
+      "itemName": "찬란한 황금향의 플레이트 코일",
+      "itemIds": [
+        {
+          "itemId": "2be538b914d1b161d99bd54ef37a2308",
+          "count": 10553
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 찬란한 황금향의 플레이트 코일",
+      "itemIds": [
+        {
+          "itemId": "7efae00cb4879db8804d107ae1c3b909",
+          "count": 38850
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 찬란한 황금향의 플레이트 코일",
+      "itemIds": [
+        {
+          "itemId": "9c026e5d38dec89186fe2ac1f9a7da5c",
+          "count": 8939
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "ed24b65d57244bbbde424696bb46e59a",
+          "count": 82251
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "AMULET",
+      "itemName": "빛나는 황금향의 축복 - 목걸이",
+      "itemIds": [
+        {
+          "itemId": "42a63799de52f2e6b270d408497c337b",
+          "count": 44
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "AMULET",
+      "itemName": "화려한 황금향의 축복 - 목걸이",
+      "itemIds": [
+        {
+          "itemId": "a072b7e6b059574e8b6a8a7dadd8d72f",
+          "count": 180
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "AMULET",
+      "itemName": "찬란한 황금향의 축복 - 목걸이",
+      "itemIds": [
+        {
+          "itemId": "3450d77e3bf63f9611d593d07a1a5645",
+          "count": 5292
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "AMULET",
+      "itemName": "영롱한 황금향의 축복 - 목걸이",
+      "itemIds": [
+        {
+          "itemId": "4ed2acf74d5cfa69947535f6a8af7c5d",
+          "count": 52866
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "715c10bcf2aaaa6d6962d81ea547eb02",
+          "count": 64316
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 영롱한 황금향의 축복 - 목걸이",
+      "itemIds": [
+        {
+          "itemId": "d844d52f4ddec5d044d17daf5ed3e803",
+          "count": 18947
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WRIST",
+      "itemName": "빛나는 황금향의 영광 - 팔찌",
+      "itemIds": [
+        {
+          "itemId": "36f65593c1d75178e0c1f7dcbba88187",
+          "count": 37
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WRIST",
+      "itemName": "화려한 황금향의 영광 - 팔찌",
+      "itemIds": [
+        {
+          "itemId": "17e1cababa951470969dbba4e9bb8547",
+          "count": 188
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WRIST",
+      "itemName": "찬란한 황금향의 영광 - 팔찌",
+      "itemIds": [
+        {
+          "itemId": "80b0d499e1b84f1c8ea3e37a7116904a",
+          "count": 5673
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WRIST",
+      "itemName": "영롱한 황금향의 영광 - 팔찌",
+      "itemIds": [
+        {
+          "itemId": "128a14815b5e02e63c8cba53ce2ac19e",
+          "count": 52512
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "51cf7eab82cb21e12737a6268c0e6add",
+          "count": 64534
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 영롱한 황금향의 영광 - 팔찌",
+      "itemIds": [
+        {
+          "itemId": "733d2c61423065cb0780674cc806ca3c",
+          "count": 18720
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "RING",
+      "itemName": "빛나는 황금향의 꿈 - 반지",
+      "itemIds": [
+        {
+          "itemId": "a8d9735b7be4436c73a17116b7b5f785",
+          "count": 42
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "RING",
+      "itemName": "화려한 황금향의 꿈 - 반지",
+      "itemIds": [
+        {
+          "itemId": "b2898f6d37bd1414074d89732d35e387",
+          "count": 172
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "RING",
+      "itemName": "찬란한 황금향의 꿈 - 반지",
+      "itemIds": [
+        {
+          "itemId": "3c7cf558f643169adce3bce92aa17cc5",
+          "count": 6121
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "RING",
+      "itemName": "영롱한 황금향의 꿈 - 반지",
+      "itemIds": [
+        {
+          "itemId": "8b38fd1925f030abf9154f9ef448d41a",
+          "count": 52399
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "e4463ab4c93bb247ed33f37843bd324c",
+          "count": 65920
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 영롱한 황금향의 꿈 - 반지",
+      "itemIds": [
+        {
+          "itemId": "51b04adc93626218e1aa26bb78b9c7e6",
+          "count": 12023
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SUPPORT",
+      "itemName": "빛나는 황금향의 집착 - 보조장비",
+      "itemIds": [
+        {
+          "itemId": "04fd9766a43e17e26b7c1c63e606a57f",
+          "count": 74
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SUPPORT",
+      "itemName": "화려한 황금향의 집착 - 보조장비",
+      "itemIds": [
+        {
+          "itemId": "e2c810db83f97eda76823b3e4f96c631",
+          "count": 210
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SUPPORT",
+      "itemName": "찬란한 황금향의 집착 - 보조장비",
+      "itemIds": [
+        {
+          "itemId": "5c6d51da9fb172943219d333a06c9868",
+          "count": 58516
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "d8d7fc1c77c8b955e0f137ec1e1c52c2",
+          "count": 76079
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "빛나는 황금향의 저주 - 마법석",
+      "itemIds": [
+        {
+          "itemId": "c7ce44a186801c7df8a69b34b49b8d85",
+          "count": 70
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "화려한 황금향의 저주 - 마법석",
+      "itemIds": [
+        {
+          "itemId": "09bcc44c3130b87a7ad45a297992a0d0",
+          "count": 231
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "찬란한 황금향의 저주 - 마법석",
+      "itemIds": [
+        {
+          "itemId": "30457efb8b2d19c2ca0b3b071b557af1",
+          "count": 56312
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "0cf2f211de3751d2e4ee971b7b29802b",
+          "count": 79144
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "EARRING",
+      "itemName": "빛나는 황금향의 이면 - 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "026b49145d07e2db871fa694994c67e5",
+          "count": 59
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "EARRING",
+      "itemName": "화려한 황금향의 이면 - 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "ee160e4221f89f704bf3b361bc7e536a",
+          "count": 210
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "EARRING",
+      "itemName": "찬란한 황금향의 이면 - 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "6dec30d4dbf75153cfad5af20cda006d",
+          "count": 58989
+        }
+      ]
+    },
+    {
+      "setItemName": "영원히 이어지는 황금향 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "039af53f45fb9d16c597db9b47461c76",
+          "count": 81131
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "JACKET",
+      "itemName": "이무기의 불을 뿜는 갑주",
+      "itemIds": [
+        {
+          "itemId": "0e7431e56d3552867eb57c7a7d85c9cb",
+          "count": 58
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "JACKET",
+      "itemName": "용의 불을 뿜는 갑주",
+      "itemIds": [
+        {
+          "itemId": "d8d0591052637b41e0adad43ad8f407b",
+          "count": 244
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "JACKET",
+      "itemName": "용왕의 불을 뿜는 갑주",
+      "itemIds": [
+        {
+          "itemId": "90949bfa792ca2b0b5df790096bdf4aa",
+          "count": 14184
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 용왕의 불을 뿜는 갑주",
+      "itemIds": [
+        {
+          "itemId": "677009a6faa5c69e3772ad745a403eda",
+          "count": 37727
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 용왕의 불을 뿜는 갑주",
+      "itemIds": [
+        {
+          "itemId": "4615fbfd1e4f7abb53a8f7692dec7015",
+          "count": 18591
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "7ed6efcd447e9f92726492bf8c07f8e6",
+          "count": 56006
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOULDER",
+      "itemName": "이무기의 태풍을 부르는 어깨",
+      "itemIds": [
+        {
+          "itemId": "1a490d053f4edb9c5b2106dce9b2e44a",
+          "count": 91
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOULDER",
+      "itemName": "용의 태풍을 부르는 어깨",
+      "itemIds": [
+        {
+          "itemId": "9156e55db26ca2e64acd2c8ca74ae878",
+          "count": 200
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOULDER",
+      "itemName": "용왕의 태풍을 부르는 어깨",
+      "itemIds": [
+        {
+          "itemId": "107e13c44d4b6d9a92e5febe5a0615be",
+          "count": 18342
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 용왕의 태풍을 부르는 어깨",
+      "itemIds": [
+        {
+          "itemId": "9682460967c40651dd1fd198e9d0d6de",
+          "count": 42500
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 용왕의 태풍을 부르는 어깨",
+      "itemIds": [
+        {
+          "itemId": "c3942f2fb4eaf36b357fffe982ca4d44",
+          "count": 9780
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "9d2004a5a541e719c46c9199076f4bea",
+          "count": 56004
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "PANTS",
+      "itemName": "이무기의 벼락 치는 각반",
+      "itemIds": [
+        {
+          "itemId": "17e5c8f237d97ad4d7c0d71f6d027922",
+          "count": 103
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "PANTS",
+      "itemName": "용의 벼락 치는 각반",
+      "itemIds": [
+        {
+          "itemId": "3392ff79954b6fec9da92df270c69512",
+          "count": 174
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "PANTS",
+      "itemName": "용왕의 벼락 치는 각반",
+      "itemIds": [
+        {
+          "itemId": "7debe03f88a52df4163fbea691606ce2",
+          "count": 16297
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 용왕의 벼락 치는 각반",
+      "itemIds": [
+        {
+          "itemId": "791a51e94891757193835b4c7ce4267b",
+          "count": 42349
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 용왕의 벼락 치는 각반",
+      "itemIds": [
+        {
+          "itemId": "52fee7a51ef977c830529c22b8333d20",
+          "count": 12008
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "e35fae842f744668a2b80a60db255650",
+          "count": 55998
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOES",
+      "itemName": "이무기의 하늘을 찢는 발톱",
+      "itemIds": [
+        {
+          "itemId": "27bd799eaf2cb62e04d4b361f33ac706",
+          "count": 87
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOES",
+      "itemName": "용의 하늘을 찢는 발톱",
+      "itemIds": [
+        {
+          "itemId": "e1ab2b23b7dff8cf865a71751d4ca229",
+          "count": 189
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOES",
+      "itemName": "용왕의 하늘을 찢는 발톱",
+      "itemIds": [
+        {
+          "itemId": "34530ab9431075fbbba5964b91de10eb",
+          "count": 14371
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 용왕의 하늘을 찢는 발톱",
+      "itemIds": [
+        {
+          "itemId": "405bb6e266b117ae4a0a9ffa01d2b274",
+          "count": 45181
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 용왕의 하늘을 찢는 발톱",
+      "itemIds": [
+        {
+          "itemId": "929d75dd6416dcb8f9ac05ccf44c0681",
+          "count": 7918
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "46afa7de9be53814c19618ecbc46afc0",
+          "count": 55624
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WAIST",
+      "itemName": "이무기의 대지를 가르는 허리",
+      "itemIds": [
+        {
+          "itemId": "2aac40e9f094ace1b4a4db63863d4e12",
+          "count": 90
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WAIST",
+      "itemName": "용의 대지를 가르는 허리",
+      "itemIds": [
+        {
+          "itemId": "591564f079e8c8c79d7de6d6f925fec5",
+          "count": 217
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WAIST",
+      "itemName": "용왕의 대지를 가르는 허리",
+      "itemIds": [
+        {
+          "itemId": "413f82801f1c0dabadbc9650eeb08d77",
+          "count": 17734
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 용왕의 대지를 가르는 허리",
+      "itemIds": [
+        {
+          "itemId": "991705263b497ff6e27bb22ff67cac47",
+          "count": 43303
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 용왕의 대지를 가르는 허리",
+      "itemIds": [
+        {
+          "itemId": "16c20d64e618a6269210840552a9d439",
+          "count": 9544
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "9fedbd1ce57302d5ed821335ec9d972f",
+          "count": 55997
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "AMULET",
+      "itemName": "이무기의 공포를 심는 포효",
+      "itemIds": [
+        {
+          "itemId": "4f9f2020615273f9dcd71479c27b6fac",
+          "count": 82
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "AMULET",
+      "itemName": "용의 공포를 심는 포효",
+      "itemIds": [
+        {
+          "itemId": "84d5b02fb7ae89f051a82e8d0b390f48",
+          "count": 193
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "AMULET",
+      "itemName": "용왕의 공포를 심는 포효",
+      "itemIds": [
+        {
+          "itemId": "52f6e55219392c1c4e654ce28c443a11",
+          "count": 6827
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "AMULET",
+      "itemName": "용제의 공포를 심는 포효",
+      "itemIds": [
+        {
+          "itemId": "44350fa45d2c52776aa5ee1bcb623a1f",
+          "count": 62387
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "d654d1928961916794e5b7d5cd395ccc",
+          "count": 41746
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 용제의 공포를 심는 포효",
+      "itemIds": [
+        {
+          "itemId": "023a29f75f45dbd924028afc8d694dbc",
+          "count": 16102
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WRIST",
+      "itemName": "이무기의 피를 머금은 흉아",
+      "itemIds": [
+        {
+          "itemId": "965e43b679d6ee0c19d6a789b97ef622",
+          "count": 73
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WRIST",
+      "itemName": "용의 피를 머금은 흉아",
+      "itemIds": [
+        {
+          "itemId": "936f1d74d912d6464d898a7075d191b3",
+          "count": 222
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WRIST",
+      "itemName": "용왕의 피를 머금은 흉아",
+      "itemIds": [
+        {
+          "itemId": "e0d55649713406e4e1b2c084c5ff8142",
+          "count": 7313
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WRIST",
+      "itemName": "용제의 피를 머금은 흉아",
+      "itemIds": [
+        {
+          "itemId": "b56711cb913ec3e76c3932b59ffd98af",
+          "count": 61925
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "99795506455042691ecb67140101e7c7",
+          "count": 42260
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 용제의 피를 머금은 흉아",
+      "itemIds": [
+        {
+          "itemId": "838cf791a665de6b155d99cc40a85200",
+          "count": 15502
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "RING",
+      "itemName": "이무기의 재해를 막는 비늘",
+      "itemIds": [
+        {
+          "itemId": "1a90bb327b2415b7a5e497c0040edb8a",
+          "count": 84
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "RING",
+      "itemName": "용의 재해를 막는 비늘",
+      "itemIds": [
+        {
+          "itemId": "3c7ae633ed91578716574cbe9958f391",
+          "count": 234
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "RING",
+      "itemName": "용왕의 재해를 막는 비늘",
+      "itemIds": [
+        {
+          "itemId": "557fe67fcc891472f4081a55dfec075a",
+          "count": 7885
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "RING",
+      "itemName": "용제의 재해를 막는 비늘",
+      "itemIds": [
+        {
+          "itemId": "bd066206710390f3e6353ab82eaab1a1",
+          "count": 61592
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "9cfcf2182a0ff95b9d6e5b1f975e9b0c",
+          "count": 43406
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 용제의 재해를 막는 비늘",
+      "itemIds": [
+        {
+          "itemId": "719de560cb2e804072dceec7aa65a74f",
+          "count": 12805
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SUPPORT",
+      "itemName": "이무기의 숨겨둔 역린",
+      "itemIds": [
+        {
+          "itemId": "03d47ef1b33879c765622f7d80e87d81",
+          "count": 112
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SUPPORT",
+      "itemName": "용의 숨겨둔 역린",
+      "itemIds": [
+        {
+          "itemId": "6b2549abc7e9492bcc98ab5786ac0b1f",
+          "count": 261
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SUPPORT",
+      "itemName": "용왕의 숨겨둔 역린",
+      "itemIds": [
+        {
+          "itemId": "51840e08072e482d0f6d5731ce0e169e",
+          "count": 70276
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "599b89c06d047c3420dfe6f9fc5200ce",
+          "count": 54092
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "이무기의 영롱한 여의주",
+      "itemIds": [
+        {
+          "itemId": "cb77867cee935c54adc5829b3ef52fb0",
+          "count": 103
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "용의 영롱한 여의주",
+      "itemIds": [
+        {
+          "itemId": "307c6eb474b76601c31aaeebcacadc56",
+          "count": 291
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "용왕의 영롱한 여의주",
+      "itemIds": [
+        {
+          "itemId": "e39133d663af30885f3ea6a62928e806",
+          "count": 69761
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "10a3bc2a67ae703481930876824cf126",
+          "count": 55531
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "EARRING",
+      "itemName": "이무기의 솟구친 뿔",
+      "itemIds": [
+        {
+          "itemId": "cc7c47f40667cfdf04a56b8eeed4d0e5",
+          "count": 107
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "EARRING",
+      "itemName": "용의 솟구친 뿔",
+      "itemIds": [
+        {
+          "itemId": "9a1853f199a426e7bbe09b967f27182d",
+          "count": 244
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "EARRING",
+      "itemName": "용왕의 솟구친 뿔",
+      "itemIds": [
+        {
+          "itemId": "95008cca6f972b35df2347a827d1c64c",
+          "count": 70120
+        }
+      ]
+    },
+    {
+      "setItemName": "용투장의 난 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "e95d0d0188c0cbbac676d9e126be54db",
+          "count": 55511
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "JACKET",
+      "itemName": "순결한 정화 상의",
+      "itemIds": [
+        {
+          "itemId": "dbe8afcfe4001a54c471902d950e4dcc",
+          "count": 89
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "JACKET",
+      "itemName": "때 묻지 않은 정화 상의",
+      "itemIds": [
+        {
+          "itemId": "8620ea36303db8fe485762e3e1b56883",
+          "count": 379
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "JACKET",
+      "itemName": "칠흑의 정화 상의",
+      "itemIds": [
+        {
+          "itemId": "d51d0071c181d4fe99b04e19f2fd6a82",
+          "count": 21000
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 칠흑의 정화 상의",
+      "itemIds": [
+        {
+          "itemId": "0e944978b8e69cc5ec088995713305ee",
+          "count": 63344
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 칠흑의 정화 상의",
+      "itemIds": [
+        {
+          "itemId": "fc6be2db9857338ad5a17a0d202bd34f",
+          "count": 30302
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "43803200c544fd434d9ab5c9880bebd3",
+          "count": 86972
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOULDER",
+      "itemName": "순결한 정화 어깨",
+      "itemIds": [
+        {
+          "itemId": "bcf610a2a286c323720c929640d11bc3",
+          "count": 145
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOULDER",
+      "itemName": "때 묻지 않은 정화 어깨",
+      "itemIds": [
+        {
+          "itemId": "2444288a5ba59fe11dacd68b811ffc18",
+          "count": 329
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOULDER",
+      "itemName": "칠흑의 정화 어깨",
+      "itemIds": [
+        {
+          "itemId": "29de998d42303d1333e8309af0344aef",
+          "count": 27778
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 칠흑의 정화 어깨",
+      "itemIds": [
+        {
+          "itemId": "af69f31a097f36466b335eb2b3951fa6",
+          "count": 71368
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 칠흑의 정화 어깨",
+      "itemIds": [
+        {
+          "itemId": "1411123f8393e57af10a7aeef33c483c",
+          "count": 15883
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "1fd5aa7227fb90d934620fd2b9bfbef6",
+          "count": 86998
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "PANTS",
+      "itemName": "순결한 정화 하의",
+      "itemIds": [
+        {
+          "itemId": "0ca40a528ad54a16c9b899a3b44b36a2",
+          "count": 147
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "PANTS",
+      "itemName": "때 묻지 않은 정화 하의",
+      "itemIds": [
+        {
+          "itemId": "5a4809553cd2957bc784cae0cfb5799d",
+          "count": 337
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "PANTS",
+      "itemName": "칠흑의 정화 하의",
+      "itemIds": [
+        {
+          "itemId": "94884ed108c1b7edf1082298bb5dd9ac",
+          "count": 24485
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 칠흑의 정화 하의",
+      "itemIds": [
+        {
+          "itemId": "5af335df168b46a51c05462b246f8484",
+          "count": 71127
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 칠흑의 정화 하의",
+      "itemIds": [
+        {
+          "itemId": "71085a9389839043a87b6ef6c29e8875",
+          "count": 19283
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "0bf45c3b01cddaf53ee81a5271b20ae4",
+          "count": 86977
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOES",
+      "itemName": "순결한 정화 신발",
+      "itemIds": [
+        {
+          "itemId": "35ef41e062426d2cb81e1e139d1f9cd1",
+          "count": 137
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOES",
+      "itemName": "때 묻지 않은 정화 신발",
+      "itemIds": [
+        {
+          "itemId": "010a6190fa3042ad98705cbbe3b2c106",
+          "count": 292
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOES",
+      "itemName": "칠흑의 정화 신발",
+      "itemIds": [
+        {
+          "itemId": "6f6202187264130623fb7386af92735f",
+          "count": 21125
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 칠흑의 정화 신발",
+      "itemIds": [
+        {
+          "itemId": "7761ada30f6888dadb90b5f05c8400d0",
+          "count": 73667
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 칠흑의 정화 신발",
+      "itemIds": [
+        {
+          "itemId": "f9ec0ece26ea9cda37e1d16618d240d5",
+          "count": 12394
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "a771af545571ab8a78f45c463bab947a",
+          "count": 85861
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WAIST",
+      "itemName": "순결한 정화 벨트",
+      "itemIds": [
+        {
+          "itemId": "2e8809b050e7e0077519f780f2e69881",
+          "count": 137
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WAIST",
+      "itemName": "때 묻지 않은 정화 벨트",
+      "itemIds": [
+        {
+          "itemId": "b7062a0ba2ddd8dc5d8d481ae764c944",
+          "count": 326
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WAIST",
+      "itemName": "칠흑의 정화 벨트",
+      "itemIds": [
+        {
+          "itemId": "6fb2ab3331418a5afa6200fb88aa5855",
+          "count": 26639
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 칠흑의 정화 벨트",
+      "itemIds": [
+        {
+          "itemId": "ebcdf9f573b5baee8e43e33b07e6691a",
+          "count": 72615
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 칠흑의 정화 벨트",
+      "itemIds": [
+        {
+          "itemId": "d687b2d94eefb217a39d09784670509d",
+          "count": 15739
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "951150903ca24cb8598e758ba4875995",
+          "count": 86970
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "AMULET",
+      "itemName": "그을린 정화 목걸이",
+      "itemIds": [
+        {
+          "itemId": "2db4ad2895f4f9d195f40e980cf710be",
+          "count": 106
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "AMULET",
+      "itemName": "타버린 정화 목걸이",
+      "itemIds": [
+        {
+          "itemId": "945c20278807e061e83042e1c1d197df",
+          "count": 369
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "AMULET",
+      "itemName": "칠흑의 정화 목걸이",
+      "itemIds": [
+        {
+          "itemId": "0eb5d7cad40b1aeaad80c8997cc7fc99",
+          "count": 11985
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "AMULET",
+      "itemName": "혼돈의 정화 목걸이",
+      "itemIds": [
+        {
+          "itemId": "634efedb77439c30128b6560278281f8",
+          "count": 101946
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "223dc58926c3f1b1d70b3577965010fb",
+          "count": 67965
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 혼돈의 정화 목걸이",
+      "itemIds": [
+        {
+          "itemId": "9cb8d68a75b3d97f42ee97411f043f42",
+          "count": 20632
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WRIST",
+      "itemName": "그을린 정화 팔찌",
+      "itemIds": [
+        {
+          "itemId": "26e9e51b1ae91436f27ceca2581ae84c",
+          "count": 129
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WRIST",
+      "itemName": "타버린 정화 팔찌",
+      "itemIds": [
+        {
+          "itemId": "7893424d65044032b098b8ac7e07f673",
+          "count": 335
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WRIST",
+      "itemName": "칠흑의 정화 팔찌",
+      "itemIds": [
+        {
+          "itemId": "91b97030310791c815100f5749e96c94",
+          "count": 12670
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WRIST",
+      "itemName": "혼돈의 정화 팔찌",
+      "itemIds": [
+        {
+          "itemId": "8cda0e4d867c18bcc1f91fcd4d8493e0",
+          "count": 101302
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "285178063c9a2d39771994cac9c1cddc",
+          "count": 68591
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 혼돈의 정화 팔찌",
+      "itemIds": [
+        {
+          "itemId": "9f404dc67c47917d8e5b062b1a2bd149",
+          "count": 20048
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "RING",
+      "itemName": "그을린 정화 반지",
+      "itemIds": [
+        {
+          "itemId": "0bdd358495b7162c1676ec8b49e19004",
+          "count": 142
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "RING",
+      "itemName": "타버린 정화 반지",
+      "itemIds": [
+        {
+          "itemId": "3c98b0a19cfc20b86099795425547710",
+          "count": 398
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "RING",
+      "itemName": "칠흑의 정화 반지",
+      "itemIds": [
+        {
+          "itemId": "854d52a64fe061dc2586a10bf274676b",
+          "count": 13600
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "RING",
+      "itemName": "혼돈의 정화 반지",
+      "itemIds": [
+        {
+          "itemId": "0801473c91a3bcc11f9ea84571034f69",
+          "count": 100621
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "664fcff55af50d736345dbd4a86b63e7",
+          "count": 70281
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 혼돈의 정화 반지",
+      "itemIds": [
+        {
+          "itemId": "5363150949435f138011f4e2933c7d1d",
+          "count": 15804
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SUPPORT",
+      "itemName": "그을린 정화 보조장비",
+      "itemIds": [
+        {
+          "itemId": "b461b9224f434cb08ef98752eaf02f6b",
+          "count": 150
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SUPPORT",
+      "itemName": "타버린 정화 보조장비",
+      "itemIds": [
+        {
+          "itemId": "c1a6496d2b9817e6cd88f6c1dbdcb115",
+          "count": 398
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SUPPORT",
+      "itemName": "칠흑의 정화 보조장비",
+      "itemIds": [
+        {
+          "itemId": "c021686f1c75aaa52d9a868d6e4eacc8",
+          "count": 114582
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "7202d17c60081ecd087db83be88edea2",
+          "count": 83821
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "그을린 정화 마법석",
+      "itemIds": [
+        {
+          "itemId": "5cc70ba3d34729ed52036218fb2d3175",
+          "count": 168
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "타버린 정화 마법석",
+      "itemIds": [
+        {
+          "itemId": "132a45d427142eb39845eb85272e062d",
+          "count": 522
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "칠흑의 정화 마법석",
+      "itemIds": [
+        {
+          "itemId": "1ec42a6c4087627c396daa257475ed5c",
+          "count": 113950
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "96f87549f21b13bbb93d703e7244d621",
+          "count": 86062
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "EARRING",
+      "itemName": "그을린 정화 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "16e3f049c62b6f3ab22e32e6caeebdcf",
+          "count": 151
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "EARRING",
+      "itemName": "타버린 정화 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "1817f0bc89bbcde471f1fbb5e50b6529",
+          "count": 377
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "EARRING",
+      "itemName": "칠흑의 정화 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "ffcad6ffb4e4629f61b56052f158f805",
+          "count": 114152
+        }
+      ]
+    },
+    {
+      "setItemName": "칠흑의 정화 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "96259aad86c6455f46f25ad6098d2ea1",
+          "count": 86085
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "JACKET",
+      "itemName": "강인한 행운을 부르는 자켓",
+      "itemIds": [
+        {
+          "itemId": "73e2376c63beaf65cf35d35fabf6474f",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "JACKET",
+      "itemName": "굳건한 행운을 부르는 자켓",
+      "itemIds": [
+        {
+          "itemId": "3977f9a43d714ed7dc823f286a8bef8b",
+          "count": 88
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "JACKET",
+      "itemName": "확고한 행운을 부르는 자켓",
+      "itemIds": [
+        {
+          "itemId": "2719b52c25246cedc2c06d5489e2c3c1",
+          "count": 3697
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 확고한 행운을 부르는 자켓",
+      "itemIds": [
+        {
+          "itemId": "9aafbf4efbaee55abb7ca97c1229138b",
+          "count": 11203
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 확고한 행운을 부르는 자켓",
+      "itemIds": [
+        {
+          "itemId": "fd29d4aa24e8e22a254e09e1f3cdb7e7",
+          "count": 4989
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "7b973287f7a5e53837f58cdeb21dd995",
+          "count": 12787
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOULDER",
+      "itemName": "강인한 행운을 부르는 견장",
+      "itemIds": [
+        {
+          "itemId": "3c36a29a5ca790a5e18b5bf16f2f359b",
+          "count": 32
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOULDER",
+      "itemName": "굳건한 행운을 부르는 견장",
+      "itemIds": [
+        {
+          "itemId": "d747b8472238c2d33e257cdd93e4b029",
+          "count": 92
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOULDER",
+      "itemName": "확고한 행운을 부르는 견장",
+      "itemIds": [
+        {
+          "itemId": "239d2af2297915233c131ed83e382dbb",
+          "count": 4846
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 확고한 행운을 부르는 견장",
+      "itemIds": [
+        {
+          "itemId": "2a444a084ca1836989315dd199fd2d93",
+          "count": 12509
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 확고한 행운을 부르는 견장",
+      "itemIds": [
+        {
+          "itemId": "6c0c5df1f4ab1e472ca4df240a71659b",
+          "count": 2667
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "44a64cbd5b1e5cfa14da263ceb18dc25",
+          "count": 12786
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "PANTS",
+      "itemName": "강인한 행운을 부르는 바지",
+      "itemIds": [
+        {
+          "itemId": "09f1981804bd65ced2e2a098d5aef0cd",
+          "count": 31
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "PANTS",
+      "itemName": "굳건한 행운을 부르는 바지",
+      "itemIds": [
+        {
+          "itemId": "0add2efd7665260ad6e57e546b5fade6",
+          "count": 75
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "PANTS",
+      "itemName": "확고한 행운을 부르는 바지",
+      "itemIds": [
+        {
+          "itemId": "e49db849c86b9817936e28c9523a1813",
+          "count": 4247
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 확고한 행운을 부르는 바지",
+      "itemIds": [
+        {
+          "itemId": "093be5f30e39e7d3d59d00f58cea7daf",
+          "count": 12547
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 확고한 행운을 부르는 바지",
+      "itemIds": [
+        {
+          "itemId": "6b0e9534ef132ce4caac25b2916b7b6b",
+          "count": 3200
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "6a463e985d14276100d208b54bad10ee",
+          "count": 12785
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOES",
+      "itemName": "강인한 행운을 부르는 부츠",
+      "itemIds": [
+        {
+          "itemId": "988bbdaa7764ed5e3da4166cdfbd3f72",
+          "count": 35
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOES",
+      "itemName": "굳건한 행운을 부르는 부츠",
+      "itemIds": [
+        {
+          "itemId": "3fa641178ec5583bb493fa6c3c53138d",
+          "count": 82
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOES",
+      "itemName": "확고한 행운을 부르는 부츠",
+      "itemIds": [
+        {
+          "itemId": "69e6ac45f1d76be33e26fd9b53313781",
+          "count": 3632
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 확고한 행운을 부르는 부츠",
+      "itemIds": [
+        {
+          "itemId": "8d27089b00ae61b34e0363a78ab8b0c0",
+          "count": 12987
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 확고한 행운을 부르는 부츠",
+      "itemIds": [
+        {
+          "itemId": "284186faf5dc623b71afda3c1bf80398",
+          "count": 2093
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "51e9ec3c18e5ff9161f659531f45d69b",
+          "count": 12706
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WAIST",
+      "itemName": "강인한 행운을 부르는 벨트",
+      "itemIds": [
+        {
+          "itemId": "3e0083a78b82c73dc460bb30f895f946",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WAIST",
+      "itemName": "굳건한 행운을 부르는 벨트",
+      "itemIds": [
+        {
+          "itemId": "e99f069f95c35aba1c5d311e81b65faf",
+          "count": 95
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WAIST",
+      "itemName": "확고한 행운을 부르는 벨트",
+      "itemIds": [
+        {
+          "itemId": "dcc0739231586874b81a2377b3c91e33",
+          "count": 4580
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 확고한 행운을 부르는 벨트",
+      "itemIds": [
+        {
+          "itemId": "fcdfe2cab1c3e7f9f18408d8a7749ccc",
+          "count": 12813
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 확고한 행운을 부르는 벨트",
+      "itemIds": [
+        {
+          "itemId": "619d0d5c5bbc9b75ed90dc1e50c83698",
+          "count": 2616
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "9e209b112d22a8286b3cc93b637b10fc",
+          "count": 12785
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "AMULET",
+      "itemName": "강인한 행운이 깃든 목걸이",
+      "itemIds": [
+        {
+          "itemId": "b206279c74c0c26aa148dbcb6c1a47b2",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "AMULET",
+      "itemName": "굳건한 행운이 깃든 목걸이",
+      "itemIds": [
+        {
+          "itemId": "241a456d8d78e4de68cdd4a8a40ccfd0",
+          "count": 108
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "AMULET",
+      "itemName": "확고한 행운이 깃든 목걸이",
+      "itemIds": [
+        {
+          "itemId": "dc3ca8e52b22bf04f2c33be7f2779bad",
+          "count": 2131
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "AMULET",
+      "itemName": "견고한 행운이 깃든 목걸이",
+      "itemIds": [
+        {
+          "itemId": "8177da9883506b6ef60bf0296b71dbde",
+          "count": 16862
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "5bb001afe350fd7f961d8011702f2e41",
+          "count": 10260
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 견고한 행운이 깃든 목걸이",
+      "itemIds": [
+        {
+          "itemId": "4ff30e524f3a8186b85918658830802e",
+          "count": 3687
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WRIST",
+      "itemName": "강인한 행운이 깃든 팔찌",
+      "itemIds": [
+        {
+          "itemId": "fb41443ec015658857e9e370f2dcdf63",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WRIST",
+      "itemName": "굳건한 행운이 깃든 팔찌",
+      "itemIds": [
+        {
+          "itemId": "da4a559ff3f46300ce9a40282160ac07",
+          "count": 88
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WRIST",
+      "itemName": "확고한 행운이 깃든 팔찌",
+      "itemIds": [
+        {
+          "itemId": "82be5cab8a1a1d74a2c76387bea74f22",
+          "count": 2205
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WRIST",
+      "itemName": "견고한 행운이 깃든 팔찌",
+      "itemIds": [
+        {
+          "itemId": "1714a46bd51c67510c0cd4f30ae3242f",
+          "count": 16802
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "8d61c8487a1df165ce75b99812c8b48c",
+          "count": 10250
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 견고한 행운이 깃든 팔찌",
+      "itemIds": [
+        {
+          "itemId": "8e88d8187f187f4686d280243923e891",
+          "count": 3736
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "RING",
+      "itemName": "강인한 행운이 깃든 반지",
+      "itemIds": [
+        {
+          "itemId": "4c7b89ad557697bd89876f3f10e717c6",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "RING",
+      "itemName": "굳건한 행운이 깃든 반지",
+      "itemIds": [
+        {
+          "itemId": "a4040f1af18b4cfb7bd3c435e2ecaa28",
+          "count": 102
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "RING",
+      "itemName": "확고한 행운이 깃든 반지",
+      "itemIds": [
+        {
+          "itemId": "f3c8cf7b1f6a7136a89f6d0fb351429e",
+          "count": 2270
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "RING",
+      "itemName": "견고한 행운이 깃든 반지",
+      "itemIds": [
+        {
+          "itemId": "127f30148084de5339713769683e2d67",
+          "count": 16813
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "409c36a479a38198b4cc9b4396a465db",
+          "count": 10373
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 견고한 행운이 깃든 반지",
+      "itemIds": [
+        {
+          "itemId": "00a3695a26bea5b83386f7eb54aa12e5",
+          "count": 3344
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SUPPORT",
+      "itemName": "강인한 행운의 마스크",
+      "itemIds": [
+        {
+          "itemId": "d62a55a38720e6d90477ccd0d8ac3641",
+          "count": 40
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SUPPORT",
+      "itemName": "굳건한 행운의 마스크",
+      "itemIds": [
+        {
+          "itemId": "f874fd2b83504fb4871add8cbf4e6e08",
+          "count": 124
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SUPPORT",
+      "itemName": "확고한 행운의 마스크",
+      "itemIds": [
+        {
+          "itemId": "dd748235442ab9f2d5d0f9e88f11eb8a",
+          "count": 19929
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "19a4ccb5b18b9e0cb62786a6f3aa6b45",
+          "count": 12414
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "강인한 행운의 보석",
+      "itemIds": [
+        {
+          "itemId": "c52b965d06ff1074b5c1bed67186b6c9",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "굳건한 행운의 보석",
+      "itemIds": [
+        {
+          "itemId": "f16a2dca4b8c28755682b390fe7d20d7",
+          "count": 251
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "확고한 행운의 보석",
+      "itemIds": [
+        {
+          "itemId": "14013c4fd0739765f0296c7cbd176c51",
+          "count": 19505
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "e95971719c18493dfe446e89b3e70a80",
+          "count": 12676
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 행운의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "bdb99428d5225b92d489f749aba47926",
+          "count": 37
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "EARRING",
+      "itemName": "굳건한 행운의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "962ffa39e94bff54fa343f3abbd578ef",
+          "count": 113
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "EARRING",
+      "itemName": "확고한 행운의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "a04b678fa0db5f95f5c274a4a513e50a",
+          "count": 19908
+        }
+      ]
+    },
+    {
+      "setItemName": "세렌디피티 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "438680ba8d92b6aec4de1230da8c5191",
+          "count": 12685
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "JACKET",
+      "itemName": "방전 - 한계를 허무는 힘",
+      "itemIds": [
+        {
+          "itemId": "a8c0effd7a91062595d6960b412bd053",
+          "count": 44
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "JACKET",
+      "itemName": "절전 - 한계를 허무는 힘",
+      "itemIds": [
+        {
+          "itemId": "6f1d35818b7a916deb172ab3602fc8f4",
+          "count": 102
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "JACKET",
+      "itemName": "충전 - 한계를 허무는 힘",
+      "itemIds": [
+        {
+          "itemId": "4dd1689341b804524e064f3be673b7cd",
+          "count": 4933
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 충전 - 한계를 허무는 힘",
+      "itemIds": [
+        {
+          "itemId": "8ddcd82496dbefc1bdee8577d4c6602b",
+          "count": 10994
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 충전 - 한계를 허무는 힘",
+      "itemIds": [
+        {
+          "itemId": "bb4da8d99997c418971012eae165ccd8",
+          "count": 6591
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "416b382789bc0b50fe07087a63b2a0e9",
+          "count": 25297
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOULDER",
+      "itemName": "방전 - 한계를 부수는 어깨",
+      "itemIds": [
+        {
+          "itemId": "56721a93d7ae633ef3961b11a373d3bc",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOULDER",
+      "itemName": "절전 - 한계를 부수는 어깨",
+      "itemIds": [
+        {
+          "itemId": "bbfb2e609b63d726e3249cd9379f6118",
+          "count": 90
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOULDER",
+      "itemName": "충전 - 한계를 부수는 어깨",
+      "itemIds": [
+        {
+          "itemId": "86b82b8b264595db44c437370f796e9a",
+          "count": 6371
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 충전 - 한계를 부수는 어깨",
+      "itemIds": [
+        {
+          "itemId": "36e839e1104abfba784737de40fcffbb",
+          "count": 12946
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 충전 - 한계를 부수는 어깨",
+      "itemIds": [
+        {
+          "itemId": "c56989329fdf44aa3a1926b1f75dba5b",
+          "count": 3288
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "20443520b128350859b9062b376c9f19",
+          "count": 25290
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "PANTS",
+      "itemName": "방전 - 한계를 무너뜨리는 다리",
+      "itemIds": [
+        {
+          "itemId": "59e5a8627aa9d65f282939169038b8be",
+          "count": 51
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "PANTS",
+      "itemName": "절전 - 한계를 무너뜨리는 다리",
+      "itemIds": [
+        {
+          "itemId": "506c8f62fe55d04dd0fc0d90c2a15661",
+          "count": 81
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "PANTS",
+      "itemName": "충전 - 한계를 무너뜨리는 다리",
+      "itemIds": [
+        {
+          "itemId": "bd5491daca84b6e920291bb098a7549d",
+          "count": 5731
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 충전 - 한계를 무너뜨리는 다리",
+      "itemIds": [
+        {
+          "itemId": "840727faf8085439978a46b24e1c5fe0",
+          "count": 12653
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 충전 - 한계를 무너뜨리는 다리",
+      "itemIds": [
+        {
+          "itemId": "bb4a9f9c7fc73048139e278bdeba14e6",
+          "count": 4231
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "583002211f7907d63e1de59cf9d37928",
+          "count": 25293
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOES",
+      "itemName": "방전 - 한계를 파괴하는 발",
+      "itemIds": [
+        {
+          "itemId": "c3d6026a495412c7fda771addfefdbf6",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOES",
+      "itemName": "절전 - 한계를 파괴하는 발",
+      "itemIds": [
+        {
+          "itemId": "f78ee2de6906df976b81a855405f1bea",
+          "count": 85
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOES",
+      "itemName": "충전 - 한계를 파괴하는 발",
+      "itemIds": [
+        {
+          "itemId": "1781b439158ddadba6057feedf66bedb",
+          "count": 4935
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 충전 - 한계를 파괴하는 발",
+      "itemIds": [
+        {
+          "itemId": "6d9844a6481626f03fa44737131e9915",
+          "count": 13417
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 충전 - 한계를 파괴하는 발",
+      "itemIds": [
+        {
+          "itemId": "51102ff2c1fb4d0eb0fcf1df6bb854a4",
+          "count": 2703
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "2af35244017d9d2daf702ef7aba3139d",
+          "count": 25059
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WAIST",
+      "itemName": "방전 - 한계를 분쇄하는 허리",
+      "itemIds": [
+        {
+          "itemId": "54de65cad440b06a1c2e00450772dec6",
+          "count": 42
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WAIST",
+      "itemName": "절전 - 한계를 분쇄하는 허리",
+      "itemIds": [
+        {
+          "itemId": "235babfe248f3d78fb746303085f1711",
+          "count": 83
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WAIST",
+      "itemName": "충전 - 한계를 분쇄하는 허리",
+      "itemIds": [
+        {
+          "itemId": "6e6932cb4995cfb2b26e701912a6f871",
+          "count": 6158
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 충전 - 한계를 분쇄하는 허리",
+      "itemIds": [
+        {
+          "itemId": "d8f5421b0076e5326f056f5f3af7ccef",
+          "count": 12955
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 충전 - 한계를 분쇄하는 허리",
+      "itemIds": [
+        {
+          "itemId": "1d19179f82164ceb8695d8da230f4a3c",
+          "count": 3482
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "30a4dbdbc267aa97f6dc984f42041cd5",
+          "count": 25289
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "AMULET",
+      "itemName": "방전 - 한계를 여는 열쇠 목걸이",
+      "itemIds": [
+        {
+          "itemId": "1292eef7f8e121537cac2a58d2c44010",
+          "count": 31
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "AMULET",
+      "itemName": "절전 - 한계를 여는 열쇠 목걸이",
+      "itemIds": [
+        {
+          "itemId": "25505bf474ebfe0744902240abc4c32b",
+          "count": 91
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "AMULET",
+      "itemName": "충전 - 한계를 여는 열쇠 목걸이",
+      "itemIds": [
+        {
+          "itemId": "7f3f59e76a3994644e0155b0450ee310",
+          "count": 2307
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "AMULET",
+      "itemName": "과충전 - 한계를 여는 열쇠 목걸이",
+      "itemIds": [
+        {
+          "itemId": "02003739f9c1d138bc25b4e5fcc60a7c",
+          "count": 19760
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "309ac7bb265b7eaf2f609084796608f0",
+          "count": 19563
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 과충전 - 한계를 여는 열쇠 목걸이",
+      "itemIds": [
+        {
+          "itemId": "686f8f5749bec61429abaad3c528ca25",
+          "count": 6502
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WRIST",
+      "itemName": "방전 - 한계를 가리키는 지침 팔찌",
+      "itemIds": [
+        {
+          "itemId": "8c807a9715cb1732b0c40cc1cea64e23",
+          "count": 37
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WRIST",
+      "itemName": "절전 - 한계를 가리키는 지침 팔찌",
+      "itemIds": [
+        {
+          "itemId": "9b8d8da0372d00ec724b6117c4319443",
+          "count": 89
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WRIST",
+      "itemName": "충전 - 한계를 가리키는 지침 팔찌",
+      "itemIds": [
+        {
+          "itemId": "855c91737d8f8559e6c5695b477711bc",
+          "count": 2479
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WRIST",
+      "itemName": "과충전 - 한계를 가리키는 지침 팔찌",
+      "itemIds": [
+        {
+          "itemId": "35cfcfdef4a58f38cc291db0b005db57",
+          "count": 19567
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "543d7a7309d039a6900e2dfd8a5744d3",
+          "count": 19618
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 과충전 - 한계를 가리키는 지침 팔찌",
+      "itemIds": [
+        {
+          "itemId": "a536234ab759db2e8bf65f252f28b8e0",
+          "count": 6486
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "RING",
+      "itemName": "방전 - 한계를 돌파하는 균열 반지",
+      "itemIds": [
+        {
+          "itemId": "ce0b17e1b2ec37867fc9306bf673120b",
+          "count": 35
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "RING",
+      "itemName": "절전 - 한계를 돌파하는 균열 반지",
+      "itemIds": [
+        {
+          "itemId": "52cfa9766253c171e6d4b9a635776033",
+          "count": 92
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "RING",
+      "itemName": "충전 - 한계를 돌파하는 균열 반지",
+      "itemIds": [
+        {
+          "itemId": "bf3e16c65ae4642d4c0c5659a0ca5253",
+          "count": 2672
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "RING",
+      "itemName": "과충전 - 한계를 돌파하는 균열 반지",
+      "itemIds": [
+        {
+          "itemId": "b10c3f4fd74d0886b9f15c1162ae7462",
+          "count": 19459
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "783eee8dea73eddcc905bbf0313a7629",
+          "count": 19938
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 과충전 - 한계를 돌파하는 균열 반지",
+      "itemIds": [
+        {
+          "itemId": "78f7df5ada2aca5b073b07c8a5b78a26",
+          "count": 5564
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SUPPORT",
+      "itemName": "방전 - 한계를 넘나드는 가능성 보조장비",
+      "itemIds": [
+        {
+          "itemId": "dfd4764463a744d04c87d3b77a54eaf8",
+          "count": 58
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SUPPORT",
+      "itemName": "절전 - 한계를 넘나드는 가능성 보조장비",
+      "itemIds": [
+        {
+          "itemId": "123f10b4ddf5ff467f936beeb2a90dcf",
+          "count": 114
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SUPPORT",
+      "itemName": "충전 - 한계를 넘나드는 가능성 보조장비",
+      "itemIds": [
+        {
+          "itemId": "8b0fe7b024e6bb048d3db00a0e88af21",
+          "count": 22582
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "2e958b96ed3c6d4c402507659c151680",
+          "count": 24556
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "방전 - 한계를 뛰어넘은 증명 마법석",
+      "itemIds": [
+        {
+          "itemId": "32fee1203c748358f466afe54700294e",
+          "count": 54
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "절전 - 한계를 뛰어넘은 증명 마법석",
+      "itemIds": [
+        {
+          "itemId": "7fb2ef7c4236088c85d3951404b9c36f",
+          "count": 129
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "충전 - 한계를 뛰어넘은 증명 마법석",
+      "itemIds": [
+        {
+          "itemId": "be8d8c1ffe33be8090c9c0d105d45aa3",
+          "count": 22368
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "b76ecf86de8c152d08e1b467ff565b31",
+          "count": 25045
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "EARRING",
+      "itemName": "방전 - 한계를 뒤흔드는 신호 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "3f3e50c61a46471d0270ed711086fc84",
+          "count": 51
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "EARRING",
+      "itemName": "절전 - 한계를 뒤흔드는 신호 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "d6a93263792249e5301cee1c0f543c71",
+          "count": 91
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "EARRING",
+      "itemName": "충전 - 한계를 뒤흔드는 신호 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "3183d3b9040e906ab2e546913b1fcfa1",
+          "count": 22511
+        }
+      ]
+    },
+    {
+      "setItemName": "한계를 넘어선 에너지 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "935accc27486f420cb570fb11fdce870",
+          "count": 25036
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "JACKET",
+      "itemName": "자연의 경고 상의",
+      "itemIds": [
+        {
+          "itemId": "43c2eb39cc903fce9a6b41f217bb985c",
+          "count": 41
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "JACKET",
+      "itemName": "자연의 격노 상의",
+      "itemIds": [
+        {
+          "itemId": "83a7067c3eaee34e5f007c8453e74c5c",
+          "count": 121
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "JACKET",
+      "itemName": "자연의 폭주 상의",
+      "itemIds": [
+        {
+          "itemId": "7f9d0231bec0fbc0932fdf1bcd4937f1",
+          "count": 5937
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 자연의 폭주 상의",
+      "itemIds": [
+        {
+          "itemId": "37c0fd5134a007f9c4c6a9f88bac96f1",
+          "count": 13088
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 자연의 폭주 상의",
+      "itemIds": [
+        {
+          "itemId": "5df6094cea9038ea79e4db455beefad8",
+          "count": 6992
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "47b783bd269732293208e991024893d9",
+          "count": 28493
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOULDER",
+      "itemName": "자연의 경고 어깨",
+      "itemIds": [
+        {
+          "itemId": "d2a15b68446a5791d8c8ed4dd7ab18ef",
+          "count": 50
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOULDER",
+      "itemName": "자연의 격노 어깨",
+      "itemIds": [
+        {
+          "itemId": "1cc582daefc24c9deec5325253ffb9b2",
+          "count": 112
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOULDER",
+      "itemName": "자연의 폭주 어깨",
+      "itemIds": [
+        {
+          "itemId": "91439d051d622370da855fc6bd31c18e",
+          "count": 7697
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 자연의 폭주 어깨",
+      "itemIds": [
+        {
+          "itemId": "fdced53099883444bd3a116fcbb60f0f",
+          "count": 14715
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 자연의 폭주 어깨",
+      "itemIds": [
+        {
+          "itemId": "93ad21a179096c8814b1039e8fa11cb4",
+          "count": 3709
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "09f0209114fe7456ae786b5d04afee58",
+          "count": 28496
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "PANTS",
+      "itemName": "자연의 경고 하의",
+      "itemIds": [
+        {
+          "itemId": "e5bb8116da60da4cd9edef54837274a7",
+          "count": 43
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "PANTS",
+      "itemName": "자연의 격노 하의",
+      "itemIds": [
+        {
+          "itemId": "b81801de770b9331b308dc312ee78b28",
+          "count": 107
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "PANTS",
+      "itemName": "자연의 폭주 하의",
+      "itemIds": [
+        {
+          "itemId": "05dcc777641fa89e55871fa8c6dcf5f8",
+          "count": 6758
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 자연의 폭주 하의",
+      "itemIds": [
+        {
+          "itemId": "764d16683ff2d6a76b0a3257ba197f40",
+          "count": 14710
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 자연의 폭주 하의",
+      "itemIds": [
+        {
+          "itemId": "cf6d6068beea568b404b9f70601fe844",
+          "count": 4603
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "db51eaf8b343975f0d387fec6e738ade",
+          "count": 28497
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOES",
+      "itemName": "자연의 경고 신발",
+      "itemIds": [
+        {
+          "itemId": "451f801e250da01b07b5966220585b8b",
+          "count": 47
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOES",
+      "itemName": "자연의 격노 신발",
+      "itemIds": [
+        {
+          "itemId": "4cc867a64fa257231f0fa2339ebc7e48",
+          "count": 100
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOES",
+      "itemName": "자연의 폭주 신발",
+      "itemIds": [
+        {
+          "itemId": "5517ee879635f9cc58b3439b8e6ced62",
+          "count": 5814
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 자연의 폭주 신발",
+      "itemIds": [
+        {
+          "itemId": "02c7cc029b91830f55360752c3e2d6c7",
+          "count": 15280
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 자연의 폭주 신발",
+      "itemIds": [
+        {
+          "itemId": "a6b4c5fb449c2d4e67552f6ddda2ccae",
+          "count": 3029
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "18c4594187c2f9d727bc63aa8aa176c8",
+          "count": 28247
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WAIST",
+      "itemName": "자연의 경고 벨트",
+      "itemIds": [
+        {
+          "itemId": "fabb76833a376c69b14188b5d51d2775",
+          "count": 53
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WAIST",
+      "itemName": "자연의 격노 벨트",
+      "itemIds": [
+        {
+          "itemId": "bc27052cab83e39c65aa908ae1d5e44e",
+          "count": 129
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WAIST",
+      "itemName": "자연의 폭주 벨트",
+      "itemIds": [
+        {
+          "itemId": "166df2b402ca0a93ce9d2dbd7ff76918",
+          "count": 7310
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 자연의 폭주 벨트",
+      "itemIds": [
+        {
+          "itemId": "6898658f09160a88a03140dbd9dcb2c5",
+          "count": 14978
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 자연의 폭주 벨트",
+      "itemIds": [
+        {
+          "itemId": "db0397605c222c424507628a8cfc881a",
+          "count": 3731
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "500e56fa4e5608d9d1cd3d7b69e6efb1",
+          "count": 28492
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "AMULET",
+      "itemName": "자연의 경고 목걸이",
+      "itemIds": [
+        {
+          "itemId": "78ae90ad176ed482ebae9dd963881f64",
+          "count": 34
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "AMULET",
+      "itemName": "자연의 격노 목걸이",
+      "itemIds": [
+        {
+          "itemId": "a09aa37fb3067a731e1f22b601b7fbc7",
+          "count": 107
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "AMULET",
+      "itemName": "자연의 폭주 목걸이",
+      "itemIds": [
+        {
+          "itemId": "857a30a79d5fa26119a1d1e247444974",
+          "count": 3328
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "AMULET",
+      "itemName": "자연 - 천재지변 목걸이",
+      "itemIds": [
+        {
+          "itemId": "18bef43afc834d281b4e189218cb97fd",
+          "count": 22210
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "28f8a4376baf4b03ee1bac70c3a1636f",
+          "count": 22491
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 자연 - 천재지변 목걸이",
+      "itemIds": [
+        {
+          "itemId": "add825e0e1f097d20f68daf9a6bacda5",
+          "count": 6880
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WRIST",
+      "itemName": "자연의 경고 팔찌",
+      "itemIds": [
+        {
+          "itemId": "d295f6b79f9e4f51a83ba3a4b8b91a54",
+          "count": 41
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WRIST",
+      "itemName": "자연의 격노 팔찌",
+      "itemIds": [
+        {
+          "itemId": "b64bc8758120a428b48ccce4d7af04a5",
+          "count": 117
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WRIST",
+      "itemName": "자연의 폭주 팔찌",
+      "itemIds": [
+        {
+          "itemId": "ceb001606e1cefd8b78a106a1a2d9201",
+          "count": 3503
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WRIST",
+      "itemName": "자연 - 천재지변 팔찌",
+      "itemIds": [
+        {
+          "itemId": "50752f1905af83563e5e2f5b746c8cc4",
+          "count": 22032
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "d11c08e84a09d567890785eb455f07b3",
+          "count": 22687
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 자연 - 천재지변 팔찌",
+      "itemIds": [
+        {
+          "itemId": "a4d1605d31a3168975a2dff65a7bc161",
+          "count": 6678
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "RING",
+      "itemName": "자연의 경고 반지",
+      "itemIds": [
+        {
+          "itemId": "1881071b426df5cd0a123e90b0774090",
+          "count": 34
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "RING",
+      "itemName": "자연의 격노 반지",
+      "itemIds": [
+        {
+          "itemId": "b6499c7fc87083543a9f1553b1e93a55",
+          "count": 110
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "RING",
+      "itemName": "자연의 폭주 반지",
+      "itemIds": [
+        {
+          "itemId": "462eb54e8c8ad926f11029e6c2b6826d",
+          "count": 3575
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "RING",
+      "itemName": "자연 - 천재지변 반지",
+      "itemIds": [
+        {
+          "itemId": "e15a039ef16cb42914a88ef74f2eef4e",
+          "count": 22034
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "16576002c26ba820eb14e919c57e9562",
+          "count": 22911
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 자연 - 천재지변 반지",
+      "itemIds": [
+        {
+          "itemId": "c97c7ca460b530ec253db8bbaca96c01",
+          "count": 5921
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SUPPORT",
+      "itemName": "자연의 경고 보조장비",
+      "itemIds": [
+        {
+          "itemId": "248b060a0f6ccd16da9fedc72aba4a7f",
+          "count": 53
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SUPPORT",
+      "itemName": "자연의 격노 보조장비",
+      "itemIds": [
+        {
+          "itemId": "eb42d507e874d34f730daf9a37f87141",
+          "count": 167
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SUPPORT",
+      "itemName": "자연의 폭주 보조장비",
+      "itemIds": [
+        {
+          "itemId": "7c3070b07ef4d13a4c2775c4c196dd83",
+          "count": 26129
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "ed086c0a1992904dbb2ed30e63ce492a",
+          "count": 27819
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "자연의 경고 마법석",
+      "itemIds": [
+        {
+          "itemId": "034e4d65fa64b17ebd4b39bfa8ad0cc3",
+          "count": 45
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "자연의 격노 마법석",
+      "itemIds": [
+        {
+          "itemId": "367b3b08ef17bbbe161d7e431c4abba6",
+          "count": 155
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "자연의 폭주 마법석",
+      "itemIds": [
+        {
+          "itemId": "220ae5e4e8c3a07d5ca4e5c027a77294",
+          "count": 25751
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "7e559b96df9ba1ee1005204f12aa0167",
+          "count": 28198
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "EARRING",
+      "itemName": "자연의 경고 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "0c7ac2feb7f11cdaf783b34ddccf6b52",
+          "count": 59
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "EARRING",
+      "itemName": "자연의 격노 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "85e1be359e3c3b9e8cb908dc2a04cb31",
+          "count": 135
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "EARRING",
+      "itemName": "자연의 폭주 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "03bb7e37d3c5d949dc43fa8640e39fd8",
+          "count": 25934
+        }
+      ]
+    },
+    {
+      "setItemName": "압도적인 자연 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "12a87ab980270c3ea4d773817ffa7888",
+          "count": 28218
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "JACKET",
+      "itemName": "선봉의 발키리 신성 갑옷",
+      "itemIds": [
+        {
+          "itemId": "f2476292c18a9108c707b37deb33f75a",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "JACKET",
+      "itemName": "역전의 발키리 신성 갑옷",
+      "itemIds": [
+        {
+          "itemId": "1010061a15b07746cd5ca65c665335a6",
+          "count": 91
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "JACKET",
+      "itemName": "불멸의 발키리 신성 갑옷",
+      "itemIds": [
+        {
+          "itemId": "48b5ccac766242cf4f11485b617aca2d",
+          "count": 3891
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 불멸의 발키리 신성 갑옷",
+      "itemIds": [
+        {
+          "itemId": "b03b07f35612f9472b874878c95f0425",
+          "count": 11147
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 불멸의 발키리 신성 갑옷",
+      "itemIds": [
+        {
+          "itemId": "7461ef33a35559e6b23e7d517c9f7dd6",
+          "count": 5137
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "fad2de6377c523c366d8333a4cbf4114",
+          "count": 16858
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "선봉의 발키리 어깨 보호대",
+      "itemIds": [
+        {
+          "itemId": "4a6eeacb7293d6d5815951afbd472e45",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "역전의 발키리 어깨 보호대",
+      "itemIds": [
+        {
+          "itemId": "a0762aa15f4ef310be1b26a5bd36bb28",
+          "count": 93
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "불멸의 발키리 어깨 보호대",
+      "itemIds": [
+        {
+          "itemId": "d2eab2379f837186577472d3e49e1130",
+          "count": 5022
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 불멸의 발키리 어깨 보호대",
+      "itemIds": [
+        {
+          "itemId": "13cfb6aa1160471254df4437ada5dd85",
+          "count": 12490
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 불멸의 발키리 어깨 보호대",
+      "itemIds": [
+        {
+          "itemId": "473b52478a229f32d7ae35850af02ecd",
+          "count": 2742
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "b2b87ac141f7eb6abe28cf6dd25b9ced",
+          "count": 16860
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "PANTS",
+      "itemName": "선봉의 발키리 드레스",
+      "itemIds": [
+        {
+          "itemId": "b1d5f8e51587c20ab665af6207db6112",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "PANTS",
+      "itemName": "역전의 발키리 드레스",
+      "itemIds": [
+        {
+          "itemId": "eaadae1ee58e750eb6a25702c8e7f7e0",
+          "count": 81
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "PANTS",
+      "itemName": "불멸의 발키리 드레스",
+      "itemIds": [
+        {
+          "itemId": "40a606b94d58c4dc3552e49d731cfa9f",
+          "count": 4280
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 불멸의 발키리 드레스",
+      "itemIds": [
+        {
+          "itemId": "af8e7941c7c63bef9499c49ca7637783",
+          "count": 12595
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 불멸의 발키리 드레스",
+      "itemIds": [
+        {
+          "itemId": "d53389fcd6d9e643222217222f6972b8",
+          "count": 3320
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "1930bf4b8c06c65798587002be154496",
+          "count": 16860
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOES",
+      "itemName": "선봉의 발키리 발걸음",
+      "itemIds": [
+        {
+          "itemId": "0f064d03d09a2f7255cb703a5b6a6b74",
+          "count": 34
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOES",
+      "itemName": "역전의 발키리 발걸음",
+      "itemIds": [
+        {
+          "itemId": "3d706ea636ce2134fb33d124599ce92f",
+          "count": 70
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOES",
+      "itemName": "불멸의 발키리 발걸음",
+      "itemIds": [
+        {
+          "itemId": "c8ac17e59f841dee73ac5c2b43e09900",
+          "count": 3660
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 불멸의 발키리 발걸음",
+      "itemIds": [
+        {
+          "itemId": "943127f37759f6d62a49379f7abcb47a",
+          "count": 13129
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 불멸의 발키리 발걸음",
+      "itemIds": [
+        {
+          "itemId": "1459bd739646352b22e557b3e4d2c624",
+          "count": 2200
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "c6738a2a183340fcb5e62bd96124659a",
+          "count": 16741
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WAIST",
+      "itemName": "선봉의 발키리 수호띠",
+      "itemIds": [
+        {
+          "itemId": "b38e30b66cfe20b9148747d7747bd5e8",
+          "count": 36
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WAIST",
+      "itemName": "역전의 발키리 수호띠",
+      "itemIds": [
+        {
+          "itemId": "2313e7cb7cad9e15e23f4c1ccfb2b4bc",
+          "count": 96
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WAIST",
+      "itemName": "불멸의 발키리 수호띠",
+      "itemIds": [
+        {
+          "itemId": "6a20433cb0401d19ee8b9c32bc2744a1",
+          "count": 4670
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 불멸의 발키리 수호띠",
+      "itemIds": [
+        {
+          "itemId": "5e9c3ddc4ae81a73a688fbf7fd4054fc",
+          "count": 12752
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 불멸의 발키리 수호띠",
+      "itemIds": [
+        {
+          "itemId": "eb4f84dfc493e57158902d5c9e4452c7",
+          "count": 2817
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "d0b767b97911504ab6704e7cadfaa39d",
+          "count": 16858
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "AMULET",
+      "itemName": "선봉의 발키리 천상 목걸이",
+      "itemIds": [
+        {
+          "itemId": "14a244bb9a7e2445e6338e1d99f15dda",
+          "count": 20
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "AMULET",
+      "itemName": "역전의 발키리 천상 목걸이",
+      "itemIds": [
+        {
+          "itemId": "1bc577c1646bdf6b907182a6b51d2ca6",
+          "count": 90
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "AMULET",
+      "itemName": "불멸의 발키리 천상 목걸이",
+      "itemIds": [
+        {
+          "itemId": "f090aa6940ba797492ef96d6c8f7796e",
+          "count": 2254
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "AMULET",
+      "itemName": "발할라의 여신 발키리 천상 목걸이",
+      "itemIds": [
+        {
+          "itemId": "28fc8eb2f6cd1cde8fefe8aca6a9ceaa",
+          "count": 17116
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "1106f7ad4891db19bfb37155c7f15156",
+          "count": 13175
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 발할라의 여신 발키리 천상 목걸이",
+      "itemIds": [
+        {
+          "itemId": "f181b68aefa12ebf2c595dd609dbb4c9",
+          "count": 4776
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WRIST",
+      "itemName": "선봉의 발키리 수호 팔찌",
+      "itemIds": [
+        {
+          "itemId": "0f3861b857b0e4f7afb9f3ec7f8b8c4e",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WRIST",
+      "itemName": "역전의 발키리 수호 팔찌",
+      "itemIds": [
+        {
+          "itemId": "a15a4791d418d52c0ab80fc20078d6cf",
+          "count": 89
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WRIST",
+      "itemName": "불멸의 발키리 수호 팔찌",
+      "itemIds": [
+        {
+          "itemId": "e84f86169540b63285be15fd6daa0d40",
+          "count": 2324
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WRIST",
+      "itemName": "발할라의 여신 발키리 수호 팔찌",
+      "itemIds": [
+        {
+          "itemId": "1696417c6db6398ea0ef00f8084184dc",
+          "count": 16962
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "5091df6fd1aedfab36231971b5604e68",
+          "count": 13218
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 발할라의 여신 발키리 수호 팔찌",
+      "itemIds": [
+        {
+          "itemId": "7971feeb61624dc467360ccc07a1e3d3",
+          "count": 4800
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "RING",
+      "itemName": "선봉의 발키리 축복 반지",
+      "itemIds": [
+        {
+          "itemId": "c68f9432454da249728e3ca9a478b590",
+          "count": 25
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "RING",
+      "itemName": "역전의 발키리 축복 반지",
+      "itemIds": [
+        {
+          "itemId": "a213bec9070fd483d1d58dff6931b421",
+          "count": 88
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "RING",
+      "itemName": "불멸의 발키리 축복 반지",
+      "itemIds": [
+        {
+          "itemId": "10d4d8976bc3ebb1527b47c469735d1c",
+          "count": 2452
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "RING",
+      "itemName": "발할라의 여신 발키리 축복 반지",
+      "itemIds": [
+        {
+          "itemId": "e776eab981b7daac85f8faa28c2eaeb4",
+          "count": 16944
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "bec5a6769fb20e0be41807a9736ed8c4",
+          "count": 13338
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 발할라의 여신 발키리 축복 반지",
+      "itemIds": [
+        {
+          "itemId": "253b9d29b4ce88d77316a95e579dbb67",
+          "count": 4372
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "선봉의 발키리 전투 투구",
+      "itemIds": [
+        {
+          "itemId": "77ea8bd5191e96e9a0ee2c8dc4d6bab9",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "역전의 발키리 전투 투구",
+      "itemIds": [
+        {
+          "itemId": "fe2a72547aae37e51e77be963e65123e",
+          "count": 119
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "불멸의 발키리 전투 투구",
+      "itemIds": [
+        {
+          "itemId": "8206c2d4d9a9460d8c55ebb9c20dd6d3",
+          "count": 20214
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "552554517ac6859a3b890cc26f2353f6",
+          "count": 16423
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "선봉의 발키리 천상 보옥",
+      "itemIds": [
+        {
+          "itemId": "43db6bd064f9e57d44c59f83e16fb8ce",
+          "count": 42
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "역전의 발키리 천상 보옥",
+      "itemIds": [
+        {
+          "itemId": "9b9bae5b288cfb421591f2b69d003063",
+          "count": 143
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "불멸의 발키리 천상 보옥",
+      "itemIds": [
+        {
+          "itemId": "bb4c4b854f05a135f39bf3a982f87b19",
+          "count": 19956
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "87883c0cfcad91dc985572e1eb45934d",
+          "count": 16673
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "EARRING",
+      "itemName": "선봉의 발키리 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "64d6a5dafad2ebbfbe0883feb3285c6f",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "EARRING",
+      "itemName": "역전의 발키리 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "f739c5bd95401ac9a3d65f75d3172aad",
+          "count": 115
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "EARRING",
+      "itemName": "불멸의 발키리 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "0d3806e81adafb48df8df7980dc434b1",
+          "count": 20219
+        }
+      ]
+    },
+    {
+      "setItemName": "고대 전장의 발키리 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "138eb59c4b4a1dfa7fffa3d462043f41",
+          "count": 16690
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "JACKET",
+      "itemName": "견습 여우의 상의",
+      "itemIds": [
+        {
+          "itemId": "ef659b992615da2412053cff0eed802e",
+          "count": 38
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "JACKET",
+      "itemName": "수습 여우의 상의",
+      "itemIds": [
+        {
+          "itemId": "b18e7187087ec03a300e22d171e83ce4",
+          "count": 65
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "JACKET",
+      "itemName": "고위 여우의 상의",
+      "itemIds": [
+        {
+          "itemId": "601b5793f84d5a068b332e6c135c8ce1",
+          "count": 3766
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 고위 여우의 상의",
+      "itemIds": [
+        {
+          "itemId": "0efcdbccbbd49d154b3b0cd8d9324ada",
+          "count": 13271
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 고위 여우의 상의",
+      "itemIds": [
+        {
+          "itemId": "8a03a42411719f3e32c1a1c40c574143",
+          "count": 6041
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "2d23a5dc389016bdc3a3e3fd142b38ce",
+          "count": 23633
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOULDER",
+      "itemName": "견습 여우의 보호 어깨",
+      "itemIds": [
+        {
+          "itemId": "9f28e51e1a00ec04424f9f5219601405",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOULDER",
+      "itemName": "수습 여우의 보호 어깨",
+      "itemIds": [
+        {
+          "itemId": "4e13a0e608282e52bfd188532a7bf8b4",
+          "count": 69
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOULDER",
+      "itemName": "고위 여우의 보호 어깨",
+      "itemIds": [
+        {
+          "itemId": "cd4d0bef1ee8cf810ee7842f1abd7b38",
+          "count": 5050
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 고위 여우의 보호 어깨",
+      "itemIds": [
+        {
+          "itemId": "cdd7c198b96057075e83ca211f0a3eb7",
+          "count": 15069
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 고위 여우의 보호 어깨",
+      "itemIds": [
+        {
+          "itemId": "241faadafaa1b5cea4ace3772d924a94",
+          "count": 3082
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "1b62c240c5a0a893a77149ef5b923bbb",
+          "count": 23633
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "PANTS",
+      "itemName": "견습 여우의 그림자 하의",
+      "itemIds": [
+        {
+          "itemId": "cceec27707a6dbd029322483c679c124",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "PANTS",
+      "itemName": "수습 여우의 그림자 하의",
+      "itemIds": [
+        {
+          "itemId": "4325a5c0577ff72d573ec54aed0671a4",
+          "count": 71
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "PANTS",
+      "itemName": "고위 여우의 그림자 하의",
+      "itemIds": [
+        {
+          "itemId": "48ec8f172a79b69fbe36bee44a471727",
+          "count": 4348
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 고위 여우의 그림자 하의",
+      "itemIds": [
+        {
+          "itemId": "f64b85871fcfa7e73012ea6584ae94cb",
+          "count": 14826
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 고위 여우의 그림자 하의",
+      "itemIds": [
+        {
+          "itemId": "7f90b11502491d33c778c54f80543aa9",
+          "count": 3956
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "cd04be485e258d9879cd6d3b9bb3f2c6",
+          "count": 23632
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOES",
+      "itemName": "견습 여우의 은빛 신발",
+      "itemIds": [
+        {
+          "itemId": "78e3c4947c76867534ce0b2241093809",
+          "count": 27
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOES",
+      "itemName": "수습 여우의 은빛 신발",
+      "itemIds": [
+        {
+          "itemId": "ba97c9bcf07aeeb902878bcb52425152",
+          "count": 57
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOES",
+      "itemName": "고위 여우의 은빛 신발",
+      "itemIds": [
+        {
+          "itemId": "e7a7e71d3e7c9b3ad70b7b672be35703",
+          "count": 3718
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 고위 여우의 은빛 신발",
+      "itemIds": [
+        {
+          "itemId": "6fd4dd925518f8c2f0f5578359cb04f2",
+          "count": 15540
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 고위 여우의 은빛 신발",
+      "itemIds": [
+        {
+          "itemId": "5ab999771e8decdb1ec4271721103950",
+          "count": 2566
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "a4e3544bd415bcf6399809025bc3de32",
+          "count": 23457
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WAIST",
+      "itemName": "견습 여우의 비밀 벨트",
+      "itemIds": [
+        {
+          "itemId": "893d167b57f729204fb8278bf05d676f",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WAIST",
+      "itemName": "수습 여우의 비밀 벨트",
+      "itemIds": [
+        {
+          "itemId": "da43042a29d4dd9f84ed2c351fa92b0b",
+          "count": 79
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WAIST",
+      "itemName": "고위 여우의 비밀 벨트",
+      "itemIds": [
+        {
+          "itemId": "1948b78828c8cf07218ee1a55c1d09a0",
+          "count": 4687
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 고위 여우의 비밀 벨트",
+      "itemIds": [
+        {
+          "itemId": "c14c4ec9fbad8cc76397447020b339c5",
+          "count": 15225
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 고위 여우의 비밀 벨트",
+      "itemIds": [
+        {
+          "itemId": "79ce556b2b3e4400e5e51e0843f7ee29",
+          "count": 3214
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "e73e2b5f535f2ec8edbf29d5ba1ef2e9",
+          "count": 23626
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "AMULET",
+      "itemName": "견습 여우의 영혼 목걸이",
+      "itemIds": [
+        {
+          "itemId": "b338be1f8c1298024ed211ae46acd9f8",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "AMULET",
+      "itemName": "수습 여우의 영혼 목걸이",
+      "itemIds": [
+        {
+          "itemId": "6f3073c9d3164de879af7d1038c91f8d",
+          "count": 82
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "AMULET",
+      "itemName": "고위 여우의 영혼 목걸이",
+      "itemIds": [
+        {
+          "itemId": "d31334eafce7fff479fb5cd858450b06",
+          "count": 2023
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "AMULET",
+      "itemName": "대 여우의 영혼 목걸이",
+      "itemIds": [
+        {
+          "itemId": "e468101e457344d9824a0f1588152f06",
+          "count": 19935
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "0b282cdf1ebaf35acaf2753a04523c25",
+          "count": 17269
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 대 여우의 영혼 목걸이",
+      "itemIds": [
+        {
+          "itemId": "fdd521d0dc90aa57d100dcf7509ddb88",
+          "count": 7837
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WRIST",
+      "itemName": "견습 여우의 지혜 팔찌",
+      "itemIds": [
+        {
+          "itemId": "20ce8bc5d4f553e427351e6b17d1d0b7",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WRIST",
+      "itemName": "수습 여우의 지혜 팔찌",
+      "itemIds": [
+        {
+          "itemId": "dbed33f13419af153131bbe5e2739a23",
+          "count": 81
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WRIST",
+      "itemName": "고위 여우의 지혜 팔찌",
+      "itemIds": [
+        {
+          "itemId": "a24185e48bea935d8755927131ee2086",
+          "count": 2095
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WRIST",
+      "itemName": "대 여우의 지혜 팔찌",
+      "itemIds": [
+        {
+          "itemId": "ab2e3267be4d5589118013d117276ba4",
+          "count": 19816
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "61ee9ec4dfd2bf600529115950c9a841",
+          "count": 17382
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 대 여우의 지혜 팔찌",
+      "itemIds": [
+        {
+          "itemId": "2ee9ed06e8feb85c04ef549bc5cdad49",
+          "count": 7748
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "RING",
+      "itemName": "견습 여우의 매혹 반지",
+      "itemIds": [
+        {
+          "itemId": "40249d82eafb0137b0e081a94c40785d",
+          "count": 28
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "RING",
+      "itemName": "수습 여우의 매혹 반지",
+      "itemIds": [
+        {
+          "itemId": "1064578619f203193e5cb55ca9909824",
+          "count": 103
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "RING",
+      "itemName": "고위 여우의 매혹 반지",
+      "itemIds": [
+        {
+          "itemId": "c2c1a2bda6c8c57eb01b9f01135aeda6",
+          "count": 2222
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "RING",
+      "itemName": "대 여우의 매혹 반지",
+      "itemIds": [
+        {
+          "itemId": "d3202f05592d04bb3b1ff144ef6c273d",
+          "count": 19791
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "51bc77072ed77633484ee871d3327821",
+          "count": 17674
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 대 여우의 매혹 반지",
+      "itemIds": [
+        {
+          "itemId": "b1a632fd1331074e108f497eaad0ad3f",
+          "count": 6785
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SUPPORT",
+      "itemName": "견습 여우의 숨결 부적 보조장비",
+      "itemIds": [
+        {
+          "itemId": "eb28490350b8d6bcbac4dc34b46f8812",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SUPPORT",
+      "itemName": "수습 여우의 숨결 부적 보조장비",
+      "itemIds": [
+        {
+          "itemId": "dd267f29006748266a62a816b5b05d48",
+          "count": 115
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SUPPORT",
+      "itemName": "고위 여우의 숨결 부적 보조장비",
+      "itemIds": [
+        {
+          "itemId": "3544ac9e43a34693e4218445b6436762",
+          "count": 23119
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "2553174da0b1bc3cf1614ea331a0aa0d",
+          "count": 22691
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "견습 여우의 구슬 마법석",
+      "itemIds": [
+        {
+          "itemId": "89c788f705db9b74bf14d0f70d7807b8",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "수습 여우의 구슬 마법석",
+      "itemIds": [
+        {
+          "itemId": "3d9f8f34d903bada8e5030666d85bd47",
+          "count": 103
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "고위 여우의 구슬 마법석",
+      "itemIds": [
+        {
+          "itemId": "9623d7f5197b40a96dffd78c65d57287",
+          "count": 22925
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "06ad4ee0f2071c2cd4d00dd6e168d250",
+          "count": 23403
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "EARRING",
+      "itemName": "견습 여우의 속삭임 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "a62d01d63e12e354c2239af508ad1b8e",
+          "count": 30
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "EARRING",
+      "itemName": "수습 여우의 속삭임 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "bad7a9f6ab9534f1200f359155e680aa",
+          "count": 94
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "EARRING",
+      "itemName": "고위 여우의 속삭임 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "3c72626a0afb037b8b2b1f226eca6176",
+          "count": 23116
+        }
+      ]
+    },
+    {
+      "setItemName": "에테리얼 오브 아츠 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "fe11b3d169c66fa3cd358e21c51a647e",
+          "count": 23410
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "JACKET",
+      "itemName": "무리의 일원 상의",
+      "itemIds": [
+        {
+          "itemId": "bf93e83e608eec17924eccb4b66722db",
+          "count": 39
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "JACKET",
+      "itemName": "무리의 유망주 상의",
+      "itemIds": [
+        {
+          "itemId": "484db18e477d21976e462e1ba7841284",
+          "count": 120
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "JACKET",
+      "itemName": "무리의 베테랑 상의",
+      "itemIds": [
+        {
+          "itemId": "660443400103e59e4c2563649e037608",
+          "count": 5136
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 무리의 베테랑 상의",
+      "itemIds": [
+        {
+          "itemId": "a1069cb291c88c04ddfc12dd240aac12",
+          "count": 9660
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 무리의 베테랑 상의",
+      "itemIds": [
+        {
+          "itemId": "9d5e634b9ddf6f5821389863cbd661e1",
+          "count": 5108
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "d4aef44b773506b88925a0ae9a723b3e",
+          "count": 24674
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOULDER",
+      "itemName": "무리의 일원 투구",
+      "itemIds": [
+        {
+          "itemId": "17462c757d716697ff9e3fbe850e785d",
+          "count": 47
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOULDER",
+      "itemName": "무리의 유망주 투구",
+      "itemIds": [
+        {
+          "itemId": "9525a9d89ef95554daecef8108868fd8",
+          "count": 123
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOULDER",
+      "itemName": "무리의 베테랑 투구",
+      "itemIds": [
+        {
+          "itemId": "0a1fac8d26d5dd6723fbd7bc8d2eed60",
+          "count": 6481
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 무리의 베테랑 투구",
+      "itemIds": [
+        {
+          "itemId": "50ebe0d4d65b35c545fda9fb6592281d",
+          "count": 10962
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 무리의 베테랑 투구",
+      "itemIds": [
+        {
+          "itemId": "2441f5398af23b66bb996fe4c5df6c4b",
+          "count": 2567
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "bfe3021c86eb7d8186183c8711226076",
+          "count": 24675
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "PANTS",
+      "itemName": "무리의 일원 하의",
+      "itemIds": [
+        {
+          "itemId": "b33baa6111159f850b26539a1ecbf9e9",
+          "count": 37
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "PANTS",
+      "itemName": "무리의 유망주 하의",
+      "itemIds": [
+        {
+          "itemId": "0823b9c11a62ea1ad8535bb3b61bc510",
+          "count": 134
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "PANTS",
+      "itemName": "무리의 베테랑 하의",
+      "itemIds": [
+        {
+          "itemId": "dc3885a9411b36832169cacff46b584c",
+          "count": 5736
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 무리의 베테랑 하의",
+      "itemIds": [
+        {
+          "itemId": "ea7a61bfa35b5fe75e1d15e9b4fcf611",
+          "count": 10808
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 무리의 베테랑 하의",
+      "itemIds": [
+        {
+          "itemId": "d7e76286efa40303acc4b79c652049c1",
+          "count": 3397
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "f6414f7c18e1bb338fb2c230b6fbd43f",
+          "count": 24675
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOES",
+      "itemName": "무리의 일원 신발",
+      "itemIds": [
+        {
+          "itemId": "4ac4a97d6ebedd2d61b06c460d114fbe",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOES",
+      "itemName": "무리의 유망주 신발",
+      "itemIds": [
+        {
+          "itemId": "3d4f3142079f551e9511a56bf3c04ccc",
+          "count": 103
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOES",
+      "itemName": "무리의 베테랑 신발",
+      "itemIds": [
+        {
+          "itemId": "6bc34e0a3c3a464a8dbb548042675af0",
+          "count": 4607
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 무리의 베테랑 신발",
+      "itemIds": [
+        {
+          "itemId": "1b74bc5839845b12db12c5ce1911522a",
+          "count": 11413
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 무리의 베테랑 신발",
+      "itemIds": [
+        {
+          "itemId": "da40fcb3f0276f246ddf14971709e8d9",
+          "count": 2182
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "da458415a7633cfdb242b62e0d1ec2ae",
+          "count": 24167
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WAIST",
+      "itemName": "무리의 일원 벨트",
+      "itemIds": [
+        {
+          "itemId": "4bf3c56658f89be0dd1be931cf81ebcf",
+          "count": 46
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WAIST",
+      "itemName": "무리의 유망주 벨트",
+      "itemIds": [
+        {
+          "itemId": "1d9bfd53d85b89f6392358bfea746dea",
+          "count": 110
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WAIST",
+      "itemName": "무리의 베테랑 벨트",
+      "itemIds": [
+        {
+          "itemId": "051a0eb63ef8356b6047a46c4a033118",
+          "count": 6070
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 무리의 베테랑 벨트",
+      "itemIds": [
+        {
+          "itemId": "5c6a8482df428324a60796f3983c6e47",
+          "count": 11097
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 무리의 베테랑 벨트",
+      "itemIds": [
+        {
+          "itemId": "6d9c5d3621a115f9ce4586c978076089",
+          "count": 2768
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "b3289c39d0fb253097e06a9f13256953",
+          "count": 24667
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "AMULET",
+      "itemName": "무리의 일원 목걸이",
+      "itemIds": [
+        {
+          "itemId": "8daee7a68a09295041a0b7db2e9fcf02",
+          "count": 27
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "AMULET",
+      "itemName": "무리의 유망주 목걸이",
+      "itemIds": [
+        {
+          "itemId": "22011b655c9771866ae25a9687ad64be",
+          "count": 112
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "AMULET",
+      "itemName": "무리의 베테랑 목걸이",
+      "itemIds": [
+        {
+          "itemId": "dd59725d490e83778ce60503fc9f71c0",
+          "count": 3053
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "AMULET",
+      "itemName": "무리의 길잡이 목걸이",
+      "itemIds": [
+        {
+          "itemId": "6aa0978e051611de538b83176ed3026a",
+          "count": 16681
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "846a482388ec2d34603890b6ef2e92a1",
+          "count": 20729
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 무리의 길잡이 목걸이",
+      "itemIds": [
+        {
+          "itemId": "0279bb77d0189112fcefd7b0de3de61f",
+          "count": 4325
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WRIST",
+      "itemName": "무리의 일원 팔목 보호대",
+      "itemIds": [
+        {
+          "itemId": "f9284a66fcfcf71cd9a84dc244bedd3c",
+          "count": 25
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WRIST",
+      "itemName": "무리의 유망주 팔목 보호대",
+      "itemIds": [
+        {
+          "itemId": "24b5d12a2d739638ebff15306991a301",
+          "count": 99
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WRIST",
+      "itemName": "무리의 베테랑 팔목 보호대",
+      "itemIds": [
+        {
+          "itemId": "29d95f975ff34bad83778e74e58b0566",
+          "count": 3151
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WRIST",
+      "itemName": "무리의 길잡이 팔목 보호대",
+      "itemIds": [
+        {
+          "itemId": "5f0746d290ec872e9d4e66741130bafc",
+          "count": 16613
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "5df10056ed10941f560017b6228309ab",
+          "count": 20840
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 무리의 길잡이 팔목 보호대",
+      "itemIds": [
+        {
+          "itemId": "0ab07e0c7c6230b5d8b58e885b72fd90",
+          "count": 4218
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "RING",
+      "itemName": "무리의 일원 반지",
+      "itemIds": [
+        {
+          "itemId": "44e624ba42d01ab87b13165adfac83b0",
+          "count": 31
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "RING",
+      "itemName": "무리의 유망주 반지",
+      "itemIds": [
+        {
+          "itemId": "5fb0df7775cfa4c2d13b57368526269f",
+          "count": 114
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "RING",
+      "itemName": "무리의 베테랑 반지",
+      "itemIds": [
+        {
+          "itemId": "a1d23b8d94de2d66d20796e7db6cd4a9",
+          "count": 3319
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "RING",
+      "itemName": "무리의 길잡이 반지",
+      "itemIds": [
+        {
+          "itemId": "60f2ce1a8ef8b2cf4dbf60b9f77b6148",
+          "count": 16444
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "894381942291cd4dbff73b69e284aff1",
+          "count": 20973
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 무리의 길잡이 반지",
+      "itemIds": [
+        {
+          "itemId": "6d7bbf03825be0b84d6c209a7cf4db15",
+          "count": 3870
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SUPPORT",
+      "itemName": "무리의 일원 손도끼",
+      "itemIds": [
+        {
+          "itemId": "513efecabc57f74244a1396725fb31f9",
+          "count": 31
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SUPPORT",
+      "itemName": "무리의 유망주 손도끼",
+      "itemIds": [
+        {
+          "itemId": "c3de6433c7b11e525402037cbc3c72a2",
+          "count": 169
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SUPPORT",
+      "itemName": "무리의 베테랑 손도끼",
+      "itemIds": [
+        {
+          "itemId": "c0da1ac87c5b9bf5fe3b0485701239a1",
+          "count": 19909
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "1a72cdab524a069756ea0f1907af5d5f",
+          "count": 24321
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무리의 일원 마법석",
+      "itemIds": [
+        {
+          "itemId": "ff7dd2a3218facfd357c2e94360feaf0",
+          "count": 43
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무리의 유망주 마법석",
+      "itemIds": [
+        {
+          "itemId": "0562bc112b009b2fa1554ba3c9ecdcb7",
+          "count": 173
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무리의 베테랑 마법석",
+      "itemIds": [
+        {
+          "itemId": "6a325513cc5227148e9c0b77b8816d9c",
+          "count": 19563
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "af4531a4615605869ba0d9067864ba17",
+          "count": 24461
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "EARRING",
+      "itemName": "무리의 일원 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "d213df3dd9bd0905fc5d286cbda58832",
+          "count": 36
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "EARRING",
+      "itemName": "무리의 유망주 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "a6a03a95ccfdfbbb9108b58a9a5bd535",
+          "count": 182
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "EARRING",
+      "itemName": "무리의 베테랑 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "922410feddfa6637bc5d5bdb66d9c040",
+          "count": 19761
+        }
+      ]
+    },
+    {
+      "setItemName": "무리 사냥의 길잡이 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "1fed15aa7914aaa2dc89c9ea9d3dee5b",
+          "count": 24483
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "JACKET",
+      "itemName": "미약한 마력의 영역 상의",
+      "itemIds": [
+        {
+          "itemId": "da5a5a9536ea3b96a296c003a3a091e3",
+          "count": 164
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "JACKET",
+      "itemName": "은은한 마력의 영역 상의",
+      "itemIds": [
+        {
+          "itemId": "10da44e3853c5dac8549572bd2b2644e",
+          "count": 405
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "JACKET",
+      "itemName": "가득찬 마력의 영역 상의",
+      "itemIds": [
+        {
+          "itemId": "3dd0c7bfef142dab5a70e9b079cae599",
+          "count": 10280
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "JACKET",
+      "itemName": "잠식 : 가득찬 마력의 영역 상의",
+      "itemIds": [
+        {
+          "itemId": "f9187d424ad941381963bba1f18e1996",
+          "count": 15904
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "JACKET",
+      "itemName": "축성 : 가득찬 마력의 영역 상의",
+      "itemIds": [
+        {
+          "itemId": "a37b7a18e80176227d85a40b91edb56e",
+          "count": 7735
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "JACKET",
+      "itemName": "긍휼 속 자비의 상의",
+      "itemIds": [
+        {
+          "itemId": "69299cc74cb75e3da2a802870c7a4c12",
+          "count": 35735
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOULDER",
+      "itemName": "미약한 마력의 영역 어깨",
+      "itemIds": [
+        {
+          "itemId": "3447b1be2e356e7ca56790b04824c8c8",
+          "count": 176
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOULDER",
+      "itemName": "은은한 마력의 영역 어깨",
+      "itemIds": [
+        {
+          "itemId": "60b2ad240af5bb11947eb7c051726f42",
+          "count": 391
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOULDER",
+      "itemName": "가득찬 마력의 영역 어깨",
+      "itemIds": [
+        {
+          "itemId": "1317ae1cbfce072ddfa2a6ae9cf8b239",
+          "count": 12710
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOULDER",
+      "itemName": "잠식 : 가득찬 마력의 영역 어깨",
+      "itemIds": [
+        {
+          "itemId": "26e9595817dbf29165134abbee87b879",
+          "count": 17089
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOULDER",
+      "itemName": "축성 : 가득찬 마력의 영역 어깨",
+      "itemIds": [
+        {
+          "itemId": "056bfdaeadf7915e97bd49fb6424809f",
+          "count": 4310
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOULDER",
+      "itemName": "숭고한 심판의 어깨",
+      "itemIds": [
+        {
+          "itemId": "0efa1142ea97a7393a3752b4c7528b86",
+          "count": 35742
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "PANTS",
+      "itemName": "미약한 마력의 영역 하의",
+      "itemIds": [
+        {
+          "itemId": "ac55d0c36c05dcf315fad61fed07ad8d",
+          "count": 176
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "PANTS",
+      "itemName": "은은한 마력의 영역 하의",
+      "itemIds": [
+        {
+          "itemId": "ec5a4dc83470ca91a8e18b11f749deb6",
+          "count": 373
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "PANTS",
+      "itemName": "가득찬 마력의 영역 하의",
+      "itemIds": [
+        {
+          "itemId": "0df1839062b9b71a77a312ea9d020004",
+          "count": 11492
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "PANTS",
+      "itemName": "잠식 : 가득찬 마력의 영역 하의",
+      "itemIds": [
+        {
+          "itemId": "cb892622b037d2973f6668a87f2956c9",
+          "count": 17312
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "PANTS",
+      "itemName": "축성 : 가득찬 마력의 영역 하의",
+      "itemIds": [
+        {
+          "itemId": "051e5c6b08faa0762695d8e08d71191a",
+          "count": 5165
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "PANTS",
+      "itemName": "명예로운 공경의 하의",
+      "itemIds": [
+        {
+          "itemId": "b5744285a3d5edb950ebca0d29d3c23e",
+          "count": 35743
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOES",
+      "itemName": "미약한 마력의 영역 신발",
+      "itemIds": [
+        {
+          "itemId": "fe67991de849c86d04dee5e10025fe5c",
+          "count": 142
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOES",
+      "itemName": "은은한 마력의 영역 신발",
+      "itemIds": [
+        {
+          "itemId": "58b77da5952116a79168333ad129f5cd",
+          "count": 340
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOES",
+      "itemName": "가득찬 마력의 영역 신발",
+      "itemIds": [
+        {
+          "itemId": "3ae1dd27d6fdc59d072c5896dd0526cf",
+          "count": 9713
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOES",
+      "itemName": "잠식 : 가득찬 마력의 영역 신발",
+      "itemIds": [
+        {
+          "itemId": "9336cf2bf80666a278d1c334c91d2096",
+          "count": 17581
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOES",
+      "itemName": "축성 : 가득찬 마력의 영역 신발",
+      "itemIds": [
+        {
+          "itemId": "125e5aa331a73cc9042caee6c7bdc311",
+          "count": 3638
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SHOES",
+      "itemName": "고요한 안식의 신발",
+      "itemIds": [
+        {
+          "itemId": "9c781395a844ec94283263bf80c1c88e",
+          "count": 35207
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WAIST",
+      "itemName": "미약한 마력의 영역 벨트",
+      "itemIds": [
+        {
+          "itemId": "41c275a8bafce08b3d863ced0df2fb84",
+          "count": 181
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WAIST",
+      "itemName": "은은한 마력의 영역 벨트",
+      "itemIds": [
+        {
+          "itemId": "a3dfb2b25d5a20047b68c9d233c7e630",
+          "count": 399
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WAIST",
+      "itemName": "가득찬 마력의 영역 벨트",
+      "itemIds": [
+        {
+          "itemId": "13453828fa83065a8bfb018067ced1f2",
+          "count": 12146
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WAIST",
+      "itemName": "잠식 : 가득찬 마력의 영역 벨트",
+      "itemIds": [
+        {
+          "itemId": "388dba33c43c37e9e3561d60d39ca7c5",
+          "count": 17529
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WAIST",
+      "itemName": "축성 : 가득찬 마력의 영역 벨트",
+      "itemIds": [
+        {
+          "itemId": "3c1efb46dd5952b8c6e62856b1fd5785",
+          "count": 4327
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WAIST",
+      "itemName": "완전한 침묵의 벨트",
+      "itemIds": [
+        {
+          "itemId": "785fe9470fe935f67553f75315668f0a",
+          "count": 35740
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "AMULET",
+      "itemName": "미약한 마력의 영역 목걸이",
+      "itemIds": [
+        {
+          "itemId": "f5797f80940b56a28cbdae4868fefb89",
+          "count": 131
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "AMULET",
+      "itemName": "은은한 마력의 영역 목걸이",
+      "itemIds": [
+        {
+          "itemId": "63b473b08a9d5c25c3ed0c8bcb1da2d7",
+          "count": 396
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "AMULET",
+      "itemName": "가득찬 마력의 영역 목걸이",
+      "itemIds": [
+        {
+          "itemId": "2fb653d00f1b0e3be82d2cf0442c232d",
+          "count": 6725
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "AMULET",
+      "itemName": "넘치는 마력의 영역 목걸이",
+      "itemIds": [
+        {
+          "itemId": "4ae668f4ebd3ac277ed63348d3dcad8f",
+          "count": 27029
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "AMULET",
+      "itemName": "성스러운 믿음의 목걸이",
+      "itemIds": [
+        {
+          "itemId": "e97845bb843e015bbbc2292b8eaf70e0",
+          "count": 31304
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "AMULET",
+      "itemName": "흑아 : 넘치는 마력의 영역 목걸이",
+      "itemIds": [
+        {
+          "itemId": "7ad900c2cfa4de26f67bb331f2a933bf",
+          "count": 3033
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WRIST",
+      "itemName": "미약한 마력의 영역 팔찌",
+      "itemIds": [
+        {
+          "itemId": "257b7232d3ebfcaa810dfa38c0cc10f7",
+          "count": 157
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WRIST",
+      "itemName": "은은한 마력의 영역 팔찌",
+      "itemIds": [
+        {
+          "itemId": "379a5272caeaace0ab9b7cbf7383d485",
+          "count": 364
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WRIST",
+      "itemName": "가득찬 마력의 영역 팔찌",
+      "itemIds": [
+        {
+          "itemId": "5cdc0cfd58d8c3e45b8cfccf94217348",
+          "count": 7156
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WRIST",
+      "itemName": "넘치는 마력의 영역 팔찌",
+      "itemIds": [
+        {
+          "itemId": "bf5b1734fcea32d436095a357dae3038",
+          "count": 26628
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WRIST",
+      "itemName": "드러난 진실의 팔찌",
+      "itemIds": [
+        {
+          "itemId": "227d89b89243ae14098449220bb7ddf8",
+          "count": 31403
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "WRIST",
+      "itemName": "흑아 : 넘치는 마력의 영역 팔찌",
+      "itemIds": [
+        {
+          "itemId": "19f4dd2b3141a01d00a5516ee37b98c5",
+          "count": 3018
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "RING",
+      "itemName": "미약한 마력의 영역 반지",
+      "itemIds": [
+        {
+          "itemId": "5c803ff7c6cfc049df9903a63495bfa4",
+          "count": 149
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "RING",
+      "itemName": "은은한 마력의 영역 반지",
+      "itemIds": [
+        {
+          "itemId": "6069dda08b7d65473814030a579b102f",
+          "count": 361
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "RING",
+      "itemName": "가득찬 마력의 영역 반지",
+      "itemIds": [
+        {
+          "itemId": "00bf74d6ad7caf7a36989a15562b14a0",
+          "count": 7564
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "RING",
+      "itemName": "넘치는 마력의 영역 반지",
+      "itemIds": [
+        {
+          "itemId": "7dfd210d865f3b98b4521ed97bf0a472",
+          "count": 26268
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "RING",
+      "itemName": "거룩한 희생의 반지",
+      "itemIds": [
+        {
+          "itemId": "265c37882223244be86ae4a58e43be81",
+          "count": 31633
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "RING",
+      "itemName": "흑아 : 넘치는 마력의 영역 반지",
+      "itemIds": [
+        {
+          "itemId": "7f442fdec753bb456d5c432c861c579f",
+          "count": 2732
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SUPPORT",
+      "itemName": "미약한 마력의 영역 보조장비",
+      "itemIds": [
+        {
+          "itemId": "9e25830dee7cb749b2c7b9a3639969a0",
+          "count": 177
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SUPPORT",
+      "itemName": "은은한 마력의 영역 보조장비",
+      "itemIds": [
+        {
+          "itemId": "18dbcf77e3394baf5109be4137cd5b69",
+          "count": 470
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SUPPORT",
+      "itemName": "가득찬 마력의 영역 보조장비",
+      "itemIds": [
+        {
+          "itemId": "cb098a39b32c2c4da0ac86f42cf02a4a",
+          "count": 33870
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "SUPPORT",
+      "itemName": "초연한 청렴의 보조장비",
+      "itemIds": [
+        {
+          "itemId": "2dac8e35dac507fb27100a55ddf7d1b4",
+          "count": 35181
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "미약한 마력의 영역 마법석",
+      "itemIds": [
+        {
+          "itemId": "32fbee66c21edd0e6d442a62b865ab95",
+          "count": 194
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "은은한 마력의 영역 마법석",
+      "itemIds": [
+        {
+          "itemId": "072f20834d1da7715e9d4a4758be9122",
+          "count": 524
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "가득찬 마력의 영역 마법석",
+      "itemIds": [
+        {
+          "itemId": "6610eb7f84f9ad49ff50bebc1e6d8b98",
+          "count": 33308
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "무결한 순수의 마법석",
+      "itemIds": [
+        {
+          "itemId": "ed8eee21c8c71948eb579cbaf01f3ade",
+          "count": 35425
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "EARRING",
+      "itemName": "미약한 마력의 영역 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "2aaa107ff93ec865c918a2604a6c2974",
+          "count": 186
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "EARRING",
+      "itemName": "은은한 마력의 영역 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "a0f8e13ef611c4b0f7ebdbd99576b56d",
+          "count": 469
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "EARRING",
+      "itemName": "가득찬 마력의 영역 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "0633b887c945499e3ca74c68261bbeb2",
+          "count": 33695
+        }
+      ]
+    },
+    {
+      "setItemName": "마력의 영역 세트",
+      "slotId": "EARRING",
+      "itemName": "강인한 절제의 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "b057580c55911f464646fc56726a52c9",
+          "count": 35551
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "JACKET",
+      "itemName": "멈춘 차원 속의 이야기 상의",
+      "itemIds": [
+        {
+          "itemId": "1aa88d350c4d1885c2157e91b2cf7dae",
+          "count": 47
+        },
+        {
+          "itemId": "2e46099362dcd059c1139fb3962333ee",
+          "count": 18
+        },
+        {
+          "itemId": "37389cde4cf790d33cbb55989811623c",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "JACKET",
+      "itemName": "흐르는 차원 속의 이야기 상의",
+      "itemIds": [
+        {
+          "itemId": "e799b9c0e825cd5904fe9a64b86c2514",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "SHOULDER",
+      "itemName": "멈춘 차원 속의 이야기 어깨",
+      "itemIds": [
+        {
+          "itemId": "e591005625174f788998c06991205fbd",
+          "count": 53
+        },
+        {
+          "itemId": "4ab640da06b812ab59166e8f4b781f8b",
+          "count": 18
+        },
+        {
+          "itemId": "3e03cb6e163d181a03779ced507cb07b",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "SHOULDER",
+      "itemName": "흐르는 차원 속의 이야기 어깨",
+      "itemIds": [
+        {
+          "itemId": "f572e9bea8690a7a455f2a0849b3d6d4",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "PANTS",
+      "itemName": "멈춘 차원 속의 이야기 하의",
+      "itemIds": [
+        {
+          "itemId": "5c90ba88a35ef35ce739427355bcf7bd",
+          "count": 50
+        },
+        {
+          "itemId": "6a9d416e2859fc5cd4c75060ddee5f9f",
+          "count": 18
+        },
+        {
+          "itemId": "7ce3ae18b644e707009678213e668032",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "PANTS",
+      "itemName": "흐르는 차원 속의 이야기 하의",
+      "itemIds": [
+        {
+          "itemId": "ad3ecec9bad57f21c3e8776aff810dd3",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "SHOES",
+      "itemName": "멈춘 차원 속의 이야기 신발",
+      "itemIds": [
+        {
+          "itemId": "50fa0f3e861c1ac5175a8d2a15cbf28f",
+          "count": 55
+        },
+        {
+          "itemId": "6e03b428b5a280ae1b092e2125e978a5",
+          "count": 18
+        },
+        {
+          "itemId": "bc0d8d5027bd6accf85d77b8f616655c",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "SHOES",
+      "itemName": "흐르는 차원 속의 이야기 신발",
+      "itemIds": [
+        {
+          "itemId": "b1563be1210d91ab07f5eda14ca42965",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "WAIST",
+      "itemName": "멈춘 차원 속의 이야기 벨트",
+      "itemIds": [
+        {
+          "itemId": "6e2ec24459a2dc4da44a81b283f79910",
+          "count": 53
+        },
+        {
+          "itemId": "86599fa9b42809b1d0e5bf54e40adf76",
+          "count": 18
+        },
+        {
+          "itemId": "5c874e2b1b8c9416f796b845c52daa2a",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "WAIST",
+      "itemName": "흐르는 차원 속의 이야기 벨트",
+      "itemIds": [
+        {
+          "itemId": "dddb6f9410cb63f4c4a03a7ce02fd1c8",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "AMULET",
+      "itemName": "멈춘 차원 속의 이야기 목걸이",
+      "itemIds": [
+        {
+          "itemId": "eaa7d6b10d19fc494029f2b86e1f134a",
+          "count": 53
+        },
+        {
+          "itemId": "f808f7102e40d7e890ca5f25620040d9",
+          "count": 17
+        },
+        {
+          "itemId": "f8127d91d14382a48a91c6bea9524b25",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "AMULET",
+      "itemName": "흐르는 차원 속의 이야기 목걸이",
+      "itemIds": [
+        {
+          "itemId": "6f07976bc592b7166b1afe8abb4e1023",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "WRIST",
+      "itemName": "멈춘 차원 속의 이야기 팔찌",
+      "itemIds": [
+        {
+          "itemId": "b5d042bd9382af77f91b77c3fe18bb5c",
+          "count": 56
+        },
+        {
+          "itemId": "0543c5ea855f2533bd3f24e3cca14b09",
+          "count": 17
+        },
+        {
+          "itemId": "4dce157cb4434a0423cd4f698cf5b92b",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "WRIST",
+      "itemName": "흐르는 차원 속의 이야기 팔찌",
+      "itemIds": [
+        {
+          "itemId": "e6e5a1ebe77bac655073a3eb8104c3d1",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "RING",
+      "itemName": "멈춘 차원 속의 이야기 반지",
+      "itemIds": [
+        {
+          "itemId": "57157d62620723784e167f88afebd6f9",
+          "count": 55
+        },
+        {
+          "itemId": "8badd9fd530576ef232e2e625cdff210",
+          "count": 17
+        },
+        {
+          "itemId": "36a5af4d5631553bd937238eb251bae7",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "RING",
+      "itemName": "흐르는 차원 속의 이야기 반지",
+      "itemIds": [
+        {
+          "itemId": "0273c661e9a9e054ae2faf5929a16130",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "SUPPORT",
+      "itemName": "멈춘 차원 속의 이야기 보조장비",
+      "itemIds": [
+        {
+          "itemId": "cd0274868da125bded975209852af070",
+          "count": 46
+        },
+        {
+          "itemId": "4476abad07650cc95faafe04dd62572b",
+          "count": 17
+        },
+        {
+          "itemId": "1ee1574a09141176ec69fd61060342f5",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "SUPPORT",
+      "itemName": "흐르는 차원 속의 이야기 보조장비",
+      "itemIds": [
+        {
+          "itemId": "ed07eba3b684a7609b473bfbee4f0081",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "멈춘 차원 속의 이야기 마법석",
+      "itemIds": [
+        {
+          "itemId": "f71104a0e11badeaedb9b96fec4e8540",
+          "count": 53
+        },
+        {
+          "itemId": "89792696c810e217c6ec42b1be3dddbd",
+          "count": 17
+        },
+        {
+          "itemId": "c4cfbe4d77a915594e6c403e19e4e209",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "MAGIC_STON",
+      "itemName": "흐르는 차원 속의 이야기 마법석",
+      "itemIds": [
+        {
+          "itemId": "60af731f902a74375a8125002033a0a1",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "EARRING",
+      "itemName": "멈춘 차원 속의 이야기 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "10de7ac1baf8b4bb37cc444c0f576b89",
+          "count": 45
+        },
+        {
+          "itemId": "ef906ca952f99c43578ff2527a57909d",
+          "count": 17
+        },
+        {
+          "itemId": "390f3a1dbe759d367da5580fa6ec5d99",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "setItemName": "차원 속의 이야기 세트",
+      "slotId": "EARRING",
+      "itemName": "흐르는 차원 속의 이야기 귀걸이",
+      "itemIds": [
+        {
+          "itemId": "f6d5dd7221a8f983c711e9ddfdde5e6c",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "setItemName": null,
+      "slotId": "RING",
+      "itemName": "광휘를 머금은 눈동자",
+      "itemIds": [
+        {
+          "itemId": "aa5273499f19ddba846919dbb6857d82",
+          "count": 11060
+        }
+      ]
+    },
+    {
+      "setItemName": null,
+      "slotId": "SUPPORT",
+      "itemName": "만병을 잉태한 역병의 심장",
+      "itemIds": [
+        {
+          "itemId": "6e1fcf6e59ed8d5a95dc152b84fe93ce",
+          "count": 13542
+        }
+      ]
+    },
+    {
+      "setItemName": null,
+      "slotId": "MAGIC_STON",
+      "itemName": "우아한 기품의 향수",
+      "itemIds": [
+        {
+          "itemId": "df77236c51ea1274a3deb79c3e470695",
+          "count": 520
+        }
+      ]
+    },
+    {
+      "setItemName": null,
+      "slotId": "EARRING",
+      "itemName": "영롱한 날씨의 큐브",
+      "itemIds": [
+        {
+          "itemId": "14449881bc371352c250502e7b201506",
+          "count": 140
+        }
+      ]
+    }
+  ]
+}

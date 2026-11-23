@@ -8,6 +8,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./equipment-variants": {
+      "types": "./dist/equipment-variants.d.ts",
+      "import": "./dist/equipment-variants.js"
+    },
     "./error-chain": {
       "types": "./dist/error-chain.d.ts",
       "import": "./dist/error-chain.js"
@@ -43,6 +47,7 @@
     "build": "tsc -p tsconfig.json && dfragon-copy-notices lib dist/notices && dfragon-copy-notices lib LICENSES",
     "test": "pnpm build && node --test test/*.test.mjs",
     "generate:cp949": "node scripts/generate-cp949.mjs",
+    "generate:equipment-variants": "node scripts/generate-equipment-variants.mjs && biome format --write src/equipment-variants.json",
     "lint": "biome lint",
     "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"
   },
