@@ -94,8 +94,8 @@ async function changeDealerEquipment({ canvasElement }: { canvasElement: HTMLEle
 }
 
 async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }) {
-  await pick(canvasElement, '칭호 교체', '운명이 담긴 책')
-  await pick(canvasElement, '크리쳐 교체', '운명을 담는 여신')
+  await pick(canvasElement, '칭호 교체', '진정한 각성을 이룬 자')
+  await pick(canvasElement, '크리쳐 교체', 'SD 흰 구름 전령 에를리히')
   await pick(canvasElement, '오라 교체', '열대야의 추억')
 }
 
