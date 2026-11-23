@@ -1,0 +1,993 @@
+{
+  "0bf45c3b01cddaf53ee81a5271b20ae4": {
+    "itemId": "0bf45c3b01cddaf53ee81a5271b20ae4",
+    "itemName": "명예로운 공경의 하의",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "7c4b28699ae7994798289f187d519992",
+    "itemTypeDetail": "하의",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1441
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "내구도",
+        "value": 50
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "65.2%"
+      },
+      {
+        "name": "물리 피해 감소",
+        "value": "10%"
+      },
+      {
+        "name": "마법 피해 감소",
+        "value": "10%"
+      }
+    ]
+  },
+  "1fd5aa7227fb90d934620fd2b9bfbef6": {
+    "itemId": "1fd5aa7227fb90d934620fd2b9bfbef6",
+    "itemName": "숭고한 심판의 어깨",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "f2976a25a516451e3e8667bac328b308",
+    "itemTypeDetail": "머리어깨",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1153
+      },
+      {
+        "name": "힘",
+        "value": 135
+      },
+      {
+        "name": "체력",
+        "value": 135
+      },
+      {
+        "name": "지능",
+        "value": 135
+      },
+      {
+        "name": "정신력",
+        "value": 135
+      },
+      {
+        "name": "공격속도",
+        "value": "40%"
+      },
+      {
+        "name": "캐스트속도",
+        "value": "40%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "81.4%"
+      }
+    ]
+  },
+  "223dc58926c3f1b1d70b3577965010fb": {
+    "itemId": "223dc58926c3f1b1d70b3577965010fb",
+    "itemName": "성스러운 믿음의 목걸이",
+    "itemRarity": "태초",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "390e3966118b0c466ce9f8eae45e1629",
+    "itemTypeDetail": "목걸이",
+    "itemAvailableLevel": 115,
+    "fame": 1600,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1600
+      },
+      {
+        "name": "마법 방어력",
+        "value": 11799
+      },
+      {
+        "name": "힘",
+        "value": 100
+      },
+      {
+        "name": "체력",
+        "value": 100
+      },
+      {
+        "name": "지능",
+        "value": 155
+      },
+      {
+        "name": "정신력",
+        "value": 235
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11320
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "51.2%"
+      }
+    ]
+  },
+  "30457efb8b2d19c2ca0b3b071b557af1": {
+    "itemId": "30457efb8b2d19c2ca0b3b071b557af1",
+    "itemName": "찬란한 황금향의 저주 - 마법석",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "fe5f3db78175f5a3196385c688d29681",
+    "itemTypeDetail": "마법석",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 178
+      },
+      {
+        "name": "체력",
+        "value": 178
+      },
+      {
+        "name": "지능",
+        "value": 178
+      },
+      {
+        "name": "정신력",
+        "value": 178
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "35.3%"
+      },
+      {
+        "name": "스킬 쿨타임 감소",
+        "value": "15%"
+      }
+    ]
+  },
+  "43803200c544fd434d9ab5c9880bebd3": {
+    "itemId": "43803200c544fd434d9ab5c9880bebd3",
+    "itemName": "긍휼 속 자비의 상의",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "3da92241d44bdafcf7554057e6479c83",
+    "itemTypeDetail": "상의",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1729
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "HP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "MP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "내구도",
+        "value": 60
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "65.2%"
+      }
+    ]
+  },
+  "6dec30d4dbf75153cfad5af20cda006d": {
+    "itemId": "6dec30d4dbf75153cfad5af20cda006d",
+    "itemName": "찬란한 황금향의 이면 - 귀걸이",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "601834074c49bb0e48cb65a75a8667bc",
+    "itemTypeDetail": "귀걸이",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 278
+      },
+      {
+        "name": "체력",
+        "value": 278
+      },
+      {
+        "name": "지능",
+        "value": 278
+      },
+      {
+        "name": "정신력",
+        "value": 278
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "45.7%"
+      }
+    ]
+  },
+  "700fb5abf341de4f8f210213ccc5e7df": {
+    "itemId": "700fb5abf341de4f8f210213ccc5e7df",
+    "itemName": "축성 : 찬란한 황금향의 플레이트 레깅스",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "7c4b28699ae7994798289f187d519992",
+    "itemTypeDetail": "하의",
+    "itemAvailableLevel": 115,
+    "fame": 1800,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1800
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1441
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "내구도",
+        "value": 50
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11640
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "63.9%"
+      },
+      {
+        "name": "물리 피해 감소",
+        "value": "10%"
+      },
+      {
+        "name": "마법 피해 감소",
+        "value": "10%"
+      }
+    ]
+  },
+  "90e09e1ad869e07977b94fbf9cd6acce": {
+    "itemId": "90e09e1ad869e07977b94fbf9cd6acce",
+    "itemName": "축성 : 찬란한 황금향의 플레이트 숄더",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "f2976a25a516451e3e8667bac328b308",
+    "itemTypeDetail": "머리어깨",
+    "itemAvailableLevel": 115,
+    "fame": 1800,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1800
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1153
+      },
+      {
+        "name": "힘",
+        "value": 135
+      },
+      {
+        "name": "체력",
+        "value": 135
+      },
+      {
+        "name": "지능",
+        "value": 135
+      },
+      {
+        "name": "정신력",
+        "value": 135
+      },
+      {
+        "name": "공격속도",
+        "value": "40%"
+      },
+      {
+        "name": "캐스트속도",
+        "value": "40%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11640
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "80%"
+      }
+    ]
+  },
+  "92d13dc1c38895202ee62b05e2b5d11e": {
+    "itemId": "92d13dc1c38895202ee62b05e2b5d11e",
+    "itemName": "축성 : 찬란한 황금향의 플레이트 부츠",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "ef6fcc3b39b2bbcbf09a71da6cbafe06",
+    "itemTypeDetail": "신발",
+    "itemAvailableLevel": 115,
+    "fame": 1800,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1800
+      },
+      {
+        "name": "물리 방어력",
+        "value": 865
+      },
+      {
+        "name": "힘",
+        "value": 127
+      },
+      {
+        "name": "체력",
+        "value": 127
+      },
+      {
+        "name": "지능",
+        "value": 127
+      },
+      {
+        "name": "정신력",
+        "value": 127
+      },
+      {
+        "name": "이동속도",
+        "value": "44%"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11640
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "75%"
+      }
+    ]
+  },
+  "951150903ca24cb8598e758ba4875995": {
+    "itemId": "951150903ca24cb8598e758ba4875995",
+    "itemName": "완전한 침묵의 벨트",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "934ed2dea99f55f775df256fc29c5d56",
+    "itemTypeDetail": "벨트",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 576
+      },
+      {
+        "name": "힘",
+        "value": 127
+      },
+      {
+        "name": "체력",
+        "value": 127
+      },
+      {
+        "name": "지능",
+        "value": 127
+      },
+      {
+        "name": "정신력",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": "35%"
+      },
+      {
+        "name": "인벤토리 무게 한도",
+        "value": "3kg"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "65.2%"
+      }
+    ]
+  },
+  "96f87549f21b13bbb93d703e7244d621": {
+    "itemId": "96f87549f21b13bbb93d703e7244d621",
+    "itemName": "무결한 순수의 마법석",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "fe5f3db78175f5a3196385c688d29681",
+    "itemTypeDetail": "마법석",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 178
+      },
+      {
+        "name": "체력",
+        "value": 178
+      },
+      {
+        "name": "지능",
+        "value": 178
+      },
+      {
+        "name": "정신력",
+        "value": 178
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "35.3%"
+      },
+      {
+        "name": "스킬 쿨타임 감소",
+        "value": "15%"
+      }
+    ]
+  },
+  "9c026e5d38dec89186fe2ac1f9a7da5c": {
+    "itemId": "9c026e5d38dec89186fe2ac1f9a7da5c",
+    "itemName": "축성 : 찬란한 황금향의 플레이트 코일",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "934ed2dea99f55f775df256fc29c5d56",
+    "itemTypeDetail": "벨트",
+    "itemAvailableLevel": 115,
+    "fame": 1800,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1800
+      },
+      {
+        "name": "물리 방어력",
+        "value": 576
+      },
+      {
+        "name": "힘",
+        "value": 127
+      },
+      {
+        "name": "체력",
+        "value": 127
+      },
+      {
+        "name": "지능",
+        "value": 127
+      },
+      {
+        "name": "정신력",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": "35%"
+      },
+      {
+        "name": "인벤토리 무게 한도",
+        "value": "3kg"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11640
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "63.9%"
+      }
+    ]
+  },
+  "a1b024bc3c80c0028e8408a5e008f915": {
+    "itemId": "a1b024bc3c80c0028e8408a5e008f915",
+    "itemName": "찬란한 황금향의 플레이트 아머",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "3da92241d44bdafcf7554057e6479c83",
+    "itemTypeDetail": "상의",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1729
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "HP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "MP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "내구도",
+        "value": 60
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10720
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "56.1%"
+      }
+    ]
+  },
+  "a771af545571ab8a78f45c463bab947a": {
+    "itemId": "a771af545571ab8a78f45c463bab947a",
+    "itemName": "고요한 안식의 신발",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "ef6fcc3b39b2bbcbf09a71da6cbafe06",
+    "itemTypeDetail": "신발",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 865
+      },
+      {
+        "name": "힘",
+        "value": 127
+      },
+      {
+        "name": "체력",
+        "value": 127
+      },
+      {
+        "name": "지능",
+        "value": 127
+      },
+      {
+        "name": "정신력",
+        "value": 127
+      },
+      {
+        "name": "이동속도",
+        "value": "44%"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "76.4%"
+      }
+    ]
+  },
+  "aa5273499f19ddba846919dbb6857d82": {
+    "itemId": "aa5273499f19ddba846919dbb6857d82",
+    "itemName": "광휘를 머금은 눈동자",
+    "itemRarity": "태초",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "b04c7fb9b29b27b91a0a9e5a1822bc8f",
+    "itemTypeDetail": "반지",
+    "itemAvailableLevel": 115,
+    "fame": 1950,
+    "setItemId": null,
+    "setItemName": null,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1950
+      },
+      {
+        "name": "마법 방어력",
+        "value": 4752
+      },
+      {
+        "name": "힘",
+        "value": 180
+      },
+      {
+        "name": "체력",
+        "value": 100
+      },
+      {
+        "name": "지능",
+        "value": 180
+      },
+      {
+        "name": "정신력",
+        "value": 100
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3729%"
+      }
+    ]
+  },
+  "d51d0071c181d4fe99b04e19f2fd6a82": {
+    "itemId": "d51d0071c181d4fe99b04e19f2fd6a82",
+    "itemName": "칠흑의 정화 상의",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "3da92241d44bdafcf7554057e6479c83",
+    "itemTypeDetail": "상의",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
+    "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1729
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "HP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "MP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "내구도",
+        "value": 60
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10720
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "56.1%"
+      }
+    ]
+  },
+  "d8d7fc1c77c8b955e0f137ec1e1c52c2": {
+    "itemId": "d8d7fc1c77c8b955e0f137ec1e1c52c2",
+    "itemName": "초연한 청렴의 보조장비",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "2fef5d81b7f59f0c75241890a8d941c9",
+    "itemTypeDetail": "보조장비",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "7f788a703a87d783079b41d0fe6448c9",
+    "setItemName": "영원히 이어지는 황금향 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 152
+      },
+      {
+        "name": "체력",
+        "value": 152
+      },
+      {
+        "name": "지능",
+        "value": 152
+      },
+      {
+        "name": "정신력",
+        "value": 152
+      },
+      {
+        "name": "물리 크리티컬 히트",
+        "value": "30%"
+      },
+      {
+        "name": "마법 크리티컬 히트",
+        "value": "30%"
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "45.7%"
+      }
+    ]
+  }
+}
