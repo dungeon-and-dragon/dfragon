@@ -415,6 +415,20 @@ export function draftOf(slot: SimulatorSlot, changes: SimulatorChanges): SlotDra
   return changed
 }
 
+/** 고른 마법부여의 옵션이다. 고르지 않았거나 등급표에 없는 id면 착용한 마법부여다. */
+export function enchantLabelsOf(
+  slot: SimulatorSlot,
+  enchantId: string | null
+): readonly EnchantOption[] {
+  const choice = slot.enchantChoices.find(({ id }) => id === enchantId)
+
+  if (choice === undefined) {
+    return slot.enchants
+  }
+
+  return choice.options
+}
+
 export function variantChoiceOf(
   slot: SimulatorSlot,
   variantId: string | null

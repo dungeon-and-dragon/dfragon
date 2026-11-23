@@ -11,6 +11,7 @@ export default defineConfig({
     setupFiles: [
       './src/testing/setup/react-act-environment.ts',
       './src/testing/setup/match-media.ts',
+      './src/testing/setup/intersection-observer.ts',
       '../../packages/ui/test/setup.ts',
       './src/testing/setup/reset-zustand-stores.ts',
       './src/testing/setup/query-notify.ts',
