@@ -1,0 +1,294 @@
+import {
+  oathCrystalVariantsOf,
+  oathVariantOf,
+  oathVariantsOf
+} from '@dfragon/lib/equipment-variants'
+import { expect, it } from 'vitest'
+import type { CharacterDetailView } from '#entities/character'
+import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
+import {
+  hasChanges,
+  NO_CHANGES,
+  type SimulatorAction,
+  type SimulatorChanges,
+  simulationBody,
+  simulatorReducer,
+  toSimulatorRows
+} from './simulator-draft'
+import {
+  crystalChoicesOf,
+  crystalDraftOf,
+  crystalItemOf,
+  crystalTuneLimitOf,
+  oathBodyItemOf,
+  oathInSet,
+  type SimulatorOath,
+  toSimulatorOath
+} from './simulator-oath'
+
+// 두 fixture 모두 야망의 용투 서약 세트다. 딜러는 태초 용투 서약과 완전한(에픽) 8개, 태초 3개 결정을, 버퍼는 세트에 속하지
+// 않는 영겁의 안개 서약을 낀다.
+const DRAGON_SET = 16204
+const SHADOW_SET = 16201
+// 광휘 결정이 아닌 결정이다.
+const MIST_CRYSTAL_ID = 'f834b16af8341719efe94a3be49d381e'
+
+function apply(changes: SimulatorChanges, ...actions: SimulatorAction[]): SimulatorChanges {
+  return actions.reduce(simulatorReducer, changes)
+}
+
+function idsOf(choices: readonly { id: string }[]): string[] {
+  return choices.map(({ id }) => id)
+}
+
+function crystalId(setId: number, rarity: string): string {
+  const found = oathCrystalVariantsOf(setId).find((crystal) => crystal.rarity === rarity)
+  expect(found, `${setId} ${rarity}`).toBeDefined()
+
+  return found!.id
+}
+
+function withCrystal(
+  detail: CharacterDetailView,
+  slotNo: number,
+  crystal: Partial<NonNullable<CharacterDetailView['oath']>['crystal'][number]>
+): CharacterDetailView {
+  const oath = detail.oath!
+  const crystals = oath.crystal.map((current) =>
+    current.slotNo === slotNo ? { ...current, ...crystal } : current
+  )
+
+  return { ...detail, oath: { ...oath, crystal: crystals } }
+}
+
+const dealerOath = toSimulatorOath(characterDetailFixture('dealer'))!
+const bufferOath = toSimulatorOath(characterDetailFixture('buffer'))!
+
+function viewOf(oath: SimulatorOath, changes: SimulatorChanges): SimulatorOath {
+  return oathInSet(oath, changes.oath.set)
+}
+
+function crystalAt(oath: SimulatorOath, slotNo: number) {
+  const found = oath.crystals.find((crystal) => crystal.slotNo === slotNo)
+  expect(found, String(slotNo)).toBeDefined()
+
+  return found!
+}
+
+it('서약은 착용한 세트, 같은 계열 4등급의 본체 선택지와 그 세트 광휘 결정 4등급의 결정 선택지를 둔다', () => {
+  const [first] = dealerOath.crystals
+
+  expect(dealerOath.setId).toBe(DRAGON_SET)
+  expect(dealerOath.sets).toHaveLength(12)
+  expect(idsOf(dealerOath.body!.choices)).toEqual(idsOf(oathVariantsOf(DRAGON_SET)))
+  expect(dealerOath.body!.wornVariantId).toBe(oathVariantOf(DRAGON_SET, '태초')?.id)
+  expect(dealerOath.crystals.map(({ slotNo }) => slotNo)).toEqual([
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  ])
+  expect(idsOf(first!.choices)).toEqual(idsOf(oathCrystalVariantsOf(DRAGON_SET)))
+  expect(first!.wornVariantId).toBe(crystalId(DRAGON_SET, '에픽'))
+  expect(toSimulatorOath({ oath: null })).toBeNull()
+})
+
+it('서약 세트를 고르면 본체와 광휘 결정이 그 세트의 같은 등급이 되고 조율은 그대로이며 세트만 요청한다', () => {
+  const changed = apply(NO_CHANGES, { type: 'oathSet', oath: dealerOath, setId: SHADOW_SET })
+  const view = viewOf(dealerOath, changed)
+
+  expect(changed.oath).toEqual({ set: SHADOW_SET, body: null, crystals: {} })
+  expect(oathBodyItemOf(view.body!, changed.oath).itemName).toBe('태초의 어둠 속 그림자 서약')
+  expect(view.crystals.map(({ wornVariantId }) => wornVariantId)).toEqual([
+    ...Array.from({ length: 8 }, () => crystalId(SHADOW_SET, '에픽')),
+    ...Array.from({ length: 3 }, () => crystalId(SHADOW_SET, '태초'))
+  ])
+  expect(view.crystals.map(({ wornTune }) => wornTune)).toEqual([3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0])
+  expect(simulationBody(toSimulatorRows(characterDetailFixture('dealer')), view, changed)).toEqual({
+    equipment: [],
+    oathSet: SHADOW_SET
+  })
+  expect(apply(changed, { type: 'oathSet', oath: dealerOath, setId: DRAGON_SET })).toEqual(
+    NO_CHANGES
+  )
+})
+
+it('서약 세트를 바꿔도 영겁의 안개 서약과 광휘 결정이 아닌 결정은 그대로 둔다', () => {
+  const detail = withCrystal(characterDetailFixture('buffer'), 3, {
+    itemId: MIST_CRYSTAL_ID,
+    itemName: '희미한 안개 결정',
+    itemRarity: '유니크'
+  })
+  const oath = toSimulatorOath(detail)!
+  const changed = apply(NO_CHANGES, { type: 'oathSet', oath, setId: SHADOW_SET })
+  const view = viewOf(oath, changed)
+  const mistCrystal = crystalAt(view, 3)
+
+  expect(view.body).toEqual(oath.body)
+  expect(view.body!.wornVariantId).toBe(oathVariantsOf(null)[2]?.id)
+  expect(mistCrystal.wornVariantId).toBeNull()
+  expect(crystalItemOf(mistCrystal, changed.oath).itemName).toBe('희미한 안개 결정')
+  expect(idsOf(mistCrystal.choices)).toEqual(idsOf(oathCrystalVariantsOf(SHADOW_SET)))
+  expect(bufferOath.body!.setBound).toBe(false)
+})
+
+it('서약 본체는 같은 계열 4등급 가운데 고르고, 착용한 등급을 다시 고르면 지운다', () => {
+  const epic = oathVariantOf(DRAGON_SET, '에픽')!
+  const changed = apply(NO_CHANGES, { type: 'oathBody', body: dealerOath.body!, id: epic.id })
+
+  expect(changed.oath.body).toBe(epic.id)
+  expect(oathBodyItemOf(dealerOath.body!, changed.oath).itemName).toBe(epic.item.itemName)
+  expect(simulationBody([], dealerOath, changed)).toEqual({ equipment: [], oathBody: epic.id })
+  expect(
+    apply(changed, {
+      type: 'oathBody',
+      body: dealerOath.body!,
+      id: dealerOath.body!.wornVariantId!
+    })
+  ).toEqual(NO_CHANGES)
+  expect(
+    apply(NO_CHANGES, {
+      type: 'oathBody',
+      body: dealerOath.body!,
+      id: crystalId(DRAGON_SET, '에픽')
+    })
+  ).toEqual(NO_CHANGES)
+})
+
+it('결정 등급을 바꾸면 조율을 새 결정의 최대 단계로 자르고, 바꾼 결정만 선택지 id와 조율로 요청한다', () => {
+  const primeval = crystalId(DRAGON_SET, '태초')
+  const unique = crystalId(DRAGON_SET, '유니크')
+  const epic = crystalId(DRAGON_SET, '에픽')
+  const changed = apply(
+    NO_CHANGES,
+    {
+      type: 'crystal',
+      oath: dealerOath,
+      crystal: crystalAt(dealerOath, 9),
+      draft: { variantId: epic }
+    },
+    {
+      type: 'crystal',
+      oath: dealerOath,
+      crystal: crystalAt(dealerOath, 6),
+      draft: { variantId: primeval }
+    },
+    {
+      type: 'crystal',
+      oath: dealerOath,
+      crystal: crystalAt(dealerOath, 0),
+      draft: { variantId: unique }
+    },
+    { type: 'crystal', oath: dealerOath, crystal: crystalAt(dealerOath, 7), draft: { tune: 2 } }
+  )
+
+  expect(crystalDraftOf(crystalAt(dealerOath, 6), changed.oath)).toEqual({
+    variantId: primeval,
+    tune: 0
+  })
+  expect(crystalDraftOf(crystalAt(dealerOath, 0), changed.oath)).toEqual({
+    variantId: unique,
+    tune: 3
+  })
+  expect(simulationBody([], dealerOath, changed).oath).toEqual([
+    { slotNo: 0, tune: 3, variantId: unique },
+    { slotNo: 6, tune: 0, variantId: primeval },
+    { slotNo: 7, tune: 2, variantId: null },
+    { slotNo: 9, tune: 0, variantId: epic }
+  ])
+})
+
+it('결정의 단계를 넘는 조율, 조율할 수 없는 태초 결정의 조율, 다른 선택지의 결정은 받지 않는다', () => {
+  expect(crystalTuneLimitOf(crystalAt(dealerOath, 8), crystalAt(dealerOath, 8).wornVariantId)).toBe(
+    0
+  )
+  expect(
+    apply(
+      NO_CHANGES,
+      { type: 'crystal', oath: dealerOath, crystal: crystalAt(dealerOath, 7), draft: { tune: 4 } },
+      { type: 'crystal', oath: dealerOath, crystal: crystalAt(dealerOath, 8), draft: { tune: 1 } },
+      {
+        type: 'crystal',
+        oath: dealerOath,
+        crystal: crystalAt(dealerOath, 0),
+        draft: { variantId: crystalId(SHADOW_SET, '에픽') }
+      }
+    )
+  ).toEqual(NO_CHANGES)
+})
+
+it('광휘 결정이 아닌 착용 결정은 광휘 결정으로 바꿨다가 착용 중으로 되돌리면 요청에서 뺀다', () => {
+  const oath = toSimulatorOath(
+    withCrystal(characterDetailFixture('dealer'), 2, {
+      itemId: MIST_CRYSTAL_ID,
+      itemName: '희미한 안개 결정',
+      itemRarity: '유니크',
+      tune: { level: 0, setPoint: 85 }
+    })
+  )!
+  const crystal = crystalAt(oath, 2)
+  const changed = apply(NO_CHANGES, {
+    type: 'crystal',
+    oath,
+    crystal,
+    draft: { variantId: crystalId(DRAGON_SET, '에픽') }
+  })
+
+  expect(crystal.wornVariantId).toBeNull()
+  expect(idsOf(crystal.choices)).toEqual(idsOf(oathCrystalVariantsOf(DRAGON_SET)))
+  expect(hasChanges(changed)).toBe(true)
+  expect(apply(changed, { type: 'crystal', oath, crystal, draft: { variantId: null } })).toEqual(
+    NO_CHANGES
+  )
+})
+
+it('서약 세트를 바꾸면 고른 본체를 지우고 결정은 새 세트의 기준 결정으로 두되 바꾼 조율은 유지한다', () => {
+  const changed = apply(
+    NO_CHANGES,
+    { type: 'oathBody', body: dealerOath.body!, id: oathVariantOf(DRAGON_SET, '에픽')!.id },
+    { type: 'crystal', oath: dealerOath, crystal: crystalAt(dealerOath, 7), draft: { tune: 2 } },
+    { type: 'oathSet', oath: dealerOath, setId: SHADOW_SET }
+  )
+  const view = viewOf(dealerOath, changed)
+
+  expect(changed.oath.body).toBeNull()
+  expect(changed.oath.crystals).toEqual({
+    7: { variantId: crystalId(SHADOW_SET, '에픽'), tune: 2 }
+  })
+  expect(simulationBody([], view, changed)).toEqual({
+    equipment: [],
+    oathSet: SHADOW_SET,
+    oath: [{ slotNo: 7, tune: 2, variantId: null }]
+  })
+  expect(apply(changed, { type: 'reset' })).toEqual(NO_CHANGES)
+})
+
+it('태초 결정이 이미 3개면 다른 결정의 선택지에 태초가 없고, 하나를 내리면 다시 생긴다', () => {
+  const primeval = crystalId(DRAGON_SET, '태초')
+  const epic = crystalId(DRAGON_SET, '에픽')
+  const crystal = crystalAt(dealerOath, 0)
+  const lowered = apply(NO_CHANGES, {
+    type: 'crystal',
+    oath: dealerOath,
+    crystal: crystalAt(dealerOath, 8),
+    draft: { variantId: epic }
+  })
+
+  expect(idsOf(crystalChoicesOf(dealerOath, crystal, NO_CHANGES.oath))).not.toContain(primeval)
+  expect(idsOf(crystalChoicesOf(dealerOath, crystalAt(dealerOath, 8), NO_CHANGES.oath))).toContain(
+    primeval
+  )
+  expect(
+    apply(NO_CHANGES, {
+      type: 'crystal',
+      oath: dealerOath,
+      crystal,
+      draft: { variantId: primeval }
+    })
+  ).toEqual(NO_CHANGES)
+  expect(idsOf(crystalChoicesOf(dealerOath, crystal, lowered.oath))).toContain(primeval)
+  expect(
+    crystalDraftOf(
+      crystal,
+      apply(lowered, { type: 'crystal', oath: dealerOath, crystal, draft: { variantId: primeval } })
+        .oath
+    ).variantId
+  ).toBe(primeval)
+})
