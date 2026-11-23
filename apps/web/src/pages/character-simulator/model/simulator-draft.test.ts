@@ -373,27 +373,45 @@ it('세트 밖 장비를 낀 부위는 주 세트의 선택지를 두고 착용 
   expect(draftOf(wrist, NO_CHANGES).variantId).toBeNull()
 })
 
-it('주 세트는 세트 포인트와 setItemId가 모두 있는 세트 가운데 세트 포인트가 가장 큰 세트다', () => {
-  const [worn] = bufferDetail.equipment.setItemInfo
-  const pointed = (setItemId: string | null, current: number) => ({
-    ...worn!,
+const [bufferSet] = bufferDetail.equipment.setItemInfo
+
+function pointed(setItemId: string | null, current: number) {
+  return {
+    ...bufferSet!,
     setItemId,
     active: { setPoint: { current, min: null, max: null }, status: [] }
-  })
-  const detail = {
-    ...bufferDetail,
-    equipment: {
-      ...bufferDetail.equipment,
-      setItemInfo: [
-        pointed(null, 9_999),
-        { ...worn!, setItemId: SOUL_FAIRY_SET, active: null },
-        pointed(ETHEREAL_SET, 100)
-      ]
-    }
   }
+}
+
+function withSets(
+  detail: CharacterDetailView,
+  setItemInfo: CharacterDetailView['equipment']['setItemInfo']
+): CharacterDetailView {
+  return { ...detail, equipment: { ...detail.equipment, setItemInfo } }
+}
+
+it('주 세트는 세트 포인트와 setItemId가 모두 있는 세트 가운데 세트 포인트가 가장 큰 세트다', () => {
+  const detail = withSets(bufferDetail, [
+    pointed(null, 9_999),
+    { ...bufferSet!, setItemId: SOUL_FAIRY_SET, active: null },
+    pointed(ETHEREAL_SET, 100)
+  ])
   const wrist = slotOf(slotsOf(toSimulatorRows(detail)), 'WRIST')
 
   expect(idsOf(wrist.variants)).toEqual(idsOf(equipmentVariantsOf(ETHEREAL_SET, 'WRIST')))
+})
+
+it('선택 목록에 없는 세트의 장비를 낀 부위는 세트 밖 장비처럼 선택 목록에 있는 주 세트의 선택지를 둔다', () => {
+  const unlistedSet = 'unlisted-set'
+  const detail = withSets(withItem(bufferDetail, 'WRIST', { setItemId: unlistedSet }), [
+    pointed(unlistedSet, 9_999),
+    pointed(ETHEREAL_SET, 100)
+  ])
+  const wrist = slotOf(slotsOf(toSimulatorRows(detail)), 'WRIST')
+
+  expect(equipmentVariantsOf(unlistedSet, 'WRIST')).toEqual([])
+  expect(idsOf(wrist.variants)).toEqual(idsOf(equipmentVariantsOf(ETHEREAL_SET, 'WRIST')))
+  expect(wrist.wornVariantId).toBeNull()
 })
 
 it('세트 밖 유일 장비를 낀 부위는 주 세트의 선택지에서 유일 장비가 고른 상태이고 착용한 정밀도를 초기값으로 둔다', () => {
