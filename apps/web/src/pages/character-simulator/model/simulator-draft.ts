@@ -686,8 +686,9 @@ function changeSlotItem(
 }
 
 /**
- * 장비 세트를 바꾸면 부위마다 고른 아이템은 새 세트의 기준 아이템으로 되돌리고, 강화, 증폭, 마법부여와 바꾼 조율은 기준
- * 아이템의 최대 단계까지 유지한다. 주 세트를 다시 고르면 세트를 고르지 않은 것으로 둔다.
+ * 장비 세트를 바꾸면 지금 보이는 부위마다의 아이템을 새 세트의 같은 등급, 같은 종류로 옮기고, 강화, 증폭, 마법부여와 조율은
+ * 새 아이템의 최대 단계까지 유지한다. 유일 장비와 선택지에 없는 착용 아이템은 그대로 둔다. 그 세트를 골라도 바뀌는 부위가
+ * 없으면(세트에 속한 부위가 모두 이미 그 세트) 세트를 고르지 않은 것으로 둔다.
  */
 function changeEquipmentSet(
   changes: SimulatorChanges,
@@ -699,32 +700,75 @@ function changeEquipmentSet(
     return changes
   }
 
-  const chosen = setItemId === equipmentSet.mainSetId ? null : setItemId
+  const current = rowsInEquipmentSet(rows, changes.equipmentSet)
+  const chosen = movesSlots(rows, setItemId) ? setItemId : null
+  const next = rowsInEquipmentSet(rows, chosen)
   const equipment = Object.fromEntries(
-    rowsInEquipmentSet(rows, chosen).flatMap((row): [EnchantGradeSlot, SlotDraft][] => {
-      if (row.kind !== 'equipment') {
+    next.flatMap((row, index): [EnchantGradeSlot, SlotDraft][] => {
+      const currentRow = current[index]
+
+      if (row.kind !== 'equipment' || currentRow?.kind !== 'equipment') {
         return []
       }
 
       const { slot } = row
-      const changed = changes.equipment[slot.slotId]
+      const moved = movedDraftOf(
+        draftOf(currentRow.slot, changes),
+        currentRow.slot,
+        slot,
+        setItemId
+      )
 
-      if (changed === undefined) {
+      if (isOriginal(slot, moved)) {
         return []
       }
 
-      const tune = Math.min(changed.tune, tuneLimitOf(slot, slot.wornVariantId))
-      const rebased = { ...changed, variantId: slot.wornVariantId, tune, potency: slot.wornPotency }
-
-      if (isOriginal(slot, rebased)) {
-        return []
-      }
-
-      return [[slot.slotId, rebased]]
+      return [[slot.slotId, moved]]
     })
   )
 
   return { ...changes, equipmentSet: chosen, equipment }
+}
+
+function movesSlots(rows: readonly SimulatorRow[], setItemId: string): boolean {
+  const moved = rowsInEquipmentSet(rows, setItemId)
+
+  return rows.some((row, index) => {
+    const movedRow = moved[index]
+
+    if (row.kind !== 'equipment' || movedRow?.kind !== 'equipment') {
+      return false
+    }
+
+    const sameChoices =
+      row.slot.variants.length === movedRow.slot.variants.length &&
+      row.slot.variants.every(({ id }, position) => movedRow.slot.variants[position]?.id === id)
+
+    return !sameChoices || row.slot.wornVariantId !== movedRow.slot.wornVariantId
+  })
+}
+
+function movedDraftOf(
+  draft: SlotDraft,
+  current: SimulatorSlot,
+  next: SimulatorSlot,
+  setItemId: string
+): SlotDraft {
+  const { slotId } = next
+
+  if (!isVariantSlot(slotId)) {
+    return draft
+  }
+
+  const chosen = variantChoiceOf(current, draft.variantId)
+  const switched = switchEquipmentSet({ [slotId]: chosen?.variant ?? null }, setItemId)[slotId]
+  const keeps = next.variants.some(({ id }) => id === draft.variantId)
+  const variantId = switched?.id ?? (keeps ? draft.variantId : next.wornVariantId)
+  const choice = variantChoiceOf(next, variantId)
+  const tune = Math.min(draft.tune, tuneLimitOf(next, variantId))
+  const potency = choice?.exalted === true ? (draft.potency ?? FULL_POTENCY) : null
+
+  return { ...draft, variantId, tune, potency }
 }
 
 export function simulatorReducer(

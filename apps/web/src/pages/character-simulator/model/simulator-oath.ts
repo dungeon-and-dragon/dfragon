@@ -1,6 +1,5 @@
 import {
   findOathCrystal,
-  findOathCrystalVariant,
   findOathVariant,
   moveOathCrystalToSet,
   type OathCrystalVariant,
@@ -121,12 +120,11 @@ function toOathCrystal(crystal: OathCrystalItem, wornSetId: number | null): Simu
     return []
   }
 
-  const match = crystal.itemId !== null ? findOathCrystalVariant(crystal.itemId) : null
-  const choiceSetId = match?.setId ?? wornSetId
-  const choices = choiceSetId !== null ? oathCrystalVariantsOf(choiceSetId).map(toOathChoice) : []
+  const choices = wornSetId !== null ? oathCrystalVariantsOf(wornSetId).map(toOathChoice) : []
   const known = crystal.itemName !== null ? findOathCrystal(crystal.itemName) : null
   const wornMaxTune = known !== null ? maxTuneOf(known.tuneSetPoints) : 0
-  const wornVariantId = match?.variant.id ?? null
+  const listed = choices.find(({ id }) => id === crystal.itemId)
+  const wornVariantId = listed?.id ?? null
   const wornTune = crystal.tune?.level ?? 0
   const itemView = toItemView(crystal)
 
@@ -180,13 +178,13 @@ function bodyInSet(body: SimulatorOathBody, setId: number): SimulatorOathBody {
 
 function crystalInSet(crystal: SimulatorOathCrystal, setId: number): SimulatorOathCrystal {
   const choices = oathCrystalVariantsOf(setId).map(toOathChoice)
+  const moved = crystal.itemId !== null ? moveOathCrystalToSet(crystal.itemId, setId) : null
 
-  if (crystal.wornVariantId === null) {
-    return { ...crystal, choices }
+  if (moved === null) {
+    return { ...crystal, choices, wornVariantId: null }
   }
 
-  const moved = moveOathCrystalToSet(crystal.wornVariantId, setId)
-  const wornVariantId = moved?.id ?? null
+  const wornVariantId = moved.id
   const limit = choiceOf(choices, wornVariantId)?.maxTune ?? crystal.wornMaxTune
   const wornTune = Math.min(crystal.wornTune, limit)
 
@@ -351,8 +349,8 @@ export function changeOathBody(
 }
 
 /**
- * 서약 세트를 바꾸면 고른 본체는 지우고, 결정은 새 세트의 기준 결정으로 되돌리되 바꾼 조율은 새 결정의 최대 단계까지 유지한다.
- * 착용한 세트를 다시 고르면 세트를 고르지 않은 것으로 둔다.
+ * 서약 세트를 바꾸면 지금 보이는 본체와 결정을 새 세트의 같은 등급으로 옮기고 조율은 새 결정의 최대 단계까지 유지한다.
+ * 영겁의 안개 서약과 광휘 결정이 아닌 결정은 그대로 둔다. 그 세트를 골라도 바뀌는 것이 없으면 세트를 고르지 않은 것으로 둔다.
  */
 export function changeOathSet(
   changes: OathChanges,
@@ -363,28 +361,74 @@ export function changeOathSet(
     return changes
   }
 
-  const set = setId === oath.setId ? null : setId
-  const view = oathInSet(oath, set)
+  const current = oathInSet(oath, changes.set)
+  const set = setId === oath.setId && !movesOath(oath, setId) ? null : setId
+  const next = oathInSet(oath, set)
+  const body =
+    current.body !== null && next.body !== null
+      ? movedBodyOf(current.body, next.body, changes, setId)
+      : null
   const crystals = Object.fromEntries(
-    view.crystals.flatMap((crystal): [number, CrystalDraft][] => {
-      const changed = changes.crystals[crystal.slotNo]
+    current.crystals.flatMap((crystal): [number, CrystalDraft][] => {
+      const moved = next.crystals.find((candidate) => candidate.slotNo === crystal.slotNo)
 
-      if (changed === undefined) {
+      if (moved === undefined) {
         return []
       }
 
-      const limit = crystalTuneLimitOf(crystal, crystal.wornVariantId)
-      const tune = Math.min(changed.tune, limit)
+      const draft = movedCrystalOf(crystalDraftOf(crystal, changes), moved, setId)
 
-      if (tune === crystal.wornTune) {
+      if (draft.variantId === moved.wornVariantId && draft.tune === moved.wornTune) {
         return []
       }
 
-      return [[crystal.slotNo, { variantId: crystal.wornVariantId, tune }]]
+      return [[crystal.slotNo, draft]]
     })
   )
 
-  return { set, body: null, crystals }
+  return { set, body, crystals }
+}
+
+// 착용한 세트를 골라도 다른 세트의 광휘 결정이나 본체를 그 세트로 옮기면 바뀌는 것이 있다.
+function movesOath(oath: SimulatorOath, setId: number): boolean {
+  const moved = oathInSet(oath, setId)
+  const bodyMoves = moved.body?.wornVariantId !== oath.body?.wornVariantId
+
+  return (
+    bodyMoves ||
+    moved.crystals.some(
+      (crystal, index) => crystal.wornVariantId !== oath.crystals[index]?.wornVariantId
+    )
+  )
+}
+
+function movedBodyOf(
+  current: SimulatorOathBody,
+  next: SimulatorOathBody,
+  changes: OathChanges,
+  setId: number
+): string | null {
+  const chosen = choiceOf(current.choices, oathBodyChoiceIdOf(current, changes))
+  const moved = chosen !== undefined && next.setBound ? oathVariantOf(setId, chosen.grade) : null
+  const id = moved !== null ? moved.id : (chosen?.id ?? null)
+
+  if (id === null || id === next.wornVariantId) {
+    return null
+  }
+
+  return id
+}
+
+function movedCrystalOf(
+  draft: CrystalDraft,
+  next: SimulatorOathCrystal,
+  setId: number
+): CrystalDraft {
+  const moved = draft.variantId !== null ? moveOathCrystalToSet(draft.variantId, setId) : null
+  const variantId = moved !== null ? moved.id : next.wornVariantId
+  const tune = Math.min(draft.tune, crystalTuneLimitOf(next, variantId))
+
+  return { variantId, tune }
 }
 
 /** 바꾼 결정만 slotNo 순서로 넣는다. 결정을 바꾸지 않았고 조율이 착용한 단계면 그 칸을 null로 둔다. */
