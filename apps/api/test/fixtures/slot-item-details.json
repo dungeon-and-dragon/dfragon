@@ -1,7 +1,7 @@
 {
-  "741f95b1012f33a3949d4fe38f094d41": {
-    "itemId": "741f95b1012f33a3949d4fe38f094d41",
-    "itemName": "프로스트의 전설 플래티넘[80Lv]",
+  "42fd3d4144f788b37ed19c70281dcda6": {
+    "itemId": "42fd3d4144f788b37ed19c70281dcda6",
+    "itemName": "프로스트의 전설",
     "itemRarity": "레어",
     "fame": 1123,
     "itemStatus": [
@@ -62,10 +62,6 @@
         "value": "3%"
       },
       {
-        "name": "마을 이동 속도 증가",
-        "value": "15%"
-      },
-      {
         "name": "공격력 증폭",
         "value": "20%"
       },
@@ -75,7 +71,7 @@
       },
       {
         "name": "최종 데미지 증가",
-        "value": "9.6%"
+        "value": "8%"
       }
     ],
     "itemBuff": {
@@ -97,9 +93,9 @@
       "status": null
     }
   },
-  "b0c0512c23d593574269e0cb2ef22ccd": {
-    "itemId": "b0c0512c23d593574269e0cb2ef22ccd",
-    "itemName": "운명을 담는 재단사 플래티넘[30Lv]",
+  "bf04e5b415fea3989e8607efb4987d14": {
+    "itemId": "bf04e5b415fea3989e8607efb4987d14",
+    "itemName": "운명을 담는 재단사",
     "itemRarity": "레어",
     "fame": 1261,
     "itemStatus": [
@@ -152,20 +148,547 @@
         "value": "3%"
       },
       {
-        "name": "인벤토리 무게 한도",
-        "value": "5kg"
-      },
-      {
         "name": "공격력 증폭",
         "value": "40%"
       },
       {
         "name": "버프력 증폭",
         "value": "10%"
+      }
+    ],
+    "itemBuff": null,
+    "itemReinforceSkill": [
+      {
+        "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+        "jobName": "귀검사(남)",
+        "skills": [
+          {
+            "skillId": "3af805da8505fe6234a95b535610f064",
+            "name": "극한의 경지",
+            "value": 1
+          },
+          {
+            "skillId": "95103ae7c54eaedea3bbcf726520db6c",
+            "name": "팬텀 마스터리",
+            "value": 1
+          },
+          {
+            "skillId": "374f53e8989ef04a8506c8ec99d9ecdc",
+            "name": "블러드 인카넷",
+            "value": 1
+          },
+          {
+            "skillId": "949849d5791944973d60af7e2a7eefb0",
+            "name": "뇌신의 기운",
+            "value": 1
+          },
+          {
+            "skillId": "481348575c1e141925c836b59c5db3ca",
+            "name": "악귀현신",
+            "value": 1
+          }
+        ]
       },
       {
-        "name": "최종 데미지 증가",
-        "value": "1.5%"
+        "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+        "jobName": "격투가(여)",
+        "skills": [
+          {
+            "skillId": "547ab2b2bd860d3e37355a9cfbc1077c",
+            "name": "낙화태염성",
+            "value": 1
+          },
+          {
+            "skillId": "8ee0099656df08a0b39225f8a21d514b",
+            "name": "리미트 브레이크",
+            "value": 1
+          },
+          {
+            "skillId": "1803b6a67047cafb9e289b4f33cc507b",
+            "name": "용독술",
+            "value": 1
+          },
+          {
+            "skillId": "5892d1fa4462e561ac8f8d2c74892b0a",
+            "name": "체인 그랩",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "afdf3b989339de478e85b614d274d1ef",
+        "jobName": "거너(남)",
+        "skills": [
+          {
+            "skillId": "2e2b7efe778656690f9c8cb6e47c3932",
+            "name": "사격술",
+            "value": 1
+          },
+          {
+            "skillId": "f4a561e272cc434a4905b3aa0c0de090",
+            "name": "중화기 개조",
+            "value": 1
+          },
+          {
+            "skillId": "5cac3411ccef1af333953e0ded5e942d",
+            "name": "HS-1 친구들",
+            "value": 1
+          },
+          {
+            "skillId": "c91a62dc0a18360acf5031ac0ebf09f5",
+            "name": "전장의 영웅",
+            "value": 1
+          },
+          {
+            "skillId": "b95d9f6fc90f067c43da96dc1e861f28",
+            "name": "리컨스트럭션 바디",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "3909d0b188e9c95311399f776e331da5",
+        "jobName": "마법사(여)",
+        "skills": [
+          {
+            "skillId": "03bb5314ffd41e9458d67ef924fef38f",
+            "name": "엘레멘탈 포텐셜",
+            "value": 1
+          },
+          {
+            "skillId": "47bd4871f29defc2a0021ee9261d7a5b",
+            "name": "이클립스 하이브",
+            "value": 1
+          },
+          {
+            "skillId": "f4a561e272cc434a4905b3aa0c0de090",
+            "name": "문무겸비",
+            "value": 1
+          },
+          {
+            "skillId": "8e358ecf99ac9df31a6132aeafe378a9",
+            "name": "현자의 돌",
+            "value": 1
+          },
+          {
+            "skillId": "de20372767d014d62dc7361ac686834e",
+            "name": "어둠에 피는 장미",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "f6a4ad30555b99b499c07835f87ce522",
+        "jobName": "프리스트(남)",
+        "skills": [
+          {
+            "skillId": "c4a5b868f1e8e60cd1867a2cfab4a242",
+            "name": "디바인 플래쉬",
+            "value": 1
+          },
+          {
+            "skillId": "8d996a242c5c0efd8cfe6cb4bc6defcc",
+            "name": "썬더 해머 : 유피테르",
+            "value": 1
+          },
+          {
+            "skillId": "328867949b763ce73e243da84fd59157",
+            "name": "신선의 경지",
+            "value": 1
+          },
+          {
+            "skillId": "087d1068ff506d090710566608a17760",
+            "name": "데스블로우",
+            "value": 1
+          },
+          {
+            "skillId": "f45301a5590cccefbe0becf2f8d029f5",
+            "name": "이블 스트라이커",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+        "jobName": "거너(여)",
+        "skills": [
+          {
+            "skillId": "b501ae53638d33a32351904f31cb6aa3",
+            "name": "쏘우 블레이드",
+            "value": 1
+          },
+          {
+            "skillId": "9bc30e0f6e22b0333762d04acae7d252",
+            "name": "알파 서포트",
+            "value": 1
+          },
+          {
+            "skillId": "0fc47245af1f21c3e9217d03aa9fff0a",
+            "name": "G-오퍼레이터",
+            "value": 1
+          },
+          {
+            "skillId": "f45301a5590cccefbe0becf2f8d029f5",
+            "name": "증명의 열쇠",
+            "value": 1
+          },
+          {
+            "skillId": "a354f4930334e70b0275f5d92668ce3d",
+            "name": "apius::제한해제();",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+        "jobName": "도적",
+        "skills": [
+          {
+            "skillId": "0c3a468aee1f7ce06bf91eb3319518c1",
+            "name": "히트 블리드",
+            "value": 1
+          },
+          {
+            "skillId": "78b86e64fbb74c1db1b71c50a5ac21cd",
+            "name": "언홀리 마스터리",
+            "value": 1
+          },
+          {
+            "skillId": "f0cc2c950f3bdf4103c75fa496bcac34",
+            "name": "야타의 거울",
+            "value": 1
+          },
+          {
+            "skillId": "51a08fd0c90f0a5276cd552047fac93d",
+            "name": "베일드 어택",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+        "jobName": "격투가(남)",
+        "skills": [
+          {
+            "skillId": "8d996a242c5c0efd8cfe6cb4bc6defcc",
+            "name": "광풍나선력",
+            "value": 1
+          },
+          {
+            "skillId": "b501ae53638d33a32351904f31cb6aa3",
+            "name": "화력개방",
+            "value": 1
+          },
+          {
+            "skillId": "a3880ba488ddca966c36c640cce927a7",
+            "name": "룰 브레이크",
+            "value": 1
+          },
+          {
+            "skillId": "734356e3ab223ae24904d8ce7fa6de17",
+            "name": "가장 강한 녀석은 누구냐?",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+        "jobName": "마법사(남)",
+        "skills": [
+          {
+            "skillId": "51a08fd0c90f0a5276cd552047fac93d",
+            "name": "검은 눈",
+            "value": 1
+          },
+          {
+            "skillId": "1803b6a67047cafb9e289b4f33cc507b",
+            "name": "아이스크래프트",
+            "value": 1
+          },
+          {
+            "skillId": "370586038cf40378f20d338d507a780c",
+            "name": "트루 블러드",
+            "value": 1
+          },
+          {
+            "skillId": "b5e3d014f75f3d17abdea52cca57f7e9",
+            "name": "세컨드 윈드",
+            "value": 1
+          },
+          {
+            "skillId": "5c45f69c9ebc7a784e994369d2cc3c66",
+            "name": "SSTH",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "17e417b31686389eebff6d754c3401ea",
+        "jobName": "다크나이트",
+        "skills": [
+          {
+            "skillId": "65827d506df24a870ef7d2e1aefbfeb7",
+            "name": "차원일치",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "b522a95d819a5559b775deb9a490e49a",
+        "jobName": "크리에이터",
+        "skills": [
+          {
+            "skillId": "9376d04c476cd41d60ed1974ca69ab95",
+            "name": "천지창조",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "1645c45aabb008c98406b3a16447040d",
+        "jobName": "귀검사(여)",
+        "skills": [
+          {
+            "skillId": "e0daa922b19cdc35de879e938361464e",
+            "name": "고대의 맹약",
+            "value": 1
+          },
+          {
+            "skillId": "2a0a39184de92acf1c1375e00b77404c",
+            "name": "베스퍼스",
+            "value": 1
+          },
+          {
+            "skillId": "d429147c372b549c3dadcabcba50787f",
+            "name": "마인의 검세",
+            "value": 1
+          },
+          {
+            "skillId": "ac21c02567f04a92b54dd85c091d1e5a",
+            "name": "등봉조극",
+            "value": 1
+          },
+          {
+            "skillId": "863295a0fc634cf5fcc01e82a735fd6b",
+            "name": "인퍼머스",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+        "jobName": "나이트",
+        "skills": [
+          {
+            "skillId": "2c9d9a36c8401bddff6cdb80fab8dc24",
+            "name": "용기의 방패",
+            "value": 1
+          },
+          {
+            "skillId": "e5c09f9132a48dc1d695968592cc5878",
+            "name": "아텐의 화신",
+            "value": 1
+          },
+          {
+            "skillId": "9f57da5cb3651d81ca7dc9f78be33d01",
+            "name": "커맨드먼트",
+            "value": 1
+          },
+          {
+            "skillId": "1ff42548e611b94781a1ae8f063dd679",
+            "name": "계승자",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+        "jobName": "마창사",
+        "skills": [
+          {
+            "skillId": "6e33d47e6622ce03b6defdd912140270",
+            "name": "마창 각성",
+            "value": 1
+          },
+          {
+            "skillId": "2a3c96b88d02372505692da0a8b54743",
+            "name": "무형의 창술사",
+            "value": 1
+          },
+          {
+            "skillId": "2a0a39184de92acf1c1375e00b77404c",
+            "name": "힘의 근원",
+            "value": 1
+          },
+          {
+            "skillId": "d429147c372b549c3dadcabcba50787f",
+            "name": "심연에 드리운 어둠",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+        "jobName": "프리스트(여)",
+        "skills": [
+          {
+            "skillId": "dbf8b30c7057032af0d68fcfa289fdae",
+            "name": "라파엘의 축복",
+            "value": 1
+          },
+          {
+            "skillId": "fc458e449ee00b01dbf88d09aae65462",
+            "name": "세큐리스 말레피카룸",
+            "value": 1
+          },
+          {
+            "skillId": "2c9d9a36c8401bddff6cdb80fab8dc24",
+            "name": "용신의 힘",
+            "value": 1
+          },
+          {
+            "skillId": "e5c09f9132a48dc1d695968592cc5878",
+            "name": "퍼스트 프라나 : 금단의 결정체",
+            "value": 1
+          },
+          {
+            "skillId": "4e9e8942841b9767f683fb23c1ef1435",
+            "name": "불완전 연소",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+        "jobName": "총검사",
+        "skills": [
+          {
+            "skillId": "38612d8f2561edc2eb68d5057a837bfa",
+            "name": "B.C 트레이닝",
+            "value": 1
+          },
+          {
+            "skillId": "2f5d03c7848effbc0a23f4df45d9ca46",
+            "name": "냉혈",
+            "value": 1
+          },
+          {
+            "skillId": "dcd536f1674630f01fc9667bb202b851",
+            "name": "황야의 무법자",
+            "value": 1
+          },
+          {
+            "skillId": "2ba299855fc22192cba4f73db75e9d0e",
+            "name": "코어 패러다임",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "b9cb48777665de22c006fabaf9a560b3",
+        "jobName": "아처",
+        "skills": [
+          {
+            "skillId": "faf9cd66281078b51be2ee0b0f6c5530",
+            "name": "브랜드 뉴",
+            "value": 1
+          },
+          {
+            "skillId": "8ee0099656df08a0b39225f8a21d514b",
+            "name": "유랑하는 별의 문장",
+            "value": 1
+          },
+          {
+            "skillId": "2c9d9a36c8401bddff6cdb80fab8dc24",
+            "name": "기어 업그레이드!",
+            "value": 1
+          },
+          {
+            "skillId": "dde3b443bd5e61d90c34e5ee771e2c28",
+            "name": "인요합의",
+            "value": 1
+          },
+          {
+            "skillId": "696721534394b40e78ac96e880f19e5a",
+            "name": "깨달음 그리고 매달음",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "jobId": "8d4d2001cdb357e41633c234eb7501b5",
+        "jobName": "제국기사",
+        "skills": [
+          {
+            "skillId": "506e7ed77d517419a6e1c437a2cedb17",
+            "name": "철의 노래",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  "d1a086d0205f4928ec5f04b53b308521": {
+    "itemId": "d1a086d0205f4928ec5f04b53b308521",
+    "itemName": "톱니꼬마 던니니",
+    "itemRarity": "레어",
+    "fame": 991,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 991
+      },
+      {
+        "name": "힘",
+        "value": 110
+      },
+      {
+        "name": "체력",
+        "value": 110
+      },
+      {
+        "name": "지능",
+        "value": 110
+      },
+      {
+        "name": "정신력",
+        "value": 110
+      },
+      {
+        "name": "공격속도",
+        "value": "2%"
+      },
+      {
+        "name": "이동속도",
+        "value": "2%"
+      },
+      {
+        "name": "캐스트속도",
+        "value": "2%"
+      },
+      {
+        "name": "물리 크리티컬 히트",
+        "value": "3%"
+      },
+      {
+        "name": "모든 속성 강화",
+        "value": 30
+      },
+      {
+        "name": "MP MAX",
+        "value": "5%"
+      },
+      {
+        "name": "마법 크리티컬 히트",
+        "value": "3%"
+      },
+      {
+        "name": "공격력 증폭",
+        "value": "25%"
+      },
+      {
+        "name": "버프력 증폭",
+        "value": "7%"
       }
     ],
     "itemBuff": null,

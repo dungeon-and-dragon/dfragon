@@ -38,24 +38,30 @@ for (const [category, expected] of [
   [
     'title',
     [
-      '운명이 담긴 책',
+      '프로스트의 전설 플래티넘',
       '프로스트의 전설',
       '진정한 각성을 이룬 자',
-      '마스터 다이버',
-      '세리아의 풍성한 선물 Ver.2',
-      '달을 삼킨 자 플래티넘'
+      '세리아의 풍성한 선물 Ver.2'
     ]
   ],
   [
     'creature',
     [
-      '운명을 담는 여신',
+      '운명을 담는 재단사 플래티넘',
       '운명을 담는 재단사',
       'SD 흰 구름 전령 에를리히',
       '순백의 나비 공주',
-      '페이퍼 폭스 플래티넘',
-      '다정한 SD 세리아 Ver.2',
-      '데스티니 라이언 플래티넘'
+      '다정한 SD 세리아 Ver.2'
+    ]
+  ],
+  [
+    'aura',
+    [
+      '열대야의 추억',
+      '스노우메이지 캐슬',
+      '어워즈 패셔니스타',
+      '로얄 패스 오라',
+      '세리아의 파스텔 버블 Ver.2'
     ]
   ]
 ]) {
@@ -79,16 +85,50 @@ test('findSlotItem은 그 카테고리의 id만 찾고 다른 카테고리나 �
   assert.equal(findSlotItem('title', 'missing-slot-item'), null)
 })
 
-test('운영에서 대표 아이템을 관측하지 못한 칭호 묶음 둘만 목록에서 빠진다', () => {
+// 대응 파일에 없는 묶음은 운영에서 대표 아이템을 관측하지 못했거나(칭호 1123의 100333421, 849의 100332647),
+// 최상위 명성 밖에서 같은 명성의 가장 많이 착용한 일반 아이템 묶음을 대표로 남긴 묶음이다.
+test('대응 파일에 없는 묶음은 목록에서 빠지고, 빠진 묶음의 명성은 남은 묶음이 대표한다', () => {
   const missing = engineIds.filter((id) => observed.items[id] === undefined)
 
   assert.deepEqual(missing, [
     'title:1123:character/common/title/100333421',
-    'title:849:character/common/title/100332647'
+    'title:849:character/common/title/100332897',
+    'title:849:character/common/title/100332647',
+    'title:790:character/common/title/100333192',
+    'creature:889:creature/100991472',
+    'creature:810:creature/2026_arcana/platinum/destinylion/autocreature_100',
+    'aura:463:character/swordman/avatar/aura/101590906',
+    'aura:463:character/swordman/avatar/aura/101590905',
+    'aura:463:character/swordman/avatar/aura/101590704',
+    'aura:463:character/swordman/avatar/aura/101590703',
+    'aura:463:character/swordman/avatar/aura/101590701',
+    'aura:463:character/swordman/avatar/aura/101590702'
   ])
 
-  for (const id of missing) {
-    assert.equal(findSlotItem('title', id), null, id)
+  for (const category of SLOT_ITEM_CATEGORIES) {
+    const fames = new Set(slotItemsOf(category).map(({ fame }) => fame))
+
+    for (const { id, fame } of table.categories[category]) {
+      if (missing.includes(id)) {
+        assert.equal(findSlotItem(category, id), null, id)
+        assert.ok(fames.has(fame), id)
+      }
+    }
+  }
+})
+
+// 최상위 명성에서만 플래티넘 판이 일반 판과 점수가 달라 둘을 따로 둔다.
+test('최상위 명성 밖에서는 명성이 겹치지 않고, 최상위 명성은 일반과 플래티넘 한 개씩까지 둔다', () => {
+  for (const category of SLOT_ITEM_CATEGORIES) {
+    const items = slotItemsOf(category)
+    const top = Math.max(...items.map(({ fame }) => fame))
+    const below = items.filter(({ fame }) => fame !== top).map(({ fame }) => fame)
+    const topItems = items.filter(({ fame }) => fame === top)
+    const platinum = topItems.filter(({ item }) => item.itemName.includes('플래티넘'))
+
+    assert.equal(new Set(below).size, below.length, category)
+    assert.ok(platinum.length <= 1, category)
+    assert.ok(topItems.length - platinum.length <= 1, category)
   }
 })
 
@@ -98,7 +138,15 @@ test('대응 파일의 묶음 id는 모두 엔진 목록에 있다', () => {
   assert.deepEqual(unknown, [])
 })
 
-test('겹치던 묶음이 빠진 칭호 둘은 덮어쓴 이름으로 보인다', () => {
+test('대응 파일이 이름을 덮어쓴 묶음 넷은 그 이름으로 보인다', () => {
+  assert.equal(
+    findSlotItem('title', 'title:1123:character/common/title/100333448')?.name,
+    '프로스트의 전설 플래티넘'
+  )
+  assert.equal(
+    findSlotItem('creature', 'creature:1261:creature/22_lounge6/autocreature_100')?.name,
+    '운명을 담는 재단사 플래티넘'
+  )
   assert.equal(
     findSlotItem('title', 'title:1123:character/common/title/100333206')?.name,
     '프로스트의 전설'

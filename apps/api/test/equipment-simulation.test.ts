@@ -787,18 +787,19 @@ const slotItemDetails = JSON.parse(
   readFileSync(new URL('../../test/fixtures/slot-item-details.json', import.meta.url), 'utf8')
 ) as Record<string, Item>
 
-const TITLE_ID = 'title:1123:character/common/title/100333448'
+const TITLE_ID = 'title:1123:character/common/title/100333206'
 const TITLE_ITEM = {
-  itemId: '741f95b1012f33a3949d4fe38f094d41',
-  itemName: '프로스트의 전설 플래티넘[80Lv]',
+  itemId: '42fd3d4144f788b37ed19c70281dcda6',
+  itemName: '프로스트의 전설',
   itemRarity: '레어'
 }
-const CREATURE_ID = 'creature:1261:creature/22_lounge6/autocreature_100'
+const CREATURE_ID = 'creature:991:creature/100990927'
 const CREATURE_ITEM = {
-  itemId: 'b0c0512c23d593574269e0cb2ef22ccd',
-  itemName: '운명을 담는 재단사 플래티넘[30Lv]',
+  itemId: 'd1a086d0205f4928ec5f04b53b308521',
+  itemName: '톱니꼬마 던니니',
   itemRarity: '레어'
 }
+const TOP_CREATURE_ID = 'creature:1261:creature/100991296'
 const AURA_ID = 'aura:645:character/swordman/avatar/aura/101590961'
 const AURA_ITEM = {
   itemId: '6997321d175648e99eb75adf5c8e2625',
@@ -1034,7 +1035,7 @@ test('실제 엔진은 딜러의 칭호, 크리쳐, 오라를 더 높은 명성 
 
   for (const body of [
     { equipment: [], title: TITLE_ID },
-    { equipment: [], creature: CREATURE_ID },
+    { equipment: [], creature: TOP_CREATURE_ID },
     { equipment: [], aura: TOP_AURA_ID }
   ]) {
     const response = await simulate(origin, path, body)
