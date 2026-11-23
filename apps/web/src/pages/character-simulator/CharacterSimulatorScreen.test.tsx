@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
+import { equipmentVariantsOf, type EquipmentVariantSlot } from '@dfragon/lib/equipment-variants'
 import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { HttpResponse, http } from 'msw'
 import { act } from 'react'
@@ -52,11 +53,25 @@ function score(value: number, calculator: CharacterCardScore['calculator'] = 'eq
 }
 
 const SLOT_ITEM_POINTS = 1_000
+const TUNE_POINTS = 10_000
+const VARIANT_POINTS = 100_000
+const POTENCY_POINTS = 1_000_000
+const KEPT_ITEM = { variantId: null, tune: null, potency: null }
 
-// 바꾼 부위의 강화 수치 합과 고른 칭호, 크리쳐, 오라마다 1,000점을 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
-function scoresFor({ equipment, ...slotItems }: SimulationBody): Response {
-  const reinforced = equipment.reduce((sum, { reinforce }) => sum + reinforce, 0)
-  const added = reinforced + Object.keys(slotItems).length * SLOT_ITEM_POINTS
+// 바꾼 부위의 강화 수치 합, 고른 칭호, 크리쳐, 오라마다 1,000점, 요청한 조율 단계마다 10,000점, 바꾼 아이템마다 100,000점,
+// 정밀도마다 1,000,000점을 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
+function scoresFor({ equipment, oath = [], ...slotItems }: SimulationBody): Response {
+  const equipmentPoints = equipment.reduce(
+    (sum, { reinforce, variantId, tune, potency }) =>
+      sum +
+      reinforce +
+      (variantId !== null ? VARIANT_POINTS : 0) +
+      (tune ?? 0) * TUNE_POINTS +
+      (potency ?? 0) * POTENCY_POINTS,
+    0
+  )
+  const oathPoints = oath.reduce((sum, { tune }) => sum + tune * TUNE_POINTS, 0)
+  const added = equipmentPoints + oathPoints + Object.keys(slotItems).length * SLOT_ITEM_POINTS
 
   return HttpResponse.json({ baseline: score(BASELINE), simulated: score(BASELINE + added) })
 }
@@ -188,8 +203,14 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
   ])
   expect(bodies.at(-1)).toEqual({
     equipment: [
-      { slotId: 'WEAPON', reinforce: 12, amplified: true, enchantId: null },
-      { slotId: 'AMULET', reinforce: 0, amplified: false, enchantId: amuletOption!.id }
+      { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 12, amplified: true, enchantId: null },
+      {
+        ...KEPT_ITEM,
+        slotId: 'AMULET',
+        reinforce: 0,
+        amplified: false,
+        enchantId: amuletOption!.id
+      }
     ]
   })
   expect(reinforceOf('무기')).toBe('+12')
@@ -331,8 +352,12 @@ it('버퍼는 버프 점수 라벨과 버퍼 색으로 보인다', async () => {
   expect(toneClassesOf(scoreValue('현재', '버프 점수'))).toEqual(['buffer'])
 })
 
+function equipmentTable(): HTMLTableElement {
+  return container.querySelector('table')!
+}
+
 function slotNames(): string[] {
-  return [...container.querySelectorAll('tbody tr')].map(
+  return [...equipmentTable().querySelectorAll('tbody tr')].map(
     (row) => row.querySelector('td')?.textContent ?? ''
   )
 }
@@ -504,7 +529,9 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
     ['차이', '+2,011']
   ])
   expect(bodies.at(-1)).toEqual({
-    equipment: [{ slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: null }],
+    equipment: [
+      { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: null }
+    ],
     creature: creatureItem!.id,
     aura: auraItem!.id
   })
@@ -582,4 +609,247 @@ it('캐릭터를 받는 동안에는 받는 중 문구만 보인다', async () =
     '캐릭터 정보를 받는 중입니다.'
   )
   expect(container.querySelector('table')).toBeNull()
+})
+
+// 딜러 fixture는 소울 페어리 세트의 5축성 공용 이름 아이템을, 버퍼 fixture는 세트 밖 고유 팔찌를 낀다.
+const SOUL_FAIRY_SET = '4ee7bd5912cda6e2a24c1f36d5202b46'
+const ETHEREAL_SET = '93e7825053bdec4e0f4c12837cf4f57e'
+const UNCHANGED_SCORES = [
+  ['현재', '1,000,000'],
+  ['변경 후', '1,000,000'],
+  ['차이', '0']
+]
+
+function variantOf(setItemId: string, slotId: EquipmentVariantSlot, rarity: string, kind: string) {
+  const found = equipmentVariantsOf(setItemId, slotId).find(
+    (variant) => variant.rarity === rarity && variant.kind === kind
+  )
+  expect(found, `${slotId} ${rarity} ${kind}`).toBeDefined()
+
+  return found!
+}
+
+function optionNames(): string[] {
+  return [...document.querySelectorAll('[role="option"]')].map((item) => item.textContent ?? '')
+}
+
+function has(label: string): boolean {
+  return container.querySelector(`[aria-label="${label}"]`) !== null
+}
+
+function oathSection(): HTMLElement | null {
+  const heading = [...container.querySelectorAll('h2')].find(
+    (candidate) => candidate.textContent === '서약 결정'
+  )
+
+  const section = heading?.closest('section')
+
+  if (section == null) {
+    return null
+  }
+
+  return section
+}
+
+it('무기는 고정 표시로 두고 나머지 장비 칸은 그 세트의 등급 선택지를 연다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(has('무기 교체')).toBe(false)
+  expect(has('무기 조율')).toBe(false)
+  expect(control('상의 교체').textContent).toBe('긍휼 속 자비의 상의')
+
+  await act(async () => control('상의 교체').click())
+
+  expect(optionNames()).toEqual(
+    equipmentVariantsOf(SOUL_FAIRY_SET, 'JACKET').map(({ item }) => item.itemName)
+  )
+  expect(document.querySelector('[role="option"][aria-selected="true"]')?.textContent).toBe(
+    variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '축성').item.itemName
+  )
+})
+
+it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결과로 바꾸며, 5축성이 풀린 다른 방어구는 축성 아이템으로 보인다', async () => {
+  const corroded = variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '잠식')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await pick('상의 교체', corroded.item.itemName)
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,100,000'],
+    ['차이', '+100,000']
+  ])
+  expect(bodies.at(-1)).toEqual({
+    equipment: [
+      {
+        slotId: 'JACKET',
+        reinforce: 0,
+        amplified: false,
+        enchantId: null,
+        variantId: corroded.id,
+        tune: 0,
+        potency: null
+      }
+    ]
+  })
+  expect(control('상의 교체').textContent).toBe(corroded.item.itemName)
+  expect(control('머리어깨 교체').textContent).toBe(
+    variantOf(SOUL_FAIRY_SET, 'SHOULDER', '에픽', '축성').item.itemName
+  )
+  expect(control('목걸이 교체').textContent).toBe(
+    variantOf(SOUL_FAIRY_SET, 'AMULET', '태초', '일반').item.itemName
+  )
+  expect(resetButton().disabled).toBe(false)
+})
+
+it('세트 밖 장비를 낀 부위는 착용 중 아이템을 첫 항목으로 두고 주 세트의 선택지를 잇는다', async () => {
+  await render(characterDetailFixture('buffer'), () =>
+    HttpResponse.json({ baseline: score(4_000, 'buff'), simulated: score(4_000, 'buff') })
+  )
+  await expect.poll(() => has('팔찌 교체')).toBe(true)
+
+  expect(control('팔찌 교체').textContent).toBe('고유 - 모독자의 조소 팔찌')
+  expect(has('팔찌 조율')).toBe(false)
+
+  await act(async () => control('팔찌 교체').click())
+
+  expect(optionNames()).toEqual([
+    '고유 - 모독자의 조소 팔찌',
+    ...equipmentVariantsOf(ETHEREAL_SET, 'WRIST').map(({ item }) => item.itemName)
+  ])
+})
+
+it('조율을 바꾸면 그 부위의 조율 단계를 요청하고, 조율할 수 없는 태초 장비에는 조율 선택이 없다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(control('보조장비 조율').textContent).toBe('-')
+  expect(has('목걸이 조율')).toBe(false)
+
+  await act(async () => control('보조장비 조율').click())
+
+  expect(optionNames()).toEqual(['-', 'I', 'II', 'III'])
+
+  await act(async () => option('II').click())
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,020,000'],
+    ['차이', '+20,000']
+  ])
+  expect(bodies.at(-1)).toEqual({
+    equipment: [
+      {
+        slotId: 'SUPPORT',
+        reinforce: 0,
+        amplified: false,
+        enchantId: null,
+        variantId: null,
+        tune: 2,
+        potency: null
+      }
+    ]
+  })
+  expect(control('보조장비 조율').textContent).toBe('II')
+})
+
+it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고 바꾼 정밀도를 요청한다', async () => {
+  const exalted = variantOf(SOUL_FAIRY_SET, 'EARRING', '태초', '유일')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await pick('보조장비 조율', 'III')
+  await pick('귀걸이 조율', 'III')
+  await pick('귀걸이 교체', exalted.item.itemName)
+
+  expect(has('귀걸이 조율')).toBe(false)
+  expect((control('귀걸이 정밀도') as HTMLInputElement).value).toBe('100')
+  expect(control('귀걸이 정밀도 올리기').hasAttribute('disabled')).toBe(true)
+
+  await step('귀걸이 정밀도 내리기', 3)
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)?.equipment).toEqual([
+      {
+        slotId: 'SUPPORT',
+        reinforce: 0,
+        amplified: false,
+        enchantId: null,
+        variantId: null,
+        tune: 3,
+        potency: null
+      },
+      {
+        slotId: 'EARRING',
+        reinforce: 8,
+        amplified: true,
+        enchantId: null,
+        variantId: exalted.id,
+        tune: 0,
+        potency: 97
+      }
+    ])
+  )
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '98,130,008'],
+    ['차이', '+97,130,008']
+  ])
+  expect(control('보조장비 조율').textContent).toBe('III')
+})
+
+it('서약 결정 표는 결정을 slotNo 순서로 두고, 조율을 바꾸면 바꾼 결정만 요청한다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  const rows = [...oathSection()!.querySelectorAll('tbody tr')]
+  expect(rows.map((row) => row.querySelector('td')?.textContent)).toEqual([
+    ...Array.from({ length: 8 }, () => '용투 : 완전한 광휘 결정'),
+    ...Array.from({ length: 3 }, () => '용투 : 태초의 광휘 결정')
+  ])
+  expect(control('결정 7 조율').textContent).toBe('I')
+  expect(has('결정 9 조율')).toBe(false)
+
+  await pick('결정 8 조율', 'III')
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,030,000'],
+    ['차이', '+30,000']
+  ])
+  expect(bodies.at(-1)).toEqual({ equipment: [], oath: [{ slotNo: 7, tune: 3 }] })
+  expect(control('결정 8 조율').textContent).toBe('III')
+})
+
+it('서약이 없는 캐릭터는 서약 결정 표를 그리지 않는다', async () => {
+  await render({ ...characterDetailFixture('dealer'), oath: null })
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(oathSection()).toBeNull()
+  expect(container.querySelectorAll('table')).toHaveLength(1)
+})
+
+it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용한 값으로 되돌린다', async () => {
+  const unique = variantOf(SOUL_FAIRY_SET, 'JACKET', '유니크', '일반')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await pick('상의 교체', unique.item.itemName)
+  await pick('상의 조율', 'II')
+  await pick('결정 8 조율', 'I')
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,130,000'],
+    ['차이', '+130,000']
+  ])
+
+  await act(async () => resetButton().click())
+
+  expect(control('상의 교체').textContent).toBe('긍휼 속 자비의 상의')
+  expect(control('상의 조율').textContent).toBe('-')
+  expect(control('결정 8 조율').textContent).toBe('-')
+  await waitForScores(UNCHANGED_SCORES)
+  expect(resetButton().disabled).toBe(true)
 })
