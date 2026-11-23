@@ -44,10 +44,10 @@ async function waitForElement<Found extends Element>(
   throw new Error('화면 요소를 찾지 못했습니다.')
 }
 
-// 열린 목록은 Portal로 문서 끝에 그려지므로 canvas가 아니라 문서에서 항목을 찾는다.
+// 조작 패널(aside)도 고른 줄의 이름을 가지므로 패널을 뺀 컨트롤에서 찾는다. 열린 목록은 Portal로 문서 끝에 그려지므로 canvas가 아니라 문서에서 항목을 찾는다.
 async function pick(canvas: HTMLElement, label: string, option: string): Promise<void> {
   const trigger = await waitForElement(
-    () => canvas.querySelector<HTMLElement>(`[aria-label="${label}"]`) ?? undefined
+    () => canvas.querySelector<HTMLElement>(`:not(aside)[aria-label="${label}"]`) ?? undefined
   )
   trigger.click()
   await pause(OPEN_SETTLE_MS)
@@ -61,7 +61,7 @@ async function pick(canvas: HTMLElement, label: string, option: string): Promise
 
 async function press(canvas: HTMLElement, label: string, times = 1): Promise<void> {
   const control = await waitForElement(
-    () => canvas.querySelector<HTMLElement>(`[aria-label="${label}"]`) ?? undefined
+    () => canvas.querySelector<HTMLElement>(`:not(aside)[aria-label="${label}"]`) ?? undefined
   )
 
   // 누를 때마다 화면이 새 값을 그린 뒤 다음을 눌러야 한 칸씩 쌓인다.
@@ -81,19 +81,29 @@ async function choose(canvas: HTMLElement, slotName: string): Promise<void> {
   await pause(STEP_SETTLE_MS)
 }
 
-async function chooseCrystal(canvas: HTMLElement, slotNo: number): Promise<void> {
-  const section = await waitForElement(
-    () =>
-      [...canvas.querySelectorAll('section')].find(
-        (candidate) => candidate.querySelector('h2')?.textContent === '서약 결정'
-      ) ?? undefined
-  )
-  section.querySelectorAll<HTMLElement>('tbody tr button')[slotNo]?.click()
+// 서약 구획 줄의 첫 칸은 "세트", "서약", "결정 1"처럼 줄 이름이다.
+async function chooseOath(canvas: HTMLElement, label: string): Promise<void> {
+  const row = await waitForElement(() => {
+    const section = [...canvas.querySelectorAll('section')].find(
+      (candidate) => candidate.querySelector('h2')?.textContent === '서약'
+    )
+
+    return [...(section?.querySelectorAll<HTMLElement>('tbody tr') ?? [])].find(
+      (candidate) => candidate.querySelector('td')?.textContent === label
+    )
+  })
+  row.querySelector<HTMLElement>('button')?.click()
   await pause(STEP_SETTLE_MS)
 }
 
-function screenStory(role: Role, handlers: Handlers): Story {
-  const detail = storyCharacterDetail(role)
+async function chooseCrystal(canvas: HTMLElement, slotNo: number): Promise<void> {
+  await chooseOath(canvas, `결정 ${slotNo + 1}`)
+}
+
+type Detail = ReturnType<typeof storyCharacterDetail>
+
+function screenStory(role: Role, handlers: Handlers, edit = (detail: Detail) => detail): Story {
+  const detail = edit(storyCharacterDetail(role))
   const { serverId, characterId } = detail.character
 
   return {
@@ -164,6 +174,39 @@ async function changeOathTune({ canvasElement }: { canvasElement: HTMLElement })
   await pick(canvasElement, '결정 8 조율', 'II')
 }
 
+async function changeEquipmentSet({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '세트')
+  await pick(canvasElement, '장비 세트', '그림자에 숨은 죽음 세트')
+}
+
+async function changeOathSet({ canvasElement }: { canvasElement: HTMLElement }) {
+  await chooseOath(canvasElement, '세트')
+  await pick(canvasElement, '서약 세트', '어둠에 잠긴 그림자 서약')
+}
+
+async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement }) {
+  await chooseOath(canvasElement, '서약')
+  await pick(canvasElement, '서약 교체', '전장을 태우는 용투 서약')
+  // 태초 결정은 3개까지라 결정 9를 내린 뒤 결정 8을 태초로 올린다.
+  await chooseCrystal(canvasElement, 8)
+  await pick(canvasElement, '결정 9 교체', '용투 : 완전한 광휘 결정')
+  await chooseCrystal(canvasElement, 7)
+  await pick(canvasElement, '결정 8 교체', '용투 : 태초의 광휘 결정')
+}
+
+async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {
+  await pick(canvasElement, '무기 조율', 'II')
+}
+
+// 조율할 수 있는 무기 이름으로 바꾼 합성 캐릭터다.
+function withTunableWeapon(detail: Detail): Detail {
+  const equipment = detail.equipment.equipment.map((item) =>
+    item.slotId === 'WEAPON' ? { ...item, itemName: 'Beast-Saw' } : item
+  )
+
+  return { ...detail, equipment: { ...detail.equipment, equipment } }
+}
+
 export const 딜러: Story = screenStory('dealer', simulatorStoryHandlers.calculated)
 
 export const 값바꿈: Story = {
@@ -194,6 +237,26 @@ export const 유일장비: Story = {
 export const 서약결정조율: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeOathTune
+}
+
+export const 장비세트: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeEquipmentSet
+}
+
+export const 서약세트: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeOathSet
+}
+
+export const 서약등급: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeOathGrades
+}
+
+export const 무기조율: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated, withTunableWeapon),
+  play: changeWeaponTune
 }
 
 export const 휴대폰: Story = {
