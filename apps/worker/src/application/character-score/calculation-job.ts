@@ -7,6 +7,7 @@ import type {
 } from '@dfragon/server-core/domain/character-detail/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
+import { toLatestContentsMinFame } from '@dfragon/server-core/domain/content-clears/index.js'
 import { type CalculatedScore, toCalculatedScore } from '@dfragon/server-core/domain/score/index.js'
 import { defineJob, fetchGroupWithRetry, NEOPLE_APIS } from '#application/jobs/index.js'
 import { calculateCharacterScore } from './calculate.js'
@@ -155,6 +156,7 @@ export class ScoreCalculationService {
    * 대상은 클리어 기록 수집과 같은 순서로 다시 읽으므로, 그 사이 최고 명성이 바뀐 캐릭터만큼 위치가 어긋날 수 있다.
    */
   async calculate(
+    minFame: number,
     reportProgress: (done: number, total: number) => void
   ): Promise<ScoreCalculationSummary> {
     const { openEngine, createSources, readConcurrency, now, pause, report } = this.ports
@@ -176,7 +178,7 @@ export class ScoreCalculationService {
     })
 
     try {
-      const targets = await this.repository.readTargets()
+      const targets = await this.repository.readTargets(minFame)
       const resumedAt = resumePosition(await this.repository.readLastFinishedRun(), now())
       let done = resumedAt
 
@@ -355,13 +357,14 @@ export function createScoreCalculationJob(
     name: SCORE_CALCULATION_JOB_NAME,
     displayName: '점수 계산',
     description:
-      '클리어 기록 수집 대상 가운데 활성 캐릭터의 상세 정보를 Neople에서 받아 장비 점수, 버프 점수를 계산해 저장합니다. 도중에 끝난 실행은 하루 안에 다시 실행하면 남은 캐릭터부터 계산합니다.',
+      '최고 명성이 minFame 이상인 활성 캐릭터의 상세 정보를 Neople에서 받아 장비 점수, 버프 점수를 계산해 저장합니다. minFame을 비우면 종류별 최신 컨텐츠에 입장할 수 있는 명성부터 계산합니다. 도중에 끝난 실행은 하루 안에 다시 실행하면 남은 캐릭터부터 계산합니다.',
     schedule,
     // 놓친 실행을 worker 시작 때 보충하면 낮에 시작해 클리어 기록 수집과 겹치므로, 정해진 일정과 수동 실행으로만 돈다.
     catchup: false,
-    argsSchema: z.object({}),
+    argsSchema: z.object({ minFame: z.number().int().positive().optional() }),
     delayMinutes: DELAY_MINUTES,
     neopleApi: NEOPLE_APIS.characterDetail,
-    run: (_args, { reportProgress }) => service.calculate(reportProgress)
+    run: ({ minFame = toLatestContentsMinFame() }, { reportProgress }) =>
+      service.calculate(minFame, reportProgress)
   })
 }
