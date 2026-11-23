@@ -62,6 +62,57 @@
       }
     ]
   },
+  "1585efdc5a6a16de5fa29d55e956665b": {
+    "itemId": "1585efdc5a6a16de5fa29d55e956665b",
+    "itemName": "짙은 그림자 속 마법석 - 폭",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "fe5f3db78175f5a3196385c688d29681",
+    "itemTypeDetail": "마법석",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 178
+      },
+      {
+        "name": "체력",
+        "value": 178
+      },
+      {
+        "name": "지능",
+        "value": 178
+      },
+      {
+        "name": "정신력",
+        "value": 178
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "35.3%"
+      },
+      {
+        "name": "스킬 쿨타임 감소",
+        "value": "15%"
+      }
+    ]
+  },
   "1fd5aa7227fb90d934620fd2b9bfbef6": {
     "itemId": "1fd5aa7227fb90d934620fd2b9bfbef6",
     "itemName": "숭고한 심판의 어깨",
@@ -125,6 +176,57 @@
       }
     ]
   },
+  "21753478bab6cd9d3f5265ae36abc34d": {
+    "itemId": "21753478bab6cd9d3f5265ae36abc34d",
+    "itemName": "짙은 그림자 속 반지 - 독",
+    "itemRarity": "에픽",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "b04c7fb9b29b27b91a0a9e5a1822bc8f",
+    "itemTypeDetail": "반지",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "마법 방어력",
+        "value": 4646
+      },
+      {
+        "name": "힘",
+        "value": 179
+      },
+      {
+        "name": "체력",
+        "value": 100
+      },
+      {
+        "name": "지능",
+        "value": 179
+      },
+      {
+        "name": "정신력",
+        "value": 100
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10720
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "45.7%"
+      }
+    ]
+  },
   "223dc58926c3f1b1d70b3577965010fb": {
     "itemId": "223dc58926c3f1b1d70b3577965010fb",
     "itemName": "성스러운 믿음의 목걸이",
@@ -176,6 +278,238 @@
       }
     ]
   },
+  "2912e0efaa521dbceef5b00e7b29fd43": {
+    "itemId": "2912e0efaa521dbceef5b00e7b29fd43",
+    "itemName": "고요한 안식의 신발",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "ef6fcc3b39b2bbcbf09a71da6cbafe06",
+    "itemTypeDetail": "신발",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 865
+      },
+      {
+        "name": "힘",
+        "value": 127
+      },
+      {
+        "name": "체력",
+        "value": 127
+      },
+      {
+        "name": "지능",
+        "value": 127
+      },
+      {
+        "name": "정신력",
+        "value": 127
+      },
+      {
+        "name": "이동속도",
+        "value": "44%"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "76.4%"
+      }
+    ]
+  },
+  "2b7b57418c2c75fc74d1cdebe44147bb": {
+    "itemId": "2b7b57418c2c75fc74d1cdebe44147bb",
+    "itemName": "어두운 그림자 속 팔찌 - 화",
+    "itemRarity": "레전더리",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "80bddf423629c28c7b4459c328fdffaf",
+    "itemTypeDetail": "팔찌",
+    "itemAvailableLevel": 115,
+    "fame": 1200,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1200
+      },
+      {
+        "name": "마법 방어력",
+        "value": 6811
+      },
+      {
+        "name": "힘",
+        "value": 152
+      },
+      {
+        "name": "체력",
+        "value": 229
+      },
+      {
+        "name": "지능",
+        "value": 100
+      },
+      {
+        "name": "정신력",
+        "value": 100
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10480
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "54.6%"
+      }
+    ]
+  },
+  "2dee8e5022e85c907d129922477b81e6": {
+    "itemId": "2dee8e5022e85c907d129922477b81e6",
+    "itemName": "옅은 그림자의 걸음",
+    "itemRarity": "유니크",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "ef6fcc3b39b2bbcbf09a71da6cbafe06",
+    "itemTypeDetail": "신발",
+    "itemAvailableLevel": 115,
+    "fame": 1100,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1100
+      },
+      {
+        "name": "물리 방어력",
+        "value": 825
+      },
+      {
+        "name": "힘",
+        "value": 125
+      },
+      {
+        "name": "체력",
+        "value": 125
+      },
+      {
+        "name": "지능",
+        "value": 125
+      },
+      {
+        "name": "정신력",
+        "value": 125
+      },
+      {
+        "name": "이동속도",
+        "value": "39%"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10240
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "63.2%"
+      }
+    ]
+  },
+  "2fe1185d9c958b52272cf57f36ffbc80": {
+    "itemId": "2fe1185d9c958b52272cf57f36ffbc80",
+    "itemName": "명예로운 공경의 하의",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "7c4b28699ae7994798289f187d519992",
+    "itemTypeDetail": "하의",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1441
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "내구도",
+        "value": 50
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "65.2%"
+      },
+      {
+        "name": "물리 피해 감소",
+        "value": "10%"
+      },
+      {
+        "name": "마법 피해 감소",
+        "value": "10%"
+      }
+    ]
+  },
   "30457efb8b2d19c2ca0b3b071b557af1": {
     "itemId": "30457efb8b2d19c2ca0b3b071b557af1",
     "itemName": "찬란한 황금향의 저주 - 마법석",
@@ -224,6 +558,124 @@
       {
         "name": "스킬 쿨타임 감소",
         "value": "15%"
+      }
+    ]
+  },
+  "31259fd7ac677855394e80a8e37fd5e9": {
+    "itemId": "31259fd7ac677855394e80a8e37fd5e9",
+    "itemName": "흑아 : 칠흑같은 그림자 속 목걸이 - 혈",
+    "itemRarity": "태초",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "390e3966118b0c466ce9f8eae45e1629",
+    "itemTypeDetail": "목걸이",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "마법 방어력",
+        "value": 11799
+      },
+      {
+        "name": "힘",
+        "value": 100
+      },
+      {
+        "name": "체력",
+        "value": 100
+      },
+      {
+        "name": "지능",
+        "value": 155
+      },
+      {
+        "name": "정신력",
+        "value": 235
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11920
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "56.8%"
+      }
+    ]
+  },
+  "32b763107adb97a3f1f2717ad92f1995": {
+    "itemId": "32b763107adb97a3f1f2717ad92f1995",
+    "itemName": "어두운 그림자를 자아내는 벨트",
+    "itemRarity": "레전더리",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "934ed2dea99f55f775df256fc29c5d56",
+    "itemTypeDetail": "벨트",
+    "itemAvailableLevel": 115,
+    "fame": 1200,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1200
+      },
+      {
+        "name": "물리 방어력",
+        "value": 563
+      },
+      {
+        "name": "힘",
+        "value": 125
+      },
+      {
+        "name": "체력",
+        "value": 125
+      },
+      {
+        "name": "지능",
+        "value": 125
+      },
+      {
+        "name": "정신력",
+        "value": 125
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": "24%"
+      },
+      {
+        "name": "인벤토리 무게 한도",
+        "value": "3kg"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10480
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "54.6%"
       }
     ]
   },
@@ -290,6 +742,124 @@
       }
     ]
   },
+  "5e88d49f703473fd5227d4fd32a3981e": {
+    "itemId": "5e88d49f703473fd5227d4fd32a3981e",
+    "itemName": "흑아 : 칠흑같은 그림자 속 팔찌 - 화",
+    "itemRarity": "태초",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "80bddf423629c28c7b4459c328fdffaf",
+    "itemTypeDetail": "팔찌",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "마법 방어력",
+        "value": 7128
+      },
+      {
+        "name": "힘",
+        "value": 155
+      },
+      {
+        "name": "체력",
+        "value": 235
+      },
+      {
+        "name": "지능",
+        "value": 100
+      },
+      {
+        "name": "정신력",
+        "value": 100
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11920
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "67.6%"
+      }
+    ]
+  },
+  "6195206e63ffc979e7cd8c0ae01ebfd3": {
+    "itemId": "6195206e63ffc979e7cd8c0ae01ebfd3",
+    "itemName": "완전한 침묵의 벨트",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "934ed2dea99f55f775df256fc29c5d56",
+    "itemTypeDetail": "벨트",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 576
+      },
+      {
+        "name": "힘",
+        "value": 127
+      },
+      {
+        "name": "체력",
+        "value": 127
+      },
+      {
+        "name": "지능",
+        "value": 127
+      },
+      {
+        "name": "정신력",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": 127
+      },
+      {
+        "name": "모든 상태 이상 내성",
+        "value": "35%"
+      },
+      {
+        "name": "인벤토리 무게 한도",
+        "value": "3kg"
+      },
+      {
+        "name": "내구도",
+        "value": 40
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "65.2%"
+      }
+    ]
+  },
   "6dec30d4dbf75153cfad5af20cda006d": {
     "itemId": "6dec30d4dbf75153cfad5af20cda006d",
     "itemName": "찬란한 황금향의 이면 - 귀걸이",
@@ -334,6 +904,53 @@
       {
         "name": "최종 데미지 증가",
         "value": "45.7%"
+      }
+    ]
+  },
+  "6f89828858bb37275f88e02e54b4e94f": {
+    "itemId": "6f89828858bb37275f88e02e54b4e94f",
+    "itemName": "옅은 그림자 속 귀걸이 - 전",
+    "itemRarity": "유니크",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "601834074c49bb0e48cb65a75a8667bc",
+    "itemTypeDetail": "귀걸이",
+    "itemAvailableLevel": 115,
+    "fame": 1100,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1100
+      },
+      {
+        "name": "힘",
+        "value": 174
+      },
+      {
+        "name": "체력",
+        "value": 174
+      },
+      {
+        "name": "지능",
+        "value": 174
+      },
+      {
+        "name": "정신력",
+        "value": 174
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10740
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "42.8%"
       }
     ]
   },
@@ -397,6 +1014,132 @@
       {
         "name": "마법 피해 감소",
         "value": "10%"
+      }
+    ]
+  },
+  "712eef49bfaeef17d21b4d984b6c28b0": {
+    "itemId": "712eef49bfaeef17d21b4d984b6c28b0",
+    "itemName": "짙은 그림자를 입은 죽음 상의",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "3da92241d44bdafcf7554057e6479c83",
+    "itemTypeDetail": "상의",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1729
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "HP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "MP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "내구도",
+        "value": 60
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10720
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "56.1%"
+      }
+    ]
+  },
+  "88c015be8ad68d67fb35cfa693dbe639": {
+    "itemId": "88c015be8ad68d67fb35cfa693dbe639",
+    "itemName": "어두운 그림자를 녹여내는 하의",
+    "itemRarity": "레전더리",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "7c4b28699ae7994798289f187d519992",
+    "itemTypeDetail": "하의",
+    "itemAvailableLevel": 115,
+    "fame": 1200,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1200
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1408
+      },
+      {
+        "name": "힘",
+        "value": 143
+      },
+      {
+        "name": "체력",
+        "value": 143
+      },
+      {
+        "name": "지능",
+        "value": 143
+      },
+      {
+        "name": "정신력",
+        "value": 143
+      },
+      {
+        "name": "내구도",
+        "value": 50
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10480
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "54.6%"
+      },
+      {
+        "name": "물리 피해 감소",
+        "value": "5%"
+      },
+      {
+        "name": "마법 피해 감소",
+        "value": "5%"
       }
     ]
   },
@@ -601,6 +1344,57 @@
     "fame": 1300,
     "setItemId": "11f7d203a05ea6f13300c0facb39f11e",
     "setItemName": "칠흑의 정화 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 178
+      },
+      {
+        "name": "체력",
+        "value": 178
+      },
+      {
+        "name": "지능",
+        "value": 178
+      },
+      {
+        "name": "정신력",
+        "value": 178
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "35.3%"
+      },
+      {
+        "name": "스킬 쿨타임 감소",
+        "value": "15%"
+      }
+    ]
+  },
+  "97a123ba55e5a3808dacb1f295871216": {
+    "itemId": "97a123ba55e5a3808dacb1f295871216",
+    "itemName": "무결한 순수의 마법석",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "fe5f3db78175f5a3196385c688d29681",
+    "itemTypeDetail": "마법석",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
     "itemStatus": [
       {
         "name": "모험가 명성",
@@ -872,6 +1666,364 @@
       }
     ]
   },
+  "c28adff4d999079e03626b5b04f0a7cc": {
+    "itemId": "c28adff4d999079e03626b5b04f0a7cc",
+    "itemName": "어두운 그림자를 입은 죽음 상의",
+    "itemRarity": "레전더리",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "3da92241d44bdafcf7554057e6479c83",
+    "itemTypeDetail": "상의",
+    "itemAvailableLevel": 115,
+    "fame": 1200,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1200
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1690
+      },
+      {
+        "name": "힘",
+        "value": 143
+      },
+      {
+        "name": "체력",
+        "value": 143
+      },
+      {
+        "name": "지능",
+        "value": 143
+      },
+      {
+        "name": "정신력",
+        "value": 143
+      },
+      {
+        "name": "HP MAX",
+        "value": "5%"
+      },
+      {
+        "name": "MP MAX",
+        "value": "5%"
+      },
+      {
+        "name": "내구도",
+        "value": 60
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10480
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "54.6%"
+      }
+    ]
+  },
+  "cd5697ca4f68d2f06b5965ee2fc5662b": {
+    "itemId": "cd5697ca4f68d2f06b5965ee2fc5662b",
+    "itemName": "숭고한 심판의 어깨",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "f2976a25a516451e3e8667bac328b308",
+    "itemTypeDetail": "머리어깨",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1153
+      },
+      {
+        "name": "힘",
+        "value": 135
+      },
+      {
+        "name": "체력",
+        "value": 135
+      },
+      {
+        "name": "지능",
+        "value": 135
+      },
+      {
+        "name": "정신력",
+        "value": 135
+      },
+      {
+        "name": "공격속도",
+        "value": "40%"
+      },
+      {
+        "name": "캐스트속도",
+        "value": "40%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "81.4%"
+      }
+    ]
+  },
+  "ce653434e129a67945878c1c2e66ce73": {
+    "itemId": "ce653434e129a67945878c1c2e66ce73",
+    "itemName": "긍휼 속 자비의 상의",
+    "itemRarity": "에픽",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "3da92241d44bdafcf7554057e6479c83",
+    "itemTypeDetail": "상의",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1729
+      },
+      {
+        "name": "힘",
+        "value": 144
+      },
+      {
+        "name": "체력",
+        "value": 144
+      },
+      {
+        "name": "지능",
+        "value": 144
+      },
+      {
+        "name": "정신력",
+        "value": 144
+      },
+      {
+        "name": "HP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "MP MAX",
+        "value": "15%"
+      },
+      {
+        "name": "내구도",
+        "value": 60
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11800
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "65.2%"
+      }
+    ]
+  },
+  "ce90fd8107a2dec651b9f7c41a84888c": {
+    "itemId": "ce90fd8107a2dec651b9f7c41a84888c",
+    "itemName": "칠흑같은 그림자 속 목걸이 - 혈",
+    "itemRarity": "태초",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "390e3966118b0c466ce9f8eae45e1629",
+    "itemTypeDetail": "목걸이",
+    "itemAvailableLevel": 115,
+    "fame": 1600,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1600
+      },
+      {
+        "name": "마법 방어력",
+        "value": 11799
+      },
+      {
+        "name": "힘",
+        "value": 100
+      },
+      {
+        "name": "체력",
+        "value": 100
+      },
+      {
+        "name": "지능",
+        "value": 155
+      },
+      {
+        "name": "정신력",
+        "value": 235
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11320
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "51.2%"
+      }
+    ]
+  },
+  "cec8dadc0b87a2faa188ba4dacfbb32b": {
+    "itemId": "cec8dadc0b87a2faa188ba4dacfbb32b",
+    "itemName": "어두운 그림자가 드리운 얼굴",
+    "itemRarity": "레전더리",
+    "itemTypeId": "b09752bfff1935188ea2735cd925a872",
+    "itemType": "방어구",
+    "itemTypeDetailId": "f2976a25a516451e3e8667bac328b308",
+    "itemTypeDetail": "머리어깨",
+    "itemAvailableLevel": 115,
+    "fame": 1200,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1200
+      },
+      {
+        "name": "물리 방어력",
+        "value": 1126
+      },
+      {
+        "name": "힘",
+        "value": 134
+      },
+      {
+        "name": "체력",
+        "value": 134
+      },
+      {
+        "name": "지능",
+        "value": 134
+      },
+      {
+        "name": "정신력",
+        "value": 134
+      },
+      {
+        "name": "공격속도",
+        "value": "40%"
+      },
+      {
+        "name": "캐스트속도",
+        "value": "40%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10480
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "70%"
+      }
+    ]
+  },
+  "d02a39cfb1501bcc8453229b7f85a43e": {
+    "itemId": "d02a39cfb1501bcc8453229b7f85a43e",
+    "itemName": "어두운 그림자 속 보조장비 - 예",
+    "itemRarity": "레전더리",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "2fef5d81b7f59f0c75241890a8d941c9",
+    "itemTypeDetail": "보조장비",
+    "itemAvailableLevel": 115,
+    "fame": 1200,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1200
+      },
+      {
+        "name": "힘",
+        "value": 151
+      },
+      {
+        "name": "체력",
+        "value": 151
+      },
+      {
+        "name": "지능",
+        "value": 151
+      },
+      {
+        "name": "정신력",
+        "value": 151
+      },
+      {
+        "name": "물리 크리티컬 히트",
+        "value": "25%"
+      },
+      {
+        "name": "마법 크리티컬 히트",
+        "value": "25%"
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 10980
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "44.3%"
+      }
+    ]
+  },
   "d51d0071c181d4fe99b04e19f2fd6a82": {
     "itemId": "d51d0071c181d4fe99b04e19f2fd6a82",
     "itemName": "칠흑의 정화 상의",
@@ -975,6 +2127,104 @@
       {
         "name": "마법 크리티컬 히트",
         "value": "30%"
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11220
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "45.7%"
+      }
+    ]
+  },
+  "e6ffc6ca5528bb4250770f6bce91e47a": {
+    "itemId": "e6ffc6ca5528bb4250770f6bce91e47a",
+    "itemName": "흑아 : 칠흑같은 그림자 속 반지 - 독",
+    "itemRarity": "태초",
+    "itemTypeId": "e490f8cce6bacd43bef1e2f5e0c4943d",
+    "itemType": "액세서리",
+    "itemTypeDetailId": "b04c7fb9b29b27b91a0a9e5a1822bc8f",
+    "itemTypeDetail": "반지",
+    "itemAvailableLevel": 115,
+    "fame": 1900,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1900
+      },
+      {
+        "name": "마법 방어력",
+        "value": 4752
+      },
+      {
+        "name": "힘",
+        "value": 180
+      },
+      {
+        "name": "체력",
+        "value": 100
+      },
+      {
+        "name": "지능",
+        "value": 180
+      },
+      {
+        "name": "정신력",
+        "value": 100
+      },
+      {
+        "name": "공격력 증가",
+        "value": "3189%"
+      },
+      {
+        "name": "버프력",
+        "value": 11920
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "56.8%"
+      }
+    ]
+  },
+  "ff2594fc8475d76fcb2fbb080a8467d1": {
+    "itemId": "ff2594fc8475d76fcb2fbb080a8467d1",
+    "itemName": "강인한 절제의 귀걸이",
+    "itemRarity": "에픽",
+    "itemTypeId": "87ff665868ffd50f8aef7948548439bd",
+    "itemType": "추가장비",
+    "itemTypeDetailId": "601834074c49bb0e48cb65a75a8667bc",
+    "itemTypeDetail": "귀걸이",
+    "itemAvailableLevel": 115,
+    "fame": 1300,
+    "setItemId": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
+    "setItemName": "그림자에 숨은 죽음 세트",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 1300
+      },
+      {
+        "name": "힘",
+        "value": 278
+      },
+      {
+        "name": "체력",
+        "value": 278
+      },
+      {
+        "name": "지능",
+        "value": 278
+      },
+      {
+        "name": "정신력",
+        "value": 278
       },
       {
         "name": "공격력 증가",
