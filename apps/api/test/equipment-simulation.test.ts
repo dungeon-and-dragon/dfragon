@@ -1039,6 +1039,7 @@ function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
     equipmentSet: false,
     weaponTune: false,
     oathItems: false,
+    oathUpgrade: false,
     ...features
   })
 }
@@ -2470,4 +2471,175 @@ test('세트가 섞인 캐릭터가 주 세트를 고르면 다른 세트를 낀
   assert.deepEqual(engine.requests[0]!.input.simulation, {
     equipment: [itemOf(original.equipment.equipment as unknown[], 'JACKET')]
   })
+})
+
+const UPGRADE_ENGINE = 'dnfscore-native 0.10.0'
+// 버퍼 원본 진의는 1~8단계의 첫 선택지이고, 딜러는 진의가 없다.
+const BUFFER_UPGRADE = [
+  '강인한 통찰',
+  '포용의 권능',
+  '심연의 고동',
+  '신념의 대가',
+  '이어진 걸음',
+  '영원의 궤적',
+  '만물의 흐름',
+  '순례자의 길'
+].map((option, index) => ({ step: index + 1, option }))
+const NINTH_STEP = { step: 9, option: '진리 도달' }
+
+for (const [name, upgrade] of [
+  ['9단계로 올리면', [...BUFFER_UPGRADE, NINTH_STEP]],
+  ['3단계로 내리면', BUFFER_UPGRADE.slice(0, 3)],
+  ['1단계 선택지만 바꾸면', [{ step: 1, option: '고요한 호흡' }, ...BUFFER_UPGRADE.slice(1)]],
+  ['진의를 모두 비우면', []]
+] as const) {
+  test(`묵언의 진의를 ${name} 바꾼 뒤의 진의 전체를 엔진에 넣는다`, async (t) => {
+    const { details, path } = fixture('buffer-muse')
+    const engine = scoring(versionedEngine(UPGRADE_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], oathUpgrade: upgrade })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated.value, 1802)
+    assert.deepEqual(engine.requests[0]!.input.simulation, {
+      equipment: [],
+      oath: { upgrade }
+    })
+  })
+}
+
+for (const [name, fixtureName, upgrade] of [
+  ['버퍼가 원본과 같은 진의를 보내면', 'buffer-muse', BUFFER_UPGRADE],
+  ['진의가 없는 딜러가 빈 진의를 보내면', 'dealer-blade', []]
+] as const) {
+  test(`묵언의 진의: ${name} 시뮬레이션 입력 없이 원본만 계산한다`, async (t) => {
+    const { details, path } = fixture(fixtureName)
+    const engine = scoring(versionedEngine(UPGRADE_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], oathUpgrade: upgrade })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated.value, 1741)
+    assert.equal(engine.requests.length, 1)
+    assert.equal(engine.requests[0]!.input.simulation, undefined)
+  })
+}
+
+test('묵언의 진의는 서약 세트 전환과 함께 보낼 수 있다', async (t) => {
+  const { details, path } = fixture('buffer-muse')
+  const engine = scoring(versionedEngine(UPGRADE_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const upgrade = BUFFER_UPGRADE.slice(0, 4)
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    oathSet: FOX_OATH_SET,
+    oathUpgrade: upgrade
+  })
+
+  assert.equal(response.status, 200)
+  const oath = engine.requests[0]!.input.simulation!.oath!
+  assert.deepEqual(oath.set, { setId: FOX_OATH_SET })
+  assert.equal(oath.info?.itemName, '강림한 여우 서약')
+  assert.deepEqual(oath.upgrade, upgrade)
+})
+
+for (const [name, package_, expected] of [
+  ['0.10.0 전 엔진에 진의 변경을 보내면 두 점수 모두 null이다', SET_ENGINE, null],
+  ['0.10.0 엔진은 진의 변경을 반영한다', UPGRADE_ENGINE, 1802]
+] as const) {
+  test(`엔진 버전: ${name}`, async (t) => {
+    const { details, path } = fixture('buffer-muse')
+    const engine = scoring(versionedEngine(package_))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, {
+      equipment: [],
+      oathUpgrade: BUFFER_UPGRADE.slice(0, 3)
+    })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated?.value ?? null, expected)
+    assert.equal(engine.requests.length, 1)
+  })
+}
+
+const tenSteps = [...BUFFER_UPGRADE, NINTH_STEP, { step: 10, option: '진리 도달' }]
+const invalidUpgradeCases: readonly (readonly [string, unknown, PayloadEdit])[] = [
+  [
+    '중간 단계가 빈 진의',
+    [
+      { step: 1, option: '강인한 통찰' },
+      { step: 3, option: '심연의 고동' }
+    ],
+    keepPayloads
+  ],
+  ['9단계를 넘는 진의', tenSteps, keepPayloads],
+  ['다른 단계의 선택지', [{ step: 1, option: '포용의 권능' }], keepPayloads],
+  ['모르는 선택지', [{ step: 1, option: '없는 선택지' }], keepPayloads],
+  ['정수가 아닌 단계', [{ step: '1', option: '강인한 통찰' }], keepPayloads],
+  ['모르는 칸', [{ step: 1, option: '강인한 통찰', status: [] }], keepPayloads],
+  ['배열이 아닌 진의', { step: 1, option: '강인한 통찰' }, keepPayloads],
+  [
+    '서약이 없는 캐릭터',
+    BUFFER_UPGRADE.slice(0, 3),
+    (payloads) => {
+      payloads.oath = { ...payloads.oath, oath: null }
+    }
+  ],
+  [
+    '서약 본체가 없는 캐릭터',
+    BUFFER_UPGRADE.slice(0, 3),
+    (payloads) => {
+      const section = payloads.oath.oath as Item
+      payloads.oath = { ...payloads.oath, oath: { ...section, info: null } }
+    }
+  ]
+]
+
+for (const [name, oathUpgrade, edit] of invalidUpgradeCases) {
+  test(`묵언의 진의 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { payloads, details, path } = fixture('buffer-muse')
+    edit(payloads)
+    const engine = scoring(versionedEngine(UPGRADE_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], oathUpgrade })
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
+
+const REAL_UPGRADE_ENGINE = realEngineSupports({ oathUpgrade: true })
+// 1~4단계 첫 선택지는 최종 데미지(딜러)와 버프력(버퍼)을 올린다.
+const DAMAGE_UPGRADE = BUFFER_UPGRADE.slice(0, 4)
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 묵언의 진의 단계를 올리면 점수를 올리고 내리면 내린다', {
+  skip: !REAL_UPGRADE_ENGINE && '묵언의 진의 변경을 반영하는 0.10.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const scoresOf = async (name: FixtureName, oathUpgrade: unknown[]) => {
+    const { details, path } = fixture(name)
+    const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+    const response = await simulate(origin, path, { equipment: [], oathUpgrade })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null, name)
+    assert.equal(response.body.simulated.skipped, null, name)
+
+    return response.body as { baseline: { value: number }; simulated: { value: number } }
+  }
+
+  const dealerRaised = await scoresOf('dealer-blade', DAMAGE_UPGRADE)
+  assert.ok(dealerRaised.simulated.value > dealerRaised.baseline.value)
+
+  const bufferRaised = await scoresOf('buffer-muse', [...BUFFER_UPGRADE, NINTH_STEP])
+  assert.ok(bufferRaised.simulated.value > bufferRaised.baseline.value)
+
+  const bufferLowered = await scoresOf('buffer-muse', DAMAGE_UPGRADE)
+  assert.ok(bufferLowered.simulated.value < bufferLowered.baseline.value)
 })
