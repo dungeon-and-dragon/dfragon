@@ -458,7 +458,8 @@ it('목록 항목의 아이콘을 눌러도 터치로 탭해도 그 항목을 �
 })
 
 it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수를 새 결과로 바꾼다', async () => {
-  const [titleItem] = slotItemsOf('title')
+  // 최상위 칭호 둘은 착용한 "프로스트의 전설 플래티넘[35Lv]"과 이름 앞부분이 같아 이름으로 고를 수 없다.
+  const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -481,7 +482,10 @@ it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수
 })
 
 it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 넣고, 초기화하면 모두 되돌린다', async () => {
-  const [creatureItem] = slotItemsOf('creature')
+  // 최상위 크리쳐 둘은 착용한 "운명을 담는 재단사"와 이름 앞부분이 같아 이름으로 고를 수 없다.
+  const creatureItem = slotItemsOf('creature').find(
+    ({ name }) => name === 'SD 흰 구름 전령 에를리히'
+  )
   const [auraItem] = slotItemsOf('aura')
   await render(characterDetailFixture('dealer'))
   await waitForScores([
