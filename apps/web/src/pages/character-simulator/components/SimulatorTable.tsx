@@ -1,5 +1,12 @@
 import { NumberField, Select, Switch } from '@dfragon/ui'
-import { type EnchantOption, enhancementTextClasses, ItemIcon, ItemName } from '#entities/character'
+import {
+  type EnchantOption,
+  enhancementTextClasses,
+  ItemIcon,
+  ItemName,
+  type ItemView
+} from '#entities/character'
+import { ItemTooltip } from '#widgets/item-tooltip'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   draftOf,
@@ -111,6 +118,41 @@ function EquipmentRow({
   )
 }
 
+type ItemFace = Readonly<{ itemId: string | null; name: string | null; rarity: ItemView['rarity'] }>
+
+function ItemFaceText({ item }: { item: ItemFace }): React.JSX.Element {
+  return (
+    <span className="flex min-w-0 items-center gap-3">
+      <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+      <span className="min-w-0 truncate">
+        <ItemName name={item.name} rarity={item.rarity} />
+      </span>
+    </span>
+  )
+}
+
+// 목록 항목의 아이콘에만 아이템 정보 tooltip을 걸고, 이름은 항목 글자로 둔다.
+function SlotItemOption({ value, item }: { value: string; item: ItemFace }): React.JSX.Element {
+  const icon = <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+  const described =
+    item.itemId !== null ? (
+      <ItemTooltip itemId={item.itemId}>
+        <span className="flex shrink-0">{icon}</span>
+      </ItemTooltip>
+    ) : (
+      icon
+    )
+
+  return (
+    <Select.Item value={value}>
+      {described}
+      <Select.ItemText>
+        <ItemName name={item.name} rarity={item.rarity} />
+      </Select.ItemText>
+    </Select.Item>
+  )
+}
+
 function SlotItemRow({
   slotItem,
   chosen,
@@ -122,16 +164,20 @@ function SlotItemRow({
 }): React.JSX.Element {
   const { slotName } = slotItem
   const label = `${slotName} 교체`
-  const currentLabel = `현재 ${slotName}`
+  const worn: ItemFace = {
+    itemId: slotItem.itemId,
+    name: slotItem.itemName,
+    rarity: slotItem.rarity
+  }
 
-  function nameOf(value: string): string {
+  function faceOf(value: string): ItemFace {
     const choice = slotItem.choices.find(({ id }) => id === value)
 
     if (choice === undefined) {
-      return currentLabel
+      return worn
     }
 
-    return choice.name
+    return choice
   }
 
   function changeItem(value: string | null): void {
@@ -145,31 +191,24 @@ function SlotItemRow({
     <tr>
       <td className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden">{slotName}</td>
       <td>
-        <div className="flex min-w-0 items-center gap-3">
-          <ItemIcon itemId={slotItem.itemId} rarity={slotItem.rarity} />
-          <ItemName name={slotItem.itemName} rarity={slotItem.rarity} />
-        </div>
-      </td>
-      <td />
-      <td>
-        <div className="grid min-w-0">
+        <div className="flex min-w-0">
           <Select.Root value={chosen ?? CURRENT} onValueChange={changeItem}>
-            <Select.Trigger size="xs" aria-label={label}>
-              <Select.Value>{(value: string) => nameOf(value)}</Select.Value>
+            <Select.Trigger size="sm" aria-label={label}>
+              <Select.Value>
+                {(value: string) => <ItemFaceText item={faceOf(value)} />}
+              </Select.Value>
             </Select.Trigger>
             <Select.Popup aria-label={label}>
-              <Select.Item value={CURRENT}>
-                <Select.ItemText>{currentLabel}</Select.ItemText>
-              </Select.Item>
+              <SlotItemOption value={CURRENT} item={worn} />
               {slotItem.choices.map((choice) => (
-                <Select.Item key={choice.id} value={choice.id}>
-                  <Select.ItemText>{choice.name}</Select.ItemText>
-                </Select.Item>
+                <SlotItemOption key={choice.id} value={choice.id} item={choice} />
               ))}
             </Select.Popup>
           </Select.Root>
         </div>
       </td>
+      <td />
+      <td />
     </tr>
   )
 }
