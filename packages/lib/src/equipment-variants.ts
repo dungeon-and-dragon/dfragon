@@ -103,6 +103,31 @@ interface EquipmentVariantSet extends EquipmentSet {
   readonly slots: Readonly<Record<EquipmentVariantSlot, readonly EquipmentVariant[]>>
 }
 
+export type OathUpgradeKind =
+  | 'Damage'
+  | 'Cooltime'
+  | 'Oathpoint'
+  | 'Speed'
+  | 'SkillRange'
+  | 'DamageReduce'
+
+/** option은 엔진에 넘기는 선택지 이름이다. */
+export interface OathUpgradeOption {
+  readonly option: string
+  readonly kind: OathUpgradeKind
+}
+
+export interface OathUpgradeStep {
+  readonly step: number
+  readonly name: string
+  readonly options: readonly OathUpgradeOption[]
+}
+
+export interface OathUpgradeSelection {
+  readonly step: number
+  readonly option: string
+}
+
 interface OathVariantSet extends OathSet {
   readonly oaths: readonly OathVariant[]
   readonly crystals: readonly OathCrystalVariant[]
@@ -118,6 +143,8 @@ interface EquipmentVariantTable {
   readonly oathSets: readonly OathVariantSet[]
   readonly mistOaths: readonly OathVariant[]
   readonly weaponMaxTuneLevels: Readonly<Record<string, number>>
+  readonly oathUpgradeMaxStep: number
+  readonly oathUpgradeSteps: readonly OathUpgradeStep[]
 }
 
 // 생성 스크립트가 만든 파일을 그대로 두므로 모양은 테스트가 확인한다.
@@ -125,6 +152,8 @@ const variantTable = table as EquipmentVariantTable
 
 // 게임에서 태초 서약 결정은 캐릭터당 3개까지만 낄 수 있다(저장소 소유자 규칙).
 export const PRIMEVAL_OATH_CRYSTAL_LIMIT = 3
+
+export const OATH_UPGRADE_MAX_STEP: number = variantTable.oathUpgradeMaxStep
 
 const ARMOR_SLOTS = ['JACKET', 'SHOULDER', 'PANTS', 'SHOES', 'WAIST'] as const
 const RARITY_ORDER = ['유니크', '레전더리', '에픽', '태초']
@@ -411,4 +440,30 @@ export function weaponMaxTuneLevelOf(itemName: string): number {
   }
 
   return level
+}
+
+export function oathUpgradeSteps(): readonly OathUpgradeStep[] {
+  return variantTable.oathUpgradeSteps
+}
+
+export function findOathUpgradeOption(step: number, option: string): OathUpgradeOption | null {
+  const upgradeStep = variantTable.oathUpgradeSteps.find((candidate) => candidate.step === step)
+  const found = upgradeStep?.options.find((candidate) => candidate.option === option)
+
+  if (found === undefined) {
+    return null
+  }
+
+  return found
+}
+
+/** 진의는 1단계부터 빠짐없이 이어져야 하고, 빈 목록은 진의가 없는 상태다. */
+export function isValidOathUpgrade(upgrades: readonly OathUpgradeSelection[]): boolean {
+  if (upgrades.length > OATH_UPGRADE_MAX_STEP) {
+    return false
+  }
+
+  return upgrades.every(
+    ({ step, option }, index) => step === index + 1 && findOathUpgradeOption(step, option) !== null
+  )
 }

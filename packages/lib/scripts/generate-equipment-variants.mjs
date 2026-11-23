@@ -205,11 +205,28 @@ const sets = engine.sets.flatMap(setOf)
 const exaltedEntries = engine.exalted.flatMap(exaltedOf)
 const exalted = Object.fromEntries(exaltedEntries)
 const oathCrystalTable = oathCrystals.map(oathCrystalOf)
+// 진의는 1단계부터 차례로 이어지고 단계마다 선택지가 셋이어야 엔진 입력의 단계 번호와 맞는다.
+function oathUpgradeStepOf({ step, name, options }, index) {
+  if (step !== index + 1 || options.length !== 3) {
+    throw new Error(`묵언의 진의 단계가 1부터 이어지지 않거나 선택지가 셋이 아님: ${step}`)
+  }
+
+  const upgradeOptions = options.map(({ option, kind }) => ({ option, kind }))
+
+  return { step, name, options: upgradeOptions }
+}
+
 const oathSets = engine.oathSets.map(oathSetOf)
 const mistOaths = engine.oaths.noSet.flatMap(oathVariantOf)
 const weaponMaxTuneLevels = Object.fromEntries(
   Object.entries(engine.weaponTune).map(weaponMaxTuneLevelOf)
 )
+const oathUpgradeSteps = engine.oathUpgrades.steps.map(oathUpgradeStepOf)
+
+if (oathUpgradeSteps.length !== engine.oathUpgrades.maxLevel) {
+  throw new Error('묵언의 진의 단계 수가 최대 단계와 다름')
+}
+
 const table = {
   version: 1,
   sets,
@@ -217,7 +234,9 @@ const table = {
   oathCrystals: oathCrystalTable,
   oathSets,
   mistOaths,
-  weaponMaxTuneLevels
+  weaponMaxTuneLevels,
+  oathUpgradeMaxStep: engine.oathUpgrades.maxLevel,
+  oathUpgradeSteps
 }
 
 writeFileSync(
