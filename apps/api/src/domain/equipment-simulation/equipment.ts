@@ -24,6 +24,12 @@ export interface EquipmentChange {
   readonly amplified: boolean
   /** null이면 착용한 장비의 마법부여를 그대로 둔다. */
   readonly enchantId: string | null
+  /** 부위별 선택지 id이고, null이면 착용한 아이템을 그대로 둔다. */
+  readonly variantId: string | null
+  /** null이면 착용한 아이템의 조율 단계를 그대로 둔다. */
+  readonly tune: number | null
+  /** 유일 장비의 정밀도이고, null이면 그대로 둔다. */
+  readonly potency: number | null
 }
 
 export interface EquipmentEdit {

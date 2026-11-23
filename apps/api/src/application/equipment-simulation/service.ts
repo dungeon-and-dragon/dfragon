@@ -19,16 +19,23 @@ import {
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
 import {
   type EquipmentChange,
+  type OathTuneChange,
+  type SimulationFeatures,
   type SlotItemChanges,
   editEquipment,
+  editEquipmentItems,
+  editOathTunes,
   editSlotItems,
+  equipmentItemIds,
   hasSlotItemEdits,
   needsMainStat,
+  simulatedCrystals,
   simulatedEquipment,
   simulatedSlotItems,
   simulationInputOf,
   slotItemIds,
-  supportsSlotItems,
+  supportsSimulation,
+  withEquipmentItems,
   wornMainStat
 } from '#domain/equipment-simulation/index.js'
 import type { LoadCharacterScoreSource, LoadItemDetails } from './ports.js'
@@ -36,6 +43,7 @@ import type { LoadCharacterScoreSource, LoadItemDetails } from './ports.js'
 export interface EquipmentSimulationRequest {
   readonly equipment: readonly EquipmentChange[]
   readonly slotItems: SlotItemChanges
+  readonly oath: readonly OathTuneChange[]
 }
 
 export interface EquipmentSimulationScores {
@@ -77,11 +85,24 @@ export class EquipmentSimulationService {
   ): Promise<EquipmentSimulationScores> {
     const { payloads, role, items } = await this.loadScoreSource(identity, signal)
     const edits = editEquipment(payloads.equipment, request.equipment, role)
+    const itemEdits = editEquipmentItems(payloads.equipment, request.equipment)
+    const oathEdits = editOathTunes(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
+    const editsSlotItems = hasSlotItemEdits(slotEdits)
+    const features: SimulationFeatures = {
+      slotItems: editsSlotItems,
+      equipmentItems: itemEdits.length > 0,
+      oathTunes: oathEdits.length > 0
+    }
     const calculator = cardScoreCalculator(role)
     const input = toScoreEngineInput(payloads, items)
 
-    if (edits.length === 0 && !hasSlotItemEdits(slotEdits)) {
+    if (
+      edits.length === 0 &&
+      !features.slotItems &&
+      !features.equipmentItems &&
+      !features.oathTunes
+    ) {
       const result = await this.calculate(payloads, input, calculator, signal)
 
       if (result === null) {
@@ -93,9 +114,12 @@ export class EquipmentSimulationService {
       return { baseline: score, simulated: score }
     }
 
-    const slotDetails = await this.itemDetails(slotItemIds(slotEdits), signal)
+    const details = await this.itemDetails(
+      [...slotItemIds(slotEdits), ...equipmentItemIds(itemEdits)],
+      signal
+    )
 
-    if (slotDetails === null) {
+    if (details === null) {
       return noScores
     }
 
@@ -111,10 +135,14 @@ export class EquipmentSimulationService {
       }
     }
 
-    const equipment = simulatedEquipment(edits, mainStat)
-    const simulation = simulationInputOf(equipment, simulatedSlotItems(slotEdits, slotDetails))
-    const slotItems = Object.fromEntries(slotDetails)
-    const engineItems = { ...input.items, ...slotItems }
+    const equipment = withEquipmentItems(simulatedEquipment(edits, mainStat), itemEdits, details)
+    const simulation = simulationInputOf(
+      equipment,
+      simulatedSlotItems(slotEdits, details),
+      simulatedCrystals(oathEdits)
+    )
+    const detailItems = Object.fromEntries(details)
+    const engineItems = { ...input.items, ...detailItems }
     const simulationInput = { ...input, items: engineItems, simulation }
     const result = await this.calculate(payloads, simulationInput, calculator, signal)
 
@@ -122,8 +150,8 @@ export class EquipmentSimulationService {
       return noScores
     }
 
-    // 0.6.0 전 엔진은 칭호, 크리쳐, 오라 교체를 반영하지 않은 점수를 바꾼 점수로 낸다.
-    if (hasSlotItemEdits(slotEdits) && !supportsSlotItems(result.versions.package)) {
+    // 옛 엔진은 반영하지 못하는 변경을 빼고 계산한 점수를 바꾼 점수로 낼 수 있다.
+    if (!supportsSimulation(result.versions.package, features)) {
       return noScores
     }
 
