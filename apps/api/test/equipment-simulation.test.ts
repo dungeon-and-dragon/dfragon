@@ -1734,3 +1734,46 @@ test('실제 엔진은 딜러의 레전더리 상의를 에픽으로, 에픽 반
   const tuned = await scoresOf({ slotId: 'JACKET', tune: 3 })
   assert.ok(tuned.simulated.value >= tuned.baseline.value)
 })
+
+const REAL_OATH_ENGINE =
+  REAL_ENGINE_PACKAGE !== null &&
+  supportsSimulation(REAL_ENGINE_PACKAGE, {
+    slotItems: false,
+    equipmentItems: false,
+    oathTunes: true
+  })
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 서약 결정만 바꾼 요청을 건너뛰지 않고 계산해, 딜러의 조율을 올리면 점수가 오르고 버퍼의 조율을 내리면 내려간다', {
+  skip: !REAL_OATH_ENGINE && '서약 결정 조율을 반영하는 0.8.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const scoresOf = async (name: FixtureName, oath: unknown[]) => {
+    const { details, path } = fixture(name)
+    const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+    const response = await simulate(origin, path, { equipment: [], oath })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null, `${name} ${JSON.stringify(oath)}`)
+    assert.equal(response.body.simulated.skipped, null, `${name} ${JSON.stringify(oath)}`)
+
+    return response.body as {
+      baseline: { calculator: string; value: number }
+      simulated: { calculator: string; value: number }
+    }
+  }
+
+  // 딜러는 유니크, 레어 결정이 모두 0단계이고, 버퍼는 에픽 결정 8개가 3단계다.
+  const raised = await scoresOf(
+    'dealer-blade',
+    [0, 1, 2, 3, 4, 5, 6, 7].map((slotNo) => ({ slotNo, tune: 3 }))
+  )
+  assert.ok(raised.simulated.value > raised.baseline.value)
+
+  const lowered = await scoresOf(
+    'buffer-muse',
+    [0, 1, 2, 3, 4, 5, 6, 7].map((slotNo) => ({ slotNo, tune: 0 }))
+  )
+  assert.equal(lowered.baseline.calculator, 'buff')
+  assert.ok(lowered.simulated.value < lowered.baseline.value)
+})
