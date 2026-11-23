@@ -4,7 +4,8 @@
     "title:1123:character/common/title/100333448": {
       "itemId": "741f95b1012f33a3949d4fe38f094d41",
       "itemName": "프로스트의 전설 플래티넘[80Lv]",
-      "itemRarity": "레어"
+      "itemRarity": "레어",
+      "name": "프로스트의 전설 플래티넘"
     },
     "title:1123:character/common/title/100333206": {
       "itemId": "42fd3d4144f788b37ed19c70281dcda6",
@@ -18,25 +19,16 @@
       "itemRarity": "레어",
       "name": "진정한 각성을 이룬 자"
     },
-    "title:849:character/common/title/100332897": {
-      "itemId": "25bb5843f1f7f581ef55460fc0b708b8",
-      "itemName": "진정한 각성을 이룬 자 플래티넘[75Lv]",
-      "itemRarity": "레어"
-    },
     "title:790:character/common/title/100332708": {
       "itemId": "74711128d2d0739c4f5d38b488d2be2c",
       "itemName": "[EVENT]세리아의 풍성한 선물 Ver.2",
       "itemRarity": "레어"
     },
-    "title:790:character/common/title/100333192": {
-      "itemId": "6952ef732a8abbf64c87aa1585ede172",
-      "itemName": "난초의 고결함 플래티넘[75Lv]",
-      "itemRarity": "레어"
-    },
     "creature:1261:creature/22_lounge6/autocreature_100": {
       "itemId": "b0c0512c23d593574269e0cb2ef22ccd",
       "itemName": "운명을 담는 재단사 플래티넘[30Lv]",
-      "itemRarity": "레어"
+      "itemRarity": "레어",
+      "name": "운명을 담는 재단사 플래티넘"
     },
     "creature:1261:creature/100991296": {
       "itemId": "bf04e5b415fea3989e8607efb4987d14",
@@ -53,19 +45,9 @@
       "itemName": "순백의 나비 공주",
       "itemRarity": "레어"
     },
-    "creature:889:creature/100991472": {
-      "itemId": "bfec0713af7dee1524fe3fd96fb2baaa",
-      "itemName": "페이퍼 래빗 플래티넘[80Lv]",
-      "itemRarity": "레어"
-    },
     "creature:810:creature/100990854": {
       "itemId": "c5d3d0419fbb1fcf0157018601b6fc20",
       "itemName": "[EVENT]다정한 SD 세리아 Ver.2",
-      "itemRarity": "레어"
-    },
-    "creature:810:creature/2026_arcana/platinum/destinylion/autocreature_100": {
-      "itemId": "1788cf8f8ee652e5a2802203c2b279a1",
-      "itemName": "데스티니 라이언 플래티넘[30Lv]",
       "itemRarity": "레어"
     },
     "aura:845:character/swordman/avatar/aura/101590700": {
@@ -91,36 +73,6 @@
     "aura:463:character/swordman/avatar/aura/101590917": {
       "itemId": "e3a8f465174ad184ee15dafb221634d2",
       "itemName": "[EVENT]세리아의 파스텔 버블 Ver.2",
-      "itemRarity": "레어"
-    },
-    "aura:463:character/swordman/avatar/aura/101590906": {
-      "itemId": "de4baa247b579a2c6c7213d5b75e3b17",
-      "itemName": "함께 내딛는 걸음",
-      "itemRarity": "레어"
-    },
-    "aura:463:character/swordman/avatar/aura/101590905": {
-      "itemId": "97d4388cd75d6459288ab28c10b83b68",
-      "itemName": "함께 내미는 손길",
-      "itemRarity": "레어"
-    },
-    "aura:463:character/swordman/avatar/aura/101590704": {
-      "itemId": "4bdf9b355eb561fe9a52c263cea2e711",
-      "itemName": "페스타의 검은빛 아다지오",
-      "itemRarity": "레어"
-    },
-    "aura:463:character/swordman/avatar/aura/101590703": {
-      "itemId": "ef99196082741cb7480cb401bdfb5f6f",
-      "itemName": "페스타의 노란빛 아다지오",
-      "itemRarity": "레어"
-    },
-    "aura:463:character/swordman/avatar/aura/101590701": {
-      "itemId": "2826f7ebeda39f4cf28deb625fa100f8",
-      "itemName": "페스타의 붉은빛 아다지오",
-      "itemRarity": "레어"
-    },
-    "aura:463:character/swordman/avatar/aura/101590702": {
-      "itemId": "31dc027043afbefe14c59a88422c99c0",
-      "itemName": "페스타의 푸른빛 아다지오",
       "itemRarity": "레어"
     }
   }
