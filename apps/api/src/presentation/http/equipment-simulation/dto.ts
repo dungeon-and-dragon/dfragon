@@ -19,6 +19,11 @@ const equipmentChange = z.strictObject({
   potency: z.int().min(0).max(POTENCY_LIMIT).nullable().default(null)
 })
 
+const oathUpgradeSelection = z.strictObject({
+  step: z.int(),
+  option: z.string()
+})
+
 const oathCrystalChange = z.strictObject({
   slotNo: z.int().min(0),
   tune: z.int().min(0).nullable().default(null),
@@ -41,7 +46,9 @@ const simulationRequest = z.strictObject({
   oath: z
     .array(oathCrystalChange)
     .refine((changes) => new Set(changes.map(({ slotNo }) => slotNo)).size === changes.length)
-    .default([])
+    .default([]),
+  // 생략과 null은 착용한 진의를 그대로 둔다.
+  oathUpgrade: z.array(oathUpgradeSelection).nullable().default(null)
 })
 
 export type EquipmentSimulationResponse = EquipmentSimulationScores
@@ -61,13 +68,14 @@ export function parseSimulationRequest(text: string): EquipmentSimulationRequest
     throw new EquipmentSimulationFailure('request')
   }
 
-  const { equipmentSet, equipment, title, creature, aura, oathSet, oathBody, oath } = parsed.data
+  const { equipmentSet, equipment, title, creature, aura, oathSet, oathBody, oath, oathUpgrade } =
+    parsed.data
   const slotItems = { title, creature, aura }
 
   return {
     equipmentSet,
     equipment,
     slotItems,
-    oath: { set: oathSet, body: oathBody, crystals: oath }
+    oath: { set: oathSet, body: oathBody, crystals: oath, upgrade: oathUpgrade }
   }
 }
