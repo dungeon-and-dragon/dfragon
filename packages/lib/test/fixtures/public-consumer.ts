@@ -42,6 +42,17 @@ import {
   type EnchantMainStat
 } from '@dfragon/lib/enchant-grades'
 import {
+  equipmentVariantsOf,
+  findEquipmentVariant,
+  findOathCrystal,
+  resolveEquipmentItems,
+  type EquipmentVariant,
+  type EquipmentVariantItems,
+  type EquipmentVariantMatch,
+  type EquipmentVariantSlot,
+  type OathCrystal
+} from '@dfragon/lib/equipment-variants'
+import {
   findSlotItem,
   slotItemsOf,
   type SlotItem,
@@ -183,4 +194,21 @@ export function slotItemNames(category: SlotItemCategory, id: string) {
   }
 
   return { names, itemId: found.item.itemId }
+}
+
+export function equipmentVariantItems(
+  setItemId: string,
+  slotId: EquipmentVariantSlot,
+  itemId: string
+) {
+  const variants: readonly EquipmentVariant[] = equipmentVariantsOf(setItemId, slotId)
+  const match: EquipmentVariantMatch | null = findEquipmentVariant(itemId)
+  const items: EquipmentVariantItems = resolveEquipmentItems({ [slotId]: variants[0] })
+  const crystal: OathCrystal | null = findOathCrystal('미광의 서약 결정')
+
+  if (match === null || crystal === null) {
+    return null
+  }
+
+  return { setItemId: match.setItemId, items, tuneSetPoints: crystal.tuneSetPoints }
 }
