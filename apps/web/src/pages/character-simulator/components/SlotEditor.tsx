@@ -1,3 +1,4 @@
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   draftOf,
   equipmentSetIdOf,
@@ -25,6 +26,10 @@ import {
   type SimulatorOathBody,
   type SimulatorOathCrystal
 } from '#pages/character-simulator/model/simulator-oath'
+import {
+  type SimulatorOathUpgrade,
+  upgradeOf
+} from '#pages/character-simulator/model/simulator-oath-upgrade'
 import type { SimulatorTarget } from '#pages/character-simulator/model/simulator-target'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
@@ -34,7 +39,7 @@ import {
   OathItemControl,
   PotencyControl,
   ReinforceControl,
-  SetControl,
+  TextControl,
   SlotItemControl
 } from './SlotControls'
 import { TuneSelect } from './TuneSelect'
@@ -45,6 +50,7 @@ export type SlotEditorActions = Readonly<{
   onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
   onOathSetChange: (setId: number) => void
   onOathBodyChange: (body: SimulatorOathBody, id: string) => void
+  onOathUpgradeChange: (upgrade: SimulatorOathUpgrade, step: number, option: string | null) => void
   onCrystalChange: (crystal: SimulatorOathCrystal, draft: Partial<CrystalDraft>) => void
 }>
 
@@ -107,6 +113,8 @@ export function SlotEditor({
       return <OathSetEditor oath={target.oath} actions={actions} />
     case 'oathBody':
       return <OathBodyEditor body={target.body} changes={changes} actions={actions} />
+    case 'oathUpgrade':
+      return <OathUpgradeEditor upgrade={target.upgrade} changes={changes} actions={actions} />
     case 'crystal':
       return (
         <CrystalEditor
@@ -140,7 +148,7 @@ function EquipmentSetEditor({
   return (
     <Fields>
       <Field label="세트">
-        <SetControl
+        <TextControl
           label="장비 세트"
           value={equipmentSetIdOf(equipmentSet, changes)}
           options={options}
@@ -224,7 +232,7 @@ function OathSetEditor({
   return (
     <Fields>
       <Field label="세트">
-        <SetControl
+        <TextControl
           label="서약 세트"
           value={String(oath.setId)}
           options={options}
@@ -316,6 +324,50 @@ function CrystalEditor({
           />
         </Field>
       )}
+    </Fields>
+  )
+}
+
+// 올리지 않은 단계를 뜻하는 항목이다. 진의 선택지 이름과 겹치지 않는다.
+const NOT_RAISED = 'none'
+
+function OathUpgradeEditor({
+  upgrade,
+  changes,
+  actions
+}: {
+  upgrade: SimulatorOathUpgrade
+  changes: SimulatorChanges
+  actions: SlotEditorActions
+}): React.JSX.Element {
+  const current = upgradeOf(upgrade, changes.oath.upgrade)
+
+  return (
+    <Fields>
+      {upgrade.steps.map(({ step, name, options }) => {
+        const chosen = current.find((selection) => selection.step === step)
+        const textOptions = [
+          { id: NOT_RAISED, name: MISSING_VALUE },
+          ...options.map(({ option, label }) => ({ id: option, name: label }))
+        ]
+
+        function changeStep(id: string): void {
+          const option = id === NOT_RAISED ? null : id
+          actions.onOathUpgradeChange(upgrade, step, option)
+        }
+
+        return (
+          <Field key={step} label={name}>
+            <TextControl
+              label={name}
+              value={chosen?.option ?? NOT_RAISED}
+              options={textOptions}
+              disabled={step > current.length + 1}
+              onChange={changeStep}
+            />
+          </Field>
+        )
+      })}
     </Fields>
   )
 }
