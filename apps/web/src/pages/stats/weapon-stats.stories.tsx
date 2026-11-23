@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite'
 import { itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { itemDetailHandlers } from './api/item-detail.handlers'
+import { itemDetailHandlers } from '#widgets/item-tooltip/api/item-detail.handlers'
 import { WeaponStatsScreen } from './WeaponStatsScreen'
 
 const meta = {
