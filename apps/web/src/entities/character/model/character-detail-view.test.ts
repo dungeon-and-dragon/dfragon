@@ -123,6 +123,7 @@ describe('캐릭터 상세 화면 응답', () => {
       itemId: null,
       itemName: null,
       itemRarity: null,
+      setItemId: null,
       itemAvailableLevel: null,
       reinforce: null,
       amplificationName: null,
