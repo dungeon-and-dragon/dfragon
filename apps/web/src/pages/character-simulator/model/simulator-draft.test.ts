@@ -240,7 +240,14 @@ it('칭호는 응답의 부위 자리에, 크리쳐와 오라는 장비 뒤에 �
     ['크리쳐', '운명을 담는 재단사'],
     ['오라', '고결한 영혼의 잔상']
   ])
-  expect(title!.choices).toEqual(slotItemsOf('title').map(({ id, name }) => ({ id, name })))
+  expect(title!.choices).toEqual(
+    slotItemsOf('title').map(({ id, name, item }) => ({
+      id,
+      name,
+      itemId: item.itemId,
+      rarity: 'rare'
+    }))
+  )
   expect(slotItemChoiceOf(title!, NO_CHANGES)).toBeNull()
 })
 
