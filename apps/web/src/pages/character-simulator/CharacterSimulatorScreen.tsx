@@ -6,16 +6,19 @@ import { useCharacterDetail } from '#entities/character-detail'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useEquipmentSimulation } from './api/useEquipmentSimulation'
+import { OathCrystalTable } from './components/OathCrystalTable'
 import { ScorePanel } from './components/ScorePanel'
 import { SimulatorTable } from './components/SimulatorTable'
 import {
   hasChanges,
   NO_CHANGES,
+  type SimulatorOathCrystal,
   type SimulatorSlot,
   type SimulatorSlotItem,
   type SlotDraft,
   simulationBody,
   simulatorReducer,
+  toOathCrystals,
   toSimulatorRows
 } from './model/simulator-draft'
 
@@ -65,10 +68,12 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
   const { character } = detail
   const identity = { serverId: character.serverId, characterId: character.characterId }
   const rows = useMemo(() => toSimulatorRows(detail), [detail])
+  const crystals = useMemo(() => toOathCrystals(detail), [detail])
   const [changes, dispatch] = useReducer(simulatorReducer, NO_CHANGES)
   const body = useMemo(() => simulationBody(rows, changes), [rows, changes])
   const simulation = useEquipmentSimulation(identity, body)
   const equipmentHeadingId = useId()
+  const oathHeadingId = useId()
 
   function change(slot: SimulatorSlot, draft: Partial<SlotDraft>): void {
     dispatch({ type: 'change', slot, draft })
@@ -76,6 +81,10 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
 
   function changeSlotItem(slotItem: SimulatorSlotItem, id: string | null): void {
     dispatch({ type: 'slotItem', slotItem, id })
+  }
+
+  function changeOathTune(crystal: SimulatorOathCrystal, tune: number): void {
+    dispatch({ type: 'oathTune', crystal, tune })
   }
 
   function reset(): void {
@@ -100,25 +109,36 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
         </div>
       </header>
       <div className="section grid grid-cols-[minmax(0,1fr)_280px] items-start py-0 max-md:grid-cols-1">
-        <section
-          aria-labelledby={equipmentHeadingId}
-          className="min-w-0 border-r border-line max-md:border-r-0 max-md:border-t"
-        >
-          <div className="section-title">
-            <h2 id={equipmentHeadingId}>장비</h2>
-            <span className="section-title-actions">
-              <Button size="sm" disabled={!hasChanges(changes)} onClick={reset}>
-                초기화
-              </Button>
-            </span>
-          </div>
-          <SimulatorTable
-            rows={rows}
-            changes={changes}
-            onChange={change}
-            onSlotItemChange={changeSlotItem}
-          />
-        </section>
+        <div className="min-w-0 border-r border-line max-md:border-r-0 max-md:border-t">
+          <section aria-labelledby={equipmentHeadingId}>
+            <div className="section-title">
+              <h2 id={equipmentHeadingId}>장비</h2>
+              <span className="section-title-actions">
+                <Button size="sm" disabled={!hasChanges(changes)} onClick={reset}>
+                  초기화
+                </Button>
+              </span>
+            </div>
+            <SimulatorTable
+              rows={rows}
+              changes={changes}
+              onChange={change}
+              onSlotItemChange={changeSlotItem}
+            />
+          </section>
+          {crystals.length > 0 && (
+            <section aria-labelledby={oathHeadingId} className="border-t border-line">
+              <div className="section-title">
+                <h2 id={oathHeadingId}>서약 결정</h2>
+              </div>
+              <OathCrystalTable
+                crystals={crystals}
+                changes={changes}
+                onTuneChange={changeOathTune}
+              />
+            </section>
+          )}
+        </div>
         <div className="md:sticky md:top-0 max-md:order-first">
           <ScorePanel role={detail.card?.role ?? null} result={simulation} />
         </div>
