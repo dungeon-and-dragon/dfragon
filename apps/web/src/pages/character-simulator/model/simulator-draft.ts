@@ -50,7 +50,12 @@ export type SimulatorSlot = ItemView &
     enchantChoices: EnchantChoice[]
   }>
 
-export type SlotItemChoice = Readonly<{ id: string; name: string }>
+export type SlotItemChoice = Readonly<{
+  id: string
+  name: string
+  itemId: string | null
+  rarity: ItemView['rarity']
+}>
 
 export type SimulatorSlotItem = ItemView &
   Readonly<{
@@ -149,7 +154,11 @@ function slotItemRow(
     return []
   }
 
-  const choices = slotItemsOf(category).map(({ id, name }) => ({ id, name }))
+  const choices = slotItemsOf(category).map(({ id, name, item: represented }) => {
+    const { itemId, rarity } = toItemView(represented)
+
+    return { id, name, itemId, rarity }
+  })
   const view = toItemView(item)
   const name = slotName ?? SLOT_ITEM_NAMES[category]
   const slotItem = { ...view, category, slotName: name, choices }
