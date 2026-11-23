@@ -7,10 +7,6 @@ import type {
 import type { ScoreSimulationInput } from '@dfragon/server-core/domain/score/index.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
-// 칭호, 크리쳐, 오라 교체는 엔진 0.6.0부터 반영하고, 그 전 엔진은 바꾸지 않은 점수를 낸다.
-const SLOT_ITEM_ENGINE_VERSION = [0, 6, 0] as const
-const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
-
 /** 묶음 id이고, null이면 착용한 아이템을 그대로 둔다. */
 export type SlotItemChanges = Readonly<Record<SlotItemCategory, string | null>>
 
@@ -172,10 +168,11 @@ export function simulatedSlotItems(
   return { title, creature, aura }
 }
 
-/** 칭호는 장비 목록에, 크리쳐와 오라는 각자의 칸에 넣고, 바꾸지 않은 칸은 보내지 않는다. */
+/** 칭호는 장비 목록에, 크리쳐, 오라, 서약 결정은 각자의 칸에 넣고, 바꾸지 않은 칸은 보내지 않는다. */
 export function simulationInputOf(
   equipment: readonly CharacterPayload[],
-  slots: SimulatedSlotItems
+  slots: SimulatedSlotItems,
+  crystals: readonly CharacterPayload[]
 ): ScoreSimulationInput {
   const { title, creature, aura } = slots
   const simulation: { -readonly [K in keyof ScoreSimulationInput]: ScoreSimulationInput[K] } = {
@@ -194,34 +191,9 @@ export function simulationInputOf(
     simulation.avatar = [aura]
   }
 
+  if (crystals.length > 0) {
+    simulation.oath = { crystal: crystals }
+  }
+
   return simulation
-}
-
-function versionOf(engine: string): number[] | null {
-  const matched = ENGINE_VERSION_PATTERN.exec(engine)
-
-  if (matched === null) {
-    return null
-  }
-
-  return matched.slice(1).map(Number)
-}
-
-/** `versions.package`("dnfscore-native X.Y.Z")가 칭호, 크리쳐, 오라 교체를 반영하는 엔진인지 본다. */
-export function supportsSlotItems(enginePackage: string): boolean {
-  const version = versionOf(enginePackage)
-
-  if (version === null) {
-    return false
-  }
-
-  for (const [index, minimum] of SLOT_ITEM_ENGINE_VERSION.entries()) {
-    const part = version[index]!
-
-    if (part !== minimum) {
-      return part > minimum
-    }
-  }
-
-  return true
 }

@@ -1,0 +1,72 @@
+type EngineVersion = readonly [number, number, number]
+
+// 그 전 엔진은 바꾸지 않은 점수를 바꾼 점수로 내거나 입력을 거부한다.
+const SLOT_ITEM_ENGINE_VERSION: EngineVersion = [0, 6, 0]
+const EQUIPMENT_ITEM_ENGINE_VERSION: EngineVersion = [0, 7, 0]
+const OATH_TUNE_ENGINE_VERSION: EngineVersion = [0, 8, 0]
+const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
+
+export interface SimulationFeatures {
+  /** 칭호, 크리쳐, 오라 교체 */
+  readonly slotItems: boolean
+  /** 무기를 뺀 11부위의 아이템, 조율, 정밀도 변경 */
+  readonly equipmentItems: boolean
+  readonly oathTunes: boolean
+}
+
+function versionOf(engine: string): number[] | null {
+  const matched = ENGINE_VERSION_PATTERN.exec(engine)
+
+  if (matched === null) {
+    return null
+  }
+
+  return matched.slice(1).map(Number)
+}
+
+function isAtLeast(version: readonly number[], minimum: EngineVersion): boolean {
+  for (const [index, part] of minimum.entries()) {
+    const own = version[index]!
+
+    if (own !== part) {
+      return own > part
+    }
+  }
+
+  return true
+}
+
+function minimumVersions(features: SimulationFeatures): EngineVersion[] {
+  const minimums: EngineVersion[] = []
+
+  if (features.slotItems) {
+    minimums.push(SLOT_ITEM_ENGINE_VERSION)
+  }
+
+  if (features.equipmentItems) {
+    minimums.push(EQUIPMENT_ITEM_ENGINE_VERSION)
+  }
+
+  if (features.oathTunes) {
+    minimums.push(OATH_TUNE_ENGINE_VERSION)
+  }
+
+  return minimums
+}
+
+/** `versions.package`("dnfscore-native X.Y.Z")가 요청에 든 변경을 모두 반영하는 엔진인지 본다. */
+export function supportsSimulation(enginePackage: string, features: SimulationFeatures): boolean {
+  const minimums = minimumVersions(features)
+
+  if (minimums.length === 0) {
+    return true
+  }
+
+  const version = versionOf(enginePackage)
+
+  if (version === null) {
+    return false
+  }
+
+  return minimums.every((minimum) => isAtLeast(version, minimum))
+}
