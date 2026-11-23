@@ -42,8 +42,10 @@ type ScoreCalculationDependencies = ScoreCalculationPorts & {
   reportProgress: (done: number, total: number) => void
 }
 
+const MIN_FAME = 70_000
+
 function calculateScores({ store, reportProgress, ...ports }: ScoreCalculationDependencies) {
-  return new ScoreCalculationService(store, ports).calculate(reportProgress)
+  return new ScoreCalculationService(store, ports).calculate(MIN_FAME, reportProgress)
 }
 
 // 합성 캐릭터와 섹션 응답이다. DB는 대상과 저장한 점수를 메모리에 두는 fake이고, 엔진은 캐릭터 ID로 결과를 고르는 fake다.
@@ -233,6 +235,7 @@ function calculation(
   const progress: [number, number][] = []
   const reports: [string, Readonly<Record<string, string | number>>][] = []
   const requested: string[] = []
+  const targetMinFames: number[] = []
   const attempts = new Map<string, number>()
   let calculations = 0
   let engineClosed = false
@@ -274,7 +277,11 @@ function calculation(
 
   const dependencies: ScoreCalculationDependencies = {
     store: {
-      readTargets: async () => [...targets],
+      readTargets: async (minFame) => {
+        targetMinFames.push(minFame)
+
+        return [...targets]
+      },
       readLastFinishedRun: async () => lastRun,
       recordScore: async (score) => {
         saved.push(score)
@@ -335,6 +342,7 @@ function calculation(
     progress,
     reports,
     requested,
+    targetMinFames,
     isEngineClosed: () => engineClosed
   }
 }
@@ -814,4 +822,19 @@ test('점수 계산 job은 기본으로 수요일 22시에 돌고, 설정한 일
   assert.equal(DEFAULT_SCORE_CALCULATION_SCHEDULE, '0 22 * * 3')
   assert.equal(configured.schedule, '30 20 * * 3')
   assert.equal(scheduled.catchup, false)
+})
+
+test('점수 계산 job은 받은 명성 하한으로 대상을 읽고, 받지 않으면 최신 컨텐츠 입장 명성 104,292로 읽으며, 양의 정수가 아닌 하한은 받지 않는다', async () => {
+  const { dependencies, targetMinFames } = calculation([])
+  const { store, reportProgress, ...ports } = dependencies
+  const job = createScoreCalculationJob(new ScoreCalculationService(store, ports))
+  const context = { reportProgress: () => undefined }
+
+  await job.run(job.argsSchema.parse({ minFame: 119_414 }), context)
+  await job.run(job.argsSchema.parse({}), context)
+
+  assert.deepEqual(targetMinFames, [119_414, 104_292])
+  assert.equal(job.argsSchema.safeParse({ minFame: 0 }).success, false)
+  assert.equal(job.argsSchema.safeParse({ minFame: 119_414.5 }).success, false)
+  assert.equal(job.argsSchema.safeParse({ minFame: '119414' }).success, false)
 })
