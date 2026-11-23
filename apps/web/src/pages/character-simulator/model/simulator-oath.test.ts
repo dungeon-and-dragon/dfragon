@@ -334,3 +334,20 @@ it('서약 세트가 선택 목록에 없으면 결정 선택지를 두지 않�
   expect(oath.crystals.every(({ choices }) => choices.length === 0)).toBe(true)
   expect(crystalTuneLimitOf(crystalAt(oath, 7), null)).toBe(3)
 })
+
+it('서약 세트를 골라도 조율 정보가 없는 광휘 밖 착용 결정은 조율까지 그대로 두고 요청에 넣지 않는다', () => {
+  const oath = toSimulatorOath(
+    withCrystal(characterDetailFixture('dealer'), 2, {
+      itemId: MIST_CRYSTAL_ID,
+      itemName: '목록에 없는 결정',
+      itemRarity: '유니크',
+      tune: { level: 2, setPoint: 105 }
+    })
+  )!
+  const changed = apply(NO_CHANGES, { type: 'oathSet', oath, setId: SHADOW_SET })
+  const view = viewOf(oath, changed)
+
+  expect(changed.oath.crystals).toEqual({})
+  expect(crystalDraftOf(crystalAt(view, 2), changed.oath)).toEqual({ variantId: null, tune: 2 })
+  expect(simulationBody([], view, changed)).toEqual({ equipment: [], oathSet: SHADOW_SET })
+})

@@ -777,3 +777,23 @@ it('초기화하면 고른 장비 세트도 지운다', () => {
   expect(hasChanges(changed)).toBe(true)
   expect(apply(changed, { type: 'reset' })).toEqual(NO_CHANGES)
 })
+
+it('장비 세트를 골라도 선택지 밖 착용 아이템을 낀 부위는 조율까지 그대로 두고 요청에 넣지 않는다', () => {
+  const detail = withItem(bufferDetail, 'WRIST', { tune: [{ level: 2, setPoint: 235 }] })
+  const rows = toSimulatorRows(detail)
+  const changed = apply(NO_CHANGES, {
+    type: 'equipmentSet',
+    rows,
+    equipmentSet: toEquipmentSet(detail)!,
+    setItemId: SHADOW_SET
+  })
+  const viewRows = rowsInEquipmentSet(rows, changed.equipmentSet)
+  const wrist = slotOf(slotsOf(viewRows), 'WRIST')
+
+  expect(changed.equipment.WRIST).toBeUndefined()
+  expect(draftOf(wrist, changed)).toMatchObject({ variantId: null, tune: 2 })
+  expect(simulationBody(viewRows, null, changed)).toEqual({
+    equipmentSet: SHADOW_SET,
+    equipment: []
+  })
+})
