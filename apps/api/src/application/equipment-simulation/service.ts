@@ -19,31 +19,36 @@ import {
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
 import {
   type EquipmentChange,
-  type OathTuneChange,
+  type OathChanges,
   type SimulationFeatures,
   type SlotItemChanges,
   editEquipment,
   editEquipmentItems,
-  editOathTunes,
+  editOath,
   editSlotItems,
+  editWeaponTune,
   equipmentItemIds,
+  hasOathEdit,
   hasSlotItemEdits,
   needsMainStat,
-  simulatedCrystals,
   simulatedEquipment,
+  simulatedOath,
   simulatedSlotItems,
   simulationInputOf,
   slotItemIds,
   supportsSimulation,
   withEquipmentItems,
+  withWeaponTune,
   wornMainStat
 } from '#domain/equipment-simulation/index.js'
 import type { LoadCharacterScoreSource, LoadItemDetails } from './ports.js'
 
 export interface EquipmentSimulationRequest {
+  /** 고른 장비 세트의 setItemId이고, null이면 그대로 둔다. */
+  readonly equipmentSet: string | null
   readonly equipment: readonly EquipmentChange[]
   readonly slotItems: SlotItemChanges
-  readonly oath: readonly OathTuneChange[]
+  readonly oath: OathChanges
 }
 
 export interface EquipmentSimulationScores {
@@ -85,14 +90,23 @@ export class EquipmentSimulationService {
   ): Promise<EquipmentSimulationScores> {
     const { payloads, role, items } = await this.loadScoreSource(identity, signal)
     const edits = editEquipment(payloads.equipment, request.equipment, role)
-    const itemEdits = editEquipmentItems(payloads.equipment, request.equipment)
-    const oathEdits = editOathTunes(payloads.oath, request.oath)
+    const itemEdits = editEquipmentItems(
+      payloads.equipment,
+      request.equipment,
+      request.equipmentSet
+    )
+    const weaponEdit = editWeaponTune(payloads.equipment, request.equipment)
+    const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const editsSlotItems = hasSlotItemEdits(slotEdits)
+    const editsOath = hasOathEdit(oathEdit)
     const features: SimulationFeatures = {
       slotItems: editsSlotItems,
       equipmentItems: itemEdits.length > 0,
-      oathTunes: oathEdits.length > 0
+      oathTunes: editsOath,
+      equipmentSet: request.equipmentSet !== null && itemEdits.length > 0,
+      weaponTune: weaponEdit !== null,
+      oathItems: oathEdit.changesItems
     }
     const calculator = cardScoreCalculator(role)
     const input = toScoreEngineInput(payloads, items)
@@ -101,7 +115,8 @@ export class EquipmentSimulationService {
       edits.length === 0 &&
       !features.slotItems &&
       !features.equipmentItems &&
-      !features.oathTunes
+      !features.weaponTune &&
+      !editsOath
     ) {
       const result = await this.calculate(payloads, input, calculator, signal)
 
@@ -135,11 +150,16 @@ export class EquipmentSimulationService {
       }
     }
 
-    const equipment = withEquipmentItems(simulatedEquipment(edits, mainStat), itemEdits, details)
+    const itemEquipment = withEquipmentItems(
+      simulatedEquipment(edits, mainStat),
+      itemEdits,
+      details
+    )
+    const equipment = withWeaponTune(itemEquipment, weaponEdit)
     const simulation = simulationInputOf(
       equipment,
       simulatedSlotItems(slotEdits, details),
-      simulatedCrystals(oathEdits)
+      simulatedOath(oathEdit)
     )
     const detailItems = Object.fromEntries(details)
     const engineItems = { ...input.items, ...detailItems }
