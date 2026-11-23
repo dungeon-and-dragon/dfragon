@@ -9,16 +9,25 @@ import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   draftOf,
   enchantLabelsOf,
+  equipmentSetNameOf,
   FULL_POTENCY,
-  oathTuneOf,
   resolvedItemsOf,
   type SimulatorChanges,
+  type SimulatorEquipmentSet,
   type SimulatorRow,
   type SimulatorSlot,
   type SimulatorSlotItem,
   slotItemChoiceOf,
   variantChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
+import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
+import {
+  crystalDraftOf,
+  crystalItemOf,
+  oathBodyItemOf,
+  oathSetNameOf,
+  type SimulatorOathBody
+} from '#pages/character-simulator/model/simulator-oath'
 import type { SimulatorTarget } from '#pages/character-simulator/model/simulator-target'
 import { EnchantText } from './SlotControls'
 
@@ -64,6 +73,17 @@ export function EquipmentList({
           const selected = target.key === selectedKey
 
           switch (target.kind) {
+            case 'equipmentSet':
+              return (
+                <EquipmentSetRow
+                  key={target.key}
+                  target={target.key}
+                  equipmentSet={target.equipmentSet}
+                  changes={changes}
+                  selected={selected}
+                  onSelect={onSelect}
+                />
+              )
             case 'equipment':
               return (
                 <EquipmentRow
@@ -87,12 +107,43 @@ export function EquipmentList({
                   onSelect={onSelect}
                 />
               )
-            case 'oath':
+            case 'oathSet':
+            case 'oathBody':
+            case 'crystal':
               return null
           }
         })}
       </tbody>
     </table>
+  )
+}
+
+function EquipmentSetRow({
+  target,
+  equipmentSet,
+  changes,
+  selected,
+  onSelect
+}: {
+  target: string
+  equipmentSet: SimulatorEquipmentSet
+  changes: SimulatorChanges
+  selected: boolean
+  onSelect: SelectTarget
+}): React.JSX.Element {
+  return (
+    <tr aria-selected={selected}>
+      <td className={`${SLOT} max-sm:hidden`}>세트</td>
+      <td>
+        <PickButton target={target} selected={selected} onSelect={onSelect}>
+          <span className="min-w-0 font-semibold">
+            {equipmentSetNameOf(equipmentSet, changes) ?? MISSING_VALUE}
+          </span>
+        </PickButton>
+      </td>
+      <td />
+      <td className="max-sm:hidden" />
+    </tr>
   )
 }
 
@@ -120,16 +171,18 @@ function PickButton({
 
 function ItemText({
   item,
+  icon = null,
   tune = null,
   potency = null
 }: {
   item: ItemView
+  icon?: string | null
   tune?: string | null
   potency?: number | null
 }): React.JSX.Element {
   return (
     <>
-      <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+      <ItemIcon itemId={item.itemId} src={icon} rarity={item.rarity} />
       <span className="flex min-w-0 flex-wrap items-center gap-2">
         <ItemName name={item.itemName} rarity={item.rarity} />
         {tune !== null && <span className="label">{tune}</span>}
@@ -223,7 +276,7 @@ function SlotItemRow({
   )
 }
 
-export function OathCrystalList({
+export function OathList({
   targets,
   changes,
   selectedKey,
@@ -236,31 +289,98 @@ export function OathCrystalList({
 }): React.JSX.Element {
   return (
     <table className="table table-wrap table-fixed">
-      <thead>
-        <tr>
-          <th scope="col">결정</th>
-        </tr>
-      </thead>
       <tbody>
         {targets.map((target) => {
-          if (target.kind !== 'oath') {
-            return null
-          }
-
-          const { crystal } = target
           const selected = target.key === selectedKey
 
-          return (
-            <tr key={target.key} aria-selected={selected}>
-              <td>
-                <PickButton target={target.key} selected={selected} onSelect={onSelect}>
-                  <ItemText item={crystal} tune={tuneNumeral(oathTuneOf(crystal, changes))} />
-                </PickButton>
-              </td>
-            </tr>
-          )
+          switch (target.kind) {
+            case 'oathSet':
+              return (
+                <OathRow
+                  key={target.key}
+                  label="세트"
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <span className="min-w-0 font-semibold">
+                    {oathSetNameOf(target.oath) ?? MISSING_VALUE}
+                  </span>
+                </OathRow>
+              )
+            case 'oathBody':
+              return (
+                <OathRow
+                  key={target.key}
+                  label="서약"
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <OathBodyText body={target.body} changes={changes} />
+                </OathRow>
+              )
+            case 'crystal': {
+              const { crystal } = target
+              const { tune } = crystalDraftOf(crystal, changes.oath)
+
+              return (
+                <OathRow
+                  key={target.key}
+                  label={`결정 ${crystal.slotNo + 1}`}
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <ItemText item={crystalItemOf(crystal, changes.oath)} tune={tuneNumeral(tune)} />
+                </OathRow>
+              )
+            }
+            case 'equipmentSet':
+            case 'equipment':
+            case 'slotItem':
+              return null
+          }
         })}
       </tbody>
     </table>
   )
+}
+
+function OathRow({
+  label,
+  target,
+  selected,
+  onSelect,
+  children
+}: {
+  label: string
+  target: string
+  selected: boolean
+  onSelect: SelectTarget
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <tr aria-selected={selected}>
+      <td className={`${SLOT} w-[80px] max-sm:hidden`}>{label}</td>
+      <td>
+        <PickButton target={target} selected={selected} onSelect={onSelect}>
+          {children}
+        </PickButton>
+      </td>
+    </tr>
+  )
+}
+
+function OathBodyText({
+  body,
+  changes
+}: {
+  body: SimulatorOathBody
+  changes: SimulatorChanges
+}): React.JSX.Element {
+  const iconOf = useOathIconOf()
+  const item = oathBodyItemOf(body, changes.oath)
+
+  return <ItemText item={item} icon={iconOf(item)} />
 }

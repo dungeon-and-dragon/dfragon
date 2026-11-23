@@ -6,12 +6,15 @@ import {
 } from '@dfragon/lib/enchant-grades'
 import {
   EQUIPMENT_VARIANT_SLOTS,
+  type EquipmentSet,
   type EquipmentVariant,
   type EquipmentVariantSlot,
+  equipmentSets,
   equipmentVariantsOf,
   findEquipmentVariant,
-  findOathCrystal,
-  resolveEquipmentItems
+  resolveEquipmentItems,
+  switchEquipmentSet,
+  weaponMaxTuneLevelOf
 } from '@dfragon/lib/equipment-variants'
 import { type SlotItemCategory, slotItemsOf } from '@dfragon/lib/slot-items'
 import {
@@ -23,14 +26,28 @@ import {
   toItemView
 } from '#entities/character'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
+import {
+  type CrystalDraft,
+  changeCrystal,
+  changeOathBody,
+  changeOathSet,
+  hasOathChanges,
+  NO_OATH_CHANGES,
+  type OathChanges,
+  type OathCrystalChange,
+  oathCrystalChanges,
+  type SimulatorOath,
+  type SimulatorOathBody,
+  type SimulatorOathCrystal
+} from './simulator-oath'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
 type SetItem = CharacterDetailView['equipment']['setItemInfo'][number]
-type OathCrystalItem = NonNullable<CharacterDetailView['oath']>['crystal'][number]
 type SimulatorDetail = Pick<CharacterDetailView, 'equipment' | 'card' | 'creature' | 'avatar'>
 type WornItem = Parameters<typeof toItemView>[0]
 
 const TITLE_SLOT_ID = 'TITLE'
+const WEAPON_SLOT_ID = 'WEAPON'
 const AURA_SLOT_ID = 'AURORA'
 // 캐릭터 상세 장비 탭과 같은 부위 이름이다. 칭호는 응답의 부위 이름을 쓴다.
 const SLOT_ITEM_NAMES: Readonly<Record<SlotItemCategory, string>> = {
@@ -65,7 +82,10 @@ export type VariantChoice = Readonly<{
   variant: EquipmentVariant
 }>
 
-/** wornVariantId가 null이면 착용 아이템이 선택지에 없다. */
+/**
+ * wornVariantId, wornTune, wornPotency는 지금 기준의 아이템, 조율, 정밀도다. 장비 세트를 고르면 그 세트로 옮긴 값이고,
+ * wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율 상한이다(무기).
+ */
 export type SimulatorSlot = ItemView &
   Readonly<{
     slotId: EnchantGradeSlot
@@ -80,6 +100,7 @@ export type SimulatorSlot = ItemView &
     wornVariantId: string | null
     wornTune: number
     wornPotency: number | null
+    wornMaxTune: number
   }>
 
 export type SlotItemChoice = Readonly<{
@@ -100,8 +121,8 @@ export type SimulatorRow =
   | Readonly<{ kind: 'equipment'; slot: SimulatorSlot }>
   | Readonly<{ kind: 'slotItem'; slotItem: SimulatorSlotItem }>
 
-export type SimulatorOathCrystal = ItemView &
-  Readonly<{ slotNo: number; tune: number; maxTune: number }>
+/** 장비 세트 줄이다. mainSetId는 캐릭터의 주 세트이고, 세트를 고르지 않았을 때 선택된 세트다. */
+export type SimulatorEquipmentSet = Readonly<{ mainSetId: string; sets: readonly EquipmentSet[] }>
 
 /**
  * 부위의 원하는 상태다. `enchantId`가 null이면 착용한 마법부여를 그대로 두고, `variantId`가 null이면 선택지에 없는 착용
@@ -116,14 +137,20 @@ export type SlotDraft = Readonly<{
   potency: number | null
 }>
 
-/** 원본과 다른 장비 부위, 바꾸려고 고른 칭호, 크리쳐, 오라 묶음 id와 slotNo별로 바꾼 서약 결정 조율만 담는다. */
+/** 고른 장비 세트, 기준과 다른 장비 부위, 바꾸려고 고른 칭호, 크리쳐, 오라 묶음 id와 서약의 바꾼 것만 담는다. */
 export type SimulatorChanges = Readonly<{
+  equipmentSet: string | null
   equipment: Readonly<Partial<Record<EnchantGradeSlot, SlotDraft>>>
   slotItems: Readonly<Partial<Record<SlotItemCategory, string>>>
-  oath: Readonly<Record<number, number>>
+  oath: OathChanges
 }>
 
-export const NO_CHANGES: SimulatorChanges = { equipment: {}, slotItems: {}, oath: {} }
+export const NO_CHANGES: SimulatorChanges = {
+  equipmentSet: null,
+  equipment: {},
+  slotItems: {},
+  oath: NO_OATH_CHANGES
+}
 
 /** `variantId`, `tune`, `potency`가 null이면 착용 아이템의 값을 그대로 둔다. */
 export type SimulationChange = Readonly<{
@@ -136,18 +163,34 @@ export type SimulationChange = Readonly<{
   potency: number | null
 }>
 
-export type OathTuneChange = Readonly<{ slotNo: number; tune: number }>
-
 export type SimulationBody = Readonly<
-  { equipment: SimulationChange[]; oath?: OathTuneChange[] } & Partial<
-    Record<SlotItemCategory, string>
-  >
+  {
+    equipmentSet?: string
+    equipment: SimulationChange[]
+    oathSet?: number
+    oathBody?: string
+    oath?: OathCrystalChange[]
+  } & Partial<Record<SlotItemCategory, string>>
 >
 
+/** rows와 oath는 세트를 옮기기 전의 줄과 서약이고, slot, body, crystal은 지금 기준으로 옮긴 것이다. */
 export type SimulatorAction =
+  | Readonly<{
+      type: 'equipmentSet'
+      rows: readonly SimulatorRow[]
+      equipmentSet: SimulatorEquipmentSet
+      setItemId: string
+    }>
   | Readonly<{ type: 'change'; slot: SimulatorSlot; draft: Partial<SlotDraft> }>
   | Readonly<{ type: 'slotItem'; slotItem: SimulatorSlotItem; id: string | null }>
-  | Readonly<{ type: 'oathTune'; crystal: SimulatorOathCrystal; tune: number }>
+  | Readonly<{ type: 'oathSet'; oath: SimulatorOath; setId: number }>
+  | Readonly<{ type: 'oathBody'; body: SimulatorOathBody; id: string }>
+  | Readonly<{
+      type: 'crystal'
+      oath: SimulatorOath
+      crystal: SimulatorOathCrystal
+      draft: Partial<CrystalDraft>
+    }>
   | Readonly<{ type: 'reset' }>
 
 function isGradeSlot(slotId: string | null): slotId is EnchantGradeSlot {
@@ -309,6 +352,7 @@ function toSimulatorSlot(
   const wornVariantId = wornVariantIdOf(item, variants)
   const wornTune = wornTuneOf(item)
   const wornPotency = wornPotencyOf(item, variants, wornVariantId)
+  const wornMaxTune = item.slotId === WEAPON_SLOT_ID ? weaponMaxTuneLevelOf(item.itemName ?? '') : 0
 
   return {
     ...itemView,
@@ -323,7 +367,8 @@ function toSimulatorSlot(
     variants,
     wornVariantId,
     wornTune,
-    wornPotency
+    wornPotency,
+    wornMaxTune
   }
 }
 
@@ -349,6 +394,87 @@ function slotItemRow(
   return [{ kind: 'slotItem', slotItem }]
 }
 
+/** 캐릭터의 주 세트가 선택 목록에 있으면 장비 세트 줄을 둔다. */
+export function toEquipmentSet(
+  detail: Pick<CharacterDetailView, 'equipment'>
+): SimulatorEquipmentSet | null {
+  const sets = equipmentSets()
+  const listed = new Set(sets.map(({ setItemId }) => setItemId))
+  const mainSetId = setIdsByPointOf(detail.equipment.setItemInfo).find((setItemId) =>
+    listed.has(setItemId)
+  )
+
+  if (mainSetId === undefined) {
+    return null
+  }
+
+  return { mainSetId, sets }
+}
+
+export function equipmentSetIdOf(
+  equipmentSet: SimulatorEquipmentSet,
+  changes: SimulatorChanges
+): string {
+  if (changes.equipmentSet === null) {
+    return equipmentSet.mainSetId
+  }
+
+  return changes.equipmentSet
+}
+
+export function equipmentSetNameOf(
+  equipmentSet: SimulatorEquipmentSet,
+  changes: SimulatorChanges
+): string | null {
+  const setItemId = equipmentSetIdOf(equipmentSet, changes)
+  const current = equipmentSet.sets.find((set) => set.setItemId === setItemId)
+
+  if (current === undefined) {
+    return null
+  }
+
+  return current.setItemName
+}
+
+function slotInSet(slot: SimulatorSlot, setItemId: string): SimulatorSlot {
+  const { slotId } = slot
+
+  if (!isVariantSlot(slotId)) {
+    return slot
+  }
+
+  const variants = equipmentVariantsOf(setItemId, slotId).map(toVariantChoice)
+  const worn = variantChoiceOf(slot, slot.wornVariantId)
+  const switched = switchEquipmentSet({ [slotId]: worn?.variant ?? null }, setItemId)[slotId]
+  const keepsWorn = variants.some(({ id }) => id === slot.wornVariantId)
+  const wornVariantId = switched?.id ?? (keepsWorn ? slot.wornVariantId : null)
+  const choice = variants.find(({ id }) => id === wornVariantId)
+  const wornTune = choice !== undefined ? Math.min(slot.wornTune, choice.maxTune) : slot.wornTune
+
+  return { ...slot, variants, wornVariantId, wornTune }
+}
+
+/**
+ * 고른 장비 세트로 옮긴 줄이다. 세트를 고르지 않았으면 그대로다. 무기를 뺀 11부위는 그 세트의 같은 등급, 같은 종류가 되고,
+ * 유일 장비와 선택지에 없는 착용 아이템은 그대로 둔다.
+ */
+export function rowsInEquipmentSet(
+  rows: readonly SimulatorRow[],
+  setItemId: string | null
+): readonly SimulatorRow[] {
+  if (setItemId === null) {
+    return rows
+  }
+
+  return rows.map((row) => {
+    if (row.kind !== 'equipment') {
+      return row
+    }
+
+    return { kind: 'equipment', slot: slotInSet(row.slot, setItemId) }
+  })
+}
+
 /** 칭호는 응답의 부위 순서 자리에, 크리쳐와 오라는 캐릭터 상세 장비 탭처럼 장비 뒤에 둔다. 장비는 등급표의 12부위만 둔다. */
 export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
   const role = simulatorRole(detail.card)
@@ -372,26 +498,6 @@ export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
   const aura = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
 
   return [...equipment, ...slotItemRow('creature', detail.creature), ...slotItemRow('aura', aura)]
-}
-
-function toOathCrystal(crystal: OathCrystalItem): SimulatorOathCrystal[] {
-  if (crystal.slotNo === null) {
-    return []
-  }
-
-  const known = crystal.itemName !== null ? findOathCrystal(crystal.itemName) : null
-  const maxTune = known !== null ? maxTuneOf(known.tuneSetPoints) : 0
-  const tune = crystal.tune?.level ?? 0
-  const itemView = toItemView(crystal)
-
-  return [{ ...itemView, slotNo: crystal.slotNo, tune, maxTune }]
-}
-
-/** 서약 결정을 slotNo 순서로 둔다. 서약이 없으면 빈 목록이다. */
-export function toOathCrystals(detail: Pick<CharacterDetailView, 'oath'>): SimulatorOathCrystal[] {
-  const crystals = detail.oath?.crystal ?? []
-
-  return crystals.flatMap(toOathCrystal).toSorted((a, b) => a.slotNo - b.slotNo)
 }
 
 function originalDraft(slot: SimulatorSlot): SlotDraft {
@@ -453,14 +559,19 @@ function isInRange(value: number, max: number): boolean {
   return Number.isInteger(value) && value >= 0 && value <= max
 }
 
-function isTuneAllowed(slot: SimulatorSlot, draft: SlotDraft): boolean {
-  const choice = variantChoiceOf(slot, draft.variantId)
+/** 그 상태의 조율 상한이다. 0이면 조율할 수 없다. */
+export function tuneLimitOf(slot: SimulatorSlot, variantId: string | null): number {
+  const choice = variantChoiceOf(slot, variantId)
 
   if (choice === undefined) {
-    return draft.tune === slot.wornTune
+    return slot.wornMaxTune
   }
 
-  return isInRange(draft.tune, choice.maxTune)
+  return choice.maxTune
+}
+
+function isTuneAllowed(slot: SimulatorSlot, draft: SlotDraft): boolean {
+  return draft.tune === slot.wornTune || isInRange(draft.tune, tuneLimitOf(slot, draft.variantId))
 }
 
 function isPotencyAllowed(slot: SimulatorSlot, draft: SlotDraft): boolean {
@@ -574,32 +685,46 @@ function changeSlotItem(
   return { ...changes, slotItems: { ...others, [slotItem.category]: id } }
 }
 
-export function oathTuneOf(crystal: SimulatorOathCrystal, changes: SimulatorChanges): number {
-  const changed = changes.oath[crystal.slotNo]
-
-  if (changed === undefined) {
-    return crystal.tune
-  }
-
-  return changed
-}
-
-function changeOathTune(
+/**
+ * 장비 세트를 바꾸면 부위마다 고른 아이템은 새 세트의 기준 아이템으로 되돌리고, 강화, 증폭, 마법부여와 바꾼 조율은 기준
+ * 아이템의 최대 단계까지 유지한다. 주 세트를 다시 고르면 세트를 고르지 않은 것으로 둔다.
+ */
+function changeEquipmentSet(
   changes: SimulatorChanges,
-  crystal: SimulatorOathCrystal,
-  tune: number
+  rows: readonly SimulatorRow[],
+  equipmentSet: SimulatorEquipmentSet,
+  setItemId: string
 ): SimulatorChanges {
-  if (!isInRange(tune, crystal.maxTune)) {
+  if (!equipmentSet.sets.some((set) => set.setItemId === setItemId)) {
     return changes
   }
 
-  const { [crystal.slotNo]: _previous, ...others } = changes.oath
+  const chosen = setItemId === equipmentSet.mainSetId ? null : setItemId
+  const equipment = Object.fromEntries(
+    rowsInEquipmentSet(rows, chosen).flatMap((row): [EnchantGradeSlot, SlotDraft][] => {
+      if (row.kind !== 'equipment') {
+        return []
+      }
 
-  if (tune === crystal.tune) {
-    return { ...changes, oath: others }
-  }
+      const { slot } = row
+      const changed = changes.equipment[slot.slotId]
 
-  return { ...changes, oath: { ...others, [crystal.slotNo]: tune } }
+      if (changed === undefined) {
+        return []
+      }
+
+      const tune = Math.min(changed.tune, tuneLimitOf(slot, slot.wornVariantId))
+      const rebased = { ...changed, variantId: slot.wornVariantId, tune, potency: slot.wornPotency }
+
+      if (isOriginal(slot, rebased)) {
+        return []
+      }
+
+      return [[slot.slotId, rebased]]
+    })
+  )
+
+  return { ...changes, equipmentSet: chosen, equipment }
 }
 
 export function simulatorReducer(
@@ -607,12 +732,27 @@ export function simulatorReducer(
   action: SimulatorAction
 ): SimulatorChanges {
   switch (action.type) {
+    case 'equipmentSet':
+      return changeEquipmentSet(changes, action.rows, action.equipmentSet, action.setItemId)
     case 'change':
       return changeSlot(changes, action.slot, action.draft)
     case 'slotItem':
       return changeSlotItem(changes, action.slotItem, action.id)
-    case 'oathTune':
-      return changeOathTune(changes, action.crystal, action.tune)
+    case 'oathSet': {
+      const oath = changeOathSet(changes.oath, action.oath, action.setId)
+
+      return { ...changes, oath }
+    }
+    case 'oathBody': {
+      const oath = changeOathBody(changes.oath, action.body, action.id)
+
+      return { ...changes, oath }
+    }
+    case 'crystal': {
+      const oath = changeCrystal(changes.oath, action.oath, action.crystal, action.draft)
+
+      return { ...changes, oath }
+    }
     case 'reset':
       return NO_CHANGES
   }
@@ -666,22 +806,14 @@ function toSimulationChange(slot: SimulatorSlot, draft: SlotDraft): SimulationCh
   }
 }
 
-function oathChanges(changes: SimulatorChanges): OathTuneChange[] {
-  return Object.entries(changes.oath)
-    .map(([key, tune]) => {
-      const slotNo = Number(key)
-
-      return { slotNo, tune }
-    })
-    .toSorted((a, b) => a.slotNo - b.slotNo)
-}
-
 /**
- * 바꾼 부위만 화면의 부위 순서대로 넣어, 같은 변경은 늘 같은 요청이 된다. 칭호, 크리쳐, 오라와 서약 결정은 바꾼 것만 넣고,
- * 장비를 바꾸지 않았어도 equipment는 빈 배열로 보낸다. 5축성 변환으로 바뀌는 다른 부위는 서버가 계산하므로 넣지 않는다.
+ * 바꾼 것만 화면의 순서대로 넣어, 같은 변경은 늘 같은 요청이 된다. 장비를 바꾸지 않았어도 equipment는 빈 배열로 보낸다.
+ * rows와 oath는 고른 세트로 옮긴 줄과 서약이다. 세트 전환과 5축성 변환으로 바뀌는 다른 부위와 결정은 서버가 계산하므로,
+ * 세트만 고르면 세트만 넣고 따로 바꾼 부위와 결정만 넣는다.
  */
 export function simulationBody(
   rows: readonly SimulatorRow[],
+  oath: SimulatorOath | null,
   changes: SimulatorChanges
 ): SimulationBody {
   const equipment = rows.flatMap((row) => {
@@ -697,19 +829,26 @@ export function simulationBody(
 
     return [toSimulationChange(row.slot, draft)]
   })
-  const oath = oathChanges(changes)
+  const crystals = oathCrystalChanges(oath, changes.oath)
+  const equipmentSet = changes.equipmentSet !== null ? { equipmentSet: changes.equipmentSet } : {}
+  const oathSet = changes.oath.set !== null ? { oathSet: changes.oath.set } : {}
+  const oathBody = changes.oath.body !== null ? { oathBody: changes.oath.body } : {}
+  const crystalChanges = crystals.length > 0 ? { oath: crystals } : {}
 
-  if (oath.length === 0) {
-    return { equipment, ...changes.slotItems }
+  return {
+    ...equipmentSet,
+    equipment,
+    ...changes.slotItems,
+    ...oathSet,
+    ...oathBody,
+    ...crystalChanges
   }
-
-  return { equipment, ...changes.slotItems, oath }
 }
 
 export function hasChanges(changes: SimulatorChanges): boolean {
   const changedEquipment = Object.keys(changes.equipment).length > 0
   const changedSlotItems = Object.keys(changes.slotItems).length > 0
-  const changedOath = Object.keys(changes.oath).length > 0
+  const changedSet = changes.equipmentSet !== null
 
-  return changedEquipment || changedSlotItems || changedOath
+  return changedSet || changedEquipment || changedSlotItems || hasOathChanges(changes.oath)
 }

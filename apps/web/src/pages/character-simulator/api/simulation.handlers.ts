@@ -8,7 +8,13 @@ import {
 import type { SimulationBody } from '#pages/character-simulator/model/simulator-draft'
 import { storyItemDetail } from '#widgets/item-tooltip/api/item-detail.fixture'
 import { ITEM_DETAIL_URL } from '#widgets/item-tooltip/api/item-detail.handlers'
-import { calculatorOf, simulationScore, syntheticSimulation } from './simulation.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import {
+  calculatorOf,
+  simulationScore,
+  simulatorOathCatalog,
+  syntheticSimulation
+} from './simulation.fixture'
 import type { EquipmentSimulation } from './useEquipmentSimulation'
 
 type Simulate = (body: SimulationBody) => EquipmentSimulation
@@ -57,6 +63,7 @@ function simulatorHandlers(detail: CharacterDetailView, simulate: Simulate) {
 
   return [
     slotItemDetailHandler,
+    oathCatalogHandlers.catalog(simulatorOathCatalog),
     http.get(characterUrl(identity), () => HttpResponse.json(detail)),
     http.post(simulationUrl(identity), async ({ request }) => {
       const body = (await request.json()) as SimulationBody
