@@ -20,6 +20,7 @@ import {
   slotItemChoiceOf,
   variantChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
+import { upgradeStepNameOf } from '#pages/character-simulator/model/simulator-oath-upgrade'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
   crystalDraftOf,
@@ -109,6 +110,7 @@ export function EquipmentList({
               )
             case 'oathSet':
             case 'oathBody':
+            case 'oathUpgrade':
             case 'crystal':
               return null
           }
@@ -320,6 +322,21 @@ export function OathList({
                   <OathBodyText body={target.body} changes={changes} />
                 </OathRow>
               )
+            case 'oathUpgrade': {
+              const stepName = upgradeStepNameOf(target.upgrade, changes.oath.upgrade)
+
+              return (
+                <OathRow
+                  key={target.key}
+                  label={target.upgrade.title}
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <span className="min-w-0 font-semibold">{stepName ?? MISSING_VALUE}</span>
+                </OathRow>
+              )
+            }
             case 'crystal': {
               const { crystal } = target
               const { tune } = crystalDraftOf(crystal, changes.oath)
@@ -362,7 +379,8 @@ function OathRow({
 }): React.JSX.Element {
   return (
     <tr aria-selected={selected}>
-      <td className={`${SLOT} w-[80px] max-sm:hidden`}>{label}</td>
+      {/* "묵언의 진의"처럼 칸보다 긴 줄 이름은 말줄임하지 않고 두 줄로 둔다. */}
+      <td className="w-[80px] text-xs text-fg-subtle max-sm:hidden">{label}</td>
       <td>
         <PickButton target={target} selected={selected} onSelect={onSelect}>
           {children}

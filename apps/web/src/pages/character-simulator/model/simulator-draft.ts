@@ -7,6 +7,7 @@ import {
 import {
   EQUIPMENT_VARIANT_SLOTS,
   type EquipmentSet,
+  type OathUpgradeSelection,
   type EquipmentVariant,
   type EquipmentVariantSlot,
   equipmentSets,
@@ -26,6 +27,7 @@ import {
   toItemView
 } from '#entities/character'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
+import { changeUpgradeStep, type SimulatorOathUpgrade } from './simulator-oath-upgrade'
 import {
   type CrystalDraft,
   changeCrystal,
@@ -169,6 +171,7 @@ export type SimulationBody = Readonly<
     equipment: SimulationChange[]
     oathSet?: number
     oathBody?: string
+    oathUpgrade?: readonly OathUpgradeSelection[]
     oath?: OathCrystalChange[]
   } & Partial<Record<SlotItemCategory, string>>
 >
@@ -185,6 +188,12 @@ export type SimulatorAction =
   | Readonly<{ type: 'slotItem'; slotItem: SimulatorSlotItem; id: string | null }>
   | Readonly<{ type: 'oathSet'; oath: SimulatorOath; setId: number }>
   | Readonly<{ type: 'oathBody'; body: SimulatorOathBody; id: string }>
+  | Readonly<{
+      type: 'oathUpgrade'
+      upgrade: SimulatorOathUpgrade
+      step: number
+      option: string | null
+    }>
   | Readonly<{
       type: 'crystal'
       oath: SimulatorOath
@@ -798,6 +807,16 @@ export function simulatorReducer(
 
       return { ...changes, oath }
     }
+    case 'oathUpgrade': {
+      const upgrade = changeUpgradeStep(
+        action.upgrade,
+        changes.oath.upgrade,
+        action.step,
+        action.option
+      )
+
+      return { ...changes, oath: { ...changes.oath, upgrade } }
+    }
     case 'crystal': {
       const oath = changeCrystal(changes.oath, action.oath, action.crystal, action.draft)
 
@@ -883,6 +902,7 @@ export function simulationBody(
   const equipmentSet = changes.equipmentSet !== null ? { equipmentSet: changes.equipmentSet } : {}
   const oathSet = changes.oath.set !== null ? { oathSet: changes.oath.set } : {}
   const oathBody = changes.oath.body !== null ? { oathBody: changes.oath.body } : {}
+  const oathUpgrade = changes.oath.upgrade !== null ? { oathUpgrade: changes.oath.upgrade } : {}
   const crystalChanges = crystals.length > 0 ? { oath: crystals } : {}
 
   return {
@@ -891,6 +911,7 @@ export function simulationBody(
     ...changes.slotItems,
     ...oathSet,
     ...oathBody,
+    ...oathUpgrade,
     ...crystalChanges
   }
 }

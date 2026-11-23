@@ -348,17 +348,19 @@ export function EnchantControl({
   )
 }
 
-export type SetOption = Readonly<{ id: string; name: string }>
+export type TextOption = Readonly<{ id: string; name: string }>
 
-export function SetControl({
+export function TextControl({
   label,
   value,
   options,
+  disabled = false,
   onChange
 }: {
   label: string
   value: string
-  options: readonly SetOption[]
+  options: readonly TextOption[]
+  disabled?: boolean
   onChange: (id: string) => void
 }): React.JSX.Element {
   function nameOf(id: string): string {
@@ -379,7 +381,7 @@ export function SetControl({
 
   return (
     <div className="grid min-w-0">
-      <Select.Root value={value} onValueChange={changeSet}>
+      <Select.Root value={value} disabled={disabled} onValueChange={changeSet}>
         <Select.Trigger size="sm" aria-label={label}>
           <Select.Value>
             {(id: string) => <span className="min-w-0 truncate">{nameOf(id)}</span>}

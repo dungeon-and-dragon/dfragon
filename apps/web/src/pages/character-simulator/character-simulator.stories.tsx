@@ -194,6 +194,12 @@ async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement 
   await pick(canvasElement, '결정 8 교체', '용투 : 태초의 광휘 결정')
 }
 
+async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement }) {
+  await chooseOath(canvasElement, '묵언의 진의')
+  await pick(canvasElement, '여섯 번째 진의', '-')
+  await pick(canvasElement, '첫 번째 진의', '최종 데미지')
+}
+
 async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {
   await pick(canvasElement, '무기 조율', 'II')
 }
@@ -252,6 +258,11 @@ export const 서약세트: Story = {
 export const 서약등급: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeOathGrades
+}
+
+export const 진의: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeOathUpgrade
 }
 
 export const 무기조율: Story = {

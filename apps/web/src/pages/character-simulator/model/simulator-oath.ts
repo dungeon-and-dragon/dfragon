@@ -17,6 +17,11 @@ import {
   itemRarityOfGrade,
   toItemView
 } from '#entities/character'
+import {
+  type OathUpgradeChanges,
+  type SimulatorOathUpgrade,
+  toSimulatorOathUpgrade
+} from './simulator-oath-upgrade'
 
 type Oath = NonNullable<CharacterDetailView['oath']>
 type OathCrystalItem = Oath['crystal'][number]
@@ -56,6 +61,7 @@ export type SimulatorOath = Readonly<{
   setId: number | null
   sets: readonly OathSet[]
   body: SimulatorOathBody | null
+  upgrade: SimulatorOathUpgrade | null
   crystals: readonly SimulatorOathCrystal[]
 }>
 
@@ -66,9 +72,10 @@ export type OathChanges = Readonly<{
   set: number | null
   body: string | null
   crystals: Readonly<Record<number, CrystalDraft>>
+  upgrade: OathUpgradeChanges
 }>
 
-export const NO_OATH_CHANGES: OathChanges = { set: null, body: null, crystals: {} }
+export const NO_OATH_CHANGES: OathChanges = { set: null, body: null, crystals: {}, upgrade: null }
 
 const PRIMEVAL: ItemView['rarity'] = 'primordial'
 
@@ -155,8 +162,9 @@ export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): Simu
     .toSorted((a, b) => a.slotNo - b.slotNo)
   const sets = oathSets()
   const body = toOathBody(oath.info)
+  const upgrade = toSimulatorOathUpgrade(detail)
 
-  return { setId, sets, body, crystals }
+  return { setId, sets, body, upgrade, crystals }
 }
 
 function choiceOf(choices: readonly OathChoice[], id: string | null): OathChoice | undefined {
@@ -386,7 +394,7 @@ export function changeOathSet(
     })
   )
 
-  return { set, body, crystals }
+  return { set, body, crystals, upgrade: changes.upgrade }
 }
 
 // 착용한 세트를 골라도 다른 세트의 광휘 결정이나 본체를 그 세트로 옮기면 바뀌는 것이 있다.
@@ -461,5 +469,9 @@ export function oathCrystalChanges(
 }
 
 export function hasOathChanges(changes: OathChanges): boolean {
-  return changes.set !== null || changes.body !== null || Object.keys(changes.crystals).length > 0
+  const changedCrystals = Object.keys(changes.crystals).length > 0
+
+  return (
+    changes.set !== null || changes.body !== null || changedCrystals || changes.upgrade !== null
+  )
 }

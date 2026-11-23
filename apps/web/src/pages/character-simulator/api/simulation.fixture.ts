@@ -16,6 +16,7 @@ const POINTS_PER_POTENCY = 310
 const EQUIPMENT_SET_POINTS = 64_500
 const OATH_SET_POINTS = 18_900
 const OATH_BODY_POINTS = 27_300
+const POINTS_PER_UPGRADE_STEP = 9_100
 
 type Calculator = CharacterCardScore['calculator']
 
@@ -85,12 +86,25 @@ function oathPointsOf(detail: CharacterDetailView, oath: SimulationBody['oath'] 
   }, 0)
 }
 
-function setPointsOf({ equipmentSet, oathSet, oathBody }: SimulationBody): number {
+function upgradePointsOf(detail: CharacterDetailView, oathUpgrade: SimulationBody['oathUpgrade']) {
+  if (oathUpgrade === undefined) {
+    return 0
+  }
+
+  const worn = detail.oath?.info?.oathUpgrade?.options.length ?? 0
+
+  return (oathUpgrade.length - worn) * POINTS_PER_UPGRADE_STEP
+}
+
+function setPointsOf(
+  detail: CharacterDetailView,
+  { equipmentSet, oathSet, oathBody, oathUpgrade }: SimulationBody
+): number {
   const equipmentSetPoints = equipmentSet !== undefined ? EQUIPMENT_SET_POINTS : 0
   const oathSetPoints = oathSet !== undefined ? OATH_SET_POINTS : 0
   const oathBodyPoints = oathBody !== undefined ? OATH_BODY_POINTS : 0
 
-  return equipmentSetPoints + oathSetPoints + oathBodyPoints
+  return equipmentSetPoints + oathSetPoints + oathBodyPoints + upgradePointsOf(detail, oathUpgrade)
 }
 
 function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
@@ -100,6 +114,7 @@ function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
     equipmentSet: _set,
     oathSet: _oathSet,
     oathBody: _body,
+    oathUpgrade: _upgrade,
     ...slotItems
   } = body
   const items = detail.equipment.equipment
@@ -118,7 +133,7 @@ function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
 
       return sum + reinforce + amplified + enchant + variant + tune + potency
     },
-    slotItemPoints + oathPointsOf(detail, oath) + setPointsOf(body)
+    slotItemPoints + oathPointsOf(detail, oath) + setPointsOf(detail, body)
   )
 }
 
