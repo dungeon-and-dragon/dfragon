@@ -94,7 +94,7 @@ it('서약 세트를 고르면 본체와 광휘 결정이 그 세트의 같은 �
   const changed = apply(NO_CHANGES, { type: 'oathSet', oath: dealerOath, setId: SHADOW_SET })
   const view = viewOf(dealerOath, changed)
 
-  expect(changed.oath).toEqual({ set: SHADOW_SET, body: null, crystals: {} })
+  expect(changed.oath).toEqual({ set: SHADOW_SET, body: null, crystals: {}, upgrade: null })
   expect(oathBodyItemOf(view.body!, changed.oath).itemName).toBe('태초의 어둠 속 그림자 서약')
   expect(view.crystals.map(({ wornVariantId }) => wornVariantId)).toEqual([
     ...Array.from({ length: 8 }, () => crystalId(SHADOW_SET, '에픽')),

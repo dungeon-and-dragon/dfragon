@@ -5,6 +5,7 @@ import {
   equipmentSets,
   equipmentVariantsOf,
   oathCrystalVariantsOf,
+  oathUpgradeSteps,
   oathVariantOf,
   oathVariantsOf
 } from '@dfragon/lib/equipment-variants'
@@ -895,6 +896,7 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
   expect(rows.map((row) => row.querySelectorAll('td')[1]?.textContent)).toEqual([
     '야망의 용투 서약',
     '세계를 태우는 용투 서약',
+    '아홉 번째 진의',
     ...Array.from({ length: 6 }, () => '용투 : 완전한 광휘 결정III'),
     '용투 : 완전한 광휘 결정I',
     '용투 : 완전한 광휘 결정',
@@ -1214,4 +1216,37 @@ it('태초 결정이 이미 3개면 다른 결정의 선택 목록에 태초 결
       .filter(({ rarity }) => rarity !== '태초')
       .map(({ item }) => item.itemName)
   )
+})
+
+it('진의 줄을 고르면 단계마다 선택을 열고, 단계를 내리고 올리면 바꾼 진의 전체를 요청하고 줄에 지금 단계를 보인다', async () => {
+  const fifthSpeed = oathUpgradeSteps()[4]!.options.find(({ kind }) => kind === 'Speed')!.option
+  const worn = ['고요한 호흡', '자애의 마음', '내면의 조율', '신념의 대가'].map(
+    (option, index) => ({ step: index + 1, option })
+  )
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent).toBe('아홉 번째 진의')
+
+  await chooseOath('묵언의 진의')
+
+  expect(control('첫 번째 진의').textContent).toBe('쿨타임 감소')
+
+  await pick('다섯 번째 진의', '-')
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathUpgrade: worn }))
+  expect(oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent).toBe('네 번째 진의')
+  expect(control('다섯 번째 진의').textContent).toBe('-')
+  expect(control('여섯 번째 진의').hasAttribute('disabled')).toBe(true)
+
+  await pick('다섯 번째 진의', '이동속도')
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)).toEqual({
+      equipment: [],
+      oathUpgrade: [...worn, { step: 5, option: fifthSpeed }]
+    })
+  )
+  expect(oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent).toBe('다섯 번째 진의')
+  expect(control('여섯 번째 진의').hasAttribute('disabled')).toBe(false)
 })
