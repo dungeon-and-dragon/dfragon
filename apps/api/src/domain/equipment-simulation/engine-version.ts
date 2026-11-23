@@ -5,6 +5,7 @@ const SLOT_ITEM_ENGINE_VERSION: EngineVersion = [0, 6, 0]
 const EQUIPMENT_ITEM_ENGINE_VERSION: EngineVersion = [0, 7, 0]
 const OATH_TUNE_ENGINE_VERSION: EngineVersion = [0, 8, 0]
 const SET_ENGINE_VERSION: EngineVersion = [0, 9, 0]
+const OATH_UPGRADE_ENGINE_VERSION: EngineVersion = [0, 10, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -17,6 +18,8 @@ export interface SimulationFeatures {
   readonly weaponTune: boolean
   /** 서약 세트, 본체, 결정 아이템 교체 */
   readonly oathItems: boolean
+  /** 묵언의 진의 단계와 선택지 변경 */
+  readonly oathUpgrade: boolean
 }
 
 function versionOf(engine: string): number[] | null {
@@ -58,6 +61,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.equipmentSet || features.weaponTune || features.oathItems) {
     minimums.push(SET_ENGINE_VERSION)
+  }
+
+  if (features.oathUpgrade) {
+    minimums.push(OATH_UPGRADE_ENGINE_VERSION)
   }
 
   return minimums
