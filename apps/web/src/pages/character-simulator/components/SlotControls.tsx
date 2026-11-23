@@ -9,17 +9,12 @@ import {
 import { ItemTooltip } from '#widgets/item-tooltip'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
-  draftOf,
   type EnchantChoice,
+  enchantLabelsOf,
   FULL_POTENCY,
-  resolvedItemsOf,
-  type SimulatorChanges,
-  type SimulatorRow,
   type SimulatorSlot,
   type SimulatorSlotItem,
-  type SlotDraft,
-  slotItemChoiceOf,
-  variantChoiceOf
+  type SlotDraft
 } from '#pages/character-simulator/model/simulator-draft'
 import { TuneSelect } from './TuneSelect'
 
@@ -28,111 +23,6 @@ const CURRENT = 'current'
 const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결']
 const SIGNED: Intl.NumberFormatOptions = { signDisplay: 'always' }
 const CONTROL_LINE = 'flex h-control-sm items-center'
-
-export function SimulatorTable({
-  rows,
-  changes,
-  onChange,
-  onSlotItemChange
-}: {
-  rows: readonly SimulatorRow[]
-  changes: SimulatorChanges
-  onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) => void
-  onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
-}): React.JSX.Element {
-  const resolved = resolvedItemsOf(rows, changes)
-
-  return (
-    <div className="table-scroll">
-      <table className="table table-wrap table-fixed min-w-[720px] max-sm:min-w-[640px]">
-        <thead>
-          <tr>
-            <th scope="col" className="w-[80px] max-sm:hidden">
-              부위
-            </th>
-            <th scope="col">장비</th>
-            <th scope="col" className="w-[200px]">
-              강화, 증폭
-            </th>
-            <th scope="col" className="w-[280px]">
-              마법부여
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => {
-            if (row.kind === 'slotItem') {
-              const { slotItem } = row
-
-              return (
-                <SlotItemRow
-                  key={slotItem.category}
-                  slotItem={slotItem}
-                  chosen={slotItemChoiceOf(slotItem, changes)}
-                  onChange={onSlotItemChange}
-                />
-              )
-            }
-
-            const { slot } = row
-
-            return (
-              <EquipmentRow
-                key={slot.slotId}
-                slot={slot}
-                shown={resolved[slot.slotId] ?? slot}
-                draft={draftOf(slot, changes)}
-                onChange={onChange}
-              />
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function EquipmentRow({
-  slot,
-  shown,
-  draft,
-  onChange
-}: {
-  slot: SimulatorSlot
-  shown: ItemView
-  draft: SlotDraft
-  onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) => void
-}): React.JSX.Element {
-  const slotLabel = slot.slotName ?? slot.slotId
-
-  function changeSlot(next: Partial<SlotDraft>): void {
-    onChange(slot, next)
-  }
-
-  return (
-    // 조율, 정밀도는 아이템 선택 아래 줄에 오므로, 다른 칸은 위에 맞춰 아이템 선택 줄과 같은 높이에 둔다.
-    <tr className="[&>td]:align-top">
-      <td className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden">
-        <div className={CONTROL_LINE}>{slotLabel}</div>
-      </td>
-      <td>
-        <ItemControl
-          slot={slot}
-          slotLabel={slotLabel}
-          shown={shown}
-          draft={draft}
-          onChange={changeSlot}
-        />
-      </td>
-      <td>
-        <ReinforceControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
-      </td>
-      <td>
-        <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
-      </td>
-    </tr>
-  )
-}
 
 type ItemFace = Readonly<{ itemId: string | null; name: string | null; rarity: ItemView['rarity'] }>
 
@@ -169,7 +59,7 @@ function SlotItemOption({ value, item }: { value: string; item: ItemFace }): Rea
   )
 }
 
-function ItemControl({
+export function ItemControl({
   slot,
   slotLabel,
   shown,
@@ -185,7 +75,6 @@ function ItemControl({
   const label = `${slotLabel} 교체`
   const face: ItemFace = { itemId: shown.itemId, name: shown.itemName, rarity: shown.rarity }
   const worn: ItemFace = { itemId: slot.itemId, name: slot.itemName, rarity: slot.rarity }
-  const choice = variantChoiceOf(slot, draft.variantId)
 
   if (slot.variants.length === 0) {
     return (
@@ -203,53 +92,75 @@ function ItemControl({
     }
   }
 
+  return (
+    <div className="grid w-full min-w-0">
+      <Select.Root value={draft.variantId ?? CURRENT} onValueChange={changeItem}>
+        <Select.Trigger size="sm" aria-label={label}>
+          <Select.Value>{() => <ItemFaceText item={face} />}</Select.Value>
+        </Select.Trigger>
+        <Select.Popup aria-label={label}>
+          {slot.wornVariantId === null && <SlotItemOption value={CURRENT} item={worn} />}
+          {slot.variants.map((variant) => (
+            <SlotItemOption key={variant.id} value={variant.id} item={variant} />
+          ))}
+        </Select.Popup>
+      </Select.Root>
+    </div>
+  )
+}
+
+export function EquipmentTuneControl({
+  slotLabel,
+  maxTune,
+  draft,
+  onChange
+}: {
+  slotLabel: string
+  maxTune: number
+  draft: SlotDraft
+  onChange: (draft: Partial<SlotDraft>) => void
+}): React.JSX.Element {
   function changeTune(tune: number): void {
     onChange({ tune })
   }
 
+  return (
+    <TuneSelect
+      label={`${slotLabel} 조율`}
+      tune={draft.tune}
+      maxTune={maxTune}
+      onChange={changeTune}
+    />
+  )
+}
+
+export function PotencyControl({
+  slotLabel,
+  draft,
+  onChange
+}: {
+  slotLabel: string
+  draft: SlotDraft
+  onChange: (draft: Partial<SlotDraft>) => void
+}): React.JSX.Element {
   function changePotency(potency: number): void {
     onChange({ potency })
   }
 
   return (
-    <div className="flex min-w-0 flex-col items-start gap-2">
-      <div className="grid w-full min-w-0">
-        <Select.Root value={draft.variantId ?? CURRENT} onValueChange={changeItem}>
-          <Select.Trigger size="sm" aria-label={label}>
-            <Select.Value>{() => <ItemFaceText item={face} />}</Select.Value>
-          </Select.Trigger>
-          <Select.Popup aria-label={label}>
-            {slot.wornVariantId === null && <SlotItemOption value={CURRENT} item={worn} />}
-            {slot.variants.map((variant) => (
-              <SlotItemOption key={variant.id} value={variant.id} item={variant} />
-            ))}
-          </Select.Popup>
-        </Select.Root>
-      </div>
-      {choice !== undefined && choice.maxTune > 0 && (
-        <TuneSelect
-          label={`${slotLabel} 조율`}
-          tune={draft.tune}
-          maxTune={choice.maxTune}
-          onChange={changeTune}
-        />
-      )}
-      {choice?.exalted === true && (
-        <div className="shrink-0 text-game-precision">
-          <NumberField
-            aria-label={`${slotLabel} 정밀도`}
-            value={draft.potency ?? FULL_POTENCY}
-            onValueChange={changePotency}
-            min={0}
-            max={FULL_POTENCY}
-          />
-        </div>
-      )}
+    <div className="self-start text-game-precision">
+      <NumberField
+        aria-label={`${slotLabel} 정밀도`}
+        value={draft.potency ?? FULL_POTENCY}
+        onValueChange={changePotency}
+        min={0}
+        max={FULL_POTENCY}
+      />
     </div>
   )
 }
 
-function SlotItemRow({
+export function SlotItemControl({
   slotItem,
   chosen,
   onChange
@@ -258,8 +169,7 @@ function SlotItemRow({
   chosen: string | null
   onChange: (slotItem: SimulatorSlotItem, id: string | null) => void
 }): React.JSX.Element {
-  const { slotName } = slotItem
-  const label = `${slotName} 교체`
+  const label = `${slotItem.slotName} 교체`
   const worn: ItemFace = {
     itemId: slotItem.itemId,
     name: slotItem.itemName,
@@ -284,32 +194,23 @@ function SlotItemRow({
   }
 
   return (
-    <tr>
-      <td className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden">{slotName}</td>
-      <td>
-        <div className="flex min-w-0">
-          <Select.Root value={chosen ?? CURRENT} onValueChange={changeItem}>
-            <Select.Trigger size="sm" aria-label={label}>
-              <Select.Value>
-                {(value: string) => <ItemFaceText item={faceOf(value)} />}
-              </Select.Value>
-            </Select.Trigger>
-            <Select.Popup aria-label={label}>
-              <SlotItemOption value={CURRENT} item={worn} />
-              {slotItem.choices.map((choice) => (
-                <SlotItemOption key={choice.id} value={choice.id} item={choice} />
-              ))}
-            </Select.Popup>
-          </Select.Root>
-        </div>
-      </td>
-      <td />
-      <td />
-    </tr>
+    <div className="grid min-w-0">
+      <Select.Root value={chosen ?? CURRENT} onValueChange={changeItem}>
+        <Select.Trigger size="sm" aria-label={label}>
+          <Select.Value>{(value: string) => <ItemFaceText item={faceOf(value)} />}</Select.Value>
+        </Select.Trigger>
+        <Select.Popup aria-label={label}>
+          <SlotItemOption value={CURRENT} item={worn} />
+          {slotItem.choices.map((choice) => (
+            <SlotItemOption key={choice.id} value={choice.id} item={choice} />
+          ))}
+        </Select.Popup>
+      </Select.Root>
+    </div>
   )
 }
 
-function ReinforceControl({
+export function ReinforceControl({
   slot,
   slotLabel,
   draft,
@@ -363,7 +264,7 @@ function joinLabels(options: readonly EnchantOption[]): string {
   return options.map(({ label }) => label).join(', ')
 }
 
-function EnchantText({ options }: { options: readonly EnchantOption[] }): React.JSX.Element {
+export function EnchantText({ options }: { options: readonly EnchantOption[] }): React.JSX.Element {
   const important = joinLabels(options.filter(({ emphasized }) => emphasized))
   const minor = joinLabels(options.filter(({ emphasized }) => !emphasized))
 
@@ -380,7 +281,7 @@ function EnchantText({ options }: { options: readonly EnchantOption[] }): React.
   )
 }
 
-function EnchantControl({
+export function EnchantControl({
   slot,
   slotLabel,
   draft,
@@ -392,16 +293,6 @@ function EnchantControl({
   onChange: (draft: Partial<SlotDraft>) => void
 }): React.JSX.Element {
   const label = `${slotLabel} 마법부여`
-
-  function optionsOf(value: string): readonly EnchantOption[] {
-    const choice = slot.enchantChoices.find(({ id }) => id === value)
-
-    if (choice === undefined) {
-      return slot.enchants
-    }
-
-    return choice.options
-  }
 
   function changeEnchant(value: string | null): void {
     if (value != null) {
@@ -415,7 +306,7 @@ function EnchantControl({
       <Select.Root value={draft.enchantId ?? CURRENT} onValueChange={changeEnchant}>
         <Select.Trigger size="xs" aria-label={label}>
           <Select.Value>
-            {(value: string) => <EnchantText options={optionsOf(value)} />}
+            {(value: string) => <EnchantText options={enchantLabelsOf(slot, value)} />}
           </Select.Value>
         </Select.Trigger>
         <Select.Popup aria-label={label}>
