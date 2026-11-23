@@ -9,7 +9,8 @@ import type { CharacterPayloads } from '@dfragon/server-core/domain/character-de
 import type {
   ScoreCalculator,
   ScoreEngineInput,
-  ScoreEngineResult
+  ScoreEngineResult,
+  ScoreSimulationInput
 } from '@dfragon/server-core/domain/score/index.js'
 import type {
   ScoreWorker,
@@ -22,7 +23,10 @@ import {
   payloadsFromEngineInput,
   readEngineInput
 } from '@dfragon/server-core/test/score-fixtures.js'
-import { supportsSimulation } from '../src/domain/equipment-simulation/index.js'
+import {
+  type SimulationFeatures,
+  supportsSimulation
+} from '../src/domain/equipment-simulation/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
 type FixtureName = 'dealer-blade' | 'buffer-muse'
@@ -1022,13 +1026,24 @@ function realEnginePackage(): string | null {
 }
 
 const REAL_ENGINE_PACKAGE = realEnginePackage()
-const REAL_SLOT_ITEM_ENGINE =
-  REAL_ENGINE_PACKAGE !== null &&
-  supportsSimulation(REAL_ENGINE_PACKAGE, {
-    slotItems: true,
+
+function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
+  if (REAL_ENGINE_PACKAGE === null) {
+    return false
+  }
+
+  return supportsSimulation(REAL_ENGINE_PACKAGE, {
+    slotItems: false,
     equipmentItems: false,
-    oathTunes: false
+    oathTunes: false,
+    equipmentSet: false,
+    weaponTune: false,
+    oathItems: false,
+    ...features
   })
+}
+
+const REAL_SLOT_ITEM_ENGINE = realEngineSupports({ slotItems: true })
 
 // 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
 test('실제 엔진은 딜러의 칭호, 크리쳐, 오라를 더 높은 명성 묶음으로 바꾸면 점수를 올린다', {
@@ -1554,7 +1569,6 @@ const invalidItemCases: readonly (readonly [string, FixtureName, Item, PayloadEd
     { slotId: 'WEAPON', variantId: PURIFICATION_EPIC_JACKET },
     keepPayloads
   ],
-  ['무기의 조율', 'dealer-blade', { slotId: 'WEAPON', tune: 0 }, keepPayloads],
   ['무기의 정밀도', 'dealer-blade', { slotId: 'WEAPON', potency: 50 }, keepPayloads],
   [
     '모르는 선택지 id',
@@ -1697,13 +1711,7 @@ for (const [name, oath, edit] of invalidOathCases) {
   })
 }
 
-const REAL_ITEM_ENGINE =
-  REAL_ENGINE_PACKAGE !== null &&
-  supportsSimulation(REAL_ENGINE_PACKAGE, {
-    slotItems: false,
-    equipmentItems: true,
-    oathTunes: false
-  })
+const REAL_ITEM_ENGINE = realEngineSupports({ equipmentItems: true })
 
 // 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
 test('실제 엔진은 딜러의 레전더리 상의를 에픽으로, 에픽 반지를 유일 장비로 바꾸면 점수를 올리고 조율을 올리면 내리지 않는다', {
@@ -1735,13 +1743,7 @@ test('실제 엔진은 딜러의 레전더리 상의를 에픽으로, 에픽 반
   assert.ok(tuned.simulated.value >= tuned.baseline.value)
 })
 
-const REAL_OATH_ENGINE =
-  REAL_ENGINE_PACKAGE !== null &&
-  supportsSimulation(REAL_ENGINE_PACKAGE, {
-    slotItems: false,
-    equipmentItems: false,
-    oathTunes: true
-  })
+const REAL_OATH_ENGINE = realEngineSupports({ oathTunes: true })
 
 // 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
 test('실제 엔진은 서약 결정만 바꾼 요청을 건너뛰지 않고 계산해, 딜러의 조율을 올리면 점수가 오르고 버퍼의 조율을 내리면 내려간다', {
@@ -1776,4 +1778,629 @@ test('실제 엔진은 서약 결정만 바꾼 요청을 건너뛰지 않고 계
   )
   assert.equal(lowered.baseline.calculator, 'buff')
   assert.ok(lowered.simulated.value < lowered.baseline.value)
+})
+
+const SET_ENGINE = 'dnfscore-native 0.9.0'
+const SHADOW_SET = {
+  setItemId: '3af7c961e7d8cd8b5b42c5f82af2a0ad',
+  setItemName: '그림자에 숨은 죽음 세트'
+}
+const VALKYRIE_OATH_SET = 16209
+const FOX_OATH_SET = 16210
+const MANA_OATH_SET = 16212
+const SHADOW_EPIC_OATH = 'acde288e06c6a6dda5e2b5d1e606dd00'
+const FOX_EPIC_OATH = '6a9706ebcbfe44e754a77c45f8d4a4aa'
+const EPIC_MIST_OATH = '316e1b0f26a3a471be2a95e33a315171'
+const SHADOW_PRIMAL_CRYSTAL = '5fe3c29985f15b1fdafd4c4d6a247839'
+const SHADOW_UNIQUE_CRYSTAL = '5a984f4a7e3e3d7360c183b95b6546bb'
+const SHADOW_EPIC_CRYSTAL = '5f722339a3f5c7ef9ba0b290873e19f1'
+const VALKYRIE_EPIC_CRYSTAL = '4b842bd9f4b36b3136b05c91d4f1e55b'
+const FOX_EPIC_CRYSTAL = '05efe7c9d4cf9f5bd0fc1aa56f1cf157'
+
+function crystalsOf(payloads: CharacterPayloads): Item[] {
+  return (payloads.oath.oath as Item).crystal as Item[]
+}
+
+function oathItem(itemId: string, itemName: string, itemRarity: string) {
+  return { itemId, itemName, itemRarity }
+}
+
+test('장비 세트를 고르면 11부위를 새 세트의 같은 등급으로 바꾸고 조율 단계를 유지한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const items = payloads.equipment.equipment as unknown[]
+
+  const response = await simulate(origin, path, {
+    equipmentSet: SHADOW_SET.setItemId,
+    equipment: []
+  })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.body.simulated.value, 1802)
+  const { input } = engine.requests[0]!
+  const replaced = bySlot(input.simulation!.equipment)
+  // 원본 조율은 상의 2단계, 신발 1단계이고 나머지는 0단계다.
+  const expected = {
+    JACKET: ['c28adff4d999079e03626b5b04f0a7cc', '어두운 그림자를 입은 죽음 상의', 2, 185],
+    SHOULDER: ['cec8dadc0b87a2faa188ba4dacfbb32b', '어두운 그림자가 드리운 얼굴', 0, 165],
+    PANTS: ['88c015be8ad68d67fb35cfa693dbe639', '어두운 그림자를 녹여내는 하의', 0, 165],
+    SHOES: ['2dee8e5022e85c907d129922477b81e6', '옅은 그림자의 걸음', 1, 125],
+    WAIST: ['32b763107adb97a3f1f2717ad92f1995', '어두운 그림자를 자아내는 벨트', 0, 165],
+    AMULET: ['ce90fd8107a2dec651b9f7c41a84888c', '칠흑같은 그림자 속 목걸이 - 혈', 0, 265],
+    WRIST: ['2b7b57418c2c75fc74d1cdebe44147bb', '어두운 그림자 속 팔찌 - 화', 0, 165],
+    RING: ['21753478bab6cd9d3f5265ae36abc34d', '짙은 그림자 속 반지 - 독', 0, 215],
+    SUPPORT: ['d02a39cfb1501bcc8453229b7f85a43e', '어두운 그림자 속 보조장비 - 예', 0, 165],
+    MAGIC_STON: ['1585efdc5a6a16de5fa29d55e956665b', '짙은 그림자 속 마법석 - 폭', 0, 215],
+    EARRING: ['6f89828858bb37275f88e02e54b4e94f', '옅은 그림자 속 귀걸이 - 전', 0, 115]
+  } as const
+  assert.deepEqual(Object.keys(replaced).sort(), Object.keys(expected).sort())
+  for (const [slotId, [itemId, itemName, level, setPoint]] of Object.entries(expected)) {
+    assert.deepEqual(
+      replaced[slotId],
+      {
+        ...itemOf(items, slotId),
+        ...detailFields(itemId),
+        ...SHADOW_SET,
+        itemName,
+        tune: [{ level, setPoint }]
+      },
+      slotId
+    )
+    assert.deepEqual(input.items[itemId], equipmentItemDetails[itemId], slotId)
+  }
+})
+
+test('5축성 캐릭터의 장비 세트를 바꾸면 새 세트의 공용 이름 아이템과 흑아로 바꾸고 유일 장비는 그대로 둔다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse', undefined, equipmentItemDetails)
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const items = payloads.equipment.equipment as unknown[]
+
+  const response = await simulate(origin, path, {
+    equipmentSet: SHADOW_SET.setItemId,
+    equipment: []
+  })
+
+  assert.equal(response.status, 200)
+  const replaced = bySlot(engine.requests[0]!.input.simulation!.equipment)
+  const expected = {
+    JACKET: ['ce653434e129a67945878c1c2e66ce73', '긍휼 속 자비의 상의', 235],
+    SHOULDER: ['cd5697ca4f68d2f06b5965ee2fc5662b', '숭고한 심판의 어깨', 235],
+    PANTS: ['2fe1185d9c958b52272cf57f36ffbc80', '명예로운 공경의 하의', 235],
+    SHOES: ['2912e0efaa521dbceef5b00e7b29fd43', '고요한 안식의 신발', 235],
+    WAIST: ['6195206e63ffc979e7cd8c0ae01ebfd3', '완전한 침묵의 벨트', 235],
+    AMULET: ['31259fd7ac677855394e80a8e37fd5e9', '흑아 : 칠흑같은 그림자 속 목걸이 - 혈', 265],
+    WRIST: ['5e88d49f703473fd5227d4fd32a3981e', '흑아 : 칠흑같은 그림자 속 팔찌 - 화', 265],
+    RING: ['e6ffc6ca5528bb4250770f6bce91e47a', '흑아 : 칠흑같은 그림자 속 반지 - 독', 265],
+    MAGIC_STON: ['97a123ba55e5a3808dacb1f295871216', '무결한 순수의 마법석', 215],
+    EARRING: ['ff2594fc8475d76fcb2fbb080a8467d1', '강인한 절제의 귀걸이', 215]
+  } as const
+  assert.deepEqual(Object.keys(replaced).sort(), Object.keys(expected).sort())
+  for (const [slotId, [itemId, itemName, setPoint]] of Object.entries(expected)) {
+    const consecrate = slotId in PURIFICATION_CONSECRATED ? { consecrate: true } : {}
+
+    assert.deepEqual(
+      replaced[slotId],
+      {
+        ...withoutKeys(itemOf(items, slotId), ['consecrate']),
+        ...detailFields(itemId),
+        ...SHADOW_SET,
+        ...consecrate,
+        itemName,
+        tune: [{ level: 0, setPoint }]
+      },
+      slotId
+    )
+  }
+})
+
+test('장비 세트를 고른 뒤 부위별 등급은 새 세트의 선택지로 고르고, 원래 세트의 선택지는 거절한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const items = payloads.equipment.equipment as unknown[]
+
+  const shadow = await simulate(origin, path, {
+    equipmentSet: SHADOW_SET.setItemId,
+    equipment: [itemChange(items, 'JACKET', { variantId: SHADOW_EPIC_JACKET })]
+  })
+  const purification = await simulate(origin, path, {
+    equipmentSet: SHADOW_SET.setItemId,
+    equipment: [itemChange(items, 'JACKET', { variantId: PURIFICATION_EPIC_JACKET })]
+  })
+
+  assert.equal(shadow.status, 200)
+  const jacket = bySlot(engine.requests[0]!.input.simulation!.equipment).JACKET!
+  assert.equal(jacket.itemName, '짙은 그림자를 입은 죽음 상의')
+  assert.deepEqual(jacket.tune, [{ level: 2, setPoint: 235 }])
+  assert.deepEqual(purification, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+  assert.equal(engine.requests.length, 1)
+})
+
+test('무기 조율을 바꾸면 원본 무기 항목의 첫 조율 단계만 바꾸고 표시값은 그대로 둔다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade')
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const items = payloads.equipment.equipment as unknown[]
+  const weapon = itemOf(items, 'WEAPON')
+  const [tune] = weapon.tune as Item[]
+
+  const response = await simulate(origin, path, {
+    equipment: [itemChange(items, 'WEAPON', { tune: 3 })]
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [{ ...weapon, amplificationName: null, tune: [{ ...tune, level: 3 }] }]
+  })
+})
+
+test('서약 세트를 고르면 세트 전용 본체와 광휘 결정을 새 세트의 같은 등급으로 바꾸고 조율 단계를 유지한다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse')
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const crystals = crystalsOf(payloads)
+
+  const response = await simulate(origin, path, { equipment: [], oathSet: FOX_OATH_SET })
+
+  assert.equal(response.status, 200)
+  const info = (payloads.oath.oath as Item).info as Item
+  // 버퍼는 에픽 결정 8개가 3단계(195), 태초 결정 3개가 0단계(205)다.
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: {
+        ...info,
+        ...oathItem('15a42c9cfd0709f609b22bb590f0a1e8', '강림한 여우 서약', '태초'),
+        setPoint: 655
+      },
+      set: { setId: FOX_OATH_SET },
+      crystal: crystals.map((crystal, index) => {
+        if (index < 8) {
+          return {
+            ...crystal,
+            ...oathItem(FOX_EPIC_CRYSTAL, '여우 : 완전한 광휘 결정', '에픽'),
+            tune: { level: 3, setPoint: 195 }
+          }
+        }
+
+        return {
+          ...crystal,
+          ...oathItem('c78cae5798f4b3d8991323d6e9274463', '여우 : 태초의 광휘 결정', '태초'),
+          tune: { level: 0, setPoint: 205 }
+        }
+      })
+    }
+  })
+})
+
+test('서약 세트를 바꿔도 영겁의 안개 서약 본체와 광휘가 아닌 결정은 그대로 두고, 원본과 같은 세트는 바꾸지 않는다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade')
+  const section = payloads.oath.oath as Item
+  section.info = {
+    ...(section.info as Item),
+    ...oathItem(EPIC_MIST_OATH, '영겁의 안개 서약', '에픽')
+  }
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const crystals = crystalsOf(payloads)
+
+  const moved = await simulate(origin, path, { equipment: [], oathSet: MANA_OATH_SET })
+  const same = await simulate(origin, path, { equipment: [], oathSet: VALKYRIE_OATH_SET })
+
+  assert.equal(moved.status, 200)
+  // 딜러는 발키리 유니크 광휘 결정 8개와 미광의 서약 결정 3개다.
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      set: { setId: MANA_OATH_SET },
+      crystal: crystals.slice(0, 8).map((crystal) => ({
+        ...crystal,
+        ...oathItem('e3f4ca0fc46dba190b74820740a97863', '마력 : 희미한 광휘 결정', '유니크'),
+        tune: { level: 0, setPoint: 85 }
+      }))
+    }
+  })
+  assert.deepEqual(same.body, {
+    baseline: {
+      ...cardScore('equipment', 1741),
+      versions: { ...cardVersions, package: SET_ENGINE }
+    },
+    simulated: {
+      ...cardScore('equipment', 1741),
+      versions: { ...cardVersions, package: SET_ENGINE }
+    }
+  })
+  assert.equal(engine.requests[1]!.input.simulation, undefined)
+})
+
+test('서약 본체 등급은 서약 세트를 옮긴 뒤의 계열에서 고르고 본체 칸만 바꾼다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse')
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const info = (payloads.oath.oath as Item).info as Item
+
+  const kept = await simulate(origin, path, { equipment: [], oathBody: SHADOW_EPIC_OATH })
+  const moved = await simulate(origin, path, {
+    equipment: [],
+    oathSet: FOX_OATH_SET,
+    oathBody: FOX_EPIC_OATH
+  })
+
+  assert.equal(kept.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: {
+        ...info,
+        ...oathItem(SHADOW_EPIC_OATH, '짙은 어둠 속 그림자 서약', '에픽'),
+        setPoint: 455
+      }
+    }
+  })
+  assert.equal(moved.status, 200)
+  const oath = engine.requests[1]!.input.simulation!.oath!
+  assert.equal(oath.info?.itemName, '빙의된 여우 서약')
+  assert.deepEqual(oath.set, { setId: FOX_OATH_SET })
+})
+
+test('결정 등급을 바꾸면 조율 단계를 새 결정의 최대 단계로 자르고, 함께 보낸 조율은 새 결정으로 검증하며 광휘가 아닌 결정도 바꿀 수 있다', async (t) => {
+  const buffer = fixture('buffer-muse')
+  const dealer = fixture('dealer-blade')
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const bufferOrigin = await listen(t, { details: buffer.details, ...engine.options })
+  const dealerOrigin = await listen(t, { details: dealer.details, ...engine.options })
+  const bufferCrystals = crystalsOf(buffer.payloads)
+  const dealerCrystals = crystalsOf(dealer.payloads)
+
+  const bufferResponse = await simulate(bufferOrigin, buffer.path, {
+    equipment: [],
+    oath: [
+      { slotNo: 0, variantId: SHADOW_PRIMAL_CRYSTAL },
+      { slotNo: 1, variantId: SHADOW_UNIQUE_CRYSTAL, tune: 2 },
+      { slotNo: 8, variantId: SHADOW_EPIC_CRYSTAL }
+    ]
+  })
+  const dealerResponse = await simulate(dealerOrigin, dealer.path, {
+    equipment: [],
+    oath: [{ slotNo: 8, variantId: VALKYRIE_EPIC_CRYSTAL }]
+  })
+
+  assert.equal(bufferResponse.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      crystal: [
+        {
+          ...bufferCrystals[0],
+          ...oathItem(SHADOW_PRIMAL_CRYSTAL, '그림자 : 태초의 광휘 결정', '태초'),
+          tune: { level: 0, setPoint: 205 }
+        },
+        {
+          ...bufferCrystals[1],
+          ...oathItem(SHADOW_UNIQUE_CRYSTAL, '그림자 : 희미한 광휘 결정', '유니크'),
+          tune: { level: 2, setPoint: 105 }
+        },
+        {
+          ...bufferCrystals[8],
+          ...oathItem(SHADOW_EPIC_CRYSTAL, '그림자 : 완전한 광휘 결정', '에픽'),
+          tune: { level: 0, setPoint: 165 }
+        }
+      ]
+    }
+  })
+  assert.equal(dealerResponse.status, 200)
+  assert.deepEqual(engine.requests[1]!.input.simulation, {
+    equipment: [],
+    oath: {
+      crystal: [
+        {
+          ...dealerCrystals[8],
+          ...oathItem(VALKYRIE_EPIC_CRYSTAL, '발키리 : 완전한 광휘 결정', '에픽'),
+          tune: { level: 0, setPoint: 165 }
+        }
+      ]
+    }
+  })
+})
+
+// 버퍼는 태초 결정 3개(slot 8~10)를 낀 상태다.
+for (const [name, oath, expected] of [
+  [
+    '결정 하나를 태초로 올려 4개가 되면 거절한다',
+    [{ slotNo: 0, variantId: SHADOW_PRIMAL_CRYSTAL }],
+    400
+  ],
+  [
+    '태초로 올리면서 다른 태초를 에픽으로 내려 3개면 받는다',
+    [
+      { slotNo: 0, variantId: SHADOW_PRIMAL_CRYSTAL },
+      { slotNo: 8, variantId: SHADOW_EPIC_CRYSTAL }
+    ],
+    200
+  ],
+  ['결정을 바꾸지 않고 조율만 바꾸면 태초 수를 보지 않는다', [{ slotNo: 0, tune: 2 }], 200]
+] as const) {
+  test(`태초 결정 상한: ${name}`, async (t) => {
+    const { payloads, details, path } = fixture('buffer-muse')
+    const engine = scoring(versionedEngine(SET_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], oath })
+
+    assert.equal(response.status, expected)
+    assert.equal(engine.requests.length, expected === 200 ? 1 : 0)
+
+    if (expected === 200) {
+      const crystals = engine.requests[0]!.input.simulation!.oath!.crystal!
+      const final = crystalsOf(payloads).map(
+        (crystal) => crystals.find(({ slotNo }) => slotNo === crystal.slotNo) ?? crystal
+      )
+      assert.ok(final.filter(({ itemRarity }) => itemRarity === '태초').length <= 3)
+    }
+  })
+}
+
+type SimulationCheck = (simulation: ScoreSimulationInput) => void
+
+const noCheck: SimulationCheck = () => undefined
+
+const VARIANT_SLOTS = [
+  'AMULET',
+  'EARRING',
+  'JACKET',
+  'MAGIC_STON',
+  'PANTS',
+  'RING',
+  'SHOES',
+  'SHOULDER',
+  'SUPPORT',
+  'WAIST',
+  'WRIST'
+]
+
+const switchedToShadow: SimulationCheck = ({ equipment, oath }) => {
+  const replaced = bySlot(equipment)
+
+  assert.deepEqual(Object.keys(replaced).sort(), VARIANT_SLOTS)
+  for (const [slotId, entry] of Object.entries(replaced)) {
+    const { setItemId, setItemName } = entry
+
+    assert.deepEqual({ setItemId, setItemName }, SHADOW_SET, slotId)
+  }
+  assert.equal(oath, undefined)
+}
+
+const weaponTunedAndOathMoved: SimulationCheck = ({ equipment, oath }) => {
+  const replaced = bySlot(equipment)
+  const [tune] = replaced.WEAPON!.tune as Item[]
+
+  assert.deepEqual(Object.keys(replaced), ['WEAPON'])
+  assert.equal(tune!.level, 1)
+  assert.deepEqual(oath?.set, { setId: MANA_OATH_SET })
+}
+
+for (const [name, package_, body, expected, check] of [
+  [
+    '0.9.0 전 엔진에 장비 세트 전환을 보내면 두 점수 모두 null이다',
+    OATH_ENGINE,
+    { equipmentSet: SHADOW_SET.setItemId, equipment: [] },
+    null,
+    noCheck
+  ],
+  [
+    '0.9.0 전 엔진에 무기 조율을 보내면 두 점수 모두 null이다',
+    OATH_ENGINE,
+    { equipment: [{ slotId: 'WEAPON', tune: 1 }] },
+    null,
+    noCheck
+  ],
+  [
+    '0.9.0 전 엔진에 서약 세트 전환을 보내면 두 점수 모두 null이다',
+    OATH_ENGINE,
+    { equipment: [], oathSet: MANA_OATH_SET },
+    null,
+    noCheck
+  ],
+  [
+    '0.9.0 전 엔진에 결정 등급 교체를 보내면 두 점수 모두 null이다',
+    OATH_ENGINE,
+    { equipment: [], oath: [{ slotNo: 0, variantId: VALKYRIE_EPIC_CRYSTAL }] },
+    null,
+    noCheck
+  ],
+  [
+    '0.9.0 전 엔진도 결정 조율만 바꾼 요청은 점수를 낸다',
+    OATH_ENGINE,
+    { equipment: [], oath: [{ slotNo: 0, tune: 1 }] },
+    1802,
+    noCheck
+  ],
+  [
+    '0.9.0 엔진은 장비 세트 전환을 반영한다',
+    SET_ENGINE,
+    { equipmentSet: SHADOW_SET.setItemId, equipment: [] },
+    1802,
+    switchedToShadow
+  ],
+  [
+    '0.9.0 엔진은 무기 조율과 서약 세트 전환을 반영한다',
+    SET_ENGINE,
+    { equipment: [{ slotId: 'WEAPON', tune: 1 }], oathSet: MANA_OATH_SET },
+    1802,
+    weaponTunedAndOathMoved
+  ]
+] as const) {
+  test(`엔진 버전: ${name}`, async (t) => {
+    const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+    const engine = scoring(versionedEngine(package_))
+    const origin = await listen(t, { details, ...engine.options })
+    const items = payloads.equipment.equipment as unknown[]
+    const equipment = body.equipment.map(({ slotId, ...fields }) =>
+      itemChange(items, slotId, fields)
+    )
+
+    const response = await simulate(origin, path, { ...body, equipment })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated?.value ?? null, expected)
+    assert.equal(engine.requests.length, 1)
+    check(engine.requests[0]!.input.simulation!)
+  })
+}
+
+const invalidSetCases: readonly (readonly [string, FixtureName, Item, PayloadEdit])[] = [
+  [
+    '목록에 없는 장비 세트',
+    'dealer-blade',
+    { equipmentSet: 'ffffffffffffffffffffffffffffffff', equipment: [] },
+    keepPayloads
+  ],
+  ['문자열이 아닌 장비 세트', 'dealer-blade', { equipmentSet: 1, equipment: [] }, keepPayloads],
+  [
+    '최대 단계를 넘는 무기 조율',
+    'dealer-blade',
+    { equipment: [{ slotId: 'WEAPON', tune: 4 }] },
+    keepPayloads
+  ],
+  [
+    '조율할 수 없는 무기의 조율',
+    'buffer-muse',
+    { equipment: [{ slotId: 'WEAPON', tune: 0 }] },
+    keepPayloads
+  ],
+  ['목록에 없는 서약 세트', 'buffer-muse', { equipment: [], oathSet: 16213 }, keepPayloads],
+  [
+    '서약 세트 정보가 없는 캐릭터의 서약 세트 전환',
+    'buffer-muse',
+    { equipment: [], oathSet: FOX_OATH_SET },
+    (payloads) => {
+      const { setInfo: _setInfo, ...section } = payloads.oath.oath as Item
+      payloads.oath = { ...payloads.oath, oath: section }
+    }
+  ],
+  [
+    '서약이 없는 캐릭터의 서약 세트 전환',
+    'buffer-muse',
+    { equipment: [], oathSet: FOX_OATH_SET },
+    (payloads) => {
+      payloads.oath = { ...payloads.oath, oath: null }
+    }
+  ],
+  ['다른 계열의 본체', 'buffer-muse', { equipment: [], oathBody: FOX_EPIC_OATH }, keepPayloads],
+  [
+    '세트를 옮기기 전 계열의 본체',
+    'buffer-muse',
+    { equipment: [], oathSet: FOX_OATH_SET, oathBody: SHADOW_EPIC_OATH },
+    keepPayloads
+  ],
+  [
+    '세트 전용 본체를 낀 캐릭터의 안개 서약 본체',
+    'buffer-muse',
+    { equipment: [], oathBody: EPIC_MIST_OATH },
+    keepPayloads
+  ],
+  [
+    '선택 목록에 없는 본체의 등급 교체',
+    'buffer-muse',
+    { equipment: [], oathBody: SHADOW_EPIC_OATH },
+    (payloads) => {
+      const section = payloads.oath.oath as Item
+      section.info = {
+        ...(section.info as Item),
+        ...oathItem('00000000000000000000000000000000', '레어 서약', '레어')
+      }
+    }
+  ],
+  [
+    '다른 서약 세트의 결정',
+    'buffer-muse',
+    { equipment: [], oath: [{ slotNo: 0, variantId: FOX_EPIC_CRYSTAL }] },
+    keepPayloads
+  ],
+  [
+    '새 결정의 단계 밖 조율',
+    'buffer-muse',
+    { equipment: [], oath: [{ slotNo: 0, variantId: SHADOW_PRIMAL_CRYSTAL, tune: 1 }] },
+    keepPayloads
+  ],
+  [
+    '문자열이 아닌 결정 선택지 id',
+    'buffer-muse',
+    { equipment: [], oath: [{ slotNo: 0, variantId: 1 }] },
+    keepPayloads
+  ],
+  ['정수가 아닌 서약 세트', 'buffer-muse', { equipment: [], oathSet: '16210' }, keepPayloads]
+]
+
+for (const [name, fixtureName, body, edit] of invalidSetCases) {
+  test(`세트, 서약, 무기 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { payloads, details, path } = fixture(fixtureName, undefined, equipmentItemDetails)
+    const items = structuredClone(payloads.equipment.equipment) as unknown[]
+    edit(payloads)
+    const engine = scoring(versionedEngine(SET_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+    const equipment = (body.equipment as Item[]).map(({ slotId, ...fields }) =>
+      itemChange(items, slotId as string, fields)
+    )
+
+    const response = await simulate(origin, path, { ...body, equipment })
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
+
+const REAL_SET_ENGINE = realEngineSupports({
+  equipmentSet: true,
+  weaponTune: true,
+  oathItems: true
+})
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 장비 세트, 서약 세트, 본체와 결정 등급, 무기 조율을 바꾼 요청을 건너뛰지 않고 계산한다', {
+  skip: !REAL_SET_ENGINE && '세트, 서약, 무기 조율 교체를 반영하는 0.9.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const scoresOf = async (name: FixtureName, body: Item) => {
+    const { payloads, details, path } = fixture(name, undefined, equipmentItemDetails)
+    const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+    const items = payloads.equipment.equipment as unknown[]
+    const equipment = ((body.equipment ?? []) as Item[]).map(({ slotId, ...fields }) =>
+      itemChange(items, slotId as string, fields)
+    )
+    const response = await simulate(origin, path, { ...body, equipment })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null, `${name} ${JSON.stringify(body)}`)
+    assert.equal(response.body.simulated.skipped, null, `${name} ${JSON.stringify(body)}`)
+
+    return response.body as { baseline: { value: number }; simulated: { value: number } }
+  }
+
+  // 같은 등급끼리 옮긴 세트는 점수가 같을 수 있어, 옮긴 세트에서 등급을 올린 쪽이 더 높은지로 본다.
+  const equipmentSet = await scoresOf('dealer-blade', { equipmentSet: SHADOW_SET.setItemId })
+  const epicJacket = await scoresOf('dealer-blade', {
+    equipmentSet: SHADOW_SET.setItemId,
+    equipment: [{ slotId: 'JACKET', variantId: SHADOW_EPIC_JACKET }]
+  })
+  assert.ok(epicJacket.simulated.value > equipmentSet.simulated.value)
+
+  await scoresOf('buffer-muse', { equipmentSet: SHADOW_SET.setItemId })
+  // 딜러 서약 포인트(865)는 서약 세트 1번 선택지 표에 행이 없어 엔진이 건너뛰므로 버퍼로 확인한다.
+  await scoresOf('buffer-muse', { oathSet: FOX_OATH_SET })
+
+  // 버퍼의 본체는 태초라 에픽으로 내리면 점수가 내려간다.
+  const lowerBody = await scoresOf('buffer-muse', { oathBody: SHADOW_EPIC_OATH })
+  assert.ok(lowerBody.simulated.value < lowerBody.baseline.value)
+
+  // 딜러의 결정은 유니크라 에픽으로 올리면 점수가 오른다.
+  const higherCrystal = await scoresOf('dealer-blade', {
+    oath: [{ slotNo: 0, variantId: VALKYRIE_EPIC_CRYSTAL }]
+  })
+  assert.ok(higherCrystal.simulated.value > higherCrystal.baseline.value)
+
+  const weapon = await scoresOf('dealer-blade', { equipment: [{ slotId: 'WEAPON', tune: 3 }] })
+  assert.ok(weapon.simulated.value > weapon.baseline.value)
 })
