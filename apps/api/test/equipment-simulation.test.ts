@@ -1975,7 +1975,7 @@ test('서약 세트를 고르면 세트 전용 본체와 광휘 결정을 새 �
   })
 })
 
-test('서약 세트를 바꿔도 영겁의 안개 서약 본체와 광휘가 아닌 결정은 그대로 두고, 원본과 같은 세트는 바꾸지 않는다', async (t) => {
+test('서약 세트를 바꿔도 영겁의 안개 서약 본체와 광휘가 아닌 결정은 그대로 두고, 원본과 같은 세트를 골라 옮길 것이 없으면 원본만 계산한다', async (t) => {
   const { payloads, details, path } = fixture('dealer-blade')
   const section = payloads.oath.oath as Item
   section.info = {
@@ -2403,4 +2403,71 @@ test('실제 엔진은 장비 세트, 서약 세트, 본체와 결정 등급, �
 
   const weapon = await scoresOf('dealer-blade', { equipment: [{ slotId: 'WEAPON', tune: 3 }] })
   assert.ok(weapon.simulated.value > weapon.baseline.value)
+})
+
+test('착용한 서약 세트를 다시 고르면 다른 세트의 본체와 광휘 결정만 그 세트의 같은 등급으로 옮기고 세트 칸은 넣지 않는다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse')
+  const section = payloads.oath.oath as Item
+  const foxBody = oathItem('15a42c9cfd0709f609b22bb590f0a1e8', '강림한 여우 서약', '태초')
+  section.info = { ...(section.info as Item), ...foxBody }
+  section.crystal = crystalsOf(payloads).map((crystal) =>
+    crystal.slotNo === 2
+      ? { ...crystal, ...oathItem(FOX_EPIC_CRYSTAL, '여우 : 완전한 광휘 결정', '에픽') }
+      : crystal
+  )
+  const crystals = crystalsOf(payloads)
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, { equipment: [], oathSet: 16201 })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: {
+        ...(section.info as Item),
+        ...oathItem('72adf78e645d9a821b9adcc98ef00044', '태초의 어둠 속 그림자 서약', '태초'),
+        setPoint: 655
+      },
+      crystal: [
+        {
+          ...crystals[2],
+          ...oathItem(SHADOW_EPIC_CRYSTAL, '그림자 : 완전한 광휘 결정', '에픽'),
+          tune: { level: 3, setPoint: 195 }
+        }
+      ]
+    }
+  })
+})
+
+test('세트가 섞인 캐릭터가 주 세트를 고르면 다른 세트를 낀 부위만 주 세트의 같은 등급으로 옮긴다', async (t) => {
+  // 원본 상의(칠흑의 정화 레전더리, 조율 2단계)를 그림자 세트 레전더리로 바꿔 세트를 섞는다.
+  const { original, details, path } = fixture(
+    'dealer-blade',
+    (entries) =>
+      entries.map((entry) =>
+        entry.slotId === 'JACKET'
+          ? {
+              ...entry,
+              ...SHADOW_SET,
+              itemId: 'c28adff4d999079e03626b5b04f0a7cc',
+              itemName: '어두운 그림자를 입은 죽음 상의'
+            }
+          : entry
+      ),
+    equipmentItemDetails
+  )
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipmentSet: PURIFICATION_SET.setItemId,
+    equipment: []
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [itemOf(original.equipment.equipment as unknown[], 'JACKET')]
+  })
 })
