@@ -92,8 +92,12 @@ function setPointOf(info: Record<string, unknown>): number | null {
   return current
 }
 
-/** 활성 세트 포인트가 가장 큰 세트이고, 동률이면 응답에서 먼저 나온 세트다. */
-function mainSetItemId(equipment: CharacterPayload): string | null {
+function isListedSet(setItemId: unknown, slotId: EquipmentVariantSlot): setItemId is string {
+  return typeof setItemId === 'string' && equipmentVariantsOf(setItemId, slotId).length > 0
+}
+
+/** 선택 목록에 있는 세트 가운데 활성 세트 포인트가 가장 큰 세트이고, 동률이면 응답에서 먼저 나온 세트다. */
+function mainSetItemId(equipment: CharacterPayload, slotId: EquipmentVariantSlot): string | null {
   const infos = Array.isArray(equipment.setItemInfo) ? equipment.setItemInfo.filter(isRecord) : []
   let chosen: string | null = null
   let chosenPoint = Number.NEGATIVE_INFINITY
@@ -101,7 +105,7 @@ function mainSetItemId(equipment: CharacterPayload): string | null {
   for (const info of infos) {
     const point = setPointOf(info)
 
-    if (point !== null && point > chosenPoint && typeof info.setItemId === 'string') {
+    if (point !== null && point > chosenPoint && isListedSet(info.setItemId, slotId)) {
       chosen = info.setItemId
       chosenPoint = point
     }
@@ -115,8 +119,11 @@ function chosenVariant(
   worn: WornSlot,
   variantId: string
 ): EquipmentVariant {
+  // 세트 밖 장비와 선택 목록에 없는 세트의 장비는 주 세트의 그 부위로 바꾼다.
   const { setItemId } = worn.original
-  const setId = typeof setItemId === 'string' ? setItemId : mainSetItemId(equipment)
+  const setId = isListedSet(setItemId, worn.slotId)
+    ? setItemId
+    : mainSetItemId(equipment, worn.slotId)
 
   if (setId === null) {
     throw new EquipmentSimulationFailure('request')
