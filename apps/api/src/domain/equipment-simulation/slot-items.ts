@@ -172,7 +172,7 @@ export function simulatedSlotItems(
 export function simulationInputOf(
   equipment: readonly CharacterPayload[],
   slots: SimulatedSlotItems,
-  crystals: readonly CharacterPayload[]
+  oath: ScoreSimulationInput['oath'] | null
 ): ScoreSimulationInput {
   const { title, creature, aura } = slots
   const simulation: { -readonly [K in keyof ScoreSimulationInput]: ScoreSimulationInput[K] } = {
@@ -191,8 +191,8 @@ export function simulationInputOf(
     simulation.avatar = [aura]
   }
 
-  if (crystals.length > 0) {
-    simulation.oath = { crystal: crystals }
+  if (oath !== null) {
+    simulation.oath = oath
   }
 
   return simulation

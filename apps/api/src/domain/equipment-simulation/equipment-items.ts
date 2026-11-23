@@ -5,9 +5,11 @@ import {
   type EquipmentVariantItems,
   type EquipmentVariantKind,
   type EquipmentVariantSlot,
+  equipmentSets,
   equipmentVariantsOf,
   findEquipmentVariant,
-  resolveEquipmentItems
+  resolveEquipmentItems,
+  switchEquipmentSet
 } from '@dfragon/lib/equipment-variants'
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
@@ -114,16 +116,32 @@ function mainSetItemId(equipment: CharacterPayload, slotId: EquipmentVariantSlot
   return chosen
 }
 
+function choiceSetOf(
+  equipment: CharacterPayload,
+  worn: WornSlot,
+  equipmentSet: string | null
+): string | null {
+  if (equipmentSet !== null) {
+    return equipmentSet
+  }
+
+  // 세트 밖 장비와 선택 목록에 없는 세트의 장비는 주 세트의 그 부위로 바꾼다.
+  const { setItemId } = worn.original
+
+  if (isListedSet(setItemId, worn.slotId)) {
+    return setItemId
+  }
+
+  return mainSetItemId(equipment, worn.slotId)
+}
+
 function chosenVariant(
   equipment: CharacterPayload,
   worn: WornSlot,
-  variantId: string
+  variantId: string,
+  equipmentSet: string | null
 ): EquipmentVariant {
-  // 세트 밖 장비와 선택 목록에 없는 세트의 장비는 주 세트의 그 부위로 바꾼다.
-  const { setItemId } = worn.original
-  const setId = isListedSet(setItemId, worn.slotId)
-    ? setItemId
-    : mainSetItemId(equipment, worn.slotId)
+  const setId = choiceSetOf(equipment, worn, equipmentSet)
 
   if (setId === null) {
     throw new EquipmentSimulationFailure('request')
@@ -208,69 +226,66 @@ function isWornItem(worn: WornSlot, target: EquipmentVariant, item: EquipmentVar
   return worn.variant?.id === target.id && worn.original.itemName === item.itemName
 }
 
-interface CheckedChange {
-  readonly change: EquipmentChange
-  /** 요청이 고른 선택지이고, null이면 착용한 아이템의 선택지를 쓴다. */
-  readonly chosen: EquipmentVariant | null
+type Targets = ReadonlyMap<EquipmentVariantSlot, EquipmentVariant | null>
+
+function checkedEquipmentSet(equipmentSet: string | null): string | null {
+  if (equipmentSet === null) {
+    return null
+  }
+
+  if (!equipmentSets().some(({ setItemId }) => setItemId === equipmentSet)) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
+  return equipmentSet
 }
 
-function checkedChanges(
-  equipment: CharacterPayload,
+/** 세트를 고르면 유일 장비와 선택지 밖 착용 아이템을 뺀 부위를 그 세트의 같은 등급으로 옮긴다. */
+function switchedTargets(
+  worn: ReadonlyMap<EquipmentVariantSlot, WornSlot>,
+  equipmentSet: string | null
+): Map<EquipmentVariantSlot, EquipmentVariant | null> {
+  const wornTargets = new Map([...worn].map(([slotId, { variant }]) => [slotId, variant]))
+
+  if (equipmentSet === null) {
+    return wornTargets
+  }
+
+  const switched = switchEquipmentSet(Object.fromEntries(wornTargets), equipmentSet)
+
+  return new Map([...wornTargets].map(([slotId, variant]) => [slotId, switched[slotId] ?? variant]))
+}
+
+function itemChanges(
   worn: ReadonlyMap<EquipmentVariantSlot, WornSlot>,
   changes: readonly EquipmentChange[]
-): Map<EquipmentVariantSlot, CheckedChange> {
-  const checked = new Map<EquipmentVariantSlot, CheckedChange>()
+): Map<EquipmentVariantSlot, EquipmentChange> {
+  const checked = new Map<EquipmentVariantSlot, EquipmentChange>()
 
   for (const change of changes) {
-    if (!hasItemChange(change)) {
+    // 무기는 weapon.ts가 맡는다.
+    if (!hasItemChange(change) || !isVariantSlot(change.slotId)) {
       continue
     }
 
-    const slot = isVariantSlot(change.slotId) ? worn.get(change.slotId) : undefined
-
-    if (slot === undefined) {
+    if (!worn.has(change.slotId)) {
       throw new EquipmentSimulationFailure('request')
     }
 
-    const chosen =
-      change.variantId !== null ? chosenVariant(equipment, slot, change.variantId) : null
-    checked.set(slot.slotId, { change, chosen })
+    checked.set(change.slotId, change)
   }
 
   return checked
 }
 
-function targetOf(
-  slot: WornSlot,
-  checked: ReadonlyMap<EquipmentVariantSlot, CheckedChange>
-): EquipmentVariant | null {
-  const chosen = checked.get(slot.slotId)?.chosen
-
-  if (chosen != null) {
-    return chosen
-  }
-
-  return slot.variant
-}
-
-function resolvedItems(
-  worn: ReadonlyMap<EquipmentVariantSlot, WornSlot>,
-  checked: ReadonlyMap<EquipmentVariantSlot, CheckedChange>
-): EquipmentVariantItems {
-  // 아이템을 바꾸지 않은 요청은 착용 상태를 다시 풀지 않아, 기존 요청의 엔진 입력이 그대로다.
-  if (![...checked.values()].some(({ chosen }) => chosen !== null)) {
-    return {}
-  }
-
+function resolvedItems(targets: Targets): EquipmentVariantItems {
   const selection = Object.fromEntries(
-    [...worn.values()].flatMap((slot) => {
-      const target = targetOf(slot, checked)
-
+    [...targets].flatMap(([slotId, target]) => {
       if (target === null) {
         return []
       }
 
-      return [[slot.slotId, target]]
+      return [[slotId, target]]
     })
   )
 
@@ -278,20 +293,34 @@ function resolvedItems(
 }
 
 /**
- * 무기를 뺀 11부위의 아이템, 조율, 정밀도 변경과 5축성 변환으로 바뀌는 부위다.
- * 무기의 변경, 착용하지 않은 부위, 그 세트의 선택지에 없는 id, 조율 단계 밖의 조율, 유일 장비가 아닌 아이템의 정밀도는 거절한다.
+ * 무기를 뺀 11부위의 세트 전환, 아이템, 조율, 정밀도 변경과 5축성 변환으로 바뀌는 부위다.
+ * 목록에 없는 세트, 착용하지 않은 부위, 그 세트의 선택지에 없는 id, 조율 단계 밖의 조율, 유일 장비가 아닌 아이템의 정밀도는 거절한다.
  */
 export function editEquipmentItems(
   equipment: CharacterPayload,
-  changes: readonly EquipmentChange[]
+  changes: readonly EquipmentChange[],
+  requestedSet: string | null
 ): EquipmentItemEdit[] {
+  const equipmentSet = checkedEquipmentSet(requestedSet)
   const worn = wornSlots(equipment)
-  const checked = checkedChanges(equipment, worn, changes)
-  const items = resolvedItems(worn, checked)
+  const checked = itemChanges(worn, changes)
+  const targets = switchedTargets(worn, equipmentSet)
+
+  for (const [slotId, change] of checked) {
+    if (change.variantId !== null) {
+      const chosen = chosenVariant(equipment, worn.get(slotId)!, change.variantId, equipmentSet)
+      targets.set(slotId, chosen)
+    }
+  }
+
+  // 아이템을 바꾸지 않은 요청은 착용 상태를 다시 풀지 않아, 기존 요청의 엔진 입력이 그대로다.
+  const changesItems =
+    equipmentSet !== null || [...checked.values()].some(({ variantId }) => variantId !== null)
+  const items = changesItems ? resolvedItems(targets) : {}
 
   return [...worn.values()].flatMap((slot): EquipmentItemEdit[] => {
-    const change = checked.get(slot.slotId)?.change
-    const target = targetOf(slot, checked)
+    const change = checked.get(slot.slotId)
+    const target = targets.get(slot.slotId) ?? null
     const resolved = items[slot.slotId]
     const itemChanged =
       resolved !== undefined && target !== null && !isWornItem(slot, target, resolved)

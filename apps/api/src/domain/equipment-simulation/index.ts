@@ -5,8 +5,8 @@ export { editEquipment, needsMainStat, simulatedEquipment, wornMainStat } from '
 export { editEquipmentItems, equipmentItemIds, withEquipmentItems } from './equipment-items.js'
 export { EquipmentSimulationFailure } from './failure.js'
 export type { EquipmentSimulationFailureKind } from './failure.js'
-export type { OathTuneChange } from './oath.js'
-export { editOathTunes, simulatedCrystals } from './oath.js'
+export type { OathChanges, OathCrystalChange } from './oath.js'
+export { editOath, hasOathEdit, simulatedOath } from './oath.js'
 export type { SimulatedSlotItems, SlotItemChanges } from './slot-items.js'
 export {
   editSlotItems,
@@ -15,3 +15,4 @@ export {
   simulationInputOf,
   slotItemIds
 } from './slot-items.js'
+export { editWeaponTune, withWeaponTune } from './weapon.js'
