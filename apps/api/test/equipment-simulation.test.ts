@@ -1190,6 +1190,52 @@ test('딜러 상의를 같은 세트의 에픽으로 바꾸면 아이템 칸을 
   assert.deepEqual(payloads, before)
 })
 
+test('선택 목록에 없는 세트의 장비를 낀 부위는 목록에 있는 세트 가운데 포인트가 가장 큰 주 세트의 선택지로 바꾼다', async (t) => {
+  const unlistedSet = {
+    setItemId: 'ffffffffffffffffffffffffffffffff',
+    setItemName: '목록에 없는 세트'
+  }
+  const { payloads, details, path } = fixture(
+    'dealer-blade',
+    (entries) =>
+      entries.map((entry) => (entry.slotId === 'JACKET' ? { ...entry, ...unlistedSet } : entry)),
+    equipmentItemDetails
+  )
+  // 포인트가 더 큰 세트가 목록에 없으면 주 세트 후보에서 빠진다.
+  const setItemInfo = payloads.equipment.setItemInfo as Item[]
+  payloads.equipment.setItemInfo = [
+    { ...unlistedSet, active: { setPoint: { current: 2620 } } },
+    ...setItemInfo
+  ]
+  const engine = scoring(versionedEngine(ITEM_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const items = payloads.equipment.equipment as unknown[]
+
+  const response = await simulate(origin, path, {
+    equipment: [itemChange(items, 'JACKET', { variantId: PURIFICATION_EPIC_JACKET })]
+  })
+
+  assert.equal(response.status, 200)
+  const { input } = engine.requests[0]!
+  assert.deepEqual(input.simulation, {
+    equipment: [
+      {
+        ...itemOf(items, 'JACKET'),
+        ...detailFields(PURIFICATION_EPIC_JACKET),
+        ...PURIFICATION_SET,
+        itemName: '칠흑의 정화 상의',
+        reinforce: 0,
+        amplificationName: null,
+        tune: [{ level: 2, setPoint: 235 }]
+      }
+    ]
+  })
+  assert.deepEqual(
+    input.items[PURIFICATION_EPIC_JACKET],
+    equipmentItemDetails[PURIFICATION_EPIC_JACKET]
+  )
+})
+
 test('세트 밖 유일 장비를 낀 부위는 주 세트의 선택지로 바꾸고, 5축성이면 공용 이름 아이템으로 넣으며 유일 장비 칸을 지운다', async (t) => {
   const { payloads, details, path } = fixture('buffer-muse', undefined, equipmentItemDetails)
   const engine = scoring(versionedEngine(ITEM_ENGINE))
