@@ -9,6 +9,9 @@ const POINTS_PER_REINFORCE = 3_100
 const AMPLIFY_POINTS = 12_400
 const ENCHANT_POINTS = 8_200
 const SLOT_ITEM_POINTS = 15_300
+const VARIANT_POINTS = 21_700
+const POINTS_PER_TUNE = 4_600
+const POINTS_PER_POTENCY = 310
 
 type Calculator = CharacterCardScore['calculator']
 
@@ -34,9 +37,26 @@ export function calculatorOf(detail: CharacterDetailView): Calculator {
   return 'equipment'
 }
 
+type Tunes = readonly Readonly<{ level: number | null }>[]
+
+function wornTuneOf(tunes: Tunes): number {
+  return Math.max(0, ...tunes.map(({ level }) => level ?? 0))
+}
+
+function oathPointsOf(detail: CharacterDetailView, oath: SimulationBody['oath'] = []): number {
+  const crystals = detail.oath?.crystal ?? []
+
+  return oath.reduce((sum, { slotNo, tune }) => {
+    const crystal = crystals.find((candidate) => candidate.slotNo === slotNo)
+    const worn = crystal?.tune?.level ?? 0
+
+    return sum + (tune - worn) * POINTS_PER_TUNE
+  }, 0)
+}
+
 function pointsOf(
   detail: CharacterDetailView,
-  { equipment, ...slotItems }: SimulationBody
+  { equipment, oath, ...slotItems }: SimulationBody
 ): number {
   const items = detail.equipment.equipment
   const slotItemPoints = Object.keys(slotItems).length * SLOT_ITEM_POINTS
@@ -46,9 +66,13 @@ function pointsOf(
     const reinforce = (change.reinforce - (item?.reinforce ?? 0)) * POINTS_PER_REINFORCE
     const amplified = change.amplified !== (item?.amplificationName != null) ? AMPLIFY_POINTS : 0
     const enchant = change.enchantId !== null ? ENCHANT_POINTS : 0
+    const variant = change.variantId !== null ? VARIANT_POINTS : 0
+    const tune =
+      change.tune !== null ? (change.tune - wornTuneOf(item?.tune ?? [])) * POINTS_PER_TUNE : 0
+    const potency = change.potency !== null ? change.potency * POINTS_PER_POTENCY : 0
 
-    return sum + reinforce + amplified + enchant
-  }, slotItemPoints)
+    return sum + reinforce + amplified + enchant + variant + tune + potency
+  }, slotItemPoints + oathPointsOf(detail, oath))
 }
 
 export function syntheticSimulation(
