@@ -1,3 +1,4 @@
+import { equipmentVariantsOf } from '@dfragon/lib/equipment-variants'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import type { RequestHandler } from 'msw'
 import { storyCharacterDetail } from '#pages/character/api/character.fixture'
@@ -99,6 +100,38 @@ async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }
   await pick(canvasElement, '오라 교체', '열대야의 추억')
 }
 
+// 딜러 story 캐릭터가 낀 세트다.
+const DEALER_SET = '4ee7bd5912cda6e2a24c1f36d5202b46'
+
+function variantName(slotId: 'JACKET' | 'EARRING', kind: string): string {
+  const variant = equipmentVariantsOf(DEALER_SET, slotId).find((found) => found.kind === kind)
+
+  if (variant === undefined) {
+    throw new Error(`${slotId} ${kind} 선택지가 없습니다.`)
+  }
+
+  return variant.item.itemName
+}
+
+async function changeVariant({ canvasElement }: { canvasElement: HTMLElement }) {
+  await pick(canvasElement, '상의 교체', variantName('JACKET', '잠식'))
+}
+
+async function changeTune({ canvasElement }: { canvasElement: HTMLElement }) {
+  await pick(canvasElement, '상의 조율', 'III')
+  await pick(canvasElement, '보조장비 조율', 'II')
+}
+
+async function chooseExalted({ canvasElement }: { canvasElement: HTMLElement }) {
+  await pick(canvasElement, '귀걸이 교체', variantName('EARRING', '유일'))
+  await press(canvasElement, '귀걸이 정밀도 내리기', 5)
+}
+
+async function changeOathTune({ canvasElement }: { canvasElement: HTMLElement }) {
+  await pick(canvasElement, '결정 7 조율', 'III')
+  await pick(canvasElement, '결정 8 조율', 'II')
+}
+
 export const 딜러: Story = screenStory('dealer', simulatorStoryHandlers.calculated)
 
 export const 값바꿈: Story = {
@@ -109,6 +142,26 @@ export const 값바꿈: Story = {
 export const 슬롯교체: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeSlotItems
+}
+
+export const 등급교체: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeVariant
+}
+
+export const 조율바꿈: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeTune
+}
+
+export const 유일장비: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: chooseExalted
+}
+
+export const 서약결정조율: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeOathTune
 }
 
 export const 버퍼: Story = screenStory('buffer', simulatorStoryHandlers.calculated)
