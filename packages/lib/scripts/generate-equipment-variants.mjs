@@ -10,6 +10,13 @@ const observedItemIds = new Map(
   ])
 )
 
+const observedOathItemIds = new Map(
+  [...observed.oaths, ...observed.oathCrystals].map(({ itemName, itemRarity, itemIds }) => [
+    JSON.stringify([itemName, itemRarity]),
+    itemIds.map(({ itemId }) => itemId)
+  ])
+)
+
 function readJson(path) {
   const url = new URL(path, import.meta.url)
 
@@ -130,6 +137,66 @@ function oathCrystalOf({ name, rarity, tune }) {
   return { name, rarity, tuneSetPoints }
 }
 
+function observedOathItemOf({ name, rarity }) {
+  const itemIds = observedOathItemIds.get(JSON.stringify([name, rarity]))
+
+  if (itemIds === undefined) {
+    return null
+  }
+
+  const [itemId, ...otherItemIds] = itemIds
+  const variant = { id: itemId, rarity, item: { itemId, itemName: name, itemRarity: rarity } }
+
+  if (otherItemIds.length > 0) {
+    variant.otherItemIds = otherItemIds
+  }
+
+  return variant
+}
+
+function oathVariantOf(oath) {
+  const variant = observedOathItemOf(oath)
+
+  if (variant === null) {
+    return []
+  }
+
+  return [{ ...variant, setPoint: oath.setPoint }]
+}
+
+function oathCrystalVariantOf(crystal) {
+  const variant = observedOathItemOf(crystal)
+
+  if (variant === null) {
+    return []
+  }
+
+  const tuneSetPoints = tuneSetPointsOf(crystal.tune)
+
+  return [{ ...variant, tuneSetPoints }]
+}
+
+function oathSetOf({ setId, name }) {
+  const oaths = engine.oaths.sets.find((oathSet) => oathSet.setId === setId)?.oaths ?? []
+  const crystals =
+    engine.oathCrystals.sets.find((crystalSet) => crystalSet.partset === setId)?.crystals ?? []
+  const oathVariants = oaths.flatMap(oathVariantOf)
+  const crystalVariants = crystals.flatMap(oathCrystalVariantOf)
+
+  return { setId, name, oaths: oathVariants, crystals: crystalVariants }
+}
+
+// 엔진은 조율할 수 있는 단계를 0부터 빠짐없이 적으므로 가장 높은 단계만 둔다.
+function weaponMaxTuneLevelOf([itemName, levels]) {
+  levels.forEach((level, index) => {
+    if (level !== index) {
+      throw new Error(`무기 조율 단계가 0부터 이어지지 않음: ${itemName}`)
+    }
+  })
+
+  return [itemName, levels.length - 1]
+}
+
 const oathCrystals = [
   ...engine.oathCrystals.sets.flatMap(({ crystals }) => crystals),
   ...engine.oathCrystals.noSet
@@ -138,7 +205,20 @@ const sets = engine.sets.flatMap(setOf)
 const exaltedEntries = engine.exalted.flatMap(exaltedOf)
 const exalted = Object.fromEntries(exaltedEntries)
 const oathCrystalTable = oathCrystals.map(oathCrystalOf)
-const table = { version: 1, sets, exalted, oathCrystals: oathCrystalTable }
+const oathSets = engine.oathSets.map(oathSetOf)
+const mistOaths = engine.oaths.noSet.flatMap(oathVariantOf)
+const weaponMaxTuneLevels = Object.fromEntries(
+  Object.entries(engine.weaponTune).map(weaponMaxTuneLevelOf)
+)
+const table = {
+  version: 1,
+  sets,
+  exalted,
+  oathCrystals: oathCrystalTable,
+  oathSets,
+  mistOaths,
+  weaponMaxTuneLevels
+}
 
 writeFileSync(
   new URL('../src/equipment-variants.json', import.meta.url),
