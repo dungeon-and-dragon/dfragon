@@ -200,9 +200,8 @@ function toVariantChoice(variant: EquipmentVariant): VariantChoice {
   }
 }
 
-// 세트 포인트가 가장 큰 세트다. 세트에 속하지 않은 장비를 낀 부위는 이 세트의 선택지를 보인다. API처럼 세트 포인트와
-// setItemId가 있는 세트만 후보로 보고, 같은 포인트면 앞 세트를 고른다.
-function mainSetIdOf(setItemInfo: readonly SetItem[]): string | null {
+// API처럼 세트 포인트와 setItemId가 있는 세트만 세트 포인트가 큰 순서로 두고, 같은 포인트면 앞 세트를 앞에 둔다.
+function setIdsByPointOf(setItemInfo: readonly SetItem[]): string[] {
   const candidates = setItemInfo.flatMap(({ setItemId, active }) => {
     const point = active?.setPoint?.current
 
@@ -212,27 +211,33 @@ function mainSetIdOf(setItemInfo: readonly SetItem[]): string | null {
 
     return [{ setItemId, point }]
   })
-  const [main] = candidates.toSorted((a, b) => b.point - a.point)
 
-  if (main === undefined) {
-    return null
-  }
-
-  return main.setItemId
+  return candidates.toSorted((a, b) => b.point - a.point).map(({ setItemId }) => setItemId)
 }
 
+/**
+ * 낀 아이템 세트의 선택지를 둔다. 세트 밖 장비나 선택 목록에 없는 세트의 장비를 낀 부위는 캐릭터의 주 세트(선택 목록에 있는
+ * 세트 가운데 세트 포인트가 가장 큰 세트)의 선택지를 둔다.
+ */
 function variantChoicesOf(
   item: EquipmentItem,
   slotId: EnchantGradeSlot,
-  mainSetId: string | null
+  setIdsByPoint: readonly string[]
 ): VariantChoice[] {
-  const setItemId = item.setItemId ?? mainSetId
-
-  if (!isVariantSlot(slotId) || setItemId === null) {
+  if (!isVariantSlot(slotId)) {
     return []
   }
 
-  return equipmentVariantsOf(setItemId, slotId).map(toVariantChoice)
+  const setIds = item.setItemId !== null ? [item.setItemId, ...setIdsByPoint] : setIdsByPoint
+  const variants = setIds
+    .map((setId) => equipmentVariantsOf(setId, slotId))
+    .find((found) => found.length > 0)
+
+  if (variants === undefined) {
+    return []
+  }
+
+  return variants.map(toVariantChoice)
 }
 
 function wornVariantIdOf(item: EquipmentItem, variants: readonly VariantChoice[]): string | null {
@@ -291,7 +296,7 @@ function wornPotencyOf(
 function toSimulatorSlot(
   item: EquipmentItem & { slotId: EnchantGradeSlot },
   role: EnchantRole,
-  mainSetId: string | null
+  setIdsByPoint: readonly string[]
 ): SimulatorSlot {
   const reinforce = item.reinforce ?? 0
   const itemView = toItemView(item)
@@ -300,7 +305,7 @@ function toSimulatorSlot(
   const reinforceEditable = item.itemAvailableLevel === SIMULATED_ITEM_LEVEL
   const enchants = equippedEnchantLabels(item.enchant, role)
   const choices = enchantChoices(item.slotId, role)
-  const variants = variantChoicesOf(item, item.slotId, mainSetId)
+  const variants = variantChoicesOf(item, item.slotId, setIdsByPoint)
   const wornVariantId = wornVariantIdOf(item, variants)
   const wornTune = wornTuneOf(item)
   const wornPotency = wornPotencyOf(item, variants, wornVariantId)
@@ -347,7 +352,7 @@ function slotItemRow(
 /** 칭호는 응답의 부위 순서 자리에, 크리쳐와 오라는 캐릭터 상세 장비 탭처럼 장비 뒤에 둔다. 장비는 등급표의 12부위만 둔다. */
 export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
   const role = simulatorRole(detail.card)
-  const mainSetId = mainSetIdOf(detail.equipment.setItemInfo)
+  const setIdsByPoint = setIdsByPointOf(detail.equipment.setItemInfo)
   const equipment = detail.equipment.equipment.flatMap((item): SimulatorRow[] => {
     const { slotId } = item
 
@@ -359,7 +364,7 @@ export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
       return []
     }
 
-    const slot = toSimulatorSlot({ ...item, slotId }, role, mainSetId)
+    const slot = toSimulatorSlot({ ...item, slotId }, role, setIdsByPoint)
 
     return [{ kind: 'equipment', slot }]
   })
