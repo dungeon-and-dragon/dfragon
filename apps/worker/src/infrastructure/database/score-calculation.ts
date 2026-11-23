@@ -14,10 +14,6 @@ import {
   recordCharacterSets
 } from '@dfragon/database'
 import type { ScoreCalculationRepository } from '#application/character-score/repository.js'
-import {
-  CLEAR_CONTENTS,
-  toLatestContentsMinFame
-} from '@dfragon/server-core/domain/content-clears/index.js'
 
 export class DatabaseScoreCalculationRepository implements ScoreCalculationRepository {
   constructor(
@@ -26,8 +22,8 @@ export class DatabaseScoreCalculationRepository implements ScoreCalculationRepos
   ) {}
 
   // 비활성 캐릭터는 30일 동안 접속하지 않아 장비가 지난 계산과 같으므로 상세를 다시 받지 않는다.
-  readTargets(): Promise<ClearPopulationCharacter[]> {
-    return readClearPopulation(this.client, toLatestContentsMinFame(CLEAR_CONTENTS), 'active-only')
+  readTargets(minFame: number): Promise<ClearPopulationCharacter[]> {
+    return readClearPopulation(this.client, minFame, 'active-only')
   }
 
   readLastFinishedRun(): Promise<FinishedJobRun | undefined> {

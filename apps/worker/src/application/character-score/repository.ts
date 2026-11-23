@@ -8,7 +8,7 @@ import type {
 } from '@dfragon/database'
 
 export interface ScoreCalculationRepository {
-  readTargets(): Promise<ClearPopulationCharacter[]>
+  readTargets(minFame: number): Promise<ClearPopulationCharacter[]>
   readLastFinishedRun(): Promise<FinishedJobRun | undefined>
   recordScore(score: CharacterScoreInput): Promise<void>
   recordBasic(basic: CharacterBasicInput): Promise<void>
