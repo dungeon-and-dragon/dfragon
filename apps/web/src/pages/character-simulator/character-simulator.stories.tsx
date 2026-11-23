@@ -71,6 +71,27 @@ async function press(canvas: HTMLElement, label: string, times = 1): Promise<voi
   }
 }
 
+async function choose(canvas: HTMLElement, slotName: string): Promise<void> {
+  const row = await waitForElement(() =>
+    [...canvas.querySelectorAll<HTMLElement>('tbody tr')].find(
+      (candidate) => candidate.querySelector('td')?.textContent === slotName
+    )
+  )
+  row.querySelector<HTMLElement>('button')?.click()
+  await pause(STEP_SETTLE_MS)
+}
+
+async function chooseCrystal(canvas: HTMLElement, slotNo: number): Promise<void> {
+  const section = await waitForElement(
+    () =>
+      [...canvas.querySelectorAll('section')].find(
+        (candidate) => candidate.querySelector('h2')?.textContent === '서약 결정'
+      ) ?? undefined
+  )
+  section.querySelectorAll<HTMLElement>('tbody tr button')[slotNo]?.click()
+  await pause(STEP_SETTLE_MS)
+}
+
 function screenStory(role: Role, handlers: Handlers): Story {
   const detail = storyCharacterDetail(role)
   const { serverId, characterId } = detail.character
@@ -89,14 +110,19 @@ function screenStory(role: Role, handlers: Handlers): Story {
 
 async function changeDealerEquipment({ canvasElement }: { canvasElement: HTMLElement }) {
   await press(canvasElement, '무기 수치 올리기', 2)
+  await choose(canvasElement, '상의')
   await press(canvasElement, '상의 증폭')
   await press(canvasElement, '상의 수치 올리기', 10)
+  await choose(canvasElement, '목걸이')
   await pick(canvasElement, '목걸이 마법부여', '최종 데미지 증가 +2%')
 }
 
 async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '칭호')
   await pick(canvasElement, '칭호 교체', '진정한 각성을 이룬 자')
+  await choose(canvasElement, '크리쳐')
   await pick(canvasElement, '크리쳐 교체', 'SD 흰 구름 전령 에를리히')
+  await choose(canvasElement, '오라')
   await pick(canvasElement, '오라 교체', '열대야의 추억')
 }
 
@@ -114,21 +140,27 @@ function variantName(slotId: 'JACKET' | 'EARRING', kind: string): string {
 }
 
 async function changeVariant({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '상의')
   await pick(canvasElement, '상의 교체', variantName('JACKET', '잠식'))
 }
 
 async function changeTune({ canvasElement }: { canvasElement: HTMLElement }) {
-  await pick(canvasElement, '상의 조율', 'III')
+  await choose(canvasElement, '보조장비')
   await pick(canvasElement, '보조장비 조율', 'II')
+  await choose(canvasElement, '상의')
+  await pick(canvasElement, '상의 조율', 'III')
 }
 
 async function chooseExalted({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '귀걸이')
   await pick(canvasElement, '귀걸이 교체', variantName('EARRING', '유일'))
   await press(canvasElement, '귀걸이 정밀도 내리기', 5)
 }
 
 async function changeOathTune({ canvasElement }: { canvasElement: HTMLElement }) {
+  await chooseCrystal(canvasElement, 6)
   await pick(canvasElement, '결정 7 조율', 'III')
+  await chooseCrystal(canvasElement, 7)
   await pick(canvasElement, '결정 8 조율', 'II')
 }
 
@@ -162,6 +194,11 @@ export const 유일장비: Story = {
 export const 서약결정조율: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeOathTune
+}
+
+export const 휴대폰: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  globals: { viewport: { value: 'phone', isRotated: false } }
 }
 
 export const 버퍼: Story = screenStory('buffer', simulatorStoryHandlers.calculated)

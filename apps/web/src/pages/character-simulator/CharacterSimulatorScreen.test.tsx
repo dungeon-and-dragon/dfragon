@@ -42,6 +42,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
+  vi.unstubAllGlobals()
 })
 
 function identityOf({ character }: CharacterDetailView) {
@@ -112,6 +113,25 @@ function control(label: string): HTMLElement {
   return found!
 }
 
+function rowOf(slotName: string): HTMLTableRowElement {
+  const rows = [
+    ...container.querySelector('table')!.querySelectorAll<HTMLTableRowElement>('tbody tr')
+  ]
+  const found = rows.find((row) => row.querySelector('td')?.textContent === slotName)
+  expect(found, slotName).toBeDefined()
+
+  return found!
+}
+
+async function choose(slotName: string): Promise<void> {
+  await act(async () => rowOf(slotName).querySelector('button')!.click())
+}
+
+async function chooseCrystal(slotNo: number): Promise<void> {
+  const buttons = oathSection()!.querySelectorAll<HTMLElement>('tbody tr button')
+  await act(async () => buttons[slotNo]!.click())
+}
+
 async function pick(label: string, option: string): Promise<void> {
   await act(async () => control(label).click())
   const item = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find((candidate) =>
@@ -173,11 +193,20 @@ it('열면 착용한 장비의 수치, 증폭, 마법부여를 기본값으로 �
   expect(bodies).toEqual([{ equipment: [] }])
   expect(reinforceOf('무기')).toBe('+10')
   expect(control('무기 증폭').getAttribute('aria-checked')).toBe('false')
-  expect(reinforceOf('귀걸이')).toBe('+8')
+  expect(control('무기 마법부여').textContent).toBe('화속성 강화 +15, 명속성 강화 +15')
+
+  await choose('상의')
+
   expect(control('상의 수치 내리기').hasAttribute('disabled')).toBe(true)
   expect(control('상의 수치 올리기').hasAttribute('disabled')).toBe(false)
+
+  await choose('귀걸이')
+
+  expect(reinforceOf('귀걸이')).toBe('+8')
   expect(control('귀걸이 증폭').getAttribute('aria-checked')).toBe('true')
-  expect(control('무기 마법부여').textContent).toBe('화속성 강화 +15, 명속성 강화 +15')
+
+  await choose('칭호')
+
   expect(container.querySelector('[aria-label="칭호 수치"]')).toBeNull()
   expect(toneClassesOf(scoreValue('변경 후'))).toEqual(['dealer'])
   expect(resetButton().disabled).toBe(true)
@@ -194,6 +223,7 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
 
   await step('무기 수치 올리기', 2)
   await act(async () => control('무기 증폭').click())
+  await choose('목걸이')
   await pick('목걸이 마법부여', '최종 데미지 증가 +2%')
 
   await waitForScores([
@@ -213,6 +243,8 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
       }
     ]
   })
+  await choose('무기')
+
   expect(reinforceOf('무기')).toBe('+12')
   expect(scoreValue('차이').className).toContain('text-fg-success')
   expect(resetButton().disabled).toBe(false)
@@ -390,22 +422,29 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
   const names = slotNames()
   expect(names.slice(0, 3)).toEqual(['무기', '칭호', '상의'])
   expect(names.slice(-2)).toEqual(['크리쳐', '오라'])
-  expect(container.querySelectorAll('tbody tr')[1]!.textContent).toContain(
-    '프로스트의 전설 플래티넘[35Lv]'
-  )
-  const titleRow = container.querySelectorAll('tbody tr')[1]!
+  const titleRow = rowOf('칭호')
   const worn = characterDetailFixture('dealer').equipment.equipment[1]!
-  const titleControl = control('칭호 교체')
-  expect(titleControl.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
-  expect(iconsIn(titleControl)).toEqual([iconUrl(worn.itemId)])
-  expect(titleRow.querySelectorAll('td')[1]!.contains(titleControl)).toBe(true)
+  expect(titleRow.querySelectorAll('td')[1]!.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
   expect([...titleRow.querySelectorAll('td')].slice(2).map((cell) => cell.textContent)).toEqual([
     '',
     ''
   ])
+
+  await choose('칭호')
+
+  const titleControl = control('칭호 교체')
+  expect(titleControl.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
+  expect(iconsIn(titleControl)).toEqual([iconUrl(worn.itemId)])
+
+  await choose('크리쳐')
+
   expect(control('크리쳐 교체').textContent).toBe('운명을 담는 재단사')
+
+  await choose('오라')
+
   expect(control('오라 교체').textContent).toBe('고결한 영혼의 잔상')
 
+  await choose('칭호')
   await act(async () => control('칭호 교체').click())
   const options = [...document.querySelectorAll('[role="option"]')]
   expect(options.map((item) => item.textContent)).toEqual([
@@ -435,6 +474,7 @@ it('목록 항목의 아이콘에 마우스를 올리면 그 아이템의 정보
     ['변경 후', '1,000,000'],
     ['차이', '0']
   ])
+  await choose('칭호')
   await act(async () => control('칭호 교체').click())
   const icon = option(titleItem!.name).querySelector('img')!.parentElement!
 
@@ -460,6 +500,7 @@ it('목록 항목의 아이콘을 눌러도 터치로 탭해도 그 항목을 �
     ['차이', '0']
   ])
 
+  await choose('칭호')
   await act(async () => control('칭호 교체').click())
   await act(async () => option(secondTitle!.name).querySelector('img')!.click())
 
@@ -492,6 +533,7 @@ it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수
     ['차이', '0']
   ])
 
+  await choose('칭호')
   await pick('칭호 교체', titleItem!.name)
 
   await waitForScores([
@@ -520,7 +562,9 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
   ])
 
   await step('무기 수치 올리기', 1)
+  await choose('크리쳐')
   await pick('크리쳐 교체', creatureItem!.name)
+  await choose('오라')
   await pick('오라 교체', auraItem!.name)
 
   await waitForScores([
@@ -538,7 +582,7 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
 
   await act(async () => resetButton().click())
 
-  expect(control('크리쳐 교체').textContent).toBe('운명을 담는 재단사')
+  expect(rowOf('크리쳐').querySelectorAll('td')[1]!.textContent).toBe('운명을 담는 재단사')
   expect(control('오라 교체').textContent).toBe('고결한 영혼의 잔상')
   await waitForScores([
     ['현재', '1,000,000'],
@@ -582,12 +626,15 @@ it('115레벨이 아닌 장비는 수치와 증폭을 막고 마법부여만 고
     ['차이', '0']
   ])
 
+  expect(control('무기 수치').hasAttribute('disabled')).toBe(false)
+
+  await choose('목걸이')
+
   expect(control('목걸이 수치').hasAttribute('disabled')).toBe(true)
   expect(control('목걸이 수치 내리기').hasAttribute('disabled')).toBe(true)
   expect(control('목걸이 수치 올리기').hasAttribute('disabled')).toBe(true)
   expect(control('목걸이 증폭').getAttribute('aria-disabled')).toBe('true')
   expect(control('목걸이 마법부여').hasAttribute('disabled')).toBe(false)
-  expect(control('무기 수치').hasAttribute('disabled')).toBe(false)
 })
 
 it('캐릭터를 받지 못하면 오류 문구를 보이고 계산을 요청하지 않는다', async () => {
@@ -637,14 +684,13 @@ function has(label: string): boolean {
   return container.querySelector(`[aria-label="${label}"]`) !== null
 }
 
+// 서약 결정을 고르면 조작 패널의 제목도 서약 결정이 되므로, 장비창의 구획에서 찾는다.
 function oathSection(): HTMLElement | null {
-  const heading = [...container.querySelectorAll('h2')].find(
-    (candidate) => candidate.textContent === '서약 결정'
+  const section = [...container.querySelectorAll('section')].find(
+    (candidate) => candidate.querySelector('h2')?.textContent === '서약 결정'
   )
 
-  const section = heading?.closest('section')
-
-  if (section == null) {
+  if (section === undefined) {
     return null
   }
 
@@ -657,6 +703,9 @@ it('무기는 고정 표시로 두고 나머지 장비 칸은 그 세트의 등�
 
   expect(has('무기 교체')).toBe(false)
   expect(has('무기 조율')).toBe(false)
+
+  await choose('상의')
+
   expect(control('상의 교체').textContent).toBe('긍휼 속 자비의 상의')
 
   await act(async () => control('상의 교체').click())
@@ -674,6 +723,7 @@ it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결�
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
+  await choose('상의')
   await pick('상의 교체', corroded.item.itemName)
 
   await waitForScores([
@@ -695,10 +745,10 @@ it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결�
     ]
   })
   expect(control('상의 교체').textContent).toBe(corroded.item.itemName)
-  expect(control('머리어깨 교체').textContent).toBe(
+  expect(rowOf('머리어깨').querySelectorAll('td')[1]!.textContent).toBe(
     variantOf(SOUL_FAIRY_SET, 'SHOULDER', '에픽', '축성').item.itemName
   )
-  expect(control('목걸이 교체').textContent).toBe(
+  expect(rowOf('목걸이').querySelectorAll('td')[1]!.textContent).toBe(
     variantOf(SOUL_FAIRY_SET, 'AMULET', '태초', '일반').item.itemName
   )
   expect(resetButton().disabled).toBe(false)
@@ -708,7 +758,8 @@ it('세트 밖 장비를 낀 부위는 착용 중 아이템을 첫 항목으로 
   await render(characterDetailFixture('buffer'), () =>
     HttpResponse.json({ baseline: score(4_000, 'buff'), simulated: score(4_000, 'buff') })
   )
-  await expect.poll(() => has('팔찌 교체')).toBe(true)
+  await expect.poll(() => container.querySelector('table') !== null).toBe(true)
+  await choose('팔찌')
 
   expect(control('팔찌 교체').textContent).toBe('고유 - 모독자의 조소 팔찌')
   expect(has('팔찌 조율')).toBe(false)
@@ -725,8 +776,13 @@ it('조율을 바꾸면 그 부위의 조율 단계를 요청하고, 조율할 �
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(control('보조장비 조율').textContent).toBe('-')
+  await choose('목걸이')
+
   expect(has('목걸이 조율')).toBe(false)
+
+  await choose('보조장비')
+
+  expect(control('보조장비 조율').textContent).toBe('-')
 
   await act(async () => control('보조장비 조율').click())
 
@@ -760,7 +816,9 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
+  await choose('보조장비')
   await pick('보조장비 조율', 'III')
+  await choose('귀걸이')
   await pick('귀걸이 조율', 'III')
   await pick('귀걸이 교체', exalted.item.itemName)
 
@@ -797,6 +855,8 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
     ['변경 후', '98,130,008'],
     ['차이', '+97,130,008']
   ])
+  await choose('보조장비')
+
   expect(control('보조장비 조율').textContent).toBe('III')
 })
 
@@ -806,12 +866,20 @@ it('서약 결정 표는 결정을 slotNo 순서로 두고, 조율을 바꾸면 
 
   const rows = [...oathSection()!.querySelectorAll('tbody tr')]
   expect(rows.map((row) => row.querySelector('td')?.textContent)).toEqual([
-    ...Array.from({ length: 8 }, () => '용투 : 완전한 광휘 결정'),
+    ...Array.from({ length: 6 }, () => '용투 : 완전한 광휘 결정III'),
+    '용투 : 완전한 광휘 결정I',
+    '용투 : 완전한 광휘 결정',
     ...Array.from({ length: 3 }, () => '용투 : 태초의 광휘 결정')
   ])
+  await chooseCrystal(6)
+
   expect(control('결정 7 조율').textContent).toBe('I')
+
+  await chooseCrystal(8)
+
   expect(has('결정 9 조율')).toBe(false)
 
+  await chooseCrystal(7)
   await pick('결정 8 조율', 'III')
 
   await waitForScores([
@@ -828,6 +896,7 @@ it('서약이 없는 캐릭터는 서약 결정 표를 그리지 않는다', asy
   await waitForScores(UNCHANGED_SCORES)
 
   expect(oathSection()).toBeNull()
+  expect(container.querySelector('nav')).toBeNull()
   expect(container.querySelectorAll('table')).toHaveLength(1)
 })
 
@@ -836,8 +905,10 @@ it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
+  await choose('상의')
   await pick('상의 교체', unique.item.itemName)
   await pick('상의 조율', 'II')
+  await chooseCrystal(7)
   await pick('결정 8 조율', 'I')
   await waitForScores([
     ['현재', '1,000,000'],
@@ -847,9 +918,77 @@ it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용
 
   await act(async () => resetButton().click())
 
+  expect(control('결정 8 조율').textContent).toBe('-')
+
+  await choose('상의')
+
   expect(control('상의 교체').textContent).toBe('긍휼 속 자비의 상의')
   expect(control('상의 조율').textContent).toBe('-')
-  expect(control('결정 8 조율').textContent).toBe('-')
   await waitForScores(UNCHANGED_SCORES)
   expect(resetButton().disabled).toBe(true)
+})
+
+it('좁은 화면에서는 장비창의 줄을 누르면 그 줄의 조작을 아래에서 올라오는 시트로 연다', async () => {
+  vi.stubGlobal('matchMedia', (query: string) =>
+    Object.assign(new EventTarget(), { matches: query === '(width < 900px)', media: query })
+  )
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(document.querySelector('[role="dialog"]')).toBeNull()
+
+  await choose('상의')
+
+  const sheet = document.querySelector<HTMLElement>('[role="dialog"]')
+  expect(sheet?.querySelector('h2')?.textContent).toBe('상의')
+  expect(sheet?.querySelector('[aria-label="상의 교체"]')?.textContent).toBe('긍휼 속 자비의 상의')
+})
+
+it('캐릭터 띠가 보이는 동안에는 요약 줄이 없고, 띠가 화면 밖으로 나가면 요약 줄이 나타나 서버, 캐릭터명, 점수를 담는다', async () => {
+  let reportHeader: ((inView: boolean) => void) | undefined
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      constructor(notify: IntersectionObserverCallback) {
+        reportHeader = (inView) =>
+          notify([{ isIntersecting: inView } as IntersectionObserverEntry], this as never)
+      }
+
+      observe(): void {}
+
+      disconnect(): void {}
+    }
+  )
+  const detail = characterDetailFixture('dealer')
+  await render(detail)
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(container.querySelectorAll('section[aria-label="장비 점수"]')).toHaveLength(1)
+
+  await act(async () => reportHeader!(false))
+
+  const [, inlineScore] = container.querySelectorAll('section[aria-label="장비 점수"]')
+  const summary = inlineScore!.parentElement!
+  expect(summary.textContent).toContain('카인')
+  expect(summary.textContent).toContain(detail.character.characterName!)
+  expect(
+    [...inlineScore!.querySelectorAll('dl > div')].map((row) => [
+      row.querySelector('dt')!.textContent,
+      row.querySelector('dd')!.firstChild?.textContent
+    ])
+  ).toEqual(UNCHANGED_SCORES)
+})
+
+it('목차는 장비와 서약 결정 구획으로 옮겨 가는 링크를 둔다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  const links = [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="목차"] a')]
+  const targets = links.map((link) => document.getElementById(link.hash.slice(1)))
+
+  expect(links.map((link) => link.textContent)).toEqual(['장비', '서약 결정'])
+  expect(targets.map((target) => target?.querySelector('h2')?.textContent)).toEqual([
+    '장비',
+    '서약 결정'
+  ])
 })
