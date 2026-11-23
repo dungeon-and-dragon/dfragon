@@ -1,12 +1,21 @@
 // @vitest-environment jsdom
 import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
-import { equipmentVariantsOf, type EquipmentVariantSlot } from '@dfragon/lib/equipment-variants'
+import {
+  type EquipmentVariantSlot,
+  equipmentSets,
+  equipmentVariantsOf,
+  oathCrystalVariantsOf,
+  oathVariantOf,
+  oathVariantsOf
+} from '@dfragon/lib/equipment-variants'
 import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterCardScore, CharacterDetailView } from '#entities/character'
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 import {
   apiFailure,
@@ -33,6 +42,7 @@ let root: Root
 let bodies: SimulationBody[]
 
 beforeEach(() => {
+  server.use(oathCatalogHandlers.notUploaded)
   bodies = []
   container = document.createElement('div')
   document.body.append(container)
@@ -59,9 +69,9 @@ const VARIANT_POINTS = 100_000
 const POTENCY_POINTS = 1_000_000
 const KEPT_ITEM = { variantId: null, tune: null, potency: null }
 
-// 바꾼 부위의 강화 수치 합, 고른 칭호, 크리쳐, 오라마다 1,000점, 요청한 조율 단계마다 10,000점, 바꾼 아이템마다 100,000점,
-// 정밀도마다 1,000,000점을 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
-function scoresFor({ equipment, oath = [], ...slotItems }: SimulationBody): Response {
+// 바꾼 부위의 강화 수치 합, 고른 칭호, 크리쳐, 오라, 장비 세트, 서약 세트, 서약 본체마다 1,000점, 요청한 조율 단계마다
+// 10,000점, 바꾼 아이템과 결정마다 100,000점, 정밀도마다 1,000,000점을 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
+function scoresFor({ equipment, oath = [], ...chosen }: SimulationBody): Response {
   const equipmentPoints = equipment.reduce(
     (sum, { reinforce, variantId, tune, potency }) =>
       sum +
@@ -71,8 +81,12 @@ function scoresFor({ equipment, oath = [], ...slotItems }: SimulationBody): Resp
       (potency ?? 0) * POTENCY_POINTS,
     0
   )
-  const oathPoints = oath.reduce((sum, { tune }) => sum + tune * TUNE_POINTS, 0)
-  const added = equipmentPoints + oathPoints + Object.keys(slotItems).length * SLOT_ITEM_POINTS
+  const oathPoints = oath.reduce(
+    (sum, { tune, variantId }) =>
+      sum + (tune ?? 0) * TUNE_POINTS + (variantId !== null ? VARIANT_POINTS : 0),
+    0
+  )
+  const added = equipmentPoints + oathPoints + Object.keys(chosen).length * SLOT_ITEM_POINTS
 
   return HttpResponse.json({ baseline: score(BASELINE), simulated: score(BASELINE + added) })
 }
@@ -106,8 +120,9 @@ async function render(
   )
 }
 
+// 조작 패널(aside)도 "장비 세트"처럼 고른 줄의 이름을 가지므로 패널을 뺀 컨트롤에서 찾는다.
 function control(label: string): HTMLElement {
-  const found = container.querySelector<HTMLElement>(`[aria-label="${label}"]`)
+  const found = container.querySelector<HTMLElement>(`:not(aside)[aria-label="${label}"]`)
   expect(found, label).not.toBeNull()
 
   return found!
@@ -127,9 +142,21 @@ async function choose(slotName: string): Promise<void> {
   await act(async () => rowOf(slotName).querySelector('button')!.click())
 }
 
+// 서약 구획 줄의 첫 칸은 "세트", "서약", "결정 1"처럼 줄 이름이다.
+function oathRowOf(label: string): HTMLTableRowElement {
+  const rows = [...oathSection()!.querySelectorAll<HTMLTableRowElement>('tbody tr')]
+  const found = rows.find((row) => row.querySelector('td')?.textContent === label)
+  expect(found, label).toBeDefined()
+
+  return found!
+}
+
+async function chooseOath(label: string): Promise<void> {
+  await act(async () => oathRowOf(label).querySelector('button')!.click())
+}
+
 async function chooseCrystal(slotNo: number): Promise<void> {
-  const buttons = oathSection()!.querySelectorAll<HTMLElement>('tbody tr button')
-  await act(async () => buttons[slotNo]!.click())
+  await chooseOath(`결정 ${slotNo + 1}`)
 }
 
 async function pick(label: string, option: string): Promise<void> {
@@ -420,7 +447,7 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
   ])
 
   const names = slotNames()
-  expect(names.slice(0, 3)).toEqual(['무기', '칭호', '상의'])
+  expect(names.slice(0, 4)).toEqual(['세트', '무기', '칭호', '상의'])
   expect(names.slice(-2)).toEqual(['크리쳐', '오라'])
   const titleRow = rowOf('칭호')
   const worn = characterDetailFixture('dealer').equipment.equipment[1]!
@@ -684,10 +711,10 @@ function has(label: string): boolean {
   return container.querySelector(`[aria-label="${label}"]`) !== null
 }
 
-// 서약 결정을 고르면 조작 패널의 제목도 서약 결정이 되므로, 장비창의 구획에서 찾는다.
+// 서약 본체를 고르면 조작 패널의 제목도 서약이 되므로, 장비창의 구획에서 찾는다.
 function oathSection(): HTMLElement | null {
   const section = [...container.querySelectorAll('section')].find(
-    (candidate) => candidate.querySelector('h2')?.textContent === '서약 결정'
+    (candidate) => candidate.querySelector('h2')?.textContent === '서약'
   )
 
   if (section === undefined) {
@@ -860,12 +887,14 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
   expect(control('보조장비 조율').textContent).toBe('III')
 })
 
-it('서약 결정 표는 결정을 slotNo 순서로 두고, 조율을 바꾸면 바꾼 결정만 요청한다', async () => {
+it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율을 바꾸면 바꾼 결정만 요청한다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   const rows = [...oathSection()!.querySelectorAll('tbody tr')]
-  expect(rows.map((row) => row.querySelector('td')?.textContent)).toEqual([
+  expect(rows.map((row) => row.querySelectorAll('td')[1]?.textContent)).toEqual([
+    '야망의 용투 서약',
+    '세계를 태우는 용투 서약',
     ...Array.from({ length: 6 }, () => '용투 : 완전한 광휘 결정III'),
     '용투 : 완전한 광휘 결정I',
     '용투 : 완전한 광휘 결정',
@@ -887,11 +916,11 @@ it('서약 결정 표는 결정을 slotNo 순서로 두고, 조율을 바꾸면 
     ['변경 후', '1,030,000'],
     ['차이', '+30,000']
   ])
-  expect(bodies.at(-1)).toEqual({ equipment: [], oath: [{ slotNo: 7, tune: 3 }] })
+  expect(bodies.at(-1)).toEqual({ equipment: [], oath: [{ slotNo: 7, tune: 3, variantId: null }] })
   expect(control('결정 8 조율').textContent).toBe('III')
 })
 
-it('서약이 없는 캐릭터는 서약 결정 표를 그리지 않는다', async () => {
+it('서약이 없는 캐릭터는 서약 구획을 그리지 않는다', async () => {
   await render({ ...characterDetailFixture('dealer'), oath: null })
   await waitForScores(UNCHANGED_SCORES)
 
@@ -979,16 +1008,210 @@ it('캐릭터 띠가 보이는 동안에는 요약 줄이 없고, 띠가 화면 
   ).toEqual(UNCHANGED_SCORES)
 })
 
-it('목차는 장비와 서약 결정 구획으로 옮겨 가는 링크를 둔다', async () => {
+it('목차는 장비와 서약 구획으로 옮겨 가는 링크를 둔다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   const links = [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="목차"] a')]
   const targets = links.map((link) => document.getElementById(link.hash.slice(1)))
 
-  expect(links.map((link) => link.textContent)).toEqual(['장비', '서약 결정'])
+  expect(links.map((link) => link.textContent)).toEqual(['장비', '서약'])
   expect(targets.map((target) => target?.querySelector('h2')?.textContent)).toEqual([
     '장비',
-    '서약 결정'
+    '서약'
   ])
+})
+
+const SHADOW_SET = '3af7c961e7d8cd8b5b42c5f82af2a0ad'
+const DRAGON_OATH_SET = 16204
+const SHADOW_OATH_SET = 16201
+
+it('장비 세트 줄을 고르면 주 세트가 선택된 세트 선택을 열고, 다른 세트를 고르면 세트만 요청하고 장비창을 그 세트로 보인다', async () => {
+  const corroded = variantOf(SHADOW_SET, 'JACKET', '에픽', '잠식')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('소울 페어리 세트')
+
+  await choose('세트')
+
+  expect(control('장비 세트').textContent).toBe('소울 페어리 세트')
+
+  await act(async () => control('장비 세트').click())
+
+  expect(optionNames()).toEqual(equipmentSets().map(({ setItemName }) => setItemName))
+
+  await act(async () => option('그림자에 숨은 죽음 세트').click())
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,001,000'],
+    ['차이', '+1,000']
+  ])
+  expect(bodies.at(-1)).toEqual({ equipmentSet: SHADOW_SET, equipment: [] })
+  expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('그림자에 숨은 죽음 세트')
+
+  await choose('상의')
+  await pick('상의 교체', corroded.item.itemName)
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)).toEqual({
+      equipmentSet: SHADOW_SET,
+      equipment: [
+        {
+          slotId: 'JACKET',
+          reinforce: 0,
+          amplified: false,
+          enchantId: null,
+          variantId: corroded.id,
+          tune: 0,
+          potency: null
+        }
+      ]
+    })
+  )
+  expect(rowOf('머리어깨').querySelectorAll('td')[1]!.textContent).toBe(
+    variantOf(SHADOW_SET, 'SHOULDER', '에픽', '축성').item.itemName
+  )
+})
+
+it('서약 세트 줄에서 다른 세트를 고르면 세트만 요청하고 서약과 광휘 결정을 그 세트의 같은 등급으로 보인다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await chooseOath('세트')
+
+  expect(control('서약 세트').textContent).toBe('야망의 용투 서약')
+
+  await pick('서약 세트', '어둠에 잠긴 그림자 서약')
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathSet: SHADOW_OATH_SET }))
+  expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('어둠에 잠긴 그림자 서약')
+  expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(
+    '태초의 어둠 속 그림자 서약'
+  )
+  expect(oathRowOf('결정 1').querySelectorAll('td')[1]!.textContent).toBe(
+    '그림자 : 완전한 광휘 결정III'
+  )
+})
+
+it('서약 줄을 고르면 같은 계열 4등급의 서약 선택을 열고, 다른 등급을 고르면 그 선택지 id를 요청한다', async () => {
+  const epic = oathVariantOf(DRAGON_OATH_SET, '에픽')!
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await chooseOath('서약')
+
+  expect(control('서약 교체').textContent).toBe('세계를 태우는 용투 서약')
+
+  await act(async () => control('서약 교체').click())
+
+  expect(optionNames()).toEqual(oathVariantsOf(DRAGON_OATH_SET).map(({ item }) => item.itemName))
+
+  await act(async () => option(epic.item.itemName).click())
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathBody: epic.id }))
+  expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(epic.item.itemName)
+})
+
+it('결정 줄에서 등급을 바꾸면 조율을 새 결정에 맞게 자르고 그 결정의 선택지 id를 요청한다', async () => {
+  const crystals = oathCrystalVariantsOf(DRAGON_OATH_SET)
+  const primeval = crystals.find(({ rarity }) => rarity === '태초')!
+  const epic = crystals.find(({ rarity }) => rarity === '에픽')!
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  // 태초 결정은 3개까지라 이미 3개인 딜러는 하나를 내려야 다른 결정을 태초로 올릴 수 있다.
+  await chooseCrystal(8)
+  await pick('결정 9 교체', epic.item.itemName)
+  await chooseCrystal(6)
+
+  expect(control('결정 7 교체').textContent).toBe('용투 : 완전한 광휘 결정')
+  expect(control('결정 7 조율').textContent).toBe('I')
+
+  await pick('결정 7 교체', primeval.item.itemName)
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)).toEqual({
+      equipment: [],
+      oath: [
+        { slotNo: 6, tune: 0, variantId: primeval.id },
+        { slotNo: 8, tune: 0, variantId: epic.id }
+      ]
+    })
+  )
+  expect(has('결정 7 조율')).toBe(false)
+  expect(oathRowOf('결정 7').querySelectorAll('td')[1]!.textContent).toBe(primeval.item.itemName)
+})
+
+it('조율할 수 있는 무기를 고르면 조율 선택을 열고 바꾼 조율을 요청한다', async () => {
+  const detail = characterDetailFixture('dealer')
+  const equipment = detail.equipment.equipment.map((item) =>
+    item.slotId === 'WEAPON' ? { ...item, itemName: 'Beast-Saw' } : item
+  )
+  await render({ ...detail, equipment: { ...detail.equipment, equipment } })
+  await waitForScores(UNCHANGED_SCORES)
+
+  await act(async () => control('무기 조율').click())
+
+  expect(optionNames()).toEqual(['-', 'I', 'II', 'III'])
+
+  await act(async () => option('II').click())
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,020,010'],
+    ['차이', '+20,010']
+  ])
+  expect(bodies.at(-1)).toEqual({
+    equipment: [
+      {
+        slotId: 'WEAPON',
+        reinforce: 10,
+        amplified: false,
+        enchantId: null,
+        variantId: null,
+        tune: 2,
+        potency: null
+      }
+    ]
+  })
+})
+
+it('서약 본체는 서약 카탈로그의 그림으로 장비창 줄, 닫힌 선택 칸, 목록 항목에 보이고 카탈로그에 없는 본체는 빈 칸이다', async () => {
+  const icon = 'https://skilltab.test/oath-item/primeval.webp'
+  const catalog = {
+    ...oathCatalogFixture.characterDetail,
+    items: [{ name: '세계를 태우는 용투 서약', rarity: '태초', icon }]
+  }
+  server.use(oathCatalogHandlers.catalog(catalog))
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await vi.waitFor(() => expect(iconsIn(oathRowOf('서약'))).toEqual([icon]))
+
+  await chooseOath('서약')
+
+  expect(iconsIn(control('서약 교체'))).toEqual([icon])
+
+  await act(async () => control('서약 교체').click())
+
+  const optionIcons = [...document.querySelectorAll('[role="option"]')].map(iconsIn)
+
+  expect(optionIcons.at(-1)).toEqual([icon])
+  expect(optionIcons.slice(0, -1).flat()).not.toContain(icon)
+})
+
+it('태초 결정이 이미 3개면 다른 결정의 선택 목록에 태초 결정을 두지 않는다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await chooseCrystal(0)
+  await act(async () => control('결정 1 교체').click())
+
+  expect(optionNames()).toEqual(
+    oathCrystalVariantsOf(DRAGON_OATH_SET)
+      .filter(({ rarity }) => rarity !== '태초')
+      .map(({ item }) => item.itemName)
+  )
 })
