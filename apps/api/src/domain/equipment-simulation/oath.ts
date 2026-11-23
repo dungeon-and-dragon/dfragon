@@ -71,20 +71,14 @@ function wornSetId(section: CharacterPayload): number | null {
   return setInfo.setId
 }
 
-/** 원본과 같은 세트를 고르면 바꾸지 않은 것으로 본다. */
-function changedSet(section: CharacterPayload, set: number | null): number | null {
+/** 본체와 결정을 옮길 서약 세트이고, 원본과 같은 세트여도 다른 세트의 본체와 광휘 결정을 그 세트로 옮긴다. */
+function checkedSet(section: CharacterPayload, set: number | null): number | null {
   if (set === null) {
     return null
   }
 
-  const original = wornSetId(section)
-
-  if (original === null || !oathSets().some(({ setId }) => setId === set)) {
+  if (wornSetId(section) === null || !oathSets().some(({ setId }) => setId === set)) {
     throw new EquipmentSimulationFailure('request')
-  }
-
-  if (set === original) {
-    return null
   }
 
   return set
@@ -259,8 +253,11 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
 
   const section = wornOath(oath)
   const crystals = (section.crystal as unknown[]).filter(isRecord)
-  const set = changedSet(section, changes.set)
-  const setId = set ?? wornSetId(section)
+  const worn = wornSetId(section)
+  const set = checkedSet(section, changes.set)
+  const setId = set ?? worn
+  // 엔진에는 서약 세트가 실제로 바뀔 때만 세트를 넣는다.
+  const changedSet = set !== worn ? set : null
 
   for (const { slotNo } of changes.crystals) {
     if (!crystals.some((crystal) => crystal.slotNo === slotNo)) {
@@ -290,9 +287,9 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
     throw new EquipmentSimulationFailure('request')
   }
 
-  const changesItems = set !== null || body !== null || changesCrystals
+  const changesItems = changedSet !== null || body !== null || changesCrystals
 
-  return { set, body, crystals: edited, changesItems }
+  return { set: changedSet, body, crystals: edited, changesItems }
 }
 
 export function hasOathEdit(edit: OathEdit): boolean {
