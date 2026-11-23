@@ -5,8 +5,18 @@ import {
   EQUIPMENT_VARIANT_SLOTS,
   equipmentVariantsOf,
   findEquipmentVariant,
+  equipmentSets,
   findOathCrystal,
-  resolveEquipmentItems
+  findOathCrystalVariant,
+  findOathVariant,
+  moveOathCrystalToSet,
+  oathCrystalVariantsOf,
+  oathSets,
+  oathVariantOf,
+  oathVariantsOf,
+  resolveEquipmentItems,
+  switchEquipmentSet,
+  weaponMaxTuneLevelOf
 } from '@dfragon/lib/equipment-variants'
 
 // build가 생성 파일을 dist에 함께 실어야 package export로 읽힌다.
@@ -345,4 +355,180 @@ test('findOathCrystal은 서약 결정 이름으로 조율 단계별 세트 포�
   assert.deepEqual(findOathCrystal('미광의 서약 결정')?.tuneSetPoints, [45, 55, 65, 75])
   assert.deepEqual(findOathCrystal('무의식의 안개 결정 35')?.tuneSetPoints, [125])
   assert.equal(findOathCrystal('없는 결정'), null)
+})
+
+function variantNamesOf(selection) {
+  return Object.fromEntries(
+    Object.entries(selection).map(([slotId, variant]) => [slotId, variant?.item.itemName ?? null])
+  )
+}
+
+test('장비 세트 목록은 13개 세트의 setItemId와 이름이다', () => {
+  const sets = equipmentSets()
+
+  assert.equal(sets.length, 13)
+  assert.deepEqual(
+    sets.find(({ setItemId }) => setItemId === DIMENSION_SET),
+    { setItemId: DIMENSION_SET, setItemName: '차원 속의 이야기 세트' }
+  )
+  assert.deepEqual(
+    sets.find(({ setItemId }) => setItemId === SOUL_FAIRY_SET),
+    { setItemId: SOUL_FAIRY_SET, setItemName: '소울 페어리 세트' }
+  )
+})
+
+test('switchEquipmentSet은 부위마다 같은 등급, 같은 종류로 옮기고 잠식, 축성, 흑아를 유지한다', () => {
+  const selection = selectionOf(SHADOW_SET, {
+    JACKET: ['에픽', '축성'],
+    SHOES: ['에픽', '잠식'],
+    AMULET: ['태초', '흑아'],
+    WRIST: ['태초', '일반'],
+    SUPPORT: ['레전더리', '일반']
+  })
+
+  assert.deepEqual(variantNamesOf(switchEquipmentSet(selection, SOUL_FAIRY_SET)), {
+    JACKET: '축성 : 노블 페어리 상의',
+    SHOES: '잠식 : 노블 페어리 신발',
+    AMULET: '흑아 : 로열 페어리 목걸이',
+    WRIST: '로열 페어리 팔찌',
+    SUPPORT: '엘더 페어리 보조장비'
+  })
+})
+
+test('switchEquipmentSet은 유일 장비와 선택지에 없는 착용 아이템을 그대로 두라는 뜻으로 null을 돌려준다', () => {
+  const selection = {
+    ...selectionOf(SHADOW_SET, { JACKET: ['유니크', '일반'], EARRING: ['태초', '유일'] }),
+    RING: null
+  }
+
+  assert.deepEqual(variantNamesOf(switchEquipmentSet(selection, SOUL_FAIRY_SET)), {
+    JACKET: '리틀 페어리 상의',
+    RING: null,
+    EARRING: null
+  })
+})
+
+test('차원 속의 이야기 세트로 옮기면 그 세트에 없는 등급은 가장 높은 레전더리로 바꾼다', () => {
+  const selection = selectionOf(SHADOW_SET, {
+    JACKET: ['에픽', '잠식'],
+    SHOES: ['유니크', '일반'],
+    AMULET: ['태초', '흑아'],
+    SUPPORT: ['에픽', '일반']
+  })
+
+  assert.deepEqual(variantNamesOf(switchEquipmentSet(selection, DIMENSION_SET)), {
+    JACKET: '흐르는 차원 속의 이야기 상의',
+    SHOES: '멈춘 차원 속의 이야기 신발',
+    AMULET: '흐르는 차원 속의 이야기 목걸이',
+    SUPPORT: '흐르는 차원 속의 이야기 보조장비'
+  })
+})
+
+test('switchEquipmentSet은 없는 세트로 옮기면 오류를 던진다', () => {
+  assert.throws(() => switchEquipmentSet({}, 'missing-set'), /Unknown equipment set/)
+})
+
+test('서약 세트는 setId 16201~16212의 12개다', () => {
+  const sets = oathSets()
+
+  assert.deepEqual(
+    sets.map(({ setId }) => setId),
+    [16201, 16202, 16203, 16204, 16205, 16206, 16207, 16208, 16209, 16210, 16211, 16212]
+  )
+  assert.deepEqual(sets[0], { setId: 16201, name: '어둠에 잠긴 그림자 서약' })
+  assert.deepEqual(sets[11], { setId: 16212, name: '경계의 마력 서약' })
+})
+
+test('세트 전용 서약 본체는 그 서약 세트의 4등급 가운데 고른다', () => {
+  assert.deepEqual(
+    oathVariantsOf(16210).map(({ rarity, item, setPoint }) => [rarity, item.itemName, setPoint]),
+    [
+      ['유니크', '기운이 감도는 여우 서약', 265],
+      ['레전더리', '부름에 이끌린 여우 서약', 355],
+      ['에픽', '빙의된 여우 서약', 455],
+      ['태초', '강림한 여우 서약', 655]
+    ]
+  )
+  assert.equal(oathVariantOf(16212, '에픽')?.id, '774dcc27d90a1d2bcd9b129ca6a45f7a')
+  assert.deepEqual(oathVariantsOf(99999), [])
+  assert.equal(oathVariantOf(16212, '레어'), null)
+})
+
+test('영겁의 안개 서약은 세트 없이 등급마다 다른 itemId로 4등급을 고른다', () => {
+  assert.deepEqual(
+    oathVariantsOf(null).map(({ id, rarity, setPoint }) => [rarity, id, setPoint]),
+    [
+      ['유니크', '79757c67d64623286761749ee6666b5f', 265],
+      ['레전더리', '8b75878dd4e1904f1bfc131b52319bde', 355],
+      ['에픽', '316e1b0f26a3a471be2a95e33a315171', 455],
+      ['태초', 'ac0586536083d560b38659de8bc0c2b8', 655]
+    ]
+  )
+})
+
+test('findOathVariant는 본체 itemId로 서약 세트(안개 서약은 null)와 등급을 찾는다', () => {
+  const shadow = findOathVariant('72adf78e645d9a821b9adcc98ef00044')
+  const mist = findOathVariant('316e1b0f26a3a471be2a95e33a315171')
+
+  assert.equal(shadow?.setId, 16201)
+  assert.equal(shadow?.variant.rarity, '태초')
+  assert.equal(shadow?.variant.item.itemName, '태초의 어둠 속 그림자 서약')
+  assert.equal(mist?.setId, null)
+  assert.equal(mist?.variant.rarity, '에픽')
+  assert.equal(mist?.variant.item.itemName, '영겁의 안개 서약')
+  // 레어 안개 서약은 엔진 서약 표에 없어 선택지가 아니다.
+  assert.equal(findOathVariant('c7c70b8a2e3233d84256e6783649ce34'), null)
+})
+
+test('광휘 결정은 서약 세트마다 희미한, 선명한, 완전한, 태초의 4등급이고 태초는 조율하지 않는다', () => {
+  assert.deepEqual(
+    oathCrystalVariantsOf(16212).map(({ rarity, item, tuneSetPoints }) => [
+      rarity,
+      item.itemName,
+      tuneSetPoints
+    ]),
+    [
+      ['유니크', '마력 : 희미한 광휘 결정', [85, 95, 105, 115]],
+      ['레전더리', '마력 : 선명한 광휘 결정', [125, 135, 145, 155]],
+      ['에픽', '마력 : 완전한 광휘 결정', [165, 175, 185, 195]],
+      ['태초', '마력 : 태초의 광휘 결정', [205]]
+    ]
+  )
+})
+
+test('findOathCrystalVariant는 광휘 결정의 서약 세트와 등급을 찾고 광휘 결정이 아니면 null이다', () => {
+  const crystal = findOathCrystalVariant('5fe3c29985f15b1fdafd4c4d6a247839')
+
+  assert.equal(crystal?.setId, 16201)
+  assert.equal(crystal?.variant.rarity, '태초')
+  assert.equal(crystal?.variant.item.itemName, '그림자 : 태초의 광휘 결정')
+  assert.equal(findOathCrystalVariant('f834b16af8341719efe94a3be49d381e'), null)
+})
+
+test('moveOathCrystalToSet은 광휘 결정을 다른 서약 세트의 같은 등급으로 옮기고 광휘 결정이 아니면 null이다', () => {
+  assert.equal(
+    moveOathCrystalToSet('5f722339a3f5c7ef9ba0b290873e19f1', 16210)?.item.itemName,
+    '여우 : 완전한 광휘 결정'
+  )
+  assert.equal(
+    moveOathCrystalToSet('5fe3c29985f15b1fdafd4c4d6a247839', 16212)?.id,
+    '0b991785c50799890f4b1821c309d39c'
+  )
+  assert.equal(moveOathCrystalToSet('f834b16af8341719efe94a3be49d381e', 16212), null)
+  assert.throws(
+    () => moveOathCrystalToSet('5f722339a3f5c7ef9ba0b290873e19f1', 99999),
+    /Unknown oath set/
+  )
+})
+
+test('findOathCrystal은 광휘 결정 밖의 결정도 이름으로 조율 포인트를 그대로 찾는다', () => {
+  assert.deepEqual(findOathCrystal('여우 : 태초의 광휘 결정')?.tuneSetPoints, [205])
+  assert.deepEqual(findOathCrystal('희미한 안개 결정')?.tuneSetPoints, [85])
+})
+
+test('무기 조율은 이름마다 0~3단계, 0~5단계가 있고 목록에 없는 무기는 조율할 수 없다', () => {
+  assert.equal(weaponMaxTuneLevelOf('Beast-Saw'), 3)
+  assert.equal(weaponMaxTuneLevelOf('넨 스텔라'), 5)
+  assert.equal(weaponMaxTuneLevelOf('짙은 심연의 편린 블레이드 : 살의의 파동'), 0)
+  assert.equal(weaponMaxTuneLevelOf('constructor'), 0)
 })

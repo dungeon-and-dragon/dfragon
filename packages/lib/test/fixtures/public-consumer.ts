@@ -42,10 +42,28 @@ import {
   type EnchantMainStat
 } from '@dfragon/lib/enchant-grades'
 import {
+  equipmentSets,
   equipmentVariantsOf,
   findEquipmentVariant,
   findOathCrystal,
+  findOathCrystalVariant,
+  findOathVariant,
+  moveOathCrystalToSet,
+  oathCrystalVariantsOf,
+  oathSets,
+  oathVariantOf,
+  oathVariantsOf,
+  PRIMEVAL_OATH_CRYSTAL_LIMIT,
   resolveEquipmentItems,
+  switchEquipmentSet,
+  weaponMaxTuneLevelOf,
+  type EquipmentSet,
+  type EquipmentSetSelection,
+  type OathCrystalVariant,
+  type OathCrystalVariantMatch,
+  type OathSet,
+  type OathVariant,
+  type OathVariantMatch,
   type EquipmentVariant,
   type EquipmentVariantItems,
   type EquipmentVariantMatch,
@@ -211,4 +229,32 @@ export function equipmentVariantItems(
   }
 
   return { setItemId: match.setItemId, items, tuneSetPoints: crystal.tuneSetPoints }
+}
+
+export function equipmentSetOathChoices(setItemId: string, oathItemId: string, setId: number) {
+  const sets: readonly EquipmentSet[] = equipmentSets()
+  const switched: EquipmentSetSelection = switchEquipmentSet({ JACKET: null }, setItemId)
+  const oathSetList: readonly OathSet[] = oathSets()
+  const oath: OathVariantMatch | null = findOathVariant(oathItemId)
+  const oaths: readonly OathVariant[] = oathVariantsOf(setId)
+  const primeval: OathVariant | null = oathVariantOf(null, '태초')
+  const crystal: OathCrystalVariantMatch | null = findOathCrystalVariant(oathItemId)
+  const crystals: readonly OathCrystalVariant[] = oathCrystalVariantsOf(setId)
+  const moved: OathCrystalVariant | null = moveOathCrystalToSet(oathItemId, setId)
+  const weaponMaxTuneLevel: number = weaponMaxTuneLevelOf('넨 스텔라')
+  const primevalCrystalLimit: number = PRIMEVAL_OATH_CRYSTAL_LIMIT
+
+  return {
+    sets,
+    switched,
+    oathSetList,
+    oath,
+    oaths,
+    primeval,
+    crystal,
+    crystals,
+    moved,
+    weaponMaxTuneLevel,
+    primevalCrystalLimit
+  }
 }
