@@ -11,18 +11,23 @@ import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   draftOf,
   type EnchantChoice,
+  FULL_POTENCY,
+  resolvedItemsOf,
   type SimulatorChanges,
   type SimulatorRow,
   type SimulatorSlot,
   type SimulatorSlotItem,
   type SlotDraft,
-  slotItemChoiceOf
+  slotItemChoiceOf,
+  variantChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
+import { TuneSelect } from './TuneSelect'
 
-// 등급표 id는 `부위:카드:역할`, 칭호, 크리쳐, 오라 묶음 id는 `분류:명성:아이템` 모양이라 이 값과 겹치지 않는다.
+// 등급표 id는 `부위:카드:역할`, 칭호, 크리쳐, 오라 묶음 id는 `분류:명성:아이템`, 장비 선택지 id는 32자리 itemId 모양이라 이 값과 겹치지 않는다.
 const CURRENT = 'current'
 const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결']
 const SIGNED: Intl.NumberFormatOptions = { signDisplay: 'always' }
+const CONTROL_LINE = 'flex h-control-sm items-center'
 
 export function SimulatorTable({
   rows,
@@ -35,6 +40,8 @@ export function SimulatorTable({
   onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) => void
   onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
 }): React.JSX.Element {
+  const resolved = resolvedItemsOf(rows, changes)
+
   return (
     <div className="table-scroll">
       <table className="table table-wrap table-fixed min-w-[720px] max-sm:min-w-[640px]">
@@ -73,6 +80,7 @@ export function SimulatorTable({
               <EquipmentRow
                 key={slot.slotId}
                 slot={slot}
+                shown={resolved[slot.slotId] ?? slot}
                 draft={draftOf(slot, changes)}
                 onChange={onChange}
               />
@@ -86,10 +94,12 @@ export function SimulatorTable({
 
 function EquipmentRow({
   slot,
+  shown,
   draft,
   onChange
 }: {
   slot: SimulatorSlot
+  shown: ItemView
   draft: SlotDraft
   onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) => void
 }): React.JSX.Element {
@@ -100,13 +110,19 @@ function EquipmentRow({
   }
 
   return (
-    <tr>
-      <td className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden">{slotLabel}</td>
+    // 조율, 정밀도는 아이템 선택 아래 줄에 오므로, 다른 칸은 위에 맞춰 아이템 선택 줄과 같은 높이에 둔다.
+    <tr className="[&>td]:align-top">
+      <td className="text-xs whitespace-nowrap text-fg-subtle max-sm:hidden">
+        <div className={CONTROL_LINE}>{slotLabel}</div>
+      </td>
       <td>
-        <div className="flex min-w-0 items-center gap-3">
-          <ItemIcon itemId={slot.itemId} rarity={slot.rarity} />
-          <ItemName name={slot.itemName} rarity={slot.rarity} />
-        </div>
+        <ItemControl
+          slot={slot}
+          slotLabel={slotLabel}
+          shown={shown}
+          draft={draft}
+          onChange={changeSlot}
+        />
       </td>
       <td>
         <ReinforceControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
@@ -150,6 +166,86 @@ function SlotItemOption({ value, item }: { value: string; item: ItemFace }): Rea
         <ItemName name={item.name} rarity={item.rarity} />
       </Select.ItemText>
     </Select.Item>
+  )
+}
+
+function ItemControl({
+  slot,
+  slotLabel,
+  shown,
+  draft,
+  onChange
+}: {
+  slot: SimulatorSlot
+  slotLabel: string
+  shown: ItemView
+  draft: SlotDraft
+  onChange: (draft: Partial<SlotDraft>) => void
+}): React.JSX.Element {
+  const label = `${slotLabel} 교체`
+  const face: ItemFace = { itemId: shown.itemId, name: shown.itemName, rarity: shown.rarity }
+  const worn: ItemFace = { itemId: slot.itemId, name: slot.itemName, rarity: slot.rarity }
+  const choice = variantChoiceOf(slot, draft.variantId)
+
+  if (slot.variants.length === 0) {
+    return (
+      <div className={`${CONTROL_LINE} min-w-0 gap-3`}>
+        <ItemIcon itemId={slot.itemId} rarity={slot.rarity} />
+        <ItemName name={slot.itemName} rarity={slot.rarity} />
+      </div>
+    )
+  }
+
+  function changeItem(value: string | null): void {
+    if (value != null) {
+      const variantId = value === CURRENT ? null : value
+      onChange({ variantId })
+    }
+  }
+
+  function changeTune(tune: number): void {
+    onChange({ tune })
+  }
+
+  function changePotency(potency: number): void {
+    onChange({ potency })
+  }
+
+  return (
+    <div className="flex min-w-0 flex-col items-start gap-2">
+      <div className="grid w-full min-w-0">
+        <Select.Root value={draft.variantId ?? CURRENT} onValueChange={changeItem}>
+          <Select.Trigger size="sm" aria-label={label}>
+            <Select.Value>{() => <ItemFaceText item={face} />}</Select.Value>
+          </Select.Trigger>
+          <Select.Popup aria-label={label}>
+            {slot.wornVariantId === null && <SlotItemOption value={CURRENT} item={worn} />}
+            {slot.variants.map((variant) => (
+              <SlotItemOption key={variant.id} value={variant.id} item={variant} />
+            ))}
+          </Select.Popup>
+        </Select.Root>
+      </div>
+      {choice !== undefined && choice.maxTune > 0 && (
+        <TuneSelect
+          label={`${slotLabel} 조율`}
+          tune={draft.tune}
+          maxTune={choice.maxTune}
+          onChange={changeTune}
+        />
+      )}
+      {choice?.exalted === true && (
+        <div className="shrink-0 text-game-precision">
+          <NumberField
+            aria-label={`${slotLabel} 정밀도`}
+            value={draft.potency ?? FULL_POTENCY}
+            onValueChange={changePotency}
+            min={0}
+            max={FULL_POTENCY}
+          />
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -237,7 +333,7 @@ function ReinforceControl({
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className={`${CONTROL_LINE} gap-3`}>
       {/* 숫자 칸은 놓인 자리의 글자색을 따르므로 강화, 증폭 색은 감싼 요소가 정한다. */}
       <div className={tone}>
         <NumberField
@@ -315,7 +411,7 @@ function EnchantControl({
   }
 
   return (
-    <div className="grid min-w-0">
+    <div className="grid h-control-sm min-w-0 items-center">
       <Select.Root value={draft.enchantId ?? CURRENT} onValueChange={changeEnchant}>
         <Select.Trigger size="xs" aria-label={label}>
           <Select.Value>
