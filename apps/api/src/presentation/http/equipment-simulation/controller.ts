@@ -27,12 +27,12 @@ export class EquipmentSimulationController {
 
     routes.post('/:serverId/:characterId/simulation', limitBody, async (c) => {
       const identity = parseCharacterIdentity(c.req.param('serverId'), c.req.param('characterId'))
-      const changes = parseSimulationRequest(await c.req.text())
+      const request = parseSimulationRequest(await c.req.text())
 
       return respondUnlessDisconnected(c, async (signal) => {
         const scores: EquipmentSimulationResponse = await this.service.simulate(
           identity,
-          changes,
+          request,
           signal
         )
 

@@ -41,6 +41,12 @@ import {
   type EnchantGradeSlot,
   type EnchantMainStat
 } from '@dfragon/lib/enchant-grades'
+import {
+  findSlotItem,
+  slotItemsOf,
+  type SlotItem,
+  type SlotItemCategory
+} from '@dfragon/lib/slot-items'
 import manifest from '@dfragon/lib/package.json' with { type: 'json' }
 
 export const packageName: string = manifest.name
@@ -165,4 +171,16 @@ export function enchantCards(
   const display: readonly EnchantDisplayStatus[] = displayStatusOf(chosen)
 
   return { labels, needsMainStat, display }
+}
+
+export function slotItemNames(category: SlotItemCategory, id: string) {
+  const items: readonly SlotItem[] = slotItemsOf(category)
+  const names = items.map((slotItem) => slotItem.name)
+  const found: SlotItem | null = findSlotItem(category, id)
+
+  if (found === null) {
+    return { names, itemId: null }
+  }
+
+  return { names, itemId: found.item.itemId }
 }

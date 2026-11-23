@@ -1,6 +1,6 @@
 import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ItemIcon } from '#entities/character'
-import { ItemTooltip } from './ItemTooltip'
+import { ItemTooltip } from '#widgets/item-tooltip'
 import type { ItemBar } from './item-stats-bars'
 
 // 무기 이름은 "제2형 - 수식, 방어의 운검"처럼 길어 반 폭 상자에서 세트 이름 칸보다 넓게 둔다.

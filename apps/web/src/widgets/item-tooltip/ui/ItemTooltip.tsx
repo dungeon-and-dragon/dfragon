@@ -1,7 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import type { ReactElement } from 'react'
-import { useItemDetail } from './api/useItemDetail'
-import type { ItemDetail } from './model/item-detail'
+import { useItemDetail } from '#widgets/item-tooltip/api/useItemDetail'
+import type { ItemDetail } from '#widgets/item-tooltip/model/item-detail'
 import { ItemIcon, raritySolidOfName, rarityTextOfName } from '#entities/character'
 
 const FAME_STATUS = '모험가 명성'
