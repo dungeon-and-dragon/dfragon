@@ -47,7 +47,14 @@ import {
   findEquipmentVariant,
   findOathCrystal,
   findOathCrystalVariant,
+  findOathUpgradeOption,
   findOathVariant,
+  isValidOathUpgrade,
+  OATH_UPGRADE_MAX_STEP,
+  oathUpgradeSteps,
+  type OathUpgradeOption,
+  type OathUpgradeSelection,
+  type OathUpgradeStep,
   moveOathCrystalToSet,
   oathCrystalVariantsOf,
   oathSets,
@@ -257,4 +264,13 @@ export function equipmentSetOathChoices(setItemId: string, oathItemId: string, s
     weaponMaxTuneLevel,
     primevalCrystalLimit
   }
+}
+
+export function oathUpgradeChoices(upgrades: readonly OathUpgradeSelection[]) {
+  const steps: readonly OathUpgradeStep[] = oathUpgradeSteps()
+  const first: OathUpgradeOption | null = findOathUpgradeOption(1, '강인한 통찰')
+  const valid: boolean = isValidOathUpgrade(upgrades)
+  const maxStep: number = OATH_UPGRADE_MAX_STEP
+
+  return { steps, first, valid, maxStep }
 }

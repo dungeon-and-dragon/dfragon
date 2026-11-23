@@ -8,7 +8,11 @@ import {
   equipmentSets,
   findOathCrystal,
   findOathCrystalVariant,
+  findOathUpgradeOption,
   findOathVariant,
+  isValidOathUpgrade,
+  OATH_UPGRADE_MAX_STEP,
+  oathUpgradeSteps,
   moveOathCrystalToSet,
   oathCrystalVariantsOf,
   oathSets,
@@ -531,4 +535,78 @@ test('무기 조율은 이름마다 0~3단계, 0~5단계가 있고 목록에 없
   assert.equal(weaponMaxTuneLevelOf('넨 스텔라'), 5)
   assert.equal(weaponMaxTuneLevelOf('짙은 심연의 편린 블레이드 : 살의의 파동'), 0)
   assert.equal(weaponMaxTuneLevelOf('constructor'), 0)
+})
+
+const OATH_UPGRADE_OPTIONS = [
+  ['강인한 통찰', '고요한 호흡', '깨어난 서약'],
+  ['포용의 권능', '자애의 마음', '자비의 맹세'],
+  ['심연의 고동', '내면의 조율', '영혼의 계약'],
+  ['신념의 대가', '경계의 인내', '구원의 언약'],
+  ['이어진 걸음', '숭고한 동행', '결의의 공명'],
+  ['영원의 궤적', '불변의 약속', '본질의 선언'],
+  ['만물의 흐름', '바래온 구원', '자각의 파동'],
+  ['순례자의 길', '맞잡은 구원', '남겨진 온기'],
+  ['진리 도달', '완성된 의지', '만개하는 빛']
+]
+
+function upgradesOf(stepCount) {
+  return OATH_UPGRADE_OPTIONS.slice(0, stepCount).map(([option], index) => ({
+    step: index + 1,
+    option
+  }))
+}
+
+test('묵언의 진의는 1~9단계이고 단계마다 선택지가 셋이다', () => {
+  const steps = oathUpgradeSteps()
+
+  assert.equal(OATH_UPGRADE_MAX_STEP, 9)
+  assert.deepEqual(
+    steps.map(({ step }) => step),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  )
+  assert.deepEqual(
+    steps.map(({ options }) => options.map(({ option }) => option)),
+    OATH_UPGRADE_OPTIONS
+  )
+  assert.equal(steps[0].name, '<묵언의 진의> - 첫 번째 진의')
+  assert.equal(steps[8].name, '<묵언의 진의> - 아홉 번째 진의')
+})
+
+test('1~4단계 선택지는 데미지, 쿨타임, 서약 포인트이고 5~9단계는 속도, 스킬 범위, 피해 감소다', () => {
+  const kinds = oathUpgradeSteps().map(({ options }) => options.map(({ kind }) => kind))
+  const early = ['Damage', 'Cooltime', 'Oathpoint']
+  const late = ['Speed', 'SkillRange', 'DamageReduce']
+
+  assert.deepEqual(kinds, [early, early, early, early, late, late, late, late, late])
+})
+
+test('findOathUpgradeOption은 그 단계의 선택지만 찾는다', () => {
+  assert.deepEqual(findOathUpgradeOption(4, '구원의 언약'), {
+    option: '구원의 언약',
+    kind: 'Oathpoint'
+  })
+  assert.equal(findOathUpgradeOption(5, '구원의 언약'), null)
+  assert.equal(findOathUpgradeOption(10, '진리 도달'), null)
+})
+
+test('isValidOathUpgrade는 1단계부터 이어지고 9단계 이하이며 단계마다 그 단계의 선택지인 목록만 받는다', () => {
+  assert.equal(isValidOathUpgrade([]), true)
+  assert.equal(isValidOathUpgrade(upgradesOf(3)), true)
+  assert.equal(isValidOathUpgrade(upgradesOf(9)), true)
+  assert.equal(
+    isValidOathUpgrade([
+      { step: 1, option: '강인한 통찰' },
+      { step: 3, option: '심연의 고동' }
+    ]),
+    false
+  )
+  assert.equal(isValidOathUpgrade([{ step: 2, option: '포용의 권능' }]), false)
+  assert.equal(isValidOathUpgrade([...upgradesOf(9), { step: 10, option: '진리 도달' }]), false)
+  assert.equal(
+    isValidOathUpgrade([
+      { step: 1, option: '강인한 통찰' },
+      { step: 2, option: '심연의 고동' }
+    ]),
+    false
+  )
 })
