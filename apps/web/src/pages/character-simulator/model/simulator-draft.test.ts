@@ -656,7 +656,7 @@ it('장비 세트를 고른 뒤 바꾼 부위의 등급은 새 세트의 선택�
   })
 })
 
-it('장비 세트를 바꾸면 부위에서 고른 등급은 새 세트의 기준 아이템으로 되돌리고 마법부여와 조율은 유지한다', () => {
+it('장비 세트를 바꾸면 부위에서 고른 등급을 새 세트의 같은 등급으로 옮기고 마법부여와 조율은 유지한다', () => {
   const enchantId = firstOptionId('EARRING', 'dealer')
   const legendary = variantOf(SOUL_FAIRY_SET, 'EARRING', '레전더리', '일반')
   const before = apply(
@@ -668,11 +668,13 @@ it('장비 세트를 바꾸면 부위에서 고른 등급은 새 세트의 기�
   const changed = switchSet(before, dealerRows, SHADOW_SET)
   const rows = rowsInEquipmentSet(dealerRows, changed.equipmentSet)
 
+  const movedLegendary = variantOf(SHADOW_SET, 'EARRING', '레전더리', '일반').id
+
   expect(changed.equipment.EARRING).toEqual({
     reinforce: 8,
     amplified: true,
     enchantId,
-    variantId: variantOf(SHADOW_SET, 'EARRING', '에픽', '일반').id,
+    variantId: movedLegendary,
     tune: 2,
     potency: null
   })
@@ -682,11 +684,50 @@ it('장비 세트를 바꾸면 부위에서 고른 등급은 새 세트의 기�
       reinforce: 8,
       amplified: true,
       enchantId,
-      variantId: null,
+      variantId: movedLegendary,
       tune: 2,
       potency: null
     }
   ])
+})
+
+it('장비 세트를 바꿔도 부위에서 고른 유일 장비와 정밀도는 그대로 둔다', () => {
+  const exalted = variantOf(SOUL_FAIRY_SET, 'EARRING', '태초', '유일')
+  const before = apply(
+    NO_CHANGES,
+    { type: 'change', slot: dealerEarring, draft: { variantId: exalted.id } },
+    { type: 'change', slot: dealerEarring, draft: { potency: 60 } }
+  )
+  const changed = switchSet(before, dealerRows, SHADOW_SET)
+
+  expect(changed.equipment.EARRING).toMatchObject({ variantId: exalted.id, tune: 0, potency: 60 })
+})
+
+it('세트가 섞인 캐릭터는 주 세트를 골라도 다른 세트의 부위가 그 세트로 옮겨 가 세트를 요청하고, 바뀌는 부위가 없으면 고르지 않은 것으로 둔다', () => {
+  const shadowJacket = variantOf(SHADOW_SET, 'JACKET', '에픽', '일반')
+  const mixed = withItem(characterDetailFixture('dealer'), 'JACKET', {
+    itemId: shadowJacket.item.itemId,
+    itemName: shadowJacket.item.itemName,
+    setItemId: SHADOW_SET
+  })
+  const rows = toSimulatorRows(mixed)
+  const mixedSet = toEquipmentSet(mixed)!
+  const changed = apply(NO_CHANGES, {
+    type: 'equipmentSet',
+    rows,
+    equipmentSet: mixedSet,
+    setItemId: SOUL_FAIRY_SET
+  })
+  const jacket = slotOf(slotsOf(rowsInEquipmentSet(rows, changed.equipmentSet)), 'JACKET')
+
+  expect(mixedSet.mainSetId).toBe(SOUL_FAIRY_SET)
+  expect(changed.equipmentSet).toBe(SOUL_FAIRY_SET)
+  expect(jacket.wornVariantId).toBe(variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '일반').id)
+  expect(simulationBody(rows, null, changed)).toEqual({
+    equipmentSet: SOUL_FAIRY_SET,
+    equipment: []
+  })
+  expect(switchSet(NO_CHANGES, dealerRows, SOUL_FAIRY_SET)).toEqual(NO_CHANGES)
 })
 
 it('장비 세트를 바꿔도 선택지에 없는 착용 아이템은 그대로 두고 새 세트의 선택지를 둔다', () => {
