@@ -12,6 +12,7 @@
       "@dfragon/ui": ["../../packages/ui/src/index.tsx"],
       "@dfragon/lib": ["../../packages/lib/src/index.ts"],
       "@dfragon/lib/enchant-grades": ["../../packages/lib/src/enchant-grades.ts"],
+      "@dfragon/lib/equipment-variants": ["../../packages/lib/src/equipment-variants.ts"],
       "@dfragon/lib/slot-items": ["../../packages/lib/src/slot-items.ts"],
       "@dfragon/lib/utils/shape-check": ["../../packages/lib/src/utils/shape-check.ts"],
       "#server-fixtures/*": ["../../packages/server-core/test/fixtures/*"]
