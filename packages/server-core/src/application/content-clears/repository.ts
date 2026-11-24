@@ -9,6 +9,7 @@ import type {
   ClearJobFameSample,
   ClearJobScoreSample,
   ClearOverviewWeekSamples,
+  ClearPopulationJob,
   ClearRecordRaidMode,
   ClearRecordRaidSelection,
   ClearRecordRaidStage,
@@ -64,6 +65,7 @@ export interface ClearWeekSampleRepository extends ClearSampleRepository {
   readPopulations(): Promise<StoredClearPopulation[]>
   readContentWeekSampleWeeks(): Promise<ClearContentWeek[]>
   readOverviewSampleWeeks(): Promise<Date[]>
+  readPopulationJobs(minMaxFame: number): Promise<ClearPopulationJob[]>
   recordLegionClears(week: LegionClearWeek): Promise<void>
   recordPopulation(population: ContentClearPopulationInput): Promise<void>
   recordContentWeekSamples(

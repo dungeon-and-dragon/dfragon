@@ -33,7 +33,7 @@ export type ClearContent = {
   kind: ContentClearKind
   name: string
   releasedAt: Date
-  entryFame: number | null
+  entryFame: number
   rule: ClearContentRule
 }
 
@@ -214,7 +214,7 @@ export function toLatestContents(
 
 // 지난 컨텐츠도 그 입장 명성부터 세야 하므로 모든 컨텐츠에 입장할 수 있는 캐릭터를 받는다.
 export function toCollectionMinFame(contents: readonly ClearContent[] = CLEAR_CONTENTS): number {
-  return Math.min(...contents.flatMap(({ entryFame }) => (entryFame !== null ? [entryFame] : [])))
+  return Math.min(...contents.map(({ entryFame }) => entryFame))
 }
 
 // 점수 계산 대상은 클리어 수집 하한과 달리 종류별 최신 컨텐츠에 입장할 수 있는 캐릭터까지다.
@@ -224,12 +224,9 @@ export function toLatestContentsMinFame(
   return toCollectionMinFame(toLatestContents(contents))
 }
 
+// 입장 명성이 수집 하한보다 낮은 컨텐츠는 하한 아래 캐릭터의 클리어를 받지 않아 하한부터 센다.
 export function toPopulationMinFame(content: ClearContent, collectionMinFame: number): number {
-  if (content.entryFame === null) {
-    return collectionMinFame
-  }
-
-  return content.entryFame
+  return Math.max(content.entryFame, collectionMinFame)
 }
 
 // 지난 주의 점수는 클리어 뒤에 계산한 값이라 그 주 장비를 보여 주지 못해, 각인된 악몽 1주차부터만 점수 통계를 낸다.
