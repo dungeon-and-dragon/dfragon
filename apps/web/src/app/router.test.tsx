@@ -270,6 +270,7 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -303,6 +304,7 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
     ['검색', null],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
 
@@ -332,6 +334,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['검색', null],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
@@ -363,6 +366,7 @@ it.each([
     ['검색', null],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
 })
@@ -467,6 +471,7 @@ it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 �
     ['검색', 'page'],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
 })
@@ -518,6 +523,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
 
@@ -532,7 +538,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   expect(detailRequests()).toBe(1)
 })
 
-it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시뮬레이터 화면만 그리고 전역 메뉴는 그대로 둔다', async () => {
+it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시뮬레이터 화면만 그리고 전역 메뉴의 장비 시뮬레이터를 지금 항목으로 둔다', async () => {
   serveDetail()
   server.use(
     http.post(`${DETAIL_URL}/simulation`, () =>
@@ -554,6 +560,7 @@ it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
+    ['장비 시뮬레이터', 'page'],
     ['즐겨찾기', null]
   ])
 })
@@ -606,6 +613,7 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
   expect(adventureRequests()).toEqual([
@@ -1387,6 +1395,62 @@ it('메인 화면의 큰 검색창에 캐릭터 이름을 제출하면 전역 �
   expect(container.querySelector('header form[role="search"]')).not.toBeNull()
 })
 
+it('시뮬레이터 검색 주소는 전역 바에 검색창 없이 화면 상자에 모험단 대상이 없는 큰 검색창 하나만 둔다', async () => {
+  window.history.replaceState(null, '', '/simulator')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(document.title).toBe('장비 시뮬레이터 - DFragon'))
+  expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex')
+  expect(container.querySelector('header form[role="search"]')).toBeNull()
+  expect(globalMenu().find(([label]) => label === '장비 시뮬레이터')).toEqual([
+    '장비 시뮬레이터',
+    'page'
+  ])
+  const main = container.querySelector('main')!
+  expect(main.querySelectorAll('form[role="search"]')).toHaveLength(1)
+  expect(main.querySelectorAll('h1, h2, h3, p, table')).toHaveLength(0)
+  await act(async () =>
+    homeSearchBox().querySelector<HTMLButtonElement>('button[aria-label="검색 대상"]')!.click()
+  )
+  const options = [...document.querySelectorAll('[role="option"]')].map((item) => item.textContent)
+  expect(options.toSorted()).toEqual(['전체', ...Object.values(CHARACTER_SERVER_NAMES)].toSorted())
+  expect(searchRequests()).toEqual([])
+})
+
+it('시뮬레이터 검색 화면에서 이름을 제출하면 시뮬레이터 검색 주소에 남아 검색창 아래에 목록을 보이고, 줄을 그 캐릭터의 시뮬레이터 주소로 잇는다', async () => {
+  serveCharacterSearch([candidateRow('시뮬', 'cain', 'simulator-1', 1000)])
+  window.history.replaceState(null, '', '/simulator')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await searchName(' 시뮬 ', homeSearchBox())
+
+  await waitForPath('/simulator')
+  expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+    characterName: '시뮬',
+    serverId: 'all'
+  })
+  await vi.waitFor(() =>
+    expect(searchResultRows()).toEqual([
+      ['/c/cain/simulator-1/simulator', '카인시뮬크루세이더(남)1,000-1,000-']
+    ])
+  )
+  const box = homeSearchBox()
+  const list = container.querySelector('main section[aria-label="시뮬"]')!
+  expect(box.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  expect(container.querySelector('header form[role="search"]')).toBeNull()
+})
+
+it('시뮬레이터 검색 결과가 없으면 검색 화면과 같은 문구를 보인다', async () => {
+  serveCharacterSearch([])
+  window.history.replaceState(null, '', '/simulator?characterName=없는이름&serverId=all')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('main section p')?.textContent).toBe('캐릭터를 찾지 못했습니다.')
+  )
+  expect(container.querySelector('main section h2')?.textContent).toBe('없는이름')
+})
+
 it('메인 화면의 큰 검색창에서 모험단을 고르고 제출하면 그 모험단 대시보드로 간다', async () => {
   serveAdventure()
   window.history.replaceState(null, '', '/')
@@ -1570,6 +1634,7 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
+    ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
   const form = container.querySelector<HTMLFormElement>('main form')!

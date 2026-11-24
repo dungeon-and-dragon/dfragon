@@ -1,5 +1,7 @@
 import { CloseIcon, Popover } from '@dfragon/ui'
 import {
+  CHARACTER_PAGE_PATHS,
+  type CharacterPage,
   characterImageUrl,
   displayJobName,
   isMaxLevel,
@@ -23,6 +25,7 @@ const listClass = 'm-0 list-none p-0'
 export function RecentCharacterList({
   open,
   size = 'medium',
+  characterPage,
   anchor,
   input,
   popup,
@@ -30,6 +33,7 @@ export function RecentCharacterList({
 }: {
   open: boolean
   size?: 'medium' | 'large'
+  characterPage: CharacterPage
   anchor: RefObject<HTMLElement | null>
   input: RefObject<HTMLInputElement | null>
   popup: RefObject<HTMLDivElement | null>
@@ -80,7 +84,7 @@ export function RecentCharacterList({
         {/* 팝오버 테두리 1px씩을 빼 팝오버 바깥 폭이 기준 폭과 같게 한다. */}
         {large ? (
           <div className="max-h-[calc(var(--available-height)-2px)] w-[calc(var(--anchor-width)-2px)] overflow-y-auto">
-            <SavedCharacterSections input={input} onPick={onClose} />
+            <SavedCharacterSections characterPage={characterPage} input={input} onPick={onClose} />
           </div>
         ) : (
           <div className="box-border max-h-[calc(min(480px,var(--available-height))-2px)] w-[min(418px,calc(var(--available-width)-2px))] overflow-y-auto py-1">
@@ -88,7 +92,11 @@ export function RecentCharacterList({
             <ul className={listClass}>
               {recentCharacters.map((character) => (
                 <li key={`${character.serverId}/${character.characterId}`} className="relative">
-                  <RecentItem character={character} onPick={onClose} />
+                  <RecentItem
+                    character={character}
+                    characterPage={characterPage}
+                    onPick={onClose}
+                  />
                   <RemoveButton character={character} onRemove={remove} />
                 </li>
               ))}
@@ -101,9 +109,11 @@ export function RecentCharacterList({
 }
 
 function SavedCharacterSections({
+  characterPage,
   input,
   onPick
 }: {
+  characterPage: CharacterPage
   input: RefObject<HTMLInputElement | null>
   onPick: () => void
 }): React.JSX.Element {
@@ -121,12 +131,14 @@ function SavedCharacterSections({
         title="최근 본 캐릭터"
         emptyMessage="최근 본 캐릭터가 없습니다."
         characters={recentCharacters.slice(0, SECTION_ROW_LIMIT)}
+        characterPage={characterPage}
         onPick={onPick}
       />
       <SavedCharacterSection
         title="즐겨찾기"
         emptyMessage="즐겨찾기한 캐릭터가 없습니다."
         characters={favoriteCharacters.slice(0, SECTION_ROW_LIMIT)}
+        characterPage={characterPage}
         onPick={onPick}
         onFavoriteToggle={focusInput}
       />
@@ -138,12 +150,14 @@ function SavedCharacterSection({
   title,
   emptyMessage,
   characters,
+  characterPage,
   onPick,
   onFavoriteToggle
 }: {
   title: string
   emptyMessage: string
   characters: CharacterDisplay[]
+  characterPage: CharacterPage
   onPick: () => void
   onFavoriteToggle?: () => void
 }): React.JSX.Element {
@@ -163,7 +177,12 @@ function SavedCharacterSection({
               key={`${character.serverId}/${character.characterId}`}
               className="flex items-center gap-2 border-b border-line pr-4 transition-colors last:border-b-0 hover:bg-inset"
             >
-              <RecentItem character={character} large onPick={onPick} />
+              <RecentItem
+                character={character}
+                characterPage={characterPage}
+                large
+                onPick={onPick}
+              />
               <FavoriteToggle character={character} onToggle={onFavoriteToggle} />
             </li>
           ))}
@@ -175,10 +194,12 @@ function SavedCharacterSection({
 
 function RecentItem({
   character,
+  characterPage,
   large = false,
   onPick
 }: {
   character: CharacterDisplay
+  characterPage: CharacterPage
   large?: boolean
   onPick: () => void
 }): React.JSX.Element {
@@ -187,7 +208,7 @@ function RecentItem({
 
   return (
     <Link
-      to="/c/$serverId/$characterId"
+      to={CHARACTER_PAGE_PATHS[characterPage]}
       params={{ serverId: character.serverId, characterId: character.characterId }}
       onClick={onPick}
       className={`flex items-center pl-4 text-fg no-underline transition-colors focus-ring-inset hover:bg-inset focus-visible:bg-inset ${large ? 'box-border h-12 min-w-0 grow gap-3' : 'gap-3 py-2 pr-12'}`}
