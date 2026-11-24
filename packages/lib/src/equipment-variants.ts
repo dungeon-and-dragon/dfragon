@@ -99,6 +99,32 @@ export interface OathCrystalVariantMatch {
   readonly variant: OathCrystalVariant
 }
 
+export type WeaponVariantLine = '기본' | '해방' | '태초의 별'
+
+/**
+ * id는 대표 아이템의 itemId다. line이 null이면 계열이 없는 유니크다. tuned는 조율을 마친 태초 기본 계열 아이템이고,
+ * releasePending은 해방 계열에서 해방 수치가 100 미만일 때의 아이템이다.
+ */
+export interface WeaponVariant {
+  readonly id: string
+  readonly rarity: string
+  readonly line: WeaponVariantLine | null
+  readonly tuned: boolean
+  readonly maxTuneLevel: number
+  readonly item: EquipmentVariantItem
+  readonly releasePending?: EquipmentVariantItem
+}
+
+export interface WeaponVariantMatch {
+  readonly itemTypeDetail: string
+  readonly variant: WeaponVariant
+}
+
+interface WeaponVariantType {
+  readonly itemTypeDetail: string
+  readonly variants: readonly WeaponVariant[]
+}
+
 interface EquipmentVariantSet extends EquipmentSet {
   readonly slots: Readonly<Record<EquipmentVariantSlot, readonly EquipmentVariant[]>>
 }
@@ -143,6 +169,7 @@ interface EquipmentVariantTable {
   readonly oathSets: readonly OathVariantSet[]
   readonly mistOaths: readonly OathVariant[]
   readonly weaponMaxTuneLevels: Readonly<Record<string, number>>
+  readonly weapons: readonly WeaponVariantType[]
   readonly oathUpgradeMaxStep: number
   readonly oathUpgradeSteps: readonly OathUpgradeStep[]
 }
@@ -154,6 +181,8 @@ const variantTable = table as EquipmentVariantTable
 export const PRIMEVAL_OATH_CRYSTAL_LIMIT = 3
 
 export const OATH_UPGRADE_MAX_STEP: number = variantTable.oathUpgradeMaxStep
+
+export const WEAPON_RELEASE_MAX = 100
 
 const ARMOR_SLOTS = ['JACKET', 'SHOULDER', 'PANTS', 'SHOES', 'WAIST'] as const
 const RARITY_ORDER = ['유니크', '레전더리', '에픽', '태초']
@@ -212,6 +241,22 @@ const oathSetList: readonly OathSet[] = variantTable.oathSets.map(({ setId, name
 }))
 const weaponMaxTuneLevels = new Map(Object.entries(variantTable.weaponMaxTuneLevels))
 const oathSetsById = new Map(variantTable.oathSets.map((oathSet) => [oathSet.setId, oathSet]))
+const weaponVariantsByType = new Map(
+  variantTable.weapons.map(({ itemTypeDetail, variants }) => [itemTypeDetail, variants])
+)
+const weaponMatchesByItemId = new Map(
+  variantTable.weapons.flatMap(({ itemTypeDetail, variants }) =>
+    variants.flatMap((variant) => {
+      const match = { itemTypeDetail, variant }
+      const items =
+        variant.releasePending !== undefined
+          ? [variant.item, variant.releasePending]
+          : [variant.item]
+
+      return items.map(({ itemId }): [string, WeaponVariantMatch] => [itemId, match])
+    })
+  )
+)
 
 function itemIdsOf(variant: OathVariant | OathCrystalVariant): string[] {
   return [variant.item.itemId, ...(variant.otherItemIds ?? [])]
@@ -440,6 +485,37 @@ export function weaponMaxTuneLevelOf(itemName: string): number {
   }
 
   return level
+}
+
+/** 무기 종류(Neople itemTypeDetail) 안에서 바꿀 수 있는 115레벨 무기 선택지다. */
+export function weaponVariantsOf(itemTypeDetail: string): readonly WeaponVariant[] {
+  const variants = weaponVariantsByType.get(itemTypeDetail)
+
+  if (variants === undefined) {
+    return []
+  }
+
+  return variants
+}
+
+/** 해방 계열의 "억압 - " 아이템도 그 선택지로 찾는다. */
+export function findWeaponVariant(itemId: string): WeaponVariantMatch | null {
+  const match = weaponMatchesByItemId.get(itemId)
+
+  if (match === undefined) {
+    return null
+  }
+
+  return match
+}
+
+/** 해방 계열은 해방 수치가 다 차야 대표 아이템이고, 그 전에는 "억압 - " 아이템이다. */
+export function weaponItemOf(variant: WeaponVariant, release: number): EquipmentVariantItem {
+  if (variant.releasePending === undefined || release >= WEAPON_RELEASE_MAX) {
+    return variant.item
+  }
+
+  return variant.releasePending
 }
 
 export function oathUpgradeSteps(): readonly OathUpgradeStep[] {
