@@ -15,11 +15,13 @@ import {
   type SimulatorRow,
   type SimulatorSlot,
   type SimulatorSlotItem,
+  type SimulationChange,
   simulationBody,
   simulatorReducer,
   slotItemChoiceOf,
   toEquipmentSet,
   toSimulatorRows,
+  TUNED_WEAPON_NAME,
   tuneLimitOf
 } from './simulator-draft'
 import { toSimulatorSwitching } from './simulator-switching'
@@ -44,8 +46,11 @@ const SOUL_FAIRY_SET = '4ee7bd5912cda6e2a24c1f36d5202b46'
 const SHADOW_SET = '3af7c961e7d8cd8b5b42c5f82af2a0ad'
 const ETHEREAL_SET = '93e7825053bdec4e0f4c12837cf4f57e'
 const EXALTED_RING_ID = 'aa5273499f19ddba846919dbb6857d82'
-const UNCHANGED_ITEM = { enchantId: null, variantId: null, tune: 0, potency: null }
-const KEPT_ITEM = { variantId: null, tune: null, potency: null }
+const UNCHANGED_ITEM = { enchantId: null, variantId: null, tune: 0, potency: null, release: null }
+const KEPT_ITEM = { variantId: null, tune: null, potency: null, release: null }
+// 딜러 fixture는 낫 해방 계열의 해방 수치 100 무기(재앙의 송곳니)를 낀다.
+const SCYTHE_RELEASE = '89c42c1d02e6749244ce518e9b34e1c7'
+const WORN_WEAPON = { variantId: SCYTHE_RELEASE, release: 100 }
 
 function variantOf(setItemId: string, slotId: EquipmentVariantSlot, rarity: string, kind: string) {
   const found = equipmentVariantsOf(setItemId, slotId).find(
@@ -116,6 +121,7 @@ it('장비 12부위를 응답 순서대로 두고, 착용한 수치와 강화, �
   expect(dealerSlots.map(({ slotId }) => slotId)).toEqual(GRADE_SLOTS)
   expect(draftOf(weapon, NO_CHANGES)).toEqual({
     ...UNCHANGED_ITEM,
+    ...WORN_WEAPON,
     reinforce: 10,
     amplified: false
   })
@@ -188,10 +194,10 @@ it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까
   expect(overLimit.reinforceLimit).toBe(23)
   expect(
     draftOf(weapon, apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { reinforce: 20 } }))
-  ).toEqual({ ...UNCHANGED_ITEM, reinforce: 20, amplified: false })
+  ).toEqual({ ...UNCHANGED_ITEM, ...WORN_WEAPON, reinforce: 20, amplified: false })
   expect(
     draftOf(weapon, apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { reinforce: 0 } }))
-  ).toEqual({ ...UNCHANGED_ITEM, reinforce: 0, amplified: false })
+  ).toEqual({ ...UNCHANGED_ITEM, ...WORN_WEAPON, reinforce: 0, amplified: false })
   expect(apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { reinforce: 21 } })).toEqual(
     NO_CHANGES
   )
@@ -206,7 +212,7 @@ it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까
       overLimit,
       apply(NO_CHANGES, { type: 'change', slot: overLimit, draft: { reinforce: 22 } })
     )
-  ).toEqual({ ...UNCHANGED_ITEM, reinforce: 22, amplified: false })
+  ).toEqual({ ...UNCHANGED_ITEM, ...WORN_WEAPON, reinforce: 22, amplified: false })
 })
 
 it('표시가 같아 합친 묶음은 묶음 id로만 고르고 묶음의 다른 항목 id는 받지 않는다', () => {
@@ -356,7 +362,6 @@ function idsOf(variants: readonly { id: string }[]): string[] {
 }
 
 it('무기를 뺀 11부위는 낀 아이템 세트의 선택지를 두고, 낀 공용 이름 아이템은 그 선택지로 고른 상태다', () => {
-  expect(weapon.variants).toEqual([])
   expect(idsOf(dealerJacket.variants)).toEqual(idsOf(equipmentVariantsOf(SOUL_FAIRY_SET, 'JACKET')))
   expect(dealerJacket.wornVariantId).toBe(variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '축성').id)
   expect(amulet.wornVariantId).toBe(variantOf(SOUL_FAIRY_SET, 'AMULET', '태초', '일반').id)
@@ -457,7 +462,8 @@ it('아이템을 바꿔도 수치, 증폭, 마법부여는 그대로 두고 조�
     enchantId,
     variantId: legendary.id,
     tune: 3,
-    potency: null
+    potency: null,
+    release: null
   })
   expect(
     draftOf(
@@ -470,7 +476,8 @@ it('아이템을 바꿔도 수치, 증폭, 마법부여는 그대로 두고 조�
     enchantId,
     variantId: exalted.id,
     tune: 0,
-    potency: 100
+    potency: 100,
+    release: null
   })
 })
 
@@ -531,8 +538,8 @@ it('아이템, 조율, 정밀도를 바꾼 부위는 바꾼 값만 요청 body�
 
   expect(simulationBody(dealerRows, null, changed)).toEqual({
     equipment: [
-      { slotId: 'JACKET', ...base, variantId: corroded.id, tune: 0, potency: null },
-      { slotId: 'SUPPORT', ...base, variantId: null, tune: 2, potency: null },
+      { slotId: 'JACKET', ...base, variantId: corroded.id, tune: 0, potency: null, release: null },
+      { slotId: 'SUPPORT', ...base, variantId: null, tune: 2, potency: null, release: null },
       {
         slotId: 'EARRING',
         reinforce: 8,
@@ -540,7 +547,8 @@ it('아이템, 조율, 정밀도를 바꾼 부위는 바꾼 값만 요청 body�
         enchantId: null,
         variantId: exalted.id,
         tune: 0,
-        potency: 70
+        potency: 70,
+        release: null
       }
     ]
   })
@@ -580,7 +588,6 @@ it('닫힌 선택 칸의 아이템은 방어구 5부위가 모두 축성이면 �
     '성스러운 믿음의 목걸이',
     '초연한 청렴의 보조장비'
   ])
-  expect(worn.WEAPON).toBeUndefined()
   expect(broken.JACKET).toEqual({
     itemId: corroded.item.itemId,
     itemName: corroded.item.itemName,
@@ -651,7 +658,8 @@ it('장비 세트를 고른 뒤 바꾼 부위의 등급은 새 세트의 선택�
         enchantId: null,
         variantId: corroded.id,
         tune: 0,
-        potency: null
+        potency: null,
+        release: null
       }
     ]
   })
@@ -677,7 +685,8 @@ it('장비 세트를 바꾸면 부위에서 고른 등급을 새 세트의 같�
     enchantId,
     variantId: movedLegendary,
     tune: 2,
-    potency: null
+    potency: null,
+    release: null
   })
   expect(simulationBody(rows, null, changed).equipment).toEqual([
     {
@@ -687,7 +696,8 @@ it('장비 세트를 바꾸면 부위에서 고른 등급을 새 세트의 같�
       enchantId,
       variantId: movedLegendary,
       tune: 2,
-      potency: null
+      potency: null,
+      release: null
     }
   ])
 })
@@ -747,9 +757,12 @@ it('장비 세트를 바꿔도 선택지에 없는 착용 아이템은 그대로
   expect(idsOf(wrist.variants)).toEqual(idsOf(equipmentVariantsOf(SHADOW_SET, 'WRIST')))
 })
 
-it('조율할 수 있는 무기는 그 무기의 최대 단계까지 조율을 받아 tune만 요청하고, 조율할 수 없는 무기는 받지 않는다', () => {
+it('선택지에 없는 착용 무기는 그 무기의 최대 단계까지 조율을 받아 tune만 요청하고, 조율할 수 없는 무기는 받지 않는다', () => {
   const rows = toSimulatorRows(
-    withItem(characterDetailFixture('dealer'), 'WEAPON', { itemName: 'Beast-Saw' })
+    withItem(characterDetailFixture('dealer'), 'WEAPON', {
+      itemId: 'unlisted-weapon',
+      itemName: 'Beast-Saw'
+    })
   )
   const tunable = slotOf(slotsOf(rows), 'WEAPON')
   const changed = apply(NO_CHANGES, { type: 'change', slot: tunable, draft: { tune: 2 } })
@@ -764,12 +777,119 @@ it('조율할 수 있는 무기는 그 무기의 최대 단계까지 조율을 �
       enchantId: null,
       variantId: null,
       tune: 2,
-      potency: null
+      potency: null,
+      release: null
     }
   ])
   expect(apply(NO_CHANGES, { type: 'change', slot: tunable, draft: { tune: 4 } })).toEqual(
     NO_CHANGES
   )
+})
+
+const SCYTHE = {
+  legacyPrimeval: '413aebce4d4cc7c7346aa6e32e27a6dd',
+  releasePending: '6aeca595f1b6f1c33e28f8d51c3f5b89'
+}
+// 버퍼 fixture는 선현궁 에픽 기본 계열 무기(시크릿 듀엣)를 낀다.
+const HARP_RELEASE = 'da48e7a57b27009cc0cc7765722edca2'
+
+function weaponChange(fields: Partial<SimulationChange>): SimulationChange {
+  return {
+    slotId: 'WEAPON',
+    reinforce: 10,
+    amplified: false,
+    enchantId: null,
+    ...KEPT_ITEM,
+    ...fields
+  }
+}
+
+it('무기는 착용한 무기 종류의 선택지를 목록 순서대로 계열 이름과 등급으로 두고 착용 무기를 고른 상태다', () => {
+  expect(weapon.variants.map(({ name, rarity }) => [name, rarity])).toEqual([
+    ['유니크', 'unique'],
+    ['레거시', 'legendary'],
+    ['태초의 별', 'legendary'],
+    ['레거시', 'epic'],
+    ['태초의 별', 'epic'],
+    ['레거시', 'primordial'],
+    [TUNED_WEAPON_NAME, 'primordial'],
+    ['디거시', 'primordial'],
+    ['태초의 별', 'primordial']
+  ])
+  expect(weapon.wornVariantId).toBe(SCYTHE_RELEASE)
+  expect(weapon.wornRelease).toBe(100)
+  expect(resolvedItemsOf(dealerRows, NO_CHANGES).WEAPON?.itemName).toBe('디거시')
+})
+
+it('디거시에서 레거시로 바꾸면 해방 수치를 비우고 조율을 열며, 디거시로 돌아오면 착용한 수치로 되돌린다', () => {
+  const legacy = apply(NO_CHANGES, {
+    type: 'change',
+    slot: weapon,
+    draft: { variantId: SCYTHE.legacyPrimeval }
+  })
+
+  expect(draftOf(weapon, legacy)).toMatchObject({ tune: 0, release: null })
+  expect(tuneLimitOf(weapon, SCYTHE.legacyPrimeval)).toBe(3)
+  expect(simulationBody(dealerRows, null, legacy).equipment).toEqual([
+    weaponChange({ variantId: SCYTHE.legacyPrimeval, tune: 0 })
+  ])
+  expect(
+    apply(legacy, { type: 'change', slot: weapon, draft: { variantId: SCYTHE_RELEASE } })
+  ).toEqual(NO_CHANGES)
+})
+
+it('해방 수치는 해방 계열에서만 0부터 100까지 정수로 받고, 100 미만이면 "억압 - " 아이템이 된다', () => {
+  const lowered = apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { release: 81 } })
+  const legacy = apply(NO_CHANGES, {
+    type: 'change',
+    slot: weapon,
+    draft: { variantId: SCYTHE.legacyPrimeval }
+  })
+
+  expect(simulationBody(dealerRows, null, lowered).equipment).toEqual([
+    weaponChange({ release: 81 })
+  ])
+  expect(resolvedItemsOf(dealerRows, lowered).WEAPON).toEqual({
+    itemId: SCYTHE.releasePending,
+    itemName: '디거시',
+    rarity: 'primordial'
+  })
+  for (const release of [101, -1, 50.5]) {
+    expect(apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { release } })).toEqual(
+      NO_CHANGES
+    )
+  }
+  expect(apply(legacy, { type: 'change', slot: weapon, draft: { release: 50 } })).toEqual(legacy)
+})
+
+it('해방 계열이 아닌 무기를 디거시로 바꾸면 해방 수치 100에서 시작하고 함께 요청한다', () => {
+  const bufferWeapon = slotOf(bufferSlots, 'WEAPON')
+  const changed = apply(NO_CHANGES, {
+    type: 'change',
+    slot: bufferWeapon,
+    draft: { variantId: HARP_RELEASE }
+  })
+
+  expect(bufferWeapon.wornRelease).toBeNull()
+  expect(simulationBody(bufferRows, null, changed).equipment).toEqual([
+    weaponChange({ reinforce: 0, variantId: HARP_RELEASE, release: 100 })
+  ])
+})
+
+it('"억압 - " 아이템을 낀 무기는 디거시를 고른 상태로 착용한 해방 수치에서 시작하고, 100으로 올리면 해방 아이템이 된다', () => {
+  const rows = toSimulatorRows(
+    withItem(characterDetailFixture('dealer'), 'WEAPON', {
+      itemId: SCYTHE.releasePending,
+      itemName: '억압 - 재앙의 송곳니',
+      weaponRelease: { value: 81 }
+    })
+  )
+  const pending = slotOf(slotsOf(rows), 'WEAPON')
+  const full = apply(NO_CHANGES, { type: 'change', slot: pending, draft: { release: 100 } })
+
+  expect(draftOf(pending, NO_CHANGES)).toMatchObject({ variantId: SCYTHE_RELEASE, release: 81 })
+  expect(resolvedItemsOf(rows, full).WEAPON?.itemId).toBe(SCYTHE_RELEASE)
+  expect(simulationBody(rows, null, full).equipment).toEqual([weaponChange({ release: 100 })])
 })
 
 it('초기화하면 고른 장비 세트도 지운다', () => {
