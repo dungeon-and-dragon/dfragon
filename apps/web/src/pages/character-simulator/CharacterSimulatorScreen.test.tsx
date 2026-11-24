@@ -5,6 +5,7 @@ import {
   equipmentSets,
   equipmentVariantsOf,
   oathCrystalVariantsOf,
+  type OathUpgradeKind,
   oathUpgradeSteps,
   oathVariantOf,
   oathVariantsOf
@@ -23,6 +24,7 @@ import {
   characterUrl,
   loadingResponse
 } from '#entities/character-detail/api/character-detail.handlers'
+import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { server } from '#testing/test-support/msw-server'
 import { toneClassesOf } from '#testing/test-support/score-tone-class'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -896,7 +898,7 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
   expect(rows.map((row) => row.querySelectorAll('td')[1]?.textContent)).toEqual([
     '야망의 용투 서약',
     '세계를 태우는 용투 서약',
-    '아홉 번째 진의',
+    '9단계',
     ...Array.from({ length: 6 }, () => '용투 : 완전한 광휘 결정III'),
     '용투 : 완전한 광휘 결정I',
     '용투 : 완전한 광휘 결정',
@@ -1218,35 +1220,82 @@ it('태초 결정이 이미 3개면 다른 결정의 선택 목록에 태초 결
   )
 })
 
-it('진의 줄을 고르면 단계마다 선택을 열고, 단계를 내리고 올리면 바꾼 진의 전체를 요청하고 줄에 지금 단계를 보인다', async () => {
-  const fifthSpeed = oathUpgradeSteps()[4]!.options.find(({ kind }) => kind === 'Speed')!.option
+function upgradeOptionOf(step: number, kind: OathUpgradeKind): string {
+  return oathUpgradeSteps()[step - 1]!.options.find((option) => option.kind === kind)!.option
+}
+
+function upgradeLevelText(): string | null {
+  return oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent
+}
+
+it('진의 줄을 고르면 단계마다 체크박스와 1~4단계 선택 칸을 두고, 쿨타임 감소를 낀 단계는 최종 데미지로 보이며 서약 포인트에서 최종 데미지로 되돌리면 착용 그대로다', async () => {
   const worn = ['고요한 호흡', '자애의 마음', '내면의 조율', '신념의 대가'].map(
     (option, index) => ({ step: index + 1, option })
   )
+  const speeds = [5, 6, 7, 8, 9].map((step) => ({ step, option: upgradeOptionOf(step, 'Speed') }))
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent).toBe('아홉 번째 진의')
+  expect(upgradeLevelText()).toBe('9단계')
 
   await chooseOath('묵언의 진의')
 
-  expect(control('첫 번째 진의').textContent).toBe('쿨타임 감소')
+  expect(control('첫 번째 진의').getAttribute('aria-checked')).toBe('true')
+  expect(control('첫 번째 진의 선택지').textContent).toBe('최종 데미지')
+  expect(container.querySelector('[aria-label="다섯 번째 진의 선택지"]')).toBeNull()
 
-  await pick('다섯 번째 진의', '-')
-
-  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathUpgrade: worn }))
-  expect(oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent).toBe('네 번째 진의')
-  expect(control('다섯 번째 진의').textContent).toBe('-')
-  expect(control('여섯 번째 진의').hasAttribute('disabled')).toBe(true)
-
-  await pick('다섯 번째 진의', '이동속도')
+  await pick('두 번째 진의 선택지', '서약 포인트')
 
   await vi.waitFor(() =>
     expect(bodies.at(-1)).toEqual({
       equipment: [],
-      oathUpgrade: [...worn, { step: 5, option: fifthSpeed }]
+      oathUpgrade: [
+        worn[0],
+        { step: 2, option: upgradeOptionOf(2, 'Oathpoint') },
+        ...worn.slice(2),
+        ...speeds
+      ]
     })
   )
-  expect(oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent).toBe('다섯 번째 진의')
-  expect(control('여섯 번째 진의').hasAttribute('disabled')).toBe(false)
+  expect(control('두 번째 진의 선택지').textContent).toBe('서약 포인트')
+
+  await pick('두 번째 진의 선택지', '최종 데미지')
+
+  expect(control('두 번째 진의 선택지').textContent).toBe('최종 데미지')
+  expect(upgradeLevelText()).toBe('9단계')
+  expect(resetButton().disabled).toBe(true)
+})
+
+it('진의 체크를 풀면 그 뒤 단계도 내리고, 건너뛰어 체크하면 사이 단계를 기본 선택지로 채워 바꾼 진의 전체를 요청한다', async () => {
+  const worn = ['고요한 호흡', '자애의 마음', '내면의 조율', '신념의 대가', '이어진 걸음'].map(
+    (option, index) => ({ step: index + 1, option })
+  )
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+  await chooseOath('묵언의 진의')
+
+  await act(async () => control('여섯 번째 진의').click())
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathUpgrade: worn }))
+  expect(upgradeLevelText()).toBe('5단계')
+  expect(control('여섯 번째 진의').getAttribute('aria-checked')).toBe('false')
+  expect(control('아홉 번째 진의').getAttribute('aria-checked')).toBe('false')
+
+  await act(async () => control('첫 번째 진의').click())
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathUpgrade: [] }))
+  expect(upgradeLevelText()).toBe(MISSING_VALUE)
+  expect(container.querySelector('[aria-label="첫 번째 진의 선택지"]')).toBeNull()
+
+  await act(async () => control('세 번째 진의').click())
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)).toEqual({
+      equipment: [],
+      oathUpgrade: [1, 2, 3].map((step) => ({ step, option: upgradeOptionOf(step, 'Damage') }))
+    })
+  )
+  expect(upgradeLevelText()).toBe('3단계')
+  expect(control('두 번째 진의').getAttribute('aria-checked')).toBe('true')
+  expect(control('두 번째 진의 선택지').textContent).toBe('최종 데미지')
 })
