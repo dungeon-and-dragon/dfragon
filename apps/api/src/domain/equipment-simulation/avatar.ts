@@ -4,6 +4,9 @@ import {
   type AvatarEmblemColor,
   type AvatarPreset,
   type AvatarPresetPartSpec,
+  type AvatarPresetRole,
+  type AvatarPresetSkinSpec,
+  avatarPresetNeedsMainStat,
   findAvatarPreset
 } from '@dfragon/lib/avatar-presets'
 import { isRecord } from '@dfragon/lib/utils/shape-check'
@@ -12,9 +15,16 @@ import type {
   CharacterPayloads
 } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterRole } from '@dfragon/server-core/domain/character-role.js'
+import type { ScoreMainStat } from '@dfragon/server-core/domain/score/index.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
 export type AvatarPresetChoice = 'best'
+
+export interface AvatarPresetJob {
+  readonly jobId: string
+  readonly jobGrowId: string
+  readonly role: AvatarPresetRole
+}
 
 const PLATINUM_COLOR = '플래티넘'
 
@@ -56,13 +66,38 @@ function emblemsOf(item: CharacterPayload): CharacterPayload[] {
   return item.emblems.filter(isRecord)
 }
 
-function presetOf(payloads: CharacterPayloads, role: CharacterRole | null): AvatarPreset {
+/** 끝 스펙을 고르지 않았으면 null이고, 끝 스펙 표에 없는 전직은 거절한다. */
+export function avatarPresetJobOf(
+  payloads: CharacterPayloads,
+  role: CharacterRole | null,
+  choice: AvatarPresetChoice | null
+): AvatarPresetJob | null {
+  if (choice === null) {
+    return null
+  }
+
   const { jobId, jobGrowId } = payloads.basic
+
+  if (typeof jobId !== 'string' || typeof jobGrowId !== 'string') {
+    throw new EquipmentSimulationFailure('request')
+  }
+
   const presetRole = role === 'buffer' ? 'buffer' : 'dealer'
-  const preset =
-    typeof jobId === 'string' && typeof jobGrowId === 'string'
-      ? findAvatarPreset({ jobId, jobGrowId }, presetRole)
-      : null
+  const job = { jobId, jobGrowId, role: presetRole } as const
+
+  if (findAvatarPreset(job, presetRole) === null) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
+  return job
+}
+
+export function needsAvatarMainStat(job: AvatarPresetJob | null): boolean {
+  return job !== null && avatarPresetNeedsMainStat(job, job.role)
+}
+
+function presetOf(job: AvatarPresetJob, mainStat: ScoreMainStat | null): AvatarPreset {
+  const preset = findAvatarPreset(job, job.role, mainStat)
 
   if (preset === null) {
     throw new EquipmentSimulationFailure('request')
@@ -112,6 +147,32 @@ function fillEmblems(
 interface PartEdit {
   readonly part: CharacterPayload
   readonly itemIds: readonly string[]
+}
+
+// 피부는 엠블렘만 점수에 들어가 낀 피부는 엠블렘만 바꾸고, 끼지 않았으면 다른 부위처럼 더한다.
+function skinEditOf(
+  original: CharacterPayload | undefined,
+  spec: AvatarPresetSkinSpec
+): PartEdit | null {
+  if (original === undefined) {
+    const { slotId, slotName, itemName, itemRarity } = spec
+    const emblems = spec.emblems.map(emblemPayload)
+    const itemIds = spec.emblems.map(({ itemId }) => itemId)
+
+    return { part: { slotId, slotName, itemName, itemRarity, emblems }, itemIds }
+  }
+
+  const wornEmblems = emblemsOf(original)
+  const filled = fillEmblems(wornEmblems, spec.emblems)
+
+  if (!filled.changed) {
+    return null
+  }
+
+  const part = structuredClone(original)
+  part.emblems = filled.emblems
+
+  return { part, itemIds: filled.itemIds }
 }
 
 function addedPart(spec: AvatarPresetPartSpec): PartEdit {
@@ -183,30 +244,37 @@ function partEditOf(original: CharacterPayload | undefined, spec: AvatarPresetPa
 }
 
 /**
- * 원본의 무기와 8부위, 오라 엠블렘을 끝 스펙으로 바꾼다. 피부, 오라 스킨과 버프 강화에 등록한 아바타는 두고,
- * 끝 스펙 표에 없는 전직은 거절한다.
+ * 원본의 무기와 8부위, 피부 엠블렘, 오라 엠블렘을 끝 스펙으로 바꾼다. 오라 스킨과 버프 강화에 등록한 아바타는 둔다.
+ * mainStat은 주스탯 갈래가 있는 전직의 갈래를 고를 때만 쓴다.
  */
 export function editAvatar(
   payloads: CharacterPayloads,
-  role: CharacterRole | null,
-  choice: AvatarPresetChoice | null
+  job: AvatarPresetJob | null,
+  mainStat: ScoreMainStat | null
 ): AvatarEdit | null {
-  if (choice === null) {
+  if (job === null) {
     return null
   }
 
-  const preset = presetOf(payloads, role)
+  const preset = presetOf(job, mainStat)
   const worn = avatarsOf(payloads)
-  const partEdits = AVATAR_PRESET_PARTS.flatMap((slotId) => {
-    const edit = partEditOf(worn.get(slotId), preset.parts[slotId])
+  const rareEdits = AVATAR_PRESET_PARTS.map((slotId) => {
+    const original = worn.get(slotId)
+    const spec = preset.parts[slotId]
 
+    return partEditOf(original, spec)
+  })
+  const wornSkin = worn.get('SKIN')
+  const wornAura = worn.get('AURORA')
+  const skinEdit = skinEditOf(wornSkin, preset.skin)
+  const partEdits = [...rareEdits, skinEdit].flatMap((edit) => {
     if (edit === null) {
       return []
     }
 
     return [edit]
   })
-  const aura = auraEditOf(preset, worn.get('AURORA'))
+  const aura = auraEditOf(preset, wornAura)
   const parts = partEdits.map(({ part }) => part)
   const auraItemIds = aura?.itemIds ?? []
   const itemIds = [...new Set([...partEdits.flatMap(({ itemIds }) => itemIds), ...auraItemIds])]
