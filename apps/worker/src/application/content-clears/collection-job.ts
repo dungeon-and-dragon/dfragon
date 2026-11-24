@@ -49,7 +49,7 @@ export function createClearWeekSampleJob(service: ClearWeekSampleService) {
     name: 'clear-week-samples',
     displayName: '마감한 주 클리어 집계',
     description:
-      '레이드 모집단이 마감한 주의 레기온 클리어를 클리어 기록에서 옮기고, 마감한 주마다 클리어 상세와 전체 개요에 쓰는 집계를 한 번 계산해 저장합니다. 저장한 주는 다시 계산하지 않습니다.',
+      '레이드 수집을 마감한 주의 레기온 클리어를 클리어 기록에서 옮기고, 마감한 주마다 클리어 상세와 전체 개요에 쓰는 집계를 한 번 계산해 저장합니다. 저장한 주는 다시 계산하지 않습니다.',
     // 클리어 기록 수집은 끝나는 시각이 일정하지 않아, 매시간 저장하지 않은 마감한 주가 있는지 본다.
     schedule: '30 * * * *',
     catchup: false,

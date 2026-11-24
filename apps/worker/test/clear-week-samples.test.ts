@@ -12,7 +12,7 @@ import type { ClearSampleRepository } from '@dfragon/server-core/application/con
 import { ClearWeekSampleService } from '../src/application/content-clears/week-samples.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 
-// 합성 모집단과 집계다. DB 읽기와 저장은 fake이며 저장한 재료를 다시 읽는 왕복은 container-content-clear-check.mjs가 확인한다.
+// 합성 분모와 집계다. DB 읽기와 저장은 fake이며 저장한 재료를 다시 읽는 왕복은 container-content-clear-check.mjs가 확인한다.
 const week = (date: string) => new Date(`${date}T06:00:00+09:00`)
 const emptySampleRepository: ClearSampleRepository = {
   readAdventureSizes: async () => [],
@@ -43,7 +43,7 @@ const population = (contentId: string, date: string, closed: boolean): StoredCle
   closed
 })
 
-test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부터 저장하고, 전체 개요는 그 주의 모든 모집단이 마감했을 때만 저장한다', async () => {
+test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부터 저장하고, 전체 개요는 그 주의 모든 분모가 마감했을 때만 저장한다', async () => {
   const recordedContents: string[] = []
   const recordedSamples = new Map<string, ClearContentWeekSamples>()
   const recordedOverviews: string[] = []
@@ -104,7 +104,7 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
   assert.equal(recordedSamples.get('engraved-nightmare-1/2026-11-05')?.streaks, null)
 })
 
-test('레기온은 출시 뒤 레이드 모집단이 마감한 주 가운데 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 그 주 가장 큰 모집단을 복사한 뒤 상세 집계를 계산한다', async () => {
+test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 그 주 가장 큰 레이드 분모를 복사한 뒤 상세 집계를 계산한다', async () => {
   const largest: StoredClearPopulation = {
     ...population('nabel-normal', '2026-11-05', true),
     population: 1500,
