@@ -222,7 +222,7 @@ export function SlotItemControl({
   onChange: (slotItem: SimulatorSlotItem, id: string | null) => void
 }): React.JSX.Element {
   const label = `${slotItem.slotName} 교체`
-  const value = chosen ?? CURRENT
+  const value = chosen ?? slotItem.wornChoiceId ?? CURRENT
   const worn: ItemFace = {
     itemId: slotItem.itemId,
     name: slotItem.itemName,
@@ -236,7 +236,9 @@ export function SlotItemControl({
 
   return (
     <div className="chip-list" role="group" aria-label={label}>
-      <ItemChoiceChip value={CURRENT} item={worn} chosen={value} onChoose={changeItem} />
+      {slotItem.wornChoiceId === null && (
+        <ItemChoiceChip value={CURRENT} item={worn} chosen={value} onChoose={changeItem} />
+      )}
       {slotItem.choices.map((choice) => (
         <ItemChoiceChip
           key={choice.id}
