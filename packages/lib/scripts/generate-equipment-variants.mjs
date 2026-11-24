@@ -17,6 +17,13 @@ const observedOathItemIds = new Map(
   ])
 )
 
+const observedWeaponItemIds = new Map(
+  observed.weapons.map(({ itemTypeDetail, itemName, itemIds }) => [
+    JSON.stringify([itemTypeDetail, itemName]),
+    itemIds.map(({ itemId }) => itemId)
+  ])
+)
+
 function readJson(path) {
   const url = new URL(path, import.meta.url)
 
@@ -197,6 +204,69 @@ function weaponMaxTuneLevelOf([itemName, levels]) {
   return [itemName, levels.length - 1]
 }
 
+function observedWeaponItemOf(itemTypeDetail, itemName, itemRarity) {
+  const [itemId] = observedWeaponItemIds.get(JSON.stringify([itemTypeDetail, itemName])) ?? []
+
+  if (itemId === undefined) {
+    return null
+  }
+
+  return { itemId, itemName, itemRarity }
+}
+
+// 해방 계열은 해방 아이템과 "억압 - " 아이템이 모두 관측됐을 때만, 조율을 마친 아이템은 기본 아이템 바로 뒤에 둔다.
+function weaponVariantsOf(type, { name, rarity, line, maxTune, tuned, release, releasePending }) {
+  const item = observedWeaponItemOf(type, name, rarity)
+
+  if (item === null) {
+    return []
+  }
+
+  if (release) {
+    const pending = observedWeaponItemOf(type, releasePending, rarity)
+
+    if (pending === null) {
+      return []
+    }
+
+    return [
+      {
+        id: item.itemId,
+        rarity,
+        line,
+        tuned: false,
+        maxTuneLevel: 0,
+        item,
+        releasePending: pending
+      }
+    ]
+  }
+
+  const variant = { id: item.itemId, rarity, line, tuned: false, maxTuneLevel: maxTune, item }
+  const tunedItem = tuned !== null ? observedWeaponItemOf(type, tuned, rarity) : null
+
+  if (tunedItem === null) {
+    return [variant]
+  }
+
+  const tunedVariant = {
+    id: tunedItem.itemId,
+    rarity,
+    line,
+    tuned: true,
+    maxTuneLevel: 0,
+    item: tunedItem
+  }
+
+  return [variant, tunedVariant]
+}
+
+function weaponTypeOf({ type, items }) {
+  const variants = items.flatMap((item) => weaponVariantsOf(type, item))
+
+  return { itemTypeDetail: type, variants }
+}
+
 const oathCrystals = [
   ...engine.oathCrystals.sets.flatMap(({ crystals }) => crystals),
   ...engine.oathCrystals.noSet
@@ -218,9 +288,12 @@ function oathUpgradeStepOf({ step, name, options }, index) {
 
 const oathSets = engine.oathSets.map(oathSetOf)
 const mistOaths = engine.oaths.noSet.flatMap(oathVariantOf)
-const weaponMaxTuneLevels = Object.fromEntries(
-  Object.entries(engine.weaponTune).map(weaponMaxTuneLevelOf)
-)
+// 115레벨 무기는 무기 단계 목록(weapons)의 조율 상한을 앞세운다. weaponTune이 더 높은 단계까지 적은 이름이 있다.
+const weaponMaxTuneLevels = Object.fromEntries([
+  ...Object.entries(engine.weaponTune).map(weaponMaxTuneLevelOf),
+  ...engine.weapons.flatMap(({ items }) => items.map(({ name, maxTune }) => [name, maxTune]))
+])
+const weapons = engine.weapons.map(weaponTypeOf)
 const oathUpgradeSteps = engine.oathUpgrades.steps.map(oathUpgradeStepOf)
 
 if (oathUpgradeSteps.length !== engine.oathUpgrades.maxLevel) {
@@ -235,6 +308,7 @@ const table = {
   oathSets,
   mistOaths,
   weaponMaxTuneLevels,
+  weapons,
   oathUpgradeMaxStep: engine.oathUpgrades.maxLevel,
   oathUpgradeSteps
 }
