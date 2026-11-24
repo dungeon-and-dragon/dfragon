@@ -354,13 +354,11 @@ export function TextControl({
   label,
   value,
   options,
-  disabled = false,
   onChange
 }: {
   label: string
   value: string
   options: readonly TextOption[]
-  disabled?: boolean
   onChange: (id: string) => void
 }): React.JSX.Element {
   function nameOf(id: string): string {
@@ -381,7 +379,7 @@ export function TextControl({
 
   return (
     <div className="grid min-w-0">
-      <Select.Root value={value} disabled={disabled} onValueChange={changeSet}>
+      <Select.Root value={value} onValueChange={changeSet}>
         <Select.Trigger size="sm" aria-label={label}>
           <Select.Value>
             {(id: string) => <span className="min-w-0 truncate">{nameOf(id)}</span>}

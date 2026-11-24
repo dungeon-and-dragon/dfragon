@@ -1,4 +1,4 @@
-import { MISSING_VALUE } from '#shared/lib/missing-value'
+import { Checkbox } from '@dfragon/ui'
 import {
   draftOf,
   equipmentSetIdOf,
@@ -27,6 +27,7 @@ import {
   type SimulatorOathCrystal
 } from '#pages/character-simulator/model/simulator-oath'
 import {
+  isOathpointChosen,
   type SimulatorOathUpgrade,
   upgradeOf
 } from '#pages/character-simulator/model/simulator-oath-upgrade'
@@ -50,7 +51,16 @@ export type SlotEditorActions = Readonly<{
   onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
   onOathSetChange: (setId: number) => void
   onOathBodyChange: (body: SimulatorOathBody, id: string) => void
-  onOathUpgradeChange: (upgrade: SimulatorOathUpgrade, step: number, option: string | null) => void
+  onOathUpgradeUnlockChange: (
+    upgrade: SimulatorOathUpgrade,
+    step: number,
+    unlocked: boolean
+  ) => void
+  onOathUpgradeOathpointChange: (
+    upgrade: SimulatorOathUpgrade,
+    step: number,
+    oathpoint: boolean
+  ) => void
   onCrystalChange: (crystal: SimulatorOathCrystal, draft: Partial<CrystalDraft>) => void
 }>
 
@@ -328,8 +338,13 @@ function CrystalEditor({
   )
 }
 
-// 올리지 않은 단계를 뜻하는 항목이다. 진의 선택지 이름과 겹치지 않는다.
-const NOT_RAISED = 'none'
+const DAMAGE = 'damage'
+const OATHPOINT = 'oathpoint'
+// 엔진은 서약 포인트가 아닌 선택지를 모두 같은 값으로 계산해, 서약 포인트가 아닌 선택지는 최종 데미지 하나로 보인다.
+const UPGRADE_OPTIONS = [
+  { id: DAMAGE, name: '최종 데미지' },
+  { id: OATHPOINT, name: '서약 포인트' }
+]
 
 function OathUpgradeEditor({
   upgrade,
@@ -340,34 +355,39 @@ function OathUpgradeEditor({
   changes: SimulatorChanges
   actions: SlotEditorActions
 }): React.JSX.Element {
-  const current = upgradeOf(upgrade, changes.oath.upgrade)
+  const level = upgradeOf(upgrade, changes.oath.upgrade).length
 
   return (
-    <Fields>
-      {upgrade.steps.map(({ step, name, options }) => {
-        const chosen = current.find((selection) => selection.step === step)
-        const textOptions = [
-          { id: NOT_RAISED, name: MISSING_VALUE },
-          ...options.map(({ option, label }) => ({ id: option, name: label }))
-        ]
+    <div className="flex flex-col gap-2 p-4">
+      {upgrade.steps.map(({ step, name, oathpointOption }) => {
+        const unlocked = step <= level
+        const oathpoint = isOathpointChosen(upgrade, changes.oath.upgrade, step)
 
-        function changeStep(id: string): void {
-          const option = id === NOT_RAISED ? null : id
-          actions.onOathUpgradeChange(upgrade, step, option)
+        function changeUnlock(checked: boolean): void {
+          actions.onOathUpgradeUnlockChange(upgrade, step, checked)
+        }
+
+        function changeOption(id: string): void {
+          actions.onOathUpgradeOathpointChange(upgrade, step, id === OATHPOINT)
         }
 
         return (
-          <Field key={step} label={name}>
-            <TextControl
-              label={name}
-              value={chosen?.option ?? NOT_RAISED}
-              options={textOptions}
-              disabled={step > current.length + 1}
-              onChange={changeStep}
-            />
-          </Field>
+          <div key={step} className="grid h-control-sm grid-cols-2 items-center gap-3">
+            <label className="flex min-w-0 cursor-pointer items-center gap-2">
+              <Checkbox aria-label={name} checked={unlocked} onCheckedChange={changeUnlock} />
+              <span className="min-w-0 truncate">{name}</span>
+            </label>
+            {unlocked && oathpointOption !== null && (
+              <TextControl
+                label={`${name} 선택지`}
+                value={oathpoint ? OATHPOINT : DAMAGE}
+                options={UPGRADE_OPTIONS}
+                onChange={changeOption}
+              />
+            )}
+          </div>
         )
       })}
-    </Fields>
+    </div>
   )
 }

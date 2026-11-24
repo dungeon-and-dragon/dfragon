@@ -27,7 +27,11 @@ import {
   toItemView
 } from '#entities/character'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
-import { changeUpgradeStep, type SimulatorOathUpgrade } from './simulator-oath-upgrade'
+import {
+  changeUpgradeOathpoint,
+  changeUpgradeUnlock,
+  type SimulatorOathUpgrade
+} from './simulator-oath-upgrade'
 import {
   type CrystalDraft,
   changeCrystal,
@@ -189,10 +193,16 @@ export type SimulatorAction =
   | Readonly<{ type: 'oathSet'; oath: SimulatorOath; setId: number }>
   | Readonly<{ type: 'oathBody'; body: SimulatorOathBody; id: string }>
   | Readonly<{
-      type: 'oathUpgrade'
+      type: 'oathUpgradeUnlock'
       upgrade: SimulatorOathUpgrade
       step: number
-      option: string | null
+      unlocked: boolean
+    }>
+  | Readonly<{
+      type: 'oathUpgradeOathpoint'
+      upgrade: SimulatorOathUpgrade
+      step: number
+      oathpoint: boolean
     }>
   | Readonly<{
       type: 'crystal'
@@ -807,12 +817,22 @@ export function simulatorReducer(
 
       return { ...changes, oath }
     }
-    case 'oathUpgrade': {
-      const upgrade = changeUpgradeStep(
+    case 'oathUpgradeUnlock': {
+      const upgrade = changeUpgradeUnlock(
         action.upgrade,
         changes.oath.upgrade,
         action.step,
-        action.option
+        action.unlocked
+      )
+
+      return { ...changes, oath: { ...changes.oath, upgrade } }
+    }
+    case 'oathUpgradeOathpoint': {
+      const upgrade = changeUpgradeOathpoint(
+        action.upgrade,
+        changes.oath.upgrade,
+        action.step,
+        action.oathpoint
       )
 
       return { ...changes, oath: { ...changes.oath, upgrade } }

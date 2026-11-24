@@ -20,7 +20,7 @@ import {
   slotItemChoiceOf,
   variantChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
-import { upgradeStepNameOf } from '#pages/character-simulator/model/simulator-oath-upgrade'
+import { upgradeOf } from '#pages/character-simulator/model/simulator-oath-upgrade'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
   crystalDraftOf,
@@ -323,7 +323,7 @@ export function OathList({
                 </OathRow>
               )
             case 'oathUpgrade': {
-              const stepName = upgradeStepNameOf(target.upgrade, changes.oath.upgrade)
+              const level = upgradeOf(target.upgrade, changes.oath.upgrade).length
 
               return (
                 <OathRow
@@ -333,7 +333,9 @@ export function OathList({
                   selected={selected}
                   onSelect={onSelect}
                 >
-                  <span className="min-w-0 font-semibold">{stepName ?? MISSING_VALUE}</span>
+                  <span className="min-w-0 font-semibold">
+                    {level > 0 ? `${level}단계` : MISSING_VALUE}
+                  </span>
                 </OathRow>
               )
             }

@@ -1,3 +1,4 @@
+import { oathUpgradeSteps } from '@dfragon/lib/equipment-variants'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import type { CharacterCardScore, CharacterDetailView } from '#entities/character'
 import type { SimulationBody } from '#pages/character-simulator/model/simulator-draft'
@@ -17,6 +18,7 @@ const EQUIPMENT_SET_POINTS = 64_500
 const OATH_SET_POINTS = 18_900
 const OATH_BODY_POINTS = 27_300
 const POINTS_PER_UPGRADE_STEP = 9_100
+const POINTS_PER_UPGRADE_OATHPOINT = 5_200
 
 type Calculator = CharacterCardScore['calculator']
 
@@ -86,14 +88,24 @@ function oathPointsOf(detail: CharacterDetailView, oath: SimulationBody['oath'] 
   }, 0)
 }
 
+// 엔진은 진의를 해금한 단계 수와 서약 포인트를 고른 단계 수로만 다르게 계산한다.
+function isOathpointOption(option: string | null): boolean {
+  return oathUpgradeSteps().some(({ options }) =>
+    options.some((candidate) => candidate.kind === 'Oathpoint' && candidate.option === option)
+  )
+}
+
 function upgradePointsOf(detail: CharacterDetailView, oathUpgrade: SimulationBody['oathUpgrade']) {
   if (oathUpgrade === undefined) {
     return 0
   }
 
-  const worn = detail.oath?.info?.oathUpgrade?.options.length ?? 0
+  const worn = detail.oath?.info?.oathUpgrade?.options ?? []
+  const wornOathpoints = worn.filter(({ optionName }) => isOathpointOption(optionName)).length
+  const oathpoints = oathUpgrade.filter(({ option }) => isOathpointOption(option)).length
+  const stepPoints = (oathUpgrade.length - worn.length) * POINTS_PER_UPGRADE_STEP
 
-  return (oathUpgrade.length - worn) * POINTS_PER_UPGRADE_STEP
+  return stepPoints + (oathpoints - wornOathpoints) * POINTS_PER_UPGRADE_OATHPOINT
 }
 
 function setPointsOf(

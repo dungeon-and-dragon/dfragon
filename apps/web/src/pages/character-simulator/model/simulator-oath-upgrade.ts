@@ -12,22 +12,15 @@ type OathInfo = NonNullable<NonNullable<CharacterDetailView['oath']>['info']>
 const UPGRADE_TITLE_PATTERN = /<([^>]+)>/
 const UPGRADE_STEP_PREFIX = /^<[^>]+>\s*-\s*/
 
-// 캐릭터 상세 서약 탭의 선택지 표기와 같다.
-const UPGRADE_KIND_LABELS: Readonly<Record<OathUpgradeKind, string>> = {
-  Damage: '최종 데미지',
-  Cooltime: '쿨타임 감소',
-  Oathpoint: '서약 포인트',
-  Speed: '이동속도',
-  SkillRange: '범위',
-  DamageReduce: '방어력'
-}
+// 엔진은 서약 포인트가 아닌 선택지를 모두 같은 값으로 계산해, 새로 올리는 단계는 1~4단계는 최종 데미지, 5~9단계는 이동속도로 둔다.
+const DEFAULT_KINDS: ReadonlySet<OathUpgradeKind> = new Set(['Damage', 'Speed'])
 
-export type OathUpgradeOptionView = Readonly<{ option: string; label: string }>
-
+/** oathpointOption은 서약 포인트를 고를 수 있는 1~4단계에만 있다. */
 export type OathUpgradeStepView = Readonly<{
   step: number
   name: string
-  options: readonly OathUpgradeOptionView[]
+  defaultOption: string
+  oathpointOption: string | null
 }>
 
 /** worn은 착용한 진의를 1단계부터 차례로 둔 것이다. */
@@ -50,14 +43,21 @@ function titleOf(stepName: string): string {
   return title
 }
 
-function toStepView({ step, name, options }: ReturnType<typeof oathUpgradeSteps>[number]) {
-  const stepName = name.replace(UPGRADE_STEP_PREFIX, '')
-  const optionViews = options.map(({ option, kind }) => ({
-    option,
-    label: UPGRADE_KIND_LABELS[kind]
-  }))
+function toStepView({
+  step,
+  name,
+  options
+}: ReturnType<typeof oathUpgradeSteps>[number]): OathUpgradeStepView | null {
+  const defaultOption = options.find(({ kind }) => DEFAULT_KINDS.has(kind))?.option
+  const oathpointOption = options.find(({ kind }) => kind === 'Oathpoint')?.option ?? null
 
-  return { step, name: stepName, options: optionViews }
+  if (defaultOption === undefined) {
+    return null
+  }
+
+  const stepName = name.replace(UPGRADE_STEP_PREFIX, '')
+
+  return { step, name: stepName, defaultOption, oathpointOption }
 }
 
 // 응답의 단계를 lib 단계 이름으로 맞추고, 1단계부터 끊기지 않고 이어진 단계까지만 착용한 진의로 읽는다.
@@ -103,11 +103,17 @@ export function toSimulatorOathUpgrade(
     return null
   }
 
-  const title = titleOf(first.name)
   const stepViews = steps.map(toStepView)
-  const worn = wornUpgradeOf(info)
 
-  return { title, steps: stepViews, worn }
+  if (stepViews.includes(null)) {
+    return null
+  }
+
+  const title = titleOf(first.name)
+  const worn = wornUpgradeOf(info)
+  const presentStepViews = stepViews.filter((view) => view !== null)
+
+  return { title, steps: presentStepViews, worn }
 }
 
 export function upgradeOf(
@@ -131,30 +137,10 @@ function isSameUpgrade(
   )
 }
 
-/**
- * 단계의 선택지를 고르거나(option) 그 단계를 내린다(null). 올리지 않은 단계는 바로 다음 단계만 올릴 수 있고, 단계를 내리면
- * 그 뒤 단계도 함께 내린다. 착용한 진의와 같아지면 바꾸지 않은 것으로 둔다.
- */
-export function changeUpgradeStep(
+function settledUpgrade(
   upgrade: SimulatorOathUpgrade,
-  changes: OathUpgradeChanges,
-  step: number,
-  option: string | null
+  next: readonly OathUpgradeSelection[]
 ): OathUpgradeChanges {
-  const current = upgradeOf(upgrade, changes)
-
-  if (step < 1 || step > current.length + 1) {
-    return changes
-  }
-
-  if (option !== null && findOathUpgradeOption(step, option) === null) {
-    return changes
-  }
-
-  const kept = current.slice(0, step - 1)
-  const rest = current.slice(step)
-  const next = option !== null ? [...kept, { step, option }, ...rest] : kept
-
   if (isSameUpgrade(next, upgrade.worn)) {
     return null
   }
@@ -162,17 +148,59 @@ export function changeUpgradeStep(
   return next
 }
 
-/** 진의 줄에 보일 지금 단계의 이름이다. 올린 단계가 없으면 null이다. */
-export function upgradeStepNameOf(
+/**
+ * 단계를 해금하면 그 앞 단계도 모두 해금하고, 새로 해금한 단계만 기본 선택지로 채운다. 해금을 풀면 그 뒤 단계도 함께 내린다.
+ */
+export function changeUpgradeUnlock(
   upgrade: SimulatorOathUpgrade,
-  changes: OathUpgradeChanges
-): string | null {
-  const last = upgradeOf(upgrade, changes).at(-1)
-  const step = upgrade.steps.find((candidate) => candidate.step === last?.step)
+  changes: OathUpgradeChanges,
+  step: number,
+  unlocked: boolean
+): OathUpgradeChanges {
+  const current = upgradeOf(upgrade, changes)
 
-  if (step === undefined) {
-    return null
+  if (!unlocked) {
+    return settledUpgrade(upgrade, current.slice(0, step - 1))
   }
 
-  return step.name
+  const added = upgrade.steps
+    .filter((view) => view.step > current.length && view.step <= step)
+    .map((view) => ({ step: view.step, option: view.defaultOption }))
+
+  return settledUpgrade(upgrade, [...current, ...added])
+}
+
+/**
+ * 해금한 단계를 서약 포인트로 바꾸거나 되돌린다. 되돌릴 때 착용한 선택지가 서약 포인트가 아니면 착용한 선택지로, 그 밖에는 기본 선택지로 둔다.
+ */
+export function changeUpgradeOathpoint(
+  upgrade: SimulatorOathUpgrade,
+  changes: OathUpgradeChanges,
+  step: number,
+  oathpoint: boolean
+): OathUpgradeChanges {
+  const current = upgradeOf(upgrade, changes)
+  const view = upgrade.steps.find((candidate) => candidate.step === step)
+
+  if (view?.oathpointOption == null || step > current.length) {
+    return changes
+  }
+
+  const worn = upgrade.worn.find((selection) => selection.step === step)?.option
+  const restored = worn !== undefined && worn !== view.oathpointOption ? worn : view.defaultOption
+  const option = oathpoint ? view.oathpointOption : restored
+  const next = current.map((selection) => (selection.step === step ? { step, option } : selection))
+
+  return settledUpgrade(upgrade, next)
+}
+
+export function isOathpointChosen(
+  upgrade: SimulatorOathUpgrade,
+  changes: OathUpgradeChanges,
+  step: number
+): boolean {
+  const option = upgradeOf(upgrade, changes).find((selection) => selection.step === step)?.option
+  const view = upgrade.steps.find((candidate) => candidate.step === step)
+
+  return option !== undefined && option === view?.oathpointOption
 }
