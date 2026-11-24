@@ -1,4 +1,5 @@
 import { ENCHANT_GRADE_SLOTS } from '@dfragon/lib/enchant-grades'
+import { WEAPON_RELEASE_MAX } from '@dfragon/lib/equipment-variants'
 import { z } from 'zod'
 import type {
   EquipmentSimulationRequest,
@@ -16,7 +17,8 @@ const equipmentChange = z.strictObject({
   // 생략과 null은 착용한 아이템의 값을 그대로 둔다.
   variantId: z.string().nullable().default(null),
   tune: z.int().min(0).nullable().default(null),
-  potency: z.int().min(0).max(POTENCY_LIMIT).nullable().default(null)
+  potency: z.int().min(0).max(POTENCY_LIMIT).nullable().default(null),
+  release: z.int().min(0).max(WEAPON_RELEASE_MAX).nullable().default(null)
 })
 
 const oathUpgradeSelection = z.strictObject({
