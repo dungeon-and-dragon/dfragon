@@ -1,17 +1,11 @@
 import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfragon/database'
 import {
   NEOPLE_TIMELINE_START,
+  type SeasonBackfillJob,
   splitTimelineRanges
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 
 const MINUTE_MS = 60_000
-
-export type SeasonBackfillTarget = {
-  character: TimelineCharacter
-  seasonId: number
-}
-
-export type SeasonBackfillJob = SeasonBackfillTarget & { range: TimelineRange }
 
 export type SeasonBackfillProgress = {
   done: number

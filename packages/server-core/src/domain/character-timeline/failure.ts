@@ -2,6 +2,7 @@ import { type FailureOptions, SanitizedFailure } from '@dfragon/lib/error-chain'
 import type { NeopleFailureKind, NeopleKeyShortage, NeopleUpstreamResponse } from '@dfragon/neople'
 
 export type TimelineFailureKind = NeopleFailureKind
+export type TimelineSyncFailure = `neople-${TimelineFailureKind}` | 'database'
 
 export type TimelineFailureOptions = FailureOptions & {
   upstream?: NeopleUpstreamResponse

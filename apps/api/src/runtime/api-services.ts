@@ -54,7 +54,7 @@ import { SoulPriceService } from '#application/soul-prices/index.js'
 import type { FetchShopGrade } from '#application/today-grade/ports.js'
 import { TodayGradeService } from '#application/today-grade/index.js'
 import { CharacterFetched } from '#domain/character-events.js'
-import type { SeasonBackfillJob } from '#domain/character-timeline/index.js'
+import type { SeasonBackfillJob } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { SoulPriceFailure } from '#domain/soul-prices/index.js'
 import { readApiBuildInfo } from '#infrastructure/build-info.js'
 import {
