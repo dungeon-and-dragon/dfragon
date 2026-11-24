@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { type FavoriteCharacter, useFavoriteCharacterStore } from '#features/favorite-character'
 import { type RecentCharacter, useRecentCharacterStore } from '#features/recent-characters'
+import type { CharacterPage } from '#entities/character'
 import { TestRouter } from '#testing/test-support/test-router'
 import { CharacterSearchBox } from './CharacterSearchBox'
 
@@ -24,11 +25,14 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-async function renderSearchBox(size?: 'medium' | 'large'): Promise<void> {
+async function renderSearchBox(
+  size?: 'medium' | 'large',
+  characterPage?: CharacterPage
+): Promise<void> {
   await act(async () =>
     root.render(
       <TestRouter>
-        <CharacterSearchBox size={size} />
+        <CharacterSearchBox size={size} characterPage={characterPage} />
       </TestRouter>
     )
   )
@@ -313,4 +317,44 @@ it('큰 검색창에 한 글자를 쓰면 드롭다운이 닫히고 지우면 �
 
   await typeName('')
   await vi.waitFor(() => expect(savedDropdown()).not.toBeNull())
+})
+
+it('시뮬레이터로 보내는 검색창은 검색 대상에 모험단을 두지 않는다', async () => {
+  await renderSearchBox('large', 'simulator')
+
+  await act(async () =>
+    container.querySelector<HTMLButtonElement>('button[aria-label="검색 대상"]')!.click()
+  )
+
+  const options = [...document.querySelectorAll('[role="option"]')].map((item) => item.textContent)
+  expect(options[0]).toBe('전체')
+  expect(options).not.toContain('모험단')
+})
+
+it('시뮬레이터로 보내는 큰 검색창의 최근 본 캐릭터와 즐겨찾기 항목은 그 캐릭터의 시뮬레이터로 간다', async () => {
+  useRecentCharacterStore.setState({ recentCharacters: [recentCharacter('recent-1', '하늘', 115)] })
+  useFavoriteCharacterStore.setState({ favoriteCharacters: [savedCharacter('favorite-1', '바다')] })
+  await renderSearchBox('large', 'simulator')
+
+  const dropdown = await openSavedDropdown()
+
+  expect([...dropdown.querySelectorAll('li a')].map((link) => link.getAttribute('href'))).toEqual([
+    '/c/prey/recent-1/simulator',
+    '/c/prey/favorite-1/simulator'
+  ])
+})
+
+it('시뮬레이터로 보내는 작은 검색창의 최근 본 캐릭터 항목은 그 캐릭터의 시뮬레이터로 간다', async () => {
+  useRecentCharacterStore.setState({ recentCharacters: [recentCharacter('recent-1', '하늘', 115)] })
+  await renderSearchBox('medium', 'simulator')
+
+  await act(async () => nameInput().focus())
+
+  const popup = await vi.waitFor(() => {
+    const element = document.querySelector('[aria-label="최근 본 캐릭터"]')
+    expect(element).not.toBeNull()
+
+    return element!
+  })
+  expect(popup.querySelector('li a')?.getAttribute('href')).toBe('/c/prey/recent-1/simulator')
 })

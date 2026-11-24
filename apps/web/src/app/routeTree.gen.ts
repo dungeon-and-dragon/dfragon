@@ -16,6 +16,7 @@ import { Route as MyRouteImport } from './routes/my'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SimulatorRouteImport } from './routes/simulator'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdventuresIndexRouteImport } from './routes/adventures.index'
 import { Route as ClearsIndexRouteImport } from './routes/clears.index'
@@ -64,6 +65,11 @@ const RankingsRoute = RankingsRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulatorRoute = SimulatorRouteImport.update({
+  id: '/simulator',
+  path: '/simulator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/rankings': typeof RankingsRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/terms': typeof TermsRoute
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/rankings': typeof RankingsRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/terms': typeof TermsRoute
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/rankings': typeof RankingsRoute
   '/search': typeof SearchRoute
+  '/simulator': typeof SimulatorRoute
   '/terms': typeof TermsRoute
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/rankings'
     | '/search'
+    | '/simulator'
     | '/terms'
     | '/clears/$content'
     | '/guilds/$guildId'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/rankings'
     | '/search'
+    | '/simulator'
     | '/terms'
     | '/clears/$content'
     | '/guilds/$guildId'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/rankings'
     | '/search'
+    | '/simulator'
     | '/terms'
     | '/clears/$content'
     | '/guilds/$guildId'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RankingsRoute: typeof RankingsRoute
   SearchRoute: typeof SearchRoute
+  SimulatorRoute: typeof SimulatorRoute
   TermsRoute: typeof TermsRoute
   ClearsContentRoute: typeof ClearsContentRoute
   GuildsGuildIdRoute: typeof GuildsGuildIdRoute
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulator': {
+      id: '/simulator'
+      path: '/simulator'
+      fullPath: '/simulator'
+      preLoaderRoute: typeof SimulatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -467,6 +487,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RankingsRoute: RankingsRoute,
   SearchRoute: SearchRoute,
+  SimulatorRoute: SimulatorRoute,
   TermsRoute: TermsRoute,
   ClearsContentRoute: ClearsContentRoute,
   GuildsGuildIdRoute: GuildsGuildIdRoute,

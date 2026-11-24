@@ -69,6 +69,12 @@ function menuLinks(): HTMLAnchorElement[] {
   return [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="전역 메뉴"] a')]
 }
 
+function currentLabels(): (string | null)[] {
+  return menuLinks()
+    .filter((link) => link.getAttribute('aria-current') === 'page')
+    .map((link) => link.textContent)
+}
+
 function underlines(): HTMLElement[] {
   return [...menu().querySelectorAll<HTMLElement>('[aria-hidden="true"]')]
 }
@@ -132,6 +138,7 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
     null,
     null,
     null,
+    null,
     null
   ])
   expect(underline().visibility).toBe('hidden')
@@ -139,4 +146,37 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
   await act(async () => router.navigate({ to: '/rankings' }))
 
   expect(container.querySelector('form[role="search"]')).not.toBeNull()
+})
+
+it('장비 시뮬레이터 항목은 즐겨찾기 바로 왼쪽에서 시뮬레이터 검색 주소로 간다', async () => {
+  await render('/rankings')
+
+  expect(menuLinks().map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+    ['멀티서치', '/multisearch'],
+    ['검색', '/rankings'],
+    ['통계', '/stats'],
+    ['모험단', '/adventures'],
+    ['장비 시뮬레이터', '/simulator'],
+    ['즐겨찾기', '/favorites']
+  ])
+})
+
+it('시뮬레이터 검색 주소에서는 장비 시뮬레이터를 지금 항목으로 두고 전역 바의 검색창을 숨긴다', async () => {
+  await render('/simulator?characterName=합성&serverId=all')
+
+  expect(currentLabels()).toEqual(['장비 시뮬레이터'])
+  expect(container.querySelector('form[role="search"]')).toBeNull()
+})
+
+it('캐릭터의 시뮬레이터 주소에서도 장비 시뮬레이터를 지금 항목으로 두고 검색창은 보인다', async () => {
+  await render('/c/cain/character-1/simulator')
+
+  expect(currentLabels()).toEqual(['장비 시뮬레이터'])
+  expect(container.querySelector('form[role="search"]')).not.toBeNull()
+})
+
+it('캐릭터 상세 주소에서는 장비 시뮬레이터를 지금 항목으로 두지 않는다', async () => {
+  await render('/c/cain/character-1')
+
+  expect(currentLabels()).toEqual([])
 })
