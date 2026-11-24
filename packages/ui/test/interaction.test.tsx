@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   Button,
+  Checkbox,
   Chip,
   ChipGroup,
   ConfirmPopover,
@@ -80,6 +81,7 @@ const IMPLICIT_ROLES: Record<string, string> = {
   alertdialog: '[role="alertdialog"]',
   alert: '[role="alert"]',
   switch: '[role="switch"]',
+  checkbox: '[role="checkbox"]',
   status: '[role="status"]',
   group: '[role="group"]'
 }
@@ -876,7 +878,7 @@ describe('Tabs의 키보드 이동과 패널 연결', () => {
   })
 })
 
-describe('Switch, Chip의 켜짐 상태', () => {
+describe('Switch, Checkbox, Chip의 켜짐 상태', () => {
   it('Switch를 누르면 켜짐 값을 전달하고 상태를 알린다', async () => {
     const onCheckedChange = vi.fn<(checked: boolean) => void>()
     await render(<Switch aria-label="자동 캡처" onCheckedChange={onCheckedChange} />)
@@ -887,6 +889,31 @@ describe('Switch, Chip의 켜짐 상태', () => {
 
     expect(onCheckedChange).toHaveBeenLastCalledWith(true, expect.anything())
     expect(control.getAttribute('aria-checked')).toBe('true')
+  })
+
+  it('Checkbox를 누르면 켜짐 값을 전달하고 켜진 동안만 체크 표시를 그린다', async () => {
+    const onCheckedChange = vi.fn<(checked: boolean) => void>()
+    await render(<Checkbox aria-label="첫 번째 진의" onCheckedChange={onCheckedChange} />)
+    const control = getByRole('checkbox', '첫 번째 진의')
+    expect(control.getAttribute('aria-checked')).toBe('false')
+    expect(control.querySelector('svg')).toBeNull()
+
+    await click(control)
+
+    expect(onCheckedChange).toHaveBeenLastCalledWith(true, expect.anything())
+    expect(control.getAttribute('aria-checked')).toBe('true')
+    expect(control.querySelector('svg')).not.toBeNull()
+  })
+
+  it('비활성 Checkbox는 눌러도 켜지지 않는다', async () => {
+    const onCheckedChange = vi.fn<(checked: boolean) => void>()
+    await render(<Checkbox aria-label="첫 번째 진의" disabled onCheckedChange={onCheckedChange} />)
+    const control = getByRole('checkbox', '첫 번째 진의')
+
+    await click(control)
+
+    expect(onCheckedChange).not.toHaveBeenCalled()
+    expect(control.getAttribute('aria-checked')).toBe('false')
   })
 
   it('Chip은 누를 때마다 aria-pressed를 바꾼다', async () => {

@@ -23373,6 +23373,173 @@
       }
     ]
   },
+  "oathUpgrades": {
+    "maxLevel": 9,
+    "steps": [
+      {
+        "step": 1,
+        "name": "<묵언의 진의> - 첫 번째 진의",
+        "options": [
+          {
+            "option": "강인한 통찰",
+            "kind": "Damage"
+          },
+          {
+            "option": "고요한 호흡",
+            "kind": "Cooltime"
+          },
+          {
+            "option": "깨어난 서약",
+            "kind": "Oathpoint"
+          }
+        ]
+      },
+      {
+        "step": 2,
+        "name": "<묵언의 진의> - 두 번째 진의",
+        "options": [
+          {
+            "option": "포용의 권능",
+            "kind": "Damage"
+          },
+          {
+            "option": "자애의 마음",
+            "kind": "Cooltime"
+          },
+          {
+            "option": "자비의 맹세",
+            "kind": "Oathpoint"
+          }
+        ]
+      },
+      {
+        "step": 3,
+        "name": "<묵언의 진의> - 세 번째 진의",
+        "options": [
+          {
+            "option": "심연의 고동",
+            "kind": "Damage"
+          },
+          {
+            "option": "내면의 조율",
+            "kind": "Cooltime"
+          },
+          {
+            "option": "영혼의 계약",
+            "kind": "Oathpoint"
+          }
+        ]
+      },
+      {
+        "step": 4,
+        "name": "<묵언의 진의> - 네 번째 진의",
+        "options": [
+          {
+            "option": "신념의 대가",
+            "kind": "Damage"
+          },
+          {
+            "option": "경계의 인내",
+            "kind": "Cooltime"
+          },
+          {
+            "option": "구원의 언약",
+            "kind": "Oathpoint"
+          }
+        ]
+      },
+      {
+        "step": 5,
+        "name": "<묵언의 진의> - 다섯 번째 진의",
+        "options": [
+          {
+            "option": "이어진 걸음",
+            "kind": "Speed"
+          },
+          {
+            "option": "숭고한 동행",
+            "kind": "SkillRange"
+          },
+          {
+            "option": "결의의 공명",
+            "kind": "DamageReduce"
+          }
+        ]
+      },
+      {
+        "step": 6,
+        "name": "<묵언의 진의> - 여섯 번째 진의",
+        "options": [
+          {
+            "option": "영원의 궤적",
+            "kind": "Speed"
+          },
+          {
+            "option": "불변의 약속",
+            "kind": "SkillRange"
+          },
+          {
+            "option": "본질의 선언",
+            "kind": "DamageReduce"
+          }
+        ]
+      },
+      {
+        "step": 7,
+        "name": "<묵언의 진의> - 일곱 번째 진의",
+        "options": [
+          {
+            "option": "만물의 흐름",
+            "kind": "Speed"
+          },
+          {
+            "option": "바래온 구원",
+            "kind": "SkillRange"
+          },
+          {
+            "option": "자각의 파동",
+            "kind": "DamageReduce"
+          }
+        ]
+      },
+      {
+        "step": 8,
+        "name": "<묵언의 진의> - 여덟 번째 진의",
+        "options": [
+          {
+            "option": "순례자의 길",
+            "kind": "Speed"
+          },
+          {
+            "option": "맞잡은 구원",
+            "kind": "SkillRange"
+          },
+          {
+            "option": "남겨진 온기",
+            "kind": "DamageReduce"
+          }
+        ]
+      },
+      {
+        "step": 9,
+        "name": "<묵언의 진의> - 아홉 번째 진의",
+        "options": [
+          {
+            "option": "진리 도달",
+            "kind": "Speed"
+          },
+          {
+            "option": "완성된 의지",
+            "kind": "SkillRange"
+          },
+          {
+            "option": "만개하는 빛",
+            "kind": "DamageReduce"
+          }
+        ]
+      }
+    ]
+  },
   "weaponTune": {
     "Beast-Saw": [0, 1, 2, 3],
     "Brutal-Saw": [0, 1, 2, 3],

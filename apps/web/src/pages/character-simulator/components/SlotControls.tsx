@@ -348,9 +348,9 @@ export function EnchantControl({
   )
 }
 
-export type SetOption = Readonly<{ id: string; name: string }>
+export type TextOption = Readonly<{ id: string; name: string }>
 
-export function SetControl({
+export function TextControl({
   label,
   value,
   options,
@@ -358,7 +358,7 @@ export function SetControl({
 }: {
   label: string
   value: string
-  options: readonly SetOption[]
+  options: readonly TextOption[]
   onChange: (id: string) => void
 }): React.JSX.Element {
   function nameOf(id: string): string {

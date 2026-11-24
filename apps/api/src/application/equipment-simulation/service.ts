@@ -106,7 +106,8 @@ export class EquipmentSimulationService {
       oathTunes: editsOath,
       equipmentSet: request.equipmentSet !== null && itemEdits.length > 0,
       weaponTune: weaponEdit !== null,
-      oathItems: oathEdit.changesItems
+      oathItems: oathEdit.changesItems,
+      oathUpgrade: oathEdit.upgrade !== null
     }
     const calculator = cardScoreCalculator(role)
     const input = toScoreEngineInput(payloads, items)
