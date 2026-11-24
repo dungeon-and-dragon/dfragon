@@ -7,7 +7,7 @@ import { splitTimelineRanges } from '@dfragon/server-core/domain/character-timel
 
 const MINUTE_MS = 60_000
 // 운영 배포 뒤 실제 요청 수와 시간을 재 다시 정할 시작값이다(#1324).
-const SEASON_BACKFILL_CONCURRENCY = 2
+export const SEASON_BACKFILL_CONCURRENCY = 2
 
 export type SeasonBackfillQueue = JobQueue<SeasonBackfillTarget, SeasonBackfillJob>
 
