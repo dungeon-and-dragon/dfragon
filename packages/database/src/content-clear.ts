@@ -384,7 +384,7 @@ export type ClearWeekSelection = {
   weekStart: Date
 }
 
-// 수집은 클리어 기록을 다 저장한 뒤 모집단을 저장하므로, 모집단의 마지막 수집 시각이 바뀌면 집계가 바뀐 것이다.
+// 수집은 클리어 기록을 다 저장한 뒤 분모를 저장하므로, 분모의 마지막 수집 시각이 바뀌면 집계가 바뀐 것이다.
 export async function readContentClearCollectedAt(client: DatabaseClient): Promise<Date | null> {
   const [row] = await client.$queryRaw<{ collectedAt: Date | null }[]>`
     SELECT max(collected_at) AS "collectedAt" FROM content_clear_populations`

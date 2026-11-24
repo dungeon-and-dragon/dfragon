@@ -80,7 +80,7 @@ function toClearJobKey(job: { jobId: string | null; jobGrowId: string | null }):
   return JSON.stringify([job.jobId, job.jobGrowId])
 }
 
-// 모집단을 저장한 뒤 전직을 바꾼 캐릭터처럼 모집단에 없는 전직의 클리어도 모집단 0으로 넣어, 클리어 수의 합이 그 주 클리어 수와 같게 한다.
+// 분모를 저장한 뒤 전직을 바꾼 캐릭터처럼 분모에 없는 전직의 클리어도 캐릭터 수 0으로 넣어, 클리어 수의 합이 그 주 클리어 수와 같게 한다.
 export function toClearJobs(
   population: StoredClearPopulation,
   samples: readonly ClearJobFameSample[],
