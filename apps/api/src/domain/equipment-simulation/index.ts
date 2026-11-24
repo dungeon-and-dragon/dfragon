@@ -25,4 +25,4 @@ export {
   simulationInputOf,
   slotItemIds
 } from './slot-items.js'
-export { editWeaponTune, withWeaponTune } from './weapon.js'
+export { editWeapon, weaponItemIds, withWeapon } from './weapon.js'

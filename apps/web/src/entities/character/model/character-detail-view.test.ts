@@ -123,6 +123,7 @@ describe('캐릭터 상세 화면 응답', () => {
       itemId: null,
       itemName: null,
       itemRarity: null,
+      itemTypeDetail: null,
       setItemId: null,
       itemAvailableLevel: null,
       reinforce: null,
@@ -130,7 +131,8 @@ describe('캐릭터 상세 화면 응답', () => {
       refine: null,
       tune: [],
       enchant: null,
-      potency: null
+      potency: null,
+      weaponRelease: null
     })
     expect(detail.avatar.map((avatar) => avatar.slotId)).not.toContain('AURORA')
   })

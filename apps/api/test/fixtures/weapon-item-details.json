@@ -1,0 +1,306 @@
+{
+  "9f0dde7a9c78384a9c5a80ff41f98e68": {
+    "itemId": "9f0dde7a9c78384a9c5a80ff41f98e68",
+    "itemName": "태초의 별 - 대검",
+    "itemRarity": "태초",
+    "itemTypeId": "4ffb6f14b86f5c818a925bf58022686e",
+    "itemType": "무기",
+    "itemTypeDetailId": "a2602f93bc8ef458d16171e8284fe15a",
+    "itemTypeDetail": "대검",
+    "itemAvailableLevel": 115,
+    "fame": 11500,
+    "setItemId": null,
+    "setItemName": null,
+    "itemExplain": "",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 11500
+      },
+      {
+        "name": "물리 공격력",
+        "value": 1757
+      },
+      {
+        "name": "마법 공격력",
+        "value": 1318
+      },
+      {
+        "name": "독립 공격력",
+        "value": 1610
+      },
+      {
+        "name": "힘",
+        "value": 96
+      },
+      {
+        "name": "공격속도",
+        "value": "-8%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "21981%"
+      }
+    ]
+  },
+  "f4ebda346ccd4281a9c37de9cb8936a5": {
+    "itemId": "f4ebda346ccd4281a9c37de9cb8936a5",
+    "itemName": "특형 - 호위무신의 운검",
+    "itemRarity": "태초",
+    "itemTypeId": "4ffb6f14b86f5c818a925bf58022686e",
+    "itemType": "무기",
+    "itemTypeDetailId": "a2602f93bc8ef458d16171e8284fe15a",
+    "itemTypeDetail": "대검",
+    "itemAvailableLevel": 115,
+    "fame": 11500,
+    "setItemId": null,
+    "setItemName": null,
+    "itemExplain": "[호위무신의 혼]\n장착 시 호위무신의 혼이 착용자를 보호합니다.\n- 물리/마법 피해 감소 +30%\n\n[철벽방어] [장비 발동 옵션]\n30초 동안 호위무신이 착용자에게 가해지는 피해를 막아줍니다.\n- HP MAX 30% 수치의 보호막 부여\n- 쿨타임 60초",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 11500
+      },
+      {
+        "name": "물리 공격력",
+        "value": 1757
+      },
+      {
+        "name": "마법 공격력",
+        "value": 1757
+      },
+      {
+        "name": "독립 공격력",
+        "value": 1757
+      },
+      {
+        "name": "힘",
+        "value": 167
+      },
+      {
+        "name": "지능",
+        "value": 167
+      },
+      {
+        "name": "적중률",
+        "value": "20%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "21981%"
+      }
+    ]
+  },
+  "d0bd701ea42d1e6ee03ae7e4c77faa09": {
+    "itemId": "d0bd701ea42d1e6ee03ae7e4c77faa09",
+    "itemName": "검은 질병의 특형 - 호위무신의 운검",
+    "itemRarity": "태초",
+    "itemTypeId": "4ffb6f14b86f5c818a925bf58022686e",
+    "itemType": "무기",
+    "itemTypeDetailId": "a2602f93bc8ef458d16171e8284fe15a",
+    "itemTypeDetail": "대검",
+    "itemAvailableLevel": 115,
+    "fame": 14500,
+    "setItemId": null,
+    "setItemName": null,
+    "itemExplain": "[호위무신의 혼]\n장착 시 호위무신의 혼이 착용자를 보호합니다.\n- 물리/마법 피해 감소 +30%\n\n[철벽방어] [장비 발동 옵션]\n30초 동안 호위무신이 착용자에게 가해지는 피해를 막아줍니다.\n- HP MAX 30% 수치의 보호막 부여\n- 쿨타임 60초",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 14500
+      },
+      {
+        "name": "물리 공격력",
+        "value": 1757
+      },
+      {
+        "name": "마법 공격력",
+        "value": 1757
+      },
+      {
+        "name": "독립 공격력",
+        "value": 1757
+      },
+      {
+        "name": "힘",
+        "value": 167
+      },
+      {
+        "name": "지능",
+        "value": 167
+      },
+      {
+        "name": "적중률",
+        "value": "20%"
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "21981%"
+      }
+    ]
+  },
+  "f3302674470356cbaeaf31e46b7067ff": {
+    "itemId": "f3302674470356cbaeaf31e46b7067ff",
+    "itemName": "구속하는 공작의 차원도",
+    "itemRarity": "태초",
+    "itemTypeId": "4ffb6f14b86f5c818a925bf58022686e",
+    "itemType": "무기",
+    "itemTypeDetailId": "bd9c897afd0825ad854f0a81fc8d42ae",
+    "itemTypeDetail": "광검",
+    "itemAvailableLevel": 115,
+    "fame": 12700,
+    "setItemId": null,
+    "setItemName": null,
+    "itemExplain": "[차원참] [장비 발동 옵션]\n세계와 세계를 끊어내는 것, 왜곡과 절망\n- 스킬을 캔슬하고 시전 가능 (각성기 제외)\n- 차원참 피해량 : 800,450%\n- 쿨타임 60초",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 12700
+      },
+      {
+        "name": "물리 공격력",
+        "value": 1757
+      },
+      {
+        "name": "마법 공격력",
+        "value": 1757
+      },
+      {
+        "name": "독립 공격력",
+        "value": 1757
+      },
+      {
+        "name": "힘",
+        "value": 167
+      },
+      {
+        "name": "지능",
+        "value": 167
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "21981%"
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "427.7%"
+      }
+    ]
+  },
+  "1e8147c4dd8b4f726d772fdda7f85417": {
+    "itemId": "1e8147c4dd8b4f726d772fdda7f85417",
+    "itemName": "LV.115 억압 - 구속하는 공작의 차원도의 형상",
+    "itemRarity": "태초",
+    "itemTypeId": "4ffb6f14b86f5c818a925bf58022686e",
+    "itemType": "무기",
+    "itemTypeDetailId": "bd9c897afd0825ad854f0a81fc8d42ae",
+    "itemTypeDetail": "광검",
+    "itemAvailableLevel": 115,
+    "fame": 12700,
+    "setItemId": null,
+    "setItemName": null,
+    "itemExplain": "[차원참] [장비 발동 옵션]\n세계와 세계를 끊어내는 것, 왜곡과 절망\n- 스킬을 캔슬하고 시전 가능 (각성기 제외)\n- 차원참 피해량 : 800,450%\n- 쿨타임 60초",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 12700
+      },
+      {
+        "name": "물리 공격력",
+        "value": 1757
+      },
+      {
+        "name": "마법 공격력",
+        "value": 1757
+      },
+      {
+        "name": "독립 공격력",
+        "value": 1757
+      },
+      {
+        "name": "힘",
+        "value": 167
+      },
+      {
+        "name": "지능",
+        "value": 167
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "21981%"
+      },
+      {
+        "name": "최종 데미지 증가",
+        "value": "427.7%"
+      }
+    ]
+  },
+  "74bfcf0bd8b6998fc1e5a896d5a90fd7": {
+    "itemId": "74bfcf0bd8b6998fc1e5a896d5a90fd7",
+    "itemName": "멸룡검 발뭉",
+    "itemRarity": "태초",
+    "itemTypeId": "4ffb6f14b86f5c818a925bf58022686e",
+    "itemType": "무기",
+    "itemTypeDetailId": "bd9c897afd0825ad854f0a81fc8d42ae",
+    "itemTypeDetail": "광검",
+    "itemAvailableLevel": 115,
+    "fame": 11500,
+    "setItemId": null,
+    "setItemName": null,
+    "itemExplain": "[용을 베는 자]\n스킬 퀵슬롯의 빈 슬롯이 3개 이상일 때 검은 용의 힘 발동\n- 슈퍼아머 적용\n- 물리/마법 피해 감소 +10%\n- 모든 속도 +20%",
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 11500
+      },
+      {
+        "name": "물리 공격력",
+        "value": 1757
+      },
+      {
+        "name": "마법 공격력",
+        "value": 1757
+      },
+      {
+        "name": "독립 공격력",
+        "value": 1757
+      },
+      {
+        "name": "힘",
+        "value": 167
+      },
+      {
+        "name": "지능",
+        "value": 167
+      },
+      {
+        "name": "내구도",
+        "value": 48
+      },
+      {
+        "name": "공격력 증가",
+        "value": "21981%"
+      }
+    ]
+  }
+}

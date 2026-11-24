@@ -9314,5 +9314,4726 @@
         }
       ]
     }
+  ],
+  "weapons": [
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "유일무이한 건틀릿",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "61d9029189caaf462021614046d88c61",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "미완성 플래닛 건틀릿",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ebb4b4448009b2109e04d5aaf9ff85d1",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "전설 속의 전승 - 건틀릿",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "5b4e7b99782b0db7c073e43c6fbab38d",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "미완성 셀레스티얼 건틀릿",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "8ff6f038f74ceb3c09903571f7503ee8",
+          "count": 148
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "서사시의 영웅담 - 건틀릿",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "40dd298d737531be88e9f8f583ebbc40",
+          "count": 23
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "미완성 코스믹 건틀릿",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "23c3a32b8c83337313f03ac82881e04f",
+          "count": 8057
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "검은 질병의 미완성 코스믹 건틀릿",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "8a52d768165980eb3398a6b103cc7a9d",
+          "count": 10958
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "천지를 뒤흔드는 공포",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "df0c0f3e9e5c83502128c6f6b0fc00d8",
+          "count": 3505
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "억압 - 천지를 뒤흔드는 공포",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3551749a761618a1b2db3247b64df33a",
+          "count": 223
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "건틀릿",
+      "itemName": "태초의 별 - 건틀릿",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4d082793556fe870683d6a2690d2d345",
+          "count": 369
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "유일무이한 광검",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "f37efc276a09fb549976a6ef819bd9e1",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "대룡검 발뭉",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2e709a666847398dff5c364688866a86",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "전설 속의 전승 - 광검",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "039cb38681a055f663646023ad8804f0",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "살룡검 발뭉",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "4995c44e88946e12811458899134f804",
+          "count": 67
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "서사시의 영웅담 - 광검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ecd263f77d6dc442bc57c89d585be70b",
+          "count": 33
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "멸룡검 발뭉",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "74bfcf0bd8b6998fc1e5a896d5a90fd7",
+          "count": 10892
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "검은 질병의 멸룡검 발뭉",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4f7c8199cd7a85492e985ebb5daa2da8",
+          "count": 20101
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "구속하는 공작의 차원도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f3302674470356cbaeaf31e46b7067ff",
+          "count": 1857
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "억압 - 구속하는 공작의 차원도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1e8147c4dd8b4f726d772fdda7f85417",
+          "count": 123
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "itemName": "태초의 별 - 광검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "40a67f2b93ea7e8014180e47b672ba58",
+          "count": 1976
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "유일무이한 광창",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "e4bf5c9859c5369add07fdd4300c7dce",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "성장군 : 유성광",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ad465c92c5ef247e407617f47eeb4afa",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "전설 속의 전승 - 광창",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "74c065a6c0b7d69e077765ac811cbfa4",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "서사시의 영웅담 - 광창",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "99806a99b87a8aea621bfe177200f254",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "성장군 : 유성우",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "aa1499de8aa13db64d969473b1c23a8e",
+          "count": 52
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "성장군 : 유성계",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d3760db625f3bd4bcde3ac5904fecac5",
+          "count": 1761
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "검은 질병의 성장군 : 유성계",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "eb2d970c237c5c7a58e7045197c13aed",
+          "count": 1420
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "구속의 대공 : 영원불멸의 추종자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "57195882c49cb21d623b9e217c92926f",
+          "count": 376
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "억압 - 구속의 대공 : 영원불멸의 추종자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "22e52815e6a18b4d69b8488f33380c5d",
+          "count": 51
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "itemName": "태초의 별 - 광창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c20fca42d5353ca84db49efc212df1bc",
+          "count": 498
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "유일무이한 권투글러브",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "fc859dc2715575f2a65d900aa80b2655",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "더체스 벳즈",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "069d3a12378df401969fd3b87273c543",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "전설 속의 전승 - 권투글러브",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b3ff6174a20be13ce9f5cbffccc8e78c",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "서사시의 영웅담 - 권투글러브",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "17b38e1d7d043b852625c2b7b839a28f",
+          "count": 35
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "카운테스 벳즈",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "78266818790d17675c2694c8b62cfa7b",
+          "count": 40
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "엠프레스 벳즈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "bbc3a1e0b819042979df672995a84d04",
+          "count": 4343
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "검은 질병의 엠프레스 벳즈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "eebeaa5d76700a5319dc7550407b70c3",
+          "count": 8002
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "흉터각인",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "89022319bcd42c5806905476948ba555",
+          "count": 586
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "억압 - 흉터각인",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "0a3490331cc016e419b24e3ccf00901d",
+          "count": 41
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "itemName": "태초의 별 - 권투글러브",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "752fe58eb2610840857c776b3a4db55e",
+          "count": 1183
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "유일무이한 낫",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "175a5bbb8924e426ac599d8b7bcf1d6b",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "소울 스토커",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "7f64ec29540edbaf17fcc6c75f30ea09",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "전설 속의 전승 - 낫",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "508bbec61115ad4ef437fb2a28a2cc2b",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "서사시의 영웅담 - 낫",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "b2a35f97ca9d078db32c42eb0bb7d572",
+          "count": 32
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "소울 헌터",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "d523df91971f8fd5f2252a93053d3d26",
+          "count": 165
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "소울 프레데터",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "413aebce4d4cc7c7346aa6e32e27a6dd",
+          "count": 7656
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "검은 질병의 소울 프레데터",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4594a10b84a066d7a78477f9ddd4f142",
+          "count": 9945
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "재앙의 송곳니",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "89c42c1d02e6749244ce518e9b34e1c7",
+          "count": 2274
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "억압 - 재앙의 송곳니",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "6aeca595f1b6f1c33e28f8d51c3f5b89",
+          "count": 322
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "itemName": "태초의 별 - 낫",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9e08f41c1efa53c838e51eb9f4e4e2a9",
+          "count": 748
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "유일무이한 너클",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "c607f6509d5e9b7182510b0340571c54",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "넨 스텔라",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "0f7270c72c010c5c9d8020b07f271526",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "전설 속의 전승 - 너클",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "fab1a69100ac8fe8b4c5996ebdfcc798",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "넨 비아렉티아",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "b5d390e43b3d3b2e56eb06155240c2d3",
+          "count": 137
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "서사시의 영웅담 - 너클",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "91b6146daf176282f0209a6d18967fdb",
+          "count": 53
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "넨 아스트론",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "52e014d425c5900fb2691c91aa8891f5",
+          "count": 6266
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "검은 질병의 넨 아스트론",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "89a1262d7c38df9e4e1f2ab836842790",
+          "count": 5079
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "종언을 끊어내는 주먹",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1d7ea4b65709a22425cd751e9607486b",
+          "count": 1586
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "억압 - 종언을 끊어내는 주먹",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7f4113c71514d87875fa89bcd4fb7d4c",
+          "count": 173
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "itemName": "태초의 별 - 너클",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "46902219ed312eea382fd87dfda1dcac",
+          "count": 3178
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "유일무이한 단검",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "3fed35b28ff0cfce2e5cac14ec8702c6",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "여제의 화려한 은장도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "45de752180af8164ea3c715cb5aabd31",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "전설 속의 전승 - 단검",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "3d69c171faf727a91bbad784e59c9e0e",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "서사시의 영웅담 - 단검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1cd71d7cf85029431c07d898d5be4607",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "여제의 찬란한 은장도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "34cc18cd9b91c305f2c90bae5ff22003",
+          "count": 52
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "여제의 영롱한 은장도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1bc8070a97e40822a8acf944587172ac",
+          "count": 3238
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "검은 질병의 여제의 영롱한 은장도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "288b1985155e3b378e45512b225fe902",
+          "count": 4956
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "원한 서린 재앙의 어금니",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "83fb473c3c241fdb0fef9ee517992bdb",
+          "count": 369
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "억압 - 원한 서린 재앙의 어금니",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d21d29c6bb4b095cad5688ad66c017dc",
+          "count": 67
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "itemName": "태초의 별 - 단검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "2470861b2f05d1fb5e917f148ba4fc12",
+          "count": 364
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "유일무이한 대검",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "9130e71576b60ef9c620d4b5f8825755",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "전설 속의 전승 - 대검",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "8215605516a956285743aff73aeb28ca",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "제1형 - 공식, 필중의 운검",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d978ce202804d10c1970bab4b46accd8",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "서사시의 영웅담 - 대검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ea202d77351094e11332f2aa8ece0d48",
+          "count": 41
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "제2형 - 수식, 방어의 운검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "49d73ddb4974cc8ee23c0da2e253cf2a",
+          "count": 197
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "특형 - 호위무신의 운검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f4ebda346ccd4281a9c37de9cb8936a5",
+          "count": 10186
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "검은 질병의 특형 - 호위무신의 운검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d0bd701ea42d1e6ee03ae7e4c77faa09",
+          "count": 7531
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "찢어지는 비명의 메아리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "91334afd67ca965ff4ed8dab5c4b2352",
+          "count": 7381
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "억압 - 찢어지는 비명의 메아리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "79c52fac4c9b4bb5d70d2c5880454060",
+          "count": 553
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "itemName": "태초의 별 - 대검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9f0dde7a9c78384a9c5a80ff41f98e68",
+          "count": 1252
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "유일무이한 도",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "f9e9cdcf4a1295cff2a1b088f75b6aaf",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "범작 금인도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b503ebf81a6011bfa6ede1467cd84bf0",
+          "count": 43
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "전설 속의 전승 - 도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "0282d9787ec3c3f57d840b011b6dc6bf",
+          "count": 40
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "명작 금인예도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "a1ee6089f23d9612a63a14e27652263c",
+          "count": 393
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "서사시의 영웅담 - 도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "57538c2b9b397b70232979076714f28e",
+          "count": 215
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "역작 금인필살도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "88d17cd5fc3fb1e5c474d6780035a492",
+          "count": 25133
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "검은 질병의 역작 금인필살도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "dd29abc71fa94f6cc6cc500c69283eb6",
+          "count": 30019
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "요도 : 날뛰는 흑혈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "cd49b55e74254b96f8f6ee8dcc5e60e7",
+          "count": 13744
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "억압 - 요도 : 날뛰는 흑혈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "dff71f52e7c60da00f33edb582413638",
+          "count": 641
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "itemName": "태초의 별 - 도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4e1cca3ced7246d44e36f0fe455f9d9c",
+          "count": 8212
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "유일무이한 둔기",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "0679ab3d6b8b103d87b9911df88e5d7c",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "양얼의 나뭇가지 : 강",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b83b37ccc8f1f13b442431b2c4473db0",
+          "count": 46
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "전설 속의 전승 - 둔기",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f69fc6fc793f98477851056c6b5e5920",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "서사시의 영웅담 - 둔기",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "11d071ef4ee1f90868e8fa6fe2f2112f",
+          "count": 45
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "양얼의 나뭇가지 : 극",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "e6581abfc6fcf50c27a2e6678f8c6411",
+          "count": 377
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "양얼의 나뭇가지 : 초",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "53569c0a2863a602cf130d6abbe64e0b",
+          "count": 12786
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "검은 질병의 양얼의 나뭇가지 : 초",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "89207ab0258fd50685e94d13bc892dab",
+          "count": 9809
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "구속된 공작의 아귀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "b6df3ddb64b6ab530c9583b8461790ae",
+          "count": 3920
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "억압 - 구속된 공작의 아귀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1beea18b7b0d7edbd5d6f41265207c73",
+          "count": 459
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "itemName": "태초의 별 - 둔기",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "8888dd81dfabf5f1dddcb4fa982aa410",
+          "count": 1368
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "유일무이한 로드",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "145fbe4ebeaf51878ce507bc177d1189",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "양치기의 첫번째 거짓말",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "c9024bc63de93337d3f7541203e2f3ed",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "전설 속의 전승 - 로드",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "1c8bf025e6dde1d03a54242c2662d102",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "서사시의 영웅담 - 로드",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "8d5ae21e09e1596f95613a0d6cddc56e",
+          "count": 51
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "양치기의 두번째 거짓말",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "576b16ece952dfee270e3ff9f87def26",
+          "count": 154
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "양치기의 마지막 진실",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f46fe4c07fda3827871b6bb8d52a28b4",
+          "count": 6070
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "검은 질병의 양치기의 마지막 진실",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9100895b8156a3a2aa6848e48cb1fa4b",
+          "count": 6189
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "아우게이오우 : 이름 잃은 자의 피리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a579ba31697a8926e0f70e8299308b75",
+          "count": 1206
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "억압 - 아우게이오우 : 이름 잃은 자의 피리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c400b1b06d823de30763738c3c9b80f2",
+          "count": 192
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "itemName": "태초의 별 - 로드",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c3e60ef4410a4d5f7e5fb2426894613b",
+          "count": 1065
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "유일무이한 리볼버",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "16c6fd9179b203587d723d2626f8ed5e",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "레인저의 길",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "7d3e5bd6566945826198852fd5d69cdb",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "전설 속의 전승 - 리볼버",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "5855e80462cafde1fb00ca2b51465865",
+          "count": 45
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "레인저의 숙명",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "809e878d07bb9fc3cbaf88941eb0bd82",
+          "count": 203
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "서사시의 영웅담 - 리볼버",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "f54e6a52c9066cd20c9023046087a2d0",
+          "count": 152
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "노블레스 오브 레인저",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d4f64370ea0e4436a988d8935fbba365",
+          "count": 15651
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "검은 질병의 노블레스 오브 레인저",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e98a9b76caeba83d3d8f3341a15323d8",
+          "count": 21526
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "오염된 피의 쾌",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "874ba46dadbc0bdd3a346ce27bd46585",
+          "count": 5225
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "억압 - 오염된 피의 쾌",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e5f44bc789463ad94f781eaab1660804",
+          "count": 337
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "itemName": "태초의 별 - 리볼버",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "31b3b9cee22a3ffea2128a481dbcf8ca",
+          "count": 5301
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "유일무이한 머스켓",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "1437c6bbde5e841d035daa352ca3fa3a",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "리턴드 스나이퍼 오브 파이어",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f50d313c302d3bad8ce47a24256db4dd",
+          "count": 19
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "전설 속의 전승 - 머스켓",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "24a990153ec9a52c4ceab9dac89d445a",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "리턴드 스나이퍼 오브 플레임",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "5a9ea8db557c42adb10951a7a61f1720",
+          "count": 190
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "서사시의 영웅담 - 머스켓",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "01f76432ae531717912ac159df825b54",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "리턴드 스나이퍼 오브 블랙 로즈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7b406b9951564c6485d209c90d71cb4e",
+          "count": 13986
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "검은 질병의 리턴드 스나이퍼 오브 블랙 로즈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "04f662fdc3e2885c6c4d385bd6b8ba8f",
+          "count": 22514
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "베놈 앱서버",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "203edfc815ea501a254539a47fb9a9a6",
+          "count": 3311
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "억압 - 베놈 앱서버",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3a08355ea464fafec89d3f91f68dbadb",
+          "count": 318
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "itemName": "태초의 별 - 머스켓",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "97f8b96a9af284b1181985075a9066ee",
+          "count": 396
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "유일무이한 미늘창",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b5af5509b88095ea97b13e90c165267c",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "전설 속의 전승 - 미늘창",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d622369b20ff9047011d8223ec1ecf5e",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "흑룡언월도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "fa34b99590789e6dd56f6e15bc716e6a",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "改 : 흑룡언월도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "b35fc3d286baec88bf3b5ec6851a8a76",
+          "count": 44
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "서사시의 영웅담 - 미늘창",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "acddbe1308bead8e8043d3c8f887a560",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "眞 : 흑룡언월도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7ad9b001664f685f438ceae50444bf09",
+          "count": 2321
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "검은 질병의 眞 : 흑룡언월도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "b2d0aa447402ddcea06fb1e24757c8f6",
+          "count": 2752
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "위선자의 응징",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "bb8561b32ea4ea1e6ba85328cb82523b",
+          "count": 946
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "억압 - 위선자의 응징",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "630ed985d1f3fa908fdaf7a5d734bd13",
+          "count": 85
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "itemName": "태초의 별 - 미늘창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c3a655013ed6f5eee3718e0be9525d03",
+          "count": 335
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "유일무이한 배틀액스",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "a7f3e74e3d0af800ea176ff68c3c83b8",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "대지파괴자",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "25fa2c34d08fc9e3c6e0b22176185de2",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "전설 속의 전승 - 배틀액스",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "20a25045544e45076c936393c0693d06",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "서사시의 영웅담 - 배틀액스",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "6a86c6cb8875a4356547e55f3622913e",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "행성분쇄자",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "3e784022b7f73107d430c20294dd5097",
+          "count": 200
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "멸망의 근원",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3838f6fa8a6f5c44a84e101715169bb4",
+          "count": 8347
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "검은 질병의 멸망의 근원",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9f9296d4fc841a76282e80914a28737f",
+          "count": 11125
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "묘혈의 배틀액스",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "0e03244a7c817cc59522bd90be06cf36",
+          "count": 2095
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "억압 - 묘혈의 배틀액스",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "15714b939de18f17f1ef08918ee59775",
+          "count": 273
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "itemName": "태초의 별 - 배틀액스",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4a450f5c9fb64b353e7561d89aa35425",
+          "count": 710
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "유일무이한 보우건",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "ff8c5e9913fef22bb1c2000fb0ef5687",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "얼어버린 불꽃의 살",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "fdae64ec5068a2e9d1cd88df7d0c48b7",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "전설 속의 전승 - 보우건",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "fdd4c6628ceddd48d26bc96f7079a6e9",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "서사시의 영웅담 - 보우건",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "eb6ba38c4a210a7950fa8a0e334f8eed",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "타버린 얼음의 살",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "7570fbd7c6f59b4d409c20d9f02055a0",
+          "count": 160
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "얼어붙은 불꽃의 살",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3d1e831cdf674892355cca45d35541ee",
+          "count": 5224
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "검은 질병의 얼어붙은 불꽃의 살",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "22677830fb0aaedc0fffba0407cdd9b9",
+          "count": 4486
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "모독을 속삭이는 깃",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "613652f9e6913690a2af7bcd124a108b",
+          "count": 2935
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "억압 - 모독을 속삭이는 깃",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d04479324ca7899a7528b85c4142b85b",
+          "count": 262
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "itemName": "태초의 별 - 보우건",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "6dad9986be24958e4a34ac8fbdd1c17f",
+          "count": 438
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "유일무이한 봉",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "c34e7f1d90ebf4b611430ed171fe5039",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "전설 속의 전승 - 봉",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "20800e86887302060a8839d007d2abf6",
+          "count": 8
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "케세라세라 : 포츈",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "cc63102a841785caf80706f1d7077b07",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "서사시의 영웅담 - 봉",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ee3c8fb7ba44d20aae6a834d2f22e2a2",
+          "count": 39
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "카르페디엠 : 모어 해피~",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "81bd41c4c3d7ad4d39dd49bdc9538c7e",
+          "count": 196
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "하쿠나마타타 : 원더풀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "2c5f996a25418be71b288c22fa2f9193",
+          "count": 8587
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "검은 질병의 하쿠나마타타 : 원더풀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "2621a41d6e34a35324fca679d591bd0d",
+          "count": 10845
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "비정이 깃든 고목",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "184c1c48bec4d1d1acb4bb210040312d",
+          "count": 1558
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "억압 - 비정이 깃든 고목",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e42f57487cf82bcaa552c8b504eae199",
+          "count": 237
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "itemName": "태초의 별 - 봉",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3d43dc0356b4d1e805fb5d85d8b1f5a4",
+          "count": 982
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "유일무이한 빗자루",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "61a897d22d05c9d5b530962a438bac6a",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "전설 속의 전승 - 빗자루",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "72b35dffdf7d756a36b5880da0f0904b",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "칠흑의 기도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f227beed455a61916d2232d5fc1d6285",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "서사시의 영웅담 - 빗자루",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "894e3ce2fb15298feda9cac871b74ea0",
+          "count": 117
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "칠흑의 기원",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ec6b9047e4b8ac8261e01dd059cf1357",
+          "count": 111
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "칠흑의 저주",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ed9e38706cb74cd8dc22344ac0672189",
+          "count": 6031
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "검은 질병의 칠흑의 저주",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7e461c6d10b51ba6f43c5d13aa2a82a4",
+          "count": 9000
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "종언을 비트는 흑미",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "defa76c37b4300d02c1312a9130c277d",
+          "count": 1302
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "억압 - 종언을 비트는 흑미",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "eea305bbc2c12313680cc47bc31a87d8",
+          "count": 140
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "itemName": "태초의 별 - 빗자루",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f3218f22b56f9f69ff623eab33a7ba0a",
+          "count": 3138
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "유일무이한 선현궁",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "3108a1ff3c63f285d3bb281c86c4f51c",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "시크릿 솔로",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a78e6b91e0ac657996cd519f05eec668",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "전설 속의 전승 - 선현궁",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f3a801e1f9d93ced175f3f19b9253a43",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "서사시의 영웅담 - 선현궁",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "efff31038d3d96c8c2db495a68002df6",
+          "count": 93
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "시크릿 듀엣",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "4c2c36b92f60155c579d36eea9786324",
+          "count": 283
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "시크릿 콘서트",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "34c4ba7289d9d0dea8ce3880bc6f8352",
+          "count": 12525
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "검은 질병의 시크릿 콘서트",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "8a79cefa4aec25884139327f093ef696",
+          "count": 23278
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "별을 꿈꿨던 눈동자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "da48e7a57b27009cc0cc7765722edca2",
+          "count": 3070
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "억압 - 별을 꿈꿨던 눈동자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "37033cc005f2ab8c3ec42e6f971e7fdf",
+          "count": 505
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "itemName": "태초의 별 - 선현궁",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "55ef0a5c7c8bda92c0451b1c75fd971e",
+          "count": 2549
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "유일무이한 소검",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "54201d2b9992fea68e71735ff44f2be0",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "무형검 - 고수",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "192710d63f0fc1f592ed34888a2f3cac",
+          "count": 25
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "전설 속의 전승 - 소검",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "478d96bae4041585b8810baa4dcf9024",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "무형검 - 절정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ab88d42e387fe93c2382513cfd53d2c9",
+          "count": 404
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "서사시의 영웅담 - 소검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "547fc71a1976699b9edc460a1a34c3d6",
+          "count": 79
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "무형검 - 생사경",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ecc073371c23fbac58ce6a055a131ad3",
+          "count": 24505
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "검은 질병의 무형검 - 생사경",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1a15504cdb16021cab92baf1fb9d4660",
+          "count": 33785
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "끓어오르는 피의 그림자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f7e70667e1fe901bed963dff18cf2380",
+          "count": 2683
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "억압 - 끓어오르는 피의 그림자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "309bdf994245a04c3ff7763d08c5244a",
+          "count": 413
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "itemName": "태초의 별 - 소검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "eb5666ec6e70818cfa40bbfe08580877",
+          "count": 2505
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "유일무이한 소태도",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "0fee3e7658566deb0351089d1107a3a0",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "나스카 : 영혼의 속삭임",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2d3b41afe3e58a6bb49b0a9a3fddf1a8",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "전설 속의 전승 - 소태도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ed12828f120919a9cc906da503d405f7",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "나스카 : 영혼의 비명",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "d51700c5dcabc4d60342e9fce67e82f0",
+          "count": 39
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "서사시의 영웅담 - 소태도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "01ca6b499ec778f66e03d6b2dc561506",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "나스카 : 영혼의 심판",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "08e41c036b44ff5f407a874b5bfc91c1",
+          "count": 1297
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "검은 질병의 나스카 : 영혼의 심판",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9a3605be5e080fdedada13c87fe8b9c9",
+          "count": 1185
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "차원을 베는 영혼검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ccb7fcdcf23d7aeab9ca9b6d2b7593ec",
+          "count": 366
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "억압 - 차원을 베는 영혼검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a40dff57e56278da386499003bdeff9e",
+          "count": 55
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "itemName": "태초의 별 - 소태도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d4032874bc3abd65cc0abbca610c83ce",
+          "count": 381
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "유일무이한 스태프",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "6da3739e4e8a9839583342a28d6959a5",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "봉인된 지식",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "5266233710b3d745b22fefab4bb87a71",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "전설 속의 전승 - 스태프",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "1e4fe5dc2901afa95bf4a6a944843960",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "금지된 지식",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "12e79effb3069d8f54799fb26d5bf16d",
+          "count": 142
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "서사시의 영웅담 - 스태프",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "614582e824e48e16ebca1f7d3c3fe0c3",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "해방된 지식",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "66f7d8714fa7810df4ffdf36e8c97557",
+          "count": 6587
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "검은 질병의 해방된 지식",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "8b7b7b91274adfd9a4bbb07be11543f8",
+          "count": 8616
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "끝없는 분노의 지팡이",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "074e07daccc7b30a4a23ed90a12a91ff",
+          "count": 3411
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "억압 - 끝없는 분노의 지팡이",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "911844dc4ceaabec00537feb60fc3a13",
+          "count": 238
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "itemName": "태초의 별 - 스태프",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5a125390e4043b05f981e6583a7ed5ff",
+          "count": 954
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "유일무이한 십자가",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "ec663f2e33f64c870bf96def27f1892c",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "영광의 올리브 나무 십자가",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "5e67bc4c40fe7996e57ac6b0e5bf85ab",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "전설 속의 전승 - 십자가",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9eed4ab46413679eea0e512b76b824e8",
+          "count": 54
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "구원의 올리브 나무 십자가",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "cc0bd19e424a9412be3d98d30db764b8",
+          "count": 247
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "서사시의 영웅담 - 십자가",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "59f18ad6fc75be438eb3700eed7ff0e8",
+          "count": 229
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "영원한 올리브 나무 십자가",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7fbc76b53ea0b985ef63b4a53a2e8aeb",
+          "count": 9334
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "검은 질병의 영원한 올리브 나무 십자가",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c0448b6dd4cd3b27572110745580b5cf",
+          "count": 11550
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "더러운 별의 지배자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "480ee2c9741a0ca8d9f2eb0c020489c9",
+          "count": 2486
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "억압 - 더러운 별의 지배자",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "8a6f0f122e37d5dfae8bef93bcd557ba",
+          "count": 378
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "itemName": "태초의 별 - 십자가",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c3f04d7307e8310fc19bcd4fa9a7c9bf",
+          "count": 6865
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "유일무이한 쌍검",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b4b1a3fa59d940492eea003f4ebffad8",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "웨이빙 인페르노",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9ba5ea416f34cbb8cd5cc5461a36b752",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "블레이징 인페르노",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "6289c024aeaa6e3d8cc4a4f87ca4814a",
+          "count": 57
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "서사시의 영웅담 - 쌍검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "969613ec98c2b8e7e6ee1fdb2b4e9015",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "샤이닝 인페르노",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f6818a1fd4d3499b995ade1fe5ac76ed",
+          "count": 1918
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "검은 질병의 샤이닝 인페르노",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "58d4382badc00d1d39731980c139950b",
+          "count": 2344
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "흉터가 깃든 분노",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c0e99c7334f24c6ffbe562e246e80e5f",
+          "count": 487
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "억압 - 흉터가 깃든 분노",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "028ba800f0a42f089a9fe827d419bac5",
+          "count": 60
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "itemName": "태초의 별 - 쌍검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7ebe0a5d5f21c59a606096f912fd26f5",
+          "count": 94
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "유일무이한 앵커",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "085ae812cdb25e63694fbdb4187345a2",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "오케아누스 타이드",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "916f71bc9310564dc559a39dec8b1613",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "전설 속의 전승 - 앵커",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a4e12cbb2b6afe3479a3075a1b0a8291",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "서사시의 영웅담 - 앵커",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "9a3483400ba0d23cc02a806975a55910",
+          "count": 55
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "오케아누스 어비스",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "61f2a6ce5e67cc1b230739881d92502d",
+          "count": 156
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "오케아누스 프라이모디어",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e164405e11a46fe1ff683d1fdf3d302b",
+          "count": 13965
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "검은 질병의 오케아누스 프라이모디어",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "39a645ef3b151c26b0bd6f4df61f59a4",
+          "count": 14570
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "뒤틀린 신념의 칼날",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "265849a009b3b7cf0983867c3f9986f0",
+          "count": 1275
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "억압 - 뒤틀린 신념의 칼날",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c90eb43a4c8e44cae8819b9a39d02b2a",
+          "count": 243
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "itemName": "태초의 별 - 앵커",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ab24c54fb9093d133f11551014522eec",
+          "count": 2566
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "유일무이한 에테리얼 보우",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "32309b1b527e7c79cff2ce3e206e8b63",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "인요의 새벽",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d031df5ab3a48e094203184386020d19",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "전설 속의 전승 - 에테리얼 보우",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9df3a8517051126aea8ae34d97e28331",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "서사시의 영웅담 - 에테리얼 보우",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1429ab8ff808941ffe2591afe9accdeb",
+          "count": 18
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "인요의 여명",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "0b5d9d66b58032214496a00bd790d69d",
+          "count": 92
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "인요의 황혼",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ec942349c845957a8ed9c6ad1db18475",
+          "count": 4694
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "검은 질병의 인요의 황혼",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e15bef41c414a2cfbd8a4f4b85659295",
+          "count": 8752
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "구속의 단죄",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ecc3a3954004d6e8d281424a3cd59146",
+          "count": 920
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "억압 - 구속의 단죄",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "dbc85cd59ff4c3227a4d9ed5194fd56c",
+          "count": 118
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "itemName": "태초의 별 - 에테리얼 보우",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d5e759883fabd926327c534627abdf0f",
+          "count": 672
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "유일무이한 염주",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "f2a7f7a14f2e6ae28021993f35ede61e",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "전설 속의 전승 - 염주",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "8b511fc80547bb9a0162a50ca8ba868a",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "코멧 로저리",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "3783cfe464239a5812cd6d0581068d11",
+          "count": 46
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "서사시의 영웅담 - 염주",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "8d0870c5f3693aa1cc1ece385e288d17",
+          "count": 24
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "슈팅 스타 로저리",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "302c248ec874fbf41dff7e4bd805d0a7",
+          "count": 365
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "폴링 스타 로저리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4bb4e84551335ec0b22368859b502d96",
+          "count": 22771
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "검은 질병의 폴링 스타 로저리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f0cdf9f53194fce86e610ace64f00c8e",
+          "count": 31716
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "일루젼 베놈 로저리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "65da5c13fb2ff7e870a85159c6f669f8",
+          "count": 7370
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "억압 - 일루젼 베놈 로저리",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9bcaae8facee36e00477aafcf5112a44",
+          "count": 430
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "itemName": "태초의 별 - 염주",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3464b2c0951154f5276371fac2546d3d",
+          "count": 505
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "유일무이한 완드",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "ed6facaa12ca4b06f172c456e5d3948e",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "로드 오브 테러",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a342f0d2194caaca92ac6d032b1af1e0",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "전설 속의 전승 - 완드",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "363700e93ab5605626be20b8fabb3210",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "로드 오브 피어",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ec4da2b2a85fa99d9538e9ae190644c1",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "서사시의 영웅담 - 완드",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "15ff0b2753cb1f093baef27034d02884",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "로드 오브 호러",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "bbbd88f7ee3d443bca540b6c4d5ae1d9",
+          "count": 818
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "검은 질병의 로드 오브 호러",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "b14516b04ddee4efb0251cc4fc14cea8",
+          "count": 304
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "종언의 선고",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3fc04b9e515931d1b47b91884aa8a845",
+          "count": 1125
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "억압 - 종언의 선고",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f6b010113f6231cde5f6a12e0dde2983",
+          "count": 68
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "itemName": "태초의 별 - 완드",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "94a64b9f8e13406436e3b0bc022a90c6",
+          "count": 326
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "유일무이한 자동권총",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b1b427480987501e6cb9cf5d789bbb4b",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "이노베이션 오토매틱 건",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "7592eb78b5257121845ff78c6e6233a4",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "전설 속의 전승 - 자동권총",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "e5a303030632df78871cfb3a070e1b78",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "서사시의 영웅담 - 자동권총",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "5a9165c4d93cef2df8b660f6b2241912",
+          "count": 56
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "트랜스포메이션 오토매틱 건",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "2b5322493ff443c55ddeba0d3a50a517",
+          "count": 140
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "에볼루션 오토매틱 건",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f6746b73578df106b51df7907ecf05e9",
+          "count": 5171
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "검은 질병의 에볼루션 오토매틱 건",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ee6dbc86c6bc2e04fef4365bd09fe616",
+          "count": 5080
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "유혹을 부르는 선율",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d0e3e5f2e8ec9e19ca6bca641b3dc23c",
+          "count": 901
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "억압 - 유혹을 부르는 선율",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a3562f364f528c6f266b4870b44eea00",
+          "count": 211
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "itemName": "태초의 별 - 자동권총",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "31b7b7bc104551ffabf52b580a69c392",
+          "count": 1324
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "유일무이한 장궁",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "3567491d2012f57a3582e50b8e5fada9",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "미스트 트래블러",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ae3100c9f624adc1d1fde8afb8570b6b",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "전설 속의 전승 - 장궁",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "885f56aaf40281047636dfd03b1f8877",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "미스트 익스플로러",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "21de642e73e551ff2951f42fe8ecdfed",
+          "count": 133
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "서사시의 영웅담 - 장궁",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "5af3fe0ed828ab42eefc1b17ea23957e",
+          "count": 29
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "미스트 파이오니어",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "102b6df1d79cfc6e77ea2718dafec309",
+          "count": 8525
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "검은 질병의 미스트 파이오니어",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "2a5a9152570c6e269b65034ce4e7d715",
+          "count": 14484
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "검은 숨결의 히드라",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e98335c5c2e667e50b1e121eacff12d3",
+          "count": 1730
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "억압 - 검은 숨결의 히드라",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "982774dee300cf72603008133dae9ce8",
+          "count": 183
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "itemName": "태초의 별 - 장궁",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "16daa7ea0285c2b16ab3ac7b278d61a9",
+          "count": 1244
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "유일무이한 장도",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "bf6bbeb9df4e07c839f832ee25e0ee3c",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "전설 속의 전승 - 장도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d7c314d573629088a6b05c7521da810f",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "현월야천도",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "133d63a2d614743be2639a8dadeb75b6",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "반월야천도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "6ae844ca30964cad928cd824413d0e12",
+          "count": 60
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "서사시의 영웅담 - 장도",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "da07efbb1c158c325ea280c27e9c0cce",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "만월 : 월광야천도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "cee3d65f9b96bc9356a38f8fe37222bc",
+          "count": 2203
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "검은 질병의 만월 : 월광야천도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c01557510f40323bedf83b867d9f0486",
+          "count": 2388
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "불신의 단말마",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "14b7dbfb32e65bd07db511300d83b3bc",
+          "count": 231
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "억압 - 불신의 단말마",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9a417971a4f5052714d1bc1518224ee7",
+          "count": 55
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "itemName": "태초의 별 - 장도",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "3809832c25cd3c458ea9e9a4d5d9bade",
+          "count": 281
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "유일무이한 장창",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "a6b737073eea81f1da4193fb2310d29a",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "전설 속의 전승 - 장창",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b3b1641009f310dd97a5c89f5b69d61a",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "전장의 지배자",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "609fc6c654ad4d9158229ad7e8819163",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "서사시의 영웅담 - 장창",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "7635dc79d1c93a6bf4d48f6b8e8cdc7f",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "전장의 패왕",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "dd15d143a5b5fd8199b8c3f163fe6578",
+          "count": 35
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "전장의 투신",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e47c02a78bfcd7d1bde959d9e3beac50",
+          "count": 1435
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "검은 질병의 전장의 투신",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1a3b9cfb43b15722c027702de9219c61",
+          "count": 1377
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "종언을 비튼 창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "749337a83f5b77482ae94e2630de7530",
+          "count": 349
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "억압 - 종언을 비튼 창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "53a875def4d27135362286d09f07d68f",
+          "count": 53
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "itemName": "태초의 별 - 장창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d0a08ee3dbf19301445164178a363b14",
+          "count": 209
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "유일무이한 중검",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "fa78fb82f629d871d540a623b354d3e3",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "Burst-Saw",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "92fcfe1019334f64c4ace41533103dcd",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "전설 속의 전승 - 중검",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2e58b19e21f3c70e1283faafb31405fd",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "Beast-Saw",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "c549cd66e8d187b6d4aa0ca0d398d0b3",
+          "count": 53
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "서사시의 영웅담 - 중검",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "a136de441fc131a39dd80b42c19af5da",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "Brutal-Saw",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "717aaaf49d09b8e2cbb7fecf56d0f3e8",
+          "count": 1180
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "검은 질병의 Brutal-Saw",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "fe7bea0350c08d6517e3b6e48461ad19",
+          "count": 900
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "질병이 깃든 허기",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "70358d52c642ab9405d34e2548a5a5d4",
+          "count": 846
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "억압 - 질병이 깃든 허기",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "edebf708a3390beab095f1b76c60e7e8",
+          "count": 47
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "itemName": "태초의 별 - 중검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "2cb865aae36fdcb3a3231a654cb5e661",
+          "count": 324
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "유일무이한 차크라 웨펀",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "1a3d7477bce40ee410564a002c063896",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "악도의 수레바퀴",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "eb79fdfe23a07631a7551ef81bb9b1c6",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "전설 속의 전승 - 차크라 웨펀",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "5b8a493b5960c3a91bc6902d620416db",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "서사시의 영웅담 - 차크라 웨펀",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "44a180c07623e70e2671421f6e1d1836",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "선도의 수레바퀴",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "537e05d8afe7aee5eefb73603555d8fb",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "육도의 수레바퀴",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "af2e8519f6b1684f2fb41de6fdb95d18",
+          "count": 705
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "검은 질병의 육도의 수레바퀴",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "160306db6814f39d3b5fa29447cffc5b",
+          "count": 629
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "부패한 심장검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "cf40c472350b52ae7e4f510b48d261ba",
+          "count": 82
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "억압 - 부패한 심장검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "da11b64832b23bded2aadd1e41319fdc",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "itemName": "태초의 별 - 차크라 웨펀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "226ba47a53e349e6d9a8dd2a2450e32a",
+          "count": 287
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "유일무이한 창",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "3f2e25c935ec5508893bfd6fe74f33da",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "익스터미네이터",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9b08692df137d2ce78df56bd6c8d0978",
+          "count": 17
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "전설 속의 전승 - 창",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "7c0d9481be86c9e7038e2cd56226c787",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "서사시의 영웅담 - 창",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "f64e10aa93a38dd76eea2869e2f030f9",
+          "count": 23
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "프로즌 익스터미네이터",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "35afb5504849b7b3520679e905e1b1f5",
+          "count": 146
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "앱솔루트 제로",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f52dae0b1e77c293f2ebf095557dc9f0",
+          "count": 8897
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "검은 질병의 앱솔루트 제로",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "775bd8de870ce3c41000e9c92b1a5da4",
+          "count": 11957
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "흘러내리는 썩은 피",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e46ce765e856d53e73e042737eb0242d",
+          "count": 4100
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "억압 - 흘러내리는 썩은 피",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5551e0d4a5f52557e839d6123b578164",
+          "count": 308
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "itemName": "태초의 별 - 창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5908737199ed3dbb63f749109760b277",
+          "count": 713
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "유일무이한 컴파운드 보우",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "9d569bef7f356e127005ccdd64452690",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "전설 속의 전승 - 컴파운드 보우",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ab4b246e90b262d9ad5a818720c69b2b",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "페이드 윙, 이카루스",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "4be671bbf76d7a75587d0e92699b821e",
+          "count": 13
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "비비드 윙, 이카루스",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "0004494f0b26980e6615f2797d1c0164",
+          "count": 151
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "서사시의 영웅담 - 컴파운드 보우",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "ef69748ca2b794324b2085c36609321f",
+          "count": 35
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "레디언트 윙, 이카루스",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "67fc555fe01cafaf2bc20557be53a7bb",
+          "count": 9454
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "검은 질병의 레디언트 윙, 이카루스",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "52cd62816527e5e0d9b15cd6f4191209",
+          "count": 16375
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "짐조 : 독을 마시는 새",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "82cd87aaec80e2525d57e59d7485f499",
+          "count": 1611
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "억압 - 짐조 : 독을 마시는 새",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "17795a6a478061bca36d8b0544f0255c",
+          "count": 257
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "itemName": "태초의 별 - 컴파운드 보우",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "676656c9ac284f893ed8e3132e54b1a2",
+          "count": 1543
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "유일무이한 코어 블레이드",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "240f073f45370d4d5338862a654003cf",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "오버클럭 하트",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "afe10e6cb0205ac778f595ce64db6f1b",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "전설 속의 전승 - 코어 블레이드",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ee5b95de15628b73050482154245fec1",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "서사시의 영웅담 - 코어 블레이드",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "7f71df8cda4c15587ae74598d9d35d9e",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "오버클럭 코어",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "7ed00c4a085b145766bfbec049c83eb2",
+          "count": 43
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "코어 오리진",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c36d82d0beb38c2bb576d9389a0320db",
+          "count": 2433
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "검은 질병의 코어 오리진",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "045cf5942214a2e1cd1be287d4730c6d",
+          "count": 4217
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "비명의 장검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e31ee94b11406697633503171073b031",
+          "count": 408
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "억압 - 비명의 장검",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "515afabd2c476a761edad2435efba12a",
+          "count": 53
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "itemName": "태초의 별 - 코어 블레이드",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "624a32012cb42900e29310643995e54f",
+          "count": 224
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "유일무이한 크로스슈터",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b6b237e3a5a3e89e14af8bfaf042b90b",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "전설 속의 전승 - 크로스슈터",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "034b3a60d5cc0c53552d4fb6c590e521",
+          "count": 5
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "파트너 팔케",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "225857a19c51fd366854fb1a94627241",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "서사시의 영웅담 - 크로스슈터",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "e8ece625c89a1aaa2197420f203851b9",
+          "count": 20
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "프렌즈 팔케",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "6e44ccf46ff077dc0ca1a93bbe36d5d5",
+          "count": 103
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "패밀리 팔케",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a3e557056061811337aa67eb0ef4a704",
+          "count": 5488
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "검은 질병의 패밀리 팔케",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4b319c435f04c6dbd8aeaa73c1ce4ec5",
+          "count": 9584
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "만개하는 불신의 눈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5c198cb7ee5f578209580cf97658be72",
+          "count": 1018
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "억압 - 만개하는 불신의 눈",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ae89549aca28cc5ca4e162d21e535b91",
+          "count": 168
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "itemName": "태초의 별 - 크로스슈터",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "fb581fde511ae040088795d5f761a774",
+          "count": 748
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "유일무이한 클로",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "48fa7444f440093219fb6627c1577fca",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "리리스의 슬픔",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d0df1a4c6412a5c7048a59505b0c9c6b",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "전설 속의 전승 - 클로",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "39fba99e1709c8e8df6c0b807ee65e9e",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "리리스의 한",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "8762cac3b2a480212ec7803d611c796f",
+          "count": 160
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "서사시의 영웅담 - 클로",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "5acc8f73edb6962e0146ca82df4b9090",
+          "count": 23
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "리리스, 디 이블",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "8cd53eed89da72eb94486e0676a7194f",
+          "count": 6891
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "검은 질병의 리리스, 디 이블",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "083e50c4036a10f1f1ee1d09b5f3ada1",
+          "count": 6523
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "만 갈래로 뻗어가는 질병",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d75a1c1ae66e426019ed0f8b64ff5044",
+          "count": 5541
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "억압 - 만 갈래로 뻗어가는 질병",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a09886810f6bc5eb1b58074f61448928",
+          "count": 183
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "itemName": "태초의 별 - 클로",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c831c093b447b149eddb151bd1ea478c",
+          "count": 655
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "유일무이한 토템",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "6ef768bac3ac52e2b92a4588968abc1d",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "전설 속의 전승 - 토템",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "0dfd3b4f9f11fda6155313075378c5c2",
+          "count": 19
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "폭군의 친절",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "aab89cb8be84744e7d065ca0642f52e5",
+          "count": 7
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "서사시의 영웅담 - 토템",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "cb4c30e30c77704f526cc8c4e8152458",
+          "count": 59
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "폭군의 자비",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "a6af051edd9cc6091a85ecf3db29e33f",
+          "count": 218
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "폭군의 본의",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "64fb6109df6a1d62f45c2049faacf3cb",
+          "count": 11240
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "검은 질병의 폭군의 본의",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9e54a6bbd2f55c3d4e80c2fe8077cbd7",
+          "count": 10809
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "썩은 시체의 아귀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ed79977e6c642c9f10e995ffe268f532",
+          "count": 1942
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "억압 - 썩은 시체의 아귀",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e51e90d38b7574e9ee5fb68798acc9c7",
+          "count": 361
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "itemName": "태초의 별 - 토템",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "7a48ac0810e04becab04028add44863f",
+          "count": 2184
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "유일무이한 통파",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b9ab29dc7c17c2dcdf8227bfd0434755",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "마나 서플라이",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "0799b5bd0c9282f0b31db5c2cdf00987",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "전설 속의 전승 - 통파",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "83d38980ff5420ca5bd19567e0e5dd47",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "마나 액티베이션",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "0065b9809763f1e36fe45d2f87ad08c9",
+          "count": 124
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "서사시의 영웅담 - 통파",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "9342e10deea98287eb0b91a93446e0f9",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "파운더 오브 마나",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9a72569c4bff3e862ebcbf4edc9d9f99",
+          "count": 5557
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "검은 질병의 파운더 오브 마나",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "1c9625815e5ccfe26f3f9f802d26f803",
+          "count": 5704
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "육신에 스민 재앙",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "0136a822fbb7a662a86cd3c80a5d9de9",
+          "count": 2657
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "억압 - 육신에 스민 재앙",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c4b4983d03a1a81abd8b385dc4c2a5d8",
+          "count": 181
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "itemName": "태초의 별 - 통파",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "59744958524f70213168cfe1b89c9068",
+          "count": 294
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "유일무이한 투창",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "d140cd5df09e8778d16e8500a9917849",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "무영흑적살",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "01e87a922735c6bf9a54c05ba3c5e88e",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "전설 속의 전승 - 투창",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d0afb59a4c553dbb2ae92928bb07fba6",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "무영흑주살",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "81a15acc16ab7a20de5646f04a40080f",
+          "count": 66
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "서사시의 영웅담 - 투창",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "bd40cdbb95da5356dc25e110cf7d0a86",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "무영흑단살",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a326005c0d5de7e94b0cb95511ebebd2",
+          "count": 2900
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "검은 질병의 무영흑단살",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "430bd751326ac577d377b66c8ba742ae",
+          "count": 3618
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "독기로 점철된 절규",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ab25fc52167049aaa9070f8cb09d6d0d",
+          "count": 957
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "억압 - 독기로 점철된 절규",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "bce7513fd5f8a162969a5a6105fe22e5",
+          "count": 62
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "itemName": "태초의 별 - 투창",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "f385a6dbe356cb602d24a04acba88d5c",
+          "count": 364
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "유일무이한 핸드캐넌",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "144e8411e89c31e6b87bdacb1fffe27f",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "전설 속의 전승 - 핸드캐넌",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "594e0befcbf416ce834ab1ca661bd28c",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "젊은 우르반의 치기",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "1e0fd50fb48f8979440498f24d8e3c4e",
+          "count": 12
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "서사시의 영웅담 - 핸드캐넌",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "e7d23724b692903ef31b5a4917053c5a",
+          "count": 43
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "초기형 우르반 거포",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "16c619aa7cd416453d83a93378c1fb2b",
+          "count": 102
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "우르반의 걸작",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9173c5067d0e368b18bf2e87500f9ac0",
+          "count": 5574
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "검은 질병의 우르반의 걸작",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5cdc32ad3f2cc3d269944f9aee38e1ae",
+          "count": 4878
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "광포한 비명의 분노",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "152c6ddea90f6165cd8b3df09775cfca",
+          "count": 834
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "억압 - 광포한 비명의 분노",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c06143d91e1ff5f72ab94502944936cd",
+          "count": 192
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "itemName": "태초의 별 - 핸드캐넌",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "97480df0d7fe65a989143514791dd89c",
+          "count": 1086
+        }
+      ]
+    }
   ]
 }

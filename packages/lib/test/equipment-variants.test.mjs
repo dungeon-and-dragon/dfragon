@@ -20,7 +20,11 @@ import {
   oathVariantsOf,
   resolveEquipmentItems,
   switchEquipmentSet,
-  weaponMaxTuneLevelOf
+  findWeaponVariant,
+  WEAPON_RELEASE_MAX,
+  weaponItemOf,
+  weaponMaxTuneLevelOf,
+  weaponVariantsOf
 } from '@dfragon/lib/equipment-variants'
 
 // build가 생성 파일을 dist에 함께 실어야 package export로 읽힌다.
@@ -530,11 +534,124 @@ test('findOathCrystal은 광휘 결정 밖의 결정도 이름으로 조율 포�
   assert.deepEqual(findOathCrystal('희미한 안개 결정')?.tuneSetPoints, [85])
 })
 
-test('무기 조율은 이름마다 0~3단계, 0~5단계가 있고 목록에 없는 무기는 조율할 수 없다', () => {
+test('무기 조율은 이름마다 상한이 있고, 목록에 없는 무기는 조율할 수 없다', () => {
   assert.equal(weaponMaxTuneLevelOf('Beast-Saw'), 3)
-  assert.equal(weaponMaxTuneLevelOf('넨 스텔라'), 5)
   assert.equal(weaponMaxTuneLevelOf('짙은 심연의 편린 블레이드 : 살의의 파동'), 0)
   assert.equal(weaponMaxTuneLevelOf('constructor'), 0)
+})
+
+// 엔진 weaponTune은 넨 스텔라를 0~5단계로 적지만 무기 단계 목록(weapons)은 0~3단계다.
+test('115레벨 무기의 조율 상한은 무기 단계 목록을 따르고, 해방 계열과 조율을 마친 무기는 조율할 수 없다', () => {
+  assert.equal(weaponMaxTuneLevelOf('넨 스텔라'), 3)
+  assert.equal(weaponMaxTuneLevelOf('찢어지는 비명의 메아리'), 0)
+  assert.equal(weaponMaxTuneLevelOf('검은 질병의 특형 - 호위무신의 운검'), 0)
+})
+
+const GREATSWORD = {
+  unique: '9130e71576b60ef9c620d4b5f8825755',
+  legendary: 'd978ce202804d10c1970bab4b46accd8',
+  legendaryStar: '8215605516a956285743aff73aeb28ca',
+  epic: '49d73ddb4974cc8ee23c0da2e253cf2a',
+  epicStar: 'ea202d77351094e11332f2aa8ece0d48',
+  primeval: 'f4ebda346ccd4281a9c37de9cb8936a5',
+  tuned: 'd0bd701ea42d1e6ee03ae7e4c77faa09',
+  release: '91334afd67ca965ff4ed8dab5c4b2352',
+  releasePending: '79c52fac4c9b4bb5d70d2c5880454060',
+  primevalStar: '9f0dde7a9c78384a9c5a80ff41f98e68'
+}
+
+function weaponVariantOf(itemTypeDetail, itemId) {
+  const found = weaponVariantsOf(itemTypeDetail).find(({ id }) => id === itemId)
+
+  assert.ok(found, `${itemTypeDetail} ${itemId}`)
+
+  return found
+}
+
+test('무기 선택지는 종류마다 엔진 목록 순서로 두고, 조율을 마친 아이템은 태초 기본 바로 뒤에 둔다', () => {
+  const variants = weaponVariantsOf('대검').map(({ rarity, line, tuned, maxTuneLevel, item }) => [
+    rarity,
+    line,
+    tuned,
+    maxTuneLevel,
+    item.itemName
+  ])
+
+  assert.deepEqual(variants, [
+    ['유니크', null, false, 3, '유일무이한 대검'],
+    ['레전더리', '기본', false, 3, '제1형 - 공식, 필중의 운검'],
+    ['레전더리', '태초의 별', false, 3, '전설 속의 전승 - 대검'],
+    ['에픽', '기본', false, 3, '제2형 - 수식, 방어의 운검'],
+    ['에픽', '태초의 별', false, 3, '서사시의 영웅담 - 대검'],
+    ['태초', '기본', false, 3, '특형 - 호위무신의 운검'],
+    ['태초', '기본', true, 0, '검은 질병의 특형 - 호위무신의 운검'],
+    ['태초', '해방', false, 0, '찢어지는 비명의 메아리'],
+    ['태초', '태초의 별', false, 3, '태초의 별 - 대검']
+  ])
+  assert.deepEqual(
+    weaponVariantsOf('대검').map(({ id }) => id),
+    Object.values(GREATSWORD).filter((itemId) => itemId !== GREATSWORD.releasePending)
+  )
+})
+
+test('itemId를 찾지 못한 "전설 속의 전승 - 쌍검"은 쌍검 선택지에서 빠진다', () => {
+  const dualSwordNames = weaponVariantsOf('쌍검').map(({ item }) => item.itemName)
+
+  assert.equal(table.weapons.length, 43)
+  assert.equal(dualSwordNames.length, 8)
+  assert.equal(dualSwordNames.includes('전설 속의 전승 - 쌍검'), false)
+})
+
+test('해방 계열 선택지는 해방 아이템을 대표로 두고 "억압 - " 아이템을 함께 가진다', () => {
+  const release = weaponVariantOf('대검', GREATSWORD.release)
+
+  assert.deepEqual(release.item, {
+    itemId: GREATSWORD.release,
+    itemName: '찢어지는 비명의 메아리',
+    itemRarity: '태초'
+  })
+  assert.deepEqual(release.releasePending, {
+    itemId: GREATSWORD.releasePending,
+    itemName: '억압 - 찢어지는 비명의 메아리',
+    itemRarity: '태초'
+  })
+  assert.equal(weaponVariantOf('대검', GREATSWORD.primeval).releasePending, undefined)
+})
+
+test('findWeaponVariant는 무기 종류와 선택지를 찾고 "억압 - " 아이템은 해방 선택지로 찾는다', () => {
+  const release = weaponVariantOf('대검', GREATSWORD.release)
+  const tuned = weaponVariantOf('대검', GREATSWORD.tuned)
+
+  assert.deepEqual(findWeaponVariant(GREATSWORD.release), {
+    itemTypeDetail: '대검',
+    variant: release
+  })
+  assert.deepEqual(findWeaponVariant(GREATSWORD.releasePending), {
+    itemTypeDetail: '대검',
+    variant: release
+  })
+  assert.deepEqual(findWeaponVariant(GREATSWORD.tuned), { itemTypeDetail: '대검', variant: tuned })
+  assert.equal(findWeaponVariant(SHADOW_SET), null)
+  assert.deepEqual(weaponVariantsOf('없는 종류'), [])
+})
+
+test('관측 자료의 무기 itemId는 모두 선택지로 찾는다', () => {
+  const missing = observed.weapons.flatMap(({ itemIds }) =>
+    itemIds.map(({ itemId }) => itemId).filter((itemId) => findWeaponVariant(itemId) === null)
+  )
+
+  assert.deepEqual(missing, [])
+})
+
+test('weaponItemOf는 해방 수치 100이면 해방 아이템, 100 미만이면 "억압 - " 아이템이고 해방 계열이 아니면 대표 아이템이다', () => {
+  const release = weaponVariantOf('대검', GREATSWORD.release)
+  const star = weaponVariantOf('대검', GREATSWORD.primevalStar)
+
+  assert.equal(WEAPON_RELEASE_MAX, 100)
+  assert.equal(weaponItemOf(release, 100).itemId, GREATSWORD.release)
+  assert.equal(weaponItemOf(release, 99).itemId, GREATSWORD.releasePending)
+  assert.equal(weaponItemOf(release, 0).itemId, GREATSWORD.releasePending)
+  assert.equal(weaponItemOf(star, 0).itemId, GREATSWORD.primevalStar)
 })
 
 const OATH_UPGRADE_OPTIONS = [

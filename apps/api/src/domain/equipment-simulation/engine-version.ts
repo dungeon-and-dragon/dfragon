@@ -9,6 +9,7 @@ const OATH_UPGRADE_ENGINE_VERSION: EngineVersion = [0, 10, 0]
 const BUFF_LEVEL_ENGINE_VERSION: EngineVersion = [0, 11, 0]
 // 0.11.0은 피부 엠블렘을 바꾸지 못해 끝 스펙의 피부 엠블렘이 빠진 점수를 낸다.
 const AVATAR_ENGINE_VERSION: EngineVersion = [0, 12, 0]
+const WEAPON_ITEM_ENGINE_VERSION: EngineVersion = [0, 13, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -19,6 +20,8 @@ export interface SimulationFeatures {
   readonly oathTunes: boolean
   readonly equipmentSet: boolean
   readonly weaponTune: boolean
+  /** 무기 아이템과 해방 수치 변경 */
+  readonly weaponItem: boolean
   /** 서약 세트, 본체, 결정 아이템 교체 */
   readonly oathItems: boolean
   /** 묵언의 진의 단계와 선택지 변경 */
@@ -80,6 +83,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.avatar) {
     minimums.push(AVATAR_ENGINE_VERSION)
+  }
+
+  if (features.weaponItem) {
+    minimums.push(WEAPON_ITEM_ENGINE_VERSION)
   }
 
   return minimums

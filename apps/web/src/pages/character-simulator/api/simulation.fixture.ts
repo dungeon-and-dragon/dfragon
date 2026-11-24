@@ -1,4 +1,4 @@
-import { oathUpgradeSteps } from '@dfragon/lib/equipment-variants'
+import { findWeaponVariant, oathUpgradeSteps } from '@dfragon/lib/equipment-variants'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import type { CharacterCardScore, CharacterDetailView } from '#entities/character'
 import type { SimulationBody } from '#pages/character-simulator/model/simulator-draft'
@@ -14,6 +14,7 @@ const SLOT_ITEM_POINTS = 15_300
 const VARIANT_POINTS = 21_700
 const POINTS_PER_TUNE = 4_600
 const POINTS_PER_POTENCY = 310
+const POINTS_PER_RELEASE = 520
 const EQUIPMENT_SET_POINTS = 64_500
 const OATH_SET_POINTS = 18_900
 const OATH_BODY_POINTS = 27_300
@@ -158,8 +159,9 @@ function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
       const tune =
         change.tune !== null ? (change.tune - wornTuneOf(item?.tune ?? [])) * POINTS_PER_TUNE : 0
       const potency = change.potency !== null ? change.potency * POINTS_PER_POTENCY : 0
+      const release = change.release !== null ? change.release * POINTS_PER_RELEASE : 0
 
-      return sum + reinforce + amplified + enchant + variant + tune + potency
+      return sum + reinforce + amplified + enchant + variant + tune + potency + release
     },
     slotItemPoints + characterPoints + oathPointsOf(detail, oath) + setPointsOf(detail, body)
   )
@@ -175,4 +177,28 @@ export function syntheticSimulation(
   const simulated = simulationScore(calculator, { value })
 
   return { baseline, simulated }
+}
+
+// 해방 계열 무기를 낀 캐릭터의 무기를 해방 수치가 덜 찬 "억압 - " 아이템으로 바꾼 합성 캐릭터다.
+export function withPendingReleaseWeapon(
+  detail: CharacterDetailView,
+  release: number
+): CharacterDetailView {
+  const equipment = detail.equipment.equipment.map((item) => {
+    const match = item.itemId !== null ? findWeaponVariant(item.itemId) : null
+    const pending = match?.variant.releasePending
+
+    if (pending === undefined) {
+      return item
+    }
+
+    return {
+      ...item,
+      itemId: pending.itemId,
+      itemName: pending.itemName,
+      weaponRelease: { value: release }
+    }
+  })
+
+  return { ...detail, equipment: { ...detail.equipment, equipment } }
 }
