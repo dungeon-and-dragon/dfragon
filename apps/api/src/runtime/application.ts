@@ -22,8 +22,11 @@ import {
 } from '#infrastructure/database/index.js'
 import {
   ENHANCEMENT_BACKFILL_CODES,
+  ENHANCEMENT_BACKFILL_CONCURRENCY,
   EnhancementBackfillService,
+  SEASON_BACKFILL_CONCURRENCY,
   SeasonBackfillService,
+  TIMELINE_SYNC_CONCURRENCY,
   TimelineSyncService
 } from '#application/character-timeline/index.js'
 import {
@@ -49,6 +52,13 @@ const CLEAR_STATS_POOL = {
   statementTimeoutMs: 180_000
 }
 
+// 동기화, 강화 백필, 옛 시즌 받기는 일 하나가 연결을 한 번에 하나만 쓴다. 풀을 세 queue가 함께 처리하는 수의 합으로 두어
+// 구간 교체 transaction이 연결을 기다리다 Prisma의 시작 대기 2초를 넘겨 실패하지 않게 하고, 메인 풀의 조회와 연결을 다투지 않게 한다.
+const TIMELINE_POOL = {
+  maxConnections:
+    TIMELINE_SYNC_CONCURRENCY + ENHANCEMENT_BACKFILL_CONCURRENCY + SEASON_BACKFILL_CONCURRENCY
+}
+
 function createDatabaseSubscribers(
   neople: NeopleClient,
   database: DatabaseConfiguration | undefined
@@ -71,30 +81,32 @@ function createDatabaseSubscribers(
   }
   const client = createDatabaseClient(database)
   const clearStatsClient = createDatabaseClient(database, CLEAR_STATS_POOL)
+  const timelineClient = createDatabaseClient(database, TIMELINE_POOL)
   const characterBasic = new DatabaseCharacterBasicRepository(client)
   const characterSearch = new DatabaseCharacterSearchRepository(client)
   const fetchTimeline = createNeopleCharacterTimeline(neople)
   const timelineRead = new DatabaseCharacterTimelineRepository(client)
   const timelineQueueCounts = new DatabaseTimelineQueueCountRepository(client)
   const itemDictionary = new ItemDictionaryService(
-    new DatabaseItemDictionaryRepository(client),
+    new DatabaseItemDictionaryRepository(timelineClient),
     createNeopleItemDetails(neople)
   )
   const timelineSync = new TimelineSyncService(
-    new DatabaseTimelineSyncRepository(client),
+    new DatabaseTimelineSyncRepository(timelineClient),
     fetchTimeline,
     itemDictionary
   )
   const enhancementBackfill = new EnhancementBackfillService(
-    new DatabaseEnhancementBackfillRepository(client),
+    new DatabaseEnhancementBackfillRepository(timelineClient),
     createNeopleCharacterTimeline(neople, ENHANCEMENT_BACKFILL_CODES)
   )
   const seasonBackfill = new SeasonBackfillService(
-    new DatabaseSeasonBackfillRepository(client),
+    new DatabaseSeasonBackfillRepository(timelineClient),
     fetchTimeline
   )
 
-  // 클리어 통계는 clearStatsClient, 나머지 option은 client를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 둘 다 닫는다.
+  // 클리어 통계는 clearStatsClient, 타임라인을 받아 저장하는 일은 timelineClient, 나머지 option은 client를 함께 쓰며,
+  // 공개 app이 닫힐 때 `timeline.close`로 모두 닫는다.
 
   return {
     timeline: {
@@ -106,7 +118,11 @@ function createDatabaseSubscribers(
       readPage: (character, list, before) => timelineRead.readPage(character, list, before),
       writeQueueCounts: (counts) => timelineQueueCounts.writeCounts(counts),
       close: async () => {
-        await Promise.all([client.$disconnect(), clearStatsClient.$disconnect()])
+        await Promise.all([
+          client.$disconnect(),
+          clearStatsClient.$disconnect(),
+          timelineClient.$disconnect()
+        ])
       }
     },
     recordCharacterBasic: (basic) => characterBasic.recordBasic(basic),
