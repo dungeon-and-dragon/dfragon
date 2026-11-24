@@ -1102,9 +1102,9 @@ try {
   await psql(
     "INSERT INTO character_collection (server_id, character_id, queued_at, attempted_at, failure) VALUES ('cain', 'ops-waiting', '2026-11-09T00:00:00Z', NULL, NULL), ('cain', 'ops-api', '2026-11-08T00:00:00Z', '2026-11-08T01:00:00Z', 'neople-api'), ('cain', 'ops-internal', '2026-11-08T00:00:00Z', '2026-11-08T02:00:00Z', 'neople-internal')"
   )
-  // API는 queue 수를 더 쓰지 않고, 운영 경로는 아직 이 테이블에서 읽어 이전에 API가 쓰던 값을 넣는다.
+  // 운영 경로는 요청 테이블을 종류별로 센다. 멈춘 worker가 집지 않아 대기와 처리 중 행이 그대로 남는다.
   await psql(
-    "INSERT INTO timeline_queue_counts (name, waiting, running) VALUES ('timeline-sync', 0, 0), ('enhancement-backfill', 0, 0), ('season-backfill', 0, 0)"
+    "INSERT INTO timeline_sync_requests (kind, server_id, character_id, season_id, started_at) VALUES ('sync', 'cain', 'ops-queue-waiting', 0, NULL), ('season-backfill', 'cain', 'ops-queue-running', 9, now())"
   )
   // 운영 app 이미지를 API 컨테이너의 network namespace에 붙여, 운영 포트 3001과 공개 포트 3000을 같은 127.0.0.1에서 확인한다.
   await podman([

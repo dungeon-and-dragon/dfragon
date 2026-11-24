@@ -1,5 +1,5 @@
-import type { TimelineQueueCount } from '@dfragon/database'
+import type { TimelineSyncRequestCount } from '@dfragon/database'
 
 export interface QueueRepository {
-  readCounts(): Promise<readonly TimelineQueueCount[]>
+  readCounts(): Promise<readonly TimelineSyncRequestCount[]>
 }
