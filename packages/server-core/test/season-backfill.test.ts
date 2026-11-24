@@ -4,7 +4,11 @@ import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfr
 import type { FetchCharacterTimeline } from '../src/application/character-timeline/ports.js'
 import type { SeasonBackfillRepository } from '../src/application/character-timeline/repository.js'
 import { SeasonBackfillService } from '../src/application/character-timeline/season-backfill.js'
-import { type SeasonBackfillJob, TimelineFailure } from '../src/domain/character-timeline/index.js'
+import {
+  type SeasonBackfillJob,
+  TimelineFailure,
+  findSeasonBackfillRange
+} from '../src/domain/character-timeline/index.js'
 
 const at = (time: string) => new Date(`${time}+09:00`)
 const MINUTE_MS = 60_000
@@ -120,4 +124,21 @@ test('구간을 받다가 실패하면 저장한 구간까지 남기고 멈추�
   assert.equal(failing.replaced.length, 1)
   assert.equal(failing.state()?.backfilledUntil.getTime(), at('2020-04-07T05:59:00').getTime())
   assert.equal(failing.state()?.completedAt, null)
+})
+
+test('시즌 구간은 그 시즌 시작부터 다음 시즌 시작 직전 분까지이고, Neople이 주지 않는 2017-09-21 전은 뺀다', () => {
+  // 순서가 섞여 와도 시작 시각으로 다음 시즌을 찾는다.
+  const seasons = [
+    { id: 7, startsAt: at('2020-01-09T06:00:00') },
+    { id: 5, startsAt: at('2017-06-22T06:00:00') },
+    { id: 6, startsAt: at('2018-08-09T06:00:00') }
+  ]
+
+  assert.deepEqual(findSeasonBackfillRange(seasons, 5), seasonRange(5))
+  assert.deepEqual(findSeasonBackfillRange(seasons, 6), {
+    start: at('2018-08-09T06:00:00'),
+    end: at('2020-01-09T05:59:00')
+  })
+  assert.equal(findSeasonBackfillRange(seasons, 7), undefined)
+  assert.equal(findSeasonBackfillRange(seasons, 8), undefined)
 })
