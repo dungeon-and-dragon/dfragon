@@ -4,7 +4,7 @@ import type { RequestHandler } from 'msw'
 import { storyCharacterDetail } from '#pages/character/api/character.fixture'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { withPendingReleaseWeapon } from './api/simulation.fixture'
+import { withPendingReleaseWeapon, withSwitchingEquipment } from './api/simulation.fixture'
 import { simulatorStoryHandlers } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
 
@@ -212,9 +212,10 @@ async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement
   await pick(canvasElement, '두 번째 진의 선택지', '서약 포인트')
 }
 
-async function changeBuffLevel({ canvasElement }: { canvasElement: HTMLElement }) {
+async function changeSwitching({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '스위칭')
   await pick(canvasElement, '스위칭 레벨', '20레벨')
+  await press(canvasElement, '짙편린 부위 수 올리기', 3)
 }
 
 async function chooseBestAvatar({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -229,6 +230,11 @@ async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement 
 
 async function chooseWeapon({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '무기')
+}
+
+// 딜러 story 캐릭터가 9부위에 짙편린을 등록한 것으로 둔다.
+function withNineSwitchingEquipment(detail: Detail): Detail {
+  return withSwitchingEquipment(detail, 9)
 }
 
 // 딜러 story 캐릭터의 해방 무기를 해방 수치 81의 "억압 - " 아이템으로 바꾼다.
@@ -289,8 +295,8 @@ export const 진의: Story = {
 }
 
 export const 스위칭: Story = {
-  ...screenStory('dealer', simulatorStoryHandlers.calculated),
-  play: changeBuffLevel
+  ...screenStory('dealer', simulatorStoryHandlers.calculated, withNineSwitchingEquipment),
+  play: changeSwitching
 }
 
 export const 종결아바타: Story = {
