@@ -27,11 +27,11 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `replaceItemAdoption`, `readItemAdoption`: 세트 값을 받은 캐릭터가 낀 무기, 유일 장비 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 부위별 선택 수를 읽습니다.
 - `replaceSetAdoption`, `readSetAdoption`: 세트 값을 받은 캐릭터의 세트 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 세트 선택 수를 읽습니다.
 - `readCharacterStatsSnapshot`, `readJobSkillAdoptionSnapshot`: 통계와 전직별 스킬 채택 수 저장분을 읽고, 없으면 `null`을 돌려줍니다.
-- `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`: 클리어 집계의 클리어 기록과 주별 모집단을 저장하고, 최고 명성이 하한 이상인 모집단을 읽습니다.
-- `readClearPopulationPage`, `countClearPopulation`, `readClearPopulationJobs`: 최고 명성이 하한 이상인 모집단을 서버, 캐릭터 순으로 나눠 읽고, 그 수와 직업별 수를 셉니다.
+- `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`: 클리어 집계의 클리어 기록과 주별 분모를 저장하고, 최고 명성이 하한 이상인 수집 대상 캐릭터를 읽습니다.
+- `readClearPopulationPage`, `countClearPopulation`, `readClearPopulationJobs`: 최고 명성이 하한 이상인 수집 대상 캐릭터를 서버, 캐릭터 순으로 나눠 읽고, 그 수와 직업별 수를 셉니다.
 - `recordLegionContentClears`: 레기온 하나와 주 하나의 클리어를 레이드, 레기온 기록 테이블에서 클리어 집계로 옮깁니다.
 - `readContentClearCollection`, `startContentClearCollection`, `recordContentClearCollectionProgress`, `finishContentClearCollection`: 클리어 수집의 진행 위치를 읽고 씁니다.
-- `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 모집단, 주와 배율별 클리어 수, 한 주의 모험단 크기 분포를 읽습니다.
+- `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 분모, 주와 배율별 클리어 수, 한 주의 모험단 크기 분포를 읽습니다.
 - `readContentClearFames`, `readContentClearJobFames`, `readContentClearRaidTimes`: 한 주의 모든 컨텐츠에서 클리어 캐릭터의 명성 분위수, 전직별 클리어 수와 명성 분위수, 레이드 클리어의 요일과 시간대별 수를 읽습니다.
 - `readSelectedContentClearJobFames`, `readSelectedContentClearTimes`, `readContentClearFirstWeeks`, `readContentClearFameBands`, `readContentClearWeekGroups`, `readContentClearStageMoves`, `readContentClearStreaks`: 컨텐츠 하나와 주 하나에서 전직별 클리어 수와 명성 분위수, 요일과 시간대별 수, 캐릭터가 처음 깬 주별 수, 명성 구간별 캐릭터 수와 클리어 수, 지난주 대비 그룹별 수와 명성 분위수, 일반과 하드 사이 이동 수, 연속 클리어 주 수 분포를 읽습니다.
 - `readContentClearScores`, `readContentClearJobScores`, `readSelectedContentClearJobScores`, `readContentClearWeekGroupScores`, `readContentClearScoreBands`: 클리어 행에 복사한 점수로 한 주의 컨텐츠별, 전직별, 지난주 대비 그룹별 점수 분위수와 점수 구간별 캐릭터 수와 클리어 수를 장비 점수와 버프 점수로 나누어 읽습니다.
@@ -80,7 +80,7 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `characters`: 캐릭터와 Neople 기본 정보, 장비 세트와 서약 세트, 마지막 활동 시각과 비활성 판정 시각
 - `character_skill_styles`: 캐릭터마다 최신 스킬 스타일 한 행
 - `character_items`: 캐릭터가 낀 무기와 유일 장비, 부위마다 한 행
-- `item_adoption`: 표본, 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 표본, 전직, 역할마다 모집단 수 한 행
+- `item_adoption`: 표본, 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 표본, 전직, 역할마다 전체 캐릭터 수 한 행
 - `set_adoption`: 표본, 전직, 역할, 장비 세트, 서약 세트와 선택지 조합마다 캐릭터 수 한 행
 - `character_scores`: 캐릭터마다 장비 점수나 버프 점수 한 행과 계산 시각, 엔진 버전, 점수를 계산할 때의 전직, 근사값이면 근사 방식
 - `character_basic_history`, `character_section_history`, `character_score_history`: 캐릭터의 기본 정보, 상세 섹션 본문, 점수가 바뀔 때마다 한 행. 점수 이력은 근사값이면 근사 방식, 경고, 건너뛴 사유도 담습니다
