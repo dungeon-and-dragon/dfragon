@@ -18,19 +18,25 @@ import {
 } from '@dfragon/server-core/domain/score/index.js'
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
 import {
+  type AvatarPresetChoice,
   type EquipmentChange,
   type OathChanges,
   type SimulationFeatures,
   type SlotItemChanges,
+  avatarItemIds,
+  editAvatar,
+  editBuffLevel,
   editEquipment,
   editEquipmentItems,
   editOath,
   editSlotItems,
   editWeaponTune,
   equipmentItemIds,
+  hasAvatarEdit,
   hasOathEdit,
   hasSlotItemEdits,
   needsMainStat,
+  simulatedAvatar,
   simulatedEquipment,
   simulatedOath,
   simulatedSlotItems,
@@ -49,6 +55,10 @@ export interface EquipmentSimulationRequest {
   readonly equipment: readonly EquipmentChange[]
   readonly slotItems: SlotItemChanges
   readonly oath: OathChanges
+  /** 버프 강화 스킬의 절대 레벨이고, null이면 그대로 둔다. */
+  readonly buffLevel: number | null
+  /** null이면 착용 아바타를 그대로 둔다. */
+  readonly avatarPreset: AvatarPresetChoice | null
 }
 
 export interface EquipmentSimulationScores {
@@ -98,8 +108,11 @@ export class EquipmentSimulationService {
     const weaponEdit = editWeaponTune(payloads.equipment, request.equipment)
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
+    const buffLevel = editBuffLevel(payloads, role, request.buffLevel)
+    const avatarEdit = editAvatar(payloads, role, request.avatarPreset)
     const editsSlotItems = hasSlotItemEdits(slotEdits)
     const editsOath = hasOathEdit(oathEdit)
+    const editsAvatar = hasAvatarEdit(avatarEdit)
     const features: SimulationFeatures = {
       slotItems: editsSlotItems,
       equipmentItems: itemEdits.length > 0,
@@ -107,7 +120,9 @@ export class EquipmentSimulationService {
       equipmentSet: request.equipmentSet !== null && itemEdits.length > 0,
       weaponTune: weaponEdit !== null,
       oathItems: oathEdit.changesItems,
-      oathUpgrade: oathEdit.upgrade !== null
+      oathUpgrade: oathEdit.upgrade !== null,
+      buffLevel: buffLevel !== null,
+      avatar: editsAvatar
     }
     const calculator = cardScoreCalculator(role)
     const input = toScoreEngineInput(payloads, items)
@@ -117,7 +132,9 @@ export class EquipmentSimulationService {
       !features.slotItems &&
       !features.equipmentItems &&
       !features.weaponTune &&
-      !editsOath
+      !editsOath &&
+      !features.buffLevel &&
+      !editsAvatar
     ) {
       const result = await this.calculate(payloads, input, calculator, signal)
 
@@ -131,7 +148,7 @@ export class EquipmentSimulationService {
     }
 
     const details = await this.itemDetails(
-      [...slotItemIds(slotEdits), ...equipmentItemIds(itemEdits)],
+      [...slotItemIds(slotEdits), ...equipmentItemIds(itemEdits), ...avatarItemIds(avatarEdit)],
       signal
     )
 
@@ -157,10 +174,13 @@ export class EquipmentSimulationService {
       details
     )
     const equipment = withWeaponTune(itemEquipment, weaponEdit)
+    const slots = simulatedSlotItems(slotEdits, details)
     const simulation = simulationInputOf(
       equipment,
-      simulatedSlotItems(slotEdits, details),
-      simulatedOath(oathEdit)
+      slots,
+      simulatedAvatar(avatarEdit, slots.aura),
+      simulatedOath(oathEdit),
+      buffLevel
     )
     const detailItems = Object.fromEntries(details)
     const engineItems = { ...input.items, ...detailItems }

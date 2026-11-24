@@ -48,7 +48,10 @@ const simulationRequest = z.strictObject({
     .refine((changes) => new Set(changes.map(({ slotNo }) => slotNo)).size === changes.length)
     .default([]),
   // 생략과 null은 착용한 진의를 그대로 둔다.
-  oathUpgrade: z.array(oathUpgradeSelection).nullable().default(null)
+  oathUpgrade: z.array(oathUpgradeSelection).nullable().default(null),
+  // 생략과 null은 버프 강화 스킬 레벨과 착용 아바타를 그대로 둔다.
+  buffLevel: z.int().nullable().default(null),
+  avatarPreset: z.literal('best').nullable().default(null)
 })
 
 export type EquipmentSimulationResponse = EquipmentSimulationScores
@@ -68,14 +71,27 @@ export function parseSimulationRequest(text: string): EquipmentSimulationRequest
     throw new EquipmentSimulationFailure('request')
   }
 
-  const { equipmentSet, equipment, title, creature, aura, oathSet, oathBody, oath, oathUpgrade } =
-    parsed.data
+  const {
+    equipmentSet,
+    equipment,
+    title,
+    creature,
+    aura,
+    oathSet,
+    oathBody,
+    oath,
+    oathUpgrade,
+    buffLevel,
+    avatarPreset
+  } = parsed.data
   const slotItems = { title, creature, aura }
 
   return {
     equipmentSet,
     equipment,
     slotItems,
-    oath: { set: oathSet, body: oathBody, crystals: oath, upgrade: oathUpgrade }
+    oath: { set: oathSet, body: oathBody, crystals: oath, upgrade: oathUpgrade },
+    buffLevel,
+    avatarPreset
   }
 }

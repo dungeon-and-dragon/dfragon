@@ -17,6 +17,7 @@ import {
   switchEquipmentSet,
   weaponMaxTuneLevelOf
 } from '@dfragon/lib/equipment-variants'
+import type { BuffSwitching } from '@dfragon/lib/buff-switching'
 import { type SlotItemCategory, slotItemsOf } from '@dfragon/lib/slot-items'
 import {
   type CharacterDetailView,
@@ -27,6 +28,7 @@ import {
   toItemView
 } from '#entities/character'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
+import type { AvatarPresetChange } from './simulator-avatar'
 import {
   changeUpgradeOathpoint,
   changeUpgradeUnlock,
@@ -46,6 +48,7 @@ import {
   type SimulatorOathBody,
   type SimulatorOathCrystal
 } from './simulator-oath'
+import { type BuffLevelChange, changeBuffLevel } from './simulator-switching'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
 type SetItem = CharacterDetailView['equipment']['setItemInfo'][number]
@@ -143,11 +146,16 @@ export type SlotDraft = Readonly<{
   potency: number | null
 }>
 
-/** 고른 장비 세트, 기준과 다른 장비 부위, 바꾸려고 고른 칭호, 크리쳐, 오라 묶음 id와 서약의 바꾼 것만 담는다. */
+/**
+ * 고른 장비 세트, 기준과 다른 장비 부위, 바꾸려고 고른 칭호, 크리쳐, 오라 묶음 id, 아바타 프리셋, 버프 강화 스킬 레벨과
+ * 서약의 바꾼 것만 담는다.
+ */
 export type SimulatorChanges = Readonly<{
   equipmentSet: string | null
   equipment: Readonly<Partial<Record<EnchantGradeSlot, SlotDraft>>>
   slotItems: Readonly<Partial<Record<SlotItemCategory, string>>>
+  avatarPreset: AvatarPresetChange
+  buffLevel: BuffLevelChange
   oath: OathChanges
 }>
 
@@ -155,6 +163,8 @@ export const NO_CHANGES: SimulatorChanges = {
   equipmentSet: null,
   equipment: {},
   slotItems: {},
+  avatarPreset: null,
+  buffLevel: null,
   oath: NO_OATH_CHANGES
 }
 
@@ -177,6 +187,8 @@ export type SimulationBody = Readonly<
     oathBody?: string
     oathUpgrade?: readonly OathUpgradeSelection[]
     oath?: OathCrystalChange[]
+    avatarPreset?: NonNullable<AvatarPresetChange>
+    buffLevel?: number
   } & Partial<Record<SlotItemCategory, string>>
 >
 
@@ -190,6 +202,8 @@ export type SimulatorAction =
     }>
   | Readonly<{ type: 'change'; slot: SimulatorSlot; draft: Partial<SlotDraft> }>
   | Readonly<{ type: 'slotItem'; slotItem: SimulatorSlotItem; id: string | null }>
+  | Readonly<{ type: 'avatarPreset'; preset: AvatarPresetChange }>
+  | Readonly<{ type: 'buffLevel'; switching: BuffSwitching; level: number }>
   | Readonly<{ type: 'oathSet'; oath: SimulatorOath; setId: number }>
   | Readonly<{ type: 'oathBody'; body: SimulatorOathBody; id: string }>
   | Readonly<{
@@ -807,6 +821,13 @@ export function simulatorReducer(
       return changeSlot(changes, action.slot, action.draft)
     case 'slotItem':
       return changeSlotItem(changes, action.slotItem, action.id)
+    case 'avatarPreset':
+      return { ...changes, avatarPreset: action.preset }
+    case 'buffLevel': {
+      const buffLevel = changeBuffLevel(action.switching, changes.buffLevel, action.level)
+
+      return { ...changes, buffLevel }
+    }
     case 'oathSet': {
       const oath = changeOathSet(changes.oath, action.oath, action.setId)
 
@@ -924,11 +945,15 @@ export function simulationBody(
   const oathBody = changes.oath.body !== null ? { oathBody: changes.oath.body } : {}
   const oathUpgrade = changes.oath.upgrade !== null ? { oathUpgrade: changes.oath.upgrade } : {}
   const crystalChanges = crystals.length > 0 ? { oath: crystals } : {}
+  const avatarPreset = changes.avatarPreset !== null ? { avatarPreset: changes.avatarPreset } : {}
+  const buffLevel = changes.buffLevel !== null ? { buffLevel: changes.buffLevel } : {}
 
   return {
     ...equipmentSet,
     equipment,
     ...changes.slotItems,
+    ...avatarPreset,
+    ...buffLevel,
     ...oathSet,
     ...oathBody,
     ...oathUpgrade,
@@ -940,6 +965,15 @@ export function hasChanges(changes: SimulatorChanges): boolean {
   const changedEquipment = Object.keys(changes.equipment).length > 0
   const changedSlotItems = Object.keys(changes.slotItems).length > 0
   const changedSet = changes.equipmentSet !== null
+  const changedAvatar = changes.avatarPreset !== null
+  const changedBuffLevel = changes.buffLevel !== null
 
-  return changedSet || changedEquipment || changedSlotItems || hasOathChanges(changes.oath)
+  return (
+    changedSet ||
+    changedEquipment ||
+    changedSlotItems ||
+    changedAvatar ||
+    changedBuffLevel ||
+    hasOathChanges(changes.oath)
+  )
 }
