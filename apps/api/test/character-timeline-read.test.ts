@@ -251,6 +251,39 @@ test('기다리는 요청은 그 캐릭터의 진행 중인 동기화가 끝난 
   gates.get('second')!.release()
 })
 
+test('끝을 기다리는 요청은 먼저 들어와 기다리던 다른 캐릭터보다 앞서 시작한다', async () => {
+  const running = gate()
+  const synced: string[] = []
+  const queue = createTimelineSyncQueue(
+    async ({ characterId }) => {
+      synced.push(characterId)
+      await running.promise
+    },
+    () => assert.fail('동기화 실패가 보고되면 안 된다')
+  )
+
+  // 함께 처리하는 10명을 채워 뒤의 요청이 기다리게 한다.
+  for (let index = 0; index < 10; index++) {
+    queue.request({ serverId: 'siroco', characterId: `running-${index}` })
+  }
+
+  queue.request({ serverId: 'siroco', characterId: 'queued-1' })
+  queue.request({ serverId: 'siroco', characterId: 'queued-2' })
+  const waited = settled(queue.requestAndWait(character))
+  const promoted = settled(queue.requestAndWait({ serverId: 'siroco', characterId: 'queued-2' }))
+  await nextTurn()
+
+  assert.equal(synced.length, 10)
+  assert.deepEqual(queue.counts(), { waiting: 3, running: 10 })
+
+  running.release()
+  await nextTurn()
+
+  assert.deepEqual(synced.slice(10), [character.characterId, 'queued-2', 'queued-1'])
+  assert.equal(waited(), true)
+  assert.equal(promoted(), true)
+})
+
 test('동기화가 실패를 기록하지 못해도 기다리는 요청은 풀린다', async () => {
   let reported = 0
   const queue = createTimelineSyncQueue(
@@ -265,6 +298,38 @@ test('동기화가 실패를 기록하지 못해도 기다리는 요청은 풀�
   await queue.requestAndWait(character)
 
   assert.equal(reported, 1)
+})
+
+test('queue를 닫으면 끝을 기다리며 대기하던 요청은 동기화 없이 풀린다', async () => {
+  const running = gate()
+  const synced: string[] = []
+  const queue = createTimelineSyncQueue(
+    async ({ characterId }) => {
+      synced.push(characterId)
+      await running.promise
+    },
+    () => assert.fail('동기화 실패가 보고되면 안 된다')
+  )
+
+  for (let index = 0; index < 10; index++) {
+    queue.request({ serverId: 'siroco', characterId: `running-${index}` })
+  }
+
+  const waited = settled(queue.requestAndWait(character))
+  await nextTurn()
+
+  assert.equal(waited(), false)
+
+  queue.close()
+  await nextTurn()
+
+  assert.equal(waited(), true)
+  assert.deepEqual(queue.counts(), { waiting: 0, running: 10 })
+
+  running.release()
+  await nextTurn()
+
+  assert.equal(synced.includes(character.characterId), false)
 })
 
 // 닫은 뒤 온 요청이 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
