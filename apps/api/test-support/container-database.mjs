@@ -45,6 +45,9 @@ const rankingStatsCheckPath = fileURLToPath(
 const skillStyleCheckPath = fileURLToPath(
   new URL('./container-skill-style-check.mjs', import.meta.url)
 )
+const skillChainBackfillCheckPath = fileURLToPath(
+  new URL('./container-skill-chain-backfill-check.mjs', import.meta.url)
+)
 const skillAdoptionCheckPath = fileURLToPath(
   new URL('./container-skill-adoption-check.mjs', import.meta.url)
 )
@@ -824,6 +827,9 @@ try {
     (await psql("SELECT string_agg(character_id, ',') FROM character_skill_styles")).stdout.trim(),
     'skill-a'
   )
+
+  stage = 'skill chain backfill job'
+  await runWorkerCheck(skillChainBackfillCheckPath)
 
   stage = 'skill adoption reads'
   await podman([
