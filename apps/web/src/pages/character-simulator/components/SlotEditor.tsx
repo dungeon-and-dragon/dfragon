@@ -47,6 +47,7 @@ import {
   OathItemControl,
   PotencyControl,
   ReinforceControl,
+  ReleaseControl,
   TextControl,
   SlotItemControl
 } from './SlotControls'
@@ -227,6 +228,11 @@ function EquipmentEditor({
       {choice?.exalted === true && (
         <Field label="정밀도">
           <PotencyControl slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+        </Field>
+      )}
+      {draft.release !== null && (
+        <Field label="해방">
+          <ReleaseControl slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
         </Field>
       )}
       <Field label="강화, 증폭">

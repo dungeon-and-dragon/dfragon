@@ -4,6 +4,7 @@ import type { RequestHandler } from 'msw'
 import { storyCharacterDetail } from '#pages/character/api/character.fixture'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
+import { withPendingReleaseWeapon } from './api/simulation.fixture'
 import { simulatorStoryHandlers } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
 
@@ -211,16 +212,22 @@ async function chooseBestAvatar({ canvasElement }: { canvasElement: HTMLElement 
 }
 
 async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '무기')
   await pick(canvasElement, '무기 조율', 'II')
 }
 
-// 조율할 수 있는 무기 이름으로 바꾼 합성 캐릭터다.
-function withTunableWeapon(detail: Detail): Detail {
-  const equipment = detail.equipment.equipment.map((item) =>
-    item.slotId === 'WEAPON' ? { ...item, itemName: 'Beast-Saw' } : item
-  )
+async function openWeaponChoices({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '무기')
+  await press(canvasElement, '무기 교체')
+}
 
-  return { ...detail, equipment: { ...detail.equipment, equipment } }
+async function chooseWeapon({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '무기')
+}
+
+// 딜러 story 캐릭터의 해방 무기를 해방 수치 81의 "억압 - " 아이템으로 바꾼다.
+function withPendingRelease(detail: Detail): Detail {
+  return withPendingReleaseWeapon(detail, 81)
 }
 
 export const 딜러: Story = screenStory('dealer', simulatorStoryHandlers.calculated)
@@ -286,8 +293,18 @@ export const 끝스펙아바타: Story = {
 }
 
 export const 무기조율: Story = {
-  ...screenStory('dealer', simulatorStoryHandlers.calculated, withTunableWeapon),
+  ...screenStory('buffer', simulatorStoryHandlers.calculated),
   play: changeWeaponTune
+}
+
+export const 무기교체: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: openWeaponChoices
+}
+
+export const 무기해방: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated, withPendingRelease),
+  play: chooseWeapon
 }
 
 export const 휴대폰: Story = {
