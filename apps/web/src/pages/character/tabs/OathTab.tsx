@@ -10,6 +10,7 @@ import {
   raritySolidOf
 } from '#entities/character'
 import {
+  GameText,
   type OathCatalog,
   type OathOptionCard,
   type OathSetBoard,
@@ -18,7 +19,6 @@ import {
   useOathCatalog
 } from '#entities/catalog'
 import type { CharacterTabProps } from './character-tab-props'
-import { GameText } from './GameText'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
 import { SetPoint, TuneNumeral } from './equipment/item-parts'
 

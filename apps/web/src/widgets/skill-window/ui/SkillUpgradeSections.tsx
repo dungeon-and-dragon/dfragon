@@ -1,22 +1,18 @@
-import { ChevronRightIcon, Tooltip } from '@dfragon/ui'
+import { Tooltip } from '@dfragon/ui'
 import {
   type EnhancementRow,
   type EvolutionRow,
-  type SkillChain,
+  GameText,
   type SkillMarks,
   type SkillUpgradeBoard,
   skillMarkOf,
   SkillSprite
 } from '#entities/catalog'
-import { ClipboardCopyButton } from '#shared/ui/ClipboardCopyButton'
-import { GameText } from '#pages/character/tabs/GameText'
+import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from '#widgets/skill-window/lib/upgrade-labels'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
-import { itemTableClasses } from '#pages/character/tabs/equipment/item-classes'
-import { EVOLUTION_MARK, PIXELATED } from './skill-classes'
-import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
+import { EVOLUTION_MARK, PIXELATED, SKILL_ICON } from './skill-classes'
 
-const { heading: HEADING } = itemTableClasses
-const SKILL_ICON = 'relative size-game-icon shrink-0 select-none'
+const HEADING = 'section-title'
 const PICKED_RING = 'outline-1 -outline-offset-1 outline-solid outline-signal shadow-selected'
 const BRANCH =
   'box-border inline-flex h-[28px] cursor-default items-center gap-2 rounded-control border px-2 text-xs'
@@ -26,57 +22,6 @@ const ROWS = 'm-0 list-none p-0'
 const ROW = 'box-border flex min-h-[56px] items-center gap-3 border-b border-line px-4 py-2'
 const ROW_BODY = 'flex min-w-0 grow flex-col gap-2'
 const BRANCHES = 'flex flex-wrap gap-2'
-
-export function SkillTreeCode({ hash }: { hash: string }): React.JSX.Element {
-  return (
-    <section aria-label="스킬 트리 코드">
-      <h2 className={HEADING}>스킬 트리 코드</h2>
-      <div className="flex items-center gap-2 border-b border-line px-4 py-3">
-        <code
-          title={hash}
-          className="box-border h-[28px] min-w-0 grow truncate rounded-control border border-line bg-surface px-2 num text-xs leading-[26px] text-fg-muted"
-        >
-          {hash}
-        </code>
-        <ClipboardCopyButton text={hash} label="코드 복사" />
-      </div>
-    </section>
-  )
-}
-
-export function SkillChainSection({ chain }: { chain: SkillChain | null }): React.JSX.Element {
-  if (chain === null) {
-    return <h2 className={HEADING}>스킬 체인 없음</h2>
-  }
-
-  return (
-    <section aria-label="스킬 체인">
-      <h2 className={HEADING}>스킬 체인</h2>
-      <ol className="m-0 flex list-none flex-wrap items-start gap-y-2 border-b border-line px-4 py-4">
-        {chain.skills.map(({ name, icon }, index) => (
-          <li key={`${name}-${index}`} className="flex items-start gap-1">
-            <span className="flex w-16 flex-col items-center gap-2 text-center text-2xs text-fg-muted">
-              {icon !== null ? (
-                <span className={SKILL_ICON}>
-                  <SkillSprite icon={icon} />
-                </span>
-              ) : (
-                <span
-                  aria-hidden="true"
-                  className={`${SKILL_ICON} box-border rounded-control border border-line-strong bg-inset`}
-                />
-              )}
-              {name}
-            </span>
-            {index < chain.skills.length - 1 && (
-              <ChevronRightIcon className="mt-2 size-icon-sm shrink-0 text-fg-subtle" />
-            )}
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
-}
 
 function Branch({
   picked,
