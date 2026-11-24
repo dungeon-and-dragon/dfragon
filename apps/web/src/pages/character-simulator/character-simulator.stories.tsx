@@ -206,6 +206,11 @@ async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement 
   await toggle(canvasElement, '결정 8 교체', '용투 : 태초의 광휘 결정')
 }
 
+async function changeMistOath({ canvasElement }: { canvasElement: HTMLElement }) {
+  await chooseOath(canvasElement, '서약')
+  await toggle(canvasElement, '서약 교체', '세계를 태우는 용투 서약')
+}
+
 async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '묵언의 진의')
   await press(canvasElement, '여섯 번째 진의')
@@ -286,6 +291,12 @@ export const 서약세트: Story = {
 export const 서약등급: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeOathGrades
+}
+
+// 버퍼 story 캐릭터는 영겁의 안개 서약을 낀다.
+export const 안개서약교체: Story = {
+  ...screenStory('buffer', simulatorStoryHandlers.calculated),
+  play: changeMistOath
 }
 
 export const 진의: Story = {
