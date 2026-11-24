@@ -19,6 +19,8 @@ const OATH_SET_POINTS = 18_900
 const OATH_BODY_POINTS = 27_300
 const POINTS_PER_UPGRADE_STEP = 9_100
 const POINTS_PER_UPGRADE_OATHPOINT = 5_200
+const AVATAR_PRESET_POINTS = 33_800
+const POINTS_PER_BUFF_LEVEL = 7_400
 
 type Calculator = CharacterCardScore['calculator']
 
@@ -108,6 +110,16 @@ function upgradePointsOf(detail: CharacterDetailView, oathUpgrade: SimulationBod
   return stepPoints + (oathpoints - wornOathpoints) * POINTS_PER_UPGRADE_OATHPOINT
 }
 
+function buffLevelPointsOf(detail: CharacterDetailView, buffLevel: number | undefined): number {
+  if (buffLevel === undefined) {
+    return 0
+  }
+
+  const worn = detail.buff.equipment?.skillInfo?.option?.level ?? buffLevel
+
+  return (buffLevel - worn) * POINTS_PER_BUFF_LEVEL
+}
+
 function setPointsOf(
   detail: CharacterDetailView,
   { equipmentSet, oathSet, oathBody, oathUpgrade }: SimulationBody
@@ -127,10 +139,14 @@ function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
     oathSet: _oathSet,
     oathBody: _body,
     oathUpgrade: _upgrade,
+    avatarPreset,
+    buffLevel,
     ...slotItems
   } = body
   const items = detail.equipment.equipment
   const slotItemPoints = Object.keys(slotItems).length * SLOT_ITEM_POINTS
+  const avatarPoints = avatarPreset !== undefined ? AVATAR_PRESET_POINTS : 0
+  const characterPoints = avatarPoints + buffLevelPointsOf(detail, buffLevel)
 
   return equipment.reduce(
     (sum, change) => {
@@ -145,7 +161,7 @@ function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
 
       return sum + reinforce + amplified + enchant + variant + tune + potency
     },
-    slotItemPoints + oathPointsOf(detail, oath) + setPointsOf(detail, body)
+    slotItemPoints + characterPoints + oathPointsOf(detail, oath) + setPointsOf(detail, body)
   )
 }
 
