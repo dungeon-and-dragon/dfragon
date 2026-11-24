@@ -83,7 +83,7 @@ function ItemChoiceChip({
   return (
     <ChoiceChip value={value} chosen={chosen} onChoose={onChoose}>
       {described}
-      <ItemName name={item.name} rarity={item.rarity} />
+      <ItemName name={item.name} rarity={item.rarity} weight="normal" />
     </ChoiceChip>
   )
 }
@@ -107,7 +107,7 @@ export function ItemControl({
     return (
       <div className={`${CONTROL_LINE} min-w-0 gap-3`}>
         <ItemIcon itemId={slot.itemId} rarity={slot.rarity} />
-        <ItemName name={slot.itemName} rarity={slot.rarity} />
+        <ItemName name={slot.itemName} rarity={slot.rarity} weight="normal" />
       </div>
     )
   }
@@ -314,9 +314,8 @@ export function EnchantText({ options }: { options: readonly EnchantOption[] }):
 
   return (
     <>
-      {important !== '' && <span className="text-game-enchant">{important}</span>}
-      {important !== '' && minor !== '' && ', '}
-      {minor !== '' && <span className="text-fg-subtle">{minor}</span>}
+      {important !== '' && <span className="block text-game-enchant">{important}</span>}
+      {minor !== '' && <span className="block text-fg-subtle">{minor}</span>}
     </>
   )
 }
@@ -365,7 +364,7 @@ export function EnchantControl({
                 chosen={chosen}
                 onChoose={changeEnchant}
               >
-                <span>
+                <span className="text-xs">
                   <EnchantText options={choice.options} />
                 </span>
               </ChoiceChip>
@@ -426,6 +425,28 @@ export function TextControl({
   )
 }
 
+export function TextChoiceControl({
+  label,
+  value,
+  options,
+  onChange
+}: {
+  label: string
+  value: string
+  options: readonly TextOption[]
+  onChange: (id: string) => void
+}): React.JSX.Element {
+  return (
+    <div className="chip-list" role="group" aria-label={label}>
+      {options.map((option) => (
+        <ChoiceChip key={option.id} value={option.id} chosen={value} onChoose={onChange}>
+          {option.name}
+        </ChoiceChip>
+      ))}
+    </div>
+  )
+}
+
 /**
  * 서약 본체와 결정처럼 아이콘과 이름으로 고르는 선택이다. 착용 아이템이 선택지에 없으면 착용 중 항목을 첫 항목으로 두고,
  * 선택지가 없으면 착용 아이템을 고정해 보인다.
@@ -465,7 +486,7 @@ export function OathItemControl({
     return (
       <div className={`${CONTROL_LINE} min-w-0 gap-3`}>
         <ItemIcon itemId={worn.itemId} src={wornIcon} rarity={worn.rarity} />
-        <ItemName name={worn.itemName} rarity={worn.rarity} />
+        <ItemName name={worn.itemName} rarity={worn.rarity} weight="normal" />
       </div>
     )
   }

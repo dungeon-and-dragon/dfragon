@@ -138,10 +138,33 @@ function control(label: string): HTMLElement {
   return found!
 }
 
+// 서약 본체를 고르면 조작 패널의 제목도 서약이 되므로, 장비창의 구획은 구획 제목으로 찾는다.
+function windowSection(title: string): HTMLElement | null {
+  const section = [...container.querySelectorAll('section')].find(
+    (candidate) => candidate.querySelector('h2')?.textContent === title
+  )
+
+  if (section === undefined) {
+    return null
+  }
+
+  return section
+}
+
+// aria-labelledby로 이어 둔 제목을 읽어, 제목과 이어지지 않은 구획은 빠진다.
+function windowSectionTitles(): (string | null | undefined)[] {
+  return [...container.querySelectorAll('section[aria-labelledby]')].map(
+    (section) => document.getElementById(section.getAttribute('aria-labelledby')!)?.textContent
+  )
+}
+
+function rowsIn(title: string): HTMLTableRowElement[] {
+  return [...(windowSection(title)?.querySelectorAll<HTMLTableRowElement>('tbody tr') ?? [])]
+}
+
+// 장비 구획과 기타 구획의 줄 이름은 서로 겹치지 않는다. 서약 구획의 "세트"는 oathRowOf로 찾는다.
 function rowOf(slotName: string): HTMLTableRowElement {
-  const rows = [
-    ...container.querySelector('table')!.querySelectorAll<HTMLTableRowElement>('tbody tr')
-  ]
+  const rows = ['장비', '기타'].flatMap(rowsIn)
   const found = rows.find((row) => row.querySelector('td')?.textContent === slotName)
   expect(found, slotName).toBeDefined()
 
@@ -154,7 +177,7 @@ async function choose(slotName: string): Promise<void> {
 
 // 서약 구획 줄의 첫 칸은 "세트", "서약", "결정 1"처럼 줄 이름이다.
 function oathRowOf(label: string): HTMLTableRowElement {
-  const rows = [...oathSection()!.querySelectorAll<HTMLTableRowElement>('tbody tr')]
+  const rows = rowsIn('서약')
   const found = rows.find((row) => row.querySelector('td')?.textContent === label)
   expect(found, label).toBeDefined()
 
@@ -466,21 +489,16 @@ function slotNames(): string[] {
   )
 }
 
+function etcNames(): string[] {
+  return rowsIn('기타').map((row) => row.querySelector('td')?.textContent ?? '')
+}
+
 function iconsIn(element: Element): (string | null)[] {
   return [...element.querySelectorAll('img')].map((image) => image.getAttribute('src'))
 }
 
 function iconUrl(itemId: string | null): string {
   return `https://img-api.neople.co.kr/df/items/${itemId}`
-}
-
-function option(name: string): HTMLElement {
-  const found = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
-    (item) => item.textContent === name
-  )
-  expect(found, name).toBeDefined()
-
-  return found!
 }
 
 it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두고 장비 칸의 켜진 버튼에 착용한 아이템의 아이콘과 이름을 보인다', async () => {
@@ -493,7 +511,7 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
 
   const names = slotNames()
   expect(names.slice(0, 4)).toEqual(['세트', '무기', '칭호', '상의'])
-  expect(names.slice(-4)).toEqual(['크리쳐', '오라', '아바타', '스위칭'])
+  expect(names.slice(-2)).toEqual(['크리쳐', '오라'])
   const titleRow = rowOf('칭호')
   const worn = characterDetailFixture('dealer').equipment.equipment[1]!
   expect(titleRow.querySelectorAll('td')[1]!.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
@@ -753,19 +771,6 @@ function has(label: string): boolean {
   return container.querySelector(`[aria-label="${label}"]`) !== null
 }
 
-// 서약 본체를 고르면 조작 패널의 제목도 서약이 되므로, 장비창의 구획에서 찾는다.
-function oathSection(): HTMLElement | null {
-  const section = [...container.querySelectorAll('section')].find(
-    (candidate) => candidate.querySelector('h2')?.textContent === '서약'
-  )
-
-  if (section === undefined) {
-    return null
-  }
-
-  return section
-}
-
 it('장비 칸은 그 세트의 등급 선택지를 버튼으로 나열하고 착용한 등급을 켠다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
@@ -992,11 +997,10 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
-  const rows = [...oathSection()!.querySelectorAll('tbody tr')]
+  const rows = rowsIn('서약')
   expect(rows.map((row) => row.querySelectorAll('td')[1]?.textContent)).toEqual([
     '야망의 용투 서약',
     '세계를 태우는 용투 서약',
-    '9단계',
     ...Array.from({ length: 6 }, () => '용투 : 완전한 광휘 결정III'),
     '용투 : 완전한 광휘 결정I',
     '용투 : 완전한 광휘 결정',
@@ -1022,12 +1026,33 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
   expect(pressedIn('결정 8 조율')).toBe('III')
 })
 
-it('서약이 없는 캐릭터는 서약 구획을 그리지 않는다', async () => {
+it('장비창은 장비, 서약, 기타 구획 순서이고 기타 구획에 아바타, 스위칭, 묵언의 진의를 둔다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(windowSectionTitles()).toEqual(['장비', '서약', '기타'])
+  expect(etcNames()).toEqual(['아바타', '스위칭', '묵언의 진의'])
+})
+
+it('서약이 없는 캐릭터는 서약 구획과 묵언의 진의 줄 없이 장비, 기타 구획만 그린다', async () => {
   await render({ ...characterDetailFixture('dealer'), oath: null })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(oathSection()).toBeNull()
-  expect(container.querySelectorAll('table')).toHaveLength(1)
+  expect(windowSectionTitles()).toEqual(['장비', '기타'])
+  expect(etcNames()).toEqual(['아바타', '스위칭'])
+})
+
+it('아바타, 스위칭, 묵언의 진의 줄이 모두 없으면 기타 구획을 그리지 않는다', async () => {
+  const detail = characterDetailFixture('dealer')
+  await render({
+    ...detail,
+    character: { ...detail.character, jobGrowId: 'unknown-job-grow' },
+    buff: { ...detail.buff, equipment: null },
+    oath: null
+  })
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(windowSectionTitles()).toEqual(['장비'])
 })
 
 it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용한 값으로 되돌린다', async () => {
@@ -1173,13 +1198,10 @@ it('장비 세트 줄을 고르면 주 세트가 선택된 세트 선택을 열�
 
   await choose('세트')
 
-  expect(control('장비 세트').textContent).toBe('소울 페어리 세트')
+  expect(buttonNames('장비 세트')).toEqual(equipmentSets().map(({ setItemName }) => setItemName))
+  expect(pressedIn('장비 세트')).toBe('소울 페어리 세트')
 
-  await act(async () => control('장비 세트').click())
-
-  expect(optionNames()).toEqual(equipmentSets().map(({ setItemName }) => setItemName))
-
-  await act(async () => option('그림자에 숨은 죽음 세트').click())
+  await press('장비 세트', '그림자에 숨은 죽음 세트')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -1221,9 +1243,9 @@ it('서약 세트 줄에서 다른 세트를 고르면 세트만 요청하고 �
 
   await chooseOath('세트')
 
-  expect(control('서약 세트').textContent).toBe('야망의 용투 서약')
+  expect(pressedIn('서약 세트')).toBe('야망의 용투 서약')
 
-  await pick('서약 세트', '어둠에 잠긴 그림자 서약')
+  await press('서약 세트', '어둠에 잠긴 그림자 서약')
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathSet: SHADOW_OATH_SET }))
   expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('어둠에 잠긴 그림자 서약')
@@ -1375,46 +1397,37 @@ function upgradeOptionOf(step: number, kind: OathUpgradeKind): string {
   return oathUpgradeSteps()[step - 1]!.options.find((option) => option.kind === kind)!.option
 }
 
+const UPGRADE_STEP_NAMES = [
+  '첫 번째 진의',
+  '두 번째 진의',
+  '세 번째 진의',
+  '네 번째 진의',
+  '다섯 번째 진의',
+  '여섯 번째 진의',
+  '일곱 번째 진의',
+  '여덟 번째 진의',
+  '아홉 번째 진의'
+]
+
 function upgradeLevelText(): string | null {
-  return oathRowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent
+  return rowOf('묵언의 진의').querySelectorAll('td')[1]!.textContent
 }
 
-it('진의 줄을 고르면 단계마다 체크박스와 1~4단계 선택 칸을 두고, 쿨타임 감소를 낀 단계는 최종 데미지로 보이며 서약 포인트에서 최종 데미지로 되돌리면 착용 그대로다', async () => {
-  const worn = ['고요한 호흡', '자애의 마음', '내면의 조율', '신념의 대가'].map(
-    (option, index) => ({ step: index + 1, option })
-  )
-  const speeds = [5, 6, 7, 8, 9].map((step) => ({ step, option: upgradeOptionOf(step, 'Speed') }))
+it('진의 줄을 고르면 아홉 단계의 체크박스만 두고 선택지 칸은 두지 않는다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   expect(upgradeLevelText()).toBe('9단계')
 
-  await chooseOath('묵언의 진의')
+  await choose('묵언의 진의')
 
-  expect(control('첫 번째 진의').getAttribute('aria-checked')).toBe('true')
-  expect(control('첫 번째 진의 선택지').textContent).toBe('최종 데미지')
-  expect(container.querySelector('[aria-label="다섯 번째 진의 선택지"]')).toBeNull()
-
-  await pick('두 번째 진의 선택지', '서약 포인트')
-
-  await vi.waitFor(() =>
-    expect(bodies.at(-1)).toEqual({
-      equipment: [],
-      oathUpgrade: [
-        worn[0],
-        { step: 2, option: upgradeOptionOf(2, 'Oathpoint') },
-        ...worn.slice(2),
-        ...speeds
-      ]
-    })
-  )
-  expect(control('두 번째 진의 선택지').textContent).toBe('서약 포인트')
-
-  await pick('두 번째 진의 선택지', '최종 데미지')
-
-  expect(control('두 번째 진의 선택지').textContent).toBe('최종 데미지')
-  expect(upgradeLevelText()).toBe('9단계')
-  expect(resetButton().disabled).toBe(true)
+  expect(
+    [...container.querySelectorAll('aside [role="checkbox"]')].map((box) => [
+      box.getAttribute('aria-label'),
+      box.getAttribute('aria-checked')
+    ])
+  ).toEqual(UPGRADE_STEP_NAMES.map((name) => [name, 'true']))
+  expect(container.querySelector('[aria-label$="진의 선택지"]')).toBeNull()
 })
 
 it('진의 체크를 풀면 그 뒤 단계도 내리고, 건너뛰어 체크하면 사이 단계를 기본 선택지로 채워 바꾼 진의 전체를 요청한다', async () => {
@@ -1423,7 +1436,7 @@ it('진의 체크를 풀면 그 뒤 단계도 내리고, 건너뛰어 체크하�
   )
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
-  await chooseOath('묵언의 진의')
+  await choose('묵언의 진의')
 
   await act(async () => control('여섯 번째 진의').click())
 
@@ -1436,7 +1449,6 @@ it('진의 체크를 풀면 그 뒤 단계도 내리고, 건너뛰어 체크하�
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathUpgrade: [] }))
   expect(upgradeLevelText()).toBe(MISSING_VALUE)
-  expect(container.querySelector('[aria-label="첫 번째 진의 선택지"]')).toBeNull()
 
   await act(async () => control('세 번째 진의').click())
 
@@ -1448,7 +1460,6 @@ it('진의 체크를 풀면 그 뒤 단계도 내리고, 건너뛰어 체크하�
   )
   expect(upgradeLevelText()).toBe('3단계')
   expect(control('두 번째 진의').getAttribute('aria-checked')).toBe('true')
-  expect(control('두 번째 진의 선택지').textContent).toBe('최종 데미지')
 })
 
 function rowValueOf(slotName: string): string | null {
@@ -1501,8 +1512,7 @@ it('종결 아바타 프리셋이 없는 전직에는 아바타 줄만 없다', 
   await render({ ...detail, character: { ...detail.character, jobGrowId: 'unknown-job-grow' } })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(slotNames()).not.toContain('아바타')
-  expect(slotNames()).toContain('스위칭')
+  expect(etcNames()).toEqual(['스위칭', '묵언의 진의'])
 })
 
 it('버프 강화 스킬을 바꿀 수 없는 캐릭터에는 스위칭 줄만 없다', async () => {
@@ -1510,8 +1520,7 @@ it('버프 강화 스킬을 바꿀 수 없는 캐릭터에는 스위칭 줄만 �
   await render({ ...detail, buff: { ...detail.buff, equipment: null } })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(slotNames()).not.toContain('스위칭')
-  expect(slotNames()).toContain('아바타')
+  expect(etcNames()).toEqual(['아바타', '묵언의 진의'])
 })
 
 it('스위칭 줄을 고르면 스킬 이름 칸에 배운 레벨부터 10레벨 위까지 고르게 두고, 고른 레벨을 요청하며 지금 레벨로 돌아오면 원본 점수로 돌아간다', async () => {
@@ -1578,15 +1587,16 @@ it('아바타 줄에서 종결 아바타와 엠블렘을 고르면 프리셋을 
   await choose('아바타')
 
   expect(editorTitle()).toBe('아바타')
-  expect(control('아바타').textContent).toBe('현재 착용 아바타')
+  expect(buttonNames('아바타')).toEqual(['현재 착용 아바타', '종결 아바타와 엠블렘'])
+  expect(pressedIn('아바타')).toBe('현재 착용 아바타')
 
-  await pick('아바타', '종결 아바타와 엠블렘')
+  await press('아바타', '종결 아바타와 엠블렘')
 
   await waitForScores(ONE_CHOICE_SCORES)
   expect(bodies.at(-1)).toEqual({ equipment: [], avatarPreset: 'best' })
   expect(rowValueOf('아바타')).toBe('종결 아바타와 엠블렘')
 
-  await pick('아바타', '현재 착용 아바타')
+  await press('아바타', '현재 착용 아바타')
 
   await waitForScores(UNCHANGED_SCORES)
   expect(rowValueOf('아바타')).toBe('현재 착용 아바타')
@@ -1597,7 +1607,7 @@ it('초기화하면 고른 아바타 프리셋, 스위칭 레벨과 짙편린 �
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
   await choose('아바타')
-  await pick('아바타', '종결 아바타와 엠블렘')
+  await press('아바타', '종결 아바타와 엠블렘')
   await choose('스위칭')
   await pick('스위칭 레벨', '12레벨')
   await step('짙편린 부위 수 올리기', 2)

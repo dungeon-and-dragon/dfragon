@@ -65,20 +65,24 @@ function oathTargets(oath: SimulatorOath | null): SimulatorTarget[] {
     oath.setId !== null ? [{ kind: 'oathSet', key: 'oathSet', oath }] : []
   const bodyTargets: SimulatorTarget[] =
     oath.body !== null ? [{ kind: 'oathBody', key: 'oathBody', body: oath.body }] : []
-  const upgradeTargets: SimulatorTarget[] =
-    oath.upgrade !== null
-      ? [{ kind: 'oathUpgrade', key: 'oathUpgrade', upgrade: oath.upgrade }]
-      : []
   const crystalTargets = oath.crystals.map(
     (crystal): SimulatorTarget => ({ kind: 'crystal', key: `crystal:${crystal.slotNo}`, crystal })
   )
 
-  return [...setTargets, ...bodyTargets, ...upgradeTargets, ...crystalTargets]
+  return [...setTargets, ...bodyTargets, ...crystalTargets]
+}
+
+function oathUpgradeTargets(oath: SimulatorOath | null): SimulatorTarget[] {
+  if (oath === null || oath.upgrade === null) {
+    return []
+  }
+
+  return [{ kind: 'oathUpgrade', key: 'oathUpgrade', upgrade: oath.upgrade }]
 }
 
 /**
- * 장비창의 줄 순서대로 장비 세트, 장비, 칭호, 크리쳐, 오라, 아바타, 스위칭 뒤에 서약 세트, 서약 본체, 진의, 서약 결정을
- * 둔다.
+ * 장비창의 줄 순서대로 장비 구획의 장비 세트, 장비, 칭호, 크리쳐, 오라, 서약 구획의 서약 세트, 서약 본체, 서약 결정, 기타
+ * 구획의 아바타, 스위칭, 진의를 둔다.
  */
 export function toSimulatorTargets(
   equipmentSet: SimulatorEquipmentSet | null,
@@ -90,19 +94,30 @@ export function toSimulatorTargets(
   return [
     ...equipmentSetTargets(equipmentSet),
     ...rows.map(rowTarget),
+    ...oathTargets(oath),
     ...avatarTargets(avatarPresetAvailable),
     ...switchingTargets(switching),
-    ...oathTargets(oath)
+    ...oathUpgradeTargets(oath)
   ]
 }
 
-export function isOathTarget(target: SimulatorTarget): boolean {
-  return (
-    target.kind === 'oathSet' ||
-    target.kind === 'oathBody' ||
-    target.kind === 'oathUpgrade' ||
-    target.kind === 'crystal'
-  )
+export type SimulatorSection = 'equipment' | 'oath' | 'etc'
+
+export function sectionOf(target: SimulatorTarget): SimulatorSection {
+  switch (target.kind) {
+    case 'equipmentSet':
+    case 'equipment':
+    case 'slotItem':
+      return 'equipment'
+    case 'oathSet':
+    case 'oathBody':
+    case 'crystal':
+      return 'oath'
+    case 'avatar':
+    case 'switching':
+    case 'oathUpgrade':
+      return 'etc'
+  }
 }
 
 /** 고른 줄이 없거나 사라졌으면 첫 장비 부위를 연다. */

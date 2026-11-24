@@ -15,12 +15,10 @@ const UPGRADE_STEP_PREFIX = /^<[^>]+>\s*-\s*/
 // 엔진은 서약 포인트가 아닌 선택지를 모두 같은 값으로 계산해, 새로 올리는 단계는 1~4단계는 최종 데미지, 5~9단계는 이동속도로 둔다.
 const DEFAULT_KINDS: ReadonlySet<OathUpgradeKind> = new Set(['Damage', 'Speed'])
 
-/** oathpointOption은 서약 포인트를 고를 수 있는 1~4단계에만 있다. */
 export type OathUpgradeStepView = Readonly<{
   step: number
   name: string
   defaultOption: string
-  oathpointOption: string | null
 }>
 
 /** worn은 착용한 진의를 1단계부터 차례로 둔 것이다. */
@@ -49,7 +47,6 @@ function toStepView({
   options
 }: ReturnType<typeof oathUpgradeSteps>[number]): OathUpgradeStepView | null {
   const defaultOption = options.find(({ kind }) => DEFAULT_KINDS.has(kind))?.option
-  const oathpointOption = options.find(({ kind }) => kind === 'Oathpoint')?.option ?? null
 
   if (defaultOption === undefined) {
     return null
@@ -57,7 +54,7 @@ function toStepView({
 
   const stepName = name.replace(UPGRADE_STEP_PREFIX, '')
 
-  return { step, name: stepName, defaultOption, oathpointOption }
+  return { step, name: stepName, defaultOption }
 }
 
 // 응답의 단계를 lib 단계 이름으로 맞추고, 1단계부터 끊기지 않고 이어진 단계까지만 착용한 진의로 읽는다.
@@ -168,39 +165,4 @@ export function changeUpgradeUnlock(
     .map((view) => ({ step: view.step, option: view.defaultOption }))
 
   return settledUpgrade(upgrade, [...current, ...added])
-}
-
-/**
- * 해금한 단계를 서약 포인트로 바꾸거나 되돌린다. 되돌릴 때 착용한 선택지가 서약 포인트가 아니면 착용한 선택지로, 그 밖에는 기본 선택지로 둔다.
- */
-export function changeUpgradeOathpoint(
-  upgrade: SimulatorOathUpgrade,
-  changes: OathUpgradeChanges,
-  step: number,
-  oathpoint: boolean
-): OathUpgradeChanges {
-  const current = upgradeOf(upgrade, changes)
-  const view = upgrade.steps.find((candidate) => candidate.step === step)
-
-  if (view?.oathpointOption == null || step > current.length) {
-    return changes
-  }
-
-  const worn = upgrade.worn.find((selection) => selection.step === step)?.option
-  const restored = worn !== undefined && worn !== view.oathpointOption ? worn : view.defaultOption
-  const option = oathpoint ? view.oathpointOption : restored
-  const next = current.map((selection) => (selection.step === step ? { step, option } : selection))
-
-  return settledUpgrade(upgrade, next)
-}
-
-export function isOathpointChosen(
-  upgrade: SimulatorOathUpgrade,
-  changes: OathUpgradeChanges,
-  step: number
-): boolean {
-  const option = upgradeOf(upgrade, changes).find((selection) => selection.step === step)?.option
-  const view = upgrade.steps.find((candidate) => candidate.step === step)
-
-  return option !== undefined && option === view?.oathpointOption
 }
