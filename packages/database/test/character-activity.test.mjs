@@ -155,7 +155,7 @@ test('마지막 활동은 더 최근 시각일 때만 바꾸고, 활동을 기�
   assert.deepEqual(await lastActiveOf('active'), at('20T21:00:00'))
 })
 
-test('클리어 모집단은 활성만 읽으면 비활성 캐릭터를 빼고, 비활성까지 읽으면 함께 읽음', {
+test('클리어 수집 대상은 활성만 읽으면 비활성 캐릭터를 빼고, 비활성까지 읽으면 함께 읽음', {
   skip: port === undefined
 }, async () => {
   const bakalOf = (rows) => keysOf(rows).filter((key) => key.startsWith('bakal/'))

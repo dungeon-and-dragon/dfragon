@@ -33,7 +33,7 @@ export class ContentClearCollectionService {
 
   /**
    * 진행 위치를 캐릭터 묶음마다 저장해, 도중에 끝난 수집은 다음 실행이 같은 시작 시각의 구간으로 남은 캐릭터부터 이어 받는다.
-   * 모집단은 클리어 기록을 다 저장한 뒤 저장한다. 조회는 모집단의 수집 시각이 바뀔 때 집계를 다시 읽는다.
+   * 분모는 클리어 기록을 다 저장한 뒤 저장한다. 조회는 분모의 수집 시각이 바뀔 때 집계를 다시 읽는다.
    */
   async collect(
     reportProgress: (done: number, total: number) => void
@@ -49,7 +49,7 @@ export class ContentClearCollectionService {
       plan.weeks.map(({ contentId, weekStart }) => weekKey(contentId, weekStart))
     )
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
-    // 분모는 비활성을 포함한 모집단 전체로 두고, 최근 구간만 받을 때는 요청을 활성 캐릭터에만 보낸다.
+    // 분모는 비활성을 포함한 수집 대상 전체로 두고, 최근 구간만 받을 때는 요청을 활성 캐릭터에만 보낸다.
     // 다시 접속한 비활성 캐릭터의 클리어는 활동이 다시 기록될 때까지 빠지는 대신 매주 요청이 줄어든다.
     const population = await this.repository.countPopulation({
       minMaxFame: collectionMinFame,
