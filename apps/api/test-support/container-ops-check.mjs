@@ -80,9 +80,9 @@ const queues = await get('/api/queues')
 assert.equal(queues.status, 200)
 assert.deepEqual(await queues.json(), {
   queues: [
-    { name: 'timeline-sync', waiting: 0, running: 0 },
+    { name: 'timeline-sync', waiting: 1, running: 0 },
     { name: 'enhancement-backfill', waiting: 0, running: 0 },
-    { name: 'season-backfill', waiting: 0, running: 0 }
+    { name: 'season-backfill', waiting: 0, running: 1 }
   ]
 })
 const readCollection = async () => {
