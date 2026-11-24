@@ -28,6 +28,7 @@ import {
   toTimelineReads
 } from '../src/infrastructure/database/adventure-timeline.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+import { syncRequestRecorder } from './timeline-request-fixtures.js'
 
 const MERGES_CHARACTERS = '여러 캐릭터의 기록을 시각 내림차순, 같은 시각이면 id 오름차순으로 합친다'
 const SAME_TIME_SOURCES = '같은 시각이면 강화와 획득을 클리어보다 앞에 둔다'
@@ -305,11 +306,9 @@ async function listen(
       readAdventureSeasonBackfill: unusedRead
     },
     timeline: {
-      sync,
       read: unused,
       readPage: unused,
-      backfillEnhancements: unused,
-      backfillSeason: unused,
+      requests: syncRequestRecorder(sync),
       close: async () => undefined
     },
     writeAccessLog: () => undefined

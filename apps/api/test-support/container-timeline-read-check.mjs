@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict'
+import { setTimeout } from 'node:timers/promises'
 import {
   createDatabaseClient,
+  deleteTimelineSyncRequest,
   readDatabaseConfiguration,
+  recordTimelineSyncSuccess,
+  replaceEnhancementBackfillRange,
   replaceTimelineRange
 } from '@dfragon/database'
-import { createTimelineSyncQueue } from './dist/application/character-timeline/queue.js'
 import { readCharacterTimeline } from './dist/infrastructure/database/character-timeline-read.js'
+import { DatabaseTimelineSyncRequestRepository } from './dist/infrastructure/database/character-timeline.js'
 import { CharacterTimelineService } from './dist/application/character-timeline/service.js'
+import { TimelineSyncRequestService } from './dist/application/character-timeline/sync-requests.js'
 
 // 합성 캐릭터와 타임라인이다. 천해천(2026-03-26 06:00+09) 둘째 주 목요일 정오에 읽는다.
 const now = new Date('2026-04-02T12:00:00+09:00')
@@ -124,23 +129,18 @@ try {
     acquisitionsCursor: null
   })
 
-  let release
-  const syncing = new Promise((resolve) => {
-    release = resolve
-  })
-  const queue = createTimelineSyncQueue(
-    async (character) => {
-      await syncing
-      await replaceTimelineRange(
-        client,
-        character,
-        range,
-        [raid(201, weekStart, '합성 레이드')],
-        []
-      )
-    },
-    () => assert.fail('동기화 실패가 보고되면 안 된다')
+  // 요청 행을 지우는 worker는 이 검사가 흉내 낸다.
+  const requests = new TimelineSyncRequestService(
+    new DatabaseTimelineSyncRequestRepository(client),
+    {
+      now: () => new Date(),
+      pause: setTimeout
+    }
   )
+  const requestRows = async (characterId) =>
+    client.$queryRaw`
+      SELECT "kind", "awaited_at" IS NOT NULL AS "awaited", "started_at" IS NULL AS "waiting"
+      FROM "timeline_sync_requests" WHERE "character_id" = ${characterId} ORDER BY "kind"`
   let readStarted = false
   const service = new CharacterTimelineService(
     {
@@ -150,17 +150,55 @@ try {
         return readCharacterTimeline(client, character, now)
       }
     },
-    queue
+    requests
   )
-  queue.request(waited)
   const answer = service.get(waited)
-  await client.$queryRaw`SELECT 1`
+
+  while ((await requestRows(waited.characterId)).length === 0) {
+    await setTimeout(50)
+  }
+
+  assert.deepEqual(await requestRows(waited.characterId), [
+    { kind: 'sync', awaited: true, waiting: true }
+  ])
   assert.equal(readStarted, false)
-  release()
+  await replaceTimelineRange(client, waited, range, [raid(201, weekStart, '합성 레이드')], [])
+  await deleteTimelineSyncRequest(client, { kind: 'sync', ...waited, seasonId: 0 })
 
   assert.deepEqual((await answer).weeklyClears, [
     { kind: 'raid', name: '합성 레이드', modeName: null, hard: false, occurredAt: weekStart }
   ])
+
+  // 1시간 안에 성공한 캐릭터의 정기 동기화와 중천 직전 분까지 받은 캐릭터의 강화 백필은 넣지 않는다.
+  const recent = { serverId: 'cain', characterId: 'timeline-request-recent-success' }
+  const backfilled = { serverId: 'cain', characterId: 'timeline-request-backfilled' }
+  await recordTimelineSyncSuccess(client, recent)
+  await replaceEnhancementBackfillRange(
+    client,
+    backfilled,
+    {
+      start: new Date('2024-12-01T00:00:00+09:00'),
+      end: new Date('2025-01-09T05:59:00+09:00')
+    },
+    [402],
+    [],
+    []
+  )
+  await requests.request([recent, backfilled], { enhancementBackfill: true })
+  assert.deepEqual(await requestRows(recent.characterId), [
+    { kind: 'enhancement-backfill', awaited: false, waiting: true }
+  ])
+  assert.deepEqual(await requestRows(backfilled.characterId), [
+    { kind: 'sync', awaited: false, waiting: true }
+  ])
+
+  // 옛 시즌 받기 요청 행이 남은 시즌만 그 요청을 넣은 캐릭터들에게 받는 중이다.
+  await requests.requestSeasonBackfill([
+    { character: recent, seasonId: 9, range: { start: range.start, end: range.start } }
+  ])
+  assert.deepEqual([...(await requests.readSeasonBackfillRunning([backfilled, recent]))], [9])
+  assert.deepEqual([...(await requests.readSeasonBackfillRunning([backfilled]))], [])
+  await client.$executeRaw`DELETE FROM "timeline_sync_requests"`
 } finally {
   await client.$disconnect()
 }

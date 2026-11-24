@@ -19,8 +19,8 @@ import {
   readAdventureSeasonDays,
   readAdventureSeasonBackfill
 } from './dist/infrastructure/database/adventure-activity.js'
-import { SeasonBackfillService } from './dist/application/character-timeline/season-backfill.js'
-import { DatabaseSeasonBackfillRepository } from './dist/infrastructure/database/character-timeline.js'
+import { SeasonBackfillService } from '@dfragon/server-core/application/character-timeline/index.js'
+import { DatabaseSeasonBackfillRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { readAdventureTimeline } from './dist/infrastructure/database/adventure-timeline.js'
 import { readAdventureWeeklyClears } from './dist/infrastructure/database/adventure-weekly.js'
 import { CharacterSearchService } from './dist/application/character-search/service.js'
@@ -567,7 +567,7 @@ try {
     adventureName: '없는모험단',
     characters: []
   })
-  // 합성 클리어는 지금 시각의 이번 주보다 오래돼 비고, 동기화 요청은 internal network라 기록만 남기고 실패한다.
+  // 합성 클리어는 지금 시각의 이번 주보다 오래돼 비고, 동기화 요청은 요청 테이블에 넣기만 한다.
   const weeklyAnswer = await get(`/adventures/${encodeURIComponent(adventureName)}/weekly`)
   assert.equal(weeklyAnswer.adventureName, adventureName)
   assert.deepEqual(weeklyAnswer.clearNames, fixedClearNames)

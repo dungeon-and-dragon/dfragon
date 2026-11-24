@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { setImmediate } from 'node:timers/promises'
 import type { SeasonBackfillState, TimelineCharacter, TimelineRange } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
 import {
@@ -15,12 +14,13 @@ import {
   withSeasonBackfills
 } from '../src/domain/adventure-guild/activity.js'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
-import type { SeasonBackfillJob } from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   toSeasonBackfillJobs,
   toSeasonBackfillProgress
 } from '../src/domain/character-timeline/season-backfill.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+import type { TimelineSyncRequestRepository } from '../src/application/character-timeline/repository.js'
+import { memoryTimelineRequests } from './timeline-request-fixtures.js'
 
 // 시즌 시작은 운영 DB seasons 표와 같은 값이고, 캐릭터와 타임라인은 합성이다.
 const at = (time: string) => new Date(`${time}+09:00`)
@@ -147,18 +147,9 @@ test('끝까지 받은 캐릭터는 받기 대상에서 빼고, 받는 중이던
   ])
 })
 
-function gate() {
-  let release!: () => void
-  const promise = new Promise<void>((resolve) => {
-    release = resolve
-  })
-
-  return { promise, release }
-}
-
 async function listen(
   reader: Pick<AdventureGuildRepository, 'readAdventureSeasonBackfill' | 'readAdventureActivity'>,
-  backfill: (job: SeasonBackfillJob) => Promise<void>
+  requests: TimelineSyncRequestRepository
 ): Promise<{ app: HttpAppHandle; origin: string }> {
   const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
   const { app } = await createApiHttpApp({
@@ -175,11 +166,9 @@ async function listen(
       ...reader
     },
     timeline: {
-      sync: async () => undefined,
       read: unused,
       readPage: unused,
-      backfillEnhancements: unused,
-      backfillSeason: backfill,
+      requests,
       close: async () => undefined
     },
     writeAccessLog: () => undefined
@@ -207,11 +196,8 @@ function backfillRead(): AdventureSeasonBackfillRead {
   }
 }
 
-test('옛 시즌 받기 요청은 받기를 기다리지 않고 진행률을 주며, 받는 중에 다시 요청해도 캐릭터마다 한 번만 받는다', {
-  timeout: 10_000
-}, async (t) => {
-  const backfilling = gate()
-  const started: SeasonBackfillJob[] = []
+test('옛 시즌 받기 요청은 받기를 기다리지 않고 캐릭터마다 요청을 넣은 뒤 진행률을 주며, 요청 행이 없어지면 running이 false이다', async (t) => {
+  const requests = memoryTimelineRequests()
   const reads: [string, number][] = []
   const { app, origin } = await listen(
     {
@@ -229,22 +215,15 @@ test('옛 시즌 받기 요청은 받기를 기다리지 않고 진행률을 주
         }
       })
     },
-    async (requested) => {
-      started.push(requested)
-      await backfilling.promise
-    }
+    requests.repository
   )
-  t.after(async () => {
-    backfilling.release()
-    await app.close()
-  })
+  t.after(() => app.close())
   const path = `/adventures/${encodeURIComponent('합성 모험단')}/activity/seasons/9/backfill`
+  const activityPath = `/adventures/${encodeURIComponent('합성 모험단')}/activity`
 
   const first = await fetch(new URL(path, origin), { method: 'POST' })
   const second = await fetch(new URL(path, origin), { method: 'POST' })
-  const activity = await fetch(
-    new URL(`/adventures/${encodeURIComponent('합성 모험단')}/activity`, origin)
-  )
+  const activity = await fetch(new URL(activityPath, origin))
 
   const expected = {
     id: 9,
@@ -260,31 +239,22 @@ test('옛 시즌 받기 요청은 받기를 기다리지 않고 진행률을 주
     ['합성 모험단', 9],
     ['합성 모험단', 9]
   ])
+  // 시즌 활동 조회는 캐릭터마다 정기 동기화도 넣어, 옛 시즌 받기 행만 본다.
   assert.deepEqual(
-    started.map(({ character: { characterId }, seasonId }) => [characterId, seasonId]),
-    [
-      ['season-backfill', 9],
-      ['season-backfill-other', 9]
-    ]
+    requests.keys().filter((key) => key.startsWith('season-backfill/')),
+    ['season-backfill/cain/season-backfill/9', 'season-backfill/siroco/season-backfill-other/9']
   )
   assert.deepEqual((await activity.json()).seasons, [
     expected,
     { id: 10, name: '중천', startsAt: '2025-01-08T21:00:00.000Z', available: true }
   ])
 
-  // 두 번째 요청이 중복으로 대기열에 들어갔다면 앞의 받기가 끝난 뒤 시작한다.
-  backfilling.release()
-  const activityPath = `/adventures/${encodeURIComponent('합성 모험단')}/activity`
-  const running = async () => {
-    const response = await fetch(new URL(activityPath, origin))
-
-    return (await response.json()).seasons[0].backfill.running
+  for (const requested of [character, other]) {
+    requests.remove({ kind: 'season-backfill', ...requested, seasonId: 9 })
   }
-  while (await running()) {
-    await setImmediate()
-  }
+  const done = await fetch(new URL(activityPath, origin))
 
-  assert.equal(started.length, 2)
+  assert.equal((await done.json()).seasons[0].backfill.running, false)
 })
 
 test('받을 캐릭터가 없으면 running이 false이다', async (t) => {
@@ -297,7 +267,7 @@ test('받을 캐릭터가 없으면 running이 false이다', async (t) => {
       }),
       readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다')
     },
-    async () => assert.fail('끝까지 받은 시즌은 받으면 안 된다')
+    memoryTimelineRequests().repository
   )
   t.after(() => app.close())
 
@@ -320,7 +290,7 @@ test('옛 시즌 받기의 시즌 번호가 정수가 아니거나 받을 수 �
       },
       readAdventureActivity: async () => assert.fail('시즌 활동을 읽으면 안 된다')
     },
-    async () => assert.fail('받으면 안 된다')
+    memoryTimelineRequests().repository
   )
   t.after(() => app.close())
 

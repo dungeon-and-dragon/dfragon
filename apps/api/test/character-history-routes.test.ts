@@ -12,6 +12,7 @@ import type { CharacterHistoryRepository } from '../src/application/character-hi
 import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
 import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
+import { memoryTimelineRequests } from './timeline-request-fixtures.js'
 
 const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
 
@@ -145,11 +146,9 @@ test('history는 기본 정보, 점수, 섹션별 변경 시각을 주고 타임
     details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     characterHistory: repository(),
     timeline: {
-      sync: unused,
-      backfillEnhancements: unused,
-      backfillSeason: unused,
       read: unused,
       readPage: unused,
+      requests: memoryTimelineRequests().repository,
       close: async () => undefined
     }
   })

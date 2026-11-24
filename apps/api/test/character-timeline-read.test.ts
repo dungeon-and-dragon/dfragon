@@ -3,7 +3,6 @@ import test from 'node:test'
 import { setImmediate as nextTurn } from 'node:timers/promises'
 import type { TimelineEventRow, TimelineItemRow } from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
-import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
 import {
   type CharacterTimeline,
   EMPTY_CHARACTER_TIMELINE,
@@ -12,33 +11,11 @@ import {
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { parseCharacterTimelineRows } from '../src/infrastructure/database/character-timeline-read.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+import { memoryTimelineRequests } from './timeline-request-fixtures.js'
 import { startOfResetWeek } from '@dfragon/server-core/domain/seoul-time.js'
 
 const character = { serverId: 'siroco', characterId: 'timeline-read-fixture' }
 const unused = async (): Promise<never> => assert.fail('부르면 안 된다')
-
-function gate() {
-  let release!: () => void
-  const promise = new Promise<void>((resolve) => {
-    release = resolve
-  })
-
-  return { promise, release }
-}
-
-function settled(promise: Promise<unknown>): () => boolean {
-  let done = false
-  promise.then(
-    () => {
-      done = true
-    },
-    () => {
-      done = true
-    }
-  )
-
-  return () => done
-}
 
 function event(row: Partial<TimelineEventRow> & Pick<TimelineEventRow, 'code'>): TimelineEventRow {
   return {
@@ -214,179 +191,27 @@ test('형식이 다른 선택 필드는 null이나 false로 두고 이름, after
   )
 })
 
-test('기다리는 요청은 그 캐릭터의 진행 중인 동기화가 끝난 뒤 풀리고 같은 동기화를 함께 기다린다', async () => {
-  const gates = new Map([
-    ['first', gate()],
-    ['second', gate()],
-    [character.characterId, gate()]
-  ])
-  const synced: string[] = []
-  const queue = createTimelineSyncQueue(
-    async ({ characterId }) => {
-      synced.push(characterId)
-      await gates.get(characterId)!.promise
-    },
-    () => assert.fail('동기화 실패가 보고되면 안 된다')
-  )
-  queue.request({ serverId: 'siroco', characterId: 'first' })
-  queue.request({ serverId: 'siroco', characterId: 'second' })
-  const waited = settled(queue.requestAndWait(character))
-  const waitedAgain = settled(queue.requestAndWait(character))
-  await nextTurn()
-
-  assert.deepEqual(synced, ['first', 'second', character.characterId])
-  assert.equal(waited(), false)
-
-  gates.get('first')!.release()
-  await nextTurn()
-
-  assert.equal(waited(), false)
-
-  gates.get(character.characterId)!.release()
-  await nextTurn()
-
-  assert.equal(waited(), true)
-  assert.equal(waitedAgain(), true)
-  assert.deepEqual(synced, ['first', 'second', character.characterId])
-  gates.get('second')!.release()
-})
-
-test('끝을 기다리는 요청은 먼저 들어와 기다리던 다른 캐릭터보다 앞서 시작한다', async () => {
-  const running = gate()
-  const synced: string[] = []
-  const queue = createTimelineSyncQueue(
-    async ({ characterId }) => {
-      synced.push(characterId)
-      await running.promise
-    },
-    () => assert.fail('동기화 실패가 보고되면 안 된다')
-  )
-
-  // 함께 처리하는 4명을 채워 뒤의 요청이 기다리게 한다.
-  for (let index = 0; index < 4; index++) {
-    queue.request({ serverId: 'siroco', characterId: `running-${index}` })
-  }
-
-  queue.request({ serverId: 'siroco', characterId: 'queued-1' })
-  queue.request({ serverId: 'siroco', characterId: 'queued-2' })
-  const waited = settled(queue.requestAndWait(character))
-  const promoted = settled(queue.requestAndWait({ serverId: 'siroco', characterId: 'queued-2' }))
-  await nextTurn()
-
-  assert.equal(synced.length, 4)
-  assert.deepEqual(queue.counts(), { waiting: 3, running: 4 })
-
-  running.release()
-  await nextTurn()
-
-  assert.deepEqual(synced.slice(4), [character.characterId, 'queued-2', 'queued-1'])
-  assert.equal(waited(), true)
-  assert.equal(promoted(), true)
-})
-
-test('동기화가 실패를 기록하지 못해도 기다리는 요청은 풀린다', async () => {
-  let reported = 0
-  const queue = createTimelineSyncQueue(
-    async () => {
-      throw new Error('database closed')
-    },
-    () => {
-      reported++
-    }
-  )
-
-  await queue.requestAndWait(character)
-
-  assert.equal(reported, 1)
-})
-
-test('queue를 닫으면 끝을 기다리며 대기하던 요청은 동기화 없이 풀린다', async () => {
-  const running = gate()
-  const synced: string[] = []
-  const queue = createTimelineSyncQueue(
-    async ({ characterId }) => {
-      synced.push(characterId)
-      await running.promise
-    },
-    () => assert.fail('동기화 실패가 보고되면 안 된다')
-  )
-
-  for (let index = 0; index < 4; index++) {
-    queue.request({ serverId: 'siroco', characterId: `running-${index}` })
-  }
-
-  const waited = settled(queue.requestAndWait(character))
-  await nextTurn()
-
-  assert.equal(waited(), false)
-
-  queue.close()
-  await nextTurn()
-
-  assert.equal(waited(), true)
-  assert.deepEqual(queue.counts(), { waiting: 0, running: 4 })
-
-  running.release()
-  await nextTurn()
-
-  assert.equal(synced.includes(character.characterId), false)
-})
-
-// 닫은 뒤 온 요청이 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
-test('queue를 닫으면 닫은 뒤 온 요청은 동기화 없이 풀리고 진행 중인 동기화는 끝을 기다린다', {
-  timeout: 10_000
-}, async () => {
-  const running = gate()
-  const synced: string[] = []
-  const queue = createTimelineSyncQueue(
-    async ({ characterId }) => {
-      synced.push(characterId)
-      await running.promise
-    },
-    () => assert.fail('동기화 실패가 보고되면 안 된다')
-  )
-  queue.request({ serverId: 'siroco', characterId: 'first' })
-  queue.request({ serverId: 'siroco', characterId: 'second' })
-
-  queue.close()
-  await queue.requestAndWait(character)
-  await queue.requestAndWait({ serverId: 'siroco', characterId: 'after-close' })
-  const runningWaited = settled(queue.requestAndWait({ serverId: 'siroco', characterId: 'first' }))
-  await nextTurn()
-
-  assert.deepEqual(synced, ['first', 'second'])
-  assert.equal(runningWaited(), false)
-
-  running.release()
-  await nextTurn()
-
-  assert.equal(runningWaited(), true)
-})
-
-test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값을 준다', async (t) => {
+test('타임라인 조회는 그 캐릭터의 동기화 요청 행이 없어진 뒤 읽은 값을 준다', async (t) => {
   const stored: CharacterTimeline = {
     ...EMPTY_CHARACTER_TIMELINE,
     seasonClears: [{ kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 }],
     enhancementsCursor: '1762311600000.42'
   }
+  const requests = memoryTimelineRequests()
+  const syncRequest = { kind: 'sync' as const, ...character, seasonId: 0 }
   let synced = false
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     timeline: {
-      sync: async () => {
-        await nextTurn()
-        synced = true
-      },
       read: async (requested) => {
         assert.deepEqual(requested, character)
-        assert.equal(synced, true, '동기화가 끝나기 전에 읽으면 안 된다')
+        assert.equal(synced, true, '요청 행이 없어지기 전에 읽으면 안 된다')
 
         return stored
       },
       readPage: unused,
-      backfillEnhancements: unused,
-      backfillSeason: unused,
+      requests: requests.repository,
       close: async () => undefined
     },
     todayGrade: { fetchShopGrade: unused },
@@ -397,10 +222,19 @@ test('타임라인 조회는 그 캐릭터의 동기화가 끝난 뒤 읽은 값
   const origin = await app.getUrl()
   const path = `/characters/${character.serverId}/${character.characterId}/timeline`
 
-  const response = await fetch(new URL(path, origin))
+  const responding = fetch(new URL(path, origin))
+
+  while (requests.inserted.length === 0) {
+    await nextTurn()
+  }
+
+  synced = true
+  requests.remove(syncRequest)
+  const response = await responding
 
   assert.equal(response.status, 200)
   assert.deepEqual(await response.json(), stored)
+  assert.deepEqual(requests.inserted, [{ ...syncRequest, awaited: true }])
 })
 
 test('DB 설정이 없으면 타임라인 조회는 query와 상관없이 빈 배열을, 이어 받기는 빈 목록을 주고 HEAD도 200으로 답하며 잘못된 캐릭터는 거절한다', async (t) => {
@@ -520,15 +354,13 @@ test('이어 받기는 동기화를 기다리지 않고 before의 cursor로 목�
     search: { searchCharacters: unused },
     details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     timeline: {
-      sync: unused,
       read: unused,
       readPage: async (requested, list, before) => {
         reads.push({ requested, list, before })
 
         return stored
       },
-      backfillEnhancements: unused,
-      backfillSeason: unused,
+      requests: memoryTimelineRequests().repository,
       close: async () => undefined
     },
     todayGrade: { fetchShopGrade: unused },
