@@ -98,11 +98,35 @@ const RESPONSE_HEADER_RULES = {
   '/ocr/korean-rec.onnx': { headers: { 'Content-Type': 'application/octet-stream' } }
 }
 
+// 서버에서 그리는 공개 화면은 사용자마다 다르지 않아, 같은 주소의 HTML을 서버 메모리에 두고 정한 시간 동안 다시 낸다.
+// cache rule은 기본으로 query를 버리므로 랭킹 필터, 클리어 주처럼 query로 고른 화면을 위해 query를 key에 넣는다.
+// 브라우저에는 지금처럼 no-cache를 보내도록 cache rule이 Cache-Control을 만들지 않게 한다.
+function pageCache(seconds: number) {
+  return { cache: { maxAge: seconds, allowQuery: true, sendCacheControl: false } }
+}
+
+const CHARACTER_LIST_PAGE_CACHE = pageCache(30)
+const AGGREGATE_PAGE_CACHE = pageCache(300)
+
+const PAGE_CACHE_RULES = {
+  '/': AGGREGATE_PAGE_CACHE,
+  '/rankings': CHARACTER_LIST_PAGE_CACHE,
+  '/stats': AGGREGATE_PAGE_CACHE,
+  '/stats/**': AGGREGATE_PAGE_CACHE,
+  '/clears': AGGREGATE_PAGE_CACHE,
+  '/clears/**': AGGREGATE_PAGE_CACHE,
+  '/guilds/**': CHARACTER_LIST_PAGE_CACHE
+}
+
+// 기본 상한 100MB는 운영 컨테이너 메모리 256MB에 비해 크다. CPU 1개, 256MB 컨테이너에 캐시에 없는 주소를 초당 100개
+// 넘게 보내면 32MB에서는 OOM으로 죽었고 16MB에서는 초당 200개에도 최고 238MB로 버텼다.
+const PAGE_CACHE_MAX_BYTES = 16 * 1024 * 1024
+
 export default defineConfig(({ command }) => {
   const routeRules =
     command === 'serve'
       ? { ...RESPONSE_HEADER_RULES, ...DEV_API_PROXY_RULE }
-      : RESPONSE_HEADER_RULES
+      : { ...RESPONSE_HEADER_RULES, ...PAGE_CACHE_RULES }
 
   return {
     plugins: [
@@ -117,7 +141,12 @@ export default defineConfig(({ command }) => {
         client: { entry: 'app/client.tsx' },
         start: { entry: 'app/start.ts' }
       }),
-      nitro({ routeRules }),
+      // node-cluster는 worker 수를 NITRO_CLUSTER_WORKERS로 받고, 없으면 컨테이너 CPU 상한이 아닌 host의 CPU 수만큼 띄운다.
+      nitro({
+        preset: 'node-cluster',
+        routeRules,
+        cache: { memory: { maxBytes: PAGE_CACHE_MAX_BYTES } }
+      }),
       react(),
       uiNotices(),
       clientNotices(),
