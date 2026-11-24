@@ -1,3 +1,7 @@
+import {
+  SWITCHING_EQUIPMENT_MAX,
+  UNIQUE_SWITCHING_EQUIPMENT_PREFIXES
+} from './equipment-variants.js'
 import { isRecord } from './utils/shape-check.js'
 
 export type BuffSwitchingRole = 'dealer' | 'buffer'
@@ -17,12 +21,22 @@ export const BUFFER_BUFF_LEVELS = { min: 10, max: 33 } as const
 // 딜러의 스위칭 항은 배운 레벨보다 10레벨 높을 때까지만 오른다.
 export const DEALER_BUFF_LEVEL_SPAN = 10
 
-/** level은 버프 강화 스킬의 지금 레벨이고, min~max 밖이어도 지금 레벨은 고를 수 있다. */
+/** count는 버프 강화 장비(칭호 제외)에 지금 등록한 유니크 스위칭 장비 수이고, 0~max를 고를 수 있다. */
+export interface BuffSwitchingEquipment {
+  readonly count: number
+  readonly max: number
+}
+
+/**
+ * level은 버프 강화 스킬의 지금 레벨이고, min~max 밖이어도 지금 레벨은 고를 수 있다.
+ * 버퍼의 버프용 유니크 스위칭 장비는 게임에 없어 버퍼의 equipment는 null이다.
+ */
 export interface BuffSwitching {
   readonly skillName: string
   readonly level: number
   readonly min: number
   readonly max: number
+  readonly equipment: BuffSwitchingEquipment | null
 }
 
 export interface BuffSwitchingSource {
@@ -112,6 +126,28 @@ function rangeOf(
   return { min: learned, max: learned + DEALER_BUFF_LEVEL_SPAN }
 }
 
+function isUniqueSwitchingEquipment(item: unknown): boolean {
+  if (!isRecord(item) || item.slotId === 'TITLE' || typeof item.itemName !== 'string') {
+    return false
+  }
+
+  const { itemName } = item
+
+  return UNIQUE_SWITCHING_EQUIPMENT_PREFIXES.some((prefix) => itemName.startsWith(prefix))
+}
+
+function switchingEquipmentOf(source: BuffSwitchingSource): BuffSwitchingEquipment | null {
+  if (source.role === 'buffer') {
+    return null
+  }
+
+  const registered = isRecord(source.buff) ? source.buff.equipment : null
+  const items = Array.isArray(registered) ? registered : []
+  const count = items.filter(isUniqueSwitchingEquipment).length
+
+  return { count, max: SWITCHING_EQUIPMENT_MAX }
+}
+
 /** 버프 강화 스킬의 레벨을 바꿀 수 없는 캐릭터(등록한 스킬이 없거나 버퍼의 주 버프가 아님)는 null이다. */
 export function buffSwitchingOf(source: BuffSwitchingSource): BuffSwitching | null {
   const skill = buffSkillOf(source.buff)
@@ -126,7 +162,9 @@ export function buffSwitchingOf(source: BuffSwitchingSource): BuffSwitching | nu
     return null
   }
 
-  return { skillName: skill.name, level: skill.level, ...range }
+  const equipment = switchingEquipmentOf(source)
+
+  return { skillName: skill.name, level: skill.level, ...range, equipment }
 }
 
 export function isSelectableBuffLevel(switching: BuffSwitching, level: number): boolean {
@@ -135,6 +173,14 @@ export function isSelectableBuffLevel(switching: BuffSwitching, level: number): 
   }
 
   return isLevel(level) && level >= switching.min && level <= switching.max
+}
+
+export function isSelectableSwitchingEquipment(switching: BuffSwitching, count: number): boolean {
+  if (switching.equipment === null) {
+    return false
+  }
+
+  return isLevel(count) && count >= 0 && count <= switching.equipment.max
 }
 
 /** 고를 수 있는 레벨을 오름차순으로 돌려준다. 범위 밖의 지금 레벨도 넣는다. */
