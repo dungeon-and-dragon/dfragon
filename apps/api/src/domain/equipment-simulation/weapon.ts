@@ -1,14 +1,36 @@
-import { weaponMaxTuneLevelOf } from '@dfragon/lib/equipment-variants'
+import {
+  type EquipmentVariantItem,
+  WEAPON_RELEASE_MAX,
+  type WeaponVariant,
+  findWeaponVariant,
+  weaponItemOf,
+  weaponMaxTuneLevelOf,
+  weaponVariantsOf
+} from '@dfragon/lib/equipment-variants'
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { EquipmentChange } from './equipment.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
 const WEAPON_SLOT = 'WEAPON'
+const RELEASE_LINE = '해방'
+const DETAIL_KEYS = [
+  'itemTypeId',
+  'itemType',
+  'itemTypeDetailId',
+  'itemTypeDetail',
+  'itemAvailableLevel'
+] as const
+// 엔진은 아이템을 바꿀 때 옛 무기의 옵션을 뺄 수만 있게 한다.
+const OLD_OPTION_KEYS = ['asrahanOption', 'fixedOption'] as const
 
-export interface WeaponTuneEdit {
+export interface WeaponEdit {
   readonly original: CharacterPayload
-  readonly level: number
+  /** null이면 착용한 아이템을 그대로 둔다. */
+  readonly item: EquipmentVariantItem | null
+  readonly tune: number
+  /** 해방 계열이 아니면 null이다. */
+  readonly release: number | null
 }
 
 function wornWeapon(equipment: CharacterPayload): CharacterPayload | null {
@@ -32,22 +54,119 @@ function wornTuneLevel(weapon: CharacterPayload): number | null {
   return null
 }
 
-/** 무기는 조율만 바꾼다. 선택지와 정밀도, 조율할 수 없는 무기의 조율, 최대 단계를 넘는 조율은 거절한다. */
-export function editWeaponTune(
+function wornRelease(weapon: CharacterPayload): number | null {
+  const { weaponRelease } = weapon
+
+  if (isRecord(weaponRelease) && typeof weaponRelease.value === 'number') {
+    return weaponRelease.value
+  }
+
+  return null
+}
+
+function wornVariantOf(weapon: CharacterPayload): WeaponVariant | null {
+  const { itemId } = weapon
+
+  if (typeof itemId !== 'string') {
+    return null
+  }
+
+  const match = findWeaponVariant(itemId)
+
+  if (match === null) {
+    return null
+  }
+
+  return match.variant
+}
+
+function chosenVariant(weapon: CharacterPayload, variantId: string): WeaponVariant {
+  const { itemTypeDetail } = weapon
+  const variants = typeof itemTypeDetail === 'string' ? weaponVariantsOf(itemTypeDetail) : []
+  const variant = variants.find(({ id }) => id === variantId)
+
+  if (variant === undefined) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
+  return variant
+}
+
+function tuneLevelOf(
+  weapon: CharacterPayload,
+  maxLevel: number,
+  change: EquipmentChange,
+  variantChanged: boolean
+): number {
+  const level = wornTuneLevel(weapon) ?? 0
+
+  if (change.tune !== null) {
+    if (maxLevel === 0 || change.tune > maxLevel) {
+      throw new EquipmentSimulationFailure('request')
+    }
+
+    return change.tune
+  }
+
+  if (variantChanged) {
+    return Math.min(level, maxLevel)
+  }
+
+  return level
+}
+
+function releaseOf(
+  weapon: CharacterPayload,
+  target: WeaponVariant | null,
+  change: EquipmentChange,
+  variantChanged: boolean
+): number | null {
+  const isRelease = target?.line === RELEASE_LINE
+
+  if (change.release !== null) {
+    if (!isRelease) {
+      throw new EquipmentSimulationFailure('request')
+    }
+
+    return change.release
+  }
+
+  if (!isRelease) {
+    return null
+  }
+
+  const worn = wornRelease(weapon)
+
+  if (variantChanged || worn === null) {
+    return WEAPON_RELEASE_MAX
+  }
+
+  return worn
+}
+
+/**
+ * 무기는 착용한 무기 종류의 선택지로 아이템을 바꾸고 조율과 해방 수치를 바꾼다. 선택지 밖 id, 정밀도, 조율할 수 없는 무기의
+ * 조율, 최대 단계를 넘는 조율, 해방 계열이 아닌 무기의 해방 수치는 거절한다.
+ */
+export function editWeapon(
   equipment: CharacterPayload,
   changes: readonly EquipmentChange[]
-): WeaponTuneEdit | null {
+): WeaponEdit | null {
+  if (changes.some(({ slotId, release }) => slotId !== WEAPON_SLOT && release !== null)) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
   const change = changes.find(({ slotId }) => slotId === WEAPON_SLOT)
 
   if (change === undefined) {
     return null
   }
 
-  if (change.variantId !== null || change.potency !== null) {
+  if (change.potency !== null) {
     throw new EquipmentSimulationFailure('request')
   }
 
-  if (change.tune === null) {
+  if (change.variantId === null && change.tune === null && change.release === null) {
     return null
   }
 
@@ -58,23 +177,70 @@ export function editWeaponTune(
     throw new EquipmentSimulationFailure('request')
   }
 
-  const maxLevel = weaponMaxTuneLevelOf(itemName)
+  const worn = wornVariantOf(original)
+  const target = change.variantId !== null ? chosenVariant(original, change.variantId) : worn
+  const variantChanged = target !== null && target.id !== worn?.id
+  const maxLevel = target !== null ? target.maxTuneLevel : weaponMaxTuneLevelOf(itemName)
+  const tune = tuneLevelOf(original, maxLevel, change, variantChanged)
+  const release = releaseOf(original, target, change, variantChanged)
+  const targetItem = target !== null ? weaponItemOf(target, release ?? WEAPON_RELEASE_MAX) : null
+  const item = targetItem !== null && targetItem.itemId !== original.itemId ? targetItem : null
+  const tuneChanged = tune !== wornTuneLevel(original)
+  const releaseChanged = release !== null && release !== wornRelease(original)
 
-  if (maxLevel === 0 || change.tune > maxLevel) {
-    throw new EquipmentSimulationFailure('request')
-  }
-
-  if (change.tune === wornTuneLevel(original)) {
+  if (item === null && !tuneChanged && !releaseChanged) {
     return null
   }
 
-  return { original, level: change.tune }
+  return { original, item, tune, release }
 }
 
-/** 엔진은 무기 `tune[0].level`만 읽으므로 그 칸만 바꾸고 표시값(`status`)은 그대로 둔다. */
-export function withWeaponTune(
+/** 엔진이 새 무기의 상세를 최상위 `items`에서 읽으므로 함께 조회할 아이템이다. */
+export function weaponItemIds(edit: WeaponEdit | null): string[] {
+  if (edit?.item == null) {
+    return []
+  }
+
+  return [edit.item.itemId]
+}
+
+function replaceItem(
+  weapon: CharacterPayload,
+  item: EquipmentVariantItem,
+  detail: CharacterPayload
+): void {
+  weapon.itemId = item.itemId
+  weapon.itemName = item.itemName
+  weapon.itemRarity = item.itemRarity
+
+  for (const key of DETAIL_KEYS) {
+    weapon[key] = detail[key] ?? null
+  }
+
+  for (const key of OLD_OPTION_KEYS) {
+    delete weapon[key]
+  }
+}
+
+function editedTune(weapon: CharacterPayload, edit: WeaponEdit): unknown[] {
+  const [first, ...rest] = Array.isArray(weapon.tune) ? weapon.tune : []
+
+  // 엔진은 `tune[0].level`만 읽으므로 아이템을 그대로 두면 표시값(`status`)도 그대로 둔다.
+  if (edit.item === null && isRecord(first)) {
+    return [{ ...first, level: edit.tune }, ...rest]
+  }
+
+  return [{ level: edit.tune }]
+}
+
+/**
+ * `entries`의 무기 항목에, 없으면 원본 무기 항목에 아이템, 조율, 해방 수치를 바꿔 넣는다. 강화, 증폭, 재련, 마법부여와
+ * 착용 품질(`itemGradeName`)은 그 항목의 값을 그대로 둔다.
+ */
+export function withWeapon(
   entries: readonly CharacterPayload[],
-  edit: WeaponTuneEdit | null
+  edit: WeaponEdit | null,
+  details: ReadonlyMap<string, CharacterPayload>
 ): CharacterPayload[] {
   if (edit === null) {
     return [...entries]
@@ -82,9 +248,25 @@ export function withWeaponTune(
 
   const index = entries.findIndex(({ slotId }) => slotId === WEAPON_SLOT)
   const weapon = structuredClone(index === -1 ? edit.original : entries[index]!)
-  const [first, ...rest] = Array.isArray(weapon.tune) ? weapon.tune : []
-  const tune = isRecord(first) ? first : {}
-  weapon.tune = [{ ...tune, level: edit.level }, ...rest]
+
+  if (edit.item !== null) {
+    const detail = details.get(edit.item.itemId)
+
+    if (detail === undefined) {
+      throw new Error('A replaced weapon needs its item detail')
+    }
+
+    replaceItem(weapon, edit.item, detail)
+  }
+
+  weapon.tune = editedTune(weapon, edit)
+
+  // 엔진은 해방 수치만 읽고 데미지와 버프력은 다시 만든다.
+  if (edit.release !== null) {
+    weapon.weaponRelease = { value: edit.release }
+  } else if (edit.item !== null) {
+    delete weapon.weaponRelease
+  }
 
   if (index === -1) {
     return [...entries, weapon]

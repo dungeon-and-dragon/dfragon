@@ -31,7 +31,7 @@ import {
   editEquipmentItems,
   editOath,
   editSlotItems,
-  editWeaponTune,
+  editWeapon,
   equipmentItemIds,
   hasAvatarEdit,
   hasOathEdit,
@@ -45,8 +45,9 @@ import {
   simulationInputOf,
   slotItemIds,
   supportsSimulation,
+  weaponItemIds,
   withEquipmentItems,
-  withWeaponTune,
+  withWeapon,
   wornMainStat
 } from '#domain/equipment-simulation/index.js'
 import type { LoadCharacterScoreSource, LoadItemDetails } from './ports.js'
@@ -107,7 +108,7 @@ export class EquipmentSimulationService {
       request.equipment,
       request.equipmentSet
     )
-    const weaponEdit = editWeaponTune(payloads.equipment, request.equipment)
+    const weaponEdit = editWeapon(payloads.equipment, request.equipment)
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const buffLevel = editBuffLevel(payloads, role, request.buffLevel)
@@ -128,12 +129,15 @@ export class EquipmentSimulationService {
     const editsSlotItems = hasSlotItemEdits(slotEdits)
     const editsOath = hasOathEdit(oathEdit)
     const editsAvatar = hasAvatarEdit(avatarEdit)
+    const editsWeaponItem =
+      weaponEdit !== null && (weaponEdit.item !== null || weaponEdit.release !== null)
     const features: SimulationFeatures = {
       slotItems: editsSlotItems,
       equipmentItems: itemEdits.length > 0,
       oathTunes: editsOath,
       equipmentSet: request.equipmentSet !== null && itemEdits.length > 0,
       weaponTune: weaponEdit !== null,
+      weaponItem: editsWeaponItem,
       oathItems: oathEdit.changesItems,
       oathUpgrade: oathEdit.upgrade !== null,
       buffLevel: buffLevel !== null,
@@ -161,7 +165,12 @@ export class EquipmentSimulationService {
     }
 
     const details = await this.itemDetails(
-      [...slotItemIds(slotEdits), ...equipmentItemIds(itemEdits), ...avatarItemIds(avatarEdit)],
+      [
+        ...slotItemIds(slotEdits),
+        ...equipmentItemIds(itemEdits),
+        ...weaponItemIds(weaponEdit),
+        ...avatarItemIds(avatarEdit)
+      ],
       signal
     )
 
@@ -184,7 +193,7 @@ export class EquipmentSimulationService {
       itemEdits,
       details
     )
-    const equipment = withWeaponTune(itemEquipment, weaponEdit)
+    const equipment = withWeapon(itemEquipment, weaponEdit, details)
     const slots = simulatedSlotItems(slotEdits, details)
     const simulation = simulationInputOf(
       equipment,
