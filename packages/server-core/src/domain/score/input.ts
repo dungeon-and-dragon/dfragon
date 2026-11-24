@@ -14,8 +14,11 @@ export type ScoreSimulationInput = Readonly<{
    * 원본에 없던 엠블렘과 바꾼 원본 플래티넘 엠블렘의 상세는 최상위 `items`에 넣는다.
    */
   avatar?: readonly CharacterPayload[]
-  /** 엔진 0.11.0부터 버프 강화 스킬의 절대 레벨이다. */
-  buff?: Readonly<{ level: number }>
+  /**
+   * 엔진 0.11.0부터 `level`은 버프 강화 스킬의 절대 레벨이다.
+   * 엔진 0.14.0부터 `switchingEquipment`는 버프 강화 장비 12부위에 등록한 것으로 볼 유니크 스위칭 장비 수이고, 버퍼는 이 칸이 오면 시뮬레이션을 건너뛴다.
+   */
+  buff?: Readonly<{ level?: number; switchingEquipment?: number }>
   /**
    * 엔진 0.9.0부터 `info`는 서약 본체, `set`은 서약 세트, `crystal`은 바꾼 결정이고 셋 다 선택이다.
    * 결정은 `slotNo`가 같은 원본 결정을 바꾸며, 0.8.0은 결정의 조율만 받는다.

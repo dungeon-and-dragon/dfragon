@@ -31,6 +31,7 @@ import {
   editEquipmentItems,
   editOath,
   editSlotItems,
+  editSwitchingEquipment,
   editWeapon,
   equipmentItemIds,
   hasAvatarEdit,
@@ -39,6 +40,7 @@ import {
   needsAvatarMainStat,
   needsMainStat,
   simulatedAvatar,
+  simulatedBuff,
   simulatedEquipment,
   simulatedOath,
   simulatedSlotItems,
@@ -60,6 +62,8 @@ export interface EquipmentSimulationRequest {
   readonly oath: OathChanges
   /** 버프 강화 스킬의 절대 레벨이고, null이면 그대로 둔다. */
   readonly buffLevel: number | null
+  /** 버프 강화 장비에 등록한 것으로 볼 유니크 스위칭 장비 수이고, null이면 그대로 둔다. */
+  readonly switchingEquipment: number | null
   /** null이면 착용 아바타를 그대로 둔다. */
   readonly avatarPreset: AvatarPresetChoice | null
 }
@@ -112,6 +116,7 @@ export class EquipmentSimulationService {
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const buffLevel = editBuffLevel(payloads, role, request.buffLevel)
+    const switchingEquipment = editSwitchingEquipment(payloads, role, request.switchingEquipment)
     const presetJob = avatarPresetJobOf(payloads, role, request.avatarPreset)
     const calculator = cardScoreCalculator(role)
     const input = toScoreEngineInput(payloads, items)
@@ -141,6 +146,7 @@ export class EquipmentSimulationService {
       oathItems: oathEdit.changesItems,
       oathUpgrade: oathEdit.upgrade !== null,
       buffLevel: buffLevel !== null,
+      switchingEquipment: switchingEquipment !== null,
       avatar: editsAvatar
     }
 
@@ -151,6 +157,7 @@ export class EquipmentSimulationService {
       !features.weaponTune &&
       !editsOath &&
       !features.buffLevel &&
+      !features.switchingEquipment &&
       !editsAvatar
     ) {
       const result = await this.calculate(payloads, input, calculator, signal)
@@ -200,7 +207,7 @@ export class EquipmentSimulationService {
       slots,
       simulatedAvatar(avatarEdit, slots.aura),
       simulatedOath(oathEdit),
-      buffLevel
+      simulatedBuff(buffLevel, switchingEquipment)
     )
     const detailItems = Object.fromEntries(details)
     const engineItems = { ...input.items, ...detailItems }

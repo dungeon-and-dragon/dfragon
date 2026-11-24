@@ -10,6 +10,7 @@ const BUFF_LEVEL_ENGINE_VERSION: EngineVersion = [0, 11, 0]
 // 0.11.0은 피부 엠블렘을 바꾸지 못해 끝 스펙의 피부 엠블렘이 빠진 점수를 낸다.
 const AVATAR_ENGINE_VERSION: EngineVersion = [0, 12, 0]
 const WEAPON_ITEM_ENGINE_VERSION: EngineVersion = [0, 13, 0]
+const SWITCHING_EQUIPMENT_ENGINE_VERSION: EngineVersion = [0, 14, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -28,6 +29,8 @@ export interface SimulationFeatures {
   readonly oathUpgrade: boolean
   /** 버프 강화 스킬 레벨 변경 */
   readonly buffLevel: boolean
+  /** 버프 강화 장비에 등록한 유니크 스위칭 장비 수 변경 */
+  readonly switchingEquipment: boolean
   /** 무기와 8부위 아바타, 피부와 오라 엠블렘 변경 */
   readonly avatar: boolean
 }
@@ -87,6 +90,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.weaponItem) {
     minimums.push(WEAPON_ITEM_ENGINE_VERSION)
+  }
+
+  if (features.switchingEquipment) {
+    minimums.push(SWITCHING_EQUIPMENT_ENGINE_VERSION)
   }
 
   return minimums

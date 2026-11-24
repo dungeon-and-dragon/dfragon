@@ -168,13 +168,13 @@ export function simulatedSlotItems(
   return { title, creature, aura }
 }
 
-/** 칭호는 장비 목록에, 크리쳐, 아바타, 서약, 버프 강화 레벨은 각자의 칸에 넣고, 바꾸지 않은 칸은 보내지 않는다. */
+/** 칭호는 장비 목록에, 크리쳐, 아바타, 서약, 버프 강화 레벨과 짙편린 등록 수는 각자의 칸에 넣고, 바꾸지 않은 칸은 보내지 않는다. */
 export function simulationInputOf(
   equipment: readonly CharacterPayload[],
   slots: Pick<SimulatedSlotItems, 'title' | 'creature'>,
   avatar: readonly CharacterPayload[],
   oath: ScoreSimulationInput['oath'] | null,
-  buffLevel: number | null
+  buff: ScoreSimulationInput['buff'] | null
 ): ScoreSimulationInput {
   const { title, creature } = slots
   const simulation: { -readonly [K in keyof ScoreSimulationInput]: ScoreSimulationInput[K] } = {
@@ -197,8 +197,8 @@ export function simulationInputOf(
     simulation.oath = oath
   }
 
-  if (buffLevel !== null) {
-    simulation.buff = { level: buffLevel }
+  if (buff !== null) {
+    simulation.buff = buff
   }
 
   return simulation
