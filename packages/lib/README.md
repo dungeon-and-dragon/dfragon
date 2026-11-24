@@ -44,8 +44,10 @@ parsePort('3000') // 3000
 `src/equipment-variants.json`은 두 파일에서 선택지에 필요한 값만 뽑은 생성 파일이며 `pnpm --filter @dfragon/lib generate:equipment-variants`로만 만듭니다.
 엔진 파일이나 대응 파일을 바꾸면 root에서 `pnpm exec biome format --write packages/lib/data`를 실행하고 생성 명령을 다시 실행한 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
-`@dfragon/lib/avatar-presets`의 `findAvatarPreset(job, role)`은 장비 시뮬레이터의 아바타 끝 스펙(무기와 8부위 레어, 찬란한 엠블렘, 상의와 하의의 플래티넘 엠블렘)을 역할, 직업, 전직(`jobId`, `jobGrowId`)으로 찾습니다.
-목록은 두 파일로 나뉩니다. `data/avatar-preset-observed.json`은 제품이 운영에서 관측한 파일로, 명성 12만 이상 캐릭터를 역할, 직업, 전직마다 명성 순으로 200명씩 뽑아 최신 착용 아바타의 전직별 최빈값(옵션 문구, 소켓 색별 찬란한 엠블렘, 플래티넘 엠블렘 쌍)과 관측 수(`count`, `total`)를 둡니다.
+`@dfragon/lib/avatar-presets`의 `findAvatarPreset(job, role, mainStat)`은 장비 시뮬레이터의 아바타 끝 스펙(무기와 8부위 레어, 찬란한 엠블렘, 상의와 하의의 플래티넘 엠블렘, 피부의 찬란한 엠블렘)을 역할, 직업, 전직(`jobId`, `jobGrowId`)으로 찾습니다.
+남성 크루세이더 버퍼는 체력과 정신력 갈래가 있어 `mainStat`으로 고르고, `avatarPresetNeedsMainStat(job, role)`이 갈래가 있는 전직인지 알려 줍니다.
+목록은 두 파일로 나뉩니다. `data/avatar-preset-observed.json`은 제품이 운영에서 관측한 파일로, 명성 12만 이상 캐릭터를 역할, 직업, 전직마다 명성 순으로 200명씩 뽑아 최신 착용 아바타의 전직별 최빈값(옵션 문구, 소켓 색별 찬란한 엠블렘, 플래티넘 엠블렘 쌍, 피부 엠블렘)과 관측 수(`count`, `total`)를 둡니다.
+남성 크루세이더 버퍼는 12부위 증폭 이름의 최빈값으로 주스탯을 가려 갈래마다 최빈값을 따로 둡니다.
 `src/avatar-presets.json`은 관측 파일에서 선택에 필요한 값만 뽑은 생성 파일이며 `pnpm --filter @dfragon/lib generate:avatar-presets`로만 만듭니다.
 관측 파일을 바꾸면 root에서 `pnpm exec biome format --write packages/lib/data`를 실행하고 생성 명령을 다시 실행한 뒤 `test/avatar-presets.test.mjs`의 전직별 기대값을 맞추고 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
