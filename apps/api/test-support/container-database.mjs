@@ -70,6 +70,9 @@ const contentClearStoredCheckPath = fileURLToPath(
   new URL('./container-content-clear-stored-check.mjs', import.meta.url)
 )
 const opsCheckPath = fileURLToPath(new URL('./container-ops-check.mjs', import.meta.url))
+const timelineSyncRequestCheckPath = fileURLToPath(
+  new URL('./container-timeline-sync-request-check.mjs', import.meta.url)
+)
 const failingMigrationPath = fileURLToPath(new URL('./failing-migration', import.meta.url))
 const pgcryptoPermissionDeniedPattern = /permission denied to create extension "pgcrypto"/
 
@@ -524,6 +527,7 @@ try {
   await psql(
     "DELETE FROM timeline_sync_requests WHERE server_id = 'cain' AND character_id = 'timeline-request-probe'"
   )
+  await runWorkerCheck(timelineSyncRequestCheckPath)
 
   stage = 'timeline tables'
   assert.equal(
@@ -1256,6 +1260,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline sync request table, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
+    'PASS: api image migration on startup, timeline sync request table and requests, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }
