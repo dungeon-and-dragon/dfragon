@@ -150,8 +150,15 @@ export type SimulatorRow =
   | Readonly<{ kind: 'equipment'; slot: SimulatorSlot }>
   | Readonly<{ kind: 'slotItem'; slotItem: SimulatorSlotItem }>
 
-/** 장비 세트 줄이다. mainSetId는 캐릭터의 주 세트이고, 세트를 고르지 않았을 때 선택된 세트다. */
-export type SimulatorEquipmentSet = Readonly<{ mainSetId: string; sets: readonly EquipmentSet[] }>
+/**
+ * 장비 세트 줄이다. mainSetId는 캐릭터의 주 세트이고, 세트를 고르지 않았을 때 선택된 세트다. rarity는 상세 응답이 준
+ * 주 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
+ */
+export type SimulatorEquipmentSet = Readonly<{
+  mainSetId: string
+  rarity: ItemView['rarity']
+  sets: readonly EquipmentSet[]
+}>
 
 /**
  * 부위의 원하는 상태다. `enchantId`가 null이면 착용한 마법부여를 그대로 두고, `variantId`가 null이면 선택지에 없는 착용
@@ -523,7 +530,10 @@ export function toEquipmentSet(
     return null
   }
 
-  return { mainSetId, sets }
+  const mainSet = detail.equipment.setItemInfo.find(({ setItemId }) => setItemId === mainSetId)
+  const rarity = itemRarityOfGrade(mainSet?.setItemRarityName ?? null)
+
+  return { mainSetId, rarity, sets }
 }
 
 export function equipmentSetIdOf(

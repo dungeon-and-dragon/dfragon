@@ -21,8 +21,8 @@ export function hasAvatarPreset(
 
 export function avatarPresetNameOf(change: AvatarPresetChange): string {
   if (change === null) {
-    return '지금 그대로'
+    return '현재 착용 아바타'
   }
 
-  return '끝 스펙'
+  return '종결 아바타와 엠블렘'
 }
