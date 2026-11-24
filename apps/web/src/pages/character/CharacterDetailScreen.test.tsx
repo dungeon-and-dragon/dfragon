@@ -189,13 +189,10 @@ function tabs(): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>('[role="tab"]')]
 }
 
-it('받는 동안에는 요약과 탭 줄 대신 뼈대와 받는 중 안내만 둔다', async () => {
+it('받는 동안에는 요약과 탭 줄 대신 뼈대만 둔다', async () => {
   await render(loadingResponse)
 
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
-  expect(container.querySelector('[role="status"]')?.textContent).toBe(
-    '캐릭터 정보를 받는 중입니다.'
-  )
   expect(container.querySelectorAll('[aria-busy="true"] > [aria-hidden="true"]')).toHaveLength(2)
   expect(container.querySelector('h1')).toBeNull()
   expect(container.querySelector('[role="tablist"]')).toBeNull()

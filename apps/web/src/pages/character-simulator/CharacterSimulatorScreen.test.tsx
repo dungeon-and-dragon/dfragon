@@ -414,7 +414,7 @@ it('엔진이 없어 두 점수가 모두 없으면 계산할 수 없다는 한 
   await expect.poll(() => panel()?.textContent).toBe('장비 점수점수를 계산할 수 없습니다.')
 })
 
-it('엔진이 지원하지 않는 변경은 바꾼 뒤 점수와 차이를 비우고 이유를 보조 기술에 읽힌다', async () => {
+it('엔진이 지원하지 않는 변경은 바꾼 뒤 점수와 차이를 비우고 이유를 마우스 설명으로 전한다', async () => {
   const skipped = { kind: 'simulation', message: 'unsupported' }
   await render(characterDetailFixture('dealer'), () =>
     HttpResponse.json({
@@ -428,7 +428,7 @@ it('엔진이 지원하지 않는 변경은 바꾼 뒤 점수와 차이를 비�
     ['변경 후', '-'],
     ['차이', '-']
   ])
-  expect(scoreValue('변경 후').querySelector('.sr-only')?.textContent).toBe(
+  expect(scoreValue('변경 후').getAttribute('title')).toBe(
     '계산하지 못함, 바꾼 장비를 계산하지 못함'
   )
 })

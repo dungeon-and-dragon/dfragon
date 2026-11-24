@@ -167,6 +167,12 @@ function bodyRows(): string[][] {
   )
 }
 
+function clearMarks(): boolean[][] {
+  return [...container.querySelectorAll('tbody tr')].map((row) =>
+    [...row.querySelectorAll('td')].slice(-3).map((cell) => cell.querySelector('svg') !== null)
+  )
+}
+
 function characterLinks(): number {
   return container.querySelectorAll('tbody a').length
 }
@@ -223,23 +229,12 @@ it('표 위에 제목 없이 한 줄 헤더에 세트 열과 줄인 레이드 �
     ['#', '캐릭터', '세트', '명성', '점수', '디레지에', '미카엘라', '다 레기온']
   ])
   const [first, second] = bodyRows()
-  expect(first.slice(2)).toEqual([
-    '합성 장비 세트합성 서약',
-    '89,999',
-    '버프4,120,000',
-    '클리어 안 함',
-    '클리어',
-    '클리어'
+  expect(first.slice(2)).toEqual(['합성 장비 세트합성 서약', '89,999', '버프4,120,000', '', '', ''])
+  expect(second.slice(2)).toEqual(['-', '89,998', '-', '', '', ''])
+  expect(clearMarks()).toEqual([
+    [false, true, true],
+    [false, false, false]
   ])
-  expect(second.slice(2)).toEqual([
-    '-',
-    '89,998',
-    '-',
-    '클리어 안 함',
-    '클리어 안 함',
-    '클리어 안 함'
-  ])
-  expect(container.querySelectorAll('tbody tr:first-child td svg')).toHaveLength(2)
   const link = container.querySelector<HTMLAnchorElement>('tbody a')!
   expect(link.textContent).toBe('합성1')
   expect(link.getAttribute('href')).toBe('/c/cain/character-1')

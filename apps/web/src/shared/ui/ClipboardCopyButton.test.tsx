@@ -58,10 +58,8 @@ it('클립보드로 복사 버튼을 누르면 지금 글자를 쓰고 잠깐 �
 
   expect(writeText).toHaveBeenCalledExactlyOnceWith('[]')
   expect(showsCopyIcon()).toBe(false)
-  expect(container.textContent).toContain('클립보드로 복사했습니다.')
   await act(async () => vi.advanceTimersByTime(1500))
   expect(showsCopyIcon()).toBe(true)
-  expect(container.textContent).not.toContain('클립보드로 복사했습니다.')
 })
 
 it('체크 아이콘이 보이는 동안 다시 복사하면 그때부터 1.5초 동안 체크를 유지한다', async () => {
@@ -84,8 +82,6 @@ it('쓰기가 실패하면 ! 오류 문구를 보이고 다음 복사가 성공�
 
   await act(async () => button().click())
   expect(failure()).toBe(`!${FAILURE}`)
-  expect(container.querySelector('[data-clipboard-announcer]')?.textContent).toBe(FAILURE)
-  expect(container.querySelectorAll('[role="status"]')).toHaveLength(1)
   expect(showsCopyIcon()).toBe(true)
 
   await act(async () => button().click())
