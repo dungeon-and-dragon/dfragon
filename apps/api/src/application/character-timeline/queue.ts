@@ -106,9 +106,21 @@ export function createJobQueue<Key, Job extends Key>(
   }
 }
 
+// 상한이 없던 2026-11-24 운영 부하 테스트에서 동기화와 백필 수백 개가 함께 돌아 메인 연결 풀 10개가 찼고, 동기화의 45%가 실패하며
+// 같은 풀을 쓰는 랭킹, 검색도 느려졌다. 옛 시즌 받기 2개와 합쳐 8개라 읽기 경로가 쓸 연결이 남는다(ADR 0087).
+const TIMELINE_SYNC_CONCURRENCY = 4
+const ENHANCEMENT_BACKFILL_CONCURRENCY = 2
+
 export function createTimelineSyncQueue(
   sync: (character: TimelineCharacter) => Promise<void>,
   reportFailure: () => void
 ): TimelineSyncQueue {
-  return createJobQueue(characterKey, sync, reportFailure, Number.POSITIVE_INFINITY)
+  return createJobQueue(characterKey, sync, reportFailure, TIMELINE_SYNC_CONCURRENCY)
+}
+
+export function createEnhancementBackfillQueue(
+  backfill: (character: TimelineCharacter) => Promise<void>,
+  reportFailure: () => void
+): TimelineSyncQueue {
+  return createJobQueue(characterKey, backfill, reportFailure, ENHANCEMENT_BACKFILL_CONCURRENCY)
 }

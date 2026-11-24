@@ -31,6 +31,7 @@ import {
 } from '#application/character-search/index.js'
 import {
   CharacterTimelineService,
+  createEnhancementBackfillQueue,
   createSeasonBackfillQueue,
   createTimelineSyncQueue,
   emptyCharacterTimelineRepository,
@@ -128,7 +129,7 @@ function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCod
       (character) => timeline.sync(character, () => reportCode('TIMELINE_ITEM_DICTIONARY_FAILED')),
       () => reportCode('TIMELINE_SYNC_FAILED')
     ),
-    enhancementBackfill: createTimelineSyncQueue(timeline.backfillEnhancements, () =>
+    enhancementBackfill: createEnhancementBackfillQueue(timeline.backfillEnhancements, () =>
       reportCode('TIMELINE_BACKFILL_FAILED')
     ),
     seasonBackfill: createSeasonBackfillQueue(timeline.backfillSeason, () =>
