@@ -22,6 +22,7 @@ import {
   toSimulatorRows,
   tuneLimitOf
 } from './simulator-draft'
+import { toSimulatorSwitching } from './simulator-switching'
 
 const GRADE_SLOTS = [
   'WEAPON',
@@ -796,4 +797,30 @@ it('장비 세트를 골라도 선택지 밖 착용 아이템을 낀 부위는 �
     equipmentSet: SHADOW_SET,
     equipment: []
   })
+})
+
+const dealerSwitching = toSimulatorSwitching(characterDetailFixture('dealer'), 'dealer')!
+
+it('스위칭 레벨은 고른 레벨만 요청에 싣고, 지금 레벨로 돌아오거나 고를 수 없는 레벨이면 바꾼 것이 없다', () => {
+  const changed = apply(NO_CHANGES, { type: 'buffLevel', switching: dealerSwitching, level: 20 })
+
+  expect(simulationBody([], null, changed)).toEqual({ equipment: [], buffLevel: 20 })
+  expect(hasChanges(changed)).toBe(true)
+  expect(apply(changed, { type: 'buffLevel', switching: dealerSwitching, level: 16 })).toEqual(
+    NO_CHANGES
+  )
+  expect(apply(NO_CHANGES, { type: 'buffLevel', switching: dealerSwitching, level: 21 })).toEqual(
+    NO_CHANGES
+  )
+  expect(apply(changed, { type: 'buffLevel', switching: dealerSwitching, level: 9 })).toEqual(
+    changed
+  )
+})
+
+it('아바타는 끝 스펙을 고르면 프리셋을 요청에 싣고, 지금 그대로로 돌아오면 바꾼 것이 없다', () => {
+  const changed = apply(NO_CHANGES, { type: 'avatarPreset', preset: 'best' })
+
+  expect(simulationBody([], null, changed)).toEqual({ equipment: [], avatarPreset: 'best' })
+  expect(hasChanges(changed)).toBe(true)
+  expect(apply(changed, { type: 'avatarPreset', preset: null })).toEqual(NO_CHANGES)
 })
