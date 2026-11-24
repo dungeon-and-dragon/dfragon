@@ -28,7 +28,7 @@ pnpm --filter @dfragon/web preview
 
 ### 웹 이미지
 
-[`Dockerfile`](Dockerfile)이 `.output`을 Node로 띄우는 이미지를 만듭니다. 서버는 `PORT`(기본 8080)에서 듣고, 서버 렌더링이 부를 API 주소를 `DFRAGON_API_ORIGIN`으로 받습니다. 응답 헤더(cross-origin isolation, 캐시)는 [`vite.config.ts`](vite.config.ts)의 route rule이 정합니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
+[`Dockerfile`](Dockerfile)이 `.output`을 Node로 띄우는 이미지를 만듭니다. 서버는 `PORT`(기본 8080)에서 듣고, 서버 렌더링이 부를 API 주소를 `DFRAGON_API_ORIGIN`으로 받습니다. 서버 process 수는 `NITRO_CLUSTER_WORKERS`(이미지 기본 1)로 받습니다. 응답 헤더(cross-origin isolation, 캐시)와 화면 HTML 캐시는 [`vite.config.ts`](vite.config.ts)의 route rule이 정합니다. 빌드에는 `ocr-finetuned` submodule이 있어야 합니다. 빌드한 commit은 `SOURCE_COMMIT` 빌드 인자로 받으며, 없으면 화면에 `dev`를 보입니다. 저장소 root에서 배포와 같은 제약으로 띄워 확인합니다.
 
 ```sh
 podman build --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -f apps/web/Dockerfile -t dfragon-web:local .
