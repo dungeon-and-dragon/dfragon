@@ -13,6 +13,7 @@
 | `NumberField` | `NumberField` | 숫자 양옆의 내리기(`MinusIcon`), 올리기(`PlusIcon`) 버튼으로 한 칸씩 바꾸는 숫자 칸. `value`, `onValueChange(value)`, `min`, `max`, `disabled`, `format`(`Intl.NumberFormatOptions`)을 받는다. 이름은 `aria-label`(필수)이고, 버튼 이름은 그 뒤에 `내리기`, `올리기`를 붙인다(`decrementLabel`, `incrementLabel`로 바꾼다). 범위 끝에 닿은 쪽 버튼은 막히고, 입력칸에서 위, 아래 화살표로도 바꾼다. 높이는 표 행 안의 작은 컨트롤 높이 하나이고 숫자 글자색은 놓인 자리를 따른다. |
 | `Tabs` | `Tabs` | `Root`, `List`(현재 탭 아래로 움직이는 2px 선 포함), `Tab`, `Panel`. |
 | `Switch`, `Chip` | `Switch`, `Toggle` | 한 요소로 쓰는 켜고 끄는 컨트롤. 이름은 감싼 label이나 `aria-label`로 준다. |
+| `Checkbox` | `Checkbox` | 16px 상자에 켜진 동안 `CheckIcon`을 그리는 체크박스. `checked`, `defaultChecked`, `onCheckedChange(checked)`, `disabled`를 받는다. 이름은 감싼 label이나 `aria-label`로 준다. |
 | `ChipGroup` | `ToggleGroup`, `Toggle` | `items`(`value`, `label`) 가운데 하나만 고르는 칩 묶음. 고른 칩을 다시 눌러도 선택이 풀리지 않는다. 화살표로 칩 사이를 옮기고 Tab은 묶음에서 칩 하나에만 멈춘다. `size` `sm`(기본), `md`(32, 40px). 이름은 `aria-label`이나 보이는 라벨의 `aria-labelledby`로 준다. |
 | `Tooltip` | `Tooltip` | `Provider`, `Root`, `Trigger`, `Popup`. Popup은 화면과 반대 색 모드로 그려, 안에 둔 글자가 어떤 색 토큰을 써도 읽힌다. |
 | `Popover` | `Popover` | `Root`, `Trigger`, `Popup`(Portal, Positioner, Popup. `anchor`, `side`, `align`, `sideOffset`을 받는다), `Title`, `Close`. 면, 테두리, 그림자만 그리고 안쪽 배치와 폭은 화면이 정한다. |
