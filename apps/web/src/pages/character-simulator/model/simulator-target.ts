@@ -1,3 +1,4 @@
+import type { BuffSwitching } from '@dfragon/lib/buff-switching'
 import type {
   SimulatorEquipmentSet,
   SimulatorRow,
@@ -12,6 +13,8 @@ export type SimulatorTarget =
   | Readonly<{ kind: 'equipmentSet'; key: string; equipmentSet: SimulatorEquipmentSet }>
   | Readonly<{ kind: 'equipment'; key: string; slot: SimulatorSlot }>
   | Readonly<{ kind: 'slotItem'; key: string; slotItem: SimulatorSlotItem }>
+  | Readonly<{ kind: 'avatar'; key: string }>
+  | Readonly<{ kind: 'switching'; key: string; switching: BuffSwitching }>
   | Readonly<{ kind: 'oathSet'; key: string; oath: SimulatorOath }>
   | Readonly<{ kind: 'oathBody'; key: string; body: SimulatorOathBody }>
   | Readonly<{ kind: 'oathUpgrade'; key: string; upgrade: SimulatorOathUpgrade }>
@@ -37,6 +40,22 @@ function equipmentSetTargets(equipmentSet: SimulatorEquipmentSet | null): Simula
   return [{ kind: 'equipmentSet', key: 'equipmentSet', equipmentSet }]
 }
 
+function avatarTargets(avatarPresetAvailable: boolean): SimulatorTarget[] {
+  if (!avatarPresetAvailable) {
+    return []
+  }
+
+  return [{ kind: 'avatar', key: 'avatar' }]
+}
+
+function switchingTargets(switching: BuffSwitching | null): SimulatorTarget[] {
+  if (switching === null) {
+    return []
+  }
+
+  return [{ kind: 'switching', key: 'switching', switching }]
+}
+
 function oathTargets(oath: SimulatorOath | null): SimulatorTarget[] {
   if (oath === null) {
     return []
@@ -57,13 +76,24 @@ function oathTargets(oath: SimulatorOath | null): SimulatorTarget[] {
   return [...setTargets, ...bodyTargets, ...upgradeTargets, ...crystalTargets]
 }
 
-/** 장비창의 줄 순서대로 장비 세트, 장비, 칭호, 크리쳐, 오라 뒤에 서약 세트, 서약 본체, 진의, 서약 결정을 둔다. */
+/**
+ * 장비창의 줄 순서대로 장비 세트, 장비, 칭호, 크리쳐, 오라, 아바타, 스위칭 뒤에 서약 세트, 서약 본체, 진의, 서약 결정을
+ * 둔다.
+ */
 export function toSimulatorTargets(
   equipmentSet: SimulatorEquipmentSet | null,
   rows: readonly SimulatorRow[],
+  avatarPresetAvailable: boolean,
+  switching: BuffSwitching | null,
   oath: SimulatorOath | null
 ): SimulatorTarget[] {
-  return [...equipmentSetTargets(equipmentSet), ...rows.map(rowTarget), ...oathTargets(oath)]
+  return [
+    ...equipmentSetTargets(equipmentSet),
+    ...rows.map(rowTarget),
+    ...avatarTargets(avatarPresetAvailable),
+    ...switchingTargets(switching),
+    ...oathTargets(oath)
+  ]
 }
 
 export function isOathTarget(target: SimulatorTarget): boolean {
@@ -110,6 +140,10 @@ export function targetTitleOf(target: SimulatorTarget): string {
     }
     case 'slotItem':
       return target.slotItem.slotName
+    case 'avatar':
+      return '아바타'
+    case 'switching':
+      return '스위칭'
     case 'oathSet':
       return '서약 세트'
     case 'oathBody':

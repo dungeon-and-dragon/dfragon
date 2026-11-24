@@ -6,6 +6,7 @@ const EQUIPMENT_ITEM_ENGINE_VERSION: EngineVersion = [0, 7, 0]
 const OATH_TUNE_ENGINE_VERSION: EngineVersion = [0, 8, 0]
 const SET_ENGINE_VERSION: EngineVersion = [0, 9, 0]
 const OATH_UPGRADE_ENGINE_VERSION: EngineVersion = [0, 10, 0]
+const BUFF_AVATAR_ENGINE_VERSION: EngineVersion = [0, 11, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -20,6 +21,10 @@ export interface SimulationFeatures {
   readonly oathItems: boolean
   /** 묵언의 진의 단계와 선택지 변경 */
   readonly oathUpgrade: boolean
+  /** 버프 강화 스킬 레벨 변경 */
+  readonly buffLevel: boolean
+  /** 무기와 8부위 아바타, 오라 엠블렘 변경 */
+  readonly avatar: boolean
 }
 
 function versionOf(engine: string): number[] | null {
@@ -65,6 +70,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.oathUpgrade) {
     minimums.push(OATH_UPGRADE_ENGINE_VERSION)
+  }
+
+  if (features.buffLevel || features.avatar) {
+    minimums.push(BUFF_AVATAR_ENGINE_VERSION)
   }
 
   return minimums

@@ -15,9 +15,11 @@ import {
   rowsInEquipmentSet,
   simulationBody,
   simulatorReducer,
+  simulatorRole,
   toEquipmentSet,
   toSimulatorRows
 } from './model/simulator-draft'
+import { hasAvatarPreset } from './model/simulator-avatar'
 import { oathInSet, toSimulatorOath } from './model/simulator-oath'
 import {
   isOathTarget,
@@ -25,6 +27,7 @@ import {
   targetTitleOf,
   toSimulatorTargets
 } from './model/simulator-target'
+import { toSimulatorSwitching } from './model/simulator-switching'
 
 const TITLE = '장비 시뮬레이터'
 // 이 폭보다 좁으면 조작 패널을 숨기고 줄을 누를 때 시트로 연다. 디자인 토큰의 md 경계와 같다.
@@ -98,6 +101,14 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
   const wornRows = useMemo(() => toSimulatorRows(detail), [detail])
   const equipmentSet = useMemo(() => toEquipmentSet(detail), [detail])
   const wornOath = useMemo(() => toSimulatorOath(detail), [detail])
+  const avatarPresetAvailable = useMemo(
+    () => hasAvatarPreset(detail, simulatorRole(detail.card)),
+    [detail]
+  )
+  const switching = useMemo(
+    () => toSimulatorSwitching(detail, simulatorRole(detail.card)),
+    [detail]
+  )
   const [changes, dispatch] = useReducer(simulatorReducer, NO_CHANGES)
   const rows = useMemo(
     () => rowsInEquipmentSet(wornRows, changes.equipmentSet),
@@ -108,8 +119,8 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     [wornOath, changes.oath.set]
   )
   const targets = useMemo(
-    () => toSimulatorTargets(equipmentSet, rows, oath),
-    [equipmentSet, rows, oath]
+    () => toSimulatorTargets(equipmentSet, rows, avatarPresetAvailable, switching, oath),
+    [equipmentSet, rows, avatarPresetAvailable, switching, oath]
   )
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -126,6 +137,9 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
       dispatch({ type: 'equipmentSet', rows: wornRows, equipmentSet: set, setItemId }),
     onChange: (slot, draft) => dispatch({ type: 'change', slot, draft }),
     onSlotItemChange: (slotItem, id) => dispatch({ type: 'slotItem', slotItem, id }),
+    onAvatarPresetChange: (preset) => dispatch({ type: 'avatarPreset', preset }),
+    onBuffLevelChange: (buffSwitching, level) =>
+      dispatch({ type: 'buffLevel', switching: buffSwitching, level }),
     onOathSetChange: (setId) => {
       if (wornOath !== null) {
         dispatch({ type: 'oathSet', oath: wornOath, setId })

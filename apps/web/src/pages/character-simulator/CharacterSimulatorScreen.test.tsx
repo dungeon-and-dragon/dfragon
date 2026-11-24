@@ -451,7 +451,7 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
 
   const names = slotNames()
   expect(names.slice(0, 4)).toEqual(['세트', '무기', '칭호', '상의'])
-  expect(names.slice(-2)).toEqual(['크리쳐', '오라'])
+  expect(names.slice(-4)).toEqual(['크리쳐', '오라', '아바타', '스위칭'])
   const titleRow = rowOf('칭호')
   const worn = characterDetailFixture('dealer').equipment.equipment[1]!
   expect(titleRow.querySelectorAll('td')[1]!.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
@@ -1298,4 +1298,127 @@ it('진의 체크를 풀면 그 뒤 단계도 내리고, 건너뛰어 체크하�
   expect(upgradeLevelText()).toBe('3단계')
   expect(control('두 번째 진의').getAttribute('aria-checked')).toBe('true')
   expect(control('두 번째 진의 선택지').textContent).toBe('최종 데미지')
+})
+
+function rowValueOf(slotName: string): string | null {
+  return rowOf(slotName).querySelectorAll('td')[1]!.textContent
+}
+
+// scoresFor는 고른 아바타 프리셋과 스위칭 레벨도 칭호처럼 1,000점으로 센다.
+const ONE_CHOICE_SCORES = [
+  ['현재', '1,000,000'],
+  ['변경 후', '1,001,000'],
+  ['차이', '+1,000']
+]
+
+function editorTitle(): string | null | undefined {
+  return container.querySelector('aside h2')?.textContent
+}
+
+it('아바타 줄은 지금 그대로를, 스위칭 줄은 버프 강화 스킬 이름과 지금 레벨을 보인다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(rowValueOf('아바타')).toBe('지금 그대로')
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
+})
+
+it('버퍼는 주 버프 스킬의 지금 레벨을 스위칭 줄에 보인다', async () => {
+  await render(characterDetailFixture('buffer'))
+
+  await vi.waitFor(() => expect(rowValueOf('스위칭')).toBe('러블리 템포 30레벨'))
+})
+
+it('끝 스펙 프리셋이 없는 전직에는 아바타 줄만 없다', async () => {
+  const detail = characterDetailFixture('dealer')
+  await render({ ...detail, character: { ...detail.character, jobGrowId: 'unknown-job-grow' } })
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(slotNames()).not.toContain('아바타')
+  expect(slotNames()).toContain('스위칭')
+})
+
+it('버프 강화 스킬을 바꿀 수 없는 캐릭터에는 스위칭 줄만 없다', async () => {
+  const detail = characterDetailFixture('dealer')
+  await render({ ...detail, buff: { ...detail.buff, equipment: null } })
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(slotNames()).not.toContain('스위칭')
+  expect(slotNames()).toContain('아바타')
+})
+
+it('스위칭 줄을 고르면 스킬 이름 칸에 배운 레벨부터 10레벨 위까지 고르게 두고, 고른 레벨을 요청하며 지금 레벨로 돌아오면 원본 점수로 돌아간다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await choose('스위칭')
+
+  expect(editorTitle()).toBe('스위칭')
+  expect(container.querySelector('aside .label')?.textContent).toBe('광적인 믿음')
+  expect(control('스위칭 레벨').textContent).toBe('16레벨')
+
+  await act(async () => control('스위칭 레벨').click())
+
+  expect(optionNames()).toEqual([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((n) => `${n}레벨`))
+
+  await act(async () =>
+    [...document.querySelectorAll<HTMLElement>('[role="option"]')]
+      .find(({ textContent }) => textContent === '20레벨')!
+      .click()
+  )
+
+  await waitForScores(ONE_CHOICE_SCORES)
+  expect(bodies.at(-1)).toEqual({ equipment: [], buffLevel: 20 })
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 20레벨')
+  expect(resetButton().disabled).toBe(false)
+
+  await pick('스위칭 레벨', '16레벨')
+
+  await waitForScores(UNCHANGED_SCORES)
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
+  expect(resetButton().disabled).toBe(true)
+})
+
+it('아바타 줄에서 끝 스펙을 고르면 프리셋을 요청하고, 지금 그대로로 돌아오면 원본 점수로 돌아간다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await choose('아바타')
+
+  expect(editorTitle()).toBe('아바타')
+  expect(control('아바타').textContent).toBe('지금 그대로')
+
+  await pick('아바타', '끝 스펙')
+
+  await waitForScores(ONE_CHOICE_SCORES)
+  expect(bodies.at(-1)).toEqual({ equipment: [], avatarPreset: 'best' })
+  expect(rowValueOf('아바타')).toBe('끝 스펙')
+
+  await pick('아바타', '지금 그대로')
+
+  await waitForScores(UNCHANGED_SCORES)
+  expect(rowValueOf('아바타')).toBe('지금 그대로')
+  expect(resetButton().disabled).toBe(true)
+})
+
+it('초기화하면 고른 아바타 프리셋과 스위칭 레벨을 함께 되돌린다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+  await choose('아바타')
+  await pick('아바타', '끝 스펙')
+  await choose('스위칭')
+  await pick('스위칭 레벨', '12레벨')
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,002,000'],
+    ['차이', '+2,000']
+  ])
+  expect(bodies.at(-1)).toEqual({ equipment: [], avatarPreset: 'best', buffLevel: 12 })
+
+  await act(async () => resetButton().click())
+
+  await waitForScores(UNCHANGED_SCORES)
+  expect(rowValueOf('아바타')).toBe('지금 그대로')
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
+  expect(control('스위칭 레벨').textContent).toBe('16레벨')
 })

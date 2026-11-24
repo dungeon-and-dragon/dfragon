@@ -8,6 +8,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./avatar-presets": {
+      "types": "./dist/avatar-presets.d.ts",
+      "import": "./dist/avatar-presets.js"
+    },
+    "./buff-switching": {
+      "types": "./dist/buff-switching.d.ts",
+      "import": "./dist/buff-switching.js"
+    },
     "./equipment-variants": {
       "types": "./dist/equipment-variants.d.ts",
       "import": "./dist/equipment-variants.js"
@@ -47,6 +55,7 @@
     "build": "tsc -p tsconfig.json && dfragon-copy-notices lib dist/notices && dfragon-copy-notices lib LICENSES",
     "test": "pnpm build && node --test test/*.test.mjs",
     "generate:cp949": "node scripts/generate-cp949.mjs",
+    "generate:avatar-presets": "node scripts/generate-avatar-presets.mjs && biome format --write src/avatar-presets.json",
     "generate:equipment-variants": "node scripts/generate-equipment-variants.mjs && biome format --write src/equipment-variants.json",
     "lint": "biome lint",
     "format:check": "biome format && node ../../scripts/statement-spacing.mjs --check"

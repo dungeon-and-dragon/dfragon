@@ -200,6 +200,16 @@ async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement
   await pick(canvasElement, '두 번째 진의 선택지', '서약 포인트')
 }
 
+async function changeBuffLevel({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '스위칭')
+  await pick(canvasElement, '스위칭 레벨', '20레벨')
+}
+
+async function chooseBestAvatar({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '아바타')
+  await pick(canvasElement, '아바타', '끝 스펙')
+}
+
 async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {
   await pick(canvasElement, '무기 조율', 'II')
 }
@@ -263,6 +273,16 @@ export const 서약등급: Story = {
 export const 진의: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: changeOathUpgrade
+}
+
+export const 스위칭: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: changeBuffLevel
+}
+
+export const 끝스펙아바타: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: chooseBestAvatar
 }
 
 export const 무기조율: Story = {

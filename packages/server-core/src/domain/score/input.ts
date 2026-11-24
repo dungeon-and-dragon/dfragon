@@ -9,8 +9,13 @@ export type ScoreSimulationInput = Readonly<{
   equipment: readonly CharacterPayload[]
   /** 원본 `creature.creature`를 이 객체로 바꾼다. */
   creature?: CharacterPayload
-  /** 엔진은 `slotId`가 AURORA인 항목만 바꾼다. */
+  /**
+   * 0.10.0까지 엔진은 `slotId`가 AURORA인 항목만 바꾼다. 0.11.0부터 무기와 8부위도 바꾸고, 원본에 없는 무기와 8부위는 더한다.
+   * 원본에 없던 엠블렘과 바꾼 원본 플래티넘 엠블렘의 상세는 최상위 `items`에 넣는다.
+   */
   avatar?: readonly CharacterPayload[]
+  /** 엔진 0.11.0부터 버프 강화 스킬의 절대 레벨이다. */
+  buff?: Readonly<{ level: number }>
   /**
    * 엔진 0.9.0부터 `info`는 서약 본체, `set`은 서약 세트, `crystal`은 바꾼 결정이고 셋 다 선택이다.
    * 결정은 `slotNo`가 같은 원본 결정을 바꾸며, 0.8.0은 결정의 조율만 받는다.

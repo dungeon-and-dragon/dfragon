@@ -1,4 +1,10 @@
+import { type BuffSwitching, selectableBuffLevels } from '@dfragon/lib/buff-switching'
 import { Checkbox } from '@dfragon/ui'
+import {
+  type AvatarPresetChange,
+  avatarPresetNameOf,
+  BEST_AVATAR_PRESET
+} from '#pages/character-simulator/model/simulator-avatar'
 import {
   draftOf,
   equipmentSetIdOf,
@@ -31,6 +37,7 @@ import {
   type SimulatorOathUpgrade,
   upgradeOf
 } from '#pages/character-simulator/model/simulator-oath-upgrade'
+import { buffLevelOf } from '#pages/character-simulator/model/simulator-switching'
 import type { SimulatorTarget } from '#pages/character-simulator/model/simulator-target'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
@@ -49,6 +56,8 @@ export type SlotEditorActions = Readonly<{
   onEquipmentSetChange: (equipmentSet: SimulatorEquipmentSet, setItemId: string) => void
   onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) => void
   onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
+  onAvatarPresetChange: (preset: AvatarPresetChange) => void
+  onBuffLevelChange: (switching: BuffSwitching, level: number) => void
   onOathSetChange: (setId: number) => void
   onOathBodyChange: (body: SimulatorOathBody, id: string) => void
   onOathUpgradeUnlockChange: (
@@ -119,6 +128,10 @@ export function SlotEditor({
           </Field>
         </Fields>
       )
+    case 'avatar':
+      return <AvatarEditor changes={changes} actions={actions} />
+    case 'switching':
+      return <SwitchingEditor switching={target.switching} changes={changes} actions={actions} />
     case 'oathSet':
       return <OathSetEditor oath={target.oath} actions={actions} />
     case 'oathBody':
@@ -221,6 +234,74 @@ function EquipmentEditor({
       </Field>
       <Field label="마법부여">
         <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+      </Field>
+    </Fields>
+  )
+}
+
+// 선택 칸의 값은 문자열이라 프리셋을 고르지 않은 상태에 따로 id를 둔다.
+const WORN_AVATAR = 'worn'
+const WORN_AVATAR_NAME = avatarPresetNameOf(null)
+const BEST_AVATAR_NAME = avatarPresetNameOf(BEST_AVATAR_PRESET)
+const AVATAR_OPTIONS = [
+  { id: WORN_AVATAR, name: WORN_AVATAR_NAME },
+  { id: BEST_AVATAR_PRESET, name: BEST_AVATAR_NAME }
+]
+
+function AvatarEditor({
+  changes,
+  actions
+}: {
+  changes: SimulatorChanges
+  actions: SlotEditorActions
+}): React.JSX.Element {
+  function changePreset(id: string): void {
+    const preset = id === BEST_AVATAR_PRESET ? BEST_AVATAR_PRESET : null
+    actions.onAvatarPresetChange(preset)
+  }
+
+  return (
+    <Fields>
+      <Field label="아바타">
+        <TextControl
+          label="아바타"
+          value={changes.avatarPreset ?? WORN_AVATAR}
+          options={AVATAR_OPTIONS}
+          onChange={changePreset}
+        />
+      </Field>
+    </Fields>
+  )
+}
+
+function SwitchingEditor({
+  switching,
+  changes,
+  actions
+}: {
+  switching: BuffSwitching
+  changes: SimulatorChanges
+  actions: SlotEditorActions
+}): React.JSX.Element {
+  const options = selectableBuffLevels(switching).map((level) => {
+    const id = String(level)
+
+    return { id, name: `${level}레벨` }
+  })
+
+  function changeLevel(id: string): void {
+    actions.onBuffLevelChange(switching, Number(id))
+  }
+
+  return (
+    <Fields>
+      <Field label={switching.skillName}>
+        <TextControl
+          label="스위칭 레벨"
+          value={String(buffLevelOf(switching, changes.buffLevel))}
+          options={options}
+          onChange={changeLevel}
+        />
       </Field>
     </Fields>
   )
