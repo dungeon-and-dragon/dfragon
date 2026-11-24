@@ -38,7 +38,7 @@ parsePort('3000') // 3000
 대응 파일의 `name`은 엔진 목록의 대표 이름 대신 그 묶음에서 가장 많이 착용하는 이름을 보이게 덮어씁니다. 엔진은 같은 명성의 다른 묶음과 겹치지 않는 이름을 고르므로, 겹치던 묶음이 목록에서 빠졌거나 착용이 적은 이름이 대표로 뽑힌 묶음에 둡니다.
 엔진 파일을 바꾸면 Biome format을 적용하고, 대응 파일의 묶음 id와 `test/slot-items.test.mjs`의 기대값을 새 목록에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
-`@dfragon/lib/equipment-variants`는 장비 시뮬레이터에서 고를 수 있는 장비의 같은 세트 다른 등급 아이템, 장비 세트와 서약 세트 전환, 서약 본체와 광휘 결정의 등급, 묵언의 진의 단계와 선택지, 조율 단계별 세트 포인트, 무기 조율 단계를 찾습니다.
+`@dfragon/lib/equipment-variants`는 장비 시뮬레이터에서 고를 수 있는 장비의 같은 세트 다른 등급 아이템, 장비 세트와 서약 세트 전환, 서약 본체와 광휘 결정의 등급, 묵언의 진의 단계와 선택지, 조율 단계별 세트 포인트, 무기 조율 단계를 찾고, 유니크 스위칭 장비 이름의 접두어와 등록 부위 상한(`switching`)을 엔진 파일에서 옮겨 둡니다.
 무기는 `weaponVariantsOf(itemTypeDetail)`가 무기 종류마다 115레벨 무기 선택지(계열과 등급)를, `findWeaponVariant(itemId)`가 착용 무기의 선택지를 찾습니다.
 목록은 세 파일로 나뉩니다. `data/equipment-variants.dfragon.json`은 점수 엔진 저장소의 같은 이름 파일(그 저장소의 packages/dnfscore-native/tools/equipment_variants 아래)을 그대로 복사한 파일이며 손으로 고치지 않습니다.
 `data/equipment-variant-ids.json`은 제품이 운영에서 관측한 세트별 `setItemId`와 장비, 서약 본체, 광휘 결정, 무기(`weapons`, 무기 종류와 이름별)의 itemId, 관측 수(`count`)를 관리하는 파일입니다.
@@ -54,6 +54,7 @@ itemId가 없는 선택지는 목록에서 빠지고, 해방 계열 무기는 �
 관측 파일을 바꾸면 root에서 `pnpm exec biome format --write packages/lib/data`를 실행하고 생성 명령을 다시 실행한 뒤 `test/avatar-presets.test.mjs`의 전직별 기대값을 맞추고 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
 `@dfragon/lib/buff-switching`의 `buffSwitchingOf(source)`는 상세 응답의 `buff.equipment`, `skillStyle`, 직업 이름과 역할로 버프 강화 스킬의 지금 레벨과 고를 수 있는 범위를 돌려주고, `selectableBuffLevels`, `isSelectableBuffLevel`이 그 범위로 레벨을 나열, 확인합니다. 웹과 API가 같은 함수를 씁니다.
+딜러면 결과의 `equipment`가 버프 강화 장비(칭호 제외)에 지금 등록한 유니크 스위칭 장비(짙은 심연의 편린) 수와 상한을 담고, `isSelectableSwitchingEquipment`가 고른 등록 수를 확인합니다. 접두어와 상한은 `src/equipment-variants.json`의 `switching`에서 읽고, 버퍼는 `equipment`가 null입니다.
 
 `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 API의 스킬 채택률 응답과 `@dfragon/database`의 표본 SQL이 함께 쓰는 표본 순위입니다.
 
