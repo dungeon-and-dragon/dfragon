@@ -5,6 +5,7 @@ import {
   findOathCrystal,
   findOathCrystalVariant,
   findOathVariant,
+  inferOathSetId,
   isValidOathUpgrade,
   moveOathCrystalToSet,
   oathCrystalVariantsOf,
@@ -45,6 +46,8 @@ export interface OathEdit {
   readonly upgrade: readonly OathUpgradeSelection[] | null
   /** 서약 세트, 본체, 결정 아이템 가운데 하나라도 바꿨는지 */
   readonly changesItems: boolean
+  /** 원본 서약 응답에 세트가 없어 지금 세트를 본체와 결정으로 추론하는지 */
+  readonly setInfoMissing: boolean
 }
 
 type SimulatedOath = NonNullable<ScoreSimulationInput['oath']>
@@ -56,7 +59,8 @@ const noOathEdit: OathEdit = {
   body: null,
   crystals: [],
   upgrade: null,
-  changesItems: false
+  changesItems: false,
+  setInfoMissing: false
 }
 
 function hasChanges(changes: OathChanges): boolean {
@@ -126,7 +130,7 @@ function wornOath(oath: CharacterPayload): CharacterPayload {
   return section
 }
 
-function wornSetId(section: CharacterPayload): number | null {
+function setInfoSetId(section: CharacterPayload): number | null {
   const { setInfo } = section
 
   if (!isRecord(setInfo) || typeof setInfo.setId !== 'number') {
@@ -136,13 +140,30 @@ function wornSetId(section: CharacterPayload): number | null {
   return setInfo.setId
 }
 
+function inferredSetId(
+  section: CharacterPayload,
+  crystals: readonly CharacterPayload[]
+): number | null {
+  const bodyItemId = wornItemId(section.info)
+  const worn = crystals.map((crystal) => {
+    const { tune } = crystal
+    const setPoint = isRecord(tune) && typeof tune.setPoint === 'number' ? tune.setPoint : null
+    const itemId = wornItemId(crystal)
+    const tuneLevel = wornTuneLevel(crystal)
+
+    return { itemId, tuneLevel, setPoint }
+  })
+
+  return inferOathSetId({ bodyItemId, crystals: worn })
+}
+
 /** 본체와 결정을 옮길 서약 세트이고, 원본과 같은 세트여도 다른 세트의 본체와 광휘 결정을 그 세트로 옮긴다. */
-function checkedSet(section: CharacterPayload, set: number | null): number | null {
+function checkedSet(worn: number | null, set: number | null): number | null {
   if (set === null) {
     return null
   }
 
-  if (wornSetId(section) === null || !oathSets().some(({ setId }) => setId === set)) {
+  if (worn === null || !oathSets().some(({ setId }) => setId === set)) {
     throw new EquipmentSimulationFailure('request')
   }
 
@@ -318,8 +339,10 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
 
   const section = wornOath(oath)
   const crystals = (section.crystal as unknown[]).filter(isRecord)
-  const worn = wornSetId(section)
-  const set = checkedSet(section, changes.set)
+  const setInfoSet = setInfoSetId(section)
+  // 응답에 세트가 없어도 게임은 세트 포인트 합이 가장 큰 세트의 효과를 적용한다.
+  const worn = setInfoSet ?? inferredSetId(section, crystals)
+  const set = checkedSet(worn, changes.set)
   const setId = set ?? worn
   // 엔진에는 서약 세트가 실제로 바뀔 때만 세트를 넣는다.
   const changedSet = set !== worn ? set : null
@@ -355,7 +378,9 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
   const upgrade = changedUpgrade(section.info, changes.upgrade)
   const changesItems = changedSet !== null || body !== null || changesCrystals
 
-  return { set: changedSet, body, crystals: edited, upgrade, changesItems }
+  const setInfoMissing = setInfoSet === null
+
+  return { set: changedSet, body, crystals: edited, upgrade, changesItems, setInfoMissing }
 }
 
 export function hasOathEdit(edit: OathEdit): boolean {
