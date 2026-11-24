@@ -6,12 +6,16 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { CharacterDetailView } from '#entities/character'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
-import { type GameTextTone, type OathCatalog, useOathCatalog } from '#entities/catalog'
+import {
+  type GameTextTone,
+  gameTextToneClasses,
+  type OathCatalog,
+  useOathCatalog
+} from '#entities/catalog'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { gameTextToneClasses } from './game-text-tones'
 import { OathTab } from './OathTab'
 
 // 세트 번호와 고른 선택지 이름은 딜러 fixture의 용투 서약이고, 서약 본체 아이콘은 딜러 서약의 태초 등급으로 고른다.
