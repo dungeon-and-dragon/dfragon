@@ -74,7 +74,7 @@ export type WeeklyClearChart = Readonly<{
 }>
 
 export function weeklyClearChart(
-  { weeklyClears }: ClearContentStats,
+  { kind, weeklyClears }: ClearContentStats,
   releasedAt: string
 ): WeeklyClearChart {
   const step = Math.max(1, Math.ceil(weeklyClears.length / WEEK_TICK_COUNT))
@@ -94,10 +94,15 @@ export function weeklyClearChart(
 
     return (everCleared / population) * 100
   })
-  const bars = [
-    { key: 'repeat', name: '다시 클리어', color: 'var(--color-chart-base)', values: repeat },
-    { key: 'first', name: '신규', color: 'var(--color-chart-1)', values: first }
-  ]
+  const repeatBar = {
+    key: 'repeat',
+    name: '다시 클리어',
+    color: 'var(--color-chart-base)',
+    values: repeat
+  }
+  const firstBar = { key: 'first', name: '신규', color: 'var(--color-chart-1)', values: first }
+  // 챌린지는 보상 칭호를 한 번만 얻어 다시 깼는지 기록에 남지 않는다.
+  const bars = kind === 'challenge' ? [firstBar] : [repeatBar, firstBar]
   const line = {
     key: 'ever',
     name: '한 번이라도 깬 캐릭터 비율',

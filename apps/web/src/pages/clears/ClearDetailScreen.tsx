@@ -299,6 +299,8 @@ function DetailStats({
   const stages = stageBars(stats.stages)
   const adventures = adventureColumns(stats.adventures, DETAIL_LAST_ADVENTURE_SIZE)
   const hasAdventures = stats.adventures.length > 0
+  // 챌린지 기록의 시각은 보스를 잡은 때가 아니라 보상 상자를 연 때다.
+  const hasTimes = stats.kind !== 'challenge' && hasClearTimes(stats)
 
   return (
     <>
@@ -364,7 +366,7 @@ function DetailStats({
             <Columns groups={[streaks]} />
           </Panel>
         )}
-        {hasClearTimes(stats) && <ClearTimePanel times={stats} />}
+        {hasTimes && <ClearTimePanel times={stats} />}
       </div>
       <div className={clearClasses.row}>
         {ratios.length > 0 && (
