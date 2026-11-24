@@ -84,7 +84,7 @@ const emptyInputs: TimelineInputs = { events: [], items: [] }
 const noItemDictionary = { fill: async () => 0 }
 const unexpectedItemDictionaryFailure = () => assert.fail('사전 채우기 실패가 보고되면 안 된다')
 
-test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기화하고, 열한 번째 캐릭터는 앞 동기화가 끝난 뒤 시작한다', async () => {
+test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기화하고, 다섯 번째 캐릭터는 앞 동기화가 끝난 뒤 시작한다', async () => {
   const running = gate()
   const synced: TimelineCharacter[] = []
   const queue = createTimelineSyncQueue(
@@ -95,36 +95,34 @@ test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기�
     () => assert.fail('동기화 실패가 보고되면 안 된다')
   )
   const others = [
-    ...Array.from({ length: 8 }, (_, index) => ({
-      serverId: 'siroco',
-      characterId: `other-${index}`
-    })),
+    { serverId: 'siroco', characterId: 'other-1' },
+    { serverId: 'siroco', characterId: 'other-2' },
     { serverId: 'cain', characterId: 'timeline-fixture' }
   ]
-  const eleventh = { serverId: 'siroco', characterId: 'other-8' }
+  const fifth = { serverId: 'siroco', characterId: 'other-3' }
 
   queue.request(character)
   queue.request(character)
   for (const other of others) {
     queue.request(other)
   }
-  queue.request(eleventh)
-  queue.request(others[8]!)
+  queue.request(fifth)
+  queue.request(others[2]!)
   queue.request(character)
   await nextTurn()
 
   assert.deepEqual(synced, [character, ...others])
-  assert.deepEqual(queue.counts(), { waiting: 1, running: 10 })
+  assert.deepEqual(queue.counts(), { waiting: 1, running: 4 })
 
   running.release()
   await nextTurn()
   queue.request(character)
   await nextTurn()
 
-  assert.deepEqual(synced, [character, ...others, eleventh, character])
+  assert.deepEqual(synced, [character, ...others, fifth, character])
 })
 
-test('강화 백필은 캐릭터 4명까지만 함께 처리하고 다섯 번째는 앞 백필이 끝난 뒤 시작한다', async () => {
+test('강화 백필은 캐릭터 2명까지만 함께 처리하고 세 번째는 앞 백필이 끝난 뒤 시작한다', async () => {
   const running = gate()
   const backfilled: string[] = []
   const queue = createEnhancementBackfillQueue(
@@ -135,19 +133,19 @@ test('강화 백필은 캐릭터 4명까지만 함께 처리하고 다섯 번째
     () => assert.fail('백필 실패가 보고되면 안 된다')
   )
 
-  for (const characterId of ['first', 'second', 'third', 'fourth', 'fifth']) {
+  for (const characterId of ['first', 'second', 'third']) {
     queue.request({ serverId: 'siroco', characterId })
   }
 
   await nextTurn()
 
-  assert.deepEqual(backfilled, ['first', 'second', 'third', 'fourth'])
-  assert.deepEqual(queue.counts(), { waiting: 1, running: 4 })
+  assert.deepEqual(backfilled, ['first', 'second'])
+  assert.deepEqual(queue.counts(), { waiting: 1, running: 2 })
 
   running.release()
   await nextTurn()
 
-  assert.deepEqual(backfilled, ['first', 'second', 'third', 'fourth', 'fifth'])
+  assert.deepEqual(backfilled, ['first', 'second', 'third'])
 })
 
 test('동기화가 실패를 기록하지 못하면 보고하고 다른 캐릭터와 그 캐릭터의 다음 요청은 막지 않는다', async () => {
@@ -542,19 +540,19 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고,
   })
   await app.listen(0, '127.0.0.1')
   const origin = await app.getUrl()
-  for (const characterId of ['first', 'second', 'third', 'fourth', 'fifth']) {
+  for (const characterId of ['first', 'second', 'third']) {
     const response = await fetch(new URL(`/characters/siroco/${characterId}`, origin))
     assert.equal(response.status, 200)
   }
 
-  assert.equal(synced, 5)
-  assert.equal(backfilled, 4)
+  assert.equal(synced, 3)
+  assert.equal(backfilled, 2)
 
   await app.close()
   running.release()
   await nextTurn()
 
   assert.equal(closed, 1)
-  assert.equal(synced, 5)
-  assert.equal(backfilled, 4)
+  assert.equal(synced, 3)
+  assert.equal(backfilled, 2)
 })
