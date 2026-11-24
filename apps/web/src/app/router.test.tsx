@@ -1709,6 +1709,18 @@ const SET_STATS = {
   ]
 }
 
+// 합성 스킬 통계다. 스킬 탭이 받을 응답 모양만 맞춘다.
+const SKILL_STATS = {
+  computedAt: '2026-11-18T15:38:47.900Z',
+  minFame: null,
+  sampleSize: 0,
+  skills: [],
+  evolutions: [],
+  enhancements: [],
+  chainSampleSize: 0,
+  chains: []
+}
+
 const ITEM_STATS = {
   computedAt: '2026-11-18T15:38:47.900Z',
   sampleSize: 4,
@@ -1763,6 +1775,37 @@ it('세트, 조합, 무기 탭 사이를 오가면 고른 직업, 전직 필터�
   expect(tab('캐릭터').getAttribute('href')).toBe('/stats')
 })
 
+it('무기 탭에서 스킬 탭으로 가면 직업, 전직 필터를 주소에 그대로 두고 표본 없이 그 전직의 스킬 통계를 받는다', async () => {
+  serveSetStats()
+  server.use(
+    http.get(`${SITE_API_URL}/stats/skills`, () => HttpResponse.json(SKILL_STATS)),
+    ...skillWindowHandlers([])
+  )
+  const [job] = RANKING_JOBS
+  const [grow] = job!.grows
+  const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
+  window.history.replaceState(null, '', `/stats/weapons${search}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  const skillTab = await vi.waitFor(() => {
+    const link = [
+      ...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="통계 종류"] a')
+    ].find((candidate) => candidate.textContent === '스킬')
+    expect(link).toBeDefined()
+
+    return link!
+  })
+  await act(async () => skillTab.click())
+  await waitForPath('/stats/skills')
+
+  expect(window.location.search).toBe(search)
+  await vi.waitFor(() =>
+    expect(requestedPaths('/stats/skills').map(({ search }) => search)).toEqual([search])
+  )
+  const current = container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')
+  expect(current?.textContent).toBe('스킬')
+})
+
 it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계를 받고, 전직을 고르면 주소를 바꿔 다시 받는다', async () => {
   serveSetStats()
   const [job] = RANKING_JOBS
@@ -1786,6 +1829,7 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
     ['무기', null],
     ['조합', null],
     ['캐릭터', null],
+    ['스킬', null],
     ['클리어', null]
   ])
 
