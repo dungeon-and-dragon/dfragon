@@ -83,6 +83,19 @@ import {
   type SlotItem,
   type SlotItemCategory
 } from '@dfragon/lib/slot-items'
+import {
+  findAvatarPreset,
+  type AvatarEmblem,
+  type AvatarPreset,
+  type AvatarPresetRole
+} from '@dfragon/lib/avatar-presets'
+import {
+  buffSwitchingOf,
+  isSelectableBuffLevel,
+  selectableBuffLevels,
+  type BuffSwitching,
+  type BuffSwitchingSource
+} from '@dfragon/lib/buff-switching'
 import manifest from '@dfragon/lib/package.json' with { type: 'json' }
 
 export const packageName: string = manifest.name
@@ -273,4 +286,29 @@ export function oathUpgradeChoices(upgrades: readonly OathUpgradeSelection[]) {
   const maxStep: number = OATH_UPGRADE_MAX_STEP
 
   return { steps, first, valid, maxStep }
+}
+
+export function avatarPresetEmblems(jobId: string, jobGrowId: string, role: AvatarPresetRole) {
+  const preset: AvatarPreset | null = findAvatarPreset({ jobId, jobGrowId }, role)
+
+  if (preset === null) {
+    return null
+  }
+
+  const emblems: readonly AvatarEmblem[] = preset.parts.JACKET.emblems
+
+  return emblems.map((emblem) => emblem.itemName)
+}
+
+export function buffLevelChoices(source: BuffSwitchingSource, level: number) {
+  const switching: BuffSwitching | null = buffSwitchingOf(source)
+
+  if (switching === null) {
+    return null
+  }
+
+  const levels = selectableBuffLevels(switching)
+  const selectable = isSelectableBuffLevel(switching, level)
+
+  return { levels, selectable }
 }
