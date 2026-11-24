@@ -227,6 +227,7 @@ test('preview는 표지, Foundations와 컴포넌트마다 카드를 marker와 �
     'IconButton',
     'TextField',
     'Switch',
+    'Checkbox',
     'Chip',
     'Listbox',
     'Popover',
