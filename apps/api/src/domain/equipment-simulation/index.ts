@@ -1,3 +1,6 @@
+export type { AvatarEdit, AvatarPresetChoice } from './avatar.js'
+export { avatarItemIds, editAvatar, hasAvatarEdit, simulatedAvatar } from './avatar.js'
+export { editBuffLevel } from './buff.js'
 export type { SimulationFeatures } from './engine-version.js'
 export { supportsSimulation } from './engine-version.js'
 export type { EquipmentChange } from './equipment.js'
