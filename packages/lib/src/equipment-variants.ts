@@ -154,6 +154,18 @@ export interface OathUpgradeSelection {
   readonly option: string
 }
 
+/** setPoint는 응답의 조율 세트 포인트이고, null이면 목록의 tuneLevel 단계 포인트를 쓴다. */
+export interface WornOathCrystal {
+  readonly itemId: string | null
+  readonly tuneLevel: number
+  readonly setPoint: number | null
+}
+
+export interface WornOath {
+  readonly bodyItemId: string | null
+  readonly crystals: readonly WornOathCrystal[]
+}
+
 interface OathVariantSet extends OathSet {
   readonly oaths: readonly OathVariant[]
   readonly crystals: readonly OathCrystalVariant[]
@@ -485,6 +497,66 @@ export function moveOathCrystalToSet(itemId: string, setId: number): OathCrystal
   }
 
   return moved
+}
+
+function crystalSetPointOf(crystal: WornOathCrystal, variant: OathCrystalVariant): number {
+  if (crystal.setPoint !== null) {
+    return crystal.setPoint
+  }
+
+  const { tuneSetPoints } = variant
+  const level = Math.min(crystal.tuneLevel, tuneSetPoints.length - 1)
+
+  return tuneSetPoints[level]!
+}
+
+// 점수 엔진(0.15.0)이 동률이면 세트 번호가 작은 쪽을 고르므로 같은 규칙을 쓴다.
+function winsOathSetTie(setId: number, otherSetId: number): boolean {
+  return setId < otherSetId
+}
+
+/**
+ * 응답에 서약 세트가 없을 때 효과가 적용되는 서약 세트다. 세트 전용 본체와 광휘 결정의 세트 포인트를 세트별로 더해 합이 가장 큰 세트이고,
+ * 영겁의 안개 서약과 광휘가 아닌 결정은 어느 세트에도 더하지 않는다. 세트에 속한 본체와 결정이 없으면 null이다.
+ */
+export function inferOathSetId(oath: WornOath): number | null {
+  const points = new Map<number, number>()
+  const add = (setId: number, setPoint: number) => {
+    points.set(setId, (points.get(setId) ?? 0) + setPoint)
+  }
+
+  const body = oath.bodyItemId !== null ? findOathVariant(oath.bodyItemId) : null
+
+  if (body?.setId != null) {
+    add(body.setId, body.variant.setPoint)
+  }
+
+  for (const crystal of oath.crystals) {
+    const match = crystal.itemId !== null ? findOathCrystalVariant(crystal.itemId) : null
+
+    if (match !== null) {
+      add(match.setId, crystalSetPointOf(crystal, match.variant))
+    }
+  }
+
+  let best: { setId: number; setPoint: number } | null = null
+
+  for (const [setId, setPoint] of points) {
+    const wins =
+      best === null ||
+      setPoint > best.setPoint ||
+      (setPoint === best.setPoint && winsOathSetTie(setId, best.setId))
+
+    if (wins) {
+      best = { setId, setPoint }
+    }
+  }
+
+  if (best === null) {
+    return null
+  }
+
+  return best.setId
 }
 
 /** 목록에 없는 무기는 조율할 수 없어 0이다. */

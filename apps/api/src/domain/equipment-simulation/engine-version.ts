@@ -11,6 +11,8 @@ const BUFF_LEVEL_ENGINE_VERSION: EngineVersion = [0, 11, 0]
 const AVATAR_ENGINE_VERSION: EngineVersion = [0, 12, 0]
 const WEAPON_ITEM_ENGINE_VERSION: EngineVersion = [0, 13, 0]
 const SWITCHING_EQUIPMENT_ENGINE_VERSION: EngineVersion = [0, 14, 0]
+// 0.15.0부터 응답에 서약 세트가 없으면 엔진이 세트 포인트 합이 가장 큰 세트로 서약 세트 상태를 만든다.
+const INFERRED_OATH_SET_ENGINE_VERSION: EngineVersion = [0, 15, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -33,6 +35,8 @@ export interface SimulationFeatures {
   readonly switchingEquipment: boolean
   /** 무기와 8부위 아바타, 피부와 오라 엠블렘 변경 */
   readonly avatar: boolean
+  /** 원본 응답에 서약 세트가 없는 캐릭터의 서약 변경 */
+  readonly oathWithoutSetInfo: boolean
 }
 
 function versionOf(engine: string): number[] | null {
@@ -94,6 +98,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.switchingEquipment) {
     minimums.push(SWITCHING_EQUIPMENT_ENGINE_VERSION)
+  }
+
+  if (features.oathWithoutSetInfo) {
+    minimums.push(INFERRED_OATH_SET_ENGINE_VERSION)
   }
 
   return minimums

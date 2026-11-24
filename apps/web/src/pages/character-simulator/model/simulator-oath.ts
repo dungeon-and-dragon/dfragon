@@ -1,6 +1,7 @@
 import {
   findOathCrystal,
   findOathVariant,
+  inferOathSetId,
   moveOathCrystalToSet,
   type OathCrystalVariant,
   type OathSet,
@@ -57,8 +58,8 @@ export type SimulatorOathCrystal = ItemView &
   }>
 
 /**
- * setId가 null이면 선택 목록에 없는 서약 세트라 세트를 고르지 않는다. rarity는 상세 응답이 준 서약 세트의 등급이라
- * 다른 세트를 골라도 바꾸지 않는다.
+ * setId는 응답에 서약 세트가 없으면 inferOathSetId로 찾은 세트다. null이면 선택 목록에 없거나 찾을 수 없는 서약 세트라
+ * 세트를 고르지 않는다. rarity는 상세 응답이 준 서약 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
  */
 export type SimulatorOath = Readonly<{
   setId: number | null
@@ -152,6 +153,25 @@ function listedSetId(setId: number | null | undefined): number | null {
   return listed.setId
 }
 
+// 응답에 서약 세트가 없는 캐릭터도 게임에서는 세트 포인트 합이 가장 큰 세트의 효과가 적용된다.
+function wornSetIdOf(oath: Oath): number | null {
+  const setId = oath.setInfo?.setId
+
+  if (setId != null) {
+    return listedSetId(setId)
+  }
+
+  const bodyItemId = oath.info?.itemId ?? null
+  const crystals = oath.crystal.map((crystal) => {
+    const tuneLevel = crystal.tune?.level ?? 0
+    const setPoint = crystal.tune?.setPoint ?? null
+
+    return { itemId: crystal.itemId, tuneLevel, setPoint }
+  })
+
+  return inferOathSetId({ bodyItemId, crystals })
+}
+
 /** 서약이 없으면 null이다. 결정은 slotNo 순서로 둔다. */
 export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): SimulatorOath | null {
   const { oath } = detail
@@ -160,7 +180,7 @@ export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): Simu
     return null
   }
 
-  const setId = listedSetId(oath.setInfo?.setId)
+  const setId = wornSetIdOf(oath)
   const rarity = itemRarityOfGrade(oath.setInfo?.setRarityName ?? null)
   const crystals = oath.crystal
     .flatMap((crystal) => toOathCrystal(crystal, setId))

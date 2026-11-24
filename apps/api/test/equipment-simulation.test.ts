@@ -1044,6 +1044,7 @@ function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
     buffLevel: false,
     switchingEquipment: false,
     avatar: false,
+    oathWithoutSetInfo: false,
     ...features
   })
 }
@@ -2255,6 +2256,112 @@ for (const [name, package_, body, expected, check] of [
   })
 }
 
+const BEFORE_INFERRED_OATH_SET_ENGINE = 'dnfscore-native 0.14.0'
+const INFERRED_OATH_SET_ENGINE = 'dnfscore-native 0.15.0'
+const PACK_OATH_SET = 16211
+const PACK_EPIC_CRYSTAL = '4d753a61b206e085665be3de2e53f2d0'
+const GLIMMER_CRYSTAL = 'f834b16af8341719efe94a3be49d381e'
+
+function packCrystal(itemId: string, itemName: string, itemRarity: string, setPoint: number) {
+  return { ...oathItem(itemId, `무리 : ${itemName}`, itemRarity), tune: { level: 0, setPoint } }
+}
+
+// 응답에 서약 세트가 없는 캐릭터처럼 태초 안개 서약 본체에 미광의 서약 결정 3개와 무리 광휘 결정 8개를 낀다.
+const WORN_WITHOUT_SET_INFO = [
+  ...Array.from({ length: 3 }, () => ({
+    ...oathItem(GLIMMER_CRYSTAL, '미광의 서약 결정', '레어'),
+    tune: { level: 0, setPoint: 45 }
+  })),
+  ...Array.from({ length: 4 }, () =>
+    packCrystal('d61a64fd59177de8d2d9bb3cc6f4e43c', '희미한 광휘 결정', '유니크', 85)
+  ),
+  ...Array.from({ length: 3 }, () =>
+    packCrystal('667733fbd81888807f5c69226a375171', '선명한 광휘 결정', '레전더리', 125)
+  ),
+  packCrystal('04702c73a373a5f5c9a504f2123dc80b', '태초의 광휘 결정', '태초', 205)
+]
+
+function withoutSetInfo(payloads: CharacterPayloads): void {
+  const section = oathOf(payloads)
+  section.setInfo = null
+  section.info = {
+    ...(section.info as Item),
+    ...oathItem('ac0586536083d560b38659de8bc0c2b8', '영겁의 안개 서약', '태초'),
+    setPoint: 655
+  }
+  section.crystal = (section.crystal as Item[]).map((crystal, index) => ({
+    ...crystal,
+    ...WORN_WITHOUT_SET_INFO[index]
+  }))
+}
+
+test('서약 세트 정보가 없는 캐릭터는 세트 포인트 합이 가장 큰 세트를 지금 세트로 두고 서약 세트와 결정을 바꿔 엔진에 넣는다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse')
+  withoutSetInfo(payloads)
+  const engine = scoring(versionedEngine(INFERRED_OATH_SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const crystals = crystalsOf(payloads)
+
+  const moved = await simulate(origin, path, { equipment: [], oathSet: FOX_OATH_SET })
+  const crystal = await simulate(origin, path, {
+    equipment: [],
+    oath: [{ slotNo: 0, variantId: PACK_EPIC_CRYSTAL }]
+  })
+  const same = await simulate(origin, path, { equipment: [], oathSet: PACK_OATH_SET })
+
+  assert.equal(moved.status, 200)
+  assert.equal(moved.body.simulated.value, 1802)
+  const movedOath = engine.requests[0]!.input.simulation!.oath!
+  assert.deepEqual(movedOath.set, { setId: FOX_OATH_SET })
+  assert.equal(movedOath.info, undefined)
+  assert.deepEqual(
+    movedOath.crystal!.map(({ slotNo, itemName }) => [slotNo, itemName]),
+    [
+      ...[3, 4, 5, 6].map((slotNo) => [slotNo, '여우 : 희미한 광휘 결정']),
+      ...[7, 8, 9].map((slotNo) => [slotNo, '여우 : 선명한 광휘 결정']),
+      [10, '여우 : 태초의 광휘 결정']
+    ]
+  )
+  assert.equal(crystal.status, 200)
+  assert.deepEqual(engine.requests[1]!.input.simulation, {
+    equipment: [],
+    oath: {
+      crystal: [
+        {
+          ...crystals[0],
+          ...oathItem(PACK_EPIC_CRYSTAL, '무리 : 완전한 광휘 결정', '에픽'),
+          tune: { level: 0, setPoint: 165 }
+        }
+      ]
+    }
+  })
+  assert.equal(same.status, 200)
+  assert.equal(engine.requests[2]!.input.simulation, undefined)
+})
+
+for (const [name, body] of [
+  ['서약 세트 전환', { equipment: [], oathSet: FOX_OATH_SET }],
+  ['결정 조율 변경', { equipment: [], oath: [{ slotNo: 3, tune: 1 }] }],
+  ['묵언의 진의 변경', { equipment: [], oathUpgrade: [] }]
+] as const) {
+  test(`엔진 버전: 0.15.0 전 엔진에 서약 세트 정보가 없는 캐릭터의 ${name}을 보내면 바꾼 점수가 null이다`, async (t) => {
+    const { payloads, details, path } = fixture('buffer-muse')
+    withoutSetInfo(payloads)
+    const before = scoring(versionedEngine(BEFORE_INFERRED_OATH_SET_ENGINE))
+    const after = scoring(versionedEngine(INFERRED_OATH_SET_ENGINE))
+    const beforeOrigin = await listen(t, { details, ...before.options })
+    const afterOrigin = await listen(t, { details, ...after.options })
+
+    const unsupported = await simulate(beforeOrigin, path, body)
+    const supported = await simulate(afterOrigin, path, body)
+
+    assert.equal(unsupported.status, 200)
+    assert.equal(unsupported.body.simulated, null)
+    assert.equal(supported.status, 200)
+    assert.equal(supported.body.simulated.value, 1802)
+  })
+}
+
 const invalidSetCases: readonly (readonly [string, FixtureName, Item, PayloadEdit])[] = [
   [
     '목록에 없는 장비 세트',
@@ -2277,13 +2384,24 @@ const invalidSetCases: readonly (readonly [string, FixtureName, Item, PayloadEdi
   ],
   ['목록에 없는 서약 세트', 'buffer-muse', { equipment: [], oathSet: 16213 }, keepPayloads],
   [
-    '서약 세트 정보가 없는 캐릭터의 서약 세트 전환',
+    '서약 세트 정보가 없고 세트에 속한 본체와 광휘 결정도 없는 캐릭터의 서약 세트 전환',
     'buffer-muse',
     { equipment: [], oathSet: FOX_OATH_SET },
     (payloads) => {
-      const { setInfo: _setInfo, ...section } = payloads.oath.oath as Item
-      payloads.oath = { ...payloads.oath, oath: section }
+      withoutSetInfo(payloads)
+      const section = oathOf(payloads)
+      section.crystal = (section.crystal as Item[]).map((crystal) => ({
+        ...crystal,
+        ...oathItem(GLIMMER_CRYSTAL, '미광의 서약 결정', '레어'),
+        tune: { level: 0, setPoint: 45 }
+      }))
     }
+  ],
+  [
+    '서약 세트 정보가 없는 캐릭터의 추론한 세트 밖 결정',
+    'buffer-muse',
+    { equipment: [], oath: [{ slotNo: 0, variantId: FOX_EPIC_CRYSTAL }] },
+    (payloads) => withoutSetInfo(payloads)
   ],
   [
     '서약이 없는 캐릭터의 서약 세트 전환',
@@ -2408,6 +2526,31 @@ test('실제 엔진은 장비 세트, 서약 세트, 본체와 결정 등급, �
 
   const weapon = await scoresOf('dealer-blade', { equipment: [{ slotId: 'WEAPON', tune: 3 }] })
   assert.ok(weapon.simulated.value > weapon.baseline.value)
+})
+
+const REAL_INFERRED_OATH_SET_ENGINE = realEngineSupports({ oathWithoutSetInfo: true })
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 건너뛰지 않는지만 확인한다.
+test('실제 엔진은 서약 세트 정보가 없는 캐릭터의 서약 세트와 결정 교체를 건너뛰지 않고 계산한다', {
+  skip:
+    !REAL_INFERRED_OATH_SET_ENGINE &&
+    '서약 세트 정보가 없는 캐릭터의 서약 세트를 만드는 0.15.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse')
+  oathOf(payloads).setInfo = null
+  const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+
+  for (const body of [
+    { equipment: [], oathSet: FOX_OATH_SET },
+    { equipment: [], oath: [{ slotNo: 0, variantId: SHADOW_UNIQUE_CRYSTAL }] }
+  ]) {
+    const response = await simulate(origin, path, body)
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null, JSON.stringify(body))
+    assert.equal(response.body.simulated.skipped, null, JSON.stringify(body))
+  }
 })
 
 // 무기 상세는 점수 엔진 저장소 테스트 자료에 있는 운영 공개 API 응답에서 엔진과 API가 읽는 칸만 옮긴 값이다.

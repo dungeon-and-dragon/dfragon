@@ -1310,6 +1310,31 @@ it('서약 세트 줄에서 다른 세트를 고르면 세트만 요청하고 �
   )
 })
 
+it('응답에 서약 세트가 없으면 세트 포인트 합이 가장 큰 세트로 세트 줄과 결정 선택지를 열고 다른 세트를 요청한다', async () => {
+  const detail = characterDetailFixture('dealer')
+  await render({ ...detail, oath: { ...detail.oath!, setInfo: null } })
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('야망의 용투 서약')
+
+  await chooseCrystal(8)
+
+  expect(buttonNames('결정 9 교체')).toEqual(
+    oathCrystalVariantsOf(DRAGON_OATH_SET).map(({ item }) => item.itemName)
+  )
+
+  await chooseOath('세트')
+
+  expect(pressedIn('서약 세트')).toBe('야망의 용투 서약')
+
+  await press('서약 세트', '어둠에 잠긴 그림자 서약')
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathSet: SHADOW_OATH_SET }))
+  expect(oathRowOf('결정 1').querySelectorAll('td')[1]!.textContent).toBe(
+    '그림자 : 완전한 광휘 결정III'
+  )
+})
+
 it('장비 세트와 서약 세트 이름은 응답이 준 세트 등급의 색으로 보인다', async () => {
   const detail = characterDetailFixture('dealer')
   const setItemInfo = detail.equipment.setItemInfo.map((set) => ({
