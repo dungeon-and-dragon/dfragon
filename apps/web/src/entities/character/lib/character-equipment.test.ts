@@ -180,9 +180,12 @@ describe('장비 탭 값', () => {
       { label: '크리티컬 +5%', emphasized: false }
     ])
     expect(view.items[12].reinforce).toEqual({ kind: 'amplify', value: 8 })
-    expect(view.sets).toEqual([
-      { name: '로열 페어리 세트', rarityName: '태초', rarity: 'primordial', point: 2615 }
-    ])
+    expect(view.set).toEqual({
+      name: '로열 페어리 세트',
+      rarityName: '태초',
+      rarity: 'primordial',
+      point: 2615
+    })
     expect(view.mistLevel).toBe(100)
     expect(view.creature).toMatchObject({ itemName: '운명을 담는 재단사', rarity: 'rare' })
     expect(view.aura).toMatchObject({ itemName: '고결한 영혼의 잔상' })
@@ -244,6 +247,42 @@ describe('장비 탭 값', () => {
     ])
   })
 
+  function withSets(points: readonly [string, number | null][]) {
+    const detail = characterDetailFixture('dealer')
+    const [royal] = detail.equipment.setItemInfo
+    detail.equipment.setItemInfo = points.map(([setItemName, current]) => ({
+      ...royal,
+      setItemName,
+      active: { setPoint: { current, min: null, max: null }, status: [] }
+    }))
+
+    return detail
+  }
+
+  it('세트가 둘 이상이면 세트 포인트가 가장 큰 세트 하나만 둔다', () => {
+    const detail = withSets([
+      ['시작의 이상향 세트', 985],
+      ['로열 페어리 세트', 2550],
+      ['찬란한 이상향 세트', 1200]
+    ])
+
+    expect(toEquipmentView(detail).set).toMatchObject({ name: '로열 페어리 세트', point: 2550 })
+  })
+
+  it('세트 포인트가 같으면 앞 세트를, 포인트가 없는 세트보다 포인트가 있는 세트를 둔다', () => {
+    const tied = withSets([
+      ['앞 세트', 2550],
+      ['뒤 세트', 2550]
+    ])
+    const unpointed = withSets([
+      ['포인트 없는 세트', null],
+      ['포인트 있는 세트', 985]
+    ])
+
+    expect(toEquipmentView(tied).set?.name).toBe('앞 세트')
+    expect(toEquipmentView(unpointed).set?.name).toBe('포인트 있는 세트')
+  })
+
   it('응답에 없는 슬롯은 행이 없고, 크리쳐, 오라, 세트, 안개 융화가 없으면 비운다', () => {
     const detail = characterDetailFixture('dealer')
     const view = toEquipmentView({
@@ -259,6 +298,6 @@ describe('장비 탭 값', () => {
 
     expect(view.items).toHaveLength(12)
     expect(view.items.map((item) => item.slotName)).not.toContain('칭호')
-    expect(view).toMatchObject({ sets: [], mistLevel: null, creature: null, aura: null })
+    expect(view).toMatchObject({ set: null, mistLevel: null, creature: null, aura: null })
   })
 })
