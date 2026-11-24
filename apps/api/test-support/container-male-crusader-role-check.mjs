@@ -35,7 +35,7 @@ const basic = (characterId, fame, { jobId, jobName } = maleJob) => ({
 const style = (
   characterId,
   skills,
-  { jobId = maleJob.jobId, jobGrowId = crusaderGrowId } = {}
+  { jobId = maleJob.jobId, jobGrowId = crusaderGrowId, chain = null } = {}
 ) => ({
   serverId: 'cain',
   characterId,
@@ -44,7 +44,7 @@ const style = (
   skills,
   evolutions: [],
   enhancements: [],
-  chain: null,
+  chain,
   fetchedAt
 })
 const dealerSkills = (courageLevel) => [
@@ -55,6 +55,8 @@ const bufferSkills = [
   { name: '영광의 축복', level: 30 },
   { name: '성령의 메이스', level: 1 }
 ]
+const dealerChain = { chain: ['성령의 메이스', null, '용기의 은총', null] }
+const bufferChain = { chain: ['영광의 축복', null, null, null] }
 const ids = (rows) => rows.map(({ characterId }) => characterId)
 
 const client = createDatabaseClient(readDatabaseConfiguration(process.env))
@@ -70,14 +72,14 @@ try {
   ]) {
     await recordCharacterBasic(client, character)
   }
-  await recordCharacterSkillStyle(client, style('mc-dealer-1', dealerSkills(10)))
-  await recordCharacterSkillStyle(client, style('mc-buffer', bufferSkills))
+  await recordCharacterSkillStyle(client, style('mc-dealer-1', dealerSkills(10), dealerChain))
+  await recordCharacterSkillStyle(client, style('mc-buffer', bufferSkills, bufferChain))
   // 인파이터일 때 받은 행이라 지금 전직의 역할로 쓰지 않는다.
   await recordCharacterSkillStyle(
     client,
     style('mc-old-grow', dealerSkills(10), { jobGrowId: infighterGrowId })
   )
-  await recordCharacterSkillStyle(client, style('mc-dealer-2', dealerSkills(1)))
+  await recordCharacterSkillStyle(client, style('mc-dealer-2', dealerSkills(1), dealerChain))
   await recordCharacterSkillStyle(client, style('mc-no-fame', bufferSkills))
   await recordCharacterSkillStyle(
     client,
@@ -121,7 +123,9 @@ try {
       { name: '성령의 메이스', learned: 2, levels: [[20, 2]] }
     ],
     evolutions: [],
-    enhancements: []
+    enhancements: [],
+    chainSampleSize: 2,
+    chains: [{ skills: dealerChain.chain, count: 2 }]
   }
   const bufferAdoption = {
     minFame: 280000,
@@ -131,7 +135,9 @@ try {
       { name: '성령의 메이스', learned: 1, levels: [[1, 1]] }
     ],
     evolutions: [],
-    enhancements: []
+    enhancements: [],
+    chainSampleSize: 1,
+    chains: [{ skills: bufferChain.chain, count: 1 }]
   }
   assert.deepEqual(
     await readJobSkillAdoption(client, { ...maleCrusader, role: 'dealer' }),

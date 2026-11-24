@@ -85,7 +85,9 @@ const adoption: JobSkillAdoption = {
     }
   ],
   evolutions: [{ name: '발도', type1: 1, type2: 1 }],
-  enhancements: [{ name: '발도', type1: 0, type2: 2 }]
+  enhancements: [{ name: '발도', type1: 0, type2: 2 }],
+  chainSampleSize: 2,
+  chains: [{ skills: ['발도', null, '맹룡단공참', null], count: 1 }]
 }
 
 const computedAt = new Date('2026-11-06T15:00:00.000Z')
@@ -908,7 +910,9 @@ test('스킬 채택률 저장분이 없는 전직은 표본 0인 빈 값과 comp
           sampleSize: 0,
           skills: [],
           evolutions: [],
-          enhancements: []
+          enhancements: [],
+          chainSampleSize: 0,
+          chains: []
         }
       }
     )
@@ -971,7 +975,9 @@ test('DB 설정이 없는 API는 표본 0인 빈 스킬 채택률과 computedAt 
           sampleSize: 0,
           skills: [],
           evolutions: [],
-          enhancements: []
+          enhancements: [],
+          chainSampleSize: 0,
+          chains: []
         }
       }
     )

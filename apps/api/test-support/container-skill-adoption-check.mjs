@@ -15,13 +15,13 @@ const jobId = 'synthetic-adopt-job'
 const jobGrowId = 'synthetic-adopt-grow'
 const job = { jobId, jobGrowId }
 const fetchedAt = new Date('2026-11-07T00:00:00Z')
-const basic = (characterId, fame, grow = jobGrowId) => ({
+const basic = (characterId, fame, grow = jobGrowId, job = jobId) => ({
   serverId: 'cain',
   characterId,
   characterName: `합성${characterId}`,
   adventureName: '합성채택모험단',
   level: 115,
-  jobId,
+  jobId: job,
   jobGrowId: grow,
   jobName: '합성직업',
   jobGrowName: `합성${grow}`,
@@ -29,14 +29,18 @@ const basic = (characterId, fame, grow = jobGrowId) => ({
   guildId: null,
   guildName: null
 })
-const style = (characterId, { grow = jobGrowId, skills, evolutions = [], enhancements = [] }) => ({
+const style = (
+  characterId,
+  { grow = jobGrowId, job = jobId, skills, evolutions = [], enhancements = [], chain = null }
+) => ({
   serverId: 'cain',
   characterId,
-  jobId,
+  jobId: job,
   jobGrowId: grow,
   skills,
   evolutions,
   enhancements,
+  chain,
   fetchedAt
 })
 const learnedAll = {
@@ -55,7 +59,9 @@ try {
     sampleSize: 0,
     skills: [],
     evolutions: [],
-    enhancements: []
+    enhancements: [],
+    chainSampleSize: 0,
+    chains: []
   })
 
   for (let index = 1; index <= SKILL_STYLE_SAMPLE_TOP_COUNT - 3; index++) {
@@ -106,7 +112,9 @@ try {
       }
     ],
     evolutions: [{ name: '발도', type1: 1, type2: 1 }],
-    enhancements: [{ name: '발도', type1: 0, type2: 2 }]
+    enhancements: [{ name: '발도', type1: 0, type2: 2 }],
+    chainSampleSize: 0,
+    chains: []
   }
   assert.deepEqual(await readJobSkillAdoption(client, job), expected)
 
@@ -125,7 +133,9 @@ try {
     sampleSize: 0,
     skills: [],
     evolutions: [],
-    enhancements: []
+    enhancements: [],
+    chainSampleSize: 0,
+    chains: []
   })
   const computedAt = new Date('2026-11-08T15:00:00.000Z')
   await saveJobSkillAdoption(client, { ...job, computedAt, adoption: expected })
@@ -138,6 +148,50 @@ try {
   // 요청은 계산하지 않으므로 저장 뒤 받은 스킬 스타일은 다음 job 실행 전까지 응답에 들지 않는다.
   await recordCharacterSkillStyle(client, style('adopt-20', learnedAll))
   assert.deepEqual(await get(), answer)
+
+  const chainJob = { jobId: 'synthetic-adopt-chain-job', jobGrowId: 'synthetic-adopt-chain-grow' }
+  const chains = [
+    ['A', 'B', 'C', 'D'],
+    ['A', 'B', 'C', 'D'],
+    ['A', 'B', 'C', 'D'],
+    ['D', 'C', 'B', 'A'],
+    ['A', null, 'B', null],
+    ['A', null, 'B', null],
+    ['G', null, null, null],
+    ['F', null, null, null],
+    ['E', null, null, null],
+    [null, null, null, null],
+    null
+  ]
+
+  for (const [index, chain] of chains.entries()) {
+    const characterId = `adopt-chain-${index}`
+
+    await recordCharacterBasic(
+      client,
+      basic(characterId, 90000 + index, chainJob.jobGrowId, chainJob.jobId)
+    )
+    await recordCharacterSkillStyle(
+      client,
+      style(characterId, {
+        job: chainJob.jobId,
+        grow: chainJob.jobGrowId,
+        skills: [{ name: 'A', level: 1 }],
+        chain
+      })
+    )
+  }
+
+  const chainAdoption = await readJobSkillAdoption(client, chainJob)
+  assert.equal(chainAdoption.sampleSize, 11)
+  assert.equal(chainAdoption.chainSampleSize, 10)
+  assert.deepEqual(chainAdoption.chains, [
+    { skills: ['A', 'B', 'C', 'D'], count: 3 },
+    { skills: ['A', null, 'B', null], count: 2 },
+    { skills: ['D', 'C', 'B', 'A'], count: 1 },
+    { skills: ['E', null, null, null], count: 1 },
+    { skills: ['F', null, null, null], count: 1 }
+  ])
 } finally {
   await client.$disconnect()
 }
