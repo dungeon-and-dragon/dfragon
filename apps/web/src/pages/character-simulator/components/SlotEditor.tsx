@@ -8,10 +8,8 @@ import {
 import {
   draftOf,
   equipmentSetIdOf,
-  resolvedItemsOf,
   type SimulatorChanges,
   type SimulatorEquipmentSet,
-  type SimulatorRow,
   type SimulatorSlot,
   type SimulatorSlotItem,
   type SlotDraft,
@@ -23,10 +21,8 @@ import {
   type CrystalDraft,
   crystalChoicesOf,
   crystalDraftOf,
-  crystalItemOf,
   crystalTuneLimitOf,
   oathBodyChoiceIdOf,
-  oathBodyItemOf,
   type OathChoice,
   type SimulatorOath,
   type SimulatorOathBody,
@@ -95,13 +91,11 @@ function Fields({ children }: { children: React.ReactNode }): React.JSX.Element 
 
 export function SlotEditor({
   target,
-  rows,
   oath,
   changes,
   actions
 }: {
   target: SimulatorTarget
-  rows: readonly SimulatorRow[]
   oath: SimulatorOath | null
   changes: SimulatorChanges
   actions: SlotEditorActions
@@ -116,7 +110,7 @@ export function SlotEditor({
         />
       )
     case 'equipment':
-      return <EquipmentEditor slot={target.slot} rows={rows} changes={changes} actions={actions} />
+      return <EquipmentEditor slot={target.slot} changes={changes} actions={actions} />
     case 'slotItem':
       return (
         <Fields>
@@ -185,18 +179,15 @@ function EquipmentSetEditor({
 
 function EquipmentEditor({
   slot,
-  rows,
   changes,
   actions
 }: {
   slot: SimulatorSlot
-  rows: readonly SimulatorRow[]
   changes: SimulatorChanges
   actions: SlotEditorActions
 }): React.JSX.Element {
   const slotLabel = slot.slotName ?? slot.slotId
   const draft = draftOf(slot, changes)
-  const shown = resolvedItemsOf(rows, changes)[slot.slotId] ?? slot
   const choice = variantChoiceOf(slot, draft.variantId)
   const tuneLimit = tuneLimitOf(slot, draft.variantId)
 
@@ -207,13 +198,7 @@ function EquipmentEditor({
   return (
     <Fields>
       <Field label="장비">
-        <ItemControl
-          slot={slot}
-          slotLabel={slotLabel}
-          shown={shown}
-          draft={draft}
-          onChange={changeSlot}
-        />
+        <ItemControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
       </Field>
       {tuneLimit > 0 && (
         <Field label="조율">
@@ -364,7 +349,6 @@ function OathBodyEditor({
           label="서약 교체"
           worn={body}
           wornListed
-          shown={oathBodyItemOf(body, changes.oath)}
           choices={body.choices}
           value={oathBodyChoiceIdOf(body, changes.oath)}
           iconOf={iconOf}
@@ -405,7 +389,6 @@ function CrystalEditor({
           label={`결정 ${number} 교체`}
           worn={crystal}
           wornListed={crystal.wornVariantId !== null}
-          shown={crystalItemOf(crystal, changes.oath)}
           choices={choices}
           value={draft.variantId}
           onChange={changeVariant}
