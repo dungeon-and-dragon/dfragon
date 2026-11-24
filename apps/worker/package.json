@@ -58,7 +58,7 @@
     "@dfragon/server-core": "workspace:*",
     "croner": "catalog:",
     "date-fns": "catalog:",
-    "p-throttle": "catalog:",
+    "p-queue": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

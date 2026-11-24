@@ -10,7 +10,7 @@ import {
   createNeopleFameSearch,
   createNeopleCharacterBasic,
   createNeopleLatestActivity,
-  paceNeopleRequests
+  pacePrioritizedNeopleRequests
 } from '#infrastructure/neople/index.js'
 import {
   createNeopleItemDetails,
@@ -67,7 +67,14 @@ export async function startCharacterCollector(
   const keyRequestsPerSecond = Math.min(KEY_REQUESTS_PER_SECOND, configuration.requestsPerSecond)
   const keyPool = createBatchNeopleKeyPool({
     store: keyRepository,
-    createNeople: (key) => paceNeopleRequests(createNeopleClient(key), keyRequestsPerSecond),
+    createNeople: (key) => {
+      const keyClient = createNeopleClient(key)
+
+      return pacePrioritizedNeopleRequests(
+        { neople: keyClient, priorityNeople: keyClient },
+        keyRequestsPerSecond
+      )
+    },
     concurrencyPerKey: configuration.concurrency,
     report
   })
@@ -85,7 +92,7 @@ export async function startCharacterCollector(
   }, BATCH_KEY_REFRESH_MS)
 
   const { readConcurrency } = keyPool
-  const neople = paceNeopleRequests(keyPool.neople, configuration.requestsPerSecond)
+  const { neople } = pacePrioritizedNeopleRequests(keyPool, configuration.requestsPerSecond)
   const fetchBasic = createNeopleCharacterBasic(neople)
   const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
   const jobs = createWorkerJobs(client, {

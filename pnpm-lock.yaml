@@ -269,9 +269,9 @@ catalogs:
     onnxruntime-web:
       specifier: 1.31.1
       version: 1.31.1
-    p-throttle:
-      specifier: 8.1.1
-      version: 8.1.1
+    p-queue:
+      specifier: 10.0.0
+      version: 10.0.0
     pngjs:
       specifier: 7.0.0
       version: 7.0.0
@@ -672,9 +672,9 @@ importers:
       date-fns:
         specifier: 'catalog:'
         version: 4.4.0
-      p-throttle:
+      p-queue:
         specifier: 'catalog:'
-        version: 8.1.1
+        version: 10.0.0
       zod:
         specifier: 'catalog:'
         version: 4.6.7
@@ -3657,9 +3657,9 @@ packages:
   oxc-resolver@11.21.2:
     resolution: {integrity: sha512-w5tLwYN3Zo24w5EeWJjJWZOwhYqTtC8PS2B1tIt7BZUuqTIcU07sQValbDw+rq7+AuAGzOHklgK+ifsy4lpXfw==}
 
-  p-throttle@8.1.1:
-    resolution: {integrity: sha512-xxWFBUyvbrQ10XC3VAr0SoXoOCKXqCX/yvbFIkBE98upphHFwjIKR6AId13ZH3jngFfF6yK43QTOtrngYAmFMA==}
-    engines: {node: '>=20'}
+  p-queue@10.0.0:
+    resolution: {integrity: sha512-P2wrCri3bhGLPo3kX7qYVXbo/5GvaVATU0DpO24CbeT53Y4z35t8JUWku04ERpXHUYB5rPMi3TkWE3fmJgx5rA==}
+    engines: {node: '>=22'}
 
   parse5@8.0.1:
     resolution: {integrity: sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==}
@@ -6812,7 +6812,7 @@ snapshots:
       '@oxc-resolver/binding-win32-arm64-msvc': 11.21.2
       '@oxc-resolver/binding-win32-x64-msvc': 11.21.2
 
-  p-throttle@8.1.1: {}
+  p-queue@10.0.0: {}
 
   parse5@8.0.1:
     dependencies:
