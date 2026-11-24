@@ -17,7 +17,7 @@ export interface ApiHttpAppOptions extends ApiServicesOptions {
 /** Public game data runs without authentication credentials; a database is only used for timeline sync, character basics, skill styles, adventure, guild reads and fame rankings, stats, clear stats. */
 export async function createApiHttpApp(options: ApiHttpAppOptions) {
   const { writeAccessLog = writeAccessLogToStdout } = options
-  const { services, readQueueCounts, refreshClearStats, close } = await createApiServices(
+  const { services, refreshClearStats, close } = await createApiServices(
     options,
     createCodeReport(writeAccessLog, 'api')
   )
@@ -31,7 +31,6 @@ export async function createApiHttpApp(options: ApiHttpAppOptions) {
 
     return {
       app: createHonoAppHandle(app, { httpsOptions: options.httpsOptions, close }),
-      readQueueCounts,
       refreshClearStats
     }
   } catch (error) {

@@ -1,12 +1,9 @@
 import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/database'
-import { type NeopleClient, createNeopleClient } from '@dfragon/neople'
+import { createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
-import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
 import {
-  createNeopleCharacterTimeline,
   createNeopleCatalog,
-  createNeopleCharacterDetails,
-  createNeopleItemDetails
+  createNeopleCharacterDetails
 } from '@dfragon/server-core/infrastructure/neople/index.js'
 import {
   DatabaseAdventureGuildRepository,
@@ -15,31 +12,14 @@ import {
   DatabaseCharacterSearchRepository,
   DatabaseCharacterTimelineRepository,
   DatabaseRankingStatsRepository,
-  DatabaseTimelineQueueCountRepository
+  DatabaseTimelineSyncRequestRepository
 } from '#infrastructure/database/index.js'
-import {
-  ENHANCEMENT_BACKFILL_CONCURRENCY,
-  SEASON_BACKFILL_CONCURRENCY,
-  TIMELINE_SYNC_CONCURRENCY
-} from '#application/character-timeline/index.js'
-import {
-  EnhancementBackfillService,
-  SeasonBackfillService,
-  TimelineSyncService
-} from '@dfragon/server-core/application/character-timeline/index.js'
-import { ENHANCEMENT_BACKFILL_CODES } from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   createNeopleCharacterSearch,
   createNeopleLowestListing,
   createNeopleShopGrade
 } from '#infrastructure/neople/index.js'
-import {
-  DatabaseClearStatsRepository,
-  DatabaseEnhancementBackfillRepository,
-  DatabaseItemDictionaryRepository,
-  DatabaseSeasonBackfillRepository,
-  DatabaseTimelineSyncRepository
-} from '@dfragon/server-core/infrastructure/database/index.js'
+import { DatabaseClearStatsRepository } from '@dfragon/server-core/infrastructure/database/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from './api-app.js'
 import type { readRuntimeConfiguration } from './configuration.js'
 
@@ -54,15 +34,7 @@ const CLEAR_STATS_POOL = {
   statementTimeoutMs: 180_000
 }
 
-// 동기화, 강화 백필, 옛 시즌 받기는 일 하나가 연결을 한 번에 하나만 쓴다. 풀을 세 queue가 함께 처리하는 수의 합으로 두어
-// 구간 교체 transaction이 연결을 기다리다 Prisma의 시작 대기 2초를 넘겨 실패하지 않게 하고, 메인 풀의 조회와 연결을 다투지 않게 한다.
-const TIMELINE_POOL = {
-  maxConnections:
-    TIMELINE_SYNC_CONCURRENCY + ENHANCEMENT_BACKFILL_CONCURRENCY + SEASON_BACKFILL_CONCURRENCY
-}
-
 function createDatabaseSubscribers(
-  neople: NeopleClient,
   database: DatabaseConfiguration | undefined
 ): Pick<
   ApiHttpAppOptions,
@@ -83,48 +55,19 @@ function createDatabaseSubscribers(
   }
   const client = createDatabaseClient(database)
   const clearStatsClient = createDatabaseClient(database, CLEAR_STATS_POOL)
-  const timelineClient = createDatabaseClient(database, TIMELINE_POOL)
   const characterBasic = new DatabaseCharacterBasicRepository(client)
   const characterSearch = new DatabaseCharacterSearchRepository(client)
-  const fetchTimeline = createNeopleCharacterTimeline(neople)
   const timelineRead = new DatabaseCharacterTimelineRepository(client)
-  const timelineQueueCounts = new DatabaseTimelineQueueCountRepository(client)
-  const itemDictionary = new ItemDictionaryService(
-    new DatabaseItemDictionaryRepository(timelineClient),
-    createNeopleItemDetails(neople)
-  )
-  const timelineSync = new TimelineSyncService(
-    new DatabaseTimelineSyncRepository(timelineClient),
-    fetchTimeline,
-    itemDictionary
-  )
-  const enhancementBackfill = new EnhancementBackfillService(
-    new DatabaseEnhancementBackfillRepository(timelineClient),
-    createNeopleCharacterTimeline(neople, ENHANCEMENT_BACKFILL_CODES)
-  )
-  const seasonBackfill = new SeasonBackfillService(
-    new DatabaseSeasonBackfillRepository(timelineClient),
-    fetchTimeline
-  )
 
-  // 클리어 통계는 clearStatsClient, 타임라인을 받아 저장하는 일은 timelineClient, 나머지 option은 client를 함께 쓰며,
-  // 공개 app이 닫힐 때 `timeline.close`로 모두 닫는다.
+  // 클리어 통계는 clearStatsClient, 나머지 option은 client를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 모두 닫는다.
 
   return {
     timeline: {
-      sync: (character, reportItemDictionaryFailure) =>
-        timelineSync.sync(character, reportItemDictionaryFailure),
-      backfillEnhancements: (character) => enhancementBackfill.backfill(character),
-      backfillSeason: (job) => seasonBackfill.backfill(job),
       read: (character) => timelineRead.readTimeline(character),
       readPage: (character, list, before) => timelineRead.readPage(character, list, before),
-      writeQueueCounts: (counts) => timelineQueueCounts.writeCounts(counts),
+      requests: new DatabaseTimelineSyncRequestRepository(client),
       close: async () => {
-        await Promise.all([
-          client.$disconnect(),
-          clearStatsClient.$disconnect(),
-          timelineClient.$disconnect()
-        ])
+        await Promise.all([client.$disconnect(), clearStatsClient.$disconnect()])
       }
     },
     recordCharacterBasic: (basic) => characterBasic.recordBasic(basic),
@@ -147,7 +90,7 @@ export function createApiRuntimeOptions(configuration: RuntimeConfiguration): Ap
     readAdventureNames: readCandidateAdventureNames,
     readCharacterScores,
     ...database
-  } = createDatabaseSubscribers(neople, configuration.database)
+  } = createDatabaseSubscribers(configuration.database)
 
   return {
     search: {

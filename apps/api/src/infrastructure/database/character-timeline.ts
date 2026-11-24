@@ -2,12 +2,16 @@ import {
   type DatabaseClient,
   type TimelineCharacter,
   type TimelineItemCursor,
-  type TimelineQueueCount,
-  writeTimelineQueueCounts
+  type TimelineSyncRequest,
+  type TimelineSyncStateRow,
+  hasTimelineSyncRequest,
+  readSeasonBackfillRequestSeasons,
+  readTimelineSyncStates,
+  requestTimelineSync
 } from '@dfragon/database'
 import type {
   CharacterTimelineRepository,
-  TimelineQueueCountRepository
+  TimelineSyncRequestRepository
 } from '#application/character-timeline/repository.js'
 import type {
   CharacterTimeline,
@@ -32,10 +36,22 @@ export class DatabaseCharacterTimelineRepository implements CharacterTimelineRep
   }
 }
 
-export class DatabaseTimelineQueueCountRepository implements TimelineQueueCountRepository {
+export class DatabaseTimelineSyncRequestRepository implements TimelineSyncRequestRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  writeCounts(counts: readonly TimelineQueueCount[]): Promise<void> {
-    return writeTimelineQueueCounts(this.client, counts)
+  readStates(characters: readonly TimelineCharacter[]): Promise<TimelineSyncStateRow[]> {
+    return readTimelineSyncStates(this.client, characters)
+  }
+
+  request(requests: readonly TimelineSyncRequest[], options: { awaited: boolean }): Promise<void> {
+    return requestTimelineSync(this.client, requests, options)
+  }
+
+  has(request: TimelineSyncRequest): Promise<boolean> {
+    return hasTimelineSyncRequest(this.client, request)
+  }
+
+  readSeasonBackfillSeasons(characters: readonly TimelineCharacter[]): Promise<number[]> {
+    return readSeasonBackfillRequestSeasons(this.client, characters)
   }
 }

@@ -1,7 +1,7 @@
 # DFragon API
 
 `apps/api`는 로그인 없는 공개 캐릭터 API(Hono)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
-DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정보를 PostgreSQL에 저장하고, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
+DB 설정이 있으면 상세 조회한 캐릭터의 기본 정보를 PostgreSQL에 저장하고 타임라인 동기화 요청을 넣으며, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
 캐릭터 수집 worker는 [`apps/worker`](../worker/README.md)에 있습니다.
 
 ## 코드 위치
@@ -21,7 +21,7 @@ DB 설정이 있으면 상세 조회한 캐릭터의 타임라인과 기본 정�
 | `src/infrastructure/neople/`, `src/infrastructure/database/` | Repository와 port를 Neople 호출, DB 읽기와 쓰기로 구현한 adapter |
 | `src/presentation/http/` | Controller, 요청과 응답 DTO, 실패를 HTTP 응답으로 바꾸는 표 |
 | `src/runtime/` | 설정 읽기, 외부 client 생성, 앱 조립 |
-| `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 queue, 점수 엔진 조립과 종료 순서 |
+| `src/runtime/api-services.ts` | 공개 app의 service, 타임라인 동기화 요청, 점수 엔진 조립과 종료 순서 |
 | `src/runtime/routes/` | 기능의 Controller에 Service를 넘겨 공개 app에 붙이는 함수(`api.ts`) |
 
 기능을 하나 더하면 아래 파일을 만듭니다.

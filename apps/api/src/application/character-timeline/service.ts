@@ -6,18 +6,20 @@ import {
   type TimelineItemPage,
   type TimelinePageList
 } from '@dfragon/server-core/domain/character-timeline/index.js'
-import type { TimelineSyncWaiter } from './ports.js'
 import type { CharacterTimelineRepository } from './repository.js'
+import type { TimelineSyncRequestService } from './sync-requests.js'
+
+export type TimelineSyncWaiter = Pick<TimelineSyncRequestService, 'syncAndWait'>
 
 export class CharacterTimelineService {
   constructor(
     private readonly repository: CharacterTimelineRepository,
-    private readonly syncQueue: TimelineSyncWaiter
+    private readonly sync: TimelineSyncWaiter
   ) {}
 
   async get(character: TimelineCharacter): Promise<CharacterTimeline> {
-    // 처음 조회한 캐릭터는 DB가 비어 있을 수 있어, 그 캐릭터의 동기화가 끝난 뒤 읽는다.
-    await this.syncQueue.requestAndWait(character)
+    // 처음 조회한 캐릭터는 DB가 비어 있을 수 있어, 그 캐릭터의 동기화를 기다린 뒤 읽는다.
+    await this.sync.syncAndWait(character)
 
     return this.repository.readTimeline(character)
   }
@@ -33,7 +35,7 @@ export class CharacterTimelineService {
 }
 
 export const noTimelineSync: TimelineSyncWaiter = {
-  requestAndWait: async () => undefined
+  syncAndWait: async () => undefined
 }
 
 export const emptyCharacterTimelineRepository: CharacterTimelineRepository = {

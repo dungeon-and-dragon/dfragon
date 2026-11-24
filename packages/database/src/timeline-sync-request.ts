@@ -1,4 +1,5 @@
 import type { DatabaseClient } from './client.js'
+import type { TimelineCharacter } from './timeline.js'
 
 export const TIMELINE_SYNC_REQUEST_KINDS = [
   'sync',
@@ -119,4 +120,32 @@ export async function countTimelineSyncRequests(
 
     return count
   })
+}
+
+export async function hasTimelineSyncRequest(
+  client: DatabaseClient,
+  request: TimelineSyncRequest
+): Promise<boolean> {
+  const found = await client.timelineSyncRequest.findFirst({
+    where: request,
+    select: { kind: true }
+  })
+
+  return found !== null
+}
+
+export async function readSeasonBackfillRequestSeasons(
+  client: DatabaseClient,
+  characters: readonly TimelineCharacter[]
+): Promise<number[]> {
+  const serverIds = characters.map(({ serverId }) => serverId)
+  const characterIds = characters.map(({ characterId }) => characterId)
+  const rows = await client.$queryRaw<{ seasonId: number }[]>`
+    SELECT DISTINCT request."season_id" AS "seasonId"
+    FROM "timeline_sync_requests" AS request
+    JOIN unnest(${serverIds}::text[], ${characterIds}::text[]) AS listed(server_id, character_id)
+      ON request."server_id" = listed.server_id AND request."character_id" = listed.character_id
+    WHERE request."kind" = 'season-backfill'`
+
+  return rows.map(({ seasonId }) => seasonId)
 }

@@ -45,7 +45,11 @@ function latestOccurredAt({ events, items }: TimelineInputs): Date | undefined {
   return new Date(Math.max(...times))
 }
 
-function syncedRecently(state: TimelineSyncState | undefined, now: Date): boolean {
+// 1시간 안에 성공했으면 동기화는 Neople을 부르지 않고 끝나, 요청을 넣는 쪽도 이 판정으로 요청하지 않는다.
+export function isSyncedRecently(
+  state: Pick<TimelineSyncState, 'lastSucceededAt'> | undefined,
+  now: Date
+): boolean {
   const lastSucceededAt = state?.lastSucceededAt
   if (lastSucceededAt == null) {
     return false
@@ -69,7 +73,7 @@ export class TimelineSyncService {
       const state = await this.repository.readSyncState(character)
       const until = this.now()
 
-      if (syncedRecently(state, until)) {
+      if (isSyncedRecently(state, until)) {
         return
       }
 
