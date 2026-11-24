@@ -20,6 +20,8 @@ export type {
   EquipmentView
 } from './lib/character-equipment'
 export { decodeCharacterImage } from './lib/character-image'
+export { CHARACTER_PAGE_PATHS } from './lib/character-page'
+export type { CharacterPage } from './lib/character-page'
 export {
   formatCount,
   formatPoint,

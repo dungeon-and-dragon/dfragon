@@ -9,12 +9,19 @@ import {
   useRef,
   useState
 } from 'react'
-import { isSearchableCharacterName } from '#entities/character'
+import { type CharacterPage, isSearchableCharacterName } from '#entities/character'
 import { ALL_CHARACTER_SERVERS, characterSearchServerOptions } from '#shared/config/server-options'
 import { RecentCharacterList } from './RecentCharacterList'
 
 const ADVENTURE = 'adventure'
-const scopeOptions = [...characterSearchServerOptions, { id: ADVENTURE, label: '모험단' }]
+const SCOPE_OPTIONS: Record<CharacterPage, readonly { id: string; label: string }[]> = {
+  detail: [...characterSearchServerOptions, { id: ADVENTURE, label: '모험단' }],
+  simulator: characterSearchServerOptions
+}
+const SEARCH_PATHS = {
+  detail: '/search',
+  simulator: '/simulator'
+} as const satisfies Record<CharacterPage, string>
 const MAX_CHARACTER_NAME_LENGTH = 12
 
 const iconButton =
@@ -43,11 +50,14 @@ const SIZE_CLASSES = {
 } as const
 
 export function CharacterSearchBox({
-  size = 'medium'
+  size = 'medium',
+  characterPage = 'detail'
 }: {
   size?: 'medium' | 'large'
+  characterPage?: CharacterPage
 }): React.JSX.Element {
   const sizeClasses = SIZE_CLASSES[size]
+  const scopeOptions = SCOPE_OPTIONS[characterPage]
   const navigate = useNavigate()
   const [scope, setScope] = useState(ALL_CHARACTER_SERVERS)
   const [name, setName] = useState('')
@@ -70,7 +80,10 @@ export function CharacterSearchBox({
     }
 
     if (isSearchableCharacterName(searchName)) {
-      await navigate({ to: '/search', search: { characterName: searchName, serverId: scope } })
+      await navigate({
+        to: SEARCH_PATHS[characterPage],
+        search: { characterName: searchName, serverId: scope }
+      })
     }
   }
 
@@ -169,6 +182,7 @@ export function CharacterSearchBox({
       <RecentCharacterList
         open={recentOpen && name === ''}
         size={size}
+        characterPage={characterPage}
         anchor={boxRef}
         input={inputRef}
         popup={popupRef}
