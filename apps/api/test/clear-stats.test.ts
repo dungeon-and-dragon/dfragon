@@ -1279,7 +1279,7 @@ test('레기온 주는 저장한 레기온 분모마다 두고 클리어 수는 
   }
 })
 
-test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업, 지난주 대비, 연속 주를 읽고 단계 기록은 읽지 않는다', async () => {
+test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업, 지난주 대비, 연속 주를 읽고 단계 기록은 읽지 않으며, 입장 명성이 수집 하한보다 낮은 베누스의 기준 명성은 입장 명성이다', async () => {
   const selections: ClearWeekSelection[] = []
   const comparisons: ClearWeekComparison[] = []
   const { app, origin } = await listen(
@@ -1323,6 +1323,7 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
       {
         kind: detail.body.kind,
         entryFame: detail.body.entryFame,
+        minFame: detail.body.week.minFame,
         weekStart: detail.body.week.weekStart,
         cleared: detail.body.week.cleared,
         bothCleared: detail.body.weekOverWeek?.both.cleared,
@@ -1333,6 +1334,8 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
       {
         kind: 'legion',
         entryFame: 41_929,
+        // 저장한 분모 기준 명성은 126,000이지만 베누스 입장 명성이 수집 하한보다 낮아 입장 명성을 준다.
+        minFame: 41_929,
         weekStart: '2026-11-05',
         cleared: 7,
         bothCleared: 7,
