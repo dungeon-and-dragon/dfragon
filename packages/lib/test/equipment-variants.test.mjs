@@ -727,3 +727,10 @@ test('isValidOathUpgrade는 1단계부터 이어지고 9단계 이하이며 단�
     false
   )
 })
+
+test('스위칭 구획은 버프 강화 장비 칸의 상한 12와 유니크 스위칭 장비 이름의 접두어 둘을 가진다', () => {
+  assert.deepEqual(table.switching, {
+    maxEquipment: 12,
+    uniqueEquipmentPrefixes: ['짙은 심연의 편린 ', '짙은 뒤틀린 심연의 ']
+  })
+})

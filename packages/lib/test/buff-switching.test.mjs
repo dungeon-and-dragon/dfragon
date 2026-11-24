@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   buffSwitchingOf,
   isSelectableBuffLevel,
+  isSelectableSwitchingEquipment,
   selectableBuffLevels
 } from '@dfragon/lib/buff-switching'
 
@@ -33,7 +34,13 @@ function dealer(buffLevel, learnedLevel) {
 test('딜러는 배운 레벨부터 10레벨 위까지 고를 수 있다', () => {
   const switching = buffSwitchingOf(dealer(20, 13))
 
-  assert.deepEqual(switching, { skillName: '하악질', level: 20, min: 13, max: 23 })
+  assert.deepEqual(switching, {
+    skillName: '하악질',
+    level: 20,
+    min: 13,
+    max: 23,
+    equipment: { count: 0, max: 12 }
+  })
   assert.equal(isSelectableBuffLevel(switching, 13), true)
   assert.equal(isSelectableBuffLevel(switching, 23), true)
   assert.equal(isSelectableBuffLevel(switching, 12), false)
@@ -58,7 +65,13 @@ test('버퍼는 주 버프를 등록했을 때 10~33레벨을 고를 수 있다'
     skillStyle: null
   })
 
-  assert.deepEqual(switching, { skillName: '용맹의 축복', level: 34, min: 10, max: 33 })
+  assert.deepEqual(switching, {
+    skillName: '용맹의 축복',
+    level: 34,
+    min: 10,
+    max: 33,
+    equipment: null
+  })
   assert.equal(isSelectableBuffLevel(switching, 9), false)
   assert.equal(isSelectableBuffLevel(switching, 10), true)
   assert.equal(isSelectableBuffLevel(switching, 33), true)
@@ -95,4 +108,38 @@ test('버프 강화 스킬 레벨이 없거나 딜러가 배운 레벨을 한 �
   assert.equal(buffSwitchingOf({ ...dealer(20, 13), buff: null }), null)
   assert.equal(buffSwitchingOf(notLearned), null)
   assert.equal(buffSwitchingOf(twice), null)
+})
+
+test('딜러는 칭호를 뺀 버프 강화 장비 가운데 짙편린 이름의 장비 수를 지금 등록한 수로 본다', () => {
+  const source = dealer(20, 13)
+  const buff = {
+    ...source.buff,
+    equipment: [
+      { slotId: 'WEAPON', itemName: '짙은 심연의 편린 소검 : 하악질' },
+      { slotId: 'RING', itemName: '짙은 심연의 편린 반지 : 하악질' },
+      { slotId: 'EARRING', itemName: '짙은 뒤틀린 심연의 귀걸이 : 하악질' },
+      { slotId: 'JACKET', itemName: '심연의 편린 상의 : 하악질' },
+      { slotId: 'SUPPORT', itemName: '침식된 심연의 완장 : 하악질' },
+      { slotId: 'TITLE', itemName: '짙은 심연의 편린 칭호' }
+    ]
+  }
+
+  assert.deepEqual(buffSwitchingOf({ ...source, buff }).equipment, { count: 3, max: 12 })
+})
+
+test('딜러는 짙편린 등록 수를 0~12에서 고를 수 있고 버퍼는 고를 수 없다', () => {
+  const switching = buffSwitchingOf(dealer(20, 13))
+  const buffer = buffSwitchingOf({
+    role: 'buffer',
+    jobName: '프리스트(여)',
+    buff: buffOf('용맹의 축복', 30),
+    skillStyle: null
+  })
+
+  assert.equal(isSelectableSwitchingEquipment(switching, 0), true)
+  assert.equal(isSelectableSwitchingEquipment(switching, 12), true)
+  assert.equal(isSelectableSwitchingEquipment(switching, -1), false)
+  assert.equal(isSelectableSwitchingEquipment(switching, 13), false)
+  assert.equal(isSelectableSwitchingEquipment(switching, 1.5), false)
+  assert.equal(isSelectableSwitchingEquipment(buffer, 0), false)
 })
