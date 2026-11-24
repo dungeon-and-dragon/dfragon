@@ -15,7 +15,11 @@ import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import type { CharacterCardScore, CharacterDetailView } from '#entities/character'
+import {
+  type CharacterCardScore,
+  type CharacterDetailView,
+  rarityTextClasses
+} from '#entities/character'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
@@ -165,6 +169,41 @@ async function chooseCrystal(slotNo: number): Promise<void> {
   await chooseOath(`결정 ${slotNo + 1}`)
 }
 
+function buttonsIn(label: string): HTMLButtonElement[] {
+  return [...control(label).querySelectorAll<HTMLButtonElement>('button')]
+}
+
+function buttonNames(label: string): string[] {
+  return buttonsIn(label).map((button) => button.textContent ?? '')
+}
+
+function buttonOf(label: string, name: string): HTMLButtonElement {
+  const found = buttonsIn(label).find((button) => button.textContent === name)
+  expect(found, name).toBeDefined()
+
+  return found!
+}
+
+function pressedButton(label: string): HTMLButtonElement | null {
+  return control(label).querySelector<HTMLButtonElement>('button[aria-pressed="true"]')
+}
+
+function pressedIn(label: string): string | null {
+  const pressed = pressedButton(label)
+
+  if (pressed === null) {
+    return null
+  }
+
+  return pressed.textContent
+}
+
+async function press(label: string, name: string): Promise<void> {
+  const button = buttonsIn(label).find((candidate) => candidate.textContent?.startsWith(name))
+  expect(button, name).toBeDefined()
+  await act(async () => button!.click())
+}
+
 async function pick(label: string, option: string): Promise<void> {
   await act(async () => control(label).click())
   const item = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find((candidate) =>
@@ -226,7 +265,7 @@ it('열면 착용한 장비의 수치, 증폭, 마법부여를 기본값으로 �
   expect(bodies).toEqual([{ equipment: [] }])
   expect(reinforceOf('무기')).toBe('+10')
   expect(control('무기 증폭').getAttribute('aria-checked')).toBe('false')
-  expect(control('무기 마법부여').textContent).toBe('화속성 강화 +15, 명속성 강화 +15')
+  expect(pressedIn('무기 마법부여')).toBe('현재 마법부여화속성 강화 +15, 명속성 강화 +15')
 
   await choose('상의')
 
@@ -257,7 +296,7 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
   await step('무기 수치 올리기', 2)
   await act(async () => control('무기 증폭').click())
   await choose('목걸이')
-  await pick('목걸이 마법부여', '최종 데미지 증가 +2%')
+  await press('목걸이 마법부여', '최종 데미지 증가 +2%')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -444,7 +483,7 @@ function option(name: string): HTMLElement {
   return found!
 }
 
-it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두고 장비 칸의 선택에 착용한 아이템의 아이콘과 이름을 보인다', async () => {
+it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두고 장비 칸의 켜진 버튼에 착용한 아이템의 아이콘과 이름을 보인다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -465,32 +504,29 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
 
   await choose('칭호')
 
-  const titleControl = control('칭호 교체')
-  expect(titleControl.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
-  expect(iconsIn(titleControl)).toEqual([iconUrl(worn.itemId)])
+  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘[35Lv]')
+  expect(iconsIn(pressedButton('칭호 교체')!)).toEqual([iconUrl(worn.itemId)])
 
   await choose('크리쳐')
 
-  expect(control('크리쳐 교체').textContent).toBe('운명을 담는 재단사')
+  expect(pressedIn('크리쳐 교체')).toBe('운명을 담는 재단사')
 
   await choose('오라')
 
-  expect(control('오라 교체').textContent).toBe('고결한 영혼의 잔상')
+  expect(pressedIn('오라 교체')).toBe('고결한 영혼의 잔상')
 
   await choose('칭호')
-  await act(async () => control('칭호 교체').click())
-  const options = [...document.querySelectorAll('[role="option"]')]
-  expect(options.map((item) => item.textContent)).toEqual([
+  expect(buttonNames('칭호 교체')).toEqual([
     '프로스트의 전설 플래티넘[35Lv]',
     ...slotItemsOf('title').map(({ name }) => name)
   ])
-  expect(options.map((item) => iconsIn(item))).toEqual([
+  expect(buttonsIn('칭호 교체').map((button) => iconsIn(button))).toEqual([
     [iconUrl(worn.itemId)],
     ...slotItemsOf('title').map(({ item }) => [iconUrl(item.itemId)])
   ])
 })
 
-it('목록 항목의 아이콘에 마우스를 올리면 그 아이템의 정보를 tooltip으로 보인다', async () => {
+it('선택 버튼의 아이콘에 마우스를 올리면 그 아이템의 정보를 tooltip으로 보이고 고르지는 않는다', async () => {
   const [titleItem] = slotItemsOf('title')
   const requestedItemIds: string[] = []
   await render(characterDetailFixture('dealer'))
@@ -508,8 +544,7 @@ it('목록 항목의 아이콘에 마우스를 올리면 그 아이템의 정보
     ['차이', '0']
   ])
   await choose('칭호')
-  await act(async () => control('칭호 교체').click())
-  const icon = option(titleItem!.name).querySelector('img')!.parentElement!
+  const icon = buttonOf('칭호 교체', titleItem!.name).querySelector('img')!.parentElement!
 
   // Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
   await act(async () => {
@@ -520,10 +555,10 @@ it('목록 항목의 아이콘에 마우스를 올리면 그 아이템의 정보
     expect(document.body.textContent).toContain('레벨제한 115')
   })
   expect(requestedItemIds).toEqual([titleItem!.item.itemId])
-  expect(control('칭호 교체').getAttribute('aria-expanded')).toBe('true')
+  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘[35Lv]')
 })
 
-it('목록 항목의 아이콘을 눌러도 터치로 탭해도 그 항목을 고른다', async () => {
+it('선택 버튼의 아이콘을 눌러도 터치로 탭해도 그 버튼을 고른다', async () => {
   const [, secondTitle, thirdTitle] = slotItemsOf('title')
   await render(characterDetailFixture('dealer'))
   server.use(itemDetailHandlers.detail)
@@ -534,14 +569,12 @@ it('목록 항목의 아이콘을 눌러도 터치로 탭해도 그 항목을 �
   ])
 
   await choose('칭호')
-  await act(async () => control('칭호 교체').click())
-  await act(async () => option(secondTitle!.name).querySelector('img')!.click())
+  await act(async () => buttonOf('칭호 교체', secondTitle!.name).querySelector('img')!.click())
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: secondTitle!.id }))
-  expect(control('칭호 교체').textContent).toBe(secondTitle!.name)
+  expect(pressedIn('칭호 교체')).toBe(secondTitle!.name)
 
-  await act(async () => control('칭호 교체').click())
-  const icon = option(thirdTitle!.name).querySelector('img')!
+  const icon = buttonOf('칭호 교체', thirdTitle!.name).querySelector('img')!
   const touch = new PointerEvent('pointerdown', {
     bubbles: true,
     cancelable: true,
@@ -553,7 +586,7 @@ it('목록 항목의 아이콘을 눌러도 터치로 탭해도 그 항목을 �
   })
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: thirdTitle!.id }))
-  expect(control('칭호 교체').textContent).toBe(thirdTitle!.name)
+  expect(pressedIn('칭호 교체')).toBe(thirdTitle!.name)
 })
 
 it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수를 새 결과로 바꾼다', async () => {
@@ -567,7 +600,7 @@ it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수
   ])
 
   await choose('칭호')
-  await pick('칭호 교체', titleItem!.name)
+  await press('칭호 교체', titleItem!.name)
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -575,8 +608,8 @@ it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수
     ['차이', '+1,000']
   ])
   expect(bodies.at(-1)).toEqual({ equipment: [], title: titleItem!.id })
-  expect(control('칭호 교체').textContent).toBe(titleItem!.name)
-  const titleIcons = iconsIn(control('칭호 교체'))
+  expect(pressedIn('칭호 교체')).toBe(titleItem!.name)
+  const titleIcons = iconsIn(pressedButton('칭호 교체')!)
   expect(titleIcons).toEqual([iconUrl(titleItem!.item.itemId)])
   expect(resetButton().disabled).toBe(false)
 })
@@ -596,9 +629,9 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
 
   await step('무기 수치 올리기', 1)
   await choose('크리쳐')
-  await pick('크리쳐 교체', creatureItem!.name)
+  await press('크리쳐 교체', creatureItem!.name)
   await choose('오라')
-  await pick('오라 교체', auraItem!.name)
+  await press('오라 교체', auraItem!.name)
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -616,7 +649,7 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
   await act(async () => resetButton().click())
 
   expect(rowOf('크리쳐').querySelectorAll('td')[1]!.textContent).toBe('운명을 담는 재단사')
-  expect(control('오라 교체').textContent).toBe('고결한 영혼의 잔상')
+  expect(pressedIn('오라 교체')).toBe('고결한 영혼의 잔상')
   await waitForScores([
     ['현재', '1,000,000'],
     ['변경 후', '1,000,000'],
@@ -667,7 +700,10 @@ it('115레벨이 아닌 장비는 수치와 증폭을 막고 마법부여만 고
   expect(control('목걸이 수치 내리기').hasAttribute('disabled')).toBe(true)
   expect(control('목걸이 수치 올리기').hasAttribute('disabled')).toBe(true)
   expect(control('목걸이 증폭').getAttribute('aria-disabled')).toBe('true')
-  expect(control('목걸이 마법부여').hasAttribute('disabled')).toBe(false)
+  const enchantButtons = buttonsIn('목걸이 마법부여')
+
+  expect(enchantButtons.length).toBeGreaterThan(1)
+  expect(enchantButtons.some((button) => button.disabled)).toBe(false)
 })
 
 it('캐릭터를 받지 못하면 오류 문구를 보이고 계산을 요청하지 않는다', async () => {
@@ -730,20 +766,16 @@ function oathSection(): HTMLElement | null {
   return section
 }
 
-it('장비 칸은 그 세트의 등급 선택지를 연다', async () => {
+it('장비 칸은 그 세트의 등급 선택지를 버튼으로 나열하고 착용한 등급을 켠다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   await choose('상의')
 
-  expect(control('상의 교체').textContent).toBe('긍휼 속 자비의 상의')
-
-  await act(async () => control('상의 교체').click())
-
-  expect(optionNames()).toEqual(
+  expect(buttonNames('상의 교체')).toEqual(
     equipmentVariantsOf(SOUL_FAIRY_SET, 'JACKET').map(({ item }) => item.itemName)
   )
-  expect(document.querySelector('[role="option"][aria-selected="true"]')?.textContent).toBe(
+  expect(pressedIn('상의 교체')).toBe(
     variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '축성').item.itemName
   )
 })
@@ -767,22 +799,16 @@ function weaponCell(): string | null {
   return rowOf('무기').querySelectorAll('td')[1]!.textContent
 }
 
-it('무기는 착용한 무기 종류의 선택지를 계열 이름으로 열고, 해방 계열을 낀 무기는 해방 수치를 보인다', async () => {
+it('무기는 착용한 무기 종류의 선택지를 계열 이름으로 나열하고, 해방 계열을 낀 무기는 해방 수치를 보인다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
   await choose('무기')
 
-  expect(control('무기 교체').textContent).toBe('디거시')
+  expect(pressedIn('무기 교체')).toBe('디거시')
   expect((control('무기 해방') as HTMLInputElement).value).toBe('100')
   expect(has('무기 조율')).toBe(false)
   expect(weaponCell()).toBe('디거시')
-
-  await act(async () => control('무기 교체').click())
-
-  expect(optionNames()).toEqual(SCYTHE_OPTIONS)
-  expect(document.querySelector('[role="option"][aria-selected="true"]')?.textContent).toBe(
-    '디거시'
-  )
+  expect(buttonNames('무기 교체')).toEqual(SCYTHE_OPTIONS)
 })
 
 it('해방 수치를 낮추면 수치만 요청한다', async () => {
@@ -797,13 +823,12 @@ it('해방 수치를 낮추면 수치만 요청한다', async () => {
   )
 })
 
-it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 선택을 열며 바꾼 무기를 요청한다', async () => {
+it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 버튼을 두며 바꾼 무기를 요청한다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
   await choose('무기')
 
-  await act(async () => control('무기 교체').click())
-  const legacy = document.querySelectorAll<HTMLElement>('[role="option"]')[5]!
+  const legacy = buttonsIn('무기 교체')[5]!
   await act(async () => legacy.click())
 
   await vi.waitFor(() =>
@@ -811,7 +836,7 @@ it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 선
       { ...WEAPON_CHANGE, ...KEPT_ITEM, variantId: SCYTHE_LEGACY_PRIMEVAL, tune: 0 }
     ])
   )
-  expect(control('무기 교체').textContent).toBe('레거시')
+  expect(pressedIn('무기 교체')).toBe('레거시')
   expect(has('무기 해방')).toBe(false)
   expect(has('무기 조율')).toBe(true)
   expect(weaponCell()).toBe('레거시')
@@ -823,7 +848,7 @@ it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결�
   await waitForScores(UNCHANGED_SCORES)
 
   await choose('상의')
-  await pick('상의 교체', corroded.item.itemName)
+  await press('상의 교체', corroded.item.itemName)
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -844,7 +869,7 @@ it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결�
       }
     ]
   })
-  expect(control('상의 교체').textContent).toBe(corroded.item.itemName)
+  expect(pressedIn('상의 교체')).toBe(corroded.item.itemName)
   expect(rowOf('머리어깨').querySelectorAll('td')[1]!.textContent).toBe(
     variantOf(SOUL_FAIRY_SET, 'SHOULDER', '에픽', '축성').item.itemName
   )
@@ -854,25 +879,22 @@ it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결�
   expect(resetButton().disabled).toBe(false)
 })
 
-it('세트 밖 장비를 낀 부위는 착용 중 아이템을 첫 항목으로 두고 주 세트의 선택지를 잇는다', async () => {
+it('세트 밖 장비를 낀 부위는 착용 중 아이템을 첫 버튼으로 두고 주 세트의 선택지를 잇는다', async () => {
   await render(characterDetailFixture('buffer'), () =>
     HttpResponse.json({ baseline: score(4_000, 'buff'), simulated: score(4_000, 'buff') })
   )
   await expect.poll(() => container.querySelector('table') !== null).toBe(true)
   await choose('팔찌')
 
-  expect(control('팔찌 교체').textContent).toBe('고유 - 모독자의 조소 팔찌')
+  expect(pressedIn('팔찌 교체')).toBe('고유 - 모독자의 조소 팔찌')
   expect(has('팔찌 조율')).toBe(false)
-
-  await act(async () => control('팔찌 교체').click())
-
-  expect(optionNames()).toEqual([
+  expect(buttonNames('팔찌 교체')).toEqual([
     '고유 - 모독자의 조소 팔찌',
     ...equipmentVariantsOf(ETHEREAL_SET, 'WRIST').map(({ item }) => item.itemName)
   ])
 })
 
-it('조율을 바꾸면 그 부위의 조율 단계를 요청하고, 조율할 수 없는 태초 장비에는 조율 선택이 없다', async () => {
+it('조율 버튼을 누르면 그 부위의 조율 단계를 요청하고 켜진 버튼을 다시 누르면 조율을 풀며, 조율할 수 없는 태초 장비에는 조율 버튼이 없다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
@@ -882,13 +904,10 @@ it('조율을 바꾸면 그 부위의 조율 단계를 요청하고, 조율할 �
 
   await choose('보조장비')
 
-  expect(control('보조장비 조율').textContent).toBe('-')
+  expect(pressedIn('보조장비 조율')).toBeNull()
+  expect(buttonNames('보조장비 조율')).toEqual(['I', 'II', 'III'])
 
-  await act(async () => control('보조장비 조율').click())
-
-  expect(optionNames()).toEqual(['-', 'I', 'II', 'III'])
-
-  await act(async () => option('II').click())
+  await press('보조장비 조율', 'II')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -909,7 +928,13 @@ it('조율을 바꾸면 그 부위의 조율 단계를 요청하고, 조율할 �
       }
     ]
   })
-  expect(control('보조장비 조율').textContent).toBe('II')
+  expect(pressedIn('보조장비 조율')).toBe('II')
+
+  await press('보조장비 조율', 'II')
+
+  await waitForScores(UNCHANGED_SCORES)
+  expect(pressedIn('보조장비 조율')).toBeNull()
+  expect(resetButton().disabled).toBe(true)
 })
 
 it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고 바꾼 정밀도를 요청한다', async () => {
@@ -918,10 +943,10 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
   await waitForScores(UNCHANGED_SCORES)
 
   await choose('보조장비')
-  await pick('보조장비 조율', 'III')
+  await press('보조장비 조율', 'III')
   await choose('귀걸이')
-  await pick('귀걸이 조율', 'III')
-  await pick('귀걸이 교체', exalted.item.itemName)
+  await press('귀걸이 조율', 'III')
+  await press('귀걸이 교체', exalted.item.itemName)
 
   expect(has('귀걸이 조율')).toBe(false)
   expect((control('귀걸이 정밀도') as HTMLInputElement).value).toBe('100')
@@ -960,7 +985,7 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
   ])
   await choose('보조장비')
 
-  expect(control('보조장비 조율').textContent).toBe('III')
+  expect(pressedIn('보조장비 조율')).toBe('III')
 })
 
 it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율을 바꾸면 바꾼 결정만 요청한다', async () => {
@@ -979,14 +1004,14 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
   ])
   await chooseCrystal(6)
 
-  expect(control('결정 7 조율').textContent).toBe('I')
+  expect(pressedIn('결정 7 조율')).toBe('I')
 
   await chooseCrystal(8)
 
   expect(has('결정 9 조율')).toBe(false)
 
   await chooseCrystal(7)
-  await pick('결정 8 조율', 'III')
+  await press('결정 8 조율', 'III')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -994,7 +1019,7 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
     ['차이', '+30,000']
   ])
   expect(bodies.at(-1)).toEqual({ equipment: [], oath: [{ slotNo: 7, tune: 3, variantId: null }] })
-  expect(control('결정 8 조율').textContent).toBe('III')
+  expect(pressedIn('결정 8 조율')).toBe('III')
 })
 
 it('서약이 없는 캐릭터는 서약 구획을 그리지 않는다', async () => {
@@ -1002,7 +1027,6 @@ it('서약이 없는 캐릭터는 서약 구획을 그리지 않는다', async (
   await waitForScores(UNCHANGED_SCORES)
 
   expect(oathSection()).toBeNull()
-  expect(container.querySelector('nav')).toBeNull()
   expect(container.querySelectorAll('table')).toHaveLength(1)
 })
 
@@ -1012,10 +1036,10 @@ it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용
   await waitForScores(UNCHANGED_SCORES)
 
   await choose('상의')
-  await pick('상의 교체', unique.item.itemName)
-  await pick('상의 조율', 'II')
+  await press('상의 교체', unique.item.itemName)
+  await press('상의 조율', 'II')
   await chooseCrystal(7)
-  await pick('결정 8 조율', 'I')
+  await press('결정 8 조율', 'I')
   await waitForScores([
     ['현재', '1,000,000'],
     ['변경 후', '1,130,000'],
@@ -1024,12 +1048,14 @@ it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용
 
   await act(async () => resetButton().click())
 
-  expect(control('결정 8 조율').textContent).toBe('-')
+  expect(pressedIn('결정 8 조율')).toBeNull()
 
   await choose('상의')
 
-  expect(control('상의 교체').textContent).toBe('긍휼 속 자비의 상의')
-  expect(control('상의 조율').textContent).toBe('-')
+  expect(pressedIn('상의 교체')).toBe(
+    variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '축성').item.itemName
+  )
+  expect(pressedIn('상의 조율')).toBeNull()
   await waitForScores(UNCHANGED_SCORES)
   expect(resetButton().disabled).toBe(true)
 })
@@ -1047,12 +1073,22 @@ it('좁은 화면에서는 장비창의 줄을 누르면 그 줄의 조작을 �
 
   const sheet = document.querySelector<HTMLElement>('[role="dialog"]')
   expect(sheet?.querySelector('h2')?.textContent).toBe('상의')
-  expect(sheet?.querySelector('[aria-label="상의 교체"]')?.textContent).toBe('긍휼 속 자비의 상의')
+  expect(sheet?.querySelector('[aria-label="상의 교체"] [aria-pressed="true"]')?.textContent).toBe(
+    variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '축성').item.itemName
+  )
+  expect(sheet?.querySelector('[aria-label="상의 조율"]')?.querySelectorAll('button')).toHaveLength(
+    3
+  )
+  expect(
+    sheet?.querySelector('[aria-label="상의 마법부여"] [aria-pressed="true"]')?.textContent
+  ).toMatch(/^현재 마법부여/)
 
   await choose('무기')
 
   const weaponSheet = document.querySelector<HTMLElement>('[role="dialog"]')
-  expect(weaponSheet?.querySelector('[aria-label="무기 교체"]')?.textContent).toBe('디거시')
+  expect(
+    weaponSheet?.querySelector('[aria-label="무기 교체"] [aria-pressed="true"]')?.textContent
+  ).toBe('디거시')
   expect(weaponSheet?.querySelector<HTMLInputElement>('[aria-label="무기 해방"]')?.value).toBe(
     '100'
   )
@@ -1093,18 +1129,27 @@ it('캐릭터 띠가 보이는 동안에는 요약 줄이 없고, 띠가 화면 
   ).toEqual(UNCHANGED_SCORES)
 })
 
-it('목차는 장비와 서약 구획으로 옮겨 가는 링크를 둔다', async () => {
+it('장비창 줄은 부위, 강화, 마법부여 칸을 눌러도 그 줄을 고른다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
-  const links = [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="목차"] a')]
-  const targets = links.map((link) => document.getElementById(link.hash.slice(1)))
+  await act(async () => rowOf('상의').querySelectorAll('td')[0]!.click())
 
-  expect(links.map((link) => link.textContent)).toEqual(['장비', '서약'])
-  expect(targets.map((target) => target?.querySelector('h2')?.textContent)).toEqual([
-    '장비',
-    '서약'
-  ])
+  expect(editorTitle()).toBe('상의')
+  expect(rowOf('상의').querySelector('button')!.getAttribute('aria-pressed')).toBe('true')
+
+  await act(async () => rowOf('목걸이').querySelectorAll('td')[2]!.click())
+
+  expect(editorTitle()).toBe('목걸이')
+  expect(rowOf('상의').getAttribute('aria-selected')).toBe('false')
+
+  await act(async () => rowOf('무기').querySelectorAll('td')[3]!.click())
+
+  expect(editorTitle()).toBe('무기')
+
+  await act(async () => oathRowOf('결정 1').querySelector('td')!.click())
+
+  expect(editorTitle()).toBe('서약 결정')
 })
 
 const SHADOW_SET = '3af7c961e7d8cd8b5b42c5f82af2a0ad'
@@ -1135,9 +1180,10 @@ it('장비 세트 줄을 고르면 주 세트가 선택된 세트 선택을 열�
   ])
   expect(bodies.at(-1)).toEqual({ equipmentSet: SHADOW_SET, equipment: [] })
   expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('그림자에 숨은 죽음 세트')
+  expect(rowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.primordial)
 
   await choose('상의')
-  await pick('상의 교체', corroded.item.itemName)
+  await press('상의 교체', corroded.item.itemName)
 
   await vi.waitFor(() =>
     expect(bodies.at(-1)).toEqual({
@@ -1173,6 +1219,7 @@ it('서약 세트 줄에서 다른 세트를 고르면 세트만 요청하고 �
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathSet: SHADOW_OATH_SET }))
   expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('어둠에 잠긴 그림자 서약')
+  expect(oathRowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.primordial)
   expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(
     '태초의 어둠 속 그림자 서약'
   )
@@ -1181,20 +1228,33 @@ it('서약 세트 줄에서 다른 세트를 고르면 세트만 요청하고 �
   )
 })
 
-it('서약 줄을 고르면 같은 계열 4등급의 서약 선택을 열고, 다른 등급을 고르면 그 선택지 id를 요청한다', async () => {
+it('장비 세트와 서약 세트 이름은 응답이 준 세트 등급의 색으로 보인다', async () => {
+  const detail = characterDetailFixture('dealer')
+  const setItemInfo = detail.equipment.setItemInfo.map((set) => ({
+    ...set,
+    setItemRarityName: '에픽'
+  }))
+  const oath = { ...detail.oath!, setInfo: { ...detail.oath!.setInfo!, setRarityName: '레전더리' } }
+  await render({ ...detail, equipment: { ...detail.equipment, setItemInfo }, oath })
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(rowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.epic)
+  expect(oathRowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.legendary)
+})
+
+it('서약 줄을 고르면 같은 계열 4등급의 서약 버튼을 두고, 다른 등급을 고르면 그 선택지 id를 요청한다', async () => {
   const epic = oathVariantOf(DRAGON_OATH_SET, '에픽')!
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   await chooseOath('서약')
 
-  expect(control('서약 교체').textContent).toBe('세계를 태우는 용투 서약')
+  expect(pressedIn('서약 교체')).toBe('세계를 태우는 용투 서약')
+  expect(buttonNames('서약 교체')).toEqual(
+    oathVariantsOf(DRAGON_OATH_SET).map(({ item }) => item.itemName)
+  )
 
-  await act(async () => control('서약 교체').click())
-
-  expect(optionNames()).toEqual(oathVariantsOf(DRAGON_OATH_SET).map(({ item }) => item.itemName))
-
-  await act(async () => option(epic.item.itemName).click())
+  await act(async () => buttonOf('서약 교체', epic.item.itemName).click())
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathBody: epic.id }))
   expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(epic.item.itemName)
@@ -1209,13 +1269,13 @@ it('결정 줄에서 등급을 바꾸면 조율을 새 결정에 맞게 자르�
 
   // 태초 결정은 3개까지라 이미 3개인 딜러는 하나를 내려야 다른 결정을 태초로 올릴 수 있다.
   await chooseCrystal(8)
-  await pick('결정 9 교체', epic.item.itemName)
+  await press('결정 9 교체', epic.item.itemName)
   await chooseCrystal(6)
 
-  expect(control('결정 7 교체').textContent).toBe('용투 : 완전한 광휘 결정')
-  expect(control('결정 7 조율').textContent).toBe('I')
+  expect(pressedIn('결정 7 교체')).toBe('용투 : 완전한 광휘 결정')
+  expect(pressedIn('결정 7 조율')).toBe('I')
 
-  await pick('결정 7 교체', primeval.item.itemName)
+  await press('결정 7 교체', primeval.item.itemName)
 
   await vi.waitFor(() =>
     expect(bodies.at(-1)).toEqual({
@@ -1230,7 +1290,7 @@ it('결정 줄에서 등급을 바꾸면 조율을 새 결정에 맞게 자르�
   expect(oathRowOf('결정 7').querySelectorAll('td')[1]!.textContent).toBe(primeval.item.itemName)
 })
 
-it('선택지에 없는 조율할 수 있는 무기는 지금 그대로를 착용 아이템 이름으로 두고, 조율 선택을 열어 바꾼 조율을 요청한다', async () => {
+it('선택지에 없는 조율할 수 있는 무기는 착용 아이템을 켠 첫 버튼으로 두고, 조율 버튼으로 바꾼 조율을 요청한다', async () => {
   const detail = characterDetailFixture('dealer')
   const equipment = detail.equipment.equipment.map((item) =>
     item.slotId === 'WEAPON' ? { ...item, itemId: 'unlisted-weapon', itemName: 'Beast-Saw' } : item
@@ -1239,13 +1299,11 @@ it('선택지에 없는 조율할 수 있는 무기는 지금 그대로를 착�
   await waitForScores(UNCHANGED_SCORES)
   await choose('무기')
 
-  expect(control('무기 교체').textContent).toBe('Beast-Saw')
+  expect(pressedIn('무기 교체')).toBe('Beast-Saw')
+  expect(buttonNames('무기 교체')[0]).toBe('Beast-Saw')
+  expect(buttonNames('무기 조율')).toEqual(['I', 'II', 'III'])
 
-  await act(async () => control('무기 조율').click())
-
-  expect(optionNames()).toEqual(['-', 'I', 'II', 'III'])
-
-  await act(async () => option('II').click())
+  await press('무기 조율', 'II')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -1267,12 +1325,10 @@ it('선택지에 없는 조율할 수 있는 무기는 지금 그대로를 착�
     ]
   })
 
-  await act(async () => control('무기 교체').click())
-
-  expect(option('Beast-Saw').getAttribute('aria-selected')).toBe('true')
+  expect(pressedIn('무기 교체')).toBe('Beast-Saw')
 })
 
-it('서약 본체는 서약 카탈로그의 그림으로 장비창 줄, 닫힌 선택 칸, 목록 항목에 보이고 카탈로그에 없는 본체는 빈 칸이다', async () => {
+it('서약 본체는 서약 카탈로그의 그림으로 장비창 줄과 선택 버튼에 보이고 카탈로그에 없는 본체는 빈 칸이다', async () => {
   const icon = 'https://skilltab.test/oath-item/primeval.webp'
   const catalog = {
     ...oathCatalogFixture.characterDetail,
@@ -1286,24 +1342,21 @@ it('서약 본체는 서약 카탈로그의 그림으로 장비창 줄, 닫힌 �
 
   await chooseOath('서약')
 
-  expect(iconsIn(control('서약 교체'))).toEqual([icon])
+  expect(iconsIn(pressedButton('서약 교체')!)).toEqual([icon])
 
-  await act(async () => control('서약 교체').click())
-
-  const optionIcons = [...document.querySelectorAll('[role="option"]')].map(iconsIn)
+  const optionIcons = buttonsIn('서약 교체').map(iconsIn)
 
   expect(optionIcons.at(-1)).toEqual([icon])
   expect(optionIcons.slice(0, -1).flat()).not.toContain(icon)
 })
 
-it('태초 결정이 이미 3개면 다른 결정의 선택 목록에 태초 결정을 두지 않는다', async () => {
+it('태초 결정이 이미 3개면 다른 결정의 선택 버튼에 태초 결정을 두지 않는다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   await chooseCrystal(0)
-  await act(async () => control('결정 1 교체').click())
 
-  expect(optionNames()).toEqual(
+  expect(buttonNames('결정 1 교체')).toEqual(
     oathCrystalVariantsOf(DRAGON_OATH_SET)
       .filter(({ rarity }) => rarity !== '태초')
       .map(({ item }) => item.itemName)
@@ -1405,11 +1458,11 @@ function editorTitle(): string | null | undefined {
   return container.querySelector('aside h2')?.textContent
 }
 
-it('아바타 줄은 지금 그대로를, 스위칭 줄은 버프 강화 스킬 이름과 지금 레벨을 보인다', async () => {
+it('아바타 줄은 현재 착용 아바타를, 스위칭 줄은 버프 강화 스킬 이름과 지금 레벨을 보인다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(rowValueOf('아바타')).toBe('지금 그대로')
+  expect(rowValueOf('아바타')).toBe('현재 착용 아바타')
   expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
 })
 
@@ -1419,7 +1472,7 @@ it('버퍼는 주 버프 스킬의 지금 레벨을 스위칭 줄에 보인다',
   await vi.waitFor(() => expect(rowValueOf('스위칭')).toBe('러블리 템포 30레벨'))
 })
 
-it('끝 스펙 프리셋이 없는 전직에는 아바타 줄만 없다', async () => {
+it('종결 아바타 프리셋이 없는 전직에는 아바타 줄만 없다', async () => {
   const detail = characterDetailFixture('dealer')
   await render({ ...detail, character: { ...detail.character, jobGrowId: 'unknown-job-grow' } })
   await waitForScores(UNCHANGED_SCORES)
@@ -1469,25 +1522,25 @@ it('스위칭 줄을 고르면 스킬 이름 칸에 배운 레벨부터 10레벨
   expect(resetButton().disabled).toBe(true)
 })
 
-it('아바타 줄에서 끝 스펙을 고르면 프리셋을 요청하고, 지금 그대로로 돌아오면 원본 점수로 돌아간다', async () => {
+it('아바타 줄에서 종결 아바타와 엠블렘을 고르면 프리셋을 요청하고, 현재 착용 아바타로 돌아오면 원본 점수로 돌아간다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   await choose('아바타')
 
   expect(editorTitle()).toBe('아바타')
-  expect(control('아바타').textContent).toBe('지금 그대로')
+  expect(control('아바타').textContent).toBe('현재 착용 아바타')
 
-  await pick('아바타', '끝 스펙')
+  await pick('아바타', '종결 아바타와 엠블렘')
 
   await waitForScores(ONE_CHOICE_SCORES)
   expect(bodies.at(-1)).toEqual({ equipment: [], avatarPreset: 'best' })
-  expect(rowValueOf('아바타')).toBe('끝 스펙')
+  expect(rowValueOf('아바타')).toBe('종결 아바타와 엠블렘')
 
-  await pick('아바타', '지금 그대로')
+  await pick('아바타', '현재 착용 아바타')
 
   await waitForScores(UNCHANGED_SCORES)
-  expect(rowValueOf('아바타')).toBe('지금 그대로')
+  expect(rowValueOf('아바타')).toBe('현재 착용 아바타')
   expect(resetButton().disabled).toBe(true)
 })
 
@@ -1495,7 +1548,7 @@ it('초기화하면 고른 아바타 프리셋과 스위칭 레벨을 함께 되
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
   await choose('아바타')
-  await pick('아바타', '끝 스펙')
+  await pick('아바타', '종결 아바타와 엠블렘')
   await choose('스위칭')
   await pick('스위칭 레벨', '12레벨')
   await waitForScores([
@@ -1508,7 +1561,7 @@ it('초기화하면 고른 아바타 프리셋과 스위칭 레벨을 함께 되
   await act(async () => resetButton().click())
 
   await waitForScores(UNCHANGED_SCORES)
-  expect(rowValueOf('아바타')).toBe('지금 그대로')
+  expect(rowValueOf('아바타')).toBe('현재 착용 아바타')
   expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
   expect(control('스위칭 레벨').textContent).toBe('16레벨')
 })
