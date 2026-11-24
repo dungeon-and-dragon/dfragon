@@ -21,6 +21,7 @@ import {
   resolveEquipmentItems,
   switchEquipmentSet,
   findWeaponVariant,
+  inferOathSetId,
   WEAPON_RELEASE_MAX,
   weaponItemOf,
   weaponMaxTuneLevelOf,
@@ -527,6 +528,63 @@ test('moveOathCrystalToSet은 광휘 결정을 다른 서약 세트의 같은 �
     () => moveOathCrystalToSet('5f722339a3f5c7ef9ba0b290873e19f1', 99999),
     /Unknown oath set/
   )
+})
+
+const PRIMEVAL_MIST_OATH = 'ac0586536083d560b38659de8bc0c2b8'
+const GLIMMER_CRYSTAL = 'f834b16af8341719efe94a3be49d381e'
+
+function wornCrystal(itemId, setPoint, tuneLevel = 0) {
+  return { itemId, tuneLevel, setPoint }
+}
+
+test('inferOathSetId는 안개 서약과 세트 없는 결정을 빼고 광휘 결정의 세트 포인트 합이 가장 큰 세트를 고른다', () => {
+  const crystals = [
+    ...Array.from({ length: 3 }, () => wornCrystal(GLIMMER_CRYSTAL, 45)),
+    ...Array.from({ length: 4 }, () => wornCrystal('d61a64fd59177de8d2d9bb3cc6f4e43c', 85)),
+    ...Array.from({ length: 3 }, () => wornCrystal('667733fbd81888807f5c69226a375171', 125)),
+    wornCrystal('04702c73a373a5f5c9a504f2123dc80b', 205)
+  ]
+
+  assert.equal(inferOathSetId({ bodyItemId: PRIMEVAL_MIST_OATH, crystals }), 16211)
+})
+
+test('inferOathSetId는 세트에 속한 본체와 결정이 없으면 null이다', () => {
+  assert.equal(
+    inferOathSetId({
+      bodyItemId: PRIMEVAL_MIST_OATH,
+      crystals: [wornCrystal(GLIMMER_CRYSTAL, 45), wornCrystal(null, null)]
+    }),
+    null
+  )
+  assert.equal(inferOathSetId({ bodyItemId: null, crystals: [] }), null)
+})
+
+test('inferOathSetId는 세트 전용 본체의 세트 포인트도 그 세트에 더한다', () => {
+  // 발키리 태초 본체 655가 무리 희미한 광휘 결정 4개의 340보다 크다.
+  const crystals = Array.from({ length: 4 }, () =>
+    wornCrystal('d61a64fd59177de8d2d9bb3cc6f4e43c', 85)
+  )
+
+  assert.equal(inferOathSetId({ bodyItemId: 'db5930dcaf3723eae9189222eb94b124', crystals }), 16209)
+})
+
+test('inferOathSetId는 응답에 조율 세트 포인트가 없으면 목록의 조율 단계 포인트를 쓴다', () => {
+  // 조율 단계를 무시하면 둘 다 125로 같아 세트 번호가 작은 페어리가 된다.
+  const crystals = [
+    wornCrystal('667733fbd81888807f5c69226a375171', null, 3),
+    wornCrystal('c5f7a001e13bacc92c2b375488bce8ff', null, 1)
+  ]
+
+  assert.equal(inferOathSetId({ bodyItemId: null, crystals }), 16211)
+})
+
+test('inferOathSetId는 세트 포인트 합이 같으면 임시로 세트 번호가 작은 세트를 고른다', () => {
+  const crystals = [
+    wornCrystal('e3f4ca0fc46dba190b74820740a97863', 85),
+    wornCrystal('e2ae50a4f7790f3185b9af91c2797148', 85)
+  ]
+
+  assert.equal(inferOathSetId({ bodyItemId: null, crystals }), 16209)
 })
 
 test('findOathCrystal은 광휘 결정 밖의 결정도 이름으로 조율 포인트를 그대로 찾는다', () => {

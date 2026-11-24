@@ -328,11 +328,75 @@ it('결정 선택지는 서약 세트의 광휘 결정이고, 다른 세트의 �
 
 it('서약 세트가 선택 목록에 없으면 결정 선택지를 두지 않는다', () => {
   const detail = characterDetailFixture('dealer')
-  const oath = toSimulatorOath({ oath: { ...detail.oath!, setInfo: null } })!
+  const setInfo = { ...detail.oath!.setInfo!, setId: 16213 }
+  const oath = toSimulatorOath({ oath: { ...detail.oath!, setInfo } })!
 
   expect(oath.setId).toBeNull()
   expect(oath.crystals.every(({ choices }) => choices.length === 0)).toBe(true)
   expect(crystalTuneLimitOf(crystalAt(oath, 7), null)).toBe(3)
+})
+
+const PACK_SET = 16211
+
+// 응답에 서약 세트가 없는 캐릭터처럼 안개 서약 본체에 미광의 서약 결정 3개와 무리 광휘 결정 8개를 낀다.
+function withoutSetInfo(detail: CharacterDetailView): CharacterDetailView {
+  const oath = detail.oath!
+  const glimmer = { itemId: MIST_CRYSTAL_ID, itemName: '미광의 서약 결정', itemRarity: '레어' }
+  const packOf = (rarity: string, setPoint: number) => {
+    const { item } = oathCrystalVariantsOf(PACK_SET).find((crystal) => crystal.rarity === rarity)!
+
+    return { ...item, tune: { level: 0, setPoint } }
+  }
+
+  const worn = [
+    ...Array.from({ length: 3 }, () => ({ ...glimmer, tune: { level: 0, setPoint: 45 } })),
+    ...Array.from({ length: 4 }, () => packOf('유니크', 85)),
+    ...Array.from({ length: 3 }, () => packOf('레전더리', 125)),
+    packOf('태초', 205)
+  ]
+
+  const crystal = oath.crystal.map((current, index) => ({ ...current, ...worn[index] }))
+
+  return { ...detail, oath: { ...oath, setInfo: null, crystal } }
+}
+
+it('응답에 서약 세트가 없으면 세트 포인트 합이 가장 큰 세트를 지금 세트로 두고 그 세트의 결정 선택지를 연다', () => {
+  const oath = toSimulatorOath(withoutSetInfo(characterDetailFixture('buffer')))!
+
+  expect(oath.setId).toBe(PACK_SET)
+  expect(oath.rarity).toBeNull()
+  expect(idsOf(crystalAt(oath, 0).choices)).toEqual(idsOf(oathCrystalVariantsOf(PACK_SET)))
+  expect(crystalAt(oath, 0).wornVariantId).toBeNull()
+  expect(crystalAt(oath, 10).wornVariantId).toBe(crystalId(PACK_SET, '태초'))
+})
+
+it('응답에 서약 세트가 없는 캐릭터도 서약 세트를 고르면 무리 광휘 결정을 그 세트로 옮겨 세트를 요청한다', () => {
+  const detail = withoutSetInfo(characterDetailFixture('buffer'))
+  const oath = toSimulatorOath(detail)!
+  const changed = apply(NO_CHANGES, { type: 'oathSet', oath, setId: SHADOW_SET })
+  const view = viewOf(oath, changed)
+
+  expect(crystalAt(view, 3).wornVariantId).toBe(crystalId(SHADOW_SET, '유니크'))
+  expect(crystalAt(view, 0).wornVariantId).toBeNull()
+  expect(simulationBody(toSimulatorRows(detail), view, changed)).toEqual({
+    equipment: [],
+    oathSet: SHADOW_SET
+  })
+  expect(apply(NO_CHANGES, { type: 'oathSet', oath, setId: PACK_SET })).toEqual(NO_CHANGES)
+})
+
+it('응답에 서약 세트가 없고 세트에 속한 본체와 광휘 결정도 없으면 결정 선택지를 두지 않는다', () => {
+  const detail = withoutSetInfo(characterDetailFixture('buffer'))
+  const crystal = detail.oath!.crystal.map((current) => ({
+    ...current,
+    itemId: MIST_CRYSTAL_ID,
+    itemName: '미광의 서약 결정',
+    itemRarity: '레어'
+  }))
+  const oath = toSimulatorOath({ oath: { ...detail.oath!, crystal } })!
+
+  expect(oath.setId).toBeNull()
+  expect(oath.crystals.every(({ choices }) => choices.length === 0)).toBe(true)
 })
 
 it('서약 세트를 골라도 조율 정보가 없는 광휘 밖 착용 결정은 조율까지 그대로 두고 요청에 넣지 않는다', () => {
