@@ -1,6 +1,7 @@
 import type { UsableBatchNeopleKey } from '@dfragon/database'
 import { type NeopleKeyShortage, NeopleRequestFailure } from '@dfragon/neople'
 import type { WorkerNeople } from './character-collection.js'
+import { type PrioritizedNeople, dispatchNeople } from './request-priority.js'
 
 const RATE_LIMITED_CODE = 'API002'
 const RATE_LIMITED_REST_MS = 60_000
@@ -15,13 +16,12 @@ export interface BatchNeopleKeyRepository {
 
 export type BatchNeopleKeyPoolDependencies = {
   store: BatchNeopleKeyRepository
-  createNeople: (key: string) => WorkerNeople
+  createNeople: (key: string) => PrioritizedNeople
   concurrencyPerKey: number
   report: (code: string, details: Readonly<Record<string, string | number>>) => void
 }
 
-export type BatchNeopleKeyPool = {
-  neople: WorkerNeople
+export type BatchNeopleKeyPool = PrioritizedNeople & {
   refresh(): Promise<void>
   readConcurrency(): number
   drainFailures(): string
@@ -29,7 +29,7 @@ export type BatchNeopleKeyPool = {
 
 type KeySlot = {
   id: number
-  neople: WorkerNeople
+  neople: PrioritizedNeople
   active: number
   restingUntil: number
 }
@@ -45,6 +45,7 @@ export function createBatchNeopleKeyPool({
 }: BatchNeopleKeyPoolDependencies): BatchNeopleKeyPool {
   let slots = new Map<number, KeySlot>()
   let waiters: (() => void)[] = []
+  let priorityWaiters: (() => void)[] = []
   let failures = new Map<string, number>()
 
   function countFailure({ kind, upstream }: NeopleRequestFailure): void {
@@ -58,8 +59,10 @@ export function createBatchNeopleKeyPool({
     return { id, neople, active: 0, restingUntil: 0 }
   }
 
+  // 먼저 깨운 쪽이 먼저 이어 실행되어 빈 슬롯을 먼저 잡으므로, 먼저 내보낼 요청을 먼저 깨운다.
   function wakeWaiters(): void {
-    const woken = waiters
+    const woken = [...priorityWaiters, ...waiters]
+    priorityWaiters = []
     waiters = []
 
     for (const wake of woken) {
@@ -94,7 +97,7 @@ export function createBatchNeopleKeyPool({
     return found
   }
 
-  async function acquire(): Promise<KeySlot> {
+  async function acquire(priority: boolean): Promise<KeySlot> {
     for (;;) {
       const at = Date.now()
       const keyShortage = findShortage(at)
@@ -110,7 +113,11 @@ export function createBatchNeopleKeyPool({
       }
 
       await new Promise<void>((resolve) => {
-        waiters.push(resolve)
+        if (priority) {
+          priorityWaiters.push(resolve)
+        } else {
+          waiters.push(resolve)
+        }
       })
     }
   }
@@ -141,12 +148,15 @@ export function createBatchNeopleKeyPool({
   }
 
   async function dispatch<Result>(
-    request: (neople: WorkerNeople) => Promise<Result>
+    request: (neople: WorkerNeople) => Promise<Result>,
+    priority: boolean
   ): Promise<Result> {
     for (;;) {
-      const slot = await acquire()
+      const slot = await acquire(priority)
       try {
-        return await request(slot.neople)
+        const neople = priority ? slot.neople.priorityNeople : slot.neople.neople
+
+        return await request(neople)
       } catch (error) {
         if (!(error instanceof NeopleRequestFailure)) {
           throw error
@@ -172,20 +182,12 @@ export function createBatchNeopleKeyPool({
     }
   }
 
+  const neople = dispatchNeople((request) => dispatch(request, false))
+  const priorityNeople = dispatchNeople((request) => dispatch(request, true))
+
   return {
-    neople: {
-      character: (identity, section, signal) =>
-        dispatch((neople) => neople.character(identity, section, signal)),
-      characterBasic: (identity) => dispatch((neople) => neople.characterBasic(identity)),
-      characterSkillStyle: (identity) => dispatch((neople) => neople.characterSkillStyle(identity)),
-      characterTimeline: (identity, query) =>
-        dispatch((neople) => neople.characterTimeline(identity, query)),
-      charactersFame: (serverId, query) =>
-        dispatch((neople) => neople.charactersFame(serverId, query)),
-      jobs: () => dispatch((neople) => neople.jobs()),
-      multiItems: (itemIds, signal) => dispatch((neople) => neople.multiItems(itemIds, signal)),
-      servers: () => dispatch((neople) => neople.servers())
-    },
+    neople,
+    priorityNeople,
     async refresh() {
       const keys = await store.readUsableKeys()
       // 남은 key는 쉬는 시각과 동시 요청 수를 그대로 이어 쓰고, 빠진 key로 나간 요청은 끝날 때까지 둔다.

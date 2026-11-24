@@ -36,4 +36,9 @@ export type {
 export { NEOPLE_TIMELINE_START, TIMELINE_RECORD_DELAY_MS, splitTimelineRanges } from './ranges.js'
 export { TIMELINE_CODES, isTimelineCode, toTimelineInputs } from './rows.js'
 export type { TimelineInputs, TimelineRow } from './rows.js'
+export {
+  findSeasonBackfillRange,
+  toSeasonBackfillRange,
+  toSeasonTimelineStart
+} from './season-backfill.js'
 export type { SeasonBackfillJob, SeasonBackfillTarget } from './season-backfill.js'
