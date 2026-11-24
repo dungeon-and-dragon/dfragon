@@ -17,6 +17,7 @@ import {
   DatabaseItemDictionaryRepository
 } from '@dfragon/server-core/infrastructure/database/index.js'
 import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
+import { parseCharacterSkillStyle } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { FetchItemDetails } from '@dfragon/server-core/application/item-dictionary/ports.js'
 import { createItemDictionaryFillJob } from '#application/item-dictionary/index.js'
 import {
@@ -25,6 +26,7 @@ import {
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository,
   DatabaseCollectionRepository,
+  DatabaseSkillChainBackfillRepository,
   DatabaseSkillStyleCollectionRepository,
   DatabaseStatsJobRepository,
   DatabaseJobRunCleanupRepository,
@@ -32,7 +34,9 @@ import {
 } from '#infrastructure/database/index.js'
 import type { SkillStyleCollectionPorts } from '#application/ranking-stats/ports.js'
 import {
+  SkillChainBackfillService,
   SkillStyleCollectionService,
+  createSkillChainBackfillJob,
   createSkillStyleCollectionJob,
   StatsJobService,
   createCharacterStatsJob,
@@ -111,6 +115,10 @@ export function createWorkerJobs(
     new DatabaseSkillStyleCollectionRepository(client),
     { fetchSkillStyle, readConcurrency, report, ...clock }
   )
+  const skillChainService = new SkillChainBackfillService(
+    new DatabaseSkillChainBackfillRepository(client),
+    parseCharacterSkillStyle
+  )
   const discoveryService = new CharacterDiscoveryService(new DatabaseCollectionRepository(client), {
     readTargets,
     readTopFame,
@@ -139,6 +147,7 @@ export function createWorkerJobs(
     createClearRecordBackfillJob(recordBackfillService),
     createClearWeekSampleJob(weekSampleService),
     createSkillStyleCollectionJob(skillStyleService),
+    createSkillChainBackfillJob(skillChainService),
     createCharacterDiscoveryJob(discoveryService),
     createFameRefreshJob(activityService),
     createInactiveRecheckJob(activityService),
