@@ -501,7 +501,7 @@ function iconUrl(itemId: string | null): string {
   return `https://img-api.neople.co.kr/df/items/${itemId}`
 }
 
-it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두고 장비 칸의 켜진 버튼에 착용한 아이템의 아이콘과 이름을 보인다', async () => {
+it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두고 착용 아이템이 속한 선택지를 켜 두며 착용 버튼을 따로 두지 않는다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -514,7 +514,8 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
   expect(names.slice(-2)).toEqual(['크리쳐', '오라'])
   const titleRow = rowOf('칭호')
   const worn = characterDetailFixture('dealer').equipment.equipment[1]!
-  expect(titleRow.querySelectorAll('td')[1]!.textContent).toBe('프로스트의 전설 플래티넘[35Lv]')
+  expect(titleRow.querySelectorAll('td')[1]!.textContent).toBe('프로스트의 전설 플래티넘')
+  expect(iconsIn(titleRow)).toEqual([iconUrl(worn.itemId)])
   expect([...titleRow.querySelectorAll('td')].slice(2).map((cell) => cell.textContent)).toEqual([
     '',
     ''
@@ -522,8 +523,7 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
 
   await choose('칭호')
 
-  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘[35Lv]')
-  expect(iconsIn(pressedButton('칭호 교체')!)).toEqual([iconUrl(worn.itemId)])
+  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘')
 
   await choose('크리쳐')
 
@@ -531,17 +531,69 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
 
   await choose('오라')
 
-  expect(pressedIn('오라 교체')).toBe('고결한 영혼의 잔상')
+  expect(pressedIn('오라 교체')).toBe('스노우메이지 캐슬')
 
   await choose('칭호')
+  expect(buttonNames('칭호 교체')).toEqual(slotItemsOf('title').map(({ name }) => name))
+  expect(buttonsIn('칭호 교체').map((button) => iconsIn(button))).toEqual(
+    slotItemsOf('title').map(({ item }) => [iconUrl(item.itemId)])
+  )
+})
+
+it('착용 아이템이 속한 선택지를 다시 누르면 칭호를 바꾸지 않은 상태로 돌아간다', async () => {
+  const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
+  await render(characterDetailFixture('dealer'))
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+
+  await choose('칭호')
+  await press('칭호 교체', titleItem!.name)
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: titleItem!.id }))
+  await act(async () => buttonOf('칭호 교체', '프로스트의 전설 플래티넘').click())
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘')
+  expect(resetButton().disabled).toBe(true)
+})
+
+it('선택지에 없는 착용 칭호는 레벨 꼬리를 뗀 이름의 착용 버튼을 첫 버튼으로 켜 둔다', async () => {
+  const detail = characterDetailFixture('dealer')
+  // 849 명성의 플래티넘 칭호는 선택 목록에 없다. itemId는 합성 값이다.
+  const worn = { itemId: 'f'.repeat(32), itemName: '진정한 각성을 이룬 자 플래티넘[35Lv]' }
+  await render({
+    ...detail,
+    equipment: {
+      ...detail.equipment,
+      equipment: detail.equipment.equipment.map((item) =>
+        item.slotId === 'TITLE' ? { ...item, ...worn } : item
+      )
+    }
+  })
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+
+  expect(rowOf('칭호').querySelectorAll('td')[1]!.textContent).toBe(
+    '진정한 각성을 이룬 자 플래티넘'
+  )
+
+  await choose('칭호')
+
   expect(buttonNames('칭호 교체')).toEqual([
-    '프로스트의 전설 플래티넘[35Lv]',
+    '진정한 각성을 이룬 자 플래티넘',
     ...slotItemsOf('title').map(({ name }) => name)
   ])
-  expect(buttonsIn('칭호 교체').map((button) => iconsIn(button))).toEqual([
-    [iconUrl(worn.itemId)],
-    ...slotItemsOf('title').map(({ item }) => [iconUrl(item.itemId)])
-  ])
+  expect(pressedIn('칭호 교체')).toBe('진정한 각성을 이룬 자 플래티넘')
+  expect(iconsIn(pressedButton('칭호 교체')!)).toEqual([iconUrl(worn.itemId)])
 })
 
 it('선택 버튼의 아이콘에 마우스를 올리면 그 아이템의 정보를 tooltip으로 보이고 고르지는 않는다', async () => {
@@ -573,7 +625,7 @@ it('선택 버튼의 아이콘에 마우스를 올리면 그 아이템의 정보
     expect(document.body.textContent).toContain('레벨제한 115')
   })
   expect(requestedItemIds).toEqual([titleItem!.item.itemId])
-  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘[35Lv]')
+  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘')
 })
 
 it('선택 버튼의 아이콘을 눌러도 터치로 탭해도 그 버튼을 고른다', async () => {
@@ -608,7 +660,7 @@ it('선택 버튼의 아이콘을 눌러도 터치로 탭해도 그 버튼을 �
 })
 
 it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수를 새 결과로 바꾼다', async () => {
-  // 최상위 칭호 둘은 착용한 "프로스트의 전설 플래티넘[35Lv]"과 이름 앞부분이 같아 이름으로 고를 수 없다.
+  // 최상위 칭호 둘은 착용 칭호가 속한 선택지이거나 그 이름과 앞부분이 같아 이름으로 고를 수 없다.
   const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
   await render(characterDetailFixture('dealer'))
   await waitForScores([
@@ -633,7 +685,7 @@ it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수
 })
 
 it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 넣고, 초기화하면 모두 되돌린다', async () => {
-  // 최상위 크리쳐 둘은 착용한 "운명을 담는 재단사"와 이름 앞부분이 같아 이름으로 고를 수 없다.
+  // 최상위 크리쳐 둘은 착용 크리쳐가 속한 선택지이거나 그 이름과 앞부분이 같아 이름으로 고를 수 없다.
   const creatureItem = slotItemsOf('creature').find(
     ({ name }) => name === 'SD 흰 구름 전령 에를리히'
   )
@@ -667,7 +719,7 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
   await act(async () => resetButton().click())
 
   expect(rowOf('크리쳐').querySelectorAll('td')[1]!.textContent).toBe('운명을 담는 재단사')
-  expect(pressedIn('오라 교체')).toBe('고결한 영혼의 잔상')
+  expect(pressedIn('오라 교체')).toBe('스노우메이지 캐슬')
   await waitForScores([
     ['현재', '1,000,000'],
     ['변경 후', '1,000,000'],

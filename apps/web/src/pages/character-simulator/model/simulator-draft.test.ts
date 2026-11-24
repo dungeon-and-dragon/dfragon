@@ -275,9 +275,14 @@ it('칭호는 응답의 부위 자리에, 크리쳐와 오라는 장비 뒤에 �
   expect(
     [title, creature, aura].map((slotItem) => [slotItem!.slotName, slotItem!.itemName])
   ).toEqual([
-    ['칭호', '프로스트의 전설 플래티넘[35Lv]'],
+    ['칭호', '프로스트의 전설 플래티넘'],
     ['크리쳐', '운명을 담는 재단사'],
     ['오라', '고결한 영혼의 잔상']
+  ])
+  expect([title, creature, aura].map((slotItem) => slotItem!.wornChoiceId)).toEqual([
+    'title:1123:character/common/title/100333448',
+    'creature:1261:creature/100991296',
+    'aura:645:character/swordman/avatar/aura/101590961'
   ])
   expect(title!.choices).toEqual(
     slotItemsOf('title').map(({ id, name, item }) => ({
@@ -291,8 +296,8 @@ it('칭호는 응답의 부위 자리에, 크리쳐와 오라는 장비 뒤에 �
 })
 
 it('칭호, 크리쳐, 오라는 고른 것만 장비 변경과 함께 body에 넣고, 장비를 바꾸지 않았으면 빈 equipment로 보낸다', () => {
-  const [titleItem] = slotItemsOf('title')
-  const [, auraItem] = slotItemsOf('aura')
+  const [, titleItem] = slotItemsOf('title')
+  const [auraItem] = slotItemsOf('aura')
   const chosen = apply(
     NO_CHANGES,
     { type: 'slotItem', slotItem: title!, id: titleItem!.id },
@@ -324,6 +329,30 @@ it('현재 아이템으로 되돌리거나 초기화하면 고른 칭호, 크리
   expect(hasChanges(chosen)).toBe(true)
   expect(apply(chosen, { type: 'slotItem', slotItem: creature!, id: null })).toEqual(NO_CHANGES)
   expect(apply(chosen, { type: 'reset' })).toEqual(NO_CHANGES)
+})
+
+it('착용 아이템이 속한 선택지를 고르면 바꾸지 않은 상태로 둔다', () => {
+  const [, otherTitle] = slotItemsOf('title')
+  const chosen = apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id: otherTitle!.id })
+
+  expect(apply(chosen, { type: 'slotItem', slotItem: title!, id: title!.wornChoiceId })).toEqual(
+    NO_CHANGES
+  )
+  expect(
+    apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id: title!.wornChoiceId })
+  ).toEqual(NO_CHANGES)
+})
+
+it('선택지에 없는 착용 아이템은 속한 선택지가 없다', () => {
+  // 849 명성의 플래티넘 칭호는 선택 목록에 없다. itemId는 합성 값이다.
+  const detail = withItem(characterDetailFixture('dealer'), 'TITLE', {
+    itemId: 'f'.repeat(32),
+    itemName: '진정한 각성을 이룬 자 플래티넘[35Lv]'
+  })
+  const [unlisted] = slotItemsIn(toSimulatorRows(detail))
+
+  expect(unlisted!.wornChoiceId).toBeNull()
+  expect(unlisted!.itemName).toBe('진정한 각성을 이룬 자 플래티넘')
 })
 
 it('그 부위의 목록에 없는 id는 받지 않는다', () => {

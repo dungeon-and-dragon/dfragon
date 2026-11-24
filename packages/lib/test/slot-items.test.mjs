@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { SLOT_ITEM_CATEGORIES, findSlotItem, slotItemsOf } from '@dfragon/lib/slot-items'
+import {
+  SLOT_ITEM_CATEGORIES,
+  findSlotItem,
+  findWornSlotItem,
+  slotItemsOf
+} from '@dfragon/lib/slot-items'
 
 // build가 선택 목록을 dist에 함께 실어야 package export로 읽힌다.
 const table = JSON.parse(readFileSync(new URL('../dist/slot-items.json', import.meta.url), 'utf8'))
@@ -163,4 +168,47 @@ test('카테고리 안에서 표시 이름이 겹치지 않는다', () => {
 
     assert.equal(new Set(names).size, names.length, category)
   }
+})
+
+// 대표가 아닌 아이템의 itemId는 이름으로만 묶음을 찾는지 보려고 만든 값이다.
+const OTHER_ITEM_ID = '0'.repeat(32)
+const FROST_PLATINUM = 'title:1123:character/common/title/100333448'
+const FROST = 'title:1123:character/common/title/100333206'
+
+test('findWornSlotItem은 착용 아이템의 이름이 멤버인 묶음을 찾고, 다른 카테고리나 목록에서 빠진 묶음의 멤버는 null이다', () => {
+  assert.equal(
+    findWornSlotItem('title', { itemId: OTHER_ITEM_ID, itemName: '프로스트의 전설 플래티넘[35Lv]' })
+      ?.id,
+    FROST_PLATINUM
+  )
+  assert.equal(
+    findWornSlotItem('aura', { itemId: OTHER_ITEM_ID, itemName: '고결한 영혼의 잔상' })?.id,
+    'aura:645:character/swordman/avatar/aura/101590961'
+  )
+  assert.equal(
+    findWornSlotItem('creature', { itemId: OTHER_ITEM_ID, itemName: '고결한 영혼의 잔상' }),
+    null
+  )
+  assert.equal(
+    findWornSlotItem('title', {
+      itemId: OTHER_ITEM_ID,
+      itemName: '진정한 각성을 이룬 자 플래티넘[35Lv]'
+    }),
+    null
+  )
+  assert.equal(findWornSlotItem('title', { itemId: OTHER_ITEM_ID, itemName: null }), null)
+})
+
+// "프로스트의 전설"은 목록에 있는 묶음과 빠진 묶음(100333421)에 같은 이름으로 있어 효과가 다를 수 있다.
+test('findWornSlotItem은 여러 묶음에 같은 이름이 있는 아이템을 대표 아이템과 itemId가 같을 때만 그 묶음으로 본다', () => {
+  const frost = findSlotItem('title', FROST)
+
+  assert.equal(
+    findWornSlotItem('title', { itemId: frost.item.itemId, itemName: '프로스트의 전설' })?.id,
+    FROST
+  )
+  assert.equal(
+    findWornSlotItem('title', { itemId: OTHER_ITEM_ID, itemName: '프로스트의 전설' }),
+    null
+  )
 })
