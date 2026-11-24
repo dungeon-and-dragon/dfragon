@@ -182,6 +182,7 @@ function wornItemId(item: unknown): string | null {
 function bodyTarget(
   info: unknown,
   set: number | null,
+  setId: number | null,
   body: string | null
 ): { worn: OathVariant | null; target: OathVariant | null } {
   const itemId = wornItemId(info)
@@ -202,7 +203,9 @@ function bodyTarget(
     return { worn: match.variant, target: moved }
   }
 
-  const chosen = oathVariantsOf(family).find(({ id }) => id === body)
+  const choices =
+    setId !== null ? [...oathVariantsOf(setId), ...oathVariantsOf(null)] : oathVariantsOf(family)
+  const chosen = choices.find(({ id }) => id === body)
 
   if (chosen === undefined) {
     throw new EquipmentSimulationFailure('request')
@@ -221,8 +224,13 @@ function replacedItem(
   return { ...cloned, itemId, itemName, itemRarity }
 }
 
-function simulatedBody(info: unknown, set: number | null, body: string | null) {
-  const { worn, target } = bodyTarget(info, set, body)
+function simulatedBody(
+  info: unknown,
+  set: number | null,
+  setId: number | null,
+  body: string | null
+) {
+  const { worn, target } = bodyTarget(info, set, setId, body)
 
   if (!isRecord(info) || worn === null || target === null || target.id === worn.id) {
     return null
@@ -353,7 +361,7 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
     }
   }
 
-  const body = simulatedBody(section.info, set, changes.body)
+  const body = simulatedBody(section.info, set, setId, changes.body)
   const edited = crystals.flatMap((crystal) => {
     const change = changes.crystals.find(({ slotNo }) => slotNo === crystal.slotNo)
     const simulated = simulatedCrystal(crystal, change, set, setId)

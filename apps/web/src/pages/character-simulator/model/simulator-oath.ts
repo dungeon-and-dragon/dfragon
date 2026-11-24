@@ -109,7 +109,18 @@ function toOathChoice(variant: OathVariant | OathCrystalVariant): OathChoice {
   }
 }
 
-function toOathBody(info: Oath['info']): SimulatorOathBody | null {
+function bodyChoicesOf(setId: number | null, wornSetId: number | null): OathChoice[] {
+  const variants =
+    setId !== null ? [...oathVariantsOf(setId), ...oathVariantsOf(null)] : oathVariantsOf(wornSetId)
+
+  return variants.map(toOathChoice)
+}
+
+function isSetBoundChoice(choice: OathChoice): boolean {
+  return findOathVariant(choice.itemId)?.setId != null
+}
+
+function toOathBody(info: Oath['info'], setId: number | null): SimulatorOathBody | null {
   if (info?.itemId == null) {
     return null
   }
@@ -121,7 +132,7 @@ function toOathBody(info: Oath['info']): SimulatorOathBody | null {
     return { ...itemView, choices: [], wornVariantId: null, setBound: false }
   }
 
-  const choices = oathVariantsOf(match.setId).map(toOathChoice)
+  const choices = bodyChoicesOf(setId, match.setId)
   const setBound = match.setId !== null
 
   return { ...itemView, choices, wornVariantId: match.variant.id, setBound }
@@ -186,7 +197,7 @@ export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): Simu
     .flatMap((crystal) => toOathCrystal(crystal, setId))
     .toSorted((a, b) => a.slotNo - b.slotNo)
   const sets = oathSets()
-  const body = toOathBody(oath.info)
+  const body = toOathBody(oath.info, setId)
   const upgrade = toSimulatorOathUpgrade(detail)
 
   return { setId, rarity, sets, body, upgrade, crystals }
@@ -197,13 +208,18 @@ function choiceOf(choices: readonly OathChoice[], id: string | null): OathChoice
 }
 
 function bodyInSet(body: SimulatorOathBody, setId: number): SimulatorOathBody {
-  if (!body.setBound) {
+  if (body.choices.length === 0) {
     return body
+  }
+
+  const choices = bodyChoicesOf(setId, null)
+
+  if (!body.setBound) {
+    return { ...body, choices }
   }
 
   const worn = choiceOf(body.choices, body.wornVariantId)
   const moved = worn !== undefined ? oathVariantOf(setId, worn.grade) : null
-  const choices = oathVariantsOf(setId).map(toOathChoice)
   const wornVariantId = moved?.id ?? null
 
   return { ...body, choices, wornVariantId }
@@ -442,7 +458,8 @@ function movedBodyOf(
   setId: number
 ): string | null {
   const chosen = choiceOf(current.choices, oathBodyChoiceIdOf(current, changes))
-  const moved = chosen !== undefined && next.setBound ? oathVariantOf(setId, chosen.grade) : null
+  const moved =
+    chosen !== undefined && isSetBoundChoice(chosen) ? oathVariantOf(setId, chosen.grade) : null
   const id = moved !== null ? moved.id : (chosen?.id ?? null)
 
   if (id === null || id === next.wornVariantId) {

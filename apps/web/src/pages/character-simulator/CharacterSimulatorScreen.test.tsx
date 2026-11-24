@@ -1349,7 +1349,7 @@ it('장비 세트와 서약 세트 이름은 응답이 준 세트 등급의 색�
   expect(oathRowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.legendary)
 })
 
-it('서약 줄을 고르면 같은 계열 4등급의 서약 버튼을 두고, 다른 등급을 고르면 그 선택지 id를 요청한다', async () => {
+it('서약 줄을 고르면 서약 세트 전용 서약 4등급 뒤에 영겁의 안개 서약 4등급 버튼을 두고, 다른 등급을 고르면 그 선택지 id를 요청한다', async () => {
   const epic = oathVariantOf(DRAGON_OATH_SET, '에픽')!
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
@@ -1357,14 +1357,31 @@ it('서약 줄을 고르면 같은 계열 4등급의 서약 버튼을 두고, �
   await chooseOath('서약')
 
   expect(pressedIn('서약 교체')).toBe('세계를 태우는 용투 서약')
-  expect(buttonNames('서약 교체')).toEqual(
-    oathVariantsOf(DRAGON_OATH_SET).map(({ item }) => item.itemName)
-  )
+  expect(buttonNames('서약 교체')).toEqual([
+    ...oathVariantsOf(DRAGON_OATH_SET).map(({ item }) => item.itemName),
+    ...Array.from({ length: 4 }, () => '영겁의 안개 서약')
+  ])
 
   await act(async () => buttonOf('서약 교체', epic.item.itemName).click())
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathBody: epic.id }))
   expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(epic.item.itemName)
+})
+
+it('영겁의 안개 서약을 낀 캐릭터는 서약 줄에서 착용한 안개 서약이 켜져 있고, 세트 전용 서약을 고르면 그 선택지 id를 요청한다', async () => {
+  const primeval = oathVariantOf(DRAGON_OATH_SET, '태초')!
+  await render(characterDetailFixture('buffer'))
+  await waitForScores(UNCHANGED_SCORES, '버프 점수')
+
+  await chooseOath('서약')
+
+  // 버퍼는 에픽 안개 서약을 껴 버튼 가운데 일곱 번째(세트 전용 4개 뒤 안개 서약 유니크, 레전더리 다음)가 켜진다.
+  expect(buttonsIn('서약 교체').indexOf(pressedButton('서약 교체')!)).toBe(6)
+
+  await act(async () => buttonOf('서약 교체', primeval.item.itemName).click())
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathBody: primeval.id }))
+  expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(primeval.item.itemName)
 })
 
 it('결정 줄에서 등급을 바꾸면 조율을 새 결정에 맞게 자르고 그 결정의 선택지 id를 요청한다', async () => {
@@ -1453,8 +1470,8 @@ it('서약 본체는 서약 카탈로그의 그림으로 장비창 줄과 선택
 
   const optionIcons = buttonsIn('서약 교체').map(iconsIn)
 
-  expect(optionIcons.at(-1)).toEqual([icon])
-  expect(optionIcons.slice(0, -1).flat()).not.toContain(icon)
+  expect(optionIcons[3]).toEqual([icon])
+  expect(optionIcons.toSpliced(3, 1).flat()).not.toContain(icon)
 })
 
 it('태초 결정이 이미 3개면 다른 결정의 선택 버튼에 태초 결정을 두지 않는다', async () => {
