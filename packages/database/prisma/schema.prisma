@@ -464,14 +464,6 @@ model WorkerEvent {
   @@map("worker_events")
 }
 
-model TimelineQueueCount {
-  name    String @id
-  waiting Int
-  running Int
-
-  @@map("timeline_queue_counts")
-}
-
 model Item {
   itemId         String   @id @map("item_id")
   availableLevel Int?     @map("available_level")
