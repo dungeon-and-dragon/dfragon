@@ -125,7 +125,7 @@ const skillStyle = {
     passive: [{ skillId: 'synthetic-passive', name: '합성 패시브', level: 20, requiredLevel: 1 }],
     evolution: [{ skillId: 'synthetic-evolved', type: 2 }],
     enhancement: [{ skillId: 'synthetic-active', type: 1 }],
-    chain: { resetTime: 0, skills: ['synthetic-active'] }
+    chain: { resetTime: 0, skills: ['synthetic-evolved', null, 'synthetic-active', null] }
   }
 }
 
@@ -395,6 +395,7 @@ test('상세 조회는 기본 정보를 저장한 뒤 받은 시각과 함께 �
       ],
       evolutions: [{ name: '합성 개화', type: 2 }],
       enhancements: [{ name: '합성 액티브', type: 1 }],
+      chain: ['합성 개화', null, '합성 액티브', null],
       fetchedAt: undefined
     }
   )

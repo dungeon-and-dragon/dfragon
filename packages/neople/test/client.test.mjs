@@ -144,7 +144,8 @@ test('스킬 스타일은 /skill/style 경로로 부르고 저장할 모양으�
     jobGrowId: 'grow-1',
     skills: [{ name: '합성 스킬', level: 13 }],
     evolutions: [],
-    enhancements: []
+    enhancements: [],
+    chain: null
   })
   assert.equal(
     requests[0].url,

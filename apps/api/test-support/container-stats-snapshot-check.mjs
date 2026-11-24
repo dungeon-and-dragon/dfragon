@@ -44,6 +44,7 @@ const style = (characterId, job, skills) => ({
   skills,
   evolutions: [],
   enhancements: [],
+  chain: null,
   fetchedAt
 })
 const withoutComputedAt = ({ computedAt: _computedAt, ...values }) => values

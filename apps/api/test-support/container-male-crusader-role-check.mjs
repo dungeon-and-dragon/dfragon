@@ -44,6 +44,7 @@ const style = (
   skills,
   evolutions: [],
   enhancements: [],
+  chain: null,
   fetchedAt
 })
 const dealerSkills = (courageLevel) => [

@@ -32,7 +32,8 @@ const styleOf = (characterId: string): NeopleCharacterSkillStyle => ({
   jobGrowId: 'synthetic-grow',
   skills: [{ name: `스킬-${characterId}`, level: 10 }],
   evolutions: [],
-  enhancements: []
+  enhancements: [],
+  chain: [`스킬-${characterId}`, null, null, null]
 })
 
 type Respond = (characterId: string, attempt: number) => NeopleCharacterSkillStyle

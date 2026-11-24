@@ -126,6 +126,7 @@ try {
       skills,
       evolutions: [],
       enhancements: [],
+      chain: null,
       fetchedAt
     })
   }
